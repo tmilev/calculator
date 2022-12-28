@@ -133,14 +133,14 @@ void Polynomial<Coefficient>::makeDeterminantFromSquareMatrix(
   }
   Permutation permutation;
   permutation.initPermutation(matrix.numberOfRows);
-  int numCycles = permutation.getNumberOfPermutations();
+  int numberOfCycles = permutation.getNumberOfPermutations();
   List<int> permutationIndices;
   permutation.getPermutationLthElementIsTheImageofLthIndex(permutationIndices);
   Polynomial<Coefficient> result, monomial;
   result.makeZero();
-  result.setExpectedSize(numCycles);
+  result.setExpectedSize(numberOfCycles);
   for (
-    int i = 0; i < numCycles;
+    int i = 0; i < numberOfCycles;
     i ++,
     permutation.incrementAndGetPermutation(permutationIndices)
   ) {
@@ -620,8 +620,8 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
   output.makeZeroMatrix(input.numberOfColumns);
   for (int i = 0; i < this->size; i ++) {
     const MonomialPolynomial& currentMon = (*this)[i];
-    int numCycles = 0;
-    if (!currentMon(0).isSmallInteger(&numCycles)) {
+    int numberOfCycles = 0;
+    if (!currentMon(0).isSmallInteger(&numberOfCycles)) {
       global.fatal
       << "Attempting to evaluate a polynomial whose "
       << i + 1
@@ -634,12 +634,12 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
       << "(and the user must be informed)."
       << global.fatal;
     }
-    bool isPositive = (numCycles > 0);
-    if (numCycles < 0) {
-      numCycles = - numCycles;
+    bool isPositive = (numberOfCycles > 0);
+    if (numberOfCycles < 0) {
+      numberOfCycles = - numberOfCycles;
     }
     element = input;
-    MathRoutines::raiseToPower(element, numCycles, idMat);
+    MathRoutines::raiseToPower(element, numberOfCycles, idMat);
     if (!isPositive) {
       element.invert();
     }

@@ -366,11 +366,11 @@ public:
     FiniteGroup<elementSomeGroup>& G
   );
   void computeIrreducibleRepresentations();
-  // A parabolic subgroup H = <hᵢ> is a subgroup of G = <gᵢ> in which for
-  // h∈H,
-  // there is a canonical word in gᵢ..gₖ for h in G, with the property that
-  // the gᵢ's
-  // in h are actually hᵢ's. Where this happens, it makes it much easier to
+  // A parabolic subgroup H = <h_i> is a subgroup of G = <g_i> in which for
+  // h\in H,
+  // there is a canonical word in g_i..g_k for h in G, with the property that
+  // the g_i's
+  // in h are actually h_i's. Where this happens, it makes it much easier to
   // come up
   // with words in H, to be used for representation theory.
   // The intended use for this API call is

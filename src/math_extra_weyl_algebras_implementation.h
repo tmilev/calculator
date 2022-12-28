@@ -68,10 +68,10 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
   MonomialWeylAlgebra buffer;
   buffer.makeOne();
   output.makeZero();
-  int numCycles = tempSel.totalNumberSubsetsSmallInt();
+  int numberOfCycles = tempSel.totalNumberSubsetsSmallInt();
   Rational coefficientBuffer;
   output.setExpectedSize(expectedSize);
-  for (int i = 0; i < numCycles; i ++) {
+  for (int i = 0; i < numberOfCycles; i ++) {
     coefficientBuffer = 1;
     for (int k = 0; k < dimension; k ++) {
       int multiplicityDrop = tempSel.multiplicities[k];

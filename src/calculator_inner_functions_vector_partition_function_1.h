@@ -9,6 +9,15 @@ public:
   static bool vectorPartitionFunctionFormula(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool vectorPartitionFunctionFormulaWithDetails(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool vectorPartitionFunctionFormulaInternal(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool flagShowDetails
+  );
   static bool vectorPartitionFunctionFormulaElementary(
     Calculator& calculator, const Expression& input, Expression& output
   );

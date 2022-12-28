@@ -1201,10 +1201,10 @@ std::string LittelmannPath::toString(
 
 template < >
 unsigned int HashFunctions::hashFunction(const std::string& input) {
-  size_t numCycles = input.size();
+  size_t numberOfCycles = input.size();
   unsigned int result = 0;
   int hashCounter = 0;
-  for (unsigned i = 0; i < numCycles; i ++) {
+  for (unsigned i = 0; i < numberOfCycles; i ++) {
     result += static_cast<unsigned>(input[i]) *
     HashConstants::getConstantIncrementCounter(hashCounter);
   }

@@ -10683,8 +10683,8 @@ bool CandidateSemisimpleSubalgebra::isDirectSummandOf(
     << "The upper limit for such automorphism group size is 100000. "
     << global.fatal;
   }
-  Rational numCyclesFromTypes = selectedTypes.totalCombinations();
-  if (!numCyclesFromTypes.isSmallInteger()) {
+  Rational numberOfCyclesFromTypes = selectedTypes.totalCombinations();
+  if (!numberOfCyclesFromTypes.isSmallInteger()) {
     global.fatal
     << "Computation is too large: "
     << "I am crashing to let you know that the program cannot "

@@ -1144,7 +1144,7 @@ void LargeIntegerUnsigned::multiplyBy(
   for (int i = 0; i < output.digits.size; i ++) {
     output.digits[i] = 0;
   }
-  unsigned long long numCycles = 0;
+  unsigned long long numberOfCycles = 0;
   bool doReport = false;
   signed ticksPerReport = 1024;
   unsigned long long totalCycles = static_cast<unsigned long long>(
@@ -1183,7 +1183,7 @@ void LargeIntegerUnsigned::multiplyBy(
           std::stringstream out;
           out
           << "<br>Crunching "
-          << numCycles
+          << numberOfCycles
           << " out of "
           << totalCycles
           << " pairs of large integer ``digits'' = "

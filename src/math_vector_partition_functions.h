@@ -632,8 +632,7 @@ public:
       OnePartialFractionDenominator, Polynomial<LargeInteger>
     >& output
   );
-  bool reduceOnce(
-    LinearCombination<
+  bool reduceOnce(LinearCombination<
       OnePartialFractionDenominator, Polynomial<LargeInteger>
     >& output
   );
@@ -718,28 +717,38 @@ public:
   LinearCombination<
     OnePartialFractionDenominator, Polynomial<LargeInteger>
   > reduced;
-  int ambientDimension;
-  int indexCurrentlyProcessed;
-  int highestIndex;
-  int numberOfIrrelevantFractions;
-  int numberOfRelevantReducedFractions;
-  int numberOfMonomialsInNumerators;
-  int numberOfGeneratorsInNumerators;
-  int numberOfRelevantNonReducedFractions;
-  int numberOfMonomialsInNumeratorsRelevantFractions;
-  int totalGeneratorsRelevantFractions;
-  int numberOfMonomialsInNumeratorsIrrelevantFractions;
-  int numberOfGeneratorsIrrelevantFractions;
-  int totalReduced;
-  int totalFractionsWithAccountedVectorPartitionFunction;
-  int numberOfRunsReduceMonomialByMonomial;
-  int numberOfProcessedForVPFMonomialsTotal;
-  Rational checkSumStart;
-  Rational checkSumLast;
+  class Statistics {
+  public:
+    int totalFractionsWithAccountedVectorPartitionFunction;
+    int numberOfElongations;
+    Statistics();
+  };
+
+  class Details {
+  public:
+    int maximumIntermediates;
+    PartialFractions* owner;
+    List<std::string> allIntermediateComputations;
+    Vectors<Rational> lastVectors;
+    Vector<Rational> lastLinearCombination;
+    OnePartialFractionDenominator lastReduced;
+ Polynomial<LargeInteger>    lastCoefficient;
+    std::string toHTML() const;
+    Details();
+    void addIntermediate();
+  };
+
+  Statistics statistics;
+  Details details;
+  bool flagShowDetails;
+  bool flagSplitTestModeNoNumerators;
+  bool flagMakingProgressReport;
+  bool flagUsingCheckSum;
   bool flagDiscardingFractions;
   bool flagInitialized;
-  int limitSplittingSteps;
-  int splitStepsCounter;
+  int ambientDimension;
+  Rational checkSumStart;
+  Rational checkSumLast;
   // The list of polyhedral cones over which our
   // vector partition function is a
   // quasipolynomial.
@@ -747,10 +756,6 @@ public:
   // The quasipolynomials over each chamber,
   // in the same order.
   List<QuasiPolynomial> allQuasiPolynomials;
-  bool flagSplitTestModeNoNumerators;
-  bool flagMakingProgressReport;
-  bool flagUsingCheckSum;
-  int flagMaxNumStringOutputLines;
   // The original vectors whose vector partition function
   // we are computing.
   List<Vector<Rational> > originalVectors;
@@ -763,7 +768,6 @@ public:
   Matrix<int> tableAllowedAminus2B;
   Selection indicesRedundantShortRoots;
   List<int> indicesDoublesOfRedundantShortRoots;
-  int numberOfNonRedundantShortRoots;
   Vector<Rational> weights;
   int getIndex(const Vector<Rational>& root);
   int getIndexDoubleOfARoot(const Vector<Rational>& root);
@@ -832,11 +836,20 @@ public:
   bool checkForMinimalityDecompositionWithRespectToRoot(
     Vector<Rational>* root
   );
-  void makeProgressReportSplittingMainPart();
   void makeProgressVPFcomputation();
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toHTML(FormatExpressions* format = nullptr) const;
   std::string toLatex(FormatExpressions* format = nullptr) const;
+  std::string toLatexInternal(FormatExpressions* format = nullptr) const;
+  std::string toLatexWithInitialState(FormatExpressions* format = nullptr)
+  const;
+  std::string toLatexFractionSum(
+    const LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >& fractions,
+    FormatExpressions* format,
+    bool isFirst
+  ) const;
   class Test {
   public:
     static bool all();

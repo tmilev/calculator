@@ -555,8 +555,8 @@ public:
   ) const {
     Coefficient converted;
     for (int j = 0; j < this->minimalNumberOfVariables(); j ++) {
-      int numCycles = 0;
-      if (!this->monomialBody[j].isSmallInteger(&numCycles)) {
+      int numberOfCycles = 0;
+      if (!this->monomialBody[j].isSmallInteger(&numberOfCycles)) {
         global.fatal
         << "Attempting to evaluate a monomial whose "
         << j + 1
@@ -569,13 +569,13 @@ public:
         << "(and the user must be informed)."
         << global.fatal;
       }
-      bool isPositive = numCycles > 0;
-      if (numCycles < 0) {
-        numCycles = - numCycles;
+      bool isPositive = numberOfCycles > 0;
+      if (numberOfCycles < 0) {
+        numberOfCycles = - numberOfCycles;
       }
       converted = input[j];
       MathRoutines::raiseToPower(
-        converted, numCycles, inputOutputCoefficient.one()
+        converted, numberOfCycles, inputOutputCoefficient.one()
       );
       if (!isPositive) {
         converted.invert();

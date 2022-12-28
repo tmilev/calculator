@@ -43,24 +43,38 @@ vectorPartitionFunctionFormulaElementary(
   return output.assignValue(calculator, result);
 }
 
+bool CalculatorFunctionsVectorPartitionFunction::
+vectorPartitionFunctionFormulaWithDetails(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  return
+  CalculatorFunctionsVectorPartitionFunction::
+  vectorPartitionFunctionFormulaInternal(calculator, input, output, true);
+}
+
 bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
 (Calculator& calculator, const Expression& input, Expression& output) {
+  return
+  CalculatorFunctionsVectorPartitionFunction::
+  vectorPartitionFunctionFormulaInternal(calculator, input, output, false);
+}
+
+bool CalculatorFunctionsVectorPartitionFunction::
+vectorPartitionFunctionFormulaInternal(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool flagShowDetails
+) {
   STACK_TRACE(
     "CalculatorFunctionsVectorPartitionFunction::"
     "vectorPartitionFunctionFormula"
   );
   Vectors<Rational> vectors;
-  Matrix<Rational> matrix;
-  if (
-    !CalculatorConversions::functionGetMatrix(
-      calculator, input, matrix, false
-    )
-  ) {
-    return
-    calculator
-    << "Failed to extract matrix of rationals from: "
-    << input.toString();
+  if (!CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition(calculator, input, vectors)){
+    return false;
   }
+
   if (
     calculator.objectContainer.vectorPartitionFunctions.contains(vectors)
   ) {
@@ -72,14 +86,14 @@ bool CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula
       )
     );
   }
-  matrix.getVectorsFromRows(vectors);
   VectorPartitionFunction& result =
   calculator.objectContainer.vectorPartitionFunctions.getValueCreateEmpty(
     vectors
   );
+  result.fractions.flagShowDetails = flagShowDetails;
   result.fractions.initializeAndSplit(vectors, &calculator.comments);
   result.fractions.computeAllVectorPartitionFunctions();
-  return output.assignValue(calculator, result);
+return  output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition

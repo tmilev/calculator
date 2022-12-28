@@ -2249,10 +2249,10 @@ void RootSubalgebra::generatePossibleNilradicals(
   owner.computeActionNormalizerOfCentralizerIntersectNilradical(
     emptySel, *this
   );
-  int numCycles =
+  int numberOfCycles =
   MathRoutines::twoToTheNth(this->simpleBasisCentralizerRoots.size);
   List<Selection> StartingNilradicalsNoRepetition;
-  StartingNilradicalsNoRepetition.reserve(numCycles);
+  StartingNilradicalsNoRepetition.reserve(numberOfCycles);
   Selection tempSel, ParabolicsGenerator;
   if (!owner.flagNilradicalComputationInitialized) {
     owner.countersNilradicalsGeneration.setSize(this->modules.size + 1);
@@ -2264,7 +2264,7 @@ void RootSubalgebra::generatePossibleNilradicals(
     this->flagFirstRoundCounting = false;
     ParabolicsGenerator.initialize(this->simpleBasisCentralizerRoots.size);
     for (
-      int i = 0; i < numCycles;
+      int i = 0; i < numberOfCycles;
       i ++,
       ParabolicsGenerator.incrementSelection()
     ) {

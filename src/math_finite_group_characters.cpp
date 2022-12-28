@@ -1171,8 +1171,8 @@ void WeylGroupData::getSignSignatureParabolics(
   this->getSignCharacter(signRep.data);
   Selection sel;
   sel.initialize(this->getDimension());
-  int numCycles = MathRoutines::twoToTheNth(sel.numberOfElements);
-  outputSubgroups.setSize(numCycles);
+  int numberOfCycles = MathRoutines::twoToTheNth(sel.numberOfElements);
+  outputSubgroups.setSize(numberOfCycles);
   ElementWeylGroup g;
   g.owner = this;
   //  global.Comments << "<hr>Meself is: " << this->toString();
@@ -1265,11 +1265,11 @@ void CharacterFunctions::computeTauSignatures(
 ) {
   Selection sel;
   sel.initialize(group->cartanSymmetric.numberOfColumns);
-  int numCycles = MathRoutines::twoToTheNth(sel.numberOfElements);
+  int numberOfCycles = MathRoutines::twoToTheNth(sel.numberOfElements);
   List<List<bool> > tss;
-  tss.setSize(numCycles);
+  tss.setSize(numberOfCycles);
   List<ElementWeylGroup> generators;
-  for (int i = 0; i < numCycles - 2; i ++) {
+  for (int i = 0; i < numberOfCycles - 2; i ++) {
     sel.incrementSelection();
     generators.setSize(sel.cardinalitySelection);
     for (int j = 0; j < sel.cardinalitySelection; j ++) {
@@ -1290,7 +1290,7 @@ void CharacterFunctions::computeTauSignatures(
     ElementWeylGroup hr =
     group->getRootReflection(group->rootSystem.size - 1);
     sel.initialize(group->cartanSymmetric.numberOfColumns);
-    for (int i = 0; i < numCycles - 1; i ++) {
+    for (int i = 0; i < numberOfCycles - 1; i ++) {
       generators.setSize(sel.cardinalitySelection);
       for (int j = 0; j < sel.cardinalitySelection; j ++) {
         generators[j].makeSimpleReflection(sel.elements[j], *group);

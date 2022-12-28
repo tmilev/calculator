@@ -1801,10 +1801,10 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
       rank - selInducing.cardinalitySelection, j
     );
     highestWeightEnumerator.incrementSubsetFixedCardinality(j);
-    LargeInteger numCycles =
+    LargeInteger numberOfCycles =
     highestWeightEnumerator.numberOfCombinationsOfCardinality(j);
     for (
-      int i = 0; i < numCycles;
+      int i = 0; i < numberOfCycles;
       i ++,
       highestWeightEnumerator.incrementSubsetFixedCardinality(j)
     ) {
@@ -4616,12 +4616,15 @@ bool CalculatorLieTheory::parabolicWeylGroups(
   }
   SemisimpleLieAlgebra& semisimpleLieAlgebra =
   *semisimpleLieAlgebraWithContext.content;
-  int numCycles = MathRoutines::twoToTheNth(selectionParSel.numberOfElements);
+  int numberOfCycles =
+  MathRoutines::twoToTheNth(selectionParSel.numberOfElements);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
   subgroup;
   std::stringstream out;
   for (
-    int i = 0; i < numCycles; i ++, selectionParSel.incrementSelection()
+    int i = 0; i < numberOfCycles;
+    i ++,
+    selectionParSel.incrementSelection()
   ) {
     subgroup.makeParabolicFromSelectionSimpleRoots(
       semisimpleLieAlgebra.weylGroup, selectionParSel, 2000

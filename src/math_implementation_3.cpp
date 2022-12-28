@@ -3828,8 +3828,7 @@ std::string FormatExpressions::getPolynomialLetter(int index) const {
   }
   std::stringstream out;
   out << this->polynomialDefaultLetter << "_{" << index + 1 << "}";
-  std::string tempS = out.str();
-  return tempS;
+  return out.str();
 }
 
 bool OnePartialFractionDenominator::reduceOnceTotalOrderMethod(
@@ -3893,6 +3892,13 @@ bool OnePartialFractionDenominator::reduceOnce(
     global.fatal
     << "Unexpected failure to find linear dependence."
     << global.fatal;
+  }
+  if (this->owner->flagShowDetails){
+    this->owner->details.lastReduced = *this;
+    this->owner->details.lastLinearCombination = linearDependence;
+    this->owner->details.lastVectors = allRootsSorted;
+    this->owner->details.lastReduced = *this;
+    this->owner->details.addIntermediate();
   }
   this->decomposeFromNormalizedLinearRelation(
     linearDependence, allRootsSorted, output
@@ -4402,6 +4408,113 @@ void OnePartialFractionDenominator::operator=(
   this->denominatorsNoScale = right.denominatorsNoScale;
 }
 
+std::string PartialFractions::toLatexFractionSum(
+  const LinearCombination<
+    OnePartialFractionDenominator, Polynomial<LargeInteger>
+  >& fractions,
+  FormatExpressions* format,
+  bool isFirst
+) const {
+  std::stringstream out;
+  for (int i = 0; i < fractions.size(); i ++) {
+    if (i != 0 || !isFirst) {
+      out << "\\\\\n&&+\n";
+    } else {
+      out << "~~";
+    }
+    out << "\\displaystyle ";
+    bool showDetails = this->flagShowDetails && fractions.monomials[i]== this->details.lastReduced;
+    if (showDetails ){
+      out << "\\underbrace{";
+    }
+    out
+    << fractions.monomials[i].toLatex(fractions.coefficients[i], format);
+    if (showDetails){
+      out << "}_{XXX}";
+    }
+  }
+  return out.str();
+}
+
+std::string PartialFractions::toLatexInternal(FormatExpressions* format) const {
+  std::stringstream out;
+  out << this->toLatexFractionSum(this->reduced, format, true);
+  out
+  << this->toLatexFractionSum(
+    this->reducedWithElongationRedundancies,
+    format,
+    this->reduced.size() == 0
+  );
+  LinearCombination<
+    OnePartialFractionDenominator, Polynomial<LargeInteger>
+  > nonReducedCopy = this->nonReduced;
+  nonReducedCopy.addMonomial(this->details.lastReduced, this->details.lastCoefficient);
+
+  out
+  << this->toLatexFractionSum(
+    nonReducedCopy,
+    format,
+    this->reduced.size() + this->reducedWithElongationRedundancies.size() == 0
+  );
+  return out.str();
+}
+
+std::string PartialFractions::Details::toHTML() const {
+  if (this->owner == nullptr) {
+    return "[uninitialized]";
+  }
+  std::stringstream out;
+  out << "\\(\\begin{array}{rcl}";
+
+out << this->allIntermediateComputations[0] << "&=&";
+for (int i = 1; i < this->allIntermediateComputations.size; i ++){
+out << this->allIntermediateComputations[i];
+if (i != this->allIntermediateComputations.size - 1){
+out << "\\\\\n&=&";
+}
+}
+  out << "\\end{array}\\)";
+  return out.str();
+}
+
+
+void PartialFractions::Details::addIntermediate() {
+  if (!this->owner->flagShowDetails) {
+    return;
+  }
+  if (this->allIntermediateComputations.size > this->maximumIntermediates) {
+    return;
+  }
+  if (
+    this->allIntermediateComputations.size == this->maximumIntermediates
+  ) {
+    this->allIntermediateComputations.addOnTop(
+      "\\text{... too many steps ...}"
+    );
+    return;
+  }
+  this->allIntermediateComputations.addOnTop(
+    this->owner->toLatexInternal(nullptr)
+  );
+}
+
+std::string PartialFractions::toLatexWithInitialState(
+  FormatExpressions* format
+) const {
+  STACK_TRACE("PartialFractions::toLatexWithInitialState");
+  std::stringstream out;
+  out << "\\(";
+  out << "\\begin{array}{rcl}\n";
+  out
+  << "\\displaystyle "
+  << this->initialPartialFraction.toLatex(1, format)
+  << "&=&";
+  out << this->toLatexInternal(format);
+  out << "\\end{array}";
+  out << "\\)";
+  return out.str();
+}
+
 std::string PartialFractions::toLatex(FormatExpressions* format) const {
   if (
     this->nonReduced.size() > 0 ||
@@ -4431,7 +4544,11 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
   STACK_TRACE("PartialFractions::toHTML");
   std::stringstream out;
   out << "Original vectors: " << this->originalVectors.toString() << "<br>";
-  out << "\\(" << this->toLatex(format) << "\\)";
+  out << this->toLatexWithInitialState(format);
+  if (this->flagShowDetails) {
+    out << "Computation details:<br>";
+    out << this->details.toHTML();
+  }
   FormatExpressions formatQuasipolynomial;
   formatQuasipolynomial.flagUseFrac = true;
   for (int i = 0; i < this->chambers.refinedCones.size(); i ++) {
@@ -4524,19 +4641,7 @@ void PartialFractions::compareCheckSums() {
 }
 
 void PartialFractions::prepareIndicatorVariables() {
-  this->numberOfIrrelevantFractions = 0;
-  this->numberOfRelevantReducedFractions = 0;
-  this->numberOfGeneratorsInNumerators = 0;
-  this->numberOfGeneratorsIrrelevantFractions = 0;
-  this->totalGeneratorsRelevantFractions = 0;
-  this->numberOfMonomialsInNumeratorsIrrelevantFractions = 0;
-  this->numberOfMonomialsInNumeratorsRelevantFractions = 0;
-  this->numberOfMonomialsInNumerators = 1;
-  this->totalReduced = 0;
-  this->numberOfRelevantNonReducedFractions = 0;
-  this->numberOfProcessedForVPFMonomialsTotal = 0;
-  this->totalFractionsWithAccountedVectorPartitionFunction = 0;
-  this->numberOfRunsReduceMonomialByMonomial = 0;
+  this->statistics.totalFractionsWithAccountedVectorPartitionFunction = 0;
 }
 
 bool PartialFractions::splitPartial() {
@@ -4548,6 +4653,9 @@ bool PartialFractions::splitPartial() {
   Polynomial<LargeInteger> currentCoefficient;
   while (this->nonReduced.size() > 0) {
     this->nonReduced.popMonomial(0, currentFraction, currentCoefficient);
+    if (this->flagShowDetails){
+      this->details.lastCoefficient = currentCoefficient;
+    }
     bool needsReduction = currentFraction.reduceOnce(currentReduction);
     if (needsReduction) {
       currentReduction *= currentCoefficient;
@@ -4557,7 +4665,6 @@ bool PartialFractions::splitPartial() {
         currentFraction, currentCoefficient
       );
     }
-    this->makeProgressReportSplittingMainPart();
   }
   this->compareCheckSums();
   return true;
@@ -4618,16 +4725,11 @@ bool OnePartialFractionDenominator::initializeFromPartialFractions(
 }
 
 PartialFractions::PartialFractions() {
-  this->highestIndex = - 1;
   this->flagSplitTestModeNoNumerators = false;
   this->flagDiscardingFractions = false;
   this->flagUsingCheckSum = true;
   this->flagInitialized = false;
   this->flagMakingProgressReport = true;
-  this->splitStepsCounter = 0;
-  this->limitSplittingSteps = 0;
-  this->numberOfMonomialsInNumeratorsRelevantFractions = 0;
-  this->numberOfProcessedForVPFMonomialsTotal = 0;
 }
 
 void OnePartialFractionDenominator::getPolyReduceMonomialByMonomial(
@@ -4750,61 +4852,8 @@ int OnePartialFractionDenominator::controlLineSizeStringPolys(
   return numberOfLinesAdded;
 }
 
-void PartialFractions::makeProgressReportSplittingMainPart() {
-  if (!global.response.monitoringAllowed()) {
-    return;
-  }
-  std::stringstream out1, out2, out3;
-  out1
-  << this->numberOfRelevantReducedFractions
-  << " relevant reduced + "
-  << this->numberOfIrrelevantFractions
-  << " disjoint = "
-  << this->totalReduced;
-  if (this->numberOfRelevantNonReducedFractions != 0) {
-    out1
-    << " + "
-    << this->numberOfRelevantNonReducedFractions
-    << " relevant unreduced ";
-  }
-  out1
-  << " out of "
-  << this->nonReduced.size()
-  << " non-reduced fractions fractions";
-  ProgressReport report1;
-  ProgressReport report2;
-  ProgressReport report3;
-  report1.report(out1.str());
-  out2
-  << this->numberOfMonomialsInNumeratorsRelevantFractions
-  << " relevant reduced + "
-  << this->numberOfMonomialsInNumeratorsIrrelevantFractions
-  << " disjoint = "
-  << this->numberOfMonomialsInNumeratorsRelevantFractions +
-  this->numberOfMonomialsInNumeratorsIrrelevantFractions
-  << " out of "
-  << this->numberOfMonomialsInNumerators
-  << " total monomials in the numerators";
-  report2.report(out2.str());
-  if (this->numberOfGeneratorsInNumerators != 0) {
-    out3
-    << this->totalGeneratorsRelevantFractions
-    << " relevant reduced + "
-    << this->numberOfGeneratorsIrrelevantFractions
-    << " disjoint = "
-    << this->numberOfGeneratorsIrrelevantFractions +
-    this->totalGeneratorsRelevantFractions
-    << " out of "
-    << this->numberOfGeneratorsInNumerators
-    << " total generators in the numerators";
-    report3.report(out3.str());
-  } else {
-    report3.report("");
-  }
-}
-
 void PartialFractions::makeProgressVPFcomputation() {
-  this->totalFractionsWithAccountedVectorPartitionFunction ++;
+  this->statistics.totalFractionsWithAccountedVectorPartitionFunction ++;
   if (!global.response.monitoringAllowed()) {
     return;
   }
@@ -4812,9 +4861,7 @@ void PartialFractions::makeProgressVPFcomputation() {
   ProgressReport report;
   out2
   << "Processed "
-  << this->totalFractionsWithAccountedVectorPartitionFunction
-  << " out of "
-  << this->numberOfRelevantReducedFractions
+  << this->statistics.totalFractionsWithAccountedVectorPartitionFunction
   << " relevant fractions";
   report.report(out2.str());
 }
@@ -4866,7 +4913,7 @@ void PartialFractions::initializeCommon() {
   this->originalVectors.clear();
   this->normalizedVectors.clear();
   this->flagInitialized = false;
-  this->splitStepsCounter = 1;
+  this->details.owner = this;
 }
 
 void PartialFractions::initializeDimension() {
@@ -10828,7 +10875,7 @@ bool PartialFractions::computeOneVectorPartitionFunction(
   ) {
     return false;
   }
-  this->totalFractionsWithAccountedVectorPartitionFunction = 0;
+  this->statistics.totalFractionsWithAccountedVectorPartitionFunction = 0;
   output.makeZeroLatticeZn(this->ambientDimension);
   QuasiPolynomial summand;
   for (int i = 0; i < this->reduced.size(); i ++) {
@@ -11331,6 +11378,7 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
   if (!found) {
     return false;
   }
+  this->statistics.numberOfElongations ++;
   const OnePartialFractionDenominatorComponent& currentFraction =
   toBeReduced.denominatorsNoScale.getValueNoFail(normalized);
   Rational localStartCheckSum;
@@ -11359,6 +11407,15 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
     );
   }
   return true;
+}
+
+PartialFractions::Details::Details() {
+  this->owner = nullptr;
+  this->maximumIntermediates = 20;
+}
+
+PartialFractions::Statistics::Statistics() {
+  this->numberOfElongations = 0;
 }
 
 bool SlTwoInSlN::computeInvariantsOfDegree(
@@ -12598,8 +12655,8 @@ bool Cone::getLatticePointsInCone(
   // if bounding box shows a vector (x_1, ...) then
   // it corresponds to a vector with coodinates (x_1-upperBoundPointsInEachDim,
   // x_2-upperBoundPointsInEachDim, ...)
-  int numCycles = boundingBox.numberOfSelectionsTotal();
-  if (numCycles <= 0 || numCycles > 1000000) {
+  int numberOfCycles = boundingBox.numberOfSelectionsTotal();
+  if (numberOfCycles <= 0 || numberOfCycles > 1000000) {
     // We test up to 1 million lattice points.
     // This is very restrictive: in 8 dimensions, selecting
     // upperBoundPointsInEachDim=2,
@@ -12607,12 +12664,14 @@ bool Cone::getLatticePointsInCone(
     // darn small box
     return false;
   }
-  outputPoints.reserve(numCycles);
+  outputPoints.reserve(numberOfCycles);
   outputPoints.size = 0;
   Vector<Rational> candidatePoint;
   Vectors<Rational> latticeBasis;
   latticeBasis.assignMatrixRows(lattice.basisRationalForm);
-  for (int i = 0; i < numCycles; i ++, boundingBox.incrementSubset()) {
+  for (
+    int i = 0; i < numberOfCycles; i ++, boundingBox.incrementSubset()
+  ) {
     candidatePoint = actualShift;
     if (shiftAllPointsBy != nullptr) {
       candidatePoint += *shiftAllPointsBy;
@@ -13106,8 +13165,8 @@ bool PartialFractions::split(Vector<Rational>* indicator) {
     this->flagInitialized = true;
   }
   if (this->splitPartial()) {
+    this->details.addIntermediate();
     this->removeRedundantShortRoots(indicator);
-    this->makeProgressReportSplittingMainPart();
   }
   this->compareCheckSums();
   return false;
@@ -14747,12 +14806,12 @@ void Cone::computeVerticesFromNormals() {
   Selection selection;
   Selection nonPivotPoints;
   selection.initialize(this->walls.size);
-  LargeInteger numCycles =
+  LargeInteger numberOfCycles =
   selection.getNumberOfCombinationsFixedCardinality(dimension - 1);
   Matrix<Rational> matrix;
   Vector<Rational> root;
   matrix.initialize(dimension - 1, dimension);
-  for (int i = 0; i < numCycles; i ++) {
+  for (int i = 0; i < numberOfCycles; i ++) {
     selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
       dimension - 1
     );

@@ -221,7 +221,7 @@ const defaultFractionScale = 0.9;
  * bottomRightQuarterCircle:MathNodeType!,
  * bottomLeftQuarterCircle:MathNodeType!,
  * topRightQuarterCircle:MathNodeType!,
- * horizontalBraceUp:MathNodeType!,
+ * horizontalBrace:MathNodeType!,
  * horizontalMath:MathNodeType!,
  * verticalLineLeftMargin:MathNodeType!,
  * verticalLineRightMargin:MathNodeType!,
@@ -237,6 +237,7 @@ const defaultFractionScale = 0.9;
  * denominator:MathNodeType!,
  * overLinedBox:MathNodeType!,
  * overBrace:MathNodeType!,
+ * underBrace:MathNodeType!,
  * baseWithSubscript:MathNodeType!,
  * genericMathBox:MathNodeType!,
  * cancel:MathNodeType!,
@@ -400,8 +401,8 @@ const knownTypes = {
   overBrace: new MathNodeType({
     'type': 'overBrace',
   }),
-  horizontalBraceUp: new MathNodeType({
-    'type': 'horizontalBraceUp',
+  horizontalBrace: new MathNodeType({
+    'type': 'horizontalBrace',
   }),
   topRightQuarterCircle: new MathNodeType({
     'type': 'topRightQuarterCircle',
@@ -762,7 +763,7 @@ class MathNodeFactory {
         new MathNode(equationEditor, knownTypes.topRightQuarterCircle);
 
     const horizontalBrace =
-        new MathNode(equationEditor, knownTypes.horizontalBraceUp);
+        new MathNodeHorizontalBrace(equationEditor, true);
     horizontalBrace.appendChildren([
       horizontalBraceTopLeft,
       horizontalBraceLeft,
@@ -776,6 +777,48 @@ class MathNodeFactory {
     result.appendChild(base);
     result.appendChild(horizontalBrace);
     result.appendChild(superscript);
+    return result;
+  }
+
+  /** @return {MathNodeUnderBrace!} */
+  underBrace(
+    /** @type {EquationEditor!} */
+    equationEditor,
+    /** @type {MathNode?} */
+    content,
+    /** @type {MathNode?} */
+    underBraceContent,
+  ) {
+    const result = new MathNodeUnderBrace(equationEditor);
+    const base = mathNodeFactory.horizontalMath(equationEditor, content);
+    // 6 components of underbrace line
+    const horizontalBraceBottomLeft =
+      new MathNode(equationEditor, knownTypes.bottomLeftQuarterCircle);
+    const horizontalBraceLeft =
+      new MathNode(equationEditor, knownTypes.horizontalLineBottomMargin);
+    const horizontalBraceTopRight =
+      new MathNode(equationEditor, knownTypes.topRightQuarterCircle);
+    const horizontalBraceTopLeft =
+      new MathNode(equationEditor, knownTypes.topLeftQuarterCircle);
+    const horizontalBraceRight =
+      new MathNode(equationEditor, knownTypes.horizontalLineBottomMargin);
+    const horizontalBraceBottomRight =
+      new MathNode(equationEditor, knownTypes.bottomRightQuarterCircle);
+
+    const horizontalBrace = new MathNodeHorizontalBrace(equationEditor, false);
+    horizontalBrace.appendChildren([
+      horizontalBraceBottomLeft,
+      horizontalBraceLeft,
+      horizontalBraceTopRight,
+      horizontalBraceTopLeft,
+      horizontalBraceRight,
+      horizontalBraceBottomRight,
+    ]);
+    let subscript =
+      mathNodeFactory.genericMathBox(equationEditor, underBraceContent);
+    result.appendChild(base);
+    result.appendChild(horizontalBrace);
+    result.appendChild(subscript);
     return result;
   }
 
@@ -1582,6 +1625,7 @@ class LaTeXConstants {
       'binom': '\\binom',
       'stackrel': '\\stackrel',
       'overbrace': '\\overbrace',
+      'underbrace': '\\underbrace',
       'overline': '\\overline',
       'color': '\\color',
       'mathbf': '\\mathbf',
@@ -2462,6 +2506,15 @@ class LaTeXParser {
       let node = mathNodeFactory.overBrace(
           this.equationEditor,
           /** @type {MathNode!} */ (thirdToLast.node), last.node);
+      return this.replaceParsingStackTop(node, '', -4);
+    }
+    if (fourthToLast.syntacticRole === '\\underbrace' &&
+      thirdToLast.isExpression() && secondToLast.syntacticRole === '_' &&
+      last.isExpression()) {
+      this.lastRuleName = 'under-brace';
+      let node = mathNodeFactory.underBrace(
+        this.equationEditor,
+          /** @type {MathNode!} */(thirdToLast.node), last.node);
       return this.replaceParsingStackTop(node, '', -4);
     }
     let fifthToLast = this.parsingStack[this.parsingStack.length - 5];
@@ -5466,85 +5519,12 @@ class MathNode {
     this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
   }
 
-  computeDimensionsHorizontalBrace(
-      /** @type {number} */
-      desiredWidth,
-  ) {
-    this.boundingBox.width = desiredWidth;
-    const topLeft = this.children[0];
-    const leftStraight = this.children[1];
-    const bottomRight = this.children[2];
-    const bottomLeft = this.children[3];
-    const rightStraight = this.children[4];
-    const topRight = this.children[5];
-    const desiredRadius = Math.max(4, Math.floor(desiredWidth * 0.02));
-    const desiredHeight = desiredRadius;
-
-    const radiusString = `${desiredRadius}px`;
-    const borderString = `2px solid`;
-
-    topLeft.element.style.borderTopLeftRadius = radiusString;
-    topLeft.element.style.borderTop = borderString;
-    topRight.element.style.borderTopRightRadius = radiusString;
-    topRight.element.style.borderTop = borderString;
-    bottomLeft.element.style.borderBottomLeftRadius = radiusString;
-    bottomLeft.element.style.borderBottom = borderString;
-    bottomRight.element.style.borderBottomRightRadius = radiusString;
-    bottomRight.element.style.borderBottom = borderString;
-
-    const halfWidth = desiredWidth / 2;
-
-    topLeft.boundingBox.width = desiredRadius;
-    topRight.boundingBox.width = desiredRadius;
-    bottomRight.boundingBox.width = desiredRadius;
-    bottomLeft.boundingBox.width = desiredRadius;
-
-    topLeft.boundingBox.height = desiredHeight;
-    topRight.boundingBox.height = desiredHeight;
-    bottomRight.boundingBox.height = desiredHeight;
-    bottomLeft.boundingBox.height = desiredHeight;
-
-    topLeft.boundingBox.top = desiredHeight;
-    topRight.boundingBox.top = desiredHeight;
-
-    bottomRight.boundingBox.left = halfWidth - desiredRadius;
-    bottomLeft.boundingBox.left = halfWidth;
-    topRight.boundingBox.left = desiredWidth - desiredRadius;
-
-    leftStraight.boundingBox.width = halfWidth - 2 * desiredRadius;
-    leftStraight.boundingBox.left = desiredRadius;
-    rightStraight.boundingBox.width = halfWidth - 2 * desiredRadius;
-    rightStraight.boundingBox.left = halfWidth + desiredRadius;
-
-    leftStraight.boundingBox.height = desiredHeight;
-    rightStraight.boundingBox.height = desiredHeight;
-    this.boundingBox.height = desiredHeight + 2;
-  }
-
   /** Computes the dimensions of an overline math node. */
   computeDimensionsOverLine() {
     this.computeDimensionsStandard();
     // The border add 1 extra pixel of height.
     this.boundingBox.fractionLineHeight =
         this.children[0].boundingBox.fractionLineHeight + 1;
-  }
-
-  /** Computes the dimensions of an overbrace math node. */
-  computeDimensionsOverBrace() {
-    let base = this.children[0];
-    let brace = this.children[1];
-    let superscript = this.children[2];
-    brace.computeDimensionsHorizontalBrace(base.boundingBox.width);
-    superscript.boundingBox.width = base.boundingBox.width;
-    superscript.computeBoundingBoxLeftSingleChild();
-    this.boundingBox.width = base.boundingBox.width;
-    this.boundingBox.height = base.boundingBox.height +
-        brace.boundingBox.height + superscript.boundingBox.height;
-    this.boundingBox.fractionLineHeight = brace.boundingBox.height +
-        superscript.boundingBox.height + base.boundingBox.fractionLineHeight;
-    brace.boundingBox.top = superscript.boundingBox.height;
-    base.boundingBox.top =
-        superscript.boundingBox.height + brace.boundingBox.height;
   }
 
   /** @return {BoundingBox?} */
@@ -5755,10 +5735,6 @@ class MathNode {
     }
     if (this.type.type === knownTypes.numerator.type) {
       this.computeDimensionsNumerator();
-    }
-    if (this.type.type === knownTypes.overBrace.type) {
-      this.computeDimensionsOverBrace();
-      return;
     }
     if (this.type.type === knownTypes.overLinedBox.type) {
       this.computeDimensionsOverLine();
@@ -9441,6 +9417,14 @@ class MathNodeError extends MathNode {
     parent.focusRestore();
     return true;
   }
+
+  /** @return {LatexWithAnnotation!} */
+  toLatexWithAnnotation(
+    /** @type {ToLatexOptions?} */
+    options,
+  ) {
+    return new LatexWithAnnotation(this.textContentOrInitialContent());
+  }
 }
 
 class MathNodeCancel extends MathNode {
@@ -9836,12 +9820,140 @@ class MathNodeFormInput extends MathNode {
   }
 }
 
+class MathNodeHorizontalBrace extends MathNode { 
+  constructor(
+    /** @type {EquationEditor!} */
+    equationEditor,
+    /** @type {Boolean} */
+    inputPointsUp,
+  ) {
+    super(equationEditor, knownTypes.horizontalBrace);
+    this.pointsUp = inputPointsUp;
+  }
+
+  computeDimensions() {
+    let desiredWidth = this.parent.boundingBox.width;
+
+    this.boundingBox.width = desiredWidth;
+    const left = this.children[0];
+    const leftStraight = this.children[1];
+    const middleLeft = this.children[2];
+    const middleRight = this.children[3];
+    const rightStraight = this.children[4];
+    const right = this.children[5];
+    const desiredRadius = Math.max(4, Math.floor(desiredWidth * 0.02));
+    const desiredHeight = desiredRadius;
+
+    const radiusString = `${desiredRadius}px`;
+    const borderString = `2px solid`;
+
+    if (this.pointsUp) {
+      left.element.style.borderTopLeftRadius = radiusString;
+      left.element.style.borderTop = borderString;
+      middleLeft.element.style.borderBottomRightRadius = radiusString;
+      middleLeft.element.style.borderBottom = borderString;
+      middleRight.element.style.borderBottomLeftRadius = radiusString;
+      middleRight.element.style.borderBottom = borderString;      
+      right.element.style.borderTopRightRadius = radiusString;
+      right.element.style.borderTop = borderString;
+    } else { 
+      left.element.style.borderBottomLeftRadius = radiusString;
+      left.element.style.borderBottom = borderString;
+      middleLeft.element.style.borderTopRightRadius = radiusString;
+      middleLeft.element.style.borderTop = borderString;
+      middleRight.element.style.borderTopLeftRadius = radiusString;
+      middleRight.element.style.borderTop = borderString;      
+      right.element.style.borderBottomRightRadius = radiusString;
+      right.element.style.borderBottom = borderString;
+    }
+
+    const halfWidth = desiredWidth / 2;
+
+    left.boundingBox.width = desiredRadius;
+    right.boundingBox.width = desiredRadius;
+    middleLeft.boundingBox.width = desiredRadius;
+    middleRight.boundingBox.width = desiredRadius;
+
+    left.boundingBox.height = desiredHeight;
+    middleLeft.boundingBox.height = desiredHeight;
+    middleRight.boundingBox.height = desiredHeight;
+    right.boundingBox.height = desiredHeight;
+    if (this.pointsUp) {
+      left.boundingBox.top = desiredHeight;
+      middleLeft.boundingBox.top = 0;
+      middleRight.boundingBox.top = 0;
+      right.boundingBox.top = desiredHeight;
+    } else { 
+      left.boundingBox.top = 0;
+      middleLeft.boundingBox.top = desiredHeight;
+      middleRight.boundingBox.top = desiredHeight;
+      right.boundingBox.top = 0;
+    }
+    middleLeft.boundingBox.left = halfWidth - desiredRadius;
+    middleRight.boundingBox.left = halfWidth;
+    right.boundingBox.left = desiredWidth - desiredRadius;
+
+    leftStraight.boundingBox.width = halfWidth - 2 * desiredRadius;
+    leftStraight.boundingBox.left = desiredRadius;
+    rightStraight.boundingBox.width = halfWidth - 2 * desiredRadius;
+    rightStraight.boundingBox.left = halfWidth + desiredRadius;
+
+    leftStraight.boundingBox.height = desiredHeight;
+    rightStraight.boundingBox.height = desiredHeight;
+    this.boundingBox.height = desiredHeight + 2;
+  }
+}
+
 class MathNodeOverBrace extends MathNode {
   constructor(
       /** @type {EquationEditor!} */
       equationEditor,
   ) {
     super(equationEditor, knownTypes.overBrace);
+  }
+
+  /** Computes the dimensions of an overbrace math node. */
+  computeDimensions() {
+    let base = this.children[0];
+    let brace = this.children[1];
+    let superscript = this.children[2];
+    this.boundingBox.width = base.boundingBox.width;
+    brace.computeDimensions(base.boundingBox.width);
+    superscript.boundingBox.width = base.boundingBox.width;
+    superscript.computeBoundingBoxLeftSingleChild();
+    this.boundingBox.height = base.boundingBox.height +
+      brace.boundingBox.height + superscript.boundingBox.height;
+    this.boundingBox.fractionLineHeight = brace.boundingBox.height +
+      superscript.boundingBox.height + base.boundingBox.fractionLineHeight;
+    brace.boundingBox.top = superscript.boundingBox.height;
+    base.boundingBox.top =
+      superscript.boundingBox.height + brace.boundingBox.height;
+  }
+}
+
+class MathNodeUnderBrace extends MathNode {
+  constructor(
+    /** @type {EquationEditor!} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.underBrace);
+  }
+
+  /** Computes the dimensions of an overbrace math node. */
+  computeDimensions() {
+    let base = this.children[0];
+    let brace = this.children[1];
+    let subscript = this.children[2];
+    this.boundingBox.width = base.boundingBox.width;
+    brace.computeDimensions(base.boundingBox.width);
+    subscript.boundingBox.width = base.boundingBox.width;
+    subscript.computeBoundingBoxLeftSingleChild();
+    this.boundingBox.height = base.boundingBox.height +
+      brace.boundingBox.height + subscript.boundingBox.height;
+    this.boundingBox.fractionLineHeight = base.boundingBox.fractionLineHeight;
+    brace.boundingBox.top = base.boundingBox.height;
+    subscript.boundingBox.top =
+      base.boundingBox.height + brace.boundingBox.height;
   }
 }
 

@@ -9831,6 +9831,14 @@ class MathNodeHorizontalBrace extends MathNode {
     this.pointsUp = inputPointsUp;
   }
 
+  /** @return{number} */
+  radius(
+    /** @type{number} */
+    desiredWidth,
+  ) {
+    return Math.max(4, Math.floor(desiredWidth * 0.08));
+  }
+
   computeDimensions() {
     let desiredWidth = this.parent.boundingBox.width;
 
@@ -9841,7 +9849,7 @@ class MathNodeHorizontalBrace extends MathNode {
     const middleRight = this.children[3];
     const rightStraight = this.children[4];
     const right = this.children[5];
-    const desiredRadius = Math.max(4, Math.floor(desiredWidth * 0.02));
+    const desiredRadius = this.radius(desiredWidth);
     const desiredHeight = desiredRadius;
 
     const radiusString = `${desiredRadius}px`;
@@ -9901,6 +9909,90 @@ class MathNodeHorizontalBrace extends MathNode {
     leftStraight.boundingBox.height = desiredHeight;
     rightStraight.boundingBox.height = desiredHeight;
     this.boundingBox.height = desiredHeight + 2;
+  }
+
+  toScalableVectorGraphics(
+    /** @type {SVGSVGElement!} */
+    container,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) { 
+    this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
+    let result = new ScalableVectorGraphicsPath();
+    let r = this.radius(this.boundingBox.width);
+    let rC = this.pointsUp ? r : -r;
+    let t = r / 2;
+    let tC = this.pointsUp ? t : -t;
+    let yMiddle = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.height / 2;
+    let xLeft = boundingBoxFromParent.left + this.boundingBox.left;
+    let arcChoiceLeft = this.pointsUp ? 1 : 0;
+    let arcChoiceOther = 1 - arcChoiceLeft;
+    let halfWidth = this.boundingBox.width / 2;
+    let xMiddleLeft = xLeft + halfWidth - r;
+    let xMiddle = xLeft + halfWidth;
+    let xMiddleRight = xLeft + halfWidth + r;
+    let xRight = xLeft + this.boundingBox.width;
+  
+    let path = `M ${xLeft} ${yMiddle + rC} `;
+    path += `A ${r} ${r} 0 0 ${arcChoiceLeft} ${xLeft + r} ${yMiddle} `;
+    path += `L ${xMiddleLeft} ${yMiddle} `;
+    path += `A ${r} ${r} 0 0 ${arcChoiceOther} ${xMiddle} ${yMiddle - rC} `;
+    path += `A ${r} ${r} 0 0 ${arcChoiceOther} ${xMiddleRight} ${yMiddle} `;
+    path += `L ${xRight - r} ${yMiddle} `;
+    path += `A ${r} ${r} 0 0 ${arcChoiceLeft} ${xRight} ${yMiddle + rC} `;
+
+    path += `A ${r} ${t} 0 0 ${arcChoiceOther} ${xRight - r} ${yMiddle + tC} `;
+    path += `L ${xMiddleRight} ${yMiddle + tC} `;
+    path += `A ${r} ${t} 0 0 ${arcChoiceLeft} ${xMiddle} ${yMiddle} `;
+    path += `A ${r} ${t} 0 0 ${arcChoiceLeft} ${xMiddleLeft} ${yMiddle + tC} `;
+    path += `L ${xLeft + r} ${yMiddle + tC} `;
+    path += `A ${r} ${t} 0 0 ${arcChoiceOther} ${xLeft} ${yMiddle + rC} `;
+
+    result.setPathString(path);
+    let color = this.type.colorText;
+    if (color === '') {
+      color = 'black';
+    }
+    result.setStrokeColor('none');
+    result.setFillColor(color);
+    container.appendChild(result.element);
+  }
+
+  drawOnCanvas(
+    /** @type {CanvasRenderingContext2D!} */
+    canvas,
+    /** @type {BoundingBox!} */
+    boundingBoxFromParent,
+  ) {
+    this.drawOnCanvasBase(canvas, boundingBoxFromParent);
+    let yMiddle = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.height / 2;
+    let sign = this.pointsUp ? -1 : 1;
+    let r = this.radius(this.boundingBox.width);
+    let rC = sign * r;
+    let t = r / 2;
+    let tC = sign * t;
+    let xLeft = boundingBoxFromParent.left + this.boundingBox.left;
+    let halfWidth = this.boundingBox.width / 2;
+    let xMiddleLeft = xLeft + halfWidth - r;
+    let xMiddle = xLeft + halfWidth;
+    let xRight = xLeft + this.boundingBox.width;
+    let xMiddleRight = xLeft + halfWidth + r;
+
+    canvas.beginPath();
+    canvas.moveTo(xLeft, yMiddle - rC);
+    canvas.ellipse(xLeft + r, yMiddle - rC, r, r, 0, Math.PI, (1 - 0.5 * sign) * Math.PI, !this.pointsUp);
+    canvas.lineTo(xMiddleLeft, yMiddle);
+    canvas.ellipse(xMiddleLeft, yMiddle + rC, r, r, 0, - sign * 0.5 * Math.PI, 0, this.pointsUp);
+    canvas.ellipse(xMiddle + r, yMiddle + rC, r, r, 0, Math.PI, (-sign * 0.5) * Math.PI, this.pointsUp);
+    canvas.lineTo(xRight - r, yMiddle);
+    canvas.ellipse(xRight - r, yMiddle - rC, r, r, 0, sign * Math.PI / 2, 0, !this.pointsUp);
+    canvas.ellipse(xRight - r, yMiddle - rC, r, t, 0, 0, sign * Math.PI / 2, this.pointsUp);
+    canvas.lineTo(xMiddleRight, yMiddle - tC);
+    canvas.ellipse(xMiddle + r, yMiddle, r, t, 0, (-sign * 0.5) * Math.PI, Math.PI, !this.pointsUp);
+    canvas.ellipse(xMiddleLeft, yMiddle , r, t, 0, 0, - sign * 0.5 * Math.PI, !this.pointsUp);
+    canvas.lineTo(xLeft + r, yMiddle - tC);
+    canvas.ellipse(xLeft + r, yMiddle - rC, r, t, 0, (1 - 0.5 * sign) * Math.PI, Math.PI, this.pointsUp);
+    canvas.fill();
   }
 }
 

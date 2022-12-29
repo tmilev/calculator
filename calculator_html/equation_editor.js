@@ -9791,6 +9791,15 @@ class MathNodeOverLine extends MathNode {
   ) {
     super(equationEditor, knownTypes.overLinedBox);
   }
+
+  /** @return {LatexWithAnnotation!} */
+  toLatexWithAnnotation(
+    /** @type {ToLatexOptions?} */
+    options,
+  ) {
+    let base = this.children[0].toLatexWithAnnotation(options);
+    return new LatexWithAnnotation(`\\overline{${base.latex}}`);
+  }
 }
 
 class MathNodeFormInput extends MathNode {
@@ -10021,6 +10030,16 @@ class MathNodeOverBrace extends MathNode {
     base.boundingBox.top =
       superscript.boundingBox.height + brace.boundingBox.height;
   }
+
+  /** @return {LatexWithAnnotation!} */
+  toLatexWithAnnotation(
+    /** @type {ToLatexOptions?} */
+    options,
+  ) {
+    let base = this.children[0].toLatexWithAnnotation(options);
+    let superscript = this.children[2].toLatexWithAnnotation(options);
+    return new LatexWithAnnotation(`\\overbrace{${base.latex}}^${superscript.latex}`);
+  }
 }
 
 class MathNodeUnderBrace extends MathNode {
@@ -10046,6 +10065,16 @@ class MathNodeUnderBrace extends MathNode {
     brace.boundingBox.top = base.boundingBox.height;
     subscript.boundingBox.top =
       base.boundingBox.height + brace.boundingBox.height;
+  }
+
+  /** @return {LatexWithAnnotation!} */
+  toLatexWithAnnotation(
+    /** @type {ToLatexOptions?} */
+    options,
+  ) {
+    let base = this.children[0].toLatexWithAnnotation(options);
+    let subscript = this.children[2].toLatexWithAnnotation(options);
+    return new LatexWithAnnotation(`\\underbrace{${base.latex}}_${subscript.latex}`);
   }
 }
 

@@ -3943,6 +3943,7 @@ void OnePartialFractionDenominator::computeOneCheckSum(
 std::string OnePartialFractionDenominator::toLatex(
   const Polynomial<LargeInteger>& numerator, FormatExpressions* format
 ) const {
+  STACK_TRACE("OnePartialFractionDenominator::toLatex");
   std::stringstream out;
   out
   << "\\frac{"
@@ -3973,6 +3974,10 @@ const {
 std::string OnePartialFractionDenominator::toStringDenominatorOnly(
   FormatExpressions* format
 ) const {
+  STACK_TRACE("OnePartialFractionDenominator::toStringDenominatorOnly");
+  if (this->owner == nullptr) {
+    return "(uninitialized)";
+  }
   std::stringstream out;
   MapList<Vector<Rational>, OnePartialFractionDenominatorComponent>
   summandsSorted;
@@ -4444,7 +4449,22 @@ std::string PartialFractions::toLatexFractionSum(
   return out.str();
 }
 
-std::string PartialFractions::toLatexInternal(FormatExpressions* format) const {
+std::string PartialFractions::toLatexWithLastReduced(
+  FormatExpressions* format
+) const {
+  return this->toLatexInternal(true, format);
+}
+
+std::string PartialFractions::toLatexWithoutLastReduced(
+  FormatExpressions* format
+) const {
+  return this->toLatexInternal(false, format);
+}
+
+std::string PartialFractions::toLatexInternal(
+  bool addLastReduced, FormatExpressions* format
+) const {
+  STACK_TRACE("PartialFractions::toLatexInternal");
   std::stringstream out;
   out << this->toLatexFractionSum(this->reduced, format, true);
   out
@@ -4457,9 +4477,11 @@ std::string PartialFractions::toLatexInternal(FormatExpressions* format) const {
     OnePartialFractionDenominator, Polynomial<LargeInteger>
   > nonReducedCopy =
   this->nonReduced;
-  nonReducedCopy.addMonomial(
-    this->details.lastReduced, this->details.lastCoefficient
-  );
+  if (addLastReduced) {
+    nonReducedCopy.addMonomial(
+      this->details.lastReduced, this->details.lastCoefficient
+    );
+  }
   out
   << this->toLatexFractionSum(
     nonReducedCopy,
@@ -4502,6 +4524,7 @@ void PartialFractions::Details::addIntermediate() {
   if (!this->owner->flagShowDetails) {
     return;
   }
+  STACK_TRACE("PartialFractions::Details::addIntermediate");
   if (this->allIntermediateComputations.size > this->maximumIntermediates) {
     return;
   }
@@ -4514,7 +4537,17 @@ void PartialFractions::Details::addIntermediate() {
     return;
   }
   this->allIntermediateComputations.addOnTop(
-    this->owner->toLatexInternal(nullptr)
+    this->owner->toLatexWithLastReduced(nullptr)
+  );
+}
+
+void PartialFractions::Details::addFullState() {
+  STACK_TRACE("PartialFractions::Details::addFullState");
+  if (!this->owner->flagShowDetails) {
+    return;
+  }
+  this->allIntermediateComputations.addOnTop(
+    this->owner->toLatexWithoutLastReduced(nullptr)
   );
 }
 
@@ -4529,7 +4562,7 @@ std::string PartialFractions::toLatexWithInitialState(
   << "\\displaystyle "
   << this->initialPartialFraction.toLatex(1, format)
   << "&=&";
-  out << this->toLatexInternal(format);
+  out << this->toLatexWithoutLastReduced(format);
   out << "\\end{array}";
   out << "\\)";
   return out.str();
@@ -5064,6 +5097,7 @@ void PartialFractions::removeRedundantShortRoots(
   OnePartialFractionDenominator denominator;
   OnePartialFractionDenominator transformedDenominator;
   Polynomial<LargeInteger> transformedCoefficient;
+  bool found = false;
   while (this->reducedWithElongationRedundancies.size() > 0) {
     this->reducedWithElongationRedundancies.popMonomial(
       0, denominator, coefficient
@@ -5073,6 +5107,7 @@ void PartialFractions::removeRedundantShortRoots(
       denominator, transformedDenominator, transformedCoefficient, indicator
     );
     if (needsMoreReduction) {
+      found = true;
       transformedCoefficient *= coefficient;
       this->reducedWithElongationRedundancies.addMonomial(
         transformedDenominator, transformedCoefficient
@@ -5080,6 +5115,9 @@ void PartialFractions::removeRedundantShortRoots(
     } else {
       this->reduced.addMonomial(denominator, coefficient);
     }
+  }
+  if (found){
+    this->details.addFullState();
   }
   this->compareCheckSums();
 }
@@ -10683,6 +10721,7 @@ void OnePartialFractionDenominator::getDenominatorsSorted(
 void OnePartialFractionDenominator::getNormalizedSortedDenominatorExponents(
   Vectors<Rational>& output
 ) const {
+  this->checkInitialization();
   output.clear();
   for (int i = 0; i < this->owner->normalizedVectors.size; i ++) {
     const Vector<Rational>& current = this->owner->normalizedVectors[i];
@@ -11431,7 +11470,7 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
 
 PartialFractions::Details::Details() {
   this->owner = nullptr;
-  this->maximumIntermediates = 20;
+  this->maximumIntermediates = 6;
 }
 
 PartialFractions::Statistics::Statistics() {
@@ -13185,7 +13224,7 @@ bool PartialFractions::split(Vector<Rational>* indicator) {
     this->flagInitialized = true;
   }
   if (this->splitPartial()) {
-    this->details.addIntermediate();
+    this->details.addFullState();
     this->removeRedundantShortRoots(indicator);
   }
   this->compareCheckSums();

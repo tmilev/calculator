@@ -737,6 +737,7 @@ public:
     std::string toHTML() const;
     Details();
     void addIntermediate();
+    void addFullState();
     std::string toStringLinearCombination() const;
   };
 
@@ -842,7 +843,13 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toHTML(FormatExpressions* format = nullptr) const;
   std::string toLatex(FormatExpressions* format = nullptr) const;
-  std::string toLatexInternal(FormatExpressions* format = nullptr) const;
+  std::string toLatexWithoutLastReduced(FormatExpressions* format = nullptr)
+  const;
+  std::string toLatexWithLastReduced(FormatExpressions* format = nullptr)
+  const;
+  std::string toLatexInternal(
+    bool addLastReduced, FormatExpressions* format = nullptr
+  ) const;
   std::string toLatexWithInitialState(FormatExpressions* format = nullptr)
   const;
   std::string toLatexFractionSum(

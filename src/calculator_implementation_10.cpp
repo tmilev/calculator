@@ -71,10 +71,12 @@ vectorPartitionFunctionFormulaInternal(
     "vectorPartitionFunctionFormula"
   );
   Vectors<Rational> vectors;
-  if (!CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition(calculator, input, vectors)){
+  if (
+    !CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition
+    (calculator, input, vectors)
+  ) {
     return false;
   }
-
   if (
     calculator.objectContainer.vectorPartitionFunctions.contains(vectors)
   ) {
@@ -93,7 +95,7 @@ vectorPartitionFunctionFormulaInternal(
   result.fractions.flagShowDetails = flagShowDetails;
   result.fractions.initializeAndSplit(vectors, &calculator.comments);
   result.fractions.computeAllVectorPartitionFunctions();
-return  output.assignValue(calculator, result);
+  return output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition

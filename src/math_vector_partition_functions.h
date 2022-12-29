@@ -632,7 +632,8 @@ public:
       OnePartialFractionDenominator, Polynomial<LargeInteger>
     >& output
   );
-  bool reduceOnce(LinearCombination<
+  bool reduceOnce(
+    LinearCombination<
       OnePartialFractionDenominator, Polynomial<LargeInteger>
     >& output
   );
@@ -732,10 +733,11 @@ public:
     Vectors<Rational> lastVectors;
     Vector<Rational> lastLinearCombination;
     OnePartialFractionDenominator lastReduced;
- Polynomial<LargeInteger>    lastCoefficient;
+    Polynomial<LargeInteger> lastCoefficient;
     std::string toHTML() const;
     Details();
     void addIntermediate();
+    std::string toStringLinearCombination() const;
   };
 
   Statistics statistics;

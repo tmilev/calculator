@@ -61,6 +61,112 @@ getMonomialOrder<OnePartialFractionDenominator>() {
   return nullptr;
 }
 
+template < >
+List<Vector<Rational> >::Comparator* FormatExpressions::getMonomialOrder<
+  Vector<Rational>
+>() {
+  return nullptr;
+}
+
+// Format expression monomial orders for the toString() function follow.
+template < >
+List<
+  MonomialWrapper<
+    std::string, HashFunctions::hashFunction<std::string>
+  >
+>::Comparator* FormatExpressions::getMonomialOrder<
+  MonomialWrapper<
+    std::string, HashFunctions::hashFunction<std::string>
+  >
+>() {
+  return nullptr;
+}
+
+template < >
+List<MonomialPolynomial>::Comparator* FormatExpressions::getMonomialOrder<
+  MonomialPolynomial
+>() {
+  return &this->monomialOrder;
+}
+
+template < >
+List<Polynomial<AlgebraicNumber> >::Comparator* FormatExpressions::
+getMonomialOrder<Polynomial<AlgebraicNumber> >() {
+  return nullptr;
+}
+
+template < >
+List<MonomialVector>::Comparator* FormatExpressions::getMonomialOrder<
+  MonomialVector
+>() {
+  return nullptr;
+}
+
+template < >
+List<MonomialWeylAlgebra>::Comparator* FormatExpressions::getMonomialOrder<
+  MonomialWeylAlgebra
+>() {
+  return nullptr;
+}
+
+template < >
+List<MonomialUniversalEnveloping<RationalFraction<Rational> > >::Comparator*
+FormatExpressions::getMonomialOrder<
+  MonomialUniversalEnveloping<RationalFraction<Rational> >
+>() {
+  return nullptr;
+}
+
+template < >
+List<MonomialGeneralizedVerma<RationalFraction<Rational> > >::Comparator*
+FormatExpressions::getMonomialOrder<
+  MonomialGeneralizedVerma<RationalFraction<Rational> >
+>() {
+  return nullptr;
+}
+
+template < >
+List<ChevalleyGenerator>::Comparator* FormatExpressions::getMonomialOrder<
+  ChevalleyGenerator
+>() {
+  return nullptr;
+}
+
+template < >
+List<MonomialMatrix>::Comparator* FormatExpressions::getMonomialOrder<
+  MonomialMatrix
+>() {
+  return nullptr;
+}
+
+template < >
+List<MonomialUniversalEnveloping<Rational> >::Comparator* FormatExpressions::
+getMonomialOrder<MonomialUniversalEnveloping<Rational> >() {
+  return nullptr;
+}
+
+template < >
+List<MonomialTensorGeneralizedVermas<RationalFraction<Rational> > >::Comparator
+* FormatExpressions::getMonomialOrder<
+  MonomialTensorGeneralizedVermas<RationalFraction<Rational> >
+>() {
+  return nullptr;
+}
+
+template < >
+List<QuasiDifferentialMononomial>::Comparator* FormatExpressions::
+getMonomialOrder<QuasiDifferentialMononomial>() {
+  return nullptr;
+}
+
+template < >
+List<MonomialUniversalEnveloping<Polynomial<Rational> > >::Comparator*
+FormatExpressions::getMonomialOrder<
+  MonomialUniversalEnveloping<Polynomial<Rational> >
+>() {
+  return nullptr;
+}
+
 int GlobalVariables::externalCommandNoOutput(
   const std::string& systemCommand, bool logErrors
 ) {
@@ -3660,105 +3766,6 @@ unsigned int HashFunctions::hashFunction(const Selection& input) {
   return input.hashFunction();
 }
 
-// Format expression monomial orders for the toString() function follow.
-template < >
-List<
-  MonomialWrapper<
-    std::string, HashFunctions::hashFunction<std::string>
-  >
->::Comparator* FormatExpressions::getMonomialOrder<
-  MonomialWrapper<
-    std::string, HashFunctions::hashFunction<std::string>
-  >
->() {
-  return nullptr;
-}
-
-template < >
-List<MonomialPolynomial>::Comparator* FormatExpressions::getMonomialOrder<
-  MonomialPolynomial
->() {
-  return &this->monomialOrder;
-}
-
-template < >
-List<Polynomial<AlgebraicNumber> >::Comparator* FormatExpressions::
-getMonomialOrder<Polynomial<AlgebraicNumber> >() {
-  return nullptr;
-}
-
-template < >
-List<MonomialVector>::Comparator* FormatExpressions::getMonomialOrder<
-  MonomialVector
->() {
-  return nullptr;
-}
-
-template < >
-List<MonomialWeylAlgebra>::Comparator* FormatExpressions::getMonomialOrder<
-  MonomialWeylAlgebra
->() {
-  return nullptr;
-}
-
-template < >
-List<MonomialUniversalEnveloping<RationalFraction<Rational> > >::Comparator*
-FormatExpressions::getMonomialOrder<
-  MonomialUniversalEnveloping<RationalFraction<Rational> >
->() {
-  return nullptr;
-}
-
-template < >
-List<MonomialGeneralizedVerma<RationalFraction<Rational> > >::Comparator*
-FormatExpressions::getMonomialOrder<
-  MonomialGeneralizedVerma<RationalFraction<Rational> >
->() {
-  return nullptr;
-}
-
-template < >
-List<ChevalleyGenerator>::Comparator* FormatExpressions::getMonomialOrder<
-  ChevalleyGenerator
->() {
-  return nullptr;
-}
-
-template < >
-List<MonomialMatrix>::Comparator* FormatExpressions::getMonomialOrder<
-  MonomialMatrix
->() {
-  return nullptr;
-}
-
-template < >
-List<MonomialUniversalEnveloping<Rational> >::Comparator* FormatExpressions::
-getMonomialOrder<MonomialUniversalEnveloping<Rational> >() {
-  return nullptr;
-}
-
-template < >
-List<MonomialTensorGeneralizedVermas<RationalFraction<Rational> > >::Comparator
-* FormatExpressions::getMonomialOrder<
-  MonomialTensorGeneralizedVermas<RationalFraction<Rational> >
->() {
-  return nullptr;
-}
-
-template < >
-List<QuasiDifferentialMononomial>::Comparator* FormatExpressions::
-getMonomialOrder<QuasiDifferentialMononomial>() {
-  return nullptr;
-}
-
-template < >
-List<MonomialUniversalEnveloping<Polynomial<Rational> > >::Comparator*
-FormatExpressions::getMonomialOrder<
-  MonomialUniversalEnveloping<Polynomial<Rational> >
->() {
-  return nullptr;
-}
-
 void FormatExpressions::makeAlphabetXYZUW() {
   if (this->polynomialAlphabet.size > 0) {
     return;
@@ -3893,7 +3900,7 @@ bool OnePartialFractionDenominator::reduceOnce(
     << "Unexpected failure to find linear dependence."
     << global.fatal;
   }
-  if (this->owner->flagShowDetails){
+  if (this->owner->flagShowDetails) {
     this->owner->details.lastReduced = *this;
     this->owner->details.lastLinearCombination = linearDependence;
     this->owner->details.lastVectors = allRootsSorted;
@@ -4423,14 +4430,15 @@ std::string PartialFractions::toLatexFractionSum(
       out << "~~";
     }
     out << "\\displaystyle ";
-    bool showDetails = this->flagShowDetails && fractions.monomials[i]== this->details.lastReduced;
-    if (showDetails ){
+    bool showDetails = this->flagShowDetails &&
+    fractions.monomials[i] == this->details.lastReduced;
+    if (showDetails) {
       out << "\\underbrace{";
     }
     out
     << fractions.monomials[i].toLatex(fractions.coefficients[i], format);
-    if (showDetails){
-      out << "}_{XXX}";
+    if (showDetails) {
+      out << "}_{" << this->details.toStringLinearCombination() << "}";
     }
   }
   return out.str();
@@ -4447,9 +4455,11 @@ std::string PartialFractions::toLatexInternal(FormatExpressions* format) const {
   );
   LinearCombination<
     OnePartialFractionDenominator, Polynomial<LargeInteger>
-  > nonReducedCopy = this->nonReduced;
-  nonReducedCopy.addMonomial(this->details.lastReduced, this->details.lastCoefficient);
-
+  > nonReducedCopy =
+  this->nonReduced;
+  nonReducedCopy.addMonomial(
+    this->details.lastReduced, this->details.lastCoefficient
+  );
   out
   << this->toLatexFractionSum(
     nonReducedCopy,
@@ -4465,18 +4475,28 @@ std::string PartialFractions::Details::toHTML() const {
   }
   std::stringstream out;
   out << "\\(\\begin{array}{rcl}";
-
-out << this->allIntermediateComputations[0] << "&=&";
-for (int i = 1; i < this->allIntermediateComputations.size; i ++){
-out << this->allIntermediateComputations[i];
-if (i != this->allIntermediateComputations.size - 1){
-out << "\\\\\n&=&";
-}
-}
+  out << this->allIntermediateComputations[0] << "&=&";
+  for (int i = 1; i < this->allIntermediateComputations.size; i ++) {
+    out << this->allIntermediateComputations[i];
+    if (i != this->allIntermediateComputations.size - 1) {
+      out << "\\\\\n&=&";
+    }
+  }
   out << "\\end{array}\\)";
   return out.str();
 }
 
+std::string PartialFractions::Details::toStringLinearCombination() const {
+  std::stringstream linearCombinationStream;
+  LinearCombination<Vector<Rational>, Rational> combination;
+  for (int i = 0; i < this->lastLinearCombination.size; i ++) {
+    combination.addMonomial(
+      this->lastVectors[i], this->lastLinearCombination[i]
+    );
+  }
+  linearCombinationStream << combination.toString();
+  return linearCombinationStream.str();
+}
 
 void PartialFractions::Details::addIntermediate() {
   if (!this->owner->flagShowDetails) {
@@ -4653,7 +4673,7 @@ bool PartialFractions::splitPartial() {
   Polynomial<LargeInteger> currentCoefficient;
   while (this->nonReduced.size() > 0) {
     this->nonReduced.popMonomial(0, currentFraction, currentCoefficient);
-    if (this->flagShowDetails){
+    if (this->flagShowDetails) {
       this->details.lastCoefficient = currentCoefficient;
     }
     bool needsReduction = currentFraction.reduceOnce(currentReduction);

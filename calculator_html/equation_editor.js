@@ -9917,7 +9917,7 @@ class MathNodeHorizontalBrace extends MathNode {
 
     leftStraight.boundingBox.height = desiredHeight;
     rightStraight.boundingBox.height = desiredHeight;
-    this.boundingBox.height = desiredHeight + 2;
+    this.boundingBox.height = 2 * desiredHeight + 2;
   }
 
   toScalableVectorGraphics(

@@ -850,7 +850,7 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
     // It must fit in the largest possible encoding:
     // b_11110???,b_10??????,b_10??????,b_10??????  (3+3*6=21 payload bits).
     // We convert the code point to the 4-byte bigendian sequence that
-    // represents the integer.
+    // represents the integer. 
     List<unsigned char> fourBytes;
     Crypto::convertUint32ToUcharBigendiaN(input, fourBytes);
     out << fourBytes[0] << fourBytes[1] << fourBytes[2] << fourBytes[3];
@@ -4407,6 +4407,12 @@ unsigned int OnePartialFractionDenominator::hashFunction() const {
   return this->denominatorsNoScale.hashFunction();
 }
 
+unsigned int OnePartialFractionDenominator::hashFunction(
+  const OnePartialFractionDenominator& input
+) {
+  return input.hashFunction();
+}
+
 bool OnePartialFractionDenominator::operator==(
   const OnePartialFractionDenominator& right
 ) const {
@@ -4491,6 +4497,21 @@ std::string PartialFractions::toLatexInternal(
   return out.str();
 }
 
+std::string PartialFractions::toStringDifferentialOperatorForm(FormatExpressions* format) const {
+  std::stringstream out;
+  for (int i = 0; i < this->reduced.size(); i ++) {
+    const OnePartialFractionDenominator& fraction = this->reduced.monomials[i];
+    out
+    << fraction.toLatexDifferentialOperator(
+      this->reduced.coefficients[i],format
+    );
+    if (i != this->reduced.size() - 1) {
+      out << "\\\\\n&+&";
+    }
+  }
+  return out.str();
+}
+
 std::string PartialFractions::Details::toHTML() const {
   if (this->owner == nullptr) {
     return "[uninitialized]";
@@ -4531,9 +4552,7 @@ void PartialFractions::Details::addIntermediate() {
   if (
     this->allIntermediateComputations.size == this->maximumIntermediates
   ) {
-    this->allIntermediateComputations.addOnTop(
-      "\\text{... too many steps ...}"
-    );
+    this->allIntermediateComputations.addOnTop("too~many~steps~");
     return;
   }
   this->allIntermediateComputations.addOnTop(
@@ -4549,6 +4568,18 @@ void PartialFractions::Details::addFullState() {
   this->allIntermediateComputations.addOnTop(
     this->owner->toLatexWithoutLastReduced(nullptr)
   );
+}
+
+void PartialFractions::Details::addDifferentialOperatorForm() {
+  STACK_TRACE("PartialFractions::Details::addDifferentialOperatorForm");
+  if (!this->owner->flagShowDetails) {
+    return;
+  }
+  FormatExpressions format;
+  format.flagSuppressOneIn1overXtimesY = true;
+  format.flagUseFrac = true;
+  this->allIntermediateComputations.addOnTop(
+      this->owner->toStringDifferentialOperatorForm(&format));
 }
 
 std::string PartialFractions::toLatexWithInitialState(
@@ -4770,7 +4801,7 @@ void OnePartialFractionDenominator::addMultiplicity(
 }
 
 bool OnePartialFractionDenominator::initializeFromPartialFractions(
-  PartialFractions& owner
+ const PartialFractions& owner
 ) {
   STACK_TRACE("OnePartialFractionDenominator::initializeFromVectors");
   *this = owner.initialPartialFraction;
@@ -5116,7 +5147,7 @@ void PartialFractions::removeRedundantShortRoots(
       this->reduced.addMonomial(denominator, coefficient);
     }
   }
-  if (found){
+  if (found) {
     this->details.addFullState();
   }
   this->compareCheckSums();
@@ -5211,13 +5242,10 @@ void PartialFractions::computeKostantFunctionFromWeylGroup(
   }
 }
 
-void OnePartialFractionDenominatorComponent::operator=(
-  const OnePartialFractionDenominatorComponent& right
+unsigned int OnePartialFractionDenominatorComponent::hashFunction(
+  const OnePartialFractionDenominatorComponent& input
 ) {
-  this->owner = right.owner;
-  this->normalizedVectorIndex = right.normalizedVectorIndex;
-  this->multiplicities = right.multiplicities;
-  this->elongations = right.elongations;
+  return input.hashFunction();
 }
 
 unsigned int OnePartialFractionDenominatorComponent::hashFunction() const {
@@ -5253,7 +5281,7 @@ int OnePartialFractionDenominatorComponent::getLargestElongation() const {
   int result = this->elongations[0];
   for (int i = 1; i < this->elongations.size; i ++) {
     if (this->elongations[i] == result) {
-      global.fatal << "Elongation does not math the result. " << global.fatal;
+      global.fatal << "Elongation repeats. " << global.fatal;
     }
     if (this->elongations[i] > result) {
       result = this->elongations[i];
@@ -10364,18 +10392,6 @@ std::string KazhdanLusztigPolynomials::rPolysToString(
   return out.str();
 }
 
-void OnePartialFractionDenominator::evaluateIntegerPolynomial(
-  const Polynomial<LargeInteger>& input,
-  const Vector<Rational>& values,
-  Rational& output
-) {
-  output.makeZero();
-  Polynomial<Rational> rationalPolynomial;
-  rationalPolynomial = input;
-  // <-implicit type conversion here!
-  output = rationalPolynomial.evaluate(values);
-}
-
 void LaTeXProcedures::beginPSTricks(std::fstream& output) {
   output << "\\begin{pspicture}(8, 8)";
 }
@@ -10682,9 +10698,9 @@ void WeylGroupData::computeExtremeRootInTheSameKMod(
   STACK_TRACE("WeylGroupData::computeExtremeRootInTheSameKMod");
   output = inputRoot;
   Vector<Rational> root;
-  bool FoundHigher = true;
+  bool foundHigher = true;
   do {
-    FoundHigher = false;
+    foundHigher = false;
     for (int i = 0; i < inputSimpleBasisK.size; i ++) {
       root = output;
       if (lookingForHighest) {
@@ -10694,14 +10710,133 @@ void WeylGroupData::computeExtremeRootInTheSameKMod(
       }
       if (this->rootSystem.getIndex(root) != - 1) {
         output = root;
-        FoundHigher = true;
+        foundHigher = true;
       }
       if (root.isEqualToZero()) {
         output *= - 1;
-        FoundHigher = true;
+        foundHigher = true;
       }
     }
-  } while (FoundHigher);
+  } while (foundHigher);
+}
+
+bool OnePartialFractionDenominator::getDifferentialOperatorForm(
+  List<ElementWeylAlgebra<Rational> >& output
+) const {
+  STACK_TRACE(
+    "OnePartialFractionDenominator::getDifferentialOperatorForm"
+  );
+  Vectors<Rational> normals;
+  this->getNormalsToConeWallsIfDecomposed(normals);
+  output.clear();
+  ElementWeylAlgebra<Rational> next;
+  ElementWeylAlgebra<Rational> summand;
+  for (int i = 0; i < normals.size; i ++) {
+    next.makeZero();
+    for (int j = 0; j < normals[i].size; j ++) {
+      summand.makexidj(j, j);
+      summand *= normals[i][j];
+      next += summand;
+    }
+    output.addOnTop(next);
+  }
+  return true;
+}
+
+void OnePartialFractionDenominator::computeDifferentialOperatorConstant(Rational& output)const{
+
+  output = 1;
+  for (int i = 0; i < this->denominatorsNoScale.size(); i++)
+  {
+    OnePartialFractionDenominatorComponent &component = this->denominatorsNoScale.values[i];
+
+output*=   Rational::factorial(component.getTotalMultiplicity()-1);
+  }
+  output.invert();
+}
+
+std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
+  Polynomial<LargeInteger>& coefficient, FormatExpressions* format
+) const {
+  STACK_TRACE("OnePartialFractionDenominator::toLatexDifferentialOperator");
+  if (
+    this->denominatorsNoScale.size() != this->owner->ambientDimension
+  ) {
+    return "(non-decomposed)";
+  }
+  List<ElementWeylAlgebra<Rational> > differentialOperators;
+  if (!this->getDifferentialOperatorForm(differentialOperators)) {
+    return "(non-decomposed)";
+  }
+  Rational extraConstant;
+  this->computeDifferentialOperatorConstant(extraConstant);
+  std::stringstream out;
+  if (coefficient.size() > 1){
+  out <<"\\left(" <<coefficient.toString() << "\\right)";
+  }else{
+  out << coefficient.toString() ;
+  }
+  out << "\\cdot ";
+  if (!extraConstant.isEqualToOne()){
+    if (extraConstant.isNegative()){
+      out << "\\left(";
+    }
+    out << extraConstant.toString(format);
+    if (extraConstant.isNegative())
+    {
+      out << "\\right)";
+    }
+  }
+  Vectors<Rational> exponents;
+  this->getNormalizedSortedDenominatorExponents(exponents);
+  for (int i = 0; i < differentialOperators.size; i++)
+  {
+    if (!this->denominatorsNoScale.contains(exponents[i])) {
+      global.fatal
+      << "Exponent vector "
+      << exponents[i]
+      << " not found in "
+      << this->denominatorsNoScale.keys
+      << global.fatal;
+    }
+  const  OnePartialFractionDenominatorComponent& component =
+    this->denominatorsNoScale.getValueNoFail(exponents[i]);
+    if (component.multiplicities.size != 1) {
+      return "(non-elongated)";
+    }
+    int power = component.getTotalMultiplicity()-1;
+    if (power ==0){
+      continue;
+    }
+    out <<"\\left("<<  differentialOperators[i].toString(format) << "\\right)";
+    if (power > 1 && power < 10) {
+      out << "^" << power;
+    }
+    if (power >= 10) {
+      out << "^{" << power << "}";
+    }
+  }
+  OnePartialFractionDenominator withMultiplicityOne;
+  withMultiplicityOne.owner = this->owner;
+  for (int i = 0; i < this->denominatorsNoScale.size(); i++)
+  {
+    OnePartialFractionDenominatorComponent &current = this->denominatorsNoScale.values[i];
+    withMultiplicityOne.addMultiplicity(this->denominatorsNoScale.keys[i], 1, current.getLargestElongation());
+  }
+  out << "\\cdot" << withMultiplicityOne.toLatex(1);
+  return out.str();
+}
+
+void OnePartialFractionDenominator::evaluateIntegerPolynomial(
+  const Polynomial<LargeInteger>& input,
+  const Vector<Rational>& values,
+  Rational& output
+) {
+  output.makeZero();
+  Polynomial<Rational> rationalPolynomial;
+  rationalPolynomial = input;
+  // <-implicit type conversion here!
+  output = rationalPolynomial.evaluate(values);
 }
 
 void OnePartialFractionDenominator::getDenominatorsSorted(
@@ -10819,6 +10954,24 @@ void OnePartialFractionDenominator::computePolynomialCorrespondingToOneMonomial
   );
 }
 
+void OnePartialFractionDenominator::getNormalsToConeWallsIfDecomposed(
+  Vectors<Rational>& output
+) const {
+  STACK_TRACE(
+    "OnePartialFractionDenominator::getNormalsToConeWallsIfDecomposed"
+  );
+  Vectors<Rational> coneGenerators;
+  this->getDenominatorExponentsWithoutMultiplicities(coneGenerators);
+  Matrix<Rational> normalsMatrixForm;
+  normalsMatrixForm.assignVectorsToRows(coneGenerators);
+  // Example 1. The matrix before inversion: (2).
+  // Example 2. The matrix before inversion: the 2x2 identity.
+  normalsMatrixForm.invert();
+  // Example 1. The matrix after inversion: (1/2).
+  // Example 2. The matrix after inversion: the 2x2 identity.
+  output.assignMatrixColumns(normalsMatrixForm);
+}
+
 void OnePartialFractionDenominator::getVectorPartitionFunction(
   PartialFractions& owner,
   Polynomial<LargeInteger>& coefficient,
@@ -10844,14 +10997,7 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
   // 1/((1-x)^2(1-y)
   Lattice lattice;
   lattice.makeFromRoots(latticeGenerators);
-  Matrix<Rational> normalsMatrixForm;
-  normalsMatrixForm.assignVectorsToRows(latticeGenerators);
-  // Example 1. The matrix before inversion: (2).
-  // Example 2. The matrix before inversion: the 2x2 identity.
-  normalsMatrixForm.invert();
-  // Example 1. The matrix after inversion: (1/2).
-  // Example 2. The matrix after inversion: the 2x2 identity.
-  normals.assignMatrixColumns(normalsMatrixForm);
+  this->getNormalsToConeWallsIfDecomposed(normals);
   output.makeZeroLatticeZn(owner.ambientDimension);
   for (int i = 0; i < coefficient.size(); i ++) {
     this->computePolynomialCorrespondingToOneMonomial(
@@ -11470,7 +11616,7 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
 
 PartialFractions::Details::Details() {
   this->owner = nullptr;
-  this->maximumIntermediates = 6;
+  this->maximumIntermediates = 4;
 }
 
 PartialFractions::Statistics::Statistics() {
@@ -13227,6 +13373,7 @@ bool PartialFractions::split(Vector<Rational>* indicator) {
     this->details.addFullState();
     this->removeRedundantShortRoots(indicator);
   }
+  this->details.addDifferentialOperatorForm();
   this->compareCheckSums();
   return false;
 }

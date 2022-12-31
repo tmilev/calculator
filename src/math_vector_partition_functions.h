@@ -500,14 +500,11 @@ public:
   unsigned int hashFunction() const;
   static unsigned int hashFunction(
     const OnePartialFractionDenominatorComponent& input
-  ) {
-    return input.hashFunction();
-  }
+  );
   OnePartialFractionDenominatorComponent();
   void computeOneCheckSum(
     Rational& output, const Vector<Rational>& variableValues
   );
-  void operator=(const OnePartialFractionDenominatorComponent& right);
   bool operator==(const OnePartialFractionDenominatorComponent& right) const;
   bool operator>(const OnePartialFractionDenominatorComponent& other) const;
   std::string toStringInternal() const;
@@ -586,6 +583,7 @@ public:
   void getDenominatorExponentsWithoutMultiplicities(
     Vectors<Rational>& output
   ) const;
+  void getNormalsToConeWallsIfDecomposed(Vectors<Rational>& output) const;
   void getVectorPartitionFunction(
     PartialFractions& owner,
     Polynomial<LargeInteger>& coefficient,
@@ -638,10 +636,7 @@ public:
     >& output
   );
   unsigned int hashFunction() const;
-  static unsigned int hashFunction(const OnePartialFractionDenominator& input)
-  {
-    return input.hashFunction();
-  }
+  static unsigned int hashFunction(const OnePartialFractionDenominator& input);
   bool decreasePowerOneFraction(int index, int increment);
   void prepareFraction(
     int indexA,
@@ -686,7 +681,7 @@ public:
   );
   bool operator==(const OnePartialFractionDenominator& right) const;
   void operator=(const OnePartialFractionDenominator& right);
-  bool initializeFromPartialFractions(PartialFractions& owner);
+  bool initializeFromPartialFractions(const PartialFractions& owner);
   void addMultiplicity(
     const Vector<Rational>& normalizedVector,
     int multiplicity,
@@ -695,6 +690,12 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringDenominatorOnly(FormatExpressions* format = nullptr)
   const;
+  bool getDifferentialOperatorForm(
+    List<ElementWeylAlgebra<Rational> >& output
+  ) const;
+  void computeDifferentialOperatorConstant(Rational &output)const;
+  std::string toLatexDifferentialOperator(
+      Polynomial<LargeInteger> &coefficient, FormatExpressions *format) const;
   std::string toLatex(
     const Polynomial<LargeInteger>& numerator,
     FormatExpressions* format = nullptr
@@ -738,6 +739,8 @@ public:
     Details();
     void addIntermediate();
     void addFullState();
+    // Adds a report of the Brion-Vergne decomposition.
+    void addDifferentialOperatorForm();
     std::string toStringLinearCombination() const;
   };
 
@@ -850,6 +853,7 @@ public:
   std::string toLatexInternal(
     bool addLastReduced, FormatExpressions* format = nullptr
   ) const;
+  std::string toStringDifferentialOperatorForm(FormatExpressions* format) const;
   std::string toLatexWithInitialState(FormatExpressions* format = nullptr)
   const;
   std::string toLatexFractionSum(

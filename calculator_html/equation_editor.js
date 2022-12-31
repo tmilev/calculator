@@ -1364,8 +1364,10 @@ class MathNodeWithCursorPosition {
   }
 }
 
-/** @return {EquationEditor!} */
-// Converts the textContent of an html element to typeset math.
+/** 
+ * Converts the textContent of an html element to typeset math. 
+ * @return {EquationEditor!} 
+ */ 
 function mathFromElement(
     /** @type {HTMLElement!} */
     container,
@@ -1391,7 +1393,11 @@ function mathFromElement(
       callback, containerSVG, copyButton);
 }
 
-/** @return {EquationEditor!} Returns typeset math.*/
+/** 
+ * Returns typeset math.
+ * 
+ * @return {EquationEditor!} 
+ */
 function mathFromLatex(
     /** @type {HTMLElement!} */
     container,
@@ -1414,6 +1420,10 @@ function mathFromLatex(
   let lineBreakWidth = 0;
   if (lineBreakWidthString !== '') {
     lineBreakWidth = parseInt(lineBreakWidthString, 10);
+  }
+  let copyButtonFromTag = container.getAttribute('copyButton');
+  if (copyButtonFromTag === 'true') {
+    copyButton = true;
   }
   let result = new EquationEditor(
       container, new EquationEditorOptions({
@@ -3240,8 +3250,8 @@ class CopyButton {
   /** Initializes the copy button. Call to create the button. */
   initialize() {
     this.container =
-        /** @type {HTMLElement!}*/ (document.createElement('span'));
-    this.button = /** @type {HTMLElement!}*/ (document.createElement('button'));
+        /** @type {HTMLElement!} */ (document.createElement('span'));
+    this.button = /** @type {HTMLElement!} */ (document.createElement('button'));
     this.container.style.fontSize = '6px';
     this.button.style.fontSize = '6px';
     this.container.appendChild(this.button);
@@ -3496,42 +3506,51 @@ class EquationEditor {
    * @return {string}
    */
   copyToClipboard() {
-    let toBeCopied = '';
     if (this.selectionEndExpanded.element === null ||
-        this.selectionStartExpanded.element === null) {
-      toBeCopied = this.rootNode.toLatexWithAnnotation(null).latex;
-    } else {
-      /** @type {MathNode!} */
-      let left = this.selectionStartExpanded.element;
-      /** @type {MathNode!} */
-      let right = this.selectionEndExpanded.element;
-      if (right.isToTheLeftOf(left)) {
-        let copy = right;
-        right = left;
-        left = copy;
+      this.selectionStartExpanded.element === null) {
+      if (!this.options.editable) {
+        return this.doCopy(this.latexLastWritten);
+      } else {
+        return this.doCopy(this.rootNode.toLatexWithAnnotation(null).latex);
       }
-      left = left.beefUpToHorizontalParent();
-      right = right.beefUpToHorizontalParent();
-      /** @type {Array.<string>!} */
-      let latexContent = [];
-      /** @type {MathNode?} */
-      let current = left;
-      for (;;) {
-        latexContent.push(current.toLatexWithAnnotation(null).latex);
-        if (current === right) {
-          break;
-        }
-        current = current.horizontalSibling(1);
-        if (current === null) {
-          break;
-        }
-      }
-      toBeCopied = latexContent.join('');
     }
+    /** @type {MathNode!} */
+    let left = this.selectionStartExpanded.element;
+    /** @type {MathNode!} */
+    let right = this.selectionEndExpanded.element;
+    if (right.isToTheLeftOf(left)) {
+      let copy = right;
+      right = left;
+      left = copy;
+    }
+    left = left.beefUpToHorizontalParent();
+    right = right.beefUpToHorizontalParent();
+    /** @type {Array.<string>!} */
+    let latexContent = [];
+    /** @type {MathNode?} */
+    let current = left;
+    for (; ;) {
+      latexContent.push(current.toLatexWithAnnotation(null).latex);
+      if (current === right) {
+        break;
+      }
+      current = current.horizontalSibling(1);
+      if (current === null) {
+        break;
+      }
+    }
+    let toBeCopied = latexContent.join('');
+    return this.doCopy(toBeCopied);
+  }
+
+  doCopy(
+    /** @type{string} */
+    toBeCopied,
+  ) {
     this.lastCopied = toBeCopied;
     navigator.clipboard.writeText(toBeCopied);
     this.writeDebugInfo(null);
-    return toBeCopied;
+    return toBeCopied;    
   }
 
   /** Computes the height of a white-space text in a DOM. */

@@ -29,6 +29,7 @@ public:
     QuasiPolynomial previousPolynomial;
     int lowestSlicingIndex;
     bool visited;
+    int displayNumber;
     Vector<Rational> internalPoint;
     List<unsigned char> hashOfContainingSimplices;
     Payload();
@@ -195,6 +196,7 @@ public:
     Cone& neighborCandidate, Vector<Rational>& normalOfWall
   );
   void addOneConeIfAdjacentToWall(Wall& wall, Cone& candidateNeighbor);
+  std::string displayId() const;
 };
 
 class ConeLatticeAndShift {
@@ -255,7 +257,7 @@ public:
   // passes through directions that span the entire plane.
   bool isSpannedByDirections(const Vector<Rational>& planeNormal);
   void markAllConesNonRefined(int directionIndex);
-  void refineByDirectionsAndSort();
+  void refineByDirectionsAndSort(ProgressReport& report);
   void refineByDirections(ProgressReport* report);
   void refineByOneDirection(int directionIndex, ProgressReport* report);
   void reportStats(ProgressReport* report);
@@ -384,6 +386,9 @@ public:
   std::string toHTML() const;
   // Returns the detailed cone description without the graphics.
   std::string toHTMLWithoutGraphics() const;
+  std::string toHTMLOneCollection(
+    const MapList<int, Cone>& cones, int& totalChambers
+  ) const;
   // Returns the graphics of all the cones without description.
   std::string toHTMLGraphicsOnly(bool includePanels) const;
   // Returns a sequence of html canvas drawings of the various stages of
@@ -693,9 +698,10 @@ public:
   bool getDifferentialOperatorForm(
     List<ElementWeylAlgebra<Rational> >& output
   ) const;
-  void computeDifferentialOperatorConstant(Rational &output)const;
+  void computeDifferentialOperatorConstant(Rational& output) const;
   std::string toLatexDifferentialOperator(
-      Polynomial<LargeInteger> &coefficient, FormatExpressions *format) const;
+    Polynomial<LargeInteger>& coefficient, FormatExpressions* format
+  ) const;
   std::string toLatex(
     const Polynomial<LargeInteger>& numerator,
     FormatExpressions* format = nullptr
@@ -845,6 +851,7 @@ public:
   void makeProgressVPFcomputation();
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toHTML(FormatExpressions* format = nullptr) const;
+  std::string toStringCheckSum() const;
   std::string toLatex(FormatExpressions* format = nullptr) const;
   std::string toLatexWithoutLastReduced(FormatExpressions* format = nullptr)
   const;
@@ -853,7 +860,8 @@ public:
   std::string toLatexInternal(
     bool addLastReduced, FormatExpressions* format = nullptr
   ) const;
-  std::string toStringDifferentialOperatorForm(FormatExpressions* format) const;
+  std::string toStringDifferentialOperatorForm(FormatExpressions* format)
+  const;
   std::string toLatexWithInitialState(FormatExpressions* format = nullptr)
   const;
   std::string toLatexFractionSum(

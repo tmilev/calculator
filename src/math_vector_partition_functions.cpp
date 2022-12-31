@@ -15,10 +15,6 @@ std::string VectorPartitionFunction::toHTML() const {
     out
     << "<div style='max-width: 500px; max-height:500px; overflow:scroll'>"
     << this->fractions.toHTML();
-    out
-    << "<br>Chambers:<br>"
-    << this->fractions.chambers.toHTML()
-    << "</div>";
   }
   if (this->elementaryMethod.flagInitialized) {
     out << this->elementaryMethod.toHTML();

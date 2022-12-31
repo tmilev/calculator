@@ -4497,13 +4497,15 @@ std::string PartialFractions::toLatexInternal(
   return out.str();
 }
 
-std::string PartialFractions::toStringDifferentialOperatorForm(FormatExpressions* format) const {
+std::string PartialFractions::toStringDifferentialOperatorForm(
+  FormatExpressions* format
+) const {
   std::stringstream out;
   for (int i = 0; i < this->reduced.size(); i ++) {
     const OnePartialFractionDenominator& fraction = this->reduced.monomials[i];
     out
     << fraction.toLatexDifferentialOperator(
-      this->reduced.coefficients[i],format
+      this->reduced.coefficients[i], format
     );
     if (i != this->reduced.size() - 1) {
       out << "\\\\\n&+&";
@@ -4579,7 +4581,8 @@ void PartialFractions::Details::addDifferentialOperatorForm() {
   format.flagSuppressOneIn1overXtimesY = true;
   format.flagUseFrac = true;
   this->allIntermediateComputations.addOnTop(
-      this->owner->toStringDifferentialOperatorForm(&format));
+    this->owner->toStringDifferentialOperatorForm(&format)
+  );
 }
 
 std::string PartialFractions::toLatexWithInitialState(
@@ -4633,21 +4636,48 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
     out << "Computation details:<br>";
     out << this->details.toHTML();
   }
+  out << this->chambers.toHTMLGraphicsOnly(false);
   FormatExpressions formatQuasipolynomial;
   formatQuasipolynomial.flagUseFrac = true;
   for (int i = 0; i < this->chambers.refinedCones.size(); i ++) {
     QuasiPolynomial& quasiPolynomial = this->allQuasiPolynomials[i];
     const Cone& cone = this->chambers.refinedCones.values[i];
-    out << "<hr>Chamber " << i + 1 << ".<br>";
+    out << "<hr>";
     out << cone.toHTML();
     out << "<br>Vector partition function.<br>";
     out << quasiPolynomial.toHTML(&formatQuasipolynomial);
   }
+  out << this->toStringCheckSum();
+  return out.str();
+}
+
+std::string PartialFractions::toStringCheckSum() const {
+  std::stringstream out;
+  out << "<hr>Checksum. ";
+  out << "Obtained by substituting \\(";
+  Vector<Polynomial<Rational> > input;
+  for (int i = 0; i < this->ambientDimension; i ++) {
+    Polynomial<Rational> monomial;
+    monomial.makeMonomial(i, 1, 1);
+    input.addOnTop(monomial);
+  }
+  out << input.toString();
   out
-  << "<br>Checksum start: "
+  << "\\mapsto "
+  << OnePartialFractionDenominatorComponent::getCheckSumRoot(
+    this->ambientDimension
+  ).toString();
+  out
+  <<
+  "\\) in the starting generating function and in the final partial fraction decomposition."
+  ;
+  out
+  << "<br>Checksum at the start: "
   << this->checkSumStart
-  << ", last: "
-  << this->checkSumLast;
+  << "."
+  << "<br>Current checksum: "
+  << this->checkSumLast
+  << ".";
   return out.str();
 }
 
@@ -4801,7 +4831,7 @@ void OnePartialFractionDenominator::addMultiplicity(
 }
 
 bool OnePartialFractionDenominator::initializeFromPartialFractions(
- const PartialFractions& owner
+  const PartialFractions& owner
 ) {
   STACK_TRACE("OnePartialFractionDenominator::initializeFromVectors");
   *this = owner.initialPartialFraction;
@@ -10723,9 +10753,7 @@ void WeylGroupData::computeExtremeRootInTheSameKMod(
 bool OnePartialFractionDenominator::getDifferentialOperatorForm(
   List<ElementWeylAlgebra<Rational> >& output
 ) const {
-  STACK_TRACE(
-    "OnePartialFractionDenominator::getDifferentialOperatorForm"
-  );
+  STACK_TRACE("OnePartialFractionDenominator::getDifferentialOperatorForm");
   Vectors<Rational> normals;
   this->getNormalsToConeWallsIfDecomposed(normals);
   output.clear();
@@ -10743,14 +10771,14 @@ bool OnePartialFractionDenominator::getDifferentialOperatorForm(
   return true;
 }
 
-void OnePartialFractionDenominator::computeDifferentialOperatorConstant(Rational& output)const{
-
+void OnePartialFractionDenominator::computeDifferentialOperatorConstant(
+  Rational& output
+) const {
   output = 1;
-  for (int i = 0; i < this->denominatorsNoScale.size(); i++)
-  {
-    OnePartialFractionDenominatorComponent &component = this->denominatorsNoScale.values[i];
-
-output*=   Rational::factorial(component.getTotalMultiplicity()-1);
+  for (int i = 0; i < this->denominatorsNoScale.size(); i ++) {
+    OnePartialFractionDenominatorComponent& component =
+    this->denominatorsNoScale.values[i];
+    output *= Rational::factorial(component.getTotalMultiplicity() - 1);
   }
   output.invert();
 }
@@ -10771,26 +10799,24 @@ std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
   Rational extraConstant;
   this->computeDifferentialOperatorConstant(extraConstant);
   std::stringstream out;
-  if (coefficient.size() > 1){
-  out <<"\\left(" <<coefficient.toString() << "\\right)";
-  }else{
-  out << coefficient.toString() ;
+  if (coefficient.size() > 1) {
+    out << "\\left(" << coefficient.toString() << "\\right)";
+  } else {
+    out << coefficient.toString();
   }
   out << "\\cdot ";
-  if (!extraConstant.isEqualToOne()){
-    if (extraConstant.isNegative()){
+  if (!extraConstant.isEqualToOne()) {
+    if (extraConstant.isNegative()) {
       out << "\\left(";
     }
     out << extraConstant.toString(format);
-    if (extraConstant.isNegative())
-    {
+    if (extraConstant.isNegative()) {
       out << "\\right)";
     }
   }
   Vectors<Rational> exponents;
   this->getNormalizedSortedDenominatorExponents(exponents);
-  for (int i = 0; i < differentialOperators.size; i++)
-  {
+  for (int i = 0; i < differentialOperators.size; i ++) {
     if (!this->denominatorsNoScale.contains(exponents[i])) {
       global.fatal
       << "Exponent vector "
@@ -10799,16 +10825,19 @@ std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
       << this->denominatorsNoScale.keys
       << global.fatal;
     }
-  const  OnePartialFractionDenominatorComponent& component =
+    const OnePartialFractionDenominatorComponent& component =
     this->denominatorsNoScale.getValueNoFail(exponents[i]);
     if (component.multiplicities.size != 1) {
       return "(non-elongated)";
     }
-    int power = component.getTotalMultiplicity()-1;
-    if (power ==0){
+    int power = component.getTotalMultiplicity() - 1;
+    if (power == 0) {
       continue;
     }
-    out <<"\\left("<<  differentialOperators[i].toString(format) << "\\right)";
+    out
+    << "\\left("
+    << differentialOperators[i].toString(format)
+    << "\\right)";
     if (power > 1 && power < 10) {
       out << "^" << power;
     }
@@ -10818,10 +10847,14 @@ std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
   }
   OnePartialFractionDenominator withMultiplicityOne;
   withMultiplicityOne.owner = this->owner;
-  for (int i = 0; i < this->denominatorsNoScale.size(); i++)
-  {
-    OnePartialFractionDenominatorComponent &current = this->denominatorsNoScale.values[i];
-    withMultiplicityOne.addMultiplicity(this->denominatorsNoScale.keys[i], 1, current.getLargestElongation());
+  for (int i = 0; i < this->denominatorsNoScale.size(); i ++) {
+    OnePartialFractionDenominatorComponent& current =
+    this->denominatorsNoScale.values[i];
+    withMultiplicityOne.addMultiplicity(
+      this->denominatorsNoScale.keys[i],
+      1,
+      current.getLargestElongation()
+    );
   }
   out << "\\cdot" << withMultiplicityOne.toLatex(1);
   return out.str();
@@ -11145,6 +11178,7 @@ bool Wall::checkConsistency() const {
 
 Cone::Payload::Payload() {
   this->lowestSlicingIndex = - 1;
+  this->displayNumber = 0;
   this->visited = false;
 }
 
@@ -12226,7 +12260,7 @@ bool Cone::drawMeProjectiveSlice(DrawingVariables& drawingVariables) const {
     }
   }
   std::stringstream out;
-  out << this->id;
+  out << this->displayId();
   Vector<Rational> point = this->internalPointNormal();
   point /= point.sumCoordinates();
   drawingVariables.drawTextAtVectorBufferRational(
@@ -14108,6 +14142,16 @@ bool ConeCollection::splitChamber(
   return true;
 }
 
+std::string Cone::displayId() const {
+  std::stringstream out;
+  if (this->payload.displayNumber > 0) {
+    out << this->payload.displayNumber;
+    return out.str();
+  }
+  out << "_" << this->id;
+  return out.str();
+}
+
 bool Cone::hasNormal(const Vector<Rational>& normalOfWall) const {
   for (const Wall& wall : this->walls) {
     if (normalOfWall == wall.normal) {
@@ -14531,7 +14575,7 @@ void ConeCollection::initializeFromDirectionsAndRefine(
   STACK_TRACE("ConeCollection::initializeFromDirectionsAndRefine");
   this->initializeFromDirections(inputVectors);
   ProgressReport report;
-  this->refineByDirections(&report);
+  this->refineByDirectionsAndSort(report);
 }
 
 void ConeCollection::sort() {
@@ -14539,6 +14583,7 @@ void ConeCollection::sort() {
   sortedValues.quickSortAscending();
   this->refinedCones.clear();
   for (int i = 0; i < sortedValues.size; i ++) {
+    sortedValues[i].payload.displayNumber = i + 1;
     this->refinedCones.setKeyValue(
       sortedValues[i].id, sortedValues[i]
     );
@@ -14573,8 +14618,7 @@ void ConeCollection::refineByNormals() {
   }
 }
 
-void ConeCollection::refineByDirectionsAndSort() {
-  ProgressReport report;
+void ConeCollection::refineByDirectionsAndSort(ProgressReport& report) {
   this->refineByDirections(&report);
   this->sort();
 }
@@ -15543,7 +15587,7 @@ std::string Cone::toHTML() const {
   STACK_TRACE("Cone::toHTML");
   std::stringstream out;
   bool lastVarIsConstant = false;
-  out << "Id: " << this->id << "<br>";
+  out << "Id: " << this->displayId() << "<br>";
   if (this->flagIsTheZeroCone) {
     out << "The cone is the zero cone.";
   } else if (this->walls.size == 0) {
@@ -15748,10 +15792,26 @@ std::string ConeCollection::toHTML() const {
   return out.str();
 }
 
+std::string ConeCollection::toHTMLOneCollection(
+  const MapList<int, Cone>& cones, int& totalChambers
+) const {
+  std::stringstream out;
+  for (int i = 0; i < cones.size(); i ++) {
+    totalChambers ++;
+    if (totalChambers > this->maximumCones) {
+      out << "<br>Printout too large: omitting the rest of the cones.";
+      break;
+    }
+    Cone& cone = cones.values[i];
+    out << "<br>";
+    out << cone.toHTML() << "\n";
+  }
+  return out.str();
+}
+
 std::string ConeCollection::toHTMLWithoutGraphics() const {
   std::stringstream out;
   FormatExpressions format;
-  out << "Total refined chambers: " << this->refinedCones.size();
   Vectors<Rational> roots;
   roots = this->splittingNormals;
   out << "<br>Normals of walls to refine by: ";
@@ -15762,37 +15822,15 @@ std::string ConeCollection::toHTMLWithoutGraphics() const {
     << this->slicingDirections.toString();
   }
   int totalChambers = 0;
-  for (int i = 0; i < this->refinedCones.size(); i ++) {
-    totalChambers ++;
-    if (totalChambers > this->maximumCones) {
-      out << "<br>Printout too large: omitting the rest of the cones.";
-      break;
-    }
-    out << "<br>Chamber " << i + 1 << ":<br>";
-    out << this->refinedCones.values[i].toHTML() << "\n\n\n";
-  }
+  out << "Total refined chambers: " << this->refinedCones.size();
+  out << this->toHTMLOneCollection(this->refinedCones, totalChambers);
   out << "<hr>Total non-refined chambers: " << this->nonRefinedCones.size();
-  for (int i = 0; i < this->nonRefinedCones.size(); i ++) {
-    totalChambers ++;
-    if (totalChambers > this->maximumCones) {
-      out << "<br>Printout too large: omitting the rest of the cones.";
-      break;
-    }
-    out << "<br>Chamber " << i + 1 << ":<br>";
-    out << this->nonRefinedCones.values[i].toHTML() << "<br>";
-  }
+  out << this->toHTMLOneCollection(this->nonRefinedCones, totalChambers);
   out
   << "<hr>Total non-refined chambers with irregular walls: "
   << this->conesWithIrregularWalls.size();
-  for (int i = 0; i < this->conesWithIrregularWalls.size(); i ++) {
-    totalChambers ++;
-    if (totalChambers > this->maximumCones) {
-      out << "<br>Printout too large: omitting the rest of the cones.";
-      break;
-    }
-    out << "<br>Chamber " << i + 1 << ":<br>";
-    out << this->conesWithIrregularWalls.values[i].toHTML() << "<br>";
-  }
+  out
+  << this->toHTMLOneCollection(this->conesWithIrregularWalls, totalChambers);
   return out.str();
 }
 

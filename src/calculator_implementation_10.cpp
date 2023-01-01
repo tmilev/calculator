@@ -186,7 +186,7 @@ applyVectorPartitionFunctionFormula(
     << ".";
   }
   Rational result;
-  partialFractions.evaluateVectorPartitionFunction(
+  partialFractions.evaluateVectorPartitionFunctionChecked(
     vector, result, &calculator.comments
   );
   return output.assignValue(calculator, result);
@@ -353,6 +353,40 @@ bool CalculatorFunctionsVectorPartitionFunction::dualLattice(
     return calculator << "Couldn't compute the dual lattice. ";
   }
   return output.assignValue(calculator, dual);
+}
+
+bool CalculatorFunctionsVectorPartitionFunction::reduceModuloLattice(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE(
+    "CalculatorFunctionsVectorPartitionFunction::reduceModuloLattice"
+  );
+  if (input.size() != 3) {
+    return false;
+  }
+  Vector<Rational> vector;
+  if (!calculator.getVector(input[1], vector)) {
+    return false;
+  }
+  Lattice lattice;
+  if (!input[2].isOfType(&lattice)) {
+    return false;
+  }
+  if (lattice.getDimension() != vector.size || vector.size < 1) {
+    return calculator << "Dimensions don't match. ";
+  }
+  if (!lattice.reduceVector(vector)) {
+    return
+    calculator
+    << "Failed to reduce vector: "
+    << vector
+    << " mod lattice: "
+    << lattice.toString();
+  }
+  return
+  CalculatorConversions::expressionFromVectorRational(
+    calculator, vector, output
+  );
 }
 
 bool CalculatorFunctionsVectorPartitionFunction::quotientLatticeRepresentatives

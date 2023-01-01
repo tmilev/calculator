@@ -4640,8 +4640,8 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
   FormatExpressions formatQuasipolynomial;
   formatQuasipolynomial.flagUseFrac = true;
   for (int i = 0; i < this->chambers.refinedCones.size(); i ++) {
-    QuasiPolynomial& quasiPolynomial = this->allQuasiPolynomials[i];
-    const Cone& cone = this->chambers.refinedCones.values[i];
+    Cone& cone = this->chambers.refinedCones.values[i];
+    const QuasiPolynomial& quasiPolynomial = cone.payload.getPolynomial();
     out << "<hr>";
     out << cone.toHTML();
     out << "<br>Vector partition function.<br>";
@@ -11041,7 +11041,9 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
       lattice
     );
     shiftedQuasiPolynomial *= coefficient.coefficients[i];
+    //    shiftedQuasiPolynomial.checkConsistency();
     output += shiftedQuasiPolynomial;
+    //    output.checkConsistency();
   }
 }
 
@@ -11055,21 +11057,22 @@ void PartialFractions::computeAllVectorPartitionFunctions() {
 
 void PartialFractions::computeQuasipolynomials() {
   STACK_TRACE("PartialFractions::computeQuasipolynomials");
-  this->allQuasiPolynomials.clear();
-  QuasiPolynomial current;
   for (Cone& cone : this->chambers.refinedCones.values) {
     Vector<Rational> internalPoint = cone.internalPoint();
-    this->computeOneVectorPartitionFunction(current, internalPoint);
-    this->allQuasiPolynomials.addOnTop(current);
+    this->computeOneVectorPartitionFunction(
+      cone.payload.getPolynomialNonConstant(), internalPoint
+    );
+    cone.payload.getPolynomialNonConstant().checkConsistencyWithoutDebugMessage
+    ();
   }
 }
 
-void PartialFractions::evaluateVectorPartitionFunction(
+void PartialFractions::evaluateVectorPartitionFunctionNonChecked(
   const Vector<Rational>& input,
   Rational& output,
   std::stringstream* comments
 ) {
-  STACK_TRACE("PartialFractions::evaluateVectorPartitionFunction");
+  STACK_TRACE("PartialFractions::evaluateVectorPartitionFunctionNonChecked");
   if (this->chambers.refinedCones.size() == 0) {
     global.fatal
     << "Please compute the partial fraction decomposition first."
@@ -11087,17 +11090,77 @@ void PartialFractions::evaluateVectorPartitionFunction(
     output = 0;
     return;
   }
+  const Cone& cone = this->chambers.refinedCones.values[coneIndex];
   if (comments != nullptr) {
     *comments
     << "Vector: "
     << input.toString()
     << " is in chamber "
-    << coneIndex + 1
+    << cone.displayId()
+    << "<br>"
     << this->chambers.refinedCones[coneIndex].toHTML()
     << "<br>";
   }
-  QuasiPolynomial& quasiPolynomial = this->allQuasiPolynomials[coneIndex];
+  const QuasiPolynomial& quasiPolynomial = cone.payload.getPolynomial();
   output = quasiPolynomial.evaluate(input, comments);
+}
+
+void PartialFractions::evaluateVectorPartitionFunctionChecked(
+  const Vector<Rational>& input,
+  Rational& output,
+  std::stringstream* comments
+) {
+  STACK_TRACE("PartialFractions::evaluateVectorPartitionFunctionChecked");
+  if (this->chambers.refinedCones.size() == 0) {
+    global.fatal
+    << "Please compute the partial fraction decomposition first."
+    << global.fatal;
+  }
+  List<int> coneIndices;
+  for (int i = 0; i < this->chambers.refinedCones.size(); i ++) {
+    const Cone& cone = this->chambers.refinedCones.values[i];
+    if (cone.isInCone(input)) {
+      coneIndices.addOnTop(i);
+    }
+  }
+  if (coneIndices.size >= this->chambers.refinedCones.size()) {
+    // No cone contains the input.
+    output = 0;
+    return;
+  }
+  Rational candidate;
+  for (int i = 0; i < coneIndices.size; i ++) {
+    const Cone& cone = this->chambers.refinedCones.values[coneIndices[i]];
+    if (comments != nullptr) {
+      *comments
+      << "Vector: "
+      << input.toString()
+      << " is in chamber "
+      << cone.displayId()
+      << "<br>"
+      << cone.toHTML()
+      << "<br>";
+    }
+    candidate = cone.payload.getPolynomial().evaluate(input, comments);
+    if (i == 0) {
+      output = candidate;
+    }
+    if (output != candidate) {
+      const Cone& previous =
+      this->chambers.refinedCones.values[coneIndices[i - 1]];
+      global.fatal
+      << "Different values: "
+      << candidate
+      << " and "
+      << output
+      << ".<hr>"
+      << cone.toString()
+      << "<hr>"
+      << previous.toString()
+      << comments->str()
+      << global.fatal;
+    }
+  }
 }
 
 bool PartialFractions::computeOneVectorPartitionFunction(
@@ -11187,7 +11250,11 @@ void Cone::Payload::setPolynomial(QuasiPolynomial& input) {
   this->polynomial = input;
 }
 
-QuasiPolynomial& Cone::Payload::getPolynomial() {
+const QuasiPolynomial& Cone::Payload::getPolynomial() const {
+  return this->polynomial;
+}
+
+QuasiPolynomial& Cone::Payload::getPolynomialNonConstant() {
   return this->polynomial;
 }
 

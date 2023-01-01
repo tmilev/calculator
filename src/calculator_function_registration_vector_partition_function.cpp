@@ -272,6 +272,22 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     innerStandard
   );
   this->addOperationHandler(
+    "ReduceModLattice",
+    CalculatorFunctionsVectorPartitionFunction::reduceModuloLattice,
+    "",
+    "Reduces a vector modulo a lattice. "
+    "First argument: vector. "
+    "Second argument: lattice. ",
+    "l = Lattice((1,2,3), (2,2,2), (3,3,9));\n"
+    "ReduceModLattice((1,1,1),l);\n"
+    "ReduceModLattice((1/2,1/3,1/4),l);\n"
+    "ReduceModLattice((1,2),l);\n",
+    "CalculatorFunctionsVectorPartitionFunction"
+    "::reduceModuloLattice",
+    "ReduceModLattice",
+    innerStandard
+  );
+  this->addOperationHandler(
     "QuotientLatticeRepresentatives",
     CalculatorFunctionsVectorPartitionFunction::quotientLatticeRepresentatives,
     "",

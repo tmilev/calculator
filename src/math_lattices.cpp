@@ -12,9 +12,9 @@ void QuasiPolynomial::addLatticeShift(
   int index = this->latticeShifts.getIndex(shift);
   if (index == - 1) {
     index = this->latticeShifts.size;
+    Polynomial<Rational> zero;
     this->latticeShifts.addOnTop(shift);
-    this->valueOnEachLatticeShift.expandOnTop(1);
-    this->valueOnEachLatticeShift.lastObject()->makeZero();
+    this->valueOnEachLatticeShift.addOnTop(zero);
   }
   this->valueOnEachLatticeShift[index] += input;
   if (this->valueOnEachLatticeShift[index].isEqualToZero()) {
@@ -384,7 +384,8 @@ bool QuasiPolynomial::substitutionFewerVariables(
       subLatticeShift.elements[i][0], Rational(0)
     );
   }
-  Matrix<Rational> shiftImage, shiftMatForm;
+  Matrix<Rational> shiftImage;
+  Matrix<Rational> shiftMatrixForm;
   output.latticeShifts.size = 0;
   output.valueOnEachLatticeShift.size = 0;
   output.valueOnEachLatticeShift.reserve(this->latticeShifts.size);
@@ -392,12 +393,12 @@ bool QuasiPolynomial::substitutionFewerVariables(
   Vector<Rational> root;
   Polynomial<Rational> tempP;
   for (int i = 0; i < this->latticeShifts.size; i ++) {
-    shiftMatForm.assignVectorColumn(this->latticeShifts[i]);
-    shiftMatForm -= subLatticeShift;
+    shiftMatrixForm.assignVectorColumn(this->latticeShifts[i]);
+    shiftMatrixForm -= subLatticeShift;
     if (
       latticeSubstitution.
       solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
-        latticeSubstitution, shiftMatForm, shiftImage
+        latticeSubstitution, shiftMatrixForm, shiftImage
       )
     ) {
       root.assignMatrixDetectRowOrColumn(shiftImage);
@@ -466,7 +467,45 @@ void QuasiPolynomial::operator*=(const QuasiPolynomial& other) {
   }
 }
 
+bool QuasiPolynomial::checkConsistency() const {
+  STACK_TRACE("QuasiPolynomial::checkConsistency");
+  global.comments << "<br>Expensive consistency check. ";
+  return this->checkConsistencyWithoutDebugMessage();
+}
+
+bool QuasiPolynomial::checkConsistencyWithoutDebugMessage() const {
+  STACK_TRACE("QuasiPolynomial::checkConsistencyWithoutDebugMessage");
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
+    Vector<Rational> shift1 = this->latticeShifts[i];
+    this->ambientLatticeReduced.reduceVector(shift1);
+    if (shift1 != this->latticeShifts[i]) {
+      global.fatal
+      << "Non-reduced lattice shift: "
+      << this->latticeShifts[i]
+      << " not reduced over: "
+      << this->ambientLatticeReduced.toStringParentheses()
+      << global.fatal;
+    }
+    for (int j = i + 1; j < this->latticeShifts.size; j ++) {
+      const Vector<Rational>& shift2 = this->latticeShifts[j];
+      if (!this->ambientLatticeReduced.isInLattice(shift1 - shift2)) {
+        continue;
+      }
+      global.fatal
+      << "Difference of two shifts is in the lattice: "
+      << shift1
+      << " - "
+      << shift2
+      << ". Lattice: "
+      << this->ambientLatticeReduced.toString()
+      << global.fatal;
+    }
+  }
+  return true;
+}
+
 void QuasiPolynomial::makeRougherLattice(const Lattice& latticeToRoughenBy) {
+  STACK_TRACE("QuasiPolynomial::makeRougherLattice");
   if (this->ambientLatticeReduced == latticeToRoughenBy) {
     return;
   }
@@ -486,20 +525,23 @@ void QuasiPolynomial::makeRougherLattice(const Lattice& latticeToRoughenBy) {
   this->valueOnEachLatticeShift.setSize(this->latticeShifts.size);
   for (int i = 0; i < oldLatticeShifts.size; i ++) {
     for (int j = 0; j < representativesQuotientLattice.size; j ++) {
-      this->latticeShifts[i * representativesQuotientLattice.size + j] =
+      int index = i * representativesQuotientLattice.size + j;
+      this->latticeShifts[index] =
       oldLatticeShifts[i] + representativesQuotientLattice[j];
-      this->valueOnEachLatticeShift[
-        i * representativesQuotientLattice.size + j
-      ] =
-      oldValues[i];
+      this->valueOnEachLatticeShift[index] = oldValues[i];
+      this->ambientLatticeReduced.reduceVector(this->latticeShifts[index]);
     }
   }
 }
 
 void QuasiPolynomial::operator+=(const QuasiPolynomial& other) {
+  STACK_TRACE("QuasiPolynomial::operator+=");
   this->makeRougherLattice(other.ambientLatticeReduced);
   QuasiPolynomial summand = other;
   summand.makeRougherLattice(this->ambientLatticeReduced);
+  if (summand.ambientLatticeReduced != this->ambientLatticeReduced) {
+    global.fatal << "Lattices must be equal." << global.fatal;
+  }
   for (int i = 0; i < summand.latticeShifts.size; i ++) {
     this->addLatticeShift(
       summand.valueOnEachLatticeShift[i], summand.latticeShifts[i]
@@ -629,26 +671,27 @@ void QuasiPolynomial::makeZeroLatticeZn(int dimension) {
 
 Rational QuasiPolynomial::evaluate(
   const Vector<Rational>& input, std::stringstream* comments
-) {
+) const {
   Vector<Rational> testLatticeBelonging;
   for (int i = 0; i < this->latticeShifts.size; i ++) {
     testLatticeBelonging = this->latticeShifts[i] - input;
-    if (this->ambientLatticeReduced.isInLattice(testLatticeBelonging)) {
-      if (comments != nullptr) {
-        *comments
-        << "Lattice shift: "
-        << this->latticeShifts[i]
-        << " contains: "
-        << input.toString()
-        << ", ambient lattice: "
-        << this->ambientLatticeReduced.toString()
-        << "<br>Quasipolynomial on shift: "
-        << "\\("
-        << this->valueOnEachLatticeShift[i].toString()
-        << "\\)";
-      }
-      return this->valueOnEachLatticeShift[i].evaluate(input);
+    if (!this->ambientLatticeReduced.isInLattice(testLatticeBelonging)) {
+      continue;
     }
+    if (comments != nullptr) {
+      *comments
+      << "Lattice shift: \\("
+      << this->latticeShifts[i]
+      << "\\) contains: "
+      << input.toString()
+      << ", ambient lattice: \\("
+      << this->ambientLatticeReduced.toString()
+      << "\\)<br>Quasipolynomial on shift: "
+      << "\\("
+      << this->valueOnEachLatticeShift[i].toString()
+      << "\\)";
+    }
+    return this->valueOnEachLatticeShift[i].evaluate(input);
   }
   return 0;
 }
@@ -751,6 +794,14 @@ void Lattice::intersectWithPreimageOfLattice(
   this->makeFromRoots(result);
 }
 
+int Lattice::getDimension() const {
+  return this->basis.numberOfColumns;
+}
+
+int Lattice::getRank() const {
+  return this->basis.numberOfRows;
+}
+
 int Lattice::getMinimalIntegerScalarSendingVectorIntoLattice(
   const Vector<Rational>& input
 ) const {
@@ -771,6 +822,7 @@ int Lattice::getMinimalIntegerScalarSendingVectorIntoLattice(
 }
 
 void Lattice::intersectWith(const Lattice& other) {
+  STACK_TRACE("Lattice::intersectWith");
   Vectors<Rational> commonBasis, otherBasis, startBasis;
   startBasis.assignMatrixRows(this->basisRationalForm);
   otherBasis.assignMatrixRows(other.basisRationalForm);
@@ -783,34 +835,34 @@ void Lattice::intersectWith(const Lattice& other) {
   Vectors<Rational>
   thisCommonBasis,
   otherCommonBasis,
-  thisCommonCoords,
-  otherCommonCoords;
+  thisCommonCoordinates,
+  otherCommonCoordinates;
   thisCommonBasis.assignMatrixRows(thisLatticeIntersected.basisRationalForm);
   otherCommonBasis.assignMatrixRows(
     otherLatticeIntersected.basisRationalForm
   );
-  thisCommonBasis.getCoordinatesInBasis(commonBasis, thisCommonCoords);
-  otherCommonBasis.getCoordinatesInBasis(commonBasis, otherCommonCoords);
-  Lattice thisCommonCoordsLattice, otherCommonCoordsLattice;
-  thisCommonCoordsLattice.makeFromRoots(thisCommonCoords);
-  otherCommonCoordsLattice.makeFromRoots(otherCommonCoords);
-  thisCommonCoordsLattice.intersectWithBothOfMaximalRank(
-    otherCommonCoordsLattice
+  thisCommonBasis.getCoordinatesInBasis(commonBasis, thisCommonCoordinates);
+  otherCommonBasis.getCoordinatesInBasis(commonBasis, otherCommonCoordinates);
+  Lattice thisCommonCoordinatesLattice, otherCommonCoordinatesLattice;
+  thisCommonCoordinatesLattice.makeFromRoots(thisCommonCoordinates);
+  otherCommonCoordinatesLattice.makeFromRoots(otherCommonCoordinates);
+  thisCommonCoordinatesLattice.intersectWithBothOfMaximalRank(
+    otherCommonCoordinatesLattice
   );
   Vectors<Rational> resultBasis;
   resultBasis.setSize(
-    thisCommonCoordsLattice.basisRationalForm.numberOfRows
+    thisCommonCoordinatesLattice.basisRationalForm.numberOfRows
   );
   for (int i = 0; i < resultBasis.size; i ++) {
     Vector<Rational>& currentRoot = resultBasis[i];
     currentRoot.makeZero(this->getDimension());
     for (
-      int j = 0; j < thisCommonCoordsLattice.basisRationalForm.numberOfColumns;
-      j ++
+      int j = 0; j < thisCommonCoordinatesLattice.basisRationalForm.
+      numberOfColumns; j ++
     ) {
       currentRoot +=
       commonBasis[j] *
-      thisCommonCoordsLattice.basisRationalForm.elements[i][j];
+      thisCommonCoordinatesLattice.basisRationalForm.elements[i][j];
     }
   }
   this->makeFromRoots(resultBasis);
@@ -850,7 +902,7 @@ bool Lattice::getAllRepresentatives(
   int column = 0;
   int dimension = this->getDimension();
   Rational currentPeriod;
-  LargeInteger currentPeriodInt;
+  LargeInteger currentPeriodInteger;
   for (int i = 0; i < this->basis.numberOfRows; i ++) {
     while (
       this->basisRationalForm.elements[i][column].isEqualToZero()
@@ -1125,6 +1177,10 @@ void Lattice::intersectWithLinearSubspaceGivenByNormals(
   for (int i = 0; i < subspaceNormals.size; i ++) {
     this->intersectWithLinearSubspaceGivenByNormal(subspaceNormals[i]);
   }
+}
+
+bool Lattice::operator!=(const Lattice& other) const {
+  return !(*this == other);
 }
 
 bool Lattice::operator==(const Lattice& other) const {

@@ -12,15 +12,13 @@ public:
   Matrix<Rational> basisRationalForm;
   Matrix<LargeInteger> basis;
   LargeIntegerUnsigned denominator;
-  int getDimension() const {
-    return this->basis.numberOfColumns;
-  }
-  int getRank() const {
-    return this->basis.numberOfRows;
-  }
+  int getDimension() const;
+  int getRank() const;
   int getMinimalIntegerScalarSendingVectorIntoLattice(
     const Vector<Rational>& input
   ) const;
+  // Intersects a lattice with another and writes the result
+  // in the caller lattice.
   void intersectWith(const Lattice& other);
   bool findOnePreimageInLatticeOf(
     const Matrix<Rational>& linearMap,
@@ -137,21 +135,13 @@ public:
   std::string toString() const;
   std::string toStringParentheses() const;
   static unsigned int hashFunction(const Lattice& input);
+  bool operator!=(const Lattice& other) const;
   bool operator==(const Lattice& other) const;
-  void operator=(const Lattice& other) {
-    this->basis = other.basis;
-    this->denominator = other.denominator;
-    this->basisRationalForm = other.basisRationalForm;
-  }
   void writeToFile(std::fstream& output);
   bool readFromFile(std::fstream& input);
   void makeZn(int dimension);
   void refineByOtherLattice(const Lattice& other);
   void makeFromRoots(const List<Vector<Rational> >& input);
-  Lattice() {}
-  Lattice(const Lattice& other) {
-    this->operator=(other);
-  }
   void makeFromMatrix(const Matrix<Rational>& input);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
 };
@@ -168,7 +158,7 @@ public:
   std::string toHTML(FormatExpressions* format = nullptr) const;
   Rational evaluate(
     const Vector<Rational>& input, std::stringstream* comments
-  );
+  ) const;
   void addLatticeShift(
     const Polynomial<Rational>& input,
     const Vector<Rational>& inputShift
@@ -248,18 +238,15 @@ public:
   ) const;
   void operator+=(const QuasiPolynomial& other);
   void operator-=(const QuasiPolynomial& other);
-  QuasiPolynomial() {}
-  QuasiPolynomial(const QuasiPolynomial& other) {
-    this->operator=(other);
-  }
   void operator*=(const Rational& scalar);
   void operator*=(const Polynomial<Rational>& other);
   void operator*=(const QuasiPolynomial& other);
-  void operator=(const QuasiPolynomial& other) {
-    this->ambientLatticeReduced = other.ambientLatticeReduced;
-    this->latticeShifts = other.latticeShifts;
-    this->valueOnEachLatticeShift = other.valueOnEachLatticeShift;
-  }
+  // Does basic correctness checks. This is an expensive function
+  // and will generate a global comment so you don't call this function too
+  // much.
+  bool checkConsistency() const;
+  // Same as checkConsistency but does not make a debug message.
+  bool checkConsistencyWithoutDebugMessage() const;
 };
 
 #endif // header_math_lattices_ALREADY_INCLUDED

@@ -3634,6 +3634,13 @@ public:
     Expression& output,
     ExpressionContext* inputContext = nullptr
   );
+  // Converstion from type to expression tree.
+  template <class Coefficient>
+  static bool expressionFromVectorRational(
+    Calculator& calculator,
+    const Vector<Coefficient>& input,
+    Expression& output
+  );
   template <class Coefficient>
   static bool expressionFromRationalFraction(
     Calculator& calculator,
@@ -4494,6 +4501,22 @@ bool CalculatorConversions::expressionFromPolynomial(
     terms.addMonomial(currentTerm, input.coefficients[i]);
   }
   return output.makeSum(calculator, terms);
+}
+
+template <class Coefficient>
+bool CalculatorConversions::expressionFromVectorRational(
+  Calculator& calculator,
+  const Vector<Coefficient>& input,
+  Expression& output
+) {
+  STACK_TRACE("CalculatorConversions::expressionFromVectorRational");
+  List<Expression> result;
+  for (int i = 0; i < input.size; i ++) {
+    Expression next(calculator);
+    next.assignValue(calculator, input[i]);
+    result.addOnTop(next);
+  }
+  return output.makeSequence(calculator, &result);
 }
 
 template <class Coefficient>

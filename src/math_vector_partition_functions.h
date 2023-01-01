@@ -35,7 +35,8 @@ public:
     Payload();
     void incrementHashOfContainingSimplices(char input);
     void setPolynomial(QuasiPolynomial& input);
-    QuasiPolynomial& getPolynomial();
+    const QuasiPolynomial& getPolynomial() const;
+    QuasiPolynomial& getPolynomialNonConstant();
   };
 
   bool flagIsTheZeroCone;
@@ -765,9 +766,6 @@ public:
   // vector partition function is a
   // quasipolynomial.
   ConeCollection chambers;
-  // The quasipolynomials over each chamber,
-  // in the same order.
-  List<QuasiPolynomial> allQuasiPolynomials;
   // The original vectors whose vector partition function
   // we are computing.
   List<Vector<Rational> > originalVectors;
@@ -833,7 +831,12 @@ public:
     >& input,
     Rational& output
   );
-  void evaluateVectorPartitionFunction(
+  void evaluateVectorPartitionFunctionNonChecked(
+    const Vector<Rational>& input,
+    Rational& output,
+    std::stringstream* comments
+  );
+  void evaluateVectorPartitionFunctionChecked(
     const Vector<Rational>& input,
     Rational& output,
     std::stringstream* comments

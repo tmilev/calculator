@@ -79,6 +79,9 @@ public:
   static bool quotientLatticeRepresentatives(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool reduceModuloLattice(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool dualLattice(
     Calculator& calculator, const Expression& input, Expression& output
   );

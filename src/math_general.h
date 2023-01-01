@@ -6099,8 +6099,8 @@ public:
   std::string toStringOnePartition(const List<int>& currentPartition);
   std::string toStringAllPartitions(bool useHtml);
   bool initialize(
-    const Vectors<Rational>& inputPartitioningRoots,
-    const Vector<Rational>& inputRoot
+    const Vectors<Rational>& inputPartitioningVectors,
+    const Vector<Rational>& inputTarget
   );
   bool incrementReturnFalseIfPastLast();
   int numberOfVectors() const {
@@ -6109,6 +6109,7 @@ public:
   int getDimension() const {
     return this->targetSum.size;
   }
+  int numberOfPartitionsByEnumeration();
 };
 
 template <class Coefficient>

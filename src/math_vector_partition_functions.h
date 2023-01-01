@@ -32,6 +32,9 @@ public:
     int displayNumber;
     Vector<Rational> internalPoint;
     List<unsigned char> hashOfContainingSimplices;
+    // Value
+    MapList<Vector<Rational>, Rational> precomputedChecked;
+    MapList<Vector<Rational>, Rational> precomputedNonChecked;
     Payload();
     void incrementHashOfContainingSimplices(char input);
     void setPolynomial(QuasiPolynomial& input);
@@ -185,7 +188,10 @@ public:
   bool operator==(const Cone& other) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringNeighbors() const;
-  std::string toHTML() const;
+  std::string toStringNeighborsAlongWall(const ConeCollection& owner) const;
+  std::string toHTML(const ConeCollection& owner, bool includeErrorChecks)
+  const;
+  std::string toStringPrecomputedVectorPartitionFunctionValues() const;
   // Determines whether the two Cones have a common irregular wall.
   // Assumptions made before this computation.
   // 1) Both cones have sufficiently many projective vertices.
@@ -198,6 +204,15 @@ public:
   );
   void addOneConeIfAdjacentToWall(Wall& wall, Cone& candidateNeighbor);
   std::string displayId() const;
+  // Precomputes vector partition function of a vector.
+  // The vector must be in the cone.
+  // If the result is small enough,
+  // Will enumerate all partitions (possibly very slowly)
+  // to double-check the computations.
+  void precomputeVectorPartitionFunction(
+    const Vector<Rational>& inputMustBeInCone,
+    const List<Vector<Rational> >& originalVectors
+  );
 };
 
 class ConeLatticeAndShift {
@@ -383,7 +398,9 @@ public:
   std::string toStringConeIds() const;
   std::string toStringNeighborGraph() const;
   std::string toStringNeighborGraph(const MapList<int, Cone>& cones) const;
-  // Returns an html canvas drawing of the cones plus detailed decription.
+  // Returns a latex report of the vector partition function.
+  std::string toLatex() const;
+  // Returns a detailed html including canvas-drawn graphics.
   std::string toHTML() const;
   // Returns the detailed cone description without the graphics.
   std::string toHTMLWithoutGraphics() const;
@@ -847,6 +864,7 @@ public:
   );
   void computeAllVectorPartitionFunctions();
   void computeQuasipolynomials();
+  void computeOneQuasipolynomial(Cone& cone);
   PartialFractions();
   bool checkForMinimalityDecompositionWithRespectToRoot(
     Vector<Rational>* root

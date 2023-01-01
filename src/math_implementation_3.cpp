@@ -4643,7 +4643,7 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
     Cone& cone = this->chambers.refinedCones.values[i];
     const QuasiPolynomial& quasiPolynomial = cone.payload.getPolynomial();
     out << "<hr>";
-    out << cone.toHTML();
+    out << cone.toHTML(this->chambers, true);
     out << "<br>Vector partition function.<br>";
     out << quasiPolynomial.toHTML(&formatQuasipolynomial);
   }
@@ -11058,13 +11058,33 @@ void PartialFractions::computeAllVectorPartitionFunctions() {
 void PartialFractions::computeQuasipolynomials() {
   STACK_TRACE("PartialFractions::computeQuasipolynomials");
   for (Cone& cone : this->chambers.refinedCones.values) {
-    Vector<Rational> internalPoint = cone.internalPoint();
-    this->computeOneVectorPartitionFunction(
-      cone.payload.getPolynomialNonConstant(), internalPoint
-    );
-    cone.payload.getPolynomialNonConstant().checkConsistencyWithoutDebugMessage
-    ();
+    this->computeOneQuasipolynomial(cone);
   }
+}
+
+void PartialFractions::computeOneQuasipolynomial(Cone& cone) {
+  Vector<Rational> internalPoint = cone.internalPoint();
+  this->computeOneVectorPartitionFunction(
+    cone.payload.getPolynomialNonConstant(), internalPoint
+  );
+  cone.payload.getPolynomialNonConstant().checkConsistencyWithoutDebugMessage(
+  );
+  for (int i = 0; i < cone.vertices.size; i ++) {
+    cone.precomputeVectorPartitionFunction(
+      cone.vertices[i], this->originalVectors
+    );
+  }
+  cone.precomputeVectorPartitionFunction(
+    internalPoint, this->originalVectors
+  );
+  Rational n = 10;
+  cone.precomputeVectorPartitionFunction(
+    internalPoint* n, this->originalVectors
+  );
+  n.raiseToPower(100);
+  cone.precomputeVectorPartitionFunction(
+    internalPoint* n, this->originalVectors
+  );
 }
 
 void PartialFractions::evaluateVectorPartitionFunctionNonChecked(
@@ -11098,7 +11118,7 @@ void PartialFractions::evaluateVectorPartitionFunctionNonChecked(
     << " is in chamber "
     << cone.displayId()
     << "<br>"
-    << this->chambers.refinedCones[coneIndex].toHTML()
+    << this->chambers.refinedCones[coneIndex].toHTML(this->chambers, false)
     << "<br>";
   }
   const QuasiPolynomial& quasiPolynomial = cone.payload.getPolynomial();
@@ -11138,7 +11158,7 @@ void PartialFractions::evaluateVectorPartitionFunctionChecked(
       << " is in chamber "
       << cone.displayId()
       << "<br>"
-      << cone.toHTML()
+      << cone.toHTML(this->chambers, false)
       << "<br>";
     }
     candidate = cone.payload.getPolynomial().evaluate(input, comments);
@@ -15650,26 +15670,18 @@ bool ConeCollection::checkIsRefinedOrCrash() const {
   return true;
 }
 
-std::string Cone::toHTML() const {
+std::string Cone::toHTML(
+  const ConeCollection& owner, bool includeErrorChecks
+) const {
   STACK_TRACE("Cone::toHTML");
   std::stringstream out;
   bool lastVarIsConstant = false;
-  out << "Id: " << this->displayId() << "<br>";
+  out << "Id: " << this->displayId();
   if (this->flagIsTheZeroCone) {
     out << "The cone is the zero cone.";
   } else if (this->walls.size == 0) {
     out << "The cone is the entire space";
   }
-  out
-  << "<br>Index of the next slicing wall: "
-  << this->payload.lowestSlicingIndex;
-  out << "<br>";
-  out
-  << "\nIndex next direction to slice in: "
-  << this->payload.lowestSlicingIndex
-  << "\n";
-  out << "<br>";
-  out << "normals:\n";
   out << "<br>";
   out << "\\(";
   FormatExpressions format;
@@ -15680,8 +15692,58 @@ std::string Cone::toHTML() const {
     out << "<br>Internal point: " << this->internalPoint().toString();
   }
   out << "<br>Neighbors: ";
+  out << this->toStringNeighborsAlongWall(owner);
+  if (includeErrorChecks) {
+    out << this->toStringPrecomputedVectorPartitionFunctionValues();
+  }
+  return out.str();
+}
+
+std::string Cone::toStringPrecomputedVectorPartitionFunctionValues() const {
+  std::stringstream out;
+  out << "<br>Precomputed values, checked by enumeration: ";
+  for (Vector<Rational> input : this->payload.precomputedChecked.keys) {
+    out
+    << "<br>"
+    << input
+    << ": "
+    << this->payload.precomputedChecked.getValueNoFail(input);
+  }
+  out << "<br>Precomputed values, too large to check: ";
+  for (
+    Vector<Rational> input : this->payload.precomputedNonChecked.keys
+  ) {
+    out
+    << "<br>"
+    << input
+    << ": "
+    << this->payload.precomputedNonChecked.getValueNoFail(input);
+  }
+  return out.str();
+}
+
+std::string Cone::toStringNeighborsAlongWall(const ConeCollection& owner) const {
+  std::stringstream out;
   for (int i = 0; i < this->walls.size; i ++) {
-    out << "<br>Along wall " << i + 1 << ": " << this->walls[i].neighbors;
+    List<std::string> neighborIds;
+    for (int j : this->walls[i].neighbors) {
+      const Cone* neighbor = owner.getConeById(j);
+      if (neighbor == nullptr) {
+        std::stringstream neigborReport;
+        neigborReport << "[missing id: " << j << "]";
+        neighborIds.addOnTop(neigborReport.str());
+        continue;
+      }
+      neighborIds.addOnTop(neighbor->displayId());
+    }
+    out
+    << "<br>Along wall "
+    << i + 1
+    << ": "
+    << StringRoutines::join(neighborIds, ",");
+    if (neighborIds.size == 0) {
+      out << "N/A";
+    }
   }
   return out.str();
 }
@@ -15755,6 +15817,39 @@ std::string Cone::toString(FormatExpressions* format) const {
     out << "\nInternal point: " << this->internalPoint().toString();
   }
   return out.str();
+}
+
+void Cone::precomputeVectorPartitionFunction(
+  const Vector<Rational>& inputMustBeInCone,
+  const List<Vector<Rational> >& originalVectors
+) {
+  Rational result =
+  this->payload.getPolynomial().evaluate(inputMustBeInCone, nullptr);
+  if (!result.isInteger()) {
+    global.fatal
+    << "Non-integer vector partition function value. "
+    << global.fatal;
+  }
+  if (result > 1000) {
+    this->payload.precomputedNonChecked.setKeyValue(inputMustBeInCone, result);
+    return;
+  }
+  this->payload.precomputedChecked.setKeyValue(inputMustBeInCone, result);
+  VectorPartition partition;
+  partition.initialize(originalVectors, inputMustBeInCone);
+  global.comments
+  << "<br>DEBUG: Partition input: "
+  << partition.toStringAllPartitions(true)
+  << "oring vect: "
+  << originalVectors
+  << "nput: "
+  << inputMustBeInCone;
+  Rational resultByEnumeration = partition.numberOfPartitionsByEnumeration();
+  if (result != resultByEnumeration) {
+    global.fatal
+    << "Vector partition function computation is incorrect. "
+    << global.fatal;
+  }
 }
 
 std::string ConeCollection::toStringNeighborGraph(
@@ -15856,7 +15951,12 @@ std::string ConeCollection::toHTML() const {
   std::stringstream out;
   out << this->toHTMLGraphicsOnly(true);
   out << this->toHTMLWithoutGraphics();
+  out << this->toLatex();
   return out.str();
+}
+
+std::string ConeCollection::toLatex() const{
+
 }
 
 std::string ConeCollection::toHTMLOneCollection(
@@ -15871,7 +15971,7 @@ std::string ConeCollection::toHTMLOneCollection(
     }
     Cone& cone = cones.values[i];
     out << "<br>";
-    out << cone.toHTML() << "\n";
+    out << cone.toHTML(*this, false) << "\n";
   }
   return out.str();
 }

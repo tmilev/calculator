@@ -8539,7 +8539,7 @@ bool CalculatorFunctions::allVectorPartitions(
     return calculator << "<hr>Failed to initialize vector partition object";
   }
   std::stringstream outFinal;
-  int numFound = 0;
+  int total = 0;
   ProgressReport report;
   outFinal << partition.toStringPartitioningVectors();
   std::stringstream outVectors;
@@ -8549,12 +8549,12 @@ bool CalculatorFunctions::allVectorPartitions(
     outVectors
     << "<br>"
     << partition.toStringOnePartition(partition.currentPartition);
-    numFound ++;
-    if (numFound % 1000 == 0) {
+    total ++;
+    if (total % 1000 == 0) {
       std::stringstream reportStream;
       reportStream
       << "Found "
-      << numFound
+      << total
       << " partitions of "
       << partition.targetSum.toString()
       << "<br>Current partition: "

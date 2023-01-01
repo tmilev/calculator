@@ -533,26 +533,26 @@ void HtmlRoutines::replaceEqualitiesAndAmpersandsBySpaces(
 }
 
 bool VectorPartition::initialize(
-  const Vectors<Rational>& inputPartitioningRoots,
-  const Vector<Rational>& inputRoot
+  const Vectors<Rational>& inputPartitioningVectors,
+  const Vector<Rational>& inputTarget
 ) {
   STACK_TRACE("VectorPartition::initialize");
-  for (int i = 0; i < inputPartitioningRoots.size; i ++) {
-    if (!inputPartitioningRoots[i].isPositive()) {
+  for (int i = 0; i < inputPartitioningVectors.size; i ++) {
+    if (!inputPartitioningVectors[i].isPositive()) {
       return false;
     }
   }
-  this->partitioningVectors = inputPartitioningRoots;
+  this->partitioningVectors = inputPartitioningVectors;
   if (this->partitioningVectors.size == 0) {
     return false;
   }
-  if (this->partitioningVectors[0].size != inputRoot.size) {
+  if (this->partitioningVectors[0].size != inputTarget.size) {
     return false;
   }
-  if (this->targetSum.isEqualToZero()) {
+  if (inputTarget.isEqualToZero()) {
     return false;
   }
-  this->targetSum = inputRoot;
+  this->targetSum = inputTarget;
   this->currentPartition.initializeFillInObject(
     this->partitioningVectors.size, 0
   );
@@ -595,6 +595,15 @@ bool VectorPartition::incrementReturnFalseIfPastLast() {
       return true;
     }
   }
+}
+
+int VectorPartition::numberOfPartitionsByEnumeration() {
+  STACK_TRACE("VectorPartition::numberOfPartitionsByEnumeration");
+  int count = 0;
+  while (this->incrementReturnFalseIfPastLast()) {
+    count ++;
+  }
+  return count;
 }
 
 bool VectorPartition::currentPartitionSumExceedsGoal() const {

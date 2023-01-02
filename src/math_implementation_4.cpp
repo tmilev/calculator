@@ -1951,8 +1951,7 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   drawOps.basisProjectionPlane[1][0] = 1;
   drawOps.basisProjectionPlane[1][1] = 1;
   drawOps.modifyToOrthonormalNoShiftSecond(
-    drawOps.basisProjectionPlane[1],
-    drawOps.basisProjectionPlane[0]
+    drawOps.basisProjectionPlane[1], drawOps.basisProjectionPlane[0]
   );
   drawOps.graphicsUnit = 50;
   PiecewiseQuasipolynomial

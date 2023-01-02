@@ -10,10 +10,6 @@ template <class Object>
 class MemorySaving {
 private:
   Object* value;
-  MemorySaving(const MemorySaving<Object>& other) {
-    (void) other;
-    fatalCrash("This constructor should not be used. ");
-  }
 public:
   void operator=(const MemorySaving<Object>& other) {
     if (!other.isZeroPointer()) {
@@ -68,7 +64,15 @@ public:
 #endif
   }
   MemorySaving() {
-    this->value = 0;
+    this->value = nullptr;
+  }
+  MemorySaving(const MemorySaving<Object>& other) {
+    if (other == this) {
+      // This does happen in practice
+      return;
+    }
+    this->value = nullptr;
+    this->getElement() == other.getElementConst();
   }
   ~MemorySaving() {
     this->freeMemory();

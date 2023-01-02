@@ -4,6 +4,15 @@
 #include "crypto.h"
 #include "calculator_interface.h"
 
+void DrawingVariables::toJSON(JSData& output) {
+  output.makeEmptyArray();
+  for (DrawOperation& operation : this->operations) {
+    JSData next;
+    operation.toJSON(next, *this);
+    output.listObjects.addOnTop(next);
+  }
+}
+
 std::string DrawingVariables::getHTMLDiv(
   int dimension, bool useSpanTag, bool generateInfoPanels
 ) {
@@ -18,7 +27,7 @@ std::string DrawingVariables::getHTMLDiv(
   data["frameLength"] = this->frameLengthInMilliseconds;
   std::string drawObjects = "drawObjects";
   data[drawObjects].elementType = JSData::token::tokenArray;
-  data[drawObjects].listObjects = this->operations;
+  this->toJSON(data[drawObjects]);
   data["dimension"] = dimension;
   std::string graphicsId =
   Crypto::convertStringToHex(

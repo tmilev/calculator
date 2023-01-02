@@ -407,7 +407,7 @@ public:
   ) const;
   // Returns the graphics of all the cones without description.
   std::string toHTMLGraphicsOnly(bool includePanels) const;
-  std::string toLatexGraphicsOnlyPsTricks()const;
+  std::string toLatexGraphicsOnlyPsTricks() const;
   // Returns a sequence of html canvas drawings of the various stages of
   // slicing.
   std::string toHTMLHistory() const;

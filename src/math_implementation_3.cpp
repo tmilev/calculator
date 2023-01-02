@@ -14,7 +14,6 @@
 #include "math_vector_partition_functions.h"
 #include "math_lattices.h"
 
-
 // The below gives upper limit to the amount of pointers
 // that are allowed to be allocated by the program. Can be changed dynamically.
 // Used to guard the web server from abuse.
@@ -498,11 +497,9 @@ void DrawingVariables::initDrawingVariables() {
   this->flagPlotShowJavascriptOnly = false;
   this->flagUseGraphicsOld = false;
   this->initialize();
-
   this->initDimensions(2);
   this->flagAnimatingMovingCoordSystem = false;
   this->indexStartingModifiableTextCommands = 0;
-
 }
 
 std::stringstream HtmlRoutines::outputStream;
@@ -800,9 +797,11 @@ std::string StringRoutines::Conversions::stringToJSONStringEscaped(
 std::string StringRoutines::Conversions::escapeQuotesBackslashesNewLines(
   const std::string& input
 ) {
-  STACK_TRACE("StringRoutines::"
-  "Conversions::"
-  "escapeQuotesBackslashesNewLines");
+  STACK_TRACE(
+    "StringRoutines::"
+    "Conversions::"
+    "escapeQuotesBackslashesNewLines"
+  );
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
@@ -1578,7 +1577,6 @@ bool FileOperations::loadFileToStringUnsecure(
   output = contentStream.str();
   return true;
 }
-
 
 MapList<
   std::string,
@@ -2504,9 +2502,6 @@ void DrawingVariables::drawCoordSystemBuffer(
   variables.basisToDrawCirclesAt.makeEiBasis(dimension);
 }
 
-
-
-
 void DrawingVariables::drawTextAtVectorBufferDouble(
   const Vector<double>& point,
   const std::string& inputText,
@@ -2517,7 +2512,6 @@ void DrawingVariables::drawTextAtVectorBufferDouble(
     point, inputText, color, this->fontSizeNormal, textStyle
   );
 }
-
 
 void DrawingVariables::projectOnToHyperPlaneGraphics(
   Vector<Rational>& input, Vector<Rational>& output
@@ -4539,14 +4533,14 @@ std::string PartialFractions::toLatexWithInitialState(
 }
 
 std::string PartialFractions::toLatex(FormatExpressions* format) const {
-STACK_TRACE("PartialFractions::toLatex");
-(void)format;
-std::stringstream out;
-out << "\\documentclass{article}";
-out << "\\begin{document}";
-out << this->chambers.toLatexGraphicsOnlyPsTricks();
-out <<"\\end{document}";
-return out.str();
+  STACK_TRACE("PartialFractions::toLatex");
+  (void) format;
+  std::stringstream out;
+  out << "\\documentclass{article}";
+  out << "\\begin{document}";
+  out << this->chambers.toLatexGraphicsOnlyPsTricks();
+  out << "\\end{document}";
+  return out.str();
 }
 
 std::string PartialFractions::toHTML(FormatExpressions* format) const {
@@ -9020,9 +9014,7 @@ void WeylGroupData::drawRootSystem(
     twoPlane[1][1] = 0;
     twoPlane[0][0] = 0;
     twoPlane[0][1] = 1;
-    outputDV.modifyToOrthonormalNoShiftSecond(
-      twoPlane[0], twoPlane[1]
-    );
+    outputDV.modifyToOrthonormalNoShiftSecond(twoPlane[0], twoPlane[1]);
   }
   output.drawTextBuffer(
     0,
@@ -12182,9 +12174,7 @@ std::string Cone::drawMeToHtmlLastCoordAffine(
     return "The cone is empty";
   }
   std::stringstream out;
-  drawingVariables.makeMeAStandardBasis(
-    this->getDimension() - 1
-  );
+  drawingVariables.makeMeAStandardBasis(this->getDimension() - 1);
   bool foundBadVertex =
   this->drawMeLastCoordinateAffine(false, drawingVariables, format);
   drawingVariables.drawCoordSystemBuffer(
@@ -12309,21 +12299,17 @@ int DrawingVariables::getDimensionFromBilinearForm() {
   return this->bilinearForm.numberOfRows;
 }
 
-
 void DrawingVariables::getCoordinatesDrawingComputeAll(
   Vector<double>& input, double& x1, double& y1
 ) {
   x1 =
-  this->bilinearForm.scalarProduct(
-    input, this->basisProjectionPlane[0]
-  );
+  this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[0]);
   y1 =
-  this->bilinearForm.scalarProduct(
-    input, this->basisProjectionPlane[1]
-  );
+  this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[1]);
   x1 = x1 * this->graphicsUnit + this->centerX;
   y1 = y1 * this->graphicsUnit + this->centerY;
 }
+
 void DrawingVariables::getCoordinatesForDrawingProjectionsComputed(
   Vector<double>& input, double& x1, double& y1
 ) {
@@ -12336,6 +12322,7 @@ void DrawingVariables::getCoordinatesForDrawingProjectionsComputed(
   x1 = x1 * this->graphicsUnit + this->centerX;
   y1 = y1 * this->graphicsUnit + this->centerY;
 }
+
 void DrawingVariables::getCoordinatesForDrawingProjectionsComputed(
   Vector<double>& input1,
   Vector<double>& input2,
@@ -12373,6 +12360,7 @@ void DrawingVariables::initDimensions(
   this->graphicsUnit = DrawingVariables::graphicsUnitDefault;
   this->computeProjectionsEiVectors();
 }
+
 void DrawingVariables::initDimensions(
   Matrix<Rational>& bilinearForm,
   Vectors<double>& draggableBasis,
@@ -12389,7 +12377,6 @@ void DrawingVariables::initDimensions(
   }
   this->initDimensions(matrix, draggableBasis, startingPlane);
 }
-
 
 void DrawingVariables::initDimensions(int dimension) {
   if (dimension < 2) {
@@ -12410,25 +12397,9 @@ void DrawingVariables::initDimensions(int dimension) {
   this->frameLengthInMilliseconds = 500;
 }
 
-int DrawingVariables::getDimensionFirstDimensionDependentOperation() {
-  for (int i = 0; i < this->operations.size; i ++) {
-    if (
-      this->operations[i][fieldOperation].stringValue ==
-      DrawingVariables::typeSegment
-    ) {
-      if (
-        this->operations[i][DrawingVariables::fieldPoints].listObjects.size > 0
-      ) {
-        return
-        this->operations[i][DrawingVariables::fieldPoints][0].listObjects.size;
-      }
-    }
-  }
-  return - 1;
-}
-
-
-bool DrawingVariables::areWithinClickTolerance(double x1, double y1, double x2, double y2) {
+bool DrawingVariables::areWithinClickTolerance(
+  double x1, double y1, double x2, double y2
+) {
   x1 -= x2;
   y1 -= y2;
   if (x1 < 0) {
@@ -12439,6 +12410,7 @@ bool DrawingVariables::areWithinClickTolerance(double x1, double y1, double x2, 
   }
   return x1 <= this->clickToleranceX && y1 <= this->clickToleranceY;
 }
+
 bool DrawingVariables::mouseMoveRedraw(int x, int y) {
   if (this->selectedCircleMinus2noneMinus1Center == - 2) {
     return false;
@@ -12458,23 +12430,6 @@ bool DrawingVariables::mouseMoveRedraw(int x, int y) {
   }
   return false;
   //  this->draw();
-}
-
-void DrawingVariables::ensureProperInitialization() {
-  int dimension = this->getDimensionFirstDimensionDependentOperation();
-  bool isGood = (
-    this->projectionsEiVectors.size == dimension &&
-    this->bilinearForm.numberOfRows == dimension
-  );
-  if (isGood) {
-    isGood = this->basisProjectionPlane.size == 2;
-  }
-  if (isGood) {
-    isGood = this->basisProjectionPlane[0].size == dimension;
-  }
-  if (!isGood) {
-    this->initDimensions(dimension);
-  }
 }
 
 template <class Base>
@@ -12534,7 +12489,6 @@ double DrawingVariables::getAngleFromXandY(double x, double y) {
 }
 
 void DrawingVariables::click(double x, double y) {
-  this->ensureProperInitialization();
   this->selectedCircleMinus2noneMinus1Center = - 2;
   if (
     this->areWithinClickTolerance(x, y, this->centerX, this->centerY)
@@ -13458,15 +13412,9 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
           this->projectivizedComplex.drawMeLastCoordinateAffine(
             true, tempDV, tempFormat
           );
-          tempDV.drawCircleAtVectorBufferRational(
-            affineInput, "black", 5
-          );
-          tempDV.drawCircleAtVectorBufferRational(
-            affineInput, "black", 10
-          );
-          tempDV.drawCircleAtVectorBufferRational(
-            affineInput, "red", 4
-          );
+          tempDV.drawCircleAtVectorBufferRational(affineInput, "black", 5);
+          tempDV.drawCircleAtVectorBufferRational(affineInput, "black", 10);
+          tempDV.drawCircleAtVectorBufferRational(affineInput, "red", 4);
           global.comments
           << tempDV.getHTMLDiv(
             this->projectivizedComplex.getDimension() - 1, false, true
@@ -15968,14 +15916,13 @@ std::string ConeCollection::toHTMLHistory() const {
   return StringRoutines::join(historyInReverse);
 }
 
-std::string ConeCollection::toLatexGraphicsOnlyPsTricks() const{
+std::string ConeCollection::toLatexGraphicsOnlyPsTricks() const {
   std::stringstream out;
   DrawingVariables drawingVariables;
   this->drawMeProjective(drawingVariables);
   out << drawingVariables.toLatexPsTricks();
   return out.str();
 }
-
 
 std::string ConeCollection::toHTMLGraphicsOnly(bool includePanels) const {
   DrawingVariables drawingVariables;
@@ -15990,7 +15937,6 @@ std::string ConeCollection::toHTML() const {
   out << this->toHTMLWithoutGraphics();
   return out.str();
 }
-
 
 std::string ConeCollection::toHTMLOneCollection(
   const MapList<int, Cone>& cones, int& totalChambers
@@ -16152,4 +16098,59 @@ bool ConeCollection::findMaxLFOverConeProjective(
     }
   }
   return true;
+}
+
+DrawOperation::DrawOperation() {}
+
+DrawOperation::DrawOperation(const DrawGeneric& other) {
+  this->drawGeneric.getElement() = other;
+}
+
+std::string DrawOperation::toString() const {
+  if (!this->drawGeneric.isZeroPointer()) {
+    return this->drawGeneric.getElementConst().toString();
+  }
+  return "null";
+}
+
+void DrawOperation::operator=(const DrawGeneric& other) {
+  this->drawGeneric.getElement() = other;
+}
+
+JSData DrawOperation::toJSON(const DrawingVariables& owner) const {
+  JSData result;
+  this->toJSON(result, owner);
+  return result;
+}
+
+void DrawOperation::toJSON(JSData& output, const DrawingVariables& owner) const {
+  if (!this->drawGeneric.isZeroPointer()) {
+    return this->drawGeneric.getElementConst().toJSON(output, owner);
+  }
+}
+
+void DrawOperation::toLatexPsTricks(
+  std::stringstream& out, const DrawingVariables& owner
+) const {
+  if (!this->drawGeneric.isZeroPointer()) {
+    return this->drawGeneric.getElementConst().toLatexPsTricks(out, owner);
+  }
+}
+
+std::string DrawGeneric::toString() const {
+  return this->content.toString();
+}
+
+void DrawGeneric::toJSON(JSData& output, const DrawingVariables& owner) const {
+  STACK_TRACE("DrawGeneric::toJSON");
+  (void) owner;
+  output = this->content;
+}
+
+void DrawGeneric::toLatexPsTricks(
+  std::stringstream& out, const DrawingVariables& owner
+) const {
+  JSData json;
+  this->toJSON(json, owner);
+  out << "%unimplemented " << json.toString();
 }

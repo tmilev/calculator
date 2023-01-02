@@ -8639,12 +8639,8 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(
       highlightGroup, highlightLabels, "black", 5
     );
   }
-  drawingVariables.basisToDrawCirclesAt.setSize(
-    basisToDrawCirclesAt.size
-  );
-  for (
-    int i = 0; i < drawingVariables.basisToDrawCirclesAt.size; i ++
-  ) {
+  drawingVariables.basisToDrawCirclesAt.setSize(basisToDrawCirclesAt.size);
+  for (int i = 0; i < drawingVariables.basisToDrawCirclesAt.size; i ++) {
     drawingVariables.basisToDrawCirclesAt[i].setSize(primalRank);
     for (int j = 0; j < primalRank; j ++) {
       drawingVariables.basisToDrawCirclesAt[i][j] =

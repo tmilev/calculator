@@ -100,13 +100,17 @@ void RootSubalgebra::getCoxeterPlane(
         outputBasis1[j] = eigenSpace[0][j].realPart;
         outputBasis2[j] = eigenSpace[0][j].imaginaryPart;
       }
-      drawingVariables.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
+      drawingVariables.modifyToOrthonormalNoShiftSecond(
+        outputBasis2, outputBasis1
+      );
     } else if (coxeterNumber <= 2 && eigenSpace.size > 1) {
       for (int j = 0; j < dimension; j ++) {
         outputBasis1[j] = eigenSpace[0][j].realPart;
         outputBasis2[j] = eigenSpace[1][j].realPart;
       }
-      drawingVariables.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
+      drawingVariables.modifyToOrthonormalNoShiftSecond(
+        outputBasis2, outputBasis1
+      );
     }
   }
 }

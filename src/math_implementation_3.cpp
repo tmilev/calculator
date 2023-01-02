@@ -459,47 +459,18 @@ int DrawingVariables::getColorFromChamberIndex(int index) {
   );
 }
 
+DrawingVariables::DrawingVariables(){
+  this->initDrawingVariables();
+
+}
+
 void DrawingVariables::initDrawingVariables() {
   this->defaultHtmlHeight = 400;
   this->defaultHtmlWidth = 400;
   this->fontSizeNormal = 10;
-  this->fontSizeSubscript = 6;
-  this->flagLaTeXDraw = false;
-  this->flagDisplayingCreationNumbersInsteadOfDisplayNumbers = false;
-  this->flagDrawChamberIndices = true;
-  this->flagDrawingInvisibles = false;
-  this->flagDrawingLinkToOrigin = true;
-  this->flagFillUserDefinedProjection = false;
-  this->colorDashes = static_cast<int>(
-    HtmlRoutines::redGreenBlue(200, 200, 200)
-  );
-  this->flag2DprojectionDraw = true;
-  this->flagIncludeExtraHtmlDescriptions = true;
-  this->flagAllowMovingCoordinateSystemFromArbitraryClick = true;
-  this->ColorChamberIndicator = static_cast<int>(
-    HtmlRoutines::redGreenBlue(220, 220, 0)
-  );
-  this->ColorWeylChamberWalls = static_cast<int>(
-    HtmlRoutines::redGreenBlue(220, 220, 0)
-  );
-  this->ColorTextPermanentlyZeroChamber = static_cast<int>(
-    HtmlRoutines::redGreenBlue(250, 220, 220)
-  );
-  this->ColorTextZeroChamber = static_cast<int>(
-    HtmlRoutines::redGreenBlue(200, 100, 100)
-  );
-  this->ColorTextDefault = static_cast<int>(
-    HtmlRoutines::redGreenBlue(0, 0, 0)
-  );
-  this->Selected = - 2;
-  this->textX = 0;
-  this->textY = 15;
-  this->flagPlotShowJavascriptOnly = false;
-  this->flagUseGraphicsOld = false;
   this->initialize();
   this->initDimensions(2);
   this->flagAnimatingMovingCoordSystem = false;
-  this->indexStartingModifiableTextCommands = 0;
 }
 
 std::stringstream HtmlRoutines::outputStream;
@@ -11762,6 +11733,12 @@ std::string DrawingVariables::getColorPsTricksFromColorIndex(int colorIndex) {
   return out.str();
 }
 
+void DrawingVariables::scaleToUnitLength(Vector<double>& root) {
+  double length = this->bilinearForm.scalarProduct(root, root);
+  length = FloatingPoint::sqrtFloating(length);
+  root /= length;
+}
+
 bool DrawingVariables::getColorIntFromColorString(
   const std::string& input, int& output
 ) {
@@ -12471,7 +12448,6 @@ void DrawingVariables::initialize() {
   this->selectedCircleMinus2noneMinus1Center = - 2;
   this->flagRotatingPreservingAngles = true;
   this->flagAnimatingMovingCoordSystem = false;
-  this->flagIsPausedWhileAnimating = false;
 }
 
 double DrawingVariables::getAngleFromXandY(double x, double y) {
@@ -12678,7 +12654,6 @@ void DrawingVariables::changeBasisPReserveAngles(double newX, double newY) {
     currentBasisPlane[0], currentBasisPlane[1]
   );
   this->computeProjectionsEiVectors();
-  this->DebugString = out.str();
 }
 
 class ImpreciseDouble {

@@ -63,9 +63,6 @@ public:
   int frameLengthInMilliseconds;
   bool flagRotatingPreservingAngles;
   bool flagAnimatingMovingCoordSystem;
-  bool flagIsPausedWhileAnimating;
-  std::string DebugString;
-  int indexStartingModifiableTextCommands;
   enum PenStyles {
     PenStyleInvisible,
     PenStyleDashed,
@@ -82,35 +79,11 @@ public:
     TextStyleChamber,
     TextStyleZeroChamber,
     TextStylePermanentlyZeroChamber  };
-  int colorDashes;
-  bool flagLaTeXDraw;
-  bool flag2DprojectionDraw;
-  bool flagDisplayingCreationNumbersInsteadOfDisplayNumbers;
-  bool flagDrawChamberIndices;
-  bool flagDrawingInvisibles;
-  bool flagDrawingLinkToOrigin;
-  bool flagFillUserDefinedProjection;
-  bool flagIncludeExtraHtmlDescriptions;
-  bool flagPlotShowJavascriptOnly;
-  bool flagAllowMovingCoordinateSystemFromArbitraryClick;
-  bool flagUseGraphicsOld;
-  Vectors<Rational> fillUserDefinedProjection;
-  int Selected;
-  int textX;
-  int textY;
   int fontSizeNormal;
-  int fontSizeSubscript;
-  int ColorTextDefault;
-  int ColorTextZeroChamber;
-  int ColorTextPermanentlyZeroChamber;
-  int ColorChamberIndicator;
-  int ColorWeylChamberWalls;
   int defaultHtmlWidth;
   int defaultHtmlHeight;
   void initDrawingVariables();
-  DrawingVariables() {
-    this->initDrawingVariables();
-  }
+  DrawingVariables();
   int getColorFromChamberIndex(int index);
   static void projectOnToHyperPlaneGraphics(
     Vector<Rational>& input, Vector<Rational>& output
@@ -120,13 +93,7 @@ public:
   static bool getColorIntFromColorString(
     const std::string& input, int& output
   );
-  void scaleToUnitLength(Vector<double>& root) {
-    double length = this->bilinearForm.scalarProduct(root, root);
-    length = FloatingPoint::sqrtFloating(length);
-    root /= length;
-  }
-  int getActualPenStyleFromFlagsAnd(int inputPenStyle);
-  int getActualTextStyleFromFlagsAnd(int inputTextStyle);
+  void scaleToUnitLength(Vector<double>& root) ;
   std::string getHTMLDiv(
     int dimension, bool useSpanTag, bool generateInfoPanels
   );

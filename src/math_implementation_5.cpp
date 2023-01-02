@@ -11,25 +11,25 @@
 #include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::makeZero(SemisimpleLieAlgebra&)'
 #include "math_extra_differential_operators.h"
 
-std::string DrawOperations::typeCircleAtVector = "circleAtVector";
-std::string DrawOperations::typePath = "path";
-std::string DrawOperations::typeSegment = "segment";
-std::string DrawOperations::typeSegment2DFixed = "segment2DFixed";
-std::string DrawOperations::typeTextAtVector = "text";
-std::string DrawOperations::typeText2DFixed = "text2DFixed";
-std::string DrawOperations::typeFilledShape = "filledShape";
-std::string DrawOperations::typeHighlightGroup = "highlightGroup";
-std::string DrawOperations::fieldColor = "color";
-std::string DrawOperations::fieldOperation = "operation";
-std::string DrawOperations::fieldPoints = "points";
-std::string DrawOperations::fieldLocation = "location";
-std::string DrawOperations::fieldRadius = "radius";
-std::string DrawOperations::fieldPenStyle = "penStyle";
-std::string DrawOperations::fieldText = "text";
-std::string DrawOperations::fieldLabels = "labels";
-std::string DrawOperations::fieldLineWidth = "lineWidth";
-std::string DrawOperations::fieldFrameId = "frameId";
-std::string DrawOperations::fieldFrameIndex = "frameIndex";
+std::string DrawingVariables::typeCircleAtVector = "circleAtVector";
+std::string DrawingVariables::typePath = "path";
+std::string DrawingVariables::typeSegment = "segment";
+std::string DrawingVariables::typeSegment2DFixed = "segment2DFixed";
+std::string DrawingVariables::typeTextAtVector = "text";
+std::string DrawingVariables::typeText2DFixed = "text2DFixed";
+std::string DrawingVariables::typeFilledShape = "filledShape";
+std::string DrawingVariables::typeHighlightGroup = "highlightGroup";
+std::string DrawingVariables::fieldColor = "color";
+std::string DrawingVariables::fieldOperation = "operation";
+std::string DrawingVariables::fieldPoints = "points";
+std::string DrawingVariables::fieldLocation = "location";
+std::string DrawingVariables::fieldRadius = "radius";
+std::string DrawingVariables::fieldPenStyle = "penStyle";
+std::string DrawingVariables::fieldText = "text";
+std::string DrawingVariables::fieldLabels = "labels";
+std::string DrawingVariables::fieldLineWidth = "lineWidth";
+std::string DrawingVariables::fieldFrameId = "frameId";
+std::string DrawingVariables::fieldFrameIndex = "frameIndex";
 
 std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
   if (this->isConstant()) {
@@ -177,7 +177,7 @@ computeSubGroupFromGeneratingReflections(
   return true;
 }
 
-void DrawOperations::drawCircleAtVectorBufferRational(
+void DrawingVariables::drawCircleAtVectorBufferRational(
   const Vector<Rational>& input,
   const std::string& color,
   double radius,
@@ -185,32 +185,32 @@ void DrawOperations::drawCircleAtVectorBufferRational(
   int frameIndex
 ) {
   JSData operation;
-  operation[DrawOperations::fieldOperation] =
-  DrawOperations::typeCircleAtVector;
-  operation[DrawOperations::fieldLocation] = input.getVectorDouble();
-  operation[DrawOperations::fieldRadius] = radius;
-  operation[DrawOperations::fieldColor] = color;
+  operation[DrawingVariables::fieldOperation] =
+  DrawingVariables::typeCircleAtVector;
+  operation[DrawingVariables::fieldLocation] = input.getVectorDouble();
+  operation[DrawingVariables::fieldRadius] = radius;
+  operation[DrawingVariables::fieldColor] = color;
   if (frameId != "") {
-    operation[DrawOperations::fieldFrameId] = frameId;
-    operation[DrawOperations::fieldFrameIndex] = frameIndex;
+    operation[DrawingVariables::fieldFrameId] = frameId;
+    operation[DrawingVariables::fieldFrameIndex] = frameIndex;
   }
-  // operation[DrawOperations::fieldPenStyle] = DrawOperations::fieldPenStyle;
+  // operation[DrawingVariables::fieldPenStyle] = DrawingVariables::fieldPenStyle;
   this->operations.addOnTop(operation);
 }
 
-void DrawOperations::drawCircleAtVectorBufferDouble(
+void DrawingVariables::drawCircleAtVectorBufferDouble(
   const Vector<double>& input, const std::string& color, double radius
 ) {
   JSData operation;
-  operation[DrawOperations::fieldOperation] =
-  DrawOperations::typeCircleAtVector;
-  operation[DrawOperations::fieldLocation] = input;
-  operation[DrawOperations::fieldRadius] = radius;
-  operation[DrawOperations::fieldColor] = color;
+  operation[DrawingVariables::fieldOperation] =
+  DrawingVariables::typeCircleAtVector;
+  operation[DrawingVariables::fieldLocation] = input;
+  operation[DrawingVariables::fieldRadius] = radius;
+  operation[DrawingVariables::fieldColor] = color;
   this->operations.addOnTop(operation);
 }
 
-void DrawOperations::drawLineBetweenTwoVectorsBufferRational(
+void DrawingVariables::drawLineBetweenTwoVectorsBufferRational(
   const Vector<Rational>& vector1,
   const Vector<Rational>& vector2,
   const std::string& color,
@@ -224,7 +224,7 @@ void DrawOperations::drawLineBetweenTwoVectorsBufferRational(
   );
 }
 
-void DrawOperations::drawPath(
+void DrawingVariables::drawPath(
   const Vectors<Rational>& vectors,
   const std::string& color,
   double lineWidth,
@@ -232,42 +232,42 @@ void DrawOperations::drawPath(
   int frameIndex
 ) {
   JSData operation;
-  operation[DrawOperations::fieldOperation] = DrawOperations::typePath;
+  operation[DrawingVariables::fieldOperation] = DrawingVariables::typePath;
   Vectors<double> vectorsDouble;
   vectors.getVectorsDouble(vectorsDouble);
-  operation[DrawOperations::fieldPoints] = vectorsDouble;
-  operation[DrawOperations::fieldFrameId] = frameId;
-  operation[DrawOperations::fieldFrameIndex] = frameIndex;
+  operation[DrawingVariables::fieldPoints] = vectorsDouble;
+  operation[DrawingVariables::fieldFrameId] = frameId;
+  operation[DrawingVariables::fieldFrameIndex] = frameIndex;
   if (color != "") {
-    operation[DrawOperations::fieldColor] = color;
+    operation[DrawingVariables::fieldColor] = color;
   }
   if (lineWidth != 1.0) {
-    operation[DrawOperations::fieldLineWidth] = lineWidth;
+    operation[DrawingVariables::fieldLineWidth] = lineWidth;
   }
   this->operations.addOnTop(operation);
 }
 
-void DrawOperations::drawLineBetweenTwoVectorsBufferDouble(
+void DrawingVariables::drawLineBetweenTwoVectorsBufferDouble(
   const Vector<double>& vector1,
   const Vector<double>& vector2,
   const std::string& color,
   double lineWidth
 ) {
   JSData operation;
-  operation[DrawOperations::fieldOperation] = DrawOperations::typeSegment;
-  operation[DrawOperations::fieldPoints] = JSData::token::tokenArray;
-  operation[DrawOperations::fieldPoints][0] = vector1;
-  operation[DrawOperations::fieldPoints][1] = vector2;
+  operation[DrawingVariables::fieldOperation] = DrawingVariables::typeSegment;
+  operation[DrawingVariables::fieldPoints] = JSData::token::tokenArray;
+  operation[DrawingVariables::fieldPoints][0] = vector1;
+  operation[DrawingVariables::fieldPoints][1] = vector2;
   if (color != "") {
-    operation[DrawOperations::fieldColor] = color;
+    operation[DrawingVariables::fieldColor] = color;
   }
   if (lineWidth != 1.0) {
-    operation[DrawOperations::fieldLineWidth] = lineWidth;
+    operation[DrawingVariables::fieldLineWidth] = lineWidth;
   }
   this->operations.addOnTop(operation);
 }
 
-void DrawOperations::drawFilledShape(
+void DrawingVariables::drawFilledShape(
   const List<Vector<double> >& corners,
   uint32_t penStyle,
   int colorIndex,
@@ -278,18 +278,26 @@ void DrawOperations::drawFilledShape(
   (void) colorIndex;
   (void) fillColorIndex;
   JSData operation;
-  operation[DrawOperations::fieldOperation] = DrawOperations::typeFilledShape;
-  operation[DrawOperations::fieldPoints] = JSData::token::tokenArray;
+  operation[DrawingVariables::fieldOperation] = DrawingVariables::typeFilledShape;
+  operation[DrawingVariables::fieldPoints] = JSData::token::tokenArray;
   for (int i = 0; i < corners.size; i ++) {
-    operation[DrawOperations::fieldPoints][i] = corners[i];
+    operation[DrawingVariables::fieldPoints][i] = corners[i];
   }
   if (lineWidth != 1.0) {
-    operation[DrawOperations::fieldLineWidth] = lineWidth;
+    operation[DrawingVariables::fieldLineWidth] = lineWidth;
   }
   this->operations.addOnTop(operation);
 }
 
-void DrawOperations::drawTextAtVectorBufferRational(
+void DrawingVariables::drawTextAtVectorBufferRational(
+  const Vector<Rational>& input,
+  const std::string& inputText,
+  const std::string& color
+) {
+  this->drawTextAtVectorBufferRational(input, inputText, color, this->fontSizeNormal);
+}
+
+void DrawingVariables::drawTextAtVectorBufferRational(
   const Vector<Rational>& input,
   const std::string& inputText,
   const std::string& color,
@@ -298,13 +306,13 @@ void DrawOperations::drawTextAtVectorBufferRational(
   (void) color;
   (void) fontSize;
   JSData operation;
-  operation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
-  operation[DrawOperations::fieldLocation] = input.getVectorDouble();
-  operation[DrawOperations::fieldText] = inputText;
+  operation[DrawingVariables::fieldOperation] = DrawingVariables::typeTextAtVector;
+  operation[DrawingVariables::fieldLocation] = input.getVectorDouble();
+  operation[DrawingVariables::fieldText] = inputText;
   this->operations.addOnTop(operation);
 }
 
-void DrawOperations::drawTextAtVectorBufferDouble(
+void DrawingVariables::drawTextAtVectorBufferDouble(
   const Vector<double>& input,
   const std::string& inputText,
   const std::string& color,
@@ -315,9 +323,9 @@ void DrawOperations::drawTextAtVectorBufferDouble(
   (void) fontSize;
   (void) textStyle;
   JSData operation;
-  operation[DrawOperations::fieldOperation] = DrawOperations::typeTextAtVector;
-  operation[DrawOperations::fieldLocation] = input;
-  operation[DrawOperations::fieldText] = inputText;
+  operation[DrawingVariables::fieldOperation] = DrawingVariables::typeTextAtVector;
+  operation[DrawingVariables::fieldLocation] = input;
+  operation[DrawingVariables::fieldText] = inputText;
   this->operations.addOnTop(operation);
 }
 
@@ -330,28 +338,28 @@ void DrawingVariables::drawLineDirectly(
   int colorIndex,
   double lineWidth
 ) {
-  this->operations.drawLineBuffer(
+  this->drawLineBuffer(
     x1, y1, x2, y2, penStyle, colorIndex, lineWidth
   );
 }
 
-void DrawOperations::drawHighlightGroup(
+void DrawingVariables::drawHighlightGroup(
   Vectors<double>& highlightGroup,
   List<std::string>& labels,
   const std::string& color,
   int radius
 ) {
   JSData operation;
-  operation[DrawOperations::fieldOperation] =
-  DrawOperations::typeHighlightGroup;
-  operation[DrawOperations::fieldPoints] = highlightGroup;
-  operation[DrawOperations::fieldLabels] = labels;
-  operation[DrawOperations::fieldColor] = color;
-  operation[DrawOperations::fieldRadius] = radius;
+  operation[DrawingVariables::fieldOperation] =
+  DrawingVariables::typeHighlightGroup;
+  operation[DrawingVariables::fieldPoints] = highlightGroup;
+  operation[DrawingVariables::fieldLabels] = labels;
+  operation[DrawingVariables::fieldColor] = color;
+  operation[DrawingVariables::fieldRadius] = radius;
   this->operations.addOnTop(operation);
 }
 
-void DrawOperations::drawLineBuffer(
+void DrawingVariables::drawLineBuffer(
   double x1,
   double y1,
   double x2,
@@ -364,18 +372,18 @@ void DrawOperations::drawLineBuffer(
   (void) colorIndex;
   (void) lineWidth;
   JSData operation;
-  operation[DrawOperations::fieldOperation] =
-  DrawOperations::typeSegment2DFixed;
-  operation[DrawOperations::fieldPoints].elementType =
+  operation[DrawingVariables::fieldOperation] =
+  DrawingVariables::typeSegment2DFixed;
+  operation[DrawingVariables::fieldPoints].elementType =
   JSData::token::tokenArray;
-  operation[DrawOperations::fieldPoints][0][0] = x1;
-  operation[DrawOperations::fieldPoints][0][1] = y1;
-  operation[DrawOperations::fieldPoints][1][0] = x2;
-  operation[DrawOperations::fieldPoints][1][1] = y2;
+  operation[DrawingVariables::fieldPoints][0][0] = x1;
+  operation[DrawingVariables::fieldPoints][0][1] = y1;
+  operation[DrawingVariables::fieldPoints][1][0] = x2;
+  operation[DrawingVariables::fieldPoints][1][1] = y2;
   this->operations.addOnTop(operation);
 }
 
-void DrawOperations::drawTextBuffer(
+void DrawingVariables::drawTextBuffer(
   double x1,
   double y1,
   const std::string& inputText,
@@ -387,13 +395,13 @@ void DrawOperations::drawTextBuffer(
   (void) colorIndex;
   (void) textStyle;
   JSData operation;
-  operation[DrawOperations::fieldOperation] =
-  DrawOperations::typeSegment2DFixed;
-  operation[DrawOperations::fieldLocation].elementType =
+  operation[DrawingVariables::fieldOperation] =
+  DrawingVariables::typeSegment2DFixed;
+  operation[DrawingVariables::fieldLocation].elementType =
   JSData::token::tokenArray;
-  operation[DrawOperations::fieldLocation][0] = x1;
-  operation[DrawOperations::fieldLocation][1] = y1;
-  operation[DrawOperations::fieldText] = inputText;
+  operation[DrawingVariables::fieldLocation][0] = x1;
+  operation[DrawingVariables::fieldLocation][1] = y1;
+  operation[DrawingVariables::fieldText] = inputText;
   this->operations.addOnTop(operation);
 }
 
@@ -467,14 +475,8 @@ int DrawingVariables::getActualTextStyleFromFlagsAnd(int inputTextStyle) {
   return DrawingVariables::TextStyleNormal;
 }
 
-DrawOperations::DrawOperations() {
-  this->initDimensions(2);
-  this->flagAnimatingMovingCoordSystem = false;
-  this->specialOperationsOnBasisChange = nullptr;
-  this->indexStartingModifiableTextCommands = 0;
-}
 
-std::string DrawOperations::toLatexPsTricks() const{
+std::string DrawingVariables::toLatexPsTricks() const{
   std::stringstream out;
   out << "\\begin{pspicture}(0,0)(5,5)";
   for (int i = 0; i < this->operations.size; i ++){
@@ -485,29 +487,16 @@ std::string DrawOperations::toLatexPsTricks() const{
 
 }
 
-std::string DrawOperations::toLatexPsTricksOnce(JSData &drawOperation) const{
+std::string DrawingVariables::toLatexPsTricksOnce(JSData &drawOperation) const{
   std::stringstream out;
 return out.str();
 }
 
-void DrawingVariables::drawLineBuffer(
-  double x1,
-  double y1,
-  double x2,
-  double y2,
-  uint32_t penStyle,
-  int colorIndex,
-  double lineWidth
-) {
-  this->operations.drawLineBuffer(
-    x1, y1, x2, y2, penStyle, colorIndex, lineWidth
-  );
-}
 
 void DrawingVariables::drawTextBuffer(
   double X1, double Y1, const std::string& inputText, int color
 ) {
-  this->operations.drawTextBuffer(
+  this->drawTextBuffer(
     X1,
     Y1,
     inputText,
@@ -531,7 +520,7 @@ void DrawingVariables::drawString(
   for (unsigned int i = 0; i < input.size(); i ++) {
     std::string character;
     character = input.at(i);
-    this->operations.drawTextBuffer(
+    this->drawTextBuffer(
       drawData.outputWidth + drawData.topLeftCornerX,
       drawData.outputHeight + drawData.topLeftCornerY,
       character,
@@ -543,11 +532,6 @@ void DrawingVariables::drawString(
       static_cast<double>(fontSize) / 1.15
     );
   }
-}
-
-std::string DrawingVariables::toLatexPsTricks() const{
-  STACK_TRACE("DrawingVariables::toLatexPsTricks");
-  return this->operations.toLatexPsTricks();
 }
 
 void HtmlRoutines::replaceEqualitiesAndAmpersandsBySpaces(

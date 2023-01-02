@@ -84,11 +84,11 @@ void RootSubalgebra::getCoxeterPlane(
   eigenMatrix.getZeroEigenSpace(eigenSpaceList);
   Vectors<Complex<double> > eigenSpace;
   eigenSpace.operator=(eigenSpaceList);
-  DrawOperations tempDO;
-  tempDO.initDimensions(dimension);
+  DrawingVariables drawingVariables;
+  drawingVariables.initDimensions(dimension);
   for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      tempDO.bilinearForm.elements[i][j] =
+      drawingVariables.bilinearForm.elements[i][j] =
       this->getAmbientWeyl().cartanSymmetric.elements[i][j].getDoubleValue();
     }
   }
@@ -100,13 +100,13 @@ void RootSubalgebra::getCoxeterPlane(
         outputBasis1[j] = eigenSpace[0][j].realPart;
         outputBasis2[j] = eigenSpace[0][j].imaginaryPart;
       }
-      tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
+      drawingVariables.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
     } else if (coxeterNumber <= 2 && eigenSpace.size > 1) {
       for (int j = 0; j < dimension; j ++) {
         outputBasis1[j] = eigenSpace[0][j].realPart;
         outputBasis2[j] = eigenSpace[1][j].realPart;
       }
-      tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
+      drawingVariables.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
     }
   }
 }

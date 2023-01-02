@@ -4,9 +4,15 @@
 
 #include "math_general.h"
 
-class DrawOperations {
+// Represents graphics in the calculator.
+// There are two classes that do that: Plot and DrawingVariables.
+// DrawingVariables supports arbitrary dimension > 2, Plot supports only
+// dimensions 2 and 3. It will be nice to unify these two classes into a
+// single class; until then, please use transition functions.
+class DrawingVariables {
 private:
   void changeBasisPReserveAngles(double newX, double newY);
+
 public:
   List<JSData> operations;
   List<List<double> > projectionsEiVectors;
@@ -33,200 +39,8 @@ public:
   bool flagIsPausedWhileAnimating;
   std::string DebugString;
   int indexStartingModifiableTextCommands;
-  void(*specialOperationsOnBasisChange)(DrawOperations& drawOperations);
-  static void projectionMultiplicityMergeOnBasisChange(
-    DrawOperations& operations
-  );
-  void makeMeAStandardBasis(int dimension);
-  void operator+=(const DrawOperations& other);
-  void initDimensions(
-    Matrix<double>& bilinearForm,
-    Vectors<double>& draggableBasis,
-    Vectors<double>& startingPlane
-  ) ;
-  void initDimensions(
-    Matrix<Rational>& bilinearForm,
-    Vectors<double>& draggableBasis,
-    Vectors<double>& startingPlane
-  ) ;
-  void initDimensions(int dimension);
-  int getDimensionFirstDimensionDependentOperation();
-  int getDimensionFromBilinearForm();
-  void getCoordinatesDrawingComputeAll(
-    Vector<double>& input, double& x1, double& y1
-  ) ;
-  void getCoordinatesForDrawingProjectionsComputed(
-    Vector<double>& input, double& x1, double& y1
-  ) ;
-  void getCoordinatesForDrawingProjectionsComputed(
-    Vector<double>& input1,
-    Vector<double>& input2,
-    double& x1,
-    double& y1,
-    double& x2,
-    double& y2
-  ) ;
-  void ensureProperInitialization();
-  bool areWithinClickTolerance(double x1, double y1, double x2, double y2);
-  bool mouseMoveRedraw(int x, int y) ;
-  void click(double x, double y);
-  void drawHighlightGroup(
-    Vectors<double>& highlightGroup,
-    List<std::string>& labels,
-    const std::string& color,
-    int radius
-  );
-  void drawLineBuffer(
-    double x1,
-    double y1,
-    double x2,
-    double y2,
-    uint32_t penStyle,
-    int colorIndex,
-    double lineWidth
-  );
-  void drawTextBuffer(
-    double x1,
-    double y1,
-    const std::string& inputText,
-    int colorIndex,
-    int fontSize,
-    int textStyle
-  );
-  void drawLineBetweenTwoVectorsBufferRational(
-    const Vector<Rational>& vector1,
-    const Vector<Rational>& vector2,
-    const std::string& color,
-    double lineWidth = 1
-  );
-  void drawFilledShape(
-    const List<Vector<double> >& corners,
-    uint32_t penStyle,
-    int colorIndex,
-    int fillColorIndex,
-    double lineWidth
-  );
-  void drawLineBetweenTwoVectorsBufferDouble(
-    const Vector<double>& vector1,
-    const Vector<double>& vector2,
-    const std::string& color,
-    double lineWidth = 1
-  );
-  void drawPath(
-    const Vectors<Rational>& vectors,
-    const std::string& color,
-    double lineWidth,
-    const std::string& frameId,
-    int frameIndex
-  );
-  void drawTextAtVectorBufferRational(
-    const Vector<Rational>& input,
-    const std::string& inputText,
-    const std::string& color,
-    int fontSize
-  );
-  void drawTextAtVectorBufferDouble(
-    const Vector<double>& input,
-    const std::string& inputText,
-    const std::string& color,
-    int fontSize,
-    int textStyle
-  );
-  void drawCircleAtVectorBufferRational(
-    const Vector<Rational>& input,
-    const std::string& color,
-    double radius,
-    const std::string& frameId = "",
-    int frameIndex = - 1
-  );
-  void drawCircleAtVectorBufferDouble(
-    const Vector<double>& input,
-    const std::string& color,
-    double radius
-  );
-  double getAngleFromXandY(double x, double y);
-  void scaleToUnitLength(Vector<double>& root) {
-    double length = this->bilinearForm.scalarProduct(root, root);
-    length = FloatingPoint::sqrtFloating(length);
-    root /= length;
-  }
-  void rotateOutOfPlane(
-    std::stringstream& Logger,
-    Vector<double>& input,
-    Vector<double>& output,
-    Vector<double>& orthoBasis1,
-    Vector<double>& orthoBasis2,
-    double oldTanSquared,
-    double newTanSquared
-  );
-  void modifyToOrthonormalNoShiftSecond(
-    Vector<double>& root1, Vector<double>& root2
-  );
-  void computeProjectionsEiVectors();
-  DrawOperations() ;
-  std::string toLatexPsTricks()const;
-  std::string toLatexPsTricksOnce(JSData& drawOperation)const;
-  void initialize();
-  static std::string typeSegment;
-  static std::string typePath;
-  static std::string typeSegment2DFixed;
-  static std::string typeHighlightGroup;
-  static std::string typeText;
-  static std::string typeText2DFixed;
-  static std::string typeTextAtVector;
-  static std::string typeCircleAtVector;
-  static std::string typeFilledShape;
-  static std::string penStyleNormal;
-  static std::string fieldPoints;
-  static std::string fieldPenStyle;
-  static std::string fieldLocation;
-  static std::string fieldRadius;
-  static std::string fieldColor;
-  static std::string fieldOperation;
-  static std::string fieldLineWidth;
-  static std::string fieldFrameId;
-  static std::string fieldFrameIndex;
-  static std::string fieldText;
-  static std::string fieldLabels;
-};
 
-// Represents graphics in the calculator.
-// There are two classes that do that: Plot and DrawingVariables.
-// DrawingVariables supports arbitrary dimension > 2, Plot supports only
-// dimensions 2 and 3. It will be nice to unify these two classes into a
-// single class; until then, please use transition functions.
-class DrawingVariables {
-public:
-  typedef void(*DrawLineFunction)(
-    double X1,
-    double Y1,
-    double X2,
-    double Y2,
-    unsigned long penStyle,
-    int colorIndex
-  );
-  typedef void(*DrawTextFunction)(
-    double X1,
-    double Y1,
-    const char* text,
-    int length,
-    int colorIndex,
-    int fontSize
-  );
-  typedef void(*DrawCircleFunction)(
-    double X1,
-    double Y1,
-    double radius,
-    unsigned long penStyle,
-    int colorIndex
-  );
-  typedef void(*DrawClearScreenFunction)();
-private:
-  DrawLineFunction drawLineFunction;
-  DrawTextFunction drawTextFunction;
-  DrawCircleFunction drawCircleFunction;
-  DrawClearScreenFunction drawClearScreenFunction;
-public:
+
   enum PenStyles {
     PenStyleInvisible,
     PenStyleDashed,
@@ -281,7 +95,13 @@ public:
   static bool getColorIntFromColorString(
     const std::string& input, int& output
   );
-  DrawOperations operations;
+
+  void scaleToUnitLength(Vector<double>& root) {
+    double length = this->bilinearForm.scalarProduct(root, root);
+    length = FloatingPoint::sqrtFloating(length);
+    root /= length;
+  }
+
   int getActualPenStyleFromFlagsAnd(int inputPenStyle);
   int getActualTextStyleFromFlagsAnd(int inputTextStyle);
   std::string getHTMLDiv(
@@ -312,39 +132,11 @@ public:
     int colorIndex,
     double lineWidth
   );
-  void drawTextDirectly(
-    double x1,
-    double y1,
-    const std::string& inputText,
-    int color,
-    std::fstream* latexOutFile
-  );
   void drawTextBuffer(
     double X1, double Y1, const std::string& inputText, int color
   );
-  // If the LatexOutFile is zero then the procedure defaults to the screen.
-  void drawLineBufferOld(
-    double x1,
-    double y1,
-    double x2,
-    double y2,
-    uint32_t penStyle,
-    int colorIndex,
-    std::fstream* latexOutFile
-  );
-  void drawLineBetweenTwoVectorsBufferRational(
-    const Vector<Rational>& r1,
-    const Vector<Rational>& r2,
-    const std::string& color,
-    double lineWidth = 1
-  ) ;
-  void drawCircleAtVector(
-    const Vector<Rational>& point,
-    const std::string& color,
-    double radius,
-    const std::string& frameId = "",
-    int frameIndex = - 1
-  ) ;
+
+
   void drawPath(
     const Vectors<Rational>& vectors,
     const std::string& color,
@@ -362,6 +154,12 @@ public:
     const Vector<Rational>& point,
     const std::string& inputText,
     const std::string& color
+  );
+  void drawTextAtVectorBufferRational(
+    const Vector<Rational>& input,
+    const std::string& inputText,
+    const std::string& color,
+    int fontSize
   );
   void drawTextAtVectorBufferDouble(
     const Vector<double>& point,
@@ -381,11 +179,121 @@ public:
     const std::string& color,
     double radius
   );
-  void operator=(const DrawingVariables& other) {
-    this->drawLineFunction = other.drawLineFunction;
-    this->drawTextFunction = other.drawTextFunction;
-  }
-std::string  toLatexPsTricks()const;
+static void projectionMultiplicityMergeOnBasisChange(
+  DrawingVariables& operations
+);
+void makeMeAStandardBasis(int dimension);
+void operator+=(const DrawingVariables& other);
+void initDimensions(
+  Matrix<double>& bilinearForm,
+  Vectors<double>& draggableBasis,
+  Vectors<double>& startingPlane
+) ;
+void initDimensions(
+  Matrix<Rational>& bilinearForm,
+  Vectors<double>& draggableBasis,
+  Vectors<double>& startingPlane
+) ;
+void initDimensions(int dimension);
+int getDimensionFirstDimensionDependentOperation();
+int getDimensionFromBilinearForm();
+void getCoordinatesDrawingComputeAll(
+  Vector<double>& input, double& x1, double& y1
+) ;
+void getCoordinatesForDrawingProjectionsComputed(
+  Vector<double>& input, double& x1, double& y1
+) ;
+void getCoordinatesForDrawingProjectionsComputed(
+  Vector<double>& input1,
+  Vector<double>& input2,
+  double& x1,
+  double& y1,
+  double& x2,
+  double& y2
+) ;
+void ensureProperInitialization();
+bool areWithinClickTolerance(double x1, double y1, double x2, double y2);
+bool mouseMoveRedraw(int x, int y) ;
+void click(double x, double y);
+void drawHighlightGroup(
+  Vectors<double>& highlightGroup,
+  List<std::string>& labels,
+  const std::string& color,
+  int radius
+);
+
+void drawTextBuffer(
+  double x1,
+  double y1,
+  const std::string& inputText,
+  int colorIndex,
+  int fontSize,
+  int textStyle
+);
+void drawLineBetweenTwoVectorsBufferRational(
+  const Vector<Rational>& vector1,
+  const Vector<Rational>& vector2,
+  const std::string& color,
+  double lineWidth = 1
+);
+void drawFilledShape(
+  const List<Vector<double> >& corners,
+  uint32_t penStyle,
+  int colorIndex,
+  int fillColorIndex,
+  double lineWidth
+);
+
+
+
+void drawTextAtVectorBufferDouble(
+  const Vector<double>& input,
+  const std::string& inputText,
+  const std::string& color,
+  int fontSize,
+  int textStyle
+);
+
+
+double getAngleFromXandY(double x, double y);
+void rotateOutOfPlane(
+  std::stringstream& Logger,
+  Vector<double>& input,
+  Vector<double>& output,
+  Vector<double>& orthoBasis1,
+  Vector<double>& orthoBasis2,
+  double oldTanSquared,
+  double newTanSquared
+);
+void modifyToOrthonormalNoShiftSecond(
+  Vector<double>& root1, Vector<double>& root2
+);
+void computeProjectionsEiVectors();
+std::string toLatexPsTricks()const;
+std::string toLatexPsTricksOnce(JSData& drawOperation)const;
+void initialize();
+
+static std::string typeSegment;
+static std::string typePath;
+static std::string typeSegment2DFixed;
+static std::string typeHighlightGroup;
+static std::string typeText;
+static std::string typeText2DFixed;
+static std::string typeTextAtVector;
+static std::string typeCircleAtVector;
+static std::string typeFilledShape;
+static std::string penStyleNormal;
+static std::string fieldPoints;
+static std::string fieldPenStyle;
+static std::string fieldLocation;
+static std::string fieldRadius;
+static std::string fieldColor;
+static std::string fieldOperation;
+static std::string fieldLineWidth;
+static std::string fieldFrameId;
+static std::string fieldFrameIndex;
+static std::string fieldText;
+static std::string fieldLabels;
 };
 
 #endif // header_math_extra_drawing_variables_ALREADY_INCLUDED

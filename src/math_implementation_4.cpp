@@ -1942,19 +1942,19 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   draggableBasis.makeEiBasis(smallDimension);
   WeylGroupData tmpWeyl;
   tmpWeyl.makeArbitrarySimple('A', 2);
-  drawOps.operations.initDimensions(
+  drawOps.initDimensions(
     tmpWeyl.cartanSymmetric, draggableBasis, draggableBasis
   );
   FormatExpressions format;
-  drawOps.operations.basisProjectionPlane[0][0] = 1;
-  drawOps.operations.basisProjectionPlane[0][1] = 0;
-  drawOps.operations.basisProjectionPlane[1][0] = 1;
-  drawOps.operations.basisProjectionPlane[1][1] = 1;
-  drawOps.operations.modifyToOrthonormalNoShiftSecond(
-    drawOps.operations.basisProjectionPlane[1],
-    drawOps.operations.basisProjectionPlane[0]
+  drawOps.basisProjectionPlane[0][0] = 1;
+  drawOps.basisProjectionPlane[0][1] = 0;
+  drawOps.basisProjectionPlane[1][0] = 1;
+  drawOps.basisProjectionPlane[1][1] = 1;
+  drawOps.modifyToOrthonormalNoShiftSecond(
+    drawOps.basisProjectionPlane[1],
+    drawOps.basisProjectionPlane[0]
   );
-  drawOps.operations.graphicsUnit = 50;
+  drawOps.graphicsUnit = 50;
   PiecewiseQuasipolynomial
   startingPolynomial,
   substitutedPolynomial,

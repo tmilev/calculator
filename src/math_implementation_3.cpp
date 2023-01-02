@@ -463,10 +463,6 @@ int DrawingVariables::getColorFromChamberIndex(int index) {
 void DrawingVariables::initDrawingVariables() {
   this->defaultHtmlHeight = 400;
   this->defaultHtmlWidth = 400;
-  this->drawLineFunction = nullptr;
-  this->drawTextFunction = nullptr;
-  this->drawCircleFunction = nullptr;
-  this->drawClearScreenFunction = nullptr;
   this->fontSizeNormal = 10;
   this->fontSizeSubscript = 6;
   this->flagLaTeXDraw = false;
@@ -501,7 +497,12 @@ void DrawingVariables::initDrawingVariables() {
   this->textY = 15;
   this->flagPlotShowJavascriptOnly = false;
   this->flagUseGraphicsOld = false;
-  this->operations.initialize();
+  this->initialize();
+
+  this->initDimensions(2);
+  this->flagAnimatingMovingCoordSystem = false;
+  this->indexStartingModifiableTextCommands = 0;
+
 }
 
 std::stringstream HtmlRoutines::outputStream;
@@ -2500,81 +2501,11 @@ void DrawingVariables::drawCoordSystemBuffer(
     variables.drawTextAtVectorBufferRational(root, tempS, "#94c894");
     variables.drawCircleAtVectorBufferRational(root, colorText, 4);
   }
-  variables.operations.basisToDrawCirclesAt.makeEiBasis(dimension);
+  variables.basisToDrawCirclesAt.makeEiBasis(dimension);
 }
 
 
-void DrawingVariables::drawLineBetweenTwoVectorsBufferRational(
-  const Vector<Rational>& r1,
-  const Vector<Rational>& r2,
-  const std::string& color,
-  double lineWidth
-) {
-  this->operations.drawLineBetweenTwoVectorsBufferRational(
-    r1, r2, color, lineWidth
-  );
-}
-void DrawingVariables::drawCircleAtVector(
-  const Vector<Rational>& point,
-  const std::string& color,
-  double radius,
-  const std::string& frameId ,
-  int frameIndex
-) {
-  this->operations.drawCircleAtVectorBufferRational(
-    point, color, radius, frameId, frameIndex
-  );
-}
-void DrawingVariables::drawPath(
-  const Vectors<Rational>& vectors,
-  const std::string& color,
-  double lineWidth,
-  const std::string& frameId ,
-  int frameIndex
-) {
-  this->operations.drawPath(
-    vectors, color, lineWidth, frameId, frameIndex
-  );
-}
-void DrawingVariables::drawLineBetweenTwoVectorsBufferDouble(
-  const Vector<double>& r1,
-  const Vector<double>& r2,
-  const std::string& color,
-  double lineWidth
-) {
-  this->operations.drawLineBetweenTwoVectorsBufferDouble(
-    r1, r2, color, lineWidth
-  );
-}
 
-void DrawingVariables::drawLineBufferOld(
-  double x1,
-  double y1,
-  double x2,
-  double y2,
-  uint32_t penStyle,
-  int colorIndex,
-  std::fstream* latexOutFile
-) {
-  this->operations.drawLineBuffer(
-    x1, y1, x2, y2, penStyle, colorIndex, 1
-  );
-  if (latexOutFile != nullptr) {
-    LaTeXProcedures::drawline(
-      x1, y1, x2, y2, penStyle, colorIndex, *latexOutFile, *this
-    );
-  }
-}
-
-void DrawingVariables::drawTextAtVectorBufferRational(
-  const Vector<Rational>& point,
-  const std::string& inputText,
-  const std::string& color
-) {
-  this->operations.drawTextAtVectorBufferRational(
-    point, inputText, color, 10
-  );
-}
 
 void DrawingVariables::drawTextAtVectorBufferDouble(
   const Vector<double>& point,
@@ -2582,52 +2513,11 @@ void DrawingVariables::drawTextAtVectorBufferDouble(
   const std::string& color,
   int textStyle
 ) {
-  this->operations.drawTextAtVectorBufferDouble(
+  this->drawTextAtVectorBufferDouble(
     point, inputText, color, this->fontSizeNormal, textStyle
   );
 }
 
-void DrawingVariables::drawCircleAtVectorBufferRational(
-  const Vector<Rational>& point,
-  const std::string& color,
-  double radius,
-  const std::string& frameId,
-  int frameIndex
-) {
-  this->operations.drawCircleAtVectorBufferRational(
-    point, color, radius, frameId, frameIndex
-  );
-}
-
-void DrawingVariables::drawCircleAtVectorBufferDouble(
-  const Vector<double>& point, const std::string& color, double radius
-) {
-  this->operations.drawCircleAtVectorBufferDouble(point, color, radius);
-}
-
-void DrawingVariables::drawTextDirectly(
-  double x1,
-  double y1,
-  const std::string& inputText,
-  int color,
-  std::fstream* latexOutFile
-) {
-  if (this->drawTextFunction != nullptr) {
-    this->drawTextFunction(
-      x1 - 7,
-      y1 - 7,
-      inputText.c_str(),
-      static_cast<int>(inputText.length()),
-      color,
-      this->fontSizeNormal
-    );
-  }
-  if (latexOutFile != nullptr) {
-    LaTeXProcedures::drawTextDirectly(
-      x1, y1, inputText, color, *latexOutFile
-    );
-  }
-}
 
 void DrawingVariables::projectOnToHyperPlaneGraphics(
   Vector<Rational>& input, Vector<Rational>& output
@@ -8948,9 +8838,9 @@ void WeylGroupData::getCoxeterPlane(
   outputBasis1.setSize(dimension);
   outputBasis2.setSize(dimension);
   eigenSpace.operator=(eigenSpaceList);
-  DrawOperations tempDO;
+  DrawingVariables tempDO;
   tempDO.initDimensions(dimension);
-  tempDO.graphicsUnit = DrawOperations::graphicsUnitDefault;
+  tempDO.graphicsUnit = DrawingVariables::graphicsUnitDefault;
   eigenSpace.operator=(eigenSpaceList);
   for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < dimension; j ++) {
@@ -8983,7 +8873,7 @@ void WeylGroupData::drawRootSystem(
   Vectors<Rational>* predefinedProjectionPlane
 ) {
   STACK_TRACE("WeylGroup::drawRootSystem");
-  DrawOperations& output = outputDV.operations;
+  DrawingVariables& output = outputDV;
   if (wipeCanvas) {
     output.initialize();
   }
@@ -9007,7 +8897,7 @@ void WeylGroupData::drawRootSystem(
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(dimension);
   output.initDimensions(dimension);
-  output.graphicsUnit = DrawOperations::graphicsUnitDefault;
+  output.graphicsUnit = DrawingVariables::graphicsUnitDefault;
   for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < dimension; j ++) {
       output.bilinearForm.elements[i][j] =
@@ -9130,7 +9020,7 @@ void WeylGroupData::drawRootSystem(
     twoPlane[1][1] = 0;
     twoPlane[0][0] = 0;
     twoPlane[0][1] = 1;
-    outputDV.operations.modifyToOrthonormalNoShiftSecond(
+    outputDV.modifyToOrthonormalNoShiftSecond(
       twoPlane[0], twoPlane[1]
     );
   }
@@ -11938,7 +11828,7 @@ std::string ConeLatticeAndShift::toString(FormatExpressions& format) {
   return out.str();
 }
 
-void DrawOperations::makeMeAStandardBasis(int dimension) {
+void DrawingVariables::makeMeAStandardBasis(int dimension) {
   if (dimension < 1) {
     return;
   }
@@ -12058,7 +11948,7 @@ bool ConeCollection::drawMeLastCoordinateAffine(
   this->checkIsRefinedOrCrash();
   bool result = true;
   if (initializeDrawingVariables) {
-    drawingVariables.operations.initDimensions(this->getDimension() - 1);
+    drawingVariables.initDimensions(this->getDimension() - 1);
   }
   drawingVariables.drawCoordSystemBuffer(
     drawingVariables, this->getDimension() - 1
@@ -12087,9 +11977,9 @@ bool ConeCollection::drawMeProjectiveInitialize(
 ) const {
   STACK_TRACE("ConeCollection::drawMeProjectiveInitialize");
   Matrix<Rational> matrix;
-  drawingVariables.operations.initialize();
-  drawingVariables.operations.initDimensions(this->getDimension());
-  drawingVariables.operations.makeMeAStandardBasis(this->getDimension());
+  drawingVariables.initialize();
+  drawingVariables.initDimensions(this->getDimension());
+  drawingVariables.makeMeAStandardBasis(this->getDimension());
   drawingVariables.drawCoordSystemBuffer(
     drawingVariables, this->getDimension()
   );
@@ -12108,13 +11998,13 @@ bool ConeCollection::drawMeProjectiveInitialize(
   matrix.getZeroEigenSpace(roots);
   for (int i = 0; i < 2; i ++) {
     for (int j = 0; j < this->getDimension(); j ++) {
-      drawingVariables.operations.basisProjectionPlane[i][j] =
+      drawingVariables.basisProjectionPlane[i][j] =
       roots[i][j].getDoubleValue();
     }
   }
-  drawingVariables.operations.modifyToOrthonormalNoShiftSecond(
-    drawingVariables.operations.basisProjectionPlane[0],
-    drawingVariables.operations.basisProjectionPlane[1]
+  drawingVariables.modifyToOrthonormalNoShiftSecond(
+    drawingVariables.basisProjectionPlane[0],
+    drawingVariables.basisProjectionPlane[1]
   );
   return true;
 }
@@ -12156,7 +12046,7 @@ bool ConeCollection::drawMeProjective(DrawingVariables& drawingVariables) const 
   result = result && this->drawProjectiveChambers(drawingVariables);
   for (Vector<Rational> vertex : this->slicingDirections) {
     vertex /= vertex.sumCoordinates();
-    drawingVariables.drawCircleAtVector(vertex, "blue", 3);
+    drawingVariables.drawCircleAtVectorBufferRational(vertex, "blue", 3);
   }
   return result;
 }
@@ -12292,7 +12182,7 @@ std::string Cone::drawMeToHtmlLastCoordAffine(
     return "The cone is empty";
   }
   std::stringstream out;
-  drawingVariables.operations.makeMeAStandardBasis(
+  drawingVariables.makeMeAStandardBasis(
     this->getDimension() - 1
   );
   bool foundBadVertex =
@@ -12405,7 +12295,7 @@ std::string Cone::drawMeToHtmlProjective(
     << this->toString(&format);
     return out.str();
   }
-  drawingVariables.operations.makeMeAStandardBasis(this->getDimension());
+  drawingVariables.makeMeAStandardBasis(this->getDimension());
   this->drawMeProjective(drawingVariables);
   drawingVariables.drawCoordSystemBuffer(
     drawingVariables, this->getDimension()
@@ -12415,12 +12305,12 @@ std::string Cone::drawMeToHtmlProjective(
   return out.str();
 }
 
-int DrawOperations::getDimensionFromBilinearForm() {
+int DrawingVariables::getDimensionFromBilinearForm() {
   return this->bilinearForm.numberOfRows;
 }
 
 
-void DrawOperations::getCoordinatesDrawingComputeAll(
+void DrawingVariables::getCoordinatesDrawingComputeAll(
   Vector<double>& input, double& x1, double& y1
 ) {
   x1 =
@@ -12434,7 +12324,7 @@ void DrawOperations::getCoordinatesDrawingComputeAll(
   x1 = x1 * this->graphicsUnit + this->centerX;
   y1 = y1 * this->graphicsUnit + this->centerY;
 }
-void DrawOperations::getCoordinatesForDrawingProjectionsComputed(
+void DrawingVariables::getCoordinatesForDrawingProjectionsComputed(
   Vector<double>& input, double& x1, double& y1
 ) {
   x1 = 0;
@@ -12446,7 +12336,7 @@ void DrawOperations::getCoordinatesForDrawingProjectionsComputed(
   x1 = x1 * this->graphicsUnit + this->centerX;
   y1 = y1 * this->graphicsUnit + this->centerY;
 }
-void DrawOperations::getCoordinatesForDrawingProjectionsComputed(
+void DrawingVariables::getCoordinatesForDrawingProjectionsComputed(
   Vector<double>& input1,
   Vector<double>& input2,
   double& x1,
@@ -12470,7 +12360,7 @@ void DrawOperations::getCoordinatesForDrawingProjectionsComputed(
   y2 = y2 * this->graphicsUnit + this->centerY;
 }
 
-void DrawOperations::initDimensions(
+void DrawingVariables::initDimensions(
   Matrix<double>& bilinearForm,
   Vectors<double>& draggableBasis,
   Vectors<double>& startingPlane
@@ -12480,10 +12370,10 @@ void DrawOperations::initDimensions(
   this->basisProjectionPlane = startingPlane;
   this->centerX = 300;
   this->centerY = 300;
-  this->graphicsUnit = DrawOperations::graphicsUnitDefault;
+  this->graphicsUnit = DrawingVariables::graphicsUnitDefault;
   this->computeProjectionsEiVectors();
 }
-void DrawOperations::initDimensions(
+void DrawingVariables::initDimensions(
   Matrix<Rational>& bilinearForm,
   Vectors<double>& draggableBasis,
   Vectors<double>& startingPlane
@@ -12501,7 +12391,7 @@ void DrawOperations::initDimensions(
 }
 
 
-void DrawOperations::initDimensions(int dimension) {
+void DrawingVariables::initDimensions(int dimension) {
   if (dimension < 2) {
     dimension = 2;
   }
@@ -12516,21 +12406,21 @@ void DrawOperations::initDimensions(int dimension) {
   this->selectedCircleMinus2noneMinus1Center = - 2;
   this->centerX = 300;
   this->centerY = 300;
-  this->graphicsUnit = DrawOperations::graphicsUnitDefault;
+  this->graphicsUnit = DrawingVariables::graphicsUnitDefault;
   this->frameLengthInMilliseconds = 500;
 }
 
-int DrawOperations::getDimensionFirstDimensionDependentOperation() {
+int DrawingVariables::getDimensionFirstDimensionDependentOperation() {
   for (int i = 0; i < this->operations.size; i ++) {
     if (
       this->operations[i][fieldOperation].stringValue ==
-      DrawOperations::typeSegment
+      DrawingVariables::typeSegment
     ) {
       if (
-        this->operations[i][DrawOperations::fieldPoints].listObjects.size > 0
+        this->operations[i][DrawingVariables::fieldPoints].listObjects.size > 0
       ) {
         return
-        this->operations[i][DrawOperations::fieldPoints][0].listObjects.size;
+        this->operations[i][DrawingVariables::fieldPoints][0].listObjects.size;
       }
     }
   }
@@ -12538,7 +12428,7 @@ int DrawOperations::getDimensionFirstDimensionDependentOperation() {
 }
 
 
-bool DrawOperations::areWithinClickTolerance(double x1, double y1, double x2, double y2) {
+bool DrawingVariables::areWithinClickTolerance(double x1, double y1, double x2, double y2) {
   x1 -= x2;
   y1 -= y2;
   if (x1 < 0) {
@@ -12549,7 +12439,7 @@ bool DrawOperations::areWithinClickTolerance(double x1, double y1, double x2, do
   }
   return x1 <= this->clickToleranceX && y1 <= this->clickToleranceY;
 }
-bool DrawOperations::mouseMoveRedraw(int x, int y) {
+bool DrawingVariables::mouseMoveRedraw(int x, int y) {
   if (this->selectedCircleMinus2noneMinus1Center == - 2) {
     return false;
   }
@@ -12570,7 +12460,7 @@ bool DrawOperations::mouseMoveRedraw(int x, int y) {
   //  this->draw();
 }
 
-void DrawOperations::ensureProperInitialization() {
+void DrawingVariables::ensureProperInitialization() {
   int dimension = this->getDimensionFirstDimensionDependentOperation();
   bool isGood = (
     this->projectionsEiVectors.size == dimension &&
@@ -12616,11 +12506,11 @@ std::iostream& operator<<(
   return output;
 }
 
-void DrawOperations::initialize() {
+void DrawingVariables::initialize() {
   this->operations.reserve(1000);
   this->centerX = 300;
   this->centerY = 300;
-  this->graphicsUnit = DrawOperations::graphicsUnitDefault;
+  this->graphicsUnit = DrawingVariables::graphicsUnitDefault;
   this->clickToleranceX = 5;
   this->clickToleranceY = 5;
   this->selectedCircleMinus2noneMinus1Center = - 2;
@@ -12629,7 +12519,7 @@ void DrawOperations::initialize() {
   this->flagIsPausedWhileAnimating = false;
 }
 
-double DrawOperations::getAngleFromXandY(double x, double y) {
+double DrawingVariables::getAngleFromXandY(double x, double y) {
   double result;
   if (x != 0.0) {
     result = FloatingPoint::arctan(y / x);
@@ -12643,7 +12533,7 @@ double DrawOperations::getAngleFromXandY(double x, double y) {
   return result;
 }
 
-void DrawOperations::click(double x, double y) {
+void DrawingVariables::click(double x, double y) {
   this->ensureProperInitialization();
   this->selectedCircleMinus2noneMinus1Center = - 2;
   if (
@@ -12665,7 +12555,7 @@ void DrawOperations::click(double x, double y) {
   }
 }
 
-void DrawOperations::rotateOutOfPlane(
+void DrawingVariables::rotateOutOfPlane(
   std::stringstream& Logger,
   Vector<double>& input,
   Vector<double>& output,
@@ -12705,7 +12595,7 @@ void DrawOperations::rotateOutOfPlane(
   output += projection;
 }
 
-void DrawOperations::modifyToOrthonormalNoShiftSecond(
+void DrawingVariables::modifyToOrthonormalNoShiftSecond(
   Vector<double>& root1, Vector<double>& root2
 ) {
   double scalar = this->bilinearForm.scalarProduct(root1, root2) /
@@ -12715,7 +12605,7 @@ void DrawOperations::modifyToOrthonormalNoShiftSecond(
   this->scaleToUnitLength(root2);
 }
 
-void DrawOperations::computeProjectionsEiVectors() {
+void DrawingVariables::computeProjectionsEiVectors() {
   int dimension = this->bilinearForm.numberOfRows;
   this->projectionsEiVectors.setSizeMakeMatrix(dimension, 2);
   Vector<double> root;
@@ -12728,7 +12618,7 @@ void DrawOperations::computeProjectionsEiVectors() {
   }
 }
 
-void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
+void DrawingVariables::changeBasisPReserveAngles(double newX, double newY) {
   double bufferCenterX = this->centerX;
   double bufferCenterY = this->centerY;
   double bufferGraphicsUnit = this->graphicsUnit;
@@ -12833,9 +12723,6 @@ void DrawOperations::changeBasisPReserveAngles(double newX, double newY) {
   << this->bilinearForm.scalarProduct(
     currentBasisPlane[0], currentBasisPlane[1]
   );
-  if (this->specialOperationsOnBasisChange != nullptr) {
-    this->specialOperationsOnBasisChange(*this);
-  }
   this->computeProjectionsEiVectors();
   this->DebugString = out.str();
 }
@@ -12948,8 +12835,8 @@ public:
   }
 };
 
-void DrawOperations::projectionMultiplicityMergeOnBasisChange(
-  DrawOperations& operations
+void DrawingVariables::projectionMultiplicityMergeOnBasisChange(
+  DrawingVariables& operations
 ) {
   Matrix<ImpreciseDouble> matrix;
   int dimension = operations.bilinearForm.numberOfRows;
@@ -12970,7 +12857,7 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(
   report.report(out.str());
 }
 
-void DrawOperations::operator+=(const DrawOperations& other) {
+void DrawingVariables::operator+=(const DrawingVariables& other) {
   if (
     this->bilinearForm.numberOfRows != other.bilinearForm.numberOfRows
   ) {
@@ -13571,13 +13458,13 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
           this->projectivizedComplex.drawMeLastCoordinateAffine(
             true, tempDV, tempFormat
           );
-          tempDV.operations.drawCircleAtVectorBufferRational(
+          tempDV.drawCircleAtVectorBufferRational(
             affineInput, "black", 5
           );
-          tempDV.operations.drawCircleAtVectorBufferRational(
+          tempDV.drawCircleAtVectorBufferRational(
             affineInput, "black", 10
           );
-          tempDV.operations.drawCircleAtVectorBufferRational(
+          tempDV.drawCircleAtVectorBufferRational(
             affineInput, "red", 4
           );
           global.comments
@@ -13790,7 +13677,7 @@ std::string ConeLatticeAndShiftMaxComputation::toString(
     out << "";
     // << this->conesLargerDim[i].toString(format);
     // out << "<br>" << this->LPtoMaximizeLargerDim[i].toString();
-    drawingVariables.operations.initialize();
+    drawingVariables.initialize();
     out
     << "<br>"
     << this->conesLargerDimension[i].projectivizedCone.
@@ -13814,7 +13701,7 @@ std::string ConeLatticeAndShiftMaxComputation::toString(
     for (int i = 0; i < this->conesSmallerDimension.size; i ++) {
       out << this->conesSmallerDimension[i].toString(*format);
       // out << "<br>" << this->LPtoMaximizeSmallerDim[i].toString();
-      drawingVariables.operations.initialize();
+      drawingVariables.initialize();
       out
       << this->conesSmallerDimension[i].projectivizedCone.
       drawMeToHtmlLastCoordAffine(drawingVariables, *format);

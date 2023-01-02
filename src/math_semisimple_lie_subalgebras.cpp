@@ -8530,10 +8530,10 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(
   << "relative to the fundamental coordinates.<br> ";
   Vectors<Rational> basisToDrawCirclesAt;
   DrawingVariables drawingVariables;
-  drawingVariables.operations.bilinearForm.initialize(primalRank, primalRank);
+  drawingVariables.bilinearForm.initialize(primalRank, primalRank);
   for (int i = 0; i < primalRank; i ++) {
     for (int j = 0; j < primalRank; j ++) {
-      drawingVariables.operations.bilinearForm(i, j) =
+      drawingVariables.bilinearForm(i, j) =
       this->bilinearFormFundamentalPrimal(i, j).getDoubleValue();
     }
   }
@@ -8635,26 +8635,26 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(
       highlightGroup[j] = currentWeights[j].getVectorDouble();
       highlightLabels[j] = currentWeights[j].toString();
     }
-    drawingVariables.operations.drawHighlightGroup(
+    drawingVariables.drawHighlightGroup(
       highlightGroup, highlightLabels, "black", 5
     );
   }
-  drawingVariables.operations.basisToDrawCirclesAt.setSize(
+  drawingVariables.basisToDrawCirclesAt.setSize(
     basisToDrawCirclesAt.size
   );
   for (
-    int i = 0; i < drawingVariables.operations.basisToDrawCirclesAt.size; i ++
+    int i = 0; i < drawingVariables.basisToDrawCirclesAt.size; i ++
   ) {
-    drawingVariables.operations.basisToDrawCirclesAt[i].setSize(primalRank);
+    drawingVariables.basisToDrawCirclesAt[i].setSize(primalRank);
     for (int j = 0; j < primalRank; j ++) {
-      drawingVariables.operations.basisToDrawCirclesAt[i][j] =
+      drawingVariables.basisToDrawCirclesAt[i][j] =
       basisToDrawCirclesAt[i][j].getDoubleValue();
     }
     drawingVariables.drawCircleAtVectorBufferRational(
       basisToDrawCirclesAt[i], "red", 4
     );
   }
-  drawingVariables.operations.basisProjectionPlane.makeEiBasis(primalRank);
+  drawingVariables.basisProjectionPlane.makeEiBasis(primalRank);
   out << drawingVariables.getHTMLDiv(primalRank, true, true);
   return out.str();
 }

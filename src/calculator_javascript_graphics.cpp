@@ -11,14 +11,14 @@ std::string DrawingVariables::getHTMLDiv(
   JSData data;
   data["widthHTML"] = this->defaultHtmlWidth;
   data["heightHTML"] = this->defaultHtmlHeight;
-  data["screenBasis"] = this->operations.basisProjectionPlane;
-  data["draggablePoints"] = this->operations.basisToDrawCirclesAt;
-  data["bilinearForm"] = this->operations.bilinearForm;
-  data["graphicsUnit"] = this->operations.graphicsUnit;
-  data["frameLength"] = this->operations.frameLengthInMilliseconds;
+  data["screenBasis"] = this->basisProjectionPlane;
+  data["draggablePoints"] = this->basisToDrawCirclesAt;
+  data["bilinearForm"] = this->bilinearForm;
+  data["graphicsUnit"] = this->graphicsUnit;
+  data["frameLength"] = this->frameLengthInMilliseconds;
   std::string drawObjects = "drawObjects";
   data[drawObjects].elementType = JSData::token::tokenArray;
-  data[drawObjects].listObjects = this->operations.operations;
+  data[drawObjects].listObjects = this->operations;
   data["dimension"] = dimension;
   std::string graphicsId =
   Crypto::convertStringToHex(

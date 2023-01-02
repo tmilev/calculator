@@ -150,16 +150,15 @@ class PolynomialSubstitution;
 template <class Coefficient>
 class GroebnerBasisComputation;
 
-// combinatorial classes
+// Combinatorial classes.
 class Selection;
 class SubsetWithMultiplicities;
 
-// the following classes have to do with user interface/displaying/drawing
-// information
+// The following classes have to do with user interface/displaying/drawing
+// information.
 class FormatExpressions;
 struct IndicatorWindowVariables;
 class DrawingVariables;
-class DrawOperations;
 struct CGI;
 
 // The calculator parsing routines:
@@ -167,7 +166,7 @@ class Calculator;
 class Function;
 class Expression;
 
-// this class is used as a custom completely portable
+// This class is used as a custom completely portable
 // stack trace log.
 class RegisterFunctionCall {
 public:

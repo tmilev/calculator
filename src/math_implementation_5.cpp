@@ -398,73 +398,96 @@ void DrawOperations::drawTextBuffer(
 }
 
 int DrawingVariables::getActualPenStyleFromFlagsAnd(int inputPenStyle) {
-  if (inputPenStyle == this->PenStyleInvisible) {
-    return this->PenStyleInvisible;
+  if (inputPenStyle == DrawingVariables::PenStyleInvisible) {
+    return DrawingVariables::PenStyleInvisible;
   }
-  if (inputPenStyle == this->PenStyleDashed) {
-    return this->PenStyleDashed;
+  if (inputPenStyle == DrawingVariables::PenStyleDashed) {
+    return DrawingVariables::PenStyleDashed;
   }
-  if (inputPenStyle == this->PenStyleDotted) {
-    return this->PenStyleDotted;
+  if (inputPenStyle == DrawingVariables::PenStyleDotted) {
+    return DrawingVariables::PenStyleDotted;
   }
-  if (inputPenStyle == this->PenStyleNormal) {
-    return this->PenStyleNormal;
+  if (inputPenStyle == DrawingVariables::PenStyleNormal) {
+    return DrawingVariables::PenStyleNormal;
   }
   if (!this->flagDrawingInvisibles) {
     if (
-      inputPenStyle == this->PenStyleLinkToOriginPermanentlyZeroChamber ||
-      inputPenStyle == this->PenStyleLinkToOriginZeroChamber ||
-      inputPenStyle == this->PenStyleZeroChamber ||
-      inputPenStyle == this->PenStylePermanentlyZeroChamber
+      inputPenStyle == DrawingVariables::PenStyleLinkToOriginPermanentlyZeroChamber ||
+      inputPenStyle == DrawingVariables::PenStyleLinkToOriginZeroChamber ||
+      inputPenStyle == DrawingVariables::PenStyleZeroChamber ||
+      inputPenStyle == DrawingVariables::PenStylePermanentlyZeroChamber
     ) {
-      return this->PenStyleInvisible;
+      return DrawingVariables::PenStyleInvisible;
     }
   }
   if (
-    inputPenStyle == this->PenStyleLinkToOrigin ||
-    inputPenStyle == this->PenStyleLinkToOriginPermanentlyZeroChamber ||
-    inputPenStyle == this->PenStyleLinkToOriginZeroChamber
+    inputPenStyle == DrawingVariables::PenStyleLinkToOrigin ||
+    inputPenStyle == DrawingVariables::PenStyleLinkToOriginPermanentlyZeroChamber ||
+    inputPenStyle == DrawingVariables::PenStyleLinkToOriginZeroChamber
   ) {
     if (this->flagDrawingLinkToOrigin) {
-      return this->PenStyleDashed;
+      return DrawingVariables::PenStyleDashed;
     } else {
-      return this->PenStyleInvisible;
+      return DrawingVariables::PenStyleInvisible;
     }
   }
   if (
-    inputPenStyle == this->PenStylePermanentlyZeroChamber ||
-    inputPenStyle == this->PenStyleZeroChamber
+    inputPenStyle == DrawingVariables::PenStylePermanentlyZeroChamber ||
+    inputPenStyle == DrawingVariables::PenStyleZeroChamber
   ) {
-    return this->PenStyleDotted;
+    return DrawingVariables::PenStyleDotted;
   }
-  return this->PenStyleNormal;
+  return DrawingVariables::PenStyleNormal;
 }
 
 int DrawingVariables::getActualTextStyleFromFlagsAnd(int inputTextStyle) {
-  if (inputTextStyle == this->TextStyleInvisible) {
-    return this->TextStyleInvisible;
+  if (inputTextStyle == DrawingVariables::TextStyleInvisible) {
+    return DrawingVariables::TextStyleInvisible;
   }
-  if (inputTextStyle == this->TextStyleNormal) {
-    return this->TextStyleNormal;
+  if (inputTextStyle == DrawingVariables::TextStyleNormal) {
+    return DrawingVariables::TextStyleNormal;
   }
   if (
     !this->flagDrawChamberIndices && (
-      inputTextStyle == this->TextStyleChamber ||
-      inputTextStyle == this->TextStylePermanentlyZeroChamber ||
-      inputTextStyle == this->TextStyleZeroChamber
+      inputTextStyle == DrawingVariables::TextStyleChamber ||
+      inputTextStyle == DrawingVariables::TextStylePermanentlyZeroChamber ||
+      inputTextStyle == DrawingVariables::TextStyleZeroChamber
     )
   ) {
-    return this->TextStyleInvisible;
+    return DrawingVariables::TextStyleInvisible;
   }
   if (
     !this->flagDrawingInvisibles && (
-      inputTextStyle == this->TextStylePermanentlyZeroChamber ||
-      inputTextStyle == this->TextStyleZeroChamber
+      inputTextStyle == DrawingVariables::TextStylePermanentlyZeroChamber ||
+      inputTextStyle == DrawingVariables::TextStyleZeroChamber
     )
   ) {
-    return this->TextStyleInvisible;
+    return DrawingVariables::TextStyleInvisible;
   }
-  return this->TextStyleNormal;
+  return DrawingVariables::TextStyleNormal;
+}
+
+DrawOperations::DrawOperations() {
+  this->initDimensions(2);
+  this->flagAnimatingMovingCoordSystem = false;
+  this->specialOperationsOnBasisChange = nullptr;
+  this->indexStartingModifiableTextCommands = 0;
+}
+
+std::string DrawOperations::toLatexPsTricks() const{
+  std::stringstream out;
+  out << "\\begin{pspicture}(0,0)(5,5)";
+  for (int i = 0; i < this->operations.size; i ++){
+    out << this->toLatexPsTricksOnce(this->operations[i]);
+  }
+  out << "\\end{pspicture}";
+  return out.str();
+
+}
+
+std::string DrawOperations::toLatexPsTricksOnce(JSData &drawOperation) const{
+  std::stringstream out;
+return out.str();
 }
 
 void DrawingVariables::drawLineBuffer(
@@ -506,12 +529,12 @@ void DrawingVariables::drawString(
     return;
   }
   for (unsigned int i = 0; i < input.size(); i ++) {
-    std::string tempS;
-    tempS = input.at(i);
+    std::string character;
+    character = input.at(i);
     this->operations.drawTextBuffer(
       drawData.outputWidth + drawData.topLeftCornerX,
       drawData.outputHeight + drawData.topLeftCornerY,
-      tempS,
+      character,
       0,
       fontSize,
       textStyle
@@ -520,6 +543,11 @@ void DrawingVariables::drawString(
       static_cast<double>(fontSize) / 1.15
     );
   }
+}
+
+std::string DrawingVariables::toLatexPsTricks() const{
+  STACK_TRACE("DrawingVariables::toLatexPsTricks");
+  return this->operations.toLatexPsTricks();
 }
 
 void HtmlRoutines::replaceEqualitiesAndAmpersandsBySpaces(
@@ -719,17 +747,17 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
 int SemisimpleLieAlgebraOrdered::getDisplayIndexFromGeneratorIndex(
   int generatorIndex
 ) {
-  int numPosRoots =
+  int numberOfPositiveRoots =
   this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
-  int posRootsPlusRank =
-  numPosRoots + this->ownerSemisimpleLieAlgebra->getRank();
-  if (generatorIndex >= posRootsPlusRank) {
-    return generatorIndex - posRootsPlusRank + 1;
+  int positiveRootsPlusRank =
+  numberOfPositiveRoots + this->ownerSemisimpleLieAlgebra->getRank();
+  if (generatorIndex >= positiveRootsPlusRank) {
+    return generatorIndex - positiveRootsPlusRank + 1;
   }
-  if (generatorIndex >= numPosRoots) {
+  if (generatorIndex >= numberOfPositiveRoots) {
     return generatorIndex + 1;
   }
-  return - numPosRoots + generatorIndex;
+  return - numberOfPositiveRoots + generatorIndex;
 }
 
 void SemisimpleLieAlgebraOrdered::initialize(
@@ -792,16 +820,16 @@ getWeightsRelativeToKInSimpleKCoordinates(
   for (int i = 0; i < inputElements.size; i ++) {
     Vector<Rational>& currentWeight = outputWeights[i];
     currentWeight.makeZero(this->domainAlgebra().getRank());
-    ElementSemisimpleLieAlgebra<Rational>& currentLieElt = inputElements[i];
+    ElementSemisimpleLieAlgebra<Rational>& currentElement = inputElements[i];
     for (int j = 0; j < this->domainAlgebra().getRank(); j ++) {
       this->coDomainAlgebra().lieBracket(
         this->imagesAllChevalleyGenerators[
           j + this->domainAlgebra().getNumberOfPositiveRoots()
         ],
-        currentLieElt,
+        currentElement,
         tempLieElement
       );
-      if (!currentLieElt.isProportionalTo(tempLieElement, scalar)) {
+      if (!currentElement.isProportionalTo(tempLieElement, scalar)) {
         global.fatal
         << "Lie algebra elements not "
         << "proportional as expected. "
@@ -946,29 +974,29 @@ std::string SlTwoInSlN::elementMatrixToTensorString(
     newLine = "\n\n\n";
   }
   std::stringstream out;
-  std::string tempS;
+  std::string coefficient;
   bool found = false;
   for (int i = 0; i < input.numberOfRows; i ++) {
     for (int j = 0; j < input.numberOfColumns; j ++) {
       if (!input.elements[i][j].isEqualToZero()) {
-        tempS = input.elements[i][j].toString();
-        if (tempS == "- 1" || tempS == "-1") {
-          tempS = "-";
+        coefficient = input.elements[i][j].toString();
+        if (coefficient == "- 1" || coefficient == "-1") {
+          coefficient = "-";
         }
-        if (tempS == "1") {
-          tempS = "";
+        if (coefficient == "1") {
+          coefficient = "";
           if (found) {
             out << "+";
           }
         } else {
           if (found) {
-            if (tempS[0] != '-') {
+            if (coefficient[0] != '-') {
               out << "+";
             }
           }
         }
         found = true;
-        out << tempS;
+        out << coefficient;
         int sI, kI, sJ, kJ;
         this->getIsPlusKIndexingFrom(i, sI, kI);
         this->getIsPlusKIndexingFrom(j, sJ, kJ);

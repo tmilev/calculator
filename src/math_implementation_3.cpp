@@ -14,6 +14,7 @@
 #include "math_vector_partition_functions.h"
 #include "math_lattices.h"
 
+
 // The below gives upper limit to the amount of pointers
 // that are allowed to be allocated by the program. Can be changed dynamically.
 // Used to guard the web server from abuse.
@@ -798,7 +799,9 @@ std::string StringRoutines::Conversions::stringToJSONStringEscaped(
 std::string StringRoutines::Conversions::escapeQuotesBackslashesNewLines(
   const std::string& input
 ) {
-  STACK_TRACE("StringRoutines::escapeQuotesBackslashesNewLines");
+  STACK_TRACE("StringRoutines::"
+  "Conversions::"
+  "escapeQuotesBackslashesNewLines");
   std::stringstream out;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (input[i] == '"') {
@@ -1480,7 +1483,7 @@ std::string FileOperations::writeFileReturnHTMLLink(
   const std::string& fileNameVirtual,
   const std::string& linkText
 ) {
-  STACK_TRACE("Calculator::writeFileReturnHTMLLink");
+  STACK_TRACE("FileOperations::writeFileReturnHTMLLink");
   std::stringstream commentsOnError;
   bool success =
   FileOperations::writeFileVirtual(
@@ -1575,7 +1578,6 @@ bool FileOperations::loadFileToStringUnsecure(
   return true;
 }
 
-#include "general_list_references.h"
 
 MapList<
   std::string,
@@ -1634,7 +1636,7 @@ List<List<std::string> >& FileOperations::folderVirtualLinksDefault() {
 }
 
 void FileOperations::initializeFoldersULTRASensitive() {
-  STACK_TRACE("WebServer::InitializeMainFoldersULTRASensitive");
+  STACK_TRACE("FileOperations::initializeFoldersULTRASensitive");
   MapList<
     std::string,
     std::string,
@@ -1654,7 +1656,7 @@ void FileOperations::initializeFoldersULTRASensitive() {
 }
 
 void FileOperations::initializeFoldersSensitive() {
-  STACK_TRACE("WebServer::InitializeMainFoldersSensitive");
+  STACK_TRACE("FileOperations::initializeFoldersSensitive");
   MapList<
     std::string,
     std::string,
@@ -1741,7 +1743,7 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults(
 }
 
 void FileOperations::initializeFoldersNonSensitive() {
-  STACK_TRACE("WebServer::InitializeMainFoldersNonSensitive");
+  STACK_TRACE("FileOperations::initializeFoldersNonSensitive");
   // Warning: order of substitutions is important.
   // Only the first rule that applies is applied, once.
   // No further rules are applied after that.
@@ -2499,6 +2501,50 @@ void DrawingVariables::drawCoordSystemBuffer(
     variables.drawCircleAtVectorBufferRational(root, colorText, 4);
   }
   variables.operations.basisToDrawCirclesAt.makeEiBasis(dimension);
+}
+
+
+void DrawingVariables::drawLineBetweenTwoVectorsBufferRational(
+  const Vector<Rational>& r1,
+  const Vector<Rational>& r2,
+  const std::string& color,
+  double lineWidth
+) {
+  this->operations.drawLineBetweenTwoVectorsBufferRational(
+    r1, r2, color, lineWidth
+  );
+}
+void DrawingVariables::drawCircleAtVector(
+  const Vector<Rational>& point,
+  const std::string& color,
+  double radius,
+  const std::string& frameId ,
+  int frameIndex
+) {
+  this->operations.drawCircleAtVectorBufferRational(
+    point, color, radius, frameId, frameIndex
+  );
+}
+void DrawingVariables::drawPath(
+  const Vectors<Rational>& vectors,
+  const std::string& color,
+  double lineWidth,
+  const std::string& frameId ,
+  int frameIndex
+) {
+  this->operations.drawPath(
+    vectors, color, lineWidth, frameId, frameIndex
+  );
+}
+void DrawingVariables::drawLineBetweenTwoVectorsBufferDouble(
+  const Vector<double>& r1,
+  const Vector<double>& r2,
+  const std::string& color,
+  double lineWidth
+) {
+  this->operations.drawLineBetweenTwoVectorsBufferDouble(
+    r1, r2, color, lineWidth
+  );
 }
 
 void DrawingVariables::drawLineBufferOld(
@@ -3928,7 +3974,7 @@ bool OnePartialFractionDenominator::operator>(
 void OnePartialFractionDenominator::computeOneCheckSum(
   Vector<Rational>& variableValues, Rational& output
 ) const {
-  STACK_TRACE("OnePartialFraction::computeOneCheckSum");
+  STACK_TRACE("OnePartialFractionDenominator::computeOneCheckSum");
   Rational multiplicand;
   output = 1;
   for (int i = 0; i < this->denominatorsNoScale.size(); i ++) {
@@ -4603,28 +4649,14 @@ std::string PartialFractions::toLatexWithInitialState(
 }
 
 std::string PartialFractions::toLatex(FormatExpressions* format) const {
-  if (
-    this->nonReduced.size() > 0 ||
-    this->reducedWithElongationRedundancies.size() > 0
-  ) {
-    return this->toString(format);
-  }
-  if (this->reduced.size() == 0) {
-    return "0";
-  }
-  std::stringstream out;
-  out << "\\begin{array}{ll}&";
-  for (int i = 0; i < this->reduced.size(); i ++) {
-    if (i != 0) {
-      out << "\\\\\n+&\n";
-    }
-    out
-    << this->reduced.monomials[i].toLatex(
-      this->reduced.coefficients[i], format
-    );
-  }
-  out << "\\end{array}";
-  return out.str();
+STACK_TRACE("PartialFractions::toLatex");
+(void)format;
+std::stringstream out;
+out << "\\documentclass{article}";
+out << "\\begin{document}";
+out << this->chambers.toLatexGraphicsOnlyPsTricks();
+out <<"\\end{document}";
+return out.str();
 }
 
 std::string PartialFractions::toHTML(FormatExpressions* format) const {
@@ -4647,6 +4679,7 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
     out << "<br>Vector partition function.<br>";
     out << quasiPolynomial.toHTML(&formatQuasipolynomial);
   }
+  out << this->toLatex();
   out << this->toStringCheckSum();
   return out.str();
 }
@@ -12386,6 +12419,88 @@ int DrawOperations::getDimensionFromBilinearForm() {
   return this->bilinearForm.numberOfRows;
 }
 
+
+void DrawOperations::getCoordinatesDrawingComputeAll(
+  Vector<double>& input, double& x1, double& y1
+) {
+  x1 =
+  this->bilinearForm.scalarProduct(
+    input, this->basisProjectionPlane[0]
+  );
+  y1 =
+  this->bilinearForm.scalarProduct(
+    input, this->basisProjectionPlane[1]
+  );
+  x1 = x1 * this->graphicsUnit + this->centerX;
+  y1 = y1 * this->graphicsUnit + this->centerY;
+}
+void DrawOperations::getCoordinatesForDrawingProjectionsComputed(
+  Vector<double>& input, double& x1, double& y1
+) {
+  x1 = 0;
+  y1 = 0;
+  for (int j = 0; j < input.size; j ++) {
+    x1 += this->projectionsEiVectors[j][0] * input[j];
+    y1 += this->projectionsEiVectors[j][1] * input[j];
+  }
+  x1 = x1 * this->graphicsUnit + this->centerX;
+  y1 = y1 * this->graphicsUnit + this->centerY;
+}
+void DrawOperations::getCoordinatesForDrawingProjectionsComputed(
+  Vector<double>& input1,
+  Vector<double>& input2,
+  double& x1,
+  double& y1,
+  double& x2,
+  double& y2
+) {
+  x1 = 0;
+  x2 = 0;
+  y1 = 0;
+  y2 = 0;
+  for (int j = 0; j < input1.size; j ++) {
+    x1 += this->projectionsEiVectors[j][0] * input1[j];
+    y1 += this->projectionsEiVectors[j][1] * input1[j];
+    x2 += this->projectionsEiVectors[j][0] * input2[j];
+    y2 += this->projectionsEiVectors[j][1] * input2[j];
+  }
+  x1 = x1 * this->graphicsUnit + this->centerX;
+  x2 = x2 * this->graphicsUnit + this->centerX;
+  y1 = y1 * this->graphicsUnit + this->centerY;
+  y2 = y2 * this->graphicsUnit + this->centerY;
+}
+
+void DrawOperations::initDimensions(
+  Matrix<double>& bilinearForm,
+  Vectors<double>& draggableBasis,
+  Vectors<double>& startingPlane
+) {
+  this->bilinearForm = bilinearForm;
+  this->basisToDrawCirclesAt = draggableBasis;
+  this->basisProjectionPlane = startingPlane;
+  this->centerX = 300;
+  this->centerY = 300;
+  this->graphicsUnit = DrawOperations::graphicsUnitDefault;
+  this->computeProjectionsEiVectors();
+}
+void DrawOperations::initDimensions(
+  Matrix<Rational>& bilinearForm,
+  Vectors<double>& draggableBasis,
+  Vectors<double>& startingPlane
+) {
+  Matrix<double> matrix;
+  matrix.initialize(
+    bilinearForm.numberOfRows, bilinearForm.numberOfColumns
+  );
+  for (int i = 0; i < bilinearForm.numberOfRows; i ++) {
+    for (int j = 0; j < bilinearForm.numberOfColumns; j ++) {
+      matrix.elements[i][j] = bilinearForm.elements[i][j].getDoubleValue();
+    }
+  }
+  this->initDimensions(matrix, draggableBasis, startingPlane);
+}
+
+
 void DrawOperations::initDimensions(int dimension) {
   if (dimension < 2) {
     dimension = 2;
@@ -12420,6 +12535,39 @@ int DrawOperations::getDimensionFirstDimensionDependentOperation() {
     }
   }
   return - 1;
+}
+
+
+bool DrawOperations::areWithinClickTolerance(double x1, double y1, double x2, double y2) {
+  x1 -= x2;
+  y1 -= y2;
+  if (x1 < 0) {
+    x1 = - x1;
+  }
+  if (y1 < 0) {
+    y1 = - y1;
+  }
+  return x1 <= this->clickToleranceX && y1 <= this->clickToleranceY;
+}
+bool DrawOperations::mouseMoveRedraw(int x, int y) {
+  if (this->selectedCircleMinus2noneMinus1Center == - 2) {
+    return false;
+  }
+  if (this->selectedCircleMinus2noneMinus1Center == - 1) {
+    this->centerX = x;
+    this->centerY = y;
+    return true;
+  }
+  if (this->selectedCircleMinus2noneMinus1Center >= 0) {
+    if (this->flagRotatingPreservingAngles) {
+      this->changeBasisPReserveAngles(
+        static_cast<double>(x), static_cast<double>(y)
+      );
+      return true;
+    }
+  }
+  return false;
+  //  this->draw();
 }
 
 void DrawOperations::ensureProperInitialization() {
@@ -15837,13 +15985,6 @@ void Cone::precomputeVectorPartitionFunction(
   this->payload.precomputedChecked.setKeyValue(inputMustBeInCone, result);
   VectorPartition partition;
   partition.initialize(originalVectors, inputMustBeInCone);
-  global.comments
-  << "<br>DEBUG: Partition input: "
-  << partition.toStringAllPartitions(true)
-  << "oring vect: "
-  << originalVectors
-  << "nput: "
-  << inputMustBeInCone;
   Rational resultByEnumeration = partition.numberOfPartitionsByEnumeration();
   if (result != resultByEnumeration) {
     global.fatal
@@ -15940,6 +16081,15 @@ std::string ConeCollection::toHTMLHistory() const {
   return StringRoutines::join(historyInReverse);
 }
 
+std::string ConeCollection::toLatexGraphicsOnlyPsTricks() const{
+  std::stringstream out;
+  DrawingVariables drawingVariables;
+  this->drawMeProjective(drawingVariables);
+  out << drawingVariables.toLatexPsTricks();
+  return out.str();
+}
+
+
 std::string ConeCollection::toHTMLGraphicsOnly(bool includePanels) const {
   DrawingVariables drawingVariables;
   FormatExpressions format;
@@ -15951,13 +16101,9 @@ std::string ConeCollection::toHTML() const {
   std::stringstream out;
   out << this->toHTMLGraphicsOnly(true);
   out << this->toHTMLWithoutGraphics();
-  out << this->toLatex();
   return out.str();
 }
 
-std::string ConeCollection::toLatex() const{
-
-}
 
 std::string ConeCollection::toHTMLOneCollection(
   const MapList<int, Cone>& cones, int& totalChambers

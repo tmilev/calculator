@@ -43,60 +43,21 @@ public:
     Matrix<double>& bilinearForm,
     Vectors<double>& draggableBasis,
     Vectors<double>& startingPlane
-  ) {
-    this->bilinearForm = bilinearForm;
-    this->basisToDrawCirclesAt = draggableBasis;
-    this->basisProjectionPlane = startingPlane;
-    this->centerX = 300;
-    this->centerY = 300;
-    this->graphicsUnit = DrawOperations::graphicsUnitDefault;
-    this->computeProjectionsEiVectors();
-  }
+  ) ;
   void initDimensions(
     Matrix<Rational>& bilinearForm,
     Vectors<double>& draggableBasis,
     Vectors<double>& startingPlane
-  ) {
-    Matrix<double> matrix;
-    matrix.initialize(
-      bilinearForm.numberOfRows, bilinearForm.numberOfColumns
-    );
-    for (int i = 0; i < bilinearForm.numberOfRows; i ++) {
-      for (int j = 0; j < bilinearForm.numberOfColumns; j ++) {
-        matrix.elements[i][j] = bilinearForm.elements[i][j].getDoubleValue();
-      }
-    }
-    this->initDimensions(matrix, draggableBasis, startingPlane);
-  }
+  ) ;
   void initDimensions(int dimension);
   int getDimensionFirstDimensionDependentOperation();
   int getDimensionFromBilinearForm();
   void getCoordinatesDrawingComputeAll(
     Vector<double>& input, double& x1, double& y1
-  ) {
-    x1 =
-    this->bilinearForm.scalarProduct(
-      input, this->basisProjectionPlane[0]
-    );
-    y1 =
-    this->bilinearForm.scalarProduct(
-      input, this->basisProjectionPlane[1]
-    );
-    x1 = x1 * this->graphicsUnit + this->centerX;
-    y1 = y1 * this->graphicsUnit + this->centerY;
-  }
+  ) ;
   void getCoordinatesForDrawingProjectionsComputed(
     Vector<double>& input, double& x1, double& y1
-  ) {
-    x1 = 0;
-    y1 = 0;
-    for (int j = 0; j < input.size; j ++) {
-      x1 += this->projectionsEiVectors[j][0] * input[j];
-      y1 += this->projectionsEiVectors[j][1] * input[j];
-    }
-    x1 = x1 * this->graphicsUnit + this->centerX;
-    y1 = y1 * this->graphicsUnit + this->centerY;
-  }
+  ) ;
   void getCoordinatesForDrawingProjectionsComputed(
     Vector<double>& input1,
     Vector<double>& input2,
@@ -104,54 +65,10 @@ public:
     double& y1,
     double& x2,
     double& y2
-  ) {
-    x1 = 0;
-    x2 = 0;
-    y1 = 0;
-    y2 = 0;
-    for (int j = 0; j < input1.size; j ++) {
-      x1 += this->projectionsEiVectors[j][0] * input1[j];
-      y1 += this->projectionsEiVectors[j][1] * input1[j];
-      x2 += this->projectionsEiVectors[j][0] * input2[j];
-      y2 += this->projectionsEiVectors[j][1] * input2[j];
-    }
-    x1 = x1 * this->graphicsUnit + this->centerX;
-    x2 = x2 * this->graphicsUnit + this->centerX;
-    y1 = y1 * this->graphicsUnit + this->centerY;
-    y2 = y2 * this->graphicsUnit + this->centerY;
-  }
+  ) ;
   void ensureProperInitialization();
-  bool areWithinClickTolerance(double x1, double y1, double x2, double y2) {
-    x1 -= x2;
-    y1 -= y2;
-    if (x1 < 0) {
-      x1 = - x1;
-    }
-    if (y1 < 0) {
-      y1 = - y1;
-    }
-    return x1 <= this->clickToleranceX && y1 <= this->clickToleranceY;
-  }
-  bool mouseMoveRedraw(int x, int y) {
-    if (this->selectedCircleMinus2noneMinus1Center == - 2) {
-      return false;
-    }
-    if (this->selectedCircleMinus2noneMinus1Center == - 1) {
-      this->centerX = x;
-      this->centerY = y;
-      return true;
-    }
-    if (this->selectedCircleMinus2noneMinus1Center >= 0) {
-      if (this->flagRotatingPreservingAngles) {
-        this->changeBasisPReserveAngles(
-          static_cast<double>(x), static_cast<double>(y)
-        );
-        return true;
-      }
-    }
-    return false;
-    //  this->draw();
-  }
+  bool areWithinClickTolerance(double x1, double y1, double x2, double y2);
+  bool mouseMoveRedraw(int x, int y) ;
   void click(double x, double y);
   void drawHighlightGroup(
     Vectors<double>& highlightGroup,
@@ -246,12 +163,9 @@ public:
     Vector<double>& root1, Vector<double>& root2
   );
   void computeProjectionsEiVectors();
-  DrawOperations() {
-    this->initDimensions(2);
-    this->flagAnimatingMovingCoordSystem = false;
-    this->specialOperationsOnBasisChange = nullptr;
-    this->indexStartingModifiableTextCommands = 0;
-  }
+  DrawOperations() ;
+  std::string toLatexPsTricks()const;
+  std::string toLatexPsTricksOnce(JSData& drawOperation)const;
   void initialize();
   static std::string typeSegment;
   static std::string typePath;
@@ -423,43 +337,27 @@ public:
     const Vector<Rational>& r2,
     const std::string& color,
     double lineWidth = 1
-  ) {
-    this->operations.drawLineBetweenTwoVectorsBufferRational(
-      r1, r2, color, lineWidth
-    );
-  }
+  ) ;
   void drawCircleAtVector(
     const Vector<Rational>& point,
     const std::string& color,
     double radius,
     const std::string& frameId = "",
     int frameIndex = - 1
-  ) {
-    this->operations.drawCircleAtVectorBufferRational(
-      point, color, radius, frameId, frameIndex
-    );
-  }
+  ) ;
   void drawPath(
     const Vectors<Rational>& vectors,
     const std::string& color,
     double lineWidth,
     const std::string& frameId = "",
     int frameIndex = - 1
-  ) {
-    this->operations.drawPath(
-      vectors, color, lineWidth, frameId, frameIndex
-    );
-  }
+  ) ;
   void drawLineBetweenTwoVectorsBufferDouble(
     const Vector<double>& r1,
     const Vector<double>& r2,
     const std::string& color,
     double lineWidth = 1
-  ) {
-    this->operations.drawLineBetweenTwoVectorsBufferDouble(
-      r1, r2, color, lineWidth
-    );
-  }
+  ) ;
   void drawTextAtVectorBufferRational(
     const Vector<Rational>& point,
     const std::string& inputText,
@@ -487,6 +385,7 @@ public:
     this->drawLineFunction = other.drawLineFunction;
     this->drawTextFunction = other.drawTextFunction;
   }
+std::string  toLatexPsTricks()const;
 };
 
 #endif // header_math_extra_drawing_variables_ALREADY_INCLUDED

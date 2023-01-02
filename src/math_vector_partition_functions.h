@@ -398,8 +398,6 @@ public:
   std::string toStringConeIds() const;
   std::string toStringNeighborGraph() const;
   std::string toStringNeighborGraph(const MapList<int, Cone>& cones) const;
-  // Returns a latex report of the vector partition function.
-  std::string toLatex() const;
   // Returns a detailed html including canvas-drawn graphics.
   std::string toHTML() const;
   // Returns the detailed cone description without the graphics.
@@ -409,6 +407,7 @@ public:
   ) const;
   // Returns the graphics of all the cones without description.
   std::string toHTMLGraphicsOnly(bool includePanels) const;
+  std::string toLatexGraphicsOnlyPsTricks()const;
   // Returns a sequence of html canvas drawings of the various stages of
   // slicing.
   std::string toHTMLHistory() const;

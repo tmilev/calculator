@@ -317,15 +317,6 @@ public:
       }
     };
 
-    class ReportType {
-    public:
-      static const int general = 0;
-      static const int gaussianElimination = 1;
-      static const int monomialAlgebraProduct = 2;
-      static const int fileInputOutput = 3;
-      static const int largeIntegerArithmetic = 4;
-    };
-
     // Respond functions start here.
     // The functions below lock one another out.
     void report(const std::string& input);
@@ -334,7 +325,7 @@ public:
     // returns true
     bool writeResponse(const JSData& incoming, bool isCrash = false);
     bool monitoringAllowed();
-    bool reportDesired(int type = Response::ReportType::general);
+    bool reportDesired();
     void disallowReport();
     void allowReport();
     bool isTimedOut();

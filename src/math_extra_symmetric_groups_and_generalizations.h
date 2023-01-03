@@ -323,11 +323,11 @@ public:
   }
 };
 
-template <typename helt, typename kelt>
+template <typename HElement, typename KElement>
 class TrivialOuterAutomorphism {
-  kelt oa(helt& x, kelt& y) {
+  KElement oa(HElement& x, KElement& y) {
     (void) x;
-    kelt z = y;
+    KElement z = y;
     return z;
   }
   template <typename somestream>
@@ -342,7 +342,7 @@ class TrivialOuterAutomorphism {
   }
   friend std::ostream& operator<<(
     std::ostream& out,
-    const TrivialOuterAutomorphism<helt, kelt>& data
+    const TrivialOuterAutomorphism<HElement, KElement>& data
   ) {
     out << data.toString();
     return out;
@@ -350,15 +350,15 @@ class TrivialOuterAutomorphism {
 };
 
 // see operator* for how this is supposed to work
-template <typename helt, typename kelt, typename oa>
+template <typename HElement, typename KElement, typename oa>
 class SemidirectProductElement {
 public:
-  helt h;
-  kelt k;
-  SemidirectProductElement<helt, kelt, oa> operator*(
-    const SemidirectProductElement<helt, kelt, oa>& right
+  HElement h;
+  KElement k;
+  SemidirectProductElement<HElement, KElement, oa> operator*(
+    const SemidirectProductElement<HElement, KElement, oa>& right
   ) const {
-    SemidirectProductElement<helt, kelt, oa> out;
+    SemidirectProductElement<HElement, KElement, oa> out;
     out.h = this->h * right.h;
     out.k = oa::oa(right.h, this->k) * right.k;
     return out;
@@ -368,29 +368,33 @@ public:
     this->k = oa::oa(this->h, this->k);
     this->k.invert();
   }
-  SemidirectProductElement<helt, kelt, oa> inverse() {
-    SemidirectProductElement<helt, kelt, oa> copy = *this;
+  SemidirectProductElement<HElement, KElement, oa> inverse() {
+    SemidirectProductElement<HElement, KElement, oa> copy = *this;
     copy.invert();
     return copy;
   }
-  SemidirectProductElement<helt, kelt, oa> operator^(
-    const SemidirectProductElement<helt, kelt, oa>& right
+  SemidirectProductElement<HElement, KElement, oa> operator^(
+    const SemidirectProductElement<HElement, KElement, oa>& right
   ) const {
     auto inv = right;
     inv.invert();
     return right *(*this) * inv;
   }
   static void conjugationAction(
-    const SemidirectProductElement<helt, kelt, oa>& conjugateWith,
-    const SemidirectProductElement<helt, kelt, oa>& conjugateOn,
-    SemidirectProductElement<helt, kelt, oa>& out
+    const SemidirectProductElement<HElement, KElement, oa>& conjugateWith,
+    const SemidirectProductElement<HElement, KElement, oa>& conjugateOn,
+    SemidirectProductElement<HElement, KElement, oa>& out
   ) {
     out = conjugateOn ^ conjugateWith;
   }
-  bool operator==(const SemidirectProductElement<helt, kelt, oa> right) const {
+  bool operator==(
+    const SemidirectProductElement<HElement, KElement, oa> right
+  ) const {
     return (this->h == right.h) && (this->k == right.k);
   }
-  bool operator>(const SemidirectProductElement<helt, kelt, oa> right) const {
+  bool operator>(
+    const SemidirectProductElement<HElement, KElement, oa> right
+  ) const {
     if (this->h > right.h) {
       return true;
     }
@@ -406,7 +410,7 @@ public:
     return false;
   }
   void makeIdentity(
-    const SemidirectProductElement<helt, kelt, oa>& prototype
+    const SemidirectProductElement<HElement, KElement, oa>& prototype
   ) {
     this->k.makeIdentity(prototype.k);
     this->h.makeIdentity(prototype.h);
@@ -435,7 +439,7 @@ public:
   }
   friend std::ostream& operator<<(
     std::ostream& s,
-    const SemidirectProductElement<helt, kelt, oa>& in
+    const SemidirectProductElement<HElement, KElement, oa>& in
   ) {
     return s << in.toString();
   }
@@ -443,7 +447,7 @@ public:
     return 2 * this->h.hashFunction() + 3 * this->k.hashFunction();
   }
   static unsigned int hashFunction(
-    const SemidirectProductElement<helt, kelt, oa>& in
+    const SemidirectProductElement<HElement, KElement, oa>& in
   ) {
     return in.hashFunction();
   }
@@ -466,30 +470,39 @@ public:
   }
 };
 
-template <typename helt, typename kelt>
+template <typename HElement, typename KElement>
 class DirectProductElement: SemidirectProductElement<
-  helt, kelt, TrivialOuterAutomorphism<helt, kelt>
+  HElement, KElement, TrivialOuterAutomorphism<HElement, KElement>
 > {};
 
 template <
-  typename hg, typename kg, typename helt, typename kelt, typename oa
+  typename hg,
+  typename kg,
+  typename HElement,
+  typename KElement,
+  typename oa
 >
 class SemidirectProductGroup: public FiniteGroup<
-  SemidirectProductElement<helt, kelt, oa>
+  SemidirectProductElement<HElement, KElement, oa>
 > {
 public:
   hg* H;
   kg* K;
   void initialize(hg* inH, kg* inK);
   void getWord(
-    SemidirectProductElement<helt, kelt, oa>& g, List<int>& out
+    SemidirectProductElement<HElement, KElement, oa>& g,
+    List<int>& out
   );
 };
 
 template <
-  typename hg, typename kg, typename helt, typename kelt, typename oa
+  typename hg,
+  typename kg,
+  typename HElement,
+  typename KElement,
+  typename oa
 >
-void SemidirectProductGroup<hg, kg, helt, kelt, oa>::initialize(
+void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::initialize(
   hg* inH, kg* inK
 ) {
   this->H = inH;
@@ -510,10 +523,15 @@ void SemidirectProductGroup<hg, kg, helt, kelt, oa>::initialize(
 }
 
 template <
-  typename hg, typename kg, typename helt, typename kelt, typename oa
+  typename hg,
+  typename kg,
+  typename HElement,
+  typename KElement,
+  typename oa
 >
-void SemidirectProductGroup<hg, kg, helt, kelt, oa>::getWord(
-  SemidirectProductElement<helt, kelt, oa>& g, List<int>& out
+void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::getWord(
+  SemidirectProductElement<HElement, KElement, oa>& g,
+  List<int>& out
 ) {
   this->H.getWord(g.h, out);
   List<int> kword;
@@ -521,9 +539,13 @@ void SemidirectProductGroup<hg, kg, helt, kelt, oa>::getWord(
   out.addListOnTop(kword);
 }
 
-template <typename hg, typename kg, typename helt, typename kelt>
+template <typename hg, typename kg, typename HElement, typename KElement>
 class DirectProductGroup: public SemidirectProductGroup<
-  hg, kg, helt, kelt, TrivialOuterAutomorphism<helt, kelt>
+  hg,
+  kg,
+  HElement,
+  KElement,
+  TrivialOuterAutomorphism<HElement, KElement>
 > {};
 
 class ElementZ2N {

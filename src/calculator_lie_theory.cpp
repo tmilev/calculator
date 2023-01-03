@@ -5564,12 +5564,8 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
   STACK_TRACE("MathRoutines::generateVectorSpaceClosedWithRespectToOperation");
   inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   Type operationResult;
-  ProgressReport report1(
-    1, GlobalVariables::Response::ReportType::gaussianElimination
-  );
-  ProgressReport report2(
-    20, GlobalVariables::Response::ReportType::gaussianElimination
-  );
+  ProgressReport report1(1);
+  ProgressReport report2(20);
   if (report1.tickAndWantReport()) {
     report1.report(
       "Extending vector space to closed with respect to binary operation. "

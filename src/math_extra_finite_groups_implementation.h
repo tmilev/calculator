@@ -67,9 +67,7 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(
     this->words.setSize(1);
     this->words.lastObject()->setSize(0);
   }
-  ProgressReport report(
-    1000, GlobalVariables::Response::ReportType::general
-  );
+  ProgressReport report(1000);
   // Warning: not checking whether the generators have repetitions.
   for (int j = 0; j < this->elements.size; j ++) {
     for (int i = 0; i < this->generators.size; i ++) {
@@ -1012,9 +1010,7 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
   int numberOfElementsToReserve =
   MathRoutines::minimum(upperLimitNumberOfElements, 1000000);
   output.setExpectedSize(numberOfElementsToReserve);
-  ProgressReport report(
-    3000, GlobalVariables::Response::ReportType::general
-  );
+  ProgressReport report(3000);
   SimpleReflectionOrOuterAutomorphism generatorsOuterGroup;
   if (outputSubset != nullptr) {
     currentElt.makeIdentity(*this);
@@ -1176,9 +1172,7 @@ bool WeylGroupData::generateOrbit(
     outputSubset->clear();
     outputSubset->addOnTop(currentElt);
   }
-  ProgressReport report(
-    1000, GlobalVariables::Response::ReportType::general
-  );
+  ProgressReport report(1000);
   SimpleReflection simpleReflection;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->cartanSymmetric.numberOfRows; j ++) {

@@ -31,7 +31,6 @@ unsigned int GlobalStatistics::numberOfListResizesTotal = 0;
 unsigned int GlobalStatistics::numberOfListsCreated = 0;
 // CombinatorialChamberContainer GlobalCollectorChambers;
 // FacetPointers GlobalCollectorFacets;
-int HtmlRoutines::globalMathSpanID = 0;
 int HtmlRoutines::globalGeneralPurposeID = 0;
 template < >
 bool Complex<double>::flagEqualityIsApproximate =
@@ -54,6 +53,7 @@ unsigned long long int Rational::totalLargeMultiplications = 0;
 unsigned long long int Rational::totalSmallAdditions = 0;
 unsigned long long int Rational::totalSmallGreatestCommonDivisors = 0;
 unsigned long long int Rational::totalSmallMultiplications = 0;
+std::stringstream HtmlRoutines::outputStream;
 
 template < >
 List<OnePartialFractionDenominator>::Comparator* FormatExpressions::
@@ -240,8 +240,7 @@ bool GlobalVariables::Response::monitoringAllowed() {
   return !this->flagBanProcessMonitoring && this->flagReportAllowed;
 }
 
-bool GlobalVariables::Response::reportDesired(int type) {
-  (void) type;
+bool GlobalVariables::Response::reportDesired() {
   return
   this->monitoringAllowed() &&
   this->flagTimedOut &&
@@ -379,7 +378,6 @@ void ProgressReport::initialize() {
   currentThreadReports.addOnTop(std::string(""));
   this->ticks = 0;
   this->ticksPerReport = 1;
-  this->reportType = GlobalVariables::Response::ReportType::general;
 }
 
 ProgressReport::~ProgressReport() {
@@ -459,9 +457,8 @@ int DrawingVariables::getColorFromChamberIndex(int index) {
   );
 }
 
-DrawingVariables::DrawingVariables(){
+DrawingVariables::DrawingVariables() {
   this->initDrawingVariables();
-
 }
 
 void DrawingVariables::initDrawingVariables() {
@@ -472,15 +469,6 @@ void DrawingVariables::initDrawingVariables() {
   this->initDimensions(2);
   this->flagAnimatingMovingCoordSystem = false;
 }
-
-std::stringstream HtmlRoutines::outputStream;
-int HtmlRoutines::numLinesAll;
-int HtmlRoutines::shiftX = 0;
-int HtmlRoutines::numDashedLines = 0;
-int HtmlRoutines::numRegularLines = 0;
-int HtmlRoutines::numDottedLines = 0;
-int HtmlRoutines::shiftY = - 200;
-int HtmlRoutines::scale = 100;
 
 std::string HtmlRoutines::cleanUpForLaTeXLabelUse(
   const std::string& inputString
@@ -4507,17 +4495,21 @@ std::string PartialFractions::toLatex(FormatExpressions* format) const {
   STACK_TRACE("PartialFractions::toLatex");
   (void) format;
   std::stringstream out;
-  out << "\\documentclass{article}";
-  out << "\\begin{document}";
+  out << "\\documentclass{article}\n";
+  out << "\\usepackage{pstricks}\n";
+  out << "\\usepackage{auto-pst-pdf}\n";
+  out << "\\begin{document}\n";
   out << this->chambers.toLatexGraphicsOnlyPsTricks();
   out << "\\end{document}";
-  return out.str();
+  return HtmlRoutines::toHtmlLatexLiteralWithCopy(out.str());
 }
 
 std::string PartialFractions::toHTML(FormatExpressions* format) const {
   STACK_TRACE("PartialFractions::toHTML");
   std::stringstream out;
-  out << "Original vectors: " << this->originalVectors.toString() << "<br>";
+  out << "Original vectors: " << this->originalVectors.toString();
+  out << "<br>";
+  out << this->toLatex();
   out << this->toLatexWithInitialState(format);
   if (this->flagShowDetails) {
     out << "Computation details:<br>";
@@ -4534,7 +4526,6 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
     out << "<br>Vector partition function.<br>";
     out << quasiPolynomial.toHTML(&formatQuasipolynomial);
   }
-  out << this->toLatex();
   out << this->toStringCheckSum();
   return out.str();
 }
@@ -10949,6 +10940,7 @@ void PartialFractions::computeQuasipolynomials() {
 }
 
 void PartialFractions::computeOneQuasipolynomial(Cone& cone) {
+  STACK_TRACE("PartialFractions::computeOneQuasipolynomial");
   Vector<Rational> internalPoint = cone.internalPoint();
   this->computeOneVectorPartitionFunction(
     cone.payload.getPolynomialNonConstant(), internalPoint
@@ -11383,6 +11375,19 @@ std::string HtmlRoutines::toHtmlTableRowsFromStringContainingJSON(
     return StringRoutines::stringTrimToLengthForDisplay(inputJSON, 1000);
   }
   return HtmlRoutines::toHtmlTableRowsFromJSON(parser);
+}
+
+std::string HtmlRoutines::toHtmlLatexLiteralWithCopy(
+  const std::string& inputLatex
+) {
+  std::stringstream out;
+  out
+  << "<div class='"
+  << HtmlRoutines::latexWithCopyButton
+  << "'>"
+  << inputLatex
+  << "</div>";
+  return out.str();
 }
 
 std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
@@ -12278,7 +12283,7 @@ int DrawingVariables::getDimensionFromBilinearForm() {
 
 void DrawingVariables::getCoordinatesDrawingComputeAll(
   Vector<double>& input, double& x1, double& y1
-) {
+) const {
   x1 =
   this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[0]);
   y1 =
@@ -12288,8 +12293,8 @@ void DrawingVariables::getCoordinatesDrawingComputeAll(
 }
 
 void DrawingVariables::getCoordinatesForDrawingProjectionsComputed(
-  Vector<double>& input, double& x1, double& y1
-) {
+  const Vector<double>& input, double& x1, double& y1
+) const {
   x1 = 0;
   y1 = 0;
   for (int j = 0; j < input.size; j ++) {
@@ -12300,14 +12305,26 @@ void DrawingVariables::getCoordinatesForDrawingProjectionsComputed(
   y1 = y1 * this->graphicsUnit + this->centerY;
 }
 
+Vector<double> DrawingVariables::getCoordinates(
+  const Vector<double>& input
+) const {
+  double x = 0;
+  double y = 0;
+  DrawingVariables::getCoordinatesForDrawingProjectionsComputed(input, x, y);
+  Vector<double> result;
+  result.addOnTop(x);
+  result.addOnTop(y);
+  return result;
+}
+
 void DrawingVariables::getCoordinatesForDrawingProjectionsComputed(
-  Vector<double>& input1,
-  Vector<double>& input2,
+  const Vector<double>& input1,
+  const Vector<double>& input2,
   double& x1,
   double& y1,
   double& x2,
   double& y2
-) {
+) const {
   x1 = 0;
   x2 = 0;
   y1 = 0;
@@ -12336,6 +12353,23 @@ void DrawingVariables::initDimensions(
   this->centerY = 300;
   this->graphicsUnit = DrawingVariables::graphicsUnitDefault;
   this->computeProjectionsEiVectors();
+}
+
+void DrawingVariables::accountBoundingBox(const Vector<double>& input) {
+  if (this->boundingBox.size == 0) {
+    Vector<double> v;
+    v.makeZero(2);
+    this->boundingBox.addOnTop(v);
+    this->boundingBox.addOnTop(v);
+  }
+  this->boundingBox[0][0] =
+  MathRoutines::minimum(this->boundingBox[0][0], input[0]);
+  this->boundingBox[0][1] =
+  MathRoutines::minimum(this->boundingBox[0][1], input[1]);
+  this->boundingBox[1][0] =
+  MathRoutines::maximum(this->boundingBox[1][0], input[0]);
+  this->boundingBox[1][1] =
+  MathRoutines::maximum(this->boundingBox[1][1], input[1]);
 }
 
 void DrawingVariables::initDimensions(
@@ -15777,10 +15811,27 @@ std::string Cone::toString(FormatExpressions* format) const {
   return out.str();
 }
 
+int Cone::upperBoundForEnumeration(int dimension) {
+  switch (dimension) {
+  case 1:
+    return 100;
+  case 2:
+    return 500;
+    break;
+  case 3:
+    return 100;
+  case 4:
+    return 30;
+  default:
+    return 10;
+  }
+}
+
 void Cone::precomputeVectorPartitionFunction(
   const Vector<Rational>& inputMustBeInCone,
   const List<Vector<Rational> >& originalVectors
 ) {
+  STACK_TRACE("Cone::precomputeVectorPartitionFunction");
   Rational result =
   this->payload.getPolynomial().evaluate(inputMustBeInCone, nullptr);
   if (!result.isInteger()) {
@@ -15788,7 +15839,8 @@ void Cone::precomputeVectorPartitionFunction(
     << "Non-integer vector partition function value. "
     << global.fatal;
   }
-  if (result > 1000) {
+  int upperBound = this->upperBoundForEnumeration(inputMustBeInCone.size);
+  if (result > upperBound) {
     this->payload.precomputedNonChecked.setKeyValue(inputMustBeInCone, result);
     return;
   }
@@ -16077,8 +16129,34 @@ bool ConeCollection::findMaxLFOverConeProjective(
 
 DrawOperation::DrawOperation() {}
 
-DrawOperation::DrawOperation(const DrawGeneric& other) {
-  this->drawGeneric.getElement() = other;
+bool DrawOperation::toJSON(JSData& output, const DrawingVariables& owner) const {
+  return
+  this->toJSONImplementation<DrawGeneric>(output, owner) ||
+  this->toJSONImplementation<DrawSegment>(output, owner);
+}
+
+bool DrawOperation::toLatexPsTricks(
+  std::stringstream& out, const DrawingVariables& owner
+) const {
+  return
+  this->toLatexPsTricksImplementation<DrawGeneric>(out, owner) ||
+  this->toLatexPsTricksImplementation<DrawSegment>(out, owner);
+}
+
+bool DrawOperation::accountBoundingBox(DrawingVariables& owner) {
+  return
+  this->accountBoundingBoxImplementation<DrawGeneric>(owner) ||
+  this->accountBoundingBoxImplementation<DrawSegment>(owner);
+}
+
+template < >
+MemorySaving<DrawGeneric>& DrawOperation::getImplementation() {
+  return this->drawGeneric;
+}
+
+template < >
+MemorySaving<DrawSegment>& DrawOperation::getImplementation() {
+  return this->drawSegment;
 }
 
 std::string DrawOperation::toString() const {
@@ -16088,32 +16166,12 @@ std::string DrawOperation::toString() const {
   return "null";
 }
 
-void DrawOperation::operator=(const DrawGeneric& other) {
-  this->drawGeneric.getElement() = other;
-}
-
-JSData DrawOperation::toJSON(const DrawingVariables& owner) const {
-  JSData result;
-  this->toJSON(result, owner);
-  return result;
-}
-
-void DrawOperation::toJSON(JSData& output, const DrawingVariables& owner) const {
-  if (!this->drawGeneric.isZeroPointer()) {
-    return this->drawGeneric.getElementConst().toJSON(output, owner);
-  }
-}
-
-void DrawOperation::toLatexPsTricks(
-  std::stringstream& out, const DrawingVariables& owner
-) const {
-  if (!this->drawGeneric.isZeroPointer()) {
-    return this->drawGeneric.getElementConst().toLatexPsTricks(out, owner);
-  }
-}
-
 std::string DrawGeneric::toString() const {
   return this->content.toString();
+}
+
+void DrawGeneric::accountBoundingBox(DrawingVariables& owner) const {
+  (void) owner;
 }
 
 void DrawGeneric::toJSON(JSData& output, const DrawingVariables& owner) const {

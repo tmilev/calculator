@@ -19,13 +19,13 @@ public:
     }
   }
   const Object& getElementConst() const {
-    if (this->value == 0) {
+    if (this->value == nullptr) {
       fatalCrash("Attempt to access zero pointer. ");
     }
     return *this->value;
   }
   Object& getElement() {
-    if (this->value == 0) {
+    if (this->value == nullptr) {
       this->value = new Object;
 #ifdef AllocationLimitsSafeguard
       GlobalStatistics::globalPointerCounter ++;
@@ -66,16 +66,17 @@ public:
   MemorySaving() {
     this->value = nullptr;
   }
-  MemorySaving(const MemorySaving<Object>& other) {
-    if (other == this) {
-      // This does happen in practice
-      return;
-    }
-    this->value = nullptr;
-    this->getElement() == other.getElementConst();
-  }
   ~MemorySaving() {
     this->freeMemory();
+  }
+  MemorySaving(const MemorySaving<Object>& other) {
+    if (this == &other) {
+      fatalCrash("This should not be possible.");
+    }
+    this->value = nullptr;
+    if (!other.isZeroPointer()) {
+      this->getElement() = other.getElementConst();
+    }
   }
 };
 

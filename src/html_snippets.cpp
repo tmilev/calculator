@@ -6,6 +6,10 @@
 #include "string_constants.h"
 #include "general_strings.h"
 
+std::string HtmlRoutines::latexWithCopyButton = "latexWithCopyButton";
+std::string HtmlRoutines::gitRepository =
+"https://github.com/tmilev/calculator";
+
 MapList<
   std::string,
   std::string,
@@ -18,9 +22,6 @@ MapList<
   > result;
   return result;
 }
-
-std::string HtmlRoutines::gitRepository =
-"https://github.com/tmilev/calculator";
 
 std::string HtmlRoutines::getJavascriptVariable(
   const std::string& variableName

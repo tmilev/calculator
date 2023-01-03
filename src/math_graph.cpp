@@ -122,7 +122,9 @@ bool GraphWeightedLabeledEdges::checkConsistency() const {
 }
 
 void GraphWeightedLabeledEdges::computeEdgesPerNodesNoMultiplicities() {
-  STACK_TRACE("Graph::computeEdgesPerNodesNoMultiplicities");
+  STACK_TRACE(
+    "GraphWeightedLabeledEdges::computeEdgesPerNodesNoMultiplicities"
+  );
   List<int> emptyList;
   this->edgesPerNodeNoMultiplicities.initializeFillInObject(
     this->numberOfNodes, emptyList
@@ -136,7 +138,7 @@ void GraphWeightedLabeledEdges::computeEdgesPerNodesNoMultiplicities() {
 }
 
 void GraphWeightedLabeledEdges::addNodeToComponent(int nodeIndex) {
-  STACK_TRACE("Graph::addNodeToComponent");
+  STACK_TRACE("GraphWeightedLabeledEdges::addNodeToComponent");
   int componentIndex = this->baseNode[nodeIndex];
   if (componentIndex == - 1) {
     global.fatal << "Bad component index." << global.fatal;
@@ -167,7 +169,9 @@ void GraphWeightedLabeledEdges::addNodeToComponent(int nodeIndex) {
 
 void GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances(
 ) {
-  STACK_TRACE("Graph::computeConnectedComponentsAndBaseNodeDistances");
+  STACK_TRACE(
+    "GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances"
+  );
   this->distanceToBaseNode.initializeFillInObject(this->numberOfNodes, - 1);
   this->baseNode.initializeFillInObject(this->numberOfNodes, - 1);
   List<int> orbit;
@@ -202,7 +206,7 @@ void GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances(
 }
 
 void GraphWeightedLabeledEdges::computeDisplayGroups() {
-  STACK_TRACE("Graph::computeDisplayGroups");
+  STACK_TRACE("GraphWeightedLabeledEdges::computeDisplayGroups");
   int numGroups = 0;
   for (int i = 0; i < this->connectedComponents.size; i ++) {
     numGroups += this->connectedComponents[i].size;
@@ -238,7 +242,7 @@ void GraphWeightedLabeledEdges::computeDisplayGroups() {
 std::string GraphWeightedLabeledEdges::getNodePSStrings(
   int groupIndex, int indexInGroup
 ) {
-  STACK_TRACE("Graph::getNodePSStrings");
+  STACK_TRACE("GraphWeightedLabeledEdges::getNodePSStrings");
   std::stringstream out;
   out
   << "\\rput[l]("
@@ -282,7 +286,7 @@ double GraphWeightedLabeledEdges::getYNode(int groupIndex, int indexInGroup) {
 std::string GraphWeightedLabeledEdges::toStringNodesAndEdges(
   FormatExpressions* format
 ) {
-  STACK_TRACE("Graph::toStringNodesAndEdges");
+  STACK_TRACE("GraphWeightedLabeledEdges::toStringNodesAndEdges");
   (void) format;
   std::stringstream out;
   out << "The graph has " << this->edges.size() << " edges: <br>\n";
@@ -357,9 +361,8 @@ std::string GraphWeightedLabeledEdges::toStringPsTricks(
   //  out << this->toStringNodesAndEdges(format);
   out << "<br>\\documentclass{article}<br>\n\n";
   out
-  <<
-  "\\usepackage{pstricks}\\usepackage{lscape}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}<br>\n"
-  ;
+  << "\\usepackage{pstricks}\\usepackage{lscape}"
+  << "\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}<br>\n";
   out << "\\begin{document}<br>\n";
   out
   << "\\psset{xunit=1.5cm,yunit=1.5cm}\\begin{pspicture}(0,"

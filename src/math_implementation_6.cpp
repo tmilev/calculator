@@ -218,9 +218,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
   Polynomial<Rational>::getValuesLagrangeInterpolands(
     pointsOfInterpolationLeft, allPointsOfEvaluation, valuesLeftInterpolands
   );
-  ProgressReport report(
-    1000, GlobalVariables::Response::ReportType::general
-  );
+  ProgressReport report(1000);
   LargeInteger total = divisorSelection.totalCombinations();
   do {
     if (report.tickAndWantReport()) {

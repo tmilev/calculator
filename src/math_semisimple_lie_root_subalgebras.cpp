@@ -599,9 +599,7 @@ void RootSubalgebra::generateKModuleLieBracketTable(
   << this->centralizerDiagram.toString();
   ProgressReport report;
   report.report(out.str());
-  ProgressReport report2(
-    10, GlobalVariables::Response::ReportType::general
-  );
+  ProgressReport report2(10);
   for (int i = 0; i < this->modules.size; i ++) {
     output[i].setSize(this->modules.size);
     for (int j = 0; j < this->modules.size; j ++) {

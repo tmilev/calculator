@@ -100,7 +100,7 @@ class ElementWithScripts {
   }
 
   bootstrapAllScripts(
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     element,
   ) {
     this.element = element;
@@ -123,6 +123,7 @@ class ElementWithScripts {
     this.bootstrapDisplayTransportLayerSecurity();
     this.bootstrapGraphicsNDimensional();
     this.bootstrapSliders();
+    this.bootstrapLatexWithCopyButtons();
   }
 
   bootstrapSliders() { 
@@ -228,6 +229,43 @@ class ElementWithScripts {
     editor, unused,
   ) {
     this.processMathNodesRecursive(editor.rootNode);
+  }
+
+  bootstrapLatexWithCopyButtons() {
+    let domElements = this.element.getElementsByClassName("latexWithCopyButton");  
+    for (let i = 0; i < domElements.length; i++) {
+      let element = domElements[i];
+      this.bootstrapOneLatexWithCopyButtons( element);
+    }
+  }
+
+  bootstrapOneLatexWithCopyButtons(
+    /** @type{HTMLElement} */
+    element,
+  ) {
+    let content = element.textContent;
+    element.textContent = "";
+    let button = document.createElement("button");
+    button.className = "buttonMQ";
+    button.innerHTML = "<tiny>L&#x1F4CB;</tiny>";
+    button.addEventListener('click', () => {
+      this.copyLatex(content, element);
+    });
+    element.appendChild(button);
+  }
+
+  copyLatex(
+    /** @type{string} */
+    content,
+    /** @type{HTMLElement} */
+    element,
+  ) {
+    navigator.clipboard.writeText(content);
+    element.style.transition = "all 1s";
+    element.style.backgroundColor = "lightgreen";
+    setTimeout(() => {
+      element.style.backgroundColor = "";
+    }, 1000);   
   }
 
   processMathNodesRecursive(

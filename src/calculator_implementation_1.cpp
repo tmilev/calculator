@@ -1219,8 +1219,11 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
   this->computeAxesAndBoundingBox();
   std::string lineSeparator = useHtml ? "<br>\n" : "\n";
   resultStream
-  << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}"
-  << "\\usepackage{pst-math}\\usepackage{pst-plot}";
+  << "\\documentclass{article}"
+  << "\\usepackage{pstricks}"
+  << "\\usepackage{auto-pst-pdf}"
+  << "\\usepackage{pst-math}"
+  << "\\usepackage{pst-plot}";
   resultStream
   << lineSeparator
   << "\\newcommand{\\fcLabels}[2]{\\rput[t](#1, -0.1){$x$}"

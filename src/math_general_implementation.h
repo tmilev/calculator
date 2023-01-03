@@ -15,12 +15,8 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
   bool doReport = this->numberOfColumns > 10 &&
   this->numberOfRows > 10 &&
   this->numberOfColumns * this->numberOfRows >= 400;
-  ProgressReport report(
-    1, GlobalVariables::Response::ReportType::gaussianElimination
-  );
-  ProgressReport report2(
-    400, GlobalVariables::Response::ReportType::gaussianElimination
-  );
+  ProgressReport report(1);
+  ProgressReport report2(400);
   int pivotIndex = 0;
   output = ringOne;
   Coefficient scalar;
@@ -161,9 +157,7 @@ void MathRoutines::raiseToPower(
     return;
   }
   ProgressReport reportOne;
-  ProgressReport reportTwo(
-    32, GlobalVariables::Response::ReportType::general
-  );
+  ProgressReport reportTwo(32);
   Coefficient squares;
   squares = element;
   if (powerCopy < 4) {
@@ -234,9 +228,7 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
   }
   int totalMonPairs = 0;
   ProgressReport report1;
-  ProgressReport report2(
-    400, GlobalVariables::Response::ReportType::monomialAlgebraProduct
-  );
+  ProgressReport report2(400);
   if (report1.tickAndWantReport()) {
     totalMonPairs = other.size() * this->size();
     std::stringstream reportStream;
@@ -333,9 +325,7 @@ void MatrixTensor<Coefficient>::operator*=(
   }
   int totalMonPairs = 0;
   ProgressReport report1;
-  ProgressReport report2(
-    400, GlobalVariables::Response::ReportType::monomialAlgebraProduct
-  );
+  ProgressReport report2(400);
   if (report1.tickAndWantReport()) {
     totalMonPairs = other.size() * this->size();
     std::stringstream reportStream;
@@ -395,9 +385,7 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
   )
 ) {
   STACK_TRACE("Matrix::gaussianEliminationEuclideanDomain");
-  ProgressReport report(
-    1, GlobalVariables::Response::ReportType::gaussianElimination
-  );
+  ProgressReport report(1);
   if (otherMatrix == this) {
     global.fatal
     << "The carbon copy in the Gaussian elimination "
@@ -547,12 +535,8 @@ void Vectors<Coefficient>::selectBasisInSubspace(
     return;
   }
   STACK_TRACE("Vectors::selectBasisInSubspace");
-  ProgressReport reportTask(
-    1, GlobalVariables::Response::ReportType::gaussianElimination
-  );
-  ProgressReport reportProgress(
-    200, GlobalVariables::Response::ReportType::gaussianElimination
-  );
+  ProgressReport reportTask(1);
+  ProgressReport reportProgress(200);
   int dimension = input[0].size;
   if (reportTask.tickAndWantReport()) {
     std::stringstream reportStream;
@@ -604,9 +588,7 @@ void Matrix<Coefficient>::addTwoRows(
   int startColumnIndex,
   const Coefficient& scalar
 ) {
-  ProgressReport report(
-    10, GlobalVariables::Response::ReportType::gaussianElimination
-  );
+  ProgressReport report(10);
   Coefficient coefficient;
   for (int i = startColumnIndex; i < this->numberOfColumns; i ++) {
     coefficient = this->elements[fromRowIndex][i];
@@ -665,9 +647,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   bool formatAsLinearSystem = format ==
   nullptr ? false : format->flagFormatMatrixAsLinearSystem;
   bool useHtmlInReport = format == nullptr ? true : format->flagUseHTML;
-  ProgressReport report(
-    100, GlobalVariables::Response::ReportType::gaussianElimination
-  );
+  ProgressReport report(100);
   if (humanReadableReport != nullptr) {
     if (useHtmlInReport) {
       *humanReadableReport

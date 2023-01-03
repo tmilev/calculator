@@ -5,21 +5,6 @@
 #include "math_general.h"
 
 class DrawingVariables;
-class DrawGeneric;
-
-class DrawOperation {
-public:
-  MemorySaving<DrawGeneric> drawGeneric;
-  void toJSON(JSData& output, const DrawingVariables& owner) const;
-  JSData toJSON(const DrawingVariables& owner) const;
-  void toLatexPsTricks(
-    std::stringstream& out, const DrawingVariables& owner
-  ) const;
-  DrawOperation();
-  DrawOperation(const DrawGeneric& other);
-  void operator=(const DrawGeneric& other);
-  std::string toString() const;
-};
 
 // Draws a generic object by bouncing back a JSData object.
 class DrawGeneric {
@@ -29,6 +14,83 @@ public:
   void toLatexPsTricks(
     std::stringstream& out, const DrawingVariables& owner
   ) const;
+  std::string toString() const;
+  void accountBoundingBox(DrawingVariables& owner) const;
+};
+
+class DrawOptions {
+public:
+  std::string color;
+  int lineWidth;
+  void set(const std::string& inputColor, int inputLineWidth);
+  void writeJSON(JSData& output) const;
+};
+
+// Draws a segment between two vectors in n dimensions.
+class DrawSegment {
+public:
+  Vector<double> vector1;
+  Vector<double> vector2;
+  DrawOptions drawOptions;
+  void toJSON(JSData& output, const DrawingVariables& owner) const;
+  void toLatexPsTricks(
+    std::stringstream& out, const DrawingVariables& owner
+  ) const;
+  void accountBoundingBox(DrawingVariables& owner) const;
+};
+
+class DrawOperation {
+  template <class Implementation>
+  MemorySaving<Implementation>& getImplementation();
+  template <class Implementation>
+  bool toJSONImplementation(JSData& output, const DrawingVariables& owner)
+  const {
+    DrawOperation copy = *this;
+    MemorySaving<Implementation>& implementation =
+    copy.getImplementation<Implementation>();
+    if (implementation.isZeroPointer()) {
+      return false;
+    }
+    implementation.getElementConst().toJSON(output, owner);
+    return true;
+  }
+  template <class Implementation>
+  bool toLatexPsTricksImplementation(
+    std::stringstream& out, const DrawingVariables& owner
+  ) const {
+    DrawOperation copy = *this;
+    MemorySaving<Implementation>& implementation =
+    copy.getImplementation<Implementation>();
+    if (implementation.isZeroPointer()) {
+      return false;
+    }
+    implementation.getElementConst().toLatexPsTricks(out, owner);
+    return true;
+  }
+  template <class Implementation>
+  bool accountBoundingBoxImplementation(DrawingVariables& owner) {
+    MemorySaving<Implementation>& implementation =
+    this->getImplementation<Implementation>();
+    if (implementation.isZeroPointer()) {
+      return false;
+    }
+    implementation.getElementConst().accountBoundingBox(owner);
+    return true;
+  }
+public:
+  MemorySaving<DrawGeneric> drawGeneric;
+  MemorySaving<DrawSegment> drawSegment;
+  bool toJSON(JSData& output, const DrawingVariables& owner) const;
+  JSData toJSON(const DrawingVariables& owner) const;
+  bool toLatexPsTricks(
+    std::stringstream& out, const DrawingVariables& owner
+  ) const;
+  bool accountBoundingBox(DrawingVariables& owner);
+  DrawOperation();
+  template <class Implementation>
+  DrawOperation(const Implementation& other) {
+    this->getImplementation<Implementation>().getElement() = other;
+  }
   std::string toString() const;
 };
 
@@ -44,10 +106,12 @@ public:
   List<DrawOperation> operations;
   List<List<double> > projectionsEiVectors;
   Vectors<double> basisProjectionPlane;
+  List<Vector<double> > boundingBox;
   static const int graphicsUnitDefault = 100;
   int selectedCircleMinus2noneMinus1Center;
-  // -2= none, - 1= center of coordinate system, nonnegative integers =
-  // selectedindex
+  // - 2 = none,
+  // - 1 = center of coordinate system,
+  // nonnegative integers = selectedindex
   Vectors<double> basisToDrawCirclesAt;
   Matrix<double> bilinearForm;
   MapList<
@@ -72,13 +136,15 @@ public:
     PenStylePermanentlyZeroChamber,
     PenStyleLinkToOriginZeroChamber,
     PenStyleLinkToOrigin,
-    PenStyleLinkToOriginPermanentlyZeroChamber  };
+    PenStyleLinkToOriginPermanentlyZeroChamber,
+  };
   enum TextStyles {
     TextStyleNormal,
     TextStyleInvisible,
     TextStyleChamber,
     TextStyleZeroChamber,
-    TextStylePermanentlyZeroChamber  };
+    TextStylePermanentlyZeroChamber,
+  };
   int fontSizeNormal;
   int defaultHtmlWidth;
   int defaultHtmlHeight;
@@ -93,7 +159,7 @@ public:
   static bool getColorIntFromColorString(
     const std::string& input, int& output
   );
-  void scaleToUnitLength(Vector<double>& root) ;
+  void scaleToUnitLength(Vector<double>& root);
   std::string getHTMLDiv(
     int dimension, bool useSpanTag, bool generateInfoPanels
   );
@@ -123,7 +189,7 @@ public:
     double lineWidth
   );
   void drawTextBuffer(
-    double X1, double Y1, const std::string& inputText, int color
+    double x1, double y1, const std::string& inputText, int color
   );
   void drawPath(
     const Vectors<Rational>& vectors,
@@ -186,18 +252,20 @@ public:
   int getDimensionFromBilinearForm();
   void getCoordinatesDrawingComputeAll(
     Vector<double>& input, double& x1, double& y1
-  );
+  ) const;
   void getCoordinatesForDrawingProjectionsComputed(
-    Vector<double>& input, double& x1, double& y1
-  );
+    const Vector<double>& input, double& x1, double& y1
+  ) const;
   void getCoordinatesForDrawingProjectionsComputed(
-    Vector<double>& input1,
-    Vector<double>& input2,
+    const Vector<double>& input1,
+    const Vector<double>& input2,
     double& x1,
     double& y1,
     double& x2,
     double& y2
-  );
+  ) const;
+  Vector<double> getCoordinates(const Vector<double>& input) const;
+  void accountBoundingBox(const Vector<double>& input);
   bool areWithinClickTolerance(double x1, double y1, double x2, double y2);
   bool mouseMoveRedraw(int x, int y);
   void click(double x, double y);

@@ -249,25 +249,68 @@ void DrawingVariables::drawPath(
   this->operations.addOnTop(drawObject);
 }
 
+void DrawOptions::writeJSON(JSData& output) const {
+  if (this->color != "") {
+    output[DrawingVariables::fieldColor] = this->color;
+  }
+  if (this->lineWidth != 1.0) {
+    output[DrawingVariables::fieldLineWidth] = this->lineWidth;
+  }
+}
+
+void DrawSegment::toJSON(JSData& output, const DrawingVariables& owner) const {
+  (void) owner;
+  output[DrawingVariables::fieldOperation] = DrawingVariables::typeSegment;
+  output[DrawingVariables::fieldPoints] = JSData::token::tokenArray;
+  output[DrawingVariables::fieldPoints][0] = this->vector1;
+  output[DrawingVariables::fieldPoints][1] = this->vector2;
+  this->drawOptions.writeJSON(output);
+}
+
+void DrawSegment::toLatexPsTricks(
+  std::stringstream& out, const DrawingVariables& owner
+) const {
+  double x1 = 0;
+  double y1 = 0;
+  double x2 = 0;
+  double y2 = 0;
+  owner.getCoordinatesForDrawingProjectionsComputed(
+    this->vector1, this->vector2, x1, y1, x2, y2
+  );
+  out
+  << "\\psline("
+  << FloatingPoint::doubleToString(x1)
+  << ","
+  << FloatingPoint::doubleToString(y1)
+  << ")"
+  << "("
+  << FloatingPoint::doubleToString(x2)
+  << ","
+  << FloatingPoint::doubleToString(y2)
+  << ")";
+}
+
+void DrawSegment::accountBoundingBox(DrawingVariables& owner) const {
+  owner.accountBoundingBox(owner.getCoordinates(this->vector1));
+  owner.accountBoundingBox(owner.getCoordinates(this->vector2));
+}
+
+void DrawOptions::set(const std::string& inputColor, int inputLineWidth) {
+  this->color = inputColor;
+  this->lineWidth = inputLineWidth;
+}
+
 void DrawingVariables::drawLineBetweenTwoVectorsBufferDouble(
   const Vector<double>& vector1,
   const Vector<double>& vector2,
   const std::string& color,
   double lineWidth
 ) {
-  DrawGeneric drawObject;
-  JSData& operation = drawObject.content;
-  operation[DrawingVariables::fieldOperation] = DrawingVariables::typeSegment;
-  operation[DrawingVariables::fieldPoints] = JSData::token::tokenArray;
-  operation[DrawingVariables::fieldPoints][0] = vector1;
-  operation[DrawingVariables::fieldPoints][1] = vector2;
-  if (color != "") {
-    operation[DrawingVariables::fieldColor] = color;
-  }
-  if (lineWidth != 1.0) {
-    operation[DrawingVariables::fieldLineWidth] = lineWidth;
-  }
-  this->operations.addOnTop(drawObject);
+  DrawSegment drawSegment;
+  drawSegment.vector1 = vector1;
+  drawSegment.vector2 = vector2;
+  drawSegment.drawOptions.set(color, lineWidth);
+  this->operations.addOnTop(drawSegment);
 }
 
 void DrawingVariables::drawFilledShape(
@@ -417,23 +460,24 @@ void DrawingVariables::drawTextBuffer(
   this->operations.addOnTop(drawObject);
 }
 
-
 std::string DrawingVariables::toLatexPsTricks() const {
   std::stringstream out;
-  out << "\\begin{pspicture}(0,0)(5,5)";
+  out << "\\psset{xunit=0.01cm, yunit=0.01cm}\n";
+  out << "\\begin{pspicture}(0,0)(500,500)\n";
   for (int i = 0; i < this->operations.size; i ++) {
     this->operations[i].toLatexPsTricks(out, *this);
+    out << "\n";
   }
   out << "\\end{pspicture}";
   return out.str();
 }
 
 void DrawingVariables::drawTextBuffer(
-  double X1, double Y1, const std::string& inputText, int color
+  double x1, double y1, const std::string& inputText, int color
 ) {
   this->drawTextBuffer(
-    X1,
-    Y1,
+    x1,
+    y1,
     inputText,
     color,
     this->fontSizeNormal,
@@ -534,7 +578,17 @@ bool VectorPartition::addOneAtIndex(int atIndex) {
 
 bool VectorPartition::incrementReturnFalseIfPastLast() {
   STACK_TRACE("VectorPartition::incrementReturnFalseIfPastLast");
+  ProgressReport report(10000);
   while (true) {
+    if (report.tickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream
+      << "Still seeking for the target: "
+      << this->targetSum
+      << ". Current value: "
+      << this->currentPartition;
+      report.report(reportStream.str());
+    }
     if (!this->addOne()) {
       return false;
     }

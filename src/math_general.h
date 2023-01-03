@@ -1020,7 +1020,7 @@ public:
   void substitute(const PolynomialSubstitution<Rational>& substitution);
   Coefficient scalarProduct(
     const Vector<Coefficient>& left, const Vector<Coefficient>& right
-  ) {
+  ) const {
     return
     this->scalarProduct(left, right, static_cast<Coefficient>(0));
   }
@@ -1028,7 +1028,7 @@ public:
     const Vector<Coefficient>& left,
     const Vector<Coefficient>& right,
     const Coefficient& ringZero
-  ) {
+  ) const {
     if (
       left.size != this->numberOfColumns || right.size != this->numberOfRows
     ) {

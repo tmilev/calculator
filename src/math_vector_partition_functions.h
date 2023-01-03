@@ -213,6 +213,7 @@ public:
     const Vector<Rational>& inputMustBeInCone,
     const List<Vector<Rational> >& originalVectors
   );
+  int upperBoundForEnumeration(int dimension);
 };
 
 class ConeLatticeAndShift {

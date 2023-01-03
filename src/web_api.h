@@ -196,17 +196,10 @@ public:
     HashFunctions::hashFunction<std::string>
   >& preLoadedFiles();
   static std::stringstream outputStream;
-  static int globalMathSpanID;
   static int globalGeneralPurposeID;
-  static int numLinesAll;
-  static int numRegularLines;
-  static int numDashedLines;
-  static int numDottedLines;
-  static int shiftX;
-  static int shiftY;
-  static int scale;
   static void loadStrings();
   static std::string gitRepository;
+  static std::string latexWithCopyButton;
   static std::string URLKeyValuePairsToNormalRecursiveHtml(
     const std::string& input, int recursionDepth = 0
   );
@@ -388,6 +381,9 @@ public:
     const std::string& inputJSON
   );
   static std::string toHtmlTableRowsFromJSON(const JSData& input);
+  static std::string toHtmlLatexLiteralWithCopy(
+    const std::string& inputLatex
+  );
 };
 
 #endif // header_web_api_ALREADY_INCLUDED

@@ -13,8 +13,6 @@ public:
   int threadIndex;
   int ticks;
   int ticksPerReport;
-  // Constant GlobalVariables::Response::ReportType
-  int reportType;
   bool flagInitialized;
   std::string name;
   static MutexRecursiveWrapper reportMutex;
@@ -29,10 +27,9 @@ public:
     this->name = inputName;
     this->initialize();
   }
-  ProgressReport(int inputTicksPerReport, int inputReportType) {
+  ProgressReport(int inputTicksPerReport) {
     this->initialize();
     this->ticksPerReport = inputTicksPerReport;
-    this->reportType = inputReportType;
   }
   ~ProgressReport();
 };

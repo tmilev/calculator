@@ -857,7 +857,6 @@ std::string SemisimpleSubalgebras::toString(
   FormatExpressions* format, bool writeToHardDisk
 ) {
   STACK_TRACE("SemisimpleSubalgebras::toString");
-  HtmlRoutines::globalMathSpanID = 0;
   std::stringstream out;
   int candidatesRealized = 0;
   int candidatesNotRealizedNotProvenImpossible = 0;

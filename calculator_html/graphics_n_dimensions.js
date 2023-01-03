@@ -219,7 +219,11 @@ class GraphicsNDimensions {
     result += `\n%\\usepackage{pst-plot}<br>\n\\begin{document}<br>\n`;
     result += `\\psset{xunit = 0.01cm, yunit = 0.01cm} <br>\n\\begin{pspicture}(0,0)(1,1)\n`;
     ComputeProjections();
-    for (let counterDrawOperation = 0; counterDrawOperation < this.drawOperations.length; counterDrawOperation++) {
+    for (
+      let counterDrawOperation = 0;
+      counterDrawOperation < this.drawOperations.length;
+      counterDrawOperation++
+    ) {
       result += this.drawOperations[counterDrawOperation].getLaTeXOperation();
     }
     result += "\\end{pspicture}<br>";
@@ -266,8 +270,7 @@ class GraphicsNDimensions {
       right: right,
       lineWidth: 1,
       colorLine: color
-    }
-    ));
+    }));
   }
 
   drawPath(points, color, lineWidth, frameId, frameIndex) {
@@ -281,8 +284,7 @@ class GraphicsNDimensions {
       colorLine: color,
       frameId: frameId,
       frameIndex: frameIndex
-    }
-    ));
+    }));
   }
 
   drawHighlightGroup(points, labels, color, radius) {
@@ -299,8 +301,7 @@ class GraphicsNDimensions {
       labels: labels,
       color: color,
       radius: radius
-    }
-    ));
+    }));
   }
 
   drawText(location, text, color) {
@@ -474,10 +475,10 @@ class GraphicsNDimensions {
     }
 
     this.makeEiBasis();
-    let theDiv = document.getElementById(this.idCanvas);
-    theDiv.width = this.widthHTML;
-    theDiv.height = this.heightHTML;
-    this.canvas = theDiv.getContext("2d");
+    let element = document.getElementById(this.idCanvas);
+    element.width = this.widthHTML;
+    element.height = this.heightHTML;
+    this.canvas = element.getContext("2d");
   }
 
   pointsAreWithinClickTolerance(x1, y1, x2, y2) {
@@ -524,7 +525,7 @@ class GraphicsNDimensions {
   computeProjectionsEiBasis() {
     if (this.projectionsEiVectors.length != this.dimension) {
       for (let i = 0; i < this.dimension; i++) {
-        this.projectionsEiVectors[i] = new Array(this.dimension);
+        this.projectionsEiVectors[i] = [0, 0];
       }
     }
     for (let i = 0; i < this.eiBasis.length; i++) {
@@ -771,14 +772,14 @@ class GraphicsNDimensions {
     event = event ? event : window.event;
     event.preventDefault();
     event.stopPropagation();
-    let theWheelDelta = event.detail ? event.detail * - 1 : event.wheelDelta / 40;
+    let wheelDelta = event.detail ? event.detail * - 1 : event.wheelDelta / 40;
     this.computePosXPosY(event);
 
     let oldXDelta = (this.mousePositionScreen[0] - this.shiftScreenCoordinates[0]);
     let oldYDelta = (this.mousePositionScreen[1] - this.shiftScreenCoordinates[1]);
     let oldXDeltaScaled = oldXDelta / this.graphicsUnit;
     let oldYDeltaScaled = oldYDelta / this.graphicsUnit;
-    this.graphicsUnit += theWheelDelta;
+    this.graphicsUnit += wheelDelta;
     if (this.graphicsUnit < 3) {
       this.graphicsUnit = 3;
     }
@@ -1185,9 +1186,9 @@ function testA4(idCanvas, idSpanInformation) {
   ];
   let numberOfPositiveVectors = labeledVectors.length;
   for (let counter = 0; counter < numberOfPositiveVectors; counter++) {
-    let theVector = labeledVectors[counter].slice();
-    multiplyVectorByScalar(theVector, - 1);
-    labeledVectors.push(theVector);
+    let vector = labeledVectors[counter].slice();
+    multiplyVectorByScalar(vector, - 1);
+    labeledVectors.push(vector);
   }
   let segments = [];
   for (let counter = 0; counter < labeledVectors.length; counter++) {
@@ -1199,8 +1200,8 @@ function testA4(idCanvas, idSpanInformation) {
       }
     }
     for (let secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
-      let theDistance = a4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
-      if (theDistance != minDistance) {
+      let distance = a4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
+      if (distance != minDistance) {
         continue;
       }
       segments.push([labeledVectors[counter].slice(), labeledVectors[secondCounter].slice()]);

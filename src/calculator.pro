@@ -158,6 +158,7 @@ SOURCES += \
     math_finite_group_characters.cpp \
     math_floating_point.cpp \
     math_graph.cpp \
+    math_graphics.cpp \
     math_hard_coded_data.cpp \
     math_implementation_1.cpp \
     math_implementation_2.cpp \

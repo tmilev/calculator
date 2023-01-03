@@ -312,7 +312,7 @@ template <class Coefficient>
 void MatrixTensor<Coefficient>::operator*=(
   const MatrixTensor<Coefficient>& other
 ) {
-  STACK_TRACE("MatrixTensor::multiplyBy");
+  STACK_TRACE("MatrixTensor::operator*=");
   if (other.isEqualToZero()) {
     this->makeZero();
     return;

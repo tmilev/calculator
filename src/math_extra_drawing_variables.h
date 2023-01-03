@@ -169,7 +169,7 @@ public:
     int fontSize,
     int textStyle
   );
-  void drawCoordSystemBuffer(DrawingVariables& variables, int dimension);
+  void drawCoordinateSystemBuffer(DrawingVariables& variables, int dimension);
   void drawLineDirectly(
     double x1,
     double y1,
@@ -341,6 +341,115 @@ public:
   static std::string fieldFrameIndex;
   static std::string fieldText;
   static std::string fieldLabels;
+};
+
+class ImpreciseDouble {
+private:
+  double precision;
+  double value;
+public:
+  std::string toString(FormatExpressions* format = nullptr) const {
+    (void) format;
+    std::stringstream out;
+    out << this->value;
+    return out.str();
+  }
+  void operator=(const ImpreciseDouble& other) {
+    this->value = other.value;
+    this->precision = other.precision;
+  }
+  void operator=(double other) {
+    this->value = other;
+  }
+  ImpreciseDouble(const ImpreciseDouble& other) {
+    this->operator=(other);
+  }
+  ImpreciseDouble() {
+    this->value = 0;
+    this->precision = 0.1;
+  }
+  ImpreciseDouble(double other) {
+    this->precision = 0.1;
+    this->operator=(other);
+  }
+  void operator+=(const ImpreciseDouble& other) {
+    if (!other.isEqualToZero()) {
+      this->value += other.value;
+    }
+  }
+  void operator-=(const ImpreciseDouble& other) {
+    if (!other.isEqualToZero()) {
+      this->value -= other.value;
+    }
+  }
+  void operator=(const Rational& other) {
+    this->value = other.getDoubleValue();
+  }
+  bool isEqualToZero() const {
+    if (this->value < 0) {
+      return (- value) < this->precision;
+    }
+    return this->value < this->precision;
+  }
+  bool operator<=(const ImpreciseDouble& other) {
+    return !(other < *this);
+  }
+  bool isPositive() const {
+    return this->value > this->precision;
+  }
+  bool isNegative() const {
+    return *this < this->zero();
+  }
+  bool operator<(const ImpreciseDouble& other) const {
+    ImpreciseDouble temp = other;
+    temp -= *this;
+    return temp.isPositive();
+  }
+  void assignFloor() {
+    this->value = FloatingPoint::floorFloating(this->value);
+  }
+  void operator/=(const ImpreciseDouble& other) {
+    ImpreciseDouble copyMe;
+    copyMe = *this;
+    *this = copyMe / other;
+  }
+  ImpreciseDouble operator/(const ImpreciseDouble& other) const {
+    ImpreciseDouble result;
+    result = *this;
+    if (other.isEqualToZero()) {
+      // The following is written like this to
+      // avoid this->value / 0;
+      // If the user attempts to divide by zero,
+      // I want a regular division by zero exception to be generated.
+      result.value = this->value / (other.value - other.value);
+      return result;
+    }
+    result.value /= other.value;
+    return result;
+  }
+  void operator*=(const ImpreciseDouble& other) {
+    if (!other.isEqualToZero()) {
+      this->value *= other.value;
+    } else {
+      this->value = 0;
+    }
+  }
+  bool operator==(const ImpreciseDouble& other) const {
+    double difference = this->value - other.value;
+    if (difference < 0) {
+      difference = - difference;
+    }
+    return difference < this->precision;
+  }
+  static ImpreciseDouble minusOne() {
+    return - 1;
+  }
+  static ImpreciseDouble getOne() {
+    return 1;
+  }
+  static ImpreciseDouble zero() {
+    return 0;
+  }
 };
 
 #endif // header_math_extra_drawing_variables_ALREADY_INCLUDED

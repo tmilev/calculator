@@ -11818,6 +11818,7 @@ bool ConeCollection::drawMeProjective(DrawingVariables& drawingVariables) const 
     vertex /= vertex.sumCoordinates();
     drawingVariables.drawCircleAtVectorBufferRational(vertex, "blue", 3);
   }
+  drawingVariables.computeBoundingBox();
   return result;
 }
 
@@ -12042,7 +12043,7 @@ bool Cone::drawMeProjectiveSlice(DrawingVariables& drawingVariables) const {
   Vector<Rational> point = this->internalPointNormal();
   point /= point.sumCoordinates();
   drawingVariables.drawTextAtVectorBufferRational(
-    point, out.str(), "red"
+    point, out.str(), "black"
   );
   return true;
 }
@@ -15394,65 +15395,4 @@ bool ConeCollection::findMaxLFOverConeProjective(
     }
   }
   return true;
-}
-
-DrawOperation::DrawOperation() {}
-
-bool DrawOperation::toJSON(JSData& output, const DrawingVariables& owner) const {
-  return
-  this->toJSONImplementation<DrawGeneric>(output, owner) ||
-  this->toJSONImplementation<DrawSegment>(output, owner);
-}
-
-bool DrawOperation::toLatexPsTricks(
-  std::stringstream& out, const DrawingVariables& owner
-) const {
-  return
-  this->toLatexPsTricksImplementation<DrawGeneric>(out, owner) ||
-  this->toLatexPsTricksImplementation<DrawSegment>(out, owner);
-}
-
-bool DrawOperation::accountBoundingBox(DrawingVariables& owner) {
-  return
-  this->accountBoundingBoxImplementation<DrawGeneric>(owner) ||
-  this->accountBoundingBoxImplementation<DrawSegment>(owner);
-}
-
-template < >
-MemorySaving<DrawGeneric>& DrawOperation::getImplementation() {
-  return this->drawGeneric;
-}
-
-template < >
-MemorySaving<DrawSegment>& DrawOperation::getImplementation() {
-  return this->drawSegment;
-}
-
-std::string DrawOperation::toString() const {
-  if (!this->drawGeneric.isZeroPointer()) {
-    return this->drawGeneric.getElementConst().toString();
-  }
-  return "null";
-}
-
-std::string DrawGeneric::toString() const {
-  return this->content.toString();
-}
-
-void DrawGeneric::accountBoundingBox(DrawingVariables& owner) const {
-  (void) owner;
-}
-
-void DrawGeneric::toJSON(JSData& output, const DrawingVariables& owner) const {
-  STACK_TRACE("DrawGeneric::toJSON");
-  (void) owner;
-  output = this->content;
-}
-
-void DrawGeneric::toLatexPsTricks(
-  std::stringstream& out, const DrawingVariables& owner
-) const {
-  JSData json;
-  this->toJSON(json, owner);
-  out << "%unimplemented " << json.toString();
 }

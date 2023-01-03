@@ -39,6 +39,18 @@ public:
   void accountBoundingBox(DrawingVariables& owner) const;
 };
 
+class DrawText {
+public:
+  Vector<double> location;
+  std::string text;
+  DrawOptions drawOptions;
+  void toJSON(JSData& output, const DrawingVariables& owner) const;
+  void toLatexPsTricks(
+    std::stringstream& out, const DrawingVariables& owner
+  ) const;
+  void accountBoundingBox(DrawingVariables& owner) const;
+};
+
 class DrawOperation {
   template <class Implementation>
   MemorySaving<Implementation>& getImplementation();
@@ -80,6 +92,7 @@ class DrawOperation {
 public:
   MemorySaving<DrawGeneric> drawGeneric;
   MemorySaving<DrawSegment> drawSegment;
+  MemorySaving<DrawText> drawText;
   bool toJSON(JSData& output, const DrawingVariables& owner) const;
   JSData toJSON(const DrawingVariables& owner) const;
   bool toLatexPsTricks(
@@ -218,8 +231,7 @@ public:
   void drawTextAtVectorBufferDouble(
     const Vector<double>& point,
     const std::string& inputText,
-    const std::string& color,
-    int textStyle
+    const std::string& color
   );
   void drawCircleAtVectorBufferRational(
     const Vector<Rational>& point,
@@ -236,6 +248,7 @@ public:
   static void projectionMultiplicityMergeOnBasisChange(
     DrawingVariables& operations
   );
+  void computeBoundingBox();
   void makeMeAStandardBasis(int dimension);
   void operator+=(const DrawingVariables& other);
   void initDimensions(
@@ -300,8 +313,7 @@ public:
     const Vector<double>& input,
     const std::string& inputText,
     const std::string& color,
-    int fontSize,
-    int textStyle
+    int fontSize
   );
   double getAngleFromXandY(double x, double y);
   void rotateOutOfPlane(

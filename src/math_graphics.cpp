@@ -2,6 +2,26 @@
 #include "progress_report.h"
 #include "math_general_implementation.h"
 
+std::string DrawingVariables::typeCircleAtVector = "circleAtVector";
+std::string DrawingVariables::typePath = "path";
+std::string DrawingVariables::typeSegment = "segment";
+std::string DrawingVariables::typeSegment2DFixed = "segment2DFixed";
+std::string DrawingVariables::typeTextAtVector = "text";
+std::string DrawingVariables::typeText2DFixed = "text2DFixed";
+std::string DrawingVariables::typeFilledShape = "filledShape";
+std::string DrawingVariables::typeHighlightGroup = "highlightGroup";
+std::string DrawingVariables::fieldColor = "color";
+std::string DrawingVariables::fieldOperation = "operation";
+std::string DrawingVariables::fieldPoints = "points";
+std::string DrawingVariables::fieldLocation = "location";
+std::string DrawingVariables::fieldRadius = "radius";
+std::string DrawingVariables::fieldPenStyle = "penStyle";
+std::string DrawingVariables::fieldText = "text";
+std::string DrawingVariables::fieldLabels = "labels";
+std::string DrawingVariables::fieldLineWidth = "lineWidth";
+std::string DrawingVariables::fieldFrameId = "frameId";
+std::string DrawingVariables::fieldFrameIndex = "frameIndex";
+
 DrawingVariables::DrawingVariables() {
   this->initDrawingVariables();
 }
@@ -22,16 +42,15 @@ void DrawingVariables::drawCoordinateSystemBuffer(
   Vector<Rational> unitVector;
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(dimension);
-  std::string colorText = "#64c064";
   for (int i = 0; i < dimension; i ++) {
     unitVector.makeEi(dimension, i);
     std::string label;
     label = unitVector.toString();
     variables.drawLineBetweenTwoVectorsBufferRational(
-      zeroRoot, unitVector, "gray", 1
+      zeroRoot, unitVector, "black", 1
     );
-    variables.drawTextAtVectorBufferRational(unitVector, label, "#94c894");
-    variables.drawCircleAtVectorBufferRational(unitVector, colorText, 4);
+    variables.drawTextAtVectorBufferRational(unitVector, label, "black");
+    variables.drawCircleAtVectorBufferRational(unitVector, "black", 4);
   }
   variables.basisToDrawCirclesAt.makeEiBasis(dimension);
 }
@@ -39,11 +58,10 @@ void DrawingVariables::drawCoordinateSystemBuffer(
 void DrawingVariables::drawTextAtVectorBufferDouble(
   const Vector<double>& point,
   const std::string& inputText,
-  const std::string& color,
-  int textStyle
+  const std::string& color
 ) {
   this->drawTextAtVectorBufferDouble(
-    point, inputText, color, this->fontSizeNormal, textStyle
+    point, inputText, color, this->fontSizeNormal
   );
 }
 
@@ -229,34 +247,23 @@ void DrawingVariables::drawTextAtVectorBufferRational(
   const std::string& color,
   int fontSize
 ) {
-  (void) color;
-  (void) fontSize;
-  DrawGeneric drawObject;
-  JSData& operation = drawObject.content;
-  operation[DrawingVariables::fieldOperation] =
-  DrawingVariables::typeTextAtVector;
-  operation[DrawingVariables::fieldLocation] = input.getVectorDouble();
-  operation[DrawingVariables::fieldText] = inputText;
-  this->operations.addOnTop(drawObject);
+  this->drawTextAtVectorBufferDouble(
+    input.getVectorDouble(), inputText, color, fontSize
+  );
 }
 
 void DrawingVariables::drawTextAtVectorBufferDouble(
   const Vector<double>& input,
   const std::string& inputText,
   const std::string& color,
-  int fontSize,
-  int textStyle
+  int fontSize
 ) {
-  (void) color;
   (void) fontSize;
-  (void) textStyle;
-  DrawGeneric drawObject;
-  JSData& operation = drawObject.content;
-  operation[DrawingVariables::fieldOperation] =
-  DrawingVariables::typeTextAtVector;
-  operation[DrawingVariables::fieldLocation] = input;
-  operation[DrawingVariables::fieldText] = inputText;
-  this->operations.addOnTop(drawObject);
+  DrawText result;
+  result.location = input;
+  result.text = inputText;
+  result.drawOptions.color = color;
+  this->operations.addOnTop(result);
 }
 
 void DrawingVariables::drawLineDirectly(
@@ -338,8 +345,25 @@ void DrawingVariables::drawTextBuffer(
 
 std::string DrawingVariables::toLatexPsTricks() const {
   std::stringstream out;
-  out << "\\psset{xunit=0.01cm, yunit=0.01cm}\n";
-  out << "\\begin{pspicture}(0,0)(500,500)\n";
+  double width = this->boundingBox[1][0] - this->boundingBox[0][0];
+  double height = this->boundingBox[1][1] - this->boundingBox[0][1];
+  double unit = MathRoutines::minimum(10 / width, 10 / height);
+  out
+  << "\\psset{xunit="
+  << FloatingPoint::doubleToString(unit)
+  << "cm, yunit="
+  << FloatingPoint::doubleToString(unit)
+  << "cm}\n";
+  out
+  << "\\begin{pspicture}("
+  << FloatingPoint::doubleToString(this->boundingBox[0][0])
+  << ","
+  << FloatingPoint::doubleToString(this->boundingBox[0][1])
+  << ")("
+  << FloatingPoint::doubleToString(this->boundingBox[1][0])
+  << ","
+  << FloatingPoint::doubleToString(this->boundingBox[1][1])
+  << ")\n";
   for (int i = 0; i < this->operations.size; i ++) {
     this->operations[i].toLatexPsTricks(out, *this);
     out << "\n";
@@ -499,6 +523,12 @@ void DrawingVariables::initDimensions(
     }
   }
   this->initDimensions(matrix, draggableBasis, startingPlane);
+}
+
+void DrawingVariables::computeBoundingBox() {
+  for (DrawOperation& operation : this->operations) {
+    operation.accountBoundingBox(*this);
+  }
 }
 
 void DrawingVariables::initDimensions(int dimension) {
@@ -806,4 +836,232 @@ void DrawingVariables::operator+=(const DrawingVariables& other) {
   // this->centerX.addListOnTop(other.centerX);
   // this->centerY.addListOnTop(other.centerY);
   // this->graphicsUnit.addListOnTop(other.graphicsUnit);
+}
+
+void DrawingVariables::drawCircleAtVectorBufferRational(
+  const Vector<Rational>& input,
+  const std::string& color,
+  double radius,
+  const std::string& frameId,
+  int frameIndex
+) {
+  DrawGeneric drawObject;
+  JSData& operation = drawObject.content;
+  operation[DrawingVariables::fieldOperation] =
+  DrawingVariables::typeCircleAtVector;
+  operation[DrawingVariables::fieldLocation] = input.getVectorDouble();
+  operation[DrawingVariables::fieldRadius] = radius;
+  operation[DrawingVariables::fieldColor] = color;
+  if (frameId != "") {
+    operation[DrawingVariables::fieldFrameId] = frameId;
+    operation[DrawingVariables::fieldFrameIndex] = frameIndex;
+  }
+  this->operations.addOnTop(drawObject);
+}
+
+void DrawingVariables::drawCircleAtVectorBufferDouble(
+  const Vector<double>& input, const std::string& color, double radius
+) {
+  DrawGeneric drawObject;
+  JSData& operation = drawObject.content;
+  operation[DrawingVariables::fieldOperation] =
+  DrawingVariables::typeCircleAtVector;
+  operation[DrawingVariables::fieldLocation] = input;
+  operation[DrawingVariables::fieldRadius] = radius;
+  operation[DrawingVariables::fieldColor] = color;
+  this->operations.addOnTop(drawObject);
+}
+
+void DrawingVariables::drawLineBetweenTwoVectorsBufferRational(
+  const Vector<Rational>& vector1,
+  const Vector<Rational>& vector2,
+  const std::string& color,
+  double lineWidth
+) {
+  this->drawLineBetweenTwoVectorsBufferDouble(
+    vector1.getVectorDouble(),
+    vector2.getVectorDouble(),
+    color,
+    lineWidth
+  );
+}
+
+void DrawingVariables::drawPath(
+  const Vectors<Rational>& vectors,
+  const std::string& color,
+  double lineWidth,
+  const std::string& frameId,
+  int frameIndex
+) {
+  DrawGeneric drawObject;
+  JSData& operation = drawObject.content;
+  operation[DrawingVariables::fieldOperation] = DrawingVariables::typePath;
+  Vectors<double> vectorsDouble;
+  vectors.getVectorsDouble(vectorsDouble);
+  operation[DrawingVariables::fieldPoints] = vectorsDouble;
+  operation[DrawingVariables::fieldFrameId] = frameId;
+  operation[DrawingVariables::fieldFrameIndex] = frameIndex;
+  if (color != "") {
+    operation[DrawingVariables::fieldColor] = color;
+  }
+  if (lineWidth != 1.0) {
+    operation[DrawingVariables::fieldLineWidth] = lineWidth;
+  }
+  this->operations.addOnTop(drawObject);
+}
+
+void DrawSegment::toJSON(JSData& output, const DrawingVariables& owner) const {
+  (void) owner;
+  output[DrawingVariables::fieldOperation] = DrawingVariables::typeSegment;
+  output[DrawingVariables::fieldPoints] = JSData::token::tokenArray;
+  output[DrawingVariables::fieldPoints][0] = this->vector1;
+  output[DrawingVariables::fieldPoints][1] = this->vector2;
+  this->drawOptions.writeJSON(output);
+}
+
+void DrawSegment::toLatexPsTricks(
+  std::stringstream& out, const DrawingVariables& owner
+) const {
+  double x1 = 0;
+  double y1 = 0;
+  double x2 = 0;
+  double y2 = 0;
+  owner.getCoordinatesForDrawingProjectionsComputed(
+    this->vector1, this->vector2, x1, y1, x2, y2
+  );
+  out << "\\psline";
+  if (this->drawOptions.color != "") {
+    out << "[linecolor=" << this->drawOptions.color << "]";
+  }
+  out
+  << "("
+  << FloatingPoint::doubleToString(x1)
+  << ","
+  << FloatingPoint::doubleToString(y1)
+  << ")"
+  << "("
+  << FloatingPoint::doubleToString(x2)
+  << ","
+  << FloatingPoint::doubleToString(y2)
+  << ")";
+}
+
+void DrawSegment::accountBoundingBox(DrawingVariables& owner) const {
+  owner.accountBoundingBox(owner.getCoordinates(this->vector1));
+  owner.accountBoundingBox(owner.getCoordinates(this->vector2));
+}
+
+void DrawOptions::writeJSON(JSData& output) const {
+  if (this->color != "") {
+    output[DrawingVariables::fieldColor] = this->color;
+  }
+  if (this->lineWidth != 1.0) {
+    output[DrawingVariables::fieldLineWidth] = this->lineWidth;
+  }
+}
+
+void DrawOptions::set(const std::string& inputColor, int inputLineWidth) {
+  this->color = inputColor;
+  this->lineWidth = inputLineWidth;
+}
+
+std::string DrawGeneric::toString() const {
+  return this->content.toString();
+}
+
+void DrawGeneric::accountBoundingBox(DrawingVariables& owner) const {
+  (void) owner;
+}
+
+void DrawGeneric::toJSON(JSData& output, const DrawingVariables& owner) const {
+  STACK_TRACE("DrawGeneric::toJSON");
+  (void) owner;
+  output = this->content;
+}
+
+void DrawGeneric::toLatexPsTricks(
+  std::stringstream& out, const DrawingVariables& owner
+) const {
+  JSData json;
+  this->toJSON(json, owner);
+  out << "%unimplemented " << json.toString();
+}
+
+DrawOperation::DrawOperation() {}
+
+bool DrawOperation::toJSON(JSData& output, const DrawingVariables& owner) const {
+  return
+  this->toJSONImplementation<DrawGeneric>(output, owner) ||
+  this->toJSONImplementation<DrawSegment>(output, owner) ||
+  this->toJSONImplementation<DrawText>(output, owner);
+}
+
+bool DrawOperation::toLatexPsTricks(
+  std::stringstream& out, const DrawingVariables& owner
+) const {
+  return
+  this->toLatexPsTricksImplementation<DrawGeneric>(out, owner) ||
+  this->toLatexPsTricksImplementation<DrawSegment>(out, owner) ||
+  this->toLatexPsTricksImplementation<DrawText>(out, owner);
+}
+
+bool DrawOperation::accountBoundingBox(DrawingVariables& owner) {
+  return
+  this->accountBoundingBoxImplementation<DrawGeneric>(owner) ||
+  this->accountBoundingBoxImplementation<DrawSegment>(owner) ||
+  this->accountBoundingBoxImplementation<DrawText>(owner);
+}
+
+template < >
+MemorySaving<DrawGeneric>& DrawOperation::getImplementation() {
+  return this->drawGeneric;
+}
+
+template < >
+MemorySaving<DrawSegment>& DrawOperation::getImplementation() {
+  return this->drawSegment;
+}
+
+template < >
+MemorySaving<DrawText>& DrawOperation::getImplementation() {
+  return this->drawText;
+}
+
+std::string DrawOperation::toString() const {
+  if (!this->drawGeneric.isZeroPointer()) {
+    return this->drawGeneric.getElementConst().toString();
+  }
+  return "null";
+}
+
+void DrawText::toJSON(JSData& output, const DrawingVariables& owner) const {
+  (void) owner;
+  output[DrawingVariables::fieldOperation] =
+  DrawingVariables::typeTextAtVector;
+  output[DrawingVariables::fieldLocation] = this->location;
+  output[DrawingVariables::fieldText] = this->text;
+  output[DrawingVariables::fieldColor] = this->drawOptions.color;
+}
+
+void DrawText::toLatexPsTricks(
+  std::stringstream& out, const DrawingVariables& owner
+) const {
+  Vector<double> coordinates = owner.getCoordinates(this->location);
+  out << "\\rput";
+  if (this->drawOptions.color != "") {
+    out << "[linecolor=" << this->drawOptions.color << "]";
+  }
+  out
+  << "("
+  << FloatingPoint::doubleToString(coordinates[0])
+  << ","
+  << FloatingPoint::doubleToString(coordinates[1])
+  << ")"
+  << "{"
+  << this->text
+  << "}";
+}
+
+void DrawText::accountBoundingBox(DrawingVariables& owner) const {
+  owner.accountBoundingBox(owner.getCoordinates(this->location));
 }

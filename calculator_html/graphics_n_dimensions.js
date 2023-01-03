@@ -857,7 +857,7 @@ class GraphicsNDimensions {
 
 class DrawHighlights {
   constructor(
-    /**@type {GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     inputOwner,
     inputData,
   ) {
@@ -884,7 +884,7 @@ class DrawHighlights {
   }
 
   drawNoFinish() {
-    /**@type {GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     if (!(this.indexInOperations in this.owner.currentHighlightIndices)) {
       return;
     }

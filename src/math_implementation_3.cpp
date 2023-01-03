@@ -11806,38 +11806,6 @@ void DrawingVariables::makeMeAStandardBasis(int dimension) {
   if (dimension < 1) {
     return;
   }
-  if (dimension > 3) {
-    this->projectionsEiVectors.setSizeMakeMatrix(dimension, 2);
-    for (int i = 0; i < dimension; i ++) {
-      this->projectionsEiVectors[i][0] =
-      FloatingPoint::sinFloating(
-        static_cast<double>(i) / static_cast<double>(
-          dimension * MathRoutines::pi()
-        )
-      );
-      this->projectionsEiVectors[i][1] =
-      FloatingPoint::cosFloating(
-        static_cast<double>(i) / static_cast<double>(
-          dimension * MathRoutines::pi()
-        )
-      );
-    }
-  } else if (dimension == 3) {
-    this->projectionsEiVectors.setSizeMakeMatrix(3, 2);
-    this->projectionsEiVectors[0][0] = 1;
-    this->projectionsEiVectors[0][1] = - 0.2;
-    this->projectionsEiVectors[1][0] = 0.1;
-    this->projectionsEiVectors[1][1] = 1;
-    this->projectionsEiVectors[2][0] = 0.01;
-    this->projectionsEiVectors[2][1] = 0.01;
-  } else {
-    // dimension = 2;
-    this->projectionsEiVectors.setSizeMakeMatrix(2, 2);
-    this->projectionsEiVectors[0][0] = 1;
-    this->projectionsEiVectors[0][1] = 0;
-    this->projectionsEiVectors[1][0] = 0;
-    this->projectionsEiVectors[1][1] = 1;
-  }
   if (this->basisProjectionPlane.size < 1) {
     this->basisProjectionPlane.setSize(1);
   }
@@ -11870,6 +11838,7 @@ void DrawingVariables::makeMeAStandardBasis(int dimension) {
   if (this->bilinearForm.numberOfRows != dimension) {
     this->bilinearForm.makeIdentityMatrix(dimension, 1, 0);
   }
+  this->computeProjectionsEiVectors();
 }
 
 std::string ConeCollection::drawMeToHtmlLastCoordAffine(

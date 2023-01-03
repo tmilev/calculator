@@ -44,7 +44,6 @@ std::string DrawingVariables::getHTMLDiv(
   std::string idCanvas = "idCanvasNDimensionalGraphics" + graphicsId;
   data["idCanvas"] = idCanvas;
   std::stringstream out;
-  std::string graphicsVar = "drawGraphics" + graphicsId;
   out
   << "\n<canvas width = '"
   << this->defaultHtmlWidth

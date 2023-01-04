@@ -312,7 +312,7 @@ std::string GraphWeightedLabeledEdges::toStringNodesAndEdges(
 std::string GraphWeightedLabeledEdges::toStringPsTricksEdge(
   int fromIndex, int toIndex, FormatExpressions* format
 ) {
-  STACK_TRACE("Graph::toStringPsTricksEdge");
+  STACK_TRACE("GraphWeightedLabeledEdges::toStringPsTricksEdge");
   (void) format;
   std::stringstream out;
   int startGroupIndex = this->displayGroupIndices[fromIndex];
@@ -352,7 +352,7 @@ std::string GraphWeightedLabeledEdges::toStringPsTricksEdge(
 std::string GraphWeightedLabeledEdges::toStringPsTricks(
   FormatExpressions* format
 ) {
-  STACK_TRACE("Graph::toStringPsTricks");
+  STACK_TRACE("GraphWeightedLabeledEdges::toStringPsTricks");
   this->computeEdgesPerNodesNoMultiplicities();
   this->computeConnectedComponentsAndBaseNodeDistances();
   this->computeDisplayGroups();

@@ -51,6 +51,20 @@ public:
   void accountBoundingBox(DrawingVariables& owner) const;
 };
 
+class DrawCircle {
+public:
+  Vector<double> location;
+  double radius;
+  DrawOptions drawOptions;
+  std::string frameId;
+  int frameIndex;
+  void toJSON(JSData& output, const DrawingVariables& owner) const;
+  void toLatexPsTricks(
+    std::stringstream& out, const DrawingVariables& owner
+  ) const;
+  void accountBoundingBox(DrawingVariables& owner) const;
+};
+
 class DrawOperation {
   template <class Implementation>
   MemorySaving<Implementation>& getImplementation();
@@ -93,6 +107,7 @@ public:
   MemorySaving<DrawGeneric> drawGeneric;
   MemorySaving<DrawSegment> drawSegment;
   MemorySaving<DrawText> drawText;
+  MemorySaving<DrawCircle> drawCircle;
   bool toJSON(JSData& output, const DrawingVariables& owner) const;
   JSData toJSON(const DrawingVariables& owner) const;
   bool toLatexPsTricks(
@@ -119,7 +134,7 @@ public:
   List<DrawOperation> operations;
   List<List<double> > projectionsEiVectors;
   Vectors<double> basisProjectionPlane;
-  List<Vector<double> > boundingBox;
+  List<Vector<double> > boundingBoxLatex;
   static const int graphicsUnitDefault = 100;
   int selectedCircleMinus2noneMinus1Center;
   // - 2 = none,
@@ -243,7 +258,9 @@ public:
   void drawCircleAtVectorBufferDouble(
     const Vector<double>& point,
     const std::string& color,
-    double radius
+    double radius,
+    const std::string& frameId = "",
+    int frameIndex = - 1
   );
   static void projectionMultiplicityMergeOnBasisChange(
     DrawingVariables& operations
@@ -277,7 +294,8 @@ public:
     double& x2,
     double& y2
   ) const;
-  Vector<double> getCoordinates(const Vector<double>& input) const;
+  Vector<double> getCoordinatesPixels(const Vector<double>& input) const;
+  Vector<double> getCoordinatesLatex(const Vector<double>& input) const;
   void accountBoundingBox(const Vector<double>& input);
   bool areWithinClickTolerance(double x1, double y1, double x2, double y2);
   bool mouseMoveRedraw(int x, int y);
@@ -329,6 +347,7 @@ public:
     Vector<double>& root1, Vector<double>& root2
   );
   void computeProjectionsEiVectors();
+  double latexUnit() const;
   std::string toLatexPsTricks() const;
   void initialize();
   void toJSON(JSData& output);

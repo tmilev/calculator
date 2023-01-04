@@ -191,6 +191,8 @@ public:
   std::string toStringNeighborsAlongWall(const ConeCollection& owner) const;
   std::string toHTML(const ConeCollection& owner, bool includeErrorChecks)
   const;
+  std::string toLatex(const ConeCollection& owner, bool includeErrorChecks)
+  const;
   std::string toStringPrecomputedVectorPartitionFunctionValues() const;
   // Determines whether the two Cones have a common irregular wall.
   // Assumptions made before this computation.
@@ -873,7 +875,7 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toHTML(FormatExpressions* format = nullptr) const;
   std::string toStringCheckSum() const;
-  std::string toLatex(FormatExpressions* format = nullptr) const;
+  std::string toLatexCopyButton(FormatExpressions* format = nullptr) const;
   std::string toLatexWithoutLastReduced(FormatExpressions* format = nullptr)
   const;
   std::string toLatexWithLastReduced(FormatExpressions* format = nullptr)

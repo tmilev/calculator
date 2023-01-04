@@ -636,6 +636,46 @@ std::string QuasiPolynomial::toHTML(FormatExpressions* format) const {
   return out.str();
 }
 
+std::string QuasiPolynomial::toLatex(FormatExpressions* format) const {
+  std::stringstream out;
+  if (this->latticeShifts.size == 0) {
+    return "0";
+  }
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
+    out << "\\(" << this->valueOnEachLatticeShift[i].toString(format) << "\\)";
+    out << " over ";
+    if (!this->latticeShifts[i].isEqualToZero()) {
+      out
+      << "\\("
+      << this->latticeShifts[i].toString()
+      << " + "
+      << "\\Lambda\\)";
+    } else {
+      out << "\\(\\Lambda\\)";
+    }
+    out << "\n";
+  }
+  if (!this->ambientLatticeReduced.basisRationalForm.isIdentity()) {
+    out << "\nwhere " << "\\(" << "\\Lambda = \\langle";
+    Vectors<Rational> roots;
+    roots.assignMatrixRows(this->ambientLatticeReduced.basisRationalForm);
+    for (int i = 0; i < roots.size; i ++) {
+      out << roots[i].toString();
+      if (i != roots.size - 1) {
+        out << ", ";
+      }
+    }
+    out << "\\rangle";
+  } else {
+    out
+    << "\nwhere \\(\\Lambda =\\mathbb{Z}^{"
+    << this->minimalNumberOfVariables()
+    << "}";
+  }
+  out << "\\)";
+  return out.str();
+}
+
 void QuasiPolynomial::makeFromPolynomialShiftAndLattice(
   const Polynomial<Rational>& inputPoly,
   const MonomialPolynomial& shift,

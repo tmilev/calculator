@@ -4386,15 +4386,28 @@ std::string PartialFractions::toLatexWithInitialState(
   return out.str();
 }
 
-std::string PartialFractions::toLatex(FormatExpressions* format) const {
-  STACK_TRACE("PartialFractions::toLatex");
+std::string PartialFractions::toLatexCopyButton(FormatExpressions* format)
+const {
+  STACK_TRACE("PartialFractions::toLatexCopyButton");
   (void) format;
   std::stringstream out;
   out << "\\documentclass{article}\n";
   out << "\\usepackage{pstricks}\n";
   out << "\\usepackage{auto-pst-pdf}\n";
+  out << "\\usepackage{amssymb}\n";
   out << "\\begin{document}\n";
   out << this->chambers.toLatexGraphicsOnlyPsTricks();
+  out << "\n\n";
+  out << this->toLatexWithInitialState(format) << "\n";
+  FormatExpressions formatQuasipolynomial;
+  formatQuasipolynomial.flagUseFrac = true;
+  for (int i = 0; i < this->chambers.refinedCones.size(); i ++) {
+    Cone& cone = this->chambers.refinedCones.values[i];
+    const QuasiPolynomial& quasiPolynomial = cone.payload.getPolynomial();
+    out << cone.toLatex(this->chambers, true);
+    out << "Vector partition function.";
+    out << quasiPolynomial.toLatex(&formatQuasipolynomial);
+  }
   out << "\\end{document}";
   return HtmlRoutines::toHtmlLatexLiteralWithCopy(out.str());
 }
@@ -4404,11 +4417,11 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
   std::stringstream out;
   out << "Original vectors: " << this->originalVectors.toString();
   out << "<br>";
-  out << this->toLatex();
-  out << this->toLatexWithInitialState(format);
+  out << this->toLatexCopyButton();
   if (this->flagShowDetails) {
-    out << "Computation details:<br>";
     out << this->details.toHTML();
+  } else {
+    out << this->toLatexWithInitialState(format);
   }
   out << this->chambers.toHTMLGraphicsOnly(false);
   FormatExpressions formatQuasipolynomial;
@@ -4442,9 +4455,8 @@ std::string PartialFractions::toStringCheckSum() const {
     this->ambientDimension
   ).toString();
   out
-  <<
-  "\\) in the starting generating function and in the final partial fraction decomposition."
-  ;
+  << "\\) in the starting generating function "
+  << "and in the final partial fraction decomposition.";
   out
   << "<br>Checksum at the start: "
   << this->checkSumStart
@@ -14930,6 +14942,35 @@ bool ConeCollection::checkIsRefinedOrCrash() const {
     << global.fatal;
   }
   return true;
+}
+
+std::string Cone::toLatex(
+  const ConeCollection& owner, bool includeErrorChecks
+) const {
+  STACK_TRACE("Cone::toLatex");
+  std::stringstream out;
+  bool lastVarIsConstant = false;
+  out << "Id: " << this->displayId();
+  if (this->flagIsTheZeroCone) {
+    out << "The cone is the zero cone.";
+  } else if (this->walls.size == 0) {
+    out << "The cone is the entire space";
+  }
+  out << "\n";
+  out << "\\(";
+  FormatExpressions format;
+  out << this->getAllNormals().toLatexInequalities(lastVarIsConstant, format);
+  out << "\\)";
+  out << "Projectivized vertices: " << this->vertices.toString();
+  if (this->vertices.size > 0) {
+    out << "\nInternal point: " << this->internalPoint().toString();
+  }
+  out << "\nNeighbors: ";
+  out << this->toStringNeighborsAlongWall(owner);
+  if (includeErrorChecks) {
+    out << this->toStringPrecomputedVectorPartitionFunctionValues();
+  }
+  return out.str();
 }
 
 std::string Cone::toHTML(

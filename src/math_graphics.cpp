@@ -343,11 +343,15 @@ void DrawingVariables::drawTextBuffer(
   this->operations.addOnTop(drawObject);
 }
 
+double DrawingVariables::latexUnit() const {
+  double width = this->boundingBoxLatex[1][0] - this->boundingBoxLatex[0][0];
+  double height = this->boundingBoxLatex[1][1] - this->boundingBoxLatex[0][1];
+  return MathRoutines::minimum(4 / width, 4 / height);
+}
+
 std::string DrawingVariables::toLatexPsTricks() const {
   std::stringstream out;
-  double width = this->boundingBox[1][0] - this->boundingBox[0][0];
-  double height = this->boundingBox[1][1] - this->boundingBox[0][1];
-  double unit = MathRoutines::minimum(10 / width, 10 / height);
+  double unit = this->latexUnit();
   out
   << "\\psset{xunit="
   << FloatingPoint::doubleToString(unit)
@@ -356,13 +360,13 @@ std::string DrawingVariables::toLatexPsTricks() const {
   << "cm}\n";
   out
   << "\\begin{pspicture}("
-  << FloatingPoint::doubleToString(this->boundingBox[0][0])
+  << FloatingPoint::doubleToString(this->boundingBoxLatex[0][0])
   << ","
-  << FloatingPoint::doubleToString(this->boundingBox[0][1])
+  << FloatingPoint::doubleToString(this->boundingBoxLatex[0][1])
   << ")("
-  << FloatingPoint::doubleToString(this->boundingBox[1][0])
+  << FloatingPoint::doubleToString(this->boundingBoxLatex[1][0])
   << ","
-  << FloatingPoint::doubleToString(this->boundingBox[1][1])
+  << FloatingPoint::doubleToString(this->boundingBoxLatex[1][1])
   << ")\n";
   for (int i = 0; i < this->operations.size; i ++) {
     this->operations[i].toLatexPsTricks(out, *this);
@@ -441,7 +445,7 @@ void DrawingVariables::getCoordinatesForDrawingProjectionsComputed(
   y1 = y1 * this->graphicsUnit + this->centerY;
 }
 
-Vector<double> DrawingVariables::getCoordinates(
+Vector<double> DrawingVariables::getCoordinatesPixels(
   const Vector<double>& input
 ) const {
   double x = 0;
@@ -450,6 +454,18 @@ Vector<double> DrawingVariables::getCoordinates(
   Vector<double> result;
   result.addOnTop(x);
   result.addOnTop(y);
+  return result;
+}
+
+Vector<double> DrawingVariables::getCoordinatesLatex(
+  const Vector<double>& input
+) const {
+  Vector<double> result;
+  result.makeZero(2);
+  for (int j = 0; j < input.size; j ++) {
+    result[0] += this->projectionsEiVectors[j][0] * input[j];
+    result[1] += this->projectionsEiVectors[j][1] * input[j];
+  }
   return result;
 }
 
@@ -492,20 +508,29 @@ void DrawingVariables::initDimensions(
 }
 
 void DrawingVariables::accountBoundingBox(const Vector<double>& input) {
-  if (this->boundingBox.size == 0) {
+  Vector<double> coordinatesLatex = this->getCoordinatesLatex(input);
+  if (this->boundingBoxLatex.size == 0) {
     Vector<double> v;
     v.makeZero(2);
-    this->boundingBox.addOnTop(v);
-    this->boundingBox.addOnTop(v);
+    this->boundingBoxLatex.addOnTop(v);
+    this->boundingBoxLatex.addOnTop(v);
   }
-  this->boundingBox[0][0] =
-  MathRoutines::minimum(this->boundingBox[0][0], input[0]);
-  this->boundingBox[0][1] =
-  MathRoutines::minimum(this->boundingBox[0][1], input[1]);
-  this->boundingBox[1][0] =
-  MathRoutines::maximum(this->boundingBox[1][0], input[0]);
-  this->boundingBox[1][1] =
-  MathRoutines::maximum(this->boundingBox[1][1], input[1]);
+  this->boundingBoxLatex[0][0] =
+  MathRoutines::minimum(
+    this->boundingBoxLatex[0][0], coordinatesLatex[0]
+  );
+  this->boundingBoxLatex[0][1] =
+  MathRoutines::minimum(
+    this->boundingBoxLatex[0][1], coordinatesLatex[1]
+  );
+  this->boundingBoxLatex[1][0] =
+  MathRoutines::maximum(
+    this->boundingBoxLatex[1][0], coordinatesLatex[0]
+  );
+  this->boundingBoxLatex[1][1] =
+  MathRoutines::maximum(
+    this->boundingBoxLatex[1][1], coordinatesLatex[1]
+  );
 }
 
 void DrawingVariables::initDimensions(
@@ -812,7 +837,7 @@ void DrawingVariables::projectionMultiplicityMergeOnBasisChange(
   // We assume that the computeProjectionsEiVectors has been called.
   for (int i = 0; i < operations.projectionsEiVectors.size; i ++) {
     for (int j = 0; j < 2; j ++) {
-      matrix.elements[i][j] = operations.projectionsEiVectors[i][j];
+      matrix(i, j) = operations.projectionsEiVectors[i][j];
     }
   }
   ProgressReport report;
@@ -845,31 +870,25 @@ void DrawingVariables::drawCircleAtVectorBufferRational(
   const std::string& frameId,
   int frameIndex
 ) {
-  DrawGeneric drawObject;
-  JSData& operation = drawObject.content;
-  operation[DrawingVariables::fieldOperation] =
-  DrawingVariables::typeCircleAtVector;
-  operation[DrawingVariables::fieldLocation] = input.getVectorDouble();
-  operation[DrawingVariables::fieldRadius] = radius;
-  operation[DrawingVariables::fieldColor] = color;
-  if (frameId != "") {
-    operation[DrawingVariables::fieldFrameId] = frameId;
-    operation[DrawingVariables::fieldFrameIndex] = frameIndex;
-  }
-  this->operations.addOnTop(drawObject);
+  this->drawCircleAtVectorBufferDouble(
+    input.getVectorDouble(), color, radius, frameId, frameIndex
+  );
 }
 
 void DrawingVariables::drawCircleAtVectorBufferDouble(
-  const Vector<double>& input, const std::string& color, double radius
+  const Vector<double>& input,
+  const std::string& color,
+  double radius,
+  const std::string& frameId,
+  int frameIndex
 ) {
-  DrawGeneric drawObject;
-  JSData& operation = drawObject.content;
-  operation[DrawingVariables::fieldOperation] =
-  DrawingVariables::typeCircleAtVector;
-  operation[DrawingVariables::fieldLocation] = input;
-  operation[DrawingVariables::fieldRadius] = radius;
-  operation[DrawingVariables::fieldColor] = color;
-  this->operations.addOnTop(drawObject);
+  DrawCircle drawCircle;
+  drawCircle.location = input;
+  drawCircle.drawOptions.color = color;
+  drawCircle.radius = radius;
+  drawCircle.frameId = frameId;
+  drawCircle.frameIndex = frameIndex;
+  this->operations.addOnTop(drawCircle);
 }
 
 void DrawingVariables::drawLineBetweenTwoVectorsBufferRational(
@@ -922,33 +941,28 @@ void DrawSegment::toJSON(JSData& output, const DrawingVariables& owner) const {
 void DrawSegment::toLatexPsTricks(
   std::stringstream& out, const DrawingVariables& owner
 ) const {
-  double x1 = 0;
-  double y1 = 0;
-  double x2 = 0;
-  double y2 = 0;
-  owner.getCoordinatesForDrawingProjectionsComputed(
-    this->vector1, this->vector2, x1, y1, x2, y2
-  );
+  Vector<double> projection1 = owner.getCoordinatesLatex(this->vector1);
+  Vector<double> projection2 = owner.getCoordinatesLatex(this->vector2);
   out << "\\psline";
   if (this->drawOptions.color != "") {
     out << "[linecolor=" << this->drawOptions.color << "]";
   }
   out
   << "("
-  << FloatingPoint::doubleToString(x1)
+  << FloatingPoint::doubleToString(projection1[0])
   << ","
-  << FloatingPoint::doubleToString(y1)
+  << FloatingPoint::doubleToString(projection1[1])
   << ")"
   << "("
-  << FloatingPoint::doubleToString(x2)
+  << FloatingPoint::doubleToString(projection2[0])
   << ","
-  << FloatingPoint::doubleToString(y2)
+  << FloatingPoint::doubleToString(projection2[1])
   << ")";
 }
 
 void DrawSegment::accountBoundingBox(DrawingVariables& owner) const {
-  owner.accountBoundingBox(owner.getCoordinates(this->vector1));
-  owner.accountBoundingBox(owner.getCoordinates(this->vector2));
+  owner.accountBoundingBox(this->vector1);
+  owner.accountBoundingBox(this->vector2);
 }
 
 void DrawOptions::writeJSON(JSData& output) const {
@@ -987,13 +1001,55 @@ void DrawGeneric::toLatexPsTricks(
   out << "%unimplemented " << json.toString();
 }
 
+void DrawCircle::accountBoundingBox(DrawingVariables& owner) const {
+  owner.accountBoundingBox(this->location);
+}
+
+void DrawCircle::toJSON(JSData& output, const DrawingVariables& owner) const {
+  STACK_TRACE("DrawCircle::toJSON");
+  (void) owner;
+  output[DrawingVariables::fieldOperation] =
+  DrawingVariables::typeCircleAtVector;
+  output[DrawingVariables::fieldLocation] = this->location;
+  output[DrawingVariables::fieldRadius] = this->radius;
+  this->drawOptions.writeJSON(output);
+  if (this->frameId != "") {
+    output[DrawingVariables::fieldFrameId] = this->frameId;
+    output[DrawingVariables::fieldFrameIndex] = this->frameIndex;
+  }
+}
+
+void DrawCircle::toLatexPsTricks(
+  std::stringstream& out, const DrawingVariables& owner
+) const {
+  Vector<double> coordinates = owner.getCoordinatesLatex(this->location);
+  out << "\\pscircle*";
+  if (this->drawOptions.color != "") {
+    out << "[linecolor=" << this->drawOptions.color << "]";
+  }
+  // As of writing, the circle radius measures
+  // a fixed radius that does not change with zoom level.
+  double inCentimeters = this->radius / owner.latexUnit();
+  double adjustedRadius = inCentimeters / 20;
+  out
+  << "("
+  << FloatingPoint::doubleToString(coordinates[0])
+  << ","
+  << FloatingPoint::doubleToString(coordinates[1])
+  << ")"
+  << "{"
+  << FloatingPoint::doubleToString(adjustedRadius)
+  << "}";
+}
+
 DrawOperation::DrawOperation() {}
 
 bool DrawOperation::toJSON(JSData& output, const DrawingVariables& owner) const {
   return
   this->toJSONImplementation<DrawGeneric>(output, owner) ||
   this->toJSONImplementation<DrawSegment>(output, owner) ||
-  this->toJSONImplementation<DrawText>(output, owner);
+  this->toJSONImplementation<DrawText>(output, owner) ||
+  this->toJSONImplementation<DrawCircle>(output, owner);
 }
 
 bool DrawOperation::toLatexPsTricks(
@@ -1002,14 +1058,16 @@ bool DrawOperation::toLatexPsTricks(
   return
   this->toLatexPsTricksImplementation<DrawGeneric>(out, owner) ||
   this->toLatexPsTricksImplementation<DrawSegment>(out, owner) ||
-  this->toLatexPsTricksImplementation<DrawText>(out, owner);
+  this->toLatexPsTricksImplementation<DrawText>(out, owner) ||
+  this->toLatexPsTricksImplementation<DrawCircle>(out, owner);
 }
 
 bool DrawOperation::accountBoundingBox(DrawingVariables& owner) {
   return
   this->accountBoundingBoxImplementation<DrawGeneric>(owner) ||
   this->accountBoundingBoxImplementation<DrawSegment>(owner) ||
-  this->accountBoundingBoxImplementation<DrawText>(owner);
+  this->accountBoundingBoxImplementation<DrawText>(owner) ||
+  this->accountBoundingBoxImplementation<DrawCircle>(owner);
 }
 
 template < >
@@ -1025,6 +1083,11 @@ MemorySaving<DrawSegment>& DrawOperation::getImplementation() {
 template < >
 MemorySaving<DrawText>& DrawOperation::getImplementation() {
   return this->drawText;
+}
+
+template < >
+MemorySaving<DrawCircle>& DrawOperation::getImplementation() {
+  return this->drawCircle;
 }
 
 std::string DrawOperation::toString() const {
@@ -1046,11 +1109,28 @@ void DrawText::toJSON(JSData& output, const DrawingVariables& owner) const {
 void DrawText::toLatexPsTricks(
   std::stringstream& out, const DrawingVariables& owner
 ) const {
-  Vector<double> coordinates = owner.getCoordinates(this->location);
+  Vector<double> coordinates = owner.getCoordinatesLatex(this->location);
   out << "\\rput";
-  if (this->drawOptions.color != "") {
-    out << "[linecolor=" << this->drawOptions.color << "]";
+  out << "[";
+  if (
+    2 *
+    coordinates[0] < owner.boundingBoxLatex[1][0] -
+    owner.boundingBoxLatex[0][0]
+  ) {
+    out << "r";
+  } else {
+    out << "l";
   }
+  if (
+    2 *
+    coordinates[1] < owner.boundingBoxLatex[1][1] -
+    owner.boundingBoxLatex[0][1]
+  ) {
+    out << "t";
+  } else {
+    out << "b";
+  }
+  out << "]";
   out
   << "("
   << FloatingPoint::doubleToString(coordinates[0])
@@ -1063,5 +1143,5 @@ void DrawText::toLatexPsTricks(
 }
 
 void DrawText::accountBoundingBox(DrawingVariables& owner) const {
-  owner.accountBoundingBox(owner.getCoordinates(this->location));
+  owner.accountBoundingBox(this->location);
 }

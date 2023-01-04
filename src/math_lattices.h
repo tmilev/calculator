@@ -156,6 +156,7 @@ public:
   List<Polynomial<Rational> > valueOnEachLatticeShift;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toHTML(FormatExpressions* format = nullptr) const;
+  std::string toLatex(FormatExpressions* format = nullptr) const;
   Rational evaluate(
     const Vector<Rational>& input, std::stringstream* comments
   ) const;

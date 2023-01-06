@@ -71,9 +71,10 @@ vectorPartitionFunctionFormulaInternal(
     "vectorPartitionFunctionFormula"
   );
   Vectors<Rational> vectors;
+  std::string label;
   if (
     !CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition
-    (calculator, input, vectors)
+    (calculator, input, vectors, label)
   ) {
     return false;
   }
@@ -93,6 +94,7 @@ vectorPartitionFunctionFormulaInternal(
     vectors
   );
   result.fractions.flagShowDetails = flagShowDetails;
+  result.fractions.label = label;
   result.fractions.initializeAndSplit(vectors, &calculator.comments);
   result.fractions.computeAllVectorPartitionFunctions();
   return output.assignValue(calculator, result);
@@ -102,9 +104,11 @@ bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition
 (
   Calculator& calculator,
   const Expression& input,
-  Vectors<Rational>& output
+  Vectors<Rational>& output,
+  std::string& outputLabel
 ) {
   Matrix<Rational> matrix;
+  outputLabel = "";
   if (
     CalculatorConversions::functionGetMatrix(
       calculator, input, matrix, false
@@ -123,6 +127,9 @@ bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition
       WeylGroupData weylGroup;
       weylGroup.makeArbitrarySimple(type.letter, type.rank);
       weylGroup.computeRootsOfBorel(output);
+      FormatExpressions format;
+      format.flagSupressDynkinIndexOne = true;
+      outputLabel = "\\(" + weylGroup.dynkinType.toString(&format) + "\\)";
       return true;
     }
   }
@@ -139,9 +146,10 @@ bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
 ) {
   STACK_TRACE("CalculatorFunctionsVectorPartitionFunction::coneDecomposition");
   Vectors<Rational> vectors;
+  std::string label;
   if (
     !CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition
-    (calculator, input, vectors)
+    (calculator, input, vectors, label)
   ) {
     return false;
   }

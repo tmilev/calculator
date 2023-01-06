@@ -2460,7 +2460,13 @@ public:
     (void) unused;
     return this->size() > 1;
   }
-  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toStringWithPossibleLineBreak(
+    FormatExpressions* format = nullptr
+  ) const;
+  std::string toString(
+    FormatExpressions* format = nullptr,
+    bool* outputNeedsLineBreak = nullptr
+  ) const;
   // Same as toString but uses a default alphabet "x", "y", ...
   // for the first few variables.
   std::string toStringPretty() const {
@@ -5613,16 +5619,32 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::getTermString(
 }
 
 template <class TemplateMonomial, class Coefficient>
+std::string LinearCombination<TemplateMonomial, Coefficient>::
+toStringWithPossibleLineBreak(FormatExpressions* format) const {
+  bool needsLineBreak = false;
+  std::string result = this->toString(format, &needsLineBreak);
+  if (!needsLineBreak) {
+    return result;
+  }
+  std::stringstream out;
+  out << "\\begin{array}{l}" << result << "\\end{array}";
+  return out.str();
+}
+
+template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
-  FormatExpressions* format
+  FormatExpressions* format, bool* outputNeedsLineBreak
 ) const {
+  STACK_TRACE("LinearCombination::toString");
+  if (outputNeedsLineBreak != nullptr) {
+    *outputNeedsLineBreak = false;
+  }
   if (this->size() == 0) {
     return "0";
   }
-  STACK_TRACE("LinearCombination::toString");
   std::stringstream out;
-  List<TemplateMonomial> sortedMons;
-  sortedMons = this->monomials;
+  List<TemplateMonomial> sortedMonomials;
+  sortedMonomials = this->monomials;
   // If this line fails to link, you must do the following.
   // You need to implement
   // FormatExpressions::getMonomialOrder<TemplateMonomial>()
@@ -5633,7 +5655,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   ) ?
   0 :
   format->getMonomialOrder<TemplateMonomial>();
-  sortedMons.quickSortDescending(monomialOrder);
+  sortedMonomials.quickSortDescending(monomialOrder);
   int cutOffCounter = 0;
   bool useCustomPlus = false;
   int maximumLineLength = format == nullptr ? - 1 : format->maximumLineLength;
@@ -5652,8 +5674,8 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
       format->customCoefficientMonomialSeparator = "";
     }
   }
-  for (int i = 0; i < sortedMons.size; i ++) {
-    TemplateMonomial& monomial = sortedMons[i];
+  for (int i = 0; i < sortedMonomials.size; i ++) {
+    TemplateMonomial& monomial = sortedMonomials[i];
     Coefficient& coefficient =
     this->coefficients[this->monomials.getIndex(monomial)];
     std::string termString =
@@ -5678,14 +5700,19 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
     if (maximumLineLength > 0) {
       if (cutOffCounter > maximumLineLength) {
         cutOffCounter = 0;
-        if (flagUseLaTeX && i != sortedMons.size - 1) {
+        if (flagUseLaTeX && i != sortedMonomials.size - 1) {
+          if (outputNeedsLineBreak != nullptr) {
+            *outputNeedsLineBreak = true;
+          }
           out << " \\\\";
           for (int k = 0; k < numberOfAmpersandsPerNewLineForLaTeX; k ++) {
             out << "&";
           }
           out << " ";
         }
-        if (flagUseHTML && !flagUseLaTeX && (i != sortedMons.size - 1)) {
+        if (
+          flagUseHTML && !flagUseLaTeX && (i != sortedMonomials.size - 1)
+        ) {
           out << " <br>";
         }
       }

@@ -42,30 +42,17 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "",
     "Computes the vector partition function. "
     "Shows all the internals of the computation, if those are not too long. ",
-    "VectorPartitionFunction(\n"
+    "VectorPartitionFunctionWithDetails(\n"
     "(1,0,0),\n"
     "(0,1,0),\n"
     "(0,0,1),\n"
     "(1,1,0),\n"
     "(0,1,1),\n"
     "(1,1,1)\n"
-    ");\n"
-    "VectorPartitionFunction(\n"
-    "(1,0),"
-    "(0,1),"
-    "(1,1),"
-    "(1,2),"
-    "(1,3),"
-    "(2,3) "
-    ");\n"
-    "VectorPartitionFunction(\n"
-    "Sequence{}1,"
-    "Sequence{}2,"
-    "Sequence{}3,"
-    "Sequence{}4)",
+    ");\n",
     "CalculatorFunctionsVectorPartitionFunction"
     "::vectorPartitionFunctionFormula",
-    "VectorPartitionFunction",
+    "VectorPartitionFunctionWithDetails",
     innerStandard
   );
   this->addOperationHandler(

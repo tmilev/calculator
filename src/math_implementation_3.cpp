@@ -4281,18 +4281,23 @@ std::string PartialFractions::toLatexInternal(
   return out.str();
 }
 
-std::string PartialFractions::toStringDifferentialOperatorForm(
+std::string PartialFractions::toLatexDifferentialOperatorForm(
   FormatExpressions* format
 ) const {
+  STACK_TRACE("PartialFractions::toLatexDifferentialOperatorForm");
   std::stringstream out;
   for (int i = 0; i < this->reduced.size(); i ++) {
     const OnePartialFractionDenominator& fraction = this->reduced.monomials[i];
-    out
-    << fraction.toLatexDifferentialOperator(
+    std::string summand =
+    fraction.toLatexDifferentialOperator(
       this->reduced.coefficients[i], format
     );
+    if (i > 0 && !StringRoutines::stringBeginsWith(summand, "-")) {
+      out << "+";
+    }
+    out << summand;
     if (i != this->reduced.size() - 1) {
-      out << "\\\\\n&+&";
+      out << "\\\\\n&&" << "\\displaystyle ";
     }
   }
   return out.str();
@@ -4365,7 +4370,7 @@ void PartialFractions::Details::addDifferentialOperatorForm() {
   format.flagSuppressOneIn1overXtimesY = true;
   format.flagUseFrac = true;
   this->allIntermediateComputations.addOnTop(
-    this->owner->toStringDifferentialOperatorForm(&format)
+    this->owner->toLatexDifferentialOperatorForm(&format)
   );
 }
 
@@ -4375,39 +4380,160 @@ std::string PartialFractions::toLatexWithInitialState(
   STACK_TRACE("PartialFractions::toLatexWithInitialState");
   std::stringstream out;
   out << "\\(";
-  out << "\\begin{array}{rcl}\n";
-  out
-  << "\\displaystyle "
-  << this->initialPartialFraction.toLatex(1, format)
-  << "&=&";
-  out << this->toLatexWithoutLastReduced(format);
-  out << "\\end{array}";
+  std::string initialExpression =
+  this->initialPartialFraction.toLatex(1, format);
+  std::string splitExpression = this->toLatexWithoutLastReduced(format);
+  std::string differentialForm = this->toLatexDifferentialOperatorForm(format);
+  bool useOneColumn = this->originalVectors.size * this->ambientDimension >=
+  18;
+  if (useOneColumn) {
+    out << "\\begin{array}{rcl}\n";
+    out
+    << "&&\\displaystyle"
+    << initialExpression
+    << "\\\\\n&=&\\displaystyle"
+    << splitExpression
+    << "\\\\\n&=&"
+    << differentialForm;
+    out << "\\end{array}";
+  } else {
+    out << "\\begin{array}{rcl}\n";
+    out
+    << "\\displaystyle "
+    << initialExpression
+    << "&=&"
+    << splitExpression
+    << "\\\\\n &=&"
+    << differentialForm
+    << "\\end{array}";
+  }
   out << "\\)";
+  return out.str();
+}
+
+std::string PartialFractions::toStringLabel() const {
+  std::stringstream out;
+  if (this->label != "") {
+    out << this->label << ":";
+  }
+  out << this->originalVectors.toStringCommaDelimited();
+  return out.str();
+}
+
+std::string PartialFractions::toLatexQuasipolynomialTable() const {
+  STACK_TRACE("PartialFractions::toLatexQuasipolynomialTable");
+  std::stringstream out;
+  FormatExpressions format;
+  format.flagUseFrac = true;
+  format.flagUseLatex = true;
+  bool isLong = this->originalVectors.size * this->ambientDimension > 18;
+  if (isLong) {
+    format.maximumLineLength = 200;
+    out << "\\begin{landscape}";
+  } else {
+    format.maximumLineLength = 80;
+  }
+  out << "\\begin{longtable}{|ccc|}";
+  out << "\\caption{\\footnotesize V.p.f. of ";
+  out << this->toStringLabel() << "}\\\\";
+  out
+  << "\\hline N & Polynomial/Lattice & Lattice shift \\\\ \\hline\n"
+  << "\\endfirsthead"
+  << "\\multicolumn{3}{c}{{"
+  << "\\bfseries \\tablename\\ \\thetable{} -- continued from previous page"
+  << "}} \\\\\n"
+  << "\\hline \\multicolumn{1}{|c|}{} & \\multicolumn{1}{c|}{} \\\\ \\hline\n"
+  << "\\endhead"
+  << "\\hline \\multicolumn{3}{|r|}{{Continued on next page}} \\\\ \\hline"
+  << "\\endfoot"
+  << "\\endlastfoot";
+  for (int i = 0; i < this->chambers.refinedCones.size(); i ++) {
+    Cone& cone = this->chambers.refinedCones.values[i];
+    const QuasiPolynomial& quasiPolynomial = cone.payload.getPolynomial();
+    out
+    << this->toLatexOneQuasipolynomialInTable(
+      cone.displayId(), quasiPolynomial, &format
+    );
+    if (i != this->chambers.refinedCones.size() - 1) {
+      out << "\\hline ";
+    }
+  }
+  out << "\\end{longtable}";
+  if (isLong) {
+    out << "\\end{landscape}";
+  }
+  return out.str();
+}
+
+std::string PartialFractions::toLatexOneQuasipolynomialInTable(
+  const std::string& displayId,
+  const QuasiPolynomial& input,
+  FormatExpressions* format
+) const {
+  STACK_TRACE("PartialFractions::toLatexOneQuasipolynomialInTable");
+  std::stringstream out;
+  bool isZn = input.ambientLatticeReduced.basisRationalForm.isIdentity();
+  if (!isZn) {
+    out << "\\multirow{" << input.latticeShifts.size + 1 << "}";
+    out << "{*}{";
+    out << displayId;
+    out << "}";
+  } else {
+    out << displayId;
+  }
+  if (!isZn) {
+    out
+    << "&\\(\\Lambda="
+    << input.ambientLatticeReduced.toString()
+    << "\\)&\\\\\\hline";
+  }
+  for (int i = 0; i < input.latticeShifts.size; i ++) {
+    out
+    << "&"
+    << "\\("
+    << input.valueOnEachLatticeShift[i].toStringWithPossibleLineBreak(format)
+    << "\\)";
+    out << "&";
+    if (isZn) {
+      out << "\\(" << input.latticeShifts[i].toString() << "\\)";
+    }
+    out << "\\\\\n";
+    out << "\\hline";
+  }
   return out.str();
 }
 
 std::string PartialFractions::toLatexCopyButton(FormatExpressions* format)
 const {
   STACK_TRACE("PartialFractions::toLatexCopyButton");
-  (void) format;
   std::stringstream out;
   out << "\\documentclass{article}\n";
   out << "\\usepackage{pstricks}\n";
   out << "\\usepackage{auto-pst-pdf}\n";
   out << "\\usepackage{amssymb}\n";
-  out << "\\begin{document}\n";
+  out << "\\usepackage{longtable}\n";
+  out << "\\usepackage{multirow}\n";
+  out << "\\usepackage{lscape}\n";
+  out << "\\begin{document}\n\n\n\n";
+  out << "\\begin{table}[h!]\n";
   out << this->chambers.toLatexGraphicsOnlyPsTricks();
+  out
+  << "\\caption{Combinatorial chambers of "
+  << this->toStringLabel()
+  << "}\n";
+  out << "\\end{table}\n";
+  out << this->toLatexQuasipolynomialTable();
   out << "\n\n";
+  out << this->chambers.toLatexWithoutGraphics(this->toStringLabel());
+  out << "\n\n";
+  out << "\\begin{table}[h!]\n";
   out << this->toLatexWithInitialState(format) << "\n";
-  FormatExpressions formatQuasipolynomial;
-  formatQuasipolynomial.flagUseFrac = true;
-  for (int i = 0; i < this->chambers.refinedCones.size(); i ++) {
-    Cone& cone = this->chambers.refinedCones.values[i];
-    const QuasiPolynomial& quasiPolynomial = cone.payload.getPolynomial();
-    out << cone.toLatex(this->chambers, true);
-    out << "Vector partition function.";
-    out << quasiPolynomial.toLatex(&formatQuasipolynomial);
-  }
+  out
+  << "\\caption{Partial fraction decomposition "
+  << "and differential operator form (Brion-Vergne) of "
+  << this->toStringLabel()
+  << "}\n";
+  out << "\\end{table}\n\n\n\n";
   out << "\\end{document}";
   return HtmlRoutines::toHtmlLatexLiteralWithCopy(out.str());
 }
@@ -4417,7 +4543,7 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
   std::stringstream out;
   out << "Original vectors: " << this->originalVectors.toString();
   out << "<br>";
-  out << this->toLatexCopyButton();
+  out << this->toLatexCopyButton(format);
   if (this->flagShowDetails) {
     out << this->details.toHTML();
   } else {
@@ -4439,6 +4565,7 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
 }
 
 std::string PartialFractions::toStringCheckSum() const {
+  STACK_TRACE("PartialFractions::toStringCheckSum");
   std::stringstream out;
   out << "<hr>Checksum. ";
   out << "Obtained by substituting \\(";
@@ -4504,6 +4631,16 @@ bool PartialFractions::assureIndicatorRegularity(
   STACK_TRACE("PartialFractions::assureIndicatorRegularity");
   if (this->ambientDimension <= 1) {
     return true;
+  }
+  for (const Cone& cone : this->chambers.refinedCones.values) {
+    if (cone.isInInterior(indicator)) {
+      return true;
+    }
+    if (cone.isInCone(indicator)) {
+      // The point is in the cone but not in the interior, so it is not
+      // regular.
+      break;
+    }
   }
   Vectors<Rational> roots;
   roots = this->normalizedVectors;
@@ -14944,32 +15081,86 @@ bool ConeCollection::checkIsRefinedOrCrash() const {
   return true;
 }
 
+std::string Cone::toLatexVectorWithErrorCheck(
+  const Vector<Rational>& input, bool includeErrorChecks
+) const {
+  std::stringstream out;
+  out << input.toString();
+  if (
+    includeErrorChecks && this->payload.precomputedNonChecked.contains(input)
+  ) {
+    out
+    << ": "
+    << this->payload.precomputedNonChecked.getValueNoFail(input).toString();
+  }
+  if (
+    includeErrorChecks && this->payload.precomputedChecked.contains(input)
+  ) {
+    out
+    << ": "
+    << this->payload.precomputedChecked.getValueNoFail(input).toString()
+    << "\\checkmark";
+  }
+  return out.str();
+}
+
+std::string Cone::toLatexVertices(bool includeErrorChecks) const {
+  std::stringstream out;
+  if (this->vertices.size == 0) {
+    return " ";
+  }
+  if (this->vertices.size == 1) {
+    return
+    this->toLatexVectorWithErrorCheck(
+      this->vertices[0], includeErrorChecks
+    );
+  }
+  out << "\\begin{array}{l}";
+  for (int i = 0; i < this->vertices.size; i ++) {
+    out
+    << this->toLatexVectorWithErrorCheck(
+      this->vertices[i], includeErrorChecks
+    );
+    if (i != this->vertices.size - 1) {
+      out << "\\\\";
+    }
+  }
+  out << "\\end{array}";
+  return out.str();
+}
+
 std::string Cone::toLatex(
   const ConeCollection& owner, bool includeErrorChecks
 ) const {
   STACK_TRACE("Cone::toLatex");
   std::stringstream out;
   bool lastVarIsConstant = false;
-  out << "Id: " << this->displayId();
+  out << this->displayId();
+  out << "&";
   if (this->flagIsTheZeroCone) {
     out << "The cone is the zero cone.";
-  } else if (this->walls.size == 0) {
+    return out.str();
+  }
+  if (this->walls.size == 0) {
     out << "The cone is the entire space";
+    return out.str();
   }
   out << "\n";
   out << "\\(";
   FormatExpressions format;
   out << this->getAllNormals().toLatexInequalities(lastVarIsConstant, format);
   out << "\\)";
-  out << "Projectivized vertices: " << this->vertices.toString();
+  out << "&";
+  out << "\\(" << this->toLatexVertices(includeErrorChecks) << "\\)";
+  out << "&";
   if (this->vertices.size > 0) {
-    out << "\nInternal point: " << this->internalPoint().toString();
+    out
+    << this->toLatexVectorWithErrorCheck(
+      this->internalPoint(), includeErrorChecks
+    );
   }
-  out << "\nNeighbors: ";
-  out << this->toStringNeighborsAlongWall(owner);
-  if (includeErrorChecks) {
-    out << this->toStringPrecomputedVectorPartitionFunctionValues();
-  }
+  out << "& ";
+  out << this->toStringNeighbors(owner);
   return out.str();
 }
 
@@ -15060,9 +15251,18 @@ void Cone::getAllNeighbors(HashedList<int>& output) const {
   }
 }
 
-std::string Cone::toStringNeighbors() const {
+std::string Cone::toStringNeighbors(const ConeCollection& owner) const {
   HashedList<int> neighbors;
   this->getAllNeighbors(neighbors);
+  List<std::string> neighborDisplayIds;
+  for (int id : neighbors) {
+    const Cone* neighbor = owner.getConeById(id);
+    if (neighbor == nullptr) {
+      neighborDisplayIds.addOnTop("(corrupt)");
+      continue;
+    }
+    neighborDisplayIds.addListOnTop(neighbor->displayId());
+  }
   std::stringstream out;
   out << neighbors;
   return out.str();
@@ -15171,7 +15371,11 @@ std::string ConeCollection::toStringNeighborGraph(
 ) const {
   std::stringstream out;
   for (const Cone& cone : map.values) {
-    out << "<br>id " << cone.id << ": " << cone.toStringNeighbors();
+    out
+    << "<br>id "
+    << cone.displayId()
+    << ": "
+    << cone.toStringNeighbors(*this);
   }
   return out.str();
 }
@@ -15254,10 +15458,44 @@ std::string ConeCollection::toHTMLHistory() const {
   return StringRoutines::join(historyInReverse);
 }
 
+std::string ConeCollection::toLatexWithoutGraphics(const std::string& label)
+const {
+  std::stringstream out;
+  bool isLong = this->refinedCones.size() > 7;
+  out << "\\begin{longtable}{|ccccc|}";
+  out << "\\caption{\\footnotesize V.p.f. of ";
+  out << label << "}\\\\";
+  out
+  <<
+  "\\hline N & Defining inequalities & Vertices& Int. Pt.& Neighbors \\\\ \\hline\n"
+  << "\\endfirsthead"
+  << "\\multicolumn{5}{c}{{"
+  << "\\bfseries \\tablename\\ \\thetable{} -- continued from previous page"
+  << "}} \\\\\n"
+  << "\\hline N &Defining inequalities &Vertices&Int. Pt.\\\\ \\hline\n"
+  << "\\endhead"
+  << "\\hline \\multicolumn{5}{|r|}{{Continued on next page}} \\\\ \\hline"
+  << "\\endfoot"
+  << "\\endlastfoot";
+  for (int i = 0; i < this->refinedCones.size(); i ++) {
+    Cone& cone = this->refinedCones.values[i];
+    out << cone.toLatex(*this, true);
+    out << "\\\\\\hline\n";
+  }
+  out << "\\end{longtable}";
+  if (isLong) {
+    out << "\\end{landscape}";
+  }
+  return out.str();
+}
+
 std::string ConeCollection::toLatexGraphicsOnlyPsTricks() const {
+  STACK_TRACE("ConeCollection::toLatexGraphicsOnlyPsTricks");
   std::stringstream out;
   DrawingVariables drawingVariables;
-  this->drawMeProjective(drawingVariables);
+  if (!this->drawMeProjective(drawingVariables)) {
+    return "";
+  }
   out << drawingVariables.toLatexPsTricks();
   return out.str();
 }

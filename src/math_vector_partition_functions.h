@@ -32,8 +32,12 @@ public:
     int displayNumber;
     Vector<Rational> internalPoint;
     List<unsigned char> hashOfContainingSimplices;
-    // Value
+    // Precomputed values of the vector partition function.
+    // These small values have been checked using the VectorPartition
+    // enumerator.
     MapList<Vector<Rational>, Rational> precomputedChecked;
+    // Precomputed values of the vector partition function,
+    // but too large to be verified with an enumerator.
     MapList<Vector<Rational>, Rational> precomputedNonChecked;
     Payload();
     void incrementHashOfContainingSimplices(char input);
@@ -83,6 +87,7 @@ public:
   bool drawMeProjectiveSlice(DrawingVariables& drawingVariables) const;
   bool isInCone(const Vector<Rational>& point) const;
   bool isInCone(const Vectors<Rational>& vertices) const;
+  bool isInInterior(const Vector<Rational>& point) const;
   bool getLatticePointsInCone(
     Lattice& lattice,
     Vector<Rational>& shift,
@@ -187,12 +192,16 @@ public:
   bool operator>(const Cone& other) const;
   bool operator==(const Cone& other) const;
   std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toStringNeighbors() const;
+  std::string toStringNeighbors(const ConeCollection& owner) const;
   std::string toStringNeighborsAlongWall(const ConeCollection& owner) const;
   std::string toHTML(const ConeCollection& owner, bool includeErrorChecks)
   const;
   std::string toLatex(const ConeCollection& owner, bool includeErrorChecks)
   const;
+  std::string toLatexVertices(bool includeErrorChecks) const;
+  std::string toLatexVectorWithErrorCheck(
+    const Vector<Rational>& input, bool includeErrorChecks
+  ) const;
   std::string toStringPrecomputedVectorPartitionFunctionValues() const;
   // Determines whether the two Cones have a common irregular wall.
   // Assumptions made before this computation.
@@ -411,6 +420,7 @@ public:
   // Returns the graphics of all the cones without description.
   std::string toHTMLGraphicsOnly(bool includePanels) const;
   std::string toLatexGraphicsOnlyPsTricks() const;
+  std::string toLatexWithoutGraphics(const std::string& label) const;
   // Returns a sequence of html canvas drawings of the various stages of
   // slicing.
   std::string toHTMLHistory() const;
@@ -798,6 +808,13 @@ public:
   Selection indicesRedundantShortRoots;
   List<int> indicesDoublesOfRedundantShortRoots;
   Vector<Rational> weights;
+  // If non-empty, this means this partition function has
+  // a mathematical name. As of writing,
+  // the only named vector partition functions that we
+  // recognize are the Kostant partition functions.
+  // They are labeled by their root systems, for example
+  // "A_3" or "B_2".
+  std::string label;
   int getIndex(const Vector<Rational>& root);
   int getIndexDoubleOfARoot(const Vector<Rational>& root);
   void computeTable(int dimension);
@@ -875,6 +892,13 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toHTML(FormatExpressions* format = nullptr) const;
   std::string toStringCheckSum() const;
+  std::string toLatexQuasipolynomialTable() const;
+  std::string toStringLabel() const;
+  std::string toLatexOneQuasipolynomialInTable(
+    const std::string& displayId,
+    const QuasiPolynomial& input,
+    FormatExpressions* format
+  ) const;
   std::string toLatexCopyButton(FormatExpressions* format = nullptr) const;
   std::string toLatexWithoutLastReduced(FormatExpressions* format = nullptr)
   const;
@@ -883,8 +907,7 @@ public:
   std::string toLatexInternal(
     bool addLastReduced, FormatExpressions* format = nullptr
   ) const;
-  std::string toStringDifferentialOperatorForm(FormatExpressions* format)
-  const;
+  std::string toLatexDifferentialOperatorForm(FormatExpressions* format) const;
   std::string toLatexWithInitialState(FormatExpressions* format = nullptr)
   const;
   std::string toLatexFractionSum(

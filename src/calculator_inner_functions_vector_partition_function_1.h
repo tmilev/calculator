@@ -35,7 +35,8 @@ public:
   static bool getVectorsForConeDecomposition(
     Calculator& calculator,
     const Expression& input,
-    Vectors<Rational>& output
+    Vectors<Rational>& output,
+    std::string& outputLabel
   );
   static bool coneDecompositionSpannedSlicesNoHistory(
     Calculator& calculator, const Expression& input, Expression& output

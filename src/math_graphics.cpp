@@ -350,6 +350,7 @@ double DrawingVariables::latexUnit() const {
 }
 
 std::string DrawingVariables::toLatexPsTricks() const {
+  STACK_TRACE("DrawingVariables::toLatexPsTricks");
   std::stringstream out;
   double unit = this->latexUnit();
   out
@@ -464,7 +465,7 @@ Vector<double> DrawingVariables::getCoordinatesLatex(
   result.makeZero(2);
   for (int j = 0; j < input.size; j ++) {
     result[0] += this->projectionsEiVectors[j][0] * input[j];
-    result[1] += this->projectionsEiVectors[j][1] * input[j];
+    result[1] += - this->projectionsEiVectors[j][1] * input[j];
   }
   return result;
 }

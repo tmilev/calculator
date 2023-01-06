@@ -1351,6 +1351,18 @@ bool Cone::isInCone(const Vector<Rational>& point) const {
   return true;
 }
 
+bool Cone::isInInterior(const Vector<Rational>& point) const {
+  if (this->flagIsTheZeroCone) {
+    return false;
+  }
+  for (const Wall& wall : this->walls) {
+    if (!wall.isInOpenHalfSpace(point)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 std::string MonomialPolynomial::toString(FormatExpressions* polynomialFormat)
 const {
   std::stringstream out;

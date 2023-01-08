@@ -2466,11 +2466,11 @@ public:
   // it will be enclosed in a \begin{array} ... \end{array} pair.
   std::string toStringWithPossibleLineBreak(
     FormatExpressions* format = nullptr,
-    bool* outputNeedsLineBreak = nullptr
+    int* outputNumberOfLines = nullptr
   ) const;
   std::string toString(
     FormatExpressions* format = nullptr,
-    bool* outputNeedsLineBreak = nullptr
+    int* outputNumberOfLines = nullptr
   ) const;
   // Same as toString but uses a default alphabet "x", "y", ...
   // for the first few variables.
@@ -5626,14 +5626,14 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::getTermString(
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::
 toStringWithPossibleLineBreak(
-  FormatExpressions* format, bool* outputNeedsLineBreak
+  FormatExpressions* format, int* outputNumberOfLines
 ) const {
-  bool needsLineBreak = false;
-  if (outputNeedsLineBreak == nullptr) {
-    outputNeedsLineBreak = &needsLineBreak;
+  int lines = 1;
+  if (outputNumberOfLines == nullptr) {
+    outputNumberOfLines = &lines;
   }
-  std::string result = this->toString(format, outputNeedsLineBreak);
-  if (!*outputNeedsLineBreak) {
+  std::string result = this->toString(format, outputNumberOfLines);
+  if (!*outputNumberOfLines) {
     return result;
   }
   std::stringstream out;
@@ -5643,11 +5643,11 @@ toStringWithPossibleLineBreak(
 
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
-  FormatExpressions* format, bool* outputNeedsLineBreak
+  FormatExpressions* format, int* outputNumberOfLines
 ) const {
   STACK_TRACE("LinearCombination::toString");
-  if (outputNeedsLineBreak != nullptr) {
-    *outputNeedsLineBreak = false;
+  if (outputNumberOfLines != nullptr) {
+    *outputNumberOfLines = 1;
   }
   if (this->size() == 0) {
     return "0";
@@ -5712,9 +5712,9 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
       if (cutOffCounter > maximumLineLength) {
         cutOffCounter = 0;
         if (flagUseLaTeX && i != sortedMonomials.size - 1) {
-          if (outputNeedsLineBreak != nullptr) {
-            *outputNeedsLineBreak = true;
-          }
+          if (outputNumberOfLines != nullptr) {
+            (*outputNumberOfLines)++;
+                     }
           out << " \\\\";
           if (isInNumerator) {
             out << " \\hline ";

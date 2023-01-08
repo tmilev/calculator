@@ -3731,10 +3731,10 @@ std::string OnePartialFractionDenominator::toLatex(
   STACK_TRACE("OnePartialFractionDenominator::toLatex");
   std::stringstream out;
   out << "\\frac{";
-  bool needsLineBreak = false;
+  int numberOfLines = 1;
   std::string numeratorString =
-  numerator.toStringWithPossibleLineBreak(format, &needsLineBreak);
-  if (needsLineBreak) {
+  numerator.toStringWithPossibleLineBreak(format, &numberOfLines);
+  if (numberOfLines>1) {
     out << "~~~~" << numeratorString << "~~~~";
   } else {
     out << numeratorString;
@@ -4434,7 +4434,7 @@ std::string PartialFractions::toLatexQuasipolynomialTable() const {
   out
   << "\\hline N & Polynomial/Lattice & \\\\ \\hline\n"
   << "\\endfirsthead"
-  << "\\multicolumn{3}{c}{{"
+  << "\\multicolumn{3}{|c|}{{"
   << "\\bfseries \\tablename\\ \\thetable{} -- continued from previous page"
   << "}} \\\\\n"
   << "\\hline \\multicolumn{1}{|c|}{} & \\multicolumn{1}{c|}{} \\\\ \\hline\n"
@@ -4551,7 +4551,10 @@ std::string PartialFractions::toLatexRawPartialFractionDecomposition() const {
       differentialOperatorForm
     }
   );
-  out << "\\(\\begin{array}{rcl}";
+  out <<   "\\alowdisplaybreaks";
+
+  out << "\\(\n"
+<<    "\\begin{array}{rcl}";
   int characterCount = 0;
   for (int i = 0; i < allEqualities.size; i ++) {
     if (i > 0) {
@@ -15536,7 +15539,7 @@ const {
   << "}} \\\\\n"
   << "\\hline N &Defining inequalities &Vertices&Int. Pt.\\\\ \\hline\n"
   << "\\endhead"
-  << "\\hline \\multicolumn{5}{|r|}{{Continued on next page}} \\\\ \\hline"
+  << "\\hline \\multicolumn{5}{|c|}{{Continued on next page}} \\\\ \\hline"
   << "\\endfoot"
   << "\\endlastfoot";
   for (int i = 0; i < this->refinedCones.size(); i ++) {

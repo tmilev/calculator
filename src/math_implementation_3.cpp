@@ -3607,6 +3607,7 @@ FormatExpressions::FormatExpressions() {
   this->flagLatexDetailsInHtml = false;
   this->flagUseQuotes = true;
   this->flagSuppressModP = false;
+  this->flagIsInNumerator = false;
   this->maximumMatrixDisplayedRows = 20;
   this->maximumMatrixLineLength = 20;
   this->monomialOrder.leftGreaterThanRight =
@@ -3729,12 +3730,16 @@ std::string OnePartialFractionDenominator::toLatex(
 ) const {
   STACK_TRACE("OnePartialFractionDenominator::toLatex");
   std::stringstream out;
-  out
-  << "\\frac{"
-  << numerator.toString(format)
-  << "}{"
-  << this->toStringDenominatorOnly(format)
-  << "}";
+  out << "\\frac{";
+  bool needsLineBreak = false;
+  std::string numeratorString =
+  numerator.toStringWithPossibleLineBreak(format, &needsLineBreak);
+  if (needsLineBreak) {
+    out << "~~~~" << numeratorString << "~~~~";
+  } else {
+    out << numeratorString;
+  }
+  out << "}{" << this->toStringDenominatorOnly(format) << "}";
   return out.str();
 }
 
@@ -4214,12 +4219,11 @@ std::string PartialFractions::toLatexFractionSum(
   const LinearCombination<
     OnePartialFractionDenominator, Polynomial<LargeInteger>
   >& fractions,
-  FormatExpressions* format,
-  bool isFirst
+  FormatExpressions* format
 ) const {
   std::stringstream out;
   for (int i = 0; i < fractions.size(); i ++) {
-    if (i != 0 || !isFirst) {
+    if (i != 0) {
       out << "\\\\\n&&+\n";
     } else {
       out << "~~";
@@ -4256,28 +4260,18 @@ std::string PartialFractions::toLatexInternal(
 ) const {
   STACK_TRACE("PartialFractions::toLatexInternal");
   std::stringstream out;
-  out << this->toLatexFractionSum(this->reduced, format, true);
-  out
-  << this->toLatexFractionSum(
-    this->reducedWithElongationRedundancies,
-    format,
-    this->reduced.size() == 0
-  );
   LinearCombination<
     OnePartialFractionDenominator, Polynomial<LargeInteger>
-  > nonReducedCopy =
-  this->nonReduced;
+  > total =
+  this->reduced;
+  total += this->reducedWithElongationRedundancies;
+  total += this->nonReduced;
   if (addLastReduced) {
-    nonReducedCopy.addMonomial(
+    total.addMonomial(
       this->details.lastReduced, this->details.lastCoefficient
     );
   }
-  out
-  << this->toLatexFractionSum(
-    nonReducedCopy,
-    format,
-    this->reduced.size() + this->reducedWithElongationRedundancies.size() == 0
-  );
+  out << this->toLatexFractionSum(total, format);
   return out.str();
 }
 
@@ -4318,6 +4312,22 @@ std::string PartialFractions::Details::toHTML() const {
   }
   out << "\\end{array}\\)";
   return out.str();
+}
+
+void PartialFractions::Details::takeSnapShotBeforeElongation() {
+  STACK_TRACE("PartialFractions::Details::takeSnapShotBeforeElongation");
+  this->snapShotBeforeElongation.makeZero();
+  if (!this->owner->nonReduced.isEqualToZero()) {
+    global.fatal
+    << "Do not call before all fractions are semi-reduced."
+    << global.fatal;
+  }
+  this->snapShotBeforeElongation += this->owner->reduced;
+  this->snapShotBeforeElongation +=
+  this->owner->reducedWithElongationRedundancies;
+  this->flagNeedsElongation =
+  this->owner->reducedWithElongationRedundancies.size() >
+  0;
 }
 
 std::string PartialFractions::Details::toStringLinearCombination() const {
@@ -4374,39 +4384,30 @@ void PartialFractions::Details::addDifferentialOperatorForm() {
   );
 }
 
-std::string PartialFractions::toLatexWithInitialState(
+std::string PartialFractions::toLatexPartialFractionDecomposition(
   FormatExpressions* format
 ) const {
-  STACK_TRACE("PartialFractions::toLatexWithInitialState");
+  STACK_TRACE("PartialFractions::toLatexPartialFractionDecomposition");
   std::stringstream out;
   out << "\\(";
   std::string initialExpression =
   this->initialPartialFraction.toLatex(1, format);
+  std::string splitExpressionBeforeReduction;
+  if (this->details.flagNeedsElongation) {
+    splitExpressionBeforeReduction =
+    this->toLatexFractionSum(
+      this->details.snapShotBeforeElongation, format
+    );
+  }
   std::string splitExpression = this->toLatexWithoutLastReduced(format);
   std::string differentialForm = this->toLatexDifferentialOperatorForm(format);
-  bool useOneColumn = this->originalVectors.size * this->ambientDimension >=
-  18;
-  if (useOneColumn) {
-    out << "\\begin{array}{rcl}\n";
-    out
-    << "&&\\displaystyle"
-    << initialExpression
-    << "\\\\\n&=&\\displaystyle"
-    << splitExpression
-    << "\\\\\n&=&"
-    << differentialForm;
-    out << "\\end{array}";
-  } else {
-    out << "\\begin{array}{rcl}\n";
-    out
-    << "\\displaystyle "
-    << initialExpression
-    << "&=&"
-    << splitExpression
-    << "\\\\\n &=&"
-    << differentialForm
-    << "\\end{array}";
+  out << "\\begin{array}{rcl}\n";
+  out << initialExpression << "&=&";
+  if (splitExpressionBeforeReduction != "") {
+    out << splitExpressionBeforeReduction << "\\\\\n&=&";
   }
+  out << splitExpression << "\\\\\n&=&" << differentialForm;
+  out << "\\end{array}";
   out << "\\)";
   return out.str();
 }
@@ -4426,25 +4427,19 @@ std::string PartialFractions::toLatexQuasipolynomialTable() const {
   FormatExpressions format;
   format.flagUseFrac = true;
   format.flagUseLatex = true;
-  bool isLong = this->originalVectors.size * this->ambientDimension > 18;
-  if (isLong) {
-    format.maximumLineLength = 200;
-    out << "\\begin{landscape}";
-  } else {
-    format.maximumLineLength = 80;
-  }
-  out << "\\begin{longtable}{|ccc|}";
+  format.maximumLineLength = 150;
+  out << "\\begin{longtable}{|c|c|c|}";
   out << "\\caption{\\footnotesize V.p.f. of ";
   out << this->toStringLabel() << "}\\\\";
   out
-  << "\\hline N & Polynomial/Lattice & Lattice shift \\\\ \\hline\n"
+  << "\\hline N & Polynomial/Lattice & \\\\ \\hline\n"
   << "\\endfirsthead"
   << "\\multicolumn{3}{c}{{"
   << "\\bfseries \\tablename\\ \\thetable{} -- continued from previous page"
   << "}} \\\\\n"
   << "\\hline \\multicolumn{1}{|c|}{} & \\multicolumn{1}{c|}{} \\\\ \\hline\n"
   << "\\endhead"
-  << "\\hline \\multicolumn{3}{|r|}{{Continued on next page}} \\\\ \\hline"
+  << "\\hline \\multicolumn{3}{|c|}{{Continued on next page}} \\\\ \\hline"
   << "\\endfoot"
   << "\\endlastfoot";
   for (int i = 0; i < this->chambers.refinedCones.size(); i ++) {
@@ -4455,13 +4450,10 @@ std::string PartialFractions::toLatexQuasipolynomialTable() const {
       cone.displayId(), quasiPolynomial, &format
     );
     if (i != this->chambers.refinedCones.size() - 1) {
-      out << "\\hline ";
+      out << "\\hline \n";
     }
   }
-  out << "\\end{longtable}";
-  if (isLong) {
-    out << "\\end{landscape}";
-  }
+  out << "\\end{longtable}\n";
   return out.str();
 }
 
@@ -4485,7 +4477,7 @@ std::string PartialFractions::toLatexOneQuasipolynomialInTable(
     out
     << "&\\(\\Lambda="
     << input.ambientLatticeReduced.toString()
-    << "\\)&\\\\\\hline";
+    << "\\)&Shift\\\\\\hline";
   }
   for (int i = 0; i < input.latticeShifts.size; i ++) {
     out
@@ -4494,17 +4486,22 @@ std::string PartialFractions::toLatexOneQuasipolynomialInTable(
     << input.valueOnEachLatticeShift[i].toStringWithPossibleLineBreak(format)
     << "\\)";
     out << "&";
-    if (isZn) {
+    if (!isZn) {
       out << "\\(" << input.latticeShifts[i].toString() << "\\)";
+    } else {
+      out << "-";
     }
     out << "\\\\\n";
-    out << "\\hline";
+    if (isZn || i == input.latticeShifts.size - 1) {
+      out << "\\hline";
+    } else {
+      out << "\\cline{2-3}";
+    }
   }
   return out.str();
 }
 
-std::string PartialFractions::toLatexCopyButton(FormatExpressions* format)
-const {
+std::string PartialFractions::toLatexCopyButton() const {
   STACK_TRACE("PartialFractions::toLatexCopyButton");
   std::stringstream out;
   out << "\\documentclass{article}\n";
@@ -4514,28 +4511,88 @@ const {
   out << "\\usepackage{longtable}\n";
   out << "\\usepackage{multirow}\n";
   out << "\\usepackage{lscape}\n";
+  out << "\\usepackage{xcolor}\n";
   out << "\\begin{document}\n\n\n\n";
+  out << this->toLatexSelfContainedDocumentBody();
+  out << "\\end{document}";
+  return HtmlRoutines::toHtmlLatexLiteralWithCopy(out.str());
+}
+
+std::string PartialFractions::toLatexRawPartialFractionDecomposition() const {
+  STACK_TRACE("PartialFractions::toLatexRawPartialFractionDecomposition");
+  std::stringstream out;
+  FormatExpressions format;
+  format.maximumLineLength = 120;
+  format.flagUseFrac = true;
+  format.flagUseLatex = true;
+  format.flagIsInNumerator = true;
+  out << "\\begin{longtable}{l}";
+  out
+  << "\\caption{\\footnotesize Partial fraction decomposition "
+  << "and differential operator form (Brion-Vergne) of "
+  << this->toStringLabel()
+  << "}\\\\\n";
+  std::string initial = this->initialPartialFraction.toLatex(1, &format);
+  std::string decomposedWithoutElongation =
+  this->toLatexFractionSum(
+    this->details.snapShotBeforeElongation, &format
+  );
+  std::string decomposed = this->toLatexFractionSum(this->reduced, &format);
+  FormatExpressions differentialOperatorFormat;
+  differentialOperatorFormat.maximumLineLength = 50;
+  differentialOperatorFormat.flagUseFrac = true;
+  differentialOperatorFormat.flagUseLatex = true;
+  std::string differentialOperatorForm =
+  this->toLatexDifferentialOperatorForm(&differentialOperatorFormat);
+  List<std::string> allEqualities = List<std::string>({
+      initial,
+      decomposedWithoutElongation,
+      decomposed,
+      differentialOperatorForm
+    }
+  );
+  out << "\\(\\begin{array}{rcl}";
+  int characterCount = 0;
+  for (int i = 0; i < allEqualities.size; i ++) {
+    if (i > 0) {
+      out << "&=&";
+    } else {
+      out << "&&";
+    }
+    out << allEqualities[i];
+    characterCount += allEqualities[i].size();
+    if (i == allEqualities.size - 1) {
+      out << "\\end{array}\\)\n";
+    } else if (characterCount > 800) {
+      characterCount = 0;
+      out << "\\end{array}\\) \\\\\n";
+      out << "\\(\\begin{array}{rcl}";
+    } else {
+      out << "\\\\\n";
+    }
+  }
+  out << "\\end{longtable}";
+  return out.str();
+}
+
+std::string PartialFractions::toLatexSelfContainedDocumentBody() const {
+  STACK_TRACE("PartialFractions::toLatexSelfContainedDocumentBody");
+  std::stringstream out;
   out << "\\begin{table}[h!]\n";
+  out << "\\begin{center}\n";
   out << this->chambers.toLatexGraphicsOnlyPsTricks();
   out
   << "\\caption{Combinatorial chambers of "
   << this->toStringLabel()
   << "}\n";
+  out << "\\end{center}\n";
   out << "\\end{table}\n";
   out << this->toLatexQuasipolynomialTable();
   out << "\n\n";
   out << this->chambers.toLatexWithoutGraphics(this->toStringLabel());
   out << "\n\n";
-  out << "\\begin{table}[h!]\n";
-  out << this->toLatexWithInitialState(format) << "\n";
-  out
-  << "\\caption{Partial fraction decomposition "
-  << "and differential operator form (Brion-Vergne) of "
-  << this->toStringLabel()
-  << "}\n";
-  out << "\\end{table}\n\n\n\n";
-  out << "\\end{document}";
-  return HtmlRoutines::toHtmlLatexLiteralWithCopy(out.str());
+  out << this->toLatexRawPartialFractionDecomposition();
+  return out.str();
 }
 
 std::string PartialFractions::toHTML(FormatExpressions* format) const {
@@ -4543,11 +4600,11 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
   std::stringstream out;
   out << "Original vectors: " << this->originalVectors.toString();
   out << "<br>";
-  out << this->toLatexCopyButton(format);
+  out << this->toLatexCopyButton();
   if (this->flagShowDetails) {
     out << this->details.toHTML();
   } else {
-    out << this->toLatexWithInitialState(format);
+    out << this->toLatexPartialFractionDecomposition(format);
   }
   out << this->chambers.toHTMLGraphicsOnly(false);
   FormatExpressions formatQuasipolynomial;
@@ -5451,11 +5508,10 @@ std::string OnePartialFractionDenominatorComponent::toStringOneDenominator(
   monomial.makeFromPowers(exponent);
   out << monomial.toString(format);
   out << ")";
-  if (multiplicity > 1) {
+  if (multiplicity > 1 && multiplicity < 10) {
+    out << "^" << multiplicity;
+  } else if (multiplicity >= 10) {
     out << "^{" << multiplicity << "}";
-  }
-  if (format->flagUseLatex) {
-    out << "}";
   }
   return out.str();
 }
@@ -10721,9 +10777,12 @@ std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
   this->computeDifferentialOperatorConstant(extraConstant);
   std::stringstream out;
   if (coefficient.size() > 1) {
-    out << "\\left(" << coefficient.toString() << "\\right)";
+    out
+    << "\\left("
+    << coefficient.toStringWithPossibleLineBreak(format)
+    << "\\right)";
   } else {
-    out << coefficient.toString();
+    out << coefficient.toStringWithPossibleLineBreak(format);
   }
   out << "\\cdot ";
   if (!extraConstant.isEqualToOne()) {
@@ -10757,7 +10816,7 @@ std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
     }
     out
     << "\\left("
-    << differentialOperators[i].toString(format)
+    << differentialOperators[i].toStringWithPossibleLineBreak(format)
     << "\\right)";
     if (power > 1 && power < 10) {
       out << "^" << power;
@@ -11673,6 +11732,7 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
 PartialFractions::Details::Details() {
   this->owner = nullptr;
   this->maximumIntermediates = 4;
+  this->flagNeedsElongation = false;
 }
 
 PartialFractions::Statistics::Statistics() {
@@ -12903,6 +12963,7 @@ bool PartialFractions::split(Vector<Rational>* indicator) {
   }
   if (this->splitPartial()) {
     this->details.addFullState();
+    this->details.takeSnapShotBeforeElongation();
     this->removeRedundantShortRoots(indicator);
   }
   this->details.addDifferentialOperatorForm();
@@ -15461,13 +15522,14 @@ std::string ConeCollection::toHTMLHistory() const {
 std::string ConeCollection::toLatexWithoutGraphics(const std::string& label)
 const {
   std::stringstream out;
-  bool isLong = this->refinedCones.size() > 7;
   out << "\\begin{longtable}{|ccccc|}";
   out << "\\caption{\\footnotesize V.p.f. of ";
   out << label << "}\\\\";
   out
-  <<
-  "\\hline N & Defining inequalities & Vertices& Int. Pt.& Neighbors \\\\ \\hline\n"
+  << "\\hline N & "
+  << "Defining inequalities & "
+  << "Vertices& Int. Pt.& "
+  << "Neighbors \\\\ \\hline\n"
   << "\\endfirsthead"
   << "\\multicolumn{5}{c}{{"
   << "\\bfseries \\tablename\\ \\thetable{} -- continued from previous page"
@@ -15483,9 +15545,6 @@ const {
     out << "\\\\\\hline\n";
   }
   out << "\\end{longtable}";
-  if (isLong) {
-    out << "\\end{landscape}";
-  }
   return out.str();
 }
 

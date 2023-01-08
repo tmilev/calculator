@@ -1186,20 +1186,19 @@ public:
     // - Functions that run extra slowly.
     // - Functions that are considered experimental / in development.
     bool dontTestAutomatically;
-    bool adminOnly;
+    bool administrativeOnly;
     void reset();
-    static Options adminNoTestInvisibleExperimental();
+    static Options administrativeNotTestedInvisibleExperimental();
     static Options administrativeNotTested();
+    static Options administrativeNotTestedInvisibleOffByDefault();
+    static Options administrativeNotTestedExperimental();
+    static Options administrativeExperimentalTested();
+    static Options administrativeTested();
     static Options innerInvisible();
     static Options standard();
     static Options compositeStandard();
     static Options innerFreezesArguments();
-    static Options adminNoTestInvisibleOffByDefault();
     static Options innerInvisibleExperimental();
-    static Options innerAdminNoTestExperimental();
-    static Options innerAdminNoTest();
-    static Options administrativeExperimentalTested();
-    static Options administrativeTested();
     static Options experimental();
     static Options invisibleNoTest();
     static Options innerNoTest();

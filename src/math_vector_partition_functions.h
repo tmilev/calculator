@@ -766,13 +766,18 @@ public:
   public:
     int maximumIntermediates;
     PartialFractions* owner;
+    bool flagNeedsElongation;
     List<std::string> allIntermediateComputations;
     Vectors<Rational> lastVectors;
     Vector<Rational> lastLinearCombination;
     OnePartialFractionDenominator lastReduced;
     Polynomial<LargeInteger> lastCoefficient;
     std::string toHTML() const;
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    > snapShotBeforeElongation;
     Details();
+    void takeSnapShotBeforeElongation();
     void addIntermediate();
     void addFullState();
     // Adds a report of the Brion-Vergne decomposition.
@@ -797,7 +802,7 @@ public:
   ConeCollection chambers;
   // The original vectors whose vector partition function
   // we are computing.
-  List<Vector<Rational> > originalVectors;
+  Vectors<Rational> originalVectors;
   // Rescaled, deduped and sorted version of the original vectors
   // so their coefficients have no greatest common
   // divisor and sorted in graded lexicographic order.
@@ -899,7 +904,8 @@ public:
     const QuasiPolynomial& input,
     FormatExpressions* format
   ) const;
-  std::string toLatexCopyButton(FormatExpressions* format = nullptr) const;
+  std::string toLatexSelfContainedDocumentBody() const;
+  std::string toLatexCopyButton() const;
   std::string toLatexWithoutLastReduced(FormatExpressions* format = nullptr)
   const;
   std::string toLatexWithLastReduced(FormatExpressions* format = nullptr)
@@ -908,14 +914,15 @@ public:
     bool addLastReduced, FormatExpressions* format = nullptr
   ) const;
   std::string toLatexDifferentialOperatorForm(FormatExpressions* format) const;
-  std::string toLatexWithInitialState(FormatExpressions* format = nullptr)
-  const;
+  std::string toLatexPartialFractionDecomposition(
+    FormatExpressions* format = nullptr
+  ) const;
+  std::string toLatexRawPartialFractionDecomposition() const;
   std::string toLatexFractionSum(
     const LinearCombination<
       OnePartialFractionDenominator, Polynomial<LargeInteger>
     >& fractions,
-    FormatExpressions* format,
-    bool isFirst
+    FormatExpressions* format
   ) const;
   class Test {
   public:

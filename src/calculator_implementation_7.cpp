@@ -9710,7 +9710,8 @@ void Calculator::Test::calculatorTestPrepare() {
           continue;
         }
         Calculator::Test::OneTest oneTest;
-        oneTest.requresAdminAccess = currentFunction.options.adminOnly;
+        oneTest.requresAdminAccess =
+        currentFunction.options.administrativeOnly;
         oneTest.command = currentFunction.example;
         oneTest.atom = this->owner->operations.keys[i];
         oneTest.functionAdditionalIdentifier =

@@ -136,7 +136,7 @@ std::string Calculator::Examples::toStringOneOperationHandler(
   if (function.additionalIdentifier != "") {
     out << " {" << function.additionalIdentifier << "}. ";
   }
-  if (function.options.adminOnly) {
+  if (function.options.administrativeOnly) {
     out << "(admin only) ";
   }
   if (!function.options.visible) {

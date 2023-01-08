@@ -4,6 +4,8 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
   STACK_TRACE("Calculator::initializeFunctionsVectorPartitionFunctions");
   Function::Options innerStandard = Function::Options::standard();
   Function::Options composite = Function::Options::compositeStandard();
+  Function::Options administrativeNotTested =
+  Function::Options::administrativeNotTested();
   this->addOperationHandler(
     Calculator::Functions::Names::vectorPartitionFunction,
     CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula,
@@ -287,5 +289,33 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     "::quotientLatticeRepresentatives",
     "QuotientLatticeRepresentatives",
     innerStandard
+  );
+  this->addOperationHandler(
+    "KostantPartitionFunctionsLatex",
+    CalculatorFunctionsVectorPartitionFunction::kostantPartitionFunctionLatex,
+    "",
+    "Requires a logged-in admin to use. "
+    "Acts similarly to the "
+    "VectorPartitionFunction but 1) displays latex only, "
+    "2) acts on Dynkin types only and "
+    "3) allows multiple dynkin type inputs "
+    "producing a single chunk of latex output. "
+    "This function is needed for the internal "
+    "documentation of our algorithms, "
+    "use VectorPartitionFunction directly instead. ",
+    "KostantPartitionFunctionsLatex(\n"
+    "a_2,\n"
+    "b_2,\n"
+    "c_2,\n"
+    "g_2,\n"
+    "a_3,\n"
+    "b_3,\n"
+    "c_3,\n"
+    "a_4\n"
+    ")",
+    "CalculatorFunctionsVectorPartitionFunction"
+    "::kostantPartitionFunctionLatex",
+    "KostantPartitionFunctionsLatex",
+    administrativeNotTested
   );
 }

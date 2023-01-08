@@ -34,7 +34,7 @@ std::string Calculator::Functions::Names::Trigonometry::cosine = "\\cos";
 void Calculator::initializeAdminFunctions() {
   Function::Options adminDefault, adminDisabled;
   adminDefault.dontTestAutomatically = true;
-  adminDefault.adminOnly = true;
+  adminDefault.administrativeOnly = true;
   adminDefault.flagIsInner = true;
   adminDisabled = adminDefault;
   adminDisabled.disabledByUserDefault = true;
@@ -89,7 +89,7 @@ void Calculator::initializeFunctionsStandard() {
   outerStandard.flagIsInner = false;
   Function::Options outerAdminInvisibleNoTest;
   outerAdminInvisibleNoTest.flagIsInner = false;
-  outerAdminInvisibleNoTest.adminOnly = true;
+  outerAdminInvisibleNoTest.administrativeOnly = true;
   outerAdminInvisibleNoTest.dontTestAutomatically = true;
   Function::Options innerNoTestInvisibleExperimental;
   innerNoTestInvisibleExperimental.flagIsInner = true;
@@ -114,11 +114,11 @@ void Calculator::initializeFunctionsStandard() {
   Function::Options innerAdminNoTest;
   innerAdminNoTest.flagIsInner = true;
   innerAdminNoTest.dontTestAutomatically = true;
-  innerAdminNoTest.adminOnly = true;
+  innerAdminNoTest.administrativeOnly = true;
   Function::Options innerAdminNoTestInvisibleOffByDefault;
   innerAdminNoTestInvisibleOffByDefault.flagIsInner = true;
   innerAdminNoTestInvisibleOffByDefault.dontTestAutomatically = true;
-  innerAdminNoTestInvisibleOffByDefault.adminOnly = true;
+  innerAdminNoTestInvisibleOffByDefault.administrativeOnly = true;
   innerAdminNoTestInvisibleOffByDefault.visible = false;
   innerAdminNoTestInvisibleOffByDefault.disabledByUser = true;
   innerAdminNoTestInvisibleOffByDefault.disabledByUserDefault = true;

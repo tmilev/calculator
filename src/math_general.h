@@ -2329,6 +2329,7 @@ public:
   bool flagLatexDetailsInHtml;
   bool flagUseQuotes;
   bool flagSuppressModP;
+  bool flagIsInNumerator;
   std::string suffixLinearCombination;
   char ambientWeylLetter;
   List<MonomialPolynomial>::Comparator monomialOrder;
@@ -2460,8 +2461,12 @@ public:
     (void) unused;
     return this->size() > 1;
   }
+  // Same as toString but, if the polynomial is too long and a line break is
+  // needed,
+  // it will be enclosed in a \begin{array} ... \end{array} pair.
   std::string toStringWithPossibleLineBreak(
-    FormatExpressions* format = nullptr
+    FormatExpressions* format = nullptr,
+    bool* outputNeedsLineBreak = nullptr
   ) const;
   std::string toString(
     FormatExpressions* format = nullptr,
@@ -5620,10 +5625,15 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::getTermString(
 
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::
-toStringWithPossibleLineBreak(FormatExpressions* format) const {
+toStringWithPossibleLineBreak(
+  FormatExpressions* format, bool* outputNeedsLineBreak
+) const {
   bool needsLineBreak = false;
-  std::string result = this->toString(format, &needsLineBreak);
-  if (!needsLineBreak) {
+  if (outputNeedsLineBreak == nullptr) {
+    outputNeedsLineBreak = &needsLineBreak;
+  }
+  std::string result = this->toString(format, outputNeedsLineBreak);
+  if (!*outputNeedsLineBreak) {
     return result;
   }
   std::stringstream out;
@@ -5664,6 +5674,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   format->numberOfAmpersandsPerNewLineForLaTeX;
   bool flagUseLaTeX = (format == nullptr) ? false : format->flagUseLatex;
   bool flagUseHTML = (format == nullptr) ? false : format->flagUseHTML;
+  bool isInNumerator = (format == nullptr) ? false : format->flagIsInNumerator;
   std::string customTimes = "";
   if (format != nullptr) {
     useCustomPlus = (format->customPlusSign != "");
@@ -5705,6 +5716,9 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
             *outputNeedsLineBreak = true;
           }
           out << " \\\\";
+          if (isInNumerator) {
+            out << " \\hline ";
+          }
           for (int k = 0; k < numberOfAmpersandsPerNewLineForLaTeX; k ++) {
             out << "&";
           }

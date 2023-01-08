@@ -1467,11 +1467,12 @@ void Calculator::addOperationHandler(
   this->registerCalculatorFunction(functionWrapper, indexOperation);
 }
 
-Function::Options Function::Options::adminNoTestInvisibleOffByDefault() {
+Function::Options Function::Options::
+administrativeNotTestedInvisibleOffByDefault() {
   Function::Options result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
-  result.adminOnly = true;
+  result.administrativeOnly = true;
   result.visible = false;
   result.disabledByUser = true;
   result.disabledByUserDefault = true;
@@ -1492,31 +1493,23 @@ Function::Options Function::Options::innerFreezesArguments() {
   return result;
 }
 
-Function::Options Function::Options::innerAdminNoTest() {
-  Function::Options result;
-  result.flagIsInner = true;
-  result.dontTestAutomatically = true;
-  result.adminOnly = true;
-  return result;
-}
-
 Function::Options Function::Options::administrativeExperimentalTested() {
   Function::Options result;
   result.flagIsExperimental = true;
-  result.adminOnly = true;
+  result.administrativeOnly = true;
   result.dontTestAutomatically = false;
   return result;
 }
 
 Function::Options Function::Options::administrativeTested() {
   Function::Options result;
-  result.adminOnly = true;
+  result.administrativeOnly = true;
   result.dontTestAutomatically = false;
   return result;
 }
 
-Function::Options Function::Options::innerAdminNoTestExperimental() {
-  Function::Options result = Function::Options::innerAdminNoTest();
+Function::Options Function::Options::administrativeNotTestedExperimental() {
+  Function::Options result = Function::Options::administrativeNotTested();
   result.flagIsExperimental = true;
   return result;
 }
@@ -1593,15 +1586,16 @@ Function::Options Function::Options::administrativeNotTested() {
   Function::Options result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
-  result.adminOnly = true;
+  result.administrativeOnly = true;
   return result;
 }
 
-Function::Options Function::Options::adminNoTestInvisibleExperimental() {
+Function::Options Function::Options::
+administrativeNotTestedInvisibleExperimental() {
   Function::Options result;
   result.flagIsInner = true;
   result.dontTestAutomatically = true;
-  result.adminOnly = true;
+  result.administrativeOnly = true;
   result.visible = false;
   return result;
 }
@@ -1615,7 +1609,7 @@ void Function::Options::reset() {
   this->disabledByUser = false;
   this->disabledByUserDefault = false;
   this->dontTestAutomatically = false;
-  this->adminOnly = false;
+  this->administrativeOnly = false;
   this->freezesArguments = false;
 }
 
@@ -1696,7 +1690,7 @@ bool Function::shouldBeApplied(int parentOperationIfAvailable) {
   if (this->parentsThatBanHandler.contains(parentOperationIfAvailable)) {
     return false;
   }
-  if (this->options.adminOnly) {
+  if (this->options.administrativeOnly) {
     if (!global.userDefaultHasAdminRights()) {
       return (*this->owner)
       << "Rule "
@@ -1737,7 +1731,7 @@ JSData Function::toJSON() const {
   } else {
     result["experimental"] = false;
   }
-  if (this->options.adminOnly) {
+  if (this->options.administrativeOnly) {
     result["administrative"] = true;
   } else {
     result["administrative"] = false;

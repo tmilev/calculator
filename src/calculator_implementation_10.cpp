@@ -95,6 +95,8 @@ vectorPartitionFunctionFormulaInternal(
   );
   result.fractions.flagShowDetails = flagShowDetails;
   result.fractions.label = label;
+  result.fractions.chambers.flagUseSpannedSlices = true;
+  result.fractions.chambers.flagAmalgamateChambers = true;
   result.fractions.initializeAndSplit(vectors, &calculator.comments);
   result.fractions.computeAllVectorPartitionFunctions();
   return output.assignValue(calculator, result);
@@ -118,22 +120,42 @@ bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition
     return true;
   }
   if (input.size() == 2) {
-    DynkinSimpleType type;
     if (
-      CalculatorConversions::functionDynkinSimpleType(
-        calculator, input[1], type
+      CalculatorFunctionsVectorPartitionFunction::
+      getVectorsForConeDecompositionFromDynkinType(
+        calculator, input[1], output, outputLabel
       )
     ) {
-      WeylGroupData weylGroup;
-      weylGroup.makeArbitrarySimple(type.letter, type.rank);
-      weylGroup.computeRootsOfBorel(output);
-      FormatExpressions format;
-      format.flagSupressDynkinIndexOne = true;
-      outputLabel = "\\(" + weylGroup.dynkinType.toString(&format) + "\\)";
       return true;
     }
   }
   return calculator << "Failed to extract matrix of rationals. ";
+}
+
+bool CalculatorFunctionsVectorPartitionFunction::
+getVectorsForConeDecompositionFromDynkinType(
+  Calculator& calculator,
+  const Expression& input,
+  Vectors<Rational>& output,
+  std::string& outputLabel
+) {
+  STACK_TRACE(
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "getVectorsForConeDecompositionFromDynkinType"
+  );
+  DynkinSimpleType type;
+  if (
+    !CalculatorConversions::functionDynkinSimpleType(calculator, input, type)
+  ) {
+    return false;
+  }
+  WeylGroupData weylGroup;
+  weylGroup.makeArbitrarySimple(type.letter, type.rank);
+  weylGroup.computeRootsOfBorel(output);
+  FormatExpressions format;
+  format.flagSupressDynkinIndexOne = true;
+  outputLabel = "\\(" + weylGroup.dynkinType.toString(&format) + "\\)";
+  return true;
 }
 
 bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
@@ -437,4 +459,44 @@ bool CalculatorFunctionsVectorPartitionFunction::quotientLatticeRepresentatives
   Matrix<Rational> result;
   result.assignVectorsToRows(representatives);
   return output.makeMatrix(calculator, result);
+}
+
+bool CalculatorFunctionsVectorPartitionFunction::kostantPartitionFunctionLatex(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE(
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "kostantPartitionFunctionLatex"
+  );
+  List<std::string> labels;
+  List<Vectors<Rational> > vectors;
+  labels.setSize(input.size() - 1);
+  vectors.setSize(input.size() - 1);
+  for (int i = 1; i < input.size(); i ++) {
+    if (
+      !CalculatorFunctionsVectorPartitionFunction::
+      getVectorsForConeDecompositionFromDynkinType(
+        calculator, input[i], vectors[i - 1], labels[i - 1]
+      )
+    ) {
+      return calculator << "Failed to extract dynkin type from " << input[i];
+    }
+  }
+  std::stringstream latex;
+  FormatExpressions format;
+  format.flagUseFrac = true;
+  format.flagSuppressOneIn1overXtimesY = true;
+  for (int i = 0; i < vectors.size; i ++) {
+    PartialFractions computation;
+    computation.label = labels[i];
+    computation.initializeAndSplit(vectors[i], nullptr);
+    computation.chambers.flagAmalgamateChambers = true;
+    computation.chambers.flagUseSpannedSlices = true;
+    computation.computeAllVectorPartitionFunctions();
+    latex << computation.toLatexSelfContainedDocumentBody();
+  }
+  return
+  output.assignValue(
+    calculator, HtmlRoutines::toHtmlLatexLiteralWithCopy(latex.str())
+  );
 }

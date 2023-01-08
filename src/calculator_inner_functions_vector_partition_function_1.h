@@ -38,6 +38,12 @@ public:
     Vectors<Rational>& output,
     std::string& outputLabel
   );
+  static bool getVectorsForConeDecompositionFromDynkinType(
+    Calculator& calculator,
+    const Expression& input,
+    Vectors<Rational>& output,
+    std::string& outputLabel
+  );
   static bool coneDecompositionSpannedSlicesNoHistory(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
@@ -90,6 +96,9 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool subLatticeScalarProductTimesDirectionInLattice(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool kostantPartitionFunctionLatex(
     Calculator& calculator, const Expression& input, Expression& output
   );
 };

@@ -14,12 +14,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   Function::Options invisibleExperimental =
   Function::Options::innerInvisibleExperimental();
   Function::Options adminNoTestExperimental =
-  Function::Options::innerAdminNoTestExperimental();
+  Function::Options::administrativeNotTestedExperimental();
   Function::Options experimental = Function::Options::experimental();
   Function::Options adminNoTestInvisibleOffByDefault =
-  Function::Options::adminNoTestInvisibleOffByDefault();
+  Function::Options::administrativeNotTestedInvisibleOffByDefault();
   Function::Options adminNoTestInvisibleExperimental =
-  Function::Options::adminNoTestInvisibleExperimental();
+  Function::Options::administrativeNotTestedInvisibleExperimental();
   Function::Options invisibleNoTest = Function::Options::invisibleNoTest();
   Function::Options experimentalNoTest =
   Function::Options::innerNoTestExperimental();

@@ -4228,8 +4228,6 @@ std::string PartialFractions::toLatexOneSum(
     if (i != 0) {
       out << separator;
       out << "+";
-    } else {
-      out << "~~";
     }
     out << "\\displaystyle ";
     bool showDetails = false;
@@ -4366,14 +4364,21 @@ std::string PartialFractions::toLatexPartialFractionDecomposition(
   FormatExpressions* format
 ) const {
   STACK_TRACE("PartialFractions::toLatexPartialFractionDecomposition");
+  FormatExpressions formatForDifferentialOperator;
+  formatForDifferentialOperator.flagIsInNumerator = false;
+  formatForDifferentialOperator.maximumLineLength = 50;
+  formatForDifferentialOperator.flagUseLatex = true;
+  formatForDifferentialOperator.flagSuppressOneIn1overXtimesY = true;
+  formatForDifferentialOperator.flagUseFrac = true;
   const std::string lineSeparator = "\\\\&\n";
-  std::string equalitySeparator = "\\\\\n&=\n";
   std::string initialExpression;
   List<std::string> intermediates;
   std::string splitExpressionBeforeElongation;
   std::string splitExpression = this->toLatexFullSum(lineSeparator, format);
   std::string differentialForm =
-  this->toLatexDifferentialOperatorForm(lineSeparator, format);
+  this->toLatexDifferentialOperatorForm(
+    lineSeparator, &formatForDifferentialOperator
+  );
   if (this->details.snapshots.size > 0) {
     // When snapshots are present, the first one is the initial expression.
     initialExpression =
@@ -4396,21 +4401,17 @@ std::string PartialFractions::toLatexPartialFractionDecomposition(
     );
   }
   std::stringstream out;
-//  out << "\\(";
-//  out << "\\begin{array}{cl}\n";
   out << "\\begin{align*}";
-  out << "&" << initialExpression;
+  out << "&~~~\n" << initialExpression;
   for (const std::string& intermediate : intermediates) {
-    out << equalitySeparator << intermediate;
+    out << "\\\\=&~~~\n" << intermediate;
   }
   if (splitExpressionBeforeElongation != "") {
-    out << equalitySeparator << splitExpressionBeforeElongation;
+    out << "\\\\=&~~~\n" << splitExpressionBeforeElongation;
   }
-  out << equalitySeparator << splitExpression;
-  out << equalitySeparator << differentialForm;
-//  out << "\\end{array}";
+  out << "\\\\=&~~~\n" << splitExpression;
+  out << "\\\\=&\n" << differentialForm;
   out << "\\end{align*}";
-  //out << "\\)";
   return out.str();
 }
 
@@ -4436,10 +4437,10 @@ std::string PartialFractions::toLatexQuasipolynomialTable() const {
   out
   << "\\hline N & Polynomial/Lattice & Shift\\\\ \\hline\n"
   << "\\endfirsthead"
-  << "\\multicolumn{3}{|c|}{{"
+  << "\\multicolumn{3}{c}{{"
   << "\\bfseries \\tablename\\ \\thetable{} -- continued from previous page"
   << "}} \\\\\n"
-  << "\\hline \\multicolumn{1}{|c|}{} & \\multicolumn{1}{c|}{} \\\\ \\hline\n"
+  << "\\hline  N &  Polynomial/Lattice & Shift \\\\ \\hline\n"
   << "\\endhead"
   << "\\hline \\multicolumn{3}{|c|}{{Continued on next page}} \\\\ \\hline"
   << "\\endfoot"
@@ -4529,8 +4530,8 @@ std::string PartialFractions::toLatexRawPartialFractionDecomposition() const {
   format.flagUseFrac = true;
   format.flagUseLatex = true;
   format.flagIsInNumerator = true;
- // out << "\\begin{longtable}{l}";
-/*  out
+  // out << "\\begin{longtable}{l}";
+  /*  out
   << "\\caption{\\footnotesize Partial fraction decomposition "
   << "and differential operator form (Brion-Vergne) of "
   << this->toStringLabel()
@@ -4580,7 +4581,7 @@ std::string PartialFractions::toLatexRawPartialFractionDecomposition() const {
       out << "\\\\\n";
     }
   }*/
-//  out << "\\end{longtable}";
+  //  out << "\\end{longtable}";
   return out.str();
 }
 
@@ -10778,22 +10779,29 @@ std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
   Rational extraConstant;
   this->computeDifferentialOperatorConstant(extraConstant);
   std::stringstream out;
+  int lineCountInCoefficient = 0;
   if (coefficient.size() > 1) {
     out
     << "\\left("
-    << coefficient.toStringWithPossibleLineBreak(format)
+    << coefficient.toStringWithPossibleLineBreak(
+      format, &lineCountInCoefficient
+    )
     << "\\right)";
   } else {
-    out << coefficient.toStringWithPossibleLineBreak(format);
+    out
+    << coefficient.toStringWithPossibleLineBreak(
+      format, &lineCountInCoefficient
+    );
   }
-  out << "\\cdot ";
+  std::stringstream outOperator;
+  outOperator << "\\cdot ";
   if (!extraConstant.isEqualToOne()) {
     if (extraConstant.isNegative()) {
-      out << "\\left(";
+      outOperator << "\\left(";
     }
-    out << extraConstant.toString(format);
+    outOperator << extraConstant.toString(format);
     if (extraConstant.isNegative()) {
-      out << "\\right)";
+      outOperator << "\\right)";
     }
   }
   Vectors<Rational> exponents;
@@ -10816,17 +10824,18 @@ std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
     if (power == 0) {
       continue;
     }
-    out
+    outOperator
     << "\\left("
     << differentialOperators[i].toStringWithPossibleLineBreak(format)
     << "\\right)";
     if (power > 1 && power < 10) {
-      out << "^" << power;
+      outOperator << "^" << power;
     }
     if (power >= 10) {
-      out << "^{" << power << "}";
+      outOperator << "^{" << power << "}";
     }
   }
+  std::stringstream outFraction;
   OnePartialFractionDenominator withMultiplicityOne;
   withMultiplicityOne.owner = this->owner;
   for (int i = 0; i < this->denominatorsNoScale.size(); i ++) {
@@ -10838,7 +10847,18 @@ std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
       current.getLargestElongation()
     );
   }
-  out << "\\cdot" << withMultiplicityOne.toLatex(1);
+  outFraction << "\\cdot" << withMultiplicityOne.toLatex(1);
+  if (lineCountInCoefficient > 1) {
+    out
+    << "\\begin{array}{l}"
+    << outOperator.str()
+    << "\\\\\n"
+    << "~~"
+    << outFraction.str()
+    << "\\end{array}";
+  } else {
+    out << outOperator.str() << outFraction.str();
+  }
   return out.str();
 }
 
@@ -15562,7 +15582,8 @@ const {
   << "\\multicolumn{5}{c}{{"
   << "\\bfseries \\tablename\\ \\thetable{} -- continued from previous page"
   << "}} \\\\\n"
-  << "\\hline N &Defining inequalities &Vertices&Int. Pt.\\\\ \\hline\n"
+  <<
+  "\\hline N &Defining inequalities &Vertices&Int. Pt.& Neighbors\\\\ \\hline\n"
   << "\\endhead"
   << "\\hline \\multicolumn{5}{|c|}{{Continued on next page}} \\\\ \\hline"
   << "\\endfoot"

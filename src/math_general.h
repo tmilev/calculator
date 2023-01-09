@@ -5631,7 +5631,7 @@ toStringWithPossibleLineBreak(
     outputNumberOfLines = &lines;
   }
   std::string result = this->toString(format, outputNumberOfLines);
-  if (!*outputNumberOfLines) {
+  if (*outputNumberOfLines <= 1) {
     return result;
   }
   std::stringstream out;

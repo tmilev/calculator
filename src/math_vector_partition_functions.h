@@ -668,7 +668,8 @@ public:
   bool reduceOnce(
     LinearCombination<
       OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >& output
+    >& output,
+    const Polynomial<LargeInteger>& numerator
   );
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const OnePartialFractionDenominator& input);
@@ -762,27 +763,46 @@ public:
     Statistics();
   };
 
+  class HighlightInformation {
+  public:
+    Vectors<Rational> highlightVectors;
+    Vector<Rational> highlightLinearCombination;
+    OnePartialFractionDenominator toBeReducedNext;
+    std::string toStringLinearCombination() const;
+  };
+
+  class Snapshot {
+  public:
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    > content;
+    bool flagTooManySummands;
+    PartialFractions::HighlightInformation highlightInformation;
+    PartialFractions* owner;
+    Snapshot();
+    std::string toLatex(
+      const std::string& lineSeparator,
+      FormatExpressions* format = nullptr
+    ) const;
+  };
+
   class Details {
   public:
     int maximumIntermediates;
     PartialFractions* owner;
     bool flagNeedsElongation;
-    List<std::string> allIntermediateComputations;
-    Vectors<Rational> lastVectors;
-    Vector<Rational> lastLinearCombination;
-    OnePartialFractionDenominator lastReduced;
-    Polynomial<LargeInteger> lastCoefficient;
-    std::string toHTML() const;
+    List<Snapshot> snapshots;
     LinearCombination<
       OnePartialFractionDenominator, Polynomial<LargeInteger>
     > snapShotBeforeElongation;
     Details();
     void takeSnapShotBeforeElongation();
-    void addIntermediate();
-    void addFullState();
-    // Adds a report of the Brion-Vergne decomposition.
-    void addDifferentialOperatorForm();
-    std::string toStringLinearCombination() const;
+    void addStateBeforeFormula(
+      const OnePartialFractionDenominator& toBeReduced,
+      const Polynomial<LargeInteger>& numerator,
+      const Vector<Rational>& linearDependence,
+      const Vectors<Rational>& sortedVectors
+    );
   };
 
   Statistics statistics;
@@ -849,6 +869,21 @@ public:
     Vector<Rational>* indicator
   );
   bool split(Vector<Rational>* indicator);
+  // Writes the full sum of the partial fractions from the
+  // nonReduced, reducedWithElongationRedundancies and reduced
+  // collections.
+  void getSum(
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >& output
+  ) const;
+  // Adds the full sum of the partial fractions to a possibly non-zero
+  // starting collection of fractions.
+  void accumulateSum(
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >& output
+  ) const;
   void computeKostantFunctionFromWeylGroup(
     char weylGroupLetter,
     int weylGroupNumber,
@@ -906,22 +941,24 @@ public:
   ) const;
   std::string toLatexSelfContainedDocumentBody() const;
   std::string toLatexCopyButton() const;
-  std::string toLatexWithoutLastReduced(FormatExpressions* format = nullptr)
-  const;
-  std::string toLatexWithLastReduced(FormatExpressions* format = nullptr)
-  const;
-  std::string toLatexInternal(
-    bool addLastReduced, FormatExpressions* format = nullptr
+  std::string toLatexFullSum(
+    const std::string& lineSeparator, FormatExpressions* format = nullptr
   ) const;
-  std::string toLatexDifferentialOperatorForm(FormatExpressions* format) const;
+  std::string toLatexDifferentialOperatorForm(
+    const std::string& lineSeparator, FormatExpressions* format
+  ) const;
+  // Converts to latex suitable for display in a web page.
   std::string toLatexPartialFractionDecomposition(
     FormatExpressions* format = nullptr
   ) const;
+  // Converts to latex suitable for a .tex file.
   std::string toLatexRawPartialFractionDecomposition() const;
-  std::string toLatexFractionSum(
+  std::string toLatexOneSum(
     const LinearCombination<
       OnePartialFractionDenominator, Polynomial<LargeInteger>
     >& fractions,
+    const std::string& separator,
+    const PartialFractions::HighlightInformation* highlightInformation,
     FormatExpressions* format
   ) const;
   class Test {

@@ -2465,12 +2465,10 @@ public:
   // needed,
   // it will be enclosed in a \begin{array} ... \end{array} pair.
   std::string toStringWithPossibleLineBreak(
-    FormatExpressions* format = nullptr,
-    int* outputNumberOfLines = nullptr
+    FormatExpressions* format = nullptr, int* outputNumberOfLines = nullptr
   ) const;
   std::string toString(
-    FormatExpressions* format = nullptr,
-    int* outputNumberOfLines = nullptr
+    FormatExpressions* format = nullptr, int* outputNumberOfLines = nullptr
   ) const;
   // Same as toString but uses a default alphabet "x", "y", ...
   // for the first few variables.
@@ -5713,8 +5711,8 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
         cutOffCounter = 0;
         if (flagUseLaTeX && i != sortedMonomials.size - 1) {
           if (outputNumberOfLines != nullptr) {
-            (*outputNumberOfLines)++;
-                     }
+            (*outputNumberOfLines) ++;
+          }
           out << " \\\\";
           if (isInNumerator) {
             out << " \\hline ";
@@ -6980,7 +6978,7 @@ public:
   void mergeBruhatLists(int fromList, int toList);
   std::string KLPolysToString(FormatExpressions* format = nullptr);
   void computeKLCoefficients();
-  int chamberIndicatorToIndex(Vector<Rational>& ChamberIndicator);
+  int chamberIndicatorToIndex(Vector<Rational>& chamberIndicator);
   std::string rPolysToString(FormatExpressions* format = nullptr);
   bool computeKLPolys(WeylGroupData* weylGroup);
   void computeRPolys();

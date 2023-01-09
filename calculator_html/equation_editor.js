@@ -1909,6 +1909,7 @@ class LaTeXConstants {
       'array': 'array',
       'cases': 'cases',
       'align': 'align',
+      'align*': 'align*',
     };
     /** @type {Object.<string, boolean>!} */
     this.matrixEnder = {
@@ -1918,6 +1919,7 @@ class LaTeXConstants {
       '\\end{vmatrix}': true,
       '\\end{array}': true,
       '\\end{align}': true,
+      '\\end{align*}': true,
       '\\end{cases}': true,
     };
     /** @type {Object.<string, boolean>!} */
@@ -2604,12 +2606,24 @@ class LaTeXParser {
       return this.replaceParsingStackTop(node, '', -1);
     }
     if ((thirdToLast.syntacticRole === '\\begin' ||
-         thirdToLast.syntacticRole === '\\end') &&
-        secondToLast.syntacticRole === '{' &&
-        last.content in latexConstants.beginEndEnvironments) {
+      thirdToLast.syntacticRole === '\\end') &&
+      secondToLast.syntacticRole === '{' &&
+      last.content in latexConstants.beginEndEnvironments) {
       this.lastRuleName = 'begin or end environment';
       return this.replaceParsingStackTop(
-          null, latexConstants.beginEndEnvironments[last.content], -1);
+        null, latexConstants.beginEndEnvironments[last.content], -1);
+    }
+    if ((fourthToLast.syntacticRole === '\\begin' ||
+      fourthToLast.syntacticRole === '\\end') &&
+      thirdToLast.syntacticRole === '{' &&
+      last.content === '*' &&
+      (secondToLast.syntacticRole + '*') in latexConstants.beginEndEnvironments
+    ) {
+      this.lastRuleName = 'begin or end environment*';
+      let environment = secondToLast.syntacticRole + '*';
+      this.decreaseParsingStack(1);
+      return this.replaceParsingStackTop(
+        null, latexConstants.beginEndEnvironments[environment], -1);
     }
     if (fourthToLast.syntacticRole === '\\begin' &&
         thirdToLast.syntacticRole === '{' &&
@@ -2634,10 +2648,14 @@ class LaTeXParser {
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (last.syntacticRole === '\\begin{matrix}' ||
-        last.syntacticRole === '\\begin{align}') {
+      last.syntacticRole === '\\begin{align}' ||
+      last.syntacticRole === '\\begin{align*}'
+    ) {
       this.lastRuleName = 'begin matrix to matrix builder';
+      let matrixStyle = last.syntacticRole === '\\begin{matrix}' ? 'matrix' : 'align';
+      let columnStyle = matrixStyle === 'matrix' ? '' : 'rl';
       let matrix =
-          mathNodeFactory.matrix(this.equationEditor, 1, 0, '', 'align');
+        mathNodeFactory.matrix(this.equationEditor, 1, 0, columnStyle, matrixStyle);
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (last.syntacticRole === '\\begin{bmatrix}') {
@@ -3269,7 +3287,12 @@ class CopyButton {
     this.button.textContent = '\uD83D\uDCCB';
     this.button.style.cursor = 'pointer';
     this.container.style.position = 'absolute';
-    this.container.style.left = '100%';
+    this.container.style.left = '0px';
+    this.container.style.top = '-15px';
+    this.container.style.paddingRight = '-100px';
+    this.container.style.marginRight = '-100px';
+    this.container.style.boxSizing = 'border-box';
+
     this.equationEditor.container.appendChild(this.container);
   }
 

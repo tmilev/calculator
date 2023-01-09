@@ -3665,7 +3665,8 @@ bool OnePartialFractionDenominator::checkInitialization() const {
 bool OnePartialFractionDenominator::reduceOnce(
   LinearCombination<
     OnePartialFractionDenominator, Polynomial<LargeInteger>
-  >& output
+  >& output,
+  const Polynomial<LargeInteger>& numerator
 ) {
   STACK_TRACE("OnePartialFractionDenominator::reduceOnce");
   this->checkInitialization();
@@ -3686,11 +3687,9 @@ bool OnePartialFractionDenominator::reduceOnce(
     << global.fatal;
   }
   if (this->owner->flagShowDetails) {
-    this->owner->details.lastReduced = *this;
-    this->owner->details.lastLinearCombination = linearDependence;
-    this->owner->details.lastVectors = allRootsSorted;
-    this->owner->details.lastReduced = *this;
-    this->owner->details.addIntermediate();
+    this->owner->details.addStateBeforeFormula(
+      *this, numerator, linearDependence, allRootsSorted
+    );
   }
   this->decomposeFromNormalizedLinearRelation(
     linearDependence, allRootsSorted, output
@@ -3734,7 +3733,7 @@ std::string OnePartialFractionDenominator::toLatex(
   int numberOfLines = 1;
   std::string numeratorString =
   numerator.toStringWithPossibleLineBreak(format, &numberOfLines);
-  if (numberOfLines>1) {
+  if (numberOfLines > 1) {
     out << "~~~~" << numeratorString << "~~~~";
   } else {
     out << numeratorString;
@@ -4215,68 +4214,59 @@ void OnePartialFractionDenominator::operator=(
   this->denominatorsNoScale = right.denominatorsNoScale;
 }
 
-std::string PartialFractions::toLatexFractionSum(
+std::string PartialFractions::toLatexOneSum(
   const LinearCombination<
     OnePartialFractionDenominator, Polynomial<LargeInteger>
   >& fractions,
+  const std::string& separator,
+  const PartialFractions::HighlightInformation* highlightInformation,
   FormatExpressions* format
 ) const {
+  STACK_TRACE("PartialFractions::toLatexOneSum");
   std::stringstream out;
   for (int i = 0; i < fractions.size(); i ++) {
     if (i != 0) {
-      out << "\\\\\n&&+\n";
+      out << separator;
+      out << "+";
     } else {
       out << "~~";
     }
     out << "\\displaystyle ";
-    bool showDetails = this->flagShowDetails &&
-    fractions.monomials[i] == this->details.lastReduced;
+    bool showDetails = false;
+    if (this->flagShowDetails && highlightInformation != nullptr) {
+      if (
+        fractions.monomials[i] == highlightInformation->toBeReducedNext
+      ) {
+        showDetails = true;
+      }
+    }
     if (showDetails) {
       out << "\\underbrace{";
     }
     out
     << fractions.monomials[i].toLatex(fractions.coefficients[i], format);
     if (showDetails) {
-      out << "}_{" << this->details.toStringLinearCombination() << "}";
+      out << "}_{" << highlightInformation->toStringLinearCombination() << "}";
     }
   }
   return out.str();
 }
 
-std::string PartialFractions::toLatexWithLastReduced(
-  FormatExpressions* format
+std::string PartialFractions::toLatexFullSum(
+  const std::string& lineSeparator, FormatExpressions* format
 ) const {
-  return this->toLatexInternal(true, format);
-}
-
-std::string PartialFractions::toLatexWithoutLastReduced(
-  FormatExpressions* format
-) const {
-  return this->toLatexInternal(false, format);
-}
-
-std::string PartialFractions::toLatexInternal(
-  bool addLastReduced, FormatExpressions* format
-) const {
-  STACK_TRACE("PartialFractions::toLatexInternal");
+  STACK_TRACE("PartialFractions::toLatexFullSum");
   std::stringstream out;
   LinearCombination<
     OnePartialFractionDenominator, Polynomial<LargeInteger>
-  > total =
-  this->reduced;
-  total += this->reducedWithElongationRedundancies;
-  total += this->nonReduced;
-  if (addLastReduced) {
-    total.addMonomial(
-      this->details.lastReduced, this->details.lastCoefficient
-    );
-  }
-  out << this->toLatexFractionSum(total, format);
+  > total;
+  this->getSum(total);
+  out << this->toLatexOneSum(total, lineSeparator, nullptr, format);
   return out.str();
 }
 
 std::string PartialFractions::toLatexDifferentialOperatorForm(
-  FormatExpressions* format
+  const std::string& lineSeparator, FormatExpressions* format
 ) const {
   STACK_TRACE("PartialFractions::toLatexDifferentialOperatorForm");
   std::stringstream out;
@@ -4291,26 +4281,9 @@ std::string PartialFractions::toLatexDifferentialOperatorForm(
     }
     out << summand;
     if (i != this->reduced.size() - 1) {
-      out << "\\\\\n&&" << "\\displaystyle ";
+      out << lineSeparator << "\\displaystyle ";
     }
   }
-  return out.str();
-}
-
-std::string PartialFractions::Details::toHTML() const {
-  if (this->owner == nullptr) {
-    return "[uninitialized]";
-  }
-  std::stringstream out;
-  out << "\\(\\begin{array}{rcl}";
-  out << this->allIntermediateComputations[0] << "&=&";
-  for (int i = 1; i < this->allIntermediateComputations.size; i ++) {
-    out << this->allIntermediateComputations[i];
-    if (i != this->allIntermediateComputations.size - 1) {
-      out << "\\\\\n&=&";
-    }
-  }
-  out << "\\end{array}\\)";
   return out.str();
 }
 
@@ -4325,90 +4298,119 @@ void PartialFractions::Details::takeSnapShotBeforeElongation() {
   this->snapShotBeforeElongation += this->owner->reduced;
   this->snapShotBeforeElongation +=
   this->owner->reducedWithElongationRedundancies;
-  this->flagNeedsElongation =
-  this->owner->reducedWithElongationRedundancies.size() >
-  0;
 }
 
-std::string PartialFractions::Details::toStringLinearCombination() const {
+std::string PartialFractions::HighlightInformation::toStringLinearCombination()
+const {
   std::stringstream linearCombinationStream;
   LinearCombination<Vector<Rational>, Rational> combination;
-  for (int i = 0; i < this->lastLinearCombination.size; i ++) {
+  for (int i = 0; i < this->highlightLinearCombination.size; i ++) {
     combination.addMonomial(
-      this->lastVectors[i], this->lastLinearCombination[i]
+      this->highlightVectors[i], this->highlightLinearCombination[i]
     );
   }
   linearCombinationStream << combination.toString();
   return linearCombinationStream.str();
 }
 
-void PartialFractions::Details::addIntermediate() {
-  if (!this->owner->flagShowDetails) {
-    return;
+PartialFractions::Snapshot::Snapshot() {
+  this->flagTooManySummands = false;
+  this->owner = nullptr;
+}
+
+std::string PartialFractions::Snapshot::toLatex(
+  const std::string& lineSeparator, FormatExpressions* format
+) const {
+  if (this->flagTooManySummands) {
+    return "\\text{...too~many~summands...}";
   }
-  STACK_TRACE("PartialFractions::Details::addIntermediate");
-  if (this->allIntermediateComputations.size > this->maximumIntermediates) {
-    return;
+  if (this->owner == nullptr) {
+    return "(corrupted)";
   }
-  if (
-    this->allIntermediateComputations.size == this->maximumIntermediates
-  ) {
-    this->allIntermediateComputations.addOnTop("too~many~steps~");
-    return;
-  }
-  this->allIntermediateComputations.addOnTop(
-    this->owner->toLatexWithLastReduced(nullptr)
+  return
+  this->owner->toLatexOneSum(
+    this->content, lineSeparator, &this->highlightInformation, format
   );
 }
 
-void PartialFractions::Details::addFullState() {
-  STACK_TRACE("PartialFractions::Details::addFullState");
+void PartialFractions::Details::addStateBeforeFormula(
+  const OnePartialFractionDenominator& toBeReduced,
+  const Polynomial<LargeInteger>& numerator,
+  const Vector<Rational>& linearDependence,
+  const Vectors<Rational>& sortedVectors
+) {
+  STACK_TRACE("PartialFractions::Details::addStateBeforeFormula");
   if (!this->owner->flagShowDetails) {
     return;
   }
-  this->allIntermediateComputations.addOnTop(
-    this->owner->toLatexWithoutLastReduced(nullptr)
-  );
-}
-
-void PartialFractions::Details::addDifferentialOperatorForm() {
-  STACK_TRACE("PartialFractions::Details::addDifferentialOperatorForm");
-  if (!this->owner->flagShowDetails) {
+  if (this->snapshots.size > this->maximumIntermediates) {
     return;
   }
-  FormatExpressions format;
-  format.flagSuppressOneIn1overXtimesY = true;
-  format.flagUseFrac = true;
-  this->allIntermediateComputations.addOnTop(
-    this->owner->toLatexDifferentialOperatorForm(&format)
-  );
+  if (this->snapshots.size == this->maximumIntermediates) {
+    PartialFractions::Snapshot empty;
+    empty.flagTooManySummands = true;
+    this->snapshots.addOnTop(empty);
+    return;
+  }
+  PartialFractions::Snapshot snapShot;
+  snapShot.owner = this->owner;
+  snapShot.content.addMonomial(toBeReduced, numerator);
+  this->owner->accumulateSum(snapShot.content);
+  snapShot.highlightInformation.toBeReducedNext = toBeReduced;
+  snapShot.highlightInformation.highlightVectors = sortedVectors;
+  snapShot.highlightInformation.highlightLinearCombination = linearDependence;
+  this->snapshots.addOnTop(snapShot);
 }
 
 std::string PartialFractions::toLatexPartialFractionDecomposition(
   FormatExpressions* format
 ) const {
   STACK_TRACE("PartialFractions::toLatexPartialFractionDecomposition");
-  std::stringstream out;
-  out << "\\(";
-  std::string initialExpression =
-  this->initialPartialFraction.toLatex(1, format);
-  std::string splitExpressionBeforeReduction;
-  if (this->details.flagNeedsElongation) {
-    splitExpressionBeforeReduction =
-    this->toLatexFractionSum(
-      this->details.snapShotBeforeElongation, format
+  const std::string lineSeparator = "\\\\&\n";
+  std::string equalitySeparator = "\\\\\n&=\n";
+  std::string initialExpression;
+  List<std::string> intermediates;
+  std::string splitExpressionBeforeElongation;
+  std::string splitExpression = this->toLatexFullSum(lineSeparator, format);
+  std::string differentialForm =
+  this->toLatexDifferentialOperatorForm(lineSeparator, format);
+  if (this->details.snapshots.size > 0) {
+    // When snapshots are present, the first one is the initial expression.
+    initialExpression =
+    this->details.snapshots[0].toLatex(lineSeparator, format);
+  } else {
+    initialExpression = this->initialPartialFraction.toLatex(1, format);
+  }
+  for (int i = 1; i < this->details.snapshots.size; i ++) {
+    intermediates.addOnTop(
+      this->details.snapshots[i].toLatex(lineSeparator, format)
     );
   }
-  std::string splitExpression = this->toLatexWithoutLastReduced(format);
-  std::string differentialForm = this->toLatexDifferentialOperatorForm(format);
-  out << "\\begin{array}{rcl}\n";
-  out << initialExpression << "&=&";
-  if (splitExpressionBeforeReduction != "") {
-    out << splitExpressionBeforeReduction << "\\\\\n&=&";
+  if (this->details.flagNeedsElongation) {
+    splitExpressionBeforeElongation =
+    this->toLatexOneSum(
+      this->details.snapShotBeforeElongation,
+      lineSeparator,
+      nullptr,
+      format
+    );
   }
-  out << splitExpression << "\\\\\n&=&" << differentialForm;
-  out << "\\end{array}";
-  out << "\\)";
+  std::stringstream out;
+//  out << "\\(";
+//  out << "\\begin{array}{cl}\n";
+  out << "\\begin{align*}";
+  out << "&" << initialExpression;
+  for (const std::string& intermediate : intermediates) {
+    out << equalitySeparator << intermediate;
+  }
+  if (splitExpressionBeforeElongation != "") {
+    out << equalitySeparator << splitExpressionBeforeElongation;
+  }
+  out << equalitySeparator << splitExpression;
+  out << equalitySeparator << differentialForm;
+//  out << "\\end{array}";
+  out << "\\end{align*}";
+  //out << "\\)";
   return out.str();
 }
 
@@ -4432,7 +4434,7 @@ std::string PartialFractions::toLatexQuasipolynomialTable() const {
   out << "\\caption{\\footnotesize V.p.f. of ";
   out << this->toStringLabel() << "}\\\\";
   out
-  << "\\hline N & Polynomial/Lattice & \\\\ \\hline\n"
+  << "\\hline N & Polynomial/Lattice & Shift\\\\ \\hline\n"
   << "\\endfirsthead"
   << "\\multicolumn{3}{|c|}{{"
   << "\\bfseries \\tablename\\ \\thetable{} -- continued from previous page"
@@ -4477,7 +4479,7 @@ std::string PartialFractions::toLatexOneQuasipolynomialInTable(
     out
     << "&\\(\\Lambda="
     << input.ambientLatticeReduced.toString()
-    << "\\)&Shift\\\\\\hline";
+    << "\\)&\\\\\\hline";
   }
   for (int i = 0; i < input.latticeShifts.size; i ++) {
     out
@@ -4508,6 +4510,7 @@ std::string PartialFractions::toLatexCopyButton() const {
   out << "\\usepackage{pstricks}\n";
   out << "\\usepackage{auto-pst-pdf}\n";
   out << "\\usepackage{amssymb}\n";
+  out << "\\usepackage{amsmath}\n";
   out << "\\usepackage{longtable}\n";
   out << "\\usepackage{multirow}\n";
   out << "\\usepackage{lscape}\n";
@@ -4526,24 +4529,27 @@ std::string PartialFractions::toLatexRawPartialFractionDecomposition() const {
   format.flagUseFrac = true;
   format.flagUseLatex = true;
   format.flagIsInNumerator = true;
-  out << "\\begin{longtable}{l}";
-  out
+ // out << "\\begin{longtable}{l}";
+/*  out
   << "\\caption{\\footnotesize Partial fraction decomposition "
   << "and differential operator form (Brion-Vergne) of "
   << this->toStringLabel()
-  << "}\\\\\n";
+  << "}\\\\\n";*/
+  out << "\\allowdisplaybreaks";
+  out << this->toLatexPartialFractionDecomposition(&format);
+  /*
   std::string initial = this->initialPartialFraction.toLatex(1, &format);
   std::string decomposedWithoutElongation =
-  this->toLatexFractionSum(
-    this->details.snapShotBeforeElongation, &format
+  this->tolate (
+    this->details.snapShotBeforeElongation,"\\\\\n", &format
   );
-  std::string decomposed = this->toLatexFractionSum(this->reduced, &format);
+  std::string decomposed = this->toLatexFractionSum(this->reduced,"\\\\\n", &format);
   FormatExpressions differentialOperatorFormat;
   differentialOperatorFormat.maximumLineLength = 50;
   differentialOperatorFormat.flagUseFrac = true;
   differentialOperatorFormat.flagUseLatex = true;
   std::string differentialOperatorForm =
-  this->toLatexDifferentialOperatorForm(&differentialOperatorFormat);
+  this->toLatexDifferentialOperatorForm("\\\\\n&\n",&differentialOperatorFormat);
   List<std::string> allEqualities = List<std::string>({
       initial,
       decomposedWithoutElongation,
@@ -4573,8 +4579,8 @@ std::string PartialFractions::toLatexRawPartialFractionDecomposition() const {
     } else {
       out << "\\\\\n";
     }
-  }
-  out << "\\end{longtable}";
+  }*/
+//  out << "\\end{longtable}";
   return out.str();
 }
 
@@ -4604,11 +4610,10 @@ std::string PartialFractions::toHTML(FormatExpressions* format) const {
   out << "Original vectors: " << this->originalVectors.toString();
   out << "<br>";
   out << this->toLatexCopyButton();
-  if (this->flagShowDetails) {
-    out << this->details.toHTML();
-  } else {
-    out << this->toLatexPartialFractionDecomposition(format);
-  }
+  out << "<br>";
+  out << "\\(";
+  out << this->toLatexPartialFractionDecomposition(format);
+  out << "\\)";
   out << this->chambers.toHTMLGraphicsOnly(false);
   FormatExpressions formatQuasipolynomial;
   formatQuasipolynomial.flagUseFrac = true;
@@ -4750,10 +4755,8 @@ bool PartialFractions::splitPartial() {
   Polynomial<LargeInteger> currentCoefficient;
   while (this->nonReduced.size() > 0) {
     this->nonReduced.popMonomial(0, currentFraction, currentCoefficient);
-    if (this->flagShowDetails) {
-      this->details.lastCoefficient = currentCoefficient;
-    }
-    bool needsReduction = currentFraction.reduceOnce(currentReduction);
+    bool needsReduction =
+    currentFraction.reduceOnce(currentReduction, currentCoefficient);
     if (needsReduction) {
       currentReduction *= currentCoefficient;
       this->nonReduced += currentReduction;
@@ -5161,7 +5164,7 @@ void PartialFractions::removeRedundantShortRoots(
     }
   }
   if (found) {
-    this->details.addFullState();
+    this->details.flagNeedsElongation = true;
   }
   this->compareCheckSums();
 }
@@ -9718,9 +9721,6 @@ SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms() {
 
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 checkInitialization() {
-  // if (this == 0)
-  // global.fatal << "Subgroup of Weyl Group has 0 this pointer. " <<
-  // global.fatal;
   if (this->ambientWeyl == nullptr) {
     global.fatal
     << "Use of non-initialized subgroup of Weyl Group. "
@@ -10048,14 +10048,14 @@ void KazhdanLusztigPolynomials::mergeBruhatLists(int fromList, int toList) {
 }
 
 int KazhdanLusztigPolynomials::chamberIndicatorToIndex(
-  Vector<Rational>& ChamberIndicator
+  Vector<Rational>& chamberIndicator
 ) {
   int dimension = this->weylGroup->cartanSymmetric.numberOfRows;
   Vector<Rational> root;
   root.setSize(dimension);
-  Vector<Rational> ChamberIndicatorPlusRho;
-  ChamberIndicatorPlusRho = (ChamberIndicator);
-  ChamberIndicatorPlusRho += this->weylGroup->rho;
+  Vector<Rational> chamberIndicatorPlusRho;
+  chamberIndicatorPlusRho = (chamberIndicator);
+  chamberIndicatorPlusRho += this->weylGroup->rho;
   for (int i = 0; i < this->size; i ++) {
     Rational scalarProduct1;
     Rational scalarProduct2;
@@ -10064,7 +10064,7 @@ int KazhdanLusztigPolynomials::chamberIndicatorToIndex(
     bool haveSameSigns = true;
     for (int j = 0; j < this->weylGroup->rootSystem.size; j ++) {
       this->weylGroup->rootScalarCartanRoot(
-        ChamberIndicatorPlusRho,
+        chamberIndicatorPlusRho,
         this->weylGroup->rootSystem[j],
         scalarProduct1
       );
@@ -10194,7 +10194,6 @@ void KazhdanLusztigPolynomials::computeRPolys() {
     this->lowestNonExplored =
     this->findMinimalBruhatNonExplored(this->explored);
   }
-  // this->ComputeDebugString();
 }
 
 bool KazhdanLusztigPolynomials::indexGEQIndex(int a, int b) {
@@ -12957,6 +12956,34 @@ void Lattice::getDefaultFundamentalDomainInternalPoint(
   output /= 2;
 }
 
+void PartialFractions::getSum(
+  LinearCombination<
+    OnePartialFractionDenominator, Polynomial<LargeInteger>
+  >& output
+) const {
+  output.makeZero();
+  this->accumulateSum(output);
+}
+
+void PartialFractions::accumulateSum(
+  LinearCombination<
+    OnePartialFractionDenominator, Polynomial<LargeInteger>
+  >& output
+) const {
+  if (
+    &output == &this->nonReduced ||
+    &output == &this->reducedWithElongationRedundancies ||
+    &output == &this->reduced
+  ) {
+    global.fatal
+    << "Not allowed to accumulate in an internal collection. "
+    << global.fatal;
+  }
+  output += this->nonReduced;
+  output += this->reducedWithElongationRedundancies;
+  output += this->reduced;
+}
+
 bool PartialFractions::split(Vector<Rational>* indicator) {
   STACK_TRACE("PartialFractions::split");
   if (!this->flagInitialized) {
@@ -12965,11 +12992,9 @@ bool PartialFractions::split(Vector<Rational>* indicator) {
     this->flagInitialized = true;
   }
   if (this->splitPartial()) {
-    this->details.addFullState();
     this->details.takeSnapShotBeforeElongation();
     this->removeRedundantShortRoots(indicator);
   }
-  this->details.addDifferentialOperatorForm();
   this->compareCheckSums();
   return false;
 }

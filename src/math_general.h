@@ -734,7 +734,7 @@ public:
       }
     }
   }
-  void appendRowToTheBottom(const Vector<Coefficient>& row){
+  void appendRowToTheBottom(const Vector<Coefficient>& row) {
     Matrix<Coefficient> matrixRow;
     matrixRow.assignVectorRow(row);
     this->appendMatrixToTheBottom(matrixRow);
@@ -1077,7 +1077,7 @@ public:
   bool isSquare() const {
     return this->numberOfColumns == this->numberOfRows;
   }
-  bool isDiagonal()const{
+  bool isDiagonal() const {
     if (
       this->numberOfRows != this->numberOfColumns || this->numberOfRows <= 0
     ) {
@@ -1089,9 +1089,8 @@ public:
           continue;
         }
         if (!this->elements[i][j].isEqualToZero()) {
-            return false;
-          }
-
+          return false;
+        }
       }
     }
     return true;

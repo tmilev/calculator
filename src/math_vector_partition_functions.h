@@ -943,7 +943,8 @@ public:
   ) const;
   // Converts to latex suitable for display in a web page.
   std::string toLatexPartialFractionDecomposition(
-    FormatExpressions* formatDecomposition, FormatExpressions* formatDenominator
+    FormatExpressions* formatDecomposition,
+    FormatExpressions* formatDenominator
   ) const;
   // Converts to latex suitable for a .tex file.
   std::string toLatexRawPartialFractionDecomposition() const;

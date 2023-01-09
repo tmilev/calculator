@@ -35,7 +35,7 @@ void QuasiPolynomial::setLatticeShift(
     this->addLatticeShift(input, inputShift);
     return;
   }
-  this->valueOnEachLatticeShift[index]=input;
+  this->valueOnEachLatticeShift[index] = input;
 }
 
 void QuasiPolynomial::substitute(
@@ -373,51 +373,56 @@ void QuasiPolynomial::substituteShiftByFloorOfLinearFunctionOnce(
   outputAccumulator += summand;
 }
 
-bool QuasiPolynomial::compress(){
+bool QuasiPolynomial::compress() {
   STACK_TRACE("QuasiPolynomial::compress");
-  int dimension = this->ambientLatticeReduced.basisRationalForm.numberOfColumns;
-  if (!this->ambientLatticeReduced.basisRationalForm.isDiagonal()){
+  int dimension =
+  this->ambientLatticeReduced.basisRationalForm.numberOfColumns;
+  if (!this->ambientLatticeReduced.basisRationalForm.isDiagonal()) {
     return false;
   }
   bool result = false;
-  for (int i =0; i < dimension; i ++){
-while(this->compressWithRespectToCoordinate(i)){
-  result = true;
-}
+  for (int i = 0; i < dimension; i ++) {
+    while (this->compressWithRespectToCoordinate(i)) {
+      result = true;
+    }
   }
   return result;
 }
 
-bool QuasiPolynomial::compressWithRespectToCoordinate(int coordinate){
+bool QuasiPolynomial::compressWithRespectToCoordinate(int coordinate) {
   int periodSmall = 0;
-  if (!this->ambientLatticeReduced.basisRationalForm(coordinate,coordinate).isSmallInteger(&periodSmall)){
+  if (
+    !this->ambientLatticeReduced.basisRationalForm(coordinate, coordinate).
+    isSmallInteger(&periodSmall)
+  ) {
     return false;
   }
-  if (periodSmall > 100){
+  if (periodSmall > 100) {
     // Too big.
     return false;
   }
-
-  for (int i=2 ;i < periodSmall; i ++){
-    if (periodSmall % i != 0){
+  for (int i = 2; i < periodSmall; i ++) {
+    if (periodSmall % i != 0) {
       continue;
     }
     Vector<Rational> shift;
     int dimension = this->ambientLatticeReduced.getDimension();
     shift.makeZero(dimension);
     shift[coordinate] = i;
-    if (this->compressWithRespectToPeriod(shift)){
+    if (this->compressWithRespectToPeriod(shift)) {
       return true;
     }
   }
   return false;
 }
 
-void QuasiPolynomial::getValueOnShift(const Vector<Rational> &shift, Polynomial<Rational> &output) const{
-Vector<Rational> reduced= shift;
-this->ambientLatticeReduced.reduceVector(reduced);
-  for (int i = 0 ; i < this->latticeShifts.size; i ++){
-    if (reduced == this->latticeShifts[i]){
+void QuasiPolynomial::getValueOnShift(
+  const Vector<Rational>& shift, Polynomial<Rational>& output
+) const {
+  Vector<Rational> reduced = shift;
+  this->ambientLatticeReduced.reduceVector(reduced);
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
+    if (reduced == this->latticeShifts[i]) {
       output = this->valueOnEachLatticeShift[i];
       return;
     }
@@ -425,21 +430,23 @@ this->ambientLatticeReduced.reduceVector(reduced);
   output.makeZero();
 }
 
-bool QuasiPolynomial::compressWithRespectToPeriod(const Vector<Rational> &period){
+bool QuasiPolynomial::compressWithRespectToPeriod(
+  const Vector<Rational>& period
+) {
   QuasiPolynomial result;
-result.ambientLatticeReduced= this->ambientLatticeReduced;
+  result.ambientLatticeReduced = this->ambientLatticeReduced;
   result.ambientLatticeReduced.refineByVector(period);
   Polynomial<Rational> valueShifted;
-  for (int i = 0; i < this->latticeShifts.size; i ++){
-   Vector<Rational> shift = this->latticeShifts[i];
-   result.ambientLatticeReduced.reduceVector(shift);
-  this->getValueOnShift(shift, valueShifted);
-   if (!this->valueOnEachLatticeShift[i].isEqualTo(valueShifted)){
-     return false;
-   }
-   result.setLatticeShift( valueShifted, shift);
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
+    Vector<Rational> shift = this->latticeShifts[i];
+    result.ambientLatticeReduced.reduceVector(shift);
+    this->getValueOnShift(shift, valueShifted);
+    if (!this->valueOnEachLatticeShift[i].isEqualTo(valueShifted)) {
+      return false;
+    }
+    result.setLatticeShift(valueShifted, shift);
   }
-*this=result;
+  *this = result;
   return true;
 }
 
@@ -1500,7 +1507,7 @@ void Lattice::testGaussianEliminationEuclideanDomainRationals(
   out << "<br>After gaussian elimination:" << output.toString();
 }
 
-void Lattice::refineByVector(const Vector<Rational> &other){
+void Lattice::refineByVector(const Vector<Rational>& other) {
   Vectors<Rational> generators;
   this->basisRationalForm.getVectorsFromRows(generators);
   generators.addOnTop(other);

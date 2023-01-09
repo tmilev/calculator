@@ -4360,25 +4360,26 @@ void PartialFractions::Details::addStateBeforeFormula(
   this->snapshots.addOnTop(snapShot);
 }
 
-std::string PartialFractions::toLatexPartialFractionDecomposition(FormatExpressions* formatDecomposition
-, FormatExpressions *formatDenominator) const {
+std::string PartialFractions::toLatexPartialFractionDecomposition(
+  FormatExpressions* formatDecomposition,
+  FormatExpressions* formatDenominator
+) const {
   STACK_TRACE("PartialFractions::toLatexPartialFractionDecomposition");
-
   const std::string lineSeparator = "\\\\&\n";
   std::string initialExpression;
   List<std::string> intermediates;
   std::string splitExpressionBeforeElongation;
-  std::string splitExpression = this->toLatexFullSum(lineSeparator, formatDecomposition);
+  std::string splitExpression =
+  this->toLatexFullSum(lineSeparator, formatDecomposition);
   std::string differentialForm =
-  this->toLatexDifferentialOperatorForm(
-    lineSeparator, formatDenominator
-  );
+  this->toLatexDifferentialOperatorForm(lineSeparator, formatDenominator);
   if (this->details.snapshots.size > 0) {
     // When snapshots are present, the first one is the initial expression.
     initialExpression =
     this->details.snapshots[0].toLatex(lineSeparator, formatDecomposition);
   } else {
-    initialExpression = this->initialPartialFraction.toLatex(1, formatDecomposition);
+    initialExpression =
+    this->initialPartialFraction.toLatex(1, formatDecomposition);
   }
   for (int i = 1; i < this->details.snapshots.size; i ++) {
     intermediates.addOnTop(
@@ -4531,7 +4532,10 @@ std::string PartialFractions::toLatexRawPartialFractionDecomposition() const {
   formatForDifferentialOperator.flagSuppressOneIn1overXtimesY = true;
   formatForDifferentialOperator.flagUseFrac = true;
   out << "\\allowdisplaybreaks";
-  out << this->toLatexPartialFractionDecomposition(&format, &formatForDifferentialOperator);
+  out
+  << this->toLatexPartialFractionDecomposition(
+    &format, &formatForDifferentialOperator
+  );
   return out.str();
 }
 
@@ -5140,7 +5144,6 @@ bool PartialFractions::isHigherThanWithRespectToWeight(
   }
   return accum > 0;
 }
-
 
 unsigned int OnePartialFractionDenominatorComponent::hashFunction(
   const OnePartialFractionDenominatorComponent& input
@@ -11096,7 +11099,14 @@ bool PartialFractions::computeOneVectorPartitionFunction(
     output += summand;
     this->makeProgressVPFcomputation();
   }
-  output.compress();
+  Lattice ambient = output.ambientLatticeReduced;
+  if (output.compress()) {
+    global.comments
+    << "<br>DEBUG: Compressed! From "
+    << ambient.toStringParentheses()
+    << " to "
+    << output.ambientLatticeReduced.toStringParentheses();
+  }
   return true;
 }
 

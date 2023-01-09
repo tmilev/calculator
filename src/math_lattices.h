@@ -243,7 +243,9 @@ public:
     QuasiPolynomial& output
   ) const;
   bool compress();
-  void getValueOnShift(const Vector<Rational>& shift, Polynomial<Rational>& output)const;
+  void getValueOnShift(
+    const Vector<Rational>& shift, Polynomial<Rational>& output
+  ) const;
   bool compressWithRespectToCoordinate(int coordinate);
   bool compressWithRespectToPeriod(const Vector<Rational>& period);
   void operator+=(const QuasiPolynomial& other);

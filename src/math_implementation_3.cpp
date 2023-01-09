@@ -4360,35 +4360,29 @@ void PartialFractions::Details::addStateBeforeFormula(
   this->snapshots.addOnTop(snapShot);
 }
 
-std::string PartialFractions::toLatexPartialFractionDecomposition(
-  FormatExpressions* format
-) const {
+std::string PartialFractions::toLatexPartialFractionDecomposition(FormatExpressions* formatDecomposition
+, FormatExpressions *formatDenominator) const {
   STACK_TRACE("PartialFractions::toLatexPartialFractionDecomposition");
-  FormatExpressions formatForDifferentialOperator;
-  formatForDifferentialOperator.flagIsInNumerator = false;
-  formatForDifferentialOperator.maximumLineLength = 50;
-  formatForDifferentialOperator.flagUseLatex = true;
-  formatForDifferentialOperator.flagSuppressOneIn1overXtimesY = true;
-  formatForDifferentialOperator.flagUseFrac = true;
+
   const std::string lineSeparator = "\\\\&\n";
   std::string initialExpression;
   List<std::string> intermediates;
   std::string splitExpressionBeforeElongation;
-  std::string splitExpression = this->toLatexFullSum(lineSeparator, format);
+  std::string splitExpression = this->toLatexFullSum(lineSeparator, formatDecomposition);
   std::string differentialForm =
   this->toLatexDifferentialOperatorForm(
-    lineSeparator, &formatForDifferentialOperator
+    lineSeparator, formatDenominator
   );
   if (this->details.snapshots.size > 0) {
     // When snapshots are present, the first one is the initial expression.
     initialExpression =
-    this->details.snapshots[0].toLatex(lineSeparator, format);
+    this->details.snapshots[0].toLatex(lineSeparator, formatDecomposition);
   } else {
-    initialExpression = this->initialPartialFraction.toLatex(1, format);
+    initialExpression = this->initialPartialFraction.toLatex(1, formatDecomposition);
   }
   for (int i = 1; i < this->details.snapshots.size; i ++) {
     intermediates.addOnTop(
-      this->details.snapshots[i].toLatex(lineSeparator, format)
+      this->details.snapshots[i].toLatex(lineSeparator, formatDecomposition)
     );
   }
   if (this->details.flagNeedsElongation) {
@@ -4397,7 +4391,7 @@ std::string PartialFractions::toLatexPartialFractionDecomposition(
       this->details.snapShotBeforeElongation,
       lineSeparator,
       nullptr,
-      format
+      formatDecomposition
     );
   }
   std::stringstream out;
@@ -4530,58 +4524,14 @@ std::string PartialFractions::toLatexRawPartialFractionDecomposition() const {
   format.flagUseFrac = true;
   format.flagUseLatex = true;
   format.flagIsInNumerator = true;
-  // out << "\\begin{longtable}{l}";
-  /*  out
-  << "\\caption{\\footnotesize Partial fraction decomposition "
-  << "and differential operator form (Brion-Vergne) of "
-  << this->toStringLabel()
-  << "}\\\\\n";*/
+  FormatExpressions formatForDifferentialOperator;
+  formatForDifferentialOperator.flagIsInNumerator = false;
+  formatForDifferentialOperator.maximumLineLength = 50;
+  formatForDifferentialOperator.flagUseLatex = true;
+  formatForDifferentialOperator.flagSuppressOneIn1overXtimesY = true;
+  formatForDifferentialOperator.flagUseFrac = true;
   out << "\\allowdisplaybreaks";
-  out << this->toLatexPartialFractionDecomposition(&format);
-  /*
-  std::string initial = this->initialPartialFraction.toLatex(1, &format);
-  std::string decomposedWithoutElongation =
-  this->tolate (
-    this->details.snapShotBeforeElongation,"\\\\\n", &format
-  );
-  std::string decomposed = this->toLatexFractionSum(this->reduced,"\\\\\n", &format);
-  FormatExpressions differentialOperatorFormat;
-  differentialOperatorFormat.maximumLineLength = 50;
-  differentialOperatorFormat.flagUseFrac = true;
-  differentialOperatorFormat.flagUseLatex = true;
-  std::string differentialOperatorForm =
-  this->toLatexDifferentialOperatorForm("\\\\\n&\n",&differentialOperatorFormat);
-  List<std::string> allEqualities = List<std::string>({
-      initial,
-      decomposedWithoutElongation,
-      decomposed,
-      differentialOperatorForm
-    }
-  );
-  out <<   "\\alowdisplaybreaks";
-
-  out << "\\(\n"
-<<    "\\begin{array}{rcl}";
-  int characterCount = 0;
-  for (int i = 0; i < allEqualities.size; i ++) {
-    if (i > 0) {
-      out << "&=&";
-    } else {
-      out << "&&";
-    }
-    out << allEqualities[i];
-    characterCount += allEqualities[i].size();
-    if (i == allEqualities.size - 1) {
-      out << "\\end{array}\\)\n";
-    } else if (characterCount > 800) {
-      characterCount = 0;
-      out << "\\end{array}\\) \\\\\n";
-      out << "\\(\\begin{array}{rcl}";
-    } else {
-      out << "\\\\\n";
-    }
-  }*/
-  //  out << "\\end{longtable}";
+  out << this->toLatexPartialFractionDecomposition(&format, &formatForDifferentialOperator);
   return out.str();
 }
 
@@ -4605,15 +4555,19 @@ std::string PartialFractions::toLatexSelfContainedDocumentBody() const {
   return out.str();
 }
 
-std::string PartialFractions::toHTML(FormatExpressions* format) const {
+std::string PartialFractions::toHTML() const {
   STACK_TRACE("PartialFractions::toHTML");
   std::stringstream out;
   out << "Original vectors: " << this->originalVectors.toString();
   out << "<br>";
+  out << "Copy self-contained latex document: ";
   out << this->toLatexCopyButton();
   out << "<br>";
+  FormatExpressions format;
+  format.flagUseFrac = true;
+  format.flagSuppressOneIn1overXtimesY = true;
   out << "\\(";
-  out << this->toLatexPartialFractionDecomposition(format);
+  out << this->toLatexPartialFractionDecomposition(&format, &format);
   out << "\\)";
   out << this->chambers.toHTMLGraphicsOnly(false);
   FormatExpressions formatQuasipolynomial;
@@ -5187,77 +5141,6 @@ bool PartialFractions::isHigherThanWithRespectToWeight(
   return accum > 0;
 }
 
-// TODO(tmilev): be fixed: you gotta use the preceding function to sort the
-// vpBasis!
-void PartialFractions::computeKostantFunctionFromWeylGroup(
-  char weylGroupLetter,
-  int weylGroupNumber,
-  QuasiPolynomial& output,
-  Vector<Rational>* chamberIndicator
-) {
-  this->initializeCommon();
-  Vectors<Rational> vectorPartitionBasis;
-  Vector<Rational> tempWeight;
-  tempWeight.setSize(weylGroupNumber);
-  WeylGroupData weylGroup;
-  weylGroup.makeArbitrarySimple(weylGroupLetter, weylGroupNumber);
-  weylGroup.computeRho(true);
-  vectorPartitionBasis = weylGroup.rootsOfBorel;
-  if (weylGroupLetter == 'B') {
-    for (int i = 0; i < vectorPartitionBasis.size; i ++) {
-      Rational scalarProduct;
-      Vector<Rational> root;
-      root = vectorPartitionBasis[i];
-      weylGroup.rootScalarCartanRoot(root, root, scalarProduct);
-      if (scalarProduct.isEqualToOne()) {
-        vectorPartitionBasis.addOnTop(weylGroup.rootsOfBorel[i] * 2);
-      }
-    }
-  }
-  if (weylGroupLetter == 'D') {
-    Vector<Rational> root;
-    root.makeZero(this->ambientDimension);
-    root[this->ambientDimension - 1] = 1;
-    root[this->ambientDimension - 2] = - 1;
-    vectorPartitionBasis.addOnTop(root);
-    root[this->ambientDimension - 1] = 1;
-    root[this->ambientDimension - 2] = 1;
-    vectorPartitionBasis.addOnTop(root);
-    for (int i = this->ambientDimension - 3; i >= 0; i --) {
-      root[i] = 2;
-      global.fatal
-      << "This line of code "
-      << "needs to be fixed but I don't have time right now. "
-      << "This code shouldn't be used before the line is fixed! "
-      << global.fatal;
-    }
-    tempWeight[this->ambientDimension - 2] = 7;
-    tempWeight[this->ambientDimension - 1] = 8;
-  }
-  vectorPartitionBasis.quickSortAscending();
-  // fix this!
-  global.fatal << " Not implemented yet. " << global.fatal;
-  //  this->initFromRoots(vpBasis, 0);
-  // this->flagSplitTestModeNoNumerators = true;
-  //  this->split(ChamberIndicator);
-  if (
-    !this->checkForMinimalityDecompositionWithRespectToRoot(chamberIndicator)
-  ) {
-    global.fatal << "Minimality decomposition missing. " << global.fatal;
-  }
-  // return;
-  Vector<Rational> root;
-  if (chamberIndicator != nullptr) {
-    root = *chamberIndicator;
-  } else {
-    root.makeZero(this->ambientDimension);
-  }
-  if (!this->computeOneVectorPartitionFunction(output, root)) {
-    global.fatal
-    << "Failed to get vector partition function. "
-    << global.fatal;
-  }
-}
 
 unsigned int OnePartialFractionDenominatorComponent::hashFunction(
   const OnePartialFractionDenominatorComponent& input
@@ -11213,6 +11096,7 @@ bool PartialFractions::computeOneVectorPartitionFunction(
     output += summand;
     this->makeProgressVPFcomputation();
   }
+  output.compress();
   return true;
 }
 
@@ -15582,8 +15466,10 @@ const {
   << "\\multicolumn{5}{c}{{"
   << "\\bfseries \\tablename\\ \\thetable{} -- continued from previous page"
   << "}} \\\\\n"
-  <<
-  "\\hline N &Defining inequalities &Vertices&Int. Pt.& Neighbors\\\\ \\hline\n"
+  << "\\hline N & "
+  << "Defining inequalities & "
+  << "Vertices&Int. Pt. & "
+  << "Neighbors\\\\ \\hline\n"
   << "\\endhead"
   << "\\hline \\multicolumn{5}{|c|}{{Continued on next page}} \\\\ \\hline"
   << "\\endfoot"

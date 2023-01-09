@@ -884,12 +884,6 @@ public:
       OnePartialFractionDenominator, Polynomial<LargeInteger>
     >& output
   ) const;
-  void computeKostantFunctionFromWeylGroup(
-    char weylGroupLetter,
-    int weylGroupNumber,
-    QuasiPolynomial& output,
-    Vector<Rational>* chamberIndicator
-  );
   bool isHigherThanWithRespectToWeight(
     const Vector<Rational>& left,
     const Vector<Rational>& r,
@@ -930,7 +924,7 @@ public:
   );
   void makeProgressVPFcomputation();
   std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toHTML(FormatExpressions* format = nullptr) const;
+  std::string toHTML() const;
   std::string toStringCheckSum() const;
   std::string toLatexQuasipolynomialTable() const;
   std::string toStringLabel() const;
@@ -949,7 +943,7 @@ public:
   ) const;
   // Converts to latex suitable for display in a web page.
   std::string toLatexPartialFractionDecomposition(
-    FormatExpressions* format = nullptr
+    FormatExpressions* formatDecomposition, FormatExpressions* formatDenominator
   ) const;
   // Converts to latex suitable for a .tex file.
   std::string toLatexRawPartialFractionDecomposition() const;

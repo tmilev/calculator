@@ -11,13 +11,10 @@ void VectorPartitionFunction::initializeVectors(
 
 std::string VectorPartitionFunction::toHTML() const {
   std::stringstream out;
-  FormatExpressions format;
-  format.flagUseFrac = true;
-  format.flagSuppressOneIn1overXtimesY = true;
   if (this->fractions.flagInitialized) {
     out
     << "<div style='max-width: 500px; max-height:500px; overflow:scroll'>"
-    << this->fractions.toHTML(&format);
+    << this->fractions.toHTML();
   }
   if (this->elementaryMethod.flagInitialized) {
     out << this->elementaryMethod.toHTML();

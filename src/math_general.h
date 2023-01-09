@@ -734,6 +734,11 @@ public:
       }
     }
   }
+  void appendRowToTheBottom(const Vector<Coefficient>& row){
+    Matrix<Coefficient> matrixRow;
+    matrixRow.assignVectorRow(row);
+    this->appendMatrixToTheBottom(matrixRow);
+  }
   void appendMatrixToTheBottom(const Matrix<Coefficient>& standsBelow) {
     if (&standsBelow == this) {
       Matrix<Coefficient> copyThis = *this;
@@ -1071,6 +1076,25 @@ public:
   }
   bool isSquare() const {
     return this->numberOfColumns == this->numberOfRows;
+  }
+  bool isDiagonal()const{
+    if (
+      this->numberOfRows != this->numberOfColumns || this->numberOfRows <= 0
+    ) {
+      return false;
+    }
+    for (int i = 0; i < this->numberOfRows; i ++) {
+      for (int j = 0; j < this->numberOfColumns; j ++) {
+        if (i == j) {
+          continue;
+        }
+        if (!this->elements[i][j].isEqualToZero()) {
+            return false;
+          }
+
+      }
+    }
+    return true;
   }
   bool isIdentity() const {
     if (

@@ -141,6 +141,7 @@ public:
   bool readFromFile(std::fstream& input);
   void makeZn(int dimension);
   void refineByOtherLattice(const Lattice& other);
+  void refineByVector(const Vector<Rational>& other);
   void makeFromRoots(const List<Vector<Rational> >& input);
   void makeFromMatrix(const Matrix<Rational>& input);
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
@@ -161,6 +162,10 @@ public:
     const Vector<Rational>& input, std::stringstream* comments
   ) const;
   void addLatticeShift(
+    const Polynomial<Rational>& input,
+    const Vector<Rational>& inputShift
+  );
+  void setLatticeShift(
     const Polynomial<Rational>& input,
     const Vector<Rational>& inputShift
   );
@@ -237,6 +242,10 @@ public:
     const PolynomialSubstitution<Rational>& substitution,
     QuasiPolynomial& output
   ) const;
+  bool compress();
+  void getValueOnShift(const Vector<Rational>& shift, Polynomial<Rational>& output)const;
+  bool compressWithRespectToCoordinate(int coordinate);
+  bool compressWithRespectToPeriod(const Vector<Rational>& period);
   void operator+=(const QuasiPolynomial& other);
   void operator-=(const QuasiPolynomial& other);
   void operator*=(const Rational& scalar);

@@ -906,7 +906,9 @@ class MathNodeFactory {
 
   /**
    * @return {MathNodeAbsoluteValue!|MathNodeAngleBrackets!|
-   * MathNodeCurlyBrace!|MathNodeParenthesis!|MathNodeSquareBrackets!|MathNodeFloor}
+   * MathNodeCurlyBrace!|MathNodeParenthesis!|
+   * MathNodeSquareBrackets!|MathNodeFloor!|
+   * MathNodeCeiling!}
    */
   delimiterMark(
       /** @type {EquationEditor!} */
@@ -9875,7 +9877,7 @@ class MathNodeHorizontalBrace extends MathNode {
   constructor(
     /** @type {EquationEditor!} */
     equationEditor,
-    /** @type {Boolean} */
+    /** @type {boolean} */
     inputPointsUp,
   ) {
     super(equationEditor, knownTypes.horizontalBrace);
@@ -10061,7 +10063,7 @@ class MathNodeOverBrace extends MathNode {
     let brace = this.children[1];
     let superscript = this.children[2];
     this.boundingBox.width = base.boundingBox.width;
-    brace.computeDimensions(base.boundingBox.width);
+    brace.computeDimensions();
     superscript.boundingBox.width = base.boundingBox.width;
     superscript.computeBoundingBoxLeftSingleChild();
     this.boundingBox.height = base.boundingBox.height +
@@ -10098,7 +10100,7 @@ class MathNodeUnderBrace extends MathNode {
     let brace = this.children[1];
     let subscript = this.children[2];
     this.boundingBox.width = base.boundingBox.width;
-    brace.computeDimensions(base.boundingBox.width);
+    brace.computeDimensions();
     subscript.boundingBox.width = base.boundingBox.width;
     subscript.computeBoundingBoxLeftSingleChild();
     this.boundingBox.height = base.boundingBox.height +

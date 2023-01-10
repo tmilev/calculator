@@ -259,7 +259,7 @@ const knownTypes = {
     'margin': '2px',
     'cursor': 'text',
     'minWidth': '30px',
-    'overflow':'visible',
+    'overflow': 'visible',
   }),
   // A math expression with no children such as "x", "2".
   // This is the only element type that has contentEditable = true;
@@ -762,8 +762,7 @@ class MathNodeFactory {
     const horizontalBraceTopRight =
         new MathNode(equationEditor, knownTypes.topRightQuarterCircle);
 
-    const horizontalBrace =
-        new MathNodeHorizontalBrace(equationEditor, true);
+    const horizontalBrace = new MathNodeHorizontalBrace(equationEditor, true);
     horizontalBrace.appendChildren([
       horizontalBraceTopLeft,
       horizontalBraceLeft,
@@ -782,28 +781,28 @@ class MathNodeFactory {
 
   /** @return {MathNodeUnderBrace!} */
   underBrace(
-    /** @type {EquationEditor!} */
-    equationEditor,
-    /** @type {MathNode?} */
-    content,
-    /** @type {MathNode?} */
-    underBraceContent,
+      /** @type {EquationEditor!} */
+      equationEditor,
+      /** @type {MathNode?} */
+      content,
+      /** @type {MathNode?} */
+      underBraceContent,
   ) {
     const result = new MathNodeUnderBrace(equationEditor);
     const base = mathNodeFactory.horizontalMath(equationEditor, content);
     // 6 components of underbrace line
     const horizontalBraceBottomLeft =
-      new MathNode(equationEditor, knownTypes.bottomLeftQuarterCircle);
+        new MathNode(equationEditor, knownTypes.bottomLeftQuarterCircle);
     const horizontalBraceLeft =
-      new MathNode(equationEditor, knownTypes.horizontalLineBottomMargin);
+        new MathNode(equationEditor, knownTypes.horizontalLineBottomMargin);
     const horizontalBraceTopRight =
-      new MathNode(equationEditor, knownTypes.topRightQuarterCircle);
+        new MathNode(equationEditor, knownTypes.topRightQuarterCircle);
     const horizontalBraceTopLeft =
-      new MathNode(equationEditor, knownTypes.topLeftQuarterCircle);
+        new MathNode(equationEditor, knownTypes.topLeftQuarterCircle);
     const horizontalBraceRight =
-      new MathNode(equationEditor, knownTypes.horizontalLineBottomMargin);
+        new MathNode(equationEditor, knownTypes.horizontalLineBottomMargin);
     const horizontalBraceBottomRight =
-      new MathNode(equationEditor, knownTypes.bottomRightQuarterCircle);
+        new MathNode(equationEditor, knownTypes.bottomRightQuarterCircle);
 
     const horizontalBrace = new MathNodeHorizontalBrace(equationEditor, false);
     horizontalBrace.appendChildren([
@@ -815,7 +814,7 @@ class MathNodeFactory {
       horizontalBraceBottomRight,
     ]);
     let subscript =
-      mathNodeFactory.genericMathBox(equationEditor, underBraceContent);
+        mathNodeFactory.genericMathBox(equationEditor, underBraceContent);
     result.appendChild(base);
     result.appendChild(horizontalBrace);
     result.appendChild(subscript);
@@ -1366,10 +1365,10 @@ class MathNodeWithCursorPosition {
   }
 }
 
-/** 
- * Converts the textContent of an html element to typeset math. 
- * @return {EquationEditor!} 
- */ 
+/**
+ * Converts the textContent of an html element to typeset math.
+ * @return {EquationEditor!}
+ */
 function mathFromElement(
     /** @type {HTMLElement!} */
     container,
@@ -1395,10 +1394,10 @@ function mathFromElement(
       callback, containerSVG, copyButton);
 }
 
-/** 
+/**
  * Returns typeset math.
- * 
- * @return {EquationEditor!} 
+ *
+ * @return {EquationEditor!}
  */
 function mathFromLatex(
     /** @type {HTMLElement!} */
@@ -2523,12 +2522,12 @@ class LaTeXParser {
       return this.replaceParsingStackTop(node, '', -4);
     }
     if (fourthToLast.syntacticRole === '\\underbrace' &&
-      thirdToLast.isExpression() && secondToLast.syntacticRole === '_' &&
-      last.isExpression()) {
+        thirdToLast.isExpression() && secondToLast.syntacticRole === '_' &&
+        last.isExpression()) {
       this.lastRuleName = 'under-brace';
       let node = mathNodeFactory.underBrace(
-        this.equationEditor,
-          /** @type {MathNode!} */(thirdToLast.node), last.node);
+          this.equationEditor,
+          /** @type {MathNode!} */ (thirdToLast.node), last.node);
       return this.replaceParsingStackTop(node, '', -4);
     }
     let fifthToLast = this.parsingStack[this.parsingStack.length - 5];
@@ -2608,24 +2607,23 @@ class LaTeXParser {
       return this.replaceParsingStackTop(node, '', -1);
     }
     if ((thirdToLast.syntacticRole === '\\begin' ||
-      thirdToLast.syntacticRole === '\\end') &&
-      secondToLast.syntacticRole === '{' &&
-      last.content in latexConstants.beginEndEnvironments) {
+         thirdToLast.syntacticRole === '\\end') &&
+        secondToLast.syntacticRole === '{' &&
+        last.content in latexConstants.beginEndEnvironments) {
       this.lastRuleName = 'begin or end environment';
       return this.replaceParsingStackTop(
-        null, latexConstants.beginEndEnvironments[last.content], -1);
+          null, latexConstants.beginEndEnvironments[last.content], -1);
     }
     if ((fourthToLast.syntacticRole === '\\begin' ||
-      fourthToLast.syntacticRole === '\\end') &&
-      thirdToLast.syntacticRole === '{' &&
-      last.content === '*' &&
-      (secondToLast.syntacticRole + '*') in latexConstants.beginEndEnvironments
-    ) {
+         fourthToLast.syntacticRole === '\\end') &&
+        thirdToLast.syntacticRole === '{' && last.content === '*' &&
+        (secondToLast.syntacticRole + '*') in
+            latexConstants.beginEndEnvironments) {
       this.lastRuleName = 'begin or end environment*';
       let environment = secondToLast.syntacticRole + '*';
       this.decreaseParsingStack(1);
       return this.replaceParsingStackTop(
-        null, latexConstants.beginEndEnvironments[environment], -1);
+          null, latexConstants.beginEndEnvironments[environment], -1);
     }
     if (fourthToLast.syntacticRole === '\\begin' &&
         thirdToLast.syntacticRole === '{' &&
@@ -2650,14 +2648,14 @@ class LaTeXParser {
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (last.syntacticRole === '\\begin{matrix}' ||
-      last.syntacticRole === '\\begin{align}' ||
-      last.syntacticRole === '\\begin{align*}'
-    ) {
+        last.syntacticRole === '\\begin{align}' ||
+        last.syntacticRole === '\\begin{align*}') {
       this.lastRuleName = 'begin matrix to matrix builder';
-      let matrixStyle = last.syntacticRole === '\\begin{matrix}' ? 'matrix' : 'align';
+      let matrixStyle =
+          last.syntacticRole === '\\begin{matrix}' ? 'matrix' : 'align';
       let columnStyle = matrixStyle === 'matrix' ? '' : 'rl';
-      let matrix =
-        mathNodeFactory.matrix(this.equationEditor, 1, 0, columnStyle, matrixStyle);
+      let matrix = mathNodeFactory.matrix(
+          this.equationEditor, 1, 0, columnStyle, matrixStyle);
       return this.replaceParsingStackTop(matrix, 'matrixBuilder', -1);
     }
     if (last.syntacticRole === '\\begin{bmatrix}') {
@@ -2974,7 +2972,7 @@ class EquationEditorOptions {
        * removeDisplayStyle: (boolean|undefined),
        * sanitizeLatexSource: (boolean|undefined),
        * debugLogContainer: (HTMLElement?|null|undefined),
-       * latexInput: (HTMLInputElement?|null|undefined),
+       * latexInput: (HTMLInputElement?|HTMLTextAreaElement?|null|undefined),
        * editHandler: (Function?|null|undefined),
        * lineBreakWidth: (number|undefined),
        * logTiming: (boolean|undefined),
@@ -2995,7 +2993,7 @@ class EquationEditorOptions {
     this.sanitizeLatexSource = options.sanitizeLatexSource;
     /** @type {HTMLElement?|undefined} */
     this.debugLogContainer = options.debugLogContainer;
-    /** @type {HTMLInputElement?|undefined} */
+    /** @type {HTMLInputElement?|HTMLTextAreaElement?|undefined} */
     this.latexInput = options.latexInput;
     /** @type {boolean|undefined} */
     this.logTiming = options.logTiming;
@@ -3271,7 +3269,8 @@ class CopyButton {
   initialize() {
     this.container =
         /** @type {HTMLElement!} */ (document.createElement('span'));
-    this.button = /** @type {HTMLElement!} */ (document.createElement('button'));
+    this.button =
+        /** @type {HTMLElement!} */ (document.createElement('button'));
     this.container.style.fontSize = '6px';
     this.button.style.fontSize = '6px';
     this.container.appendChild(this.button);
@@ -3532,7 +3531,7 @@ class EquationEditor {
    */
   copyToClipboard() {
     if (this.selectionEndExpanded.element === null ||
-      this.selectionStartExpanded.element === null) {
+        this.selectionStartExpanded.element === null) {
       if (!this.options.editable) {
         return this.doCopy(this.latexLastWritten);
       } else {
@@ -3554,7 +3553,7 @@ class EquationEditor {
     let latexContent = [];
     /** @type {MathNode?} */
     let current = left;
-    for (; ;) {
+    for (;;) {
       latexContent.push(current.toLatexWithAnnotation(null).latex);
       if (current === right) {
         break;
@@ -3568,14 +3567,18 @@ class EquationEditor {
     return this.doCopy(toBeCopied);
   }
 
+  /**
+   * Carries out the actual browser copy operation and bounced back the copied
+   * string. @return {string}
+   */
   doCopy(
-    /** @type{string} */
-    toBeCopied,
+      /** @type {string} */
+      toBeCopied,
   ) {
     this.lastCopied = toBeCopied;
     navigator.clipboard.writeText(toBeCopied);
     this.writeDebugInfo(null);
-    return toBeCopied;    
+    return toBeCopied;
   }
 
   /** Computes the height of a white-space text in a DOM. */
@@ -5094,7 +5097,8 @@ class MathNode {
       this.element =
           /** @type {HTMLElement!} */ (document.createElement('input'));
     } else {
-      this.element = /** @type {HTMLElement!} */ (document.createElement('div'));
+      this.element =
+          /** @type {HTMLElement!} */ (document.createElement('div'));
     }
     if ((this.type.type === knownTypes.eventCatcher.type ||
          this.type.type === knownTypes.atom.type) &&
@@ -5478,10 +5482,10 @@ class MathNode {
   /** @return {boolean} */
   isAtomOrAtomImmutable() {
     return (
-      this.type.type === knownTypes.atom.type ||
-      this.type.type === knownTypes.atomImmutable.type);
+        this.type.type === knownTypes.atom.type ||
+        this.type.type === knownTypes.atomImmutable.type);
   }
-  
+
   /** @return {boolean} */
   isDelimiter() {
     return (
@@ -5573,13 +5577,14 @@ class MathNode {
 
   /** @return {BoundingBox?} */
   findBaselineBox(
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     let box = new BoundingBox();
     box.top = boundingBoxFromParent.top + this.boundingBox.top;
     box.height = this.boundingBox.height;
-    if (this.isAtomOrAtomImmutable() && this.boundingBox.width !== 0 && this.contentIfAtomic() !== '') {
+    if (this.isAtomOrAtomImmutable() && this.boundingBox.width !== 0 &&
+        this.contentIfAtomic() !== '') {
       box.width = this.boundingBox.width;
       return box;
     }
@@ -9392,7 +9397,7 @@ class MathNodeRoot extends MathNode {
     }
   }
 
-  /** 
+  /**
    * Computes the dimensions of the bounding box
    * when the expression does not need middle alignment
    * (no fraction lines).
@@ -9464,8 +9469,8 @@ class MathNodeError extends MathNode {
 
   /** @return {LatexWithAnnotation!} */
   toLatexWithAnnotation(
-    /** @type {ToLatexOptions?} */
-    options,
+      /** @type {ToLatexOptions?} */
+      options,
   ) {
     return new LatexWithAnnotation(this.textContentOrInitialContent());
   }
@@ -9838,8 +9843,8 @@ class MathNodeOverLine extends MathNode {
 
   /** @return {LatexWithAnnotation!} */
   toLatexWithAnnotation(
-    /** @type {ToLatexOptions?} */
-    options,
+      /** @type {ToLatexOptions?} */
+      options,
   ) {
     let base = this.children[0].toLatexWithAnnotation(options);
     return new LatexWithAnnotation(`\\overline{${base.latex}}`);
@@ -9873,12 +9878,12 @@ class MathNodeFormInput extends MathNode {
   }
 }
 
-class MathNodeHorizontalBrace extends MathNode { 
+class MathNodeHorizontalBrace extends MathNode {
   constructor(
-    /** @type {EquationEditor!} */
-    equationEditor,
-    /** @type {boolean} */
-    inputPointsUp,
+      /** @type {EquationEditor!} */
+      equationEditor,
+      /** @type {boolean} */
+      inputPointsUp,
   ) {
     super(equationEditor, knownTypes.horizontalBrace);
     this.pointsUp = inputPointsUp;
@@ -9886,12 +9891,13 @@ class MathNodeHorizontalBrace extends MathNode {
 
   /** @return{number} */
   radius(
-    /** @type{number} */
-    desiredWidth,
+      /** @type{number} */
+      desiredWidth,
   ) {
     return Math.max(4, Math.floor(desiredWidth * 0.08));
   }
 
+  /** Computes the dimensions of a horizontal curly brace. */
   computeDimensions() {
     let desiredWidth = this.parent.boundingBox.width;
 
@@ -9914,16 +9920,16 @@ class MathNodeHorizontalBrace extends MathNode {
       middleLeft.element.style.borderBottomRightRadius = radiusString;
       middleLeft.element.style.borderBottom = borderString;
       middleRight.element.style.borderBottomLeftRadius = radiusString;
-      middleRight.element.style.borderBottom = borderString;      
+      middleRight.element.style.borderBottom = borderString;
       right.element.style.borderTopRightRadius = radiusString;
       right.element.style.borderTop = borderString;
-    } else { 
+    } else {
       left.element.style.borderBottomLeftRadius = radiusString;
       left.element.style.borderBottom = borderString;
       middleLeft.element.style.borderTopRightRadius = radiusString;
       middleLeft.element.style.borderTop = borderString;
       middleRight.element.style.borderTopLeftRadius = radiusString;
-      middleRight.element.style.borderTop = borderString;      
+      middleRight.element.style.borderTop = borderString;
       right.element.style.borderBottomRightRadius = radiusString;
       right.element.style.borderBottom = borderString;
     }
@@ -9944,7 +9950,7 @@ class MathNodeHorizontalBrace extends MathNode {
       middleLeft.boundingBox.top = 0;
       middleRight.boundingBox.top = 0;
       right.boundingBox.top = desiredHeight;
-    } else { 
+    } else {
       left.boundingBox.top = 0;
       middleLeft.boundingBox.top = desiredHeight;
       middleRight.boundingBox.top = desiredHeight;
@@ -9965,18 +9971,19 @@ class MathNodeHorizontalBrace extends MathNode {
   }
 
   toScalableVectorGraphics(
-    /** @type {SVGSVGElement!} */
-    container,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
-  ) { 
+      /** @type {SVGSVGElement!} */
+      container,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
+  ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
     let r = this.radius(this.boundingBox.width);
     let rC = this.pointsUp ? r : -r;
     let t = r / 2;
     let tC = this.pointsUp ? t : -t;
-    let yMiddle = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.height / 2;
+    let yMiddle = boundingBoxFromParent.top + this.boundingBox.top +
+        this.boundingBox.height / 2;
     let xLeft = boundingBoxFromParent.left + this.boundingBox.left;
     let arcChoiceLeft = this.pointsUp ? 1 : 0;
     let arcChoiceOther = 1 - arcChoiceLeft;
@@ -9985,7 +9992,7 @@ class MathNodeHorizontalBrace extends MathNode {
     let xMiddle = xLeft + halfWidth;
     let xMiddleRight = xLeft + halfWidth + r;
     let xRight = xLeft + this.boundingBox.width;
-  
+
     let path = `M ${xLeft} ${yMiddle + rC} `;
     path += `A ${r} ${r} 0 0 ${arcChoiceLeft} ${xLeft + r} ${yMiddle} `;
     path += `L ${xMiddleLeft} ${yMiddle} `;
@@ -10012,13 +10019,14 @@ class MathNodeHorizontalBrace extends MathNode {
   }
 
   drawOnCanvas(
-    /** @type {CanvasRenderingContext2D!} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
-    let yMiddle = boundingBoxFromParent.top + this.boundingBox.top + this.boundingBox.height / 2;
+    let yMiddle = boundingBoxFromParent.top + this.boundingBox.top +
+        this.boundingBox.height / 2;
     let sign = this.pointsUp ? -1 : 1;
     let r = this.radius(this.boundingBox.width);
     let rC = sign * r;
@@ -10033,18 +10041,34 @@ class MathNodeHorizontalBrace extends MathNode {
 
     canvas.beginPath();
     canvas.moveTo(xLeft, yMiddle - rC);
-    canvas.ellipse(xLeft + r, yMiddle - rC, r, r, 0, Math.PI, (1 - 0.5 * sign) * Math.PI, !this.pointsUp);
+    canvas.ellipse(
+        xLeft + r, yMiddle - rC, r, r, 0, Math.PI, (1 - 0.5 * sign) * Math.PI,
+        !this.pointsUp);
     canvas.lineTo(xMiddleLeft, yMiddle);
-    canvas.ellipse(xMiddleLeft, yMiddle + rC, r, r, 0, - sign * 0.5 * Math.PI, 0, this.pointsUp);
-    canvas.ellipse(xMiddle + r, yMiddle + rC, r, r, 0, Math.PI, (-sign * 0.5) * Math.PI, this.pointsUp);
+    canvas.ellipse(
+        xMiddleLeft, yMiddle + rC, r, r, 0, -sign * 0.5 * Math.PI, 0,
+        this.pointsUp);
+    canvas.ellipse(
+        xMiddle + r, yMiddle + rC, r, r, 0, Math.PI, (-sign * 0.5) * Math.PI,
+        this.pointsUp);
     canvas.lineTo(xRight - r, yMiddle);
-    canvas.ellipse(xRight - r, yMiddle - rC, r, r, 0, sign * Math.PI / 2, 0, !this.pointsUp);
-    canvas.ellipse(xRight - r, yMiddle - rC, r, t, 0, 0, sign * Math.PI / 2, this.pointsUp);
+    canvas.ellipse(
+        xRight - r, yMiddle - rC, r, r, 0, sign * Math.PI / 2, 0,
+        !this.pointsUp);
+    canvas.ellipse(
+        xRight - r, yMiddle - rC, r, t, 0, 0, sign * Math.PI / 2,
+        this.pointsUp);
     canvas.lineTo(xMiddleRight, yMiddle - tC);
-    canvas.ellipse(xMiddle + r, yMiddle, r, t, 0, (-sign * 0.5) * Math.PI, Math.PI, !this.pointsUp);
-    canvas.ellipse(xMiddleLeft, yMiddle , r, t, 0, 0, - sign * 0.5 * Math.PI, !this.pointsUp);
+    canvas.ellipse(
+        xMiddle + r, yMiddle, r, t, 0, (-sign * 0.5) * Math.PI, Math.PI,
+        !this.pointsUp);
+    canvas.ellipse(
+        xMiddleLeft, yMiddle, r, t, 0, 0, -sign * 0.5 * Math.PI,
+        !this.pointsUp);
     canvas.lineTo(xLeft + r, yMiddle - tC);
-    canvas.ellipse(xLeft + r, yMiddle - rC, r, t, 0, (1 - 0.5 * sign) * Math.PI, Math.PI, this.pointsUp);
+    canvas.ellipse(
+        xLeft + r, yMiddle - rC, r, t, 0, (1 - 0.5 * sign) * Math.PI, Math.PI,
+        this.pointsUp);
     canvas.fill();
   }
 }
@@ -10067,29 +10091,30 @@ class MathNodeOverBrace extends MathNode {
     superscript.boundingBox.width = base.boundingBox.width;
     superscript.computeBoundingBoxLeftSingleChild();
     this.boundingBox.height = base.boundingBox.height +
-      brace.boundingBox.height + superscript.boundingBox.height;
+        brace.boundingBox.height + superscript.boundingBox.height;
     this.boundingBox.fractionLineHeight = brace.boundingBox.height +
-      superscript.boundingBox.height + base.boundingBox.fractionLineHeight;
+        superscript.boundingBox.height + base.boundingBox.fractionLineHeight;
     brace.boundingBox.top = superscript.boundingBox.height;
     base.boundingBox.top =
-      superscript.boundingBox.height + brace.boundingBox.height;
+        superscript.boundingBox.height + brace.boundingBox.height;
   }
 
   /** @return {LatexWithAnnotation!} */
   toLatexWithAnnotation(
-    /** @type {ToLatexOptions?} */
-    options,
+      /** @type {ToLatexOptions?} */
+      options,
   ) {
     let base = this.children[0].toLatexWithAnnotation(options);
     let superscript = this.children[2].toLatexWithAnnotation(options);
-    return new LatexWithAnnotation(`\\overbrace{${base.latex}}^${superscript.latex}`);
+    return new LatexWithAnnotation(
+        `\\overbrace{${base.latex}}^${superscript.latex}`);
   }
 }
 
 class MathNodeUnderBrace extends MathNode {
   constructor(
-    /** @type {EquationEditor!} */
-    equationEditor,
+      /** @type {EquationEditor!} */
+      equationEditor,
   ) {
     super(equationEditor, knownTypes.underBrace);
   }
@@ -10104,21 +10129,22 @@ class MathNodeUnderBrace extends MathNode {
     subscript.boundingBox.width = base.boundingBox.width;
     subscript.computeBoundingBoxLeftSingleChild();
     this.boundingBox.height = base.boundingBox.height +
-      brace.boundingBox.height + subscript.boundingBox.height;
+        brace.boundingBox.height + subscript.boundingBox.height;
     this.boundingBox.fractionLineHeight = base.boundingBox.fractionLineHeight;
     brace.boundingBox.top = base.boundingBox.height;
     subscript.boundingBox.top =
-      base.boundingBox.height + brace.boundingBox.height;
+        base.boundingBox.height + brace.boundingBox.height;
   }
 
   /** @return {LatexWithAnnotation!} */
   toLatexWithAnnotation(
-    /** @type {ToLatexOptions?} */
-    options,
+      /** @type {ToLatexOptions?} */
+      options,
   ) {
     let base = this.children[0].toLatexWithAnnotation(options);
     let subscript = this.children[2].toLatexWithAnnotation(options);
-    return new LatexWithAnnotation(`\\underbrace{${base.latex}}_${subscript.latex}`);
+    return new LatexWithAnnotation(
+        `\\underbrace{${base.latex}}_${subscript.latex}`);
   }
 }
 
@@ -10529,19 +10555,19 @@ class MathNodeSquareBracketsLike extends MathNodeDelimiterMark {
 
 class MathNodeSquareBrackets extends MathNodeSquareBracketsLike {
   constructor(
-    /** @type {EquationEditor!} */
-    equationEditor,
-    /** @type {boolean} */
-    left,
+      /** @type {EquationEditor!} */
+      equationEditor,
+      /** @type {boolean} */
+      left,
   ) {
     super(equationEditor, left);
   }
 
   verticallyStretch(
-    /** @type {number} */
-    heightToEnclose,
-    /** @type {number} */
-    fractionLineHeightEnclosed,
+      /** @type {number} */
+      heightToEnclose,
+      /** @type {number} */
+      fractionLineHeightEnclosed,
   ) {
     this.verticallyStretchBase(heightToEnclose, fractionLineHeightEnclosed);
     if (this.element !== null) {
@@ -10552,15 +10578,16 @@ class MathNodeSquareBrackets extends MathNodeSquareBracketsLike {
   }
 
   toScalableVectorGraphics(
-    /** @type {SVGSVGElement!} */
-    container,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {SVGSVGElement!} */
+      container,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
     let c = this.computeBracketCoordinates(boundingBoxFromParent);
-    let command = `M ${c.xStart} ${c.yLow} L ${c.xMiddle} ${c.yLow} L ${c.xMiddle} ${c.yHigh} L ${c.xStart} ${c.yHigh}`;  // move to point.
+    let command = `M ${c.xStart} ${c.yLow} L ${c.xMiddle} ${c.yLow} L ${
+        c.xMiddle} ${c.yHigh} L ${c.xStart} ${c.yHigh}`;  // move to point.
     result.setPathString(command);
     result.setLineWidth(this.parenthesisThickness);
     let color = this.type.colorText;
@@ -10573,10 +10600,10 @@ class MathNodeSquareBrackets extends MathNodeSquareBracketsLike {
   }
 
   drawOnCanvas(
-    /** @type {CanvasRenderingContext2D!} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
     let c = this.computeBracketCoordinates(boundingBoxFromParent);
@@ -10591,19 +10618,19 @@ class MathNodeSquareBrackets extends MathNodeSquareBracketsLike {
 
 class MathNodeFloor extends MathNodeSquareBracketsLike {
   constructor(
-    /** @type {EquationEditor!} */
-    equationEditor,
-    /** @type {boolean} */
-    left,
+      /** @type {EquationEditor!} */
+      equationEditor,
+      /** @type {boolean} */
+      left,
   ) {
     super(equationEditor, left);
   }
 
   verticallyStretch(
-    /** @type {number} */
-    heightToEnclose,
-    /** @type {number} */
-    fractionLineHeightEnclosed,
+      /** @type {number} */
+      heightToEnclose,
+      /** @type {number} */
+      fractionLineHeightEnclosed,
   ) {
     this.verticallyStretchBase(heightToEnclose, fractionLineHeightEnclosed);
     if (this.element !== null) {
@@ -10613,15 +10640,16 @@ class MathNodeFloor extends MathNodeSquareBracketsLike {
   }
 
   toScalableVectorGraphics(
-    /** @type {SVGSVGElement!} */
-    container,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {SVGSVGElement!} */
+      container,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
     let c = this.computeBracketCoordinates(boundingBoxFromParent);
-    let command = `M ${c.xStart} ${c.yLow} L ${c.xMiddle} ${c.yLow} L ${c.xMiddle} ${c.yHigh}`;  // move to point.
+    let command = `M ${c.xStart} ${c.yLow} L ${c.xMiddle} ${c.yLow} L ${
+        c.xMiddle} ${c.yHigh}`;  // move to point.
     result.setPathString(command);
     result.setLineWidth(this.parenthesisThickness);
     let color = this.type.colorText;
@@ -10634,10 +10662,10 @@ class MathNodeFloor extends MathNodeSquareBracketsLike {
   }
 
   drawOnCanvas(
-    /** @type {CanvasRenderingContext2D!} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
     let c = this.computeBracketCoordinates(boundingBoxFromParent);
@@ -10651,19 +10679,19 @@ class MathNodeFloor extends MathNodeSquareBracketsLike {
 
 class MathNodeCeiling extends MathNodeSquareBracketsLike {
   constructor(
-    /** @type {EquationEditor!} */
-    equationEditor,
-    /** @type {boolean} */
-    left,
+      /** @type {EquationEditor!} */
+      equationEditor,
+      /** @type {boolean} */
+      left,
   ) {
     super(equationEditor, left);
   }
 
   verticallyStretch(
-    /** @type {number} */
-    heightToEnclose,
-    /** @type {number} */
-    fractionLineHeightEnclosed,
+      /** @type {number} */
+      heightToEnclose,
+      /** @type {number} */
+      fractionLineHeightEnclosed,
   ) {
     this.verticallyStretchBase(heightToEnclose, fractionLineHeightEnclosed);
     if (this.element !== null) {
@@ -10673,15 +10701,16 @@ class MathNodeCeiling extends MathNodeSquareBracketsLike {
   }
 
   toScalableVectorGraphics(
-    /** @type {SVGSVGElement!} */
-    container,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {SVGSVGElement!} */
+      container,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.toScalableVectorGraphicsBase(container, boundingBoxFromParent);
     let result = new ScalableVectorGraphicsPath();
     let c = this.computeBracketCoordinates(boundingBoxFromParent);
-    let command = `M ${c.xMiddle} ${c.yLow} L ${c.xMiddle} ${c.yHigh} L ${c.xStart} ${c.yHigh}`;  // move to point.
+    let command = `M ${c.xMiddle} ${c.yLow} L ${c.xMiddle} ${c.yHigh} L ${
+        c.xStart} ${c.yHigh}`;  // move to point.
     result.setPathString(command);
     result.setLineWidth(this.parenthesisThickness);
     let color = this.type.colorText;
@@ -10694,10 +10723,10 @@ class MathNodeCeiling extends MathNodeSquareBracketsLike {
   }
 
   drawOnCanvas(
-    /** @type {CanvasRenderingContext2D!} */
-    canvas,
-    /** @type {BoundingBox!} */
-    boundingBoxFromParent,
+      /** @type {CanvasRenderingContext2D!} */
+      canvas,
+      /** @type {BoundingBox!} */
+      boundingBoxFromParent,
   ) {
     this.drawOnCanvasBase(canvas, boundingBoxFromParent);
     let c = this.computeBracketCoordinates(boundingBoxFromParent);
@@ -12905,6 +12934,7 @@ let mathNodeFactory = new MathNodeFactory();
  * this file is inserted into a function body, which receives as an argument a
  * variable called module. Modifications to module.exports are then visible to
  * the caller of this functions, i.e., to external javascript files.
+ * @suppress {lintVarDeclarations}
  */
 var module;
 if (module === undefined) {

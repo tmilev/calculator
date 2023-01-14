@@ -912,6 +912,7 @@ public:
   std::string toString() const;
   std::string toStringCommaDelimited(FormatExpressions* format) const;
   std::string toStringCommaDelimited() const;
+  std::string toStringWithSeparator(const std::string& separator) const;
   void toString(std::string& output, FormatExpressions* format = nullptr) const {
     output = this->toString(format);
   }
@@ -2205,11 +2206,18 @@ std::string List<Object>::toString() const {
 
 template <class Object>
 std::string List<Object>::toStringCommaDelimited() const {
+  return this->toStringWithSeparator(", ");
+}
+
+template <class Object>
+std::string List<Object>::toStringWithSeparator(
+  const std::string& separator
+) const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
     out << this->objects[i];
     if (i != this->size - 1) {
-      out << ", ";
+      out << separator;
     }
   }
   return out.str();

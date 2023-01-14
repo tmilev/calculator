@@ -158,6 +158,10 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toHTML(FormatExpressions* format = nullptr) const;
   std::string toLatex(FormatExpressions* format = nullptr) const;
+  void sortLatticeShifts();
+  void combineLatticeShifts(
+    MapList<Polynomial<Rational>, List<Vector<Rational> > >& output
+  ) const;
   Rational evaluate(
     const Vector<Rational>& input, std::stringstream* comments
   ) const;
@@ -243,10 +247,10 @@ public:
     QuasiPolynomial& output
   ) const;
   bool compress();
+  bool compressOnce();
   void getValueOnShift(
     const Vector<Rational>& shift, Polynomial<Rational>& output
   ) const;
-  bool compressWithRespectToCoordinate(int coordinate);
   bool compressWithRespectToPeriod(const Vector<Rational>& period);
   void operator+=(const QuasiPolynomial& other);
   void operator-=(const QuasiPolynomial& other);

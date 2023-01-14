@@ -933,6 +933,10 @@ public:
     const QuasiPolynomial& input,
     FormatExpressions* format
   ) const;
+  // Helper method for toLatexOneQuasipolynomialInTable.
+  std::string toStringLatticeShiftsOneQuasipolynomial(
+    const List<Vector<Rational> >& shifts, bool isInZn
+  ) const;
   std::string toLatexSelfContainedDocumentBody() const;
   std::string toLatexCopyButton() const;
   std::string toLatexFullSum(

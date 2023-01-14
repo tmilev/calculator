@@ -373,44 +373,57 @@ void QuasiPolynomial::substituteShiftByFloorOfLinearFunctionOnce(
   outputAccumulator += summand;
 }
 
+void QuasiPolynomial::sortLatticeShifts() {
+  this->latticeShifts.quickSortAscending(
+    nullptr, &this->valueOnEachLatticeShift
+  );
+}
+
+void QuasiPolynomial::combineLatticeShifts(
+  MapList<Polynomial<Rational>, List<Vector<Rational> > >& output
+) const {
+  STACK_TRACE("QuasiPolynomial::combineLatticeShifts");
+  output.clear();
+  List<Vector<Rational> > empty;
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
+    const Polynomial<Rational>& current = this->valueOnEachLatticeShift[i];
+    if (!output.contains(current)) {
+      output.setKeyValue(current, empty);
+    }
+    output.getValueNoFailNonConst(current).addOnTop(
+      this->latticeShifts[i]
+    );
+  }
+}
+
 bool QuasiPolynomial::compress() {
   STACK_TRACE("QuasiPolynomial::compress");
-  int dimension =
-  this->ambientLatticeReduced.basisRationalForm.numberOfColumns;
-  if (!this->ambientLatticeReduced.basisRationalForm.isDiagonal()) {
+  if (!this->ambientLatticeReduced.basisRationalForm.isSquare()) {
     return false;
   }
   bool result = false;
-  for (int i = 0; i < dimension; i ++) {
-    while (this->compressWithRespectToCoordinate(i)) {
-      result = true;
-    }
+  while (this->compressOnce()) {
+    result = true;
   }
   return result;
 }
 
-bool QuasiPolynomial::compressWithRespectToCoordinate(int coordinate) {
-  int periodSmall = 0;
-  if (
-    !this->ambientLatticeReduced.basisRationalForm(coordinate, coordinate).
-    isSmallInteger(&periodSmall)
-  ) {
-    return false;
-  }
-  if (periodSmall > 100) {
-    // Too big.
-    return false;
-  }
-  for (int i = 2; i < periodSmall; i ++) {
-    if (periodSmall % i != 0) {
-      continue;
-    }
-    Vector<Rational> shift;
-    int dimension = this->ambientLatticeReduced.getDimension();
-    shift.makeZero(dimension);
-    shift[coordinate] = i;
-    if (this->compressWithRespectToPeriod(shift)) {
-      return true;
+bool QuasiPolynomial::compressOnce() {
+  STACK_TRACE("QuasiPolynomial::compressOnce");
+  for (int i = 0; i < this->latticeShifts.size; i ++) {
+    for (int j = i + 1; j < this->latticeShifts.size; j ++) {
+      if (
+        this->valueOnEachLatticeShift[i] != this->valueOnEachLatticeShift[j]
+      ) {
+        continue;
+      }
+      if (
+        this->compressWithRespectToPeriod(
+          this->latticeShifts[i] - this->latticeShifts[j]
+        )
+      ) {
+        return true;
+      }
     }
   }
   return false;

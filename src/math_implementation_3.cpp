@@ -4430,12 +4430,12 @@ std::string PartialFractions::toLatexQuasipolynomialTable() const {
   out << "\\caption{\\footnotesize V.p.f. of ";
   out << this->toStringLabel() << "}\\\\";
   out
-  << "\\hline N & Polynomial/Lattice & Shift\\\\ \\hline\n"
+  << "\\hline N & Polynomial/Lattice & Shift(s)\\\\ \\hline\n"
   << "\\endfirsthead"
   << "\\multicolumn{3}{c}{{"
   << "\\bfseries \\tablename\\ \\thetable{} -- continued from previous page"
   << "}} \\\\\n"
-  << "\\hline  N &  Polynomial/Lattice & Shift \\\\ \\hline\n"
+  << "\\hline  N &  Polynomial/Lattice & Shift(s) \\\\ \\hline\n"
   << "\\endhead"
   << "\\hline \\multicolumn{3}{|c|}{{Continued on next page}} \\\\ \\hline"
   << "\\endfoot"
@@ -4452,6 +4452,25 @@ std::string PartialFractions::toLatexQuasipolynomialTable() const {
     }
   }
   out << "\\end{longtable}\n";
+  return out.str();
+}
+
+std::string PartialFractions::toStringLatticeShiftsOneQuasipolynomial(
+  const List<Vector<Rational> >& shifts, bool isInZn
+) const {
+  if (isInZn) {
+    return "-";
+  }
+  std::stringstream out;
+  if (shifts.size == 1) {
+    out << "\\(" << shifts[0].toString() << "\\)";
+    return out.str();
+  }
+  out << "\\(";
+  out << "\\begin{array}{l}\n";
+  out << shifts.toStringWithSeparator("\\\\\n");
+  out << "\\end{array}\n";
+  out << "\\)";
   return out.str();
 }
 
@@ -4477,18 +4496,18 @@ std::string PartialFractions::toLatexOneQuasipolynomialInTable(
     << input.ambientLatticeReduced.toString()
     << "\\)&\\\\\\hline";
   }
-  for (int i = 0; i < input.latticeShifts.size; i ++) {
+  MapList<Polynomial<Rational>, List<Vector<Rational> > > combinedShifts;
+  input.combineLatticeShifts(combinedShifts);
+  for (int i = 0; i < combinedShifts.size(); i ++) {
+    const Polynomial<Rational>& polynomial = combinedShifts.keys[i];
+    const List<Vector<Rational> >& shifts = combinedShifts.values[i];
     out
     << "&"
     << "\\("
-    << input.valueOnEachLatticeShift[i].toStringWithPossibleLineBreak(format)
+    << polynomial.toStringWithPossibleLineBreak(format)
     << "\\)";
     out << "&";
-    if (!isZn) {
-      out << "\\(" << input.latticeShifts[i].toString() << "\\)";
-    } else {
-      out << "-";
-    }
+    out << this->toStringLatticeShiftsOneQuasipolynomial(shifts, isZn);
     out << "\\\\\n";
     if (isZn || i == input.latticeShifts.size - 1) {
       out << "\\hline";
@@ -11100,13 +11119,8 @@ bool PartialFractions::computeOneVectorPartitionFunction(
     this->makeProgressVPFcomputation();
   }
   Lattice ambient = output.ambientLatticeReduced;
-  if (output.compress()) {
-    global.comments
-    << "<br>DEBUG: Compressed! From "
-    << ambient.toStringParentheses()
-    << " to "
-    << output.ambientLatticeReduced.toStringParentheses();
-  }
+  output.compress();
+  output.sortLatticeShifts();
   return true;
 }
 

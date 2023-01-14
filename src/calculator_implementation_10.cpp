@@ -447,7 +447,13 @@ bool CalculatorFunctionsVectorPartitionFunction::quotientLatticeRepresentatives
     << "Both lattices must be of full rank and equal dimension";
   }
   if (!dividend.containsLattice(divisor)) {
-    return calculator << "The divisor is not a sub-lattice of the dividend.";
+    return
+    calculator
+    << "The divisor "
+    << divisor.toString()
+    << " is not a sub-lattice of the dividend "
+    << dividend.toString()
+    << ".";
   }
   Vectors<Rational> representatives;
   if (!dividend.getAllRepresentatives(divisor, representatives)) {

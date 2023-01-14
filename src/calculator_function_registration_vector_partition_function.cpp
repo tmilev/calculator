@@ -156,6 +156,26 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     innerStandard
   );
   this->addOperationHandler(
+    "ConeDecompositionArbitrarySlicesWithHistory",
+    CalculatorFunctionsVectorPartitionFunction::
+    coneDecompositionArbitrarySlicesWithHistory,
+    "",
+    "Same as ConeDecompositionArbitrarySlices but prints out "
+    "the intermediate steps. ",
+    "ConeDecompositionArbitrarySlicesWithHistory(\n"
+    "(1,0,0),\n"
+    "(0,1,0),\n"
+    "(0,0,1),\n"
+    "(1,1,0),\n"
+    "(0,1,1),\n"
+    "(1,1,1)\n"
+    ");\n",
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "coneDecompositionArbitrarySlicesWithHistory",
+    "ConeDecompositionArbitrarySlicesWithHistory",
+    innerStandard
+  );
+  this->addOperationHandler(
     this->builtInName<VectorPartitionFunction>(),
     CalculatorFunctionsVectorPartitionFunction::
     applyVectorPartitionFunctionFormula,

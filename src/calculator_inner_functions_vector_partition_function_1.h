@@ -68,6 +68,14 @@ public:
       calculator, input, output, true, true, true
     );
   }
+  static bool coneDecompositionArbitrarySlicesWithHistory(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
+      calculator, input, output, true, true, false
+    );
+  }
   static bool coneDecompositionArbitrarySlices(
     Calculator& calculator, const Expression& input, Expression& output
   ) {

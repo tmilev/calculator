@@ -6,12 +6,6 @@
  * Please don't require(...) any modules from this file.
  **/
 
-var collectionGraphicsNDimensions = {};
-
-function startProjectionPlaneUser(canvasId) {
-  collectionGraphicsNDimensions[canvasId].startProjectionPlaneUser();
-}
-
 function toStringVector(vector) {
   let result = "";
   result += "(";
@@ -44,20 +38,26 @@ function getAngleScreenChange(newX, newY, oldX, oldY) {
 }
 
 class GraphicsNDimensions {
-  constructor(inputIdCanvas, inputIdInfo, inputIdHighlightInfo, PanelExpandable) {
-    this.PanelExpandable = PanelExpandable;
-    if (this.PanelExpandable === undefined) {
-      this.PanelExpandable = null;
-    }
+  constructor(
+    /** @type{HTMLCanvasElement|string} */
+    inputContainer,
+    /** @type{HTMLElement|string} */
+    inputIdInfo,
+    inputIdHighlightInfo,
+  ) {
     this.vectors = [];
     this.vectorProjections = [];
     this.drawOperations = [];
-    this.idCanvas = inputIdCanvas;
-    this.idsBasis = [];
+    /** @type{Array.<Array.<HTMLTextAreaElement>>} */
+    this.screenBasisInputs = [];
     this.idInfo = inputIdInfo;
     this.idPlaneInfo = `${inputIdInfo}projectionPlane`;
     this.panelInfo = null;
-    if (inputIdHighlightInfo !== null && inputIdHighlightInfo !== undefined && inputIdHighlightInfo !== "") {
+    if (
+      inputIdHighlightInfo !== null &&
+      inputIdHighlightInfo !== undefined &&
+      inputIdHighlightInfo !== ""
+    ) {
       this.idHighlightInfo = inputIdHighlightInfo;
     } else {
       this.idHighlightInfo = null;
@@ -73,7 +73,11 @@ class GraphicsNDimensions {
     this.projectionSelectedAtSelection = [];
     this.screenBasis = [];
     this.screenBasisAtSelection = [];
-    this.canvasContainer = document.getElementById(this.idCanvas);
+    if (typeof inputContainer === "string") {
+      inputContainer = document.getElementById(inputContainer);
+    }
+    /** @type{HTMLCanvasElement} */
+    this.canvasContainer = inputContainer;
     this.dimension = 0;
     this.bilinearForm = [];
     this.graphicsUnit = 0;
@@ -122,7 +126,6 @@ class GraphicsNDimensions {
     this.mousePositionScreenClicked = [0, 0];
     this.shiftScreenCoordinatesClicked = [0, 0];
 
-    collectionGraphicsNDimensions[this.idCanvas] = this;
     this.clickTolerance = 5;
     this.textShift = [- 3, - 4];
   }
@@ -174,26 +177,29 @@ class GraphicsNDimensions {
     info.style.height = "300px";
     info.style.overflowY = "scroll";
     for (let i = 0; i < 2; i++) {
-      this.idsBasis[i] = [];
+      this.screenBasisInputs.push([]);
       for (let j = 0; j < this.dimension; j++) {
-        this.idsBasis[i][j] = `${this.idCanvas}textEbasis_${i}_${j}`;
         let textArea = document.createElement("textarea");
         textArea.rows = 1;
         textArea.cols = 2;
-        textArea.id = this.idsBasis[i][j];
-        info.appendChild(textArea)
+        this.screenBasisInputs[i].push(textArea);
+        info.appendChild(textArea);
       }
       info.appendChild(document.createElement("br"));
     }
     let button = document.createElement("button");
     button.textContent = "Change to basis";
     button.addEventListener("click", () => {
-      window.calculator.graphicsNDimensions.startProjectionPlaneUser(this.idCanvas);
+      this.startProjectionPlaneUser();
     });
     info.appendChild(button);
     info.appendChild(document.createElement("br"));
-    let snapShotLaTeX = document.createElement("span");
-    snapShotLaTeX.id = `${this.idCanvas}snapShotLateXspan`;
+    let snapShotLaTeX = document.createElement("button");
+    snapShotLaTeX.innerHTML = "<tiny>L&#x1F4CB;</tiny>";
+    snapShotLaTeX.title = "Copy LaTeX+pstricks self-contained document.";
+    snapShotLaTeX.addEventListener("click", () => {
+      this.snapShotLaTeX();
+    });
     info.appendChild(snapShotLaTeX);
     let planeInfo = document.createElement("div");
     planeInfo.id = this.idPlaneInfo;
@@ -201,37 +207,30 @@ class GraphicsNDimensions {
     info.appendChild(planeInfo);
     let element = document.getElementById(this.idInfo);
     if (element !== null) {
-      if (this.PanelExpandable === null) {
-        element.textContent = "";
-        element.appendChild(info);
-      } else {
-        this.panelInfo = new this.PanelExpandable(this.idInfo);
-        this.panelInfo.initialize(true);
-        this.panelInfo.setPanelContent(info);
-      }
+      element.textContent = "";
+      element.appendChild(info);
     }
   }
 
   snapShotLaTeX() {
-    let textComponent = document.getElementById(`${this.idCanvas}snapShotLateXspan`);
-    let result = "";
-    result += `\\documentclass{article} \\usepackage{auto-pst-pdf}<br>`;
-    result += `\n%\\usepackage{pst-plot}<br>\n\\begin{document}<br>\n`;
-    result += `\\psset{xunit = 0.01cm, yunit = 0.01cm} <br>\n\\begin{pspicture}(0,0)(1,1)\n`;
-    ComputeProjections();
+    let result = [];
+    result.push("\\documentclass{article}");
+    result.push("\\usepackage{auto-pst-pdf}");
+    result.push("\\usepackage{pst-plot}")
+    result.push("\\begin{document}");
+    result.push("\\psset{xunit = 0.01cm, yunit = 0.01cm}");
+    result.push("\\begin{pspicture}(0,0)(1,1)");
+    this.computeProjectionsEiBasis();
     for (
       let counterDrawOperation = 0;
       counterDrawOperation < this.drawOperations.length;
       counterDrawOperation++
     ) {
-      result += this.drawOperations[counterDrawOperation].getLaTeXOperation();
+      result.push(this.drawOperations[counterDrawOperation].getLaTeXOperation());
     }
-    result += "\\end{pspicture}<br>";
-    if (nonImplementedFound) {
-      result += `Not all elements in the html picture were drawn in LaTex. To do: fix this.`;
-    }
+    result.push("\\end{pspicture}");
     result += "\\end{document}";
-    textComponent.innerHTML = result;
+    navigator.clipboard.writeText(result);
   }
 
   drawStandardEiBasis(color) {
@@ -317,38 +316,6 @@ class GraphicsNDimensions {
     ));
   }
 
-  getBilinearFormInput() {
-    let result = "";
-    result += "The bilinear form of the vector space follows. The ij^th element ";
-    result += "gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite ";
-    result += "symmetric bilinear form the javascript might crash. You are expected to enter ";
-    result += "a symmetric strictly positive definite matrix. <br> \n";
-    for (let counterRow = 0; counterRow < this.bilinearForm.length; counterRow++) {
-      for (let counterColumn = 0; counterColumn < this.bilinearForm[counterRow].NumCols; counterColumn++) {
-        let idBilinearForm = `${this.idCanvas}textBilinearForm_${i}_${j}`;
-        result += `<textarea rows = "1" cols = "2" id = "${idBilinearForm}" `;
-        result += `onChange = "setBilinearForm('this.idCanvas', ${counterRow}, ${counterColumn})">`;
-        result += this.bilinearForm[i][j];
-        result += "</textarea>";
-      }
-      result += "<br>";
-    }
-    result += `<button id = "canvasRedraw('${theCanvasId}');">redraw</button>`;
-    result += "<br> Left click + hold+ move the mouse on a special vector = rotates the special vector. ";
-    result += "<br>Moving a vector rotates ``infinitesimally'' the projection plane of your screen ";
-    result += "<br>1) inside the projection plane ";
-    result += "<br>2) in the plane spanned by the selected vector and its orthogonal complement relative to the projection plane. ";
-    result += "<br>The angle change matches the motion of your mouse pointer.  ";
-    result += "Special care must be taken if the selected vector lies ";
-    result += "inside the projection plane or the selected vector is orthogonal to the projection plane. ";
-    result += "If one of these cases happens, the picture might jump around a bit.";
-    result += "<br>The mouse wheel zooms in/out. ";
-    result += "Zooming is tested to work on Firefox and google Chrome browsers on Ubuntu. ";
-    result += `<br>${this.drawOperations.length} elements drawn. `;
-    let textComponent = document.getElementById(`${this.idCanvas}snapShotLateXspan`);
-    textComponent.innerHTML = result;
-  }
-
   startProjectionPlaneUser() {
     this.animationBasisChange.frameCount = 0;
     this.animationBasisChange.screenStart[0] = this.screenBasis[0].slice();
@@ -356,7 +323,7 @@ class GraphicsNDimensions {
     for (let i = 0; i < 2; i++) {
       this.animationBasisChange.screenGoal[i] = [];
       for (let counterDimension = 0; counterDimension < this.dimension; counterDimension++) {
-        let coordinate = document.getElementById(this.idsBasis[i][counterDimension]).value;
+        let coordinate =  this.screenBasisInputs[i][counterDimension].value;
         this.animationBasisChange.screenGoal[i][counterDimension] = Number(coordinate);
       }
     }
@@ -381,9 +348,10 @@ class GraphicsNDimensions {
     }
     let screenStart = this.animationBasisChange.screenStart;
     let screenGoal = this.animationBasisChange.screenGoal;
+    let ratio = frameCount / maxFrameCount;
     for (let i = 0; i < this.dimension; i++) {
-      this.screenBasis[0][i] = screenGoal[0][i] * (frameCount / maxFrameCount) + screenStart[0][i] * (1 - frameCount / maxFrameCount);
-      this.screenBasis[1][i] = screenGoal[1][i] * (frameCount / maxFrameCount) + screenStart[1][i] * (1 - frameCount / maxFrameCount);
+      this.screenBasis[0][i] = screenGoal[0][i] * ratio + screenStart[0][i] * (1 - ratio);
+      this.screenBasis[1][i] = screenGoal[1][i] * ratio + screenStart[1][i] * (1 - ratio);
     }
     this.makeScreenBasisOrthonormal();
     this.drawAll();
@@ -475,10 +443,9 @@ class GraphicsNDimensions {
     }
 
     this.makeEiBasis();
-    let element = document.getElementById(this.idCanvas);
-    element.width = this.widthHTML;
-    element.height = this.heightHTML;
-    this.canvas = element.getContext("2d");
+    this.canvasContainer.width = this.widthHTML;
+    this.canvasContainer.height = this.heightHTML;
+    this.canvas = this.canvasContainer.getContext("2d");
   }
 
   pointsAreWithinClickTolerance(x1, y1, x2, y2) {
@@ -1230,7 +1197,6 @@ if (window.calculator === undefined) {
 
 if (window.calculator.graphicsNDimensions === undefined) {
   window.calculator.graphicsNDimensions = {
-    startProjectionPlaneUser: startProjectionPlaneUser,
     createGraphicsFromObject: createGraphicsFromObject,
     GraphicsNDimensions: GraphicsNDimensions,
   };
@@ -1238,9 +1204,7 @@ if (window.calculator.graphicsNDimensions === undefined) {
 
 module.exports = {
   createGraphicsFromObject,
-  collectionGraphicsNDimensions,
   GraphicsNDimensions,
-  startProjectionPlaneUser,
   testA3,
   testA4,
 };

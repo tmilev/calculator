@@ -1274,7 +1274,7 @@ class DrawSegmentBetweenTwoVectors {
     }
     let options = `linecolor=${correctColor(this.colorLine)}`;
     if (this.penStyle !== "") {
-      options += ` linestyle=${this.penStyle}`;
+      options += `, linestyle=${this.penStyle}`;
     }
     if (options !== "") {
       options = `[${options}]`;

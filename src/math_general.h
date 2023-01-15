@@ -3725,9 +3725,9 @@ public:
     }
   }
   std::string toString(int numberOfDisplayedElementsMinus1ForAll = - 1) const {
-    std::string tempS;
-    this->toString(tempS, numberOfDisplayedElementsMinus1ForAll);
-    return tempS;
+    std::string result;
+    this->toString(result, numberOfDisplayedElementsMinus1ForAll);
+    return result;
   }
   bool operator==(const PolynomialSubstitution& right);
   void makeSubstitutionFromMatrixIntegerAndDenominator(
@@ -4151,10 +4151,10 @@ void Polynomial<Coefficient>::makeLinearWithConstantTerm(
   const Vector<Rational>& inputLastCoordinateConstantTerm
 ) {
   this->makeZero();
-  MonomialPolynomial tempM;
+  MonomialPolynomial monomial;
   for (int i = 0; i < inputLastCoordinateConstantTerm.size - 1; i ++) {
-    tempM.makeEi(i);
-    this->addMonomial(tempM, inputLastCoordinateConstantTerm[i]);
+    monomial.makeEi(i);
+    this->addMonomial(monomial, inputLastCoordinateConstantTerm[i]);
   }
   this->operator+=(*inputLastCoordinateConstantTerm.lastObject());
 }
@@ -4516,34 +4516,31 @@ template <class Coefficient>
 void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(
   Matrix<LargeInteger>& substitution
 ) {
-  Polynomial<Coefficient> tempP;
-  MonomialPolynomial tempM;
-  tempM.makeOne();
+  Polynomial<Coefficient> polynomial;
+  MonomialPolynomial monomial;
+  monomial.makeOne();
   this->size = 0;
   this->setSize(substitution.numberOfColumns);
   for (int i = 0; i < substitution.numberOfColumns; i ++) {
     for (int j = 0; j < substitution.numberOfRows; j ++) {
-      tempM.setVariable(j, substitution(j, i));
+      monomial.setVariable(j, substitution(j, i));
     }
-    tempP.makeZero();
-    tempP.addMonomial(tempM, 1);
-    this->objects[i] = tempP;
+    polynomial.makeZero();
+    polynomial.addMonomial(monomial, 1);
+    this->objects[i] = polynomial;
   }
 }
 
 class LaTeXProcedures {
 public:
-  static const int ScaleFactor = 40;
-  static const int FigureSizeX = 10;
+  static const int scaleFactor = 40;
   // In centimeters.
-  static const int FigureSizeY = 10;
+  static const int figureCenterCoordSystemX = 4;
   // In centimeters.
-  static const int FigureCenterCoordSystemX = 4;
+  static const int figureCenterCoordSystemY = 8;
   // In centimeters.
-  static const int FigureCenterCoordSystemY = 8;
-  // In centimeters.
-  static const int TextPrintCenteringAdjustmentX = 3;
-  static const int TextPrintCenteringAdjustmentY = 3;
+  static const int textPrintCenteringAdjustmentX = 3;
+  static const int textPrintCenteringAdjustmentY = 3;
   static void drawline(
     double x1,
     double y1,
@@ -7038,7 +7035,8 @@ std::ostream& operator<<(
     output << "0";
     return output;
   }
-  std::string tempS1, tempS2;
+  std::string coefficientString;
+  std::string monomialString;
   List<TemplateMonomial> sortedMons;
   sortedMons = collection.monomials;
   sortedMons.quickSortDescending();
@@ -7048,27 +7046,29 @@ std::ostream& operator<<(
     Coefficient& coefficient =
     collection.coefficients[collection.monomials.getIndex(currentMon)];
     tempStream << coefficient;
-    tempS1 = tempStream.str();
-    tempS2 = currentMon.toString();
-    if (tempS1 == "1" && tempS2 != "1") {
-      tempS1 = "";
+    coefficientString = tempStream.str();
+    monomialString = currentMon.toString();
+    if (coefficientString == "1" && monomialString != "1") {
+      coefficientString = "";
     }
-    if ((tempS1 == "- 1" || tempS1 == "-1") && tempS2 != "1") {
-      tempS1 = "-";
+    if ((coefficientString == "- 1" || coefficientString == "-1") &&
+      monomialString != "1"
+    ) {
+      coefficientString = "-";
     }
-    if (tempS2 != "1") {
-      tempS1 += tempS2;
+    if (monomialString != "1") {
+      coefficientString += monomialString;
     }
     if (i > 0) {
-      if (tempS1.size() > 0) {
-        if (tempS1[0] != '-') {
+      if (coefficientString.size() > 0) {
+        if (coefficientString[0] != '-') {
           output << "+";
         }
       } else {
         output << "+";
       }
     }
-    output << tempS1;
+    output << coefficientString;
   }
   return output;
 }

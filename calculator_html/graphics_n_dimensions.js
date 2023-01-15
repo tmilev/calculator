@@ -23,7 +23,16 @@ function getAngleFromXandY(x, y) {
   return Math.atan2(y, x);
 }
 
-function getAngleScreenChange(newX, newY, oldX, oldY) {
+function getAngleScreenChange(
+  /** @type{number} */
+  newX,
+  /** @type{number} */
+  newY,
+  /** @type{number} */
+  oldX,
+  /** @type{number} */
+  oldY,
+) {
   let result = getAngleFromXandY(newX, newY) - getAngleFromXandY(oldX, oldY);
   let topBound = Math.PI;
   let bottomBound = - Math.PI;
@@ -50,6 +59,25 @@ function correctColor(
     return stringCorrections[input];
   }
   return input;
+}
+
+class Layer {
+  constructor(
+    /** @type{string} */
+    name,
+  ) {
+    this.name = name;
+    /** @type{number[]} */
+    this.indices = [];
+    this.visible = true;
+  }
+
+  addIndex(
+    /** @type{number} */
+    index,
+  ) {
+    this.indices.push(index);    
+  }
 }
 
 class GraphicsNDimensions {
@@ -105,7 +133,7 @@ class GraphicsNDimensions {
       inputContainerControls = document.getElementById(inputContainerControls);
     }
     /** @type{HTMLElement} */
-    this.controlsContainer = inputContainerControls;
+    this.containerControls = inputContainerControls;
     this.dimension = 0;
     this.bilinearForm = [];
     this.graphicsUnit = 0;
@@ -156,6 +184,13 @@ class GraphicsNDimensions {
 
     this.clickTolerance = 5;
     this.textShift = [- 3, - 4];
+
+    /** @type{Object.<string, Layer>} */
+    this.layers = {};
+    /** @type{Layer[]} */
+    this.layerOfEachDrawOperation = [];
+    /** @type{HTMLElement|null} */
+    this.containerLayers = null;
   }
 
   initVectors(inputVectors) {
@@ -200,22 +235,27 @@ class GraphicsNDimensions {
   }
 
   initializeControls() {
-    if (this.controlsContainer === null) {
+    if (this.containerControls === null) {
       return;
     }
-    this.controlsContainer.style.transition = "1s all";
-    this.controlsContainer.textContent = "";
+
+    this.containerControls.style.transition = "1s all";
+    this.containerControls.textContent = "";
     let button = document.createElement("button");
     button.textContent = "\u21BB";
     button.title = "redraw";
-    this.controlsContainer.appendChild(button);
+    this.containerControls.appendChild(button);
     let snapShotLaTeX = document.createElement("button");
     snapShotLaTeX.innerHTML = "<tiny>L&#x1F4CB;</tiny>";
     snapShotLaTeX.title = "Copy LaTeX+pstricks self-contained document.";
     snapShotLaTeX.addEventListener("click", () => {
       this.snapShotLaTeX();
     });
-    this.controlsContainer.appendChild(snapShotLaTeX);
+    this.containerControls.appendChild(snapShotLaTeX);
+    if (Object.keys(this.layers).length > 1) {
+      this.initializeLayers();
+    }
+
   }
 
   initInfo() {
@@ -251,9 +291,9 @@ class GraphicsNDimensions {
 
   snapShotLaTeX() {
     let result = [];
-    this.controlsContainer.style.backgroundColor = "lightgreen";
+    this.containerControls.style.backgroundColor = "lightgreen";
     setTimeout(() => {
-      this.controlsContainer.style.backgroundColor = "";
+      this.containerControls.style.backgroundColor = "";
     }, 1000);
     result.push("\\documentclass{article}");
     result.push("\\usepackage{auto-pst-pdf}");
@@ -263,11 +303,14 @@ class GraphicsNDimensions {
     result.push("\\begin{pspicture}(-100,-100)(100,100)");
     this.computeProjectionsEiBasis();
     for (
-      let counterDrawOperation = 0;
-      counterDrawOperation < this.drawOperations.length;
-      counterDrawOperation++
+      let i = 0;
+      i < this.drawOperations.length;
+      i++
     ) {
-      const drawOperation = this.drawOperations[counterDrawOperation];
+      if (!this.layerOfEachDrawOperation[i].visible) {
+        continue;
+      }
+      const drawOperation = this.drawOperations[i];
       result.push(drawOperation.getLaTeXOperation());
     }
     result.push("\\end{pspicture}");
@@ -302,17 +345,21 @@ class GraphicsNDimensions {
     }));
   }
 
-  drawLine(left, right, color) {
+  drawLine(left, right, color, extraOptions) {
     if (color === undefined) {
       color = "black";
     }
-    this.drawOperations.push(new DrawSegmentBetweenTwoVectors(
-      this, {
+    let segment = {
       left: left,
       right: right,
       lineWidth: 1,
       colorLine: color,
-    }));
+    };
+    // Copy all unforeseen options into the segment object.
+    segment = Object.assign(extraOptions, segment);
+    this.drawOperations.push(new DrawSegmentBetweenTwoVectors(
+      this, segment
+    ));
   }
 
   drawPath(points, color, lineWidth, frameId, frameIndex) {
@@ -365,9 +412,9 @@ class GraphicsNDimensions {
     this.animationBasisChange.screenStart[1] = this.screenBasis[1].slice();
     for (let i = 0; i < 2; i++) {
       this.animationBasisChange.screenGoal[i] = [];
-      for (let counterDimension = 0; counterDimension < this.dimension; counterDimension++) {
-        let coordinate =  this.screenBasisInputs[i][counterDimension].value;
-        this.animationBasisChange.screenGoal[i][counterDimension] = Number(coordinate);
+      for (let j = 0; j < this.dimension; j++) {
+        let coordinate =  this.screenBasisInputs[i][j].value;
+        this.animationBasisChange.screenGoal[i][j] = Number(coordinate);
       }
     }
     this.animateChangeProjectionPlaneUser();
@@ -420,10 +467,16 @@ class GraphicsNDimensions {
     this.highlightInfoContent = [];
     for (let i = 0; i < this.drawOperations.length; i++) {
       let currentOperation = this.drawOperations[i];
-      if (currentOperation.frameId !== undefined && currentOperation.frameId !== null) {
+      if (
+        currentOperation.frameId !== undefined &&
+        currentOperation.frameId !== null
+      ) {
         if (currentOperation.frameIndex !== this.animation.currentFrameIndex) {
           continue;
         }
+      }
+      if (!this.layerOfEachDrawOperation[i].visible) {
+        continue;
       }
       currentOperation.drawNoFinish();
     }
@@ -489,6 +542,7 @@ class GraphicsNDimensions {
     this.makeEiBasis();
     this.canvasContainer.width = this.widthHTML;
     this.canvasContainer.height = this.heightHTML;
+    /** @type {CanvasRenderingContext2D} */
     this.canvas = this.canvasContainer.getContext("2d");
   }
 
@@ -534,8 +588,14 @@ class GraphicsNDimensions {
     /** @type{number[]} */
     output,
   ) {
-    output[0] = this.shiftScreenCoordinates[0] + this.graphicsUnit * this.scalarProduct(this.screenBasis[0], input);
-    output[1] = this.shiftScreenCoordinates[1] + this.graphicsUnit * this.scalarProduct(this.screenBasis[1], input);
+    output[0] = this.shiftScreenCoordinates[0];
+    output[0] += this.graphicsUnit * this.scalarProduct(
+      this.screenBasis[0], input,
+    );
+    output[1] = this.shiftScreenCoordinates[1];
+    output[1] += this.graphicsUnit * this.scalarProduct(
+      this.screenBasis[1], input,
+    );
   }
 
   computeLatexCoordinates(
@@ -564,7 +624,10 @@ class GraphicsNDimensions {
 
   computeProjectionsSpecialVectors() {
     for (let i = 0; i < this.basisCircles.length; i++) {
-      if (this.projectionsBasisCircles[i] === null || this.projectionsBasisCircles[i] === undefined) {
+      if (
+        this.projectionsBasisCircles[i] === null ||
+        this.projectionsBasisCircles[i] === undefined
+      ) {
         this.projectionsBasisCircles[i] = [];
       }
       this.computeScreenCoordinates(this.basisCircles[i], this.projectionsBasisCircles[i]);
@@ -612,7 +675,10 @@ class GraphicsNDimensions {
       return;
     }
     this.angleScreenChange = - getAngleScreenChange(newX, newY, oldX, oldY);
-    if (this.angleScreenChange > Math.PI / 2 || this.angleScreenChange < - Math.PI / 2) {
+    if (
+      this.angleScreenChange > Math.PI / 2 ||
+      this.angleScreenChange < - Math.PI / 2
+    ) {
       return;
     }
     this.screenBasis[0] = this.screenBasisAtSelection[0].slice();
@@ -631,7 +697,10 @@ class GraphicsNDimensions {
       return;
     }
     let selectedVector = this.basisCircles[this.selectedBasisIndex];
-    let xCuttingOld = this.scalarProduct(selectedVector, this.vProjectionNormalizedSelected);
+    let xCuttingOld = this.scalarProduct(
+      selectedVector,
+      this.vProjectionNormalizedSelected,
+    );
     let yCuttingOld = this.scalarProduct(selectedVector, this.vOrthogonalSelected);
     let hypothenuseSquared = xCuttingOld * xCuttingOld + yCuttingOld * yCuttingOld;
 
@@ -655,7 +724,10 @@ class GraphicsNDimensions {
       if (this.angleCuttingChange > Math.PI) {
         this.angleCuttingChange -= 2 * Math.PI;
       }
-      if (this.angleCuttingChange >= 0 && this.angleCuttingChange <= Math.PI) {
+      if (
+        this.angleCuttingChange >= 0 &&
+        this.angleCuttingChange <= Math.PI
+      ) {
         break;
       }
     }
@@ -701,8 +773,14 @@ class GraphicsNDimensions {
       if (round > 0) {
         selectedVector[(round + 1) % this.dimension] += 0.01;
       }
-      let vectorTimesE1 = this.scalarProduct(selectedVector, this.screenBasisAtSelection[0]);
-      let vectorTimesE2 = this.scalarProduct(selectedVector, this.screenBasisAtSelection[1]);
+      let vectorTimesE1 = this.scalarProduct(
+        selectedVector,
+        this.screenBasisAtSelection[0],
+      );
+      let vectorTimesE2 = this.scalarProduct(
+        selectedVector,
+        this.screenBasisAtSelection[1],
+      );
       this.vProjectionNormalizedSelected = this.screenBasisAtSelection[0].slice();
       multiplyVectorByScalar(this.vProjectionNormalizedSelected, vectorTimesE1);
       addVectorTimesScalar(
@@ -770,7 +848,10 @@ class GraphicsNDimensions {
       let currentVectors = currentHighlight.vectorProjections;
       for (let j = 0; j < currentVectors.length; j++) {
         if (this.pointsAreWithinClickTolerance(
-          this.mousePositionScreen[0], this.mousePositionScreen[1], currentVectors[j][0], currentVectors[j][1]
+          this.mousePositionScreen[0],
+          this.mousePositionScreen[1],
+          currentVectors[j][0],
+          currentVectors[j][1],
         )) {
           this.selectedHighlightIndex = currentIndex;
           if (this.currentHighlightIndices[currentIndex] === undefined) {
@@ -833,7 +914,7 @@ class GraphicsNDimensions {
     this.drawAll();
   }
 
-  initFromObject(input) {
+  initializeFromObject(input) {
     this.dimension = input.dimension;
     this.bilinearForm = input.bilinearForm;
     this.screenBasis = input.screenBasis;
@@ -841,42 +922,12 @@ class GraphicsNDimensions {
     if (input.frameLength !== undefined && input.frameLength !== null) {
       this.animation.frameLength = input.frameLength;
     }
+    this.layers = {};
+    this.layerOfEachDrawOperation = [];
     for (let i = 0; i < input.drawObjects.length; i++) {
       let currentOperation = input.drawObjects[i];
-      if (currentOperation.operation === "circleAtVector") {
-        this.drawCircle(
-          currentOperation.location,
-          currentOperation.color,
-          currentOperation.radius,
-          currentOperation.frameId,
-          currentOperation.frameIndex
-        );
-      } else if (currentOperation.operation === "segment") {
-        this.drawLine(
-          currentOperation.points[0],
-          currentOperation.points[1],
-          currentOperation.color,
-        );
-      } else if (currentOperation.operation === "highlightGroup") {
-        this.drawHighlightGroup(
-          currentOperation.points, currentOperation.labels,
-          currentOperation.color, currentOperation.radius
-        );
-      } else if (currentOperation.operation === "text") {
-        this.drawText(
-          currentOperation.location,
-          currentOperation.text,
-          currentOperation.color,
-        );
-      } else if (currentOperation.operation === "path") {
-        this.drawPath(
-          currentOperation.points,
-          currentOperation.color,
-          currentOperation.lineWidth,
-          currentOperation.frameId,
-          currentOperation.frameIndex
-        );
-      }
+      this.drawOneOperation(currentOperation);
+      this.accountLayer(currentOperation, i);
     }
     this.graphicsUnit = input.graphicsUnit;
     if (this.graphicsUnit === undefined || this.graphicsUnit === null) {
@@ -892,6 +943,93 @@ class GraphicsNDimensions {
       this.animation.timeoutHandle = setTimeout(this.animate.bind(this), 0);
     } else {
       this.drawAll();
+    }
+  }
+
+  initializeLayers() {
+    if (this.containerLayers === null) {
+      this.containerLayers = document.createElement("div");
+      this.containerControls.appendChild(this.containerLayers);
+    }
+    this.containerLayers.textContent = "";
+    for (const label in this.layers) {
+      if (label === "") {
+        continue;
+      }
+      const layer = this.layers[label];
+      const child = document.createElement("input");
+      child.type = "checkbox";
+      child.checked = true;
+      child.addEventListener(
+        "change", () => {
+          layer.visible = child.checked;
+          this.drawAll();
+        });
+      this.containerLayers.appendChild(child);
+      this.containerLayers.appendChild(document.createTextNode(layer.name));
+    }
+  }
+
+  accountLayer(
+    input,
+    /** @type{number} */
+    index,
+  ) {
+    let layerLabel = input["layer"];
+    if (layerLabel === undefined ) {
+      layerLabel = "";
+    }
+    if (!(layerLabel in this.layers)) {
+      this.layers[layerLabel] = new Layer(layerLabel);
+    }
+    const layer = this.layers[layerLabel];
+    layer.addIndex(index);
+    this.layerOfEachDrawOperation.push(layer);
+  }
+
+  drawOneOperation(input) {
+    switch (input.operation) {
+      case "circleAtVector":
+        this.drawCircle(
+          input.location,
+          input.color,
+          input.radius,
+          input.frameId,
+          input.frameIndex
+        );
+        return;
+      case "segment":
+        this.drawLine(
+          input.points[0],
+          input.points[1],
+          input.color,
+          input,
+        );
+        return;
+      case "highlightGroup":
+        this.drawHighlightGroup(
+          input.points, input.labels,
+          input.color, input.radius
+        );
+        return;
+      case "text":
+        this.drawText(
+          input.location,
+          input.text,
+          input.color,
+        );
+        return;
+      case "path":
+        this.drawPath(
+          input.points,
+          input.color,
+          input.lineWidth,
+          input.frameId,
+          input.frameIndex
+        );
+        return;
+      default:
+        throw new Error(`Unknown object type: ${input.operation}`);
     }
   }
 
@@ -1038,6 +1176,10 @@ class DrawSegmentBetweenTwoVectors {
     if (this.colorLine === undefined) {
       this.colorLine = "";
     }
+    this.penStyle = inputData.penStyle;
+    if (this.penStyle === undefined) {
+      this.penStyle = "";
+    }
   }
 
   drawNoFinish() {
@@ -1049,9 +1191,26 @@ class DrawSegmentBetweenTwoVectors {
     let screenCoordinatesRight = [];
     this.owner.computeScreenCoordinates(this.left, screenCoordinatesLeft);
     this.owner.computeScreenCoordinates(this.right, screenCoordinatesRight);
+    if (this.penStyle === "dashed") {
+      canvas.setLineDash([3, 4]);
+    }
     canvas.moveTo(screenCoordinatesLeft[0], screenCoordinatesLeft[1]);
     canvas.lineTo(screenCoordinatesRight[0], screenCoordinatesRight[1]);
     canvas.stroke();
+    if (this.penStyle !== "") {
+      canvas.setLineDash([]);
+    }
+  }
+
+  getLaTeXOptions() {
+    if (this.colorLine === "") {
+      return "";
+    }
+    let options = `linecolor=${correctColor(this.colorLine)}`;
+    if (this.penStyle !== "") {
+      options += ` linestyle=${this.penStyle}`;
+    }
+    return options;
   }
 
   getLaTeXOperation() {
@@ -1059,11 +1218,7 @@ class DrawSegmentBetweenTwoVectors {
     let rightCoordinates = [0, 0];
     this.owner.computeLatexCoordinates(this.left, leftCoordinates);
     this.owner.computeLatexCoordinates(this.right, rightCoordinates);
-    let options = "";
-    if (this.colorLine !== "") {
-      options = `[linecolor=${correctColor(this.colorLine)}]`;
-    }
-    return `\\psline${options}(${leftCoordinates[0]},${leftCoordinates[1]})` +
+    return `\\psline${this.getLaTeXOptions()}(${leftCoordinates[0]},${leftCoordinates[1]})` +
       `(${rightCoordinates[0]},${rightCoordinates[1]})`;
   }
 }
@@ -1212,7 +1367,7 @@ function createGraphicsFromObject(input) {
     spanInformationId,
     input.idHighlightInformation,
   );
-  object.initFromObject(input);
+  object.initializeFromObject(input);
 }
 
 function testA3(idCanvas, idSpanInformation) {

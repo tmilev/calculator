@@ -20,10 +20,29 @@ public:
 
 class DrawOptions {
 public:
+  enum PenStyle {
+    normal,
+    invisible,
+    dashed,
+    PenStyleDotted,
+    PenStyleZeroChamber,
+    PenStylePermanentlyZeroChamber,
+    PenStyleLinkToOriginZeroChamber,
+    PenStyleLinkToOrigin,
+    PenStyleLinkToOriginPermanentlyZeroChamber,
+  };
+  static std::string penStyleNormal;
+  static std::string penStyleDashed;
   std::string color;
   int lineWidth;
+  DrawOptions::PenStyle penStyle;
+  std::string layer;
+  std::string toStringPsTricks() const;
+  static std::string toPsTricksPenStyle(DrawOptions::PenStyle input);
+  static std::string toJSONPenStyle(DrawOptions::PenStyle input);
   void set(const std::string& inputColor, int inputLineWidth);
   void writeJSON(JSData& output) const;
+  DrawOptions();
 };
 
 // Draws a segment between two vectors in n dimensions.
@@ -155,17 +174,6 @@ public:
   int frameLengthInMilliseconds;
   bool flagRotatingPreservingAngles;
   bool flagAnimatingMovingCoordSystem;
-  enum PenStyles {
-    PenStyleInvisible,
-    PenStyleDashed,
-    PenStyleDotted,
-    PenStyleNormal,
-    PenStyleZeroChamber,
-    PenStylePermanentlyZeroChamber,
-    PenStyleLinkToOriginZeroChamber,
-    PenStyleLinkToOrigin,
-    PenStyleLinkToOriginPermanentlyZeroChamber,
-  };
   enum TextStyles {
     TextStyleNormal,
     TextStyleInvisible,
@@ -230,7 +238,9 @@ public:
     const Vector<double>& r1,
     const Vector<double>& r2,
     const std::string& color,
-    double lineWidth = 1
+    double lineWidth = 1,
+    DrawOptions::PenStyle penstyle = DrawOptions::PenStyle::normal,
+    const std::string& layer = ""
   );
   void drawTextAtVectorBufferRational(
     const Vector<Rational>& point,
@@ -318,7 +328,9 @@ public:
     const Vector<Rational>& vector1,
     const Vector<Rational>& vector2,
     const std::string& color,
-    double lineWidth = 1
+    double lineWidth = 1,
+    DrawOptions::PenStyle penstyle = DrawOptions::PenStyle::normal,
+    const std::string& layer = ""
   );
   void drawFilledShape(
     const List<Vector<double> >& corners,
@@ -360,9 +372,9 @@ public:
   static std::string typeTextAtVector;
   static std::string typeCircleAtVector;
   static std::string typeFilledShape;
-  static std::string penStyleNormal;
   static std::string fieldPoints;
   static std::string fieldPenStyle;
+  static std::string fieldLayer;
   static std::string fieldLocation;
   static std::string fieldRadius;
   static std::string fieldColor;

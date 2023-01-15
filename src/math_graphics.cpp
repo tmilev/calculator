@@ -16,11 +16,14 @@ std::string DrawingVariables::fieldPoints = "points";
 std::string DrawingVariables::fieldLocation = "location";
 std::string DrawingVariables::fieldRadius = "radius";
 std::string DrawingVariables::fieldPenStyle = "penStyle";
+std::string DrawingVariables::fieldLayer = "layer";
 std::string DrawingVariables::fieldText = "text";
 std::string DrawingVariables::fieldLabels = "labels";
 std::string DrawingVariables::fieldLineWidth = "lineWidth";
 std::string DrawingVariables::fieldFrameId = "frameId";
 std::string DrawingVariables::fieldFrameIndex = "frameIndex";
+std::string DrawOptions::penStyleDashed = "dashed";
+std::string DrawOptions::penStyleNormal = "normal";
 
 DrawingVariables::DrawingVariables() {
   this->initDrawingVariables();
@@ -47,7 +50,12 @@ void DrawingVariables::drawCoordinateSystemBuffer(
     std::string label;
     label = unitVector.toString();
     variables.drawLineBetweenTwoVectorsBufferRational(
-      zeroRoot, unitVector, "black", 1
+      zeroRoot,
+      unitVector,
+      "black",
+      1,
+      DrawOptions::PenStyle::dashed,
+      "axes"
     );
     variables.drawTextAtVectorBufferRational(unitVector, label, "black");
     variables.drawCircleAtVectorBufferRational(unitVector, "black", 4);
@@ -198,12 +206,16 @@ void DrawingVariables::drawLineBetweenTwoVectorsBufferDouble(
   const Vector<double>& vector1,
   const Vector<double>& vector2,
   const std::string& color,
-  double lineWidth
+  double lineWidth,
+  DrawOptions::PenStyle penstyle,
+  const std::string& layer
 ) {
   DrawSegment drawSegment;
   drawSegment.vector1 = vector1;
   drawSegment.vector2 = vector2;
   drawSegment.drawOptions.set(color, lineWidth);
+  drawSegment.drawOptions.penStyle = penstyle;
+  drawSegment.drawOptions.layer = layer;
   this->operations.addOnTop(drawSegment);
 }
 
@@ -896,13 +908,17 @@ void DrawingVariables::drawLineBetweenTwoVectorsBufferRational(
   const Vector<Rational>& vector1,
   const Vector<Rational>& vector2,
   const std::string& color,
-  double lineWidth
+  double lineWidth,
+  DrawOptions::PenStyle penstyle,
+  const std::string& layer
 ) {
   this->drawLineBetweenTwoVectorsBufferDouble(
     vector1.getVectorDouble(),
     vector2.getVectorDouble(),
     color,
-    lineWidth
+    lineWidth,
+    penstyle,
+    layer
   );
 }
 
@@ -945,8 +961,9 @@ void DrawSegment::toLatexPsTricks(
   Vector<double> projection1 = owner.getCoordinatesLatex(this->vector1);
   Vector<double> projection2 = owner.getCoordinatesLatex(this->vector2);
   out << "\\psline";
-  if (this->drawOptions.color != "") {
-    out << "[linecolor=" << this->drawOptions.color << "]";
+  std::string options = this->drawOptions.toStringPsTricks();
+  if (options != "") {
+    out << "[" << options << "]";
   }
   out
   << "("
@@ -966,6 +983,11 @@ void DrawSegment::accountBoundingBox(DrawingVariables& owner) const {
   owner.accountBoundingBox(this->vector2);
 }
 
+DrawOptions::DrawOptions() {
+  this->penStyle = DrawOptions::PenStyle::normal;
+  this->lineWidth = 1;
+}
+
 void DrawOptions::writeJSON(JSData& output) const {
   if (this->color != "") {
     output[DrawingVariables::fieldColor] = this->color;
@@ -973,6 +995,50 @@ void DrawOptions::writeJSON(JSData& output) const {
   if (this->lineWidth != 1.0) {
     output[DrawingVariables::fieldLineWidth] = this->lineWidth;
   }
+  if (this->penStyle != DrawOptions::PenStyle::normal) {
+    output[DrawingVariables::fieldPenStyle] =
+    this->toJSONPenStyle(this->penStyle);
+  }
+  if (this->layer != "") {
+    output[DrawingVariables::fieldLayer] = this->layer;
+  }
+}
+
+std::string DrawOptions::toJSONPenStyle(DrawOptions::PenStyle input) {
+  switch (input) {
+  case DrawOptions::PenStyle::dashed:
+    return DrawOptions::penStyleDashed;
+  case DrawOptions::PenStyle::normal:
+    return DrawOptions::penStyleNormal;
+  default:
+    return "";
+  }
+}
+
+std::string DrawOptions::toPsTricksPenStyle(DrawOptions::PenStyle input) {
+  switch (input) {
+  case DrawOptions::PenStyle::dashed:
+    return "dashed";
+  case DrawOptions::PenStyle::normal:
+  default:
+    return "";
+  }
+}
+
+std::string DrawOptions::toStringPsTricks() const {
+  std::stringstream out;
+  bool found = false;
+  if (this->color != "") {
+    out << "linecolor=" << this->color;
+    found = true;
+  }
+  if (this->penStyle != DrawOptions::PenStyle::normal) {
+    if (found) {
+      out << " ";
+    }
+    out << "linestyle=" << this->toPsTricksPenStyle(this->penStyle);
+  }
+  return out.str();
 }
 
 void DrawOptions::set(const std::string& inputColor, int inputLineWidth) {

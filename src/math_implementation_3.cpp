@@ -10391,15 +10391,15 @@ void LaTeXProcedures::drawTextDirectly(
 ) {
   (void) colorIndex;
   output.precision(4);
-  x1 -= text.length() * LaTeXProcedures::TextPrintCenteringAdjustmentX;
-  y1 += LaTeXProcedures::TextPrintCenteringAdjustmentY;
-  x1 /= LaTeXProcedures::ScaleFactor;
-  y1 /= LaTeXProcedures::ScaleFactor;
+  x1 -= text.length() * LaTeXProcedures::textPrintCenteringAdjustmentX;
+  y1 += LaTeXProcedures::textPrintCenteringAdjustmentY;
+  x1 /= LaTeXProcedures::scaleFactor;
+  y1 /= LaTeXProcedures::scaleFactor;
   output
   << "\\put("
-  << x1 - LaTeXProcedures::FigureCenterCoordSystemX
+  << x1 - LaTeXProcedures::figureCenterCoordSystemX
   << ", "
-  << LaTeXProcedures::FigureCenterCoordSystemY - y1
+  << LaTeXProcedures::figureCenterCoordSystemY - y1
   << "){\\tiny{"
   << text
   << "}}";
@@ -10415,17 +10415,17 @@ void LaTeXProcedures::drawline(
   std::fstream& output,
   DrawingVariables& drawInput
 ) {
-  if (static_cast<int>(penStyle) == DrawingVariables::PenStyleInvisible) {
+  if (static_cast<int>(penStyle) == DrawOptions::PenStyle::invisible) {
     return;
   }
   output.precision(4);
-  x1 /= LaTeXProcedures::ScaleFactor;
-  x2 /= LaTeXProcedures::ScaleFactor;
-  y1 /= LaTeXProcedures::ScaleFactor;
-  y2 /= LaTeXProcedures::ScaleFactor;
+  x1 /= LaTeXProcedures::scaleFactor;
+  x2 /= LaTeXProcedures::scaleFactor;
+  y1 /= LaTeXProcedures::scaleFactor;
+  y2 /= LaTeXProcedures::scaleFactor;
   std::string tempS;
   if (
-    penStyle == static_cast<unsigned>(DrawingVariables::PenStyleDashed)
+    penStyle == static_cast<unsigned>(DrawOptions::PenStyle::dashed)
   ) {
     tempS = "lightgray";
   } else {
@@ -10435,14 +10435,14 @@ void LaTeXProcedures::drawline(
   << "\\psline[linewidth = 0.3pt, linecolor ="
   << tempS
   << "]("
-  << x1 - LaTeXProcedures::FigureCenterCoordSystemX
+  << x1 - LaTeXProcedures::figureCenterCoordSystemX
   << ", "
-  << LaTeXProcedures::FigureCenterCoordSystemY - y1
+  << LaTeXProcedures::figureCenterCoordSystemY - y1
   << ")"
   << "("
-  << x2 - LaTeXProcedures::FigureCenterCoordSystemX
+  << x2 - LaTeXProcedures::figureCenterCoordSystemX
   << ", "
-  << LaTeXProcedures::FigureCenterCoordSystemY - y2
+  << LaTeXProcedures::figureCenterCoordSystemY - y2
   << ")\n";
 }
 
@@ -11888,9 +11888,6 @@ bool ConeCollection::drawMeProjectiveInitialize(
   drawingVariables.initialize();
   drawingVariables.initDimensions(this->getDimension());
   drawingVariables.makeMeAStandardBasis(this->getDimension());
-  drawingVariables.drawCoordinateSystemBuffer(
-    drawingVariables, this->getDimension()
-  );
   Vectors<Rational> roots;
   Vector<Rational> point;
   if (this->getDimension() == 2) {
@@ -11952,6 +11949,9 @@ bool ConeCollection::drawMeProjective(DrawingVariables& drawingVariables) const 
     return false;
   }
   this->drawMeProjectiveInitialize(drawingVariables);
+  drawingVariables.drawCoordinateSystemBuffer(
+    drawingVariables, this->getDimension()
+  );
   result = result && this->drawProjectiveChambers(drawingVariables);
   for (Vector<Rational> vertex : this->slicingDirections) {
     vertex /= vertex.sumCoordinates();
@@ -12138,7 +12138,12 @@ bool Cone::drawMeProjectiveVertices(DrawingVariables& drawingVariables) const {
   Vector<Rational> root;
   for (int i = 0; i < this->vertices.size; i ++) {
     drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-      zeroRoot, verticesScaled[i], "lightblue", 1
+      zeroRoot,
+      verticesScaled[i],
+      "lightblue",
+      1,
+      DrawOptions::PenStyle::dashed,
+      "vertices"
     );
   }
   return true;

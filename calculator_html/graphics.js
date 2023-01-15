@@ -1668,16 +1668,16 @@ class VectorFieldTwoD {
         let theRatioY = j / (this.numSegmentsXY[1] - 1);
         let y =
             this.lowLeft[1] * (1 - theRatioY) + this.highRight[1] * theRatioY;
-        let theV = this.theField(x, y);
+        let vector = this.theField(x, y);
         if (this.isDirectionField) {
-          if (vectorLength(theV) !== 0) {
+          if (vectorLength(vector) !== 0) {
             vectorTimesScalar(
-                theV,
-                this.desiredLengthDirectionVectors * 1 / vectorLength(theV));
+                vector,
+                this.desiredLengthDirectionVectors * 1 / vectorLength(vector));
           }
         }
-        let headMath = [x + theV[0] / 2, y + theV[1] / 2];
-        let tailMath = [x - theV[0] / 2, y - theV[1] / 2];
+        let headMath = [x + vector[0] / 2, y + vector[1] / 2];
+        let tailMath = [x - vector[0] / 2, y - vector[1] / 2];
         let headScreen = canvas.coordinatesMathToScreen(headMath);
         let tailScreen = canvas.coordinatesMathToScreen(tailMath);
         surface.moveTo(tailScreen[0], tailScreen[1]);
@@ -3849,15 +3849,15 @@ class Canvas {
    * @private
    */
   computeBoundingBoxAccountPoint(input) {
-    let theV = this.coordsProjectMathToMathScreen2d(input);
+    let vector = this.coordsProjectMathToMathScreen2d(input);
     for (let i = 0; i < 2; i++) {
-      if (theV[i] < this.boundingBoxMathScreen[0][i]) {
-        this.boundingBoxMathScreen[0][i] = theV[i];
+      if (vector[i] < this.boundingBoxMathScreen[0][i]) {
+        this.boundingBoxMathScreen[0][i] = vector[i];
       }
     }
     for (let i = 0; i < 2; i++) {
-      if (theV[i] > this.boundingBoxMathScreen[1][i]) {
-        this.boundingBoxMathScreen[1][i] = theV[i];
+      if (vector[i] > this.boundingBoxMathScreen[1][i]) {
+        this.boundingBoxMathScreen[1][i] = vector[i];
       }
     }
     for (let i = 0; i < 3; i++) {
@@ -3870,12 +3870,12 @@ class Canvas {
         this.boundingBoxMath[1][i] = input[i];
       }
     }
-    let theScalarProd = vectorScalarVector(this.screenNormal, input);
-    if (theScalarProd < this.boundingSegmentZ[0]) {
-      this.boundingSegmentZ[0] = theScalarProd;
+    let scalarProduct = vectorScalarVector(this.screenNormal, input);
+    if (scalarProduct < this.boundingSegmentZ[0]) {
+      this.boundingSegmentZ[0] = scalarProduct;
     }
-    if (theScalarProd > this.boundingSegmentZ[1]) {
-      this.boundingSegmentZ[1] = theScalarProd;
+    if (scalarProduct > this.boundingSegmentZ[1]) {
+      this.boundingSegmentZ[1] = scalarProduct;
     }
   }
 
@@ -3941,10 +3941,10 @@ class Canvas {
    * @private
    */
   computePatchOrderOneContourPoint(patch, contour, ptIndex) {
-    let thePointMathScreen = contour.thePointsMathScreen[ptIndex];
+    let pointMathScreen = contour.thePointsMathScreen[ptIndex];
     let point = contour.points[ptIndex];
-    let theIndices = this.coordsMathScreenToBufferIndices(thePointMathScreen);
-    let currentBuffer = this.zBuffer[theIndices[0]][theIndices[1]];
+    let indices = this.coordsMathScreenToBufferIndices(pointMathScreen);
+    let currentBuffer = this.zBuffer[indices[0]][indices[1]];
     let allPatches = this.all3dObjects.allPatches;
     for (let i = 0; i < currentBuffer.length; i++) {
       if (patch.index === currentBuffer[i]) {
@@ -4134,11 +4134,11 @@ class Canvas {
     return [
       [
         this.boundingBoxMathScreen[0][0] + this.bufferDeltaX * col,
-        this.boundingBoxMathScreen[0][1] + this.bufferDeltaY * row
+        this.boundingBoxMathScreen[0][1] + this.bufferDeltaY * row,
       ],
       [
         this.boundingBoxMathScreen[0][0] + this.bufferDeltaX * (col + 1),
-        this.boundingBoxMathScreen[0][1] + this.bufferDeltaY * (row + 1)
+        this.boundingBoxMathScreen[0][1] + this.bufferDeltaY * (row + 1),
       ]
     ];
   }

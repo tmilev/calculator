@@ -42,7 +42,9 @@ std::string DrawingVariables::getHTMLDiv(
     data["idHighlightInformation"] = idHighlightInformation;
   }
   std::string idCanvas = "idCanvasNDimensionalGraphics" + graphicsId;
+  std::string idControls = "idNDimensionalGraphicsControls" +graphicsId;
   data["idCanvas"] = idCanvas;
+  data["idControls"] = idControls;
   std::stringstream out;
   out
   << "\n<canvas width = '"
@@ -54,6 +56,7 @@ std::string DrawingVariables::getHTMLDiv(
   << " id = '"
   << idCanvas
   << "'>Canvas not supported</canvas>\n<br>\n";
+  out << "<div id='" << idControls<< "'></div>";
   if (generateInfoPanels) {
     out << "<div id='" << idHighlightInformation << "'></div>\n<br>\n";
     out << "<span id='" << idSpanInformation << "'></span>\n<br>\n";

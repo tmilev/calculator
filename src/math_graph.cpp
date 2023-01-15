@@ -327,14 +327,14 @@ std::string GraphWeightedLabeledEdges::toStringPsTricksEdge(
   bool goingLeft = (startX > endX);
   if (goingRight) {
     out
-    << "\\psline[linecolor =red, arrows =<-]("
+    << "\\psline[linecolor=red, arrows =<-]("
     << startX + 0.7
     << ", "
     << startY
     << ")";
   } else {
     out
-    << "\\psline[linecolor =red, arrows =<-]("
+    << "\\psline[linecolor=red, arrows =<-]("
     << startX
     << ", "
     << startY

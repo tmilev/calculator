@@ -1,10 +1,10 @@
-"use strict";
 /**
  * File needs to function as stand-alone javascript
  * as well be used as a commonJS module included via
  * require('graphics_n_dimension.js')).
  * Please don't require(...) any modules from this file.
  **/
+"use strict";
 
 function toStringVector(vector) {
   let result = "";
@@ -37,12 +37,29 @@ function getAngleScreenChange(newX, newY, oldX, oldY) {
   return result;
 }
 
+const stringCorrections = {
+  "lightblue": "blue",
+};
+
+/** @return{string} */
+function correctColor(
+  /** @type {string} */
+  input,
+) {
+  if (input in stringCorrections) {
+    return stringCorrections[input];
+  }
+  return input;
+}
+
 class GraphicsNDimensions {
   constructor(
     /** @type{HTMLCanvasElement|string} */
     inputContainer,
+    /** @type{HTMLCanvasElement|string} */
+    inputContainerControls,
     /** @type{HTMLElement|string} */
-    inputIdInfo,
+    inputInfoContainer,
     inputIdHighlightInfo,
   ) {
     this.vectors = [];
@@ -50,8 +67,14 @@ class GraphicsNDimensions {
     this.drawOperations = [];
     /** @type{Array.<Array.<HTMLTextAreaElement>>} */
     this.screenBasisInputs = [];
-    this.idInfo = inputIdInfo;
-    this.idPlaneInfo = `${inputIdInfo}projectionPlane`;
+    if (typeof inputInfoContainer === "string") {
+      inputInfoContainer = document.getElementById(inputInfoContainer);
+    }
+    /** @type{HTMLElement} */
+    this.informationContainer = inputInfoContainer;
+    /** @type{HTMLElement} */
+    this.planeInfo = null;
+    /** @type{HTMLElement} */
     this.panelInfo = null;
     if (
       inputIdHighlightInfo !== null &&
@@ -78,18 +101,23 @@ class GraphicsNDimensions {
     }
     /** @type{HTMLCanvasElement} */
     this.canvasContainer = inputContainer;
+    if (typeof inputContainerControls === "string") {
+      inputContainerControls = document.getElementById(inputContainerControls);
+    }
+    /** @type{HTMLElement} */
+    this.controlsContainer = inputContainerControls;
     this.dimension = 0;
     this.bilinearForm = [];
     this.graphicsUnit = 0;
     this.selectedBasisIndex = - 1;
     this.selectedHighlightIndex = - 1;
+
     /**
      * @type {Object<string, Object<string, boolean> >}
      * Keys are indices of groups currently highlighted.
      * Values are arrays with indices
      * within each group over which the mouse is located. 
      */
-
     this.currentHighlightIndices = {};
     this.flagAllowMovingCoordinateSystemFromArbitraryClick = true;
 
@@ -165,11 +193,29 @@ class GraphicsNDimensions {
 
   writeInfo() {
     let info = this.getInfoHTML();
-    let panelInfoElement = document.getElementById(this.idPlaneInfo);
-    if (panelInfoElement === null) {
+    if (this.panelInfo === null) {
       return;
     }
-    panelInfoElement.innerHTML = info;
+    this.panelInfo.innerHTML = info;
+  }
+
+  initializeControls() {
+    if (this.controlsContainer === null) {
+      return;
+    }
+    this.controlsContainer.style.transition = "1s all";
+    this.controlsContainer.textContent = "";
+    let button = document.createElement("button");
+    button.textContent = "\u21BB";
+    button.title = "redraw";
+    this.controlsContainer.appendChild(button);
+    let snapShotLaTeX = document.createElement("button");
+    snapShotLaTeX.innerHTML = "<tiny>L&#x1F4CB;</tiny>";
+    snapShotLaTeX.title = "Copy LaTeX+pstricks self-contained document.";
+    snapShotLaTeX.addEventListener("click", () => {
+      this.snapShotLaTeX();
+    });
+    this.controlsContainer.appendChild(snapShotLaTeX);
   }
 
   initInfo() {
@@ -194,43 +240,40 @@ class GraphicsNDimensions {
     });
     info.appendChild(button);
     info.appendChild(document.createElement("br"));
-    let snapShotLaTeX = document.createElement("button");
-    snapShotLaTeX.innerHTML = "<tiny>L&#x1F4CB;</tiny>";
-    snapShotLaTeX.title = "Copy LaTeX+pstricks self-contained document.";
-    snapShotLaTeX.addEventListener("click", () => {
-      this.snapShotLaTeX();
-    });
-    info.appendChild(snapShotLaTeX);
-    let planeInfo = document.createElement("div");
-    planeInfo.id = this.idPlaneInfo;
-    planeInfo.className = "panel";
-    info.appendChild(planeInfo);
-    let element = document.getElementById(this.idInfo);
-    if (element !== null) {
-      element.textContent = "";
-      element.appendChild(info);
+    this.planeInfo = document.createElement("div");
+    this.planeInfo.className = "panel";
+    info.appendChild(this.planeInfo);
+    if (this.informationContainer !== null) {
+      this.informationContainer.textContent = "";
+      this.informationContainer.appendChild(info);
     }
   }
 
   snapShotLaTeX() {
     let result = [];
+    this.controlsContainer.style.backgroundColor = "lightgreen";
+    setTimeout(() => {
+      this.controlsContainer.style.backgroundColor = "";
+    }, 1000);
     result.push("\\documentclass{article}");
     result.push("\\usepackage{auto-pst-pdf}");
     result.push("\\usepackage{pst-plot}")
     result.push("\\begin{document}");
     result.push("\\psset{xunit = 0.01cm, yunit = 0.01cm}");
-    result.push("\\begin{pspicture}(0,0)(1,1)");
+    result.push("\\begin{pspicture}(-100,-100)(100,100)");
     this.computeProjectionsEiBasis();
     for (
       let counterDrawOperation = 0;
       counterDrawOperation < this.drawOperations.length;
       counterDrawOperation++
     ) {
-      result.push(this.drawOperations[counterDrawOperation].getLaTeXOperation());
+      const drawOperation = this.drawOperations[counterDrawOperation];
+      result.push(drawOperation.getLaTeXOperation());
     }
     result.push("\\end{pspicture}");
-    result += "\\end{document}";
-    navigator.clipboard.writeText(result);
+    result.push("\\end{document}");
+    
+    navigator.clipboard.writeText(result.join("\n"));
   }
 
   drawStandardEiBasis(color) {
@@ -268,7 +311,7 @@ class GraphicsNDimensions {
       left: left,
       right: right,
       lineWidth: 1,
-      colorLine: color
+      colorLine: color,
     }));
   }
 
@@ -282,7 +325,7 @@ class GraphicsNDimensions {
       lineWidth: lineWidth,
       colorLine: color,
       frameId: frameId,
-      frameIndex: frameIndex
+      frameIndex: frameIndex,
     }));
   }
 
@@ -424,6 +467,7 @@ class GraphicsNDimensions {
   }
 
   init() {
+    this.initializeControls();
     this.initInfo();
     if (this.dimension === -1) {
       console.log("Negative dimension received, not plotting.");
@@ -484,9 +528,27 @@ class GraphicsNDimensions {
     this.scaleToUnitLength(this.screenBasis[1]);
   }
 
-  computeScreenCoordinates(input, output) {
+  computeScreenCoordinates(
+    /** @type{number[]} */
+    input,
+    /** @type{number[]} */
+    output,
+  ) {
     output[0] = this.shiftScreenCoordinates[0] + this.graphicsUnit * this.scalarProduct(this.screenBasis[0], input);
     output[1] = this.shiftScreenCoordinates[1] + this.graphicsUnit * this.scalarProduct(this.screenBasis[1], input);
+  }
+
+  computeLatexCoordinates(
+    /** @type{number[]} */
+    input,
+    /** @type{number[]} */
+    output,
+  ) {
+    const intermediate = [0, 0];
+    this.computeScreenCoordinates(input, intermediate);
+    output[0] = intermediate[0] - this.shiftScreenCoordinates[0];
+    output[1] = intermediate[1] - this.shiftScreenCoordinates[1];
+    output[1] *= -1;
   }
 
   computeProjectionsEiBasis() {
@@ -581,7 +643,11 @@ class GraphicsNDimensions {
     //if (newX * oldX + newY * oldY < 0) {
     //  xCuttingNew *= - 1;
     //}
-    this.angleCuttingChange = - Math.atan2(yCuttingNew, xCuttingNew) + Math.atan2(yCuttingOld, xCuttingOld);
+    this.angleCuttingChange = - Math.atan2(
+      yCuttingNew, xCuttingNew
+    ) + Math.atan2(
+      yCuttingOld, xCuttingOld
+    );
     for (let i = 0; i < 5; i++) {
       if (this.angleCuttingChange <= - Math.PI) {
         this.angleCuttingChange += 2 * Math.PI;
@@ -639,11 +705,21 @@ class GraphicsNDimensions {
       let vectorTimesE2 = this.scalarProduct(selectedVector, this.screenBasisAtSelection[1]);
       this.vProjectionNormalizedSelected = this.screenBasisAtSelection[0].slice();
       multiplyVectorByScalar(this.vProjectionNormalizedSelected, vectorTimesE1);
-      addVectorTimesScalar(this.vProjectionNormalizedSelected, this.screenBasisAtSelection[1], vectorTimesE2);
+      addVectorTimesScalar(
+        this.vProjectionNormalizedSelected,
+        this.screenBasisAtSelection[1],
+        vectorTimesE2,
+      );
       this.vOrthogonalSelected = selectedVector.slice();
       addVectorTimesScalar(this.vOrthogonalSelected, this.vProjectionNormalizedSelected, - 1);
-      let vOrthogonalSquareLength = this.scalarProduct(this.vOrthogonalSelected, this.vOrthogonalSelected);
-      let vProjectionSquareLength = this.scalarProduct(this.vProjectionNormalizedSelected, this.vProjectionNormalizedSelected);
+      let vOrthogonalSquareLength = this.scalarProduct(
+        this.vOrthogonalSelected,
+        this.vOrthogonalSelected,
+      );
+      let vProjectionSquareLength = this.scalarProduct(
+        this.vProjectionNormalizedSelected,
+        this.vProjectionNormalizedSelected,
+      );
       if (vOrthogonalSquareLength > epsilon && vProjectionSquareLength > epsilon) {
         break;
       }
@@ -776,14 +852,22 @@ class GraphicsNDimensions {
           currentOperation.frameIndex
         );
       } else if (currentOperation.operation === "segment") {
-        this.drawLine(currentOperation.points[0], currentOperation.points[1], currentOperation.color);
+        this.drawLine(
+          currentOperation.points[0],
+          currentOperation.points[1],
+          currentOperation.color,
+        );
       } else if (currentOperation.operation === "highlightGroup") {
         this.drawHighlightGroup(
           currentOperation.points, currentOperation.labels,
           currentOperation.color, currentOperation.radius
         );
       } else if (currentOperation.operation === "text") {
-        this.drawText(currentOperation.location, currentOperation.text, currentOperation.color);
+        this.drawText(
+          currentOperation.location,
+          currentOperation.text,
+          currentOperation.color,
+        );
       } else if (currentOperation.operation === "path") {
         this.drawPath(
           currentOperation.points,
@@ -814,11 +898,17 @@ class GraphicsNDimensions {
   animate() {
     clearTimeout(this.animation.timeoutHandle);
     this.animation.currentFrameIndex++;
-    if (this.animation.currentFrameIndex < 0 || this.animation.currentFrameIndex > this.animation.numberOfFrames) {
+    if (
+      this.animation.currentFrameIndex < 0 ||
+      this.animation.currentFrameIndex > this.animation.numberOfFrames
+    ) {
       this.animation.currentFrameIndex = 0;
     }
     this.drawAll();
-    this.animation.timeoutHandle = setTimeout(this.animate.bind(this), this.animation.frameLength);
+    this.animation.timeoutHandle = setTimeout(
+      this.animate.bind(this),
+      this.animation.frameLength,
+    );
   }
 
 }
@@ -844,19 +934,27 @@ class DrawHighlights {
       this.vectorProjecions = new Array(this.vectors.length);
     }
     for (let i = 0; i < this.vectors.length; i++) {
-      if (this.vectorProjections[i] === undefined || this.vectorProjections[i] === null) {
+      if (
+        this.vectorProjections[i] === undefined ||
+        this.vectorProjections[i] === null
+      ) {
         this.vectorProjections[i] = [];
       }
-      this.owner.computeScreenCoordinates(this.vectors[i], this.vectorProjections[i]);
+      this.owner.computeScreenCoordinates(
+        this.vectors[i],
+        this.vectorProjections[i],
+      );
     }
   }
 
   drawNoFinish() {
-    /** @type {GraphicsNDimensions} */
+    /** @type{GraphicsNDimensions} */
     if (!(this.indexInOperations in this.owner.currentHighlightIndices)) {
       return;
     }
-    let currentIndices = this.owner.currentHighlightIndices[this.indexInOperations];
+    let currentIndices = this.owner.currentHighlightIndices[
+      this.indexInOperations
+    ];
     let nextLine = [];
     for (let i = 0; i < this.labels.length; i++) {
       if (i in currentIndices) {
@@ -881,6 +979,10 @@ class DrawHighlights {
       canvas.stroke();
     }
   }
+
+  getLaTeXOperation() {
+    return '%javascript highlighting not suitable for latex';
+  }
 }
 
 class DrawPath {
@@ -894,7 +996,11 @@ class DrawPath {
     this.points = inputData.points;
     this.lineWidth = inputData.lineWidth;
     this.colorLine = inputData.colorLine;
-    if (inputData.frameId !== "" && inputData.frameId !== null && inputData.frameId !== undefined) {
+    if (
+      inputData.frameId !== "" &&
+      inputData.frameId !== null &&
+      inputData.frameId !== undefined
+    ) {
       this.frameId = inputData.frameId;
       this.frameIndex = inputData.frameIndex;
       this.owner.registerFrameIndex(this.frameIndex);
@@ -929,6 +1035,9 @@ class DrawSegmentBetweenTwoVectors {
     this.right = inputData.right.slice();
     this.lineWidth = inputData.lineWidth;
     this.colorLine = inputData.colorLine;
+    if (this.colorLine === undefined) {
+      this.colorLine = "";
+    }
   }
 
   drawNoFinish() {
@@ -943,6 +1052,19 @@ class DrawSegmentBetweenTwoVectors {
     canvas.moveTo(screenCoordinatesLeft[0], screenCoordinatesLeft[1]);
     canvas.lineTo(screenCoordinatesRight[0], screenCoordinatesRight[1]);
     canvas.stroke();
+  }
+
+  getLaTeXOperation() {
+    let leftCoordinates = [0, 0];
+    let rightCoordinates = [0, 0];
+    this.owner.computeLatexCoordinates(this.left, leftCoordinates);
+    this.owner.computeLatexCoordinates(this.right, rightCoordinates);
+    let options = "";
+    if (this.colorLine !== "") {
+      options = `[linecolor=${correctColor(this.colorLine)}]`;
+    }
+    return `\\psline${options}(${leftCoordinates[0]},${leftCoordinates[1]})` +
+      `(${rightCoordinates[0]},${rightCoordinates[1]})`;
   }
 }
 
@@ -965,13 +1087,19 @@ class DrawFilledShape {
     let currentPoint = [];
     this.owner.computeScreenCoordinates(this.points[0], currentPoint);
     canvas.moveTo(currentPoint[0], currentPoint[1]);
-    for (let counterPoint = 1; counterPoint < this.points.length; counterPoint++) {
-      this.owner.computeAllScreenCoordinates(this.points[counterPoint], currentPoint);
+    for (
+      let counterPoint = 1;
+      counterPoint < this.points.length;
+      counterPoint++
+    ) {
+      this.owner.computeAllScreenCoordinates(
+        this.points[counterPoint],
+        currentPoint
+      );
       canvas.lineTo(currentPoint[0], currentPoint[1]);
     }
     canvas.closePath();
     canvas.fill();
-    //canvas.stroke();
   }
 }
 
@@ -998,7 +1126,10 @@ class DrawCircleAtVector {
     let canvas = this.owner.canvas;
     canvas.strokeStyle = this.colorFill;
     canvas.fillStyle = this.colorFill;
-    this.owner.computeScreenCoordinates(this.location, this.locationScreenCoordinates);
+    this.owner.computeScreenCoordinates(
+      this.location,
+      this.locationScreenCoordinates,
+    );
     canvas.beginPath();
     canvas.arc(
       this.locationScreenCoordinates[0],
@@ -1007,6 +1138,13 @@ class DrawCircleAtVector {
       0, 2 * Math.PI
     );
     canvas.fill();
+  }
+
+  getLaTeXOperation() {
+    let coordinates = [0, 0];
+    this.owner.computeLatexCoordinates(this.location, coordinates);
+    let rescaledRadius = 0.03 * this.radius;
+    return `\\pscircle*(${coordinates[0]},${coordinates[1]}){${rescaledRadius}}`;
   }
 }
 
@@ -1018,6 +1156,7 @@ class DrawTextAtVector {
     inputData,
   ) {
     this.owner = inputOwner;
+    /** @type{string} */
     this.text = inputData.text;
     this.location = inputData.location;
     this.locationScreen = [];
@@ -1034,18 +1173,46 @@ class DrawTextAtVector {
       this.locationScreen[1] + this.owner.textShift[1],
     );
   }
+
+  getLaTeXOperation() {
+    let coordinates = [0, 0];
+    this.owner.computeLatexCoordinates(this.location, coordinates);
+    let correctedText = this.text;
+    if (correctedText.includes("_")) {
+      // The input is latex.
+      correctedText = `$${correctedText}$`;
+    }
+    return `\\rput(${coordinates[0]},${coordinates[1]}){${correctedText}}`;
+  }
 }
 
 function multiplyVectorByScalar(vector, scalar) {
-  for (let counterDimension = 0; counterDimension < vector.length; counterDimension++) {
-    vector[counterDimension] *= scalar;
+  for (let i = 0; i < vector.length; i++) {
+    vector[i] *= scalar;
   }
 }
 
 function addVectorTimesScalar(vector, other, scalar) {
-  for (let counterDimension = 0; counterDimension < vector.length; counterDimension++) {
-    vector[counterDimension] += other[counterDimension] * scalar;
+  for (let i = 0; i < vector.length; i++) {
+    vector[i] += other[i] * scalar;
   }
+}
+
+function createGraphicsFromObject(input) {
+  if (input.idCanvas === undefined || input.idCanvas === null) {
+    throw ("idCanvas missing.");
+  }
+  let spanInformationId = input.idSpanInformation;
+  if (spanInformationId == undefined) {
+    spanInformationId = null;
+  }
+  let object = new GraphicsNDimensions(
+    input.idCanvas,
+    input.idControls,
+    spanInformationId,
+    input.idHighlightInformation,
+  );
+  object.initFromObject(input);
 }
 
 function testA3(idCanvas, idSpanInformation) {
@@ -1054,11 +1221,11 @@ function testA3(idCanvas, idSpanInformation) {
   a3.bilinearForm = [
     [2, -1, 0],
     [-1, 2, -1],
-    [0, -1, 2]
+    [0, -1, 2],
   ];
   a3.screenBasis = [
     [0.707107, 0.707107, 0],
-    [0, 0.707107, 0.707107]
+    [0, 0.707107, 0.707107],
   ];
   let labeledVectors = [
     [-1, -1, -1],
@@ -1098,32 +1265,18 @@ function testA3(idCanvas, idSpanInformation) {
     [[0, 0, 1], [1, 1, 1]],
     [[0, 0, 1], [0, -1, 0]],
     [[-1, -1, -1], [0, 0, -1]],
-    [[0, 0, -1], [0, 1, 0]]
+    [[0, 0, -1], [0, 1, 0]],
   ];
   a3.drawStandardEiBasis("red");
   a3.drawText([1, 0, 0], "(1, 0, 0)");
-  for (let counterLabel = 0; counterLabel < labeledVectors.length; counterLabel++) {
-    a3.drawLine([0, 0, 0], labeledVectors[counterLabel], "green");
-    //a3.drawText(labeledVectors[counterLabel], `[${labeledVectors.join(', ')}]`);
-    //a3.drawCircle(labeledVectors[counterLabel], "red");
+  for (let i = 0; i < labeledVectors.length; i++) {
+    a3.drawLine([0, 0, 0], labeledVectors[i], "green");
   }
-  for (let counterSegment = 0; counterSegment < segments.length; counterSegment++) {
-    a3.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
+  for (let i = 0; i < segments.length; i++) {
+    a3.drawLine(segments[i][0], segments[i][1], "blue");
   }
   a3.graphicsUnit = 150;
   a3.drawAll();
-}
-
-function createGraphicsFromObject(input) {
-  if (input.idCanvas === undefined || input.idCanvas === null) {
-    throw ("idCanvas missing.");
-  }
-  let spanInformationId = input.idSpanInformation;
-  if (spanInformationId == undefined ) {
-    spanInformationId = null;
-  }
-  let object = new GraphicsNDimensions(input.idCanvas, spanInformationId, input.idHighlightInformation);
-  object.initFromObject(input);
 }
 
 function testA4(idCanvas, idSpanInformation) {
@@ -1133,11 +1286,11 @@ function testA4(idCanvas, idSpanInformation) {
     [2, -1, 0, 0],
     [-1, 2, -1, 0],
     [0, -1, 2, -1],
-    [0, 0, -1, 2]
+    [0, 0, -1, 2],
   ];
   a4.screenBasis = [
     [-0.195, 0.316, 0.828, 0.632],
-    [0.602, 0.973, 0.602, 0]
+    [0.602, 0.973, 0.602, 0],
   ];
   let labeledVectors = [
     [1, 0, 0, 0],
@@ -1152,35 +1305,35 @@ function testA4(idCanvas, idSpanInformation) {
     [1, 1, 1, 1],
   ];
   let numberOfPositiveVectors = labeledVectors.length;
-  for (let counter = 0; counter < numberOfPositiveVectors; counter++) {
-    let vector = labeledVectors[counter].slice();
+  for (let i = 0; i < numberOfPositiveVectors; i++) {
+    let vector = labeledVectors[i].slice();
     multiplyVectorByScalar(vector, - 1);
     labeledVectors.push(vector);
   }
   let segments = [];
-  for (let counter = 0; counter < labeledVectors.length; counter++) {
+  for (let i = 0; i < labeledVectors.length; i++) {
     let minDistance = 10;
-    for (let secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
-      let newDistance = a4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
+    for (let j = i + 1; j < labeledVectors.length; j++) {
+      let newDistance = a4.scalarProduct(labeledVectors[i], labeledVectors[j]);
       if (newDistance < minDistance && newDistance > 0) {
         minDistance = newDistance;
       }
     }
-    for (let secondCounter = counter + 1; secondCounter < labeledVectors.length; secondCounter++) {
-      let distance = a4.scalarProduct(labeledVectors[counter], labeledVectors[secondCounter]);
+    for (let j = i + 1; j < labeledVectors.length; j++) {
+      let distance = a4.scalarProduct(labeledVectors[i], labeledVectors[j]);
       if (distance != minDistance) {
         continue;
       }
-      segments.push([labeledVectors[counter].slice(), labeledVectors[secondCounter].slice()]);
+      segments.push([labeledVectors[i].slice(), labeledVectors[j].slice()]);
     }
   }
 
   a4.drawStandardEiBasis("red");
-  for (let counterLabel = 0; counterLabel < labeledVectors.length; counterLabel++) {
-    a4.drawLine([0, 0, 0, 0], labeledVectors[counterLabel], "green");
+  for (let i = 0; i < labeledVectors.length; i++) {
+    a4.drawLine([0, 0, 0, 0], labeledVectors[i], "green");
   }
-  for (let counterSegment = 0; counterSegment < segments.length; counterSegment++) {
-    a4.drawLine(segments[counterSegment][0], segments[counterSegment][1], "blue");
+  for (let i = 0; i < segments.length; i++) {
+    a4.drawLine(segments[i][0], segments[i][1], "blue");
   }
   a4.graphicsUnit = 150;
   a4.drawAll();

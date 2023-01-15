@@ -191,6 +191,8 @@ class GraphicsNDimensions {
     this.layerOfEachDrawOperation = [];
     /** @type{HTMLElement|null} */
     this.containerLayers = null;
+    this.boundingBoxScreen = [[0, 0], [0, 0]];
+    this.boundingBoxLatex = [[0, 0], [0, 0]];
   }
 
   initVectors(inputVectors) {
@@ -302,12 +304,13 @@ class GraphicsNDimensions {
     result.push("\\psset{xunit = 0.01cm, yunit = 0.01cm}");
     result.push("\\begin{pspicture}(-100,-100)(100,100)");
     this.computeProjectionsEiBasis();
+    this.computeBoundingBox();
     for (
       let i = 0;
       i < this.drawOperations.length;
       i++
     ) {
-      if (!this.layerOfEachDrawOperation[i].visible) {
+      if (!this.isVisible(i)) {
         continue;
       }
       const drawOperation = this.drawOperations[i];
@@ -317,6 +320,56 @@ class GraphicsNDimensions {
     result.push("\\end{document}");
     
     navigator.clipboard.writeText(result.join("\n"));
+  }
+
+  computeBoundingBox() {
+    this.boundingBoxLatex = [[0, 0], [0, 0]];
+    this.boundingBoxScreen = [[0, 0], [0, 0]];
+    for (
+      let i = 0;
+      i < this.drawOperations.length;
+      i++
+    ) {
+      if (!this.isVisible(i)) {
+        continue;
+      }
+      const drawOperation = this.drawOperations[i];
+      drawOperation.accountBoundingBox();
+    }    
+  }
+
+  accountVectorInBoundingBox(
+    /** @type{number[]} */
+    vector,
+  ) {
+    const screenCoordinates = [0, 0];
+    const latexCoordinates = [0, 0];
+    this.computeScreenCoordinates(vector, screenCoordinates);
+    this.computeLatexCoordinates(vector, latexCoordinates);
+    this.accountVectorInBoundingBoxOfType(
+      screenCoordinates,
+      this.boundingBoxScreen,
+    );
+    this.accountVectorInBoundingBoxOfType(
+      latexCoordinates,
+      this.boundingBoxLatex,
+    );
+  }
+
+  accountVectorInBoundingBoxOfType(
+    /** @type{number[]} */
+    vector,
+    /** @type{number[][]} */
+    output,
+  ) {
+    output[0][0] = Math.min(vector[0], output[0][0]);
+    output[0][1] = Math.min(vector[1], output[0][1]);
+    output[1][0] = Math.max(vector[0], output[1][0]);
+    output[1][1] = Math.max(vector[1], output[1][1]); 
+  }
+
+  isVisible(index) {
+    return this.layerOfEachDrawOperation[index].visible;
   }
 
   drawStandardEiBasis(color) {
@@ -475,7 +528,7 @@ class GraphicsNDimensions {
           continue;
         }
       }
-      if (!this.layerOfEachDrawOperation[i].visible) {
+      if (!this.isVisible(i)) {
         continue;
       }
       currentOperation.drawNoFinish();
@@ -1048,7 +1101,6 @@ class GraphicsNDimensions {
       this.animation.frameLength,
     );
   }
-
 }
 
 class DrawHighlights {
@@ -1121,6 +1173,10 @@ class DrawHighlights {
   getLaTeXOperation() {
     return '%javascript highlighting not suitable for latex';
   }
+
+  accountBoundingBox() {  
+    // Nothing to do.
+  }
 }
 
 class DrawPath {
@@ -1158,6 +1214,16 @@ class DrawPath {
       canvas.lineTo(vector[0], vector[1]);
     }
     canvas.stroke();
+  }
+
+  getLaTeXOperation() {
+    return '%not implemented';
+  }
+
+  accountBoundingBox() {
+    for (let i = 0; i < this.points.length; i++){
+      this.owner.accountVectorInBoundingBox(this.points[i]);
+    }
   }
 }
 
@@ -1210,6 +1276,9 @@ class DrawSegmentBetweenTwoVectors {
     if (this.penStyle !== "") {
       options += ` linestyle=${this.penStyle}`;
     }
+    if (options !== "") {
+      options = `[${options}]`;
+    } 
     return options;
   }
 
@@ -1220,6 +1289,11 @@ class DrawSegmentBetweenTwoVectors {
     this.owner.computeLatexCoordinates(this.right, rightCoordinates);
     return `\\psline${this.getLaTeXOptions()}(${leftCoordinates[0]},${leftCoordinates[1]})` +
       `(${rightCoordinates[0]},${rightCoordinates[1]})`;
+  }
+
+  accountBoundingBox() {
+    this.owner.accountVectorInBoundingBox(this.left);
+    this.owner.accountVectorInBoundingBox(this.right);
   }
 }
 
@@ -1301,6 +1375,10 @@ class DrawCircleAtVector {
     let rescaledRadius = 0.03 * this.radius;
     return `\\pscircle*(${coordinates[0]},${coordinates[1]}){${rescaledRadius}}`;
   }
+
+  accountBoundingBox() {
+    this.owner.accountVectorInBoundingBox(this.location);
+  }
 }
 
 class DrawTextAtVector {
@@ -1337,7 +1415,31 @@ class DrawTextAtVector {
       // The input is latex.
       correctedText = `$${correctedText}$`;
     }
-    return `\\rput(${coordinates[0]},${coordinates[1]}){${correctedText}}`;
+    let width = this.owner.boundingBoxLatex[1][0] - this.owner.boundingBoxLatex[0][0];
+    let height = this.owner.boundingBoxLatex[1][1] - this.owner.boundingBoxLatex[0][1];
+    let xOffset = coordinates[0] - this.owner.boundingBoxLatex[0][0];
+    let yOffset = coordinates[1] - this.owner.boundingBoxLatex[0][1];
+    let options = "";
+    let widthRatio = xOffset / width;
+    let heightRatio = yOffset / height;
+    if (widthRatio < 0.33) {
+      options += "r";
+    } else if (widthRatio > 0.67) {
+      options += "l";
+    }
+    if (heightRatio < 0.33) {
+      options += "t";
+    } else if (heightRatio > 0.67) {
+      options += "b";
+    }
+    if (options !== "") {
+      options = `[${options}]`;
+    }
+    return `\\rput${options}(${coordinates[0]},${coordinates[1]}){${correctedText}}`;
+  }
+
+  accountBoundingBox() {
+    this.owner.accountVectorInBoundingBox(this.location);
   }
 }
 

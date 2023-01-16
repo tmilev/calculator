@@ -1218,7 +1218,7 @@ public:
     *this = standsOnTheRight;
     this->multiplyOnTheLeft(thisCopy);
   }
-  void getVectorsFromRows(List<Vector<Coefficient> >& output) {
+  void getVectorsFromRows(List<Vector<Coefficient> >& output) const {
     output.setSize(this->numberOfRows);
     for (int i = 0; i < this->numberOfRows; i ++) {
       output[i].setSize(this->numberOfColumns);

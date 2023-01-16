@@ -8,6 +8,27 @@ class Lattice {
   void testGaussianEliminationEuclideanDomainRationals(
     Matrix<Rational>& output
   );
+  void drawOnePointWithSigns(
+    const Vector<Rational>& toDraw,
+    const List<Vector<Rational> >& basis,
+    DrawingVariables& output,
+    int& outputTotalPointsDrawn,
+    List<Vector<Rational> >* restrictingCone
+  ) const;
+  void drawOnePoint(
+    const Vector<Rational>& inBasisCoordinates,
+    const List<Vector<Rational> >& basis,
+    const Selection& signs,
+    DrawingVariables& output,
+    int& outputTotalPointsDrawn,
+    List<Vector<Rational> >* restrictingCone
+  ) const;
+  static void drawOnePointBase(
+    const Vector<Rational>& toDraw,
+    DrawingVariables& output,
+    int& outputTotalPointsDrawn
+  );
+  static const int maximumPointsToDraw;
 public:
   Matrix<Rational> basisRationalForm;
   Matrix<LargeInteger> basis;
@@ -144,6 +165,12 @@ public:
   void refineByVector(const Vector<Rational>& other);
   void makeFromRoots(const List<Vector<Rational> >& input);
   void makeFromMatrix(const Matrix<Rational>& input);
+  // Draws the lattice. If a restricting cone is given,
+  // all points outside of if will be omitted.
+  // The restricting cone is specified by giving the normals of its walls.
+  void draw(
+    DrawingVariables& output, List<Vector<Rational> >* restrictingCone
+  ) const;
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
 };
 

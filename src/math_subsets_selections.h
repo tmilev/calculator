@@ -139,10 +139,12 @@ public:
   void computeElements();
 };
 
-class SelectionWithMaxMultiplicity: public SelectionWithMultiplicities {
+class SelectionWithMaximumMultiplicity: public SelectionWithMultiplicities {
 public:
   int maximumMultiplicity;
-  void initMaxMultiplicity(int numberOfElements, int maximulMultiplicity);
+  void initializeMaximumMultiplicity(
+    int numberOfElements, int maximulMultiplicity
+  );
   LargeInteger numberOfCombinationsOfCardinality(int cardinality);
   LargeInteger getTotalCombinationCount() const;
   int numberOfSelectionsTotal() {
@@ -153,13 +155,16 @@ public:
   }
   bool incrementReturnFalseIfPastLast();
   void incrementSubset();
-  void incrementSubsetFixedCardinality(int cardinality);
+  // Returns false when holding the last element and called again.
+  bool incrementSubsetFixedCardinality(int cardinality);
   bool hasMultiplicitiesZeroAndOneOnly();
   int maximumCardinalityWithMultiplicities() {
     return this->maximumMultiplicity * this->multiplicities.size;
   }
   int cardinalitySelectionWithMultiplicities();
-  static unsigned int hashFunction(const SelectionWithMaxMultiplicity& input) {
+  static unsigned int hashFunction(
+    const SelectionWithMaximumMultiplicity& input
+  ) {
     return
     static_cast<unsigned int>(input.maximumMultiplicity) *
     HashConstants::constant0 +

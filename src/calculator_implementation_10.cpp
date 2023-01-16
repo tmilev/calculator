@@ -1,4 +1,5 @@
 #include "calculator_inner_functions_vector_partition_function_1.h"
+#include "math_extra_drawing_variables.h"
 
 bool CalculatorFunctionsVectorPartitionFunction::
 vectorPartitionFunctionFormulaElementary(
@@ -505,4 +506,45 @@ bool CalculatorFunctionsVectorPartitionFunction::kostantPartitionFunctionLatex(
   output.assignValue(
     calculator, HtmlRoutines::toHtmlLatexLiteralWithCopy(latex.str())
   );
+}
+
+bool CalculatorFunctionsVectorPartitionFunction::plotLatticeRestricted(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE(
+    "CalculatorFunctionsVectorPartitionFunction::"
+    "plotLatticeRestricted"
+  );
+  if (input.size() < 2) {
+    return false;
+  }
+  Lattice toBePlotted;
+  if (!input[1].isOfType(&toBePlotted)) {
+    return
+    calculator
+    << "Frist argument: "
+    << input[1]
+    << " must be of type Lattice. ";
+  }
+  Matrix<Rational> restrictingNormalsMatrixForm;
+  if (input.size() > 2) {
+    if (
+      !CalculatorConversions::functionGetMatrix(
+        calculator, input[2], restrictingNormalsMatrixForm, false
+      )
+    ) {
+      return
+      calculator
+      << "Failed to extract matrix from "
+      << input[2]
+      << ". ";
+    }
+  }
+  Vectors<Rational> restrictingNormals;
+  restrictingNormalsMatrixForm.getVectorsFromRows(restrictingNormals);
+  DrawingVariables drawingVariables;
+  toBePlotted.draw(drawingVariables, &restrictingNormals);
+  std::string html =
+  drawingVariables.getHTMLDiv(toBePlotted.getDimension(), false, true);
+  return output.assignValue(calculator, html);
 }

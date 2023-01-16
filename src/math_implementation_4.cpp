@@ -1942,7 +1942,7 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   draggableBasis.makeEiBasis(smallDimension);
   WeylGroupData tmpWeyl;
   tmpWeyl.makeArbitrarySimple('A', 2);
-  drawOps.initDimensions(
+  drawOps.initializeDimensions(
     tmpWeyl.cartanSymmetric, draggableBasis, draggableBasis
   );
   FormatExpressions format;
@@ -1978,7 +1978,7 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   << "change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].toString();
   startingPolynomial.makeVPF(this->gModKNegativeWeightsBasisChanged, tempS);
-  drawOps.drawCoordinateSystemBuffer(drawOps, 2);
+  drawOps.drawCoordinateSystemBuffer(2);
   Cone smallWeylChamber;
   Matrix<Rational> invertedCartan;
   invertedCartan = smallWeylGroup.cartanSymmetric;

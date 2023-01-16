@@ -262,8 +262,6 @@ class GraphicsNDimensions {
 
   initInfo() {
     let info = document.createElement("div");
-    info.style.height = "300px";
-    info.style.overflowY = "scroll";
     for (let i = 0; i < 2; i++) {
       this.screenBasisInputs.push([]);
       for (let j = 0; j < this.dimension; j++) {

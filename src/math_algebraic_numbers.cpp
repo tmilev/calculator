@@ -1537,18 +1537,18 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   if (!inputOwner.mergeRadicals(factors)) {
     return false;
   }
-  Selection FactorSel;
-  FactorSel.initialize(inputOwner.quadraticRadicals.size);
+  Selection factorSelection;
+  factorSelection.initialize(inputOwner.quadraticRadicals.size);
   for (int i = 0; i < factors.size; i ++) {
     if (factors[i] == - 1) {
-      FactorSel.addSelectionAppendNewIndex(
+      factorSelection.addSelectionAppendNewIndex(
         inputOwner.quadraticRadicals.getIndex(- 1)
       );
     } else {
       for (int j = 0; j < inputOwner.quadraticRadicals.size; j ++) {
         if (inputOwner.quadraticRadicals[j] != - 1) {
           if (factors[i] % inputOwner.quadraticRadicals[j] == 0) {
-            FactorSel.addSelectionAppendNewIndex(j);
+            factorSelection.addSelectionAppendNewIndex(j);
           }
         }
       }
@@ -1557,7 +1557,7 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   this->owner = &inputOwner;
   this->basisIndex = this->owner->basisInjections.size - 1;
   this->element.makeEi(
-    this->owner->getIndexFromRadicalSelection(FactorSel)
+    this->owner->getIndexFromRadicalSelection(factorSelection)
   );
   this->element *= squareRootRationalPart;
   this->checkConsistency();

@@ -82,6 +82,7 @@ public:
     FormatExpressions& format,
     const std::string& chamberWallColor = nullptr
   ) const;
+  void drawLattice(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(DrawingVariables& drawingVariables) const;
   bool drawMeProjectiveVertices(DrawingVariables& drawingVariables) const;
   bool drawMeProjectiveSlice(DrawingVariables& drawingVariables) const;
@@ -400,10 +401,16 @@ public:
   Cone* getConeByIdNonConst(int id);
   Cone& getConeByIdNonConstNoFail(int id);
   bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
-  bool drawMeProjective(DrawingVariables& drawingVariables) const;
-  bool drawProjectiveChambers(DrawingVariables& drawingVariables) const;
+  bool drawMeProjective(
+    DrawingVariables& drawingVariables, bool includeLattice
+  ) const;
+  bool drawProjectiveChambers(
+    DrawingVariables& drawingVariables, bool includeLattice
+  ) const;
   std::string drawMeToHtmlProjective(
-    DrawingVariables& drawingVariables, bool generateControls
+    DrawingVariables& drawingVariables,
+    bool includeLattice,
+    bool generateControls
   ) const;
   std::string toString() const;
   std::string toStringConeCount() const;
@@ -418,8 +425,9 @@ public:
     const MapList<int, Cone>& cones, int& totalChambers
   ) const;
   // Returns the graphics of all the cones without description.
-  std::string toHTMLGraphicsOnly(bool includePanels) const;
-  std::string toLatexGraphicsOnlyPsTricks() const;
+  std::string toHTMLGraphicsOnly(bool includePanels, bool includeLattice)
+  const;
+  std::string toLatexGraphicsOnlyPsTricks(bool includeLattice) const;
   std::string toLatexWithoutGraphics(const std::string& label) const;
   // Returns a sequence of html canvas drawings of the various stages of
   // slicing.
@@ -1011,6 +1019,7 @@ public:
     List<std::string> comments;
     void initialize(VectorPartitionFunctionElementary* inputOwner);
     void addGraphicsIfAllowed();
+    void addChamberLabel(int id, const Vector<Rational>& direction);
     bool shouldComment() const;
     List<std::string>* commentsPointer();
     Comments();

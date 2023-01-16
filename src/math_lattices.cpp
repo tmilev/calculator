@@ -1,6 +1,9 @@
 #include "math_lattices.h"
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_extra_drawing_variables.h"
+
+const int Lattice::maximumPointsToDraw = 1024;
 
 void QuasiPolynomial::addLatticeShift(
   const Polynomial<Rational>& input,
@@ -1599,4 +1602,100 @@ std::string Lattice::toStringParentheses() const {
   }
   out << ")";
   return out.str();
+}
+
+void Lattice::drawOnePointWithSigns(
+  const Vector<Rational>& toDraw,
+  const List<Vector<Rational> >& basis,
+  DrawingVariables& output,
+  int& outputTotalPointsDrawn,
+  List<Vector<Rational> >* restrictingCone
+) const {
+  STACK_TRACE("Lattice::drawOnePointWithSigns");
+  Selection signs;
+  signs.initialize(toDraw.size);
+  this->drawOnePoint(
+    toDraw, basis, signs, output, outputTotalPointsDrawn, restrictingCone
+  );
+  while (signs.incrementReturnFalseIfPastLast()) {
+    this->drawOnePoint(
+      toDraw,
+      basis,
+      signs,
+      output,
+      outputTotalPointsDrawn,
+      restrictingCone
+    );
+  }
+}
+
+void Lattice::drawOnePointBase(
+  const Vector<Rational>& toDraw,
+  DrawingVariables& output,
+  int& outputTotalPointsDrawn
+) {
+  outputTotalPointsDrawn ++;
+  output.drawCircleAtVectorBufferRational(toDraw, "blue", 3);
+}
+
+void Lattice::drawOnePoint(
+  const Vector<Rational>& inBasisCoordinates,
+  const List<Vector<Rational> >& basis,
+  const Selection& signs,
+  DrawingVariables& output,
+  int& outputTotalPointsDrawn,
+  List<Vector<Rational> >* restrictingCone
+) const {
+  STACK_TRACE("Lattice::drawOnePoint");
+  if (outputTotalPointsDrawn >= this->maximumPointsToDraw) {
+    return;
+  }
+  Vector<Rational> toDraw;
+  toDraw.makeZero(this->getDimension());
+  for (int i = 0; i < inBasisCoordinates.size; i ++) {
+    Rational coefficient = inBasisCoordinates[i];
+    if (signs.selected[i]) {
+      coefficient *= - 1;
+    }
+    toDraw += basis[i] * coefficient;
+  }
+  for (const Vector<Rational>& wallNormal : *restrictingCone) {
+    if (wallNormal.scalarEuclidean(toDraw).isNegative()) {
+      return;
+    }
+  }
+  this->drawOnePointBase(toDraw, output, outputTotalPointsDrawn);
+}
+
+void Lattice::draw(
+  DrawingVariables& output, List<Vector<Rational> >* restrictingCone
+) const {
+  STACK_TRACE("Lattice::draw");
+  if (this->basisRationalForm.numberOfRows == 0) {
+    return;
+  }
+  Vector<Rational> currentDot;
+  int dimension = this->getDimension();
+  output.initializeDimensions(dimension);
+  output.makeMeAStandardBasis(dimension);
+  output.drawCoordinateSystemBuffer(dimension);
+  int totalPointsDrawn = 0;
+  this->drawOnePointBase(
+    Vector<Rational>({0, 0}), output, totalPointsDrawn
+  );
+  Vectors<Rational> generators;
+  this->basisRationalForm.getVectorsFromRows(generators);
+  SelectionWithMaximumMultiplicity selection;
+  for (int i = 1; i < 9; i ++) {
+    selection.initializeMaximumMultiplicity(generators.size, i);
+    while (selection.incrementSubsetFixedCardinality(i)) {
+      currentDot = selection;
+      this->drawOnePointWithSigns(
+        currentDot, generators, output, totalPointsDrawn, restrictingCone
+      );
+      if (totalPointsDrawn > this->maximumPointsToDraw) {
+        return;
+      }
+    }
+  }
 }

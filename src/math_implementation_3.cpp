@@ -3333,7 +3333,7 @@ int MathRoutines::binomialCoefficientMultivariate(
 
 void Selection::initialize(int inputNumberOfElements) {
   this->selected.initializeFillInObject(inputNumberOfElements, false);
-  this->elements.initializeFillInObject(inputNumberOfElements, 0);
+  this->elements.initializeFillInObject(inputNumberOfElements, - 1);
   this->numberOfElements = inputNumberOfElements;
   this->cardinalitySelection = 0;
 }
@@ -4563,7 +4563,7 @@ std::string PartialFractions::toLatexSelfContainedDocumentBody() const {
   std::stringstream out;
   out << "\\begin{table}[h!]\n";
   out << "\\begin{center}\n";
-  out << this->chambers.toLatexGraphicsOnlyPsTricks();
+  out << this->chambers.toLatexGraphicsOnlyPsTricks(false);
   out
   << "\\caption{Combinatorial chambers of "
   << this->toStringLabel()
@@ -4592,7 +4592,7 @@ std::string PartialFractions::toHTML() const {
   out << "\\(";
   out << this->toLatexPartialFractionDecomposition(&format, &format);
   out << "\\)";
-  out << this->chambers.toHTMLGraphicsOnly(false);
+  out << this->chambers.toHTMLGraphicsOnly(false, false);
   FormatExpressions formatQuasipolynomial;
   formatQuasipolynomial.flagUseFrac = true;
   for (int i = 0; i < this->chambers.refinedCones.size(); i ++) {
@@ -5545,7 +5545,7 @@ void SelectionWithMultiplicities::toString(std::string& output) {
   output = out.str();
 }
 
-void SelectionWithMaxMultiplicity::initMaxMultiplicity(
+void SelectionWithMaximumMultiplicity::initializeMaximumMultiplicity(
   int numberOfElements, int maximulMultiplicity
 ) {
   this->::SelectionWithMultiplicities::initWithMultiplicities(
@@ -5554,7 +5554,8 @@ void SelectionWithMaxMultiplicity::initMaxMultiplicity(
   this->maximumMultiplicity = maximulMultiplicity;
 }
 
-int::SelectionWithMaxMultiplicity::cardinalitySelectionWithMultiplicities() {
+int::SelectionWithMaximumMultiplicity::cardinalitySelectionWithMultiplicities()
+{
   int result = 0;
   for (int i = 0; i < this->multiplicities.size; i ++) {
     result += this->multiplicities[i];
@@ -5562,7 +5563,7 @@ int::SelectionWithMaxMultiplicity::cardinalitySelectionWithMultiplicities() {
   return result;
 }
 
-bool SelectionWithMaxMultiplicity::hasMultiplicitiesZeroAndOneOnly() {
+bool SelectionWithMaximumMultiplicity::hasMultiplicitiesZeroAndOneOnly() {
   for (int i = 0; i < this->elements.size; i ++) {
     if (this->multiplicities[elements[i]] > 1) {
       return false;
@@ -5571,14 +5572,14 @@ bool SelectionWithMaxMultiplicity::hasMultiplicitiesZeroAndOneOnly() {
   return true;
 }
 
-void SelectionWithMaxMultiplicity::incrementSubsetFixedCardinality(
+bool SelectionWithMaximumMultiplicity::incrementSubsetFixedCardinality(
   int cardinality
 ) {
   if (
     cardinality < 1 ||
     cardinality > this->maximumMultiplicity * this->multiplicities.size
   ) {
-    return;
+    return false;
   }
   if (this->cardinalitySelectionWithMultiplicities() != cardinality) {
     this->multiplicities.initializeFillInObject(
@@ -5595,7 +5596,7 @@ void SelectionWithMaxMultiplicity::incrementSubsetFixedCardinality(
       cardinality -= this->multiplicities[i];
     }
     this->computeElements();
-    return;
+    return true;
   }
   int firstNonZeroMult;
   int currentCardinality = cardinality;
@@ -5608,7 +5609,7 @@ void SelectionWithMaxMultiplicity::incrementSubsetFixedCardinality(
     }
   }
   if (firstNonZeroMult == 0) {
-    return;
+    return false;
   }
   currentCardinality -= this->multiplicities[firstNonZeroMult];
   this->multiplicities[firstNonZeroMult] = 0;
@@ -5639,18 +5640,18 @@ void SelectionWithMaxMultiplicity::incrementSubsetFixedCardinality(
     currentCardinality += this->multiplicities[i];
   }
   this->computeElements();
+  return true;
 }
 
-LargeInteger SelectionWithMaxMultiplicity::numberOfCombinationsOfCardinality(
-  int cardinality
-) {
+LargeInteger SelectionWithMaximumMultiplicity::
+numberOfCombinationsOfCardinality(int cardinality) {
   return
   MathRoutines::nChooseK(
     this->multiplicities.size + cardinality - 1, cardinality
   );
 }
 
-LargeInteger SelectionWithMaxMultiplicity::getTotalCombinationCount() const {
+LargeInteger SelectionWithMaximumMultiplicity::getTotalCombinationCount() const {
   // if (this->maximumMultiplicity == 0)
   //  return 1;
   LargeInteger result;
@@ -5660,12 +5661,12 @@ LargeInteger SelectionWithMaxMultiplicity::getTotalCombinationCount() const {
   return result;
 }
 
-bool SelectionWithMaxMultiplicity::incrementReturnFalseIfPastLast() {
+bool SelectionWithMaximumMultiplicity::incrementReturnFalseIfPastLast() {
   this->incrementSubset();
   return this->elements.size != 0;
 }
 
-void SelectionWithMaxMultiplicity::incrementSubset() {
+void SelectionWithMaximumMultiplicity::incrementSubset() {
   for (int i = this->multiplicities.size - 1; i >= 0; i --) {
     if (this->multiplicities[i] < this->maximumMultiplicity) {
       if (this->multiplicities[i] == 0) {
@@ -8807,7 +8808,7 @@ void WeylGroupData::getCoxeterPlane(
   outputBasis2.setSize(dimension);
   eigenSpace.operator=(eigenSpaceList);
   DrawingVariables tempDO;
-  tempDO.initDimensions(dimension);
+  tempDO.initializeDimensions(dimension);
   tempDO.graphicsUnit = DrawingVariables::graphicsUnitDefault;
   eigenSpace.operator=(eigenSpaceList);
   for (int i = 0; i < dimension; i ++) {
@@ -8864,7 +8865,7 @@ void WeylGroupData::drawRootSystem(
   this->computeRho(true);
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(dimension);
-  output.initDimensions(dimension);
+  output.initializeDimensions(dimension);
   output.graphicsUnit = DrawingVariables::graphicsUnitDefault;
   for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < dimension; j ++) {
@@ -11231,7 +11232,7 @@ bool Cone::checkConsistencyFull(const ConeCollection& owner) const {
         << " present more than once.<br>"
         << owner.toStringNeighborGraph()
         << "<br>"
-        << owner.toHTMLGraphicsOnly(false)
+        << owner.toHTMLGraphicsOnly(false, false)
         << owner.toHTMLHistory()
         << global.fatal;
       }
@@ -11250,7 +11251,7 @@ bool Cone::checkConsistencyFull(const ConeCollection& owner) const {
         << ".<br>All cone ids: "
         << owner.toStringConeIds()
         << "<br>"
-        << owner.toHTMLGraphicsOnly(true)
+        << owner.toHTMLGraphicsOnly(false, true)
         << "<br>"
         << owner.toHTMLHistory()
         << owner.toHTMLWithoutGraphics()
@@ -11676,8 +11677,8 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   std::string& outputError
 ) {
   this->initFromModuleDecomposition(decompositionDimensions, false, false);
-  SelectionWithMaxMultiplicity selection;
-  selection.initMaxMultiplicity(this->dimension, degree);
+  SelectionWithMaximumMultiplicity selection;
+  selection.initializeMaximumMultiplicity(this->dimension, degree);
   outputError = "";
   LargeInteger numberOfCycles =
   selection.numberOfCombinationsOfCardinality(degree);
@@ -11822,11 +11823,13 @@ std::string ConeCollection::drawMeToHtmlLastCoordAffine(
 }
 
 std::string ConeCollection::drawMeToHtmlProjective(
-  DrawingVariables& drawingVariables, bool generateControls
+  DrawingVariables& drawingVariables,
+  bool includeLattice,
+  bool generateControls
 ) const {
   STACK_TRACE("ConeCollection::drawMeToHtmlProjective");
   bool isGood = true;
-  isGood = this->drawMeProjective(drawingVariables);
+  isGood = this->drawMeProjective(drawingVariables, includeLattice);
   std::stringstream out;
   if (this->refinedCones.size() > this->maximumCones) {
     out
@@ -11856,11 +11859,9 @@ bool ConeCollection::drawMeLastCoordinateAffine(
   this->checkIsRefinedOrCrash();
   bool result = true;
   if (initializeDrawingVariables) {
-    drawingVariables.initDimensions(this->getDimension() - 1);
+    drawingVariables.initializeDimensions(this->getDimension() - 1);
   }
-  drawingVariables.drawCoordinateSystemBuffer(
-    drawingVariables, this->getDimension() - 1
-  );
+  drawingVariables.drawCoordinateSystemBuffer(this->getDimension() - 1);
   for (int i = 0; i < this->refinedCones.size(); i ++) {
     if (
       !this->refinedCones[i].drawMeLastCoordinateAffine(
@@ -11886,7 +11887,7 @@ bool ConeCollection::drawMeProjectiveInitialize(
   STACK_TRACE("ConeCollection::drawMeProjectiveInitialize");
   Matrix<Rational> matrix;
   drawingVariables.initialize();
-  drawingVariables.initDimensions(this->getDimension());
+  drawingVariables.initializeDimensions(this->getDimension());
   drawingVariables.makeMeAStandardBasis(this->getDimension());
   Vectors<Rational> roots;
   Vector<Rational> point;
@@ -11916,7 +11917,7 @@ bool ConeCollection::drawMeProjectiveInitialize(
 }
 
 bool ConeCollection::drawProjectiveChambers(
-  DrawingVariables& drawingVariables
+  DrawingVariables& drawingVariables, bool includeLattice
 ) const {
   bool result = true;
   List<const List<Cone>*> coneCollectionsToPlot = List<const List<Cone>*>({
@@ -11928,6 +11929,13 @@ bool ConeCollection::drawProjectiveChambers(
   if (this->refinedCones.size() > this->maximumCones) {
     // Too many cones to draw;
     return true;
+  }
+  if (includeLattice) {
+    for (const List<Cone> * collection : coneCollectionsToPlot) {
+      for (Cone& cone : *collection) {
+        cone.drawLattice(drawingVariables);
+      }
+    }
   }
   for (const List<Cone> * collection : coneCollectionsToPlot) {
     for (Cone& cone : *collection) {
@@ -11942,17 +11950,18 @@ bool ConeCollection::drawProjectiveChambers(
   return result;
 }
 
-bool ConeCollection::drawMeProjective(DrawingVariables& drawingVariables) const {
+bool ConeCollection::drawMeProjective(
+  DrawingVariables& drawingVariables, bool includeLattice
+) const {
   STACK_TRACE("ConeCollection::drawMeProjective");
   bool result = true;
   if (this->getDimension() <= 1) {
     return false;
   }
   this->drawMeProjectiveInitialize(drawingVariables);
-  drawingVariables.drawCoordinateSystemBuffer(
-    drawingVariables, this->getDimension()
-  );
-  result = result && this->drawProjectiveChambers(drawingVariables);
+  drawingVariables.drawCoordinateSystemBuffer(this->getDimension());
+  result = result &&
+  this->drawProjectiveChambers(drawingVariables, includeLattice);
   for (Vector<Rational> vertex : this->slicingDirections) {
     vertex /= vertex.sumCoordinates();
     drawingVariables.drawCircleAtVectorBufferRational(vertex, "blue", 3);
@@ -12095,9 +12104,7 @@ std::string Cone::drawMeToHtmlLastCoordAffine(
   drawingVariables.makeMeAStandardBasis(this->getDimension() - 1);
   bool foundBadVertex =
   this->drawMeLastCoordinateAffine(false, drawingVariables, format);
-  drawingVariables.drawCoordinateSystemBuffer(
-    drawingVariables, this->getDimension() - 1
-  );
+  drawingVariables.drawCoordinateSystemBuffer(this->getDimension() - 1);
   if (foundBadVertex) {
     out << "<br>The cone does not lie in the upper half-space. ";
   } else {
@@ -12130,7 +12137,18 @@ void Cone::computeRescaledVerticesForDrawing(Vectors<Rational>& output) const {
   }
 }
 
+void Cone::drawLattice(DrawingVariables& drawingVariables) const {
+  STACK_TRACE("Cone::drawLattice");
+  const QuasiPolynomial& polynomial = this->payload.getPolynomial();
+  if (polynomial.isEqualToZero()) {
+    return;
+  }
+  Vectors<Rational> allNormals = this->getAllNormals();
+  polynomial.ambientLatticeReduced.draw(drawingVariables, &allNormals);
+}
+
 bool Cone::drawMeProjectiveVertices(DrawingVariables& drawingVariables) const {
+  STACK_TRACE("Cone::drawMeProjectiveVertices");
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(this->getDimension());
   Vectors<Rational> verticesScaled;
@@ -12210,9 +12228,7 @@ std::string Cone::drawMeToHtmlProjective(
   }
   drawingVariables.makeMeAStandardBasis(this->getDimension());
   this->drawMeProjective(drawingVariables);
-  drawingVariables.drawCoordinateSystemBuffer(
-    drawingVariables, this->getDimension()
-  );
+  drawingVariables.drawCoordinateSystemBuffer(this->getDimension());
   out << drawingVariables.getHTMLDiv(this->getDimension(), false, true);
   out << "<br>" << this->toString(&format);
   return out.str();
@@ -12385,8 +12401,8 @@ bool Cone::getLatticePointsInCone(
   if (lastCoordinateIsOne) {
     dimensionAffine --;
   }
-  SelectionWithMaxMultiplicity boundingBox;
-  boundingBox.initMaxMultiplicity(
+  SelectionWithMaximumMultiplicity boundingBox;
+  boundingBox.initializeMaximumMultiplicity(
     dimensionAffine, upperBoundPointsInEachDim* 2
   );
   // format of the boundingBox:
@@ -13978,7 +13994,7 @@ void ConeCollection::addHistoryPoint() {
   << "<hr>"
   << this->toStringNeighborGraph()
   << "<br>"
-  << this->toHTMLGraphicsOnly(false);
+  << this->toHTMLGraphicsOnly(false, false);
   this->historyHTML.addOnTop(out.str());
 }
 
@@ -15512,27 +15528,33 @@ const {
   return out.str();
 }
 
-std::string ConeCollection::toLatexGraphicsOnlyPsTricks() const {
+std::string ConeCollection::toLatexGraphicsOnlyPsTricks(bool includeLattice)
+const {
   STACK_TRACE("ConeCollection::toLatexGraphicsOnlyPsTricks");
   std::stringstream out;
   DrawingVariables drawingVariables;
-  if (!this->drawMeProjective(drawingVariables)) {
+  if (!this->drawMeProjective(drawingVariables, includeLattice)) {
     return "";
   }
   out << drawingVariables.toLatexPsTricks();
   return out.str();
 }
 
-std::string ConeCollection::toHTMLGraphicsOnly(bool includePanels) const {
+std::string ConeCollection::toHTMLGraphicsOnly(
+  bool includePanels, bool includeLattice
+) const {
   DrawingVariables drawingVariables;
   FormatExpressions format;
-  return this->drawMeToHtmlProjective(drawingVariables, includePanels);
+  return
+  this->drawMeToHtmlProjective(
+    drawingVariables, includeLattice, includePanels
+  );
 }
 
 std::string ConeCollection::toHTML() const {
   STACK_TRACE("ConeCollection::toHTML");
   std::stringstream out;
-  out << this->toHTMLGraphicsOnly(true);
+  out << this->toHTMLGraphicsOnly(true, false);
   out << this->toHTMLWithoutGraphics();
   return out.str();
 }

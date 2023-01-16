@@ -85,7 +85,7 @@ void RootSubalgebra::getCoxeterPlane(
   Vectors<Complex<double> > eigenSpace;
   eigenSpace.operator=(eigenSpaceList);
   DrawingVariables drawingVariables;
-  drawingVariables.initDimensions(dimension);
+  drawingVariables.initializeDimensions(dimension);
   for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < dimension; j ++) {
       drawingVariables.bilinearForm.elements[i][j] =
@@ -1204,7 +1204,7 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
   Vectors<Rational>& nilradicalRoots
 ) {
   Vector<Rational> root, accumulator;
-  SelectionWithMaxMultiplicity selection;
+  SelectionWithMaximumMultiplicity selection;
   Vectors<Rational> chosenAlphas;
   int rank = this->getOwnerLieAlgebra().getRank();
   DynkinDiagramRootSubalgebra diagram;
@@ -1212,7 +1212,7 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
     int i = 2; i <= MathRoutines::maximum(highestWeightsAllowed.size, rank); i
     ++
   ) {
-    selection.initMaxMultiplicity(highestWeightsAllowed.size, i);
+    selection.initializeMaximumMultiplicity(highestWeightsAllowed.size, i);
     LargeInteger numberOfElements =
     selection.numberOfCombinationsOfCardinality(i);
     for (int j = 0; j < numberOfElements; j ++) {

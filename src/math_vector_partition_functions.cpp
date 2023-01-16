@@ -27,6 +27,7 @@ VectorPartitionFunctionElementary::VectorPartitionFunctionElementary() {
 }
 
 std::string VectorPartitionFunctionElementary::toHTML() const {
+  STACK_TRACE("VectorPartitionFunctionElementary::toHTML");
   if (!this->flagInitialized) {
     return "";
   }
@@ -47,7 +48,7 @@ std::string VectorPartitionFunctionElementary::toHTML() const {
     !this->comments.flagGenerateComments ||
     this->comments.totalSteps > this->comments.maximumStepsToRecord
   ) {
-    out << this->collection.toHTMLGraphicsOnly(false);
+    out << this->collection.toHTMLGraphicsOnly(true, true);
   }
   for (Cone& cone : this->collection.refinedCones.values) {
     out << "<hr>";
@@ -65,10 +66,10 @@ void VectorPartitionFunctionElementary::compute() {
   for (int i = 0; i < this->originalVectors.size; i ++) {
     this->collection.markAllConesNonRefined(i);
     this->collection.refineByOneDirection(i, &report);
+    this->computeQuasiPolynomials(i);
     if (i >= this->collection.getDimension() - 1) {
       this->comments.addGraphicsIfAllowed();
     }
-    this->computeQuasiPolynomials(i);
     this->comments.comments.addOnTop("<hr><hr>");
   }
 }
@@ -123,11 +124,12 @@ bool VectorPartitionFunctionElementary::computeStartingQuasipolynomial(
     output.ambientLatticeReduced.makeZn(this->collection.getDimension());
     cone.payload.setPolynomial(output);
     if (this->comments.shouldComment()) {
-      this->comments.comments.addOnTop(((std::string) "Zero quasipolynomial: "
-        ) +
-        "the cone is outside of the span of " +
-        firstDirections.toString()
-      );
+      std::stringstream out;
+      out
+      << "Zero quasipolynomial: "
+      << "the cone is outside of the span of "
+      << firstDirections.toString();
+      this->comments.comments.addOnTop(out.str());
     }
     return true;
   }
@@ -157,6 +159,7 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
   ) {
     return false;
   }
+  this->comments.addChamberLabel(cone.id, direction);
   if (exitWalls.size > 1) {
     global.fatal
     << "At this point of code, a maximum of 1 exit walls is expected."
@@ -476,6 +479,21 @@ void VectorPartitionFunctionElementary::Comments::initialize(
   this->owner = inputOwner;
 }
 
+void VectorPartitionFunctionElementary::Comments::addChamberLabel(
+  int id, const Vector<Rational>& direction
+) {
+  if (!this->shouldComment()) {
+    return;
+  }
+  std::stringstream out;
+  out
+  << "<hr>Computing cone id: "
+  << id
+  << ", direction: "
+  << direction.toString();
+  this->comments.addOnTop(out.str());
+}
+
 void VectorPartitionFunctionElementary::Comments::addGraphicsIfAllowed() {
   int largestId = this->owner->collection.largestConeId();
   if (largestId == this->largestIdWithGeneratedGraphics) {
@@ -483,7 +501,7 @@ void VectorPartitionFunctionElementary::Comments::addGraphicsIfAllowed() {
   }
   this->largestIdWithGeneratedGraphics = largestId;
   this->comments.addOnTop(
-    this->owner->collection.toHTMLGraphicsOnly(false)
+    this->owner->collection.toHTMLGraphicsOnly(true, true)
   );
 }
 

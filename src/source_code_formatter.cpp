@@ -4353,6 +4353,20 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if (
+    thirdToLast.type == CodeFormatter::Element::FunctionDeclaration &&
+    secondToLast.type == CodeFormatter::Element::Colon &&
+    last.type == CodeFormatter::Element::FunctionWithArguments
+  ) {
+    this->lastRuleName = "functionDeclaration colon functionWithArguments";
+    thirdToLast.makeFrom3(
+      CodeFormatter::Element::FunctionDeclaration,
+      thirdToLast,
+      secondToLast,
+      last
+    );
+    return this->removeLast(2);
+  }
+  if (
     secondToLast.type == CodeFormatter::Element::TypeAndIdentifier &&
     last.isParenthesesBlock()
   ) {

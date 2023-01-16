@@ -569,12 +569,12 @@ public:
 private:
   friend class ListZeroAfterUse<Object>;
   void expandArrayOnTop(int increase);
-  template <class compareClass, class carbonCopyType>
+  template <class CompareClass, class CarbonCopyType>
   bool quickSortAscendingCustomRecursive(
     int bottomIndex,
     int topIndex,
-    compareClass& comparator,
-    List<carbonCopyType>* carbonCopy
+    CompareClass& comparator,
+    List<CarbonCopyType>* carbonCopy
   );
   void quickSortDescending(int bottomIndex, int topIndex);
   inline void initConstructorCallOnly() {
@@ -1875,12 +1875,12 @@ std::ostream& operator<<(
 }
 
 template <class Object>
-template <class compareClass, class carbonCopyType>
+template <class CompareClass, class CarbonCopyType>
 bool List<Object>::quickSortAscendingCustomRecursive(
   int bottomIndex,
   int topIndex,
-  compareClass& comparator,
-  List<carbonCopyType>* carbonCopy
+  CompareClass& comparator,
+  List<CarbonCopyType>* carbonCopy
 ) {
   if (topIndex <= bottomIndex) {
     return true;

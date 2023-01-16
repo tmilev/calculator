@@ -205,7 +205,7 @@ public:
     int fontSize,
     int textStyle
   );
-  void drawCoordinateSystemBuffer(DrawingVariables& variables, int dimension);
+  void drawCoordinateSystemBuffer(int dimension);
   void drawLineDirectly(
     double x1,
     double y1,
@@ -278,17 +278,17 @@ public:
   void computeBoundingBox();
   void makeMeAStandardBasis(int dimension);
   void operator+=(const DrawingVariables& other);
-  void initDimensions(
+  void initializeDimensions(
     Matrix<double>& bilinearForm,
     Vectors<double>& draggableBasis,
     Vectors<double>& startingPlane
   );
-  void initDimensions(
+  void initializeDimensions(
     Matrix<Rational>& bilinearForm,
     Vectors<double>& draggableBasis,
     Vectors<double>& startingPlane
   );
-  void initDimensions(int dimension);
+  void initializeDimensions(int dimension);
   int getDimensionFromBilinearForm();
   void getCoordinatesDrawingComputeAll(
     Vector<double>& input, double& x1, double& y1

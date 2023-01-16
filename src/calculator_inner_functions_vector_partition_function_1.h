@@ -109,6 +109,9 @@ public:
   static bool kostantPartitionFunctionLatex(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool plotLatticeRestricted(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
 };
 
 #endif // header_calculator_inner_functions_vector_partition_function_1_ALREADY_INCLUDED

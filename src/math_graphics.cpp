@@ -34,13 +34,11 @@ void DrawingVariables::initDrawingVariables() {
   this->defaultHtmlWidth = 400;
   this->fontSizeNormal = 10;
   this->initialize();
-  this->initDimensions(2);
+  this->initializeDimensions(2);
   this->flagAnimatingMovingCoordSystem = false;
 }
 
-void DrawingVariables::drawCoordinateSystemBuffer(
-  DrawingVariables& variables, int dimension
-) {
+void DrawingVariables::drawCoordinateSystemBuffer(int dimension) {
   STACK_TRACE("DrawingVariables::drawCoordinateSystemBuffer");
   Vector<Rational> unitVector;
   Vector<Rational> zeroRoot;
@@ -49,7 +47,7 @@ void DrawingVariables::drawCoordinateSystemBuffer(
     unitVector.makeEi(dimension, i);
     std::string label;
     label = unitVector.toString();
-    variables.drawLineBetweenTwoVectorsBufferRational(
+    this->drawLineBetweenTwoVectorsBufferRational(
       zeroRoot,
       unitVector,
       "black",
@@ -57,10 +55,10 @@ void DrawingVariables::drawCoordinateSystemBuffer(
       DrawOptions::PenStyle::dashed,
       "axes"
     );
-    variables.drawTextAtVectorBufferRational(unitVector, label, "black");
-    variables.drawCircleAtVectorBufferRational(unitVector, "black", 4);
+    this->drawTextAtVectorBufferRational(unitVector, label, "black");
+    this->drawCircleAtVectorBufferRational(unitVector, "black", 4);
   }
-  variables.basisToDrawCirclesAt.makeEiBasis(dimension);
+  this->basisToDrawCirclesAt.makeEiBasis(dimension);
 }
 
 void DrawingVariables::drawTextAtVectorBufferDouble(
@@ -506,7 +504,7 @@ void DrawingVariables::getCoordinatesForDrawingProjectionsComputed(
   y2 = y2 * this->graphicsUnit + this->centerY;
 }
 
-void DrawingVariables::initDimensions(
+void DrawingVariables::initializeDimensions(
   Matrix<double>& bilinearForm,
   Vectors<double>& draggableBasis,
   Vectors<double>& startingPlane
@@ -546,7 +544,7 @@ void DrawingVariables::accountBoundingBox(const Vector<double>& input) {
   );
 }
 
-void DrawingVariables::initDimensions(
+void DrawingVariables::initializeDimensions(
   Matrix<Rational>& bilinearForm,
   Vectors<double>& draggableBasis,
   Vectors<double>& startingPlane
@@ -560,7 +558,7 @@ void DrawingVariables::initDimensions(
       matrix.elements[i][j] = bilinearForm.elements[i][j].getDoubleValue();
     }
   }
-  this->initDimensions(matrix, draggableBasis, startingPlane);
+  this->initializeDimensions(matrix, draggableBasis, startingPlane);
 }
 
 void DrawingVariables::computeBoundingBox() {
@@ -569,7 +567,7 @@ void DrawingVariables::computeBoundingBox() {
   }
 }
 
-void DrawingVariables::initDimensions(int dimension) {
+void DrawingVariables::initializeDimensions(int dimension) {
   if (dimension < 2) {
     dimension = 2;
   }

@@ -311,6 +311,25 @@ void Calculator::initializeFunctionsVectorPartitionFunctions() {
     innerStandard
   );
   this->addOperationHandler(
+    "PlotLatticeRestricted",
+    CalculatorFunctionsVectorPartitionFunction::plotLatticeRestricted,
+    "",
+    "Plots a lattice. "
+    "The first argument must be a lattice. "
+    "The second optional argument is a list of the normals "
+    "of a restricting cone. All points in the lattice whose scalar "
+    "product with any of the restricting vectors is zero will be omitted. ",
+    "l = Lattice((1,1,0), (0,2,0), (0,0,1));\n"
+    "PlotLatticeRestricted(l);\n"
+    "m = Lattice((1,1), (0,2));\n"
+    "PlotLatticeRestricted(m,((1,0), (0,1)) );\n"
+    "PlotLatticeRestricted(m,((-1,1), (1,0)) );\n",
+    "CalculatorFunctionsVectorPartitionFunction"
+    "::plotLatticeRestricted",
+    "PlotLatticeRestricted",
+    innerStandard
+  );
+  this->addOperationHandler(
     "KostantPartitionFunctionsLatex",
     CalculatorFunctionsVectorPartitionFunction::kostantPartitionFunctionLatex,
     "",

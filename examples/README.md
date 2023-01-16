@@ -4672,6 +4672,21 @@ Sequence{}1,Sequence{}2,Sequence{}3,Sequence{}4)
 ```
 Work in progress. Vector partition function formula. 
 
+*VectorPartitionFunctionWithDetails* [VectorPartitionFunctionWithDetails] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunctionWithDetails%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+VectorPartitionFunctionWithDetails(
+(1,0,0),
+(0,1,0),
+(0,0,1),
+(1,1,0),
+(0,1,1),
+(1,1,1)
+);
+
+```
+Computes the vector partition function. Shows all the internals of the computation, if those are not too long. 
+
 *VectorPartitionFunctionElementary* [VectorPartitionFunctionElementary] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormulaElementary}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunctionElementary%28%5cn%281%2c1%29%2c%5cn%281%2c0%29%2c%5cn%280%2c1%29%5cn%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
@@ -4699,7 +4714,7 @@ ConeDecompositionWithHistory(
 Same as ConeDecomposition but shows the history of which slices were made to get the decomposition.
 
 *ConeDecomposition* [ConeDecomposition] {CalculatorFunctionsVectorPartitionFunction::coneDecompositionSpannedSlicesNoHistory}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecomposition%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecomposition%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cnConeDecomposition%28G_2%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 ConeDecomposition(
 (1,0,0),
@@ -4709,10 +4724,17 @@ ConeDecomposition(
 (0,1,1),
 (1,1,1)
 );
+ConeDecomposition(G_2);
 
 ```
-Work in progress. 
-Cone decomposition related to a vector partition function. Uses only slicing plances spanned by n-1 vectors. 
+Cone decomposition related to a vector partition function. Uses only slicing plances spanned by n-1 vectors. If you use a single argument that is a Dynkin type, this function automatically computes the cone decomposition with respect to the positve roots of the type. Works up to type B_4. Larger types will be rejected as their computation run time is measured in hours or worse.
+
+*ConeDecompositionWithoutAmalgamation* [ConeDecompositionWithoutAmalgamation] {CalculatorFunctionsVectorPartitionFunction::coneDecompositionSpannedSlicesNoHistoryNoAmalgamation}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecomposition%28D_4%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+ConeDecomposition(D_4);
+```
+A faster version of ConeDecomposition that produces possibly finer (more) chambers than are actually needed. Runs considerably faster.
 
 *ConeDecompositionArbitrarySlices* [ConeDecompositionArbitrarySlices] {CalculatorFunctionsVectorPartitionFunction::coneDecompositionArbitrarySlices}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecompositionArbitrarySlices%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4727,8 +4749,22 @@ ConeDecompositionArbitrarySlices(
 );
 
 ```
-Work in progress. 
 Cone decomposition related to a vector partition function. Unlike ConeDecomposition, this decomposition uses arbitrary combinatorial chamber walls.
+
+*ConeDecompositionArbitrarySlicesWithHistory* [ConeDecompositionArbitrarySlicesWithHistory] {CalculatorFunctionsVectorPartitionFunction::coneDecompositionArbitrarySlicesWithHistory}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ConeDecompositionArbitrarySlicesWithHistory%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+ConeDecompositionArbitrarySlicesWithHistory(
+(1,0,0),
+(0,1,0),
+(0,0,1),
+(1,1,0),
+(0,1,1),
+(1,1,1)
+);
+
+```
+Same as ConeDecompositionArbitrarySlices but prints out the intermediate steps. 
 
 *BernoulliSum* [BernoulliSum] {CalculatorFunctionsVectorPartitionFunction::bernouliSum}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22p%3d3%3b%5cnN%3d100%3b%5cnB%3dBernoulliSum%28p%2cn%29%3b%5cnf%7b%7d0%3d%200%3b%5cnf%7b%7d%7b%7bn%7d%7d%20%3d%20n%5ep%2bf%7b%7d%28n-1%29%3b%5cnf%7b%7dN%3b%5cn%28n%3dN%3bB%29_2%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4776,6 +4812,54 @@ l = Lattice((1,2,3), (2,2,2), (3,3,9));
 DualLattice(l)
 ```
 Computes the dual lattice of a given lattice. The dual of the lattice is the lattice of vectors with integral scalar products with the given vectors. 
+
+*ReduceModLattice* [ReduceModLattice] {CalculatorFunctionsVectorPartitionFunction::reduceModuloLattice}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22l%20%3d%20Lattice%28%281%2c2%2c3%29%2c%20%282%2c2%2c2%29%2c%20%283%2c3%2c9%29%29%3b%5cnReduceModLattice%28%281%2c1%2c1%29%2cl%29%3b%5cnReduceModLattice%28%281%2f2%2c1%2f3%2c1%2f4%29%2cl%29%3b%5cnReduceModLattice%28%281%2c2%29%2cl%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+l = Lattice((1,2,3), (2,2,2), (3,3,9));
+ReduceModLattice((1,1,1),l);
+ReduceModLattice((1/2,1/3,1/4),l);
+ReduceModLattice((1,2),l);
+
+```
+Reduces a vector modulo a lattice. First argument: vector. Second argument: lattice. 
+
+*QuotientLatticeRepresentatives* [QuotientLatticeRepresentatives] {CalculatorFunctionsVectorPartitionFunction::quotientLatticeRepresentatives}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22l%20%3d%20Lattice%28%281%2c0%2c0%29%2c%20%280%2c1%2c0%29%2c%20%280%2c0%2c1%29%29%3b%5cnm%20%3d%20Lattice%28%281%2c2%2c3%29%2c%20%282%2c2%2c2%29%2c%20%283%2c3%2c9%29%29%3b%5cnQuotientLatticeRepresentatives%28l%2cm%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+l = Lattice((1,0,0), (0,1,0), (0,0,1));
+m = Lattice((1,2,3), (2,2,2), (3,3,9));
+QuotientLatticeRepresentatives(l,m)
+```
+Computes all representatives of a quotient lattice L/M. Both arguments must be lattices. 
+
+*PlotLatticeRestricted* [PlotLatticeRestricted] {CalculatorFunctionsVectorPartitionFunction::plotLatticeRestricted}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22l%20%3d%20Lattice%28%281%2c1%2c0%29%2c%20%280%2c2%2c0%29%2c%20%280%2c0%2c1%29%29%3b%5cnPlotLatticeRestricted%28l%29%3b%5cnm%20%3d%20Lattice%28%281%2c1%29%2c%20%280%2c2%29%29%3b%5cnPlotLatticeRestricted%28m%2c%28%281%2c0%29%2c%20%280%2c1%29%29%20%29%3b%5cnPlotLatticeRestricted%28m%2c%28%28-1%2c1%29%2c%20%281%2c0%29%29%20%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+l = Lattice((1,1,0), (0,2,0), (0,0,1));
+PlotLatticeRestricted(l);
+m = Lattice((1,1), (0,2));
+PlotLatticeRestricted(m,((1,0), (0,1)) );
+PlotLatticeRestricted(m,((-1,1), (1,0)) );
+
+```
+Plots a lattice. The first argument must be a lattice. The second optional argument is a list of the normals of a restricting cone. All points in the lattice whose scalar product with any of the restricting vectors is zero will be omitted. 
+
+*KostantPartitionFunctionsLatex* [KostantPartitionFunctionsLatex] {CalculatorFunctionsVectorPartitionFunction::kostantPartitionFunctionLatex}. (admin only) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22KostantPartitionFunctionsLatex%28%5cna_2%2c%5cnb_2%2c%5cnc_2%2c%5cng_2%2c%5cna_3%2c%5cnb_3%2c%5cnc_3%2c%5cna_4%5cn%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+KostantPartitionFunctionsLatex(
+a_2,
+b_2,
+c_2,
+g_2,
+a_3,
+b_3,
+c_3,
+a_4
+)
+```
+Requires a logged-in admin to use. Acts similarly to the VectorPartitionFunction but 1) displays latex only, 2) acts on Dynkin types only and 3) allows multiple dynkin type inputs producing a single chunk of latex output. This function is needed for the internal documentation of our algorithms, use VectorPartitionFunction directly instead. 
 
 *SemisimpleLieAlgebra* [SemisimpleLieAlgebra] {CalculatorConversions::semisimpleLieAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28SemisimpleLieAlgebra%7b%7dG_2%2c%20i%29%3b%5cn%5bg_1%2cg_%7b-%201%7d%5d%3b%20%5cn%5bg_2%2c%20g_%7b-2%7d%5d%3b%20%5cn%5bh_%7b1%7d%2c%20g_6%5d%3b%20%5cn%5bh_2%2c%20g_%7b-6%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)

@@ -23,15 +23,19 @@ class Vector: public List<Coefficient> {
   );
 public:
   Vector() {}
-  Vector(const Vector<Coefficient>& other): List<Coefficient>(other) {
+  Vector(const Vector<Coefficient>& other): List<Coefficient>(other) {}
+  template <class OtherCoefficient>
+  Vector(const Vector<OtherCoefficient>& other):
+  List<Coefficient>() {
     *this = other;
   }
-  template <class otherCoeff>
-  Vector(const Vector<otherCoeff>& other) {
+  Vector(const Selection& other): List<Coefficient>() {
     *this = other;
   }
-  Vector(const Selection& other) {
-    *this = other;
+  template <class OtherCoefficient>
+  Vector(const std::initializer_list<OtherCoefficient>& input):
+  List<Coefficient>() {
+    *this = List<OtherCoefficient>(input);
   }
   std::string toString(FormatExpressions* format = nullptr) const {
     std::stringstream out;
@@ -94,15 +98,15 @@ public:
   }
   template <class otherType>
   static void scalarProduct(
-    const Vector<Coefficient>& r1,
-    const Vector<Coefficient>& r2,
+    const Vector<Coefficient>& v1,
+    const Vector<Coefficient>& v2,
     const Matrix<otherType>& bilinearForm,
     Coefficient& result
   ) {
     if (
-      r1.size != bilinearForm.numberOfRows ||
-      r1.size != r2.size ||
-      r1.size != bilinearForm.numberOfColumns
+      v1.size != bilinearForm.numberOfRows ||
+      v1.size != v2.size ||
+      v1.size != bilinearForm.numberOfColumns
     ) {
       global.fatal
       << "Attempt to take "
@@ -112,9 +116,9 @@ public:
       << bilinearForm.numberOfColumns
       << " columns "
       << "of vectors of dimension "
-      << r1.size
+      << v1.size
       << " and "
-      << r2.size
+      << v2.size
       << ". "
       << global.fatal;
     }
@@ -124,11 +128,11 @@ public:
     for (int i = 0; i < bilinearForm.numberOfRows; i ++) {
       rowAccumulator = 0;
       for (int j = 0; j < bilinearForm.numberOfColumns; j ++) {
-        summand = r2[j];
+        summand = v2[j];
         summand *= bilinearForm.elements[i][j];
         rowAccumulator += summand;
       }
-      rowAccumulator *= r1[i];
+      rowAccumulator *= v1[i];
       result += rowAccumulator;
     }
   }

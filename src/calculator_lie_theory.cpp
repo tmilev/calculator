@@ -1794,10 +1794,10 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
   Selection invertedSelInducing = selInducing;
   invertedSelInducing.invertSelection();
   highestWeights.setSize(0);
-  SelectionWithMaxMultiplicity highestWeightEnumerator;
+  SelectionWithMaximumMultiplicity highestWeightEnumerator;
   Vector<Polynomial<Rational> > highestWeightRationalFunction;
   for (int j = 0; j <= desiredHeight; j ++) {
-    highestWeightEnumerator.initMaxMultiplicity(
+    highestWeightEnumerator.initializeMaximumMultiplicity(
       rank - selInducing.cardinalitySelection, j
     );
     highestWeightEnumerator.incrementSubsetFixedCardinality(j);
@@ -2401,7 +2401,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCommon(
 ) {
   STACK_TRACE("CalculatorLieTheory::printB3G2branchingTableCommon");
   Vector<RationalFraction<Rational> > highestWeightRationalFraction;
-  SelectionWithMaxMultiplicity highestWeightEnumerator;
+  SelectionWithMaximumMultiplicity highestWeightEnumerator;
   int desiredHeight = 0;
   if (
     !CalculatorLieTheory::printB3G2branchingTableInit(
@@ -2418,7 +2418,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCommon(
   invertedSelInducing.invertSelection();
   outputHighestWeights.setSize(0);
   for (int j = 0; j <= desiredHeight; j ++) {
-    highestWeightEnumerator.initMaxMultiplicity(
+    highestWeightEnumerator.initializeMaximumMultiplicity(
       3 - g2InB3Data.inducing.cardinalitySelection, j
     );
     highestWeightEnumerator.incrementSubsetFixedCardinality(j);

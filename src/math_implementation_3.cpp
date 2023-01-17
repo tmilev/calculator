@@ -15584,7 +15584,7 @@ const {
   if (!this->drawMeProjective(drawingVariables, includeLattice)) {
     return "";
   }
-  out << "{\tiny\n";
+  out << "{\\tiny\n";
   out << drawingVariables.toLatexPsTricks();
   out << "}\n";
   return out.str();

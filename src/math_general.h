@@ -2361,6 +2361,9 @@ public:
   std::string getPolynomialLetter(int index) const;
   FormatExpressions();
   static FormatExpressions* defaultFormat();
+  void makePolynomialAlphabetLetters(
+    const std::string& inputDefaultLetter, int letterCount
+  );
   void makeAlphabetXYZUW();
 };
 
@@ -3724,9 +3727,9 @@ public:
       this->objects[i].makeZero(numberOfVariables);
     }
   }
-  std::string toString(int numberOfDisplayedElementsMinus1ForAll = - 1) const {
+  std::string toString(FormatExpressions* format = nullptr) const {
     std::string result;
-    this->toString(result, numberOfDisplayedElementsMinus1ForAll);
+    this->toString(result, format);
     return result;
   }
   bool operator==(const PolynomialSubstitution& right);
@@ -3737,19 +3740,16 @@ public:
     rescaled.assignMatrixIntegerWithDenominator(matrix, denominator);
     this->makeLinearSubstitutionConstantTermsLastRow(rescaled);
   }
-  void toString(std::string& output, int displayedElementsMinus1ForAll) const {
+  void toString(std::string& output, FormatExpressions* format) const {
     std::stringstream out;
     output.clear();
-    FormatExpressions polynomialFormatLocal;
-    if (displayedElementsMinus1ForAll == - 1) {
-      displayedElementsMinus1ForAll = this->size;
-    }
     for (int i = 0; i < this->size; i ++) {
-      out
-      << "x_{"
-      << i + 1
-      << "} \\mapsto "
-      << this->objects[i].toString(&polynomialFormatLocal);
+      if (format != nullptr) {
+        out << format->getPolynomialLetter(i);
+      } else {
+        out << "x_{" << i + 1 << "}";
+      }
+      out << "\\mapsto " << this->objects[i].toString(format);
       if (i != this->size - 1) {
         out << ", ";
       }

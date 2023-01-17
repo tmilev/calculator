@@ -3550,6 +3550,23 @@ unsigned int HashFunctions::hashFunction(const Selection& input) {
   return input.hashFunction();
 }
 
+void FormatExpressions::makePolynomialAlphabetLetters(
+  const std::string& inputDefaultLetter, int letterCount
+) {
+  this->polynomialAlphabet.clear();
+  for (int i = 0; i < letterCount; i ++) {
+    std::stringstream out;
+    out << inputDefaultLetter << "_";
+    int index = i + 1;
+    if (index < 10) {
+      out << index;
+    } else {
+      out << "{" << index << "}";
+    }
+    this->polynomialAlphabet.addOnTop(out.str());
+  }
+}
+
 void FormatExpressions::makeAlphabetXYZUW() {
   if (this->polynomialAlphabet.size > 0) {
     return;
@@ -4498,14 +4515,39 @@ std::string PartialFractions::toLatexOneQuasipolynomialInTable(
   }
   MapList<Polynomial<Rational>, List<Vector<Rational> > > combinedShifts;
   input.combineLatticeShifts(combinedShifts);
+  Polynomial<Rational> commonPart = combinedShifts.keys[0];
+  for (const Polynomial<Rational>& other : combinedShifts.keys) {
+    Polynomial<Rational> difference = commonPart - other;
+    for (const MonomialPolynomial& monomial : difference.monomials) {
+      commonPart.subtractMonomial(
+        monomial, commonPart.getCoefficientOf(monomial)
+      );
+    }
+  }
   for (int i = 0; i < combinedShifts.size(); i ++) {
     const Polynomial<Rational>& polynomial = combinedShifts.keys[i];
     const List<Vector<Rational> >& shifts = combinedShifts.values[i];
-    out
-    << "&"
-    << "\\("
-    << polynomial.toStringWithPossibleLineBreak(format)
-    << "\\)";
+    out << "&";
+    out << "\\(";
+    if (combinedShifts.size() == 1 || commonPart.isEqualToZero()) {
+      out << polynomial.toStringWithPossibleLineBreak(format);
+    } else {
+      Polynomial<Rational> difference = polynomial - commonPart;
+      std::string sign = "+";
+      if (difference.getLeadingCoefficient(nullptr).isNegative()) {
+        sign = "";
+      }
+      out
+      << "\\begin{array}{l}"
+      << commonPart.toStringWithPossibleLineBreak(format)
+      << "\\\\\n"
+      << "\\color{red}\n"
+      << sign
+      << difference.toStringWithPossibleLineBreak(format)
+      << "\\color{black}\n"
+      << "\\end{array}\n";
+    }
+    out << "\\)";
     out << "&";
     out << this->toStringLatticeShiftsOneQuasipolynomial(shifts, isZn);
     out << "\\\\\n";
@@ -15542,7 +15584,9 @@ const {
   if (!this->drawMeProjective(drawingVariables, includeLattice)) {
     return "";
   }
+  out << "{\tiny\n";
   out << drawingVariables.toLatexPsTricks();
+  out << "}\n";
   return out.str();
 }
 

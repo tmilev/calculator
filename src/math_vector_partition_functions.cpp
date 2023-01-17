@@ -177,11 +177,11 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
   }
   QuasiPolynomial output;
   if (this->comments.shouldComment()) {
-     std::stringstream report;
-     report
+    std::stringstream report;
+    report
     << "<br>We are integrating: "
     << cone.payload.getPolynomial().toHTML();
-     this->comments.comments.addOnTop(report.str());
+    this->comments.comments.addOnTop(report.str());
   }
   this->sumQuasiPolynomialOverCone(cone, direction, exitWalls[0], output);
   List<int> exitCones;
@@ -272,6 +272,18 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
     subtracand,
     this->comments.commentsPointer()
   );
+  if (this->comments.shouldComment()) {
+    std::stringstream reportStream;
+    reportStream
+    << "Contribution of neighbor id: "
+    << cone.displayId()
+    << ". "
+    << "Add:<br>"
+    << summand.toHTML()
+    << "<br>Subtract:<br>"
+    << subtracand.toHTML();
+    this->comments.comments.addOnTop(reportStream.str());
+  }
   outputAccumulator += summand;
   outputAccumulator -= subtracand;
 }
@@ -350,17 +362,7 @@ void VectorPartitionFunctionElementary::induceQuasiPolynomialFromWall(
   Vector<Rational> zeroVector;
   zeroVector.makeZero(dimension);
   indicatorIntegral.addLatticeShift(one, zeroVector);
-  if (this->comments.shouldComment()) {
-    this->comments.comments.addOnTop("About to multiply: ");
-    this->comments.comments.addOnTop(output.toHTML());
-    this->comments.comments.addOnTop("by the indicator: ");
-    this->comments.comments.addOnTop(indicatorIntegral.toHTML());
-  }
   output *= indicatorIntegral;
-  if (this->comments.shouldComment()) {
-    this->comments.comments.addOnTop("Induced starting value: ");
-    this->comments.comments.addOnTop(output.toHTML());
-  }
 }
 
 void VectorPartitionFunctionElementary::sumQuasiPolynomialOverCone(
@@ -484,10 +486,49 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
   substituted.getPolynomialUnivariateWithPolynomialCoefficients(
     dimension, polynomialWithPolynomialCoefficients
   );
+  if (this->comments.shouldComment()) {
+    std::stringstream reportStream;
+    FormatExpressions format;
+    format.flagUseLatex = true;
+    format.flagSuppressOneIn1overXtimesY = true;
+    format.flagUseFrac = true;
+    format.makePolynomialAlphabetLetters(
+      "x", this->collection.getDimension()
+    );
+    format.polynomialAlphabet.addOnTop("t");
+    reportStream
+    << "<br>Lattice shift: \\("
+    << startingShift.toString()
+    << " + "
+    << startingLattice.toString()
+    << "\\).";
+    reportStream
+    << "<br>Starting quasipolynomial: "
+    << toBeIntegrated.toString()
+    << ".";
+    reportStream
+    << "<br>Substitution: \\("
+    << substitution.toString(&format)
+    << "\\). ";
+    reportStream
+    << "<br>Substituted: \\("
+    << substituted.toString(&format)
+    << "\\).";
+    this->comments.comments.addOnTop(reportStream.str());
+  }
   for (int i = 0; i <= startingDegree; i ++) {
     coefficientInFrontOfPower =
     polynomialWithPolynomialCoefficients.getCoefficientOfXPowerK(dimension, i);
     this->bernoulliSumComputer.getBernoulliSumStartingAtZero(i, bernoulliSum);
+    if (this->comments.shouldComment()) {
+      FormatExpressions format;
+      format.polynomialAlphabet.addOnTop("t");
+      std::stringstream reportStream;
+      reportStream
+      << "<br>Current bernouli sum: "
+      << bernoulliSum.toString(&format);
+      this->comments.comments.addOnTop(reportStream.str());
+    }
     bernoulliSumSubstituted.assignPolynomialOfFloorOfLinearFunction(
       bernoulliSum,
       scalarProductBy,

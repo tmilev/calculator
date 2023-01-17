@@ -1032,7 +1032,7 @@ std::string DrawOptions::toStringPsTricks() const {
   }
   if (this->penStyle != DrawOptions::PenStyle::normal) {
     if (found) {
-      out << " ";
+      out << ", ";
     }
     out << "linestyle=" << this->toPsTricksPenStyle(this->penStyle);
   }

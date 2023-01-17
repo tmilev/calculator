@@ -154,9 +154,9 @@ void QuasiPolynomial::substitute(
   const Lattice& ambientLatticeNewSpace,
   QuasiPolynomial& output
 ) {
-  QuasiPolynomial tempQP;
-  this->substitute(inputTranslationSubtractedFromArgument, tempQP);
-  tempQP.substitute(
+  QuasiPolynomial quasiPolynomial;
+  this->substitute(inputTranslationSubtractedFromArgument, quasiPolynomial);
+  quasiPolynomial.substitute(
     mapFromNewSpaceToOldSpace, ambientLatticeNewSpace, output
   );
 }

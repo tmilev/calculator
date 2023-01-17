@@ -92,11 +92,13 @@ void VectorPartitionFunctionElementary::computeFirstQuasiPolynomial(
   );
   for (int i = 0; i < this->collection.nonRefinedCones.size(); i ++) {
     Cone& cone = this->collection.nonRefinedCones.values[i];
-    if (this->computeOneQuasiPolynomial(cone, directionIndex)) {
-      this->collection.refinedCones.setKeyValue(cone.id, cone);
-      this->collection.nonRefinedCones.removeIndex(i);
-      return;
+    if (!this->computeOneQuasiPolynomial(cone, directionIndex)) {
+      continue;
     }
+    int id = cone.id;
+    this->collection.refinedCones.setKeyValue(id, cone);
+    this->collection.nonRefinedCones.removeIndex(i);
+    return;
   }
   if (this->collection.nonRefinedCones.size() != 0) {
     global.fatal
@@ -159,7 +161,6 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
   ) {
     return false;
   }
-  this->comments.addChamberLabel(cone.id, direction);
   if (exitWalls.size > 1) {
     global.fatal
     << "At this point of code, a maximum of 1 exit walls is expected."
@@ -169,16 +170,19 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
   if (directionIndex < this->collection.getDimension() - 1) {
     return true;
   }
+  this->comments.addChamberLabel(cone.id, direction);
   this->comments.totalSteps ++;
-  if (this->comments.shouldComment()) {
-    std::stringstream commentStream;
-    commentStream << "Cone id: " << cone.id << ".";
-    this->comments.comments.addOnTop(commentStream.str());
-  }
   if (directionIndex == this->collection.getDimension() - 1) {
     return this->computeStartingQuasipolynomial(cone);
   }
   QuasiPolynomial output;
+  if (this->comments.shouldComment()) {
+     std::stringstream report;
+     report
+    << "<br>We are integrating: "
+    << cone.payload.getPolynomial().toHTML();
+     this->comments.comments.addOnTop(report.str());
+  }
   this->sumQuasiPolynomialOverCone(cone, direction, exitWalls[0], output);
   List<int> exitCones;
   this->getExitConesAfterStart(cone, direction, exitCones);
@@ -197,6 +201,11 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
     );
   }
   cone.payload.setPolynomial(output);
+  List<Vector<Rational> > directionsCurrent;
+  this->originalVectors.slice(0, directionIndex + 1, directionsCurrent);
+  cone.precomputeVectorPartitionFunction(
+    cone.internalPoint(), directionsCurrent
+  );
   return true;
 }
 
@@ -382,6 +391,20 @@ void VectorPartitionFunctionElementary::sumQuasiPolynomialOverCone(
   int scale =
   toBeIntegrated.ambientLatticeReduced.
   getMinimalIntegerScalarSendingVectorIntoLattice(direction);
+  if (this->comments.shouldComment()) {
+    std::stringstream out;
+    out
+    << "The smallest a for which a*direction "
+    << "is in the lattice of the cone is a="
+    << scale
+    << ", where direction="
+    << direction.toString()
+    << " and the lattice is: "
+    << "\\("
+    << toBeIntegrated.ambientLatticeReduced.toString()
+    << "\\).";
+    this->comments.comments.addOnTop(out.str());
+  }
   for (int i = 0; i < scale; i ++) {
     this->computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
       toBeIntegrated, i, scale, output, direction, exitWall.normal
@@ -408,7 +431,7 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
   for (int i = 0; i < dimension; i ++) {
     substitution[i].makeMonomial(i, 1, 1);
     substitution[i].subtractMonomial(
-      MonomialPolynomial(dimension + 1), direction[i] * scale
+      MonomialPolynomial(dimension), direction[i] * scale
     );
     substitution[i] -= direction[i] * shift;
   }
@@ -457,10 +480,13 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
   Polynomial<Rational> bernoulliSum;
   QuasiPolynomial bernoulliSumSubstituted;
   output.makeZeroOverLattice(startingLattice);
+  Polynomial<Polynomial<Rational> > polynomialWithPolynomialCoefficients;
+  substituted.getPolynomialUnivariateWithPolynomialCoefficients(
+    dimension, polynomialWithPolynomialCoefficients
+  );
   for (int i = 0; i <= startingDegree; i ++) {
-    substituted.getCoefficientPolynomialOfXPowerK(
-      dimension, i, coefficientInFrontOfPower
-    );
+    coefficientInFrontOfPower =
+    polynomialWithPolynomialCoefficients.getCoefficientOfXPowerK(dimension, i);
     this->bernoulliSumComputer.getBernoulliSumStartingAtZero(i, bernoulliSum);
     bernoulliSumSubstituted.assignPolynomialOfFloorOfLinearFunction(
       bernoulliSum,
@@ -469,6 +495,7 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
       startingLattice,
       startingShift
     );
+    bernoulliSumSubstituted *= coefficientInFrontOfPower;
     output += bernoulliSumSubstituted;
   }
 }

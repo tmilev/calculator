@@ -15399,7 +15399,13 @@ void Cone::precomputeVectorPartitionFunction(
   Rational resultByEnumeration = partition.numberOfPartitionsByEnumeration();
   if (result != resultByEnumeration) {
     global.fatal
-    << "Vector partition function computation is incorrect. "
+    << "Vector partition function computation is incorrect. Input: "
+    << inputMustBeInCone.toString()
+    << ". Cone id: "
+    << this->id
+    << ". Quasipolynomial: \\("
+    << this->payload.getPolynomial().toString()
+    << "\\)"
     << global.fatal;
   }
 }

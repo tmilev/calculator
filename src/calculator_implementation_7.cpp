@@ -1409,15 +1409,6 @@ bool CalculatorFunctions::combineFractionsCommutative(
   return true;
 }
 
-template <class Coefficient>
-void Polynomial<Coefficient>::getPolynomialUnivariateWithPolynomialCoefficients
-(int variableIndex, Polynomial<Polynomial<Coefficient> >& output) const {
-  Selection variables;
-  variables.initialize(this->minimalNumberOfVariables());
-  variables.addSelectionAppendNewIndex(variableIndex);
-  this->getPolynomialWithPolynomialCoefficient(variables, output);
-}
-
 class IntegralRationalFunctionComputation {
 public:
   WithContext<RationalFraction<Rational> > rationalFraction;

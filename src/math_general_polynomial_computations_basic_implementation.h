@@ -1770,4 +1770,13 @@ void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
   }
 }
 
+template <class Coefficient>
+void Polynomial<Coefficient>::getPolynomialUnivariateWithPolynomialCoefficients
+(int variableIndex, Polynomial<Polynomial<Coefficient> >& output) const {
+  Selection variables;
+  variables.initialize(this->minimalNumberOfVariables());
+  variables.addSelectionAppendNewIndex(variableIndex);
+  this->getPolynomialWithPolynomialCoefficient(variables, output);
+}
+
 #endif // header_math_general_polynomial_computations_basic_implementation_ALREADY_INCLUDED

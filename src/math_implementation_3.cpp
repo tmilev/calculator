@@ -4605,9 +4605,12 @@ std::string PartialFractions::toLatexSelfContainedDocumentBody() const {
   std::stringstream out;
   out << "\\begin{table}[h!]\n";
   out << "\\begin{center}\n";
-  out << this->chambers.toLatexGraphicsOnlyPsTricks(false);
+  bool includeVertices = this->ambientDimension <= 2;
+  out << this->chambers.toLatexGraphicsOnlyPsTricks(includeVertices, false);
   out
-  << "\\caption{Combinatorial chambers of "
+  << "\\caption{$"
+  << this->chambers.refinedCones.size()
+  << "$ combinatorial chambers of "
   << this->toStringLabel()
   << "}\n";
   out << "\\end{center}\n";
@@ -11866,12 +11869,14 @@ std::string ConeCollection::drawMeToHtmlLastCoordAffine(
 
 std::string ConeCollection::drawMeToHtmlProjective(
   DrawingVariables& drawingVariables,
+  bool includeVertices,
   bool includeLattice,
   bool generateControls
 ) const {
   STACK_TRACE("ConeCollection::drawMeToHtmlProjective");
   bool isGood = true;
-  isGood = this->drawMeProjective(drawingVariables, includeLattice);
+  isGood =
+  this->drawMeProjective(drawingVariables, includeVertices, includeLattice);
   std::stringstream out;
   if (this->refinedCones.size() > this->maximumCones) {
     out
@@ -11959,7 +11964,9 @@ bool ConeCollection::drawMeProjectiveInitialize(
 }
 
 bool ConeCollection::drawProjectiveChambers(
-  DrawingVariables& drawingVariables, bool includeLattice
+  DrawingVariables& drawingVariables,
+  bool includeVertices,
+  bool includeLattice
 ) const {
   bool result = true;
   List<const List<Cone>*> coneCollectionsToPlot = List<const List<Cone>*>({
@@ -11979,21 +11986,28 @@ bool ConeCollection::drawProjectiveChambers(
       }
     }
   }
-  for (const List<Cone> * collection : coneCollectionsToPlot) {
-    for (Cone& cone : *collection) {
-      result = result && cone.drawMeProjectiveVertices(drawingVariables);
+  bool omitLowerIdWalls = this->conesWithIrregularWalls.size() == 0;
+  if (includeVertices) {
+    for (const List<Cone> * collection : coneCollectionsToPlot) {
+      for (Cone& cone : *collection) {
+        result = result &&
+        cone.drawMeProjectiveVertices(drawingVariables, omitLowerIdWalls);
+      }
     }
   }
   for (const List<Cone> * collection : coneCollectionsToPlot) {
     for (Cone& cone : *collection) {
-      result = result && cone.drawMeProjectiveSlice(drawingVariables);
+      result = result &&
+      cone.drawMeProjectiveSlice(drawingVariables, omitLowerIdWalls);
     }
   }
   return result;
 }
 
 bool ConeCollection::drawMeProjective(
-  DrawingVariables& drawingVariables, bool includeLattice
+  DrawingVariables& drawingVariables,
+  bool includeVertices,
+  bool includeLattice
 ) const {
   STACK_TRACE("ConeCollection::drawMeProjective");
   bool result = true;
@@ -12003,7 +12017,9 @@ bool ConeCollection::drawMeProjective(
   this->drawMeProjectiveInitialize(drawingVariables);
   drawingVariables.drawCoordinateSystemBuffer(this->getDimension());
   result = result &&
-  this->drawProjectiveChambers(drawingVariables, includeLattice);
+  this->drawProjectiveChambers(
+    drawingVariables, includeVertices, includeLattice
+  );
   for (Vector<Rational> vertex : this->slicingDirections) {
     vertex /= vertex.sumCoordinates();
     drawingVariables.drawCircleAtVectorBufferRational(vertex, "blue", 3);
@@ -12159,8 +12175,8 @@ std::string Cone::drawMeToHtmlLastCoordAffine(
 
 bool Cone::drawMeProjective(DrawingVariables& drawingVariables) const {
   STACK_TRACE("Cone::drawMeProjective");
-  this->drawMeProjectiveVertices(drawingVariables);
-  return this->drawMeProjectiveSlice(drawingVariables);
+  this->drawMeProjectiveVertices(drawingVariables, false);
+  return this->drawMeProjectiveSlice(drawingVariables, false);
 }
 
 void Cone::computeRescaledVerticesForDrawing(Vectors<Rational>& output) const {
@@ -12189,17 +12205,39 @@ void Cone::drawLattice(DrawingVariables& drawingVariables) const {
   polynomial.ambientLatticeReduced.draw(drawingVariables, &allNormals);
 }
 
-bool Cone::drawMeProjectiveVertices(DrawingVariables& drawingVariables) const {
+bool Cone::isAlreadyDrawn(const Vector<Rational>& vertex) const {
+  for (const Wall& wall : this->walls) {
+    if (!wall.normal.scalarEuclidean(vertex).isEqualToZero()) {
+      continue;
+    }
+    if (wall.neighbors.size != 1) {
+      continue;
+    }
+    if (this->id > wall.neighbors[0]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Cone::drawMeProjectiveVertices(
+  DrawingVariables& drawingVariables, bool omitAlreadyDrawn
+) const {
   STACK_TRACE("Cone::drawMeProjectiveVertices");
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(this->getDimension());
   Vectors<Rational> verticesScaled;
   this->computeRescaledVerticesForDrawing(verticesScaled);
   Vector<Rational> root;
-  for (int i = 0; i < this->vertices.size; i ++) {
+  for (const Vector<Rational>& vertex : verticesScaled) {
+    if (omitAlreadyDrawn) {
+      if (this->isAlreadyDrawn(vertex)) {
+        continue;
+      }
+    }
     drawingVariables.drawLineBetweenTwoVectorsBufferRational(
       zeroRoot,
-      verticesScaled[i],
+      vertex,
       "lightblue",
       1,
       DrawOptions::PenStyle::dashed,
@@ -12209,7 +12247,9 @@ bool Cone::drawMeProjectiveVertices(DrawingVariables& drawingVariables) const {
   return true;
 }
 
-bool Cone::drawMeProjectiveSlice(DrawingVariables& drawingVariables) const {
+bool Cone::drawMeProjectiveSlice(
+  DrawingVariables& drawingVariables, bool omitWallsBelongingToLowerId
+) const {
   Vectors<Rational> verticesScaled;
   this->computeRescaledVerticesForDrawing(verticesScaled);
   std::string color = "black";
@@ -12218,18 +12258,21 @@ bool Cone::drawMeProjectiveSlice(DrawingVariables& drawingVariables) const {
     color = "brown";
     width = 2;
   }
-  for (int k = 0; k < this->walls.size; k ++) {
+  for (const Wall& wall : this->walls) {
+    if (omitWallsBelongingToLowerId && wall.neighbors.size == 1) {
+      if (wall.neighbors[0] < this->id) {
+        continue;
+      }
+    }
     for (int i = 0; i < this->vertices.size; i ++) {
       if (
-        !this->walls[k].normal.scalarEuclidean(this->vertices[i]).isEqualToZero
-        ()
+        !wall.normal.scalarEuclidean(this->vertices[i]).isEqualToZero()
       ) {
         continue;
       }
       for (int j = i + 1; j < this->vertices.size; j ++) {
         if (
-          !this->walls[k].normal.scalarEuclidean(this->vertices[j]).
-          isEqualToZero()
+          !wall.normal.scalarEuclidean(this->vertices[j]).isEqualToZero()
         ) {
           continue;
         }
@@ -15576,12 +15619,17 @@ const {
   return out.str();
 }
 
-std::string ConeCollection::toLatexGraphicsOnlyPsTricks(bool includeLattice)
-const {
+std::string ConeCollection::toLatexGraphicsOnlyPsTricks(
+  bool includeVertices, bool includeLattice
+) const {
   STACK_TRACE("ConeCollection::toLatexGraphicsOnlyPsTricks");
   std::stringstream out;
   DrawingVariables drawingVariables;
-  if (!this->drawMeProjective(drawingVariables, includeLattice)) {
+  if (
+    !this->drawMeProjective(
+      drawingVariables, includeVertices, includeLattice
+    )
+  ) {
     return "";
   }
   out << "{\\tiny\n";
@@ -15597,7 +15645,7 @@ std::string ConeCollection::toHTMLGraphicsOnly(
   FormatExpressions format;
   return
   this->drawMeToHtmlProjective(
-    drawingVariables, includeLattice, includePanels
+    drawingVariables, true, includeLattice, includePanels
   );
 }
 

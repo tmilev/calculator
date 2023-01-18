@@ -84,8 +84,16 @@ public:
   ) const;
   void drawLattice(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(DrawingVariables& drawingVariables) const;
-  bool drawMeProjectiveVertices(DrawingVariables& drawingVariables) const;
-  bool drawMeProjectiveSlice(DrawingVariables& drawingVariables) const;
+  bool drawMeProjectiveVertices(
+    DrawingVariables& drawingVariables, bool omitAlreadyDrawn
+  ) const;
+  bool isAlreadyDrawn(const Vector<Rational>& vertex) const;
+  // Draws the cone. When omitWallsBelongingToLowerId, the edge won't be drawn
+  // if it belongs to
+  // a chamber with a smaller id.
+  bool drawMeProjectiveSlice(
+    DrawingVariables& drawingVariables, bool omitWallsBelongingToLowerId
+  ) const;
   bool isInCone(const Vector<Rational>& point) const;
   bool isInCone(const Vectors<Rational>& vertices) const;
   bool isInInterior(const Vector<Rational>& point) const;
@@ -402,13 +410,18 @@ public:
   Cone& getConeByIdNonConstNoFail(int id);
   bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(
-    DrawingVariables& drawingVariables, bool includeLattice
+    DrawingVariables& drawingVariables,
+    bool includeVertices,
+    bool includeLattice
   ) const;
   bool drawProjectiveChambers(
-    DrawingVariables& drawingVariables, bool includeLattice
+    DrawingVariables& drawingVariables,
+    bool includeVertices,
+    bool includeLattice
   ) const;
   std::string drawMeToHtmlProjective(
     DrawingVariables& drawingVariables,
+    bool includeVertices,
     bool includeLattice,
     bool generateControls
   ) const;
@@ -427,7 +440,9 @@ public:
   // Returns the graphics of all the cones without description.
   std::string toHTMLGraphicsOnly(bool includePanels, bool includeLattice)
   const;
-  std::string toLatexGraphicsOnlyPsTricks(bool includeLattice) const;
+  std::string toLatexGraphicsOnlyPsTricks(
+    bool includeVertices, bool includeLattice
+  ) const;
   std::string toLatexWithoutGraphics(const std::string& label) const;
   // Returns a sequence of html canvas drawings of the various stages of
   // slicing.

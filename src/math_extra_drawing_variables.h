@@ -181,7 +181,7 @@ public:
     TextStyleZeroChamber,
     TextStylePermanentlyZeroChamber,
   };
-  int fontSizeNormal;
+  static const int fontSizeNormal = 10;
   int defaultHtmlWidth;
   int defaultHtmlHeight;
   void initDrawingVariables();
@@ -206,7 +206,7 @@ public:
     int textStyle
   );
   void drawCoordinateSystemBuffer(int dimension);
-  void drawLineDirectly(
+  void drawLineDirectly2D(
     double x1,
     double y1,
     double x2,
@@ -214,18 +214,6 @@ public:
     uint32_t penStyle,
     int colorIndex,
     double lineWidth
-  );
-  void drawLineBuffer(
-    double x1,
-    double y1,
-    double x2,
-    double y2,
-    uint32_t penStyle,
-    int colorIndex,
-    double lineWidth
-  );
-  void drawTextBuffer(
-    double x1, double y1, const std::string& inputText, int color
   );
   void drawPath(
     const Vectors<Rational>& vectors,
@@ -242,21 +230,17 @@ public:
     DrawOptions::PenStyle penstyle = DrawOptions::PenStyle::normal,
     const std::string& layer = ""
   );
-  void drawTextAtVectorBufferRational(
-    const Vector<Rational>& point,
-    const std::string& inputText,
-    const std::string& color
-  );
-  void drawTextAtVectorBufferRational(
-    const Vector<Rational>& input,
+  void drawTextAtVectorDouble(
+    const Vector<double>& input,
     const std::string& inputText,
     const std::string& color,
-    int fontSize
+    int fontSize = DrawingVariables::fontSizeNormal
   );
-  void drawTextAtVectorBufferDouble(
-    const Vector<double>& point,
+  void drawTextAtVector(
+    const Vector<Rational>& point,
     const std::string& inputText,
-    const std::string& color
+    const std::string& color,
+    int fontSize = DrawingVariables::fontSizeNormal
   );
   void drawCircleAtVectorBufferRational(
     const Vector<Rational>& point,
@@ -316,7 +300,7 @@ public:
     const std::string& color,
     int radius
   );
-  void drawTextBuffer(
+  void drawTextDirectly2d(
     double x1,
     double y1,
     const std::string& inputText,
@@ -338,12 +322,6 @@ public:
     int colorIndex,
     int fillColorIndex,
     double lineWidth
-  );
-  void drawTextAtVectorBufferDouble(
-    const Vector<double>& input,
-    const std::string& inputText,
-    const std::string& color,
-    int fontSize
   );
   double getAngleFromXandY(double x, double y);
   void rotateOutOfPlane(

@@ -9011,7 +9011,7 @@ void WeylGroupData::drawRootSystem(
     output.drawCircleAtVectorBufferRational(rationalRoot, "red", 4);
     if (labelDynkinDiagramVertices) {
       Vector<Rational>& current = epsNotationSimpleBasis[i];
-      output.drawTextAtVectorBufferRational(
+      output.drawTextAtVector(
         rationalRoot, current.toStringLetterFormat("e"), "black", 10
       );
     }
@@ -9036,14 +9036,6 @@ void WeylGroupData::drawRootSystem(
     twoPlane[0][1] = 1;
     outputDV.modifyToOrthonormalNoShiftSecond(twoPlane[0], twoPlane[1]);
   }
-  output.drawTextBuffer(
-    0,
-    0,
-    tempStream.str(),
-    10,
-    static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0)),
-    DrawingVariables::TextStyleNormal
-  );
 }
 
 std::string WeylGroupData::generateWeightSupportMethod1(
@@ -11921,9 +11913,7 @@ bool ConeCollection::drawMeLastCoordinateAffine(
     tempStream << i + 1;
     Vector<Rational> point = this->nonRefinedCones[i].internalPoint();
     point.makeAffineUsingLastCoordinate();
-    drawingVariables.drawTextAtVectorBufferRational(
-      point, tempStream.str(), "black"
-    );
+    drawingVariables.drawTextAtVector(point, tempStream.str(), "black");
   }
   return result;
 }
@@ -12289,9 +12279,7 @@ bool Cone::drawMeProjectiveSlice(
   out << this->displayId();
   Vector<Rational> point = this->internalPointNormal();
   point /= point.sumCoordinates();
-  drawingVariables.drawTextAtVectorBufferRational(
-    point, out.str(), "black"
-  );
+  drawingVariables.drawTextAtVector(point, out.str(), "black");
   return true;
 }
 
@@ -12838,7 +12826,7 @@ void PiecewiseQuasipolynomial::drawMe(
     drawingVariables.drawCircleAtVectorBufferRational(
       latticePointsFinal[i], latticePointColors[i], 2
     );
-    drawingVariables.drawTextAtVectorBufferRational(
+    drawingVariables.drawTextAtVector(
       latticePointsFinal[i],
       this->evaluateInputProjectivized(latticePointsFinal[i], nullptr).toString
       (),

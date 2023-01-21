@@ -266,7 +266,8 @@ public:
   );
   static std::string getCalculatorComputationAnchorThisServer(
     const std::string& inputNoEncoding,
-    const std::string& desiredAnchorTextEmptyForDefault
+    const std::string& desiredAnchorTextEmptyForDefault,
+    bool useAppWithoutCache = false
   );
   static std::string getCalculatorComputationAnchorRelativeAppAddress(
     const std::string& inputNoEncoding,

@@ -457,6 +457,19 @@ class GraphicsNDimensions {
     ));
   }
 
+  drawTextFixed(location, text, color) {
+    if (color === undefined) {
+      color = "black";
+    }
+    this.drawOperations.push(new DrawTextFixed(
+      this, {
+      x: location[0],
+      y: location[1],
+      text: text,
+      colorFill: color
+    }
+    ));
+  }
   startProjectionPlaneUser() {
     this.animationBasisChange.frameCount = 0;
     this.animationBasisChange.screenStart[0] = this.screenBasis[0].slice();
@@ -647,6 +660,17 @@ class GraphicsNDimensions {
     output[1] += this.graphicsUnit * this.scalarProduct(
       this.screenBasis[1], input,
     );
+  }
+
+  /** @return {number[]} */
+  computeDirectDrawCoordinates(
+    /** @type{number[]} */
+    input,
+  ) {
+    return [
+      this.shiftScreenCoordinates[0] + input[0],
+      this.shiftScreenCoordinates[1] + input[1],
+    ];
   }
 
   computeLatexCoordinates(
@@ -1070,6 +1094,13 @@ class GraphicsNDimensions {
           input.color,
         );
         return;
+      case "text2DFixed":
+        this.drawTextFixed(
+          input.location,
+          input.text,
+          input.color,
+        );
+        return;
       case "path":
         this.drawPath(
           input.points,
@@ -1380,7 +1411,6 @@ class DrawCircleAtVector {
 }
 
 class DrawTextAtVector {
-  /** @type{GraphicsNDimensions} */
   constructor(
     /** @type{GraphicsNDimensions} */
     inputOwner, 
@@ -1438,6 +1468,39 @@ class DrawTextAtVector {
 
   accountBoundingBox() {
     this.owner.accountVectorInBoundingBox(this.location);
+  }
+}
+
+class DrawTextFixed {
+  constructor(
+    /** @type{GraphicsNDimensions} */
+    inputOwner,
+    inputData,
+  ) {
+    this.owner = inputOwner;
+    /** @type{string} */
+    this.text = inputData.text;
+    this.x = inputData.x;
+    this.y = inputData.y;
+    this.colorFill = inputData.colorFill;
+  }
+
+  drawNoFinish() {
+    let canvas = this.owner.canvas;
+    canvas.strokeStyle = this.colorFill;
+    canvas.strokeText(
+      this.text,
+      this.x + this.owner.textShift[0],
+      this.y + this.owner.textShift[1],
+    );
+  }
+
+  getLaTeXOperation() {
+    console.log("DrawTextFixed.getLaTeXOperation not implemented.")
+    return "";
+  }
+
+  accountBoundingBox() {
   }
 }
 

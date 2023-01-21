@@ -266,7 +266,7 @@ std::string SemisimpleLieAlgebra::toHTML(
   } else {
     DrawingVariables drawingVariables;
     this->weylGroup.drawRootSystem(
-      drawingVariables, true, true, nullptr, true, nullptr
+      drawingVariables, true, false, nullptr, true, nullptr
     );
     out
     << "A drawing of the root system in its corresponding Coxeter plane. "
@@ -274,7 +274,7 @@ std::string SemisimpleLieAlgebra::toHTML(
     << "as explained by the website of John Stembridge. "
     << "<br>The darker red dots can be "
     << "dragged with the mouse to rotate the picture."
-    << "<br>The grey lines are the edges of the Weyl chamber.<br>"
+    << "<br>"
     << drawingVariables.getHTMLDiv(
       this->weylGroup.getDimension(), true, true
     );

@@ -241,13 +241,16 @@ std::string HtmlRoutines::getCalculatorComputationAnchorSameURL(
 
 std::string HtmlRoutines::getCalculatorComputationAnchorThisServer(
   const std::string& inputNoEncoding,
-  const std::string& desiredAnchorTextEmptyForDefault
+  const std::string& desiredAnchorTextEmptyForDefault,
+  bool useAppWithoutCache
 ) {
+  std::string app =
+  useAppWithoutCache ?
+  global.displayApplicationNoCache :
+  global.displayApplication;
   return
   HtmlRoutines::getCalculatorComputationAnchor(
-    global.displayApplication,
-    inputNoEncoding,
-    desiredAnchorTextEmptyForDefault
+    app, inputNoEncoding, desiredAnchorTextEmptyForDefault
   );
 }
 

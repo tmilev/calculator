@@ -516,9 +516,7 @@ splitOverLeviMonomialsEncodeHighestWeight(
       );
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
-      drawingVariables.drawTextAtVectorBufferRational(
-        root, tempStream.str(), "black"
-      );
+      drawingVariables.drawTextAtVector(root, tempStream.str(), "black");
     }
     out
     << "<hr>"

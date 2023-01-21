@@ -2550,9 +2550,6 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   << "\nPreimage Weyl chamber larger algebra: "
   << this->preimageWeylChamberLargerAlgebra.toString(&format)
   << "\n";
-  // global.indicatorVariables.StatusString1NeedsRefresh = true;
-  // global.indicatorVariables.StatusString1= this->log.str();
-  // global.makeReport();
 }
 
 std::string GeneralizedVermaModuleCharacters::prepareReport() {

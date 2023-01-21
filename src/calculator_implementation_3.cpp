@@ -287,8 +287,8 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   coxeterPlane.setSize(2);
   this->owner->getCoxeterPlane(coxeterPlane[0], coxeterPlane[1]);
   DrawingVariables animated, collapsed;
-  this->owner->drawRootSystem(animated, true, true);
-  this->owner->drawRootSystem(collapsed, true, true);
+  this->owner->drawRootSystem(animated, true, false);
+  this->owner->drawRootSystem(collapsed, true, false);
   for (int i = 0; i < orbit.size; i ++) {
     LittelmannPath& currentPath = orbit[i];
     animated.drawPath(
@@ -948,7 +948,7 @@ bool Calculator::Test::processResults() {
     currentLine
     << "<td style = 'min-width:200px;'>"
     << HtmlRoutines::getCalculatorComputationAnchorThisServer(
-      this->commands.keys[i], this->commands.keys[i]
+      this->commands.keys[i], this->commands.keys[i], true
     )
     << "</td>";
     bool isBad = false;

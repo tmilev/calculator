@@ -571,7 +571,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
   );
   std::stringstream out;
   WeylGroupData& weylGroup = this->getOwner()->weylGroup;
-  weylGroup.drawRootSystem(drawingVariables, false, true);
+  weylGroup.drawRootSystem(drawingVariables, false, false);
   int totalWeights = 0;
   Vectors<Coefficient> dominantWeightsNonHashed;
   HashedList<Vector<Coefficient> > finalWeights;
@@ -606,8 +606,11 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
         convertor, "black", 3
       );
       if (useMultiplicities) {
-        drawingVariables.drawTextAtVectorBufferRational(
-          convertor, CharCartan.coefficients[i].toString(), "black"
+        drawingVariables.drawTextAtVector(
+          convertor,
+          CharCartan.coefficients[i].toString(),
+          "black",
+          drawingVariables.fontSizeNormal
         );
       }
     }
@@ -645,7 +648,7 @@ drawMeAssumeCharIsOverCartan(
     drawingVariables.drawCircleAtVectorBufferRational(
       actualWeightRationalPart, "black", 5
     );
-    drawingVariables.drawTextAtVectorBufferRational(
+    drawingVariables.drawTextAtVector(
       actualWeightRationalPart,
       this->coefficients[j].toString(),
       "black"
@@ -912,7 +915,7 @@ splitCharacterOverReductiveSubalgebra(
       ).getVectorRational();
       std::stringstream tempStream;
       tempStream << output.coefficients[i].toString();
-      drawingVariables1.drawTextAtVectorBufferRational(
+      drawingVariables1.drawTextAtVector(
         leftRoot, tempStream.str(), "black"
       );
       for (

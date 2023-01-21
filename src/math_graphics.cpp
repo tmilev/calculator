@@ -32,7 +32,6 @@ DrawingVariables::DrawingVariables() {
 void DrawingVariables::initDrawingVariables() {
   this->defaultHtmlHeight = 400;
   this->defaultHtmlWidth = 400;
-  this->fontSizeNormal = 10;
   this->initialize();
   this->initializeDimensions(2);
   this->flagAnimatingMovingCoordSystem = false;
@@ -55,20 +54,12 @@ void DrawingVariables::drawCoordinateSystemBuffer(int dimension) {
       DrawOptions::PenStyle::dashed,
       "axes"
     );
-    this->drawTextAtVectorBufferRational(unitVector, label, "black");
+    this->drawTextAtVector(
+      unitVector, label, "black", this->fontSizeNormal
+    );
     this->drawCircleAtVectorBufferRational(unitVector, "black", 4);
   }
   this->basisToDrawCirclesAt.makeEiBasis(dimension);
-}
-
-void DrawingVariables::drawTextAtVectorBufferDouble(
-  const Vector<double>& point,
-  const std::string& inputText,
-  const std::string& color
-) {
-  this->drawTextAtVectorBufferDouble(
-    point, inputText, color, this->fontSizeNormal
-  );
 }
 
 void DrawingVariables::projectOnToHyperPlaneGraphics(
@@ -241,28 +232,18 @@ void DrawingVariables::drawFilledShape(
   this->operations.addOnTop(drawObject);
 }
 
-void DrawingVariables::drawTextAtVectorBufferRational(
-  const Vector<Rational>& input,
-  const std::string& inputText,
-  const std::string& color
-) {
-  this->drawTextAtVectorBufferRational(
-    input, inputText, color, this->fontSizeNormal
-  );
-}
-
-void DrawingVariables::drawTextAtVectorBufferRational(
+void DrawingVariables::drawTextAtVector(
   const Vector<Rational>& input,
   const std::string& inputText,
   const std::string& color,
   int fontSize
 ) {
-  this->drawTextAtVectorBufferDouble(
+  this->drawTextAtVectorDouble(
     input.getVectorDouble(), inputText, color, fontSize
   );
 }
 
-void DrawingVariables::drawTextAtVectorBufferDouble(
+void DrawingVariables::drawTextAtVectorDouble(
   const Vector<double>& input,
   const std::string& inputText,
   const std::string& color,
@@ -274,18 +255,6 @@ void DrawingVariables::drawTextAtVectorBufferDouble(
   result.text = inputText;
   result.drawOptions.color = color;
   this->operations.addOnTop(result);
-}
-
-void DrawingVariables::drawLineDirectly(
-  double x1,
-  double y1,
-  double x2,
-  double y2,
-  uint32_t penStyle,
-  int colorIndex,
-  double lineWidth
-) {
-  this->drawLineBuffer(x1, y1, x2, y2, penStyle, colorIndex, lineWidth);
 }
 
 void DrawingVariables::drawHighlightGroup(
@@ -305,7 +274,7 @@ void DrawingVariables::drawHighlightGroup(
   this->operations.addOnTop(drawObject);
 }
 
-void DrawingVariables::drawLineBuffer(
+void DrawingVariables::drawLineDirectly2D(
   double x1,
   double y1,
   double x2,
@@ -330,7 +299,7 @@ void DrawingVariables::drawLineBuffer(
   this->operations.addOnTop(drawObject);
 }
 
-void DrawingVariables::drawTextBuffer(
+void DrawingVariables::drawTextDirectly2d(
   double x1,
   double y1,
   const std::string& inputText,
@@ -344,7 +313,7 @@ void DrawingVariables::drawTextBuffer(
   DrawGeneric drawObject;
   JSData& operation = drawObject.content;
   operation[DrawingVariables::fieldOperation] =
-  DrawingVariables::typeSegment2DFixed;
+  DrawingVariables::typeText2DFixed;
   operation[DrawingVariables::fieldLocation].elementType =
   JSData::token::tokenArray;
   operation[DrawingVariables::fieldLocation][0] = x1;
@@ -387,19 +356,6 @@ std::string DrawingVariables::toLatexPsTricks() const {
   return out.str();
 }
 
-void DrawingVariables::drawTextBuffer(
-  double x1, double y1, const std::string& inputText, int color
-) {
-  this->drawTextBuffer(
-    x1,
-    y1,
-    inputText,
-    color,
-    this->fontSizeNormal,
-    this->TextStyleNormal
-  );
-}
-
 void DrawingVariables::drawString(
   DrawElementInputOutput& drawData,
   const std::string& input,
@@ -414,7 +370,7 @@ void DrawingVariables::drawString(
   for (unsigned int i = 0; i < input.size(); i ++) {
     std::string character;
     character = input.at(i);
-    this->drawTextBuffer(
+    this->drawTextDirectly2d(
       drawData.outputWidth + drawData.topLeftCornerX,
       drawData.outputHeight + drawData.topLeftCornerY,
       character,

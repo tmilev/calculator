@@ -550,13 +550,12 @@ class Calculator {
   /** @return{HTMLElement} */
   writeResult(
     inputParsed,
-    /** @type {panels.PanelExpandableData[]} */
-    panelData,
   ) {
     let result = document.createElement("div");
     result.style.width = "100%";
     result.style.height = "100%";
-    result.appendChild(this.writeErrorsCrashesComments(inputParsed));
+    const crashesAndComments = this.writeErrorsCrashesComments(inputParsed);
+    result.appendChild(crashesAndComments);
     if (inputParsed.timeOut === true) {
       if (inputParsed.timeOutComments !== undefined) {
         let comment = document.createElement("div");
@@ -580,17 +579,49 @@ class Calculator {
     if (inputParsed.result === undefined) {
       return result;
     }
-    let fullResultTable = document.createElement("table");
-    fullResultTable.className = 'tableCalculatorOutputAndResults';
-    let mainRow = fullResultTable.insertRow();
-    let resultCell = mainRow.insertCell();
+    const inputOutputComments = this.constructInputOutputComments(inputParsed);
+    result.appendChild(inputOutputComments);
+    if (inputParsed.parsingLog !== undefined) {
+      let element = document.createElement("div");
+      element.innerHTML = inputParsed.parsingLog;
+      result.appendChild(element);
+    }
+    return result;
+  }
+
+  constructInputOutputComments(
+    inputParsed,
+  ) {
+    let inputOutputComments = document.createElement("div");
+    inputOutputComments.className = "calculatorInputOutputComments";
+    let inputOutput = document.createElement("div");
+    inputOutputComments.appendChild(inputOutput);
+    inputOutput.className = "calculatorInputOutput";
     if (inputParsed.syntaxErrors !== undefined) {
       let element = document.createElement("div");
       element.innerHTML = inputParsed.syntaxErrors;
-      resultCell.appendChild(element);
+      inputOutput.appendChild(element);
     }
+    let inputOutputTable = this.constructInputOutput(inputParsed);
+    inputOutput.appendChild(inputOutputTable);
+    let commentsContainer = this.constructComments(inputParsed);
+    inputOutputComments.appendChild(commentsContainer);
+    if (
+      storage.storage.variables.flagDebug.isTrue() &&
+      inputParsed.debug !== undefined
+    ) {
+      let debugComments = document.createElement("div");
+      debugComments.innerHTML = inputParsed.debug;
+      inputOutputComments.appendChild(debugComments);
+    }
+    return inputOutputComments;
+  }
+
+  /** @return{HTMLElement} */
+  constructInputOutput(
+    inputParsed,
+  ) {
     let inputOutputTable = document.createElement("table");
-    resultCell.appendChild(inputOutputTable);
     inputOutputTable.className = 'tableCalculatorOutput';
     let headerRow = inputOutputTable.insertRow();
     let inputLabelCell = document.createElement("th");
@@ -623,7 +654,7 @@ class Calculator {
       inputCell.append(input);
       outputCell.append(output);
       if (i < inputParsed.result.input.length) {
-        panelData.push(new panels.PanelExpandableData(
+        this.panels.push(new panels.PanelExpandableData(
           currentInput,
           input,
           150,
@@ -633,7 +664,7 @@ class Calculator {
         ));
       }
       if (i < inputParsed.result.output.length) {
-        panelData.push(new panels.PanelExpandableData(
+        this.panels.push(new panels.PanelExpandableData(
           currentOutput,
           output,
           150,
@@ -643,19 +674,22 @@ class Calculator {
         ));
       }
     }
-    let commentsCell = mainRow.insertCell();
-    commentsCell.style.verticalAlign = 'top';
-    commentsCell.style.width = "100%";
+    return inputOutputTable;
+  }
+
+  /** @return{HTMLElement} */
+  constructComments(
+    inputParsed,
+  ) {
     let commentsContainer = document.createElement("div");
     commentsContainer.className = "containerComments";
-    commentsCell.appendChild(commentsContainer);
     let performance = inputParsed[pathnames.urlFields.result.performance];
     if (performance !== undefined) {
       let content = performance[pathnames.urlFields.result.comments];
       let label = `<b style='color:blue'>${performance[pathnames.urlFields.result.computationTime]}</b>`;
       let performanceDetails = document.createElement("div");
       commentsContainer.appendChild(performanceDetails);
-      panelData.push(new panels.PanelExpandableData(
+      this.panels.push(new panels.PanelExpandableData(
         content,
         performanceDetails,
         0,
@@ -668,21 +702,7 @@ class Calculator {
       comments.innerHTML = inputParsed.comments;
       commentsContainer.appendChild(comments);
     }
-    let mainPage = window.calculator.mainPage;
-    if (
-      mainPage.storage.variables.flagDebug.isTrue() &&
-      inputParsed.debug !== undefined
-    ) {
-      let cell = mainRow.insertCell();
-      cell.innerHTML = inputParsed.debug;
-    }
-    result.appendChild(fullResultTable);
-    if (inputParsed.parsingLog !== undefined) {
-      let element = document.createElement("div");
-      element.innerHTML = inputParsed.parsingLog;
-      result.appendChild(element);
-    }
-    return result;
+    return commentsContainer;
   }
 
   typeset(
@@ -694,7 +714,7 @@ class Calculator {
     }
     dynamicJavascript.typeset(
       this.getOutputElement(),
-      { "lineBreakWidth": 600 },
+      { "lineBreakWidth": 600, },
       typeSetCallback,
     );
     this.flagTypeset = true;

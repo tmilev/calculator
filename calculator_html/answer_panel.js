@@ -299,12 +299,12 @@ class AnswerPanel {
   ) {
     clearTimeout(this.timerForPreviewAnswers);
     let studentAnswer = this.panel.getPureLatexElement().value;
-    let theURL = "";
-    theURL += `${pathnames.urls.calculatorAPI}?${requestQuery}&`;
-    theURL += `calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}&`;
-    theURL += `${pathnames.urlFields.problem.fileName}=${this.problemId}&`;
+    let url = "";
+    url += `${pathnames.urls.calculatorAPI}?${requestQuery}&`;
+    url += `calculatorAnswer${this.idPureLatex}=${encodeURIComponent(studentAnswer)}&`;
+    url += `${pathnames.urlFields.problem.fileName}=${this.problemId}&`;
     submitRequests.submitGET({
-      url: theURL,
+      url: url,
       progress: ids.domElements.spanProgressReportGeneral,
       callback: (input) => {
         this.submitOrPreviewAnswersCallback(input);

@@ -134,7 +134,7 @@ class StandardResponses {
   constructor() { }
 
   /**
-   * @returns{boolean} Whether the response indicates that the user is not logged in.
+   * @return{boolean} Whether the response indicates that the user is not logged in.
    * Please note that if this returns false, the user may still be not logged in, if for example,
    * the request was one that did not require login.
    * @param responseObjectParsed the js object returned from the calculator, parsed.
@@ -144,7 +144,7 @@ class StandardResponses {
   }
   
   /**
-   * @returns{boolean} Whether the response indicates that the user logged in.
+   * @return{boolean} Whether the response indicates that the user logged in.
    * Please note that if this returns false, the user may still be logged in - perhaps the backend 
    * did not attach the information that the user is logged in to the response.
    * @param responseObjectParsed the js object returned from the calculator, parsed.
@@ -159,7 +159,7 @@ let standardResponses = new StandardResponses();
 class Addresses {
   constructor() { }
 
-  /** @returns{string} */
+  /** @return{string} */
   calculatorComputation(
     /** @type{string} */
     input,
@@ -172,7 +172,7 @@ class Addresses {
     return `${urls.appWithCache}#${encoded}`;
   }
 
-  /** @returns{string} */
+  /** @return{string} */
   solveJSON(
     /** @type{string} */
     problem,

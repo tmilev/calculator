@@ -40,7 +40,7 @@ class GraphicsSerialization {
   /** 
    * Constructs a canvas from JSON.
    *  
-   * @returns {CanvasTwoD|CanvasThreeD|null} 
+   * @return {CanvasTwoD|CanvasThreeD|null} 
    */
   fromJSON(
     input,
@@ -142,7 +142,7 @@ class GraphicsSerialization {
   /**
    * Creates three-dimensional graphics.
    * 
-   * @returns{CanvasThreeD} 
+   * @return{CanvasThreeD} 
    */
   threeDimensionalGraphics(
     input,
@@ -163,7 +163,7 @@ class GraphicsSerialization {
   /** 
    * Plots two dimensional graphics on an already created graphics object.
    * 
-   * @returns {CanvasTwoD} 
+   * @return {CanvasTwoD} 
    */
   plotTwoDimensionalGraphics(
     /** @type{CanvasTwoD}*/

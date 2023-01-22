@@ -203,7 +203,7 @@ class GraphicsNDimensions {
     }
   }
 
-  /** @returns {string} */
+  /** @return {string} */
   getInfoHTML() {
     let result = "";
     result += `<br>Mouse position: ${toStringVector(this.mousePositionScreen)}`;

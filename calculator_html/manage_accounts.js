@@ -42,7 +42,14 @@ class ManageAccountsPage {
 
 function getAccountsTable(inputAccounts) {
   let result = "";
-  result += "<table><tr><th>username</th><th>Email</th><th>Activated?</th><th>Course</th><th>Section</th><th>Semester</th></tr>";
+  result += "<table><tr>";
+  result += "<th>username</th>";
+  result += "<th>Email</th>";
+  result += "<th>Activated?</th>";
+  result += "<th>Course</th>";
+  result += "<th>Section</th>";
+  result += "<th>Semester</th>";
+  result += "</tr>";
   for (let counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts++) {
     result += "<tr>";
     let currentUser = inputAccounts[counterAccounts];
@@ -122,16 +129,16 @@ function addEmailsOrUsers(
   let spanEmailList = document.getElementById(idEmailList);
   let spanUserGroup = document.getElementById(idUserGroup);
   let spanPasswords = document.getElementById(idPasswords);
-  let theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += `${pathnames.urlFields.request}=${requestType}&`;
-  theURL += `${pathnames.urlFields.userRole}=${userRole}&`;
-  theURL += `userList=${encodeURIComponent(spanEmailList.value)}&`;
-  theURL += `studentSection=${encodeURIComponent(spanUserGroup.value)}&`;
-  theURL += `passwordList=${encodeURIComponent(spanPasswords.value)}&`;
-  theURL += `filterAccounts=&`;
+  let url = "";
+  url += `${pathnames.urls.calculatorAPI}?`;
+  url += `${pathnames.urlFields.request}=${requestType}&`;
+  url += `${pathnames.urlFields.userRole}=${userRole}&`;
+  url += `userList=${encodeURIComponent(spanEmailList.value)}&`;
+  url += `studentSection=${encodeURIComponent(spanUserGroup.value)}&`;
+  url += `passwordList=${encodeURIComponent(spanPasswords.value)}&`;
+  url += `filterAccounts=&`;
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     progress: ids.domElements.spanProgressReportGeneral,
     result: idOutput,
     callback: callbackAddEmailsOrUsers
@@ -143,7 +150,7 @@ function getTeachersStudentsCallback(input, output) {
 }
 
 function getTeachersStudents() {
-  let theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setTeacher}&`;
+  let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setTeacher}&`;
   let inputSections = document.getElementById('inputSections').value;
   let inputTeachers = document.getElementById('inputSetTeacher').value;
   let teachersAndSections = {};
@@ -153,9 +160,9 @@ function getTeachersStudents() {
   teachersAndSections[
     pathnames.urlFields.requests.sections
   ] = encodeURIComponent(inputSections);
-  theURL += `${pathnames.urlFields.teachersAndSections}=${encodeURIComponent(JSON.stringify(teachersAndSections))}&`;
+  url += `${pathnames.urlFields.teachersAndSections}=${encodeURIComponent(JSON.stringify(teachersAndSections))}&`;
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     progress: ids.domElements.spanProgressReportGeneral,
     result: "idOutputSections",
     callback: getTeachersStudentsCallback
@@ -164,10 +171,10 @@ function getTeachersStudents() {
 }
 
 function updateAccountsPage() {
-  let theURL = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.accountsJSON}`;
+  let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.accountsJSON}`;
 
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     callback: updateAccountsPageCallback,
     progress: ids.domElements.spanProgressReportGeneral,
   });

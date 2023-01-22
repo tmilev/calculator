@@ -18,7 +18,7 @@
 /**
  * Converts a vector to string.
  * @param {!Array.<number>} vector to be converted to string
- * @returns{string}
+ * @return{string}
  */
 function vectorToString(vector) {
   let result = '[';
@@ -36,7 +36,7 @@ function vectorToString(vector) {
  * Scalar product of two vectors.
  * @param {!Array.<number>} s the first vector
  * @param {!Array.<number>} t the second vector
- * @returns{number}
+ * @return{number}
  */
 function vectorScalarVector(s, t) {
   let result = 0;
@@ -65,7 +65,7 @@ function vectorTimesScalar(vector, scalar) {
  * Adds two vectors. The vectors must have the same dimension.
  * @param {!Array.<number>} left the left summand
  * @param {!Array.<number>} right the right summand
- * @returns{!Array.<number>}
+ * @return{!Array.<number>}
  */
 function vectorPlusVector(left, right) {
   let output = new Array(left.length);
@@ -79,7 +79,7 @@ function vectorPlusVector(left, right) {
  * Computes the cross product of two vectors in 3d.
  * @param {!Array.<number>} left the vector on the left
  * @param {!Array.<number>} right the vector on the right
- * @returns {!Array.<number>}
+ * @return {!Array.<number>}
  */
 function vectorCrossVector(left, right) {
   return [
@@ -93,7 +93,7 @@ function vectorCrossVector(left, right) {
  * Subtracts two vectors: left-right. The vectors must have the same dimension.
  * @param {!Array.<number>} left the minuend
  * @param {!Array.<number>} right the subtrahend
- * @returns{!Array.<number>}
+ * @return{!Array.<number>}
  */
 function vectorMinusVector(left, right) {
   let output = new Array(left.length);
@@ -122,7 +122,7 @@ function vectorAddVectorTimesScalar(output, otherVector, scalar) {
  * The length of a vector = sqrt(vector dot product vector).
  *
  * @param {!Array.<number>} vector the input vector
- * @returns{number}
+ * @return{number}
  */
 function vectorLength(vector) {
   return Math.sqrt(vectorScalarVector(vector, vector));
@@ -152,7 +152,7 @@ function vectorNormalize(vector) {
  * Returns true if the vector is the zero vector,
  * false otherwise.
  * @param {!Array.<number>} vector the vector to be rescaled in place
- * @returns {boolean}
+ * @return {boolean}
  */
 function vectorIsZero(
     vector,
@@ -196,7 +196,7 @@ function accountBoundingBox(inputPoint, outputBox) {
  * @param {number} cy the y coordinate of the center of the mathematical
  *     coordinate system
  *
- * @returns{!Array.<number>}
+ * @return{!Array.<number>}
  */
 function getXYPositionOfObject(object, cx, cy) {
   let rectangle = object.getBoundingClientRect();
@@ -209,7 +209,7 @@ function getXYPositionOfObject(object, cx, cy) {
  * @param {number} g green value.
  * @param {number} b blue value.
  *
- * @returns{string}
+ * @return{string}
  */
 function colorRGBToHex(r, g, b) {
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
@@ -222,7 +222,7 @@ function colorRGBToHex(r, g, b) {
  *
  * @param {!Array<number>} inputRGB an RGB-triple of numbers.
  *
- * @returns {string}
+ * @return {string}
  */
 function colorRGBToString(inputRGB) {
   return `rgb(${inputRGB[0].toString()},${inputRGB[1].toString()},${
@@ -238,7 +238,7 @@ function colorRGBToString(inputRGB) {
  * @param {!Array<number>} inputRGB an RGB-triple of numbers.
  * @param {number} scale the scale.
  *
- * @returns {!Array<number>}
+ * @return {!Array<number>}
  */
 function colorScale(inputRGB, scale) {
   let result = [0, 0, 0];
@@ -260,7 +260,7 @@ function colorScale(inputRGB, scale) {
  * @param {string|!Array.<number>} input color, named, rgb hex value or RGB
  *     number triple.
  *
- * @returns {!Array.<number>}
+ * @return {!Array.<number>}
  */
 function colorToRGB(input) {
   if (typeof input !== 'string') {
@@ -281,7 +281,7 @@ function colorToRGB(input) {
  *
  * @param {string} color input named color.
  *
- * @returns {string}
+ * @return {string}
  */
 function colorToHex(color) {
   const colors = {
@@ -440,7 +440,7 @@ function colorToHex(color) {
  * Converts a number or string to a number.
  *
  * @param {number|string} input the number or string to be normalized
- * @returns {number}
+ * @return {number}
  */
 function numberFromNumberOfInfinity(input) {
   if (typeof input === 'string') {
@@ -460,7 +460,7 @@ function numberFromNumberOfInfinity(input) {
  *
  * @param {number|string} input the input number or string.
  *
- * @returns {string}
+ * @return {string}
  */
 function infinityType(input) {
   if (typeof input !== 'string') {
@@ -2358,7 +2358,7 @@ class CanvasTwoD {
    *
    * @param {!Array.<number>} input mathematical screen coordinates.
    *
-   * @returns {!Array.<number>}
+   * @return {!Array.<number>}
    */
   coordinatesMathScreenToMath(input) {
     let output = this.screenBasisOrthonormal[0].slice();
@@ -2373,7 +2373,7 @@ class CanvasTwoD {
    *
    * @param {!Array.<number>} vector mathematical coordinates.
    *
-   * @returns {!Array.<number>}
+   * @return {!Array.<number>}
    */
   coordinatesMathToMathScreen(vector) {
     return [
@@ -2387,7 +2387,7 @@ class CanvasTwoD {
    *
    * @param {!Array.<number>} vector mathematical coordinates.
    *
-   * @returns {!Array.<number>}
+   * @return {!Array.<number>}
    *
    * @private
    */
@@ -2407,7 +2407,7 @@ class CanvasTwoD {
    * @param {number} screenX absolute x coordinate.
    * @param {number} screenY absolute y coordinate.
    *
-   * @returns {!Array.<number>}
+   * @return {!Array.<number>}
    *
    * @private
    */
@@ -2420,7 +2420,7 @@ class CanvasTwoD {
    *
    * @param {!Array.<number>} screenPosition screen coordinates.
    *
-   * @returns {!Array.<number>}
+   * @return {!Array.<number>}
    *
    * @private
    */
@@ -2437,7 +2437,7 @@ class CanvasTwoD {
    * @param {number} screenX screen x coordinate.
    * @param {number} screenY screen y coordinate.
    *
-   * @returns {!Array.<number>}
+   * @return {!Array.<number>}
    */
   coordsScreenAbsoluteToMathScreen(screenX, screenY) {
     return this.coordsScreenToMathScreen(
@@ -2448,7 +2448,7 @@ class CanvasTwoD {
    * Converts mathematical coordinates to screen coordinates.
    *
    * @param {!Array.<number>} coordinates mathematical coordinates.
-   * @returns {!Array.<number>}
+   * @return {!Array.<number>}
    *
    * @private
    */
@@ -2555,7 +2555,7 @@ class CanvasTwoD {
    * @param {!Array.<number>} leftXY [x,y]-coordinates of first point.
    * @param {!Array.<number>} rightXY [x,y]-coordinates of the second point.
    *
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   pointsWithinClickTolerance(leftXY, rightXY) {
@@ -3246,7 +3246,7 @@ class Canvas {
    * @param{string} inputColor color of the points.
    * @param{number} inputLineWidth line width.
    *
-   * @returns {number}
+   * @return {number}
    */
   drawLine(leftPt, rightPt, inputColor, inputLineWidth) {
     let newContour = new Contour([], inputColor, inputLineWidth);
@@ -3307,7 +3307,7 @@ class Canvas {
    * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
    * @param{!Patch} patch the patch.
    *
-   * @returns{number}
+   * @return{number}
    * @private
    */
   pointRelativeToPatch(point, patch) {
@@ -3365,7 +3365,7 @@ class Canvas {
    * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
    * @param{!Patch} patch the patch.
    *
-   * @returns{boolean}
+   * @return{boolean}
    * @private
    */
   pointIsBehindPatch(point, patch) {
@@ -3378,7 +3378,7 @@ class Canvas {
    * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
    * @param{!Patch} patch the patch.
    *
-   * @returns{boolean}
+   * @return{boolean}
    */
   pointIsInFrontOfPatch(point, patch) {
     return this.pointRelativeToPatch(point, patch) === 1;
@@ -3394,7 +3394,7 @@ class Canvas {
    * @param{!Object.<number,boolean>} containerPatches the patches that can
    * occlude the point.
    *
-   * @returns{boolean}
+   * @return{boolean}
    * @private
    */
   pointIsInForeGround(point, containerPatches) {
@@ -3630,7 +3630,7 @@ class Canvas {
    * @param {!Array.<number>} pt3 the third point.
    * @param {!Array.<number>} pt4 the fourth point.
    *
-   * @returns{number}
+   * @return{number}
    * @private
    */
   getExtremePoint(indexToCompareBy, getLarger, pt1, pt2, pt3, pt4) {
@@ -3664,7 +3664,7 @@ class Canvas {
    *
    * @param {number} input the y coordinate of the point.
    *
-   * @returns{number}
+   * @return{number}
    * @private
    */
   coordsMathScreenToBufferIndicesROWSFloat(input) {
@@ -3678,7 +3678,7 @@ class Canvas {
    *
    * @param {number} input the y coordinate of the point.
    *
-   * @returns{number}
+   * @return{number}
    * @private
    */
   coordsMathScreenToBufferIndicesROWS(input) {
@@ -3695,7 +3695,7 @@ class Canvas {
    *
    * @param {number} input the x coordinate of the point.
    *
-   * @returns{number}
+   * @return{number}
    * @private
    */
   coordsMathScreenToBufferIndicesCOLSFloat(input) {
@@ -3709,7 +3709,7 @@ class Canvas {
    *
    * @param {number} input the x coordinate of the point.
    *
-   * @returns{number}
+   * @return{number}
    * @private
    */
   coordsMathScreenToBufferIndicesCOLS(input) {
@@ -3728,7 +3728,7 @@ class Canvas {
    * @param {!Array.<number>} input the [x,y]-coordinates of an orthographic
    *     projection of a point in our 3d scene.
    *
-   * @returns{!Array.<number>}
+   * @return{!Array.<number>}
    * @private
    */
   coordsMathScreenToBufferIndices(input) {
@@ -4127,7 +4127,7 @@ class Canvas {
    * @param {number} row index of the row.
    * @param {number} col index of the column.
    *
-   * @returns {!Array.<!Array<number>>}
+   * @return {!Array.<!Array<number>>}
    * @private
    */
   getBufferBox(row, col) {
@@ -4314,7 +4314,7 @@ class Canvas {
    * @param {!Array.<number>} coordinates the [x,y] coordinates in the 2d
    *     screen.
    *
-   * @returns {!Array.<number>}
+   * @return {!Array.<number>}
    * @private
    */
   coordsInjectMathScreen2dToMath3d(coordinates) {
@@ -4334,7 +4334,7 @@ class Canvas {
    * @param {!Array.<number>} vector the [x,y,z] coordinates of the point
    *     in 3d.
    *
-   * @returns {!Array.<number>}
+   * @return {!Array.<number>}
    */
   coordsProjectMathToMathSelectedScreen2d(vector) {
     return [
@@ -4350,7 +4350,7 @@ class Canvas {
    * @param {!Array.<number>} vector the [x,y,z] coordinates of the point
    *     in 3d.
    *
-   * @returns {!Array.<number>}
+   * @return {!Array.<number>}
    * @private
    */
   coordsProjectMathToMathScreen2d(vector) {
@@ -4366,7 +4366,7 @@ class Canvas {
    *
    * @param {!Array.<number>} vector the vector to be projected.
    *
-   * @returns{!Array.<number>}
+   * @return{!Array.<number>}
    */
   coordsProjectToMathScreen3d(vector) {
     let output = this.screenBasisOrthonormal[0].slice();
@@ -4385,7 +4385,7 @@ class Canvas {
    *
    * @param {!Array.<number>} vector the vector to be projected.
    *
-   * @returns{!Array.<number>}
+   * @return{!Array.<number>}
    */
   coordsProjectToSelectedMathScreen3d(vector) {
     let output = this.selectedScreenBasisOrthonormal[0].slice();
@@ -4405,7 +4405,7 @@ class Canvas {
    *
    * @param {!Array.<number>} vector the [x,y,z] coordinates of the vector.
    *
-   * @returns{!Array.<number>}
+   * @return{!Array.<number>}
    * @private
    */
   coordinatesMathToScreen(vector) {
@@ -4423,7 +4423,7 @@ class Canvas {
    *
    * @param {!Array.<number>} vector the [x,y,z] coordinates of the vector.
    *
-   * @returns{!Array.<number>}
+   * @return{!Array.<number>}
    * @private
    */
   coordsMathToSelectedScreen(vector) {
@@ -4444,7 +4444,7 @@ class Canvas {
    *
    * @param {!Array.<number>} screenPos the [x,y] coordinates on the screen.
    *
-   * @returns{!Array.<number>}
+   * @return{!Array.<number>}
    * @private
    */
   coordsScreenToMathScreen(screenPos) {
@@ -4460,7 +4460,7 @@ class Canvas {
    * @param {number} cx x coordinate of the center of the coordinae system.
    * @param {number} cy y coordinate of the center of the coordinae system.
    *
-   * @returns{!Array.<number>}
+   * @return{!Array.<number>}
    * @private
    */
   coordsScreenAbsoluteToScreen(cx, cy) {
@@ -4474,7 +4474,7 @@ class Canvas {
    * @param {number} screenX x coordinate of the center of the coordinae system.
    * @param {number} screenY y coordinate of the center of the coordinae system.
    *
-   * @returns{!Array.<number>}
+   * @return{!Array.<number>}
    * @private
    */
   coordsScreenAbsoluteToMathScreen(screenX, screenY) {
@@ -4487,7 +4487,7 @@ class Canvas {
    *
    * @param {!Array.<number>} coordinates mathematical [x,y]-coordinates.
    *
-   * @returns{!Array.<number>}
+   * @return{!Array.<number>}
    * @private
    */
   coordsMathScreenToScreen(coordinates) {
@@ -4510,7 +4510,7 @@ class Canvas {
    *     injection of the math screen.
    * @param {number} angle the angle of rotation.
    *
-   * @returns{!Array.<number>}
+   * @return{!Array.<number>}
    * @private
    */
   rotateOutOfPlane(input, orthoBasis1, orthoBasis2, angle) {
@@ -4682,7 +4682,7 @@ class Canvas {
    * @param {!Array.<number>} leftXY screen coordinates of the first point.
    * @param {!Array.<number>} rightXY screen coordinates of the second point.
    *
-   * @returns {boolean}
+   * @return {boolean}
    * @private
    */
   pointsWithinClickTolerance(leftXY, rightXY) {
@@ -5152,7 +5152,7 @@ class Drawing {
    * @param {{preventDefault: !Function, stopPropagation: !Function, detail:
    *     (number|null|undefined), wheelDelta: number, clientX: number, clientY:
    *     number}} e the mouse wheel event.
-   * @returns{{delta:number, x:number, y:number}}
+   * @return{{delta:number, x:number, y:number}}
    */
   mouseWheelCommon(e) {
     e.preventDefault();

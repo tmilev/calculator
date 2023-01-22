@@ -29,8 +29,8 @@ getLatexLink = function () {
   if (hash.indexOf("{") !== - 1) {
     hash = encodeURIComponent(hash);
   }
-  let theURL = `${firstPart}#${hash}`;
-  return latexifyLink(theURL);
+  let url = `${firstPart}#${hash}`;
+  return latexifyLink(url);
 }
 
 /** @return {string} */

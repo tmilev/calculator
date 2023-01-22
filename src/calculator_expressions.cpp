@@ -4160,33 +4160,33 @@ bool Expression::toStringEndStatement(
     (*outputJS)["output"].elementType = JSData::token::tokenArray;
   }
   for (int i = 1; i < this->size(); i ++) {
-    const Expression currentE = (*this)[i];
+    const Expression expression = (*this)[i];
     if (createTable) {
       this->toStringEndStatementOneRow(
         out, startingExpression, outputJS, i, isFinal, *format
       );
     } else {
-      bool addLatexDelimiter = !currentE.isOfType<JSData>();
+      bool addLatexDelimiter = !expression.isOfType<JSData>();
       std::stringstream outWithDelimiter;
       if (createSingleTable) {
         out << "<tr><td>\n";
-        addLatexDelimiter = !currentE.hasType<Plot>() &&
-        !currentE.isOfType<JSData>();
+        addLatexDelimiter = !expression.hasType<Plot>() &&
+        !expression.isOfType<JSData>();
         if (addLatexDelimiter) {
           outWithDelimiter << "\\(";
         }
       }
-      outWithDelimiter << currentE.toString(format);
+      outWithDelimiter << expression.toString(format);
       if (createSingleTable && addLatexDelimiter) {
         outWithDelimiter << "\\)";
       }
-      outWithDelimiter << currentE.toStringAllSlidersInExpression();
+      outWithDelimiter << expression.toStringAllSlidersInExpression();
       out << outWithDelimiter.str();
       if (outputJS != nullptr) {
         (*outputJS)["output"][i] = outWithDelimiter.str();
       }
       if (createSingleTable) {
-        out << "</td><tr>\n";
+        out << "</td></tr>\n";
       }
       if (i != this->size() - 1 && !createSingleTable) {
         out << ";";

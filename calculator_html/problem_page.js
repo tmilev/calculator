@@ -190,6 +190,7 @@ class ProblemCollection {
       "buttonSelectPage", "buttonSlowTransition", "buttonFlash"
     );
     button.style.width = "150px";
+    const page = window.calculator.mainPage;
     button.addEventListener("click", () => {
       page.selectPage('currentCourse');
     });
@@ -438,9 +439,9 @@ class Problem {
     }
     this.flagForReal = problemData["forReal"];
     this.setRandomSeed(problemData.randomSeed);
-    for (let counterAnswers = 0; counterAnswers < answerVectors.length; counterAnswers++) {
-      let currentVector = answerVectors[counterAnswers];
-      this.answerPanels[counterAnswers] = new AnswerPanel({
+    for (let i = 0; i < answerVectors.length; i++) {
+      let currentVector = answerVectors[i];
+      this.answerPanels[i] = new AnswerPanel({
         problemId: this.problemId,
         forReal: this.flagForReal,
         properties: currentVector.properties,

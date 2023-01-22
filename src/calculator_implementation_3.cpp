@@ -1004,7 +1004,7 @@ bool Calculator::Test::processResults() {
   }
   if (this->inconsistencies > 0) {
     out
-    << "<b style = 'color:red'>"
+    << "<b style='color:red'>"
     << "The test file results do not match the current results. </b>"
     << "There were "
     << this->inconsistencies
@@ -1016,7 +1016,7 @@ bool Calculator::Test::processResults() {
     << " and rerun the present test to store the expected results. "
     << "Alternatively, run: ./calculator test update";
     out
-    << "<table class = 'tableCalculatorOutput'>"
+    << "<table class='tableCalculatorOutput'>"
     << badCommands.str()
     << "</table>";
     global

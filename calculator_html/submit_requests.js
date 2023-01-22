@@ -6,12 +6,12 @@ const panels = require('./panels');
 
 function convertStringToHtml(input) {
   let result = "";
-  for (let counter = 0; counter < input.length; counter++) {
-    if (input[counter] === '&') {
+  for (let i = 0; i < input.length; i++) {
+    if (input[i] === '&') {
       result += '&amp;';
       continue;
     }
-    result += input[counter];
+    result += input[i];
   }
   return result;
 }
@@ -119,7 +119,6 @@ class RequestWithProgress {
       this.progress = document.getElementById(ids.domElements.spanProgressReportGeneral);
     }
     this.output = output;
-    // this.progress = progress;
     this.callback = callback;
     /** @type{{dontCollapsePanel:boolean, width:number}} */
     this.panelOptions = panelOptions;
@@ -255,7 +254,14 @@ function submitGET(
   if (inputObject.panelOptions !== undefined) {
     panelOptions = inputObject.panelOptions;
   }
-  let request = new RequestWithProgress(address, result, false, progress, callback, panelOptions);
+  let request = new RequestWithProgress(
+    address,
+    result,
+    false,
+    progress,
+    callback,
+    panelOptions,
+  );
   request.sendGET();
 }
 
@@ -263,7 +269,7 @@ function submitPOST(
   /** @type {{url: string, parameters: string, callback: Function, progress: string, result: string}}*/
   inputObject,
 ) {
-  let theAddress = correctAddress(inputObject.url);
+  let address = correctAddress(inputObject.url);
   let progress = inputObject.progress;
   let result = inputObject.result;
   let callback = inputObject.callback;
@@ -272,7 +278,7 @@ function submitPOST(
   if (inputObject.panelOptions !== undefined) {
     panelOptions = inputObject.panelOptions;
   }
-  let request = new RequestWithProgress(theAddress, result, true, progress, callback, panelOptions);
+  let request = new RequestWithProgress(address, result, true, progress, callback, panelOptions);
   request.sendPOST(parameters);
 }
 

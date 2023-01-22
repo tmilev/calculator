@@ -314,10 +314,10 @@ class AnswerPanel {
 
   showSolution() {
     let request = "";
-    let thePage = window.calculator.mainPage;
-    let currentProblem = thePage.getProblemById(this.problemId);
+    let page = window.calculator.mainPage;
+    let currentProblem = page.getProblemById(this.problemId);
     if (!this.flagForReal) {
-      if (thePage.isLoggedIn()) {
+      if (page.isLoggedIn()) {
         request += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolution}&`;
       } else {
         request += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolutionNoLogin}&`;
@@ -331,9 +331,9 @@ class AnswerPanel {
 
   submitAnswers() {
     let request = "";
-    let thePage = window.calculator.mainPage;
-    let currentProblem = thePage.getProblemById(this.problemId);
-    if (thePage.isLoggedIn()) {
+    let page = window.calculator.mainPage;
+    let currentProblem = page.getProblemById(this.problemId);
+    if (page.isLoggedIn()) {
       if (this.flagForReal) {
         request = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
       } else {
@@ -352,10 +352,10 @@ class AnswerPanel {
   }
 
   submitGiveUp() {
-    let thePage = window.calculator.mainPage;
-    let currentProblem = thePage.getProblemById(this.problemId);
+    let page = window.calculator.mainPage;
+    let currentProblem = page.getProblemById(this.problemId);
     let theRequest = "";
-    if (thePage.isLoggedIn()) {
+    if (page.isLoggedIn()) {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUp}&`;
     } else {
       theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUpNoLogin}&`;
@@ -368,10 +368,10 @@ class AnswerPanel {
   }
 
   submitPreview() {
-    let thePage = window.calculator.mainPage;
+    let page = window.calculator.mainPage;
     let theRequest = "";
-    let currentProblem = thePage.getProblemById(this.problemId);
-    if (thePage.isLoggedIn()) {
+    let currentProblem = page.getProblemById(this.problemId);
+    if (page.isLoggedIn()) {
       if (this.flagForReal) {
         theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
       } else {

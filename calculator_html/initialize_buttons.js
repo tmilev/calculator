@@ -51,11 +51,11 @@ function initializeAccordionButtons() {
   if (localStorage !== undefined) {
     if (localStorage.panels !== undefined) {
       panelsCollapseStatus = JSON.parse(localStorage.panels)
-      let theProps = Object.getOwnPropertyNames(panelsCollapseStatus);
-      for (let i = 0; i < theProps.length; i++) {
-        let current = panelsCollapseStatus[theProps[i]];
+      let props = Object.getOwnPropertyNames(panelsCollapseStatus);
+      for (let i = 0; i < props.length; i++) {
+        let current = panelsCollapseStatus[props[i]];
         if (current.isCollapsed) {
-          panels.toggleHeight(document.getElementById(current.button), theProps[i]);
+          panels.toggleHeight(document.getElementById(current.button), props[i]);
         }
       }
     }
@@ -65,9 +65,9 @@ function initializeAccordionButtons() {
     acc[i].onclick = function () {
       if (this.firstLoad === undefined) {
         this.firstLoad = true;
-        let theDeadlines = this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
-        for (let j = 0; j < theDeadlines.length; j++) {
-          datePicker.createDatePicker(theDeadlines[j].id);
+        let deadlines = this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
+        for (let j = 0; j < deadlines.length; j++) {
+          datePicker.createDatePicker(deadlines[j].id);
         }
         this.nextElementSibling.style.display = "inline-block";
       }

@@ -424,7 +424,7 @@ class Page {
     //Initialize global variables
     //////////////////////////////////////
     //////////////////////////////////////
-    this.theCourses = {};
+    this.courses = {};
     this.logoutRequestFromUrl = null;
     this.locationRequestFromUrl = null;
     this.storage.loadSettings();

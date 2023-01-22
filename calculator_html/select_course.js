@@ -6,59 +6,64 @@ const ids = require("./ids_dom_elements");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
 
 function selectCourse(courseIndex) {
-  var thePage = window.calculator.mainPage;
-  var theCourse = thePage.theCourses[courseIndex];
-  thePage.storage.variables.currentCourse.courseHome.setAndStore(theCourse.courseHome);
-  thePage.storage.variables.currentCourse.topicList.setAndStore(theCourse.topicList);
-  thePage.selectPage(thePage.pages.currentCourse.name);
+  const page = window.calculator.mainPage;
+  const course = page.courses[courseIndex];
+  page.storage.variables.currentCourse.courseHome.setAndStore(course.courseHome);
+  page.storage.variables.currentCourse.topicList.setAndStore(course.topicList);
+  page.selectPage(page.pages.currentCourse.name);
 }
 
 function afterLoadSelectCoursePage(incomingPage, result) {
-  var result = [];
-  var thePage = window.calculator.mainPage;
-  thePage.theCourses = JSON.parse(incomingPage)["courses"];
+  result = [];
+  const page = window.calculator.mainPage;
+  page.courses = JSON.parse(incomingPage)["courses"];
   pageSetup.needsLoad = false;
 
-  var userHasProblemEditRights = thePage.user.hasProblemEditRights();
+  let userHasProblemEditRights = page.user.hasProblemEditRights();
   if (userHasProblemEditRights) {
-    var problemInfoBar = document.createElement("div");
+    let problemInfoBar = document.createElement("div");
     problemInfoBar.className = "problemInfoBar";
-    problemInfoBar.appendChild(editPage.getEditPanel("/coursesavailable/default.txt", thePage.hasInstructorRightsNotViewingAsStudent(), false));
+    let editPanel = editPage.getEditPanel(
+      "/coursesavailable/default.txt",
+      page.hasInstructorRightsNotViewingAsStudent(),
+      false,
+    );
+    problemInfoBar.appendChild(editPanel);
     result.push(problemInfoBar);
   }
-  var courseContainer = document.createElement("div");
+  let courseContainer = document.createElement("div");
   courseContainer.style.textAlign = "center";
   courseContainer.style.width = "100%";
-  for (var counterCourses = 0; counterCourses < thePage.theCourses.length; counterCourses++) {
-    var currentCourse = thePage.theCourses[counterCourses];
-    var isRoughDraft = false;
+  for (let i = 0; i < page.courses.length; i++) {
+    let currentCourse = page.courses[i];
+    let isRoughDraft = false;
     if (currentCourse.roughDraft === "true" || currentCourse.roughDraft === true) {
       isRoughDraft = true;
-      if (!thePage.serverIsOnLocalHost() && !userHasProblemEditRights) {
+      if (!page.serverIsOnLocalHost() && !userHasProblemEditRights) {
         continue;
       }
     }
-    var editButton = document.createElement("button");
+    let editButton = document.createElement("button");
     editButton.className = "courseButton";
-    editButton.addEventListener("click", selectCourse.bind(null, counterCourses));
-    var editButtonInternal = "";
+    editButton.addEventListener("click", selectCourse.bind(null, i));
+    let editButtonInternal = "";
     editButtonInternal += `${currentCourse.title}`;
     if (isRoughDraft) {
       editButtonInternal += "<b style = 'color:red; font-size: x-small'>rough draft</b>";
     }
     editButton.innerHTML = editButtonInternal;
     courseContainer.appendChild(editButton);
-    if (counterCourses != thePage.theCourses.length - 1) {
+    if (i != page.courses.length - 1) {
       courseContainer.appendChild(document.createElement("br"));
     }
   }
   result.push(courseContainer);
-  var divSelectcourse = document.getElementById("divSelectCourse");
+  let divSelectcourse = document.getElementById("divSelectCourse");
   divSelectcourse.innerHTML = "";
   miscellaneousFrontend.appendHtml(divSelectcourse, result);
 }
 
-var pageSetup = {
+const pageSetup = {
   needsLoad: true,
 };
 

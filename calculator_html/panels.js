@@ -65,11 +65,11 @@ function transitionDone(event) {
   if (this.transitionState === "collapsing") {
     this.style.display = "none";
     this.transitionState = "collapsed";
-    window.frontend.thePage.storeOneCollapsiblePanelSettings(this, true);
+    window.frontend.page.storeOneCollapsiblePanelSettings(this, true);
   } else if (this.transitionState === "expanding") {
     this.style.display = "";
     this.transitionState = "expanded";
-    window.frontend.thePage.storeOneCollapsiblePanelSettings(this, false);
+    window.frontend.page.storeOneCollapsiblePanelSettings(this, false);
   }
 }
 

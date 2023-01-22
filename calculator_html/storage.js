@@ -1,5 +1,6 @@
 "use strict";
 const ids = require("./ids_dom_elements");
+const pathnames = require("./pathnames");
 const cookies = require("./cookies");
 const configuration = require("./configuration");
 
@@ -484,6 +485,7 @@ class StorageCalculator {
     let incomingHashRaw = this.getPercentEncodedURL(this.urlObject);
 
     if (incomingHashRaw !== this.currentHashRaw) {
+      //window.history.pushState(null, "", pathnames.urls.appWithCache + "?" + incomingHashRaw);
       window.location.hash = incomingHashRaw;
       this.currentHashRaw = incomingHashRaw;
     }

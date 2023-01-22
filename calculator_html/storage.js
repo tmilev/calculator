@@ -406,7 +406,7 @@ class StorageCalculator {
       }),
     };
     this.currentHashRaw = "";
-    this.currenTHashDecoded = "";
+    this.currentHashDecoded = "";
     this.urlObject = {};
   }
 
@@ -434,25 +434,34 @@ class StorageCalculator {
   }
 
   parseURL() {
-    try {
+    let newHash = window.location.search;
+    if (newHash === "") {
+      // The query parameters is empty. In the past, the calculator used
+      // the hash parameter for the same purpose as the query parameter.
+      // Perhaps we have an old link pointing here?
+      newHash = window.location.hash;
+    }
+    if (
+      this.currentHashRaw === newHash
+    ) {
+      return;
+    }
+    this.currentHashRaw = newHash;
+    try {  
+      this.currentHashDecoded = decodeURIComponent(this.currentHashRaw);
       if (
-        this.currentHashRaw === window.location.hash
+        this.currentHashDecoded.startsWith('#') ||
+        this.currentHashDecoded.startsWith("?")
       ) {
-        return;
+        this.currentHashDecoded = this.currentHashDecoded.slice(1);
       }
-      this.currentHashRaw = window.location.hash;
-      this.currenTHashDecoded = decodeURIComponent(this.currentHashRaw);
-      if (this.currenTHashDecoded.startsWith('#')) {
-        this.currenTHashDecoded = this.currenTHashDecoded.slice(1);
-      }
-      if (this.currenTHashDecoded === "") {
-        this.urlObject = {
-        };
+      if (this.currentHashDecoded === "") {
+        this.urlObject = {};
       } else {
-        this.urlObject = JSON.parse(this.currenTHashDecoded);
+        this.urlObject = JSON.parse(this.currentHashDecoded);
       }
     } catch (e) {
-      console.log(`Failed to parse your url hash ${this.currenTHashDecoded} obtained from ${window.location.hash}.${e}.`);
+      console.log(`Failed to parse your url hash ${this.currentHashDecoded} obtained from ${this.currentHashRaw}.${e}.`);
     }
   }
 
@@ -485,8 +494,8 @@ class StorageCalculator {
     let incomingHashRaw = this.getPercentEncodedURL(this.urlObject);
 
     if (incomingHashRaw !== this.currentHashRaw) {
-      //window.history.pushState(null, "", pathnames.urls.appWithCache + "?" + incomingHashRaw);
-      window.location.hash = incomingHashRaw;
+      const newURL = `${pathnames.urls.appWithCache}?${incomingHashRaw}`;
+      window.history.pushState(null, "", newURL);
       this.currentHashRaw = incomingHashRaw;
     }
   }

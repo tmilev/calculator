@@ -18,9 +18,9 @@ let transformersStandard = {
 };
 
 function writeJSONtoDOMComponent(
-  /**@type{Object} */
+  /** @type{Object} */
   inputObject,
-  /**@type{HTMLElement|string} */
+  /** @type{HTMLElement|string} */
   domComponent,
 ) {
   if (typeof domComponent === "string") {
@@ -59,7 +59,7 @@ class JSONToHTML {
   }
 
   getOptionFromLabel(
-    /**@type {String[]} */
+    /** @type {String[]} */
     currentLabelsGeneralized,
   ) {
     if (this.optionsConstant.transformers === null || this.optionsConstant.transformers === undefined) {
@@ -80,9 +80,9 @@ class JSONToHTML {
   getButtonFromLabels(
     input,
     inputTransformed,
-    /**@type {String[]} */
+    /** @type {String[]} */
     currentLabels,
-    /**@type {Function} */
+    /** @type {Function} */
     clickHandler,
   ) {
     statistics.buttonsGenerated++;
@@ -110,12 +110,12 @@ class JSONToHTML {
     return panelContainer;
   }
 
-  /**@returns{HTMLElement} */
+  /** @return{HTMLElement} */
   getSingleEntry(
     input,
-    /**@type {String[]} */
+    /** @type {String[]} */
     currentLabels,
-    /**@type {String[]} */
+    /** @type {String[]} */
     currentLabelsGeneralized,
   ) {
     let currentOption = this.getOptionFromLabel(currentLabelsGeneralized);
@@ -145,12 +145,12 @@ class JSONToHTML {
     return this.getToggleButton(input, inputTransformed);
   }
 
-  /**@returns{HTMLElement} */
+  /** @return{HTMLElement} */
   getTableHorizontallyLaidFromJSON(
     input,
-    /**@type {String[]} */
+    /** @type {String[]} */
     currentLabels,
-    /**@type {String[]} */
+    /** @type {String[]} */
     currentLabelsGeneralized,
   ) {
     let inputType = typeof input;
@@ -168,9 +168,9 @@ class JSONToHTML {
     return result;
   }
 
-  /**@returns{HTMLElement} */
+  /** @return{HTMLElement} */
   getErrorElement(
-    /**@type{string} */
+    /** @type{string} */
     message,
   ) {
     let result = document.createElement("b");
@@ -179,12 +179,12 @@ class JSONToHTML {
     return result;
   }
 
-  /**@returns{HTMLElement} */
+  /** @return{HTMLElement} */
   getTableHorizontallyLaidFromArray(
     input,
-    /**@type {String[]} */
+    /** @type {String[]} */
     currentLabels,
-    /**@type {String[]} */
+    /** @type {String[]} */
     currentLabelsGeneralized,
   ) {
     if (!Array.isArray(input)) {
@@ -214,12 +214,12 @@ class JSONToHTML {
     return table;
   }
 
-  /**@returns{HTMLElement} */
+  /** @return{HTMLElement} */
   getTableHorizontallyLaidFromObject(
     input,
-    /**@type {String[]} */
+    /** @type {String[]} */
     currentLabels,
-    /**@type {String[]} */
+    /** @type {String[]} */
     currentLabelsGeneralized,
   ) {
     if (typeof input !== "object") {
@@ -264,11 +264,11 @@ class JSONToHTML {
     return result;
   }
 
-  /**@returns{HtmlElement} */
+  /** @return{HtmlElement} */
   getTableFromObject(
     input,
     optionsConstant,
-    /**@type {{table: String, forceRowLayout: Boolean}} */
+    /** @type {{table: String, forceRowLayout: Boolean}} */
     optionsModified,
   ) {
     this.inputParsed = input;
@@ -311,9 +311,9 @@ class JSONToHTML {
     return result;
   }
 
-  /**@returns{HTMLElement} */
+  /** @return{HTMLElement} */
   getTinyLabel(
-    /**@type{string} */
+    /** @type{string} */
     content,
   ) {
     let result = document.createElement("tiny");
@@ -321,14 +321,14 @@ class JSONToHTML {
     return result;
   }
 
-  /**@return{HTMLElement} */
+  /** @return{HTMLElement} */
   getHtmlElementFromArray(
     inputJSON,
   ) {
     if (!Array.isArray(inputJSON)) {
       return document.createElement("span");
     }
-    /**@type{HTMLTableElement} */
+    /** @type{HTMLTableElement} */
     let table = document.createElement("table");
     table.className = "tableJSON";
     this.labelsRows = getLabelsRows(inputJSON);

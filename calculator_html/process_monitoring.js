@@ -11,7 +11,7 @@ class Monitor {
     this.timeIncrement = 2;
     this.timeOutOldCounter = 0;
     this.timeOutCounter = 0;
-    /**@type{string} */
+    /** @type{string} */
     this.currentWorkerId = "";
     this.currentTimeOutHandler = null;
     this.ownerCalculator = null;
@@ -22,7 +22,7 @@ class Monitor {
   }
 
   start(
-    /**@type{String} */
+    /** @type{String} */
     workerId,
   ) {
     this.isFinished = false;

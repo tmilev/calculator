@@ -167,7 +167,9 @@ let domElements = {
   },
   menu: {
     buttonToggleTheMainMenu: "buttonToggleTheMainMenu",
+    divMainMenuPanel: "divMainMenuPanel",
   },
+  divProfilePicture: "divProfilePicture",
   calculatorExamples: "divCalculatorExamples",
   spanProgressReportGeneral: "spanProgressReportGeneral",
   spanUserIdInActivateAccountPage: "spanUserIdInActivateAccountPage",

@@ -20,12 +20,12 @@ function modifyDeadlines(incomingId) {
     let currentSection = page.user.sectionsTaught[counterDates];
     jsonToSubmit[idDecoded].deadlines[currentSection] = theDates[counterDates].value;
   }
-  let theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?`;
-  theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemDeadline}&`;
-  theURL += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
+  let url = "";
+  url += `${pathnames.urls.calculatorAPI}?`;
+  url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemDeadline}&`;
+  url += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     progress: ids.domElements.spanProgressReportGeneral,
     result: `deadlines${incomingId}`,
   });
@@ -107,12 +107,12 @@ function loadTopicList(callback) {
   }
   let topicName = page.storage.variables.currentCourse.topicList.getValue();
   let courseHome = page.storage.variables.currentCourse.courseHome.getValue();
-  let theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicListRequest}&`;
-  theURL += `${pathnames.urlFields.problem.topicList}=${topicName}&`;
-  theURL += `${pathnames.urlFields.problem.courseHome}=${courseHome}&`;
+  let url = "";
+  url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicListRequest}&`;
+  url += `${pathnames.urlFields.problem.topicList}=${topicName}&`;
+  url += `${pathnames.urlFields.problem.courseHome}=${courseHome}&`;
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     callback: callback,
     progress: ids.domElements.spanProgressReportGeneral
   });
@@ -158,12 +158,12 @@ function selectCurrentCoursePage() {
   if (page.user.flagLoggedIn) {
     topicRequest = "templateJSON";
   }
-  let theURL = "";
-  theURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicRequest}&`;
-  theURL += `${pathnames.urlFields.problem.courseHome}=${incomingCourse}&`;
-  theURL += `${pathnames.urlFields.problem.topicList}=${incomingTopicList}`;
+  let url = "";
+  url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicRequest}&`;
+  url += `${pathnames.urlFields.problem.courseHome}=${incomingCourse}&`;
+  url += `${pathnames.urlFields.problem.topicList}=${incomingTopicList}`;
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     callback: afterLoadCoursePage,
     progress: ids.domElements.spanProgressReportGeneral
   });

@@ -57,7 +57,7 @@ class Browserifier {
   }
 
   require(
-    /**@type{string} */
+    /** @type{string} */
     inputFileName,
   ) {
     let currentSource = this.sanitizedFileNameContents[inputFileName];

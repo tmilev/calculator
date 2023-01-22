@@ -161,7 +161,7 @@ class Addresses {
 
   /** @returns{string} */
   calculatorComputation(
-    /**@type{string} */
+    /** @type{string} */
     input,
   ) {
     let url = {
@@ -174,9 +174,9 @@ class Addresses {
 
   /** @returns{string} */
   solveJSON(
-    /**@type{string} */
+    /** @type{string} */
     problem,
-    /**@type{boolean} */
+    /** @type{boolean} */
     debug,
   ) {
     let result = `${urls.calculatorAPI}?`;
@@ -190,11 +190,11 @@ class Addresses {
   }
 
   compareExpressions(
-    /**@type{string} */
+    /** @type{string} */
     given,
-    /**@type{string} */
+    /** @type{string} */
     desired,
-    /**@type{boolean} */
+    /** @type{boolean} */
     debug,
   ) {
     let result = `${urls.calculatorAPI}?`;
@@ -210,13 +210,13 @@ class Addresses {
   }
 
   submitAnswerHardcoded(
-    /**@type{string} */
+    /** @type{string} */
     answerId,
-    /**@type{string} */
+    /** @type{string} */
     answerGiven,
-    /**@type{string} */
+    /** @type{string} */
     answerCheck,
-    /**@type{boolean} */
+    /** @type{boolean} */
     debug,
   ) {
     let result = `${urls.calculatorAPI}?`;

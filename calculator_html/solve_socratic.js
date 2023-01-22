@@ -12,17 +12,17 @@ let idsSocratic = {
 
 class SolverSocratic {
   constructor() {
-    /**@type{EquationEditor|null} */
+    /** @type{EquationEditor|null} */
     this.equationEditor = null;
-    /**@type{InputPanelData|null} */
+    /** @type{InputPanelData|null} */
     this.panel = null;
-    /**@type{string|null} */
+    /** @type{string|null} */
     this.pendingTypeset = null;
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     this.debugDiv = document.getElementById(ids.domElements.pages.solveSocratic.editorSolveProblemDebug);
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     this.flagPendingSolutionTypeset = false;
-    /**@type{HTMLOptionElement} */
+    /** @type{HTMLOptionElement} */
     this.backendElement = document.getElementById(idsSocratic.socraticBackendServer);
     if (this.backendElement !== null) {
       this.backendElement.addEventListener("change", () => {
@@ -30,14 +30,14 @@ class SolverSocratic {
         this.setAnchor(this.inputElement().value);
       });
     }
-    /**@type{HTMLButtonElement} */
+    /** @type{HTMLButtonElement} */
     this.buttonSolve = document.getElementById(ids.domElements.pages.solveSocratic.buttonMain);
     if (this.buttonSolve !== null) {
       this.buttonSolve.addEventListener('click', () => {
         this.solve();
       });
     }
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     this.socraticSolution = document.getElementById(ids.domElements.pages.solveSocratic.solution);
     /** @type{string} 
      * We store our socratic key with byte entries shifted so it does not appear in the javascript as plain text. 
@@ -56,7 +56,7 @@ class SolverSocratic {
     return result;
   }
 
-  /**@returns{HTMLInputElement} */
+  /** @return{HTMLInputElement} */
   inputElement() {
     return document.getElementById(ids.domElements.pages.solveSocratic.input);
   }
@@ -143,27 +143,27 @@ class SolverSocratic {
   }
 
   valueChange(
-    /**@type{string} */
+    /** @type{string} */
     text,
   ) {
     this.setAnchor(text);
     storage.variables.solveSocratic.problemToAutoSolve.setAndStore(text, true, false);
   }
 
-  /**@returns{string} */
+  /** @return{string} */
   getBackend() {
     return this.backendElement.value;
   }
 
-  /**@returns{string} */
+  /** @return{string} */
   getSocraticLinkDefault(
   ) {
     return this.getSocraticLink(this.inputElement().value);
   }
 
-  /**@returns{string} */
+  /** @return{string} */
   getSocraticLink(
-    /**@type{string} */
+    /** @type{string} */
     latex,
   ) {
     let encoded = encodeURIComponent(latex);
@@ -172,7 +172,7 @@ class SolverSocratic {
   }
 
   setAnchor(
-    /**@type{string} */
+    /** @type{string} */
     text,
   ) {
     let anchor = document.getElementById(ids.domElements.pages.solveSocratic.link);
@@ -199,7 +199,7 @@ class SolverSocratic {
     });
   }
   solveCallback(
-    /**@type{string} */ text
+    /** @type{string} */ text
   ) {
     this.socraticSolution.textContent = text;
 

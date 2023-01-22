@@ -13,37 +13,37 @@ const datePicker = require("./date_picker").datePicker;
 let charsToSplit = ['x', 'y'];
 let panelsCollapseStatus = {};
 
-function processMathQuillLatex(theText) {
-  for (let i = 0; i < theText.length; i++) {
-    if (i + 1 < theText.length) {
-      if ((theText[i] === '_' || theText[i] === '^') && theText[i + 1] !== '{') {
-        theText = theText.slice(0, i + 1) + '{' + theText[i + 1] + '}' + theText.slice(i + 2);
+function processMathQuillLatex(inputText) {
+  for (let i = 0; i < inputText.length; i++) {
+    if (i + 1 < inputText.length) {
+      if ((inputText[i] === '_' || inputText[i] === '^') && inputText[i + 1] !== '{') {
+        inputText = inputText.slice(0, i + 1) + '{' + inputText[i + 1] + '}' + inputText.slice(i + 2);
       }
-      if (theText[i] === '\\' && theText[i + 1] === '\\') {
-        theText = theText.slice(0, i + 2) + ' ' + theText.slice(i + 2);
+      if (inputText[i] === '\\' && inputText[i + 1] === '\\') {
+        inputText = inputText.slice(0, i + 2) + ' ' + inputText.slice(i + 2);
       }
     }
   }
   if (charsToSplit !== undefined) {
-    for (let i = 0; i < theText.length - 1; i++) {
+    for (let i = 0; i < inputText.length - 1; i++) {
       for (let j = 0; j < charsToSplit.length; j++) {
         if (
-          theText[i] === charsToSplit[j] && theText[i + 1] !== ' ' &&
-          theText[i + 1] !== '\\' && theText[i + 1] !== '+' &&
-          theText[i + 1] !== '*' && theText[i + 1] !== '/' &&
-          theText[i + 1] !== '-' && theText[i + 1] !== '='
+          inputText[i] === charsToSplit[j] && inputText[i + 1] !== ' ' &&
+          inputText[i + 1] !== '\\' && inputText[i + 1] !== '+' &&
+          inputText[i + 1] !== '*' && inputText[i + 1] !== '/' &&
+          inputText[i + 1] !== '-' && inputText[i + 1] !== '='
         ) {
-          if (theText[i] === 'x') {
-            if (theText.slice(i - 5, i + 1) === 'matrix') {
+          if (inputText[i] === 'x') {
+            if (inputText.slice(i - 5, i + 1) === 'matrix') {
               continue;
             }
           }
-          theText = theText.slice(0, i + 1) + " " + theText.slice(i + 1);
+          inputText = inputText.slice(0, i + 1) + " " + inputText.slice(i + 1);
         }
       }
     }
   }
-  return theText;
+  return inputText;
 }
 
 function initializeAccordionButtons() {
@@ -77,19 +77,9 @@ function initializeAccordionButtons() {
   }
 }
 
-function initializeButtons() {
-  initializeAccordionButtons();
-  let buttonToggleMainMenu = document.getElementById(
-    ids.domElements.menu.buttonToggleTheMainMenu
-  );
-  buttonToggleMainMenu.addEventListener('click', () => {
-    panels.toggleMenu();
-  });
-}
-
 class ButtonCollection {
   constructor(
-    /**@type {Object} */
+    /** @type {Object} */
     keywords
   ) {
     this.selected = false;
@@ -121,7 +111,7 @@ class InputPanelData {
     if (this.idEquationEditorElement === "") {
       this.idEquationEditorElement = "";
     }
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.equationEditorContainer = null;
     if (input.equationEditorContainer !== undefined) {
       this.equationEditorContainer = input.equationEditorContainer;
@@ -131,12 +121,12 @@ class InputPanelData {
       this.problemId = "";
     }
     this.idPureLatex = input.idPureLatex;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.pureLatexElement = null;
     if (input.pureLatexElement !== undefined && input.pureLatexElement !== null) {
       this.pureLatexElement = input.pureLatexElement;
     }
-    /**@type{EquationEditorButtonFactory[]} */
+    /** @type{EquationEditorButtonFactory[]} */
     this.buttonFactories = [];
     this.valueChangeHandler = null;
     if (input.valueChangeHandler !== undefined) {
@@ -235,14 +225,14 @@ class InputPanelData {
         "matrices": true,
       }),
     };
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.buttonSubmitHardCoded = input.buttonSubmitHardCoded;
     if (this.buttonSubmitHardCoded === undefined) {
       this.buttonSubmitHardCoded = null;
     }
-    /**@type{string} */
+    /** @type{string} */
     this.idButtonContainer = input.idButtonContainer;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.buttonContainer = input.buttonContainer;
     if (this.buttonContainer === undefined || this.buttonContainer === null) {
       this.buttonContainer = document.getElementById(this.idButtonContainer);
@@ -279,7 +269,7 @@ class InputPanelData {
         console.log("Missing key: " + key);
       }
     }
-    /**@type{EquationEditor|null} */
+    /** @type{EquationEditor|null} */
     this.equationEditor = null;
     this.ignoreNextEditorEvent = false;
     this.flagAnswerPanel = input.flagAnswerPanel;
@@ -296,7 +286,7 @@ class InputPanelData {
     }
   }
 
-  /**@returns{HTMLElement|null} */
+  /** @return{HTMLElement|null} */
   getButtonContainer() {
     if (this.buttonContainer !== null) {
       return this.buttonContainer;
@@ -305,7 +295,7 @@ class InputPanelData {
     return this.buttonContainer;
   }
 
-  /**@returns{HTMLElement|null} */
+  /** @return{HTMLElement|null} */
   getEditorContainer() {
     if (this.equationEditorContainer !== null && this.equationEditorContainer !== undefined) {
       return this.equationEditorContainer;
@@ -314,7 +304,7 @@ class InputPanelData {
     return this.equationEditorContainer;
   }
 
-  /**@returns{HTMLElement|null} */
+  /** @return{HTMLElement|null} */
   getPureLatexElement() {
     if (this.pureLatexElement !== null && this.pureLatexElement !== undefined) {
       return this.pureLatexElement;
@@ -332,9 +322,9 @@ class InputPanelData {
   }
 
   editLatexHook(
-    /**@type{EquationEditor} */
+    /** @type{EquationEditor} */
     editor,
-    /**@type{equation_editor.MathNode} */
+    /** @type{equation_editor.MathNode} */
     unusedNode,
   ) {
     if (this.ignoreNextEditorEvent) {
@@ -387,7 +377,7 @@ class InputPanelData {
   }
 
   computeFlags(
-    /**@type {boolean} */
+    /** @type {boolean} */
     forceShowAll,
   ) {
     let currentButtonPanel = this.getButtonContainer();
@@ -418,11 +408,11 @@ class InputPanelData {
   }
 
   addLatexCommand(
-    /**@type{string} */
+    /** @type{string} */
     command,
-    /**@type{string} */
+    /** @type{string} */
     label,
-    /**@type{string} */
+    /** @type{string} */
     additionalStyle,
   ) {
     let buttonFactory = new EquationEditorButtonFactory(
@@ -432,11 +422,11 @@ class InputPanelData {
   }
 
   addKeySequence(
-    /**@type{string[]} */
+    /** @type{string[]} */
     keys,
-    /**@type{string} */
+    /** @type{string} */
     label,
-    /**@type{string} */
+    /** @type{string} */
     additionalStyle,
   ) {
     let buttonFactory = new EquationEditorButtonFactory(
@@ -449,9 +439,9 @@ class InputPanelData {
   }
 
   addButtons(
-    /**@type{boolean} */
+    /** @type{boolean} */
     forceShowAll,
-    /**@type{boolean} */
+    /** @type{boolean} */
     forceShowNone,
   ) {
     this.buttonFactories = [];
@@ -547,9 +537,9 @@ class InputPanelData {
   }
 
   initializePartTwo(
-    /**@type{boolean} */
+    /** @type{boolean} */
     forceShowAll,
-    /**@type{boolean} */
+    /** @type{boolean} */
     forceShowNone,
   ) {
     if (this.idEquationEditorElement === ids.domElements.pages.solve.editor) {
@@ -605,7 +595,7 @@ class InputPanelData {
     return false;
   }
 
-  /**@returns{HTMLButtonElement} */
+  /** @return{HTMLButtonElement} */
   getShowAllToggle() {
     let toggle = document.createElement("button");
     toggle.addEventListener(
@@ -620,7 +610,7 @@ class InputPanelData {
     return toggle;
   }
 
-  /**@returns{HTMLButtonElement} */
+  /** @return{HTMLButtonElement} */
   getShowNoneToggle() {
     let toggle = document.createElement("button");
     toggle.addEventListener(
@@ -635,7 +625,7 @@ class InputPanelData {
     return toggle;
   }
 
-  /**@returns{HTMLButtonElement} */
+  /** @return{HTMLButtonElement} */
   getShowDefaultToggle() {
     let toggle = document.createElement("button");
     toggle.addEventListener(
@@ -653,7 +643,6 @@ class InputPanelData {
 
 module.exports = {
   initializeAccordionButtons,
-  initializeButtons,
   InputPanelData,
   processMathQuillLatex,
 };

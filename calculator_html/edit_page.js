@@ -32,11 +32,11 @@ function ctrlSPressAceEditorHandler(event) {
   storeEditedPage();
 }
 
-/**@returns {HTMLElement[]} */
+/** @return {HTMLElement[]} */
 function getClonePanel(
-  /**@type{string} */
+  /** @type{string} */
   fileNameSource,
-  /**@type{string} */
+  /** @type{string} */
   fileNameTarget
 ) {
   if (fileNameSource === "" || fileNameSource === undefined || fileNameSource === null) {
@@ -77,9 +77,9 @@ function getClonePanel(
   return result;
 }
 
-/**@returns {HTMLElement} */
+/** @return {HTMLElement} */
 function getEditPanel(
-  /**@type{string} */
+  /** @type{string} */
   fileName,
   /** @type{boolean} Whether online edit is allowed. */
   withInstructorRights,
@@ -206,7 +206,7 @@ function initEditorAce() {
 
 function selectEditPageCallback(
   input,
-  /**@type{boolean} Injects error html from server dangerously.*/
+  /** @type{boolean} Injects error html from server dangerously.*/
   injectHTMLDangerously,
 ) {
   if (injectHTMLDangerously === undefined) {
@@ -250,17 +250,17 @@ function selectEditPageCallback(
   }
 }
 
-/**@returns {HTMLElement} */
+/** @return {HTMLElement} */
 function getNextEditButton(problemId) {
   return getNavigationEditButton(problemId, "&#8594;");
 }
 
-/** @returns {HTMLElement} */
+/** @return {HTMLElement} */
 function getPreviousEditButton(problemId) {
   return getNavigationEditButton(problemId, "&#8592;");
 }
 
-/** @returns {HTMLElement} */
+/** @return {HTMLElement} */
 function getNavigationEditButton(problemId, contentHTML) {
   if (
     problemId === null ||
@@ -299,7 +299,7 @@ function writeNextPreviousEditButton(
 }
 
 function selectEditPage(
-  /**@type{string} */
+  /** @type{string} */
   currentlyEditedPage,
   /** @type{boolean} Whether online edit is allowed. */
   withInstructorRights,

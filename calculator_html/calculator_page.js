@@ -706,7 +706,7 @@ class Calculator {
   }
 
   typeset(
-    /**@type{Function} */
+    /** @type{Function} */
     typeSetCallback,
   ) {
     if (this.flagTypeset === true) {

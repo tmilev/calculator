@@ -27,9 +27,9 @@ class ProblemCollection {
     this.topics = {};
   }
 
-  /** @returns{Problem} */
+  /** @return{Problem} */
   getProblemById(
-    /**@type{string} */
+    /** @type{string} */
     label,
   ) {
     if (!(label in this.allProblems)) {
@@ -43,7 +43,7 @@ class ProblemCollection {
     this.topicProblems = {};
   }
 
-  /** @returns{Problem} */
+  /** @return{Problem} */
   createOrUpdateProblem(
     problemData,
   ) {
@@ -75,10 +75,10 @@ class ProblemCollection {
     return null;
   }
 
-  /**@return{Problem} */
+  /** @return{Problem} */
   getProblemByIdOrRegisterEmpty(
     problemFileName,
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     outputElement,
   ) {
     // normalize the file name:
@@ -129,6 +129,79 @@ class ProblemCollection {
       console.log(logMessage);
     }
   }
+
+  updateProblemPage() {
+    let page = window.calculator.mainPage;
+    window.calculator.coursePage.selectCurrentCoursePage();
+    // page.pages.problemPage.flagLoaded is modified by the following
+    // functions: selectCurrentProblem, logout, callbackClone,
+    // the present function updateProblemPage
+    /** @type {Problem} */
+    let problem = getCurrentProblem();
+    if (page.pages.problemPage.flagLoaded) {
+      if (problem !== undefined && problem !== null) {
+        let problemNavigation = document.getElementById(problem.idNavigationProblemNotEntirePanel);
+        if (problemNavigation !== null) {
+          problemNavigation.innerHTML = "";
+          let updatedContent = problem.getProblemNavigationContent();
+          for (let i = 0; i < updatedContent.length; i++) {
+            problemNavigation.appendChild(updatedContent[i]);
+          }
+        }
+      }
+      return;
+    }
+    let url;
+    if (problem !== undefined && problem !== null) {
+      let forReal = problem.flagForReal;
+      url = `${pathnames.urls.calculatorAPI}?${problem.getCalculatorURLRequestFileCourseTopics(forReal)}`;
+    } else {
+      let problemFileName = storage.storage.variables.currentCourse.problemFileName.getValue();
+      if (
+        problemFileName === "" ||
+        problemFileName === undefined ||
+        problemFileName === null
+      ) {
+        this.displaySelectCourse();
+        return;
+      }
+      url = getCalculatorURLRequestFileCourseTopicsFromStorage();
+    }
+    page.pages.problemPage.flagLoaded = true;
+    submitRequests.submitGET({
+      url: url,
+      callback: (input, outputComponent) => {
+        problem.writeProblemPage(input, outputComponent);
+      },
+      progress: ids.domElements.spanProgressReportGeneral,
+    });
+  }
+
+  displaySelectCourse() {
+    let courseBody = document.getElementById(
+      ids.domElements.problemPageContentContainer,
+    );
+    courseBody.textContent = "";
+    let text = document.createTextNode("Problems are selected from the ");
+    courseBody.appendChild(text);
+    let button = document.createElement("button");
+    button.textContent = 'Current course';
+    button.classList.add(
+      "buttonSelectPage", "buttonSlowTransition", "buttonFlash"
+    );
+    button.style.width = "150px";
+    button.addEventListener("click", () => {
+      page.selectPage('currentCourse');
+    });
+    courseBody.appendChild(button);
+    courseBody.appendChild(document.createElement("br"));
+    courseBody.appendChild(document.createTextNode(
+      "To select a problem, click Practice or Quiz within the course page."
+    ));
+    setTimeout(() => {
+      button.classList.remove("buttonFlash");
+    }, 100);
+  }
 }
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {
@@ -154,15 +227,15 @@ class Problem {
     /** @type{HTMLElement}*/
     outputElement,
   ) {
-    /**@type{string} */
+    /** @type{string} */
     this.nextProblemId = "";
-    /**@type{string} */
+    /** @type{string} */
     this.previousProblemId = "";
-    /**@type{number} */
+    /** @type{number} */
     this.totalChildren = 0;
     /** @type{HTMLElement} */
     this.outputElement = outputElement;
-    /**@type{string} */
+    /** @type{string} */
     this.title = "";
   }
 
@@ -199,7 +272,7 @@ class Problem {
      * does not include the entire panel.
      */
     this.idNavigationProblemNotEntirePanel = `navigationPanel${this.problemId}`;
-    /**@type {AnswerPanel[]} */
+    /** @type {AnswerPanel[]} */
     this.answerPanels = [];
     this.title = problemData.title;
     this.fileName = problemData.fileName;
@@ -230,7 +303,7 @@ class Problem {
     this.initializeProblemContent(problemData);
   }
 
-  /** @returns{number} Number of children processed. */
+  /** @return{number} Number of children processed. */
   initializeInfo(problemData, inputParentIdURLed) {
     this.initializeBasic(problemData);
     this.decodedProblem = "";
@@ -254,14 +327,14 @@ class Problem {
     this.deadline = null;
     this.weight = problemData.weight;
     this.links = {
-      /**@type{HTMLElement[]} */
+      /** @type{HTMLElement[]} */
       video: [],
-      /**@type{HTMLElement[]} */
+      /** @type{HTMLElement[]} */
       slides: [],
-      /**@type{HTMLElement[]} */
+      /** @type{HTMLElement[]} */
       homework: [],
     };
-    /**@type{HTMLElement[]} */
+    /** @type{HTMLElement[]} */
     this.badProblemExplanation = [];
     if (problemData.deadlines !== undefined) {
       this.deadlines = problemData.deadlines;
@@ -393,9 +466,9 @@ class Problem {
   }
 
   getAppAnchorRequestFileCourseTopics(
-    /**@type {boolean} */
+    /** @type {boolean} */
     isScoredQuiz,
-    /**@type {boolean} */
+    /** @type {boolean} */
     includeRandomSeed,
   ) {
     let page = window.calculator.mainPage;
@@ -483,7 +556,7 @@ class Problem {
     return result;
   }
 
-  /**@returns {HTMLElement} */
+  /** @return {HTMLElement} */
   getProblemNavigation() {
     let result = document.createElement("div");
     result.id = this.idNavigationProblemNotEntirePanel;
@@ -497,7 +570,7 @@ class Problem {
     return result;
   }
 
-  /**@returns {HTMLElement} */
+  /** @return {HTMLElement} */
   getNextProblemButton(
     /** @type{ProblemNavigationHints} */
     hints
@@ -524,7 +597,7 @@ class Problem {
     return nextProblemTag;
   }
 
-  /** @returns {HTMLElement} */
+  /** @return{HTMLElement} */
   getPreviousProblemButton(
     /** @type{ProblemNavigationHints} */
     hints
@@ -556,7 +629,7 @@ class Problem {
     return previousLink;
   }
 
-  /** @returns{ProblemNavigationHints} */
+  /** @return{ProblemNavigationHints} */
   getProblemNavigationHints() {
     let page = window.calculator.mainPage;
     let result = new ProblemNavigationHints();
@@ -568,7 +641,7 @@ class Problem {
     return result;
   }
 
-  /** @returns {HTMLElement[]} */
+  /** @return {HTMLElement[]} */
   getProblemNavigationContent() {
     let page = window.calculator.mainPage;
     let result = [];
@@ -648,7 +721,7 @@ class Problem {
     );
   }
 
-  /**@returns{HTMLElement[]} */
+  /** @return{HTMLElement[]} */
   getHTMLProblems() {
     let nextElement = document.createElement("div");
     nextElement.className = "bodySubsection";
@@ -671,7 +744,7 @@ class Problem {
     return document.createTextNode(this.title + " ");
   }
 
-  /** @returns{HTMLElement[]} */
+  /** @return{HTMLElement[]} */
   getHTMLSubSection() {
     let result = [];
     let nextElement = document.createElement("div");
@@ -697,7 +770,7 @@ class Problem {
     return false;
   }
 
-  /** @returns{HTMLElement[]} */
+  /** @return{HTMLElement[]} */
   getHTMLSection() {
     let result = [];
     if (this.type === "Section") {
@@ -726,7 +799,7 @@ class Problem {
     return result;
   }
 
-  /**@returns{HTMLElement[]} */
+  /** @return{HTMLElement[]} */
   toHTMLChapter() {
     let result = [];
     let headChapterElement = document.createElement("div");
@@ -753,13 +826,17 @@ class Problem {
     return result;
   }
 
-  /**@returns {HTMLElement[]} */
+  /** @return{HTMLElement[]} */
   getProblemMaterialLinks() {
     let result = [];
     this.links.slides = [];
     this.links.video = [];
     this.links.homework = [];
-    if (this.video !== "" && this.video !== undefined && this.video !== null) {
+    if (
+      this.video !== "" &&
+      this.video !== undefined &&
+      this.video !== null
+    ) {
       let videoLink = document.createElement("a");
       videoLink.classList = "videoLink";
       videoLink.href = this.video;
@@ -767,9 +844,16 @@ class Problem {
       videoLink.innerHTML = "Video";
       this.links.video.push(videoLink);
     }
-    if (this.querySlides !== "" && this.querySlides !== null && this.querySlides !== undefined) {
+    if (
+      this.querySlides !== "" &&
+      this.querySlides !== null &&
+      this.querySlides !== undefined
+    ) {
       for (let counter in linkSlides) {
-        this.links.slides.push(this.getLinkFromSpec(linkSpecs[linkSlides[counter]], this.querySlides));
+        this.links.slides.push(this.getLinkFromSpec(
+          linkSpecs[linkSlides[counter]],
+          this.querySlides,
+        ));
       }
     }
     miscellaneousFrontend.appendHtmlToArray(result, this.links.slides);
@@ -887,8 +971,16 @@ class Problem {
       let sectionIndex = page.storage.variables.currentSectionComputed.getValue();
       this.deadlineString = this.deadlines[sectionIndex];
     }
-    if (this.deadlineString === "" || this.deadlineString === null || this.deadlineString === undefined) {
-      if (this.parentIdURLed !== null && this.parentIdURLed !== undefined && this.parentIdURLed !== "") {
+    if (
+      this.deadlineString === "" ||
+      this.deadlineString === null ||
+      this.deadlineString === undefined
+    ) {
+      if (
+        this.parentIdURLed !== null &&
+        this.parentIdURLed !== undefined &&
+        this.parentIdURLed !== ""
+      ) {
         let parentProblem = allProblems.getProblemById(this.parentIdURLed);
         let inheritedResult = parentProblem.toHTMLDeadlineElement();
         if (inheritedResult.textContent !== "") {
@@ -974,17 +1066,17 @@ class Problem {
     deadline.textContent = "Deadline";
     headerRow.appendChild(group);
     headerRow.appendChild(deadline);
-    for (let counterGroup = 0; counterGroup < page.user.sectionsTaught.length; counterGroup++) {
+    for (let i = 0; i < page.user.sectionsTaught.length; i++) {
       let row = table.insertRow();
       let cell = row.insertCell();
-      cell.textContent = page.user.sectionsTaught[counterGroup];
+      cell.textContent = page.user.sectionsTaught[i];
       let inputCell = row.insertCell();
       let input = document.createElement("input");
       input.type = "date";
       input.className = "datePicker";
       input.name = `datePicker${this.problemId}`;
-      if (this.deadlines[counterGroup] !== "" && this.deadlines[counterGroup] !== undefined) {
-        let deadline = this.deadlines[counterGroup];
+      if (this.deadlines[i] !== "" && this.deadlines[i] !== undefined) {
+        let deadline = this.deadlines[i];
         input.value = deadline;
       }
       inputCell.appendChild(input);
@@ -1041,18 +1133,18 @@ class Problem {
     modifyObject[idDecoded] = {
       weight: incomingPoints
     };
-    let theURL = "";
-    theURL += `${pathnames.urls.calculatorAPI}?`;
-    theURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemWeight}&`;
-    theURL += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(modifyObject))}`;
+    let url = "";
+    url += `${pathnames.urls.calculatorAPI}?`;
+    url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemWeight}&`;
+    url += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(modifyObject))}`;
     submitRequests.submitGET({
-      url: theURL,
+      url: url,
       progress: ids.domElements.spanProgressReportGeneral,
       result: reportSpan,
     });
   }
 
-  /** @returns{HTMLElement[]} */
+  /** @return{HTMLElement[]} */
   getProblemWeightContent() {
     let page = window.calculator.mainPage;
     if (this.type !== "Problem" || this.fileName === "") {
@@ -1123,11 +1215,11 @@ class Problem {
     return `<b style = "color:${color}">${result}</b>`;
   }
 
-  /** @returns{HTMLElement} */
+  /** @return{HTMLElement} */
   getLinkFromSpec(
-    /**@type {{request: string, name: string, extension: string, options: string, download: boolean}} */
+    /** @type {{request: string, name: string, extension: string, options: string, download: boolean}} */
     linkSpec,
-    /**@type {string} */
+    /** @type {string} */
     query
   ) {
     if (linkSpec.adminView === true) {
@@ -1188,14 +1280,14 @@ function ProblemNavigationHints() {
 
 class ProblemNavigation {
   constructor() {
-    /**@type{Problem} */
+    /** @type{Problem} */
     this.currentProblem = null;
     /** @type{HTMLElement|null}*/
     this.infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
   }
 
   setCurrentProblemAndUpdate(
-    /**@type{Problem} */
+    /** @type{Problem} */
     inputProblem,
   ) {
     this.currentProblem = inputProblem;
@@ -1240,7 +1332,6 @@ class ProblemNavigation {
         miscellaneousFrontend.appendHtml(problemTitle, this.currentProblem.links.video);
       }
     }
-    //topPart += "<br>"
     problemTitle.appendChild(this.currentProblem.getEditPanel());
     this.infoBar.appendChild(problemTitle);
     typeset.typesetter.typesetSoft(this.infoBar, "");
@@ -1318,7 +1409,7 @@ let linkHomework = [
   "homeworkTex",
 ];
 
-/**@returns{HTMLElement[]} */
+/** @return{HTMLElement[]} */
 function getHTMLfromTopics() {
   let result = [];
   for (let label in allProblems.theChapterIds) {
@@ -1342,15 +1433,13 @@ function initializeDatePickers() {
 }
 
 function initializeProblemWeightsAndDeadlines() {
-  let theWeights = document.getElementsByClassName('panelProblemWeights');
-  for (let i = 0; i < theWeights.length; i++) {
-    //theScores[i].style.transition ='opacity 1s linear';
-    theWeights[i].style.maxHeight = '0px';
+  let weights = document.getElementsByClassName('panelProblemWeights');
+  for (let i = 0; i < weights.length; i++) {
+    weights[i].style.maxHeight = '0px';
   }
-  let theDeadlines = document.getElementsByClassName('panelDeadlines');
-  for (let i = 0; i < theDeadlines.length; i++) {
-    //theScores[i].style.transition ='opacity 1s linear';
-    theDeadlines[i].style.maxHeight = '0px';
+  let deadlines = document.getElementsByClassName('panelDeadlines');
+  for (let i = 0; i < deadlines.length; i++) {
+    deadlines[i].style.maxHeight = '0px';
   }
 }
 
@@ -1404,70 +1493,11 @@ function writeTopicsToCoursePage() {
 }
 
 function updateProblemPage() {
-  let page = window.calculator.mainPage;
-  window.calculator.coursePage.selectCurrentCoursePage();
-  // page.pages.problemPage.flagLoaded is modified by the following
-  // functions: selectCurrentProblem, logout, callbackClone,
-  // the present function updateProblemPage
-  /**@type {Problem} */
-  let problem = getCurrentProblem();
-  if (page.pages.problemPage.flagLoaded) {
-    if (problem !== undefined && problem !== null) {
-      let problemNavigation = document.getElementById(problem.idNavigationProblemNotEntirePanel);
-      if (problemNavigation !== null) {
-        problemNavigation.innerHTML = "";
-        let updatedContent = problem.getProblemNavigationContent();
-        for (let i = 0; i < updatedContent.length; i++) {
-          problemNavigation.appendChild(updatedContent[i]);
-        }
-      }
-    }
-    return;
-  }
-  let theURL;
-  if (problem !== undefined && problem !== null) {
-    let forReal = problem.flagForReal;
-    theURL = `${pathnames.urls.calculatorAPI}?${problem.getCalculatorURLRequestFileCourseTopics(forReal)}`;
-  } else {
-    let fileName = page.storage.variables.currentCourse.fileName.getValue();
-    if (fileName === "" || fileName === undefined || fileName === null) {
-      let courseBody = document.getElementById(ids.domElements.problemPageContentContainer);
-      courseBody.textContent = "";
-      let text = document.createTextNode("Problems are selected from the "); 
-      courseBody.appendChild(text);
-      let button = document.createElement("button");
-      button.textContent = 'Current course';
-      button.classList.add(
-        "buttonSelectPage", "buttonSlowTransition", "buttonFlash"
-      );
-      button.style.width = "150px";
-      button.addEventListener("click", () => {
-        page.selectPage('currentCourse');
-      });
-      courseBody.appendChild(button);
-      courseBody.appendChild(document.createElement("br"));
-      courseBody.appendChild(document.createTextNode(
-        "To select a problem, click Practice or Quiz within the course page."
-      ));
-      setTimeout(() => {
-        button.classList.remove("buttonFlash");
-      }, 100);
-      return;
-    }
-    theURL = getCalculatorURLRequestFileCourseTopicsFromStorage();
-  }
-  page.pages.problemPage.flagLoaded = true;
-  submitRequests.submitGET({
-    url: theURL,
-    callback: (input, outputComponent) => {
-      problem.writeProblemPage(input, outputComponent);
-    },
-    progress: ids.domElements.spanProgressReportGeneral,
-  });
+  allProblems.updateProblemPage();
 }
 
 function loadProblemIntoElement(
-  /**@type{HTMLElement|string} */
+  /** @type{HTMLElement|string} */
   problemElement,
 ) {
   if (typeof problemElement === "string") {
@@ -1479,9 +1509,9 @@ function loadProblemIntoElement(
   if (problemElement.getAttribute("forReal") === "true") {
     problem.flagForReal = true;
   }
-  let theURL = `${pathnames.urls.calculatorAPI}?${problem.getCalculatorURLRequestFileCourseTopics(problem.flagForReal)}`;
+  let url = `${pathnames.urls.calculatorAPI}?${problem.getCalculatorURLRequestFileCourseTopics(problem.flagForReal)}`;
   submitRequests.submitGET({
-    url: theURL,
+    url: url,
     callback: (input, outputComponent) => {
       problem.writeProblemPage(input, outputComponent);
     },
@@ -1490,7 +1520,7 @@ function loadProblemIntoElement(
   });
 }
 
-/**@returns{Problem|null} */
+/** @return{Problem|null} */
 function getCurrentProblem() {
   let problemFileName = storage.storage.variables.currentCourse.problemFileName.getValue();
   if (

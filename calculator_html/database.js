@@ -29,9 +29,9 @@ function clickDatabaseTable(currentCollection) {
 }
 
 function callbackFetchProblemData(
-  /**@type{string} */
+  /** @type{string} */
   input,
-  /**@type{HTMLElement} */
+  /** @type{HTMLElement} */
   output,
 ) {
   let outputPanel = new panels.PanelExpandable(output);
@@ -60,7 +60,7 @@ function callbackFetchProblemData(
 
 function fetchProblemData(
   labels,
-  /**@type{HTMLElement} */
+  /** @type{HTMLElement} */
   output,
 ) {
   //let labels = JSON.parse(labelsString);

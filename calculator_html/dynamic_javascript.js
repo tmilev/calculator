@@ -71,7 +71,7 @@ class ElementWithScripts {
   }
 
   accountOneScript(
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     script,
   ) {
     let content = script.textContent;
@@ -85,7 +85,7 @@ class ElementWithScripts {
   }
 
   accountOneSlider(
-    /**@type{HTMLInputElement} */
+    /** @type{HTMLInputElement} */
     slider,
   ) {
     let sliderName = slider.getAttribute("name");
@@ -166,7 +166,7 @@ class ElementWithScripts {
   }
 
   bootstrapOneGraphicsNDimensional(
-    /**@type{string} */
+    /** @type{string} */
     content,
   ) {
     let parsed = JSON.parse(content);
@@ -181,7 +181,7 @@ class ElementWithScripts {
   }
 
   bootstrapOneDisplayTransportLayerSecurity(
-    /**@type{string} */
+    /** @type{string} */
     content,
   ) {
     let parsed = JSON.parse(content);
@@ -196,7 +196,7 @@ class ElementWithScripts {
   }
 
   bootstrapOneDisplaySSLRecord(
-    /**@type{string} */
+    /** @type{string} */
     content,
   ) {
     let parsed = JSON.parse(content);
@@ -211,7 +211,7 @@ class ElementWithScripts {
   }
 
   bootstrapOneAbstractSyntaxNotation(
-    /**@type{string} */
+    /** @type{string} */
     content,
   ) {
     let parsed = JSON.parse(content);
@@ -279,7 +279,7 @@ class ElementWithScripts {
   }
 
   processOne(
-    /**@type{MathNode} */
+    /** @type{MathNode} */
     node,
   ) {
     if (node.type.type !== knownTypes.formInput.type) {

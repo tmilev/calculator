@@ -85,38 +85,6 @@ function toggleHeightForTimeout(currentPanel) {
   }
 }
 
-let mainMenuIsHidden = false;
-let mainMenuExpandedLength = null;
-function toggleMenu() {
-  let theMenuDiv = document.getElementById("divTheMainMenuPanel");
-  let theToggleButton = document.getElementById("buttonToggleTheMainMenu");
-  if (!mainMenuIsHidden) {
-    if (mainMenuExpandedLength === null) {
-      mainMenuExpandedLength = theMenuDiv.style.width;
-    }
-    for (let counterDiv = 3; counterDiv < theMenuDiv.childNodes.length; counterDiv++) {
-      let currentNode = theMenuDiv.childNodes[counterDiv];
-      if (currentNode.nodeName === "DIV" || currentNode.nodeName === "div") {
-        currentNode.style.display = "none";
-      }
-    }
-    theMenuDiv.classList.add("divMainMenuCollapsed");
-    mainMenuIsHidden = true;
-    theToggleButton.innerHTML = "&#9656;";
-    document.getElementById("divProfilePicture").classList.add("divProfilePictureContainerCollapsed");
-  } else {
-    for (let counterDiv = 3; counterDiv < theMenuDiv.childNodes.length; counterDiv++) {
-      let currentNode = theMenuDiv.childNodes[counterDiv];
-      if (currentNode.nodeName === "DIV" || currentNode.nodeName === "div") {
-        currentNode.style.display = "";
-      }
-    }
-    theMenuDiv.classList.remove("divMainMenuCollapsed");
-    mainMenuIsHidden = false;
-    theToggleButton.innerHTML = "&#9660;";
-    document.getElementById("divProfilePicture").classList.remove("divProfilePictureContainerCollapsed");
-  }
-}
 
 class PanelExpandableData {
   constructor(
@@ -133,7 +101,7 @@ class PanelExpandableData {
     startHidden,
     /** @type {string} */
     label,
-    /**@type{boolean} */
+    /** @type{boolean} */
     allowFullExpand,
   ) {
     this.content = content;
@@ -156,7 +124,7 @@ class PanelExpandableData {
 
 class PanelExpandable {
   constructor(
-    /**@type{HtmlElement|string} */
+    /** @type{HtmlElement|string} */
     container,
   ) {
     this.originalHeight = "0px";
@@ -164,17 +132,17 @@ class PanelExpandable {
     this.collapsed = true;
     this.containerId = "";
     this.container = container;
-    /**@type{HtmlElement|null} */
+    /** @type{HtmlElement|null} */
     this.panelContent = null;
-    /**@type{HtmlElement|null} */
+    /** @type{HtmlElement|null} */
     this.panelLabel = null;
-    /**@type{HtmlElement|null} */
+    /** @type{HtmlElement|null} */
     this.expandedMark = null;
-    /**@type{HtmlElement|null} */
+    /** @type{HtmlElement|null} */
     this.button = null;
-    /**@type{HtmlElement|null} */
+    /** @type{HtmlElement|null} */
     this.buttonFullExpand = null;
-    /**@type{boolean} */
+    /** @type{boolean} */
     this.fullyExpanded = false;
     if (typeof container === "string") {
       this.containerId = container;
@@ -206,7 +174,7 @@ class PanelExpandable {
   }
 
   setPanelContent(
-    /**@type{HTMLElement|string} */
+    /** @type{HTMLElement|string} */
     input,
   ) {
     this.panelContent.style.maxHeight = "";
@@ -227,9 +195,9 @@ class PanelExpandable {
   }
 
   initialize(
-    /**@type{boolean} */
+    /** @type{boolean} */
     startsCollapsed,
-    /**@type{boolean} */
+    /** @type{boolean} */
     allowFullExpand,
   ) {
     if (allowFullExpand === null || allowFullExpand === undefined) {
@@ -267,7 +235,7 @@ class PanelExpandable {
     this.setCollapsed(startsCollapsed);
   }
 
-  setCollapsed(/**@type{boolean} */ newValue) {
+  setCollapsed(/** @type{boolean} */ newValue) {
     this.collapsed = newValue;
     if (this.collapsed) {
       this.expandedMark.textContent = "\u25C2"; // triangle pointing left
@@ -295,7 +263,7 @@ class PanelExpandable {
   }
 }
 
-/**@returns{PanelExpandable|null} Returns the panel, or null if the content is too small for a panel. */
+/** @return{PanelExpandable|null} Returns the panel, or null if the content is too small for a panel. */
 function makePanelFromData(
   /** @type {PanelExpandableData} */
   data,
@@ -332,7 +300,6 @@ if (window.calculator.panels === undefined) {
 
 module.exports = {
   modifyHeightForTimeout,
-  toggleMenu,
   PanelExpandable,
   PanelExpandableData,
   makePanelFromData,

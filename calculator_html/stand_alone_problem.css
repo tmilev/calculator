@@ -718,7 +718,7 @@ div.divPage {
   position: relative;
 }
 
-div.divTheMainMenu {
+div.divMainMenu {
   display: flex;
   flex-direction: column;
   transition: all 1s;
@@ -731,8 +731,8 @@ div.divTheMainMenu {
 
 div.divMainMenuCollapsed {
   display: flex;
-  max-width: 20px;
-  width: 20px;
+  max-width: 25px;
+  width: 25px;
   flex-direction: column;
   transition: all 1s;
 }
@@ -1170,7 +1170,7 @@ div.divProfilePictureContainerExpanded {
   margin-right: auto;
 }
 
-div.divProfilePictureContainerCollapsed {
+div.profilePictureContainerCollapsed {
   max-width: 25px;
   max-height: 25px;
   transition: all 1s;

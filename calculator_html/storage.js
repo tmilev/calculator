@@ -30,9 +30,9 @@ class StorageVariable {
     this.secure = true;
     this.showInURLByDefault = false;
     this.defaultValue = "";
-    /**@type {Function|null} */
+    /** @type {Function|null} */
     this.callbackOnValueChange = null;
-    /**@type {Function|null} */
+    /** @type {Function|null} */
     this.callbackSetValueFromStorage = null;
     let labelsToRead = [
       "nameURL",
@@ -55,7 +55,7 @@ class StorageVariable {
     }
   }
 
-  /**@returns {boolean}  */
+  /** @return {boolean}  */
   isTrue() {
     if (this.value === "true" || this.value === true) {
       return true;
@@ -67,7 +67,7 @@ class StorageVariable {
     return this.value;
   }
 
-  /**@returns{string} */
+  /** @return{string} */
   loadMe(hashParsed) {
     /** @type{string|null} */
     let candidate = null;
@@ -101,7 +101,7 @@ class StorageVariable {
   }
 
   storeMePersistent(
-    /**@type {boolean} */
+    /** @type {boolean} */
     updateURL,
   ) {
     if (Storage !== undefined || localStorage !== undefined) {
@@ -118,9 +118,9 @@ class StorageVariable {
   }
 
   storeMe(
-    /**@type {boolean} */
+    /** @type {boolean} */
     updateURL,
-    /**@type {boolean} */
+    /** @type {boolean} */
     updateAssociatedInput,
   ) {
     this.storeMePersistent(updateURL);
@@ -140,9 +140,9 @@ class StorageVariable {
 
   setAndStore(
     newValue,
-    /**@type {boolean} */
+    /** @type {boolean} */
     updateURL,
-    /**@type {boolean} */
+    /** @type {boolean} */
     updateAssociatedInput,
   ) {
     if (updateURL === undefined) {
@@ -176,6 +176,10 @@ class StorageCalculator {
       editPage: true,
     };
     this.variables = {
+      mainMenuIsHidden: new StorageVariable({
+        name: "mainMenuIsHidden",
+        nameLocalStorage : "mainMenuIsHidden",
+      }),
       currentPage: new StorageVariable({
         name: "currentPage",
         nameLocalStorage: "currentPage", //<- when given and non-empty, local storage will be used to store variable
@@ -405,12 +409,12 @@ class StorageCalculator {
     this.urlObject = {};
   }
 
-  /**@returns {string} */
+  /** @return {string} */
   getPercentEncodedURL(input) {
     return encodeURIComponent(JSON.stringify(input));
   }
 
-  /**@returns {string} */
+  /** @return {string} */
   getCleanedUpURL(input) {
     let stringifiedInput = JSON.stringify(input);
     let isGood = true;
@@ -460,7 +464,7 @@ class StorageCalculator {
   }
 
   loadSettingsRecursively(
-    /**@type {StorageVariable} */
+    /** @type {StorageVariable} */
     currentStorage,
     inputHashParsed,
   ) {
@@ -536,7 +540,7 @@ class StorageCalculator {
     return result;
   }
 
-  /**@returns{string} */
+  /** @return{string} */
   toStringProblem() {
     let problemFileName = this.variables.currentCourse.problemFileName.getValue();
     let fileName = this.variables.currentCourse.p;

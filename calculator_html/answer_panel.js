@@ -21,18 +21,18 @@ class AnswerPanel {
     input,
   ) {
     this.input = input;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.element = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.problemElement = null;
-    /**@type{boolean} */
+    /** @type{boolean} */
     this.flagForReal = false;
     if (input["forReal"] === true) {
       this.flagForReal = true;
     }
     this.idPureLatex = input.idPureLatex;
     this.problemId = input.problemId;
-    /**@type{boolean} */
+    /** @type{boolean} */
     this.flagGenerateInterpretButton = true;
     if (input.generateInterpretButton === false) {
       this.flagGenerateInterpretButton = false;
@@ -41,36 +41,36 @@ class AnswerPanel {
     if (input.dontBootstrapButtons === true) {
       this.flagDontBootstrapButtons = true;
     }
-    /**@type{boolean} */
+    /** @type{boolean} */
     this.layoutVertical = true;
 
-    /**@type {InputPanelData|null} */
+    /** @type {InputPanelData|null} */
     this.panel = null;
-    /**@type{HTMLTableElement|null} */
+    /** @type{HTMLTableElement|null} */
     this.table = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.buttonContainerMath = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.pureLatexElement = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.verificationSpan = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.solutionSpan = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.buttonInterpret = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.buttonSubmit = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.buttonAnswer = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.buttonSolution = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.buttonDetails = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.spanAnswerHighlight = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.editorSpan = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.editorEnclosure = null;
   }
 
@@ -110,7 +110,7 @@ class AnswerPanel {
     this.onePanelComputeHtmlElements();
     this.table = document.createElement("table");
     if (this.layoutVertical === true) {
-      /**@type{HTMLTableRowElement} */
+      /** @type{HTMLTableRowElement} */
       let row = this.table.insertRow();
       row.insertCell().appendChild(this.onePanelQuestionAndAnswerField());
       row.insertCell().appendChild(this.buttonContainerMath);
@@ -215,7 +215,7 @@ class AnswerPanel {
     }
   }
 
-  /**@returns{HTMLElement} */
+  /** @return{HTMLElement} */
   onePanelQuestionAndAnswerField() {
     let result = document.createElement("table");
     let row = result.insertRow();
@@ -226,7 +226,7 @@ class AnswerPanel {
     return result;
   }
 
-  /**@returns{HTMLElement} */
+  /** @return{HTMLElement} */
   onePanelButtonsVerticalLayout() {
     let result = document.createElement("table");
     result.insertRow().insertCell().appendChild(this.buttonSubmit);
@@ -244,7 +244,7 @@ class AnswerPanel {
     return result;
   }
 
-  /**@returns{HTMLElement} */
+  /** @return{HTMLElement} */
   onePanelButtonsHorizontalLayout() {
     let result = document.createElement("table");
     let row = result.insertRow();
@@ -294,7 +294,7 @@ class AnswerPanel {
   }
 
   submitOrPreviewAnswers(
-    /**@type{string} */
+    /** @type{string} */
     requestQuery,
   ) {
     clearTimeout(this.timerForPreviewAnswers);

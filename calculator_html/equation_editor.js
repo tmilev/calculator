@@ -3257,7 +3257,7 @@ class CopyButton {
       /** @type {EquationEditor?} */
       equationEditor,
   ) {
-    /**@type {EquationEditor?} */
+    /** @type {EquationEditor?} */
     this.equationEditor = equationEditor;
     /** @type {HTMLElement?} */
     this.button = null;

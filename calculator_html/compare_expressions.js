@@ -11,31 +11,31 @@ const answerProcessing = require("./answer_processing");
 
 class CompareExpressions {
   constructor() {
-    /**@type{boolean} */
+    /** @type{boolean} */
     this.initialized = false;
-    /**@type{InputPanelData|null} */
+    /** @type{InputPanelData|null} */
     this.givenPanel = null;
-    /**@type{InputPanelData|null} */
+    /** @type{InputPanelData|null} */
     this.desiredPanel = null;
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     this.resultUserFriendly = document.getElementById(
       ids.domElements.pages.compareExpressions.resultUserFriendly
     );
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     this.resultBoxRaw = document.getElementById(
       ids.domElements.pages.compareExpressions.resultRaw
     );
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     this.resultBoxFormatted = document.getElementById(
       ids.domElements.pages.compareExpressions.resultFormatted
     );
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     this.calculatorLink = document.getElementById(
       ids.domElements.pages.compareExpressions.calculatorLink
     );
-    /**@type{string} */
+    /** @type{string} */
     this.givenData = "";
-    /**@type{string} */
+    /** @type{string} */
     this.desiredData = "";
   }
 
@@ -121,7 +121,7 @@ class CompareExpressions {
   }
 
   writeResult(
-    /**@type{string} */
+    /** @type{string} */
     input,
   ) {
     try {

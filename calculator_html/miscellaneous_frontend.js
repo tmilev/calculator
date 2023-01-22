@@ -65,7 +65,7 @@ function appendHtmlToArray(
   throw (`Could not recognize the html content ${contentToAppend}`);
 }
 
-/**@returns{string} */
+/** @return{string} */
 function htmlFromCommentsAndErrors(input) {
   let extraTags = [
     pathnames.urlFields.result.comments,
@@ -84,7 +84,7 @@ function htmlFromCommentsAndErrors(input) {
   return resultHTML;
 }
 
-/** @returns{HTMLElement[]} */
+/** @return{HTMLElement[]} */
 function htmlElementsFromCommentsAndErrors(input) {
   let extraTags = [
     pathnames.urlFields.result.comments,
@@ -164,9 +164,9 @@ function deepCopy(from) {
   return result;
 }
 
-/**@returns{string} */
+/** @return{string} */
 function jsonParseGetHtmlStandard(
-  /**@type{string} */
+  /** @type{string} */
   input,
 ) {
   if (input.search("\n") !== - 1) {
@@ -198,14 +198,14 @@ function jsonParseGetHtmlStandard(
   return result;
 }
 
-/**@returns{string} */
+/** @return{string} */
 function unescapeInequalitiesAmpersands(input) {
   input = input.replace(/&lt;/g, "<");
   input = input.replace(/&gt;/g, ">");
   return input.replace(/&amp;/g, "&");
 }
 
-/**@returns{Object} */
+/** @return{Object} */
 function jsonUnescapeParse(
   /** @type{string} */
   input,
@@ -225,9 +225,9 @@ function jsonUnescapeParse(
   }
 }
 
-/**@returns{string} */
+/** @return{string} */
 function toHex(
-  /**@type{string} */
+  /** @type{string} */
   input,
 ) {
   let result = "";

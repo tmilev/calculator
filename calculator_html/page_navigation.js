@@ -12,7 +12,7 @@ const cookies = require("./cookies");
 const ids = require("./ids_dom_elements");
 const serverInformation = require("./server_information");
 const login = require("./login");
-const initializeButtons = require("./initialize_buttons");
+const initializeButtonsModule = require("./initialize_buttons");
 const calculatorPage = require("./calculator_page");
 const signUp = require("./signup").signUp;
 const mathTypeSet = require("./math_typeset");
@@ -66,8 +66,8 @@ class User {
   }
 
   hideProfilePicture() {
-    document.getElementById("divProfilePicture").classList.add("divInvisible");
-    document.getElementById("divProfilePicture").classList.remove("divVisible");
+    document.getElementById(ids.domElements.divProfilePicture).classList.add("divInvisible");
+    document.getElementById(ids.domElements.divProfilePicture).classList.remove("divVisible");
   }
 
   makeFromUserInfo(inputData) {
@@ -179,7 +179,7 @@ class Page {
         container: null,
         selectFunction: () => {
           signUp.signUp();
-        } 
+        }
       },
       forgotLogin: {
         name: "forgotLogin",
@@ -250,6 +250,8 @@ class Page {
     this.storage = storage;
     this.initializeStorageCallbacks();
     this.flagProblemPageOnly = false;
+    this.mainMenuExpandedLength = null;
+
     this.initializeLoginPage();
     this.initializeAccountButtons();
   }
@@ -374,12 +376,12 @@ class Page {
   }
 
   showProfilePicture() {
-    document.getElementById("divProfilePicture").classList.remove("divInvisible");
-    document.getElementById("divProfilePicture").classList.add("divVisible");
+    document.getElementById(ids.domElements.divProfilePicture).classList.remove("divInvisible");
+    document.getElementById(ids.domElements.divProfilePicture).classList.add("divVisible");
     if (this.user.googleProfile.picture === undefined) {
       return;
     }
-    if (document.getElementById("divProfilePicture").children.length > 0) {
+    if (document.getElementById(ids.domElements.divProfilePicture).children.length > 0) {
       return;
     }
     try {
@@ -390,7 +392,7 @@ class Page {
       profilePicElement.setAttribute("title", this.user.googleProfile.name);
       profilePicElement.setAttribute("className", "profilePicture");
       //profilePicElement.setAttribute("width", 50);
-      document.getElementById("divProfilePicture").appendChild(profilePicElement);
+      document.getElementById(ids.domElements.divProfilePicture).appendChild(profilePicElement);
     } catch (e) {
       console.log("Failed to set profile picture: " + e);
     }
@@ -426,6 +428,7 @@ class Page {
     this.logoutRequestFromUrl = null;
     this.locationRequestFromUrl = null;
     this.storage.loadSettings();
+    this.hideOrUnhideMainMenu();
     this.hashHistory = [];
     this.lastKnownGoodProblemFileName = "";
     this.user = new User();
@@ -449,7 +452,7 @@ class Page {
   }
 
   initializeCalculatorPagePartTwo() {
-    initializeButtons.initializeButtons();
+    this.initializeButtons();
     mathTypeSet.typesetter.typesetSoft(ids.domElements.divMathjaxProblematicRender);
     document.getElementById(
       ids.domElements.sliderDebugFlag
@@ -535,7 +538,7 @@ class Page {
     radioPanel.textContent = '';
     if (studentView) {
       spanView.innerHTML = "Student view";
-      for (let counterSections = 0; counterSections < this.user.sectionsTaught.length; counterSections++) {
+      for (let i = 0; i < this.user.sectionsTaught.length; i++) {
         radioPanel.appendChild(document.createElement("br"));
         let label = document.createElement("label");
         label.className = "containerRadioButton";
@@ -543,17 +546,17 @@ class Page {
         let input = document.createElement("input")
         input.type = "radio";
         input.name = "radioSection";
-        input.addEventListener("change", () => { 
-          this.sectionSelect(counterSections);
+        input.addEventListener("change", () => {
+          this.sectionSelect(i);
         });
         radioPanel.appendChild(input);
 
         let counterFromStorage = parseInt(this.storage.variables.currentSectionComputed.getValue());
-        if (counterSections === counterFromStorage) {
+        if (i === counterFromStorage) {
           input.checked = true;
         }
         let radioMarkSpan = document.createElement("radioMark");
-        radioMarkSpan.textContent = this.user.sectionsTaught[counterSections];
+        radioMarkSpan.textContent = this.user.sectionsTaught[i];
         radioPanel.appendChild(radioMarkSpan)
       }
     } else {
@@ -634,7 +637,6 @@ class Page {
     return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label, element);
   }
 
-
   toggleMonitoring() {
     let monitoring = this.storage.variables.calculator.monitoring;
     if (monitoring.value !== "false") {
@@ -644,7 +646,7 @@ class Page {
     }
   }
 
-  /**@returns {HTMLButtonElement} */
+  /** @return {HTMLButtonElement} */
   pauseButton() {
     return document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle);
   }
@@ -702,16 +704,100 @@ class Page {
       pauseButton.style.display = "none";
     }
   }
+
+  toggleMenu() {
+    if (storage.variables.mainMenuIsHidden.isTrue()) {
+      this.unhideMainMenu();
+    } else {
+      this.hideMainMenu();
+    }
+  }
+
+  hideOrUnhideMainMenu() {
+    if (storage.variables.mainMenuIsHidden.isTrue()) {
+      this.hideMainMenu();
+    } else {
+      this.unhideMainMenu();
+    }
+  }
+
+  unhideMainMenu() {
+    storage.variables.mainMenuIsHidden.setAndStore(false);
+    let menuDiv = document.getElementById(
+      ids.domElements.menu.divMainMenuPanel
+    );
+    let toggleButton = document.getElementById(
+      ids.domElements.menu.buttonToggleTheMainMenu
+    );
+    for (let i = 3; i < menuDiv.childNodes.length; i++) {
+      let currentNode = menuDiv.childNodes[i];
+      if (currentNode.nodeName === "DIV" || currentNode.nodeName === "div") {
+        currentNode.style.display = "";
+      }
+    }
+    let pages = document.getElementsByClassName("divPage");
+    for (let i = 0; i < pages.length; i++){
+      pages[i].classList.remove("divPageMainMenuCollapsed");
+    }
+    menuDiv.classList.remove("divMainMenuCollapsed");
+    toggleButton.innerHTML = "&#9660;";
+    document.getElementById(
+      ids.domElements.divProfilePicture
+    ).classList.remove(
+      "profilePictureContainerCollapsed"
+    );
+  }
+
+  hideMainMenu() {
+    storage.variables.mainMenuIsHidden.setAndStore(true);
+    let menuDiv = document.getElementById(
+      ids.domElements.menu.divMainMenuPanel
+    );
+    let toggleButton = document.getElementById(
+      ids.domElements.menu.buttonToggleTheMainMenu
+    );
+    if (this.mainMenuExpandedLength === null) {
+      this.mainMenuExpandedLength = menuDiv.style.width;
+    }
+    for (let i = 3; i < menuDiv.childNodes.length; i++) {
+      let currentNode = menuDiv.childNodes[i];
+      if (currentNode.nodeName === "DIV" || currentNode.nodeName === "div") {
+        currentNode.style.display = "none";
+      }
+    }
+    let pages = document.getElementsByClassName("divPage");
+    for (let i = 0; i < pages.length; i++) {
+      pages[i].classList.add("divPageMainMenuCollapsed");
+    }
+    menuDiv.classList.add("divMainMenuCollapsed");
+    toggleButton.innerHTML = "&#9656;";
+    document.getElementById(
+      ids.domElements.divProfilePicture
+    ).classList.add(
+      "profilePictureContainerCollapsed"
+    );    
+  }
+
+  initializeButtons() {
+    initializeButtonsModule.initializeAccordionButtons();
+    let buttonToggleMainMenu = document.getElementById(
+      ids.domElements.menu.buttonToggleTheMainMenu
+    );
+    buttonToggleMainMenu.addEventListener('click', () => {
+      this.toggleMenu();
+    });
+  }
 }
 
+
 /**
- * @returns {Page}
- * */
+ * @return {Page}
+ */
 function mainPage() {
   return window.calculator.mainPage;
 }
 
-/**@returns {String} */
+/** @return {String} */
 function getCleanedUpURL(input) {
   return mainPage().storage.getCleanedUpURL(input);
 }

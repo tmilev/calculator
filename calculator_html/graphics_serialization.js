@@ -44,13 +44,13 @@ class GraphicsSerialization {
    */
   fromJSON(
     input,
-    /**@type{HTMLCanvasElement} */
+    /** @type{HTMLCanvasElement} */
     canvas,
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     controls,
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     messages,
-    /**@type{Object.<string,HTMLElement>} */
+    /** @type{Object.<string,HTMLElement>} */
     sliders,
   ) {
     let graphicsType = input["graphicsType"];
@@ -66,10 +66,10 @@ class GraphicsSerialization {
 
   /** Redraws the canvas, without re-creating it. */
   redrawFromJSON(
-    /**@type{CanvasTwoD|CanvasThreeD}*/
+    /** @type{CanvasTwoD|CanvasThreeD}*/
     canvas,
     input,
-    /**@type{Object.<string,HTMLElement>} */
+    /** @type{Object.<string,HTMLElement>} */
     sliders,
   ) {
     let graphicsType = input["graphicsType"];
@@ -93,13 +93,13 @@ class GraphicsSerialization {
    */
   twoDimensionalGraphics(
     input,
-    /**@type{HTMLCanvasElement} */
+    /** @type{HTMLCanvasElement} */
     canvasElement,
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     controls,
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     messages,
-    /**@type{Object.<string,HTMLElement>} */
+    /** @type{Object.<string,HTMLElement>} */
     sliders,
   ) {
     let drawCanvas = null;
@@ -146,13 +146,13 @@ class GraphicsSerialization {
    */
   threeDimensionalGraphics(
     input,
-    /**@type{HTMLCanvasElement}*/
+    /** @type{HTMLCanvasElement}*/
     canvasElement,
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     controls,
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     messages,
-    /**@type{Object.<string,HTMLElement>} */
+    /** @type{Object.<string,HTMLElement>} */
     sliders
   ) {
     let canvas = new CanvasThreeD(canvasElement, controls, messages);
@@ -209,10 +209,10 @@ class GraphicsSerialization {
    * @return{CanvasThreeD}
    */
   plotThreeDimensionalGraphics(
-    /**@type{CanvasThreeD}*/
+    /** @type{CanvasThreeD}*/
     canvas,
     input,
-    /**@type{Object.<string,HTMLElement>} */
+    /** @type{Object.<string,HTMLElement>} */
     sliders,
   ) {
     let plotObjects = input["plotObjects"];
@@ -232,9 +232,9 @@ class GraphicsSerialization {
 
   oneTwoDimensionalObject(
     plot,
-    /**@type{CanvasTwoD} */
+    /** @type{CanvasTwoD} */
     canvas,
-    /**@type{Object.<string,HTMLElement>} */
+    /** @type{Object.<string,HTMLElement>} */
     sliders,
   ) {
     let plotType = plot[this.labels.plotType];
@@ -370,9 +370,9 @@ class GraphicsSerialization {
 
   oneThreeDimensionalObject(
     plot,
-    /**@type{CanvasThreeD} */
+    /** @type{CanvasThreeD} */
     canvas,
-    /**@type{Object.<string,HTMLElement>} */
+    /** @type{Object.<string,HTMLElement>} */
     sliders
   ) {
     let plotType = plot[this.labels.plotType];
@@ -479,7 +479,7 @@ class GraphicsSerialization {
    * @return{Array.<Array.<number|function(Array.<number>):number>>} 
    */
   interpretListListStringsAsNumbers(
-    /**@type{string[][]} */
+    /** @type{string[][]} */
     input,
     /** @type{string[]} */
     inputArguments,
@@ -501,7 +501,7 @@ class GraphicsSerialization {
 
   functionFromObject(
     input,
-    /**@type{Object.<string,HTMLElement>} */
+    /** @type{Object.<string,HTMLElement>} */
     sliders,
   ) {
     /** @type{string} */

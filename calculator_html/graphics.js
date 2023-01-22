@@ -444,7 +444,7 @@ function colorToHex(color) {
  */
 function numberFromNumberOfInfinity(input) {
   if (typeof input === 'string') {
-    let inputString = /**@type{string}*/ (input);
+    let inputString = /** @type{string}*/ (input);
     if (inputString.toLowerCase() === 'infinity' ||
         inputString.toLowerCase() === 'minusInfinity') {
       return 0;
@@ -1254,7 +1254,7 @@ class EscapeMap {
     this.lastImageData = null;
     this.ignoreNextComputation = true;
     this.boundingBoxEntries = [];
-    /**@type {Array.<number>} */
+    /** @type {Array.<number>} */
     this.parametersOnTheGraph = parametersOnTheGraph.slice();
     /** Whether to draw the Mandelbrot set or the Julia set.
      * The Julia set is the escape map of the (x,y) coordinate with parameters 

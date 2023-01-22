@@ -38,7 +38,7 @@
       window.calculator.login.onGoogleSignIn(googleUser);
     }
     var grecaptcha;
-    function googleRecaptchaCallback(){
+    function googleRecaptchaCallback() {
       if (window.calculator === undefined) {
         window.calculator = {};
       }
@@ -67,42 +67,36 @@
           <div class="divCenteredItem divVisible" id="divLoginCalculatorPanel">
             <b>Local account:</b><br><br>
             <form>
-              <!--pasword input form, avoid password not in form warning-->
               <input class="textInputUsername" type="text" id="inputUsername" name="username" placeholder="username"
                 required><br>
-              <input class="textInputUsername" type="password" id="inputPassword" name="password" placeholder="password" autocomplete="on"><br>
+              <input class="textInputUsername" type="password" id="inputPassword" name="password" placeholder="password"
+                autocomplete="on"><br>
             </form>
-            <!--password input form-->
             <button class="buttonSelectPage" id="buttonLogin">Login</button><br>
             <button class="buttonSignUp" id="buttonSignUp">Sign up</button><br>
             <button class="buttonSignUp" id="buttonForgotLogin">Forgot login</button><br>
           </div>
-          <!--divLoginCalculatorPanel-->
           <div class="divCenteredItem">
             <a href="#" id="linkLogout" class="linkLogoutInactive linkStandardButtonLike">Log out</a>
           </div>
-          <!--divCenteredItem-->
           <div class="divCenteredItem">
             <b>Google login:</b>
             <script src="https://accounts.google.com/gsi/client" async defer></script>
-            <div id="g_id_onload" data-client_id="538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com" data-callback="googleSignIn" data-auto_select="false">
+            <div id="g_id_onload"
+              data-client_id="538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com"
+              data-callback="googleSignIn" data-auto_select="false">
             </div>
             <div class="g_id_signin" data-type="standard">Google unavailable (did page fully load? Internet?).</div>
           </div>
-          <!--divCenteredItem-->
           <div class="divCenteredItem">
           </div>
-          <!--divCenteredItem-->
           <div class="divCenteredItem">
             <div id="spanLoginStatus" style="width: 190px; text-align: center"></div>
             <div id="spanLoginStatusExtra" style="width: 190px; text-align: center"></div>
           </div>
         </div>
-        <!--centerVerticallyInPageContainer-->
       </div>
-      <!--centerHorizontallyInPageContainer-->
     </div>
-    <!--divLoginPage-->
     <div id="divSolvePage" class="divPage">
       <div class="centerHorizontally">
         Type your problem here [<b style="color:red">Experimental</b>].<br>
@@ -134,8 +128,8 @@
           <td><input type="text" id="emailForSignUp" placeholder="email"></td>
         </tr>
       </table>
-  <script src='https://www.google.com/recaptcha/api.js?onload=googleRecaptchaCallback&render=explicit' async
-    defer></script>
+      <script src='https://www.google.com/recaptcha/api.js?onload=googleRecaptchaCallback&render=explicit' async
+        defer></script>
       <div id="recaptchaSignUp"></div>
       <button id="buttonSignUpStart">Sign up</button>
       <br>
@@ -143,7 +137,6 @@
       <br>
       <span id="signUpResult"></span>
     </div>
-    <!--divSignUpPage-->
     <div id="divForgotLogin" class="divPage">
       <table>
         <tr>
@@ -152,19 +145,15 @@
         </tr>
       </table>
       <div id="recaptchaForgotPassword"></div>
-      <button id="buttonSendRecoveryEmail">Send recovery email</button><span
-        id="forgotLoginResultReport"></span>
+      <button id="buttonSendRecoveryEmail">Send recovery email</button><span id="forgotLoginResultReport"></span>
       <br>
       <span id="forgotLoginResult"></span>
     </div>
-    <!--divForgotLogin-->
     <div id="divProblemPage" class="divPage">
       <div id="divProblemInfoBar" class="problemInfoBar"></div>
       <div id="divProblemPageContentContainer">
       </div>
-      <!--divProblemPageContentContainer-->
     </div>
-    <!--divProblemPage-->
     <div id="divEditPage" class="divPage">
       <span id="spanButtonPreviousEdit"></span><button id="buttonSaveEdit">Save</button><span
         id="spanButtonNextEdit"></span>
@@ -173,16 +162,13 @@
       <span id="spanErrorEditPage"></span>
       <div id="divEditorAce">
       </div>
-      <!--divEditorAce-->
     </div>
     <div id="divCurrentCourse" class="divPage">
       <div id="divCurrentCourseEditPanel"></div>
       <div id="divCurrentCourseBody"></div>
     </div>
-    <!--divCurrentCourse-->
     <div id="divSelectCourse" class="divPage">
     </div>
-    <!--divSelectCourse-->
     <div id="divCalculatorPage" class="divPage">
       <div id="divCalculatorMainInputOutput">
         <div id="divCalculatorMainInput">
@@ -199,18 +185,21 @@
                 <span id="idProgressReportTimer"></span>
                 <br>
                 <span id="spanComputationLink">
-                  <button class="buttonMQ" style="visibility:hidden;" id="buttonCopyLatexLink" title="Copy latex version of the link.">
+                  <button class="buttonMQ" style="visibility:hidden;" id="buttonCopyLatexLink"
+                    title="Copy latex version of the link.">
                     <tiny>L&#x1F4CB;</tiny>
                   </button>
                   <a id="anchorComputationLink" style="transition: all 1s;"></a>
                 </span>
               </td>
               <td><button id="buttonToggleEquations" class="buttonToggleTopics" title="expand/collapse"></button></td>
-              <td><div id="divEquationEditor" style="display:inline-block">
+              <td>
+                <div id="divEquationEditor" style="display:inline-block">
                   <input id="equationEditorFontSizeSlider" type="range" min="8" max="100" value="48"><br>
-                  <div style="font-size: 48px; font-family: 'Times New Roman'; vertical-align:top" id="mainInputEditorField"></div>
+                  <div style="font-size: 48px; font-family: 'Times New Roman'; vertical-align:top"
+                    id="mainInputEditorField"></div>
                   <br>
-                  <span id="calculatorEditorDebug"> </span>                    
+                  <span id="calculatorEditorDebug"> </span>
                 </div>
               </td>
               <td>
@@ -240,7 +229,9 @@
         <div id="divCalculatorMainOutput"></div>
       </div>
       <div id="divCalculatorExamplesContainer">
-        <button id="buttonCalculatorExamples" class="buttonToggleTopics" title="expand/collapse">&#9656;</button>
+        <button id="buttonCalculatorExamples" class="buttonToggleTopics" title="expand/collapse">
+          &#9656;
+        </button>
         Examples
         <span id="spanProgressCalculatorExamples"></span>
         <div id="divCalculatorExamples">
@@ -306,12 +297,8 @@
       (todor.milev at
       google's email).
     </div>
-    <!--divAboutPage-->
-
     <div id="divPrivacyPolicy" class="divPage">
       <h1>Privacy Policy</h1>
-
-
       <p>Effective date: December 10, 2018</p>
 
 
@@ -500,8 +487,7 @@
     </div>
 
     <div id="divDatabase" class="divPage">
-      <button class="buttonStandard" id = "buttonTables">Tables</button><span
-        id="spanDatabaseComments"></span>
+      <button class="buttonStandard" id="buttonTables">Tables</button><span id="spanDatabaseComments"></span>
       <div id="divDatabaseOutput"> </div>
     </div>
     <div id="divThemes" class="divPage">
@@ -666,9 +652,11 @@
       <div id="idServerStatus">
       </div>
     </div>
-    <div id="divTheMainMenuPanel" class="divTheMainMenu">
+    <div id="divMainMenuPanel" class="divMainMenu">
+      <button id="buttonToggleTheMainMenu" class="buttonToggleTopics" title="expand/collapse">
+        &#9660;
+      </button>
       <div class="divLoginPanel">
-        <button id="buttonToggleTheMainMenu" class="buttonToggleTopics" title="expand/collapse">&#9660;</button>
         <div id="divProfilePicture" class="divProfilePictureContainerExpanded divInvisible"></div>
         <div id="divLoginPanelUsernameReport" class="divInvisible divSmall" style="margin: 4px"></div>
         <div id="divLoginPanelDatabaseInfo" class="divSmall" style="margin: 4px"></div>
@@ -752,9 +740,7 @@
         <a href="/src/" target="_blank">server source</a>
       </div>
     </div>
-    <!--divTheMainMenuPanel-->
   </div>
-  <!--divPage-->
 </body>
 
 </html>

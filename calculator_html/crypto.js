@@ -4,7 +4,7 @@ const styles = require('./styles');
 const jsonToHtml = require('./json_to_html');
 
 function attachTooltip(
-  /**@type {HTMLElement} */
+  /** @type {HTMLElement} */
   element,
   /**@string {string} */
   tooltipHTML,
@@ -18,14 +18,14 @@ function attachTooltip(
 }
 
 function showToolTip(
-  /**@type {HTMLElement} */
+  /** @type {HTMLElement} */
   tooltipElement,
 ) {
   tooltipElement.style.visibility = "visible";
 }
 
 function hideToolTip(
-  /**@type {HTMLElement} */
+  /** @type {HTMLElement} */
   tooltipElement,
 ) {
   tooltipElement.style.visibility = "hidden";
@@ -39,7 +39,7 @@ function abstractSyntaxNotationAnnotate(binaryHex, interpretation, id) {
 }
 
 function displayTransportLayerSecurity(
-  /**@type {string} */
+  /** @type {string} */
   outputId,
   input,
 ) {
@@ -49,7 +49,7 @@ function displayTransportLayerSecurity(
 
 function writeSessionToDOM(
   session,
-  /**@type {HTMLElement} */
+  /** @type {HTMLElement} */
   outputElement,
 ) {
   var htmlContent = "";
@@ -82,7 +82,7 @@ function writeSessionToDOM(
 }
 
 function displaySSLRecord(
-  /**@type {string} */
+  /** @type {string} */
   outputId,
   input,
 ) {
@@ -140,17 +140,17 @@ function displaySSLRecord(
 
 class AbstractSyntaxOne {
   constructor() {
-    /**@type {string} */
+    /** @type {string} */
     this.idAnnotation = null;
-    /**@type {HTMLElement} */
+    /** @type {HTMLElement} */
     this.DOMElementAnnotationContainer = null;
-    /**@type {HTMLElement} */
+    /** @type {HTMLElement} */
     this.DOMElementAnnotation = null;
-    /**@type {HTMLElement} */
+    /** @type {HTMLElement} */
     this.DOMElementAnnotationTree = null;
-    /**@type {string} */
+    /** @type {string} */
     this.binaryHex = "";
-    /**@type {Object} */
+    /** @type {Object} */
     this.interpretation = null;
     this.positionInBinary = 0;
   }
@@ -158,7 +158,7 @@ class AbstractSyntaxOne {
   initializeAnnotation(
     inputBinaryHex,
     inputInterpretation,
-    /**@type {string} */
+    /** @type {string} */
     inputIdAnnotation,
   ) {
     this.idAnnotation = inputIdAnnotation;
@@ -171,9 +171,9 @@ class AbstractSyntaxOne {
   }
 
   appendAnnotation(
-    /**@type {HTMLElement} */
+    /** @type {HTMLElement} */
     container,
-    /**@type  {ASNElement}*/
+    /** @type  {ASNElement}*/
     currentInterpretation,
   ) {
     var currentElement = document.createElement("SPAN");
@@ -274,7 +274,7 @@ class AbstractSyntaxOne {
 
   mouseOverAbstractSyntaxOneElement(
     annotation,
-    /**@type {HTMLElement} */
+    /** @type {HTMLElement} */
     annotationTreeElement,
   ) {
     annotation.leadingByte.style.backgroundColor = "gray";
@@ -285,7 +285,7 @@ class AbstractSyntaxOne {
 
   mouseOutAbstractSyntaxOneElement(
     annotation,
-    /**@type {HTMLElement} */
+    /** @type {HTMLElement} */
     annotationTreeElement,
   ) {
     annotation.leadingByte.style.backgroundColor = "";
@@ -295,9 +295,9 @@ class AbstractSyntaxOne {
   }
 
   appendAnnotationTree(
-    /**@type {HTMLElement} */
+    /** @type {HTMLElement} */
     container,
-    /**@type  {ASNElement}*/
+    /** @type  {ASNElement}*/
     currentInterpretation,
   ) {
     var currentElement = document.createElement("DIV");
@@ -378,7 +378,7 @@ class TransportLayerSecurityServer {
   }
 
   displayMessages(
-    /**@type {string} */
+    /** @type {string} */
     outputId,
     input,
   ) {
@@ -464,7 +464,7 @@ class AnnotatedBytes {
 
   writeMessageToDOM(
     input,
-    /**@type {HTMLElement} */
+    /** @type {HTMLElement} */
     outputComponent,
   ) {
     var serialization = input.serialization;

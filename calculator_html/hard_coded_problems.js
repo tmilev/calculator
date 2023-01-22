@@ -8,13 +8,14 @@ const pathnames = require("./pathnames");
 
 class HardCodedProblemCollection {
   constructor() {
-    /**@type{HardCodedProblem} */
+    /** @type{HardCodedProblem} */
     this.problems = [];
   }
+  
   create(
-    /**@type{HTMLElement[]|string[]} */
+    /** @type{HTMLElement[]|string[]} */
     elements,
-    /**@type{string} */
+    /** @type{string} */
     server,
   ) {
     if (!Array.isArray(elements)) {
@@ -31,18 +32,18 @@ class HardCodedProblemCollection {
 
 class HardCodedProblem {
   constructor(
-    /**@type{HTMLElement|string} */
+    /** @type{HTMLElement|string} */
     element,
-    /**@type{string} */
+    /** @type{string} */
     server,
   ) {
     if (typeof element === "string") {
       element = document.getElementById(element);
     }
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     this.element = element;
     this.calculatorServer = server;
-    /**@type{AnswerPanel[]} */
+    /** @type{AnswerPanel[]} */
     this.answers = [];
   }
 
@@ -62,9 +63,9 @@ class HardCodedProblem {
   }
 
   createAnswers(
-    /**@type{HTMLElement[]} */
+    /** @type{HTMLElement[]} */
     answersElements,
-    /**@type{boolean} */
+    /** @type{boolean} */
     hardCoded,
   ) {
     for (let i = 0; i < answersElements.length; i++) {
@@ -96,55 +97,55 @@ class HardCodedProblem {
 
 class HardCodedAnswer {
   constructor(
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     element,
-    /**@type{string} */
+    /** @type{string} */
     desiredAnswer,
-    /**@type{string} */
+    /** @type{string} */
     answerCheck,
-    /**@type{string} */
+    /** @type{string} */
     calculatorServer,
-    /**@type{boolean} */
+    /** @type{boolean} */
     hardCoded,
   ) {
-    /**@type{HTMLElement} */
+    /** @type{HTMLElement} */
     this.element = element;
-    /**@type{string|null} */
+    /** @type{string|null} */
     this.answerId = this.element.id;
-    /**@type{string} */
+    /** @type{string} */
     this.calculatorServer = calculatorServer;
-    /**@type{boolean} Whether the problem should have an answer/solution button. */
+    /** @type{boolean} Whether the problem should have an answer/solution button. */
     this.forReal = false;
     let forRealString = this.element.getAttribute("forReal");
     if (forRealString === "true") {
       this.forReal = true;
     }
-    /**@type{boolean} When true, printouts will contain additional information. */
+    /** @type{boolean} When true, printouts will contain additional information. */
     this.debug = false;
     if (this.element.getAttribute("debug") === "true") {
       this.debug = true;
     }
-    /**@type{string} */
+    /** @type{string} */
     this.buttonOptions = this.element.getAttribute("buttons");
-    /**@type{string} */
+    /** @type{string} */
     this.desiredAnswer = desiredAnswer;
-    /**@type{string} */
+    /** @type{string} */
     this.answerCheck = answerCheck;
-    /**@type{AnswerPanel|null} */
+    /** @type{AnswerPanel|null} */
     this.answerPanel = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.pureLatexElement = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.buttonSubmitHardCoded = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.equationEditor = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.panelWithButtons = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.verificationSpan = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.solutionSpan = null;
-    /**@type{HTMLElement|null} */
+    /** @type{HTMLElement|null} */
     this.hardCoded = hardCoded;
   }
 
@@ -219,7 +220,7 @@ class HardCodedAnswer {
 
   writeResult(
     input,
-    /**@type{string} */
+    /** @type{string} */
     givenData,
   ) {
     try {
@@ -248,9 +249,9 @@ class HardCodedAnswer {
 }
 
 function create(
-  /**@type{HTMLElement[]|string[]} */
+  /** @type{HTMLElement[]|string[]} */
   elements,
-  /**@type{string} */
+  /** @type{string} */
   server,
 ) {
   hardCodedProblems.create(elements, server);

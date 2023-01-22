@@ -4,7 +4,7 @@ class DatePicker {
   constructor() {
   }
   createDatePicker(
-    /**@type{string} */
+    /** @type{string} */
     id,
   ) {
 

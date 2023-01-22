@@ -8,7 +8,7 @@ class AnswerProcessing {
 
   getFirstValueFromKeys(
     input,
-    /**@type{string[]} */
+    /** @type{string[]} */
     keys,
   ) {
     for (let i = 0; i < keys.length; i++) {
@@ -22,7 +22,7 @@ class AnswerProcessing {
 
   getAllValuesOfGivenKeys(
     input,
-    /**@type{string[]} */
+    /** @type{string[]} */
     labels,
   ) {
     let result = [];

@@ -7,10 +7,10 @@ const processMonitoring = require("./process_monitoring");
 
 class CalculatorEquationEditor {
   constructor(
-    /**@type{Function} */
+    /** @type{Function} */
     keyPressHandler,
   ) {
-    /**@type{InputPanelData|null} */
+    /** @type{InputPanelData|null} */
     this.calculatorPanel = null;
     this.flagCalculatorInputOK = true;
     this.keyPressHandler = keyPressHandler;
@@ -145,7 +145,7 @@ class CalculatorEquationEditor {
     this.inputMainTextbox().value = this.extractor.leftString + this.extractor.middleEditedString + this.extractor.rightString;
   }
 
-  /**@returns{HTMLTextAreaElement} */
+  /** @return{HTMLTextAreaElement} */
   inputMainTextbox() {
     return this.calculatorPanel.getPureLatexElement();
   }
@@ -153,26 +153,26 @@ class CalculatorEquationEditor {
 
 class EditorInputExtractor {
   constructor() {
-    /**@type{string} */
+    /** @type{string} */
     this.rawInput = "";
-    /**@type{string} */
+    /** @type{string} */
     this.leftString = "";
-    /**@type{string} */
+    /** @type{string} */
     this.middleEditedString = "";
-    /**@type{string} */
+    /** @type{string} */
     this.rightString = "";
-    /**@type{number} */
+    /** @type{number} */
     this.caretPosition = 0;
 
-    /**@type{number} The right end of the selection, equal to the index of the right caret needed to enclose our selection.*/
+    /** @type{number} The right end of the selection, equal to the index of the right caret needed to enclose our selection.*/
     this.rightIndex = - 1;
-    /**@type{number} The left end of the selection, equal to index of the left caret needed to enclose our selection. */
+    /** @type{number} The left end of the selection, equal to index of the left caret needed to enclose our selection. */
     this.leftIndex = - 1;
-    /**@type{number}*/
+    /** @type{number}*/
     this.openLeftDelimiters = 0;
-    /**@type{number}*/
+    /** @type{number}*/
     this.openRightDelimiters = 0;
-    /**@type{boolean}*/
+    /** @type{boolean}*/
     this.foundSemiColumn = false;
     this.leftDelimiters = {
       "(": true,
@@ -185,9 +185,9 @@ class EditorInputExtractor {
   }
 
   extract(
-    /**@type{string}*/
+    /** @type{string}*/
     inputLatex,
-    /**@type{number}*/
+    /** @type{number}*/
     caretPosition,
   ) {
     this.rawInput = inputLatex;

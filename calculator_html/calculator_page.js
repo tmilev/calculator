@@ -267,11 +267,11 @@ class Calculator {
       }
       let handlerReport = document.createElement("span");
       handlerReport.textContent = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
-      let output = document.getElementById(ids.domElements.calculatorExamples);
+      let output = document.getElementById(ids.domElements.pages.calculator.examples);
       output.appendChild(handlerReport);
       for (let i = 0; i < allElements.length; i++) {
-        output.appendChild(allElements[i]); 
-      }      
+        output.appendChild(allElements[i]);
+      }
     } catch (e) {
       console.log(`Bad json: ${e}\n Input JSON follows.`);
       console.log(inputJSONtext);
@@ -287,16 +287,31 @@ class Calculator {
     event.preventDefault();
   }
 
-  adjustCalculatorPageSize() {
-    miscellaneousFrontend.switchMenu(ids.domElements.calculatorExamples);
-    let element = document.getElementById(ids.domElements.calculatorExamples);
+  formatExamplesPanel() {
+    let examples = document.getElementById(
+      ids.domElements.pages.calculator.examples
+    );
+    let examplesContainer = document.getElementById(
+      ids.domElements.pages.calculator.examplesContainer
+    );
     let calculatorElement = document.getElementById(
       ids.domElements.divCalculatorMainInputOutput
     );
-    if (element.classList.contains("hiddenClass")) {
-      calculatorElement.style.maxWidth = "100%";
+    const button = document.getElementById(
+      ids.domElements.pages.calculator.buttonCalculatorExamples
+    );
+    if (this.flagExamplesWantedShown) {
+      button.innerHTML = "&#9660;";
+      calculatorElement.style.maxWidth = "85%";
+      examples.classList.remove("hiddenClass");
+      examplesContainer.style.height = "100%";
+      examplesContainer.style.maxHeight = "100%";
     } else {
-      calculatorElement.style.maxWidth = "80%";
+      calculatorElement.style.maxWidth = "98%";
+      button.innerHTML = "&#9656;";
+      examples.classList.add("hiddenClass");
+      examplesContainer.style.height = "5%";
+      examplesContainer.style.maxHeight = "5%";
     }
   }
 
@@ -337,35 +352,30 @@ class Calculator {
     }
   }
  
-  setExamples(
-    /** @type{HTMLElement} */
-    button,
-  ) {
+  downloadExamples() {
+    let url = "";
+    url += pathnames.urls.calculatorAPI;
+    url += `?${pathnames.urlFields.request}=${pathnames.urlFields.requests.calculatorExamplesJSON}`;
+    submitRequests.submitGET({
+      url: url,
+      callback: (input) => {
+        this.processExamples(input);
+      },
+      progress: "spanProgressCalculatorExamples"
+    });
+  }
+
+  setExamples() {
     let examples = document.getElementById(
-      ids.domElements.calculatorExamples
+      ids.domElements.pages.calculator.examplesContainer,
     );
     if (
       examples.innerHTML.length < 300 &&
       this.flagExamplesWantedShown
     ) {
-      let url = "";
-      url += pathnames.urls.calculatorAPI;
-      url += `?${pathnames.urlFields.request}=${pathnames.urlFields.requests.calculatorExamplesJSON}`;
-      submitRequests.submitGET({
-        url: url,
-        callback: (input) => {
-          this.processExamples(input);
-        },
-        progress: "spanProgressCalculatorExamples"
-      });
-    } else {
-      this.adjustCalculatorPageSize();
+      this.downloadExamples();
     }
-    if (this.flagExamplesWantedShown) {
-      button.innerHTML = "&#9660;";
-    } else {
-      button.innerHTML = "&#9656;";
-    }
+    this.formatExamplesPanel();
   }
 
   initialize() {
@@ -392,6 +402,7 @@ class Calculator {
     buttonLinkLatex.addEventListener('click', () => {
       this.prepareLatexLink();
     });
+    this.formatExamplesPanel();
   }
 
   initializeToggleExamples() {
@@ -406,12 +417,16 @@ class Calculator {
       this.setExamples(buttonExamples);
     }
     buttonExamples.addEventListener('click', () => {
-      this.flagExamplesWantedShown = !this.flagExamplesWantedShown;
-      storage.storage.variables.calculator.examplesWantedShown.setAndStore(
-        this.flagExamplesWantedShown, true, false,
-      );
-      this.setExamples(buttonExamples);
+      this.toggleExamples();
     });
+  }
+
+  toggleExamples() {
+    this.flagExamplesWantedShown = !this.flagExamplesWantedShown;
+    storage.storage.variables.calculator.examplesWantedShown.setAndStore(
+      this.flagExamplesWantedShown, true, false,
+    );
+    this.setExamples();
   }
 
   initializeToggleEditor() {

@@ -68,6 +68,8 @@ let domElements = {
       divCalculatorMainInput: "divCalculatorMainInput",
       divCalculatorMainInputOutput: "divCalculatorMainInputOutput",
       divCalculatorSplitter: "divCalculatorSplitter",
+      examples: "divCalculatorExamples",
+      examplesContainer: "divCalculatorExamplesContainer",
     },
     compareExpressions: {
       div: "divCompareExpressionsPage",
@@ -170,7 +172,6 @@ let domElements = {
     divMainMenuPanel: "divMainMenuPanel",
   },
   divProfilePicture: "divProfilePicture",
-  calculatorExamples: "divCalculatorExamples",
   spanProgressReportGeneral: "spanProgressReportGeneral",
   spanUserIdInActivateAccountPage: "spanUserIdInActivateAccountPage",
   spanUserIdInAccountsPage: "spanUserIdInAccountsPage",

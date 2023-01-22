@@ -569,8 +569,8 @@ a.linkProgressReport {
 #divCalculatorMainInputOutput{
   overflow: hidden;
   height: 100%;
-  width: 80%;
-  max-width: 80%;
+  width: 100%;
+  max-width: 100%;
 }
 
 #divCalculatorExamplesContainer {
@@ -580,8 +580,8 @@ a.linkProgressReport {
   position: absolute; 
   right: 0%;
   top: 0%;
-  max-width: 20%;
-  width: 10%;
+  max-width: 15%;
+  width: 15%;
   height: 100%;
 }
 

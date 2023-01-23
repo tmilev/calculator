@@ -373,6 +373,7 @@ bool CodeFormatter::Element::isSuitableForTemplateArgument() const {
   return
   this->isSuitableForTypeExpression() ||
   this->type == CodeFormatter::Element::TypeAndIdentifier ||
+  this->type == CodeFormatter::Element::FunctionWithArguments||
   this->type == CodeFormatter::Element::Expression ||
   this->type == CodeFormatter::Element::CommaList ||
   this->type == CodeFormatter::Element::ClassDeclaration;
@@ -384,6 +385,7 @@ bool CodeFormatter::Element::isSuitableForParenthesesEnclosure() const {
   this->isExpressionIdentifierOrAtom() ||
   this->type == CodeFormatter::Element::InParentheses ||
   this->type == CodeFormatter::Element::TypeAndIdentifier ||
+  this->type == CodeFormatter::Element::Star ||
   this->type == CodeFormatter::Element::TypeKeyWord ||
   this->type == CodeFormatter::Element::TypeExpression ||
   this->type == CodeFormatter::Element::FunctionDeclaration ||
@@ -3283,7 +3285,8 @@ bool CodeFormatter::Processor::applyOneRule() {
   if (
     secondToLast.type == CodeFormatter::Element::FunctionWithArguments && (
       last.type == CodeFormatter::Element::LessThan ||
-      last.type == CodeFormatter::Element::GreaterThan
+  (
+      last.type == CodeFormatter::Element::GreaterThan && thirdToLast.type != CodeFormatter::Element::LessThan)
     )
   ) {
     this->lastRuleName = "function with arguments inequality";
@@ -4712,6 +4715,7 @@ bool CodeFormatter::Processor::isSuitableForExpressionOperatorExpressionXX(
   ) {
     return true;
   }
+
   if (
     !left.isExpressionIdentifierAtomOrFunctionWithArguments() &&
     left.type != CodeFormatter::Element::InParentheses &&

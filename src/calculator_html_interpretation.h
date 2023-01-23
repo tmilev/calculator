@@ -694,7 +694,7 @@ public:
         >
       > maintainWebArguments;
       StateMaintainer<std::string> maintainRequestType;
-      StateMaintainer<int32_t(*)()> maintainTimePointer;
+      StateMaintainer < int32_t(*)() > maintainTimePointer;
     public:
       Database::Test databaseTester;
       Setup(bool useFallbackDatabase);

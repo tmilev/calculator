@@ -33,9 +33,13 @@ void initializeTimer() {
   gettimeofday(&SytemFunctionsGlobal::computationStartGlobal, nullptr);
 }
 
-int GlobalVariables::getGlobalTimeInSeconds() {
+int32_t GlobalVariables::timeInternal() {
   time_t result = time(nullptr);
-  return static_cast<int>(result);
+  return static_cast<int32_t>(result);
+}
+
+int32_t GlobalVariables::timeMockForTests() {
+  return 1234567;
 }
 
 void GlobalVariables::fallAsleep(int microseconds) {

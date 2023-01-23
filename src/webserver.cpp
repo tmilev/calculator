@@ -5056,7 +5056,8 @@ void WebServer::initializeMainHashes() {
   std::stringstream buildHeadHashWithTimeStream;
   buildHeadHashWithTimeStream
   << global.buildHeadHashWithServerTime
-  << global.getGlobalTimeInSeconds();
+  << "_"
+  << global.timePointer();
   global.buildHeadHashWithServerTime = buildHeadHashWithTimeStream.str();
   FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().
   addOnTopNoRepetitionMustBeNew(WebAPI::request::calculatorHTML);

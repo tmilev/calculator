@@ -301,6 +301,7 @@ GlobalVariables::GlobalVariables() {
   this->flagDisableDatabaseLogEveryoneAsAdmin = false;
   this->flagUseMathTags = false;
   this->flagRunningFormatCode = false;
+  this->timePointer = GlobalVariables::timeInternal;
 }
 
 bool ProgressReport::tickAndWantReport() {

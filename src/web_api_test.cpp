@@ -250,7 +250,7 @@ bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
     << resultFirst
     << "\nSecond:\n"
     << resultSecond
-    << "Database before start:\n"
+    << "\nDatabase before start:\n"
     << databaseBeforeFirstRun
     << "\nDatabase before second run:\n"
     << databaseAfterFirstRun

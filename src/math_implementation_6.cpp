@@ -397,17 +397,17 @@ bool PolynomialFactorizationFiniteFields::factorWithTiming(
   this->millisecondsFactorizationFromLift = 0;
   this->numberOfRunsOfFactor ++;
   bool result = this->factor(comments, commentsOnFailure);
-  int64_t ellapsedMillseconds =
+  int64_t elapsedMillseconds =
   global.getElapsedMilliseconds() - startMilliseconds;
   if (this->millisecondsTotal == 0) {
-    this->millisecondsTotal = ellapsedMillseconds;
+    this->millisecondsTotal = elapsedMillseconds;
   } else {
     global
     << Logger::red
     << "Second run of factorWithTiming; input: "
     << this->output->original.toString()
     << ". Milliseconds: "
-    << ellapsedMillseconds
+    << elapsedMillseconds
     << " ms. "
     << Logger::endL;
   }

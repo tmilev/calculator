@@ -2427,7 +2427,7 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
   this->randomSeedPerAttempt.setSize(this->maxInterpretationAttempts);
   UnsecurePseudoRandomGenerator generator;
   if (!this->problemData.flagRandomSeedGiven) {
-    generator.setRandomSeedSmall(static_cast<uint32_t>(time(nullptr)));
+    generator.setRandomSeedSmall(global.timePointer());
   } else {
     generator.setRandomSeedSmall(this->problemData.randomSeed);
   }

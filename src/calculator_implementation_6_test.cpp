@@ -635,6 +635,8 @@ databaseTester(useFallbackDatabase) {
   this->maintainUserRole.initialize(global.userDefault);
   this->maintainWebArguments.initialize(global.webArguments);
   this->maintainRequestType.initialize(global.requestType);
+  this->maintainTimePointer.initialize(global.timePointer);
+  global.timePointer = global.timeMockForTests;
   global.flagLoggedIn = true;
   global.userDefault.userRole = UserCalculatorData::Roles::administator;
   global.userDefault.username = WebAPI::userDefaultAdmin;
@@ -726,8 +728,8 @@ bool Course::Test::setDeadlines(bool useFallback) {
   global.setWebInput(
     "mainInput",
     HtmlRoutines::convertStringToURLString(
-      "{\"test/problems/sample2.html\":{\"deadlines\":{\"2\":\"2023-01-01\"}}}"
-      ,
+      "{\"test/problems/sample2.html\":"
+      "{\"deadlines\":{\"2\":\"2023-01-01\"}}}",
       false
     )
   );

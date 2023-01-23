@@ -218,8 +218,9 @@ public:
   int(*pointerExternalCommandStream)(const std::string& systemCommand);
   // When non-null, this usually points to: callChDirWrapper.
   void(*pointerCallChDir)(const std::string& directoryName);
-  // double
-  // MaxWebWorkerRunTimeWithoutComputationStartedSecondsNonPositiveMeansNoLimit;
+  int32_t(*timePointer)();
+  static int32_t timeInternal();
+  static int32_t timeMockForTests();
   MemorySaving<Calculator>& calculator();
   int64_t millisecondOffset;
   int64_t millisecondsMaxComputation;
@@ -449,8 +450,7 @@ public:
   bool configurationStore();
   bool configurationLoad();
   void configurationProcess();
-  int getGlobalTimeInSeconds();
-  int64_t getElapsedMilliseconds();
+  static int64_t getElapsedMilliseconds();
   double getElapsedSeconds() {
     return static_cast<double>(this->getElapsedMilliseconds()) / 1000;
   }

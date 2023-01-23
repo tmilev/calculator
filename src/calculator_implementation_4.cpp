@@ -2387,9 +2387,7 @@ void ObjectContainer::reset() {
   this->weightsPolynomial.clear();
   this->hyperOctahedralGroups.setSize(0);
   this->elementsHyperOctGroup.clear();
-  this->pseudoRandom.setRandomSeedSmall(
-    static_cast<uint32_t>(time(nullptr))
-  );
+  this->pseudoRandom.setRandomSeedSmall(global.timePointer());
   this->userInputTextBoxesWithValues.clear();
   this->graphicsScripts.clear();
   this->ellipticCurveElementsZmodP.clear();

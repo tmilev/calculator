@@ -38,8 +38,8 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   }
   if (problem.flagIsForReal) {
     out
-    <<
-    " <b>Not allowed to show answer of a problem being tested for real. </b>";
+    << " <b>Not allowed to show answer of a "
+    << "problem being tested for real. </b>";
     result[WebAPI::result::resultHtml] = out.str();
     return result;
   }

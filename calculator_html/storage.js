@@ -434,12 +434,14 @@ class StorageCalculator {
   }
 
   parseURL() {
-    let newHash = window.location.search;
+    // We use the hash parameter for the same purpose as the query parameter.
+    // However, changing the hash does not force a page reload, which
+    // we want for internal app links.
+    // So, hash parameters take precedence over query parameters.
+    let newHash = window.location.hash;
     if (newHash === "") {
-      // The query parameters is empty. In the past, the calculator used
-      // the hash parameter for the same purpose as the query parameter.
-      // Perhaps we have an old link pointing here?
-      newHash = window.location.hash;
+      // The hash parameter is empty. Lets look into the query parameter.
+      newHash = window.location.search;
     }
     if (
       this.currentHashRaw === newHash

@@ -559,23 +559,22 @@ bool CalculatorConversions::extractPolynomialFromPower(
       inverted.invert();
       power *= - 1;
       content = inverted;
-      return true;
-    }
-    if (content.size() == 1 && acceptNonPositiveOrNonIntegerPowers) {
+    } else if (content.size() == 1 && acceptNonPositiveOrNonIntegerPowers) {
       MonomialPolynomial monomial = content.monomials[0];
       inverted = content.coefficients[0];
       monomial.invert();
       inverted.invert();
       content.makeZero();
       content.addMonomial(monomial, inverted);
-      return true;
+      power *= - 1;
+    } else {
+      return
+      calculator
+      << "<hr>Failed to extract polynomial from "
+      << input.toString()
+      << " because the exponent was negative. "
+      << "Please make sure that this is not a typo. ";
     }
-    return
-    calculator
-    << "<hr>Failed to extract polynomial from "
-    << input.toString()
-    << " because the exponent was negative. "
-    << "Please make sure that this is not a typo. ";
   }
   output.content.raiseToPower(power, 1);
   return true;

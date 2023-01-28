@@ -2370,17 +2370,17 @@ void Expression::getCoefficientMultiplicandForm(
 }
 
 void Expression::getCoefficientMultiplicandForm(
-  Rational& outputCoeff, Expression& outputNoCoeff
+  Rational& outputCoefficient, Expression& outputNoCoefficient
 ) const {
   this->checkInitialization();
   if (this->startsWith(this->owner->opTimes(), 3)) {
-    if ((*this)[1].isOfType(&outputCoeff)) {
-      outputNoCoeff = (*this)[2];
+    if ((*this)[1].isOfType(&outputCoefficient)) {
+      outputNoCoefficient = (*this)[2];
       return;
     }
   }
-  outputCoeff = 1;
-  outputNoCoeff = *this;
+  outputCoefficient = 1;
+  outputNoCoefficient = *this;
   return;
 }
 

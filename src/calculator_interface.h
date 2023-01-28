@@ -179,7 +179,7 @@ public:
     Expression& outputCoefficient, Expression& outputNoCoefficient
   ) const;
   void getCoefficientMultiplicandForm(
-    Rational& outputCoeff, Expression& outputNoCoeff
+    Rational& outputCoefficient, Expression& outputNoCoefficient
   ) const;
   bool setChildAtomValue(int childIndex, const std::string& atom);
   bool setChildAtomValue(int childIndex, int atomValue);

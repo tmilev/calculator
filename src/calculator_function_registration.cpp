@@ -702,7 +702,9 @@ void Calculator::initializeFunctionsStandard() {
     "A = Polynomialize(C);\n"
     "B = MakeExpression(Polynomial(C));\n"
     "A - B;\n"
-    "Polynomialize((a+a^-1+sqrt(-1))^2)",
+    "Polynomialize((a+a^-1+sqrt(-1))^2);"
+    "Polynomialize(x^-2);\n"
+    "Polynomialize((x^-{1/3}+1)^2)",
     "CalculatorFunctions::polynomialize",
     "Polynomialize",
     innerStandard
@@ -758,7 +760,8 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Attempts to rearrange into standard "
     "polynomial form and then integrate.",
-    "\\int \\left( \\frac{x(x + 1)}{2} \\right)^2 dx ",
+    "\\int \\left( \\frac{x(x + 1)}{2} \\right)^2 dx ;\n"
+    "\\int x^-2 dx",
     "CalculatorFunctionsIntegration::"
     "integratePowerByUncoveringParenthesisFirst",
     "IntegrateAfterPolynomialization",

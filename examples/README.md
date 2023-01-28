@@ -2062,13 +2062,14 @@ Operator or function \int is overloaded with 18 total handlers.
 Integrates a definite integral.  
 
 *\int* [IntegrateAfterPolynomialization] {CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%5c%5cleft%28%20%5c%5cfrac%7bx%28x%20%2b%201%29%7d%7b2%7d%20%5c%5cright%29%5e2%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%5c%5cleft%28%20%5c%5cfrac%7bx%28x%20%2b%201%29%7d%7b2%7d%20%5c%5cright%29%5e2%20dx%20%3b%5cn%5c%5cint%20x%5e-2%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\int \left( \frac{x(x + 1)}{2} \right)^2 dx 
+\int \left( \frac{x(x + 1)}{2} \right)^2 dx ;
+\int x^-2 dx
 ```
 Attempts to rearrange into standard polynomial form and then integrate.
 
-*\int* [IntegratePowerRule] {CalculatorFunctionsIntegration::integrateXnDiffX}. 
+*\int* [IntegratePowerRule] {CalculatorFunctionsIntegration::integrateXPowerN}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20x%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \int x dx 
@@ -2625,13 +2626,14 @@ IsDifferentialOneFormOneVariable(1/(\text{d} y));
 Tests whether the expression is a differential form in one variable. 
 
 *Polynomialize* [Polynomialize] {CalculatorFunctions::polynomialize}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22C%20%3d%20%28c%20a%20%2b%20a%20b%20%2b%20b%20c%20%2b%201%29%5e3%3b%5cnA%20%3d%20Polynomialize%28C%29%3b%5cnB%20%3d%20MakeExpression%28Polynomial%28C%29%29%3b%5cnA%20-%20B%3b%5cnPolynomialize%28%28a%2ba%5e-1%2bsqrt%28-1%29%29%5e2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22C%20%3d%20%28c%20a%20%2b%20a%20b%20%2b%20b%20c%20%2b%201%29%5e3%3b%5cnA%20%3d%20Polynomialize%28C%29%3b%5cnB%20%3d%20MakeExpression%28Polynomial%28C%29%29%3b%5cnA%20-%20B%3b%5cnPolynomialize%28%28a%2ba%5e-1%2bsqrt%28-1%29%29%5e2%29%3bPolynomialize%28x%5e-2%29%3b%5cnPolynomialize%28%28x%5e-%7b1%2f3%7d%2b1%29%5e2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 C = (c a + a b + b c + 1)^3;
 A = Polynomialize(C);
 B = MakeExpression(Polynomial(C));
 A - B;
-Polynomialize((a+a^-1+sqrt(-1))^2)
+Polynomialize((a+a^-1+sqrt(-1))^2);Polynomialize(x^-2);
+Polynomialize((x^-{1/3}+1)^2)
 ```
 Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).
 

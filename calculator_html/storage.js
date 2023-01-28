@@ -496,7 +496,11 @@ class StorageCalculator {
     let incomingHashRaw = this.getPercentEncodedURL(this.urlObject);
 
     if (incomingHashRaw !== this.currentHashRaw) {
-      const newURL = `${pathnames.urls.appWithCache}?${incomingHashRaw}`;
+      let app = pathnames.urls.appWithCache;
+      if (window.location.pathname.startsWith(pathnames.urls.appNoCache)) {
+        app = pathnames.urls.appNoCache;
+      }
+      const newURL = `${app}?${incomingHashRaw}`;
       window.history.pushState(null, "", newURL);
       this.currentHashRaw = incomingHashRaw;
     }

@@ -5432,12 +5432,11 @@ bool CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst
   STACK_TRACE(
     "CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst"
   );
-  Expression
-  functionExpression,
-  integrandE,
-  newIntegralE,
-  variableExpression,
-  integrationSetE;
+  Expression functionExpression;
+  Expression integrandE;
+  Expression newIntegralE;
+  Expression variableExpression;
+  Expression integrationSetE;
   if (
     !input.isIndefiniteIntegralFdx(
       &variableExpression, &functionExpression, &integrationSetE
@@ -5598,13 +5597,16 @@ bool CalculatorFunctionsIntegration::integrateXPowerN(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsIntegration::integrateXPowerN");
-  Expression functionExpression, variableExpression;
+  Expression functionExpression;
+  Expression variableExpression;
   if (
     !input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression)
   ) {
     return false;
   }
-  Expression functionCoefficient, functionNoCoefficient, outputNoCoeff;
+  Expression functionCoefficient;
+  Expression functionNoCoefficient;
+  Expression outputNoCoefficient;
   if (functionExpression.isConstantNumber()) {
     output = functionExpression * variableExpression;
     return true;
@@ -5627,19 +5629,19 @@ bool CalculatorFunctionsIntegration::integrateXPowerN(
     return false;
   }
   if (functionNoCoefficient[2].isEqualToMOne()) {
-    outputNoCoeff.reset(calculator, 2);
-    outputNoCoeff.addChildAtomOnTop(calculator.opLog());
-    outputNoCoeff.addChildOnTop(variableExpression);
-    output = functionCoefficient * outputNoCoeff;
+    outputNoCoefficient.reset(calculator, 2);
+    outputNoCoefficient.addChildAtomOnTop(calculator.opLog());
+    outputNoCoefficient.addChildOnTop(variableExpression);
+    output = functionCoefficient * outputNoCoefficient;
     return true;
   }
   Expression outputPower = functionNoCoefficient[2];
   outputPower += 1;
-  outputNoCoeff.makeXOX(
+  outputNoCoefficient.makeXOX(
     calculator, calculator.opPower(), variableExpression, outputPower
   );
-  outputNoCoeff /= outputPower;
-  output = functionCoefficient * outputNoCoeff;
+  outputNoCoefficient /= outputPower;
+  output = functionCoefficient * outputNoCoefficient;
   output.checkConsistency();
   output.checkInitializationRecursively();
   return true;

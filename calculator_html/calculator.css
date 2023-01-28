@@ -609,6 +609,7 @@ a.linkProgressReport {
 .tableCalculatorOutput td {
   /* height: 100%; */
   vertical-align: top;
+  align-self: top;
 }
 
 table.tableCalculatorOutput {
@@ -620,13 +621,15 @@ table.tableCalculatorOutput {
 }
 
 .calculatorInputOutput{
-  float: left;
+/*  float: left;*/
+align-self: top;
 }
 
 .containerComments {
   word-break: break-all;
-  width: 8%;
+/*  width: 8%;*/
   min-width: 8%;
+  flex-grow: 0;
 }
 
 .calculatorInputOutputComments {

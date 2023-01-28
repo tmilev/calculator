@@ -5594,10 +5594,10 @@ bool CalculatorFunctionsIntegration::integrateSum(
   return true;
 }
 
-bool CalculatorFunctionsIntegration::integrateXnDiffX(
+bool CalculatorFunctionsIntegration::integrateXPowerN(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsIntegration::integrateXnDiffX");
+  STACK_TRACE("CalculatorFunctionsIntegration::integrateXPowerN");
   Expression functionExpression, variableExpression;
   if (
     !input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression)

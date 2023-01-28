@@ -400,7 +400,7 @@ public:
   static bool integratePullImaginaryUnit(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool integrateXnDiffX(
+  static bool integrateXPowerN(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool integratePullConstant(

@@ -766,11 +766,11 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctionsIntegration::integrateXnDiffX,
+    CalculatorFunctionsIntegration::integrateXPowerN,
     "",
     "Integrates x^n dx. ",
     "\\int x dx ",
-    "CalculatorFunctionsIntegration::integrateXnDiffX",
+    "CalculatorFunctionsIntegration::integrateXPowerN",
     "IntegratePowerRule",
     innerStandard
   );

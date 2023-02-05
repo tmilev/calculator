@@ -273,8 +273,17 @@ public:
   std::string buildVersionSimple;
   std::string buildHeadHashWithServerTime;
   std::string operatingSystem;
-  std::string hostWithPort;
-  std::string hostNoPort;
+  class WebGlobals{
+  public:
+    std::string hostWithPort;
+    std::string hostNoPort;
+    // For the hostname with the given key,
+    // the calculator will act as a stand-alone server.
+    // The server content will be serves from the virtual folder
+    // with the given value.
+    MapList<std::string, std::string> actAsWebServerOnlyForTheseHosts;
+  };
+  WebGlobals web;
   bool flagRequestComingLocally;
   // internal infrastructure flags
   bool flagServerForkedIntoWorker;

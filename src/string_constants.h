@@ -260,6 +260,7 @@ public:
   static std::string useMathTags;
   static std::string webAddress;
   static std::string sendEmailFrom;
+  static std::string actAsWebServerForTheseHosts;
 };
 
 class DatabaseStrings {

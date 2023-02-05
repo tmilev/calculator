@@ -181,7 +181,6 @@ SOURCES += \
     string_constants.cpp \
     symmetric_groups_and_generalizations.cpp \
     system_functions.cpp \
-    temp.cpp \
     test.cpp \
     transport_layer_security.cpp \
     transport_layer_security_implementation.cpp \

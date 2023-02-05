@@ -254,3 +254,4 @@ std::string Configuration::freecalc = "freecalc/";
 std::string Configuration::useMathTags = "useMathTags";
 std::string Configuration::webAddress = "webAddress";
 std::string Configuration::sendEmailFrom = "sendEmailFrom";
+std::string Configuration::actAsWebServerForTheseHosts = "actAsWebServerForTheseHosts";

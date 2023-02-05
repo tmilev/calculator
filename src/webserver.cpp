@@ -509,9 +509,9 @@ std::string WebWorker::toStringMessageShort() const {
   }
   out
   << "\n<hr>\nHost with port:<br>\n"
-  << HtmlRoutines::convertStringToHtmlString(global.hostWithPort, false)
+  << HtmlRoutines::convertStringToHtmlString(global.web.hostWithPort, false)
   << "<br>Host without port:<br>\n"
-  << HtmlRoutines::convertStringToHtmlString(global.hostNoPort, false);
+  << HtmlRoutines::convertStringToHtmlString(global.web.hostNoPort, false);
   out
   << "\n<hr>\nFull message head:<br>\n"
   << HtmlRoutines::convertStringToHtmlString(this->messageHead, true);
@@ -1067,7 +1067,7 @@ void WebWorker::parseMessageHead() {
   if (this->messageBody.size() > 0 && this->contentLength < 0) {
     this->contentLength = static_cast<signed>(this->messageBody.size());
   }
-  global.hostWithPort = this->hostWithPort;
+  global.web.hostWithPort = this->hostWithPort;
 }
 
 void WebWorker::attemptUnknownRequestErrorCorrection() {
@@ -1143,9 +1143,9 @@ void WebWorker::extractHostInfo() {
   } else {
     this->hostNoPort = this->hostWithPort;
   }
-  global.hostWithPort = this->hostWithPort;
-  global.hostNoPort = this->hostNoPort;
-  if (global.hostNoPort == "localhost" || global.hostNoPort == "127.0.0.1") {
+  global.web.hostWithPort = this->hostWithPort;
+  global.web.hostNoPort = this->hostNoPort;
+  if (global.web.hostNoPort == "localhost" || global.web.hostNoPort == "127.0.0.1") {
     global.flagRequestComingLocally = true;
   } else {
     global.flagRequestComingLocally = false;
@@ -2353,7 +2353,7 @@ bool WebWorker::processRedirectAwayFromWWW() {
   std::string addressNoWWW;
   if (
     !StringRoutines::stringBeginsWith(
-      global.hostWithPort, "www.", &addressNoWWW
+      global.web.hostWithPort, "www.", &addressNoWWW
     )
   ) {
     return false;
@@ -5628,6 +5628,12 @@ void GlobalVariables::configurationProcess() {
   global.flagUseMathTags =
   global.configuration[Configuration::useMathTags].isTrueRepresentationInJSON(
   );
+  JSData& webServerOnly =
+  global.configuration[Configuration::actAsWebServerForTheseHosts];
+for (int i = 0; i < webServerOnly.objects.size(); i ++){
+  global.web.actAsWebServerOnlyForTheseHosts.setKeyValue( webServerOnly.objects.keys[i], webServerOnly.objects.values[i].stringValue);
+}
+
   List<List<std::string> > folderVirtualLinksDefault =
   FileOperations::initializeFolderVirtualLinksDefaults();
   for (int i = 0; i < folderVirtualLinksDefault.size; i ++) {

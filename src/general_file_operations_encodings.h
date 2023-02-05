@@ -262,6 +262,8 @@ public:
     bool openAsBinary,
     bool accessSensitiveFolders = false
   );
+  // Combines paths making sure that we don't get a "//" in the middle.
+ static std::string addPaths(const std::string& left, const std::string right);
 };
 
 class StateMaintainerCurrentFolder {

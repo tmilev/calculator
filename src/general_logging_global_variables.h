@@ -105,6 +105,16 @@ public:
   Logger& logString(const std::string& input);
 };
 
+struct ActAsWebServerOnly{
+  std::string portHTTPS;
+  std::string portHTTP;
+  std::string baseFolder;
+  std::string landingPage;
+  std::string adjustURL(const std::string& url)const;
+  bool fromJSON(JSData &input);
+  JSData toJSON();
+};
+
 // All global objects are either
 // 1) fields of variable:  GlobalVariables& global
 // or
@@ -281,7 +291,7 @@ public:
     // the calculator will act as a stand-alone server.
     // The server content will be serves from the virtual folder
     // with the given value.
-    MapList<std::string, std::string> actAsWebServerOnlyForTheseHosts;
+    MapList<std::string, ActAsWebServerOnly> actAsWebServerOnlyForTheseHosts;
   };
   WebGlobals web;
   bool flagRequestComingLocally;

@@ -261,6 +261,12 @@ public:
   static std::string webAddress;
   static std::string sendEmailFrom;
   static std::string actAsWebServerForTheseHosts;
+  struct ActAsWebServer{
+    static std::string portHTTP;
+    static std::string portHTTPS;
+  static  std::string baseFolder;
+  static std::string landingPage;
+  };
 };
 
 class DatabaseStrings {

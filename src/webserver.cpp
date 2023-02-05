@@ -1572,13 +1572,14 @@ int WebWorker::processFolder() {
   return 0;
 }
 
-int WebWorker::processFileDoesntExist() {
+int WebWorker::processFileDoesntExist(bool generateLinkToCalculatorOnMissingFile) {
   this->setHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
   // WARNING: cross-site scripting danger. Pay attention when editing.
   // Use convertStringToHtmlString to sanitize strings.
   // Never return non-sanitized user input back to the user.
   std::stringstream out;
   out << "<html>" << "<body>";
+  if (generateLinkToCalculatorOnMissingFile){
   out
   << "one page <a href = \""
   << global.displayApplication
@@ -1587,6 +1588,7 @@ int WebWorker::processFileDoesntExist() {
   << " Same app without browser cache: <a href = \""
   << global.displayApplicationNoCache
   << "\">app no cache</a>.<hr>";
+  }
   out << "<b>File does not exist.</b>";
   if (this->flagFileNameSanitized) {
     out
@@ -1664,12 +1666,12 @@ int WebWorker::processFileTooLarge(long fileSize) {
   return this->writeToBodyJSON(result);
 }
 
-int WebWorker::processFile() {
+int WebWorker::processFile(bool generateLinkToCalculatorOnMissingFile) {
   STACK_TRACE("WebWorker::processFile");
   if (
     !FileOperations::fileExistsUnsecure(this->relativePhysicalFileName)
   ) {
-    return this->processFileDoesntExist();
+    return this->processFileDoesntExist(generateLinkToCalculatorOnMissingFile);
   }
   std::string fileExtension =
   FileOperations::getFileExtensionWithDot(this->relativePhysicalFileName);
@@ -2478,6 +2480,12 @@ int WebWorker::serveClient() {
   }
   this->extractHostInfo();
   this->extractAddressParts();
+  if (global.web.actAsWebServerOnlyForTheseHosts.contains( this->hostNoPort)){
+const ActAsWebServerOnly &config =  global.web.actAsWebServerOnlyForTheseHosts.getValueNoFail(this->hostNoPort);
+    this->addressComputed = config.adjustURL(this->addressComputed);
+
+    return this->processFolderOrFile(false);
+  }
   std::stringstream argumentProcessingFailureComments;
   this->flagArgumentsAreOK = true;
   if (
@@ -2593,10 +2601,10 @@ int WebWorker::serveClient() {
   ) {
     return 0;
   }
-  return this->processFolderOrFile();
+  return this->processFolderOrFile(true);
 }
 
-int WebWorker::processFolderOrFile() {
+int WebWorker::processFolderOrFile(bool generateLinkToCalculatorOnMissingFile) {
   STACK_TRACE("WebWorker::processFolderOrFile");
   this->VirtualFileName =
   HtmlRoutines::convertURLStringToNormal(this->addressComputed, true);
@@ -2633,7 +2641,7 @@ int WebWorker::processFolderOrFile() {
   if (FileOperations::isFolderUnsecure(this->relativePhysicalFileName)) {
     return this->processFolder();
   }
-  return this->processFile();
+  return this->processFile(generateLinkToCalculatorOnMissingFile);
 }
 
 void WebWorker::pauseIfRequested() {
@@ -5631,7 +5639,14 @@ void GlobalVariables::configurationProcess() {
   JSData& webServerOnly =
   global.configuration[Configuration::actAsWebServerForTheseHosts];
 for (int i = 0; i < webServerOnly.objects.size(); i ++){
-  global.web.actAsWebServerOnlyForTheseHosts.setKeyValue( webServerOnly.objects.keys[i], webServerOnly.objects.values[i].stringValue);
+  ActAsWebServerOnly subServerConfiguration;
+  subServerConfiguration.fromJSON(webServerOnly.objects.values[i]);
+std::string key =  webServerOnly.objects.keys[i];
+  global.web.actAsWebServerOnlyForTheseHosts.setKeyValue(key,subServerConfiguration);
+webServerOnly[key] = subServerConfiguration.toJSON();
+}
+if (webServerOnly.elementType != JSData::token::tokenObject) {
+  webServerOnly.elementType = JSData::token::tokenObject;
 }
 
   List<List<std::string> > folderVirtualLinksDefault =
@@ -6005,4 +6020,31 @@ void WebServer::computeActiveWorkerId() {
     << "This may be a memory leak. "
     << Logger::endL;
   }
+}
+
+std::string ActAsWebServerOnly::adjustURL(const std::string &url) const{
+  std::string corrected = url;
+  if (corrected == "/" || corrected == ""){
+    corrected = this->landingPage;
+  }
+  return FileOperations::addPaths(this->baseFolder,
+ corrected );
+
+}
+
+bool ActAsWebServerOnly::fromJSON( JSData &input){
+  this->portHTTP = input[Configuration::ActAsWebServer::portHTTP].stringValue;
+  this->portHTTPS = input[Configuration::ActAsWebServer::portHTTPS].stringValue;
+  this->baseFolder = input[Configuration::ActAsWebServer::baseFolder].stringValue;
+  this->landingPage= input[Configuration::ActAsWebServer::landingPage].stringValue;
+  return true;
+}
+
+JSData ActAsWebServerOnly::toJSON(){
+  JSData result;
+  result[Configuration::ActAsWebServer::portHTTP]=this->portHTTP;
+  result[Configuration::ActAsWebServer::portHTTPS]=this->portHTTPS;
+  result[Configuration::ActAsWebServer::baseFolder] = this->baseFolder;
+  result[Configuration::ActAsWebServer::landingPage] = this->landingPage;
+ return result;
 }

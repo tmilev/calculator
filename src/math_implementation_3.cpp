@@ -1793,6 +1793,19 @@ bool FileOperations::openFileVirtualReadOnly(
   );
 }
 
+std::string FileOperations::addPaths(const std::string &left, const std::string right){
+  std::string leftWithoutEndSlash = left;
+  std::string rightWithoutStartSlash = right;
+  if (StringRoutines::stringEndsWith(left, "/")) {
+    leftWithoutEndSlash = left.substr(0, left.size()-1);
+
+  }
+  if (StringRoutines::stringBeginsWith(right, "/")){
+    rightWithoutStartSlash = right.substr(1);
+  }
+  return leftWithoutEndSlash +"/"+rightWithoutStartSlash;
+}
+
 bool FileOperations::openFileVirtualCustomizedWriteOnly(
   std::fstream& file,
   const std::string& fileName,

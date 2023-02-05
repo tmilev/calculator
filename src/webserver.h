@@ -89,10 +89,10 @@ public:
   std::string closeIndentTag(const std::string& tag);
   JSData processComputationIndicatorJSData();
   int getIndexIfRunningWorkerId(JSData& outputComputationStatus);
-  int processFolderOrFile();
+  int processFolderOrFile(bool generateLinkToCalculatorOnMissingFile);
   int processFolder();
-  int processFile();
-  int processFileDoesntExist();
+  int processFile(bool generateLinkToCalculatorOnMissingFile);
+  int processFileDoesntExist(bool generateLinkToCalculatorOnMissingFile);
   int processFileCantOpen();
   int processFileTooLarge(long fileSize);
   JSData setEmail(const std::string& input);

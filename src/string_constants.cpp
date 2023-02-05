@@ -255,3 +255,7 @@ std::string Configuration::useMathTags = "useMathTags";
 std::string Configuration::webAddress = "webAddress";
 std::string Configuration::sendEmailFrom = "sendEmailFrom";
 std::string Configuration::actAsWebServerForTheseHosts = "actAsWebServerForTheseHosts";
+std::string Configuration::ActAsWebServer::baseFolder = "baseFolder";
+std::string Configuration::ActAsWebServer::portHTTP = "portHTTP";
+std::string Configuration::ActAsWebServer::portHTTPS = "portHTTPS";
+std::string Configuration::ActAsWebServer::landingPage = "landingPage";

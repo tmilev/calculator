@@ -517,15 +517,16 @@ class Calculator {
     return stringifiedHash;
   }
 
-  /** Writest the given raw html string into the html element. */
+  /** Writes html input to an element on the page. */
   writeHTML(
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     element,
-    /** @type{string} */
-    input,
+    /**@type{string} */
+    htmlContent,
   ) {
-    element.setHTML(input, element);
+    panels.writeHTML(element, htmlContent);
   }
+
 
   /** @return{HTMLElement} */
   writeErrorsCrashesComments(
@@ -539,6 +540,17 @@ class Calculator {
       let comments = document.createElement("div");
       this.writeHTML(comments, inputParsed.commentsGlobal);
       result.appendChild(comments);
+    }
+    let commentsDebug = document.getElementById(
+      ids.domElements.pages.calculator.divDebugComments
+    );
+    if (
+      inputParsed.commentsDebug !== "" &&
+      inputParsed.commentsDebug !== undefined
+    ) {
+      this.writeHTML(commentsDebug, inputParsed.commentsDebug);
+    } else {
+      commentsDebug.textContent = "";
     }
     if (
       inputParsed.result === undefined &&

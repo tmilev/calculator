@@ -509,7 +509,9 @@ std::string WebWorker::toStringMessageShort() const {
   }
   out
   << "\n<hr>\nHost with port:<br>\n"
-  << HtmlRoutines::convertStringToHtmlString(global.hostWithPort, false);
+  << HtmlRoutines::convertStringToHtmlString(global.hostWithPort, false)
+  << "<br>Host without port:<br>\n"
+  << HtmlRoutines::convertStringToHtmlString(global.hostNoPort, false);
   out
   << "\n<hr>\nFull message head:<br>\n"
   << HtmlRoutines::convertStringToHtmlString(this->messageHead, true);

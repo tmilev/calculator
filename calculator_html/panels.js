@@ -11,6 +11,19 @@ if (module === undefined) {
   module = {};
 }
 
+function writeHTML(
+  /** @type{HTMLElement} */
+  element,
+  /** @type{string} */
+  htmlContent,
+) {
+  try {
+    element.setHTML(htmlContent);
+  } catch (e) {
+    element.innerHTML = htmlContent;
+  }
+}
+
 function modifyHeightForTimeout(currentButtonPanel, newHeight) {
   currentButtonPanel.style.maxHeight = newHeight;
   currentButtonPanel.style.height = newHeight;
@@ -284,7 +297,7 @@ function makePanelFromData(
       element = document.getElementById(element);
     }
     if (element !== null) {
-      element.setHTML(data.content);
+      writeHTML(element, data.content);
     }
     return null;
   }
@@ -299,6 +312,7 @@ if (window.calculator.panels === undefined) {
 }
 
 module.exports = {
+  writeHTML,
   modifyHeightForTimeout,
   PanelExpandable,
   PanelExpandableData,

@@ -70,6 +70,7 @@ let domElements = {
       divCalculatorSplitter: "divCalculatorSplitter",
       examples: "divCalculatorExamples",
       examplesContainer: "divCalculatorExamplesContainer",
+      divDebugComments: "divCalculatorPageDebugComments",
     },
     compareExpressions: {
       div: "divCompareExpressionsPage",

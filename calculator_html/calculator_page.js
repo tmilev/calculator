@@ -240,6 +240,9 @@ class Calculator {
 
   /** @return{HTMLElement} */
   processOneFunctionAtom(handlers) {
+    if (handlers === undefined || handlers === null) {
+      throw new Error("Bad handlers");
+    } 
     let result = document.createElement("div");
     for (let i = 0; i < handlers.length; i++) {
       let handler = new AtomHandler();
@@ -251,27 +254,32 @@ class Calculator {
     return result;
   }
 
+  doProcessExamples(inputJSONtext) {
+    let examplesMessage = miscellaneousFrontend.jsonUnescapeParse(inputJSONtext);
+    this.examples = examplesMessage["calculatorExamples"];
+    let atomsSorted = Object.keys(this.examples).slice().sort();
+    let numHandlers = 0;
+    let allElements = [];
+    for (let i = 0; i < atomsSorted.length; i++) {
+      let atom = atomsSorted[i];
+      let currentExamples = this.examples[atom];
+      allElements.push(this.processOneFunctionAtom(currentExamples.regular));
+      allElements.push(this.processOneFunctionAtom(currentExamples.composite));
+      numHandlers += this.examples[atom].regular.length + this.examples[atom].composite.length;
+    }
+    let handlerReport = document.createElement("span");
+    handlerReport.textContent = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
+    let output = document.getElementById(ids.domElements.pages.calculator.examples);
+    output.appendChild(handlerReport);
+    for (let i = 0; i < allElements.length; i++) {
+      output.appendChild(allElements[i]);
+    }
+  }
+
   processExamples(inputJSONtext) {
     try {
-      this.examples = miscellaneousFrontend.jsonUnescapeParse(inputJSONtext);
-      
-      let atomsSorted = Object.keys(this.examples).slice().sort();
-      let numHandlers = 0;
-      let allElements = [];
-      for (let i = 0; i < atomsSorted.length; i++) {
-        let atom = atomsSorted[i];
-        let currentExamples = this.examples[atom];
-        allElements.push(this.processOneFunctionAtom(currentExamples.regular));
-        allElements.push(this.processOneFunctionAtom(currentExamples.composite));
-        numHandlers += this.examples[atom].regular.length + this.examples[atom].composite.length;
-      }
-      let handlerReport = document.createElement("span");
-      handlerReport.textContent = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
-      let output = document.getElementById(ids.domElements.pages.calculator.examples);
-      output.appendChild(handlerReport);
-      for (let i = 0; i < allElements.length; i++) {
-        output.appendChild(allElements[i]);
-      }
+      this.doProcessExamples(inputJSONtext)
+
     } catch (e) {
       console.log(`Bad json: ${e}\n Input JSON follows.`);
       console.log(inputJSONtext);
@@ -509,6 +517,16 @@ class Calculator {
     return stringifiedHash;
   }
 
+  /** Writest the given raw html string into the html element. */
+  writeHTML(
+    /** @type{HTMLElement} */
+    element,
+    /** @type{string} */
+    input,
+  ) {
+    element.setHTML(input, element);
+  }
+
   /** @return{HTMLElement} */
   writeErrorsCrashesComments(
     inputParsed,
@@ -519,7 +537,7 @@ class Calculator {
       inputParsed.commentsGlobal !== undefined
     ) {
       let comments = document.createElement("div");
-      comments.innerHTML = inputParsed.commentsGlobal;
+      this.writeHTML(comments, inputParsed.commentsGlobal);
       result.appendChild(comments);
     }
     if (
@@ -527,7 +545,7 @@ class Calculator {
       inputParsed.comments !== undefined
     ) {
       let comments = document.createElement("div");
-      comments.innerHTML = inputParsed.comments;
+      this.writeHTML(comments, inputParsed.comments);
       result.appendChild(comments);
     }
     if (
@@ -547,7 +565,7 @@ class Calculator {
       inputParsed.badInput !== ""
     ) {
       let badInput = document.createElement("div");
-      badInput.innerHTML = inputParsed.badInput;
+      this.writeHTML(badInput, inputParsed.badInput);
       result.appendChild(badInput);
     }
     if (
@@ -556,7 +574,7 @@ class Calculator {
       inputParsed.crashReport !== ""
     ) {
       let crash = document.createElement("div");
-      crash.innerHTML = inputParsed.crashReport;
+      this.writeHTML(crash, inputParsed.crashReport);
       result.appendChild(crash);
     }
     return result;
@@ -574,7 +592,7 @@ class Calculator {
     if (inputParsed.timeOut === true) {
       if (inputParsed.timeOutComments !== undefined) {
         let comment = document.createElement("div");
-        comment.innerHTML = inputParsed.timeOutComments;
+        this.writeHTML(comment, inputParsed.timeOutComments);
         result.append(comment);
       }
       processMonitoring.monitor.start(inputParsed.workerId);

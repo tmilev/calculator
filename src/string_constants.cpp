@@ -26,6 +26,7 @@ std::string WebAPI::result::performance = "performance";
 std::string WebAPI::result::computationTime = "computationTime";
 std::string WebAPI::result::parsingLog = "parsingLog";
 std::string WebAPI::result::commentsGlobal = "commentsGlobal";
+std::string WebAPI::result::commentsDebug = "commentsDebug";
 std::string WebAPI::result::timeOut = "timeOut";
 std::string WebAPI::result::timeOutComments = "timeOutComments";
 std::string WebAPI::result::workerId = "workerId";
@@ -162,6 +163,7 @@ std::string WebAPI::frontend::problemFileName = "problemFileName";
 std::string WebAPI::frontend::exercise = "exerciseJSON";
 std::string WebAPI::frontend::exerciseType = "exerciseType";
 std::string WebAPI::frontend::scoredQuiz = "scoredQuizJSON";
+std::string WebAPI::frontend::calculatorExamples= "calculatorExamples";
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 std::string WebAPI::calculator::testFileNameVirtual =
 "test/automated_test_known_inputs_outputs.json";

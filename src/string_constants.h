@@ -108,6 +108,7 @@ public:
     static std::string computationTime;
     static std::string parsingLog;
     static std::string commentsGlobal;
+    static std::string commentsDebug;
     static std::string timeOut;
     static std::string timeOutComments;
     static std::string workerId;
@@ -168,6 +169,8 @@ public:
     static std::string exerciseType;
     static std::string scoredQuiz;
     static std::string exercise;
+    static std::string calculatorExamples;
+
   };
 
   struct problem {
@@ -205,6 +208,7 @@ public:
   struct calculator {
   public:
     static std::string testFileNameVirtual;
+
   };
 
   static std::string headerCacheControl;

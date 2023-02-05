@@ -284,7 +284,7 @@ function makePanelFromData(
       element = document.getElementById(element);
     }
     if (element !== null) {
-      element.innerHTML = data.content;
+      element.setHTML(data.content);
     }
     return null;
   }

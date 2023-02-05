@@ -28,8 +28,8 @@ Calculator::Examples::Examples() {
 
 JSData Calculator::Examples::toJSONFunctionHandlers() {
   STACK_TRACE("Calculator::Examples::toJSONFunctionHandlers");
-  JSData output;
-  output.elementType = JSData::token::tokenObject;
+  JSData examples;
+  examples.elementType = JSData::token::tokenObject;
   MapReferences<
     std::string,
     MemorySaving<OperationHandlers>,
@@ -43,8 +43,10 @@ JSData Calculator::Examples::toJSONFunctionHandlers() {
     const std::string& operationName = operations.keys[i];
     Calculator::OperationHandlers& handlers =
     operations.values[i].getElement();
-    output[operationName] = handlers.toJSON();
+    examples[operationName] = handlers.toJSON();
   }
+  JSData output;
+  output[WebAPI::frontend::calculatorExamples] = examples;
   return output;
 }
 

@@ -48,8 +48,8 @@ void TransportLayerSecurityOpenSSL::freeContextGlobal() {
   TransportLayerSecurityOpenSSL::contextGlobal = nullptr;
 }
 
-void TransportLayerSecurityOpenSSL::initSSLLibrary() {
-  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLlibrary");
+void TransportLayerSecurityOpenSSL::initializeSSLLibrary() {
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initializeSSLLibrary");
   if (this->flagSSLlibraryInitialized) {
     return;
   }
@@ -92,14 +92,8 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
   if (!global.flagSSLAvailable) {
     return false;
   }
-  if (
-    FileOperations::fileExistsVirtual(
-      TransportLayerSecurity::certificateSelfSignedVirtual(), true, true
-    ) &&
-    FileOperations::fileExistsVirtual(
-      TransportLayerSecurity::keySelfSignedVirtual(), true, true
-    )
-  ) {
+  this->owner->selfSigned.makeSelfSignedKeyAndCertificate();
+  if (this->owner->selfSigned.keysExist()){
     return true;
   }
   global
@@ -108,26 +102,11 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
   << Logger::endL;
   global << "Let me try to create those files for you." << Logger::endL;
   std::stringstream command;
-  std::string certificatePhysicalName, keyPhysicalName;
-  FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::certificateSelfSignedVirtual(),
-    certificatePhysicalName,
-    true,
-    true,
-    nullptr
-  );
-  FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::keySelfSignedVirtual(),
-    keyPhysicalName,
-    true,
-    true,
-    nullptr
-  );
   command
   << "openssl req -x509 -newkey rsa:2048 -nodes -keyout "
-  << keyPhysicalName
+  << this->owner->selfSigned.privateKeyFileNamePhysical
   << " -out "
-  << certificatePhysicalName
+  << this->owner->selfSigned.certificateFileNamePhysical
   << " -days 3001 ";
   if (
     global.configuration["openSSLSubject"].elementType !=
@@ -161,29 +140,9 @@ bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand() {
   return true;
 }
 
-bool TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSigned() {
-  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSigned");
-  if (
-    !TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSignedCreateOnDemand()
-  ) {
-    return false;
-  }
-  if (
-    !FileOperations::fileExistsVirtual(
-      TransportLayerSecurity::certificateSelfSignedVirtual(), true, true
-    ) ||
-    !FileOperations::fileExistsVirtual(
-      TransportLayerSecurity::keySelfSignedVirtual(), true, true
-    )
-  ) {
-    global.flagSSLAvailable = false;
-    return false;
-  }
-  return true;
-}
 
-void TransportLayerSecurityOpenSSL::initSSLClient() {
-  this->initSSLCommon(false);
+void TransportLayerSecurityOpenSSL::initializeSSLClient() {
+  this->initializeSSLCommon(false);
 }
 
 bool TransportLayerSecurityOpenSSL::checkCanInitializeToClient() {
@@ -206,173 +165,46 @@ bool TransportLayerSecurityOpenSSL::checkCanInitialize(bool toServer) {
   return true;
 }
 
-void TransportLayerSecurityOpenSSL::initSSLCommon(bool isServer) {
-  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLCommon");
+void TransportLayerSecurityOpenSSL::initializeSSLCommon(bool isServer) {
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initializeSSLCommon");
   this->checkCanInitialize(isServer);
   if (this->flagContextInitialized) {
     return;
   }
   this->flagIsServer = isServer;
-  this->initSSLLibrary();
+  this->initializeSSLLibrary();
   std::stringstream commentsOnError;
   this->flagContextInitialized = true;
 }
 
-std::string TransportLayerSecurity::certificateSelfSignedPhysical() {
-  STACK_TRACE("TransportLayerSecurity::certificateSelfSignedPhysical");
-  std::string result;
-  FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::certificateSelfSignedVirtual(),
-    result,
-    true,
-    true,
-    nullptr
-  );
-  return result;
-}
 
-std::string TransportLayerSecurity::certificateSelfSignedVirtual() {
-  return
-  TransportLayerSecurity::certificateFolder +
-  TransportLayerSecurity::certificateSelfSigned;
-}
 
-std::string TransportLayerSecurity::keySelfSignedVirtual() {
-  return
-  TransportLayerSecurity::certificateFolder +
-  TransportLayerSecurity::keySelfSigneD;
-}
 
-std::string TransportLayerSecurity::certificateOfficialPhysical() {
-  STACK_TRACE("TransportLayerSecurity::certificateOfficialPhysical");
-  List<std::string> filesInCertificateFolder;
-  List<std::string> extensions;
-  FileOperations::getFolderFileNamesVirtual(
-    this->certificateFolder,
-    filesInCertificateFolder,
-    &extensions,
-    true,
-    true,
-    nullptr
-  );
-  std::string authorityCertificate;
-  for (int i = 0; i < filesInCertificateFolder.size; i ++) {
-    if (extensions[i] != ".crt") {
-      continue;
-    }
-    if (filesInCertificateFolder[i] == this->certificateSelfSigned) {
-      continue;
-    }
-    if (authorityCertificate != "") {
-      global.fatal
-      << "Found more than one external "
-      << "certificate file in certificates/ folder:\n"
-      << authorityCertificate
-      << "\nand\n"
-      << filesInCertificateFolder[i]
-      << "\n"
-      << "The certificate folder must "
-      << "contain one or two certificates (.crt files): "
-      << "that of the server and that of an external signing authority. "
-      << "The self-signed certificate, if present, "
-      << "must be called "
-      << this->certificateSelfSigned
-      << ". The other file with .crt extension will be assumed to be"
-      << " that of the signing authority. "
-      << global.fatal;
-    }
-    authorityCertificate = filesInCertificateFolder[i];
-  }
-  std::string result;
-  FileOperations::getPhysicalFileNameFromVirtual(
-    this->certificateFolder + authorityCertificate,
-    result,
-    true,
-    true,
-    nullptr
-  );
-  return result;
-}
 
-std::string TransportLayerSecurity::keyOfficialPhysical() {
-  STACK_TRACE("TransportLayerSecurity::keyOfficialPhysical");
-  List<std::string> filesInCertificateFolder;
-  List<std::string> extensions;
-  FileOperations::getFolderFileNamesVirtual(
-    this->certificateFolder,
-    filesInCertificateFolder,
-    &extensions,
-    true,
-    true,
-    nullptr
-  );
-  std::string keyFileName;
-  for (int i = 0; i < filesInCertificateFolder.size; i ++) {
-    if (extensions[i] != ".key") {
-      continue;
-    }
-    if (filesInCertificateFolder[i] == this->keySelfSigneD) {
-      continue;
-    }
-    if (keyFileName != "") {
-      global.fatal
-      << "Found more than one private key "
-      << "in certificates/ folder:\n"
-      << keyFileName
-      << "\nand\n"
-      << filesInCertificateFolder[i]
-      << "\n"
-      << "The certificate folder must "
-      << "contain one or two private .key files: "
-      << "the official one and a self-signed one. "
-      << "The self-signed one is for testing "
-      << "and experimentation purposes. "
-      << global.fatal;
-    }
-    keyFileName = filesInCertificateFolder[i];
-  }
-  std::string result;
-  FileOperations::getPhysicalFileNameFromVirtual(
-    this->certificateFolder + keyFileName, result, true, true, nullptr
-  );
-  return result;
-}
-
-void TransportLayerSecurityOpenSSL::initSSLServerSelfSigned() {
-  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLServerSelfSigned");
-  if (!this->initSSLKeyFilesSelfSigned()) {
+void TransportLayerSecurityOpenSSL::initializeSSLServerCertificatesSelfSigned(){
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initializeSSLServerCertificatesSelfSigned");
+  if (this->flagSelfSignedCertificatesAreInitialized){
     return;
   }
-  std::string certificate;
-  std::string key;
-  FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::certificateSelfSignedVirtual(),
-    certificate,
-    true,
-    true,
-    nullptr
-  );
-  FileOperations::getPhysicalFileNameFromVirtual(
-    TransportLayerSecurity::keySelfSignedVirtual(),
-    key,
-    true,
-    true,
-    nullptr
-  );
+  this->flagSelfSignedCertificatesAreInitialized = true;
+  TransportLayerSecurityConfiguration &selfSigned = this->owner->selfSigned;
+  if (selfSigned.privateKeyFileNamePhysical == ""){
+    selfSigned.makeSelfSignedKeyAndCertificate();
+  }
   global
   << Logger::purple
   << "Using self-signed certificate: "
   << Logger::yellow
-  << certificate
+  << selfSigned.certificateFileNamePhysical
   << Logger::endL
   << "Private key: "
   << Logger::red
-  << key
+  << selfSigned.privateKeyFileNamePhysical
   << Logger::endL;
 #ifdef MACRO_use_open_ssl
   if (
     SSL_CTX_use_certificate_file(
-      this->contextGlobal, certificate.c_str(), SSL_FILETYPE_PEM
+      this->contextGlobal, selfSigned.certificateFileNamePhysical.c_str(), SSL_FILETYPE_PEM
     ) <=
     0
   ) {
@@ -381,7 +213,7 @@ void TransportLayerSecurityOpenSSL::initSSLServerSelfSigned() {
   }
   if (
     SSL_CTX_use_PrivateKey_file(
-      this->contextGlobal, key.c_str(), SSL_FILETYPE_PEM
+      this->contextGlobal, selfSigned.privateKeyFileNamePhysical.c_str(), SSL_FILETYPE_PEM
     ) <=
     0
   ) {
@@ -393,38 +225,40 @@ void TransportLayerSecurityOpenSSL::initSSLServerSelfSigned() {
 #endif
 }
 
-void TransportLayerSecurityOpenSSL::initSSLServer() {
-  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLServer");
-  this->initSSLCommon(true);
-  if (this->owner->flagInitializedPrivateKey) {
+void TransportLayerSecurityOpenSSL::initializeSSLServerCertificatesOfficial() {
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initializeSSLServerCertificatesOfficial");
+  if (this->flagOfficialCertificatesAreInitialized) {
     return;
   }
-  this->owner->flagInitializedPrivateKey = true;
-  std::string certificateOfficialPhysical =
-  this->owner->certificateOfficialPhysical();
-  std::string keyOfficialPhysical = this->owner->keyOfficialPhysical();
+  this->flagOfficialCertificatesAreInitialized = true;
+  std::string certificateFileName = this->owner->official.certificateFileNamePhysical;
+  std::string keyFileName = this->owner->official.privateKeyFileNamePhysical;
+  if ( certificateFileName  == "" || keyFileName == ""){
+    global << "Found no officially signed certificate. " << Logger::endL;
+    return;
+  }
 #ifdef MACRO_use_open_ssl
   global << Logger::green << "SSL is available." << Logger::endL;
   SSL_CTX_set_ecdh_auto(this->contextGlobal, 1);
   if (
     SSL_CTX_use_certificate_chain_file(
-      this->contextGlobal, certificateOfficialPhysical.c_str()
+      this->contextGlobal, certificateFileName.c_str()
     ) <=
     0
   ) {
-    this->initSSLServerSelfSigned();
-  } else {
-    global
+    global.fatal << "Could not find certificate file: " << certificateFileName;
+  }
+  global
     << Logger::green
     << "Found officially signed certificate: "
     << Logger::endL
     << Logger::green
-    << certificateOfficialPhysical
+    << certificateFileName
     << Logger::endL;
     if (
       SSL_CTX_use_PrivateKey_file(
         this->contextGlobal,
-        keyOfficialPhysical.c_str(),
+        keyFileName.c_str(),
         SSL_FILETYPE_PEM
       ) <=
       0
@@ -433,15 +267,16 @@ void TransportLayerSecurityOpenSSL::initSSLServer() {
       global.fatal << "Failed to use private key." << global.fatal;
     }
     global.flagCertificatesAreOfficiallySigned = true;
-  }
-  /*
-  if (!SSL_CTX_check_private_key(this->contextGlobal)) {
-    global << "Private key does not match the certificate public key. ";
-    // global.fatal << "Private key does not match the certificate public key. " << global.fatal;
-  }*/
+
 #else
   global << Logger::red << "Openssl not available." << Logger::endL;
 #endif // MACRO_use_open_ssl
+}
+
+void TransportLayerSecurityOpenSSL::initializeSSLServer() {
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initializeSSLServer");
+  this->initializeSSLCommon(true);
+
 }
 
 void TransportLayerSecurityOpenSSL::clearErrorQueue(
@@ -508,7 +343,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
   (void) commentsOnFailure;
   (void) commentsGeneral;
   this->freeSession();
-  this->initSSLClient();
+  this->initializeSSLClient();
 #ifdef MACRO_use_open_ssl
   this->sslData = SSL_new(this->contextGlobal);
   if (this->sslData == nullptr) {
@@ -897,4 +732,123 @@ TransportLayerSecurityOpenSSL::TransportLayerSecurityOpenSSL() {
   this->flagSSLHandshakeSuccessful = false;
   this->flagContextInitialized = false;
   this->flagIsServer = true;
+  this->flagOfficialCertificatesAreInitialized = false;
+  this->flagSelfSignedCertificatesAreInitialized = false;
+}
+
+
+
+void TransportLayerSecurityConfiguration::makeOfficialKeyAndCertificate() {
+   STACK_TRACE("TransportLayerSecurityConfiguration::makeOfficialKeyAndCertificate");
+this->readCertificateFilename();
+   this->readPrivateKeyFilename();
+}
+
+void TransportLayerSecurityConfiguration::readCertificateFilename(){
+  List<std::string> filesInCertificateFolder;
+  List<std::string> extensions;
+  FileOperations::getFolderFileNamesVirtual(
+    this->certificateFolder,
+    filesInCertificateFolder,
+    &extensions,
+    true,
+    true,
+    nullptr
+  );
+  std::string authorityCertificate;
+  for (int i = 0; i < filesInCertificateFolder.size; i ++) {
+    if (extensions[i] != ".crt") {
+      continue;
+    }
+    if (filesInCertificateFolder[i] == this->selfSignedCertificate) {
+      continue;
+    }
+    if (authorityCertificate != "") {
+      global.fatal
+      << "Found more than one external "
+      << "certificate file in certificates/ folder:\n"
+      << authorityCertificate
+      << "\nand\n"
+      << filesInCertificateFolder[i]
+      << "\n"
+      << "The certificate folder must "
+      << "contain one or two certificates (.crt files): "
+      << "that of the server and that of an external signing authority. "
+      << "The self-signed certificate, if present, "
+      << "must be called "
+      << this->selfSignedCertificate
+      << ". The other file with .crt extension will be assumed to be"
+      << " that of the signing authority. "
+      << global.fatal;
+    }
+    authorityCertificate = filesInCertificateFolder[i];
+  }
+  if (authorityCertificate == "") {
+    return;
+  }
+  std::string result;
+  FileOperations::getPhysicalFileNameFromVirtual(
+    this->certificateFolder + authorityCertificate,
+    this->certificateFileNamePhysical,
+    true,
+    true,
+    nullptr
+  );
+}
+
+void TransportLayerSecurityConfiguration::readPrivateKeyFilename() {
+  STACK_TRACE("TransportLayerSecurity::keyOfficialPhysical");
+  List<std::string> filesInCertificateFolder;
+  List<std::string> extensions;
+  FileOperations::getFolderFileNamesVirtual(
+    this->certificateFolder,
+    filesInCertificateFolder,
+    &extensions,
+    true,
+    true,
+    nullptr
+  );
+  std::string keyFileName;
+  for (int i = 0; i < filesInCertificateFolder.size; i ++) {
+    if (extensions[i] != ".key") {
+      continue;
+    }
+    if (filesInCertificateFolder[i] == this->selfSignedPrivateKey) {
+      continue;
+    }
+    if (keyFileName != "") {
+      global.fatal
+      << "Found more than one private key "
+      << "in certificates/ folder:\n"
+      << keyFileName
+      << "\nand\n"
+      << filesInCertificateFolder[i]
+      << "\n"
+      << "The certificate folder must "
+      << "contain one or two private .key files: "
+      << "the official one and a self-signed one. "
+      << "The self-signed one is for testing "
+      << "and experimentation purposes. "
+      << global.fatal;
+    }
+    keyFileName = filesInCertificateFolder[i];
+  }
+  FileOperations::getPhysicalFileNameFromVirtual(
+    this->certificateFolder + keyFileName, this->privateKeyFileNamePhysical, true, true, nullptr
+  );
+}
+
+
+bool TransportLayerSecurityConfiguration::makeSelfSignedKeyAndCertificate() {
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSigned");
+ return FileOperations::getPhysicalFileNameFromVirtual(
+        this->selfSignedCertificate, this->certificateFileNamePhysical, true, true,nullptr
+  ) &&
+  FileOperations::getPhysicalFileNameFromVirtual(this->selfSignedPrivateKey, this->privateKeyFileNamePhysical, true, true,nullptr);
+
+
+}
+
+bool TransportLayerSecurityConfiguration::keysExist() const{
+  return FileOperations::fileExistsUnsecure(this->privateKeyFileNamePhysical) && FileOperations::fileExistsUnsecure(this->certificateFileNamePhysical);
 }

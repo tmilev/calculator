@@ -128,8 +128,8 @@ std::string WebWorker::closeIndentTag(const std::string& tag) {
   return out.str();
 }
 
-void WebServer::initSSL() {
-  STACK_TRACE("WebServer::initSSL");
+void WebServer::initializeSSL() {
+  STACK_TRACE("WebServer::initializeSSL");
   if (!global.flagSSLAvailable) {
     global << Logger::red << "SSL is DISABLED." << Logger::endL;
     return;
@@ -4248,7 +4248,7 @@ int WebServer::run() {
   this->writeVersionJSFile();
   global.initModifiableDatabaseFields();
   HtmlRoutines::loadStrings();
-  this->initSSL();
+  this->initializeSSL();
   this->transportLayerSecurity.initializeNonThreadSafeOnFirstCall(true);
   if (!this->initPrepareWebServerALL()) {
     return 1;
@@ -4452,7 +4452,7 @@ int WebServer::run() {
   // Cleanup, if ever needed:
   // this->releaseEverything();
   // this->tls.freeEverythingShutdown();
-  // return 0;
+  return 0;
 }
 
 void WebServer::computeSSLFlags() {

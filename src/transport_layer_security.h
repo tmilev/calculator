@@ -36,6 +36,8 @@ public:
   bool flagSSLHandshakeSuccessful;
   bool flagContextInitialized;
   bool flagIsServer;
+  bool flagOfficialCertificatesAreInitialized;
+  bool flagSelfSignedCertificatesAreInitialized;
   List<int> socketStack;
   struct errors {
     static std::string errorWantRead;
@@ -48,11 +50,12 @@ public:
   // One call per program run.
   static void freeContextGlobal();
   void freeSession();
-  void initSSLLibrary();
-  void initSSLServer();
-  void initSSLServerSelfSigned();
-  void initSSLClient();
-  void initSSLCommon(bool isServer);
+  void initializeSSLLibrary();
+  void initializeSSLServer();
+  void initializeSSLCommon(bool isServer);
+  void initializeSSLServerCertificatesSelfSigned();
+  void initializeSSLServerCertificatesOfficial();
+  void initializeSSLClient();
   void reset();
   void clearErrorQueue(int numberOfTransferredBytes);
   bool handShakeIAmClientNoSocketCleanup(
@@ -86,8 +89,7 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  static bool initSSLKeyFilesSelfSigned();
-  static bool initSSLKeyFilesSelfSignedCreateOnDemand();
+  bool initSSLKeyFilesSelfSignedCreateOnDemand();
 };
 
 class TransportLayerSecurityServer;
@@ -558,6 +560,7 @@ public:
     ) const;
   };
 
+  TransportLayerSecurity* owner;
   TransportLayerSecurityServer::Session session;
   X509Certificate certificate;
   PrivateKeyRSA privateKey;
@@ -603,11 +606,46 @@ public:
     List<SSLRecord>& input, std::stringstream* commentsOnFailure
   );
   JSData toJSON();
+bool  initializeCertificatesSelfSigned(std::stringstream* commentsOnFailure);
+bool loadSelfSignedPEMCertificate(std::stringstream* commentsOnFailure);
+bool loadSelfSignedPEMPrivateKey(std::stringstream* commentsOnFailure);
+
+};
+
+class TransportLayerSecurityConfiguration{
+  // Contains the string "certificates/"
+  // The relative file name of the folder
+  // where the certificates + private keys of the
+  // server are stored. This folder is in one of the
+  // "ultra-sensitive" folders that are
+  // guarded by the
+  // sanitizers in FileOperations.
+  static const std::string certificateFolder;
+  static const std::string selfSignedCertificate;
+  static const std::string selfSignedPrivateKey;
+  // Contains the string "certificates/additional/".
+  // Similar to the certificatesFolder, but has additional certificates to be used
+  // by stand-alone web server configurations.
+  static const std::string additionalCertificateFolder;
+  void readCertificateFilename();
+  void readPrivateKeyFilename();
+public:
+  // The physical file name of the certificate. Not sanitized once created.
+std::string certificateFileNamePhysical;
+// The private key file name. Not sanitized once created.
+std::string privateKeyFileNamePhysical;
+
+// Makes this the official certificate configuration.
+void makeOfficialKeyAndCertificate();
+bool makeSelfSignedKeyAndCertificate();
+
+bool keysExist()const;
+
 };
 
 class TransportLayerSecurity {
+
 public:
-  bool flagInitializedPrivateKey;
   bool flagIsServer;
   bool flagInitialized;
   bool flagUseBuiltInTlS;
@@ -617,23 +655,17 @@ public:
   List<char> writeBuffer;
   int readBufferStandardSize;
   static TransportLayerSecurity& defaultTLS_READ_ONLY();
-  static const std::string certificateSelfSigned;
-  static const std::string keySelfSigneD;
-  // Certificate signed by an external authority
+  TransportLayerSecurityConfiguration selfSigned;
+  // Certificate + private key pair signed by an external authority
   // such as GoDaddy or another institution.
-  // This will be the .crt file
+  // This will be the (.crt, .key) file pair
   // in the certificates/ folder that is not
-  // the self-signed certificate and is not the official certificate.
-  // If there are more than one such .crt file,
+  // the self-signed.
+  // If there are multiple .crt file candidates,
   // the server will crash.
-  std::string certificateOfficial;
-  // The private key used in the official certificate.
-  // Will use the .key file found in the certificates/ folder
-  // that is not the self-signed key.
-  // If there are more than such .key files, the server will crash.
-  std::string keyOfficial;
-  // Contains the string "certificates/"
-  static const std::string certificateFolder;
+  TransportLayerSecurityConfiguration official;
+  // Read from the
+  List<TransportLayerSecurityConfiguration> additionalConfigurations;
   // Once the first function call returns, the function becomes thread-safe.
   static void initializeNonThreadSafePartsCommon();
   // First call of function (with any member function) is not thread safe (must
@@ -670,11 +702,6 @@ public:
     std::stringstream* commentsOnError,
     bool includeNoErrorInComments
   );
-  // Certificate file (.crt) of the external authority.
-  std::string certificateOfficialPhysical();
-  std::string keyOfficialPhysical();
-  static std::string certificateSelfSignedVirtual();
-  static std::string certificateSelfSignedPhysical();
   static std::string keySelfSignedVirtual();
   TransportLayerSecurity();
   ~TransportLayerSecurity();
@@ -687,10 +714,7 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  bool initSSLKeyFiles(std::stringstream* commentsOnFailure);
-  bool initSSLKeyFilesInternal(std::stringstream* commentsOnFailure);
-  bool loadPEMCertificate(std::stringstream* commentsOnFailure);
-  bool loadPEMPrivateKey(std::stringstream* commentsOnFailure);
+  bool initializeCertificatesSelfSigned(std::stringstream* commentsOnFailure);
   void free();
   void freeEverythingShutdown();
 };

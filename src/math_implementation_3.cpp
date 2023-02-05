@@ -2148,8 +2148,7 @@ bool FileOperations::deleteFileVirtual(
   return true;
 }
 
-bool FileOperations::getPhysicalFileNameFromVirtual(
-  const std::string& inputFileNamE,
+bool FileOperations::getPhysicalFileNameFromVirtual(const std::string& inputFileName,
   std::string& output,
   bool accessSensitiveFolders,
   bool accessULTRASensitiveFolders,
@@ -2159,15 +2158,15 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
   // Using loggers forbidden here: function is used by the loggers themselves.
   if (
     !FileOperations::isOKFileNameVirtual(
-      inputFileNamE, accessSensitiveFolders
+      inputFileName, accessSensitiveFolders
     )
   ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "File name: " << inputFileNamE << " not allowed. ";
+      *commentsOnFailure << "File name: " << inputFileName << " not allowed. ";
     }
     return false;
   }
-  std::string inputCopy = inputFileNamE;
+  std::string inputCopy = inputFileName;
   std::string folderEnd, folderEnd2;
   for (
     int i = 0; i <

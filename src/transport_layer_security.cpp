@@ -18,17 +18,18 @@
 // calculator-algebra.key
 // then get the CSR.csr file to a signing authority,
 // from where you get the signedFileCertificate1 and signedFileCertificate3
-const std::string TransportLayerSecurity::certificateSelfSigned = "cert.pem";
-const std::string TransportLayerSecurity::keySelfSigneD = "key.pem";
-const std::string TransportLayerSecurity::certificateFolder = "certificates/";
+const std::string TransportLayerSecurityConfiguration::certificateFolder = "certificates/";
+const std::string TransportLayerSecurityConfiguration::selfSignedCertificate= TransportLayerSecurityConfiguration::certificateFolder+"cert.pem";
+const std::string TransportLayerSecurityConfiguration::selfSignedPrivateKey = TransportLayerSecurityConfiguration::certificateFolder+"key.pem";
+const std::string TransportLayerSecurityConfiguration::additionalCertificateFolder = TransportLayerSecurityConfiguration::certificateFolder+"additional/";
 
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
-  this->flagInitializedPrivateKey = false;
   this->flagInitialized = false;
   this->openSSLData.owner = this;
   this->readBufferStandardSize = 100000;
   this->flagUseBuiltInTlS = false;
+  this->server.owner  = this;
 }
 
 TransportLayerSecurity::~TransportLayerSecurity() {}
@@ -45,13 +46,17 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
   }
   this->initializeNonThreadSafePartsCommon();
   if (isServer) {
-    this->openSSLData.initSSLServer();
+    this->official.makeOfficialKeyAndCertificate();
+    this->selfSigned.makeSelfSignedKeyAndCertificate();
+    this->openSSLData.initializeSSLServer();
+    this->openSSLData.initializeSSLServerCertificatesOfficial();
+    this->initializeCertificatesSelfSigned(nullptr);
     bool flagBuiltInTLSAvailable = false;
     if (flagBuiltInTLSAvailable) {
       this->server.initialize();
     }
   } else {
-    this->openSSLData.initSSLClient();
+    this->openSSLData.initializeSSLClient();
   }
   this->flagInitialized = true;
 }
@@ -61,25 +66,13 @@ void TransportLayerSecurity::freeEverythingShutdown() {
   this->openSSLData.freeSession();
 }
 
-bool TransportLayerSecurity::initSSLKeyFiles(
-  std::stringstream* commentsOnFailure
-) {
-  STACK_TRACE("TransportLayerSecurity::initSSLKeyFiles");
-  if (!this->openSSLData.initSSLKeyFilesSelfSigned()) {
+bool TransportLayerSecurity::initializeCertificatesSelfSigned(std::stringstream *commentsOnFailure)
+{  STACK_TRACE("TransportLayerSecurity::initializeCertificatesSelfSigned");
+  if (!this->selfSigned.keysExist()){
     return false;
   }
-  bool flagBuiltInTLSAvailable = false;
-  if (!flagBuiltInTLSAvailable) {
-    return true;
-  }
-  if (!this->initSSLKeyFilesInternal(commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      global.fatal << commentsOnFailure->str();
-    }
-    global.fatal
-    << "Failed to initialize ssl keys of built-in tls server. "
-    << global.fatal;
-  }
+  this->openSSLData.initializeSSLServerCertificatesSelfSigned();
+  this->server.initializeCertificatesSelfSigned(commentsOnFailure);
   return true;
 }
 
@@ -354,6 +347,7 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->serverHelloKeyExchange.owner = this;
   this->serverHelloStart.owner = this;
   this->spoofer.owner = this;
+  this->owner = nullptr;
 }
 
 bool TransportLayerSecurityServer::NetworkSpoofer::writeSSLRecords(
@@ -2379,10 +2373,30 @@ bool TransportLayerSecurityServer::handShakeIamServer(
     }
     return false;
   }
-  // global.fatal << "Handshake i am server not implemented yet. " <<
-  // global.fatal;
   return false;
 }
+
+bool TransportLayerSecurityServer::initializeCertificatesSelfSigned(std::stringstream *commentsOnFailure)
+{  STACK_TRACE("TransportLayerSecurity::initializeCertificatesSelfSigned");
+  this->owner->openSSLData.initSSLKeyFilesSelfSignedCreateOnDemand();
+  global
+  << Logger::purple
+  << "Using self-signed certificate. "
+  << Logger::endL;
+  if (!this->loadSelfSignedPEMCertificate(commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load pem certificate. ";
+    }
+    return false;
+  }
+  if (!this->loadSelfSignedPEMPrivateKey(commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to load pem private key. ";
+    }
+  }
+  return true;
+}
+
 
 bool TransportLayerSecurity::handShakeIamServer(
   int inputSocketID, std::stringstream* commentsOnFailure

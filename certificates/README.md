@@ -1,5 +1,5 @@
 # Folder for all site secrets
-
+Please do not check those in the repository by accident! This folder *must* be kept .gitignore'd!
 
 ## SSL certificates
 To generate a certificate signing request, do the following. 

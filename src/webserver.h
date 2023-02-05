@@ -348,7 +348,7 @@ public:
   );
   void initPortsITry();
   void initListeningSockets();
-  void initSSL();
+  void initializeSSL();
   bool sslServerSideHandShake(std::stringstream* commentsOnFailure);
   static void terminateProcessId(int processId);
   void terminateChildSystemCall(int i);

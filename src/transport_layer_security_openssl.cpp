@@ -23,7 +23,7 @@ std::string TransportLayerSecurityOpenSSL::errors::errorWantRead =
 "SSL_ERROR_WANT_READ";
 bool TransportLayerSecurityOpenSSL::flagSSLContextInitialized = false;
 const SSL_METHOD* TransportLayerSecurityOpenSSL::methodGlobaL = nullptr;
-SSL_CTX* TransportLayerSecurityOpenSSL::contextGlobaL=nullptr;
+SSL_CTX * TransportLayerSecurityOpenSSL::contextGlobaL = nullptr;
 
 TransportLayerSecurityOpenSSL::~TransportLayerSecurityOpenSSL() {
   this->peer_certificate = nullptr;
@@ -85,7 +85,8 @@ void TransportLayerSecurityOpenSSL::initializeSSLLibrary() {
 #endif // MACRO_use_open_ssl
 }
 
-bool TransportLayerSecurityOpenSSL::initializeSSLKeyFilesSelfSignedCreateOnDemand() {
+bool TransportLayerSecurityOpenSSL::
+initializeSSLKeyFilesSelfSignedCreateOnDemand() {
   STACK_TRACE(
     "TransportLayerSecurityOpenSSL::initializeSSLKeyFilesSelfSignedCreateOnDemand"
   );
@@ -183,7 +184,6 @@ void TransportLayerSecurityOpenSSL::initializeSSL(bool isServer) {
   }
 }
 
-
 void TransportLayerSecurityOpenSSL::initializeSSLServerCertificatesSelfSigned()
 {
   STACK_TRACE(
@@ -208,36 +208,65 @@ void TransportLayerSecurityOpenSSL::initializeSSLServerCertificatesSelfSigned()
   this->initializeOneCertificate(this->owner->selfSigned);
 }
 
-bool TransportLayerSecurityOpenSSL::hasOKCertificates(){
-  return this->configuration.certificateFileNamePhysical != "" && this->configuration.privateKeyFileNamePhysical!="";
+bool TransportLayerSecurityOpenSSL::hasOKCertificates() {
+  return
+  this->configuration.certificateFileNamePhysical != "" &&
+  this->configuration.privateKeyFileNamePhysical != "";
 }
 
-void TransportLayerSecurityOpenSSL::initializeOneCertificate(TransportLayerSecurityConfiguration &input) {
-  STACK_TRACE(
-    "TransportLayerSecurityOpenSSL::initializeCertificates"
-  );
+void TransportLayerSecurityOpenSSL::initializeOneCertificate(
+  TransportLayerSecurityConfiguration& input
+) {
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initializeCertificates");
   if (this->hasOKCertificates()) {
     return;
   }
-  if (input.certificateFileNamePhysical == "" || input.privateKeyFileNamePhysical == "") {
+  if (
+    input.certificateFileNamePhysical == "" ||
+    input.privateKeyFileNamePhysical == ""
+  ) {
     return;
   }
-  if (!input.keysExist()){
-    global.fatal << "The certificate files are missing: " << input.certificateFileNamePhysical << " and "
-    << input.privateKeyFileNamePhysical << global.fatal;
-    return ;
+  if (!input.keysExist()) {
+    global.fatal
+    << "The certificate files are missing: "
+    << input.certificateFileNamePhysical
+    << " and "
+    << input.privateKeyFileNamePhysical
+    << global.fatal;
+    return;
   }
   this->configuration = input;
 #ifdef MACRO_use_open_ssl
   global << Logger::green << "SSL is available." << Logger::endL;
-  SSL_CTX_set_ecdh_auto(this->contextGlobal, 1);
   if (
     SSL_use_certificate_chain_file(
       this->sslDatA, input.certificateFileNamePhysical.c_str()
     ) <=
     0
   ) {
-    global.fatal << "Could not find certificate file: " << input.certificateFileNamePhysical;
+    ERR_print_errors_fp(stderr);
+    global
+    << "Could not load your certificate file: "
+    << input.certificateFileNamePhysical
+    << " as a chain certificate file. "
+    << "Trying as a stand-alone certificate"
+    << Logger::endL;
+  } else if (
+    SSL_use_certificate_file(
+      this->sslDatA,
+      input.certificateFileNamePhysical.c_str(),
+      SSL_FILETYPE_PEM
+    ) <=
+    0
+  ) {
+    ERR_print_errors_fp(stderr);
+    global.fatal
+    << "Your certificate file exists by I failed to load it. "
+    << input.certificateFileNamePhysical
+    << global.fatal;
+  } else {
+    global << "Stand-alone certificate loaded." << Logger::endL;
   }
   global
   << Logger::green
@@ -248,21 +277,25 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(TransportLayerSecur
   << Logger::endL;
   if (
     SSL_use_PrivateKey_file(
-      this->sslDatA, input.privateKeyFileNamePhysical .c_str(), SSL_FILETYPE_PEM
+      this->sslDatA,
+      input.privateKeyFileNamePhysical.c_str(),
+      SSL_FILETYPE_PEM
     ) <=
     0
   ) {
     ERR_print_errors_fp(stderr);
-    global.fatal << "Failed to use private key." << global.fatal;
+    global.fatal
+    << "Failed to use private key: "
+    << input.privateKeyFileNamePhysical
+    << " for certificate: "
+    << input.certificateFileNamePhysical
+    << global.fatal;
   }
   global.flagCertificatesAreOfficiallySigned = true;
 #else
   global << Logger::red << "Openssl not available." << Logger::endL;
 #endif // MACRO_use_open_ssl
 }
-
-
-
 
 void TransportLayerSecurityOpenSSL::initializeSSLServer() {
   STACK_TRACE("TransportLayerSecurityOpenSSL::initializeSSLServer");
@@ -823,20 +856,19 @@ void TransportLayerSecurityConfiguration::readPrivateKeyFilename() {
   );
 }
 
-bool TransportLayerSecurityConfiguration::makeFromAdditionalKeyAndCertificate(const std::string &key, const std::string &certificate){
-  std::string keyWithFolder = FileOperations::addPaths(this->additionalCertificateFolder, key);
-  std::string certificateWithFolder = FileOperations::addPaths(this->additionalCertificateFolder, certificate);
-
+bool TransportLayerSecurityConfiguration::makeFromAdditionalKeyAndCertificate(
+  const std::string& key, const std::string& certificate
+) {
+  std::string keyWithFolder =
+  FileOperations::addPaths(this->additionalCertificateFolder, key);
+  std::string certificateWithFolder =
+  FileOperations::addPaths(this->additionalCertificateFolder, certificate);
   FileOperations::getPhysicalFileNameFromVirtual(
-    keyWithFolder,
-    this->certificateFileNamePhysical,
-    true,
-    true,
-    nullptr
-  ) ;
+    keyWithFolder, this->privateKeyFileNamePhysical, true, true, nullptr
+  );
   FileOperations::getPhysicalFileNameFromVirtual(
     certificateWithFolder,
-    this->privateKeyFileNamePhysical,
+    this->certificateFileNamePhysical,
     true,
     true,
     nullptr

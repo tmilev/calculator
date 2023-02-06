@@ -16,8 +16,6 @@
 
 class TransportLayerSecurity;
 
-
-
 class TransportLayerSecurityConfiguration {
   // Contains the string "certificates/"
   // The relative file name of the folder
@@ -44,7 +42,9 @@ public:
   // Makes this the official certificate configuration.
   void makeOfficialKeyAndCertificate();
   bool makeSelfSignedKeyAndCertificate();
-  bool makeFromAdditionalKeyAndCertificate(const std::string& key, const std::string& certificate);
+  bool makeFromAdditionalKeyAndCertificate(
+    const std::string& key, const std::string& certificate
+  );
   bool keysExist() const;
 };
 
@@ -86,7 +86,6 @@ public:
   void initializeSSL(bool isServer);
   void initializeSSLServerCertificatesSelfSigned();
   void initializeOneCertificate(TransportLayerSecurityConfiguration& input);
-
   void initializeSSLClient();
   void reset();
   void clearErrorQueue(int numberOfTransferredBytes);
@@ -646,9 +645,16 @@ public:
   bool loadSelfSignedPEMPrivateKey(std::stringstream* commentsOnFailure);
 };
 
-
 class TransportLayerSecurity {
 public:
+  // Whether this is a server or a client connection.
+  // A server connection occurs when you connect to
+  // the computer algebra system and it is your server.
+  // A client connection happens when, for some reason, the
+  // server needs to look up something on the internet by itself.
+  // For example, this could be some login information from a login provider
+  // such as google. In this case, this flag would be false and we
+  // would be the client.
   bool flagIsServer;
   bool flagInitialized;
   bool flagUseBuiltInTlS;
@@ -657,6 +663,9 @@ public:
   List<char> readBuffer;
   List<char> writeBuffer;
   int readBufferStandardSize;
+  // The current listening socket, where the port is bound.
+  // Not the same as the connection socket.
+  int currentListeningSocket;
   static TransportLayerSecurity& defaultTLS_READ_ONLY();
   TransportLayerSecurityConfiguration selfSigned;
   // Certificate + private key pair signed by an external authority
@@ -668,7 +677,10 @@ public:
   // the server will crash.
   TransportLayerSecurityConfiguration official;
   // Map from ports to certificates.
-  MapReferences<std::string, TransportLayerSecurityOpenSSL> additionalConfigurations;
+  MapReferences<std::string, TransportLayerSecurityOpenSSL>
+  additionalConfigurations;
+  // A map from sockets to additional configurations.
+  MapList<int, int> socketsToAdditionalConfigurations;
   // Once the first function call returns, the function becomes thread-safe.
   static void initializeNonThreadSafePartsCommon();
   // First call of function (with any member function) is not thread safe (must
@@ -676,6 +688,7 @@ public:
   // Once the first function call returns, the function becomes thread-safe for
   // all members.
   void initializeNonThreadSafeOnFirstCall(bool isServer);
+  TransportLayerSecurityOpenSSL& getOpenSSLData();
   int readOnce(
     int socket,
     std::string* outputError,

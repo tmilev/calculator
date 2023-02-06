@@ -447,7 +447,7 @@ void WebClient::fetchWebPage(
   STACK_TRACE("WebCrawler::fetchWebPage");
   (void) commentsOnFailure;
   (void) commentsGeneral;
-  this->transportLayerSecurity.openSSLData.checkCanInitializeToClient();
+  this->transportLayerSecurity.getOpenSSLData().checkCanInitializeToClient();
   this->transportLayerSecurity.initializeNonThreadSafeOnFirstCall(false);
 #ifdef MACRO_use_open_ssl
   this->lastTransaction = "";
@@ -660,7 +660,7 @@ void WebClient::fetchWebPagePart2(
     messageHeader << "\r\n\r\n";
     messageHeader << this->postMessageToSend;
   }
-  this->transportLayerSecurity.openSSLData.checkCanInitializeToClient();
+  this->transportLayerSecurity.getOpenSSLData().checkCanInitializeToClient();
   if (
     !this->transportLayerSecurity.handShakeIAmClientNoSocketCleanup(
       this->socketInteger, commentsOnFailure, commentsGeneral
@@ -923,7 +923,7 @@ bool CalculatorFunctions::fetchKnownPublicKeys(
     return output.assignValue(calculator, out.str());
   }
   WebClient crawler;
-  crawler.transportLayerSecurity.openSSLData.name = "crawler";
+  crawler.transportLayerSecurity.getOpenSSLData().name = "crawler";
   crawler.updatePublicKeys(&out, &out);
   crawler.closeEverything();
   global << "Closed web connection." << Logger::endL;
@@ -1079,7 +1079,8 @@ bool Crypto::verifyJWTagainstKnownKeys(
       *commentsGeneral << "<br>Reloading google public keys. ";
     }
     WebClient webClient;
-    webClient.transportLayerSecurity.openSSLData.name = "public key fetcher";
+    webClient.transportLayerSecurity.getOpenSSLData().name =
+    "public key fetcher";
     webClient.updatePublicKeys(commentsOnFailure, commentsGeneral);
   }
   if (index == - 1) {

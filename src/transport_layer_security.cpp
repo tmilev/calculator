@@ -35,6 +35,7 @@ TransportLayerSecurity::TransportLayerSecurity() {
   this->readBufferStandardSize = 100000;
   this->flagUseBuiltInTlS = false;
   this->server.owner = this;
+  this->currentListeningSocket = - 1;
 }
 
 TransportLayerSecurity::~TransportLayerSecurity() {}
@@ -55,13 +56,20 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
     this->selfSigned.makeSelfSignedKeyAndCertificate();
     this->openSSLData.initializeSSLServer();
     this->openSSLData.initializeOneCertificate(this->official);
-    if(this->openSSLData.hasOKCertificates()) {
-      global << Logger::green << "Successfully loaded official certificates." << Logger::endL;
-    } else{
-      global << Logger::red << "Official certificates not found. Trying self-signed ones. " << Logger::endL;
+    if (this->openSSLData.hasOKCertificates()) {
+      global
+      << Logger::green
+      << "Successfully loaded official certificates."
+      << Logger::endL;
+    } else {
+      global
+      << Logger::red
+      << "Official certificates not found. Trying self-signed ones. "
+      << Logger::endL;
       this->openSSLData.initializeSSLKeyFilesSelfSignedCreateOnDemand();
-    this->openSSLData.initializeOneCertificate(this->selfSigned);
+      this->openSSLData.initializeOneCertificate(this->selfSigned);
     }
+    this->initializeAdditionalCertificates();
     bool flagBuiltInTLSAvailable = false;
     if (flagBuiltInTLSAvailable) {
       this->server.initialize();
@@ -74,22 +82,28 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
 
 void TransportLayerSecurity::freeEverythingShutdown() {
   STACK_TRACE("TransportLayerSecurity::freeEverythingShutdown");
-  this->openSSLData.freeSession();
+  this->getOpenSSLData().freeSession();
 }
 
-bool TransportLayerSecurity::initializeAdditionalCertificates(
-) {
+bool TransportLayerSecurity::initializeAdditionalCertificates() {
   STACK_TRACE("TransportLayerSecurity::initializeAdditionalCertificates");
-  for (const ActAsWebServerOnly& configuration: global.web.actAsWebServerOnlyForTheseHosts.values){
-    if (configuration.portHTTPS == ""){
+  for (
+    const ActAsWebServerOnly& configuration :
+    global.web.actAsWebServerOnlyForTheseHosts.values
+  ) {
+    if (configuration.portHTTPS == "") {
       continue;
     }
-    TransportLayerSecurityOpenSSL& newSSLServer=
-    this->additionalConfigurations.getValueCreateNoInitialization(configuration.portHTTPS);
+    TransportLayerSecurityOpenSSL & newSSLServer =
+    this->additionalConfigurations.getValueCreateNoInitialization(
+      configuration.portHTTPS
+    );
     newSSLServer.initializeSSL(true);
     TransportLayerSecurityConfiguration configurationTransport;
-    configurationTransport.makeFromAdditionalKeyAndCertificate(configuration.privateKeyFile, configuration.certificateFile);
-newSSLServer.initializeOneCertificate(configurationTransport);
+    configurationTransport.makeFromAdditionalKeyAndCertificate(
+      configuration.privateKeyFile, configuration.certificateFile
+    );
+    newSSLServer.initializeOneCertificate(configurationTransport);
   }
   return true;
 }
@@ -194,12 +208,12 @@ void TransportLayerSecurityOpenSSL::setSocketAddToStack(
 }
 
 void TransportLayerSecurity::free() {
-  this->openSSLData.freeSession();
+  this->getOpenSSLData().freeSession();
   this->flagInitialized = false;
 }
 
 void TransportLayerSecurity::removeLastSocket() {
-  this->openSSLData.removeLastSocket();
+  this->getOpenSSLData().removeLastSocket();
 }
 
 void TransportLayerSecurityOpenSSL::removeLastSocket() {
@@ -2423,7 +2437,9 @@ bool TransportLayerSecurity::handShakeIamServer(
 ) {
   if (!this->flagUseBuiltInTlS) {
     return
-    this->openSSLData.handShakeIamServer(inputSocketID, commentsOnFailure);
+    this->getOpenSSLData().handShakeIamServer(
+      inputSocketID, commentsOnFailure
+    );
   }
   return this->server.handShakeIamServer(inputSocketID, commentsOnFailure);
 }
@@ -2434,13 +2450,31 @@ bool TransportLayerSecurity::handShakeIAmClientNoSocketCleanup(
   std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("TransportLayerSecurity::handShakeIAmClientNoSocketCleanup");
-  this->openSSLData.checkCanInitializeToClient();
+  this->getOpenSSLData().checkCanInitializeToClient();
   this->initializeNonThreadSafeOnFirstCall(false);
-  this->openSSLData.checkCanInitializeToClient();
+  this->getOpenSSLData().checkCanInitializeToClient();
   return
-  this->openSSLData.handShakeIAmClientNoSocketCleanup(
+  this->getOpenSSLData().handShakeIAmClientNoSocketCleanup(
     inputSocketID, commentsOnFailure, commentsGeneral
   );
+}
+
+TransportLayerSecurityOpenSSL& TransportLayerSecurity::getOpenSSLData() {
+  if (!this->flagIsServer) {
+    return this->openSSLData;
+  }
+  if (
+    !this->socketsToAdditionalConfigurations.contains(
+      this->currentListeningSocket
+    )
+  ) {
+    return this->openSSLData;
+  }
+  int index =
+  this->socketsToAdditionalConfigurations.getValueNoFail(
+    this->currentListeningSocket
+  );
+  return this->additionalConfigurations.values[index];
 }
 
 int TransportLayerSecurity::readOnce(
@@ -2456,7 +2490,7 @@ int TransportLayerSecurity::readOnce(
   int result = - 1;
   if (useSSL) {
     result =
-    this->openSSLData.sslRead(
+    this->getOpenSSLData().sslRead(
       readBuffer, outputError, commentsGeneral, includeNoErrorInComments
     );
   } else {
@@ -2484,7 +2518,7 @@ int TransportLayerSecurity::writeOnce(
   global.flagSSLAvailable;
   if (useSSL) {
     return
-    this->openSSLData.sslWrite(
+    this->getOpenSSLData().sslWrite(
       writeBuffer,
       outputError,
       commentsGeneral,

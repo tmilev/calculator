@@ -372,7 +372,7 @@ void WebWorker::sendAllBytesNoHeaders() {
       << this->connectedSocketID
       << ". "
       << Logger::endL;
-      this->parent->transportLayerSecurity.openSSLData.clearErrorQueue(
+      this->parent->transportLayerSecurity.getOpenSSLData().clearErrorQueue(
         bytesSent
       );
       return;
@@ -3391,6 +3391,9 @@ void WebServer::initializeListeningSockets() {
     this->allListeningSockets.addOnTop(this->listeningSocketHTTPSOpenSSL);
     this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSOpenSSL;
   }
+  for (int socket : this->additionalPorts.values) {
+    this->allListeningSockets.addOnTop(socket);
+  }
   this->highestSocketNumber = - 1;
   for (int i = 0; i < this->allListeningSockets.size; i ++) {
     this->highestSocketNumber =
@@ -3886,6 +3889,10 @@ bool WebServer::initializeBindToPorts() {
     << Logger::yellow
     << "https://localhost:"
     << this->portHTTPSOpenSSL
+    << Logger::normalColor
+    << " on listening socket: "
+    << this->listeningSocketHTTPSOpenSSL
+    << ". "
     << Logger::endL;
   }
   for (int i = 0; i < this->additionalPorts.size(); i ++) {
@@ -3894,10 +3901,31 @@ bool WebServer::initializeBindToPorts() {
     if (!this->initializeBindToOnePort(port, socket)) {
       return false;
     }
+    int indexInTransportArray =
+    this->transportLayerSecurity.additionalConfigurations.getIndex(port);
+    if (indexInTransportArray < 0) {
+      // Not an https port.
+      global << "Listening to additional HTTP port: "
+      << Logger::blue
+      << port
+      << Logger::normalColor
+      << " on listening socket: "
+      << socket
+      << "."
+      << Logger::endL;
+      continue;
+    }
+    this->transportLayerSecurity.socketsToAdditionalConfigurations.setKeyValue(
+      socket, indexInTransportArray
+    );
     global
-    << "Listening to additional port: "
+    << "Listening to additional HTTPS port: "
     << Logger::yellow
     << port
+    << Logger::normalColor
+    << " on listening socket: "
+    << socket
+    << ". "
     << Logger::endL;
   }
   return true;
@@ -3943,46 +3971,9 @@ void SignalsInfrastructure::initializeSignals() {
     << "Crashing to let you know. "
     << global.fatal;
   }
-  // //////////////////
-  // ignore interruptsflagSignalsInitialized
-  // if (sigemptyset(&SignalINT.sa_mask) == - 1)
-  // global.fatal << "Failed to initialize SignalINT mask. Crashing to let you
-  // know. " << global.fatal;
-  // SignalINT.sa_sigaction = 0;
-  // SignalINT.sa_handler = &WebServer::Signal_SIGINT_handler;
-  // if (sigaction(SIGINT, &SignalINT, NULL) == - 1)
-  // global.fatal << "Failed to register null SIGINT handler. Crashing to let
-  // you know. " << global.fatal;
-  // //////////////////
-  // reap children
-  // if (sigemptyset(&SignalChild.sa_mask) == - 1)
-  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let
-  // you
-  // know. " << global.fatal;
-  // if (sigaddset(&SignalChild.sa_mask, SIGINT) == - 1)
-  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let
-  // you
-  // know. " << global.fatal;
-  // //////////////////////////////
-  // sigchld signal should automatically be blocked when calling the sigchld
-  // handler.
-  // Nevertheless, let's explicitly add it:
-  // if (sigaddset(&SignalChild.sa_mask, SIGCHLD) == - 1)
-  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let
-  // you
-  // know. " << global.fatal;
-  // //////////////////////////////
-  // if (sigaddset(&SignalChild.sa_mask, SIGFPE) == - 1)
-  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let
-  // you
-  // know. " << global.fatal;
-  // if (sigaddset(&SignalChild.sa_mask, SIGSEGV) == - 1)
-  // global.fatal << "Failed to initialize SignalChild mask. Crashing to let
-  // you
-  // know. " << global.fatal;
   SignalChild.sa_flags = SA_NOCLDWAIT;
   SignalChild.sa_handler = &WebServer::signal_SIGCHLD_handler;
-  // reap all dead processes
+  // Reap all dead processes.
   if (sigaction(SIGCHLD, &SignalChild, nullptr) == - 1) {
     global.fatal
     << "Was not able to register SIGCHLD handler "
@@ -3990,10 +3981,6 @@ void SignalsInfrastructure::initializeSignals() {
     << "Crashing to let you know."
     << global.fatal;
   }
-  //  sigemptyset(&sa.sa_mask);
-  //  sa.sa_flags = SA_RESTART;
-  //  if (sigaction(SIGCHLD, &sa, NULL) == - 1)
-  //    global << "sigaction returned - 1" << Logger::endL;
   this->flagInitialized = true;
 }
 
@@ -4387,7 +4374,6 @@ int WebServer::run() {
     }
     // ///////////
     this->getActiveWorker().connectedSocketID = newConnectedSocket;
-    this->computeSSLFlags();
     this->getActiveWorker().connectedSocketIDLastValueBeforeRelease =
     newConnectedSocket;
     this->getActiveWorker().millisecondsServerAtWorkerStart =
@@ -4495,11 +4481,20 @@ int WebServer::run() {
 }
 
 void WebServer::computeSSLFlags() {
+  this->transportLayerSecurity.currentListeningSocket =
+  this->lastListeningSocket;
   global.flagUsingSSLinCurrentConnection = false;
   if (this->lastListeningSocket == this->listeningSocketHTTPSBuiltIn) {
     global.flagUsingSSLinCurrentConnection = true;
     this->transportLayerSecurity.flagUseBuiltInTlS = true;
   } else if (this->lastListeningSocket == this->listeningSocketHTTPSOpenSSL) {
+    global.flagUsingSSLinCurrentConnection = true;
+    this->transportLayerSecurity.flagUseBuiltInTlS = false;
+  } else if (
+    this->transportLayerSecurity.socketsToAdditionalConfigurations.contains(
+      this->lastListeningSocket
+    )
+  ) {
     global.flagUsingSSLinCurrentConnection = true;
     this->transportLayerSecurity.flagUseBuiltInTlS = false;
   }
@@ -4515,6 +4510,7 @@ bool WebWorker::runInitialize() {
     << "Worker::run() started on a connecting with ID equal to - 1. "
     << global.fatal;
   }
+  this->parent->computeSSLFlags();
   std::stringstream processNameStream;
   processNameStream << "W" << this->indexInParent + 1 << ": ";
   MutexProcess::currentProcessName = processNameStream.str();

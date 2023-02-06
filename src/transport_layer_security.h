@@ -56,11 +56,11 @@ typedef struct ssl_method_st SSL_METHOD;
 
 class TransportLayerSecurityOpenSSL {
 public:
-  SSL* sslDatA;
+  SSL* sslData;
   X509* peer_certificate;
   // One context per program as per ssl documetnation.
-  static SSL_CTX* contextGlobaL;
-  static const SSL_METHOD* methodGlobaL;
+  static SSL_CTX* contextGlobal;
+  static const SSL_METHOD* methodGlobal;
   TransportLayerSecurityConfiguration configuration;
   TransportLayerSecurity* owner;
   std::string name;

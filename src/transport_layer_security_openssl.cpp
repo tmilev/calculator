@@ -242,8 +242,8 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
 #ifdef MACRO_use_open_ssl
   global << Logger::green << "SSL is available." << Logger::endL;
   if (
-    SSL_use_certificate_chain_file(
-      this->sslData, input.certificateFileNamePhysical.c_str()
+    SSL_CTX_use_certificate_chain_file(
+      this->contextGlobal, input.certificateFileNamePhysical.c_str()
     ) <=
     0
   ) {

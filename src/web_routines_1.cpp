@@ -1395,7 +1395,7 @@ bool GlobalVariables::Response::writeResponse(
   if (comments != "") {
     output[WebAPI::result::commentsGlobal] = comments;
   }
-  if (global.userDebugFlagOn() ) {
+  if (global.userDebugFlagOn()) {
     output[WebAPI::result::commentsDebug] = worker.toStringMessageShort();
   }
   if (this->flagTimedOut) {

@@ -271,20 +271,17 @@ public:
   std::string portHTTPSOpenSSL;
   std::string portHTTPSBuiltIn;
   std::string portHTTPSDefault;
-  List<int> listeningSockets;
+  // Additional connections.
+  // A map from ports to sockets.
+  MapList<std::string, int> additionalPorts;
+  List<int> allListeningSockets;
   ListReferences<WebWorker> allWorkers;
-  MapList<
-    std::string, int, HashFunctions::hashFunction<std::string>
-  > workerIds;
+  MapList<std::string, int> workerIds;
   HashedList<std::string> requestsNotNeedingLogin;
   List<std::string> addressStartsNotNeedingLogin;
   List<std::string> addressStartsSentWithCacheMaxAge;
   HashedList<std::string> addressStartsInterpretedAsCalculatorRequest;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > MIMETypes;
+  MapList<std::string, std::string> MIMETypes;
   int activeWorker;
   int64_t timeLastExecutableModification;
   ListReferences<std::string> progressReports;
@@ -340,14 +337,14 @@ public:
   static void fperror_sigaction[[noreturn]](int signal);
   void reapChildren();
   static void signal_SIGCHLD_handler(int s);
-  bool initPrepareWebServerALL();
+  bool initPrepareWebServerAll();
   void initializeSignals();
-  bool initBindToPorts();
-  bool initBindToOnePort(
+  bool initializeBindToPorts();
+  bool initializeBindToOnePort(
     const std::string& port, int& outputListeningSocket
   );
-  void initPortsITry();
-  void initListeningSockets();
+  void initializePortsITry();
+  void initializeListeningSockets();
   void initializeSSL();
   bool sslServerSideHandShake(std::stringstream* commentsOnFailure);
   static void terminateProcessId(int processId);

@@ -105,13 +105,15 @@ public:
   Logger& logString(const std::string& input);
 };
 
-struct ActAsWebServerOnly{
+struct ActAsWebServerOnly {
   std::string portHTTPS;
   std::string portHTTP;
   std::string baseFolder;
   std::string landingPage;
-  std::string adjustURL(const std::string& url)const;
-  bool fromJSON(JSData &input);
+  std::string privateKeyFile;
+  std::string certificateFile;
+  std::string adjustURL(const std::string& url) const;
+  bool fromJSON(JSData& input);
   JSData toJSON();
 };
 
@@ -283,7 +285,7 @@ public:
   std::string buildVersionSimple;
   std::string buildHeadHashWithServerTime;
   std::string operatingSystem;
-  class WebGlobals{
+  class WebGlobals {
   public:
     std::string hostWithPort;
     std::string hostNoPort;
@@ -293,6 +295,7 @@ public:
     // with the given value.
     MapList<std::string, ActAsWebServerOnly> actAsWebServerOnlyForTheseHosts;
   };
+
   WebGlobals web;
   bool flagRequestComingLocally;
   // internal infrastructure flags

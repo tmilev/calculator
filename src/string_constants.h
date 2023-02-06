@@ -170,7 +170,6 @@ public:
     static std::string scoredQuiz;
     static std::string exercise;
     static std::string calculatorExamples;
-
   };
 
   struct problem {
@@ -208,7 +207,6 @@ public:
   struct calculator {
   public:
     static std::string testFileNameVirtual;
-
   };
 
   static std::string headerCacheControl;
@@ -261,11 +259,13 @@ public:
   static std::string webAddress;
   static std::string sendEmailFrom;
   static std::string actAsWebServerForTheseHosts;
-  struct ActAsWebServer{
+  struct ActAsWebServer {
     static std::string portHTTP;
     static std::string portHTTPS;
-  static  std::string baseFolder;
-  static std::string landingPage;
+    static std::string baseFolder;
+    static std::string landingPage;
+    static std::string privateKeyFile;
+    static std::string certificateFile;
   };
 };
 

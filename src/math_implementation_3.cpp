@@ -1793,17 +1793,18 @@ bool FileOperations::openFileVirtualReadOnly(
   );
 }
 
-std::string FileOperations::addPaths(const std::string &left, const std::string right){
+std::string FileOperations::addPaths(
+  const std::string& left, const std::string right
+) {
   std::string leftWithoutEndSlash = left;
   std::string rightWithoutStartSlash = right;
   if (StringRoutines::stringEndsWith(left, "/")) {
-    leftWithoutEndSlash = left.substr(0, left.size()-1);
-
+    leftWithoutEndSlash = left.substr(0, left.size() - 1);
   }
-  if (StringRoutines::stringBeginsWith(right, "/")){
+  if (StringRoutines::stringBeginsWith(right, "/")) {
     rightWithoutStartSlash = right.substr(1);
   }
-  return leftWithoutEndSlash +"/"+rightWithoutStartSlash;
+  return leftWithoutEndSlash + "/" + rightWithoutStartSlash;
 }
 
 bool FileOperations::openFileVirtualCustomizedWriteOnly(
@@ -2148,7 +2149,8 @@ bool FileOperations::deleteFileVirtual(
   return true;
 }
 
-bool FileOperations::getPhysicalFileNameFromVirtual(const std::string& inputFileName,
+bool FileOperations::getPhysicalFileNameFromVirtual(
+  const std::string& inputFileName,
   std::string& output,
   bool accessSensitiveFolders,
   bool accessULTRASensitiveFolders,

@@ -163,7 +163,7 @@ std::string WebAPI::frontend::problemFileName = "problemFileName";
 std::string WebAPI::frontend::exercise = "exerciseJSON";
 std::string WebAPI::frontend::exerciseType = "exerciseType";
 std::string WebAPI::frontend::scoredQuiz = "scoredQuizJSON";
-std::string WebAPI::frontend::calculatorExamples= "calculatorExamples";
+std::string WebAPI::frontend::calculatorExamples = "calculatorExamples";
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 std::string WebAPI::calculator::testFileNameVirtual =
 "test/automated_test_known_inputs_outputs.json";
@@ -254,8 +254,11 @@ std::string Configuration::freecalc = "freecalc/";
 std::string Configuration::useMathTags = "useMathTags";
 std::string Configuration::webAddress = "webAddress";
 std::string Configuration::sendEmailFrom = "sendEmailFrom";
-std::string Configuration::actAsWebServerForTheseHosts = "actAsWebServerForTheseHosts";
+std::string Configuration::actAsWebServerForTheseHosts =
+"actAsWebServerForTheseHosts";
 std::string Configuration::ActAsWebServer::baseFolder = "baseFolder";
 std::string Configuration::ActAsWebServer::portHTTP = "portHTTP";
 std::string Configuration::ActAsWebServer::portHTTPS = "portHTTPS";
 std::string Configuration::ActAsWebServer::landingPage = "landingPage";
+std::string Configuration::ActAsWebServer::privateKeyFile = "privateKeyFile";
+std::string Configuration::ActAsWebServer::certificateFile = "certificateFile";

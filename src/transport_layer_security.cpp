@@ -10,18 +10,23 @@
 #include <sys/time.h> // <- timeval
 
 // http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
-// openssl req -x509 -keyalg RSA -newkey rsa:2048 -nodes -keyout key.pem -out
-// cert.pem -days 3001
+// openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem
+// -days 3001
 // Alternatively:
 // certificate with certificate signing request:
 // openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout
 // calculator-algebra.key
 // then get the CSR.csr file to a signing authority,
 // from where you get the signedFileCertificate1 and signedFileCertificate3
-const std::string TransportLayerSecurityConfiguration::certificateFolder = "certificates/";
-const std::string TransportLayerSecurityConfiguration::selfSignedCertificate= TransportLayerSecurityConfiguration::certificateFolder+"cert.pem";
-const std::string TransportLayerSecurityConfiguration::selfSignedPrivateKey = TransportLayerSecurityConfiguration::certificateFolder+"key.pem";
-const std::string TransportLayerSecurityConfiguration::additionalCertificateFolder = TransportLayerSecurityConfiguration::certificateFolder+"additional/";
+const std::string TransportLayerSecurityConfiguration::certificateFolder =
+"certificates/";
+const std::string TransportLayerSecurityConfiguration::selfSignedCertificate =
+TransportLayerSecurityConfiguration::certificateFolder + "cert.pem";
+const std::string TransportLayerSecurityConfiguration::selfSignedPrivateKey =
+TransportLayerSecurityConfiguration::certificateFolder + "key.pem";
+const std::string TransportLayerSecurityConfiguration::
+additionalCertificateFolder =
+TransportLayerSecurityConfiguration::certificateFolder + "additional/";
 
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
@@ -29,7 +34,7 @@ TransportLayerSecurity::TransportLayerSecurity() {
   this->openSSLData.owner = this;
   this->readBufferStandardSize = 100000;
   this->flagUseBuiltInTlS = false;
-  this->server.owner  = this;
+  this->server.owner = this;
 }
 
 TransportLayerSecurity::~TransportLayerSecurity() {}
@@ -49,8 +54,14 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
     this->official.makeOfficialKeyAndCertificate();
     this->selfSigned.makeSelfSignedKeyAndCertificate();
     this->openSSLData.initializeSSLServer();
-    this->openSSLData.initializeSSLServerCertificatesOfficial();
-    this->initializeCertificatesSelfSigned(nullptr);
+    this->openSSLData.initializeOneCertificate(this->official);
+    if(this->openSSLData.hasOKCertificates()) {
+      global << Logger::green << "Successfully loaded official certificates." << Logger::endL;
+    } else{
+      global << Logger::red << "Official certificates not found. Trying self-signed ones. " << Logger::endL;
+      this->openSSLData.initializeSSLKeyFilesSelfSignedCreateOnDemand();
+    this->openSSLData.initializeOneCertificate(this->selfSigned);
+    }
     bool flagBuiltInTLSAvailable = false;
     if (flagBuiltInTLSAvailable) {
       this->server.initialize();
@@ -66,13 +77,20 @@ void TransportLayerSecurity::freeEverythingShutdown() {
   this->openSSLData.freeSession();
 }
 
-bool TransportLayerSecurity::initializeCertificatesSelfSigned(std::stringstream *commentsOnFailure)
-{  STACK_TRACE("TransportLayerSecurity::initializeCertificatesSelfSigned");
-  if (!this->selfSigned.keysExist()){
-    return false;
+bool TransportLayerSecurity::initializeAdditionalCertificates(
+) {
+  STACK_TRACE("TransportLayerSecurity::initializeAdditionalCertificates");
+  for (const ActAsWebServerOnly& configuration: global.web.actAsWebServerOnlyForTheseHosts.values){
+    if (configuration.portHTTPS == ""){
+      continue;
+    }
+    TransportLayerSecurityOpenSSL& newSSLServer=
+    this->additionalConfigurations.getValueCreateNoInitialization(configuration.portHTTPS);
+    newSSLServer.initializeSSL(true);
+    TransportLayerSecurityConfiguration configurationTransport;
+    configurationTransport.makeFromAdditionalKeyAndCertificate(configuration.privateKeyFile, configuration.certificateFile);
+newSSLServer.initializeOneCertificate(configurationTransport);
   }
-  this->openSSLData.initializeSSLServerCertificatesSelfSigned();
-  this->server.initializeCertificatesSelfSigned(commentsOnFailure);
   return true;
 }
 
@@ -96,15 +114,16 @@ bool TransportLayerSecurity::sslReadLoop(
   output = "";
   int i = 0;
   std::string next;
-  int numBytes = - 1;
+  int numberOfBytes = - 1;
   for (i = 0; i < numTries; i ++) {
-    numBytes =
+    numberOfBytes =
     this->readOnce(
       - 1, outputError, commentsGeneral, includeNoErrorInComments
     );
-    if (numBytes > 0) {
+    if (numberOfBytes > 0) {
       next.assign(
-        this->readBuffer.objects, static_cast<unsigned>(numBytes)
+        this->readBuffer.objects,
+        static_cast<unsigned>(numberOfBytes)
       );
       output += next;
       if (expectedLength <= 0) {
@@ -115,11 +134,11 @@ bool TransportLayerSecurity::sslReadLoop(
         }
       }
     }
-    if (numBytes == 0) {
+    if (numberOfBytes == 0) {
       break;
     }
   }
-  if (numBytes < 0) {
+  if (numberOfBytes < 0) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral << "SSL-ERROR reading from socket. ";
     }
@@ -129,7 +148,7 @@ bool TransportLayerSecurity::sslReadLoop(
 }
 
 bool TransportLayerSecurity::sslWriteLoop(
-  int numTries,
+  int numberOfTries,
   const std::string& input,
   std::string* outputError,
   std::stringstream* commentsGeneral,
@@ -138,9 +157,9 @@ bool TransportLayerSecurity::sslWriteLoop(
   STACK_TRACE("TransportLayerSecurity::sslWriteLoop");
   Crypto::convertStringToListBytesSigned(input, this->writeBuffer);
   int i = 0;
-  int numBytes = - 1;
-  for (i = 0; i < numTries; i ++) {
-    numBytes =
+  int numberOfBytes = - 1;
+  for (i = 0; i < numberOfTries; i ++) {
+    numberOfBytes =
     this->writeOnce(
       - 1,
       this->writeBuffer,
@@ -149,16 +168,16 @@ bool TransportLayerSecurity::sslWriteLoop(
       commentsGeneral,
       includeNoErrorInComments
     );
-    if (numBytes == this->writeBuffer.size) {
+    if (numberOfBytes == this->writeBuffer.size) {
       break;
     }
   }
-  if (numBytes != this->writeBuffer.size) {
+  if (numberOfBytes != this->writeBuffer.size) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << i
       << " errors writing to socket.\n NumBytes: "
-      << numBytes
+      << numberOfBytes
       << ". ";
     }
     return false;
@@ -342,7 +361,7 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->millisecondsDefaultTimeOut = 5000;
   this->millisecondsTimeOut = this->millisecondsDefaultTimeOut;
   this->defaultBufferCapacity = 1000000;
-  this->lastReaD.owner = this;
+  this->lastRead.owner = this;
   this->serverHelloCertificate.owner = this;
   this->serverHelloKeyExchange.owner = this;
   this->serverHelloStart.owner = this;
@@ -702,11 +721,11 @@ void SSLContent::writeBytesHandshakeServerHello(
     << "Not allowed to serialize non server-hello content as server hello. "
     << global.fatal;
   }
-  this->WriteType(output, annotations);
+  this->writeType(output, annotations);
   Serialization::LengthWriterThreeBytes writeLength(
     output, annotations, "SSL content body"
   );
-  this->WriteVersion(output, annotations);
+  this->writeVersion(output, annotations);
   this->writeBytesMyRandomAndSessionId(output, annotations);
   // 256 = 0x0100 = no compression:
   Serialization::WriterTwoByteInteger compressionWriter(
@@ -772,7 +791,7 @@ void TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey(
   output.addListOnTop(this->signature);
 }
 
-void SSLContent::WriteType(
+void SSLContent::writeType(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) const {
@@ -786,7 +805,7 @@ void SSLContent::WriteType(
   output.addOnTop(this->contentType);
 }
 
-void SSLContent::WriteVersion(
+void SSLContent::writeVersion(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) const {
@@ -805,7 +824,7 @@ void SSLContent::writeBytesHandshakeCertificate(
     << "Not allowed to serialize non-certificate content as certificate. "
     << global.fatal;
   }
-  this->WriteType(output, annotations);
+  this->writeType(output, annotations);
   Serialization::LengthWriterThreeBytes writeLength(
     output, annotations, "certificateCollection"
   );
@@ -826,7 +845,7 @@ void SSLContent::writeBytesHandshakeSecretExchange(
     << "Not allowed to serialize non-server key exchange as such. "
     << global.fatal;
   }
-  this->WriteType(output, annotations);
+  this->writeType(output, annotations);
   Serialization::LengthWriterThreeBytes writeLength(
     output, annotations, "server key exchange"
   );
@@ -843,11 +862,11 @@ void SSLContent::writeBytesHandshakeClientHello(
     << "Not allowed to serialize non client-hello content as client hello. "
     << global.fatal;
   }
-  this->WriteType(output, annotations);
+  this->writeType(output, annotations);
   Serialization::LengthWriterThreeBytes writeLength(
     output, annotations, "Handshake clientHello body"
   );
-  this->WriteVersion(output, annotations);
+  this->writeVersion(output, annotations);
   this->writeBytesIncomingRandomAndSessionId(output, annotations);
   this->writeBytesSupportedCiphers(output, annotations);
   // 256 = 0x0100 = no compression:
@@ -2076,7 +2095,7 @@ bool TransportLayerSecurityServer::decodeSSLRecord(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("TransportLayerSecurityServer::decodeSSLRecord");
-  if (!this->lastReaD.decode(commentsOnFailure)) {
+  if (!this->lastRead.decode(commentsOnFailure)) {
     return false;
   }
   return true;
@@ -2092,7 +2111,7 @@ bool TransportLayerSecurityServer::readBytesDecodeOnce(
     }
     return false;
   }
-  this->lastReaD.incomingBytes = this->incomingBytes;
+  this->lastRead.incomingBytes = this->incomingBytes;
   if (!this->decodeSSLRecord(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to decode ssl record. ";
@@ -2275,7 +2294,7 @@ bool TransportLayerSecurityServer::replyToClientHello(
   (void) commentsOnFailure;
   (void) inputSocketID;
   this->outgoingRecords.setSize(0);
-  this->serverHelloStart.prepareServerHello1Start(this->lastReaD);
+  this->serverHelloStart.prepareServerHello1Start(this->lastRead);
   this->serverHelloCertificate.prepareServerHello2Certificate();
   if (
     !this->serverHelloKeyExchange.prepareServerHello3SecretExchange(
@@ -2353,7 +2372,7 @@ bool TransportLayerSecurityServer::handShakeIamServer(
     this->spoofer.incomingMessages[
       this->spoofer.currentInputMessageIndex - 1
     ] =
-    this->lastReaD;
+    this->lastRead;
   }
   if (!success) {
     global << Logger::red << commentsOnFailure->str() << Logger::endL;
@@ -2376,9 +2395,11 @@ bool TransportLayerSecurityServer::handShakeIamServer(
   return false;
 }
 
-bool TransportLayerSecurityServer::initializeCertificatesSelfSigned(std::stringstream *commentsOnFailure)
-{  STACK_TRACE("TransportLayerSecurity::initializeCertificatesSelfSigned");
-  this->owner->openSSLData.initSSLKeyFilesSelfSignedCreateOnDemand();
+bool TransportLayerSecurityServer::initializeCertificatesSelfSigned(
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("TransportLayerSecurity::initializeCertificatesSelfSigned");
+  this->owner->openSSLData.initializeSSLKeyFilesSelfSignedCreateOnDemand();
   global
   << Logger::purple
   << "Using self-signed certificate. "
@@ -2396,7 +2417,6 @@ bool TransportLayerSecurityServer::initializeCertificatesSelfSigned(std::strings
   }
   return true;
 }
-
 
 bool TransportLayerSecurity::handShakeIamServer(
   int inputSocketID, std::stringstream* commentsOnFailure

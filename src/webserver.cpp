@@ -509,7 +509,9 @@ std::string WebWorker::toStringMessageShort() const {
   }
   out
   << "\n<hr>\nHost with port:<br>\n"
-  << HtmlRoutines::convertStringToHtmlString(global.web.hostWithPort, false)
+  << HtmlRoutines::convertStringToHtmlString(
+    global.web.hostWithPort, false
+  )
   << "<br>Host without port:<br>\n"
   << HtmlRoutines::convertStringToHtmlString(global.web.hostNoPort, false);
   out
@@ -1145,7 +1147,10 @@ void WebWorker::extractHostInfo() {
   }
   global.web.hostWithPort = this->hostWithPort;
   global.web.hostNoPort = this->hostNoPort;
-  if (global.web.hostNoPort == "localhost" || global.web.hostNoPort == "127.0.0.1") {
+  if (
+    global.web.hostNoPort == "localhost" ||
+    global.web.hostNoPort == "127.0.0.1"
+  ) {
     global.flagRequestComingLocally = true;
   } else {
     global.flagRequestComingLocally = false;
@@ -1572,22 +1577,24 @@ int WebWorker::processFolder() {
   return 0;
 }
 
-int WebWorker::processFileDoesntExist(bool generateLinkToCalculatorOnMissingFile) {
+int WebWorker::processFileDoesntExist(
+  bool generateLinkToCalculatorOnMissingFile
+) {
   this->setHeader("HTTP/1.0 404 Object not found", "Content-Type: text/html");
   // WARNING: cross-site scripting danger. Pay attention when editing.
   // Use convertStringToHtmlString to sanitize strings.
   // Never return non-sanitized user input back to the user.
   std::stringstream out;
   out << "<html>" << "<body>";
-  if (generateLinkToCalculatorOnMissingFile){
-  out
-  << "one page <a href = \""
-  << global.displayApplication
-  << "\">app</a>. ";
-  out
-  << " Same app without browser cache: <a href = \""
-  << global.displayApplicationNoCache
-  << "\">app no cache</a>.<hr>";
+  if (generateLinkToCalculatorOnMissingFile) {
+    out
+    << "one page <a href = \""
+    << global.displayApplication
+    << "\">app</a>. ";
+    out
+    << " Same app without browser cache: <a href = \""
+    << global.displayApplicationNoCache
+    << "\">app no cache</a>.<hr>";
   }
   out << "<b>File does not exist.</b>";
   if (this->flagFileNameSanitized) {
@@ -2480,10 +2487,14 @@ int WebWorker::serveClient() {
   }
   this->extractHostInfo();
   this->extractAddressParts();
-  if (global.web.actAsWebServerOnlyForTheseHosts.contains( this->hostNoPort)){
-const ActAsWebServerOnly &config =  global.web.actAsWebServerOnlyForTheseHosts.getValueNoFail(this->hostNoPort);
+  if (
+    global.web.actAsWebServerOnlyForTheseHosts.contains(this->hostNoPort)
+  ) {
+    const ActAsWebServerOnly& config =
+    global.web.actAsWebServerOnlyForTheseHosts.getValueNoFail(
+      this->hostNoPort
+    );
     this->addressComputed = config.adjustURL(this->addressComputed);
-
     return this->processFolderOrFile(false);
   }
   std::stringstream argumentProcessingFailureComments;
@@ -2604,7 +2615,8 @@ const ActAsWebServerOnly &config =  global.web.actAsWebServerOnlyForTheseHosts.g
   return this->processFolderOrFile(true);
 }
 
-int WebWorker::processFolderOrFile(bool generateLinkToCalculatorOnMissingFile) {
+int WebWorker::processFolderOrFile(bool generateLinkToCalculatorOnMissingFile)
+{
   STACK_TRACE("WebWorker::processFolderOrFile");
   this->VirtualFileName =
   HtmlRoutines::convertURLStringToNormal(this->addressComputed, true);
@@ -2837,8 +2849,8 @@ void WebServer::releaseEverything() {
     << ". "
     << Logger::endL;
   }
-  for (int i = 0; i < this->listeningSockets.size; i ++) {
-    int socket = this->listeningSockets[i];
+  for (int i = 0; i < this->allListeningSockets.size; i ++) {
+    int socket = this->allListeningSockets[i];
     close(socket);
     if (global.flagServerDetailedLog) {
       global
@@ -3341,7 +3353,8 @@ void WebServer::stop() {
   exit(0);
 }
 
-void WebServer::initPortsITry() {
+void WebServer::initializePortsITry() {
+  STACK_TRACE("WebServer::initializePortsITry");
   this->portHTTP = global.configuration[Configuration::portHTTP].stringValue;
   if (!global.flagSSLAvailable) {
     return;
@@ -3351,37 +3364,49 @@ void WebServer::initPortsITry() {
   this->portHTTPSBuiltIn =
   global.configuration[Configuration::portHTTPSBuiltIn].stringValue;
   this->portHTTPSDefault = this->portHTTPSOpenSSL;
+  for (
+    const ActAsWebServerOnly& configuration :
+    global.web.actAsWebServerOnlyForTheseHosts.values
+  ) {
+    if (configuration.portHTTP != "") {
+      this->additionalPorts.setKeyValue(configuration.portHTTP, - 1);
+    }
+    if (configuration.portHTTPS != "") {
+      this->additionalPorts.setKeyValue(configuration.portHTTPS, - 1);
+    }
+  }
 }
 
-void WebServer::initListeningSockets() {
-  STACK_TRACE("WebServer::initListeningSockets");
+void WebServer::initializeListeningSockets() {
+  STACK_TRACE("WebServer::initializeListeningSockets");
   this->highestSocketNumber = - 1;
   if (this->listeningSocketHTTP != - 1) {
-    this->listeningSockets.addOnTop(this->listeningSocketHTTP);
+    this->allListeningSockets.addOnTop(this->listeningSocketHTTP);
   }
   if (this->listeningSocketHTTPSBuiltIn != - 1) {
-    this->listeningSockets.addOnTop(this->listeningSocketHTTPSBuiltIn);
+    this->allListeningSockets.addOnTop(this->listeningSocketHTTPSBuiltIn);
     this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSBuiltIn;
   }
   if (this->listeningSocketHTTPSOpenSSL != - 1) {
-    this->listeningSockets.addOnTop(this->listeningSocketHTTPSOpenSSL);
+    this->allListeningSockets.addOnTop(this->listeningSocketHTTPSOpenSSL);
     this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSOpenSSL;
   }
   this->highestSocketNumber = - 1;
-  for (int i = 0; i < this->listeningSockets.size; i ++) {
+  for (int i = 0; i < this->allListeningSockets.size; i ++) {
     this->highestSocketNumber =
     MathRoutines::maximum(
-      this->listeningSockets[i], this->highestSocketNumber
+      this->allListeningSockets[i], this->highestSocketNumber
     );
     if (
       listen(
-        this->listeningSockets[i], WebServer::maxNumPendingConnections
+        this->allListeningSockets[i],
+        WebServer::maxNumPendingConnections
       ) ==
       - 1
     ) {
       global.fatal
       << "Listen function failed on socket: "
-      << this->listeningSockets[i]
+      << this->allListeningSockets[i]
       << global.fatal;
     }
   }
@@ -3740,18 +3765,18 @@ void WebServer::recycleChildrenIfPossible() {
   this->handleTooManyWorkers(numInUse);
 }
 
-bool WebServer::initPrepareWebServerALL() {
-  STACK_TRACE("WebServer::initPrepareWebServerALL");
-  this->initPortsITry();
-  if (!this->initBindToPorts()) {
+bool WebServer::initPrepareWebServerAll() {
+  STACK_TRACE("WebServer::initPrepareWebServerAll");
+  this->initializePortsITry();
+  if (!this->initializeBindToPorts()) {
     return false;
   }
   this->initializeSignals();
-  this->initListeningSockets();
+  this->initializeListeningSockets();
   return true;
 }
 
-bool WebServer::initBindToOnePort(
+bool WebServer::initializeBindToOnePort(
   const std::string& port, int& outputListeningSocket
 ) {
   STACK_TRACE("WebServer::initBindToOnePort");
@@ -3823,10 +3848,12 @@ bool WebServer::initBindToOnePort(
   return true;
 }
 
-bool WebServer::initBindToPorts() {
-  STACK_TRACE("WebServer::initBindToPorts");
+bool WebServer::initializeBindToPorts() {
+  STACK_TRACE("WebServer::initializeBindToPorts");
   if (
-    !this->initBindToOnePort(this->portHTTP, this->listeningSocketHTTP)
+    !this->initializeBindToOnePort(
+      this->portHTTP, this->listeningSocketHTTP
+    )
   ) {
     return false;
   }
@@ -3839,7 +3866,7 @@ bool WebServer::initBindToPorts() {
   bool flagBuiltInTLSAvailable = false;
   if (flagBuiltInTLSAvailable) {
     if (
-      !this->initBindToOnePort(
+      !this->initializeBindToOnePort(
         this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn
       )
     ) {
@@ -3848,7 +3875,7 @@ bool WebServer::initBindToPorts() {
   }
   if (global.flagSSLAvailable) {
     if (
-      !this->initBindToOnePort(
+      !this->initializeBindToOnePort(
         this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL
       )
     ) {
@@ -3859,6 +3886,18 @@ bool WebServer::initBindToPorts() {
     << Logger::yellow
     << "https://localhost:"
     << this->portHTTPSOpenSSL
+    << Logger::endL;
+  }
+  for (int i = 0; i < this->additionalPorts.size(); i ++) {
+    const std::string& port = this->additionalPorts.keys[i];
+    int& socket = this->additionalPorts.values[i];
+    if (!this->initializeBindToOnePort(port, socket)) {
+      return false;
+    }
+    global
+    << "Listening to additional port: "
+    << Logger::yellow
+    << port
     << Logger::endL;
   }
   return true;
@@ -3989,7 +4028,7 @@ void WebServer::writeVersionJSFile() {
 // the fd_set and sockaddr_storage structures.
 class Listener {
 public:
-  fd_set FDSetListenSockets;
+  fd_set fdSetListenSockets;
   WebServer* owner;
   sockaddr_storage theirAddress;
   // connector's address information
@@ -4005,10 +4044,10 @@ public:
 };
 
 void Listener::zeroSocketSet() {
-  FD_ZERO(&this->FDSetListenSockets);
-  for (int i = 0; i < this->owner->listeningSockets.size; i ++) {
+  FD_ZERO(&this->fdSetListenSockets);
+  for (int i = 0; i < this->owner->allListeningSockets.size; i ++) {
     FD_SET(
-      this->owner->listeningSockets[i], &this->FDSetListenSockets
+      this->owner->allListeningSockets[i], &this->fdSetListenSockets
     );
   }
   if (global.flagServerDetailedLog) {
@@ -4023,7 +4062,7 @@ void Listener::selectWrapper() {
   while (
     select(
       this->owner->highestSocketNumber + 1,
-      &this->FDSetListenSockets,
+      &this->fdSetListenSockets,
       nullptr,
       nullptr,
       nullptr
@@ -4052,9 +4091,9 @@ void Listener::selectWrapper() {
 int Listener::acceptWrapper() {
   STACK_TRACE("Listener::acceptWrapper");
   socklen_t sin_size = sizeof(this->theirAddress);
-  for (int i = this->owner->listeningSockets.size - 1; i >= 0; i --) {
-    int currentListeningSocket = this->owner->listeningSockets[i];
-    if (!FD_ISSET(currentListeningSocket, &this->FDSetListenSockets)) {
+  for (int i = this->owner->allListeningSockets.size - 1; i >= 0; i --) {
+    int currentListeningSocket = this->owner->allListeningSockets[i];
+    if (!FD_ISSET(currentListeningSocket, &this->fdSetListenSockets)) {
       continue;
     }
     int result =
@@ -4250,7 +4289,7 @@ int WebServer::run() {
   HtmlRoutines::loadStrings();
   this->initializeSSL();
   this->transportLayerSecurity.initializeNonThreadSafeOnFirstCall(true);
-  if (!this->initPrepareWebServerALL()) {
+  if (!this->initPrepareWebServerAll()) {
     return 1;
   }
   global << Logger::purple << "waiting for connections..." << Logger::endL;
@@ -5638,17 +5677,18 @@ void GlobalVariables::configurationProcess() {
   );
   JSData& webServerOnly =
   global.configuration[Configuration::actAsWebServerForTheseHosts];
-for (int i = 0; i < webServerOnly.objects.size(); i ++){
-  ActAsWebServerOnly subServerConfiguration;
-  subServerConfiguration.fromJSON(webServerOnly.objects.values[i]);
-std::string key =  webServerOnly.objects.keys[i];
-  global.web.actAsWebServerOnlyForTheseHosts.setKeyValue(key,subServerConfiguration);
-webServerOnly[key] = subServerConfiguration.toJSON();
-}
-if (webServerOnly.elementType != JSData::token::tokenObject) {
-  webServerOnly.elementType = JSData::token::tokenObject;
-}
-
+  for (int i = 0; i < webServerOnly.objects.size(); i ++) {
+    ActAsWebServerOnly subServerConfiguration;
+    subServerConfiguration.fromJSON(webServerOnly.objects.values[i]);
+    std::string key = webServerOnly.objects.keys[i];
+    global.web.actAsWebServerOnlyForTheseHosts.setKeyValue(
+      key, subServerConfiguration
+    );
+    webServerOnly[key] = subServerConfiguration.toJSON();
+  }
+  if (webServerOnly.elementType != JSData::token::tokenObject) {
+    webServerOnly.elementType = JSData::token::tokenObject;
+  }
   List<List<std::string> > folderVirtualLinksDefault =
   FileOperations::initializeFolderVirtualLinksDefaults();
   for (int i = 0; i < folderVirtualLinksDefault.size; i ++) {
@@ -6022,29 +6062,37 @@ void WebServer::computeActiveWorkerId() {
   }
 }
 
-std::string ActAsWebServerOnly::adjustURL(const std::string &url) const{
+std::string ActAsWebServerOnly::adjustURL(const std::string& url) const {
   std::string corrected = url;
-  if (corrected == "/" || corrected == ""){
+  if (corrected == "/" || corrected == "") {
     corrected = this->landingPage;
   }
-  return FileOperations::addPaths(this->baseFolder,
- corrected );
-
+  return FileOperations::addPaths(this->baseFolder, corrected);
 }
 
-bool ActAsWebServerOnly::fromJSON( JSData &input){
+bool ActAsWebServerOnly::fromJSON(JSData& input) {
   this->portHTTP = input[Configuration::ActAsWebServer::portHTTP].stringValue;
-  this->portHTTPS = input[Configuration::ActAsWebServer::portHTTPS].stringValue;
-  this->baseFolder = input[Configuration::ActAsWebServer::baseFolder].stringValue;
-  this->landingPage= input[Configuration::ActAsWebServer::landingPage].stringValue;
+  this->portHTTPS =
+  input[Configuration::ActAsWebServer::portHTTPS].stringValue;
+  this->baseFolder =
+  input[Configuration::ActAsWebServer::baseFolder].stringValue;
+  this->landingPage =
+  input[Configuration::ActAsWebServer::landingPage].stringValue;
+  this->certificateFile =
+  input[Configuration::ActAsWebServer::certificateFile].stringValue;
+  this->privateKeyFile =
+  input[Configuration::ActAsWebServer::privateKeyFile].stringValue;
   return true;
 }
 
-JSData ActAsWebServerOnly::toJSON(){
+JSData ActAsWebServerOnly::toJSON() {
   JSData result;
-  result[Configuration::ActAsWebServer::portHTTP]=this->portHTTP;
-  result[Configuration::ActAsWebServer::portHTTPS]=this->portHTTPS;
+  result[Configuration::ActAsWebServer::portHTTP] = this->portHTTP;
+  result[Configuration::ActAsWebServer::portHTTPS] = this->portHTTPS;
   result[Configuration::ActAsWebServer::baseFolder] = this->baseFolder;
   result[Configuration::ActAsWebServer::landingPage] = this->landingPage;
- return result;
+  result[Configuration::ActAsWebServer::privateKeyFile] = this->privateKeyFile;
+  result[Configuration::ActAsWebServer::certificateFile] =
+  this->certificateFile;
+  return result;
 }

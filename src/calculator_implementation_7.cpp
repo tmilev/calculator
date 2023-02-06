@@ -68,7 +68,7 @@ bool CalculatorFunctionsCrypto::testTLSDecodeSSLRecord(
   std::stringstream commentsOnFailure;
   if (
     !Crypto::convertHexToListUnsignedChar(
-      inputString, testServer.lastReaD.incomingBytes, &commentsOnFailure
+      inputString, testServer.lastRead.incomingBytes, &commentsOnFailure
     )
   ) {
     return calculator << commentsOnFailure.str();
@@ -81,7 +81,7 @@ bool CalculatorFunctionsCrypto::testTLSDecodeSSLRecord(
     << "<b style = 'color:red'>Failed to decode the record.</b> "
     << commentsOnFailure.str();
   }
-  out << testServer.lastReaD.toHtml(1);
+  out << testServer.lastRead.toHtml(1);
   return output.assignValue(calculator, out.str());
 }
 

@@ -16,6 +16,38 @@
 
 class TransportLayerSecurity;
 
+
+
+class TransportLayerSecurityConfiguration {
+  // Contains the string "certificates/"
+  // The relative file name of the folder
+  // where the certificates + private keys of the
+  // server are stored. This folder is in one of the
+  // "ultra-sensitive" folders that are
+  // guarded by the
+  // sanitizers in FileOperations.
+  static const std::string certificateFolder;
+  static const std::string selfSignedCertificate;
+  static const std::string selfSignedPrivateKey;
+  // Contains the string "certificates/additional/".
+  // Similar to the certificatesFolder, but has additional certificates to be
+  // used
+  // by stand-alone web server configurations.
+  static const std::string additionalCertificateFolder;
+  void readCertificateFilename();
+  void readPrivateKeyFilename();
+public:
+  // The physical file name of the certificate. Not sanitized once created.
+  std::string certificateFileNamePhysical;
+  // The private key file name. Not sanitized once created.
+  std::string privateKeyFileNamePhysical;
+  // Makes this the official certificate configuration.
+  void makeOfficialKeyAndCertificate();
+  bool makeSelfSignedKeyAndCertificate();
+  bool makeFromAdditionalKeyAndCertificate(const std::string& key, const std::string& certificate);
+  bool keysExist() const;
+};
+
 // Forward-declare openssl dependencies
 typedef struct ssl_st SSL;
 typedef struct x509_st X509;
@@ -24,20 +56,19 @@ typedef struct ssl_method_st SSL_METHOD;
 
 class TransportLayerSecurityOpenSSL {
 public:
-  SSL* sslData;
+  SSL* sslDatA;
   X509* peer_certificate;
   // One context per program as per ssl documetnation.
-  static SSL_CTX* contextGlobal;
-  static const SSL_METHOD* methodGlobal;
+  static SSL_CTX* contextGlobaL;
+  static const SSL_METHOD* methodGlobaL;
+  TransportLayerSecurityConfiguration configuration;
   TransportLayerSecurity* owner;
   std::string name;
   int errorCode;
-  static bool flagSSLlibraryInitialized;
+  static bool flagSSLContextInitialized;
   bool flagSSLHandshakeSuccessful;
-  bool flagContextInitialized;
+  bool flagSSLInitialized;
   bool flagIsServer;
-  bool flagOfficialCertificatesAreInitialized;
-  bool flagSelfSignedCertificatesAreInitialized;
   List<int> socketStack;
   struct errors {
     static std::string errorWantRead;
@@ -52,9 +83,10 @@ public:
   void freeSession();
   void initializeSSLLibrary();
   void initializeSSLServer();
-  void initializeSSLCommon(bool isServer);
+  void initializeSSL(bool isServer);
   void initializeSSLServerCertificatesSelfSigned();
-  void initializeSSLServerCertificatesOfficial();
+  void initializeOneCertificate(TransportLayerSecurityConfiguration& input);
+
   void initializeSSLClient();
   void reset();
   void clearErrorQueue(int numberOfTransferredBytes);
@@ -89,7 +121,8 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  bool initSSLKeyFilesSelfSignedCreateOnDemand();
+  bool initializeSSLKeyFilesSelfSignedCreateOnDemand();
+  bool hasOKCertificates();
 };
 
 class TransportLayerSecurityServer;
@@ -370,11 +403,11 @@ public:
     List<unsigned char>& output,
     List<Serialization::Marker>* annotations
   ) const;
-  void WriteType(
+  void writeType(
     List<unsigned char>& output,
     List<Serialization::Marker>* annotations
   ) const;
-  void WriteVersion(
+  void writeVersion(
     List<unsigned char>& output,
     List<Serialization::Marker>* annotations
   ) const;
@@ -572,7 +605,7 @@ public:
   int64_t millisecondsTimeOut;
   int64_t millisecondsDefaultTimeOut;
   int defaultBufferCapacity;
-  SSLRecord lastReaD;
+  SSLRecord lastRead;
   SSLRecord serverHelloStart;
   SSLRecord serverHelloCertificate;
   SSLRecord serverHelloKeyExchange;
@@ -606,45 +639,15 @@ public:
     List<SSLRecord>& input, std::stringstream* commentsOnFailure
   );
   JSData toJSON();
-bool  initializeCertificatesSelfSigned(std::stringstream* commentsOnFailure);
-bool loadSelfSignedPEMCertificate(std::stringstream* commentsOnFailure);
-bool loadSelfSignedPEMPrivateKey(std::stringstream* commentsOnFailure);
-
+  bool initializeCertificatesSelfSigned(
+    std::stringstream* commentsOnFailure
+  );
+  bool loadSelfSignedPEMCertificate(std::stringstream* commentsOnFailure);
+  bool loadSelfSignedPEMPrivateKey(std::stringstream* commentsOnFailure);
 };
 
-class TransportLayerSecurityConfiguration{
-  // Contains the string "certificates/"
-  // The relative file name of the folder
-  // where the certificates + private keys of the
-  // server are stored. This folder is in one of the
-  // "ultra-sensitive" folders that are
-  // guarded by the
-  // sanitizers in FileOperations.
-  static const std::string certificateFolder;
-  static const std::string selfSignedCertificate;
-  static const std::string selfSignedPrivateKey;
-  // Contains the string "certificates/additional/".
-  // Similar to the certificatesFolder, but has additional certificates to be used
-  // by stand-alone web server configurations.
-  static const std::string additionalCertificateFolder;
-  void readCertificateFilename();
-  void readPrivateKeyFilename();
-public:
-  // The physical file name of the certificate. Not sanitized once created.
-std::string certificateFileNamePhysical;
-// The private key file name. Not sanitized once created.
-std::string privateKeyFileNamePhysical;
-
-// Makes this the official certificate configuration.
-void makeOfficialKeyAndCertificate();
-bool makeSelfSignedKeyAndCertificate();
-
-bool keysExist()const;
-
-};
 
 class TransportLayerSecurity {
-
 public:
   bool flagIsServer;
   bool flagInitialized;
@@ -664,8 +667,8 @@ public:
   // If there are multiple .crt file candidates,
   // the server will crash.
   TransportLayerSecurityConfiguration official;
-  // Read from the
-  List<TransportLayerSecurityConfiguration> additionalConfigurations;
+  // Map from ports to certificates.
+  MapReferences<std::string, TransportLayerSecurityOpenSSL> additionalConfigurations;
   // Once the first function call returns, the function becomes thread-safe.
   static void initializeNonThreadSafePartsCommon();
   // First call of function (with any member function) is not thread safe (must
@@ -688,7 +691,7 @@ public:
     bool includeNoErrorInComments
   );
   bool sslWriteLoop(
-    int numTries,
+    int numberOfTries,
     const std::string& input,
     std::string* outputError,
     std::stringstream* commentsGeneral,
@@ -714,7 +717,7 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  bool initializeCertificatesSelfSigned(std::stringstream* commentsOnFailure);
+  bool initializeAdditionalCertificates();
   void free();
   void freeEverythingShutdown();
 };

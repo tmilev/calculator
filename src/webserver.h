@@ -12,7 +12,7 @@ class WebWorker {
 public:
   WebServer* parent;
   int indexInParent;
-  int ProcessPID;
+  int processPID;
   std::string workerId;
   class Statistics {
   public:
@@ -45,7 +45,7 @@ public:
   std::string argumentFomURL;
   // Query parameters given in the message body.
   std::string argumentFomMessageBody;
-  std::string VirtualFileName;
+  std::string virtualFileName;
   std::string relativePhysicalFileName;
   std::string status;
   std::string pingMessage;
@@ -119,9 +119,10 @@ public:
   );
   bool correctRequestsBEFORELoginReturnFalseIfModified();
   bool correctRequestsAFTERLoginReturnFalseIfModified();
-  bool redirectIfNeeded(
+  bool redirectIfPasswordIsGiven(
     std::stringstream& argumentProcessingFailureComments
   );
+  void redirect(const std::string& address);
   bool extractArgumentsFromMessage(
     const std::string& input,
     std::stringstream& argumentProcessingFailureComments,
@@ -274,7 +275,8 @@ public:
   // Additional connections.
   // A map from ports to sockets.
   MapList<std::string, int> additionalPorts;
-  List<int> allListeningSockets;
+  // Map from listening sockets to ports.
+  MapList<int, std::string> allListeningSockets;
   ListReferences<WebWorker> allWorkers;
   MapList<std::string, int> workerIds;
   HashedList<std::string> requestsNotNeedingLogin;

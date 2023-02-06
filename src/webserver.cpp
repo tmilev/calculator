@@ -470,7 +470,7 @@ std::string WebWorker::toStringMessageShort() const {
   out
   << lineBreak
   << "\nVirtual file/directory name:\n"
-  << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, true);
+  << HtmlRoutines::convertStringToHtmlString(this->virtualFileName, true);
   out
   << lineBreak
   << "\nRelative physical file/directory name:\n"
@@ -552,7 +552,7 @@ void WebWorker::resetMessageComponentsExceptRawMessage() {
   this->argumentFomURL = "";
   this->argumentFomMessageBody = "";
   this->relativePhysicalFileName = "";
-  this->VirtualFileName = "";
+  this->virtualFileName = "";
   this->displayUserInput = "";
   this->messageHeaderStrings.setSize(0);
   this->requestHeaders.clear();
@@ -1147,6 +1147,10 @@ void WebWorker::extractHostInfo() {
   }
   global.web.hostWithPort = this->hostWithPort;
   global.web.hostNoPort = this->hostNoPort;
+  global.web.port =
+  this->parent->allListeningSockets.getValue(
+    this->parent->lastListeningSocket, ""
+  );
   if (
     global.web.hostNoPort == "localhost" ||
     global.web.hostNoPort == "127.0.0.1"
@@ -1254,32 +1258,32 @@ void WebWorker::setHeaderOKNoContentLength(
 void WebWorker::sanitizeVirtualFileName() {
   STACK_TRACE("WebWorker::sanitizeVirtualFileName");
   std::string resultName;
-  resultName.reserve(this->VirtualFileName.size());
+  resultName.reserve(this->virtualFileName.size());
   bool foundslash = false;
   for (
-    signed i = static_cast<signed>(this->VirtualFileName.size()) - 1; i >= 0; i
+    signed i = static_cast<signed>(this->virtualFileName.size()) - 1; i >= 0; i
     --
   ) {
     unsigned k = static_cast<unsigned>(i);
     bool isOK = true;
-    if (foundslash && this->VirtualFileName[k] == '.') {
-      if (i > 0 && this->VirtualFileName[k - 1] == '.') {
+    if (foundslash && this->virtualFileName[k] == '.') {
+      if (i > 0 && this->virtualFileName[k - 1] == '.') {
         this->flagFileNameSanitized = true;
         isOK = false;
       }
     }
     if (isOK) {
-      resultName.push_back(this->VirtualFileName[k]);
+      resultName.push_back(this->virtualFileName[k]);
     }
-    if (this->VirtualFileName[k] == '/') {
+    if (this->virtualFileName[k] == '/') {
       foundslash = true;
     }
   }
-  this->VirtualFileName = "";
+  this->virtualFileName = "";
   for (
     signed i = static_cast<signed>(resultName.size()) - 1; i >= 0; i --
   ) {
-    this->VirtualFileName.push_back(
+    this->virtualFileName.push_back(
       resultName[static_cast<unsigned>(i)]
     );
   }
@@ -1507,7 +1511,7 @@ int WebWorker::processFolder() {
     std::stringstream sanitization;
     sanitization
     << "<hr>The virtual file name I extracted was: "
-    << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, false)
+    << HtmlRoutines::convertStringToHtmlString(this->virtualFileName, false)
     << "<br>However, I do not allow folder names that contain dots. "
     << "Therefore I have sanitized the main address to: "
     << HtmlRoutines::convertStringToHtmlString(
@@ -1537,7 +1541,7 @@ int WebWorker::processFolder() {
   << "Browsing folder: "
   << HtmlRoutines::convertStringToHtmlString(this->addressGetOrPost, false)
   << "<br>Virtual name: "
-  << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, false)
+  << HtmlRoutines::convertStringToHtmlString(this->virtualFileName, false)
   << "<hr>";
   List<std::string> folderLinksSanitized, fileLinksSanitized;
   for (int i = 0; i < fileNames.size; i ++) {
@@ -1600,7 +1604,7 @@ int WebWorker::processFileDoesntExist(
   if (this->flagFileNameSanitized) {
     out
     << "<hr>You requested virtual file: "
-    << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, false)
+    << HtmlRoutines::convertStringToHtmlString(this->virtualFileName, false)
     << "<br>However, I do not allow addresses that contain dots "
     << "(to avoid access to folders below the server). "
     << "Therefore I have sanitized "
@@ -1614,7 +1618,7 @@ int WebWorker::processFileDoesntExist(
   << "<br><b>Address:</b> "
   << HtmlRoutines::convertStringToHtmlString(this->addressGetOrPost, true)
   << "<br><b>Virtual file name:</b> "
-  << HtmlRoutines::convertStringToHtmlString(this->VirtualFileName, true)
+  << HtmlRoutines::convertStringToHtmlString(this->virtualFileName, true)
   << "<br><b>Computed relative physical file name:</b> "
   << HtmlRoutines::convertStringToHtmlString(
     this->relativePhysicalFileName, true
@@ -1642,7 +1646,7 @@ int WebWorker::processFileCantOpen() {
   if (this->flagFileNameSanitized) {
     out
     << "You requested virtual file: "
-    << this->VirtualFileName
+    << this->virtualFileName
     << "However, I do not allow addresses that contain dots. "
     << "Therefore I have sanitized "
     << "the address to a relative physical address: "
@@ -1652,7 +1656,7 @@ int WebWorker::processFileCantOpen() {
   << "File display name: "
   << this->addressGetOrPost
   << ". Virtual file name: "
-  << this->VirtualFileName
+  << this->virtualFileName
   << ". ";
   JSData result;
   result[WebAPI::result::error] = out.str();
@@ -1664,7 +1668,7 @@ int WebWorker::processFileTooLarge(long fileSize) {
   std::stringstream out;
   out
   << "User requested file: "
-  << this->VirtualFileName
+  << this->virtualFileName
   << " but it is too large, namely, "
   << fileSize
   << " bytes.";
@@ -1710,7 +1714,7 @@ int WebWorker::processFile(bool generateLinkToCalculatorOnMissingFile) {
   ) {
     if (
       StringRoutines::stringBeginsWith(
-        this->VirtualFileName,
+        this->virtualFileName,
         this->parent->addressStartsSentWithCacheMaxAge[i]
       )
     ) {
@@ -1748,7 +1752,7 @@ int WebWorker::processFile(bool generateLinkToCalculatorOnMissingFile) {
 
 void WebWorker::reset() {
   this->connectedSocketID = - 1;
-  this->ProcessPID = - 1;
+  this->processPID = - 1;
   this->connectedSocketIDLastValueBeforeRelease = - 1;
   this->connectionID = - 1;
   this->indexInParent = - 1;
@@ -2251,10 +2255,10 @@ bool WebWorker::correctRequestsBEFORELoginReturnFalseIfModified() {
   return !modified;
 }
 
-bool WebWorker::redirectIfNeeded(
+bool WebWorker::redirectIfPasswordIsGiven(
   std::stringstream& argumentProcessingFailureComments
 ) {
-  STACK_TRACE("WebWorker::redirectIfNeeded");
+  STACK_TRACE("WebWorker::redirectIfPasswordIsGiven");
   UserCalculatorData& user = global.userDefault;
   if (!user.flagEnteredPassword) {
     return false;
@@ -2299,25 +2303,29 @@ bool WebWorker::redirectIfNeeded(
     )
     << "&";
   }
+  this->redirect(redirectedAddress.str());
+  return true;
+}
+
+void WebWorker::redirect(const std::string& address) {
   std::stringstream headerStream;
-  headerStream << "Location: " << redirectedAddress.str();
+  headerStream << "Location: " << address;
   this->setHeader("HTTP/1.0 303 See other", headerStream.str());
   std::stringstream out;
   out
   << "<html><head>"
   << "<meta http-equiv=\"refresh\" content =\"0; url ='"
-  << redirectedAddress.str()
+  << address
   << "'\" />"
   << "</head>";
   out
   << "<body>Click <a href=\""
-  << redirectedAddress.str()
+  << address
   << "\">"
   << " here "
   << "</a> if your browser does not redirect the page automatically. ";
   out << "</body></html>";
   this->writeToBody(out.str());
-  return true;
 }
 
 bool WebWorker::correctRequestsAFTERLoginReturnFalseIfModified() {
@@ -2494,6 +2502,22 @@ int WebWorker::serveClient() {
     global.web.actAsWebServerOnlyForTheseHosts.getValueNoFail(
       this->hostNoPort
     );
+    if (
+      global.web.port != config.portHTTP && global.web.port != config.portHTTPS
+    ) {
+      std::stringstream redirectAddressStart;
+      redirectAddressStart
+      << "https://"
+      << this->hostNoPort
+      << ":"
+      << config.portHTTPS;
+      std::string redirectAddress =
+      FileOperations::addPaths(
+        redirectAddressStart.str(), this->addressComputed
+      );
+      this->redirect(redirectAddress);
+      return 0;
+    }
     this->addressComputed = config.adjustURL(this->addressComputed);
     return this->processFolderOrFile(false);
   }
@@ -2565,7 +2589,7 @@ int WebWorker::serveClient() {
   if (!isNotModified) {
     comments << this->toStringAddressRequest() << ": modified after login. ";
   }
-  if (this->redirectIfNeeded(argumentProcessingFailureComments)) {
+  if (this->redirectIfPasswordIsGiven(argumentProcessingFailureComments)) {
     this->sendPending();
     return 0;
   }
@@ -2618,13 +2642,13 @@ int WebWorker::serveClient() {
 int WebWorker::processFolderOrFile(bool generateLinkToCalculatorOnMissingFile)
 {
   STACK_TRACE("WebWorker::processFolderOrFile");
-  this->VirtualFileName =
+  this->virtualFileName =
   HtmlRoutines::convertURLStringToNormal(this->addressComputed, true);
   this->sanitizeVirtualFileName();
   std::stringstream commentsOnFailure;
   if (
     !FileOperations::getPhysicalFileNameFromVirtual(
-      this->VirtualFileName,
+      this->virtualFileName,
       this->relativePhysicalFileName,
       global.userDefaultHasAdminRights(),
       false,
@@ -2639,7 +2663,7 @@ int WebWorker::processFolderOrFile(bool generateLinkToCalculatorOnMissingFile)
     out
     << "File name: "
     << HtmlRoutines::convertStringToHtmlStringRestrictSize(
-      this->VirtualFileName, false, 1000
+      this->virtualFileName, false, 1000
     )
     << " <b style = 'color:red'>deemed unsafe</b>. "
     << "Please note that folder names "
@@ -2781,8 +2805,8 @@ std::string WebWorker::toStringStatus() const {
     << "</span>";
   }
   out << ", connection " << this->connectionID << ", process ID: ";
-  if (this->ProcessPID != 0) {
-    out << this->ProcessPID;
+  if (this->processPID != 0) {
+    out << this->processPID;
   } else {
     out << "(not accessible)";
   }
@@ -2849,8 +2873,8 @@ void WebServer::releaseEverything() {
     << ". "
     << Logger::endL;
   }
-  for (int i = 0; i < this->allListeningSockets.size; i ++) {
-    int socket = this->allListeningSockets[i];
+  for (int i = 0; i < this->allListeningSockets.size(); i ++) {
+    int socket = this->allListeningSockets.keys[i];
     close(socket);
     if (global.flagServerDetailedLog) {
       global
@@ -2924,7 +2948,7 @@ void WebServer::reapChildren() {
     waitResult = waitpid(- 1, nullptr, exitFlags);
     if (waitResult > 0) {
       for (int i = 0; i < this->allWorkers.size; i ++) {
-        if (this->allWorkers[i].ProcessPID == waitResult) {
+        if (this->allWorkers[i].processPID == waitResult) {
           this->allWorkers[i].flagExited = true;
           this->statistics.processesReaped ++;
         }
@@ -3381,28 +3405,37 @@ void WebServer::initializeListeningSockets() {
   STACK_TRACE("WebServer::initializeListeningSockets");
   this->highestSocketNumber = - 1;
   if (this->listeningSocketHTTP != - 1) {
-    this->allListeningSockets.addOnTop(this->listeningSocketHTTP);
+    this->allListeningSockets.setKeyValue(
+      this->listeningSocketHTTP, this->portHTTP
+    );
   }
   if (this->listeningSocketHTTPSBuiltIn != - 1) {
-    this->allListeningSockets.addOnTop(this->listeningSocketHTTPSBuiltIn);
+    this->allListeningSockets.setKeyValue(
+      this->listeningSocketHTTPSBuiltIn, this->portHTTPSBuiltIn
+    );
     this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSBuiltIn;
   }
   if (this->listeningSocketHTTPSOpenSSL != - 1) {
-    this->allListeningSockets.addOnTop(this->listeningSocketHTTPSOpenSSL);
+    this->allListeningSockets.setKeyValue(
+      this->listeningSocketHTTPSOpenSSL, this->portHTTPSOpenSSL
+    );
     this->listeningSocketHTTPSDefault = this->listeningSocketHTTPSOpenSSL;
   }
-  for (int socket : this->additionalPorts.values) {
-    this->allListeningSockets.addOnTop(socket);
+  for (int i = 0; i < this->additionalPorts.size(); i ++) {
+    this->allListeningSockets.setKeyValue(
+      this->additionalPorts.values[i],
+      this->additionalPorts.keys[i]
+    );
   }
   this->highestSocketNumber = - 1;
-  for (int i = 0; i < this->allListeningSockets.size; i ++) {
+  for (int i = 0; i < this->allListeningSockets.size(); i ++) {
     this->highestSocketNumber =
     MathRoutines::maximum(
-      this->allListeningSockets[i], this->highestSocketNumber
+      this->allListeningSockets.keys[i], this->highestSocketNumber
     );
     if (
       listen(
-        this->allListeningSockets[i],
+        this->allListeningSockets.keys[i],
         WebServer::maxNumPendingConnections
       ) ==
       - 1
@@ -3474,7 +3507,7 @@ void WebServer::terminateChildSystemCall(int i) {
     return;
   }
   this->markChildNotInUse(i);
-  if (this->allWorkers[i].ProcessPID > 0) {
+  if (this->allWorkers[i].processPID > 0) {
     if (global.flagServerDetailedLog) {
       global
       << "Detail: "
@@ -3483,8 +3516,8 @@ void WebServer::terminateChildSystemCall(int i) {
       << "."
       << Logger::endL;
     }
-    this->terminateProcessId(this->allWorkers[i].ProcessPID);
-    this->allWorkers[i].ProcessPID = - 1;
+    this->terminateProcessId(this->allWorkers[i].processPID);
+    this->allWorkers[i].processPID = - 1;
   }
 }
 
@@ -3546,7 +3579,7 @@ void WebServer::handleTooManyConnections(
     << "Terminating child "
     << indices[j] + 1
     << " with PID "
-    << this->allWorkers[indices[j]].ProcessPID
+    << this->allWorkers[indices[j]].processPID
     << ": address: "
     << incomingAddress
     << " opened more than "
@@ -3698,7 +3731,7 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
   << "Killing connection "
   << currentWorker.connectionID
   << ", pid: "
-  << currentWorker.ProcessPID
+  << currentWorker.processPID
   << ". ";
   global << Logger::red << pingTimeoutStream.str() << Logger::endL;
   currentWorker.pingMessage =
@@ -3727,7 +3760,7 @@ void WebServer::handleTooManyWorkers(int& numInUse) {
     << "Terminating child "
     << i + 1
     << " with PID "
-    << this->allWorkers[i].ProcessPID
+    << this->allWorkers[i].processPID
     << ": too many workers in use. ";
     this->allWorkers[i].pingMessage = errorStream.str();
     global << Logger::red << errorStream.str() << Logger::endL;
@@ -4032,9 +4065,10 @@ public:
 
 void Listener::zeroSocketSet() {
   FD_ZERO(&this->fdSetListenSockets);
-  for (int i = 0; i < this->owner->allListeningSockets.size; i ++) {
+  for (int i = 0; i < this->owner->allListeningSockets.size(); i ++) {
     FD_SET(
-      this->owner->allListeningSockets[i], &this->fdSetListenSockets
+      this->owner->allListeningSockets.keys[i],
+      &this->fdSetListenSockets
     );
   }
   if (global.flagServerDetailedLog) {
@@ -4078,8 +4112,10 @@ void Listener::selectWrapper() {
 int Listener::acceptWrapper() {
   STACK_TRACE("Listener::acceptWrapper");
   socklen_t sin_size = sizeof(this->theirAddress);
-  for (int i = this->owner->allListeningSockets.size - 1; i >= 0; i --) {
-    int currentListeningSocket = this->owner->allListeningSockets[i];
+  for (
+    int i = this->owner->allListeningSockets.size() - 1; i >= 0; i --
+  ) {
+    int currentListeningSocket = this->owner->allListeningSockets.keys[i];
     if (!FD_ISSET(currentListeningSocket, &this->fdSetListenSockets)) {
       continue;
     }
@@ -4427,8 +4463,8 @@ int WebServer::run() {
       << " FAILED to spawn a child process. "
       << Logger::endL;
     }
-    this->getActiveWorker().ProcessPID = incomingPID;
-    if (this->getActiveWorker().ProcessPID == 0) {
+    this->getActiveWorker().processPID = incomingPID;
+    if (this->getActiveWorker().processPID == 0) {
       // this is the child (worker) process
       global.flagIsChildProcess = true;
       if (global.flagServerDetailedLog) {

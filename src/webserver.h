@@ -18,6 +18,7 @@ public:
   public:
     int allReceives;
     int pingReceives;
+    int standaloneServerReceives;
   };
 
   Statistics statistics;
@@ -237,10 +238,12 @@ public:
   public:
     static const std::string allRequestsString;
     static const std::string pingRequestsString;
+    static const std::string standaloneServerRequestsString;
     int allConnections;
     int pingConnections;
     int allRequests;
     int pingRequests;
+    int standaloneServerRequests;
     // Number of processes reaped with the wait loop.
     int processesReaped;
     // Number of processes killed: hopefully zero or close to zero.

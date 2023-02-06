@@ -21,6 +21,8 @@
 const std::string WebServer::Statististics::pingRequestsString =
 "pingRequests";
 const std::string WebServer::Statististics::allRequestsString = "allRequests";
+const std::string WebServer::Statististics::standaloneServerRequestsString =
+"standaloneServerRequests";
 
 WebServer& GlobalVariables::server() {
   static WebServer result;
@@ -1775,6 +1777,7 @@ void WebWorker::reset() {
   this->relativePhysicalFileName = "";
   this->statistics.allReceives = 0;
   this->statistics.pingReceives = 0;
+  this->statistics.standaloneServerReceives = 0;
   this->numberOfConsecutiveNoReportsBeforeDisconnect = 0;
   this->release();
 }
@@ -1818,6 +1821,10 @@ void WebWorker::wrapUpConnection() {
   this->statistics.allReceives;
   this->resultWork[WebServer::Statististics::pingRequestsString] =
   this->statistics.pingReceives;
+  this->resultWork[
+    WebServer::Statististics::standaloneServerRequestsString
+  ] =
+  this->statistics.standaloneServerReceives;
   this->resultWork["result"] = "close";
   this->pipeWorkerToServerControls.writeOnceAfterEmptying(
     this->resultWork.toString(nullptr), false
@@ -2495,9 +2502,11 @@ int WebWorker::serveClient() {
   }
   this->extractHostInfo();
   this->extractAddressParts();
+  global.web.flagIsStandaloneWebserver = false;
   if (
     global.web.actAsWebServerOnlyForTheseHosts.contains(this->hostNoPort)
   ) {
+    global.web.flagIsStandaloneWebserver = true;
     const ActAsWebServerOnly& config =
     global.web.actAsWebServerOnlyForTheseHosts.getValueNoFail(
       this->hostNoPort
@@ -2565,7 +2574,8 @@ int WebWorker::serveClient() {
     ) {
       global.requestType = correctedRequest;
       comments
-      << "Address was interpretted as request, so your request was set to: "
+      << "Address was interpretted as request, "
+      << "so your request was set to: "
       << global.requestType
       << ". ";
     }
@@ -2914,6 +2924,7 @@ WebServer::WebServer() {
   this->processIdServer = - 1;
   this->statistics.pingConnections = 0;
   this->statistics.allConnections = 0;
+  this->statistics.standaloneServerRequests = 0;
   this->statistics.pingRequests = 0;
   this->statistics.allRequests = 0;
   this->statistics.processesReaped = 0;
@@ -3184,17 +3195,47 @@ std::string WebServer::toStringConnectionSummary() {
   60 *
   60 *
   24;
+  double requestsPerDayCalculator = static_cast<double>(
+    this->statistics.allRequests -
+    this->statistics.pingRequests -
+    this->statistics.standaloneServerRequests
+  ) / (double(timeRunning) / 1000) *
+  60 *
+  60 *
+  24;
+  double requestsPerDayTotal = static_cast<double>(
+    this->statistics.allRequests
+  ) / (double(timeRunning) / 1000) *
+  60 *
+  60 *
+  24;
   out
-  << this->statistics.allConnections - this->statistics.pingConnections
+  << (
+    this->statistics.allConnections - this->statistics.pingConnections
+  )
   << " http connections, "
   << this->statistics.pingConnections
   << " ping connections, "
   << " with "
-  << this->statistics.allRequests - this->statistics.pingRequests
+  << (
+    this->statistics.allRequests -
+    this->statistics.pingRequests -
+    this->statistics.standaloneServerRequests
+  )
   << " non-ping http requests. "
-  << "(~"
+  << this->statistics.standaloneServerRequests
+  << " non-calculator web server requests, "
+  << this->statistics.pingRequests
+  << " ping requests. "
+  << "~"
   << FloatingPoint::doubleToString(connectionsPerDay, 0)
-  << " connections per day). "
+  << " calculator connections per day. "
+  << "~"
+  << FloatingPoint::doubleToString(requestsPerDayCalculator, 0)
+  << " calculator requests per day. "
+  << "~"
+  << FloatingPoint::doubleToString(requestsPerDayTotal, 0)
+  << " all requests per day (pings and non-calculator actions included). "
   << "Timed-out connections are excluded. ";
   out
   << "<br>"
@@ -3648,6 +3689,16 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
     if (incomingPingRequests > 0) {
       this->statistics.pingConnections ++;
     }
+  }
+  if (
+    workerMessage[WebServer::Statististics::standaloneServerRequestsString].
+    elementType ==
+    JSData::token::tokenLargeInteger
+  ) {
+    int incomingStandaloneRequests =
+    workerMessage[WebServer::Statististics::standaloneServerRequestsString].
+    integerValue.getElement().getIntValueTruncated();
+    this->statistics.standaloneServerRequests += incomingStandaloneRequests;
   }
   if (
     workerMessage["stopNeeded"].isTrueRepresentationInJSON() ||
@@ -4578,6 +4629,8 @@ bool WebWorker::runInitialize() {
     << Logger::endL;
   }
   this->statistics.allReceives = 0;
+  this->statistics.pingReceives = 0;
+  this->statistics.standaloneServerReceives = 0;
   return true;
 }
 
@@ -4632,6 +4685,9 @@ bool WebWorker::runOnce() {
   }
   this->ensureAllBytesSent();
   this->statistics.allReceives ++;
+  if (global.web.flagIsStandaloneWebserver) {
+    this->statistics.standaloneServerReceives ++;
+  }
   if ((!this->flagKeepAlive) || global.response.isTimedOut()) {
     return false;
   }

@@ -290,6 +290,7 @@ public:
     std::string hostWithPort;
     std::string hostNoPort;
     std::string port;
+    bool flagIsStandaloneWebserver;
     // For the hostname with the given key,
     // the calculator will act as a stand-alone server.
     // The server content will be serves from the virtual folder

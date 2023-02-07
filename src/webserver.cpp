@@ -3210,35 +3210,40 @@ std::string WebServer::toStringConnectionSummary() {
   60 *
   24;
   out
-  << (
-    this->statistics.allConnections - this->statistics.pingConnections
-  )
-  << " http connections, "
-  << this->statistics.pingConnections
-  << " ping connections, "
-  << " with "
+  << "<hr>"
   << (
     this->statistics.allRequests -
     this->statistics.pingRequests -
     this->statistics.standaloneServerRequests
   )
-  << " non-ping http requests. "
+  << " calculator http requests. "
   << this->statistics.standaloneServerRequests
   << " non-calculator web server requests, "
   << this->statistics.pingRequests
-  << " ping requests. "
-  << "~"
-  << FloatingPoint::doubleToString(connectionsPerDay, 0)
-  << " calculator connections per day. "
+  << " ping requests "
+  << "["
+  << this->statistics.allRequests
+  << " total]. "
   << "~"
   << FloatingPoint::doubleToString(requestsPerDayCalculator, 0)
   << " calculator requests per day. "
   << "~"
   << FloatingPoint::doubleToString(requestsPerDayTotal, 0)
   << " all requests per day (pings and non-calculator actions included). "
+  << "<hr>"
+  << "~"
+  << FloatingPoint::doubleToString(connectionsPerDay, 0)
+  << " calculator connections per day. "
+  << "~"
+  << (
+    this->statistics.allConnections - this->statistics.pingConnections
+  )
+  << " http connections, "
+  << this->statistics.pingConnections
+  << " ping connections. "
   << "Timed-out connections are excluded. ";
   out
-  << "<br>"
+  << "<hr>"
   << "<b>The following policies are quite "
   << "strict and will be relaxed in the future.</b><br>"
   << this->maximumTotalUsedWorkers

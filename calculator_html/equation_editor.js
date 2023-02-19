@@ -7972,6 +7972,26 @@ class MathNode {
           [leftWhiteSpace, fraction, rightWhiteSpace]);
       childIndexToFocus = 1;
     } else if (
+      split[0] === null &&
+      previous !== null &&
+      previous.type.type !== knownTypes.rightDelimiter.type &&
+      previous.type.type !== knownTypes.leftDelimiter.type
+    ) {
+      let indexPrevious = previous.indexInParent;
+      let numerator =
+          mathNodeFactory.horizontalMath(this.equationEditor, previous);
+      numerator.ensureEditableAtoms();
+      numerator.normalizeHorizontalMath();
+      fraction =
+          mathNodeFactory.fraction(this.equationEditor, numerator, split[1]);
+      oldParent.replaceChildRangeWithChildren(
+        indexPrevious, indexPrevious + 1,
+        [leftWhiteSpace, fraction, rightWhiteSpace]);
+      if (oldParent.type.type === knownTypes.horizontalMath.type) {
+        oldParent.normalizeHorizontalMath();
+      }
+      childIndexToFocus = 1;      
+    } else if (
         split[1] === null && next !== null &&
         next.type.type === knownTypes.leftDelimiter.type) {
       let leftIndex = oldIndexInParent + 1;

@@ -1,6 +1,10 @@
 # A math equation editor written from scratch
 
-Demo: https://calculator-algebra.org:8166/calculator_html/equation_editor/test_equation_editor.html
+Demo, light-weight: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor.html
+
+Demo with panel: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor_with_panel.html
+
+Detailed demo+debug page: https://calculator-algebra.org:8166/calculator_html/equation_editor/test_equation_editor.html
 
 - Uses Apache 2.0 license (no more license headaches).
 - Written from scratch: not a single line from another project.
@@ -14,4 +18,55 @@ Demo: https://calculator-algebra.org:8166/calculator_html/equation_editor/test_e
 - Matrix support from the start.
 - Will construct math tags from content enclosed in \\(...\\) just like MathJax; can be used as a drop-in replacement. 
 - Will also construct math from <div class="mathcalculator">your formula here</div>
+- Works with LaTeX.
+- Prints to SVG and canvas.
+
+```
+
+<html>
+<script type="text/javascript" src="equation_editor.js"></script>
+<script>
+  function createEditor() {
+    const options = new EquationEditorOptions({
+      // Can you edit the math or is it static math?
+      editable: true,
+      // Bind a raw LaTeX input box to the editor. Editing the box automatically updates the editor.  
+      latexInput: document.getElementById('latex'),
+      // Set to true to have your LaTeX sanitized to a preferred mathematical equivalent.
+      sanitizeLatexSource: false,
+      // Set to true to strip \displaystyle from your latex source, independent of the sanitization flag.
+      removeDisplayStyle: false,
+      // Show debug-related information.
+      debugLogContainer: null,
+      // Should I generate a copy button at the corner of the editor?
+      copyButton: false,
+    });
+    let editor = new EquationEditor(document.getElementById('editor'), options);
+    // The \cursor command indicates the desired location of the cursor. 
+    new EquationEditorButtonFactory("\\frac{123}{\\cursor}\\sqrt{7}", "", "").attachToClickById("custom-button", editor);
+    buttonFactories.sqrt.attachToClickById("sqrt-button", editor);
+    editor.updateDOM();
+    editor.rootNode.focus(- 1);
+  }
+</script>
+
+<body onload="createEditor()">
+
+  Equation editor here: <div id='editor' style="font-size: 72px; font-family:'Times New Roman'"> </div>
+  <br>
+  Latex of what you typed, can edit directly: <input id="latex">
+  <hr>
+  Sample buttons:
+  <button id="sqrt-button">&Sqrt;</button>
+  <button id="custom-button">custom</button>
+  <hr>
+  Typeset all math in the 'toBeTypeSet' tag.
+  <button id="typeSetButton" onclick="typeset(document.getElementById('toBeTypeSet'));">typeset</button>
+
+  <div id='toBeTypeSet'>
+    \(\frac{-b\pm \sqrt{b^2-4ac}}{2a}\)
+  </div>
+</body>
+
+</html>
 ```

@@ -1,5 +1,5 @@
 {
-  "name": "equation_editor",
+  "name": "math_equation_editor",
   "version": "1.0.0",
   "description": "A math equation editor",
   "main": "equation_editor.js",

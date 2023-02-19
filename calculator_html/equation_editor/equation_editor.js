@@ -12252,7 +12252,7 @@ class MathTagCoverter {
       this.copyButton = true;
     }
     if (style === null) {
-      style = {fontFamily: 'Times New Roman', display: 'inline-block'};
+      style = {display: 'inline-block'};
     }
     let styleComputer = document.createElement('DIV');
     for (let label in style) {

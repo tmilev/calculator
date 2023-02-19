@@ -16,18 +16,10 @@ A list of all calculator handlers can be found [here](examples/README.md).
 
 ## Check out our math equation editor
 
-https://calculator-algebra.org:8166/calculator_html/equation_editor/test_equation_editor.html
+More details [here](calculator_html/equation_editor/README.md).
 
-Inspired by MathQuill (we continue to love that editor - best wishes to the MathQuill team!). Our editor has the following  advantages.
+Demo: https://calculator-algebra.org:8166/calculator_html/equation_editor/test_equation_editor.html
 
-- Uses Apache 2.0 license (no more license headaches).
-- Written from scratch: not a single line from another project.
-- No fonts: uses Times New Roman by default. Chose Times New Roman as that seemed to be most-likely-to-be-available out-of-the-box on Linux, Chromebook, Mac and Windows.
-- No css files.
-- No external dependencies whatsoever, not even jquery.
-- No more build system headaches: just copy and paste one [single javascript file](calculator_html/equation_editor.js) and you're done.
-- Matrix support from the start.
-- Will construct math tags from content enclosed in \\(...\\) just like MathJax; can be used as a drop-in replacement.
 
 ## calculator installation 
 1. Download the `courses_calculator` repository:

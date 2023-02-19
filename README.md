@@ -14,9 +14,9 @@ More details on the calculator substitution engine can be found [here](wiki/READ
 
 A list of all calculator handlers can be found [here](examples/README.md).
 
-## Check out our new math equation editor
+## Check out our math equation editor
 
-https://calculator-algebra.org:8166/calculator_html/test_equation_editor.html
+https://calculator-algebra.org:8166/calculator_html/equation_editor/test_equation_editor.html
 
 Inspired by MathQuill (we continue to love that editor - best wishes to the MathQuill team!). Our editor has the following  advantages.
 

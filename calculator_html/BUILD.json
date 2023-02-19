@@ -17,6 +17,7 @@
   "/calculator_html/autocomplete.js",
   "/calculator_html/panels.js",
   "/calculator_html/solve.js",
+  "/calculator_html/equation_editor/equation_editor.js",
   "/calculator_html/solve_socratic.js",
   "/calculator_html/compare_expressions.js",
   "/calculator_html/compare_expressions_socratic.js",

@@ -75,7 +75,7 @@ function loadGlobals() {
   calculator.dynamicJavascript = require("./dynamic_javascript");
   calculator.processMonitoring = require("./process_monitoring");
   calculator.pageNavigation = require("./page_navigation");
-  calculator.equationEditor = require("./equation_editor");
+  calculator.equationEditor = require("./equation_editor/equation_editor");
   calculator.crypto = require("./crypto");
   // External dependencies:
   require("./external/build/output-min");

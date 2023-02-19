@@ -1,4 +1,4 @@
-const equationEditor = require("./equation_editor");
+const equationEditor = require("./equation_editor/equation_editor");
 // const mathjaxSetup = require("./mathjax-calculator-setup");
 
 class TypeSetter {

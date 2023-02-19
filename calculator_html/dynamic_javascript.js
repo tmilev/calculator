@@ -5,9 +5,9 @@ const crypto = require("./crypto");
 const graphicsNDimensions = require("./graphics_n_dimensions");
 const pathnames = require("./pathnames");
 const typeset = require("./math_typeset");
-const EquationEditor = require("./equation_editor").EquationEditor;
-const MathNode = require("./equation_editor").MathNode;
-const knownTypes = require("./equation_editor").knownTypes;
+const EquationEditor = require("./equation_editor/equation_editor").EquationEditor;
+const MathNode = require("./equation_editor/equation_editor").MathNode;
+const knownTypes = require("./equation_editor/equation_editor").knownTypes;
 
 class OneGraphicWithSliders {
   constructor(

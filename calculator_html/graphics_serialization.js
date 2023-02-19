@@ -1,6 +1,6 @@
 "use strict";
 
-const EquationEditor = require("./equation_editor");
+const EquationEditor = require("./equation_editor/equation_editor");
 
 const CanvasTwoD = require("./graphics").CanvasTwoD;
 const CanvasThreeD = require("./graphics").Canvas;

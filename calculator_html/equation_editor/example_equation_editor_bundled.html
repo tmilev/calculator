@@ -1,0 +1,33 @@
+<html>
+<script type="text/javascript" src="out/equation_editor_minified.js"></script>
+
+<body>
+
+  This file shows how to bundle the equation editor with webpack. It uses the files:
+  <pre>
+    equation_editor.js
+    app.js
+    webpack.config.js
+  </pre>
+  The webpack server packs the app.js and equation_editor.js files to a the equation_editor_minified.js script, which is
+  then included in the present html file.
+
+  <br>
+
+  <div id='editor' style="font-size: 72px; font-family:'Times New Roman'"> </div>
+  <br>
+  Latex of what you typed, can edit directly: <input id="latex">
+  <hr>
+  Sample buttons:
+  <button id="sqrt-button">&Sqrt;</button>
+  <button id="custom-button">custom</button>
+  <hr>
+  Typeset all math in the 'toBeTypeSet' tag.
+  <button id="typeSetButton" onclick="typeset(document.getElementById('toBeTypeSet'));">typeset</button>
+
+  <div id='toBeTypeSet'>
+    \(\frac{-b\pm \sqrt{b^2-4ac}}{2a}\)
+  </div>
+</body>
+
+</html>

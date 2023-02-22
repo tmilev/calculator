@@ -55,6 +55,12 @@ public:
     PolynomialUnivariateModular& output,
     std::stringstream* commentsOnFailure
   );
+  static bool greatestCommonDivisorRational(
+    const Polynomial<Rational>& left,
+    const Polynomial<Rational>& right,
+    Polynomial<Rational>& output,
+    std::stringstream* commentsOnFailure
+  );
   int getLeadingCoefficient() const;
   void divideBy(
     const PolynomialUnivariateModular& divisor,

@@ -1154,6 +1154,10 @@ bool PolynomialUnivariateModular::greatestCommonDivisor(
   return true;
 }
 
+bool PolynomialUnivariateModular::greatestCommonDivisorRational(const Polynomial<Rational> &left, const Polynomial<Rational> &right, Polynomial<Rational> &output, std::stringstream *commentsOnFailure){
+  return false;
+}
+
 void PolynomialUnivariateModular::ensureCoefficientLength(int desiredLength) {
   int oldLength = this->coefficients.size;
   if (desiredLength > oldLength) {

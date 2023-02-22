@@ -827,6 +827,12 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
       calculator, input, output, doGCD
     );
   }
+ return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(calculator, input, output, doGCD, true);
+}
+
+bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
+Calculator &calculator, const Expression &input, Expression &output, bool doGCD, bool tryQuickly){
+  STACK_TRACE("CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialRational");
   Vector<Polynomial<Rational> > polynomials;
   ExpressionContext context(calculator);
   if (
@@ -834,8 +840,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
       input,
       polynomials,
       &context,
-      2 // ,
-      // CalculatorConversions::functionPolynomial<Rational>
+      2
     )
   ) {
     return
@@ -843,16 +848,48 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
       calculator, "Failed to extract a list of 2 polynomials. "
     );
   }
+  Polynomial<Rational> &left= polynomials[0];
+  Polynomial<Rational> &right= polynomials[1];
+  if (tryQuickly){
+  if (CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(calculator, left, right, context, output )){
+    return true;
+  }}
   return
   CalculatorFunctionsPolynomial::
   greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
     calculator,
-    polynomials[0],
-    polynomials[1],
+    left,
+    right,
     context,
     output,
     doGCD
   );
+}
+
+
+
+bool CalculatorFunctionsPolynomial::
+greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(Calculator& calculator,
+  const Polynomial<Rational>& left,
+  const Polynomial<Rational>& right,
+  const ExpressionContext& context,
+  Expression& output) {
+  STACK_TRACE(
+    "CalculatorFunctionsPolynomial::"
+    "greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo"
+  );
+  Polynomial<Rational> outputPolynomial;
+  if (left.isEqualToZero() || right.isEqualToZero()) {
+    return calculator << "Not allowed to take gcd of zero. ";
+  }
+  if (left.minimalNumberOfVariables() > 1 || right.minimalNumberOfVariables()> 1){
+    return calculator << "Only implemented for 1 variable.";
+  }
+  if (!
+    PolynomialUnivariateModular ::greatestCommonDivisorRational(
+      left, right, outputPolynomial, &calculator.comments
+    )){return false;}
+  return output.assignValueWithContext(calculator, outputPolynomial, context);
 }
 
 class GroebnerComputationCalculator {

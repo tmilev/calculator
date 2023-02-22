@@ -1549,7 +1549,9 @@ void Calculator::initializeFunctionsStandard() {
     "are relatively prime integers, "
     "and so that the leading monomial under the "
     "graded lexicographic order (x_2>x_1, etc.) "
-    "has positive coefficient.",
+    "has positive coefficient. "
+    "If the polynomial is rational and univariate, "
+  "will attempt to compute the GCD quicker.",
     "GCDPoly{}(x^3-1, x^2-1)\n;"
     "GCDPoly{}(2/3x^3-2/3, 10x^2-10)\n;"
     "GCDPoly( (a^2-b^2)(a^3-b^3), (a^4-b^4)(a^5-b^5));\n"
@@ -1576,6 +1578,38 @@ void Calculator::initializeFunctionsStandard() {
     "x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2})",
     "CalculatorFunctionsPolynomial::greatestCommonDivisorPolynomial",
     "GCDPoly",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "GCDPolySlow",
+    CalculatorFunctionsPolynomial::greatestCommonDivisorPolynomialRationalSlow,
+    "",
+    "Same as GCDPoly but only for rational polynomials "
+  "and does not make attempts to run quicker by "
+  "sidestepping the Euclidean algorithm over the rationals."
+    ,
+    "GCDPolySlow{}(x^3-1, x^2-1);\n"
+  "GCDPoly(x^3-1, x^2-1);\n"
+  "GCDPolySlow(\n"
+  "151782 x^{70}-1383143 x^{69}+131971 x^{68}+14514 x^{67}+14750 x^{66}"
+  "-14042 x^{65}-35786 x^{64}+17375 x^{63}-3422 x^{61}-3567 x^{60}"
+  "+32161 x^{59}+2952 x^{58}+225120 x^{57}-27698 x^{56}-167529792 x^{55}"
+  "+150535156 x^{54}-867304 x^{53}-14579095 x^{52}-14601596 x^{51}"
+  "+129978 x^{50}+3641327 x^{49}-75977 x^{48}-4854 x^{47}+5192 x^{46}"
+  "+3452139 x^{45}+152799 x^{44}-2966830 x^{43}-25133900 x^{42}"
+  "+111031 x^{41}+15241383675 x^{40}+79868 x^{39}-12080640 x^{38}"
+  "+163947 x^{37}-8286516 x^{36}-868172 x^{35}-11138693 x^{34}"
+  "-3751 x^{33}-14939 x^{32}+2771 x^{31}+25066400 x^{30}+10167 x^{29}"
+  "-5572 x^{28}-15801492 x^{27}+2571 x^{26}-5427 x^{25}-12475983 x^{24}"
+  "+11855683 x^{23}-2952474 x^{22}+2470608 x^{21}-6775360 x^{20}"
+  "-2720 x^{19}+7368 x^{18}-17886 x^{17}+2809 x^{16}-685 x^{15}"
+  "-3680 x^{14}+9744 x^{13}-2436 x^{12}+8494 x^{11}-11726 x^{10}"
+  "+1536 x^{9}+1270 x^{8}-1328 x^{7}+3516 x^{6}-2162 x^{5}"
+  "+3881 x^{4}-2880 x^{3}+760 x^{2}-550 x+756,\n"
+  ")"
+    ,
+    "CalculatorFunctionsPolynomial::greatestCommonDivisorPolynomialRationalSlow",
+    "GCDPolySlow",
     innerStandard
   );
   this->addOperationHandler(

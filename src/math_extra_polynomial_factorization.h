@@ -55,12 +55,6 @@ public:
     PolynomialUnivariateModular& output,
     std::stringstream* commentsOnFailure
   );
-  static bool greatestCommonDivisorRational(
-    const Polynomial<Rational>& left,
-    const Polynomial<Rational>& right,
-    Polynomial<Rational>& output,
-    std::stringstream* commentsOnFailure
-  );
   int getLeadingCoefficient() const;
   void divideBy(
     const PolynomialUnivariateModular& divisor,
@@ -96,6 +90,9 @@ public:
   bool isEqualToZero() const;
   // Multiplies the polynomial by a constant so the leading coefficient is one.
   void rescaleSoLeadingCoefficientIsOne();
+  void makeFromPolynomialAndModulus(
+    IntegerModulusSmall* modulus, const Polynomial<LargeInteger>& input
+  );
   bool makeFromPolynomialAndModulus(
     IntegerModulusSmall* modulus, const Polynomial<Rational>& input
   );
@@ -136,6 +133,44 @@ public:
       const Polynomial<ElementZmodP>& other
     );
   };
+};
+
+// (Attempts to) compute polynomial gcd for rational polynomials.
+// quickly using tricks.
+class PolynomialRationalGreatestCommonDivisorComputer {
+private:
+  void convertModularPolynomialToIntegerPolynomial(
+    const PolynomialUnivariateModular& inputModCurrentPrime,
+    const Polynomial<LargeInteger>& inputModProductOfModuliSoFar,
+    Polynomial<LargeInteger>& output
+  );
+public:
+  Polynomial<LargeInteger> leftInput;
+  Polynomial<LargeInteger> rightInput;
+  Polynomial<LargeInteger> leftFactorCandidate;
+  Polynomial<LargeInteger> rightFactorCandidate;
+  Polynomial<LargeInteger> greatestCommonDivisorCandidate;
+  LargeIntegerUnsigned product;
+  LargeIntegerUnsigned currentPrime;
+  LargeIntegerUnsigned previousProduct;
+  LargeIntegerUnsigned inverseOfPreviousProductModCurrentPrime;
+  LargeIntegerUnsigned oneModCurrentPrimeZeroModPreviousProduct;
+  bool flagFound;
+  int degreeLargestDivisor;
+  void computeOneGreatestCommonDivisor(
+    int prime, std::stringstream* commentsOnFailure
+  );
+  bool computeGreatestCommonDivisor(
+    Polynomial<LargeInteger>& output,
+    std::stringstream* commentsOnFailure
+  );
+  static bool greatestCommonDivisorRational(
+    const Polynomial<Rational>& leftInput,
+    const Polynomial<Rational>& rightInput,
+    Polynomial<Rational>& output,
+    std::stringstream* commentsOnFailure
+  );
+  PolynomialRationalGreatestCommonDivisorComputer();
 };
 
 class PolynomialUnivariateModularAsModulus {

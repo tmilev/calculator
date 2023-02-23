@@ -327,6 +327,7 @@ public:
   ElementZmodP getDenominator() const;
   void operator=(const ElementZmodP& other);
   void operator=(const LargeIntegerUnsigned& other);
+  void operator=(const LargeInteger& other);
   void makeZero();
   void makeOne(const LargeIntegerUnsigned& newModulo);
   void makeMinusOne(const LargeIntegerUnsigned& newModulo);
@@ -354,7 +355,6 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringModP() const;
   static std::string toStringModP(const LargeIntegerUnsigned& modulus);
-  void operator=(const LargeInteger& other);
   bool assignRational(const Rational& other);
   void operator=(const Rational& other);
   bool operator/=(const ElementZmodP& den);

@@ -827,20 +827,29 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
       calculator, input, output, doGCD
     );
   }
- return CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(calculator, input, output, doGCD, true);
+  return
+  CalculatorFunctionsPolynomial::
+  greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
+    calculator, input, output, doGCD, true
+  );
 }
 
-bool CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
-Calculator &calculator, const Expression &input, Expression &output, bool doGCD, bool tryQuickly){
-  STACK_TRACE("CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialRational");
+bool CalculatorFunctionsPolynomial::
+greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool doGCD,
+  bool tryQuickly
+) {
+  STACK_TRACE(
+    "CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialRational"
+  );
   Vector<Polynomial<Rational> > polynomials;
   ExpressionContext context(calculator);
   if (
     !calculator.getVectorFromFunctionArguments(
-      input,
-      polynomials,
-      &context,
-      2
+      input, polynomials, &context, 2
     )
   ) {
     return
@@ -848,32 +857,33 @@ Calculator &calculator, const Expression &input, Expression &output, bool doGCD,
       calculator, "Failed to extract a list of 2 polynomials. "
     );
   }
-  Polynomial<Rational> &left= polynomials[0];
-  Polynomial<Rational> &right= polynomials[1];
-  if (tryQuickly){
-  if (CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(calculator, left, right, context, output )){
-    return true;
-  }}
+  Polynomial<Rational>& left = polynomials[0];
+  Polynomial<Rational>& right = polynomials[1];
+  if (tryQuickly) {
+    if (
+      CalculatorFunctionsPolynomial::
+      greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(
+        calculator, left, right, context, output
+      )
+    ) {
+      return true;
+    }
+  }
   return
   CalculatorFunctionsPolynomial::
   greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    calculator,
-    left,
-    right,
-    context,
-    output,
-    doGCD
+    calculator, left, right, context, output, doGCD
   );
 }
 
-
-
 bool CalculatorFunctionsPolynomial::
-greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(Calculator& calculator,
+greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(
+  Calculator& calculator,
   const Polynomial<Rational>& left,
   const Polynomial<Rational>& right,
   const ExpressionContext& context,
-  Expression& output) {
+  Expression& output
+) {
   STACK_TRACE(
     "CalculatorFunctionsPolynomial::"
     "greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo"
@@ -882,13 +892,19 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(Calculator& 
   if (left.isEqualToZero() || right.isEqualToZero()) {
     return calculator << "Not allowed to take gcd of zero. ";
   }
-  if (left.minimalNumberOfVariables() > 1 || right.minimalNumberOfVariables()> 1){
+  if (
+    left.minimalNumberOfVariables() > 1 || right.minimalNumberOfVariables() > 1
+  ) {
     return calculator << "Only implemented for 1 variable.";
   }
-  if (!
-    PolynomialUnivariateModular ::greatestCommonDivisorRational(
+  if (
+    !PolynomialRationalGreatestCommonDivisorComputer::
+    greatestCommonDivisorRational(
       left, right, outputPolynomial, &calculator.comments
-    )){return false;}
+    )
+  ) {
+    return false;
+  }
   return output.assignValueWithContext(calculator, outputPolynomial, context);
 }
 

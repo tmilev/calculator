@@ -1154,10 +1154,6 @@ bool PolynomialUnivariateModular::greatestCommonDivisor(
   return true;
 }
 
-bool PolynomialUnivariateModular::greatestCommonDivisorRational(const Polynomial<Rational> &left, const Polynomial<Rational> &right, Polynomial<Rational> &output, std::stringstream *commentsOnFailure){
-  return false;
-}
-
 void PolynomialUnivariateModular::ensureCoefficientLength(int desiredLength) {
   int oldLength = this->coefficients.size;
   if (desiredLength > oldLength) {
@@ -1280,6 +1276,20 @@ bool PolynomialUnivariateModular::makeFromPolynomialAndModulus(
     this->addTerm(coefficient, input.monomials[i].totalDegreeInt());
   }
   return true;
+}
+
+void PolynomialUnivariateModular::makeFromPolynomialAndModulus(
+  IntegerModulusSmall* modulus, const Polynomial<LargeInteger>& input
+) {
+  this->makeZero(modulus);
+  for (int i = 0; i < input.size(); i ++) {
+    ElementZmodP element;
+    element.modulus = modulus->modulus;
+    element = input.coefficients[i];
+    int coefficient = 0;
+    element.value.isIntegerFittingInInt(&coefficient);
+    this->addTerm(coefficient, input.monomials[i].totalDegreeInt());
+  }
 }
 
 void PolynomialUnivariateModular::makeFromPolynomialAndModulusNoFailure(
@@ -1695,5 +1705,180 @@ void IntegerModulusSmall::initializeModulusData(int inputModulus) {
       << " is not prime. "
       << global.fatal;
     }
+  }
+}
+
+PolynomialRationalGreatestCommonDivisorComputer::
+PolynomialRationalGreatestCommonDivisorComputer() {
+  this->flagFound = false;
+  this->degreeLargestDivisor = - 1;
+}
+
+bool PolynomialRationalGreatestCommonDivisorComputer::
+greatestCommonDivisorRational(
+  const Polynomial<Rational>& leftInput,
+  const Polynomial<Rational>& rightInput,
+  Polynomial<Rational>& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (
+    leftInput.minimalNumberOfVariables() > 1 ||
+    rightInput.minimalNumberOfVariables() > 1
+  ) {
+    return false;
+  }
+  PolynomialRationalGreatestCommonDivisorComputer computer;
+  Polynomial<Rational> leftRescaled = leftInput;
+  Polynomial<Rational> rightRescaled = rightInput;
+  leftRescaled.scaleNormalizeLeadingMonomial(
+    &MonomialPolynomial::orderDefault()
+  );
+  rightRescaled.scaleNormalizeLeadingMonomial(
+    &MonomialPolynomial::orderDefault()
+  );
+  computer.leftInput = leftRescaled;
+  computer.rightInput = rightRescaled;
+  Polynomial<LargeInteger> outputInteger;
+  if (
+    !computer.computeGreatestCommonDivisor(outputInteger, commentsOnFailure)
+  ) {
+    return false;
+  }
+  output = outputInteger;
+  return true;
+}
+
+bool PolynomialRationalGreatestCommonDivisorComputer::
+computeGreatestCommonDivisor(
+  Polynomial<LargeInteger>& output,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE(
+    "PolynomialGreatestCommonDivisorComputer::computeGreatestCommonDivisor"
+  );
+  const List<unsigned int>& primes =
+  LargeIntegerUnsigned::allPrimesSmallerThan15Bits();
+  this->degreeLargestDivisor = this->leftInput.totalDegreeInt();
+  this->product = 1;
+  for (int i = 10; i < primes.size; i ++) {
+    this->computeOneGreatestCommonDivisor(primes[i], commentsOnFailure);
+    if (this->flagFound) {
+      output = this->greatestCommonDivisorCandidate;
+      return true;
+    }
+  }
+  return false;
+}
+
+void PolynomialRationalGreatestCommonDivisorComputer::
+computeOneGreatestCommonDivisor(
+  int prime, std::stringstream* commentsOnFailure
+) {
+  IntegerModulusSmall modulus;
+  modulus.initializeModulusData(prime);
+  PolynomialUnivariateModular leftModular;
+  PolynomialUnivariateModular rightModular;
+  PolynomialUnivariateModular leftFactorModular;
+  PolynomialUnivariateModular rightFactorModular;
+  leftModular.makeFromPolynomialAndModulus(&modulus, this->leftInput);
+  rightModular.makeFromPolynomialAndModulus(&modulus, this->rightInput);
+  if (
+    leftModular.totalDegreeInt() < this->leftInput.totalDegreeInt() ||
+    rightModular.totalDegreeInt() < this->rightInput.totalDegreeInt()
+  ) {
+    return;
+  }
+  PolynomialUnivariateModular greatestCommonDivisorModular;
+  PolynomialUnivariateModular unused;
+  leftModular.greatestCommonDivisor(
+    leftModular,
+    rightModular,
+    greatestCommonDivisorModular,
+    commentsOnFailure
+  );
+  leftModular.divideBy(
+    greatestCommonDivisorModular, leftFactorModular, unused
+  );
+  rightModular.divideBy(
+    greatestCommonDivisorModular, rightFactorModular, unused
+  );
+  this->previousProduct = this->product;
+  this->currentPrime = LargeIntegerUnsigned(prime);
+  this->product *= this->currentPrime;
+  bool mustBeTrue =
+  MathRoutines::invertXModN(
+    this->previousProduct,
+    this->currentPrime,
+    this->inverseOfPreviousProductModCurrentPrime
+  );
+  this->oneModCurrentPrimeZeroModPreviousProduct =
+  this->inverseOfPreviousProductModCurrentPrime * this->previousProduct;
+  if (!mustBeTrue) {
+    global.fatal
+    <<
+    "Product of primes not invertible mod a new prime: we must have a programming error. "
+    << global.fatal;
+  }
+  this->convertModularPolynomialToIntegerPolynomial(
+    leftFactorModular,
+    this->leftFactorCandidate,
+    this->leftFactorCandidate
+  );
+  this->convertModularPolynomialToIntegerPolynomial(
+    rightFactorModular,
+    this->rightFactorCandidate,
+    this->rightFactorCandidate
+  );
+  this->convertModularPolynomialToIntegerPolynomial(
+    greatestCommonDivisorModular,
+    this->greatestCommonDivisorCandidate,
+    this->greatestCommonDivisorCandidate
+  );
+  Polynomial<LargeInteger> product =
+  this->leftFactorCandidate * this->greatestCommonDivisorCandidate;
+  if (product != this->leftInput) {
+    return;
+  }
+  product = this->rightFactorCandidate * this->greatestCommonDivisorCandidate;
+  if (product != this->rightInput) {
+    return;
+  }
+  this->flagFound = true;
+}
+
+void PolynomialRationalGreatestCommonDivisorComputer::
+convertModularPolynomialToIntegerPolynomial(
+  const PolynomialUnivariateModular& inputModCurrentPrime,
+  const Polynomial<LargeInteger>& inputModProductOfModuliSoFar,
+  Polynomial<LargeInteger>& output
+) {
+  if (&inputModProductOfModuliSoFar == &output) {
+    Polynomial<LargeInteger> inputCopy = inputModProductOfModuliSoFar;
+    this->convertModularPolynomialToIntegerPolynomial(
+      inputModCurrentPrime, inputCopy, output
+    );
+    return;
+  }
+  // Let p, q be coprime. We are seeking x so that
+  // x=a mod p, x=b mod q for given a and b.
+  // The existence of such an x is known as the Chinese Remainder Theorem.
+  // By Bezout's lemma, there exist r,s so that p r + q s =1.
+  // So qs = 1-pr.
+  // Then x=b+(a-b)*q*s = b+(a-b)(1-pr) = pr(b-a)+a is our solution.
+  // Here:
+  // s   = inverseOfPreviousProductModCurrentPrime,
+  // q*s = oneModCurrentPrimeZeroModPreviousProduct
+  // p   = currentPrime
+  // q   = previousProductOfModuli
+  // p*q = productOfModuliSoFar
+  output.makeZero();
+  for (int i = 0; i < inputModCurrentPrime.coefficients.size; i ++) {
+    MonomialPolynomial currentMonomial = MonomialPolynomial(0, i);
+    LargeInteger b = inputModCurrentPrime.coefficients[i];
+    LargeInteger a =
+    inputModProductOfModuliSoFar.getCoefficientOf(currentMonomial);
+    LargeInteger x =
+    b + (a - b) * this->oneModCurrentPrimeZeroModPreviousProduct;
+    output.addMonomial(currentMonomial, x);
   }
 }

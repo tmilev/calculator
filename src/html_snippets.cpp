@@ -5,6 +5,7 @@
 #include <iomanip>
 #include "string_constants.h"
 #include "general_strings.h"
+#include "math_basics.h"
 
 std::string HtmlRoutines::latexWithCopyButton = "latexWithCopyButton";
 std::string HtmlRoutines::gitRepository =

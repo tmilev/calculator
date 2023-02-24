@@ -150,11 +150,11 @@ public:
   Polynomial<LargeInteger> leftFactorCandidate;
   Polynomial<LargeInteger> rightFactorCandidate;
   Polynomial<LargeInteger> greatestCommonDivisorCandidate;
-  LargeIntegerUnsigned product;
-  LargeIntegerUnsigned currentPrime;
-  LargeIntegerUnsigned previousProduct;
-  LargeIntegerUnsigned inverseOfPreviousProductModCurrentPrime;
-  LargeIntegerUnsigned oneModCurrentPrimeZeroModPreviousProduct;
+  LargeInteger product;
+  LargeInteger currentPrime;
+  LargeInteger previousProduct;
+  LargeInteger inverseOfPreviousProductModCurrentPrime;
+  LargeInteger oneModCurrentPrimeZeroModPreviousProduct;
   bool flagFound;
   int degreeLargestDivisor;
   void computeOneGreatestCommonDivisor(

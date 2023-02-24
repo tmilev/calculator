@@ -211,7 +211,7 @@ public:
     std::string, ASNObject, HashFunctions::hashFunction<std::string>
   >& namesToObjectIdsNonThreadSafe();
   static MapList<
-    List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars
+    List<unsigned char>, ASNObject
   >& objectIdsToNames();
   static void initializeNonThreadSafe();
   bool loadFromASN(

@@ -108,6 +108,7 @@ LargeIntegerUnsigned LargeIntegerUnsigned::operator/(unsigned int x) const {
 LargeIntegerUnsigned LargeIntegerUnsigned::operator/(
   const LargeIntegerUnsigned& x
 ) const {
+  global.comments << "<br>DEBUG: divide: " << this->toString() << " by " << x.toString();
   LargeIntegerUnsigned result;
   LargeIntegerUnsigned remainder;
   this->dividePositive(x, result, remainder);
@@ -1106,6 +1107,10 @@ void LargeIntegerUnsigned::addLargeIntegerUnsignedShiftedTimesDigit(
 void LargeIntegerUnsigned::subtractSmallerPositive(
   const LargeIntegerUnsigned& x
 ) {
+  if (x.digits.size > this->digits.size){
+    global.fatal << "Attempt to subtract larger unsinged from smaller: "<< this->toString() << " - "
+    << x.toString() << global.fatal;
+  }
   int carryOver = 0;
   for (int i = 0; i < x.digits.size; i ++) {
     int nextDigit = x.digits[i] + carryOver;

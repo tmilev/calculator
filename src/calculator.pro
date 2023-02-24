@@ -48,6 +48,7 @@ HEADERS += \
     general_multitasking.h \
     general_test.h \
     general_time_date.h \
+    math_basics.h \
     math_extra_polynomial_factorization.h \
     math_lattices.h \
     math_vector_partition_functions.h \

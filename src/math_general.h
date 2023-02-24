@@ -19,29 +19,6 @@ template <class Coefficient>
 class MatrixTensor;
 class ProgressReport;
 
-// We are wrapping the math.h c++ functions for portability reasons
-// (if for some reason we want to change from math.h to a better floating point
-// library, we only need to change the implementation of the FloatingPoint
-// class.
-// Due to conflicts with namespaces, we use function names different from the
-// built-in ones.
-class FloatingPoint {
-public:
-  static double absFloating(double argument);
-  static double sinFloating(double argument);
-  static double cosFloating(double argument);
-  static double arccos(double argument);
-  static double arctan(double argument);
-  static double arcsin(double argument);
-  static double sqrtFloating(double argument);
-  static double power(double base, double exponent);
-  static double logFloating(double argument);
-  static bool isNaN(const double& argument);
-  static double floorFloating(double argument);
-  static std::string doubleToString(double input);
-  static std::string doubleToString(double input, int precision);
-};
-
 class ChevalleyGenerator {
 public:
   SemisimpleLieAlgebra* owner;

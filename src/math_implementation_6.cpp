@@ -1754,13 +1754,19 @@ computeGreatestCommonDivisor(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE(
-    "PolynomialGreatestCommonDivisorComputer::computeGreatestCommonDivisor"
+    "PolynomialRationalGreatestCommonDivisorComputer::computeGreatestCommonDivisor"
   );
   const List<unsigned int>& primes =
   LargeIntegerUnsigned::allPrimesSmallerThan15Bits();
   this->degreeLargestDivisor = this->leftInput.totalDegreeInt();
   this->product = 1;
+  ProgressReport report(20);
   for (int i = 10; i < primes.size; i ++) {
+    if (report.tickAndWantReport()){
+      std::stringstream reportStream;
+      reportStream<< "Computing gcd: " << i << " out of " << primes.size;
+      report.report(reportStream.str());
+    }
     this->computeOneGreatestCommonDivisor(primes[i], commentsOnFailure);
     if (this->flagFound) {
       output = this->greatestCommonDivisorCandidate;
@@ -1774,6 +1780,8 @@ void PolynomialRationalGreatestCommonDivisorComputer::
 computeOneGreatestCommonDivisor(
   int prime, std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("PolynomialRationalGreatestCommonDivisorComputer::"
+  "computeOneGreatestCommonDivisor");
   IntegerModulusSmall modulus;
   modulus.initializeModulusData(prime);
   PolynomialUnivariateModular leftModular;
@@ -1790,33 +1798,45 @@ computeOneGreatestCommonDivisor(
   }
   PolynomialUnivariateModular greatestCommonDivisorModular;
   PolynomialUnivariateModular unused;
+  global.comments << "<br>DEBUG: got to here";
   leftModular.greatestCommonDivisor(
     leftModular,
     rightModular,
     greatestCommonDivisorModular,
     commentsOnFailure
   );
+  global.comments << "<br>DEBUG: got to here 2";
   leftModular.divideBy(
     greatestCommonDivisorModular, leftFactorModular, unused
   );
+  global.comments << "<br>DEBUG: got to here 3";
   rightModular.divideBy(
     greatestCommonDivisorModular, rightFactorModular, unused
   );
+  global.comments << "<br>DEBUG: got to here 4";
   this->previousProduct = this->product;
   this->currentPrime = LargeIntegerUnsigned(prime);
   this->product *= this->currentPrime;
+  global.comments << "<br>DEBUG: got to here 5";
+  static int count = 0;
+  count ++;
+  if (count >3){
+  global.fatal << "DEBUG: after round 2" << global.fatal;
+  }
   bool mustBeTrue =
   MathRoutines::invertXModN(
     this->previousProduct,
     this->currentPrime,
     this->inverseOfPreviousProductModCurrentPrime
   );
+  global.comments << "<br>DEBUG: got to here 6";
   this->oneModCurrentPrimeZeroModPreviousProduct =
   this->inverseOfPreviousProductModCurrentPrime * this->previousProduct;
   if (!mustBeTrue) {
     global.fatal
     <<
-    "Product of primes not invertible mod a new prime: we must have a programming error. "
+    "Product of primes not invertible mod a new prime: "
+    <<"we must have a programming error. "
     << global.fatal;
   }
   this->convertModularPolynomialToIntegerPolynomial(
@@ -1852,6 +1872,8 @@ convertModularPolynomialToIntegerPolynomial(
   const Polynomial<LargeInteger>& inputModProductOfModuliSoFar,
   Polynomial<LargeInteger>& output
 ) {
+  STACK_TRACE("PolynomialRationalGreatestCommonDivisorComputer::"
+  "convertModularPolynomialToIntegerPolynomial");
   if (&inputModProductOfModuliSoFar == &output) {
     Polynomial<LargeInteger> inputCopy = inputModProductOfModuliSoFar;
     this->convertModularPolynomialToIntegerPolynomial(
@@ -1872,6 +1894,7 @@ convertModularPolynomialToIntegerPolynomial(
   // q   = previousProductOfModuli
   // p*q = productOfModuliSoFar
   output.makeZero();
+  LargeInteger halfProduct = this->product/2;
   for (int i = 0; i < inputModCurrentPrime.coefficients.size; i ++) {
     MonomialPolynomial currentMonomial = MonomialPolynomial(0, i);
     LargeInteger b = inputModCurrentPrime.coefficients[i];
@@ -1879,6 +1902,9 @@ convertModularPolynomialToIntegerPolynomial(
     inputModProductOfModuliSoFar.getCoefficientOf(currentMonomial);
     LargeInteger x =
     b + (a - b) * this->oneModCurrentPrimeZeroModPreviousProduct;
+ x %= this->product;
+ if (x>halfProduct){
+ x-=this->product;}
     output.addMonomial(currentMonomial, x);
   }
 }

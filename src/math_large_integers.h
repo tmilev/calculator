@@ -3,6 +3,7 @@
 #define header_math_large_integers_ALREADY_INCLUDED
 
 #include "general_lists.h"
+#include "math_basics.h"
 
 class LargeIntegerUnsigned {
   void addNoFitSize(const LargeIntegerUnsigned& x);

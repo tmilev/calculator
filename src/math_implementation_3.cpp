@@ -2506,19 +2506,6 @@ char MathRoutines::convertHumanReadableHexToCharValue(char input) {
   return - 1;
 }
 
-unsigned int MathRoutines::hashListUnsignedChars(
-  const List<unsigned char>& input
-) {
-  unsigned int result = 0;
-  int j = 0;
-  for (int i = 0; i < input.size; i ++) {
-    result +=
-    HashConstants::getConstantIncrementCounter(j) * static_cast<unsigned>(
-      input[i]
-    );
-  }
-  return result;
-}
 
 unsigned int MathRoutines::hashListStrings(
   const List<std::string>& input

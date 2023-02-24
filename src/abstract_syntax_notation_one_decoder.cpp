@@ -25,6 +25,27 @@ std::string ASNElement::JSLabels::interpretation = "interpretation";
 std::string ASNElement::JSLabels::numberOfChildren = "numberOfChildren";
 std::string ASNElement::JSLabels::comment = "comment";
 
+
+
+std::string ASNObject::names::sha1 = "sha1";
+std::string ASNObject::names::sha256 = "sha256";
+std::string ASNObject::names::sha384 = "sha384";
+std::string ASNObject::names::sha512 = "sha512";
+std::string ASNObject::names::sha256WithRSAEncryption =
+"sha256WithRSAEncryption";
+std::string ASNObject::names::rsaEncryption = "RSAEncryption";
+std::string ASNObject::names::countryName = "countryName";
+std::string ASNObject::names::stateOrProvinceName = "stateOrProvinceName";
+std::string ASNObject::names::localityName = "localityName";
+std::string ASNObject::names::organizationName = "organizationName";
+std::string ASNObject::names::organizationalUnitName =
+"organizationalUnitName";
+std::string ASNObject::names::commonName = "commonName";
+std::string ASNObject::names::emailAddress = "emailAddress";
+std::string ASNObject::names::basicConstraints = "basicConstraints";
+std::string ASNObject::names::subjectKeyIdentifier = "subjectKeyIdentifier";
+std::string ASNObject::names::authorityKeyIdentifier =
+"authorityKeyIdentifier";
 bool ASNElement::hasCostructedStartByte() const {
   int sixthBit = this->startByte / 32;
   sixthBit %= 2;
@@ -1193,34 +1214,13 @@ void ASNObject::initializeAddSample(
   container.setKeyValue(incoming.name, incoming);
 }
 
-MapList<
-  List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars
->& ASNObject::objectIdsToNames() {
+MapList<List<unsigned char>, ASNObject> &ASNObject::objectIdsToNames() {
   static MapList<
-    List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars
+    List<unsigned char>, ASNObject
   > result;
   return result;
 }
 
-std::string ASNObject::names::sha1 = "sha1";
-std::string ASNObject::names::sha256 = "sha256";
-std::string ASNObject::names::sha384 = "sha384";
-std::string ASNObject::names::sha512 = "sha512";
-std::string ASNObject::names::sha256WithRSAEncryption =
-"sha256WithRSAEncryption";
-std::string ASNObject::names::rsaEncryption = "RSAEncryption";
-std::string ASNObject::names::countryName = "countryName";
-std::string ASNObject::names::stateOrProvinceName = "stateOrProvinceName";
-std::string ASNObject::names::localityName = "localityName";
-std::string ASNObject::names::organizationName = "organizationName";
-std::string ASNObject::names::organizationalUnitName =
-"organizationalUnitName";
-std::string ASNObject::names::commonName = "commonName";
-std::string ASNObject::names::emailAddress = "emailAddress";
-std::string ASNObject::names::basicConstraints = "basicConstraints";
-std::string ASNObject::names::subjectKeyIdentifier = "subjectKeyIdentifier";
-std::string ASNObject::names::authorityKeyIdentifier =
-"authorityKeyIdentifier";
 
 MapList<
   std::string, ASNObject, HashFunctions::hashFunction<std::string>
@@ -1330,7 +1330,7 @@ MapList<
     AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
   );
   MapList<
-    List<unsigned char>, ASNObject, MathRoutines::hashListUnsignedChars
+    List<unsigned char>, ASNObject, HashFunctions::hashFunction<List<unsigned char>>
   >& reverseMap =
   ASNObject::objectIdsToNames();
   for (int i = 0; i < container.values.size; i ++) {

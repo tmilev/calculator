@@ -1762,9 +1762,9 @@ computeGreatestCommonDivisor(
   this->product = 1;
   ProgressReport report(20);
   for (int i = 10; i < primes.size; i ++) {
-    if (report.tickAndWantReport()){
+    if (report.tickAndWantReport()) {
       std::stringstream reportStream;
-      reportStream<< "Computing gcd: " << i << " out of " << primes.size;
+      reportStream << "Computing gcd: " << i << " out of " << primes.size;
       report.report(reportStream.str());
     }
     this->computeOneGreatestCommonDivisor(primes[i], commentsOnFailure);
@@ -1780,8 +1780,10 @@ void PolynomialRationalGreatestCommonDivisorComputer::
 computeOneGreatestCommonDivisor(
   int prime, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("PolynomialRationalGreatestCommonDivisorComputer::"
-  "computeOneGreatestCommonDivisor");
+  STACK_TRACE(
+    "PolynomialRationalGreatestCommonDivisorComputer::"
+    "computeOneGreatestCommonDivisor"
+  );
   IntegerModulusSmall modulus;
   modulus.initializeModulusData(prime);
   PolynomialUnivariateModular leftModular;
@@ -1820,8 +1822,8 @@ computeOneGreatestCommonDivisor(
   global.comments << "<br>DEBUG: got to here 5";
   static int count = 0;
   count ++;
-  if (count >3){
-  global.fatal << "DEBUG: after round 2" << global.fatal;
+  if (count > 3) {
+    global.fatal << "DEBUG: after round 2" << global.fatal;
   }
   bool mustBeTrue =
   MathRoutines::invertXModN(
@@ -1834,9 +1836,8 @@ computeOneGreatestCommonDivisor(
   this->inverseOfPreviousProductModCurrentPrime * this->previousProduct;
   if (!mustBeTrue) {
     global.fatal
-    <<
-    "Product of primes not invertible mod a new prime: "
-    <<"we must have a programming error. "
+    << "Product of primes not invertible mod a new prime: "
+    << "we must have a programming error. "
     << global.fatal;
   }
   this->convertModularPolynomialToIntegerPolynomial(
@@ -1872,8 +1873,10 @@ convertModularPolynomialToIntegerPolynomial(
   const Polynomial<LargeInteger>& inputModProductOfModuliSoFar,
   Polynomial<LargeInteger>& output
 ) {
-  STACK_TRACE("PolynomialRationalGreatestCommonDivisorComputer::"
-  "convertModularPolynomialToIntegerPolynomial");
+  STACK_TRACE(
+    "PolynomialRationalGreatestCommonDivisorComputer::"
+    "convertModularPolynomialToIntegerPolynomial"
+  );
   if (&inputModProductOfModuliSoFar == &output) {
     Polynomial<LargeInteger> inputCopy = inputModProductOfModuliSoFar;
     this->convertModularPolynomialToIntegerPolynomial(
@@ -1894,7 +1897,7 @@ convertModularPolynomialToIntegerPolynomial(
   // q   = previousProductOfModuli
   // p*q = productOfModuliSoFar
   output.makeZero();
-  LargeInteger halfProduct = this->product/2;
+  LargeInteger halfProduct = this->product / 2;
   for (int i = 0; i < inputModCurrentPrime.coefficients.size; i ++) {
     MonomialPolynomial currentMonomial = MonomialPolynomial(0, i);
     LargeInteger b = inputModCurrentPrime.coefficients[i];
@@ -1902,9 +1905,10 @@ convertModularPolynomialToIntegerPolynomial(
     inputModProductOfModuliSoFar.getCoefficientOf(currentMonomial);
     LargeInteger x =
     b + (a - b) * this->oneModCurrentPrimeZeroModPreviousProduct;
- x %= this->product;
- if (x>halfProduct){
- x-=this->product;}
+    x %= this->product;
+    if (x > halfProduct) {
+      x -= this->product;
+    }
     output.addMonomial(currentMonomial, x);
   }
 }

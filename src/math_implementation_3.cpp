@@ -2506,7 +2506,6 @@ char MathRoutines::convertHumanReadableHexToCharValue(char input) {
   return - 1;
 }
 
-
 unsigned int MathRoutines::hashListStrings(
   const List<std::string>& input
 ) {

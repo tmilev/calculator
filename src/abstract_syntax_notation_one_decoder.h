@@ -210,9 +210,7 @@ public:
   static MapList<
     std::string, ASNObject, HashFunctions::hashFunction<std::string>
   >& namesToObjectIdsNonThreadSafe();
-  static MapList<
-    List<unsigned char>, ASNObject
-  >& objectIdsToNames();
+  static MapList<List<unsigned char>, ASNObject>& objectIdsToNames();
   static void initializeNonThreadSafe();
   bool loadFromASN(
     const ASNElement& input, std::stringstream* commentsOnFailure

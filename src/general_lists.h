@@ -277,11 +277,8 @@ unsigned int HashFunctions::hashFunction(
     MonomialTensor<int, HashFunctions::hashFunction<int> >
   >& input
 );
-template <>
-unsigned int HashFunctions::hashFunction(
-  const List<unsigned char>& input
-);
-
+template < >
+unsigned int HashFunctions::hashFunction(const List<unsigned char>& input);
 template <typename Object>
 class ListIterator {
 public:
@@ -1120,7 +1117,7 @@ public:
     int maxHashSize = 0;
     int numNonZeroHashes = 0;
     for (int i = 0; i < this->hashBuckets.size; i ++) {
-      if (maxHashSize < this->hashBuckets[i].size){
+      if (maxHashSize < this->hashBuckets[i].size) {
         maxHashSize = this->hashBuckets[i].size;
       }
       if (this->hashBuckets[i].size > 0) {

@@ -24,9 +24,6 @@ std::string ASNElement::JSLabels::type = "type";
 std::string ASNElement::JSLabels::interpretation = "interpretation";
 std::string ASNElement::JSLabels::numberOfChildren = "numberOfChildren";
 std::string ASNElement::JSLabels::comment = "comment";
-
-
-
 std::string ASNObject::names::sha1 = "sha1";
 std::string ASNObject::names::sha256 = "sha256";
 std::string ASNObject::names::sha384 = "sha384";
@@ -46,6 +43,7 @@ std::string ASNObject::names::basicConstraints = "basicConstraints";
 std::string ASNObject::names::subjectKeyIdentifier = "subjectKeyIdentifier";
 std::string ASNObject::names::authorityKeyIdentifier =
 "authorityKeyIdentifier";
+
 bool ASNElement::hasCostructedStartByte() const {
   int sixthBit = this->startByte / 32;
   sixthBit %= 2;
@@ -1214,13 +1212,10 @@ void ASNObject::initializeAddSample(
   container.setKeyValue(incoming.name, incoming);
 }
 
-MapList<List<unsigned char>, ASNObject> &ASNObject::objectIdsToNames() {
-  static MapList<
-    List<unsigned char>, ASNObject
-  > result;
+MapList<List<unsigned char>, ASNObject>& ASNObject::objectIdsToNames() {
+  static MapList<List<unsigned char>, ASNObject> result;
   return result;
 }
-
 
 MapList<
   std::string, ASNObject, HashFunctions::hashFunction<std::string>
@@ -1330,7 +1325,9 @@ MapList<
     AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
   );
   MapList<
-    List<unsigned char>, ASNObject, HashFunctions::hashFunction<List<unsigned char>>
+    List<unsigned char>,
+    ASNObject,
+    HashFunctions::hashFunction<List<unsigned char> >
   >& reverseMap =
   ASNObject::objectIdsToNames();
   for (int i = 0; i < container.values.size; i ++) {

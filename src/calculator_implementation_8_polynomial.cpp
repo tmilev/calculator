@@ -847,6 +847,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
   );
   Vector<Polynomial<Rational> > polynomials;
   ExpressionContext context(calculator);
+  int64_t start = global.getElapsedMilliseconds();
   if (
     !calculator.getVectorFromFunctionArguments(
       input, polynomials, &context, 2
@@ -857,6 +858,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
       calculator, "Failed to extract a list of 2 polynomials. "
     );
   }
+  global.comments << "DEBUG: extraction time: " << global.getElapsedMilliseconds()- start << " ms. ";
   Polynomial<Rational>& left = polynomials[0];
   Polynomial<Rational>& right = polynomials[1];
   if (tryQuickly) {
@@ -897,6 +899,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(
   ) {
     return calculator << "Only implemented for 1 variable.";
   }
+  int64_t start = global.getElapsedMilliseconds();
   if (
     !PolynomialRationalGreatestCommonDivisorComputer::
     greatestCommonDivisorRational(
@@ -905,6 +908,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(
   ) {
     return false;
   }
+  global.comments << "<br>DEBUG: duration: " << global.getElapsedMilliseconds()-start;
   return output.assignValueWithContext(calculator, outputPolynomial, context);
 }
 

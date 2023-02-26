@@ -174,6 +174,8 @@ public:
   LargeInteger previousProduct;
   LargeInteger inverseOfPreviousProductModCurrentPrime;
   LargeInteger oneModCurrentPrimeZeroModPreviousProduct;
+  int64_t millisecondsGreatestCommonDivisorDense= 0;
+  int64_t millisecondsTotal=0;
   bool flagFound;
   int degreeLargestDivisor;
   void computeOneGreatestCommonDivisor(

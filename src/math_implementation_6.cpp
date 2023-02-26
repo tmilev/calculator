@@ -1749,11 +1749,16 @@ greatestCommonDivisorRational(
   computer.leftInput = leftRescaled;
   computer.rightInput = rightRescaled;
   Polynomial<LargeInteger> outputInteger;
+  int64_t millisecondsStart=global.getElapsedMilliseconds();
   if (
     !computer.computeGreatestCommonDivisor(outputInteger, commentsOnFailure)
   ) {
     return false;
   }
+  computer.millisecondsTotal = global.getElapsedMilliseconds()-millisecondsStart;
+  global.comments << "DEBUG: Total ms: " << computer.millisecondsTotal << ", gcd millis: "
+  << computer.millisecondsGreatestCommonDivisorDense;
+
   output = outputInteger;
   output.scaleNormalizeLeadingMonomial(nullptr);
   return true;
@@ -1819,12 +1824,14 @@ computeOneGreatestCommonDivisor(
   }
   PolynomialUnivariateModular greatestCommonDivisorModular;
   PolynomialUnivariateModular unused;
+  int64_t startGreatestCommonDivisor = global.getElapsedMilliseconds();
   leftModular.greatestCommonDivisor(
     leftModular,
     rightModular,
     greatestCommonDivisorModular,
     commentsOnFailure
   );
+  this->millisecondsGreatestCommonDivisorDense+= global.getElapsedMilliseconds()-startGreatestCommonDivisor;
   leftModular.divideBy(
     greatestCommonDivisorModular, leftFactorModular, unused
   );
@@ -1877,32 +1884,7 @@ rightFactorModular*= this->leftTimesRightLeadingCoefficients;
   this->rescaleAndReduce(this->greatestCommonDivisorCandidate, this->greatestCommonDivisorCandidateRational);
   this->rescaleAndReduce(this->leftFactorCandidate, this->leftFactorCandidateRational);
   this->rescaleAndReduce(this->rightFactorCandidate, this->rightFactorCandidateRational);
-  global.comments
-  << "<hr>DEBUG: left modular: "
-  << leftModular.toString()
-  << "<br>left factor modular: "
-  << leftFactorModular.toString()
-  << "<br>right modular: "
-  << rightModular.toString()
-  << "<br>right factor modular: "
-  << rightFactorModular.toString()
-  << "<br>gcd modular: "
-  << greatestCommonDivisorModular.toString()
-  << "<br>number product: "
-  << this->product.toString()
-  << "<br>left candidate: "
-  << this->leftFactorCandidate.toStringPretty()
-  << "<br> left candidate rational: " << this->leftFactorCandidateRational.toStringPretty()
-  << "<br> left target: " << this->leftInputRational.toStringPretty()
-  << "<br>right candidate: "
-  << this->rightFactorCandidate.toStringPretty()
-  << "<br> right candidate rational: " << this->rightFactorCandidateRational.toStringPretty()
-  << "<br> right target: " << this->rightInputRational.toStringPretty()
-  << "<br> candidate gcd: "
-  << this->greatestCommonDivisorCandidate.toStringPretty()
-  << "<br> candidate gcd rational: "
-  << this->greatestCommonDivisorCandidateRational.toStringPretty()
-  ;
+
   Polynomial<Rational> product;
   product = this->greatestCommonDivisorCandidateRational;
   product *= this->leftFactorCandidateRational;
@@ -1971,7 +1953,6 @@ void PolynomialRationalGreatestCommonDivisorComputer::rescaleAndReduce(Polynomia
   LargeInteger halfInteger = this->product / 2;
   for (int i = 0; i < input.size(); i ++) {
     LargeInteger coefficient = input.coefficients[i];
-//    coefficient*= this->leftTimesRightLeadingCoefficients;
     coefficient %= this->product;
     if (coefficient > halfInteger) {
       coefficient -= product;

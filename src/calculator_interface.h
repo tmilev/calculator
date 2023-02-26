@@ -3089,6 +3089,7 @@ public:
     ) {
       return false;
     }
+    global.comments << "<br>DEBUG: goty to here!";
     return
     getVectorFromFunctionArgumentsInternal(
       input[1], output, inputOutputStartingContext, targetDimNonMandatory
@@ -3851,6 +3852,7 @@ bool Calculator::getVector(
   STACK_TRACE("Calculator::getVector");
   input.checkInitialization();
   List<Expression> nonConvertedExpressions;
+  global.comments << "DEBUG: getvector on: " << input.toString();
   if (
     !this->getVectorExpressions(
       input, nonConvertedExpressions, targetDimensionNonMandatory
@@ -3858,11 +3860,13 @@ bool Calculator::getVector(
   ) {
     return false;
   }
+  global.comments << "DEBUG: here be i " ;
   if (targetDimensionNonMandatory > 0) {
     if (nonConvertedExpressions.size != targetDimensionNonMandatory) {
       return false;
     }
   }
+  global.comments << "DEBUG: here be i 222 " ;
   List<WithContext<Type> > outputCandidate;
   outputCandidate.setSize(nonConvertedExpressions.size);
   ExpressionContext context;
@@ -3870,15 +3874,20 @@ bool Calculator::getVector(
   if (inputOutputStartingContext == nullptr) {
     inputOutputStartingContext = &context;
   }
+  int64_t start = global.getElapsedMilliseconds();
+  global.comments << "DEBUG: timer start. ";
   for (int i = 0; i < nonConvertedExpressions.size; i ++) {
     nonConvertedExpressions[i].checkInitialization();
+    int64_t startLocal=global.getElapsedMilliseconds();
     if (
       !CalculatorConversions::convert<Type>(
         *this, nonConvertedExpressions[i], outputCandidate[i]
       )
     ) {
+      global.comments << "<br>DEBUG: exit: " << global.getElapsedMilliseconds()-start << "ms. ";
       return false;
     }
+    global.comments << "<br>DEBUG: coord: extract:" << global.getElapsedMilliseconds()- startLocal;
     // Expand the context to be the combination of all contexts.
     if (
       !outputCandidate[i].setContextAtLeast(
@@ -3888,6 +3897,7 @@ bool Calculator::getVector(
       return false;
     }
   }
+  global.comments << "DEBUG: non-converted extraction took: " << global.getElapsedMilliseconds()-start << "ms. ";
   output.setSize(outputCandidate.size);
   for (int i = 0; i < outputCandidate.size; i ++) {
     if (

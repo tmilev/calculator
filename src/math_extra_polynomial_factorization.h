@@ -41,6 +41,8 @@ public:
   void operator-=(const PolynomialUnivariateModular& other);
   void operator*=(const PolynomialUnivariateModular& other);
   void operator*=(int other);
+  void operator*=(const LargeInteger& other);
+  void operator/=(const LargeInteger& other);
   std::string toString(FormatExpressions* format = nullptr) const;
   static bool greatestCommonDivisor(
     const PolynomialUnivariateModular& left,
@@ -144,12 +146,29 @@ private:
     const Polynomial<LargeInteger>& inputModProductOfModuliSoFar,
     Polynomial<LargeInteger>& output
   );
+  bool computeGreatestCommonDivisor(
+    Polynomial<LargeInteger>& output,
+    std::stringstream* commentsOnFailure
+  );
+  void rescaleAndReduce(Polynomial<LargeInteger>& input, Polynomial<Rational>& output);
 public:
+  // The left input, rescaled.
   Polynomial<LargeInteger> leftInput;
+  // Same as leftInput but over the rationals.
+  Polynomial<Rational> leftInputRational;
+  // The right input, rescaled.
   Polynomial<LargeInteger> rightInput;
+  // Same as rightInput but over the rationals.
+  Polynomial<Rational> rightInputRational;
   Polynomial<LargeInteger> leftFactorCandidate;
   Polynomial<LargeInteger> rightFactorCandidate;
   Polynomial<LargeInteger> greatestCommonDivisorCandidate;
+  Polynomial<Rational> leftFactorCandidateRational;
+  Polynomial<Rational> rightFactorCandidateRational;
+  Polynomial<Rational> greatestCommonDivisorCandidateRational;
+  LargeInteger leftLeadingCoefficient;
+  LargeInteger rightLeadingCoefficient;
+  LargeInteger leftTimesRightLeadingCoefficients;
   LargeInteger product;
   LargeInteger currentPrime;
   LargeInteger previousProduct;
@@ -159,10 +178,6 @@ public:
   int degreeLargestDivisor;
   void computeOneGreatestCommonDivisor(
     int prime, std::stringstream* commentsOnFailure
-  );
-  bool computeGreatestCommonDivisor(
-    Polynomial<LargeInteger>& output,
-    std::stringstream* commentsOnFailure
   );
   static bool greatestCommonDivisorRational(
     const Polynomial<Rational>& leftInput,

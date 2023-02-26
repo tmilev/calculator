@@ -44,8 +44,8 @@ public:
       divisorN = swapN - quotient * divisorN;
     }
     if (dividend != 1) {
-      return false;
       // d and p were not relatively prime.
+      return false;
     }
     output = dividendX % n;
     if (output < 0) {

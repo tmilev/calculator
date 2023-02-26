@@ -706,7 +706,7 @@ void LargeIntegerUnsigned::dividePositive(
   int currentQuotientDigit = 0;
   int divisorLeadingDigit = *divisor.digits.lastObject();
   int lastRemainderSize = - 1;
-  int numRunsNoDigitImprovement = 0;
+  int numberOfRunsWithoutDigitImprovement = 0;
   LargeIntegerUnsigned remainderBackup;
   int upperlimitNoImprovementRounds = this->squareRootOfCarryOverBound * 2;
   while (remainderOutput.isGreaterThanOrEqualTo(divisor)) {
@@ -749,12 +749,12 @@ void LargeIntegerUnsigned::dividePositive(
       lastRemainderSize == remainderOutput.digits.size &&
       lastRemainderSize != 1
     ) {
-      numRunsNoDigitImprovement ++;
+      numberOfRunsWithoutDigitImprovement ++;
     } else {
-      numRunsNoDigitImprovement = 0;
+      numberOfRunsWithoutDigitImprovement = 0;
     }
     lastRemainderSize = remainderOutput.digits.size;
-    if (numRunsNoDigitImprovement > upperlimitNoImprovementRounds) {
+    if (numberOfRunsWithoutDigitImprovement > upperlimitNoImprovementRounds) {
       global.fatal
       << "Bad division: while dividing "
       << this->toString()
@@ -1696,15 +1696,15 @@ void LargeInteger::operator=(const LargeInteger& x) {
 LargeInteger LargeInteger::operator/(int x) const {
   LargeInteger result;
   LargeIntegerUnsigned remainder;
-  LargeIntegerUnsigned tempX;
-  int absX = x;
+  LargeIntegerUnsigned xShifted;
+  int absoluteValueOfX = x;
   signed char signX = 1;
   if (x < 0) {
     signX = - 1;
-    absX = - absX;
+    absoluteValueOfX = - absoluteValueOfX;
   }
-  tempX.assignShiftedUInt(static_cast<unsigned>(absX), 0);
-  this->value.dividePositive(tempX, result.value, remainder);
+  xShifted.assignShiftedUInt(static_cast<unsigned>(absoluteValueOfX), 0);
+  this->value.dividePositive(xShifted, result.value, remainder);
   result.sign = this->sign * signX;
   return result;
 }
@@ -1726,12 +1726,12 @@ int LargeInteger::operator%(int x) {
   }
   LargeIntegerUnsigned result;
   LargeIntegerUnsigned remainder;
-  LargeIntegerUnsigned tempX;
+  LargeIntegerUnsigned xShifted;
   if (x < 0) {
     x = - x;
   }
-  tempX.assignShiftedUInt(static_cast<unsigned>(x), 0);
-  this->value.dividePositive(tempX, result, remainder);
+  xShifted.assignShiftedUInt(static_cast<unsigned>(x), 0);
+  this->value.dividePositive(xShifted, result, remainder);
   if (remainder.digits.size == 0) {
     return 0;
   } else {
@@ -1769,11 +1769,11 @@ void Rational::raiseToPower(int x) {
     this->invert();
   }
   LargeInteger tempNum = this->getNumerator();
-  LargeIntegerUnsigned oneLI;
-  oneLI.makeOne();
-  MathRoutines::raiseToPower(tempNum.value, x, oneLI);
+  LargeIntegerUnsigned one;
+  one.makeOne();
+  MathRoutines::raiseToPower(tempNum.value, x, one);
   LargeIntegerUnsigned tempDen = this->getDenominator();
-  MathRoutines::raiseToPower(tempDen, x, oneLI);
+  MathRoutines::raiseToPower(tempDen, x, one);
   char sign = (this->isPositive() || x % 2 == 0) ? 1 : - 1;
   this->allocateExtended();
   this->extended->numerator.sign = sign;

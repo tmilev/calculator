@@ -108,11 +108,6 @@ LargeIntegerUnsigned LargeIntegerUnsigned::operator/(unsigned int x) const {
 LargeIntegerUnsigned LargeIntegerUnsigned::operator/(
   const LargeIntegerUnsigned& x
 ) const {
-  global.comments
-  << "<br>DEBUG: divide: "
-  << this->toString()
-  << " by "
-  << x.toString();
   LargeIntegerUnsigned result;
   LargeIntegerUnsigned remainder;
   this->dividePositive(x, result, remainder);

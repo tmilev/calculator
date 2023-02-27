@@ -426,7 +426,6 @@ bool CalculatorConversions::extractPolynomialFromDifference(
   STACK_TRACE(
     "CalculatorConversions::extractPolynomialFromDifferenceOrProduct"
   );
-  global.comments << "<br>DEBUG: diff extraction ran";
   if (
     !input.isListStartingWithAtom(calculator.opMinus()) || input.size() != 3
   ) {
@@ -556,7 +555,8 @@ bool CalculatorConversions::extractPolynomialArgumentsOfOperation(
 ) {
   STACK_TRACE("CalculatorConversions::extractPolynomialArgumentsOfOperation");
   // Please note: the following code holds serious performance traps.
-  // A previous version of this code was running >30 times slower on a particular
+  // A previous version of this code was running >30 times slower on a
+  // particular
   // mid-sized example.
   // Proceed with caution.
   List<Expression> opands;

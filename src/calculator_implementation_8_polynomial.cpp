@@ -858,7 +858,6 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
       calculator, "Failed to extract a list of 2 polynomials. "
     );
   }
-  global.comments << "DEBUG: extraction time: " << global.getElapsedMilliseconds()- start << " ms. ";
   Polynomial<Rational>& left = polynomials[0];
   Polynomial<Rational>& right = polynomials[1];
   if (tryQuickly) {
@@ -908,7 +907,6 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(
   ) {
     return false;
   }
-  global.comments << "<br>DEBUG: duration: " << global.getElapsedMilliseconds()-start;
   return output.assignValueWithContext(calculator, outputPolynomial, context);
 }
 

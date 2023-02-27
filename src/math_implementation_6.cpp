@@ -1756,9 +1756,6 @@ greatestCommonDivisorRational(
     return false;
   }
   computer.millisecondsTotal = global.getElapsedMilliseconds()-millisecondsStart;
-  global.comments << "DEBUG: Total ms: " << computer.millisecondsTotal << ", gcd millis: "
-  << computer.millisecondsGreatestCommonDivisorDense;
-
   output = outputInteger;
   output.scaleNormalizeLeadingMonomial(nullptr);
   return true;
@@ -1847,17 +1844,12 @@ rightFactorModular*= this->leftTimesRightLeadingCoefficients;
   this->previousProduct = this->product;
   this->currentPrime = LargeIntegerUnsigned(prime);
   this->product *= this->currentPrime;
-  static int count = 0;
-  count ++;
   bool mustBeTrue =
   MathRoutines::invertXModN(
     this->previousProduct,
     this->currentPrime,
     this->inverseOfPreviousProductModCurrentPrime
   );
-  if (count > 50) {
-    global.fatal << "DEBUG: Crashing in case" << global.fatal;
-  }
   this->oneModCurrentPrimeZeroModPreviousProduct =
   this->inverseOfPreviousProductModCurrentPrime * this->previousProduct;
   if (!mustBeTrue) {

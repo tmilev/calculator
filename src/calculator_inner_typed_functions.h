@@ -415,7 +415,7 @@ bool CalculatorConversions::getPolynomial(
 }
 
 template <class Coefficient>
-bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
+bool CalculatorConversions::extractPolynomialFromDifference(
   Calculator& calculator,
   const Expression& input,
   WithContext<Polynomial<Coefficient> >& output,
@@ -424,29 +424,155 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
   bool acceptNonPositiveOrNonIntegerPowers
 ) {
   STACK_TRACE(
-    "CalculatorConversions::extractPolynomialSumDifferenceOrProduct"
+    "CalculatorConversions::extractPolynomialFromDifferenceOrProduct"
   );
+  global.comments << "<br>DEBUG: diff extraction ran";
   if (
-    !input.isListStartingWithAtom(calculator.opTimes()) &&
-    !input.isListStartingWithAtom(calculator.opPlus()) &&
-    !input.isListStartingWithAtom(calculator.opMinus())
+    !input.isListStartingWithAtom(calculator.opMinus()) || input.size() != 3
   ) {
     global.fatal
-    << "Unexpected input for extractPolynomialSumDifferenceOrProduct. "
+    << "Unexpected input for extractPolynomialFromDifference. "
     << global.fatal;
   }
-  WithContext<Polynomial<Coefficient> > converted;
-  if (input.isListStartingWithAtom(calculator.opTimes())) {
-    output.content.makeOne();
-  } else {
-    output.content.makeZero();
+  WithContext<Polynomial<Coefficient> > right;
+  if (
+    !CalculatorConversions::functionPolynomial<Coefficient>(
+      calculator,
+      input[1],
+      output,
+      maximumVariables,
+      maximumPowerToExpand,
+      acceptNonPositiveOrNonIntegerPowers
+    ) ||
+    !CalculatorConversions::functionPolynomial<Coefficient>(
+      calculator,
+      input[2],
+      right,
+      maximumVariables,
+      maximumPowerToExpand,
+      acceptNonPositiveOrNonIntegerPowers
+    )
+  ) {
+    return
+    calculator
+    << "<hr>Failed to extract polynomials from "
+    << input.toString()
+    << ". ";
   }
-  for (int i = 1; i < input.size(); i ++) {
+  if (!output.mergeContexts(output, output, &calculator.comments)) {
+    return calculator << "Failed to merge contexts in polynomial conversion. ";
+  }
+  if (!output.mergeContexts(output, right, &calculator.comments)) {
+    return calculator << "Failed to merge contexts in polynomial conversion. ";
+  }
+  if (
+    maximumVariables >= 0 &&
+    output.context.numberOfVariables() > maximumVariables
+  ) {
+    return
+    calculator
+    << "Maximum number of variables exceeded: "
+    << maximumVariables
+    << ". ";
+  }
+  output.content -= right.content;
+  return true;
+}
+
+template <class Coefficient>
+bool CalculatorConversions::extractPolynomialFromProduct(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<Coefficient> >& output,
+  int maximumVariables,
+  int maximumPowerToExpand,
+  bool acceptNonPositiveOrNonIntegerPowers
+) {
+  STACK_TRACE("CalculatorConversions::extractPolynomialFromSum");
+  List<Polynomial<Coefficient> > multiplicands;
+  if (
+    !CalculatorConversions::extractPolynomialArgumentsOfOperation(
+      calculator,
+      input,
+      calculator.opTimes(),
+      multiplicands,
+      output.context,
+      maximumVariables,
+      maximumPowerToExpand,
+      acceptNonPositiveOrNonIntegerPowers
+    )
+  ) {
+    return false;
+  }
+  output.content.makeOne();
+  for (Polynomial<Coefficient>& multiplicand : multiplicands) {
+    output.content *= multiplicand;
+  }
+  return true;
+}
+
+template <class Coefficient>
+bool CalculatorConversions::extractPolynomialFromSum(
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Polynomial<Coefficient> >& output,
+  int maximumVariables,
+  int maximumPowerToExpand,
+  bool acceptNonPositiveOrNonIntegerPowers
+) {
+  STACK_TRACE("CalculatorConversions::extractPolynomialFromSum");
+  List<Polynomial<Coefficient> > summands;
+  if (
+    !CalculatorConversions::extractPolynomialArgumentsOfOperation(
+      calculator,
+      input,
+      calculator.opPlus(),
+      summands,
+      output.context,
+      maximumVariables,
+      maximumPowerToExpand,
+      acceptNonPositiveOrNonIntegerPowers
+    )
+  ) {
+    return false;
+  }
+  output.content.makeZero();
+  for (Polynomial<Coefficient>& summand : summands) {
+    output.content += summand;
+  }
+  return true;
+}
+
+template <class Coefficient>
+bool CalculatorConversions::extractPolynomialArgumentsOfOperation(
+  Calculator& calculator,
+  const Expression& input,
+  int operation,
+  List<Polynomial<Coefficient> >& output,
+  ExpressionContext& outputContext,
+  int maximumVariables,
+  int maximumPowerToExpand,
+  int acceptNonPositiveOrNonIntegerPowers
+) {
+  STACK_TRACE("CalculatorConversions::extractPolynomialArgumentsOfOperation");
+  // Please note: the following code holds serious performance traps.
+  // A previous version of this code was running >30 times slower on a particular
+  // mid-sized example.
+  // Proceed with caution.
+  List<Expression> opands;
+  // Performance alert: extract summands as a flat list first, without any
+  // math operations.
+  calculator.accumulateOpandsReturnTrueIfOrderIsNonCanonical(
+    input, opands, operation
+  );
+  WithContext<Polynomial<Coefficient> > next;
+  List<WithContext<Polynomial<Coefficient> > > converted;
+  for (Expression& opand : opands) {
     if (
       !CalculatorConversions::functionPolynomial<Coefficient>(
         calculator,
-        input[i],
-        converted,
+        opand,
+        next,
         maximumVariables,
         maximumPowerToExpand,
         acceptNonPositiveOrNonIntegerPowers
@@ -455,44 +581,36 @@ bool CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
       return
       calculator
       << "<hr>Failed to extract polynomial from "
-      << input[i].toString()
-      << ". ";
-    }
-    if (
-      !output.mergeContexts(output, converted, &calculator.comments)
-    ) {
-      return
-      calculator
-      << "Failed to merge contexts in polynomial conversion. ";
-    }
-    if (
-      maximumVariables >= 0 &&
-      output.context.numberOfVariables() > maximumVariables
-    ) {
-      return
-      calculator
-      << "Maximum number of variables exceeded: "
-      << maximumVariables
-      << ". ";
-    }
-    if (input.isListStartingWithAtom(calculator.opPlus())) {
-      output.content += converted.content;
-    } else if (input.isListStartingWithAtom(calculator.opMinus())) {
-      if (i == 1 && input.size() == 2) {
-        output.content -= converted.content;
-      } else if (i == 1 && input.size() > 2) {
-        output.content += converted.content;
-      } else {
-        output.content -= converted.content;
-      }
-    } else if (input.isListStartingWithAtom(calculator.opTimes())) {
-      output.content *= converted.content;
-    } else {
-      global.fatal
-      << "While extracting input polynomial, got unexpected input type: "
       << input.toString()
-      << global.fatal;
+      << ". ";
     }
+    converted.addOnTop(next);
+  }
+  outputContext.initialize(calculator);
+  // Performance alert: merge contexts first, before summing.
+  for (WithContext<Polynomial<Coefficient> >& opand : converted) {
+    if (!outputContext.mergeContexts(opand.context, outputContext)) {
+      return calculator << "Failed to merge contexts. ";
+    }
+    // Performance alert: do not convert the polynomials before all contexts
+    // are merged
+  }
+  if (
+    maximumVariables >= 0 &&
+    outputContext.numberOfVariables() > maximumVariables
+  ) {
+    return
+    calculator
+    << "Maximum number of variables exceeded: "
+    << maximumVariables
+    << ". ";
+  }
+  output.clear();
+  for (WithContext<Polynomial<Coefficient> >& opand : converted) {
+    if (!opand.extendContext(outputContext, &calculator.comments)) {
+      return false;
+    }
+    output.addOnTop(opand.content);
   }
   return true;
 }
@@ -610,14 +728,11 @@ bool CalculatorConversions::functionPolynomial(
   if (noConversionDesired) {
     return false;
   }
-  WithContext<Polynomial<Coefficient> > converted, candidate;
-  if (
-    input.isListStartingWithAtom(calculator.opTimes()) ||
-    input.isListStartingWithAtom(calculator.opPlus()) ||
-    input.isListStartingWithAtom(calculator.opMinus())
-  ) {
+  WithContext<Polynomial<Coefficient> > converted;
+  WithContext<Polynomial<Coefficient> > candidate;
+  if (input.startsWith(calculator.opMinus(), 3)) {
     return
-    CalculatorConversions::extractPolynomialFromSumDifferenceOrProduct(
+    CalculatorConversions::extractPolynomialFromDifference(
       calculator,
       input,
       output,
@@ -625,8 +740,27 @@ bool CalculatorConversions::functionPolynomial(
       maximumPowerToExpand,
       acceptNonPositiveOrNonIntegerPowers
     );
-  }
-  if (input.startsWith(calculator.opPower(), 3)) {
+  } else if (input.startsWith(calculator.opTimes())) {
+    return
+    CalculatorConversions::extractPolynomialFromProduct(
+      calculator,
+      input,
+      output,
+      maximumVariables,
+      maximumPowerToExpand,
+      acceptNonPositiveOrNonIntegerPowers
+    );
+  } else if (input.startsWith(calculator.opPlus())) {
+    return
+    CalculatorConversions::extractPolynomialFromSum(
+      calculator,
+      input,
+      output,
+      maximumVariables,
+      maximumPowerToExpand,
+      acceptNonPositiveOrNonIntegerPowers
+    );
+  } else if (input.startsWith(calculator.opPower(), 3)) {
     return
     CalculatorConversions::extractPolynomialFromPower(
       calculator,

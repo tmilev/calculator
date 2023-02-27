@@ -6363,7 +6363,7 @@ bool Expression::splitProduct(
   this->checkInitialization();
   List<Expression> multiplicandsLeft;
   List<Expression> multiplicandsRight;
-  this->owner->appendOpandsReturnTrueIfOrderNonCanonical(
+  this->owner->accumulateOpandsReturnTrueIfOrderIsNonCanonical(
     *this, multiplicandsLeft, this->owner->opTimes()
   );
   if (multiplicandsLeft.size <= numDesiredMultiplicandsLeft) {

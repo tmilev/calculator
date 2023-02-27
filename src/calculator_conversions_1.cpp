@@ -425,15 +425,19 @@ bool CalculatorConversions::convert<Polynomial<Rational> >(
   WithContext<Polynomial<Rational> >& output
 ) {
   int64_t startTime = global.getElapsedMilliseconds();
-
-bool result=  CalculatorConversions::functionPolynomial(
+  bool result =
+  CalculatorConversions::functionPolynomial(
     calculator, input, output, - 1, - 1, false
   );
-  int64_t ellapsedTime = global.getElapsedMilliseconds()- startTime;
-  if (ellapsedTime>100){
-    calculator << "<b style='color:red'>Warning:</b> extraction of rational polynomial took too long: " << ellapsedTime << " ms.<br>";
+  int64_t ellapsedTime = global.getElapsedMilliseconds() - startTime;
+  if (ellapsedTime > 100) {
+    calculator
+    <<
+    "<b style='color:red'>Warning:</b> extraction of rational polynomial took too long: "
+    << ellapsedTime
+    << " ms.<br>";
   }
-    return result;
+  return result;
 }
 
 template < >
@@ -544,7 +548,8 @@ bool CalculatorConversions::convert(
   const Expression& input,
   WithContext<Polynomial<AlgebraicNumber> >& output
 ) {
-return  CalculatorConversions::functionPolynomial(
+  return
+  CalculatorConversions::functionPolynomial(
     calculator, input, output, - 1, - 1, false
   );
 }

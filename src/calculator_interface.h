@@ -2880,22 +2880,33 @@ public:
   int opInterpretProblemGiveUp() {
     return this->operations.getIndexNoFail("ProblemGiveUp");
   }
-  bool appendOpandsReturnTrueIfOrderNonCanonical(
+  // Accumulates a flat list (non-associated) of all arguments of a single
+  // operation.
+  // Examples:
+  // 1) operation = +, input = (a+b)+c or a+(b+c)
+  //    output = (a,b,c).
+  // 2) operation = *, input = (a*b)+c
+  //    output = (a*b+c)
+  // 3) operation = *, input = a*(b+c)
+  //    output = (a,b+c)
+  // Will return true if the order was non-canonical. The canonical order is:
+  // a+(b+(c+d)).
+  bool accumulateOpandsReturnTrueIfOrderIsNonCanonical(
     const Expression& input, List<Expression>& output, int operation
   );
-  bool appendMultiplicandsReturnTrueIfOrderNonCanonical(
-    Expression& expression, List<Expression>& output
-  ) {
-    return
-    this->appendOpandsReturnTrueIfOrderNonCanonical(
-      expression, output, this->opTimes()
-    );
-  }
-  bool appendSummandsReturnTrueIfOrderNonCanonical(
+  bool accumulateMultiplicands(
     const Expression& expression, List<Expression>& output
   ) {
     return
-    this->appendOpandsReturnTrueIfOrderNonCanonical(
+    this->accumulateOpandsReturnTrueIfOrderIsNonCanonical(
+      expression, output, this->opTimes()
+    );
+  }
+  bool accumulateSummands(
+    const Expression& expression, List<Expression>& output
+  ) {
+    return
+    this->accumulateOpandsReturnTrueIfOrderIsNonCanonical(
       expression, output, this->opPlus()
     );
   }
@@ -3496,13 +3507,42 @@ public:
 class CalculatorConversions {
 private:
   template <class Coefficient>
-  static bool extractPolynomialFromSumDifferenceOrProduct(
+  static bool extractPolynomialFromDifference(
     Calculator& calculator,
     const Expression& input,
     WithContext<Polynomial<Coefficient> >& output,
     int maximumVariables,
     int maximumPowerToExpand,
     bool acceptNonPositiveOrNonIntegerPowers
+  );
+  template <class Coefficient>
+  static bool extractPolynomialFromProduct(
+    Calculator& calculator,
+    const Expression& input,
+    WithContext<Polynomial<Coefficient> >& output,
+    int maximumVariables,
+    int maximumPowerToExpand,
+    bool acceptNonPositiveOrNonIntegerPowers
+  );
+  template <class Coefficient>
+  static bool extractPolynomialFromSum(
+    Calculator& calculator,
+    const Expression& input,
+    WithContext<Polynomial<Coefficient> >& output,
+    int maximumVariables,
+    int maximumPowerToExpand,
+    bool acceptNonPositiveOrNonIntegerPowers
+  );
+  template <class Coefficient>
+  static bool extractPolynomialArgumentsOfOperation(
+    Calculator& calculator,
+    const Expression& input,
+    int operation,
+    List<Polynomial<Coefficient> >& output,
+    ExpressionContext& outputContext,
+    int maximumVariables,
+    int maximumPowerToExpand,
+    int acceptNonPositiveOrNonIntegerPowers
   );
   template <class Coefficient>
   static bool extractPolynomialFromPower(
@@ -3870,10 +3910,8 @@ bool Calculator::getVector(
   if (inputOutputStartingContext == nullptr) {
     inputOutputStartingContext = &context;
   }
-  int64_t start = global.getElapsedMilliseconds();
   for (int i = 0; i < nonConvertedExpressions.size; i ++) {
     nonConvertedExpressions[i].checkInitialization();
-    int64_t startLocal=global.getElapsedMilliseconds();
     if (
       !CalculatorConversions::convert<Type>(
         *this, nonConvertedExpressions[i], outputCandidate[i]

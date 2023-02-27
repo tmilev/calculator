@@ -150,7 +150,9 @@ private:
     Polynomial<LargeInteger>& output,
     std::stringstream* commentsOnFailure
   );
-  void rescaleAndReduce(Polynomial<LargeInteger>& input, Polynomial<Rational>& output);
+  void rescaleAndReduce(
+    Polynomial<LargeInteger>& input, Polynomial<Rational>& output
+  );
 public:
   // The left input, rescaled.
   Polynomial<LargeInteger> leftInput;
@@ -174,8 +176,8 @@ public:
   LargeInteger previousProduct;
   LargeInteger inverseOfPreviousProductModCurrentPrime;
   LargeInteger oneModCurrentPrimeZeroModPreviousProduct;
-  int64_t millisecondsGreatestCommonDivisorDense= 0;
-  int64_t millisecondsTotal=0;
+  int64_t millisecondsGreatestCommonDivisorDense = 0;
+  int64_t millisecondsTotal = 0;
   bool flagFound;
   int degreeLargestDivisor;
   void computeOneGreatestCommonDivisor(

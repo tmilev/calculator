@@ -847,7 +847,6 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
   );
   Vector<Polynomial<Rational> > polynomials;
   ExpressionContext context(calculator);
-  int64_t start = global.getElapsedMilliseconds();
   if (
     !calculator.getVectorFromFunctionArguments(
       input, polynomials, &context, 2
@@ -898,7 +897,6 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(
   ) {
     return calculator << "Only implemented for 1 variable.";
   }
-  int64_t start = global.getElapsedMilliseconds();
   if (
     !PolynomialRationalGreatestCommonDivisorComputer::
     greatestCommonDivisorRational(

@@ -1265,7 +1265,7 @@ bool CalculatorFunctions::collectOpands(
     return false;
   }
   List<Expression> opandList;
-  calculator.appendOpandsReturnTrueIfOrderNonCanonical(
+  calculator.accumulateOpandsReturnTrueIfOrderIsNonCanonical(
     input[2], opandList, input[1].data
   );
   return output.makeSequence(calculator, &opandList);
@@ -1274,12 +1274,12 @@ bool CalculatorFunctions::collectOpands(
 bool CalculatorFunctions::collectMultiplicands(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::outerCollectSummands");
+  STACK_TRACE("CalculatorFunctions::collectMultiplicands");
   if (input.size() != 2) {
     return false;
   }
   List<Expression> multiplicands;
-  calculator.appendOpandsReturnTrueIfOrderNonCanonical(
+  calculator.accumulateOpandsReturnTrueIfOrderIsNonCanonical(
     input[1], multiplicands, calculator.opTimes()
   );
   return output.makeSequence(calculator, &multiplicands);
@@ -1293,9 +1293,7 @@ bool CalculatorFunctions::collectSummands(
     return false;
   }
   List<Expression> summands;
-  calculator.appendSummandsReturnTrueIfOrderNonCanonical(
-    input[1], summands
-  );
+  calculator.accumulateSummands(input[1], summands);
   return output.makeSequence(calculator, &summands);
 }
 

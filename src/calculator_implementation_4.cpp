@@ -336,32 +336,32 @@ bool Expression::hasBoundVariables() const {
   return false;
 }
 
-bool Calculator::appendOpandsReturnTrueIfOrderNonCanonical(
+bool Calculator::accumulateOpandsReturnTrueIfOrderIsNonCanonical(
   const Expression& input, List<Expression>& output, int operation
 ) {
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (this->recursionDepth > this->maximumRecursionDepth) {
     return false;
   }
-  bool result = false;
   if (!input.isListStartingWithAtom(operation)) {
     output.addOnTop(input);
-  } else {
-    for (int i = 1; i < input.size(); i ++) {
-      if (
-        this->appendOpandsReturnTrueIfOrderNonCanonical(
-          input[i], output, operation
-        )
-      ) {
-        result = true;
-      }
-      if (
-        i < input.size() - 1 &&
-        input[i].isListStartingWithAtom(operation) &&
-        input[i].size() > 2
-      ) {
-        result = true;
-      }
+    return false;
+  }
+  bool result = false;
+  for (int i = 1; i < input.size(); i ++) {
+    if (
+      this->accumulateOpandsReturnTrueIfOrderIsNonCanonical(
+        input[i], output, operation
+      )
+    ) {
+      result = true;
+    }
+    if (
+      i < input.size() - 1 &&
+      input[i].isListStartingWithAtom(operation) &&
+      input[i].size() > 2
+    ) {
+      result = true;
     }
   }
   return result;
@@ -1000,8 +1000,7 @@ bool Calculator::functionCollectSummandsSeparatelyTrueIfOrderNonCanonical(
   STACK_TRACE(
     "Calculator::functionCollectSummandsSeparatelyTrueIfOrderNonCanonical"
   );
-  bool result =
-  calculator.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
+  bool result = calculator.accumulateSummands(input, summands);
   for (int i = 0; i < summands.size; i ++) {
     Calculator::functionCollectOneSummand(
       calculator, summands[i], outputMonomials, outputCoefficients
@@ -1017,7 +1016,7 @@ bool Calculator::functionCollectSummandsCombine(
 ) {
   STACK_TRACE("Calculator::functionCollectSummandsCombine");
   List<Expression> summands;
-  calculator.appendSummandsReturnTrueIfOrderNonCanonical(input, summands);
+  calculator.accumulateSummands(input, summands);
   outputSum.makeZero();
   LinearCombination<Expression, AlgebraicNumber> sumOverAlgebraicNumbers;
   LinearCombination<Expression, double> sumOverDoubles;

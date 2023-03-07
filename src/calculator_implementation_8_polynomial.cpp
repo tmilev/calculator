@@ -843,7 +843,8 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
   bool tryQuickly
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsPolynomial::greatestCommonDivisorOrLeastCommonMultiplePolynomialRational"
+    "CalculatorFunctionsPolynomial::"
+    "greatestCommonDivisorOrLeastCommonMultiplePolynomialRational"
   );
   Vector<Polynomial<Rational> > polynomials;
   ExpressionContext context(calculator);

@@ -150,9 +150,6 @@ private:
     Polynomial<LargeInteger>& output,
     std::stringstream* commentsOnFailure
   );
-  void rescaleAndReduce(
-    Polynomial<LargeInteger>& input, Polynomial<Rational>& output
-  );
 public:
   // The left input, rescaled.
   Polynomial<LargeInteger> leftInput;
@@ -162,25 +159,24 @@ public:
   Polynomial<LargeInteger> rightInput;
   // Same as rightInput but over the rationals.
   Polynomial<Rational> rightInputRational;
+  Polynomial<LargeInteger> leftInputExtraLeadingCoefficient;
+  Polynomial<LargeInteger> rightInputExtraLeadingCoefficient;
   Polynomial<LargeInteger> leftFactorCandidate;
   Polynomial<LargeInteger> rightFactorCandidate;
   Polynomial<LargeInteger> greatestCommonDivisorCandidate;
-  Polynomial<Rational> leftFactorCandidateRational;
-  Polynomial<Rational> rightFactorCandidateRational;
-  Polynomial<Rational> greatestCommonDivisorCandidateRational;
   LargeInteger leftLeadingCoefficient;
   LargeInteger rightLeadingCoefficient;
   LargeInteger leftTimesRightLeadingCoefficients;
   LargeInteger product;
+  LargeInteger halfProduct;
   LargeInteger currentPrime;
   LargeInteger previousProduct;
   LargeInteger inverseOfPreviousProductModCurrentPrime;
   LargeInteger oneModCurrentPrimeZeroModPreviousProduct;
   int64_t millisecondsGreatestCommonDivisorDense = 0;
   int64_t millisecondsTotal = 0;
-  bool flagFound;
   int degreeLargestDivisor;
-  void computeOneGreatestCommonDivisor(
+  bool computeOneGreatestCommonDivisor(
     int prime, std::stringstream* commentsOnFailure
   );
   static bool greatestCommonDivisorRational(
@@ -189,6 +185,8 @@ public:
     Polynomial<Rational>& output,
     std::stringstream* commentsOnFailure
   );
+  void initializeComputation();
+  void resetComputation();
   PolynomialRationalGreatestCommonDivisorComputer();
 };
 

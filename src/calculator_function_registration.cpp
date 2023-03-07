@@ -1588,7 +1588,8 @@ void Calculator::initializeFunctionsStandard() {
     "and does not make attempts to run quicker by "
     "sidestepping the Euclidean algorithm over the rationals.",
     "GCDPolySlow{}(x^3-1, x^2-1);\n"
-    "GCDPoly(x^3-1, x^2-1);\n"
+    "GCDPoly(x^9-31x -1, x^11-31x-1);\n"
+    "GCDPoly(x^9-31*37x -31, x^11-31*37x-31);\n"
     "a="
     "151782 x^{70}-1383143 x^{69}+131971 x^{68}+14514 x^{67}+14750 x^{66}\n"
     "-14042 x^{65}-35786 x^{64}+17375 x^{63}-3422 x^{61}-3567 x^{60}\n"

@@ -2,7 +2,7 @@
 //
 // Documentation of the equation editor can be found in:
 //
-// https://calculator-algebra.org:8166/calculator_html/test_equation_editor.html
+// https://calculator-algebra.org:8166/calculator_html/equation_editor/test_equation_editor.html
 //
 // The source code of the editor can be found in:
 //
@@ -3571,7 +3571,9 @@ class EquationEditor {
 
   /**
    * Carries out the actual browser copy operation and bounced back the copied
-   * string. @return {string}
+   * string. 
+   * 
+   * @return {string}
    */
   doCopy(
       /** @type {string} */
@@ -7974,11 +7976,9 @@ class MathNode {
           [leftWhiteSpace, fraction, rightWhiteSpace]);
       childIndexToFocus = 1;
     } else if (
-      split[0] === null &&
-      previous !== null &&
-      previous.type.type !== knownTypes.rightDelimiter.type &&
-      previous.type.type !== knownTypes.leftDelimiter.type
-    ) {
+        split[0] === null && previous !== null &&
+        previous.type.type !== knownTypes.rightDelimiter.type &&
+        previous.type.type !== knownTypes.leftDelimiter.type) {
       let indexPrevious = previous.indexInParent;
       let numerator =
           mathNodeFactory.horizontalMath(this.equationEditor, previous);
@@ -7987,12 +7987,12 @@ class MathNode {
       fraction =
           mathNodeFactory.fraction(this.equationEditor, numerator, split[1]);
       oldParent.replaceChildRangeWithChildren(
-        indexPrevious, indexPrevious + 1,
-        [leftWhiteSpace, fraction, rightWhiteSpace]);
+          indexPrevious, indexPrevious + 1,
+          [leftWhiteSpace, fraction, rightWhiteSpace]);
       if (oldParent.type.type === knownTypes.horizontalMath.type) {
         oldParent.normalizeHorizontalMath();
       }
-      childIndexToFocus = 1;      
+      childIndexToFocus = 1;
     } else if (
         split[1] === null && next !== null &&
         next.type.type === knownTypes.leftDelimiter.type) {

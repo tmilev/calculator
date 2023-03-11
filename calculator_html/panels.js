@@ -98,7 +98,6 @@ function toggleHeightForTimeout(currentPanel) {
   }
 }
 
-
 class PanelExpandableData {
   constructor(
     /** @type {string} */
@@ -116,6 +115,8 @@ class PanelExpandableData {
     label,
     /** @type{boolean} */
     allowFullExpand,
+    /** @type{boolean|undefined} */
+    createCopyButton
   ) {
     this.content = content;
     this.container = container;
@@ -132,6 +133,10 @@ class PanelExpandableData {
     if (this.allowFullExpand === undefined) {
       this.allowFullExpand = false;
     }
+    this.createCopyButton = false;
+    if (createCopyButton !== undefined) {
+      this.createCopyButton = createCopyButton;
+    }
   }
 }
 
@@ -140,10 +145,11 @@ class PanelExpandable {
     /** @type{HtmlElement|string} */
     container,
   ) {
-    this.originalHeight = "0px";
-    this.originalWidth = "0px";
+    this.originalHeight = 0;
+    this.originalWidth = 0;
     this.collapsed = true;
     this.containerId = "";
+    /** @type{HTMLElement} */
     this.container = container;
     /** @type{HtmlElement|null} */
     this.panelContent = null;
@@ -155,6 +161,11 @@ class PanelExpandable {
     this.button = null;
     /** @type{HtmlElement|null} */
     this.buttonFullExpand = null;
+    /** @type{HtmlButtonElement|null} */
+    this.buttonCopy = null;
+    this.contentCopyButton = "";
+    /** @type{HtmlElement|null} */
+    this.spanContainerButtons = null;
     /** @type{boolean} */
     this.fullyExpanded = false;
     if (typeof container === "string") {
@@ -171,8 +182,8 @@ class PanelExpandable {
       this.panelContent.style.maxWidth = "0px";
     } else {
       if (!this.fullyExpanded) {
-        this.panelContent.style.maxHeight = `${this.originalHeight + 45}`;
-        this.panelContent.style.maxWidth = `${this.originalWidth + 35}`;
+        this.panelContent.style.maxHeight = `${this.originalHeight + 45}px`;
+        this.panelContent.style.maxWidth = `${this.originalWidth + 35}px`;
       } else {
         this.panelContent.style.maxHeight = "";
         this.panelContent.style.maxWidth = "";
@@ -216,8 +227,8 @@ class PanelExpandable {
     if (allowFullExpand === null || allowFullExpand === undefined) {
       allowFullExpand = false;
     }
-    let spanContainer = document.createElement("span");
     this.panelLabel = document.createElement("span");
+    this.spanContainerButtons = document.createElement("span");    
     this.button = document.createElement("button");
     this.button.className = "buttonProgress";
     this.button.classList.add("accordionLikeIndividual");
@@ -228,7 +239,7 @@ class PanelExpandable {
     this.button.appendChild(this.panelLabel);
     this.expandedMark = document.createElement("span");
     this.button.appendChild(this.expandedMark);
-    spanContainer.appendChild(this.button);
+    this.spanContainerButtons.appendChild(this.button);
     if (allowFullExpand) {
       this.buttonFullExpand = document.createElement("button");
       // Character looks like four corners of a screen.
@@ -238,14 +249,46 @@ class PanelExpandable {
         this.toggleExpand();
       })
       this.buttonFullExpand.className = "buttonProgress";
-      spanContainer.appendChild(this.buttonFullExpand);
+      this.spanContainerButtons.appendChild(this.buttonFullExpand);
     }
     this.panelContent = document.createElement("div");
     this.panelContent.className = "PanelExpandable";
-    spanContainer.appendChild(this.panelContent);
     this.container.textContent = "";
-    this.container.appendChild(spanContainer);
+    this.container.appendChild(this.spanContainerButtons);
+    this.container.appendChild(this.panelContent);
+    this.container.style.transition = "all 1s";
     this.setCollapsed(startsCollapsed);
+  }
+
+  addCopyButton() {
+    if (this.panelContent === null || this.buttonFullExpand === null) {
+      return;
+    }
+    /** @type{string} */
+    let textContent = this.panelContent.textContent;
+    if (!textContent.startsWith("\\(") || !textContent.endsWith("\\)")) {
+      return;
+    }
+    this.contentCopyButton = textContent.substring(2, textContent.length - 2);
+    this.buttonCopy = document.createElement("button");
+    this.buttonCopy.innerHTML = "<tiny>&#x1F4CB;</tiny>";
+    this.buttonCopy.className = "buttonProgress";
+    this.buttonCopy.addEventListener("click", () => {
+      this.doCopy();
+    });
+    this.spanContainerButtons.appendChild(this.buttonCopy);    
+  }
+
+  doCopy() {
+    if (this.contentCopyButton === "") {
+      return;
+    }
+    navigator.clipboard.writeText(this.contentCopyButton);
+    /** @type{HTMLElement} */
+    this.container.style.backgroundColor = "lightgreen";
+    setTimeout(() => {
+      this.container.style.backgroundColor = "";
+    }, 1000);
   }
 
   setCollapsed(/** @type{boolean} */ newValue) {
@@ -290,6 +333,7 @@ function makePanelFromData(
     inputPanel.initialize(data.startHidden, data.allowFullExpand);
     inputPanel.setPanelContent(data.content);
     inputPanel.setPanelLabel(data.label);
+    inputPanel.addCopyButton();
     return inputPanel;
   } else {
     let element = data.container;

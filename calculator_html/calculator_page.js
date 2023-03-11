@@ -705,6 +705,7 @@ class Calculator {
           150,
           false,
           "",
+          true, 
           true,
         ));
       }
@@ -715,6 +716,7 @@ class Calculator {
           150,
           false,
           "",
+          true,
           true,
         ));
       }
@@ -764,7 +766,7 @@ class Calculator {
     );
     this.flagTypeset = true;
   }
-
+  
   resizePanel(
     /** @type{equationEditor.EquationEditor} */
     editor,
@@ -853,8 +855,8 @@ class Calculator {
       progressReportTimer.innerHTML = "";
       this.writeResultAndUpdateElement();
     } catch (e) {
-      inputHtml = input + "<br>" + e;
-      console.log("Error processing calculator output: " + e);
+      let inputHtml = input + "<br>" + e;
+      console.log("Error processing calculator output: " + inputHtml);
     }
     this.afterWriteOutput();
   }

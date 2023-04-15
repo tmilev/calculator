@@ -7659,6 +7659,18 @@ bool CalculatorFunctionsPlot::plot2D(
   return output.assignValue(calculator, plot);
 }
 
+bool CalculatorFunctionsPlot::plotParametricPoint(
+  Calculator& calculator, const Expression& input, Expression& output
+
+){
+  STACK_TRACE("CalclatorFunctionsPlot::plotParametricPoint");
+  if (input.size() != 3){
+    return calculator << "Exactly two arguments required: your input: " << input << ". ";
+  }
+  PlotObject plotObject;
+  return false;
+}
+
 bool CalculatorFunctionsPlot::plotPoint(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

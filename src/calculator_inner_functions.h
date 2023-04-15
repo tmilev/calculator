@@ -228,6 +228,9 @@ public:
   static bool plot2DWithBars(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool plotParametricPoint(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool makeJavascriptExpression(
     Calculator& calculator, const Expression& input, Expression& output
   );

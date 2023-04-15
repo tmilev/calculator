@@ -799,7 +799,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "ConvertPolynomialModularToPolynomialRational",
     CalculatorFunctions::convertPolynomialModularToPolynomialRational,
     "",
-    "Converts polynomial  ",
+    "Converts a modular polynomial to a rational one. ",
     "A = 100x-55;\n"
     "B = PolynomialModP(A, 101);\n"
     "ConvertPolynomialModularToPolynomialRational B",
@@ -821,9 +821,9 @@ void Calculator::initializeFunctionsScientificBasic() {
     "The map works as follows. "
     "Start with a given value of the complex parameter C. "
     "The value of the parameter is given by the x,y-coordinate of "
-    "the plotting surface."
+    "the plotting surface. "
     "Now, iterate the map: f(...f(C)). "
-    "If the point escapes to infinity, color the point with a color"
+    "If the point escapes to infinity, color the point with a color "
     "that matches the escape speed. "
     "Else, color the point black. "
     "You are not limited to the function z^2+C only. "
@@ -843,15 +843,28 @@ void Calculator::initializeFunctionsScientificBasic() {
     "The first argument is the map we are iterating. "
     "The remaining parameters are complex parameters of the formula. "
     "The complex parameters can be adjusted dynamically using the "
-    "drag and drop."
+    "mouse. "
     "To compute the plot: we start with the x,y-coordinate of "
     "the plotting surface and the number x+iy. "
     "Now, iterate the map: f(...f(x+iy)). "
-    "If the point escapes to infinity, color the point with a color"
+    "If the point escapes to infinity, color the point with a color "
     "that matches the escape speed. "
     "Else, color the point black. "
     "You are not limited to the function z^2+C only. "
     "Feel free to try other functions as well.",
+    "PlotJuliaSet( z^2+0.7i+C, C=0);\n"
+    "PlotJuliaSet(1/(b)(z^2+z+1/z+1/z^2), b=3);",
+    "CalculatorFunctionsComplexDynamics::plotJuliaSet",
+    "PlotJuliaSet",
+    innerStandard
+  );
+
+   this->addOperationHandler(
+    "PlotParametricPoint",
+    CalculatorFunctionsPlot::plotParametricPoint,
+    "",
+    "Plots a point on a graph. "
+    "",
     "PlotJuliaSet( z^2+0.7i+C, C=0);\n"
     "PlotJuliaSet(1/(b)(z^2+z+1/z+1/z^2), b=3);",
     "CalculatorFunctionsComplexDynamics::plotJuliaSet",

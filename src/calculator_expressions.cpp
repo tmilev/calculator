@@ -2247,11 +2247,10 @@ bool Expression::isIntegerFittingInInt(int* whichInteger) const {
   return rational.isIntegerFittingInInt(whichInteger);
 }
 
-bool Expression::makeAtom(
-  Calculator& newBoss, const std::string& atomName
+bool Expression::makeAtom(Calculator& newOwner, const std::string& atomName
 ) {
-  this->reset(newBoss);
-  this->data = newBoss.addOperationNoRepetitionOrReturnIndexFirst(atomName);
+  this->reset(newOwner);
+  this->data = newOwner.addOperationNoRepetitionOrReturnIndexFirst(atomName);
   return true;
 }
 
@@ -2620,7 +2619,14 @@ bool Expression::toStringBuiltIn<InputBox>(
   FormatExpressions* format
 ) {
   (void) format;
-  out << input.getValue<InputBox>().getUserInputBox();
+  bool isFinal = format == nullptr ? true : format->flagExpressionIsFinal;
+  if (!isFinal){
+    out << "(input box not shown)";
+    return true;
+  }
+  if (isFinal ) {
+    out << input.getValueNonConst<InputBox>().getUserInputBox();
+  }
   return true;
 }
 

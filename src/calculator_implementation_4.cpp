@@ -1162,8 +1162,8 @@ bool Expression::makeXOXOdotsOX(
   return true;
 }
 
-bool Expression::makeAtom(Calculator& newBoss, int input) {
-  this->reset(newBoss);
+bool Expression::makeAtom(Calculator& newOwner, int input) {
+  this->reset(newOwner);
   this->data = input;
   return true;
 }

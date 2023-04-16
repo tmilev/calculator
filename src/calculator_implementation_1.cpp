@@ -53,6 +53,7 @@ std::string PlotObject::PlotTypes::pathFilled = "pathFilled";
 std::string PlotObject::PlotTypes::label = "label";
 std::string PlotObject::PlotTypes::latex = "latex";
 std::string PlotObject::PlotTypes::axesGrid = "axesGrid";
+std::string PlotObject::PlotTypes::parametricPoint = "parametricPoint";
 std::string Plot::Labels::canvasName = "canvasName";
 std::string Plot::Labels::controlsName = "controlsName";
 std::string Plot::Labels::messagesName = "messagesName";
@@ -473,6 +474,11 @@ void PlotObject::makeLatex(
   this->pointsDouble.addOnTop(position);
   this->colorJS = "black";
   this->plotType = PlotObject::PlotTypes::latex;
+}
+
+void PlotObject::makeParametricPoint(const Vector<double> &position, const std::string &input){
+this->pointsDouble.addOnTop(position);
+  this->label = input;
 }
 
 void PlotObject::makePlotFillStart() {

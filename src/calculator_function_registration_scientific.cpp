@@ -859,16 +859,4 @@ void Calculator::initializeFunctionsScientificBasic() {
     innerStandard
   );
 
-   this->addOperationHandler(
-    "PlotParametricPoint",
-    CalculatorFunctionsPlot::plotParametricPoint,
-    "",
-    "Plots a point on a graph. "
-    "",
-    "PlotJuliaSet( z^2+0.7i+C, C=0);\n"
-    "PlotJuliaSet(1/(b)(z^2+z+1/z+1/z^2), b=3);",
-    "CalculatorFunctionsComplexDynamics::plotJuliaSet",
-    "PlotJuliaSet",
-    innerStandard
-  );
 }

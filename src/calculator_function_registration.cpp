@@ -2053,6 +2053,23 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
+   "PlotParametricPoint",
+   CalculatorFunctionsPlot::plotParametricPoint,
+   "",
+   "Plots a point on a graph. Takes on three arguments:\n"
+  "1) the name of the point\n"
+  "2) the x coordinate and \n"
+  "3) the y coordinate. "
+
+   ,
+   "PlotParametricPoint( z, 1, 1);\n"
+   ,
+   "CalculatorFunctionsPlot::plotParametricPoint",
+   "PlotParametricPoint",
+   innerStandard
+ );
+
+  this->addOperationHandler(
     "PlotSegment",
     CalculatorFunctionsPlot::plotSegment,
     "",

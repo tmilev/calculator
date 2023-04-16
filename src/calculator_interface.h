@@ -402,9 +402,9 @@ public:
   bool isNegativeConstant() const;
   bool makeIdentityMatrixExpressions(int dimension, Calculator& inputBoss);
   // bool makeAtom(int input, Calculator& newBoss);
-  bool makeAtom(Calculator& newBoss, int input);
+  bool makeAtom(Calculator& newOwner, int input);
   // TODO(tmilev): rename to MakeOperation
-  bool makeAtom(Calculator& newBoss, const std::string& atomName);
+  bool makeAtom(Calculator& newOwner, const std::string& atomName);
   bool makeIntegral(
     Calculator& calculator,
     const Expression& integrationSet,
@@ -1351,8 +1351,10 @@ public:
     static std::string escapeMap;
     static std::string label;
     static std::string latex;
+    static std::string parametricPoint;
   };
 
+  std::string label;
   std::string plotString;
   std::string fillStyle;
   std::string plotStringWithHtml;
@@ -1382,7 +1384,7 @@ public:
   // Each rectangle is a list of two 2-dim vectors.
   // The first vector gives the (x, y) - coordinates
   // of the lower left corner of the rectangle.
-  // The Second vector gives the (width, height) of the rectangle.
+  // The second vector gives the (width, height) of the rectangle.
   std::string plotType;
   Expression manifoldImmersion;
   std::string manifoldImmersionJS;
@@ -1461,6 +1463,7 @@ public:
   void makeLatex(
     const Vector<double>& position, const std::string& latex
   );
+  void makeParametricPoint(const Vector<double>& position, const std::string& input);
   void makeEscapeMap(
     const Expression& functionX,
     const std::string& javascriptX,

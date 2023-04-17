@@ -645,9 +645,9 @@ void StateMaintainerCalculator::addRule(const Expression& rule) {
   }
 }
 
-StateMaintainerCalculator::StateMaintainerCalculator(Calculator& inputBoss) {
-  this->owner = &inputBoss;
-  this->startingRuleStackSize = inputBoss.ruleStack.size();
+StateMaintainerCalculator::StateMaintainerCalculator(Calculator& inputOwner) {
+  this->owner = &inputOwner;
+  this->startingRuleStackSize = inputOwner.ruleStack.size();
 }
 
 StateMaintainerCalculator::~StateMaintainerCalculator() {

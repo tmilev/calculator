@@ -476,9 +476,15 @@ void PlotObject::makeLatex(
   this->plotType = PlotObject::PlotTypes::latex;
 }
 
-void PlotObject::makeParametricPoint(const Vector<double> &position, const std::string &input){
-this->pointsDouble.addOnTop(position);
-  this->label = input;
+void PlotObject::makeParametricPoint(
+  const Expression& inputX,
+  const Expression& inputY,
+  const Vector<double>& position
+) {
+  this->dimension = 2;
+  this->pointsDouble.addOnTop(position);
+  this->coordinateFunctionsE.addOnTop(inputX);
+  this->coordinateFunctionsE.addOnTop(inputY);
 }
 
 void PlotObject::makePlotFillStart() {

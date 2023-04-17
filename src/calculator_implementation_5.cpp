@@ -1730,6 +1730,46 @@ bool CalculatorFunctionsBasic::round(
   return false;
 }
 
+bool PlotObject::readColorAndLineWidthFromChild3And4(
+  Calculator& calculator, const Expression& input
+) {
+  if (input.size() < 3) {
+    return true;
+  }
+  this->colorJS = "black";
+  this->colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
+  const Expression& colorE = input[2];
+  if (!colorE.isOfType<std::string>(&this->colorJS)) {
+    this->colorJS = colorE.toString();
+  }
+  if (
+    !DrawingVariables::getColorIntFromColorString(
+      this->colorJS, this->colorRGB
+    )
+  ) {
+    calculator << "Unrecognized color: " << this->colorJS;
+  }
+  if (input.size() >= 4) {
+    const Expression& lineWidthE = input[3];
+    if (!lineWidthE.evaluatesToDouble(&this->lineWidth)) {
+      calculator
+      << "Failed to extract line width from: "
+      << lineWidthE.toString();
+    }
+    std::stringstream lineWidthStream;
+    lineWidthStream.precision(4);
+    lineWidthStream << this->lineWidth;
+    this->lineWidthJS = lineWidthStream.str();
+  }
+  this->plotType = PlotObject::Labels::path;
+  if (input.size() >= 4) {
+    if (!input[3].evaluatesToDouble(&this->lineWidth)) {
+      this->lineWidth = 1;
+    }
+  }
+  return true;
+}
+
 bool CalculatorFunctionsPlot::plotPath(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -1737,13 +1777,13 @@ bool CalculatorFunctionsPlot::plotPath(
   if (input.size() < 3) {
     return false;
   }
-  const Expression& matrixE = input[1];
+  const Expression& matrixExpression = input[1];
   Matrix<double> matrix;
-  if (!calculator.getMatrixDoubles(matrixE, matrix)) {
+  if (!calculator.getMatrixDoubles(matrixExpression, matrix)) {
     return
     calculator
     << "Failed to extract matrix from: "
-    << matrixE.toString();
+    << matrixExpression.toString();
   }
   if (matrix.numberOfColumns != 2 && matrix.numberOfColumns != 3) {
     return
@@ -1751,45 +1791,44 @@ bool CalculatorFunctionsPlot::plotPath(
     << "Only dimensions 2 and 3 are supported at the moment. ";
   }
   PlotObject segment;
-  if (input.size() >= 3) {
-    segment.colorJS = "black";
-    segment.colorRGB = static_cast<int>(
-      HtmlRoutines::redGreenBlue(0, 0, 0)
-    );
-    const Expression& colorE = input[2];
-    if (!colorE.isOfType<std::string>(&segment.colorJS)) {
-      segment.colorJS = colorE.toString();
-    }
-    if (
-      !DrawingVariables::getColorIntFromColorString(
-        segment.colorJS, segment.colorRGB
-      )
-    ) {
-      calculator << "Unrecognized color: " << segment.colorJS;
-    }
-  }
-  if (input.size() >= 4) {
-    const Expression& lineWidthE = input[3];
-    if (!lineWidthE.evaluatesToDouble(&segment.lineWidth)) {
-      calculator
-      << "Failed to extract line width from: "
-      << lineWidthE.toString();
-    }
-    std::stringstream lineWidthStream;
-    lineWidthStream.precision(4);
-    lineWidthStream << segment.lineWidth;
-    segment.lineWidthJS = lineWidthStream.str();
-  }
-  segment.plotType = PlotObject::Labels::path;
+  segment.readColorAndLineWidthFromChild3And4(calculator, input);
   segment.dimension = matrix.numberOfColumns;
   matrix.getVectorsFromRows(segment.pointsDouble);
-  if (input.size() >= 4) {
-    if (!input[3].evaluatesToDouble(&segment.lineWidth)) {
-      segment.lineWidth = 1;
-    }
-  }
   Plot plot;
   plot += segment;
+  return output.assignValue(calculator, plot);
+}
+
+bool CalculatorFunctionsPlot::plotPathParametric(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsPlot::plotPathParametric");
+  if (input.size() < 3) {
+    return false;
+  }
+  const Expression& matrixExpression = input[1];
+  PlotObject path;
+  if (
+    !calculator.getMatrixExpressionsFromArguments(
+      matrixExpression, path.points
+    )
+  ) {
+    return
+    calculator
+    << "Failed to extract matrix from: "
+    << matrixExpression.toString();
+  }
+  if (
+    path.points.numberOfColumns != 2 && path.points.numberOfColumns != 3
+  ) {
+    return
+    calculator
+    << "Only dimensions 2 and 3 are supported at the moment. ";
+  }
+  path.readColorAndLineWidthFromChild3And4(calculator, input);
+  path.dimension = path.points.numberOfColumns;
+  Plot plot;
+  plot += path;
   return output.assignValue(calculator, plot);
 }
 
@@ -1865,12 +1904,13 @@ bool CalculatorFunctionsPlot::plotSegment(
   if (input.size() < 3) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
-  Vector<double> leftV, rightV;
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
+  Vector<double> leftV;
+  Vector<double> rightV;
   if (
-    !calculator.getVectorDoubles(leftE, leftV) ||
-    !calculator.getVectorDoubles(rightE, rightV)
+    !calculator.getVectorDoubles(leftExpression, leftV) ||
+    !calculator.getVectorDoubles(rightExpression, rightV)
   ) {
     return false;
   }

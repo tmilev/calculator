@@ -858,5 +858,4 @@ void Calculator::initializeFunctionsScientificBasic() {
     "PlotJuliaSet",
     innerStandard
   );
-
 }

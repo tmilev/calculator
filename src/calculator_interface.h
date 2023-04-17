@@ -1463,7 +1463,11 @@ public:
   void makeLatex(
     const Vector<double>& position, const std::string& latex
   );
-  void makeParametricPoint(const Vector<double>& position, const std::string& input);
+  void makeParametricPoint(
+    const Expression& inputX,
+    const Expression& inputY,
+    const Vector<double>& position
+  );
   void makeEscapeMap(
     const Expression& functionX,
     const std::string& javascriptX,
@@ -1486,10 +1490,13 @@ public:
     const std::string& color
   );
   PlotObject();
+  bool readColorAndLineWidthFromChild3And4(
+    Calculator& calculator, const Expression& input
+  );
   bool operator==(const PlotObject& other) const;
 };
 
-// The following class is meant to use to draw plots for calculus students.
+// A class to plot 2d and 3d graphics.
 class Plot {
   friend std::ostream& operator<<(std::ostream& output, const Plot& plot) {
     output << "Plot[canvasName: " << plot.canvasName << "]";
@@ -1735,7 +1742,7 @@ class StateMaintainerCalculator {
 public:
   Calculator* owner;
   int startingRuleStackSize;
-  StateMaintainerCalculator(Calculator& inputBoss);
+  StateMaintainerCalculator(Calculator& inputOwner);
   void addRule(const Expression& rule);
   ~StateMaintainerCalculator();
 };

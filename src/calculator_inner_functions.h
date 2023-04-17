@@ -165,6 +165,9 @@ public:
   static bool plotPath(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool plotPathParametric(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool plotParametricCurve(
     Calculator& calculator, const Expression& input, Expression& output
   );

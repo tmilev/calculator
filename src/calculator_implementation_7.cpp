@@ -7661,31 +7661,43 @@ bool CalculatorFunctionsPlot::plot2D(
 
 bool CalculatorFunctionsPlot::plotParametricPoint(
   Calculator& calculator, const Expression& input, Expression& output
-
-){
+) {
   STACK_TRACE("CalclatorFunctionsPlot::plotParametricPoint");
-  if (input.size() != 3){
-    return calculator << "Exactly two arguments required: your input: " << input << ". ";
-
+  if (input.size() != 5) {
+    return
+    calculator
+    << "Exactly four arguments required: your input: "
+    << input
+    << ". ";
   }
-  std::string atomName;
-  if (!input[0].isAtomUserDefined(&atomName)){
-    return calculator
+  std::string atomX;
+  std::string atomY;
+  if (
+    !input[1].isAtomUserDefined(&atomX) || !input[2].isAtomUserDefined(&atomY)
+  ) {
+    return
+    calculator
     << "Failed to extract user-defined variable name "
-    <<"from the first argument of " << input << ".<br>";
+    << "from the first argument of "
+    << input
+    << ".<br>";
   }
   Vector<double> vector;
   vector.setSize(2);
-  if (!input[1].evaluatesToDouble(&vector[0])|| !input[2].evaluatesToDouble(&vector[1])){
-    return calculator
+  if (
+    !input[3].evaluatesToDouble(&vector[0]) ||
+    !input[4].evaluatesToDouble(&vector[1])
+  ) {
+    return
+    calculator
     << "Failed to extract floating point number "
-    <<"from the second and third argument of " << input << ".<br>";
-
+    << "from the second and third argument of "
+    << input
+    << ".<br>";
   }
   PlotObject plotObject;
-  plotObject.makeParametricPoint(vector, atomName);
-
-  return false;
+  plotObject.makeParametricPoint(input[1], input[2], vector);
+  return output.assignValue(calculator, plotObject);
 }
 
 bool CalculatorFunctionsPlot::plotPoint(

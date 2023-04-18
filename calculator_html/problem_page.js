@@ -14,22 +14,22 @@ const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 
 class ProblemCollection {
   constructor() {
-    /** @type{Object<string,Problem>} */
+    /** @type {Object<string,Problem>} */
     this.topicProblems = {};
-    /** @type{Object<string,Problem>} */
+    /** @type {Object<string,Problem>} */
     this.allProblems = {};
-    /** @type{string} */
+    /** @type {string} */
     this.previousProblemId = null;
-    /** @type{string} */
+    /** @type {string} */
     this.nextProblemId = null;
-    /** @type{Object<string, boolean>} */
+    /** @type {Object<string, boolean>} */
     this.theChapterIds = {};
     this.topics = {};
   }
 
   /** @return{Problem} */
   getProblemById(
-    /** @type{string} */
+    /** @type {string} */
     label,
   ) {
     if (!(label in this.allProblems)) {
@@ -78,7 +78,7 @@ class ProblemCollection {
   /** @return{Problem} */
   getProblemByIdOrRegisterEmpty(
     problemFileName,
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     outputElement,
   ) {
     // normalize the file name:
@@ -225,18 +225,18 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
 
 class Problem {
   constructor(
-    /** @type{HTMLElement}*/
+    /** @type {HTMLElement}*/
     outputElement,
   ) {
-    /** @type{string} */
+    /** @type {string} */
     this.nextProblemId = "";
-    /** @type{string} */
+    /** @type {string} */
     this.previousProblemId = "";
-    /** @type{number} */
+    /** @type {number} */
     this.totalChildren = 0;
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.outputElement = outputElement;
-    /** @type{string} */
+    /** @type {string} */
     this.title = "";
   }
 
@@ -328,14 +328,14 @@ class Problem {
     this.deadline = null;
     this.weight = problemData.weight;
     this.links = {
-      /** @type{HTMLElement[]} */
+      /** @type {HTMLElement[]} */
       video: [],
-      /** @type{HTMLElement[]} */
+      /** @type {HTMLElement[]} */
       slides: [],
-      /** @type{HTMLElement[]} */
+      /** @type {HTMLElement[]} */
       homework: [],
     };
-    /** @type{HTMLElement[]} */
+    /** @type {HTMLElement[]} */
     this.badProblemExplanation = [];
     if (problemData.deadlines !== undefined) {
       this.deadlines = problemData.deadlines;
@@ -517,7 +517,7 @@ class Problem {
   }
 
   getCalculatorURLRequestPartOne(
-    /** @type{boolean} */
+    /** @type {boolean} */
     isScoredQuiz,
   ) {
     let page = window.calculator.mainPage;
@@ -573,7 +573,7 @@ class Problem {
 
   /** @return {HTMLElement} */
   getNextProblemButton(
-    /** @type{ProblemNavigationHints} */
+    /** @type {ProblemNavigationHints} */
     hints
   ) {
     if (
@@ -600,7 +600,7 @@ class Problem {
 
   /** @return{HTMLElement} */
   getPreviousProblemButton(
-    /** @type{ProblemNavigationHints} */
+    /** @type {ProblemNavigationHints} */
     hints
   ) {
     let previousLink = document.createElement("a");
@@ -1281,14 +1281,14 @@ function ProblemNavigationHints() {
 
 class ProblemNavigation {
   constructor() {
-    /** @type{Problem} */
+    /** @type {Problem} */
     this.currentProblem = null;
-    /** @type{HTMLElement|null}*/
+    /** @type {HTMLElement|null}*/
     this.infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
   }
 
   setCurrentProblemAndUpdate(
-    /** @type{Problem} */
+    /** @type {Problem} */
     inputProblem,
   ) {
     this.currentProblem = inputProblem;
@@ -1498,7 +1498,7 @@ function updateProblemPage() {
 }
 
 function loadProblemIntoElement(
-  /** @type{HTMLElement|string} */
+  /** @type {HTMLElement|string} */
   problemElement,
 ) {
   if (typeof problemElement === "string") {

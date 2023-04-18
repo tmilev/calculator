@@ -7490,23 +7490,23 @@ bool CalculatorFunctionsPlot::plot2D(
   } else {
     plotObject.colorJS = "red";
   }
-  plotObject.colorRGB = static_cast<int>(
+  plotObject.colorRedGreenBlue = static_cast<int>(
     HtmlRoutines::redGreenBlue(255, 0, 0)
   );
   DrawingVariables::getColorIntFromColorString(
-    plotObject.colorJS, plotObject.colorRGB
+    plotObject.colorJS, plotObject.colorRedGreenBlue
   );
   plotObject.lineWidth = 1;
   if (input.size() >= 6) {
     input[5].evaluatesToDouble(&plotObject.lineWidth);
   }
   if (input.size() >= 7) {
-    plotObject.numSegmentsE = input[6];
+    plotObject.numberOfSegmentsExpression = input[6];
   } else {
-    plotObject.numSegmentsE.assignValue(calculator, 500);
+    plotObject.numberOfSegmentsExpression.assignValue(calculator, 500);
   }
   int numberOfIntervals = - 1;
-  if (!plotObject.numSegmentsE.isSmallInteger(&numberOfIntervals)) {
+  if (!plotObject.numberOfSegmentsExpression.isSmallInteger(&numberOfIntervals)) {
     numberOfIntervals = 500;
   }
   if (numberOfIntervals < 2) {
@@ -7593,7 +7593,7 @@ bool CalculatorFunctionsPlot::plot2D(
   plotObject.numberOfSegmentsJS[0] = "200";
   if (
     extractor.extractJavascript(
-      plotObject.numSegmentsE, &calculator.comments
+      plotObject.numberOfSegmentsExpression, &calculator.comments
     )
   ) {
     plotObject.numberOfSegmentsJS[0] = extractor.result;
@@ -7713,46 +7713,14 @@ bool CalculatorFunctionsPlot::plotPoint(
     );
   }
   PlotObject plot;
-  if (!calculator.getMatrixExpressions(input[1], plot.points)) {
-    return
-    calculator
-    << "The first argument of PlotPoint is "
-    << "expected to be a sequence, instead I had: "
-    << input[1].toString();
-  }
-  plot.dimension = plot.points.numberOfColumns;
-  plot.coordinateFunctionsE.setSize(plot.dimension);
-  plot.coordinateFunctionsJS.setSize(plot.dimension);
-  Expression jsConverterE;
-  plot.pointsJS.initialize(
-    plot.points.numberOfRows, plot.points.numberOfColumns
-  );
   JavascriptExtractor extractor(calculator);
-  for (int i = 0; i < plot.points.numberOfRows; i ++) {
-    for (int j = 0; j < plot.points.numberOfColumns; j ++) {
-      if (
-        !extractor.extract(
-          plot.points(i, j),
-          plot.pointsJS(i, j),
-          &calculator.comments
-        )
-      ) {
-        return
-        calculator
-        << "Failed to extract coordinate "
-        << i + 1
-        << " from: "
-        << plot.coordinateFunctionsE[i].toString();
-      }
-      plot.parameterLetter = extractor.parameterLetter;
-    }
+  if (!extractor.expressionToMatrixToPoints(input[1], plot)) {
+    return false;
   }
-  extractor.writeParameterNames(plot);
-  plot.dimension = plot.dimension;
-  plot.colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
+  plot.colorRedGreenBlue = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
   if (input[2].isOfType<std::string>()) {
     DrawingVariables::getColorIntFromColorString(
-      input[2].getValue<std::string>(), plot.colorRGB
+      input[2].getValue<std::string>(), plot.colorRedGreenBlue
     );
   }
   plot.colorJS = input[2].toString();
@@ -7804,7 +7772,7 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
   outputPlot += output.getValue<Plot>();
   const Expression& lowerFunctionE = input[1];
   const Expression& upperFunctionE = input[2];
-  const Expression& lowerE = input[3];
+  const Expression& lowerExpression = input[3];
   const Expression& upperE = input[4];
   const Expression& deltaE = input[5];
   double deltaNoSign;
@@ -7821,7 +7789,7 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
   }
   double upperBound, lowerBound;
   if (
-    !lowerE.evaluatesToDouble(&lowerBound) ||
+    !lowerExpression.evaluatesToDouble(&lowerBound) ||
     !upperE.evaluatesToDouble(&upperBound)
   ) {
     return
@@ -7833,10 +7801,10 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
     MathRoutines::swap(upperBound, lowerBound);
   }
   Expression
-  xValueE,
-  xExpression,
-  functionValueExpressioNonEvaluated,
-  functionValueFinal;
+  xValueE;
+Expression  xExpression;
+Expression    functionValueExpressioNonEvaluated;
+Expression    functionValueFinal;
   xExpression.makeAtom(
     calculator,
     calculator.addOperationNoRepetitionOrReturnIndexFirst("x")
@@ -7861,7 +7829,7 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
   Rational upperBoundRational;
   Rational deltaRational;
   if (
-    lowerE.isOfType<Rational>(&lowerBoundRational) &&
+    lowerExpression.isOfType<Rational>(&lowerBoundRational) &&
     upperE.isOfType<Rational>(&upperBoundRational) &&
     deltaE.isOfType<Rational>(&deltaRational)
   ) {
@@ -8094,9 +8062,9 @@ bool CalculatorFunctionsPlot::plotPolarRfunctionTheta(
   if (input.hasBoundVariables()) {
     return false;
   }
-  const Expression& polarE = input[1];
+  const Expression& polarExpression = input[1];
   HashedList<Expression> variables;
-  if (!polarE.getFreeVariables(variables, true)) {
+  if (!polarExpression.getFreeVariables(variables, true)) {
     return false;
   }
   if (variables.size > 1) {
@@ -8111,8 +8079,8 @@ bool CalculatorFunctionsPlot::plotPolarRfunctionTheta(
   cosine.addChildAtomOnTop(calculator.opCos());
   sine.addChildOnTop(variables[0]);
   cosine.addChildOnTop(variables[0]);
-  Expression xCoordinate = cosine * polarE;
-  Expression yCoordinate = sine * polarE;
+  Expression xCoordinate = cosine * polarExpression;
+  Expression yCoordinate = sine * polarExpression;
   Expression newArg;
   newArg.makeSequence(calculator);
   newArg.addChildOnTop(xCoordinate);
@@ -8222,7 +8190,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     )
   );
   plot.colorJS = "red";
-  plot.colorRGB = static_cast<int>(
+  plot.colorRedGreenBlue = static_cast<int>(
     HtmlRoutines::redGreenBlue(255, 0, 0)
   );
   if (input.size() >= 5) {
@@ -8231,7 +8199,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     }
   }
   DrawingVariables::getColorIntFromColorString(
-    plot.colorJS, plot.colorRGB
+    plot.colorJS, plot.colorRedGreenBlue
   );
   plot.lineWidth = 1;
   if (input.size() >= 6) {
@@ -8247,7 +8215,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
       << "<hr>Could not extract number of points from "
       << input[6].toString();
     }
-    plot.numSegmentsE = input[6];
+    plot.numberOfSegmentsExpression = input[6];
   }
   if (numberOfPoints < 2 || numberOfPoints > 30000) {
     numberOfPoints = 1000;
@@ -8257,21 +8225,21 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     << " point but that is not valid. Changing to 1000. ";
   }
   if (input.size() < 7) {
-    plot.numSegmentsE.assignValue(calculator, numberOfPoints);
+    plot.numberOfSegmentsExpression.assignValue(calculator, numberOfPoints);
   }
   List<Expression> convertedExpressions;
   convertedExpressions.setSize(plot.dimension);
-  plot.paramLowE = input[2];
-  plot.paramHighE = input[3];
+  plot.parameterLowExpression = input[2];
+  plot.parameterHighExpression = input[3];
   if (
-    !plot.paramLowE.evaluatesToDouble(&plot.paramLow) ||
-    !plot.paramHighE.evaluatesToDouble(&plot.paramHigh)
+    !plot.parameterLowExpression.evaluatesToDouble(&plot.paramLow) ||
+    !plot.parameterHighExpression.evaluatesToDouble(&plot.paramHigh)
   ) {
     calculator
     << "Failed to convert "
-    << plot.paramLowE.toString()
+    << plot.parameterLowExpression.toString()
     << " and "
-    << plot.paramHighE.toString()
+    << plot.parameterHighExpression.toString()
     << " to left and right endpoint of parameter interval. ";
   }
   Vectors<double> xCoordinates, yCoordinates;
@@ -8342,28 +8310,28 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   plot.numberOfSegmentsJS.setSize(1);
   plot.numberOfSegmentsJS[0] = "200";
   if (
-    extractor.extractJavascript(plot.numSegmentsE, &calculator.comments)
+    extractor.extractJavascript(plot.numberOfSegmentsExpression, &calculator.comments)
   ) {
     plot.numberOfSegmentsJS[0] = extractor.result;
   } else {
     plot.plotType = "parametricCurvePrecomputMakeBoxed";
-    calculator << "Failed to convert: " << plot.numSegmentsE << " to js. ";
+    calculator << "Failed to convert: " << plot.numberOfSegmentsExpression << " to js. ";
   }
   if (
-    extractor.extractJavascript(plot.paramLowE, &calculator.comments)
+    extractor.extractJavascript(plot.parameterLowExpression, &calculator.comments)
   ) {
     plot.paramLowJS = extractor.result;
   } else {
     plot.plotType = "parametricCurvePrecomputed";
-    calculator << "Failed to convert: " << plot.paramLowE << " to js. ";
+    calculator << "Failed to convert: " << plot.parameterLowExpression << " to js. ";
   }
   if (
-    extractor.extractJavascript(plot.paramHighE, &calculator.comments)
+    extractor.extractJavascript(plot.parameterHighExpression, &calculator.comments)
   ) {
     plot.paramHighJS = extractor.result;
   } else {
     plot.plotType = "parametricCurvePrecomputed";
-    calculator << "Failed to convert: " << plot.paramHighE << " to js. ";
+    calculator << "Failed to convert: " << plot.parameterHighExpression << " to js. ";
   }
   if (plot.dimension == 2) {
     if (

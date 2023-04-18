@@ -575,7 +575,7 @@ class Page {
   }
 
   selectPage(
-    /** @type{string} */
+    /** @type {string} */
     inputPage,
   ) {
     if (!(inputPage in this.pages)) {
@@ -619,7 +619,7 @@ class Page {
   }
 
   selectPageFunction(
-    /** @type{string} */
+    /** @type {string} */
     inputPage,
   ) {
     let selectedPage = this.pages[inputPage];

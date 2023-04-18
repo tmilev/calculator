@@ -444,14 +444,14 @@ function colorToHex(color) {
  */
 function numberFromNumberOfInfinity(input) {
   if (typeof input === 'string') {
-    let inputString = /** @type{string}*/ (input);
+    let inputString = /** @type {string}*/ (input);
     if (inputString.toLowerCase() === 'infinity' ||
         inputString.toLowerCase() === 'minusInfinity') {
       return 0;
     }
     return parseInt(input, 10);
   }
-  return /** @type{number} */ (input);
+  return /** @type {number} */ (input);
 }
 
 /**
@@ -466,7 +466,7 @@ function infinityType(input) {
   if (typeof input !== 'string') {
     return '';
   }
-  let inputString = /** @type{string} */ (input);
+  let inputString = /** @type {string} */ (input);
   if (inputString.toLowerCase() === 'infinity') {
     return 'infinity';
   }
@@ -488,7 +488,7 @@ class PointsTwoD {
   ) {
     this.pointsComputer = inputPoints;
     this.location = [];
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.type = 'points';
   }
@@ -562,38 +562,38 @@ class PointsTwoD {
  */
 class CurveTwoD {
   /**
-   * @param{!Array.<function(number):number>} inputCoordinateFunctions a pair of
+   * @param {!Array.<function(number):number>} inputCoordinateFunctions a pair of
    * coordinate functions.
-   * @param{number|function(number):number} inputLeftPt lower bound for the parameter.
-   * @param{number|function(number):number} inputRightPt higher bound for the parameter.
-   * @param{number|function(number):number} inputNumSegments number of segments used to approximate the
+   * @param {number|function(number):number} inputLeftPt lower bound for the parameter.
+   * @param {number|function(number):number} inputRightPt higher bound for the parameter.
+   * @param {number|function(number):number} inputNumSegments number of segments used to approximate the
    * curve.
-   * @param{string} inputColor the color of the curve.
-   * @param{number} inputLineWidth the width of the line.
-   * @param{string} letter used for external parameters given by sliders.
+   * @param {string} inputColor the color of the curve.
+   * @param {number} inputLineWidth the width of the line.
+   * @param {string} letter used for external parameters given by sliders.
    */
   constructor(
       inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
       inputColor, inputLineWidth) {
-    /** @type{!Array.<!Function>}*/
+    /** @type {!Array.<!Function>}*/
     this.coordinateFunctions = inputCoordinateFunctions;
-    /** @type{number|function(number):number}  */
+    /** @type {number|function(number):number}  */
     this.leftPointComputer = inputLeftPt;
-    /** @type{number|function(number):number}  */
+    /** @type {number|function(number):number}  */
     this.rightPointComputer = inputRightPt;
-    /** @type{number|function(number):number}  */
+    /** @type {number|function(number):number}  */
     this.numberOfSegmentsComputer = inputNumSegments;    
-    /** @type{number} */
+    /** @type {number} */
     this.leftPt = 0;
-    /** @type{number} */
+    /** @type {number} */
     this.rightPt = 0;
-    /** @type{number} */
+    /** @type {number} */
     this.numSegments = 0;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
-    /** @type{number} */
+    /** @type {number} */
     this.lineWidth = inputLineWidth;
-    /** @type{string} */
+    /** @type {string} */
     this.type = 'curve';
   }
 
@@ -706,24 +706,41 @@ class CurveTwoD {
  */
 class PathTwoD {
   /**
-   * @param{!Array.<!Array.<number>>} inputPath a list of points in 2d.
-   * @param{string} inputColor the color of the path.
-   * @param{string} inputFillColor fill color of the path, used when isFilled is
+   * @param {Array.<Array.<number|function(Array.<number>):number>>} inputPath a list of points in 2d.
+   * @param {string} inputColor the color of the path.
+   * @param {string} inputFillColor fill color of the path, used when isFilled is
    * set.
-   * @param{number} inputLineWidth line width.
+   * @param {number} inputLineWidth line width.
    */
   constructor(inputPath, inputColor, inputFillColor, inputLineWidth) {
-    /** @type{!Array.<!Array.<number>>} */
-    this.path = inputPath;
-    /** @type{!Array.<number>} */
+    /** @type {Array.<Array.<number|function(Array.<number>):number>>} */
+    this.pointsComputer = inputPath;
+    this.path = [];
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.colorFill = colorToRGB(inputFillColor);
     this.isFilled = false;
-    /** @type{string} */
+    /** @type {string} */
     this.type = 'path';
-    /** @type{number} */
+    /** @type {number} */
     this.lineWidth = inputLineWidth;
+  }
+
+  /** 
+   * Updates the point coordinates.
+   * 
+   * @param {CanvasTwoD} canvas the canvas.
+   */
+  updatePoints(canvas) {
+    this.path = [];
+    for (let i = 0; i < this.pointsComputer.length; i++) {
+      let point = []
+      for (let j = 0; j < this.pointsComputer[i].length; j++) {
+        point.push(canvas.evaluateNumberOrParameter(this.pointsComputer[i][j]));
+      }
+      this.path.push(point);
+    }
   }
 
   /**
@@ -746,9 +763,10 @@ class PathTwoD {
    * drawing a line
    */
   drawNoFinish(canvas, startByMoving) {
-    if (this.path.length < 1) {
+    if (this.pointsComputer.length < 1) {
       return;
     }
+    this.updatePoints(canvas);
     let surface = canvas.surface;
     let coordinates = canvas.coordinatesMathToScreen(this.path[0]);
     if (startByMoving) {
@@ -774,7 +792,7 @@ class PathTwoD {
    * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
-    if (this.path.length < 1) {
+    if (this.pointsComputer.length < 1) {
       return;
     }
     let surface = canvas.surface;
@@ -790,11 +808,11 @@ class CoordinateAxesTwoD {
    * @param {string} inputYAxisLabel string label of the y axis.
    */
   constructor(inputXAxisLabel, inputYAxisLabel) {
-    /** @type{string} */
+    /** @type {string} */
     this.xAxisLabel = inputXAxisLabel;
-    /** @type{string} */
+    /** @type {string} */
     this.yAxisLabel = inputYAxisLabel;
-    /** @type{string} */
+    /** @type {string} */
     this.type = 'axis';
   }
 
@@ -962,15 +980,15 @@ class PlotTwoD {
       inputFunction, leftPoint, rightPoint, numberOfSegments, inputColor,
       inputLineWidth) {
     this.functionPlotted = inputFunction;
-    /** @type{number} */
+    /** @type {number} */
     this.leftPoint = numberFromNumberOfInfinity(leftPoint);
-    /** @type{string} */
+    /** @type {string} */
     this.leftInfinityType = infinityType(leftPoint);
-    /** @type{number} */
+    /** @type {number} */
     this.rightPoint = numberFromNumberOfInfinity(rightPoint);
-    /** @type{string} */
+    /** @type {string} */
     this.rightInfinityType = infinityType(rightPoint);
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     if (inputLineWidth === undefined) {
       this.lineWidth = 1;
@@ -1085,11 +1103,11 @@ class TextPlotTwoD {
    * @param {string} inputColor text color.
    */
   constructor(inputLocation, inputText, inputColor) {
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.location = inputLocation;
-    /** @type{string} */
+    /** @type {string} */
     this.text = inputText;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.type = 'plotText';
   }
@@ -1139,9 +1157,9 @@ class LatexPlotTwoD {
    * @param {string} inputLatex text to draw.
    */
   constructor(inputLocation, inputLatex) {
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.location = inputLocation;
-    /** @type{string} */
+    /** @type {string} */
     this.text = inputLatex;
     this.type = 'plotLatex';
   }
@@ -1268,7 +1286,7 @@ class EscapeMap {
       this.mandelbrotMode = false;
     }
     /** 
-     * @type{Array.<number>} indicesOfSelectablePoints indices int the 
+     * @type {Array.<number>} indicesOfSelectablePoints indices int the 
      * drawObject of selectable points
      * that govern parameters of the graph.
      */
@@ -1321,7 +1339,7 @@ class EscapeMap {
   updateParameters(canvas) { 
     for (let i = 0; i < this.indicesOfSelectablePoints.length; i++) {
       let index = this.indicesOfSelectablePoints[i];
-      /** @type{SelectablePointTwoD} */
+      /** @type {SelectablePointTwoD} */
       let point = canvas.drawObjects[index];
       this.parametersOnTheGraph[2 * i] = point.x;
       this.parametersOnTheGraph[2 * i + 1] = point.y;
@@ -1612,18 +1630,18 @@ class VectorFieldTwoD {
       inputColor,
       inputLineWidth,
   ) {
-    /** @type{!Function} */
+    /** @type {!Function} */
     this.theField = inputField;
-    /** @type{boolean} */
+    /** @type {boolean} */
     this.isDirectionField = inputIsDirectionField;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.lowLeft = inputLowLeft;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.highRight = inputHighRight;
     this.numSegmentsXY = inputNumSegmentsXY;
-    /** @type{number} */
+    /** @type {number} */
     this.desiredLengthDirectionVectors = inputDesiredLengthDirectionVectors;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.lineWidth = inputLineWidth;
     this.type = 'vectorField';
@@ -1698,11 +1716,11 @@ class SegmentTwoD {
    * @param {number} inputLineWidth line width.
    */
   constructor(inputLeftPt, inputRightPt, inputColor, inputLineWidth) {
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.leftPt = inputLeftPt;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.rightPt = inputRightPt;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.type = 'segment';
     this.lineWidth = inputLineWidth;
@@ -1761,12 +1779,12 @@ class SegmentTwoD {
  */
 class PlotFillTwoD {
   /**
-   * @param{!CanvasTwoD} inputCanvas the owner canvas.
-   * @param{string} inputColor color of the plot fill.
+   * @param {!CanvasTwoD} inputCanvas the owner canvas.
+   * @param {string} inputColor color of the plot fill.
    */
   constructor(inputCanvas, inputColor) {
     this.indexFillStart = inputCanvas.drawObjects.length;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.type = 'plotFillStart';
   }
@@ -1888,40 +1906,40 @@ class CanvasTwoD {
 
     this.canvasId = null;
 
-    /** @type{function(number[], string)|null} */
+    /** @type {function(number[], string)|null} */
     this.latexPlotFunction = null;
     if (latexPlotFunction !== null && latexPlotFunction !== undefined) {
       this.latexPlotFunction = latexPlotFunction;
     }
 
     this.screenBasisOrthonormal = [];
-    /** @type{?HTMLElement} */
+    /** @type {?HTMLElement} */
     this.spanMessages = messages;
     if (this.spanMessages === undefined) {
       this.spanMessages = null;
     }
-    /** @type{?HTMLElement} */
+    /** @type {?HTMLElement} */
     this.spanControls = controls;
     if (this.spanControls === undefined) {
       this.spanControls = null;
     }
-    /** @type{number} */
+    /** @type {number} */
     this.numDrawnObjects = 0;
     this.boundingBoxMath = [[-0.1, -0.1], [0.1, 0.1]];
-    /** @type{number} */
+    /** @type {number} */
     this.width = inputCanvas.width;
-    /** @type{number} */
+    /** @type {number} */
     this.height = inputCanvas.height;
     this.centerCanvasX = inputCanvas.width / 2;
     this.centerCanvasY = inputCanvas.height / 2;
     this.centerX = this.centerCanvasX;
     this.centerY = this.centerCanvasY;
     this.viewWindowDefault = [[-5, -5], [5, 5]];
-    /** @type{number} */
+    /** @type {number} */
     this.scale = 50;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.mousePosition = [];
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.clickedPosition = [];
     this.positionDelta = [];
     this.textMouseInfo = '';
@@ -1945,11 +1963,11 @@ class CanvasTwoD {
     this.flagShowPerformance = true;
     this.flagShowAxesTicks = false;
     this.flagShowGrid = false;
-    /** @type{!Array.<function(number, number)>} */
+    /** @type {!Array.<function(number, number)>} */
     this.additionalMouseMoveListeners = [];
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.parameterValues = [];
-    /** @type{!Object.<string, number>} */
+    /** @type {!Object.<string, number>} */
     this.parameterNames = {};
   }
 
@@ -2063,9 +2081,9 @@ class CanvasTwoD {
   /**
    * Draws a path.
    *
-   * @param{!Array.<!Array.<number>>} inputPath a list of points in 2d.
-   * @param{string} inputColor the color of the path.
-   * @param{number} inputLineWidth line width.
+   * @param {!Array.<!Array.<number>>} inputPath a list of points in 2d.
+   * @param {string} inputColor the color of the path.
+   * @param {number} inputLineWidth line width.
    */
   drawPath(inputPath, inputColor, inputLineWidth) {
     let newPath =
@@ -2076,9 +2094,9 @@ class CanvasTwoD {
   /**
    * Draws a filled path.
    *
-   * @param{!Array.<!Array.<number>>} inputPath a list of points in 2d.
-   * @param{string} inputContourColor the color of the path.
-   * @param{string} inputFillColor the fill color.
+   * @param {!Array.<!Array.<number>>} inputPath a list of points in 2d.
+   * @param {string} inputContourColor the color of the path.
+   * @param {string} inputFillColor the fill color.
    */
   drawPathFilled(inputPath, inputContourColor, inputFillColor) {
     let newPath = new PathTwoD(inputPath, inputContourColor, inputFillColor, 1);
@@ -2089,15 +2107,15 @@ class CanvasTwoD {
   /**
    * Plots a function.
    *
-   * @param{function(number):number} toBePlotted the function to plot
-   * @param{number|string} leftPoint the x-coordinate of the left-most point of
+   * @param {function(number):number} toBePlotted the function to plot
+   * @param {number|string} leftPoint the x-coordinate of the left-most point of
    * the plot or the string 'minusInfinity'
-   * @param{number|string} rightPoint the x-coordinate of the right-most point
+   * @param {number|string} rightPoint the x-coordinate of the right-most point
    * of the plot or the string 'infinity'
-   * @param{number} inputNumSegments number of straight segments that make up
+   * @param {number} inputNumSegments number of straight segments that make up
    * our plot
-   * @param{string} inputColor the color of the plot
-   * @param{number} inputLineWidth the width of the line to plot in pixels.
+   * @param {string} inputColor the color of the plot
+   * @param {number} inputLineWidth the width of the line to plot in pixels.
    */
   drawFunction(
       toBePlotted, leftPoint, rightPoint, inputNumSegments, inputColor,
@@ -2111,11 +2129,11 @@ class CanvasTwoD {
   /**
    * Plots an escape map [Julia set].
    *
-   * @param{function(number, number):number} functionX the x-coordinate of the 
+   * @param {function(number, number):number} functionX the x-coordinate of the 
    * map we are iterating
-   * @param{function(number, number):number} functionY the y-coordinate of the 
+   * @param {function(number, number):number} functionY the y-coordinate of the 
    * map we are iterating
-   * @param{Array.<number>} parametersOnTheGraph parameters on the graph 
+   * @param {Array.<number>} parametersOnTheGraph parameters on the graph 
    * that will be made into a clickable points that can be dragged around
    */
   drawEscapeMap(
@@ -2141,14 +2159,14 @@ class CanvasTwoD {
 
   /**
    * Draws a parametric curve on the canvas
-   * @param{!Array.<function(number):number>} inputCoordinateFunctions a pair
+   * @param {!Array.<function(number):number>} inputCoordinateFunctions a pair
    * of coordinate functions.
-   * @param{number|function(number):number} inputLeftPt lower bound for the parameter.
-   * @param{number|function(number):number} inputRightPt higher bound for the parameter.
-   * @param{number|function(number):number} inputNumSegments number of segments used to approximate the
+   * @param {number|function(number):number} inputLeftPt lower bound for the parameter.
+   * @param {number|function(number):number} inputRightPt higher bound for the parameter.
+   * @param {number|function(number):number} inputNumSegments number of segments used to approximate the
    * curve.
-   * @param{string} inputColor the color of the curve.
-   * @param{number} inputLineWidth the width of the line.
+   * @param {string} inputColor the color of the curve.
+   * @param {number} inputLineWidth the width of the line.
    */
   drawCurve(
       inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
@@ -2529,7 +2547,7 @@ class CanvasTwoD {
   }
 
   mouseMoveSelectedPoint() {
-    /** @type{SelectablePointTwoD} */
+    /** @type {SelectablePointTwoD} */
     let point = this.drawObjects[this.selectedElement];
     point.x = this.mousePosition[0];
     point.y = this.mousePosition[1];
@@ -2581,7 +2599,7 @@ class CanvasTwoD {
     this.selectedElement = 'origin';
     for (let i = 0; i < this.indicesOfSelectablePoints.length; i++) {
       let index = this.indicesOfSelectablePoints[i];
-      /** @type{SelectablePointTwoD} */
+      /** @type {SelectablePointTwoD} */
       let currentPoint = this.drawObjects[index];
       if (this.pointsWithinClickTolerance(
         [currentPoint.x, currentPoint.y], this.clickedPosition,
@@ -2660,15 +2678,15 @@ class CurveThreeD {
   constructor(
       inputCoordinateFunctions, inputLeftPoint, inputRightPoint,
       inputNumberOfSegments, inputColor, inputLineWidth) {
-    /** @type{function(number):!Array.<number>} */
+    /** @type {function(number):!Array.<number>} */
     this.coordinateFunctions = inputCoordinateFunctions;
-    /** @type{number} */
+    /** @type {number} */
     this.leftPt = inputLeftPoint;
-    /** @type{number} */
+    /** @type {number} */
     this.rightPt = inputRightPoint;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
-    /** @type{number} */
+    /** @type {number} */
     this.numSegments = inputNumberOfSegments;
     this.lineWidth = inputLineWidth;
   }
@@ -2774,15 +2792,15 @@ class Surface {
    * @param {function(number,number):!Array.<number>} inputXYZFunction a
    *     two-variable function that returns a the [x,y,z]-coordinates [f(u,v),
    *     h(u,v), g(u,v)].
-   * @param{!Array.<!Array.<number|function(Array.<number>):number>>} inputUVBox u,v-variable ranges, format:
+   * @param {!Array.<!Array.<number|function(Array.<number>):number>>} inputUVBox u,v-variable ranges, format:
    * [[uMin, uMax], [vMin, vMax]].
    * @param {!Array.<number|function(Array.<number>):number>} inputPatchDimensions the pair of numbers.
    * [uPatchCount, vPathCount], where we subdivide the UV-rectangle in
    * uPatchCount times uPatchCount rectangles.
-   * @param{string} colorFront color of the front of the patch.
-   * @param{string} colorBack color of the back of the patch.
-   * @param{string} colorContour color of the patch contour.
-   * @param{number} inputContourWidth the line width of the contour.
+   * @param {string} colorFront color of the front of the patch.
+   * @param {string} colorBack color of the back of the patch.
+   * @param {string} colorContour color of the patch contour.
+   * @param {number} inputContourWidth the line width of the contour.
    */
   constructor(
       inputXYZFunction,
@@ -2794,9 +2812,9 @@ class Surface {
       inputContourWidth,
   ) {
     this.xyzFun = inputXYZFunction;
-    /** @type{Array.<!Array.<number>>} */
+    /** @type {Array.<!Array.<number>>} */
     this.uvBox = [[0,0], [0,0]];
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.patchDimensions = [0, 0];
     /** @type {!Array.< !Array.< number | function (Array.<number>): number >>} */
     this.uvBoxComputer = inputUVBox;
@@ -2845,7 +2863,7 @@ class Point {
    */
   constructor(inputLocation, inputColor) {
     this.location = inputLocation;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
   }
 }
@@ -2862,31 +2880,31 @@ class Point {
  */
 class Patch {
   /**
-   * @param{!Array.<number>} inputBase the base point of the patch.
-   * @param{!Array.<number>} inputEdge1 the first edge vector.
-   * @param{!Array.<number>} inputEdge2 the second edge vector.
-   * @param{string} inputColorUV color of the "forward" side of the patch.
-   * @param{string} inputColorVU color of the "back" side of the patch.
+   * @param {!Array.<number>} inputBase the base point of the patch.
+   * @param {!Array.<number>} inputEdge1 the first edge vector.
+   * @param {!Array.<number>} inputEdge2 the second edge vector.
+   * @param {string} inputColorUV color of the "forward" side of the patch.
+   * @param {string} inputColorVU color of the "back" side of the patch.
    */
   constructor(inputBase, inputEdge1, inputEdge2, inputColorUV, inputColorVU) {
-    /** @type{!Array.<number>}*/
+    /** @type {!Array.<number>} */
     this.base = inputBase.slice();
-    /** @type{!Array.<number>}*/
+    /** @type {!Array.<number>} */
     this.edge1 = inputEdge1.slice();
-    /** @type{!Array.<number>}*/
+    /** @type {!Array.<number>} */
     this.edge2 = inputEdge2.slice();
     this.colorUV = colorToRGB(inputColorUV);
     this.colorVU = colorToRGB(inputColorVU);
-    /** @type{!Array.<number>}*/
+    /** @type {!Array.<number>} */
     this.v1 = vectorPlusVector(this.base, this.edge1);
     this.v2 = vectorPlusVector(this.base, this.edge2);
     this.vEnd = vectorPlusVector(this.v1, this.edge2);
     this.internalPoint = this.base.slice();
-    /** @type{!Array.<number>}*/
+    /** @type {!Array.<number>} */
     this.normalScreen1 = [];
-    /** @type{!Array.<number>}*/
+    /** @type {!Array.<number>} */
     this.normalScreen2 = [];
-    /** @type{!Array.<number>}*/
+    /** @type {!Array.<number>} */
     this.normal = [];
     vectorAddVectorTimesScalar(this.internalPoint, this.edge1, 0.5);
     vectorAddVectorTimesScalar(this.internalPoint, this.edge2, 0.5);
@@ -2906,16 +2924,15 @@ class Patch {
  */
 class Contour {
   /**
-   * @param{!Array.<!Array<number>>} inputPoints the points on the contour.
-   * @param{string|!Array.<number>} inputColor color of the contour.
-   * @param{number} inputLineWidth line width of the contour.
-   *
+   * @param {!Array.<!Array<number>>} inputPoints the points on the contour.
+   * @param {string|!Array.<number>} inputColor color of the contour.
+   * @param {number} inputLineWidth line width of the contour.
    */
   constructor(inputPoints, inputColor, inputLineWidth) {
-    /** @type{!Array.<!Array<number>>} */
+    /** @type {!Array.<!Array<number>>} */
     this.points = inputPoints.slice();
     this.thePointsMathScreen = [];
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     /** @type {!Object.<number,boolean>} */
     this.adjacentPatches = {};
@@ -2929,9 +2946,9 @@ class Contour {
  */
 class TextInThreeD {
   /**
-   * @param{!Array.<number>} location [x,y,z]-location of the label.
-   * @param{string} text text of the label
-   * @param{string} color color of the text.
+   * @param {!Array.<number>} location [x,y,z]-location of the label.
+   * @param {string} text text of the label
+   * @param {string} color color of the text.
    */
   constructor(location, text, color) {
     this.location = location;
@@ -3025,7 +3042,7 @@ class Canvas {
     this.numContourPoints = 0;
     this.numContourPaths = 0;
     this.patchIsAccounted = [];
-    /** @type{?CanvasRenderingContext2D} */
+    /** @type {?CanvasRenderingContext2D} */
     this.surface = null;
     this.canvasId = null;
     this.screenBasisUserDefault = [[2, 1, 0], [0, 1, 1]];
@@ -3036,7 +3053,7 @@ class Canvas {
     this.zBufferRowCount = 20;
     this.zBuffer = [];
     this.zBufferIndexStrip = [];
-    /** @type{boolean} */
+    /** @type {boolean} */
     this.flagPaintZBuffer = false;
     this.bufferDeltaX = 0;
     this.bufferDeltaY = 0;
@@ -3052,11 +3069,11 @@ class Canvas {
     this.centerX = this.defaultCenterX;
     this.centerY = this.defaultCenterY;
     this.scaleDefault = 50;
-    /** @type{number} */
+    /** @type {number} */
     this.scale = this.scaleDefault;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.mousePosition = [];
-    /** @type{!Array.<number>} Position in math coordinates, 3d. */
+    /** @type {!Array.<number>} Position in math coordinates, 3d. */
     this.clickedPosition = [];
     this.unitRay = [];
     this.zUnit = [];
@@ -3074,9 +3091,9 @@ class Canvas {
     this.anglePolar = 0;
     this.selectedElement = '';
     this.selectedVector = [];
-    /** @type{!Array.<!Array.<number>>} */
+    /** @type {!Array.<!Array.<number>>} */
     this.selectedScreenBasisOrthonormal = [];
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.selectedScreenProjectionNormalized = [];
     this.selectedScreenNormal = [];
     this.selectedPolarAngleChange = 0;
@@ -3087,9 +3104,9 @@ class Canvas {
     this.flagRoundContours = false;
     this.flagRoundPatches = true;
     this.flagDebugLabelPatches = false;
-    /** @type{!Array.<number>} */
+    /** @type {!Array.<number>} */
     this.parameterValues = [];
-    /** @type{!Object.<string, number>} */
+    /** @type {!Object.<string, number>} */
     this.parameterNames = {};
   }
 
@@ -3129,8 +3146,8 @@ class Canvas {
    */
   initialize() {
     this.clear();
-    /** @type{!CanvasRenderingContext2D} */
-    this.surface = /** @type{!CanvasRenderingContext2D} */ (
+    /** @type {!CanvasRenderingContext2D} */
+    this.surface = /** @type {!CanvasRenderingContext2D} */ (
       this.canvasContainer.getContext('2d'));
     this.canvasContainer.addEventListener('DOMMouseScroll', (e) => {
       this.mouseWheelHandler(e);
@@ -3167,9 +3184,9 @@ class Canvas {
   /**
    * Draws a text at a location in the 3d scene.
    *
-   * @param{!Array.<number>} location [x,y,z]-location of the label.
-   * @param{string} text text of the label
-   * @param{string} color color of the text.
+   * @param {!Array.<number>} location [x,y,z]-location of the label.
+   * @param {string} text text of the label
+   * @param {string} color color of the text.
    */
   drawText(location, text, color) {
     this.all3dObjects.theLabels.push(new TextInThreeD(location, text, color));
@@ -3179,7 +3196,7 @@ class Canvas {
    * Draws a curve in 3d. Curve sections that are in the background will be
    * drawn with a dashed line.
    *
-   * @param{!CurveThreeD} curve [x,y,z]-location of the label.
+   * @param {!CurveThreeD} curve [x,y,z]-location of the label.
    */
   drawCurve(curve) {
     let contourPoints = new Array(curve.numSegments + 1);
@@ -3195,10 +3212,10 @@ class Canvas {
   /**
    * Draws a 2d parallelogram in 3d.
    *
-   * @param{!Array.<number>} base the base point of the patch.
-   * @param{!Array.<number>} edge1 the first edge vector.
-   * @param{!Array.<number>} edge2 the second edge vector.
-   * @param{string} color color of the "forward" side of the patch.
+   * @param {!Array.<number>} base the base point of the patch.
+   * @param {!Array.<number>} edge1 the first edge vector.
+   * @param {!Array.<number>} edge2 the second edge vector.
+   * @param {string} color color of the "forward" side of the patch.
    */
   drawPatchStraight(base, edge1, edge2, color) {
     this.all3dObjects.allPatches.push(
@@ -3228,8 +3245,8 @@ class Canvas {
   /**
    * Draws points on the scene. Points are always painted, even when occluded.
    *
-   * @param{!Array.<!Array<number>>} inputPoints list of [x,y,z]-coordinates.
-   * @param{string} inputColor color of the points.
+   * @param {!Array.<!Array<number>>} inputPoints list of [x,y,z]-coordinates.
+   * @param {string} inputColor color of the points.
    */
   drawPoints(inputPoints, inputColor) {
     for (let i = 0; i < inputPoints.length; i++) {
@@ -3241,10 +3258,10 @@ class Canvas {
    * Draws a straight segment. Parts of the segment in the background with be
    * drawn with dashed lines. Returns the index of the newly added contour.
    *
-   * @param{!Array.<number>} leftPt [x,y,z]-coordinates of the first point.
-   * @param{!Array.<number>} rightPt [x,y,z]-coordinates of the first point.
-   * @param{string} inputColor color of the points.
-   * @param{number} inputLineWidth line width.
+   * @param {!Array.<number>} leftPt [x,y,z]-coordinates of the first point.
+   * @param {!Array.<number>} rightPt [x,y,z]-coordinates of the first point.
+   * @param {string} inputColor color of the points.
+   * @param {number} inputLineWidth line width.
    *
    * @return {number}
    */
@@ -3271,7 +3288,7 @@ class Canvas {
   /**
    * Computes internal information about a patch in place.
    *
-   * @param{!Patch} patch the patch to be updated.
+   * @param {!Patch} patch the patch to be updated.
    * @private
    */
   computePatch(patch) {
@@ -3286,7 +3303,7 @@ class Canvas {
   /**
    * Computes internal information about a contour in place.
    *
-   * @param{!Contour} contour the contour to be updated.
+   * @param {!Contour} contour the contour to be updated.
    * @private
    */
   computeContour(contour) {
@@ -3304,8 +3321,8 @@ class Canvas {
    * Returns 1 if the point is in front of the patch. Returns -1 if the patch
    * occludes the point. Returns 0 if the point and the patch do not overlap.
    *
-   * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
-   * @param{!Patch} patch the patch.
+   * @param {!Array.<number>} point [x,y,z]-coordinates of a point.
+   * @param {!Patch} patch the patch.
    *
    * @return{number}
    * @private
@@ -3362,8 +3379,8 @@ class Canvas {
   /**
    * Computes whether a point is occluded by a patch.
    *
-   * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
-   * @param{!Patch} patch the patch.
+   * @param {!Array.<number>} point [x,y,z]-coordinates of a point.
+   * @param {!Patch} patch the patch.
    *
    * @return{boolean}
    * @private
@@ -3375,8 +3392,8 @@ class Canvas {
   /**
    * Computes whether a point is in front of a patch.
    *
-   * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
-   * @param{!Patch} patch the patch.
+   * @param {!Array.<number>} point [x,y,z]-coordinates of a point.
+   * @param {!Patch} patch the patch.
    *
    * @return{boolean}
    */
@@ -3390,8 +3407,8 @@ class Canvas {
    * The point is compared only to the given patches. Patches can be optimized
    * out of this comparison using the z-buffer.
    *
-   * @param{!Array.<number>} point [x,y,z]-coordinates of a point.
-   * @param{!Object.<number,boolean>} containerPatches the patches that can
+   * @param {!Array.<number>} point [x,y,z]-coordinates of a point.
+   * @param {!Object.<number,boolean>} containerPatches the patches that can
    * occlude the point.
    *
    * @return{boolean}
@@ -4979,15 +4996,15 @@ class Canvas {
    * @param {function(number,number):!Array.<number>} inputXYZFunction a
    *     two-variable function that returns a the [x,y,z]-coordinates [f(u,v),
    *     h(u,v), g(u,v)].
-   * @param{!Array.<!Array.<number|function(Array.<number>):number>>} inputUVBox u,v-variable ranges, format:
+   * @param {!Array.<!Array.<number|function(Array.<number>):number>>} inputUVBox u,v-variable ranges, format:
    * [[uMin, uMax], [vMin, vMax]].
    * @param {!Array.<number|function(Array.<number>):number>} inputPatchDimensions the pair of numbers.
    * [uPatchCount, vPathCount], where we subdivide the UV-rectangle in
    * uPatchCount times uPatchCount rectangles.
-   * @param{string} colorFront color of the front of the patch.
-   * @param{string} colorBack color of the back of the patch.
-   * @param{string} colorContour color of the patch contour.
-   * @param{number} inputContourWidth the line width of the contour.
+   * @param {string} colorFront color of the front of the patch.
+   * @param {string} colorBack color of the back of the patch.
+   * @param {string} colorContour color of the patch contour.
+   * @param {number} inputContourWidth the line width of the contour.
    */
   drawSurfaceCreate(
       inputXYZFunction,
@@ -5139,7 +5156,7 @@ class Drawing {
   /**
    * Processes an error message.
    * 
-   * @param{string} input
+   * @param {string} input
    */
   calculatorError(input) {
     console.log(input);

@@ -302,6 +302,8 @@ public:
     std::stringstream* commentsOnFailure
   );
   void writeParameterNames(PlotObject& output);
+  bool expressionToMatrixToPoints(const Expression &input, PlotObject &output);
+  bool convertMatrixOfExpressionToPoints(const Matrix<Expression> &input, PlotObject &output);
 };
 
 class CalculatorFunctionsTrigonometry {

@@ -24,13 +24,13 @@ function getAngleFromXandY(x, y) {
 }
 
 function getAngleScreenChange(
-  /** @type{number} */
+  /** @type {number} */
   newX,
-  /** @type{number} */
+  /** @type {number} */
   newY,
-  /** @type{number} */
+  /** @type {number} */
   oldX,
-  /** @type{number} */
+  /** @type {number} */
   oldY,
 ) {
   let result = getAngleFromXandY(newX, newY) - getAngleFromXandY(oldX, oldY);
@@ -63,17 +63,17 @@ function correctColor(
 
 class Layer {
   constructor(
-    /** @type{string} */
+    /** @type {string} */
     name,
   ) {
     this.name = name;
-    /** @type{number[]} */
+    /** @type {number[]} */
     this.indices = [];
     this.visible = true;
   }
 
   addIndex(
-    /** @type{number} */
+    /** @type {number} */
     index,
   ) {
     this.indices.push(index);    
@@ -82,27 +82,27 @@ class Layer {
 
 class GraphicsNDimensions {
   constructor(
-    /** @type{HTMLCanvasElement|string} */
+    /** @type {HTMLCanvasElement|string} */
     inputContainer,
-    /** @type{HTMLCanvasElement|string} */
+    /** @type {HTMLCanvasElement|string} */
     inputContainerControls,
-    /** @type{HTMLElement|string} */
+    /** @type {HTMLElement|string} */
     inputInfoContainer,
     inputIdHighlightInfo,
   ) {
     this.vectors = [];
     this.vectorProjections = [];
     this.drawOperations = [];
-    /** @type{Array.<Array.<HTMLTextAreaElement>>} */
+    /** @type {Array.<Array.<HTMLTextAreaElement>>} */
     this.screenBasisInputs = [];
     if (typeof inputInfoContainer === "string") {
       inputInfoContainer = document.getElementById(inputInfoContainer);
     }
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.informationContainer = inputInfoContainer;
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.planeInfo = null;
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.panelInfo = null;
     if (
       inputIdHighlightInfo !== null &&
@@ -127,12 +127,12 @@ class GraphicsNDimensions {
     if (typeof inputContainer === "string") {
       inputContainer = document.getElementById(inputContainer);
     }
-    /** @type{HTMLCanvasElement} */
+    /** @type {HTMLCanvasElement} */
     this.canvasContainer = inputContainer;
     if (typeof inputContainerControls === "string") {
       inputContainerControls = document.getElementById(inputContainerControls);
     }
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.containerControls = inputContainerControls;
     this.dimension = 0;
     this.bilinearForm = [];
@@ -173,7 +173,7 @@ class GraphicsNDimensions {
       timeoutHandle: null,
       frameLength: 300
     };
-    /** @type{HTMLCanvasElement|null} */
+    /** @type {HTMLCanvasElement|null} */
     this.canvas = null;
     this.widthHTML = this.canvasContainer.width;
     this.heightHTML = this.canvasContainer.height;
@@ -185,11 +185,11 @@ class GraphicsNDimensions {
     this.clickTolerance = 5;
     this.textShift = [- 3, - 4];
 
-    /** @type{Object.<string, Layer>} */
+    /** @type {Object.<string, Layer>} */
     this.layers = {};
-    /** @type{Layer[]} */
+    /** @type {Layer[]} */
     this.layerOfEachDrawOperation = [];
-    /** @type{HTMLElement|null} */
+    /** @type {HTMLElement|null} */
     this.containerLayers = null;
     this.boundingBoxScreen = [[0, 0], [0, 0]];
     this.boundingBoxLatex = [[0, 0], [0, 0]];
@@ -337,7 +337,7 @@ class GraphicsNDimensions {
   }
 
   accountVectorInBoundingBox(
-    /** @type{number[]} */
+    /** @type {number[]} */
     vector,
   ) {
     const screenCoordinates = [0, 0];
@@ -355,9 +355,9 @@ class GraphicsNDimensions {
   }
 
   accountVectorInBoundingBoxOfType(
-    /** @type{number[]} */
+    /** @type {number[]} */
     vector,
-    /** @type{number[][]} */
+    /** @type {number[][]} */
     output,
   ) {
     output[0][0] = Math.min(vector[0], output[0][0]);
@@ -647,9 +647,9 @@ class GraphicsNDimensions {
   }
 
   computeScreenCoordinates(
-    /** @type{number[]} */
+    /** @type {number[]} */
     input,
-    /** @type{number[]} */
+    /** @type {number[]} */
     output,
   ) {
     output[0] = this.shiftScreenCoordinates[0];
@@ -664,7 +664,7 @@ class GraphicsNDimensions {
 
   /** @return {number[]} */
   computeDirectDrawCoordinates(
-    /** @type{number[]} */
+    /** @type {number[]} */
     input,
   ) {
     return [
@@ -674,9 +674,9 @@ class GraphicsNDimensions {
   }
 
   computeLatexCoordinates(
-    /** @type{number[]} */
+    /** @type {number[]} */
     input,
-    /** @type{number[]} */
+    /** @type {number[]} */
     output,
   ) {
     const intermediate = [0, 0];
@@ -1047,7 +1047,7 @@ class GraphicsNDimensions {
 
   accountLayer(
     input,
-    /** @type{number} */
+    /** @type {number} */
     index,
   ) {
     let layerLabel = input["layer"];
@@ -1167,7 +1167,7 @@ class DrawHighlights {
   }
 
   drawNoFinish() {
-    /** @type{GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     if (!(this.indexInOperations in this.owner.currentHighlightIndices)) {
       return;
     }
@@ -1210,11 +1210,11 @@ class DrawHighlights {
 
 class DrawPath {
   constructor(
-    /** @type{GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     inputOwner, 
     inputData,
   ) {
-    /** @type{GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     this.owner = inputOwner;
     this.points = inputData.points;
     this.lineWidth = inputData.lineWidth;
@@ -1258,11 +1258,11 @@ class DrawPath {
 
 class DrawSegmentBetweenTwoVectors {
   constructor(
-    /** @type{GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     inputOwner, 
     inputData,
   ) {
-    /** @type{GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     this.owner = inputOwner;
     this.left = inputData.left.slice();
     this.right = inputData.right.slice();
@@ -1328,7 +1328,7 @@ class DrawSegmentBetweenTwoVectors {
 
 class DrawFilledShape {
   constructor(
-    /** @type{GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     inputOwner, inputData,
   ) {
     this.points = inputData.points;
@@ -1363,11 +1363,11 @@ class DrawFilledShape {
 
 class DrawCircleAtVector {
   constructor(
-    /** @type{GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     inputOwner, 
     inputData,
   ) {
-    /** @type{GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     this.owner = inputOwner;
     this.location = inputData.location.slice();
     this.locationScreenCoordinates = [];
@@ -1412,12 +1412,12 @@ class DrawCircleAtVector {
 
 class DrawTextAtVector {
   constructor(
-    /** @type{GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     inputOwner, 
     inputData,
   ) {
     this.owner = inputOwner;
-    /** @type{string} */
+    /** @type {string} */
     this.text = inputData.text;
     this.location = inputData.location;
     this.locationScreen = [];
@@ -1473,12 +1473,12 @@ class DrawTextAtVector {
 
 class DrawTextFixed {
   constructor(
-    /** @type{GraphicsNDimensions} */
+    /** @type {GraphicsNDimensions} */
     inputOwner,
     inputData,
   ) {
     this.owner = inputOwner;
-    /** @type{string} */
+    /** @type {string} */
     this.text = inputData.text;
     this.x = inputData.x;
     this.y = inputData.y;

@@ -1366,7 +1366,7 @@ public:
   double paramHigh;
   double lineWidth;
   int dimension;
-  int colorRGB;
+  int colorRedGreenBlue;
   int colorFillRGB;
   bool leftBoundaryIsMinusInfinity;
   bool rightBoundaryIsMinusInfinity;
@@ -1397,9 +1397,9 @@ public:
   std::string parametersOnTheGraphLetter;
   Expression leftPoint;
   Expression rightPoint;
-  Expression paramLowE;
-  Expression paramHighE;
-  Expression numSegmentsE;
+  Expression parameterLowExpression;
+  Expression parameterHighExpression;
+  Expression numberOfSegmentsExpression;
   // Parameters are user input variables that describe families of curves.
   // As of writing, parameters are input by the front-end via
   // inputs/sliders at the hands of the end-user.
@@ -1438,6 +1438,7 @@ public:
   JSData toJSONSetProjectionScreen();
   JSData toJSONSegment();
   JSData toJSONPoints();
+  JSData toJSONPointsJs();
   JSData toJSONDirectionFieldInTwoDimensions();
   JSData toJSONDrawText();
   JSData toJSONDrawPath();

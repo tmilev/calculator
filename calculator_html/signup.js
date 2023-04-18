@@ -69,7 +69,7 @@ class SignUp {
   }
 
   writeDebugLoginStatus(
-    /** @type{string} */
+    /** @type {string} */
     extraMessage
   ) {
     let recaptchaElement = document.getElementById(

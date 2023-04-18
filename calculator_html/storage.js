@@ -70,7 +70,7 @@ class StorageVariable {
 
   /** @return{string} */
   loadMe(hashParsed) {
-    /** @type{string|null} */
+    /** @type {string|null} */
     let candidate = null;
     if ((Storage !== undefined || localStorage !== undefined) && this.nameLocalStorage !== "") {
       let incoming = localStorage.getItem(this.nameLocalStorage);

@@ -303,11 +303,11 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   } else {
     plotObject.colorJS = "blue";
   }
-  plotObject.colorRGB = static_cast<int>(
+  plotObject.colorRedGreenBlue = static_cast<int>(
     HtmlRoutines::redGreenBlue(0, 0, 255)
   );
   DrawingVariables::getColorIntFromColorString(
-    plotObject.colorJS, plotObject.colorRGB
+    plotObject.colorJS, plotObject.colorRedGreenBlue
   );
   plotObject.lineWidth = 1;
   if (input.size() >= 8) {

@@ -9911,9 +9911,9 @@ class MathNodeHorizontalBrace extends MathNode {
     this.pointsUp = inputPointsUp;
   }
 
-  /** @return{number} */
+  /** @return {number} */
   radius(
-      /** @type{number} */
+      /** @type {number} */
       desiredWidth,
   ) {
     return Math.max(4, Math.floor(desiredWidth * 0.08));
@@ -10446,7 +10446,7 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
     container.appendChild(result.element);
   }
 
-  /** @return{{x: number, yLow: number, yHigh: number}} */
+  /** @return {{x: number, yLow: number, yHigh: number}} */
   computeCoordinates(
       /** @type {BoundingBox!} */
       boundingBoxFromParent,
@@ -10535,7 +10535,7 @@ class MathNodeSquareBracketsLike extends MathNodeDelimiterMark {
     container.appendChild(result.element);
   }
 
-  /** @return{{xStart: number, xMiddle: number, yHigh: number, yLow: number}} */
+  /** @return {{xStart: number, xMiddle: number, yHigh: number, yLow: number}} */
   computeBracketCoordinates(
       /** @type {BoundingBox!} */
       boundingBoxFromParent,
@@ -10833,7 +10833,7 @@ class MathNodeAngleBrackets extends MathNodeDelimiterMark {
   }
 
   /**
-   * @return{{xEnd: number, xMiddle: number, yLow: number, yMiddle: number,
+   * @return {{xEnd: number, xMiddle: number, yLow: number, yMiddle: number,
    * yHigh: number}}
    */
   computeCoordinates(
@@ -10942,7 +10942,7 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
   }
 
   /**
-   * @return{{
+   * @return {{
    * x: number,
    * startY: number,
    * endY: number,
@@ -11381,7 +11381,7 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
   }
 
   /**
-   * @return{{
+   * @return {{
    * radius: number,
    * xLeft: number,
    * xEnd: number,
@@ -11495,7 +11495,7 @@ class MathNodeMatrix extends MathNode {
    * Returns whether  the matrix is actually used to record a \binom{a}{b}
    * element.
    *
-   * @return{boolean}
+   * @return {boolean}
    */
   isBinom() {
     if (this.matrixEnvironment !== 'binom') {

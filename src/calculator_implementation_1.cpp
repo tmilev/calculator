@@ -248,7 +248,7 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->plotString == other.plotString &&
   this->fillStyle == other.fillStyle &&
   this->plotStringWithHtml == other.plotStringWithHtml &&
-  this->colorRGB == other.colorRGB &&
+  this->colorRedGreenBlue == other.colorRedGreenBlue &&
   this->colorFillRGB == other.colorFillRGB &&
   this->dimension == other.dimension &&
   this->colorUV == other.colorUV &&
@@ -268,9 +268,9 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->variableRangesJS == other.variableRangesJS &&
   this->leftPoint == other.leftPoint &&
   this->rightPoint == other.rightPoint &&
-  this->paramLowE == other.paramLowE &&
-  this->paramHighE == other.paramHighE &&
-  this->numSegmentsE == other.numSegmentsE &&
+  this->parameterLowExpression == other.parameterLowExpression &&
+  this->parameterHighExpression == other.parameterHighExpression &&
+  this->numberOfSegmentsExpression == other.numberOfSegmentsExpression &&
   this->variablesInPlayJS == other.variablesInPlayJS &&
   this->leftBoundaryIsMinusInfinity == other.leftBoundaryIsMinusInfinity &&
   this->rightBoundaryIsMinusInfinity == other.rightBoundaryIsMinusInfinity &&
@@ -290,7 +290,7 @@ PlotObject::PlotObject() {
   this->paramHigh = 0;
   this->yLow = 0;
   this->yHigh = 0;
-  this->colorRGB = 0;
+  this->colorRedGreenBlue = 0;
   this->lineWidth = 1;
   this->colorFillRGB = 0;
   this->dimension = - 1;
@@ -1010,7 +1010,15 @@ JSData PlotObject::toJSONDrawText() {
 
 JSData PlotObject::toJSONDrawPath() {
   JSData result;
+  if (this->pointsJS.numberOfRows > 0) {
+
+    result[PlotObject::PlotTypes::points] = this->toJSONPointsJs();
+
+  }else{
   result[PlotObject::PlotTypes::points] = this->pointsDouble;
+  }
+  global.comments << "DEBUG: result points: " << result[PlotObject::PlotTypes::points] ;
+
   this->writeColorLineWidth(result);
   return result;
 }
@@ -1052,7 +1060,7 @@ JSData PlotObject::toJSON() {
   }
   if (correctedPlotType == "setProjectionScreen") {
     result = this->toJSONSetProjectionScreen();
-  } else if (correctedPlotType == "segment") {
+  } else if (correctedPlotType == PlotObject::PlotTypes::segment) {
     result = this->toJSONSegment();
   } else if (correctedPlotType == "surface") {
     result = this->toJSONSurfaceImmersion();
@@ -1091,6 +1099,14 @@ JSData PlotObject::toJSON() {
 JSData PlotObject::toJSONPoints() {
   STACK_TRACE("PlotObject::toJSONPoints");
   JSData result;
+  result[PlotObject::PlotTypes::points] = this->toJSONPointsJs();
+  result[PlotObject::Labels::color] = this->colorJS;
+  this->writeVariables(result);
+  return result;
+}
+
+JSData PlotObject::toJSONPointsJs() {
+  STACK_TRACE("PlotObject::toJSONPointsJs");
   JSData points = JSData::makeEmptyArray();
   for (int i = 0; i < this->pointsJS.numberOfRows; i ++) {
     JSData onePoint = JSData::makeEmptyArray();
@@ -1099,10 +1115,7 @@ JSData PlotObject::toJSONPoints() {
     }
     points[i] = onePoint;
   }
-  result[PlotObject::PlotTypes::points] = points;
-  result[PlotObject::Labels::color] = this->colorJS;
-  this->writeVariables(result);
-  return result;
+  return points;
 }
 
 void Plot::computeCanvasNameIfNecessary(int& canvasCounter) {

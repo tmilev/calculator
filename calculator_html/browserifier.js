@@ -30,7 +30,7 @@
  * function(require, module, export) { *** } 
  * enclosures of each script, with the script in place of the ***.
  * 
- * @type{Object<string,Function>} 
+ * @type {Object<string,Function>} 
  */
 var require;
 
@@ -43,7 +43,7 @@ var require;
  * defines the allModules object, and so the calculator
  * hijacks it to inject the name of the entry point script.
  *  
- * @type{string}
+ * @type {string}
  */
 var module;
 
@@ -57,7 +57,7 @@ class Browserifier {
   }
 
   require(
-    /** @type{string} */
+    /** @type {string} */
     inputFileName,
   ) {
     let currentSource = this.sanitizedFileNameContents[inputFileName];

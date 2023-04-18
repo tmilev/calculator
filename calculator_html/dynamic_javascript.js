@@ -11,15 +11,15 @@ const knownTypes = require("./equation_editor/equation_editor").knownTypes;
 
 class OneGraphicWithSliders {
   constructor(
-    /** @type{ElementWithScripts} */
+    /** @type {ElementWithScripts} */
     owner,
-    /** @type{string} */
+    /** @type {string} */
     serialization
   ) {
     this.owner = owner;
     this.serialization = serialization;
     this.graphics = null;
-    /** @type{CanvasThreeD|CanvasTwoD|null} */
+    /** @type {CanvasThreeD|CanvasTwoD|null} */
     this.canvas = null;
   }
 
@@ -60,18 +60,18 @@ class ElementWithScripts {
       "displayTransportLayerSecurity": [],
       "graphicsNDimensional": [],
     };
-    /** @type{HTMLElement|null} */
+    /** @type {HTMLElement|null} */
     this.element = null;
-    /** @type{Object.<string,HTMLInputElement>} */
+    /** @type {Object.<string,HTMLInputElement>} */
     this.sliders = {};
-    /** @type{Object.<string,Array.<MathNode>>} */
+    /** @type {Object.<string,Array.<MathNode>>} */
     this.mathNodesAssociatedWithSliders = {}; 
-    /** @type{Array.<OneGraphicWithSliders>} */
+    /** @type {Array.<OneGraphicWithSliders>} */
     this.graphicsWithSliders = [];
   }
 
   accountOneScript(
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     script,
   ) {
     let content = script.textContent;
@@ -85,7 +85,7 @@ class ElementWithScripts {
   }
 
   accountOneSlider(
-    /** @type{HTMLInputElement} */
+    /** @type {HTMLInputElement} */
     slider,
   ) {
     let sliderName = slider.getAttribute("name");
@@ -100,7 +100,7 @@ class ElementWithScripts {
   }
 
   bootstrapAllScripts(
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     element,
   ) {
     this.element = element;
@@ -150,7 +150,7 @@ class ElementWithScripts {
   }
 
   bootstrapOneGraphic(
-    /** @type{string} */
+    /** @type {string} */
     content,
   ) {
     let oneGraphic = new OneGraphicWithSliders(this, content);
@@ -166,7 +166,7 @@ class ElementWithScripts {
   }
 
   bootstrapOneGraphicsNDimensional(
-    /** @type{string} */
+    /** @type {string} */
     content,
   ) {
     let parsed = JSON.parse(content);
@@ -181,7 +181,7 @@ class ElementWithScripts {
   }
 
   bootstrapOneDisplayTransportLayerSecurity(
-    /** @type{string} */
+    /** @type {string} */
     content,
   ) {
     let parsed = JSON.parse(content);
@@ -196,7 +196,7 @@ class ElementWithScripts {
   }
 
   bootstrapOneDisplaySSLRecord(
-    /** @type{string} */
+    /** @type {string} */
     content,
   ) {
     let parsed = JSON.parse(content);
@@ -211,7 +211,7 @@ class ElementWithScripts {
   }
 
   bootstrapOneAbstractSyntaxNotation(
-    /** @type{string} */
+    /** @type {string} */
     content,
   ) {
     let parsed = JSON.parse(content);
@@ -240,7 +240,7 @@ class ElementWithScripts {
   }
 
   bootstrapOneLatexWithCopyButtons(
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     element,
   ) {
     let content = element.textContent;
@@ -255,9 +255,9 @@ class ElementWithScripts {
   }
 
   copyLatex(
-    /** @type{string} */
+    /** @type {string} */
     content,
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     element,
   ) {
     navigator.clipboard.writeText(content);
@@ -269,7 +269,7 @@ class ElementWithScripts {
   }
 
   processMathNodesRecursive(
-    /** @type{MathNode} */
+    /** @type {MathNode} */
     node,
   ) {
     for (let i = 0; i < node.children.length; i++) {
@@ -279,7 +279,7 @@ class ElementWithScripts {
   }
 
   processOne(
-    /** @type{MathNode} */
+    /** @type {MathNode} */
     node,
   ) {
     if (node.type.type !== knownTypes.formInput.type) {
@@ -327,11 +327,11 @@ class DynamicJavascript {
   }
 
   typeset(
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     output,
-    /** @type{Object<string, string>} */
+    /** @type {Object<string, string>} */
     extraAttributes,
-    /** @type{Function|null} */
+    /** @type {Function|null} */
     typeSetCallback,
   ) {
     if (extraAttributes === undefined || extraAttributes === null) {
@@ -361,7 +361,7 @@ class DynamicJavascript {
    * @return{ElementWithScripts}
    */
   bootstrapAllScripts(
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     element,
   ) {
     let elementWithScripts = new ElementWithScripts();

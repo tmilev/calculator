@@ -6,25 +6,25 @@ const jsonToHtml = require("./json_to_html");
 
 class CompareExpressionsSocratic {
   constructor() {
-    /** @type{boolean} */
+    /** @type {boolean} */
     this.initialized = false;
-    /** @type{InputPanelData|null} */
+    /** @type {InputPanelData|null} */
     this.givenPanel = null;
-    /** @type{InputPanelData|null} */
+    /** @type {InputPanelData|null} */
     this.desiredPanel = null;
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.resultUserFriendly = document.getElementById(ids.domElements.pages.compareExpressionsSocratic.resultUserFriendly);
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.resultBoxRaw = document.getElementById(ids.domElements.pages.compareExpressionsSocratic.resultRaw);
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.resultBoxFormatted = document.getElementById(ids.domElements.pages.compareExpressionsSocratic.resultFormatted);
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.calculatorLink = document.getElementById(ids.domElements.pages.compareExpressionsSocratic.calculatorLink);
-    /** @type{string} */
+    /** @type {string} */
     this.givenData = "";
-    /** @type{string} */
+    /** @type {string} */
     this.desiredData = "";
-    /** @type{string} 
+    /** @type {string} 
      * We store our socratic key with byte entries shifted so it does not appear in the javascript as plain text. 
      * Of course, this is not intended to be secure, 
      * but a protection that the api key pop up easily in searches.
@@ -120,7 +120,7 @@ class CompareExpressionsSocratic {
   }
 
   writeResult(
-    /** @type{string} */
+    /** @type {string} */
     input,
   ) {
     try {

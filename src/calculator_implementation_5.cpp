@@ -75,7 +75,7 @@ void MeshTriangles::plotGrid(int color) {
   PlotObject currentLinePlot;
   List<Vector<double> >& pointsVector = currentLinePlot.pointsDouble;
   currentLinePlot.pointsDouble.setSize(4);
-  currentLinePlot.colorRGB = color;
+  currentLinePlot.colorRedGreenBlue = color;
   for (int i = 0; i < this->triangles.size; i ++) {
     pointsVector[0] = this->triangles[i][0];
     pointsVector[1] = this->triangles[i][1];
@@ -254,7 +254,7 @@ void MeshTriangles::computeImplicitPlotPart2() {
   MathRoutines::minimum(this->height, this->width) *
   this->minTriangleSideAsPercentOfWidthPlusHeight;
   PlotObject currentPlot;
-  currentPlot.colorRGB = static_cast<int>(
+  currentPlot.colorRedGreenBlue = static_cast<int>(
     HtmlRoutines::redGreenBlue(255, 0, 0)
   );
   Vectors<double>& segment = currentPlot.pointsDouble;
@@ -1448,7 +1448,7 @@ bool CalculatorFunctionsPlot::plotRectangle(
   plot.colorJS = "blue";
   plot.pointsDouble.addOnTop(currentCorner);
   plot.rectangles.addOnTop(rectangle);
-  plot.colorRGB = static_cast<int>(
+  plot.colorRedGreenBlue = static_cast<int>(
     HtmlRoutines::redGreenBlue(0, 0, 255)
   );
   plot.colorFillRGB = static_cast<int>(
@@ -1737,14 +1737,14 @@ bool PlotObject::readColorAndLineWidthFromChild3And4(
     return true;
   }
   this->colorJS = "black";
-  this->colorRGB = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
+  this->colorRedGreenBlue = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
   const Expression& colorE = input[2];
   if (!colorE.isOfType<std::string>(&this->colorJS)) {
     this->colorJS = colorE.toString();
   }
   if (
     !DrawingVariables::getColorIntFromColorString(
-      this->colorJS, this->colorRGB
+      this->colorJS, this->colorRedGreenBlue
     )
   ) {
     calculator << "Unrecognized color: " << this->colorJS;
@@ -1807,24 +1807,12 @@ bool CalculatorFunctionsPlot::plotPathParametric(
     return false;
   }
   const Expression& matrixExpression = input[1];
-  PlotObject path;
-  if (
-    !calculator.getMatrixExpressionsFromArguments(
-      matrixExpression, path.points
-    )
-  ) {
-    return
-    calculator
-    << "Failed to extract matrix from: "
-    << matrixExpression.toString();
-  }
-  if (
-    path.points.numberOfColumns != 2 && path.points.numberOfColumns != 3
-  ) {
-    return
-    calculator
-    << "Only dimensions 2 and 3 are supported at the moment. ";
-  }
+PlotObject path;
+JavascriptExtractor javascriptExtractor(calculator);
+if (!javascriptExtractor.expressionToMatrixToPoints(matrixExpression, path)){
+return false;
+}
+global.comments << "DEBUG: Points js: " << path.pointsJS;
   path.readColorAndLineWidthFromChild3And4(calculator, input);
   path.dimension = path.points.numberOfColumns;
   Plot plot;
@@ -1839,35 +1827,36 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   if (input.size() < 3) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
-  Vector<double> leftV, rightV;
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
+  Vector<double> leftVector;
+  Vector<double>  rightVector;
   if (
-    !calculator.getVectorDoubles(leftE, leftV) ||
-    !calculator.getVectorDoubles(rightE, rightV)
+    !calculator.getVectorDoubles(leftExpression, leftVector) ||
+    !calculator.getVectorDoubles(rightExpression, rightVector)
   ) {
     return false;
   }
-  if (leftV.size != rightV.size) {
+  if (leftVector.size != rightVector.size) {
     return false;
   }
-  if (leftV.size != 2) {
+  if (leftVector.size != 2) {
     return false;
   }
-  int numSegments = 1;
+  int numberOfSegments = 1;
   if (input.size() >= 4) {
-    if (!input[3].isSmallInteger(&numSegments)) {
+    if (!input[3].isSmallInteger(&numberOfSegments)) {
       return
       calculator
       << "Could not extract small integer from "
       << input[3].toString();
     }
   }
-  if (numSegments < 1 || numSegments > 100) {
-    return calculator << "Bad number of segments: " << numSegments;
+  if (numberOfSegments < 1 || numberOfSegments > 100) {
+    return calculator << "Bad number of segments: " << numberOfSegments;
   }
-  Expression vectorExpression = (rightE - leftE);
-  Expression midPt = (rightE + leftE) / 2;
+  Expression vectorExpression = (rightExpression - leftExpression);
+  Expression midPoint = (rightExpression + leftExpression) / 2;
   Expression vectorX, vectorY;
   vectorX.makeXOX(
     calculator,
@@ -1885,8 +1874,8 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   orthogonalVector.makeXOX(
     calculator, calculator.opSequence(), vectorY *(- 1), vectorX
   );
-  Expression leftPt = midPt - orthogonalVector / 25;
-  Expression rightPt = midPt + orthogonalVector / 25;
+  Expression leftPt = midPoint - orthogonalVector / 25;
+  Expression rightPt = midPoint + orthogonalVector / 25;
   output.reset(calculator);
   output.addChildAtomOnTop("PlotSegment");
   output.addChildOnTop(leftPt);
@@ -1923,7 +1912,7 @@ bool CalculatorFunctionsPlot::plotSegment(
   PlotObject segment;
   if (input.size() >= 4) {
     segment.colorJS = "black";
-    segment.colorRGB = static_cast<int>(
+    segment.colorRedGreenBlue = static_cast<int>(
       HtmlRoutines::redGreenBlue(0, 0, 0)
     );
     const Expression& colorE = input[3];
@@ -1932,7 +1921,7 @@ bool CalculatorFunctionsPlot::plotSegment(
     }
     if (
       !DrawingVariables::getColorIntFromColorString(
-        segment.colorJS, segment.colorRGB
+        segment.colorJS, segment.colorRedGreenBlue
       )
     ) {
       calculator << "Unrecognized color: " << segment.colorJS;
@@ -2245,6 +2234,53 @@ bool CalculatorFunctionsPlot::makeJavascriptExpression(
 JavascriptExtractor::JavascriptExtractor(Calculator& inputOwner) {
   this->owner = &inputOwner;
   this->recursionDepth = 0;
+}
+
+bool JavascriptExtractor::expressionToMatrixToPoints(const Expression &input, PlotObject &output){
+  if (!this->owner->getMatrixExpressions(input, output.points)) {
+    return
+    *this->owner
+    << "The first argument of PlotPoint is "
+    << "expected to be a sequence, instead I had: "
+    << input.toString();
+  }
+if (!this->convertMatrixOfExpressionToPoints(output.points, output)) {
+  return false;
+}
+return  this->convertMatrixOfExpressionToPoints(output.points, output);
+
+}
+
+bool JavascriptExtractor::convertMatrixOfExpressionToPoints(const Matrix<Expression> &input, PlotObject &output){
+  STACK_TRACE("JavascriptExtractor::convertMatrixOfExpressionToPoints");
+  output.points = input;
+  output.dimension = output.points.numberOfColumns;
+  output.coordinateFunctionsE.setSize(output.dimension);
+  output.coordinateFunctionsJS.setSize(output.dimension);
+  Expression jsConverterE;
+  output.pointsJS.initialize(
+    output.points.numberOfRows, output.points.numberOfColumns
+  );
+  for (int i = 0; i < output.points.numberOfRows; i ++) {
+    for (int j = 0; j < output.points.numberOfColumns; j ++) {
+      if (
+        !this->extract(
+          output.points(i, j),
+          output.pointsJS(i, j),
+          &this->owner->comments
+        )
+      ) {
+        return
+        *this->owner
+        << "Failed to extract coordinate "
+        << i + 1
+        << " from: "
+        << output.coordinateFunctionsE[i].toString();
+      }
+      output.parameterLetter = this->parameterLetter;
+    }
+  }
+  return true;
 }
 
 void JavascriptExtractor::writeParameterNames(PlotObject& output) {

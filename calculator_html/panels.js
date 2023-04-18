@@ -12,9 +12,9 @@ if (module === undefined) {
 }
 
 function writeHTML(
-  /** @type{HTMLElement} */
+  /** @type {HTMLElement} */
   element,
-  /** @type{string} */
+  /** @type {string} */
   htmlContent,
 ) {
   try {
@@ -113,9 +113,9 @@ class PanelExpandableData {
     startHidden,
     /** @type {string} */
     label,
-    /** @type{boolean} */
+    /** @type {boolean} */
     allowFullExpand,
-    /** @type{boolean|undefined} */
+    /** @type {boolean|undefined} */
     createCopyButton
   ) {
     this.content = content;
@@ -142,31 +142,31 @@ class PanelExpandableData {
 
 class PanelExpandable {
   constructor(
-    /** @type{HtmlElement|string} */
+    /** @type {HtmlElement|string} */
     container,
   ) {
     this.originalHeight = 0;
     this.originalWidth = 0;
     this.collapsed = true;
     this.containerId = "";
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.container = container;
-    /** @type{HtmlElement|null} */
+    /** @type {HtmlElement|null} */
     this.panelContent = null;
-    /** @type{HtmlElement|null} */
+    /** @type {HtmlElement|null} */
     this.panelLabel = null;
-    /** @type{HtmlElement|null} */
+    /** @type {HtmlElement|null} */
     this.expandedMark = null;
-    /** @type{HtmlElement|null} */
+    /** @type {HtmlElement|null} */
     this.button = null;
-    /** @type{HtmlElement|null} */
+    /** @type {HtmlElement|null} */
     this.buttonFullExpand = null;
-    /** @type{HtmlButtonElement|null} */
+    /** @type {HtmlButtonElement|null} */
     this.buttonCopy = null;
     this.contentCopyButton = "";
-    /** @type{HtmlElement|null} */
+    /** @type {HtmlElement|null} */
     this.spanContainerButtons = null;
-    /** @type{boolean} */
+    /** @type {boolean} */
     this.fullyExpanded = false;
     if (typeof container === "string") {
       this.containerId = container;
@@ -193,12 +193,18 @@ class PanelExpandable {
 
   computeOriginalDimensions() {
     let computedStyle = window.getComputedStyle(this.panelContent);
-    this.originalHeight = Math.max(parseInt(computedStyle.height), this.panelContent.scrollHeight);
-    this.originalWidth = Math.max(parseInt(computedStyle.width), this.panelContent.scrollWidth);
+    this.originalHeight = Math.max(
+      parseInt(computedStyle.height),
+      this.panelContent.scrollHeight,
+    );
+    this.originalWidth = Math.max(
+      parseInt(computedStyle.width),
+      this.panelContent.scrollWidth,
+    );
   }
 
   setPanelContent(
-    /** @type{HTMLElement|string} */
+    /** @type {HTMLElement|string} */
     input,
   ) {
     this.panelContent.style.maxHeight = "";
@@ -219,9 +225,9 @@ class PanelExpandable {
   }
 
   initialize(
-    /** @type{boolean} */
+    /** @type {boolean} */
     startsCollapsed,
-    /** @type{boolean} */
+    /** @type {boolean} */
     allowFullExpand,
   ) {
     if (allowFullExpand === null || allowFullExpand === undefined) {
@@ -264,7 +270,7 @@ class PanelExpandable {
     if (this.panelContent === null || this.buttonFullExpand === null) {
       return;
     }
-    /** @type{string} */
+    /** @type {string} */
     let textContent = this.panelContent.textContent;
     if (!textContent.startsWith("\\(") || !textContent.endsWith("\\)")) {
       return;
@@ -284,14 +290,14 @@ class PanelExpandable {
       return;
     }
     navigator.clipboard.writeText(this.contentCopyButton);
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.container.style.backgroundColor = "lightgreen";
     setTimeout(() => {
       this.container.style.backgroundColor = "";
     }, 1000);
   }
 
-  setCollapsed(/** @type{boolean} */ newValue) {
+  setCollapsed(/** @type {boolean} */ newValue) {
     this.collapsed = newValue;
     if (this.collapsed) {
       this.expandedMark.textContent = "\u25C2"; // triangle pointing left

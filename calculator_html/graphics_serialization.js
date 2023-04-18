@@ -44,13 +44,13 @@ class GraphicsSerialization {
    */
   fromJSON(
     input,
-    /** @type{HTMLCanvasElement} */
+    /** @type {HTMLCanvasElement} */
     canvas,
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     controls,
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     messages,
-    /** @type{Object.<string,HTMLElement>} */
+    /** @type {Object.<string,HTMLElement>} */
     sliders,
   ) {
     let graphicsType = input["graphicsType"];
@@ -66,10 +66,10 @@ class GraphicsSerialization {
 
   /** Redraws the canvas, without re-creating it. */
   redrawFromJSON(
-    /** @type{CanvasTwoD|CanvasThreeD}*/
+    /** @type {CanvasTwoD|CanvasThreeD} */
     canvas,
     input,
-    /** @type{Object.<string,HTMLElement>} */
+    /** @type {Object.<string,HTMLElement>} */
     sliders,
   ) {
     let graphicsType = input["graphicsType"];
@@ -93,17 +93,17 @@ class GraphicsSerialization {
    */
   twoDimensionalGraphics(
     input,
-    /** @type{HTMLCanvasElement} */
+    /** @type {HTMLCanvasElement} */
     canvasElement,
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     controls,
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     messages,
-    /** @type{Object.<string,HTMLElement>} */
+    /** @type {Object.<string,HTMLElement>} */
     sliders,
   ) {
     let drawCanvas = null;
-    /** @type{EquationEditor.EquationEditor|null} */
+    /** @type {EquationEditor.EquationEditor|null} */
     let equationEditor = null;
     if (controls !== null && controls !== undefined) {
       controls.textContent = '';
@@ -122,9 +122,9 @@ class GraphicsSerialization {
       editorContainer.style.overflow = "clip";
       controls.appendChild(editorContainer);
       drawCanvas = (
-        /** @type{number[]} */
+        /** @type {number[]} */
         textLocation,
-        /** @type{string} */
+        /** @type {string} */
         latex,
       ) => {
         equationEditor.writeLatex(latex);
@@ -146,13 +146,13 @@ class GraphicsSerialization {
    */
   threeDimensionalGraphics(
     input,
-    /** @type{HTMLCanvasElement}*/
+    /** @type {HTMLCanvasElement} */
     canvasElement,
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     controls,
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     messages,
-    /** @type{Object.<string,HTMLElement>} */
+    /** @type {Object.<string,HTMLElement>} */
     sliders
   ) {
     let canvas = new CanvasThreeD(canvasElement, controls, messages);
@@ -166,10 +166,10 @@ class GraphicsSerialization {
    * @return {CanvasTwoD} 
    */
   plotTwoDimensionalGraphics(
-    /** @type{CanvasTwoD}*/
+    /** @type {CanvasTwoD} */
     canvas,
     input,
-    /** @type{Object.<string,HTMLElement>} */
+    /** @type {Object.<string,HTMLElement>} */
     sliders,
   ) {
     let plotObjects = input["plotObjects"];
@@ -185,11 +185,11 @@ class GraphicsSerialization {
   }
 
   writeParameters(
-    /** @type{Array.<string>}*/
+    /** @type {Array.<string>}*/
     parameterNames,
-    /** @type{CanvasTwoD|CanvasThreeD} */
+    /** @type {CanvasTwoD|CanvasThreeD} */
     canvas,
-    /** @type{Object.<string,HTMLElement>} */
+    /** @type {Object.<string,HTMLElement>} */
     sliders,
   ) {
     for (let i = 0; i < parameterNames.length; i++) {
@@ -209,10 +209,10 @@ class GraphicsSerialization {
    * @return{CanvasThreeD}
    */
   plotThreeDimensionalGraphics(
-    /** @type{CanvasThreeD}*/
+    /** @type {CanvasThreeD} */
     canvas,
     input,
-    /** @type{Object.<string,HTMLElement>} */
+    /** @type {Object.<string,HTMLElement>} */
     sliders,
   ) {
     let plotObjects = input["plotObjects"];
@@ -232,9 +232,9 @@ class GraphicsSerialization {
 
   oneTwoDimensionalObject(
     plot,
-    /** @type{CanvasTwoD} */
+    /** @type {CanvasTwoD} */
     canvas,
-    /** @type{Object.<string,HTMLElement>} */
+    /** @type {Object.<string,HTMLElement>} */
     sliders,
   ) {
     let plotType = plot[this.labels.plotType];
@@ -370,9 +370,9 @@ class GraphicsSerialization {
 
   oneThreeDimensionalObject(
     plot,
-    /** @type{CanvasThreeD} */
+    /** @type {CanvasThreeD} */
     canvas,
-    /** @type{Object.<string,HTMLElement>} */
+    /** @type {Object.<string,HTMLElement>} */
     sliders
   ) {
     let plotType = plot[this.labels.plotType];
@@ -437,11 +437,11 @@ class GraphicsSerialization {
    * @return{number|function(Array.<number>):number} 
    */
   interpretStringToNumber(
-    /** @type{string} */
+    /** @type {string} */
     input,
-    /** @type{string[]} */
+    /** @type {string[]} */
     inputParameters,
-    /** @type{Array.<number>} */
+    /** @type {Array.<number>} */
     parameterValues,
   ) {
     let definingFunction = this.functionFromBodyAndArguments(
@@ -459,11 +459,11 @@ class GraphicsSerialization {
    * @return{number[]} 
    */
   interpretListStringsAsNumbers(
-    /** @type{string[]} */
+    /** @type {string[]} */
     input,
-    /** @type{string[]} */
+    /** @type {string[]} */
     inputArguments,
-    /** @type{Array.<number>} */
+    /** @type {Array.<number>} */
     parameterValues,
   ) {
     let result = [];
@@ -479,11 +479,11 @@ class GraphicsSerialization {
    * @return{Array.<Array.<number|function(Array.<number>):number>>} 
    */
   interpretListListStringsAsNumbers(
-    /** @type{string[][]} */
+    /** @type {string[][]} */
     input,
-    /** @type{string[]} */
+    /** @type {string[]} */
     inputArguments,
-    /** @type{Array.<number>} */
+    /** @type {Array.<number>} */
     parameterValues,
   ) {
     let result = [];
@@ -501,10 +501,10 @@ class GraphicsSerialization {
 
   functionFromObject(
     input,
-    /** @type{Object.<string,HTMLElement>} */
+    /** @type {Object.<string,HTMLElement>} */
     sliders,
   ) {
-    /** @type{string} */
+    /** @type {string} */
     let body = input[this.labels.body];
     return this.functionFromBodyAndArguments(body, this.getArguments(input));
   }
@@ -515,7 +515,7 @@ class GraphicsSerialization {
    * @return {Array.<string>} 
    */
   getArguments(input) {
-    /** @type{string[]} */
+    /** @type {string[]} */
     let result = [];
     if (this.labels.arguments in input) {
       result = result.concat(input[this.labels.arguments].slice());
@@ -533,7 +533,7 @@ class GraphicsSerialization {
    * @return {Array.<string>} 
    */
   getParametersOnGraph(input) {
-    /** @type{string[]} */
+    /** @type {string[]} */
     let result = [];
     let parametersOnTheGraphLetter = input[this.labels.parametersOnTheGraphLetter];
     if (
@@ -551,7 +551,7 @@ class GraphicsSerialization {
    * @return {Array.<string>} 
    */
   getParameters(input) {
-    /** @type{string[]} */
+    /** @type {string[]} */
     let result = [];
     let parameterLetter = input[this.labels.parameterLetter];
     if (parameterLetter !== "" && parameterLetter !== undefined) {
@@ -561,9 +561,9 @@ class GraphicsSerialization {
   }
 
   functionFromBodyAndArguments(
-    /** @type{string} */
+    /** @type {string} */
     body,
-    /** @type{string[]} */
+    /** @type {string[]} */
     inputArguments
   ) {
     if (inputArguments.length === 0) {

@@ -11,21 +11,21 @@ const InputPanelData = require("./initialize_buttons").InputPanelData;
 
 class Solver {
   constructor() {
-    /** @type{EquationEditor|null} */
+    /** @type {EquationEditor|null} */
     this.equationEditor = null;
-    /** @type{InputPanelData|null} */
+    /** @type {InputPanelData|null} */
     this.panel = null;
-    /** @type{string|null} */
+    /** @type {string|null} */
     this.pendingTypeset = null;
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.debugDiv = document.getElementById(ids.domElements.pages.solve.editorSolveProblemDebug);
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.flagPendingSolutionTypeset = false;
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.solutionBox = document.getElementById(ids.domElements.pages.solve.solutionBox);
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.commentsBox = document.getElementById(ids.domElements.pages.solve.commentsBox);
-    /** @type{string} */
+    /** @type {string} */
     this.resultFontSize = "48px";
   }
 
@@ -96,7 +96,7 @@ class Solver {
   }
 
   setAutoSolveProblemBox(
-    /** @type{string} */
+    /** @type {string} */
     input,
   ) {
     this.pendingTypeset = input;
@@ -117,7 +117,7 @@ class Solver {
   }
 
   solveFromStorage(
-    /** @type{string} */
+    /** @type {string} */
     input,
   ) {
     if (document.getElementById(ids.domElements.pages.solve.div) === null) {
@@ -134,7 +134,7 @@ class Solver {
   }
 
   solveCallback(
-    /** @type{string} */
+    /** @type {string} */
     input,
   ) {
     try {
@@ -180,7 +180,7 @@ class Solver {
   }
 
   writeSolutionRow(
-    /** @type{HTMLTableRowElement} */
+    /** @type {HTMLTableRowElement} */
     row,
     step,
   ) {

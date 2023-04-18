@@ -34,7 +34,7 @@ class ForgotLogin {
   }
 
   writeDebugLoginStatus(
-    /** @type{string} */ extraMessage
+    /** @type {string} */ extraMessage
   ) {
     let recaptchaElement = document.getElementById(
       ids.domElements.pages.forgotLogin.forgotLoginResult

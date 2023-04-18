@@ -354,35 +354,35 @@ class AnswerPanel {
   submitGiveUp() {
     let page = window.calculator.mainPage;
     let currentProblem = page.getProblemById(this.problemId);
-    let theRequest = "";
+    let request = "";
     if (page.isLoggedIn()) {
-      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUp}&`;
+      request += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUp}&`;
     } else {
-      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUpNoLogin}&`;
+      request += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUpNoLogin}&`;
     }
     if (currentProblem.randomSeed === undefined) {
       throw ("Random seed not supposed to be undefined. ");
     }
-    theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
-    this.submitOrPreviewAnswers(theRequest);
+    request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+    this.submitOrPreviewAnswers(request);
   }
 
   submitPreview() {
     let page = window.calculator.mainPage;
-    let theRequest = "";
+    let request = "";
     let currentProblem = page.getProblemById(this.problemId);
     if (page.isLoggedIn()) {
       if (this.flagForReal) {
-        theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
+        request += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
       } else {
-        theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreview}&`;
-        theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+        request += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreview}&`;
+        request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
       }
     } else {
-      theRequest += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreviewNoLogin}&`;
-      theRequest += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+      request += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreviewNoLogin}&`;
+      request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
     }
-    this.submitOrPreviewAnswers(theRequest);
+    this.submitOrPreviewAnswers(request);
   }
 
   submitPreviewWithTimeOut() {

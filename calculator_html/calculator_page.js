@@ -22,9 +22,9 @@ class AtomHandler {
     this.administrative = false;
     this.experimental = false;
     this.shown = false;
-    /** @type{HTMLElement|null} */
+    /** @type {HTMLElement|null} */
     this.panel = null;
-    /** @type{HTMLElement|null} */
+    /** @type {HTMLElement|null} */
     this.button = null;
   }
 
@@ -220,7 +220,7 @@ class Calculator {
     this.parsedComputation = {};
     /** @type {panels.PanelExpandableData[]} */
     this.panels = [];
-    /** @type{HTMLElement|null} */
+    /** @type {HTMLElement|null} */
     this.outputElement = null;
     this.examples = null;
     this.submissionCalculatorCounter = 0;
@@ -228,9 +228,9 @@ class Calculator {
     this.numberOfCalculatorPanels = 0;
     this.flagExamplesWantedShown = false;
     processMonitoring.monitor.ownerCalculator = this;
-    /** @type{boolean} */
+    /** @type {boolean} */
     this.flagTypeset = false;
-    /** @type{boolean} */
+    /** @type {boolean} */
     this.initialized = false;
     this.editor = new calculatorPageEditor.CalculatorEquationEditor((event) => {
       this.submitCalculatorInputOnEnter(event);
@@ -324,7 +324,7 @@ class Calculator {
   }
 
   changeSplitterInputOutput(
-    /** @type{string} */
+    /** @type {string} */
     value,
   ) {
     this.splitter.setHeight(value);    
@@ -339,7 +339,7 @@ class Calculator {
     this.doToggleEditor(hideEditor)
   }
 
-  doToggleEditor(/** @type{boolean} */ hideEditor) {
+  doToggleEditor(/** @type {boolean} */ hideEditor) {
     let editor = document.getElementById(
       ids.domElements.pages.calculator.divEquationEditor
     );
@@ -452,7 +452,7 @@ class Calculator {
   }
 
   latexLink(
-    /** @type{string} */
+    /** @type {string} */
     input
   ) {
     let result = [];
@@ -521,7 +521,7 @@ class Calculator {
   writeHTML(
     /** @type {HTMLElement} */
     element,
-    /**@type{string} */
+    /**@type {string} */
     htmlContent,
   ) {
     panels.writeHTML(element, htmlContent);
@@ -753,7 +753,7 @@ class Calculator {
   }
 
   typeset(
-    /** @type{Function} */
+    /** @type {Function} */
     typeSetCallback,
   ) {
     if (this.flagTypeset === true) {
@@ -768,7 +768,7 @@ class Calculator {
   }
   
   resizePanel(
-    /** @type{equationEditor.EquationEditor} */
+    /** @type {equationEditor.EquationEditor} */
     editor,
     constructedPanels,
   ) {
@@ -788,7 +788,7 @@ class Calculator {
     if (!(parent.id in constructedPanels)) {
       return;
     }
-    /** @type{panels.PanelExpandable} */
+    /** @type {panels.PanelExpandable} */
     let panel = constructedPanels[parent.id];
     panel.computeOriginalDimensions();
     if (panel.originalWidth > 1500) {
@@ -819,9 +819,9 @@ class Calculator {
       console.log(e);
     }
     this.typeset((
-      /** @type{equationEditor.EquationEditor} */
+      /** @type {equationEditor.EquationEditor} */
       editor,
-      /** @type{HTMLElement} */
+      /** @type {HTMLElement} */
       output,
     ) => {
       if (elementWithScripts === null) {

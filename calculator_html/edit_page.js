@@ -34,9 +34,9 @@ function ctrlSPressAceEditorHandler(event) {
 
 /** @return {HTMLElement[]} */
 function getClonePanel(
-  /** @type{string} */
+  /** @type {string} */
   fileNameSource,
-  /** @type{string} */
+  /** @type {string} */
   fileNameTarget
 ) {
   if (fileNameSource === "" || fileNameSource === undefined || fileNameSource === null) {
@@ -79,11 +79,11 @@ function getClonePanel(
 
 /** @return {HTMLElement} */
 function getEditPanel(
-  /** @type{string} */
+  /** @type {string} */
   fileName,
-  /** @type{boolean} Whether online edit is allowed. */
+  /** @type {boolean} Whether online edit is allowed. */
   withInstructorRights,
-  /** @type{boolean} Show a source button without full admin rights. */
+  /** @type {boolean} Show a source button without full admin rights. */
   showSource,
 ) {
   if (withInstructorRights === undefined) {
@@ -206,7 +206,7 @@ function initEditorAce() {
 
 function selectEditPageCallback(
   input,
-  /** @type{boolean} Injects error html from server dangerously.*/
+  /** @type {boolean} Injects error html from server dangerously.*/
   injectHTMLDangerously,
 ) {
   if (injectHTMLDangerously === undefined) {
@@ -299,9 +299,9 @@ function writeNextPreviousEditButton(
 }
 
 function selectEditPage(
-  /** @type{string} */
+  /** @type {string} */
   currentlyEditedPage,
-  /** @type{boolean} Whether online edit is allowed. */
+  /** @type {boolean} Whether online edit is allowed. */
   withInstructorRights,
 ) {
   let page = window.calculator.mainPage;

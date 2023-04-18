@@ -18,9 +18,9 @@ class TypeSetter {
     element,
     /** @type {(Object.<string,string>|null)} */
     styleOverride,
-    /** @type{Function|null} */
+    /** @type {Function|null} */
     callbackEquationCreation,
-    /** @type{Object<string, string>} */
+    /** @type {Object<string, string>} */
     extraAttributes,
   ) {
     if (typeof element === "string") {

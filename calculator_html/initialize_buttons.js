@@ -86,7 +86,7 @@ class ButtonCollection {
     this.keywords = keywords;
   }
   updateFlags(
-    /** @type{Object.<string, string} */
+    /** @type {Object.<string, string} */
     allFlags,
   ) {
     for (let keyword in this.keywords) {
@@ -101,17 +101,17 @@ class ButtonCollection {
 class InputPanelData {
   constructor(
     /**
-     * @type{{
+     * @type {{
      * pureLatexElement?:HTMLElement|null,
      * }} */
     input,
   ) {
-    /** @type{string} Id of component where the editor is placed.*/
+    /** @type {string} Id of component where the editor is placed.*/
     this.idEquationEditorElement = input.idEquationEditorElement;
     if (this.idEquationEditorElement === "") {
       this.idEquationEditorElement = "";
     }
-    /** @type{HTMLElement|null} */
+    /** @type {HTMLElement|null} */
     this.equationEditorContainer = null;
     if (input.equationEditorContainer !== undefined) {
       this.equationEditorContainer = input.equationEditorContainer;
@@ -121,12 +121,12 @@ class InputPanelData {
       this.problemId = "";
     }
     this.idPureLatex = input.idPureLatex;
-    /** @type{HTMLElement|null} */
+    /** @type {HTMLElement|null} */
     this.pureLatexElement = null;
     if (input.pureLatexElement !== undefined && input.pureLatexElement !== null) {
       this.pureLatexElement = input.pureLatexElement;
     }
-    /** @type{EquationEditorButtonFactory[]} */
+    /** @type {EquationEditorButtonFactory[]} */
     this.buttonFactories = [];
     this.valueChangeHandler = null;
     if (input.valueChangeHandler !== undefined) {
@@ -225,14 +225,14 @@ class InputPanelData {
         "matrices": true,
       }),
     };
-    /** @type{HTMLElement|null} */
+    /** @type {HTMLElement|null} */
     this.buttonSubmitHardCoded = input.buttonSubmitHardCoded;
     if (this.buttonSubmitHardCoded === undefined) {
       this.buttonSubmitHardCoded = null;
     }
-    /** @type{string} */
+    /** @type {string} */
     this.idButtonContainer = input.idButtonContainer;
-    /** @type{HTMLElement|null} */
+    /** @type {HTMLElement|null} */
     this.buttonContainer = input.buttonContainer;
     if (this.buttonContainer === undefined || this.buttonContainer === null) {
       this.buttonContainer = document.getElementById(this.idButtonContainer);
@@ -269,7 +269,7 @@ class InputPanelData {
         console.log("Missing key: " + key);
       }
     }
-    /** @type{EquationEditor|null} */
+    /** @type {EquationEditor|null} */
     this.equationEditor = null;
     this.ignoreNextEditorEvent = false;
     this.flagAnswerPanel = input.flagAnswerPanel;
@@ -322,9 +322,9 @@ class InputPanelData {
   }
 
   editLatexHook(
-    /** @type{EquationEditor} */
+    /** @type {EquationEditor} */
     editor,
-    /** @type{equation_editor.MathNode} */
+    /** @type {equation_editor.MathNode} */
     unusedNode,
   ) {
     if (this.ignoreNextEditorEvent) {
@@ -408,11 +408,11 @@ class InputPanelData {
   }
 
   addLatexCommand(
-    /** @type{string} */
+    /** @type {string} */
     command,
-    /** @type{string} */
+    /** @type {string} */
     label,
-    /** @type{string} */
+    /** @type {string} */
     additionalStyle,
   ) {
     let buttonFactory = new EquationEditorButtonFactory(
@@ -422,11 +422,11 @@ class InputPanelData {
   }
 
   addKeySequence(
-    /** @type{string[]} */
+    /** @type {string[]} */
     keys,
-    /** @type{string} */
+    /** @type {string} */
     label,
-    /** @type{string} */
+    /** @type {string} */
     additionalStyle,
   ) {
     let buttonFactory = new EquationEditorButtonFactory(
@@ -439,9 +439,9 @@ class InputPanelData {
   }
 
   addButtons(
-    /** @type{boolean} */
+    /** @type {boolean} */
     forceShowAll,
-    /** @type{boolean} */
+    /** @type {boolean} */
     forceShowNone,
   ) {
     this.buttonFactories = [];
@@ -537,9 +537,9 @@ class InputPanelData {
   }
 
   initializePartTwo(
-    /** @type{boolean} */
+    /** @type {boolean} */
     forceShowAll,
-    /** @type{boolean} */
+    /** @type {boolean} */
     forceShowNone,
   ) {
     if (this.idEquationEditorElement === ids.domElements.pages.solve.editor) {
@@ -553,7 +553,7 @@ class InputPanelData {
     this.computeFlags(forceShowAll);
     this.addButtons(forceShowAll, forceShowNone);
     let currentButtonPanel = this.getButtonContainer();
-    /** @type{HTMLTableElement} */
+    /** @type {HTMLTableElement} */
     let table = document.createElement("TABLE");
     table.style.margin = "auto";
     let currentRow = null;

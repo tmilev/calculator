@@ -2053,20 +2053,6 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    "PlotParametricPoint",
-    CalculatorFunctionsPlot::plotParametricPoint,
-    "",
-    "Plots a point on a graph. Takes on three arguments:\n"
-    "1) the name of the point\n"
-    "2) the x coordinate and \n"
-    "3) the y coordinate. ",
-    "PlotParametricPoint( x,y, 1, 1) + "
-    "PlotPath(((0,0),(x,y)), black);\n",
-    "CalculatorFunctionsPlot::plotParametricPoint",
-    "PlotParametricPoint",
-    innerStandard
-  );
-  this->addOperationHandler(
     "PlotSegment",
     CalculatorFunctionsPlot::plotSegment,
     "",
@@ -2091,7 +2077,9 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsPlot::plotPathParametric,
     "",
     "Plots a straight segment path with parametric points. ",
-    "PlotPath(((0, 0), (x,y)), blue)",
+    "x=MakeInputBox(name=x, value=2);\n"
+  "y=MakeInputBox(name=y, value=3);"
+  "PlotPath(((0, 0), (x,y)), blue);\n",
     "CalculatorFunctionsPlot::plotPathParametric",
     "PlotPathParametric",
     innerStandard

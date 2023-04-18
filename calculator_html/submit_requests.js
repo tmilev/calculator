@@ -51,7 +51,7 @@ latexifyLink = function (inputURL) {
 }
 
 function addressToHtml(
-  /** @type{string} */
+  /** @type {string} */
   address,
 ) {
   let censoredAddressStarts = [
@@ -96,21 +96,21 @@ function correctAddress(inputURL) {
 
 class RequestWithProgress {
   constructor(
-    /** @type{string} */
+    /** @type {string} */
     address,
-    /** @type{HTMLElement|string} */
+    /** @type {HTMLElement|string} */
     output,
-    /** @type{boolean} */
+    /** @type {boolean} */
     isPost,
-    /** @type{HtmlElement|string|null} */
+    /** @type {HtmlElement|string|null} */
     progress,
     callback,
-    /** @type{{dontCollapsePanel:boolean, width:number}} */
+    /** @type {{dontCollapsePanel:boolean, width:number}} */
     panelOptions,
-    /** @type{string|null|undefined} */
+    /** @type {string|null|undefined} */
     additionalDetails,
   ) {
-    /** @type{XMLHttpRequest|null} */
+    /** @type {XMLHttpRequest|null} */
     this.xhr = null;
     this.address = address;
     this.isPost = isPost;
@@ -120,16 +120,16 @@ class RequestWithProgress {
     }
     this.output = output;
     this.callback = callback;
-    /** @type{{dontCollapsePanel:boolean, width:number}} */
+    /** @type {{dontCollapsePanel:boolean, width:number}} */
     this.panelOptions = panelOptions;
-    /** @type{panels.PanelExpandable|null} */
+    /** @type {panels.PanelExpandable|null} */
     this.panel = null;
     if (this.progress !== null) {
       this.panel = new panels.PanelExpandable(this.progress);
     }
     this.startTime = 0;
     this.details = "";
-    /** @type{string} */
+    /** @type {string} */
     this.additionalDetails = additionalDetails;
     if (this.additionalDetails === null || this.additionalDetails === undefined) {
       this.additionalDetails = "";
@@ -178,7 +178,7 @@ class RequestWithProgress {
   }
 
   errorStandard(
-    /** @type{ProgressEvent} */e,
+    /** @type {ProgressEvent} */e,
   ) {
     if (this.progress === null || this.progress === undefined) {
       console.log(e);
@@ -207,7 +207,7 @@ class RequestWithProgress {
   }
 
   recordResult(
-    /** @type{string} */
+    /** @type {string} */
     resultText,
   ) {
     if (this.output === null || this.output === undefined) {

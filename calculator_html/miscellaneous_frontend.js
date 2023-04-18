@@ -2,7 +2,7 @@
 let pathnames = require("./pathnames");
 
 function switchMenu(
-  /** @type{string|HTMLElement} */
+  /** @type {string|HTMLElement} */
   object
 ) {
   if (typeof object === "string") {
@@ -16,9 +16,9 @@ function switchMenu(
 }
 
 function appendHtml(
-  /** @type{HTMLElement}*/
+  /** @type {HTMLElement}*/
   targetToAppendTo,
-  /** @type{HTMLElement|HTMLElement[]}*/
+  /** @type {HTMLElement|HTMLElement[]}*/
   contentToAppend,
 ) {
   if (contentToAppend === null) {
@@ -41,9 +41,9 @@ function appendHtml(
 }
 
 function appendHtmlToArray(
-  /** @type{HTMLElement[]}*/
+  /** @type {HTMLElement[]}*/
   targetArray,
-  /** @type{HTMLElement|HTMLElement[]}*/
+  /** @type {HTMLElement|HTMLElement[]}*/
   contentToAppend,
 ) {
   if (contentToAppend === null) {
@@ -121,18 +121,18 @@ function htmlElementsFromCommentsAndErrors(input) {
 }
 
 function writeHtmlFromCommentsAndErrors(
-  /** @type{any} */
+  /** @type {any} */
   input,
-  /** @type{HTMLElement} */
+  /** @type {HTMLElement} */
   output,
 ) {
   output.innerHTML = htmlFromCommentsAndErrors(input);
 }
 
 function writeHtmlElementsFromCommentsAndErrors(
-  /** @type{any} */
+  /** @type {any} */
   input,
-  /** @type{HTMLElement} */
+  /** @type {HTMLElement} */
   output,
 ) {
   let elements = htmlElementsFromCommentsAndErrors(input);
@@ -166,7 +166,7 @@ function deepCopy(from) {
 
 /** @return{string} */
 function jsonParseGetHtmlStandard(
-  /** @type{string} */
+  /** @type {string} */
   input,
 ) {
   if (input.search("\n") !== - 1) {
@@ -207,7 +207,7 @@ function unescapeInequalitiesAmpersands(input) {
 
 /** @return{Object} */
 function jsonUnescapeParse(
-  /** @type{string} */
+  /** @type {string} */
   input,
 ) {
   let unescaped = unescapeInequalitiesAmpersands(input);
@@ -227,7 +227,7 @@ function jsonUnescapeParse(
 
 /** @return{string} */
 function toHex(
-  /** @type{string} */
+  /** @type {string} */
   input,
 ) {
   let result = "";

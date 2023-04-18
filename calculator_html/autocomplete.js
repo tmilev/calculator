@@ -4,11 +4,11 @@ const autoCompleteDictionary = require("./autocomplete_keywords").autoCompleteDi
 
 class WordWithHighlight {
   constructor(
-    /** @type{string} */
+    /** @type {string} */
     left,
-    /** @type{string} */
+    /** @type {string} */
     highlighted,
-    /** @type{string} */
+    /** @type {string} */
     right,
   ) {
     this.left = left;
@@ -18,9 +18,9 @@ class WordWithHighlight {
 
   /** @return {HTMLElement} */
   toHTML(
-    /** @type{boolean} */
+    /** @type {boolean} */
     isHighlighted, 
-    /** @type{Function} */
+    /** @type {Function} */
     clickHandler,
   ) {
     let result = document.createElement("div");
@@ -45,23 +45,23 @@ class WordWithHighlight {
 class Autocompleter {
   constructor() {
     this.initialized = false;
-    /** @type{Array.<string>} */
+    /** @type {Array.<string>} */
     this.autoCompleteDictionaryLowerCase = [];
     this.minLengthAutocompleteTrigger = 2;
     this.debugCounter = 0;
-    /** @type{Array.<string>} */
+    /** @type {Array.<string>} */
     this.autoCompleteDictionaryByKey = [];
-    /** @type{string} */
+    /** @type {string} */
     this.currentText = "";
-    /** @type{Array.<string>} */
+    /** @type {Array.<string>} */
     this.suggestions = [];
-    /** @type{Array.<WordWithHighlight>} */
+    /** @type {Array.<WordWithHighlight>} */
     this.suggestionsHighlighted = [];
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.autocompleteElement = document.getElementById(
       ids.domElements.pages.calculator.inputAutocompleteList
     );
-    /** @type{HTMLElement} */
+    /** @type {HTMLElement} */
     this.autocompleteHintsElement = document.getElementById(
       ids.domElements.pages.calculator.divAutocompleteHints
     );
@@ -254,7 +254,7 @@ class Autocompleter {
   }
 
   handleClick(
-    /** @type{number} */ indexClicked
+    /** @type {number} */ indexClicked
   ) {
     this.indexInAutocomplete = indexClicked;
     this.autocompleteElement.textContent = '';

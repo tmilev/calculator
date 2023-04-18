@@ -18,9 +18,9 @@ let transformersStandard = {
 };
 
 function writeJSONtoDOMComponent(
-  /** @type{Object} */
+  /** @type {Object} */
   inputObject,
-  /** @type{HTMLElement|string} */
+  /** @type {HTMLElement|string} */
   domComponent,
 ) {
   if (typeof domComponent === "string") {
@@ -170,7 +170,7 @@ class JSONToHTML {
 
   /** @return{HTMLElement} */
   getErrorElement(
-    /** @type{string} */
+    /** @type {string} */
     message,
   ) {
     let result = document.createElement("b");
@@ -313,7 +313,7 @@ class JSONToHTML {
 
   /** @return{HTMLElement} */
   getTinyLabel(
-    /** @type{string} */
+    /** @type {string} */
     content,
   ) {
     let result = document.createElement("tiny");
@@ -328,7 +328,7 @@ class JSONToHTML {
     if (!Array.isArray(inputJSON)) {
       return document.createElement("span");
     }
-    /** @type{HTMLTableElement} */
+    /** @type {HTMLTableElement} */
     let table = document.createElement("table");
     table.className = "tableJSON";
     this.labelsRows = getLabelsRows(inputJSON);

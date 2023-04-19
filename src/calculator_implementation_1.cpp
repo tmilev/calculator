@@ -1013,6 +1013,8 @@ JSData PlotObject::toJSONDrawPath() {
   if (this->pointsJS.numberOfRows > 0) {
 
     result[PlotObject::PlotTypes::points] = this->toJSONPointsJs();
+    this->writeParameters(result);
+    this->writeParameters(result);
 
   }else{
   result[PlotObject::PlotTypes::points] = this->pointsDouble;
@@ -1102,6 +1104,7 @@ JSData PlotObject::toJSONPoints() {
   result[PlotObject::PlotTypes::points] = this->toJSONPointsJs();
   result[PlotObject::Labels::color] = this->colorJS;
   this->writeVariables(result);
+  this->writeParameters(result);
   return result;
 }
 
@@ -1115,6 +1118,7 @@ JSData PlotObject::toJSONPointsJs() {
     }
     points[i] = onePoint;
   }
+
   return points;
 }
 

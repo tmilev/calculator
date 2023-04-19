@@ -1812,7 +1812,11 @@ JavascriptExtractor javascriptExtractor(calculator);
 if (!javascriptExtractor.expressionToMatrixToPoints(matrixExpression, path)){
 return false;
 }
-global.comments << "DEBUG: Points js: " << path.pointsJS;
+javascriptExtractor.writeParameterNames(path);
+global.comments << "DEBUG: Points js: "
+<< path.pointsJS << "<br>js xtractor: parameterNamesJS  " << javascriptExtractor.parameterNamesJS
+<< "<br>Param names: " << javascriptExtractor.parameterNames
+<< "<br> Param letter: " << javascriptExtractor.parameterLetter;
   path.readColorAndLineWidthFromChild3And4(calculator, input);
   path.dimension = path.points.numberOfColumns;
   Plot plot;
@@ -2284,6 +2288,7 @@ bool JavascriptExtractor::convertMatrixOfExpressionToPoints(const Matrix<Express
 }
 
 void JavascriptExtractor::writeParameterNames(PlotObject& output) {
+  global.comments << "<br>DEBUG: write params on: " << output.toJSON() << "param names: " <<this-> parameterNames<< "<br>";
   output.parametersInPlay = this->parameterNames;
   output.parametersInPlayJS = this->parameterNamesJS;
   output.parameterLetter = this->parameterLetter;

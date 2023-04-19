@@ -670,7 +670,7 @@ class CurveTwoD {
       // computing x introduces smaller numerical errors.
       // For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
       // If not careful with rounding errors,
-      // you may end up evaluating sqrt(1-x^2) for x =1.00000000000004
+      // you may end up evaluating sqrt(1-x^2) for x = 1.00000000000004
       // resulting in serious visual glitches.
       // Note: the remarks above were discovered the painful way (trial and
       // error).

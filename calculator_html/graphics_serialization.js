@@ -266,11 +266,11 @@ class GraphicsSerialization {
         let functionConstructed = this.functionFromObject(functionObject, sliders);
         canvas.drawFunction(
           functionConstructed,
-          this.interpretStringToNumber(left, parameterNames, parameterValues),
-          this.interpretStringToNumber(right, parameterNames, parameterValues),
-          this.interpretStringToNumber(numberOfSegments, parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(left, parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(right, parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(numberOfSegments, parameterNames, parameterValues),
           color,
-          this.interpretStringToNumber(lineWidth, parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(lineWidth, parameterNames, parameterValues),
         );
         return;
       case "plotFillStart":
@@ -315,13 +315,13 @@ class GraphicsSerialization {
         ];
         canvas.drawCurve(
           coordinateFunctionArray,
-          this.interpretStringToNumber(
+          this.interpretStringToNumberOrFunction(
             variableRanges[0], variableAndParameterNames, parameterValues,
           ),
-          this.interpretStringToNumber(
+          this.interpretStringToNumberOrFunction(
             variableRanges[1], variableAndParameterNames, parameterValues,
           ),
-          this.interpretStringToNumber(
+          this.interpretStringToNumberOrFunction(
             numberOfSegments, variableAndParameterNames, parameterValues,
           ),
           color,
@@ -330,7 +330,7 @@ class GraphicsSerialization {
         return;
       case "points":
         canvas.drawPoints(
-          this.interpretListListStringsAsNumbers(
+          this.interpretListListStringsAsNumbersOrFunctions(
             points, parameterNames, parameterValues,
           ), color
         );
@@ -339,7 +339,10 @@ class GraphicsSerialization {
         canvas.drawPathFilled(points, color, colorFill);
       case "path":
       case "segment":
-        canvas.drawPath(points, color, lineWidth);
+        let interpretedPoints = this.interpretListListStringsAsNumbersOrFunctions(
+          points, parameterNames, 
+        );
+        canvas.drawPath(interpretedPoints, color, lineWidth);
         return;
       case "label":
         canvas.drawText(onePoint, text, color);
@@ -367,6 +370,7 @@ class GraphicsSerialization {
         throw `Unknown plot type: ${plotType}.`;
     }
   }
+  
 
   oneThreeDimensionalObject(
     plot,
@@ -403,15 +407,15 @@ class GraphicsSerialization {
         return;
       case "surface":
         let convertedRanges = [[
-          this.interpretStringToNumber(variableRanges[0][0], parameterNames, parameterValues),
-          this.interpretStringToNumber(variableRanges[0][1], parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(variableRanges[0][0], parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(variableRanges[0][1], parameterNames, parameterValues),
         ], [
-          this.interpretStringToNumber(variableRanges[1][0], parameterNames, parameterValues),
-          this.interpretStringToNumber(variableRanges[1][1], parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(variableRanges[1][0], parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(variableRanges[1][1], parameterNames, parameterValues),
         ]];
         let convertedSegments = [
-          this.interpretStringToNumber(numberOfSegments[0], parameterNames, parameterValues),
-          this.interpretStringToNumber(numberOfSegments[1], parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(numberOfSegments[0], parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(numberOfSegments[1], parameterNames, parameterValues),
         ];
         canvas.drawSurfaceCreate(
           this.functionFromBodyAndArguments(coordinateFunctions, variableNames, parameterValues),
@@ -436,7 +440,7 @@ class GraphicsSerialization {
    * 
    * @return{number|function(Array.<number>):number} 
    */
-  interpretStringToNumber(
+  interpretStringToNumberOrFunction(
     /** @type {string} */
     input,
     /** @type {string[]} */
@@ -458,7 +462,7 @@ class GraphicsSerialization {
    * 
    * @return{number[]} 
    */
-  interpretListStringsAsNumbers(
+  interpretListStringsAsNumbersOrFunctions(
     /** @type {string[]} */
     input,
     /** @type {string[]} */
@@ -468,7 +472,7 @@ class GraphicsSerialization {
   ) {
     let result = [];
     for (let i = 0; i < input.length; i++) {
-      result.push(this.interpretStringToNumber(input[i], inputArguments, parameterValues));
+      result.push(this.interpretStringToNumberOrFunction(input[i], inputArguments, parameterValues));
     }
     return result;
   }
@@ -478,7 +482,7 @@ class GraphicsSerialization {
    * 
    * @return{Array.<Array.<number|function(Array.<number>):number>>} 
    */
-  interpretListListStringsAsNumbers(
+  interpretListListStringsAsNumbersOrFunctions(
     /** @type {string[][]} */
     input,
     /** @type {string[]} */
@@ -489,7 +493,7 @@ class GraphicsSerialization {
     let result = [];
     for (let i = 0; i < input.length; i++) {
       result.push(
-        this.interpretListStringsAsNumbers(
+        this.interpretListStringsAsNumbersOrFunctions(
           input[i],
           inputArguments,
           parameterValues,

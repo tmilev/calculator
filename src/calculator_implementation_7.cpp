@@ -7393,7 +7393,7 @@ bool CalculatorFunctionsPlot::plotFill(
     << colorE.toString()
     << "; using default color value. ";
   }
-  filledPlot.colorFillJS = colorString;
+  filledPlot.colorFillJavascript = colorString;
   for (int i = 0; i < startPlot.getPlots().size; i ++) {
     filledPlot.pointsDouble.addListOnTop(
       startPlot.getPlots()[i].pointsDouble
@@ -7484,17 +7484,19 @@ bool CalculatorFunctionsPlot::plot2D(
   plotObject.leftPoint = input[2];
   plotObject.rightPoint = input[3];
   if (input.size() >= 5) {
-    if (!input[4].isOfType<std::string>(&plotObject.colorJS)) {
-      plotObject.colorJS = input[4].toString();
+    if (
+      !input[4].isOfType<std::string>(&plotObject.colorJavascript)
+    ) {
+      plotObject.colorJavascript = input[4].toString();
     }
   } else {
-    plotObject.colorJS = "red";
+    plotObject.colorJavascript = "red";
   }
   plotObject.colorRedGreenBlue = static_cast<int>(
     HtmlRoutines::redGreenBlue(255, 0, 0)
   );
   DrawingVariables::getColorIntFromColorString(
-    plotObject.colorJS, plotObject.colorRedGreenBlue
+    plotObject.colorJavascript, plotObject.colorRedGreenBlue
   );
   plotObject.lineWidth = 1;
   if (input.size() >= 6) {
@@ -7506,7 +7508,9 @@ bool CalculatorFunctionsPlot::plot2D(
     plotObject.numberOfSegmentsExpression.assignValue(calculator, 500);
   }
   int numberOfIntervals = - 1;
-  if (!plotObject.numberOfSegmentsExpression.isSmallInteger(&numberOfIntervals)) {
+  if (
+    !plotObject.numberOfSegmentsExpression.isSmallInteger(&numberOfIntervals)
+  ) {
     numberOfIntervals = 500;
   }
   if (numberOfIntervals < 2) {
@@ -7659,10 +7663,10 @@ bool CalculatorFunctionsPlot::plot2D(
   return output.assignValue(calculator, plot);
 }
 
-bool CalculatorFunctionsPlot::plotParametricPoint(
+bool CalculatorFunctionsPlot::plotSelectablePoint(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalclatorFunctionsPlot::plotParametricPoint");
+  STACK_TRACE("CalclatorFunctionsPlot::plotSelectablePoint");
   if (input.size() != 5) {
     return
     calculator
@@ -7717,13 +7721,15 @@ bool CalculatorFunctionsPlot::plotPoint(
   if (!extractor.expressionToMatrixToPoints(input[1], plot)) {
     return false;
   }
-  plot.colorRedGreenBlue = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
+  plot.colorRedGreenBlue = static_cast<int>(
+    HtmlRoutines::redGreenBlue(0, 0, 0)
+  );
   if (input[2].isOfType<std::string>()) {
     DrawingVariables::getColorIntFromColorString(
       input[2].getValue<std::string>(), plot.colorRedGreenBlue
     );
   }
-  plot.colorJS = input[2].toString();
+  plot.colorJavascript = input[2].toString();
   plot.plotType = "points";
   Plot finalPlot;
   finalPlot.dimension = plot.dimension;
@@ -7800,11 +7806,10 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
   if (upperBound < lowerBound) {
     MathRoutines::swap(upperBound, lowerBound);
   }
-  Expression
-  xValueE;
-Expression  xExpression;
-Expression    functionValueExpressioNonEvaluated;
-Expression    functionValueFinal;
+  Expression xValueE;
+  Expression xExpression;
+  Expression functionValueExpressioNonEvaluated;
+  Expression functionValueFinal;
   xExpression.makeAtom(
     calculator,
     calculator.addOperationNoRepetitionOrReturnIndexFirst("x")
@@ -8189,17 +8194,17 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
       plot.variablesInPlay[0].toString()
     )
   );
-  plot.colorJS = "red";
+  plot.colorJavascript = "red";
   plot.colorRedGreenBlue = static_cast<int>(
     HtmlRoutines::redGreenBlue(255, 0, 0)
   );
   if (input.size() >= 5) {
-    if (!input[4].isOfType<std::string>(&plot.colorJS)) {
-      plot.colorJS = input[4].toString();
+    if (!input[4].isOfType<std::string>(&plot.colorJavascript)) {
+      plot.colorJavascript = input[4].toString();
     }
   }
   DrawingVariables::getColorIntFromColorString(
-    plot.colorJS, plot.colorRedGreenBlue
+    plot.colorJavascript, plot.colorRedGreenBlue
   );
   plot.lineWidth = 1;
   if (input.size() >= 6) {
@@ -8310,28 +8315,43 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   plot.numberOfSegmentsJS.setSize(1);
   plot.numberOfSegmentsJS[0] = "200";
   if (
-    extractor.extractJavascript(plot.numberOfSegmentsExpression, &calculator.comments)
+    extractor.extractJavascript(
+      plot.numberOfSegmentsExpression, &calculator.comments
+    )
   ) {
     plot.numberOfSegmentsJS[0] = extractor.result;
   } else {
     plot.plotType = "parametricCurvePrecomputMakeBoxed";
-    calculator << "Failed to convert: " << plot.numberOfSegmentsExpression << " to js. ";
+    calculator
+    << "Failed to convert: "
+    << plot.numberOfSegmentsExpression
+    << " to js. ";
   }
   if (
-    extractor.extractJavascript(plot.parameterLowExpression, &calculator.comments)
+    extractor.extractJavascript(
+      plot.parameterLowExpression, &calculator.comments
+    )
   ) {
     plot.paramLowJS = extractor.result;
   } else {
     plot.plotType = "parametricCurvePrecomputed";
-    calculator << "Failed to convert: " << plot.parameterLowExpression << " to js. ";
+    calculator
+    << "Failed to convert: "
+    << plot.parameterLowExpression
+    << " to js. ";
   }
   if (
-    extractor.extractJavascript(plot.parameterHighExpression, &calculator.comments)
+    extractor.extractJavascript(
+      plot.parameterHighExpression, &calculator.comments
+    )
   ) {
     plot.paramHighJS = extractor.result;
   } else {
     plot.plotType = "parametricCurvePrecomputed";
-    calculator << "Failed to convert: " << plot.parameterHighExpression << " to js. ";
+    calculator
+    << "Failed to convert: "
+    << plot.parameterHighExpression
+    << " to js. ";
   }
   if (plot.dimension == 2) {
     if (
@@ -10165,14 +10185,15 @@ public:
         plotSegment.plotString = "segment";
         plotSegment.pointsDouble.addOnTop(arrowBase);
         plotSegment.pointsDouble.addOnTop(arrowHead);
-        plotSegment.colorJS = "black";
+        plotSegment.colorJavascript = "black";
         this->plot += plotSegment;
       }
       if (this->displayedExpressionStrings[i] != "") {
         PlotObject plotText;
         plotText.plotType = "label";
         plotText.pointsDouble.addOnTop(this->nodePositionsDouble[i]);
-        plotText.colorJS = this->displayedStringIsLeaf[i] ? "red" : "gray";
+        plotText.colorJavascript =
+        this->displayedStringIsLeaf[i] ? "red" : "gray";
         std::string doubledBackslashes =
         HtmlRoutines::doubleBackslashes(
           this->displayedExpressionStrings[i]
@@ -10184,7 +10205,7 @@ public:
       } else {
         PlotObject point;
         point.plotType = "point";
-        point.colorJS = "blue";
+        point.colorJavascript = "blue";
         point.pointsDouble.addOnTop(this->nodePositionsDouble[i]);
         this->plot += point;
       }

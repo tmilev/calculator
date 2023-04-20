@@ -2004,6 +2004,25 @@ class CanvasTwoD {
   }
 
   /**
+   * Draw selectable point.
+   *
+   * @param {Array.<number>} point to plot.
+   * @param {Array.<string>} parameterNames the two parameters.
+   */
+  drawSelectablePoint(point, inputParameterNames) {
+    let selectablePoint = new SelectablePointTwoD(point[0], point[1], "red");
+    if (
+      inputParameterNames !== null &&
+      inputParameterNames !== undefined &&
+      inputParameterNames.length !== 2
+    ) {
+      this.parameterNames[inputParameterNames[0]] = point[0];
+      this.parameterNames[inputParameterNames[1]] = point[1];
+    }
+    this.drawObjects.push(selectablePoint);
+  }
+
+  /**
    * Draws a segment on the canvas.
    *
    * @param {!Array.<number>} inputLeftPt first endpoint.
@@ -2144,7 +2163,9 @@ class CanvasTwoD {
     if (parametersOnTheGraph === undefined) {
       throw "Missing parameters on the graph";
     }
-    let newPlot = new EscapeMap(functionX, functionY, parametersOnTheGraph, mandelbrotMode);
+    let newPlot = new EscapeMap(
+      functionX, functionY, parametersOnTheGraph, mandelbrotMode
+    );
     this.drawObjects.push(newPlot);    
     for (let i = 0; i + 1 < parametersOnTheGraph.length; i += 2) {
       let selectablePoint = new SelectablePointTwoD(

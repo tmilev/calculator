@@ -1444,8 +1444,8 @@ bool CalculatorFunctionsPlot::plotRectangle(
   plot.pointsDouble.addOnTop(currentCorner);
   currentCorner[1] -= dimensions[1];
   plot.pointsDouble.addOnTop(currentCorner);
-  plot.colorFillJS = "cyan";
-  plot.colorJS = "blue";
+  plot.colorFillJavascript = "cyan";
+  plot.colorJavascript = "blue";
   plot.pointsDouble.addOnTop(currentCorner);
   plot.rectangles.addOnTop(rectangle);
   plot.colorRedGreenBlue = static_cast<int>(
@@ -1736,18 +1736,20 @@ bool PlotObject::readColorAndLineWidthFromChild3And4(
   if (input.size() < 3) {
     return true;
   }
-  this->colorJS = "black";
-  this->colorRedGreenBlue = static_cast<int>(HtmlRoutines::redGreenBlue(0, 0, 0));
+  this->colorJavascript = "black";
+  this->colorRedGreenBlue = static_cast<int>(
+    HtmlRoutines::redGreenBlue(0, 0, 0)
+  );
   const Expression& colorE = input[2];
-  if (!colorE.isOfType<std::string>(&this->colorJS)) {
-    this->colorJS = colorE.toString();
+  if (!colorE.isOfType<std::string>(&this->colorJavascript)) {
+    this->colorJavascript = colorE.toString();
   }
   if (
     !DrawingVariables::getColorIntFromColorString(
-      this->colorJS, this->colorRedGreenBlue
+      this->colorJavascript, this->colorRedGreenBlue
     )
   ) {
-    calculator << "Unrecognized color: " << this->colorJS;
+    calculator << "Unrecognized color: " << this->colorJavascript;
   }
   if (input.size() >= 4) {
     const Expression& lineWidthE = input[3];
@@ -1807,16 +1809,14 @@ bool CalculatorFunctionsPlot::plotPathParametric(
     return false;
   }
   const Expression& matrixExpression = input[1];
-PlotObject path;
-JavascriptExtractor javascriptExtractor(calculator);
-if (!javascriptExtractor.expressionToMatrixToPoints(matrixExpression, path)){
-return false;
-}
-javascriptExtractor.writeParameterNames(path);
-global.comments << "DEBUG: Points js: "
-<< path.pointsJS << "<br>js xtractor: parameterNamesJS  " << javascriptExtractor.parameterNamesJS
-<< "<br>Param names: " << javascriptExtractor.parameterNames
-<< "<br> Param letter: " << javascriptExtractor.parameterLetter;
+  PlotObject path;
+  JavascriptExtractor javascriptExtractor(calculator);
+  if (
+    !javascriptExtractor.expressionToMatrixToPoints(matrixExpression, path)
+  ) {
+    return false;
+  }
+  javascriptExtractor.writeParameterNames(path);
   path.readColorAndLineWidthFromChild3And4(calculator, input);
   path.dimension = path.points.numberOfColumns;
   Plot plot;
@@ -1834,7 +1834,7 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   const Expression& leftExpression = input[1];
   const Expression& rightExpression = input[2];
   Vector<double> leftVector;
-  Vector<double>  rightVector;
+  Vector<double> rightVector;
   if (
     !calculator.getVectorDoubles(leftExpression, leftVector) ||
     !calculator.getVectorDoubles(rightExpression, rightVector)
@@ -1915,20 +1915,20 @@ bool CalculatorFunctionsPlot::plotSegment(
   }
   PlotObject segment;
   if (input.size() >= 4) {
-    segment.colorJS = "black";
+    segment.colorJavascript = "black";
     segment.colorRedGreenBlue = static_cast<int>(
       HtmlRoutines::redGreenBlue(0, 0, 0)
     );
     const Expression& colorE = input[3];
-    if (!colorE.isOfType<std::string>(&segment.colorJS)) {
-      segment.colorJS = colorE.toString();
+    if (!colorE.isOfType<std::string>(&segment.colorJavascript)) {
+      segment.colorJavascript = colorE.toString();
     }
     if (
       !DrawingVariables::getColorIntFromColorString(
-        segment.colorJS, segment.colorRedGreenBlue
+        segment.colorJavascript, segment.colorRedGreenBlue
       )
     ) {
-      calculator << "Unrecognized color: " << segment.colorJS;
+      calculator << "Unrecognized color: " << segment.colorJavascript;
     }
   }
   if (input.size() >= 5) {
@@ -2240,7 +2240,9 @@ JavascriptExtractor::JavascriptExtractor(Calculator& inputOwner) {
   this->recursionDepth = 0;
 }
 
-bool JavascriptExtractor::expressionToMatrixToPoints(const Expression &input, PlotObject &output){
+bool JavascriptExtractor::expressionToMatrixToPoints(
+  const Expression& input, PlotObject& output
+) {
   if (!this->owner->getMatrixExpressions(input, output.points)) {
     return
     *this->owner
@@ -2248,14 +2250,15 @@ bool JavascriptExtractor::expressionToMatrixToPoints(const Expression &input, Pl
     << "expected to be a sequence, instead I had: "
     << input.toString();
   }
-if (!this->convertMatrixOfExpressionToPoints(output.points, output)) {
-  return false;
+  if (!this->convertMatrixOfExpressionToPoints(output.points, output)) {
+    return false;
+  }
+  return this->convertMatrixOfExpressionToPoints(output.points, output);
 }
-return  this->convertMatrixOfExpressionToPoints(output.points, output);
 
-}
-
-bool JavascriptExtractor::convertMatrixOfExpressionToPoints(const Matrix<Expression> &input, PlotObject &output){
+bool JavascriptExtractor::convertMatrixOfExpressionToPoints(
+  const Matrix<Expression>& input, PlotObject& output
+) {
   STACK_TRACE("JavascriptExtractor::convertMatrixOfExpressionToPoints");
   output.points = input;
   output.dimension = output.points.numberOfColumns;
@@ -2288,7 +2291,6 @@ bool JavascriptExtractor::convertMatrixOfExpressionToPoints(const Matrix<Express
 }
 
 void JavascriptExtractor::writeParameterNames(PlotObject& output) {
-  global.comments << "<br>DEBUG: write params on: " << output.toJSON() << "param names: " <<this-> parameterNames<< "<br>";
   output.parametersInPlay = this->parameterNames;
   output.parametersInPlayJS = this->parameterNamesJS;
   output.parameterLetter = this->parameterLetter;
@@ -2631,7 +2633,7 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(
   Plot resultPlot;
   resultPlot.dimension = 3;
   PlotObject plot;
-  plot.colorJS = "black";
+  plot.colorJavascript = "black";
   plot.plotType = "segment";
   plot.pointsDouble.setSize(2);
   for (int i = 0; i < 3; i ++) {
@@ -2644,7 +2646,7 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(
   PlotObject plotLabels;
   plotLabels.plotType = "label";
   plotLabels.pointsDouble.setSize(1);
-  plotLabels.colorJS = "blue";
+  plotLabels.colorJavascript = "blue";
   for (char i = 0; i < 3; i ++) {
     plotLabels.pointsDouble[0].makeZero(3);
     plotLabels.pointsDouble[0][i] = corner2[i];

@@ -231,7 +231,7 @@ public:
   static bool plot2DWithBars(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool plotParametricPoint(
+  static bool plotSelectablePoint(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool makeJavascriptExpression(
@@ -302,8 +302,12 @@ public:
     std::stringstream* commentsOnFailure
   );
   void writeParameterNames(PlotObject& output);
-  bool expressionToMatrixToPoints(const Expression &input, PlotObject &output);
-  bool convertMatrixOfExpressionToPoints(const Matrix<Expression> &input, PlotObject &output);
+  bool expressionToMatrixToPoints(
+    const Expression& input, PlotObject& output
+  );
+  bool convertMatrixOfExpressionToPoints(
+    const Matrix<Expression>& input, PlotObject& output
+  );
 };
 
 class CalculatorFunctionsTrigonometry {

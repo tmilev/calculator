@@ -53,7 +53,7 @@ std::string PlotObject::PlotTypes::pathFilled = "pathFilled";
 std::string PlotObject::PlotTypes::label = "label";
 std::string PlotObject::PlotTypes::latex = "latex";
 std::string PlotObject::PlotTypes::axesGrid = "axesGrid";
-std::string PlotObject::PlotTypes::parametricPoint = "parametricPoint";
+std::string PlotObject::PlotTypes::selectablePoint = "selectablePoint";
 std::string Plot::Labels::canvasName = "canvasName";
 std::string Plot::Labels::controlsName = "controlsName";
 std::string Plot::Labels::messagesName = "messagesName";
@@ -253,7 +253,7 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->dimension == other.dimension &&
   this->colorUV == other.colorUV &&
   this->colorVU == other.colorVU &&
-  this->colorJS == other.colorJS &&
+  this->colorJavascript == other.colorJavascript &&
   this->lineWidthJS == other.lineWidthJS &&
   this->numberOfSegmentsJS == other.numberOfSegmentsJS &&
   this->points == other.points &&
@@ -276,7 +276,7 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->rightBoundaryIsMinusInfinity == other.rightBoundaryIsMinusInfinity &&
   this->leftPtJS == other.leftPtJS &&
   this->rightPtJS == other.rightPtJS &&
-  this->colorFillJS == other.colorFillJS &&
+  this->colorFillJavascript == other.colorFillJavascript &&
   this->paramLowJS == other.paramLowJS &&
   this->paramHighJS == other.paramHighJS &&
   this->defaultLengthJS == other.defaultLengthJS &&
@@ -453,7 +453,7 @@ void PlotObject::makeRectangle(
   this->pointsDouble.addOnTop(current);
   current[1] -= height;
   this->pointsDouble.addOnTop(current);
-  this->colorFillJS = color;
+  this->colorFillJavascript = color;
 }
 
 void PlotObject::makeLabel(
@@ -462,7 +462,7 @@ void PlotObject::makeLabel(
   this->dimension = position.size;
   this->plotString = label;
   this->pointsDouble.addOnTop(position);
-  this->colorJS = "black";
+  this->colorJavascript = "black";
   this->plotType = PlotObject::PlotTypes::label;
 }
 
@@ -472,7 +472,7 @@ void PlotObject::makeLatex(
   this->dimension = position.size;
   this->plotString = label;
   this->pointsDouble.addOnTop(position);
-  this->colorJS = "black";
+  this->colorJavascript = "black";
   this->plotType = PlotObject::PlotTypes::latex;
 }
 
@@ -482,6 +482,7 @@ void PlotObject::makeParametricPoint(
   const Vector<double>& position
 ) {
   this->dimension = 2;
+  this->plotType = PlotObject::PlotTypes::selectablePoint;
   this->pointsDouble.addOnTop(position);
   this->coordinateFunctionsE.addOnTop(inputX);
   this->coordinateFunctionsE.addOnTop(inputY);
@@ -520,7 +521,7 @@ void PlotObject::makeCircle(
   center[0].toString() + "+" + radiusString + "*Math.cos(t)";
   this->coordinateFunctionsJS[1] =
   center[1].toString() + "+" + radiusString + "*Math.sin(t)";
-  this->colorJS = color;
+  this->colorJavascript = color;
   this->plotType = PlotObject::PlotTypes::parametricCurve;
 }
 
@@ -939,7 +940,7 @@ void PlotObject::writeColorWidthSegments(JSData& output) {
 }
 
 void PlotObject::writeColor(JSData& output) {
-  output[PlotObject::Labels::color] = this->colorJS;
+  output[PlotObject::Labels::color] = this->colorJavascript;
 }
 
 void PlotObject::writeColorLineWidth(JSData& output) {
@@ -1011,22 +1012,18 @@ JSData PlotObject::toJSONDrawText() {
 JSData PlotObject::toJSONDrawPath() {
   JSData result;
   if (this->pointsJS.numberOfRows > 0) {
-
-    result[PlotObject::PlotTypes::points] = this->toJSONPointsJs();
+    result[PlotObject::PlotTypes::points] = this->toJSONPointsJavascript();
     this->writeParameters(result);
     this->writeParameters(result);
-
-  }else{
-  result[PlotObject::PlotTypes::points] = this->pointsDouble;
+  } else {
+    result[PlotObject::PlotTypes::points] = this->pointsDouble;
   }
-  global.comments << "DEBUG: result points: " << result[PlotObject::PlotTypes::points] ;
-
   this->writeColorLineWidth(result);
   return result;
 }
 
 void PlotObject::writeColorFilled(JSData& output) {
-  output[PlotObject::Labels::colorFill] = this->colorFillJS;
+  output[PlotObject::Labels::colorFill] = this->colorFillJavascript;
 }
 
 JSData PlotObject::toJSONDrawPathFilled() {
@@ -1068,6 +1065,8 @@ JSData PlotObject::toJSON() {
     result = this->toJSONSurfaceImmersion();
   } else if (correctedPlotType == PlotObject::PlotTypes::parametricCurve) {
     result = this->toJSONParametricCurve();
+  } else if (correctedPlotType == PlotObject::PlotTypes::selectablePoint) {
+    result = this->toJSONSelectablePoint();
   } else if (correctedPlotType == PlotObject::PlotTypes::plotFunction) {
     result = this->toJSON2dDrawFunction();
   } else if (correctedPlotType == "plotDirectionField") {
@@ -1098,18 +1097,25 @@ JSData PlotObject::toJSON() {
   return result;
 }
 
+JSData PlotObject::toJSONSelectablePoint() {
+  STACK_TRACE("PlotObject::toJSONSelectablePoint");
+  JSData result;
+  result[PlotObject::PlotTypes::points] = this->pointsDouble[0];
+  return result;
+}
+
 JSData PlotObject::toJSONPoints() {
   STACK_TRACE("PlotObject::toJSONPoints");
   JSData result;
-  result[PlotObject::PlotTypes::points] = this->toJSONPointsJs();
-  result[PlotObject::Labels::color] = this->colorJS;
+  result[PlotObject::PlotTypes::points] = this->toJSONPointsJavascript();
+  result[PlotObject::Labels::color] = this->colorJavascript;
   this->writeVariables(result);
   this->writeParameters(result);
   return result;
 }
 
-JSData PlotObject::toJSONPointsJs() {
-  STACK_TRACE("PlotObject::toJSONPointsJs");
+JSData PlotObject::toJSONPointsJavascript() {
+  STACK_TRACE("PlotObject::toJSONPointsJavascript");
   JSData points = JSData::makeEmptyArray();
   for (int i = 0; i < this->pointsJS.numberOfRows; i ++) {
     JSData onePoint = JSData::makeEmptyArray();
@@ -1118,7 +1124,6 @@ JSData PlotObject::toJSONPointsJs() {
     }
     points[i] = onePoint;
   }
-
   return points;
 }
 

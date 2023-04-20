@@ -335,6 +335,10 @@ class GraphicsSerialization {
           ), color
         );
         return;
+      case "selectablePoint":
+        canvas.drawSelectablePoint(points, parameterNames);
+        console.log("DEBUG: here i am");
+        return;
       case "pathFilled":
         canvas.drawPathFilled(points, color, colorFill);
       case "path":

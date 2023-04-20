@@ -1351,7 +1351,7 @@ public:
     static std::string escapeMap;
     static std::string label;
     static std::string latex;
-    static std::string parametricPoint;
+    static std::string selectablePoint;
   };
 
   std::string label;
@@ -1371,8 +1371,8 @@ public:
   bool leftBoundaryIsMinusInfinity;
   bool rightBoundaryIsMinusInfinity;
   std::string defaultLengthJS;
-  std::string colorJS;
-  std::string colorFillJS;
+  std::string colorJavascript;
+  std::string colorFillJavascript;
   std::string colorUV;
   std::string colorVU;
   std::string lineWidthJS;
@@ -1437,8 +1437,9 @@ public:
   JSData toJSON2dDrawFunction();
   JSData toJSONSetProjectionScreen();
   JSData toJSONSegment();
+  JSData toJSONSelectablePoint();
   JSData toJSONPoints();
-  JSData toJSONPointsJs();
+  JSData toJSONPointsJavascript();
   JSData toJSONDirectionFieldInTwoDimensions();
   JSData toJSONDrawText();
   JSData toJSONDrawPath();

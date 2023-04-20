@@ -4220,7 +4220,7 @@ void VoganDiagram::plotTwoElementOrbit(
   center[0].toString() + "+" + widthString + "*Math.cos(t)";
   plotObject.coordinateFunctionsJS[1] =
   center[1].toString() + "+" + height + "*Math.sin(t)";
-  plotObject.colorJS = "black";
+  plotObject.colorJavascript = "black";
   plotObject.plotType = PlotObject::PlotTypes::parametricCurve;
   output.addPlotOnTop(plotObject);
 }

@@ -297,17 +297,19 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   plotObject.leftPoint = input[2];
   plotObject.rightPoint = input[3];
   if (input.size() >= 7) {
-    if (!input[6].isOfType<std::string>(&plotObject.colorJS)) {
-      plotObject.colorJS = input[6].toString();
+    if (
+      !input[6].isOfType<std::string>(&plotObject.colorJavascript)
+    ) {
+      plotObject.colorJavascript = input[6].toString();
     }
   } else {
-    plotObject.colorJS = "blue";
+    plotObject.colorJavascript = "blue";
   }
   plotObject.colorRedGreenBlue = static_cast<int>(
     HtmlRoutines::redGreenBlue(0, 0, 255)
   );
   DrawingVariables::getColorIntFromColorString(
-    plotObject.colorJS, plotObject.colorRedGreenBlue
+    plotObject.colorJavascript, plotObject.colorRedGreenBlue
   );
   plotObject.lineWidth = 1;
   if (input.size() >= 8) {

@@ -2078,8 +2078,8 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Plots a straight segment path with parametric points. ",
     "x=MakeInputBox(name=x, value=2);\n"
-  "y=MakeInputBox(name=y, value=3);"
-  "PlotPath(((0, 0), (x,y)), blue);\n",
+    "y=MakeInputBox(name=y, value=3);"
+    "PlotPath(((0, 0), (x,y)), blue);\n",
     "CalculatorFunctionsPlot::plotPathParametric",
     "PlotPathParametric",
     innerStandard
@@ -2094,6 +2094,16 @@ void Calculator::initializeFunctionsStandard() {
     "PlotPath(((0, 0), (3, 0), (3, 4), (0, 0)), blue)",
     "CalculatorFunctionsPlot::plotPath",
     "PlotPath",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "PlotSelectablePoint",
+    CalculatorFunctionsPlot::plotSelectablePoint,
+    "",
+    "Plots a point that can be moved with the mouse. ",
+    "PlotSelectablePoint(x,y, 2,3)",
+    "CalculatorFunctionsPlot::plotSelectablePoint",
+    "PlotSelectablePoint",
     innerStandard
   );
   this->addOperationHandler(

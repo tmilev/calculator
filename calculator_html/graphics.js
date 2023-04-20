@@ -1201,13 +1201,13 @@ class LatexPlotTwoD {
   }
 }
 
-class SelectablePointTwoD{
+class SelectablePointTwoD {
   /**
    * @param {number} x coordinate.
    * @param {number} y coordinate.
    * @param {string} color
    */
-  constructor(inputX, inputY, color) { 
+  constructor(inputX, inputY, color) {
     this.x = inputX;
     this.y = inputY;
     this.color = colorToRGB(color);
@@ -1221,6 +1221,7 @@ class SelectablePointTwoD{
   accountBoundingBox(box, canvas) {
     accountBoundingBox([this.x, this.y], box);
   }
+
   /**
    * Same as draw but required to satisfy interface.
    *
@@ -1243,7 +1244,7 @@ class SelectablePointTwoD{
     surface.fillStyle = colorRGBToString(this.color);
     let coordinates = canvas.coordinatesMathToScreen([this.x, this.y]);
     surface.arc(coordinates[0], coordinates[1], 4, 0, Math.PI * 2);
-    surface.fill();  
+    surface.fill();
   }
 }
 
@@ -1333,9 +1334,10 @@ class EscapeMap {
       [255, 255, 255],
     ];
   }
-  /** 
-    * @param { CanvasTwoD } canvas  owning the plot
-    */
+
+  /**
+   * @param { CanvasTwoD } canvas  owning the plot
+   */
   updateParameters(canvas) { 
     for (let i = 0; i < this.indicesOfSelectablePoints.length; i++) {
       let index = this.indicesOfSelectablePoints[i];
@@ -1680,8 +1682,8 @@ class VectorFieldTwoD {
     surface.fillStyle = colorRGBToString(this.color);
     surface.lineWidth = this.lineWidth;
     for (let i = 0; i < this.numSegmentsXY[0]; i++) {
-      let theRatioX = i / (this.numSegmentsXY[0] - 1);
-      let x = this.lowLeft[0] * (1 - theRatioX) + this.highRight[0] * theRatioX;
+      let ratioX = i / (this.numSegmentsXY[0] - 1);
+      let x = this.lowLeft[0] * (1 - ratioX) + this.highRight[0] * ratioX;
       for (let j = 0; j < this.numSegmentsXY[1]; j++) {
         let theRatioY = j / (this.numSegmentsXY[1] - 1);
         let y =
@@ -1814,12 +1816,12 @@ class PlotFillTwoD {
    */
   draw(canvas) {
     let surface = canvas.surface;
-    let theObs = canvas.drawObjects;
+    let objects = canvas.drawObjects;
     let tempCounter = canvas.numDrawnObjects;
     surface.beginPath();
     let firstRun = true;
-    for (tempCounter++; tempCounter < theObs.length; tempCounter++) {
-      let currentO = theObs[tempCounter];
+    for (tempCounter++; tempCounter < objects.length; tempCounter++) {
+      let currentO = objects[tempCounter];
       if (currentO.type === 'plotFillFinish') {
         break;
       }
@@ -1828,9 +1830,9 @@ class PlotFillTwoD {
     }
     surface.fillStyle = colorRGBToString(this.color);
     surface.fill();
-    for (canvas.numDrawnObjects++; canvas.numDrawnObjects < theObs.length;
+    for (canvas.numDrawnObjects++; canvas.numDrawnObjects < objects.length;
          canvas.numDrawnObjects++) {
-      let currentO = theObs[canvas.numDrawnObjects];
+      let currentO = objects[canvas.numDrawnObjects];
       if (currentO.type === 'plotFillFinish') {
         break;
       }
@@ -2169,11 +2171,11 @@ class CanvasTwoD {
    * @param {number} inputLineWidth the width of the line.
    */
   drawCurve(
-      inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
-      inputColor, inputLineWidth) {
+    inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
+    inputColor, inputLineWidth) {
     let newPlot = new CurveTwoD(
-        inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
-        inputColor, inputLineWidth);
+      inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
+      inputColor, inputLineWidth);
     this.drawObjects.push(newPlot);
   }
 
@@ -2412,10 +2414,10 @@ class CanvasTwoD {
   coordinatesMathToScreen(vector) {
     return [
       this.scale * vectorScalarVector(vector, this.screenBasisOrthonormal[0]) +
-          this.centerX,
+      this.centerX,
       (-1) * this.scale *
-              vectorScalarVector(vector, this.screenBasisOrthonormal[1]) +
-          this.centerY
+      vectorScalarVector(vector, this.screenBasisOrthonormal[1]) +
+      this.centerY
     ];
   }
 
@@ -2459,7 +2461,7 @@ class CanvasTwoD {
    */
   coordsScreenAbsoluteToMathScreen(screenX, screenY) {
     return this.coordsScreenToMathScreen(
-        this.coordsScreenAbsoluteToScreen(screenX, screenY));
+      this.coordsScreenAbsoluteToScreen(screenX, screenY));
   }
 
   /**
@@ -2655,9 +2657,9 @@ class CanvasTwoD {
     this.textMouseInfo = '';
     this.textMouseInfo += `time last redraw: ${this.redrawTime}" ms `;
     this.textMouseInfo += `(~ ${(1000 / this.redrawTime).toFixed(1)} f.p.s.)`;
-    this.textMouseInfo += `<br>mouse coordinates: ${this.mousePosition}`;
-    this.textMouseInfo += `<br>clicked coordinates: ${this.clickedPosition}`;
-    this.textMouseInfo += `<br>delta of position: ${this.positionDelta}`;
+    this.textMouseInfo += `\nmouse coordinates: ${this.mousePosition}`;
+    this.textMouseInfo += `\nclicked coordinates: ${this.clickedPosition}`;
+    this.textMouseInfo += `\ndelta of position: ${this.positionDelta}`;
     this.showMessages();
   }
 }
@@ -4766,8 +4768,6 @@ class Canvas {
     this.selectedVector = this.selectedScreenProjectionNormalized.slice();
     vectorNormalize(this.selectedScreenProjectionNormalized);
     this.selectedScreenNormal = this.screenNormal;
-    //    vectorAddVectorTimesScalar(this.selectedVector, this.screenNormal,
-    //    0.1);
     let lengthSelectedVector =
         vectorScalarVector(this.selectedVector, this.selectedVector);
     if (lengthSelectedVector < 0.5) {
@@ -4819,7 +4819,7 @@ class Canvas {
    */
   infoPatchesCompute() {
     this.textPatchInfo = '';
-    this.textPatchInfo += 'Z-depth: ' + this.boundingSegmentZ + '<br>';
+    this.textPatchInfo += 'Z-depth: ' + this.boundingSegmentZ + '\n';
     let allPatches = this.all3dObjects.allPatches;
     for (let i = 0; i < allPatches.length; i++) {
       let currentPatch = allPatches[i];
@@ -4831,7 +4831,7 @@ class Canvas {
           this.textPatchInfo += '->';
         }
       }
-      this.textPatchInfo += `<b>${i}</b>`;
+      this.textPatchInfo += `\n${i}\n`;
       if (currentPatch.patchesBelowMe.length > 0) {
         this.textPatchInfo += '->';
       }
@@ -4849,27 +4849,25 @@ class Canvas {
         }
       }
       if (i != allPatches.length - 1) {
-        this.textPatchInfo += '<br>';
+        this.textPatchInfo += '\n';
       }
     }
-    this.textPatchInfo +=
-        '<style>#patchInfo{ border: 1px solid black;}</style>';
-    this.textPatchInfo += '<table id ="patchInfo">';
+    this.textPatchInfo += '\n';
     for (let i = this.zBuffer.length - 1; i >= 0; i--) {
-      this.textPatchInfo += '<tr id ="patchInfo">';
+      this.textPatchInfo += '\n';
       for (let j = 0; j < this.zBuffer[i].length; j++) {
-        this.textPatchInfo += '<td id ="patchInfo">';
+        this.textPatchInfo += ' ';
         for (let k = 0; k < this.zBuffer[i][j].length; k++) {
           this.textPatchInfo += this.zBuffer[i][j][k];
           if (k !== this.zBuffer[i][j].length - 1) {
             this.textPatchInfo += ', ';
           }
         }
-        this.textPatchInfo += '</td>';
+        this.textPatchInfo += ' ';
       }
-      this.textPatchInfo += '</tr>';
+      this.textPatchInfo += '\n';
     }
-    this.textPatchInfo += '</table>';
+    this.textPatchInfo += '\n';
   }
 
   /**
@@ -4885,25 +4883,25 @@ class Canvas {
     this.textMouseInfo = '';
     let allPatches = this.all3dObjects.allPatches;
     if (this.numAccountedPatches < allPatches.length) {
-      this.textMouseInfo += `<span style ='color:red'><b>Error: only ${
+      this.textMouseInfo += `Error: only ${
           this.numAccountedPatches} out of `;
       this.textMouseInfo += `${
           this.all3dObjects.allPatches
-              .length} patches accounted. </b></span><br>`;
+              .length} patches accounted. \n`;
     }
     this.textMouseInfo += `time last redraw: ${this.redrawTime} ms `;
     this.textMouseInfo += `(~${(1000 / this.redrawTime).toFixed(1)} f.p.s.)`;
-    this.textMouseInfo += `<br>selected element: ${this.selectedElement}`;
+    this.textMouseInfo += `\nselected element: ${this.selectedElement}`;
     this.textMouseInfo +=
-        `<br>mouse coordinates: ${vectorToString(this.screenXY)}`;
+        `\nmouse coordinates: ${vectorToString(this.screenXY)}`;
     this.textMouseInfo +=
-        `<br>2d coordinates: ${vectorToString(this.mousePosition)}`;
-    this.textMouseInfo += `<br>clicked coordinates: ${this.clickedPosition}`;
-    this.textMouseInfo += `<br>delta of position: ${this.positionDelta}`;
-    this.textMouseInfo += `<br>ray component of mouse: ${this.rayComponent}`;
-    this.textMouseInfo += `<br>selected vector: ${this.selectedVector}`;
+        `\n2d coordinates: ${vectorToString(this.mousePosition)}`;
+    this.textMouseInfo += `\nclicked coordinates: ${this.clickedPosition}`;
+    this.textMouseInfo += `\ndelta of position: ${this.positionDelta}`;
+    this.textMouseInfo += `\nray component of mouse: ${this.rayComponent}`;
+    this.textMouseInfo += `\nselected vector: ${this.selectedVector}`;
     this.textMouseInfo +=
-        `<br>normal angle change: ${this.angleNormal.toFixed(3)}`;
+        `\nnormal angle change: ${this.angleNormal.toFixed(3)}`;
     this.textMouseInfo +=
         ` (${(this.angleNormal * 180 / Math.PI).toFixed(1)} deg)`;
     this.textMouseInfo += ` = ${this.oldAngleNormal.toFixed(3)}`;

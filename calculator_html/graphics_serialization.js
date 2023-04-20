@@ -370,7 +370,6 @@ class GraphicsSerialization {
         throw `Unknown plot type: ${plotType}.`;
     }
   }
-  
 
   oneThreeDimensionalObject(
     plot,

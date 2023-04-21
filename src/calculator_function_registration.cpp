@@ -2077,9 +2077,7 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsPlot::plotPathParametric,
     "",
     "Plots a straight segment path with parametric points. ",
-    "x=MakeInputBox(name=x, value=2);\n"
-    "y=MakeInputBox(name=y, value=3);"
-    "PlotPath(((0, 0), (x,y)), blue);\n",
+    "PlotPath(((0, 0), (x,y)), blue) + PlotSelectablePoint(x,y, 2,3);\n",
     "CalculatorFunctionsPlot::plotPathParametric",
     "PlotPathParametric",
     innerStandard

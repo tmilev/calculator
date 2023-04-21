@@ -1,0 +1,19 @@
+
+%HideLHS 
+%This figure was proposed and named "twirled moebius strip" by my baby daughter Evelyn Tran Mileva;
+s= MakeInputBox(name = smallAngleRatio, value = 10, min = 1, max = 10);
+smallAngle = u/2 *s;
+
+x = (R+v*cos(smallAngle))*cos(u);
+y = (R+v*cos(smallAngle))*sin(u);
+z = v*sin(smallAngle);
+R=MakeInputBox(name = radiusBig, value = 2, min = 2, max = 5);
+r=MakeInputBox(name = radiusSmall, value = 0.6, min = 0.2, max = 1, step = 0.2);
+uSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max = 40);
+vSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max = 10);
+PlotSurface(
+(x, y, z), u \in (0, 2\pi), v \in (- r, r), 
+color1 = blue, color2 = cyan, numSegments1 = uSegments, numSegments2 = vSegments
+) + PlotSurface(
+( x + 2, z, y), u \in (0, 2 \pi), v \in (- r,r), 
+color1 = red, color2 = pink, numSegments1 = uSegments, numSegments2 = vSegments); 

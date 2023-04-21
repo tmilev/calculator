@@ -1202,12 +1202,13 @@ class LatexPlotTwoD {
 }
 
 class SelectablePointTwoD {
+
   /**
    * @param {number} x coordinate.
    * @param {number} y coordinate.
    * @param {string} color
    */
-  constructor(inputX, inputY, color) {
+   constructor(inputX, inputY, color) {
     this.x = inputX;
     this.y = inputY;
     this.color = colorToRGB(color);
@@ -2019,6 +2020,7 @@ class CanvasTwoD {
       this.parameterNames[inputParameterNames[0]] = point[0];
       this.parameterNames[inputParameterNames[1]] = point[1];
     }
+    this.indicesOfSelectablePoints.push(this.drawObjects.length);
     this.drawObjects.push(selectablePoint);
   }
 
@@ -2139,11 +2141,21 @@ class CanvasTwoD {
    * @param {number} inputLineWidth the width of the line to plot in pixels.
    */
   drawFunction(
-      toBePlotted, leftPoint, rightPoint, inputNumSegments, inputColor,
-      inputLineWidth) {
+    toBePlotted,
+    leftPoint,
+    rightPoint,
+    inputNumSegments,
+    inputColor,
+    inputLineWidth,
+  ) {
     let newPlot = new PlotTwoD(
-        toBePlotted, leftPoint, rightPoint, inputNumSegments, inputColor,
-        inputLineWidth);
+      toBePlotted,
+      leftPoint,
+      rightPoint,
+      inputNumSegments,
+      inputColor,
+      inputLineWidth,
+    );
     this.drawObjects.push(newPlot);
   }
 

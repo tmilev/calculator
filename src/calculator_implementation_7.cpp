@@ -7577,7 +7577,7 @@ bool CalculatorFunctionsPlot::plot2D(
   }
   if (
     extractor.extractJavascript(
-      plotObject.leftPoint, &calculator.comments
+      plotObject.leftPoint,&calculator.comments
     )
   ) {
     plotObject.leftPtJS = extractor.result;
@@ -7667,40 +7667,47 @@ bool CalculatorFunctionsPlot::plotSelectablePoint(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalclatorFunctionsPlot::plotSelectablePoint");
-  if (input.size() != 5) {
+  if (input.size() < 3) {
     return
     calculator
-    << "Exactly four arguments required: your input: "
+    << "At least 2 arguments required: your input: "
     << input
     << ". ";
   }
-  std::string atomX;
-  std::string atomY;
+  InputBox inputX;
+ InputBox inputY;
   if (
-    !input[1].isAtomUserDefined(&atomX) || !input[2].isAtomUserDefined(&atomY)
+    !input[1].isOfType(&inputX) || !input[2].isOfType(&inputY)
   ) {
     return
     calculator
-    << "Failed to extract user-defined variable name "
+    << "Failed to extract input box "
     << "from the first argument of "
     << input
     << ".<br>";
   }
-  Vector<double> vector;
-  vector.setSize(2);
-  if (
-    !input[3].evaluatesToDouble(&vector[0]) ||
-    !input[4].evaluatesToDouble(&vector[1])
-  ) {
-    return
-    calculator
-    << "Failed to extract floating point number "
-    << "from the second and third argument of "
-    << input
-    << ".<br>";
+  if (inputX.name == inputY.name){
+    return calculator << "Input boxes for the x and y coordinates were different.";
   }
+
+JavascriptExtractor extractor(calculator);
+if (!
+extractor.extractJavascript(input[1], &calculator.comments)){
+  return false;
+}
+std::string xJavascript = extractor.result;
+if (!
+extractor.extractJavascript(input[2], &calculator.comments)){
+  return false;
+}
+std::string yJavascript = extractor.result;
+global.comments << "<br>DEBUG: xJS: " << xJavascript << " yJS: " << yJavascript;
+global.comments << "<br>DEBUG: extractor: param letter" << extractor.parameterLetter;
+global.comments << "<br>DEBUG: extractor: param names" << extractor.parameterNames;
   PlotObject plotObject;
-  plotObject.makeParametricPoint(input[1], input[2], vector);
+  plotObject.makeSelectablePoint(input[1], input[2], xJavascript, yJavascript);
+  extractor.writeParameterNames(plotObject);
+  global.comments << "<br>DEBUG: params in play: " << plotObject.parametersInPlay ;
   return output.assignValue(calculator, plotObject);
 }
 
@@ -8185,9 +8192,9 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     << ". ";
   }
   if (plot.variablesInPlay.size == 0) {
-    Expression tempE;
-    tempE.makeAtom(calculator, "t");
-    plot.variablesInPlay.addOnTop(tempE);
+    Expression parameterExpression;
+    parameterExpression.makeAtom(calculator, "t");
+    plot.variablesInPlay.addOnTop(parameterExpression);
   }
   plot.variablesInPlayJS.addOnTop(
     HtmlRoutines::getJavascriptVariable(
@@ -8247,7 +8254,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     << plot.parameterHighExpression.toString()
     << " to left and right endpoint of parameter interval. ";
   }
-  Vectors<double> xCoordinates, yCoordinates;
+  Vectors<double> xCoordinates;
+  Vectors<double> yCoordinates;
   bool isGoodLatexWise = true;
   for (int i = 0; i < plot.dimension; i ++) {
     if (
@@ -8316,7 +8324,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   plot.numberOfSegmentsJS[0] = "200";
   if (
     extractor.extractJavascript(
-      plot.numberOfSegmentsExpression, &calculator.comments
+      plot.numberOfSegmentsExpression,  &calculator.comments
     )
   ) {
     plot.numberOfSegmentsJS[0] = extractor.result;
@@ -8342,7 +8350,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   }
   if (
     extractor.extractJavascript(
-      plot.parameterHighExpression, &calculator.comments
+      plot.parameterHighExpression,  &calculator.comments
     )
   ) {
     plot.paramHighJS = extractor.result;

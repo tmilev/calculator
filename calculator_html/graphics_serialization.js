@@ -5,6 +5,54 @@ const EquationEditor = require("./equation_editor/equation_editor");
 const CanvasTwoD = require("./graphics").CanvasTwoD;
 const CanvasThreeD = require("./graphics").Canvas;
 
+
+class SliderUpdater {
+  constructor(
+    /** @type {function(Object.<string,number>)} */
+    inputSlideAndFormUpdateFunction,
+  ) {
+    /** @type {Object.<string, HTMLElement>} */
+    this.sliders = {};
+    /** @type {function(string, string)} */
+    this.slideAndFormUpdateFunction = inputSlideAndFormUpdateFunction;
+  }
+
+  updateTwoSlidersFromPoint(
+    /** @type {number} */
+    x,
+    /** @type {number} */
+    y,
+    /** @type {string} */
+    nameX,
+    /** @type{string} */
+    nameY,
+    /** @type {CanvasTwoD} */
+    canvas,
+  ) {
+    canvas.parameterValues[canvas.parameterNames[nameX]] = x;
+    canvas.parameterValues[canvas.parameterNames[nameY]] = y;
+    let nameMap = {};
+    nameMap[nameX] = x;
+    nameMap[nameY] = y;
+    this.slideAndFormUpdateFunction(nameMap);
+  }
+
+  accountOneSlider(
+    /** @type {HTMLInputElement} */
+    slider,
+  ) {
+    let sliderName = slider.getAttribute("name");
+    if (sliderName === "" || sliderName === null || sliderName === undefined) {
+      return;
+    }
+    if (sliderName in this.sliders) {
+      console.log(`Slider name ${sliderName} already present in current element.`);
+      return;
+    }
+    this.sliders[sliderName] = slider;
+  } 
+}
+
 class GraphicsSerialization {
   constructor() {
     this.labels = {
@@ -50,7 +98,7 @@ class GraphicsSerialization {
     controls,
     /** @type {HTMLElement} */
     messages,
-    /** @type {Object.<string,HTMLElement>} */
+    /** @type {SliderUpdater} */
     sliders,
   ) {
     let graphicsType = input["graphicsType"];
@@ -69,7 +117,7 @@ class GraphicsSerialization {
     /** @type {CanvasTwoD|CanvasThreeD} */
     canvas,
     input,
-    /** @type {Object.<string,HTMLElement>} */
+    /** @type {SliderUpdater} */
     sliders,
   ) {
     let graphicsType = input["graphicsType"];
@@ -79,7 +127,7 @@ class GraphicsSerialization {
         return;
       case "threeDimensional":
         canvas.clear();
-        this.plotThreeDimensionalGraphics(canvas, input, sliders, {});
+        this.plotThreeDimensionalGraphics(canvas, input, sliders);
         return;
       default:
         throw `Unknown graphics type ${graphicsType}.`;
@@ -99,7 +147,7 @@ class GraphicsSerialization {
     controls,
     /** @type {HTMLElement} */
     messages,
-    /** @type {Object.<string,HTMLElement>} */
+    /** @type {SliderUpdater} */
     sliders,
   ) {
     let drawCanvas = null;
@@ -152,7 +200,7 @@ class GraphicsSerialization {
     controls,
     /** @type {HTMLElement} */
     messages,
-    /** @type {Object.<string,HTMLElement>} */
+    /** @type {SliderUpdater} */
     sliders
   ) {
     let canvas = new CanvasThreeD(canvasElement, controls, messages);
@@ -169,7 +217,7 @@ class GraphicsSerialization {
     /** @type {CanvasTwoD} */
     canvas,
     input,
-    /** @type {Object.<string,HTMLElement>} */
+    /** @type {SliderUpdater} */
     sliders,
   ) {
     let plotObjects = input["plotObjects"];
@@ -189,14 +237,14 @@ class GraphicsSerialization {
     parameterNames,
     /** @type {CanvasTwoD|CanvasThreeD} */
     canvas,
-    /** @type {Object.<string,HTMLElement>} */
+    /** @type {SliderUpdater} */
     sliders,
   ) {
     for (let i = 0; i < parameterNames.length; i++) {
       let parameterName = parameterNames[i];
       canvas.parameterNames[parameterName] = i;
-      if (parameterName in sliders) {
-        canvas.parameterValues[i] = parseFloat(sliders[parameterName].value);
+      if (parameterName in sliders.sliders) {
+        canvas.parameterValues[i] = parseFloat(sliders.sliders[parameterName].value);
       } else {
         throw `Parameter value ${parameterName} not found.`;
       }
@@ -212,7 +260,7 @@ class GraphicsSerialization {
     /** @type {CanvasThreeD} */
     canvas,
     input,
-    /** @type {Object.<string,HTMLElement>} */
+    /** @type {SliderUpdater} */
     sliders,
   ) {
     let plotObjects = input["plotObjects"];
@@ -221,7 +269,7 @@ class GraphicsSerialization {
     }
     this.writeParameters(input[this.labels.parameters], canvas, sliders);
     for (let i = 0; i < plotObjects.length; i++) {
-      this.oneThreeDimensionalObject(plotObjects[i], canvas, sliders);
+      this.oneThreeDimensionalObject(plotObjects[i], canvas);
     }
     if (input["setBoundingBoxAsDefaultViewWindow"]) {
       canvas.setBoundingBoxAsDefaultViewWindow();
@@ -233,9 +281,9 @@ class GraphicsSerialization {
   oneTwoDimensionalObject(
     plot,
     /** @type {CanvasTwoD} */
-    canvas,
-    /** @type {Object.<string,HTMLElement>} */
-    sliders,
+    canvas, 
+    /** @type {SliderUpdater} */
+    sliderUpdater,
   ) {
     let plotType = plot[this.labels.plotType];
     let functionObject = plot[this.labels.functionLabel];
@@ -257,13 +305,14 @@ class GraphicsSerialization {
     let variableRanges = plot[this.labels.variableRanges];
     let manifoldImmersion = plot[this.labels.manifoldImmersion];
     let coordinateFunctions = plot[this.labels.coordinateFunctions];
+    let parametersFromInputBoxes = plot[this.labels.parameters];
     let parametersOnTheGraph = plot[this.labels.parametersOnTheGraph];
     if (parametersOnTheGraph === undefined) {
       parametersOnTheGraph = [];
     }
     switch (plotType) {
       case "plotFunction":
-        let functionConstructed = this.functionFromObject(functionObject, sliders);
+        let functionConstructed = this.functionFromObject(functionObject);
         canvas.drawFunction(
           functionConstructed,
           this.interpretStringToNumberOrFunction(left, parameterNames, parameterValues),
@@ -292,7 +341,7 @@ class GraphicsSerialization {
         canvas.computeViewWindow();
         return;
       case "plotDirectionField":
-        let immersion = this.functionFromObject(manifoldImmersion, sliders);
+        let immersion = this.functionFromObject(manifoldImmersion);
         canvas.drawVectorField(
           immersion,
           true,
@@ -336,7 +385,19 @@ class GraphicsSerialization {
         );
         return;
       case "selectablePoint":
-        canvas.drawSelectablePoint(points, parameterNames);
+        let pointComputer = this.interpretListListStringsAsNumbersOrFunctions(
+          points, parameterNames, parameterValues
+        )[0];
+        let nameX = parametersFromInputBoxes[0];
+        let nameY = parametersFromInputBoxes[1];
+        canvas.drawSelectablePoint(
+          pointComputer,
+          (x, y) => {
+            sliderUpdater.updateTwoSlidersFromPoint(
+              x, y, nameX, nameY, canvas,
+            );
+          }
+        );
         return;
       case "pathFilled":
         canvas.drawPathFilled(points, color, colorFill);
@@ -377,9 +438,7 @@ class GraphicsSerialization {
   oneThreeDimensionalObject(
     plot,
     /** @type {CanvasThreeD} */
-    canvas,
-    /** @type {Object.<string,HTMLElement>} */
-    sliders
+    canvas
   ) {
     let plotType = plot[this.labels.plotType];
     let variableRanges = plot[this.labels.variableRanges];
@@ -505,11 +564,7 @@ class GraphicsSerialization {
     return result;
   }
 
-  functionFromObject(
-    input,
-    /** @type {Object.<string,HTMLElement>} */
-    sliders,
-  ) {
+  functionFromObject(input) {
     /** @type {string} */
     let body = input[this.labels.body];
     return this.functionFromBodyAndArguments(body, this.getArguments(input));
@@ -659,4 +714,5 @@ let graphicsSerialization = new GraphicsSerialization();
 
 module.exports = {
   graphicsSerialization,
+  SliderUpdater,
 };

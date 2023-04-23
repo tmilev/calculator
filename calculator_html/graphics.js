@@ -575,13 +575,13 @@ class CurveTwoD {
   constructor(
       inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
       inputColor, inputLineWidth) {
-    /** @type {!Array.<!Function>}*/
+    /** @type {!Array.<!Function>} */
     this.coordinateFunctions = inputCoordinateFunctions;
-    /** @type {number|function(number):number}  */
+    /** @type {number|function(number):number} */
     this.leftPointComputer = inputLeftPt;
-    /** @type {number|function(number):number}  */
+    /** @type {number|function(number):number} */
     this.rightPointComputer = inputRightPt;
-    /** @type {number|function(number):number}  */
+    /** @type {number|function(number):number} */
     this.numberOfSegmentsComputer = inputNumSegments;    
     /** @type {number} */
     this.leftPt = 0;
@@ -750,6 +750,7 @@ class PathTwoD {
    * @param {CanvasTwoD} canvas output bounding box.
    */
   accountBoundingBox(inputOutputBox, canvas) {
+    this.updatePoints(canvas);
     for (let i = 0; i < this.path.length; i++) {
       accountBoundingBox(this.path[i], inputOutputBox);
     }
@@ -1204,14 +1205,34 @@ class LatexPlotTwoD {
 class SelectablePointTwoD {
 
   /**
-   * @param {number} x coordinate.
-   * @param {number} y coordinate.
+   * @param {number|function(Array.<number>):number} x coordinate.
+   * @param {number|function(Array.<number>):number} y coordinate.
    * @param {string} color
    */
-   constructor(inputX, inputY, color) {
-    this.x = inputX;
-    this.y = inputY;
+  constructor(inputXComputer, inputYComputer, color) {
+    this.xComputer = inputXComputer;
+    this.yComputer = inputYComputer;
+    /** @type{number} */
+    this.x = 0;
+    /** @type{number} */
+    this.y = 0;
+    if (typeof this.xComputer === "number") {
+      this.x = /** @type{number} */ (this.xComputer);
+    }
+    if (typeof this.yComputer === "number") {
+      this.y = /** @type{number} */ (this.yComputer);
+    }
     this.color = colorToRGB(color);
+  }
+
+  /** 
+  * Updates the point coordinates.
+  * 
+  * @param {CanvasTwoD} canvas the canvas.
+  */
+  updatePoints(canvas) {
+    this.x = canvas.evaluateNumberOrParameter(this.xComputer);
+    this.y = canvas.evaluateNumberOrParameter(this.yComputer);
   }
 
   /** 
@@ -1220,6 +1241,7 @@ class SelectablePointTwoD {
    * @param {CanvasTwoD} canvas  owning the plot
    */
   accountBoundingBox(box, canvas) {
+    this.updatePoints(canvas);
     accountBoundingBox([this.x, this.y], box);
   }
 
@@ -1239,6 +1261,7 @@ class SelectablePointTwoD {
    * @param {!CanvasTwoD} canvas the canvas.
    */
   draw(canvas) {
+    this.updatePoints(canvas);
     let surface = canvas.surface;
     surface.beginPath();
     surface.strokeStyle = colorRGBToString(this.color);
@@ -1249,7 +1272,8 @@ class SelectablePointTwoD {
   }
 }
 
-class EscapeMap { 
+class EscapeMap {
+
   /**
    * Plots an escape map. 
    * In Julia set mode, the x,y-coordinates of the canvas are used 
@@ -1263,10 +1287,9 @@ class EscapeMap {
    * 
    * @param {!function(number, number):number} functionX.
    * @param {!function(number, number):number} functionY.
-   * @param {Array.<number>} parametersOnTheGraph  parameters on the graph 
-   * that will be made into a clickable points that can be dragged around
-   * @param {boolean} mandelbrotMode whether to draw in Mandelbrot mode 
-   * 
+   * @param {Array.<number>} parametersOnTheGraph  parameters on the graph. 
+   * that will be made into a clickable points that can be dragged around.
+   * @param {boolean} mandelbrotMode whether to draw in Mandelbrot mode. 
    */
   constructor(functionX, functionY, parametersOnTheGraph, mandelbrotMode) {
     this.functionX = functionX;
@@ -1337,7 +1360,7 @@ class EscapeMap {
   }
 
   /**
-   * @param { CanvasTwoD } canvas  owning the plot
+   * @param { CanvasTwoD } canvas owning the plot.
    */
   updateParameters(canvas) { 
     for (let i = 0; i < this.indicesOfSelectablePoints.length; i++) {
@@ -2008,20 +2031,21 @@ class CanvasTwoD {
    * Draw selectable point.
    *
    * @param {Array.<number>} point to plot.
-   * @param {Array.<string>} parameterNames the two parameters.
+   * @param {function(number,number)} callbackOnPointChange function to call
+   * with the math x,y-coordinates of the point.
    */
-  drawSelectablePoint(point, inputParameterNames) {
+  drawSelectablePoint(point, callbackOnPointChange) {
     let selectablePoint = new SelectablePointTwoD(point[0], point[1], "red");
-    if (
-      inputParameterNames !== null &&
-      inputParameterNames !== undefined &&
-      inputParameterNames.length !== 2
-    ) {
-      this.parameterNames[inputParameterNames[0]] = point[0];
-      this.parameterNames[inputParameterNames[1]] = point[1];
-    }
-    this.indicesOfSelectablePoints.push(this.drawObjects.length);
+    let numberOfObjects = this.drawObjects.length;
+    this.indicesOfSelectablePoints.push(numberOfObjects);
     this.drawObjects.push(selectablePoint);
+    this.additionalMouseMoveListeners.push((x, y) => {
+      if (this.selectedElement !== numberOfObjects) {
+        return;
+      }
+      let mathCoordinates = this.coordsScreenAbsoluteToMathScreen(x, y);
+      callbackOnPointChange(mathCoordinates[0], mathCoordinates[1]);
+    });
   }
 
   /**
@@ -2034,7 +2058,7 @@ class CanvasTwoD {
    */
   drawLine(inputLeftPt, inputRightPt, inputColor, inputLineWidth) {
     let newLine =
-        new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
+      new SegmentTwoD(inputLeftPt, inputRightPt, inputColor, inputLineWidth);
     this.drawObjects.push(newLine);
   }
 
@@ -2071,14 +2095,24 @@ class CanvasTwoD {
    * @param {!Array.<number>} inputHighRight [x,y]-coordinate of the high right
    *     coordinate of the rectangle over which we draw the vector field.
    * @param {!Array.<number>} inputNumSegmentsXY a pair of numbers. The first
-   *     number gives the number of x-coordinates of the sample points less one
-   * the second number gives the number of y coordinates less one.
+   *     number gives the number of x-coordinates of the sample points less one 
+   *     the second number gives the number of y coordinates less one.
    * @param {number} inputDesiredLengthDirectionVectors lengths of the direction
    *     vectors; used when inputIsDirectionField is set.
    * @param {string} inputColor color of the vectors.
    * @param {number} inputLineWidth line width.
    */
   drawVectorField(
+    inputField,
+    inputIsDirectionField,
+    inputLowLeft,
+    inputHighRight,
+    inputNumSegmentsXY,
+    inputDesiredLengthDirectionVectors,
+    inputColor,
+    inputLineWidth,
+  ) {
+    let newLine = new VectorFieldTwoD(
       inputField,
       inputIsDirectionField,
       inputLowLeft,
@@ -2087,16 +2121,6 @@ class CanvasTwoD {
       inputDesiredLengthDirectionVectors,
       inputColor,
       inputLineWidth,
-  ) {
-    let newLine = new VectorFieldTwoD(
-        inputField,
-        inputIsDirectionField,
-        inputLowLeft,
-        inputHighRight,
-        inputNumSegmentsXY,
-        inputDesiredLengthDirectionVectors,
-        inputColor,
-        inputLineWidth,
     );
     this.drawObjects.push(newLine);
   }
@@ -2110,7 +2134,7 @@ class CanvasTwoD {
    */
   drawPath(inputPath, inputColor, inputLineWidth) {
     let newPath =
-        new PathTwoD(inputPath, inputColor, inputColor, inputLineWidth);
+      new PathTwoD(inputPath, inputColor, inputColor, inputLineWidth);
     this.drawObjects.push(newPath);
   }
 
@@ -2176,7 +2200,10 @@ class CanvasTwoD {
       throw "Missing parameters on the graph";
     }
     let newPlot = new EscapeMap(
-      functionX, functionY, parametersOnTheGraph, mandelbrotMode
+      functionX,
+      functionY,
+      parametersOnTheGraph,
+      mandelbrotMode,
     );
     this.drawObjects.push(newPlot);    
     for (let i = 0; i + 1 < parametersOnTheGraph.length; i += 2) {
@@ -2521,8 +2548,8 @@ class CanvasTwoD {
    * @param {number} screenY absolute screen y coordinates.
    */
   mouseWheel(wheelDelta, screenX, screenY) {
-    let screenPos = this.coordsScreenAbsoluteToScreen(screenX, screenY);
-    let mathScreenPos = this.coordsScreenToMathScreen(screenPos);
+    let screenPosition = this.coordsScreenAbsoluteToScreen(screenX, screenY);
+    let mathScreenPosition = this.coordsScreenToMathScreen(screenPosition);
     if (wheelDelta / this.scale > 0.1) {
       wheelDelta = this.scale * 0.1;
     }
@@ -2533,9 +2560,9 @@ class CanvasTwoD {
     if (this.scale <= 0) {
       this.scale = 1;
     }
-    let intermediateScreenPos = this.coordsMathScreenToScreen(mathScreenPos);
-    this.centerX = this.centerX + screenPos[0] - intermediateScreenPos[0];
-    this.centerY = this.centerY + screenPos[1] - intermediateScreenPos[1];
+    let intermediateScreenPosition = this.coordsMathScreenToScreen(mathScreenPosition);
+    this.centerX = this.centerX + screenPosition[0] - intermediateScreenPosition[0];
+    this.centerY = this.centerY + screenPosition[1] - intermediateScreenPosition[1];
     this.redraw();
   }
 
@@ -2716,9 +2743,9 @@ class CurveThreeD {
     /** @type {function(number):!Array.<number>} */
     this.coordinateFunctions = inputCoordinateFunctions;
     /** @type {number} */
-    this.leftPt = inputLeftPoint;
+    this.leftPoint = inputLeftPoint;
     /** @type {number} */
-    this.rightPt = inputRightPoint;
+    this.rightPoint = inputRightPoint;
     /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     /** @type {number} */
@@ -2732,13 +2759,13 @@ class CurveThreeD {
    * @param {!Array.<!Array.<number>>} inputOutputBox output bounding box.
    */
   accountBoundingBox(inputOutputBox) {
-    let argumentT = this.leftPt;
+    let argumentT = this.leftPoint;
     let x = this.coordinateFunctions[0](argumentT);
     let y = this.coordinateFunctions[1](argumentT);
     accountBoundingBox([x, y], inputOutputBox);
     for (let i = 0; i < this.numSegments; i++) {
       let ratio = i / (this.numSegments - 1);
-      argumentT = this.leftPt * (1 - ratio) + this.rightPt * ratio;
+      argumentT = this.leftPoint * (1 - ratio) + this.rightPoint * ratio;
       x = this.coordinateFunctions[0](argumentT);
       y = this.coordinateFunctions[1](argumentT);
       accountBoundingBox([x, y], inputOutputBox);
@@ -2756,7 +2783,7 @@ class CurveThreeD {
     let surface = canvas.surface;
     surface.strokeStyle = colorRGBToString(this.color);
     surface.fillStyle = colorRGBToString(this.color);
-    let argumentT = this.leftPt;
+    let argumentT = this.leftPoint;
     let x = this.coordinateFunctions[0](argumentT);
     let y = this.coordinateFunctions[1](argumentT);
     let coordinates = canvas.coordinatesMathToScreen([x, y]);
@@ -2769,7 +2796,7 @@ class CurveThreeD {
     for (let i = 0; i < this.numSegments; i++) {
       let ratio = i / (this.numSegments - 1);
       argumentT =
-          this.leftPt * (1 - ratio) + this.rightPt * ratio;  //<- this way of
+          this.leftPoint * (1 - ratio) + this.rightPoint * ratio;  //<- this way of
       // computing x introduces smaller numerical errors.
       // For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
       // If not careful with rounding errors,
@@ -3237,7 +3264,7 @@ class Canvas {
     let contourPoints = new Array(curve.numSegments + 1);
     for (let i = 0; i < curve.numSegments + 1; i++) {
       let ratio = i / curve.numSegments;
-      let currentParam = curve.leftPt * (1 - ratio) + curve.rightPt * ratio;
+      let currentParam = curve.leftPoint * (1 - ratio) + curve.rightPoint * ratio;
       contourPoints[i] = curve.coordinateFunctions(currentParam);
     }
     this.all3dObjects.allContours.push(

@@ -2077,7 +2077,10 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsPlot::plotPathParametric,
     "",
     "Plots a straight segment path with parametric points. ",
-    "PlotPath(((0, 0), (x,y)), blue) + PlotSelectablePoint(x,y, 2,3);\n",
+    "x=MakeInputBox(name=x, value = 2);\n"
+  "y=MakeInputBox(name=y, value = 3);\n"
+  "PlotPath(((0, 0), (x,y)), blue) + "
+  "PlotSelectablePoint(x,y);\n",
     "CalculatorFunctionsPlot::plotPathParametric",
     "PlotPathParametric",
     innerStandard
@@ -2098,8 +2101,12 @@ void Calculator::initializeFunctionsStandard() {
     "PlotSelectablePoint",
     CalculatorFunctionsPlot::plotSelectablePoint,
     "",
-    "Plots a point that can be moved with the mouse. ",
-    "PlotSelectablePoint(x,y, 2,3)",
+    "Plots a point that can be moved with the mouse. "
+  "The first two inputs are the x and y arguments and must be"
+  "input boxes.",
+    "x=MakeInputBox(name=x, value=2);\n"
+  "y=MakeInputBox(name=y, value = 3);\n"
+  "PlotSelectablePoint(x,y)",
     "CalculatorFunctionsPlot::plotSelectablePoint",
     "PlotSelectablePoint",
     innerStandard

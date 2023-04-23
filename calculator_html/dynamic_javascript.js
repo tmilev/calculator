@@ -1,4 +1,5 @@
 const graphicsSerialization = require("./graphics_serialization").graphicsSerialization;
+const SliderUpdater = require("./graphics_serialization").SliderUpdater;
 const CanvasTwoD = require("./graphics").CanvasTwoD;
 const CanvasThreeD = require("./graphics").Canvas;
 const crypto = require("./crypto");
@@ -62,8 +63,12 @@ class ElementWithScripts {
     };
     /** @type {HTMLElement|null} */
     this.element = null;
-    /** @type {Object.<string,HTMLInputElement>} */
-    this.sliders = {};
+    this.sliders = new SliderUpdater((
+      /** @type {Object.<string,number> } */
+      map
+    ) => {
+      this.updateSlidersAndFormInputs(map);
+    });
     /** @type {Object.<string,Array.<MathNode>>} */
     this.mathNodesAssociatedWithSliders = {}; 
     /** @type {Array.<OneGraphicWithSliders>} */
@@ -84,21 +89,6 @@ class ElementWithScripts {
     script.setAttribute("scriptType", "processed");
   }
 
-  accountOneSlider(
-    /** @type {HTMLInputElement} */
-    slider,
-  ) {
-    let sliderName = slider.getAttribute("name");
-    if (sliderName === "" || sliderName === null || sliderName === undefined) {
-      return;
-    }
-    if (sliderName in this.sliders) {
-      console.log(`Slider name ${sliderName} already present in current element.`);
-      return;
-    }
-    this.sliders[sliderName] = slider;
-  }
-
   bootstrapAllScripts(
     /** @type {HTMLElement} */
     element,
@@ -114,7 +104,7 @@ class ElementWithScripts {
     }
     let candidateSliders = this.element.getElementsByTagName("input");
     for (let i = 0; i < candidateSliders.length; i++) {
-      this.accountOneSlider(candidateSliders[i]);
+      this.sliders.accountOneSlider(candidateSliders[i]);
     }
     this.bootstrapGraphics3d();
     this.bootstrapGraphics();
@@ -127,8 +117,8 @@ class ElementWithScripts {
   }
 
   bootstrapSliders() { 
-    for (let label in this.sliders) {
-      let current = this.sliders[label];
+    for (let label in this.sliders.sliders) {
+      let current = this.sliders.sliders[label];
       current.addEventListener("input", () => {
         this.updateSlidersAndFormInputs(label, current.value);
       });
@@ -294,31 +284,52 @@ class ElementWithScripts {
     }
     this.mathNodesAssociatedWithSliders[name].push(node);
   }
+  
+  /**
+  * Updates all form inputs and sliders to all the given value, number pairs. 
+  * 
+  * @param {Object.<string, value>} map a collection of name-value pairs.
+  */
+  updateSlidersAndFormInputs(map) {
+    let setToRedraw = new Set();
+    for (let label in map) {
+      let moreToRedraw = this.updateOneSliderAndFormInput(label, map[label]);
+      for (let graphic in moreToRedraw.keys) {
+        setToRedraw.add(graphic);
+      }
+    }
+    for (let graphic in setToRedraw) {
+      graphic.redraw();
+    }
+  }
 
   /** 
-   * Updates all form inputs and sliders to the given value. 
-   * 
-   * @param {string} name name of the slider
-   * @param {string} value value to update to
-   */
-  updateSlidersAndFormInputs(name, value) {
+    * Updates all form inputs and sliders to the given value. 
+    * 
+    * @param {name} name of of the input box.
+    * @param {string} value value to update to.
+    * @return a set of graphics to redraw.
+    */
+  updateOneSliderAndFormInput(name, value) {
+    let result = new Set();
     let mathNodes = this.mathNodesAssociatedWithSliders[name];
-    for (let i = 0; i < mathNodes.length; i++){
+    for (let i = 0; i < mathNodes.length; i++) {
       let node = mathNodes[i];
       if (node.element !== null) {
         node.element.value = value;
       }
     }
-    let slider = this.sliders[name];
+    let slider = this.sliders.sliders[name];
     slider.value = value;
     for (let i = 0; i < this.graphicsWithSliders.length; i++) {
       let graphic = this.graphicsWithSliders[i];
       if (name in graphic.canvas.parameterNames) {
         let index = graphic.canvas.parameterNames[name];
         graphic.canvas.parameterValues[index] = parseFloat(value);
-        graphic.redraw();
+        result.add(graphic.canvas);
       }
     }
+    return result;
   }
 }
 

@@ -2229,7 +2229,7 @@ bool CalculatorFunctionsPlot::makeJavascriptExpression(
     return false;
   }
   JavascriptExtractor extractor(calculator);
-  if (!extractor.extractJavascript(input[1], &calculator.comments)) {
+  if (!extractor.extractJavascript(input[1] , &calculator.comments)) {
     return false;
   }
   return output.assignValue(calculator, extractor.result);
@@ -2257,7 +2257,7 @@ bool JavascriptExtractor::expressionToMatrixToPoints(
 }
 
 bool JavascriptExtractor::convertMatrixOfExpressionToPoints(
-  const Matrix<Expression>& input, PlotObject& output
+  const Matrix<Expression>& input,PlotObject& output
 ) {
   STACK_TRACE("JavascriptExtractor::convertMatrixOfExpressionToPoints");
   output.points = input;
@@ -2300,20 +2300,21 @@ void JavascriptExtractor::writeParameterNames(PlotObject& output) {
 
 bool JavascriptExtractor::extract(
   const Expression& input,
-  std::string& output,
-  std::stringstream* commentsOnFailure
+  std::string& output
+,   std::stringstream* commentsOnFailure
 ) {
-  if (!this->extractJavascript(input, commentsOnFailure)) {
+  if (!this->extractJavascript(input,commentsOnFailure)) {
     return false;
   }
   output = this->result;
   return true;
 }
 
-bool JavascriptExtractor::extractJavascript(
-  const Expression& input, std::stringstream* commentsOnFailure
+bool JavascriptExtractor::extractJavascript(const Expression& input,std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("JavascriptExtractor::extractJavascript");
   this->startingExpression = input;
+
   if (this->parameterLetter == "") {
     Expression parameterAtom = this->owner->getNewAtom("p");
     this->parameterLetter = parameterAtom.toString();
@@ -2344,7 +2345,7 @@ bool JavascriptExtractor::extractFromAtom(
     return true;
   }
   if (this->parametersOnTheGraph.contains(atomString)) {
-//    global.comments << "<br>DEBUG: parameter on the graph!: " << input;
+    global.comments << "<br>DEBUG: parameter on the graph!: " << input;
 
     std::stringstream out;
     out
@@ -2355,11 +2356,11 @@ bool JavascriptExtractor::extractFromAtom(
     output = out.str();
     return true;
   }
-//  global.comments << "<br>DEBUG: parameter IS NOT on the graph!!!!" << input;
 
   if (input.data >= this->owner->numberOfPredefinedAtoms) {
     // User-defined atoms need to be corrected for safety.
     output = HtmlRoutines::getJavascriptVariable(atomString);
+    global.comments << "<br>DEBUG: parameter IS NOT on the graph!!!!" << output;
     return true;
   }
   if (
@@ -2576,7 +2577,9 @@ bool JavascriptExtractor::extractJavascriptRecursive(
     output = out.str();
     return true;
   }
-  Expression operation, leftE, rightE;
+  Expression operation;
+  Expression leftE;
+  Expression  rightE;
   if (
     input.startsWith(this->owner->opSequence()) ||
     input.startsWith(this->owner->opIntervalOpen())

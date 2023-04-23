@@ -476,16 +476,20 @@ void PlotObject::makeLatex(
   this->plotType = PlotObject::PlotTypes::latex;
 }
 
-void PlotObject::makeParametricPoint(
+void PlotObject::makeSelectablePoint(
   const Expression& inputX,
   const Expression& inputY,
-  const Vector<double>& position
+const std::string& xJavascript,
+const std::string& yJavascript
 ) {
   this->dimension = 2;
   this->plotType = PlotObject::PlotTypes::selectablePoint;
-  this->pointsDouble.addOnTop(position);
-  this->coordinateFunctionsE.addOnTop(inputX);
-  this->coordinateFunctionsE.addOnTop(inputY);
+  this->points.resize(1, 2, false);
+  this->points(0,0)=inputX;
+  this->points(0,1)=inputY;
+  this->pointsJS.resize(1,2,false);
+  this->pointsJS(0,0)=xJavascript;
+  this->pointsJS(0,1) = yJavascript;
 }
 
 void PlotObject::makePlotFillStart() {
@@ -1100,7 +1104,9 @@ JSData PlotObject::toJSON() {
 JSData PlotObject::toJSONSelectablePoint() {
   STACK_TRACE("PlotObject::toJSONSelectablePoint");
   JSData result;
-  result[PlotObject::PlotTypes::points] = this->pointsDouble[0];
+  result[PlotObject::PlotTypes::points] = this->toJSONPointsJavascript();
+  result[PlotObject::Labels::parameterLetter] = this->parameterLetter;
+  result[PlotObject::Labels::parameters] = this->parametersInPlayJS;
   return result;
 }
 
@@ -1207,9 +1213,17 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   result[Plot::Labels::controlsName] = controls;
   result[Plot::Labels::messagesName] = messages;
   result["plotUpdaters"].elementType = JSData::token::tokenArray;
+  global.comments << "<br>DEBUG: all parameter names: " << this->parameterNames << " in js: " << this->parameterNamesJS;
   for (int i = 0; i < this->parameterNames.size; i ++) {
+    if (! owner.objectContainer.userInputTextBoxesWithValues.contains(this->parameterNames[i])){
+      std::stringstream out;
+      out << "[Parameter: " << this->parameterNames[i] << " not found. ]";
+return out.str();
+    }
+    global << "[Parameter: " << this->parameterNames[i] << " YES found. ]";
+
     InputBox& currentBox =
-    owner.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(
+    owner.objectContainer.userInputTextBoxesWithValues.getValueNoFailNonConst(
       this->parameterNames[i]
     );
     result["plotUpdaters"][i] = currentBox.getSliderName();

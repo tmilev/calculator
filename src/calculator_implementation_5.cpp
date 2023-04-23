@@ -386,8 +386,7 @@ bool Calculator::getVectorDoubles(
     input,
     output,
     nullptr,
-    desiredDimensionNonMandatory // ,
-    // CalculatorFunctions::functionEvaluateToDouble
+    desiredDimensionNonMandatory
   );
 }
 
@@ -401,8 +400,7 @@ bool Calculator::getVectorDoublesFromFunctionArguments(
     input,
     output,
     nullptr,
-    desiredDimensionNonMandatory // ,
-    // CalculatorFunctions::functionEvaluateToDouble
+    desiredDimensionNonMandatory
   );
 }
 

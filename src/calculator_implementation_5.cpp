@@ -2331,7 +2331,6 @@ bool JavascriptExtractor::extractFromAtom(
   const Expression& input, std::string& output
 ) {
   STACK_TRACE("JavascriptExtractor::extractFromAtom");
-//  global.comments << "<br>DEBUG: extracting atom from: " << input;
   std::string atomString;
   if (!input.isOperation(&atomString)) {
     return false;
@@ -2345,7 +2344,6 @@ bool JavascriptExtractor::extractFromAtom(
     return true;
   }
   if (this->parametersOnTheGraph.contains(atomString)) {
-    global.comments << "<br>DEBUG: parameter on the graph!: " << input;
 
     std::stringstream out;
     out
@@ -2360,7 +2358,6 @@ bool JavascriptExtractor::extractFromAtom(
   if (input.data >= this->owner->numberOfPredefinedAtoms) {
     // User-defined atoms need to be corrected for safety.
     output = HtmlRoutines::getJavascriptVariable(atomString);
-    global.comments << "<br>DEBUG: parameter IS NOT on the graph!!!!" << output;
     return true;
   }
   if (

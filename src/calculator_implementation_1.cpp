@@ -1213,7 +1213,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   result[Plot::Labels::controlsName] = controls;
   result[Plot::Labels::messagesName] = messages;
   result["plotUpdaters"].elementType = JSData::token::tokenArray;
-  global.comments << "<br>DEBUG: all parameter names: " << this->parameterNames << " in js: " << this->parameterNamesJS;
+
   for (int i = 0; i < this->parameterNames.size; i ++) {
     if (! owner.objectContainer.userInputTextBoxesWithValues.contains(this->parameterNames[i])){
       std::stringstream out;

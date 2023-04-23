@@ -7701,13 +7701,9 @@ extractor.extractJavascript(input[2], &calculator.comments)){
   return false;
 }
 std::string yJavascript = extractor.result;
-global.comments << "<br>DEBUG: xJS: " << xJavascript << " yJS: " << yJavascript;
-global.comments << "<br>DEBUG: extractor: param letter" << extractor.parameterLetter;
-global.comments << "<br>DEBUG: extractor: param names" << extractor.parameterNames;
   PlotObject plotObject;
   plotObject.makeSelectablePoint(input[1], input[2], xJavascript, yJavascript);
   extractor.writeParameterNames(plotObject);
-  global.comments << "<br>DEBUG: params in play: " << plotObject.parametersInPlay ;
   return output.assignValue(calculator, plotObject);
 }
 

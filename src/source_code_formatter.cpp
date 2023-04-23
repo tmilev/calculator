@@ -1131,7 +1131,9 @@ bool CodeFormatter::Element::computeIndentationCodeBlock() {
   this->children[0].whiteSpaceBefore = 1;
   this->children[0].indentationLevel = this->indentationLevel;
   this->children[0].computeIndentation();
-  this->children[0].newLinesAfter=1;
+  if (this->children.size > 2) {
+    this->children[0].newLinesAfter = 1;
+  }
   if (this->children.size == 3) {
     if (
       this->children[1].type == CodeFormatter::Element::CommandList ||
@@ -1144,7 +1146,6 @@ bool CodeFormatter::Element::computeIndentationCodeBlock() {
       this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
     }
   }
-  global.comments << "<br>DEBUG: here I am";
   int indentationChildren = this->indentationLevel + this->owner->tabLength;
   for (int i = 1; i < this->children.size - 1; i ++) {
     this->children[i].indentationLevel = indentationChildren;

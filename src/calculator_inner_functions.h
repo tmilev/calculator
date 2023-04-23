@@ -293,16 +293,20 @@ public:
   HashedList<std::string> parameterNames;
   HashedList<std::string> parameterNamesJS;
   JavascriptExtractor(Calculator& inputOwner);
-  bool extractJavascript(const Expression& input, std::stringstream* commentsOnFailure
+  bool extractJavascript(
+    const Expression& input, std::stringstream* commentsOnFailure
   );
-  bool extract(const Expression& input,
+  bool extract(
+    const Expression& input,
     std::string& output,
     std::stringstream* commentsOnFailure
   );
   void writeParameterNames(PlotObject& output);
-  bool expressionToMatrixToPoints(const Expression& input, PlotObject& output
+  bool expressionToMatrixToPoints(
+    const Expression& input, PlotObject& output
   );
-  bool convertMatrixOfExpressionToPoints(const Matrix<Expression>& input, PlotObject& output
+  bool convertMatrixOfExpressionToPoints(
+    const Matrix<Expression>& input, PlotObject& output
   );
 };
 

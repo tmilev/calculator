@@ -348,7 +348,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   if (input.size() >= 6) {
     if (
       !extractor.extract(
-        input[5], plotObject.defaultLengthJS , &calculator.comments
+        input[5], plotObject.defaultLengthJS, &calculator.comments
       )
     ) {
       return

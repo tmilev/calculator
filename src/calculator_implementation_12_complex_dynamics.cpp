@@ -123,7 +123,7 @@ bool CalculatorFunctionsComplexDynamics::plotEscapeMap(
   std::string javascriptX = extractorJavascript.result;
   if (
     !extractorJavascript.extractJavascript(
-      extractor.imaginaryPart,&calculator.comments
+      extractor.imaginaryPart, &calculator.comments
     )
   ) {
     return false;

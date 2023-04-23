@@ -499,7 +499,8 @@ void RootSubalgebra::possibleNilradicalComputation(
         }
         currentSubalgebrasList.addOnTop(newNilradical);
       }
-    } else {      // the below commented out code should be incapsulated. It computes
+    } else {
+      // the below commented out code should be incapsulated. It computes
       // whether a given nilradical is a nilradical of a parabolic subalgebra.
       // this task is pushed on the end of the to-do list.
       /* owner.NumconeConditionHoldsBySSpart.objects[indexInOwner] ++;
@@ -5729,7 +5730,8 @@ bool ConeRelation::isStrictlyWeaklyProhibiting(
   if (
     this->diagram.simpleComponentTypes[0].letter == 'A' &&
     this->diagram.simpleComponentTypes[0].rank == 1
-  ) { //  global.fatal << global.fatal;
+  ) {
+    //  global.fatal << global.fatal;
   }
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
   tempSubgroup;

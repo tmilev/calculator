@@ -479,17 +479,17 @@ void PlotObject::makeLatex(
 void PlotObject::makeSelectablePoint(
   const Expression& inputX,
   const Expression& inputY,
-const std::string& xJavascript,
-const std::string& yJavascript
+  const std::string& xJavascript,
+  const std::string& yJavascript
 ) {
   this->dimension = 2;
   this->plotType = PlotObject::PlotTypes::selectablePoint;
   this->points.resize(1, 2, false);
-  this->points(0,0)=inputX;
-  this->points(0,1)=inputY;
-  this->pointsJS.resize(1,2,false);
-  this->pointsJS(0,0)=xJavascript;
-  this->pointsJS(0,1) = yJavascript;
+  this->points(0, 0) = inputX;
+  this->points(0, 1) = inputY;
+  this->pointsJS.resize(1, 2, false);
+  this->pointsJS(0, 0) = xJavascript;
+  this->pointsJS(0, 1) = yJavascript;
 }
 
 void PlotObject::makePlotFillStart() {
@@ -1085,11 +1085,13 @@ JSData PlotObject::toJSON() {
     result = this->toJSONDrawText();
   } else if (correctedPlotType == PlotObject::PlotTypes::plotFillStart) {
     result = this->toJSONPlotFillStart();
-  } else if (correctedPlotType == PlotObject::PlotTypes::plotFillFinish) {    // The
+  } else if (correctedPlotType == PlotObject::PlotTypes::plotFillFinish) {
+    // The
     // plot type carries
     // all
     // information.
-  } else if (correctedPlotType == PlotObject::PlotTypes::axesGrid) {    // The plot
+  } else if (correctedPlotType == PlotObject::PlotTypes::axesGrid) {
+    // The plot
     // type carries all
     // information.
   } else if (correctedPlotType == PlotObject::PlotTypes::pathFilled) {
@@ -1213,15 +1215,17 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   result[Plot::Labels::controlsName] = controls;
   result[Plot::Labels::messagesName] = messages;
   result["plotUpdaters"].elementType = JSData::token::tokenArray;
-
   for (int i = 0; i < this->parameterNames.size; i ++) {
-    if (! owner.objectContainer.userInputTextBoxesWithValues.contains(this->parameterNames[i])){
+    if (
+      !owner.objectContainer.userInputTextBoxesWithValues.contains(
+        this->parameterNames[i]
+      )
+    ) {
       std::stringstream out;
       out << "[Parameter: " << this->parameterNames[i] << " not found. ]";
-return out.str();
+      return out.str();
     }
     global << "[Parameter: " << this->parameterNames[i] << " YES found. ]";
-
     InputBox& currentBox =
     owner.objectContainer.userInputTextBoxesWithValues.getValueNoFailNonConst(
       this->parameterNames[i]

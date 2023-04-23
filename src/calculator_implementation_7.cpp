@@ -7577,7 +7577,7 @@ bool CalculatorFunctionsPlot::plot2D(
   }
   if (
     extractor.extractJavascript(
-      plotObject.leftPoint,&calculator.comments
+      plotObject.leftPoint, &calculator.comments
     )
   ) {
     plotObject.leftPtJS = extractor.result;
@@ -7675,7 +7675,7 @@ bool CalculatorFunctionsPlot::plotSelectablePoint(
     << ". ";
   }
   InputBox inputX;
- InputBox inputY;
+  InputBox inputY;
   if (
     !input[1].isOfType(&inputX) || !input[2].isOfType(&inputY)
   ) {
@@ -7686,23 +7686,24 @@ bool CalculatorFunctionsPlot::plotSelectablePoint(
     << input
     << ".<br>";
   }
-  if (inputX.name == inputY.name){
-    return calculator << "Input boxes for the x and y coordinates were different.";
+  if (inputX.name == inputY.name) {
+    return
+    calculator
+    << "Input boxes for the x and y coordinates were different.";
   }
-
-JavascriptExtractor extractor(calculator);
-if (!
-extractor.extractJavascript(input[1], &calculator.comments)){
-  return false;
-}
-std::string xJavascript = extractor.result;
-if (!
-extractor.extractJavascript(input[2], &calculator.comments)){
-  return false;
-}
-std::string yJavascript = extractor.result;
+  JavascriptExtractor extractor(calculator);
+  if (!extractor.extractJavascript(input[1], &calculator.comments)) {
+    return false;
+  }
+  std::string xJavascript = extractor.result;
+  if (!extractor.extractJavascript(input[2], &calculator.comments)) {
+    return false;
+  }
+  std::string yJavascript = extractor.result;
   PlotObject plotObject;
-  plotObject.makeSelectablePoint(input[1], input[2], xJavascript, yJavascript);
+  plotObject.makeSelectablePoint(
+    input[1], input[2], xJavascript, yJavascript
+  );
   extractor.writeParameterNames(plotObject);
   return output.assignValue(calculator, plotObject);
 }
@@ -8320,7 +8321,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   plot.numberOfSegmentsJS[0] = "200";
   if (
     extractor.extractJavascript(
-      plot.numberOfSegmentsExpression,  &calculator.comments
+      plot.numberOfSegmentsExpression, &calculator.comments
     )
   ) {
     plot.numberOfSegmentsJS[0] = extractor.result;
@@ -8346,7 +8347,7 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   }
   if (
     extractor.extractJavascript(
-      plot.parameterHighExpression,  &calculator.comments
+      plot.parameterHighExpression, &calculator.comments
     )
   ) {
     plot.paramHighJS = extractor.result;

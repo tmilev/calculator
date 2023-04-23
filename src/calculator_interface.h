@@ -1465,8 +1465,12 @@ public:
   void makeLatex(
     const Vector<double>& position, const std::string& latex
   );
-  void makeSelectablePoint(const Expression& inputX,
-    const Expression& inputY, const std::string &xJavascript, const std::string &yJavascript);
+  void makeSelectablePoint(
+    const Expression& inputX,
+    const Expression& inputY,
+    const std::string& xJavascript,
+    const std::string& yJavascript
+  );
   void makeEscapeMap(
     const Expression& functionX,
     const std::string& javascriptX,

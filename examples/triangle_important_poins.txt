@@ -1,0 +1,24 @@
+a_1= MakeInputBox(name=a_1, value = 0);
+
+a_2= MakeInputBox(name=a_2, value = 0);
+
+b_1 = MakeInputBox(name=b_1, value = 1);
+
+b_2 = MakeInputBox(name=b_2, value = 0);
+c_1 = MakeInputBox(name=c_1, value = 0.9);
+c_2 = MakeInputBox(name=c_2, value = 0.9);
+A= (a_1, a_2);
+B= (b_1, b_2);
+C= (c_1, c_2);
+
+
+PlotPath((A,B, C, A), blue)+ 
+PlotPath((A, (B+C)/2), blue)+
+PlotPath((B, (C+A)/2), blue)+
+PlotPath((C, (A+B)/2), blue)+
+PlotSelectablePoint((a_1, a_2))+
+PlotSelectablePoint((b_1, b_2))+
+PlotSelectablePoint((c_1, c_2))
++PlotRemoveCoordinateAxes()
++PlotPoint((A+B+C)/3, orange)
+;

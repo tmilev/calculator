@@ -159,6 +159,9 @@ public:
   static bool plotSegment(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool plotSegmentParametric(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool plotMarkSegment(
     Calculator& calculator, const Expression& input, Expression& output
   );
@@ -307,6 +310,9 @@ public:
   );
   bool convertMatrixOfExpressionToPoints(
     const Matrix<Expression>& input, PlotObject& output
+  );
+  bool convertListOfListOfExpressionsToPoints(
+    const List<Expression>& input,int desiredDimension, PlotObject& output
   );
 };
 

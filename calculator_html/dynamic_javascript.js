@@ -120,7 +120,7 @@ class ElementWithScripts {
     for (let label in this.sliders.sliders) {
       let current = this.sliders.sliders[label];
       current.addEventListener("input", () => {
-        this.updateSlidersAndFormInputs(label, current.value);
+        this.updateSlidersAndFormInputsOneKeyValuePair(label, current.value);
       });
     }    
   }
@@ -277,12 +277,18 @@ class ElementWithScripts {
     }
     let name = node.name;
     node.element.addEventListener("input", () => {
-      this.updateSlidersAndFormInputs(name, node.element.value);
+      this.updateSlidersAndFormInputsOneKeyValuePair(name, node.element.value);
     });
     if (!(name in this.mathNodesAssociatedWithSliders)) {
       this.mathNodesAssociatedWithSliders[name] = [];
     }
     this.mathNodesAssociatedWithSliders[name].push(node);
+  }
+
+  updateSlidersAndFormInputsOneKeyValuePair(key, value) {
+    let map = {};
+    map[key] = value;
+    this.updateSlidersAndFormInputs(map);
   }
   
   /**
@@ -294,11 +300,11 @@ class ElementWithScripts {
     let setToRedraw = new Set();
     for (let label in map) {
       let moreToRedraw = this.updateOneSliderAndFormInput(label, map[label]);
-      for (let graphic in moreToRedraw.keys) {
+      for (let graphic of moreToRedraw) {
         setToRedraw.add(graphic);
       }
     }
-    for (let graphic in setToRedraw) {
+    for (let graphic of setToRedraw) {
       graphic.redraw();
     }
   }

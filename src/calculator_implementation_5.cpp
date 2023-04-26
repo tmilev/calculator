@@ -1809,6 +1809,7 @@ bool CalculatorFunctionsPlot::plotPathParametric(
   javascriptExtractor.writeParameterNames(path);
   path.readColorAndLineWidthFromChild3And4(calculator, input);
   path.dimension = path.points.numberOfColumns;
+  path.plotType= PlotObject::PlotTypes::pathParametric;
   Plot plot;
   plot += path;
   return output.assignValue(calculator, plot);
@@ -1941,6 +1942,60 @@ bool CalculatorFunctionsPlot::plotSegment(
   }
   segment.pointsDouble.addOnTop(leftV);
   segment.pointsDouble.addOnTop(rightV);
+  if (input.size() >= 5) {
+    if (!input[4].evaluatesToDouble(&segment.lineWidth)) {
+      segment.lineWidth = 1;
+    }
+  }
+  Plot plot;
+  plot += segment;
+  return output.assignValue(calculator, plot);
+}
+bool CalculatorFunctionsPlot::plotSegmentParametric(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsPlot::plotSegmentParametric");
+  if (input.size() < 3) {
+    return false;
+  }
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
+  JavascriptExtractor extractor(calculator);
+  PlotObject segment;
+  if (!  extractor.convertListOfListOfExpressionsToPoints(List<Expression>({leftExpression,rightExpression}) , 2, segment)){
+    return false;
+  }
+
+  if (input.size() >= 4) {
+    segment.colorJavascript = "black";
+    segment.colorRedGreenBlue = static_cast<int>(
+      HtmlRoutines::redGreenBlue(0, 0, 0)
+    );
+    const Expression& colorExpression = input[3];
+    if (!colorExpression.isOfType<std::string>(&segment.colorJavascript)) {
+      segment.colorJavascript = colorExpression.toString();
+    }
+    if (
+      !DrawingVariables::getColorIntFromColorString(
+        segment.colorJavascript, segment.colorRedGreenBlue
+      )
+    ) {
+      calculator << "Unrecognized color: " << segment.colorJavascript;
+    }
+  }
+  if (input.size() >= 5) {
+    const Expression& lineWidthExpression = input[4];
+    if (!lineWidthExpression.evaluatesToDouble(&segment.lineWidth)) {
+      calculator
+      << "Failed to extract line width from: "
+      << lineWidthExpression.toString();
+    }
+    std::stringstream lineWidthStream;
+    lineWidthStream.precision(4);
+    lineWidthStream << segment.lineWidth;
+    segment.lineWidthJS = lineWidthStream.str();
+  }
+  segment.plotType = PlotObject::PlotTypes::segmentParametric;
   if (input.size() >= 5) {
     if (!input[4].evaluatesToDouble(&segment.lineWidth)) {
       segment.lineWidth = 1;
@@ -2252,8 +2307,6 @@ bool JavascriptExtractor::convertMatrixOfExpressionToPoints(
   STACK_TRACE("JavascriptExtractor::convertMatrixOfExpressionToPoints");
   output.points = input;
   output.dimension = output.points.numberOfColumns;
-  output.coordinateFunctionsE.setSize(output.dimension);
-  output.coordinateFunctionsJS.setSize(output.dimension);
   Expression jsConverterE;
   output.pointsJS.initialize(
     output.points.numberOfRows, output.points.numberOfColumns
@@ -2269,16 +2322,39 @@ bool JavascriptExtractor::convertMatrixOfExpressionToPoints(
       ) {
         return
         *this->owner
-        << "Failed to extract coordinate "
+        << "Failed to extract row, column: "
         << i + 1
+        << ", "
+        << j+1
         << " from: "
-        << output.coordinateFunctionsE[i].toString();
+        << input.toString();
       }
       output.parameterLetter = this->parameterLetter;
     }
   }
   return true;
 }
+
+bool JavascriptExtractor::convertListOfListOfExpressionsToPoints(const List<Expression> &input, int desiredDimension, PlotObject &output)
+ {
+  STACK_TRACE("JavascriptExtractor::convertListOfListOfExpressionToPoint");
+  if (input.size ==0){
+    return false;
+  }
+  Matrix<Expression> matrix;
+  matrix.resize(input.size, desiredDimension, false, nullptr);
+for (int i = 0; i < input.size; i ++){
+if (!input[i].isSequenceNElements(desiredDimension)){
+  return false;
+}
+for (int j = 1; j < input[i].size(); j ++){
+  matrix(i, j-1) = input[i][j];
+}
+}
+return this->convertMatrixOfExpressionToPoints(matrix, output);
+
+}
+
 
 void JavascriptExtractor::writeParameterNames(PlotObject& output) {
   output.parametersInPlay = this->parameterNames;
@@ -2628,7 +2704,7 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(
   resultPlot.dimension = 3;
   PlotObject plot;
   plot.colorJavascript = "black";
-  plot.plotType = "segment";
+  plot.plotType = PlotObject::PlotTypes::segment;
   plot.pointsDouble.setSize(2);
   for (int i = 0; i < 3; i ++) {
     plot.pointsDouble[0].makeZero(3);

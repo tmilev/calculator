@@ -2063,6 +2063,19 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
+    "PlotSegment",
+    CalculatorFunctionsPlot::plotSegmentParametric,
+    "",
+    "Plots a segment connecting two points; "
+  "works with parameters. ",
+    "x=MakeInputBox(name=x, value=1);\n"
+  "y=MakeInputBox(name=y, value=2);\n"
+  "PlotSegment((x,y), (3,4))",
+    "CalculatorFunctionsPlot::plotSegmentParametric",
+    "PlotSegmentParametric",
+    innerStandard
+  );
+  this->addOperationHandler(
     "PlotMarkSegment",
     CalculatorFunctionsPlot::plotMarkSegment,
     "",

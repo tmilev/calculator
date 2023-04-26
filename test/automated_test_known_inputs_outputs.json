@@ -1356,8 +1356,16 @@
     "output":"[plot already displayed]"
   },
   {
+    "input":"x=MakeInputBox(name=x, value = 2);\ny=MakeInputBox(name=y, value = 3);\nPlotPath(((0, 0), (x,y)), blue) + PlotSelectablePoint(x,y);\n",
+    "output":"(x=\\formInput{2.0000, x2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881};y=\\formInput{3.0000, ya1fce4363854ff888cff4b8e7875d600c2682390412a8cf79b37d0b11148b0fa};[plot already displayed])"
+  },
+  {
     "input":"PlotPath(((0, 0), (3, 0), (3, 4), (0, 0)), blue)",
     "output":"[plot already displayed]"
+  },
+  {
+    "input":"x=MakeInputBox(name=x, value=2);\ny=MakeInputBox(name=y, value = 3);\nPlotSelectablePoint(x,y)",
+    "output":"(x=\\formInput{2.0000, x2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881};y=\\formInput{3.0000, ya1fce4363854ff888cff4b8e7875d600c2682390412a8cf79b37d0b11148b0fa};[plot already displayed])"
   },
   {
     "input":"PlotSetId(myId) + PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4))",

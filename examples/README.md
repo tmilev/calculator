@@ -3267,12 +3267,33 @@ PlotSegment((1, 2), (3,4)) + PlotMarkSegment((1, 2), (3, 4))
 ```
 Plots a segment mark. 
 
+Operator or function PlotPath is overloaded with 2 total handlers.
+
+*PlotPath* [PlotPathParametric] {CalculatorFunctionsPlot::plotPathParametric}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%3dMakeInputBox%28name%3dx%2c%20value%20%3d%202%29%3b%5cny%3dMakeInputBox%28name%3dy%2c%20value%20%3d%203%29%3b%5cnPlotPath%28%28%280%2c%200%29%2c%20%28x%2cy%29%29%2c%20blue%29%20%2b%20PlotSelectablePoint%28x%2cy%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+x=MakeInputBox(name=x, value = 2);
+y=MakeInputBox(name=y, value = 3);
+PlotPath(((0, 0), (x,y)), blue) + PlotSelectablePoint(x,y);
+
+```
+Plots a straight segment path with parametric points. 
+
 *PlotPath* [PlotPath] {CalculatorFunctionsPlot::plotPath}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotPath%28%28%280%2c%200%29%2c%20%283%2c%200%29%2c%20%283%2c%204%29%2c%20%280%2c%200%29%29%2c%20blue%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotPath(((0, 0), (3, 0), (3, 4), (0, 0)), blue)
 ```
 Plots a straight segment path. The path should be enclosed in parentheses, and color must be indicated. 
+
+*PlotSelectablePoint* [PlotSelectablePoint] {CalculatorFunctionsPlot::plotSelectablePoint}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%3dMakeInputBox%28name%3dx%2c%20value%3d2%29%3b%5cny%3dMakeInputBox%28name%3dy%2c%20value%20%3d%203%29%3b%5cnPlotSelectablePoint%28x%2cy%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+x=MakeInputBox(name=x, value=2);
+y=MakeInputBox(name=y, value = 3);
+PlotSelectablePoint(x,y)
+```
+Plots a point that can be moved with the mouse. The first two inputs are the x and y arguments and must beinput boxes.
 
 *PlotSetId* [PlotSetId] {CalculatorFunctionsPlot::plotSetId}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotSetId%28myId%29%20%2b%20PlotCoordinateSystem%28%28-%203%2c%20-%202%2c%20-%203%29%2c%20%281%2c%205%2c%204%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4678,7 +4699,7 @@ A = 100x-55;
 B = PolynomialModP(A, 101);
 ConvertPolynomialModularToPolynomialRational B
 ```
-Converts polynomial  
+Converts a modular polynomial to a rational one. 
 
 *PlotMandelbrotSet* [PlotMandelbrotSet] {CalculatorFunctionsComplexDynamics::plotMandelbrotSet}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotMandelbrotSet%28z%5e2%2bC%2c%20C%3d0%29%3b%5cnPlotMandelbrotSet%28z%5e3%2bC%2c%20C%3d0%29%3b%5cnPlotMandelbrotSet%28%20z%5e2%2bz%2bC%2c%20C%3d0%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4688,7 +4709,7 @@ PlotMandelbrotSet(z^3+C, C=0);
 PlotMandelbrotSet( z^2+z+C, C=0);
 
 ```
-Plots the Mandelbrot set of a complex function. The first argument is the map we are iterating. The second argument is which of the letters of your function is the parameter that is governed by the (x,y) position of the picture, together with the initial value to set for it. For classical Mandelbrot set, the first argument should be z^2+C. The second argument should be C=0. The map works as follows. Start with a given value of the complex parameter C. The value of the parameter is given by the x,y-coordinate of the plotting surface.Now, iterate the map: f(...f(C)). If the point escapes to infinity, color the point with a colorthat matches the escape speed. Else, color the point black. You are not limited to the function z^2+C only. Feel free to try other functions as well.
+Plots the Mandelbrot set of a complex function. The first argument is the map we are iterating. The second argument is which of the letters of your function is the parameter that is governed by the (x,y) position of the picture, together with the initial value to set for it. For classical Mandelbrot set, the first argument should be z^2+C. The second argument should be C=0. The map works as follows. Start with a given value of the complex parameter C. The value of the parameter is given by the x,y-coordinate of the plotting surface. Now, iterate the map: f(...f(C)). If the point escapes to infinity, color the point with a color that matches the escape speed. Else, color the point black. You are not limited to the function z^2+C only. Feel free to try other functions as well.
 
 *PlotJuliaSet* [PlotJuliaSet] {CalculatorFunctionsComplexDynamics::plotJuliaSet}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotJuliaSet%28%20z%5e2%2b0.7i%2bC%2c%20C%3d0%29%3b%5cnPlotJuliaSet%281%2f%28b%29%28z%5e2%2bz%2b1%2fz%2b1%2fz%5e2%29%2c%20b%3d3%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -4696,7 +4717,7 @@ Plots the Mandelbrot set of a complex function. The first argument is the map we
 PlotJuliaSet( z^2+0.7i+C, C=0);
 PlotJuliaSet(1/(b)(z^2+z+1/z+1/z^2), b=3);
 ```
-Plots the Julia set of a complex function. The first argument is the map we are iterating. The remaining parameters are complex parameters of the formula. The complex parameters can be adjusted dynamically using the drag and drop.To compute the plot: we start with the x,y-coordinate of the plotting surface and the number x+iy. Now, iterate the map: f(...f(x+iy)). If the point escapes to infinity, color the point with a colorthat matches the escape speed. Else, color the point black. You are not limited to the function z^2+C only. Feel free to try other functions as well.
+Plots the Julia set of a complex function. The first argument is the map we are iterating. The remaining parameters are complex parameters of the formula. The complex parameters can be adjusted dynamically using the mouse. To compute the plot: we start with the x,y-coordinate of the plotting surface and the number x+iy. Now, iterate the map: f(...f(x+iy)). If the point escapes to infinity, color the point with a color that matches the escape speed. Else, color the point black. You are not limited to the function z^2+C only. Feel free to try other functions as well.
 
 *VectorPartitionFunction* [VectorPartitionFunction] {CalculatorFunctionsVectorPartitionFunction::vectorPartitionFunctionFormula}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22VectorPartitionFunction%28%5cn%281%2c0%2c0%29%2c%5cn%280%2c1%2c0%29%2c%5cn%280%2c0%2c1%29%2c%5cn%281%2c1%2c0%29%2c%5cn%280%2c1%2c1%29%2c%5cn%281%2c1%2c1%29%5cn%29%3b%5cnVectorPartitionFunction%28%5cn%281%2c0%29%2c%280%2c1%29%2c%281%2c1%29%2c%281%2c2%29%2c%281%2c3%29%2c%282%2c3%29%20%29%3b%5cnVectorPartitionFunction%28%5cnSequence%7b%7d1%2cSequence%7b%7d2%2cSequence%7b%7d3%2cSequence%7b%7d4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

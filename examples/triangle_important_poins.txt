@@ -12,13 +12,13 @@ B= (b_1, b_2);
 C= (c_1, c_2);
 
 
-PlotPath((A,B, C, A), blue)+ 
-PlotPath((A, (B+C)/2), blue)+
-PlotPath((B, (C+A)/2), blue)+
-PlotPath((C, (A+B)/2), blue)+
+PlotPath((A,B, C, A), blue) 
++ PlotSegment(A, (B+C)/2, blue)
++ PlotSegment(B, (C+A)/2, blue)
++ PlotSegment(C, (A+B)/2, blue)+
 PlotSelectablePoint((a_1, a_2))+
 PlotSelectablePoint((b_1, b_2))+
 PlotSelectablePoint((c_1, c_2))
 +PlotRemoveCoordinateAxes()
 +PlotPoint((A+B+C)/3, orange)
-;
+

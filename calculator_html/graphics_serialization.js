@@ -401,8 +401,11 @@ class GraphicsSerialization {
         return;
       case "pathFilled":
         canvas.drawPathFilled(points, color, colorFill);
+        // no break is intentional: we want to execute the next case.
       case "path":
+      case "pathParametric":
       case "segment":
+      case "segmentParametric":
         let interpretedPoints = this.interpretListListStringsAsNumbersOrFunctions(
           points, parameterNames, 
         );

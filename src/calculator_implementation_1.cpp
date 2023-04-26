@@ -46,7 +46,10 @@ std::string PlotObject::PlotTypes::escapeMap = "escapeMap";
 std::string PlotObject::PlotTypes::parametricCurve = "parametricCurve";
 std::string PlotObject::PlotTypes::plotFunction = "plotFunction";
 std::string PlotObject::PlotTypes::points = "points";
+std::string PlotObject::PlotTypes::path= "path";
+std::string PlotObject::PlotTypes::pathParametric= "pathParametric";
 std::string PlotObject::PlotTypes::segment = "segment";
+std::string PlotObject::PlotTypes::segmentParametric = "segmentParametric";
 std::string PlotObject::PlotTypes::plotFillStart = "plotFillStart";
 std::string PlotObject::PlotTypes::plotFillFinish = "plotFillFinish";
 std::string PlotObject::PlotTypes::pathFilled = "pathFilled";
@@ -1013,15 +1016,19 @@ JSData PlotObject::toJSONDrawText() {
   return result;
 }
 
-JSData PlotObject::toJSONDrawPath() {
+JSData PlotObject::toJSONPathParametric() {
   JSData result;
-  if (this->pointsJS.numberOfRows > 0) {
-    result[PlotObject::PlotTypes::points] = this->toJSONPointsJavascript();
-    this->writeParameters(result);
-    this->writeParameters(result);
-  } else {
+  result[PlotObject::PlotTypes::points] = this->toJSONPointsJavascript();
+  this->writeParameters(result);
+  this->writeParameters(result);
+  this->writeColorLineWidth(result);
+  return result;
+
+}
+
+JSData PlotObject::toJSONPath() {
+  JSData result;
     result[PlotObject::PlotTypes::points] = this->pointsDouble;
-  }
   this->writeColorLineWidth(result);
   return result;
 }
@@ -1031,7 +1038,7 @@ void PlotObject::writeColorFilled(JSData& output) {
 }
 
 JSData PlotObject::toJSONDrawPathFilled() {
-  JSData result = this->toJSONDrawPath();
+  JSData result = this->toJSONPath();
   this->writeColorFilled(result);
   return result;
 }
@@ -1048,6 +1055,10 @@ JSData PlotObject::toJSONSetProjectionScreen() {
   return result;
 }
 
+JSData PlotObject::toJSONSegmentParametric() {
+return this->toJSONPathParametric();
+
+}
 JSData PlotObject::toJSONSegment() {
   JSData result;
   result[PlotObject::PlotTypes::points] = this->pointsDouble;
@@ -1059,13 +1070,16 @@ JSData PlotObject::toJSON() {
   JSData result;
   std::string correctedPlotType = this->plotType;
   if (correctedPlotType == "") {
-    correctedPlotType = "path";
+    correctedPlotType = PlotObject::PlotTypes::path;
   }
   if (correctedPlotType == "setProjectionScreen") {
     result = this->toJSONSetProjectionScreen();
   } else if (correctedPlotType == PlotObject::PlotTypes::segment) {
     result = this->toJSONSegment();
-  } else if (correctedPlotType == "surface") {
+  } else if (correctedPlotType == PlotObject::PlotTypes::segmentParametric){
+    result = this->toJSONSegmentParametric();
+  }
+  else if (correctedPlotType == "surface") {
     result = this->toJSONSurfaceImmersion();
   } else if (correctedPlotType == PlotObject::PlotTypes::parametricCurve) {
     result = this->toJSONParametricCurve();
@@ -1086,18 +1100,15 @@ JSData PlotObject::toJSON() {
   } else if (correctedPlotType == PlotObject::PlotTypes::plotFillStart) {
     result = this->toJSONPlotFillStart();
   } else if (correctedPlotType == PlotObject::PlotTypes::plotFillFinish) {
-    // The
-    // plot type carries
-    // all
-    // information.
+    // The plot type carries all information.
   } else if (correctedPlotType == PlotObject::PlotTypes::axesGrid) {
-    // The plot
-    // type carries all
-    // information.
+    // The plot type carries all information.
   } else if (correctedPlotType == PlotObject::PlotTypes::pathFilled) {
     result = this->toJSONDrawPathFilled();
-  } else {
-    result = this->toJSONDrawPath();
+  } else if (correctedPlotType == PlotObject::PlotTypes::pathParametric){
+  result = this->toJSONPathParametric();
+  }else{
+    result = this->toJSONPath();
   }
   result[PlotObject::Labels::plotType] = correctedPlotType;
   return result;

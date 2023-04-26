@@ -700,7 +700,7 @@ class CurveTwoD {
 }
 
 /**
- * A path in two dimenions.
+ * A path in two dimenions, whose points can be dynamically recomputed.
  *
  * Here, "path" means a sequence of points connected by straight segments.
  */
@@ -725,6 +725,7 @@ class PathTwoD {
     this.type = 'path';
     /** @type {number} */
     this.lineWidth = inputLineWidth;
+    this.foundNonNumber = true;
   }
 
   /** 
@@ -733,11 +734,18 @@ class PathTwoD {
    * @param {CanvasTwoD} canvas the canvas.
    */
   updatePoints(canvas) {
+    if (!this.foundNonNumber) {
+      return;
+    }
     this.path = [];
+    this.foundNonNumber = false;
     for (let i = 0; i < this.pointsComputer.length; i++) {
       let point = []
       for (let j = 0; j < this.pointsComputer[i].length; j++) {
         point.push(canvas.evaluateNumberOrParameter(this.pointsComputer[i][j]));
+        if (typeof this.pointsComputer !== "number") {
+          this.foundNonNumber = true;
+        }
       }
       this.path.push(point);
     }

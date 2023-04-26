@@ -1150,6 +1150,7 @@ public:
   Expression argumentTypes;
   std::string description;
   std::string example;
+  // A unique identifier for the function.
   std::string calculatorIdentifier;
   std::string additionalIdentifier;
   int indexOperation;
@@ -2360,6 +2361,8 @@ public:
     int64_t startTimeEvaluationMilliseconds;
     int64_t startParsing;
     int64_t lastStopwatchParsing;
+    LinearCombination<MonomialWrapper<std::string>, LargeInteger>
+    performancePerHandler;
     EvaluationStatistics();
     void initialize();
     void reset();
@@ -2447,6 +2450,7 @@ public:
   std::string toStringRuleStatusUser();
   std::string toString();
   JSData toJSONPerformance();
+  JSData toJSONPerformancePerHandler();
   Expression getNewBoundVariable();
   Expression getNewAtom(const std::string& preferredName = "");
   void computeAutoCompleteKeyWords();
@@ -2521,6 +2525,7 @@ public:
   Expression expressionMinusInfinity();
   Expression expressionSquareRootNegativeOne();
   void logFunctionWithTime(Function& input, int64_t startTime);
+  void accountFunctionPerformance(Function& input, int64_t startTime);
   void logTime(int64_t startTime);
   void logPublicError(const std::string& error);
   std::string writeDefaultLatexFileReturnHtmlLink(

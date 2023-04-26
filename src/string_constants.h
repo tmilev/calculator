@@ -105,6 +105,7 @@ public:
     static std::string badInput;
     static std::string comments;
     static std::string performance;
+    static std::string performancePerHandler;
     static std::string computationTime;
     static std::string parsingLog;
     static std::string commentsGlobal;

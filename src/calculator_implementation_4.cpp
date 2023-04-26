@@ -1922,8 +1922,30 @@ void Calculator::computeAutoCompleteKeyWords() {
   }
 }
 
+JSData Calculator::toJSONPerformancePerHandler() {
+  std::stringstream out;
+  List<std::string> badHandlers;
+  for (
+    int i = 0; i < this->statistics.performancePerHandler.size(); i ++
+  ) {
+    if (this->statistics.performancePerHandler.coefficients[i] > 1000) {
+      badHandlers.addOnTop(
+        this->statistics.performancePerHandler.monomials[i].content
+      );
+    }
+  }
+  JSData result;
+  if (badHandlers.size == 0) {
+    result = "";
+    return result;
+  }
+  out << "TurnOffRules(" << badHandlers.toStringCommaDelimited() << ");\n";
+  result = out.str();
+  return result;
+}
+
 JSData Calculator::toJSONPerformance() {
-  STACK_TRACE("Calculator::toStringPerformance");
+  STACK_TRACE("Calculator::toJSONPerformance");
   int64_t elapsedMilliseconds = global.getElapsedMilliseconds();
   int64_t computationMilliseconds =
   elapsedMilliseconds - this->statistics.startTimeEvaluationMilliseconds;
@@ -2065,6 +2087,8 @@ JSData Calculator::toJSONPerformance() {
   millisecondsStream << computationMilliseconds << " ms";
   result[WebAPI::result::computationTime] = millisecondsStream.str();
   result[WebAPI::result::comments] = moreDetails.str();
+  result[WebAPI::result::performancePerHandler] =
+  this->toJSONPerformancePerHandler();
   return result;
 }
 

@@ -60,6 +60,8 @@ const urlFields = {
     syntaxErrorsExtra: "syntaxErrorsExtra",
     // Comments on performance.
     performance: "performance",
+    // Comments on performance per individual internal math handler.
+    performancePerHandler: "performancePerHandler",
     // Computation time. Excludes https traffic.
     computationTime: "computationTime",
     // Comments for the specific task.

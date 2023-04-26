@@ -1,3 +1,4 @@
+TurnOffRules(CommonDenominator);
 a_1= MakeInputBox(name=a_1, value = 0);
 
 a_2= MakeInputBox(name=a_2, value = 0);
@@ -10,17 +11,24 @@ c_2 = MakeInputBox(name=c_2, value = 0.9);
 A= (a_1, a_2);
 B= (b_1, b_2);
 C= (c_1, c_2);
-AB = B-A;
-AC = C-A;
-AC AB^t;
+t_a =     ((A-C)(B-C)^t)_1 / ((B-C)(B-C)^t)_1;
+t_b =     ((B-A)(C-A)^t)_1 / ((C-A)(C-A)^t)_1;
+t_c =     ((C-B)(A-B)^t)_1 / ((A-B)(A-B)^t)_1;
+
+H_a=( b_1 t_a +c_1(1-t_a), b_2 t_a + c_2(1-t_a));
+H_b=(c_1 t_b +a_1(1-t_b), c_2 t_b + a_2(1-t_b));
+H_c=(a_1 t_c +b_1(1-t_c), a_2 t_c + b_2(1-t_c));
 
 PlotPath((A,B, C, A), blue) 
 + PlotSegment(A, (B+C)/2, blue)
 + PlotSegment(B, (C+A)/2, blue)
-+ PlotSegment(C, (A+B)/2, blue)+
-PlotSelectablePoint((a_1, a_2))+
-PlotSelectablePoint((b_1, b_2))+
-PlotSelectablePoint((c_1, c_2))
-+PlotRemoveCoordinateAxes()
-+PlotPoint((A+B+C)/3, orange)
++ PlotSegment(C, (A+B)/2, blue)
++ PlotSelectablePoint((a_1, a_2))
++ PlotSelectablePoint((b_1, b_2))
++ PlotSelectablePoint((c_1, c_2))
++ PlotRemoveCoordinateAxes()
++ PlotPoint((A+B+C)/3, orange)
++ PlotSegment(A, H_a, green)
++ PlotSegment(B, H_b, green)
++ PlotSegment(C, H_c, green)+PlotWindow(800, 800)
 

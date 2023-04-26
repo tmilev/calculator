@@ -743,6 +743,17 @@ class Calculator {
         true,
         label,
       ));
+      let performancePerHandlerContent = performance[
+        pathnames.urlFields.result.performancePerHandler
+      ];
+      if (
+        performancePerHandlerContent !== undefined &&
+        performancePerHandlerContent !== null
+      ) {
+        let divPerformancePerHandler = document.createElement("div");
+        divPerformancePerHandler.textContent = performancePerHandlerContent;
+        commentsContainer.appendChild(divPerformancePerHandler);
+      }
     }
     if (inputParsed.comments !== undefined) {
       let comments = document.createElement("div");

@@ -2609,6 +2609,14 @@ bool JavascriptExtractor::extractJavascriptRecursive(
     }
     return false;
   }
+  if (input.size() == 2) {
+    if (input[0].isOperationGiven("Freeze")) {
+      return
+      this->extractJavascriptRecursive(
+        input[1], output, commentsOnFailure
+      );
+    }
+  }
   if (input == this->owner->expressionMinusInfinity()) {
     output = "\"minusInfinity\"";
     return true;

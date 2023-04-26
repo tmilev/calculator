@@ -71,6 +71,7 @@ let domElements = {
       examples: "divCalculatorExamples",
       examplesContainer: "divCalculatorExamplesContainer",
       divDebugComments: "divCalculatorPageDebugComments",
+      performancePerHandler: "divPerformancePerHandler",
     },
     compareExpressions: {
       div: "divCompareExpressionsPage",
@@ -194,7 +195,6 @@ let domElements = {
   spanStudentViewPanel: "spanStudentViewPanel",
   spanStudentViewSectionSelectPanel: "spanStudentViewSectionSelectPanel",
   divCalculatorMainInputOutput: "divCalculatorMainInputOutput",
-  divPerformance: "divPerformance",
   divCurrentCourse: "divCurrentCourse",
   divCurrentCourseBody: "divCurrentCourseBody",
   divMathjaxProblematicRender: "divMathjaxProblematicRender",

@@ -271,7 +271,9 @@ public:
 
 template <
   typename Type,
-  unsigned int objectHashFunction(const Type&) = Type::hashFunction
+  unsigned int objectHashFunction(const Type&) = HashFunctions::hashFunction<
+    Type
+  >
 >
 class MonomialWrapper {
 public:
@@ -3039,6 +3041,7 @@ public:
   }
 };
 
+// Monomial used to implement sparse vectors.
 class MonomialVector {
   friend std::ostream& operator<<(
     std::ostream& output, const MonomialVector& monomial
@@ -5682,8 +5685,8 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   }
   for (int i = 0; i < sortedMonomials.size; i ++) {
     TemplateMonomial& monomial = sortedMonomials[i];
-    Coefficient& coefficient =
-    this->coefficients[this->monomials.getIndex(monomial)];
+    int coefficientIndex = this->monomials.getIndex(monomial);
+    Coefficient& coefficient = this->coefficients[coefficientIndex];
     std::string termString =
     this->getTermString(coefficient, monomial, format, customTimes);
     if (i > 0) {

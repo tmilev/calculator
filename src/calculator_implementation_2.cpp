@@ -315,6 +315,17 @@ void Calculator::logTime(int64_t startTime) {
   this->statistics.millisecondsLastLog = currentMilliseconds;
 }
 
+void Calculator::accountFunctionPerformance(
+  Function& input, int64_t startTime
+) {
+  int64_t elapsed = global.getElapsedMilliseconds() - startTime;
+  LargeInteger largeInteger;
+  largeInteger = elapsed;
+  this->statistics.performancePerHandler.addMonomial(
+    input.calculatorIdentifier, largeInteger
+  );
+}
+
 void Calculator::logFunctionWithTime(Function& input, int64_t startTime) {
   this->statistics.totalSubstitutions ++;
   if (!this->flagLogEvaluation) {
@@ -387,11 +398,15 @@ bool Calculator::outerStandardCompositeHandler(
     if (!currentHandler.shouldBeApplied(opIndexParentIfAvailable)) {
       continue;
     }
+    int64_t startCurrentFunction = global.getElapsedMilliseconds();
     if (
       !currentHandler.apply(
         calculator, input, output, opIndexParentIfAvailable, outputHandler
       )
     ) {
+      calculator.accountFunctionPerformance(
+        currentHandler, startCurrentFunction
+      );
       continue;
     }
     calculator.logFunctionWithTime(currentHandler, start);
@@ -474,11 +489,13 @@ bool Calculator::outerStandardHandler(
   calculator.operations.values[operationIndex].getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     Function& currentFunction = handlers[i];
+    int64_t startTime = global.getElapsedMilliseconds();
     if (
       currentFunction.apply(
         calculator, input, output, opIndexParentIfAvailable, outputHandler
       )
     ) {
+      calculator.accountFunctionPerformance(currentFunction, startTime);
       return true;
     }
   }
@@ -1002,7 +1019,8 @@ bool Calculator::EvaluateLoop::evaluateChildren(
       indexOp = (*this->output)[0].data;
     }
   }
-  Expression childEvaluation, historyContainer;
+  Expression childEvaluation;
+  Expression historyContainer;
   Expression* historyChild = nullptr;
   if (this->history != nullptr) {
     historyChild = &historyContainer;

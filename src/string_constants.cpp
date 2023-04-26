@@ -23,6 +23,7 @@ std::string WebAPI::result::resultLabel = "result";
 std::string WebAPI::result::badInput = "badInput";
 std::string WebAPI::result::comments = "comments";
 std::string WebAPI::result::performance = "performance";
+std::string WebAPI::result::performancePerHandler = "performancePerHandler";
 std::string WebAPI::result::computationTime = "computationTime";
 std::string WebAPI::result::parsingLog = "parsingLog";
 std::string WebAPI::result::commentsGlobal = "commentsGlobal";

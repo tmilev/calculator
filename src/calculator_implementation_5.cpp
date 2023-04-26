@@ -1809,7 +1809,7 @@ bool CalculatorFunctionsPlot::plotPathParametric(
   javascriptExtractor.writeParameterNames(path);
   path.readColorAndLineWidthFromChild3And4(calculator, input);
   path.dimension = path.points.numberOfColumns;
-  path.plotType= PlotObject::PlotTypes::pathParametric;
+  path.plotType = PlotObject::PlotTypes::pathParametric;
   Plot plot;
   plot += path;
   return output.assignValue(calculator, plot);
@@ -1951,6 +1951,7 @@ bool CalculatorFunctionsPlot::plotSegment(
   plot += segment;
   return output.assignValue(calculator, plot);
 }
+
 bool CalculatorFunctionsPlot::plotSegmentParametric(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -1962,17 +1963,24 @@ bool CalculatorFunctionsPlot::plotSegmentParametric(
   const Expression& rightExpression = input[2];
   JavascriptExtractor extractor(calculator);
   PlotObject segment;
-  if (!  extractor.convertListOfListOfExpressionsToPoints(List<Expression>({leftExpression,rightExpression}) , 2, segment)){
+  if (
+    !extractor.convertListOfListOfExpressionsToPoints(
+      List<Expression>({leftExpression, rightExpression}),
+      2,
+      segment
+    )
+  ) {
     return false;
   }
-
   if (input.size() >= 4) {
     segment.colorJavascript = "black";
     segment.colorRedGreenBlue = static_cast<int>(
       HtmlRoutines::redGreenBlue(0, 0, 0)
     );
     const Expression& colorExpression = input[3];
-    if (!colorExpression.isOfType<std::string>(&segment.colorJavascript)) {
+    if (
+      !colorExpression.isOfType<std::string>(&segment.colorJavascript)
+    ) {
       segment.colorJavascript = colorExpression.toString();
     }
     if (
@@ -2325,7 +2333,7 @@ bool JavascriptExtractor::convertMatrixOfExpressionToPoints(
         << "Failed to extract row, column: "
         << i + 1
         << ", "
-        << j+1
+        << j + 1
         << " from: "
         << input.toString();
       }
@@ -2335,26 +2343,27 @@ bool JavascriptExtractor::convertMatrixOfExpressionToPoints(
   return true;
 }
 
-bool JavascriptExtractor::convertListOfListOfExpressionsToPoints(const List<Expression> &input, int desiredDimension, PlotObject &output)
- {
+bool JavascriptExtractor::convertListOfListOfExpressionsToPoints(
+  const List<Expression>& input,
+  int desiredDimension,
+  PlotObject& output
+) {
   STACK_TRACE("JavascriptExtractor::convertListOfListOfExpressionToPoint");
-  if (input.size ==0){
+  if (input.size == 0) {
     return false;
   }
   Matrix<Expression> matrix;
   matrix.resize(input.size, desiredDimension, false, nullptr);
-for (int i = 0; i < input.size; i ++){
-if (!input[i].isSequenceNElements(desiredDimension)){
-  return false;
+  for (int i = 0; i < input.size; i ++) {
+    if (!input[i].isSequenceNElements(desiredDimension)) {
+      return false;
+    }
+    for (int j = 1; j < input[i].size(); j ++) {
+      matrix(i, j - 1) = input[i][j];
+    }
+  }
+  return this->convertMatrixOfExpressionToPoints(matrix, output);
 }
-for (int j = 1; j < input[i].size(); j ++){
-  matrix(i, j-1) = input[i][j];
-}
-}
-return this->convertMatrixOfExpressionToPoints(matrix, output);
-
-}
-
 
 void JavascriptExtractor::writeParameterNames(PlotObject& output) {
   output.parametersInPlay = this->parameterNames;

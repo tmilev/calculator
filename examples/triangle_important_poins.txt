@@ -10,7 +10,9 @@ c_2 = MakeInputBox(name=c_2, value = 0.9);
 A= (a_1, a_2);
 B= (b_1, b_2);
 C= (c_1, c_2);
-
+AB = B-A;
+AC = C-A;
+AC AB^t;
 
 PlotPath((A,B, C, A), blue) 
 + PlotSegment(A, (B+C)/2, blue)

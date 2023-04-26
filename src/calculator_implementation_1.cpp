@@ -46,8 +46,8 @@ std::string PlotObject::PlotTypes::escapeMap = "escapeMap";
 std::string PlotObject::PlotTypes::parametricCurve = "parametricCurve";
 std::string PlotObject::PlotTypes::plotFunction = "plotFunction";
 std::string PlotObject::PlotTypes::points = "points";
-std::string PlotObject::PlotTypes::path= "path";
-std::string PlotObject::PlotTypes::pathParametric= "pathParametric";
+std::string PlotObject::PlotTypes::path = "path";
+std::string PlotObject::PlotTypes::pathParametric = "pathParametric";
 std::string PlotObject::PlotTypes::segment = "segment";
 std::string PlotObject::PlotTypes::segmentParametric = "segmentParametric";
 std::string PlotObject::PlotTypes::plotFillStart = "plotFillStart";
@@ -1023,12 +1023,11 @@ JSData PlotObject::toJSONPathParametric() {
   this->writeParameters(result);
   this->writeColorLineWidth(result);
   return result;
-
 }
 
 JSData PlotObject::toJSONPath() {
   JSData result;
-    result[PlotObject::PlotTypes::points] = this->pointsDouble;
+  result[PlotObject::PlotTypes::points] = this->pointsDouble;
   this->writeColorLineWidth(result);
   return result;
 }
@@ -1056,9 +1055,9 @@ JSData PlotObject::toJSONSetProjectionScreen() {
 }
 
 JSData PlotObject::toJSONSegmentParametric() {
-return this->toJSONPathParametric();
-
+  return this->toJSONPathParametric();
 }
+
 JSData PlotObject::toJSONSegment() {
   JSData result;
   result[PlotObject::PlotTypes::points] = this->pointsDouble;
@@ -1076,10 +1075,9 @@ JSData PlotObject::toJSON() {
     result = this->toJSONSetProjectionScreen();
   } else if (correctedPlotType == PlotObject::PlotTypes::segment) {
     result = this->toJSONSegment();
-  } else if (correctedPlotType == PlotObject::PlotTypes::segmentParametric){
+  } else if (correctedPlotType == PlotObject::PlotTypes::segmentParametric) {
     result = this->toJSONSegmentParametric();
-  }
-  else if (correctedPlotType == "surface") {
+  } else if (correctedPlotType == "surface") {
     result = this->toJSONSurfaceImmersion();
   } else if (correctedPlotType == PlotObject::PlotTypes::parametricCurve) {
     result = this->toJSONParametricCurve();
@@ -1105,9 +1103,9 @@ JSData PlotObject::toJSON() {
     // The plot type carries all information.
   } else if (correctedPlotType == PlotObject::PlotTypes::pathFilled) {
     result = this->toJSONDrawPathFilled();
-  } else if (correctedPlotType == PlotObject::PlotTypes::pathParametric){
-  result = this->toJSONPathParametric();
-  }else{
+  } else if (correctedPlotType == PlotObject::PlotTypes::pathParametric) {
+    result = this->toJSONPathParametric();
+  } else {
     result = this->toJSONPath();
   }
   result[PlotObject::Labels::plotType] = correctedPlotType;

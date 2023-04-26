@@ -468,11 +468,7 @@ bool CalculatorConversions::extractPolynomialFromDifference(
     maximumVariables >= 0 &&
     output.context.numberOfVariables() > maximumVariables
   ) {
-    return
-    calculator
-    << "Maximum number of variables exceeded: "
-    << maximumVariables
-    << ". ";
+    return false;
   }
   output.content -= right.content;
   return true;
@@ -556,9 +552,7 @@ bool CalculatorConversions::extractPolynomialArgumentsOfOperation(
   STACK_TRACE("CalculatorConversions::extractPolynomialArgumentsOfOperation");
   // Please note: the following code holds serious performance traps.
   // A previous version of this code was running >30 times slower on a
-  // particular
-  // mid-sized example.
-  // Proceed with caution.
+  // particular mid-sized example. Proceed with caution.
   List<Expression> opands;
   // Performance alert: extract summands as a flat list first, without any
   // math operations.
@@ -578,11 +572,7 @@ bool CalculatorConversions::extractPolynomialArgumentsOfOperation(
         acceptNonPositiveOrNonIntegerPowers
       )
     ) {
-      return
-      calculator
-      << "<hr>Failed to extract polynomial from "
-      << input.toString()
-      << ". ";
+      return false;
     }
     converted.addOnTop(next);
   }
@@ -593,17 +583,13 @@ bool CalculatorConversions::extractPolynomialArgumentsOfOperation(
       return calculator << "Failed to merge contexts. ";
     }
     // Performance alert: do not convert the polynomials before all contexts
-    // are merged
+    // are merged.
   }
   if (
     maximumVariables >= 0 &&
     outputContext.numberOfVariables() > maximumVariables
   ) {
-    return
-    calculator
-    << "Maximum number of variables exceeded: "
-    << maximumVariables
-    << ". ";
+    return false;
   }
   output.clear();
   for (WithContext<Polynomial<Coefficient> >& opand : converted) {
@@ -656,11 +642,7 @@ bool CalculatorConversions::extractPolynomialFromPower(
       acceptNonPositiveOrNonIntegerPowers
     )
   ) {
-    return
-    calculator
-    << "<hr>Failed to extract polynomial from "
-    << input[1].toString()
-    << ". ";
+    return false;
   }
   if (maximumPowerToExpand >= 0 && power > maximumPowerToExpand) {
     return

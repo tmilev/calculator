@@ -1705,7 +1705,7 @@ JSData Function::toJSON() const {
   JSData result;
   result.elementType = JSData::token::tokenObject;
   if (this->owner == nullptr) {
-    result[WebAPI::result::error] = "bad_owner";
+    result[WebAPI::Result::error] = "bad_owner";
     return result;
   }
   if (this->options.visible) {
@@ -1850,8 +1850,8 @@ JSData Calculator::toJSONOutputAndSpecials() {
   if (this->inputString == "") {
     return result;
   }
-  result[WebAPI::result::performance] = this->toJSONPerformance();
-  result[WebAPI::result::parsingLog] = this->parser.parsingLog;
+  result[WebAPI::Result::performance] = this->toJSONPerformance();
+  result[WebAPI::Result::parsingLog] = this->parser.parsingLog;
   return result;
 }
 
@@ -1955,6 +1955,13 @@ JSData Calculator::toJSONPerformancePerHandler() {
     << "TurnOffRules("
     << verySlowHandlers.toStringCommaDelimited()
     << ");\n";
+    std::stringstream linkStream;
+    linkStream
+    << "TurnOffRules("
+    << verySlowHandlers.toStringCommaDelimited()
+    << ");\n";
+    linkStream << inputString;
+    result[WebAPI::Result::performanceTurnOffVerySlowRules] = linkStream.str();
   }
   if (slowHandlers.size > 0) {
     out
@@ -1963,8 +1970,15 @@ JSData Calculator::toJSONPerformancePerHandler() {
     << " internal functions that took more than 10 ms of total run time. "
     << "To turn them off, prepend the following snippet. ";
     out << "TurnOffRules(" << slowHandlers.toStringCommaDelimited() << ");\n";
+    std::stringstream linkStream;
+    linkStream
+    << "TurnOffRules("
+    << slowHandlers.toStringCommaDelimited()
+    << ");\n";
+    linkStream << inputString;
+    result[WebAPI::Result::performanceTurnOffSlowRules] = linkStream.str();
   }
-  result = out.str();
+  result[WebAPI::Result::comments] = out.str();
   return result;
 }
 
@@ -2109,9 +2123,9 @@ JSData Calculator::toJSONPerformance() {
   }
   std::stringstream millisecondsStream;
   millisecondsStream << computationMilliseconds << " ms";
-  result[WebAPI::result::computationTime] = millisecondsStream.str();
-  result[WebAPI::result::comments] = moreDetails.str();
-  result[WebAPI::result::performancePerHandler] =
+  result[WebAPI::Result::computationTime] = millisecondsStream.str();
+  result[WebAPI::Result::comments] = moreDetails.str();
+  result[WebAPI::Result::performancePerHandler] =
   this->toJSONPerformancePerHandler();
   return result;
 }

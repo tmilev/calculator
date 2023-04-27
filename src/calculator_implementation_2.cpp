@@ -46,7 +46,7 @@ JSData Calculator::Examples::toJSONFunctionHandlers() {
     examples[operationName] = handlers.toJSON();
   }
   JSData output;
-  output[WebAPI::frontend::calculatorExamples] = examples;
+  output[WebAPI::Frontend::calculatorExamples] = examples;
   return output;
 }
 
@@ -1562,7 +1562,7 @@ void Calculator::evaluateCommands() {
       << "Syntax errors encountered: "
       << Logger::consoleNormal();
     }
-    this->outputJS[WebAPI::result::syntaxErrors] =
+    this->outputJS[WebAPI::Result::syntaxErrors] =
     this->parser.toStringSyntacticStackHTMLSimple();
     out << this->parser.syntaxErrors;
     out << "<hr>";
@@ -1617,7 +1617,7 @@ void Calculator::evaluateCommands() {
     this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharactersString != "") {
       out << badCharactersString << "<hr>";
-      this->outputJS[WebAPI::result::badInput] = badCharactersString;
+      this->outputJS[WebAPI::Result::badInput] = badCharactersString;
     }
     this->objectContainer.resetSliders();
     this->objectContainer.resetPlots();
@@ -1636,14 +1636,14 @@ void Calculator::evaluateCommands() {
       true,
       &result
     );
-    this->outputJS[WebAPI::result::resultLabel] = result;
+    this->outputJS[WebAPI::Result::resultLabel] = result;
     out << resultString;
   } else {
     std::string badCharsString =
     this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
     if (badCharsString != "") {
       out << badCharsString << "<hr>";
-      this->outputJS[WebAPI::result::badInput] = badCharsString;
+      this->outputJS[WebAPI::Result::badInput] = badCharsString;
     }
     this->objectContainer.resetSliders();
     out
@@ -1652,13 +1652,13 @@ void Calculator::evaluateCommands() {
     << "<hr>"
     << "Output:<br>"
     << this->programExpression.toStringFull();
-    this->outputJS[WebAPI::result::resultLabel]["input"] =
+    this->outputJS[WebAPI::Result::resultLabel]["input"] =
     startingExpression.toStringFull();
-    this->outputJS[WebAPI::result::resultLabel]["output"] =
+    this->outputJS[WebAPI::Result::resultLabel]["output"] =
     this->programExpression.toStringFull();
   }
   this->outputString = out.str();
-  this->outputJS[WebAPI::result::resultHtml] = out.str();
+  this->outputJS[WebAPI::Result::resultHtml] = out.str();
   std::stringstream commentsStream;
   if (this->objectContainer.algebraicClosure.latestBasis.size > 1) {
     commentsStream
@@ -1679,7 +1679,7 @@ void Calculator::evaluateCommands() {
     commentsStream << "<br><span>" << this->comments.str() << "</span>";
   }
   this->outputCommentsString = commentsStream.str();
-  this->outputJS[WebAPI::result::comments] = this->outputCommentsString;
+  this->outputJS[WebAPI::Result::comments] = this->outputCommentsString;
   if (global.flagRunningConsoleRegular && this->comments.str() != "") {
     this->outputString += this->outputCommentsString;
   }

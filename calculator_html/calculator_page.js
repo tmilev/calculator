@@ -733,7 +733,10 @@ class Calculator {
     let performance = inputParsed[pathnames.urlFields.result.performance];
     if (performance !== undefined) {
       let content = performance[pathnames.urlFields.result.comments];
-      let label = `<b style='color:blue'>${performance[pathnames.urlFields.result.computationTime]}</b>`;
+      let computationTime = performance[
+        pathnames.urlFields.result.computationTime
+      ];
+      let label = `<b style='color:blue'>${computationTime}</b>`;
       let performanceDetails = document.createElement("div");
       commentsContainer.appendChild(performanceDetails);
       this.panels.push(new panels.PanelExpandableData(
@@ -743,16 +746,34 @@ class Calculator {
         true,
         label,
       ));
-      let performancePerHandlerContent = performance[
+      let performancePerHandler = performance[
         pathnames.urlFields.result.performancePerHandler
       ];
       if (
-        performancePerHandlerContent !== undefined &&
-        performancePerHandlerContent !== null
+        performancePerHandler !== undefined &&
+        performancePerHandler !== null
       ) {
         let divPerformancePerHandler = document.createElement("div");
-        divPerformancePerHandler.textContent = performancePerHandlerContent;
+        divPerformancePerHandler.textContent = performancePerHandler[
+          pathnames.urlFields.result.comments
+        ];
         commentsContainer.appendChild(divPerformancePerHandler);
+        let performanceVerySlow = performancePerHandler[
+          pathnames.urlFields.result.performanceTurnOffVerySlowRules
+        ];
+        this.writeAnchor(
+          performanceVerySlow,
+          "Turn off very slow rules.",
+          commentsContainer,
+        );
+        let performanceSlow = performancePerHandler[
+          pathnames.urlFields.result.performanceTurnOffSlowRules
+        ];
+        this.writeAnchor(
+          performanceSlow,
+          "Turn off slow rules.",
+          commentsContainer,
+        );
       }
     }
     if (inputParsed.comments !== undefined) {
@@ -761,6 +782,20 @@ class Calculator {
       commentsContainer.appendChild(comments);
     }
     return commentsContainer;
+  }
+
+  writeAnchor(
+    /** @type {string} */ input,
+    /** @type {string} */ label,
+    /** @type {HTMLElement} */ outputContainer,
+  ) {
+    if (input === "" || input === null || input === undefined) {
+      return;
+    }
+    let anchor = document.createElement("a");
+    anchor.href = pathnames.addresses.calculatorComputationWithoutAppURL(input);
+    anchor.textContent = label;
+    outputContainer.appendChild(anchor);
   }
 
   typeset(

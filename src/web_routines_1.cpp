@@ -1231,7 +1231,7 @@ bool WebAPIResponse::processForgotLogin() {
   );
   WebClient webClient;
   if (!webClient.verifyRecaptcha(&out, &out, nullptr)) {
-    result[WebAPI::result::comments] = out.str();
+    result[WebAPI::Result::comments] = out.str();
     return global.response.writeResponse(result, false);
   }
   if (!user.exists(&out)) {
@@ -1239,12 +1239,12 @@ bool WebAPIResponse::processForgotLogin() {
     << "We failed to find your email: "
     << user.email
     << " in our records. ";
-    result[WebAPI::result::comments] = out.str();
+    result[WebAPI::Result::comments] = out.str();
     return global.response.writeResponse(result, false);
   }
   if (!user.loadFromDatabase(&out, &out)) {
     out << "Failed to fetch user info for email: " << user.email << ". ";
-    result[WebAPI::result::comments] = out.str();
+    result[WebAPI::Result::comments] = out.str();
     return global.response.writeResponse(result, false);
   }
   out << "Your email is on record. ";
@@ -1261,10 +1261,10 @@ bool WebAPIResponse::processForgotLogin() {
     this->owner->doSetEmail(user, &commentsOnError, &out, nullptr);
   }
   if (!success) {
-    result[WebAPI::result::error] = commentsOnError.str();
+    result[WebAPI::Result::error] = commentsOnError.str();
   }
   out << "Response time: " << global.getElapsedSeconds() << " second(s). ";
-  result[WebAPI::result::comments] = out.str();
+  result[WebAPI::Result::comments] = out.str();
   return global.response.writeResponse(result, false);
 }
 
@@ -1290,20 +1290,20 @@ JSData WebWorker::getSignUpRequestResult() {
       &errorStream, &generalCommentsStream, nullptr
     )
   ) {
-    result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::comments] = generalCommentsStream.str();
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
     return result;
   }
   if (user.username == "") {
     errorStream << "Empty username not allowed. ";
-    result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::comments] = generalCommentsStream.str();
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
     return result;
   }
   if (!EmailRoutines::isOKEmail(user.email, &generalCommentsStream)) {
     errorStream << "Your email address does not appear to be valid. ";
-    result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::comments] = generalCommentsStream.str();
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
     return result;
   }
   if (user.exists(nullptr)) {
@@ -1313,8 +1313,8 @@ JSData WebWorker::getSignUpRequestResult() {
     << ") or the email ("
     << user.email
     << ") you requested is already taken.";
-    result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::comments] = generalCommentsStream.str();
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
     return result;
   } else {
     outputStream
@@ -1326,9 +1326,9 @@ JSData WebWorker::getSignUpRequestResult() {
   }
   if (!user.storeToDatabase(false, &errorStream)) {
     errorStream << "Failed to store error stream. ";
-    result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::comments] = generalCommentsStream.str();
-    result[WebAPI::result::resultLabel] = outputStream.str();
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
+    result[WebAPI::Result::resultLabel] = outputStream.str();
     return result;
   }
   std::stringstream* adminOutputStream = nullptr;
@@ -1338,9 +1338,9 @@ JSData WebWorker::getSignUpRequestResult() {
   this->doSetEmail(
     user, &errorStream, &generalCommentsStream, adminOutputStream
   );
-  result[WebAPI::result::error] = errorStream.str();
-  result[WebAPI::result::comments] = generalCommentsStream.str();
-  result[WebAPI::result::resultHtml] = outputStream.str();
+  result[WebAPI::Result::error] = errorStream.str();
+  result[WebAPI::Result::comments] = generalCommentsStream.str();
+  result[WebAPI::Result::resultHtml] = outputStream.str();
   return result;
 }
 
@@ -1394,10 +1394,10 @@ bool GlobalVariables::Response::writeResponse(
   JSData output = incoming;
   std::string comments = global.comments.getCurrentReset();
   if (comments != "") {
-    output[WebAPI::result::commentsGlobal] = comments;
+    output[WebAPI::Result::commentsGlobal] = comments;
   }
   if (global.userDebugFlagOn()) {
-    output[WebAPI::result::commentsDebug] = worker.toStringMessageShort();
+    output[WebAPI::Result::commentsDebug] = worker.toStringMessageShort();
   }
   if (this->flagTimedOut) {
     worker.writeAfterTimeoutJSON(

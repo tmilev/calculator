@@ -1069,7 +1069,7 @@ std::string AbstractSyntaxNotationOneSubsetDecoder::toStringAnnotateBinary() {
   std::stringstream out;
   out
   << "<script "
-  << WebAPI::result::scriptType
+  << WebAPI::Result::scriptType
   << "='abstractSyntaxNotationAnnotate'>";
   out
   << "[\""

@@ -1283,7 +1283,7 @@ class ProblemNavigation {
   constructor() {
     /** @type {Problem} */
     this.currentProblem = null;
-    /** @type {HTMLElement|null}*/
+    /** @type {HTMLElement|null} */
     this.infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
   }
 

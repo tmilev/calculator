@@ -566,7 +566,7 @@ JSData WebWorker::getDatabaseJSON() {
   STACK_TRACE("WebWorker::getDatabaseJSON");
   JSData result;
   if (!global.userDefaultHasAdminRights()) {
-    result[WebAPI::result::error] =
+    result[WebAPI::Result::error] =
     "Only logged-in admins can access database. ";
     return result;
   }
@@ -575,15 +575,15 @@ JSData WebWorker::getDatabaseJSON() {
     return result;
   }
   std::string operation =
-  global.getWebInput(WebAPI::databaseParameters::operation);
+  global.getWebInput(WebAPI::DatabaseParameters::operation);
   std::string labels =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::databaseParameters::labels), false
+    global.getWebInput(WebAPI::DatabaseParameters::labels), false
   );
-  if (operation == WebAPI::databaseParameters::fetch) {
+  if (operation == WebAPI::DatabaseParameters::fetch) {
     result = Database::get().toJSONDatabaseFetch(labels);
   } else {
-    result[WebAPI::result::error] =
+    result[WebAPI::Result::error] =
     "Uknown database operation: " + operation + ". ";
   }
   if (global.userDebugFlagOn()) {
@@ -831,8 +831,8 @@ bool WebWorker::loginProcedure(
   } else if (user.username == "") {
     return !user.flagMustLogin;
   }
-  bool changingPass = global.requestType == WebAPI::request::changePassword ||
-  global.requestType == WebAPI::request::activateAccountJSON;
+  bool changingPass = global.requestType == WebAPI::Request::changePassword ||
+  global.requestType == WebAPI::Request::activateAccountJSON;
   if (changingPass) {
     user.enteredAuthenticationToken = "";
   }
@@ -924,7 +924,7 @@ void WebWorker::writeAfterTimeoutProgress(
   }
   this->writeAfterTimeoutString(
     input,
-    WebAPI::result::running,
+    WebAPI::Result::running,
     global.relativePhysicalNameOptionalProgressReport
   );
 }
@@ -1293,7 +1293,7 @@ void WebWorker::sanitizeVirtualFileName() {
 
 int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
   STACK_TRACE("WebWorker::GetJSONResultFromFile");
-  std::string workerId = global.getWebInput(WebAPI::request::workerId);
+  std::string workerId = global.getWebInput(WebAPI::Request::workerId);
   std::stringstream commentsOnError;
   std::string computationResult;
   // 1. Warning: timing attacks on the speed of looking up file names
@@ -1320,7 +1320,7 @@ int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
     << "Failed to load your output with id: "
     << workerId
     << ". ";
-    outputComputationStatus[WebAPI::result::error] = commentsOnError.str();
+    outputComputationStatus[WebAPI::Result::error] = commentsOnError.str();
     return - 1;
   }
   if (!outputComputationStatus.parse(computationResult)) {
@@ -1329,18 +1329,18 @@ int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
     << workerId
     << " but I could not parse its JSON status. "
     << "This is likely an internal server error. ";
-    outputComputationStatus[WebAPI::result::error] = commentsOnError.str();
+    outputComputationStatus[WebAPI::Result::error] = commentsOnError.str();
     return - 1;
   }
   if (
-    !outputComputationStatus[WebAPI::result::status].isEqualTo(
-      WebAPI::result::running
+    !outputComputationStatus[WebAPI::Result::status].isEqualTo(
+      WebAPI::Result::running
     )
   ) {
     return - 1;
   }
   int indexFromFile = - 1;
-  outputComputationStatus[WebAPI::result::workerIndex].isIntegerFittingInInt(
+  outputComputationStatus[WebAPI::Result::workerIndex].isIntegerFittingInInt(
     &indexFromFile
   );
   if (indexOther < 0) {
@@ -1369,7 +1369,7 @@ int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
     << ". "
     << workerId
     << " not found. ";
-    outputComputationStatus[WebAPI::result::comments] = out.str();
+    outputComputationStatus[WebAPI::Result::comments] = out.str();
     this->flagKeepAlive = false;
     indexOther = - 1;
   }
@@ -1394,7 +1394,7 @@ JSData WebWorker::processComputationIndicatorJSData() {
     << "1) over https or "
     << "2) when flag disableDatabaseLogEveryoneAsAdmin is set to true "
     << "using file configuration/configuration.json.";
-    result[WebAPI::result::error] = commentsOnFailure.str();
+    result[WebAPI::Result::error] = commentsOnFailure.str();
     return result;
   }
   int otherIndex = this->getIndexIfRunningWorkerId(result);
@@ -1438,7 +1438,7 @@ void WebWorker::writeAfterTimeoutString(
 ) {
   STACK_TRACE("WebWorker::WriteAfterTimeout");
   JSData result;
-  result[WebAPI::result::resultHtml] = input;
+  result[WebAPI::Result::resultHtml] = input;
   WebWorker::writeAfterTimeoutPartTwo(result, status, fileNameCarbonCopy);
 }
 
@@ -1460,9 +1460,9 @@ void WebWorker::writeAfterTimeoutPartTwo(
 ) {
   STACK_TRACE("WebWorker::writeAfterTimeoutPartTwo");
   std::stringstream commentsOnError;
-  result[WebAPI::result::status] = status;
+  result[WebAPI::Result::status] = status;
   WebWorker& currentWorker = global.server().getActiveWorker();
-  result[WebAPI::result::workerIndex] = currentWorker.indexInParent;
+  result[WebAPI::Result::workerIndex] = currentWorker.indexInParent;
   std::string toWrite = result.toString(nullptr);
   currentWorker.writingReportFile.lock();
   bool success =
@@ -1535,7 +1535,7 @@ int WebWorker::processFolder() {
     )
     << " </b>";
     JSData result;
-    result[WebAPI::result::error] = outError.str();
+    result[WebAPI::Result::error] = outError.str();
     global.response.writeResponse(result);
     return 0;
   }
@@ -1661,7 +1661,7 @@ int WebWorker::processFileCantOpen() {
   << this->virtualFileName
   << ". ";
   JSData result;
-  result[WebAPI::result::error] = out.str();
+  result[WebAPI::Result::error] = out.str();
   return this->writeToBodyJSON(result);
 }
 
@@ -1675,7 +1675,7 @@ int WebWorker::processFileTooLarge(long fileSize) {
   << fileSize
   << " bytes.";
   JSData result;
-  result[WebAPI::result::error] = out.str();
+  result[WebAPI::Result::error] = out.str();
   return this->writeToBodyJSON(result);
 }
 
@@ -2100,7 +2100,7 @@ JSData WebWorker::setEmail(const std::string& input) {
   (void) input;
   JSData result;
   if (!global.flagDatabaseCompiled) {
-    result[WebAPI::result::error] =
+    result[WebAPI::Result::error] =
     "Database not available (cannot set email). ";
     return result;
   }
@@ -2116,13 +2116,13 @@ JSData WebWorker::setEmail(const std::string& input) {
       global.userDefault, &errorStream, &out, adminOutputStream
     )
   ) {
-    result[WebAPI::result::error] = errorStream.str();
+    result[WebAPI::Result::error] = errorStream.str();
   }
   if (global.flagDebugLogin) {
     out << "Debug login information. " << debugStream.str();
   }
   out << "Response time: " << global.getElapsedSeconds() << " second(s).";
-  result[WebAPI::result::comments] = out.str();
+  result[WebAPI::Result::comments] = out.str();
   return result;
 }
 
@@ -2162,13 +2162,13 @@ std::string WebAPIResponse::modifyProblemReport() {
   }
   std::string mainInput =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::fileContent), false
+    global.getWebInput(WebAPI::Problem::fileContent), false
   );
   mainInput = StringRoutines::replaceAll(mainInput, "\r", "");
   mainInput = StringRoutines::replaceAll(mainInput, "\t", " ");
   std::string fileName =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::fileName), false
+    global.getWebInput(WebAPI::Problem::fileName), false
   );
   std::stringstream commentsOnFailure;
   bool fileExists =
@@ -2271,8 +2271,8 @@ bool WebWorker::redirectIfPasswordIsGiven(
     return false;
   }
   if (
-    global.requestType == WebAPI::request::changePassword ||
-    global.requestType == WebAPI::request::activateAccountJSON
+    global.requestType == WebAPI::Request::changePassword ||
+    global.requestType == WebAPI::Request::activateAccountJSON
   ) {
     return false;
   }
@@ -2360,7 +2360,7 @@ bool WebWorker::correctRequestsAFTERLoginReturnFalseIfModified() {
       shouldFallBackToDefaultPage = true;
     } else if (
       global.requestType == "template" &&
-      global.getWebInput(WebAPI::problem::courseHome) == ""
+      global.getWebInput(WebAPI::Problem::courseHome) == ""
     ) {
       shouldFallBackToDefaultPage = true;
     }
@@ -2609,14 +2609,14 @@ int WebWorker::serveClient() {
     user.flagMustLogin
   );
   if (user.flagStopIfNoLogin) {
-    if (global.requestType == WebAPI::request::changePassword) {
+    if (global.requestType == WebAPI::Request::changePassword) {
       user.flagStopIfNoLogin = false;
     }
   }
   if (user.flagStopIfNoLogin) {
     if (
-      global.requestType != WebAPI::request::logout &&
-      global.requestType != WebAPI::request::login
+      global.requestType != WebAPI::Request::logout &&
+      global.requestType != WebAPI::Request::login
     ) {
       argumentProcessingFailureComments
       << this->toStringAddressRequest()
@@ -2634,7 +2634,7 @@ int WebWorker::serveClient() {
   }
   if (
     argumentProcessingFailureComments.str() != "" && (
-      user.flagMustLogin || global.requestType == WebAPI::request::userInfoJSON
+      user.flagMustLogin || global.requestType == WebAPI::Request::userInfoJSON
     )
   ) {
     global.setWebInput("error", argumentProcessingFailureComments.str());
@@ -2681,7 +2681,7 @@ int WebWorker::processFolderOrFile(bool generateLinkToCalculatorOnMissingFile)
     << "are not allowed to start with dots. "
     << "There may be additional restrictions "
     << "on file names added for security reasons.";
-    result[WebAPI::result::error] = out.str();
+    result[WebAPI::Result::error] = out.str();
     return global.response.writeResponse(result);
   }
   if (FileOperations::isFolderUnsecure(this->relativePhysicalFileName)) {
@@ -2728,7 +2728,7 @@ void WebWorker::getIndicatorOnTimeout(
   << "Computation timeout, sending progress indicator instead of output. "
   << Logger::endL;
   std::stringstream timeOutComments;
-  output[WebAPI::result::timeOut] = true;
+  output[WebAPI::Result::timeOut] = true;
   timeOutComments << message;
   if (global.response.flagBanProcessMonitoring) {
     timeOutComments
@@ -2736,13 +2736,13 @@ void WebWorker::getIndicatorOnTimeout(
     << "Please note that monitoring computations "
     << "is the default behavior, so the "
     << "owners of the server must have explicitly banned monitoring. ";
-    output[WebAPI::result::timeOutComments] = timeOutComments.str();
+    output[WebAPI::Result::timeOutComments] = timeOutComments.str();
   } else if (!global.response.flagReportDesired) {
     timeOutComments << "Monitoring computations not desired by user. ";
-    output[WebAPI::result::timeOutComments] = timeOutComments.str();
+    output[WebAPI::Result::timeOutComments] = timeOutComments.str();
   } else {
-    output[WebAPI::result::workerId] = this->workerId;
-    output[WebAPI::result::timeOutComments] = timeOutComments.str();
+    output[WebAPI::Result::workerId] = this->workerId;
+    output[WebAPI::Result::timeOutComments] = timeOutComments.str();
   }
 }
 
@@ -5202,12 +5202,12 @@ void WebServer::initializeMainHashes() {
   << global.timePointer();
   global.buildHeadHashWithServerTime = buildHeadHashWithTimeStream.str();
   FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().
-  addOnTopNoRepetitionMustBeNew(WebAPI::request::calculatorHTML);
-  WebAPI::request::onePageJSWithHash =
-  FileOperations::getVirtualNameWithHash(WebAPI::request::onePageJS);
-  WebAPI::request::calculatorWorkerJSWithHash =
+  addOnTopNoRepetitionMustBeNew(WebAPI::Request::calculatorHTML);
+  WebAPI::Request::onePageJSWithHash =
+  FileOperations::getVirtualNameWithHash(WebAPI::Request::onePageJS);
+  WebAPI::Request::calculatorWorkerJSWithHash =
   FileOperations::getVirtualNameWithHash(
-    WebAPI::request::calculatorWorkerJS
+    WebAPI::Request::calculatorWorkerJS
   );
 }
 
@@ -5216,45 +5216,45 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop("about");
   this->requestsNotNeedingLogin.addOnTop("signUp");
   this->requestsNotNeedingLogin.addOnTop("signUpPage");
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::solveRequest);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::forgotLogin);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::compute);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::solveRequest);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::forgotLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::compute);
   this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::compareExpressions
+    WebAPI::Request::compareExpressions
   );
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::examplesJSON);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::indicator);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::pause);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::exerciseNoLogin);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::exerciseJSON);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::templateNoLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::examplesJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::indicator);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::pause);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::exerciseNoLogin);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::exerciseJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::templateNoLogin);
   this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::templateJSONNoLogin
-  );
-  this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::topicListJSONNoLogin
+    WebAPI::Request::templateJSONNoLogin
   );
   this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::problemGiveUpNoLogin
+    WebAPI::Request::topicListJSONNoLogin
   );
   this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::problemSolutionNoLogin
+    WebAPI::Request::problemGiveUpNoLogin
   );
   this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::homeworkFromSource
-  );
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::slides::source);
-  this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::slides::pdfFromSource
-  );
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::homeworkSource);
-  this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::submitExerciseNoLogin
+    WebAPI::Request::problemSolutionNoLogin
   );
   this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::submitExercisePreviewNoLogin
+    WebAPI::Request::homeworkFromSource
   );
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::selectCourseJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::Slides::source);
+  this->requestsNotNeedingLogin.addOnTop(
+    WebAPI::Request::Slides::pdfFromSource
+  );
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::homeworkSource);
+  this->requestsNotNeedingLogin.addOnTop(
+    WebAPI::Request::submitExerciseNoLogin
+  );
+  this->requestsNotNeedingLogin.addOnTop(
+    WebAPI::Request::submitExercisePreviewNoLogin
+  );
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::selectCourseJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::app);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::appNoCache);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::compareExpressionsPage);
@@ -5262,14 +5262,14 @@ void WebServer::initializeMainRequests() {
     WebAPI::compareExpressionsPageNoCache
   );
   this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::compareExpressions
+    WebAPI::Request::compareExpressions
   );
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::userInfoJSON);
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::serverStatusJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::userInfoJSON);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::serverStatusJSON);
   this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::request::submitAnswerHardcoded
+    WebAPI::Request::submitAnswerHardcoded
   );
-  this->requestsNotNeedingLogin.addOnTop(WebAPI::request::editPage);
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::editPage);
 }
 
 void WebServer::initializeMainAddresses() {
@@ -5286,7 +5286,7 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addOnTop("/login");
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::app);
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::appNoCache);
-  this->addressStartsNotNeedingLogin.addOnTop(WebAPI::request::onePageJS);
+  this->addressStartsNotNeedingLogin.addOnTop(WebAPI::Request::onePageJS);
   this->addressStartsNotNeedingLogin.addOnTop(Configuration::HTMLCommon);
   this->addressStartsNotNeedingLogin.addOnTop(
     "/" + Configuration::HTMLCommon
@@ -5328,16 +5328,16 @@ void WebServer::initializeMainAddresses() {
     WebAPI::compareExpressionsPageNoCache
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    WebAPI::request::onePageJS
+    WebAPI::Request::onePageJS
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    WebAPI::request::onePageJSWithHash
+    WebAPI::Request::onePageJSWithHash
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    WebAPI::request::calculatorWorkerJS
+    WebAPI::Request::calculatorWorkerJS
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    WebAPI::request::calculatorWorkerJSWithHash
+    WebAPI::Request::calculatorWorkerJSWithHash
   );
   // FORBIDDEN:
   // this->addressStartsNotNeedingLogin.addOnTop("logout");

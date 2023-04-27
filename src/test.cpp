@@ -163,7 +163,7 @@ void Test::run() {
       std::cin >> userInput;
       if (userInput == "y" || userInput == "Y") {
         FileOperations::deleteFileVirtual(
-          WebAPI::calculator::testFileNameVirtual, nullptr
+          WebAPI::Calculator::testFileNameVirtual, nullptr
         );
         global << Logger::blue << " test file deleted. " << Logger::endL;
       } else {

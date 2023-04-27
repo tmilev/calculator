@@ -22,7 +22,7 @@ bool WebAPIResponse::Test::solveJSON() {
     Calculator::Mode::educational
   );
   global.comments.resetComments();
-  global.setWebInput(WebAPI::request::calculatorInput, "1+1");
+  global.setWebInput(WebAPI::Request::calculatorInput, "1+1");
   JSData result = response.solveJSON();
   std::string expected =
   "{\"solution\":{\"solution\":{\"input\":\"1+1\",\"solutionSteps\":"
@@ -138,18 +138,18 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
     Calculator::Mode::educational
   );
   global.setWebInput(
-    WebAPI::request::compareExpressionsGiven,
+    WebAPI::Request::compareExpressionsGiven,
     HtmlRoutines::convertStringToURLString(this->given, false)
   );
   global.setWebInput(
-    WebAPI::request::compareExpressionsDesired,
+    WebAPI::Request::compareExpressionsDesired,
     HtmlRoutines::convertStringToURLString(this->desired, false)
   );
   JSData result = response.compareExpressions(false);
   std::string areEqual =
-  result[WebAPI::result::ComparisonData::areEqual].toString();
+  result[WebAPI::Result::ComparisonData::areEqual].toString();
   std::string areEqualAsAnswers =
-  result[WebAPI::result::ComparisonData::areEqualAsAnswers].toString();
+  result[WebAPI::Result::ComparisonData::areEqualAsAnswers].toString();
   if (this->expectedWrong) {
     if (areEqual != "false" || areEqualAsAnswers != "false") {
       global.fatal
@@ -182,7 +182,7 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
   }
   if (hideDesiredAnswer) {
     if (
-      result[WebAPI::result::ComparisonData::desired].isString(nullptr)
+      result[WebAPI::Result::ComparisonData::desired].isString(nullptr)
     ) {
       global.fatal
       << "Desired answer must be absent but was given. "
@@ -233,8 +233,8 @@ bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
   Course::Test::Setup setup(useFallbackDatabase);
   setup.deleteDatabaseSetupAll();
   std::string sample = "test/problems/interval_notation_1.html";
-  global.webArguments[WebAPI::problem::fileName] = sample;
-  global.requestType = WebAPI::frontend::scoredQuiz;
+  global.webArguments[WebAPI::Problem::fileName] = sample;
+  global.requestType = WebAPI::Frontend::scoredQuiz;
   std::string databaseBeforeFirstRun =
   Database::get().fallBack.databaseContent.toString();
   JSData resultFirst = WebAPIResponse::getExamPageJSON();

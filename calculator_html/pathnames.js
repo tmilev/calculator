@@ -62,6 +62,8 @@ const urlFields = {
     performance: "performance",
     // Comments on performance per individual internal math handler.
     performancePerHandler: "performancePerHandler",
+    performanceTurnOffSlowRules: "performanceTurnOffSlowRules",
+    performanceTurnOffVerySlowRules: "performanceTurnOffVerySlowRules",
     // Computation time. Excludes https traffic.
     computationTime: "computationTime",
     // Comments for the specific task.
@@ -166,12 +168,21 @@ class Addresses {
     /** @type {string} */
     input,
   ) {
+    let hashURL = this.calculatorComputationWithoutAppURL(input);
+    return `${urls.appWithCache}${hashURL}`;
+  }
+
+  /** @return{string} */
+  calculatorComputationWithoutAppURL(
+    /** @type {string} */
+    input,
+  ) {
     let url = {
       "currentPage": "calculator",
       "calculatorInput": input,
     };
     let encoded = encodeURIComponent(JSON.stringify(url));
-    return `${urls.appWithCache}#${encoded}`;
+    return `#${encoded}`;
   }
 
   /** @return{string} */

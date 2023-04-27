@@ -27,7 +27,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
   if (
     global.flagLoggedIn &&
     global.userDefaultHasAdminRights() &&
-    global.requestType == WebAPI::request::database
+    global.requestType == WebAPI::Request::database
   ) {
     return this->processDatabaseJSON();
   } else if (
@@ -42,48 +42,48 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processDatabaseModifyEntry();
   } else if (global.flagLoggedIn && global.requestType == "accountsJSON") {
     return this->processAccountsJSON();
-  } else if (global.requestType == WebAPI::request::examplesJSON) {
+  } else if (global.requestType == WebAPI::Request::examplesJSON) {
     return this->processCalculatorExamplesJSON();
-  } else if (global.requestType == WebAPI::request::serverStatusJSON) {
+  } else if (global.requestType == WebAPI::Request::serverStatusJSON) {
     return this->processServerStatusJSON();
   }
-  if (global.requestType == WebAPI::request::pause) {
+  if (global.requestType == WebAPI::Request::pause) {
     return this->processPauseWorker();
-  } else if (global.requestType == WebAPI::request::unpause) {
+  } else if (global.requestType == WebAPI::Request::unpause) {
     return this->processUnpauseWorker();
-  } else if (global.requestType == WebAPI::request::indicator) {
+  } else if (global.requestType == WebAPI::Request::indicator) {
     return this->processComputationIndicator();
-  } else if (global.requestType == WebAPI::request::setProblemWeight) {
+  } else if (global.requestType == WebAPI::Request::setProblemWeight) {
     return this->processSetProblemWeight();
-  } else if (global.requestType == WebAPI::request::setProblemDeadline) {
+  } else if (global.requestType == WebAPI::Request::setProblemDeadline) {
     return this->processSetProblemDeadline();
-  } else if (global.requestType == WebAPI::request::changePassword) {
+  } else if (global.requestType == WebAPI::Request::changePassword) {
     return
     this->processChangePassword(argumentProcessingFailureComments.str());
-  } else if (global.requestType == WebAPI::request::activateAccountJSON) {
+  } else if (global.requestType == WebAPI::Request::activateAccountJSON) {
     return this->processActivateAccount();
-  } else if (global.requestType == WebAPI::request::signUp) {
+  } else if (global.requestType == WebAPI::Request::signUp) {
     return this->processSignUp();
-  } else if (global.requestType == WebAPI::request::forgotLogin) {
+  } else if (global.requestType == WebAPI::Request::forgotLogin) {
     return this->processForgotLogin();
-  } else if (global.requestType == WebAPI::request::login) {
+  } else if (global.requestType == WebAPI::Request::login) {
     return this->processLoginUserInfo(comments.str());
-  } else if (global.requestType == WebAPI::request::logout) {
+  } else if (global.requestType == WebAPI::Request::logout) {
     return this->processLogout();
   } else if ((
-      global.requestType == WebAPI::request::addEmails ||
-      global.requestType == WebAPI::request::addUsers
+      global.requestType == WebAPI::Request::addEmails ||
+      global.requestType == WebAPI::Request::addUsers
     ) &&
     global.flagLoggedIn
   ) {
     return this->processAddUserEmails();
   } else if (
-    global.requestType == WebAPI::request::setTeacher && global.flagLoggedIn
+    global.requestType == WebAPI::Request::setTeacher && global.flagLoggedIn
   ) {
     return this->processAssignTeacherToSection();
   } else if ((
-      global.requestType == WebAPI::request::submitAnswers ||
-      global.requestType == WebAPI::request::submitExercise
+      global.requestType == WebAPI::Request::submitAnswers ||
+      global.requestType == WebAPI::Request::submitExercise
     ) &&
     global.flagLoggedIn
   ) {
@@ -99,10 +99,10 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
   ) {
     return this->processSubmitAnswers();
   } else if ((
-      global.requestType == WebAPI::request::problemGiveUp &&
+      global.requestType == WebAPI::Request::problemGiveUp &&
       global.flagLoggedIn
     ) ||
-    global.requestType == WebAPI::request::problemGiveUpNoLogin
+    global.requestType == WebAPI::Request::problemGiveUpNoLogin
   ) {
     return this->processProblemGiveUp();
   } else if ((
@@ -119,7 +119,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
   ) {
     return this->processSubmitAnswersPreview();
   } else if (
-    global.requestType == WebAPI::request::submitExercisePreviewNoLogin &&
+    global.requestType == WebAPI::Request::submitExercisePreviewNoLogin &&
     global.userGuestMode()
   ) {
     return this->processSubmitAnswersPreview();
@@ -128,42 +128,42 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     global.requestType == "exercise" ||
     global.requestType == "exerciseNoLogin" ||
     global.requestType == "exerciseJSON" ||
-    global.requestType == WebAPI::frontend::scoredQuiz
+    global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
     return this->processExamPageJSON();
   } else if (
     global.requestType == "templateJSON" ||
-    global.requestType == WebAPI::request::templateJSONNoLogin
+    global.requestType == WebAPI::Request::templateJSONNoLogin
   ) {
     return this->processTemplateJSON();
-  } else if (global.requestType == WebAPI::request::userInfoJSON) {
+  } else if (global.requestType == WebAPI::Request::userInfoJSON) {
     comments << argumentProcessingFailureComments.str();
     return this->processLoginUserInfo(comments.str());
-  } else if (global.requestType == WebAPI::request::editPage) {
+  } else if (global.requestType == WebAPI::Request::editPage) {
     return this->processEditPageJSON(true);
-  } else if (global.requestType == WebAPI::request::modifyPage) {
+  } else if (global.requestType == WebAPI::Request::modifyPage) {
     return this->processModifyPage();
   } else if (
-    global.requestType == WebAPI::request::slides::pdfFromSource ||
-    global.requestType == WebAPI::request::homeworkFromSource
+    global.requestType == WebAPI::Request::Slides::pdfFromSource ||
+    global.requestType == WebAPI::Request::homeworkFromSource
   ) {
     return this->processSlidesOrHomeworkFromSource();
   } else if (
-    global.requestType == WebAPI::request::slides::source ||
-    global.requestType == WebAPI::request::homeworkSource
+    global.requestType == WebAPI::Request::Slides::source ||
+    global.requestType == WebAPI::Request::homeworkSource
   ) {
     return this->processSlidesSource();
-  } else if (global.requestType == WebAPI::request::clonePage) {
+  } else if (global.requestType == WebAPI::Request::clonePage) {
     return this->processClonePage();
-  } else if (global.requestType == WebAPI::request::compute) {
+  } else if (global.requestType == WebAPI::Request::compute) {
     return this->processCompute();
-  } else if (global.requestType == WebAPI::request::solveRequest) {
+  } else if (global.requestType == WebAPI::Request::solveRequest) {
     return this->processSolveJSON();
-  } else if (global.requestType == WebAPI::request::selectCourseJSON) {
+  } else if (global.requestType == WebAPI::Request::selectCourseJSON) {
     return this->processSelectCourseJSON();
   } else if (
     global.requestType == "topicListJSON" ||
-    global.requestType == WebAPI::request::topicListJSONNoLogin
+    global.requestType == WebAPI::Request::topicListJSONNoLogin
   ) {
     return this->processTopicListJSON();
   } else if (global.requestType == WebAPI::app) {
@@ -174,26 +174,26 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processCompareExpressionsPage(true);
   } else if (global.requestType == WebAPI::compareExpressionsPageNoCache) {
     return this->processCompareExpressionsPage(false);
-  } else if (global.requestType == WebAPI::request::compareExpressions) {
+  } else if (global.requestType == WebAPI::Request::compareExpressions) {
     return this->processCompareExpressions(true);
-  } else if (global.requestType == WebAPI::request::submitAnswerHardcoded) {
+  } else if (global.requestType == WebAPI::Request::submitAnswerHardcoded) {
     return this->processSubmitAnswerHardcoded();
   } else if (
-    global.requestType == WebAPI::request::compareExpressionsInternal
+    global.requestType == WebAPI::Request::compareExpressionsInternal
   ) {
     return this->processCompareExpressions(false);
-  } else if ("/" + global.requestType == WebAPI::request::onePageJS) {
+  } else if ("/" + global.requestType == WebAPI::Request::onePageJS) {
     return this->processCalculatorOnePageJS(false);
   } else if (
-    "/" + global.requestType == WebAPI::request::onePageJSWithHash
+    "/" + global.requestType == WebAPI::Request::onePageJSWithHash
   ) {
     return this->processCalculatorOnePageJS(true);
   } else if (
-    "/" + global.requestType == WebAPI::request::calculatorWorkerJS
+    "/" + global.requestType == WebAPI::Request::calculatorWorkerJS
   ) {
     return this->processCalculatorWebWorkerJS(false);
   } else if (
-    "/" + global.requestType == WebAPI::request::calculatorWorkerJSWithHash
+    "/" + global.requestType == WebAPI::Request::calculatorWorkerJSWithHash
   ) {
     return this->processCalculatorWebWorkerJS(true);
   }
@@ -220,7 +220,7 @@ bool WebAPIResponse::processServerStatusJSON() {
   << global.toHTMLTopCommandLinuxSystem()
   << "</td></tr></table>";
   JSData outputJS;
-  outputJS[WebAPI::result::resultHtml] = out.str();
+  outputJS[WebAPI::Result::resultHtml] = out.str();
   return global.response.writeResponse(outputJS, false);
 }
 
@@ -235,9 +235,9 @@ bool WebAPIResponse::processUnpauseWorker() {
   }
   WebWorker& otherWorker = this->owner->parent->allWorkers[indexWorker];
   if (!otherWorker.pauseWorker.unlock()) {
-    result[WebAPI::result::error] = "Failed to unpause process";
+    result[WebAPI::Result::error] = "Failed to unpause process";
   } else {
-    result[WebAPI::result::status] = "unpaused";
+    result[WebAPI::Result::status] = "unpaused";
   }
   return global.response.writeResponse(result, false);
 }
@@ -253,9 +253,9 @@ bool WebAPIResponse::processPauseWorker() {
   }
   WebWorker& otherWorker = this->owner->parent->allWorkers[indexWorker];
   if (otherWorker.pauseWorker.lock()) {
-    result[WebAPI::result::status] = "paused";
+    result[WebAPI::Result::status] = "paused";
   } else {
-    result[WebAPI::result::error] = "Failed to pause process. ";
+    result[WebAPI::Result::error] = "Failed to pause process. ";
   }
   return global.response.writeResponse(result, false);
 }
@@ -287,11 +287,11 @@ bool WebAPIResponse::processChangePassword(
   UserCalculatorData& user = global.userDefault;
   user.enteredAuthenticationToken = "";
   if (!global.flagUsingSSLinCurrentConnection) {
-    result[WebAPI::result::error] = "Please use secure connection.";
+    result[WebAPI::Result::error] = "Please use secure connection.";
     return global.response.writeResponse(result);
   }
   if (!global.flagLoggedIn) {
-    result[WebAPI::result::error] =
+    result[WebAPI::Result::error] =
     "Please enter (old) password [correctly]. " + reasonForNoAuthentication;
     return global.response.writeResponse(result);
   }
@@ -327,7 +327,7 @@ bool WebAPIResponse::processChangePassword(
       DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail
     );
     if (Database::get().findOne(queryEmailTaken, notUsed, nullptr)) {
-      result[WebAPI::result::error] =
+      result[WebAPI::Result::error] =
       "It appears the email is already taken. ";
       return global.response.writeResponse(result);
     }
@@ -337,7 +337,7 @@ bool WebAPIResponse::processChangePassword(
     return global.response.writeResponse(result);
   }
   if (newPassword != reenteredPassword) {
-    result[WebAPI::result::error] = "Passwords don't match. ";
+    result[WebAPI::Result::error] = "Passwords don't match. ";
     return global.response.writeResponse(result);
   }
   std::stringstream commentsOnFailure;
@@ -350,7 +350,7 @@ bool WebAPIResponse::processChangePassword(
       commentsOnFailure
     )
   ) {
-    result[WebAPI::result::error] = commentsOnFailure.str();
+    result[WebAPI::Result::error] = commentsOnFailure.str();
     return global.response.writeResponse(result);
   }
   QueryExact findQuery(
@@ -365,7 +365,7 @@ bool WebAPIResponse::processChangePassword(
       findQuery, QuerySet::makeFrom(setQuery), &commentsOnFailure
     )
   ) {
-    result[WebAPI::result::error] =
+    result[WebAPI::Result::error] =
     "Failed to set activationToken: " + commentsOnFailure.str();
     return global.response.writeResponse(result);
   }
@@ -383,7 +383,7 @@ bool WebAPIResponse::processChangePassword(
     << "&activationToken = &authenticationToken = &"
     << "'\" />";
   }
-  result[WebAPI::result::resultHtml] = out.str();
+  result[WebAPI::Result::resultHtml] = out.str();
   return global.response.writeResponse(result);
 }
 
@@ -393,7 +393,7 @@ void WebAPIResponse::initializeCalculatorComputation() {
     this->owner->setHeaderOKNoContentLength("");
   }
   global.response.flagReportDesired = true;
-  if (global.getWebInput(WebAPI::request::monitoring) == "false") {
+  if (global.getWebInput(WebAPI::Request::monitoring) == "false") {
     global.response.flagReportDesired = false;
   } else {
     global.response.flagReportDesired = true;
@@ -406,7 +406,7 @@ bool WebAPIResponse::processCompute() {
   Calculator& calculator = global.calculator().getElement();
   calculator.inputString =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::request::calculatorInput), false
+    global.getWebInput(WebAPI::Request::calculatorInput), false
   );
   global.initOutputReportAndCrashFileNames(
     HtmlRoutines::convertStringToURLString(calculator.inputString, false),
@@ -430,7 +430,7 @@ JSData WebAPIResponse::solveJSON() {
   Calculator& calculator = global.calculator().getElement();
   calculator.inputString =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::request::calculatorInput), false
+    global.getWebInput(WebAPI::Request::calculatorInput), false
   );
   global.initOutputReportAndCrashFileNames(
     HtmlRoutines::convertStringToURLString(
@@ -441,8 +441,8 @@ JSData WebAPIResponse::solveJSON() {
   global.response.disallowReport();
   JSData solution = calculator.solve(calculator.inputString);
   JSData result;
-  result[WebAPI::result::solution] = solution;
-  result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
+  result[WebAPI::Result::solution] = solution;
+  result[WebAPI::Result::commentsGlobal] = global.comments.getCurrentReset();
   global.flagComputationComplete = true;
   return result;
 }
@@ -451,12 +451,12 @@ JSData WebAPIResponse::compareExpressions(bool hideDesiredAnswer) {
   STACK_TRACE("WebAPIResponse::compareExpressions");
   std::string given =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::request::compareExpressionsGiven),
+    global.getWebInput(WebAPI::Request::compareExpressionsGiven),
     false
   );
   std::string desired =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::request::compareExpressionsDesired),
+    global.getWebInput(WebAPI::Request::compareExpressionsDesired),
     false
   );
   this->initializeCalculatorComputation();
@@ -471,7 +471,7 @@ bool WebAPIResponse::processActivateAccount() {
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
   bool notUsed = false;
-  result[WebAPI::result::resultHtml] =
+  result[WebAPI::Result::resultHtml] =
   this->owner->getChangePasswordPagePartOne(notUsed);
   return global.response.writeResponse(result);
 }
@@ -579,7 +579,7 @@ bool WebAPIResponse::processTemplateJSON() {
   STACK_TRACE("WebAPIResponse::processTemplateJSON");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::getJSONFromTemplate();
+  result[WebAPI::Result::resultHtml] = WebAPIResponse::getJSONFromTemplate();
   return global.response.writeResponse(result);
 }
 
@@ -593,7 +593,7 @@ bool WebAPIResponse::processSetProblemWeight() {
   STACK_TRACE("WebAPIResponse::processSetProblemWeight");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::setProblemWeight();
+  result[WebAPI::Result::resultHtml] = WebAPIResponse::setProblemWeight();
   return global.response.writeResponse(result);
 }
 
@@ -601,7 +601,7 @@ bool WebAPIResponse::processSetProblemDeadline() {
   STACK_TRACE("WebAPIResponse::processSetProblemDatabaseInfo");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::setProblemDeadline();
+  result[WebAPI::Result::resultHtml] = WebAPIResponse::setProblemDeadline();
   return global.response.writeResponse(result);
 }
 
@@ -609,7 +609,7 @@ bool WebAPIResponse::processAddUserEmails() {
   STACK_TRACE("WebAPIResponse::processAddUserEmails");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = this->owner->getAddUserEmails();
+  result[WebAPI::Result::resultHtml] = this->owner->getAddUserEmails();
   return global.response.writeResponse(result);
 }
 
@@ -617,7 +617,7 @@ bool WebAPIResponse::processModifyPage() {
   STACK_TRACE("WebAPIResponse::processModifyPage");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::modifyProblemReport();
+  result[WebAPI::Result::resultHtml] = WebAPIResponse::modifyProblemReport();
   return global.response.writeResponse(result);
 }
 
@@ -625,7 +625,7 @@ bool WebAPIResponse::processAssignTeacherToSection() {
   STACK_TRACE("WebAPIResponse::processAssignTeacherToSection");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::addTeachersSections();
+  result[WebAPI::Result::resultHtml] = WebAPIResponse::addTeachersSections();
   return global.response.writeResponse(result);
 }
 
@@ -633,7 +633,7 @@ bool WebAPIResponse::processScores() {
   STACK_TRACE("WebAPIResponse::processScores");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::getScoresPage();
+  result[WebAPI::Result::resultHtml] = WebAPIResponse::getScoresPage();
   return global.response.writeResponse(result);
 }
 
@@ -641,7 +641,7 @@ bool WebAPIResponse::processScoresInCoursePage() {
   STACK_TRACE("WebAPIResponse::processScoresInCoursePage");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = WebAPIResponse::getScoresInCoursePage();
+  result[WebAPI::Result::resultHtml] = WebAPIResponse::getScoresInCoursePage();
   return global.response.writeResponse(result);
 }
 
@@ -664,7 +664,7 @@ bool WebAPIResponse::processDatabaseDeleteEntry() {
   STACK_TRACE("WebAPIResponse::processDatabaseDeleteEntry");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::resultHtml] = this->owner->getDatabaseDeleteOneItem();
+  result[WebAPI::Result::resultHtml] = this->owner->getDatabaseDeleteOneItem();
   return global.response.writeResponse(this->owner->getDatabaseJSON());
 }
 
@@ -672,7 +672,7 @@ bool WebAPIResponse::processDatabaseModifyEntry() {
   STACK_TRACE("WebAPIResponse::processDatabaseModifyEntry");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::result::error] =
+  result[WebAPI::Result::error] =
   "WebAPIResponse::processDatabaseModifyEntry not implemented yet";
   return global.response.writeResponse(result);
 }
@@ -694,7 +694,7 @@ bool WebAPIResponse::processSlidesOrHomeworkFromSource() {
   std::stringstream commentsOnFailure;
   if (!latexCrawler.initializeFromGlobalVariables(&commentsOnFailure)) {
     commentsOnFailure << "Failed to process slides or homework from source. ";
-    resultOnError[WebAPI::result::error] = commentsOnFailure.str();
+    resultOnError[WebAPI::Result::error] = commentsOnFailure.str();
     return global.response.writeResponse(resultOnError);
   }
   std::stringstream comments;
@@ -713,7 +713,7 @@ bool WebAPIResponse::processSlidesOrHomeworkFromSource() {
   if (!latexCrawler.buildOrFetchFromCachePDF(&comments, &comments)) {
     resultOnError["targetPdfFileName"] =
     latexCrawler.targetPDFFileNameWithPathVirtual;
-    resultOnError[WebAPI::result::error] = comments.str();
+    resultOnError[WebAPI::Result::error] = comments.str();
     this->owner->flagDoAddContentLength = true;
     global.response.writeResponse(resultOnError);
     return true;
@@ -733,12 +733,12 @@ bool LaTeXCrawler::initializeFromGlobalVariables(
 ) {
   LaTeXCrawler::Slides slides;
   std::string slideSpecification =
-  global.webArguments.getValue(WebAPI::request::slides::content, "");
+  global.webArguments.getValue(WebAPI::Request::Slides::content, "");
   if (!slides.fromString(slideSpecification, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Failed to initialize slides from global inputs: key: "
-      << WebAPI::request::slides::content
+      << WebAPI::Request::Slides::content
       << " is missing. ";
     }
     return false;
@@ -755,7 +755,7 @@ bool WebAPIResponse::processSlidesSource() {
   JSData result;
   std::stringstream commentsOnFailure;
   if (!latexCrawler.initializeFromGlobalVariables(&commentsOnFailure)) {
-    result[WebAPI::result::error] = commentsOnFailure.str();
+    result[WebAPI::Result::error] = commentsOnFailure.str();
     return global.response.writeResponse(result);
   }
   if (global.requestType == "homeworkSource") {
@@ -777,7 +777,7 @@ bool WebAPIResponse::processSlidesSource() {
   if (!latexCrawler.buildOrFetchFromCachePDF(&comments, &comments)) {
     this->owner->flagDoAddContentLength = true;
     comments << "Failed to build your slides. ";
-    result[WebAPI::result::error] = comments.str();
+    result[WebAPI::Result::error] = comments.str();
     return global.response.writeResponse(result);
   }
   this->owner->setHeader(

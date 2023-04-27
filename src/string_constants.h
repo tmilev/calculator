@@ -21,7 +21,7 @@ public:
   static std::string app;
   static std::string compareExpressionsPage;
   static std::string compareExpressionsPageNoCache;
-  struct request {
+  struct Request {
     static std::string requestAPI;
     static std::string database;
     static std::string setProblemWeight;
@@ -66,7 +66,7 @@ public:
     static std::string teachersAndSections;
     static std::string teachers;
     static std::string sections;
-    struct slides {
+    struct Slides {
     public:
       static std::string source;
       static std::string pdfFromSource;
@@ -97,7 +97,7 @@ public:
     static std::string passwordList;
   };
 
-  struct result {
+  struct Result {
     static std::string resultHtml;
     static std::string syntaxErrors;
     static std::string syntaxErrorsExtra;
@@ -106,6 +106,8 @@ public:
     static std::string comments;
     static std::string performance;
     static std::string performancePerHandler;
+    static std::string performanceTurnOffSlowRules;
+    static std::string performanceTurnOffVerySlowRules;
     static std::string computationTime;
     static std::string parsingLog;
     static std::string commentsGlobal;
@@ -162,7 +164,7 @@ public:
     };
   };
 
-  struct frontend {
+  struct Frontend {
     static std::string problemFileName;
     static std::string problemPage;
     static std::string currentPage;
@@ -173,7 +175,7 @@ public:
     static std::string calculatorExamples;
   };
 
-  struct problem {
+  struct Problem {
     static std::string title;
     static std::string fileName;
     static std::string courseHome;
@@ -199,13 +201,13 @@ public:
     static std::string forReal;
   };
 
-  struct databaseParameters {
+  struct DatabaseParameters {
     static std::string labels;
     static std::string operation;
     static std::string fetch;
   };
 
-  struct calculator {
+  struct Calculator {
   public:
     static std::string testFileNameVirtual;
   };

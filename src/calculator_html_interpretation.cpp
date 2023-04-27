@@ -20,7 +20,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   JSData result;
   problem.loadCurrentProblemItem(
     false,
-    global.getWebInput(WebAPI::problem::randomSeed),
+    global.getWebInput(WebAPI::Problem::randomSeed),
     &errorStream
   );
   if (!problem.flagLoadedSuccessfully) {
@@ -33,27 +33,27 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     if (errorStream.str() != "") {
       out << " Comments: " << errorStream.str();
     }
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
   if (problem.flagIsForReal) {
     out
     << " <b>Not allowed to show answer of a "
     << "problem being tested for real. </b>";
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
-  if (global.getWebInput(WebAPI::problem::randomSeed) == "") {
+  if (global.getWebInput(WebAPI::Problem::randomSeed) == "") {
     out
     << "<b>I could not figure out the "
     << "exercise problem (missing random seed). </b>";
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
   std::stringstream comments;
   if (!problem.parseHTMLPrepareCommands(&comments)) {
     out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
   std::string lastStudentAnswerID;
@@ -66,7 +66,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   for (int i = 0; i < arguments.size(); i ++) {
     StringRoutines::stringBeginsWith(
       arguments.keys[i],
-      WebAPI::problem::calculatorAnswerPrefix,
+      WebAPI::Problem::calculatorAnswerPrefix,
       &lastStudentAnswerID
     );
   }
@@ -80,8 +80,8 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       out << "<hr>" << problem.problemData.toStringAvailableAnswerIds();
     }
-    result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] =
+    result[WebAPI::Result::resultHtml] = out.str();
+    result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
@@ -95,7 +95,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     << "<b>Failed to prepare calculator commands.</b>"
     << "<br>Comments:<br>"
     << comments.str();
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
   if (answer.solutionElements.size == 0) {
@@ -103,7 +103,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     << "<b>There is no solution given for this question (answerID: "
     << lastStudentAnswerID
     << ").</b>";
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
   std::stringstream answerCommands, answerCommandsNoEnclosures;
@@ -125,8 +125,8 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     << CalculatorHTML::bugsGenericMessage
     << "<br>Details: <br>"
     << interpreter.parser.toStringSyntacticStackHTMLSimple();
-    result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] =
+    result[WebAPI::Result::resultHtml] = out.str();
+    result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
@@ -141,8 +141,8 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     << interpreter.outputCommentsString
     << "<hr>Input: <br>"
     << interpreter.inputString;
-    result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] =
+    result[WebAPI::Result::resultHtml] = out.str();
+    result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
@@ -151,8 +151,8 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
       interpreter, answer.solutionElements, out
     )
   ) {
-    result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] =
+    result[WebAPI::Result::resultHtml] = out.str();
+    result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedMilliseconds() - startMilliseconds;
     return result;
   }
@@ -174,8 +174,8 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     << "<hr><b>Raw command:</b> "
     << answer.commandsSolutionOnly;
   }
-  result[WebAPI::result::resultHtml] = out.str();
-  result[WebAPI::result::millisecondsComputation] =
+  result[WebAPI::Result::resultHtml] = out.str();
+  result[WebAPI::Result::millisecondsComputation] =
   global.getElapsedMilliseconds() - startMilliseconds;
   return result;
 }
@@ -325,7 +325,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     if (
       StringRoutines::stringBeginsWith(
         arguments.keys[i],
-        WebAPI::problem::calculatorAnswerPrefix,
+        WebAPI::Problem::calculatorAnswerPrefix,
         &lastStudentAnswerID
       )
     ) {
@@ -345,11 +345,11 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   std::stringstream errorStream, comments;
   problem.loadCurrentProblemItem(
     global.userRequestRequiresLoadingRealExamData(),
-    global.getWebInput(WebAPI::problem::randomSeed),
+    global.getWebInput(WebAPI::Problem::randomSeed),
     &errorStream
   );
   if (!problem.flagLoadedSuccessfully) {
-    out << "<br><b>" << WebAPI::problem::failedToLoadProblem << "</b> ";
+    out << "<br><b>" << WebAPI::Problem::failedToLoadProblem << "</b> ";
   }
   if (!problem.parseHTMLPrepareCommands(&comments)) {
     out << "<br><b>Failed to parse problem.</b> Comments: " << comments.str();
@@ -363,8 +363,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << "<br>Response time: "
     << global.getElapsedSeconds() - startTime
     << " second(s). ";
-    result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
   Answer& currentA = problem.problemData.answers.values[indexLastAnswerId];
@@ -374,10 +374,10 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       errorStream << comments.str();
     }
-    result[WebAPI::result::millisecondsComputation] =
+    result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedSeconds() - startTime;
-    result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
   Calculator interpreter;
@@ -397,17 +397,17 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     errorStream
     << "<b style ='color:red'>Parsing failure:</b><br>"
     << interpreter.parser.toStringSyntacticStackHTMLSimple();
-    result[WebAPI::result::error] = errorStream.str();
-    result[WebAPI::result::millisecondsComputation] =
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedSeconds() - startTime;
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::resultHtml] = out.str();
     return result;
   } else if (interpreter.flagAbortComputationASAP) {
     out
     << "<b style='color:red'>Failed to evaluate your answer, got:</b><br>"
     << interpreter.outputString;
-    result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] =
+    result[WebAPI::Result::resultHtml] = out.str();
+    result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedSeconds() - startTime;
     return result;
   }
@@ -480,8 +480,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
       << "<br>"
       << interpreterWithAdvice.outputCommentsString;
     }
-    result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] =
+    result[WebAPI::Result::resultHtml] = out.str();
+    result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedSeconds() - startTime;
     return result;
   }
@@ -504,8 +504,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
       << "<br>"
       << calculatorInputStream.str();
     }
-    result[WebAPI::result::resultHtml] = out.str();
-    result[WebAPI::result::millisecondsComputation] =
+    result[WebAPI::Result::resultHtml] = out.str();
+    result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedSeconds() - startTime;
     return result;
   }
@@ -515,7 +515,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
       interpreterWithAdvice, 3, format
     );
   }
-  result[WebAPI::result::millisecondsComputation] =
+  result[WebAPI::Result::millisecondsComputation] =
   global.getElapsedSeconds() - startTime;
   if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
     out
@@ -531,7 +531,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << "<br>Parsed elements: "
     << problem.parser.toStringParsingStack(problem.content);
   }
-  result[WebAPI::result::resultHtml] = out.str();
+  result[WebAPI::Result::resultHtml] = out.str();
   return result;
 }
 
@@ -543,17 +543,17 @@ JSData WebAPIResponse::clonePageResult() {
     !global.userDefaultHasAdminRights() ||
     !global.flagUsingSSLinCurrentConnection
   ) {
-    result[WebAPI::result::error] =
+    result[WebAPI::Result::error] =
     "Cloning problems allowed only for logged-in admins under ssl connection.";
     return result;
   }
   std::string fileNameTarget =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::fileNameTarget), false
+    global.getWebInput(WebAPI::Problem::fileNameTarget), false
   );
   std::string fileNameToBeCloned =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::fileName), false
+    global.getWebInput(WebAPI::Problem::fileName), false
   );
   std::stringstream out;
   std::string startingFileString;
@@ -563,7 +563,7 @@ JSData WebAPIResponse::clonePageResult() {
     )
   ) {
     out << "Could not find input file: " << fileNameToBeCloned;
-    result[WebAPI::result::error] = out.str();
+    result[WebAPI::Result::error] = out.str();
     return result;
   }
   std::fstream fileStream;
@@ -573,7 +573,7 @@ JSData WebAPIResponse::clonePageResult() {
     )
   ) {
     out << "Output file: " << fileNameTarget << " already exists. ";
-    result[WebAPI::result::error] = out.str();
+    result[WebAPI::Result::error] = out.str();
     return result;
   }
   if (
@@ -582,7 +582,7 @@ JSData WebAPIResponse::clonePageResult() {
     )
   ) {
     out << "Failed to open output file: " << fileNameTarget << ".";
-    result[WebAPI::result::error] = out.str();
+    result[WebAPI::Result::error] = out.str();
     return result;
   }
   fileStream << startingFileString;
@@ -602,19 +602,19 @@ JSData WebAPIResponse::clonePageResult() {
     << " bytes to file: "
     << fileNameTarget;
   }
-  result[WebAPI::result::resultHtml] = out.str();
+  result[WebAPI::Result::resultHtml] = out.str();
   return result;
 }
 
 void BuilderApplication::initializeTags(bool appendBuildHash) {
   this->allInOneJavascriptTagOriginal =
   "<script type='text/javascript' src='" +
-  WebAPI::request::onePageJS +
+  WebAPI::Request::onePageJS +
   "'></script>";
-  std::string virtualJavascriptFileName = WebAPI::request::onePageJS;
+  std::string virtualJavascriptFileName = WebAPI::Request::onePageJS;
   if (appendBuildHash) {
     virtualJavascriptFileName =
-    FileOperations::getVirtualNameWithHash(WebAPI::request::onePageJS);
+    FileOperations::getVirtualNameWithHash(WebAPI::Request::onePageJS);
   }
   this->allInOneJavascriptTagDesired =
   "<script src='" +
@@ -622,12 +622,12 @@ void BuilderApplication::initializeTags(bool appendBuildHash) {
   "' onerror = 'errorLoadingScript(this);'></script>\n";
   this->calculatorCSSTagOriginal =
   "<link type='text/css' rel='stylesheet' href='" +
-  WebAPI::request::calculatorCSS +
+  WebAPI::Request::calculatorCSS +
   "'>";
-  std::string virtualCSSFileName = WebAPI::request::calculatorCSS;
+  std::string virtualCSSFileName = WebAPI::Request::calculatorCSS;
   if (appendBuildHash) {
     virtualCSSFileName =
-    FileOperations::getVirtualNameWithHash(WebAPI::request::calculatorCSS);
+    FileOperations::getVirtualNameWithHash(WebAPI::Request::calculatorCSS);
   }
   this->calculatorCSSTagDesired =
   "<link type='text/css' rel='stylesheet' href='" +
@@ -863,10 +863,10 @@ std::string WebAPIResponse::getCompareExpressionsPage(bool appendBuildHash) {
 
 JSData Course::toJSON() const {
   JSData result;
-  result[WebAPI::problem::courseTitle] = this->title;
-  result[WebAPI::problem::courseHome] =
+  result[WebAPI::Problem::courseTitle] = this->title;
+  result[WebAPI::Problem::courseHome] =
   Configuration::courseTemplates + this->courseTemplate;
-  result[WebAPI::problem::topicList] =
+  result[WebAPI::Problem::topicList] =
   Configuration::topicLists + this->courseTopicsNoFolder;
   if (this->flagRoughDraft != "") {
     result["roughDraft"] = this->flagRoughDraft;
@@ -987,7 +987,7 @@ bool CourseList::load() {
 JSData CourseList::toJSON() {
   JSData output;
   if (this->errorMessage != "") {
-    output[WebAPI::result::error] = this->errorMessage;
+    output[WebAPI::Result::error] = this->errorMessage;
   }
   output["courses"].elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->allCourses.size; i ++) {
@@ -1021,30 +1021,30 @@ JSData WebAPIResponse::getTopicTableJSON() {
   std::stringstream comments;
   page.fileName =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::courseHome), false
+    global.getWebInput(WebAPI::Problem::courseHome), false
   );
   page.topicListFileName =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::topicList), false
+    global.getWebInput(WebAPI::Problem::topicList), false
   );
   JSData result;
   if (!page.loadAndParseTopicList(out)) {
     out << "Failed to load and parse topic list.";
-    result[WebAPI::result::error] = out.str();
+    result[WebAPI::Result::error] = out.str();
     return result;
   }
   if (
     !page.loadMe(
       true,
-      global.getWebInput(WebAPI::problem::randomSeed),
+      global.getWebInput(WebAPI::Problem::randomSeed),
       &comments
     )
   ) {
     comments
     << "While loading topic table, failed to load file: ["
-    << global.getWebInput(WebAPI::problem::courseHome)
+    << global.getWebInput(WebAPI::Problem::courseHome)
     << "].";
-    result[WebAPI::result::comments] = comments.str();
+    result[WebAPI::Result::comments] = comments.str();
     return result;
   }
   page.computeTopicListAndPointsEarned(comments);
@@ -1056,14 +1056,14 @@ void WebAPIResponse::getJSDataUserInfo(
 ) {
   STACK_TRACE("WebAPIReponse::getJSDataUserInfo");
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
-  outputAppend[WebAPI::result::loginDisabledEveryoneIsAdmin] =
+  outputAppend[WebAPI::Result::loginDisabledEveryoneIsAdmin] =
   global.flagDisableDatabaseLogEveryoneAsAdmin;
-  outputAppend[WebAPI::result::debugLogin] = global.flagDebugLogin;
-  outputAppend[WebAPI::result::useFallbackDatabase] =
+  outputAppend[WebAPI::Result::debugLogin] = global.flagDebugLogin;
+  outputAppend[WebAPI::Result::useFallbackDatabase] =
   !global.flagDatabaseCompiled;
-  outputAppend[WebAPI::result::httpsSupport] = global.flagSSLAvailable;
+  outputAppend[WebAPI::Result::httpsSupport] = global.flagSSLAvailable;
   if (comments != "") {
-    outputAppend[WebAPI::result::comments] =
+    outputAppend[WebAPI::Result::comments] =
     HtmlRoutines::convertStringToHtmlString(comments, false);
   }
   if (global.response.monitoringAllowed()) {
@@ -1073,17 +1073,17 @@ void WebAPIResponse::getJSDataUserInfo(
   } else {
     outputAppend[WebAPI::UserInfo::processMonitoring] = "false";
   }
-  if (global.getWebInput(WebAPI::result::error) != "") {
-    outputAppend[WebAPI::result::error] =
+  if (global.getWebInput(WebAPI::Result::error) != "") {
+    outputAppend[WebAPI::Result::error] =
     HtmlRoutines::convertStringToHtmlString(
-      global.getWebInput(WebAPI::result::error), false
+      global.getWebInput(WebAPI::Result::error), false
     );
   }
   if (!global.flagLoggedIn) {
-    outputAppend[WebAPI::result::status] = "not logged in";
+    outputAppend[WebAPI::Result::status] = "not logged in";
     return;
   }
-  outputAppend[WebAPI::result::status] = "logged in";
+  outputAppend[WebAPI::Result::status] = "logged in";
   outputAppend[DatabaseStrings::labelUsername] =
   HtmlRoutines::convertStringToHtmlString(
     global.userDefault.username, false
@@ -1139,18 +1139,18 @@ std::string WebAPIResponse::getJSONFromTemplate() {
   std::stringstream comments;
   page.fileName =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::courseHome), false
+    global.getWebInput(WebAPI::Problem::courseHome), false
   );
   if (
     !page.loadMe(
       true,
-      global.getWebInput(WebAPI::problem::randomSeed),
+      global.getWebInput(WebAPI::Problem::randomSeed),
       &comments
     )
   ) {
     out
     << "<b>Failed to load file: "
-    << global.getWebInput(WebAPI::problem::courseHome)
+    << global.getWebInput(WebAPI::Problem::courseHome)
     << ". </b>"
     << "<br>Comments:<br> "
     << comments.str();
@@ -1159,7 +1159,7 @@ std::string WebAPIResponse::getJSONFromTemplate() {
   if (!page.interpretHtml(&comments)) {
     out
     << "<b>Failed to interpret as template the following file: "
-    << global.getWebInput(WebAPI::problem::courseHome)
+    << global.getWebInput(WebAPI::Problem::courseHome)
     << ". </b>"
     << "<br>Comments:<br> "
     << comments.str();
@@ -1167,7 +1167,7 @@ std::string WebAPIResponse::getJSONFromTemplate() {
   }
   out
   << "<!-- File automatically generated from template: "
-  << global.getWebInput(WebAPI::problem::fileName)
+  << global.getWebInput(WebAPI::Problem::fileName)
   << ".-->\n";
   out << page.outputHtmlBodyNoTag;
   out
@@ -1182,9 +1182,9 @@ JSData WebAPIResponse::getExamPageJSON() {
   std::stringstream out;
   JSData output;
   if (
-    !global.flagLoggedIn && global.requestType == WebAPI::frontend::scoredQuiz
+    !global.flagLoggedIn && global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
-    output[WebAPI::result::error] = "Scored quiz requires login";
+    output[WebAPI::Result::error] = "Scored quiz requires login";
     return output;
   }
   CalculatorHTML problem;
@@ -1192,23 +1192,23 @@ JSData WebAPIResponse::getExamPageJSON() {
   std::string problemBody =
   problem.loadAndInterpretCurrentProblemItemJSON(
     global.userRequestRequiresLoadingRealExamData(),
-    global.getWebInput(WebAPI::problem::randomSeed),
+    global.getWebInput(WebAPI::Problem::randomSeed),
     &errorAndDebugStream
   );
   // <-must come after file.outputHtmlHeadNoTag
   errorAndDebugStream << problem.outputDebugInformationBody;
   out << problemBody;
   std::string commentsProblem = errorAndDebugStream.str();
-  output[WebAPI::problem::content] =
+  output[WebAPI::Problem::content] =
   HtmlRoutines::convertStringToURLString(out.str(), false);
   if (commentsProblem != "") {
-    output[WebAPI::problem::commentsProblem] = commentsProblem;
+    output[WebAPI::Problem::commentsProblem] = commentsProblem;
   }
-  output[WebAPI::problem::deadlineSingle] = problem.outputDeadlineString;
-  output[WebAPI::problem::problemLabel] = problem.outputProblemLabel;
-  output[WebAPI::problem::title] = problem.outputProblemTitle;
-  output[WebAPI::problem::fileName] = problem.fileName;
-  output[WebAPI::problem::idProblem] = problem.fileName;
+  output[WebAPI::Problem::deadlineSingle] = problem.outputDeadlineString;
+  output[WebAPI::Problem::problemLabel] = problem.outputProblemLabel;
+  output[WebAPI::Problem::title] = problem.outputProblemTitle;
+  output[WebAPI::Problem::fileName] = problem.fileName;
+  output[WebAPI::Problem::idProblem] = problem.fileName;
   if (problem.flagLoadedSuccessfully) {
     output["answers"] = problem.getEditorBoxesHTML();
     JSData scripts;
@@ -1221,11 +1221,11 @@ JSData WebAPIResponse::getExamPageJSON() {
       );
     }
     output["scripts"] = scripts;
-    output[WebAPI::problem::forReal] = problem.flagIsForReal;
+    output[WebAPI::Problem::forReal] = problem.flagIsForReal;
     if (!problem.flagIsForReal) {
       std::stringstream randomSeedStream;
       randomSeedStream << problem.problemData.randomSeed;
-      output[WebAPI::problem::randomSeed] = randomSeedStream.str();
+      output[WebAPI::Problem::randomSeed] = randomSeedStream.str();
     }
   }
   return output;
@@ -1236,10 +1236,10 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
   JSData output;
   if (!global.flagLoggedIn || !global.userDefaultHasAdminRights()) {
     if (!showSourceRelaxed) {
-      output[WebAPI::result::error] = "Only logged-in admins can edit pages.";
+      output[WebAPI::Result::error] = "Only logged-in admins can edit pages.";
       return output;
     } else {
-      output[WebAPI::result::comments] =
+      output[WebAPI::Result::comments] =
       "Only logged-in admins can edit pages.";
     }
   }
@@ -1249,7 +1249,7 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
   if (
     !editedFile.loadMe(
       false,
-      global.getWebInput(WebAPI::problem::randomSeed),
+      global.getWebInput(WebAPI::Problem::randomSeed),
       &failureStream
     )
   ) {
@@ -1259,7 +1259,7 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
     << editedFile.fileName
     << "], perhaps the file does not exist. </b>"
     << failureStream.str();
-    output[WebAPI::result::error] = errorStream.str();
+    output[WebAPI::Result::error] = errorStream.str();
     return output;
   }
   if (!editedFile.parser.parseHTML(&failureStream)) {
@@ -1269,7 +1269,7 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
     << editedFile.fileName
     << ".</b> Details:<br>"
     << failureStream.str();
-    output[WebAPI::result::error] = errorStream.str();
+    output[WebAPI::Result::error] = errorStream.str();
     // return output.toString(false);
   }
   HashedList<std::string> autocompleteKeyWords;
@@ -1321,7 +1321,7 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
 JSData WebAPIResponse::submitAnswersJSON() {
   return
   WebAPIResponse::submitAnswersJSON(
-    global.getWebInput(WebAPI::problem::randomSeed), nullptr, true
+    global.getWebInput(WebAPI::Problem::randomSeed), nullptr, true
   );
 }
 
@@ -1394,13 +1394,13 @@ bool AnswerChecker::prepareProblem(const std::string& inputRandomSeed) {
   );
   if (!this->problem.flagLoadedSuccessfully) {
     errorStream << "Failed to load current problem. ";
-    this->result[WebAPI::result::error] = errorStream.str();
+    this->result[WebAPI::Result::error] = errorStream.str();
     return false;
   }
   if (!this->problem.parseHTMLPrepareCommands(&comments)) {
     errorStream << "<b>Failed to parse problem. </b>";
-    this->result[WebAPI::result::error] = errorStream.str();
-    this->result[WebAPI::result::comments] = comments.str();
+    this->result[WebAPI::Result::error] = errorStream.str();
+    this->result[WebAPI::Result::comments] = comments.str();
     return false;
   }
   if (
@@ -1408,7 +1408,7 @@ bool AnswerChecker::prepareProblem(const std::string& inputRandomSeed) {
     !this->problem.flagIsForReal
   ) {
     errorStream << "<b>Random seed not given.</b>";
-    this->result[WebAPI::result::error] = errorStream.str();
+    this->result[WebAPI::Result::error] = errorStream.str();
     return false;
   }
   if (this->problem.fileName == "") {
@@ -1434,7 +1434,7 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
     if (
       !StringRoutines::stringBeginsWith(
         webArguments.keys[i],
-        WebAPI::problem::calculatorAnswerPrefix,
+        WebAPI::Problem::calculatorAnswerPrefix,
         &studentAnswerNameReader
       )
     ) {
@@ -1455,7 +1455,7 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
       << " and "
       << this->problem.problemData.answers.values[newAnswerIndex].answerId
       << "].</b> At present, multiple answer submission is not supported. ";
-      this->result[WebAPI::result::resultHtml] = out.str();
+      this->result[WebAPI::Result::resultHtml] = out.str();
       return false;
     }
     if (this->answerIndex == - 1) {
@@ -1464,7 +1464,7 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
       << "<b> You submitted an answer to tag with id "
       << studentAnswerNameReader
       << " which is not on my list of answerable tags. </b>";
-      this->result[WebAPI::result::resultHtml] = out.str();
+      this->result[WebAPI::Result::resultHtml] = out.str();
       return false;
     }
     Answer& currentProblemData =
@@ -1476,14 +1476,14 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
       << "<b> Your answer to tag with id "
       << studentAnswerNameReader
       << " appears to be empty, please resubmit. </b>";
-      this->result[WebAPI::result::resultHtml] = out.str();
+      this->result[WebAPI::Result::resultHtml] = out.str();
       return false;
     }
   }
   if (this->answerIndex == - 1) {
     std::stringstream out;
     out << "<b>Something is wrong: I found no submitted answers.</b>";
-    this->result[WebAPI::result::resultHtml] = out.str();
+    this->result[WebAPI::Result::resultHtml] = out.str();
     return false;
   }
   return true;
@@ -1553,7 +1553,7 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
         << "This should not happen. "
         << CalculatorHTML::bugsGenericMessage
         << "";
-        this->result[WebAPI::result::resultHtml] = out.str();
+        this->result[WebAPI::Result::resultHtml] = out.str();
         return false;
       }
       now.assignLocalTime();
@@ -1643,9 +1643,9 @@ bool AnswerChecker::checkAnswerHardcoded(bool* outputIsCorrect) {
     *outputIsCorrect = this->checker.answerIsCorrect;
   }
   this->result = comparison.toJSON();
-  if (this->result.hasKey(WebAPI::result::resultHtml)) {
+  if (this->result.hasKey(WebAPI::Result::resultHtml)) {
     this->checker.verification +=
-    this->result.getValue(WebAPI::result::resultHtml).stringValue;
+    this->result.getValue(WebAPI::Result::resultHtml).stringValue;
   }
   return
   comparison.syntaxErrorsLeftRaw == "" &&
@@ -1679,7 +1679,7 @@ JSData AnswerCheckerNoProblem::toJSON(bool hideGivenAnswer) {
   (void) hideGivenAnswer;
   JSData result;
   if (this->errorSyntax != "") {
-    result[WebAPI::result::resultHtml] = this->errorSyntax;
+    result[WebAPI::Result::resultHtml] = this->errorSyntax;
   }
   return result;
 }
@@ -1873,15 +1873,15 @@ JSData WebAPIResponse::checkAnswer(bool hideDesiredAnswer) {
   AnswerCheckerNoProblem checker;
   checker.answerId =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::answerId), false
+    global.getWebInput(WebAPI::Problem::answerId), false
   );
   checker.answerGiven =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::answerValue), false
+    global.getWebInput(WebAPI::Problem::answerValue), false
   );
   checker.answerCheck =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::answerCheck), false
+    global.getWebInput(WebAPI::Problem::answerCheck), false
   );
   checker.checkAnswer(&checker.answerIsCorrect);
   return checker.toJSON(hideDesiredAnswer);
@@ -1906,7 +1906,7 @@ JSData AnswerChecker::submitAnswersJSON(
     return this->result;
   }
   if (!this->problem.flagIsForReal) {
-    this->result[WebAPI::problem::randomSeed] = inputRandomSeed;
+    this->result[WebAPI::Problem::randomSeed] = inputRandomSeed;
   }
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& currentA = currentProblemData.answers.values[this->answerIndex];
@@ -1937,11 +1937,11 @@ JSData AnswerChecker::submitAnswersJSON(
 }
 
 void AnswerChecker::computeResultHTML() {
-  this->result[WebAPI::result::resultHtml] =
+  this->result[WebAPI::Result::resultHtml] =
   this->checker.verification + this->checker.errorSyntax + this->storageReport;
-  this->result[WebAPI::result::millisecondsComputation] =
+  this->result[WebAPI::Result::millisecondsComputation] =
   global.getElapsedMilliseconds() - this->startTime;
-  this->result[WebAPI::problem::forReal] = this->problem.flagIsForReal;
+  this->result[WebAPI::Problem::forReal] = this->problem.flagIsForReal;
 }
 
 JSData WebAPIResponse::submitAnswersHardcoded(bool hideDesiredAnswer) {
@@ -1950,15 +1950,15 @@ JSData WebAPIResponse::submitAnswersHardcoded(bool hideDesiredAnswer) {
   AnswerChecker checker;
   checker.checker.answerId =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::answerId), false
+    global.getWebInput(WebAPI::Problem::answerId), false
   );
   checker.checker.answerGiven =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::answerValue), false
+    global.getWebInput(WebAPI::Problem::answerValue), false
   );
   checker.checker.answerCheck =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::answerCheck), false
+    global.getWebInput(WebAPI::Problem::answerCheck), false
   );
   checker.checker.commandsBeforeAnswer = "1";
   bool errorsCheckingAnswer =
@@ -1966,9 +1966,9 @@ JSData WebAPIResponse::submitAnswersHardcoded(bool hideDesiredAnswer) {
   if (!errorsCheckingAnswer) {
     return checker.checker.toJSON(hideDesiredAnswer);
   }
-  checker.result[WebAPI::result::resultHtml] =
+  checker.result[WebAPI::Result::resultHtml] =
   checker.checker.verification + checker.storageReport;
-  checker.result[WebAPI::result::millisecondsComputation] =
+  checker.result[WebAPI::Result::millisecondsComputation] =
   global.getElapsedSeconds() - startTime;
   return checker.result;
 }
@@ -2005,7 +2005,7 @@ std::string WebAPIResponse::addTeachersSections() {
   }
   std::string input =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::request::teachersAndSections), false
+    global.getWebInput(WebAPI::Request::teachersAndSections), false
   );
   JSData inputParsed;
   if (!inputParsed.parse(input, false, &out)) {
@@ -2013,32 +2013,32 @@ std::string WebAPIResponse::addTeachersSections() {
     return out.str();
   }
   if (
-    inputParsed[WebAPI::request::teachers].elementType !=
+    inputParsed[WebAPI::Request::teachers].elementType !=
     JSData::token::tokenString
   ) {
     out
     << "<b style='color:red'>Failed to extract key "
-    << WebAPI::request::teachers
+    << WebAPI::Request::teachers
     << " from your input. </b>";
     return out.str();
   }
   if (
-    inputParsed[WebAPI::request::sections].elementType !=
+    inputParsed[WebAPI::Request::sections].elementType !=
     JSData::token::tokenString
   ) {
     out
     << "<b style='color:red'>Failed to find key "
-    << WebAPI::request::sections
+    << WebAPI::Request::sections
     << " in your input. </b>";
     return out.str();
   }
   std::string desiredUsers =
   HtmlRoutines::convertURLStringToNormal(
-    inputParsed[WebAPI::request::teachers].stringValue, false
+    inputParsed[WebAPI::Request::teachers].stringValue, false
   );
   std::string desiredSectionsOneString =
   HtmlRoutines::convertURLStringToNormal(
-    inputParsed[WebAPI::request::sections].stringValue, false
+    inputParsed[WebAPI::Request::sections].stringValue, false
   );
   if (desiredUsers == "") {
     return "Empty user list not allowed.";
@@ -2113,11 +2113,11 @@ std::string WebAPIResponse::addUserEmails(
   }
   std::string inputEmails =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::request::userList), false
+    global.getWebInput(WebAPI::Request::userList), false
   );
   std::string userPasswords =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::request::passwordList), false
+    global.getWebInput(WebAPI::Request::passwordList), false
   );
   std::string userGroup =
   StringRoutines::stringTrimWhiteSpace(
@@ -2180,7 +2180,7 @@ std::string WebAPIResponse::addUserEmails(
 JSData WebAPIResponse::getAnswerOnGiveUp() {
   return
   WebAPIResponse::getAnswerOnGiveUp(
-    global.getWebInput(WebAPI::problem::randomSeed)
+    global.getWebInput(WebAPI::Problem::randomSeed)
   );
 }
 
@@ -2199,7 +2199,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     *outputNakedAnswer = "";
   }
   JSData result;
-  result[WebAPI::problem::answerGenerationSuccess] = "false";
+  result[WebAPI::Problem::answerGenerationSuccess] = "false";
   if (answerGenerationSuccess != nullptr) {
     *answerGenerationSuccess = false;
   }
@@ -2214,26 +2214,26 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     << " <b>Could not load problem, this may be a bug. "
     << CalculatorHTML::bugsGenericMessage
     << "</b>";
-    result[WebAPI::result::error] = errorStream.str();
+    result[WebAPI::Result::error] = errorStream.str();
     return result;
   }
   if (problem.flagIsForReal) {
     errorStream
     << " <b>Not allowed to show answer "
     << "of a problem being tested for real. </b>";
-    result[WebAPI::result::error] = errorStream.str();
+    result[WebAPI::Result::error] = errorStream.str();
     return result;
   }
   if (inputRandomSeed == "") {
-    result[WebAPI::result::error] =
+    result[WebAPI::Result::error] =
     "<b>I could not figure out "
     "the exercise problem (missing random seed). </b>";
     return result;
   }
-  result[WebAPI::problem::randomSeed] = inputRandomSeed;
+  result[WebAPI::Problem::randomSeed] = inputRandomSeed;
   if (!problem.parseHTMLPrepareCommands(&errorStream)) {
     errorStream << "<br><b>Problem preparation failed.</b>";
-    result[WebAPI::result::error] = errorStream.str();
+    result[WebAPI::Result::error] = errorStream.str();
     return result;
   }
   std::string lastStudentAnswerID;
@@ -2246,7 +2246,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   for (int i = 0; i < arguments.size(); i ++) {
     StringRoutines::stringBeginsWith(
       arguments.keys[i],
-      WebAPI::problem::calculatorAnswerPrefix,
+      WebAPI::Problem::calculatorAnswerPrefix,
       &lastStudentAnswerID
     );
   }
@@ -2265,9 +2265,9 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       << "<hr>"
       << problem.problemData.toStringAvailableAnswerIds();
     }
-    result[WebAPI::result::millisecondsComputation] =
+    result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedMilliseconds() - startTimeInMilliseconds;
-    result[WebAPI::result::error] = errorStream.str();
+    result[WebAPI::Result::error] = errorStream.str();
     return result;
   }
   Answer& currentA = problem.problemData.answers.values[indexLastAnswerId];
@@ -2282,7 +2282,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     ) {
       out << "<br>Answer status: " << currentA.toString();
     }
-    result[WebAPI::result::error] = out.str();
+    result[WebAPI::Result::error] = out.str();
     return result;
   }
   Calculator interpreter;
@@ -2315,10 +2315,10 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     << CalculatorHTML::bugsGenericMessage
     << "<br>Details: <br>"
     << interpreter.parser.toStringSyntacticStackHTMLSimple();
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::resultHtml] = out.str();
     int64_t elapsedTime =
     global.getElapsedMilliseconds() - startTimeInMilliseconds;
-    result[WebAPI::result::millisecondsComputation] = elapsedTime;
+    result[WebAPI::Result::millisecondsComputation] = elapsedTime;
     return result;
   }
   if (interpreter.flagAbortComputationASAP) {
@@ -2341,8 +2341,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     << interpreter.inputString;
     int64_t elapsedTime =
     global.getElapsedMilliseconds() - startTimeInMilliseconds;
-    result[WebAPI::result::millisecondsComputation] = elapsedTime;
-    result[WebAPI::result::resultHtml] = out.str();
+    result[WebAPI::Result::millisecondsComputation] = elapsedTime;
+    result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
   FormatExpressions format;
@@ -2359,7 +2359,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     if (outputNakedAnswer != nullptr) {
       *outputNakedAnswer = currentE.toString(&format);
     }
-    result[WebAPI::problem::answerGenerationSuccess] = "true";
+    result[WebAPI::Problem::answerGenerationSuccess] = "true";
     if (answerGenerationSuccess != nullptr) {
       *answerGenerationSuccess = true;
     }
@@ -2397,7 +2397,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
         if (outputNakedAnswer != nullptr) {
           *outputNakedAnswer = currentE[j].toString(&format);
         }
-        result[WebAPI::problem::answerGenerationSuccess] = "true";
+        result[WebAPI::Problem::answerGenerationSuccess] = "true";
         if (answerGenerationSuccess != nullptr) {
           *answerGenerationSuccess = true;
         }
@@ -2408,7 +2408,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   if (doIncludeTimeStats) {
     int64_t elapsedTime =
     global.getElapsedMilliseconds() - startTimeInMilliseconds;
-    result[WebAPI::result::millisecondsComputation] = elapsedTime;
+    result[WebAPI::Result::millisecondsComputation] = elapsedTime;
   }
   if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
     out
@@ -2425,7 +2425,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       interpreter.inputString, "Raw calculator input"
     );
   }
-  result[WebAPI::result::resultHtml] = out.str();
+  result[WebAPI::Result::resultHtml] = out.str();
   return result;
 }
 
@@ -2436,7 +2436,7 @@ JSData WebAPIResponse::getAccountsPageJSON(
   (void) hostWebAddressWithPort;
   JSData output;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    output[WebAPI::result::error] =
+    output[WebAPI::Result::error] =
     "Database disabled (cannot get accounts). ";
     return output;
   }
@@ -2445,7 +2445,7 @@ JSData WebAPIResponse::getAccountsPageJSON(
     !global.flagLoggedIn ||
     !global.flagUsingSSLinCurrentConnection
   ) {
-    output[WebAPI::result::error] =
+    output[WebAPI::Result::error] =
     "Must be logged-in administrator over ssl.";
     return output;
   }
@@ -2526,7 +2526,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   );
   std::string currentCourse =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::courseHome), false
+    global.getWebInput(WebAPI::Problem::courseHome), false
   );
   if (flagFilterCourse) {
     out
@@ -2827,7 +2827,7 @@ int ProblemData::getExpectedNumberOfAnswers(
   if (!problemParser.loadMe(false, "", &commentsOnFailure)) {
     global
     << Logger::yellow
-    << WebAPI::problem::failedToLoadProblem
+    << WebAPI::Problem::failedToLoadProblem
     << commentsOnFailure.str()
     << Logger::endL;
     return 0;
@@ -3024,7 +3024,7 @@ bool UserScores::computeScoresAndStats(std::stringstream& comments) {
   );
   bool ignoreSectionsIdontTeach = true;
   this->currentSection = global.userDefault.sectionComputed;
-  this->currentCourse = global.getWebInput(WebAPI::problem::courseHome);
+  this->currentCourse = global.getWebInput(WebAPI::Problem::courseHome);
   if (global.getWebInput("request") == "scoresInCoursePage") {
     this->currentSection =
     StringRoutines::stringTrimWhiteSpace(
@@ -3325,7 +3325,7 @@ std::string WebAPIResponse::toStringUserDetails(
   << "<li>Added/updated users will have their current course set to: <br>"
   << "<span class =\"currentCourseIndicator\">"
   << HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::courseHome), false
+    global.getWebInput(WebAPI::Problem::courseHome), false
   )
   << "</span></li>"
   << "<li>To change course use "

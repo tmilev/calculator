@@ -286,14 +286,14 @@ void Calculator::ExpressionHistoryEnumerator::Step::mergeAnnotations(
 
 JSData Calculator::ExpressionHistoryEnumerator::Step::toJSON() {
   JSData result;
-  result[WebAPI::result::SolutionData::transformation] =
+  result[WebAPI::Result::SolutionData::transformation] =
   this->content.toString();
   JSData annotationJSON = JSData::makeEmptyArray();
   for (int i = 0; i < this->annotations.size; i ++) {
     annotationJSON[i] = this->annotations[i];
   }
-  result[WebAPI::result::SolutionData::stepType] = this->stepType;
-  result[WebAPI::result::SolutionData::annotations] = annotationJSON;
+  result[WebAPI::Result::SolutionData::stepType] = this->stepType;
+  result[WebAPI::Result::SolutionData::annotations] = annotationJSON;
   return result;
 }
 

@@ -1621,7 +1621,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   result["currentTable"] = currentTable;
   if (currentTable == "") {
     if (global.userDebugFlagOn() != 0) {
-      result[WebAPI::result::comments] =
+      result[WebAPI::Result::comments] =
       "Requested table empty, returning list of tables. ";
     }
     List<std::string> collectionNamesList;

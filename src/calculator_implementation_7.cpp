@@ -9752,8 +9752,8 @@ void Calculator::Test::calculatorTestPrepare() {
 
 bool Calculator::Test::calculatorTestRun() {
   STACK_TRACE("Calculator::Test::calculatorTestRun");
-  this->debugFlagAtStart = global.getWebInput(WebAPI::request::debugFlag);
-  global.setWebInput(WebAPI::request::debugFlag, "false");
+  this->debugFlagAtStart = global.getWebInput(WebAPI::Request::debugFlag);
+  global.setWebInput(WebAPI::Request::debugFlag, "false");
   this->calculatorTestPrepare();
   Calculator tester;
   ProgressReport report;
@@ -9809,7 +9809,7 @@ bool Calculator::Test::calculatorTestRun() {
     << " seconds. ";
     report.report(reportStream.str());
   }
-  global.setWebInput(WebAPI::request::debugFlag, this->debugFlagAtStart);
+  global.setWebInput(WebAPI::Request::debugFlag, this->debugFlagAtStart);
   return this->processResults();
 }
 

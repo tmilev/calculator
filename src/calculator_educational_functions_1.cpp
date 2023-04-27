@@ -434,17 +434,17 @@ JSData Calculator::extractSolution() {
   STACK_TRACE("Calculator::extractSolution");
   JSData result;
   if (this->parser.syntaxErrors != "") {
-    result[WebAPI::result::error] = "Failed to parse.";
-    result[WebAPI::result::syntaxErrors] =
+    result[WebAPI::Result::error] = "Failed to parse.";
+    result[WebAPI::Result::syntaxErrors] =
     this->parser.toStringSyntacticStackHTMLSimple();
     return result;
   }
   JSData solutionJSON;
   if (!this->programExpression.isOfType(&solutionJSON)) {
-    result[WebAPI::result::error] = "Could not solve your problem. ";
+    result[WebAPI::Result::error] = "Could not solve your problem. ";
     return result;
   } else {
-    result[WebAPI::result::solution] = solutionJSON;
+    result[WebAPI::Result::solution] = solutionJSON;
   }
   return result;
 }
@@ -520,35 +520,35 @@ CompareExpressions::CompareExpressions(bool hideDesiredAnswer) {
 
 JSData CompareExpressions::toJSON() const {
   JSData result;
-  result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
-  result[WebAPI::result::ComparisonData::givenRaw] = this->givenString;
+  result[WebAPI::Result::commentsGlobal] = global.comments.getCurrentReset();
+  result[WebAPI::Result::ComparisonData::givenRaw] = this->givenString;
   if (!this->flagHideDesiredAnswer) {
-    result[WebAPI::result::ComparisonData::desiredRaw] = this->desiredString;
+    result[WebAPI::Result::ComparisonData::desiredRaw] = this->desiredString;
   }
   if (this->syntaxErrorsLeftRaw != "") {
-    result[WebAPI::result::error] =
+    result[WebAPI::Result::error] =
     "Failed to parse the given (student) answer.";
-    result[WebAPI::result::syntaxErrors] = this->syntaxErrorsLeftFormatted;
-    result[WebAPI::result::syntaxErrorsExtra] = this->syntaxErrorsLeftRaw;
+    result[WebAPI::Result::syntaxErrors] = this->syntaxErrorsLeftFormatted;
+    result[WebAPI::Result::syntaxErrorsExtra] = this->syntaxErrorsLeftRaw;
     return result;
   }
   if (this->syntaxErrorsRightRaw != "") {
-    result[WebAPI::result::error] =
+    result[WebAPI::Result::error] =
     "Failed to parse the desired (teacher) answer.";
-    result[WebAPI::result::syntaxErrors] = this->syntaxErrorsRightFormatted;
-    result[WebAPI::result::syntaxErrorsExtra] = this->syntaxErrorsRightRaw;
+    result[WebAPI::Result::syntaxErrors] = this->syntaxErrorsRightFormatted;
+    result[WebAPI::Result::syntaxErrorsExtra] = this->syntaxErrorsRightRaw;
     return result;
   }
   if (this->errorEvaluation != "") {
-    result[WebAPI::result::ComparisonData::errorEvaluation] =
+    result[WebAPI::Result::ComparisonData::errorEvaluation] =
     this->errorEvaluation;
   }
   if (this->errorInAnswer != "") {
-    result[WebAPI::result::ComparisonData::errorInAnswer] =
+    result[WebAPI::Result::ComparisonData::errorInAnswer] =
     this->errorInAnswer;
   }
-  result[WebAPI::result::ComparisonData::areEqual] = this->flagAreEqual;
-  result[WebAPI::result::ComparisonData::areEqualAsAnswers] =
+  result[WebAPI::Result::ComparisonData::areEqual] = this->flagAreEqual;
+  result[WebAPI::Result::ComparisonData::areEqualAsAnswers] =
   this->flagAreEqualAsAnswers;
   if (
     this->syntaxErrorsLeftRaw != "" ||
@@ -570,23 +570,23 @@ JSData CompareExpressions::toJSON() const {
       << "<b style='color:green;font-size: x-large;'>&#x2713;</b><br>";
     }
   }
-  result[WebAPI::problem::answerWasHardCoded] = true;
-  result[WebAPI::result::resultHtml] = resultHTML.str();
+  result[WebAPI::Problem::answerWasHardCoded] = true;
+  result[WebAPI::Result::resultHtml] = resultHTML.str();
   return result;
 }
 
 JSData ProblemWithSolution::toJSON() {
   JSData result;
-  result[WebAPI::result::SolutionData::input] = this->toBeSolved.toString();
+  result[WebAPI::Result::SolutionData::input] = this->toBeSolved.toString();
   JSData stepsJSON = JSData::makeEmptyArray();
   for (int i = 0; i < this->steps.size; i ++) {
     stepsJSON[i] = this->steps[i].toJSON();
   }
-  result[WebAPI::result::SolutionData::steps] = stepsJSON;
-  result[WebAPI::result::SolutionData::finalExpression] =
+  result[WebAPI::Result::SolutionData::steps] = stepsJSON;
+  result[WebAPI::Result::SolutionData::finalExpression] =
   this->solutionsSimplified.toString();
-  result[WebAPI::result::SolutionData::comments] = this->comments;
-  result[WebAPI::result::error] = this->error;
+  result[WebAPI::Result::SolutionData::comments] = this->comments;
+  result[WebAPI::Result::error] = this->error;
   return result;
 }
 

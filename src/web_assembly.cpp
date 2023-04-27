@@ -22,7 +22,7 @@ extern "C" {
     JSData result;
     calculator.evaluate(input);
     result = calculator.toJSONOutputAndSpecials();
-    result[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
+    result[WebAPI::Result::commentsGlobal] = global.comments.getCurrentReset();
     std::string resultString = result.toString();
     char* buffer = new char[resultString.size() + 1];
     strcpy(buffer, resultString.c_str());

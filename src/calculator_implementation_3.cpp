@@ -761,7 +761,7 @@ bool Calculator::Test::loadTestStrings(std::stringstream* commentsOnFailure) {
   STACK_TRACE("Calculator::Test::loadTestStrings");
   if (
     !FileOperations::fileExistsVirtual(
-      WebAPI::calculator::testFileNameVirtual, false, false, nullptr
+      WebAPI::Calculator::testFileNameVirtual, false, false, nullptr
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -773,7 +773,7 @@ bool Calculator::Test::loadTestStrings(std::stringstream* commentsOnFailure) {
   std::string testStrings;
   if (
     !FileOperations::loadFileToStringVirtual(
-      WebAPI::calculator::testFileNameVirtual,
+      WebAPI::Calculator::testFileNameVirtual,
       testStrings,
       false,
       commentsOnFailure
@@ -831,7 +831,7 @@ bool Calculator::Test::writeTestStrings(
   }
   return
   FileOperations::writeFileVirtual(
-    WebAPI::calculator::testFileNameVirtual,
+    WebAPI::Calculator::testFileNameVirtual,
     result.toString(&JSData::PrintOptions::newLine()),
     commentsOnFailure
   );
@@ -894,7 +894,7 @@ bool Calculator::Test::processResults() {
   if (!this->flagTestResultsExist) {
     out
     << "<b style='color:green'>Writing new test strings into: "
-    << WebAPI::calculator::testFileNameVirtual
+    << WebAPI::Calculator::testFileNameVirtual
     << ". </b>";
     std::stringstream commentsOnFailure2;
     if (!this->writeTestStrings(&commentsOnFailure2)) {
@@ -1012,7 +1012,7 @@ bool Calculator::Test::processResults() {
     << "If you think the current computations are correct, "
     << "say, the expected results have changed since the last test run, "
     << "erase file: "
-    << WebAPI::calculator::testFileNameVirtual
+    << WebAPI::Calculator::testFileNameVirtual
     << " and rerun the present test to store the expected results. "
     << "Alternatively, run: ./calculator test update";
     out
@@ -1041,12 +1041,12 @@ bool Calculator::Test::processResults() {
     if (this->flagTestResultsExist) {
       out
       << "<b>Erase file "
-      << WebAPI::calculator::testFileNameVirtual
+      << WebAPI::Calculator::testFileNameVirtual
       << " and rerun the present test to store the expected results.</b>";
       global
       << Logger::yellow
       << "Erase file "
-      << WebAPI::calculator::testFileNameVirtual
+      << WebAPI::Calculator::testFileNameVirtual
       << " and rerun the present test to store the expected results. ";
     }
     out << "<table>" << unknownCommands.str() << "</table>";

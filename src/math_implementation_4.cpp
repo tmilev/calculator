@@ -100,8 +100,8 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::doCrash(
   this->writeCrashFile();
   std::cout << this->crashReportConsolE.str() << std::endl;
   JSData output;
-  output[WebAPI::result::crashReport] = this->crashReportHtml.str();
-  output[WebAPI::result::comments] = global.comments.getCurrentReset();
+  output[WebAPI::Result::crashReport] = this->crashReportHtml.str();
+  output[WebAPI::Result::comments] = global.comments.getCurrentReset();
   global.response.writeResponse(output, true);
   std::exit(- 1);
   return *this;
@@ -478,7 +478,7 @@ bool GlobalVariables::userSecureNonAdminOperationsAllowed() {
 }
 
 bool GlobalVariables::userDebugFlagOn() {
-  return global.getWebInput(WebAPI::request::debugFlag) == "true";
+  return global.getWebInput(WebAPI::Request::debugFlag) == "true";
 }
 
 bool GlobalVariables::userStudentVieWOn() {
@@ -539,9 +539,9 @@ bool GlobalVariables::userGuestMode() {
   }
   return
   this->requestType == "exerciseNoLogin" ||
-  this->requestType == WebAPI::request::problemGiveUpNoLogin ||
-  this->requestType == WebAPI::request::submitExerciseNoLogin ||
-  this->requestType == WebAPI::request::submitExercisePreviewNoLogin ||
+  this->requestType == WebAPI::Request::problemGiveUpNoLogin ||
+  this->requestType == WebAPI::Request::submitExerciseNoLogin ||
+  this->requestType == WebAPI::Request::submitExercisePreviewNoLogin ||
   this->requestType == "templateNoLogin";
 }
 
@@ -552,7 +552,7 @@ bool GlobalVariables::userRequestRequiresLoadingRealExamData() {
   return
   this->flagLoggedIn && (
     this->requestType == "scoredQuiz" ||
-    this->requestType == WebAPI::frontend::scoredQuiz ||
+    this->requestType == WebAPI::Frontend::scoredQuiz ||
     this->requestType == "submitAnswers" ||
     this->requestType == "submitAnswersPreview"
   );
@@ -575,9 +575,9 @@ std::string GlobalVariables::toStringCalculatorArgumentsNoNavigation(
     if (
       currentName == "request" ||
       currentName == DatabaseStrings::labelPassword ||
-      currentName == WebAPI::problem::fileName ||
-      currentName == WebAPI::problem::courseHome ||
-      currentName == WebAPI::problem::topicList ||
+      currentName == WebAPI::Problem::fileName ||
+      currentName == WebAPI::Problem::courseHome ||
+      currentName == WebAPI::Problem::topicList ||
       currentName == "currentDatabaseTable" ||
       currentName == "mainInput" ||
       currentName == "studentView" ||

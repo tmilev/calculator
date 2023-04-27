@@ -945,10 +945,10 @@ bool UserCalculatorData::computeCourseInformation() {
   } else {
     this->sectionComputed = this->sectionInDB;
   }
-  if (isAdmin && global.getWebInput(WebAPI::problem::courseHome) != "") {
+  if (isAdmin && global.getWebInput(WebAPI::Problem::courseHome) != "") {
     this->courseComputed =
     HtmlRoutines::convertURLStringToNormal(
-      global.getWebInput(WebAPI::problem::courseHome), false
+      global.getWebInput(WebAPI::Problem::courseHome), false
     );
   } else {
     this->courseComputed = this->courseInDB;
@@ -1014,7 +1014,7 @@ JSData ProblemData::storeJSON() const {
     std::stringstream stringConverter;
     stringConverter << this->randomSeed;
     // Store random seed as string to avoid type conversion issues.
-    result[WebAPI::problem::randomSeed] = stringConverter.str();
+    result[WebAPI::Problem::randomSeed] = stringConverter.str();
   }
   for (int i = 0; i < this->answers.size(); i ++) {
     Answer& currentA = this->answers.values[i];
@@ -1272,11 +1272,11 @@ bool ProblemData::loadFromOldFormat(
   this->totalNumSubmissions = 0;
   this->flagRandomSeedGiven = false;
   if (global.userRequestRequiresLoadingRealExamData()) {
-    if (mapStrings.contains(WebAPI::problem::randomSeed)) {
+    if (mapStrings.contains(WebAPI::Problem::randomSeed)) {
       global.comments << "Loading random seed from old format.";
       this->randomSeed = static_cast<uint32_t>(
         atoi(
-          mapStrings.getValueCreateEmpty(WebAPI::problem::randomSeed).c_str()
+          mapStrings.getValueCreateEmpty(WebAPI::Problem::randomSeed).c_str()
         )
       );
       this->flagRandomSeedGiven = true;
@@ -1290,7 +1290,7 @@ bool ProblemData::loadFromOldFormat(
     HashFunctions::hashFunction<std::string>
   > currentQuestionMap;
   for (int i = 0; i < mapStrings.size(); i ++) {
-    if (mapStrings.keys[i] == WebAPI::problem::randomSeed) {
+    if (mapStrings.keys[i] == WebAPI::Problem::randomSeed) {
       continue;
     }
     Answer answer;
@@ -1353,10 +1353,10 @@ bool ProblemData::loadFromJSON(
   this->flagRandomSeedGiven = false;
   this->randomSeed = - 1;
   if (global.userRequestRequiresLoadingRealExamData()) {
-    if (inputData.objects.contains(WebAPI::problem::randomSeed)) {
+    if (inputData.objects.contains(WebAPI::Problem::randomSeed)) {
       this->randomSeed = static_cast<uint32_t>(
         atoi(
-          inputData.objects.getValueNoFail(WebAPI::problem::randomSeed).
+          inputData.objects.getValueNoFail(WebAPI::Problem::randomSeed).
           stringValue.c_str()
         )
       );
@@ -1366,7 +1366,7 @@ bool ProblemData::loadFromJSON(
   this->answers.clear();
   bool result = true;
   for (int i = 0; i < inputData.objects.size(); i ++) {
-    if (inputData.objects.keys[i] == WebAPI::problem::randomSeed) {
+    if (inputData.objects.keys[i] == WebAPI::Problem::randomSeed) {
       continue;
     }
     Answer newAnswer;
@@ -1773,7 +1773,7 @@ bool Database::User::addUsersFromEmails(
     currentUser.reset();
     currentUser.username = emails[i];
     currentUser.courseInDB =
-    global.getWebInput(WebAPI::problem::courseHome);
+    global.getWebInput(WebAPI::Problem::courseHome);
     currentUser.sectionInDB = userGroup;
     currentUser.instructorInDB = global.userDefault.username;
     currentUser.email = emails[i];
@@ -2244,9 +2244,9 @@ bool Database::User::loginViaDatabase(
   }
   if (userWrapper.enteredActivationToken != "") {
     if (
-      global.requestType == WebAPI::request::changePassword ||
-      global.requestType == WebAPI::request::changePasswordPage ||
-      global.requestType == WebAPI::request::activateAccountJSON
+      global.requestType == WebAPI::Request::changePassword ||
+      global.requestType == WebAPI::Request::changePasswordPage ||
+      global.requestType == WebAPI::Request::activateAccountJSON
     ) {
       if (
         userWrapper.actualActivationToken != "activated" &&
@@ -2394,7 +2394,7 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   jsonData[DatabaseStrings::labelActivationToken] = activationToken;
   jsonData[DatabaseStrings::labelUsername] = inputUserNameUnsafe;
   jsonData[DatabaseStrings::labelCalculatorRequest] =
-  WebAPI::request::activateAccountJSON;
+  WebAPI::Request::activateAccountJSON;
   jsonData[DatabaseStrings::labelEmail] = inputEmailUnsafe;
   jsonData[DatabaseStrings::labelCurrentPage] =
   DatabaseStrings::labelPageActivateAccount;

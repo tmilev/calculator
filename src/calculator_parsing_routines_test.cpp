@@ -235,7 +235,7 @@ bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
     << "type = 'text/css' "
     << "rel = 'stylesheet' "
     << "href = '"
-    << WebAPI::request::calculatorCSS
+    << WebAPI::Request::calculatorCSS
     << "'>"
     << "<body><div style='overflow:auto;height:100%'>"
     << test.reportHtml

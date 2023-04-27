@@ -171,7 +171,7 @@ std::string HtmlRoutines::getCalculatorComputationURL(
   JSData request;
   request[DatabaseStrings::labelCalculatorInput] = inputNoEncoding;
   request[DatabaseStrings::labelCurrentPage] =
-  WebAPI::frontend::calculatorPage;
+  WebAPI::Frontend::calculatorPage;
   out
   << "#"
   << HtmlRoutines::convertStringToURLString(
@@ -185,8 +185,8 @@ std::string HtmlRoutines::getProblemURLRelative(
 ) {
   std::stringstream out;
   JSData anchor;
-  anchor[WebAPI::frontend::currentPage] = WebAPI::frontend::problemPage;
-  anchor[WebAPI::frontend::problemFileName] = problemName;
+  anchor[WebAPI::Frontend::currentPage] = WebAPI::Frontend::problemPage;
+  anchor[WebAPI::Frontend::problemFileName] = problemName;
   out
   << "/"
   << WebAPI::appNoCache
@@ -359,7 +359,7 @@ std::string HtmlRoutines::scriptFromJSON(
   std::stringstream out;
   out
   << "<script "
-  << WebAPI::result::scriptType
+  << WebAPI::Result::scriptType
   << "='"
   << scriptType
   << "'>\n"
@@ -374,7 +374,7 @@ std::string HtmlRoutines::jsonContainer(
   std::stringstream out;
   out
   << "<span name='script' style='display:none' "
-  << WebAPI::result::scriptType
+  << WebAPI::Result::scriptType
   << "='"
   << scriptType
   << "'>\n"

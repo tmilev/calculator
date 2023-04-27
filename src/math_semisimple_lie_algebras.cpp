@@ -202,17 +202,17 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
   out
   << "\n<link rel='stylesheet' href='"
   << relativeTo
-  << WebAPI::request::calculatorCSS
+  << WebAPI::Request::calculatorCSS
   << "'>";
   out
   << "\n<link rel='stylesheet' href='"
   << relativeTo
-  << WebAPI::request::lieAlgebrasCSS
+  << WebAPI::Request::lieAlgebrasCSS
   << "'>";
   out
   << "\n<script src='"
   << relativeTo
-  << WebAPI::request::onePageJS
+  << WebAPI::Request::onePageJS
   << "'></script>\n";
   return out.str();
 }

@@ -195,9 +195,9 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
   randomSeedStream << problem.problemData.randomSeed;
   this->answers.setSize(problem.problemData.answers.size());
   this->flagAllBuiltInAnswersOK = true;
-  global.setWebInput(WebAPI::problem::fileName, problem.fileName);
+  global.setWebInput(WebAPI::Problem::fileName, problem.fileName);
   global.setWebInput(
-    WebAPI::problem::randomSeed, randomSeedStream.str()
+    WebAPI::Problem::randomSeed, randomSeedStream.str()
   );
   this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
@@ -205,7 +205,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
     this->answers[j];
     current.answerId = problem.problemData.answers.values[j].answerId;
     current.answerIdWebAPI =
-    WebAPI::problem::calculatorAnswerPrefix + current.answerId;
+    WebAPI::Problem::calculatorAnswerPrefix + current.answerId;
     global.setWebInput(current.answerIdWebAPI, "1");
     current.builtInAnswerAPICall =
     WebAPIResponse::getAnswerOnGiveUp(
@@ -221,7 +221,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
       << current.answerId
       << "<br>";
       commentsOnFailure
-      << current.builtInAnswerAPICall[WebAPI::result::resultHtml].stringValue;
+      << current.builtInAnswerAPICall[WebAPI::Result::resultHtml].stringValue;
       this->flagAllBuiltInAnswersOK = false;
       this->flagSuccess = false;
       break;
@@ -244,7 +244,7 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
       << " does not work:<br>"
       << current.builtInAnswer
       << "<hr>"
-      << current.builtInAnswerReply[WebAPI::result::resultHtml].stringValue;
+      << current.builtInAnswerReply[WebAPI::Result::resultHtml].stringValue;
       this->flagSuccess = false;
       break;
     }
@@ -648,7 +648,7 @@ bool Course::Test::Setup::deleteDatabaseSetupAll() {
   this->databaseTester.createAdminAccount();
   global.userDefault.computeCourseInformation();
   global.webArguments.setKeyValue(
-    WebAPI::request::teachersAndSections,
+    WebAPI::Request::teachersAndSections,
     "{\"teachers\":\"default\",\"sections\":\"1,2\"}"
   );
   std::string result = WebAPIResponse::addTeachersSections();
@@ -668,14 +668,14 @@ bool Course::Test::setDeadlines(bool useFallback) {
   STACK_TRACE("Course::Test::setDeadlines");
   Course::Test::Setup setup(useFallback);
   global.setWebInput(
-    WebAPI::frontend::problemFileName,
+    WebAPI::Frontend::problemFileName,
     "test/problems/interval_notation_1.html"
   );
-  global.setWebInput(WebAPI::problem::courseHome, "test/test.html");
+  global.setWebInput(WebAPI::Problem::courseHome, "test/test.html");
   global.setWebInput(
-    WebAPI::problem::topicList, "test/topiclists/test.txt"
+    WebAPI::Problem::topicList, "test/topiclists/test.txt"
   );
-  global.setWebInput(WebAPI::problem::courseHome, "COURSE");
+  global.setWebInput(WebAPI::Problem::courseHome, "COURSE");
   global.setWebInput(
     "mainInput",
     HtmlRoutines::convertStringToURLString(

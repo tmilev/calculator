@@ -20,17 +20,17 @@ std::string CalculatorHTML::toStringLinkFromProblem(
   const std::string& fileName, bool practiceMode, int randomSeed
 ) {
   JSData request;
-  request[WebAPI::problem::fileName] = fileName;
-  request[WebAPI::frontend::problemFileName] = fileName;
+  request[WebAPI::Problem::fileName] = fileName;
+  request[WebAPI::Frontend::problemFileName] = fileName;
   std::stringstream randomSeedStream;
   randomSeedStream << randomSeed;
-  request[WebAPI::problem::randomSeed] = randomSeedStream.str();
-  request[WebAPI::problem::fileName] = fileName;
-  request[WebAPI::frontend::currentPage] = WebAPI::frontend::problemPage;
+  request[WebAPI::Problem::randomSeed] = randomSeedStream.str();
+  request[WebAPI::Problem::fileName] = fileName;
+  request[WebAPI::Frontend::currentPage] = WebAPI::Frontend::problemPage;
   if (practiceMode) {
-    request[WebAPI::frontend::exerciseType] = WebAPI::frontend::exercise;
+    request[WebAPI::Frontend::exerciseType] = WebAPI::Frontend::exercise;
   } else {
-    request[WebAPI::frontend::exerciseType] = WebAPI::frontend::scoredQuiz;
+    request[WebAPI::Frontend::exerciseType] = WebAPI::Frontend::scoredQuiz;
   }
   std::stringstream out;
   out

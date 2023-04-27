@@ -565,7 +565,7 @@ bool CalculatorHTML::loadMe(
   this->flagIsForReal = global.userRequestRequiresLoadingRealExamData();
   this->topicListFileName =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::topicList), false
+    global.getWebInput(WebAPI::Problem::topicList), false
   );
   if (doLoadDatabase) {
     std::stringstream errorStream;
@@ -600,7 +600,7 @@ std::string CalculatorHTML::loadAndInterpretCurrentProblemItemJSON(
     needToLoadDatabaseMayIgnore, desiredRandomSeed, commentsOnFailure
   );
   if (!this->flagLoadedSuccessfully) {
-    return WebAPI::problem::failedToLoadProblem;
+    return WebAPI::Problem::failedToLoadProblem;
   }
   std::stringstream out;
   if (!this->interpretHtml(commentsOnFailure)) {
@@ -640,15 +640,15 @@ std::string CalculatorHTML::loadAndInterpretCurrentProblemItemJSON(
 void CalculatorHTML::loadFileNames() {
   this->fileName =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::fileName), false
+    global.getWebInput(WebAPI::Problem::fileName), false
   );
   this->courseHome =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::courseHome), false
+    global.getWebInput(WebAPI::Problem::courseHome), false
   );
   this->topicListFileName =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::topicList), false
+    global.getWebInput(WebAPI::Problem::topicList), false
   );
 }
 
@@ -753,7 +753,7 @@ std::string CalculatorHTML::toStringLinkCurrentAdmin(
   std::string urledProblem =
   HtmlRoutines::convertStringToURLString(this->fileName, false);
   List<std::string> randomSeedContainer;
-  randomSeedContainer.addOnTop(WebAPI::problem::randomSeed);
+  randomSeedContainer.addOnTop(WebAPI::Problem::randomSeed);
   out
   << "fileName="
   << urledProblem
@@ -900,29 +900,29 @@ bool CalculatorHtmlFunctions::interpretProblemGiveUp(
     << "Expected 3 arguments: "
     << "problem filename, answer id and randomSeed string. ";
   }
-  std::string oldProblem = global.getWebInput(WebAPI::problem::fileName);
+  std::string oldProblem = global.getWebInput(WebAPI::Problem::fileName);
   std::string testedProblem = input[1].toString();
-  global.setWebInput(WebAPI::problem::fileName, testedProblem);
+  global.setWebInput(WebAPI::Problem::fileName, testedProblem);
   std::string randomSeed = input[3].toString();
   std::string answerId = input[2].toString();
   global.setWebInput(
-    WebAPI::problem::calculatorAnswerPrefix + answerId, "not used"
+    WebAPI::Problem::calculatorAnswerPrefix + answerId, "not used"
   );
   JSData result =
   WebAPIResponse::getAnswerOnGiveUp(randomSeed, nullptr, nullptr, false);
   global.webArguments.removeKey(
-    WebAPI::problem::calculatorAnswerPrefix + answerId
+    WebAPI::Problem::calculatorAnswerPrefix + answerId
   );
-  global.setWebInput(WebAPI::problem::fileName, oldProblem);
+  global.setWebInput(WebAPI::Problem::fileName, oldProblem);
   std::stringstream out;
   out
-  << WebAPI::problem::answerGenerationSuccess
+  << WebAPI::Problem::answerGenerationSuccess
   << ":"
-  << result[WebAPI::problem::answerGenerationSuccess]
+  << result[WebAPI::Problem::answerGenerationSuccess]
   << "<br>";
   out
   << "<br>resultHTML:<br>"
-  << result[WebAPI::result::resultHtml].stringValue;
+  << result[WebAPI::Result::resultHtml].stringValue;
   return output.assignValue(calculator, out.str());
 }
 
@@ -1869,7 +1869,7 @@ bool CalculatorHTML::computeAnswerRelatedStrings(
   int numSubmissions = currentA.numSubmissions;
   if (
     global.requestType == "scoredQuiz" ||
-    global.requestType == WebAPI::frontend::scoredQuiz
+    global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
     if (numCorrectSubmissions > 0) {
       verifyStream
@@ -2408,7 +2408,7 @@ void CalculatorHTML::figureOutCurrentProblemList(
   this->flagParentInvestigated = true;
   this->topicListFileName =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::problem::topicList), false
+    global.getWebInput(WebAPI::Problem::topicList), false
   );
   this->loadAndParseTopicList(comments);
 }
@@ -3989,7 +3989,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(
     }
   }
   if (
-    this->flagIsForReal && global.requestType == WebAPI::frontend::scoredQuiz
+    this->flagIsForReal && global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
     if (global.flagDatabaseCompiled) {
       bool problemAlreadySolved = false;
@@ -4140,28 +4140,28 @@ std::string CalculatorHTML::toStringCalculatorArgumentsForProblem(
   std::stringstream out;
   out << "request=" << requestType << "&";
   List<std::string> excludedTags;
-  excludedTags.addOnTop(WebAPI::problem::randomSeed);
+  excludedTags.addOnTop(WebAPI::Problem::randomSeed);
   out
   << global.toStringCalculatorArgumentsNoNavigation(&excludedTags)
   << "courseHome="
-  << global.getWebInput(WebAPI::problem::courseHome)
+  << global.getWebInput(WebAPI::Problem::courseHome)
   << "&";
   if (this->fileName != "") {
     out
-    << WebAPI::problem::fileName
+    << WebAPI::Problem::fileName
     << "="
     << HtmlRoutines::convertStringToURLString(this->fileName, false)
     << "&";
   } else {
     out
-    << WebAPI::problem::fileName
+    << WebAPI::Problem::fileName
     << "="
     << HtmlRoutines::convertStringToURLString(
-      global.getWebInput(WebAPI::problem::fileName), false
+      global.getWebInput(WebAPI::Problem::fileName), false
     )
     << "&";
   }
-  out << "topicList=" << global.getWebInput(WebAPI::problem::topicList) << "&";
+  out << "topicList=" << global.getWebInput(WebAPI::Problem::topicList) << "&";
   out << "studentView=" << studentView << "&";
   if (studentSection != "") {
     out
@@ -5120,7 +5120,7 @@ JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
   JSData output;
   JSData topicBundleFiles;
   if (!this->loadAndParseTopicList(out)) {
-    output[WebAPI::result::error] = out.str();
+    output[WebAPI::Result::error] = out.str();
     return output;
   }
   topicBundleFiles.elementType = JSData::token::tokenArray;
@@ -5137,9 +5137,9 @@ JSData CalculatorHTML::toStringTopicListJSON(std::stringstream* comments) {
   }
   if (global.userDefaultIsDebuggingAdmin()) {
     if (comments != nullptr) {
-      output[WebAPI::result::comments] = comments->str();
+      output[WebAPI::Result::comments] = comments->str();
     }
-    output[WebAPI::result::commentsGlobal] = global.comments.getCurrentReset();
+    output[WebAPI::Result::commentsGlobal] = global.comments.getCurrentReset();
   }
   return output;
 }
@@ -5198,9 +5198,9 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(
 
 JSData LaTeXCrawler::FileWithOption::toJSON() {
   JSData result;
-  result[WebAPI::request::slides::slideFilename] = this->fileName;
+  result[WebAPI::Request::Slides::slideFilename] = this->fileName;
   if (this->isSolution) {
-    result[WebAPI::request::slides::isSolution] = "true";
+    result[WebAPI::Request::Slides::isSolution] = "true";
   }
   return result;
 }
@@ -5208,12 +5208,12 @@ JSData LaTeXCrawler::FileWithOption::toJSON() {
 bool LaTeXCrawler::FileWithOption::fromJSON(
   JSData& input, std::stringstream* commentsOnFailure
 ) {
-  JSData& file = input[WebAPI::request::slides::slideFilename];
+  JSData& file = input[WebAPI::Request::Slides::slideFilename];
   if (file.elementType != JSData::token::tokenString) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "While parsing file, failed to find key: "
-      << WebAPI::request::slides::slideFilename
+      << WebAPI::Request::Slides::slideFilename
       << ". ";
     }
     return false;
@@ -5221,7 +5221,7 @@ bool LaTeXCrawler::FileWithOption::fromJSON(
   this->fileName = file.stringValue;
   this->isSolution = false;
   if (
-    input[WebAPI::request::slides::isSolution].stringValue == "true"
+    input[WebAPI::Request::Slides::isSolution].stringValue == "true"
   ) {
     this->isSolution = true;
   }
@@ -5236,13 +5236,13 @@ void LaTeXCrawler::Slides::addSlidesOnTop(const List<std::string>& input) {
 
 JSData LaTeXCrawler::Slides::toJSON() {
   JSData result;
-  result[WebAPI::request::slides::title] = this->title;
+  result[WebAPI::Request::Slides::title] = this->title;
   JSData fileNames;
   fileNames.elementType = JSData::token::tokenArray;
   for (int i = 0; i < this->filesToCrawl.size; i ++) {
     fileNames.listObjects.addOnTop(this->filesToCrawl[i].toJSON());
   }
-  result[WebAPI::request::slides::files] = fileNames;
+  result[WebAPI::Request::Slides::files] = fileNames;
   return result;
 }
 
@@ -5250,14 +5250,14 @@ bool LaTeXCrawler::Slides::fromJSON(
   JSData& input, std::stringstream* commentsOnFailure
 ) {
   if (
-    !input[WebAPI::request::slides::title].isString(&this->title)
+    !input[WebAPI::Request::Slides::title].isString(&this->title)
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "slideTitle entry missing or not a string. ";
     }
     return false;
   }
-  JSData & files = input[WebAPI::request::slides::files];
+  JSData & files = input[WebAPI::Request::Slides::files];
   if (files.elementType != JSData::token::tokenArray) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "files entry missing or not a list. ";
@@ -5336,7 +5336,7 @@ void TopicElement::computeHomework(CalculatorHTML& owner) {
   }
   JSData resultJSON = this->computeHomeworkJSON(owner);
   this->queryHomework =
-  WebAPI::request::slides::content +
+  WebAPI::Request::Slides::content +
   "=" +
   HtmlRoutines::convertStringToURLString(resultJSON.toString(), false);
 }
@@ -5348,7 +5348,7 @@ void TopicElement::computeSlides(CalculatorHTML& owner) {
   }
   JSData resultJSON = this->computeSlidesJSON(owner);
   this->querySlides =
-  WebAPI::request::slides::content +
+  WebAPI::Request::Slides::content +
   "=" +
   HtmlRoutines::convertStringToURLString(resultJSON.toString(), false);
 }
@@ -5530,16 +5530,16 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
     output["querySlides"] = this->querySlides;
   }
   if (this->queryHomework != "") {
-    output[WebAPI::request::slides::queryHomework] = this->queryHomework;
+    output[WebAPI::Request::Slides::queryHomework] = this->queryHomework;
   }
   output[DatabaseStrings::labelDeadlines] = this->deadlinesPerSection;
   if (!global.userDefaultHasProblemComposingRights()) {
     std::string deadline = owner.getDeadlineNoInheritance(this->id);
-    output[WebAPI::problem::deadlineSingle] = deadline;
+    output[WebAPI::Problem::deadlineSingle] = deadline;
   }
   output["handwrittenSolution"] = this->handwrittenSolution;
-  output[WebAPI::problem::fileName] = this->problemFileName;
-  output[WebAPI::problem::idProblem] = this->id;
+  output[WebAPI::Problem::fileName] = this->problemFileName;
+  output[WebAPI::Problem::idProblem] = this->id;
   if (global.flagDatabaseCompiled) {
     if (
       owner.currentUser.problemData.contains(this->problemFileName)

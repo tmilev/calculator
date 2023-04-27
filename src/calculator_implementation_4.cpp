@@ -1924,22 +1924,46 @@ void Calculator::computeAutoCompleteKeyWords() {
 
 JSData Calculator::toJSONPerformancePerHandler() {
   std::stringstream out;
-  List<std::string> badHandlers;
+  List<std::string> slowHandlers;
+  List<std::string> verySlowHandlers;
   for (
     int i = 0; i < this->statistics.performancePerHandler.size(); i ++
   ) {
     if (this->statistics.performancePerHandler.coefficients[i] > 1000) {
-      badHandlers.addOnTop(
+      verySlowHandlers.addOnTop(
+        this->statistics.performancePerHandler.monomials[i].content
+      );
+    }
+    if (this->statistics.performancePerHandler.coefficients[i] > 10) {
+      slowHandlers.addOnTop(
         this->statistics.performancePerHandler.monomials[i].content
       );
     }
   }
   JSData result;
-  if (badHandlers.size == 0) {
+  if (slowHandlers.size == 0 && verySlowHandlers.size == 0) {
     result = "";
     return result;
   }
-  out << "TurnOffRules(" << badHandlers.toStringCommaDelimited() << ");\n";
+  if (verySlowHandlers.size > 0) {
+    out
+    << "There were "
+    << verySlowHandlers.size
+    << " internal functions that took more than 1000 ms of total run time. "
+    << "To turn them off, prepend the following snippet. ";
+    out
+    << "TurnOffRules("
+    << verySlowHandlers.toStringCommaDelimited()
+    << ");\n";
+  }
+  if (slowHandlers.size > 0) {
+    out
+    << "There were "
+    << slowHandlers.size
+    << " internal functions that took more than 10 ms of total run time. "
+    << "To turn them off, prepend the following snippet. ";
+    out << "TurnOffRules(" << slowHandlers.toStringCommaDelimited() << ");\n";
+  }
   result = out.str();
   return result;
 }

@@ -1,4 +1,4 @@
-TurnOffRules(CommonDenominator);
+TurnOffRules(CommonDenominator,AddTerms);
 a_1= MakeInputBox(name=a_1, value = 0);
 
 a_2= MakeInputBox(name=a_2, value = 0);
@@ -27,7 +27,7 @@ PlotPath((A,B, C, A), blue)
 + PlotSelectablePoint((b_1, b_2))
 + PlotSelectablePoint((c_1, c_2))
 + PlotRemoveCoordinateAxes()
-+ PlotPoint((A+B+C)/3, orange)
++ PlotPoint((A+B+C)/3, orange) 
 + PlotSegment(A, H_a, green)
 + PlotSegment(B, H_b, green)
 + PlotSegment(C, H_c, green)+PlotWindow(800, 800)

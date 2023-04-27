@@ -1234,8 +1234,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
       out << "[Parameter: " << this->parameterNames[i] << " not found. ]";
       return out.str();
     }
-    global << "[Parameter: " << this->parameterNames[i] << " YES found. ]";
-    InputBox& currentBox =
+    InputBox & currentBox =
     owner.objectContainer.userInputTextBoxesWithValues.getValueNoFailNonConst(
       this->parameterNames[i]
     );

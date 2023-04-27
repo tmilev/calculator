@@ -1352,6 +1352,10 @@
     "output":"[plot already displayed]"
   },
   {
+    "input":"x=MakeInputBox(name=x, value=1);\ny=MakeInputBox(name=y, value=2);\nPlotSegment((x,y), (3,4))",
+    "output":"(x=\\formInput{1.0000, x2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881};y=\\formInput{2.0000, ya1fce4363854ff888cff4b8e7875d600c2682390412a8cf79b37d0b11148b0fa};[plot already displayed])"
+  },
+  {
     "input":"PlotSegment((1, 2), (3,4)) + PlotMarkSegment((1, 2), (3, 4))",
     "output":"[plot already displayed]"
   },

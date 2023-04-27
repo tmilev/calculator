@@ -3253,12 +3253,23 @@ PlotFill(PlotCurve((sin(a t), cos(b t)), 0, 2\pi, blue, 2, 2000), pink)
 ```
 Plots a curve sitting in 2-dimensional space. The first and second argument give the x and y coordinate functions; the curve parameter must be t.The third and fourth argument give the start/finish range for t. The next argument gives the curve color. The next argument gives the curve width. The next argument gives the number of points used to draw the curve. 
 
+Operator or function PlotSegment is overloaded with 2 total handlers.
+
 *PlotSegment* [PlotSegment] {CalculatorFunctionsPlot::plotSegment}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotSegment%28%281%2c2%29%2c%20%283%2c4%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PlotSegment((1,2), (3,4))
 ```
 Plots a segment connecting two points. 
+
+*PlotSegment* [PlotSegmentParametric] {CalculatorFunctionsPlot::plotSegmentParametric}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%3dMakeInputBox%28name%3dx%2c%20value%3d1%29%3b%5cny%3dMakeInputBox%28name%3dy%2c%20value%3d2%29%3b%5cnPlotSegment%28%28x%2cy%29%2c%20%283%2c4%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+x=MakeInputBox(name=x, value=1);
+y=MakeInputBox(name=y, value=2);
+PlotSegment((x,y), (3,4))
+```
+Plots a segment connecting two points; works with parameters. 
 
 *PlotMarkSegment* [PlotMarkSegment] {CalculatorFunctionsPlot::plotMarkSegment}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotSegment%28%281%2c%202%29%2c%20%283%2c4%29%29%20%2b%20PlotMarkSegment%28%281%2c%202%29%2c%20%283%2c%204%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

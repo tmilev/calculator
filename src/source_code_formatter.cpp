@@ -1018,6 +1018,7 @@ bool CodeFormatter::Element::computeIndentationCommentCollection() {
     current.rightMostAtomUnderMe()->newLinesAfter = 1;
     current.leftMostAtomUnderMe()->whiteSpaceBefore = current.indentationLevel;
   }
+  this->whiteSpaceBefore = 0;
   return true;
 }
 
@@ -1171,9 +1172,14 @@ bool CodeFormatter::Element::computeIndentationEnumDefinition() {
   this->children[1].indentationLevel = this->indentationLevel;
   this->children[1].whiteSpaceBefore = 1;
   this->children[1].newLinesAfter = 1;
-  this->children[2].indentationLevel =
-  this->indentationLevel + this->owner->tabLength;
-  this->children[2].computeIndentation();
+  CodeFormatter::Element& content = this->children[2];
+  content.indentationLevel = this->indentationLevel + this->owner->tabLength;
+  content.computeIndentation();
+  if (content.type == CodeFormatter::Element::Type::CommaList) {
+    if (content.children.size > 0) {
+      content.rightMostAtomUnderMe()->newLinesAfter = 1;
+    }
+  }
   this->children[3].indentationLevel = this->indentationLevel;
   this->children[3].whiteSpaceBefore = this->indentationLevel;
   this->children[4].indentationLevel = this->indentationLevel;

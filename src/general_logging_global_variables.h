@@ -65,7 +65,8 @@ public:
   Logger();
   void checkLogSize();
   enum LoggerSpecialSymbols {
-    endL, red, blue, yellow, green, purple, cyan, normalColor, orange  };
+    endL, red, blue, yellow, green, purple, cyan, normalColor, orange
+  };
   static std::string consoleRed();
   static std::string consoleBlue();
   static std::string consoleYellow();

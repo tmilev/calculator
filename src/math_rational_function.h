@@ -35,7 +35,8 @@ public:
     typeConstant = 0,
     typePolynomial = 1,
     typeRationalFraction = 2,
-    typeError = 3  };
+    typeError = 3
+  };
   std::string toString(FormatExpressions* format = nullptr) const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused = nullptr)
   const;

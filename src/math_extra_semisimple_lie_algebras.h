@@ -138,7 +138,8 @@ class SatakeDiagram {
 private:
 public:
   enum DiagramType {
-    AI, AII, AIII, BI, CI, DI, DII,  };
+    AI, AII, AIII, BI, CI, DI, DII,
+  };
   DiagramType diagram;
   // Some of the classical Satake types
   // depend on an additional parameter,
@@ -185,7 +186,8 @@ public:
     EIX,
     FI,
     FII,
-    G  };
+    G
+  };
   DiagramType diagram;
   static const int radiusOfRootCircle = 1;
   static const int distanceBetweenRootCenters = 20;

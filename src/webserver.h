@@ -209,7 +209,8 @@ public:
   void attemptUnknownRequestErrorCorrection();
   bool requireSSL();
   enum requestTypes {
-    requestUnknown, requestGet, requestPost, requestHead, requestChunked  };
+    requestUnknown, requestGet, requestPost, requestHead, requestChunked
+  };
   std::string toStringAddressRequest() const;
   std::string toStringStatus() const;
   std::string toStringMessageShort() const;

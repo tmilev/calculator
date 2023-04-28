@@ -834,7 +834,8 @@ public:
   List<struct stack_frame> stack;
   int frame_pointer;
   enum pcpositions {
-    beginning, loop, firstout, afterloop, end  };
+    beginning, loop, firstout, afterloop, end
+  };
   void initialize(List<object>& input) {
     if (input.size == 0) {
       done_iterating = true;
@@ -992,7 +993,8 @@ class GeneratorElementsSnxSnOnIndicesAndIndices {
 public:
   List<GeneratorPermutationR2sOnIndices> generators;
   enum pcpositions {
-    beginning, loop, midloop, end  };
+    beginning, loop, midloop, end
+  };
   struct frame {
     int program_counter;
     PermutationR2 subprod;

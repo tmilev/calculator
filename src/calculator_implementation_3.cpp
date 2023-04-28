@@ -515,7 +515,8 @@ bool Expression::assignMatrixExpressions(
     typePolynomialRational,
     typePolynomialAlgebraic,
     typeRationalFraction,
-    typeExpression  };
+    typeExpression
+  };
   MatrixType outType = typeUnknown;
   Expression currentRow;
   for (int i = 0; i < input.numberOfRows; i ++) {

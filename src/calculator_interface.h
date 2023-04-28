@@ -2224,7 +2224,7 @@ public:
   // Allows to avoid bootstrapping a number of
   // functions/operations.
   enum Mode {
-        // Run in full scientific mode;
+    // Run in full scientific mode;
     // initialize all scientific functions.
     full,
     // Initialize only the functions required for
@@ -2232,7 +2232,8 @@ public:
     // commutative algebra are included but not
     // representation theory, Lie theory and other
     // advanced functions
-    educational  };
+    educational
+  };
   Mode mode;
   // Operations parametrize the expression elements.
   // Operations are the labels of the atom nodes of the expression tree.

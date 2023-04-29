@@ -2363,7 +2363,9 @@ public:
     int64_t startParsing;
     int64_t lastStopwatchParsing;
     LinearCombination<MonomialWrapper<std::string>, LargeInteger>
-    performancePerHandler;
+    trivialPerformancePerHandler;
+    LinearCombination<MonomialWrapper<std::string>, LargeInteger>
+    nonTrivialPerformancePerHandler;
     EvaluationStatistics();
     void initialize();
     void reset();
@@ -2526,7 +2528,10 @@ public:
   Expression expressionMinusInfinity();
   Expression expressionSquareRootNegativeOne();
   void logFunctionWithTime(Function& input, int64_t startTime);
-  void accountFunctionPerformance(Function& input, int64_t startTime);
+  void accountFunctionTrivialPerformance(Function& input, int64_t startTime);
+  void accountFunctionNonTrivialPerformance(
+    Function& input, int64_t startTime
+  );
   void logTime(int64_t startTime);
   void logPublicError(const std::string& error);
   std::string writeDefaultLatexFileReturnHtmlLink(

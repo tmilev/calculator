@@ -1926,18 +1926,22 @@ JSData Calculator::toJSONPerformancePerHandler() {
   std::stringstream out;
   List<std::string> slowHandlers;
   List<std::string> verySlowHandlers;
-  for (
-    int i = 0; i < this->statistics.performancePerHandler.size(); i ++
-  ) {
-    if (this->statistics.performancePerHandler.coefficients[i] > 1000) {
-      verySlowHandlers.addOnTop(
-        this->statistics.performancePerHandler.monomials[i].content
-      );
-    }
-    if (this->statistics.performancePerHandler.coefficients[i] > 10) {
-      slowHandlers.addOnTop(
-        this->statistics.performancePerHandler.monomials[i].content
-      );
+  LargeInteger slowDelay;
+  LargeInteger verySlowDelay;
+  LinearCombination<MonomialWrapper<std::string>, LargeInteger>
+  performancePerHandler =
+  this->statistics.nonTrivialPerformancePerHandler +
+  this->statistics.trivialPerformancePerHandler;
+  for (int i = 0; i < performancePerHandler.size(); i ++) {
+    const LargeInteger& coefficient = performancePerHandler.coefficients[i];
+    const std::string& handlerAtom =
+    performancePerHandler.monomials[i].content;
+    if (coefficient > 1000) {
+      verySlowHandlers.addOnTop(handlerAtom);
+      verySlowDelay += coefficient;
+    } else if (coefficient > 10) {
+      slowHandlers.addOnTop(handlerAtom);
+      slowDelay += coefficient;
     }
   }
   JSData result;
@@ -1949,7 +1953,9 @@ JSData Calculator::toJSONPerformancePerHandler() {
     out
     << "There were "
     << verySlowHandlers.size
-    << " internal functions that took more than 1000 ms of total run time. "
+    << " very slow internal functions that took "
+    << verySlowDelay
+    << " ms of run time. "
     << "To turn them off, prepend the following snippet. ";
     out
     << "TurnOffRules("
@@ -1967,7 +1973,9 @@ JSData Calculator::toJSONPerformancePerHandler() {
     out
     << "There were "
     << slowHandlers.size
-    << " internal functions that took more than 10 ms of total run time. "
+    << " slow internal functions that took "
+    << slowDelay
+    << " ms of run time."
     << "To turn them off, prepend the following snippet. ";
     out << "TurnOffRules(" << slowHandlers.toStringCommaDelimited() << ");\n";
     std::stringstream linkStream;

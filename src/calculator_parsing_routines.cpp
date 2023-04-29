@@ -415,7 +415,8 @@ void Calculator::EvaluationStatistics::reset() {
   this->startTimeEvaluationMilliseconds = - 1;
   this->startParsing = - 1;
   this->lastStopwatchParsing = - 1;
-  this->performancePerHandler.makeZero();
+  this->trivialPerformancePerHandler.makeZero();
+  this->nonTrivialPerformancePerHandler.makeZero();
 }
 
 void Calculator::reset() {

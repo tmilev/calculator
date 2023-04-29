@@ -315,13 +315,24 @@ void Calculator::logTime(int64_t startTime) {
   this->statistics.millisecondsLastLog = currentMilliseconds;
 }
 
-void Calculator::accountFunctionPerformance(
+void Calculator::accountFunctionTrivialPerformance(
   Function& input, int64_t startTime
 ) {
   int64_t elapsed = global.getElapsedMilliseconds() - startTime;
   LargeInteger largeInteger;
   largeInteger = elapsed;
-  this->statistics.performancePerHandler.addMonomial(
+  this->statistics.trivialPerformancePerHandler.addMonomial(
+    input.calculatorIdentifier, largeInteger
+  );
+}
+
+void Calculator::accountFunctionNonTrivialPerformance(
+  Function& input, int64_t startTime
+) {
+  int64_t elapsed = global.getElapsedMilliseconds() - startTime;
+  LargeInteger largeInteger;
+  largeInteger = elapsed;
+  this->statistics.nonTrivialPerformancePerHandler.addMonomial(
     input.calculatorIdentifier, largeInteger
   );
 }
@@ -404,11 +415,14 @@ bool Calculator::outerStandardCompositeHandler(
         calculator, input, output, opIndexParentIfAvailable, outputHandler
       )
     ) {
-      calculator.accountFunctionPerformance(
+      calculator.accountFunctionTrivialPerformance(
         currentHandler, startCurrentFunction
       );
       continue;
     }
+    calculator.accountFunctionNonTrivialPerformance(
+      currentHandler, startCurrentFunction
+    );
     calculator.logFunctionWithTime(currentHandler, start);
     return true;
   }
@@ -495,9 +509,12 @@ bool Calculator::outerStandardHandler(
         calculator, input, output, opIndexParentIfAvailable, outputHandler
       )
     ) {
-      calculator.accountFunctionPerformance(currentFunction, startTime);
+      calculator.accountFunctionNonTrivialPerformance(
+        currentFunction, startTime
+      );
       return true;
     }
+    calculator.accountFunctionTrivialPerformance(currentFunction, startTime);
   }
   return false;
 }

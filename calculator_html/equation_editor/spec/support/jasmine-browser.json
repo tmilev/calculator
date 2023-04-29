@@ -1,7 +1,8 @@
 {
   "srcDir": "src/",
   "srcFiles": [
-    "*test.js"
+    "equation_editor.js",
+    "equation_editor_test.js"
   ],
   "specDir": "spec",
   "specFiles": [

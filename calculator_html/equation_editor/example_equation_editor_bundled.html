@@ -1,16 +1,18 @@
 <html>
-<script type="text/javascript" src="out/equation_editor_minified.js"></script>
+<script type="text/javascript" src="out/equation_editor_example_app.js"></script>
 
 <body>
 
-  This file shows how to bundle the equation editor with webpack. It uses the files:
+  This file shows how to bundle the equation editor with <a href="https://webpack.js.org/">webpack</a>. 
+  It uses the files:
   <pre>
     equation_editor.js
     app.js
-    webpack.config.js
   </pre>
-  The webpack server packs the app.js and equation_editor.js files to a the equation_editor_minified.js script, which is
-  then included in the present html file.
+  The entry point file is app.js, specified in file webpack.config.js, 
+  used to generate the app_minified.js script, which is
+  then included in the present html file. The app.js file holds all 
+  code that initializes the page.
 
   <br>
 
@@ -21,13 +23,6 @@
   Sample buttons:
   <button id="sqrt-button">&Sqrt;</button>
   <button id="custom-button">custom</button>
-  <hr>
-  Typeset all math in the 'toBeTypeSet' tag.
-  <button id="typeSetButton" onclick="typeset(document.getElementById('toBeTypeSet'));">typeset</button>
-
-  <div id='toBeTypeSet'>
-    \(\frac{-b\pm \sqrt{b^2-4ac}}{2a}\)
-  </div>
 </body>
 
 </html>

@@ -67,6 +67,36 @@ Detailed demo+debug page: https://calculator-algebra.org:8166/calculator_html/eq
     \(\frac{-b\pm \sqrt{b^2-4ac}}{2a}\)
   </div>
 </body>
-
 </html>
 ```
+
+## Common commands
+Build the example app with webpack.
+
+```
+npm run build
+```
+
+or, alternatively:
+```
+webpack src/app.js
+```
+
+Push a new version to npm. You also need to increment the version number in package.json.
+
+```
+npm publish
+```
+
+Run the unit tests.
+
+```
+npm test
+```
+
+Run the unit tests manually.
+```
+npx jasmine-browser-runner runSpecs
+```
+
+

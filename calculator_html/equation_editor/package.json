@@ -1,10 +1,11 @@
 {
   "name": "math_equation_editor",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A math equation editor",
   "main": "equation_editor.js",
   "scripts": {
-    "test": "jasmine-browser-runner runSpecs"
+    "test": "jasmine-browser-runner runSpecs",
+    "build": "webpack src/app.js"
   },
   "repository": {
     "type": "git",

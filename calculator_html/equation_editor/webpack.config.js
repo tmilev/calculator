@@ -4,6 +4,6 @@ module.exports = {
   entry: 'src/app.js',
   output: {
     path: path.resolve(__dirname, 'out'),
-    filename: 'equation_editor_minified.js',
+    filename: 'equation_editor_example_app.js',
   },
 };

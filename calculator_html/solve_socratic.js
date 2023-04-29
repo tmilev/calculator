@@ -1,7 +1,7 @@
 "use strict";
 const ids = require("./ids_dom_elements");
-const equationEditor = require("./equation_editor/equation_editor");
-const EquationEditor = require("./equation_editor/equation_editor").EquationEditor;
+const equationEditor = require("./equation_editor/src/equation_editor");
+const EquationEditor = require("./equation_editor/src/equation_editor").EquationEditor;
 const storage = require("./storage").storage;
 const InputPanelData = require("./initialize_buttons").InputPanelData;
 const submitRequest = require("./submit_requests");

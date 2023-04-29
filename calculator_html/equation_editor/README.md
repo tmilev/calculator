@@ -14,7 +14,7 @@ Detailed demo+debug page: https://calculator-algebra.org:8166/calculator_html/eq
 - No external dependencies whatsoever, not even jquery.
 - No more build system headaches.
 	- Can be require("./equation_editor")-ed like a regular node module.
-	- Can be copy and pasted: one [single javascript file](https://github.com/tmilev/calculator/blob/HEAD/calculator_html/equation_editor/equation_editor.js) and you're done.
+	- Can be copy and pasted: one [single javascript file](https://github.com/tmilev/calculator/blob/HEAD/calculator_html/equation_editor/src/equation_editor.js) and you're done.
 - Matrix support from the start.
 - Will construct math tags from content enclosed in \\(...\\) just like MathJax; can be used as a drop-in replacement. 
 - Will also construct math from ```<div class="mathcalculator">your formula here</div>```.

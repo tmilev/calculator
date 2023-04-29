@@ -28,7 +28,7 @@
   "/calculator_html/course_page.js",
   "/calculator_html/problem_page.js",
   "/calculator_html/select_course.js",
-  "/calculator_html/equation_editor/equation_editor.js",
+  "/calculator_html/equation_editor/src/equation_editor.js",
   "/calculator_html/login.js",
   "/calculator_html/signup.js",
   "/calculator_html/forgot_password.js",

@@ -1,5 +1,5 @@
-
-TurnOffRules(CommonDenominator, AddTerms, DivideExpressionsAsIfPolynomial, CommuteIfUnivariate);
+%HideLHS
+TurnOffRules(CommonDenominator, AddTerms, DivideExpressionsAsIfPolynomial, CommuteIfUnivariate,CommuteAtimesBtimesCifUnivariate);
 a_1= MakeInputBox(name=a_1, value = 0);
 
 a_2= MakeInputBox(name=a_2, value = 0);

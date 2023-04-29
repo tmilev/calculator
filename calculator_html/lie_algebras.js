@@ -1,4 +1,4 @@
-const equationEditor = require("./equation_editor/equation_editor");
+const equationEditor = require("./equation_editor/src/equation_editor");
 const panels = require("./panels");
 
 let ids = {

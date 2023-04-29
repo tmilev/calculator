@@ -8,7 +8,7 @@ const processMonitoring = require("./process_monitoring");
 const storage = require("./storage");
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 const calculatorPageEditor = require("./calculator_page_editor");
-const equationEditor = require("./equation_editor/equation_editor");
+const equationEditor = require("./equation_editor/src/equation_editor");
 const startCalculatorWebAssemblyWorker = require("./web_assembly_worker");
 
 class AtomHandler {

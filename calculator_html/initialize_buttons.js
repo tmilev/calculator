@@ -2,12 +2,12 @@
 const panels = require("./panels");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
-const equation_editor = require("./equation_editor/equation_editor");
+const equation_editor = require("./equation_editor/src/equation_editor");
 const storage = require("./storage");
-const EquationEditorAction = require("./equation_editor/equation_editor").EquationEditorAction;
-const EquationEditor = require("./equation_editor/equation_editor").EquationEditor;
-const EquationEditorButtonFactory = require("./equation_editor/equation_editor").EquationEditorButtonFactory;
-const EquationEditorOptions = require("./equation_editor/equation_editor").EquationEditorOptions;
+const EquationEditorAction = require("./equation_editor/src/equation_editor").EquationEditorAction;
+const EquationEditor = require("./equation_editor/src/equation_editor").EquationEditor;
+const EquationEditorButtonFactory = require("./equation_editor/src/equation_editor").EquationEditorButtonFactory;
+const EquationEditorOptions = require("./equation_editor/src/equation_editor").EquationEditorOptions;
 const datePicker = require("./date_picker").datePicker;
 
 let charsToSplit = ['x', 'y'];

@@ -4,8 +4,8 @@ const pathnames = require("./pathnames");
 const submit = require("./submit_requests");
 const calculator = require("./calculator_page");
 const miscellaneous = require("./miscellaneous_frontend");
-const equationEditor = require("./equation_editor/equation_editor");
-const EquationEditor = require("./equation_editor/equation_editor").EquationEditor;
+const equationEditor = require("./equation_editor/src/equation_editor");
+const EquationEditor = require("./equation_editor/src/equation_editor").EquationEditor;
 const storage = require("./storage").storage;
 const InputPanelData = require("./initialize_buttons").InputPanelData;
 

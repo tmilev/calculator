@@ -1953,7 +1953,7 @@ JSData Calculator::toJSONPerformancePerHandler() {
     out
     << "There were "
     << verySlowHandlers.size
-    << " very slow internal functions that took "
+    << " very slow internal function(s) that took "
     << verySlowDelay
     << " ms of run time. "
     << "To turn them off, prepend the following snippet. ";
@@ -1973,9 +1973,9 @@ JSData Calculator::toJSONPerformancePerHandler() {
     out
     << "There were "
     << slowHandlers.size
-    << " slow internal functions that took "
+    << " slow internal function(s) that took "
     << slowDelay
-    << " ms of run time."
+    << " ms of run time. "
     << "To turn them off, prepend the following snippet. ";
     out << "TurnOffRules(" << slowHandlers.toStringCommaDelimited() << ");\n";
     std::stringstream linkStream;

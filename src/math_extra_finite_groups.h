@@ -907,7 +907,7 @@ public:
     Vector<Coefficient>& weight,
     int* sign = nullptr,
     bool* stabilizerFound = nullptr,
-    ElementWeylGroup* raisingElt = nullptr
+    ElementWeylGroup* raisingElement = nullptr
   );
   bool areMaximallyDominantGroupInner(List<Vector<Rational> >& weights);
   template <class Coefficient>

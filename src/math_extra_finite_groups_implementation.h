@@ -1061,11 +1061,10 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
 }
 
 template <class Coefficient>
-void WeylGroupData::raiseToDominantWeight(
-  Vector<Coefficient>& weight,
+void WeylGroupData::raiseToDominantWeight(Vector<Coefficient>& weight,
   int* sign,
   bool* stabilizerFound,
-  ElementWeylGroup* raisingElt
+  ElementWeylGroup* raisingElement
 ) {
   STACK_TRACE("WeylGroupData::raiseToDominantWeight");
   if (sign != nullptr) {
@@ -1077,8 +1076,8 @@ void WeylGroupData::raiseToDominantWeight(
   Coefficient scalarProduct;
   int dimension = this->getDimension();
   SimpleReflection generator;
-  if (raisingElt != nullptr) {
-    raisingElt->makeIdentity(*this);
+  if (raisingElement != nullptr) {
+    raisingElement->makeIdentity(*this);
   }
   for (bool found = true; found;) {
     found = false;
@@ -1093,8 +1092,8 @@ void WeylGroupData::raiseToDominantWeight(
           *sign *= - 1;
         }
         generator.makeSimpleReflection(i);
-        if (raisingElt != nullptr) {
-          raisingElt->generatorsLastAppliedFirst.addOnTop(generator);
+        if (raisingElement != nullptr) {
+          raisingElement->generatorsLastAppliedFirst.addOnTop(generator);
           // warning order of raising element is reversed, must reverse back
         }
       }
@@ -1105,9 +1104,9 @@ void WeylGroupData::raiseToDominantWeight(
       }
     }
   }
-  if (raisingElt != nullptr) {
-    raisingElt->generatorsLastAppliedFirst.reverseElements();
-    raisingElt->makeCanonical();
+  if (raisingElement != nullptr) {
+    raisingElement->generatorsLastAppliedFirst.reverseElements();
+    raisingElement->makeCanonical();
   }
 }
 
@@ -1407,7 +1406,9 @@ bool WeylGroupData::freudenthalFormula(
     outputDominantWeightsSimpleCoords.size, false
   );
   outputMultsSimpleCoords.setSize(outputDominantWeightsSimpleCoords.size);
-  Vector<Coefficient> currentWeight, currentDominantRepresentative, convertor;
+  Vector<Coefficient> currentWeight;
+  Vector<Coefficient> currentDominantRepresentative;
+  Vector<Coefficient>  convertor;
   Coefficient hwPlusRhoSquared;
   convertor = hwSimpleCoords;
   convertor += this->rho;
@@ -1419,8 +1420,8 @@ bool WeylGroupData::freudenthalFormula(
   ProgressReport report;
   for (int k = 1; k < outputDominantWeightsSimpleCoords.size; k ++) {
     Explored[k] = true;
-    Coefficient& currentAccum = outputMultsSimpleCoords[k];
-    currentAccum = 0;
+    Coefficient& currentAccumulator = outputMultsSimpleCoords[k];
+    currentAccumulator = 0;
     for (int j = 0; j < this->rootsOfBorel.size; j ++) {
       for (int i = 1;; i ++) {
         currentWeight = outputDominantWeightsSimpleCoords[k];
@@ -1450,10 +1451,10 @@ bool WeylGroupData::freudenthalFormula(
         bufferCoefficient =
         this->rootScalarCartanRoot(currentWeight, this->rootsOfBorel[j]);
         bufferCoefficient *= outputMultsSimpleCoords[index];
-        currentAccum += bufferCoefficient;
+        currentAccumulator += bufferCoefficient;
       }
     }
-    currentAccum *= 2;
+    currentAccumulator *= 2;
     convertor = outputDominantWeightsSimpleCoords[k];
     convertor += this->rho;
     bufferCoefficient = hwPlusRhoSquared;
@@ -1468,7 +1469,7 @@ bool WeylGroupData::freudenthalFormula(
       << this->toString()
       << global.fatal;
     }
-    currentAccum /= bufferCoefficient;
+    currentAccumulator /= bufferCoefficient;
     std::stringstream out;
     out
     << " Computed the multiplicities of "
@@ -1526,8 +1527,8 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
   outputWeightsSimpleCoords.clear();
   outputWeightsSimpleCoords.setHashSize(10000);
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
-  int numTotalWeightsFound = 0;
-  int numPosRoots = this->rootsOfBorel.size;
+  int numberOfTotalWeightsFound = 0;
+  int numberOfPositiveRoots = this->rootsOfBorel.size;
   Vector<Coefficient> currentWeight;
   for (
     int lowestUnexploredHeightDiff = 0; lowestUnexploredHeightDiff <=
@@ -1535,7 +1536,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
   ) {
     if (
       upperBoundDominantWeights > 0 &&
-      numTotalWeightsFound > upperBoundDominantWeights
+      numberOfTotalWeightsFound > upperBoundDominantWeights
     ) {
       break;
     }
@@ -1544,7 +1545,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
     HashedList<Vector<Coefficient> >& currentHashes =
     outputWeightsByHeight[bufferIndexShift];
     for (int lowest = 0; lowest < currentHashes.size; lowest ++) {
-      for (int i = 0; i < numPosRoots; i ++) {
+      for (int i = 0; i < numberOfPositiveRoots; i ++) {
         currentWeight = currentHashes[lowest];
         currentWeight -= this->rootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
@@ -1557,7 +1558,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
               currentWeight
             )
           ) {
-            numTotalWeightsFound ++;
+            numberOfTotalWeightsFound ++;
             outputWeightsByHeight[currentIndexShift].adjustHashes();
           }
         }
@@ -1567,7 +1568,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
     outputWeightsSimpleCoords.adjustHashes();
     currentHashes.clear();
     if (
-      numTotalWeightsFound > upperBoundDominantWeights &&
+      numberOfTotalWeightsFound > upperBoundDominantWeights &&
       upperBoundDominantWeights > 0
     ) {
       out
@@ -1592,7 +1593,9 @@ void WeylGroupData::reflectBetaWithRespectToAlpha(
   bool rhoAction,
   Vector<Coefficient>& output
 ) const {
-  Coefficient bufferCoeff, alphaShift, lengthA;
+  Coefficient bufferCoefficient;
+  Coefficient alphaShift;
+  Coefficient lengthA;
   Vector<Coefficient> result;
   result = beta;
   alphaShift = beta[0].zero();
@@ -1605,23 +1608,23 @@ void WeylGroupData::reflectBetaWithRespectToAlpha(
   }
   for (int i = 0; i < this->cartanSymmetric.numberOfRows; i ++) {
     for (int j = 0; j < this->cartanSymmetric.numberOfColumns; j ++) {
-      bufferCoeff = result[j];
-      bufferCoeff *= alpha[i];
-      bufferCoeff *= this->cartanSymmetric.elements[i][j] *(- 2);
-      alphaShift += bufferCoeff;
-      bufferCoeff = alpha[i];
-      bufferCoeff *= alpha[j];
-      bufferCoeff *= this->cartanSymmetric.elements[i][j];
-      lengthA += bufferCoeff;
+      bufferCoefficient = result[j];
+      bufferCoefficient *= alpha[i];
+      bufferCoefficient *= this->cartanSymmetric.elements[i][j] *(- 2);
+      alphaShift += bufferCoefficient;
+      bufferCoefficient = alpha[i];
+      bufferCoefficient *= alpha[j];
+      bufferCoefficient *= this->cartanSymmetric.elements[i][j];
+      lengthA += bufferCoefficient;
     }
   }
   alphaShift /= lengthA;
   output.setSize(this->cartanSymmetric.numberOfRows);
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    bufferCoeff = alphaShift;
-    bufferCoeff *= alpha[i];
-    bufferCoeff += result[i];
-    output[i] = bufferCoeff;
+    bufferCoefficient = alphaShift;
+    bufferCoefficient *= alpha[i];
+    bufferCoefficient += result[i];
+    output[i] = bufferCoefficient;
   }
   if (rhoAction) {
     output -= this->rho;
@@ -2028,7 +2031,9 @@ weylDimensionFormulaInnerSimpleCoords(
   );
   this->checkInitialization();
   Coefficient result, buffer;
-  Vector<Coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;
+  Vector<Coefficient> rhoOverNewRing;
+  Vector<Coefficient> rootOfBorelNewRing;
+  Vector<Coefficient> sumWithRho;
   // <-to facilitate type conversion!
   Vector<Rational> rho;
   this->rootsOfBorel.sum(rho, this->ambientWeyl->getDimension());
@@ -2813,7 +2818,7 @@ decomposeTodorsVersionRecursive(
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >*
   appendOnlyGRCAMSList
 ) {
-  STACK_TRACE("WeylGroupRepresentation::decomposeTodorsVersionRecursive");
+  STACK_TRACE("GroupRepresentationCarriesAllMatrices::decomposeTodorsVersionRecursive");
   this->checkInitialization();
   this->ownerGroup->
   checkInitializationFiniteDimensionalRepresentationComputation();

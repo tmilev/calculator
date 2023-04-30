@@ -667,12 +667,12 @@ public:
       other, highIndex + 1, topIndex, order, carbonCopy
     );
   }
-  template <class templateList, class otherList>
+  template <class TemplateList, class OtherTemplateList>
   static void quickSortAscendingNoOrder(
-    templateList& input,
+    TemplateList& input,
     int bottomIndex,
     int topIndex,
-    otherList* carbonCopy
+    OtherTemplateList* carbonCopy
   ) {
     if (topIndex <= bottomIndex) {
       return;

@@ -2348,7 +2348,7 @@ bool JavascriptExtractor::convertListOfListOfExpressionsToPoints(
   int desiredDimension,
   PlotObject& output
 ) {
-  STACK_TRACE("JavascriptExtractor::convertListOfListOfExpressionToPoint");
+  STACK_TRACE("JavascriptExtractor::convertListOfListOfExpressionsToPoints");
   if (input.size == 0) {
     return false;
   }

@@ -3314,7 +3314,7 @@ bool CalculatorParser::applyOneRule() {
   if (secondToLastS == "%" && lastS == "DontUsePredefinedWordSplits") {
     this->owner->flagUsePredefinedWordSplits = false;
     this->owner->comments
-    << "Using predefined word splits -for example xy is replaced by x y. ";
+    << "Predefined word splits are OFF. xy will *not* be replaced by x*y. ";
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
   }

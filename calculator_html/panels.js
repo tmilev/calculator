@@ -168,6 +168,7 @@ class PanelExpandable {
     this.spanContainerButtons = null;
     /** @type {boolean} */
     this.fullyExpanded = false;
+    this.transitionStyle = "all 0.6s"
     if (typeof container === "string") {
       this.containerId = container;
       this.container = document.getElementById(this.containerId);
@@ -182,7 +183,7 @@ class PanelExpandable {
       this.panelContent.style.maxWidth = "0px";
     } else {
       if (!this.fullyExpanded) {
-        this.panelContent.style.maxHeight = `${this.originalHeight + 45}px`;
+        this.panelContent.style.maxHeight = `${this.originalHeight + 55}px`;
         this.panelContent.style.maxWidth = `${this.originalWidth + 35}px`;
       } else {
         this.panelContent.style.maxHeight = "";
@@ -252,7 +253,7 @@ class PanelExpandable {
       this.buttonFullExpand.textContent = "\u26F6";
       this.buttonFullExpand.title = "toggle full expansion";
       this.buttonFullExpand.addEventListener("click", () => {
-        this.toggleExpand();
+        this.toggleFullExpand();
       })
       this.buttonFullExpand.className = "buttonProgress";
       this.spanContainerButtons.appendChild(this.buttonFullExpand);
@@ -262,7 +263,6 @@ class PanelExpandable {
     this.container.textContent = "";
     this.container.appendChild(this.spanContainerButtons);
     this.container.appendChild(this.panelContent);
-    this.container.style.transition = "all 1s";
     this.setCollapsed(startsCollapsed);
   }
 
@@ -278,6 +278,7 @@ class PanelExpandable {
     this.contentCopyButton = textContent.substring(2, textContent.length - 2);
     this.buttonCopy = document.createElement("button");
     this.buttonCopy.innerHTML = "<tiny>&#x1F4CB;</tiny>";
+    this.buttonCopy.title = "copy";
     this.buttonCopy.className = "buttonProgress";
     this.buttonCopy.addEventListener("click", () => {
       this.doCopy();
@@ -311,8 +312,9 @@ class PanelExpandable {
     }, 0);
   }
 
-  toggleExpand() {
+  toggleFullExpand() {
     this.fullyExpanded = !this.fullyExpanded;
+    this.panelContent.style.transition = this.transitionStyle;
     if (this.fullyExpanded) {
       this.setCollapsed(false);
       return;
@@ -321,6 +323,7 @@ class PanelExpandable {
   }
 
   doToggleContent() {
+    this.panelContent.style.transition = this.transitionStyle;
     this.setCollapsed(!this.collapsed);
   }
 }

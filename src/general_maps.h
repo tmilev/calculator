@@ -98,6 +98,13 @@ public:
     }
     return this->values[index];
   }
+  Value* getValuePointer(const Key& input) {
+    int index = this->keys.getIndex(input);
+    if (index == - 1) {
+      return nullptr;
+    }
+    return this->values[index];
+  }
   void setKeyValue(const Key& inputKey, const Value& inputValue) {
     if (this->contains(inputKey)) {
       this->values[this->keys.getIndex(inputKey)] = inputValue;

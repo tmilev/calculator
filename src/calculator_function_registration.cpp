@@ -4947,6 +4947,16 @@ void Calculator::initializeFunctionsStandard() {
     "DivideExpressionsAsIfPolynomial",
     innerStandard
   );
+  this->addOperationHandler(
+    "/",
+    CalculatorFunctionsBinaryOps::divideSequenceByScalar,
+    "",
+    "Divides a sequence by a scalar. ",
+    "(1,2)/x",
+    "CalculatorFunctionsBinaryOps::divideSequenceByScalar",
+    "DivideSequenceByScalar",
+    innerStandard
+  );
   this->addOperationBinaryInnerHandlerWithTypes(
     "^",
     CalculatorFunctionsBinaryOps::powerRationalByInteger,

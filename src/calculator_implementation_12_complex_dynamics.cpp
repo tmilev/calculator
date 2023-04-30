@@ -221,10 +221,10 @@ bool RealAndImaginaryPartExtractor::extractOneParameter(
   double valueWithIOne = 0;
   double valueWithINegativeOne = 0;
   if (
-    !input[2].evaluatesToDoubleUnderSubstitutions(
+    !input[2].evaluatesToDoubleUsingSubstitutions(
       setI, List<double>({1}), &valueWithIOne
     ) ||
-    !input[2].evaluatesToDoubleUnderSubstitutions(
+    !input[2].evaluatesToDoubleUsingSubstitutions(
       setI, List<double>({- 1}), &valueWithINegativeOne
     )
   ) {

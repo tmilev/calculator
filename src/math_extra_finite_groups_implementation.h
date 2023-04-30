@@ -1061,7 +1061,8 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
 }
 
 template <class Coefficient>
-void WeylGroupData::raiseToDominantWeight(Vector<Coefficient>& weight,
+void WeylGroupData::raiseToDominantWeight(
+  Vector<Coefficient>& weight,
   int* sign,
   bool* stabilizerFound,
   ElementWeylGroup* raisingElement
@@ -1408,7 +1409,7 @@ bool WeylGroupData::freudenthalFormula(
   outputMultsSimpleCoords.setSize(outputDominantWeightsSimpleCoords.size);
   Vector<Coefficient> currentWeight;
   Vector<Coefficient> currentDominantRepresentative;
-  Vector<Coefficient>  convertor;
+  Vector<Coefficient> convertor;
   Coefficient hwPlusRhoSquared;
   convertor = hwSimpleCoords;
   convertor += this->rho;
@@ -2818,7 +2819,9 @@ decomposeTodorsVersionRecursive(
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >*
   appendOnlyGRCAMSList
 ) {
-  STACK_TRACE("GroupRepresentationCarriesAllMatrices::decomposeTodorsVersionRecursive");
+  STACK_TRACE(
+    "GroupRepresentationCarriesAllMatrices::decomposeTodorsVersionRecursive"
+  );
   this->checkInitialization();
   this->ownerGroup->
   checkInitializationFiniteDimensionalRepresentationComputation();

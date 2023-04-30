@@ -186,7 +186,7 @@ private:
   );
   static std::string getMathSpan(
     const std::string& input,
-    int upperNumChars = 10000,
+    int upperNumberOfCharacters = 10000,
     bool useDisplayStyle = false
   );
 public:
@@ -302,11 +302,8 @@ public:
   );
   static const std::string& getJavascriptAceEditorScriptWithTags();
   static std::string getJavascriptVariable(const std::string& variableName);
-  static std::string getMathDisplayStyle(
-    const std::string& input, int upperNumChars = 10000
-  );
   static std::string getMathNoDisplay(
-    const std::string& input, int upperNumChars = 10000
+    const std::string& input, int upperNumberOfCharacters = 10000
   );
   static std::string getStyleButtonLikeHtml();
   static std::string clearNewLines(const std::string& inputString);

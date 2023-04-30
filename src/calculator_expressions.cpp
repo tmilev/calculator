@@ -1419,7 +1419,12 @@ unsigned int Expression::hashFunction() const {
     }
     global.fatal << "Uninitialized expression. " << global.fatal;
   }
-  return this->children.hashFunction();
+  int hashCounter = 0;
+  for (int childIndex : this->children) {
+    unsigned int cache = this->owner->allChildExpressionHashes[childIndex];
+    result += HashConstants::getConstantIncrementCounter(hashCounter) * cache;
+  }
+  return result;
 }
 
 Expression Expression::zero() {
@@ -1519,10 +1524,10 @@ bool Expression::setChild(int childIndexInMe, const Expression& inputChild) {
   return true;
 }
 
-bool Expression::setChild(int childIndexInMe, int childIndexInBoss) {
+bool Expression::setChild(int childIndexInMe, int childIndexInOwner) {
   this->checkInitialization();
-  this->children.setObjectAtIndex(childIndexInMe, childIndexInBoss);
-  if (this->children[childIndexInMe] != childIndexInBoss) {
+  this->children.setObjectAtIndex(childIndexInMe, childIndexInOwner);
+  if (this->children[childIndexInMe] != childIndexInOwner) {
     global.fatal << "Bad child index. " << global.fatal;
   }
   return true;
@@ -1922,6 +1927,46 @@ bool Expression::isSequenceNElements(int n) const {
     return false;
   }
   return this->startsWith(this->owner->opSequence(), n + 1);
+}
+
+bool Expression::evaluatesToScalar() const {
+  if (this->owner == nullptr) {
+    return false;
+  }
+  Calculator & calculator = *this->owner;
+  Calculator::GlobalCache& globalCache =
+  calculator.globalCache.getValueCreateEmpty(*this);
+  if (!globalCache.flagIsScalar.isZeroPointer()) {
+    return globalCache.flagIsScalar.getElement();
+  }
+  bool result = this->evaluatesToScalarInternal();
+  globalCache.flagIsScalar.getElement() = result;
+  return result;
+}
+
+bool Expression::evaluatesToScalarInternal() const {
+  if (this->owner == nullptr) {
+    return false;
+  }
+  if (this->isOfType<InputBox>()) {
+    return true;
+  }
+  if (this->evaluatesToDouble()) {
+    return true;
+  }
+  if (
+    this->startsWithArithmeticOperation() ||
+    this->startsWith(this->owner->opSqrt())
+  ) {
+    for (int i = 1; i < this->children.size; i ++) {
+      const Expression& child = (*this)[i];
+      if (!child.evaluatesToScalar()) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
 }
 
 bool Expression::isIntervalRealLine() const {

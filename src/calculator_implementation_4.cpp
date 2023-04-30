@@ -237,16 +237,19 @@ bool Calculator::checkConsistencyAfterInitialization() {
     global.fatal << global.fatal;
   }
   if (
-    this->cachedExpressions.size() != 0 ||
-    this->evaluatedExpressionsStack.size != 0
+    this->cachedExpressionsPerStack.size() != 0 ||
+    this->evaluatedExpressionsStack.size != 0 ||
+    this->globalCache.size() != 0
   ) {
     global.fatal
-    << "Cached expressions, evaluatedExpressionsStack "
+    << "Cached expressions, evaluatedExpressionsStack, globalCache "
     << "are supposed to be empty, but "
     << "instead they contain respectively "
-    << this->cachedExpressions.size()
+    << this->cachedExpressionsPerStack.size()
     << ", "
     << this->evaluatedExpressionsStack.size
+    << ", "
+    << this->globalCache.size()
     << " elements. "
     << global.fatal;
   }
@@ -2030,7 +2033,7 @@ JSData Calculator::toJSONPerformance() {
   << ". ";
   moreDetails
   << "<br>Cached expression at last rule stack: "
-  << this->cachedExpressions.size()
+  << this->cachedExpressionsPerStack.size()
   << ". ";
   moreDetails
   << "<br>Expressions evaluated: "
@@ -2206,36 +2209,33 @@ std::string Calculator::toString() {
   << "Children expressions ("
   << this->allChildExpressions.size
   << " total): <br>";
-  int numExpressionsToDisplay = this->allChildExpressions.size;
+  int expressionsToDisplay = this->allChildExpressions.size;
   if (this->allChildExpressions.size > 1000) {
-    numExpressionsToDisplay = 1000;
-    out
-    << " <b>Displaying first "
-    << numExpressionsToDisplay
-    << " only </b><br>";
+    expressionsToDisplay = 1000;
+    out << " <b>Displaying first " << expressionsToDisplay << " only </b><br>";
   }
-  for (int i = 0; i < numExpressionsToDisplay; i ++) {
+  for (int i = 0; i < expressionsToDisplay; i ++) {
     out << this->allChildExpressions[i].toString() << ", ";
   }
   out << "<hr>";
   out
   << "\n Cached expressions ("
-  << this->cachedExpressions.size()
+  << this->cachedExpressionsPerStack.size()
   << " total):\n<br>\n";
-  numExpressionsToDisplay = this->cachedExpressions.size();
-  if (numExpressionsToDisplay > 1000) {
-    numExpressionsToDisplay = 1000;
+  expressionsToDisplay = this->cachedExpressionsPerStack.size();
+  if (expressionsToDisplay > 1000) {
+    expressionsToDisplay = 1000;
     out
     << "<b>Displaying first "
-    << numExpressionsToDisplay
+    << expressionsToDisplay
     << " expressions only. </b><br>";
   }
-  for (int i = 0; i < numExpressionsToDisplay; i ++) {
+  for (int i = 0; i < expressionsToDisplay; i ++) {
     out
-    << this->cachedExpressions.keys[i].toString()
+    << this->cachedExpressionsPerStack.keys[i].toString()
     << " -> "
-    << this->cachedExpressions.values[i].reducesTo.toString();
-    if (i != this->cachedExpressions.size() - 1) {
+    << this->cachedExpressionsPerStack.values[i].reducesTo.toString();
+    if (i != this->cachedExpressionsPerStack.size() - 1) {
       out << "<br>";
     }
   }
@@ -2465,6 +2465,7 @@ void ObjectContainer::reset() {
   this->elementsOfSemisimpleLieAlgebrasWithAlgebraicCoefficients.clear();
   this->vectorPartitionFunctions.clear();
   this->lattices.clear();
+  this->arithmeticOperations.clear();
   this->resetPlots();
   this->resetSliders();
 }

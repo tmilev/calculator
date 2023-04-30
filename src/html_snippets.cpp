@@ -256,15 +256,18 @@ std::string HtmlRoutines::getCalculatorComputationAnchorThisServer(
 }
 
 std::string HtmlRoutines::getMathSpan(
-  const std::string& input, int upperNumChars, bool useDisplayStyle
+  const std::string& input,
+  int upperNumberOfCharacters,
+  bool useDisplayStyle
 ) {
   std::stringstream out;
   if (
-    input.size() > static_cast<unsigned>(upperNumChars) && upperNumChars > 0
+    input.size() > static_cast<unsigned>(upperNumberOfCharacters) &&
+    upperNumberOfCharacters > 0
   ) {
     out
     << "<b>LaTeX output is longer than "
-    << upperNumChars
+    << upperNumberOfCharacters
     << " characters and I dare not use the equation editor. "
     << "Here is the output as plain LaTeX.</b> "
     << input;
@@ -288,15 +291,9 @@ std::string HtmlRoutines::getMathSpan(
 }
 
 std::string HtmlRoutines::getMathNoDisplay(
-  const std::string& input, int upperNumChars
+  const std::string& input, int upperNumberOfCharacters
 ) {
-  return HtmlRoutines::getMathSpan(input, upperNumChars, false);
-}
-
-std::string HtmlRoutines::getMathDisplayStyle(
-  const std::string& input, int upperNumChars
-) {
-  return HtmlRoutines::getMathSpan(input, upperNumChars, true);
+  return HtmlRoutines::getMathSpan(input, upperNumberOfCharacters, false);
 }
 
 std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(

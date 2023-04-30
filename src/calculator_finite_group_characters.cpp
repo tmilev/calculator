@@ -886,12 +886,12 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   for (int i = 0; i < outputOrbit.size; i ++) {
     format.simpleRootLetter = "\\alpha";
     format.fundamentalWeightLetter = "\\psi";
-    std::string orbitEltString = outputOrbit[i].toString(&format);
-    Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
-    epsilonCoordinatesMatrix.actOnVectorColumn(epsVect, zero);
+    std::string orbitElementString = outputOrbit[i].toString(&format);
+    Vector<Polynomial<Rational> > epsilonVector = outputOrbit[i];
+    epsilonCoordinatesMatrix.actOnVectorColumn(epsilonVector, zero);
     std::string orbitEltStringEpsilonCoords =
-    epsVect.toStringLetterFormat("\\varepsilon", &format);
-    std::string weightEltString =
+    epsilonVector.toStringLetterFormat("\\varepsilon", &format);
+    std::string weightElementString =
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).
     toStringLetterFormat(format.fundamentalWeightLetter, &format);
     out
@@ -905,8 +905,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     << "</td><td>"
     << (
       useMathTag ?
-      HtmlRoutines::getMathNoDisplay(orbitEltString) :
-      orbitEltString
+      HtmlRoutines::getMathNoDisplay(orbitElementString) :
+      orbitElementString
     )
     << "</td><td>"
     << (
@@ -917,8 +917,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     << "</td><td>"
     << (
       useMathTag ?
-      HtmlRoutines::getMathNoDisplay(weightEltString) :
-      weightEltString
+      HtmlRoutines::getMathNoDisplay(weightElementString) :
+      weightElementString
     )
     << "</td>";
     latexReport
@@ -927,7 +927,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     << "$ & $"
     << orbitEltStringEpsilonCoords
     << "$ & $"
-    << weightEltString
+    << weightElementString
     << "$ & $"
     << (outputOrbit[0] - outputOrbit[i]).toStringLetterFormat(
       format.simpleRootLetter, &format

@@ -120,6 +120,9 @@ public:
   static bool multiplyAnyScalarBySequence(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool divideSequenceByScalar(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool multiplySequenceByAnyScalar(
     Calculator& calculator, const Expression& input, Expression& output
   );

@@ -469,7 +469,8 @@ void Calculator::reset() {
   this->evaluatedExpressionsStack.clear();
   this->evaluationErrors.setSize(0);
   this->programExpression.reset(*this);
-  this->cachedExpressions.clear();
+  this->cachedExpressionsPerStack.clear();
+  this->globalCache.clear();
   // The expression container must be cleared second to last.
   this->allChildExpressions.clear();
   // The hashes list below is used in computing the hashes of the list above.

@@ -14,9 +14,9 @@ public:
   Calculator* owner;
   int xStartingGridCount;
   int yStartingGridCount;
-  int numBadEvaluations;
-  int numGoodEvaluations;
-  int maxNumTriangles;
+  int numberOfBadEvaluations;
+  int numberOfGoodEvaluations;
+  int maximimNumberOfTriangles;
   double height;
   double width;
   double minTriangleSideAsPercentOfWidthPlusHeight;
@@ -59,10 +59,10 @@ public:
 MeshTriangles::MeshTriangles() {
   this->xStartingGridCount = 0;
   this->yStartingGridCount = 0;
-  this->numBadEvaluations = 0;
-  this->numGoodEvaluations = 0;
+  this->numberOfBadEvaluations = 0;
+  this->numberOfGoodEvaluations = 0;
   this->minTriangleSideAsPercentOfWidthPlusHeight = 0.001;
-  this->maxNumTriangles = 2000;
+  this->maximimNumberOfTriangles = 2000;
   this->flagTriangleLimitReached = false;
   this->flagShowGrid = false;
   this->flagFunctionEvaluationFailed = false;
@@ -94,13 +94,13 @@ double MeshTriangles::getValueAtPoint(const Vector<double>& point) {
   this->knownValues[this->knownValues.size - 1] = point[1];
   double functionValue = 0;
   if (
-    this->functionExpression.evaluatesToDoubleUnderSubstitutions(
+    this->functionExpression.evaluatesToDoubleUsingSubstitutions(
       this->knownEs, this->knownValues, &functionValue
     )
   ) {
-    this->numGoodEvaluations ++;
+    this->numberOfGoodEvaluations ++;
   } else {
-    this->numBadEvaluations ++;
+    this->numberOfBadEvaluations ++;
     functionValue = std::nan("");
   }
   this->evaluatedPoints.setKeyValue(point, functionValue);
@@ -168,7 +168,7 @@ int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex)
   STACK_TRACE("MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex");
   if (
     this->flagTriangleLimitReached ||
-    this->triangles.size < this->maxNumTriangles * 2
+    this->triangles.size < this->maximimNumberOfTriangles * 2
   ) {
     return currentIndex;
   }
@@ -200,7 +200,7 @@ int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex)
   }
   this->triangles.setSize(lowestFree);
   this->trianglesUsed.setSize(lowestFree);
-  if (lowestFree > this->maxNumTriangles) {
+  if (lowestFree > this->maximimNumberOfTriangles) {
     this->flagTriangleLimitReached = true;
   }
   return currentIndex;
@@ -238,15 +238,15 @@ void MeshTriangles::subdivide(int triangleIndex) {
 
 void MeshTriangles::computeImplicitPlotPart2() {
   STACK_TRACE("MeshTriangles::ComputeImplicitPlotPart2");
-  this->triangles.setExpectedSize(this->maxNumTriangles * 2);
-  this->trianglesUsed.setExpectedSize(this->maxNumTriangles * 2);
+  this->triangles.setExpectedSize(this->maximimNumberOfTriangles * 2);
+  this->trianglesUsed.setExpectedSize(this->maximimNumberOfTriangles * 2);
   this->trianglesUsed.initializeFillInObject(this->triangles.size, true);
-  this->evaluatedPoints.setExpectedSize(this->maxNumTriangles * 4);
+  this->evaluatedPoints.setExpectedSize(this->maximimNumberOfTriangles * 4);
   this->flagTriangleLimitReached = false;
   for (int i = 0; i < this->triangles.size; i ++) {
     this->evaluateFunAtTriangleVertices(i);
   }
-  if (this->numGoodEvaluations < 5) {
+  if (this->numberOfGoodEvaluations < 5) {
     this->flagFunctionEvaluationFailed = true;
     return;
   }
@@ -509,14 +509,14 @@ bool MeshTriangles::computePoints(
   this->xStartingGridCount = gridCount[0];
   this->yStartingGridCount = gridCount[1];
   if (input.size() >= 6) {
-    if (!input[5].isSmallInteger(&this->maxNumTriangles)) {
+    if (!input[5].isSmallInteger(&this->maximimNumberOfTriangles)) {
       return
       calculator
       << "Failed to extract small integer from: "
       << input[5].toString();
     }
-    if (this->maxNumTriangles > 20000) {
-      this->maxNumTriangles = 20000;
+    if (this->maximimNumberOfTriangles > 20000) {
+      this->maximimNumberOfTriangles = 20000;
       calculator
       << "Max number of triangles decreased from your input: "
       << input[5].toString()
@@ -531,9 +531,9 @@ bool MeshTriangles::computePoints(
   this->computeImplicitPlot();
   calculator
   << "Evaluated function in: "
-  << this->numGoodEvaluations
+  << this->numberOfGoodEvaluations
   << " points and failed to evaluate it at: "
-  << this->numBadEvaluations
+  << this->numberOfBadEvaluations
   << " points. ";
   return true;
 }
@@ -857,7 +857,7 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
     if (setExpression[i].evaluatesToDouble(&variableValues[0])) {
       double result = 0;
       if (
-        !solvedIntegral.evaluatesToDoubleUnderSubstitutions(
+        !solvedIntegral.evaluatesToDoubleUsingSubstitutions(
           variables, variableValues, &result
         )
       ) {

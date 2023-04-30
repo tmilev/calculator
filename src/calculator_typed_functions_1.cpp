@@ -2521,11 +2521,37 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence(
   output.reset(calculator);
   output.setExpectedSize(input[2].size());
   output.addChildAtomOnTop(calculator.opSequence());
-  Expression tempProduct;
+  Expression product;
   for (int i = 1; i < input[2].size(); i ++) {
-    tempProduct.makeProduct(calculator, input[1], input[2][i]);
-    output.addChildOnTop(tempProduct);
+    product.makeProduct(calculator, input[1], input[2][i]);
+    output.addChildOnTop(product);
   }
+  return true;
+}
+
+bool CalculatorFunctionsBinaryOps::divideSequenceByScalar(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsBinaryOps::divideSequenceByScalar");
+  if (!input.startsWith(calculator.opDivide(), 3)) {
+    return false;
+  }
+  if (!input[1].isSequenceNElements()) {
+    return false;
+  }
+  if (!input[2].evaluatesToScalar()) {
+    return false;
+  }
+  Expression result;
+  result.reset(calculator);
+  result.setExpectedSize(input[1].size());
+  result.addChildAtomOnTop(calculator.opSequence());
+  for (int i = 1; i < input[1].size(); i ++) {
+    Expression product;
+    product.makeQuotientReduce(calculator, input[1][i], input[2]);
+    result.addChildOnTop(product);
+  }
+  output = result;
   return true;
 }
 
@@ -2549,7 +2575,8 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixBySequence(
   if (numberOfColumns != 1 || numberOfRows < 2) {
     return false;
   }
-  Matrix<Expression> rightAsMatrix, leftAsMatrix;
+  Matrix<Expression> rightAsMatrix;
+  Matrix<Expression> leftAsMatrix;
   if (
     !calculator.getMatrixExpressions(right, rightAsMatrix, 1, numberOfRows)
   ) {

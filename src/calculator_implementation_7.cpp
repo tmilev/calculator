@@ -3932,7 +3932,7 @@ bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
     }
     double floatingResult = 0;
     if (
-      !functionExpression.evaluatesToDoubleUnderSubstitutions(
+      !functionExpression.evaluatesToDoubleUsingSubstitutions(
         knownEs, knownValues, &floatingResult
       )
     ) {
@@ -4121,7 +4121,7 @@ bool CalculatorFunctions::compareExpressionsNumerically(
     }
     double floatingResult = 0;
     if (
-      !functionExpression.evaluatesToDoubleUnderSubstitutions(
+      !functionExpression.evaluatesToDoubleUsingSubstitutions(
         knownEs, knownValues, &floatingResult
       )
     ) {
@@ -7111,7 +7111,8 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
     << "Whlie doing Euler's method: right endpoint equals left! ";
   }
   double delta = (rightEndpoint - leftEndpoint) / numPoints;
-  List<double> XValues, YValues;
+  List<double> XValues;
+  List<double> YValues;
   XValues.setExpectedSize(numPoints + 5);
   YValues.setExpectedSize(numPoints + 5);
   int pointsCounter = 0;
@@ -7158,7 +7159,7 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
       for (int counter = 0;; counter ++) {
         knownValues[knownValues.size - 1] = YValues[i];
         if (
-          !functionE.evaluatesToDoubleUnderSubstitutions(
+          !functionE.evaluatesToDoubleUsingSubstitutions(
             knownConsts, knownValues, &currentYprimeApprox
           )
         ) {
@@ -8847,7 +8848,7 @@ bool Expression::evaluatesToDoubleInRange(
       // correcting for floating point errors.
     }
     if (
-      !this->evaluatesToDoubleUnderSubstitutions(
+      !this->evaluatesToDoubleUsingSubstitutions(
         knownEs, knownValues, &currentValue
       )
     ) {
@@ -8906,23 +8907,70 @@ bool Expression::evaluatesToDoubleInRange(
 
 bool Expression::evaluatesToDouble(double* whichDouble) const {
   return
-  this->evaluatesToDoubleUnderSubstitutions(
+  this->evaluatesToDoubleUnderSubstitutionsWithCache(
     this->owner->knownDoubleConstants,
     this->owner->knownDoubleConstantValues,
+    true,
     whichDouble
   );
 }
 
-bool Expression::evaluatesToDoubleUnderSubstitutions(
+bool Expression::evaluatesToDoubleUsingSubstitutions(
   const HashedList<Expression>& knownEs,
   const List<double>& valuesKnownEs,
   double* whichDouble
 ) const {
-  STACK_TRACE("Expression::evaluatesToDoubleUnderSubstitutions");
+  return
+  this->evaluatesToDoubleUnderSubstitutionsWithCache(
+    knownEs, valuesKnownEs, false, whichDouble
+  );
+}
+
+bool Expression::evaluatesToDoubleUnderSubstitutionsWithCache(
+  const HashedList<Expression>& knownExpressions,
+  const List<double>& knownValues,
+  bool useCache,
+  double* whichDouble
+) const {
+  STACK_TRACE("Expression::evaluatesToDoubleUnderSubstitutionsWithCache");
   if (this->owner == nullptr) {
     return false;
   }
   Calculator& calculator = *this->owner;
+  if (!useCache) {
+    return
+    this->evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
+      calculator, knownExpressions, knownValues, useCache, whichDouble
+    );
+  }
+  Calculator::GlobalCache cache =
+  calculator.globalCache.getValueCreateEmpty(*this);
+  double value = 0;
+  if (cache.flagIsDouble.isZeroPointer()) {
+    cache.flagIsDouble.getElement() =
+    this->evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
+      calculator, knownExpressions, knownValues, useCache, &value
+    );
+    cache.doubleValue.getElement() = value;
+  }
+  bool result = cache.flagIsDouble.getElement();
+  if (result && whichDouble != nullptr) {
+    *whichDouble = cache.doubleValue.getElement();
+  }
+  return result;
+}
+
+bool Expression::evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
+  Calculator& calculator,
+  const HashedList<Expression>& knownExpressions,
+  const List<double>& knownValues,
+  bool useCache,
+  double* whichDouble
+) const {
+  STACK_TRACE(
+    "Expression::"
+    "evaluatesToDoubleUnderSubstitutionsWithCacheInternal"
+  );
   if (this->isOfType<double>(whichDouble)) {
     return true;
   }
@@ -8947,9 +8995,9 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
     << "evaluating innerEvaluateToDouble. "
     << "This may be a programming error. ";
   }
-  if (knownEs.contains(*this)) {
+  if (knownExpressions.contains(*this)) {
     if (whichDouble != nullptr) {
-      *whichDouble = valuesKnownEs[knownEs.getIndex(*this)];
+      *whichDouble = knownValues[knownExpressions.getIndex(*this)];
     }
     return true;
   }
@@ -8964,11 +9012,11 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
   if (isArithmeticOperationTwoArguments) {
     double leftD, rightD;
     if (
-      !(*this)[1].evaluatesToDoubleUnderSubstitutions(
-        knownEs, valuesKnownEs, &leftD
+      !(*this)[1].evaluatesToDoubleUnderSubstitutionsWithCache(
+        knownExpressions, knownValues, useCache, &leftD
       ) ||
-      !(*this)[2].evaluatesToDoubleUnderSubstitutions(
-        knownEs, valuesKnownEs, &rightD
+      !(*this)[2].evaluatesToDoubleUnderSubstitutionsWithCache(
+        knownExpressions, knownValues, useCache, &rightD
       )
     ) {
       return false;
@@ -9097,8 +9145,8 @@ bool Expression::evaluatesToDoubleUnderSubstitutions(
   if (isKnownFunctionOneArgument) {
     double argumentD;
     if (
-      !(*this)[1].evaluatesToDoubleUnderSubstitutions(
-        knownEs, valuesKnownEs, &argumentD
+      !(*this)[1].evaluatesToDoubleUnderSubstitutionsWithCache(
+        knownExpressions, knownValues, useCache, &argumentD
       )
     ) {
       return false;

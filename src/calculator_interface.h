@@ -19,14 +19,28 @@ class ExpressionContext;
 
 class Expression {
 private:
-  HashedList<int, HashFunctions::hashFunction> children;
+  HashedList<int> children;
   void reset() {
     this->owner = nullptr;
     this->children.size = 0;
     this->data = - 1;
   }
-  static const int maximumCharactersInLatexPrintout = 30001;
-  bool setChild(int childIndexInMe, int childIndexInBoss);
+  static const int maximumCharactersInLatexPrintout = 100001;
+  bool setChild(int childIndexInMe, int childIndexInOwner);
+  bool evaluatesToScalarInternal() const;
+  bool evaluatesToDoubleUnderSubstitutionsWithCache(
+    const HashedList<Expression>& knownExpressions,
+    const List<double>& knownValues,
+    bool useCache,
+    double* whichDouble
+  ) const;
+  bool evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
+    Calculator& calculator,
+    const HashedList<Expression>& knownExpressions,
+    const List<double>& knownValues,
+    bool useCache,
+    double* whichDouble
+  ) const;
   // Definitions.
   // 1. Fundamentals.
   // 1.1. An atom is an expression with zero children.
@@ -271,6 +285,7 @@ public:
   bool isIntervalRealLine() const;
   bool isSequenceDoubleButNotTripleNested() const;
   bool isSequenceNElements(int n = - 2) const;
+  bool evaluatesToScalar() const;
   bool isError(std::string* outputErrorMessage = nullptr) const;
   bool isContext() const;
   bool needsParenthesisForBaseOfExponent() const;
@@ -879,10 +894,10 @@ public:
   bool getBoundVariables(
     HashedList<Expression>& outputAccumulateBoundVariables
   ) const;
-  bool evaluatesToDoubleUnderSubstitutions(
+  bool evaluatesToDoubleUsingSubstitutions(
     const HashedList<Expression>& knownEs,
     const List<double>& valuesKnownEs,
-    double* whichDouble = nullptr
+    double* whichDouble
   ) const;
   bool hasBoundVariables() const;
   bool hasInputBoxVariables(
@@ -1739,6 +1754,7 @@ public:
   );
   UnsecurePseudoRandomGenerator pseudoRandom;
   int canvasPlotCounter;
+  HashedList<unsigned int> arithmeticOperations;
   void reset();
   void resetSliders();
   void resetPlots();
@@ -2402,19 +2418,28 @@ public:
   int numberOfPredefinedAtoms;
   Expression programExpression;
   CalculatorParser parser;
-  class ExpressionCache {
+  class ExpressionCachePerStack {
   public:
     int ruleState;
     bool flagNonCacheable;
     bool flagFinalized;
     Expression reducesTo;
-    ExpressionCache();
+    ExpressionCachePerStack();
   };
 
   // Cached expressions per rule stack.
-  MapList<Expression, Calculator::ExpressionCache> cachedExpressions;
-  // //
+  MapList<Expression, Calculator::ExpressionCachePerStack>
+  cachedExpressionsPerStack;
   HashedList<Expression> evaluatedExpressionsStack;
+  class GlobalCache {
+  public:
+    MemorySaving<bool> flagIsScalar;
+    MemorySaving<bool> flagIsDouble;
+    MemorySaving<double> doubleValue;
+    GlobalCache();
+  };
+
+  MapList<Expression, Calculator::GlobalCache> globalCache;
   Expression ruleStack;
   HashedListReferences<Expression> allChildExpressions;
   List<unsigned int> allChildExpressionHashes;
@@ -3299,7 +3324,6 @@ public:
     int opIndexParentIfAvailable,
     Expression* outputHistory
   );
-  void storeCache();
   class EvaluateLoop {
   private:
     bool detectLoops();
@@ -3309,7 +3333,6 @@ public:
     bool userDefinedEvaluation();
     bool evaluateChildren(StateMaintainerCalculator& maintainRuleStack);
     void reportChildEvaluation(Expression& output, int childIndex);
-    void storeCache();
   public:
     Calculator* owner;
     bool flagIsNonCacheable;

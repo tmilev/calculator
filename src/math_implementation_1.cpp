@@ -1222,6 +1222,11 @@ unsigned int HashFunctions::hashFunction(const int& input) {
 }
 
 template < >
+unsigned int HashFunctions::hashFunction(const unsigned int& input) {
+  return input;
+}
+
+template < >
 unsigned int HashFunctions::hashFunction(const char& input) {
   return static_cast<unsigned int>(input);
 }

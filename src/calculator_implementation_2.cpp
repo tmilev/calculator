@@ -656,7 +656,7 @@ void StateMaintainerCalculator::addRule(const Expression& rule) {
     << global.fatal;
   }
   this->owner->ruleStack.addChildOnTop(rule);
-  this->owner->cachedExpressions.clear();
+  this->owner->cachedExpressionsPerStack.clear();
   std::string currentRule;
   if (
     rule.startsWith(this->owner->opRulesOn()) ||
@@ -737,7 +737,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
     }
   }
   if (this->owner->ruleStack.size() != this->startingRuleStackSize) {
-    this->owner->cachedExpressions.clear();
+    this->owner->cachedExpressionsPerStack.clear();
   }
   this->owner->ruleStack.setSize(this->startingRuleStackSize);
   this->owner = nullptr;
@@ -940,11 +940,13 @@ bool Calculator::EvaluateLoop::setOutput(
   return true;
 }
 
-Calculator::ExpressionCache::ExpressionCache() {
+Calculator::ExpressionCachePerStack::ExpressionCachePerStack() {
   this->ruleState = - 1;
   this->flagNonCacheable = false;
   this->flagFinalized = false;
 }
+
+Calculator::GlobalCache::GlobalCache() {}
 
 void Calculator::EvaluateLoop::accountIntermediateState() {
   STACK_TRACE("Calculator:EvaluateLoop:::accountIntermediateState");
@@ -1224,8 +1226,8 @@ bool Calculator::EvaluateLoop::reduceOnce() {
 }
 
 bool Calculator::EvaluateLoop::reduceUsingCache() {
-  ExpressionCache& cache =
-  this->owner->cachedExpressions.getValueCreateEmpty(*this->output);
+  ExpressionCachePerStack& cache =
+  this->owner->cachedExpressionsPerStack.getValueCreateEmpty(*this->output);
   if (!cache.flagFinalized || cache.flagNonCacheable) {
     return false;
   }
@@ -1252,8 +1254,8 @@ bool Calculator::EvaluateLoop::reduceUsingCache() {
 
 void Calculator::EvaluateLoop::writeCache() {
   for (int i = 0; i < this->intermediateOutputs.size; i ++) {
-    Calculator::ExpressionCache& cache =
-    this->owner->cachedExpressions.getValueCreateEmpty(
+    Calculator::ExpressionCachePerStack& cache =
+    this->owner->cachedExpressionsPerStack.getValueCreateEmpty(
       this->intermediateOutputs[i]
     );
     if (this->flagIsNonCacheable) {

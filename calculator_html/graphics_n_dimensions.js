@@ -50,7 +50,7 @@ const stringCorrections = {
   "lightblue": "blue",
 };
 
-/** @return{string} */
+/** @return {string} */
 function correctColor(
   /** @type {string} */
   input,

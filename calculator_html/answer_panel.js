@@ -215,7 +215,7 @@ class AnswerPanel {
     }
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   onePanelQuestionAndAnswerField() {
     let result = document.createElement("table");
     let row = result.insertRow();
@@ -226,7 +226,7 @@ class AnswerPanel {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   onePanelButtonsVerticalLayout() {
     let result = document.createElement("table");
     result.insertRow().insertCell().appendChild(this.buttonSubmit);
@@ -244,7 +244,7 @@ class AnswerPanel {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   onePanelButtonsHorizontalLayout() {
     let result = document.createElement("table");
     let row = result.insertRow();

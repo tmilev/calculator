@@ -81,7 +81,7 @@ class AtomHandler {
     }
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   toHTMLInfo() { 
     let result = document.createElement("div");
     let countElement = document.createElement("span");
@@ -127,7 +127,7 @@ class AtomHandler {
     return result;
   }
   
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   toHTML(
     /** @type {Calculator} */
     calculator,
@@ -238,7 +238,7 @@ class Calculator {
     this.splitter = new Splitter();
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   processOneFunctionAtom(handlers) {
     if (handlers === undefined || handlers === null) {
       throw new Error("Bad handlers");
@@ -528,7 +528,7 @@ class Calculator {
   }
 
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   writeErrorsCrashesComments(
     inputParsed,
   ) {
@@ -592,7 +592,7 @@ class Calculator {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   writeResult(
     inputParsed,
   ) {
@@ -662,7 +662,7 @@ class Calculator {
     return inputOutputComments;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   constructInputOutput(
     inputParsed,
   ) {
@@ -724,7 +724,7 @@ class Calculator {
     return inputOutputTable;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   constructComments(
     inputParsed,
   ) {

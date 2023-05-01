@@ -145,7 +145,7 @@ class CalculatorEquationEditor {
     this.inputMainTextbox().value = this.extractor.leftString + this.extractor.middleEditedString + this.extractor.rightString;
   }
 
-  /** @return{HTMLTextAreaElement} */
+  /** @return {HTMLTextAreaElement} */
   inputMainTextbox() {
     return this.calculatorPanel.getPureLatexElement();
   }

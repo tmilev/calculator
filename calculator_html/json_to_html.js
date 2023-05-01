@@ -110,7 +110,7 @@ class JSONToHTML {
     return panelContainer;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getSingleEntry(
     input,
     /** @type {String[]} */
@@ -145,7 +145,7 @@ class JSONToHTML {
     return this.getToggleButton(input, inputTransformed);
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getTableHorizontallyLaidFromJSON(
     input,
     /** @type {String[]} */
@@ -168,7 +168,7 @@ class JSONToHTML {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getErrorElement(
     /** @type {string} */
     message,
@@ -179,7 +179,7 @@ class JSONToHTML {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getTableHorizontallyLaidFromArray(
     input,
     /** @type {String[]} */
@@ -214,7 +214,7 @@ class JSONToHTML {
     return table;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getTableHorizontallyLaidFromObject(
     input,
     /** @type {String[]} */
@@ -264,7 +264,7 @@ class JSONToHTML {
     return result;
   }
 
-  /** @return{HtmlElement} */
+  /** @return {HtmlElement} */
   getTableFromObject(
     input,
     optionsConstant,
@@ -311,7 +311,7 @@ class JSONToHTML {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getTinyLabel(
     /** @type {string} */
     content,
@@ -321,7 +321,7 @@ class JSONToHTML {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getHtmlElementFromArray(
     inputJSON,
   ) {

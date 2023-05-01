@@ -491,6 +491,7 @@ bool Calculator::outerStandardHandler(
   int opIndexParentIfAvailable,
   Function** outputHandler
 ) {
+  STACK_TRACE("Calculator::outerStandardHandler");
   const Expression& functionNameNode = input[0];
   int operationIndex = - 1;
   if (!functionNameNode.isOperation(operationIndex)) {

@@ -32,7 +32,7 @@ class CompareExpressionsSocratic {
     this.keyShifted = "FNfX~H|TUY^t{\\y~8INq[OWRMf~5h_YY66gunl";
   }
 
-  /** @return{string} */
+  /** @return {string} */
   getKey() {
     let result = "";
     for (let i = 0; i < this.keyShifted.length; i++) {

@@ -1930,6 +1930,7 @@ bool Expression::isSequenceNElements(int n) const {
 }
 
 bool Expression::evaluatesToScalar() const {
+  STACK_TRACE("Expression::evaluatesToScalar");
   if (this->owner == nullptr) {
     return false;
   }
@@ -1937,7 +1938,8 @@ bool Expression::evaluatesToScalar() const {
   Calculator::GlobalCache& globalCache =
   calculator.globalCache.getValueCreateEmpty(*this);
   if (!globalCache.flagIsScalar.isZeroPointer()) {
-    return globalCache.flagIsScalar.getElement();
+    bool result = globalCache.flagIsScalar.getElement();
+    return result;
   }
   bool result = this->evaluatesToScalarInternal();
   globalCache.flagIsScalar.getElement() = result;
@@ -1945,6 +1947,7 @@ bool Expression::evaluatesToScalar() const {
 }
 
 bool Expression::evaluatesToScalarInternal() const {
+  STACK_TRACE("Expression::evaluatesToScalarInternal");
   if (this->owner == nullptr) {
     return false;
   }

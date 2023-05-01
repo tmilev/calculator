@@ -68,7 +68,7 @@ class StorageVariable {
     return this.value;
   }
 
-  /** @return{string} */
+  /** @return {string} */
   loadMe(hashParsed) {
     /** @type {string|null} */
     let candidate = null;
@@ -557,7 +557,7 @@ class StorageCalculator {
     return result;
   }
 
-  /** @return{string} */
+  /** @return {string} */
   toStringProblem() {
     let problemFileName = this.variables.currentCourse.problemFileName.getValue();
     let fileName = this.variables.currentCourse.p;

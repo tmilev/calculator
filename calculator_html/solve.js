@@ -168,7 +168,7 @@ class Solver {
     this.solutionBox.appendChild(this.getSolutionSteps(steps));
   }
 
-  /** @return{Array.<HTMLElement>} */
+  /** @return {Array.<HTMLElement>} */
   getSolutionSteps(steps) {
     let table = document.createElement("table");
     table.style.margin = "auto";
@@ -197,7 +197,7 @@ class Solver {
     cell.style.borderLeft = "1px solid black";
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getOneSolutionTransformation(step) {
     let result = document.createElement("span");
     result.style.fontSize = this.resultFontSize;
@@ -211,7 +211,7 @@ class Solver {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getOneSolutionStepComment(step) {
     let result = document.createElement("span");
     let annotations = step[pathnames.urlFields.result.solution.annotations];

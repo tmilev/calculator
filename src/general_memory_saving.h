@@ -53,11 +53,11 @@ public:
     return input.hashFunction();
   }
   bool isZeroPointer() const {
-    return this->value == 0;
+    return this->value == nullptr;
   }
   void freeMemory() {
     delete this->value;
-    this->value = 0;
+    this->value = nullptr;
 #ifdef AllocationLimitsSafeguard
     GlobalStatistics::globalPointerCounter --;
     GlobalStatistics::checkPointerCounters();

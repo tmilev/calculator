@@ -47,7 +47,7 @@ class SolverSocratic {
     this.keyShifted = "FNfX~H|TUY^t{\\y~8INq[OWRMf~5h_YY66gunl";
   }
 
-  /** @return{string} */
+  /** @return {string} */
   getKey() {
     let result = "";
     for (let i = 0; i < this.keyShifted.length; i++) {
@@ -56,7 +56,7 @@ class SolverSocratic {
     return result;
   }
 
-  /** @return{HTMLInputElement} */
+  /** @return {HTMLInputElement} */
   inputElement() {
     return document.getElementById(ids.domElements.pages.solveSocratic.input);
   }
@@ -150,18 +150,18 @@ class SolverSocratic {
     storage.variables.solveSocratic.problemToAutoSolve.setAndStore(text, true, false);
   }
 
-  /** @return{string} */
+  /** @return {string} */
   getBackend() {
     return this.backendElement.value;
   }
 
-  /** @return{string} */
+  /** @return {string} */
   getSocraticLinkDefault(
   ) {
     return this.getSocraticLink(this.inputElement().value);
   }
 
-  /** @return{string} */
+  /** @return {string} */
   getSocraticLink(
     /** @type {string} */
     latex,

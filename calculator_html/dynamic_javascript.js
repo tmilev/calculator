@@ -375,7 +375,7 @@ class DynamicJavascript {
    * Boostraps all scripts in a given html element and returns a handle
    * to the bootstrap element.
    * 
-   * @return{ElementWithScripts}
+   * @return {ElementWithScripts}
    */
   bootstrapAllScripts(
     /** @type {HTMLElement} */

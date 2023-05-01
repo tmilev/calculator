@@ -25,7 +25,7 @@ private:
     this->children.size = 0;
     this->data = - 1;
   }
-  static const int maximumCharactersInLatexPrintout = 100001;
+  static const int maximumCharactersInLatexPrintout = 200001;
   bool setChild(int childIndexInMe, int childIndexInOwner);
   bool evaluatesToScalarInternal() const;
   bool evaluatesToDoubleUnderSubstitutionsWithCache(
@@ -162,11 +162,11 @@ public:
     output << element.toString();
     return output;
   }
-  void reset(Calculator& newBoss, int numExpectedChildren = 0) {
-    this->owner = &newBoss;
+  void reset(Calculator& newOwner, int numberOfExpectedChildren = 0) {
+    this->owner = &newOwner;
     this->data = 0;
     this->children.clear();
-    this->children.setExpectedSize(numExpectedChildren);
+    this->children.setExpectedSize(numberOfExpectedChildren);
   }
   Expression zero();
   static Expression zeroStatic();
@@ -2439,7 +2439,7 @@ public:
     GlobalCache();
   };
 
-  MapList<Expression, Calculator::GlobalCache> globalCache;
+  MapReferences<Expression, Calculator::GlobalCache> globalCache;
   Expression ruleStack;
   HashedListReferences<Expression> allChildExpressions;
   List<unsigned int> allChildExpressionHashes;

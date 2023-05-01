@@ -27,7 +27,7 @@ class ProblemCollection {
     this.topics = {};
   }
 
-  /** @return{Problem} */
+  /** @return {Problem} */
   getProblemById(
     /** @type {string} */
     label,
@@ -43,7 +43,7 @@ class ProblemCollection {
     this.topicProblems = {};
   }
 
-  /** @return{Problem} */
+  /** @return {Problem} */
   createOrUpdateProblem(
     problemData,
   ) {
@@ -75,7 +75,7 @@ class ProblemCollection {
     return null;
   }
 
-  /** @return{Problem} */
+  /** @return {Problem} */
   getProblemByIdOrRegisterEmpty(
     problemFileName,
     /** @type {HTMLElement} */
@@ -304,7 +304,7 @@ class Problem {
     this.initializeProblemContent(problemData);
   }
 
-  /** @return{number} Number of children processed. */
+  /** @return {number} Number of children processed. */
   initializeInfo(problemData, inputParentIdURLed) {
     this.initializeBasic(problemData);
     this.decodedProblem = "";
@@ -380,7 +380,7 @@ class Problem {
     }
   }
 
-  /** @return{HTMLElement[]} */
+  /** @return {HTMLElement[]} */
   computeBadProblemExplanation() {
     let userHasInstructorRights = true;
     let pageLastKnownGoodProblemName = "";
@@ -598,7 +598,7 @@ class Problem {
     return nextProblemTag;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getPreviousProblemButton(
     /** @type {ProblemNavigationHints} */
     hints
@@ -630,7 +630,7 @@ class Problem {
     return previousLink;
   }
 
-  /** @return{ProblemNavigationHints} */
+  /** @return {ProblemNavigationHints} */
   getProblemNavigationHints() {
     let page = window.calculator.mainPage;
     let result = new ProblemNavigationHints();
@@ -722,7 +722,7 @@ class Problem {
     );
   }
 
-  /** @return{HTMLElement[]} */
+  /** @return {HTMLElement[]} */
   getHTMLProblems() {
     let nextElement = document.createElement("div");
     nextElement.className = "bodySubsection";
@@ -745,7 +745,7 @@ class Problem {
     return document.createTextNode(this.title + " ");
   }
 
-  /** @return{HTMLElement[]} */
+  /** @return {HTMLElement[]} */
   getHTMLSubSection() {
     let result = [];
     let nextElement = document.createElement("div");
@@ -771,7 +771,7 @@ class Problem {
     return false;
   }
 
-  /** @return{HTMLElement[]} */
+  /** @return {HTMLElement[]} */
   getHTMLSection() {
     let result = [];
     if (this.type === "Section") {
@@ -800,7 +800,7 @@ class Problem {
     return result;
   }
 
-  /** @return{HTMLElement[]} */
+  /** @return {HTMLElement[]} */
   toHTMLChapter() {
     let result = [];
     let headChapterElement = document.createElement("div");
@@ -827,7 +827,7 @@ class Problem {
     return result;
   }
 
-  /** @return{HTMLElement[]} */
+  /** @return {HTMLElement[]} */
   getProblemMaterialLinks() {
     let result = [];
     this.links.slides = [];
@@ -960,7 +960,7 @@ class Problem {
     return page.hasInstructorRightsNotViewingAsStudent();
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   toHTMLDeadlineElement() {
     let page = window.calculator.mainPage;
     let result = document.createElement("span");
@@ -1025,7 +1025,7 @@ class Problem {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   toHTMLDeadline() {
     let result = document.createElement("span");
     result.className = ids.domElements.classSpanDeadlineContainer;
@@ -1033,7 +1033,7 @@ class Problem {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   toHTMLDeadlinePanel() {
     let page = window.calculator.mainPage;
     let result = document.createElement("span");
@@ -1095,7 +1095,7 @@ class Problem {
     return result;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   toHTMLWeights() {
     let result = document.createElement("span");
     result.className = "panelProblemWeights";
@@ -1145,7 +1145,7 @@ class Problem {
     });
   }
 
-  /** @return{HTMLElement[]} */
+  /** @return {HTMLElement[]} */
   getProblemWeightContent() {
     let page = window.calculator.mainPage;
     if (this.type !== "Problem" || this.fileName === "") {
@@ -1216,7 +1216,7 @@ class Problem {
     return `<b style = "color:${color}">${result}</b>`;
   }
 
-  /** @return{HTMLElement} */
+  /** @return {HTMLElement} */
   getLinkFromSpec(
     /** @type {{request: string, name: string, extension: string, options: string, download: boolean}} */
     linkSpec,
@@ -1410,7 +1410,7 @@ let linkHomework = [
   "homeworkTex",
 ];
 
-/** @return{HTMLElement[]} */
+/** @return {HTMLElement[]} */
 function getHTMLfromTopics() {
   let result = [];
   for (let label in allProblems.theChapterIds) {
@@ -1521,7 +1521,7 @@ function loadProblemIntoElement(
   });
 }
 
-/** @return{Problem|null} */
+/** @return {Problem|null} */
 function getCurrentProblem() {
   let problemFileName = storage.storage.variables.currentCourse.problemFileName.getValue();
   if (

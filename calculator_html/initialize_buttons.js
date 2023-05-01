@@ -286,7 +286,7 @@ class InputPanelData {
     }
   }
 
-  /** @return{HTMLElement|null} */
+  /** @return {HTMLElement|null} */
   getButtonContainer() {
     if (this.buttonContainer !== null) {
       return this.buttonContainer;
@@ -295,7 +295,7 @@ class InputPanelData {
     return this.buttonContainer;
   }
 
-  /** @return{HTMLElement|null} */
+  /** @return {HTMLElement|null} */
   getEditorContainer() {
     if (this.equationEditorContainer !== null && this.equationEditorContainer !== undefined) {
       return this.equationEditorContainer;
@@ -304,7 +304,7 @@ class InputPanelData {
     return this.equationEditorContainer;
   }
 
-  /** @return{HTMLElement|null} */
+  /** @return {HTMLElement|null} */
   getPureLatexElement() {
     if (this.pureLatexElement !== null && this.pureLatexElement !== undefined) {
       return this.pureLatexElement;
@@ -595,7 +595,7 @@ class InputPanelData {
     return false;
   }
 
-  /** @return{HTMLButtonElement} */
+  /** @return {HTMLButtonElement} */
   getShowAllToggle() {
     let toggle = document.createElement("button");
     toggle.addEventListener(
@@ -610,7 +610,7 @@ class InputPanelData {
     return toggle;
   }
 
-  /** @return{HTMLButtonElement} */
+  /** @return {HTMLButtonElement} */
   getShowNoneToggle() {
     let toggle = document.createElement("button");
     toggle.addEventListener(
@@ -625,7 +625,7 @@ class InputPanelData {
     return toggle;
   }
 
-  /** @return{HTMLButtonElement} */
+  /** @return {HTMLButtonElement} */
   getShowDefaultToggle() {
     let toggle = document.createElement("button");
     toggle.addEventListener(

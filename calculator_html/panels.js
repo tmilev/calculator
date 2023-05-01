@@ -328,7 +328,7 @@ class PanelExpandable {
   }
 }
 
-/** @return{PanelExpandable|null} Returns the panel, or null if the content is too small for a panel. */
+/** @return {PanelExpandable|null} Returns the panel, or null if the content is too small for a panel. */
 function makePanelFromData(
   /** @type {PanelExpandableData} */
   data,

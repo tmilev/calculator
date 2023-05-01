@@ -190,7 +190,7 @@ class GraphicsSerialization {
   /**
    * Creates three-dimensional graphics.
    * 
-   * @return{CanvasThreeD} 
+   * @return {CanvasThreeD} 
    */
   threeDimensionalGraphics(
     input,
@@ -254,7 +254,7 @@ class GraphicsSerialization {
   /** 
    * Plots three dimensional graphics on an already created graphics object.
    * 
-   * @return{CanvasThreeD}
+   * @return {CanvasThreeD}
    */
   plotThreeDimensionalGraphics(
     /** @type {CanvasThreeD} */
@@ -502,7 +502,7 @@ class GraphicsSerialization {
    * graphics parameter that is tied to a slider or 
    * another user-controlled element.
    * 
-   * @return{number|function(Array.<number>):number} 
+   * @return {number|function(Array.<number>):number} 
    */
   interpretStringToNumberOrFunction(
     /** @type {string} */
@@ -524,7 +524,7 @@ class GraphicsSerialization {
   /** 
    * Interprets a list of strings from javascript.
    * 
-   * @return{number[]} 
+   * @return {number[]} 
    */
   interpretListStringsAsNumbersOrFunctions(
     /** @type {string[]} */
@@ -544,7 +544,7 @@ class GraphicsSerialization {
   /** 
    * Interprets a list of list of strings from javascript.
    * 
-   * @return{Array.<Array.<number|function(Array.<number>):number>>} 
+   * @return {Array.<Array.<number|function(Array.<number>):number>>} 
    */
   interpretListListStringsAsNumbersOrFunctions(
     /** @type {string[][]} */

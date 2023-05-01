@@ -2547,9 +2547,9 @@ bool CalculatorFunctionsBinaryOps::divideSequenceByScalar(
   result.setExpectedSize(input[1].size());
   result.addChildAtomOnTop(calculator.opSequence());
   for (int i = 1; i < input[1].size(); i ++) {
-    Expression product;
-    product.makeQuotientReduce(calculator, input[1][i], input[2]);
-    result.addChildOnTop(product);
+    Expression quotient;
+    quotient.makeQuotientReduce(calculator, input[1][i], input[2]);
+    result.addChildOnTop(quotient);
   }
   output = result;
   return true;

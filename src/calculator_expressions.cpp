@@ -1934,7 +1934,7 @@ bool Expression::evaluatesToScalar() const {
   if (this->owner == nullptr) {
     return false;
   }
-  Calculator & calculator = *this->owner;
+  Calculator& calculator = *this->owner;
   Calculator::GlobalCache& globalCache =
   calculator.globalCache.getValueCreateEmpty(*this);
   if (!globalCache.flagIsScalar.isZeroPointer()) {

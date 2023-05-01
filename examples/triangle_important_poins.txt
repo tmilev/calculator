@@ -1,6 +1,6 @@
 %HideLHS
 %DontUsePredefinedWordSplits
-TurnOffRules(CommonDenominator, AddTerms, DivideExpressionsAsIfPolynomial, CommuteIfUnivariate,CommuteAtimesBtimesCifUnivariate, ConstantExtraction);
+TurnOffRules(CommonDenominator, AddTerms, DivideExpressionsAsIfPolynomial, CommuteIfUnivariate,CommuteAtimesBtimesCifUnivariate, ConstantExtraction, AssociativeRule);
 a_1= MakeInputBox(name=a_1, value = 0);
 
 a_2= MakeInputBox(name=a_2, value = 0);

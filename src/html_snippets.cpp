@@ -273,7 +273,14 @@ std::string HtmlRoutines::getMathSpan(
     << input;
     return out.str();
   }
-  if (global.flagUseMathTags) {
+  // Above 2^16 = 65536, observation of the behavior of
+  // the google chrome browser shows that the
+  // resulting text blob will not be packed into a single
+  // DOM element. This throws off our frontent javascript conversion
+  // script. So, above 60k characters, let us use the mathcalculator
+  // class tag.
+  bool useMathTags = global.flagUseMathTags || input.size() > 60000;
+  if (useMathTags) {
     out << "<div class='mathcalculator'>";
   } else {
     out << "\\(";
@@ -282,7 +289,7 @@ std::string HtmlRoutines::getMathSpan(
     out << "\\displaystyle ";
   }
   out << input;
-  if (global.flagUseMathTags) {
+  if (useMathTags) {
     out << "</div>";
   } else {
     out << "\\)";

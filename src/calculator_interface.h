@@ -215,6 +215,7 @@ public:
   );
   bool divisionByMeShouldBeWrittenInExponentForm() const;
   bool isCalculatorStatusChanger() const;
+  bool isCalculatorBuiltInStatusChanger() const;
   bool isList() const;
   bool isListNElements(int N = - 1) const;
   bool startsWithBuiltInAtom() const;
@@ -2247,7 +2248,7 @@ public:
     // basic mathematics. Integrals and
     // commutative algebra are included but not
     // representation theory, Lie theory and other
-    // advanced functions
+    // advanced functions.
     educational
   };
   Mode mode;
@@ -2431,14 +2432,27 @@ public:
   MapList<Expression, Calculator::ExpressionCachePerStack>
   cachedExpressionsPerStack;
   HashedList<Expression> evaluatedExpressionsStack;
+
   class GlobalCache {
   public:
+    class BuiltInTransformation{
+    public:
+      bool flagChangedByHandlers;
+      Function* firstApplicableHandler;
+      Expression transformsTo;
+      BuiltInTransformation();
+int      ruleCollectionId;
+
+
+    };
     MemorySaving<bool> flagIsScalar;
     MemorySaving<bool> flagIsDouble;
     MemorySaving<double> doubleValue;
+    MemorySaving<BuiltInTransformation> builtInTransformations;
     GlobalCache();
   };
 
+  int ruleCollectionId;
   MapReferences<Expression, Calculator::GlobalCache> globalCache;
   Expression ruleStack;
   HashedListReferences<Expression> allChildExpressions;
@@ -2581,7 +2595,7 @@ public:
   );
   void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool accountRule(
-    const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer
+    const Expression& ruleExpression, StateMaintainerCalculator& ruleStackMaintainer
   );
   int opIsDenotedBy() {
     return this->operations.getIndexNoFail("=:");
@@ -4514,7 +4528,7 @@ bool Expression::makeMatrix(
   const ExpressionContext* inputContext,
   bool reduceOneRowToSequenceAndOneByOneToNonMatrix
 ) {
-  STACK_TRACE("Expression::assignMatrix");
+  STACK_TRACE("Expression::makeMatrix");
   Matrix<Expression> matrixExpressions;
   matrixExpressions.initialize(input.numberOfRows, input.numberOfColumns);
   Expression currentElt;

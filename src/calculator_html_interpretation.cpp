@@ -2236,7 +2236,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     result[WebAPI::Result::error] = errorStream.str();
     return result;
   }
-  std::string lastStudentAnswerID;
+  std::string lastStudentAnswerId;
   MapList<
     std::string,
     std::string,
@@ -2247,17 +2247,17 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     StringRoutines::stringBeginsWith(
       arguments.keys[i],
       WebAPI::Problem::calculatorAnswerPrefix,
-      &lastStudentAnswerID
+      &lastStudentAnswerId
     );
   }
-  int indexLastAnswerId = problem.getAnswerIndex(lastStudentAnswerID);
+  int indexLastAnswerId = problem.getAnswerIndex(lastStudentAnswerId);
   std::stringstream out;
   if (indexLastAnswerId == - 1) {
     errorStream
     << "File: "
     << problem.fileName
     << "<br><b>Student submitted answerID: "
-    << lastStudentAnswerID
+    << lastStudentAnswerId
     << " but that is not an ID of an answer tag. "
     << "</b>";
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
@@ -2275,7 +2275,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     out
     << "<b>No answer given for "
     << "question (answerID: "
-    << lastStudentAnswerID
+    << lastStudentAnswerId
     << ").</b>";
     if (
       global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights()
@@ -2801,13 +2801,13 @@ int ProblemData::getExpectedNumberOfAnswers(
           continue;
         }
         std::stringstream stringStream(expectedNumberOfAnswersString);
-        int numAnswers = - 1;
-        stringStream >> numAnswers;
-        if (numAnswers == - 1) {
+        int numberOfAnswers = - 1;
+        stringStream >> numberOfAnswers;
+        if (numberOfAnswers == - 1) {
           continue;
         }
         global.problemExpectedNumberOfAnswers.setKeyValue(
-          currentProblemName, numAnswers
+          currentProblemName, numberOfAnswers
         );
       }
     }
@@ -3085,14 +3085,14 @@ bool UserScores::computeScoresAndStats(std::stringstream& comments) {
     this->scoresBreakdown.lastObject()->clear();
     for (int j = 0; j < problem.topics.topics.size(); j ++) {
       TopicElement& currentTopic = problem.topics.topics.values[j];
-      Rational currentPts = currentTopic.totalPointsEarned;
-      Rational maxPts = currentTopic.maxPointsInAllChildren;
+      Rational currentPoints = currentTopic.totalPointsEarned;
+      Rational maximumPoints = currentTopic.maxPointsInAllChildren;
       this->scoresBreakdown.lastObject()->setKeyValue(
-        problem.topics.topics.keys[j], currentPts
+        problem.topics.topics.keys[j], currentPoints
       );
-      if (maxPts == currentPts) {
+      if (maximumPoints == currentPoints) {
         this->numStudentsSolvedEntireTopic[j] ++;
-      } else if (currentPts > 0) {
+      } else if (currentPoints > 0) {
         this->numStudentsSolvedPartOfTopic[j] ++;
       } else {
         this->numStudentsSolvedNothingInTopic[j] ++;
@@ -3217,30 +3217,30 @@ std::string WebAPIResponse::toStringUserScores() {
   out << "</tr>\n";
   out << "<tr>";
   for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
-    TopicElement& currentElt = scores.problem.topics.topics.values[i];
+    TopicElement& currentElement = scores.problem.topics.topics.values[i];
     if (
-      currentElt.problemFileName == "" &&
-      currentElt.type != TopicElement::types::problem &&
-      currentElt.type != TopicElement::types::topic &&
-      currentElt.type != TopicElement::types::texHeader
+      currentElement.problemFileName == "" &&
+      currentElement.type != TopicElement::types::problem &&
+      currentElement.type != TopicElement::types::topic &&
+      currentElement.type != TopicElement::types::texHeader
     ) {
       if ((
-          currentElt.flagContainsProblemsNotInSubsection &&
-          currentElt.totalSubSectionsUnderMeIncludingEmptySubsections > 1
+          currentElement.flagContainsProblemsNotInSubsection &&
+          currentElement.totalSubSectionsUnderMeIncludingEmptySubsections > 1
         ) ||
-        currentElt.immediateChildren.size == 0
+        currentElement.immediateChildren.size == 0
       ) {
         out << "<td></td>";
       }
       continue;
     }
     if (
-      currentElt.problemFileName != "" ||
-      currentElt.type != TopicElement::types::topic
+      currentElement.problemFileName != "" ||
+      currentElement.type != TopicElement::types::topic
     ) {
       continue;
     }
-    out << "<td>" << currentElt.title << "</td>";
+    out << "<td>" << currentElement.title << "</td>";
   }
   out << "</tr>\n";
   out << "<tr><td><b>maximum score</b></td>" << "<td>-</td>";
@@ -3249,17 +3249,17 @@ std::string WebAPIResponse::toStringUserScores() {
   << scores.problem.currentUser.pointsMax.getDoubleValue()
   << "</td>";
   for (int j = 0; j < scores.problem.topics.topics.size(); j ++) {
-    TopicElement& currentElt = scores.problem.topics.topics.values[j];
-    if (currentElt.problemFileName != "") {
+    TopicElement& currentElement = scores.problem.topics.topics.values[j];
+    if (currentElement.problemFileName != "") {
       continue;
     }
     if (
-      currentElt.type != TopicElement::types::topic &&
-      !currentElt.flagContainsProblemsNotInSubsection
+      currentElement.type != TopicElement::types::topic &&
+      !currentElement.flagContainsProblemsNotInSubsection
     ) {
       continue;
     }
-    out << "<td>" << currentElt.maxPointsInAllChildren << "</td>";
+    out << "<td>" << currentElement.maxPointsInAllChildren << "</td>";
   }
   out << "</tr>";
   for (int i = 0; i < scores.userInfos.size; i ++) {
@@ -3274,13 +3274,13 @@ std::string WebAPIResponse::toStringUserScores() {
     << scores.userScores[i].getDoubleValue()
     << "</td>";
     for (int j = 0; j < scores.problem.topics.topics.size(); j ++) {
-      TopicElement& currentElt = scores.problem.topics.topics.values[j];
-      if (currentElt.problemFileName != "") {
+      TopicElement& currentElement = scores.problem.topics.topics.values[j];
+      if (currentElement.problemFileName != "") {
         continue;
       }
       if (
-        currentElt.type != TopicElement::types::topic &&
-        !currentElt.flagContainsProblemsNotInSubsection
+        currentElement.type != TopicElement::types::topic &&
+        !currentElement.flagContainsProblemsNotInSubsection
       ) {
         continue;
       }

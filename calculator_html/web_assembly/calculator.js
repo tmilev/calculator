@@ -177,9 +177,9 @@ if (ENVIRONMENT_IS_SHELL) {
 
   if (typeof print !== 'undefined') {
     // Prefer to use print/printErr where they exist, as they usually work better.
-    if (typeof console === 'undefined') console = /** @type{!Console} */({});
-    console.log = /** @type{!function(this:Console, ...*): undefined} */ (print);
-    console.warn = console.error = /** @type{!function(this:Console, ...*): undefined} */ (typeof printErr !== 'undefined' ? printErr : print);
+    if (typeof console === 'undefined') console = /** @type {!Console} */({});
+    console.log = /** @type {!function(this:Console, ...*): undefined} */ (print);
+    console.warn = console.error = /** @type {!function(this:Console, ...*): undefined} */ (typeof printErr !== 'undefined' ? printErr : print);
   }
 
 } else
@@ -225,7 +225,7 @@ if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
         xhr.open('GET', url, false);
         xhr.responseType = 'arraybuffer';
         xhr.send(null);
-        return new Uint8Array(/** @type{!ArrayBuffer} */(xhr.response));
+        return new Uint8Array(/** @type {!ArrayBuffer} */(xhr.response));
     };
   }
 
@@ -1560,7 +1560,7 @@ function getBinaryPromise() {
       if (readAsync) {
         // fetch is not available or url is file => try XHR (readAsync uses XHR internally)
         return new Promise(function(resolve, reject) {
-          readAsync(wasmBinaryFile, function(response) { resolve(new Uint8Array(/** @type{!ArrayBuffer} */(response))) }, reject)
+          readAsync(wasmBinaryFile, function(response) { resolve(new Uint8Array(/** @type {!ArrayBuffer} */(response))) }, reject)
         });
       }
     }
@@ -3961,7 +3961,7 @@ var ASM_CONSTS = {
             xhr.send(null);
             if (!(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304)) throw new Error("Couldn't load " + url + ". Status: " + xhr.status);
             if (xhr.response !== undefined) {
-              return new Uint8Array(/** @type{Array<number>} */(xhr.response || []));
+              return new Uint8Array(/** @type {Array<number>} */(xhr.response || []));
             } else {
               return intArrayFromString(xhr.responseText || '', true);
             }
@@ -4703,7 +4703,7 @@ var ASM_CONSTS = {
               // If node we use the ws library.
               var WebSocketConstructor;
               if (ENVIRONMENT_IS_NODE) {
-                WebSocketConstructor = /** @type{(typeof WebSocket)} */(require('ws'));
+                WebSocketConstructor = /** @type {(typeof WebSocket)} */(require('ws'));
               } else
               {
                 WebSocketConstructor = WebSocket;

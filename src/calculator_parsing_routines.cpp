@@ -421,6 +421,7 @@ void Calculator::EvaluationStatistics::reset() {
 
 void Calculator::reset() {
   this->statistics.reset();
+  this->ruleCollectionId= 0;
   this->mode = Calculator::Mode::full;
   this->maximumAlgebraicTransformationsPerExpression = 100;
   this->maximumRecursionDepth = 10000;

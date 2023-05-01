@@ -1,6 +1,6 @@
 class Runner {
   constructor() {
-    /** @type{string} */
+    /** @type {string} */
     this.lastInput = "";
     this.webAssemblyJavascriptDriverLoaded = false;
     this.webAssemblyBinaryReady = false;
@@ -45,7 +45,7 @@ class Runner {
     let request = message[0];
     let computationInput = message[1];
     if (request === "compute") {
-      this.callCalculator(computationInput, (/** @type{string} */ result) => {
+      this.callCalculator(computationInput, (/** @type {string} */ result) => {
         this.postComputationToMainThread(result);
       })
     }
@@ -72,7 +72,7 @@ class Runner {
   }
 
   postComputationToMainThread(
-    /** @type{string} */
+    /** @type {string} */
     result,
   ) {
     postMessage(result);

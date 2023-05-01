@@ -24,7 +24,7 @@ class SliderUpdater {
     y,
     /** @type {string} */
     nameX,
-    /** @type{string} */
+    /** @type {string} */
     nameY,
     /** @type {CanvasTwoD} */
     canvas,

@@ -5746,6 +5746,15 @@ bool Expression::isCalculatorStatusChanger() const {
   this->startsWith(this->owner->opRulesOn());
 }
 
+bool Expression::isCalculatorBuiltInStatusChanger() const {
+  if (this->owner == nullptr) {
+    return false;
+  }
+  return
+  this->startsWith(this->owner->opRulesOff()) ||
+  this->startsWith(this->owner->opRulesOn());
+}
+
 bool Expression::isArithmeticOperation(std::string* outputWhichOperation) const {
   if (this->owner == nullptr) {
     return false;

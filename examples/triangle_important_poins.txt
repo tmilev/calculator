@@ -1,6 +1,6 @@
 %HideLHS
 %DontUsePredefinedWordSplits
-TurnOffRules(CommonDenominator, AddTerms, DivideExpressionsAsIfPolynomial, CommuteIfUnivariate,CommuteAtimesBtimesCifUnivariate, ConstantExtraction, AssociativeRule);
+TurnOffRules(CommonDenominator, AddTerms, DivideExpressionsAsIfPolynomial, CommuteIfUnivariate,CommuteAtimesBtimesCifUnivariate, ConstantExtraction, AssociativeRule, DistributeMultiplication);
 a_1= MakeInputBox(name=a_1, value = 0);
 
 a_2= MakeInputBox(name=a_2, value = 0);
@@ -21,9 +21,9 @@ H_a=( b_1 t_a +c_1(1-t_a), b_2 t_a + c_2(1-t_a));
 H_b=(c_1 t_b +a_1(1-t_b), c_2 t_b + a_2(1-t_b));
 H_c=(a_1 t_c +b_1(1-t_c), a_2 t_c + b_2(1-t_c));
 tick = 0.05;
-ab = (A-B)/ sqrt( (a_1-b_1)^2+(a_2-b_2)^2);
-bc = (B-C)/ sqrt( (b_1-c_1)^2+(b_2-c_2)^2);
-ca = (C-A)/ sqrt( (c_1-a_1)^2+(c_2-a_2)^2);
+ab = (B-A)/ sqrt( (a_1-b_1)^2+(a_2-b_2)^2);
+bc = (C-B)/ sqrt( (b_1-c_1)^2+(b_2-c_2)^2);
+ca = (A-C)/ sqrt( (c_1-a_1)^2+(c_2-a_2)^2);
 abperp = (-ab_2, ab_1);
 bcperp = (-bc_2, bc_1);
 caperp = (-ca_2, ca_1);

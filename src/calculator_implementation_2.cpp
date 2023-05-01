@@ -528,6 +528,29 @@ bool Calculator::outerStandardFunction(
   Function** outputHandler
 ) {
   STACK_TRACE("Calculator::outerStandardFunction");
+  Calculator::GlobalCache& globalCache =  calculator.globalCache.getValueCreateEmpty(input);
+  if (!globalCache.builtInTransformations.isZeroPointer()){
+     Calculator::GlobalCache::BuiltInTransformation& transformation = globalCache.builtInTransformations.getElement();
+     if (transformation.ruleCollectionId == calculator.ruleCollectionId){
+
+     if (transformation.firstApplicableHandler == nullptr){
+       return false;
+     }
+        if (outputHandler != nullptr){
+          *outputHandler = transformation.firstApplicableHandler;
+        }
+        output = transformation.transformsTo;
+        return true;
+
+     }else{
+       Calculator::GlobalCache::BuiltInTransformation clearTransformation;
+       transformation=clearTransformation;
+     }
+  }
+  Calculator::GlobalCache::BuiltInTransformation& transformation = globalCache.builtInTransformations.getElement();
+
+transformation.ruleCollectionId = calculator.ruleCollectionId;
+
   RecursionDepthCounter counter(&calculator.recursionDepth);
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isList()) {
@@ -535,16 +558,22 @@ bool Calculator::outerStandardFunction(
   }
   if (
     calculator.outerStandardCompositeHandler(
-      calculator, input, output, opIndexParentIfAvailable, outputHandler
+      calculator, input, output, opIndexParentIfAvailable, &transformation.firstApplicableHandler
     )
   ) {
+    if (outputHandler!= nullptr){
+      *outputHandler = transformation.firstApplicableHandler;
+    }
     return true;
   }
   if (
     calculator.outerStandardHandler(
-      calculator, input, output, opIndexParentIfAvailable, outputHandler
+      calculator, input, output, opIndexParentIfAvailable, &transformation.firstApplicableHandler
     )
   ) {
+    if (outputHandler!= nullptr){
+      *outputHandler = transformation.firstApplicableHandler;
+    }
     return true;
   }
   return false;
@@ -786,28 +815,31 @@ Expression Calculator::getNewAtom(const std::string& preferredName) {
   }
 }
 
-bool Calculator::accountRule(
-  const Expression& ruleE, StateMaintainerCalculator& ruleStackMaintainer
+bool Calculator::accountRule(const Expression& ruleExpression, StateMaintainerCalculator& ruleStackMaintainer
 ) {
   STACK_TRACE("Calculator::accountRule");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (this->recursionDepth > this->maximumRecursionDepth) {
     return false;
   }
-  if (ruleE.isCalculatorStatusChanger()) {
-    ruleStackMaintainer.addRule(ruleE);
+  if (ruleExpression.isCalculatorStatusChanger()) {
+    ruleStackMaintainer.addRule(ruleExpression);
   }
-  if (!ruleE.isListStartingWithAtom(this->opCommandEnclosure())) {
+  if (ruleExpression.isCalculatorBuiltInStatusChanger()){
+    global.comments << "<br>DEBUG: rule collection id: " << this->ruleCollectionId;
+    this->ruleCollectionId++;
+  }
+  if (!ruleExpression.isListStartingWithAtom(this->opCommandEnclosure())) {
     return true;
   }
-  if (ruleE.size() <= 1) {
+  if (ruleExpression.size() <= 1) {
     return true;
   }
-  if (!ruleE[1].startsWith(this->opCommandSequence())) {
-    return this->accountRule(ruleE[1], ruleStackMaintainer);
+  if (!ruleExpression[1].startsWith(this->opCommandSequence())) {
+    return this->accountRule(ruleExpression[1], ruleStackMaintainer);
   }
-  for (int i = 1; i < ruleE[1].size(); i ++) {
-    if (!this->accountRule(ruleE[1][i], ruleStackMaintainer)) {
+  for (int i = 1; i < ruleExpression[1].size(); i ++) {
+    if (!this->accountRule(ruleExpression[1][i], ruleStackMaintainer)) {
       return false;
     }
   }
@@ -949,6 +981,12 @@ Calculator::ExpressionCachePerStack::ExpressionCachePerStack() {
 
 Calculator::GlobalCache::GlobalCache() {}
 
+Calculator::GlobalCache::BuiltInTransformation::BuiltInTransformation(){
+  this->flagChangedByHandlers = false;
+  this->firstApplicableHandler = nullptr;
+  this->ruleCollectionId=0;
+}
+
 void Calculator::EvaluateLoop::accountIntermediateState() {
   STACK_TRACE("Calculator:EvaluateLoop:::accountIntermediateState");
   std::string atomValue;
@@ -1033,10 +1071,10 @@ bool Calculator::EvaluateLoop::evaluateChildren(
   if (this->output->isFrozen()) {
     return true;
   }
-  int indexOp = - 1;
+  int indexOperation = - 1;
   if (this->output->size() > 0) {
     if ((*this->output)[0].isAtom()) {
-      indexOp = (*this->output)[0].data;
+      indexOperation = (*this->output)[0].data;
     }
   }
   Expression childEvaluation;
@@ -1058,7 +1096,7 @@ bool Calculator::EvaluateLoop::evaluateChildren(
         *this->owner, (*this->output)[i],
         childEvaluation,
         childIsNonCacheable,
-        indexOp,
+        indexOperation,
         historyChild
       )
     ) {
@@ -1100,7 +1138,8 @@ bool Calculator::EvaluateLoop::evaluateChildren(
 
 bool Calculator::EvaluateLoop::userDefinedEvaluation() {
   STACK_TRACE("Calculator::EvaluateLoop::userDefinedEvaluation");
-  Expression beforepatternMatch, afterpatternMatch;
+  Expression beforePatternMatch;
+  Expression afterPatternMatch;
   for (
     int i = 0; i < this->owner->ruleStack.size() &&
     !this->owner->flagAbortComputationASAP; i ++
@@ -1108,15 +1147,15 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
     const Expression& currentPattern = this->owner->ruleStack[i];
     this->owner->statistics.totalPatternMatchesPerformed ++;
     if (this->owner->flagLogEvaluation) {
-      beforepatternMatch = *this->output;
+      beforePatternMatch = *this->output;
     }
     MapList<Expression, Expression> bufferPairs;
     std::stringstream* logStream =
     this->owner->flagLogpatternMatching ? &this->owner->comments : nullptr;
-    afterpatternMatch = *(this->output);
+    afterPatternMatch = *(this->output);
     if (
       this->owner->processOneExpressionOnePatternOneSubstitution(
-        currentPattern, afterpatternMatch, bufferPairs, logStream
+        currentPattern, afterPatternMatch, bufferPairs, logStream
       )
     ) {
       std::stringstream substitutionComment;
@@ -1126,7 +1165,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
         << currentPattern.toString();
       }
       this->setOutput(
-        afterpatternMatch, nullptr, substitutionComment.str()
+        afterPatternMatch, nullptr, substitutionComment.str()
       );
       this->reductionOccurred = true;
       if (this->owner->flagLogEvaluation) {
@@ -1134,7 +1173,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
         << "<hr>Rule: "
         << currentPattern.toString()
         << "<br>"
-        << HtmlRoutines::getMathNoDisplay(beforepatternMatch.toString())
+        << HtmlRoutines::getMathNoDisplay(beforePatternMatch.toString())
         << " -> "
         << HtmlRoutines::getMathNoDisplay(this->output->toString());
       }
@@ -1154,6 +1193,7 @@ bool Calculator::EvaluateLoop::checkInitialization() {
 bool Calculator::EvaluateLoop::builtInEvaluation() {
   STACK_TRACE("Calculator::EvaluateLoop::builtInEvaluation");
   this->checkInitialization();
+
   Expression result;
   Function* handlerContainer = nullptr;
   if (
@@ -1227,6 +1267,7 @@ bool Calculator::EvaluateLoop::reduceOnce() {
 }
 
 bool Calculator::EvaluateLoop::reduceUsingCache() {
+  STACK_TRACE("Calculator::EvaluateLoop::reduceUsingCache");
   ExpressionCachePerStack& cache =
   this->owner->cachedExpressionsPerStack.getValueCreateEmpty(*this->output);
   if (!cache.flagFinalized || cache.flagNonCacheable) {
@@ -1455,7 +1496,7 @@ bool Calculator::processOneExpressionOnePatternOneSubstitution(
   MapList<Expression, Expression>& bufferPairs,
   std::stringstream* logStream
 ) {
-  STACK_TRACE("Calculator::processOneExpressionOnePatternOneSub");
+  STACK_TRACE("Calculator::processOneExpressionOnePatternOneSubstitution");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
   if (
     !pattern.startsWith(this->opDefine(), 3) &&

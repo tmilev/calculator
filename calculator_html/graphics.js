@@ -1220,15 +1220,15 @@ class SelectablePointTwoD {
   constructor(inputXComputer, inputYComputer, color) {
     this.xComputer = inputXComputer;
     this.yComputer = inputYComputer;
-    /** @type{number} */
+    /** @type {number} */
     this.x = 0;
-    /** @type{number} */
+    /** @type {number} */
     this.y = 0;
     if (typeof this.xComputer === "number") {
-      this.x = /** @type{number} */ (this.xComputer);
+      this.x = /** @type {number} */ (this.xComputer);
     }
     if (typeof this.yComputer === "number") {
-      this.y = /** @type{number} */ (this.yComputer);
+      this.y = /** @type {number} */ (this.yComputer);
     }
     this.color = colorToRGB(color);
   }

@@ -23,6 +23,7 @@ Calculator::Calculator() {
   this->numberExpectedExpressionsAtInitialization = - 1;
   this->mode = Calculator::Mode::full;
   this->examples.owner = this;
+  this->ruleCollectionId = 0;
 }
 
 MemorySaving<Calculator>& GlobalVariables::calculator() {

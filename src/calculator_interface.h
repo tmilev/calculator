@@ -2432,19 +2432,17 @@ public:
   MapList<Expression, Calculator::ExpressionCachePerStack>
   cachedExpressionsPerStack;
   HashedList<Expression> evaluatedExpressionsStack;
-
   class GlobalCache {
   public:
-    class BuiltInTransformation{
+    class BuiltInTransformation {
     public:
       bool flagChangedByHandlers;
       Function* firstApplicableHandler;
       Expression transformsTo;
       BuiltInTransformation();
-int      ruleCollectionId;
-
-
+      int ruleCollectionId;
     };
+
     MemorySaving<bool> flagIsScalar;
     MemorySaving<bool> flagIsDouble;
     MemorySaving<double> doubleValue;
@@ -2595,7 +2593,8 @@ int      ruleCollectionId;
   );
   void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool accountRule(
-    const Expression& ruleExpression, StateMaintainerCalculator& ruleStackMaintainer
+    const Expression& ruleExpression,
+    StateMaintainerCalculator& ruleStackMaintainer
   );
   int opIsDenotedBy() {
     return this->operations.getIndexNoFail("=:");

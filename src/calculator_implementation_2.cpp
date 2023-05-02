@@ -528,29 +528,28 @@ bool Calculator::outerStandardFunction(
   Function** outputHandler
 ) {
   STACK_TRACE("Calculator::outerStandardFunction");
-  Calculator::GlobalCache& globalCache =  calculator.globalCache.getValueCreateEmpty(input);
-  if (!globalCache.builtInTransformations.isZeroPointer()){
-     Calculator::GlobalCache::BuiltInTransformation& transformation = globalCache.builtInTransformations.getElement();
-     if (transformation.ruleCollectionId == calculator.ruleCollectionId){
-
-     if (transformation.firstApplicableHandler == nullptr){
-       return false;
-     }
-        if (outputHandler != nullptr){
-          *outputHandler = transformation.firstApplicableHandler;
-        }
-        output = transformation.transformsTo;
-        return true;
-
-     }else{
-       Calculator::GlobalCache::BuiltInTransformation clearTransformation;
-       transformation=clearTransformation;
-     }
+  Calculator::GlobalCache& globalCache =
+  calculator.globalCache.getValueCreateEmpty(input);
+  if (!globalCache.builtInTransformations.isZeroPointer()) {
+    Calculator::GlobalCache::BuiltInTransformation& transformation =
+    globalCache.builtInTransformations.getElement();
+    if (transformation.ruleCollectionId == calculator.ruleCollectionId) {
+      if (transformation.firstApplicableHandler == nullptr) {
+        return false;
+      }
+      if (outputHandler != nullptr) {
+        *outputHandler = transformation.firstApplicableHandler;
+      }
+      output = transformation.transformsTo;
+      return true;
+    } else {
+      Calculator::GlobalCache::BuiltInTransformation clearTransformation;
+      transformation = clearTransformation;
+    }
   }
-  Calculator::GlobalCache::BuiltInTransformation& transformation = globalCache.builtInTransformations.getElement();
-
-transformation.ruleCollectionId = calculator.ruleCollectionId;
-
+  Calculator::GlobalCache::BuiltInTransformation& transformation =
+  globalCache.builtInTransformations.getElement();
+  transformation.ruleCollectionId = calculator.ruleCollectionId;
   RecursionDepthCounter counter(&calculator.recursionDepth);
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isList()) {
@@ -558,22 +557,32 @@ transformation.ruleCollectionId = calculator.ruleCollectionId;
   }
   if (
     calculator.outerStandardCompositeHandler(
-      calculator, input, output, opIndexParentIfAvailable, &transformation.firstApplicableHandler
+      calculator,
+      input,
+      output,
+      opIndexParentIfAvailable,
+      &transformation.firstApplicableHandler
     )
   ) {
-    if (outputHandler!= nullptr){
+    if (outputHandler != nullptr) {
       *outputHandler = transformation.firstApplicableHandler;
     }
+    transformation.transformsTo = output;
     return true;
   }
   if (
     calculator.outerStandardHandler(
-      calculator, input, output, opIndexParentIfAvailable, &transformation.firstApplicableHandler
+      calculator,
+      input,
+      output,
+      opIndexParentIfAvailable,
+      &transformation.firstApplicableHandler
     )
   ) {
-    if (outputHandler!= nullptr){
+    if (outputHandler != nullptr) {
       *outputHandler = transformation.firstApplicableHandler;
     }
+    transformation.transformsTo = output;
     return true;
   }
   return false;
@@ -815,7 +824,9 @@ Expression Calculator::getNewAtom(const std::string& preferredName) {
   }
 }
 
-bool Calculator::accountRule(const Expression& ruleExpression, StateMaintainerCalculator& ruleStackMaintainer
+bool Calculator::accountRule(
+  const Expression& ruleExpression,
+  StateMaintainerCalculator& ruleStackMaintainer
 ) {
   STACK_TRACE("Calculator::accountRule");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
@@ -825,11 +836,15 @@ bool Calculator::accountRule(const Expression& ruleExpression, StateMaintainerCa
   if (ruleExpression.isCalculatorStatusChanger()) {
     ruleStackMaintainer.addRule(ruleExpression);
   }
-  if (ruleExpression.isCalculatorBuiltInStatusChanger()){
-    global.comments << "<br>DEBUG: rule collection id: " << this->ruleCollectionId;
-    this->ruleCollectionId++;
+  if (ruleExpression.isCalculatorBuiltInStatusChanger()) {
+    global.comments
+    << "<br>DEBUG: rule collection id: "
+    << this->ruleCollectionId;
+    this->ruleCollectionId ++;
   }
-  if (!ruleExpression.isListStartingWithAtom(this->opCommandEnclosure())) {
+  if (
+    !ruleExpression.isListStartingWithAtom(this->opCommandEnclosure())
+  ) {
     return true;
   }
   if (ruleExpression.size() <= 1) {
@@ -839,7 +854,9 @@ bool Calculator::accountRule(const Expression& ruleExpression, StateMaintainerCa
     return this->accountRule(ruleExpression[1], ruleStackMaintainer);
   }
   for (int i = 1; i < ruleExpression[1].size(); i ++) {
-    if (!this->accountRule(ruleExpression[1][i], ruleStackMaintainer)) {
+    if (
+      !this->accountRule(ruleExpression[1][i], ruleStackMaintainer)
+    ) {
       return false;
     }
   }
@@ -981,10 +998,10 @@ Calculator::ExpressionCachePerStack::ExpressionCachePerStack() {
 
 Calculator::GlobalCache::GlobalCache() {}
 
-Calculator::GlobalCache::BuiltInTransformation::BuiltInTransformation(){
+Calculator::GlobalCache::BuiltInTransformation::BuiltInTransformation() {
   this->flagChangedByHandlers = false;
   this->firstApplicableHandler = nullptr;
-  this->ruleCollectionId=0;
+  this->ruleCollectionId = 0;
 }
 
 void Calculator::EvaluateLoop::accountIntermediateState() {
@@ -1193,7 +1210,6 @@ bool Calculator::EvaluateLoop::checkInitialization() {
 bool Calculator::EvaluateLoop::builtInEvaluation() {
   STACK_TRACE("Calculator::EvaluateLoop::builtInEvaluation");
   this->checkInitialization();
-
   Expression result;
   Function* handlerContainer = nullptr;
   if (
@@ -1475,8 +1491,6 @@ void Calculator::specializeBoundVariables(
   if (toBeSubbedIn.isListOfTwoAtomsStartingWith(this->opBind())) {
     if (matchedPairs.contains(toBeSubbedIn)) {
       toBeSubbedIn = matchedPairs.getValueCreateEmpty(toBeSubbedIn);
-      // this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1,
-      // MaxRecursionDepth);
       return;
     }
   }
@@ -1486,8 +1500,6 @@ void Calculator::specializeBoundVariables(
     this->specializeBoundVariables(subbedE, matchedPairs);
     toBeSubbedIn.setChild(i, subbedE);
   }
-  // this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+ 1,
-  // MaxRecursionDepth);
 }
 
 bool Calculator::processOneExpressionOnePatternOneSubstitution(
@@ -1518,22 +1530,22 @@ bool Calculator::processOneExpressionOnePatternOneSubstitution(
   if (isConditionalDefine) {
     condition = &pattern[2];
   }
-  Expression* toBeSubbed =
+  Expression* toBeSubstituted =
   this->patternMatch(
     currentPattern, expression, bufferPairs, condition, logStream
   );
-  if (toBeSubbed == nullptr) {
+  if (toBeSubstituted == nullptr) {
     return false;
   }
   if (logStream != nullptr) {
     *logStream << "<br><b>found a match!</b>";
   }
   if (isConditionalDefine) {
-    *toBeSubbed = pattern[3];
+    *toBeSubstituted = pattern[3];
   } else {
-    *toBeSubbed = pattern[2];
+    *toBeSubstituted = pattern[2];
   }
-  this->specializeBoundVariables(*toBeSubbed, bufferPairs);
+  this->specializeBoundVariables(*toBeSubstituted, bufferPairs);
   return true;
 }
 

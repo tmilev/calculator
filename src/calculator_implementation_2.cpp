@@ -543,6 +543,10 @@ bool Calculator::outerStandardFunction(
       output = transformation.transformsTo;
       return true;
     } else {
+      // The built-in rules have been turned on/off. We could
+      // store individual caches per rule status, but it
+      // is simplest to just wipe out the cache; this will
+      // be efficient if there aren't many rule changes.
       Calculator::GlobalCache::BuiltInTransformation clearTransformation;
       transformation = clearTransformation;
     }
@@ -837,9 +841,6 @@ bool Calculator::accountRule(
     ruleStackMaintainer.addRule(ruleExpression);
   }
   if (ruleExpression.isCalculatorBuiltInStatusChanger()) {
-    global.comments
-    << "<br>DEBUG: rule collection id: "
-    << this->ruleCollectionId;
     this->ruleCollectionId ++;
   }
   if (

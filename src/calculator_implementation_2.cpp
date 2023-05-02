@@ -549,6 +549,7 @@ bool Calculator::outerStandardFunction(
       // be efficient if there aren't many rule changes.
       Calculator::GlobalCache::BuiltInTransformation clearTransformation;
       transformation = clearTransformation;
+      transformation.ruleCollectionId = calculator.ruleCollectionId;
     }
   }
   Calculator::GlobalCache::BuiltInTransformation& transformation =

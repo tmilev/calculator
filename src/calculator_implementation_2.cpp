@@ -266,8 +266,12 @@ Expression Calculator::expressionSquareRootNegativeOne() {
 
 List<Function> Calculator::OperationHandlers::mergeHandlers() {
   List<Function> result;
-  result.addListOnTop(this->handlers);
-  result.addListOnTop(this->compositeHandlers);
+  for (Function& handler: this->handlers){
+  result.addOnTop(handler);
+  }
+  for (Function& handler: this->compositeHandlers){
+  result.addOnTop(handler);
+  }
   return result;
 }
 
@@ -351,7 +355,7 @@ void Calculator::logFunctionWithTime(Function& input, int64_t startTime) {
   *this << "Rule stack size: " << this->ruleStack.size();
 }
 
-const List<Function>* Calculator::getOperationCompositeHandlers(int operation)
+const ListReferences<Function>* Calculator::getOperationCompositeHandlers(int operation)
 {
   if (operation < 0 || operation >= this->operations.size()) {
     // Instead of crashing, we may instead return nullptr.
@@ -367,7 +371,7 @@ const List<Function>* Calculator::getOperationCompositeHandlers(int operation)
   &this->operations.values[operation].getElementConst().compositeHandlers;
 }
 
-const List<Function>* Calculator::getOperationHandlers(int operation) {
+const ListReferences<Function> *Calculator::getOperationHandlers(int operation) {
   if (operation < 0 || operation >= this->operations.size()) {
     // Instead of crashing, we may instead return nullptr.
     // TODO(tmilev): document why we are so harsh
@@ -399,7 +403,7 @@ bool Calculator::outerStandardCompositeHandler(
   if (!functionNameNode.startsWith()) {
     return false;
   }
-  const List<Function>* handlers =
+  const ListReferences<Function>* handlers =
   calculator.getOperationCompositeHandlers(functionNameNode[0].data);
   if (handlers == nullptr) {
     return false;
@@ -500,7 +504,7 @@ bool Calculator::outerStandardHandler(
   if (calculator.operations.values[operationIndex].isZeroPointer()) {
     return false;
   }
-  const List<Function>& handlers =
+  const ListReferences<Function>& handlers =
   calculator.operations.values[operationIndex].getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     Function& currentFunction = handlers[i];
@@ -537,11 +541,13 @@ bool Calculator::outerStandardFunction(
       if (transformation.firstApplicableHandler == nullptr) {
         return false;
       }
-      if (outputHandler != nullptr) {
-        *outputHandler = transformation.firstApplicableHandler;
+      if (transformation.firstApplicableHandler->options.flagIsCacheable) {
+        if (outputHandler != nullptr) {
+          *outputHandler = transformation.firstApplicableHandler;
+        }
+        output = transformation.transformsTo;
+        return true;
       }
-      output = transformation.transformsTo;
-      return true;
     } else {
       // The built-in rules have been turned on/off. We could
       // store individual caches per rule status, but it
@@ -549,7 +555,6 @@ bool Calculator::outerStandardFunction(
       // be efficient if there aren't many rule changes.
       Calculator::GlobalCache::BuiltInTransformation clearTransformation;
       transformation = clearTransformation;
-      transformation.ruleCollectionId = calculator.ruleCollectionId;
     }
   }
   Calculator::GlobalCache::BuiltInTransformation& transformation =
@@ -785,14 +790,6 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
   }
   this->owner->ruleStack.setSize(this->startingRuleStackSize);
   this->owner = nullptr;
-}
-
-bool Calculator::approximationsBanned() {
-  Function& approximationsDummyHandler =
-  this->getFunctionHandlerFromNamedRule(
-    Calculator::Functions::Names::approximations
-  );
-  return approximationsDummyHandler.options.disabledByUser;
 }
 
 Expression Calculator::getNewBoundVariable() {

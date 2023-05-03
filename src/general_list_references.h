@@ -4,6 +4,29 @@
 
 #include "general_lists.h"
 
+
+template <class Object>
+class ListReferences ;
+
+template <typename Object>
+class ListReferencesIterator {
+public:
+  const ListReferences<Object>* iterated;
+  int index;
+  ListReferencesIterator(const ListReferences<Object>* input) {
+    this->iterated = input;
+    this->index = 0;
+  }
+  bool operator!=(const ListReferencesIterator<Object>& other) {
+    return this->index != other.index;
+  }
+  Object& operator*() const;
+  const ListReferencesIterator<Object>& operator++() {
+    this->index ++;
+    return *this;
+  }
+};
+
 // class ListReferences is to be used in the same way as class List.
 // The essential difference between ListReferences and List is in the way the
 // objects are
@@ -201,6 +224,16 @@ public:
     out << *this;
     return out.str();
   }
+  ListReferencesIterator<Object> begin() const {
+    ListReferencesIterator<Object> result(this);
+    return result;
+  }
+  ListReferencesIterator<Object> end() const {
+    ListReferencesIterator<Object> result(this);
+    result.index = this->size;
+    return result;
+  }
+
 };
 
 template <class Object>
@@ -263,6 +296,12 @@ int ListReferences<Object>::getIndex(const Object& o) const {
   }
   return - 1;
 }
+
+template <typename Object>
+Object&ListReferencesIterator<Object>::operator*() const {
+  return (*this->iterated)[this->index];
+}
+
 
 template <
   class Object,

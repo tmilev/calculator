@@ -478,6 +478,7 @@ void Calculator::reset() {
   // It must therefore be cleared last.
   this->allChildExpressionHashes.clear();
   this->parser.reset();
+  this->approximationHandlers.clear();
 }
 
 void Calculator::initializeLogDuration(Calculator::Mode desiredMode) {
@@ -618,6 +619,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->initializeOperationsThatAreKnownFunctions();
   this->initializeAtomsNonCacheable();
   this->initializeArithmeticOperations();
+  this->initializeApproximationFunctions();
   this->parser.initializePredefinedWordSplits();
   this->parser.initializeStringsThatSplitIfFollowedByDigit();
   this->initializeToStringHandlers();
@@ -637,7 +639,7 @@ bool Calculator::checkPredefinedFunctionNameRepetitions() {
     if (current.isZeroPointer()) {
       continue;
     }
-    List<Function>* currentHandlers = &current.getElement().handlers;
+    ListReferences<Function>* currentHandlers = &current.getElement().handlers;
     for (int j = 0; j < 2; j ++) {
       for (int k = 0; k < currentHandlers->size; k ++) {
         std::string& currentName = (*currentHandlers)[k].calculatorIdentifier;

@@ -320,10 +320,16 @@ public:
 
 class CalculatorFunctionsTrigonometry {
 public:
-  static bool sin(
+  static bool sinExact(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool cos(
+  static bool sinApproximate(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool cosExact(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool cosApproximate(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool sec(
@@ -344,13 +350,16 @@ public:
   static bool arccosAlgebraic(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool arcsin(
+  static bool arcsinApproximate(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool arccos(
+  static bool arccosApproximate(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool arctan(
+  static bool arctanExact(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool arctanApproximate(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool exploitCosineEvenness(

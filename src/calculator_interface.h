@@ -1190,6 +1190,8 @@ public:
     bool disabledByUser;
     bool disabledByUserDefault;
     bool freezesArguments;
+    bool flagIsCacheable;
+    bool flagIsApproximation;
     // The dontTestAutomatically
     // indicates that the function should not be auto-tested.
     // This functions that are not auto-tested include the following.
@@ -1213,7 +1215,9 @@ public:
     static Options administrativeTested();
     static Options innerInvisible();
     static Options standard();
+    static Options nonCacheable();
     static Options compositeStandard();
+    static Options approximation();
     static Options innerFreezesArguments();
     static Options innerInvisibleExperimental();
     static Options experimental();
@@ -1232,12 +1236,6 @@ public:
   std::string toStringFull() const;
   JSData toJSON() const;
   bool shouldBeApplied(int parentOperationIfAvailable);
-  bool operator==(const Function& other) const {
-    return
-    this->argumentTypes == other.argumentTypes &&
-    this->functionAddress == other.functionAddress &&
-    this->options.flagIsInner == other.options.flagIsInner;
-  }
   bool inputFitsMyInnerType(const Expression& input);
   Function();
   Function(
@@ -2196,8 +2194,8 @@ public:
   class OperationHandlers {
   public:
     std::string atom;
-    List<Function> handlers;
-    List<Function> compositeHandlers;
+    ListReferences<Function> handlers;
+    ListReferences<Function> compositeHandlers;
     bool flagDeallocated;
     OperationHandlers();
     ~OperationHandlers();
@@ -2219,7 +2217,6 @@ public:
       static std::string setRandomSeed;
       static std::string sort;
       static std::string transpose;
-      static std::string approximations;
       static std::string turnOnRules;
       static std::string turnOffRules;
       static std::string vectorPartitionFunction;
@@ -2270,6 +2267,7 @@ public:
   HashedList<std::string> atomsNotInterpretedAsFunctions;
   HashedList<std::string> atomsThatMustNotBeCached;
   HashedList<std::string> autoCompleteKeyWords;
+  List<Function*> approximationHandlers;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
   toStringHandlersAtoms;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
@@ -2486,7 +2484,6 @@ public:
   int builtInCode() {
     return this->operations.getIndexNoFail(this->builtInName<Type>());
   }
-  bool approximationsBanned();
   std::string toStringRuleStatusUser();
   std::string toString();
   JSData toJSONPerformance();
@@ -2550,8 +2547,8 @@ public:
   const HashedList<std::string, HashFunctions::hashFunction>& getOperations() {
     return this->operations.keys;
   }
-  const List<Function>* getOperationHandlers(int operation);
-  const List<Function>* getOperationCompositeHandlers(int operation);
+  const ListReferences<Function>* getOperationHandlers(int operation);
+  const ListReferences<Function>* getOperationCompositeHandlers(int operation);
   Expression expressionInteger(int input);
   Expression expressionRational(const Rational& input);
   Expression expressionZero();
@@ -2616,12 +2613,6 @@ public:
   }
   int opRulesOn() {
     return this->operations.getIndexNoFail("RulesOn");
-  }
-  int opApproximations() {
-    return
-    this->operations.getIndexNoFail(
-      Calculator::Functions::Names::approximations
-    );
   }
   int opCommandEnclosureStart() {
     return this->operations.getIndexNoFail("CommandEnclosureStart");
@@ -3307,6 +3298,8 @@ public:
   void initializeAtomsThatFreezeArguments();
   void initializeBuiltInsFreezeArguments();
   void initializeAtomsNonCacheable();
+  void setNonCacheableAtom(const std::string& atom);
+  int countNonCacheableHandlers();
   void initializeAtomsThatAllowCommutingOfArguments();
   void initializeOperationsInterpretedAsFunctionsMultiplicatively();
   void initializeOperationsThatAreKnownFunctions();
@@ -3322,6 +3315,8 @@ public:
   void initializeFunctionsSemisimpleLieAlgebras();
   void initializePredefinedStandardOperationsWithoutHandler();
   void initializeAdminFunctions();
+  void initializeApproximationFunctions();
+  void initializeApproximationFunctionsForOneAtom(OperationHandlers& handlers);
   JSData toJSONOutputAndSpecials();
   void evaluateCommands();
   JSData extractSolution();

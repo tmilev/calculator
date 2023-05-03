@@ -749,7 +749,7 @@ bool CalculatorFunctions::operationBinary(
   if (operationMap.isZeroPointer()) {
     return false;
   }
-  List<Function>& handlers = operationMap.getElement().handlers;
+  ListReferences<Function>& handlers = operationMap.getElement().handlers;
   for (int i = 0; i < handlers.size; i ++) {
     if (handlers[i].inputFitsMyInnerType(input)) {
       if (handlers[i].functionAddress(calculator, input, output)) {

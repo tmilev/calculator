@@ -1537,6 +1537,18 @@ Function::Options Function::Options::standard() {
   result.flagIsInner = true;
   return result;
 }
+Function::Options Function::Options::nonCacheable() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.flagIsCacheable = false;
+  return result;
+}
+Function::Options Function::Options::approximation() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.flagIsApproximation = true;
+  return result;
+}
 
 Function::Options Function::Options::innerInvisible() {
   Function::Options result;
@@ -1614,6 +1626,8 @@ void Function::Options::reset() {
   this->dontTestAutomatically = false;
   this->administrativeOnly = false;
   this->freezesArguments = false;
+  this->flagIsCacheable = true;
+  this->flagIsApproximation = false;
 }
 
 Function::Options::Options() {
@@ -1664,6 +1678,9 @@ std::string Function::toStringShort() const {
     << " out of "
     << handler.handlers.size
     << "). ";
+  }
+  if (!this->options. flagIsCacheable) {
+    out << "Not cached. ";
   }
   return out.str();
 }
@@ -1729,6 +1746,7 @@ JSData Function::toJSON() const {
     result["total"] = operationHandlers.handlers.size;
     result["atom"] = this->owner->operations.keys[this->indexOperation];
   }
+  result["cacheable"] = this->options.flagIsCacheable;
   if (this->options.flagIsExperimental) {
     result["experimental"] = true;
   } else {

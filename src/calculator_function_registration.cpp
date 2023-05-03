@@ -20,7 +20,6 @@ std::string Calculator::Functions::Names::commandEnclosure =
 std::string Calculator::Functions::Names::setInputBox = "SetInputBox";
 std::string Calculator::Functions::Names::sort = "Sort";
 std::string Calculator::Functions::Names::transpose = "Transpose";
-std::string Calculator::Functions::Names::approximations = "Approximations";
 std::string Calculator::Functions::Names::vectorPartitionFunction =
 "VectorPartitionFunction";
 std::string Calculator::Functions::Names::vectorPartitionFunctionElementary =
@@ -125,6 +124,8 @@ void Calculator::initializeFunctionsStandard() {
   Function::Options compositeStandard = Function::Options::compositeStandard();
   compositeStandard.flagIsCompositeHandler = true;
   compositeStandard.flagIsInner = true;
+
+  Function::Options approximation = Function::Options::approximation();
   this->addOperationHandler(
     Calculator::Functions::Names::setRandomSeed,
     CalculatorFunctions::setRandomSeed,
@@ -145,7 +146,7 @@ void Calculator::initializeFunctionsStandard() {
     "f=SelectAtRandom(\\sin, \\cos); "
     "g=SelectAtRandom(\\tan, \\cot, \\sec, \\csc);"
     "f{}g{}x",
-    "CalculatorFunctions::SelectAtRandom",
+    "CalculatorFunctions::selectAtRandom",
     "SelectAtRandom",
     innerNoTest
   );
@@ -196,22 +197,6 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
-    Calculator::Functions::Names::approximations,
-    CalculatorFunctions::approximationsDummy,
-    "",
-    "A dummy handler, used to make the implementation of"
-    "TurnOnApproximations easier. ",
-    "TurnOffApproximations(0);\n"
-    "ln(2);\n"
-    "TurnOnApproximations(0);\n"
-    "ln(2);\n"
-    "(TurnOffApproximations 0; ln(2));\n"
-    "ln(2)",
-    "CalculatorFunctions::approximationsDummy",
-    Calculator::Functions::Names::approximations,
-    innerInvisible
-  );
-  this->addOperationHandler(
     "TurnOnApproximations",
     CalculatorFunctions::turnOnApproximations,
     "",
@@ -235,7 +220,7 @@ void Calculator::initializeFunctionsStandard() {
     "Turns on numerical approximations. "
     "Takes as input dummy argument. ",
     "TurnOffApproximations(0);\n"
-    "ln(2);\n"
+    "ln(2)+sin(2);\n"
     "TurnOnApproximations(0);\n"
     "ln(2)",
     "CalculatorFunctions::turnOffApproximations",
@@ -1303,7 +1288,7 @@ void Calculator::initializeFunctionsStandard() {
     "\\log 10",
     "CalculatorFunctionsBasic::logarithm",
     "\\log",
-    innerStandard
+    approximation
   );
   this->addOperationHandler(
     "LogBase",
@@ -1343,13 +1328,23 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\arctan",
-    CalculatorFunctionsTrigonometry::arctan,
+    CalculatorFunctionsTrigonometry::arctanExact,
+    "",
+    "Arctan function. Tries to evaluate the arctan function. ",
+    "\\arctan(0)",
+    "CalculatorFunctionsTrigonometry::arctanExact",
+    "ArctanExact",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "\\arctan",
+    CalculatorFunctionsTrigonometry::arctanApproximate,
     "",
     "Arctan function. Tries to evaluate the arctan function. ",
     "\\arctan(3/4)",
-    "CalculatorFunctionsTrigonometry::arctan",
-    "\\arctan",
-    innerStandard
+    "CalculatorFunctionsTrigonometry::arctanApproximate",
+    "ArctanApproximate",
+    approximation
   );
   this->addOperationHandler(
     "\\arcsin",
@@ -1373,25 +1368,25 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\arccos",
-    CalculatorFunctionsTrigonometry::arccos,
+    CalculatorFunctionsTrigonometry::arccosApproximate,
     "",
     "Arccos function. "
-    "Tries to evaluate the arccos function. ",
+    "Tries to evaluate the arccos function approximately. ",
     "\\arccos(3/4)",
-    "CalculatorFunctionsTrigonometry::arccos",
-    "\\arccos",
-    innerStandard
+    "CalculatorFunctionsTrigonometry::arccosApproximate",
+    "ArccosApproximate",
+    approximation
   );
   this->addOperationHandler(
     "\\arcsin",
-    CalculatorFunctionsTrigonometry::arcsin,
+    CalculatorFunctionsTrigonometry::arcsinApproximate,
     "",
-    "Arcsin function. "
-    "Tries to evaluate the arcsin function. ",
+    "Arcsin function, evaluated approximately. "
+,
     "\\arcsin(3/4)",
-    "CalculatorFunctionsTrigonometry::arcsin",
+    "CalculatorFunctionsTrigonometry::arcsinApproximate",
     "\\arcsin",
-    innerStandard
+    approximation
   );
   this->addOperationHandler(
     "|",
@@ -1405,25 +1400,51 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\sin",
-    CalculatorFunctionsTrigonometry::sin,
+    CalculatorFunctionsTrigonometry::sinExact,
     "",
-    "Sine function. Evaluates to a decimal "
+    "Sine function, evaluates only if exact. ",
+    "TurnOffApproximations{}();\n"
+  "\\sin{}(3.1415) - \\sin \\pi",
+    "CalculatorFunctionsTrigonometry::sinExact",
+    "SineExact",
+innerStandard
+  );
+
+  this->addOperationHandler(
+    "\\sin",
+    CalculatorFunctionsTrigonometry::sinApproximate,
+    "",
+    "Sine function: evaluates to a decimal "
     "approximation if the input is a double number. ",
     "\\sin{}(3.1415)",
     "CalculatorFunctionsTrigonometry::sin",
-    "Sine",
+    "SineApproximate",
+Function::Options::approximation()
+  );
+  this->addOperationHandler(
+    "\\cos",
+    CalculatorFunctionsTrigonometry::cosExact,
+    "",
+    "Cosine function. Evaluates only if exact. ",
+  "TurnOffApproximations{}();\n"
+    "\\cos \\pi- \\cos{}(3.1415)",
+    "CalculatorFunctionsTrigonometry::cos",
+    "CosineExact",
     innerStandard
   );
   this->addOperationHandler(
     "\\cos",
-    CalculatorFunctionsTrigonometry::cos,
+    CalculatorFunctionsTrigonometry::cosApproximate,
     "",
     "Cosine function. Evaluates to a decimal approximation "
     "if the input is a double number. ",
-    "\\cos{}(3.1415)",
-    "CalculatorFunctionsTrigonometry::cos",
-    "Cosine",
-    innerStandard
+  "TurnOffApproximations{}();\n"
+    "\\cos \\pi- \\cos{}(3.1415);\n"
+  "TurnOnApproximations{}();\n"
+  "\\cos \\pi- \\cos{}(3.1415);",
+    "CalculatorFunctionsTrigonometry::cosApproximate",
+    "CosineApproximate",
+    approximation
   );
   this->addOperationHandler(
     "\\tan",
@@ -4251,7 +4272,7 @@ void Calculator::initializeFunctionsStandard() {
     "(x^{1/2})^2;",
     "CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY",
     "CombineExponents",
-    innerStandard
+    Function::Options::nonCacheable()
   );
   this->addOperationHandler(
     "*",
@@ -5287,7 +5308,7 @@ void Calculator::initializeFunctionsStandard() {
     "(a^{2})^{1/2};",
     "CalculatorBasics::associateExponentExponent",
     "PowerPowerToPower",
-    innerStandard
+  Function::Options::nonCacheable()
   );
   this->addOperationHandler(
     "^",
@@ -5870,21 +5891,83 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
   this->addOperationNoRepetitionAllowed("CompareExpressionsJSON");
 }
 
+int Calculator::countNonCacheableHandlers() {
+  int count = 0;
+  for (int i = 0; i < this->operations.size(); i ++) {
+    if (this->operations.values[i].isZeroPointer()) {
+      continue;
+    }
+    OperationHandlers & handlers = this->operations.values[i].getElement();
+    for (int j = 0; j < handlers.handlers.size; j ++) {
+      if (!handlers.handlers[j].options.flagIsCacheable) {
+        count ++;
+      }
+    }
+    for (int j = 0; j < handlers.compositeHandlers.size; j ++) {
+      if (!handlers.compositeHandlers[j].options.flagIsCacheable) {
+        count ++;
+      }
+    }
+  }
+  return count;
+}
+
+void Calculator::setNonCacheableAtom(const std::string& atom) {
+  this->atomsThatMustNotBeCached.addOnTop(atom);
+  if (!this->operations.contains(atom)) {
+    return;
+  }
+  MemorySaving<OperationHandlers>& handlerContainer =
+  this->operations.getValueNoFailNonConst(atom);
+  if (handlerContainer.isZeroPointer()) {
+    return;
+  }
+  OperationHandlers& handlers = handlerContainer.getElement();
+  for (int i = 0; i < handlers.compositeHandlers.size; i ++) {
+    Function& oneHandler = handlers.compositeHandlers[i];
+    oneHandler.options.flagIsCacheable = false;
+  }
+  for (int i = 0; i < handlers.handlers.size; i ++) {
+    Function& oneHandler = handlers.handlers[i];
+    oneHandler.options.flagIsCacheable = false;
+  }
+}
+
 void Calculator::initializeAtomsNonCacheable() {
   STACK_TRACE("Calculator::initializeAtomsNonCacheable");
   this->atomsThatMustNotBeCached.setExpectedSize(30);
-  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew(
-    "RandomInteger"
-  );
-  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew(
-    "SelectAtRandom"
-  );
-  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew(
-    "GenerateRandomPrime"
-  );
-  this->atomsThatMustNotBeCached.addOnTopNoRepetitionMustBeNew(
-    "PrintAlgebraicClosureStatus"
-  );
+  this->setNonCacheableAtom("RandomInteger");
+  this->setNonCacheableAtom("SelectAtRandom");
+  this->setNonCacheableAtom("GenerateRandomPrime");
+  this->setNonCacheableAtom("PrintAlgebraicClosureStatus");
+  this->setNonCacheableAtom("PrintRuleStack");
+}
+
+void Calculator::initializeApproximationFunctions(){
+  STACK_TRACE("Calculator::initializeApproximationFunctions");
+this->approximationHandlers.clear();
+  for (int i =0 ; i < this->operations.values.size; i ++) {
+    MemorySaving<Calculator:: OperationHandlers>& container = this->operations.values[i];
+    if (container.isZeroPointer()){
+      continue;
+    }
+  Calculator::OperationHandlers& handlers = container.getElement();
+  this->initializeApproximationFunctionsForOneAtom(handlers);
+  }
+
+}
+
+void Calculator::initializeApproximationFunctionsForOneAtom(OperationHandlers &handlers){
+  for (int j =0; j < 2; j ++){
+    ListReferences<Function> &handlerCollection = j==0? handlers.handlers : handlers.compositeHandlers;
+  for (int i = 0; i < handlerCollection.size; i ++){
+    Function& current = handlerCollection[i];
+    if (!current.options.flagIsApproximation){
+      continue;
+    }
+      this->approximationHandlers.addOnTopNoRepetition(& current);
+  }
+  }
 }
 
 void Calculator::initializeAtomsNotGoodForChainRule() {

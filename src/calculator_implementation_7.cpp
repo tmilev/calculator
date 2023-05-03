@@ -899,9 +899,6 @@ bool CalculatorFunctionsBasic::logarithm(
   if (input[1].isEqualToOne()) {
     return output.assignValue(calculator, 0);
   }
-  if (calculator.approximationsBanned()) {
-    return false;
-  }
   double argument;
   if (!input[1].evaluatesToDouble(&argument)) {
     if (input[1].isOperationGiven(calculator.opE())) {
@@ -9776,7 +9773,7 @@ void Calculator::Test::calculatorTestPrepare() {
       continue;
     }
     Calculator::OperationHandlers& current = currentPointer.getElement();
-    List<Function>* currentHandler = &current.handlers;
+    ListReferences<Function>* currentHandler = &current.handlers;
     for (int j = 0; j < 2; j ++) {
       for (int k = 0; k < currentHandler->size; k ++) {
         Function& currentFunction = (*currentHandler)[k];
@@ -10469,14 +10466,14 @@ bool CalculatorFunctions::turnOnApproximations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctions::turnOnApproximations");
-  (void) input;
-  Expression approximations;
-  approximations.makeAtom(calculator, calculator.opApproximations());
-  Expression onSwitch;
-  onSwitch.makeOX(
-    calculator, calculator.opTurnOffRules(), approximations
-  );
-  return CalculatorFunctions::turnOnRules(calculator, onSwitch, output);
+  (void )input;
+  Expression expressionOn(calculator);
+expressionOn.addChildAtomOnTop(calculator.opTurnOnRules());
+for (Function* handler : calculator.approximationHandlers){
+  expressionOn.addChildAtomOnTop( handler->calculatorIdentifier);
+}
+output = expressionOn;
+return true;
 }
 
 bool CalculatorFunctions::turnOffApproximations(
@@ -10484,13 +10481,14 @@ bool CalculatorFunctions::turnOffApproximations(
 ) {
   STACK_TRACE("CalculatorFunctions::turnOffApproximations");
   (void) input;
-  Expression approximations;
-  approximations.makeAtom(calculator, calculator.opApproximations());
-  Expression offSwitch;
-  offSwitch.makeOX(
-    calculator, calculator.opTurnOffRules(), approximations
-  );
-  return CalculatorFunctions::turnOffRules(calculator, offSwitch, output);
+  (void )input;
+  Expression expressionOff(calculator);
+expressionOff.addChildAtomOnTop(calculator.opTurnOffRules());
+for (Function* handler : calculator.approximationHandlers){
+  expressionOff.addChildAtomOnTop( handler->calculatorIdentifier);
+}
+output = expressionOff;
+return true;
 }
 
 bool CalculatorFunctions::turnOffRules(

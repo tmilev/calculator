@@ -443,7 +443,7 @@ Equivalent to (a +b){}x = (a{}x) +(b{}x)
 ```
 Transforms a - b to a +(- 1) * b and - b to (- 1) * b. Equivalent to a rule -{{b}}=MinusOne * b; {{a}}-{{b}}=a + MinusOne * b
 
-Operator or function / is overloaded with 26 total handlers.
+Operator or function / is overloaded with 27 total handlers.
 
 */* [SumProductNotationToOperatorRelativeToDivision] {CalculatorFunctions::sumTimesExpressionToSumOf}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%29%3b%5cnPlotExpressionTree%28%20%5c%5csum%5c%5climits_%7bb%7d%5ec%2aa%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -656,6 +656,13 @@ x^2/x;
 (x+1)^2/(x+1)
 ```
 Assumes that the numerator and denominator of a fraction commute. Divides the two expressions under the assumption that both can be converted topolynomials with rational coefficients.
+
+*/* [DivideSequenceByScalar] {CalculatorFunctionsBinaryOps::divideSequenceByScalar}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%2c2%29%2fx%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+(1,2)/x
+```
+Divides a sequence by a scalar. 
 
 */* (_composite_) [CompositeArithmeticOperationEvaluatedOnArgumentDivision] {CalculatorFunctions::compositeArithmeticOperationEvaluatedOnArgument}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2fb%29%7b%7dx%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2307,7 +2314,7 @@ RandomInteger(- 100, 100)
 ```
 Sets the random seed of the calculator to the given integer value
 
-*SelectAtRandom* [SelectAtRandom] {CalculatorFunctions::SelectAtRandom}. 
+*SelectAtRandom* [SelectAtRandom] {CalculatorFunctions::selectAtRandom}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%3dSelectAtRandom%28%5c%5csin%2c%20%5c%5ccos%29%3b%20g%3dSelectAtRandom%28%5c%5ctan%2c%20%5c%5ccot%2c%20%5c%5csec%2c%20%5c%5ccsc%29%3bf%7b%7dg%7b%7dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 f=SelectAtRandom(\sin, \cos); g=SelectAtRandom(\tan, \cot, \sec, \csc);f{}g{}x

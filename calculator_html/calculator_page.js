@@ -44,6 +44,8 @@ class AtomHandler {
     this.visible = true;
     this.administrative = false;
     this.experimental = false;
+    /** @type {boolean} */
+    this.cacheable = input["cacheable"]
     if (input.administrative === "true" || input.administrative === true) {
       this.administrative = true;
     }
@@ -103,6 +105,12 @@ class AtomHandler {
       let element = document.createElement("b");
       element.textContent = "(experimental)";
       result.appendChild(element);      
+    }
+    if (!this.cacheable) {
+      let element = document.createElement("b");
+      element.textContent = "Non-cacheable";
+      element.style.color = "purple";
+      result.appendChild(element);
     }
     let infoElement = document.createElement("span");
     infoElement.textContent = this.description;

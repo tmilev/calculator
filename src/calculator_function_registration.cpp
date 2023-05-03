@@ -124,7 +124,6 @@ void Calculator::initializeFunctionsStandard() {
   Function::Options compositeStandard = Function::Options::compositeStandard();
   compositeStandard.flagIsCompositeHandler = true;
   compositeStandard.flagIsInner = true;
-
   Function::Options approximation = Function::Options::approximation();
   this->addOperationHandler(
     Calculator::Functions::Names::setRandomSeed,
@@ -170,7 +169,7 @@ void Calculator::initializeFunctionsStandard() {
     innerNoTest
   );
   this->addOperationHandler(
-    "TurnOffRules",
+    Calculator::Functions::Names::turnOffRules,
     CalculatorFunctions::turnOffRules,
     "",
     "Turns off computational rules.",
@@ -183,17 +182,35 @@ void Calculator::initializeFunctionsStandard() {
     "TurnOnRules(\"ConvertShortDenominatorToNegativePower\");"
     "b",
     "CalculatorFunctions::turnOffRules",
-    "TurnOffRules",
+    Calculator::Functions::Names::turnOffRules,
     innerStandard
   );
   this->addOperationHandler(
-    "TurnOnRules",
+    Calculator::Functions::Names::turnOnRules,
     CalculatorFunctions::turnOnRules,
     "",
     "Turns on computational rules.",
     "TurnOffRules(\"sqrt\"); a = \\sqrt[4]{t}; TurnOnRules(\"sqrt\"); a",
     "CalculatorFunctions::turnOnRules",
-    "TurnOnRules",
+    Calculator::Functions::Names::turnOnRules,
+    innerStandard
+  );
+  this->addOperationHandler(
+    "ResetBuiltInHandlerCache",
+    CalculatorFunctions::resetBuiltInHandlerCache,
+    "",
+    "Some built in handlers are affected by user-defined substitutions. "
+    "This resets the cached evaluation of all built handlers. ",
+    " sqrt(a^2);\n"
+    "a^{1/2}a^{1/3};\n"
+    "(a>0)=1;\n"
+    " sqrt(a^2);\n"
+    "a^{1/2}a^{1/3};\n"
+    "ResetBuiltInHandlerCache();\n"
+    " sqrt(a^2);\n"
+    "a^{1/2}a^{1/3};\n",
+    "CalculatorFunctions::resetBuiltInHandlerCache",
+    "ResetBuiltInHandlerCache",
     innerStandard
   );
   this->addOperationHandler(
@@ -1381,8 +1398,7 @@ void Calculator::initializeFunctionsStandard() {
     "\\arcsin",
     CalculatorFunctionsTrigonometry::arcsinApproximate,
     "",
-    "Arcsin function, evaluated approximately. "
-,
+    "Arcsin function, evaluated approximately. ",
     "\\arcsin(3/4)",
     "CalculatorFunctionsTrigonometry::arcsinApproximate",
     "\\arcsin",
@@ -1404,12 +1420,11 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Sine function, evaluates only if exact. ",
     "TurnOffApproximations{}();\n"
-  "\\sin{}(3.1415) - \\sin \\pi",
+    "\\sin{}(3.1415) - \\sin \\pi",
     "CalculatorFunctionsTrigonometry::sinExact",
     "SineExact",
-innerStandard
+    innerStandard
   );
-
   this->addOperationHandler(
     "\\sin",
     CalculatorFunctionsTrigonometry::sinApproximate,
@@ -1419,14 +1434,14 @@ innerStandard
     "\\sin{}(3.1415)",
     "CalculatorFunctionsTrigonometry::sin",
     "SineApproximate",
-Function::Options::approximation()
+    Function::Options::approximation()
   );
   this->addOperationHandler(
     "\\cos",
     CalculatorFunctionsTrigonometry::cosExact,
     "",
     "Cosine function. Evaluates only if exact. ",
-  "TurnOffApproximations{}();\n"
+    "TurnOffApproximations{}();\n"
     "\\cos \\pi- \\cos{}(3.1415)",
     "CalculatorFunctionsTrigonometry::cos",
     "CosineExact",
@@ -1438,10 +1453,10 @@ Function::Options::approximation()
     "",
     "Cosine function. Evaluates to a decimal approximation "
     "if the input is a double number. ",
-  "TurnOffApproximations{}();\n"
+    "TurnOffApproximations{}();\n"
     "\\cos \\pi- \\cos{}(3.1415);\n"
-  "TurnOnApproximations{}();\n"
-  "\\cos \\pi- \\cos{}(3.1415);",
+    "TurnOnApproximations{}();\n"
+    "\\cos \\pi- \\cos{}(3.1415);",
     "CalculatorFunctionsTrigonometry::cosApproximate",
     "CosineApproximate",
     approximation
@@ -4268,11 +4283,12 @@ Function::Options::approximation()
     "x*(x*y)*x*(x*x^3*x);\n"
     "x^{2/3}x^{1/2};\n"
     "(x>0)=1;\n"
+    "ResetBuiltInHandlerCache();\n"
     "x^{2/3}x^{1/2};\n"
     "(x^{1/2})^2;",
     "CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY",
     "CombineExponents",
-    Function::Options::nonCacheable()
+    innerStandard
   );
   this->addOperationHandler(
     "*",
@@ -4973,7 +4989,8 @@ Function::Options::approximation()
     CalculatorFunctionsBinaryOps::divideSequenceByScalar,
     "",
     "Divides a sequence by a scalar. ",
-    "(1,2)/x",
+    "(1,2)/x;\n"
+    "(2,3)/MakeInputBox{}(name=x, value=2)",
     "CalculatorFunctionsBinaryOps::divideSequenceByScalar",
     "DivideSequenceByScalar",
     innerStandard
@@ -5305,10 +5322,11 @@ Function::Options::approximation()
     "(a^{1/2})^2;\n"
     "(a^{2})^{1/2};\n"
     "(a>0)=1;\n"
+    "ResetBuiltInHandlerCache();\n"
     "(a^{2})^{1/2};",
     "CalculatorBasics::associateExponentExponent",
     "PowerPowerToPower",
-  Function::Options::nonCacheable()
+    innerStandard
   );
   this->addOperationHandler(
     "^",
@@ -5943,30 +5961,33 @@ void Calculator::initializeAtomsNonCacheable() {
   this->setNonCacheableAtom("PrintRuleStack");
 }
 
-void Calculator::initializeApproximationFunctions(){
+void Calculator::initializeApproximationFunctions() {
   STACK_TRACE("Calculator::initializeApproximationFunctions");
-this->approximationHandlers.clear();
-  for (int i =0 ; i < this->operations.values.size; i ++) {
-    MemorySaving<Calculator:: OperationHandlers>& container = this->operations.values[i];
-    if (container.isZeroPointer()){
+  this->approximationHandlers.clear();
+  for (int i = 0; i < this->operations.values.size; i ++) {
+    MemorySaving<Calculator::OperationHandlers>& container =
+    this->operations.values[i];
+    if (container.isZeroPointer()) {
       continue;
     }
-  Calculator::OperationHandlers& handlers = container.getElement();
-  this->initializeApproximationFunctionsForOneAtom(handlers);
+    Calculator::OperationHandlers& handlers = container.getElement();
+    this->initializeApproximationFunctionsForOneAtom(handlers);
   }
-
 }
 
-void Calculator::initializeApproximationFunctionsForOneAtom(OperationHandlers &handlers){
-  for (int j =0; j < 2; j ++){
-    ListReferences<Function> &handlerCollection = j==0? handlers.handlers : handlers.compositeHandlers;
-  for (int i = 0; i < handlerCollection.size; i ++){
-    Function& current = handlerCollection[i];
-    if (!current.options.flagIsApproximation){
-      continue;
+void Calculator::initializeApproximationFunctionsForOneAtom(
+  OperationHandlers& handlers
+) {
+  for (int j = 0; j < 2; j ++) {
+    ListReferences<Function>& handlerCollection = j ==
+    0 ? handlers.handlers : handlers.compositeHandlers;
+    for (int i = 0; i < handlerCollection.size; i ++) {
+      Function& current = handlerCollection[i];
+      if (!current.options.flagIsApproximation) {
+        continue;
+      }
+      this->approximationHandlers.addOnTopNoRepetition(&current);
     }
-      this->approximationHandlers.addOnTopNoRepetition(& current);
-  }
   }
 }
 

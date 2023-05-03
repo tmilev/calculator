@@ -658,9 +658,10 @@ x^2/x;
 Assumes that the numerator and denominator of a fraction commute. Divides the two expressions under the assumption that both can be converted topolynomials with rational coefficients.
 
 */* [DivideSequenceByScalar] {CalculatorFunctionsBinaryOps::divideSequenceByScalar}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%2c2%29%2fx%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%2c2%29%2fx%3b%5cn%282%2c3%29%2fMakeInputBox%7b%7d%28name%3dx%2c%20value%3d2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-(1,2)/x
+(1,2)/x;
+(2,3)/MakeInputBox{}(name=x, value=2)
 ```
 Divides a sequence by a scalar. 
 
@@ -912,11 +913,12 @@ M * M * M * M;
 Multiplies rational by matrix tensor form. 
 
 *\** [CombineExponents] {CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%2a%28x%2ay%29%2ax%2a%28x%2ax%5e3%2ax%29%3b%5cnx%5e%7b2%2f3%7dx%5e%7b1%2f2%7d%3b%5cn%28x%3e0%29%3d1%3b%5cnx%5e%7b2%2f3%7dx%5e%7b1%2f2%7d%3b%5cn%28x%5e%7b1%2f2%7d%29%5e2%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%2a%28x%2ay%29%2ax%2a%28x%2ax%5e3%2ax%29%3b%5cnx%5e%7b2%2f3%7dx%5e%7b1%2f2%7d%3b%5cn%28x%3e0%29%3d1%3b%5cnResetBuiltInHandlerCache%28%29%3b%5cnx%5e%7b2%2f3%7dx%5e%7b1%2f2%7d%3b%5cn%28x%5e%7b1%2f2%7d%29%5e2%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x*(x*y)*x*(x*x^3*x);
 x^{2/3}x^{1/2};
 (x>0)=1;
+ResetBuiltInHandlerCache();
 x^{2/3}x^{1/2};
 (x^{1/2})^2;
 ```
@@ -1735,7 +1737,7 @@ f{}Xcardano
 Calls the built-in cpp functions to approximately raise a double to a power, provided either the base or the exponent is a double. If the base is negative and the exponent is rational with odd denominator, the exponent is evaluated to the corresponding real negative root. 
 
 *^* [PowerPowerToPower] {CalculatorBasics::associateExponentExponent}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%5em%29%5en%3b%5cn%28%28ln%283%29%29%5em%29%5en%3b%5cn%28%28ln%280.5%29%29%5em%29%5en%3b%5cn%28a%5em%29%5e2%3b%5cn%28a%5e2%29%5em%3b%5cn%28a%5e%7b1%2f2%7d%29%5e2%3b%5cn%28a%5e%7b2%7d%29%5e%7b1%2f2%7d%3b%5cn%28a%3e0%29%3d1%3b%5cn%28a%5e%7b2%7d%29%5e%7b1%2f2%7d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%5em%29%5en%3b%5cn%28%28ln%283%29%29%5em%29%5en%3b%5cn%28%28ln%280.5%29%29%5em%29%5en%3b%5cn%28a%5em%29%5e2%3b%5cn%28a%5e2%29%5em%3b%5cn%28a%5e%7b1%2f2%7d%29%5e2%3b%5cn%28a%5e%7b2%7d%29%5e%7b1%2f2%7d%3b%5cn%28a%3e0%29%3d1%3b%5cnResetBuiltInHandlerCache%28%29%3b%5cn%28a%5e%7b2%7d%29%5e%7b1%2f2%7d%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a^m)^n;
 ((ln(3))^m)^n;
@@ -1745,6 +1747,7 @@ Calls the built-in cpp functions to approximately raise a double to a power, pro
 (a^{1/2})^2;
 (a^{2})^{1/2};
 (a>0)=1;
+ResetBuiltInHandlerCache();
 (a^{2})^{1/2};
 ```
 If the rule doesn't break over the complex numbers, substitutes (a^b)^c with a^{b*c}. The rule acts when one of the following holds:
@@ -2282,7 +2285,16 @@ Internal data structure transformation: sequence ->open interval.
 ```
 Logarithm function. Gives a decimal approximation of the natural logarithm provided the input is a double number. 
 
-*\arctan* [\arctan] {CalculatorFunctionsTrigonometry::arctan}. 
+Operator or function \arctan is overloaded with 2 total handlers.
+
+*\arctan* [ArctanExact] {CalculatorFunctionsTrigonometry::arctanExact}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5carctan%280%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+\arctan(0)
+```
+Arctan function. Tries to evaluate the arctan function. 
+
+*\arctan* [ArctanApproximate] {CalculatorFunctionsTrigonometry::arctanApproximate}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5carctan%283%2f4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \arctan(3/4)
@@ -2347,17 +2359,20 @@ TurnOffRules("sqrt"); a = \sqrt[4]{t}; TurnOnRules("sqrt"); a
 ```
 Turns on computational rules.
 
-*Approximations* [Approximations] {CalculatorFunctions::approximationsDummy}. (invisible) 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%280%29%3b%5cnln%282%29%3b%5cnTurnOnApproximations%280%29%3b%5cnln%282%29%3b%5cn%28TurnOffApproximations%200%3b%20ln%282%29%29%3b%5cnln%282%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*ResetBuiltInHandlerCache* [ResetBuiltInHandlerCache] {CalculatorFunctions::resetBuiltInHandlerCache}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%20sqrt%28a%5e2%29%3b%5cna%5e%7b1%2f2%7da%5e%7b1%2f3%7d%3b%5cn%28a%3e0%29%3d1%3b%5cn%20sqrt%28a%5e2%29%3b%5cna%5e%7b1%2f2%7da%5e%7b1%2f3%7d%3b%5cnResetBuiltInHandlerCache%28%29%3b%5cn%20sqrt%28a%5e2%29%3b%5cna%5e%7b1%2f2%7da%5e%7b1%2f3%7d%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-TurnOffApproximations(0);
-ln(2);
-TurnOnApproximations(0);
-ln(2);
-(TurnOffApproximations 0; ln(2));
-ln(2)
+ sqrt(a^2);
+a^{1/2}a^{1/3};
+(a>0)=1;
+ sqrt(a^2);
+a^{1/2}a^{1/3};
+ResetBuiltInHandlerCache();
+ sqrt(a^2);
+a^{1/2}a^{1/3};
+
 ```
-A dummy handler, used to make the implementation ofTurnOnApproximations easier. 
+Some built in handlers are affected by user-defined substitutions. This resets the cached evaluation of all built handlers. 
 
 *TurnOnApproximations* [TurnOnApproximations] {CalculatorFunctions::turnOnRules}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%280%29%3b%5cnln%282%29%3b%5cnTurnOnApproximations%280%29%3b%5cnln%282%29%3b%5cn%28TurnOffApproximations%200%3b%20ln%282%29%29%3b%5cnln%282%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2372,10 +2387,10 @@ ln(2)
 Turns on numerical approximations. Will wipe out the expression cache. Takes as input dummy argument. 
 
 *TurnOffApproximations* [TurnOffApproximations] {CalculatorFunctions::turnOffApproximations}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%280%29%3b%5cnln%282%29%3b%5cnTurnOnApproximations%280%29%3b%5cnln%282%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%280%29%3b%5cnln%282%29%2bsin%282%29%3b%5cnTurnOnApproximations%280%29%3b%5cnln%282%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 TurnOffApproximations(0);
-ln(2);
+ln(2)+sin(2);
 TurnOnApproximations(0);
 ln(2)
 ```
@@ -2669,7 +2684,7 @@ IsConstant(e^{\sin(\pi^2 + e +\sqrt{2} + 3)});
 ```
 Tests whether the expression is a constant.  
 
-Operator or function \sin is overloaded with 4 total handlers.
+Operator or function \sin is overloaded with 5 total handlers.
 
 *\sin* [SineOfAngleSum] {CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22SineOfAngleSum%5c%22%29%3b%20%5c%5csin%28a%20%2b%20b%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2695,14 +2710,22 @@ sin(- 5x)
 ```
 If a is negative, converts sin (a) to -sin(-a).
 
-*\sin* [Sine] {CalculatorFunctionsTrigonometry::sin}. 
+*\sin* [SineExact] {CalculatorFunctionsTrigonometry::sinExact}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%7b%7d%28%29%3b%5cn%5c%5csin%7b%7d%283.1415%29%20-%20%5c%5csin%20%5c%5cpi%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+TurnOffApproximations{}();
+\sin{}(3.1415) - \sin \pi
+```
+Sine function, evaluates only if exact. 
+
+*\sin* [SineApproximate] {CalculatorFunctionsTrigonometry::sin}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csin%7b%7d%283.1415%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sin{}(3.1415)
 ```
-Sine function. Evaluates to a decimal approximation if the input is a double number. 
+Sine function: evaluates to a decimal approximation if the input is a double number. 
 
-Operator or function \cos is overloaded with 4 total handlers.
+Operator or function \cos is overloaded with 5 total handlers.
 
 *\cos* [CosineOfAngleSum] {CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOnRules%28%5c%22CosineOfAngleSum%5c%22%29%3b%5cn%5c%5ccos%28a%20%2b%20b%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2729,10 +2752,21 @@ cos(- 5x)
 ```
 If a is negative, converts cos (a) to cos(- a).
 
-*\cos* [Cosine] {CalculatorFunctionsTrigonometry::cos}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ccos%7b%7d%283.1415%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*\cos* [CosineExact] {CalculatorFunctionsTrigonometry::cos}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%7b%7d%28%29%3b%5cn%5c%5ccos%20%5c%5cpi-%20%5c%5ccos%7b%7d%283.1415%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\cos{}(3.1415)
+TurnOffApproximations{}();
+\cos \pi- \cos{}(3.1415)
+```
+Cosine function. Evaluates only if exact. 
+
+*\cos* [CosineApproximate] {CalculatorFunctionsTrigonometry::cosApproximate}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22TurnOffApproximations%7b%7d%28%29%3b%5cn%5c%5ccos%20%5c%5cpi-%20%5c%5ccos%7b%7d%283.1415%29%3b%5cnTurnOnApproximations%7b%7d%28%29%3b%5cn%5c%5ccos%20%5c%5cpi-%20%5c%5ccos%7b%7d%283.1415%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+TurnOffApproximations{}();
+\cos \pi- \cos{}(3.1415);
+TurnOnApproximations{}();
+\cos \pi- \cos{}(3.1415);
 ```
 Cosine function. Evaluates to a decimal approximation if the input is a double number. 
 
@@ -2903,12 +2937,12 @@ Operator or function \arcsin is overloaded with 2 total handlers.
 ```
 Arcsin function for special angles. 
 
-*\arcsin* [\arcsin] {CalculatorFunctionsTrigonometry::arcsin}. 
+*\arcsin* [\arcsin] {CalculatorFunctionsTrigonometry::arcsinApproximate}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5carcsin%283%2f4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \arcsin(3/4)
 ```
-Arcsin function. Tries to evaluate the arcsin function. 
+Arcsin function, evaluated approximately. 
 
 Operator or function \arccos is overloaded with 2 total handlers.
 
@@ -2919,12 +2953,12 @@ Operator or function \arccos is overloaded with 2 total handlers.
 ```
 Arccos function for special angles. 
 
-*\arccos* [\arccos] {CalculatorFunctionsTrigonometry::arccos}. 
+*\arccos* [ArccosApproximate] {CalculatorFunctionsTrigonometry::arccosApproximate}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5carccos%283%2f4%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \arccos(3/4)
 ```
-Arccos function. Tries to evaluate the arccos function. 
+Arccos function. Tries to evaluate the arccos function approximately. 
 
 *\tan* [ExpressTanViaSineCosine] {CalculatorFunctionsTrigonometry::tan}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ctan%7b%7d%283.1415%29%3b%5cn%5c%5ctan%201.570796327%22%2c%22currentPage%22%3a%22calculator%22%7d)

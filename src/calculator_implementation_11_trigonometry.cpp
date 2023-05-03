@@ -1,7 +1,8 @@
 #include "calculator_inner_functions.h"
 
-bool CalculatorFunctionsTrigonometry::sinExact(Calculator &calculator, const Expression &input, Expression &output)
- {
+bool CalculatorFunctionsTrigonometry::sinExact(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   STACK_TRACE("CalculatorFunctionsTrigonometry::sin");
   if (input.size() != 2) {
     return false;
@@ -15,35 +16,36 @@ bool CalculatorFunctionsTrigonometry::sinExact(Calculator &calculator, const Exp
   }
   Rational piProportion;
   if (!argumentExpression.startsWith(calculator.opTimes(), 3)) {
-  return false;
+    return false;
   }
-    if (!argumentExpression[2].isOperationGiven(calculator.opPi())) {
-     return false;
-    }
-    if (!argumentExpression[1].isOfType<Rational>(&piProportion)) {
-
-    return false;}
-        AlgebraicNumber algebraicOutput;
-        if (
-          !algebraicOutput.assignSinRationalTimesPi(
-            piProportion, calculator.objectContainer.algebraicClosure
-          )
-        ) {return false;}
-        Rational rational;
-          if (algebraicOutput.isRational(&rational)) {
-            return output.assignValue(calculator, rational);
-          }
-          return output.assignValue(calculator, algebraicOutput);
-
+  if (!argumentExpression[2].isOperationGiven(calculator.opPi())) {
+    return false;
+  }
+  if (!argumentExpression[1].isOfType<Rational>(&piProportion)) {
+    return false;
+  }
+  AlgebraicNumber algebraicOutput;
+  if (
+    !algebraicOutput.assignSinRationalTimesPi(
+      piProportion, calculator.objectContainer.algebraicClosure
+    )
+  ) {
+    return false;
+  }
+  Rational rational;
+  if (algebraicOutput.isRational(&rational)) {
+    return output.assignValue(calculator, rational);
+  }
+  return output.assignValue(calculator, algebraicOutput);
 }
 
-bool CalculatorFunctionsTrigonometry::sinApproximate(Calculator &calculator, const Expression &input, Expression &output)
- {
+bool CalculatorFunctionsTrigonometry::sinApproximate(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   if (input.size() != 2) {
     return false;
   }
   const Expression& argumentExpression = input[1];
-
   double argumentDouble = 0;
   if (!argumentExpression.evaluatesToDouble(&argumentDouble)) {
     return false;
@@ -54,8 +56,10 @@ bool CalculatorFunctionsTrigonometry::sinApproximate(Calculator &calculator, con
   );
 }
 
-bool CalculatorFunctionsTrigonometry::cosExact(Calculator &calculator, const Expression &input, Expression &output)
-{  STACK_TRACE("CalculatorFunctionsTrigonometry::cosExact");
+bool CalculatorFunctionsTrigonometry::cosExact(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsTrigonometry::cosExact");
   if (input.size() != 2) {
     return false;
   }
@@ -68,38 +72,36 @@ bool CalculatorFunctionsTrigonometry::cosExact(Calculator &calculator, const Exp
   }
   Rational piProportion;
   if (!argument.startsWith(calculator.opTimes(), 3)) {
-  return false;
+    return false;
   }
   if (!argument[2].isOperationGiven(calculator.opPi())) {
-  return false;
+    return false;
   }
-      if (!argument[1].isOfType<Rational>(&piProportion)) {
-      return false;
-      }
-        AlgebraicNumber algebraicOutput;
-        if (
-          !algebraicOutput.assignCosRationalTimesPi(
-            piProportion, calculator.objectContainer.algebraicClosure
-          )
-        ) {
-        return false;}
-        Rational rational;
-          if (algebraicOutput.isRational(&rational)) {
-            return output.assignValue(calculator, rational);
-          }
-          return output.assignValue(calculator, algebraicOutput);
-
-
-
+  if (!argument[1].isOfType<Rational>(&piProportion)) {
+    return false;
   }
+  AlgebraicNumber algebraicOutput;
+  if (
+    !algebraicOutput.assignCosRationalTimesPi(
+      piProportion, calculator.objectContainer.algebraicClosure
+    )
+  ) {
+    return false;
+  }
+  Rational rational;
+  if (algebraicOutput.isRational(&rational)) {
+    return output.assignValue(calculator, rational);
+  }
+  return output.assignValue(calculator, algebraicOutput);
+}
 
-bool CalculatorFunctionsTrigonometry::cosApproximate(Calculator &calculator, const Expression &input, Expression &output)
-{  if (input.size() != 2) {
+bool CalculatorFunctionsTrigonometry::cosApproximate(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  if (input.size() != 2) {
     return false;
   }
   const Expression& argument = input[1];
-
-
   double argumentDouble = 0;
   if (!argument.evaluatesToDouble(&argumentDouble)) {
     return false;
@@ -445,8 +447,10 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   return false;
 }
 
-bool CalculatorFunctionsTrigonometry::arctanExact(Calculator &calculator, const Expression &input, Expression &output)
-  {STACK_TRACE("CalculatorFunctionsTrigonometry::arctanExact");
+bool CalculatorFunctionsTrigonometry::arctanExact(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsTrigonometry::arctanExact");
   if (input.size() != 2) {
     return false;
   }
@@ -463,11 +467,11 @@ bool CalculatorFunctionsTrigonometry::arctanExact(Calculator &calculator, const 
     return true;
   }
   return false;
-  }
+}
 
-
-bool CalculatorFunctionsTrigonometry::arctanApproximate(Calculator &calculator, const Expression &input, Expression &output)
-  {
+bool CalculatorFunctionsTrigonometry::arctanApproximate(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   if (input.size() != 2) {
     return false;
   }
@@ -480,8 +484,10 @@ bool CalculatorFunctionsTrigonometry::arctanApproximate(Calculator &calculator, 
   output.assignValue(calculator, FloatingPoint::arctan(argumentDouble));
 }
 
-bool CalculatorFunctionsTrigonometry::arccosApproximate(Calculator &calculator, const Expression &input, Expression &output)
-{  STACK_TRACE("CalculatorFunctionsTrigonometry::arccosApproximate");
+bool CalculatorFunctionsTrigonometry::arccosApproximate(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsTrigonometry::arccosApproximate");
   if (input.size() != 2) {
     return false;
   }
@@ -494,8 +500,9 @@ bool CalculatorFunctionsTrigonometry::arccosApproximate(Calculator &calculator, 
   output.assignValue(calculator, FloatingPoint::arccos(doubleArgument));
 }
 
-bool CalculatorFunctionsTrigonometry::arcsinApproximate(Calculator &calculator, const Expression &input, Expression &output)
-{
+bool CalculatorFunctionsTrigonometry::arcsinApproximate(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   STACK_TRACE("CalculatorFunctionsTrigonometry::arcsin");
   if (input.size() != 2) {
     return false;

@@ -10466,14 +10466,14 @@ bool CalculatorFunctions::turnOnApproximations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctions::turnOnApproximations");
-  (void )input;
+  (void) input;
   Expression expressionOn(calculator);
-expressionOn.addChildAtomOnTop(calculator.opTurnOnRules());
-for (Function* handler : calculator.approximationHandlers){
-  expressionOn.addChildAtomOnTop( handler->calculatorIdentifier);
-}
-output = expressionOn;
-return true;
+  expressionOn.addChildAtomOnTop(calculator.opTurnOnRules());
+  for (Function * handler : calculator.approximationHandlers) {
+    expressionOn.addChildAtomOnTop(handler->calculatorIdentifier);
+  }
+  output = expressionOn;
+  return true;
 }
 
 bool CalculatorFunctions::turnOffApproximations(
@@ -10481,14 +10481,14 @@ bool CalculatorFunctions::turnOffApproximations(
 ) {
   STACK_TRACE("CalculatorFunctions::turnOffApproximations");
   (void) input;
-  (void )input;
+  (void) input;
   Expression expressionOff(calculator);
-expressionOff.addChildAtomOnTop(calculator.opTurnOffRules());
-for (Function* handler : calculator.approximationHandlers){
-  expressionOff.addChildAtomOnTop( handler->calculatorIdentifier);
-}
-output = expressionOff;
-return true;
+  expressionOff.addChildAtomOnTop(calculator.opTurnOffRules());
+  for (Function * handler : calculator.approximationHandlers) {
+    expressionOff.addChildAtomOnTop(handler->calculatorIdentifier);
+  }
+  output = expressionOff;
+  return true;
 }
 
 bool CalculatorFunctions::turnOffRules(
@@ -10505,6 +10505,16 @@ bool CalculatorFunctions::turnOnRules(
   STACK_TRACE("CalculatorFunctions::turnOnRules");
   return
   CalculatorFunctions::turnRulesOnOff(calculator, input, output, false);
+}
+
+bool CalculatorFunctions::resetBuiltInHandlerCache(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  (void) input;
+  calculator.ruleCollectionId ++;
+  calculator.cachedExpressionsPerStack.clear();
+  return
+  output.assignValue<std::string>(calculator, "Built in evaluation reset.");
 }
 
 bool CalculatorFunctions::equalityToArithmeticExpression(

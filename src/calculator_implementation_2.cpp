@@ -266,11 +266,11 @@ Expression Calculator::expressionSquareRootNegativeOne() {
 
 List<Function> Calculator::OperationHandlers::mergeHandlers() {
   List<Function> result;
-  for (Function& handler: this->handlers){
-  result.addOnTop(handler);
+  for (Function& handler : this->handlers) {
+    result.addOnTop(handler);
   }
-  for (Function& handler: this->compositeHandlers){
-  result.addOnTop(handler);
+  for (Function& handler : this->compositeHandlers) {
+    result.addOnTop(handler);
   }
   return result;
 }
@@ -355,8 +355,9 @@ void Calculator::logFunctionWithTime(Function& input, int64_t startTime) {
   *this << "Rule stack size: " << this->ruleStack.size();
 }
 
-const ListReferences<Function>* Calculator::getOperationCompositeHandlers(int operation)
-{
+const ListReferences<Function>* Calculator::getOperationCompositeHandlers(
+  int operation
+) {
   if (operation < 0 || operation >= this->operations.size()) {
     // Instead of crashing, we may instead return nullptr.
     // TODO(tmilev): document why we are so harsh
@@ -371,7 +372,8 @@ const ListReferences<Function>* Calculator::getOperationCompositeHandlers(int op
   &this->operations.values[operation].getElementConst().compositeHandlers;
 }
 
-const ListReferences<Function> *Calculator::getOperationHandlers(int operation) {
+const ListReferences<Function>* Calculator::getOperationHandlers(int operation)
+{
   if (operation < 0 || operation >= this->operations.size()) {
     // Instead of crashing, we may instead return nullptr.
     // TODO(tmilev): document why we are so harsh
@@ -539,11 +541,27 @@ bool Calculator::outerStandardFunction(
     globalCache.builtInTransformations.getElement();
     if (transformation.ruleCollectionId == calculator.ruleCollectionId) {
       if (transformation.firstApplicableHandler == nullptr) {
+        if (calculator.flagLogCache) {
+          calculator
+          << "<hr>Built-in evaluation cached skip at stack level: "
+          << calculator.ruleStack.size()
+          << ". Expression: "
+          << input.toString();
+        }
         return false;
       }
       if (transformation.firstApplicableHandler->options.flagIsCacheable) {
         if (outputHandler != nullptr) {
           *outputHandler = transformation.firstApplicableHandler;
+        }
+        if (calculator.flagLogCache) {
+          calculator
+          << "<hr>Built-in evaluation cache hit at stack level: "
+          << calculator.ruleStack.size()
+          << ": "
+          << input.toString()
+          << "->"
+          << transformation.transformsTo.toString();
         }
         output = transformation.transformsTo;
         return true;
@@ -731,6 +749,7 @@ void StateMaintainerCalculator::addRule(const Expression& rule) {
 StateMaintainerCalculator::StateMaintainerCalculator(Calculator& inputOwner) {
   this->owner = &inputOwner;
   this->startingRuleStackSize = inputOwner.ruleStack.size();
+  this->startingRuleCollectionId = inputOwner.ruleCollectionId;
 }
 
 StateMaintainerCalculator::~StateMaintainerCalculator() {
@@ -789,6 +808,9 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
     this->owner->cachedExpressionsPerStack.clear();
   }
   this->owner->ruleStack.setSize(this->startingRuleStackSize);
+  if (this->owner->ruleCollectionId != this->startingRuleCollectionId) {
+    this->owner->ruleCollectionId ++;
+  }
   this->owner = nullptr;
 }
 

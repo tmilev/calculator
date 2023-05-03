@@ -405,7 +405,8 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  Expression constPower, power;
+  Expression constPower;
+  Expression power;
   const Expression* left = &input[1];
   const Expression* right = &input[2];
   if (*left == *right) {
@@ -448,7 +449,8 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
           if (!isGood) {
             continue;
           }
-          Rational leftRat, rightRat;
+          Rational leftRat;
+          Rational rightRat;
           if (!isGood) {
             if ((*left)[2].isOfType<Rational>(&leftRat) && (*right)[2].isOfType<
                 Rational
@@ -1537,12 +1539,14 @@ Function::Options Function::Options::standard() {
   result.flagIsInner = true;
   return result;
 }
+
 Function::Options Function::Options::nonCacheable() {
   Function::Options result;
   result.flagIsInner = true;
   result.flagIsCacheable = false;
   return result;
 }
+
 Function::Options Function::Options::approximation() {
   Function::Options result;
   result.flagIsInner = true;
@@ -1679,7 +1683,7 @@ std::string Function::toStringShort() const {
     << handler.handlers.size
     << "). ";
   }
-  if (!this->options. flagIsCacheable) {
+  if (!this->options.flagIsCacheable) {
     out << "Not cached. ";
   }
   return out.str();

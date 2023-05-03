@@ -695,6 +695,9 @@ public:
   static bool turnOnRules(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool resetBuiltInHandlerCache(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   // Returns false. The purpose of this function is to make the
   // turnOnApproximations implementation easier.
   static bool approximationsDummy(

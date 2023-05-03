@@ -4,9 +4,8 @@
 
 #include "general_lists.h"
 
-
 template <class Object>
-class ListReferences ;
+class ListReferences;
 
 template <typename Object>
 class ListReferencesIterator {
@@ -233,7 +232,6 @@ public:
     result.index = this->size;
     return result;
   }
-
 };
 
 template <class Object>
@@ -301,7 +299,6 @@ template <typename Object>
 Object&ListReferencesIterator<Object>::operator*() const {
   return (*this->iterated)[this->index];
 }
-
 
 template <
   class Object,

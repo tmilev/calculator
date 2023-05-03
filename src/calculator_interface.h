@@ -1766,6 +1766,7 @@ class StateMaintainerCalculator {
 public:
   Calculator* owner;
   int startingRuleStackSize;
+  int startingRuleCollectionId;
   StateMaintainerCalculator(Calculator& inputOwner);
   void addRule(const Expression& rule);
   ~StateMaintainerCalculator();

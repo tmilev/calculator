@@ -915,9 +915,9 @@ bool CalculatorFunctionsBasic::logarithm(
   }
   argument *= - 1;
   Expression iE;
-  Expression  ipiE;
-  Expression  piE;
-  Expression  lnPart;
+  Expression ipiE;
+  Expression piE;
+  Expression lnPart;
   iE.makeSqrt(calculator, Rational(- 1), 2);
   piE.makeAtom(calculator, calculator.opPi());
   ipiE.makeXOX(calculator, calculator.opTimes(), piE, iE);

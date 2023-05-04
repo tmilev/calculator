@@ -444,7 +444,7 @@ function colorToHex(color) {
  */
 function numberFromNumberOfInfinity(input) {
   if (typeof input === 'string') {
-    let inputString = /** @type {string}*/ (input);
+    let inputString = /** @type {string} */ (input);
     if (inputString.toLowerCase() === 'infinity' ||
         inputString.toLowerCase() === 'minusInfinity') {
       return 0;

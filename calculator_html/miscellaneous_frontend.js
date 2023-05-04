@@ -16,9 +16,9 @@ function switchMenu(
 }
 
 function appendHtml(
-  /** @type {HTMLElement}*/
+  /** @type {HTMLElement} */
   targetToAppendTo,
-  /** @type {HTMLElement|HTMLElement[]}*/
+  /** @type {HTMLElement|HTMLElement[]} */
   contentToAppend,
 ) {
   if (contentToAppend === null) {
@@ -41,9 +41,9 @@ function appendHtml(
 }
 
 function appendHtmlToArray(
-  /** @type {HTMLElement[]}*/
+  /** @type {HTMLElement[]} */
   targetArray,
-  /** @type {HTMLElement|HTMLElement[]}*/
+  /** @type {HTMLElement|HTMLElement[]} */
   contentToAppend,
 ) {
   if (contentToAppend === null) {

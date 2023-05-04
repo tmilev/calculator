@@ -17,7 +17,7 @@ class AnswerPanel {
      * mathQuillPanelOptions:string,
      * dontBootstrapButtons:boolean,
      * valueChangeHandler:function,
-     * idButtonAnswer:string}}*/
+     * idButtonAnswer:string}} */
     input,
   ) {
     this.input = input;

@@ -168,11 +168,11 @@ class EditorInputExtractor {
     this.rightIndex = - 1;
     /** @type {number} The left end of the selection, equal to index of the left caret needed to enclose our selection. */
     this.leftIndex = - 1;
-    /** @type {number}*/
+    /** @type {number} */
     this.openLeftDelimiters = 0;
-    /** @type {number}*/
+    /** @type {number} */
     this.openRightDelimiters = 0;
-    /** @type {boolean}*/
+    /** @type {boolean} */
     this.foundSemiColumn = false;
     this.leftDelimiters = {
       "(": true,
@@ -185,9 +185,9 @@ class EditorInputExtractor {
   }
 
   extract(
-    /** @type {string}*/
+    /** @type {string} */
     inputLatex,
-    /** @type {number}*/
+    /** @type {number} */
     caretPosition,
   ) {
     this.rawInput = inputLatex;

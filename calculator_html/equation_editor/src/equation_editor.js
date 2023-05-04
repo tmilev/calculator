@@ -609,9 +609,9 @@ class MathNodeFactory {
   fraction(
       /** @type {EquationEditor!} */
       equationEditor,
-      /** @type {MathNode?}*/
+      /** @type {MathNode?} */
       numeratorContent,
-      /** @type {MathNode?}*/
+      /** @type {MathNode?} */
       denominatorContent,
   ) {
     const fraction = new MathNodeFraction(equationEditor);
@@ -652,7 +652,7 @@ class MathNodeFactory {
   cancel(
       /** @type {EquationEditor!} */
       equationEditor,
-      /** @type {MathNode?}*/
+      /** @type {MathNode?} */
       content,
   ) {
     const result = new MathNodeCancel(equationEditor);
@@ -827,7 +827,7 @@ class MathNodeFactory {
       equationEditor,
       /** @type {MathNode?} */
       base,
-      /** @type {MathNode?}*/
+      /** @type {MathNode?} */
       exponent,
   ) {
     const baseWithExponent = new MathNodeBaseWithExponent(equationEditor);
@@ -1443,7 +1443,7 @@ function mathFromLatex(
   return result;
 }
 
-/** @return {Element!}*/
+/** @return {Element!} */
 function boldElement(
     /** @type {string} */
     text,
@@ -1505,8 +1505,8 @@ class SyntacticElement {
 }
 
 class ToLatexOptions {
-  constructor(/** @type {boolean}*/ useCursorCommand) {
-    /** @type {boolean}*/
+  constructor(/** @type {boolean} */ useCursorCommand) {
+    /** @type {boolean} */
     this.useCursorCommand = useCursorCommand;
   }
 }
@@ -1529,7 +1529,7 @@ class LaTeXConstants {
     this.characterReplacingSelectionString =
         'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 +-*';
 
-    /** @type {Object<string, boolean>!}*/
+    /** @type {Object<string, boolean>!} */
     this.characterReplacingSelection = {};
     for (let i = 0; i < this.characterReplacingSelectionString.length; i++) {
       this.characterReplacingSelection[this.characterReplacingSelectionString
@@ -2059,7 +2059,7 @@ class LaTeXConstants {
 
   /** @return {boolean} */
   isLatinCharacter(
-      /** @type {string}*/
+      /** @type {string} */
       input,
   ) {
     return input in this.latinCharacters;
@@ -2067,7 +2067,7 @@ class LaTeXConstants {
 
   /** @return {boolean} */
   isDigit(
-      /** @type {string}*/
+      /** @type {string} */
       input,
   ) {
     return input in this.digits;
@@ -2102,7 +2102,7 @@ class LaTeXConstants {
   }
 }
 
-/** @type {LaTeXConstants!}*/
+/** @type {LaTeXConstants!} */
 const latexConstants = new LaTeXConstants();
 
 class LaTeXParser {
@@ -3397,9 +3397,9 @@ class EquationEditor {
     this.history = new CircularBuffer(5000);
     /** @type {Array.<string>!} */
     this.redoBuffer = [];
-    /** @type {boolean}*/
+    /** @type {boolean} */
     this.backslashSequenceStarted = false;
-    /** @type {string}*/
+    /** @type {string} */
     this.backslashSequence = '';
     /** @type {number} */
     this.backslashPosition = -1;
@@ -3591,7 +3591,7 @@ class EquationEditor {
     // not so for non-breaking space.
     this.eventCatcher.initialContent = '\u200A';
     this.eventCatcher.element =
-        /** @type {HTMLElement!}*/ (document.createElement('div'));
+        /** @type {HTMLElement!} */ (document.createElement('div'));
     this.eventCatcher.element.textContent = this.eventCatcher.initialContent;
     this.container.appendChild(this.eventCatcher.element);
     let boundingBox = this.eventCatcher.element.getBoundingClientRect();
@@ -3628,10 +3628,10 @@ class EquationEditor {
       this.pasteFromClipboard();
     });
     this.eventCatcher.element.addEventListener('keydown', (e) => {
-      this.handleKeyDownCatchAll(/** @type {KeyboardEvent!}*/ (e));
+      this.handleKeyDownCatchAll(/** @type {KeyboardEvent!} */ (e));
     });
     this.container.addEventListener('keydown', (e) => {
-      this.handleKeyDownCatchAll(/** @type {KeyboardEvent!}*/ (e));
+      this.handleKeyDownCatchAll(/** @type {KeyboardEvent!} */ (e));
     });
     this.eventCatcher.element.addEventListener('blur', (e) => {
       this.blur();
@@ -3709,7 +3709,7 @@ class EquationEditor {
       return;
     }
     if (this.canvasTwoDContext === null) {
-      this.canvasTwoDContext = /** @type {CanvasRenderingContext2D!}*/ (
+      this.canvasTwoDContext = /** @type {CanvasRenderingContext2D!} */ (
           this.containerCanvas.getContext('2d'));
     }
     if (this.containerCanvas !== null) {
@@ -3994,7 +3994,7 @@ class EquationEditor {
   }
 
   dispatchKeyToNode(
-      /** @type {MathNode?}*/
+      /** @type {MathNode?} */
       focused,
       /** @type {string} */
       key,
@@ -4767,7 +4767,7 @@ class EquationEditor {
       }
     }
     for (let i = left; i <= right; i++) {
-      accountChildToTheRight(/** @type {MathNode!}*/ (parent.children[i]));
+      accountChildToTheRight(/** @type {MathNode!} */ (parent.children[i]));
     }
     while (leftOpenCount > 0 || rightOpenCount > 0) {
       if (leftOpenCount > 0) {
@@ -4777,7 +4777,7 @@ class EquationEditor {
           return;
         }
         accountChildToTheRight(
-            /** @type {MathNode!}*/ (parent.children[right]));
+            /** @type {MathNode!} */ (parent.children[right]));
       }
       if (rightOpenCount > 0) {
         left--;
@@ -4785,7 +4785,7 @@ class EquationEditor {
           console.log('Missing left delimiter');
           return;
         }
-        accountChildToTheLeft(/** @type {MathNode!}*/ (parent.children[left]));
+        accountChildToTheLeft(/** @type {MathNode!} */ (parent.children[left]));
       }
     }
     if (swapped) {
@@ -4962,7 +4962,7 @@ class BoundingBox {
 
     /** @type {boolean} */
     this.needsMiddleAlignment = false;
-    /** @type {Array.<number>!}*/
+    /** @type {Array.<number>!} */
     // Used for math nodes that have columns (matrices, tables
     // (\begin{array}...)).
     this.columnOffsets = [];
@@ -5215,7 +5215,7 @@ class MathNode {
     }
     if (this.initialContent !== '') {
       if (this.type.type === knownTypes.formInput.type) {
-        (/** @type {HTMLInputElement!}*/ (this.element)).value =
+        (/** @type {HTMLInputElement!} */ (this.element)).value =
             this.initialContent;
       } else {
         this.element.textContent = this.initialContent;
@@ -5234,10 +5234,10 @@ class MathNode {
           this.pasteFromClipboard(e);
         });
         this.element.addEventListener('keyup', (e) => {
-          this.handleKeyUp(/** @type {KeyboardEvent!}*/ (e));
+          this.handleKeyUp(/** @type {KeyboardEvent!} */ (e));
         });
         this.element.addEventListener('keydown', (e) => {
-          this.handleKeyDown(/** @type {KeyboardEvent!}*/ (e));
+          this.handleKeyDown(/** @type {KeyboardEvent!} */ (e));
         });
         this.element.addEventListener('focus', (e) => {
           this.handleFocus(e);
@@ -5248,19 +5248,19 @@ class MathNode {
       }
       if (this.type.type !== knownTypes.eventCatcher.type) {
         this.element.addEventListener('click', (e) => {
-          this.handleSingleClick(/** @type {MouseEvent!}*/ (e));
+          this.handleSingleClick(/** @type {MouseEvent!} */ (e));
         });
         this.element.addEventListener('mousedown', (e) => {
           this.equationEditor.handleMouseSelectionStart(
-              /** @type {MouseEvent!}*/ (e), this);
+              /** @type {MouseEvent!} */ (e), this);
         });
         this.element.addEventListener('mouseup', (e) => {
           this.equationEditor.handleMouseSelectionEnd(
-              /** @type {MouseEvent!}*/ (e));
+              /** @type {MouseEvent!} */ (e));
         });
         this.element.addEventListener('mousemove', (e) => {
           this.equationEditor.handleMouseMoveSelection(
-              /** @type {MouseEvent!}*/ (e), this);
+              /** @type {MouseEvent!} */ (e), this);
         });
       }
       if (this.type.type === knownTypes.root.type) {
@@ -5275,7 +5275,7 @@ class MathNode {
     }
     if (this.type.type === knownTypes.root.type) {
       this.element.addEventListener('dblclick', (e) => {
-        this.equationEditor.handleDoubleClick(/** @type {MouseEvent!}*/ (e));
+        this.equationEditor.handleDoubleClick(/** @type {MouseEvent!} */ (e));
       });
     }
   }
@@ -5366,7 +5366,7 @@ class MathNode {
     if (parentWithIndex.parent === null) {
       return this;
     }
-    return /** @type {MathNode!}*/ (
+    return /** @type {MathNode!} */ (
         parentWithIndex.parent.children[parentWithIndex.indexInParent]);
   }
 
@@ -6346,7 +6346,7 @@ class MathNode {
       return null;
     }
     let commonPath =
-        /** @type {Array<number>!}*/ (this.commonPathToRoot(other));
+        /** @type {Array<number>!} */ (this.commonPathToRoot(other));
     return this.equationEditor.elementFromPath(commonPath);
   }
 
@@ -6768,7 +6768,7 @@ class MathNode {
           j === current.children.length - 1) {
         current.children[j].desiredCursorPosition = 1;
       }
-      normalizedChildren.push(/** @type {MathNode!}*/ (current.children[j]));
+      normalizedChildren.push(/** @type {MathNode!} */ (current.children[j]));
     }
     return true;
   }
@@ -6780,7 +6780,7 @@ class MathNode {
     for (let i = 0; i < this.children.length; i++) {
       if (this.normalizeHorizontalMathInHorizontalMathOnceAccountOneChild(
               normalizedChildren,
-              /** @type {MathNode!}*/ (this.children[i]),
+              /** @type {MathNode!} */ (this.children[i]),
               )) {
         found = true;
       }
@@ -7217,7 +7217,7 @@ class MathNode {
       rows,
       /** @type {number} */
       columns,
-      /** @type {string}*/
+      /** @type {string} */
       matrixEnvironment,
   ) {
     let split = this.splitByCursorEmptyAtoms();
@@ -7231,7 +7231,7 @@ class MathNode {
       columns,
       /** @type {Array.<MathNode!>!} */
       split,
-      /** @type {string}*/
+      /** @type {string} */
       matrixEnvironment,
   ) {
     // Find closest ancestor node that's of type horizontal math.
@@ -7325,7 +7325,7 @@ class MathNode {
   makeOperatorWithSubscriptFromSplit(
       /** @type {string} */
       operator,
-      /** @type {Array.<MathNode?>!}*/
+      /** @type {Array.<MathNode?>!} */
       split,
   ) {
     let parent = this.parent;
@@ -7491,7 +7491,7 @@ class MathNode {
     return parent.children[index];
   }
 
-  /** @return {number}*/
+  /** @return {number} */
   findIndexMatchingDelimiter(
       /** @type {number} */
       indexStartingDelimiter,
@@ -8481,7 +8481,7 @@ class MathNode {
   }
 
   toScalableVectorGraphicsAtomic(
-      /** @type {SVGSVGElement!}*/
+      /** @type {SVGSVGElement!} */
       container,
       /** @type {BoundingBox!} */
       boundingBoxFromParent,
@@ -11561,7 +11561,7 @@ class MathNodeMatrix extends MathNode {
         // We have a last row, that is empty, except for an \hline.
         // This means that the table has a bottom border, which
         // we create by appending a bottom border on the row above.
-        let row = /** @type {MathNodeMatrixRow!}*/ (
+        let row = /** @type {MathNodeMatrixRow!} */ (
             matrixTable.children[numberOfRows - 2]);
         row.addBottomBorder();
       }
@@ -11612,7 +11612,7 @@ class MathNodeMatrixRow extends MathNode {
       equationEditor,
   ) {
     super(equationEditor, knownTypes.matrixRow);
-    /** @type {number}*/
+    /** @type {number} */
     this.topLineCount = 0;
     this.bottomLineCount = 0;
   }
@@ -11983,7 +11983,7 @@ class MathNodeOperatorSuperscript extends MathNode {
    */
   applyBackspaceToTheLeft() {
     let parent =
-        /** @type {MathNodeOperatorWithSuperAndSubscript!}*/ (this.parent);
+        /** @type {MathNodeOperatorWithSuperAndSubscript!} */ (this.parent);
     return parent.applyBackspaceToTheLeftEndOfOperatorSubscript();
   }
 }
@@ -12561,12 +12561,12 @@ class EquationEditorButtonFactory {
     /** @type {string} */
     this.className = '';
     if (className !== null && className !== undefined) {
-      this.className = /** @type {string}*/ (className);
+      this.className = /** @type {string} */ (className);
     }
   }
 
   addEditorAction(
-      /** @type {EquationEditorAction!}*/
+      /** @type {EquationEditorAction!} */
       command,
   ) {
     this.commands.push(command);
@@ -12803,7 +12803,7 @@ class EquationEditorButtonPanel {
     /** @type {boolean} */
     this.startsExpanded = (options.startsExpanded === undefined) ?
         true :
-        /** @type {boolean}*/ (options.startsExpanded);
+        /** @type {boolean} */ (options.startsExpanded);
     /** @type {boolean} */
     this.expanded = false;
     if (options.useDefaultButtonFactories === true ||
@@ -12869,7 +12869,7 @@ class EquationEditorButtonPanel {
   constructPanelDOM() {
     this.panelContainer.textContent = '';
     this.buttonTable =
-        /** @type {HTMLTableElement!}*/ (document.createElement('table'));
+        /** @type {HTMLTableElement!} */ (document.createElement('table'));
     /** @type {HTMLTableRowElement!} */
     let currentRow =
         /** @type {HTMLTableRowElement!} */ (this.buttonTable.insertRow(-1));
@@ -12883,7 +12883,7 @@ class EquationEditorButtonPanel {
           currentFactory.getButton(this.editor));
     }
     this.expandableDiv =
-        /** @type {HTMLElement!}*/ (document.createElement('div'));
+        /** @type {HTMLElement!} */ (document.createElement('div'));
     this.expandableDiv.appendChild(this.buttonTable);
     this.buttonTable.style.marginLeft = 'auto';
     this.buttonTable.style.marginRight = 'auto';
@@ -12901,7 +12901,7 @@ class EquationEditorButtonPanel {
         this.expand();
       });
     }
-    this.panelHeight = /** @type {string}*/ (
+    this.panelHeight = /** @type {string} */ (
         window.getComputedStyle(this.expandableDiv).height);
     setTimeout(() => {
       this.matchExpandedStatus();

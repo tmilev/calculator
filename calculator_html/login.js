@@ -72,7 +72,7 @@ class Authenticator {
       url: url,
       parameters: parameters,
       callback: (
-        /** @type {string}*/
+        /** @type {string} */
         input,
         output,
       ) => {
@@ -83,7 +83,7 @@ class Authenticator {
   }
 
   loginWithServerCallback(
-    /** @type {string}*/
+    /** @type {string} */
     incomingString,
     output,
   ) {

@@ -950,7 +950,7 @@ table.lectureMaterials col:nth-child(3) {
   width: 15%;
 }
 
-/*table.lectureMaterials tr:nth-child(even){}*/
+/* table.lectureMaterials tr:nth-child(even){} */
 table.lectureMaterials tr:nth-child(odd) {
   background-color: #fafafa;
 }
@@ -1004,12 +1004,12 @@ table.topicList td, table.topicList th {
   width: 20%;
 }
 
-/*table.topicList tr:nth-child(even){}*/
+/* table.topicList tr:nth-child(even){} */
 table.topicList tr:nth-child(odd) {
   background-color: #fafafa;
 }
 
-/*table.topicList tr:hover {background-color: #ddd;}*/
+/* table.topicList tr:hover {background-color: #ddd;} */
 table.topicList th {
   padding-top: 12px;
   padding-bottom: 12px;

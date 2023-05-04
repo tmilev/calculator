@@ -233,7 +233,7 @@ class GraphicsSerialization {
   }
 
   writeParameters(
-    /** @type {Array.<string>}*/
+    /** @type {Array.<string>} */
     parameterNames,
     /** @type {CanvasTwoD|CanvasThreeD} */
     canvas,

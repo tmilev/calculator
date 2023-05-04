@@ -225,7 +225,7 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
 
 class Problem {
   constructor(
-    /** @type {HTMLElement}*/
+    /** @type {HTMLElement} */
     outputElement,
   ) {
     /** @type {string} */

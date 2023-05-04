@@ -243,7 +243,7 @@ class RequestWithProgress {
  *   Pass null or undefined if you don't want to show the result.
  */
 function submitGET(
-  /** @type {{url: string, callback: Function, progress: string, result: HTMLElement|string, panelOptions:{dontCollapsePanel:boolean, width:number}}}*/
+  /** @type {{url: string, callback: Function, progress: string, result: HTMLElement|string, panelOptions:{dontCollapsePanel:boolean, width:number}}} */
   inputObject,
 ) {
   let address = correctAddress(inputObject.url);
@@ -266,7 +266,7 @@ function submitGET(
 }
 
 function submitPOST(
-  /** @type {{url: string, parameters: string, callback: Function, progress: string, result: string}}*/
+  /** @type {{url: string, parameters: string, callback: Function, progress: string, result: string}} */
   inputObject,
 ) {
   let address = correctAddress(inputObject.url);

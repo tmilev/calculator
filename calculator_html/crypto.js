@@ -173,7 +173,7 @@ class AbstractSyntaxOne {
   appendAnnotation(
     /** @type {HTMLElement} */
     container,
-    /** @type  {ASNElement}*/
+    /** @type  {ASNElement} */
     currentInterpretation,
   ) {
     var currentElement = document.createElement("SPAN");
@@ -297,7 +297,7 @@ class AbstractSyntaxOne {
   appendAnnotationTree(
     /** @type {HTMLElement} */
     container,
-    /** @type  {ASNElement}*/
+    /** @type  {ASNElement} */
     currentInterpretation,
   ) {
     var currentElement = document.createElement("DIV");

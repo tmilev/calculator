@@ -568,9 +568,10 @@ Substitutes a/(b/c)^d =a c^d/b^d.Note the order of multiplication in the rules: 
 Rule: (a_0 + a_1 x^{c_1}+ ... + a_n x^{c_n}) /x^t =a_0 x^{-t}+ a_1 x^{c_1-t}+...+a_n x^{c_n-t} 
 
 */* [DivideRationalByRational] {CalculatorFunctionsBinaryOps::divideRationalByRational}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%224%2f6%3b%202%2f0%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%224%2f6%3b%5cn2%2f0%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-4/6; 2/0;
+4/6;
+2/0;
 ```
 Divides two rational numbers. 
 
@@ -1398,7 +1399,7 @@ Z\otimes W
 ```
 Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.
 
-*\otimes* [TensorProductStandard] {CalculatorBasics::outerTensor}. (invisible) 
+*\otimes* [TensorProductStandard] {CalculatorBasics::tensorProductStandard}. (invisible) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2ci%29%3b%5cnv%3dHeighestWeightVector%7b%7d%28X%2c%20%281%2c0%29%2c%280%2c0%29%29%3b%5cng_%7b-%201%7d%28v%5c%5cotimes%20v%29%3b%5cng_%7b-%201%7dg_%7b-%201%7d%28v%5c%5cotimes%20v%29%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
@@ -1565,9 +1566,13 @@ Converts degrees to radians
 Handles expressions of the form \limits_a^b
 
 *^* [PowerIntegerByInteger] {CalculatorFunctionsBinaryOps::powerRationalByInteger}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%7b3%5e3%7d%5e3%3b%203%5e%7b3%5e3%7d%3b%203%5e3%5e3%3b%200%5e3%3b%200%5e%7b-3%7d%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%7b3%5e3%7d%5e3%3b%5cn3%5e%7b3%5e3%7d%3b%5cn3%5e3%5e3%3b%5cn0%5e3%3b%5cn0%5e%7b-3%7d%3b%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; 
+{3^3}^3;
+3^{3^3};
+3^3^3;
+0^3;
+0^{-3}; 
 ```
 Raises rational to power, provided the power is a small integer. 
 
@@ -1635,16 +1640,18 @@ X =\begin{pmatrix} 1 & -1 \\ 4 & -3\end{pmatrix}; X^{-55!- 1}
 Attempts to exponentiate matrix by a large power. 
 
 *^* [PowerMatrixNumbersBySmallIntegerIfPossible] {CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%5c%5cbegin%7bpmatrix%7d%20a%20%26%20b%20%5c%5c%5c%5c%20t%20%2bq%20%26r%5c%5cend%7bpmatrix%7d%3b%20X%5e%7b2%7d%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%5c%5cbegin%7bpmatrix%7d%20a%20%26%20b%20%5c%5c%5c%5c%20t%20%2bq%20%26r%5c%5cend%7bpmatrix%7d%3b%5cnX%5e%7b2%7d%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-X =\begin{pmatrix} a & b \\ t +q &r\end{pmatrix}; X^{2}  
+X =\begin{pmatrix} a & b \\ t +q &r\end{pmatrix};
+X^{2} 
 ```
 Attempts to exponentiate a matrix of expressions, if the exponent is small. 
 
 *^* [PowerElementZmodPToInteger] {CalculatorFunctionsBinaryOps::powerElementZmodPByInteger}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%203%20mod%207%3b%20a%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3d%203%20mod%207%3b%5cna%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-a = 3 mod 7; a^2
+a = 3 mod 7;
+a^2
 ```
 Raises an element of Z mod p to an integer power. 
 
@@ -1667,9 +1674,11 @@ B=x^0;
 Replaces p^0 by 1. Notice that 0^0 is defined to be 1.An explanation of that definition was given, among others, by Donald Knuth; the argument boils down to making the Newton binomial formula work for (a+0)^n. 
 
 *^* [PowerPolynomialBySmallInteger] {CalculatorFunctionsBinaryOps::powerPolynomialBySmallInteger}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20Polynomial%7b%7dx%3b%20y%20%3d%20Polynomial%7b%7dy%3b%28x%20%2b2y%2bx%20y%2bx%5e2%2b3y%5e2%29%5e3%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20Polynomial%7b%7dx%3b%5cny%20%3d%20Polynomial%7b%7dy%3b%5cn%28x%20%2b2y%2bx%20y%2bx%5e2%2b3y%5e2%29%5e3%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-x = Polynomial{}x; y = Polynomial{}y;(x +2y+x y+x^2+3y^2)^3
+x = Polynomial{}x;
+y = Polynomial{}y;
+(x +2y+x y+x^2+3y^2)^3
 ```
 Raises polynomial to small integer power. 
 
@@ -1741,10 +1750,10 @@ Raises algebraic number to small integer or half-integer power.
 \sqrt{3+2\sqrt[2]{2}};
 (7-5\sqrt{2})^{7/3}
 ```
-Takes the radical of an algebraic number, if the algebraic number is a positive numberthat whose radical lies in the underlying algebraic closure.
+Takes the radical of an algebraic number, if the algebraic number is a positive number that whose radical lies in the underlying algebraic closure.
 
 *^* [PowerFloatingToPower] {CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%7b%7d%7b%7bx%7d%7d%3dx%5e3%2bp%20x%20%2bq%3b%5cnXcardano%20%3d%20%28%20-q%2f2%2b%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%20%2b%28%20-q%2f2-%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%3b%5cnq%3d%20DoubleValue%7b%7d1%3b%5cnp%20%3d%20DoubleValue%7b%7d1%3b%5cnXcardano%3b%5cnf%7b%7dx%3b%5cnf%7b%7dXcardano%20%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22f%7b%7d%7b%7bx%7d%7d%3dx%5e3%2bp%20x%20%2bq%3b%5cnXcardano%20%3d%20%28%20-q%2f2%2b%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%20%2b%28%20-q%2f2-%20%28q%5e2%2f4%2bp%5e3%2f27%29%5e%281%2f2%29%29%5e%281%2f3%29%3b%5cnq%3d%20DoubleValue%7b%7d1%3b%5cnp%20%3d%20DoubleValue%7b%7d1%3b%5cnXcardano%3b%5cnf%7b%7dx%3b%5cnf%7b%7dXcardano%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 f{}{{x}}=x^3+p x +q;
 Xcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);
@@ -1752,7 +1761,7 @@ q= DoubleValue{}1;
 p = DoubleValue{}1;
 Xcardano;
 f{}x;
-f{}Xcardano   
+f{}Xcardano 
 ```
 Calls the built-in cpp functions to approximately raise a double to a power, provided either the base or the exponent is a double. If the base is negative and the exponent is rational with odd denominator, the exponent is evaluated to the corresponding real negative root. 
 
@@ -1777,16 +1786,18 @@ If the rule doesn't break over the complex numbers, substitutes (a^b)^c with a^{
 4) a evaluates to real (double), b and c are rational and b*c is an even integer. 
 
 *^* [DistributeExponent] {CalculatorFunctions::distributeExponent}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2ab%29%5en%3b%20%28%5c%5csqrt%282%29%2ab%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2ab%29%5en%3b%5cn%28%5c%5csqrt%282%29%2ab%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-(a*b)^n; (\sqrt(2)*b)^2
+(a*b)^n;
+(\sqrt(2)*b)^2
 ```
 If a is a positive constant, substitutes (a*b)^c with a^c b^c.
 
 *^* [PowerToOne] {Calculator::outerPowerRaiseToFirst}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%5e1%20%2b%20x%5e2%3b%20A%5e1%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%5e1%20%2b%20x%5e2%3b%5cnA%5e1%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-x^1 + x^2; A^1
+x^1 + x^2;
+A^1
 ```
 Realizes the tranformation {{anything}}^1=a. 
 
@@ -1864,10 +1875,11 @@ g_{{i}}= ChevalleyGenerator{}(G_2, i); h_{{i}}= CartanGenerator{}(G_2, i);
 Provided that an element of Universal Enveloping algebra is a single generator (raised to arbitrary formal RF power) with coefficient 1, raises (formally) the element of the UE to arbitrary RF power. 
 
 *^* (_composite_) [ApowerBevaluatedAtC] {CalculatorFunctions::compositeAPowerBEvaluatedAtC}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ctan%5e2%20x%3b%5cn%28f%5e-2%29%20%7b%7dx%20%3b%20%28f%5e-%201%29%7b%7dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5ctan%5e2%20x%3b%5cn%28f%5e-2%29%20%7b%7dx%3b%5cn%28f%5e-%201%29%7b%7dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \tan^2 x;
-(f^-2) {}x ; (f^- 1){}x 
+(f^-2) {}x;
+(f^- 1){}x 
 ```
 Provided that n is not equal to - 1 and f is not a sequence, use the rule ({{f}}^{{n}}){}{{x}}= (f{}x)^n.
 
@@ -1898,14 +1910,15 @@ x_5x_4x_3x_2x_1
 Greater than: has similar action to the less than sign. The following example shows an implementation of commutativity. 
 
 *\<* [LessThan] {CalculatorFunctions::lessThan}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%223%20%3c%204%3b%205%20%3c%204%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%223%20%3c%204%3b%5cn5%20%3c%204%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-3 < 4; 5 < 4
+3 < 4;
+5 < 4
 ```
 If both the left hand side and the right hand side are rational, replaces the expression by 1 if the left number is less than the right, else replaces the expression by 0.
 
 *==* [IsEqualTo] {CalculatorFunctions::outerEqualEqual}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25NumberColors%5cn%20%20A%20%3d%20%28a%20%3d3%2c%20b%3d4%29%3b%5cnB%20%3d%20%28a%20%3d%20%28sqrt%283%29%29%5e2%2c%20b%20%3d%204%29%3b%5cnA%20%3d%3d%20B%3b%5cnx%20%3d%3d%20y%3b%5cnx%20%3d%3d%201%3b%5cnIsEqualToX%7b%7d%7b%7ba%7d%7d%20%3d%20%28a%20%3d%3d%20x%29%3b%5cnIsEqualToX%7b%7dy%3b%5cnIsEqualToX%7b%7dx%3b%5cnIsEqualToX%7b%7d1%3b%5cnx%20%3d1%3b%5cnIsEqualToX%7b%7d1%3b%20z%3d%20%5c%5csqrt%7b%7d1%3b%20z%3d%3d1%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25NumberColors%5cn%20%20A%20%3d%20%28a%20%3d3%2c%20b%3d4%29%3b%5cnB%20%3d%20%28a%20%3d%20%28sqrt%283%29%29%5e2%2c%20b%20%3d%204%29%3b%5cnA%20%3d%3d%20B%3b%5cnx%20%3d%3d%20y%3b%5cnx%20%3d%3d%201%3b%5cnIsEqualToX%7b%7d%7b%7ba%7d%7d%20%3d%20%28a%20%3d%3d%20x%29%3b%5cnIsEqualToX%7b%7dy%3b%5cnIsEqualToX%7b%7dx%3b%5cnIsEqualToX%7b%7d1%3b%5cnx%20%3d1%3b%5cnIsEqualToX%7b%7d1%3b%5cnz%3d%20%5c%5csqrt%7b%7d1%3b%5cnz%3d%3d1%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 %NumberColors
   A = (a =3, b=4);
@@ -1918,7 +1931,9 @@ IsEqualToX{}y;
 IsEqualToX{}x;
 IsEqualToX{}1;
 x =1;
-IsEqualToX{}1; z= \sqrt{}1; z==1
+IsEqualToX{}1;
+z= \sqrt{}1;
+z==1
 ```
 If either the left or the right argument contains a bound variable does nothing. Else evaluates to 1 if the left argument equals mathematically the right argument.
 
@@ -1998,13 +2013,14 @@ Intersects with the empty set.
 Intersects two intervals. 
 
 *\cap* [\cap] {CalculatorFunctionsListsAndSets::intersection}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2cb%2cc%29%5c%5ccap%20%28c%2c%20d%2c%20e%29%3b%5cnx%20%3d%20%28a%2cb%2cc%29%5c%5ccap%20%28c%2c%20d%2c%20e%29%3b%5cna%20%3d%201%3b%5cnd%20%3d1%3b%5cn%28a%2c%20b%2c%20c%29%5c%5ccap%20%28c%2c%20d%2c%20e%29%3b%20x%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%28a%2cb%2cc%29%5c%5ccap%20%28c%2c%20d%2c%20e%29%3b%5cnx%20%3d%20%28a%2cb%2cc%29%5c%5ccap%20%28c%2c%20d%2c%20e%29%3b%5cna%20%3d%201%3b%5cnd%20%3d1%3b%5cn%28a%2c%20b%2c%20c%29%5c%5ccap%20%28c%2c%20d%2c%20e%29%3b%5cnx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (a,b,c)\cap (c, d, e);
 x = (a,b,c)\cap (c, d, e);
 a = 1;
 d =1;
-(a, b, c)\cap (c, d, e); x
+(a, b, c)\cap (c, d, e);
+x
 ```
 Intersects lists. For the time being, the output order is not specified (will be fixed in the future).
 
@@ -4006,9 +4022,10 @@ Operator or function \_ is overloaded with 5 total handlers.
 Handles expressions of the form \limits_a^b
 
 *\_* [OperatorBoundsUnderscore] {CalculatorFunctions::operatorBounds}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%5ea_b%20f%20dx%3b%20%5c%5cint_a%5eb%20f%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%5ea_b%20f%20dx%3b%5cn%5c%5cint_a%5eb%20f%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-\int^a_b f dx; \int_a^b f dx
+\int^a_b f dx;
+\int_a^b f dx
 ```
 Takes care of the integral superscript notation \int^a 
 
@@ -4043,10 +4060,10 @@ Dereferences a sequence or a matrix. The syntax is as illustrated by the example
 Dereferences an interval, as illustrated by the example. 
 
 *\_* [DereferenceSequenceStatements] {CalculatorFunctions::dereferenceSequenceStatements}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20d%2fdx%28%20%5c%5csqrt%28x%20%2b%20y%29%20-%204x%5e2y%5e2%29%3b%5cn%28d%2fdx%28y%29%3d%200%3b%20A%29_2%3b%20%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%20d%2fdx%28%20%5c%5csqrt%28x%20%2b%20y%29%20-%204x%5e2y%5e2%29%3b%5cn%28d%2fdx%28y%29%3d%200%3b%20A%29_2%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 A = d/dx( \sqrt(x + y) - 4x^2y^2);
-(d/dx(y)= 0; A)_2;  
+(d/dx(y)= 0; A)_2;
 ```
 Dereferences a sequence of rules. The syntax is as illustrated by the example. 
 

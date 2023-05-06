@@ -30,9 +30,9 @@ caperp = (-ca_2, ca_1);
 heel_a = (H_a+bc*tick, H_a+bcperp*tick+bc*tick, H_a + bcperp*tick);
 heel_b = (H_b+ca*tick, H_b+caperp*tick+ca*tick, H_b + caperp*tick);
 heel_c = (H_c+ab*tick, H_c+abperp*tick+ab*tick, H_c + abperp*tick);
-bisector_a = (B+C)/2 + bcperp; 
-bisector_b = (C+A)/2 + caperp; 
-bisector_c = (A+B)/2 + abperp; 
+bisector_a = (B+C)/2 + bcperp;
+bisector_b = (C+A)/2 + caperp;
+bisector_c = (A+B)/2 + abperp;
 M = (A+B+C)/3;
 
 PlotPath((A,H_c, B,H_a, C,H_b, A), blue) 

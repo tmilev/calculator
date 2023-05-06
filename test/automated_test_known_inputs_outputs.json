@@ -228,7 +228,7 @@
     "output":"(a x^{-\\frac{1}{2}}+b;b x^{-1}+a x^{-\\frac{3}{2}})"
   },
   {
-    "input":"4/6; 2/0;",
+    "input":"4/6;\n2/0;",
     "output":"(\\frac{2}{3};\\text{Error:~\"Division~by~zero.~\"})"
   },
   {
@@ -624,7 +624,7 @@
     "output":"(\\left({\\limits}_{a}\\right)^{b};{\\limits^{b}}_{a})"
   },
   {
-    "input":"{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ",
+    "input":"{3^3}^3;\n3^{3^3};\n3^3^3;\n0^3;\n0^{-3}; ",
     "output":"(19683;7625597484987;19683;0;\\text{Error:~\"Division~by~zero:~trying~to~raise~0~to~negative~or~zero~power.~\"})"
   },
   {
@@ -652,11 +652,11 @@
     "output":"(X=\\begin{pmatrix}1 & -1\\\\ \n4 & -3 \\end{pmatrix};\\begin{pmatrix}-25392806707316551851930201695133033919160642102898873524551680000000000003 & 12696403353658275925965100847566516959580321051449436762275840000000000001\\\\ \n-50785613414633103703860403390266067838321284205797747049103360000000000004 & 25392806707316551851930201695133033919160642102898873524551680000000000001 \\end{pmatrix})"
   },
   {
-    "input":"X =\\begin{pmatrix} a & b \\\\ t +q &r\\end{pmatrix}; X^{2}  ",
+    "input":"X =\\begin{pmatrix} a & b \\\\ t +q &r\\end{pmatrix};\nX^{2} ",
     "output":"(X=\\begin{pmatrix}a & b\\\\ \nt+q & r \\end{pmatrix};\\begin{pmatrix}a^{2}+b t+b q & b r+a b\\\\ \nt a+r t+r q+q a & r^{2}+t b+q b \\end{pmatrix})"
   },
   {
-    "input":"a = 3 mod 7; a^2",
+    "input":"a = 3 mod 7;\na^2",
     "output":"(a=(3 mod (7));(2 mod (7)))"
   },
   {
@@ -668,7 +668,7 @@
     "output":"(A=1;x=0;1;B=1;1)"
   },
   {
-    "input":"x = Polynomial{}x; y = Polynomial{}y;(x +2y+x y+x^2+3y^2)^3",
+    "input":"x = Polynomial{}x;\ny = Polynomial{}y;\n(x +2y+x y+x^2+3y^2)^3",
     "output":"(x=Polynomial{}(x );y=Polynomial{}(y );Polynomial{}(x^6+3x^5y +12x^4y^2+19x^3y^3+36x^2y^4+27x y^5+27y^6+3x^5+12x^4y +33x^3y^2+60x^2y^3+63x y^4+54y^5+3x^4+15x^3y +33x^2y^2+48x y^3+36y^4+x^3+6x^2y +12x y^2+8y^3))"
   },
   {
@@ -696,7 +696,7 @@
     "output":"(\\sqrt{2}+1;-169\\sqrt{2}+239)"
   },
   {
-    "input":"f{}{{x}}=x^3+p x +q;\nXcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\nq= DoubleValue{}1;\np = DoubleValue{}1;\nXcardano;\nf{}x;\nf{}Xcardano   ",
+    "input":"f{}{{x}}=x^3+p x +q;\nXcardano = ( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\nq= DoubleValue{}1;\np = DoubleValue{}1;\nXcardano;\nf{}x;\nf{}Xcardano ",
     "output":"(f{}\\left({{x}}\\right)={{x}}^{3}+p {{x}}+q;Xcardano=\\left(-\\sqrt{\\frac{1}{4} q^{2}+\\frac{1}{27} p^{3}}-\\frac{1}{2} q\\right)^{\\frac{1}{3}}+\\left(\\sqrt{\\frac{1}{4} q^{2}+\\frac{1}{27} p^{3}}-\\frac{1}{2} q\\right)^{\\frac{1}{3}};q=1;p=1;-0.6823278;x^{3}+x+1;-0)"
   },
   {
@@ -704,11 +704,11 @@
     "output":"(\\left(a^{m}\\right)^{n};1.09861229^{m n};\\left(\\left(-0.69314718\\right)^{m}\\right)^{n};a^{2 m};\\left(a^{2}\\right)^{m};a;\\sqrt{a^{2}};\\left(a&gt;0\\right)=1;\"Built in evaluation reset.\";a)"
   },
   {
-    "input":"(a*b)^n; (\\sqrt(2)*b)^2",
+    "input":"(a*b)^n;\n(\\sqrt(2)*b)^2",
     "output":"(\\left(a b\\right)^{n};2 b^{2})"
   },
   {
-    "input":"x^1 + x^2; A^1",
+    "input":"x^1 + x^2;\nA^1",
     "output":"(x^{2}+x;A)"
   },
   {
@@ -740,7 +740,7 @@
     "output":"({g}_{{{i}}}=ChevalleyGenerator{}\\left({G}_{2}, {{i}}\\right);{h}_{{{i}}}=CartanGenerator{}\\left({G}_{2}, {{i}}\\right);UEE{}(g_{2}g_{1}^{x y }+g_{1}^{x y }g_{2}+g_{2}^{2}+g_{1}^{2x y }))"
   },
   {
-    "input":"\\tan^2 x;\n(f^-2) {}x ; (f^- 1){}x ",
+    "input":"\\tan^2 x;\n(f^-2) {}x;\n(f^- 1){}x ",
     "output":"(\\left(\\frac{\\sin{}x}{\\cos{}x}\\right)^{2};\\left(f{}\\left(x\\right)\\right)^{-2};\\left(f{}\\left(x\\right)\\right)^{-1})"
   },
   {
@@ -756,11 +756,11 @@
     "output":"({x}_{{{i}}} {x}_{{{j}}} {{a}} :if \\left({{i}}&gt;{{j}}\\right)={x}_{{{j}}} {x}_{{{i}}} {{a}};{x}_{{{i}}} {x}_{{{j}}} :if \\left({{i}}&gt;{{j}}\\right)={x}_{{{j}}} {x}_{{{i}}};-{x}_{1} {x}_{2} {x}_{3} {x}_{4} {x}_{5}+{x}_{1} \\left({x}_{2}\\right)^{2} {x}_{4} {x}_{5}-\\left({x}_{1}\\right)^{2} {x}_{3} {x}_{5}+\\left({x}_{1}\\right)^{2} {x}_{2} {x}_{5};{x}_{1} {x}_{2} {x}_{3} {x}_{4} {x}_{5})"
   },
   {
-    "input":"3 < 4; 5 < 4",
+    "input":"3 < 4;\n5 < 4",
     "output":"(1;0)"
   },
   {
-    "input":"%NumberColors\n  A = (a =3, b=4);\nB = (a = (sqrt(3))^2, b = 4);\nA == B;\nx == y;\nx == 1;\nIsEqualToX{}{{a}} = (a == x);\nIsEqualToX{}y;\nIsEqualToX{}x;\nIsEqualToX{}1;\nx =1;\nIsEqualToX{}1; z= \\sqrt{}1; z==1",
+    "input":"%NumberColors\n  A = (a =3, b=4);\nB = (a = (sqrt(3))^2, b = 4);\nA == B;\nx == y;\nx == 1;\nIsEqualToX{}{{a}} = (a == x);\nIsEqualToX{}y;\nIsEqualToX{}x;\nIsEqualToX{}1;\nx =1;\nIsEqualToX{}1;\nz= \\sqrt{}1;\nz==1",
     "output":"(A=\\left(a=3, b=4\\right);B=\\left(a=\\color{red}{3}, b=4\\right);0;0;0;IsEqualToX{}\\left({{a}}\\right)={{a}}==x;0;1;0;x=1;1;z=1;1)"
   },
   {
@@ -800,7 +800,7 @@
     "output":"\\left[3, 8\\right)"
   },
   {
-    "input":"(a,b,c)\\cap (c, d, e);\nx = (a,b,c)\\cap (c, d, e);\na = 1;\nd =1;\n(a, b, c)\\cap (c, d, e); x",
+    "input":"(a,b,c)\\cap (c, d, e);\nx = (a,b,c)\\cap (c, d, e);\na = 1;\nd =1;\n(a, b, c)\\cap (c, d, e);\nx",
     "output":"({Sequence{}\\left(c\\right)};x={Sequence{}\\left(c\\right)};a=1;d=1;\\left(c, 1\\right);{Sequence{}\\left(c\\right)})"
   },
   {
@@ -1672,7 +1672,7 @@
     "output":"(\\begin{pmatrix}1 & 1\\\\ \n2 & 2\\\\ \n0 & 0\\\\ \n1 & 1 \\end{pmatrix};a=\\begin{pmatrix}3 & 3\\\\ \n3 & 3 \\end{pmatrix};b=\\begin{pmatrix}4 & 4 & 4\\\\ \n4 & 4 & 4 \\end{pmatrix};AugmentMatrixBelow{}\\left(\\begin{pmatrix}4 & 4 & 4\\\\ \n4 & 4 & 4 \\end{pmatrix}, \\begin{pmatrix}3 & 3\\\\ \n3 & 3 \\end{pmatrix}\\right);\\begin{pmatrix}3 & 3\\\\ \n3 & 3\\\\ \n3 & 3\\\\ \n3 & 3 \\end{pmatrix};\\begin{pmatrix}4 & 4 & 4\\\\ \n4 & 4 & 4\\\\ \n4 & 4 & 4\\\\ \n4 & 4 & 4 \\end{pmatrix})"
   },
   {
-    "input":"\\int^a_b f dx; \\int_a^b f dx",
+    "input":"\\int^a_b f dx;\n\\int_a^b f dx",
     "output":"(\\int _{a}^{b}f {\\text{d}} x;\\int _{a}^{b}f {\\text{d}} x)"
   },
   {
@@ -1684,7 +1684,7 @@
     "output":"(a;b;a)"
   },
   {
-    "input":"A = d/dx( \\sqrt(x + y) - 4x^2y^2);\n(d/dx(y)= 0; A)_2;  ",
+    "input":"A = d/dx( \\sqrt(x + y) - 4x^2y^2);\n(d/dx(y)= 0; A)_2;",
     "output":"(A=\\frac{1}{2} \\left(y+x\\right)^{-\\frac{1}{2}} \\frac{\\text{d} y}{\\text{d} x}-8 x^{2} y \\frac{\\text{d} y}{\\text{d} x}+\\frac{1}{2} \\left(y+x\\right)^{-\\frac{1}{2}}-8 x y^{2};\\frac{1}{2} \\left(y+x\\right)^{-\\frac{1}{2}}-8 x y^{2})"
   },
   {

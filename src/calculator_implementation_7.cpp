@@ -831,7 +831,7 @@ bool CalculatorFunctions::quoteToString(
   std::string operation;
   if (input.size() != 2) {
     calculator
-    << "<b>Warning: this shouldn't happen: "
+    << "<br><b>Warning: this shouldn't happen: "
     << "quote operation is applied to an expression "
     << "with wrong number of arguments. "
     << "This may be a bug with the function "

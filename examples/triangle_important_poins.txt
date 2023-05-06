@@ -27,13 +27,27 @@ ca = (A-C)/ sqrt( (c_1-a_1)^2+(c_2-a_2)^2);
 abperp = (-ab_2, ab_1);
 bcperp = (-bc_2, bc_1);
 caperp = (-ca_2, ca_1);
+heel_a = (H_a+bc*tick, H_a+bcperp*tick+bc*tick, H_a + bcperp*tick);
+heel_b = (H_b+ca*tick, H_b+caperp*tick+ca*tick, H_b + caperp*tick);
 heel_c = (H_c+ab*tick, H_c+abperp*tick+ab*tick, H_c + abperp*tick);
+bisector_a = (B+C)/2 + bcperp; 
+bisector_b = (C+A)/2 + caperp; 
+bisector_c = (A+B)/2 + abperp; 
+M = (A+B+C)/3;
 
-PlotPath((A,B, C, A), blue) 
-+ PlotSegment(A, (B+C)/2, blue)
-+ PlotSegment(B, (C+A)/2, blue)
-+ PlotSegment(C, (A+B)/2, blue)
-+PlotPath(heel_c, red) 
+PlotPath((A,H_c, B,H_a, C,H_b, A), blue) 
++ PlotSegment(A, (B+C)/2, purple)
++ PlotSegment(B, (C+A)/2, purple)
++ PlotSegment(C, (A+B)/2, purple)
++ PlotSegment(bisector_a, (B+C)/2, orange)
++ PlotSegment(bisector_b, (C+A)/2, orange)
++ PlotSegment(bisector_c, (A+B)/2, orange)
++ PlotSegment(B, (C+A)/2, purple)
++ PlotSegment(C, (A+B)/2, purple)
++ PlotLabel(M, "M")
++ PlotPath(heel_a, red) 
++ PlotPath(heel_b, red) 
++ PlotPath(heel_c, red) 
 + PlotSelectablePoint((a_1, a_2))
 + PlotSelectablePoint((b_1, b_2))
 + PlotSelectablePoint((c_1, c_2))

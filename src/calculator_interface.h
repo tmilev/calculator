@@ -2223,6 +2223,9 @@ public:
       static std::string vectorPartitionFunction;
       static std::string vectorPartitionFunctionElementary;
       static std::string lattice;
+      static std::string bind;
+      static std::string quote;
+      static std::string freeze;
       class Trigonometry {
       public:
         static std::string sine;
@@ -2766,7 +2769,8 @@ public:
     >();
   }
   int opFreeze() {
-    return this->operations.getIndexNoFail("Freeze");
+    return
+    this->operations.getIndexNoFail(Calculator::Functions::Names::freeze);
   }
   int opElementUEOverRF() {
     return
@@ -2880,7 +2884,8 @@ public:
     return this->operations.getIndexNoFail("\\sqcup");
   }
   int opBind() {
-    return this->operations.getIndexNoFail("Bind");
+    return
+    this->operations.getIndexNoFail(Calculator::Functions::Names::bind);
   }
   int opOr() {
     return this->operations.getIndexNoFail("or");

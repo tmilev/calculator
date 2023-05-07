@@ -812,8 +812,8 @@
     "output":"1"
   },
   {
-    "input":"\"The quick brown fox jumps over the lazy dog.\";\n\"\\u00B0\";\n\"\\u00b0\"",
-    "output":"(\"The quick brown fox jumps over the lazy dog.\";\"\\xc2\\xb0\";\"\\xc2\\xb0\")"
+    "input":"\"The quick brown fox jumps over the lazy dog.\";\n\"\\u00B0\";\n\"\\u00b0\";\nM=1;\n\"M\"",
+    "output":"(\"The quick brown fox jumps over the lazy dog.\";\"\\xc2\\xb0\";\"\\xc2\\xb0\";M=1;\"M\")"
   },
   {
     "input":"if (1, x, y);\nif (1, x, 1 / 0);\nif (2 - 1, x, 1 / 0);\nif (1 + 1, 1 / 0, 1 / 0);\nif (0, x, 1 / 0);\n",

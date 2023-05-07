@@ -17,6 +17,9 @@
 std::string Calculator::Functions::Names::setRandomSeed = "SetRandomSeed";
 std::string Calculator::Functions::Names::commandEnclosure =
 "CommandEnclosure";
+std::string Calculator::Functions::Names::bind = "Bind";
+std::string Calculator::Functions::Names::freeze = "Freeze";
+std::string Calculator::Functions::Names::quote = "\"";
 std::string Calculator::Functions::Names::setInputBox = "SetInputBox";
 std::string Calculator::Functions::Names::sort = "Sort";
 std::string Calculator::Functions::Names::transpose = "Transpose";
@@ -191,9 +194,9 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Turns on computational rules.",
     "TurnOffRules(\"sqrt\");\n"
-  "a = \\sqrt[4]{t};\n"
-  "TurnOnRules(\"sqrt\");\n"
-  "a",
+    "a = \\sqrt[4]{t};\n"
+    "TurnOnRules(\"sqrt\");\n"
+    "a",
     "CalculatorFunctions::turnOnRules",
     Calculator::Functions::Names::turnOnRules,
     innerStandard
@@ -287,7 +290,7 @@ void Calculator::initializeFunctionsStandard() {
     "may fail to be identical, for example "
     "a rational number 5 and an algebraic number 5. ",
     "a or b;\n"
-  "a or a",
+    "a or a",
     "CalculatorFunctions::orIdentical",
     "orIdentical",
     innerStandard
@@ -342,11 +345,11 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Logical and. ",
     "0 and 0;\n"
-  "0 and 1;\n"
-  "1 and 0;\n"
-  "1 and 1;\n"
-  "a and 1;\n"
-  "a and 0;",
+    "0 and 1;\n"
+    "1 and 0;\n"
+    "1 and 1;\n"
+    "a and 1;\n"
+    "a and 0;",
     "CalculatorFunctions::and",
     "and",
     innerStandard
@@ -453,7 +456,7 @@ void Calculator::initializeFunctionsStandard() {
     "The string representation is (supposed to be) LaTeX-compatible. ",
     "ToString( e^x);\n"
     "\"e^x\";\n"
-  "\"The quick brown fox jumps over the lazy dog.\"",
+    "\"The quick brown fox jumps over the lazy dog.\"",
     "CalculatorFunctions::expressionToString",
     "ToString",
     innerStandard
@@ -493,7 +496,10 @@ void Calculator::initializeFunctionsStandard() {
     "These may be escaped back when returned to the frontend.",
     "\"The quick brown fox jumps over the lazy dog.\";\n"
     "\"\\u00B0\";\n"
-    "\"\\u00b0\"",
+    "\"\\u00b0\";\n"
+    "M=1;\n"
+    "\"M\";\n"
+    "\"1+1\"",
     "CalculatorFunctions::quoteToString",
     "QuoteToString",
     innerStandard
@@ -740,7 +746,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Tests whether the expression is a real constant. ",
     "IsReal(\\sqrt{5 + \\sqrt{- 1}});\n"
-  "IsReal(\\sqrt{\\sqrt{5} - 1});\n"
+    "IsReal(\\sqrt{\\sqrt{5} - 1});\n"
     "IsReal(sqrt(\\sqrt{\\pi} - 2) )",
     "CalculatorFunctions::isReal",
     "IsReal",
@@ -752,8 +758,8 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Tests whether the expression is a constant.  ",
     "IsConstant(\\pi^2);\n"
-  "IsConstant(1);\n"
-  "IsConstant(x);\n"
+    "IsConstant(1);\n"
+    "IsConstant(x);\n"
     "IsConstant(e^{\\sin(\\pi^2 + e +\\sqrt{2} + 3)});",
     "CalculatorFunctions::isConstant",
     "IsConstant",
@@ -889,7 +895,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Implementation of sin (a + b) = sin(a) cos(b) + cos(a) sin(b).",
     "TurnOnRules(\"SineOfAngleSum\");\n"
-  "\\sin(a + b)",
+    "\\sin(a + b)",
     "CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry",
     "SineOfAngleSum",
     innerStandardOffByDefault
@@ -1674,8 +1680,7 @@ void Calculator::initializeFunctionsStandard() {
     "+11904 x^{3}-2936 x^{2}+2530 x-7560;\n"
     "GCDPoly(a,b);\n",
     "CalculatorFunctionsPolynomial::"
-  "greatestCommonDivisorPolynomialRationalSlow"
-    ,
+    "greatestCommonDivisorPolynomialRationalSlow",
     "GCDPolySlow",
     innerStandard
   );
@@ -2598,7 +2603,7 @@ void Calculator::initializeFunctionsStandard() {
     "Internal data structure transformation: "
     "sequence ->open interval.",
     "%UseBracketForIntervals\n"
-  "PlotExpressionTree (1,2); ",
+    "PlotExpressionTree (1,2); ",
     "CalculatorFunctions::intervalOpenFromSequence",
     "IntervalOpen",
     innerStandard
@@ -2874,7 +2879,7 @@ void Calculator::initializeFunctionsStandard() {
     "You can expressions such as StringToAtom(\"+\") "
     "to make an arbitrary expresssion. ",
     "%UseBracketForIntervals\n"
-  "GetOpandList\n"
+    "GetOpandList\n"
     "(StringToAtom(\"\\otimes\"), a\\otimes b \\otimes c );\n"
     "GetOpandList(StringToAtom(\"\\cup\"), [a,b]\\cup [c,d] \\cup [e,f] );",
     "CalculatorFunctions::collectOpands",
@@ -3072,7 +3077,7 @@ void Calculator::initializeFunctionsStandard() {
     "Square root of a rational, "
     "implemented as algebraic extension of the rationals. ",
     "\\sqrt 2+\\sqrt 3;\n"
-  "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2",
+    "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2",
     "CalculatorFunctions::sqrt",
     "sqrt",
     innerStandard
@@ -3586,9 +3591,9 @@ void Calculator::initializeFunctionsStandard() {
     "Combines fractions. "
     "Equivalent to {{a}}/{{b}}+{{c}}= (a +c*b)/b; ",
     "f{}{{x}}= (2x +3)/(2x + 1);\n"
-  "g{}{{y}}= (y-2)/(y+3);\n"
-  "g{}f{}z;\n"
-  "f{}g{}z",
+    "g{}{{y}}= (y-2)/(y+3);\n"
+    "g{}f{}z;\n"
+    "f{}g{}z",
     "CalculatorBasics::combineFractions",
     "CommonDenominatorOneNonFraction",
     outerStandard
@@ -3904,7 +3909,7 @@ void Calculator::initializeFunctionsStandard() {
     "Transforms a - b to a +(- 1) * b and - b to (- 1) * b. "
     "Equivalent to a rule "
     "-{{b}}=MinusOne * b;\n"
-  "{{a}}-{{b}}=a + MinusOne * b;\n",
+    "{{a}}-{{b}}=a + MinusOne * b;\n",
     "- 1 + (- 5)",
     "CalculatorBasics::minus",
     "Minus",
@@ -3968,7 +3973,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Handles expressions of the form \\limits_a^b",
     "\\limits_a^b;\n"
-  "\\limits^b_a",
+    "\\limits^b_a",
     "CalculatorFunctions::handleUnderscorePowerLimits",
     "LimitBoundaryNotationPower",
     innerStandard
@@ -3979,7 +3984,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Handles expressions of the form \\limits_a^b",
     "\\limits_a^b;\n"
-  "\\limits^b_a",
+    "\\limits^b_a",
     "CalculatorFunctions::handleUnderscorePowerLimits",
     "LimitBoundaryNotationUnderscore",
     innerStandard
@@ -4333,7 +4338,7 @@ void Calculator::initializeFunctionsStandard() {
     "Provided that a is a constant number "
     "(built in) and b is not, replaces b*a by a*b. ",
     "x 6^{1/3};\n"
-  "(x 10^{1/2})^{1/3}",
+    "(x 10^{1/2})^{1/3}",
     "CalculatorFunctions::outerCommuteConstants",
     "CommuteConstants",
     outerStandard
@@ -4369,8 +4374,8 @@ void Calculator::initializeFunctionsStandard() {
     "1) a and and b depend on exactly one user-defined variable, "
     "2) a is not a constant and 3) a>b as an expression. ",
     "x(x + 1)^{- 1}x;\n"
-  "x(y+ 1)^{- 1}x;\n"
-  "(\\sin x ) x (\\cos x)",
+    "x(y+ 1)^{- 1}x;\n"
+    "(\\sin x ) x (\\cos x)",
     "CalculatorFunctions::outerCommuteAtimesBtimesCifUnivariate",
     "CommuteAtimesBtimesCifUnivariate",
     outerStandard
@@ -4394,7 +4399,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Pulls rationals in the front of multiplicative terms.",
     "2*((3*c)*(4*d));\n"
-  "3*((a*(d-d))b*c)",
+    "3*((a*(d-d))b*c)",
     "CalculatorBasics::extractBaseMultiplication",
     "ConstantExtraction",
     outerStandard
@@ -4416,7 +4421,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Cancels multiplicative inverse. ",
     "(a*b)/b;\n"
-  "(a/b)*b",
+    "(a/b)*b",
     "CalculatorBasics::cancelMultiplicativeInverse",
     "CancelMultiplicativeInverse",
     innerStandard
@@ -4442,8 +4447,8 @@ void Calculator::initializeFunctionsStandard() {
     "the DistributeMultiplication rule is turned off "
     "(which is the intended use case of this rule).",
     "a(b+c);\n"
-  "TurnOffRules(DistributeMultiplication);\n"
-  "a(b+c); -5(b+c) ",
+    "TurnOffRules(DistributeMultiplication);\n"
+    "a(b+c); -5(b+c) ",
     "CalculatorBasics::distributeTimesConstant",
     "DistributeMultiplicationConstants",
     outerStandard
@@ -4586,7 +4591,7 @@ void Calculator::initializeFunctionsStandard() {
     "Carries out multiplication between a rational number on left "
     "and sequence on the right.",
     "x = Polynomial{}x;\n"
-  "v=x*(1, 2, 3);",
+    "v=x*(1, 2, 3);",
     "CalculatorFunctionsBinaryOps::multiplyAnyScalarBySequence",
     "MultiplyPolynomialBySequence",
     innerStandard
@@ -4654,7 +4659,7 @@ void Calculator::initializeFunctionsStandard() {
     "from the elements of the first set. "
     "The outputs will be sorted in ascending order. ",
     "(x,y,t) \\setminus Sequence{}x;\n"
-  "(x,y)\\setminus (z,y)",
+    "(x,y)\\setminus (z,y)",
     "CalculatorFunctionsBinaryOps::setMinus",
     "\\setminus",
     innerStandard
@@ -4779,7 +4784,7 @@ void Calculator::initializeFunctionsStandard() {
     "6/15+(a +b)/5;\n"
     "a/\\sqrt{}2;\n"
     "x/DoubleValue{}10^10;\n"
-  "x/DoubleValue{}5;\n"
+    "x/DoubleValue{}5;\n"
     "6/4+3/0",
     "CalculatorFunctions::divideByNumber",
     "DivideByNumber",
@@ -4823,7 +4828,7 @@ void Calculator::initializeFunctionsStandard() {
     "Division cancellations. "
     "Substitutes (a/b)/(a/d) with d/a and (a/b)/(c/b) with a/c. ",
     "(a/b)/(a/d);\n"
-  "(a/b)/(c/b)",
+    "(a/b)/(c/b)",
     "CalculatorFunctions::divisionCancellations",
     "DivideCancellations",
     outerStandard
@@ -4873,7 +4878,7 @@ void Calculator::initializeFunctionsStandard() {
     this->opRational(),
     "Divides two rational numbers. ",
     "4/6;\n"
-  "2/0;",
+    "2/0;",
     "CalculatorFunctionsBinaryOps::divideRationalByRational",
     "DivideRationalByRational",
     innerStandard
@@ -4921,8 +4926,7 @@ void Calculator::initializeFunctionsStandard() {
     "1/z",
     "CalculatorFunctionsBinaryOps::"
     "divideRationalFractionOrPolynomial"
-  "OrRationalByRationalFractionOrPolynomial"
-    ,
+    "OrRationalByRationalFractionOrPolynomial",
     "DivideRationalByPolynomial",
     innerStandard
   );
@@ -4937,8 +4941,7 @@ void Calculator::initializeFunctionsStandard() {
     "Polynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+ 1) ",
     "CalculatorFunctionsBinaryOps::"
     "divideRationalFractionOrPolynomial"
-  "OrRationalByRationalFractionOrPolynomial"
-    ,
+    "OrRationalByRationalFractionOrPolynomial",
     "DividePolynomialByPolynomial",
     innerStandard
   );
@@ -4952,8 +4955,7 @@ void Calculator::initializeFunctionsStandard() {
     "MakeRationalFunction(x)/Polynomial(y) ",
     "CalculatorFunctionsBinaryOps::"
     "divideRationalFractionOrPolynomial"
-  "OrRationalByRationalFractionOrPolynomial"
-    ,
+    "OrRationalByRationalFractionOrPolynomial",
     "DivideRationalFractionByPolynomial",
     innerStandard
   );
@@ -4968,8 +4970,7 @@ void Calculator::initializeFunctionsStandard() {
     "MakeRationalFunction(y) ",
     "CalculatorFunctionsBinaryOps::"
     "divideRationalFractionOrPolynomial"
-  "OrRationalByRationalFractionOrPolynomial"
-    ,
+    "OrRationalByRationalFractionOrPolynomial",
     "DividePolynomialByRationalFraction",
     innerStandard
   );
@@ -4987,8 +4988,7 @@ void Calculator::initializeFunctionsStandard() {
     "2 / MakeRationalFunction{}(y)",
     "CalculatorFunctionsBinaryOps::"
     "divideRationalFractionOrPolynomial"
-  "OrRationalByRationalFractionOrPolynomial"
-    ,
+    "OrRationalByRationalFractionOrPolynomial",
     "DivideRationalFractionByRationalFraction",
     innerStandard
   );
@@ -5043,10 +5043,10 @@ void Calculator::initializeFunctionsStandard() {
     this->opRational(),
     "Raises rational to power, provided the power is a small integer. ",
     "{3^3}^3;\n"
-  "3^{3^3};\n"
-  "3^3^3;\n"
-  "0^3;\n"
-  "0^{-3}; ",
+    "3^{3^3};\n"
+    "3^3^3;\n"
+    "0^3;\n"
+    "0^{-3}; ",
     "CalculatorFunctionsBinaryOps::powerRationalByInteger",
     "PowerIntegerByInteger",
     innerStandard
@@ -5167,7 +5167,7 @@ void Calculator::initializeFunctionsStandard() {
     "Attempts to exponentiate a matrix of expressions, "
     "if the exponent is small. ",
     "X =\\begin{pmatrix} a & b \\\\ t +q &r\\end{pmatrix};\n"
-  "X^{2} ",
+    "X^{2} ",
     "CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger",
     "PowerMatrixNumbersBySmallIntegerIfPossible",
     innerStandard
@@ -5178,7 +5178,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Raises an element of Z mod p to an integer power. ",
     "a = 3 mod 7;\n"
-  "a^2",
+    "a^2",
     "CalculatorFunctionsBinaryOps::powerElementZmodPByInteger",
     "PowerElementZmodPToInteger",
     innerStandard
@@ -5218,8 +5218,8 @@ void Calculator::initializeFunctionsStandard() {
     this->opRational(),
     "Raises polynomial to small integer power. ",
     "x = Polynomial{}x;\n"
-  "y = Polynomial{}y;\n"
-  "(x +2y+x y+x^2+3y^2)^3",
+    "y = Polynomial{}y;\n"
+    "(x +2y+x y+x^2+3y^2)^3",
     "CalculatorFunctionsBinaryOps::powerPolynomialBySmallInteger",
     "PowerPolynomialBySmallInteger",
     innerStandard
@@ -5383,7 +5383,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "If a is a positive constant, substitutes (a*b)^c with a^c b^c.",
     "(a*b)^n;\n"
-  "(\\sqrt(2)*b)^2",
+    "(\\sqrt(2)*b)^2",
     "CalculatorFunctions::distributeExponent",
     "DistributeExponent",
     innerStandard
@@ -5405,7 +5405,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Realizes the tranformation {{anything}}^1=a. ",
     "x^1 + x^2;\n"
-  "A^1",
+    "A^1",
     "Calculator::outerPowerRaiseToFirst",
     "PowerToOne",
     outerStandard
@@ -5428,7 +5428,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Takes care of the integral superscript notation \\int^a ",
     "\\int^a_b f dx;\n"
-  "\\int_a^b f dx",
+    "\\int_a^b f dx",
     "CalculatorFunctions::operatorBounds",
     "OperatorBoundsUnderscore",
     innerStandard
@@ -5568,7 +5568,7 @@ void Calculator::initializeFunctionsStandard() {
     "replaces the expression by 1 if the left number "
     "is less than the right, else replaces the expression by 0.",
     "3 < 4;\n"
-  "5 < 4",
+    "5 < 4",
     "CalculatorFunctions::lessThan",
     "LessThan",
     innerStandard
@@ -5649,8 +5649,8 @@ void Calculator::initializeFunctionsStandard() {
     "IsEqualToX{}1;\n"
     "x =1;\n"
     "IsEqualToX{}1;\n"
-  "z= \\sqrt{}1;\n"
-  "z==1",
+    "z= \\sqrt{}1;\n"
+    "z==1",
     "CalculatorFunctions::outerEqualEqual",
     "IsEqualTo",
     outerStandard
@@ -5744,7 +5744,7 @@ void Calculator::initializeFunctionsStandard() {
     "a = 1;\n"
     "d =1;\n"
     "(a, b, c)\\cap (c, d, e);\n"
-  "x",
+    "x",
     "CalculatorFunctionsListsAndSets::intersection",
     "\\cap",
     innerStandard
@@ -5895,7 +5895,7 @@ void Calculator::initializeFunctionsStandard() {
     "f is not a sequence, use the rule ({{f}}^{{n}}){}{{x}}= (f{}x)^n.",
     "\\tan^2 x;\n"
     "(f^-2) {}x;\n"
-  "(f^- 1){}x ",
+    "(f^- 1){}x ",
     "CalculatorFunctions::compositeAPowerBEvaluatedAtC",
     "ApowerBevaluatedAtC",
     compositeStandard
@@ -5934,7 +5934,9 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
   // as syntactic elements.
   this->addOperationNoRepetitionAllowed("RulesOff");
   this->addOperationNoRepetitionAllowed("RulesOn");
-  this->addOperationNoRepetitionAllowed("Freeze");
+  this->addOperationNoRepetitionAllowed(
+    Calculator::Functions::Names::freeze
+  );
   this->addOperationNoRepetitionAllowed("\\infty");
   this->addOperationNoRepetitionAllowed("\\phantom");
   this->addOperationNoRepetitionAllowed(
@@ -5942,7 +5944,9 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
   );
   this->addOperationNoRepetitionAllowed("MonomialPoly");
   this->addOperationNoRepetitionAllowed("Melt");
-  this->addOperationNoRepetitionAllowed("Bind");
+  this->addOperationNoRepetitionAllowed(
+    Calculator::Functions::Names::bind
+  );
   this->addOperationNoRepetitionAllowed("\\limits");
   this->addOperationNoRepetitionAllowed("[)");
   this->addOperationNoRepetitionAllowed("(]");
@@ -6050,7 +6054,9 @@ void Calculator::initializeApproximationFunctionsForOneAtom(
 
 void Calculator::initializeAtomsNotGoodForChainRule() {
   STACK_TRACE("Calculator::initializeAtomsNotGoodForChainRule");
-  this->atomsNotAllowingChainRule.addOnTopNoRepetitionMustBeNew("Bind");
+  this->atomsNotAllowingChainRule.addOnTopNoRepetitionMustBeNew(
+    Calculator::Functions::Names::bind
+  );
 }
 
 void Calculator::initializeAtomsThatAllowCommutingOfArguments() {
@@ -6412,6 +6418,13 @@ void Calculator::initializeBuiltInsFreezeArguments() {
 
 void Calculator::initializeAtomsThatFreezeArguments() {
   STACK_TRACE("Calculator::initializeAtomsThatFreezeArguments");
-  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Freeze");
-  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew("Bind");
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew(
+    Calculator::Functions::Names::freeze
+  );
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew(
+    Calculator::Functions::Names::bind
+  );
+  this->atomsThatFreezeArguments.addOnTopNoRepetitionMustBeNew(
+    Calculator::Functions::Names::quote
+  );
 }

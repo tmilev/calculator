@@ -2610,7 +2610,9 @@ bool JavascriptExtractor::extractJavascriptRecursive(
     return false;
   }
   if (input.size() == 2) {
-    if (input[0].isOperationGiven("Freeze")) {
+    if (
+      input[0].isOperationGiven(Calculator::Functions::Names::freeze)
+    ) {
       return
       this->extractJavascriptRecursive(
         input[1], output, commentsOnFailure

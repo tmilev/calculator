@@ -831,11 +831,13 @@ bool CalculatorFunctions::quoteToString(
   std::string operation;
   if (input.size() != 2) {
     calculator
-    << "<br><b>Warning: this shouldn't happen: "
+    << "<br>\n<b>Warning: this shouldn't happen: "
     << "quote operation is applied to an expression "
     << "with wrong number of arguments. "
     << "This may be a bug with the function "
-    << "Calculator::parseFillDictionary.</b>";
+    << "Calculator::parseFillDictionary.</b> "
+    << "Input: "
+    << input.toString();
     return output.assignValue(calculator, input.toString());
   }
   if (input[1].isOperation(&operation)) {

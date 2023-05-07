@@ -82,7 +82,10 @@ class AccountActivator{
         spanActivation
       );
       let resultSpan = document.createElement("div");
-      resultSpan.innerHTML = inputParsed[pathnames.urlFields.result.resultHtml];
+      miscellaneous.writeHTML(
+        resultSpan,
+        inputParsed[pathnames.urlFields.result.resultHtml],
+      );
       spanActivation.append(resultSpan);
     } catch (e) {
       spanActivation.textContent = "Result: " + result + ". Error: " + e;

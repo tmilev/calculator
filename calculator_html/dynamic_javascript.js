@@ -9,6 +9,7 @@ const typeset = require("./math_typeset");
 const EquationEditor = require("./equation_editor/src/equation_editor").EquationEditor;
 const MathNode = require("./equation_editor/src/equation_editor").MathNode;
 const knownTypes = require("./equation_editor/src/equation_editor").knownTypes;
+const miscellaneous = require("./miscellaneous_frontend");
 
 class OneGraphicWithSliders {
   constructor(
@@ -237,7 +238,7 @@ class ElementWithScripts {
     element.textContent = "";
     let button = document.createElement("button");
     button.className = "buttonMQ";
-    button.innerHTML = "<tiny>L&#x1F4CB;</tiny>";
+    miscellaneous.writeHTML(button, "<tiny>L&#x1F4CB;</tiny>");
     button.addEventListener('click', () => {
       this.copyLatex(content, element);
     });

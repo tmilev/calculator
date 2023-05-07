@@ -2,7 +2,7 @@
 const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
-const miscallaneous = require("./miscellaneous_frontend");
+const miscellaneous = require("./miscellaneous_frontend");
 
 function getRecaptchaId() {
   let localRecaptcha = '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql';
@@ -128,8 +128,8 @@ class SignUp {
     let outputStatus = document.getElementById(ids.domElements.pages.login.signUpResultReport);
     let output = document.getElementById(ids.domElements.pages.login.signUpResult);
     try {
-      let inputParsed = miscallaneous.jsonUnescapeParse(input);
-      miscallaneous.writeHtmlFromCommentsAndErrors(inputParsed, outputStatus);
+      let inputParsed = miscellaneous.jsonUnescapeParse(input);
+      miscellaneous.writeHtmlFromCommentsAndErrors(inputParsed, outputStatus);
       let resultHtml = inputParsed[pathnames.urlFields.result.resultHtml];
       if (resultHtml !== undefined) {
         output.innerHTML = resultHtml;

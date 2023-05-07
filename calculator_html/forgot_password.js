@@ -40,12 +40,18 @@ class ForgotLogin {
       ids.domElements.pages.forgotLogin.forgotLoginResult
     );
     if (window.calculator.mainPage.user.debugLoginIsOn()) {
-      recaptchaElement.innerHTML = "<b style='color:blue'>Debugging login, recaptcha is off.</b>";
+      miscellaneous.writeHTML(
+        recaptchaElement,
+        "<b style='color:blue'>Debugging login, recaptcha is off.</b>"
+      );
       return;
     }    
     if (this.grecaptcha === undefined || this.grecaptcha === null) {
-      recaptchaElement.innerHTML = `<b style='color:red'>Missing google (re)captcha: no Internet?</b> `+
-        `<b style='color:orange'>${extraMessage}</b>`;
+      miscellaneous.writeHTML(
+        recaptchaElement,
+        `<b style='color:red'>Missing google (re)captcha: no Internet?</b> ` +
+        `<b style='color:orange'>${extraMessage}</b>`,
+      );
       return;
     }
   }

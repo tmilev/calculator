@@ -11,6 +11,13 @@ const calculatorPageEditor = require("./calculator_page_editor");
 const equationEditor = require("./equation_editor/src/equation_editor");
 const startCalculatorWebAssemblyWorker = require("./web_assembly_worker");
 
+function writeHTML(
+  /** @type {HTMLElement} */ element,
+  /** @type {string} */ htmlContent,
+) {
+  panels.writeHTML(element, htmlContent);
+}
+
 class AtomHandler {
   constructor() {
     this.description = "";
@@ -317,14 +324,14 @@ class Calculator {
       ids.domElements.pages.calculator.buttonCalculatorExamples
     );
     if (this.flagExamplesWantedShown) {
-      button.innerHTML = "&#9660;";
+      writeHTML(button, "&#9660;")
       calculatorElement.style.maxWidth = "85%";
       examples.classList.remove("hiddenClass");
       examplesContainer.style.height = "100%";
       examplesContainer.style.maxHeight = "100%";
     } else {
       calculatorElement.style.maxWidth = "98%";
-      button.innerHTML = "&#9656;";
+      writeHTML(button, "&#9656;")
       examples.classList.add("hiddenClass");
       examplesContainer.style.height = "5%";
       examplesContainer.style.maxHeight = "5%";
@@ -386,7 +393,7 @@ class Calculator {
       ids.domElements.pages.calculator.examplesContainer,
     );
     if (
-      examples.innerHTML.length < 300 &&
+      examples.textContent.length < 300 &&
       this.flagExamplesWantedShown
     ) {
       this.downloadExamples();
@@ -626,7 +633,7 @@ class Calculator {
       // resultHTML must be a fallback, 
       // so we ignore it.
       let resultHTML = document.createElement("div");
-      resultHTML.innerHTML = inputParsed.resultHtml;
+      writeHTML(resultHTML, inputParsed.resultHtml);
       result.appendChild(resultHTML);
     }
     if (inputParsed.result === undefined) {
@@ -636,7 +643,7 @@ class Calculator {
     result.appendChild(inputOutputComments);
     if (inputParsed.parsingLog !== undefined) {
       let element = document.createElement("div");
-      element.innerHTML = inputParsed.parsingLog;
+      writeHTML(element , inputParsed.parsingLog);
       result.appendChild(element);
     }
     return result;
@@ -652,7 +659,7 @@ class Calculator {
     inputOutput.className = "calculatorInputOutput";
     if (inputParsed.syntaxErrors !== undefined) {
       let element = document.createElement("div");
-      element.innerHTML = inputParsed.syntaxErrors;
+      writeHTML(element, inputParsed.syntaxErrors);
       inputOutput.appendChild(element);
     }
     let inputOutputTable = this.constructInputOutput(inputParsed);
@@ -664,7 +671,7 @@ class Calculator {
       inputParsed.debug !== undefined
     ) {
       let debugComments = document.createElement("div");
-      debugComments.innerHTML = inputParsed.debug;
+      writeHTML(debugComments, inputParsed.debug);
       inputOutputComments.appendChild(debugComments);
     }
     return inputOutputComments;
@@ -786,7 +793,7 @@ class Calculator {
     }
     if (inputParsed.comments !== undefined) {
       let comments = document.createElement("div");
-      comments.innerHTML = inputParsed.comments;
+      writeHTML(comments, inputParsed.comments);
       commentsContainer.appendChild(comments);
     }
     return commentsContainer;
@@ -906,7 +913,7 @@ class Calculator {
       let progressReportTimer = document.getElementById(
         ids.domElements.pages.calculator.monitoring.progressTimer,
       );
-      progressReportTimer.innerHTML = "";
+      progressReportTimer.textContent = "";
       this.writeResultAndUpdateElement();
     } catch (e) {
       let inputHtml = input + "<br>" + e;

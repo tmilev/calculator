@@ -8,6 +8,13 @@ const answerProcessing = require("./answer_processing").answerProcessing;
 const typeset = require("./math_typeset");
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 
+function writeHTML(
+  /** @type {HtmlElement} */ element,
+  /** @type {string} */ htmlContent,
+) { 
+  miscellaneous.writeHTML(element, htmlContent);  
+}
+
 class AnswerPanel {
   constructor(
     /**
@@ -158,6 +165,14 @@ class AnswerPanel {
     }
   }
 
+  editLaTeX() {
+    this.ignoreNextEditorEvent = true;
+    this.panel.equationEditor.writeLatex(this.panel.getPureLatexElement().value + ' ');
+    this.ignoreNextEditorEvent = false;
+    this.submitPreviewWithTimeOut();
+  }
+
+
   onePanelComputeHtmlElements() {
     if (this.flagForReal === true) {
       this.buttonAnswer = null;
@@ -199,7 +214,7 @@ class AnswerPanel {
       this.input.answerHighlight !== undefined &&
       this.input.answerHighlight !== null
     ) {
-      this.spanAnswerHighlight.innerHTML = this.input.answerHighlight;
+      writeHTML(this.spanAnswerHighlight, this.input.answerHighlight);
     }
     this.editorEnclosure.appendChild(this.editorSpan);
     this.verificationSpan = document.createElement("span");

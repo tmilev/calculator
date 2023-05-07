@@ -313,14 +313,6 @@ class InputPanelData {
     return this.pureLatexElement;
   }
 
-  editLaTeX() {
-    // useful event handlers	
-    this.ignoreNextEditorEvent = true;
-    this.equationEditor.writeLatex(document.getElementById(this.idPureLatex).value + ' ');
-    this.ignoreNextEditorEvent = false;
-    this.submitPreviewWithTimeOut();
-  }
-
   editLatexHook(
     /** @type {EquationEditor} */
     editor,

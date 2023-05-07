@@ -1,6 +1,19 @@
 "use strict";
 let pathnames = require("./pathnames");
 
+function writeHTML(
+  /** @type {HTMLElement} */
+  element,
+  /** @type {string} */
+  htmlContent,
+) {
+  try {
+    element.setHTML(htmlContent);
+  } catch (e) {
+    element.innerHTML = htmlContent;
+  }
+}
+
 function switchMenu(
   /** @type {string|HTMLElement} */
   object
@@ -251,4 +264,5 @@ module.exports = {
   jsonParseGetHtmlStandard,
   unescapeInequalitiesAmpersands,
   jsonUnescapeParse,
+  writeHTML,
 };

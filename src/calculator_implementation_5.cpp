@@ -2706,7 +2706,8 @@ bool CalculatorFunctionsPlot::plotCoordinateSystem(
   if (input.size() != 3) {
     return false;
   }
-  Vector<double> corner1, corner2;
+  Vector<double> corner1;
+  Vector<double> corner2;
   if (
     !calculator.getVectorDoubles(input[1], corner1, 3) ||
     !calculator.getVectorDoubles(input[2], corner2, 3)

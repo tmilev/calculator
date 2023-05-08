@@ -293,10 +293,10 @@ class ElementWithScripts {
   }
   
   /**
-  * Updates all form inputs and sliders to all the given value, number pairs. 
-  * 
-  * @param {Object.<string, value>} map a collection of name-value pairs.
-  */
+   * Updates all form inputs and sliders to all the given value, number pairs. 
+   * 
+   * @param {Object.<string, value>} map a collection of name-value pairs.
+   */
   updateSlidersAndFormInputs(map) {
     let setToRedraw = new Set();
     for (let label in map) {
@@ -311,12 +311,12 @@ class ElementWithScripts {
   }
 
   /** 
-    * Updates all form inputs and sliders to the given value. 
-    * 
-    * @param {name} name of of the input box.
-    * @param {string} value value to update to.
-    * @return a set of graphics to redraw.
-    */
+   * Updates all form inputs and sliders to the given value. 
+   * 
+   * @param {name} name of of the input box.
+   * @param {string} value value to update to.
+   * @return a set of graphics to redraw.
+   */
   updateOneSliderAndFormInput(name, value) {
     let result = new Set();
     let mathNodes = this.mathNodesAssociatedWithSliders[name];

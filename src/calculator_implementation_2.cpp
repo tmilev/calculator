@@ -1715,12 +1715,6 @@ void Calculator::evaluateCommands() {
     }
     this->objectContainer.resetSliders();
     this->objectContainer.resetPlots();
-    std::string javascriptString =
-    this->objectContainer.toStringJavascriptForUserInputBoxes();
-    if (javascriptString != "") {
-      this->outputJS["javascriptForUserInputBoxes"] = javascriptString;
-    }
-    out << javascriptString;
     JSData result;
     result.elementType = JSData::token::tokenObject;
     std::string resultString =

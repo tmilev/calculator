@@ -1,10 +1,8 @@
 "use strict";
 
 const EquationEditor = require("./equation_editor/src/equation_editor");
-
 const CanvasTwoD = require("./graphics").CanvasTwoD;
 const CanvasThreeD = require("./graphics").Canvas;
-
 
 class SliderUpdater {
   constructor(

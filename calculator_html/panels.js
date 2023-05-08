@@ -57,13 +57,13 @@ function toggleHeight(currentButton, currentPanelID) {
   if (currentPanel.transitionState === "collapsing" ||
     currentPanel.transitionState === "collapsed") {
     currentPanel.transitionState = "expanding";
-    currentButton.innerHTML = "&#9660;";
+    writeHTML(currentButton, "&#9660;");
   } else if (
     currentPanel.transitionState === null || currentPanel.transitionState === undefined ||
     currentPanel.transitionState === "expanding" || currentPanel.transitionState === "expanded"
   ) {
     currentPanel.transitionState = "collapsing";
-    currentButton.innerHTML = "&#9656;";
+    writeHTML(currentButton, "&#9656;");
   }
   currentPanel.addEventListener("transitionend", transitionDone);
   setTimeout(
@@ -207,12 +207,18 @@ class PanelExpandable {
   setPanelContent(
     /** @type {HTMLElement|string} */
     input,
+    /** @type {boolean|undefined} */
+    useSetHtml,
   ) {
     this.panelContent.style.maxHeight = "";
     this.panelContent.style.maxWidth = "";
     if (typeof input === "string") {
       let element = document.createElement("span");
-      element.innerHTML = input;
+      if (useSetHtml === true) {
+        writeHTML(element, input);
+      } else {
+        element.innerHTML = input;
+      }
       input = element;
     }
     this.panelContent.textContent = "";
@@ -222,7 +228,7 @@ class PanelExpandable {
   }
 
   setPanelLabel(input) {
-    this.panelLabel.innerHTML = input;
+    writeHTML(this.panelLabel, input);
   }
 
   initialize(
@@ -277,7 +283,7 @@ class PanelExpandable {
     }
     this.contentCopyButton = textContent.substring(2, textContent.length - 2);
     this.buttonCopy = document.createElement("button");
-    this.buttonCopy.innerHTML = "<tiny>&#x1F4CB;</tiny>";
+    writeHTML(this.buttonCopy, "<tiny>&#x1F4CB;</tiny>");
     this.buttonCopy.title = "copy";
     this.buttonCopy.className = "buttonProgress";
     this.buttonCopy.addEventListener("click", () => {
@@ -332,6 +338,8 @@ class PanelExpandable {
 function makePanelFromData(
   /** @type {PanelExpandableData} */
   data,
+  /** @type {boolean|undefined} */
+  useSetHtml,
 ) {
   let doCreatePanel = false;
   if (data.content.length > data.minimalCharacterLengthForPanel) {
@@ -340,7 +348,8 @@ function makePanelFromData(
   if (doCreatePanel) {
     let inputPanel = new PanelExpandable(data.container);
     inputPanel.initialize(data.startHidden, data.allowFullExpand);
-    inputPanel.setPanelContent(data.content);
+    let content = data.content;
+    inputPanel.setPanelContent(content, useSetHtml);
     inputPanel.setPanelLabel(data.label);
     inputPanel.addCopyButton();
     return inputPanel;

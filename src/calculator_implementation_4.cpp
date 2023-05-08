@@ -2349,23 +2349,6 @@ WeylGroupData& ObjectContainer::getWeylGroupDataCreateIfNotPresent(
   return this->getLieAlgebraCreateIfNotPresent(input).weylGroup;
 }
 
-std::string ObjectContainer::toStringJavascriptForUserInputBoxes() {
-  JSData inputBoxes;
-  JSData inputBoxNames = JSData::makeEmptyArray();
-  JSData inputBoxToSliderUpdaters;
-  for (int i = 0; i < this->userInputTextBoxesWithValues.size(); i ++) {
-    InputBox& currentBox = this->userInputTextBoxesWithValues.values[i];
-    inputBoxNames[i] = currentBox.name;
-  }
-  for (int i = 0; i < this->userInputTextBoxesWithValues.size(); i ++) {
-    InputBox& currentBox = this->userInputTextBoxesWithValues.values[i];
-    inputBoxToSliderUpdaters[currentBox.name] = currentBox.getSliderName();
-  }
-  inputBoxes["inputBoxNames"] = inputBoxNames;
-  inputBoxes["inputBoxToSliderUpdaters"] = inputBoxToSliderUpdaters;
-  return HtmlRoutines::scriptFromJSON("userInputBoxes", inputBoxes);
-}
-
 void ObjectContainer::resetPlots() {
   this->canvasPlotCounter = 0;
   for (int i = 0; i < this->allPlots.size; i ++) {

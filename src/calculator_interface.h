@@ -1759,7 +1759,6 @@ public:
   void resetPlots();
   bool checkConsistencyAfterReset();
   std::string toString();
-  std::string toStringJavascriptForUserInputBoxes();
 };
 
 class StateMaintainerCalculator {
@@ -3150,11 +3149,11 @@ public:
     const Expression& input,
     Vector<Type>& output,
     ExpressionContext* inputOutputStartingContext = nullptr,
-    int targetDimNonMandatory = - 1
+    int targetDimensionNonMandatory = - 1
   ) {
     if (
       this->getVectorFromFunctionArgumentsInternal(
-        input, output, inputOutputStartingContext, targetDimNonMandatory
+        input, output, inputOutputStartingContext, targetDimensionNonMandatory
       )
     ) {
       return true;
@@ -3166,7 +3165,7 @@ public:
     }
     return
     getVectorFromFunctionArgumentsInternal(
-      input[1], output, inputOutputStartingContext, targetDimNonMandatory
+      input[1], output, inputOutputStartingContext, targetDimensionNonMandatory
     );
   }
   template <class Type>
@@ -3174,7 +3173,7 @@ public:
     const Expression& input,
     Vector<Type>& output,
     ExpressionContext* inputOutputStartingContext = nullptr,
-    int targetDimNonMandatory = - 1
+    int targetDimensionNonMandatory = - 1
   ) {
     STACK_TRACE("Calculator::getVectorFromFunctionArguments");
     input.checkInitialization();
@@ -3185,7 +3184,7 @@ public:
     sequence.checkInitialization();
     return
     this->getVector(
-      sequence, output, inputOutputStartingContext, targetDimNonMandatory
+      sequence, output, inputOutputStartingContext, targetDimensionNonMandatory
     );
   }
   bool getSumProductsExpressions(
@@ -3233,7 +3232,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Vector<Coefficient>& outputWeightSimpleCoords,
-    WithContext<SemisimpleLieAlgebra*>& outputAmbientSSalgebra
+    WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra
   );
   template <class Coefficient>
   bool getTypeHighestWeightParabolic(
@@ -4363,22 +4362,22 @@ bool Calculator::getTypeWeight(
     << "is expected to have two arguments: "
     << "Semisimple algebra type, highest weight in simple coordinates. ";
   }
-  const Expression& leftE = input[1];
-  const Expression& middleE = input[2];
+  const Expression& leftExpression = input[1];
+  const Expression& middleExpression = input[2];
   outputAmbientSemisimpleLieAlgebra.content = nullptr;
   if (
     !CalculatorConversions::convert(
-      *this, leftE, outputAmbientSemisimpleLieAlgebra
+      *this, leftExpression, outputAmbientSemisimpleLieAlgebra
     )
   ) {
-    calculator << "Error extracting Lie algebra from " << leftE.toString();
+    calculator << "Error extracting Lie algebra from " << leftExpression.toString();
     return false;
   }
   SemisimpleLieAlgebra* ambientSemisimpleLieAlgebra =
   outputAmbientSemisimpleLieAlgebra.content;
   if (
     !calculator.getVector<Coefficient>(
-      middleE,
+      middleExpression,
       outputWeightSimpleCoords,
       &outputAmbientSemisimpleLieAlgebra.context,
       ambientSemisimpleLieAlgebra->getRank()
@@ -4389,7 +4388,7 @@ bool Calculator::getTypeWeight(
     << "argument of HWV to a list of "
     << ambientSemisimpleLieAlgebra->getRank()
     << " polynomials. The second argument you gave is "
-    << middleE.toString()
+    << middleExpression.toString()
     << ".";
     return false;
   }
@@ -4441,11 +4440,11 @@ bool Calculator::getTypeHighestWeightParabolic(
       "[optional] parabolic selection. "
     );
   }
-  const Expression& leftE = input[1];
-  const Expression& middleE = input[2];
+  const Expression& leftExpression = input[1];
+  const Expression& middleExpression = input[2];
   if (
     !CalculatorConversions::convert(
-      calculator, leftE, outputAmbientSemisimpleLieAlgebra
+      calculator, leftExpression, outputAmbientSemisimpleLieAlgebra
     )
   ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
@@ -4454,42 +4453,42 @@ bool Calculator::getTypeHighestWeightParabolic(
   outputAmbientSemisimpleLieAlgebra.content;
   if (
     !calculator.getVector<Coefficient>(
-      middleE,
+      middleExpression,
       outputWeightHWFundcoords,
       &outputAmbientSemisimpleLieAlgebra.context,
       ambientSemisimpleLieAlgebra->getRank()
     )
   ) {
-    std::stringstream tempStream;
-    tempStream
+    std::stringstream errorStream;
+    errorStream
     << "Failed to convert the second argument of "
     << "highest weight vector to a list of "
     << ambientSemisimpleLieAlgebra->getRank()
     << " polynomials. The second argument you gave is "
-    << middleE.toString()
+    << middleExpression.toString()
     << ".";
-    return output.assignError(calculator, tempStream.str());
+    return output.assignError(calculator, errorStream.str());
   }
   if (input.isListNElements(4)) {
     Vector<Rational> parabolicSelection;
-    const Expression& rightE = input[3];
+    const Expression& rightExpression = input[3];
     if (
       !calculator.getVector<Rational>(
-        rightE,
+        rightExpression,
         parabolicSelection,
         &outputAmbientSemisimpleLieAlgebra.context,
         ambientSemisimpleLieAlgebra->getRank()
       )
     ) {
-      std::stringstream tempStream;
-      tempStream
+      std::stringstream errorStream;
+      errorStream
       << "Failed to convert the third argument "
       << "of highest weight vector to a list of "
       << ambientSemisimpleLieAlgebra->getRank()
       << " rationals. The third argument you gave is "
-      << rightE.toString()
+      << rightExpression.toString()
       << ".";
-      return output.assignError(calculator, tempStream.str());
+      return output.assignError(calculator, errorStream.str());
     }
     outputInducingSelection = parabolicSelection;
   } else {
@@ -4562,7 +4561,10 @@ bool CalculatorConversions::expressionFromPolynomial(
 ) {
   STACK_TRACE("CalculatorConversions::expressionFromPolynomial");
   LinearCombination<Expression, Coefficient> terms;
-  Expression currentBase, currentPower, currentTerm, currentMultTermE;
+  Expression currentBase;
+  Expression currentPower;
+  Expression  currentTerm;
+  Expression  currentMultTermExpression;
   if (!input.isConstant() && inputContext == nullptr) {
     calculator
     << "While converting polynomial to expression, "
@@ -4588,17 +4590,17 @@ bool CalculatorConversions::expressionFromPolynomial(
           currentBase.addChildValueOnTop(Rational(j));
         }
         if (input[i](j) == 1) {
-          currentMultTermE = currentBase;
+          currentMultTermExpression = currentBase;
         } else {
           currentPower.assignValue(calculator, input[i](j));
-          currentMultTermE.makeXOX(
+          currentMultTermExpression.makeXOX(
             calculator, calculator.opPower(), currentBase, currentPower
           );
         }
         if (!found) {
-          currentTerm = currentMultTermE;
+          currentTerm = currentMultTermExpression;
         } else {
-          currentTerm *= currentMultTermE;
+          currentTerm *= currentMultTermExpression;
         }
         found = true;
       }
@@ -4653,7 +4655,8 @@ bool CalculatorConversions::expressionFromRationalFraction(
   if (input.isConstant(&aConst)) {
     return output.assignValue(calculator, aConst);
   }
-  Polynomial<Coefficient> numerator, denominator;
+  Polynomial<Coefficient> numerator;
+  Polynomial<Coefficient> denominator;
   input.getNumerator(numerator);
   if (
     input.isConstant() ||

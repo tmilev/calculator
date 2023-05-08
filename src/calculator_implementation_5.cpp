@@ -2779,7 +2779,8 @@ bool CalculatorFunctionsPlot::plotSurface(
     << ". I've been taught to plot 2d surfaces only. "
     << "Please reduce the number of variables to 2. ";
   }
-  Expression uE, vE;
+  Expression uE;
+  Expression vE;
   uE.makeAtom(calculator, "u");
   vE.makeAtom(calculator, "v");
   if (plot.variablesInPlay.size == 1) {

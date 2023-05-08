@@ -127,7 +127,9 @@
       },
       (x, y) => {
         return 2 * x * y;
-      }
+      },
+      [], 
+      true,
     );
     canvas4.drawGrid();
     canvas4.drawCoordinateAxes();
@@ -147,10 +149,10 @@
     canvas.screenBasisUserDefault = [[0.59, 0.78, 0.18], [0.46, - 0.15, - 0.87]];
     canvas.screenBasisUser = canvas.screenBasisUserDefault.slice();
     canvas.initialize();
-    canvas.drawLine([- 1, 0, 0], [1, 0, 0], 'black', 2);
-    canvas.drawLine([0, - 1, 0], [0, 1, 0], 'black', 2);
-    canvas.drawLine([0, 0, - 1], [0, 0, 1], 'black', 2);
-    canvas.drawLine([0, 0, 0], [1, 0.5, 0.5], 'red', 2);
+    canvas.drawLineCreate([- 1, 0, 0], [1, 0, 0], 'black', 2);
+    canvas.drawLineCreate([0, - 1, 0], [0, 1, 0], 'black', 2);
+    canvas.drawLineCreate([0, 0, - 1], [0, 0, 1], 'black', 2);
+    canvas.drawLineCreate([0, 0, 0], [1, 0.5, 0.5], 'red', 2);
     canvas.scale = 100;
     canvas.drawSurface(testGetMoebiusSurface());
     canvas.drawSurface(testGetMoebiusSurface2());

@@ -3375,6 +3375,7 @@ class Canvas {
   drawLineCreate(leftPt, rightPt, inputColor, inputLineWidth) {
     let segment = new SegmentInThreeD(leftPt, rightPt, inputColor, inputLineWidth);
     this.highLevel3dObjects.segments.push(segment);
+    this.drawLine(segment);
   }
 
   /**

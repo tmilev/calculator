@@ -1721,7 +1721,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(
     if (global.userDefaultHasAdminRights()) {
       *comments
       << "The result of the interpretation attempt is:<br>"
-      << interpreter.outputString
+      << interpreter.outputHTMLString
       << "<br><b>Comments</b><br>"
       << interpreter.outputCommentsString;
     } else {

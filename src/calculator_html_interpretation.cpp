@@ -137,7 +137,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     << "<br>"
     << CalculatorHTML::bugsGenericMessage
     << "<br>Details: <br>"
-    << interpreter.outputString
+    << interpreter.outputHTMLString
     << interpreter.outputCommentsString
     << "<hr>Input: <br>"
     << interpreter.inputString;
@@ -168,7 +168,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
       answerCommandsNoEnclosures.str(), "Input link"
     )
     << "<br>"
-    << interpreter.outputString
+    << interpreter.outputHTMLString
     << "<hr>"
     << interpreter.outputCommentsString
     << "<hr><b>Raw command:</b> "
@@ -405,7 +405,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   } else if (interpreter.flagAbortComputationASAP) {
     out
     << "<b style='color:red'>Failed to evaluate your answer, got:</b><br>"
-    << interpreter.outputString;
+    << interpreter.outputHTMLString;
     result[WebAPI::Result::resultHtml] = out.str();
     result[WebAPI::Result::millisecondsComputation] =
     global.getElapsedSeconds() - startTime;
@@ -476,7 +476,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     if (global.userDefaultHasAdminRights()) {
       out
       << problemLinkStream.str()
-      << interpreterWithAdvice.outputString
+      << interpreterWithAdvice.outputHTMLString
       << "<br>"
       << interpreterWithAdvice.outputCommentsString;
     }
@@ -495,7 +495,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
       out
       <<
       "<br>Logged-in as administator with debug flag on => printing error details. "
-      << interpreterWithAdvice.outputString
+      << interpreterWithAdvice.outputHTMLString
       << "<br>"
       << interpreterWithAdvice.outputCommentsString;
       out
@@ -525,7 +525,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << calculatorInputStreamNoEnclosures.str()
     << "<br>"
     << "Result:<br>"
-    << interpreterWithAdvice.outputString
+    << interpreterWithAdvice.outputHTMLString
     << "<br>"
     << interpreterWithAdvice.outputCommentsString
     << "<br>Parsed elements: "
@@ -1772,14 +1772,14 @@ bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
     if (isolatedInterpreter.parser.syntaxErrors != "") {
       out << isolatedInterpreter.parser.toStringSyntacticStackHTMLSimple();
     } else {
-      out << isolatedInterpreter.outputString;
+      out << isolatedInterpreter.outputHTMLString;
     }
     if (global.userDebugFlagOn() && global.userDefaultHasAdminRights()) {
       out
       << "<hr><b>Administartor view internals.</b><hr>"
       << this->administratorViewInternals
       << "<hr>"
-      << interpreter.outputString
+      << interpreter.outputHTMLString
       << "<br>"
       << interpreter.outputCommentsString
       << "<hr>Input, no enclosures: <hr>"
@@ -1821,7 +1821,7 @@ void AnswerCheckerNoProblem::computeVerificationString() {
       << "<hr>"
       << this->administratorViewInternals
       << "<br>The calculator output is: "
-      << this->interpreter.outputString
+      << this->interpreter.outputHTMLString
       << "Comments: "
       << this->interpreter.comments.str()
       << "<hr>Input, no enclosures: <hr>"
@@ -2335,7 +2335,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     << "<br>"
     << CalculatorHTML::bugsGenericMessage
     << "<br>Details: <br>"
-    << interpreter.outputString
+    << interpreter.outputHTMLString
     << interpreter.outputCommentsString
     << "<hr>Input: <br>"
     << interpreter.inputString;
@@ -2417,7 +2417,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       answerCommandsNoEnclosure.str(), "Calculator input no enclosures"
     );
     out
-    << interpreter.outputString
+    << interpreter.outputHTMLString
     << "<hr>"
     << interpreter.outputCommentsString
     << "<hr>"

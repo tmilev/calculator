@@ -1656,7 +1656,7 @@ void Calculator::evaluateCommands() {
       << "Syntax errors encountered: "
       << Logger::consoleNormal();
     }
-    this->outputJS[WebAPI::Result::syntaxErrors] =
+    this->output[WebAPI::Result::syntaxErrors] =
     this->parser.toStringSyntacticStackHTMLSimple();
     out << this->parser.syntaxErrors;
     out << "<hr>";
@@ -1695,8 +1695,8 @@ this->evaluateCommandsStandardOutput(startingExpression , out);
     this->evaluateCommandsDebugExpressionTreeOutput(startingExpression , out);
 
   }
-  this->outputString = out.str();
-  this->outputJS[WebAPI::Result::resultHtml] = out.str();
+  this->outputHTMLString = out.str();
+  this->output[WebAPI::Result::resultHtml] = out.str();
   std::stringstream commentsStream;
   if (this->objectContainer.algebraicClosure.latestBasis.size > 1) {
     commentsStream
@@ -1717,9 +1717,9 @@ this->evaluateCommandsStandardOutput(startingExpression , out);
     commentsStream << "<br><span>" << this->comments.str() << "</span>";
   }
   this->outputCommentsString = commentsStream.str();
-  this->outputJS[WebAPI::Result::comments] = this->outputCommentsString;
+  this->output[WebAPI::Result::comments] = this->outputCommentsString;
   if (global.flagRunningConsoleRegular && this->comments.str() != "") {
-    this->outputString += this->outputCommentsString;
+    this->outputHTMLString += this->outputCommentsString;
   }
 }
 
@@ -1750,7 +1750,7 @@ void Calculator::evaluateCommandsStandardOutput( Expression& startingExpression,
   this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
   if (badCharactersString != "") {
     out << badCharactersString << "<hr>";
-    this->outputJS[WebAPI::Result::badInput] = badCharactersString;
+    this->output[WebAPI::Result::badInput] = badCharactersString;
   }
   this->objectContainer.resetSliders();
   this->objectContainer.resetPlots();
@@ -1763,7 +1763,7 @@ void Calculator::evaluateCommandsStandardOutput( Expression& startingExpression,
     true,
     &result
   );
-  this->outputJS[WebAPI::Result::resultLabel] = result;
+  this->output[WebAPI::Result::resultLabel] = result;
   out << resultString;
 }
 
@@ -1772,7 +1772,7 @@ void Calculator::evaluateCommandsDebugExpressionTreeOutput(Expression& startingE
   this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
   if (badCharsString != "") {
     out << badCharsString << "<hr>";
-    this->outputJS[WebAPI::Result::badInput] = badCharsString;
+    this->output[WebAPI::Result::badInput] = badCharsString;
   }
   this->objectContainer.resetSliders();
   out
@@ -1781,8 +1781,8 @@ void Calculator::evaluateCommandsDebugExpressionTreeOutput(Expression& startingE
   << "<hr>"
   << "Output:<br>"
   << this->programExpression.toStringFull();
-  this->outputJS[WebAPI::Result::resultLabel]["input"] =
+  this->output[WebAPI::Result::resultLabel]["input"] =
   startingExpression.toStringFull();
-  this->outputJS[WebAPI::Result::resultLabel]["output"] =
+  this->output[WebAPI::Result::resultLabel]["output"] =
   this->programExpression.toStringFull();
 }

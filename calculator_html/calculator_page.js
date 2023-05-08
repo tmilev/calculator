@@ -864,7 +864,7 @@ class Calculator {
   afterWriteOutput() {
     let constructedPanels = {};
     for (let i = 0; i < this.panels.length; i++) {
-      let next = panels.makePanelFromData(this.panels[i], true);
+      let next = panels.makePanelFromData(this.panels[i], false);
       if (next === null) {
         continue;
       }

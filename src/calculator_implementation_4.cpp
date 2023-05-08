@@ -1872,7 +1872,7 @@ std::string ObjectContainer::toString() {
 
 JSData Calculator::toJSONOutputAndSpecials() {
   STACK_TRACE("Calculator::toJSONOutputAndSpecials");
-  JSData result = this->outputJS;
+  JSData result = this->output;
   if (this->inputString == "") {
     return result;
   }

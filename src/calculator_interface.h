@@ -2463,8 +2463,8 @@ public:
   HashedList<std::string> allBuiltInTypes;
   // std::string inputStringRawestOfTheRaw;
   std::string inputString;
-  std::string outputString;
-  JSData outputJS;
+  std::string outputHTMLString;
+  JSData output;
   std::string outputCommentsString;
   ObjectContainer objectContainer;
   std::string javaScriptDisplayingIndicator;

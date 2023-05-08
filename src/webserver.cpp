@@ -5953,8 +5953,8 @@ int WebServer::mainCommandLine() {
   FileOperations::openFileCreateIfNotPresentVirtual(
     outputFile, "output/outputFileCommandLine.html", false, true, false
   );
-  global << calculator.outputString;
-  outputFile << calculator.outputString;
+  global << calculator.outputHTMLString;
+  outputFile << calculator.outputHTMLString;
   global
   << "Total running time: "
   << Logger::blue

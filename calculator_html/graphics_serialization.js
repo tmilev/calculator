@@ -459,10 +459,10 @@ class GraphicsSerialization {
 
     switch (plotType) {
       case "segment":
-        canvas.drawLine(points[0], points[1], color, lineWidth);
+        canvas.drawLineCreate(points[0], points[1], color, lineWidth);
         return;
       case "label":
-        canvas.drawText(point, text, color);
+        canvas.drawTextCreate(point, text, color);
         return;
       case "setProjectionScreen":
         canvas.screenBasisUserDefault = plot["projectionScreen"];
@@ -479,8 +479,13 @@ class GraphicsSerialization {
           this.interpretStringToNumberOrFunction(numberOfSegments[0], parameterNames, parameterValues),
           this.interpretStringToNumberOrFunction(numberOfSegments[1], parameterNames, parameterValues),
         ];
+        let surfaceImmersion = this.functionFromBodyAndArguments(
+          coordinateFunctions,
+          variableNames,
+          parameterValues,
+        );
         canvas.drawSurfaceCreate(
-          this.functionFromBodyAndArguments(coordinateFunctions, variableNames, parameterValues),
+          surfaceImmersion,
           convertedRanges,
           convertedSegments,
           colorFront,

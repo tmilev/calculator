@@ -2923,6 +2923,24 @@ class Surface {
   }
 }
 
+/** A class that represents a segment in IIId. */
+class SegmentInThreeD {
+  /** 
+   * Constructor for the segment.
+   * @param { !Array.< number >} leftPt [x, y, z] - coordinates of the first point.
+   * @param { !Array.< number >} rightPt [x, y, z] - coordinates of the first point.
+   * @param { string } inputColor color of the points.
+   * @param { number } inputLineWidth line width.
+   */
+  constructor(leftPt, rightPt, inputColor, inputLineWidth) {
+    this.leftPt = leftPt;
+    this.rightPt = rightPt;
+    this.color = inputColor; 
+    this.lineWidth = inputLineWidth;
+  }
+
+}
+
 /**
  * A class that represents a point in IIId.
  */
@@ -3097,6 +3115,18 @@ class Canvas {
       /** @type {!Array.<!TextInThreeD>} */
       theLabels: [],
     };
+    /** 
+     * These objects are "high-level" objects that 
+     * can be used to recompute all3dObjects.
+     */
+    this.highLevel3dObjects = {
+      /** @type {Array.<Surface>} */
+      surfaces: [],
+      /** @type {Array.<SegmentInThreeD>} */
+      segments: [],
+      /** @type {Array.<TextInThreeD>} */
+      texts: [],
+    };
     this.screenXY = [0, 0];
     this.flagShowPerformance = true;
     this.rotationModesAvailable = {
@@ -3258,8 +3288,19 @@ class Canvas {
    * @param {string} text text of the label
    * @param {string} color color of the text.
    */
-  drawText(location, text, color) {
-    this.all3dObjects.theLabels.push(new TextInThreeD(location, text, color));
+  drawTextCreate(location, text, color) {
+    let element = new TextInThreeD(location, text, color);
+    this.highLevel3dObjects.texts.push(element);
+    this.drawText(element);
+  }
+
+  /**
+   * Draws a text at a location in the 3d scene.
+   * 
+   * @param {TextInThreeD} element The element to draw.
+   */
+  drawText(element) {
+    this.all3dObjects.theLabels.push(element);
   }
 
   /**
@@ -3324,18 +3365,31 @@ class Canvas {
     }
   }
 
-  /**
-   * Draws a straight segment. Parts of the segment in the background with be
-   * drawn with dashed lines. Returns the index of the newly added contour.
-   *
+  /** 
+   * Creates a drawLine object and draws it. 
    * @param {!Array.<number>} leftPt [x,y,z]-coordinates of the first point.
    * @param {!Array.<number>} rightPt [x,y,z]-coordinates of the first point.
    * @param {string} inputColor color of the points.
    * @param {number} inputLineWidth line width.
+   */
+  drawLineCreate(leftPt, rightPt, inputColor, inputLineWidth) {
+    let segment = new SegmentInThreeD(leftPt, rightPt, inputColor, inputLineWidth);
+    this.highLevel3dObjects.segments.push(segment);
+  }
+
+  /**
+   * Draws a straight segment. Parts of the segment in the background with be
+   * drawn with dashed lines. Returns the index of the newly added contour.
+   *
+   * @param {SegmentInThreeD} segment the segment object.
    *
    * @return {number}
    */
-  drawLine(leftPt, rightPt, inputColor, inputLineWidth) {
+  drawLine(segment) {
+    let leftPt = segment.leftPt;
+    let rightPt = segment.rightPt;
+    let inputColor = segment.color;
+    let inputLineWidth = segment.lineWidth;
     let newContour = new Contour([], inputColor, inputLineWidth);
     let numSegments = this.defaultNumSegmentsPerContour;
     newContour.index = this.all3dObjects.allContours.length;
@@ -3506,13 +3560,18 @@ class Canvas {
    * @private
    */
   paintMouseInfo() {
-    if (this.selectedElement !== 'default' ||
-        this.selectedElement === undefined || this.selectedVector === [] ||
-        this.selectedVector === undefined) {
+    if (
+      this.selectedElement !== 'default' ||
+      this.selectedElement === undefined ||
+      this.selectedVector === [] ||
+      this.selectedVector === undefined
+    ) {
       return;
     }
-    if (this.selectedVector.length === 0 ||
-        this.selectedVector.length === undefined) {
+    if (
+      this.selectedVector.length === 0 ||
+      this.selectedVector.length === undefined
+    ) {
       return;
     }
     let currentPt;
@@ -4980,6 +5039,21 @@ class Canvas {
         `(${(this.newAngleNormal * 180 / Math.PI).toFixed(1)} deg)`;
   }
 
+  /** Recomputes parametric objects and redraws the surface. */
+  recomputeAndRedraw() {
+    this.clear();
+    for (let i = 0; i < this.highLevel3dObjects.surfaces.length; i++) {
+      this.drawSurface(this.highLevel3dObjects.surfaces[i]);
+    }
+    for (let i = 0; i < this.highLevel3dObjects.segments.length; i++) {
+      this.drawLine(this.highLevel3dObjects.segments[i]);
+    }
+    for (let i = 0; i < this.highLevel3dObjects.texts.length; i++) {
+      this.drawText(this.highLevel3dObjects.texts[i]);
+    }
+    this.redraw();
+  }
+
   /** Redraws the 3d scene. */
   redraw() {
     this.redrawStart = new Date().getTime();
@@ -5081,15 +5155,17 @@ class Canvas {
       colorContour,
       inputContourWidth,
   ) {
-    this.drawSurface(new Surface(
-        inputXYZFunction,
-        inputUVBox,
-        inputPatchDimensions,
-        colorFront,
-        colorBack,
-        colorContour,
-        inputContourWidth,
-        ));
+    let surface = new Surface(
+      inputXYZFunction,
+      inputUVBox,
+      inputPatchDimensions,
+      colorFront,
+      colorBack,
+      colorContour,
+      inputContourWidth,
+    );
+    this.highLevel3dObjects.surfaces.push(surface);
+    this.drawSurface(surface);
   }
 
   /** 
@@ -5181,7 +5257,7 @@ class Canvas {
       for (let j = 0; j < numVsegments + 1; j++) {
         let currentV = surface.uvBox[1][0] + j * deltaV;
         for (let k = 0; k < numSegmentsPerContour + 1; k++) {
-          let currentU =surface.uvBox[0][0] + (i + k / numSegmentsPerContour) * deltaU;
+          let currentU = surface.uvBox[0][0] + (i + k / numSegmentsPerContour) * deltaU;
           contourPoints[k] = surface.xyzFun(currentU, currentV, this.parameterValues);
         }
         let incomingContour = new Contour(

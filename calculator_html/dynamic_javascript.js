@@ -328,7 +328,11 @@ class ElementWithScripts {
       }
     }
     for (let graphic of setToRedraw) {
-      graphic.redraw();
+      if (graphic instanceof CanvasThreeD) {
+        graphic.recomputeAndRedraw();
+      } else {
+        graphic.redraw();
+      }
     }
   }
 

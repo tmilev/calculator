@@ -710,7 +710,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
   this->computeCanvasNameIfNecessary(
     owner.objectContainer.canvasPlotCounter
   );
-  JSData result;
+  JSData result = this->plotJSON3d(owner);
   std::stringstream out;
   if (!owner.flagPlotShowJavascriptOnly) {
     std::string canvasId = this->getCanvasName();
@@ -733,29 +733,8 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
     << "<span name='"
     << messagesId
     << "'></span>";
-    result[Plot::Labels::canvasName] = this->getCanvasName();
-    result[Plot::Labels::controlsName] = controlsId;
-    result[Plot::Labels::messagesName] = messagesId;
   }
-  JSData plotUpdaters;
-  for (int i = 0; i < this->parameterNames.size; i ++) {
-    InputBox& currentBox =
-    owner.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(
-      this->parameterNames[i]
-    );
-    plotUpdaters[currentBox.getSliderName()] = this->getCanvasName();
-  }
-  result["plotUpdaters"] = plotUpdaters;
-  JSData objects3D = JSData::makeEmptyArray();
-  for (int i = 0; i < this->plotObjects.size; i ++) {
-    PlotObject& current = this->plotObjects[i];
-    objects3D.listObjects.addOnTop(current.toJSON());
-  }
-  result[Plot::Labels::plotObjects] = objects3D;
-  result["showPerformance"] = owner.flagPlotNoControls;
-  result["setBoundingBoxAsDefaultViewWindow"] = true;
-  result[Plot::Labels::graphicsType] = "threeDimensional";
-  this->writeParameters(result, owner);
+
   std::string script = HtmlRoutines::scriptFromJSON("graphics3d", result);
   out << script;
   owner.objectContainer.graphicsScripts.setKeyValue(
@@ -889,9 +868,7 @@ std::string Plot::getPlotHtml(Calculator& owner) {
 JSData Plot::plotJSON(Calculator &owner){
   STACK_TRACE("Plot::plotJSON");
   if (this->dimension == 3) {
-    JSData notImplemented;
-    notImplemented = "not implemented";
-    return notImplemented;
+    return this->plotJSON3d(owner);
   } else if (this->dimension == 2) {
     return this->plotJSON2d(owner);
   }
@@ -1240,18 +1217,62 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   return out.str();
 }
 
+JSData Plot::plotJSON3d(Calculator &owner){
+  JSData result;
+  this->computeCanvasNameIfNecessary(
+    owner.objectContainer.canvasPlotCounter
+  );
+
+  result[WebAPI::Result::scriptType] = "graphics3d";
+
+  if (!owner.flagPlotShowJavascriptOnly) {
+    std::string canvasId = this->getCanvasName();
+    std::string controlsId = canvasId + "Controls";
+    std::string messagesId = canvasId + "Messages";
+
+    result[Plot::Labels::canvasName] = canvasId;
+    result[Plot::Labels::controlsName] = controlsId;
+    result[Plot::Labels::messagesName] = messagesId;
+  }
+  JSData plotUpdaters;
+  for (int i = 0; i < this->parameterNames.size; i ++) {
+    InputBox& currentBox =
+    owner.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(
+      this->parameterNames[i]
+    );
+    plotUpdaters[currentBox.getSliderName()] = this->getCanvasName();
+  }
+  result["plotUpdaters"] = plotUpdaters;
+  JSData objects3D = JSData::makeEmptyArray();
+  for (int i = 0; i < this->plotObjects.size; i ++) {
+    PlotObject& current = this->plotObjects[i];
+    objects3D.listObjects.addOnTop(current.toJSON());
+  }
+  result[Plot::Labels::plotObjects] = objects3D;
+  result["showPerformance"] = owner.flagPlotNoControls;
+  result["setBoundingBoxAsDefaultViewWindow"] = true;
+  result[Plot::Labels::graphicsType] = "threeDimensional";
+  this->writeParameters(result, owner);
+
+  return result;
+}
+
 JSData Plot::plotJSON2d(Calculator &owner){
   JSData result;
+  result[WebAPI::Result::scriptType] = "graphics";
   std::string controls = this->getCanvasName() + "Controls";
   std::string messages = this->getCanvasName() + "Messages";
 
   result["noControls"] = owner.flagPlotNoControls;
   result[Plot::Labels::canvasName] = this->getCanvasName();
   result[Plot::Labels::graphicsType] = "twoDimensional";
-  result[WebAPI::Result::scriptType] = "graphics";
   result[Plot::Labels::controlsName] = controls;
   result[Plot::Labels::messagesName] = messages;
   result["plotUpdaters"].elementType = JSData::token::tokenArray;
+  if (!this->flagPlotShowJavascriptOnly) {
+
+     result["noControls"] = owner.flagPlotNoControls;
+  }
   for (int i = 0; i < this->parameterNames.size; i ++) {
     if (
       !owner.objectContainer.userInputTextBoxesWithValues.contains(

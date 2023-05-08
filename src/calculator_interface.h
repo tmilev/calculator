@@ -1578,6 +1578,7 @@ public:
   std::string getPlotHtml3d(Calculator& owner);
   std::string getPlotHtml2d(Calculator& owner);
   JSData plotJSON2d(Calculator& owner);
+  JSData plotJSON3d(Calculator& owner);
   JSData plotJSON(Calculator& owner);
   void writeParameters(JSData& output, Calculator& owner);
   std::string getPlotStringAddLatexCommands(bool useHtml);

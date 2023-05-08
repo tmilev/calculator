@@ -1792,7 +1792,7 @@ std::string SSLRecord::toHtml(int id) {
   out << "<div id = '" << spanId.str() << "'></div>";
   content["id"] = spanId.str();
   content["content"] = this->toJSON();
-  out << HtmlRoutines::scriptFromJSON("displaySSLRecord", content);
+  out << HtmlRoutines::jsonContainer("displaySSLRecord", content);
   return out.str();
 }
 

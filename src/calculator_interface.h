@@ -1519,6 +1519,25 @@ public:
   bool operator==(const PlotObject& other) const;
 };
 
+// A class that encapsulates an html snippet together with
+// a javascript data structure that can be interpreted.
+// Loading dynamically generated <script> tags is a security
+// violation as it poses risks of script injection.
+// Explanation.
+// As of writing, a <script> tag written in innerHTML of a javascript
+// object will not execute automatically. However
+// using innerHTML still poses security risks through other
+// code injection schemes: for example, the <img> tag has
+// fallback javascript execution that is not enclosed in a <script> tag.
+// and will be executed regardless.
+// This injection risk can be mitigated cleanly using the new setHTML()
+// method. However, this strips <script> tags right away.
+// We can encode our <script> data in regular <span> elements,
+// and then extract our scripts through these spans.
+// An alternative is the present class.
+
+class ScriptWithHtml {};
+
 // A class to plot 2d and 3d graphics.
 class Plot {
   friend std::ostream& operator<<(std::ostream& output, const Plot& plot) {
@@ -2193,11 +2212,19 @@ class Calculator {
     output.comments << any;
     return output;
   }
-  void evaluateCommandsConsoleOutput(const Expression &startingExpression, std::stringstream &out);
-  void evaluateCommandsStandardOutput(Expression &startingExpression, std::stringstream &out);
-  void evaluateCommandsDebugExpressionTreeOutput(Expression &startingExpression, std::stringstream &out);
+  void evaluateCommandsConsoleOutput(
+    const Expression& startingExpression, std::stringstream& out
+  );
+  void evaluateCommandsStandardOutput(
+    Expression& startingExpression, std::stringstream& out
+  );
+  void evaluateCommandsDebugExpressionTreeOutput(
+    Expression& startingExpression, std::stringstream& out
+  );
   void evaluateCommandsWriteJavascriptOutput();
-  void collectJavascript(const Expression& input, HashedList<JSData>& output);
+  void collectJavascript(
+    const Expression& input, HashedList<JSData>& output
+  );
 public:
   class OperationHandlers {
   public:
@@ -3161,7 +3188,10 @@ public:
   ) {
     if (
       this->getVectorFromFunctionArgumentsInternal(
-        input, output, inputOutputStartingContext, targetDimensionNonMandatory
+        input,
+        output,
+        inputOutputStartingContext,
+        targetDimensionNonMandatory
       )
     ) {
       return true;
@@ -3173,7 +3203,10 @@ public:
     }
     return
     getVectorFromFunctionArgumentsInternal(
-      input[1], output, inputOutputStartingContext, targetDimensionNonMandatory
+      input[1],
+      output,
+      inputOutputStartingContext,
+      targetDimensionNonMandatory
     );
   }
   template <class Type>
@@ -3192,7 +3225,10 @@ public:
     sequence.checkInitialization();
     return
     this->getVector(
-      sequence, output, inputOutputStartingContext, targetDimensionNonMandatory
+      sequence,
+      output,
+      inputOutputStartingContext,
+      targetDimensionNonMandatory
     );
   }
   bool getSumProductsExpressions(
@@ -4378,7 +4414,9 @@ bool Calculator::getTypeWeight(
       *this, leftExpression, outputAmbientSemisimpleLieAlgebra
     )
   ) {
-    calculator << "Error extracting Lie algebra from " << leftExpression.toString();
+    calculator
+    << "Error extracting Lie algebra from "
+    << leftExpression.toString();
     return false;
   }
   SemisimpleLieAlgebra* ambientSemisimpleLieAlgebra =
@@ -4571,8 +4609,8 @@ bool CalculatorConversions::expressionFromPolynomial(
   LinearCombination<Expression, Coefficient> terms;
   Expression currentBase;
   Expression currentPower;
-  Expression  currentTerm;
-  Expression  currentMultTermExpression;
+  Expression currentTerm;
+  Expression currentMultTermExpression;
   if (!input.isConstant() && inputContext == nullptr) {
     calculator
     << "While converting polynomial to expression, "

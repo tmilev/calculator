@@ -197,7 +197,7 @@ public:
   );
   void scaleToUnitLength(Vector<double>& root);
   std::string getHTMLDiv(
-    int dimension, bool useSpanTag, bool generateInfoPanels
+    int dimension, bool generateInfoPanels
   );
   void drawString(
     DrawElementInputOutput& drawData,

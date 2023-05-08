@@ -276,7 +276,7 @@ std::string SemisimpleLieAlgebra::toHTML(
     << "dragged with the mouse to rotate the picture."
     << "<br>"
     << drawingVariables.getHTMLDiv(
-      this->weylGroup.getDimension(), true, true
+      this->weylGroup.getDimension(), true
     );
     out << this->weylGroup.toStringRootsAndRootReflections();
     out

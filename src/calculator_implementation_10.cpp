@@ -545,6 +545,6 @@ bool CalculatorFunctionsVectorPartitionFunction::plotLatticeRestricted(
   DrawingVariables drawingVariables;
   toBePlotted.draw(drawingVariables, &restrictingNormals);
   std::string html =
-  drawingVariables.getHTMLDiv(toBePlotted.getDimension(), false, true);
+  drawingVariables.getHTMLDiv(toBePlotted.getDimension(),  true);
   return output.assignValue(calculator, html);
 }

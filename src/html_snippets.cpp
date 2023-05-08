@@ -357,32 +357,19 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
   return out.str();
 }
 
-std::string HtmlRoutines::scriptFromJSON(
-  const std::string& scriptType, const JSData& scriptContent
-) {
-  std::stringstream out;
-  out
-  << "<script "
-  << WebAPI::Result::scriptType
-  << "='"
-  << scriptType
-  << "'>\n"
-  << scriptContent.toString()
-  << "</script>";
-  return out.str();
-}
-
 std::string HtmlRoutines::jsonContainer(
   const std::string& scriptType, const JSData& scriptContent
 ) {
   std::stringstream out;
+  JSData sciprtContentWithScriptType = scriptContent;
+  sciprtContentWithScriptType[WebAPI::Result::scriptType] = scriptType;
   out
   << "<span name='script' style='display:none' "
   << WebAPI::Result::scriptType
   << "='"
   << scriptType
-  << "'>\n"
-  << scriptContent.toString()
+  << "'>"
+  << sciprtContentWithScriptType.toString()
   << "</span>";
   return out.str();
 }

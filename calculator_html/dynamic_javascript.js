@@ -17,12 +17,11 @@ class OneGraphicWithSliders {
   constructor(
     /** @type {ElementWithScripts} */
     owner,
-    /** @type {string} */
-    serialization
+    /** @type {Object} */
+    graphics,
   ) {
     this.owner = owner;
-    this.serialization = serialization;
-    this.graphics = null;
+    this.graphics = graphics;
     /** @type {CanvasThreeD|CanvasTwoD|null} */
     this.canvas = null;
   }
@@ -31,11 +30,6 @@ class OneGraphicWithSliders {
    * Computes the graphics.
    */
   computeFromSerialization() {
-    if (typeof this.serialization === "string") {
-      this.graphics = JSON.parse(this.serialization);
-    } else {
-      this.graphics = this.serialization;
-    }
     let canvasName = this.graphics[pathnames.urlFields.result.canvasName];
     let controlsName = this.graphics[pathnames.urlFields.result.controlsName];
     let canvases = this.owner.element.querySelectorAll(`[name="${canvasName}"]`);
@@ -87,8 +81,15 @@ class ElementWithScripts {
     script,
   ) {
     let content = script.textContent;
+    let contentParsed = JSON.parse(content);
     let scriptType = script.getAttribute(scriptTypeLabel);
-    this.addOneScript(scriptType, content);
+    if (scriptType === null) {
+      scriptType = contentParsed[scriptTypeLabel];
+    }
+    if (scriptType === undefined || scriptType === null) {
+      throw `Unknown script type: ${scriptType}.`;
+    }
+    this.addOneScript(scriptType, contentParsed);
     script.setAttribute(scriptTypeLabel, "processed");
   }
 

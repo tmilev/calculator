@@ -520,7 +520,7 @@ splitOverLeviMonomialsEncodeHighestWeight(
     }
     out
     << "<hr>"
-    << drawingVariables.getHTMLDiv(weylGroup.getDimension(), false, true);
+    << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
     *report = out.str();
   }
   return true;
@@ -535,7 +535,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   Vectors<Coefficient>* outputEigenSpace,
   CharacterSemisimpleLieAlgebraModule<Coefficient>* outputChar
 ) {
-  STACK_TRACE("ModuleSSalgebra<Coefficient>::splitOverLevi");
+  STACK_TRACE("ModuleSSalgebra::splitOverLevi");
   this->checkInitialization();
   if (this->character.size() != 1) {
     if (report != nullptr) {
@@ -1752,7 +1752,7 @@ const {
   );
   out
   << " A picture of the weight support follows. "
-  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), false, true);
+  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
   bool isBad = false;
   for (int k = 0; k < this->bilinearFormsAtEachWeightLevel.size; k ++) {
     Matrix<Coefficient>& bilinearForm =

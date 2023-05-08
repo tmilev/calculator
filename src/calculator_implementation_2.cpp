@@ -1688,14 +1688,13 @@ void Calculator::evaluateCommands() {
   this->flagWriteLatexPlots;
   global.defaultFormat.getElement().flagExpressionIsFinal = true;
   if (global.flagRunningConsoleRegular) {
-    this->evaluateCommandsConsoleOutput(startingExpression , out);
+    this->evaluateCommandsConsoleOutput(startingExpression, out);
   } else if (!this->flagDisplayFullExpressionTree) {
-this->evaluateCommandsStandardOutput(startingExpression , out);
+    this->evaluateCommandsStandardOutput(startingExpression, out);
   } else {
-    this->evaluateCommandsDebugExpressionTreeOutput(startingExpression , out);
-
+    this->evaluateCommandsDebugExpressionTreeOutput(startingExpression, out);
   }
-  this->evaluateCommandsWriteJavascriptOutput();
+  // this->evaluateCommandsWriteJavascriptOutput();
   this->outputHTMLString = out.str();
   this->output[WebAPI::Result::resultHtml] = out.str();
   std::stringstream commentsStream;
@@ -1724,8 +1723,9 @@ this->evaluateCommandsStandardOutput(startingExpression , out);
   }
 }
 
-void Calculator::evaluateCommandsConsoleOutput(const Expression& startingExpression, std::stringstream& out){
-
+void Calculator::evaluateCommandsConsoleOutput(
+  const Expression& startingExpression, std::stringstream& out
+) {
   global.defaultFormat.getElement().flagUseQuotes = false;
   global.defaultFormat.getElement().flagExpressionIsFinal = true;
   if (global.programArguments.size > 1) {
@@ -1746,7 +1746,9 @@ void Calculator::evaluateCommandsConsoleOutput(const Expression& startingExpress
   << std::endl;
 }
 
-void Calculator::evaluateCommandsStandardOutput( Expression& startingExpression, std::stringstream& out){
+void Calculator::evaluateCommandsStandardOutput(
+  Expression& startingExpression, std::stringstream& out
+) {
   std::string badCharactersString =
   this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
   if (badCharactersString != "") {
@@ -1768,7 +1770,9 @@ void Calculator::evaluateCommandsStandardOutput( Expression& startingExpression,
   out << resultString;
 }
 
-void Calculator::evaluateCommandsDebugExpressionTreeOutput(Expression& startingExpression, std::stringstream& out){
+void Calculator::evaluateCommandsDebugExpressionTreeOutput(
+  Expression& startingExpression, std::stringstream& out
+) {
   std::string badCharsString =
   this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
   if (badCharsString != "") {
@@ -1788,20 +1792,21 @@ void Calculator::evaluateCommandsDebugExpressionTreeOutput(Expression& startingE
   this->programExpression.toStringFull();
 }
 
-void Calculator::collectJavascript(const Expression &input, HashedList<JSData> &output){
-  if (input.isOfType<Plot>()){
-    Plot& plot =input.getValueNonConst<Plot>();
-output.addOnTopNoRepetition(    plot.plotJSON(*this));
+void Calculator::collectJavascript(
+  const Expression& input, HashedList<JSData>& output
+) {
+  if (input.isOfType<Plot>()) {
+    Plot& plot = input.getValueNonConst<Plot>();
+    output.addOnTopNoRepetition(plot.plotJSON(*this));
   }
-  for (int i =0 ; i < input.size(); i ++){
+  for (int i = 0; i < input.size(); i ++) {
     const Expression& child = input[i];
     collectJavascript(child, output);
   }
 }
 
-void Calculator::evaluateCommandsWriteJavascriptOutput(){
+void Calculator::evaluateCommandsWriteJavascriptOutput() {
   HashedList<JSData> scripts;
   this->collectJavascript(this->programExpression, scripts);
   this->output[WebAPI::Result::scripts] = scripts;
-
 }

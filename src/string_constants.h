@@ -129,7 +129,6 @@ public:
     static std::string httpsSupport;
     static std::string scriptType;
     static std::string scripts;
-
     struct ComparisonData {
       // The given (student answer) expression string.
       static std::string givenRaw;

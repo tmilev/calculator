@@ -125,7 +125,7 @@ bool CalculatorFunctionsCrypto::testTLSMessageSequence(
   JSData script;
   script["id"] = spanId.str();
   script["content"] = spoofServer.toJSON();
-  out << HtmlRoutines::scriptFromJSON("displayTransportLayerSecurity", script);
+  out << HtmlRoutines::jsonContainer("displayTransportLayerSecurity", script);
   return output.assignValue(calculator, out.str());
 }
 

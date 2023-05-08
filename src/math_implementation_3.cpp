@@ -11852,7 +11852,7 @@ std::string ConeCollection::drawMeToHtmlLastCoordAffine(
   isBad = this->drawMeLastCoordinateAffine(true, drawingVariables, format);
   std::stringstream out;
   out
-  << drawingVariables.getHTMLDiv(this->getDimension() - 1, false, true);
+  << drawingVariables.getHTMLDiv(this->getDimension() - 1, true);
   if (isBad) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
@@ -11881,7 +11881,7 @@ std::string ConeCollection::drawMeToHtmlProjective(
   }
   out
   << drawingVariables.getHTMLDiv(
-    this->getDimension(), false, generateControls
+    this->getDimension(),  generateControls
   );
   if (!isGood) {
     out << "<hr>" << "Found cones which I cannot draw.<hr>";
@@ -12158,7 +12158,7 @@ std::string Cone::drawMeToHtmlLastCoordAffine(
     out << "<br>The cone does not lie in the upper half-space. ";
   } else {
     out
-    << drawingVariables.getHTMLDiv(this->getDimension() - 1, false, true);
+    << drawingVariables.getHTMLDiv(this->getDimension() - 1, true);
   }
   out << "<br>" << this->toString(&format);
   return out.str();
@@ -12303,7 +12303,7 @@ std::string Cone::drawMeToHtmlProjective(
   drawingVariables.makeMeAStandardBasis(this->getDimension());
   this->drawMeProjective(drawingVariables);
   drawingVariables.drawCoordinateSystemBuffer(this->getDimension());
-  out << drawingVariables.getHTMLDiv(this->getDimension(), false, true);
+  out << drawingVariables.getHTMLDiv(this->getDimension(),  true);
   out << "<br>" << this->toString(&format);
   return out.str();
 }
@@ -12930,7 +12930,7 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
           tempDV.drawCircleAtVectorBufferRational(affineInput, "red", 4);
           global.comments
           << tempDV.getHTMLDiv(
-            this->projectivizedComplex.getDimension() - 1, false, true
+            this->projectivizedComplex.getDimension() - 1, true
           );
         }
         firstFail = false;

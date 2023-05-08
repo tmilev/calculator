@@ -734,8 +734,7 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
     << messagesId
     << "'></span>";
   }
-
-  std::string script = HtmlRoutines::scriptFromJSON("graphics3d", result);
+  std::string script = HtmlRoutines::jsonContainer("graphics3d", result);
   out << script;
   owner.objectContainer.graphicsScripts.setKeyValue(
     this->getCanvasName(), script
@@ -865,19 +864,18 @@ std::string Plot::getPlotHtml(Calculator& owner) {
   }
 }
 
-JSData Plot::plotJSON(Calculator &owner){
+JSData Plot::plotJSON(Calculator& owner) {
   STACK_TRACE("Plot::plotJSON");
   if (this->dimension == 3) {
     return this->plotJSON3d(owner);
   } else if (this->dimension == 2) {
     return this->plotJSON2d(owner);
   }
-    std::stringstream out;
-    out << "Error:dimension =" << this->dimension;
-    JSData error;
-    error[WebAPI::Result::error] =out.str();
-    return error;
-
+  std::stringstream out;
+  out << "Error:dimension =" << this->dimension;
+  JSData error;
+  error[WebAPI::Result::error] = out.str();
+  return error;
 }
 
 void PlotObject::writeParameters(JSData& output) {
@@ -1212,24 +1210,20 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     }
     out << "<span name='" << messages << "'></span>";
   }
-
-  out << HtmlRoutines::scriptFromJSON("graphics", result);
+  out << HtmlRoutines::jsonContainer("graphics", result);
   return out.str();
 }
 
-JSData Plot::plotJSON3d(Calculator &owner){
+JSData Plot::plotJSON3d(Calculator& owner) {
   JSData result;
   this->computeCanvasNameIfNecessary(
     owner.objectContainer.canvasPlotCounter
   );
-
   result[WebAPI::Result::scriptType] = "graphics3d";
-
   if (!owner.flagPlotShowJavascriptOnly) {
     std::string canvasId = this->getCanvasName();
     std::string controlsId = canvasId + "Controls";
     std::string messagesId = canvasId + "Messages";
-
     result[Plot::Labels::canvasName] = canvasId;
     result[Plot::Labels::controlsName] = controlsId;
     result[Plot::Labels::messagesName] = messagesId;
@@ -1253,16 +1247,14 @@ JSData Plot::plotJSON3d(Calculator &owner){
   result["setBoundingBoxAsDefaultViewWindow"] = true;
   result[Plot::Labels::graphicsType] = "threeDimensional";
   this->writeParameters(result, owner);
-
   return result;
 }
 
-JSData Plot::plotJSON2d(Calculator &owner){
+JSData Plot::plotJSON2d(Calculator& owner) {
   JSData result;
   result[WebAPI::Result::scriptType] = "graphics";
   std::string controls = this->getCanvasName() + "Controls";
   std::string messages = this->getCanvasName() + "Messages";
-
   result["noControls"] = owner.flagPlotNoControls;
   result[Plot::Labels::canvasName] = this->getCanvasName();
   result[Plot::Labels::graphicsType] = "twoDimensional";
@@ -1270,8 +1262,7 @@ JSData Plot::plotJSON2d(Calculator &owner){
   result[Plot::Labels::messagesName] = messages;
   result["plotUpdaters"].elementType = JSData::token::tokenArray;
   if (!this->flagPlotShowJavascriptOnly) {
-
-     result["noControls"] = owner.flagPlotNoControls;
+    result["noControls"] = owner.flagPlotNoControls;
   }
   for (int i = 0; i < this->parameterNames.size; i ++) {
     if (
@@ -1280,7 +1271,10 @@ JSData Plot::plotJSON2d(Calculator &owner){
       )
     ) {
       std::stringstream errorStream;
-      errorStream << "[Parameter: " << this->parameterNames[i] << " not found. ]";
+      errorStream
+      << "[Parameter: "
+      << this->parameterNames[i]
+      << " not found. ]";
       result[WebAPI::Result::error] = errorStream.str();
       return result;
     }

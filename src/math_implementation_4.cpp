@@ -2031,7 +2031,7 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   accumulator.drawMe(
     drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged
   );
-  out << drawOps.getHTMLDiv(2, false, true);
+  out << drawOps.getHTMLDiv(2, true);
   out << accumulator.toString();
   return out.str();
 }

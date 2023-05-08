@@ -203,11 +203,7 @@ public:
   static std::string URLKeyValuePairsToNormalRecursiveHtml(
     const std::string& input, int recursionDepth = 0
   );
-  // A script tag a that contains a json data structure.
-  static std::string scriptFromJSON(
-    const std::string& scriptType, const JSData& scriptContent
-  );
-  // Same as scriptFromJSON but uses a no-display span with name="script".
+  // Returns a no-display span with name="script" with the given content.
   static std::string jsonContainer(
     const std::string& scriptType, const JSData& scriptContent
   );

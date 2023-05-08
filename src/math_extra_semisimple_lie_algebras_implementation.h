@@ -934,8 +934,7 @@ splitCharacterOverReductiveSubalgebra(
     out
     << "<hr>"
     << drawingVariables1.getHTMLDiv(
-      weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(),
-      true
+      weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(), true
     );
     *report = out.str();
   }

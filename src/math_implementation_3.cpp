@@ -11851,8 +11851,7 @@ std::string ConeCollection::drawMeToHtmlLastCoordAffine(
   bool isBad = false;
   isBad = this->drawMeLastCoordinateAffine(true, drawingVariables, format);
   std::stringstream out;
-  out
-  << drawingVariables.getHTMLDiv(this->getDimension() - 1, true);
+  out << drawingVariables.getHTMLDiv(this->getDimension() - 1, true);
   if (isBad) {
     out << "<hr>" << "found cones which I can't draw<hr>";
   }
@@ -11880,9 +11879,7 @@ std::string ConeCollection::drawMeToHtmlProjective(
     << " allowed for drawing. I am omitting most of the graphics. ";
   }
   out
-  << drawingVariables.getHTMLDiv(
-    this->getDimension(),  generateControls
-  );
+  << drawingVariables.getHTMLDiv(this->getDimension(), generateControls);
   if (!isGood) {
     out << "<hr>" << "Found cones which I cannot draw.<hr>";
     out << this->toString();
@@ -12157,8 +12154,7 @@ std::string Cone::drawMeToHtmlLastCoordAffine(
   if (foundBadVertex) {
     out << "<br>The cone does not lie in the upper half-space. ";
   } else {
-    out
-    << drawingVariables.getHTMLDiv(this->getDimension() - 1, true);
+    out << drawingVariables.getHTMLDiv(this->getDimension() - 1, true);
   }
   out << "<br>" << this->toString(&format);
   return out.str();
@@ -12303,7 +12299,7 @@ std::string Cone::drawMeToHtmlProjective(
   drawingVariables.makeMeAStandardBasis(this->getDimension());
   this->drawMeProjective(drawingVariables);
   drawingVariables.drawCoordinateSystemBuffer(this->getDimension());
-  out << drawingVariables.getHTMLDiv(this->getDimension(),  true);
+  out << drawingVariables.getHTMLDiv(this->getDimension(), true);
   out << "<br>" << this->toString(&format);
   return out.str();
 }

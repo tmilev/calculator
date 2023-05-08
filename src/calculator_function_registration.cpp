@@ -4952,7 +4952,7 @@ void Calculator::initializeFunctionsStandard() {
     this->opRationalFraction(),
     this->opPolynomialRational(),
     "Divides rational fraction by polynomial (to get a rational fraction). ",
-    "MakeRationalFunction(x)/Polynomial(y) ",
+    "MakeRationalFunction(x)/Polynomial{}(y) ",
     "CalculatorFunctionsBinaryOps::"
     "divideRationalFractionOrPolynomial"
     "OrRationalByRationalFractionOrPolynomial",
@@ -4967,7 +4967,7 @@ void Calculator::initializeFunctionsStandard() {
     this->opRationalFraction(),
     "Divides rational fraction by polynomial (to get a rational fraction). ",
     "Polynomial(x) /\n"
-    "MakeRationalFunction(y) ",
+    "MakeRationalFunction{}(y) ",
     "CalculatorFunctionsBinaryOps::"
     "divideRationalFractionOrPolynomial"
     "OrRationalByRationalFractionOrPolynomial",

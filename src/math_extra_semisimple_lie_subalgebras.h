@@ -25,14 +25,13 @@ public:
   Vector<Rational> coneIntersection;
   Vector<Rational> coneStrongIntersection;
   Vector<Rational> coneRelativelyStrongIntersection;
-  //  Vector<Rational> LInfiniteRelation;
   Vector<Rational> coneSeparatingNormal;
   Vectors<Rational> nilradicalWeights;
   Vectors<Rational> nonFernandoKacHighestWeights;
   Vectors<Rational> nonFernandoKacHighestWeightsStronglyTwoSided;
   List<int> ownerModulesNilradicalElements;
   List<int> ownerModulesNonFernandoKacHighestWeightVectors;
-  Vectors<Rational> leviRootsAmbienT;
+  Vectors<Rational> leviRootsAmbient;
   Vectors<Rational> leviRootsSmallPrimalFundamentalCoordinates;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >
   nonFernandoKacHighestWeightVectors;

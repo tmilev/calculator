@@ -13,7 +13,8 @@ void DrawingVariables::toJSON(JSData& output) {
   }
 }
 
-std::string DrawingVariables::getHTMLDiv(int dimension, bool generateInfoPanels
+std::string DrawingVariables::getHTMLDiv(
+  int dimension, bool generateInfoPanels
 ) {
   STACK_TRACE("DrawingVariables::getHTMLDiv");
   JSData data;
@@ -60,6 +61,6 @@ std::string DrawingVariables::getHTMLDiv(int dimension, bool generateInfoPanels
     out << "<div id='" << idHighlightInformation << "'></div>\n<br>\n";
     out << "<span id='" << idSpanInformation << "'></span>\n<br>\n";
   }
-    out << HtmlRoutines::jsonContainer("graphicsNDimensional", data) << "\n";
+  out << HtmlRoutines::jsonContainer("graphicsNDimensional", data) << "\n";
   return out.str();
 }

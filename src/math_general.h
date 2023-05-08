@@ -1554,15 +1554,10 @@ public:
     }
     this->getZeroEigenSpaceModifyMe(outputEigenspace);
   }
-  static bool systemLinearInequalitiesHasSolution(
-    Matrix<Coefficient>& matA,
-    Matrix<Coefficient>& matb,
-    Matrix<Coefficient>& outputPoint
-  );
   static bool
   systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
-    Matrix<Coefficient>& matA,
-    Matrix<Coefficient>& matb,
+    Matrix<Coefficient>& matrixA,
+    Matrix<Coefficient>& matrixb,
     Vector<Coefficient>* outputSolution = 0
   );
   static void computePotentialChangeGradient(
@@ -1574,7 +1569,7 @@ public:
     bool& hasAPotentialLeavingVariable
   );
   static void getMaxMovementAndLeavingVariableRow(
-    Rational& maxMovement,
+    Rational& maximumMovement,
     int& leavingVariableRow,
     int enteringVariable,
     Matrix<Coefficient>& matrixA,
@@ -4998,7 +4993,7 @@ void Matrix<Coefficient>::computePotentialChangeGradient(
 
 template <class Coefficient>
 void Matrix<Coefficient>::getMaxMovementAndLeavingVariableRow(
-  Rational& maxMovement,
+  Rational& maximumMovement,
   int& leavingVariableRow,
   int enteringVariable,
   Matrix<Coefficient>& matrixA,
@@ -5006,7 +5001,7 @@ void Matrix<Coefficient>::getMaxMovementAndLeavingVariableRow(
   Selection& baseVariables
 ) {
   leavingVariableRow = - 1;
-  maxMovement.makeZero();
+  maximumMovement.makeZero();
   for (int i = 0; i < matrixA.numberOfRows; i ++) {
     Rational pivotCoefficient;
     pivotCoefficient.assign(matrixA.elements[i][enteringVariable]);
@@ -5016,11 +5011,11 @@ void Matrix<Coefficient>::getMaxMovementAndLeavingVariableRow(
         inputVectorX[baseVariables.elements[i]]
       );
       if (
-        maxMovement.isGreaterThan(pivotCoefficient) || (
+        maximumMovement.isGreaterThan(pivotCoefficient) || (
           leavingVariableRow == - 1
         )
       ) {
-        maxMovement.assign(pivotCoefficient);
+        maximumMovement.assign(pivotCoefficient);
         leavingVariableRow = i;
       }
     }
@@ -5167,24 +5162,24 @@ std::string Vector<Coefficient>::toStringLetterFormat(
     return "0";
   }
   std::stringstream out;
-  std::string tempS;
+  std::string term;
   bool found = false;
   int numberOfVariables = dontIncludeLastVar ? this->size - 1 : this->size;
   for (int i = 0; i < numberOfVariables; i ++) {
     if (!this->objects[i].isEqualToZero()) {
-      tempS = (*this)[i].toString(format);
+      term = (*this)[i].toString(format);
       if ((*this)[i].needsParenthesisForMultiplication(format)) {
-        tempS = "(" + tempS + ")";
+        term = "(" + term + ")";
       }
-      if (tempS == "1") {
-        tempS = "";
+      if (term == "1") {
+        term = "";
       }
-      if (tempS == "- 1" || tempS == "-1") {
-        tempS = "-";
+      if (term == "- 1" || term == "-1") {
+        term = "-";
       }
       if (found) {
-        if (tempS.size() > 0) {
-          if (tempS[0] != '-') {
+        if (term.size() > 0) {
+          if (term[0] != '-') {
             out << "+";
           }
         } else {
@@ -5192,7 +5187,7 @@ std::string Vector<Coefficient>::toStringLetterFormat(
         }
       }
       found = true;
-      out << tempS;
+      out << term;
       if (format != nullptr) {
         if (format->vectorSpaceEiBasisNames.size > i) {
           out << format->vectorSpaceEiBasisNames[i];
@@ -5374,7 +5369,7 @@ std::string Matrix<Coefficient>::toStringSystemLatex(
 template <typename Coefficient>
 std::string Matrix<Coefficient>::toString(FormatExpressions* format) const {
   std::stringstream out;
-  std::string tempS;
+  std::string coefficientString;
   bool useHtml = (format == nullptr) ? true : format->flagUseHTML;
   bool useLatex = (format == nullptr) ? false : format->flagUseLatex;
   bool usePmatrix = (format == nullptr) ? true : format->flagUsePmatrix;
@@ -5403,11 +5398,11 @@ std::string Matrix<Coefficient>::toString(FormatExpressions* format) const {
       out << "<tr>";
     }
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      tempS = (*this)(i, j).toString(format);
+      coefficientString = (*this)(i, j).toString(format);
       if (useHtml) {
         out << "<td>";
       }
-      out << tempS;
+      out << coefficientString;
       if (useLatex) {
         if (j != this->numberOfColumns - 1) {
           out << " & ";
@@ -5474,7 +5469,7 @@ template <typename Coefficient>
 std::string Matrix<Coefficient>::toStringPlainText(bool jsonFormat) const {
   List<List<std::string> > element_strings;
   element_strings.setSize(this->numberOfRows);
-  int cols_per_elt = 0;
+  int columnsPerElement = 0;
   for (int i = 0; i < this->numberOfRows; i ++) {
     element_strings[i].setSize(this->numberOfColumns);
     for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -5482,8 +5477,8 @@ std::string Matrix<Coefficient>::toStringPlainText(bool jsonFormat) const {
       ss << this->elements[i][j];
       element_strings[i][j] = ss.str();
       int sl = element_strings[i][j].length();
-      if (sl > cols_per_elt) {
-        cols_per_elt = sl;
+      if (sl > columnsPerElement) {
+        columnsPerElement = sl;
       }
     }
   }
@@ -5499,7 +5494,7 @@ std::string Matrix<Coefficient>::toStringPlainText(bool jsonFormat) const {
     out << '[';
     for (int j = 0; j < this->numberOfColumns; j ++) {
       int sl = element_strings[i][j].length();
-      int pad = cols_per_elt - sl;
+      int pad = columnsPerElement - sl;
       for (int pi = 0; pi < pad; pi ++) {
         out << ' ';
       }
@@ -5541,7 +5536,7 @@ getBlendCoefficientAndMonomial(
     }
     return out.str();
   }
-  std::string monString = inputMonomial.toString(format);
+  std::string monomialString = inputMonomial.toString(format);
   if (inputCoefficient.needsParenthesisForMultiplication(format)) {
     coefficientString = "\\left(" + coefficientString + "\\right)";
   }
@@ -5549,17 +5544,17 @@ getBlendCoefficientAndMonomial(
     if (addPlusToFront) {
       out << "+";
     }
-    out << monString;
+    out << monomialString;
     return out.str();
   }
   if (coefficientString == "- 1" || coefficientString == "-1") {
-    out << "-" << monString;
+    out << "-" << monomialString;
     return out.str();
   }
   if (coefficientString[0] != '-' && addPlusToFront) {
-    out << "+" << coefficientString << monString;
+    out << "+" << coefficientString << monomialString;
   } else {
-    out << coefficientString << monString;
+    out << coefficientString << monomialString;
   }
   return out.str();
 }
@@ -5577,7 +5572,8 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::getTermString(
       fracSpecialDesired = true;
     }
   }
-  std::string coefficientString, monomialString;
+  std::string coefficientString;
+  std::string monomialString;
   if (coefficient.needsParenthesisForMultiplication(format)) {
     coefficientString = "\\left(" + coefficient.toString(format) + "\\right)";
   } else {

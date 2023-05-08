@@ -180,11 +180,10 @@ class ElementWithScripts {
   }
 
   bootstrapOneGraphicsNDimensional(
-    /** @type {string} */
-    content,
+    /** @type {Object} */
+    parsedContent,
   ) {
-    let parsed = JSON.parse(content);
-    graphicsNDimensions.createGraphicsFromObject(parsed);
+    graphicsNDimensions.createGraphicsFromObject(parsedContent);
   }
 
   bootstrapDisplayTransportLayerSecurity() {
@@ -196,10 +195,9 @@ class ElementWithScripts {
 
   bootstrapOneDisplayTransportLayerSecurity(
     /** @type {string} */
-    content,
+    parsedContent,
   ) {
-    let parsed = JSON.parse(content);
-    crypto.displayTransportLayerSecurity(parsed["id"], parsed["content"]);
+    crypto.displayTransportLayerSecurity(parsedContent["id"], parsedContent["content"]);
   }
 
   bootstrapDisplaySSLRecord() {
@@ -211,10 +209,9 @@ class ElementWithScripts {
 
   bootstrapOneDisplaySSLRecord(
     /** @type {string} */
-    content,
+    parsedContent,
   ) {
-    let parsed = JSON.parse(content);
-    crypto.displaySSLRecord(parsed["id"], parsed["content"]);
+    crypto.displaySSLRecord(parsedContent["id"], parsedContent["content"]);
   }
 
   bootstrapAbstractSyntaxNotationScripts() {
@@ -225,11 +222,10 @@ class ElementWithScripts {
   }
 
   bootstrapOneAbstractSyntaxNotation(
-    /** @type {string} */
-    content,
+    /** @type {Object} */
+    parsedContent,
   ) {
-    let parsed = JSON.parse(content);
-    crypto.abstractSyntaxNotationAnnotate(parsed[0], parsed[1], parsed[2]);
+    crypto.abstractSyntaxNotationAnnotate(parsedContent[0], parsedContent[1], parsedContent[2]);
   }
 
   /** 

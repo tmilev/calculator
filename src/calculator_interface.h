@@ -1535,7 +1535,6 @@ public:
 // We can encode our <script> data in regular <span> elements,
 // and then extract our scripts through these spans.
 // An alternative is the present class.
-
 class ScriptWithHtml {};
 
 // A class to plot 2d and 3d graphics.

@@ -11,8 +11,8 @@
 template <class Element>
 bool Matrix<Element>::
 systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
-  Matrix<Element>& matA,
-  Matrix<Element>& matb,
+  Matrix<Element>& matrixA,
+  Matrix<Element>& matrixb,
   Vector<Element>* outputSolution
 ) {
   // This function return true if Ax = b >= 0 has a solution with x >= 0 and
@@ -21,28 +21,28 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
   // n by m matrix
   // and x is a column vector with m entries.
   Matrix<Rational> workingMatrix;
-  Vector<Rational> matX;
+  Vector<Rational> matrixX;
   Selection baseVariables;
   Rational globalGoal;
   globalGoal.makeZero();
-  if (matA.numberOfRows != matb.numberOfRows) {
+  if (matrixA.numberOfRows != matrixb.numberOfRows) {
     global.fatal
     << "The number of inequalities: "
-    << matA.numberOfRows
+    << matrixA.numberOfRows
     << " does not match the number of "
     << "constaints: "
-    << matb.numberOfRows
+    << matrixb.numberOfRows
     << ". "
     << global.fatal;
   }
-  for (int j = 0; j < matb.numberOfRows; j ++) {
-    globalGoal += matb.elements[j][0];
-    if (matb.elements[j][0].isNegative()) {
+  for (int j = 0; j < matrixb.numberOfRows; j ++) {
+    globalGoal += matrixb.elements[j][0];
+    if (matrixb.elements[j][0].isNegative()) {
       global.fatal
       << "Constraint index "
       << j
       << " is negative: "
-      << matb.elements[j][0]
+      << matrixb.elements[j][0]
       << " which is not allowed. "
       << global.fatal;
     }
@@ -50,32 +50,32 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
   if (globalGoal.isEqualToZero()) {
     return false;
   }
-  int numberOfTrueVariables = matA.numberOfColumns;
+  int numberOfTrueVariables = matrixA.numberOfColumns;
   workingMatrix.initialize(
-    matA.numberOfRows, numberOfTrueVariables + matA.numberOfRows
+    matrixA.numberOfRows, numberOfTrueVariables + matrixA.numberOfRows
   );
   HashedList<Selection> visitedVertices;
   visitedVertices.clear();
   baseVariables.initialize(workingMatrix.numberOfColumns);
   workingMatrix.makeZero();
-  matX.makeZero(workingMatrix.numberOfColumns);
-  for (int j = 0; j < matA.numberOfColumns; j ++) {
-    for (int i = 0; i < matA.numberOfRows; i ++) {
-      workingMatrix.elements[i][j].assign(matA.elements[i][j]);
+  matrixX.makeZero(workingMatrix.numberOfColumns);
+  for (int j = 0; j < matrixA.numberOfColumns; j ++) {
+    for (int i = 0; i < matrixA.numberOfRows; i ++) {
+      workingMatrix.elements[i][j].assign(matrixA.elements[i][j]);
     }
   }
-  for (int j = 0; j < matA.numberOfRows; j ++) {
+  for (int j = 0; j < matrixA.numberOfRows; j ++) {
     workingMatrix.elements[j][j + numberOfTrueVariables].makeOne();
-    matX[j + numberOfTrueVariables] = (matb.elements[j][0]);
+    matrixX[j + numberOfTrueVariables] = (matrixb.elements[j][0]);
     baseVariables.addSelectionAppendNewIndex(j + numberOfTrueVariables);
   }
   Rational changeGradient;
   // Change, PotentialChange;
   int enteringVariable = 0;
-  bool WeHaveNotEnteredACycle = true;
+  bool weHaveNotEnteredACycle = true;
   while (
     enteringVariable != - 1 &&
-    WeHaveNotEnteredACycle &&
+    weHaveNotEnteredACycle &&
     globalGoal.isPositive()
   ) {
     enteringVariable = - 1;
@@ -109,7 +109,7 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
         leavingVariableRow,
         enteringVariable,
         workingMatrix,
-        matX,
+        matrixX,
         baseVariables
       );
       Rational scalar;
@@ -139,7 +139,7 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
       workingMatrix.rowTimesScalar(leavingVariableRow, scalar);
       tempTotalChange.assign(maximumMovement);
       tempTotalChange.multiplyBy(changeGradient);
-      matX[enteringVariable] += maximumMovement;
+      matrixX[enteringVariable] += maximumMovement;
       if (!tempTotalChange.isEqualToZero()) {
         visitedVertices.clear();
         globalGoal.subtract(tempTotalChange);
@@ -148,7 +148,7 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
         if (index == - 1) {
           visitedVertices.addOnTop(baseVariables);
         } else {
-          WeHaveNotEnteredACycle = false;
+          weHaveNotEnteredACycle = false;
         }
       }
       for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
@@ -158,17 +158,17 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
         ) {
           scalar.assign(workingMatrix.elements[i][enteringVariable]);
           scalar.multiplyBy(maximumMovement);
-          matX[baseVariables.elements[i]] -= scalar;
+          matrixX[baseVariables.elements[i]] -= scalar;
           scalar.assign(workingMatrix.elements[i][enteringVariable]);
           scalar.negate();
           workingMatrix.addTwoRows(leavingVariableRow, i, 0, scalar);
         }
         if (i == leavingVariableRow) {
-          matX[baseVariables.elements[i]] = 0;
+          matrixX[baseVariables.elements[i]] = 0;
         }
       }
       if (
-        !matX[baseVariables.elements[leavingVariableRow]].isEqualToZero()
+        !matrixX[baseVariables.elements[leavingVariableRow]].isEqualToZero()
       ) {
         global.fatal
         << "Leaving variable coefficient not allowed to be zero. "
@@ -190,15 +190,15 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
       }
     }
   }
-  for (int i = numberOfTrueVariables; i < matX.size; i ++) {
-    if (matX[i].isPositive()) {
+  for (int i = numberOfTrueVariables; i < matrixX.size; i ++) {
+    if (matrixX[i].isPositive()) {
       return false;
     }
   }
   if (outputSolution != nullptr) {
     outputSolution->setSize(numberOfTrueVariables);
     for (int i = 0; i < numberOfTrueVariables; i ++) {
-      (*outputSolution)[i] = matX[i];
+      (*outputSolution)[i] = matrixX[i];
     }
   }
   return true;
@@ -674,7 +674,8 @@ bool CalculatorFunctions::printAllVectorPartitions(
   for (int i = 0; i < partition.size; i ++) {
     partition[i] = 0;
   }
-  Vector<Rational> weight, tmpWt;
+  Vector<Rational> weight;
+  Vector<Rational> currentWeight;
   Vectors<Rational>& rootsBorel = semisimpleLieAlgebra.weylGroup.rootsOfBorel;
   int counter = 0;
   int totalCycles = 0;
@@ -683,8 +684,8 @@ bool CalculatorFunctions::printAllVectorPartitions(
   while (i > 0 && counter < 10000) {
     totalCycles ++;
     if (weight == highestWeight) {
-      tmpWt = partition;
-      out << "<br>" << tmpWt.toStringLetterFormat("\\alpha");
+      currentWeight = partition;
+      out << "<br>" << currentWeight.toStringLetterFormat("\\alpha");
       counter ++;
     }
     if (!(highestWeight - weight).isPositive() || i > rootsBorel.size) {
@@ -839,26 +840,29 @@ bool CalculatorBasics::extractBaseMultiplication(
     // handle Anything1 * (Rational * Anything2) = Rational * (Anything1 *
     // Anything2)
     if (output[2][1].isOfType<Rational>()) {
-      Expression tempRight;
-      tempRight.makeXOX(
+      Expression right;
+      right.makeXOX(
         calculator,
         calculator.opTimes(),
         output[1],
         output[2][2]
       );
       output.makeXOX(
-        calculator, calculator.opTimes(), output[2][1], tempRight
+        calculator, calculator.opTimes(), output[2][1], right
       );
       result = true;
     }
     // <- handle a * (b * anything)
     // on condition that a*b has an inner handler
-    Expression tempExp, newExpr;
-    tempExp.makeXOX(
+    Expression rearranged;
+    Expression newExpression;
+    rearranged.makeXOX(
       calculator, calculator.opTimes(), output[1], output[2][1]
     );
-    if (CalculatorFunctions::times(calculator, tempExp, newExpr)) {
-      output.makeProduct(calculator, newExpr, output[2][2]);
+    if (
+      CalculatorFunctions::times(calculator, rearranged, newExpression)
+    ) {
+      output.makeProduct(calculator, newExpression, output[2][2]);
       result = true;
     }
   }

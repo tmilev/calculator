@@ -5438,7 +5438,7 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
   STACK_TRACE("NilradicalCandidate::computeParabolicACExtendsToParabolicAC");
   Vector<Rational> projectionRoot;
   WeylGroupData& weyl = this->owner->owner->owner->weylGroup;
-  this->leviRootsAmbienT.reserve(weyl.rootSystem.size);
+  this->leviRootsAmbient.reserve(weyl.rootSystem.size);
   this->leviRootsSmallPrimalFundamentalCoordinates.reserve(
     weyl.rootSystem.size
   );
@@ -5462,7 +5462,7 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
       weyl.rootSystem[i], projectionRoot
     );
     if (projectionRoot.scalarEuclidean(this->coneSeparatingNormal) == 0) {
-      this->leviRootsAmbienT.addOnTop(weyl.rootSystem[i]);
+      this->leviRootsAmbient.addOnTop(weyl.rootSystem[i]);
       if (
         this->owner->rootSystemCentralizerPrimalCoordinates.contains(
           projectionRoot
@@ -5474,7 +5474,7 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
       }
     }
   }
-  Vectors<Rational> tempVs = this->leviRootsAmbienT;
+  Vectors<Rational> tempVs = this->leviRootsAmbient;
   this->leviDiagramAmbient.computeDiagramTypeModifyInput(tempVs, weyl);
   this->leviDiagramSmall.computeDiagramTypeModifyInputRelative(
     this->leviRootsSmallPrimalFundamentalCoordinates,
@@ -5932,7 +5932,7 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
   const Vectors<Rational>& nonStrictConeNonPositiveScalar,
   const List<Vector<Rational> >& vectorsToBeInGeneralPosition
 ) {
-  STACK_TRACE("Vectors::perturbNormalRelativeToVectorsInGeneralPosition");
+  STACK_TRACE("Vector::perturbNormalRelativeToVectorsInGeneralPosition");
   for (int i = 0; i < nonStrictConeNonPositiveScalar.size; i ++) {
     if (this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) < 0) {
       global.fatal
@@ -5954,8 +5954,8 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
   Vectors<Rational> allVectors = cone.vertices;
   allVectors.addListOnTop(vectorsToBeInGeneralPosition);
   for (int i = 0; i < vectorsToBeInGeneralPosition.size; i ++) {
+    bool foundModifier = false;
     if (this->scalarEuclidean(vectorsToBeInGeneralPosition[i]) == 0) {
-      bool foundModifier = false;
       for (int j = 0; j < cone.walls.size; j ++) {
         if (
           cone.walls[j].normal.scalarEuclidean(
@@ -5982,26 +5982,29 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
         }
       }
     }
+    if (!foundModifier) {
+      continue;
+    }
     *this += currentModifier * scale;
-    for (int i = 0; i < nonStrictConeNonPositiveScalar.size; i ++) {
-      if (this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) < 0) {
+    for (int k = 0; k < nonStrictConeNonPositiveScalar.size; k ++) {
+      if (this->scalarEuclidean(nonStrictConeNonPositiveScalar[k]) < 0) {
         global.fatal
         << "<br>During perturbation, the splitting normal "
         << this->toString()
         << " is supposed to have non-negative scalar product with the vector "
-        << nonStrictConeNonPositiveScalar[i].toString()
+        << nonStrictConeNonPositiveScalar[k].toString()
         << ", but it doesn't."
         << global.fatal;
       } else {
         if (
-          this->scalarEuclidean(nonStrictConeNonPositiveScalar[i]) == 0 &&
-          oldThis.scalarEuclidean(nonStrictConeNonPositiveScalar[i]) > 0
+          this->scalarEuclidean(nonStrictConeNonPositiveScalar[k]) == 0 &&
+          oldThis.scalarEuclidean(nonStrictConeNonPositiveScalar[k]) > 0
         ) {
           global.fatal
           << "<br>During perturbation, the splitting normal "
           << this->toString()
-          << " lost  positive scalar product with "
-          << nonStrictConeNonPositiveScalar[i].toString()
+          << " lost positive scalar product with "
+          << nonStrictConeNonPositiveScalar[k].toString()
           << "."
           << global.fatal;
         }
@@ -9156,7 +9159,7 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
     << "<br>Levi components in centralizer: "
     << this->leviDiagramSmall.toString()
     << "<br>Levi roots containing parabolic: "
-    << this->leviRootsAmbienT.toString()
+    << this->leviRootsAmbient.toString()
     << "<br>Levi components containing parabolic: "
     << this->leviDiagramAmbient.toString();
     out

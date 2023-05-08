@@ -2190,6 +2190,9 @@ class Calculator {
     output.comments << any;
     return output;
   }
+  void evaluateCommandsConsoleOutput(const Expression &startingExpression, std::stringstream &out);
+  void evaluateCommandsStandardOutput(Expression &startingExpression, std::stringstream &out);
+  void evaluateCommandsDebugExpressionTreeOutput(Expression &startingExpression, std::stringstream &out);
 public:
   class OperationHandlers {
   public:

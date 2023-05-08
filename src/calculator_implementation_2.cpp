@@ -1688,62 +1688,12 @@ void Calculator::evaluateCommands() {
   this->flagWriteLatexPlots;
   global.defaultFormat.getElement().flagExpressionIsFinal = true;
   if (global.flagRunningConsoleRegular) {
-    global.defaultFormat.getElement().flagUseQuotes = false;
-    global.defaultFormat.getElement().flagExpressionIsFinal = true;
-    if (global.programArguments.size > 1) {
-      out
-      << "Input:\n"
-      << startingExpression.toString(&global.defaultFormat.getElement())
-      << std::endl;
-    }
-    global.defaultFormat.getElement().flagExpressionIsFinal = true;
-    this->objectContainer.resetSliders();
-    out
-    << Logger::consoleNormal()
-    << "Output:\n"
-    << this->programExpression.toString(
-      &global.defaultFormat.getElement()
-    )
-    << Logger::consoleNormal()
-    << std::endl;
+    this->evaluateCommandsConsoleOutput(startingExpression , out);
   } else if (!this->flagDisplayFullExpressionTree) {
-    std::string badCharactersString =
-    this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
-    if (badCharactersString != "") {
-      out << badCharactersString << "<hr>";
-      this->outputJS[WebAPI::Result::badInput] = badCharactersString;
-    }
-    this->objectContainer.resetSliders();
-    this->objectContainer.resetPlots();
-    JSData result;
-    result.elementType = JSData::token::tokenObject;
-    std::string resultString =
-    this->programExpression.toString(
-      &global.defaultFormat.getElement(),
-      &startingExpression,
-      true,
-      &result
-    );
-    this->outputJS[WebAPI::Result::resultLabel] = result;
-    out << resultString;
+this->evaluateCommandsStandardOutput(startingExpression , out);
   } else {
-    std::string badCharsString =
-    this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
-    if (badCharsString != "") {
-      out << badCharsString << "<hr>";
-      this->outputJS[WebAPI::Result::badInput] = badCharsString;
-    }
-    this->objectContainer.resetSliders();
-    out
-    << "<hr>Input:<br> "
-    << startingExpression.toStringFull()
-    << "<hr>"
-    << "Output:<br>"
-    << this->programExpression.toStringFull();
-    this->outputJS[WebAPI::Result::resultLabel]["input"] =
-    startingExpression.toStringFull();
-    this->outputJS[WebAPI::Result::resultLabel]["output"] =
-    this->programExpression.toStringFull();
+    this->evaluateCommandsDebugExpressionTreeOutput(startingExpression , out);
+
   }
   this->outputString = out.str();
   this->outputJS[WebAPI::Result::resultHtml] = out.str();
@@ -1771,4 +1721,68 @@ void Calculator::evaluateCommands() {
   if (global.flagRunningConsoleRegular && this->comments.str() != "") {
     this->outputString += this->outputCommentsString;
   }
+}
+
+void Calculator::evaluateCommandsConsoleOutput(const Expression& startingExpression, std::stringstream& out){
+
+  global.defaultFormat.getElement().flagUseQuotes = false;
+  global.defaultFormat.getElement().flagExpressionIsFinal = true;
+  if (global.programArguments.size > 1) {
+    out
+    << "Input:\n"
+    << startingExpression.toString(&global.defaultFormat.getElement())
+    << std::endl;
+  }
+  global.defaultFormat.getElement().flagExpressionIsFinal = true;
+  this->objectContainer.resetSliders();
+  out
+  << Logger::consoleNormal()
+  << "Output:\n"
+  << this->programExpression.toString(
+    &global.defaultFormat.getElement()
+  )
+  << Logger::consoleNormal()
+  << std::endl;
+}
+
+void Calculator::evaluateCommandsStandardOutput( Expression& startingExpression, std::stringstream& out){
+  std::string badCharactersString =
+  this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
+  if (badCharactersString != "") {
+    out << badCharactersString << "<hr>";
+    this->outputJS[WebAPI::Result::badInput] = badCharactersString;
+  }
+  this->objectContainer.resetSliders();
+  this->objectContainer.resetPlots();
+  JSData result;
+  result.elementType = JSData::token::tokenObject;
+  std::string resultString =
+  this->programExpression.toString(
+    &global.defaultFormat.getElement(),
+    &startingExpression,
+    true,
+    &result
+  );
+  this->outputJS[WebAPI::Result::resultLabel] = result;
+  out << resultString;
+}
+
+void Calculator::evaluateCommandsDebugExpressionTreeOutput(Expression& startingExpression, std::stringstream& out){
+  std::string badCharsString =
+  this->parser.toStringIsCorrectAsciiCalculatorString(this->inputString);
+  if (badCharsString != "") {
+    out << badCharsString << "<hr>";
+    this->outputJS[WebAPI::Result::badInput] = badCharsString;
+  }
+  this->objectContainer.resetSliders();
+  out
+  << "<hr>Input:<br> "
+  << startingExpression.toStringFull()
+  << "<hr>"
+  << "Output:<br>"
+  << this->programExpression.toStringFull();
+  this->outputJS[WebAPI::Result::resultLabel]["input"] =
+  startingExpression.toStringFull();
+  this->outputJS[WebAPI::Result::resultLabel]["output"] =
+  this->programExpression.toStringFull();
 }

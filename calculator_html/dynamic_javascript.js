@@ -11,6 +11,8 @@ const MathNode = require("./equation_editor/src/equation_editor").MathNode;
 const knownTypes = require("./equation_editor/src/equation_editor").knownTypes;
 const miscellaneous = require("./miscellaneous_frontend");
 
+const scriptTypeLabel = "scriptType";
+
 class OneGraphicWithSliders {
   constructor(
     /** @type {ElementWithScripts} */
@@ -29,7 +31,11 @@ class OneGraphicWithSliders {
    * Computes the graphics.
    */
   computeFromSerialization() {
-    this.graphics = JSON.parse(this.serialization);
+    if (typeof this.serialization === "string") {
+      this.graphics = JSON.parse(this.serialization);
+    } else {
+      this.graphics = this.serialization;
+    }
     let canvasName = this.graphics[pathnames.urlFields.result.canvasName];
     let controlsName = this.graphics[pathnames.urlFields.result.controlsName];
     let canvases = this.owner.element.querySelectorAll(`[name="${canvasName}"]`);
@@ -81,18 +87,29 @@ class ElementWithScripts {
     script,
   ) {
     let content = script.textContent;
-    let scriptType = script.getAttribute("scriptType");
+    let scriptType = script.getAttribute(scriptTypeLabel);
+    this.addOneScript(scriptType, content);
+    script.setAttribute(scriptTypeLabel, "processed");
+  }
+
+  accountOneScriptObject(script) {
+    let scriptType = script[scriptTypeLabel];
+    this.addOneScript(scriptType, script);    
+  }
+
+  addOneScript(scriptType, content) {
     if (scriptType in this.scriptContents) {
       this.scriptContents[scriptType].push(content);
     } else {
       throw `Unrecognized script type ${scriptType}.`;
     }
-    script.setAttribute("scriptType", "processed");
   }
 
   bootstrapAllScripts(
     /** @type {HTMLElement} */
     element,
+    /** @type {Array.<Object>} */
+    scripts,
   ) {
     this.element = element;
     let incomingScripts = this.element.getElementsByTagName("script");
@@ -102,6 +119,11 @@ class ElementWithScripts {
     let incomingScriptsInSpans = this.element.querySelectorAll(`[name="script"]`);
     for (let i = 0; i < incomingScriptsInSpans.length; i++) {
       this.accountOneScript(incomingScriptsInSpans[i]);
+    }
+    if (scripts !== undefined && scripts !== null) {
+      for (let i = 0; i < scripts.length; i++){
+        this.accountOneScriptObject(scripts[i]);
+      }
     }
     let candidateSliders = this.element.getElementsByTagName("input");
     for (let i = 0; i < candidateSliders.length; i++) {
@@ -381,9 +403,11 @@ class DynamicJavascript {
   bootstrapAllScripts(
     /** @type {HTMLElement} */
     element,
+    /** @type {Array.<Object>} */
+    scripts,
   ) {
     let elementWithScripts = new ElementWithScripts();
-    elementWithScripts.bootstrapAllScripts(element);
+    elementWithScripts.bootstrapAllScripts(element, scripts);
     return elementWithScripts;
   }
 }

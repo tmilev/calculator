@@ -1577,6 +1577,8 @@ public:
   void computeCanvasNameIfNecessary(int& canvasCounter);
   std::string getPlotHtml3d(Calculator& owner);
   std::string getPlotHtml2d(Calculator& owner);
+  JSData plotJSON2d(Calculator& owner);
+  JSData plotJSON(Calculator& owner);
   void writeParameters(JSData& output, Calculator& owner);
   std::string getPlotStringAddLatexCommands(bool useHtml);
   bool isOKVector(const Vector<double>& input);
@@ -2193,6 +2195,8 @@ class Calculator {
   void evaluateCommandsConsoleOutput(const Expression &startingExpression, std::stringstream &out);
   void evaluateCommandsStandardOutput(Expression &startingExpression, std::stringstream &out);
   void evaluateCommandsDebugExpressionTreeOutput(Expression &startingExpression, std::stringstream &out);
+  void evaluateCommandsWriteJavascriptOutput();
+  void collectJavascript(const Expression& input, HashedList<JSData>& output);
 public:
   class OperationHandlers {
   public:

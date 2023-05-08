@@ -864,7 +864,7 @@ class Calculator {
   afterWriteOutput() {
     let constructedPanels = {};
     for (let i = 0; i < this.panels.length; i++) {
-      let next = panels.makePanelFromData(this.panels[i], false);
+      let next = panels.makePanelFromData(this.panels[i], true);
       if (next === null) {
         continue;
       }
@@ -874,7 +874,8 @@ class Calculator {
     let elementWithScripts = null;
     try {
       elementWithScripts = dynamicJavascript.bootstrapAllScripts(
-        this.getOutputElement()
+        this.getOutputElement(),
+        this.parsedComputation.scripts,
       );
     } catch (e) {
       console.log(e);

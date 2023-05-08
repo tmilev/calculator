@@ -886,6 +886,23 @@ std::string Plot::getPlotHtml(Calculator& owner) {
   }
 }
 
+JSData Plot::plotJSON(Calculator &owner){
+  STACK_TRACE("Plot::plotJSON");
+  if (this->dimension == 3) {
+    JSData notImplemented;
+    notImplemented = "not implemented";
+    return notImplemented;
+  } else if (this->dimension == 2) {
+    return this->plotJSON2d(owner);
+  }
+    std::stringstream out;
+    out << "Error:dimension =" << this->dimension;
+    JSData error;
+    error[WebAPI::Result::error] =out.str();
+    return error;
+
+}
+
 void PlotObject::writeParameters(JSData& output) {
   JSData parameters = JSData::makeEmptyArray();
   for (int i = 0; i < this->parametersInPlayJS.size; i ++) {
@@ -1196,9 +1213,9 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   if (this->priorityViewRectangle <= 0) {
     this->computeAxesAndBoundingBox();
   }
-  JSData result;
   std::string controls = this->getCanvasName() + "Controls";
   std::string messages = this->getCanvasName() + "Messages";
+  JSData result = this->plotJSON2d(owner);
   if (!this->flagPlotShowJavascriptOnly) {
     out
     << "<canvas width='"
@@ -1217,10 +1234,21 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
       out << "<br>";
     }
     out << "<span name='" << messages << "'></span>";
-    result["noControls"] = owner.flagPlotNoControls;
   }
+
+  out << HtmlRoutines::scriptFromJSON("graphics", result);
+  return out.str();
+}
+
+JSData Plot::plotJSON2d(Calculator &owner){
+  JSData result;
+  std::string controls = this->getCanvasName() + "Controls";
+  std::string messages = this->getCanvasName() + "Messages";
+
+  result["noControls"] = owner.flagPlotNoControls;
   result[Plot::Labels::canvasName] = this->getCanvasName();
   result[Plot::Labels::graphicsType] = "twoDimensional";
+  result[WebAPI::Result::scriptType] = "graphics";
   result[Plot::Labels::controlsName] = controls;
   result[Plot::Labels::messagesName] = messages;
   result["plotUpdaters"].elementType = JSData::token::tokenArray;
@@ -1230,9 +1258,10 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
         this->parameterNames[i]
       )
     ) {
-      std::stringstream out;
-      out << "[Parameter: " << this->parameterNames[i] << " not found. ]";
-      return out.str();
+      std::stringstream errorStream;
+      errorStream << "[Parameter: " << this->parameterNames[i] << " not found. ]";
+      result[WebAPI::Result::error] = errorStream.str();
+      return result;
     }
     InputBox & currentBox =
     owner.objectContainer.userInputTextBoxesWithValues.getValueNoFailNonConst(
@@ -1255,8 +1284,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   }
   result[Plot::Labels::plotObjects] = plotObjects;
   this->writeParameters(result, owner);
-  out << HtmlRoutines::scriptFromJSON("graphics", result);
-  return out.str();
+  return result;
 }
 
 void Plot::writeParameters(JSData& output, Calculator& owner) {

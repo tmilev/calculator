@@ -1695,6 +1695,7 @@ this->evaluateCommandsStandardOutput(startingExpression , out);
     this->evaluateCommandsDebugExpressionTreeOutput(startingExpression , out);
 
   }
+  this->evaluateCommandsWriteJavascriptOutput();
   this->outputHTMLString = out.str();
   this->output[WebAPI::Result::resultHtml] = out.str();
   std::stringstream commentsStream;
@@ -1785,4 +1786,22 @@ void Calculator::evaluateCommandsDebugExpressionTreeOutput(Expression& startingE
   startingExpression.toStringFull();
   this->output[WebAPI::Result::resultLabel]["output"] =
   this->programExpression.toStringFull();
+}
+
+void Calculator::collectJavascript(const Expression &input, HashedList<JSData> &output){
+  if (input.isOfType<Plot>()){
+    Plot& plot =input.getValueNonConst<Plot>();
+output.addOnTopNoRepetition(    plot.plotJSON(*this));
+  }
+  for (int i =0 ; i < input.size(); i ++){
+    const Expression& child = input[i];
+    collectJavascript(child, output);
+  }
+}
+
+void Calculator::evaluateCommandsWriteJavascriptOutput(){
+  HashedList<JSData> scripts;
+  this->collectJavascript(this->programExpression, scripts);
+  this->output[WebAPI::Result::scripts] = scripts;
+
 }

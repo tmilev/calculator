@@ -134,6 +134,8 @@ class RequestWithProgress {
     if (this.additionalDetails === null || this.additionalDetails === undefined) {
       this.additionalDetails = "";
     }
+    this.attempts = 0;
+    this.storedParameters = "";
   }
 
   sendPrepare() {
@@ -142,7 +144,7 @@ class RequestWithProgress {
       this.responseStandard();
     }
     this.xhr.onerror = (e) => { 
-      this.errorStandard(e);
+      this.errorStandard(e);      
     }
   }
 
@@ -157,6 +159,7 @@ class RequestWithProgress {
 
   sendPOST(parameters) {
     this.sendPrepare();
+    this.storedParameters = parameters;
     this.xhr.open("POST", this.address, true);
     this.xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     if (typeof parameters === "string") {
@@ -173,19 +176,37 @@ class RequestWithProgress {
     }
     this.panel.initialize(true);
     this.startTime = new Date().getTime();
-    this.panel.setPanelLabel(`<b style = "color:orange">Sent</b>`)
+    if (this.attempts === 0) {
+      this.panel.setPanelLabel(`<b style = "color:orange">Sent</b>`);
+    } else {
+      this.panel.setPanelLabel(`<b style = "color:orange">Sent ${this.attempts}</b>`);
+    }
     this.panel.setPanelContent(this.additionalDetails + this.details);
   }
 
   errorStandard(
-    /** @type {ProgressEvent} */e,
+    /** @type {ProgressEvent} */ e,
   ) {
     if (this.progress === null || this.progress === undefined) {
       console.log(e);
       return;
     }
-    let panelLabel = `<b style='color:red'>Connection error</b>`;
+    this.attempts++;
+    let panelLabel = `<b style='color:red'>Connection error ${this.attempts}</b>`;
     this.panel.setPanelLabel(panelLabel);
+    if (this.attempts < 5) {
+      setTimeout(() => {
+        this.send();
+      }, 500);
+    }
+  }
+
+  send() {
+    if (this.isPost) {
+      this.sendPOST(this.storedParameters);
+    } else {
+      this.sendGET();
+    }
   }
 
   responseStandard() {
@@ -198,11 +219,20 @@ class RequestWithProgress {
   }
 
   recordProgressDone() {
-    if (this.progress === null || this.progress === undefined || this.progress === "") {
+    if (
+      this.progress === null ||
+      this.progress === undefined ||
+      this.progress === ""
+    ) {
       return;
     }
     let timeTotal = new Date().getTime() - this.startTime;
-    let panelLabel = `<b style = 'color:green'>Received</b> ${timeTotal} ms`;
+    let panelLabel = "";
+    if (this.attempts === 0) {
+      panelLabel = `<b style = 'color:green'>Received</b> ${timeTotal} ms`;
+    } else {
+      panelLabel = `<b style = 'color:green'>Received ${this.attempts}</b> ${timeTotal} ms`;
+    }
     this.panel.setPanelLabel(panelLabel);
   }
 

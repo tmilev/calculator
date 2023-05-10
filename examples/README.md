@@ -616,17 +616,17 @@ Polynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+ 1)
 Divides polynomial by polynomial (to get a rational function). 
 
 */* [DivideRationalFractionByPolynomial] {CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22MakeRationalFunction%28x%29%2fPolynomial%28y%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22MakeRationalFunction%28x%29%2fPolynomial%7b%7d%28y%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-MakeRationalFunction(x)/Polynomial(y) 
+MakeRationalFunction(x)/Polynomial{}(y) 
 ```
 Divides rational fraction by polynomial (to get a rational fraction). 
 
 */* [DividePolynomialByRationalFraction] {CalculatorFunctionsBinaryOps::divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%28x%29%20%2f%5cnMakeRationalFunction%28y%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Polynomial%28x%29%20%2f%5cnMakeRationalFunction%7b%7d%28y%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 Polynomial(x) /
-MakeRationalFunction(y) 
+MakeRationalFunction{}(y) 
 ```
 Divides rational fraction by polynomial (to get a rational fraction). 
 
@@ -2049,13 +2049,14 @@ If A is a non-typed matrix of expressions that can be converted to a typed matri
 Absolute value function 
 
 *"* [QuoteToString] {CalculatorFunctions::quoteToString}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%22The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.%5c%22%3b%5cn%5c%22%5c%5cu00B0%5c%22%3b%5cn%5c%22%5c%5cu00b0%5c%22%3b%5cnM%3d1%3b%5cn%5c%22M%5c%22%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%22The%20quick%20brown%20fox%20jumps%20over%20the%20lazy%20dog.%5c%22%3b%5cn%5c%22%5c%5cu00B0%5c%22%3b%5cn%5c%22%5c%5cu00b0%5c%22%3b%5cnM%3d1%3b%5cn%5c%22M%5c%22%3b%5cn%5c%221%2b1%5c%22%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 "The quick brown fox jumps over the lazy dog.";
 "\u00B0";
 "\u00b0";
 M=1;
-"M"
+"M";
+"1+1"
 ```
 Creates a string. Transforms escape sequences to their byte representations. These may be escaped back when returned to the frontend.
 

@@ -350,7 +350,7 @@ void Calculator::initializeFunctionsStandard() {
     "1 and 1;\n"
     "a and 1;\n"
     "a and 0;",
-    "CalculatorFunctions::and",
+    "CalculatorFunctions::andFunction",
     "and",
     innerStandard
   );

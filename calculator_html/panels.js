@@ -207,18 +207,12 @@ class PanelExpandable {
   setPanelContent(
     /** @type {HTMLElement|string} */
     input,
-    /** @type {boolean|undefined} */
-    useSetHtml,
   ) {
     this.panelContent.style.maxHeight = "";
     this.panelContent.style.maxWidth = "";
     if (typeof input === "string") {
       let element = document.createElement("span");
-      if (useSetHtml === true) {
-        writeHTML(element, input);
-      } else {
-        element.innerHTML = input;
-      }
+      writeHTML(element, input);
       input = element;
     }
     this.panelContent.textContent = "";
@@ -338,8 +332,6 @@ class PanelExpandable {
 function makePanelFromData(
   /** @type {PanelExpandableData} */
   data,
-  /** @type {boolean|undefined} */
-  useSetHtml,
 ) {
   let doCreatePanel = false;
   if (data.content.length > data.minimalCharacterLengthForPanel) {
@@ -349,7 +341,7 @@ function makePanelFromData(
     let inputPanel = new PanelExpandable(data.container);
     inputPanel.initialize(data.startHidden, data.allowFullExpand);
     let content = data.content;
-    inputPanel.setPanelContent(content, useSetHtml);
+    inputPanel.setPanelContent(content);
     inputPanel.setPanelLabel(data.label);
     inputPanel.addCopyButton();
     return inputPanel;

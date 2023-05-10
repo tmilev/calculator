@@ -9,8 +9,8 @@ function attachTooltip(
   /**@string {string} */
   tooltipHTML,
 ) {
-  var tooltip = document.createElement("SPAN");
-  tooltip.innerHTML = tooltipHTML;
+  let tooltip = document.createElement("SPAN");
+  miscellaneous.writeHTML(tooltip, tooltipHTML);
   tooltip.classList.add("tooltiptext");
   element.appendChild(tooltip);
   element.addEventListener("mouseover", showToolTip.bind(element, tooltip));
@@ -33,7 +33,7 @@ function hideToolTip(
 
 
 function abstractSyntaxNotationAnnotate(binaryHex, interpretation, id) {
-  var annotation = new AbstractSyntaxOne();
+  let annotation = new AbstractSyntaxOne();
   annotation.initializeAnnotation(binaryHex, interpretation, id);
   annotation.annotate();
 }
@@ -43,7 +43,7 @@ function displayTransportLayerSecurity(
   outputId,
   input,
 ) {
-  var theServer = new TransportLayerSecurityServer();
+  let theServer = new TransportLayerSecurityServer();
   theServer.displayMessages(outputId, input);
 }
 
@@ -52,13 +52,13 @@ function writeSessionToDOM(
   /** @type {HTMLElement} */
   outputElement,
 ) {
-  var htmlContent = "";
+  let htmlContent = "";
   htmlContent += `<table class = '${styles.classNames.table.borderStandard}'>`;
-  var labelsToIgnore = {
+  let labelsToIgnore = {
     "cipherSuites": true,
     "algorithmSpecifications": true,
   };
-  for (var label in session) {
+  for (let label in session) {
     if (label in labelsToIgnore) {
       continue;
     }
@@ -66,17 +66,17 @@ function writeSessionToDOM(
   }
   htmlContent += "</table>";
   htmlContent += `<table class = '${styles.classNames.table.borderStandard}'><tr><th>id</th><th>interpretation</th></tr>`;
-  for (var label in session.cipherSuites) {
+  for (let label in session.cipherSuites) {
     htmlContent += `<tr>`;
     htmlContent += `<td>${label}</td>`;
     htmlContent += `<td>${session.cipherSuites[label]}</td>`;
     htmlContent += `</tr>`;
   }
   htmlContent += "</table>";
-  var newChild = document.createElement("SPAN");
+  let newChild = document.createElement("SPAN");
   newChild.innerHTML = htmlContent;
   outputElement.appendChild(newChild);
-  var algorithmSpecs = document.createElement("SPAN");
+  let algorithmSpecs = document.createElement("SPAN");
   jsonToHtml.writeJSONtoDOMComponent(session.algorithmSpecifications, algorithmSpecs);
   outputElement.appendChild(algorithmSpecs);
 }
@@ -86,16 +86,16 @@ function displaySSLRecord(
   outputId,
   input,
 ) {
-  var outputElement = document.getElementById(outputId);
-  var annotation = new AnnotatedBytes();
+  let outputElement = document.getElementById(outputId);
+  let annotation = new AnnotatedBytes();
   outputElement.className = styles.classNames.containers.hexStandardWidth;
   annotation.writeMessageToDOM(input, outputElement);
-  var extraAnnotation = "";
-  var content = input.content;
+  let extraAnnotation = "";
+  let content = input.content;
   writeSessionToDOM(input.session, outputElement);
-  var flagNames = ["renegotiate", "OCSPrequest", "signedCertificateTimestampRequest"];
-  for (var counter = 0; counter < flagNames.length; counter++) {
-    var flagName = flagNames[counter];
+  let flagNames = ["renegotiate", "OCSPrequest", "signedCertificateTimestampRequest"];
+  for (let counter = 0; counter < flagNames.length; counter++) {
+    let flagName = flagNames[counter];
     if (content[flagName] !== undefined) {
       extraAnnotation += `<br>${flagName}: ${content[flagName]}`;
     }
@@ -104,10 +104,10 @@ function displaySSLRecord(
   extraAnnotation += `<br>Cipher spec length: ${content.cipherSpecLength}`;
   extraAnnotation += `<br>Renegotiation characters: ${content.renegotiationCharacters}`;
   extraAnnotation += `<table class = '${styles.classNames.table.borderStandard}'><tr><th>type</th><th>name</th><th width = '50%'>data</th></tr>`;
-  for (var counter = 0; counter < content.extensions.length; counter++) {
-    var label = content.extensions[counter].name;
-    var type = content.extensions[counter].type;
-    var data = content.extensions[counter].data;
+  for (let counter = 0; counter < content.extensions.length; counter++) {
+    let label = content.extensions[counter].name;
+    let type = content.extensions[counter].type;
+    let data = content.extensions[counter].data;
     extraAnnotation += `<tr>`;
     extraAnnotation += `<td>${type}</td>`;
     extraAnnotation += `<td>${label}</td>`;
@@ -116,7 +116,7 @@ function displaySSLRecord(
   }
   extraAnnotation += "</table>";
   // extraAnnotation += JSON.stringify(content);
-  var annotationAnnotation = document.createElement("SPAN");
+  let annotationAnnotation = document.createElement("SPAN");
   annotationAnnotation.innerHTML += extraAnnotation;
   outputElement.appendChild(annotationAnnotation);
 }
@@ -176,15 +176,15 @@ class AbstractSyntaxOne {
     /** @type  {ASNElement} */
     currentInterpretation,
   ) {
-    var currentElement = document.createElement("SPAN");
+    let currentElement = document.createElement("SPAN");
     currentInterpretation.dom = {};
     currentInterpretation.dom.element = currentElement;
     currentElement.classList.add("abstractSyntaxOneElement");
-    var elementLeadingByte = document.createElement("SPAN");
+    let elementLeadingByte = document.createElement("SPAN");
     currentInterpretation.dom.leadingByte = elementLeadingByte;
     elementLeadingByte.classList.add("abstractSyntaxOneLeadingByte");
     elementLeadingByte.innerHTML = currentInterpretation.startByteOriginal;
-    var tooltipLeadingByte = `Type: ${currentInterpretation.type}`;
+    let tooltipLeadingByte = `Type: ${currentInterpretation.type}`;
     tooltipLeadingByte += `<br>Leading byte: ${currentInterpretation.startByteOriginal}`;
     // offsetLastWrite is the offset in the recoded stream.
     // offsetLastRead is the offset in the original stream.
@@ -211,35 +211,35 @@ class AbstractSyntaxOne {
       tooltipLeadingByte,
     );
 
-    var elementLength = document.createElement("SPAN");
+    let elementLength = document.createElement("SPAN");
     currentInterpretation.dom.length = elementLength;
     elementLength.classList.add("abstractSyntaxOneLength");
     elementLength.innerHTML = currentInterpretation.lengthEncoding;
-    var lengthTooltipContent = `Length: ${currentInterpretation.lengthPromised}`;
+    let lengthTooltipContent = `Length: ${currentInterpretation.lengthPromised}`;
     attachTooltip(elementLength, lengthTooltipContent);
 
-    var elementHeader = document.createElement("SPAN");
+    let elementHeader = document.createElement("SPAN");
     currentInterpretation.dom.header = elementHeader;
     elementHeader.classList.add("abstractSyntaxOneHeader");
     elementHeader.appendChild(elementLeadingByte);
     elementHeader.appendChild(elementLength);
     currentElement.appendChild(elementHeader);
-    var elementBody = document.createElement("SPAN");
+    let elementBody = document.createElement("SPAN");
     currentInterpretation.dom.body = elementBody;
-    var foundContent = false;
+    let foundContent = false;
     if (currentInterpretation.children !== undefined) {
       foundContent = true;
-      for (var i = 0; i < currentInterpretation.children.length; i++) {
-        var interpretation = currentInterpretation.children[i];
+      for (let i = 0; i < currentInterpretation.children.length; i++) {
+        let interpretation = currentInterpretation.children[i];
         this.appendAnnotation(elementBody, interpretation);
       }
     } else if (currentInterpretation.body !== undefined && currentInterpretation.body !== null) {
-      var elementHex = document.createElement("SPAN");
+      let elementHex = document.createElement("SPAN");
       elementHex.innerHTML = currentInterpretation.body;
       elementHex.classList.add("abstractSyntaxOneContent");
       elementBody.appendChild(elementHex);
       foundContent = true;
-      var tooltipBody = "";
+      let tooltipBody = "";
       if (currentInterpretation.interpretation !== undefined) {
         tooltipBody += `Interpretation: ${currentInterpretation.interpretation}`;
       }
@@ -258,13 +258,13 @@ class AbstractSyntaxOne {
       currentInterpretation.error !== null &&
       currentInterpretation.error !== undefined
     ) {
-      var errorElement = document.createElement("SPAN");
+      let errorElement = document.createElement("SPAN");
       errorElement.style.color = "red";
       errorElement.innerHTML = currentInterpretation.error;
       elementBody.appendChild(noContent);
     }
     if (!foundContent) {
-      var errorElement = document.createElement("SPAN");
+      let errorElement = document.createElement("SPAN");
       errorElement.innerHTML = `[no content] ${JSON.stringify(currentInterpretation)}`;
       elementBody.appendChild(noContent);
     }
@@ -300,10 +300,10 @@ class AbstractSyntaxOne {
     /** @type  {ASNElement} */
     currentInterpretation,
   ) {
-    var currentElement = document.createElement("DIV");
+    let currentElement = document.createElement("DIV");
     currentElement.classList.add("abstractSyntaxOneElementTree");
-    var currentHead = document.createElement("SPAN");
-    var headHTML = `<b>${currentInterpretation.type}</b>`;
+    let currentHead = document.createElement("SPAN");
+    let headHTML = `<b>${currentInterpretation.type}</b>`;
     if (
       currentInterpretation.numberOfChildren !== undefined &&
       currentInterpretation.numberOfChildren !== 0
@@ -315,17 +315,17 @@ class AbstractSyntaxOne {
     }
     currentHead.innerHTML = headHTML;
     currentElement.appendChild(currentHead);
-    var annotationElementPeer = currentInterpretation.dom;
-    var elementsToAttachTo = [currentHead, annotationElementPeer.header];
+    let annotationElementPeer = currentInterpretation.dom;
+    let elementsToAttachTo = [currentHead, annotationElementPeer.header];
     if (currentInterpretation.children !== undefined) {
-      for (var counter = 0; counter < currentInterpretation.children.length; counter++) {
+      for (let counter = 0; counter < currentInterpretation.children.length; counter++) {
         this.appendAnnotationTree(currentElement, currentInterpretation.children[counter]);
       }
     } else {
       elementsToAttachTo.push(annotationElementPeer.body);
     }
-    for (var counter = 0; counter < elementsToAttachTo.length; counter++) {
-      var theElement = elementsToAttachTo[counter];
+    for (let counter = 0; counter < elementsToAttachTo.length; counter++) {
+      let theElement = elementsToAttachTo[counter];
       theElement.addEventListener(
         'mouseover',
         this.mouseOverAbstractSyntaxOneElement.bind(
@@ -354,10 +354,10 @@ class AbstractSyntaxOne {
     this.DOMElementAnnotationTree = document.createElement("SPAN");
     this.DOMElementAnnotation.classList.add("abstractSyntaxOneAnnotationTree");
     this.DOMElementAnnotation.innerHTML = "";
-    var theTable = document.createElement("TABLE");
-    var row = theTable.insertRow(0);
-    var cellLeft = row.insertCell(- 1);
-    var cellRight = row.insertCell(- 1);
+    let theTable = document.createElement("TABLE");
+    let row = theTable.insertRow(0);
+    let cellLeft = row.insertCell(- 1);
+    let cellRight = row.insertCell(- 1);
     cellLeft.appendChild(this.DOMElementAnnotationTree);
     cellRight.appendChild(this.DOMElementAnnotation);
     this.DOMElementAnnotationContainer.appendChild(theTable);
@@ -382,47 +382,47 @@ class TransportLayerSecurityServer {
     outputId,
     input,
   ) {
-    var outputElement = document.getElementById(outputId);
+    let outputElement = document.getElementById(outputId);
     outputElement.className = "hexContainerStandardWidth";
     writeSessionToDOM(input.session, outputElement);
-    var inputHeader = document.createElement("span");
+    let inputHeader = document.createElement("span");
     inputHeader.innerHTML = "<br>";
     outputElement.appendChild(inputHeader);
-    for (var i = 0; i < input.spoofer.inputMessages.length; i++) {
-      var currentStringHeader = document.createElement("SPAN");
+    for (let i = 0; i < input.spoofer.inputMessages.length; i++) {
+      let currentStringHeader = document.createElement("SPAN");
       currentStringHeader.innerHTML = `<br><b>Input ${i + 1}:</b><br>`;
       outputElement.appendChild(currentStringHeader);
-      var nextInput = document.createElement("span");
+      let nextInput = document.createElement("span");
       nextInput.className = "hexContainerStandard";
-      var annotation = new AnnotatedBytes();
+      let annotation = new AnnotatedBytes();
       annotation.writeMessageToDOM(input.spoofer.inputMessages[i], nextInput);
       outputElement.appendChild(nextInput);
     }
     if (input.spoofer.errorsOnInput.length > 0) {
-      var inputErrors = document.createElement("span");
-      var errorHTML = "<br><b style = 'color:red'>Input errors:</b>";
-      for (var i = 0; i < input.spoofer.errorsOnInput.length; i++) {
+      let inputErrors = document.createElement("span");
+      let errorHTML = "<br><b style = 'color:red'>Input errors:</b>";
+      for (let i = 0; i < input.spoofer.errorsOnInput.length; i++) {
         errorHTML += "<br>" + input.spoofer.errorsOnInput[i];
       }
       inputErrors.innerHTML = errorHTML;
       outputElement.appendChild(inputErrors);
     }
-    var outputHeader = document.createElement("span");
+    let outputHeader = document.createElement("span");
     outputHeader.innerHTML = "<br>";
     outputElement.appendChild(outputHeader);
-    for (var i = 0; i < input.spoofer.outputMessages.length; i++) {
-      var outputHeader = document.createElement("span");
+    for (let i = 0; i < input.spoofer.outputMessages.length; i++) {
+      let outputHeader = document.createElement("span");
       outputHeader.innerHTML = `<br><b>Output ${i + 1}:</b><br>`;
       outputElement.appendChild(outputHeader);
-      var currentOutputContainer = document.createElement("span");
+      let currentOutputContainer = document.createElement("span");
       currentOutputContainer.className = "hexContainerStandard";
-      for (var j = 0; j < input.spoofer.outputMessages[i].length; j++) {
-        var nextOutput = document.createElement("span");
-        var annotation = new AnnotatedBytes();
+      for (let j = 0; j < input.spoofer.outputMessages[i].length; j++) {
+        let nextOutput = document.createElement("span");
+        let annotation = new AnnotatedBytes();
         annotation.writeMessageToDOM(input.spoofer.outputMessages[i][j], nextOutput);
         currentOutputContainer.appendChild(nextOutput);
         if (j < input.spoofer.outputMessages[i].length - 1) {
-          var separator = document.createElement("span");
+          let separator = document.createElement("span");
           separator.innerHTML = "<span style = 'background-color:red;display:inline-block;'>&nbsp;</span>";
           currentOutputContainer.appendChild(separator);
         }
@@ -430,24 +430,24 @@ class TransportLayerSecurityServer {
       outputElement.appendChild(currentOutputContainer);
     }
     if (input.spoofer.errorsOnOutput.length > 0) {
-      var outputErrors = document.createElement("span");
-      var errorHTML = "Output errors:<br>";
-      for (var i = 0; i < input.spoofer.errorsOnOutput.length; i++) {
+      let outputErrors = document.createElement("span");
+      let errorHTML = "Output errors:<br>";
+      for (let i = 0; i < input.spoofer.errorsOnOutput.length; i++) {
         errorHTML += input.spoofer.errorsOnOutput[i] + "<br>";
       }
       outputErrors.innerHTML = errorHTML;
       outputElement.appendChild(outputErrors);
     }
     if (input.spoofer.errorsOnOutput.length > 0) {
-      var inputErrors = document.createElement("span");
-      var errorHTML = "<br><b style = 'color:red'>Output errors:</b><br>";
-      for (var i = 0; i < input.spoofer.errorsOnOutput.length; i++) {
+      let inputErrors = document.createElement("span");
+      let errorHTML = "<br><b style = 'color:red'>Output errors:</b><br>";
+      for (let i = 0; i < input.spoofer.errorsOnOutput.length; i++) {
         errorHTML += "<br>" + input.spoofer.errorsOnOutput[i];
       }
       inputErrors.innerHTML = errorHTML;
       outputElement.appendChild(inputErrors);
     }
-    var sessionStatusElement = document.createElement("SPAN");
+    let sessionStatusElement = document.createElement("SPAN");
     if (outputElement.style.height < 800) {
       outputElement.style.height = 800;
     }
@@ -467,7 +467,7 @@ class AnnotatedBytes {
     /** @type {HTMLElement} */
     outputComponent,
   ) {
-    var serialization = input.serialization;
+    let serialization = input.serialization;
     this.bodyHex = serialization.body;
     this.byteLength = this.bodyHex.length / 2;
     this.stack = [new StackElement(
@@ -496,7 +496,7 @@ class AnnotatedBytes {
     if (this.top.currentBody.length > 0) {
       this.top.flushBody();
     }
-    var inputStringifiedElement = document.createElement("SPAN");
+    let inputStringifiedElement = document.createElement("SPAN");
     // inputStringifiedElement.innerHTML = "<br>" + JSON.stringify(input);
     outputComponent.appendChild(inputStringifiedElement);
   }
@@ -519,13 +519,13 @@ class AnnotatedBytes {
 
   stackOnTop() {
     while (this.nextMarkerOffset < this.markers.length) {
-      var nextMarker = this.markers[this.nextMarkerOffset];
+      let nextMarker = this.markers[this.nextMarkerOffset];
       if (nextMarker.offset > this.nextByteOffset) {
         break;
       }
       if (nextMarker.offset == this.nextByteOffset) {
         this.top.flushBody();
-        var newElement = document.createElement("SPAN");
+        let newElement = document.createElement("SPAN");
         this.top.dom.appendChild(newElement);
         this.stack.push(
           new StackElement(
@@ -570,10 +570,10 @@ class StackElement {
     if (this.currentBody.length <= 0) {
       return;
     }
-    var bodyElement = document.createElement("SPAN");
+    let bodyElement = document.createElement("SPAN");
     bodyElement.innerHTML = this.currentBody.join("");
     bodyElement.className = "byteAnnotationBody";
-    var tooltipContent = "";
+    let tooltipContent = "";
     tooltipContent += `Offset: ${this.offset}, length: ${this.length}`
     if (this.label !== "" && this.label !== undefined) {
       tooltipContent += `<br>label: ${this.label}`;

@@ -144,15 +144,20 @@ function updateDatabasePageCallback(incoming, unused) {
     parsed.error != null &&
     parsed.error != ""
   ) {
-    output.innerHTML = miscellaneous.jsonParseGetHtmlStandard(incoming);
+    miscellaneous.writeHTML(output, miscellaneous.jsonParseGetHtmlStandard(incoming));
   } else if ("rows" in parsed) {
     let transformer = new jsonToHtml.JSONToHTML();
     for (let i = 0; i < parsed.rows.length; i++) {
       parsed.rows[i]["problemDataJSON"] = "";
     }
-    document.getElementById(
-      ids.domElements.spanDatabaseComments
-    ).innerHTML = `${parsed.rows.length} out of ${parsed.totalRows} rows displayed.<br> `;
+    let comments =
+      document.getElementById(
+        ids.domElements.spanDatabaseComments
+      );
+    miscellaneous.writeHTML(
+      comments,
+      `${parsed.rows.length} out of ${parsed.totalRows} rows displayed.<br> `,
+    );
     output.appendChild(
       transformer.getTableFromObject(
         parsed.rows, optionsDatabase, {
@@ -186,7 +191,8 @@ function updateDatabasePageResetCurrentTable() {
 function updateDatabasePage() {
   let page = window.calculator.mainPage;
   if (!page.isLoggedIn()) {
-    document.getElementById(ids.domElements.divDatabaseOutput).innerHTML = "<b>Not logged-in.</b>";
+    let element = document.getElementById(ids.domElements.divDatabaseOutput);
+    miscellaneous.writeHTML(element, "<b>Not logged-in.</b>");
     return;
   }
   let labels = page.storage.variables.database.labels.getValue();

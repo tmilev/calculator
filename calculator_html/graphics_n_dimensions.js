@@ -233,7 +233,7 @@ class GraphicsNDimensions {
     if (this.panelInfo === null) {
       return;
     }
-    this.panelInfo.innerHTML = info;
+    writeHTML(this.panelInfo, info);
   }
 
   initializeControls() {
@@ -248,7 +248,9 @@ class GraphicsNDimensions {
     button.title = "redraw";
     this.containerControls.appendChild(button);
     let snapShotLaTeX = document.createElement("button");
-    snapShotLaTeX.innerHTML = "<tiny>L&#x1F4CB;</tiny>";
+    let tiny = document.createElement("tiny");
+    snapShotLaTeX.appendChild(tiny);
+    tiny.textContent = "\uD83D\uDCCB";
     snapShotLaTeX.title = "Copy LaTeX+pstricks self-contained document.";
     snapShotLaTeX.addEventListener("click", () => {
       this.snapShotLaTeX();
@@ -547,7 +549,7 @@ class GraphicsNDimensions {
     if (this.highlightInfoContent.length > 0) {
       if (this.idHighlightInfo !== null) {
         let highlightComponent = document.getElementById(this.idHighlightInfo);
-        highlightComponent.innerHTML = this.highlightInfoContent.join("<br>");
+        writeHTML(highlightComponent, this.highlightInfoContent.join("<br>"));
       }
     }
     this.animationBasisChange.frameStarted = false;
@@ -1655,6 +1657,19 @@ function testA4(idCanvas, idSpanInformation) {
   }
   a4.graphicsUnit = 150;
   a4.drawAll();
+}
+
+function writeHTML(
+  /** @type {HTMLElement} */
+  element,
+  /** @type {string} */
+  htmlContent,
+) {
+  try {
+    element.setHTML(htmlContent);
+  } catch (e) {
+    element.innerHTML = htmlContent;
+  }
 }
 
 var module;

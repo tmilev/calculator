@@ -571,7 +571,7 @@ class InputPanelData {
     let oldHeight = window.getComputedStyle(currentButtonPanel).height;
     currentButtonPanel.style.maxHeight = "";
     currentButtonPanel.style.height = "";
-    currentButtonPanel.innerHTML = "";
+    currentButtonPanel.textContent = "";
     currentButtonPanel.appendChild(table);
     for (let i = 0; i < toggles.length; i++) {
       currentButtonPanel.appendChild(toggles[i]);
@@ -581,7 +581,10 @@ class InputPanelData {
       currentButtonPanel.style.maxHeight = oldHeight;
       currentButtonPanel.style.height = oldHeight;
       setTimeout(function () {
-        panels.modifyHeightForTimeout(currentButtonPanel, newHeight)
+        panels.modifyHeightForTimeout(
+          currentButtonPanel,
+          newHeight,
+        )
       }, 0);
     }
     return false;

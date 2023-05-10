@@ -188,7 +188,10 @@ class HardCodedAnswer {
 
   submitAnswerCalculator() {
     if (this.id === "" || this.id === null) {
-      this.verificationSpan.innerHTML = "<b style='color:red'>Non-hard-coded calculator answers need id property.</b>";
+      miscellaneous.writeHTML(
+        this.verificationSpan,
+        "<b style='color:red'>Non-hard-coded calculator answers need id property.</b>",
+      );
       return;
     }
     let givenData = this.answerPanel.panel.equationEditor.rootNode.toLatex();
@@ -229,15 +232,21 @@ class HardCodedAnswer {
       if (this.hardCoded) {
         resultHTML += `<br>Your answer: \\(${givenData}\\)`;
       }
-      this.answerPanel.verificationSpan.innerHTML = resultHTML;
+      miscellaneous.writeHTML(this.answerPanel.verificationSpan, resultHTML);
       equationEditor.typeset(this.answerPanel.verificationSpan);
     } catch (e) {
-      this.answerPanel.verificationSpan.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
+      miscellaneous.writeHTML(
+        this.answerPanel.verificationSpan,
+        `<b style='color:red'>${e}</b><br>${input}`,
+      );
     }
   }
 
   giveUp() {
-    this.answerPanel.verificationSpan.innerHTML = `\\(${this.desiredAnswer}\\)`;
+    miscellaneous.writeHTML(
+      this.answerPanel.verificationSpan,
+      `\\(${this.desiredAnswer}\\)`,
+    );
     equationEditor.typeset(this.answerPanel.verificationSpan, "", false, false, false);
   }
 

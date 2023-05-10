@@ -92,12 +92,21 @@ class ForgotLogin {
     
     if (token === '' || token === null) {
       if (debugLogin) {
-        let reportElement = document.getElementById(ids.domElements.pages.forgotLogin.forgotLoginResultReport);
-        reportElement.innerHTML = "<b style='color:blue'>Debug login: recaptcha ignored.</b>";
+        let reportElement = document.getElementById(
+          ids.domElements.pages.forgotLogin.forgotLoginResultReport,
+        );
+        miscellaneous.writeHTML(
+          reportElement,
+          "<b style='color:blue'>Debug login: recaptcha ignored.</b>",
+        );
       } else {
-        document.getElementById(
-          ids.domElements.pages.forgotLogin.forgotLoginResult
-        ).innerHTML = "<b style ='color:red'>Please don't forget to solve the captcha.</b>";
+        let element =document.getElementById(
+            ids.domElements.pages.forgotLogin.forgotLoginResult
+          );
+        miscellaneous.writeHTML(
+          element,
+          "<b style='color:red'>Please don't forget to solve the captcha.</b>",
+        );
         return false;
       }
     }

@@ -121,7 +121,7 @@ class JSONToHTML {
     let currentOption = this.getOptionFromLabel(currentLabelsGeneralized);
     if (currentOption === null || currentOption === undefined) {
       let result = document.createElement("span");
-      result.innerHTML = `${input}`;
+      miscellaneous.writeHTML(result, input);
       return result;
     }
     let inputTransformed = input;
@@ -139,7 +139,7 @@ class JSONToHTML {
     }
     if (inputTransformed === input) {
       let result = document.createElement("span");
-      result.innerHTML = `${input}`;
+      miscellaneous.writeHTML(result, input);
       return result;
     }
     return this.getToggleButton(input, inputTransformed);
@@ -307,7 +307,7 @@ class JSONToHTML {
       return this.getHtmlElementFromArray(this.inputParsed);
     }
     let result = document.createElement("span");
-    result.innerHTML = this.inputParsed;
+    miscellaneous.writeHTML(result, this.inputParsed);
     return result;
   }
 
@@ -338,8 +338,15 @@ class JSONToHTML {
     let header = table.createTHead();
     let headerRow = header.insertRow();
     headerRow.insertCell();
-    for (let counterColumn = 0; counterColumn < this.labelsRows.labels.length; counterColumn++) {
-      headerRow.insertCell().innerHTML = this.labelsRows.labels[counterColumn];
+    for (
+      let counterColumn = 0;
+      counterColumn < this.labelsRows.labels.length;
+      counterColumn++
+    ) {
+      miscellaneous.writeHTML(
+        headerRow.insertCell(),
+        this.labelsRows.labels[counterColumn],
+      );
     }
     let id = "";
     for (let counterRow = 0; counterRow < this.labelsRows.rows.length; counterRow++) {

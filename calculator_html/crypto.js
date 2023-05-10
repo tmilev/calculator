@@ -74,7 +74,7 @@ function writeSessionToDOM(
   }
   htmlContent += "</table>";
   let newChild = document.createElement("SPAN");
-  newChild.innerHTML = htmlContent;
+  miscellaneous.writeHTML(newChild, htmlContent);
   outputElement.appendChild(newChild);
   let algorithmSpecs = document.createElement("SPAN");
   jsonToHtml.writeJSONtoDOMComponent(session.algorithmSpecifications, algorithmSpecs);
@@ -117,7 +117,7 @@ function displaySSLRecord(
   extraAnnotation += "</table>";
   // extraAnnotation += JSON.stringify(content);
   let annotationAnnotation = document.createElement("SPAN");
-  annotationAnnotation.innerHTML += extraAnnotation;
+  miscellaneous.writeHTML(annotationAnnotation, extraAnnotation);
   outputElement.appendChild(annotationAnnotation);
 }
 
@@ -183,7 +183,7 @@ class AbstractSyntaxOne {
     let elementLeadingByte = document.createElement("SPAN");
     currentInterpretation.dom.leadingByte = elementLeadingByte;
     elementLeadingByte.classList.add("abstractSyntaxOneLeadingByte");
-    elementLeadingByte.innerHTML = currentInterpretation.startByteOriginal;
+    miscellaneous.writeHTML(elementLeadingByte, currentInterpretation.startByteOriginal);
     let tooltipLeadingByte = `Type: ${currentInterpretation.type}`;
     tooltipLeadingByte += `<br>Leading byte: ${currentInterpretation.startByteOriginal}`;
     // offsetLastWrite is the offset in the recoded stream.
@@ -214,7 +214,7 @@ class AbstractSyntaxOne {
     let elementLength = document.createElement("SPAN");
     currentInterpretation.dom.length = elementLength;
     elementLength.classList.add("abstractSyntaxOneLength");
-    elementLength.innerHTML = currentInterpretation.lengthEncoding;
+    miscellaneous.writeHTML(elementLength, currentInterpretation.lengthEncoding);
     let lengthTooltipContent = `Length: ${currentInterpretation.lengthPromised}`;
     attachTooltip(elementLength, lengthTooltipContent);
 
@@ -235,7 +235,7 @@ class AbstractSyntaxOne {
       }
     } else if (currentInterpretation.body !== undefined && currentInterpretation.body !== null) {
       let elementHex = document.createElement("SPAN");
-      elementHex.innerHTML = currentInterpretation.body;
+      miscellaneous.writeHTML(elementHex, currentInterpretation.body);
       elementHex.classList.add("abstractSyntaxOneContent");
       elementBody.appendChild(elementHex);
       foundContent = true;
@@ -260,12 +260,15 @@ class AbstractSyntaxOne {
     ) {
       let errorElement = document.createElement("SPAN");
       errorElement.style.color = "red";
-      errorElement.innerHTML = currentInterpretation.error;
+      miscellaneous.writeHTML(errorElement, currentInterpretation.error);
       elementBody.appendChild(noContent);
     }
     if (!foundContent) {
       let errorElement = document.createElement("SPAN");
-      errorElement.innerHTML = `[no content] ${JSON.stringify(currentInterpretation)}`;
+      miscellaneous.writeHTML(
+        errorElement,
+        `[no content] ${JSON.stringify(currentInterpretation)}`,
+      );
       elementBody.appendChild(noContent);
     }
     currentElement.appendChild(elementBody);
@@ -313,7 +316,7 @@ class AbstractSyntaxOne {
     if (currentInterpretation.interpretation !== undefined) {
       headHTML += " " + miscellaneous.shortenString(15, currentInterpretation.interpretation);
     }
-    currentHead.innerHTML = headHTML;
+    miscellaneous.writeHTML(currentHead, headHTML);
     currentElement.appendChild(currentHead);
     let annotationElementPeer = currentInterpretation.dom;
     let elementsToAttachTo = [currentHead, annotationElementPeer.header];
@@ -347,13 +350,13 @@ class AbstractSyntaxOne {
   }
 
   annotate() {
-    this.DOMElementAnnotationContainer.innerHTML = "";
+    this.DOMElementAnnotationContainer.textContent = "";
     this.DOMElementAnnotation = document.createElement("SPAN");
     this.DOMElementAnnotation.classList.add("abstractSyntaxOneAnnotation");
-    this.DOMElementAnnotation.innerHTML = "";
+    this.DOMElementAnnotation.textContent = "";
     this.DOMElementAnnotationTree = document.createElement("SPAN");
     this.DOMElementAnnotation.classList.add("abstractSyntaxOneAnnotationTree");
-    this.DOMElementAnnotation.innerHTML = "";
+    this.DOMElementAnnotation.textContent = "";
     let theTable = document.createElement("TABLE");
     let row = theTable.insertRow(0);
     let cellLeft = row.insertCell(- 1);
@@ -386,11 +389,11 @@ class TransportLayerSecurityServer {
     outputElement.className = "hexContainerStandardWidth";
     writeSessionToDOM(input.session, outputElement);
     let inputHeader = document.createElement("span");
-    inputHeader.innerHTML = "<br>";
+    miscellaneous.writeHTML(inputHeader, "<br>");
     outputElement.appendChild(inputHeader);
     for (let i = 0; i < input.spoofer.inputMessages.length; i++) {
       let currentStringHeader = document.createElement("SPAN");
-      currentStringHeader.innerHTML = `<br><b>Input ${i + 1}:</b><br>`;
+      miscellaneous.writeHTML(currentStringHeader, `<br><b>Input ${i + 1}:</b><br>`);
       outputElement.appendChild(currentStringHeader);
       let nextInput = document.createElement("span");
       nextInput.className = "hexContainerStandard";
@@ -404,15 +407,15 @@ class TransportLayerSecurityServer {
       for (let i = 0; i < input.spoofer.errorsOnInput.length; i++) {
         errorHTML += "<br>" + input.spoofer.errorsOnInput[i];
       }
-      inputErrors.innerHTML = errorHTML;
+      miscellaneous.writeHTML(inputErrors, errorHTML);
       outputElement.appendChild(inputErrors);
     }
     let outputHeader = document.createElement("span");
-    outputHeader.innerHTML = "<br>";
+    miscellaneous.writeHTML(outputHeader, "<br>");
     outputElement.appendChild(outputHeader);
     for (let i = 0; i < input.spoofer.outputMessages.length; i++) {
       let outputHeader = document.createElement("span");
-      outputHeader.innerHTML = `<br><b>Output ${i + 1}:</b><br>`;
+      miscellaneous.writeHTML(outputHeader, `<br><b>Output ${i + 1}:</b><br>`);
       outputElement.appendChild(outputHeader);
       let currentOutputContainer = document.createElement("span");
       currentOutputContainer.className = "hexContainerStandard";
@@ -423,7 +426,10 @@ class TransportLayerSecurityServer {
         currentOutputContainer.appendChild(nextOutput);
         if (j < input.spoofer.outputMessages[i].length - 1) {
           let separator = document.createElement("span");
-          separator.innerHTML = "<span style = 'background-color:red;display:inline-block;'>&nbsp;</span>";
+          miscellaneous.writeHTML(
+            separator,
+            "<span style = 'background-color:red;display:inline-block;'>&nbsp;</span>",
+          );
           currentOutputContainer.appendChild(separator);
         }
       }
@@ -435,7 +441,7 @@ class TransportLayerSecurityServer {
       for (let i = 0; i < input.spoofer.errorsOnOutput.length; i++) {
         errorHTML += input.spoofer.errorsOnOutput[i] + "<br>";
       }
-      outputErrors.innerHTML = errorHTML;
+      miscellaneous.writeHTML(outputErrors, errorHTML);
       outputElement.appendChild(outputErrors);
     }
     if (input.spoofer.errorsOnOutput.length > 0) {
@@ -444,7 +450,7 @@ class TransportLayerSecurityServer {
       for (let i = 0; i < input.spoofer.errorsOnOutput.length; i++) {
         errorHTML += "<br>" + input.spoofer.errorsOnOutput[i];
       }
-      inputErrors.innerHTML = errorHTML;
+      miscellaneous.writeHTML(inputErrors, errorHTML);
       outputElement.appendChild(inputErrors);
     }
     let sessionStatusElement = document.createElement("SPAN");
@@ -497,7 +503,6 @@ class AnnotatedBytes {
       this.top.flushBody();
     }
     let inputStringifiedElement = document.createElement("SPAN");
-    // inputStringifiedElement.innerHTML = "<br>" + JSON.stringify(input);
     outputComponent.appendChild(inputStringifiedElement);
   }
 
@@ -571,7 +576,7 @@ class StackElement {
       return;
     }
     let bodyElement = document.createElement("SPAN");
-    bodyElement.innerHTML = this.currentBody.join("");
+    miscellaneous.writeHTML(bodyElement, this.currentBody.join(""));
     bodyElement.className = "byteAnnotationBody";
     let tooltipContent = "";
     tooltipContent += `Offset: ${this.offset}, length: ${this.length}`

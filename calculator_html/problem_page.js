@@ -142,7 +142,7 @@ class ProblemCollection {
       if (problem !== undefined && problem !== null) {
         let problemNavigation = document.getElementById(problem.idNavigationProblemNotEntirePanel);
         if (problemNavigation !== null) {
-          problemNavigation.innerHTML = "";
+          problemNavigation.textContent = "";
           let updatedContent = problem.getProblemNavigationContent();
           for (let i = 0; i < updatedContent.length; i++) {
             problemNavigation.appendChild(updatedContent[i]);
@@ -298,7 +298,7 @@ class Problem {
     }
     if (problemData.crashReport !== undefined && problemData.crashReport !== null) {
       let html = miscellaneousFrontend.htmlFromCommentsAndErrors(problemData);
-      this.outputElement.innerHTML = html;
+      miscellaneous.writeHTML(this.outputElement, html);
       return;
     }
     this.initializeProblemContent(problemData);
@@ -395,10 +395,12 @@ class Problem {
     }
     pageLastKnownGoodProblemName = page.lastKnownGoodProblemFileName;
     let badProblemExplanationPartOne = document.createElement("div");
-    badProblemExplanationPartOne.innerHTML += "It appears your problem failed to load.<br>";
+    let html = badProblemExplanationPartOne.innerHTML;
+    html += "It appears your problem failed to load.<br>";
     if (this.lastKnownGoodProblemFileName !== "" && userHasInstructorRights) {
-      badProblemExplanationPartOne.innerHTML += "Perhaps you may like to clone the last good known problem.<br>";
+      html += "Perhaps you may like to clone the last good known problem.<br>";
     }
+    miscellaneous.writeHTML(badProblemExplanationPartOne, html);
     this.badProblemExplanation.push(badProblemExplanationPartOne);
     miscellaneousFrontend.appendHtmlToArray(
       this.badProblemExplanation,
@@ -594,7 +596,7 @@ class Problem {
         selectCurrentProblem(this.nextProblemId, hints.defaultRequest);
       }
     );
-    nextProblemTag.innerHTML = "&#8594;";
+    miscellaneous.writeHTML(nextProblemTag, "&#8594;");
     return nextProblemTag;
   }
 
@@ -613,7 +615,7 @@ class Problem {
       enabled = false;
     }
     previousLink.className = hints.linkType;
-    previousLink.innerHTML = "&#8592;";
+    miscellaneous.writeHTML(previousLink, "&#8592;");
     if (enabled) {
       let previousProblem = allProblems.getProblemById(this.previousProblemId);
       let previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(hints.isScoredQuiz, false);
@@ -656,13 +658,13 @@ class Problem {
       practiceTag.addEventListener("click", () => {
         selectCurrentProblem(this.problemId, "exerciseJSON");
       });
-      practiceTag.innerHTML = "Practice";
+      practiceTag.textContent = "Practice";
       result.push(practiceTag);
     } else {
       let selectedPracticeTag = document.createElement("span");
       selectedPracticeTag.className = "problemLinkSelectedPractice";
       selectedPracticeTag.style.color = "green";
-      selectedPracticeTag.innerHTML = "Practice";
+      selectedPracticeTag.textContent = "Practice";
       result.push(selectedPracticeTag)
     }
     if (
@@ -680,14 +682,14 @@ class Problem {
           selectCurrentProblem(this.problemId, "scoredQuizJSON");
         }
       );
-      quizTag.innerHTML = "Quiz";
+      quizTag.textContent = "Quiz";
       result.push(quizTag);
     } else {
       if (this.flagForReal) {
         let quizTag = document.createElement("span");
         quizTag.className = "problemLinkSelectedQuiz";
         quizTag.style.color = "brown";
-        quizTag.innerHTML = "Quiz";
+        quizTag.textContent = "Quiz";
         result.push(quizTag);
       }
     }
@@ -695,20 +697,20 @@ class Problem {
     if (this.flagForReal !== true && this.flagForReal !== "true") {
       let scoresTag = document.createElement("b");
       scoresTag.style.color = "green";
-      scoresTag.innerHTML = "Scores not recorded.";
+      scoresTag.textContent = "Scores not recorded.";
       result.push(scoresTag);
       result.push(document.createTextNode(" "));
       let randomSeedElement = document.createElement("span");
       randomSeedElement.id = ids.domElements.spanProblemLinkWithRandomSeed;
       let randomSeedAnchor = document.createElement("a");
       randomSeedAnchor.href = "#" + this.getAppAnchorRequestFileCourseTopics(false, true);
-      randomSeedAnchor.innerHTML = this.randomSeed;
+      randomSeedAnchor.textContent = this.randomSeed;
       randomSeedElement.appendChild(randomSeedAnchor);
       result.push(randomSeedElement);
     } else {
       let scoresTag = document.createElement("b");
       scoresTag.style.color = "brown";
-      scoresTag.innerHTML = "Scores are recorded. ";
+      scoresTag.textContent = "Scores are recorded. ";
       result.push(scoresTag);
     }
     return result;
@@ -842,7 +844,7 @@ class Problem {
       videoLink.classList = "videoLink";
       videoLink.href = this.video;
       videoLink.target = "_blank";
-      videoLink.innerHTML = "Video";
+      videoLink.textContent = "Video";
       this.links.video.push(videoLink);
     }
     if (
@@ -883,7 +885,7 @@ class Problem {
     let page = window.calculator.mainPage;
     let nextCell = outputRow.insertCell(- 1);
     nextCell.className = "topicListTitle";
-    nextCell.innerHTML = this.problemNumberString + " " + this.title;
+    miscellaneous.writeHTML(nextCell, this.problemNumberString + " " + this.title);
     nextCell = outputRow.insertCell(- 1);
     nextCell.className = "topicListMaterials";
     let materialLinks = this.getProblemMaterialLinks();
@@ -901,13 +903,13 @@ class Problem {
             selectCurrentProblem(this.problemId, "scoredQuizJSON");
           }
         );
-        nextElement.innerHTML = "Quiz";
+        nextElement.textContent = "Quiz";
         nextCell.appendChild(nextElement);
       }
       let nextElement = document.createElement("a");
       nextElement.className = "problemLinkPractice";
       nextElement.href = "#" + this.getAppAnchorRequestFileCourseTopics(false);
-      nextElement.innerHTML = "Practice";
+      nextElement.textContent = "Practice";
       nextElement.addEventListener(
         "click",
         () => {
@@ -931,7 +933,7 @@ class Problem {
     let contentArray = [];
     miscellaneousFrontend.appendHtmlToArray(contentArray, this.badProblemExplanation);
     let problemBody = document.createElement("span");
-    problemBody.innerHTML = this.decodedProblem + this.commentsProblem
+    miscellaneous.writeHTML(problemBody, this.decodedProblem + this.commentsProblem);
     contentArray.push(problemBody);
     miscellaneousFrontend.appendHtml(this.outputElement, contentArray);
     for (let i = 0; i < this.answerPanels.length; i++) {
@@ -998,7 +1000,7 @@ class Problem {
     remainingInHours += 24;
     if (this.isSolvedForSure()) {
       let deadline = document.createElement("b");
-      deadline.textContent = this.deadline.toLocaleDateString()
+      miscellaneous.writeHTML(deadline, this.deadline.toLocaleDateString());
       deadline.style.color = "green";
       result.appendChild(deadline);
       return result;
@@ -1006,14 +1008,17 @@ class Problem {
     if (remainingInHours < 48 && remainingInHours >= 0) {
       let deadline = document.createElement("b");
       deadline.style.color = "red";
-      deadline.textContent = `${this.deadline.toLocaleDateString()}, ~${remainingInHours.toFixed(1)} hrs left`;
+      miscellaneous.writeHTML(
+        deadline,
+        `${this.deadline.toLocaleDateString()}, ~${remainingInHours.toFixed(1)} hrs left`,
+      );
       result.appendChild(deadline)
       return result;
     }
     if (remainingInHours < 0) {
       let deadline = document.createElement("b");
       deadline.style.color = "red";
-      deadline.textContent = this.deadline.toLocaleDateString();
+      miscellaneous.writeHTML(deadline, this.deadline.toLocaleDateString());
       result.appendChild(deadline);
       let passed = document.createElement("b");
       passed.textContent = "[passed]";
@@ -1107,7 +1112,7 @@ class Problem {
     textArea.rows = 1;
     textArea.cols = 2;
     if (this.weight !== undefined && this.weight !== null) {
-      textArea.textContent = this.weight;
+      miscellaneous.writeHTML(textArea, this.weight);
     }
     result.appendChild(textArea);
     let button = document.createElement("button");
@@ -1153,13 +1158,13 @@ class Problem {
     }
     let content = document.createElement("span");
     if (!page.user.hasInstructorRights() || page.studentView()) {
-      content.innerHTML = this.toStringProblemWeight();
+      miscellaneous.writeHTML(content, this.toStringProblemWeight());
       return [content];
     }
 
     let button = document.createElement("button");
     button.className = "accordionLikeProblemWeight";
-    button.innerHTML = `${this.toStringProblemWeight()} &#9666`;
+    miscellaneous.writeHTML(button,`${this.toStringProblemWeight()} &#9666`);
     button.name = this.problemId;
     button.addEventListener("click", () => { 
       window.calculator.coursePage.toggleProblemWeights();
@@ -1241,7 +1246,7 @@ class Problem {
     }
     result.download = `${convertStringToLaTeXFileName(this.title)}${extension}`;
     result.target = "_blank";
-    result.innerHTML = linkSpec.name;
+    miscellaneous.writeHTML(result, linkSpec.name);
     return result;
   }
 }
@@ -1420,7 +1425,7 @@ function getHTMLfromTopics() {
   let extraHtml = miscellaneousFrontend.htmlFromCommentsAndErrors(allProblems.topics);
   if (extraHtml !== "") {
     let extraNode = document.createElement("span");
-    extraNode.innerHTML = extraHtml;
+    miscellaneous.writeHTML(extraNode, extraHtml);
     result.push(extraNode);
   }
   return result;
@@ -1447,7 +1452,7 @@ function initializeProblemWeightsAndDeadlines() {
 function writeEditCoursePagePanel() {
   let page = window.calculator.mainPage;
   let panel = document.getElementById(ids.domElements.courseEditPanel);
-  panel.innerHTML = "";
+  panel.textContent = "";
   let courseHome = page.storage.variables.currentCourse.courseHome.getValue()
   panel.appendChild(editPage.getEditPanel(courseHome, page.hasInstructorRightsNotViewingAsStudent(), false));
   let topicList = page.storage.variables.currentCourse.topicList.getValue();

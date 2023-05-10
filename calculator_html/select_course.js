@@ -51,7 +51,7 @@ function afterLoadSelectCoursePage(incomingPage, result) {
     if (isRoughDraft) {
       editButtonInternal += "<b style = 'color:red; font-size: x-small'>rough draft</b>";
     }
-    editButton.innerHTML = editButtonInternal;
+    miscellaneousFrontend.writeHTML(editButton, editButtonInternal);
     courseContainer.appendChild(editButton);
     if (i != page.courses.length - 1) {
       courseContainer.appendChild(document.createElement("br"));
@@ -59,7 +59,7 @@ function afterLoadSelectCoursePage(incomingPage, result) {
   }
   result.push(courseContainer);
   let divSelectcourse = document.getElementById("divSelectCourse");
-  divSelectcourse.innerHTML = "";
+  divSelectcourse.textContent = "";
   miscellaneousFrontend.appendHtml(divSelectcourse, result);
 }
 

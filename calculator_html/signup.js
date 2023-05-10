@@ -76,12 +76,18 @@ class SignUp {
       ids.domElements.pages.signUp.signUpResultReport
     );
     if (this.grecaptcha === null || this.grecaptcha === undefined) {
-      recaptchaElement.innerHTML = `<b style='color:red'>Missing google (re)captcha: no Internet?</b> ` +
-        `<b style='color:orange'>${extraMessage}</b>`;
+      miscellaneous.writeHTML(
+        recaptchaElement,
+        `<b style='color:red'>Missing google (re)captcha: no Internet?</b> ` +
+        `<b style='color:orange'>${extraMessage}</b>`,
+      );
       return;
     }
     if (window.calculator.mainPage.user.debugLoginIsOn()) {
-      recaptchaElement.innerHTML = "<b style='color:blue'>Debugging login, recaptcha is off.</b>";
+      miscellaneous.writeHTML(
+        recaptchaElement,
+        "<b style='color:blue'>Debugging login, recaptcha is off.</b>",
+      );
       return;
     }
   }
@@ -104,14 +110,22 @@ class SignUp {
     url += `email=${desiredEmailEncoded}&`;
     if (token === '' || token === null) {
       if (!debugLogin) {
-        document.getElementById(
+        let element = document.getElementById(
           ids.domElements.pages.signUp.signUpResult
-        ).innerHTML = "<b style ='color:red'>Please don't forget to solve the captcha. </b>";
+        );
+        miscellaneous.writeHTML(
+          element,
+          "<b style ='color:red'>Please don't forget to solve the captcha. </b>",
+        );
         return false;
       } 
-      document.getElementById(
+      let element = document.getElementById(
         ids.domElements.pages.signUp.signUpResult
-      ).innerHTML = "<b style='color:red'>Debug login: recaptcha ignored.</b>";
+      );
+      miscellaneous.writeHTML(
+        element,
+        "<b style='color:red'>Debug login: recaptcha ignored.</b>",
+      );
     } 
     this.recaptchaIdForSignUp = null;
     url += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(token)}&`;
@@ -132,7 +146,7 @@ class SignUp {
       miscellaneous.writeHtmlFromCommentsAndErrors(inputParsed, outputStatus);
       let resultHtml = inputParsed[pathnames.urlFields.result.resultHtml];
       if (resultHtml !== undefined) {
-        output.innerHTML = resultHtml;
+        miscellaneous.writeHTML(output, resultHtml);
       }
     } catch (e) {
       output.textContent = `Result: ${input}. Error: ${e}.`;

@@ -246,7 +246,10 @@ class RequestWithProgress {
     if (typeof this.output === "string") {
       this.output = document.getElementById(this.output);
     }
-    this.output.innerHTML = miscellaneous.jsonParseGetHtmlStandard(resultText);
+    miscellaneous.writeHTML(
+      this.output,
+      miscellaneous.jsonParseGetHtmlStandard(resultText),
+    );
   }
 }
 

@@ -31,7 +31,7 @@ class Monitor {
     this.timeOutOldCounter = 0;
     this.currentWorkerId = workerId;
     let pauseButton = this.pauseButton();
-    pauseButton.innerHTML = "Pause";
+    pauseButton.textContent = "Pause";
     pauseButton.style.display = "";
     this.progressReport();
   }
@@ -64,7 +64,7 @@ class Monitor {
 
   pauseButtonMarkFinished() {
     let pauseButton = this.pauseButton();
-    pauseButton.innerHTML = "finished";
+    pauseButton.textContent = "finished";
     pauseButton.style.display = "none";
   }
 
@@ -97,7 +97,7 @@ class Monitor {
       doUpdateCalculatorPage = true;
     } else if (status === "paused") {
       this.isPaused = true;
-      indicatorButton.innerHTML = "Continue";
+      indicatorButton.textContent = "Continue";
     } else {
       if (status === "noReport") {
         progressReportContent += "No report on last ping. ";
@@ -107,14 +107,16 @@ class Monitor {
         doUpdateCalculatorPage = true;
       }
       this.isPaused = false;
-      indicatorButton.innerHTML = "Pause";
+      indicatorButton.textContent = "Pause";
       this.clearTimeout();
       this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
     }
     progressReportContent += `Refreshing every ${this.timeIncrement} second(s). `;
     progressReportContent += `Client time: ~${Math.floor(this.timeOutOldCounter)} second(s)<br>`;
-    let progReportTimer = document.getElementById(ids.domElements.pages.calculator.monitoring.progressTimer);
-    progReportTimer.innerHTML = progressReportContent;
+    let progReportTimer = document.getElementById(
+      ids.domElements.pages.calculator.monitoring.progressTimer,
+    );
+    miscellaneous.writeHTML(progReportTimer, progressReportContent);
 
     if (doUpdateCalculatorPage) {
       this.ownerCalculator.panels.length = 0;

@@ -88,7 +88,7 @@ class Authenticator {
     output,
   ) {
     let spanLoginStatus = document.getElementById(ids.domElements.pages.login.spanLoginStatus);
-    spanLoginStatus.innerHTML = "";
+    spanLoginStatus.textContent = "";
     let page = window.calculator.mainPage;
     let success = false;
     let loginErrorMessage = "";
@@ -129,10 +129,15 @@ class Authenticator {
       parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === true
     ) {
       let databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
-      databaseInfo.innerHTML = "<b style='color:red'>Fallback database.</b>";
+      miscellaneous.writeHTML(
+        databaseInfo,
+        "<b style='color:red'>Fallback database.</b>",
+      );
     }
-    let loginInfoComponent = document.getElementById(ids.domElements.divLoginPanelInfo);
-    loginInfoComponent.innerHTML = loginInfo;
+    let loginInfoComponent = document.getElementById(
+      ids.domElements.divLoginPanelInfo,
+    );
+    miscellaneous.writeHTML(loginInfoComponent, loginInfo);
     if (success) {
       page.user.makeFromUserInfo(parsedAuthentication);
       toggleAccountPanels();
@@ -157,7 +162,7 @@ class Authenticator {
         miscellaneous.writeHtmlElementsFromCommentsAndErrors(parsedAuthentication, spanLoginExtra);
       }
       if (loginErrorMessage !== undefined && loginErrorMessage !== "") {
-        spanLoginStatus.innerHTML = loginErrorMessage;
+        miscellaneous.writeHTML(spanLoginStatus, loginErrorMessage);
       }
       page.storage.variables.user.authenticationToken.setAndStore("");
       page.storage.variables.user.name.setAndStore("");
@@ -183,7 +188,11 @@ function reloadPage(reason, time) {
     time = 0;
   }
   let timeRemaining = time / 1000;
-  document.getElementById("spanLoginStatus").innerHTML = `${reason} [in ${timeRemaining} (s)]`;
+  let element = document.getElementById("spanLoginStatus");
+  miscellaneous.writeHTML(
+    element,
+    `${reason} [in ${timeRemaining} (s)]`,
+  );
   if (time <= 0) {
     doReload();
   } else {
@@ -203,8 +212,8 @@ function logout() {
   page.user.sectionsTaught = [];
   page.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
-  document.getElementById(ids.domElements.problemPageContentContainer).innerHTML = "";
-  document.getElementById(ids.domElements.divCurrentCourseBody).innerHTML = "";
+  document.getElementById(ids.domElements.problemPageContentContainer).textContent = "";
+  document.getElementById(ids.domElements.divCurrentCourseBody).textContent = "";
   logoutPartTwo();
 }
 
@@ -223,7 +232,10 @@ function logoutPartTwo() {
     });
     anchor.textContent = "Reload page";
     let textNode = document.createElement("span");
-    textNode.innerHTML = ` for complete logout (when <span style='color:red'>using public computer</span>).`;
+    miscellaneous.writeHTML(
+      textNode,
+      ` for complete logout (when <span style='color:red'>using public computer</span>).`,
+    );
     loginStatus.appendChild(boldComponent);
     loginStatus.appendChild(textNode);
     showLoginCalculatorButtons();
@@ -318,7 +330,7 @@ function hideLoginCalculatorButtons() {
   let page = window.calculator.mainPage;
   document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.remove("divVisible");
   document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.add("divInvisible");
-  document.getElementById(ids.domElements.pages.login.userNameReport).innerHTML = page.storage.variables.user.name.value;
+  document.getElementById(ids.domElements.pages.login.userNameReport).textContent = page.storage.variables.user.name.value;
   document.getElementById(ids.domElements.pages.login.userNameReport).classList.remove("divInvisible");
   document.getElementById(ids.domElements.pages.login.userNameReport).classList.add("divVisible");
 }

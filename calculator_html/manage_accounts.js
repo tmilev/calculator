@@ -93,19 +93,25 @@ function updateAccountsPageCallback(input, notUsed) {
   try {
     parsedUserInfo = miscellaneous.jsonUnescapeParse(input);
     if (pathnames.standardResponses.isNotLoggedInResponse(parsedUserInfo)) {
-      outputComponentStudents.innerHTML = "<b style='color:red'>Not logged in</b>";
+      miscellaneous.writeHTML(
+        outputComponentStudents,
+        "<b style='color:red'>Not logged in</b>",
+      );
       return;
     }
     let admins = parsedUserInfo["admins"];
     let students = parsedUserInfo["students"];
-    if (parsedUserInfo.error !== undefined && parsedUserInfo.error !== "") {
-      outputComponentAdmin.innerHTML = parsedUserInfo.error;
+    if (
+      parsedUserInfo.error !== undefined &&
+      parsedUserInfo.error !== ""
+    ) {
+      miscellaneous.writeHTML(outputComponentAdmin, parsedUserInfo.error);
     } else {
-      outputComponentAdmin.innerHTML = getAccountsTable(admins);
-      outputComponentStudents.innerHTML = getAccountsTable(students);
+      miscellaneous.writeHTML(outputComponentAdmin, getAccountsTable(admins));
+      miscellaneous.writeHTML(outputComponentStudents, getAccountsTable(students));
     }
   } catch (e) {
-    outputComponentStudents.innerHTML = e;
+    miscellaneous.writeHTML(outputComponentStudents, e);
     console.log(e);
   }
 }
@@ -114,7 +120,10 @@ function callbackAddEmailsOrUsers(input, outputComponent) {
   if (typeof outputComponent == "string") {
     outputComponent = document.getElementById(outputComponent);
   }
-  outputComponent.innerHTML = miscellaneous.jsonParseGetHtmlStandard(decodeURIComponent(input));
+  miscellaneous.writeHTML(
+    outputComponent,
+    miscellaneous.jsonParseGetHtmlStandard(decodeURIComponent(input)),
+  );
 }
 
 function addEmailsOrUsers(
@@ -146,7 +155,11 @@ function addEmailsOrUsers(
 }
 
 function getTeachersStudentsCallback(input, output) {
-  document.getElementById(output).innerHTML = miscellaneous.jsonParseGetHtmlStandard(decodeURIComponent(input));
+  let element = document.getElementById(output);
+  miscellaneous.writeHTML(
+    element,
+    miscellaneous.jsonParseGetHtmlStandard(decodeURIComponent(input)),
+  );
 }
 
 function getTeachersStudents() {

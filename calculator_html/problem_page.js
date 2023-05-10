@@ -395,8 +395,7 @@ class Problem {
     }
     pageLastKnownGoodProblemName = page.lastKnownGoodProblemFileName;
     let badProblemExplanationPartOne = document.createElement("div");
-    let html = badProblemExplanationPartOne.innerHTML;
-    html += "It appears your problem failed to load.<br>";
+    let html = "It appears your problem failed to load.<br>";
     if (this.lastKnownGoodProblemFileName !== "" && userHasInstructorRights) {
       html += "Perhaps you may like to clone the last good known problem.<br>";
     }

@@ -53,22 +53,31 @@ function getClonePanel(
   let buttonClone = document.createElement("button");
   buttonClone.className = "buttonClone";
   buttonClone.style.width = "50px";
-  buttonClone.addEventListener("click", window.calculator.editPage.handleClone.bind(null, fileNameSource, idCloneInput, idSpanClonePageReport));
-  buttonClone.innerHTML = "Clone";
+  buttonClone.addEventListener("click", () => {
+    handleClone(
+      fileNameSource,
+      idCloneInput,
+      idSpanClonePageReport,
+    );
+  });
+  buttonClone.textContent = "Clone";
   cellClone.appendChild(buttonClone)
   let cellFileInfo = row.insertCell(- 1);
   let cellFileInfoTable = document.createElement("table");
   let cellFileInfoTableRow = cellFileInfoTable.insertRow(- 1);
   let nextCell = cellFileInfoTableRow.insertCell(- 1);
-  nextCell.innerHTML = "from:";
+  nextCell.textContent = "from:";
   nextCell = cellFileInfoTableRow.insertCell(- 1);
-  nextCell.innerHTML = `<b style = 'color: green'>${fileNameSource}</b></td>`;
+  miscellaneous.writeHTML(nextCell, `<b style = 'color: green'>${fileNameSource}</b>`);
   let sizeFile = fileNameTarget.length;
   cellFileInfoTableRow = cellFileInfoTable.insertRow(- 1);
   nextCell = cellFileInfoTableRow.insertCell(- 1);
-  nextCell.innerHTML = "to:";
+  nextCell.textContent = "to:";
   nextCell = cellFileInfoTableRow.insertCell(- 1);
-  nextCell.innerHTML = `<input type = "text" value = '${fileNameTarget}' size = '${sizeFile}' id = '${idCloneInput}'></input>`;
+  miscellaneous.writeHTML(
+    nextCell,
+    `<input type="text" value='${fileNameTarget}' size='${sizeFile}' id='${idCloneInput}'></input>`,
+  );
   cellFileInfo.append(cellFileInfoTable);
   result.push(table);
   let cloneReport = document.createElement("div");
@@ -119,7 +128,7 @@ function getEditPanel(
   result.appendChild(document.createTextNode(` ${fileName} `));
   let clonePanel = document.createElement("BUTTON");
   clonePanel.className = "accordionLike";
-  clonePanel.innerHTML = "Clone panel &#9666;";
+  miscellaneous.writeHTML(clonePanel, "Clone panel &#9666;");
   clonePanel.addEventListener('click', window.calculator.editPage.toggleClonePanel.bind(null, clonePanel));
   result.appendChild(clonePanel);
   let panelElement = document.createElement("span");
@@ -198,7 +207,7 @@ function initEditorAce() {
   saveButton.addEventListener("click", () => {
     storeEditedPage();
   });
-  saveButton.innerHTML = "Save";
+  saveButton.textContent = "Save";
   let editorElement = document.getElementById(ids.domElements.divEditorAce);
   editorElement.addEventListener("keydown", window.calculator.editPage.ctrlSPressAceEditorHandler);
   editorAce = ace.edit(ids.domElements.divEditorAce);
@@ -274,7 +283,7 @@ function getNavigationEditButton(problemId, contentHTML) {
     "click", selectEditPage.bind(null, problemId)
   );
   navigationButton.className = "buttonNavigationStandard";
-  navigationButton.innerHTML = contentHTML;
+  miscellaneous.writeHTML(navigationButton, contentHTML);
   return navigationButton;
 }
 
@@ -289,11 +298,11 @@ function writeNextPreviousEditButton(
   let previousButtonSpan = document.getElementById(ids.domElements.spanButtonPreviousEdit);
   let nextButtonSpan = document.getElementById(ids.domElements.spanButtonNextEdit);
   if (previousButtonSpan !== null) {
-    previousButtonSpan.innerHTML = "";
+    previousButtonSpan.textContent = "";
     previousButtonSpan.appendChild(getPreviousEditButton(problem.previousProblemId));
   }
   if (nextButtonSpan !== null) {
-    nextButtonSpan.innerHTML = "";
+    nextButtonSpan.textContent = "";
     nextButtonSpan.appendChild(getNextEditButton(problem.nextProblemId));
   }
 }
@@ -366,11 +375,11 @@ function toggleClonePanel(button) {
   if (thePanel.style.maxHeight === '200px') {
     thePanel.style.opacity = '0';
     thePanel.style.maxHeight = '0';
-    button.innerHTML = `Clone panel &#9666;`;
+    miscellaneous.writeHTML(button, `Clone panel &#9666;`);
   } else {
     thePanel.style.opacity = '1';
     thePanel.style.maxHeight = '200px';
-    button.innerHTML = `Clone panel &#9660;`;
+    miscellaneous.writeHTML(button, `Clone panel &#9660;`);
   }
 }
 

@@ -24,6 +24,7 @@ const forgotPassword = require("./forgot_password");
 const compareExpressions = require("./compare_expressions").compareExpressions;
 const compareExpressionsSocratic = require("./compare_expressions_socratic").compareExpressionsSocratic;
 const storage = require("./storage").storage;
+const miscellaneous = require("./miscellaneous_frontend");
 
 class User {
   constructor() {
@@ -84,12 +85,14 @@ class User {
     this.sectionInDB = inputData.studentSection;
     this.sectionComputed = inputData.studentSection;
     this.deadlineSchema = inputData.deadlineSchema;
-    document.getElementById(
+    let spanUser = document.getElementById(
       ids.domElements.spanUserIdInAccountsPage
-    ).innerHTML = page.storage.variables.user.name.value;
-    document.getElementById(
+    );
+    miscellaneous.writeHTML(spanUser, page.storage.variables.user.name.value);
+    let userName = document.getElementById(
       ids.domElements.inputUsername
-    ).value = page.storage.variables.user.name.value;
+    );
+    userName.value = page.storage.variables.user.name.value;
   }
 }
 

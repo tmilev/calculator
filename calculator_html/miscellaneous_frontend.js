@@ -117,7 +117,7 @@ function htmlElementsFromCommentsAndErrors(input) {
     }
     let incoming = document.createElement("div");
     if (extraTags[i] === pathnames.urlFields.result.crashReport) {
-      incoming.innerHTML = current; 
+      writeHTML(incoming, current);
     } else {
       incoming.textContent = current;
     }
@@ -139,7 +139,7 @@ function writeHtmlFromCommentsAndErrors(
   /** @type {HTMLElement} */
   output,
 ) {
-  output.innerHTML = htmlFromCommentsAndErrors(input);
+  writeHTML(output, htmlFromCommentsAndErrors(input));
 }
 
 function writeHtmlElementsFromCommentsAndErrors(

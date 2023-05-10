@@ -129,7 +129,7 @@ class CompareExpressions {
       let resultHTML = answerProcessing.answerProcessing.htmlUserFriendlyResult(
         result
       );
-      this.resultUserFriendly.innerHTML = resultHTML;
+      miscellaneous.writeHTML(this.resultUserFriendly, resultHTML);
       this.writeCalculatorLink();
       this.resultBoxRaw.textContent = JSON.stringify(result);
       this.resultBoxFormatted.textContent = "";
@@ -138,7 +138,7 @@ class CompareExpressions {
       );
       equationEditor.typeset(this.resultBoxFormatted);
     } catch (e) {
-      this.resultBoxRaw.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
+      miscellaneous.writeHTML(this.resultBoxRaw, `<b style='color:red'>${e}</b><br>${input}`);
     }
   }
 
@@ -146,7 +146,10 @@ class CompareExpressions {
     let url = pathnames.addresses.calculatorComputation(
       `CompareExpressionsJSON(${this.givenData},${this.desiredData})`,
     );
-    this.calculatorLink.innerHTML = `<a href=${url} target="_blank">calculator link</a>`;
+    miscellaneous.writeHTML(
+      this.calculatorLink,
+      `<a href=${url} target="_blank">calculator link</a>`,
+    );
   }
 }
 

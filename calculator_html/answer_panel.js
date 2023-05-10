@@ -219,10 +219,13 @@ class AnswerPanel {
     this.editorEnclosure.appendChild(this.editorSpan);
     this.verificationSpan = document.createElement("span");
     if (this.input.previousAnswers !== undefined && this.input.previousAnswers !== "") {
-      this.verificationSpan.innerHTML = this.input.previousAnswers;
+      miscellaneous.writeHTML(this.verificationSpan, this.input.previousAnswers);
     } else {
       if (this.layoutVertical === true) {
-        this.verificationSpan.innerHTML = `<b style = "color:brown">Waiting for answer [unlimited tries]</b>`;
+        miscellaneous.writeHTML(
+          this.verificationSpan,
+          `<b style = "color:brown">Waiting for answer [unlimited tries]</b>`,
+        );
       }
     }
     if (this.flagForReal !== true && this.input.idSpanSolution !== undefined && this.input.idSpanSolution !== null) {
@@ -303,7 +306,7 @@ class AnswerPanel {
     }
     resultHtml += answerProcessing.htmlUserFriendlyResultComparisonErrorsOnly(inputParsed);
     resultHtml += miscellaneous.htmlFromCommentsAndErrors(inputParsed);
-    this.verificationSpan.innerHTML = resultHtml;
+    miscellaneous.writeHTML(this.verificationSpan, resultHtml);
     typeset.typesetter.typesetSoft(this.verificationSpan, "");
     dynamicJavascript.bootstrapAllScripts(this.problemElement);
   }

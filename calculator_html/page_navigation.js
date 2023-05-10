@@ -328,11 +328,17 @@ class Page {
     if (buildVersion === null) {
       return;
     }
-    buildVersion.innerHTML = `Build version ${serverInformation.serverInformation.version}`;
+    miscellaneous.writeHTML(
+      buildVersion,
+      `Build version ${serverInformation.serverInformation.version}`,
+    );
   }
 
   serverIsOnLocalHost() {
-    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    ) {
       return true;
     }
     return false;
@@ -497,10 +503,10 @@ class Page {
     let debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
     if (debugOn) {
       solve.solver.setDebugLogContainer();
-      debugSpan.innerHTML = "Debug <b style='color:red'>on</b>";
+      miscellaneous.writeHTML(debugSpan, "Debug <b style='color:red'>on</b>");
     } else {
       solve.solver.setDebugLogContainer();
-      debugSpan.innerHTML = "Debug <b style='color:green'>off</b>";
+      miscellaneous.writeHTML(debugSpan, "Debug <b style='color:green'>off</b>");
     }
   }
 
@@ -540,7 +546,7 @@ class Page {
     );
     radioPanel.textContent = '';
     if (studentView) {
-      spanView.innerHTML = "Student view";
+      spanView.textContent = "Student view";
       for (let i = 0; i < this.user.sectionsTaught.length; i++) {
         radioPanel.appendChild(document.createElement("br"));
         let label = document.createElement("label");
@@ -563,7 +569,7 @@ class Page {
         radioPanel.appendChild(radioMarkSpan)
       }
     } else {
-      spanView.innerHTML = "Admin view";
+      spanView.textContent = "Admin view";
     }
     login.resetPagesNeedingReload();
     login.setAdminPanels();
@@ -677,12 +683,12 @@ class Page {
 
     if (webAssembly === "true") {
       webAssemblySlider.checked = true;
-      webAssemblyStatus.innerHTML = "Web assembly <b style='color:red'>ON</b>";
-      buttonGo.innerHTML = "Go <b style='color:red'>wasm</b>";
+      miscellaneous.writeHTML(webAssemblyStatus, "Web assembly <b style='color:red'>ON</b>");
+      miscellaneous.writeHTML(buttonGo, "Go <b style='color:red'>wasm</b>");
     } else {
       webAssemblySlider.checked = false;
-      webAssemblyStatus.innerHTML = "Web assembly <b style='color:green'>off</b>";
-      buttonGo.innerHTML = "Go";
+      miscellaneous.writeHTML(webAssemblyStatus, "Web assembly <b style='color:green'>off</b>");
+      buttonGo.textContent = "Go";
     }
   }
 
@@ -699,11 +705,11 @@ class Page {
     }
     let pauseButton = this.pauseButton();
     if (monitoring === "true") {
-      monitorResult.innerHTML = "Monitor <b style='color:red'>on</b>";
+      miscellaneous.writeHTML(monitorResult, "Monitor <b style='color:red'>on</b>");
       document.getElementById(ids.domElements.switch.monitoring).checked = true;
     } else {
       document.getElementById(ids.domElements.switch.monitoring).checked = false;
-      monitorResult.innerHTML = "Monitor <b style='color:green'>off</b>";
+      miscellaneous.writeHTML(monitorResult, "Monitor <b style='color:green'>off</b>");
       pauseButton.style.display = "none";
     }
   }
@@ -743,7 +749,7 @@ class Page {
       pages[i].classList.remove("divPageMainMenuCollapsed");
     }
     menuDiv.classList.remove("divMainMenuCollapsed");
-    toggleButton.innerHTML = "&#9660;";
+    miscellaneous.writeHTML(toggleButton, "&#9660;");
     document.getElementById(
       ids.domElements.divProfilePicture
     ).classList.remove(
@@ -773,7 +779,7 @@ class Page {
       pages[i].classList.add("divPageMainMenuCollapsed");
     }
     menuDiv.classList.add("divMainMenuCollapsed");
-    toggleButton.innerHTML = "&#9656;";
+    miscellaneous.writeHTML(toggleButton, "&#9656;");
     document.getElementById(
       ids.domElements.divProfilePicture
     ).classList.add(

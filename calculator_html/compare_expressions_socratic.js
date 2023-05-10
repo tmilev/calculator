@@ -3,6 +3,7 @@ const ids = require("./ids_dom_elements");
 const InputPanelData = require("./initialize_buttons").InputPanelData;
 const storage = require("./storage").storage;
 const jsonToHtml = require("./json_to_html");
+const miscellaneous = require("./miscellaneous_frontend");
 
 class CompareExpressionsSocratic {
   constructor() {
@@ -129,10 +130,9 @@ class CompareExpressionsSocratic {
       this.resultBoxFormatted.textContent = "";
       jsonToHtml.writeJSONtoDOMComponent(result, this.resultBoxFormatted);
     } catch (e) {
-      this.resultBoxRaw.innerHTML = `<b style='color:red'>${e}</b><br>${input}`;
+      miscellaneous.writeHTML(this.resultBoxRaw, `<b style='color:red'>${e}</b><br>${input}`);
     }
   }
-
 }
 
 const compareExpressionsSocratic = new CompareExpressionsSocratic();

@@ -4,6 +4,7 @@ const autocompleter = require("./autocomplete").autocompleter;
 const initializeButtons = require("./initialize_buttons");
 const ids = require("./ids_dom_elements");
 const processMonitoring = require("./process_monitoring");
+const miscellaneous = require("./miscellaneous_frontend");
 
 class CalculatorEquationEditor {
   constructor(
@@ -126,7 +127,7 @@ class CalculatorEquationEditor {
     let textBox = this.inputMainTextbox();
     if (textBox.value.length > 10000) {
       this.flagCalculatorInputOK = false;
-      this.commentsElement().innerHTML = "<b style ='color:red'>Formula too big </b>";
+      miscellaneous.writeHTML(this.commentsElement(), "<b style ='color:red'>Formula too big </b>");
       return;
     }
     this.commentsElement().textContent = "";
@@ -218,7 +219,7 @@ class EditorInputExtractor {
     this.leftString = this.rawInput.substr(0, this.leftIndex);
     this.middleEditedString = this.rawInput.substr(this.leftIndex, this.rightIndex - this.leftIndex);
     this.rightString = this.rawInput.substr(this.rightIndex);
-    this.commentsElement().innerHTML = ""; //this.toStringDebug();
+    this.commentsElement().textContent = ""; //this.toStringDebug();
   }
 
   growReturnFalseWhenDone() {

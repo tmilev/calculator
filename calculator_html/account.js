@@ -21,7 +21,11 @@ class AccountPage {
 }
 
 function submitChangePassRequestCallback(result) {
-  document.getElementById("spanVerification").innerHTML = miscellaneous.jsonParseGetHtmlStandard(result);
+  let spanVerification = document.getElementById("spanVerification");
+  miscellaneous.writeHTML(
+    spanVerification,
+    miscellaneous.jsonParseGetHtmlStandard(result),
+  );
   document.getElementById("inputPassword").value = document.getElementById("inputNewPasswordInAccount").value;
   document.getElementById("inputOldPasswordInAccount").value = "";
   document.getElementById("inputNewPasswordInAccount").value = "";
@@ -54,8 +58,8 @@ function updateAccountPage() {
     ids.domElements.spanUserIdInAccountsPage
   );
   let emailSpan = document.getElementById(ids.domElements.spanOldEmail);
-  usernameInput.innerHTML = page.storage.variables.user.name.getValue();
-  emailSpan.innerHTML = page.storage.variables.user.email.getValue();
+  usernameInput.textContent = page.storage.variables.user.name.getValue();
+  emailSpan.textContent = page.storage.variables.user.email.getValue();
   let spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
   let table = document.createElement("table");
   let resultCell = document.createElement("th");

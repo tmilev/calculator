@@ -72,9 +72,9 @@ function toggleProblemWeights() {
   for (let i = 0; i < buttons.length; i++) {
     let currentProblem = problemPage.allProblems.getProblemById(buttons[i].name);
     if (!problemWeightsVisible) {
-      buttons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9660;`;
+      miscellaneous.writeHTML(buttons[i], `${currentProblem.toStringProblemWeight()} &#9660;`);
     } else {
-      buttons[i].innerHTML = `${currentProblem.toStringProblemWeight()} &#9666;`;
+      miscellaneous.writeHTML(buttons[i], `${currentProblem.toStringProblemWeight()} &#9666;`);
     }
   }
   problemWeightsVisible = !problemWeightsVisible;
@@ -83,7 +83,10 @@ function toggleProblemWeights() {
 function afterLoadCoursePage(incoming, result) {
   let courseBody = document.getElementById(ids.domElements.divCurrentCourseBody);
   let coursePage = document.getElementById(ids.domElements.divCurrentCourse);
-  courseBody.innerHTML = miscellaneous.jsonParseGetHtmlStandard(incoming);
+  miscellaneous.writeHTML(
+    courseBody,
+    miscellaneous.jsonParseGetHtmlStandard(incoming),
+  );
   let titleElements = courseBody.getElementsByTagName('title');
   if (titleElements !== null && titleElements !== undefined) {
     if (titleElements.length > 0) {

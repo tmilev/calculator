@@ -2108,7 +2108,7 @@ Operator or function \int is overloaded with 18 total handlers.
 ```
 \int_{1}^2 (x^2+x) dx 
 ```
-Integrates a definite integral.  
+Integrates a definite integral.
 
 *\int* [IntegrateAfterPolynomialization] {CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%5c%5cleft%28%20%5c%5cfrac%7bx%28x%20%2b%201%29%7d%7b2%7d%20%5c%5cright%29%5e2%20dx%20%3b%5cn%5c%5cint%20x%5e-2%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2138,9 +2138,9 @@ If a is a number, integrates e^{a x} dx.
 ```
 \int 2\sqrt{2-x^2} dx
 ```
-Pulls out constants from integrals  
+Pulls out constants from integrals.
 
-*\int* [IntegrateSqrtOneminusXsquared] {CalculatorFunctionsIntegration::integrateSqrtOneminusXsquared}. 
+*\int* [IntegrateSqrtOneminusXsquared] {CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%202%5c%5csqrt%7b2-x%5e2%7d%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \int 2\sqrt{2-x^2} dx 
@@ -2712,7 +2712,7 @@ IsAlgebraicRadical(\sqrt{5 + \sqrt{2}});
 IsAlgebraicRadical(\sqrt{x});
 IsAlgebraicRadical(\sqrt{\pi + e + 1})
 ```
-Tests whether the expression is an algebraic expression obtained using radicals and the four arithmetic operations.  
+Tests whether the expression is an algebraic expression obtained using radicals and the four arithmetic operations.
 
 *IsReal* [IsReal] {CalculatorFunctions::isReal}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22IsReal%28%5c%5csqrt%7b5%20%2b%20%5c%5csqrt%7b-%201%7d%7d%29%3b%5cnIsReal%28%5c%5csqrt%7b%5c%5csqrt%7b5%7d%20-%201%7d%29%3b%5cnIsReal%28sqrt%28%5c%5csqrt%7b%5c%5cpi%7d%20-%202%29%20%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

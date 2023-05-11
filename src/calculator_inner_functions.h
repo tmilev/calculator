@@ -311,6 +311,9 @@ public:
   bool convertMatrixOfExpressionToPoints(
     const Matrix<Expression>& input, PlotObject& output
   );
+  bool convertExpressionToPoint(
+    const Expression& input, int desiredDimension, PlotObject& output
+  );
   bool convertListOfListOfExpressionsToPoints(
     const List<Expression>& input,
     int desiredDimension,

@@ -3758,7 +3758,8 @@ void DynkinSimpleType::plotBC(
     return;
   }
   DynkinSimpleType::plotAn(output, rank - 1, filledRoots, verticalOffset);
-  Vector<Rational> lastCenter, secondToLastCenter;
+  Vector<Rational> lastCenter;
+  Vector<Rational> secondToLastCenter;
   secondToLastCenter.makeZero(2);
   secondToLastCenter[1] = verticalOffset;
   secondToLastCenter[0] =

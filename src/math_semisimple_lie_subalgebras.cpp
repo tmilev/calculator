@@ -2794,11 +2794,10 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
           << "Failed to open log file: "
           << this->fileNameToLogComments
           << ". This is not fatal but "
-          << " I am crashing to let you know. "
+          << "I am crashing to let you know. "
           << global.fatal;
         }
         logFile << reportStream.str();
-        global.comments << reportStream.str();
         return true;
       }
     }

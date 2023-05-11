@@ -732,7 +732,7 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsAlgebraic::isAlgebraicRadical,
     "",
     "Tests whether the expression is an algebraic expression "
-    "obtained using radicals and the four arithmetic operations.  ",
+    "obtained using radicals and the four arithmetic operations.",
     "IsAlgebraicRadical(\\sqrt{5 + \\sqrt{2}});\n"
     "IsAlgebraicRadical(\\sqrt{x});\n"
     "IsAlgebraicRadical(\\sqrt{\\pi + e + 1})",
@@ -769,7 +769,7 @@ void Calculator::initializeFunctionsStandard() {
     "\\int",
     CalculatorFunctionsIntegration::integrateDefiniteIntegral,
     "",
-    "Integrates a definite integral.  ",
+    "Integrates a definite integral.",
     "\\int_{1}^2 (x^2+x) dx ",
     "CalculatorFunctionsIntegration::integrateDefiniteIntegral",
     "DefiniteIntegral",
@@ -813,7 +813,7 @@ void Calculator::initializeFunctionsStandard() {
     "\\int",
     CalculatorFunctionsIntegration::integratePullConstant,
     "",
-    "Pulls out constants from integrals  ",
+    "Pulls out constants from integrals.",
     "\\int 2\\sqrt{2-x^2} dx",
     "CalculatorFunctionsIntegration::integratePullConstant",
     "IntegratePullConstant",
@@ -825,7 +825,7 @@ void Calculator::initializeFunctionsStandard() {
     "",
     "Integrates \\int \\sqrt{a-x^2}dx, a > 0.",
     "\\int 2\\sqrt{2-x^2} dx ",
-    "CalculatorFunctionsIntegration::integrateSqrtOneminusXsquared",
+    "CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared",
     "IntegrateSqrtOneminusXsquared",
     innerStandard
   );

@@ -1107,18 +1107,31 @@ class PlotTwoD {
 /** A text label in two dimensions. */
 class TextPlotTwoD {
   /**
-   * @param {!Array.<number>} inputLocation location of the text.
+   * @param {!Array.<number|function(Array.<number>):number>} inputLocation location of the text.
    * @param {string} inputText text to draw.
    * @param {string} inputColor text color.
    */
   constructor(inputLocation, inputText, inputColor) {
+    /** @type {!Array.<number|function(Array.<number>):number>} */
+    this.locationComputer = inputLocation;
     /** @type {!Array.<number>} */
-    this.location = inputLocation;
+    this.location = [];
     /** @type {string} */
     this.text = inputText;
     /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     this.type = 'plotText';
+  }
+
+  /**  
+   * Recomputes the text location
+   * @param { CanvasTwoD } canvas output bounding box.
+   */
+  updateLocation(canvas) {
+    this.location = [];
+    for (let i = 0; i < this.locationComputer.length; i++){
+      this.location.push(canvas.evaluateNumberOrParameter(this.locationComputer[i]));
+    }
   }
 
   /**
@@ -1128,6 +1141,7 @@ class TextPlotTwoD {
    * @param {CanvasTwoD} canvas output bounding box.
    */
   accountBoundingBox(inputOutputBox, canvas) {
+    this.updateLocation(canvas);
     accountBoundingBox(this.location, inputOutputBox);
   }
 
@@ -1135,10 +1149,11 @@ class TextPlotTwoD {
    * Same as draw but does not complete the stroke command; use for plot fills.
    *
    * @param {!CanvasTwoD} canvas the canvas.
-   * @param {boolean} startByMoving whether to move to the initial point without
+   * @param {boolean} startByMoving whether to move to the initial point without 
    * drawing a line. Ignored.
    */
   drawNoFinish(canvas, startByMoving) {
+    this.updateLocation(canvas);
     let surface = canvas.surface;
     surface.strokeStyle = colorRGBToString(this.color);
     surface.fillStyle = colorRGBToString(this.color);
@@ -2250,7 +2265,7 @@ class CanvasTwoD {
   /**
    * Draws a text on the canvas.
    *
-   * @param {!Array.<number>} inputLocation location of the text.
+   * @param {!Array.<number|function(Array.<number>):number>} inputLocation location of the text.
    * @param {string} inputText text to draw.
    * @param {string} inputColor text color.
    */

@@ -405,12 +405,17 @@ class GraphicsSerialization {
       case "segment":
       case "segmentParametric":
         let interpretedPoints = this.interpretListListStringsAsNumbersOrFunctions(
-          points, parameterNames, 
+          points, parameterNames, parameterValues,
         );
         canvas.drawPath(interpretedPoints, color, lineWidth);
         return;
       case "label":
-        canvas.drawText(onePoint, text, color);
+        let onePointComputer = this.interpretListStringsAsNumbersOrFunctions(
+          onePoint,
+          parameterNames,
+          parameterValues,
+        );
+        canvas.drawText(onePointComputer, text, color);
         return;
       case "escapeMap":
         let functionX =
@@ -429,7 +434,12 @@ class GraphicsSerialization {
         );
         return;
       case "latex":
-        canvas.drawLatex(onePoint, text);
+        canvas.drawLatex(
+          this.interpretListStringsAsNumbersOrFunctions(
+             onePoint, parameterNames, parameterValues,
+          ),
+          text,
+        );
         return;
       default:
         throw `Unknown plot type: ${plotType}.`;
@@ -539,7 +549,11 @@ class GraphicsSerialization {
   ) {
     let result = [];
     for (let i = 0; i < input.length; i++) {
-      result.push(this.interpretStringToNumberOrFunction(input[i], inputArguments, parameterValues));
+      result.push(
+        this.interpretStringToNumberOrFunction(
+          input[i], inputArguments, parameterValues,
+        ),
+      );
     }
     return result;
   }
@@ -573,7 +587,9 @@ class GraphicsSerialization {
   functionFromObject(input) {
     /** @type {string} */
     let body = input[this.labels.body];
-    return this.functionFromBodyAndArguments(body, this.getArguments(input));
+    return this.functionFromBodyAndArguments(
+      body, this.getArguments(input),
+    );
   }
 
   /** 
@@ -627,12 +643,16 @@ class GraphicsSerialization {
     return result;
   }
 
+  /** @return {number|function(Array.<number>):number>} */
   functionFromBodyAndArguments(
-    /** @type {string} */
+    /** @type {string|number} */
     body,
     /** @type {string[]} */
     inputArguments
   ) {
+    if (typeof body === "number") {
+      return body;
+    }
     if (inputArguments.length === 0) {
       // Create a fake parameter so we can always call the function
       // with one parameter. If the inputArguments is empty,

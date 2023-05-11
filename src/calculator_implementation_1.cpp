@@ -1002,8 +1002,11 @@ JSData PlotObject::toJSONDrawText() {
   JSData result;
   result[PlotObject::Labels::text] = this->plotString;
   this->writeColor(result);
+  this->writeParameters(result);
   if (this->pointsDouble.size > 0) {
     result[PlotObject::Labels::point] = this->pointsDouble[0];
+  } else {
+    result[PlotObject::Labels::point] = this->toJSONPointsJavascript()[0];
   }
   return result;
 }
@@ -1011,7 +1014,6 @@ JSData PlotObject::toJSONDrawText() {
 JSData PlotObject::toJSONPathParametric() {
   JSData result;
   result[PlotObject::PlotTypes::points] = this->toJSONPointsJavascript();
-  this->writeParameters(result);
   this->writeParameters(result);
   this->writeColorLineWidth(result);
   return result;

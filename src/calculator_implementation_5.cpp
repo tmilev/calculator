@@ -1370,16 +1370,16 @@ bool CalculatorFunctionsPlot::plotLabel(
   if (input.size() != 3) {
     return false;
   }
-  Vector<double> labelPosition;
-  if (!calculator.getVectorDoubles(input[1], labelPosition, - 1)) {
-    return false;
-  }
-  std::string label;
-  if (!input[2].isOfType<std::string>(&label)) {
-    label = input[2].toString();
-  }
+  JavascriptExtractor extractor(calculator);
   PlotObject plotObject;
-  plotObject.makeLabel(labelPosition, label);
+  extractor.convertExpressionToPoint(
+    input[1], input[1].size() - 1, plotObject
+  );
+  if (!input[2].isOfType<std::string>(&plotObject.plotString)) {
+    plotObject.plotString = input[2].toString();
+  }
+  plotObject.plotType = PlotObject::PlotTypes::label;
+  extractor.writeParameterNames(plotObject);
   Plot plot;
   plot += plotObject;
   return output.assignValue(calculator, plot);
@@ -2148,7 +2148,8 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   if (argument == 1) {
     return output.assignValue(calculator, 0);
   }
-  Expression newBaseExpression, newArgumentExpression;
+  Expression newBaseExpression;
+  Expression newArgumentExpression;
   newBaseExpression.assignValue(calculator, base);
   newArgumentExpression.assignValue(calculator, argument);
   if (base < 1) {
@@ -2175,7 +2176,8 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
     output *= - 1;
     return true;
   }
-  LargeInteger baseInteger, argumentNumerator;
+  LargeInteger baseInteger;
+  LargeInteger argumentNumerator;
   if (!base.isInteger(&baseInteger)) {
     return false;
   }
@@ -2341,6 +2343,17 @@ bool JavascriptExtractor::convertMatrixOfExpressionToPoints(
     }
   }
   return true;
+}
+
+bool JavascriptExtractor::convertExpressionToPoint(
+  const Expression& input, int desiredDimension, PlotObject& output
+) {
+  STACK_TRACE("JavascriptExtractor::convertExpressionToPoint");
+  List<Expression> wrapper = List<Expression>({input});
+  return
+  this->convertListOfListOfExpressionsToPoints(
+    wrapper, desiredDimension, output
+  );
 }
 
 bool JavascriptExtractor::convertListOfListOfExpressionsToPoints(

@@ -1983,13 +1983,9 @@ bool CalculatorFunctionsPlot::plotSegmentParametric(
     ) {
       segment.colorJavascript = colorExpression.toString();
     }
-    if (
-      !DrawingVariables::getColorIntFromColorString(
-        segment.colorJavascript, segment.colorRedGreenBlue
-      )
-    ) {
-      calculator << "Unrecognized color: " << segment.colorJavascript;
-    }
+    DrawingVariables::getColorIntFromColorString(
+      segment.colorJavascript, segment.colorRedGreenBlue
+    );
   }
   if (input.size() >= 5) {
     const Expression& lineWidthExpression = input[4];

@@ -880,7 +880,7 @@ public:
     const std::string& variableName,
     double lowBound,
     double highBound,
-    int numberOfPoints,
+    int numberOfSegments,
     double* outputYmin = nullptr,
     double* outputYmax = nullptr,
     Vectors<double>* outputPoints = nullptr

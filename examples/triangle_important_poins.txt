@@ -34,6 +34,10 @@ bisector_a = (B+C)/2 + bcperp;
 bisector_b = (C+A)/2 + caperp;
 bisector_c = (A+B)/2 + abperp;
 M = (A+B+C)/3;
+D=2(a_1(b_2-c_2)+b_1(c_2-a_2)+c_1(a_2-b_2));
+U= ( (a_1^2+a_2^2)(b_2-c_2)+(b_1^2+b_2^2)(c_2-a_2)+(c_1^2+c_2^2)(a_2-b_2), (a_1^2+a_2^2)(c_1-b_1)+(b_1^2+b_2^2)(a_1-c_1)+(c_1^2+c_2^2)(b_1-a_1))/D;
+
+R =sqrt( (U_1-a_1)^2+(U_2-a_2)^2);
 
 PlotPath((A,H_c, B,H_a, C,H_b, A), blue) 
 + PlotSegment(A, (B+C)/2, purple)
@@ -45,6 +49,9 @@ PlotPath((A,H_c, B,H_a, C,H_b, A), blue)
 + PlotSegment(B, (C+A)/2, purple)
 + PlotSegment(C, (A+B)/2, purple)
 + PlotLabel(M, "M")
++PlotPoint(U, red)
++PlotLabel(U, "U")
++PlotCurve((U_1+R cos t, U_2+R sin t), 0, 2pi)
 + PlotPath(heel_a, red) 
 + PlotPath(heel_b, red) 
 + PlotPath(heel_c, red) 

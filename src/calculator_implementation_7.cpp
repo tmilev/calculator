@@ -8266,9 +8266,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
       )
     ) {
       calculator
-      << "Failed to extract suffix notation from argument "
-      << plot.coordinateFunctionsE[i].toString()
-      << ". ";
+      << "Failed to extract suffix notation for plot. "
+      << "Latex output will not be generated. ";
       isGoodLatexWise = false;
       break;
     }
@@ -8815,13 +8814,16 @@ bool Expression::evaluatesToDoubleInRange(
   const std::string& variableName,
   double lowBound,
   double highBound,
-  int numberOfPoints,
+  int numberOfSegments,
   double* outputYmin,
   double* outputYmax,
   Vectors<double>* outputPoints
 ) const {
   STACK_TRACE("Expression::evaluatesToDoubleInRange");
-  if (numberOfPoints < 1 || this->owner == nullptr) {
+  if (numberOfSegments < 1 || this->owner == nullptr) {
+    return false;
+  }
+  if (this->hasInputBoxVariables()) {
     return false;
   }
   HashedList<Expression> knownEs = this->owner->knownDoubleConstants;
@@ -8835,17 +8837,17 @@ bool Expression::evaluatesToDoubleInRange(
   }
   knownEs.addOnTop(variableExpression);
   knownValues.addOnTop(0);
-  int numPoints = numberOfPoints + 1;
-  double delta = (highBound - lowBound) / (numberOfPoints);
+  int numberOfPoints = numberOfSegments + 1;
+  double delta = (highBound - lowBound) / (numberOfSegments);
   *knownValues.lastObject() = lowBound;
   double currentValue = 0;
   if (outputPoints != nullptr) {
-    outputPoints->setSize(numPoints);
+    outputPoints->setSize(numberOfPoints);
   }
   bool result = true;
   int numberOfFailedEvaluations = 0;
-  for (int i = 0; i < numPoints; i ++) {
-    if (i == numPoints - 1) {
+  for (int i = 0; i < numberOfPoints; i ++) {
+    if (i == numberOfPoints - 1) {
       *knownValues.lastObject() = highBound;
       // correcting for floating point errors.
     }
@@ -8855,17 +8857,16 @@ bool Expression::evaluatesToDoubleInRange(
       )
     ) {
       numberOfFailedEvaluations ++;
-      if (numberOfFailedEvaluations < 5) {
+      if (numberOfFailedEvaluations < 2) {
         *(this->owner)
-        << "<br>Failed to evaluate "
-        << this->toString()
-        << " at "
+        << "<br>Failed to evaluate your input "
+        << "at "
         << variableName
         << "="
         << *knownValues.lastObject()
         << ". ";
       }
-      if (numberOfFailedEvaluations == 5) {
+      if (numberOfFailedEvaluations == 2) {
         *(this->owner) << "<br>...";
       }
       result = false;

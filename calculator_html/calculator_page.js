@@ -643,7 +643,7 @@ class Calculator {
     result.appendChild(inputOutputComments);
     if (inputParsed.parsingLog !== undefined) {
       let element = document.createElement("div");
-      writeHTML(element , inputParsed.parsingLog);
+      writeHTML(element, inputParsed.parsingLog);
       result.appendChild(element);
     }
     return result;
@@ -747,7 +747,8 @@ class Calculator {
     commentsContainer.className = "containerComments";
     let performance = inputParsed[pathnames.urlFields.result.performance];
     if (performance !== undefined) {
-      let content = performance[pathnames.urlFields.result.comments];
+      let contentWithoutStyle = performance[pathnames.urlFields.result.comments];
+      let content = `<div style='width: 400px'>${contentWithoutStyle}</div>`;
       let computationTime = performance[
         pathnames.urlFields.result.computationTime
       ];

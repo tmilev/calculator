@@ -116,7 +116,9 @@ class CalculatorEquationEditor {
   }
 
   commentsElement() {
-    return document.getElementById(ids.domElements.pages.calculator.editorCommentsDebug);
+    return document.getElementById(
+      ids.domElements.pages.calculator.editorCommentsDebug,
+    );
   }
 
   writeIntoEquationEditor() {
@@ -127,7 +129,10 @@ class CalculatorEquationEditor {
     let textBox = this.inputMainTextbox();
     if (textBox.value.length > 10000) {
       this.flagCalculatorInputOK = false;
-      miscellaneous.writeHTML(this.commentsElement(), "<b style ='color:red'>Formula too big </b>");
+      miscellaneous.writeHTML(
+        this.commentsElement(),
+        "<b style ='color:red'>Formula too big </b>",
+      );
       return;
     }
     this.commentsElement().textContent = "";
@@ -197,7 +202,9 @@ class EditorInputExtractor {
   }
 
   commentsElement() {
-    return document.getElementById(ids.domElements.pages.calculator.editorCommentsDebug);
+    return document.getElementById(
+      ids.domElements.pages.calculator.editorCommentsDebug,
+    );
   }
 
   toStringDebug() {
@@ -216,10 +223,10 @@ class EditorInputExtractor {
     this.initializeIndices();
     while (this.growReturnFalseWhenDone()) {
     }
-    this.leftString = this.rawInput.substr(0, this.leftIndex);
-    this.middleEditedString = this.rawInput.substr(this.leftIndex, this.rightIndex - this.leftIndex);
-    this.rightString = this.rawInput.substr(this.rightIndex);
-    this.commentsElement().textContent = ""; //this.toStringDebug();
+    this.leftString = this.rawInput.substring(0, this.leftIndex);
+    this.middleEditedString = this.rawInput.substring(this.leftIndex, this.rightIndex - this.leftIndex);
+    this.rightString = this.rawInput.substring(this.rightIndex);
+    this.commentsElement().textContent = "";
   }
 
   growReturnFalseWhenDone() {

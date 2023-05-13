@@ -62,7 +62,6 @@ std::string Plot::Labels::canvasName = "canvasName";
 std::string Plot::Labels::controlsName = "controlsName";
 std::string Plot::Labels::messagesName = "messagesName";
 std::string Plot::Labels::layerContainerName = "layerContainerName";
-
 std::string Plot::Labels::graphicsType = "graphicsType";
 std::string Plot::Labels::graphicsThreeDimensional =
 "graphicsThreeDimensional";
@@ -287,7 +286,7 @@ bool PlotObject::operator==(const PlotObject& other) const {
   this->paramHighJS == other.paramHighJS &&
   this->defaultLengthJS == other.defaultLengthJS &&
   this->parametersInPlayJS == other.parametersInPlayJS &&
-  this->layerLabel  == other.layerLabel;
+  this->layerLabel == other.layerLabel;
 }
 
 PlotObject::PlotObject() {
@@ -1205,7 +1204,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   }
   std::string controls = this->getCanvasName() + "Controls";
   std::string messages = this->getCanvasName() + "Messages";
-  std::string layerContainer = this->getCanvasName()+"LayerContainer";
+  std::string layerContainer = this->getCanvasName() + "LayerContainer";
   JSData result = this->plotJSON2d(owner);
   if (!this->flagPlotShowJavascriptOnly) {
     out
@@ -1220,7 +1219,9 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     << "'"
     << ">"
     << "Your browser does not support the HTML5 canvas tag.</canvas>"
-    << "<span name='" << layerContainer << "'></span>"
+    << "<span name='"
+    << layerContainer
+    << "'></span>"
     << "<br>";
     out << "<span name='" << controls << "'></span>";
     if (!owner.flagPlotNoControls) {

@@ -3506,6 +3506,16 @@ PlotLabel{}((1,1), "(1,1)")
 ```
 Plots a label at a given position. Arguments format: PlotLabel((Xcoord, Ycoord), "Label"). 
 
+*LayerLabel* [LayerLabel] {CalculatorFunctionsPlot::plotLabel}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22LayerLabel%28PlotCurve%28%28cos%20t%2c%20sin%20t%29%2c%200%2c%202pi%29%2c%20%5c%22Circle%5c%22%29%2b%5cnLayerLabel%28%5cnPlotSegment%28%28-sqrt%282%29%2c-sqrt%282%29%29%2f2%2c%28sqrt%282%29%2csqrt%282%29%29%2f2%2c%20green%29%5cn%2c%20%5c%22diameter%5c%22%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+LayerLabel(PlotCurve((cos t, sin t), 0, 2pi), "Circle")+
+LayerLabel(
+PlotSegment((-sqrt(2),-sqrt(2))/2,(sqrt(2),sqrt(2))/2, green)
+, "diameter");
+```
+Labels a given plot object; use to provide a layer to the graphics. First argument must be a plot, second argument must be the label. 
+
 *PlotLatex* [PlotLatex] {CalculatorFunctionsPlot::plotLatex}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PlotLatex%7b%7d%28%281%2f2%2c%5c%5csqrt%7b3%7d%2f2%29%2c%20%5c%22%5c%5cfrac%7b%5c%5csqrt%7b3%7d%7d%7b2%7d%5c%22%29%2bPlotPoint%7b%7d%28%281%2f2%2c%5c%5csqrt%7b3%7d%2f2%29%2c%20blue%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```

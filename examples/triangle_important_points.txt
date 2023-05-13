@@ -53,43 +53,64 @@ L_b = (C * lengthC + A* lengthA )/(lengthC+lengthA);
 L_c = (A * lengthA + B* lengthB )/(lengthA+lengthB);
 
 PlotPath((A,h_c, B,h_a, C,h_b, A), blue) 
-+ PlotSegment(A, (B+C)/2, purple)
+
++LayerLabel(
+PlotSegment(A, (B+C)/2, purple)
 + PlotSegment(B, (C+A)/2, purple)
 + PlotSegment(C, (A+B)/2, purple)
++ PlotPoint((A+B+C)/3, orange) 
++ PlotLabel(M, "M")
+, "medians")
 
++LayerLabel(
+ PlotPath(heel_a, red) 
++ PlotPath(heel_b, red) 
++ PlotPath(heel_c, red) 
++ PlotSegment(A, h_a, green)
++ PlotSegment(B, h_b, green)
++ PlotSegment(C, h_c, green)
++ PlotPoint(H, purple)
++ PlotLabel(H, "H")
+, "heights")
+
++LayerLabel(
+PlotSegment(A, L_a, brown)
++PlotSegment(B, L_b, brown)
++PlotSegment(C, L_c, brown)
++ PlotPoint(I, red)
++PlotLabel(I, "I")
+, "angle bisectors")
+
++LayerLabel(
+PlotPoint(U, red)
++PlotLabel(U, "U")
 + PlotSegment(bisector_a, (B+C)/2, orange)
 + PlotSegment(bisector_b, (C+A)/2, orange)
 + PlotSegment(bisector_c, (A+B)/2, orange)
-+ PlotSegment(B, (C+A)/2, purple)
-+ PlotSegment(C, (A+B)/2, purple)
-+ PlotLabel(M, "M")
-+PlotPoint(U, red)
-+PlotLabel(U, "U")
-+PlotLabel(I, "I")
+, "perp. bisectors"
+)
+
 +PlotLabel(A, "A")
 +PlotLabel(B, "B")
 +PlotLabel(C, "C")
-+PlotCurve((U_1+R cos t, U_2+R sin t), 0, 2pi)
-+ PlotPath(heel_a, red) 
-+ PlotPath(heel_b, red) 
-+ PlotPath(heel_c, red) 
-+ PlotPoint(I, red)
-+ PlotPoint(H, purple)
+
++LayerLabel(
+PlotCurve((U_1+R cos t, U_2+R sin t), 0, 2pi)
+,"circumscribed circle")
+
++LayerLabel(PlotCurve(I+(r cos t, r sin t), 0, 2pi), "inscribed circle")
+
++LayerLabel(PlotSegment(H, U, brown), "Euler line")
+
++LayerLabel(
+ PlotLabel(N, "N")
 + PlotPoint(N, red)
-+ PlotLabel(H, "H")
-+ PlotLabel(N, "N")
 +PlotCurve(N+(nl cos t, nl sin t), 0, 2pi)
-+PlotSegment(H, U, brown)
-+PlotCurve(I+(r cos t, r sin t), 0, 2pi)
-+PlotSegment(A, L_a, brown)
-+PlotSegment(B, L_b, brown)
-+PlotSegment(C, L_c, brown)
+,"9 point circle"
+)
 + PlotSelectablePoint((a_1, a_2))
 + PlotSelectablePoint((b_1, b_2))
 + PlotSelectablePoint((c_1, c_2))
 + PlotRemoveCoordinateAxes()
-+ PlotPoint((A+B+C)/3, orange) 
-+ PlotSegment(A, h_a, green)
-+ PlotSegment(B, h_b, green)
-+ PlotSegment(C, h_c, green)+PlotWindow(800, 800)
++PlotWindow(800, 800)
 

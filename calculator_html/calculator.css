@@ -1761,3 +1761,12 @@ td.longDivisionTable {
   cursor: row-resize;
   transition: 500ms all;
 }
+
+.layerContainer {
+  display: inline-block;
+}
+
+.canvasAndLayers {
+  display: inline-block;
+  white-space: nowrap;
+}

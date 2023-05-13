@@ -2403,6 +2403,7 @@ class CanvasTwoD {
         });
       this.layerContainer.appendChild(child);
       this.layerContainer.appendChild(document.createTextNode(layer));
+      this.layerContainer.appendChild(document.createElement("br"));
     }
   }
 

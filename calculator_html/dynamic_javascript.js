@@ -39,6 +39,7 @@ class OneGraphicWithSliders {
     let layerContainer = null;
     if (layerContainerArray.length > 0) {
       layerContainer = layerContainerArray[0];
+      layerContainer.className = "layerContainer";
     }
     if (canvases.length < 1) {
       throw "Unexpected missing canvas.";

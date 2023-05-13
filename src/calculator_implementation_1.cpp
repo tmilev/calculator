@@ -1208,7 +1208,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   JSData result = this->plotJSON2d(owner);
   if (!this->flagPlotShowJavascriptOnly) {
     out
-    << "<canvas width='"
+    << "<span class='canvasAndLayers'><canvas width='"
     << this->desiredHtmlWidthInPixels
     << "' height='"
     << this->desiredHtmlHeightInPixels
@@ -1221,7 +1221,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     << "Your browser does not support the HTML5 canvas tag.</canvas>"
     << "<span name='"
     << layerContainer
-    << "'></span>"
+    << "'></span></span>"
     << "<br>";
     out << "<span name='" << controls << "'></span>";
     if (!owner.flagPlotNoControls) {

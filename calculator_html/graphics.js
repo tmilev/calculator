@@ -1939,8 +1939,15 @@ class CanvasTwoD {
    * @param {?HTMLElement|null} generate debug messages here.
    * @param {?function(number[], string)|null} a plot 
    * function that can draw latex at a location.
+   * @param {HTMLElement|null|undefined} layerContainer
    */
-  constructor(inputCanvas, controls, messages, latexPlotFunction) {
+  constructor(
+    inputCanvas,
+    controls,
+    messages,
+    latexPlotFunction,
+    layerContainer,
+  ) {
     /**
      * @type {!Array.<{
      *   draw: function(!CanvasTwoD),
@@ -1950,14 +1957,19 @@ class CanvasTwoD {
      * }}
      */
     this.drawObjects = [];
-    /** @type {Array.<boolean>} */
-    this.visibility = [];
+    /** @type {Object.<string, boolean>|null} */
+    this.visibility = null;
+    /** @type {Array.<string>} */
+    this.layers = [];
     /** @type {?Canvas2DContext} */
     this.surface = null;
     this.canvasContainer = inputCanvas;
 
-    this.canvasId = null;
-
+    /** @type {HTMLElement|null} */
+    this.layerContainer = layerContainer;
+    if (this.layerContainer === undefined) {
+      this.layerContainer = null;
+    }
     /** @type {function(number[], string)|null} */
     this.latexPlotFunction = null;
     if (latexPlotFunction !== null && latexPlotFunction !== undefined) {
@@ -2344,30 +2356,67 @@ class CanvasTwoD {
   clear() { 
     this.drawObjects = [];
     this.additionalMouseMoveListeners = [];
-    this.visibility = [];
+    this.visibility = null;
+  }
+
+  /** @return {boolean} */
+  isVisible(
+    /** @type {number} */
+    index,
+  ) {
+    if (index >= this.layers.length) {
+      return true;
+    }
+    let label = this.layers[index];
+    if (!(label in this.visibility)) {
+      return true;
+    }
+    return this.visibility[label];    
   }
 
   initializeVisibility() {
-    if (this.visibility.length !== 0) {
+    if (this.visibility !== null) {
       return;
     }
-    for (let i = 0; i < this.drawObjects.length; i++){
-      this.visibility[i] = true;
+    this.visibility = {};
+    if (
+      this.layerContainer === null ||
+      this.layerContainer === undefined
+    ) {
+      return;
+    }
+    this.layerContainer.textContent = "";
+    for (let i = 0; i < this.layers.length; i++) {
+      this.visibility[this.layers[i]] = true; 
+    }
+    for (let layer in this.visibility) {
+      if (layer === "") {
+        continue;
+      }
+      const child = document.createElement("input");
+      child.type = "checkbox";
+      child.checked = true;
+      child.addEventListener(
+        "change", () => {
+          this.visibility[layer] = child.checked;
+          this.redraw();
+        });
+      this.layerContainer.appendChild(child);
+      this.layerContainer.appendChild(document.createTextNode(layer));
     }
   }
 
   /** Redraws the entire two dimensional plot. */
   redraw() {
-    this.initializeVisibility();
     this.textPerformance = '';
+    this.initializeVisibility();
     this.redrawStart = new Date().getTime();
     let surface = this.surface;
     surface.clearRect(0, 0, this.width, this.height);
-    
     for (this.numDrawnObjects = 0;
          this.numDrawnObjects < this.drawObjects.length;
       this.numDrawnObjects++) {
-      if (this.visibility[this.numDrawnObjects] === false) {
+      if (!this.isVisible(this.numDrawnObjects)) {
         continue;
       }
       this.drawObjects[this.numDrawnObjects].draw(this);
@@ -3177,7 +3226,6 @@ class Canvas {
     this.patchIsAccounted = [];
     /** @type {?CanvasRenderingContext2D} */
     this.surface = null;
-    this.canvasId = null;
     this.screenBasisUserDefault = [[2, 1, 0], [0, 1, 1]];
     this.screenBasisUser = this.screenBasisUserDefault.slice();
     this.screenNormal = [];

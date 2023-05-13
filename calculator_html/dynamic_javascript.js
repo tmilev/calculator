@@ -32,8 +32,14 @@ class OneGraphicWithSliders {
   computeFromSerialization() {
     let canvasName = this.graphics[pathnames.urlFields.result.canvasName];
     let controlsName = this.graphics[pathnames.urlFields.result.controlsName];
+    let layerContainerName = this.graphics[pathnames.urlFields.result.layerContainerName];
     let canvases = this.owner.element.querySelectorAll(`[name="${canvasName}"]`);
     let controls = this.owner.element.querySelectorAll(`[name="${controlsName}"]`);
+    let layerContainerArray = this.owner.element.querySelectorAll(`[name="${layerContainerName}"]`);
+    let layerContainer = null;
+    if (layerContainerArray.length > 0) {
+      layerContainer = layerContainerArray[0];
+    }
     if (canvases.length < 1) {
       throw "Unexpected missing canvas.";
     }
@@ -43,6 +49,7 @@ class OneGraphicWithSliders {
       controls[0],
       null,
       this.owner.sliders,
+      layerContainer,
     );
   }
 

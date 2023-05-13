@@ -1557,6 +1557,7 @@ public:
     static std::string canvasName;
     static std::string controlsName;
     static std::string messagesName;
+    static std::string layerContainerName;
     static std::string graphicsType;
     static std::string graphicsTwoDimensional;
     static std::string graphicsThreeDimensional;

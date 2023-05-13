@@ -72,6 +72,7 @@ const urlFields = {
     commentsGlobal: "commentsGlobal",
     canvasName: "canvasName",
     controlsName: "controlsName",
+    layerContainerName: "layerContainerName",
     messagesName: "messagesName",
     solution: {
       steps: "solutionSteps",

@@ -80,6 +80,7 @@ class GraphicsSerialization {
       viewWindow: "viewWindow",
       manifoldImmersion: "manifoldImmersion",
       defaultLength: "defaultLength",
+      layerLabel: "layerLabel",
     };
   }
 
@@ -98,11 +99,20 @@ class GraphicsSerialization {
     messages,
     /** @type {SliderUpdater} */
     sliders,
+    /** @type {HTMLElement|null|undefined} */
+    layerContainer,
   ) {
     let graphicsType = input["graphicsType"];
     switch (graphicsType) {
       case "twoDimensional":
-        return this.twoDimensionalGraphics(input, canvas, controls, messages, sliders);
+        return this.twoDimensionalGraphics(
+          input,
+          canvas,
+          controls,
+          messages,
+          sliders,
+          layerContainer,
+        );
       case "threeDimensional":
         return this.threeDimensionalGraphics(input, canvas, controls, messages, sliders);
       default:
@@ -147,8 +157,10 @@ class GraphicsSerialization {
     messages,
     /** @type {SliderUpdater} */
     sliders,
+    /** @type {HTMLElement|null|undefined} */
+    layerContainer,
   ) {
-    let drawCanvas = null;
+    let drawLatexOnCanvas = null;
     /** @type {EquationEditor.EquationEditor|null} */
     let equationEditor = null;
     if (controls !== null && controls !== undefined) {
@@ -167,7 +179,7 @@ class GraphicsSerialization {
       editorContainer.style.height = "0";
       editorContainer.style.overflow = "clip";
       controls.appendChild(editorContainer);
-      drawCanvas = (
+      drawLatexOnCanvas = (
         /** @type {number[]} */
         textLocation,
         /** @type {string} */
@@ -177,12 +189,22 @@ class GraphicsSerialization {
         equationEditor.drawOnCanvasAtLocation(textLocation);
       };
     }
-    let canvas = new CanvasTwoD(canvasElement, controls, messages, drawCanvas);
+    let canvas = new CanvasTwoD(
+      canvasElement,
+      controls,
+      messages,
+      drawLatexOnCanvas,
+      layerContainer,
+    );
     canvas.initialize();
     if (equationEditor !== null) {
       equationEditor.canvasTwoDContext = canvas.surface;
     } 
-    return this.plotTwoDimensionalGraphics(canvas, input, sliders);
+    return this.plotTwoDimensionalGraphics(
+      canvas,
+      input,
+      sliders,
+    );
   }
 
   /**
@@ -224,7 +246,7 @@ class GraphicsSerialization {
     }
     this.writeParameters(input[this.labels.parameters], canvas, sliders);
     for (let i = 0; i < plotObjects.length; i++) {
-      this.oneTwoDimensionalObject(plotObjects[i], canvas, sliders);
+      this.oneTwoDimensionalObjectWithLabel(plotObjects[i], canvas, sliders);
     }
     canvas.redraw();
     return canvas;
@@ -274,6 +296,25 @@ class GraphicsSerialization {
     }
     canvas.redraw();
     return canvas;    
+  }
+  
+  oneTwoDimensionalObjectWithLabel(
+    plot,
+    /** @type {CanvasTwoD} */
+    canvas,
+    /** @type {SliderUpdater} */
+    sliderUpdater,
+  ) {
+    let objectsAtStart = canvas.drawObjects.length;
+    this.oneTwoDimensionalObject(plot, canvas, sliderUpdater);
+    /** @type {string} */
+    let layer = plot[this.labels.layerLabel];
+    if (layer === null || layer === undefined) {
+      layer = "";
+    }
+    for (let i = objectsAtStart; i < canvas.drawObjects.length; i++){
+      canvas.layers.push(layer);
+    }
   }
 
   oneTwoDimensionalObject(

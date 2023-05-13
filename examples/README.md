@@ -677,7 +677,7 @@ Divides a sequence by a scalar.
 ```
 Equivalent to (a/b){}x = (a{}x)/(b{}x) 
 
-Operator or function \* is overloaded with 71 total handlers.
+Operator or function \* is overloaded with 72 total handlers.
 
 *\** [MultiplyMatrixByMatrix] {CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cbegin%7bpmatrix%7d%201%26%20%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%5c%5cbegin%7bpmatrix%7d%201%26%20-2%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -692,6 +692,13 @@ Multiplies matrices.
 (1,2)\begin{pmatrix} 1& 2 \\ 3& 5\end{pmatrix}
 ```
 Multiplies matrices.
+
+*\** [MultiplySequenceByScalarLike] {CalculatorFunctionsBinaryOps::multiplySequenceByScalarLike}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%2c2%29sqrt%28x%2by%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+(1,2)sqrt(x+y)
+```
+Multiplies a sequence standing on the left by a constant. 
 
 *\** [MultiplyMatrixBySequence] {CalculatorFunctionsBinaryOps::multiplySequenceByMatrix}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%281%2c2%29%5c%5cbegin%7bpmatrix%7d%201%26%202%20%5c%5c%5c%5c%203%26%205%5c%5cend%7bpmatrix%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)

@@ -284,6 +284,10 @@
     "output":"\\left(7, 12\\right)"
   },
   {
+    "input":"(1,2)sqrt(x+y)",
+    "output":"\\left(\\sqrt{y+x}, 2 \\sqrt{y+x}\\right)"
+  },
+  {
     "input":"\\int x dx; \\int x (1 + x) dx; \\int_2^3 x dx; \\int_2^3 x (1 + x) dx",
     "output":"(\\frac{1}{2} x^{2};\\frac{1}{3} x^{3}+\\frac{1}{2} x^{2};\\frac{5}{2};\\frac{53}{6})"
   },

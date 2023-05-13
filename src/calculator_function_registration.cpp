@@ -3861,6 +3861,16 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "*",
+    CalculatorFunctionsBinaryOps::multiplySequenceByScalarLike,
+    "",
+    "Multiplies a sequence standing on the left by a constant. ",
+    "(1,2)sqrt(x+y)",
+    "CalculatorFunctionsBinaryOps::multiplySequenceByScalarLike",
+    "MultiplySequenceByScalarLike",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "*",
     CalculatorFunctionsBinaryOps::multiplyMatrixBySequence,
     "",
     "Multiplies a matrix standing on the left by a "

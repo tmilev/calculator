@@ -2555,6 +2555,44 @@ bool CalculatorFunctionsBinaryOps::divideSequenceByScalar(
   return true;
 }
 
+bool CalculatorFunctionsBinaryOps::isScalarLike(const Expression& input) {
+  STACK_TRACE("CalculatorFunctionsBinaryOps::isScalarLike");
+  if (input.owner == nullptr) {
+    return false;
+  }
+  Calculator& calculator = *input.owner;
+  if (!input.startsWith(calculator.opPower())) {
+    return false;
+  }
+  const Expression& base = input[1];
+  if (base.isSequenceNElements() || base.isMatrix()) {
+    return false;
+  }
+  return true;
+}
+
+bool CalculatorFunctionsBinaryOps::multiplySequenceByScalarLike(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplySequenceByScalarLike");
+  if (!input.startsWith(calculator.opTimes(), 3)) {
+    return false;
+  }
+  const Expression& left = input[1];
+  const Expression& right = input[2];
+  if (!left.isSequenceNElements()) {
+    return false;
+  }
+  if (!CalculatorFunctionsBinaryOps::isScalarLike(right)) {
+    return false;
+  }
+  List<Expression> newSequence;
+  for (int i = 1; i < left.size(); i ++) {
+    newSequence.addOnTop(left[i] * right);
+  }
+  return output.makeSequence(calculator, &newSequence);
+}
+
 bool CalculatorFunctionsBinaryOps::multiplyMatrixBySequence(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -2732,20 +2770,21 @@ bool CalculatorFunctionsBinaryOps::multiplySequenceByMatrix(
   if (!input.startsWith(calculator.opTimes())) {
     return false;
   }
-  int matRows = - 1, matCols = - 1;
+  int matrixRows = - 1;
+  int matrixColumns = - 1;
   if (
     !input[1].isSequenceNElements() ||
-    !input[2].isMatrix(&matRows, &matCols)
+    !input[2].isMatrix(&matrixRows, &matrixColumns)
   ) {
     return false;
   }
-  if (input[1].size() - 1 != matRows) {
+  if (input[1].size() - 1 != matrixRows) {
     return false;
   }
   List<Expression> result;
-  result.setSize(matCols);
+  result.setSize(matrixColumns);
   for (int i = 0; i < result.size; i ++) {
-    for (int j = 0; j < matRows; j ++) {
+    for (int j = 0; j < matrixRows; j ++) {
       if (j == 0) {
         result[i] = input[1][j + 1] * input[2][j + 1][i + 1];
       } else {

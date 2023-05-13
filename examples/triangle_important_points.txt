@@ -17,32 +17,46 @@ t_a =     ((A-C)(B-C)^t)_1 / ((B-C)(B-C)^t)_1;
 t_b =     ((B-A)(C-A)^t)_1 / ((C-A)(C-A)^t)_1;
 t_c =     ((C-B)(A-B)^t)_1 / ((A-B)(A-B)^t)_1;
 
-H_a=( b_1 t_a +c_1(1-t_a), b_2 t_a + c_2(1-t_a));
-H_b=(c_1 t_b +a_1(1-t_b), c_2 t_b + a_2(1-t_b));
-H_c=(a_1 t_c +b_1(1-t_c), a_2 t_c + b_2(1-t_c));
+h_a=( b_1 t_a +c_1(1-t_a), b_2 t_a + c_2(1-t_a));
+h_b=(c_1 t_b +a_1(1-t_b), c_2 t_b + a_2(1-t_b));
+h_c=(a_1 t_c +b_1(1-t_c), a_2 t_c + b_2(1-t_c));
 tick = 0.05;
-ab = (B-A)/ sqrt( (a_1-b_1)^2+(a_2-b_2)^2);
-bc = (C-B)/ sqrt( (b_1-c_1)^2+(b_2-c_2)^2);
-ca = (A-C)/ sqrt( (c_1-a_1)^2+(c_2-a_2)^2);
+lengthC = sqrt( (a_1-b_1)^2+(a_2-b_2)^2);
+lengthA = sqrt( (b_1-c_1)^2+(b_2-c_2)^2);
+lengthB = sqrt( (c_1-a_1)^2+(c_2-a_2)^2);
+ab = (B-A)/ lengthC;
+bc = (C-B)/ lengthA;
+ca = (A-C)/ lengthB;
 abperp = (-ab_2, ab_1);
 bcperp = (-bc_2, bc_1);
 caperp = (-ca_2, ca_1);
-heel_a = (H_a+bc*tick, H_a+bcperp*tick+bc*tick, H_a + bcperp*tick);
-heel_b = (H_b+ca*tick, H_b+caperp*tick+ca*tick, H_b + caperp*tick);
-heel_c = (H_c+ab*tick, H_c+abperp*tick+ab*tick, H_c + abperp*tick);
+heel_a = (h_a+bc*tick, h_a+bcperp*tick+bc*tick, h_a + bcperp*tick);
+heel_b = (h_b+ca*tick, h_b+caperp*tick+ca*tick, h_b + caperp*tick);
+heel_c = (h_c+ab*tick, h_c+abperp*tick+ab*tick, h_c + abperp*tick);
 bisector_a = (B+C)/2 + bcperp;
 bisector_b = (C+A)/2 + caperp;
 bisector_c = (A+B)/2 + abperp;
 M = (A+B+C)/3;
 D=2(a_1(b_2-c_2)+b_1(c_2-a_2)+c_1(a_2-b_2));
 U= ( (a_1^2+a_2^2)(b_2-c_2)+(b_1^2+b_2^2)(c_2-a_2)+(c_1^2+c_2^2)(a_2-b_2), (a_1^2+a_2^2)(c_1-b_1)+(b_1^2+b_2^2)(a_1-c_1)+(c_1^2+c_2^2)(b_1-a_1))/D;
+H=3M-2U;
+N = (H+U)/2;
+nl =sqrt( (N_1-(a_1+b_1)/2)^2 + (N_2-(a_2+b_2)/2)^2);
 
 R =sqrt( (U_1-a_1)^2+(U_2-a_2)^2);
+p  = lengthA + lengthB + lengthC;
+I = (A lengthA + B lengthB + C lengthC)/p; 
+r = sqrt(2(p/2 - lengthA )(p/2 - lengthB )(p/2 - lengthC )/p);
 
-PlotPath((A,H_c, B,H_a, C,H_b, A), blue) 
+L_a = (B * lengthB + C* lengthC )/(lengthB+lengthC);
+L_b = (C * lengthC + A* lengthA )/(lengthC+lengthA);
+L_c = (A * lengthA + B* lengthB )/(lengthA+lengthB);
+
+PlotPath((A,h_c, B,h_a, C,h_b, A), blue) 
 + PlotSegment(A, (B+C)/2, purple)
 + PlotSegment(B, (C+A)/2, purple)
 + PlotSegment(C, (A+B)/2, purple)
+
 + PlotSegment(bisector_a, (B+C)/2, orange)
 + PlotSegment(bisector_b, (C+A)/2, orange)
 + PlotSegment(bisector_c, (A+B)/2, orange)
@@ -51,16 +65,30 @@ PlotPath((A,H_c, B,H_a, C,H_b, A), blue)
 + PlotLabel(M, "M")
 +PlotPoint(U, red)
 +PlotLabel(U, "U")
++PlotLabel(I, "I")
++PlotLabel(A, "A")
++PlotLabel(B, "B")
++PlotLabel(C, "C")
 +PlotCurve((U_1+R cos t, U_2+R sin t), 0, 2pi)
 + PlotPath(heel_a, red) 
 + PlotPath(heel_b, red) 
 + PlotPath(heel_c, red) 
++ PlotPoint(I, red)
++ PlotPoint(H, purple)
++ PlotLabel(H, "H")
++ PlotLabel(N, "N")
++PlotCurve(N+(nl cos t, nl sin t), 0, 2pi)
++PlotSegment(H, U, brown)
++PlotCurve(I+(r cos t, r sin t), 0, 2pi)
++PlotSegment(A, L_a, brown)
++PlotSegment(B, L_b, brown)
++PlotSegment(C, L_c, brown)
 + PlotSelectablePoint((a_1, a_2))
 + PlotSelectablePoint((b_1, b_2))
 + PlotSelectablePoint((c_1, c_2))
 + PlotRemoveCoordinateAxes()
 + PlotPoint((A+B+C)/3, orange) 
-+ PlotSegment(A, H_a, green)
-+ PlotSegment(B, H_b, green)
-+ PlotSegment(C, H_c, green)+PlotWindow(800, 800)
++ PlotSegment(A, h_a, green)
++ PlotSegment(B, h_b, green)
++ PlotSegment(C, h_c, green)+PlotWindow(800, 800)
 

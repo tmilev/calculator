@@ -138,6 +138,10 @@ public:
     const Matrix<Expression>& right,
     Expression& output
   );
+  static bool isScalarLike(const Expression& input);
+  static bool multiplySequenceByScalarLike(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool multiplyMatrixBySequence(
     Calculator& calculator, const Expression& input, Expression& output
   );

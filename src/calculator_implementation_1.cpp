@@ -32,6 +32,7 @@ std::string PlotObject::Labels::manifoldImmersion = "manifoldImmersion";
 std::string PlotObject::Labels::variableRange = "variableRange";
 std::string PlotObject::Labels::defaultLength = "defaultLength";
 std::string PlotObject::Labels::plotType = "plotType";
+std::string PlotObject::Labels::layerLabel = "layerLabel";
 std::string PlotObject::Labels::body = "body";
 std::string PlotObject::Labels::text = "text";
 std::string PlotObject::Labels::mandelbrotMode = "mandelbrotMode";
@@ -685,6 +686,12 @@ void Plot::addPlotsOnTop(Plot& input) {
   this->parameterNamesJS.addOnTopNoRepetition(input.parameterNamesJS);
 }
 
+void Plot::setLabel(const std::string& layerLabel) {
+  for (PlotObject& object : this->plotObjects) {
+    object.layerLabel = layerLabel;
+  }
+}
+
 void Plot::clearPlotObjects() {
   this->plotObjects.clear();
   this->parameterNames.clear();
@@ -1103,6 +1110,9 @@ JSData PlotObject::toJSON() {
     result = this->toJSONPath();
   }
   result[PlotObject::Labels::plotType] = correctedPlotType;
+  if (this->layerLabel != "") {
+    result[PlotObject::Labels::layerLabel] = this->layerLabel;
+  }
   return result;
 }
 

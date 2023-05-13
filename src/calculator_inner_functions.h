@@ -195,6 +195,9 @@ public:
   static bool isPlot(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool layerLabel(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool plot2D(
     Calculator& calculator, const Expression& input, Expression& output
   );

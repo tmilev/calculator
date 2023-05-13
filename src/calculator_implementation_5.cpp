@@ -1447,6 +1447,25 @@ bool CalculatorFunctionsPlot::plotRectangle(
   return output.assignValue(calculator, plot);
 }
 
+bool CalculatorFunctionsPlot::layerLabel(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsPlot::layerLabel");
+  if (input.size() != 3) {
+    return false;
+  }
+  Plot plot;
+  if (!input[1].isOfType(&plot)) {
+    return false;
+  }
+  std::string label;
+  if (!input[2].isOfType(&label)) {
+    label = input[2].toString();
+  }
+  plot.setLabel(label);
+  return output.assignValue(calculator, plot);
+}
+
 bool CalculatorFunctions::operatorBounds(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

@@ -1343,6 +1343,7 @@ public:
     static std::string variableRange;
     static std::string defaultLength;
     static std::string plotType;
+    static std::string layerLabel;
     static std::string viewWindow;
     static std::string body;
     static std::string text;
@@ -1372,8 +1373,9 @@ public:
     static std::string selectablePoint;
   };
 
-  std::string label;
+  std::string layerLabel;
   std::string plotString;
+  std::string plotStringAlignment;
   std::string fillStyle;
   std::string plotStringWithHtml;
   double xLow;
@@ -1603,6 +1605,7 @@ public:
   bool isOKVector(const Vector<double>& input);
   void addPlotOnTop(PlotObject& input);
   void addPlotsOnTop(Plot& input);
+  void setLabel(const std::string& layerLabel);
   void drawSegment(
     const Vector<Rational>& left, const Vector<Rational>& right
   );

@@ -2365,6 +2365,20 @@ void Calculator::initializeFunctionsStandard() {
     innerStandard
   );
   this->addOperationHandler(
+    "LayerLabel",
+    CalculatorFunctionsPlot::layerLabel,
+    "",
+    "Labels a given plot object; use to provide a layer to the graphics. "
+    "First argument must be a plot, second argument must be the label. ",
+    "LayerLabel(PlotCurve((cos t, sin t), 0, 2pi), \"Circle\")+\n"
+    "LayerLabel(\n"
+    "PlotSegment((-sqrt(2),-sqrt(2))/2,(sqrt(2),sqrt(2))/2, green)\n"
+    ", \"diameter\");",
+    "CalculatorFunctionsPlot::plotLabel",
+    "LayerLabel",
+    innerStandard
+  );
+  this->addOperationHandler(
     "PlotLatex",
     CalculatorFunctionsPlot::plotLatex,
     "",

@@ -277,13 +277,16 @@ class PanelExpandable {
     }
     this.contentCopyButton = textContent.substring(2, textContent.length - 2);
     this.buttonCopy = document.createElement("button");
-    writeHTML(this.buttonCopy, "<tiny>&#x1F4CB;</tiny>");
     this.buttonCopy.title = "copy";
     this.buttonCopy.className = "buttonProgress";
+    let tiny = document.createElement("tiny");
+    writeHTML(tiny, "&#x1F4CB;");
+    this.buttonCopy.appendChild(tiny);
     this.buttonCopy.addEventListener("click", () => {
+      this.container.style.transition = this.transitionStyle;
       this.doCopy();
     });
-    this.spanContainerButtons.appendChild(this.buttonCopy);    
+    this.spanContainerButtons.appendChild(this.buttonCopy);
   }
 
   doCopy() {

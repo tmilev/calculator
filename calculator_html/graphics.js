@@ -1130,7 +1130,9 @@ class TextPlotTwoD {
   updateLocation(canvas) {
     this.location = [];
     for (let i = 0; i < this.locationComputer.length; i++){
-      this.location.push(canvas.evaluateNumberOrParameter(this.locationComputer[i]));
+      this.location.push(
+        canvas.evaluateNumberOrParameter(this.locationComputer[i]),
+      );
     }
   }
 
@@ -1948,7 +1950,8 @@ class CanvasTwoD {
      * }}
      */
     this.drawObjects = [];
-
+    /** @type {Array.<boolean>} */
+    this.visibility = [];
     /** @type {?Canvas2DContext} */
     this.surface = null;
     this.canvasContainer = inputCanvas;
@@ -2341,17 +2344,32 @@ class CanvasTwoD {
   clear() { 
     this.drawObjects = [];
     this.additionalMouseMoveListeners = [];
+    this.visibility = [];
+  }
+
+  initializeVisibility() {
+    if (this.visibility.length !== 0) {
+      return;
+    }
+    for (let i = 0; i < this.drawObjects.length; i++){
+      this.visibility[i] = true;
+    }
   }
 
   /** Redraws the entire two dimensional plot. */
   redraw() {
+    this.initializeVisibility();
     this.textPerformance = '';
     this.redrawStart = new Date().getTime();
     let surface = this.surface;
     surface.clearRect(0, 0, this.width, this.height);
+    
     for (this.numDrawnObjects = 0;
          this.numDrawnObjects < this.drawObjects.length;
-         this.numDrawnObjects++) {
+      this.numDrawnObjects++) {
+      if (this.visibility[this.numDrawnObjects] === false) {
+        continue;
+      }
       this.drawObjects[this.numDrawnObjects].draw(this);
     }
     let redrawTime = new Date().getTime();

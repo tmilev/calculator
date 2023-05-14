@@ -397,7 +397,7 @@ Calculator::EvaluationStatistics::EvaluationStatistics() {
 void Calculator::EvaluationStatistics::reset() {
   this->expressionsEvaluated = 0;
   this->maximumCallsBeforeReportGeneration = 5000;
-  this->callsSinceReport = 0;
+  this->report.freeMemory();
   this->totalSubstitutions = 0;
   this->totalEvaluationLoops = 0;
   this->totalPatternMatchesPerformed = 0;
@@ -417,6 +417,7 @@ void Calculator::EvaluationStatistics::reset() {
   this->lastStopwatchParsing = - 1;
   this->trivialPerformancePerHandler.makeZero();
   this->nonTrivialPerformancePerHandler.makeZero();
+  this->patternMatchMilliseconds = 0;
 }
 
 void Calculator::reset() {

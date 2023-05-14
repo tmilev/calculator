@@ -531,6 +531,19 @@ public:
   };
 };
 
+class Timer {
+public:
+  int64_t* millisecondCounter;
+  int64_t start;
+  Timer(int64_t* inputMillisecondCounter) {
+    this->millisecondCounter = inputMillisecondCounter;
+    this->start = global.getElapsedMilliseconds();
+  }
+  ~Timer() {
+    *this->millisecondCounter += global.getElapsedMilliseconds() - this->start;
+  }
+};
+
 template <typename Type>
 Logger& Logger::doTheLogging(const Type& toBePrinted) {
   this->initializeIfNeeded();

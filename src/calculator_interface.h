@@ -2400,13 +2400,20 @@ public:
   class EvaluationStatistics {
   public:
     int expressionsEvaluated;
-    int callsSinceReport;
     int maximumCallsBeforeReportGeneration;
     int totalSubstitutions;
     int numberOfListsStart;
     int numberListResizesStart;
     int numberHashResizesStart;
     int totalPatternMatchesPerformed;
+    int64_t loopDetectionMilliseconds;
+    int64_t patternMatchMilliseconds;
+    int64_t builtInEvaluationMilliseconds;
+    int64_t millisecondsLastLog;
+    int64_t startTimeEvaluationMilliseconds;
+    int64_t startParsing;
+    int64_t lastStopwatchParsing;
+    int64_t cachePerformanceMilliseconds;
     int totalEvaluationLoops;
     long long int numberOfSmallAdditionsStart;
     long long int numberOfSmallMultiplicationsStart;
@@ -2414,14 +2421,11 @@ public:
     long long int numberOfLargeAdditionsStart;
     long long int numberOfLargeMultiplicationsStart;
     long long int numberOfLargeGreatestCommonDivisorsStart;
-    int64_t millisecondsLastLog;
-    int64_t startTimeEvaluationMilliseconds;
-    int64_t startParsing;
-    int64_t lastStopwatchParsing;
     LinearCombination<MonomialWrapper<std::string>, LargeInteger>
     trivialPerformancePerHandler;
     LinearCombination<MonomialWrapper<std::string>, LargeInteger>
     nonTrivialPerformancePerHandler;
+    MemorySaving<ProgressReport> report;
     EvaluationStatistics();
     void initialize();
     void reset();
@@ -3389,17 +3393,20 @@ public:
     bool detectLoops();
     void accountIntermediateState();
     bool reduceUsingCache();
+    bool reduceUsingCacheWithStatistics();
     bool builtInEvaluation();
     bool userDefinedEvaluation();
+    bool detectLoopsWithStatistics();
+    bool builtInEvaluationWithStatistics();
+    bool userDefinedEvaluationWithStatistics();
     bool evaluateChildren(StateMaintainerCalculator& maintainRuleStack);
-    void reportChildEvaluation(Expression& output, int childIndex);
+    void reportChildEvaluation(ProgressReport &report, Expression& output, int childIndex);
   public:
     Calculator* owner;
     bool flagIsNonCacheable;
     int opIndexParent;
     int numberOfTransformations;
     int indexInCache;
-    ProgressReport report;
     bool reductionOccurred;
     Expression* output;
     Expression* history;

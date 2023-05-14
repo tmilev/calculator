@@ -2063,6 +2063,16 @@ JSData Calculator::toJSONPerformance() {
   << this->statistics.expressionsEvaluated
   << ". ";
   moreDetails
+  << "<br>Loop detection duration: "
+  << this->statistics.loopDetectionMilliseconds
+  << " ms."
+  << "<br>Cache duration: "
+  << this->statistics.cachePerformanceMilliseconds
+  << " ms.";
+  moreDetails
+  << "<br>Pattern matching duration: "
+  << this->statistics.patternMatchMilliseconds
+  << "ms. "
   << "<br>Total number of pattern matches performed: "
   << this->statistics.totalPatternMatchesPerformed
   << "";
@@ -2155,6 +2165,33 @@ JSData Calculator::toJSONPerformance() {
     << ", total: "
     << Rational::totalLargeGreatestCommonDivisors;
   }
+  LargeInteger trivialPerformance;
+  LargeInteger nonTrivialPerformance;
+  for (
+    int i = 0; i < this->statistics.trivialPerformancePerHandler.size(); i ++
+  ) {
+    trivialPerformance +=
+    this->statistics.trivialPerformancePerHandler.coefficients[i];
+  }
+  for (
+    int i = 0; i < this->statistics.nonTrivialPerformancePerHandler.size(); i
+    ++
+  ) {
+    nonTrivialPerformance +=
+    this->statistics.nonTrivialPerformancePerHandler.coefficients[i];
+  }
+  moreDetails
+  << "<br>Built in evaluation duration: "
+  << this->statistics.builtInEvaluationMilliseconds
+  << " ms. ";
+  moreDetails
+  << "<br>Built in trivial performance: "
+  << trivialPerformance.toString()
+  << " ms. ";
+  moreDetails
+  << "<br>Built in non-trivial performance: "
+  << nonTrivialPerformance.toString()
+  << " ms. ";
   std::stringstream millisecondsStream;
   millisecondsStream << computationMilliseconds << " ms";
   result[WebAPI::Result::computationTime] = millisecondsStream.str();

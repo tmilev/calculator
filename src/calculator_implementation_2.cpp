@@ -1066,12 +1066,11 @@ bool Calculator::EvaluateLoop::outputHasErrors() {
 }
 
 void Calculator::EvaluateLoop::reportChildEvaluation(
+ProgressReport& report,
   Expression& output, int childIndex
 ) {
-  if (!this->report.tickAndWantReport()) {
-    return;
-  }
-  std::stringstream ruleStream, reportStream;
+  std::stringstream ruleStream;
+  std::stringstream reportStream;
   int ruleCount = 0;
   for (int j = 1; j < childIndex; j ++) {
     if (
@@ -1122,9 +1121,6 @@ bool Calculator::EvaluateLoop::evaluateChildren(
     historyChild = &historyContainer;
   }
   for (int i = 0; i < this->output->size(); i ++) {
-    if (i > 0) {
-      this->reportChildEvaluation(*this->output, i);
-    }
     bool childIsNonCacheable = false;
     if (this->history != nullptr) {
       this->currentChild = (*this->output)[i];
@@ -1172,6 +1168,16 @@ bool Calculator::EvaluateLoop::evaluateChildren(
     }
   }
   return true;
+}
+
+bool Calculator::EvaluateLoop::builtInEvaluationWithStatistics() {
+  Timer timer(&this->owner->statistics.builtInEvaluationMilliseconds);
+  return this->builtInEvaluation();
+}
+
+bool Calculator::EvaluateLoop::userDefinedEvaluationWithStatistics() {
+  Timer timer(&this->owner->statistics.patternMatchMilliseconds);
+  return this->userDefinedEvaluation();
 }
 
 bool Calculator::EvaluateLoop::userDefinedEvaluation() {
@@ -1255,6 +1261,11 @@ bool Calculator::EvaluateLoop::builtInEvaluation() {
   return this->setOutput(result, handlerContainer, "");
 }
 
+bool Calculator::EvaluateLoop::detectLoopsWithStatistics() {
+  Timer timer(&this->owner->statistics.loopDetectionMilliseconds);
+  return this->detectLoops();
+}
+
 bool Calculator::EvaluateLoop::detectLoops() {
   if (!this->intermediateOutputs.contains(*this->output)) {
     return false;
@@ -1277,11 +1288,11 @@ bool Calculator::EvaluateLoop::reduceOnce() {
   this->checkInitialization();
   this->numberOfTransformations ++;
   this->owner->statistics.totalEvaluationLoops ++;
-  if (this->detectLoops()) {
+  if (this->detectLoopsWithStatistics()) {
     return false;
   }
   this->accountIntermediateState();
-  if (this->reduceUsingCache()) {
+  if (this->reduceUsingCacheWithStatistics()) {
     return false;
   }
   StateMaintainerCalculator maintainRuleStack(*(this->owner));
@@ -1294,13 +1305,18 @@ bool Calculator::EvaluateLoop::reduceOnce() {
   if (this->owner->flagAbortComputationASAP) {
     return false;
   }
-  if (this->builtInEvaluation()) {
+  if (this->builtInEvaluationWithStatistics()) {
     return true;
   }
-  if (this->userDefinedEvaluation()) {
+  if (this->userDefinedEvaluationWithStatistics()) {
     return true;
   }
   return false;
+}
+
+bool Calculator::EvaluateLoop::reduceUsingCacheWithStatistics() {
+  Timer timer(&this->owner->statistics.cachePerformanceMilliseconds);
+  return this->reduceUsingCache();
 }
 
 bool Calculator::EvaluateLoop::reduceUsingCache() {
@@ -1358,7 +1374,6 @@ bool Calculator::evaluateExpression(
   RecursionDepthCounter recursionCounter;
   recursionCounter.initialize(&calculator.recursionDepth);
   calculator.statistics.expressionsEvaluated ++;
-  calculator.statistics.callsSinceReport ++;
   Calculator::EvaluateLoop state(calculator);
   state.output = &output;
   state.history = outputHistory;
@@ -1367,13 +1382,11 @@ bool Calculator::evaluateExpression(
   }
   state.opIndexParent = opIndexParentIfAvailable;
   if (
-    calculator.statistics.callsSinceReport >=
-    calculator.statistics.maximumCallsBeforeReportGeneration
+  calculator.statistics.report.getElement().tickAndWantReport()
   ) {
-    calculator.statistics.callsSinceReport = 0;
     std::stringstream reportStream;
     reportStream << "Evaluating: " << input.toString();
-    state.report.report(reportStream.str());
+    calculator.statistics.report.getElement().report(reportStream.str());
   }
   if (calculator.flagLogFullTreeCrunching && calculator.recursionDepth < 3) {
     calculator << "<br>";
@@ -1614,6 +1627,7 @@ void Calculator::EvaluationStatistics::initialize() {
   this->numberOfLargeGreatestCommonDivisorsStart = static_cast<signed>(
     Rational::totalLargeGreatestCommonDivisors
   );
+  this->report.getElement().ticksPerReport = 1000;
 }
 
 void Calculator::evaluate(const std::string& input) {

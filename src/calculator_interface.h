@@ -2489,6 +2489,7 @@ public:
     MemorySaving<bool> flagIsScalar;
     MemorySaving<bool> flagIsDouble;
     MemorySaving<double> doubleValue;
+    MemorySaving<bool> flagContainsMatrixOrSequence;
     MemorySaving<BuiltInTransformation> builtInTransformations;
     GlobalCache();
   };

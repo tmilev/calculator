@@ -2555,20 +2555,36 @@ bool CalculatorFunctionsBinaryOps::divideSequenceByScalar(
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::isScalarLike(const Expression& input) {
-  STACK_TRACE("CalculatorFunctionsBinaryOps::isScalarLike");
+bool CalculatorFunctionsBinaryOps::containsMatrixOrSequence(
+  const Expression& input
+) {
+  if (input.isSequenceNElements() || input.isMatrix()) {
+    return true;
+  }
   if (input.owner == nullptr) {
     return false;
   }
-  Calculator& calculator = *input.owner;
-  if (!input.startsWith(calculator.opPower())) {
-    return false;
+  Calculator::GlobalCache& cache =
+  input.owner->globalCache.getValueCreateEmpty(input);
+  if (!cache.flagContainsMatrixOrSequence.isZeroPointer()) {
+    return cache.flagContainsMatrixOrSequence.getElement();
   }
-  const Expression& base = input[1];
-  if (base.isSequenceNElements() || base.isMatrix()) {
-    return false;
+  bool result = false;
+  for (int i = 1; i < input.size(); i ++) {
+    if (
+      CalculatorFunctionsBinaryOps::containsMatrixOrSequence(input[i])
+    ) {
+      result = true;
+      break;
+    }
   }
-  return true;
+  cache.flagContainsMatrixOrSequence.getElement() = result;
+  return result;
+}
+
+bool CalculatorFunctionsBinaryOps::isScalarLike(const Expression& input) {
+  STACK_TRACE("CalculatorFunctionsBinaryOps::isScalarLike");
+  return !containsMatrixOrSequence(input);
 }
 
 bool CalculatorFunctionsBinaryOps::multiplySequenceByScalarLike(

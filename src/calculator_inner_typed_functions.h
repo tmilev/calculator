@@ -139,6 +139,7 @@ public:
     Expression& output
   );
   static bool isScalarLike(const Expression& input);
+  static bool containsMatrixOrSequence(const Expression& input);
   static bool multiplySequenceByScalarLike(
     Calculator& calculator, const Expression& input, Expression& output
   );

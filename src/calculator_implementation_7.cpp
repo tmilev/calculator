@@ -8243,17 +8243,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   convertedExpressions.setSize(plot.dimension);
   plot.parameterLowExpression = input[2];
   plot.parameterHighExpression = input[3];
-  if (
-    !plot.parameterLowExpression.evaluatesToDouble(&plot.paramLow) ||
-    !plot.parameterHighExpression.evaluatesToDouble(&plot.paramHigh)
-  ) {
-    calculator
-    << "Failed to convert "
-    << plot.parameterLowExpression.toString()
-    << " and "
-    << plot.parameterHighExpression.toString()
-    << " to left and right endpoint of parameter interval. ";
-  }
+  plot.parameterLowExpression.evaluatesToDouble(&plot.paramLow);
+  plot.parameterHighExpression.evaluatesToDouble(&plot.paramHigh);
   Vectors<double> xCoordinates;
   Vectors<double> yCoordinates;
   bool isGoodLatexWise = true;

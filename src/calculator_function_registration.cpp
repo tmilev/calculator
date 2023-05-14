@@ -1384,6 +1384,20 @@ void Calculator::initializeFunctionsStandard() {
     approximation
   );
   this->addOperationHandler(
+    "Arctan2",
+    CalculatorFunctionsTrigonometry::arctan2,
+    "",
+    "Arctan2 function: takes as input y and x "
+    "coordinate and returns the polar angle. ",
+    "Arctan2(1,2);\n"
+    "Arctan2(-1,2);\n"
+    "Arctan2(-1,-2);\n"
+    "Arctan2(1,-2);\n",
+    "CalculatorFunctionsTrigonometry::arctan2",
+    "Arctan2",
+    approximation
+  );
+  this->addOperationHandler(
     "\\arcsin",
     CalculatorFunctionsTrigonometry::arcsinAlgebraic,
     "",

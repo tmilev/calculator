@@ -71,6 +71,10 @@ double FloatingPoint::arctan(double argument) {
   return atan(argument);
 }
 
+double FloatingPoint::arctan2(double y, double x) {
+  return atan2(y, x);
+}
+
 double FloatingPoint::arccos(double argument) {
   return acos(argument);
 }

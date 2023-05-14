@@ -484,6 +484,31 @@ bool CalculatorFunctionsTrigonometry::arctanApproximate(
   output.assignValue(calculator, FloatingPoint::arctan(argumentDouble));
 }
 
+bool CalculatorFunctionsTrigonometry::arctan2(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsTrigonometry::arctan2");
+  if (input.size() != 3) {
+    return false;
+  }
+  const Expression& y = input[1];
+  const Expression& x = input[2];
+  double xDouble = 0;
+  double yDouble = 0;
+  if (
+    !x.evaluatesToDouble(&xDouble) || !y.evaluatesToDouble(&yDouble)
+  ) {
+    return false;
+  }
+  if (xDouble == 0 && yDouble == 0) {
+    return false;
+  }
+  return
+  output.assignValue(
+    calculator, FloatingPoint::arctan2(yDouble, xDouble)
+  );
+}
+
 bool CalculatorFunctionsTrigonometry::arccosApproximate(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

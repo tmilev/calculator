@@ -2561,6 +2561,11 @@ bool JavascriptExtractor::extractFromBinaryOrUnary(
       output = out.str();
       return true;
     }
+    if (opString == "Arctan2") {
+      out << "Math.atan2(" << leftString << ", " << rightString << ")";
+      output = out.str();
+      return true;
+    }
     if (opString == "\\sqrt") {
       out << "Math.pow(" << rightString << ", 1/" << leftString << ")";
       output = out.str();

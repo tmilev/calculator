@@ -401,17 +401,20 @@ class GraphicsSerialization {
             coordinateFunctions[1], this.getArguments(plot),
           ),
         ];
+        let left = this.interpretStringToNumberOrFunction(
+          variableRanges[0], parameterNames, parameterValues,
+        );
+        let right = this.interpretStringToNumberOrFunction(
+          variableRanges[1], parameterNames, parameterValues,
+        );
+        let segmentCount = this.interpretStringToNumberOrFunction(
+          numberOfSegments, parameterNames, parameterValues,
+        );
         canvas.drawCurve(
           coordinateFunctionArray,
-          this.interpretStringToNumberOrFunction(
-            variableRanges[0], variableAndParameterNames, parameterValues,
-          ),
-          this.interpretStringToNumberOrFunction(
-            variableRanges[1], variableAndParameterNames, parameterValues,
-          ),
-          this.interpretStringToNumberOrFunction(
-            numberOfSegments, variableAndParameterNames, parameterValues,
-          ),
+          left,
+          right,
+          segmentCount,
           color,
           lineWidth,
         );

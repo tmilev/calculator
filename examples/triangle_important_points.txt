@@ -21,6 +21,7 @@ h_a=( b_1 t_a +c_1(1-t_a), b_2 t_a + c_2(1-t_a));
 h_b=(c_1 t_b +a_1(1-t_b), c_2 t_b + a_2(1-t_b));
 h_c=(a_1 t_c +b_1(1-t_c), a_2 t_c + b_2(1-t_c));
 tick = 0.05;
+tickSmall = 0.04;
 lengthC = sqrt( (a_1-b_1)^2+(a_2-b_2)^2);
 lengthA = sqrt( (b_1-c_1)^2+(b_2-c_2)^2);
 lengthB = sqrt( (c_1-a_1)^2+(c_2-a_2)^2);
@@ -36,6 +37,17 @@ heel_c = (h_c+ab*tick, h_c+abperp*tick+ab*tick, h_c + abperp*tick);
 bisector_a = (B+C)/2 + bcperp;
 bisector_b = (C+A)/2 + caperp;
 bisector_c = (A+B)/2 + abperp;
+
+alpha_b = Arctan2(b_2-a_2, b_1-a_1) ;
+alpha_c =  Arctan2(c_2-a_2, c_1-a_1);
+
+beta_c = Arctan2(c_2-b_2, c_1-b_1) ;
+beta_a =  Arctan2(a_2-b_2, a_1-b_1);
+
+gamma_a =Arctan2(a_2-c_2, a_1-c_1) ;
+gamma_b =    Arctan2(b_2-c_2, b_1-c_1);
+
+
 M = (A+B+C)/3;
 D=2(a_1(b_2-c_2)+b_1(c_2-a_2)+c_1(a_2-b_2));
 U= ( (a_1^2+a_2^2)(b_2-c_2)+(b_1^2+b_2^2)(c_2-a_2)+(c_1^2+c_2^2)(a_2-b_2), (a_1^2+a_2^2)(c_1-b_1)+(b_1^2+b_2^2)(a_1-c_1)+(c_1^2+c_2^2)(b_1-a_1))/D;
@@ -77,6 +89,15 @@ PlotSegment(A, (B+C)/2, purple)
 PlotSegment(A, L_a, brown)
 +PlotSegment(B, L_b, brown)
 +PlotSegment(C, L_c, brown)
++PlotCurve( (a_1+tick*cos t, a_2 + tick*sin t), alpha_b, (alpha_c+alpha_b)/2, orange,3)
++PlotCurve( (a_1+tickSmall*cos t, a_2 + tickSmall*sin t), (alpha_c+alpha_b)/2, alpha_c, orange,3)
+
++PlotCurve( (b_1+tick*cos t, b_2 + tick*sin t), beta_c, (beta_a+beta_c)/2, orange,3)
++PlotCurve( (b_1+tickSmall*cos t, b_2 + tickSmall*sin t), (beta_a+beta_c)/2, beta_a, orange,3)
+
++PlotCurve( (c_1+tick*cos t, c_2 + tick*sin t), gamma_a, (gamma_b+gamma_a)/2, orange,3)
++PlotCurve( (c_1+tickSmall*cos t, c_2 + tickSmall*sin t), (gamma_b+gamma_a)/2, gamma_b, orange,3)
+
 + PlotPoint(I, red)
 +PlotLabel(I, "I")
 , "angle bisectors")

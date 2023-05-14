@@ -368,6 +368,9 @@ public:
   static bool arctanApproximate(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool arctan2(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool exploitCosineEvenness(
     Calculator& calculator, const Expression& input, Expression& output
   );

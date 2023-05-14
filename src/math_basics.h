@@ -217,6 +217,7 @@ public:
   static double cosFloating(double argument);
   static double arccos(double argument);
   static double arctan(double argument);
+  static double arctan2(double y, double x);
   static double arcsin(double argument);
   static double sqrtFloating(double argument);
   static double power(double base, double exponent);

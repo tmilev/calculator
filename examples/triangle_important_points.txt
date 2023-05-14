@@ -43,7 +43,7 @@ alpha_c =  Arctan2(c_2-a_2, c_1-a_1);
 
 beta_c = Arctan2(c_2-b_2, c_1-b_1) ;
 protobeta_a = Arctan2(a_2-b_2, a_1-b_1);
-beta_a =if (  protobeta_a-beta_c<0,protobeta_a+2pi,protobeta_a)  ;
+beta_a =IfStandard (  protobeta_a-beta_c<0,protobeta_a+2pi,protobeta_a)  ;
 
 gamma_a =Arctan2(a_2-c_2, a_1-c_1) ;
 gamma_b =    Arctan2(b_2-c_2, b_1-c_1);

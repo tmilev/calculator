@@ -1388,11 +1388,13 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctionsTrigonometry::arctan2,
     "",
     "Arctan2 function: takes as input y and x "
-    "coordinate and returns the polar angle. ",
-    "Arctan2(1,2);\n"
-    "Arctan2(-1,2);\n"
-    "Arctan2(-1,-2);\n"
-    "Arctan2(1,-2);\n",
+    "coordinate and returns the polar angle. "
+    "The first argument is y, the second is x.",
+    "Arctan2(1,sqrt(3)  );\n"
+    "Arctan2(-1,sqrt(3) );\n"
+    "Arctan2(-1,-sqrt(3));\n"
+    "Arctan2(1,-sqrt(3));\n"
+    "Arctan2(1,sqrt(3))- DoubleValue\\pi/6;",
     "CalculatorFunctionsTrigonometry::arctan2",
     "Arctan2",
     approximation

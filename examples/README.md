@@ -2985,6 +2985,17 @@ EnsureExpressionDependsMandatoryVariables(2, \pi, none );
 ```
 Same as EnsureExpressionDependsMandatoryVariables including named constants such as \pi, e. 
 
+*Arctan2* [Arctan2] {CalculatorFunctionsTrigonometry::arctan2}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22Arctan2%281%2csqrt%283%29%20%20%29%3b%5cnArctan2%28-1%2csqrt%283%29%20%29%3b%5cnArctan2%28-1%2c-sqrt%283%29%29%3b%5cnArctan2%281%2c-sqrt%283%29%29%3b%5cnArctan2%281%2csqrt%283%29%29-%20DoubleValue%5c%5cpi%2f6%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+Arctan2(1,sqrt(3)  );
+Arctan2(-1,sqrt(3) );
+Arctan2(-1,-sqrt(3));
+Arctan2(1,-sqrt(3));
+Arctan2(1,sqrt(3))- DoubleValue\pi/6;
+```
+Arctan2 function: takes as input y and x coordinate and returns the polar angle. The first argument is y, the second is x.
+
 Operator or function \arcsin is overloaded with 2 total handlers.
 
 *\arcsin* [arcsinAlgebraic] {CalculatorFunctionsTrigonometry::arcsinAlgebraic}. 

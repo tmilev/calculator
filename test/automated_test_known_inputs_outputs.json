@@ -577,7 +577,7 @@
   },
   {
     "input":"TurnOffApproximations 0;\n\\sqrt{\\frac{676}{25} ln 3}",
-    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);\\frac{26}{5} {\\sqrt{\\log}}{}3)"
+    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"Arctan2\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);\\frac{26}{5} {\\sqrt{\\log}}{}3)"
   },
   {
     "input":"[a+b, c]",
@@ -961,11 +961,11 @@
   },
   {
     "input":"TurnOffApproximations(0);\nln(2);\nTurnOnApproximations(0);\nln(2);\n(TurnOffApproximations 0; ln(2));\nln(2)",
-    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);\\log{}\\left(2\\right);RulesOn{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);0.69314718;(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);\\log{}\\left(2\\right));0.69314718)"
+    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"Arctan2\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);\\log{}\\left(2\\right);RulesOn{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"Arctan2\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);0.69314718;(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"Arctan2\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);\\log{}\\left(2\\right));0.69314718)"
   },
   {
     "input":"TurnOffApproximations(0);\nln(2)+sin(2);\nTurnOnApproximations(0);\nln(2)",
-    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);\\sin{}\\left(2\\right)+\\log{}\\left(2\\right);RulesOn{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);0.69314718)"
+    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"Arctan2\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);\\sin{}\\left(2\\right)+\\log{}\\left(2\\right);RulesOn{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"Arctan2\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);0.69314718)"
   },
   {
     "input":"x = 5;\nleft = a;\nEvaluateSymbols(\"x^x +ax +a x +\\left(left \\right)\")",
@@ -1109,7 +1109,7 @@
   },
   {
     "input":"TurnOffApproximations{}();\n\\sin{}(3.1415) - \\sin \\pi",
-    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);\\sin{}\\left(\\frac{6283}{2000}\\right))"
+    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"Arctan2\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);\\sin{}\\left(\\frac{6283}{2000}\\right))"
   },
   {
     "input":"\\sin{}(3.1415)",
@@ -1125,11 +1125,11 @@
   },
   {
     "input":"TurnOffApproximations{}();\n\\cos \\pi- \\cos{}(3.1415)",
-    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);-1-\\cos{}\\left(\\frac{6283}{2000}\\right))"
+    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"Arctan2\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);-1-\\cos{}\\left(\\frac{6283}{2000}\\right))"
   },
   {
     "input":"TurnOffApproximations{}();\n\\cos \\pi- \\cos{}(3.1415);\nTurnOnApproximations{}();\n\\cos \\pi- \\cos{}(3.1415);",
-    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);-1-\\cos{}\\left(\\frac{6283}{2000}\\right);RulesOn{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);-0)"
+    "output":"(RulesOff{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"Arctan2\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);-1-\\cos{}\\left(\\frac{6283}{2000}\\right);RulesOn{}\\left(\"\\\\log\", \"ArctanApproximate\", \"SineApproximate\", \"CosineApproximate\", \"Arctan2\", \"\\\\arcsin\", \"ArccosApproximate\"\\right);-0)"
   },
   {
     "input":"A = cos(2x)/(cos^3 x - sin^3 x);\nFourierFractionForm A;\n",
@@ -1206,6 +1206,10 @@
   {
     "input":"EnsureExpressionDependsMandatoryVariablesIncludeNamedConstants(2\\pi, \\pi, y);\nEnsureExpressionDependsMandatoryVariables(2, \\pi, none );",
     "output":"(\"\";\"<hr>Your expression:<br>\\\\(2\\\\)<br><b style ='color:red'>is required to contain the variables:</b><br><b>\\\\(\\\\pi\\\\)</b>.<br>The mandatory variable(s) are: \\\\pi. <br>Beware of typos such as:<br>[wrong:] <span style = 'color:red'>lnx, sqrt2</span>  <br>[correct:] <span style = 'color:green'>ln(x)</span> or <span style ='color:green'>ln x</span>, <span style ='color:green'>sqrt(2)</span> or <span style ='color:green'>sqrt 2</span>.<hr>\")"
+  },
+  {
+    "input":"Arctan2(1,sqrt(3)  );\nArctan2(-1,sqrt(3) );\nArctan2(-1,-sqrt(3));\nArctan2(1,-sqrt(3));\nArctan2(1,sqrt(3))- DoubleValue\\pi/6;",
+    "output":"(0.52359878;-0.52359878;-2.61799388;2.61799388;0)"
   },
   {
     "input":"\\arcsin(1/2)",

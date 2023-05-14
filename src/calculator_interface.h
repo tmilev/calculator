@@ -3400,7 +3400,9 @@ public:
     bool builtInEvaluationWithStatistics();
     bool userDefinedEvaluationWithStatistics();
     bool evaluateChildren(StateMaintainerCalculator& maintainRuleStack);
-    void reportChildEvaluation(ProgressReport &report, Expression& output, int childIndex);
+    void reportChildEvaluation(
+      ProgressReport& report, Expression& output, int childIndex
+    );
   public:
     Calculator* owner;
     bool flagIsNonCacheable;

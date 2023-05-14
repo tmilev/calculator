@@ -1066,8 +1066,7 @@ bool Calculator::EvaluateLoop::outputHasErrors() {
 }
 
 void Calculator::EvaluateLoop::reportChildEvaluation(
-ProgressReport& report,
-  Expression& output, int childIndex
+  ProgressReport& report, Expression& output, int childIndex
 ) {
   std::stringstream ruleStream;
   std::stringstream reportStream;
@@ -1381,9 +1380,7 @@ bool Calculator::evaluateExpression(
     state.history->reset(calculator);
   }
   state.opIndexParent = opIndexParentIfAvailable;
-  if (
-  calculator.statistics.report.getElement().tickAndWantReport()
-  ) {
+  if (calculator.statistics.report.getElement().tickAndWantReport()) {
     std::stringstream reportStream;
     reportStream << "Evaluating: " << input.toString();
     calculator.statistics.report.getElement().report(reportStream.str());

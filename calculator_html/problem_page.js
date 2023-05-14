@@ -1483,18 +1483,18 @@ function processLoadedTopicsWriteToCoursePage(incomingTopics, result) {
 
 function writeTopicsToCoursePage() {
   let page = window.calculator.mainPage;
-  let topicsElements = document.getElementsByTagName("topicList");
+  let topicsElement = getTopicListElement();
   writeEditCoursePagePanel();
   let htmlContentElements = getHTMLfromTopics();
   let extraComments = miscellaneousFrontend.htmlElementsFromCommentsAndErrors(allProblems.topics);
-  miscellaneousFrontend.appendHtml(topicsElements[0], extraComments);
-  miscellaneousFrontend.appendHtml(topicsElements[0], htmlContentElements);
+  miscellaneousFrontend.appendHtml(topicsElement, extraComments);
+  miscellaneousFrontend.appendHtml(topicsElement, htmlContentElements);
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
   if (page.pages.problemPage.flagLoaded) {
     problemNavigation.writeToHTML();
   }
-  typeset.typesetter.typesetSoft(topicsElements[0], "");
+  typeset.typesetter.typesetSoft(topicsElement, "");
 }
 
 function updateProblemPage() {
@@ -1539,10 +1539,23 @@ function getCurrentProblem() {
   return allProblems.getProblemByIdOrRegisterEmpty(problemFileName, element);
 }
 
+/** @return {HTMLElement|null} */
+function getTopicListElement() {
+  let topics = document.getElementsByTagName("topicList");
+  if (topics.length === 0) {
+    topics = document.getElementsByClassName("topicList");
+  }
+  if (topics.length === 0) {
+    return null;
+  }
+  return topics[0];
+}
+
 let problemNavigation = new ProblemNavigation();
 let allProblems = new ProblemCollection();
 
 module.exports = {
+  getTopicListElement,
   Problem,
   allProblems,
   problemNavigation,

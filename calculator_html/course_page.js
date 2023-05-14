@@ -94,9 +94,8 @@ function afterLoadCoursePage(incoming, result) {
     }
   }
   typeset.typesetter.typesetSoft(coursePage, "");
-  let topics = document.getElementsByTagName("topicList");
   problemPage.writeEditCoursePagePanel();
-  if (topics.length === 0) {
+  if (problemPage.getTopicListElement() === null) {
     return;
   }
   loadTopicList(problemPage.processLoadedTopicsWriteToCoursePage);

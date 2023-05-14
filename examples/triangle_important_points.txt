@@ -21,7 +21,7 @@ h_a=( b_1 t_a +c_1(1-t_a), b_2 t_a + c_2(1-t_a));
 h_b=(c_1 t_b +a_1(1-t_b), c_2 t_b + a_2(1-t_b));
 h_c=(a_1 t_c +b_1(1-t_c), a_2 t_c + b_2(1-t_c));
 tick = 0.05;
-tickSmall = 0.04;
+tickSmall = 0.047;
 lengthC = sqrt( (a_1-b_1)^2+(a_2-b_2)^2);
 lengthA = sqrt( (b_1-c_1)^2+(b_2-c_2)^2);
 lengthB = sqrt( (c_1-a_1)^2+(c_2-a_2)^2);
@@ -42,7 +42,8 @@ alpha_b = Arctan2(b_2-a_2, b_1-a_1) ;
 alpha_c =  Arctan2(c_2-a_2, c_1-a_1);
 
 beta_c = Arctan2(c_2-b_2, c_1-b_1) ;
-beta_a =  Arctan2(a_2-b_2, a_1-b_1);
+protobeta_a = Arctan2(a_2-b_2, a_1-b_1);
+beta_a =if (  protobeta_a-beta_c<0,protobeta_a+2pi,protobeta_a)  ;
 
 gamma_a =Arctan2(a_2-c_2, a_1-c_1) ;
 gamma_b =    Arctan2(b_2-c_2, b_1-c_1);
@@ -108,7 +109,7 @@ PlotPoint(U, red)
 + PlotSegment(bisector_a, (B+C)/2, orange)
 + PlotSegment(bisector_b, (C+A)/2, orange)
 + PlotSegment(bisector_c, (A+B)/2, orange)
-, "perp. bisectors"
+, "perpendicular bisectors"
 )
 
 +PlotLabel(A, "A")
@@ -133,5 +134,5 @@ PlotCurve((U_1+R cos t, U_2+R sin t), 0, 2pi)
 + PlotSelectablePoint((b_1, b_2))
 + PlotSelectablePoint((c_1, c_2))
 + PlotRemoveCoordinateAxes()
-+PlotWindow(800, 800)
++PlotWindow(700, 700)
 

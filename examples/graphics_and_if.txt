@@ -1,0 +1,8 @@
+a= MakeInputBox(name=a, value = 1);
+b = MakeInputBox(name=b, value = 0);
+protoalpha = Arctan2(b,a);
+alpha = ifStandard (protoalpha < 0, protoalpha+2pi, protoalpha);
+PlotSelectablePoint(a, b, red)
++PlotRemoveCoordinateAxes(0)
++PlotPath(((a,b),(0,0), (1,0)), blue)
++PlotCurve( 0.1(cos t, sin t), 0, alpha, red)

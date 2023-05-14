@@ -2465,9 +2465,23 @@ bool JavascriptExtractor::extractFromAtom(
     atomString == "+" ||
     atomString == "*" ||
     atomString == "/" ||
-    atomString == "-"
+    atomString == "-" ||
+    atomString == ">" ||
+    atomString == "if" ||
+    atomString == "IfStandard" ||
+    atomString == "<" ||
+    atomString == ">" ||
+    atomString == "=="
   ) {
     output = atomString;
+    return true;
+  }
+  if (atomString == "\\geq") {
+    output = ">=";
+    return true;
+  }
+  if (atomString == "\\leq") {
+    output = "<=";
     return true;
   }
   output = atomString;
@@ -2506,7 +2520,63 @@ bool JavascriptExtractor::extractFromSequence(
   return true;
 }
 
-bool JavascriptExtractor::extractFromBinaryOrUnary(
+bool JavascriptExtractor::extractFromOperation(
+  const Expression& input,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (input.size() == 4) {
+    return this->extractFromTernary(input, output, commentsOnFailure);
+  }
+  return this->extractFromUnaryOrBinary(input, output, commentsOnFailure);
+}
+
+bool JavascriptExtractor::extractFromTernary(
+  const Expression& input,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("JavascriptExtractor::extractFromTernary");
+  if (input.size() != 4) {
+    return false;
+  }
+  std::string operationString;
+  std::string leftString;
+  std::string middleString;
+  std::string rightString;
+  if (
+    !this->extractJavascriptRecursive(
+      input[0], operationString, commentsOnFailure
+    ) ||
+    !this->extractJavascriptRecursive(
+      input[1], leftString, commentsOnFailure
+    ) ||
+    !this->extractJavascriptRecursive(
+      input[2], middleString, commentsOnFailure
+    ) ||
+    !this->extractJavascriptRecursive(
+      input[3], rightString, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  if (operationString != "if" && operationString != "IfStandard") {
+    return false;
+  }
+  std::stringstream out;
+  out
+  << "(()=>{if ("
+  << leftString
+  << "){return "
+  << middleString
+  << ";} else {return "
+  << rightString
+  << ";}})()";
+  output = out.str();
+  return true;
+}
+
+bool JavascriptExtractor::extractFromUnaryOrBinary(
   const Expression& input,
   std::string& output,
   std::stringstream* commentsOnFailure
@@ -2554,6 +2624,24 @@ bool JavascriptExtractor::extractFromBinaryOrUnary(
   }
   std::stringstream out;
   if (input.size() == 3) {
+    if (
+      opString == "==" ||
+      opString == ">" ||
+      opString == "<" ||
+      opString == "<=" ||
+      opString == ">="
+    ) {
+      out
+      << "(()=>{if ("
+      << leftString
+      << " "
+      << opString
+      << " "
+      << rightString
+      << ") {return 1;} else {return 0;}})()";
+      output = out.str();
+      return true;
+    }
     if (
       opString == "+" || opString == "-" || opString == "/" || opString == "*"
     ) {
@@ -2699,7 +2787,7 @@ bool JavascriptExtractor::extractJavascriptRecursive(
   ) {
     return this->extractFromSequence(input, output, commentsOnFailure);
   }
-  return this->extractFromBinaryOrUnary(input, output, commentsOnFailure);
+  return this->extractFromOperation(input, output, commentsOnFailure);
 }
 
 bool CalculatorFunctionsPlot::plotSetProjectionScreenBasis(

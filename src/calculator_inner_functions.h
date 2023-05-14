@@ -280,7 +280,17 @@ private:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
-  bool extractFromBinaryOrUnary(
+  bool extractFromOperation(
+    const Expression& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool extractFromUnaryOrBinary(
+    const Expression& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool extractFromTernary(
     const Expression& input,
     std::string& output,
     std::stringstream* commentsOnFailure

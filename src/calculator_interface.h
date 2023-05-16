@@ -2875,6 +2875,9 @@ public:
   int opArcTan() {
     return this->operations.getIndexNoFail("\\arctan");
   }
+  int opArcTan2() {
+    return this->operations.getIndexNoFail("Arctan2");
+  }
   int opArcSin() {
     return this->operations.getIndexNoFail("\\arcsin");
   }

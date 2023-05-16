@@ -186,7 +186,7 @@ public:
     Expression& output,
     bool vectorsAreNormalized
   );
-  static bool plotPolarRfunctionThetaExtended(
+  static bool plotPolarRFunctionThetaExtended(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool plotPolarRfunctionTheta(

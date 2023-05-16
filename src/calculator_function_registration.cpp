@@ -1911,7 +1911,7 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "PlotPolarExtended",
-    CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended,
+    CalculatorFunctionsPlot::plotPolarRFunctionThetaExtended,
     "",
     "<b>Calculus teaching function.</b> Same as PlotPolar "
     "but also produces a graph in the (rho,theta)-plane. ",

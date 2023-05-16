@@ -285,6 +285,8 @@ class Calculator {
     let handlerReport = document.createElement("span");
     handlerReport.textContent = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
     let output = document.getElementById(ids.domElements.pages.calculator.examples);
+    output.textContent = "";
+    miscellaneousFrontend.writeHtmlFromCommentsAndErrors(examplesMessage, output);
     output.appendChild(handlerReport);
     for (let i = 0; i < allElements.length; i++) {
       output.appendChild(allElements[i]);

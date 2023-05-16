@@ -202,10 +202,9 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
 
 bool WebAPIResponse::processCalculatorExamplesJSON() {
   STACK_TRACE("WebAPIResponse::processCalculatorExamplesJSON");
-  global.response.writeResponse(
-    global.calculator().getElement().examples.toJSONFunctionHandlers(),
-    false
-  );
+  JSData response =
+  global.calculator().getElement().examples.toJSONFunctionHandlers();
+  global.response.writeResponse(response, false);
   return true;
 }
 

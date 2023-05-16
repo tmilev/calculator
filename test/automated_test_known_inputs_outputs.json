@@ -269,7 +269,7 @@
   },
   {
     "input":"(1,2)/x;\n(2,3)/MakeInputBox{}(name=x, value=2)",
-    "output":"(\\frac{\\left(1, 2\\right)}{x};\\left(2 \\left(\\formInput{2.0000, x2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881}\\right)^{-1}, 3 \\left(\\formInput{2.0000, x2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881}\\right)^{-1}\\right))"
+    "output":"(\\frac{\\left(1, 2\\right)}{x};\\left(2 \\left(x\\right)^{-1}, 3 \\left(x\\right)^{-1}\\right))"
   },
   {
     "input":"(a/b){}x;",
@@ -981,11 +981,7 @@
   },
   {
     "input":"MakeInputBox(name = a, value = 3);\nMakeInputBox(name = b, value = 3, min = 1, max = 11);\nMakeInputBox(name = a, value = 5);\n",
-    "output":"(\\formInput{3.0000, aca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb};\\formInput{3.0000, b3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d};\\formInput{3.0000, aca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb})"
-  },
-  {
-    "input":"SetInputBox(name = a, value = 3); MakeInputBox(name = a)",
-    "output":"(\"Set value to input box name: a\";\\formInput{3.0000, aca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb})"
+    "output":"(a;b;a)"
   },
   {
     "input":"a =Freeze{}(1 + 1);\nThaw a;\nc =Thaw(Freeze(a,b));\nPlotExpressionTree c",
@@ -1369,11 +1365,11 @@
   },
   {
     "input":"%HideLHS x = (R+v*cos(u/2))*cos(u);\ny = (R+v*cos(u/2))*sin(u);\nz = v*sin(u/2);\nR=MakeInputBox(name = radiusBig, value = 2, min = 2, max = 5);\nr=MakeInputBox(name = radiusSmall, value = 0.6, min = 0.2, max = 1, step = 0.2);\nuSegments = MakeInputBox(name = uSegments, value = 22, min = 8, max = 40);\nvSegments = MakeInputBox(name = vSegments, value = 4, min = 2, max = 10);\nPlotSurface(\n(x, y, z), u \\in (0, 2\\pi), v \\in (- r, r), \ncolor1 = blue, color2 = cyan, numSegments1 = uSegments, numSegments2 = vSegments\n) + PlotSurface(\n( x + 2, z, y), u \\in (0, 2 \\pi), v \\in (- r,r), \ncolor1 = red, color2 = pink, numSegments1 = uSegments, numSegments2 = vSegments); ",
-    "output":"(x=v \\left(\\cos{}u\\right)\\cos{}\\left(\\frac{1}{2} u\\right)+R \\cos{}u;y=v \\left(\\sin{}u\\right)\\cos{}\\left(\\frac{1}{2} u\\right)+R \\sin{}u;z=v \\sin{}\\left(\\frac{1}{2} u\\right);R=\\formInput{2.0000, radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552};r=\\formInput{0.6000, radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762};uSegments=\\formInput{22.0000, uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b};vSegments=\\formInput{4.0000, vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0};<canvas width='350' height='350' style='border:solid 1px' name='theCanvas3'>Your browser does not support the HTML5 canvas tag.</canvas><br><span name='theCanvas3Controls'></span><span name='theCanvas3Messages'></span><span name='script' style='display:none' scriptType='graphics3d'>{\"scriptType\":\"graphics3d\",\"canvasName\":\"theCanvas3\",\"controlsName\":\"theCanvas3Controls\",\"messagesName\":\"theCanvas3Messages\",\"plotUpdaters\":{\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\":\"theCanvas3\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\":\"theCanvas3\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\":\"theCanvas3\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\":\"theCanvas3\"},\"plotObjects\":[{\"arguments\":[\"u\",\"v\"],\"parameters\":[\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\"],\"parameterLetter\":\"p\",\"coordinateFunctions\":\"return [((v * ((Math.cos( u)) * (Math.cos( ( 0.5 * u))))) + (p[0] * (Math.cos( u)))), ((v * ((Math.sin( u)) * (Math.cos( ( 0.5 * u))))) + (p[0] * (Math.sin( u)))), (v * (Math.sin( ( 0.5 * u))))];\",\"variableRange\":[[\" 0\",\" 6.28318531\"],[\"((-1) * p[1])\",\"p[1]\"]],\"numberOfSegments\":[\"p[2]\",\"p[3]\"],\"colorContour\":\"black\",\"colorBack\":\"blue\",\"colorFront\":\"cyan\",\"lineWidth\":1,\"plotType\":\"surface\"},{\"arguments\":[\"u\",\"v\"],\"parameters\":[\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\"],\"parameterLetter\":\"a\",\"coordinateFunctions\":\"return [((v * ((Math.cos( u)) * (Math.cos( ( 0.5 * u))))) + ((a[0] * (Math.cos( u))) +  2)), (v * (Math.sin( ( 0.5 * u)))), ((v * ((Math.sin( u)) * (Math.cos( ( 0.5 * u))))) + (a[0] * (Math.sin( u))))];\",\"variableRange\":[[\" 0\",\" 6.28318531\"],[\"((-1) * a[1])\",\"a[1]\"]],\"numberOfSegments\":[\"a[2]\",\"a[3]\"],\"colorContour\":\"black\",\"colorBack\":\"red\",\"colorFront\":\"pink\",\"lineWidth\":1,\"plotType\":\"surface\"}],\"showPerformance\":true,\"setBoundingBoxAsDefaultViewWindow\":true,\"graphicsType\":\"threeDimensional\",\"parameters\":[\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\"]}</span>)"
+    "output":"(x=v \\left(\\cos{}u\\right)\\cos{}\\left(\\frac{1}{2} u\\right)+R \\cos{}u;y=v \\left(\\sin{}u\\right)\\cos{}\\left(\\frac{1}{2} u\\right)+R \\sin{}u;z=v \\sin{}\\left(\\frac{1}{2} u\\right);R=radiusBig;r=radiusSmall;uSegments=uSegments;vSegments=vSegments;<canvas width='350' height='350' style='border:solid 1px' name='theCanvas3'>Your browser does not support the HTML5 canvas tag.</canvas><br><span name='theCanvas3Controls'></span><span name='theCanvas3Messages'></span><span name='script' style='display:none' scriptType='graphics3d'>{\"scriptType\":\"graphics3d\",\"canvasName\":\"theCanvas3\",\"controlsName\":\"theCanvas3Controls\",\"messagesName\":\"theCanvas3Messages\",\"plotUpdaters\":{\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\":\"theCanvas3\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\":\"theCanvas3\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\":\"theCanvas3\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\":\"theCanvas3\"},\"plotObjects\":[{\"arguments\":[\"u\",\"v\"],\"parameters\":[\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\"],\"parameterLetter\":\"p\",\"coordinateFunctions\":\"return [((v * ((Math.cos( u)) * (Math.cos( ( 0.5 * u))))) + (p[0] * (Math.cos( u)))), ((v * ((Math.sin( u)) * (Math.cos( ( 0.5 * u))))) + (p[0] * (Math.sin( u)))), (v * (Math.sin( ( 0.5 * u))))];\",\"variableRange\":[[\" 0\",\" 6.28318531\"],[\"((-1) * p[1])\",\"p[1]\"]],\"numberOfSegments\":[\"p[2]\",\"p[3]\"],\"colorContour\":\"black\",\"colorBack\":\"blue\",\"colorFront\":\"cyan\",\"lineWidth\":1,\"plotType\":\"surface\"},{\"arguments\":[\"u\",\"v\"],\"parameters\":[\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\"],\"parameterLetter\":\"a\",\"coordinateFunctions\":\"return [((v * ((Math.cos( u)) * (Math.cos( ( 0.5 * u))))) + ((a[0] * (Math.cos( u))) +  2)), (v * (Math.sin( ( 0.5 * u)))), ((v * ((Math.sin( u)) * (Math.cos( ( 0.5 * u))))) + (a[0] * (Math.sin( u))))];\",\"variableRange\":[[\" 0\",\" 6.28318531\"],[\"((-1) * a[1])\",\"a[1]\"]],\"numberOfSegments\":[\"a[2]\",\"a[3]\"],\"colorContour\":\"black\",\"colorBack\":\"red\",\"colorFront\":\"pink\",\"lineWidth\":1,\"plotType\":\"surface\"}],\"showPerformance\":true,\"setBoundingBoxAsDefaultViewWindow\":true,\"graphicsType\":\"threeDimensional\",\"parameters\":[\"radiusBigb2ee915e2243bf3aa3a142a04beb72857b2f5979677f26b62d3f3ae16f654552\",\"radiusSmall7361dd2f3b736033d7d743c690ab6e0a153374d3dab878b69145c65f344ef762\",\"uSegments182e73df2e90334affd13ef79f620787a1f6862c643448611a40963dea6ccb8b\",\"vSegments176bd46696a94b4e3e562a72825371c477c8393b2deb998b8c7175dcfa76ccb0\"]}</span>)"
   },
   {
     "input":"a = MakeInputBox(name = \"a\", value = 12, min = 1, max = 25);\nb = MakeInputBox(name = \"b\", value = 13, min = 1, max = 25);\nPlotFill(PlotCurve((sin(a t), cos(b t)), 0, 2\\pi, blue, 2, 2000), pink)",
-    "output":"(a=\\formInput{12.0000, aca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb};b=\\formInput{13.0000, b3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d};[plot already displayed])"
+    "output":"(a=a;b=b;[plot already displayed])"
   },
   {
     "input":"PlotSegment((1,2), (3,4))",
@@ -1381,7 +1377,7 @@
   },
   {
     "input":"x=MakeInputBox(name=x, value=1);\ny=MakeInputBox(name=y, value=2);\nPlotSegment((x,y), (3,4))",
-    "output":"(x=\\formInput{1.0000, x2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881};y=\\formInput{2.0000, ya1fce4363854ff888cff4b8e7875d600c2682390412a8cf79b37d0b11148b0fa};[plot already displayed])"
+    "output":"(x=x;y=y;[plot already displayed])"
   },
   {
     "input":"PlotSegment((1, 2), (3,4)) + PlotMarkSegment((1, 2), (3, 4))",
@@ -1389,7 +1385,7 @@
   },
   {
     "input":"x=MakeInputBox(name=x, value = 2);\ny=MakeInputBox(name=y, value = 3);\nPlotPath(((0, 0), (x,y)), blue) + PlotSelectablePoint(x,y);\n",
-    "output":"(x=\\formInput{2.0000, x2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881};y=\\formInput{3.0000, ya1fce4363854ff888cff4b8e7875d600c2682390412a8cf79b37d0b11148b0fa};[plot already displayed])"
+    "output":"(x=x;y=y;[plot already displayed])"
   },
   {
     "input":"PlotPath(((0, 0), (3, 0), (3, 4), (0, 0)), blue)",
@@ -1397,7 +1393,7 @@
   },
   {
     "input":"x=MakeInputBox(name=x, value=2);\ny=MakeInputBox(name=y, value = 3);\nPlotSelectablePoint(x,y)",
-    "output":"(x=\\formInput{2.0000, x2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881};y=\\formInput{3.0000, ya1fce4363854ff888cff4b8e7875d600c2682390412a8cf79b37d0b11148b0fa};[plot already displayed])"
+    "output":"(x=x;y=y;[plot already displayed])"
   },
   {
     "input":"PlotSetId(myId) + PlotCoordinateSystem((- 3, - 2, - 3), (1, 5, 4))",
@@ -1417,7 +1413,7 @@
   },
   {
     "input":"PlotPoint{}((1, 2\\pi), blue);\nPlotPoint{}(((1, 2), (2,3)), blue);\na = MakeInputBox(name = a, value = 3);\nb = MakeInputBox(name = b, value = 5);\nPlotPoint((a, b), red)",
-    "output":"([plot already displayed];[plot already displayed];a=\\formInput{3.0000, aca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb};b=\\formInput{5.0000, b3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d};[plot already displayed])"
+    "output":"([plot already displayed];[plot already displayed];a=a;b=b;[plot already displayed])"
   },
   {
     "input":"%UseBracketForIntervals\nPlot2D{}(\\sin{}x +cos{}x, [0, \\pi]\\cup [2\\pi, 3\\pi), \"blue\",2,8)",

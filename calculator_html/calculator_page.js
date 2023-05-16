@@ -890,7 +890,6 @@ class Calculator {
       if (elementWithScripts === null) {
         return;
       }
-      elementWithScripts.bootstrapFormInputs(editor, output);
       this.resizePanel(editor, constructedPanels);
     });
   }

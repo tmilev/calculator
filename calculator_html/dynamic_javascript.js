@@ -78,8 +78,6 @@ class ElementWithScripts {
     ) => {
       this.updateSlidersAndFormInputs(map);
     });
-    /** @type {Object.<string,Array.<MathNode>>} */
-    this.mathNodesAssociatedWithSliders = {}; 
     /** @type {Array.<OneGraphicWithSliders>} */
     this.graphicsWithSliders = [];
   }
@@ -154,8 +152,26 @@ class ElementWithScripts {
       current.addEventListener("input", () => {
         this.updateSlidersAndFormInputsOneKeyValuePair(label, current.value);
       });
-    }    
+      this.bootstrapOneInput(label);
+    }
   }
+
+  bootstrapOneInput(
+    /** @type {string} */
+    name,
+  ) {
+    let inputs = document.getElementsByName(name);
+    for (let i = 0; i < inputs.length; i++) {
+      let current = inputs[i];
+      if (current.type === "range") {
+        continue;
+      }
+      current.addEventListener("input", () => {
+        this.updateSlidersAndFormInputsOneKeyValuePair(name, current.value);
+      });
+    }
+  }
+
 
   bootstrapGraphics3d() {
     let annotations = this.scriptContents["graphics3d"];
@@ -236,19 +252,6 @@ class ElementWithScripts {
     crypto.abstractSyntaxNotationAnnotate(parsedContent[0], parsedContent[1], parsedContent[2]);
   }
 
-  /** 
-   * Bootstraps all form inputs in typeset math.
-   * 
-   * @param {EquationEditor} editor the equation editor object 
-   * @param {HTMLElement} unused the ambient html element that contains 
-   * the graphics and the equations 
-   */
-  bootstrapFormInputs(
-    editor, unused,
-  ) {
-    this.processMathNodesRecursive(editor.rootNode);
-  }
-
   bootstrapLatexWithCopyButtons() {
     let domElements = this.element.getElementsByClassName("latexWithCopyButton");  
     for (let i = 0; i < domElements.length; i++) {
@@ -286,33 +289,7 @@ class ElementWithScripts {
     }, 1000);   
   }
 
-  processMathNodesRecursive(
-    /** @type {MathNode} */
-    node,
-  ) {
-    for (let i = 0; i < node.children.length; i++) {
-      this.processMathNodesRecursive(node.children[i]);
-    }
-    this.processOne(node);
-  }
-
-  processOne(
-    /** @type {MathNode} */
-    node,
-  ) {
-    if (node.type.type !== knownTypes.formInput.type) {
-      return;
-    }
-    let name = node.name;
-    node.element.addEventListener("input", () => {
-      this.updateSlidersAndFormInputsOneKeyValuePair(name, node.element.value);
-    });
-    if (!(name in this.mathNodesAssociatedWithSliders)) {
-      this.mathNodesAssociatedWithSliders[name] = [];
-    }
-    this.mathNodesAssociatedWithSliders[name].push(node);
-  }
-
+ 
   updateSlidersAndFormInputsOneKeyValuePair(key, value) {
     let map = {};
     map[key] = value;
@@ -350,15 +327,10 @@ class ElementWithScripts {
    */
   updateOneSliderAndFormInput(name, value) {
     let result = new Set();
-    let mathNodes = this.mathNodesAssociatedWithSliders[name];
-    for (let i = 0; i < mathNodes.length; i++) {
-      let node = mathNodes[i];
-      if (node.element !== null) {
-        node.element.value = value;
-      }
-    }
     let slider = this.sliders.sliders[name];
     slider.value = value;
+    let inputForm = this.sliders.inputsForms[name];
+    inputForm.value = value;
     for (let i = 0; i < this.graphicsWithSliders.length; i++) {
       let graphic = this.graphicsWithSliders[i];
       if (name in graphic.canvas.parameterNames) {

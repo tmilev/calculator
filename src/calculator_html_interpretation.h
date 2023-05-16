@@ -436,7 +436,6 @@ public:
   bool prepareAndExecuteCommands(
     Calculator& interpreter, std::stringstream* comments
   );
-  std::string prepareUserInputBoxes();
   bool prepareCommandsAnswerOnGiveUp(
     Answer& answer, std::stringstream* comments
   );

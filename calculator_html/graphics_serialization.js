@@ -11,6 +11,8 @@ class SliderUpdater {
   ) {
     /** @type {Object.<string, HTMLElement>} */
     this.sliders = {};
+    /** @type {Object.<string, HTMLElement>} */
+    this.inputsForms = {};
     /** @type {function(string, string)} */
     this.slideAndFormUpdateFunction = inputSlideAndFormUpdateFunction;
   }
@@ -40,11 +42,27 @@ class SliderUpdater {
     slider,
   ) {
     let sliderName = slider.getAttribute("name");
-    if (sliderName === "" || sliderName === null || sliderName === undefined) {
+    if (
+      sliderName === "" ||
+      sliderName === null ||
+      sliderName === undefined
+    ) {
+      return;
+    }
+    if (slider.type !== "range") {
+      if (sliderName in this.inputsForms) {
+        console.log(
+          `Input name ${sliderName} already present.`
+        );
+        return;
+      }
+      this.inputsForms[sliderName] = slider;
       return;
     }
     if (sliderName in this.sliders) {
-      console.log(`Slider name ${sliderName} already present in current element.`);
+      console.log(
+        `Slider name ${sliderName} already present.`
+      );
       return;
     }
     this.sliders[sliderName] = slider;
@@ -349,16 +367,32 @@ class GraphicsSerialization {
     if (parametersOnTheGraph === undefined) {
       parametersOnTheGraph = [];
     }
+    let leftEvaluated;
+    let rightEvaluated;
+    let segmentCount;
+    let lineWidthEvaluated;
     switch (plotType) {
       case "plotFunction":
         let functionConstructed = this.functionFromObject(functionObject);
+        leftEvaluated = this.interpretStringToNumberOrFunction(
+          left, parameterNames, parameterValues,
+        );
+        rightEvaluated = this.interpretStringToNumberOrFunction(
+          right, parameterNames, parameterValues,
+        );
+        segmentCount = this.interpretStringToNumberOrFunction(
+          numberOfSegments, parameterNames, parameterValues,
+        );
+        lineWidthEvaluated = this.interpretStringToNumberOrFunction(
+          lineWidth, parameterNames, parameterValues,
+        );
         canvas.drawFunction(
           functionConstructed,
-          this.interpretStringToNumberOrFunction(left, parameterNames, parameterValues),
-          this.interpretStringToNumberOrFunction(right, parameterNames, parameterValues),
-          this.interpretStringToNumberOrFunction(numberOfSegments, parameterNames, parameterValues),
+          leftEvaluated,
+          rightEvaluated,
+          segmentCount,
           color,
-          this.interpretStringToNumberOrFunction(lineWidth, parameterNames, parameterValues),
+          lineWidthEvaluated,
         );
         return;
       case "plotFillStart":
@@ -401,19 +435,19 @@ class GraphicsSerialization {
             coordinateFunctions[1], this.getArguments(plot),
           ),
         ];
-        let left = this.interpretStringToNumberOrFunction(
+        leftEvaluated = this.interpretStringToNumberOrFunction(
           variableRanges[0], parameterNames, parameterValues,
         );
-        let right = this.interpretStringToNumberOrFunction(
+        rightEvaluated = this.interpretStringToNumberOrFunction(
           variableRanges[1], parameterNames, parameterValues,
         );
-        let segmentCount = this.interpretStringToNumberOrFunction(
+        segmentCount = this.interpretStringToNumberOrFunction(
           numberOfSegments, parameterNames, parameterValues,
         );
         canvas.drawCurve(
           coordinateFunctionArray,
-          left,
-          right,
+          leftEvaluated,
+          rightEvaluated,
           segmentCount,
           color,
           lineWidth,

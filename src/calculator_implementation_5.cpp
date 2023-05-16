@@ -2265,8 +2265,8 @@ std::string InputBox::getSliderName() const {
   );
 }
 
-std::string InputBox::getUserInputBox() const {
-  STACK_TRACE("InputBox::getUserInputBox");
+std::string InputBox::getInputBoxLatex() const {
+  STACK_TRACE("InputBox::getUserInputBoxAndLatex");
   std::stringstream out;
   double reader = 0;
   out.precision(4);
@@ -2468,12 +2468,15 @@ bool JavascriptExtractor::extractFromAtom(
     atomString == "-" ||
     atomString == ">" ||
     atomString == "if" ||
-    atomString == "IfStandard" ||
     atomString == "<" ||
     atomString == ">" ||
     atomString == "=="
   ) {
     output = atomString;
+    return true;
+  }
+  if (atomString == "IfStandard") {
+    output = "if";
     return true;
   }
   if (atomString == "\\geq") {
@@ -2560,7 +2563,7 @@ bool JavascriptExtractor::extractFromTernary(
   ) {
     return false;
   }
-  if (operationString != "if" && operationString != "IfStandard") {
+  if (operationString != "if") {
     return false;
   }
   std::stringstream out;

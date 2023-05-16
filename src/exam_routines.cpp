@@ -1322,41 +1322,6 @@ bool SyntacticElementHTML::isAnswerElement(std::string* desiredAnswerId) {
   return result;
 }
 
-std::string CalculatorHTML::prepareUserInputBoxes() {
-  STACK_TRACE("CalculatorHTML::prepareUserInputBoxes");
-  if (this->flagIsForReal) {
-    return "";
-  }
-  std::stringstream out;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& arguments =
-  global.webArguments;
-  std::string inputNonAnswerReader;
-  for (int i = 0; i < arguments.size(); i ++) {
-    if (
-      StringRoutines::stringBeginsWith(
-        arguments.keys[i], "userInputBox", &inputNonAnswerReader
-      )
-    ) {
-      if (inputNonAnswerReader != "" && arguments.values[i] != "") {
-        out
-        << Calculator::Functions::Names::setInputBox
-        << "(name = "
-        << inputNonAnswerReader
-        << ", value = "
-        << HtmlRoutines::convertURLStringToNormal(
-          arguments.values[i], false
-        )
-        << "); ";
-      }
-    }
-  }
-  return out.str();
-}
-
 std::string CalculatorHTML::getProblemHeaderEnclosure() {
   std::stringstream out;
   out << Calculator::Functions::Names::commandEnclosure << "{}(";
@@ -1365,7 +1330,6 @@ std::string CalculatorHTML::getProblemHeaderEnclosure() {
   << "{}("
   << this->problemData.randomSeed
   << "); ";
-  out << this->prepareUserInputBoxes();
   out << "); ";
   return out.str();
 }
@@ -1377,7 +1341,6 @@ std::string CalculatorHTML::getProblemHeaderWithoutEnclosure() {
   << " {}("
   << this->problemData.randomSeed
   << "); ";
-  out << this->prepareUserInputBoxes();
   return out.str();
 }
 

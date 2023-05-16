@@ -952,7 +952,6 @@ class Problem {
         if (elementWithScripts === null) {
           return;
         }
-        elementWithScripts.bootstrapFormInputs(editor, element);
       });
   }
 

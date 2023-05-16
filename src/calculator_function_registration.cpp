@@ -20,7 +20,6 @@ std::string Calculator::Functions::Names::commandEnclosure =
 std::string Calculator::Functions::Names::bind = "Bind";
 std::string Calculator::Functions::Names::freeze = "Freeze";
 std::string Calculator::Functions::Names::quote = "\"";
-std::string Calculator::Functions::Names::setInputBox = "SetInputBox";
 std::string Calculator::Functions::Names::sort = "Sort";
 std::string Calculator::Functions::Names::transpose = "Transpose";
 std::string Calculator::Functions::Names::vectorPartitionFunction =
@@ -374,18 +373,6 @@ void Calculator::initializeFunctionsStandard() {
     "MakeInputBox(name = a, value = 5);\n",
     "CalculatorHtmlFunctions::userInputBox",
     "MakeInputBox",
-    innerStandard
-  );
-  this->addOperationHandler(
-    Calculator::Functions::Names::setInputBox,
-    CalculatorHtmlFunctions::setInputBox,
-    "",
-    "Sets value for input box that overrides "
-    "the input box (no box is displayed). ",
-    "SetInputBox(name = a, value = 3); "
-    "MakeInputBox(name = a)",
-    "CalculatorHtmlFunctions::setInputBox",
-    Calculator::Functions::Names::setInputBox,
     innerStandard
   );
   this->addOperationHandler(

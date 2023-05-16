@@ -2674,7 +2674,7 @@ bool Expression::toStringBuiltIn<InputBox>(
     return true;
   }
   if (isFinal) {
-    out << input.getValueNonConst<InputBox>().getUserInputBox();
+    out << input.getValueNonConst<InputBox>().name;
   }
   return true;
 }
@@ -3758,6 +3758,12 @@ std::string Expression::toStringAllSlidersInExpression() const {
       out << "value='1' ";
     }
     out << " class='sliderStandard'></input>";
+    out
+    << "<input name='"
+    << sliderName
+    << "' size=3 value='"
+    << box.value
+    << "'></input>";
   }
   return out.str();
 }

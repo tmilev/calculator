@@ -28,19 +28,6 @@ private:
   static const int maximumCharactersInLatexPrintout = 200001;
   bool setChild(int childIndexInMe, int childIndexInOwner);
   bool evaluatesToScalarInternal() const;
-  bool evaluatesToDoubleUnderSubstitutionsWithCache(
-    const HashedList<Expression>& knownExpressions,
-    const List<double>& knownValues,
-    bool useCache,
-    double* whichDouble
-  ) const;
-  bool evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
-    Calculator& calculator,
-    const HashedList<Expression>& knownExpressions,
-    const List<double>& knownValues,
-    bool useCache,
-    double* whichDouble
-  ) const;
   // Definitions.
   // 1. Fundamentals.
   // 1.1. An atom is an expression with zero children.
@@ -885,7 +872,9 @@ public:
     double* outputYmax = nullptr,
     Vectors<double>* outputPoints = nullptr
   ) const;
-  bool evaluatesToDouble(double* whichDouble = nullptr) const;
+  bool evaluatesToDouble(
+    double* whichDouble = nullptr, bool evaluateInputBoxes = false
+  ) const;
   bool getExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const;
   bool getFreeVariables(
     HashedList<Expression>& outputAccumulateFreeVariables,
@@ -898,7 +887,8 @@ public:
   bool evaluatesToDoubleUsingSubstitutions(
     const HashedList<Expression>& knownEs,
     const List<double>& valuesKnownEs,
-    double* whichDouble
+    double* whichDouble,
+    bool evaluateInputBoxes = false
   ) const;
   bool hasBoundVariables() const;
   bool hasInputBoxVariables(
@@ -1672,7 +1662,7 @@ public:
     return this->name == other.name;
   }
   std::string getSliderName() const;
-  std::string getUserInputBox() const;
+  std::string getInputBoxLatex() const;
   static unsigned int hashFunction(const InputBox& input) {
     return HashFunctions::hashFunction(input.name);
   }
@@ -2251,7 +2241,6 @@ public:
     class Names {
     public:
       static std::string commandEnclosure;
-      static std::string setInputBox;
       static std::string setRandomSeed;
       static std::string sort;
       static std::string transpose;

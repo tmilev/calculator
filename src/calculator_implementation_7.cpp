@@ -8118,7 +8118,8 @@ bool CalculatorFunctionsPlot::plotPolarRfunctionThetaExtended(
       "function, lower angle bound and upper angle bound. "
     );
   }
-  Expression plotXYE, plotRthetaE;
+  Expression plotXYE;
+  Expression plotRthetaE;
   if (
     !calculator.callCalculatorFunction(
       CalculatorFunctionsPlot::plotPolarRfunctionTheta, input, plotXYE
@@ -8243,8 +8244,18 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
   convertedExpressions.setSize(plot.dimension);
   plot.parameterLowExpression = input[2];
   plot.parameterHighExpression = input[3];
-  plot.parameterLowExpression.evaluatesToDouble(&plot.paramLow);
-  plot.parameterHighExpression.evaluatesToDouble(&plot.paramHigh);
+  if (
+    !plot.parameterLowExpression.evaluatesToDouble(&plot.paramLow, true)
+  ) {
+    return
+    calculator
+    << "Failed to evaluate your input at the left endpoint. ";
+  }
+  if (
+    !plot.parameterHighExpression.evaluatesToDouble(&plot.paramHigh, true)
+  ) {
+    return calculator << "Failed to evaluate your input at right endpoints. ";
+  }
   Vectors<double> xCoordinates;
   Vectors<double> yCoordinates;
   bool isGoodLatexWise = true;
@@ -8899,32 +8910,84 @@ bool Expression::evaluatesToDoubleInRange(
   return result;
 }
 
-bool Expression::evaluatesToDouble(double* whichDouble) const {
+class ExpressionToDoubleComputer {
+public:
+  Calculator* owner;
+  ExpressionToDoubleComputer(Calculator* calculator) {
+    this->owner = calculator;
+  }
+  bool evaluatesToDoubleUnderSubstitutionsWithCache(
+    const Expression& input,
+    const HashedList<Expression>& knownExpressions,
+    const List<double>& knownValues,
+    bool useCache,
+    double* whichDouble,
+    bool evaluateInputBoxes
+  ) const;
+  bool evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
+    const Expression& input,
+    const HashedList<Expression>& knownExpressions,
+    const List<double>& knownValues,
+    bool useCache,
+    double* whichDouble,
+    bool evaluateInputBoxes
+  ) const;
+  bool isArithmeticOperation(
+    const Expression& input,
+    const HashedList<Expression>& knownExpressions,
+    const List<double>& knownValues,
+    bool useCache,
+    double* whichDouble,
+    bool evaluateInputBoxes
+  ) const;
+  bool isKnownFunctionOneArgument(
+    const Expression& input,
+    const HashedList<Expression>& knownExpressions,
+    const List<double>& knownValues,
+    bool useCache,
+    double* whichDouble,
+    bool evaluateInputBoxes
+  ) const;
+};
+
+bool Expression::evaluatesToDouble(
+  double* whichDouble, bool evaluateInputBoxes
+) const {
+  if (this->owner == nullptr) {
+    return false;
+  }
+  ExpressionToDoubleComputer computer(this->owner);
   return
-  this->evaluatesToDoubleUnderSubstitutionsWithCache(
+  computer.evaluatesToDoubleUnderSubstitutionsWithCache(
+    *this,
     this->owner->knownDoubleConstants,
     this->owner->knownDoubleConstantValues,
     true,
-    whichDouble
+    whichDouble,
+    evaluateInputBoxes
   );
 }
 
 bool Expression::evaluatesToDoubleUsingSubstitutions(
   const HashedList<Expression>& knownEs,
   const List<double>& valuesKnownEs,
-  double* whichDouble
+  double* whichDouble,
+  bool evaluateInputBoxes
 ) const {
+  ExpressionToDoubleComputer computer(this->owner);
   return
-  this->evaluatesToDoubleUnderSubstitutionsWithCache(
-    knownEs, valuesKnownEs, false, whichDouble
+  computer.evaluatesToDoubleUnderSubstitutionsWithCache(
+    *this, knownEs, valuesKnownEs, false, whichDouble, evaluateInputBoxes
   );
 }
 
-bool Expression::evaluatesToDoubleUnderSubstitutionsWithCache(
+bool ExpressionToDoubleComputer::evaluatesToDoubleUnderSubstitutionsWithCache(
+  const Expression& input,
   const HashedList<Expression>& knownExpressions,
   const List<double>& knownValues,
   bool useCache,
-  double* whichDouble
+  double* whichDouble,
+  bool evaluateInputBoxes
 ) const {
   STACK_TRACE("Expression::evaluatesToDoubleUnderSubstitutionsWithCache");
   if (this->owner == nullptr) {
@@ -8934,18 +8997,30 @@ bool Expression::evaluatesToDoubleUnderSubstitutionsWithCache(
   if (!useCache) {
     return
     this->evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
-      calculator, knownExpressions, knownValues, useCache, whichDouble
+      input,
+      knownExpressions,
+      knownValues,
+      useCache,
+      whichDouble,
+      evaluateInputBoxes
     );
   }
   Calculator::GlobalCache cache =
-  calculator.globalCache.getValueCreateEmpty(*this);
-  double value = 0;
+  calculator.globalCache.getValueCreateEmpty(input);
   if (cache.flagIsDouble.isZeroPointer()) {
+    double value = 0;
     cache.flagIsDouble.getElement() =
     this->evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
-      calculator, knownExpressions, knownValues, useCache, &value
+      input,
+      knownExpressions,
+      knownValues,
+      useCache,
+      &value,
+      evaluateInputBoxes
     );
-    cache.doubleValue.getElement() = value;
+    if (cache.flagIsDouble.getElement()) {
+      cache.doubleValue.getElement() = value;
+    }
   }
   bool result = cache.flagIsDouble.getElement();
   if (result && whichDouble != nullptr) {
@@ -8954,29 +9029,31 @@ bool Expression::evaluatesToDoubleUnderSubstitutionsWithCache(
   return result;
 }
 
-bool Expression::evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
-  Calculator& calculator,
+bool ExpressionToDoubleComputer::
+evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
+  const Expression& input,
   const HashedList<Expression>& knownExpressions,
   const List<double>& knownValues,
   bool useCache,
-  double* whichDouble
+  double* whichDouble,
+  bool evaluateInputBoxes
 ) const {
   STACK_TRACE(
     "Expression::"
     "evaluatesToDoubleUnderSubstitutionsWithCacheInternal"
   );
-  if (this->isOfType<double>(whichDouble)) {
+  if (input.isOfType<double>(whichDouble)) {
     return true;
   }
-  if (this->isOfType<Rational>()) {
+  if (input.isOfType<Rational>()) {
     if (whichDouble != nullptr) {
-      *whichDouble = this->getValue<Rational>().getDoubleValue();
+      *whichDouble = input.getValue<Rational>().getDoubleValue();
     }
     return true;
   }
-  if (this->isOfType<AlgebraicNumber>()) {
+  if (input.isOfType<AlgebraicNumber>()) {
     if (
-      this->getValue<AlgebraicNumber>().evaluatesToDouble(whichDouble)
+      input.getValue<AlgebraicNumber>().evaluatesToDouble(whichDouble)
     ) {
       return true;
     }
@@ -8989,257 +9066,336 @@ bool Expression::evaluatesToDoubleUnderSubstitutionsWithCacheInternal(
     << "evaluating innerEvaluateToDouble. "
     << "This may be a programming error. ";
   }
-  if (knownExpressions.contains(*this)) {
+  if (evaluateInputBoxes) {
+    InputBox box;
+    if (input.isOfType<InputBox>(&box)) {
+      return
+      this->evaluatesToDoubleUnderSubstitutionsWithCache(
+        box.value,
+        knownExpressions,
+        knownValues,
+        useCache,
+        whichDouble,
+        evaluateInputBoxes
+      );
+    }
+  }
+  if (knownExpressions.contains(input)) {
     if (whichDouble != nullptr) {
-      *whichDouble = knownValues[knownExpressions.getIndex(*this)];
+      *whichDouble = knownValues[knownExpressions.getIndex(input)];
     }
     return true;
   }
-  bool isArithmeticOperationTwoArguments =
-  this->startsWith(calculator.opTimes(), 3) ||
-  this->startsWith(calculator.opPlus(), 3) ||
-  this->startsWith(calculator.opMinus(), 3) ||
-  this->startsWith(calculator.opPower(), 3) ||
-  this->startsWith(calculator.opDivide(), 3) ||
-  this->startsWith(calculator.opSqrt(), 3) ||
-  this->startsWith(calculator.opLogBase(), 3);
-  if (isArithmeticOperationTwoArguments) {
-    double leftD, rightD;
-    if (
-      !(*this)[1].evaluatesToDoubleUnderSubstitutionsWithCache(
-        knownExpressions, knownValues, useCache, &leftD
-      ) ||
-      !(*this)[2].evaluatesToDoubleUnderSubstitutionsWithCache(
-        knownExpressions, knownValues, useCache, &rightD
-      )
-    ) {
-      return false;
-    }
-    if ((*this).startsWith(calculator.opTimes(), 3)) {
-      if (whichDouble != nullptr) {
-        *whichDouble = leftD * rightD;
-      }
-      return true;
-    }
-    if ((*this).startsWith(calculator.opPlus(), 3)) {
-      if (whichDouble != nullptr) {
-        *whichDouble = leftD + rightD;
-      }
-      return true;
-    }
-    if ((*this).startsWith(calculator.opMinus(), 3)) {
-      if (whichDouble != nullptr) {
-        *whichDouble = leftD - rightD;
-      }
-      return true;
-    }
-    if ((*this).startsWith(calculator.opLogBase(), 3)) {
-      if (leftD <= 0 || rightD <= 0) {
-        return false;
-      }
-      if (leftD - 1 == 0.0) {
-        return false;
-      }
-      if (whichDouble != nullptr) {
-        *whichDouble = (FloatingPoint::logFloating(rightD)) / (
-          FloatingPoint::logFloating(leftD)
-        );
-      }
-      return true;
-    }
-    if ((*this).startsWith(calculator.opPower(), 3)) {
-      bool signChange = false;
-      if (leftD < 0) {
-        Rational rational;
-        if ((*this)[2].isRational(&rational)) {
-          if (!rational.getDenominator().isEven()) {
-            if (!rational.getNumerator().isEven()) {
-              signChange = true;
-            }
-            leftD *= - 1;
-          }
-        }
-      }
-      double tempDouble = 0;
-      if (whichDouble == nullptr) {
-        whichDouble = &tempDouble;
-      }
-      if (leftD == 0.0 && rightD < 0) {
-        return false;
-      }
-      if (leftD == 0.0 && rightD > 0) {
-        *whichDouble = 0;
-      } else {
-        *whichDouble = FloatingPoint::power(leftD, rightD);
-      }
-      if (signChange) {
-        *whichDouble *= - 1;
-      }
-      return !FloatingPoint::isNaN(*whichDouble) && !std::isinf(*whichDouble);
-    }
-    if ((*this).startsWith(calculator.opSqrt(), 3)) {
-      bool signChange = false;
-      if (rightD < 0) {
-        Rational rational;
-        if ((*this)[1].isRational(&rational)) {
-          if (!rational.getNumerator().isEven()) {
-            if (!rational.getDenominator().isEven()) {
-              signChange = true;
-            }
-            rightD *= - 1;
-          }
-        }
-      }
-      if (leftD == 0.0 && rightD < 0) {
-        return false;
-      }
-      double tempDouble = 0;
-      if (whichDouble == nullptr) {
-        whichDouble = &tempDouble;
-      }
-      if (rightD == 0.0 && leftD > 0) {
-        *whichDouble = 0;
-      } else {
-        *whichDouble = FloatingPoint::power(rightD, 1 / leftD);
-      }
-      if (signChange) {
-        *whichDouble *= - 1;
-      }
-      return !FloatingPoint::isNaN(*whichDouble) && !std::isinf(*whichDouble);
-    }
-    if ((*this).startsWith(calculator.opDivide(), 3)) {
-      if (rightD == 0.0) {
-        if (whichDouble != nullptr) {
-          *whichDouble = std::nan("");
-        }
-        return false;
-      }
-      if (whichDouble != nullptr) {
-        *whichDouble = leftD / rightD;
-      }
-      return true;
-    }
-    global.fatal
-    << "This is a piece of code which should never be reached. "
-    << global.fatal;
+  if (
+    this->isArithmeticOperation(
+      input,
+      knownExpressions,
+      knownValues,
+      useCache,
+      whichDouble,
+      evaluateInputBoxes
+    )
+  ) {
+    return true;
   }
-  bool isKnownFunctionOneArgument =
-  this->startsWith(calculator.opSin(), 2) ||
-  this->startsWith(calculator.opCos(), 2) ||
-  this->startsWith(calculator.opTan(), 2) ||
-  this->startsWith(calculator.opCot(), 2) ||
-  this->startsWith(calculator.opCsc(), 2) ||
-  this->startsWith(calculator.opSec(), 2) ||
-  this->startsWith(calculator.opArcTan(), 2) ||
-  this->startsWith(calculator.opArcCos(), 2) ||
-  this->startsWith(calculator.opArcSin(), 2) ||
-  this->startsWith(calculator.opSqrt(), 2) ||
-  this->startsWith(calculator.opLog(), 2) ||
-  this->startsWith(calculator.opAbsoluteValue(), 2);
-  if (isKnownFunctionOneArgument) {
-    double argumentD;
-    if (
-      !(*this)[1].evaluatesToDoubleUnderSubstitutionsWithCache(
-        knownExpressions, knownValues, useCache, &argumentD
-      )
-    ) {
-      return false;
-    }
-    if (this->startsWith(calculator.opSqrt())) {
-      if (argumentD < 0) {
-        return false;
-      }
-      if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::sqrtFloating(argumentD);
-      }
-    }
-    if (this->startsWith(calculator.opAbsoluteValue())) {
-      if (whichDouble != nullptr) {
-        if (argumentD < 0) {
-          *whichDouble = - argumentD;
-        } else {
-          *whichDouble = argumentD;
-        }
-      }
-    }
-    if (this->startsWith(calculator.opArcCos())) {
-      if (argumentD > 1 || argumentD < - 1) {
-        return false;
-      }
-      if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::arccos(argumentD);
-      }
-    }
-    if (this->startsWith(calculator.opArcSin())) {
-      if (argumentD > 1 || argumentD < - 1) {
-        return false;
-      }
-      if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::arcsin(argumentD);
-      }
-    }
-    if (this->startsWith(calculator.opSin())) {
-      if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::sinFloating(argumentD);
-      }
-    }
-    if (this->startsWith(calculator.opCos())) {
-      if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::cosFloating(argumentD);
-      }
-    }
-    if (this->startsWith(calculator.opTan())) {
-      if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::cosFloating(argumentD);
-        if (denominator == 0.0) {
-          return false;
-        }
-        *whichDouble = FloatingPoint::sinFloating(argumentD) / denominator;
-      }
-    }
-    if (this->startsWith(calculator.opCot())) {
-      if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::sinFloating(argumentD);
-        if (denominator == 0.0) {
-          return false;
-        }
-        *whichDouble = FloatingPoint::cosFloating(argumentD) / denominator;
-      }
-    }
-    if (this->startsWith(calculator.opCsc())) {
-      if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::sinFloating(argumentD);
-        if (denominator == 0.0) {
-          return false;
-        }
-        *whichDouble = 1 / denominator;
-      }
-    }
-    if (this->startsWith(calculator.opSec())) {
-      if (whichDouble != nullptr) {
-        double denominator = FloatingPoint::cosFloating(argumentD);
-        if (denominator == 0.0) {
-          return false;
-        }
-        *whichDouble = 1 / denominator;
-      }
-    }
-    if (this->startsWith(calculator.opArcTan())) {
-      if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::arctan(argumentD);
-      }
-    }
-    if (this->startsWith(calculator.opLog())) {
-      if (argumentD <= 0) {
-        return false;
-      }
-      if (whichDouble != nullptr) {
-        *whichDouble = FloatingPoint::logFloating(argumentD);
-      }
-    }
+  if (
+    this->isKnownFunctionOneArgument(
+      input,
+      knownExpressions,
+      knownValues,
+      useCache,
+      whichDouble,
+      evaluateInputBoxes
+    )
+  ) {
     return true;
   }
   return false;
+}
+
+bool ExpressionToDoubleComputer::isArithmeticOperation(
+  const Expression& input,
+  const HashedList<Expression>& knownExpressions,
+  const List<double>& knownValues,
+  bool useCache,
+  double* whichDouble,
+  bool evaluateInputBoxes
+) const {
+  Calculator& calculator = *this->owner;
+  bool isArithmeticOperationTwoArguments =
+  input.startsWith(calculator.opTimes(), 3) ||
+  input.startsWith(calculator.opPlus(), 3) ||
+  input.startsWith(calculator.opMinus(), 3) ||
+  input.startsWith(calculator.opPower(), 3) ||
+  input.startsWith(calculator.opDivide(), 3) ||
+  input.startsWith(calculator.opSqrt(), 3) ||
+  input.startsWith(calculator.opLogBase(), 3);
+  if (!isArithmeticOperationTwoArguments) {
+    return false;
+  }
+  double leftD = 0;
+  double rightD = 0;
+  if (
+    !this->evaluatesToDoubleUnderSubstitutionsWithCache(
+      input[1],
+      knownExpressions,
+      knownValues,
+      useCache,
+      &leftD,
+      evaluateInputBoxes
+    ) ||
+    !this->evaluatesToDoubleUnderSubstitutionsWithCache(
+      input[2],
+      knownExpressions,
+      knownValues,
+      useCache,
+      &rightD,
+      evaluateInputBoxes
+    )
+  ) {
+    return false;
+  }
+  if (input.startsWith(calculator.opTimes(), 3)) {
+    if (whichDouble != nullptr) {
+      *whichDouble = leftD * rightD;
+    }
+    return true;
+  }
+  if (input.startsWith(calculator.opPlus(), 3)) {
+    if (whichDouble != nullptr) {
+      *whichDouble = leftD + rightD;
+    }
+    return true;
+  }
+  if (input.startsWith(calculator.opMinus(), 3)) {
+    if (whichDouble != nullptr) {
+      *whichDouble = leftD - rightD;
+    }
+    return true;
+  }
+  if (input.startsWith(calculator.opLogBase(), 3)) {
+    if (leftD <= 0 || rightD <= 0) {
+      return false;
+    }
+    if (leftD - 1 == 0.0) {
+      return false;
+    }
+    if (whichDouble != nullptr) {
+      *whichDouble = (FloatingPoint::logFloating(rightD)) / (
+        FloatingPoint::logFloating(leftD)
+      );
+    }
+    return true;
+  }
+  if (input.startsWith(calculator.opPower(), 3)) {
+    bool signChange = false;
+    if (leftD < 0) {
+      Rational rational;
+      if (input[2].isRational(&rational)) {
+        if (!rational.getDenominator().isEven()) {
+          if (!rational.getNumerator().isEven()) {
+            signChange = true;
+          }
+          leftD *= - 1;
+        }
+      }
+    }
+    double doubleContainer = 0;
+    if (whichDouble == nullptr) {
+      whichDouble = &doubleContainer;
+    }
+    if (leftD == 0.0 && rightD < 0) {
+      return false;
+    }
+    if (leftD == 0.0 && rightD > 0) {
+      *whichDouble = 0;
+    } else {
+      *whichDouble = FloatingPoint::power(leftD, rightD);
+    }
+    if (signChange) {
+      *whichDouble *= - 1;
+    }
+    return !FloatingPoint::isNaN(*whichDouble) && !std::isinf(*whichDouble);
+  }
+  if (input.startsWith(calculator.opSqrt(), 3)) {
+    bool signChange = false;
+    if (rightD < 0) {
+      Rational rational;
+      if (input[1].isRational(&rational)) {
+        if (!rational.getNumerator().isEven()) {
+          if (!rational.getDenominator().isEven()) {
+            signChange = true;
+          }
+          rightD *= - 1;
+        }
+      }
+    }
+    if (leftD == 0.0 && rightD < 0) {
+      return false;
+    }
+    double tempDouble = 0;
+    if (whichDouble == nullptr) {
+      whichDouble = &tempDouble;
+    }
+    if (rightD == 0.0 && leftD > 0) {
+      *whichDouble = 0;
+    } else {
+      *whichDouble = FloatingPoint::power(rightD, 1 / leftD);
+    }
+    if (signChange) {
+      *whichDouble *= - 1;
+    }
+    return !FloatingPoint::isNaN(*whichDouble) && !std::isinf(*whichDouble);
+  }
+  if (input.startsWith(calculator.opDivide(), 3)) {
+    if (rightD == 0.0) {
+      if (whichDouble != nullptr) {
+        *whichDouble = std::nan("");
+      }
+      return false;
+    }
+    if (whichDouble != nullptr) {
+      *whichDouble = leftD / rightD;
+    }
+    return true;
+  }
+  global.fatal
+  << "This is a piece of code which should never be reached. "
+  << global.fatal;
+  return false;
+}
+
+bool ExpressionToDoubleComputer::isKnownFunctionOneArgument(
+  const Expression& input,
+  const HashedList<Expression>& knownExpressions,
+  const List<double>& knownValues,
+  bool useCache,
+  double* whichDouble,
+  bool evaluateInputBoxes
+) const {
+  Calculator& calculator = *this->owner;
+  bool isKnownFunctionOneArgument =
+  input.startsWith(calculator.opSin(), 2) ||
+  input.startsWith(calculator.opCos(), 2) ||
+  input.startsWith(calculator.opTan(), 2) ||
+  input.startsWith(calculator.opCot(), 2) ||
+  input.startsWith(calculator.opCsc(), 2) ||
+  input.startsWith(calculator.opSec(), 2) ||
+  input.startsWith(calculator.opArcTan(), 2) ||
+  input.startsWith(calculator.opArcCos(), 2) ||
+  input.startsWith(calculator.opArcSin(), 2) ||
+  input.startsWith(calculator.opSqrt(), 2) ||
+  input.startsWith(calculator.opLog(), 2) ||
+  input.startsWith(calculator.opAbsoluteValue(), 2);
+  if (!isKnownFunctionOneArgument) {
+    return false;
+  }
+  double argumentD = 0;
+  if (
+    !this->evaluatesToDoubleUnderSubstitutionsWithCache(
+      input[1],
+      knownExpressions,
+      knownValues,
+      useCache,
+      &argumentD,
+      evaluateInputBoxes
+    )
+  ) {
+    return false;
+  }
+  if (input.startsWith(calculator.opSqrt())) {
+    if (argumentD < 0) {
+      return false;
+    }
+    if (whichDouble != nullptr) {
+      *whichDouble = FloatingPoint::sqrtFloating(argumentD);
+    }
+  }
+  if (input.startsWith(calculator.opAbsoluteValue())) {
+    if (whichDouble != nullptr) {
+      if (argumentD < 0) {
+        *whichDouble = - argumentD;
+      } else {
+        *whichDouble = argumentD;
+      }
+    }
+  }
+  if (input.startsWith(calculator.opArcCos())) {
+    if (argumentD > 1 || argumentD < - 1) {
+      return false;
+    }
+    if (whichDouble != nullptr) {
+      *whichDouble = FloatingPoint::arccos(argumentD);
+    }
+  }
+  if (input.startsWith(calculator.opArcSin())) {
+    if (argumentD > 1 || argumentD < - 1) {
+      return false;
+    }
+    if (whichDouble != nullptr) {
+      *whichDouble = FloatingPoint::arcsin(argumentD);
+    }
+  }
+  if (input.startsWith(calculator.opSin())) {
+    if (whichDouble != nullptr) {
+      *whichDouble = FloatingPoint::sinFloating(argumentD);
+    }
+  }
+  if (input.startsWith(calculator.opCos())) {
+    if (whichDouble != nullptr) {
+      *whichDouble = FloatingPoint::cosFloating(argumentD);
+    }
+  }
+  if (input.startsWith(calculator.opTan())) {
+    if (whichDouble != nullptr) {
+      double denominator = FloatingPoint::cosFloating(argumentD);
+      if (denominator == 0.0) {
+        return false;
+      }
+      *whichDouble = FloatingPoint::sinFloating(argumentD) / denominator;
+    }
+  }
+  if (input.startsWith(calculator.opCot())) {
+    if (whichDouble != nullptr) {
+      double denominator = FloatingPoint::sinFloating(argumentD);
+      if (denominator == 0.0) {
+        return false;
+      }
+      *whichDouble = FloatingPoint::cosFloating(argumentD) / denominator;
+    }
+  }
+  if (input.startsWith(calculator.opCsc())) {
+    if (whichDouble != nullptr) {
+      double denominator = FloatingPoint::sinFloating(argumentD);
+      if (denominator == 0.0) {
+        return false;
+      }
+      *whichDouble = 1 / denominator;
+    }
+  }
+  if (input.startsWith(calculator.opSec())) {
+    if (whichDouble != nullptr) {
+      double denominator = FloatingPoint::cosFloating(argumentD);
+      if (denominator == 0.0) {
+        return false;
+      }
+      *whichDouble = 1 / denominator;
+    }
+  }
+  if (input.startsWith(calculator.opArcTan())) {
+    if (whichDouble != nullptr) {
+      *whichDouble = FloatingPoint::arctan(argumentD);
+    }
+  }
+  if (input.startsWith(calculator.opLog())) {
+    if (argumentD <= 0) {
+      return false;
+    }
+    if (whichDouble != nullptr) {
+      *whichDouble = FloatingPoint::logFloating(argumentD);
+    }
+  }
+  return true;
 }
 
 bool CalculatorFunctions::testTopCommand(

@@ -106,60 +106,6 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorHtmlFunctions::setInputBox(
-  Calculator& calculator, const Expression& input, Expression& output
-) {
-  STACK_TRACE("CalculatorHtmlFunctions::setInputBox");
-  MapList<
-    std::string,
-    Expression,
-    HashFunctions::hashFunction<std::string>
-  > arguments;
-  if (
-    !CalculatorConversions::loadKeysFromStatementList(
-      calculator,
-      input,
-      arguments,
-      false,
-      nullptr,
-      &calculator.comments
-    )
-  ) {
-    return false;
-  }
-  if (!arguments.contains("name")) {
-    return
-    calculator
-    << "User input name not specified in: "
-    << input.toString();
-  }
-  if (!arguments.contains("value")) {
-    return
-    calculator
-    << "Input box value not specified in: "
-    << input.toString();
-  }
-  std::string boxName = CalculatorHtmlFunctions::getUserInputBoxName(input);
-  if (
-    calculator.objectContainer.userInputTextBoxesWithValues.contains(boxName)
-  ) {
-    return
-    calculator
-    << "Input box with name: "
-    << boxName
-    << " already has value.";
-  }
-  InputBox& box =
-  calculator.objectContainer.userInputTextBoxesWithValues.getValueCreateEmpty(
-    boxName
-  );
-  box.name = boxName;
-  box.value = arguments.getValueCreateEmpty("value");
-  std::stringstream out;
-  out << "Set value to input box name: " << boxName;
-  return output.assignValue(calculator, out.str());
-}
-
 std::string CalculatorHtmlFunctions::getUserInputBoxName(
   const Expression& box
 ) {

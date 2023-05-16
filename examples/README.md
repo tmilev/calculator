@@ -2483,13 +2483,6 @@ MakeInputBox(name = a, value = 5);
 ```
 Creates an user input text box. 
 
-*SetInputBox* [SetInputBox] {CalculatorHtmlFunctions::setInputBox}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SetInputBox%28name%20%3d%20a%2c%20value%20%3d%203%29%3b%20MakeInputBox%28name%20%3d%20a%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
-```
-SetInputBox(name = a, value = 3); MakeInputBox(name = a)
-```
-Sets value for input box that overrides the input box (no box is displayed). 
-
 *Thaw* [Thaw] {CalculatorFunctions::thaw}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22a%20%3dFreeze%7b%7d%281%20%2b%201%29%3b%5cnThaw%20a%3b%5cnc%20%3dThaw%28Freeze%28a%2cb%29%29%3b%5cnPlotExpressionTree%20c%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```

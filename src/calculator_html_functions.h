@@ -20,9 +20,6 @@ public:
   static bool userInputBox(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool setInputBox(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
   static bool evaluateSymbols(
     Calculator& calculator, const Expression& input, Expression& output
   );

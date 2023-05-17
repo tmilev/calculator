@@ -190,7 +190,7 @@ public:
   static bool openFileCreateIfNotPresentVirtual(
     std::fstream& file,
     const std::string& fileName,
-    bool OpenInAppendMode,
+    bool openInAppendMode,
     bool truncate,
     bool openAsBinary,
     bool accessSensitiveFolders = false,

@@ -3,6 +3,7 @@
 const EquationEditor = require("./equation_editor/src/equation_editor");
 const CanvasTwoD = require("./graphics").CanvasTwoD;
 const CanvasThreeD = require("./graphics").Canvas;
+const Graphics = require("./graphics");
 
 class SliderUpdater {
   constructor(
@@ -544,7 +545,6 @@ class GraphicsSerialization {
     let variableNames = this.getArguments(plot);
     let parameterNames = this.getParameters(plot);
     let parameterValues = canvas.parameterValues;
-
     switch (plotType) {
       case "segment":
         canvas.drawLineCreate(points[0], points[1], color, lineWidth);
@@ -555,17 +555,65 @@ class GraphicsSerialization {
       case "setProjectionScreen":
         canvas.screenBasisUserDefault = plot["projectionScreen"];
         return;
+      case "parametricCurve":
+        let coordinates = [
+          this.functionFromBodyAndArguments(
+            coordinateFunctions[0], this.getArguments(plot),
+          ),
+          this.functionFromBodyAndArguments(
+            coordinateFunctions[1], this.getArguments(plot),
+          ),
+          this.functionFromBodyAndArguments(
+            coordinateFunctions[2], this.getArguments(plot),
+          ),
+        ];
+        let curveImmersion = (p,q) => {
+          return [
+            coordinates[0](p, q),
+            coordinates[1](p, q),
+            coordinates[2](p, q),
+          ];
+        }
+        let leftEvaluated = this.interpretStringToNumberOrFunction(
+          variableRanges[0], parameterNames, parameterValues,
+        );
+        let rightEvaluated = this.interpretStringToNumberOrFunction(
+          variableRanges[1], parameterNames, parameterValues,
+        );
+        canvas.drawCurve(
+          new Graphics.CurveThreeD(
+            curveImmersion,
+            leftEvaluated,
+            rightEvaluated,
+            numberOfSegments,
+            color,
+            lineWidth,
+          ),
+        );
+        return;
       case "surface":
         let convertedRanges = [[
-          this.interpretStringToNumberOrFunction(variableRanges[0][0], parameterNames, parameterValues),
-          this.interpretStringToNumberOrFunction(variableRanges[0][1], parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(
+            variableRanges[0][0], parameterNames, parameterValues,
+          ),
+          this.interpretStringToNumberOrFunction(
+            variableRanges[0][1], parameterNames, parameterValues,
+          ),
         ], [
-          this.interpretStringToNumberOrFunction(variableRanges[1][0], parameterNames, parameterValues),
-          this.interpretStringToNumberOrFunction(variableRanges[1][1], parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(
+            variableRanges[1][0], parameterNames, parameterValues,
+          ),
+          this.interpretStringToNumberOrFunction(
+            variableRanges[1][1], parameterNames, parameterValues,
+          ),
         ]];
         let convertedSegments = [
-          this.interpretStringToNumberOrFunction(numberOfSegments[0], parameterNames, parameterValues),
-          this.interpretStringToNumberOrFunction(numberOfSegments[1], parameterNames, parameterValues),
+          this.interpretStringToNumberOrFunction(
+            numberOfSegments[0], parameterNames, parameterValues,
+          ),
+          this.interpretStringToNumberOrFunction(
+            numberOfSegments[1], parameterNames, parameterValues,
+          ),
         ];
         let surfaceImmersion = this.functionFromBodyAndArguments(
           coordinateFunctions,

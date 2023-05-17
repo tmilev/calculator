@@ -149,10 +149,10 @@ JSData QueryExact::toJSON() const {
     << Logger::red
     << "Failed to convert find query to mongoDB encoding. "
     << Logger::endL;
-    result.elementType = JSData::token::tokenNull;
+    result.elementType = JSData::Token::tokenNull;
     return result;
   }
-  result.elementType = JSData::token::tokenObject;
+  result.elementType = JSData::Token::tokenObject;
   result[this->getLabel()] = encodedKeys;
   return result;
 }
@@ -262,7 +262,7 @@ bool Database::convertJSONToJSONEncodeKeys(
     return false;
   }
   output.reset(input.elementType);
-  if (input.elementType == JSData::token::tokenArray) {
+  if (input.elementType == JSData::Token::tokenArray) {
     for (int i = 0; i < input.listObjects.size; i ++) {
       JSData nextItem;
       if (
@@ -280,7 +280,7 @@ bool Database::convertJSONToJSONEncodeKeys(
     }
     return true;
   }
-  if (input.elementType == JSData::token::tokenObject) {
+  if (input.elementType == JSData::Token::tokenObject) {
     for (int i = 0; i < input.objects.size(); i ++) {
       JSData nextItem;
       if (
@@ -867,7 +867,7 @@ bool UserCalculatorData::loadFromJSON(JSData& input) {
     this->actualHashedSaltedPassword, false
   );
   JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
-  if (sectionsTaughtList.elementType == JSData::token::tokenArray) {
+  if (sectionsTaughtList.elementType == JSData::Token::tokenArray) {
     for (int i = 0; i < sectionsTaughtList.listObjects.size; i ++) {
       this->sectionsTaught.addOnTop(
         sectionsTaughtList.listObjects[i].stringValue
@@ -892,10 +892,10 @@ JSData UserCalculatorData::toJSON() {
   this->timeOfAuthenticationTokenCreation;
   result[DatabaseStrings::labelProblemDataJSON] = this->problemDataJSON;
   if (
-    this->problemDataJSON.elementType == JSData::token::tokenUndefined
+    this->problemDataJSON.elementType == JSData::Token::tokenUndefined
   ) {
     result[DatabaseStrings::labelProblemDataJSON].elementType =
-    JSData::token::tokenObject;
+    JSData::Token::tokenObject;
     result[DatabaseStrings::labelProblemDataJSON].objects.clear();
   }
   result[DatabaseStrings::labelPassword] = this->actualHashedSaltedPassword;
@@ -905,7 +905,7 @@ JSData UserCalculatorData::toJSON() {
   result[DatabaseStrings::labelSection] = this->sectionInDB;
   result[DatabaseStrings::labelCurrentCourses] = this->courseInDB;
   JSData sectionsTaughtList;
-  sectionsTaughtList.elementType = JSData::token::tokenArray;
+  sectionsTaughtList.elementType = JSData::Token::tokenArray;
   for (int i = 0; i < this->sectionsTaught.size; i ++) {
     sectionsTaughtList[i] = this->sectionsTaught[i];
   }
@@ -914,7 +914,7 @@ JSData UserCalculatorData::toJSON() {
     JSData& currentValue = result.objects.values[i];
     if (
       currentValue.stringValue == "" &&
-      currentValue.elementType == JSData::token::tokenString
+      currentValue.elementType == JSData::Token::tokenString
     ) {
       result.objects.removeKey(result.objects.keys[i]);
     }
@@ -1009,7 +1009,7 @@ std::string ProblemData::store() {
 JSData ProblemData::storeJSON() const {
   STACK_TRACE("ProblemData::storeJSON");
   JSData result;
-  result.elementType = JSData::token::tokenObject;
+  result.elementType = JSData::Token::tokenObject;
   if (this->flagRandomSeedGiven) {
     std::stringstream stringConverter;
     stringConverter << this->randomSeed;
@@ -2132,7 +2132,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
     return false;
   }
   if (
-    data.getValue("email").elementType != JSData::token::tokenString
+    data.getValue("email").elementType != JSData::Token::tokenString
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure

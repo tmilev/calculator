@@ -4,13 +4,13 @@
 JSData Calculator::OperationHandlers::toJSON() {
   JSData result;
   JSData currentFunctionListDirect;
-  currentFunctionListDirect.elementType = JSData::token::tokenArray;
+  currentFunctionListDirect.elementType = JSData::Token::tokenArray;
   for (int i = 0; i < this->handlers.size; i ++) {
     Function& currentHandler = this->handlers[i];
     currentFunctionListDirect.listObjects.addOnTop(currentHandler.toJSON());
   }
   JSData currentFunctionListComposite;
-  currentFunctionListComposite.elementType = JSData::token::tokenArray;
+  currentFunctionListComposite.elementType = JSData::Token::tokenArray;
   for (int i = 0; i < this->compositeHandlers.size; i ++) {
     Function& currentHandler = this->compositeHandlers[i];
     currentFunctionListComposite.listObjects.addOnTop(
@@ -26,10 +26,46 @@ Calculator::Examples::Examples() {
   this->owner = nullptr;
 }
 
+JSData Calculator::Examples::toJSONFunctionHandlersAndExamples() {
+  STACK_TRACE("Calculator::Examples::toJSONFunctionHandlersAndExamples");
+  JSData result;
+  result[WebAPI::Frontend::calculatorHandlerDocumentation] =
+  this->toJSONFunctionHandlers();
+  result[WebAPI::Frontend::calculatorExamples] = this->toJSONExamples();
+  return result;
+}
+
+JSData Calculator::Examples::toJSONExamples() {
+  JSData result;
+  result.elementType = JSData::Token::tokenObject;
+  List<std::string> fileNames;
+  if (!FileOperations::getFolderFileNamesVirtual("examples/", fileNames)) {
+    result[WebAPI::Result::error] = "Failed to open examples";
+    return result;
+  }
+  for (std::string& fileName : fileNames) {
+    std::string fileNameWithoutExtension;
+    if (
+      !StringRoutines::stringEndsWith(
+        fileName, ".txt", &fileNameWithoutExtension
+      )
+    ) {
+      continue;
+    }
+    std::stringstream errorStream;
+    std::string content;
+    FileOperations::loadFileToStringVirtual(
+      "examples/" + fileName, content, false, &errorStream
+    );
+    result[fileNameWithoutExtension] = content;
+  }
+  return result;
+}
+
 JSData Calculator::Examples::toJSONFunctionHandlers() {
   STACK_TRACE("Calculator::Examples::toJSONFunctionHandlers");
   JSData examples;
-  examples.elementType = JSData::token::tokenObject;
+  examples.elementType = JSData::Token::tokenObject;
   MapReferences<
     std::string,
     MemorySaving<OperationHandlers>,
@@ -45,9 +81,7 @@ JSData Calculator::Examples::toJSONFunctionHandlers() {
     operations.values[i].getElement();
     examples[operationName] = handlers.toJSON();
   }
-  JSData output;
-  output[WebAPI::Frontend::calculatorExamples] = examples;
-  return output;
+  return examples;
 }
 
 std::string Calculator::Examples::escape(const std::string& atom) {
@@ -1769,7 +1803,7 @@ void Calculator::evaluateCommandsStandardOutput(
   this->objectContainer.resetSliders();
   this->objectContainer.resetPlots();
   JSData result;
-  result.elementType = JSData::token::tokenObject;
+  result.elementType = JSData::Token::tokenObject;
   std::string resultString =
   this->programExpression.toString(
     &global.defaultFormat.getElement(),

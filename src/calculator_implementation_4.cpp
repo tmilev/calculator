@@ -1728,7 +1728,7 @@ bool Function::shouldBeApplied(int parentOperationIfAvailable) {
 JSData Function::toJSON() const {
   STACK_TRACE("Function::toJSON");
   JSData result;
-  result.elementType = JSData::token::tokenObject;
+  result.elementType = JSData::Token::tokenObject;
   if (this->owner == nullptr) {
     result[WebAPI::Result::error] = "bad_owner";
     return result;

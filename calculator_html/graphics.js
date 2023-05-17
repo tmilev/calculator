@@ -3395,8 +3395,12 @@ class Canvas {
     let contourPoints = new Array(curve.numSegments + 1);
     for (let i = 0; i < curve.numSegments + 1; i++) {
       let ratio = i / curve.numSegments;
-      let currentParam = curve.leftPoint * (1 - ratio) + curve.rightPoint * ratio;
-      contourPoints[i] = curve.coordinateFunctions(currentParam);
+      let leftEvaluated = this.evaluateNumberOrParameter(curve.leftPoint); 
+      let rightEvaluated = this.evaluateNumberOrParameter(curve.rightPoint);
+      let argumentValue = leftEvaluated * (1 - ratio) + rightEvaluated * ratio;
+      contourPoints[i] = curve.coordinateFunctions(
+        argumentValue, this.parameterValues,
+      );
     }
     this.all3dObjects.allContours.push(
         new Contour(contourPoints, curve.color, curve.lineWidth));
@@ -5432,4 +5436,5 @@ module.exports = {
   drawing,
   Canvas,
   CanvasTwoD,
+  CurveThreeD,
 };

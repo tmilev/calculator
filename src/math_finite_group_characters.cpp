@@ -1324,35 +1324,35 @@ template <typename elementSomeGroup>
 void CharacterFunctions::exportCharTable(
   FiniteGroup<elementSomeGroup>& G, JSData& data
 ) {
-  data.elementType = JSData::token::tokenObject;
+  data.elementType = JSData::Token::tokenObject;
   JSData emptyArray;
   emptyArray.makeEmptyArray();
   JSData& representatives =
   data.objects.getValueCreate("representatives", emptyArray);
   JSData& sizes = data.objects.getValueCreate("sizes", emptyArray);
   JSData& characters = data.objects.getValueCreate("characters", emptyArray);
-  representatives.elementType = JSData::token::tokenArray;
+  representatives.elementType = JSData::Token::tokenArray;
   representatives.listObjects.setSize(G.conjugacyClassCount());
   for (int i = 0; i < G.conjugacyClassCount(); i ++) {
     List<int> reprefs;
     G.getWord(G.conjugacyClasses[i].representative, reprefs);
-    representatives.listObjects[i].elementType = JSData::token::tokenArray;
+    representatives.listObjects[i].elementType = JSData::Token::tokenArray;
     representatives.listObjects[i].listObjects.setSize(reprefs.size);
     for (int j = 0; j < reprefs.size; j ++) {
       representatives.listObjects[i].listObjects[j].elementType =
-      JSData::token::tokenLargeInteger;
+      JSData::Token::tokenLargeInteger;
       representatives.listObjects[i].listObjects[j].integerValue.getElement() =
       reprefs[j];
     }
   }
-  sizes.elementType = JSData::token::tokenArray;
+  sizes.elementType = JSData::Token::tokenArray;
   sizes.listObjects.setSize(G.conjugacyClassCount());
   for (int i = 0; i < G.conjugacyClassCount(); i ++) {
-    sizes.listObjects[i].elementType = JSData::token::tokenLargeInteger;
+    sizes.listObjects[i].elementType = JSData::Token::tokenLargeInteger;
     sizes.listObjects[i].integerValue.getElement() =
     G.conjugacyClasses[i].size;
   }
-  characters.elementType = JSData::token::tokenArray;
+  characters.elementType = JSData::Token::tokenArray;
   characters.listObjects.setSize(G.characterTable.size);
   for (int i = 0; i < G.characterTable.size; i ++) {
     for (int j = 0; j < G.characterTable[i].data.size; j ++) {

@@ -170,6 +170,8 @@ std::string WebAPI::Frontend::exercise = "exerciseJSON";
 std::string WebAPI::Frontend::exerciseType = "exerciseType";
 std::string WebAPI::Frontend::scoredQuiz = "scoredQuizJSON";
 std::string WebAPI::Frontend::calculatorExamples = "calculatorExamples";
+std::string WebAPI::Frontend::calculatorHandlerDocumentation =
+"calculatorHandlerDocumentation";
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 std::string WebAPI::Calculator::testFileNameVirtual =
 "test/automated_test_known_inputs_outputs.json";

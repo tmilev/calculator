@@ -10110,8 +10110,8 @@ bool CalculatorFunctions::solveProductSumEquationOverSetModN(
   output.assignValue(calculator, std::string("Couldn't find solution"));
 }
 
-void Calculator::Test::calculatorTestPrepare() {
-  STACK_TRACE("Calculator::Test::calculatorTestPrepare");
+void Calculator::Test::initialize() {
+  STACK_TRACE("Calculator::Test::initialize");
   if (this->owner == nullptr) {
     global.fatal << "Non-initialized calculator test. " << global.fatal;
   }
@@ -10149,7 +10149,7 @@ bool Calculator::Test::calculatorTestRun() {
   STACK_TRACE("Calculator::Test::calculatorTestRun");
   this->debugFlagAtStart = global.getWebInput(WebAPI::Request::debugFlag);
   global.setWebInput(WebAPI::Request::debugFlag, "false");
-  this->calculatorTestPrepare();
+  this->initialize();
   Calculator tester;
   ProgressReport report;
   FormatExpressions format;

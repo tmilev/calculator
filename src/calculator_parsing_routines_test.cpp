@@ -225,7 +225,7 @@ Calculator::Test::OneTest::OneTest() {
 
 bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
   Calculator::Test test(ownerInitialized);
-  test.calculatorTestPrepare();
+  test.initialize();
   global.userInputStringIfAvailable = "";
   if (!test.calculatorTestRun()) {
     std::stringstream crashFileWriteReport;

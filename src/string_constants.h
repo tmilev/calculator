@@ -173,6 +173,7 @@ public:
     static std::string exerciseType;
     static std::string scoredQuiz;
     static std::string exercise;
+    static std::string calculatorHandlerDocumentation;
     static std::string calculatorExamples;
   };
 

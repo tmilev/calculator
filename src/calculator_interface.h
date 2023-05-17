@@ -2540,6 +2540,8 @@ public:
     HashedList<std::string, HashFunctions::hashFunction> toBeEscaped;
     // Generates a JSON with all functions and their documentation.
     JSData toJSONFunctionHandlers();
+    JSData toJSONFunctionHandlersAndExamples();
+    JSData toJSONExamples();
     // Writes a readme file in folder examples/Readme.md.
     bool writeExamplesReadme();
     std::string getExamplesReadmeFragment();
@@ -3093,8 +3095,7 @@ public:
 
     MapList<
       std::string,
-      Calculator::Test::OneTest,
-      HashFunctions::hashFunction<std::string>
+      Calculator::Test::OneTest
     > commands;
     JSData storedResults;
     Test(Calculator& inputOwner);
@@ -3114,7 +3115,7 @@ public:
     static bool parseConsumeQuote(Calculator& ownerInitialized);
     static bool builtInFunctionsABTest(Calculator& ownerInitialized);
     static bool checkBuiltInInitializations(Calculator& ownerInitialized);
-    void calculatorTestPrepare();
+    void initialize();
     bool calculatorTestRun();
   };
 

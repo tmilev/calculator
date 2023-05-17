@@ -8,7 +8,7 @@ std::string Database::FallBack::databaseFilename =
 bool Database::FallBack::deleteDatabase(
   std::stringstream* commentsOnFailure
 ) {
-  this->databaseContent.reset(JSData::token::tokenObject);
+  this->databaseContent.reset(JSData::Token::tokenObject);
   this->indexDatabase(commentsOnFailure);
   if (
     !FileOperations::writeFileVirtual(
@@ -283,7 +283,7 @@ bool Database::FallBack::hasCollection(
 ) {
   STACK_TRACE("Database::FallBack::hasCollection");
   if (Database::FallBack::knownCollections.contains(collection)) {
-    this->databaseContent[collection].elementType = JSData::token::tokenArray;
+    this->databaseContent[collection].elementType = JSData::Token::tokenArray;
     return true;
   }
   if (this->databaseContent.hasKey(collection)) {
@@ -385,7 +385,7 @@ bool Database::FallBack::indexDatabase(std::stringstream* commentsOnFailure) {
 void Database::FallBack::indexOneRecord(
   const JSData& entry, int32_t row, const std::string& collection
 ) {
-  if (entry.elementType != JSData::token::tokenObject) {
+  if (entry.elementType != JSData::Token::tokenObject) {
     return;
   }
   for (int i = 0; i < entry.objects.size(); i ++) {
@@ -397,7 +397,7 @@ void Database::FallBack::indexOneRecord(
       continue;
     }
     const JSData& keyToIndexBy = entry.objects.values[i];
-    if (keyToIndexBy.elementType != JSData::token::tokenString) {
+    if (keyToIndexBy.elementType != JSData::Token::tokenString) {
       continue;
     }
     Database::FallBack::Index& currentIndex =
@@ -445,7 +445,7 @@ bool Database::FallBack::readDatabase(std::stringstream* commentsOnFailure) {
       << Logger::green
       << "Fallback database file does not exist. Creating ..."
       << Logger::endL;
-      this->databaseContent.elementType = JSData::token::tokenObject;
+      this->databaseContent.elementType = JSData::Token::tokenObject;
       return true;
     }
     return false;

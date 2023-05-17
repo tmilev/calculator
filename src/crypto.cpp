@@ -2299,7 +2299,7 @@ bool PublicKeyRSA::loadFromJSON(
     << "<hr>Loading certificate from: "
     << input.toString(nullptr);
   }
-  if (input.elementType != JSData::token::tokenObject) {
+  if (input.elementType != JSData::Token::tokenObject) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Can't load certificate: JSON not of type object. ";
@@ -2363,10 +2363,10 @@ bool Crypto::loadOneKnownCertificate(
   }
   PublicKeyRSA currentCert;
   bool isGood = false;
-  if (certificateJSON.elementType == JSData::token::tokenObject) {
+  if (certificateJSON.elementType == JSData::Token::tokenObject) {
     if (certificateJSON.hasKey("keys")) {
       JSData keys = certificateJSON.getValue("keys");
-      if (keys.elementType == JSData::token::tokenArray) {
+      if (keys.elementType == JSData::Token::tokenArray) {
         isGood = true;
         for (int i = 0; i < keys.listObjects.size; i ++) {
           if (

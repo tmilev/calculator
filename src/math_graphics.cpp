@@ -222,7 +222,7 @@ void DrawingVariables::drawFilledShape(
   JSData& operation = drawObject.content;
   operation[DrawingVariables::fieldOperation] =
   DrawingVariables::typeFilledShape;
-  operation[DrawingVariables::fieldPoints] = JSData::token::tokenArray;
+  operation[DrawingVariables::fieldPoints] = JSData::Token::tokenArray;
   for (int i = 0; i < corners.size; i ++) {
     operation[DrawingVariables::fieldPoints][i] = corners[i];
   }
@@ -291,7 +291,7 @@ void DrawingVariables::drawLineDirectly2D(
   operation[DrawingVariables::fieldOperation] =
   DrawingVariables::typeSegment2DFixed;
   operation[DrawingVariables::fieldPoints].elementType =
-  JSData::token::tokenArray;
+  JSData::Token::tokenArray;
   operation[DrawingVariables::fieldPoints][0][0] = x1;
   operation[DrawingVariables::fieldPoints][0][1] = y1;
   operation[DrawingVariables::fieldPoints][1][0] = x2;
@@ -315,7 +315,7 @@ void DrawingVariables::drawTextDirectly2d(
   operation[DrawingVariables::fieldOperation] =
   DrawingVariables::typeText2DFixed;
   operation[DrawingVariables::fieldLocation].elementType =
-  JSData::token::tokenArray;
+  JSData::Token::tokenArray;
   operation[DrawingVariables::fieldLocation][0] = x1;
   operation[DrawingVariables::fieldLocation][1] = y1;
   operation[DrawingVariables::fieldText] = inputText;
@@ -903,7 +903,7 @@ void DrawingVariables::drawPath(
 void DrawSegment::toJSON(JSData& output, const DrawingVariables& owner) const {
   (void) owner;
   output[DrawingVariables::fieldOperation] = DrawingVariables::typeSegment;
-  output[DrawingVariables::fieldPoints] = JSData::token::tokenArray;
+  output[DrawingVariables::fieldPoints] = JSData::Token::tokenArray;
   output[DrawingVariables::fieldPoints][0] = this->vector1;
   output[DrawingVariables::fieldPoints][1] = this->vector2;
   this->drawOptions.writeJSON(output);

@@ -17,7 +17,7 @@ class LargeInteger;
 class JSData {
 public:
   static const int numEmptyTokensAtStart = 6;
-  struct token {
+  struct Token {
     static const char tokenUndefined = 0;
     static const char tokenNull = 1;
     static const char tokenBool = 2;
@@ -63,7 +63,7 @@ public:
   template <typename any>
   void operator=(const List<any>& other) {
     this->reset();
-    this->elementType = JSData::token::tokenArray;
+    this->elementType = JSData::Token::tokenArray;
     this->listObjects.setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->listObjects[i] = other[i];
@@ -126,7 +126,7 @@ public:
   bool isString(std::string* whichString) const;
   // parsing
   bool isValidElement();
-  void reset(char inputType = JSData::token::tokenUndefined);
+  void reset(char inputType = JSData::Token::tokenUndefined);
   class PrintOptions {
   public:
     bool useNewLine;

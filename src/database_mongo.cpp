@@ -500,7 +500,7 @@ bool MongoQuery::findMultiple(
     bson_destroy(this->options);
     this->options = nullptr;
   }
-  if (inputOptions.elementType != JSData::token::tokenUndefined) {
+  if (inputOptions.elementType != JSData::Token::tokenUndefined) {
     std::string optionsString = inputOptions.toString(nullptr);
     this->options =
     bson_new_from_json(
@@ -713,7 +713,7 @@ void QueryResultOptions::makeProjection(const List<std::string>& fields) {
 
 JSData QueryResultOptions::toJSON() const {
   JSData result, fields;
-  result.reset(JSData::token::tokenObject);
+  result.reset(JSData::Token::tokenObject);
   bool found = false;
   for (int i = 0; i < this->fieldsToProjectTo.size; i ++) {
     fields[this->fieldsToProjectTo[i]] = 1;
@@ -990,7 +990,7 @@ bool Database::getLabels(
   labels.setSize(0);
   for (int i = 0; i < fieldEntries.listObjects.size; i ++) {
     if (
-      fieldEntries.listObjects[i].elementType != JSData::token::tokenString
+      fieldEntries.listObjects[i].elementType != JSData::Token::tokenString
     ) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
@@ -1012,7 +1012,7 @@ bool Database::isDeleteable(
 ) {
   STACK_TRACE("Database::isDeleteable");
   if (
-    entry.elementType != JSData::token::tokenObject ||
+    entry.elementType != JSData::Token::tokenObject ||
     !entry.hasKey(DatabaseStrings::labelFields)
   ) {
     if (commentsOnFailure != nullptr) {
@@ -1268,7 +1268,7 @@ bool Database::Mongo::updateOneFromSome(
 }
 
 QuerySet::QuerySet() {
-  this->value.elementType = JSData::token::tokenObject;
+  this->value.elementType = JSData::Token::tokenObject;
 }
 
 void QuerySet::makeFromRecursive(
@@ -1320,7 +1320,7 @@ bool QuerySet::toJSONSetMongo(
   JSData& output, std::stringstream* commentsOnFailure
 ) const {
   (void) commentsOnFailure;
-  output.reset(JSData::token::token::tokenObject);
+  output.reset(JSData::Token::Token::tokenObject);
   output["$set"] = this->value;
   return true;
 }
@@ -1460,7 +1460,7 @@ bool Database::fetchTable(
 ) {
   STACK_TRACE("Database::fetchTable");
   JSData findQuery;
-  findQuery.elementType = JSData::token::tokenObject;
+  findQuery.elementType = JSData::Token::tokenObject;
   List<JSData> rowsJSON;
   Database::get().findFromJSON(
     tableName, findQuery, rowsJSON, 200, totalItems, commentsOnFailure
@@ -1528,7 +1528,7 @@ JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
   std::string currentTable = labelStrings[0];
   result["currentTable"] = currentTable;
   JSData findQuery;
-  findQuery.elementType = JSData::token::tokenObject;
+  findQuery.elementType = JSData::Token::tokenObject;
   findQuery[DatabaseStrings::labelIdMongo][
     DatabaseStrings::objectSelectorMongo
   ] =
@@ -1562,7 +1562,7 @@ JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
   }
   Database::correctData(rowsJSON);
   JSData rows;
-  rows.elementType = JSData::token::tokenArray;
+  rows.elementType = JSData::Token::tokenArray;
   rows.listObjects = rowsJSON;
   if (flagDebuggingAdmin) {
     result["findQuery"] = findQuery;
@@ -1627,7 +1627,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
     List<std::string> collectionNamesList;
     if (Database::fetchCollectionNames(collectionNamesList, &out)) {
       JSData collectionNames;
-      collectionNames.elementType = JSData::token::tokenArray;
+      collectionNames.elementType = JSData::Token::tokenArray;
       collectionNames.listObjects.setSize(collectionNamesList.size);
       for (int i = 0; i < collectionNamesList.size; i ++) {
         collectionNames[i] = collectionNamesList[i];
@@ -1641,7 +1641,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   JSData findQuery;
   QueryResultOptions projector;
   projector = Database::getStandardProjectors(currentTable);
-  findQuery.elementType = JSData::token::tokenObject;
+  findQuery.elementType = JSData::Token::tokenObject;
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
@@ -1679,7 +1679,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
     return result;
   }
   JSData rows;
-  rows.elementType = JSData::token::tokenArray;
+  rows.elementType = JSData::Token::tokenArray;
   rows.listObjects = rowsJSON;
   result["rows"] = rows;
   result["totalRows"] = static_cast<int>(totalItems);

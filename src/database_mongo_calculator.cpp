@@ -47,7 +47,7 @@ bool CalculatorDatabaseFunctions::executeMongoQuery(
     return output.assignValue(calculator, commentsOnFailure.str());
   }
   JSData finalOutput;
-  finalOutput.elementType = JSData::token::tokenArray;
+  finalOutput.elementType = JSData::Token::tokenArray;
   finalOutput.listObjects = outputList;
   return
   output.assignValue(

@@ -1040,7 +1040,7 @@ bool Crypto::verifyJWTagainstKnownKeys(
     }
     return false;
   }
-  if (header.elementType == JSData::token::tokenObject) {
+  if (header.elementType == JSData::Token::tokenObject) {
     if (header.hasKey("kid")) {
       keyIDstring = header.getValue("kid").stringValue;
     }
@@ -1192,7 +1192,7 @@ bool WebClient::verifyRecaptcha(
   JSData success;
   success = jsonParser.getValue("success");
   if (
-    success.elementType != JSData::token::tokenBool ||
+    success.elementType != JSData::Token::tokenBool ||
     success.booleanValue != true
   ) {
     if (commentsOnFailure != nullptr) {

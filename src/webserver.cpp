@@ -3679,9 +3679,9 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
   this->statistics.workersNormallyExited ++;
   if (
     workerMessage[WebServer::Statististics::allRequestsString].elementType ==
-    JSData::token::tokenLargeInteger &&
+    JSData::Token::tokenLargeInteger &&
     workerMessage[WebServer::Statististics::pingRequestsString].elementType ==
-    JSData::token::tokenLargeInteger
+    JSData::Token::tokenLargeInteger
   ) {
     int incomingAllRequests =
     workerMessage[WebServer::Statististics::allRequestsString].integerValue.
@@ -3698,7 +3698,7 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
   if (
     workerMessage[WebServer::Statististics::standaloneServerRequestsString].
     elementType ==
-    JSData::token::tokenLargeInteger
+    JSData::Token::tokenLargeInteger
   ) {
     int incomingStandaloneRequests =
     workerMessage[WebServer::Statististics::standaloneServerRequestsString].
@@ -4778,7 +4778,7 @@ void WebServer::checkSystemInstallationOpenSSL() {
   }
   if (
     global.configuration["openSSL"].elementType !=
-    JSData::token::tokenUndefined
+    JSData::Token::tokenUndefined
   ) {
     return;
   }
@@ -4826,7 +4826,7 @@ void WebServer::checkSystemInstallationMongoDatabase() {
   }
   if (
     global.configuration["mongoDB"].elementType !=
-    JSData::token::tokenUndefined
+    JSData::Token::tokenUndefined
   ) {
     return;
   }
@@ -4872,7 +4872,7 @@ void WebServer::checkMongoDatabaseSetup() {
   }
   if (
     global.configuration["mongoDBSetup"].elementType !=
-    JSData::token::tokenUndefined
+    JSData::Token::tokenUndefined
   ) {
     return;
   }
@@ -4941,7 +4941,7 @@ void WebServer::checkFreecalcSetup() {
   STACK_TRACE("WebServer::checkFreecalcSetup");
   if (
     global.configuration["freecalcSetup"].elementType !=
-    JSData::token::tokenUndefined
+    JSData::Token::tokenUndefined
   ) {
     return;
   }
@@ -5135,7 +5135,7 @@ bool ArgumentAnalyzer::processOneArgument() {
 
 void WebServer::analyzeMainArguments(int argC, char** argv) {
   STACK_TRACE("WebServer::analyzeMainArguments");
-  global.configurationCommandLine.reset(JSData::token::tokenObject);
+  global.configurationCommandLine.reset(JSData::Token::tokenObject);
   if (argC < 0) {
     argC = 0;
   }
@@ -5284,6 +5284,7 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addOnTop("/css/");
   this->addressStartsNotNeedingLogin.addOnTop("/javascriptlibs/");
   this->addressStartsNotNeedingLogin.addOnTop("/login");
+  this->addressStartsNotNeedingLogin.addOnTop("/examples/");
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::app);
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::appNoCache);
   this->addressStartsNotNeedingLogin.addOnTop(WebAPI::Request::onePageJS);
@@ -5729,7 +5730,7 @@ void GlobalVariables::configurationProcess() {
   }
   if (
     global.configuration[Configuration::gitRepository].elementType ==
-    JSData::token::tokenString
+    JSData::Token::tokenString
   ) {
     HtmlRoutines::gitRepository =
     global.configuration[Configuration::gitRepository].stringValue;
@@ -5779,8 +5780,8 @@ void GlobalVariables::configurationProcess() {
     );
     webServerOnly[key] = subServerConfiguration.toJSON();
   }
-  if (webServerOnly.elementType != JSData::token::tokenObject) {
-    webServerOnly.elementType = JSData::token::tokenObject;
+  if (webServerOnly.elementType != JSData::Token::tokenObject) {
+    webServerOnly.elementType = JSData::Token::tokenObject;
   }
   List<List<std::string> > folderVirtualLinksDefault =
   FileOperations::initializeFolderVirtualLinksDefaults();

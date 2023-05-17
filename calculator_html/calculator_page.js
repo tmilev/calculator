@@ -18,6 +18,30 @@ function writeHTML(
   panels.writeHTML(element, htmlContent);
 }
 
+class ExampleBuiltIn {
+  constructor(
+    /** @type {string} */
+    name,
+    /** @type {string} */
+    example,
+  ) {
+    this.name = name;
+    this.example = example;
+  }
+
+  /** @return {HTMLElement} */
+  toHTML() {
+    let result = document.createElement("div");
+    let anchor = document.createElement("a");
+    anchor.textContent = this.name;
+    anchor.href = pathnames.addresses.calculatorComputationWithoutAppURL(
+      this.example,
+    );
+    result.appendChild(anchor);
+    return result;
+  }
+}
+
 class AtomHandler {
   constructor() {
     this.description = "";
@@ -237,6 +261,7 @@ class Calculator {
     this.panels = [];
     /** @type {HTMLElement|null} */
     this.outputElement = null;
+    this.handlerDocumentation = null;
     this.examples = null;
     this.submissionCalculatorCounter = 0;
     this.lastSubmittedInput = "";
@@ -269,18 +294,35 @@ class Calculator {
     return result;
   }
 
+  /** @return {HTMLElement} */
+  processOneBuiltInExample(
+    /** @type {string} */ name,
+    /** @type {string} */ example,
+  ) {
+    let element = new ExampleBuiltIn(name, example);
+    return element.toHTML();
+  }
+
   doProcessExamples(inputJSONtext) {
     let examplesMessage = miscellaneousFrontend.jsonUnescapeParse(inputJSONtext);
+    this.handlerDocumentation = examplesMessage["calculatorHandlerDocumentation"];
     this.examples = examplesMessage["calculatorExamples"];
-    let atomsSorted = Object.keys(this.examples).slice().sort();
+    let atomsSorted = Object.keys(this.handlerDocumentation).slice().sort();
+    let examplesSorted = Object.keys(this.examples).slice().sort();
     let numHandlers = 0;
     let allElements = [];
+    for (let i = 0; i < examplesSorted.length; i++) {
+      let name = examplesSorted[i];
+      let example = this.examples[name];
+      let element = this.processOneBuiltInExample(name, example);
+      allElements.push(element);
+    }
     for (let i = 0; i < atomsSorted.length; i++) {
       let atom = atomsSorted[i];
-      let currentExamples = this.examples[atom];
+      let currentExamples = this.handlerDocumentation[atom];
       allElements.push(this.processOneFunctionAtom(currentExamples.regular));
       allElements.push(this.processOneFunctionAtom(currentExamples.composite));
-      numHandlers += this.examples[atom].regular.length + this.examples[atom].composite.length;
+      numHandlers += this.handlerDocumentation[atom].regular.length + this.handlerDocumentation[atom].composite.length;
     }
     let handlerReport = document.createElement("span");
     handlerReport.textContent = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;

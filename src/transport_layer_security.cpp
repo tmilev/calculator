@@ -462,11 +462,11 @@ JSData TransportLayerSecurityServer::toJSON() {
 
 JSData TransportLayerSecurityServer::NetworkSpoofer::toJSON() {
   JSData result, inputMessage, outputMessages, inErrors, outErrors;
-  result.elementType = JSData::token::tokenArray;
-  inputMessage.elementType = JSData::token::tokenArray;
-  outputMessages.elementType = JSData::token::tokenArray;
-  inErrors.elementType = JSData::token::tokenArray;
-  outErrors.elementType = JSData::token::tokenArray;
+  result.elementType = JSData::Token::tokenArray;
+  inputMessage.elementType = JSData::Token::tokenArray;
+  outputMessages.elementType = JSData::Token::tokenArray;
+  inErrors.elementType = JSData::Token::tokenArray;
+  outErrors.elementType = JSData::Token::tokenArray;
   for (int i = 0; i < this->incomingMessages.size; i ++) {
     inputMessage[i] = this->incomingMessages[i].toJSON();
   }
@@ -474,7 +474,7 @@ JSData TransportLayerSecurityServer::NetworkSpoofer::toJSON() {
   outErrors = this->errorsOnOutgoing;
   for (int i = 0; i < this->outgoingMessages.size; i ++) {
     JSData currentOutputMessages;
-    currentOutputMessages.elementType = JSData::token::tokenArray;
+    currentOutputMessages.elementType = JSData::Token::tokenArray;
     for (int j = 0; j < this->outgoingMessages[i].size; j ++) {
       currentOutputMessages[j] = this->outgoingMessages[i][j].toJSON();
     }
@@ -642,7 +642,7 @@ JSData SSLContent::toJSON() const {
   result[SSLContent::JSLabels::compressionMethod] =
   Crypto::convertIntToHex(this->compressionMethod, 2);
   JSData extensionsObject;
-  extensionsObject.elementType = JSData::token::tokenArray;
+  extensionsObject.elementType = JSData::Token::tokenArray;
   for (int i = 0; i < this->extensions.size; i ++) {
     extensionsObject.listObjects.addOnTop(
       this->extensions[i].toJSON()
@@ -1243,7 +1243,7 @@ bool SSLHelloExtension::checkInitialization() {
 
 JSData SSLHelloExtension::toJSON() {
   JSData result;
-  result.elementType = JSData::token::tokenObject;
+  result.elementType = JSData::Token::tokenObject;
   result["name"] = this->name();
   std::stringstream hex;
   hex << std::hex << std::setfill('0') << std::setw(4) << this->extensionType;
@@ -1778,7 +1778,7 @@ std::string Serialization::Marker::toString() const {
 
 JSData Serialization::Marker::toJSON() {
   JSData result;
-  result.elementType = JSData::token::tokenObject;
+  result.elementType = JSData::Token::tokenObject;
   result[Serialization::JSLabels::offset] = LargeInteger(this->offset);
   result[Serialization::JSLabels::length] = LargeInteger(this->length);
   result[Serialization::JSLabels::label] = this->label;
@@ -1911,7 +1911,7 @@ std::string TransportLayerSecurityServer::Session::JSLabels::bytesToSign =
 
 JSData TransportLayerSecurityServer::Session::toJSON() {
   JSData result;
-  result.elementType = JSData::token::tokenArray;
+  result.elementType = JSData::Token::tokenArray;
   result[TransportLayerSecurityServer::Session::JSLabels::chosenCipher] =
   Crypto::convertIntToHex(this->chosenCipher, 2);
   result[
@@ -1942,14 +1942,14 @@ JSData TransportLayerSecurityServer::Session::toJSON() {
   result[TransportLayerSecurityServer::Session::JSLabels::bytesToSign] =
   Crypto::convertListUnsignedCharsToHex(this->bytesToSign);
   JSData ciphers;
-  ciphers.elementType = JSData::token::tokenObject;
+  ciphers.elementType = JSData::Token::tokenObject;
   ciphers.listObjects.setSize(this->incomingCiphers.size);
   for (int i = 0; i < this->incomingCiphers.size; i ++) {
     CipherSuiteSpecification& current = this->incomingCiphers[i];
     ciphers[Crypto::convertIntToHex(current.id, 2)] = current.name;
   }
   JSData algorithmSpecifications;
-  algorithmSpecifications.elementType = JSData::token::tokenArray;
+  algorithmSpecifications.elementType = JSData::Token::tokenArray;
   for (int i = 0; i < this->incomingAlgorithmSpecifications.size; i ++) {
     algorithmSpecifications.listObjects.addOnTop(
       this->incomingAlgorithmSpecifications[i].toJSON()
@@ -1975,7 +1975,7 @@ JSData SSLRecord::toJSONSerialization() {
   List<Serialization::Marker> markers;
   this->writeBytes(serialization, &markers);
   JSData jsMarkers;
-  jsMarkers.elementType = JSData::token::tokenArray;
+  jsMarkers.elementType = JSData::Token::tokenArray;
   for (int i = 0; i < markers.size; i ++) {
     jsMarkers.listObjects.addOnTop(markers[i].toJSON());
   }

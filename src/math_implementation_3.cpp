@@ -2319,7 +2319,7 @@ openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
 bool FileOperations::openFileCreateIfNotPresentVirtual(
   std::fstream& file,
   const std::string& fileName,
-  bool OpenInAppendMode,
+  bool openInAppendMode,
   bool truncate,
   bool openAsBinary,
   bool accessSensitiveFolders,
@@ -2341,7 +2341,7 @@ bool FileOperations::openFileCreateIfNotPresentVirtual(
   }
   return
   FileOperations::openFileCreateIfNotPresentUnsecure(
-    file, computedFileName, OpenInAppendMode, truncate, openAsBinary
+    file, computedFileName, openInAppendMode, truncate, openAsBinary
   );
 }
 
@@ -11464,7 +11464,7 @@ std::string HtmlRoutines::toHtmlLatexLiteralWithCopy(
 
 std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
   STACK_TRACE("HtmlRoutines::toHtmlTableRowsFromJSON");
-  if (input.elementType == JSData::token::tokenObject) {
+  if (input.elementType == JSData::Token::tokenObject) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++) {
@@ -11480,7 +11480,7 @@ std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
     out << "</table>";
     return out.str();
   }
-  if (input.elementType == JSData::token::tokenArray) {
+  if (input.elementType == JSData::Token::tokenArray) {
     std::stringstream out;
     out << "<table class='tableDatabaseItem'>";
     for (int i = 0; i < input.objects.size(); i ++) {

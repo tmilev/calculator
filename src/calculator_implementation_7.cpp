@@ -10116,6 +10116,16 @@ void Calculator::Test::initialize() {
     global.fatal << "Non-initialized calculator test. " << global.fatal;
   }
   this->commands.clear();
+  JSData examples = this->owner->examples.toJSONExamples();
+  for (int i = 0; i < examples.objects.size(); i ++) {
+    Calculator::Test::OneTest oneTest;
+    oneTest.requresAdminAccess = false;
+    std::string name = examples.objects.keys[i];
+    oneTest.command = examples.objects.values[i].stringValue;
+    oneTest.atom = name;
+    oneTest.functionAdditionalIdentifier = name;
+    this->commands.setKeyValue(oneTest.command, oneTest);
+  }
   for (int i = 0; i < this->owner->numberOfPredefinedAtoms; i ++) {
     MemorySaving<Calculator::OperationHandlers>& currentPointer =
     this->owner->operations.values[i];

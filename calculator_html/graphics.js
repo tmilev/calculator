@@ -3209,6 +3209,8 @@ class Canvas {
       segments: [],
       /** @type {Array.<TextInThreeD>} */
       texts: [],
+      /** @type {Array.<CurveThreeD>} */
+      curves: [],
     };
     this.screenXY = [0, 0];
     this.flagShowPerformance = true;
@@ -3383,6 +3385,17 @@ class Canvas {
    */
   drawText(element) {
     this.all3dObjects.theLabels.push(element);
+  }
+
+  /**
+   * Draws a curve in 3d. Curve sections that are in the background will be
+   * drawn with a dashed line.
+   *
+   * @param {!CurveThreeD} curve [x,y,z]-location of the label.
+   */
+  drawCurveCreate(curve) {
+    this.highLevel3dObjects.curves.push(curve);
+    this.drawCurve(curve);
   }
 
   /**
@@ -5134,6 +5147,9 @@ class Canvas {
     }
     for (let i = 0; i < this.highLevel3dObjects.segments.length; i++) {
       this.drawLine(this.highLevel3dObjects.segments[i]);
+    }
+    for (let i = 0; i < this.highLevel3dObjects.curves.length; i++) {
+      this.drawCurve(this.highLevel3dObjects.curves[i]);
     }
     for (let i = 0; i < this.highLevel3dObjects.texts.length; i++) {
       this.drawText(this.highLevel3dObjects.texts[i]);

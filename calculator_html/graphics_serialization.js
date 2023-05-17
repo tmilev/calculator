@@ -580,7 +580,7 @@ class GraphicsSerialization {
         let rightEvaluated = this.interpretStringToNumberOrFunction(
           variableRanges[1], parameterNames, parameterValues,
         );
-        canvas.drawCurve(
+        canvas.drawCurveCreate(
           new Graphics.CurveThreeD(
             curveImmersion,
             leftEvaluated,

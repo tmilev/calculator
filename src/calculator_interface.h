@@ -3093,10 +3093,7 @@ public:
       OneTest();
     };
 
-    MapList<
-      std::string,
-      Calculator::Test::OneTest
-    > commands;
+    MapList<std::string, Calculator::Test::OneTest> commands;
     JSData storedResults;
     Test(Calculator& inputOwner);
     bool processResults();

@@ -1647,7 +1647,8 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
   STACK_TRACE("Polynomial::greatestCommonDivisorOneVariable");
   Polynomial<Coefficient> leftCopy = left;
   Polynomial<Coefficient> rightCopy = right;
-  Polynomial<Coefficient> quotient, remainder;
+  Polynomial<Coefficient> quotient;
+  Polynomial<Coefficient> remainder;
   if (
     !leftCopy.hasNonNegativeIntegralExponents() ||
     !rightCopy.hasNonNegativeIntegralExponents()

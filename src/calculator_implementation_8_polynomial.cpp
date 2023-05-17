@@ -1239,6 +1239,12 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
       return false;
     }
   }
+  if (
+    !numerator.content.hasNonNegativeIntegralExponents() ||
+    !denominator.content.hasNonNegativeIntegralExponents()
+  ) {
+    return false;
+  }
   RationalFraction<AlgebraicNumber> result;
   result = numerator.content;
   result /= denominator.content;

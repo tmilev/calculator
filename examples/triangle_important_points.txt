@@ -65,6 +65,8 @@ R =sqrt( (U_1-a_1)^2+(U_2-a_2)^2);
 p  = lengthA + lengthB + lengthC;
 I = (A lengthA + B lengthB + C lengthC)/p; 
 touch_c= A+ (B-A) ((I-A) (B-A)^t )_1/((B-A)(B-A)^t)_1 ;
+touch_a= B+ (C-B) ((I-B) (C-B)^t )_1/((C-B)(C-B)^t)_1 ;
+touch_b= C+ (A-C) ((I-C) (A-C)^t )_1/((A-C)(A-C)^t)_1 ;
 
 
 r = sqrt(2(p/2 - lengthA )(p/2 - lengthB )(p/2 - lengthC )/p);
@@ -134,7 +136,17 @@ PlotCurve((U_1+R cos t, U_2+R sin t), 0, 2pi)
 +LayerLabel(
 PlotCurve(I+(r cos t, r sin t), 0, 2pi), "inscribed circle"
 )
+
++LayerLabel(
+PlotPoint(touch_a, green)
++PlotPoint(touch_b, green)
 +PlotPoint(touch_c, green)
++PlotSegment(touch_a, I)
++PlotSegment(touch_b, I)
++PlotSegment(touch_c, I)
+, "touch points")
+
+
 
 +LayerLabel(PlotSegment(H, U, brown), "Euler line")
 

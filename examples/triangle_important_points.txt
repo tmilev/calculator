@@ -33,6 +33,7 @@ ca = (A-C)/ lengthB;
 abperp = (-ab_2, ab_1);
 bcperp = (-bc_2, bc_1);
 caperp = (-ca_2, ca_1);
+DrawHeel{}({{tip}}, {{base}},{{height}}) = (tip + base*tick, tip + base*tick+height*tick, tip+height*tick);
 heel_a = (h_a+bc*tick, h_a+bcperp*tick+bc*tick, h_a + bcperp*tick);
 heel_b = (h_b+ca*tick, h_b+caperp*tick+ca*tick, h_b + caperp*tick);
 heel_c = (h_c+ab*tick, h_c+abperp*tick+ab*tick, h_c + abperp*tick);
@@ -67,6 +68,9 @@ I = (A lengthA + B lengthB + C lengthC)/p;
 touch_c= A+ (B-A) ((I-A) (B-A)^t )_1/((B-A)(B-A)^t)_1 ;
 touch_a= B+ (C-B) ((I-B) (C-B)^t )_1/((C-B)(C-B)^t)_1 ;
 touch_b= C+ (A-C) ((I-C) (A-C)^t )_1/((A-C)(A-C)^t)_1 ;
+touchHeel_a =DrawHeel{}(touch_a, bc, bcperp);
+touchHeel_b =DrawHeel{}(touch_b, ca, caperp);
+touchHeel_c =DrawHeel{}(touch_c, ab, abperp);
 
 
 r = sqrt(2(p/2 - lengthA )(p/2 - lengthB )(p/2 - lengthC )/p);
@@ -144,6 +148,9 @@ PlotPoint(touch_a, green)
 +PlotSegment(touch_a, I)
 +PlotSegment(touch_b, I)
 +PlotSegment(touch_c, I)
++PlotPath(touchHeel_a, red)
++PlotPath(touchHeel_b, red)
++PlotPath(touchHeel_c, red)
 , "touch points")
 
 

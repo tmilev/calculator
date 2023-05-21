@@ -120,7 +120,7 @@ class ForgotLogin {
   }
 }
 
-var forgotLogin = new ForgotLogin();
+let forgotLogin = new ForgotLogin();
 
 module.exports = {
   forgotLogin

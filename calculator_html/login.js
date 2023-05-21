@@ -218,7 +218,7 @@ function logout() {
 }
 
 function logoutPartTwo() {
-  var page = window.calculator.mainPage;
+  let page = window.calculator.mainPage;
   if (oldUserRole === "admin") {
     reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
   } else {

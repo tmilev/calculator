@@ -192,14 +192,14 @@ bool WebWorker::receiveAll() {
   );
   std::string errorString;
   double numSecondsAtStart = global.getElapsedSeconds();
-  int numBytesInBuffer = 0;
+  int numberOfBytesInBuffer = 0;
   List<char>& readBuffer = this->parent->transportLayerSecurity.readBuffer;
   while (true) {
-    numBytesInBuffer =
+    numberOfBytesInBuffer =
     this->parent->transportLayerSecurity.readOnce(
       this->connectedSocketID, &errorString, nullptr, true
     );
-    if (numBytesInBuffer >= 0) {
+    if (numberOfBytesInBuffer >= 0) {
       break;
     }
     failedReceives ++;
@@ -222,12 +222,12 @@ bool WebWorker::receiveAll() {
         out << "Too many failed receives, aborting. ";
         this->error = out.str();
       }
-      numBytesInBuffer = 0;
+      numberOfBytesInBuffer = 0;
       return false;
     }
   }
   this->messageHead.assign(
-    readBuffer.objects, static_cast<unsigned>(numBytesInBuffer)
+    readBuffer.objects, static_cast<unsigned>(numberOfBytesInBuffer)
   );
   this->parseMessageHead();
   if (this->requestType == WebWorker::requestTypes::requestPost) {
@@ -266,18 +266,18 @@ bool WebWorker::receiveAll() {
       this->displayUserInput = this->error;
       return false;
     }
-    numBytesInBuffer =
+    numberOfBytesInBuffer =
     this->parent->transportLayerSecurity.readOnce(
       this->connectedSocketID, &errorString, nullptr, true
     );
-    if (numBytesInBuffer == 0) {
+    if (numberOfBytesInBuffer == 0) {
       this->error =
       "While trying to fetch message-body, received 0 bytes. " +
       this->parent->toStringLastErrorDescription();
       this->displayUserInput = this->error;
       return false;
     }
-    if (numBytesInBuffer < 0) {
+    if (numberOfBytesInBuffer < 0) {
       if (
         errno == EAGAIN ||
         errno == EWOULDBLOCK ||
@@ -296,7 +296,7 @@ bool WebWorker::receiveAll() {
       return false;
     }
     bufferString.assign(
-      readBuffer.objects, static_cast<unsigned>(numBytesInBuffer)
+      readBuffer.objects, static_cast<unsigned>(numberOfBytesInBuffer)
     );
     this->messageBody += bufferString;
   }
@@ -1738,15 +1738,15 @@ int WebWorker::processFile(bool generateLinkToCalculatorOnMissingFile) {
   this->bufferFileIO.setSize(bufferSize);
   fileStream.seekg(0);
   fileStream.read(&this->bufferFileIO[0], this->bufferFileIO.size);
-  long numBytesRead = fileStream.gcount();
-  while (numBytesRead != 0) {
-    this->bufferFileIO.setSize(static_cast<int>(numBytesRead));
+  long numberOfBytesRead = fileStream.gcount();
+  while (numberOfBytesRead != 0) {
+    this->bufferFileIO.setSize(static_cast<int>(numberOfBytesRead));
     this->queueBytesForSendingNoHeader(this->bufferFileIO);
     this->bufferFileIO.setSize(bufferSize);
     fileStream.read(
       this->bufferFileIO.objects, this->bufferFileIO.size
     );
-    numBytesRead = fileStream.gcount();
+    numberOfBytesRead = fileStream.gcount();
   }
   this->sendAllBytesNoHeaders();
   return 0;

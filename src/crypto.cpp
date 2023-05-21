@@ -72,10 +72,9 @@ bool Crypto::haveEqualHashes(
   return leftSHA == rightSHA;
 }
 
-void Crypto::Random::getRandomLargePrime(
-  LargeIntegerUnsigned& output, int numBytes
+void Crypto::Random::getRandomLargePrime(LargeIntegerUnsigned& output, int numberOfBytes
 ) {
-  Crypto::Random::getRandomLargeIntegerSecure(output, numBytes);
+  Crypto::Random::getRandomLargeIntegerSecure(output, numberOfBytes);
   if (output.isEven()) {
     output ++;
   }
@@ -87,11 +86,10 @@ void Crypto::Random::getRandomLargePrime(
   }
 }
 
-void Crypto::Random::getRandomLargeIntegerSecure(
-  LargeIntegerUnsigned& output, int numBytes
+void Crypto::Random::getRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numberOfBytes
 ) {
   ListZeroAfterUse<unsigned char> randomBytes;
-  Crypto::Random::getRandomBytesSecureInternal(randomBytes, numBytes);
+  Crypto::Random::getRandomBytesSecureInternal(randomBytes, numberOfBytes);
   Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
     randomBytes.data, output
   );
@@ -1515,14 +1513,14 @@ void Crypto::computeSha1(
   // adding: if (messageLength % 256 == 0)
   // appears to produce wrong results.
   inputStringPreprocessed.push_back(static_cast<char>(0x80));
-  unsigned numbytesMod64 = inputStringPreprocessed.size() % 64;
-  if (numbytesMod64 > 56) {
-    for (unsigned i = numbytesMod64; i < 64; i ++) {
+  unsigned numberOfBytesMod64 = inputStringPreprocessed.size() % 64;
+  if (numberOfBytesMod64 > 56) {
+    for (unsigned i = numberOfBytesMod64; i < 64; i ++) {
       inputStringPreprocessed.push_back(0);
     }
-    numbytesMod64 = 0;
+    numberOfBytesMod64 = 0;
   }
-  for (unsigned i = numbytesMod64; i < 56; i ++) {
+  for (unsigned i = numberOfBytesMod64; i < 56; i ++) {
     inputStringPreprocessed.push_back(0);
   }
   Crypto::convertUint64toBigendianStringAppendResult(
@@ -2032,14 +2030,14 @@ void Crypto::computeSha2xx(
   // *sizeof(char);
   List<unsigned char> inputPreprocessed = input;
   inputPreprocessed.addOnTop(0x80);
-  unsigned numbytesMod64 = inputPreprocessed.size % 64;
-  if (numbytesMod64 > 56) {
-    for (unsigned i = numbytesMod64; i < 64; i ++) {
+  unsigned numberOfBytesMod64 = inputPreprocessed.size % 64;
+  if (numberOfBytesMod64 > 56) {
+    for (unsigned i = numberOfBytesMod64; i < 64; i ++) {
       inputPreprocessed.addOnTop(0);
     }
-    numbytesMod64 = 0;
+    numberOfBytesMod64 = 0;
   }
-  for (unsigned i = numbytesMod64; i < 56; i ++) {
+  for (unsigned i = numberOfBytesMod64; i < 56; i ++) {
     inputPreprocessed.addOnTop(0);
   }
   Crypto::convertUint64toBigendianListUnsignedCharAppendResult(
@@ -2183,14 +2181,14 @@ void Crypto::computeSha512(
   uint64_t messageBitLength = static_cast<unsigned>(input.size) * 8;
   List<unsigned char> inputPreprocessed = input;
   inputPreprocessed.addOnTop(0x80);
-  unsigned numbytesMod128 = inputPreprocessed.size % 128;
-  if (numbytesMod128 > 112) {
-    for (unsigned i = numbytesMod128; i < 128; i ++) {
+  unsigned numberOfBytesMod128 = inputPreprocessed.size % 128;
+  if (numberOfBytesMod128 > 112) {
+    for (unsigned i = numberOfBytesMod128; i < 128; i ++) {
       inputPreprocessed.addOnTop(0);
     }
-    numbytesMod128 = 0;
+    numberOfBytesMod128 = 0;
   }
-  for (unsigned i = numbytesMod128; i < 112; i ++) {
+  for (unsigned i = numberOfBytesMod128; i < 112; i ++) {
     inputPreprocessed.addOnTop(0);
   }
   Crypto::convertUint128toBigendianListUnsignedCharAppendResult(

@@ -190,7 +190,7 @@ bool TransportLayerSecurity::sslWriteLoop(
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << i
-      << " errors writing to socket.\n NumBytes: "
+      << " errors writing to socket.\n NumberOfBytes: "
       << numberOfBytes
       << ". ";
     }
@@ -419,19 +419,19 @@ bool TransportLayerSecurityServer::writeBytesOnce(
     static_cast<void*>(&tv),
     sizeof(timeval)
   );
-  ssize_t numBytesSent =
+  ssize_t numberOfBytesSent =
   send(
     this->session.socketId,
     input.objects,
     static_cast<size_t>(input.size),
     0
   );
-  if (numBytesSent < 0) {
+  if (numberOfBytesSent < 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Error receiving bytes. " << strerror(errno);
     }
   }
-  return numBytesSent >= 0;
+  return numberOfBytesSent >= 0;
 }
 
 std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
@@ -541,7 +541,7 @@ bool TransportLayerSecurityServer::readBytesOnce(
     sizeof(timeval)
   );
   this->incomingBytes.setSize(this->defaultBufferCapacity);
-  int numBytesInBuffer = static_cast<int>(
+  int numberOfBytesInBuffer = static_cast<int>(
     recv(
       this->session.socketId,
       this->incomingBytes.objects,
@@ -549,8 +549,8 @@ bool TransportLayerSecurityServer::readBytesOnce(
       0
     )
   );
-  if (numBytesInBuffer >= 0) {
-    this->incomingBytes.setSize(numBytesInBuffer);
+  if (numberOfBytesInBuffer >= 0) {
+    this->incomingBytes.setSize(numberOfBytesInBuffer);
   }
   global
   << "Read bytes:\n"
@@ -558,7 +558,7 @@ bool TransportLayerSecurityServer::readBytesOnce(
     this->incomingBytes, 40, false
   )
   << Logger::endL;
-  return numBytesInBuffer > 0;
+  return numberOfBytesInBuffer > 0;
 }
 
 TransportLayerSecurityServer& SSLContent::GetServer() const {
@@ -1437,23 +1437,22 @@ bool Serialization::readFourByteInt(
   );
 }
 
-bool Serialization::readNByteInt(
-  int numBytes,
+bool Serialization::readNByteInt(int numberOfBytes,
   const List<unsigned char>& input,
   int& inputOutputOffset,
   int& result,
   std::stringstream* commentsOnFailure
 ) {
-  if (numBytes > 4) {
+  if (numberOfBytes > 4) {
     global.fatal
     << "Not allowed to read more than 4 bytes into an integer. "
     << global.fatal;
   }
-  if (numBytes + inputOutputOffset > input.size) {
+  if (numberOfBytes + inputOutputOffset > input.size) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "At least "
-      << numBytes
+      << numberOfBytes
       << " bytes required to read integer. Input has: "
       << input.size
       << " bytes and offset is: "
@@ -1463,11 +1462,11 @@ bool Serialization::readNByteInt(
     return false;
   }
   result = 0;
-  for (int i = 0; i < numBytes; i ++) {
+  for (int i = 0; i < numberOfBytes; i ++) {
     result *= 256;
     result += static_cast<unsigned>(input[inputOutputOffset + i]);
   }
-  inputOutputOffset += numBytes;
+  inputOutputOffset += numberOfBytes;
   return true;
 }
 
@@ -1545,8 +1544,7 @@ bool Serialization::readTwoByteLengthFollowedByBytesDontOutputOffset(
   );
 }
 
-bool Serialization::readNByteLengthFollowedByBytes(
-  int numBytesLength,
+bool Serialization::readNByteLengthFollowedByBytes(int numberOfBytesLength,
   const List<unsigned char>& input,
   int& outputOffset,
   int* resultLength,
@@ -1559,7 +1557,7 @@ bool Serialization::readNByteLengthFollowedByBytes(
   }
   if (
     !Serialization::readNByteInt(
-      numBytesLength, input, outputOffset, *resultLength, commentsOnError
+      numberOfBytesLength, input, outputOffset, *resultLength, commentsOnError
     )
   ) {
     return false;

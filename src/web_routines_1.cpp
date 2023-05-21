@@ -162,7 +162,7 @@ void WebServerMonitor::monitor(
       << "Connection monitor: ping #"
       << numPings
       << ": received "
-      << webCrawler.lastNumBytesRead
+      << webCrawler.lastNumberOfBytesRead
       << " bytes. "
       << std::endl;
       numConsecutiveFailedPings = 0;
@@ -225,7 +225,7 @@ WebClient::WebClient() {
   this->socketInteger = - 1;
   this->serverOtherSide = nullptr;
   this->serverInfo = nullptr;
-  this->lastNumBytesRead = 0;
+  this->lastNumberOfBytesRead = 0;
 }
 
 void WebClient::freeAddressInfo() {
@@ -298,7 +298,7 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
   // will point to the results
   this->socketInteger = - 1;
   char ipString[INET6_ADDRSTRLEN];
-  int numBytesWritten = - 1;
+  int numberOfBytesWritten = - 1;
   for (
     p = this->serverInfo; p != nullptr;
     p = p->ai_next,
@@ -401,22 +401,22 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
     std::string getMessage =
     "GET /cgi-bin/calculator?request=" + pingAuthentication;
     std::stringstream errorStream1;
-    numBytesWritten =
+    numberOfBytesWritten =
     Pipe::writeWithTimeoutViaSelect(
       this->socketInteger, getMessage, 1, 10, &errorStream1
     );
-    if (static_cast<unsigned>(numBytesWritten) != getMessage.size()) {
+    if (static_cast<unsigned>(numberOfBytesWritten) != getMessage.size()) {
       this->lastTransactionErrors +=
       "\nERROR writing to socket. " + errorStream1.str();
       close(this->socketInteger);
       continue;
     }
     std::stringstream errorStream2;
-    this->lastNumBytesRead =
+    this->lastNumberOfBytesRead =
     Pipe::readWithTimeOutViaSelect(
       this->socketInteger, this->buffer, 1, 10, &errorStream2
     );
-    if (this->lastNumBytesRead < 0) {
+    if (this->lastNumberOfBytesRead < 0) {
       this->lastTransactionErrors +=
       "ERROR reading from socket. " + errorStream2.str();
       close(this->socketInteger);
@@ -424,13 +424,13 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
     }
     std::string readString;
     readString.assign(
-      buffer.objects, static_cast<unsigned>(this->lastNumBytesRead)
+      buffer.objects, static_cast<unsigned>(this->lastNumberOfBytesRead)
     );
     reportStream
     << "Wrote "
-    << numBytesWritten
+    << numberOfBytesWritten
     << ", read "
-    << this->lastNumBytesRead
+    << this->lastNumberOfBytesRead
     << " bytes: "
     << readString
     << ". ";

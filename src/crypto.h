@@ -477,10 +477,10 @@ public:
     // entropy than 64 bits.
     static void acquireAdditionalRandomness(int64_t additionalRandomness);
     static void getRandomLargeIntegerSecure(
-      LargeIntegerUnsigned& output, int numBytes
+      LargeIntegerUnsigned& output, int numberOfBytes
     );
     static void getRandomLargePrime(
-      LargeIntegerUnsigned& output, int numBytes
+      LargeIntegerUnsigned& output, int numberOfBytes
     );
   };
 

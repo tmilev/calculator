@@ -230,7 +230,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   static bool readNByteInt(
-    int numBytes,
+    int numberOfBytes,
     const List<unsigned char>& input,
     int& inputOutputOffset,
     int& result,
@@ -271,7 +271,7 @@ public:
     std::stringstream* commentsOnError
   );
   static bool readNByteLengthFollowedByBytes(
-    int numBytesLength,
+    int numberOfBytesLength,
     const List<unsigned char>& input,
     int& outputOffset,
     int* resultLength,

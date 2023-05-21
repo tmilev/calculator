@@ -23,7 +23,7 @@ public:
   bool flagDoUseGET;
   LargeInteger expectedLength;
   List<char> buffer;
-  int lastNumBytesRead;
+  int lastNumberOfBytesRead;
   struct sockaddr_in serverAddress;
   struct hostent* serverOtherSide;
   struct addrinfo hints;

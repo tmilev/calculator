@@ -1989,7 +1989,7 @@ getActionGeneralizedVermaModuleAsDifferentialOperator(
     exponentContribution.makeOne();
     coefficient = result.coefficients[i];
     for (int j = 0; j < indicesNilrad.size; j ++) {
-      currentMon.powers[j].getConstantTerm(currentShift);
+      currentMon.powers[j].constantTerm(currentShift);
       ElementWeylAlgebra<Rational>::
       getStandardOrderDifferentialOperatorCorrespondingToNRaisedTo(
         currentShift,

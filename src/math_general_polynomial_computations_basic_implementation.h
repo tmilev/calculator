@@ -91,7 +91,7 @@ Polynomial<Coefficient> Polynomial<Coefficient>::zero() {
 template <class Coefficient>
 Rational Polynomial<Coefficient>::rationalValue() {
   Rational result;
-  this->getConstantTerm(result, 0);
+  this->constantTerm(result, 0);
   return result;
 }
 
@@ -602,8 +602,7 @@ void Polynomial<Coefficient>::raiseToPower(int d, const Coefficient& one) {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::
-getRootFromLinearPolynomialConstantTermLastVariable(
+bool Polynomial<Coefficient>::rootFromLinearPolynomialConstantTermLastVariable(
   Vector<Coefficient>& outputRoot
 ) {
   return this->isLinearGetRootConstantTermLastCoordinate(outputRoot);
@@ -651,7 +650,7 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
 
 template <class Coefficient>
 int Polynomial<Coefficient>::
-getHighestIndexSuchThatHigherIndexVariablesDontParticipate() {
+highestIndexSuchThatHigherIndexVariablesDontParticipate() {
   int result = - 1;
   for (int i = 0; i < this->size; i ++) {
     result =
@@ -1125,8 +1124,7 @@ void Polynomial<Coefficient>::assignMinimalPolynomial(
 }
 
 template <class Coefficient>
-int Polynomial<Coefficient>::getMaximumPowerOfVariableIndex(int variableIndex)
-{
+int Polynomial<Coefficient>::maximumPowerOfVariableIndex(int variableIndex) {
   int result = 0;
   for (int i = 0; i < this->size(); i ++) {
     result =
@@ -1168,7 +1166,7 @@ void Polynomial<Coefficient>::interpolate(
 }
 
 template <class Coefficient>
-Coefficient Polynomial<Coefficient>::getDiscriminant() {
+Coefficient Polynomial<Coefficient>::discriminant() {
   STACK_TRACE("Polynomial::getDiscriminant");
   if (this->minimalNumberOfVariables() > 1) {
     global.fatal
@@ -1189,7 +1187,7 @@ Coefficient Polynomial<Coefficient>::getDiscriminant() {
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::getConstantTerm(
+void Polynomial<Coefficient>::constantTerm(
   Coefficient& output, const Coefficient& ringZero
 ) const {
   MonomialPolynomial tempM;
@@ -1223,7 +1221,7 @@ void Polynomial<Coefficient>::makeMonomial(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::getCoefficientInFrontOfLinearTermVariableIndex(
+void Polynomial<Coefficient>::coefficientInFrontOfLinearTermVariableIndex(
   int index, Coefficient& output
 ) {
   MonomialPolynomial tempM;
@@ -1710,13 +1708,13 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::getCoefficientPolynomialOfXPowerK(
+void Polynomial<Coefficient>::coefficientPolynomialOfXPowerK(
   int variableIndex, int variablePower, Polynomial<Coefficient>& output
 ) {
   if (this == &output) {
     Polynomial<Coefficient> myCopy = *this;
     return
-    myCopy.getCoefficientPolynomialOfXPowerK(
+    myCopy.coefficientPolynomialOfXPowerK(
       variableIndex, variablePower, output
     );
   }
@@ -1733,7 +1731,7 @@ void Polynomial<Coefficient>::getCoefficientPolynomialOfXPowerK(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
+void Polynomial<Coefficient>::polynomialWithPolynomialCoefficient(
   Selection& nonCoefficientVariables,
   Polynomial<Polynomial<Coefficient> >& output
 ) const {
@@ -1771,12 +1769,13 @@ void Polynomial<Coefficient>::getPolynomialWithPolynomialCoefficient(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::getPolynomialUnivariateWithPolynomialCoefficients
-(int variableIndex, Polynomial<Polynomial<Coefficient> >& output) const {
+void Polynomial<Coefficient>::polynomialUnivariateWithPolynomialCoefficients(
+  int variableIndex, Polynomial<Polynomial<Coefficient> >& output
+) const {
   Selection variables;
   variables.initialize(this->minimalNumberOfVariables());
   variables.addSelectionAppendNewIndex(variableIndex);
-  this->getPolynomialWithPolynomialCoefficient(variables, output);
+  this->polynomialWithPolynomialCoefficient(variables, output);
 }
 
 #endif // header_math_general_polynomial_computations_basic_implementation_ALREADY_INCLUDED

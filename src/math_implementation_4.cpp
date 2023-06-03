@@ -2711,7 +2711,7 @@ void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
     currentCLS.lattice = ZnLattice;
     bool tempBool =
     this->multiplicities[i].valueOnEachLatticeShift[0].
-    getRootFromLinearPolynomialConstantTermLastVariable(latticePtoMax);
+    rootFromLinearPolynomialConstantTermLastVariable(latticePtoMax);
     if (!tempBool) {
       global.fatal << "This should not happen. " << global.fatal;
     }

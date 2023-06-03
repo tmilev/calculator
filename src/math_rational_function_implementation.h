@@ -214,7 +214,7 @@ Rational RationalFraction<Coefficient>::rationalValue() const {
   case RationalFraction::typeError:
     return 0;
   default:
-    return this->numerator.getElementConst().getConstantTerm();
+    return this->numerator.getElementConst().constantTerm();
   }
 }
 
@@ -350,10 +350,9 @@ void RationalFraction<Coefficient>::greatestCommonDivisor(
     return;
   }
   STACK_TRACE("RationalFunctionOld::gcd");
-  Polynomial<Coefficient>
-  leastCommonMultipleBuffer,
-  productBuffer,
-  remainderBuffer;
+  Polynomial<Coefficient> leastCommonMultipleBuffer;
+  Polynomial<Coefficient> productBuffer;
+  Polynomial<Coefficient> remainderBuffer;
   RationalFraction<Coefficient>::leastCommonMultiple(
     left, right, leastCommonMultipleBuffer
   );
@@ -1504,7 +1503,7 @@ bool RationalFraction<Coefficient>::getRelations(
     Polynomial<Rational>& currentPoly = groebnerBasis[i];
     bool bad = false;
     for (int j = 0; j < numStartingVariables; j ++) {
-      if (currentPoly.getMaximumPowerOfVariableIndex(j) > 0) {
+      if (currentPoly.maximumPowerOfVariableIndex(j) > 0) {
         bad = true;
         break;
       }

@@ -54,8 +54,8 @@ solvePolynomialWithRadicals(
     }
     if (factor.isLinear()) {
       this->solutions.addOnTop(
-        - factor.getConstantTerm() /
-        factor.getCoefficientInFrontOfLinearTermVariableIndex(0)
+        - factor.constantTerm() /
+        factor.coefficientInFrontOfLinearTermVariableIndex(0)
       );
     } else {
       Rational a = factor.getCoefficientOf(MonomialPolynomial(0, 2));
@@ -875,11 +875,11 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   &MonomialPolynomial::orderDefault();
   minimialPolynomial /=
   minimialPolynomial.getLeadingCoefficient(monomialOrder);
-  minimialPolynomial.getCoefficientInFrontOfLinearTermVariableIndex(
+  minimialPolynomial.coefficientInFrontOfLinearTermVariableIndex(
     0, linearTermCoefficientFDividedByTwo
   );
   linearTermCoefficientFDividedByTwo /= 2;
-  minimialPolynomial.getConstantTerm(constantTermShifted);
+  minimialPolynomial.constantTerm(constantTermShifted);
   constantTermShifted -=
   linearTermCoefficientFDividedByTwo * linearTermCoefficientFDividedByTwo;
   constantTermShifted *= - 1;

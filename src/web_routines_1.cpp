@@ -405,7 +405,9 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
     Pipe::writeWithTimeoutViaSelect(
       this->socketInteger, getMessage, 1, 10, &errorStream1
     );
-    if (static_cast<unsigned>(numberOfBytesWritten) != getMessage.size()) {
+    if (
+      static_cast<unsigned>(numberOfBytesWritten) != getMessage.size()
+    ) {
       this->lastTransactionErrors +=
       "\nERROR writing to socket. " + errorStream1.str();
       close(this->socketInteger);
@@ -424,7 +426,8 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
     }
     std::string readString;
     readString.assign(
-      buffer.objects, static_cast<unsigned>(this->lastNumberOfBytesRead)
+      buffer.objects,
+      static_cast<unsigned>(this->lastNumberOfBytesRead)
     );
     reportStream
     << "Wrote "

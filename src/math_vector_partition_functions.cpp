@@ -483,7 +483,7 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
   QuasiPolynomial bernoulliSumSubstituted;
   output.makeZeroOverLattice(startingLattice);
   Polynomial<Polynomial<Rational> > polynomialWithPolynomialCoefficients;
-  substituted.getPolynomialUnivariateWithPolynomialCoefficients(
+  substituted.polynomialUnivariateWithPolynomialCoefficients(
     dimension, polynomialWithPolynomialCoefficients
   );
   if (this->comments.shouldComment()) {
@@ -518,7 +518,7 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
   }
   for (int i = 0; i <= startingDegree; i ++) {
     coefficientInFrontOfPower =
-    polynomialWithPolynomialCoefficients.getCoefficientOfXPowerK(dimension, i);
+    polynomialWithPolynomialCoefficients.coefficientOfXPowerK(dimension, i);
     this->bernoulliSumComputer.getBernoulliSumStartingAtZero(i, bernoulliSum);
     if (this->comments.shouldComment()) {
       FormatExpressions format;

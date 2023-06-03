@@ -1437,7 +1437,8 @@ bool Serialization::readFourByteInt(
   );
 }
 
-bool Serialization::readNByteInt(int numberOfBytes,
+bool Serialization::readNByteInt(
+  int numberOfBytes,
   const List<unsigned char>& input,
   int& inputOutputOffset,
   int& result,
@@ -1544,7 +1545,8 @@ bool Serialization::readTwoByteLengthFollowedByBytesDontOutputOffset(
   );
 }
 
-bool Serialization::readNByteLengthFollowedByBytes(int numberOfBytesLength,
+bool Serialization::readNByteLengthFollowedByBytes(
+  int numberOfBytesLength,
   const List<unsigned char>& input,
   int& outputOffset,
   int* resultLength,
@@ -1557,7 +1559,11 @@ bool Serialization::readNByteLengthFollowedByBytes(int numberOfBytesLength,
   }
   if (
     !Serialization::readNByteInt(
-      numberOfBytesLength, input, outputOffset, *resultLength, commentsOnError
+      numberOfBytesLength,
+      input,
+      outputOffset,
+      *resultLength,
+      commentsOnError
     )
   ) {
     return false;

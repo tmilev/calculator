@@ -3204,11 +3204,11 @@ public:
     this->makeZero();
     this->addMonomial(r, coefficient);
   }
-  void getConstantTerm(Coefficient& output, const Coefficient& ringZero = 0)
+  void constantTerm(Coefficient& output, const Coefficient& ringZero = 0)
   const;
-  Coefficient getConstantTerm(const Coefficient& ringZero = 0) const {
+  Coefficient constantTerm(const Coefficient& ringZero = 0) const {
     Coefficient result;
-    this->getConstantTerm(result, ringZero);
+    this->constantTerm(result, ringZero);
     return result;
   }
   static void getValuesLagrangeInterpolands(
@@ -3239,13 +3239,13 @@ public:
     const Vector<Coefficient>& valuesAtPoints
   );
   bool findOneVariableRationalRoots(List<Rational>& output);
-  Coefficient getDiscriminant();
-  void getCoefficientInFrontOfLinearTermVariableIndex(
+  Coefficient discriminant();
+  void coefficientInFrontOfLinearTermVariableIndex(
     int index, Coefficient& output
   );
-  Coefficient getCoefficientInFrontOfLinearTermVariableIndex(int index) {
+  Coefficient coefficientInFrontOfLinearTermVariableIndex(int index) {
     Coefficient result;
-    this->getCoefficientInFrontOfLinearTermVariableIndex(index, result);
+    this->coefficientInFrontOfLinearTermVariableIndex(index, result);
     return result;
   }
   void makeMonomial(
@@ -3301,16 +3301,16 @@ public:
     this->addMonomial(one, constant);
   }
   void makeOne();
-  void getPolynomialWithPolynomialCoefficient(
+  void polynomialWithPolynomialCoefficient(
     Selection& nonCoefficientVariables,
     Polynomial<Polynomial<Coefficient> >& output
   ) const;
-  void getPolynomialUnivariateWithPolynomialCoefficients(
+  void polynomialUnivariateWithPolynomialCoefficients(
     int variableIndex, Polynomial<Polynomial<Coefficient> >& output
   ) const;
   // Returns the polynomial coefficient in front of the variable
   // x_{variableIndex}^variablePower.
-  void getCoefficientPolynomialOfXPowerK(
+  void coefficientPolynomialOfXPowerK(
     int variableIndex, int variablePower, Polynomial<Coefficient>& output
   );
   // Multivariable polynomial division with remainder.
@@ -3331,7 +3331,7 @@ public:
   }
   void shiftVariableIndicesToTheRight(int variableIndexShift);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables);
-  int getHighestIndexSuchThatHigherIndexVariablesDontParticipate();
+  int highestIndexSuchThatHigherIndexVariablesDontParticipate();
   void scaleToPositiveMonomialExponents(
     MonomialPolynomial& outputIWasMultipliedBy
   );
@@ -3352,7 +3352,7 @@ public:
     Vector<Coefficient>& outputRoot
   );
   void raiseToPower(int d, const Coefficient& one);
-  bool getRootFromLinearPolynomialConstantTermLastVariable(
+  bool rootFromLinearPolynomialConstantTermLastVariable(
     Vector<Coefficient>& outputRoot
   );
   Matrix<Coefficient> evaluateUnivariatePolynomial(
@@ -3374,7 +3374,7 @@ public:
     Coefficient& outputTimesMeEqualsOther,
     const Coefficient& ringUnit
   ) const;
-  int getMaximumPowerOfVariableIndex(int variableIndex);
+  int maximumPowerOfVariableIndex(int variableIndex);
   bool operator<=(const Coefficient& other) const;
   bool operator<(const Coefficient& other) const;
   bool operator>(const Polynomial<Coefficient>& other) const;
@@ -3414,7 +3414,7 @@ public:
   template <class otherType>
   void assignOtherType(const Polynomial<otherType>& other);
   // Returns the coefficient a of a monomial of the form ax^k.
-  Coefficient getCoefficientOfXPowerK(int variableIndex, int variablePower) {
+  Coefficient coefficientOfXPowerK(int variableIndex, int variablePower) {
     MonomialPolynomial monomial;
     monomial.setVariable(variableIndex, variablePower);
     return this->getCoefficientOf(monomial);
@@ -3486,6 +3486,12 @@ public:
   };
 };
 
+/*template <>
+void Polynomial<Rational>::greatestCommonDivisorOneVariable(    const Polynomial<Coefficient>& left,
+const Polynomial<Rational>& right,
+Polynomial<Rational>& output,
+std::stringstream* commentsOnFailure
+);*/
 template <class Coefficient>
 class SylvesterMatrix {
   static void fillSylvesterMatrix(

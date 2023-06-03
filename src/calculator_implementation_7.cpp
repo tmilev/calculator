@@ -2121,7 +2121,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
       );
       continue;
     }
-    Rational discriminant = currentSecondDegreePolynomial.getDiscriminant();
+    Rational discriminant = currentSecondDegreePolynomial.discriminant();
     if (discriminant < 0) {
       this->denominatorFactorsAlgebraicWithMultiplicities.addMonomial(
         currentSecondDegreePolyAlgebraic,
@@ -2194,7 +2194,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
   << this->stringPolyIndentityNonSimplifiedLatex
   << "\\]";
   Polynomial<Polynomial<AlgebraicNumber> > univariateThatMustVanish;
-  polynomialThatMustVanish.getPolynomialUnivariateWithPolynomialCoefficients(
+  polynomialThatMustVanish.polynomialUnivariateWithPolynomialCoefficients(
     0, univariateThatMustVanish
   );
   this->printoutPartialFractionsHtml

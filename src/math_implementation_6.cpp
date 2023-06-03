@@ -56,7 +56,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
     &MonomialPolynomial::orderDefault()
   );
   Rational lowestTerm, highestCoefficient;
-  this->getConstantTerm(lowestTerm);
+  this->constantTerm(lowestTerm);
   if (lowestTerm == 0) {
     Polynomial<Rational> x1, tempP;
     x1.makeMonomial(0, 1, 1);
@@ -333,7 +333,7 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
   Rational a, b, c;
   for (int i = 0; i < factorization.reduced.size; i ++) {
     Polynomial<Rational>& factor = factorization.reduced[i];
-    c = factor.getConstantTerm(0);
+    c = factor.constantTerm(0);
     b = factor.getCoefficientOf(x);
     a = factor.getCoefficientOf(xSquared);
     if (factor.totalDegree() > 2 || factor.totalDegree() < 1) {
@@ -350,7 +350,7 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
     }
     if (factor.totalDegree() == 2) {
       AlgebraicNumber squareRootOfDiscriminant;
-      Rational discriminant = factor.getDiscriminant();
+      Rational discriminant = factor.discriminant();
       if (
         !squareRootOfDiscriminant.assignRationalQuadraticRadical(
           discriminant, closure, nullptr

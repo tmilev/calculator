@@ -644,7 +644,7 @@ bool CalculatorFunctions::cardanoFormula(
   int indexVariableMaximumDegree = - 1;
   int maximumPower = 0;
   for (int i = 0; i < withContext.context.numberOfVariables(); i ++) {
-    int currentPower = polynomialInternal.getMaximumPowerOfVariableIndex(i);
+    int currentPower = polynomialInternal.maximumPowerOfVariableIndex(i);
     if (currentPower > maximumPower) {
       maximumPower = currentPower;
       indexVariableMaximumDegree = i;
@@ -667,31 +667,31 @@ bool CalculatorFunctions::cardanoFormula(
   Expression cCoefficient;
   Expression dCoefficient;
   Polynomial<Polynomial<Rational> > coefficients;
-  polynomialInternal.getPolynomialWithPolynomialCoefficient(
+  polynomialInternal.polynomialWithPolynomialCoefficient(
     nonCoefficientVariables, coefficients
   );
   ExpressionContext contextCopy = withContext.context;
   CalculatorConversions::expressionFromPolynomial(
     calculator,
-    coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 3),
+    coefficients.coefficientOfXPowerK(indexVariableMaximumDegree, 3),
     aCoefficient,
     &contextCopy
   );
   CalculatorConversions::expressionFromPolynomial(
     calculator,
-    coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 2),
+    coefficients.coefficientOfXPowerK(indexVariableMaximumDegree, 2),
     bCoefficient,
     &contextCopy
   );
   CalculatorConversions::expressionFromPolynomial(
     calculator,
-    coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 1),
+    coefficients.coefficientOfXPowerK(indexVariableMaximumDegree, 1),
     cCoefficient,
     &contextCopy
   );
   CalculatorConversions::expressionFromPolynomial(
     calculator,
-    coefficients.getCoefficientOfXPowerK(indexVariableMaximumDegree, 0),
+    coefficients.coefficientOfXPowerK(indexVariableMaximumDegree, 0),
     dCoefficient,
     &contextCopy
   );

@@ -1044,7 +1044,8 @@ writeLength(unsigned int input, List<unsigned char>& output, int offset) {
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::
   getReservedBytesForLength(static_cast<signed>(input)) -
   1;
-  unsigned char lengthPlus128 = 128 + static_cast<unsigned char>(numberOfBytes);
+  unsigned char lengthPlus128 =
+  128 + static_cast<unsigned char>(numberOfBytes);
   output[offset] = lengthPlus128;
   offset ++;
   Serialization::writeNByteUnsigned(

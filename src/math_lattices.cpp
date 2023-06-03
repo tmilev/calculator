@@ -488,7 +488,7 @@ bool QuasiPolynomial::substitutionFewerVariables(
   }
   subLatticeShift.initialize(latticeSubstitution.numberOfRows, 1);
   for (int i = 0; i < subLatticeShift.numberOfRows; i ++) {
-    substitution[i].getConstantTerm(
+    substitution[i].constantTerm(
       subLatticeShift.elements[i][0], Rational(0)
     );
   }
@@ -1244,7 +1244,7 @@ getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
       return false;
     }
     for (int j = 0; j < targetDimension; j ++) {
-      currentPoly.getCoefficientInFrontOfLinearTermVariableIndex(
+      currentPoly.coefficientInFrontOfLinearTermVariableIndex(
         j, output.elements[i][j]
       );
     }

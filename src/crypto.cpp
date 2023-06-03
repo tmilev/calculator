@@ -72,7 +72,8 @@ bool Crypto::haveEqualHashes(
   return leftSHA == rightSHA;
 }
 
-void Crypto::Random::getRandomLargePrime(LargeIntegerUnsigned& output, int numberOfBytes
+void Crypto::Random::getRandomLargePrime(
+  LargeIntegerUnsigned& output, int numberOfBytes
 ) {
   Crypto::Random::getRandomLargeIntegerSecure(output, numberOfBytes);
   if (output.isEven()) {
@@ -86,7 +87,8 @@ void Crypto::Random::getRandomLargePrime(LargeIntegerUnsigned& output, int numbe
   }
 }
 
-void Crypto::Random::getRandomLargeIntegerSecure(LargeIntegerUnsigned& output, int numberOfBytes
+void Crypto::Random::getRandomLargeIntegerSecure(
+  LargeIntegerUnsigned& output, int numberOfBytes
 ) {
   ListZeroAfterUse<unsigned char> randomBytes;
   Crypto::Random::getRandomBytesSecureInternal(randomBytes, numberOfBytes);

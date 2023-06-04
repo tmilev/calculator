@@ -1620,33 +1620,6 @@ void Calculator::initializeFunctionsStandard() {
     "g=PolynomialModP{}(3x^{4}+2x^{3}+3x +3,7);\n"
     "GCDPoly(f, g);\n"
     "GCDPoly{}(x y, y+x z);\n"
-    "GCDPoly{}("
-    "-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}"
-    "-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ "
-    "2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+"
-    "2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ "
-    "x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-"
-    "x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ "
-    "x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, "
-    "x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-"
-    "2x_{13}^{3}x_{17}^{2}x_{21}^{3}- "
-    "4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+"
-    "2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- "
-    "2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+"
-    "2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- "
-    "x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2})",
-    "CalculatorFunctionsPolynomial::greatestCommonDivisorPolynomial",
-    "GCDPoly",
-    innerStandard
-  );
-  this->addOperationHandler(
-    "GCDPolySlow",
-    CalculatorFunctionsPolynomial::greatestCommonDivisorPolynomialRationalSlow,
-    "",
-    "Same as GCDPoly but only for rational polynomials "
-    "and does not make attempts to run quicker by "
-    "sidestepping the Euclidean algorithm over the rationals.",
-    "GCDPolySlow{}(x^3-1, x^2-1);\n"
     "GCDPoly(x^9-31x -1, x^11-31x-1);\n"
     "GCDPoly(x^9-31*37x -31, x^11-31*37x-31);\n"
     "a="
@@ -1681,10 +1654,24 @@ void Calculator::initializeFunctionsStandard() {
     "+9744 x^{13}-2436 x^{12}+8416 x^{11}+19334 x^{10}+1548 x^{9}\n"
     "+1160 x^{8}-20917 x^{7}+3492 x^{6}-2142 x^{5}-11573 x^{4}\n"
     "+11904 x^{3}-2936 x^{2}+2530 x-7560;\n"
-    "GCDPoly(a,b);\n",
-    "CalculatorFunctionsPolynomial::"
-    "greatestCommonDivisorPolynomialRationalSlow",
-    "GCDPolySlow",
+    "GCDPoly(a,b);\n"
+    "GCDPoly{}("
+    "-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}"
+    "-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+ "
+    "2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+"
+    "2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+ "
+    "x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-"
+    "x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+ "
+    "x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2}, "
+    "x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-"
+    "2x_{13}^{3}x_{17}^{2}x_{21}^{3}- "
+    "4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+"
+    "2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}- "
+    "2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+"
+    "2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}- "
+    "x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2})",
+    "CalculatorFunctionsPolynomial::greatestCommonDivisorPolynomial",
+    "GCDPoly",
     innerStandard
   );
   this->addOperationHandler(

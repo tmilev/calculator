@@ -108,14 +108,6 @@ public:
     Expression& output,
     bool doGCD
   );
-  static bool
-  greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(
-    Calculator& calculator,
-    const Polynomial<Rational>& left,
-    const Polynomial<Rational>& right,
-    const ExpressionContext& context,
-    Expression& output
-  );
   static bool greatestCommonDivisorOrLeastCommonMultiplePolynomial(
     Calculator& calculator,
     const Expression& input,
@@ -126,18 +118,8 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool doGCD,
-    bool tryQuickly
+    bool doGCD
   );
-  static bool greatestCommonDivisorPolynomialRationalSlow(
-    Calculator& calculator, const Expression& input, Expression& output
-  ) {
-    return
-    CalculatorFunctionsPolynomial::
-    greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
-      calculator, input, output, true, false
-    );
-  }
   static bool leastCommonMultiplePolynomial(
     Calculator& calculator, const Expression& input, Expression& output
   ) {

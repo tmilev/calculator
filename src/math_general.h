@@ -3419,12 +3419,28 @@ public:
     monomial.setVariable(variableIndex, variablePower);
     return this->getCoefficientOf(monomial);
   }
-  static bool greatestCommonDivisorOneVariable(
+  // Default implementation of gcd using the Euclidean algorithm;
+  // can be sped up particular coefficient types; for example
+  // rational gcd can be sped up using modular arithmetic.
+  static bool greatestCommonDivisorOneVariableDefault(
     const Polynomial<Coefficient>& left,
     const Polynomial<Coefficient>& right,
     Polynomial<Coefficient>& output,
     std::stringstream* commentsOnFailure
   );
+  // The default implementation is overriden for
+  // Polynomial<Rational>::greatestCommonDivisorOneVariable.
+  static bool greatestCommonDivisorOneVariable(
+    const Polynomial<Coefficient>& left,
+    const Polynomial<Coefficient>& right,
+    Polynomial<Coefficient>& output,
+    std::stringstream* commentsOnFailure
+  ) {
+    return
+    greatestCommonDivisorOneVariableDefault(
+      left, right, output, commentsOnFailure
+    );
+  }
   static bool greatestCommonDivisor(
     const Polynomial<Coefficient>& left,
     const Polynomial<Coefficient>& right,
@@ -3486,12 +3502,13 @@ public:
   };
 };
 
-/*template <>
-void Polynomial<Rational>::greatestCommonDivisorOneVariable(    const Polynomial<Coefficient>& left,
-const Polynomial<Rational>& right,
-Polynomial<Rational>& output,
-std::stringstream* commentsOnFailure
-);*/
+template < >
+bool Polynomial<Rational>::greatestCommonDivisorOneVariable(
+  const Polynomial<Rational>& left,
+  const Polynomial<Rational>& right,
+  Polynomial<Rational>& output,
+  std::stringstream* commentsOnFailure
+);
 template <class Coefficient>
 class SylvesterMatrix {
   static void fillSylvesterMatrix(

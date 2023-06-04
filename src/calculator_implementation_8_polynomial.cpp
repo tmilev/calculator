@@ -830,7 +830,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
   return
   CalculatorFunctionsPolynomial::
   greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
-    calculator, input, output, doGCD, true
+    calculator, input, output, doGCD
   );
 }
 
@@ -839,8 +839,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool doGCD,
-  bool tryQuickly
+  bool doGCD
 ) {
   STACK_TRACE(
     "CalculatorFunctionsPolynomial::"
@@ -860,53 +859,11 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
   }
   Polynomial<Rational>& left = polynomials[0];
   Polynomial<Rational>& right = polynomials[1];
-  if (tryQuickly) {
-    if (
-      CalculatorFunctionsPolynomial::
-      greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(
-        calculator, left, right, context, output
-      )
-    ) {
-      return true;
-    }
-  }
   return
   CalculatorFunctionsPolynomial::
   greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
     calculator, left, right, context, output, doGCD
   );
-}
-
-bool CalculatorFunctionsPolynomial::
-greatestCommonDivisorOrLeastCommonMultiplePolynomialRationalQuickly(
-  Calculator& calculator,
-  const Polynomial<Rational>& left,
-  const Polynomial<Rational>& right,
-  const ExpressionContext& context,
-  Expression& output
-) {
-  STACK_TRACE(
-    "CalculatorFunctionsPolynomial::"
-    "greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo"
-  );
-  Polynomial<Rational> outputPolynomial;
-  if (left.isEqualToZero() || right.isEqualToZero()) {
-    return calculator << "Not allowed to take gcd of zero. ";
-  }
-  if (
-    left.minimalNumberOfVariables() > 1 || right.minimalNumberOfVariables() > 1
-  ) {
-    return calculator << "Only implemented for 1 variable.";
-  }
-  if (
-    !PolynomialRationalGreatestCommonDivisorComputer::
-    greatestCommonDivisorRational(
-      left, right, outputPolynomial, &calculator.comments
-    )
-  ) {
-    return false;
-  }
-  return output.assignValueWithContext(calculator, outputPolynomial, context);
 }
 
 class GroebnerComputationCalculator {

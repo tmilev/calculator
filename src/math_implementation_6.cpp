@@ -1760,6 +1760,18 @@ greatestCommonDivisorRational(
   return true;
 }
 
+template < >
+bool Polynomial<Rational>::greatestCommonDivisorOneVariable(
+  const Polynomial<Rational>& left,
+  const Polynomial<Rational>& right,
+  Polynomial<Rational>& output,
+  std::stringstream* commentsOnFailure
+) {
+  return
+  PolynomialRationalGreatestCommonDivisorComputer::
+  greatestCommonDivisorRational(left, right, output, commentsOnFailure);
+}
+
 void PolynomialRationalGreatestCommonDivisorComputer::resetComputation() {
   this->product = 1;
   this->previousProduct = 1;

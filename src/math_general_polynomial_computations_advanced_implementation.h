@@ -1638,13 +1638,13 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
+bool Polynomial<Coefficient>::greatestCommonDivisorOneVariableDefault(
   const Polynomial<Coefficient>& left,
   const Polynomial<Coefficient>& right,
   Polynomial<Coefficient>& output,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("Polynomial::greatestCommonDivisorOneVariable");
+  STACK_TRACE("Polynomial::greatestCommonDivisorOneVariableDefault");
   Polynomial<Coefficient> leftCopy = left;
   Polynomial<Coefficient> rightCopy = right;
   Polynomial<Coefficient> quotient;

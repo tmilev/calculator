@@ -5,12 +5,6 @@
 #include "system_functions_global_objects.h"
 #include <string.h>
 
-#ifdef MACRO_use_wasm
-
-//#include "../emsdk/upstream/emscripten/system/include/emscripten.h"
-
-#endif
-
 int WebAssembly::numberOfMainLoopCalls = 0;
 extern "C" {
   char* callCalculator(char* inputBuffer) {

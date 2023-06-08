@@ -1,12 +1,25 @@
 <html>
 <script type="text/javascript" src="src/equation_editor.js"></script>
 <script>
+  let editor = null;
+  function clickSlider(slider) {
+    document.getElementById("editor").style.fontSize = `${slider.value}px`;
+    document.getElementById("font-size").textContent = `${slider.value}px`;
+    editor.resizingEditorFont = true;
+    editor.updateDOM();
+    editor.writeSVG();
+    editor.drawOnCanvas();
+    editor.rootNode.focusRestore(1);
+    editor.writeDebugInfo(null);
+    editor.resizingEditorFont = false;
+  }
+
   function createEditor() {
     const options = new EquationEditorOptions({
       // Can you edit the math or is it static math?
       editable: true,
     });
-    let editor = new EquationEditor(document.getElementById('editor'), options);
+    editor = new EquationEditor(document.getElementById('editor'), options);
     let panel = new EquationEditorButtonPanel(
       // The editor to go with the button panel.
       editor,
@@ -31,6 +44,11 @@
     <br>
 
     <div id='editor' style="font-size: 72px; font-family:'Times New Roman'"> </div>
+
+    <br>
+    Font size: <span id="font-size">72px</span>
+    <input type="range" min="5" max="100" value="72" class="slider" onchange="clickSlider(this);"
+      oninput="clickSlider(this);">
   </div>
 </body>
 

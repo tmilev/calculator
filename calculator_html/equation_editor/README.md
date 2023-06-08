@@ -1,8 +1,8 @@
 # A math equation editor written from scratch
 
-Demo, light-weight: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor.html
+Demo: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor_with_panel.html
 
-Demo with panel: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor_with_panel.html
+Demo, with a custom button: https://calculator-algebra.org:8166/calculator_html/equation_editor/example_equation_editor.html
 
 Detailed demo+debug page: https://calculator-algebra.org:8166/calculator_html/equation_editor/test_equation_editor.html
 

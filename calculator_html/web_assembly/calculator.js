@@ -375,10 +375,6 @@ function assert(condition, text) {
 
 // We used to include malloc/free by default in the past. Show a helpful error in
 // builds with assertions.
-function _free() {
-  // Show a helpful error since we used to include free by default in the past.
-  abort("free() called but not included in the build - add '_free' to EXPORTED_FUNCTIONS");
-}
 
 // Memory management
 
@@ -5765,6 +5761,8 @@ var ___wasm_call_ctors = createExportWrapper("__wasm_call_ctors");
 var ___errno_location = createExportWrapper("__errno_location");
 /** @type {function(...*):?} */
 var _callCalculator = Module["_callCalculator"] = createExportWrapper("callCalculator");
+/** @type {function(...*):?} */
+var _free = Module["_free"] = createExportWrapper("free");
 /** @type {function(...*):?} */
 var _fflush = Module["_fflush"] = createExportWrapper("fflush");
 /** @type {function(...*):?} */

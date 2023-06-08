@@ -52,7 +52,7 @@ ifeq ($(wasm), 1)
     CFLAGS+=-s
     # No pthread
     LDFLAGS=$(OPTIMIZATION_FLAGS)
-    LDFLAGS+=-s LLD_REPORT_UNDEFINED -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -s EXPORTED_FUNCTIONS='["_callCalculator"]'
+    LDFLAGS+=-s LLD_REPORT_UNDEFINED -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -s EXPORTED_FUNCTIONS='["_callCalculator", "_free"]'
     $(info [1;31mWeb assembly: turning off ssl and mongoDB.[0m) 
     TARGET=calculator_html/web_assembly/calculator.js
     OBJECT_FILE_OUTPUT=bin/wasm/

@@ -7,7 +7,7 @@
 
 #ifdef MACRO_use_wasm
 
-#include "../emsdk/upstream/emscripten/system/include/emscripten.h"
+//#include "../emsdk/upstream/emscripten/system/include/emscripten.h"
 
 #endif
 

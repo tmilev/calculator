@@ -863,14 +863,14 @@ void RootSubalgebra::computeModuleFromHighestVector(int moduleIndex) {
   module.setSize(wPrimalSimple.size);
   int indexInZeroSpace = 0;
   for (int i = 0; i < wPrimalSimple.size; i ++) {
-    ElementSemisimpleLieAlgebra<Rational>& currentElt = module[i];
+    ElementSemisimpleLieAlgebra<Rational>& currentElement = module[i];
     if (!wPrimalSimple[i].isEqualToZero()) {
-      currentElt.makeGGenerator(
+      currentElement.makeGGenerator(
         wPrimalSimple[i], this->getOwnerLieAlgebra()
       );
       continue;
     }
-    currentElt.makeCartanGenerator(
+    currentElement.makeCartanGenerator(
       zeroSpace[indexInZeroSpace], this->getOwnerLieAlgebra()
     );
     indexInZeroSpace ++;
@@ -982,7 +982,6 @@ bool RootSubalgebra::coneConditionHolds(
     return true;
   }
   nilradicalRoots.size = 0;
-  int counter = 0;
   for (
     int i = 0; i < this->nilradicalKModules.cardinalitySelection; i ++
   ) {
@@ -992,7 +991,6 @@ bool RootSubalgebra::coneConditionHolds(
     ];
     for (int j = 0; j < tempKmod.size; j ++) {
       nilradicalRoots.addOnTop(tempKmod[j]);
-      counter ++;
     }
   }
   kSingular.size = 0;

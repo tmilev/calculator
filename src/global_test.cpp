@@ -6,6 +6,14 @@ bool GlobalVariables::Test::all() {
   return true;
 }
 
+bool GlobalVariables::Test::webAssemblyBuild() {
+  int wasmResult = global.externalCommandNoOutput("make -j20 wasm=1", true);
+  if (wasmResult != 0) {
+    global << Logger::red << "Wasm make was not successful. " << Logger::endL;
+  }
+  return true;
+}
+
 bool GlobalVariables::Test::builds() {
   global.externalCommandNoOutput("make clean", true);
   if (FileOperations::fileExistsVirtual("calculator")) {

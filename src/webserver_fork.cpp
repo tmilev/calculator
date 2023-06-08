@@ -1,9 +1,12 @@
 #include "webserver.h"
+
+// This file handles process management.
+// This is not intended to work with web assembly.
+#ifndef MACRO_use_wasm
+
 #include <unistd.h>
 #include <sys/prctl.h> //<- prctl here
 #include <signal.h> // <-signals here
-
-#ifndef MACRO_use_wasm
 
 int WebServer::forkRaw() {
   return fork();

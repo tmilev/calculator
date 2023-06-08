@@ -47,10 +47,10 @@ private:
   // Then I copied and pasted a few numbers at random,
   // trying not to pick consecutive primes.
   // I also went for 3+ decimal digits.
-  static const unsigned int primeConstants[size];
+  static const unsigned int primeConstants[HashConstants::size];
 public:
   static inline unsigned int getConstantIncrementCounter(int& counter) {
-    if (counter > size) {
+    if (counter > HashConstants::size) {
       counter = 0;
     }
     return primeConstants[counter];
@@ -870,15 +870,13 @@ public:
   void releaseMemory();
   unsigned int hashFunction() const {
     unsigned int result = 0;
-    int j = - 1;
     int k = 0;
     int hashCounter = 0;
     for (int i = 0; i < this->size; i ++) {
-      j ++;
       k ++;
       result +=
       k * HashConstants::getConstantIncrementCounter(hashCounter) *
-      HashFunctions::hashFunction(objects[i]);
+      HashFunctions::hashFunction(this->objects[i]);
     }
     return result;
   }

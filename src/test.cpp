@@ -18,6 +18,7 @@ public:
     static const std::string database;
     static const std::string problems;
     static const std::string build;
+    static const std::string wasm;
     static const std::string crypto;
     static const std::string topicLists;
     static const std::string topiclists;
@@ -59,6 +60,7 @@ const std::string Test::Suites::topiclists = "topiclists";
 const std::string Test::Suites::calculator = "calculator";
 const std::string Test::Suites::polynomial = "polynomial";
 const std::string Test::Suites::build = "build";
+const std::string Test::Suites::wasm = "wasm";
 const std::string Test::Suites::basic = "basic";
 const std::string Test::Suites::API = "api";
 
@@ -181,6 +183,9 @@ void Test::run() {
   }
   if (this->shouldTest(Test::Suites::build)) {
     GlobalVariables::Test::all();
+  }
+  if (this->shouldTest(Test::Suites::wasm)) {
+    GlobalVariables::Test::webAssemblyBuild();
   }
   global << Logger::green << "All tests passed. " << Logger::endL;
 }

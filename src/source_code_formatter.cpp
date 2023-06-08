@@ -5079,7 +5079,7 @@ bool CodeFormatter::mustSplitWithWhitespace(
     if (previousSiblingOfParent != nullptr) {
       if (
         previousSiblingOfParent->type == CodeFormatter::Element::TypeExpression
-        &&
+        ||
         previousSiblingOfParent->type == CodeFormatter::Element::GreaterThan
       ) {
         return false;

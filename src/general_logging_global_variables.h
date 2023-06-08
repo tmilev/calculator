@@ -528,6 +528,7 @@ public:
   public:
     static bool all();
     static bool builds();
+    static bool webAssemblyBuild();
   };
 };
 

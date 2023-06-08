@@ -1076,7 +1076,6 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
   this->actionsGeneratorsMatrix.setSize(
     this->getOwner().getNumberOfGenerators()
   );
-  int numScalarProducts = 0;
   this->flagConjectureBholds = true;
   this->flagConjectureCholds = true;
   for (int l = 0; l < this->generatingWordsGrouppedByWeight.size; l ++) {
@@ -1101,7 +1100,6 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
         << j + 1
         << " out of "
         << currentWordList.size;
-        numScalarProducts ++;
         currentBF.elements[i][j] =
         this->
         highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(

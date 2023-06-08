@@ -164,10 +164,8 @@ void LaTeXCrawler::buildFreecalc() {
   report.report(reportStream.str());
   bool isLecture = false;
   bool isHomework = false;
-  int currentLineIndex = - 1;
   while (!inputFile.eof()) {
     std::getline(inputFile, buffer);
-    currentLineIndex ++;
     bool isInput = false;
     if (
       StringRoutines::stringBeginsWith(buffer, "\\lect") &&

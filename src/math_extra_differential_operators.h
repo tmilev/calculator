@@ -132,7 +132,6 @@ void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
   this->gaussianEliminationByRows(elementsConverted);
   QuasiDifferentialOperator tempQDO;
   bool foundNew = true;
-  int numTimesEliminationWasExecuted = 0;
   while (foundNew) {
     foundNew = false;
     for (int i = 0; i < elementsConverted.size; i ++) {
@@ -160,7 +159,6 @@ void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
         QuasiDifferentialOperator::gaussianEliminationByRows(
           elementsConverted, 0, &bufferMons
         );
-        numTimesEliminationWasExecuted ++;
         if (!elementsConverted.lastObject()->isEqualToZero()) {
           foundNew = true;
         }

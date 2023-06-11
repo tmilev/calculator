@@ -179,7 +179,7 @@ SOURCES_RELATIVE_PATH=\
     database.cpp \
     database_test.cpp \
     database_mongo.cpp \
-    database_fallback_json.cpp \
+    database_local.cpp \
     database_mongo_calculator.cpp \
     date_time_wrappers.cpp \
     exam_routines.cpp \

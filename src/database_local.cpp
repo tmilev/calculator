@@ -2,15 +2,16 @@
 #include "database.h"
 #include "string_constants.h"
 
-std::string LocalDatabase::databaseFilename =
-"database_fallback/database.json";
+std::string LocalDatabase::jsonLocation() {
+  return "database/" + global.databaseName + "/database.json";
+}
 
 bool LocalDatabase::deleteDatabase(std::stringstream* commentsOnFailure) {
   this->databaseContent.reset(JSData::Token::tokenObject);
   this->indexDatabase(commentsOnFailure);
   if (
     !FileOperations::writeFileVirtual(
-      LocalDatabase::databaseFilename, "{}", commentsOnFailure
+      LocalDatabase::jsonLocation(), "{}", commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -409,9 +410,11 @@ bool LocalDatabase::storeDatabase(std::stringstream* commentsOnFailure) {
     return false;
   }
   return
-  FileOperations::writeFileVirualWithPermissions(
-    LocalDatabase::databaseFilename,
+  FileOperations::
+  writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
+    LocalDatabase::jsonLocation(),
     this->databaseContent.toString(nullptr),
+    true,
     true,
     commentsOnFailure
   );
@@ -420,8 +423,13 @@ bool LocalDatabase::storeDatabase(std::stringstream* commentsOnFailure) {
 bool LocalDatabase::readDatabase(std::stringstream* commentsOnFailure) {
   std::string database;
   if (
-    !FileOperations::loadFileToStringVirtual(
-      LocalDatabase::databaseFilename, database, true, commentsOnFailure
+    !FileOperations::
+    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
+      LocalDatabase::jsonLocation(),
+      database,
+      true,
+      true,
+      commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -429,7 +437,7 @@ bool LocalDatabase::readDatabase(std::stringstream* commentsOnFailure) {
     }
     if (
       !FileOperations::fileExistsVirtual(
-        LocalDatabase::databaseFilename, true, false, commentsOnFailure
+        LocalDatabase::jsonLocation(), true, true, commentsOnFailure
       )
     ) {
       global

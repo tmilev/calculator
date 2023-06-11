@@ -106,7 +106,7 @@ public:
     LocalDatabase::Index,
     HashFunctions::hashFunction<std::string>
   > indices;
-  std::string jsonLocation();
+  static std::string jsonLocation();
   bool deleteDatabase(std::stringstream* commentsOnFailure);
   bool updateOne(
     const QueryExact& findQuery,
@@ -239,7 +239,7 @@ public:
   bool flagInitializedServer;
   bool flagInitializedWorker;
   List<std::string> modifyableColumns;
-  int numDatabaseInstancesMustBeOneOrZero;
+  int databaseInstanceCountMustBeOneOrZero;
   // Get global database instance.
   // Implemented as function rather than static member to
   // avoid the static initalization order fiasco.
@@ -515,6 +515,7 @@ public:
   public:
     StateMaintainer<bool> maintainServerForkFlag;
     StateMaintainer<bool> maintainerDatabase;
+    StateMaintainer<std::string> maintainerDatabaseName;
     static std::string adminPassword;
     static bool all();
     static bool basics(bool useFallbackDatabase);

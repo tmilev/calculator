@@ -97,7 +97,6 @@ HEADERS += \
     webserver.h \
     serialization_basic.h \
     general_strings.h \
-    database_fallback_json.h \
     calculator_problem_storage.h \
     calculator_problem_storage.h \
     crypto_public_domain.h \
@@ -145,6 +144,7 @@ SOURCES += \
     crypto_public_domain.cpp \
     crypto_test.cpp \
     database.cpp \
+    database_local.cpp \
     database_mongo.cpp \
     database_mongo_calculator.cpp \
     date_time_wrappers.cpp \
@@ -196,7 +196,6 @@ SOURCES += \
     math_implementation_1_test.cpp \
     calculator_expressions_test.cpp \
     calculator_parsing_routines_test.cpp \
-    database_fallback_json.cpp \
     main.cpp \
     web_api.cpp \
     json_test.cpp \

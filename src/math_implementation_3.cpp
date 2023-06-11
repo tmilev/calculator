@@ -1358,7 +1358,7 @@ bool FileOperations::writeFileVirualWithPermissions(
 ) {
   return
   FileOperations::
-  writeFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+  writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
     fileNameVirtual,
     fileContent,
     accessSensitiveFolders,
@@ -1368,7 +1368,7 @@ bool FileOperations::writeFileVirualWithPermissions(
 }
 
 bool FileOperations::
-writeFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
   const std::string& fileNameVirtual,
   const std::string& fileContent,
   bool accessSensitiveFolders,
@@ -1572,6 +1572,8 @@ void FileOperations::initializeFoldersULTRASensitive() {
     "crashes/", "results/crashes/"
   );
   folderSubstitutionsULTRASensitive.setKeyValue("calculator", "calculator");
+  folderSubstitutionsULTRASensitive.setKeyValue("database/", "database/");
+  folderSubstitutionsULTRASensitive.setKeyValue("/database/", "/database/");
 }
 
 void FileOperations::initializeFoldersSensitive() {
@@ -1594,12 +1596,6 @@ void FileOperations::initializeFoldersSensitive() {
   );
   folderSubstitutionsSensitive.setKeyValue(
     "/" + Configuration::freecalc, "../freecalc/"
-  );
-  folderSubstitutionsSensitive.setKeyValue(
-    "database_fallback/database.json", "database_fallback/database.json"
-  );
-  folderSubstitutionsSensitive.setKeyValue(
-    "/database_fallback/database.json", "database_fallback/database.json"
   );
 }
 

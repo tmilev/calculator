@@ -1467,7 +1467,7 @@ void WebWorker::writeAfterTimeoutPartTwo(
   currentWorker.writingReportFile.lock();
   bool success =
   FileOperations::
-  writeFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+  writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
     "results/" + currentWorker.workerId,
     toWrite,
     true,

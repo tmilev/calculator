@@ -3,7 +3,6 @@
 #define header_general_file_operations_encodings_ALREADY_INCLUDED
 
 #include "general_lists.h"
-#include "general_list_references.h"
 #include "general_maps.h"
 
 class FileOperations {
@@ -67,7 +66,7 @@ public:
     std::stringstream* commentsOnError
   );
   static bool
-  writeFileVirualWithPermissions_AccessUltraSensitiveFoldersIfNeeded(
+  writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
     const std::string& fileNameVirtual,
     const std::string& fileContent,
     bool accessSensitiveFolders,

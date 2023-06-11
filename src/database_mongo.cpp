@@ -44,7 +44,7 @@ Database::~Database() {}
 
 Database::Database() {
   this->flagInitializedServer = false;
-  this->numDatabaseInstancesMustBeOneOrZero = 0;
+  this->databaseInstanceCountMustBeOneOrZero = 0;
 }
 
 Database::User::User() {

@@ -867,7 +867,7 @@ std::string CalculatorHTML::toStringProblemInfo(
   std::stringstream out;
   out << this->toStringLinkFromFileName(fileName);
   out << this->toStringProblemScoreFull(fileName);
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     bool problemAlreadySolved = false;
     if (this->currentUser.problemData.contains(fileName)) {
       ProblemData& problemData =
@@ -1754,7 +1754,7 @@ void CalculatorHTML::interpretManageClass(SyntacticElementHTML& inputOutput) {
   ) {
     return;
   }
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     inputOutput.interpretedCommand =
     "<b>Managing class not available (no database).</b>";
     return;
@@ -1941,7 +1941,7 @@ std::string CalculatorHTML::cleanUpFileName(const std::string& inputLink) {
 std::string CalculatorHTML::getDeadlineNoInheritance(const std::string& id) {
   STACK_TRACE("CalculatorHTML::getDeadlineNoInheritance");
   (void) id;
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     // deadline not present.
     return "";
   }
@@ -1974,7 +1974,7 @@ std::string CalculatorHTML::getDeadline(
   (void) outputIsInherited;
   outputIsInherited = true;
   std::string result;
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return "While getting deadline: database not compiled";
   }
   int topicIndex = this->topics.topics.getIndex(problemName);
@@ -2022,7 +2022,7 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
     out << "<span style='color:orange'>No deadline yet</span>";
     return out.str();
   }
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     out << "Database not running: no deadlines";
     return out.str();
   }
@@ -2128,7 +2128,7 @@ std::string CalculatorHTML::toStringDeadline(
   (void) problemAlreadySolved;
   (void) returnEmptyStringIfNoDeadline;
   (void) isSection;
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return "Database not available";
   }
   if (global.userGuestMode()) {
@@ -3954,7 +3954,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(
   if (
     this->flagIsForReal && global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
-    if (global.flagDatabaseCompiled) {
+    if (global.flagUseExternalDatabase) {
       bool problemAlreadySolved = false;
       if (this->currentUser.problemData.contains(this->fileName)) {
         ProblemData& problemData =
@@ -4148,7 +4148,7 @@ std::string CalculatorHTML::toStringProblemScoreFull(
     out << "scores require login";
     return out.str();
   }
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     out << "scores not available: no database. ";
     return out.str();
   }
@@ -4216,7 +4216,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(
   STACK_TRACE("CalculatorHTML::toStringProblemScoreShort");
   (void) fileName;
   (void) outputAlreadySolved;
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return "Error: database not running. ";
   }
   std::stringstream out;
@@ -5128,7 +5128,7 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(
   if (!this->prepareSectionList(commentsOnFailure)) {
     commentsOnFailure << "Error preparing section list. ";
   }
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     this->flagIncludeStudentScores = global.userDefaultHasAdminRights() &&
     !global.userStudentVieWOn() &&
     global.requestType != "templateNoLogin";
@@ -5503,7 +5503,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   output["handwrittenSolution"] = this->handwrittenSolution;
   output[WebAPI::Problem::fileName] = this->problemFileName;
   output[WebAPI::Problem::idProblem] = this->id;
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     if (
       owner.currentUser.problemData.contains(this->problemFileName)
     ) {

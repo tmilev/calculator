@@ -42,7 +42,7 @@ std::string WebAPI::Result::millisecondsComputation = "timeComputation";
 std::string WebAPI::Result::loginDisabledEveryoneIsAdmin =
 "loginDisabledEveryoneIsAdmin";
 std::string WebAPI::Result::debugLogin = "debugLogin";
-std::string WebAPI::Result::useFallbackDatabase = "useFallbackDatabase";
+std::string WebAPI::Result::database = "database";
 std::string WebAPI::Result::httpsSupport = "httpsSupport";
 std::string WebAPI::Result::solution = "solution";
 std::string WebAPI::Result::SolutionData::steps = "solutionSteps";

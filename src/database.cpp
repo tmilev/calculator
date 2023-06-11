@@ -55,7 +55,7 @@ bool Database::User::userDefaultHasInstructorRights() {
   if (global.userDefaultHasAdminRights()) {
     return true;
   }
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return true;
   }
   if (!global.flagLoggedIn) {
@@ -339,7 +339,7 @@ bool Database::findOneWithOptions(
 ) {
   STACK_TRACE("Database::findOneWithOptions");
   (void) commentsGeneralNonSensitive;
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     return
     Database::get().mongoDB.findOneWithOptions(
       query,
@@ -385,7 +385,7 @@ bool Database::updateOne(
     }
     return false;
   }
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     return this->mongoDB.updateOne(findQuery, dataToMerge, commentsOnFailure);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return
@@ -403,7 +403,7 @@ bool Database::findOneFromSome(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     return
     this->mongoDB.findOneFromSome(findOrQueries, output, commentsOnFailure);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
@@ -420,7 +420,7 @@ bool Database::findOneFromSome(
 }
 
 bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     return this->mongoDB.deleteDatabase(commentsOnFailure);
   } else {
     return this->fallBack.deleteDatabase(commentsOnFailure);
@@ -431,7 +431,7 @@ void Database::createHashIndex(
   const std::string& collectionName, const std::string& key
 ) {
   STACK_TRACE("Database::createHashIndex");
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     this->mongoDB.createHashIndex(collectionName, key);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     this->fallBack.createHashIndex(collectionName, key);
@@ -443,7 +443,7 @@ bool Database::initializeWorker() {
   if (this->flagInitializedWorker) {
     return true;
   }
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     this->mongoDB.initialize();
   }
   this->createHashIndex(
@@ -483,7 +483,7 @@ bool Database::initializeServer() {
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return true;
   }
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     return true;
   }
   global
@@ -1661,7 +1661,7 @@ bool UserCalculator::computeAndStoreActivationStats(
     return false;
   }
   this->activationEmailSubject = "NO REPLY: Activation of your math account. ";
-  if (global.flagDebugLogin && !global.flagDatabaseCompiled) {
+  if (global.flagDebugLogin && !global.flagUseExternalDatabase) {
     global.comments
     << "Activation link displayed for debugging purposes. Database is off. "
     << "<a href='"
@@ -2102,7 +2102,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
   (void) commentsOnFailure;
   (void) user;
   (void) commentsGeneral;
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return Database::User::loginNoDatabaseSupport(user, commentsGeneral);
   }
   STACK_TRACE("Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded");
@@ -2181,7 +2181,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
 bool Database::User::loginNoDatabaseSupport(
   UserCalculatorData& user, std::stringstream* commentsGeneral
 ) {
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       <<

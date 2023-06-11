@@ -6,13 +6,13 @@ std::string Database::Test::adminPassword = "111";
 
 Database::Test::Test(bool useFallbackDatabase) {
   this->maintainServerForkFlag.initialize(global.flagServerForkedIntoWorker);
-  this->maintainerDatabase.initialize(global.flagDatabaseCompiled);
+  this->maintainerDatabase.initialize(global.flagUseExternalDatabase);
   if (useFallbackDatabase) {
-    global.flagDatabaseCompiled = false;
+    global.flagUseExternalDatabase = false;
   }
   global.flagServerForkedIntoWorker = true;
   DatabaseStrings::databaseName = "calculatortest";
-  Database::FallBack::databaseFilename = "test/test_database.json";
+  FallBackDatabase::databaseFilename = "test/test_database.json";
   Database::get().initializeServer();
   Database::get().initializeWorker();
 }

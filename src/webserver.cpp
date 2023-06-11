@@ -614,7 +614,7 @@ std::string WebWorker::getDatabaseDeleteOneItem() {
   if (Database::get().deleteOneEntry(inputParsed, &commentsStream)) {
     return "success";
   }
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     commentsStream << "Database not available (cannot delete item). ";
   }
   return commentsStream.str();
@@ -720,7 +720,7 @@ bool WebWorker::loginProcedure(
   global.flagLoggedIn = false;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     global.flagLoggedIn = true;
-    global.flagDatabaseCompiled = false;
+    global.flagUseExternalDatabase = false;
     return true;
   }
   MapList<
@@ -2048,7 +2048,7 @@ bool WebWorker::doSetEmail(
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
   (void) commentsGeneralSensitive;
-  if (!global.flagDatabaseCompiled && commentsGeneralNonSensitive != nullptr) {
+  if (!global.flagUseExternalDatabase && commentsGeneralNonSensitive != nullptr) {
     *commentsGeneralNonSensitive
     << "doSetEmail: project compiled without database support. ";
   }
@@ -2099,7 +2099,7 @@ JSData WebWorker::setEmail(const std::string& input) {
   STACK_TRACE("WebWorker::setEmail");
   (void) input;
   JSData result;
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     result[WebAPI::Result::error] =
     "Database not available (cannot set email). ";
     return result;
@@ -4773,7 +4773,7 @@ void WebServer::figureOutOperatingSystem() {
 
 void WebServer::checkSystemInstallationOpenSSL() {
   STACK_TRACE("WebServer::checkSystemInstallationOpenSSL");
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return;
   }
   if (
@@ -4817,7 +4817,7 @@ void WebServer::checkSystemInstallationOpenSSL() {
 
 void WebServer::checkSystemInstallationMongoDatabase() {
   STACK_TRACE("WebServer::checkSystemInstallationMongoDatabase");
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     return;
   }
   WebServer::figureOutOperatingSystem();
@@ -4859,7 +4859,7 @@ void WebServer::checkSystemInstallationMongoDatabase() {
 
 void WebServer::checkMongoDatabaseSetup() {
   STACK_TRACE("WebServer::checkMongoDatabaseSetup");
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     global
     << Logger::green
     << "Compiled with mongo DB support. "
@@ -5000,7 +5000,7 @@ void WebServer::initializeBuildFlags() {
   global.flagSSLAvailable = true;
 #endif
 #ifdef MACRO_use_MongoDB
-  global.flagDatabaseCompiled = true;
+  global.flagUseExternalDatabase = true;
 #endif
   global.flagRunningBuiltInWebServer = false;
 }
@@ -5559,7 +5559,7 @@ void GlobalVariables::configurationProcess() {
   global.flagDebugLogin =
   global.configuration[Configuration::debugLogin].isTrueRepresentationInJSON();
   if (global.flagDebugLogin) {
-    global.flagDatabaseCompiled = false;
+    global.flagUseExternalDatabase = false;
     global
     << Logger::purple
     << "************************"
@@ -5578,7 +5578,7 @@ void GlobalVariables::configurationProcess() {
   global.configuration[Configuration::disableDatabaseLogEveryoneAsAdmin].
   isTrueRepresentationInJSON();
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    global.flagDatabaseCompiled = false;
+    global.flagUseExternalDatabase = false;
     global
     << Logger::purple
     << "************************"

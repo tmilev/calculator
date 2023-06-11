@@ -40,7 +40,7 @@ void Calculator::initializeAdminFunctions() {
   adminDisabled = adminDefault;
   adminDisabled.disabledByUserDefault = true;
   adminDisabled.disabledByUser = true;
-  if (!global.flagDatabaseCompiled || global.flagRunningConsoleTest) {
+  if (!global.flagUseExternalDatabase|| global.flagRunningConsoleTest) {
     return;
   }
   this->addOperationHandler(

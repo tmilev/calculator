@@ -32,7 +32,7 @@ Database& Database::get() {
 
 std::string Database::toString() {
   std::stringstream out;
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     out << "Current DB is: MongoDB. ";
   } else {
     out << "Current DB is: Fallback. ";
@@ -1221,7 +1221,7 @@ bool Database::updateOneFromSome(
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     return
     this->mongoDB.updateOneFromSome(
       findOrQueries, updateQuery, commentsOnFailure
@@ -1408,7 +1408,7 @@ bool Database::fetchCollectionNames(
     }
     return false;
   }
-  if (global.flagDatabaseCompiled) {
+  if (global.flagUseExternalDatabase) {
     return
     Database::get().mongoDB.fetchCollectionNames(output, commentsOnFailure);
   }

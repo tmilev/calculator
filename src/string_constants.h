@@ -125,7 +125,7 @@ public:
     static std::string millisecondsComputation;
     static std::string loginDisabledEveryoneIsAdmin;
     static std::string debugLogin;
-    static std::string useFallbackDatabase;
+    static std::string database;
     static std::string httpsSupport;
     static std::string scriptType;
     static std::string scripts;

@@ -8,11 +8,11 @@ class Authenticator {
   constructor() {
     this.flagInitialized = false;
   }
-  
+
   initialize() {
     if (this.flagInitialized === true) {
       return;
-    } 
+    }
     this.flagInitialized = true;
     document.getElementById(
       ids.domElements.pages.login.buttonLogin
@@ -39,7 +39,7 @@ class Authenticator {
       ids.domElements.pages.login.linkLogoutTop
     ).addEventListener('click', () => {
       logout();
-    });   
+    });
   }
 
   handlePasswordInputKeyPress(/** @type {KeyboardEvent} */ e) {
@@ -124,14 +124,12 @@ class Authenticator {
       }
       loginInfo += "<b style='color:red'>Https off.</b>";
     }
-    if (
-      parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === "true" ||
-      parsedAuthentication[pathnames.urlFields.requests.useFallbackDatabase] === true
-    ) {
+    let database = parsedAuthentication[pathnames.urlFields.requests.database];
+    if (database !== undefined && database !== "") {
       let databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
       miscellaneous.writeHTML(
         databaseInfo,
-        "<b style='color:red'>Fallback database.</b>",
+        database,
       );
     }
     let loginInfoComponent = document.getElementById(

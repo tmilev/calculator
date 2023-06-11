@@ -182,7 +182,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
 
 std::string WebAPIResponse::setProblemWeight() {
   STACK_TRACE("WebAPIReponse::setProblemWeight");
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return "Cannot modify problem weights (no database available)";
   }
   if (!global.userDefaultHasAdminRights()) {
@@ -1059,8 +1059,7 @@ void WebAPIResponse::getJSDataUserInfo(
   outputAppend[WebAPI::Result::loginDisabledEveryoneIsAdmin] =
   global.flagDisableDatabaseLogEveryoneAsAdmin;
   outputAppend[WebAPI::Result::debugLogin] = global.flagDebugLogin;
-  outputAppend[WebAPI::Result::useFallbackDatabase] =
-  !global.flagDatabaseCompiled;
+  outputAppend[WebAPI::Result::database] = global.databaseName;
   outputAppend[WebAPI::Result::httpsSupport] = global.flagSSLAvailable;
   if (comments != "") {
     outputAppend[WebAPI::Result::comments] =
@@ -1506,7 +1505,7 @@ bool AnswerChecker::extractStudentAnswerPartTwo() {
 
 bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
   STACK_TRACE("AnswerChecker::storeInDatabase");
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return true;
   }
   if (!this->problem.flagIsForReal) {
@@ -2517,7 +2516,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   const std::string& hostWebAddressWithPort
 ) {
   STACK_TRACE("WebAPIReponse::toStringUserDetailsTable");
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return "Compiled without database support. ";
   }
   std::stringstream out;
@@ -2971,7 +2970,7 @@ public:
 
 bool UserScores::computeScoresAndStats(std::stringstream& comments) {
   STACK_TRACE("UserScores::computeScoresAndStats");
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return false;
   }
   problem.currentUser.::UserCalculatorData::operator=(global.userDefault);
@@ -3158,7 +3157,7 @@ std::string WebAPIResponse::toStringUserScores() {
   if (!global.userDefaultHasAdminRights()) {
     return "only admins are allowed to view scores";
   }
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     return "Error: database not running. ";
   }
   std::stringstream out;
@@ -3310,7 +3309,7 @@ std::string WebAPIResponse::toStringUserDetails(
 ) {
   STACK_TRACE("WebAPIReponse::toStringUserDetails");
   std::stringstream out;
-  if (!global.flagDatabaseCompiled) {
+  if (!global.flagUseExternalDatabase) {
     out << "<b>Adding emails not available (database not present).</b> ";
     return out.str();
   }

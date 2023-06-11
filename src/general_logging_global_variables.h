@@ -262,11 +262,10 @@ public:
   bool flagSSLAvailable;
   bool flagCertificatesAreOfficiallySigned;
   bool flagCrashInitiated;
-  // If false, signals use of a mock database.
-  // Mock database = simple json file that
-  // is 100% read/overwritten on each database
-  // read/store operation.
-  bool flagDatabaseCompiled;
+  // If true, signals use of a local database.
+  // If false, signals use of external database (mongodb).
+  bool flagUseExternalDatabase;
+  std::string databaseName;
   // A flag that triggers debug messages during login.
   // This will reveal secrets to end users and cannot run in production.
   // The flag can only be used with fallback database.

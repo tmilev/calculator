@@ -93,6 +93,7 @@ ifneq ($(mongoLocation),)
 $(info [1;32mMongo found.[0m) 
 else
 $(info [1;31mNOT FOUND: Mongo.[0m The calculator will run using a fallback database.)
+noMongo=1
 endif
 endif
 

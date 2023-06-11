@@ -1228,7 +1228,7 @@ bool Database::updateOneFromSome(
     );
   }
   return
-  this->fallBack.updateOneFromSome(
+  this->localDatabase.updateOneFromSome(
     findOrQueries, updateQuery, commentsOnFailure
   );
 }
@@ -1412,7 +1412,7 @@ bool Database::fetchCollectionNames(
     return
     Database::get().mongoDB.fetchCollectionNames(output, commentsOnFailure);
   }
-  return this->fallBack.fetchCollectionNames(output, commentsOnFailure);
+  return this->localDatabase.fetchCollectionNames(output, commentsOnFailure);
 }
 
 bool Database::Mongo::fetchCollectionNames(

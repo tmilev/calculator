@@ -2048,7 +2048,9 @@ bool WebWorker::doSetEmail(
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
   (void) commentsGeneralSensitive;
-  if (!global.flagUseExternalDatabase && commentsGeneralNonSensitive != nullptr) {
+  if (
+    !global.flagUseExternalDatabase && commentsGeneralNonSensitive != nullptr
+  ) {
     *commentsGeneralNonSensitive
     << "doSetEmail: project compiled without database support. ";
   }
@@ -5577,6 +5579,12 @@ void GlobalVariables::configurationProcess() {
   global.flagDisableDatabaseLogEveryoneAsAdmin =
   global.configuration[Configuration::disableDatabaseLogEveryoneAsAdmin].
   isTrueRepresentationInJSON();
+  global.databaseName =
+  global.configuration[Configuration::database].stringValue;
+  if (global.databaseName == "") {
+    global.databaseName = "local";
+    global.configuration[Configuration::database] = "local";
+  }
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     global.flagUseExternalDatabase = false;
     global

@@ -2,17 +2,15 @@
 #include "database.h"
 #include "string_constants.h"
 
-std::string FallBackDatabase::databaseFilename =
+std::string LocalDatabase::databaseFilename =
 "database_fallback/database.json";
 
-bool FallBackDatabase::deleteDatabase(
-  std::stringstream* commentsOnFailure
-) {
+bool LocalDatabase::deleteDatabase(std::stringstream* commentsOnFailure) {
   this->databaseContent.reset(JSData::Token::tokenObject);
   this->indexDatabase(commentsOnFailure);
   if (
     !FileOperations::writeFileVirtual(
-      FallBackDatabase::databaseFilename, "{}", commentsOnFailure
+      LocalDatabase::databaseFilename, "{}", commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -23,12 +21,12 @@ bool FallBackDatabase::deleteDatabase(
   return true;
 }
 
-bool FallBackDatabase::findOneFromSome(
+bool LocalDatabase::findOneFromSome(
   const List<QueryExact>& findOrQueries,
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FallBackDatabase::findOneFromSome");
+  STACK_TRACE("LocalDatabase::findOneFromSome");
   for (int i = 0; i < findOrQueries.size; i ++) {
     if (this->findOne(findOrQueries[i], output, commentsOnFailure)) {
       return true;
@@ -37,12 +35,12 @@ bool FallBackDatabase::findOneFromSome(
   return false;
 }
 
-bool FallBackDatabase::updateOneFromSome(
+bool LocalDatabase::updateOneFromSome(
   const List<QueryExact>& findOrQueries,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FallBackDatabase::updateOneFromSome");
+  STACK_TRACE("LocalDatabase::updateOneFromSome");
   JSData unusedOutput;
   for (const QueryExact& query : findOrQueries) {
     if (!this->findOne(query, unusedOutput, commentsOnFailure)) {
@@ -53,16 +51,16 @@ bool FallBackDatabase::updateOneFromSome(
   return false;
 }
 
-bool FallBackDatabase::updateOne(
+bool LocalDatabase::updateOne(
   const QueryExact& findQuery,
   const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FallBackDatabase::updateOne");
+  STACK_TRACE("LocalDatabase::updateOne");
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "FallBackDatabase::updateOne failed. "
+      << "LocalDatabase::updateOne failed. "
       << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
@@ -86,12 +84,12 @@ bool FallBackDatabase::updateOne(
   return this->storeDatabase(commentsOnFailure);
 }
 
-bool FallBackDatabase::updateOneNolocks(
+bool LocalDatabase::updateOneNolocks(
   const QueryExact& findQuery,
   const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FallBackDatabase::updateOneNolocks");
+  STACK_TRACE("LocalDatabase::updateOneNolocks");
   if (!this->hasCollection(findQuery.collection, commentsOnFailure)) {
     return false;
   }
@@ -134,13 +132,13 @@ bool FallBackDatabase::updateOneNolocks(
   return true;
 }
 
-bool FallBackDatabase::updateOneEntry(
+bool LocalDatabase::updateOneEntry(
   JSData& modified,
   const List<std::string>& labels,
   const JSData& value,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FallBackDatabase::updateOneEntry");
+  STACK_TRACE("LocalDatabase::updateOneEntry");
   (void) commentsOnFailure;
   JSData* output = &modified;
   for (int i = 0; i < labels.size - 1; i ++) {
@@ -150,12 +148,12 @@ bool FallBackDatabase::updateOneEntry(
   return true;
 }
 
-bool FallBackDatabase::findOne(
+bool LocalDatabase::findOne(
   const QueryExact& query,
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FallBackDatabase::findOne");
+  STACK_TRACE("LocalDatabase::findOne");
   MutexProcesslockGuard guardDB(this->access);
   if (!this->readAndIndexDatabase(commentsOnFailure)) {
     return false;
@@ -175,7 +173,7 @@ bool FallBackDatabase::findOne(
   return Database::convertJSONMongoToJSON(output, output, commentsOnFailure);
 }
 
-std::string FallBackDatabase::toStringIndices() const {
+std::string LocalDatabase::toStringIndices() const {
   std::stringstream out;
   out << this->indices.size() << " indices total. ";
   int maxIndexedToDisplay = 3;
@@ -209,12 +207,12 @@ std::string FallBackDatabase::toStringIndices() const {
   return out.str();
 }
 
-bool FallBackDatabase::findIndexOneNolocksMinusOneNotFound(
+bool LocalDatabase::findIndexOneNolocksMinusOneNotFound(
   const QueryExact& query,
   int& output,
   std::stringstream* commentsOnNotFound
 ) {
-  STACK_TRACE("FallBackDatabase::findIndexOneNolocksMinusOneNotFound");
+  STACK_TRACE("LocalDatabase::findIndexOneNolocksMinusOneNotFound");
   output = - 1;
   if (!this->hasCollection(query.collection, commentsOnNotFound)) {
     if (commentsOnNotFound != nullptr) {
@@ -244,8 +242,7 @@ bool FallBackDatabase::findIndexOneNolocksMinusOneNotFound(
     }
     return false;
   }
-  FallBackDatabase::Index& currentIndex =
-  this->indices.getValueCreateEmpty(key);
+  LocalDatabase::Index& currentIndex = this->indices.getValueCreateEmpty(key);
   int currentLocationIndex = currentIndex.locations.getIndex(value);
   if (currentLocationIndex == - 1) {
     if (commentsOnNotFound != nullptr) {
@@ -266,7 +263,7 @@ bool FallBackDatabase::findIndexOneNolocksMinusOneNotFound(
   return true;
 }
 
-bool FallBackDatabase::fetchCollectionNames(
+bool LocalDatabase::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   MutexProcesslockGuard guardDB(this->access);
@@ -278,11 +275,11 @@ bool FallBackDatabase::fetchCollectionNames(
   return true;
 }
 
-bool FallBackDatabase::hasCollection(
+bool LocalDatabase::hasCollection(
   const std::string& collection, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FallBackDatabase::hasCollection");
-  if (FallBackDatabase::knownCollections.contains(collection)) {
+  STACK_TRACE("LocalDatabase::hasCollection");
+  if (LocalDatabase::knownCollections.contains(collection)) {
     this->databaseContent[collection].elementType = JSData::Token::tokenArray;
     return true;
   }
@@ -301,12 +298,12 @@ bool FallBackDatabase::hasCollection(
   return false;
 }
 
-FallBackDatabase::FallBackDatabase() {
+LocalDatabase::LocalDatabase() {
   this->owner = nullptr;
   this->initialized = false;
 }
 
-void FallBackDatabase::initialize() {
+void LocalDatabase::initialize() {
   if (this->initialized) {
     return;
   }
@@ -332,38 +329,38 @@ void FallBackDatabase::initialize() {
   );
 }
 
-void FallBackDatabase::createHashIndex(
+void LocalDatabase::createHashIndex(
   const std::string& collectionName, const std::string& key
 ) {
-  FallBackDatabase::Index newIndex;
+  LocalDatabase::Index newIndex;
   newIndex.collection = collectionName;
   newIndex.label = key;
   newIndex.collectionAndLabelCache = newIndex.collectionAndLabel();
   this->indices.setKeyValue(newIndex.collectionAndLabelCache, newIndex);
 }
 
-std::string FallBackDatabase::Index::collectionAndLabelStatic(
+std::string LocalDatabase::Index::collectionAndLabelStatic(
   const std::string& inputCollection, const std::string& inputLabel
 ) {
   return inputCollection + "." + inputLabel;
 }
 
-std::string FallBackDatabase::Index::collectionAndLabel() {
+std::string LocalDatabase::Index::collectionAndLabel() {
   return this->collectionAndLabelStatic(this->collection, this->label);
 }
 
-bool FallBackDatabase::readAndIndexDatabase(
+bool LocalDatabase::readAndIndexDatabase(
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FallBackDatabase::readAndIndexDatabase");
+  STACK_TRACE("LocalDatabase::readAndIndexDatabase");
   if (!this->readDatabase(commentsOnFailure)) {
     return false;
   }
   return this->indexDatabase(commentsOnFailure);
 }
 
-bool FallBackDatabase::indexDatabase(std::stringstream* commentsOnFailure) {
-  STACK_TRACE("FallBackDatabase::indexDatabase");
+bool LocalDatabase::indexDatabase(std::stringstream* commentsOnFailure) {
+  STACK_TRACE("LocalDatabase::indexDatabase");
   (void) commentsOnFailure;
   this->indices.clear();
   for (int i = 0; i < this->knownIndices.size; i ++) {
@@ -382,7 +379,7 @@ bool FallBackDatabase::indexDatabase(std::stringstream* commentsOnFailure) {
   return true;
 }
 
-void FallBackDatabase::indexOneRecord(
+void LocalDatabase::indexOneRecord(
   const JSData& entry, int32_t row, const std::string& collection
 ) {
   if (entry.elementType != JSData::Token::tokenObject) {
@@ -390,7 +387,7 @@ void FallBackDatabase::indexOneRecord(
   }
   for (int i = 0; i < entry.objects.size(); i ++) {
     std::string indexLabel =
-    FallBackDatabase::Index::collectionAndLabelStatic(
+    LocalDatabase::Index::collectionAndLabelStatic(
       collection, entry.objects.keys[i]
     );
     if (!this->indices.contains(indexLabel)) {
@@ -400,34 +397,31 @@ void FallBackDatabase::indexOneRecord(
     if (keyToIndexBy.elementType != JSData::Token::tokenString) {
       continue;
     }
-    FallBackDatabase::Index& currentIndex =
+    LocalDatabase::Index& currentIndex =
     this->indices.getValueCreateEmpty(indexLabel);
     currentIndex.locations.getValueCreateEmpty(keyToIndexBy.stringValue).
     addOnTop(row);
   }
 }
 
-bool FallBackDatabase::storeDatabase(std::stringstream* commentsOnFailure) {
+bool LocalDatabase::storeDatabase(std::stringstream* commentsOnFailure) {
   if (!this->indexDatabase(commentsOnFailure)) {
     return false;
   }
   return
   FileOperations::writeFileVirualWithPermissions(
-    FallBackDatabase::databaseFilename,
+    LocalDatabase::databaseFilename,
     this->databaseContent.toString(nullptr),
     true,
     commentsOnFailure
   );
 }
 
-bool FallBackDatabase::readDatabase(std::stringstream* commentsOnFailure) {
+bool LocalDatabase::readDatabase(std::stringstream* commentsOnFailure) {
   std::string database;
   if (
     !FileOperations::loadFileToStringVirtual(
-      FallBackDatabase::databaseFilename,
-      database,
-      true,
-      commentsOnFailure
+      LocalDatabase::databaseFilename, database, true, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -435,10 +429,7 @@ bool FallBackDatabase::readDatabase(std::stringstream* commentsOnFailure) {
     }
     if (
       !FileOperations::fileExistsVirtual(
-        FallBackDatabase::databaseFilename,
-        true,
-        false,
-        commentsOnFailure
+        LocalDatabase::databaseFilename, true, false, commentsOnFailure
       )
     ) {
       global

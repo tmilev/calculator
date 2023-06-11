@@ -1,8 +1,6 @@
 #include "database.h"
 #include "crypto.h"
 #include "webserver.h"
-#include "system_functions_global_objects.h"
-#include "calculator_database_mongo.h"
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
 
@@ -358,7 +356,7 @@ bool Database::findOneWithOptions(
       << options.toJSON();
       return false;
     }
-    return Database::fallBack.findOne(query, output, commentsOnFailure);
+    return Database::localDatabase.findOne(query, output, commentsOnFailure);
   }
 }
 
@@ -389,7 +387,7 @@ bool Database::updateOne(
     return this->mongoDB.updateOne(findQuery, dataToMerge, commentsOnFailure);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return
-    this->fallBack.updateOne(findQuery, dataToMerge, commentsOnFailure);
+    this->localDatabase.updateOne(findQuery, dataToMerge, commentsOnFailure);
   }
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure
@@ -408,7 +406,9 @@ bool Database::findOneFromSome(
     this->mongoDB.findOneFromSome(findOrQueries, output, commentsOnFailure);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return
-    this->fallBack.findOneFromSome(findOrQueries, output, commentsOnFailure);
+    this->localDatabase.findOneFromSome(
+      findOrQueries, output, commentsOnFailure
+    );
   } else {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -423,7 +423,7 @@ bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
   if (global.flagUseExternalDatabase) {
     return this->mongoDB.deleteDatabase(commentsOnFailure);
   } else {
-    return this->fallBack.deleteDatabase(commentsOnFailure);
+    return this->localDatabase.deleteDatabase(commentsOnFailure);
   }
 }
 
@@ -434,7 +434,7 @@ void Database::createHashIndex(
   if (global.flagUseExternalDatabase) {
     this->mongoDB.createHashIndex(collectionName, key);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    this->fallBack.createHashIndex(collectionName, key);
+    this->localDatabase.createHashIndex(collectionName, key);
   }
 }
 
@@ -478,14 +478,16 @@ bool Database::initializeWorker() {
 bool Database::initializeServer() {
   STACK_TRACE("Database::initializeServer");
   this->user.owner = this;
-  this->fallBack.owner = this;
+  this->localDatabase.owner = this;
   this->flagInitializedServer = true;
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return true;
   }
   if (global.flagUseExternalDatabase) {
+    global.databaseName = "mongodb";
     return true;
   }
+  global.databaseName = "local";
   global
   << Logger::red
   << "Calculator compiled without (mongoDB) database support. "
@@ -496,7 +498,7 @@ bool Database::initializeServer() {
   << Logger::green
   << "fall-back JSON storage."
   << Logger::endL;
-  this->fallBack.initialize();
+  this->localDatabase.initialize();
   return true;
 }
 

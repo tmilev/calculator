@@ -125,13 +125,17 @@ class Authenticator {
       loginInfo += "<b style='color:red'>Https off.</b>";
     }
     let database = parsedAuthentication[pathnames.urlFields.requests.database];
-    if (database !== undefined && database !== "") {
-      let databaseInfo = document.getElementById(ids.domElements.divLoginPanelDatabaseInfo);
-      miscellaneous.writeHTML(
-        databaseInfo,
-        database,
-      );
+    if (database === "local") {
+      database = "<b style='color:green'>local database</b>";
+
     }
+    let databaseInfo = document.getElementById(
+      ids.domElements.divLoginPanelDatabaseInfo,
+    );
+    miscellaneous.writeHTML(
+      databaseInfo,
+      database,
+    );
     let loginInfoComponent = document.getElementById(
       ids.domElements.divLoginPanelInfo,
     );

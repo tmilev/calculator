@@ -12,7 +12,7 @@ Database::Test::Test(bool useFallbackDatabase) {
   }
   global.flagServerForkedIntoWorker = true;
   DatabaseStrings::databaseName = "calculatortest";
-  FallBackDatabase::databaseFilename = "test/test_database.json";
+  LocalDatabase::databaseFilename = "test/test_database.json";
   Database::get().initializeServer();
   Database::get().initializeWorker();
 }

@@ -236,13 +236,13 @@ bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
   global.webArguments[WebAPI::Problem::fileName] = sample;
   global.requestType = WebAPI::Frontend::scoredQuiz;
   std::string databaseBeforeFirstRun =
-  Database::get().fallBack.databaseContent.toString();
+  Database::get().localDatabase.databaseContent.toString();
   JSData resultFirst = WebAPIResponse::getExamPageJSON();
   std::string databaseAfterFirstRun =
-  Database::get().fallBack.databaseContent.toString();
+  Database::get().localDatabase.databaseContent.toString();
   JSData resultSecond = WebAPIResponse::getExamPageJSON();
   std::string afterSecondRun =
-  Database::get().fallBack.databaseContent.toString();
+  Database::get().localDatabase.databaseContent.toString();
   if (resultFirst != resultSecond) {
     global.fatal
     << "Two consecutive scored quiz requests "

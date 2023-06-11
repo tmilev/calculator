@@ -8,7 +8,6 @@
 class UserCalculator;
 class Database;
 
-
 // Stores a recipe for updating an item.
 // A typical item would be stored allong the lines of:
 // {
@@ -23,146 +22,140 @@ class Database;
 // }
 class QuerySet {
 private:
-    static void makeFromRecursive(
-        const JSData& input,
-        List<std::string>& nestedLabels,
-        QuerySet& output
-        );
+  static void makeFromRecursive(
+    const JSData& input,
+    List<std::string>& nestedLabels,
+    QuerySet& output
+  );
 public:
-    // Key-value pairs to be set.
-    // 1. All keys that contain dots are regarded as sub-field selectors.
-    // The query:
-    // nestedLabels=[]
-    // value = {"key1.value1": "XXY"}
-    // will set the value1.key1 sub-key of an item.
-    // 2. All keys of this json that do not contain
-    // dots are expected to be %-encoded.
-    JSData value;
-    QuerySet();
-    static QuerySet makeFrom(const JSData& inputValue);
-    bool toJSONSetMongo(
-        JSData& output, std::stringstream* commentsOnFailure
-        ) const;
-    std::string toStringDebug() const;
-    class Test {
-    public:
-        static bool all();
-        static bool basics(bool useFallbackDatabase);
-        static void updateNoFail(QueryExact& find, QuerySet updater);
-        static void findNoFail(QueryExact& find, JSData& result);
-        static void matchKeyValue(
-            const JSData& mustContain, const JSData& mustBeContained
-            );
-    };
+  // Key-value pairs to be set.
+  // 1. All keys that contain dots are regarded as sub-field selectors.
+  // The query:
+  // nestedLabels=[]
+  // value = {"key1.value1": "XXY"}
+  // will set the value1.key1 sub-key of an item.
+  // 2. All keys of this json that do not contain
+  // dots are expected to be %-encoded.
+  JSData value;
+  QuerySet();
+  static QuerySet makeFrom(const JSData& inputValue);
+  bool toJSONSetMongo(
+    JSData& output, std::stringstream* commentsOnFailure
+  ) const;
+  std::string toStringDebug() const;
+  class Test {
+  public:
+    static bool all();
+    static bool basics(bool useFallbackDatabase);
+    static void updateNoFail(QueryExact& find, QuerySet updater);
+    static void findNoFail(QueryExact& find, JSData& result);
+    static void matchKeyValue(
+      const JSData& mustContain, const JSData& mustBeContained
+    );
+  };
 };
 
 class QueryResultOptions {
 public:
-    List<std::string> fieldsToProjectTo;
-    List<std::string> fieldsProjectedAway;
-    JSData toJSON() const;
-    void makeProjection(const List<std::string>& fields);
+  List<std::string> fieldsToProjectTo;
+  List<std::string> fieldsProjectedAway;
+  JSData toJSON() const;
+  void makeProjection(const List<std::string>& fields);
 };
 
-
-class LocalDatabase{
-
-};
-class FallBackDatabase {
+class LocalDatabase {
 private:
-    bool initialized;
-    bool updateOneNolocks(
-        const QueryExact& findQuery,
-        const QuerySet& updateQuery,
-        std::stringstream* commentsOnFailure = nullptr
-        );
-    bool updateOneEntry(
-        JSData& modified,
-        const List<std::string>& labels,
-        const JSData& value,
-        std::stringstream* commentsOnFailure = nullptr
-        );
+  bool initialized;
+  bool updateOneNolocks(
+    const QueryExact& findQuery,
+    const QuerySet& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool updateOneEntry(
+    JSData& modified,
+    const List<std::string>& labels,
+    const JSData& value,
+    std::stringstream* commentsOnFailure = nullptr
+  );
 public:
-    Database* owner;
-    MutexProcess access;
-    HashedList<std::string> knownCollections;
-    HashedList<std::string> knownIndices;
-    JSData databaseContent;
-    static std::string databaseFilename;
-    class Index {
-    public:
-        // Collection A, label B is denoted as A.B.
-        // Dots in the labels and collections are forbidden.
-        std::string collection;
-        std::string label;
-        std::string collectionAndLabelCache;
-        MapList<
-            std::string,
-            List<int32_t>,
-            HashFunctions::hashFunction<std::string>
-            > locations;
-        static std::string collectionAndLabelStatic(
-            const std::string& inputCollection,
-            const std::string& inputLabel
-            );
-        std::string collectionAndLabel();
-    };
+  Database* owner;
+  MutexProcess access;
+  HashedList<std::string> knownCollections;
+  HashedList<std::string> knownIndices;
+  JSData databaseContent;
+  class Index {
+  public:
+    // Collection A, label B is denoted as A.B.
+    // Dots in the labels and collections are forbidden.
+    std::string collection;
+    std::string label;
+    std::string collectionAndLabelCache;
+    MapList<
+      std::string,
+      List<int32_t>,
+      HashFunctions::hashFunction<std::string>
+    > locations;
+    static std::string collectionAndLabelStatic(
+      const std::string& inputCollection, const std::string& inputLabel
+    );
+    std::string collectionAndLabel();
+  };
 
-    MapReferences<
-        std::string,
-        FallBackDatabase::Index,
-        HashFunctions::hashFunction<std::string>
-        > indices;
-    bool deleteDatabase(std::stringstream* commentsOnFailure);
-    bool updateOne(
-        const QueryExact& findQuery,
-        const QuerySet& updateQuery,
-        std::stringstream* commentsOnFailure = nullptr
-        );
-    bool updateOneFromSome(
-        const List<QueryExact>& findOrQueries,
-        const QuerySet& updateQuery,
-        std::stringstream* commentsOnFailure = nullptr
-        );
-    bool findOne(
-        const QueryExact& query,
-        JSData& output,
-        std::stringstream* commentsOnFailure
-        );
-    // Return indicates query success / failure.
-    // When the element isn't found but otherwise there were
-    // no problems with the query, true will be returned with
-    // output set to [].
-    bool findIndexOneNolocksMinusOneNotFound(
-        const QueryExact& query,
-        int& output,
-        std::stringstream* commentsOnNotFound
-        );
-    bool fetchCollectionNames(
-        List<std::string>& output, std::stringstream* commentsOnFailure
-        );
-    void createHashIndex(
-        const std::string& collectionName, const std::string& key
-        );
-    bool hasCollection(
-        const std::string& collection,
-        std::stringstream* commentsOnFailure
-        );
-    bool storeDatabase(std::stringstream* commentsOnFailure);
-    bool readDatabase(std::stringstream* commentsOnFailure);
-    bool readAndIndexDatabase(std::stringstream* commentsOnFailure);
-    bool indexDatabase(std::stringstream* commentsOnFailure);
-    void indexOneRecord(
-        const JSData& entry, int32_t row, const std::string& collection
-        );
-    void initialize();
-    bool findOneFromSome(
-        const List<QueryExact>& findOrQueries,
-        JSData& output,
-        std::stringstream* commentsOnFailure
-        );
-    std::string toStringIndices() const;
-    FallBackDatabase();
+  MapReferences<
+    std::string,
+    LocalDatabase::Index,
+    HashFunctions::hashFunction<std::string>
+  > indices;
+  std::string jsonLocation();
+  bool deleteDatabase(std::stringstream* commentsOnFailure);
+  bool updateOne(
+    const QueryExact& findQuery,
+    const QuerySet& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool updateOneFromSome(
+    const List<QueryExact>& findOrQueries,
+    const QuerySet& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool findOne(
+    const QueryExact& query,
+    JSData& output,
+    std::stringstream* commentsOnFailure
+  );
+  // Return indicates query success / failure.
+  // When the element isn't found but otherwise there were
+  // no problems with the query, true will be returned with
+  // output set to [].
+  bool findIndexOneNolocksMinusOneNotFound(
+    const QueryExact& query,
+    int& output,
+    std::stringstream* commentsOnNotFound
+  );
+  bool fetchCollectionNames(
+    List<std::string>& output, std::stringstream* commentsOnFailure
+  );
+  void createHashIndex(
+    const std::string& collectionName, const std::string& key
+  );
+  bool hasCollection(
+    const std::string& collection, std::stringstream* commentsOnFailure
+  );
+  bool storeDatabase(std::stringstream* commentsOnFailure);
+  bool readDatabase(std::stringstream* commentsOnFailure);
+  bool readAndIndexDatabase(std::stringstream* commentsOnFailure);
+  bool indexDatabase(std::stringstream* commentsOnFailure);
+  void indexOneRecord(
+    const JSData& entry, int32_t row, const std::string& collection
+  );
+  void initialize();
+  bool findOneFromSome(
+    const List<QueryExact>& findOrQueries,
+    JSData& output,
+    std::stringstream* commentsOnFailure
+  );
+  std::string toStringIndices() const;
+  LocalDatabase();
 };
 
 // Stores a query for an item.
@@ -321,10 +314,7 @@ public:
   };
 
   User user;
-  FallBackDatabase fallBack;
   LocalDatabase localDatabase;
-
-
   class Mongo {
   public:
     // The following variable has type mongoc_client_t.

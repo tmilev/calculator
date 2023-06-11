@@ -233,6 +233,7 @@ public:
   static std::string serverAutoMonitor;
   static std::string monitorPingTime;
   static std::string disableDatabaseLogEveryoneAsAdmin;
+  static std::string database;
   static std::string debugLogin;
   static std::string serverDetailedLog;
   static std::string gitRepository;

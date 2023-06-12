@@ -53,7 +53,7 @@ bool Database::User::userDefaultHasInstructorRights() {
   if (global.userDefaultHasAdminRights()) {
     return true;
   }
-  if (!global.flagUseExternalDatabase) {
+  if (!global.flagDatabaseExternal) {
     return true;
   }
   if (!global.flagLoggedIn) {
@@ -337,7 +337,7 @@ bool Database::findOneWithOptions(
 ) {
   STACK_TRACE("Database::findOneWithOptions");
   (void) commentsGeneralNonSensitive;
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     return
     Database::get().mongoDB.findOneWithOptions(
       query,
@@ -383,7 +383,7 @@ bool Database::updateOne(
     }
     return false;
   }
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     return this->mongoDB.updateOne(findQuery, dataToMerge, commentsOnFailure);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return
@@ -401,7 +401,7 @@ bool Database::findOneFromSome(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     return
     this->mongoDB.findOneFromSome(findOrQueries, output, commentsOnFailure);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
@@ -420,7 +420,7 @@ bool Database::findOneFromSome(
 }
 
 bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     return this->mongoDB.deleteDatabase(commentsOnFailure);
   } else {
     return this->localDatabase.deleteDatabase(commentsOnFailure);
@@ -431,7 +431,7 @@ void Database::createHashIndex(
   const std::string& collectionName, const std::string& key
 ) {
   STACK_TRACE("Database::createHashIndex");
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     this->mongoDB.createHashIndex(collectionName, key);
   } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
     this->localDatabase.createHashIndex(collectionName, key);
@@ -443,7 +443,7 @@ bool Database::initializeWorker() {
   if (this->flagInitializedWorker) {
     return true;
   }
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     this->mongoDB.initialize();
   }
   this->createHashIndex(
@@ -475,6 +475,89 @@ bool Database::initializeWorker() {
   return true;
 }
 
+bool Database::findFromJSONWithProjection(
+  const std::string& collectionName,
+  const JSData& findQuery,
+  List<JSData>& output,
+  List<std::string>& fieldsToProjectTo,
+  int maxOutputItems,
+  long long* totalItems,
+  std::stringstream* commentsOnFailure
+) {
+  QueryResultOptions options;
+  options.makeProjection(fieldsToProjectTo);
+  return
+  Database::findFromJSONWithOptions(
+    collectionName,
+    findQuery,
+    output,
+    options,
+    maxOutputItems,
+    totalItems,
+    commentsOnFailure
+  );
+}
+
+bool Database::findFromJSON(
+  const std::string& collectionName,
+  const JSData& findQuery,
+  List<JSData>& output,
+  int maxOutputItems,
+  long long* totalItems,
+  std::stringstream* commentsOnFailure
+) {
+  QueryResultOptions options;
+  return
+  Database::findFromJSONWithOptions(
+    collectionName,
+    findQuery,
+    output,
+    options,
+    maxOutputItems,
+    totalItems,
+    commentsOnFailure
+  );
+}
+
+bool Database::findFromJSONWithOptions(
+  const std::string& collectionName,
+  const JSData& findQuery,
+  List<JSData>& output,
+  const QueryResultOptions& options,
+  int maxOutputItems,
+  long long* totalItems,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneralNonSensitive
+) {
+  STACK_TRACE("Database::findFromJSONWithOptions");
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Database::findFromJSONWithOptions fail. "
+      << DatabaseStrings::errorDatabaseDisabled;
+    }
+    return false;
+  }
+  if (global.flagDatabaseExternal) {
+    return
+    Database::Mongo::findFromJSONWithOptions(
+      collectionName,
+      findQuery,
+      output,
+      options,
+      maxOutputItems,
+      totalItems,
+      commentsOnFailure,
+      commentsGeneralNonSensitive
+    );
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    << "Database::findFromJSONWithOptions not implemented outside of mongo. ";
+  }
+  return false;
+}
+
 bool Database::initializeServer() {
   STACK_TRACE("Database::initializeServer");
   this->user.owner = this;
@@ -483,7 +566,7 @@ bool Database::initializeServer() {
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
     return true;
   }
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     DatabaseStrings::databaseName = "calculator";
     return true;
   }
@@ -1662,7 +1745,7 @@ bool UserCalculator::computeAndStoreActivationStats(
     return false;
   }
   this->activationEmailSubject = "NO REPLY: Activation of your math account. ";
-  if (global.flagDebugLogin && !global.flagUseExternalDatabase) {
+  if (global.flagDebugLogin && !global.flagDatabaseExternal) {
     global.comments
     << "Activation link displayed for debugging purposes. Database is off. "
     << "<a href='"
@@ -2103,7 +2186,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
   (void) commentsOnFailure;
   (void) user;
   (void) commentsGeneral;
-  if (!global.flagUseExternalDatabase) {
+  if (!global.flagDatabaseExternal) {
     return Database::User::loginNoDatabaseSupport(user, commentsGeneral);
   }
   STACK_TRACE("Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded");
@@ -2182,7 +2265,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
 bool Database::User::loginNoDatabaseSupport(
   UserCalculatorData& user, std::stringstream* commentsGeneral
 ) {
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       <<

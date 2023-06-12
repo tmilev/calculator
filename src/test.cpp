@@ -1,11 +1,9 @@
-#include "calculator.h"
 #include "crypto.h"
-#include "webserver.h"
+#include "transport_layer_security.h"
 #include "database.h"
 #include "calculator_html_interpretation.h"
 #include "signals_infrastructure.h"
 #include "source_code_formatter.h"
-#include "math_general_implementation.h"
 #include "calculator_inner_functions.h"
 #include "string_constants.h"
 

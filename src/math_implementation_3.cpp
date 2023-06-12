@@ -295,7 +295,7 @@ GlobalVariables::GlobalVariables() {
   this->flagCachingInternalFilesOn = true;
   this->flagRunServerOnEmptyCommandLine = false;
   this->flagRequestComingLocally = false;
-  this->flagUseExternalDatabase = false;
+  this->flagDatabaseExternal = false;
   this->flagLocalhostConnectionMonitor = true;
   this->flagDaemonMonitor = false;
   this->flagDisableDatabaseLogEveryoneAsAdmin = false;

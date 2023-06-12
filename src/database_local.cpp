@@ -8,10 +8,12 @@ std::string LocalDatabase::jsonLocation() {
 
 bool LocalDatabase::deleteDatabase(std::stringstream* commentsOnFailure) {
   this->databaseContent.reset(JSData::Token::tokenObject);
-  if (DatabaseStrings::databaseName!= "test") {
+  if (DatabaseStrings::databaseName != "test") {
     global.fatal
     << "Attempt to delete non-test database: "
-    << "["<< DatabaseStrings::databaseName << "]. "
+    << "["
+    << DatabaseStrings::databaseName
+    << "]. "
     << "Is this what you actually want to do? "
     << "Assuming this is an accident, "
     << "if not, simply remove the present check. "

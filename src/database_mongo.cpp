@@ -32,7 +32,7 @@ Database& Database::get() {
 
 std::string Database::toString() {
   std::stringstream out;
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     out << "Current DB is: MongoDB. ";
   } else {
     out << "Current DB is: Fallback. ";
@@ -729,51 +729,7 @@ JSData QueryResultOptions::toJSON() const {
   return result;
 }
 
-bool Database::findFromJSONWithProjection(
-  const std::string& collectionName,
-  const JSData& findQuery,
-  List<JSData>& output,
-  List<std::string>& fieldsToProjectTo,
-  int maxOutputItems,
-  long long* totalItems,
-  std::stringstream* commentsOnFailure
-) {
-  QueryResultOptions options;
-  options.makeProjection(fieldsToProjectTo);
-  return
-  Database::findFromJSONWithOptions(
-    collectionName,
-    findQuery,
-    output,
-    options,
-    maxOutputItems,
-    totalItems,
-    commentsOnFailure
-  );
-}
-
-bool Database::findFromJSON(
-  const std::string& collectionName,
-  const JSData& findQuery,
-  List<JSData>& output,
-  int maxOutputItems,
-  long long* totalItems,
-  std::stringstream* commentsOnFailure
-) {
-  QueryResultOptions options;
-  return
-  Database::findFromJSONWithOptions(
-    collectionName,
-    findQuery,
-    output,
-    options,
-    maxOutputItems,
-    totalItems,
-    commentsOnFailure
-  );
-}
-
-bool Database::findFromJSONWithOptions(
+bool Database::Mongo::findFromJSONWithOptions(
   const std::string& collectionName,
   const JSData& findQuery,
   List<JSData>& output,
@@ -783,15 +739,6 @@ bool Database::findFromJSONWithOptions(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
 ) {
-  STACK_TRACE("Database::findFromJSONWithOptions");
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Database::findFromJSONWithOptions fail. "
-      << DatabaseStrings::errorDatabaseDisabled;
-    }
-    return false;
-  }
   (void) commentsGeneralNonSensitive;
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
@@ -941,10 +888,10 @@ bool Database::matchesPattern(
     return false;
   }
   for (int i = 0; i < pattern.size; i ++) {
-      if (pattern[i] == DatabaseStrings::anyField) {
+    if (pattern[i] == DatabaseStrings::anyField) {
       continue;
     }
-      if (pattern[i] == DatabaseStrings::objectSelector) {
+    if (pattern[i] == DatabaseStrings::objectSelector) {
       continue;
     }
     if (fieldLabel[i] != pattern[i]) {
@@ -1221,7 +1168,7 @@ bool Database::updateOneFromSome(
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     return
     this->mongoDB.updateOneFromSome(
       findOrQueries, updateQuery, commentsOnFailure
@@ -1408,7 +1355,7 @@ bool Database::fetchCollectionNames(
     }
     return false;
   }
-  if (global.flagUseExternalDatabase) {
+  if (global.flagDatabaseExternal) {
     return
     Database::get().mongoDB.fetchCollectionNames(output, commentsOnFailure);
   }

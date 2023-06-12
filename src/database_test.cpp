@@ -6,9 +6,9 @@ std::string Database::Test::adminPassword = "111";
 
 Database::Test::Test() {
   this->maintainServerForkFlag.initialize(global.flagServerForkedIntoWorker);
-  this->maintainerDatabase.initialize(global.flagUseExternalDatabase);
+  this->maintainerDatabase.initialize(global.flagDatabaseExternal);
   this->maintainerDatabaseName.initialize(DatabaseStrings::databaseName);
-  global.flagUseExternalDatabase = false;
+  global.flagDatabaseExternal = false;
   global.flagServerForkedIntoWorker = true;
   DatabaseStrings::databaseName = "test";
   Database::get().initializeServer();

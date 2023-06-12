@@ -353,6 +353,16 @@ public:
       std::string& output,
       std::stringstream* commentsOnFailure = nullptr
     );
+    static bool findFromJSONWithOptions(
+      const std::string& collectionName,
+      const JSData& findQuery,
+      List<JSData>& output,
+      const QueryResultOptions& options,
+      int maxOutputItems,
+      long long* totalItems,
+      std::stringstream* commentsOnFailure,
+      std::stringstream* commentsGeneralNonSensitive
+    );
     bool updateOneFromSome(
       const List<QueryExact>& findOrQueries,
       const QuerySet& updateQuery,

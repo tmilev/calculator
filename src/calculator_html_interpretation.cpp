@@ -182,7 +182,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
 
 std::string WebAPIResponse::setProblemWeight() {
   STACK_TRACE("WebAPIReponse::setProblemWeight");
-  if (!global.flagUseExternalDatabase) {
+  if (!global.flagDatabaseExternal) {
     return "Cannot modify problem weights (no database available)";
   }
   if (!global.userDefaultHasAdminRights()) {
@@ -1505,7 +1505,7 @@ bool AnswerChecker::extractStudentAnswerPartTwo() {
 
 bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
   STACK_TRACE("AnswerChecker::storeInDatabase");
-  if (!global.flagUseExternalDatabase) {
+  if (!global.flagDatabaseExternal) {
     return true;
   }
   if (!this->problem.flagIsForReal) {
@@ -2516,7 +2516,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   const std::string& hostWebAddressWithPort
 ) {
   STACK_TRACE("WebAPIReponse::toStringUserDetailsTable");
-  if (!global.flagUseExternalDatabase) {
+  if (!global.flagDatabaseExternal) {
     return "Compiled without database support. ";
   }
   std::stringstream out;
@@ -2970,7 +2970,7 @@ public:
 
 bool UserScores::computeScoresAndStats(std::stringstream& comments) {
   STACK_TRACE("UserScores::computeScoresAndStats");
-  if (!global.flagUseExternalDatabase) {
+  if (!global.flagDatabaseExternal) {
     return false;
   }
   problem.currentUser.::UserCalculatorData::operator=(global.userDefault);
@@ -3157,7 +3157,7 @@ std::string WebAPIResponse::toStringUserScores() {
   if (!global.userDefaultHasAdminRights()) {
     return "only admins are allowed to view scores";
   }
-  if (!global.flagUseExternalDatabase) {
+  if (!global.flagDatabaseExternal) {
     return "Error: database not running. ";
   }
   std::stringstream out;
@@ -3309,7 +3309,7 @@ std::string WebAPIResponse::toStringUserDetails(
 ) {
   STACK_TRACE("WebAPIReponse::toStringUserDetails");
   std::stringstream out;
-  if (!global.flagUseExternalDatabase) {
+  if (!global.flagDatabaseExternal) {
     out << "<b>Adding emails not available (database not present).</b> ";
     return out.str();
   }

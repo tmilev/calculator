@@ -46,7 +46,7 @@ public:
   class Test {
   public:
     static bool all();
-    static bool basics(bool useFallbackDatabase);
+    static bool basics();
     static void updateNoFail(QueryExact& find, QuerySet updater);
     static void findNoFail(QueryExact& find, JSData& result);
     static void matchKeyValue(
@@ -518,11 +518,11 @@ public:
     StateMaintainer<std::string> maintainerDatabaseName;
     static std::string adminPassword;
     static bool all();
-    static bool basics(bool useFallbackDatabase);
+    static bool basics();
     bool deleteDatabase();
     void initializeForDatabaseOperations();
     bool createAdminAccount();
-    Test(bool useFallbackDatabase);
+    Test();
   };
 
   Database();

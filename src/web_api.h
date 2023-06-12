@@ -170,7 +170,7 @@ public:
   );
   class Test {
   public:
-    static bool scoredQuiz(bool useFallbackDatabase);
+    static bool scoredQuiz();
     static bool all();
     static bool solveJSON();
     static bool compareExpressions();

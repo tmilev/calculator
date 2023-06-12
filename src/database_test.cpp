@@ -4,34 +4,30 @@
 
 std::string Database::Test::adminPassword = "111";
 
-Database::Test::Test(bool useFallbackDatabase) {
+Database::Test::Test() {
   this->maintainServerForkFlag.initialize(global.flagServerForkedIntoWorker);
   this->maintainerDatabase.initialize(global.flagUseExternalDatabase);
-  this->maintainerDatabaseName.initialize(global.databaseName);
-  if (useFallbackDatabase) {
-    global.flagUseExternalDatabase = false;
-  }
+  this->maintainerDatabaseName.initialize(DatabaseStrings::databaseName);
+  global.flagUseExternalDatabase = false;
   global.flagServerForkedIntoWorker = true;
-  DatabaseStrings::databaseName = "calculatortest";
-  global.databaseName = "test";
+  DatabaseStrings::databaseName = "test";
   Database::get().initializeServer();
   Database::get().initializeWorker();
 }
 
 bool Database::Test::all() {
   STACK_TRACE("Database::Test::all");
-  Database::Test::basics(false);
-  Database::Test::basics(true);
+  Database::Test::basics();
   return true;
 }
 
-bool Database::Test::basics(bool useFallbackDatabase) {
+bool Database::Test::basics() {
   STACK_TRACE("Database::Test::basics");
   global
   << "Testing default database. "
   << Database::toString()
   << Logger::endL;
-  Database::Test tester(useFallbackDatabase);
+  Database::Test tester;
   tester.deleteDatabase();
   tester.createAdminAccount();
   return true;
@@ -74,8 +70,7 @@ bool Database::Test::createAdminAccount() {
 }
 
 bool QuerySet::Test::all() {
-  QuerySet::Test::basics(false);
-  QuerySet::Test::basics(true);
+  QuerySet::Test::basics();
   return true;
 }
 
@@ -130,8 +125,8 @@ void QuerySet::Test::matchKeyValue(
   }
 }
 
-bool QuerySet::Test::basics(bool useFallbackDatabase) {
-  Database::Test tester(useFallbackDatabase);
+bool QuerySet::Test::basics() {
+  Database::Test tester;
   tester.deleteDatabase();
   tester.initializeForDatabaseOperations();
   QueryExact find;

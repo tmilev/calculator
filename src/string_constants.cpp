@@ -189,7 +189,7 @@ std::string DatabaseStrings::labelTimeOfAuthenticationTokenCreation =
 "authenticationCreationTime";
 std::string DatabaseStrings::labelEmail = "email";
 std::string DatabaseStrings::tableUsers = "users";
-std::string DatabaseStrings::databaseName = "calculator";
+std::string DatabaseStrings::databaseName = "local";
 std::string DatabaseStrings::tableDeadlines = "deadlines";
 std::string DatabaseStrings::labelDeadlines = "deadlines";
 std::string DatabaseStrings::labelSection = "studentSection";
@@ -210,8 +210,8 @@ std::string DatabaseStrings::labelLastActivationEmailTime =
 "lastActivationEmailTime";
 std::string DatabaseStrings::labelNumActivationEmails = "numActivationEmails";
 std::string DatabaseStrings::tableDeleted = "deleted";
-std::string DatabaseStrings::anyFielD = "${any}";
-std::string DatabaseStrings::objectSelectoR = "${number}";
+std::string DatabaseStrings::anyField = "${any}";
+std::string DatabaseStrings::objectSelector = "${number}";
 std::string DatabaseStrings::objectSelectorMongo = "$oid";
 std::string DatabaseStrings::labelFields = "fields";
 std::string DatabaseStrings::labelTable = "table";

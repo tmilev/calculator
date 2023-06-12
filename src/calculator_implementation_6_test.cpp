@@ -623,13 +623,11 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
 bool Course::Test::all() {
   STACK_TRACE("Course::Test::all");
   global << "Testing course setup. " << Logger::endL;
-  Course::Test::setDeadlines(true);
-  Course::Test::setDeadlines(false);
+  Course::Test::setDeadlines();
   return true;
 }
 
-Course::Test::Setup::Setup(bool useFallbackDatabase):
-databaseTester(useFallbackDatabase) {
+Course::Test::Setup::Setup(): databaseTester() {
   this->maintainLogin.initialize(global.flagLoggedIn);
   this->maintainSSLFlag.initialize(global.flagUsingSSLinCurrentConnection);
   this->maintainUserRole.initialize(global.userDefault);
@@ -664,9 +662,9 @@ bool Course::Test::Setup::deleteDatabaseSetupAll() {
   return true;
 }
 
-bool Course::Test::setDeadlines(bool useFallback) {
+bool Course::Test::setDeadlines() {
   STACK_TRACE("Course::Test::setDeadlines");
-  Course::Test::Setup setup(useFallback);
+  Course::Test::Setup setup;
   global.setWebInput(
     WebAPI::Frontend::problemFileName,
     "test/problems/interval_notation_1.html"

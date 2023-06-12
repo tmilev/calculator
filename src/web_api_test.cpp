@@ -2,14 +2,12 @@
 #include "json.h"
 #include "general_logging_global_variables.h"
 #include "string_constants.h"
-#include "calculator.h"
 #include "database.h"
 #include "calculator_html_interpretation.h"
 
 bool WebAPIResponse::Test::all() {
   StateMaintainer<std::string> databaseName(DatabaseStrings::databaseName);
-  WebAPIResponse::Test::scoredQuiz(false);
-  WebAPIResponse::Test::scoredQuiz(true);
+  WebAPIResponse::Test::scoredQuiz();
   WebAPIResponse::Test::solveJSON();
   WebAPIResponse::Test::compareExpressions();
   return true;
@@ -223,14 +221,14 @@ bool WebAPIResponse::Test::compareExpressions() {
   return true;
 }
 
-bool WebAPIResponse::Test::scoredQuiz(bool useFallbackDatabase) {
+bool WebAPIResponse::Test::scoredQuiz() {
   STACK_TRACE("WebAPIResponse::Test::scoredQuiz");
   global
   << "Test scored quiz. "
   << Logger::blue
   << Database::toString()
   << Logger::endL;
-  Course::Test::Setup setup(useFallbackDatabase);
+  Course::Test::Setup setup;
   setup.deleteDatabaseSetupAll();
   std::string sample = "test/problems/interval_notation_1.html";
   global.webArguments[WebAPI::Problem::fileName] = sample;

@@ -5579,10 +5579,11 @@ void GlobalVariables::configurationProcess() {
   global.flagDisableDatabaseLogEveryoneAsAdmin =
   global.configuration[Configuration::disableDatabaseLogEveryoneAsAdmin].
   isTrueRepresentationInJSON();
-  global.databaseName =
+
+  DatabaseStrings::databaseName =
   global.configuration[Configuration::database].stringValue;
-  if (global.databaseName == "") {
-    global.databaseName = "local";
+  if (DatabaseStrings::databaseName == "") {
+    DatabaseStrings::databaseName = "local";
     global.configuration[Configuration::database] = "local";
   }
   if (global.flagDisableDatabaseLogEveryoneAsAdmin) {

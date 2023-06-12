@@ -3,15 +3,29 @@
 #include "string_constants.h"
 
 std::string LocalDatabase::jsonLocation() {
-  return "database/" + global.databaseName + "/database.json";
+  return "database/" + DatabaseStrings::databaseName + "/database.json";
 }
 
 bool LocalDatabase::deleteDatabase(std::stringstream* commentsOnFailure) {
   this->databaseContent.reset(JSData::Token::tokenObject);
+  if (DatabaseStrings::databaseName!= "test") {
+    global.fatal
+    << "Attempt to delete non-test database: "
+    << "["<< DatabaseStrings::databaseName << "]. "
+    << "Is this what you actually want to do? "
+    << "Assuming this is an accident, "
+    << "if not, simply remove the present check. "
+    << global.fatal;
+  }
   this->indexDatabase(commentsOnFailure);
   if (
-    !FileOperations::writeFileVirtual(
-      LocalDatabase::jsonLocation(), "{}", commentsOnFailure
+    !FileOperations::
+    writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
+      LocalDatabase::jsonLocation(),
+      "{}",
+      true,
+      true,
+      commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {

@@ -314,10 +314,10 @@ public:
   static std::string tableProblemInformation;
   static std::string labelProblemTotalQuestions;
   // deleted fields
-  static std::string anyFielD;
+  static std::string anyField;
   static std::string labelFields;
   static std::string labelTable;
-  static std::string objectSelectoR;
+  static std::string objectSelector;
   static std::string objectSelectorMongo;
   static std::string labelIdMongo;
   // deleted info

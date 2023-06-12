@@ -1059,7 +1059,7 @@ void WebAPIResponse::getJSDataUserInfo(
   outputAppend[WebAPI::Result::loginDisabledEveryoneIsAdmin] =
   global.flagDisableDatabaseLogEveryoneAsAdmin;
   outputAppend[WebAPI::Result::debugLogin] = global.flagDebugLogin;
-  outputAppend[WebAPI::Result::database] = global.databaseName;
+  outputAppend[WebAPI::Result::database] = DatabaseStrings::databaseName;
   outputAppend[WebAPI::Result::httpsSupport] = global.flagSSLAvailable;
   if (comments != "") {
     outputAppend[WebAPI::Result::comments] =

@@ -941,10 +941,10 @@ bool Database::matchesPattern(
     return false;
   }
   for (int i = 0; i < pattern.size; i ++) {
-    if (pattern[i] == DatabaseStrings::anyFielD) {
+      if (pattern[i] == DatabaseStrings::anyField) {
       continue;
     }
-    if (pattern[i] == DatabaseStrings::objectSelectoR) {
+      if (pattern[i] == DatabaseStrings::objectSelector) {
       continue;
     }
     if (fieldLabel[i] != pattern[i]) {

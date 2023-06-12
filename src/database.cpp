@@ -484,10 +484,9 @@ bool Database::initializeServer() {
     return true;
   }
   if (global.flagUseExternalDatabase) {
-    global.databaseName = "mongodb";
+    DatabaseStrings::databaseName = "calculator";
     return true;
   }
-  global.databaseName = "local";
   global
   << Logger::red
   << "Calculator compiled without (mongoDB) database support. "
@@ -519,17 +518,17 @@ void GlobalVariables::initModifiableDatabaseFields() {
   List<std::string> currentEntry;
   modifiableData.reserve(10);
   currentEntry.addOnTop(DatabaseStrings::tableUsers);
-  currentEntry.addOnTop(DatabaseStrings::objectSelectoR);
+  currentEntry.addOnTop(DatabaseStrings::objectSelector);
   currentEntry.addOnTop(DatabaseStrings::labelProblemDataJSON);
-  currentEntry.addOnTop(DatabaseStrings::anyFielD);
+  currentEntry.addOnTop(DatabaseStrings::anyField);
   modifiableData.addOnTop(currentEntry);
   currentEntry.setSize(0);
   currentEntry.addOnTop(DatabaseStrings::tableUsers);
-  currentEntry.addOnTop(DatabaseStrings::objectSelectoR);
+  currentEntry.addOnTop(DatabaseStrings::objectSelector);
   modifiableData.addOnTop(currentEntry);
   currentEntry.setSize(0);
   currentEntry.addOnTop(DatabaseStrings::tableEmailInfo);
-  currentEntry.addOnTop(DatabaseStrings::objectSelectoR);
+  currentEntry.addOnTop(DatabaseStrings::objectSelector);
   modifiableData.addOnTop(currentEntry);
   std::fstream outputFile;
   FileOperations::openFileCreateIfNotPresentVirtual(

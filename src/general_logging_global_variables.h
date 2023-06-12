@@ -265,7 +265,6 @@ public:
   // If true, signals use of a local database.
   // If false, signals use of external database (mongodb).
   bool flagUseExternalDatabase;
-  std::string databaseName;
   // A flag that triggers debug messages during login.
   // This will reveal secrets to end users and cannot run in production.
   // The flag can only be used with fallback database.

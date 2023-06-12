@@ -679,7 +679,7 @@ public:
   class Test {
   public:
     static bool all();
-    static bool setDeadlines(bool useFallback);
+    static bool setDeadlines();
     class Setup {
       StateMaintainer<bool> maintainLogin;
       StateMaintainer<bool> maintainerDatabase;
@@ -696,7 +696,7 @@ public:
       StateMaintainer<int32_t(*)()> maintainTimePointer;
     public:
       Database::Test databaseTester;
-      Setup(bool useFallbackDatabase);
+      Setup();
       bool deleteDatabaseSetupAll();
     };
   };

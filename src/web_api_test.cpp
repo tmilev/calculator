@@ -271,7 +271,7 @@ bool WebAPIResponse::Test::scoredQuiz() {
   QueryExact userQuery;
   userQuery.collection = DatabaseStrings::tableUsers;
   userQuery.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
-  userQuery.value = WebAPI::userDefaultAdmin;
+  userQuery.exactValue = WebAPI::userDefaultAdmin;
   JSData recordedProblem;
   std::stringstream comments;
   if (

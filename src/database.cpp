@@ -34,17 +34,12 @@ bool Database::User::userExists(
   if (!global.flagLoggedIn) {
     return false;
   }
-  JSData userQuery;
-  userQuery[DatabaseStrings::labelUsername] = inputUsername;
+  QueryExact userQuery;
+  userQuery.collection = DatabaseStrings::tableUsers;
+  userQuery.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
+  userQuery.exactValue = inputUsername;
   List<JSData> allUsers;
-  this->owner->findFromJSON(
-    DatabaseStrings::tableUsers,
-    userQuery,
-    allUsers,
-    - 1,
-    nullptr,
-    &comments
-  );
+  this->owner->findFromJSON(userQuery, allUsers, - 1, nullptr, &comments);
   return allUsers.size > 0;
 }
 
@@ -78,7 +73,9 @@ bool Database::User::logoutViaDatabase() {
   return true;
 }
 
-QueryExact::QueryExact() {}
+QueryExact::QueryExact() {
+  this->selectAny = false;
+}
 
 QueryExact::QueryExact(
   const std::string& desiredCollection,
@@ -87,7 +84,8 @@ QueryExact::QueryExact(
 ) {
   this->collection = desiredCollection;
   this->nestedLabels.addOnTop(label);
-  this->value = desiredValue;
+  this->exactValue = desiredValue;
+  this->selectAny = false;
 }
 
 QueryExact::QueryExact(
@@ -96,9 +94,10 @@ QueryExact::QueryExact(
   const std::string& desiredValue
 ) {
   this->collection = desiredCollection;
-  this->value = desiredValue;
+  this->exactValue = desiredValue;
   this->nestedLabels.setSize(0);
   this->nestedLabels.addListOnTop(desiredLabels);
+  this->selectAny = false;
 }
 
 bool QueryExact::isEmpty() const {
@@ -135,14 +134,14 @@ JSData QueryExact::toJSONCombineLabelsAndValue() const {
   Database::convertStringToMongoKeyString(
     *this->nestedLabels.lastObject()
   );
-  (*current)[label] = this->value;
+  (*current)[label] = this->exactValue;
   return result;
 }
 
 JSData QueryExact::toJSON() const {
   JSData result;
   JSData encodedKeys;
-  if (!Database::convertJSONToJSONMongo(this->value, encodedKeys)) {
+  if (!Database::convertJSONToJSONMongo(this->exactValue, encodedKeys)) {
     global
     << Logger::red
     << "Failed to convert find query to mongoDB encoding. "
@@ -192,20 +191,20 @@ bool QueryExact::getMongoKeyValue(
   }
   out << this->collection << "." << this->getLabel();
   outputKey = out.str();
-  return this->value.isString(&outputValue);
+  return this->exactValue.isString(&outputValue);
 }
 
 void QueryExact::setLabelsValue(
   const List<std::string>& labels, const std::string& desiredValue
 ) {
-  this->value = desiredValue;
+  this->exactValue = desiredValue;
   this->nestedLabels = labels;
 }
 
 void QueryExact::setLabelValue(
   const std::string& label, const std::string& desiredValue
 ) {
-  this->value = desiredValue;
+  this->exactValue = desiredValue;
   this->nestedLabels.setSize(1);
   this->nestedLabels[0] = label;
 }
@@ -360,6 +359,53 @@ bool Database::findOneWithOptions(
   }
 }
 
+QueryResultOptions Database::getStandardProjectors(
+  const std::string& collectionName
+) {
+  QueryResultOptions result;
+  if (collectionName == DatabaseStrings::tableUsers) {
+    result.fieldsProjectedAway.addOnTop(
+      DatabaseStrings::labelProblemDataJSON
+    );
+  }
+  return result;
+}
+
+Database& Database::get() {
+  static Database result;
+  return result;
+}
+
+std::string Database::toString() {
+  std::stringstream out;
+  if (global.flagDatabaseExternal) {
+    out << "Current DB is: MongoDB. ";
+  } else {
+    out << "Current DB is: Fallback. ";
+  }
+  return out.str();
+}
+
+Database::~Database() {}
+
+Database::Database() {
+  this->flagInitializedServer = false;
+  this->databaseInstanceCountMustBeOneOrZero = 0;
+}
+
+Database::User::User() {
+  this->owner = nullptr;
+}
+
+bool Database::checkInitialization() {
+  if (!this->flagInitializedServer) {
+    global.fatal
+    << "Database not initialized at a place it should be. "
+    << global.fatal;
+  }
+  return true;
+}
+
 bool Database::findOne(
   const QueryExact& query,
   JSData& output,
@@ -476,8 +522,7 @@ bool Database::initializeWorker() {
 }
 
 bool Database::findFromJSONWithProjection(
-  const std::string& collectionName,
-  const JSData& findQuery,
+  const QueryExact& findQuery,
   List<JSData>& output,
   List<std::string>& fieldsToProjectTo,
   int maxOutputItems,
@@ -488,7 +533,6 @@ bool Database::findFromJSONWithProjection(
   options.makeProjection(fieldsToProjectTo);
   return
   Database::findFromJSONWithOptions(
-    collectionName,
     findQuery,
     output,
     options,
@@ -499,8 +543,7 @@ bool Database::findFromJSONWithProjection(
 }
 
 bool Database::findFromJSON(
-  const std::string& collectionName,
-  const JSData& findQuery,
+  const QueryExact& findQuery,
   List<JSData>& output,
   int maxOutputItems,
   long long* totalItems,
@@ -509,7 +552,6 @@ bool Database::findFromJSON(
   QueryResultOptions options;
   return
   Database::findFromJSONWithOptions(
-    collectionName,
     findQuery,
     output,
     options,
@@ -520,11 +562,10 @@ bool Database::findFromJSON(
 }
 
 bool Database::findFromJSONWithOptions(
-  const std::string& collectionName,
-  const JSData& findQuery,
+  const QueryExact& findQuery,
   List<JSData>& output,
   const QueryResultOptions& options,
-  int maxOutputItems,
+  int maximumOutputItems,
   long long* totalItems,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
@@ -541,21 +582,25 @@ bool Database::findFromJSONWithOptions(
   if (global.flagDatabaseExternal) {
     return
     Database::Mongo::findFromJSONWithOptions(
-      collectionName,
       findQuery,
       output,
       options,
-      maxOutputItems,
+      maximumOutputItems,
       totalItems,
       commentsOnFailure,
       commentsGeneralNonSensitive
     );
   }
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure
-    << "Database::findFromJSONWithOptions not implemented outside of mongo. ";
-  }
-  return false;
+  return
+  Database::get().localDatabase.findFromJSONWithOptions(
+    findQuery,
+    output,
+    options,
+    maximumOutputItems,
+    totalItems,
+    commentsOnFailure,
+    commentsGeneralNonSensitive
+  );
 }
 
 bool Database::initializeServer() {
@@ -582,6 +627,307 @@ bool Database::initializeServer() {
   << Logger::endL;
   this->localDatabase.initialize();
   return true;
+}
+
+bool Database::fetchCollectionNames(
+  List<std::string>& output, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::fetchCollectionNames");
+  if (!Database::get().initializeWorker()) {
+    return false;
+  }
+  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Database disabled. ";
+    }
+    return false;
+  }
+  if (global.flagDatabaseExternal) {
+    return
+    Database::get().mongoDB.fetchCollectionNames(output, commentsOnFailure);
+  }
+  return this->localDatabase.fetchCollectionNames(output, commentsOnFailure);
+}
+
+bool Database::fetchTable(
+  const std::string& tableName,
+  List<std::string>& outputLabels,
+  List<List<std::string> >& outputRows,
+  long long* totalItems,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::fetchTable");
+  QueryExact findQuery;
+  List<JSData> rowsJSON;
+  findQuery.selectAny = true;
+  Database::get().findFromJSON(
+    findQuery, rowsJSON, 200, totalItems, commentsOnFailure
+  );
+  HashedList<std::string> labels;
+  for (int i = 0; i < rowsJSON.size; i ++) {
+    for (int j = 0; j < rowsJSON[i].objects.size(); j ++) {
+      labels.addOnTopNoRepetition(rowsJSON[i].objects.keys[j]);
+    }
+  }
+  outputLabels = labels;
+  outputRows.setSize(rowsJSON.size);
+  for (int i = 0; i < rowsJSON.size; i ++) {
+    outputRows[i].setSize(labels.size);
+    for (int j = 0; j < labels.size; j ++) {
+      if (rowsJSON[i].objects.contains(labels[j])) {
+        outputRows[i][j] = rowsJSON[i].getValue(labels[j]).toString(nullptr);
+      } else {
+        outputRows[i][j] = "";
+      }
+    }
+  }
+  return true;
+}
+
+JSData Database::toJSONDatabaseFetch(const std::string& incomingLabels) {
+  STACK_TRACE("Database::toJSONDatabaseFetch");
+  JSData result;
+  JSData labels;
+  std::stringstream commentsOnFailure;
+  if (!labels.parse(incomingLabels, false, &commentsOnFailure)) {
+    commentsOnFailure
+    << "Failed to parse labels from: "
+    << StringRoutines::stringTrimToLengthForDisplay(incomingLabels, 100);
+    result["error"] = commentsOnFailure.str();
+    return result;
+  }
+  List<std::string> labelStrings;
+  for (const JSData& label : labels.listObjects) {
+    if (label.elementType == JSData::Token::tokenString) {
+      labelStrings.addOnTop(label.stringValue);
+    } else if (label.elementType == JSData::Token::tokenLargeInteger) {
+      std::stringstream index;
+      index << label.integerValue.getElementConst();
+      labelStrings.addOnTop(index.str());
+    } else {
+      commentsOnFailure << "Label required to be a list of labels. ";
+      result["error"] = commentsOnFailure.str();
+      return result;
+    }
+  }
+  if (labelStrings.size == 0) {
+    return this->toJSONDatabaseCollection("");
+  }
+  if (labelStrings.size == 1) {
+    return this->toJSONDatabaseCollection(labelStrings[0]);
+  }
+  return Database::toJSONFetchItem(labelStrings);
+}
+
+JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
+  STACK_TRACE("Database::toJSONFetchItem");
+  JSData result;
+  if (labelStrings.size < 1) {
+    result["error"] = "No collection specified. ";
+    return result;
+  }
+  if (labelStrings.size < 2) {
+    result["error"] = "No id specified. ";
+    return result;
+  }
+  std::stringstream out;
+  std::string currentTable = labelStrings[0];
+  result["currentTable"] = currentTable;
+  QueryExact findQuery;
+  findQuery.collection = currentTable;
+  findQuery.nestedLabels.addOnTop(DatabaseStrings::labelIdMongo);
+  findQuery.nestedLabels.addOnTop(DatabaseStrings::objectSelectorMongo);
+  findQuery.exactValue = labelStrings[1];
+  QueryResultOptions projector;
+  labelStrings.slice(
+    2, labelStrings.size - 2, projector.fieldsToProjectTo
+  );
+  List<JSData> rowsJSON;
+  long long totalItems = 0;
+  std::stringstream comments;
+  std::stringstream* commentsPointer = nullptr;
+  bool flagDebuggingAdmin = global.userDefaultIsDebuggingAdmin();
+  if (flagDebuggingAdmin) {
+    commentsPointer = &comments;
+  }
+  if (
+    !Database::findFromJSONWithOptions(
+      findQuery,
+      rowsJSON,
+      projector,
+      200,
+      &totalItems,
+      &out,
+      commentsPointer
+    )
+  ) {
+    result["error"] = out.str();
+    return result;
+  }
+  Database::correctData(rowsJSON);
+  JSData rows;
+  rows.elementType = JSData::Token::tokenArray;
+  rows.listObjects = rowsJSON;
+  if (flagDebuggingAdmin) {
+    result["findQuery"] = findQuery.toJSON();
+  }
+  result["rows"] = rows;
+  result["totalRows"] = static_cast<int>(totalItems);
+  return result;
+}
+
+void Database::correctData(List<JSData>& toBeCorrected) {
+  for (int i = 0; i < toBeCorrected.size; i ++) {
+    correctData(toBeCorrected[i]);
+  }
+}
+
+void Database::correctData(JSData& row) {
+  Database::correctDataFromLabels(
+    row, List<std::string>({"_id", "$oid"})
+  );
+  Database::correctDataFromLabels(row, DatabaseStrings::labelEmail);
+  Database::correctDataFromLabels(
+    row, DatabaseStrings::labelAuthenticationToken
+  );
+  Database::correctDataFromLabels(row, DatabaseStrings::labelPassword);
+}
+
+void Database::correctDataFromLabels(
+  JSData& row, const std::string& oneLabel
+) {
+  Database::correctDataFromLabels(
+    row, List<std::string>({oneLabel})
+  );
+}
+
+void Database::correctDataFromLabels(
+  JSData& row, const List<std::string>& labels
+) {
+  JSData* toBeModified = &row;
+  for (int i = 0; i < labels.size; i ++) {
+    if (!toBeModified->hasKey(labels[i])) {
+      return;
+    }
+    toBeModified = &((*toBeModified)[labels[i]]);
+  }
+  std::string value;
+  if (!toBeModified->isString(&value)) {
+    return;
+  }
+  (*toBeModified) = StringRoutines::shortenInsertDots(value, 8);
+}
+
+JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
+  STACK_TRACE("Database::toJSONDatabaseCollection");
+  JSData result;
+  std::stringstream out;
+  result["currentTable"] = currentTable;
+  if (currentTable == "") {
+    if (global.userDebugFlagOn() != 0) {
+      result[WebAPI::Result::comments] =
+      "Requested table empty, returning list of tables. ";
+    }
+    List<std::string> collectionNamesList;
+    if (Database::fetchCollectionNames(collectionNamesList, &out)) {
+      JSData collectionNames;
+      collectionNames.elementType = JSData::Token::tokenArray;
+      collectionNames.listObjects.setSize(collectionNamesList.size);
+      for (int i = 0; i < collectionNamesList.size; i ++) {
+        collectionNames[i] = collectionNamesList[i];
+      }
+      result["collections"] = collectionNames;
+    } else {
+      result["error"] = out.str();
+    }
+    return result;
+  }
+  QueryExact findQuery;
+  QueryResultOptions projector;
+  projector = Database::getStandardProjectors(currentTable);
+  findQuery.collection = currentTable;
+  findQuery.selectAny = true;
+  List<JSData> rowsJSON;
+  long long totalItems = 0;
+  std::stringstream comments;
+  std::stringstream* commentsPointer = nullptr;
+  bool flagDebuggingAdmin = global.userDefaultIsDebuggingAdmin();
+  if (flagDebuggingAdmin) {
+    commentsPointer = &comments;
+  }
+  if (
+    !Database::findFromJSONWithOptions(
+      findQuery,
+      rowsJSON,
+      projector,
+      200,
+      &totalItems,
+      &out,
+      commentsPointer
+    )
+  ) {
+    result["error"] = out.str();
+    return result;
+  }
+  Database::correctData(rowsJSON);
+  if (rowsJSON.size == 0) {
+    result = Database::toJSONDatabaseCollection("");
+    if (flagDebuggingAdmin) {
+      std::stringstream moreComments;
+      moreComments
+      << "First query returned 0 rows, fetching all tables instead. ";
+      result["moreComments"] = moreComments.str();
+      result["commentsOnFirstQuery"] = commentsPointer->str();
+      result["currentTableRawOriginal"] = currentTable;
+    }
+    return result;
+  }
+  JSData rows;
+  rows.elementType = JSData::Token::tokenArray;
+  rows.listObjects = rowsJSON;
+  result["rows"] = rows;
+  result["totalRows"] = static_cast<int>(totalItems);
+  return result;
+}
+
+std::string Database::toHtmlDatabaseCollection(
+  const std::string& currentTable
+) {
+  STACK_TRACE("Database::toHtmlDatabaseCollection");
+  std::stringstream out;
+  if (currentTable == "") {
+    List<std::string> collectionNames;
+    if (this->fetchCollectionNames(collectionNames, &out)) {
+      out << "There are " << collectionNames.size << " collections. ";
+      for (int i = 0; i < collectionNames.size; i ++) {
+        out << "<br>";
+        out
+        << "<a href=\""
+        << global.displayNameExecutable
+        << "?request=database&currentDatabaseTable="
+        << collectionNames[i]
+        << "\">"
+        << collectionNames[i]
+        << "</a>";
+      }
+    }
+    return out.str();
+  }
+  out << "Current table: " << currentTable << "<br>";
+  List<std::string> labels;
+  List<List<std::string> > rows;
+  long long totalItems = - 1;
+  if (
+    !Database::fetchTable(currentTable, labels, rows, &totalItems, &out)
+  ) {
+    return out.str();
+  }
+  out << "Total: " << totalItems << ". ";
+  if (totalItems > rows.size) {
+    out << "Only the first " << rows.size << " are displayed. ";
+  }
+  out << "<br>" << HtmlRoutines::toHtmlTable(labels, rows, true);
+  return out.str();
 }
 
 void GlobalVariables::initialize() {

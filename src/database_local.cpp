@@ -190,6 +190,44 @@ bool LocalDatabase::findOne(
   return Database::convertJSONMongoToJSON(output, output, commentsOnFailure);
 }
 
+bool LocalDatabase::findFromJSONWithOptions(
+  const QueryExact& findQuery,
+  List<JSData>& output,
+  const QueryResultOptions& options,
+  int maximumOutputItems,
+  long long* totalItems,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneralNonSensitive
+) {
+  STACK_TRACE("LocalDatabase::findFromJSONWithOptions");
+  if (!this->readAndIndexDatabaseWithLockGuard(commentsOnFailure)) {
+    return false;
+  }
+  if (!this->databaseContent.hasKey(findQuery.collection)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Collection not found: " << findQuery.collection;
+    }
+    return true;
+  }
+  output.clear();
+  const ListReferences<JSData>& records =
+  this->databaseContent[findQuery.collection].listObjects;
+  if (totalItems != nullptr) {
+    *totalItems = records.size;
+  }
+  int i = 0;
+  for (const JSData& record : records) {
+    i ++;
+    if (i > maximumOutputItems && maximumOutputItems >= 0) {
+      return true;
+    }
+    output.addOnTop(record);
+  }
+  (void) options;
+  (void) commentsGeneralNonSensitive;
+  return true;
+}
+
 std::string LocalDatabase::toStringIndices() const {
   std::stringstream out;
   out << this->indices.size() << " indices total. ";
@@ -265,7 +303,7 @@ bool LocalDatabase::findIndexOneNolocksMinusOneNotFound(
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound
       << "Entry "
-      << query.value.toString(nullptr)
+      << query.exactValue.toString(nullptr)
       << " not found. ";
     }
     return true;
@@ -364,6 +402,13 @@ std::string LocalDatabase::Index::collectionAndLabelStatic(
 
 std::string LocalDatabase::Index::collectionAndLabel() {
   return this->collectionAndLabelStatic(this->collection, this->label);
+}
+
+bool LocalDatabase::readAndIndexDatabaseWithLockGuard(
+  std::stringstream* commentsOnFailure
+) {
+  MutexProcesslockGuard guardDB(this->access);
+  return this->readAndIndexDatabase(commentsOnFailure);
 }
 
 bool LocalDatabase::readAndIndexDatabase(

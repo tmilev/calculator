@@ -16,7 +16,7 @@ class LargeInteger;
 
 class JSData {
 public:
-  static const int numEmptyTokensAtStart = 6;
+  static const int numberOfEmptyTokensAtStart = 6;
   struct Token {
     static const char tokenUndefined = 0;
     static const char tokenNull = 1;

@@ -144,7 +144,11 @@ public:
   bool storeDatabase(std::stringstream* commentsOnFailure);
   bool readDatabase(std::stringstream* commentsOnFailure);
   bool readAndIndexDatabase(std::stringstream* commentsOnFailure);
+  bool readAndIndexDatabaseWithLockGuard(
+    std::stringstream* commentsOnFailure
+  );
   bool indexDatabase(std::stringstream* commentsOnFailure);
+  const JSData& getFullCollection(const std::string& collection);
   void indexOneRecord(
     const JSData& entry, int32_t row, const std::string& collection
   );
@@ -153,6 +157,15 @@ public:
     const List<QueryExact>& findOrQueries,
     JSData& output,
     std::stringstream* commentsOnFailure
+  );
+  bool findFromJSONWithOptions(
+    const QueryExact& findQuery,
+    List<JSData>& output,
+    const QueryResultOptions& options,
+    int maximumOutputItems,
+    long long* totalItems,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneralNonSensitive
   );
   std::string toStringIndices() const;
   LocalDatabase();
@@ -194,7 +207,8 @@ public:
   // Labels, stored in non-encoded form.
   List<std::string> nestedLabels;
   // Exact values we are looking for. All keys must be %-encoded.
-  JSData value;
+  JSData exactValue;
+  bool selectAny;
   QueryExact();
   QueryExact(
     const std::string& desiredCollection,
@@ -354,8 +368,7 @@ public:
       std::stringstream* commentsOnFailure = nullptr
     );
     static bool findFromJSONWithOptions(
-      const std::string& collectionName,
-      const JSData& findQuery,
+      const QueryExact& findQuery,
       List<JSData>& output,
       const QueryResultOptions& options,
       int maxOutputItems,
@@ -393,16 +406,14 @@ public:
     std::stringstream* commentsOnFailure = nullptr
   );
   bool findFromJSON(
-    const std::string& collectionName,
-    const JSData& findQuery,
+    const QueryExact& findQuery,
     List<JSData>& output,
     int maxOutputItems = - 1,
     long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
   static bool findFromJSONWithProjection(
-    const std::string& collectionName,
-    const JSData& findQuery,
+    const QueryExact& findQuery,
     List<JSData>& output,
     List<std::string>& fieldsToProjectTo,
     int maxOutputItems = - 1,
@@ -410,11 +421,10 @@ public:
     std::stringstream* commentsOnFailure = nullptr
   );
   static bool findFromJSONWithOptions(
-    const std::string& collectionName,
-    const JSData& findQuery,
+    const QueryExact& findQuery,
     List<JSData>& output,
     const QueryResultOptions& options,
-    int maxOutputItems = - 1,
+    int maximumOutputItems = - 1,
     long long* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr,
     std::stringstream* commentsGeneralNonSensitive = nullptr

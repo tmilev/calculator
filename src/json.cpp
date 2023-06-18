@@ -724,7 +724,7 @@ bool JSData::parse(
   }
   List<JSData> readingStack;
   JSData emptyElt;
-  for (int i = 0; i < this->numEmptyTokensAtStart; i ++) {
+  for (int i = 0; i < this->numberOfEmptyTokensAtStart; i ++) {
     readingStack.addOnTop(emptyElt);
   }
   readingStack.addOnTop(inputTokens[1]);
@@ -803,7 +803,7 @@ bool JSData::parse(
     }
     readingStack.addOnTop(inputTokens[i]);
   }
-  if (readingStack.size != JSData::numEmptyTokensAtStart + 1) {
+  if (readingStack.size != JSData::numberOfEmptyTokensAtStart + 1) {
     if (commentsOnFailure != nullptr) {
       std::stringstream calculatorInput;
       calculatorInput
@@ -823,7 +823,7 @@ bool JSData::parse(
       << "</a>"
       << "<br>Result:<br>\n ";
       for (
-        int i = JSData::numEmptyTokensAtStart; i < readingStack.size; i ++
+        int i = JSData::numberOfEmptyTokensAtStart; i < readingStack.size; i ++
       ) {
         *commentsOnFailure
         << i
@@ -834,8 +834,8 @@ bool JSData::parse(
     }
     return false;
   }
-  if (JSData::numEmptyTokensAtStart < readingStack.size) {
-    *this = readingStack[JSData::numEmptyTokensAtStart];
+  if (JSData::numberOfEmptyTokensAtStart < readingStack.size) {
+    *this = readingStack[JSData::numberOfEmptyTokensAtStart];
   }
   bool result = this->isValidElement();
   if (!result) {

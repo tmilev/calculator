@@ -706,7 +706,7 @@ bool Course::Test::setDeadlines() {
   QueryExact finder;
   finder.collection = DatabaseStrings::tableDeadlines;
   finder.nestedLabels.addOnTop(DatabaseStrings::labelDeadlinesSchema);
-  finder.value = "deadlinesdefaultCOURSE";
+  finder.exactValue = "deadlinesdefaultCOURSE";
   JSData resultData;
   QuerySet::Test::findNoFail(finder, resultData);
   std::string result =

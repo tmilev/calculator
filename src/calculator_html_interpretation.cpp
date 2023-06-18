@@ -2449,14 +2449,13 @@ JSData WebAPIResponse::getAccountsPageJSON(
     return output;
   }
   std::stringstream commentsOnFailure;
-  JSData findStudents;
-  JSData findAdmins;
+  QueryExact findStudents;
   List<JSData> students;
   List<JSData> admins;
   long long totalStudents;
-  findStudents[DatabaseStrings::labelInstructor] = global.userDefault.username;
-  findAdmins[DatabaseStrings::labelUserRole] =
-  UserCalculator::Roles::administator;
+  findStudents.collection = DatabaseStrings::tableUsers;
+  findStudents.nestedLabels.addOnTop(DatabaseStrings::labelInstructor);
+  findStudents.exactValue = global.userDefault.username;
   List<std::string> columnsToRetain;
   columnsToRetain.addOnTop(DatabaseStrings::labelUsername);
   columnsToRetain.addOnTop(DatabaseStrings::labelEmail);
@@ -2467,7 +2466,6 @@ JSData WebAPIResponse::getAccountsPageJSON(
   columnsToRetain.addOnTop(DatabaseStrings::labelSemester);
   if (
     !Database::findFromJSONWithProjection(
-      DatabaseStrings::tableUsers,
       findStudents,
       students,
       columnsToRetain,
@@ -2480,9 +2478,12 @@ JSData WebAPIResponse::getAccountsPageJSON(
     "Failed to load user info. Comments: " + commentsOnFailure.str();
     return output;
   }
+  QueryExact findAdmins;
+  findAdmins.collection = DatabaseStrings::tableUsers;
+  findAdmins.nestedLabels.addOnTop(DatabaseStrings::labelUserRole);
+  findAdmins.exactValue = UserCalculator::Roles::administator;
   if (
     !Database::findFromJSONWithProjection(
-      DatabaseStrings::tableUsers,
       findAdmins,
       admins,
       columnsToRetain,
@@ -2771,21 +2772,15 @@ int ProblemData::getExpectedNumberOfAnswers(
     return this->knownNumberOfAnswersFromHD;
   }
   if (global.problemExpectedNumberOfAnswers.size() == 0) {
-    JSData findProblemInfo;
-    findProblemInfo.elementType = JSData::Token::tokenArray;
     List<JSData> result;
     List<std::string> fields;
     fields.addOnTop(DatabaseStrings::labelProblemFileName);
     fields.addOnTop(DatabaseStrings::labelProblemTotalQuestions);
+    QueryExact findProblemInfo;
+    findProblemInfo.collection = DatabaseStrings::tableProblemInformation;
     if (
       Database::findFromJSONWithProjection(
-        DatabaseStrings::tableProblemInformation,
-        findProblemInfo,
-        result,
-        fields,
-        - 1,
-        nullptr,
-        &commentsOnFailure
+        findProblemInfo, result, fields, - 1, nullptr, &commentsOnFailure
       )
     ) {
       for (int i = 0; i < result.size; i ++) {

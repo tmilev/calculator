@@ -132,7 +132,7 @@ bool QuerySet::Test::basics() {
   QueryExact find;
   find.collection = DatabaseStrings::tableUsers;
   find.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
-  find.value = "ttt";
+  find.exactValue = "ttt";
   QuerySet updater;
   JSData found;
   updater.value.parseNoFail(

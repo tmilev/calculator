@@ -9,15 +9,15 @@ const storage = require('./storage');
 
 class DatabasePage {
   constructor() {
-    
+
   }
   initialize() {
     let tableButtons = document.getElementById(
       ids.domElements.pages.database.buttonTables
     );
     tableButtons.addEventListener('click', () => {
-      updateDatabasePageResetCurrentTable();   
-    });     
+      updateDatabasePageResetCurrentTable();
+    });
   }
 }
 
@@ -165,23 +165,35 @@ function updateDatabasePageCallback(incoming, unused) {
       })
     );
   } else {
-    let table = document.createElement("table");
-    for (let i = 0; i < parsed.collections.length; i++) {
-      let currentCollection = parsed.collections[i];
-      let anchor = document.createElement("a");
-      anchor.textContent = currentCollection;
-      let urlObjectIncoming = miscellaneous.deepCopy(storage.storage.urlObject);
-      urlObjectIncoming.databaseLabels = currentCollection;
-      anchor.href = `#${JSON.stringify(urlObjectIncoming)}`;
-      anchor.addEventListener("click", () => { 
-        clickDatabaseTable([currentCollection]);
-      });
-      table.insertRow().insertCell().appendChild(anchor);
-    }
-    table.className = "tableJSON";
-    output.appendChild(table);
+    updateTables(parsed, output);
   }
 }
+
+function updateTables(parsed, /** @type {HTMLElement} */ output) {
+  if (parsed.collections === null || parsed.collections === undefined) {
+    let errorDiv = document.createElement("b");
+    errorDiv.style.color = "red";
+    errorDiv.textContent = "Missing collections.";
+    output.appendChild(errorDiv);
+    return;
+  }
+  let table = document.createElement("table");
+  table.className = "tableJSON";
+  for (let i = 0; i < parsed.collections.length; i++) {
+    let currentCollection = parsed.collections[i];
+    let anchor = document.createElement("a");
+    anchor.textContent = currentCollection;
+    let urlObjectIncoming = miscellaneous.deepCopy(storage.storage.urlObject);
+    urlObjectIncoming.databaseLabels = currentCollection;
+    anchor.href = `#${JSON.stringify(urlObjectIncoming)}`;
+    anchor.addEventListener("click", () => {
+      clickDatabaseTable([currentCollection]);
+    });
+    table.insertRow().insertCell().appendChild(anchor);
+  }
+  output.appendChild(table);
+}
+
 
 function updateDatabasePageResetCurrentTable() {
   storage.storage.variables.database.labels.setAndStore("[]");

@@ -2848,24 +2848,23 @@ bool StringRoutines::isASCIICharacterVisible(char input) {
   return input >= 32 && input <= 126;
 }
 
-std::string StringRoutines::shortenInsertDots(
-  const std::string& inputString, int maxNumChars
+std::string StringRoutines::shortenInsertDots(const std::string& inputString, int maximumCharacters
 ) {
-  if (inputString.size() <= static_cast<unsigned>(maxNumChars)) {
+  if (inputString.size() <= static_cast<unsigned>(maximumCharacters)) {
     return inputString;
   }
   std::stringstream out;
-  int numCharsBeginEnd = maxNumChars / 2 - 2;
-  int numCharsOmitted = static_cast<signed>(inputString.size()) -
-  numCharsBeginEnd * 2;
+  int numberOfCharactersBeginEnd = maximumCharacters / 2 - 2;
+  int numberOfCharactersOmitted = static_cast<signed>(inputString.size()) -
+  numberOfCharactersBeginEnd * 2;
   out
-  << inputString.substr(0, static_cast<unsigned>(numCharsBeginEnd))
+  << inputString.substr(0, static_cast<unsigned>(numberOfCharactersBeginEnd))
   << "..omit_"
-  << numCharsOmitted
+  << numberOfCharactersOmitted
   << ".."
   << inputString.substr(
     static_cast<unsigned>(
-      static_cast<signed>(inputString.size()) - numCharsBeginEnd
+      static_cast<signed>(inputString.size()) - numberOfCharactersBeginEnd
     )
   );
   return out.str();

@@ -6,9 +6,6 @@
 
 class CalculatorDatabaseFunctions {
 public:
-  static bool executeMongoQuery(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
 };
 
 #endif

@@ -103,7 +103,7 @@ public:
   bson_t* updateResult;
   bson_t* command;
   bson_error_t errorDatabase;
-  int maxOutputItems;
+  int maximumOutputItems;
   long long totalItems;
   std::string findQuery;
   std::string updateQuery;
@@ -148,7 +148,7 @@ MongoQuery::MongoQuery() {
   this->options = nullptr;
   this->cursor = nullptr;
   this->updateResult = nullptr;
-  this->maxOutputItems = - 1;
+  this->maximumOutputItems = - 1;
   this->totalItems = - 1;
   this->flagfindOneOnly = false;
 }
@@ -495,7 +495,7 @@ bool MongoQuery::findMultiple(
     std::string current(bufferOutpurStringFormat);
     bson_free(bufferOutpurStringFormat);
     if (
-      this->maxOutputItems <= 0 || this->totalItems < this->maxOutputItems
+      this->maximumOutputItems <= 0 || this->totalItems < this->maximumOutputItems
     ) {
       outputString.addOnTop(current);
     }
@@ -620,7 +620,7 @@ void Database::Mongo::createHashIndex(
   );
 #endif
 }
-
+/*
 bool Database::findFromString(
   const std::string& collectionName,
   const std::string& findQuery,
@@ -656,7 +656,7 @@ bool Database::findFromString(
   (void) totalItems;
   return false;
 #endif
-}
+}*/
 
 void QueryResultOptions::makeProjection(const List<std::string>& fields) {
   this->fieldsToProjectTo = fields;
@@ -680,21 +680,21 @@ JSData QueryResultOptions::toJSON() const {
   return result;
 }
 
-bool Database::Mongo::findFromJSONWithOptions(
-  const QueryExact& findQuery,
+bool Database::Mongo::findFromJSONWithOptions(const QueryExact& findQuery,
   List<JSData>& output,
   const QueryResultOptions& options,
-  int maxOutputItems,
+  int maximumOutputItems,
   long long* totalItems,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
 ) {
+  STACK_TRACE("Database::Mongo::findFromJSONWithOptions");
   (void) commentsGeneralNonSensitive;
 #ifdef MACRO_use_MongoDB
   MongoQuery query;
-  query.collectionName = collectionName;
-  query.findQuery = findQuery.toString(nullptr);
-  query.maxOutputItems = maxOutputItems;
+  query.collectionName = findQuery.collection;
+  query.findQuery = findQuery.toJSON().toString(nullptr);
+  query.maximumOutputItems = maximumOutputItems;
   global
   << Logger::blue
   << "Query input JSON: "
@@ -802,7 +802,7 @@ bool Database::Mongo::findOneWithOptions(
   MongoQuery mongoQuery;
   mongoQuery.collectionName = query.collection;
   mongoQuery.findQuery = query.toJSON().toString();
-  mongoQuery.maxOutputItems = 1;
+  mongoQuery.maximumOutputItems = 1;
   List<JSData> outputList;
   mongoQuery.findMultiple(
     outputList,

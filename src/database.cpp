@@ -140,6 +140,10 @@ JSData QueryExact::toJSONCombineLabelsAndValue() const {
 
 JSData QueryExact::toJSON() const {
   JSData result;
+  if (this->nestedLabels.size ==0 && this->selectAny){
+    result.elementType = JSData::Token::tokenObject;
+    return result;
+  }
   JSData encodedKeys;
   if (!Database::convertJSONToJSONMongo(this->exactValue, encodedKeys)) {
     global
@@ -248,12 +252,12 @@ bool Database::convertJSONToJSONEncodeKeys(
   bool encodeOverDecode,
   std::stringstream* commentsOnFailure
 ) {
-  static const int maxRecursionDepth = 100;
-  if (recursionDepth > maxRecursionDepth) {
+  static const int maximumRecursionDepth = 100;
+  if (recursionDepth > maximumRecursionDepth) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Input json is too deeply nested, maximum depth: "
-      << maxRecursionDepth
+      << maximumRecursionDepth
       << ". ";
     }
     return false;
@@ -277,7 +281,10 @@ bool Database::convertJSONToJSONEncodeKeys(
     }
     return true;
   }
-  if (input.elementType == JSData::Token::tokenObject) {
+  if (input.elementType != JSData::Token::tokenObject) {
+    output = input;
+return true;
+  }
     for (int i = 0; i < input.objects.size(); i ++) {
       JSData nextItem;
       if (
@@ -304,9 +311,7 @@ bool Database::convertJSONToJSONEncodeKeys(
       output[key] = nextItem;
     }
     return true;
-  }
-  output = input;
-  return true;
+
 }
 
 std::string Database::convertStringToMongoKeyString(
@@ -686,6 +691,7 @@ bool Database::fetchTable(
 
 JSData Database::toJSONDatabaseFetch(const std::string& incomingLabels) {
   STACK_TRACE("Database::toJSONDatabaseFetch");
+  global.comments << "DEBUG: fetch: incomingLabels: " << incomingLabels;
   JSData result;
   JSData labels;
   std::stringstream commentsOnFailure;
@@ -710,6 +716,7 @@ JSData Database::toJSONDatabaseFetch(const std::string& incomingLabels) {
       return result;
     }
   }
+  global.comments << "DEBUG: fetch: labelStrings: " << labelStrings;
   if (labelStrings.size == 0) {
     return this->toJSONDatabaseCollection("");
   }
@@ -783,9 +790,6 @@ void Database::correctData(List<JSData>& toBeCorrected) {
 }
 
 void Database::correctData(JSData& row) {
-  Database::correctDataFromLabels(
-    row, List<std::string>({"_id", "$oid"})
-  );
   Database::correctDataFromLabels(row, DatabaseStrings::labelEmail);
   Database::correctDataFromLabels(
     row, DatabaseStrings::labelAuthenticationToken
@@ -815,7 +819,7 @@ void Database::correctDataFromLabels(
   if (!toBeModified->isString(&value)) {
     return;
   }
-  (*toBeModified) = StringRoutines::shortenInsertDots(value, 8);
+  (*toBeModified) = StringRoutines::shortenInsertDots(value, 12);
 }
 
 JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {

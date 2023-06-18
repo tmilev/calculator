@@ -371,7 +371,7 @@ public:
       const QueryExact& findQuery,
       List<JSData>& output,
       const QueryResultOptions& options,
-      int maxOutputItems,
+      int maximumOutputItems,
       long long* totalItems,
       std::stringstream* commentsOnFailure,
       std::stringstream* commentsGeneralNonSensitive
@@ -397,14 +397,6 @@ public:
   };
 
   Mongo mongoDB;
-  static bool findFromString(
-    const std::string& collectionName,
-    const std::string& findQuery,
-    List<JSData>& output,
-    int maxOutputItems = - 1,
-    long long* totalItems = nullptr,
-    std::stringstream* commentsOnFailure = nullptr
-  );
   bool findFromJSON(
     const QueryExact& findQuery,
     List<JSData>& output,

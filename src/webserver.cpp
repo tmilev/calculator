@@ -191,7 +191,7 @@ bool WebWorker::receiveAll() {
     sizeof(timeval)
   );
   std::string errorString;
-  double numSecondsAtStart = global.getElapsedSeconds();
+  double numberOfSecondsAtStart = global.getElapsedSeconds();
   int numberOfBytesInBuffer = 0;
   List<char>& readBuffer = this->parent->transportLayerSecurity.readBuffer;
   while (true) {
@@ -260,7 +260,7 @@ bool WebWorker::receiveAll() {
   while (
     static_cast<signed>(this->messageBody.size()) < this->contentLength
   ) {
-    if (global.getElapsedSeconds() - numSecondsAtStart > 5) {
+    if (global.getElapsedSeconds() - numberOfSecondsAtStart > 5) {
       this->error = "Receiving bytes timed out (5 seconds).";
       global << this->error << Logger::endL;
       this->displayUserInput = this->error;
@@ -336,7 +336,7 @@ void WebWorker::sendAllBytesNoHeaders() {
   tv.tv_sec = 5;
   // 5 Secs Timeout
   tv.tv_usec = 0;
-  int numTimesRunWithoutSending = 0;
+  int numberOfTimesRunWithoutSending = 0;
   int timeOutInSeconds = 20;
   setsockopt(
     this->connectedSocketID,
@@ -350,7 +350,7 @@ void WebWorker::sendAllBytesNoHeaders() {
   while (this->remainingBytesToSend.size > 0) {
     if (global.getElapsedSeconds() - startTime > timeOutInSeconds) {
       global
-      << "WebWorker::SendAllBytes failed: more than "
+      << "WebWorker::sendAllBytesNoHeaders failed: more than "
       << timeOutInSeconds
       << " seconds have elapsed. "
       << Logger::endL;
@@ -368,7 +368,7 @@ void WebWorker::sendAllBytesNoHeaders() {
     if (bytesSent < 0) {
       global
       << Logger::red
-      << "WebWorker::SendAllBytes: writeOnce failed. "
+      << "WebWorker::sendAllBytesNoHeaders: writeOnce failed. "
       << Logger::blue
       << "Socket: "
       << this->connectedSocketID
@@ -380,9 +380,9 @@ void WebWorker::sendAllBytesNoHeaders() {
       return;
     }
     if (bytesSent == 0) {
-      numTimesRunWithoutSending ++;
+      numberOfTimesRunWithoutSending ++;
     } else {
-      numTimesRunWithoutSending = 0;
+      numberOfTimesRunWithoutSending = 0;
     }
     global << bytesSent;
     this->remainingBytesToSend.sliceInPlace(
@@ -391,9 +391,9 @@ void WebWorker::sendAllBytesNoHeaders() {
     if (this->remainingBytesToSend.size > 0) {
       global << ", ";
     }
-    if (numTimesRunWithoutSending > 3) {
+    if (numberOfTimesRunWithoutSending > 3) {
       global
-      << "WebWorker::SendAllBytes failed: "
+      << "WebWorker::sendAllBytesNoHeaders failed: "
       << "send function went through 3 cycles without "
       << "sending any bytes. "
       << Logger::endL;
@@ -628,25 +628,25 @@ bool WebWorker::extractArgumentsFromCookies(
     std::string,
     std::string,
     HashFunctions::hashFunction<std::string>
-  > newlyFoundArgs;
+  > newlyFoundArguments;
   bool result = true;
   for (int i = 0; i < this->cookies.size; i ++) {
     if (
       !HtmlRoutines::chopPercentEncodedStringAppend(
         this->cookies[i],
-        newlyFoundArgs,
+        newlyFoundArguments,
         argumentProcessingFailureComments
       )
     ) {
       result = false;
     }
   }
-  for (int i = 0; i < newlyFoundArgs.size(); i ++) {
-    if (global.webArguments.contains(newlyFoundArgs.keys[i])) {
+  for (int i = 0; i < newlyFoundArguments.size(); i ++) {
+    if (global.webArguments.contains(newlyFoundArguments.keys[i])) {
       continue;
       // <-if a key is already given cookie entries are ignored.
     }
-    std::string trimmed = newlyFoundArgs.values[i];
+    std::string trimmed = newlyFoundArguments.values[i];
     if (trimmed.size() > 0) {
       if (trimmed[trimmed.size() - 1] == ';') {
         trimmed = trimmed.substr(0, trimmed.size() - 1);
@@ -655,7 +655,7 @@ bool WebWorker::extractArgumentsFromCookies(
     // <-except the last cookie, cookies have extra semicolumn at the end,
     // trimming.
     bool isGood = true;
-    if (newlyFoundArgs.keys[i] == "request") {
+    if (newlyFoundArguments.keys[i] == "request") {
       // <- we are careful about
       // reading arbitrary requests from the cookie. Those may effectively deny
       // login
@@ -676,7 +676,7 @@ bool WebWorker::extractArgumentsFromCookies(
       }
     }
     if (isGood) {
-      global.webArguments.setKeyValue(newlyFoundArgs.keys[i], trimmed);
+      global.webArguments.setKeyValue(newlyFoundArguments.keys[i], trimmed);
     }
   }
   return result;
@@ -5000,7 +5000,7 @@ void WebServer::initializeBuildFlags() {
   global.flagSSLAvailable = true;
 #endif
 #ifdef MACRO_use_MongoDB
-  global.flagUseExternalDatabase = true;
+  global.flagDatabaseExternal = true;
 #endif
   global.flagRunningBuiltInWebServer = false;
 }

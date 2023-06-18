@@ -43,18 +43,7 @@ void Calculator::initializeAdminFunctions() {
   if (!global.flagDatabaseExternal || global.flagRunningConsoleTest) {
     return;
   }
-  this->addOperationHandler(
-    "MongoFind",
-    CalculatorDatabaseFunctions::executeMongoQuery,
-    "",
-    "Executes a mongoDB query. Requires administator rights. "
-    "The database name is calculator (can't be modified). "
-    "First argument: collection name. Second argument: query. ",
-    "MongoFind(\"users\", \"{}\")",
-    "CalculatorDatabaseFunctions::executeMongoQuery",
-    "MongoFind",
-    adminDefault
-  );
+
 }
 
 // Naming conventions: please start all built-in calculator functions with

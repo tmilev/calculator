@@ -151,7 +151,7 @@ public:
     const std::string& replaceWith
   );
   static std::string shortenInsertDots(
-    const std::string& inputString, int maxNumChars
+    const std::string& inputString, int maximumCharacters
   );
   static bool isASCIICharacterVisible(char input);
   class Differ {

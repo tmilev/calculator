@@ -9,14 +9,6 @@ for (let i = 0; i < modifiableDatabaseData.modifiableFields.length; i++) {
   modifiableFields[incomingLabel] = true;
 }
 
-let transformersStandard = {
-  shortener: {
-    transformer: (input) => {
-      return miscellaneous.shortenString(30, input);
-    },
-  },
-};
-
 function writeJSONtoDOMComponent(
   /** @type {Object} */
   inputObject,
@@ -47,21 +39,117 @@ class Statistics {
 
 let statistics = new Statistics();
 
-class CollectionRowSelector {
+class CompositeDataKey {
   constructor(
     /** @type {string} */
     tableName,
+    /** @type {Array.<Object>} */
+    labels,
   ) {
     this.tableName = tableName;
-    this.labels = [];
-    this.exactValue = "";
-    this.selectorWithinRow = [];
+    this.labels = labels;
+  }
+  addLabel(
+    /** @type{string|number} */
+    label,
+  ) {
+    this.labels.push(label);
+  }
+  popLabel() {
+    this.labels.pop;
   }
   copy() {
-    const result = new CollectionRowSelector(this.tableName);
-    result.labels = this.labels.slice();
-    result.exactValue = this.exactValue;
-    result.selectorWithinRow = this.selectorWithinRow.slice();
+    return new CompositeDataKey(
+      this.tableName,
+      this.labels.slice(),
+    );
+  }
+}
+
+class CompositeDataKeyAndValue{
+  constructor(
+    /** @type {CompositeDataKey} */
+    key,
+    value,
+  ) {
+    this.key = key;
+    this.value = value;
+  }
+}
+
+class DataTransformer{
+  constructor(
+    /** @type {Function?} */
+    clickHandler,
+    /** @type {Function?} */
+    labelTransformer
+  ) {
+    this.clickHandler = clickHandler;
+    this.labelTransformer = labelTransformer;
+  }
+}
+
+class DataProcessor {
+  constructor(
+    /** @type {CompositeDataKey} */
+    selector,
+    /** @type {DataTransformer} */
+    transformer,
+  ) {
+    this.selector = selector;
+    this.transformer = transformer;
+  }
+}
+
+class DataProcessorCollection {
+  constructor(
+    /** @type {Array.<DataProcessor>} */
+    dataProcessors,
+  ) {
+    this.dataProcessors = dataProcessors;
+  }
+  /** @return {DataTransformer|null} */
+  getDataTransformer(
+    /** @type {CompositeDataKey} */
+    selector
+  ) {
+    for (let i = 0; i < this.dataProcessors.length; i++){
+      let candidate = this.transformerFromSelector(
+        selector, this.dataProcessors[i]
+      );
+      if (candidate !== null) {
+        return candidate;
+      }
+    }
+    return null;    
+  }
+
+  /** @return {DataTransformer|null} */
+  transformerFromSelector(
+    /** @type {CompositeDataKey} */
+    selector,
+    /** @type {DataProcessor} */
+    processor,
+  ) {
+    const key = processor.selector;
+    if (key.tableName != selector.tableName) {
+      return null;
+    }
+    if (key.labels.length > selector.labels.length) {
+      return null;
+    }
+    for (let i = 0; i < key.labels.length; i++){
+      let filter = key.labels[i];
+      let toBeMatched = selector.labels[i];
+      if (filter === null) {
+        // null matches everything.
+        continue;
+      }
+      if (filter !== toBeMatched) {
+        return null;
+      }
+    }
+    return processor.transformer;
   }
 }
 
@@ -71,31 +159,21 @@ class JSONToHTML {
     this.tableName = "";
     this.ambientObject = null;
     this.labelsRows = null;
-    this.optionsConstant = {};
+    /** @type {DataProcessorCollection?} */
+    this.optionsConstant = null;
     this.inputParsed = null;
     this.result = null;
   }
 
+  /** @return {DataTransformer|null} */
   getOptionFromLabel(
-    /** @type {CollectionRowSelector} */
+    /** @type {CompositeDataKey} */
     selector,
   ) {
-    if (
-      this.optionsConstant.transformers === null ||
-      this.optionsConstant.transformers === undefined
-    ) {
+    if (this.optionsConstant === null) {
       return null;
     }
-    for (let i = - 1; i < selector.selectorWithinRow.length; i++) {
-      let labelTry = selector.selectorWithinRow.slice();
-      if (i >= 0) {
-        labelTry[i] = "${any}";
-      }
-      let currentLabel = labelTry.join(".");
-      if (currentLabel in this.optionsConstant.transformers) {
-        return this.optionsConstant.transformers[currentLabel];
-      }
-    }
+    return this.optionsConstant.getDataTransformer(selector);
   }
 
   getButtonFromLabels(
@@ -126,7 +204,7 @@ class JSONToHTML {
   ) {
     let panelContainer = document.createElement("span");
     let currentPanel = new panels.PanelExpandable(panelContainer);
-    currentPanel.initialize(true);
+    currentPanel.initialize(true, false);
     currentPanel.setPanelLabel(label);
     currentPanel.setPanelContent(input);
     return panelContainer;
@@ -135,9 +213,12 @@ class JSONToHTML {
   /** @return {HTMLElement} */
   getSingleEntry(
     input,
-    /** @type {DatabaseSelector} */
+    /** @type {CompositeDataKey} */
     selector,
+    /** @type {CompositeDataKeyAndValue|null} */
+    ambientRowSelector,
   ) {
+    /** @type {DataTransformer} */
     let currentOption = this.getOptionFromLabel(selector);
     if (currentOption === null || currentOption === undefined) {
       let result = document.createElement("span");
@@ -145,8 +226,8 @@ class JSONToHTML {
       return result;
     }
     let inputTransformed = input;
-    if (typeof currentOption.transformer === "function") {
-      inputTransformed = currentOption.transformer(input);
+    if (typeof currentOption.labelTransformer === "function") {
+      inputTransformed = currentOption.labelTransformer(input);
     }
     statistics.toggleButtons++;
     if (typeof currentOption.clickHandler === "function") {
@@ -171,8 +252,10 @@ class JSONToHTML {
   /** @return {HTMLElement} */
   getTableHorizontallyLaidFromJSON(
     input,
-    /** @type {CollectionRowSelector} */
+    /** @type {CompositeDataKey} */
     selector,
+    /** @type {CompositeDataKeyAndValue|null} */
+    ambientRowSelector,
   ) {
     let inputType = typeof input;
     if (
@@ -180,16 +263,16 @@ class JSONToHTML {
       inputType === "number" ||
       inputType === "boolean"
     ) {
-      return this.getSingleEntry(input, selector);
+      return this.getSingleEntry(input, selector, ambientRowSelector);
     }
     if (Array.isArray(input)) {
       return this.getTableHorizontallyLaidFromArray(
-        input, selector,
+        input, selector, ambientRowSelector,
       );
     }
     if (inputType === "object") {
       return this.getTableHorizontallyLaidFromObject(
-        input, selector,
+        input, selector, ambientRowSelector,
       );
     }
     let result = document.createElement("span");
@@ -211,8 +294,10 @@ class JSONToHTML {
   /** @return {HTMLElement} */
   getTableHorizontallyLaidFromArray(
     input,
-    /** @type {CollectionRowSelector} */
+    /** @type {CompositeDataKey} */
     selector,
+    /** @type {CompositeDataKeyAndValue|null} */
+    ambientRowSelector
   ) {
     if (!Array.isArray(input)) {
       return this.getErrorElement(
@@ -222,14 +307,14 @@ class JSONToHTML {
     let table = document.createElement("table");
     table.className = "tableJSONItem";
     for (let i = 0; i < input.length; i++) {
-      selector.selectorWithinRow.push(i)
+      selector.addLabel(i)
       let item = input[i];
       let row = table.insertRow();
       row.insertCell().appendChild(this.getTinyLabel(`${i}`));
       let content = this.getTableHorizontallyLaidFromJSON(
-        item, selector,
+        item, selector, ambientRowSelector
       );
-      selector.selectorWithinRow.pop();
+      selector.popLabel();
       row.insertCell().appendChild(content);
     }
     return table;
@@ -238,8 +323,10 @@ class JSONToHTML {
   /** @return {HTMLElement} */
   getTableHorizontallyLaidFromObject(
     input,
-    /** @type {CollectionRowSelector} */
+    /** @type {CompositeDataKey} */
     selector,
+    /** @type {CompositeDataKeyAndValue|null} */
+    ambientRowSelector
   ) {
     if (typeof input !== "object") {
       return this.getErrorElement("Error: bad input to getTableHorizontallyLaidFromObject.");
@@ -247,13 +334,13 @@ class JSONToHTML {
     let table = document.createElement("table");
     table.className = "tableJSONItem";
     for (let item in input) {
-      selector.selectorWithinRow.push(item);
+      selector.addLabel(item);
       let currentRow = table.insertRow();
       currentRow.insertCell().textContent = `${item}`;
       let content = this.getTableHorizontallyLaidFromJSON(
-        input[item], selector,
+        input[item], selector, ambientRowSelector
       );
-      selector.selectorWithinRow.pop();
+      selector.popLabel();
       currentRow.insertCell().appendChild(content);
     }
     return table;
@@ -277,14 +364,15 @@ class JSONToHTML {
   /** @return {HtmlElement} */
   getTableFromObject(
     input,
-    optionsConstant,
+    /** @type {DataProcessorCollection} */
+    selectors,
     /** @type {{table: String, forceRowLayout: Boolean}} */
     optionsModified,
   ) {
     this.inputParsed = input;
-    this.optionsConstant = {};
-    if ((typeof optionsConstant) === "object" && optionsConstant !== null) {
-      this.optionsConstant = optionsConstant;
+    this.optionsConstant = null;
+    if (selectors !== null && selectors != undefined) {
+      this.optionsConstant = selectors;
     }
     if (optionsModified === null || typeof optionsModified !== "object") {
       optionsModified = {};
@@ -336,7 +424,7 @@ class JSONToHTML {
     inputJSON,
   ) {
     if (!Array.isArray(inputJSON)) {
-      return document.createElement("span");
+      throw "Error: not an array";
     }
     /** @type {HTMLTableElement} */
     let table = document.createElement("table");
@@ -345,7 +433,7 @@ class JSONToHTML {
     if (this.labelsRows === null) {
       return this.getTableHorizontallyLaidFromJSON(
         inputJSON,
-        new CollectionRowSelector(this.tableName),
+        new CollectionRowSelector(this.tableName, [], "", []),
       );
     }
     let header = table.createTHead();
@@ -362,12 +450,12 @@ class JSONToHTML {
       );
     }
     for (let i = 0; i < this.labelsRows.rows.length; i++) {
-      this.getTableRow(table, i);
+      this.getTopLevelTableRow(table, i);
     }
     return table;
   }
 
-  getTableRow(
+  getTopLevelTableRow(
     /** @type {HTMLTableElement} */
     table,
     /** @type {number} */
@@ -376,15 +464,29 @@ class JSONToHTML {
     let currentRow = table.insertRow();
     currentRow.insertCell().appendChild(this.getTinyLabel(`${index}`));
     const row = this.labelsRows.rows[index];
-    let selector = new CollectionRowSelector(this.tableName);
-    if (this.tableName !== "" && this.tableName !== undefined) {
-      selector.labels.push("_id");
-      selector.labels.push("$oid");
+    /** @type {CompositeDataKeyAndValue|null} */
+    let ambientRowSelector = null;
+    if (
+      this.tableName !== "" &&
+      this.tableName !== undefined &&
+      row["_id"] !== undefined &&
+      row["_id"]["$oid"] !== undefined
+    ) {
+      let rowLabels = new CompositeDataKey(
+        this.tableName,
+        ["_id", "$oid"],
+      );
+      ambientRowSelector = new CompositeDataKeyAndValue(
+        rowLabels, row["_id"]["$oid"],
+      );
     }
     for (let j = 0; j < this.labelsRows.labels.length; j++) {
+      let label = this.labelsRows.labels[j];
+      let selector = new CompositeDataKey(this.tableName, [label]);
       let content = this.getTableHorizontallyLaidFromJSON(
         row[j],
-        selector
+        selector,
+        ambientRowSelector,
       );
       currentRow.insertCell().appendChild(content);
     }
@@ -398,11 +500,11 @@ function getLabelsRows(input) {
     idRow: - 1,
   };
   let labelFinder = {};
-  for (let counterRow = 0; counterRow < input.length; counterRow++) {
-    if (typeof input[counterRow] !== "object") {
+  for (let i = 0; i < input.length; i++) {
+    if (typeof input[i] !== "object") {
       return null;
     }
-    for (let label in input[counterRow]) {
+    for (let label in input[i]) {
       labelFinder[label] = true;
     }
   }
@@ -413,8 +515,8 @@ function getLabelsRows(input) {
       break;
     }
   }
-  for (let counterRow = 0; counterRow < input.length; counterRow++) {
-    let currentInputItem = input[counterRow];
+  for (let i = 0; i < input.length; i++) {
+    let currentInputItem = input[i];
     result.rows.push([]);
     let currentOutputItem = result.rows[result.rows.length - 1];
     for (let counterLabel = 0; counterLabel < result.labels.length; counterLabel++) {
@@ -430,8 +532,11 @@ function getLabelsRows(input) {
 }
 
 module.exports = {
+  DataProcessor,
+  DataProcessorCollection,
+  DataTransformer,
+  CompositeDataKey,
   JSONToHTML,
   writeJSONtoDOMComponent,
-  transformersStandard,
   statistics,
 };

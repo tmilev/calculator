@@ -147,6 +147,7 @@ class PanelExpandable {
   ) {
     this.originalHeight = 0;
     this.originalWidth = 0;
+    this.originalDimensionsKnown = true;
     this.collapsed = true;
     this.containerId = "";
     /** @type {HTMLElement} */
@@ -182,7 +183,7 @@ class PanelExpandable {
       this.panelContent.style.maxHeight = "0px";
       this.panelContent.style.maxWidth = "0px";
     } else {
-      if (!this.fullyExpanded) {
+      if (!this.fullyExpanded && this.originalDimensionsKnown) {
         this.panelContent.style.maxHeight = `${this.originalHeight + 55}px`;
         this.panelContent.style.maxWidth = `${this.originalWidth + 35}px`;
       } else {
@@ -194,14 +195,21 @@ class PanelExpandable {
 
   computeOriginalDimensions() {
     let computedStyle = window.getComputedStyle(this.panelContent);
+    let height = parseInt(computedStyle.height);
+    let width = parseInt(computedStyle.widows);
     this.originalHeight = Math.max(
-      parseInt(computedStyle.height),
+      height,
       this.panelContent.scrollHeight,
     );
     this.originalWidth = Math.max(
-      parseInt(computedStyle.width),
+      width,
       this.panelContent.scrollWidth,
     );
+    if (isNaN(this.originalHeight) || isNaN(this.originalWidth)) {
+      this.originalDimensionsKnown = false;
+      this.originalHeight = 0;
+      this.originalWidth = 0;
+    }
   }
 
   setPanelContent(
@@ -217,7 +225,7 @@ class PanelExpandable {
     }
     this.panelContent.textContent = "";
     this.panelContent.appendChild(input);
-    this.computeOriginalDimensions()
+    this.computeOriginalDimensions();
     this.matchPanelStatus();
   }
 

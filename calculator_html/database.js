@@ -3,6 +3,10 @@ const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
 const jsonToHtml = require('./json_to_html');
+const CompositeDataKey = require('./json_to_html').CompositeDataKey;
+const DataProcessor = require('./json_to_html').DataProcessor;
+const DataProcessorCollection = require('./json_to_html').DataProcessorCollection;
+const DataTransformer = require('./json_to_html').DataTransformer;
 const miscellaneous = require("./miscellaneous_frontend");
 const panels = require('./panels');
 const storage = require('./storage');
@@ -104,28 +108,44 @@ function deleteDatabaseItem(
   });
 }
 
-function bounceString(input) {
-  return input;
+function shortenString(input) {
+  return miscellaneous.shortenString(8, input);
 }
 
-let transformersDatabase = {
-  deleteProblemDataItem: {
-    clickHandler: deleteDatabaseItem,
-  },
-  fetchProblemData: {
-    clickHandler: fetchProblemData,
-    transformer: bounceString.bind(null, "problem data"),
-  },
-};
+let shortener = new DataTransformer(null, shortenString);
+let problemFetcher = new DataTransformer(
+  fetchProblemData,
+  (_) => {
+    return "problem data";
+  }
+);
 
-let optionsDatabase = {
-  transformers: {
-    "users.${number}.problemDataJSON": transformersDatabase.fetchProblemData,
-    "users.${number}.activationToken": jsonToHtml.transformersStandard.shortener,
-    "users.${number}.authenticationToken": jsonToHtml.transformersStandard.shortener,
-    "users.${number}.password": jsonToHtml.transformersStandard.shortener,
-  },
-};
+let optionsDatabase = new DataProcessorCollection([
+  new DataProcessor(
+    new CompositeDataKey("users", ["problemDataJSON"]),
+    problemFetcher,
+  ),
+  new DataProcessor(
+    new CompositeDataKey("users", ["activationToken"]),
+    shortener,
+  ),
+  new DataProcessor(
+    new CompositeDataKey("users", ["activationToken"]),
+    shortener,
+  ),
+  new DataProcessor(
+    new CompositeDataKey("users", ["authenticationToken"]),
+    shortener,
+  ),
+  new DataProcessor(
+    new CompositeDataKey("users", ["_id", "$oid"]),
+    shortener,
+  ),
+  new DataProcessor(
+    new CompositeDataKey("users", ["password"]),
+    shortener,
+  ),
+]);
 
 function updateDatabasePageCallback(incoming, unused) {
   let labelString = storage.storage.variables.database.labels.getValue();
@@ -225,7 +245,6 @@ databasePage.initialize();
 
 module.exports = {
   databasePage,
-  transformersDatabase,
   optionsDatabase,
   updateDatabasePage,
   clickDatabaseTable,

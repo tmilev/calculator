@@ -742,7 +742,7 @@ JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
   result["currentTable"] = currentTable;
   QueryExact findQuery;
   findQuery.collection = currentTable;
-  findQuery.nestedLabels.addOnTop(DatabaseStrings::labelIdMongo);
+  findQuery.nestedLabels.addOnTop(DatabaseStrings::labelId);
   findQuery.nestedLabels.addOnTop(DatabaseStrings::objectSelectorMongo);
   findQuery.exactValue = labelStrings[1];
   QueryResultOptions projector;

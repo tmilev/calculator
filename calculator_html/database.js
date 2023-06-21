@@ -66,11 +66,19 @@ function callbackFetchProblemData(
 function fetchProblemData(
   /** @type {CompositeDataKey} */
   key,
-  /** @type {CompositeDataKeyAndValue} */
+  /** @type {CompositeDataKeyAndValue|null} */
   ambientRowSelector,
   /** @type {HTMLElement} */
   output,
 ) {
+  if (ambientRowSelector === null) {
+    let errorMessage = document.createElement("b");
+    errorMessage.textContent = "Missing row selector.";
+    errorMessage.style.color = "red";
+    output.textContent = "";
+    output.appendChild(errorMessage);
+    return;
+  }
   //let labels = JSON.parse(labelsString);
   let url = "";
   url += `${pathnames.urls.calculatorAPI}?`;

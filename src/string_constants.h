@@ -319,7 +319,7 @@ public:
   static std::string labelTable;
   static std::string objectSelector;
   static std::string objectSelectorMongo;
-  static std::string labelIdMongo;
+  static std::string labelId;
   // deleted info
   static std::string tableDeleted;
   // app info

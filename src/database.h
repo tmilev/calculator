@@ -63,7 +63,7 @@ public:
   void makeProjection(const List<std::string>& fields);
 };
 
-class LocalDatabase {
+class FallbackDatabase {
 private:
   bool initialized;
   bool updateOneNolocks(
@@ -103,7 +103,7 @@ public:
 
   MapReferences<
     std::string,
-    LocalDatabase::Index,
+  FallbackDatabase::Index,
     HashFunctions::hashFunction<std::string>
   > indices;
   static std::string jsonLocation();
@@ -168,7 +168,7 @@ public:
     std::stringstream* commentsGeneralNonSensitive
   );
   std::string toStringIndices() const;
-  LocalDatabase();
+  FallbackDatabase();
 };
 
 // Stores a query for an item.
@@ -328,7 +328,7 @@ public:
   };
 
   User user;
-  LocalDatabase localDatabase;
+  FallbackDatabase localDatabase;
   class Mongo {
   public:
     // The following variable has type mongoc_client_t.

@@ -717,7 +717,7 @@ bool Database::Mongo::findFromJSONWithOptions(const QueryExact& findQuery,
   (void) options;
   (void) findQuery;
   (void) output;
-  (void) maxOutputItems;
+  (void) maximumOutputItems;
   (void) totalItems;
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure
@@ -978,7 +978,7 @@ bool Database::deleteOneEntry(
   QueryExact findQuery(
     labels[0],
     List<std::string>({
-        DatabaseStrings::labelIdMongo,
+                          DatabaseStrings::labelId,
         DatabaseStrings::objectSelectorMongo
       }
     ),

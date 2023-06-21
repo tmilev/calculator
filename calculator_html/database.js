@@ -4,6 +4,7 @@ const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
 const jsonToHtml = require('./json_to_html');
 const CompositeDataKey = require('./json_to_html').CompositeDataKey;
+const CompositeDataKeyAndValue = require('./json_to_html').CompositeDataKeyAndValue;
 const DataProcessor = require('./json_to_html').DataProcessor;
 const DataProcessorCollection = require('./json_to_html').DataProcessorCollection;
 const DataTransformer = require('./json_to_html').DataTransformer;
@@ -63,7 +64,10 @@ function callbackFetchProblemData(
 }
 
 function fetchProblemData(
-  labels,
+  /** @type {CompositeDataKey} */
+  key,
+  /** @type {CompositeDataKeyAndValue} */
+  ambientRowSelector,
   /** @type {HTMLElement} */
   output,
 ) {
@@ -72,7 +76,7 @@ function fetchProblemData(
   url += `${pathnames.urls.calculatorAPI}?`;
   url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
   url += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
-  let labelsString = JSON.stringify(labels);
+  let labelsString = JSON.stringify(ambientRowSelector.toJSON());
   url += `${pathnames.urlFields.database.labels}=${labelsString}&`;
   submitRequests.submitGET({
     url: url,

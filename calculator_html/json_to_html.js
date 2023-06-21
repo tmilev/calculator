@@ -75,6 +75,12 @@ class CompositeDataKeyAndValue{
     this.key = key;
     this.value = value;
   }
+  copy() {
+    return new CompositeDataKeyAndValue(this.key.copy(), this.value);
+  }
+  toJSON() {
+    return this.key.labels.toString() + ":" + this.value;
+  }
 }
 
 class DataTransformer{
@@ -179,8 +185,10 @@ class JSONToHTML {
   getButtonFromLabels(
     input,
     inputTransformed,
-    /** @type {CollectionRowSelector} */
+    /** @type {CompositeDataKey} */
     selector,
+    /** @type {CompositeDataKeyAndValue} */
+    ambientRowSelector,
     /** @type {Function} */
     clickHandler,
   ) {
@@ -191,7 +199,7 @@ class JSONToHTML {
     button.textContent = inputTransformed;
     let selectorCopy = selector.copy();
     button.addEventListener("click", () => {
-      clickHandler(selectorCopy, panel);
+      clickHandler(selectorCopy, ambientRowSelector, panel);
     });
     result.appendChild(button);
     result.appendChild(panel);
@@ -236,6 +244,7 @@ class JSONToHTML {
         input,
         inputTransformed,
         selector,
+        ambientRowSelector,
         currentOption.clickHandler,
       );
       result.appendChild(button);

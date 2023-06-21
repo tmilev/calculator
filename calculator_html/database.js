@@ -83,7 +83,7 @@ function fetchProblemData(
   url += `${pathnames.urls.calculatorAPI}?`;
   url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
   url += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
-  let findQuery = queryFromSelector(ambientRowSelector);
+  let findQuery = JSON.stringify(queryFromSelector(ambientRowSelector));
   url += `${pathnames.urlFields.database.findQuery}=${findQuery}&`;
   url += `${pathnames.urlFields.database.projector}="${key.toStringLabels()}"&`;
   submitRequests.submitGET({
@@ -178,12 +178,12 @@ let optionsDatabase = new DataProcessorCollection([
 ]);
 
 function updateDatabasePageCallback(incoming, unused) {
-  let labelString = storage.storage.variables.database.findQuery.getValue();
-  let labels = [];
+  let findQueryString = storage.storage.variables.database.findQuery.getValue();
+  let findQuery = {};
   try {
-    labels = JSON.parse(labelString);
+    findQuery = JSON.parse(findQueryString);
   } catch (e) {
-    labels = [""];
+    findQuery = {};
   }
   let parsed = miscellaneous.jsonUnescapeParse(incoming);
   let output = document.getElementById(ids.domElements.divDatabaseOutput);
@@ -211,7 +211,7 @@ function updateDatabasePageCallback(incoming, unused) {
     output.appendChild(
       transformer.getTableFromObject(
         parsed.rows, optionsDatabase, {
-        table: labels[0]
+        table: findQuery[pathnames.urlFields.database.table],
       })
     );
   } else {

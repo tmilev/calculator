@@ -179,7 +179,7 @@ class StorageCalculator {
     this.variables = {
       mainMenuIsHidden: new StorageVariable({
         name: "mainMenuIsHidden",
-        nameLocalStorage : "mainMenuIsHidden",
+        nameLocalStorage: "mainMenuIsHidden",
       }),
       currentPage: new StorageVariable({
         name: "currentPage",
@@ -189,9 +189,9 @@ class StorageCalculator {
         showInURLByDefault: true, // <- when given and true, url will be added to the window hash
       }),
       database: {
-        labels: new StorageVariable({
-          name: "databaseLabels",
-          nameLocalStorage: "databaseLabels"
+        findQuery: new StorageVariable({
+          name: "findQuery",
+          nameLocalStorage: "findQuery"
         }),
       },
       editor: {
@@ -453,7 +453,7 @@ class StorageCalculator {
       return;
     }
     this.currentHashRaw = newHash;
-    try {  
+    try {
       this.currentHashDecoded = decodeURIComponent(this.currentHashRaw);
       if (
         this.currentHashDecoded.startsWith('#') ||

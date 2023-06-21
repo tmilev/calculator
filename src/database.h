@@ -103,7 +103,7 @@ public:
 
   MapReferences<
     std::string,
-  FallbackDatabase::Index,
+    FallbackDatabase::Index,
     HashFunctions::hashFunction<std::string>
   > indices;
   static std::string jsonLocation();
@@ -244,6 +244,12 @@ public:
   // this will return {"keyId": "id1"}
   JSData toJSONCombineLabelsAndValue() const;
   JSData toJSON() const;
+  bool fromString(
+    const std::string& input, std::stringstream* commentsOnFailure
+  );
+  bool fromJSON(
+    const JSData& source, std::stringstream* commentsOnFailure
+  );
   std::string toString() const;
   bool isEmpty() const;
 };
@@ -470,7 +476,9 @@ public:
     std::stringstream* commentsOnFailure
   );
   std::string toHtmlDatabaseCollection(const std::string& currentTable);
-  static JSData toJSONFetchItem(const List<std::string>& labelStrings);
+  JSData toJSONFetchItem(
+    QueryExact& findQuery, QueryResultOptions& projector
+  );
   // Redacts object ids and hashes.
   static void correctData(JSData& row);
   static void correctData(List<JSData>& toBeCorrected);
@@ -481,7 +489,7 @@ public:
     JSData& row, const std::string& oneLabel
   );
   JSData toJSONDatabaseCollection(const std::string& currentTable);
-  JSData toJSONDatabaseFetch(const std::string& incomingLabels);
+  JSData toJSONDatabaseFetch(const std::string& findQueryAndProjector);
   static bool getLabels(
     const JSData& fieldEntries,
     List<std::string>& labels,

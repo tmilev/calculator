@@ -495,7 +495,8 @@ bool MongoQuery::findMultiple(
     std::string current(bufferOutpurStringFormat);
     bson_free(bufferOutpurStringFormat);
     if (
-      this->maximumOutputItems <= 0 || this->totalItems < this->maximumOutputItems
+      this->maximumOutputItems <= 0 ||
+      this->totalItems < this->maximumOutputItems
     ) {
       outputString.addOnTop(current);
     }
@@ -620,6 +621,7 @@ void Database::Mongo::createHashIndex(
   );
 #endif
 }
+
 /*
 bool Database::findFromString(
   const std::string& collectionName,
@@ -657,7 +659,6 @@ bool Database::findFromString(
   return false;
 #endif
 }*/
-
 void QueryResultOptions::makeProjection(const List<std::string>& fields) {
   this->fieldsToProjectTo = fields;
 }
@@ -680,7 +681,8 @@ JSData QueryResultOptions::toJSON() const {
   return result;
 }
 
-bool Database::Mongo::findFromJSONWithOptions(const QueryExact& findQuery,
+bool Database::Mongo::findFromJSONWithOptions(
+  const QueryExact& findQuery,
   List<JSData>& output,
   const QueryResultOptions& options,
   int maximumOutputItems,
@@ -978,8 +980,7 @@ bool Database::deleteOneEntry(
   QueryExact findQuery(
     labels[0],
     List<std::string>({
-                          DatabaseStrings::labelId,
-        DatabaseStrings::objectSelectorMongo
+        DatabaseStrings::labelId, DatabaseStrings::objectSelectorMongo
       }
     ),
     labels[1]

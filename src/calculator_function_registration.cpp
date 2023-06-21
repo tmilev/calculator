@@ -43,7 +43,6 @@ void Calculator::initializeAdminFunctions() {
   if (!global.flagDatabaseExternal || global.flagRunningConsoleTest) {
     return;
   }
-
 }
 
 // Naming conventions: please start all built-in calculator functions with

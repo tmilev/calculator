@@ -106,7 +106,10 @@ const urlFields = {
   database: {
     operation: "databaseOperation",
     fetch: "databaseFetch",
-    labels: "databaseLabels",
+    table: "table",
+    findQueryAndProjector: "findQueryAndProjector",
+    findQuery: "findQuery",
+    projector: "projector",
   },
   debugFlag: "debugFlag",
   selectCourse: "selectCourseJSON",

@@ -49,15 +49,23 @@ class CompositeDataKey {
     this.tableName = tableName;
     this.labels = labels;
   }
+
+  /** @return {string} */
+  toStringLabels() {
+    return this.labels.join(".");
+  }
+
   addLabel(
     /** @type{string|number} */
     label,
   ) {
     this.labels.push(label);
   }
+
   popLabel() {
     this.labels.pop;
   }
+
   copy() {
     return new CompositeDataKey(
       this.tableName,
@@ -66,7 +74,7 @@ class CompositeDataKey {
   }
 }
 
-class CompositeDataKeyAndValue{
+class CompositeDataKeyAndValue {
   constructor(
     /** @type {CompositeDataKey} */
     key,
@@ -75,15 +83,21 @@ class CompositeDataKeyAndValue{
     this.key = key;
     this.value = value;
   }
+
   copy() {
     return new CompositeDataKeyAndValue(this.key.copy(), this.value);
   }
-  toJSON() {
-    return this.key.labels.toString() + ":" + this.value;
+
+  toObject() {
+    return {
+      "table": this.key.tableName,
+      "key": this.key.toStringLabels(),
+      "value": this.value,
+    };
   }
 }
 
-class DataTransformer{
+class DataTransformer {
   constructor(
     /** @type {Function?} */
     clickHandler,
@@ -119,7 +133,7 @@ class DataProcessorCollection {
     /** @type {CompositeDataKey} */
     selector
   ) {
-    for (let i = 0; i < this.dataProcessors.length; i++){
+    for (let i = 0; i < this.dataProcessors.length; i++) {
       let candidate = this.transformerFromSelector(
         selector, this.dataProcessors[i]
       );
@@ -127,7 +141,7 @@ class DataProcessorCollection {
         return candidate;
       }
     }
-    return null;    
+    return null;
   }
 
   /** @return {DataTransformer|null} */
@@ -144,7 +158,7 @@ class DataProcessorCollection {
     if (key.labels.length > selector.labels.length) {
       return null;
     }
-    for (let i = 0; i < key.labels.length; i++){
+    for (let i = 0; i < key.labels.length; i++) {
       let filter = key.labels[i];
       let toBeMatched = selector.labels[i];
       if (filter === null) {
@@ -475,18 +489,20 @@ class JSONToHTML {
     const row = this.labelsRows.rows[index];
     /** @type {CompositeDataKeyAndValue|null} */
     let ambientRowSelector = null;
+    let idColumn = this.labelsRows.idColumn;
     if (
+      idColumn !== -1 &&
       this.tableName !== "" &&
       this.tableName !== undefined &&
-      row["_id"] !== undefined &&
-      row["_id"]["$oid"] !== undefined
+      row[idColumn] !== undefined &&
+      row[idColumn]["$oid"] !== undefined
     ) {
       let rowLabels = new CompositeDataKey(
         this.tableName,
         ["_id", "$oid"],
       );
       ambientRowSelector = new CompositeDataKeyAndValue(
-        rowLabels, row["_id"]["$oid"],
+        rowLabels, row[idColumn]["$oid"],
       );
     }
     for (let j = 0; j < this.labelsRows.labels.length; j++) {
@@ -506,7 +522,7 @@ function getLabelsRows(input) {
   let result = {
     labels: [],
     rows: [],
-    idRow: - 1,
+    idColumn: - 1,
   };
   let labelFinder = {};
   for (let i = 0; i < input.length; i++) {
@@ -520,7 +536,7 @@ function getLabelsRows(input) {
   result.labels = Object.keys(labelFinder).sort();
   for (let counterLabel = 0; counterLabel < result.labels.length; counterLabel++) {
     if (result.labels[counterLabel] === "_id") {
-      result.idRow = counterLabel;
+      result.idColumn = counterLabel;
       break;
     }
   }

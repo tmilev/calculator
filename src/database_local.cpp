@@ -2,6 +2,7 @@
 #include "database.h"
 #include "string_constants.h"
 #include "crypto.h"
+
 std::string FallbackDatabase::jsonLocation() {
   return "database/" + DatabaseStrings::databaseName + "/database.json";
 }
@@ -23,7 +24,7 @@ bool FallbackDatabase::deleteDatabase(std::stringstream* commentsOnFailure) {
   if (
     !FileOperations::
     writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
-              FallbackDatabase::jsonLocation(),
+      FallbackDatabase::jsonLocation(),
       "{}",
       true,
       true,
@@ -124,9 +125,9 @@ bool FallbackDatabase::updateOneNolocks(
   if (index == - 1) {
     index = this->databaseContent[findQuery.collection].listObjects.size;
     JSData incoming = findQuery.toJSONCombineLabelsAndValue();
-    incoming[DatabaseStrings::labelId][DatabaseStrings::objectSelectorMongo]=Crypto::Random::getRandomHexStringLeaveMemoryTrace(12);
+    incoming[DatabaseStrings::labelId][DatabaseStrings::objectSelectorMongo] =
+    Crypto::Random::getRandomHexStringLeaveMemoryTrace(12);
     this->databaseContent[findQuery.collection].listObjects.addOnTop(incoming);
-
   }
   const MapReferences<
     std::string, JSData, HashFunctions::hashFunction<std::string>
@@ -299,7 +300,8 @@ bool FallbackDatabase::findIndexOneNolocksMinusOneNotFound(
     }
     return false;
   }
-  FallbackDatabase::Index& currentIndex = this->indices.getValueCreateEmpty(key);
+  FallbackDatabase::Index& currentIndex =
+  this->indices.getValueCreateEmpty(key);
   int currentLocationIndex = currentIndex.locations.getIndex(value);
   if (currentLocationIndex == - 1) {
     if (commentsOnNotFound != nullptr) {
@@ -389,7 +391,7 @@ void FallbackDatabase::initialize() {
 void FallbackDatabase::createHashIndex(
   const std::string& collectionName, const std::string& key
 ) {
-    FallbackDatabase::Index newIndex;
+  FallbackDatabase::Index newIndex;
   newIndex.collection = collectionName;
   newIndex.label = key;
   newIndex.collectionAndLabelCache = newIndex.collectionAndLabel();
@@ -451,7 +453,7 @@ void FallbackDatabase::indexOneRecord(
   }
   for (int i = 0; i < entry.objects.size(); i ++) {
     std::string indexLabel =
-            FallbackDatabase::Index::collectionAndLabelStatic(
+    FallbackDatabase::Index::collectionAndLabelStatic(
       collection, entry.objects.keys[i]
     );
     if (!this->indices.contains(indexLabel)) {
@@ -475,7 +477,7 @@ bool FallbackDatabase::storeDatabase(std::stringstream* commentsOnFailure) {
   return
   FileOperations::
   writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
-              FallbackDatabase::jsonLocation(),
+    FallbackDatabase::jsonLocation(),
     this->databaseContent.toString(nullptr),
     true,
     true,
@@ -488,7 +490,7 @@ bool FallbackDatabase::readDatabase(std::stringstream* commentsOnFailure) {
   if (
     !FileOperations::
     loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-              FallbackDatabase::jsonLocation(),
+      FallbackDatabase::jsonLocation(),
       database,
       true,
       true,
@@ -500,7 +502,7 @@ bool FallbackDatabase::readDatabase(std::stringstream* commentsOnFailure) {
     }
     if (
       !FileOperations::fileExistsVirtual(
-                FallbackDatabase::jsonLocation(), true, true, commentsOnFailure
+        FallbackDatabase::jsonLocation(), true, true, commentsOnFailure
       )
     ) {
       global

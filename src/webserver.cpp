@@ -11,7 +11,6 @@
 #include <unistd.h>
 #include <sys/stat.h>//<-for file statistics
 #include <fcntl.h>//<-setting flags of file descriptors
-#include "math_extra_latex_routines.h"
 #include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
 #include "assert.h"
 #include "signals_infrastructure.h"
@@ -576,19 +575,23 @@ JSData WebWorker::getDatabaseJSON() {
   }
   std::string operation =
   global.getWebInput(WebAPI::DatabaseParameters::operation);
-  std::string labels =
+  std::string findQuery =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::DatabaseParameters::labels), false
+    global.getWebInput(WebAPI::DatabaseParameters::findQuery), false
   );
+  std::string projector=
+          HtmlRoutines::convertURLStringToNormal(
+            global.getWebInput(WebAPI::DatabaseParameters::projector), false
+          );
   if (operation == WebAPI::DatabaseParameters::fetch) {
-    result = Database::get().toJSONDatabaseFetch(labels);
+    result = Database::get().toJSONDatabaseFetch(findQuery);
   } else {
     result[WebAPI::Result::error] =
     "Uknown database operation: " + operation + ". ";
   }
   if (global.userDebugFlagOn()) {
     result["databaseOperation"] = operation;
-    result["databaseLabels"] = labels;
+    result["findQuery"] = findQuery;
   }
   return result;
 }
@@ -676,7 +679,9 @@ bool WebWorker::extractArgumentsFromCookies(
       }
     }
     if (isGood) {
-      global.webArguments.setKeyValue(newlyFoundArguments.keys[i], trimmed);
+      global.webArguments.setKeyValue(
+        newlyFoundArguments.keys[i], trimmed
+      );
     }
   }
   return result;

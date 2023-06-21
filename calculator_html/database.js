@@ -26,9 +26,9 @@ class DatabasePage {
   }
 }
 
-function clickDatabaseTable(currentCollection) {
-  window.calculator.mainPage.storage.variables.database.labels.setAndStore(
-    JSON.stringify(currentCollection)
+function clickDatabaseTable(findQuery) {
+  window.calculator.mainPage.storage.variables.database.findQuery.setAndStore(
+    JSON.stringify(findQuery)
   );
   updateDatabasePage();
 }
@@ -79,13 +79,13 @@ function fetchProblemData(
     output.appendChild(errorMessage);
     return;
   }
-  //let labels = JSON.parse(labelsString);
   let url = "";
   url += `${pathnames.urls.calculatorAPI}?`;
   url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
   url += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
-  let labelsString = JSON.stringify(ambientRowSelector.toJSON());
-  url += `${pathnames.urlFields.database.labels}=${labelsString}&`;
+  let findQuery = queryFromSelector(ambientRowSelector);
+  url += `${pathnames.urlFields.database.findQuery}=${findQuery}&`;
+  url += `${pathnames.urlFields.database.projector}="${key.toStringLabels()}"&`;
   submitRequests.submitGET({
     url: url,
     progress: ids.domElements.spanProgressReportGeneral,
@@ -93,6 +93,24 @@ function fetchProblemData(
       callbackFetchProblemData(input, output);
     },
   });
+}
+
+function queryFromSelector(
+  /** @type {CompositeDataKeyAndValue|null} */
+  ambientRowSelector,
+) {
+  let result = {};
+  result[pathnames.urlFields.database.findQuery] = ambientRowSelector.toObject();
+  return result;
+}
+
+function queryFromCollection(
+  /** @type {string} */
+  collection,
+) {
+  let result = {};
+  result[pathnames.urlFields.database.table] = collection;
+  return result;
 }
 
 function deleteDatabaseItemCallback(
@@ -160,7 +178,7 @@ let optionsDatabase = new DataProcessorCollection([
 ]);
 
 function updateDatabasePageCallback(incoming, unused) {
-  let labelString = storage.storage.variables.database.labels.getValue();
+  let labelString = storage.storage.variables.database.findQuery.getValue();
   let labels = [];
   try {
     labels = JSON.parse(labelString);
@@ -215,11 +233,10 @@ function updateTables(parsed, /** @type {HTMLElement} */ output) {
     let currentCollection = parsed.collections[i];
     let anchor = document.createElement("a");
     anchor.textContent = currentCollection;
-    let urlObjectIncoming = miscellaneous.deepCopy(storage.storage.urlObject);
-    urlObjectIncoming.databaseLabels = currentCollection;
-    anchor.href = `#${JSON.stringify(urlObjectIncoming)}`;
+    let findQuery = queryFromCollection(currentCollection);
+    anchor.href = `#${JSON.stringify(findQuery)}`;
     anchor.addEventListener("click", () => {
-      clickDatabaseTable([currentCollection]);
+      clickDatabaseTable(findQuery);
     });
     table.insertRow().insertCell().appendChild(anchor);
   }
@@ -228,7 +245,7 @@ function updateTables(parsed, /** @type {HTMLElement} */ output) {
 
 
 function updateDatabasePageResetCurrentTable() {
-  storage.storage.variables.database.labels.setAndStore("[]");
+  storage.storage.variables.database.findQuery.setAndStore("{}");
   updateDatabasePage();
 }
 
@@ -239,12 +256,12 @@ function updateDatabasePage() {
     miscellaneous.writeHTML(element, "<b>Not logged-in.</b>");
     return;
   }
-  let labels = page.storage.variables.database.labels.getValue();
+  let findQuery = page.storage.variables.database.findQuery.getValue();
   let url = "";
   url += `${pathnames.urls.calculatorAPI}?`;
   url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
   url += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
-  url += `${pathnames.urlFields.database.labels}=${labels}&`;
+  url += `${pathnames.urlFields.database.findQuery}=${findQuery}&`;
   submitRequests.submitGET({
     url: url,
     progress: ids.domElements.spanProgressReportGeneral,

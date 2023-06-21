@@ -140,7 +140,7 @@ JSData QueryExact::toJSONCombineLabelsAndValue() const {
 
 JSData QueryExact::toJSON() const {
   JSData result;
-  if (this->nestedLabels.size ==0 && this->selectAny){
+  if (this->nestedLabels.size == 0 && this->selectAny) {
     result.elementType = JSData::Token::tokenObject;
     return result;
   }
@@ -213,6 +213,45 @@ void QueryExact::setLabelValue(
   this->nestedLabels[0] = label;
 }
 
+bool QueryExact::fromString(
+  const std::string& input, std::stringstream* commentsOnFailure
+) {
+  JSData querySource;
+  if (!querySource.parse(input, false, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to parse query from: "
+      << StringRoutines::stringTrimToLengthForDisplay(input, 200);
+    }
+    return false;
+  }
+  return this->fromJSON(querySource, commentsOnFailure);
+}
+
+bool QueryExact::fromJSON(
+  const JSData& source, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("QueryExact::fromJSON");
+  global.comments << "DEBUG: got to here: pt 0 " << source.toString();
+  (void) commentsOnFailure;
+  this->nestedLabels.clear();
+  this->exactValue = JSData();
+  this->selectAny = false;
+  JSData findQuery = source;
+  this->collection = findQuery[DatabaseStrings::labelTable].stringValue;
+  if (this->collection == "") {
+      global.comments << "DEBUG: Empty collection";
+    return true;
+  }
+  global.comments << "DEBUG: got to here: " << source.toString();
+  std::string nestedKeySource = findQuery["key"].stringValue;
+  std::string desiredValue = findQuery["value"].stringValue;
+  StringRoutines::splitExcludeDelimiter(
+    nestedKeySource, '.', this->nestedLabels
+  );
+  return true;
+}
+
 bool Database::convertJSONToJSONMongo(
   const JSData& input,
   JSData& output,
@@ -283,35 +322,34 @@ bool Database::convertJSONToJSONEncodeKeys(
   }
   if (input.elementType != JSData::Token::tokenObject) {
     output = input;
-return true;
-  }
-    for (int i = 0; i < input.objects.size(); i ++) {
-      JSData nextItem;
-      if (
-        !Database::convertJSONToJSONEncodeKeys(
-          input.objects.values[i],
-          nextItem,
-          recursionDepth + 1,
-          encodeOverDecode,
-          commentsOnFailure
-        )
-      ) {
-        return false;
-      }
-      std::string key;
-      if (encodeOverDecode) {
-        key =
-        Database::convertStringToMongoKeyString(input.objects.keys[i]);
-      } else {
-        key =
-        HtmlRoutines::convertURLStringToNormal(
-          input.objects.keys[i], false
-        );
-      }
-      output[key] = nextItem;
-    }
     return true;
-
+  }
+  for (int i = 0; i < input.objects.size(); i ++) {
+    JSData nextItem;
+    if (
+      !Database::convertJSONToJSONEncodeKeys(
+        input.objects.values[i],
+        nextItem,
+        recursionDepth + 1,
+        encodeOverDecode,
+        commentsOnFailure
+      )
+    ) {
+      return false;
+    }
+    std::string key;
+    if (encodeOverDecode) {
+      key =
+      Database::convertStringToMongoKeyString(input.objects.keys[i]);
+    } else {
+      key =
+      HtmlRoutines::convertURLStringToNormal(
+        input.objects.keys[i], false
+      );
+    }
+    output[key] = nextItem;
+  }
+  return true;
 }
 
 std::string Database::convertStringToMongoKeyString(
@@ -665,6 +703,7 @@ bool Database::fetchTable(
   QueryExact findQuery;
   List<JSData> rowsJSON;
   findQuery.selectAny = true;
+  findQuery.collection = tableName;
   Database::get().findFromJSON(
     findQuery, rowsJSON, 200, totalItems, commentsOnFailure
   );
@@ -689,66 +728,31 @@ bool Database::fetchTable(
   return true;
 }
 
-JSData Database::toJSONDatabaseFetch(const std::string& incomingLabels) {
+JSData Database::toJSONDatabaseFetch(const std::string& findQueryAndProjector) {
   STACK_TRACE("Database::toJSONDatabaseFetch");
-  global.comments << "DEBUG: fetch: incomingLabels: " << incomingLabels;
   JSData result;
-  JSData labels;
+  QueryExact queryExact;
+  QueryResultOptions projector;
   std::stringstream commentsOnFailure;
-  if (!labels.parse(incomingLabels, false, &commentsOnFailure)) {
-    commentsOnFailure
-    << "Failed to parse labels from: "
-    << StringRoutines::stringTrimToLengthForDisplay(incomingLabels, 100);
+  if (!queryExact.fromString(findQueryAndProjector, &commentsOnFailure)) {
     result["error"] = commentsOnFailure.str();
     return result;
   }
-  List<std::string> labelStrings;
-  for (const JSData& label : labels.listObjects) {
-    if (label.elementType == JSData::Token::tokenString) {
-      labelStrings.addOnTop(label.stringValue);
-    } else if (label.elementType == JSData::Token::tokenLargeInteger) {
-      std::stringstream index;
-      index << label.integerValue.getElementConst();
-      labelStrings.addOnTop(index.str());
-    } else {
-      commentsOnFailure << "Label required to be a list of labels. ";
-      result["error"] = commentsOnFailure.str();
-      return result;
-    }
-  }
-  global.comments << "DEBUG: fetch: labelStrings: " << labelStrings;
-  if (labelStrings.size == 0) {
-    return this->toJSONDatabaseCollection("");
-  }
-  if (labelStrings.size == 1) {
-    return this->toJSONDatabaseCollection(labelStrings[0]);
-  }
-  return Database::toJSONFetchItem(labelStrings);
+  return Database::get().toJSONFetchItem(queryExact, projector);
 }
 
-JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
+JSData Database::toJSONFetchItem(
+  QueryExact& findQuery, QueryResultOptions& projector
+) {
   STACK_TRACE("Database::toJSONFetchItem");
+  if (findQuery.collection == "") {
+    return this->toJSONDatabaseCollection("");
+  }
+  if (findQuery.collection != "" && findQuery.nestedLabels.size == 0) {
+    return this->toJSONDatabaseCollection(findQuery.collection);
+  }
   JSData result;
-  if (labelStrings.size < 1) {
-    result["error"] = "No collection specified. ";
-    return result;
-  }
-  if (labelStrings.size < 2) {
-    result["error"] = "No id specified. ";
-    return result;
-  }
-  std::stringstream out;
-  std::string currentTable = labelStrings[0];
-  result["currentTable"] = currentTable;
-  QueryExact findQuery;
-  findQuery.collection = currentTable;
-  findQuery.nestedLabels.addOnTop(DatabaseStrings::labelId);
-  findQuery.nestedLabels.addOnTop(DatabaseStrings::objectSelectorMongo);
-  findQuery.exactValue = labelStrings[1];
-  QueryResultOptions projector;
-  labelStrings.slice(
-    2, labelStrings.size - 2, projector.fieldsToProjectTo
-  );
+  result[DatabaseStrings::labelTable] = findQuery.collection;
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
@@ -764,11 +768,11 @@ JSData Database::toJSONFetchItem(const List<std::string>& labelStrings) {
       projector,
       200,
       &totalItems,
-      &out,
+      &comments,
       commentsPointer
     )
   ) {
-    result["error"] = out.str();
+    result["error"] = comments.str();
     return result;
   }
   Database::correctData(rowsJSON);

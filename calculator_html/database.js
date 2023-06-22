@@ -83,7 +83,7 @@ function fetchProblemData(
   url += `${pathnames.urls.calculatorAPI}?`;
   url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
   url += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
-  let findQuery = JSON.stringify(queryFromSelector(ambientRowSelector));
+  let findQuery = JSON.stringify(ambientRowSelector.toObject());
   url += `${pathnames.urlFields.database.findQuery}=${findQuery}&`;
   url += `${pathnames.urlFields.database.projector}="${key.toStringLabels()}"&`;
   submitRequests.submitGET({
@@ -93,15 +93,6 @@ function fetchProblemData(
       callbackFetchProblemData(input, output);
     },
   });
-}
-
-function queryFromSelector(
-  /** @type {CompositeDataKeyAndValue|null} */
-  ambientRowSelector,
-) {
-  let result = {};
-  result[pathnames.urlFields.database.findQuery] = ambientRowSelector.toObject();
-  return result;
 }
 
 function queryFromCollection(

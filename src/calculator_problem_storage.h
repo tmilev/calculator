@@ -129,8 +129,8 @@ public:
   bool flagAutoGenerateVerificationField;
   bool flagAutoGenerateButtonSolution;
   bool flagAnswerHardcoded;
-  int numSubmissions;
-  int numCorrectSubmissions;
+  int numberOfSubmissions;
+  int numberOfCorrectSubmissions;
   std::string commandsCommentsBeforeSubmission;
   std::string commandsCommentsBeforeInterpretation;
   std::string commandsBeforeAnswer;

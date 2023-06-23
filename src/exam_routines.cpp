@@ -1501,8 +1501,8 @@ bool CalculatorHTML::exrtactSolutionCommands(
 }
 
 Answer::Answer() {
-  this->numSubmissions = 0;
-  this->numCorrectSubmissions = 0;
+    this->numberOfSubmissions = 0;
+  this->numberOfCorrectSubmissions = 0;
   this->flagAutoGenerateSubmitButtons = true;
   this->flagAutoGenerateMQButtonPanel = true;
   this->flagAutoGenerateMQfield = true;
@@ -1828,8 +1828,8 @@ bool CalculatorHTML::computeAnswerRelatedStrings(
   currentA.idButtonAnswer = "buttonAnswer" + answerId;
   currentA.idButtonSolution = "buttonSolution" + answerId;
   std::stringstream verifyStream;
-  int numCorrectSubmissions = currentA.numCorrectSubmissions;
-  int numSubmissions = currentA.numSubmissions;
+  int numCorrectSubmissions = currentA.numberOfCorrectSubmissions;
+  int numSubmissions = currentA.numberOfSubmissions;
   if (
     global.requestType == "scoredQuiz" ||
     global.requestType == WebAPI::Frontend::scoredQuiz
@@ -1974,9 +1974,6 @@ std::string CalculatorHTML::getDeadline(
   (void) outputIsInherited;
   outputIsInherited = true;
   std::string result;
-  if (!global.flagDatabaseExternal) {
-    return "While getting deadline: database not compiled";
-  }
   int topicIndex = this->topics.topics.getIndex(problemName);
   if (topicIndex == - 1) {
     return problemName + " not found in topic list. ";

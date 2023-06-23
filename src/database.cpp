@@ -232,7 +232,6 @@ bool QueryExact::fromJSON(
   const JSData& source, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("QueryExact::fromJSON");
-  global.comments << "DEBUG: got to here: pt 0 " << source.toString();
   (void) commentsOnFailure;
   this->nestedLabels.clear();
   this->exactValue = JSData();
@@ -240,10 +239,8 @@ bool QueryExact::fromJSON(
   JSData findQuery = source;
   this->collection = findQuery[DatabaseStrings::labelTable].stringValue;
   if (this->collection == "") {
-      global.comments << "DEBUG: Empty collection";
     return true;
   }
-  global.comments << "DEBUG: got to here: " << source.toString();
   std::string nestedKeySource = findQuery["key"].stringValue;
   std::string desiredValue = findQuery["value"].stringValue;
   StringRoutines::splitExcludeDelimiter(
@@ -1086,8 +1083,8 @@ std::string ProblemData::toString() const {
   for (int i = 0; i < this->answers.size(); i ++) {
     Answer& currentA = this->answers.values[i];
     out << "AnswerId: " << currentA.answerId;
-    out << ", numCorrectSubmissions: " << currentA.numCorrectSubmissions;
-    out << ", numSubmissions: " << currentA.numSubmissions;
+    out << ", numCorrectSubmissions: " << currentA.numberOfCorrectSubmissions;
+    out << ", numSubmissions: " << currentA.numberOfSubmissions;
     out << ", firstCorrectAnswer: ";
     if (currentA.firstCorrectAnswerClean == "") {
       out << "[none yet], ";
@@ -1429,9 +1426,9 @@ std::string ProblemData::store() {
     std::stringstream questionsStream;
     questionsStream
     << "numCorrectSubmissions="
-    << currentA.numCorrectSubmissions
+    << currentA.numberOfCorrectSubmissions
     << "&numSubmissions="
-    << currentA.numSubmissions
+    << currentA.numberOfSubmissions
     << "&firstCorrectAnswer="
     << HtmlRoutines::convertStringToURLString(
       currentA.firstCorrectAnswerClean, false
@@ -1458,9 +1455,9 @@ JSData ProblemData::storeJSON() const {
     Answer& currentA = this->answers.values[i];
     JSData currentAnswerJSON;
     currentAnswerJSON["numCorrectSubmissions"] =
-    std::to_string(currentA.numCorrectSubmissions);
+    std::to_string(currentA.numberOfCorrectSubmissions);
     currentAnswerJSON["numSubmissions"] =
-    std::to_string(currentA.numSubmissions);
+            std::to_string(currentA.numberOfSubmissions);
     currentAnswerJSON["firstCorrectAnswer"] =
     HtmlRoutines::convertStringToURLString(
       currentA.firstCorrectAnswerClean, false
@@ -1749,13 +1746,13 @@ bool ProblemData::loadFromOldFormat(
       continue;
     }
     if (currentQuestionMap.contains("numCorrectSubmissions")) {
-      currentA.numCorrectSubmissions =
+      currentA.numberOfCorrectSubmissions =
       atoi(
         currentQuestionMap.getValueCreateEmpty("numCorrectSubmissions").c_str()
       );
     }
     if (currentQuestionMap.contains("numSubmissions")) {
-      currentA.numSubmissions =
+        currentA.numberOfSubmissions =
       atoi(
         currentQuestionMap.getValueCreateEmpty("numSubmissions").c_str()
       );
@@ -1813,14 +1810,14 @@ bool ProblemData::loadFromJSON(
     Answer& currentA = *this->answers.values.lastObject();
     JSData currentQuestionJSON = inputData.objects.values[i];
     if (currentQuestionJSON.objects.contains("numCorrectSubmissions")) {
-      currentA.numCorrectSubmissions =
+      currentA.numberOfCorrectSubmissions =
       atoi(
         currentQuestionJSON.objects.getValueNoFail("numCorrectSubmissions").
         stringValue.c_str()
       );
     }
     if (currentQuestionJSON.objects.contains("numSubmissions")) {
-      currentA.numSubmissions =
+        currentA.numberOfSubmissions =
       atoi(
         currentQuestionJSON.objects.getValueNoFail("numSubmissions").
         stringValue.c_str()

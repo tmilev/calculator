@@ -1505,9 +1505,6 @@ bool AnswerChecker::extractStudentAnswerPartTwo() {
 
 bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
   STACK_TRACE("AnswerChecker::storeInDatabase");
-  if (!global.flagDatabaseExternal) {
-    return true;
-  }
   if (!this->problem.flagIsForReal) {
     return true;
   }
@@ -1536,7 +1533,8 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
     if (deadlineString == "" || deadlineString == " ") {
       hasDeadline = false;
     } else {
-      TimeWrapper now, deadline;
+      TimeWrapper now;
+      TimeWrapper deadline;
       // <-needs a fix for different time formats.
       // <-For the time being, we hard-code it
       // to month/day/year format (no time to program it better).
@@ -1548,7 +1546,7 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
         << ". Comments: "
         << "<span style='color:red'>"
         << badDateStream.str()
-        << "</span>"
+        << "</span>. "
         << "This should not happen. "
         << CalculatorHTML::bugsGenericMessage
         << "";
@@ -1567,9 +1565,9 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
     << "Deadline passed, attempt not recorded."
     << "</b>";
   } else {
-    currentAnswer.numSubmissions ++;
+      currentAnswer.numberOfSubmissions ++;
     if (answerIsCorrect) {
-      currentAnswer.numCorrectSubmissions ++;
+      currentAnswer.numberOfCorrectSubmissions ++;
       if (currentAnswer.firstCorrectAnswerClean == "") {
         currentAnswer.firstCorrectAnswerClean =
         currentAnswer.currentAnswerClean;
@@ -1593,9 +1591,9 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
   } else {
     out
     << "So far "
-    << currentAnswer.numCorrectSubmissions
+    << currentAnswer.numberOfCorrectSubmissions
     << " correct and "
-    << currentAnswer.numSubmissions - currentAnswer.numCorrectSubmissions
+    << currentAnswer.numberOfSubmissions - currentAnswer.numberOfCorrectSubmissions
     << " incorrect submissions. ";
   }
   if (hasDeadline) {
@@ -2886,55 +2884,55 @@ void UserCalculator::computePointsEarned(
     if (!gradableProblems.contains(problemName)) {
       continue;
     }
-    ProblemData& currentP = this->problemData.values[i];
-    currentP.points = 0;
-    currentP.totalNumSubmissions = 0;
-    currentP.numCorrectlyAnswered = 0;
+    ProblemData& currentProblem = this->problemData.values[i];
+    currentProblem.points = 0;
+    currentProblem.totalNumSubmissions = 0;
+    currentProblem.numCorrectlyAnswered = 0;
     Rational currentWeight;
-    currentP.flagProblemWeightIsOK =
-    currentP.adminData.getWeightFromCourse(
+    currentProblem.flagProblemWeightIsOK =
+    currentProblem.adminData.getWeightFromCourse(
       this->courseComputed, currentWeight
     );
-    if (!currentP.flagProblemWeightIsOK) {
+    if (!currentProblem.flagProblemWeightIsOK) {
       currentWeight = 0;
     }
-    for (int j = 0; j < currentP.answers.size(); j ++) {
-      if (currentP.answers.values[j].numCorrectSubmissions > 0) {
-        currentP.numCorrectlyAnswered ++;
+    for (int j = 0; j < currentProblem.answers.size(); j ++) {
+      if (currentProblem.answers.values[j].numberOfCorrectSubmissions > 0) {
+        currentProblem.numCorrectlyAnswered ++;
       }
-      currentP.totalNumSubmissions +=
-      currentP.answers.values[j].numSubmissions;
+      currentProblem.totalNumSubmissions +=
+              currentProblem.answers.values[j].numberOfSubmissions;
     }
-    if (currentP.flagProblemWeightIsOK) {
+    if (currentProblem.flagProblemWeightIsOK) {
       int expectedNumberOfAnswers =
-      currentP.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
+      currentProblem.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
       if (expectedNumberOfAnswers > 0) {
-        currentP.points = (currentWeight * currentP.numCorrectlyAnswered) /
+        currentProblem.points = (currentWeight * currentProblem.numCorrectlyAnswered) /
         expectedNumberOfAnswers;
-        this->pointsEarned += currentP.points;
+        this->pointsEarned += currentProblem.points;
       }
     }
     if (topics != nullptr) {
       if (topics->contains(problemName)) {
-        TopicElement& currentElt = topics->getValueCreateEmpty(problemName);
+        TopicElement& currentElement = topics->getValueCreateEmpty(problemName);
         this->pointsMax += currentWeight;
-        for (int j = 0; j < currentElt.parentTopics.size; j ++) {
-          (*topics).values[currentElt.parentTopics[j]].totalPointsEarned +=
-          currentP.points;
-          (*topics).values[currentElt.parentTopics[j]].maxPointsInAllChildren
+        for (int j = 0; j < currentElement.parentTopics.size; j ++) {
+          (*topics).values[currentElement.parentTopics[j]].totalPointsEarned +=
+          currentProblem.points;
+          (*topics).values[currentElement.parentTopics[j]].maxPointsInAllChildren
           +=
           currentWeight;
           if (currentWeight == 0) {
-            (*topics).values[currentElt.parentTopics[j]].
+            (*topics).values[currentElement.parentTopics[j]].
             flagSubproblemHasNoWeight =
             true;
           }
         }
-        if (currentElt.parentTopics.size > 1) {
+        if (currentElement.parentTopics.size > 1) {
           (*topics).values[
-            currentElt.parentTopics[currentElt.parentTopics.size - 2]
+            currentElement.parentTopics[currentElement.parentTopics.size - 2]
           ].pointsEarnedInProblemsThatAreImmediateChildren +=
-          currentP.points;
+          currentProblem.points;
         }
       }
     }

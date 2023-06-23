@@ -10195,12 +10195,10 @@ bool Calculator::Test::calculatorTestRun() {
     << ", command:\n"
     << currentTest.command
     << Logger::endL;
-    StateMaintainer<bool> maintainOriginalValueDatabaseFlag;
-    maintainOriginalValueDatabaseFlag.initialize(
-      global.flagDisableDatabaseLogEveryoneAsAdmin
-    );
+    StateMaintainer<DatabaseType> maintainOriginalValueDatabaseFlag;
+    maintainOriginalValueDatabaseFlag.initialize(global.databaseType);
     if (currentTest.requresAdminAccess) {
-      global.flagDisableDatabaseLogEveryoneAsAdmin = true;
+      global.databaseType = DatabaseType::noDatabaseEveryoneIsAdmin;
     }
     report.report(reportStream.str());
     tester.initialize(Calculator::Mode::full);

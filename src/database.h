@@ -46,7 +46,7 @@ public:
   class Test {
   public:
     static bool all();
-    static bool basics();
+    static bool basics(DatabaseType databaseType);
     static void updateNoFail(QueryExact& find, QuerySet updater);
     static void findNoFail(QueryExact& find, JSData& result);
     static void matchKeyValue(
@@ -122,6 +122,13 @@ public:
     const QueryExact& query,
     JSData& output,
     std::stringstream* commentsOnFailure
+  );
+  bool findOneWithOptions(
+    const QueryExact& query,
+    const QueryResultOptions& options,
+    JSData& output,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneralNonSensitive = nullptr
   );
   // Return indicates query success / failure.
   // When the element isn't found but otherwise there were
@@ -254,6 +261,53 @@ public:
   bool isEmpty() const;
 };
 
+// Work in progress. When done, this will be a self contained
+// simple database implementation that supports concurrent reads,
+// writes and locks.
+class LocalDatabase {
+public:
+  static std::string folder();
+  bool findOneWithOptions(
+    const QueryExact& query,
+    const QueryResultOptions& options,
+    JSData& output,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneralNonSensitive = nullptr
+  );
+  bool findOneFromSome(
+    const List<QueryExact>& findOrQueries,
+    JSData& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool findFromJSONWithOptions(
+    const QueryExact& findQuery,
+    List<JSData>& output,
+    const QueryResultOptions& options,
+    int maximumOutputItems,
+    long long* totalItems,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneralNonSensitive
+  );
+  bool updateOne(
+    const QueryExact& findQuery,
+    const QuerySet& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool updateOneFromSome(
+    const List<QueryExact>& findOrQueries,
+    const QuerySet& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool deleteDatabase(std::stringstream* commentsOnFailure);
+  void createHashIndex(
+    const std::string& collectionName, const std::string& key
+  );
+  void initialize();
+  bool fetchCollectionNames(
+    List<std::string>& output, std::stringstream* commentsOnFailure
+  );
+};
+
 class Database {
 public:
   bool flagInitializedServer;
@@ -334,7 +388,9 @@ public:
   };
 
   User user;
+  // TODO(tmilev): Rename this to fallbackDatabase.
   FallbackDatabase localDatabase;
+  LocalDatabase database;
   class Mongo {
   public:
     // The following variable has type mongoc_client_t.
@@ -534,15 +590,15 @@ public:
   class Test {
   public:
     StateMaintainer<bool> maintainServerForkFlag;
-    StateMaintainer<bool> maintainerDatabase;
+    StateMaintainer<DatabaseType> maintainerDatabase;
     StateMaintainer<std::string> maintainerDatabaseName;
     static std::string adminPassword;
     static bool all();
-    static bool basics();
+    static bool basics(DatabaseType databaseType);
     bool deleteDatabase();
     void initializeForDatabaseOperations();
     bool createAdminAccount();
-    Test();
+    Test(DatabaseType databaseType);
   };
 
   Database();

@@ -75,7 +75,7 @@ bool FallbackDatabase::updateOne(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("FallbackDatabase::updateOne");
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "FallbackDatabase::updateOne failed. "
@@ -166,6 +166,25 @@ bool FallbackDatabase::updateOneEntry(
   }
   output->setKeyValue(labels[labels.size - 1], value);
   return true;
+}
+
+bool FallbackDatabase::findOneWithOptions(
+  const QueryExact& query,
+  const QueryResultOptions& options,
+  JSData& output,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneralNonSensitive
+) {
+  (void) commentsGeneralNonSensitive;
+  if (options.toJSON().objects.size() > 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Fallback database does not suppor non-empty query options. "
+      << options.toJSON();
+    }
+    return false;
+  }
+  return findOne(query, output, commentsOnFailure);
 }
 
 bool FallbackDatabase::findOne(

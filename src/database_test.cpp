@@ -4,11 +4,11 @@
 
 std::string Database::Test::adminPassword = "111";
 
-Database::Test::Test() {
+Database::Test::Test(DatabaseType databaseType) {
   this->maintainServerForkFlag.initialize(global.flagServerForkedIntoWorker);
-  this->maintainerDatabase.initialize(global.flagDatabaseExternal);
+  this->maintainerDatabase.initialize(global.databaseType);
   this->maintainerDatabaseName.initialize(DatabaseStrings::databaseName);
-  global.flagDatabaseExternal = false;
+  global.databaseType = databaseType;
   global.flagServerForkedIntoWorker = true;
   DatabaseStrings::databaseName = "test";
   Database::get().initializeServer();
@@ -17,17 +17,18 @@ Database::Test::Test() {
 
 bool Database::Test::all() {
   STACK_TRACE("Database::Test::all");
-  Database::Test::basics();
+  Database::Test::basics(DatabaseType::fallback);
+  Database::Test::basics(DatabaseType::internal);
   return true;
 }
 
-bool Database::Test::basics() {
+bool Database::Test::basics(DatabaseType databaseType) {
   STACK_TRACE("Database::Test::basics");
   global
   << "Testing default database. "
   << Database::toString()
   << Logger::endL;
-  Database::Test tester;
+  Database::Test tester(databaseType);
   tester.deleteDatabase();
   tester.createAdminAccount();
   return true;
@@ -70,7 +71,8 @@ bool Database::Test::createAdminAccount() {
 }
 
 bool QuerySet::Test::all() {
-  QuerySet::Test::basics();
+  QuerySet::Test::basics(DatabaseType::fallback);
+  QuerySet::Test::basics(DatabaseType::internal);
   return true;
 }
 
@@ -125,8 +127,8 @@ void QuerySet::Test::matchKeyValue(
   }
 }
 
-bool QuerySet::Test::basics() {
-  Database::Test tester;
+bool QuerySet::Test::basics(DatabaseType databaseType) {
+  Database::Test tester(databaseType);
   tester.deleteDatabase();
   tester.initializeForDatabaseOperations();
   QueryExact find;

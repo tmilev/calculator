@@ -609,7 +609,6 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
     this->initializeFunctionsScientificBasic();
     this->initializeFunctionsVectorPartitionFunctions();
     this->initializeFunctionsSemisimpleLieAlgebras();
-    this->initializeAdminFunctions();
     this->initializeFunctionsExtra();
   }
   this->initializeAtomsThatAllowCommutingOfArguments();

@@ -7,7 +7,8 @@
 
 bool WebAPIResponse::Test::all() {
   StateMaintainer<std::string> databaseName(DatabaseStrings::databaseName);
-  WebAPIResponse::Test::scoredQuiz();
+  WebAPIResponse::Test::scoredQuiz(DatabaseType::fallback);
+  WebAPIResponse::Test::scoredQuiz(DatabaseType::internal);
   WebAPIResponse::Test::solveJSON();
   WebAPIResponse::Test::compareExpressions();
   return true;
@@ -221,14 +222,14 @@ bool WebAPIResponse::Test::compareExpressions() {
   return true;
 }
 
-bool WebAPIResponse::Test::scoredQuiz() {
+bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
   STACK_TRACE("WebAPIResponse::Test::scoredQuiz");
   global
   << "Test scored quiz. "
   << Logger::blue
   << Database::toString()
   << Logger::endL;
-  Course::Test::Setup setup;
+  Course::Test::Setup setup(databaseType);
   setup.deleteDatabaseSetupAll();
   std::string sample = "test/problems/interval_notation_1.html";
   global.webArguments[WebAPI::Problem::fileName] = sample;

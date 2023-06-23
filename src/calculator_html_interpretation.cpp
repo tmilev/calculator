@@ -182,9 +182,6 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
 
 std::string WebAPIResponse::setProblemWeight() {
   STACK_TRACE("WebAPIReponse::setProblemWeight");
-  if (!global.flagDatabaseExternal) {
-    return "Cannot modify problem weights (no database available)";
-  }
   if (!global.userDefaultHasAdminRights()) {
     return "<b>Only admins may set problem weights.</b>";
   }
@@ -1057,7 +1054,7 @@ void WebAPIResponse::getJSDataUserInfo(
   STACK_TRACE("WebAPIReponse::getJSDataUserInfo");
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
   outputAppend[WebAPI::Result::loginDisabledEveryoneIsAdmin] =
-  global.flagDisableDatabaseLogEveryoneAsAdmin;
+  global.hasDisabledDatabaseEveryoneIsAdmin();
   outputAppend[WebAPI::Result::debugLogin] = global.flagDebugLogin;
   outputAppend[WebAPI::Result::database] = DatabaseStrings::databaseName;
   outputAppend[WebAPI::Result::httpsSupport] = global.flagSSLAvailable;
@@ -1565,7 +1562,7 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
     << "Deadline passed, attempt not recorded."
     << "</b>";
   } else {
-      currentAnswer.numberOfSubmissions ++;
+    currentAnswer.numberOfSubmissions ++;
     if (answerIsCorrect) {
       currentAnswer.numberOfCorrectSubmissions ++;
       if (currentAnswer.firstCorrectAnswerClean == "") {
@@ -1593,7 +1590,8 @@ bool AnswerChecker::storeInDatabase(bool answerIsCorrect) {
     << "So far "
     << currentAnswer.numberOfCorrectSubmissions
     << " correct and "
-    << currentAnswer.numberOfSubmissions - currentAnswer.numberOfCorrectSubmissions
+    << currentAnswer.numberOfSubmissions -
+    currentAnswer.numberOfCorrectSubmissions
     << " incorrect submissions. ";
   }
   if (hasDeadline) {
@@ -2432,7 +2430,7 @@ JSData WebAPIResponse::getAccountsPageJSON(
   STACK_TRACE("WebAPIReponse::getAccountsPageJSON");
   (void) hostWebAddressWithPort;
   JSData output;
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     output[WebAPI::Result::error] =
     "Database disabled (cannot get accounts). ";
     return output;
@@ -2515,9 +2513,6 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   const std::string& hostWebAddressWithPort
 ) {
   STACK_TRACE("WebAPIReponse::toStringUserDetailsTable");
-  if (!global.flagDatabaseExternal) {
-    return "Compiled without database support. ";
-  }
   std::stringstream out;
   bool flagFilterCourse = (!adminsOnly) && (
     global.getWebInput("filterAccounts") == "true"
@@ -2897,30 +2892,37 @@ void UserCalculator::computePointsEarned(
       currentWeight = 0;
     }
     for (int j = 0; j < currentProblem.answers.size(); j ++) {
-      if (currentProblem.answers.values[j].numberOfCorrectSubmissions > 0) {
+      if (
+        currentProblem.answers.values[j].numberOfCorrectSubmissions > 0
+      ) {
         currentProblem.numCorrectlyAnswered ++;
       }
       currentProblem.totalNumSubmissions +=
-              currentProblem.answers.values[j].numberOfSubmissions;
+      currentProblem.answers.values[j].numberOfSubmissions;
     }
     if (currentProblem.flagProblemWeightIsOK) {
       int expectedNumberOfAnswers =
-      currentProblem.getExpectedNumberOfAnswers(problemName, commentsOnFailure);
+      currentProblem.getExpectedNumberOfAnswers(
+        problemName, commentsOnFailure
+      );
       if (expectedNumberOfAnswers > 0) {
-        currentProblem.points = (currentWeight * currentProblem.numCorrectlyAnswered) /
+        currentProblem.points = (
+          currentWeight * currentProblem.numCorrectlyAnswered
+        ) /
         expectedNumberOfAnswers;
         this->pointsEarned += currentProblem.points;
       }
     }
     if (topics != nullptr) {
       if (topics->contains(problemName)) {
-        TopicElement& currentElement = topics->getValueCreateEmpty(problemName);
+        TopicElement& currentElement =
+        topics->getValueCreateEmpty(problemName);
         this->pointsMax += currentWeight;
         for (int j = 0; j < currentElement.parentTopics.size; j ++) {
           (*topics).values[currentElement.parentTopics[j]].totalPointsEarned +=
           currentProblem.points;
-          (*topics).values[currentElement.parentTopics[j]].maxPointsInAllChildren
-          +=
+          (*topics).values[currentElement.parentTopics[j]].
+          maxPointsInAllChildren +=
           currentWeight;
           if (currentWeight == 0) {
             (*topics).values[currentElement.parentTopics[j]].
@@ -2930,7 +2932,9 @@ void UserCalculator::computePointsEarned(
         }
         if (currentElement.parentTopics.size > 1) {
           (*topics).values[
-            currentElement.parentTopics[currentElement.parentTopics.size - 2]
+            currentElement.parentTopics[
+              currentElement.parentTopics.size - 2
+            ]
           ].pointsEarnedInProblemsThatAreImmediateChildren +=
           currentProblem.points;
         }
@@ -2963,9 +2967,6 @@ public:
 
 bool UserScores::computeScoresAndStats(std::stringstream& comments) {
   STACK_TRACE("UserScores::computeScoresAndStats");
-  if (!global.flagDatabaseExternal) {
-    return false;
-  }
   problem.currentUser.::UserCalculatorData::operator=(global.userDefault);
   this->problem.loadFileNames();
   if (!this->problem.loadAndParseTopicList(comments)) {
@@ -3150,9 +3151,6 @@ std::string WebAPIResponse::toStringUserScores() {
   if (!global.userDefaultHasAdminRights()) {
     return "only admins are allowed to view scores";
   }
-  if (!global.flagDatabaseExternal) {
-    return "Error: database not running. ";
-  }
   std::stringstream out;
   out.precision(4);
   UserScores scores;
@@ -3302,8 +3300,10 @@ std::string WebAPIResponse::toStringUserDetails(
 ) {
   STACK_TRACE("WebAPIReponse::toStringUserDetails");
   std::stringstream out;
-  if (!global.flagDatabaseExternal) {
-    out << "<b>Adding emails not available (database not present).</b> ";
+  if (!global.hasDisabledDatabaseEveryoneIsAdmin()) {
+    out
+    << "<b>Adding emails not available (database not present).</b> "
+    << DatabaseStrings::errorDatabaseDisabled;
     return out.str();
   }
   std::string userRole =

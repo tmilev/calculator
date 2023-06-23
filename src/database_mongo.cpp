@@ -1118,16 +1118,32 @@ bool Database::updateOneFromSome(
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  if (global.flagDatabaseExternal) {
+  switch (global.databaseType) {
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Database::updateOneFromSome failed. "
+      << DatabaseStrings::errorDatabaseDisabled;
+    }
+    return false;
+  case DatabaseType::externalMongo:
     return
     this->mongoDB.updateOneFromSome(
       findOrQueries, updateQuery, commentsOnFailure
     );
+  case DatabaseType::fallback:
+    return
+    this->localDatabase.updateOneFromSome(
+      findOrQueries, updateQuery, commentsOnFailure
+    );
+  case DatabaseType::internal:
+    return
+    this->database.updateOneFromSome(
+      findOrQueries, updateQuery, commentsOnFailure
+    );
   }
-  return
-  this->localDatabase.updateOneFromSome(
-    findOrQueries, updateQuery, commentsOnFailure
-  );
+  global.fatal << "This piece of code should be unreachable. " << global.fatal;
+  return false;
 }
 
 bool Database::Mongo::updateOneFromSome(

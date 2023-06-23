@@ -296,9 +296,8 @@ public:
   static void figureOutOperatingSystem();
   void computeSSLFlags();
   static void checkInstallation();
-  static void checkSystemInstallationMongoDatabase();
   static void checkSystemInstallationOpenSSL();
-  static void checkMongoDatabaseSetup();
+  static void checkDatabaseSetup();
   static void checkFreecalcSetup();
   static void analyzeMainArguments(int argC, char** argv);
   static bool analyzeMainArgumentsTimeString(

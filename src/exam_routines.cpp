@@ -867,20 +867,16 @@ std::string CalculatorHTML::toStringProblemInfo(
   std::stringstream out;
   out << this->toStringLinkFromFileName(fileName);
   out << this->toStringProblemScoreFull(fileName);
-  if (global.flagDatabaseExternal) {
-    bool problemAlreadySolved = false;
-    if (this->currentUser.problemData.contains(fileName)) {
-      ProblemData& problemData =
-      this->currentUser.problemData.getValueCreateEmpty(fileName);
-      if (
-        problemData.numCorrectlyAnswered >= problemData.answers.size()
-      ) {
-        problemAlreadySolved = true;
-      }
+  bool problemAlreadySolved = false;
+  if (this->currentUser.problemData.contains(fileName)) {
+    ProblemData& problemData =
+    this->currentUser.problemData.getValueCreateEmpty(fileName);
+    if (problemData.numCorrectlyAnswered >= problemData.answers.size()) {
+      problemAlreadySolved = true;
     }
-    out
-    << this->toStringDeadline(fileName, problemAlreadySolved, false, false);
   }
+  out
+  << this->toStringDeadline(fileName, problemAlreadySolved, false, false);
   std::string finalStringToDisplay = stringToDisplay;
   if (finalStringToDisplay == "") {
     finalStringToDisplay =
@@ -1501,7 +1497,7 @@ bool CalculatorHTML::exrtactSolutionCommands(
 }
 
 Answer::Answer() {
-    this->numberOfSubmissions = 0;
+  this->numberOfSubmissions = 0;
   this->numberOfCorrectSubmissions = 0;
   this->flagAutoGenerateSubmitButtons = true;
   this->flagAutoGenerateMQButtonPanel = true;
@@ -1754,9 +1750,10 @@ void CalculatorHTML::interpretManageClass(SyntacticElementHTML& inputOutput) {
   ) {
     return;
   }
-  if (!global.flagDatabaseExternal) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     inputOutput.interpretedCommand =
-    "<b>Managing class not available (no database).</b>";
+    "<b>Managing class not available (no database).</b> " +
+    DatabaseStrings::errorDatabaseDisabled;
     return;
   }
   std::stringstream out;
@@ -1941,10 +1938,6 @@ std::string CalculatorHTML::cleanUpFileName(const std::string& inputLink) {
 std::string CalculatorHTML::getDeadlineNoInheritance(const std::string& id) {
   STACK_TRACE("CalculatorHTML::getDeadlineNoInheritance");
   (void) id;
-  if (!global.flagDatabaseExternal) {
-    // deadline not present.
-    return "";
-  }
   if (!this->currentUser.problemData.contains(id)) {
     return "";
   }
@@ -2007,6 +2000,12 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
   bool isSection
 ) {
   std::stringstream out;
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
+    out
+    << "Database not running: no deadlines"
+    << DatabaseStrings::errorDatabaseDisabled;
+    return out.str();
+  }
   (void) problemAlreadySolved;
   (void) isSection;
   bool deadlineIsInherited = false;
@@ -2017,10 +2016,6 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
       return "";
     }
     out << "<span style='color:orange'>No deadline yet</span>";
-    return out.str();
-  }
-  if (!global.flagDatabaseExternal) {
-    out << "Database not running: no deadlines";
     return out.str();
   }
   TimeWrapper now, deadline;
@@ -2125,8 +2120,8 @@ std::string CalculatorHTML::toStringDeadline(
   (void) problemAlreadySolved;
   (void) returnEmptyStringIfNoDeadline;
   (void) isSection;
-  if (!global.flagDatabaseExternal) {
-    return "Database not available";
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
+    return "Database not available. " + DatabaseStrings::errorDatabaseDisabled;
   }
   if (global.userGuestMode()) {
     return "deadlines require login";
@@ -3951,22 +3946,20 @@ bool CalculatorHTML::interpretHtmlOneAttempt(
   if (
     this->flagIsForReal && global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
-    if (global.flagDatabaseExternal) {
-      bool problemAlreadySolved = false;
-      if (this->currentUser.problemData.contains(this->fileName)) {
-        ProblemData& problemData =
-        this->currentUser.problemData.getValueCreateEmpty(this->fileName);
-        if (
-          problemData.numCorrectlyAnswered >= problemData.answers.size()
-        ) {
-          problemAlreadySolved = true;
-        }
+    bool problemAlreadySolved = false;
+    if (this->currentUser.problemData.contains(this->fileName)) {
+      ProblemData& problemData =
+      this->currentUser.problemData.getValueCreateEmpty(this->fileName);
+      if (
+        problemData.numCorrectlyAnswered >= problemData.answers.size()
+      ) {
+        problemAlreadySolved = true;
       }
-      this->outputDeadlineString =
-      this->toStringDeadline(
-        this->fileName, problemAlreadySolved, true, true
-      );
     }
+    this->outputDeadlineString =
+    this->toStringDeadline(
+      this->fileName, problemAlreadySolved, true, true
+    );
   }
   return
   this->interpretHtmlOneAttemptPartTwo(
@@ -4145,8 +4138,10 @@ std::string CalculatorHTML::toStringProblemScoreFull(
     out << "scores require login";
     return out.str();
   }
-  if (!global.flagDatabaseExternal) {
-    out << "scores not available: no database. ";
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
+    out
+    << "Scores not available: no database. "
+    << DatabaseStrings::errorDatabaseDisabled;
     return out.str();
   }
   Rational currentWeight;
@@ -4213,8 +4208,10 @@ std::string CalculatorHTML::toStringProblemScoreShort(
   STACK_TRACE("CalculatorHTML::toStringProblemScoreShort");
   (void) fileName;
   (void) outputAlreadySolved;
-  if (!global.flagDatabaseExternal) {
-    return "Error: database not running. ";
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
+    return
+    "Error: database not running. " +
+    DatabaseStrings::errorDatabaseDisabled;
   }
   std::stringstream out;
   if (global.userGuestMode()) {
@@ -5116,6 +5113,12 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(
   std::stringstream& commentsOnFailure
 ) {
   STACK_TRACE("CalculatorHTML::computeTopicListAndPointsEarned");
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
+    commentsOnFailure
+    << "CalculatorHTML::computeTopicListAndPointsEarned failed: "
+    << DatabaseStrings::errorDatabaseDisabled;
+    return false;
+  }
   if (!this->loadAndParseTopicList(commentsOnFailure)) {
     return false;
   }
@@ -5125,33 +5128,29 @@ bool CalculatorHTML::computeTopicListAndPointsEarned(
   if (!this->prepareSectionList(commentsOnFailure)) {
     commentsOnFailure << "Error preparing section list. ";
   }
-  if (global.flagDatabaseExternal) {
-    this->flagIncludeStudentScores = global.userDefaultHasAdminRights() &&
-    !global.userStudentVieWOn() &&
-    global.requestType != "templateNoLogin";
-    HashedList<std::string> gradableProblems;
-    for (int i = 0; i < this->topics.topics.size(); i ++) {
-      if (
-        this->topics.topics.values[i].type == TopicElement::types::problem
-      ) {
-        gradableProblems.addOnTopNoRepetition(
-          this->topics.topics.values[i].id
-        );
-        if (
-          this->topics.topics.values[i].immediateChildren.size > 0
-        ) {
-          global.fatal
-          << "Error: problem "
-          << this->topics.topics.values[i].toString()
-          << " has children topics which is not allowed. "
-          << global.fatal;
-        }
+  this->flagIncludeStudentScores = global.userDefaultHasAdminRights() &&
+  !global.userStudentVieWOn() &&
+  global.requestType != "templateNoLogin";
+  HashedList<std::string> gradableProblems;
+  for (int i = 0; i < this->topics.topics.size(); i ++) {
+    if (
+      this->topics.topics.values[i].type == TopicElement::types::problem
+    ) {
+      gradableProblems.addOnTopNoRepetition(
+        this->topics.topics.values[i].id
+      );
+      if (this->topics.topics.values[i].immediateChildren.size > 0) {
+        global.fatal
+        << "Error: problem "
+        << this->topics.topics.values[i].toString()
+        << " has children topics which is not allowed. "
+        << global.fatal;
       }
     }
-    this->currentUser.computePointsEarned(
-      gradableProblems, &this->topics.topics, commentsOnFailure
-    );
   }
+  this->currentUser.computePointsEarned(
+    gradableProblems, &this->topics.topics, commentsOnFailure
+  );
   this->topics.initializeElementTypes();
   return true;
 }
@@ -5500,27 +5499,21 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   output["handwrittenSolution"] = this->handwrittenSolution;
   output[WebAPI::Problem::fileName] = this->problemFileName;
   output[WebAPI::Problem::idProblem] = this->id;
-  if (global.flagDatabaseExternal) {
-    if (
-      owner.currentUser.problemData.contains(this->problemFileName)
-    ) {
-      ProblemData& currentData =
-      owner.currentUser.problemData.getValueCreateEmpty(
-        this->problemFileName
-      );
-      output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
-      output["totalQuestions"] = currentData.answers.size();
-      Rational currentWeight;
-      std::string currentWeightAsGivenByInstructor;
-      currentData.flagProblemWeightIsOK =
-      currentData.adminData.getWeightFromCourse(
-        owner.currentUser.courseComputed,
-        currentWeight,
-        &currentWeightAsGivenByInstructor
-      );
-      if (currentData.flagProblemWeightIsOK) {
-        output["weight"] = currentWeightAsGivenByInstructor;
-      }
+  if (owner.currentUser.problemData.contains(this->problemFileName)) {
+    ProblemData& currentData =
+    owner.currentUser.problemData.getValueCreateEmpty(this->problemFileName);
+    output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
+    output["totalQuestions"] = currentData.answers.size();
+    Rational currentWeight;
+    std::string currentWeightAsGivenByInstructor;
+    currentData.flagProblemWeightIsOK =
+    currentData.adminData.getWeightFromCourse(
+      owner.currentUser.courseComputed,
+      currentWeight,
+      &currentWeightAsGivenByInstructor
+    );
+    if (currentData.flagProblemWeightIsOK) {
+      output["weight"] = currentWeightAsGivenByInstructor;
     }
   }
   return output;

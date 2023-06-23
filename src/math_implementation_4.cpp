@@ -516,7 +516,7 @@ bool GlobalVariables::userDefaultIsDebuggingAdmin() {
 }
 
 bool GlobalVariables::userDefaultHasAdminRights() {
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return true;
   }
   return

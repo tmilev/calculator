@@ -48,9 +48,6 @@ bool Database::User::userDefaultHasInstructorRights() {
   if (global.userDefaultHasAdminRights()) {
     return true;
   }
-  if (!global.flagDatabaseExternal) {
-    return true;
-  }
   if (!global.flagLoggedIn) {
     return false;
   }
@@ -376,7 +373,8 @@ bool Database::findOneWithOptions(
 ) {
   STACK_TRACE("Database::findOneWithOptions");
   (void) commentsGeneralNonSensitive;
-  if (global.flagDatabaseExternal) {
+  switch (global.databaseType) {
+  case DatabaseType::externalMongo:
     return
     Database::get().mongoDB.findOneWithOptions(
       query,
@@ -385,18 +383,35 @@ bool Database::findOneWithOptions(
       commentsOnFailure,
       commentsGeneralNonSensitive
     );
-  } else {
-    // We are using the fallback database
-    if (options.toJSON().objects.size() > 0) {
+  case DatabaseType::internal:
+    return
+    Database::get().database.findOneWithOptions(
+      query,
+      options,
+      output,
+      commentsOnFailure,
+      commentsGeneralNonSensitive
+    );
+    return false;
+  case DatabaseType::fallback:
+    return
+    Database::localDatabase.findOneWithOptions(
+      query,
+      options,
+      output,
+      commentsOnFailure,
+      commentsGeneralNonSensitive
+    );
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "Project compiled without mongoDB support, "
-      << "so I am using a fallback database. "
-      << "Non-empty query options are not supported: "
-      << options.toJSON();
-      return false;
+      << "Error: findOneWithOptions failed. "
+      << DatabaseStrings::errorDatabaseDisabled;
     }
-    return Database::localDatabase.findOne(query, output, commentsOnFailure);
+    return false;
   }
+  global.fatal << "This should be unreachable. " << global.fatal;
+  return false;
 }
 
 QueryResultOptions Database::getStandardProjectors(
@@ -418,11 +433,22 @@ Database& Database::get() {
 
 std::string Database::toString() {
   std::stringstream out;
-  if (global.flagDatabaseExternal) {
-    out << "Current DB is: MongoDB. ";
-  } else {
-    out << "Current DB is: Fallback. ";
+  switch (global.databaseType) {
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    out
+    << "No database: everyone is admin. "
+    << DatabaseStrings::errorDatabaseDisabled;
+    break;
+  case DatabaseType::externalMongo:
+    out << "Current database: MongoDB. ";
+    break;
+  case DatabaseType::fallback:
+    out << "Current database: Fallback. ";
+    break;
+  case DatabaseType::internal:
+    out << "Currrent database: internal. ";
   }
+  out << "Database name: [" << DatabaseStrings::databaseName << "]";
   return out.str();
 }
 
@@ -469,15 +495,22 @@ bool Database::updateOne(
     }
     return false;
   }
-  if (global.flagDatabaseExternal) {
+  switch (global.databaseType) {
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Update one failed. "
+      << DatabaseStrings::errorDatabaseDisabled;
+    }
+    return false;
+  case DatabaseType::externalMongo:
     return this->mongoDB.updateOne(findQuery, dataToMerge, commentsOnFailure);
-  } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  case DatabaseType::fallback:
     return
     this->localDatabase.updateOne(findQuery, dataToMerge, commentsOnFailure);
-  }
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure
-    << "Database::updateOne fail: no DB compiled and fallback is disabled. ";
+  case DatabaseType::internal:
+    return
+    this->database.updateOne(findQuery, dataToMerge, commentsOnFailure);
   }
   return false;
 }
@@ -487,40 +520,65 @@ bool Database::findOneFromSome(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  if (global.flagDatabaseExternal) {
-    return
-    this->mongoDB.findOneFromSome(findOrQueries, output, commentsOnFailure);
-  } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    return
-    this->localDatabase.findOneFromSome(
-      findOrQueries, output, commentsOnFailure
-    );
-  } else {
+  switch (global.databaseType) {
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Database::findOneFromSome failed. "
       << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
+  case DatabaseType::externalMongo:
+    return
+    this->mongoDB.findOneFromSome(findOrQueries, output, commentsOnFailure);
+  case DatabaseType::fallback:
+    return
+    this->localDatabase.findOneFromSome(
+      findOrQueries, output, commentsOnFailure
+    );
+  case DatabaseType::internal:
+    this->database.findOneFromSome(findOrQueries, output, commentsOnFailure);
   }
+  global.fatal << "This should be unreachable. " << global.fatal;
+  return false;
 }
 
 bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
-  if (global.flagDatabaseExternal) {
+  switch (global.databaseType) {
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Database::deleteDatabase failed. "
+      << DatabaseStrings::errorDatabaseDisabled;
+    }
+    return false;
+  case DatabaseType::externalMongo:
     return this->mongoDB.deleteDatabase(commentsOnFailure);
-  } else {
+  case DatabaseType::fallback:
     return this->localDatabase.deleteDatabase(commentsOnFailure);
+  case DatabaseType::internal:
+    return this->database.deleteDatabase(commentsOnFailure);
   }
+  global.fatal << "This should be unreachable. " << global.fatal;
+  return false;
 }
 
 void Database::createHashIndex(
   const std::string& collectionName, const std::string& key
 ) {
   STACK_TRACE("Database::createHashIndex");
-  if (global.flagDatabaseExternal) {
+  switch (global.databaseType) {
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    return;
+  case DatabaseType::externalMongo:
     this->mongoDB.createHashIndex(collectionName, key);
-  } else if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
+    return;
+  case DatabaseType::fallback:
     this->localDatabase.createHashIndex(collectionName, key);
+    return;
+  case DatabaseType::internal:
+    this->database.createHashIndex(collectionName, key);
+    return;
   }
 }
 
@@ -529,8 +587,12 @@ bool Database::initializeWorker() {
   if (this->flagInitializedWorker) {
     return true;
   }
-  if (global.flagDatabaseExternal) {
+  switch (global.databaseType) {
+  case DatabaseType::externalMongo:
     this->mongoDB.initialize();
+    break;
+  default:
+    break;
   }
   this->createHashIndex(
     DatabaseStrings::tableUsers, DatabaseStrings::labelUsername
@@ -611,15 +673,15 @@ bool Database::findFromJSONWithOptions(
   std::stringstream* commentsGeneralNonSensitive
 ) {
   STACK_TRACE("Database::findFromJSONWithOptions");
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  switch (global.databaseType) {
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Database::findFromJSONWithOptions fail. "
       << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
-  }
-  if (global.flagDatabaseExternal) {
+  case DatabaseType::externalMongo:
     return
     Database::Mongo::findFromJSONWithOptions(
       findQuery,
@@ -630,17 +692,31 @@ bool Database::findFromJSONWithOptions(
       commentsOnFailure,
       commentsGeneralNonSensitive
     );
+  case DatabaseType::fallback:
+    return
+    Database::get().localDatabase.findFromJSONWithOptions(
+      findQuery,
+      output,
+      options,
+      maximumOutputItems,
+      totalItems,
+      commentsOnFailure,
+      commentsGeneralNonSensitive
+    );
+  case DatabaseType::internal:
+    return
+    Database::get().database.findFromJSONWithOptions(
+      findQuery,
+      output,
+      options,
+      maximumOutputItems,
+      totalItems,
+      commentsOnFailure,
+      commentsGeneralNonSensitive
+    );
   }
-  return
-  Database::get().localDatabase.findFromJSONWithOptions(
-    findQuery,
-    output,
-    options,
-    maximumOutputItems,
-    totalItems,
-    commentsOnFailure,
-    commentsGeneralNonSensitive
-  );
+  global.fatal << "This should be unreachable. " << global.fatal;
+  return false;
 }
 
 bool Database::initializeServer() {
@@ -648,24 +724,31 @@ bool Database::initializeServer() {
   this->user.owner = this;
   this->localDatabase.owner = this;
   this->flagInitializedServer = true;
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return true;
   }
-  if (global.flagDatabaseExternal) {
+  switch (global.databaseType) {
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    // should be unreachable.
+    return true;
+  case DatabaseType::fallback:
+    DatabaseStrings::databaseName = "local";
+    global
+    << Logger::red
+    << "Using "
+    << "**SLOW** "
+    << "fall-back JSON storage."
+    << Logger::endL;
+    this->localDatabase.initialize();
+    break;
+  case DatabaseType::internal:
+    DatabaseStrings::databaseName = "local";
+    this->database.initialize();
+    break;
+  case DatabaseType::externalMongo:
     DatabaseStrings::databaseName = "calculator";
-    return true;
+    break;
   }
-  global
-  << Logger::red
-  << "Calculator compiled without (mongoDB) database support. "
-  << Logger::green
-  << "Using "
-  << Logger::red
-  << "**SLOW** "
-  << Logger::green
-  << "fall-back JSON storage."
-  << Logger::endL;
-  this->localDatabase.initialize();
   return true;
 }
 
@@ -676,17 +759,26 @@ bool Database::fetchCollectionNames(
   if (!Database::get().initializeWorker()) {
     return false;
   }
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  switch (global.databaseType) {
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Database disabled. ";
+      *commentsOnFailure
+      << "Database::fetchCollectionNames failed. "
+      << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
-  }
-  if (global.flagDatabaseExternal) {
+  case DatabaseType::externalMongo:
     return
     Database::get().mongoDB.fetchCollectionNames(output, commentsOnFailure);
+  case DatabaseType::fallback:
+    return
+    Database::get().localDatabase.fetchCollectionNames(
+      output, commentsOnFailure
+    );
+  case DatabaseType::internal:
+    return
+    Database::get().database.fetchCollectionNames(output, commentsOnFailure);
   }
-  return this->localDatabase.fetchCollectionNames(output, commentsOnFailure);
 }
 
 bool Database::fetchTable(
@@ -725,7 +817,9 @@ bool Database::fetchTable(
   return true;
 }
 
-JSData Database::toJSONDatabaseFetch(const std::string& findQueryAndProjector) {
+JSData Database::toJSONDatabaseFetch(
+  const std::string& findQueryAndProjector
+) {
   STACK_TRACE("Database::toJSONDatabaseFetch");
   JSData result;
   QueryExact queryExact;
@@ -1457,7 +1551,7 @@ JSData ProblemData::storeJSON() const {
     currentAnswerJSON["numCorrectSubmissions"] =
     std::to_string(currentA.numberOfCorrectSubmissions);
     currentAnswerJSON["numSubmissions"] =
-            std::to_string(currentA.numberOfSubmissions);
+    std::to_string(currentA.numberOfSubmissions);
     currentAnswerJSON["firstCorrectAnswer"] =
     HtmlRoutines::convertStringToURLString(
       currentA.firstCorrectAnswerClean, false
@@ -1752,7 +1846,7 @@ bool ProblemData::loadFromOldFormat(
       );
     }
     if (currentQuestionMap.contains("numSubmissions")) {
-        currentA.numberOfSubmissions =
+      currentA.numberOfSubmissions =
       atoi(
         currentQuestionMap.getValueCreateEmpty("numSubmissions").c_str()
       );
@@ -1817,7 +1911,7 @@ bool ProblemData::loadFromJSON(
       );
     }
     if (currentQuestionJSON.objects.contains("numSubmissions")) {
-        currentA.numberOfSubmissions =
+      currentA.numberOfSubmissions =
       atoi(
         currentQuestionJSON.objects.getValueNoFail("numSubmissions").
         stringValue.c_str()
@@ -2096,7 +2190,9 @@ bool UserCalculator::computeAndStoreActivationStats(
     return false;
   }
   this->activationEmailSubject = "NO REPLY: Activation of your math account. ";
-  if (global.flagDebugLogin && !global.flagDatabaseExternal) {
+  if (
+    global.flagDebugLogin && global.databaseType == DatabaseType::fallback
+  ) {
     global.comments
     << "Activation link displayed for debugging purposes. Database is off. "
     << "<a href='"
@@ -2537,7 +2633,7 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
   (void) commentsOnFailure;
   (void) user;
   (void) commentsGeneral;
-  if (!global.flagDatabaseExternal) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return Database::User::loginNoDatabaseSupport(user, commentsGeneral);
   }
   STACK_TRACE("Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded");
@@ -2616,18 +2712,17 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
 bool Database::User::loginNoDatabaseSupport(
   UserCalculatorData& user, std::stringstream* commentsGeneral
 ) {
-  if (global.flagDatabaseExternal) {
+  if (global.databaseType == DatabaseType::externalMongo) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
-      <<
-      "Database support is available, yet you requested no-database login. "
-      <<
-      "The command 'make -j10 noMongo=1' compiles the calculator without database support."
-      ;
+      << "Database support is available, yet "
+      << "you requested no-database login. "
+      << "The command 'make -j10 noMongo=1' compiles "
+      << "the calculator without database support.";
     }
     return false;
   }
-  if (!global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (!global.hasDisabledDatabaseEveryoneIsAdmin()) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "Logging-in without database is not allowed. "
@@ -2647,7 +2742,7 @@ bool Database::User::loginNoDatabaseSupport(
   user.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
   if (commentsGeneral != nullptr) {
     *commentsGeneral
-    << "Automatic login as default: calculator compiled without DB. ";
+    << "Automatic login as default: calculator running without database. ";
   }
   return true;
 }
@@ -2656,7 +2751,7 @@ bool Database::User::loginViaDatabase(
   UserCalculatorData& user, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::User::loginViaDatabase");
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return Database::User::loginNoDatabaseSupport(user, commentsOnFailure);
   }
   UserCalculator userWrapper;

@@ -179,7 +179,8 @@ SOURCES_RELATIVE_PATH=\
     database.cpp \
     database_test.cpp \
     database_mongo.cpp \
-    database_local.cpp \
+    database_fallback.cpp \
+    database_internal.cpp \
     date_time_wrappers.cpp \
     exam_routines.cpp \
     global_objects.cpp \

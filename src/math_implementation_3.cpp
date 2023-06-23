@@ -295,10 +295,9 @@ GlobalVariables::GlobalVariables() {
   this->flagCachingInternalFilesOn = true;
   this->flagRunServerOnEmptyCommandLine = false;
   this->flagRequestComingLocally = false;
-  this->flagDatabaseExternal = false;
+  this->databaseType = DatabaseType::internal;
   this->flagLocalhostConnectionMonitor = true;
   this->flagDaemonMonitor = false;
-  this->flagDisableDatabaseLogEveryoneAsAdmin = false;
   this->flagUseMathTags = false;
   this->flagRunningFormatCode = false;
   this->timePointer = GlobalVariables::timeInternal;

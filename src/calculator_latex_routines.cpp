@@ -901,7 +901,7 @@ bool LaTeXCrawler::extractFileNames(
     }
     if (
       global.userDefaultHasAdminRights() &&
-      !global.flagDisableDatabaseLogEveryoneAsAdmin
+      !global.hasDisabledDatabaseEveryoneIsAdmin()
     ) {
       if (
         !FileOperations::fileExistsVirtual(
@@ -1162,7 +1162,7 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
   }
   if (
     !global.userDefaultHasAdminRights() ||
-    global.flagDisableDatabaseLogEveryoneAsAdmin
+    global.hasDisabledDatabaseEveryoneIsAdmin()
   ) {
     if (!this->flagPDFExists || !this->flagSourceOnly) {
       if (commentsOnFailure != nullptr) {

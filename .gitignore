@@ -24,8 +24,7 @@ LogFiles*
 
 database-backups*
 database_fallback/*
-database/local
-database/test
+database_local/
 test/test_database.json
 
 bin/*

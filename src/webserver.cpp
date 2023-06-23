@@ -569,7 +569,7 @@ JSData WebWorker::getDatabaseJSON() {
     "Only logged-in admins can access database. ";
     return result;
   }
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     result["error"] = "Database not available (cannot get database info). ";
     return result;
   }
@@ -579,10 +579,10 @@ JSData WebWorker::getDatabaseJSON() {
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::DatabaseParameters::findQuery), false
   );
-  std::string projector=
-          HtmlRoutines::convertURLStringToNormal(
-            global.getWebInput(WebAPI::DatabaseParameters::projector), false
-          );
+  std::string projector =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::DatabaseParameters::projector), false
+  );
   if (operation == WebAPI::DatabaseParameters::fetch) {
     result = Database::get().toJSONDatabaseFetch(findQuery);
   } else {
@@ -617,8 +617,8 @@ std::string WebWorker::getDatabaseDeleteOneItem() {
   if (Database::get().deleteOneEntry(inputParsed, &commentsStream)) {
     return "success";
   }
-  if (!global.flagDatabaseExternal) {
-    commentsStream << "Database not available (cannot delete item). ";
+  if (global.databaseType != DatabaseType::externalMongo) {
+    commentsStream << "No external database available.";
   }
   return commentsStream.str();
 }
@@ -723,9 +723,8 @@ bool WebWorker::loginProcedure(
 ) {
   STACK_TRACE("WebWorker::loginProcedure");
   global.flagLoggedIn = false;
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     global.flagLoggedIn = true;
-    global.flagDatabaseExternal = false;
     return true;
   }
   MapList<
@@ -1389,7 +1388,7 @@ JSData WebWorker::processComputationIndicatorJSData() {
   bool allowed = true;
   if (
     !this->flagUsingSSLInWorkerProcess &&
-    !global.flagDisableDatabaseLogEveryoneAsAdmin
+    !global.hasDisabledDatabaseEveryoneIsAdmin()
   ) {
     allowed = false;
   }
@@ -2053,7 +2052,7 @@ bool WebWorker::doSetEmail(
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
   (void) commentsGeneralSensitive;
-  if (!global.flagDatabaseExternal && commentsGeneralNonSensitive != nullptr) {
+  if (commentsGeneralNonSensitive != nullptr) {
     *commentsGeneralNonSensitive
     << "doSetEmail: project compiled without database support. ";
   }
@@ -2104,12 +2103,13 @@ JSData WebWorker::setEmail(const std::string& input) {
   STACK_TRACE("WebWorker::setEmail");
   (void) input;
   JSData result;
-  if (!global.flagDatabaseExternal) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     result[WebAPI::Result::error] =
-    "Database not available (cannot set email). ";
+    "Set email failed. " + DatabaseStrings::errorDatabaseDisabled;
     return result;
   }
-  std::stringstream out, debugStream;
+  std::stringstream out;
+  std::stringstream debugStream;
   global.userDefault.email = input;
   std::stringstream* adminOutputStream = nullptr;
   std::stringstream errorStream;
@@ -2181,7 +2181,7 @@ std::string WebAPIResponse::modifyProblemReport() {
     fileName, &commentsOnFailure
   );
   std::fstream file;
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     global.userDefault.instructorComputed = "default";
   }
   if (
@@ -4778,7 +4778,7 @@ void WebServer::figureOutOperatingSystem() {
 
 void WebServer::checkSystemInstallationOpenSSL() {
   STACK_TRACE("WebServer::checkSystemInstallationOpenSSL");
-  if (!global.flagDatabaseExternal) {
+  if (global.databaseType != DatabaseType::externalMongo) {
     return;
   }
   if (
@@ -4820,126 +4820,33 @@ void WebServer::checkSystemInstallationOpenSSL() {
   global.configurationStore();
 }
 
-void WebServer::checkSystemInstallationMongoDatabase() {
-  STACK_TRACE("WebServer::checkSystemInstallationMongoDatabase");
-  if (global.flagDatabaseExternal) {
-    return;
-  }
-  WebServer::figureOutOperatingSystem();
-  if (global.operatingSystem == "") {
-    return;
-  }
-  if (
-    global.configuration["mongoDB"].elementType !=
-    JSData::Token::tokenUndefined
-  ) {
-    return;
-  }
-  global.configuration["mongoDB"] = "Attempted installation";
-  global.configurationStore();
-  StateMaintainerCurrentFolder preserveFolder;
-  global
-  << "You appear to be missing an mongoDB installation. "
-  << "Let me try to install that for you. "
-  << Logger::green
-  << "Enter your the sudo password as prompted please. "
-  << Logger::endL;
-  if (global.operatingSystem == "Ubuntu") {
-    global.externalCommandNoOutput("sudo apt-get install mongodb", true);
-    global.configuration["mongoDB"] = "Attempted installation on Ubuntu";
-  } else if (global.operatingSystem == "CentOS") {
-    global.externalCommandNoOutput("sudo yum install mongodb", true);
-    global.configuration["mongoDB"] = "Attempted installation on CentOS";
-  }
-  global.changeDirectory(global.physicalPathProjectBase);
-  global.externalCommandNoOutput("make clean", true);
-  global
-  << "Proceeding to rebuild the calculator. "
-  << Logger::red
-  << "This is expected to take 10+ minutes. "
-  << Logger::endL;
-  global.externalCommandNoOutput("make -j8", true);
-  global.configurationStore();
-}
-
-void WebServer::checkMongoDatabaseSetup() {
+void WebServer::checkDatabaseSetup() {
   STACK_TRACE("WebServer::checkMongoDatabaseSetup");
-  if (global.flagDatabaseExternal) {
+  switch (global.databaseType) {
+  case DatabaseType::externalMongo:
     global
     << Logger::green
     << "Compiled with mongo DB support. "
     << Logger::endL;
-  } else {
+    break;
+  case DatabaseType::internal:
+    global
+    << Logger::blue
+    << "Compiled with internal DB support. "
+    << Logger::endL;
+    break;
+  case DatabaseType::fallback:
+    global
+    << Logger::yellow
+    << "Compiled with fallback DB support. "
+    << Logger::endL;
+    break;
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
     global
     << Logger::red
-    << "Compiled without mongo DB support. "
+    << "No database, everyone is admin. "
     << Logger::endL;
   }
-  if (
-    global.configuration["mongoDBSetup"].elementType !=
-    JSData::Token::tokenUndefined
-  ) {
-    return;
-  }
-  global.configuration["mongoDBSetup"] = "Attempting";
-  global.configurationStore();
-  WebServer::figureOutOperatingSystem();
-  global
-  << Logger::yellow
-  << "Mongo setup file missing, proceeding with setup. "
-  << Logger::endL;
-  global
-  << Logger::green
-  << "Enter the sudo password as prompted please. "
-  << Logger::endL;
-  StateMaintainerCurrentFolder maintainFolder;
-  global.changeDirectory("../external-source");
-  std::stringstream commandUnzipMongoC, commandUnzipLibbson;
-  commandUnzipMongoC << "tar -xvzf mongo-c-driver-1.9.3.tar.gz";
-  global << Logger::green << commandUnzipMongoC.str() << Logger::endL;
-  global << global.externalCommandReturnOutput(commandUnzipMongoC.str());
-  commandUnzipLibbson << "tar -xvzf libbson-1.9.3.tar.gz";
-  global << Logger::green << commandUnzipLibbson.str() << Logger::endL;
-  global << global.externalCommandReturnOutput(commandUnzipLibbson.str());
-  global.changeDirectory("./mongo-c-driver-1.9.3");
-  global.externalCommandNoOutput("./configure", true);
-  global.externalCommandNoOutput("make -j8", true);
-  global
-  << "Need sudo access for command: "
-  << Logger::red
-  << "sudo make install"
-  << Logger::endL;
-  global.externalCommandNoOutput("sudo make install", true);
-  global.changeDirectory("../libbson-1.9.3");
-  global.externalCommandNoOutput("./configure", true);
-  global.externalCommandNoOutput("make -j8", true);
-  global
-  << "Need sudo access for command: "
-  << Logger::red
-  << "sudo make install"
-  << Logger::endL;
-  global.externalCommandNoOutput("sudo make install", true);
-  global.changeDirectory("../../bin");
-  global
-  << "Need sudo access for command to configure "
-  << "linker to use local usr/local/lib path (needed by mongo): "
-  << Logger::red
-  << "sudo cp ../external-source/usr_local_lib_for_mongo.conf "
-  << "/etc/ld.so.conf.d/"
-  << Logger::endL;
-  global.externalCommandNoOutput(
-    "sudo cp ../external-source/usr_local_lib_for_mongo.conf "
-    "/etc/ld.so.conf.d/",
-    true
-  );
-  global
-  << "Need sudo access for command: "
-  << Logger::red
-  << "sudo ldconfig"
-  << Logger::endL;
-  global.externalCommandNoOutput("sudo ldconfig", true);
-  global.configuration["mongoDBSetup"] = "Setup complete";
-  global.configurationStore();
 }
 
 void WebServer::checkFreecalcSetup() {
@@ -5564,7 +5471,7 @@ void GlobalVariables::configurationProcess() {
   global.flagDebugLogin =
   global.configuration[Configuration::debugLogin].isTrueRepresentationInJSON();
   if (global.flagDebugLogin) {
-    global.flagDatabaseExternal = false;
+    global.databaseType = DatabaseType::fallback;
     global
     << Logger::purple
     << "************************"
@@ -5579,17 +5486,11 @@ void GlobalVariables::configurationProcess() {
     << "************************"
     << Logger::endL;
   }
-  global.flagDisableDatabaseLogEveryoneAsAdmin =
-  global.configuration[Configuration::disableDatabaseLogEveryoneAsAdmin].
-  isTrueRepresentationInJSON();
-  DatabaseStrings::databaseName =
-  global.configuration[Configuration::database].stringValue;
-  if (DatabaseStrings::databaseName == "") {
-    DatabaseStrings::databaseName = "local";
-    global.configuration[Configuration::database] = "local";
-  }
-  if (global.flagDisableDatabaseLogEveryoneAsAdmin) {
-    global.flagDatabaseExternal = false;
+  if (
+    global.configuration[Configuration::disableDatabaseLogEveryoneAsAdmin].
+    isTrueRepresentationInJSON()
+  ) {
+    global.databaseType = DatabaseType::noDatabaseEveryoneIsAdmin;
     global
     << Logger::purple
     << "************************"
@@ -5605,6 +5506,12 @@ void GlobalVariables::configurationProcess() {
     << Logger::purple
     << "************************"
     << Logger::endL;
+  }
+  DatabaseStrings::databaseName =
+  global.configuration[Configuration::database].stringValue;
+  if (DatabaseStrings::databaseName == "") {
+    DatabaseStrings::databaseName = "local";
+    global.configuration[Configuration::database] = "local";
   }
   if (
     global.configuration[Configuration::serverAutoMonitor].
@@ -5807,8 +5714,7 @@ void GlobalVariables::configurationProcess() {
 
 void WebServer::checkInstallation() {
   global.server().checkSystemInstallationOpenSSL();
-  global.server().checkSystemInstallationMongoDatabase();
-  global.server().checkMongoDatabaseSetup();
+  global.server().checkDatabaseSetup();
   global.server().checkFreecalcSetup();
 }
 

@@ -144,7 +144,8 @@ SOURCES += \
     crypto_public_domain.cpp \
     crypto_test.cpp \
     database.cpp \
-    database_local.cpp \
+    database_fallback.cpp \
+    database_internal.cpp \
     database_mongo.cpp \
     database_mongo_calculator.cpp \
     date_time_wrappers.cpp \

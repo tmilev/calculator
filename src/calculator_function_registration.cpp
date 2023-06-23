@@ -31,20 +31,6 @@ std::string Calculator::Functions::Names::turnOnRules = "TurnOnRules";
 std::string Calculator::Functions::Names::turnOffRules = "TurnOffRules";
 std::string Calculator::Functions::Names::Trigonometry::sine = "\\sin";
 std::string Calculator::Functions::Names::Trigonometry::cosine = "\\cos";
-
-void Calculator::initializeAdminFunctions() {
-  Function::Options adminDefault, adminDisabled;
-  adminDefault.dontTestAutomatically = true;
-  adminDefault.administrativeOnly = true;
-  adminDefault.flagIsInner = true;
-  adminDisabled = adminDefault;
-  adminDisabled.disabledByUserDefault = true;
-  adminDisabled.disabledByUser = true;
-  if (!global.flagDatabaseExternal || global.flagRunningConsoleTest) {
-    return;
-  }
-}
-
 // Naming conventions: please start all built-in calculator functions with
 // capital letter.
 // Exceptions are made for the following.

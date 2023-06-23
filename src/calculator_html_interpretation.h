@@ -679,7 +679,7 @@ public:
   class Test {
   public:
     static bool all();
-    static bool setDeadlines();
+    static bool setDeadlines(DatabaseType databaseType);
     class Setup {
       StateMaintainer<bool> maintainLogin;
       StateMaintainer<bool> maintainerDatabase;
@@ -696,7 +696,7 @@ public:
       StateMaintainer<int32_t(*)()> maintainTimePointer;
     public:
       Database::Test databaseTester;
-      Setup();
+      Setup(DatabaseType databaseType);
       bool deleteDatabaseSetupAll();
     };
   };

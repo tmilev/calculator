@@ -204,8 +204,8 @@ public:
   };
 
   struct DatabaseParameters {
-      static std::string findQuery;
-      static std::string projector;
+    static std::string findQuery;
+    static std::string projector;
     static std::string operation;
     static std::string fetch;
   };

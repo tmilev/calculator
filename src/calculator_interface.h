@@ -3343,7 +3343,6 @@ public:
   void initializeFunctionsCryptoAndEncoding();
   void initializeFunctionsSemisimpleLieAlgebras();
   void initializePredefinedStandardOperationsWithoutHandler();
-  void initializeAdminFunctions();
   void initializeApproximationFunctions();
   void initializeApproximationFunctionsForOneAtom(OperationHandlers& handlers);
   JSData toJSONOutputAndSpecials();

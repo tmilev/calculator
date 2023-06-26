@@ -10,17 +10,23 @@ void LocalDatabase::createHashIndex(
 ) {
   (void) collectionName;
   (void) key;
-  global.fatal << "Not implemented yet." << global.fatal;
+  global.fatal
+  << "LocalDatabase::createHashIndex: not implemented yet. "
+  << global.fatal;
 }
 
-void LocalDatabase::initialize() {}
+LocalDatabase::LocalDatabase(){
+    this->processIdDatabase = -1;
+}
 
 bool LocalDatabase::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   (void) output;
   (void) commentsOnFailure;
-  global.fatal << "Not implemented yet." << global.fatal;
+  global.fatal
+  << "LocalDatabase::fetchCollectionNames: not implemented yet. "
+  << global.fatal;
   return false;
 }
 
@@ -36,7 +42,9 @@ bool LocalDatabase::findOneWithOptions(
   (void) output;
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
-  global.fatal << "Not implemented yet" << global.fatal;
+  global.fatal
+  << "LocalDatabase::findOneWithOptions: not implemented yet. "
+  << global.fatal;
   return false;
 }
 
@@ -48,7 +56,9 @@ bool LocalDatabase::updateOne(
   (void) findQuery;
   (void) updateQuery;
   (void) commentsOnFailure;
-  global.fatal << "Not implemented yet" << global.fatal;
+  global.fatal
+  << "LocalDatabase::updateOne: not implemented yet. "
+  << global.fatal;
   return false;
 }
 
@@ -60,13 +70,15 @@ bool LocalDatabase::findOneFromSome(
   (void) findOrQueries;
   (void) output;
   (void) commentsOnFailure;
-  global.fatal << "Not implemented yet" << global.fatal;
+  global.fatal << "LocalDatabase::findOneFromSome: not implemented yet. " << global.fatal;
   return false;
 }
 
 bool LocalDatabase::deleteDatabase(std::stringstream* commentsOnFailure) {
   (void) commentsOnFailure;
-  global.fatal << "Not implemented yet" << global.fatal;
+  global.fatal
+  << "LocalDatabase::deleteDatabase: not implemented yet."
+  << global.fatal;
   return false;
 }
 
@@ -86,7 +98,9 @@ bool LocalDatabase::findFromJSONWithOptions(
   (void) totalItems;
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
-  global.fatal << "Not implemented yet" << global.fatal;
+  global.fatal
+  << "LocalDatabase::findFromJSONWithOptions: not implemented yet. "
+  << global.fatal;
   return false;
 }
 
@@ -98,6 +112,8 @@ bool LocalDatabase::updateOneFromSome(
   (void) findOrQueries;
   (void) updateQuery;
   (void) commentsOnFailure;
-  global.fatal << "Not implemented yet" << global.fatal;
+  global.fatal
+  << "LocalDatabase::updateOneFromSome: not implemented yet. "
+  << global.fatal;
   return false;
 }

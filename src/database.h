@@ -266,6 +266,7 @@ public:
 // writes and locks.
 class LocalDatabase {
 public:
+    int processIdDatabase;
   static std::string folder();
   bool findOneWithOptions(
     const QueryExact& query,
@@ -302,10 +303,11 @@ public:
   void createHashIndex(
     const std::string& collectionName, const std::string& key
   );
-  void initialize();
+  void initializeServer();
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
   );
+  LocalDatabase();
 };
 
 class Database {

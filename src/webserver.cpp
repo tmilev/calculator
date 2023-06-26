@@ -3801,8 +3801,8 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
   this->statistics.processKilled ++;
 }
 
-void WebServer::handleTooManyWorkers(int& numInUse) {
-  if (numInUse <= this->maximumTotalUsedWorkers) {
+void WebServer::handleTooManyWorkers(int& workerCount) {
+  if (workerCount <= this->maximumTotalUsedWorkers) {
     if (global.flagServerDetailedLog) {
       global
       << Logger::green
@@ -3811,7 +3811,7 @@ void WebServer::handleTooManyWorkers(int& numInUse) {
     }
     return;
   }
-  for (int i = 0; i < this->allWorkers.size && numInUse > 1; i ++) {
+  for (int i = 0; i < this->allWorkers.size && workerCount > 1; i ++) {
     if (!this->allWorkers[i].flagInUse) {
       continue;
     }
@@ -3825,7 +3825,7 @@ void WebServer::handleTooManyWorkers(int& numInUse) {
     << ": too many workers in use. ";
     this->allWorkers[i].pingMessage = errorStream.str();
     global << Logger::red << errorStream.str() << Logger::endL;
-    numInUse --;
+    workerCount --;
     this->statistics.processKilled ++;
   }
   if (global.flagServerDetailedLog) {
@@ -3862,7 +3862,7 @@ void WebServer::recycleChildrenIfPossible() {
   this->handleTooManyWorkers(numInUse);
 }
 
-bool WebServer::initPrepareWebServerAll() {
+bool WebServer::initializePrepareWebServerAll() {
   STACK_TRACE("WebServer::initPrepareWebServerAll");
   this->initializePortsITry();
   if (!this->initializeBindToPorts()) {
@@ -3873,8 +3873,7 @@ bool WebServer::initPrepareWebServerAll() {
   return true;
 }
 
-bool WebServer::initializeBindToOnePort(
-  const std::string& port, int& outputListeningSocket
+bool WebServer::initializeBindToOnePort(const std::string& desiredPort, int& outputListeningSocket, int & outputActualPort
 ) {
   STACK_TRACE("WebServer::initBindToOnePort");
   addrinfo hints;
@@ -3888,7 +3887,7 @@ bool WebServer::initializeBindToOnePort(
   hints.ai_flags = AI_PASSIVE;
   // use my IP
   // loop through all the results and bind to the first we can
-  rv = getaddrinfo(nullptr, port.c_str(), &hints, &servinfo);
+  rv = getaddrinfo(nullptr, desiredPort.c_str(), &hints, &servinfo);
   if (rv != 0) {
     global << "getaddrinfo: " << gai_strerror(rv) << Logger::endL;
     return false;
@@ -3921,12 +3920,28 @@ bool WebServer::initializeBindToOnePort(
       outputListeningSocket = - 1;
       global
       << "Error: bind failed at port: "
-      << port
+      << desiredPort
       << ". Error: "
       << this->toStringLastErrorDescription()
       << Logger::endL;
       continue;
     }
+    struct sockaddr_in serverAddress;
+    unsigned int serverAddressLength=0;
+   if ( getsockname(
+            outputListeningSocket,
+           (sockaddr*)& serverAddress,
+            &serverAddressLength) == -1) {
+       global << Logger::red<< "Error: failed to find socket name. " << Logger::endL;
+   } else {
+   outputActualPort = ntohs(serverAddress.sin_port);
+   std::stringstream listeningPortString;
+   listeningPortString << outputActualPort;
+   if ( desiredPort== "0"){
+     global <<  "Listening on port: " << Logger::red <<outputActualPort << Logger::normalColor
+             <<", desired port: " << Logger::yellow << desiredPort <<Logger::endL;
+   }
+   }
     int setFlagCounter = 0;
     while (fcntl(outputListeningSocket, F_SETFL, O_NONBLOCK) != 0) {
       if (++ setFlagCounter > 10) {
@@ -3940,16 +3955,17 @@ bool WebServer::initializeBindToOnePort(
   freeaddrinfo(servinfo);
   // all done with this structure
   if (outputListeningSocket == - 1) {
-    global.fatal << "Failed to bind to port: " << port << ". " << global.fatal;
+    global.fatal << "Failed to bind to port: " << desiredPort << ". " << global.fatal;
   }
   return true;
 }
 
 bool WebServer::initializeBindToPorts() {
   STACK_TRACE("WebServer::initializeBindToPorts");
+  int unusedPort=0;
   if (
     !this->initializeBindToOnePort(
-      this->portHTTP, this->listeningSocketHTTP
+      this->portHTTP, this->listeningSocketHTTP, unusedPort
     )
   ) {
     return false;
@@ -3964,7 +3980,7 @@ bool WebServer::initializeBindToPorts() {
   if (flagBuiltInTLSAvailable) {
     if (
       !this->initializeBindToOnePort(
-        this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn
+        this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn,unusedPort
       )
     ) {
       return false;
@@ -3973,7 +3989,7 @@ bool WebServer::initializeBindToPorts() {
   if (global.flagSSLAvailable) {
     if (
       !this->initializeBindToOnePort(
-        this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL
+        this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL,unusedPort
       )
     ) {
       return false;
@@ -3992,7 +4008,7 @@ bool WebServer::initializeBindToPorts() {
   for (int i = 0; i < this->additionalPorts.size(); i ++) {
     const std::string& port = this->additionalPorts.keys[i];
     int& socket = this->additionalPorts.values[i];
-    if (!this->initializeBindToOnePort(port, socket)) {
+    if (!this->initializeBindToOnePort(port, socket, unusedPort)) {
       return false;
     }
     int indexInTransportArray =
@@ -4247,7 +4263,7 @@ int WebServer::daemon() {
   int pidChild = - 1;
   while (true) {
     if (pidChild < 0) {
-      pidChild = fork();
+      pidChild = this->forkRaw();
       if (pidChild == 0) {
         // Child process.
         global << Logger::orange
@@ -4339,6 +4355,7 @@ int WebServer::run() {
   global.logs.server.reset();
   global.logs.serverMonitor.reset();
   global.logs.worker.reset();
+  Database::get().initializeServer();
   this->processIdServer = getpid();
   List<unsigned char> pingBytes;
   this->pingAuthentication =
@@ -4373,7 +4390,7 @@ int WebServer::run() {
   HtmlRoutines::loadStrings();
   this->initializeSSL();
   this->transportLayerSecurity.initializeNonThreadSafeOnFirstCall(true);
-  if (!this->initPrepareWebServerAll()) {
+  if (!this->initializePrepareWebServerAll()) {
     return 1;
   }
   global << Logger::purple << "waiting for connections..." << Logger::endL;
@@ -5762,9 +5779,6 @@ int WebServer::main(int argc, char** argv) {
     global.configurationProcess();
     // Store back the config file if it changed.
     global.configurationStore();
-    if (!Database::get().initializeServer()) {
-      global.fatal << "Failed to initialize database. " << global.fatal;
-    }
     if (global.millisecondsMaxComputation > 0) {
       global.millisecondsNoPingBeforeChildIsPresumedDead =
       global.millisecondsMaxComputation + 20000;
@@ -5839,6 +5853,9 @@ int WebServer::mainConsoleHelp() {
 
 int WebServer::mainCommandLine() {
   STACK_TRACE("WebServer::mainCommandLine");
+  if (!Database::get().initializeServer()) {
+    global.fatal << "Failed to initialize database. " << global.fatal;
+  }
   Calculator& calculator = global.calculator().getElement();
   calculator.initialize(Calculator::Mode::full);
   if (global.programArguments.size > 1) {
@@ -6107,3 +6124,16 @@ JSData ActAsWebServerOnly::toJSON() {
   this->certificateFile;
   return result;
 }
+
+void LocalDatabase::initializeServer() {
+    int listeningSocket=-1;
+    int databasePort = 0;
+if (!global.server().initializeBindToOnePort("0", listeningSocket, databasePort)){
+    global.fatal << "Failed to bind to port 0: " << global.fatal;
+}
+global << "Database initialized, listening on port: " << Logger::endL;
+
+//this->processIdDatabase= global.server().forkProcess();
+
+}
+

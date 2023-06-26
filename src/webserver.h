@@ -342,12 +342,11 @@ public:
   static void fperror_sigaction[[noreturn]](int signal);
   void reapChildren();
   static void signal_SIGCHLD_handler(int s);
-  bool initPrepareWebServerAll();
+  bool initializePrepareWebServerAll();
   void initializeSignals();
   bool initializeBindToPorts();
-  bool initializeBindToOnePort(
-    const std::string& port, int& outputListeningSocket
-  );
+  bool initializeBindToOnePort(const std::string& desiredPort, int& outputListeningSocket
+  , int &outputActualPort);
   void initializePortsITry();
   void initializeListeningSockets();
   void initializeSSL();
@@ -358,7 +357,7 @@ public:
   void recycleChildrenIfPossible();
   void recycleOneChild(int childIndex, int& numberInUse);
   void handleTooManyConnections(const std::string& incomingUserAddress);
-  void handleTooManyWorkers(int& numInUse);
+  void handleTooManyWorkers(int& workerCount);
   void stopKillAll();
   void stop();
   bool restartNeeded();

@@ -740,16 +740,16 @@ bool Database::initializeServer() {
     << "fall-back JSON storage."
     << Logger::endL;
     this->localDatabase.initialize();
-    break;
+    return true;
   case DatabaseType::internal:
     DatabaseStrings::databaseName = "local";
-    this->database.initialize();
-    break;
+    this->database.initializeServer();
+    return false;
   case DatabaseType::externalMongo:
     DatabaseStrings::databaseName = "calculator";
-    break;
+    return true;
   }
-  return true;
+  return false;
 }
 
 bool Database::fetchCollectionNames(
@@ -779,6 +779,8 @@ bool Database::fetchCollectionNames(
     return
     Database::get().database.fetchCollectionNames(output, commentsOnFailure);
   }
+  global.fatal << "This code should be unreachable. " << global.fatal;
+  return false;
 }
 
 bool Database::fetchTable(

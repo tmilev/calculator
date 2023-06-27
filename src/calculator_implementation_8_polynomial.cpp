@@ -597,9 +597,9 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
     return
     output.assignError(calculator, "Function takes at least two arguments. ");
   }
-  const Expression& numComputationsE = input[1];
+  const Expression& numeratorComputationsE = input[1];
   Rational upperBound = 0;
-  if (!numComputationsE.isOfType(&upperBound)) {
+  if (!numeratorComputationsE.isOfType(&upperBound)) {
     return
     output.assignError(
       calculator,

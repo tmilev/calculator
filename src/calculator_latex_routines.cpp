@@ -425,9 +425,9 @@ void LaTeXCrawler::buildFreecalc() {
     0, this->fileNameToCrawlPhysicalNoPathName.size() - 3
   ) +
   "pdf";
-  int numLecturesToProcess = this->lectureNumbers.size;
+  int totalLecturesToProcess = this->lectureNumbers.size;
   std::fstream workingFile;
-  for (int i = 0; i < numLecturesToProcess; i ++) {
+  for (int i = 0; i < totalLecturesToProcess; i ++) {
     reportStream
     << "<br>Processing lecture "
     << i + 1
@@ -567,7 +567,7 @@ void LaTeXCrawler::buildFreecalc() {
     << "</td>";
     resultTable << "</tr>";
   }
-  int numSlidesToBuild = this->slideTexInputCommands.size;
+  int totalSlidesToBuild = this->slideTexInputCommands.size;
   this->slideFileNamesVirtualNoPathNoExtension.setSize(
     this->slideTexInputCommands.size
   );
@@ -587,7 +587,7 @@ void LaTeXCrawler::buildFreecalc() {
   // this->slides.toStringCommaDelimited();
   // executedCommands << "<br>Slides names: " <<
   // this->slideNames.toStringCommaDelimited();
-  for (int i = 0; i < numSlidesToBuild; i ++) {
+  for (int i = 0; i < totalSlidesToBuild; i ++) {
     for (int k = 0; k < 2; k ++) {
       if (
         !FileOperations::openFileUnsecure(

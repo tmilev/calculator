@@ -148,14 +148,14 @@ public:
     int fileDescriptor,
     const std::string& input,
     int timeOutInSeconds,
-    int maxNumTries = 10,
+    int maximumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
   static int readWithTimeOutViaSelect(
     int fileDescriptor,
     List<char>& output,
     int timeOutInSeconds,
-    int maxNumTries = 10,
+    int maximumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
   void writeOnceAfterEmptying(

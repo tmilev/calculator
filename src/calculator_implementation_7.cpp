@@ -1,15 +1,10 @@
-#include "calculator.h"
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
 #include "math_general_implementation.h"
 #include "math_extra_weyl_algebras_implementation.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
-#include "math_extra_universal_enveloping_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_modules_semisimple_lie_algebras_implementation.h"
 #include "crypto.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "web_api.h"
 #include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"
@@ -639,10 +634,10 @@ bool CalculatorFunctionsEncoding::convertHexToBase58(
   }
   LargeIntegerUnsigned outputInteger;
   std::string outputString;
-  int numLeadingZeroBytes = 0;
+  int totalLeadingZeroBytes = 0;
   if (
     !Crypto::convertHexToInteger(
-      inputString, outputInteger, numLeadingZeroBytes
+      inputString, outputInteger, totalLeadingZeroBytes
     )
   ) {
     return
@@ -652,7 +647,7 @@ bool CalculatorFunctionsEncoding::convertHexToBase58(
     << " from hex to integer. ";
   }
   Crypto::convertLargeIntUnsignedToBase58SignificantDigitsFIRST(
-    outputInteger, outputString, numLeadingZeroBytes
+    outputInteger, outputString, totalLeadingZeroBytes
   );
   return output.assignValue(calculator, outputString);
 }
@@ -1472,18 +1467,19 @@ preparePartialFractionExpressionSummands() {
     "IntegralRationalFunctionComputation::preparePartialFractionExpressionSummands"
   );
   this->checkConsistency();
-  Expression
-  polyE,
-  currentNumerator,
-  denominatorExponent,
-  currentDenominatorNoPowerMonic,
-  currentDen,
-  currentPartialFractionNoCoefficient,
-  currentPFWithCoeff,
-  coeffE;
+  Expression polyE;
+  Expression currentNumerator;
+  Expression denominatorExponent;
+  Expression currentDenominatorNoPowerMonic;
+  Expression currentDen;
+  Expression currentPartialFractionNoCoefficient;
+  Expression currentPFWithCoeff;
+  Expression coeffE;
   this->partialFractionSummands.setSize(0);
-  Polynomial<AlgebraicNumber> denominatorRescaled, numeratorRescaled;
-  AlgebraicNumber currentCoefficient, numScale;
+  Polynomial<AlgebraicNumber> denominatorRescaled;
+  Polynomial<AlgebraicNumber> numeratorRescaled;
+  AlgebraicNumber currentCoefficient;
+  AlgebraicNumber numberScale;
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderDefault();
   for (int i = 0; i < this->numerators.size; i ++) {
@@ -1503,10 +1499,10 @@ preparePartialFractionExpressionSummands() {
         currentCoefficient, j + 1, AlgebraicNumber(1)
       );
       numeratorRescaled.getIndexLeadingMonomial(
-        nullptr, &numScale, monomialOrder
+        nullptr, &numberScale, monomialOrder
       );
-      numeratorRescaled /= numScale;
-      currentCoefficient *= numScale;
+      numeratorRescaled /= numberScale;
+      currentCoefficient *= numberScale;
       polyE.assignValueWithContext(
         *this->owner, numeratorRescaled, this->context
       );
@@ -1580,19 +1576,20 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
     return false;
   }
   printoutIntegration << this->printoutPartialFractionsHtml.str();
-  Expression
-  polyE,
-  currentNumerator,
-  denExpE,
-  currentDenominatorNoPowerMonic,
-  currentDen,
-  currentIntegrand,
-  currentIntegralNoCoeff,
-  currentIntegralWithCoeff,
-  coeffE;
+  Expression polyE;
+  Expression currentNumerator;
+  Expression denExpE;
+  Expression currentDenominatorNoPowerMonic;
+  Expression currentDen;
+  Expression currentIntegrand;
+  Expression currentIntegralNoCoeff;
+  Expression currentIntegralWithCoeff;
+  Expression coeffE;
   this->integralSummands.setSize(0);
-  Polynomial<AlgebraicNumber> denRescaled, numRescaled;
-  AlgebraicNumber currentCoefficient, numScale;
+  Polynomial<AlgebraicNumber> denominatorRescaled;
+  Polynomial<AlgebraicNumber> numeratorRescaled;
+  AlgebraicNumber currentCoefficient;
+  AlgebraicNumber numberScale;
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderDefault();
   for (int i = 0; i < this->numerators.size; i ++) {
@@ -1600,19 +1597,21 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
       if (this->numerators[i][j].isEqualToZero()) {
         continue;
       }
-      denRescaled = this->denominatorFactorsAlgebraicWithMultiplicities[i];
-      numRescaled = this->numerators[i][j];
-      currentCoefficient = denRescaled.getLeadingCoefficient(monomialOrder);
+      denominatorRescaled =
+      this->denominatorFactorsAlgebraicWithMultiplicities[i];
+      numeratorRescaled = this->numerators[i][j];
+      currentCoefficient =
+      denominatorRescaled.getLeadingCoefficient(monomialOrder);
       currentCoefficient.invert();
-      denRescaled *= currentCoefficient;
+      denominatorRescaled *= currentCoefficient;
       MathRoutines::raiseToPower(
         currentCoefficient, j + 1, AlgebraicNumber(1)
       );
-      numScale = numRescaled.getLeadingCoefficient(monomialOrder);
-      numRescaled /= numScale;
-      currentCoefficient *= numScale;
+      numberScale = numeratorRescaled.getLeadingCoefficient(monomialOrder);
+      numeratorRescaled /= numberScale;
+      currentCoefficient *= numberScale;
       polyE.assignValueWithContext(
-        *this->owner, numRescaled, this->context
+        *this->owner, numeratorRescaled, this->context
       );
       if (
         !CalculatorConversions::functionExpressionFromBuiltInType(
@@ -1622,7 +1621,7 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
         return false;
       }
       polyE.assignValueWithContext(
-        *this->owner, denRescaled, this->context
+        *this->owner, denominatorRescaled, this->context
       );
       if (
         !CalculatorConversions::functionExpressionFromBuiltInType(
@@ -3781,9 +3780,9 @@ bool CalculatorFunctions::compareFunctionsNumerically(
     calculator
     << "Failed to extract the right endpoint of the comparison interval. ";
   }
-  int numPoints = 50;
+  int numberOfPoints = 50;
   if (input.size() > 5) {
-    if (!input[5].isSmallInteger(&numPoints)) {
+    if (!input[5].isSmallInteger(&numberOfPoints)) {
       return
       calculator
       << "Failed to convert argument: "
@@ -3797,7 +3796,7 @@ bool CalculatorFunctions::compareFunctionsNumerically(
       variables[0].toString(),
       leftBoundary,
       rightBoundary,
-      numPoints,
+      numberOfPoints,
       &minDiff,
       &maxDiff,
       nullptr
@@ -3926,7 +3925,7 @@ bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
     }
   }
   knownValues.setSize(knownEs.size);
-  int numFailedSamples = 0;
+  int totalFailedSamples = 0;
   int totalSamples = points.numberOfRows;
   for (int i = 0; i < points.numberOfRows; i ++) {
     for (int j = 0; j < points.numberOfColumns; j ++) {
@@ -3938,8 +3937,8 @@ bool CalculatorFunctions::compareExpressionsNumericallyAtPoints(
         knownEs, knownValues, &floatingResult
       )
     ) {
-      numFailedSamples ++;
-      if ((numFailedSamples* 100) / totalSamples > 20) {
+      totalFailedSamples ++;
+      if ((totalFailedSamples* 100) / totalSamples > 20) {
         calculator
         << "Failed to evaluate at least one "
         << "of the functions in more "
@@ -3986,7 +3985,7 @@ bool CalculatorFunctions::compareExpressionsNumerically(
   List<double> leftBoundaries;
   List<double> rightBoundaries;
   HashedList<Expression> boundaryVariables;
-  List<int> numSamples;
+  List<int> numberOfSamples;
   for (int i = 4; i < input.size(); i += 2) {
     const Expression& currentIntervalWithVariable = input[i];
     if (
@@ -4004,7 +4003,8 @@ bool CalculatorFunctions::compareExpressionsNumerically(
       << "Could not get a two-element sequence from "
       << currentIntervalWithVariable[2].toString();
     }
-    double currentLeft, currentRight;
+    double currentLeft;
+    double currentRight;
     if (
       !currentIntervalWithVariable[2][1].evaluatesToDouble(&currentLeft)
     ) {
@@ -4031,11 +4031,11 @@ bool CalculatorFunctions::compareExpressionsNumerically(
     boundaryVariables.addOnTop(currentIntervalWithVariable[1]);
     leftBoundaries.addOnTop(currentLeft);
     rightBoundaries.addOnTop(currentRight);
-    numSamples.addOnTop(10);
+    numberOfSamples.addOnTop(10);
     int currentNumberOfSamplingPoints = 0;
     if (i + 1 < input.size()) {
       if (input[i + 1].isSmallInteger(&currentNumberOfSamplingPoints)) {
-        *numSamples.lastObject() = currentNumberOfSamplingPoints;
+        *numberOfSamples.lastObject() = currentNumberOfSamplingPoints;
       } else {
         return
         calculator
@@ -4043,18 +4043,18 @@ bool CalculatorFunctions::compareExpressionsNumerically(
         << "for the number of sampling points from: "
         << input[i + 1].toString();
       }
-      if (*numSamples.lastObject() > 1000) {
+      if (*numberOfSamples.lastObject() > 1000) {
         return
         calculator
-        << *numSamples.lastObject()
+        << *numberOfSamples.lastObject()
         << " sampling points requested for variable/expression "
         << boundaryVariables.lastObject()->toString()
         << "; this exceeds the hard-coded limit of 1000. ";
       }
-      if (*numSamples.lastObject() < 1) {
+      if (*numberOfSamples.lastObject() < 1) {
         return
         calculator
-        << *numSamples.lastObject()
+        << *numberOfSamples.lastObject()
         << " sampling points requested for variable/expression "
         << boundaryVariables.lastObject()->toString()
         << "; this is not allowed. ";
@@ -4084,7 +4084,7 @@ bool CalculatorFunctions::compareExpressionsNumerically(
   }
   knownValues.setSize(knownEs.size);
   SelectionWithDifferentMaxMultiplicities samplingSelector;
-  samplingSelector.initializeFromIntegers(numSamples);
+  samplingSelector.initializeFromIntegers(numberOfSamples);
   if (samplingSelector.totalNumberOfSubsets() > 1000000) {
     return
     calculator
@@ -4105,7 +4105,7 @@ bool CalculatorFunctions::compareExpressionsNumerically(
     tolerance *= - 1;
   }
   Rational totalSamples = samplingSelector.totalNumberSubsetsSmallInt();
-  Rational numFailedSamples = 0;
+  Rational totalFailedSamples = 0;
   do {
     for (int i = 0; i < samplingSelector.multiplicities.size; i ++) {
       double& currentValue =
@@ -4127,8 +4127,8 @@ bool CalculatorFunctions::compareExpressionsNumerically(
         knownEs, knownValues, &floatingResult
       )
     ) {
-      numFailedSamples ++;
-      if ((numFailedSamples* 100) / totalSamples > 20) {
+      totalFailedSamples ++;
+      if ((totalFailedSamples* 100) / totalSamples > 20) {
         calculator
         << "Failed to evaluate at least "
         << "one of the functions in more than "
@@ -5215,12 +5215,12 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
   if (!functionExpression[2].startsWith(calculator.opPower(), 3)) {
     return false;
   }
-  Expression numPowerE = functionExpression[2][2];
-  int numPower = 0;
-  if (!numPowerE.isSmallInteger(&numPower)) {
+  Expression numeratorPowerE = functionExpression[2][2];
+  int numeratorPower = 0;
+  if (!numeratorPowerE.isSmallInteger(&numeratorPower)) {
     return false;
   }
-  if (numPower <= 1) {
+  if (numeratorPower <= 1) {
     return false;
   }
   Expression denNoPower = functionExpression[2][1];
@@ -5281,18 +5281,24 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
   quadraticPowerOneMinusN,
   quadraticPowerNMinusOne;
   quadraticPowerOneMinusN.makeXOX(
-    calculator, calculator.opPower(), monicQuadratic, oneE - numPowerE
+    calculator,
+    calculator.opPower(),
+    monicQuadratic,
+    oneE - numeratorPowerE
   );
   quadraticPowerNMinusOne.makeXOX(
-    calculator, calculator.opPower(), monicQuadratic, numPowerE - oneE
+    calculator,
+    calculator.opPower(),
+    monicQuadratic,
+    numeratorPowerE - oneE
   );
   functionRemainingToIntegrate = oneE / quadraticPowerNMinusOne;
   remainingIntegral.makeIntegral(
     calculator, integrationSetE, functionRemainingToIntegrate, x
   );
-  output = oneE / D *((x + b / twoE) / (twoE * numPowerE - twoE) *
-    quadraticPowerOneMinusN + (twoE * numPowerE - threeE) / (
-      twoE * numPowerE - twoE
+  output = oneE / D *((x + b / twoE) / (twoE * numeratorPowerE - twoE) *
+    quadraticPowerOneMinusN + (twoE * numeratorPowerE - threeE) / (
+      twoE * numeratorPowerE - twoE
     ) *
     remainingIntegral
   );
@@ -5322,11 +5328,11 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
     return false;
   }
   Expression nE = functionExpression[2][2];
-  int numPower = 0;
-  if (!nE.isSmallInteger(&numPower)) {
+  int numeratorPower = 0;
+  if (!nE.isSmallInteger(&numeratorPower)) {
     return false;
   }
-  if (numPower <= 1) {
+  if (numeratorPower <= 1) {
     return false;
   }
   Expression denNoPower = functionExpression[2][1];
@@ -6354,12 +6360,12 @@ bool CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ(
 }
 
 bool Expression::splitProduct(
-  int numDesiredMultiplicandsLeft,
+  int totalDesiredMultiplicandsLeft,
   Expression& outputLeftMultiplicand,
   Expression& outputRightMultiplicand
 ) const {
   STACK_TRACE("Expression::splitProduct");
-  if (numDesiredMultiplicandsLeft <= 0) {
+  if (totalDesiredMultiplicandsLeft <= 0) {
     return false;
   }
   this->checkInitialization();
@@ -6368,18 +6374,18 @@ bool Expression::splitProduct(
   this->owner->accumulateOpandsReturnTrueIfOrderIsNonCanonical(
     *this, multiplicandsLeft, this->owner->opTimes()
   );
-  if (multiplicandsLeft.size <= numDesiredMultiplicandsLeft) {
+  if (multiplicandsLeft.size <= totalDesiredMultiplicandsLeft) {
     return false;
   }
   multiplicandsRight.setExpectedSize(
-    multiplicandsLeft.size - numDesiredMultiplicandsLeft
+    multiplicandsLeft.size - totalDesiredMultiplicandsLeft
   );
   for (
-    int i = numDesiredMultiplicandsLeft; i < multiplicandsLeft.size; i ++
+    int i = totalDesiredMultiplicandsLeft; i < multiplicandsLeft.size; i ++
   ) {
     multiplicandsRight.addOnTop(multiplicandsLeft[i]);
   }
-  multiplicandsLeft.setSize(numDesiredMultiplicandsLeft);
+  multiplicandsLeft.setSize(totalDesiredMultiplicandsLeft);
   outputLeftMultiplicand.makeOXdotsX(
     *this->owner, this->owner->opTimes(), multiplicandsLeft
   );
@@ -6396,35 +6402,39 @@ bool CalculatorFunctions::atimesBpowerJplusEtcDivBpowerI(
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
-  Expression denominatorBase, denominatorExponent;
+  Expression denominatorBase;
+  Expression denominatorExponent;
   input[2].getBaseExponentForm(denominatorBase, denominatorExponent);
   if (!denominatorBase.divisionByMeShouldBeWrittenInExponentForm()) {
     return false;
   }
-  LinearCombination<Expression, Rational> numerators, numeratorsNew;
+  LinearCombination<Expression, Rational> numerators;
+  LinearCombination<Expression, Rational> numeratorsNew;
   calculator.functionCollectSummandsCombine(
     calculator, input[1], numerators
   );
   numeratorsNew.setExpectedSize(numerators.size());
   numeratorsNew.makeZero();
-  Expression
-  numeratorMultiplicandLeft,
-  numeratorMultiplicandRight,
-  numeratorBaseRight,
-  numeratorExponentRight;
-  Expression newNumSummand, newNumSummandRightPart, newNumExponent, mOneE;
+  Expression numeratorMultiplicandLeft;
+  Expression numeratorMultiplicandRight;
+  Expression numeratorBaseRight;
+  Expression numeratorExponentRight;
+  Expression newNumeratorSummand;
+  Expression newNumeratorSummandRightPart;
+  Expression newNumeratorExponent;
+  Expression mOneE;
   mOneE.assignValue(calculator, - 1);
   for (int i = 0; i < numerators.size(); i ++) {
     if (numerators[i].isConstantNumber()) {
-      newNumSummandRightPart.makeXOX(
+      newNumeratorSummandRightPart.makeXOX(
         calculator,
         calculator.opPower(),
         denominatorBase,
         mOneE* denominatorExponent
       );
-      newNumSummand = numerators[i] * newNumSummandRightPart;
+      newNumeratorSummand = numerators[i] * newNumeratorSummandRightPart;
       numeratorsNew.addMonomial(
-        newNumSummand, numerators.coefficients[i]
+        newNumeratorSummand, numerators.coefficients[i]
       );
       continue;
     }
@@ -6432,20 +6442,20 @@ bool CalculatorFunctions::atimesBpowerJplusEtcDivBpowerI(
       numeratorBaseRight, numeratorExponentRight
     );
     if (numeratorBaseRight == denominatorBase) {
-      newNumExponent.makeXOX(
+      newNumeratorExponent.makeXOX(
         calculator,
         calculator.opMinus(),
         numeratorExponentRight,
         denominatorExponent
       );
-      newNumSummand.makeXOX(
+      newNumeratorSummand.makeXOX(
         calculator,
         calculator.opPower(),
         denominatorBase,
-        newNumExponent
+        newNumeratorExponent
       );
       numeratorsNew.addMonomial(
-        newNumSummand, numerators.coefficients[i]
+        newNumeratorSummand, numerators.coefficients[i]
       );
       continue;
     }
@@ -6461,26 +6471,26 @@ bool CalculatorFunctions::atimesBpowerJplusEtcDivBpowerI(
       if (numeratorBaseRight != denominatorBase) {
         continue;
       }
-      newNumExponent.makeXOX(
+      newNumeratorExponent.makeXOX(
         calculator,
         calculator.opMinus(),
         numeratorExponentRight,
         denominatorExponent
       );
-      newNumSummandRightPart.makeXOX(
+      newNumeratorSummandRightPart.makeXOX(
         calculator,
         calculator.opPower(),
         denominatorBase,
-        newNumExponent
+        newNumeratorExponent
       );
-      newNumSummand.makeXOX(
+      newNumeratorSummand.makeXOX(
         calculator,
         calculator.opTimes(),
         numeratorMultiplicandLeft,
-        newNumSummandRightPart
+        newNumeratorSummandRightPart
       );
       numeratorsNew.addMonomial(
-        newNumSummand, numerators.coefficients[i]
+        newNumeratorSummand, numerators.coefficients[i]
       );
       isGood = true;
       break;
@@ -6554,7 +6564,8 @@ bool Expression::makeSequenceCommands(
 ) {
   STACK_TRACE("Expression::makeSequenceCommands");
   List<Expression> statements;
-  Expression currentStatement, currentKey;
+  Expression currentStatement;
+  Expression currentKey;
   if (inputValues.size != inputKeys.size) {
     global.fatal
     << "I am asked to create a "
@@ -6655,13 +6666,13 @@ bool CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix(
   ) {
     return output.assignError(calculator, "Error: matrix is not square.");
   }
-  FormatExpressions tempF;
-  tempF.polynomialAlphabet.setSize(1);
-  tempF.polynomialAlphabet[0] = "q";
+  FormatExpressions format;
+  format.polynomialAlphabet.setSize(1);
+  format.polynomialAlphabet[0] = "q";
   Polynomial<Rational> minimalPolynomial;
   minimalPolynomial.assignMinimalPolynomial(matrix);
   return
-  output.assignValue(calculator, minimalPolynomial.toString(&tempF));
+  output.assignValue(calculator, minimalPolynomial.toString(&format));
 }
 
 bool CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix(
@@ -7037,7 +7048,7 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
     return calculator << "Euler method function takes 6 arguments";
   }
   double xInitial, yInitial, leftEndpoint, rightEndpoint;
-  int numPoints;
+  int numberOfPoints;
   if (
     !input[2].evaluatesToDouble(&xInitial) ||
     !input[3].evaluatesToDouble(&yInitial)
@@ -7047,7 +7058,7 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
     << "Failed to extract initial x,y values from "
     << input.toString();
   }
-  if (!input[4].isSmallInteger(&numPoints)) {
+  if (!input[4].isSmallInteger(&numberOfPoints)) {
     return
     calculator
     << "Failed to extract number of points from "
@@ -7093,18 +7104,18 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
   knownConsts.addOnTop(yE);
   knownValues.addOnTop(0);
   knownValues.addOnTop(0);
-  if (numPoints < 2) {
+  if (numberOfPoints < 2) {
     return
     calculator
     << "The number of points for Euler's method is "
-    << numPoints
+    << numberOfPoints
     << ", too few. ";
   }
-  if (numPoints > 10001) {
+  if (numberOfPoints > 10001) {
     return
     calculator
     << "The number of points for Euler's method is "
-    << numPoints
+    << numberOfPoints
     << ", I am not allowed to handle that many. ";
   }
   if (leftEndpoint - rightEndpoint == 0.0) {
@@ -7112,11 +7123,11 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
     calculator
     << "Whlie doing Euler's method: right endpoint equals left! ";
   }
-  double delta = (rightEndpoint - leftEndpoint) / numPoints;
+  double delta = (rightEndpoint - leftEndpoint) / numberOfPoints;
   List<double> XValues;
   List<double> YValues;
-  XValues.setExpectedSize(numPoints + 5);
-  YValues.setExpectedSize(numPoints + 5);
+  XValues.setExpectedSize(numberOfPoints + 5);
+  YValues.setExpectedSize(numberOfPoints + 5);
   int pointsCounter = 0;
   for (
     double currentX = xInitial; currentX > leftEndpoint - delta; currentX -=
@@ -7124,7 +7135,7 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
   ) {
     XValues.addOnTop(currentX);
     pointsCounter ++;
-    if (pointsCounter > numPoints) {
+    if (pointsCounter > numberOfPoints) {
       break;
       // <-in case floating point arithmetic is misbehaving
     }
@@ -7138,7 +7149,7 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
   ) {
     XValues.addOnTop(currentX);
     pointsCounter ++;
-    if (pointsCounter > numPoints) {
+    if (pointsCounter > numberOfPoints) {
       break;
       // <-in case floating point arithmetic is misbehaving
     }
@@ -8508,7 +8519,7 @@ bool CalculatorFunctions::allPartitions(
     << input[1].toString();
   }
   List<Partition> partitions;
-  Partition::GetPartitions(partitions, rank);
+  Partition::getPartitions(partitions, rank);
   std::stringstream out;
   out
   << "The partitions of "
@@ -9631,8 +9642,8 @@ bool CalculatorFunctions::testIndicator(
     << "Testing indicator requires two arguments: "
     << "number of iterations and size of dummy comment. ";
   }
-  int numRuns = - 1;
-  if (!input[1].isIntegerFittingInInt(&numRuns)) {
+  int totalRuns = - 1;
+  if (!input[1].isIntegerFittingInInt(&totalRuns)) {
     return
     calculator
     << "Argument of CalculatorFunctions::testIndicator "
@@ -9640,16 +9651,16 @@ bool CalculatorFunctions::testIndicator(
     << input[1]
     << ".";
   }
-  if (numRuns > 200000) {
+  if (totalRuns > 200000) {
     calculator
     << "The argument "
-    << numRuns
+    << totalRuns
     << " of CalculatorFunctions::testIndicator "
     << "larger than 200000, trimming down to 200000.";
-    numRuns = 200000;
+    totalRuns = 200000;
   }
-  if (numRuns < 0) {
-    numRuns = 0;
+  if (totalRuns < 0) {
+    totalRuns = 0;
   }
   int dummyCommentSize = 0;
   if (!input[2].isIntegerFittingInInt(&dummyCommentSize)) {
@@ -9674,19 +9685,19 @@ bool CalculatorFunctions::testIndicator(
   }
   global.response.initiate("Triggered by test indicator. ");
   ProgressReport report;
-  for (int i = 0; i < numRuns; i ++) {
+  for (int i = 0; i < totalRuns; i ++) {
     std::stringstream reportStream;
     reportStream
     << " Running indicator test, "
     << i + 1
     << " out of "
-    << numRuns
+    << totalRuns
     << ".";
     report.report(reportStream.str());
     global.fallAsleep(4000);
   }
   std::stringstream out;
-  out << numRuns << " iterations of the indicator test executed. ";
+  out << totalRuns << " iterations of the indicator test executed. ";
   if (dummyCommentSize > 0) {
     calculator << "Dummy comment:<br>" << dummyComment;
   }
@@ -10074,7 +10085,7 @@ bool CalculatorFunctions::solveProductSumEquationOverSetModN(
   }
   LargeIntegerUnsigned modulusLarge;
   modulusLarge = static_cast<unsigned>(modulusSmall);
-  int numTestedSoFar = 0;
+  int totalTestedSoFar = 0;
   ProgressReport report;
   LargeIntegerUnsigned oneUI = 1;
   while (vectorPartition.incrementReturnFalseIfPastLast()) {
@@ -10101,9 +10112,9 @@ bool CalculatorFunctions::solveProductSumEquationOverSetModN(
       }
       return output.assignValue(calculator, out.str());
     }
-    numTestedSoFar ++;
+    totalTestedSoFar ++;
     std::stringstream reportStream;
-    reportStream << numTestedSoFar << " tested so far ...";
+    reportStream << totalTestedSoFar << " tested so far ...";
     report.report(reportStream.str());
   }
   return
@@ -10341,8 +10352,8 @@ public:
   int indexInCurrentLayer;
   int indexCurrentChild;
   Rational widthMaxLayer;
-  int numLayers;
-  int maxNumCharsInString;
+  int numberOfLayers;
+  int maximumCharactersInString;
   bool flagUseFullTree;
   Expression baseExpression;
   HashedList<std::string> displayedExpressionStrings;
@@ -10365,8 +10376,8 @@ public:
     this->flagUseFullTree = false;
     this->indexInCurrentLayer = - 1;
     this->indexCurrentChild = - 1;
-    this->maxNumCharsInString = 100;
-    this->numLayers = 0;
+    this->maximumCharactersInString = 100;
+    this->numberOfLayers = 0;
     this->owner = nullptr;
     this->charWidth.assignNumeratorAndDenominator(1, 20);
     this->padding = 1;
@@ -10490,14 +10501,14 @@ public:
   void addStringTruncate(const std::string& input, bool isLeaf) {
     this->displayedStringIsLeaf.addOnTop(isLeaf);
     if (
-      input.size() <= static_cast<unsigned>(this->maxNumCharsInString)
+      input.size() <= static_cast<unsigned>(this->maximumCharactersInString)
     ) {
       this->displayedExpressionStrings.addOnTop(input);
       return;
     }
     std::string truncatedInput = input;
     truncatedInput.resize(
-      static_cast<unsigned>(this->maxNumCharsInString) - 3
+      static_cast<unsigned>(this->maximumCharactersInString) - 3
     );
     truncatedInput += "...";
     this->displayedExpressionStrings.addOnTop(truncatedInput);
@@ -10525,7 +10536,7 @@ public:
     return
     this->charWidth *
     MathRoutines::minimum(
-      this->maxNumCharsInString,
+      this->maximumCharactersInString,
       static_cast<signed>(
         this->displayedExpressionStrings[index].size()
       )

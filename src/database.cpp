@@ -385,7 +385,7 @@ bool Database::findOneWithOptions(
     );
   case DatabaseType::internal:
     return
-    Database::get().database.findOneWithOptions(
+    Database::get().localDatabase.findOneWithOptions(
       query,
       options,
       output,
@@ -395,7 +395,7 @@ bool Database::findOneWithOptions(
     return false;
   case DatabaseType::fallback:
     return
-    Database::localDatabase.findOneWithOptions(
+    Database::fallbackDatabase.findOneWithOptions(
       query,
       options,
       output,
@@ -507,10 +507,12 @@ bool Database::updateOne(
     return this->mongoDB.updateOne(findQuery, dataToMerge, commentsOnFailure);
   case DatabaseType::fallback:
     return
-    this->localDatabase.updateOne(findQuery, dataToMerge, commentsOnFailure);
+    this->fallbackDatabase.updateOne(
+      findQuery, dataToMerge, commentsOnFailure
+    );
   case DatabaseType::internal:
     return
-    this->database.updateOne(findQuery, dataToMerge, commentsOnFailure);
+    this->localDatabase.updateOne(findQuery, dataToMerge, commentsOnFailure);
   }
   return false;
 }
@@ -533,11 +535,13 @@ bool Database::findOneFromSome(
     this->mongoDB.findOneFromSome(findOrQueries, output, commentsOnFailure);
   case DatabaseType::fallback:
     return
-    this->localDatabase.findOneFromSome(
+    this->fallbackDatabase.findOneFromSome(
       findOrQueries, output, commentsOnFailure
     );
   case DatabaseType::internal:
-    this->database.findOneFromSome(findOrQueries, output, commentsOnFailure);
+    this->localDatabase.findOneFromSome(
+      findOrQueries, output, commentsOnFailure
+    );
   }
   global.fatal << "This should be unreachable. " << global.fatal;
   return false;
@@ -555,9 +559,9 @@ bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
   case DatabaseType::externalMongo:
     return this->mongoDB.deleteDatabase(commentsOnFailure);
   case DatabaseType::fallback:
-    return this->localDatabase.deleteDatabase(commentsOnFailure);
+    return this->fallbackDatabase.deleteDatabase(commentsOnFailure);
   case DatabaseType::internal:
-    return this->database.deleteDatabase(commentsOnFailure);
+    return this->localDatabase.deleteDatabase(commentsOnFailure);
   }
   global.fatal << "This should be unreachable. " << global.fatal;
   return false;
@@ -574,10 +578,10 @@ void Database::createHashIndex(
     this->mongoDB.createHashIndex(collectionName, key);
     return;
   case DatabaseType::fallback:
-    this->localDatabase.createHashIndex(collectionName, key);
+    this->fallbackDatabase.createHashIndex(collectionName, key);
     return;
   case DatabaseType::internal:
-    this->database.createHashIndex(collectionName, key);
+    this->localDatabase.createHashIndex(collectionName, key);
     return;
   }
 }
@@ -694,7 +698,7 @@ bool Database::findFromJSONWithOptions(
     );
   case DatabaseType::fallback:
     return
-    Database::get().localDatabase.findFromJSONWithOptions(
+    Database::get().fallbackDatabase.findFromJSONWithOptions(
       findQuery,
       output,
       options,
@@ -705,7 +709,7 @@ bool Database::findFromJSONWithOptions(
     );
   case DatabaseType::internal:
     return
-    Database::get().database.findFromJSONWithOptions(
+    Database::get().localDatabase.findFromJSONWithOptions(
       findQuery,
       output,
       options,
@@ -722,7 +726,7 @@ bool Database::findFromJSONWithOptions(
 bool Database::initializeServer() {
   STACK_TRACE("Database::initializeServer");
   this->user.owner = this;
-  this->localDatabase.owner = this;
+  this->fallbackDatabase.owner = this;
   this->flagInitializedServer = true;
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return true;
@@ -739,11 +743,11 @@ bool Database::initializeServer() {
     << "**SLOW** "
     << "fall-back JSON storage."
     << Logger::endL;
-    this->localDatabase.initialize();
+    this->fallbackDatabase.initialize();
     return true;
   case DatabaseType::internal:
     DatabaseStrings::databaseName = "local";
-    this->database.initializeServer();
+    this->localDatabase.initializeForkAndRun();
     return false;
   case DatabaseType::externalMongo:
     DatabaseStrings::databaseName = "calculator";
@@ -772,12 +776,14 @@ bool Database::fetchCollectionNames(
     Database::get().mongoDB.fetchCollectionNames(output, commentsOnFailure);
   case DatabaseType::fallback:
     return
-    Database::get().localDatabase.fetchCollectionNames(
+    Database::get().fallbackDatabase.fetchCollectionNames(
       output, commentsOnFailure
     );
   case DatabaseType::internal:
     return
-    Database::get().database.fetchCollectionNames(output, commentsOnFailure);
+    Database::get().localDatabase.fetchCollectionNames(
+      output, commentsOnFailure
+    );
   }
   global.fatal << "This code should be unreachable. " << global.fatal;
   return false;
@@ -1084,8 +1090,8 @@ void GlobalVariables::initModifiableDatabaseFields() {
 ProblemData::ProblemData() {
   this->randomSeed = 0;
   this->flagRandomSeedGiven = false;
-  this->numCorrectlyAnswered = 0;
-  this->totalNumSubmissions = 0;
+  this->totalCorrectlyAnswered = 0;
+  this->totalSubmissions = 0;
   this->expectedNumberOfAnswersFromDB = 0;
   this->knownNumberOfAnswersFromHD = - 1;
   this->flagProblemWeightIsOK = false;
@@ -1258,9 +1264,9 @@ std::string UserCalculator::toString() {
     << "; random seed: "
     << this->problemData.values[i].randomSeed
     << "; numSubmissions: "
-    << this->problemData.values[i].totalNumSubmissions
+    << this->problemData.values[i].totalSubmissions
     << "; correct: "
-    << this->problemData.values[i].numCorrectlyAnswered
+    << this->problemData.values[i].totalCorrectlyAnswered
     << "; points: "
     << this->problemData.values[i].points
     << ";";
@@ -1799,8 +1805,8 @@ bool ProblemData::loadFromOldFormat(
     return false;
   }
   this->points = 0;
-  this->numCorrectlyAnswered = 0;
-  this->totalNumSubmissions = 0;
+  this->totalCorrectlyAnswered = 0;
+  this->totalSubmissions = 0;
   this->flagRandomSeedGiven = false;
   if (global.userRequestRequiresLoadingRealExamData()) {
     if (mapStrings.contains(WebAPI::Problem::randomSeed)) {
@@ -1879,8 +1885,8 @@ bool ProblemData::loadFromJSON(
   STACK_TRACE("ProblemData::loadFromJSON");
   (void) commentsOnFailure;
   this->points = 0;
-  this->numCorrectlyAnswered = 0;
-  this->totalNumSubmissions = 0;
+  this->totalCorrectlyAnswered = 0;
+  this->totalSubmissions = 0;
   this->flagRandomSeedGiven = false;
   this->randomSeed = - 1;
   if (global.userRequestRequiresLoadingRealExamData()) {
@@ -2112,12 +2118,12 @@ bool UserCalculator::computeAndStoreActivationStats(
   lastEmailTime =
   emailStat[DatabaseStrings::labelLastActivationEmailTime].stringValue;
   emailCountForThisEmail =
-  emailStat[DatabaseStrings::labelNumActivationEmails].stringValue;
-  LargeInteger numActivationsThisEmail = 0;
+  emailStat[DatabaseStrings::labelTotalActivationEmails].stringValue;
+  LargeInteger totalActivationsThisEmail = 0;
   if (emailCountForThisEmail != "") {
-    numActivationsThisEmail.assignString(emailCountForThisEmail);
+    totalActivationsThisEmail.assignString(emailCountForThisEmail);
   }
-  numActivationsThisEmail ++;
+  totalActivationsThisEmail ++;
   TimeWrapper now;
   TimeWrapper lastActivationOnThisEmail;
   TimeWrapper lastActivationOnThisAccount;
@@ -2141,7 +2147,7 @@ bool UserCalculator::computeAndStoreActivationStats(
     *commentsGeneral
     << "Total activations (attempted on) this email, "
     << "including the present one: "
-    << numActivationsThisEmail.toString()
+    << totalActivationsThisEmail.toString()
     << ". ";
   }
   QueryExact findQueryInUsers(DatabaseStrings::tableUsers, "", "");
@@ -2177,8 +2183,8 @@ bool UserCalculator::computeAndStoreActivationStats(
   QuerySet emailStatQuery;
   emailStatQuery.value[DatabaseStrings::labelLastActivationEmailTime] =
   now.toString();
-  emailStatQuery.value[DatabaseStrings::labelNumActivationEmails] =
-  numActivationsThisEmail.toString();
+  emailStatQuery.value[DatabaseStrings::labelTotalActivationEmails] =
+  totalActivationsThisEmail.toString();
   emailStatQuery.value[DatabaseStrings::labelActivationToken] =
   this->actualActivationToken;
   emailStatQuery.value[DatabaseStrings::labelUsername] = this->username;
@@ -2273,8 +2279,8 @@ bool Database::User::addUsersFromEmails(
   std::string& userRole,
   std::string& userGroup,
   std::stringstream& comments,
-  int& outputNumNewUsers,
-  int& outputNumUpdatedUsers
+  int& outputNumberOfNewUsers,
+  int& outputNumberOfUpdatedUsers
 ) {
   STACK_TRACE("Database::User::addUsersFromEmails");
   global.millisecondsMaxComputation = 100000;
@@ -2300,8 +2306,8 @@ bool Database::User::addUsersFromEmails(
   UserCalculator currentUser;
   bool result = true;
   bool doSendEmails = false;
-  outputNumNewUsers = 0;
-  outputNumUpdatedUsers = 0;
+  outputNumberOfNewUsers = 0;
+  outputNumberOfUpdatedUsers = 0;
   for (int i = 0; i < emails.size; i ++) {
     currentUser.reset();
     currentUser.username = emails[i];
@@ -2345,14 +2351,14 @@ bool Database::User::addUsersFromEmails(
           result = false;
           continue;
         } else {
-          outputNumNewUsers ++;
+          outputNumberOfNewUsers ++;
         }
       }
       if (isEmail) {
         this->owner->updateOneFromSome(findUser, currentUserData, &comments);
       }
     } else {
-      outputNumUpdatedUsers ++;
+      outputNumberOfUpdatedUsers ++;
       // currentUser may have its updated entries modified by the functions
       // above.
       QuerySet setUser;
@@ -2592,7 +2598,7 @@ bool EmailRoutines::isOKEmail(
     }
     return false;
   }
-  int numAts = 0;
+  int totalAts = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
     if (
       !EmailRoutines::getRecognizedEmailChars()[
@@ -2610,16 +2616,16 @@ bool EmailRoutines::isOKEmail(
       return false;
     }
     if (input[i] == '@') {
-      numAts ++;
+      totalAts ++;
     }
   }
-  if (numAts != 1 && commentsOnError != nullptr) {
+  if (totalAts != 1 && commentsOnError != nullptr) {
     *commentsOnError
     << "Email: "
     << input
     << " is required to have exactly one @ character. ";
   }
-  return numAts == 1;
+  return totalAts == 1;
 }
 
 EmailRoutines::EmailRoutines() {

@@ -71,7 +71,7 @@ void WebServerMonitor::monitor(
   }
   this->pidServer = pidServer;
   STACK_TRACE("Monitor");
-  int maxNumPingFailures = 3;
+  int maximumPingFailures = 3;
   // warning: setting global.server().WebServerPingIntervalInSeconds to more
   // than 1000
   // may overflow the variable int microsecondsToSleep.
@@ -124,20 +124,20 @@ void WebServerMonitor::monitor(
   << "Please beware that the server will "
   << "restart and you will lose all computations "
   << "if "
-  << maxNumPingFailures
+  << maximumPingFailures
   << " consecutive pings fail. "
   << Logger::endL;
-  int numConsecutiveFailedPings = 0;
-  int numPings = 0;
+  int totalConsecutiveFailedPings = 0;
+  int totalPings = 0;
   TimeWrapper now;
   for (;;) {
     global.fallAsleep(microsecondsToSleep);
     this->backupDatabaseIfNeeded();
     webCrawler.pingCalculatorStatus(pingAuthentication);
-    numPings ++;
+    totalPings ++;
     if (webCrawler.lastTransactionErrors != "") {
       now.assignLocalTime();
-      numConsecutiveFailedPings ++;
+      totalConsecutiveFailedPings ++;
       global
       << Logger::red
       << "Connection monitor: ping of "
@@ -152,22 +152,22 @@ void WebServerMonitor::monitor(
       << "Errors: "
       << webCrawler.lastTransactionErrors
       << webCrawler.lastTransaction
-      << numConsecutiveFailedPings
+      << totalConsecutiveFailedPings
       << " consecutive fails so far, restarting on "
-      << maxNumPingFailures
+      << maximumPingFailures
       << ". "
       << Logger::endL;
     } else {
       std::cout
       << "Connection monitor: ping #"
-      << numPings
+      << totalPings
       << ": received "
       << webCrawler.lastNumberOfBytesRead
       << " bytes. "
       << std::endl;
-      numConsecutiveFailedPings = 0;
+      totalConsecutiveFailedPings = 0;
     }
-    if (numConsecutiveFailedPings >= maxNumPingFailures) {
+    if (totalConsecutiveFailedPings >= maximumPingFailures) {
       this->stop();
     }
   }
@@ -343,14 +343,14 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
       timeval timeOut;
       timeOut.tv_sec = 1;
       timeOut.tv_usec = 0;
-      int numPingFails = 0;
-      int numSelected = 0;
+      int totalPingFails = 0;
+      int totalSelected = 0;
       std::stringstream failStream;
       do {
-        if (numPingFails > 10) {
+        if (totalPingFails > 10) {
           break;
         }
-        numSelected =
+        totalSelected =
         select(
           this->socketInteger + 1,
           &fdConnectSockets,
@@ -362,14 +362,14 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
         << "While pinging, select failed. Error message: "
         << strerror(errno)
         << ". \n";
-        numPingFails ++;
-      } while (numSelected < 0);
-      if (numSelected <= 0) {
+        totalPingFails ++;
+      } while (totalSelected < 0);
+      if (totalSelected <= 0) {
         global << Logger::red << failStream.str() << Logger::endL;
         reportStream
         << failStream.str()
         << "Could not connect through port. select returned: "
-        << numSelected;
+        << totalSelected;
         connectionResult = - 1;
       } else {
         connectionResult =
@@ -550,14 +550,14 @@ void WebClient::fetchWebPage(
       FD_SET(this->socketInteger, &fdConnectSockets);
       timeOut.tv_sec = 1;
       timeOut.tv_usec = 0;
-      int numPingFails = 0;
-      int numSelected = 0;
+      int totalPingFails = 0;
+      int totalSelected = 0;
       std::stringstream failStream;
       do {
-        if (numPingFails > 10) {
+        if (totalPingFails > 10) {
           break;
         }
-        numSelected =
+        totalSelected =
         select(
           this->socketInteger + 1,
           &fdConnectSockets,
@@ -569,15 +569,15 @@ void WebClient::fetchWebPage(
         << "While pinging, select failed. Error message: "
         << strerror(errno)
         << ". \n";
-        numPingFails ++;
-      } while (numSelected < 0);
-      if (numSelected <= 0) {
+        totalPingFails ++;
+      } while (totalSelected < 0);
+      if (totalSelected <= 0) {
         global << Logger::red << failStream.str() << Logger::endL;
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << failStream.str()
           << "Could not connect through port. select returned: "
-          << numSelected;
+          << totalSelected;
         }
         connectionResult = - 1;
       } else {
@@ -702,19 +702,19 @@ void WebClient::fetchWebPagePart2(
     return;
   }
   unsigned bodyStart = 0;
-  int numcrlfs = 0;
+  int totalCrLfs = 0;
   // std::stringstream tempStream;
   for (; bodyStart < this->headerReceived.size(); bodyStart ++) {
-    if (numcrlfs >= 4) {
+    if (totalCrLfs >= 4) {
       break;
     }
     if (
       this->headerReceived[bodyStart] == '\n' ||
       this->headerReceived[bodyStart] == '\r'
     ) {
-      numcrlfs ++;
+      totalCrLfs ++;
     } else {
-      numcrlfs = 0;
+      totalCrLfs = 0;
     }
   }
   if (bodyStart < this->headerReceived.size()) {

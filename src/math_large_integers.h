@@ -45,7 +45,7 @@ public:
     return output;
   }
   static const List<unsigned int>& allPrimesSmallerThan15Bits();
-  void padWithZeroesToAtLeastNDigits(int desiredMinNumDigits);
+  void padWithZeroesToAtLeastNDigits(int desiredMinimumDigits);
   void addLargeIntegerUnsignedShiftedTimesDigit(
     const LargeIntegerUnsigned& other, int digitShift, int constantTerm
   );

@@ -775,9 +775,9 @@ const {
   std::stringstream out;
   if (this->carryOverBound == 1000000000 || this->carryOverBound == 10) {
     std::string tempS;
-    int numZeroesInCarryOver = 9;
+    int numberOfZeroesInCarryOver = 9;
     if (this->carryOverBound == 10) {
-      numZeroesInCarryOver = 1;
+      numberOfZeroesInCarryOver = 1;
     }
     if (*this->digits.lastObject() < 0) {
       out << "[";
@@ -793,9 +793,9 @@ const {
       if (tempS[0] == '-') {
         out << "[";
       }
-      int numZeroesToPad =
-      numZeroesInCarryOver - static_cast<signed>(tempS.length());
-      for (int j = 0; j < numZeroesToPad; j ++) {
+      int numberOfZeroesToPad =
+      numberOfZeroesInCarryOver - static_cast<signed>(tempS.length());
+      for (int j = 0; j < numberOfZeroesToPad; j ++) {
         out << "0";
       }
       out << tempS;
@@ -807,24 +807,24 @@ const {
     return;
   }
   unsigned int base = 10;
-  int MaxNumIntegersPerCarryOverBound = 11;
+  int maximumIntegersPerCarryOverBound = 11;
   List<LargeIntegerUnsigned> bufferPowersOfBase;
-  int initialNumDigitsEstimate =
-  MaxNumIntegersPerCarryOverBound * this->digits.size;
+  int initialNumberOfDigitsEstimate =
+  maximumIntegersPerCarryOverBound * this->digits.size;
   int sizeBufferPowersOfBase =
-  MathRoutines::minimum(initialNumDigitsEstimate, 10000);
+  MathRoutines::minimum(initialNumberOfDigitsEstimate, 10000);
   bufferPowersOfBase.setSize(sizeBufferPowersOfBase);
   LargeIntegerUnsigned currentPower;
   LargeIntegerUnsigned remainder = *this;
-  int numRemainingDigits;
+  int numberOfRemainingDigits;
   while (!remainder.isEqualToZero()) {
     currentPower.makeOne();
-    numRemainingDigits = 0;
+    numberOfRemainingDigits = 0;
     int highestBufferIndex = - 1;
     bufferPowersOfBase.objects[0].makeOne();
     bool bufferFilled = false;
     while (remainder.isGreaterThanOrEqualTo(currentPower)) {
-      numRemainingDigits ++;
+      numberOfRemainingDigits ++;
       highestBufferIndex ++;
       highestBufferIndex %= sizeBufferPowersOfBase;
       bufferPowersOfBase.objects[highestBufferIndex] = currentPower;
@@ -842,7 +842,7 @@ const {
         currentPower += bufferPowersOfBase[highestBufferIndex];
       }
       out << digit;
-      numRemainingDigits --;
+      numberOfRemainingDigits --;
       if (digit != 1) {
         bufferPowersOfBase[highestBufferIndex] *= digit;
       }
@@ -858,7 +858,7 @@ const {
       }
     } while (highestBufferIndex != startIndex);
   }
-  for (int i = 0; i < numRemainingDigits; i ++) {
+  for (int i = 0; i < numberOfRemainingDigits; i ++) {
     out << "0";
   }
   output = out.str();
@@ -1040,14 +1040,14 @@ const List<unsigned int>& LargeIntegerUnsigned::allPrimesSmallerThan15Bits() {
 }
 
 void LargeIntegerUnsigned::padWithZeroesToAtLeastNDigits(
-  int desiredMinNumDigits
+  int desiredMinimumDigits
 ) {
-  if (this->digits.size >= desiredMinNumDigits) {
+  if (this->digits.size >= desiredMinimumDigits) {
     return;
   }
   int i = this->digits.size;
-  this->digits.setSize(desiredMinNumDigits);
-  for (; i < desiredMinNumDigits; i ++) {
+  this->digits.setSize(desiredMinimumDigits);
+  for (; i < desiredMinimumDigits; i ++) {
     this->digits[i] = 0;
   }
 }
@@ -1066,11 +1066,11 @@ void LargeIntegerUnsigned::addLargeIntegerUnsignedShiftedTimesDigit(
     << " is too large"
     << global.fatal;
   }
-  int numDigits =
+  int numberOfDigits =
   MathRoutines::maximum(
     other.digits.size + 1 + digitShift, this->digits.size + 1
   );
-  this->padWithZeroesToAtLeastNDigits(numDigits);
+  this->padWithZeroesToAtLeastNDigits(numberOfDigits);
   long long nextDigit = 0;
   for (int j = 0; j < other.digits.size; j ++) {
     int currentIndex = j + digitShift;
@@ -2104,7 +2104,8 @@ bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
 }
 
 bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
-  int otherNumeratorAbsoluteValue, thisNumAbs;
+  int otherNumeratorAbsoluteValue;
+  int thisNumeratorAbsoluteValue;
   if (this->denominatorShort <= 0 || otherDenominator <= 0) {
     if (denominatorShort == 0 || otherDenominator == 0) {
       global.fatal << "Division by zero. ";
@@ -2121,13 +2122,14 @@ bool Rational::tryToMultiplyQuickly(int otherNumerator, int otherDenominator) {
     otherNumeratorAbsoluteValue = otherNumerator;
   }
   if (this->numeratorShort < 0) {
-    thisNumAbs = - this->numeratorShort;
+    thisNumeratorAbsoluteValue = - this->numeratorShort;
   } else {
-    thisNumAbs = this->numeratorShort;
+    thisNumeratorAbsoluteValue = this->numeratorShort;
   }
   if (
     this->extended != nullptr ||
-    thisNumAbs >= LargeIntegerUnsigned::squareRootOfCarryOverBound ||
+    thisNumeratorAbsoluteValue >=
+    LargeIntegerUnsigned::squareRootOfCarryOverBound ||
     this->denominatorShort >= LargeIntegerUnsigned::squareRootOfCarryOverBound
     ||
     otherNumeratorAbsoluteValue >=
@@ -2484,25 +2486,25 @@ const {
     if (this->numeratorShort < 0) {
       out << "-";
     }
-    int numShortAbsoluteValue =
+    int numeratorShortAbsoluteValue =
     this->numeratorShort < 0 ? - this->numeratorShort : this->numeratorShort;
     if (this->denominatorShort == 1) {
-      out << numShortAbsoluteValue;
+      out << numeratorShortAbsoluteValue;
     } else {
-      out << numShortAbsoluteValue << "_div_" << this->denominatorShort;
+      out << numeratorShortAbsoluteValue << "_div_" << this->denominatorShort;
     }
     return out.str();
   }
-  LargeInteger numAbsVal = this->extended->numerator;
-  if (numAbsVal < 0) {
+  LargeInteger numeratorAbsoluteValue = this->extended->numerator;
+  if (numeratorAbsoluteValue < 0) {
     out << "-";
-    numAbsVal.sign = 1;
+    numeratorAbsoluteValue.sign = 1;
   }
   if (this->extended->denominator.isEqualToOne()) {
-    out << numAbsVal.toString();
+    out << numeratorAbsoluteValue.toString();
   } else {
     out
-    << numAbsVal.toString()
+    << numeratorAbsoluteValue.toString()
     << "_div_"
     << this->extended->denominator.toString();
   }
@@ -2515,31 +2517,31 @@ std::string Rational::toStringFrac() const {
     if (this->numeratorShort < 0) {
       out << "-";
     }
-    int numShortAbsoluteValue =
+    int numeratorShortAbsoluteValue =
     this->numeratorShort < 0 ? - this->numeratorShort : this->numeratorShort;
     if (this->denominatorShort == 1) {
-      out << numShortAbsoluteValue;
+      out << numeratorShortAbsoluteValue;
     } else {
       out
       << "\\frac{"
-      << numShortAbsoluteValue
+      << numeratorShortAbsoluteValue
       << "}{"
       << this->denominatorShort
       << "}";
     }
     return out.str();
   }
-  LargeInteger numAbsVal = this->extended->numerator;
-  if (numAbsVal < 0) {
+  LargeInteger numeratorAbsoluteValue = this->extended->numerator;
+  if (numeratorAbsoluteValue < 0) {
     out << "-";
-    numAbsVal.sign = 1;
+    numeratorAbsoluteValue.sign = 1;
   }
   if (this->extended->denominator.isEqualToOne()) {
-    out << numAbsVal.toString();
+    out << numeratorAbsoluteValue.toString();
   } else {
     out
     << "\\frac{"
-    << numAbsVal.toString()
+    << numeratorAbsoluteValue.toString()
     << "}{"
     << this->extended->denominator.toString()
     << "}";

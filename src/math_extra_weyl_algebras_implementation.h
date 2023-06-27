@@ -445,13 +445,15 @@ bool ElementWeylAlgebra<Coefficient>::actOnPolynomial(
       currentCoefficient = actedUpon.coefficients[j];
       currentCoefficient *= this->coefficients[i];
       for (int k = 0; k < currentOpMon.minimalNumberOfVariables(); k ++) {
-        int numDiff = 0;
+        int numeratorDifferntial = 0;
         if (
-          !currentOpMon.differentialPart(k).isSmallInteger(&numDiff)
+          !currentOpMon.differentialPart(k).isSmallInteger(
+            &numeratorDifferntial
+          )
         ) {
           return false;
         }
-        for (; numDiff > 0; numDiff --) {
+        for (; numeratorDifferntial > 0; numeratorDifferntial --) {
           currentCoefficient *= resultMonomial[k];
           if (currentCoefficient.isEqualToZero()) {
             break;

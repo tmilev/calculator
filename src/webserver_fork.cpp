@@ -12,12 +12,16 @@ int WebServer::forkRaw() {
   return fork();
 }
 
-int WebServer::forkProcess() {
+int WebServer::forkWorkerProcess() {
   if (!this->createProcessMutex()) {
     global << Logger::red << "Failed to create process mutex." << Logger::endL;
     return - 1;
   }
   this->computeActiveWorkerId();
+  return this->forkProcessAndAcquireRandomness();
+}
+
+int WebServer::forkProcessAndAcquireRandomness() {
   // timer taken at server level:
   int64_t millisecondsAtfork = global.getElapsedMilliseconds();
   int result = this->forkRaw();

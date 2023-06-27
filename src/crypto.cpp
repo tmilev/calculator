@@ -1210,11 +1210,11 @@ bool Crypto::convertHexToString(
 bool Crypto::convertHexToInteger(
   const std::string& input,
   LargeIntegerUnsigned& output,
-  int& outputNumLeadingZeroPairs
+  int& outputTotalLeadingZeroPairs
 ) {
   output.makeZero();
   bool foundNonZero = false;
-  outputNumLeadingZeroPairs = 0;
+  outputTotalLeadingZeroPairs = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
     int digit = - 1;
     if (input[i] >= 'A' && input[i] <= 'F') {
@@ -1234,13 +1234,13 @@ bool Crypto::convertHexToInteger(
       output += static_cast<unsigned int>(digit);
     }
     if (!foundNonZero) {
-      outputNumLeadingZeroPairs ++;
+      outputTotalLeadingZeroPairs ++;
     }
   }
-  if (outputNumLeadingZeroPairs % 2 != 0) {
-    outputNumLeadingZeroPairs --;
+  if (outputTotalLeadingZeroPairs % 2 != 0) {
+    outputTotalLeadingZeroPairs --;
   }
-  outputNumLeadingZeroPairs /= 2;
+  outputTotalLeadingZeroPairs /= 2;
   return true;
 }
 

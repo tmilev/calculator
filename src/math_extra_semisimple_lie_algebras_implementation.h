@@ -172,7 +172,7 @@ template <class Coefficient>
 bool CharacterSemisimpleLieAlgebraModule<Coefficient>::
 freudenthalEvaluateMeFullCharacter(
   CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero,
-  int upperBoundNumDominantWeights,
+  int upperBoundTotalDominantWeights,
   std::string* outputDetails
 ) {
   STACK_TRACE(
@@ -182,7 +182,7 @@ freudenthalEvaluateMeFullCharacter(
   CharacterSemisimpleLieAlgebraModule<Coefficient> domChar;
   if (
     !this->freudenthalEvalMeDominantWeightsOnly(
-      domChar, upperBoundNumDominantWeights, outputDetails
+      domChar, upperBoundTotalDominantWeights, outputDetails
     )
   ) {
     return false;
@@ -207,7 +207,7 @@ freudenthalEvaluateMeFullCharacter(
           false,
           - 1,
           0,
-          upperBoundNumDominantWeights
+          upperBoundTotalDominantWeights
         )
       )
     ) {
@@ -278,7 +278,7 @@ template <class Coefficient>
 bool CharacterSemisimpleLieAlgebraModule<Coefficient>::
 freudenthalEvalMeDominantWeightsOnly(
   CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero,
-  int upperBoundNumDominantWeights,
+  int upperBoundTotalDominantWeights,
   std::string* outputDetails
 ) {
   STACK_TRACE(
@@ -288,7 +288,7 @@ freudenthalEvalMeDominantWeightsOnly(
     CharacterSemisimpleLieAlgebraModule<Coefficient> thisCopy = *this;
     return
     thisCopy.freudenthalEvalMeDominantWeightsOnly(
-      outputCharOwnerSetToZero, upperBoundNumDominantWeights, outputDetails
+      outputCharOwnerSetToZero, upperBoundTotalDominantWeights, outputDetails
     );
   }
   this->checkNonZeroOwner();
@@ -309,7 +309,7 @@ freudenthalEvalMeDominantWeightsOnly(
         currentWeights,
         currentMults,
         &localDetail,
-        upperBoundNumDominantWeights
+        upperBoundTotalDominantWeights
       )
     ) {
       if (outputDetails != nullptr) {
@@ -414,8 +414,8 @@ void SemisimpleLieAlgebra::lieBracket(
   if (g1.isEqualToZero() || g2.isEqualToZero()) {
     return;
   }
-  int maxNumMonsFinal = g1.size() * g2.size();
-  output.setExpectedSize(maxNumMonsFinal);
+  int maximumMonomialsFinal = g1.size() * g2.size();
+  output.setExpectedSize(maximumMonomialsFinal);
   Coefficient coefficient;
   ElementSemisimpleLieAlgebra<Coefficient> buffer;
   for (int i = 0; i < g1.size(); i ++) {
@@ -452,7 +452,7 @@ const {
   ChevalleyGenerator tempGen;
   SemisimpleLieAlgebra* owner = this->getOwner();
   int rank = owner->getRank();
-  int numPosRoots = owner->getNumberOfPositiveRoots();
+  int numberOfPositiveRoots = owner->getNumberOfPositiveRoots();
   result.makeZero(rank);
   if (rank <= 0 || owner == nullptr) {
     global.fatal
@@ -461,7 +461,7 @@ const {
     << global.fatal;
   }
   for (int i = 0; i < rank; i ++) {
-    tempGen.makeGenerator(*owner, i + numPosRoots);
+    tempGen.makeGenerator(*owner, i + numberOfPositiveRoots);
     int currentIndex = this->monomials.getIndex(tempGen);
     if (currentIndex != - 1) {
       result[i] += this->coefficients[currentIndex];

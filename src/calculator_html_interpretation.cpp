@@ -2131,8 +2131,8 @@ std::string WebAPIResponse::addUserEmails(
   std::stringstream comments;
   bool sentEmails = true;
   bool doSendEmails = global.requestType == "sendEmails" ? true : false;
-  int numNewUsers = 0;
-  int numUpdatedUsers = 0;
+  int numberOfNewUsers = 0;
+  int numberOfUpdatedUsers = 0;
   bool createdUsers =
   Database::get().user.addUsersFromEmails(
     inputEmails,
@@ -2140,15 +2140,15 @@ std::string WebAPIResponse::addUserEmails(
     userRole,
     userGroup,
     comments,
-    numNewUsers,
-    numUpdatedUsers
+    numberOfNewUsers,
+    numberOfUpdatedUsers
   );
   if (createdUsers) {
     out
     << "<span style='color:green'>Success: "
-    << numNewUsers
+    << numberOfNewUsers
     << " new users and "
-    << numUpdatedUsers
+    << numberOfUpdatedUsers
     << " user updates.</span> User roles: "
     << userRole;
   } else out
@@ -2567,7 +2567,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   activatedAccountBucketsBySection.setSize(sections.size);
   nonActivatedAccountBucketsBySection.setSize(sections.size);
   preFilledLinkBucketsBySection.setSize(sections.size);
-  int numActivatedUsers = 0;
+  int totalActivatedUsers = 0;
   for (int i = 0; i < users.size; i ++) {
     currentUser.loadFromJSON(users[i]);
     if (currentUser.courseInDB.find('%') != std::string::npos) {
@@ -2595,7 +2595,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
       currentUser.actualActivationToken != "error"
     ) {
       isActivated = false;
-      numActivatedUsers ++;
+      totalActivatedUsers ++;
       oneTableLineStream
       << "<td><span style='color:red'>not activated</span></td>";
       std::string activationLink;
@@ -2747,10 +2747,10 @@ std::string WebAPIResponse::toStringUserDetailsTable(
     }
   }
   out << "\n" << users.size << " user(s)";
-  if (numActivatedUsers > 0) {
+  if (totalActivatedUsers > 0) {
     out
     << ", <span style='color:red'>"
-    << numActivatedUsers
+    << totalActivatedUsers
     << " have not activated their accounts. </span>";
   }
   out << tableStream.str() << preFilledLoginLinks.str();
@@ -2865,7 +2865,7 @@ void UserCalculator::computePointsEarned(
 ) {
   STACK_TRACE("UserCalculator::computePointsEarned");
   this->pointsEarned = 0;
-  this->pointsMax = 0;
+  this->pointsMaximum = 0;
   if (topics != nullptr) {
     for (int i = 0; i < topics->size(); i ++) {
       (*topics).values[i].totalPointsEarned = 0;
@@ -2881,8 +2881,8 @@ void UserCalculator::computePointsEarned(
     }
     ProblemData& currentProblem = this->problemData.values[i];
     currentProblem.points = 0;
-    currentProblem.totalNumSubmissions = 0;
-    currentProblem.numCorrectlyAnswered = 0;
+    currentProblem.totalSubmissions = 0;
+    currentProblem.totalCorrectlyAnswered = 0;
     Rational currentWeight;
     currentProblem.flagProblemWeightIsOK =
     currentProblem.adminData.getWeightFromCourse(
@@ -2895,9 +2895,9 @@ void UserCalculator::computePointsEarned(
       if (
         currentProblem.answers.values[j].numberOfCorrectSubmissions > 0
       ) {
-        currentProblem.numCorrectlyAnswered ++;
+        currentProblem.totalCorrectlyAnswered ++;
       }
-      currentProblem.totalNumSubmissions +=
+      currentProblem.totalSubmissions +=
       currentProblem.answers.values[j].numberOfSubmissions;
     }
     if (currentProblem.flagProblemWeightIsOK) {
@@ -2907,7 +2907,7 @@ void UserCalculator::computePointsEarned(
       );
       if (expectedNumberOfAnswers > 0) {
         currentProblem.points = (
-          currentWeight * currentProblem.numCorrectlyAnswered
+          currentWeight * currentProblem.totalCorrectlyAnswered
         ) /
         expectedNumberOfAnswers;
         this->pointsEarned += currentProblem.points;
@@ -2917,7 +2917,7 @@ void UserCalculator::computePointsEarned(
       if (topics->contains(problemName)) {
         TopicElement& currentElement =
         topics->getValueCreateEmpty(problemName);
-        this->pointsMax += currentWeight;
+        this->pointsMaximum += currentWeight;
         for (int j = 0; j < currentElement.parentTopics.size; j ++) {
           (*topics).values[currentElement.parentTopics[j]].totalPointsEarned +=
           currentProblem.points;
@@ -2959,9 +2959,9 @@ public:
   List<Rational> userScores;
   List<std::string> userInfos;
   List<std::string> userNames;
-  List<LargeInteger> numStudentsSolvedEntireTopic;
-  List<LargeInteger> numStudentsSolvedPartOfTopic;
-  List<LargeInteger> numStudentsSolvedNothingInTopic;
+  List<LargeInteger> numberOfStudentsSolvedEntireTopic;
+  List<LargeInteger> numberOfStudentsSolvedPartOfTopic;
+  List<LargeInteger> numberOfStudentsSolvedNothingInTopic;
   bool computeScoresAndStats(std::stringstream& comments);
 };
 
@@ -3006,13 +3006,13 @@ bool UserScores::computeScoresAndStats(std::stringstream& comments) {
   this->userNames.setSize(0);
   this->userInfos.setSize(0);
   this->scoresBreakdown.setSize(0);
-  this->numStudentsSolvedEntireTopic.initializeFillInObject(
+  this->numberOfStudentsSolvedEntireTopic.initializeFillInObject(
     this->problem.topics.topics.size(), 0
   );
-  this->numStudentsSolvedPartOfTopic.initializeFillInObject(
+  this->numberOfStudentsSolvedPartOfTopic.initializeFillInObject(
     this->problem.topics.topics.size(), 0
   );
-  this->numStudentsSolvedNothingInTopic.initializeFillInObject(
+  this->numberOfStudentsSolvedNothingInTopic.initializeFillInObject(
     this->problem.topics.topics.size(), 0
   );
   bool ignoreSectionsIdontTeach = true;
@@ -3084,11 +3084,11 @@ bool UserScores::computeScoresAndStats(std::stringstream& comments) {
         problem.topics.topics.keys[j], currentPoints
       );
       if (maximumPoints == currentPoints) {
-        this->numStudentsSolvedEntireTopic[j] ++;
+        this->numberOfStudentsSolvedEntireTopic[j] ++;
       } else if (currentPoints > 0) {
-        this->numStudentsSolvedPartOfTopic[j] ++;
+        this->numberOfStudentsSolvedPartOfTopic[j] ++;
       } else {
-        this->numStudentsSolvedNothingInTopic[j] ++;
+        this->numberOfStudentsSolvedNothingInTopic[j] ++;
       }
     }
     *this->userScores.lastObject() =
@@ -3127,19 +3127,19 @@ std::string WebAPIResponse::getScoresInCoursePage() {
     << "studentScoresInHomePage["
     << i
     << "].numSolvedAll ="
-    << scores.numStudentsSolvedEntireTopic[i]
+    << scores.numberOfStudentsSolvedEntireTopic[i]
     << ";\n";
     out
     << "studentScoresInHomePage["
     << i
     << "].numSolvedPart ="
-    << scores.numStudentsSolvedPartOfTopic[i]
+    << scores.numberOfStudentsSolvedPartOfTopic[i]
     << ";\n";
     out
     << "studentScoresInHomePage["
     << i
     << "].numSolvedNone ="
-    << scores.numStudentsSolvedNothingInTopic[i]
+    << scores.numberOfStudentsSolvedNothingInTopic[i]
     << ";\n";
   }
   out << "</script>";
@@ -3174,8 +3174,9 @@ std::string WebAPIResponse::toStringUserScores() {
     ) {
       continue;
     }
-    int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
-    out << "<td colspan =\"" << numCols << "\"";
+    int numberOfColumns =
+    currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
+    out << "<td colspan =\"" << numberOfColumns << "\"";
     if (
       currentElt.totalSubSectionsUnderME == 0 &&
       currentElt.flagContainsProblemsNotInSubsection
@@ -3194,8 +3195,9 @@ std::string WebAPIResponse::toStringUserScores() {
     ) {
       continue;
     }
-    int numCols = currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
-    out << "<td colspan =\"" << numCols << "\"";
+    int numberOfColumns =
+    currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
+    out << "<td colspan =\"" << numberOfColumns << "\"";
     if (
       currentElt.totalSubSectionsUnderME == 0 &&
       currentElt.flagContainsProblemsNotInSubsection
@@ -3236,7 +3238,7 @@ std::string WebAPIResponse::toStringUserScores() {
   out << "<tr><td><b>maximum score</b></td>" << "<td>-</td>";
   out
   << "<td>"
-  << scores.problem.currentUser.pointsMax.getDoubleValue()
+  << scores.problem.currentUser.pointsMaximum.getDoubleValue()
   << "</td>";
   for (int j = 0; j < scores.problem.topics.topics.size(); j ++) {
     TopicElement& currentElement = scores.problem.topics.topics.values[j];

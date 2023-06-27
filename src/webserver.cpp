@@ -402,7 +402,7 @@ void WebWorker::sendAllBytesNoHeaders() {
   global << "... done." << Logger::endL;
 }
 
-const int WebServer::maxNumPendingConnections = 1000000;
+const int WebServer::maximumPendingConnections = 1000000;
 
 void SystemFunctions::segfaultSigaction[[noreturn]](
   int signal, siginfo_t* si, void* arg
@@ -2921,7 +2921,7 @@ WebServer::WebServer() {
   this->listeningSocketHTTPSOpenSSL = - 1;
   this->highestSocketNumber = - 1;
   this->flagReapingChildren = false;
-  this->maximumNumberOfWorkersPerIPAdress = 64;
+  this->maximumWorkersPerIPAdress = 64;
   this->maximumTotalUsedWorkers = 120;
   this->webServerPingIntervalInSeconds = 10;
   this->previousServerStatReport = 0;
@@ -3257,7 +3257,7 @@ std::string WebServer::toStringConnectionSummary() {
   << "all connections except a randomly "
   << "chosen one will be terminated. "
   << "<br>"
-  << this->maximumNumberOfWorkersPerIPAdress
+  << this->maximumWorkersPerIPAdress
   << " maximum simultaneous connection per IP address. "
   << "When the limit is exceeded, "
   << "all connections from that IP address are terminated. ";
@@ -3268,15 +3268,15 @@ std::string WebServer::toStringStatusForLogFile() {
   STACK_TRACE("WebServer::toStringStatusForLogFile");
   std::stringstream out;
   out << this->toStringConnectionSummary();
-  int numInUse = 0;
+  int totalInUse = 0;
   for (int i = 0; i < this->allWorkers.size; i ++) {
     if (this->allWorkers[i].flagInUse) {
-      numInUse ++;
+      totalInUse ++;
     }
   }
   out
   << "<hr>Currently, there are "
-  << numInUse
+  << totalInUse
   << " worker(s) in use. The peak number of "
   << "worker(s)/concurrent connections was "
   << this->allWorkers.size
@@ -3487,7 +3487,7 @@ void WebServer::initializeListeningSockets() {
     if (
       listen(
         this->allListeningSockets.keys[i],
-        WebServer::maxNumPendingConnections
+        WebServer::maximumPendingConnections
       ) ==
       - 1
     ) {
@@ -3591,7 +3591,7 @@ void WebServer::handleTooManyConnections(
   > incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress = (
     this->currentlyConnectedAddresses.getCoefficientOf(incomingAddress) >
-    this->maximumNumberOfWorkersPerIPAdress
+    this->maximumWorkersPerIPAdress
   );
   if (!purgeIncomingAddress) {
     return;
@@ -3634,7 +3634,7 @@ void WebServer::handleTooManyConnections(
     << ": address: "
     << incomingAddress
     << " opened more than "
-    << this->maximumNumberOfWorkersPerIPAdress
+    << this->maximumWorkersPerIPAdress
     << " simultaneous connections. ";
     this->allWorkers[indices[j]].pingMessage = errorStream.str();
     global << Logger::red << errorStream.str() << Logger::endL;
@@ -3655,7 +3655,7 @@ void WebServer::markChildNotInUse(int childIndex) {
   worker.workerId = "";
 }
 
-void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
+void WebServer::processOneChildMessage(int childIndex, int& outputTotalInUse) {
   std::string messageString =
   this->allWorkers[childIndex].pipeWorkerToServerControls.getLastRead();
   this->markChildNotInUse(childIndex);
@@ -3680,7 +3680,7 @@ void WebServer::processOneChildMessage(int childIndex, int& outputNumInUse) {
     << ". Marking for reuse. "
     << Logger::endL;
   }
-  outputNumInUse --;
+  outputTotalInUse --;
   this->statistics.workersNormallyExited ++;
   if (
     workerMessage[WebServer::Statististics::allRequestsString].elementType ==
@@ -3850,16 +3850,16 @@ void WebServer::recycleChildrenIfPossible() {
     << "Detail: recycleChildrenIfPossible start. "
     << Logger::endL;
   }
-  int numInUse = 0;
+  int inUseTotal = 0;
   for (int i = 0; i < this->allWorkers.size; i ++) {
     if (this->allWorkers[i].flagInUse) {
-      numInUse ++;
+      inUseTotal ++;
     }
   }
   for (int i = 0; i < this->allWorkers.size; i ++) {
-    this->recycleOneChild(i, numInUse);
+    this->recycleOneChild(i, inUseTotal);
   }
-  this->handleTooManyWorkers(numInUse);
+  this->handleTooManyWorkers(inUseTotal);
 }
 
 bool WebServer::initializePrepareWebServerAll() {
@@ -3873,7 +3873,10 @@ bool WebServer::initializePrepareWebServerAll() {
   return true;
 }
 
-bool WebServer::initializeBindToOnePort(const std::string& desiredPort, int& outputListeningSocket, int & outputActualPort
+bool WebServer::initializeBindToOnePort(
+  const std::string& desiredPort,
+  int& outputListeningSocket,
+  int& outputActualPort
 ) {
   STACK_TRACE("WebServer::initBindToOnePort");
   addrinfo hints;
@@ -3927,21 +3930,34 @@ bool WebServer::initializeBindToOnePort(const std::string& desiredPort, int& out
       continue;
     }
     struct sockaddr_in serverAddress;
-    unsigned int serverAddressLength=0;
-   if ( getsockname(
-            outputListeningSocket,
-           (sockaddr*)& serverAddress,
-            &serverAddressLength) == -1) {
-       global << Logger::red<< "Error: failed to find socket name. " << Logger::endL;
-   } else {
-   outputActualPort = ntohs(serverAddress.sin_port);
-   std::stringstream listeningPortString;
-   listeningPortString << outputActualPort;
-   if ( desiredPort== "0"){
-     global <<  "Listening on port: " << Logger::red <<outputActualPort << Logger::normalColor
-             <<", desired port: " << Logger::yellow << desiredPort <<Logger::endL;
-   }
-   }
+    unsigned int serverAddressLength = 0;
+    if (
+      getsockname(
+        outputListeningSocket, (sockaddr*) & serverAddress,
+        &serverAddressLength
+      ) ==
+      - 1
+    ) {
+      global
+      << Logger::red
+      << "Error: failed to find socket name. "
+      << Logger::endL;
+    } else {
+      outputActualPort = ntohs(serverAddress.sin_port);
+      std::stringstream listeningPortString;
+      listeningPortString << outputActualPort;
+      if (desiredPort == "0") {
+        global
+        << "Listening on port: "
+        << Logger::red
+        << outputActualPort
+        << Logger::normalColor
+        << ", desired port: "
+        << Logger::yellow
+        << desiredPort
+        << Logger::endL;
+      }
+    }
     int setFlagCounter = 0;
     while (fcntl(outputListeningSocket, F_SETFL, O_NONBLOCK) != 0) {
       if (++ setFlagCounter > 10) {
@@ -3955,14 +3971,18 @@ bool WebServer::initializeBindToOnePort(const std::string& desiredPort, int& out
   freeaddrinfo(servinfo);
   // all done with this structure
   if (outputListeningSocket == - 1) {
-    global.fatal << "Failed to bind to port: " << desiredPort << ". " << global.fatal;
+    global.fatal
+    << "Failed to bind to port: "
+    << desiredPort
+    << ". "
+    << global.fatal;
   }
   return true;
 }
 
 bool WebServer::initializeBindToPorts() {
   STACK_TRACE("WebServer::initializeBindToPorts");
-  int unusedPort=0;
+  int unusedPort = 0;
   if (
     !this->initializeBindToOnePort(
       this->portHTTP, this->listeningSocketHTTP, unusedPort
@@ -3980,7 +4000,9 @@ bool WebServer::initializeBindToPorts() {
   if (flagBuiltInTLSAvailable) {
     if (
       !this->initializeBindToOnePort(
-        this->portHTTPSBuiltIn, this->listeningSocketHTTPSBuiltIn,unusedPort
+        this->portHTTPSBuiltIn,
+        this->listeningSocketHTTPSBuiltIn,
+        unusedPort
       )
     ) {
       return false;
@@ -3989,7 +4011,9 @@ bool WebServer::initializeBindToPorts() {
   if (global.flagSSLAvailable) {
     if (
       !this->initializeBindToOnePort(
-        this->portHTTPSOpenSSL, this->listeningSocketHTTPSOpenSSL,unusedPort
+        this->portHTTPSOpenSSL,
+        this->listeningSocketHTTPSOpenSSL,
+        unusedPort
       )
     ) {
       return false;
@@ -4356,6 +4380,10 @@ int WebServer::run() {
   global.logs.serverMonitor.reset();
   global.logs.worker.reset();
   Database::get().initializeServer();
+  if (Database::get().localDatabase.processId == 0) {
+    // This is the database process.
+    return 0;
+  }
   this->processIdServer = getpid();
   List<unsigned char> pingBytes;
   this->pingAuthentication =
@@ -4398,200 +4426,205 @@ int WebServer::run() {
   this->statistics.failedSelectsSoFar = 0;
   long long previousReportedNumberOfSelects = 0;
   Listener listener(this);
-  while (true) {
-    // Main accept() loop.
-    listener.zeroSocketSet();
-    SignalsInfrastructure::signals().unblockSignals();
-    listener.selectWrapper();
-    SignalsInfrastructure::signals().blockSignals();
-    if (global.flagServerDetailedLog) {
-      global << Logger::green << "Detail: select success. " << Logger::endL;
-    }
-    int64_t millisecondsAfterSelect = global.getElapsedMilliseconds();
-    this->statistics.successfulSelectsSoFar ++;
-    if ((
-        this->statistics.successfulSelectsSoFar +
-        this->statistics.failedSelectsSoFar
-      ) -
-      previousReportedNumberOfSelects >
-      100
-    ) {
-      global
-      << Logger::blue
-      << this->statistics.successfulSelectsSoFar
-      << " successful and "
-      << this->statistics.failedSelectsSoFar
-      << " bad ("
-      << this->statistics.successfulSelectsSoFar +
-      this->statistics.failedSelectsSoFar
-      << " total) selects. "
-      << Logger::endL;
-      previousReportedNumberOfSelects =
+  int returnCode = 0;
+  while (
+    this->runOnce(listener, previousReportedNumberOfSelects, returnCode)
+  ) {}
+  return 0;
+}
+
+bool WebServer::runOnce(
+  Listener& listener,
+  long long& previousReportedNumberOfSelects,
+  int& returnCode
+) {
+  // Main accept() loop.
+  listener.zeroSocketSet();
+  SignalsInfrastructure::signals().unblockSignals();
+  listener.selectWrapper();
+  SignalsInfrastructure::signals().blockSignals();
+  if (global.flagServerDetailedLog) {
+    global << Logger::green << "Detail: select success. " << Logger::endL;
+  }
+  int64_t millisecondsAfterSelect = global.getElapsedMilliseconds();
+  this->statistics.successfulSelectsSoFar ++;
+  if ((
       this->statistics.successfulSelectsSoFar +
-      this->statistics.failedSelectsSoFar;
-    }
-    int reportCount =
-    this->statistics.processKilled +
-    this->statistics.processesReaped +
-    this->statistics.workersNormallyExited +
-    this->statistics.allConnections;
-    if (reportCount - previousServerStatReport > 99) {
-      this->previousServerStatReport = reportCount;
-      global
-      << "# kill commands: "
-      << this->statistics.processKilled
-      << " #processes reaped: "
-      << this->statistics.processesReaped
-      << " #normally reclaimed workers: "
-      << this->statistics.workersNormallyExited
-      << " #connections so far: "
-      << this->statistics.allConnections
-      << Logger::endL;
-    }
-    if (reportCount - previousServerStatDetailedReport > 499) {
-      this->previousServerStatDetailedReport = reportCount;
-      global << this->toStringStatusForLogFile() << Logger::endL;
-    }
-    int newConnectedSocket = listener.acceptWrapper();
-    if (newConnectedSocket < 0) {
-      global
-      << Logger::red
-      << "This is not supposed to to happen: select succeeded "
-      << "but I found no set socket. "
-      << Logger::endL;
-    }
-    if (newConnectedSocket < 0) {
-      if (global.flagServerDetailedLog) {
-        global
-        << "Detail: newConnectedSocket is negative: "
-        << newConnectedSocket
-        << ". Not accepting. "
-        << Logger::endL;
-      }
-      continue;
-    }
-    listener.computeUserAddress();
-    this->handleTooManyConnections(listener.userAddress);
-    this->recycleChildrenIfPossible();
-    if (!this->createNewActiveWorker()) {
-      global
-      << Logger::purple
-      << " failed to create an active worker. "
-      << "System error string: "
-      << strerror(errno)
-      << "\n"
-      << Logger::red
-      << "Failed to create active worker: closing connection. "
-      << Logger::endL;
-      close(newConnectedSocket);
-      continue;
-    }
-    // ///////////
-    this->getActiveWorker().connectedSocketID = newConnectedSocket;
-    this->getActiveWorker().connectedSocketIDLastValueBeforeRelease =
-    newConnectedSocket;
-    this->getActiveWorker().millisecondsServerAtWorkerStart =
-    global.getElapsedMilliseconds();
-    this->getActiveWorker().millisecondsLastPingServerSideOnly =
-    this->getActiveWorker().millisecondsServerAtWorkerStart;
-    this->getActiveWorker().millisecondsAfterSelect = millisecondsAfterSelect;
-    // <- measured right after select()
-    // <- cannot set earlier as the active worker may change after recycling.
-    this->statistics.allConnections ++;
-    this->getActiveWorker().connectionID = this->statistics.allConnections;
-    this->getActiveWorker().userAddress.content = listener.userAddress;
-    this->currentlyConnectedAddresses.addMonomial(
-      this->getActiveWorker().userAddress, 1
-    );
-    // ///////////
-    if (global.flagServerDetailedLog) {
-      global << "Detail: about to fork, sigprocmasking " << Logger::endL;
-    }
+      this->statistics.failedSelectsSoFar
+    ) -
+    previousReportedNumberOfSelects >
+    100
+  ) {
+    global
+    << Logger::blue
+    << this->statistics.successfulSelectsSoFar
+    << " successful and "
+    << this->statistics.failedSelectsSoFar
+    << " bad ("
+    << this->statistics.successfulSelectsSoFar +
+    this->statistics.failedSelectsSoFar
+    << " total) selects. "
+    << Logger::endL;
+    previousReportedNumberOfSelects =
+    this->statistics.successfulSelectsSoFar +
+    this->statistics.failedSelectsSoFar;
+  }
+  int reportCount =
+  this->statistics.processKilled +
+  this->statistics.processesReaped +
+  this->statistics.workersNormallyExited +
+  this->statistics.allConnections;
+  if (reportCount - previousServerStatReport > 99) {
+    this->previousServerStatReport = reportCount;
+    global
+    << "# kill commands: "
+    << this->statistics.processKilled
+    << " #processes reaped: "
+    << this->statistics.processesReaped
+    << " #normally reclaimed workers: "
+    << this->statistics.workersNormallyExited
+    << " #connections so far: "
+    << this->statistics.allConnections
+    << Logger::endL;
+  }
+  if (reportCount - previousServerStatDetailedReport > 499) {
+    this->previousServerStatDetailedReport = reportCount;
+    global << this->toStringStatusForLogFile() << Logger::endL;
+  }
+  int newConnectedSocket = listener.acceptWrapper();
+  if (newConnectedSocket < 0) {
+    global
+    << Logger::red
+    << "This is not supposed to to happen: select succeeded "
+    << "but I found no set socket. "
+    << Logger::endL;
+  }
+  if (newConnectedSocket < 0) {
     if (global.flagServerDetailedLog) {
       global
-      << "Detail: Sigprocmask done. Proceeding to fork. "
-      << "Time elapsed: "
-      << global.getElapsedSeconds()
-      << " second(s). <br>"
+      << "Detail: newConnectedSocket is negative: "
+      << newConnectedSocket
+      << ". Not accepting. "
       << Logger::endL;
     }
-    int incomingPID = this->forkProcess();
-    // creates an almost identical copy of this process.
-    // <- Please don't assign directly to this->getActiveWorker().ProcessPID.
-    // <- There may be a race condition around this line of code and I
-    // want as little code as possible between the fork and the logFile.
-    // The original process is the parent, the almost identical copy is the
-    // child.
-    // global << "\r\nChildPID: " << this->childPID;
-    if (global.flagServerDetailedLog && incomingPID == 0) {
-      global
-      << "Detail: fork() successful in worker; elapsed ms @ fork(): "
-      << global.getElapsedMilliseconds()
-      << Logger::endL;
-    }
-    if (global.flagServerDetailedLog && incomingPID > 0) {
-      global
-      << "Detail: fork() successful; elapsed ms @ fork(): "
-      << global.getElapsedMilliseconds()
-      << Logger::endL;
-    }
-    if (incomingPID < 0) {
-      global
-      << Logger::red
-      << " FAILED to spawn a child process. "
-      << Logger::endL;
-    }
-    this->getActiveWorker().processPID = incomingPID;
-    if (this->getActiveWorker().processPID == 0) {
-      // this is the child (worker) process
-      global.flagIsChildProcess = true;
-      if (global.flagServerDetailedLog) {
-        global
-        << Logger::green
-        << "Detail: "
-        << "FORK successful in worker, next step. "
-        << "Time elapsed: "
-        << global.getElapsedSeconds()
-        << " second(s). Calling sigprocmask. "
-        << Logger::endL;
-      }
-      SignalsInfrastructure::signals().unblockSignals();
-      if (global.flagServerDetailedLog) {
-        global
-        << Logger::green
-        << "Detail: sigprocmask success, running... "
-        << Logger::endL;
-      }
-      int result = this->getActiveWorker().run();
-      if (global.flagServerDetailedLog) {
-        global
-        << "Detail: run finished, releasing resources. "
-        << Logger::endL;
-      }
-      this->releaseEverything();
-      if (global.flagServerDetailedLog) {
-        global
-        << Logger::green
-        << "Detail: resources released, returning. "
-        << Logger::endL;
-      }
-      return result;
-    }
+    return true;
+  }
+  listener.computeUserAddress();
+  this->handleTooManyConnections(listener.userAddress);
+  this->recycleChildrenIfPossible();
+  if (!this->createNewActiveWorker()) {
+    global
+    << Logger::purple
+    << " failed to create an active worker. "
+    << "System error string: "
+    << strerror(errno)
+    << "\n"
+    << Logger::red
+    << "Failed to create active worker: closing connection. "
+    << Logger::endL;
+    close(newConnectedSocket);
+    return true;
+  }
+  // ///////////
+  this->getActiveWorker().connectedSocketID = newConnectedSocket;
+  this->getActiveWorker().connectedSocketIDLastValueBeforeRelease =
+  newConnectedSocket;
+  this->getActiveWorker().millisecondsServerAtWorkerStart =
+  global.getElapsedMilliseconds();
+  this->getActiveWorker().millisecondsLastPingServerSideOnly =
+  this->getActiveWorker().millisecondsServerAtWorkerStart;
+  this->getActiveWorker().millisecondsAfterSelect = millisecondsAfterSelect;
+  // <- measured right after select()
+  // <- cannot set earlier as the active worker may change after recycling.
+  this->statistics.allConnections ++;
+  this->getActiveWorker().connectionID = this->statistics.allConnections;
+  this->getActiveWorker().userAddress.content = listener.userAddress;
+  this->currentlyConnectedAddresses.addMonomial(
+    this->getActiveWorker().userAddress, 1
+  );
+  // ///////////
+  if (global.flagServerDetailedLog) {
+    global << "Detail: about to fork, sigprocmasking " << Logger::endL;
+  }
+  if (global.flagServerDetailedLog) {
+    global
+    << "Detail: Sigprocmask done. Proceeding to fork. "
+    << "Time elapsed: "
+    << global.getElapsedSeconds()
+    << " second(s). <br>"
+    << Logger::endL;
+  }
+  int incomingPID = this->forkWorkerProcess();
+  // creates an almost identical copy of this process.
+  // <- Please don't assign directly to this->getActiveWorker().ProcessPID.
+  // <- There may be a race condition around this line of code and I
+  // want as little code as possible between the fork and the logFile.
+  // The original process is the parent, the almost identical copy is the
+  // child.
+  // global << "\r\nChildPID: " << this->childPID;
+  if (global.flagServerDetailedLog && incomingPID == 0) {
+    global
+    << "Detail: fork() successful in worker; elapsed ms @ fork(): "
+    << global.getElapsedMilliseconds()
+    << Logger::endL;
+  }
+  if (global.flagServerDetailedLog && incomingPID > 0) {
+    global
+    << "Detail: fork() successful; elapsed ms @ fork(): "
+    << global.getElapsedMilliseconds()
+    << Logger::endL;
+  }
+  if (incomingPID < 0) {
+    global
+    << Logger::red
+    << " FAILED to spawn a child process. "
+    << Logger::endL;
+  }
+  this->getActiveWorker().processPID = incomingPID;
+  if (this->getActiveWorker().processPID == 0) {
+    // this is the child (worker) process
+    global.flagIsChildProcess = true;
     if (global.flagServerDetailedLog) {
       global
       << Logger::green
-      << "Detail: fork successful. Time elapsed: "
-      << global.getElapsedMilliseconds()
-      << " ms. "
-      << "About to unmask signals. "
+      << "Detail: "
+      << "FORK successful in worker, next step. "
+      << "Time elapsed: "
+      << global.getElapsedSeconds()
+      << " second(s). Calling sigprocmask. "
       << Logger::endL;
     }
-    this->releaseWorkerSideResources();
+    SignalsInfrastructure::signals().unblockSignals();
+    if (global.flagServerDetailedLog) {
+      global
+      << Logger::green
+      << "Detail: sigprocmask success, running... "
+      << Logger::endL;
+    }
+    returnCode = this->getActiveWorker().run();
+    if (global.flagServerDetailedLog) {
+      global << "Detail: run finished, releasing resources. " << Logger::endL;
+    }
+    this->releaseEverything();
+    if (global.flagServerDetailedLog) {
+      global
+      << Logger::green
+      << "Detail: resources released, returning. "
+      << Logger::endL;
+    }
+    return false;
   }
-  // Cleanup, if ever needed:
-  // this->releaseEverything();
-  // this->tls.freeEverythingShutdown();
-  return 0;
+  if (global.flagServerDetailedLog) {
+    global
+    << Logger::green
+    << "Detail: fork successful. Time elapsed: "
+    << global.getElapsedMilliseconds()
+    << " ms. "
+    << "About to unmask signals. "
+    << Logger::endL;
+  }
+  this->releaseWorkerSideResources();
+  return true;
 }
 
 void WebServer::computeSSLFlags() {
@@ -5311,7 +5344,7 @@ void WebServer::initializeMainFoldersInstructorSpecific() {
 }
 
 void WebServer::initializeMainAll() {
-  GlobalStatistics::cgiLimitRAMuseNumPointersInList = 4000000000;
+  GlobalStatistics::limitTotalPointersInList = 4000000000;
   this->initializeMainHashes();
   FileOperations::initializeFoldersULTRASensitive();
   FileOperations::initializeFoldersSensitive();
@@ -6125,15 +6158,42 @@ JSData ActAsWebServerOnly::toJSON() {
   return result;
 }
 
-void LocalDatabase::initializeServer() {
-    int listeningSocket=-1;
-    int databasePort = 0;
-if (!global.server().initializeBindToOnePort("0", listeningSocket, databasePort)){
+void LocalDatabase::initializeForkAndRun() {
+  STACK_TRACE("LocalDatabase::initializeForkAndRun");
+  if (
+    !global.server().initializeBindToOnePort(
+      "0", this->socket, this->port
+    )
+  ) {
     global.fatal << "Failed to bind to port 0: " << global.fatal;
+  }
+  global << "Database initialized, listening on port: " << Logger::endL;
+  if (listen(this->socket, WebServer::maximumPendingConnections) == - 1) {
+    global.fatal << "Failed to listen on database socket. " << global.fatal;
+  }
+  Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(
+    this->randomId, 24
+  );
+  this->idLoggable =
+  Crypto::convertListUnsignedCharsToHexFormat(this->randomId, 0, false);
+  this->idLoggable =
+  this->idLoggable.substr(0, 4) +
+  "_" +
+  this->idLoggable.substr(this->idLoggable.size() - 4, 4);
+  global << "Database session id: " << this->idLoggable << Logger::endL;
+  this->processId = global.server().forkProcessAndAcquireRandomness();
+  if (this->processId == - 1) {
+    global.fatal << "Failed to start database. " << global.fatal;
+  }
+  if (this->processId != 0) {
+    // This is the parent process.
+    return;
+  }
+  Crypto::computeSha3_256(this->randomId, this->randomIdHash);
+  this->randomId.clear();
+  this->run();
 }
-global << "Database initialized, listening on port: " << Logger::endL;
 
-//this->processIdDatabase= global.server().forkProcess();
-
+void LocalDatabase::run() {
+  STACK_TRACE("LocalDatabase::run");
 }
-

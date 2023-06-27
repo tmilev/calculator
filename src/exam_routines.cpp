@@ -871,7 +871,9 @@ std::string CalculatorHTML::toStringProblemInfo(
   if (this->currentUser.problemData.contains(fileName)) {
     ProblemData& problemData =
     this->currentUser.problemData.getValueCreateEmpty(fileName);
-    if (problemData.numCorrectlyAnswered >= problemData.answers.size()) {
+    if (
+      problemData.totalCorrectlyAnswered >= problemData.answers.size()
+    ) {
       problemAlreadySolved = true;
     }
   }
@@ -1478,14 +1480,14 @@ bool CalculatorHTML::exrtactSolutionCommands(
 ) {
   (void) comments;
   std::stringstream streamCommands;
-  int numCommandsSoFar = 2;
+  int totalCommandsSoFar = 2;
   for (int j = 0; j < answer.solutionElements.size; j ++) {
     SyntacticElementHTML& current = answer.solutionElements[j];
     if (!current.isInterpretedByCalculatorOnGeneration()) {
       continue;
     }
-    current.commandIndex = numCommandsSoFar;
-    numCommandsSoFar ++;
+    current.commandIndex = totalCommandsSoFar;
+    totalCommandsSoFar ++;
     streamCommands
     << Calculator::Functions::Names::commandEnclosure
     << "{}("
@@ -1825,27 +1827,27 @@ bool CalculatorHTML::computeAnswerRelatedStrings(
   currentA.idButtonAnswer = "buttonAnswer" + answerId;
   currentA.idButtonSolution = "buttonSolution" + answerId;
   std::stringstream verifyStream;
-  int numCorrectSubmissions = currentA.numberOfCorrectSubmissions;
-  int numSubmissions = currentA.numberOfSubmissions;
+  int totalCorrectSubmissions = currentA.numberOfCorrectSubmissions;
+  int totalSubmissions = currentA.numberOfSubmissions;
   if (
     global.requestType == "scoredQuiz" ||
     global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
-    if (numCorrectSubmissions > 0) {
+    if (totalCorrectSubmissions > 0) {
       verifyStream
       << "<b style =\"color:green\">Correctly answered: \\("
       << currentA.firstCorrectAnswerClean
       << "\\) </b> ";
-      if (numSubmissions > 0) {
+      if (totalSubmissions > 0) {
         verifyStream
         << "<br>Used: "
-        << numSubmissions
+        << totalSubmissions
         << " attempt(s) ("
-        << numCorrectSubmissions
+        << totalCorrectSubmissions
         << " correct).";
       }
-    } else if (numSubmissions > 0) {
-      verifyStream << numSubmissions << " attempt(s) so far. ";
+    } else if (totalSubmissions > 0) {
+      verifyStream << totalSubmissions << " attempt(s) so far. ";
     }
   }
   currentA.htmlSpanVerifyAnswer = verifyStream.str();
@@ -3951,7 +3953,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(
       ProblemData& problemData =
       this->currentUser.problemData.getValueCreateEmpty(this->fileName);
       if (
-        problemData.numCorrectlyAnswered >= problemData.answers.size()
+        problemData.totalCorrectlyAnswered >= problemData.answers.size()
       ) {
         problemAlreadySolved = true;
       }
@@ -4159,26 +4161,28 @@ std::string CalculatorHTML::toStringProblemScoreFull(
         currentWeight = 0;
       }
       if (problemData.answers.size() == 1) {
-        if (problemData.numCorrectlyAnswered == 1) {
+        if (problemData.totalCorrectlyAnswered == 1) {
           out
-          << problemData.totalNumSubmissions
+          << problemData.totalSubmissions
           << " submission(s), problem correctly answered. ";
         } else {
           out
-          << problemData.totalNumSubmissions
+          << problemData.totalSubmissions
           << " submission(s), problem not correctly answered yet. ";
         }
       } else if (problemData.answers.size() > 1) {
         out
-        << problemData.totalNumSubmissions
+        << problemData.totalSubmissions
         << " submission(s), "
-        << problemData.numCorrectlyAnswered
+        << problemData.totalCorrectlyAnswered
         << " out of "
         << problemData.answers.size()
         << " subproblems correctly answered. ";
       }
-    } else if (problemData.totalNumSubmissions != 0) {
-      if (problemData.numCorrectlyAnswered < problemData.answers.size()) {
+    } else if (problemData.totalSubmissions != 0) {
+      if (
+        problemData.totalCorrectlyAnswered < problemData.answers.size()
+      ) {
         out
         << "<b style='color:red'>"
         << problemData.points
@@ -4186,7 +4190,7 @@ std::string CalculatorHTML::toStringProblemScoreFull(
         << currentWeight
         << " point(s). </b>";
       } else if (
-        problemData.numCorrectlyAnswered == problemData.answers.size()
+        problemData.totalCorrectlyAnswered == problemData.answers.size()
       ) {
         out
         << "<b style='color:green'>"
@@ -4229,7 +4233,7 @@ std::string CalculatorHTML::toStringProblemScoreShort(
     problemData = this->currentUser.problemData.getValueCreateEmpty(fileName);
     Rational percentSolved = 0, totalPoints = 0;
     percentSolved.assignNumeratorAndDenominator(
-      problemData.numCorrectlyAnswered, problemData.answers.size()
+      problemData.totalCorrectlyAnswered, problemData.answers.size()
     );
     problemData.flagProblemWeightIsOK =
     problemData.adminData.getWeightFromCourse(
@@ -5502,7 +5506,7 @@ JSData TopicElement::toJSON(CalculatorHTML& owner) {
   if (owner.currentUser.problemData.contains(this->problemFileName)) {
     ProblemData& currentData =
     owner.currentUser.problemData.getValueCreateEmpty(this->problemFileName);
-    output["correctlyAnswered"] = currentData.numCorrectlyAnswered;
+    output["correctlyAnswered"] = currentData.totalCorrectlyAnswered;
     output["totalQuestions"] = currentData.answers.size();
     Rational currentWeight;
     std::string currentWeightAsGivenByInstructor;

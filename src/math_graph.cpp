@@ -207,11 +207,11 @@ void GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances(
 
 void GraphWeightedLabeledEdges::computeDisplayGroups() {
   STACK_TRACE("GraphWeightedLabeledEdges::computeDisplayGroups");
-  int numGroups = 0;
+  int numberOfGroups = 0;
   for (int i = 0; i < this->connectedComponents.size; i ++) {
-    numGroups += this->connectedComponents[i].size;
+    numberOfGroups += this->connectedComponents[i].size;
   }
-  this->nodeGroupsForDisplay.setExpectedSize(numGroups);
+  this->nodeGroupsForDisplay.setExpectedSize(numberOfGroups);
   this->nodeGroupsForDisplay.setSize(0);
   for (int i = 0; i < this->connectedComponents.size; i ++) {
     for (int j = 0; j < this->connectedComponents[i].size; j ++) {

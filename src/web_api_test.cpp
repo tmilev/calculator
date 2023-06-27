@@ -235,13 +235,13 @@ bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
   global.webArguments[WebAPI::Problem::fileName] = sample;
   global.requestType = WebAPI::Frontend::scoredQuiz;
   std::string databaseBeforeFirstRun =
-  Database::get().localDatabase.databaseContent.toString();
+  Database::get().fallbackDatabase.databaseContent.toString();
   JSData resultFirst = WebAPIResponse::getExamPageJSON();
   std::string databaseAfterFirstRun =
-  Database::get().localDatabase.databaseContent.toString();
+  Database::get().fallbackDatabase.databaseContent.toString();
   JSData resultSecond = WebAPIResponse::getExamPageJSON();
   std::string afterSecondRun =
-  Database::get().localDatabase.databaseContent.toString();
+  Database::get().fallbackDatabase.databaseContent.toString();
   if (resultFirst != resultSecond) {
     global.fatal
     << "Two consecutive scored quiz requests "

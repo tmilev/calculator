@@ -142,15 +142,14 @@ class RootSubalgebra {
     return output;
   }
 public:
-  int numHeirsRejectedNotMaximallyDominant;
-  int numHeirsRejectedSameModuleDecompo;
-  int numHeirsRejectedBadAngleS;
-  int numHeirsRejectedNotMaxWRTouterAuto;
+  int totalHeirsRejectedNotMaximallyDominant;
+  int totalHeirsRejectedSameModuleDecomposition;
+  int totalHeirsRejectedBadAngleS;
+  int totalHeirsRejectedNotMaximalWithRespectToOuterAutomorphisms;
   List<DynkinType> parabolicallyAllowedHeirs;
   int numberOfNilradicalsAllowed;
   int numberOfConeConditionFailures;
   int numberOfRelationsWithStronglyPerpendicularDecomposition;
-  // int NumRelationsgreaterLengthThan2;
   int numberOfGModKTableRowsAllowedLatex;
   int totalSubalgebras;
   int indexInducingSubalgebra;
@@ -176,7 +175,7 @@ public:
   DynkinType dynkinType;
   DynkinType centralizerDynkinType;
   List<List<int> > coneRelationsBuffer;
-  List<int> coneRelationsNumSameTypeComponentsTaken;
+  List<int> coneRelationsNumberOfSameTypeComponentsTaken;
   List<DynkinDiagramRootSubalgebra> relationsDiagrams;
   FinitelyGeneratedMatrixMonoid<Rational>
   outerSAautosExtendingToAmbientAutosGenerators;
@@ -201,7 +200,8 @@ public:
   List<int> kComponentRanks;
   RootSubalgebras* owner;
   HashedList<Vector<Rational> > bufferForModuleGeneration;
-  Matrix<Rational> scalarProdMatrixPermuted, scalarProdMatrixOrdered;
+  Matrix<Rational> scalarProdMatrixPermuted;
+  Matrix<Rational> scalarProdMatrixOrdered;
   Matrix<Rational> scalarProdInvertedMatrixOrdered;
   List<Matrix<Rational> > potentialExtensionCartanSymmetrics;
   List<List<int> > potentialExtensionRootPermutations;
@@ -467,7 +467,7 @@ public:
   SemisimpleLieAlgebra* owner;
   WeylGroupAutomorphisms weylGroupAutomorphisms;
   int parabolicsCounterNilradicalGeneration;
-  List<int> numNilradicalsBySA;
+  List<int> totalNilradicalsBySA;
   int indexCurrentSubalgebraNilradicalsGeneration;
   int numberReductiveRootSubalgebrasToBeProcessedNilradicalsGeneration;
   List<int> countersNilradicalsGeneration;

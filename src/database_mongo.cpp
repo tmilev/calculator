@@ -1133,12 +1133,12 @@ bool Database::updateOneFromSome(
     );
   case DatabaseType::fallback:
     return
-    this->localDatabase.updateOneFromSome(
+    this->fallbackDatabase.updateOneFromSome(
       findOrQueries, updateQuery, commentsOnFailure
     );
   case DatabaseType::internal:
     return
-    this->database.updateOneFromSome(
+    this->localDatabase.updateOneFromSome(
       findOrQueries, updateQuery, commentsOnFailure
     );
   }

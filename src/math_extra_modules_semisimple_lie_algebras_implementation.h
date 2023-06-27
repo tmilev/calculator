@@ -198,8 +198,8 @@ template <class Coefficient>
 MatrixTensor<Coefficient>& ModuleSSalgebra<Coefficient>::
 getActionGeneratorIndex(int generatorIndex) {
   STACK_TRACE("ModuleSSalgebra::getActionGeneratorIndex");
-  int numGenerators = this->getOwner().getNumberOfGenerators();
-  if (generatorIndex < 0 || generatorIndex >= numGenerators) {
+  int numberOfGenerators = this->getOwner().getNumberOfGenerators();
+  if (generatorIndex < 0 || generatorIndex >= numberOfGenerators) {
     global.fatal
     << "Bad generator index: "
     << generatorIndex
@@ -857,7 +857,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   this->character.makeFromWeight(
     this->highestWeightSimpleCoordinatesBaseField, this->owner
   );
-  unsigned long long startingNumRationalOperations =
+  unsigned long long startingRationalOperations =
   Rational::totalLargeAdditions +
   Rational::totalSmallAdditions +
   Rational::totalLargeMultiplications +
@@ -974,7 +974,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
   Rational::totalLargeAdditions +
   Rational::totalSmallAdditions +
   Rational::totalLargeMultiplications +
-  Rational::totalSmallMultiplications - startingNumRationalOperations;
+  Rational::totalSmallMultiplications - startingRationalOperations;
   bool isBad = false;
   for (int k = 0; k < this->bilinearFormsAtEachWeightLevel.size; k ++) {
     Matrix<Coefficient>& bilinearForm =
@@ -1602,11 +1602,11 @@ void ElementTensorsGeneralizedVermas<Coefficient>::tensorOnTheRight(
     this->makeZero();
     return;
   }
-  int maxNumMonsFinal = this->size() * right.size();
+  int maximumMonomialsFinal = this->size() * right.size();
   ElementTensorsGeneralizedVermas<Coefficient> output;
   MonomialTensorGeneralizedVermas<Coefficient> monomial;
   output.makeZero();
-  output.setExpectedSize(maxNumMonsFinal);
+  output.setExpectedSize(maximumMonomialsFinal);
   Coefficient coefficient;
   for (int i = 0; i < right.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {

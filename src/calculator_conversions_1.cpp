@@ -1675,26 +1675,26 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   }
   keys.addOnTop("CurrentChain");
   values.addOnTop(currentChainE);
-  Expression numTypesExploredE;
-  numTypesExploredE.makeSequence(calculator);
+  Expression totalTypesExploredE;
+  totalTypesExploredE.makeSequence(calculator);
   for (
     int i = 0; i < input.currentNumberOfLargerTypesExplored.size; i ++
   ) {
     numericalConvertorE = input.currentNumberOfLargerTypesExplored[i];
-    numTypesExploredE.addChildOnTop(numericalConvertorE);
+    totalTypesExploredE.addChildOnTop(numericalConvertorE);
   }
   keys.addOnTop("NumExploredTypes");
-  values.addOnTop(numTypesExploredE);
-  Expression numHsExploredE;
-  numHsExploredE.makeSequence(calculator);
+  values.addOnTop(totalTypesExploredE);
+  Expression totalHsExploredE;
+  totalHsExploredE.makeSequence(calculator);
   for (
     int i = 0; i < input.currentNumberOfHCandidatesExplored.size; i ++
   ) {
     numericalConvertorE = input.currentNumberOfHCandidatesExplored[i];
-    numHsExploredE.addChildOnTop(numericalConvertorE);
+    totalHsExploredE.addChildOnTop(numericalConvertorE);
   }
   keys.addOnTop("NumExploredHs");
-  values.addOnTop(numHsExploredE);
+  values.addOnTop(totalHsExploredE);
   Expression subalgebrasListE, candidateE;
   subalgebrasListE.makeSequence(calculator);
   subalgebrasListE.setExpectedSize(input.subalgebras.values.size + 1);

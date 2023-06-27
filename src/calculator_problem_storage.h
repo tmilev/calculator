@@ -217,8 +217,8 @@ public:
   bool flagProblemWeightIsOK;
   Rational points;
   ProblemDataAdministrative adminData;
-  int numCorrectlyAnswered;
-  int totalNumSubmissions;
+  int totalCorrectlyAnswered;
+  int totalSubmissions;
   std::string commandsGenerateProblem;
   std::string commandsGenerateProblemNoEnclosures;
   std::string commandsGenerateProblemLink;
@@ -331,7 +331,7 @@ public:
   > problemData;
   TimeWrapper authenticationCreationTime;
   Rational pointsEarned;
-  Rational pointsMax;
+  Rational pointsMaximum;
   bool flagNewAuthenticationTokenComputedUserNeedsIt;
   void computeExpectedNumberOfAnswersPerProblem();
   void computePointsEarned(

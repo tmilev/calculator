@@ -744,15 +744,15 @@ public:
     // So far, we have guaranteed that this and
     // &standsBelow have the same number of columns and
     // are different objects.
-    int oldNumRows = this->numberOfRows;
+    int oldNumberOfRows = this->numberOfRows;
     this->resize(
       this->numberOfRows + standsBelow.numberOfRows,
       this->numberOfColumns,
       true
     );
-    for (int i = oldNumRows; i < this->numberOfRows; i ++) {
+    for (int i = oldNumberOfRows; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
-        this->elements[i][j] = standsBelow(i - oldNumRows, j);
+        this->elements[i][j] = standsBelow(i - oldNumberOfRows, j);
       }
     }
   }
@@ -1663,8 +1663,8 @@ bool Vectors<Coefficient>::conesIntersect(
     return false;
   }
   int dimension = strictCone[0].size;
-  int numCols = strictCone.size + nonStrictCone.size;
-  matA.initialize(dimension + 1, numCols);
+  int numberOfColumns = strictCone.size + nonStrictCone.size;
+  matA.initialize(dimension + 1, numberOfColumns);
   matb.initialize(dimension + 1, 1);
   matb.makeZero();
   matb.elements[dimension][0].makeOne();
@@ -1736,19 +1736,20 @@ void Matrix<Element>::resize(
     return;
   }
   Element** newElements = nullptr;
-  int newActualNumCols =
+  int newActualNumberOfColumns =
   MathRoutines::maximum(this->actualNumberOfColumns, c);
-  int newActualNumRows = MathRoutines::maximum(this->actualNumberOfRows, r);
+  int newActualNumberOfRows =
+  MathRoutines::maximum(this->actualNumberOfRows, r);
   if (r > this->actualNumberOfRows || c > this->actualNumberOfColumns) {
-    newElements = new Element*[newActualNumRows];
+    newElements = new Element*[newActualNumberOfRows];
 #ifdef AllocationLimitsSafeguard
-    GlobalStatistics::globalPointerCounter += newActualNumRows;
+    GlobalStatistics::globalPointerCounter += newActualNumberOfRows;
     GlobalStatistics::checkPointerCounters();
 #endif
-    for (int i = 0; i < newActualNumRows; i ++) {
-      newElements[i] = new Element[newActualNumCols];
+    for (int i = 0; i < newActualNumberOfRows; i ++) {
+      newElements[i] = new Element[newActualNumberOfColumns];
 #ifdef AllocationLimitsSafeguard
-      GlobalStatistics::globalPointerCounter += newActualNumCols;
+      GlobalStatistics::globalPointerCounter += newActualNumberOfColumns;
       GlobalStatistics::checkPointerCounters();
 #endif
     }
@@ -1777,8 +1778,8 @@ void Matrix<Element>::resize(
   if (newElements != nullptr) {
     this->releaseMemory();
     this->elements = newElements;
-    this->actualNumberOfColumns = newActualNumCols;
-    this->actualNumberOfRows = newActualNumRows;
+    this->actualNumberOfColumns = newActualNumberOfColumns;
+    this->actualNumberOfRows = newActualNumberOfRows;
   }
   this->numberOfColumns = c;
   this->numberOfRows = r;
@@ -2088,8 +2089,8 @@ template <typename Element>
 void Matrix<Element>::directSumWith(
   const Matrix<Element>& m2, const Element& ringZero
 ) {
-  int oldNumRows = this->numberOfRows;
-  int oldNumCols = this->numberOfColumns;
+  int oldNumberOfRows = this->numberOfRows;
+  int oldNumberOfColumns = this->numberOfColumns;
   this->resize(
     this->numberOfRows + m2.numberOfRows,
     this->numberOfColumns + m2.numberOfColumns,
@@ -2097,14 +2098,15 @@ void Matrix<Element>::directSumWith(
   );
   for (int i = 0; i < m2.numberOfRows; i ++) {
     for (int j = 0; j < m2.numberOfColumns; j ++) {
-      this->elements[i + oldNumRows][j + oldNumCols] = m2.elements[i][j];
+      this->elements[i + oldNumberOfRows][j + oldNumberOfColumns] =
+      m2.elements[i][j];
     }
-    for (int j = 0; j < oldNumCols; j ++) {
-      this->elements[i + oldNumRows][j] = ringZero;
+    for (int j = 0; j < oldNumberOfColumns; j ++) {
+      this->elements[i + oldNumberOfRows][j] = ringZero;
     }
   }
-  for (int j = 0; j < oldNumRows; j ++) {
-    for (int i = oldNumCols; i < this->numberOfColumns; i ++) {
+  for (int j = 0; j < oldNumberOfRows; j ++) {
+    for (int i = oldNumberOfColumns; i < this->numberOfColumns; i ++) {
       this->elements[j][i] = ringZero;
     }
   }
@@ -2182,16 +2184,16 @@ bool Matrix<Element>::rowEchelonFormToLinearSystemSolution(
     << global.fatal;
   }
   outputSolution.initialize(this->numberOfColumns, 1);
-  int numPivots = 0;
+  int numberOfPivots = 0;
   for (int i = 0; i < this->numberOfColumns; i ++) {
     if (inputPivotPoints.selected[i]) {
-      outputSolution(i, 0) = inputRightHandSide(numPivots, 0);
-      numPivots ++;
+      outputSolution(i, 0) = inputRightHandSide(numberOfPivots, 0);
+      numberOfPivots ++;
     } else {
       outputSolution(i, 0).makeZero();
     }
   }
-  for (int i = numPivots; i < this->numberOfRows; i ++) {
+  for (int i = numberOfPivots; i < this->numberOfRows; i ++) {
     if (!inputRightHandSide.elements[i][0].isEqualToZero()) {
       return false;
     }
@@ -3701,7 +3703,7 @@ public:
   // number of
   // target variables and whose number of columns must equal the number of
   // variables in
-  // the current polynomial (this->NumVariables).
+  // the current polynomial (this->totalVariables).
   // The first row denotes the constant term in the substitution of the
   // respective variable.
   // An element in the x-th row and y-th column
@@ -4306,11 +4308,11 @@ gaussianEliminationByRows(
   HashedList<TemplateMonomial>& allMons = seedMonomials ==
   0 ? bufferMonomials.getElement() : *seedMonomials;
   if (seedMonomials == 0) {
-    int topBoundNumMons = 0;
+    int topBoundNumberOfMonomials = 0;
     for (int i = 0; i < toBeEliminated.size; i ++) {
-      topBoundNumMons += toBeEliminated[i].size();
+      topBoundNumberOfMonomials += toBeEliminated[i].size();
     }
-    allMons.setExpectedSize(topBoundNumMons);
+    allMons.setExpectedSize(topBoundNumberOfMonomials);
   }
   for (int i = 0; i < toBeEliminated.size; i ++) {
     allMons.addOnTopNoRepetition(toBeEliminated[i].monomials);
@@ -4930,11 +4932,11 @@ bool Vectors<Coefficient>::getNormalSeparatingCones(
     }
     return true;
   }
-  int numRows =
+  int numberOfRows =
   coneStrictlyPositiveCoefficients.size + coneNonNegativeCoefficients.size;
-  matrixA.initialize(numRows, dimension * 2 + numRows);
+  matrixA.initialize(numberOfRows, dimension * 2 + numberOfRows);
   matrixA.makeZero();
-  matrixB.initialize(numRows, 1);
+  matrixB.initialize(numberOfRows, 1);
   matrixB.makeZero();
   for (int i = 0; i < coneStrictlyPositiveCoefficients.size; i ++) {
     for (int k = 0; k < dimension; k ++) {
@@ -6723,7 +6725,7 @@ public:
       return;
     }
     output.setSize(this->getMinimalNumberOfRows());
-    int numColsTarget = inputStandToTheLeftAsVectorRows[0].size;
+    int numberOfColumnsTarget = inputStandToTheLeftAsVectorRows[0].size;
     if (
       this->getMinimalNumberOfColumns() != inputStandToTheLeftAsVectorRows.size
     ) {
@@ -6741,10 +6743,10 @@ public:
       << global.fatal;
     }
     for (int i = 0; i < inputStandToTheLeftAsVectorRows.size; i ++) {
-      output[i].makeZero(numColsTarget);
+      output[i].makeZero(numberOfColumnsTarget);
     }
     for (int i = 0; i < this->size(); i ++) {
-      for (int j = 0; j < numColsTarget; j ++) {
+      for (int j = 0; j < numberOfColumnsTarget; j ++) {
         output[(*this)[i].vIndex][j] +=
         inputStandToTheLeftAsVectorRows[(*this)[i].dualIndex][j] *
         this->coefficients[i];

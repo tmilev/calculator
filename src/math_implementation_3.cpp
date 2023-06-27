@@ -19,7 +19,7 @@
 // Used to guard the web server from abuse.
 #ifdef AllocationLimitsSafeguard
 
-long long GlobalStatistics::cgiLimitRAMuseNumPointersInList = 2000000000;
+long long GlobalStatistics::limitTotalPointersInList = 2000000000;
 #endif
 
 MutexRecursiveWrapper ProgressReport::reportMutex;
@@ -43,8 +43,6 @@ class TensorProductMonomial;
 
 // template < > int ListPointers<PartFraction>::MemoryAllocationIncrement =100;
 // ListPointers<PartFraction> PartFraction::GlobalCollectorPartFraction;
-// int PartFraction::lastApplicationOfSVformulaNumNewGenerators = 0;
-// int PartFraction::lastApplicationOfSVformulaNumNewMonomials = 0;
 // FacetPointers TheBigFacetOutput;
 // DrawingVariables TDV(200, 400);
 unsigned long long int Rational::totalLargeAdditions = 0;
@@ -4924,11 +4922,11 @@ void OnePartialFractionDenominator::getPolyReduceMonomialByMonomial(
 int OnePartialFractionDenominator::controlLineSizeFracs(
   std::string& output, FormatExpressions& polynomialFormatLocal
 ) {
-  int numCutOffs = static_cast<signed>(output.size()) % polynomialFormatLocal.
-  maximumLineLength;
+  int numberOfCutOffs = static_cast<signed>(output.size()) %
+  polynomialFormatLocal.maximumLineLength;
   int lastCutOffIndex = 0;
   int numberOfLinesAdded = 0;
-  for (int i = 0; i < numCutOffs; i ++) {
+  for (int i = 0; i < numberOfCutOffs; i ++) {
     for (
       int j = lastCutOffIndex + polynomialFormatLocal.maximumLineLength; j <
       static_cast<signed>(output.size()) -
@@ -5850,21 +5848,22 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
 ) {
   STACK_TRACE("DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn");
   output.setSize(0);
-  MatrixTensor<Rational> directSummand, finalMat;
+  MatrixTensor<Rational> directSummand;
+  MatrixTensor<Rational> finalMatrix;
   if (
     dynkinType.letter == 'D' || (
       dynkinType.letter == 'A' && dynkinType.rank > 1
     ) || (dynkinType.letter == 'E' && dynkinType.rank == 6)
   ) {
     directSummand.makeIdentity(dynkinType.rank *(multiplicity - 1));
-    int numGens = 1;
+    int numberOfGenerators = 1;
     if (dynkinType.letter == 'D' && dynkinType.rank == 4) {
-      numGens = 2;
+      numberOfGenerators = 2;
     }
-    for (int i = 1; i < numGens + 1; i ++) {
-      dynkinType.getAutomorphismActingOnVectorColumn(finalMat, i);
-      finalMat.directSumWith(directSummand);
-      output.addOnTop(finalMat);
+    for (int i = 1; i < numberOfGenerators + 1; i ++) {
+      dynkinType.getAutomorphismActingOnVectorColumn(finalMatrix, i);
+      finalMatrix.directSumWith(directSummand);
+      output.addOnTop(finalMatrix);
     }
   }
   if (multiplicity < 2) {
@@ -5880,11 +5879,11 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
         MonomialMatrix(dynkinType.rank + j, j), 1
       );
     }
-    finalMat.makeIdentity(i * dynkinType.rank);
-    finalMat.directSumWith(directSummand);
+    finalMatrix.makeIdentity(i * dynkinType.rank);
+    finalMatrix.directSumWith(directSummand);
     directSummand.makeIdentity((multiplicity - 2 - i) * dynkinType.rank);
-    finalMat.directSumWith(directSummand);
-    output.addOnTop(finalMat);
+    finalMatrix.directSumWith(directSummand);
+    output.addOnTop(finalMatrix);
   }
 }
 
@@ -5895,29 +5894,31 @@ void DynkinType::getOuterAutosGeneratorsActOnVectorColumn(
   this->sortDynkinTypes();
   List<MatrixTensor<Rational> > intermediateGenerators;
   MatrixTensor<Rational> matrixFinal, matrixToGo;
-  int currentMult = 0;
+  int currentMultiplicity = 0;
   output.setSize(0);
-  int numRowsSoFar = 0;
+  int numberOfRowsSoFar = 0;
   for (int i = 0; i < this->size(); i ++) {
-    if (!this->coefficients[i].isSmallInteger(&currentMult)) {
+    if (!this->coefficients[i].isSmallInteger(&currentMultiplicity)) {
       global.fatal
       << "This is not supposed to happen in function "
       << "DynkinType::getOuterAutosGeneratorsActOnVectorColumn."
       << global.fatal;
     }
     this->getOuterAutosGeneratorsOneTypeActOnVectorColumn(
-      intermediateGenerators, (*this)[i], currentMult
+      intermediateGenerators, (*this)[i], currentMultiplicity
     );
     matrixToGo.makeIdentity(
-      this->getRank() - numRowsSoFar - currentMult *(*this)[i].rank
+      this->getRank() -
+      numberOfRowsSoFar -
+      currentMultiplicity *(*this)[i].rank
     );
     for (int j = 0; j < intermediateGenerators.size; j ++) {
-      matrixFinal.makeIdentity(numRowsSoFar);
+      matrixFinal.makeIdentity(numberOfRowsSoFar);
       matrixFinal.directSumWith(intermediateGenerators[j]);
       matrixFinal.directSumWith(matrixToGo);
       output.addOnTop(matrixFinal);
     }
-    numRowsSoFar += currentMult *(*this)[i].rank;
+    numberOfRowsSoFar += currentMultiplicity *(*this)[i].rank;
   }
   if (output.size == 0) {
     output.setSize(1);
@@ -7797,8 +7798,9 @@ void WeylGroupData::actOnAffineHyperplaneByGroupElement(
   bool rhoAction,
   bool useMinusRho
 ) {
-  int numGens = this->group.elements[index].generatorsLastAppliedFirst.size;
-  for (int i = numGens - 1; i >= 0; i --) {
+  int numberOfGenerators =
+  this->group.elements[index].generatorsLastAppliedFirst.size;
+  for (int i = numberOfGenerators - 1; i >= 0; i --) {
     this->reflectSimple(
       this->group.elements[index].generatorsLastAppliedFirst[i].index,
       output.affinePoint,
@@ -7806,8 +7808,9 @@ void WeylGroupData::actOnAffineHyperplaneByGroupElement(
       useMinusRho
     );
     this->simpleReflectionDualSpace(
-      this->group.elements[index].generatorsLastAppliedFirst[numGens - i - 1].
-      index,
+      this->group.elements[index].generatorsLastAppliedFirst[
+        numberOfGenerators - i - 1
+      ].index,
       output.normal
     );
   }
@@ -8709,7 +8712,6 @@ void WeylGroupData::getExtremeElementInOrbit(
   }
   Rational scalarProduct;
   ElementWeylGroup eltSimplReflection;
-  //  static int numTimesReflectionWasApplied = 0;
   for (bool found = true; found;) {
     found = false;
     for (int i = 0; i < this->getDimension(); i ++) {
@@ -9714,10 +9716,10 @@ computeRootSubsystem() {
     << roots.toString()
     << global.fatal;
   }
-  int numPosRoots = this->rootSubsystem.size / 2;
-  this->rootsOfBorel.setSize(numPosRoots);
-  for (int i = 0; i < numPosRoots; i ++) {
-    this->rootsOfBorel[i] = this->rootSubsystem[i + numPosRoots];
+  int numberOfPositiveRoots = this->rootSubsystem.size / 2;
+  this->rootsOfBorel.setSize(numberOfPositiveRoots);
+  for (int i = 0; i < numberOfPositiveRoots; i ++) {
+    this->rootsOfBorel[i] = this->rootSubsystem[i + numberOfPositiveRoots];
   }
 }
 
@@ -11679,9 +11681,11 @@ bool PartialFractions::reduceOnceRedundantShortRoots(
     if (elongationValue == leastCommonMultipleElongations) {
       continue;
     }
-    int numSummands = leastCommonMultipleElongations / elongationValue;
+    int totalSummands = leastCommonMultipleElongations / elongationValue;
     Vector<Rational> exponent = normalized * elongationValue;
-    toBeReduced.getNElongationPolynomial(numSummands, exponent, multiplicand);
+    toBeReduced.getNElongationPolynomial(
+      totalSummands, exponent, multiplicand
+    );
     int multiplicityChange = currentFraction.multiplicities[i];
     multiplicand.raiseToPower(multiplicityChange, 1);
     outputCoefficient *= multiplicand;
@@ -13110,16 +13114,16 @@ void ConeLatticeAndShiftMaxComputation::initialize(
   allCones.projectivizedCone = startingCone;
   allCones.lattice = startingLattice;
   allCones.shift = startingShift;
-  this->numNonParaM = 0;
-  this->numProcessedNonParam = 0;
-  this->LPtoMaximizeLargerDim.size = 0;
-  this->LPtoMaximizeSmallerDim.size = 0;
+  this->numberOfNonParameters = 0;
+  this->numberOfProcessedNonParameters = 0;
+  this->lPtoMaximizeLargerDim.size = 0;
+  this->lPtoMaximizeSmallerDim.size = 0;
   this->startingRepresentative = startingShift;
   this->finalRepresentatives.size = 0;
   this->complexStartingPerRepresentative.size = 0;
   this->complexRefinedPerRepresentative.size = 0;
   this->conesLargerDimension.addOnTop(allCones);
-  this->LPtoMaximizeLargerDim.addOnTop(inequalities);
+  this->lPtoMaximizeLargerDim.addOnTop(inequalities);
   this->isInfinity.initializeFillInObject(1, false);
 }
 
@@ -13169,7 +13173,7 @@ std::string ConeLatticeAndShiftMaxComputation::toString(
     << " + "
     << this->conesLargerDimension[i].lattice.toString();
     polynomialPart.makeLinearWithConstantTerm(
-      this->LPtoMaximizeLargerDim[i]
+      this->lPtoMaximizeLargerDim[i]
     );
     out
     << "<br>the function we have maxed, as "
@@ -13241,7 +13245,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
           this->conesLargerDimension[j].projectivizedCone
         );
         this->startingLPtoMaximize[i].addOnTop(
-          this->LPtoMaximizeLargerDim[j]
+          this->lPtoMaximizeLargerDim[j]
         );
       }
     }
@@ -13319,14 +13323,14 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1() {
   ProgressReport report2;
   ProgressReport report3;
   for (
-    ; this->numProcessedNonParam < this->numNonParaM; this->
-    numProcessedNonParam ++
+    ; this->numberOfProcessedNonParameters < this->numberOfNonParameters; this
+    ->numberOfProcessedNonParameters ++
   ) {
     while (this->conesLargerDimension.size > 0) {
       ConeLatticeAndShift& currentCLS =
       *this->conesLargerDimension.lastObject();
       if (
-        this->LPtoMaximizeLargerDim.lastObject()->size !=
+        this->lPtoMaximizeLargerDim.lastObject()->size !=
         currentCLS.getDimensionAffine() + 1
       ) {
         global.fatal
@@ -13334,21 +13338,21 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1() {
         << "dimensions don't match. "
         << global.fatal;
       }
-      if (!this->LPtoMaximizeLargerDim.lastObject()->isEqualToZero()) {
+      if (!this->lPtoMaximizeLargerDim.lastObject()->isEqualToZero()) {
         currentCLS.findExtremaInDirectionOverLatticeOneNonParametric(
-          *this->LPtoMaximizeLargerDim.lastObject(),
-          this->LPtoMaximizeSmallerDim,
+          *this->lPtoMaximizeLargerDim.lastObject(),
+          this->lPtoMaximizeSmallerDim,
           this->conesSmallerDimension
         );
       }
       this->conesLargerDimension.size --;
-      this->LPtoMaximizeLargerDim.size --;
+      this->lPtoMaximizeLargerDim.size --;
       std::stringstream tempStream1, tempStream2, tempStream3;
       tempStream1
       << "Processing "
-      << this->numProcessedNonParam + 1
+      << this->numberOfProcessedNonParameters + 1
       << " out of "
-      << this->numNonParaM;
+      << this->numberOfNonParameters;
       tempStream2 << "Remaining cones: " << this->conesLargerDimension.size;
       tempStream3
       << "Cones smaller dim total: "
@@ -13357,10 +13361,10 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1() {
       report2.report(tempStream2.str());
       report3.report(tempStream3.str());
     }
-    this->LPtoMaximizeLargerDim = this->LPtoMaximizeSmallerDim;
+    this->lPtoMaximizeLargerDim = this->lPtoMaximizeSmallerDim;
     this->conesLargerDimension = this->conesSmallerDimension;
     this->conesSmallerDimension.size = 0;
-    this->LPtoMaximizeSmallerDim.size = 0;
+    this->lPtoMaximizeSmallerDim.size = 0;
   }
 }
 

@@ -319,9 +319,9 @@ void MatrixTensor<Coefficient>::operator*=(
   }
   this->checkConsistency();
   other.checkConsistency();
-  int maxNumMonsFinal = this->size() * other.size();
-  if (maxNumMonsFinal > 2000000) {
-    maxNumMonsFinal = 2000000;
+  int maximumMonomialsFinal = this->size() * other.size();
+  if (maximumMonomialsFinal > 2000000) {
+    maximumMonomialsFinal = 2000000;
   }
   int totalMonPairs = 0;
   ProgressReport report1;
@@ -343,7 +343,7 @@ void MatrixTensor<Coefficient>::operator*=(
     report1.report(reportStream.str());
   }
   MatrixTensor<Coefficient> result;
-  result.setExpectedSize(maxNumMonsFinal);
+  result.setExpectedSize(maximumMonomialsFinal);
   Coefficient currentCoefficient;
   MonomialMatrix currentMonomial;
   for (int i = 0; i < other.size(); i ++) {

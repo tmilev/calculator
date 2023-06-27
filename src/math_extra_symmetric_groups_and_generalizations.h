@@ -4,8 +4,6 @@
 
 #include "general_lists.h"
 #include "math_general.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_extra_vector_space.h"
 #include "math_extra_graph.h"
 #include "math_extra_finite_groups.h"
 #include "math_extra_finite_groups_implementation.h"
@@ -135,7 +133,7 @@ public:
   List<int> p;
   int& operator[](int i) const;
   void fromListInt(const List<int>& in, int lastElement = - 1);
-  static void GetPartitions(List<Partition>& out, int n);
+  static void getPartitions(List<Partition>& out, int n);
   void transpose();
   void fillTableau(Tableau& out, List<int>& stuffing) const;
   void fillTableauOrdered(Tableau& out) const;
@@ -1615,14 +1613,14 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(
   }
   // pad the numbers out front
   List<std::string> numbers;
-  int numpad = 0;
+  int paddingSize = 0;
   for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
     std::stringstream ns;
     ns << i;
     numbers.addOnTop(ns.str());
     int nil = numbers.lastObject()->length();
-    if (numpad < nil) {
-      numpad = nil;
+    if (paddingSize < nil) {
+      paddingSize = nil;
     }
   }
   // pad the character values
@@ -1648,7 +1646,7 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(
   columnsPerElement ++;
   // ok print it all up
   for (int i = 0; i < values.size; i ++) {
-    int padn = numpad - static_cast<signed>(numbers[i].length());
+    int padn = paddingSize - static_cast<signed>(numbers[i].length());
     for (int pp = 0; pp < padn; pp ++) {
       out << ' ';
     }
@@ -1710,14 +1708,14 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCCRepsSizes(
   std::stringstream out;
   // pad the numbers out front
   List<std::string> numbers;
-  int numpad = 0;
+  int paddingLevel = 0;
   for (int i = 0; i < this->conjugacyClasses.size; i ++) {
     std::stringstream ns;
     ns << i;
     numbers.addOnTop(ns.str());
     int nilen = numbers.lastObject()->length();
-    if (numpad < nilen) {
-      numpad = nilen;
+    if (paddingLevel < nilen) {
+      paddingLevel = nilen;
     }
   }
   // pad the sizes
@@ -1734,7 +1732,7 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCCRepsSizes(
   }
   for (int i = 0; i < this->conjugacyClasses.size; i ++) {
     int pad;
-    pad = numpad - static_cast<int>(numbers[i].length());
+    pad = paddingLevel - static_cast<int>(numbers[i].length());
     for (int j = 0; j < pad; j ++) {
       out << " ";
     }

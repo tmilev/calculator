@@ -165,8 +165,8 @@ public:
   bool flagCentralizerTypeIsComputed;
   bool flagUsedInducingSubalgebraRealization;
   int recursionDepthCounterForNilradicalGeneration;
-  int totalNumUnknownsNoCentralizer;
-  int totalNumUnknownsWithCentralizer;
+  int totalUnknownsNoCentralizer;
+  int totalUnknownsWithCentralizer;
   long long int totalArithmeticOpsToSolveSystem;
   List<NilradicalCandidate> fernandoKacNilradicalCandidates;
   int numberOfConeIntersections;

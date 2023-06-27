@@ -167,8 +167,6 @@ public:
   Rational totalPointsEarned;
   Rational pointsEarnedInProblemsThatAreImmediateChildren;
   Rational maxPointsInAllChildren;
-  //  Rational numAnsweredInAllChildren;
-  //  Rational maxCorrectAnswersInAllChildren;
   void computeID(int elementIndex, TopicElementParser& owner);
   void reset();
   friend std::ostream& operator<<(

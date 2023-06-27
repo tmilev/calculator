@@ -2144,8 +2144,8 @@ bool CalculatorFunctions::newtonsMethod(
     << "on exactly one variable. The variables I got were: "
     << variables.toStringCommaDelimited();
   }
-  int numIterations = - 1;
-  if (!input[3].isSmallInteger(&numIterations)) {
+  int totalIterations = - 1;
+  if (!input[3].isSmallInteger(&totalIterations)) {
     std::stringstream errorStream;
     errorStream
     << "While doing Newton's method, "
@@ -2156,13 +2156,13 @@ bool CalculatorFunctions::newtonsMethod(
     << ". Please enter a number as the third argument of Newton's method. ";
     return output.assignError(calculator, errorStream.str());
   }
-  if (numIterations < 1 || numIterations > 50) {
+  if (totalIterations < 1 || totalIterations > 50) {
     std::stringstream errorStream;
     errorStream
     << "While doing Newton's method with the command: "
     << input.toString()
     << ", the third argument requests "
-    << numIterations
+    << totalIterations
     << " iterations. However, "
     << "the number of iterations is required "
     << "to be a number between 1 and 50. ";
@@ -2655,11 +2655,11 @@ bool CalculatorFunctions::generateMultiplicativelyClosedSet(
   for (int i = 2; i < input.size(); i ++) {
     set.addOnTop(input[i]);
   }
-  int numGenerators = set.size;
+  int numberOfGenerators = set.size;
   Expression product, evaluatedProduct;
   ProgressReport report;
   for (int i = 0; i < set.size; i ++) {
-    for (int j = 0; j < numGenerators; j ++) {
+    for (int j = 0; j < numberOfGenerators; j ++) {
       product.makeProduct(calculator, set[j], set[i]);
       std::stringstream reportStream;
       reportStream

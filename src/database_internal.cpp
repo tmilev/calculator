@@ -15,8 +15,10 @@ void LocalDatabase::createHashIndex(
   << global.fatal;
 }
 
-LocalDatabase::LocalDatabase(){
-    this->processIdDatabase = -1;
+LocalDatabase::LocalDatabase() {
+  this->processId = - 1;
+  this->socket = - 1;
+  this->port = - 1;
 }
 
 bool LocalDatabase::fetchCollectionNames(
@@ -70,7 +72,9 @@ bool LocalDatabase::findOneFromSome(
   (void) findOrQueries;
   (void) output;
   (void) commentsOnFailure;
-  global.fatal << "LocalDatabase::findOneFromSome: not implemented yet. " << global.fatal;
+  global.fatal
+  << "LocalDatabase::findOneFromSome: not implemented yet. "
+  << global.fatal;
   return false;
 }
 

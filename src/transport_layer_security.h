@@ -696,7 +696,7 @@ public:
     bool includeNoErrorInComments
   );
   bool sslReadLoop(
-    int numTries,
+    int totalTries,
     std::string& output,
     const LargeInteger& expectedLength,
     std::string* commentsOnFailure,

@@ -296,7 +296,7 @@ public:
   // email info
   static std::string tableEmailInfo;
   static std::string labelLastActivationEmailTime;
-  static std::string labelNumActivationEmails;
+  static std::string labelTotalActivationEmails;
   // course info column names
   static std::string labelCurrentCourses;
   static std::string labelSection;

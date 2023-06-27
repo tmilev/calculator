@@ -109,7 +109,7 @@ bool TransportLayerSecurity::initializeAdditionalCertificates() {
 }
 
 bool TransportLayerSecurity::sslReadLoop(
-  int numTries,
+  int totalTries,
   std::string& output,
   const LargeInteger& expectedLength,
   std::string* outputError,
@@ -129,7 +129,7 @@ bool TransportLayerSecurity::sslReadLoop(
   int i = 0;
   std::string next;
   int numberOfBytes = - 1;
-  for (i = 0; i < numTries; i ++) {
+  for (i = 0; i < totalTries; i ++) {
     numberOfBytes =
     this->readOnce(
       - 1, outputError, commentsGeneral, includeNoErrorInComments

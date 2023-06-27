@@ -2446,14 +2446,14 @@ bool CalculatorParser::replaceEXdotsXbySsXdotsX(int numberOfDots) {
   ) {
     SyntacticElement& current = (*this->currentSyntacticStack)[i];
     if (
-      current.numBoundVariablesInherited >= 0 &&
-      current.numNonBoundVariablesInherited >= 0
+      current.totalBoundVariablesInherited >= 0 &&
+      current.totalNonBoundVariablesInherited >= 0
     ) {
       this->nonBoundVariablesInContext.setSize(
-        current.numNonBoundVariablesInherited
+        current.totalNonBoundVariablesInherited
       );
       this->boundVariablesInContext.setSize(
-        current.numBoundVariablesInherited
+        current.totalBoundVariablesInherited
       );
       found = true;
       break;
@@ -3085,7 +3085,7 @@ bool CalculatorParser::extractExpressions(
   this->parsingLog = "";
   this->nonBoundVariablesInContext.clear();
   this->boundVariablesInContext.clear();
-  const int maxNumTimesOneRuleCanBeCalled = 1000;
+  const int totalTimesOneRuleCanBeCalled = 1000;
   int counterReport = 0;
   int symbolsToIssueReport = 100;
   int minMillisecondsPerReport = 200;
@@ -3125,24 +3125,24 @@ bool CalculatorParser::extractExpressions(
       this->lastRuleName = "[next token]";
       this->logParsingOperation();
     }
-    int numTimesRulesCanBeAppliedWithoutStackDecrease = 0;
+    int totalTimesRulesCanBeAppliedWithoutStackDecrease = 0;
     int minStackSize = this->currentSyntacticStack->size;
     while (this->applyOneRule()) {
       this->logParsingOperation();
       if (this->currentSyntacticStack->size < minStackSize) {
-        numTimesRulesCanBeAppliedWithoutStackDecrease = 0;
+        totalTimesRulesCanBeAppliedWithoutStackDecrease = 0;
         minStackSize = this->currentSyntacticStack->size;
       } else {
-        numTimesRulesCanBeAppliedWithoutStackDecrease ++;
+        totalTimesRulesCanBeAppliedWithoutStackDecrease ++;
       }
       if (
-        numTimesRulesCanBeAppliedWithoutStackDecrease >
-        maxNumTimesOneRuleCanBeCalled
+        totalTimesRulesCanBeAppliedWithoutStackDecrease >
+        totalTimesOneRuleCanBeCalled
       ) {
         global.fatal
         << "This may be a programming error: "
         << "CalculatorParser::applyOneRule called more than "
-        << maxNumTimesOneRuleCanBeCalled
+        << totalTimesOneRuleCanBeCalled
         << " times without advancing to the "
         << "next syntactic element in the syntactic soup. "
         << "If this is indeed an expression which requires that "
@@ -3248,10 +3248,10 @@ bool CalculatorParser::applyOneRule() {
   }
   if (lastS == "(" || lastS == "{") {
     (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1
-    ].numNonBoundVariablesInherited =
+    ].totalNonBoundVariablesInherited =
     this->nonBoundVariablesInContext.size;
     (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1
-    ].numBoundVariablesInherited =
+    ].totalBoundVariablesInherited =
     this->boundVariablesInContext.size;
   }
   const SyntacticElement& thirdToLastE = (*this->currentSyntacticStack)[(

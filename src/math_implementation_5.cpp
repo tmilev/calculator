@@ -350,11 +350,11 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
     ] =
     input.coefficients[i];
   }
-  int numPosRoots =
+  int numberOfPositiveRoots =
   this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
   Vector<Rational> tempH = input.getCartanPart();
   for (int i = 0; i < this->ownerSemisimpleLieAlgebra->getRank(); i ++) {
-    coefficients[numPosRoots + i] = tempH[i];
+    coefficients[numberOfPositiveRoots + i] = tempH[i];
   }
   this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(
     coefficients

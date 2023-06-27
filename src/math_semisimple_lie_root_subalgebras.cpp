@@ -472,7 +472,7 @@ void RootSubalgebra::possibleNilradicalComputation(
 ) {
   this->numberOfNilradicalsAllowed ++;
   if (owner.flagCountingNilradicalsOnlyNoComputation) {
-    owner.numNilradicalsBySA[indexInOwner] ++;
+    owner.totalNilradicalsBySA[indexInOwner] ++;
     this->makeProgressReportpossibleNilradicalComputation(owner);
     return;
   }
@@ -503,7 +503,7 @@ void RootSubalgebra::possibleNilradicalComputation(
       // the below commented out code should be incapsulated. It computes
       // whether a given nilradical is a nilradical of a parabolic subalgebra.
       // this task is pushed on the end of the to-do list.
-      /* owner.NumconeConditionHoldsBySSpart.objects[indexInOwner] ++;
+      /* owner.numberOfconeConditionHoldsBySSpart.objects[indexInOwner] ++;
       if (owner.ReportStringNonNilradicalParabolic == "") {
         this->computeRootsOfK();
         Vectors<Rational> tempNilradical; Vectors<Rational> tempOthers; Vectors<Rational> tempK;
@@ -590,7 +590,7 @@ void RootSubalgebra::generateKModuleLieBracketTable(
 ) {
   output.setSize(this->modules.size);
   oppositeKmods.setSize(this->modules.size);
-  int numTotal = this->modules.size * this->modules.size;
+  int total = this->modules.size * this->modules.size;
   std::stringstream out;
   out
   << "Computing pairing table for the module "
@@ -613,7 +613,7 @@ void RootSubalgebra::generateKModuleLieBracketTable(
         << "Computing pairing table: "
         << i * this->modules.size + j + 1
         << " out of "
-        << numTotal;
+        << total;
         report2.report(out5.str());
       }
     }
@@ -1758,16 +1758,16 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   out
   << "<br>Heirs rejected due to having symmetric Cartan type outside "
   << "of list dictated by parabolic heirs: "
-  << this->numHeirsRejectedBadAngleS
+  << this->totalHeirsRejectedBadAngleS
   << "<br>Heirs rejected due to not being maximally dominant: "
-  << this->numHeirsRejectedNotMaximallyDominant
+  << this->totalHeirsRejectedNotMaximallyDominant
   << "<br>Heirs rejected due to not being maximal "
   << "with respect to small Dynkin diagram automorphism that extends to "
   << "ambient automorphism: "
-  << this->numHeirsRejectedNotMaximallyDominant
+  << this->totalHeirsRejectedNotMaximallyDominant
   << "<br>Heirs rejected due to having ambient Lie algebra "
   << "decomposition iso to an already found subalgebra: "
-  << this->numHeirsRejectedSameModuleDecompo;
+  << this->totalHeirsRejectedSameModuleDecomposition;
   if (this->indexInducingSubalgebra == - 1) {
     out << "<br>This subalgebra is not parabolically induced by anyone";
   } else {
@@ -2008,10 +2008,10 @@ RootSubalgebra::RootSubalgebra() {
 
 void RootSubalgebra::initNoOwnerReset() {
   this->indexInducingSubalgebra = - 1;
-  this->numHeirsRejectedNotMaximallyDominant = 0;
-  this->numHeirsRejectedSameModuleDecompo = 0;
-  this->numHeirsRejectedBadAngleS = 0;
-  this->numHeirsRejectedNotMaxWRTouterAuto = 0;
+  this->totalHeirsRejectedNotMaximallyDominant = 0;
+  this->totalHeirsRejectedSameModuleDecomposition = 0;
+  this->totalHeirsRejectedBadAngleS = 0;
+  this->totalHeirsRejectedNotMaximalWithRespectToOuterAutomorphisms = 0;
   this->indicesSubalgebrasContainingK.clear();
 }
 
@@ -2380,7 +2380,8 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);
   int tempI2 = permComponentsCentralizer.totalNumberSubsetsSmallInt();
-  int NumAutosCentralizer = tempAutosCentralizer.totalNumberSubsetsSmallInt();
+  int totalAutomorphismsOfCentralizer =
+  tempAutosCentralizer.totalNumberSubsetsSmallInt();
   permComponentsCentralizer.getPermutationLthElementIsTheImageofLthIndex(
     tempPermutation2
   );
@@ -2403,7 +2404,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   }
   int givenSize = isoDomain.size;
   for (int j = 0; j < tempI2; j ++) {
-    for (int l = 0; l < NumAutosCentralizer; l ++) {
+    for (int l = 0; l < totalAutomorphismsOfCentralizer; l ++) {
       isoDomain.size = givenSize;
       isoRange.size = givenSize;
       domainRootSubalgebra.centralizerDiagram.getMapFromPermutation(
@@ -2432,8 +2433,8 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
       }
       if (outputAutomorphisms != nullptr) {
         domainRootSubalgebra.makeProgressReportGeneratorAutomorphisms(
-          l + NumAutosCentralizer * j,
-          tempI2* NumAutosCentralizer,
+          l + totalAutomorphismsOfCentralizer * j,
+          tempI2* totalAutomorphismsOfCentralizer,
           outputAutomorphisms->externalAutomorphisms.size
         );
       }
@@ -2501,11 +2502,12 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);
   int tempI1;
-  int NumAutos;
+  int totalAutomorphisms;
   tempI1 = permComponents.totalNumberSubsetsSmallInt();
-  NumAutos = tempAutos.totalNumberSubsetsSmallInt();
+  totalAutomorphisms = tempAutos.totalNumberSubsetsSmallInt();
   int tempI2 = permComponentsCentralizer.totalNumberSubsetsSmallInt();
-  int NumAutosCentralizer = tempAutosCentralizer.totalNumberSubsetsSmallInt();
+  int totalAutomorphismsOfCentralizer =
+  tempAutosCentralizer.totalNumberSubsetsSmallInt();
   permComponents.getPermutationLthElementIsTheImageofLthIndex(
     tempPermutation1
   );
@@ -2514,8 +2516,8 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   );
   for (int i = 0; i < tempI1; i ++) {
     for (int j = 0; j < tempI2; j ++) {
-      for (int k = 0; k < NumAutos; k ++) {
-        for (int l = 0; l < NumAutosCentralizer; l ++) {
+      for (int k = 0; k < totalAutomorphisms; k ++) {
+        for (int l = 0; l < totalAutomorphismsOfCentralizer; l ++) {
           isoDomain.size = 0;
           isoRange.size = 0;
           this->dynkinDiagram.getMapFromPermutation(
@@ -2552,8 +2554,12 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
           }
           if (outputAutomorphisms != nullptr) {
             this->makeProgressReportGeneratorAutomorphisms(
-              l + NumAutosCentralizer *(k + NumAutos *(j + i * tempI2)),
-              tempI1 * tempI2 * NumAutos * NumAutosCentralizer,
+              l +
+              totalAutomorphismsOfCentralizer *(
+                k + totalAutomorphisms *(j + i * tempI2)
+              ),
+              tempI1 * tempI2 * totalAutomorphisms *
+              totalAutomorphismsOfCentralizer,
               outputAutomorphisms->externalAutomorphisms.size
             );
           }
@@ -2868,7 +2874,7 @@ bool RootSubalgebra::checkForMaximalDominanceCartanSubalgebra() {
           ) {
             if (this->indexInducingSubalgebra != - 1) {
               this->owner->subalgebras[this->indexInducingSubalgebra].
-              numHeirsRejectedNotMaxWRTouterAuto ++;
+              totalHeirsRejectedNotMaximalWithRespectToOuterAutomorphisms ++;
             }
             return false;
           } else {
@@ -2969,7 +2975,7 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     }
     if (goodPermutation == - 1) {
       this->owner->subalgebras[this->indexInducingSubalgebra].
-      numHeirsRejectedBadAngleS ++;
+      totalHeirsRejectedBadAngleS ++;
       return false;
     }
     Vectors<Rational> copySimpleBasisK = this->simpleRootsReductiveSubalgebra;
@@ -3017,7 +3023,7 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     }
     if (this->indexInducingSubalgebra != - 1) {
       this->owner->subalgebras[this->indexInducingSubalgebra].
-      numHeirsRejectedNotMaximallyDominant ++;
+      totalHeirsRejectedNotMaximallyDominant ++;
     }
     return false;
   }
@@ -3046,7 +3052,7 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     ) {
       if (this->indexInducingSubalgebra != - 1) {
         this->owner->subalgebras[this->indexInducingSubalgebra].
-        numHeirsRejectedSameModuleDecompo ++;
+        totalHeirsRejectedSameModuleDecomposition ++;
       }
       return false;
     }
@@ -4322,7 +4328,7 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
     outerIsomorphism.computeSubGroupFromGeneratingReflections(
       &emptyRoots, &outerIsomorphism.externalAutomorphisms, 0, true
     );
-    Rational numInnerIsos =
+    Rational totalInnerIsomorphisms =
     current.centralizerDiagram.getSizeCorrespondingWeylGroupByFormula();
     if (useHtml) {
       out << "<td>";
@@ -4350,14 +4356,15 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
     if (useLatex) {
       out << " & ";
     }
-    out << numInnerIsos.toString();
+    out << totalInnerIsomorphisms.toString();
     if (useHtml) {
       out << "</td><td>";
     }
     if (useLatex) {
       out << " & ";
     }
-    out << (numInnerIsos * outerIsomorphism.allElements.size).toString();
+    out
+    << (totalInnerIsomorphisms * outerIsomorphism.allElements.size).toString();
     if (useHtml) {
       out << "</td></tr>";
     }
@@ -4990,7 +4997,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
   std::stringstream out;
   std::stringstream out2;
   std::string tempS;
-  int numNonSolvableNonReductive = 0;
+  int totalNonSolvableNonReductive = 0;
   char simpleType;
   int rank;
   if (
@@ -5076,12 +5083,12 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
       } else {
         out << "\\end{tabular} &\n\\begin{tabular}{l}";
       }
-      int numNonReductiveCurrent = 0;
+      int totalNonReductiveCurrent = 0;
       for (int j = 0; j < this->storedNilradicals[i].size; j ++) {
         List<int>& currentNilrad = this->storedNilradicals[i][j];
         if (currentNilrad.size > 0) {
-          numNonSolvableNonReductive ++;
-          numNonReductiveCurrent ++;
+          totalNonSolvableNonReductive ++;
+          totalNonReductiveCurrent ++;
           roots.size =
           currentRootSubalgebra.positiveRootsReductiveSubalgebra.size * 2;
           for (int k = 0; k < currentNilrad.size; k ++) {
@@ -5093,7 +5100,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
           }
           this->toStringRootSpaces(tempS, includeMatrixForm, roots);
           out << tempS << "\n";
-          if (numNonReductiveCurrent % 2 == 0) {
+          if (totalNonReductiveCurrent % 2 == 0) {
             out << "\n\n";
             if (!includeMatrixForm) {
               out << "\\\\";
@@ -5112,7 +5119,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
   out2
   << "\n\nThe number of non-conjugate non-solvable non-reductive "
   << "root subalgebras not satisfying the cone condition is: "
-  << numNonSolvableNonReductive
+  << totalNonSolvableNonReductive
   << "\n\n";
   tempS = out.str();
   out2 << tempS;
@@ -5275,16 +5282,17 @@ void RootSubalgebras::toStringRootSpaces(
   if (includeMatrixForm) {
     out << "\\\\";
   }
-  int numNilradicalRootSpaces = 0;
+  int totalNilradicalRootSpaces = 0;
   for (int i = 0; i < epsilonCoordinates.size; i ++) {
     Vector<Rational>& currentRoot = epsilonCoordinates[i];
     tempS = currentRoot.toStringEpsilonFormat();
     if (!epsilonCoordinates.contains(- currentRoot)) {
       out << tempS << ", ";
-      numNilradicalRootSpaces ++;
+      totalNilradicalRootSpaces ++;
     }
     if (includeMatrixForm) {
-      if (numNilradicalRootSpaces % 2 == 0 && numNilradicalRootSpaces != 0) {
+      if (totalNilradicalRootSpaces % 2 == 0 && totalNilradicalRootSpaces != 0)
+      {
         out << "\\\\";
       }
     }
@@ -5328,31 +5336,31 @@ void RootSubalgebras::toStringRootSpaces(
 void RootSubalgebras::applyOneGenerator(
   List<int>& generator, Selection& targetSelection
 ) {
-  Selection tempSel;
-  tempSel.initialize(targetSelection.numberOfElements);
+  Selection selection;
+  selection.initialize(targetSelection.numberOfElements);
   for (int i = 0; i < targetSelection.cardinalitySelection; i ++) {
-    tempSel.addSelectionAppendNewIndex(
+    selection.addSelectionAppendNewIndex(
       generator[targetSelection.elements[i]]
     );
   }
-  targetSelection = tempSel;
+  targetSelection = selection;
 }
 
 bool RootSubalgebras::approveSelAgainstOneGenerator(
   List<int>& generator, Selection& targetSelection
 ) {
-  Selection tempSel;
-  tempSel.initialize(targetSelection.numberOfElements);
+  Selection selection;
+  selection.initialize(targetSelection.numberOfElements);
   for (int i = 0; i < targetSelection.cardinalitySelection; i ++) {
-    tempSel.addSelectionAppendNewIndex(
+    selection.addSelectionAppendNewIndex(
       generator[targetSelection.elements[i]]
     );
   }
-  for (int i = 0; i < tempSel.numberOfElements; i ++) {
-    if (targetSelection.selected[i] && !tempSel.selected[i]) {
+  for (int i = 0; i < selection.numberOfElements; i ++) {
+    if (targetSelection.selected[i] && !selection.selected[i]) {
       return true;
     }
-    if (!targetSelection.selected[i] && tempSel.selected[i]) {
+    if (!targetSelection.selected[i] && selection.selected[i]) {
       return false;
     }
   }
@@ -5501,11 +5509,11 @@ void ConeRelation::relationOneSideToString(
     out << "\\\\";
   }
   List<int> takenIndices;
-  List<int> NumPrimesUniTypicComponent;
+  List<int> numberOfPrimesUniTypicComponent;
   takenIndices.initializeFillInObject(
     owner.dynkinDiagram.simpleBasesConnectedComponents.size, - 1
   );
-  NumPrimesUniTypicComponent.initializeFillInObject(
+  numberOfPrimesUniTypicComponent.initializeFillInObject(
     owner.dynkinDiagram.sameTypeComponents.size, - 1
   );
   for (int i = 0; i < kComponents.size; i ++) {
@@ -5517,8 +5525,9 @@ void ConeRelation::relationOneSideToString(
       int indexUniComponent = owner.dynkinDiagram.indexUniComponent[index];
       out << owner.dynkinDiagram.simpleComponentTypes[index].toString();
       if (takenIndices[index] == - 1) {
-        NumPrimesUniTypicComponent[indexUniComponent] ++;
-        takenIndices[index] = NumPrimesUniTypicComponent[indexUniComponent];
+        numberOfPrimesUniTypicComponent[indexUniComponent] ++;
+        takenIndices[index] =
+        numberOfPrimesUniTypicComponent[indexUniComponent];
       }
       for (int k = 0; k < takenIndices[index]; k ++) {
         out << "'";
@@ -5653,7 +5662,7 @@ int ConeRelation::rootsToScalarProductString(
 ) {
   std::string coefficientString;
   std::stringstream out;
-  int numLinesLatex = 0;
+  int numberOfLinesLatex = 0;
   Rational scalarProduct;
   for (int i = 0; i < inputLeft.size; i ++) {
     for (int j = 0; j < inputRight.size; j ++) {
@@ -5675,13 +5684,13 @@ int ConeRelation::rootsToScalarProductString(
           << "\\rangle ="
           << coefficientString
           << "$, ";
-          numLinesLatex ++;
+          numberOfLinesLatex ++;
         }
       }
     }
   }
   output = out.str();
-  return numLinesLatex;
+  return numberOfLinesLatex;
 }
 
 void ConeRelation::computeConnectedComponents(

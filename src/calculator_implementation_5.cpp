@@ -175,8 +175,8 @@ int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex)
   // Clean up carried out only when we have twice
   // exceeded the triangle limit
   // this way clean up will be carried only after
-  // we have generated at least maxNumTriangles since the last cleanup
-  // (which leaves no more than maxNumTriangles alive).
+  // we have generated at least maximimNumberOfTriangles since the last cleanup
+  // (which leaves no more than maximimNumberOfTriangles alive).
   if (this->triangles.size != this->trianglesUsed.size) {
     global.fatal
     << "this->triangles.size is not equal to "

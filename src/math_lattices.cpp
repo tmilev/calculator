@@ -1368,13 +1368,15 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& substitution) {
   if (nonPivotPoints.cardinalitySelection != 0) {
     return false;
   }
-  int numNonZeroRows = nonPivotPoints.numberOfElements;
-  int numZeroRows = matrix.numberOfRows - numNonZeroRows;
-  matRelationBetweenStartingVariables.initialize(numZeroRows, startingDim);
-  for (int i = 0; i < numZeroRows; i ++) {
+  int numberOfNonZeroRows = nonPivotPoints.numberOfElements;
+  int numberOfZeroRows = matrix.numberOfRows - numberOfNonZeroRows;
+  matRelationBetweenStartingVariables.initialize(
+    numberOfZeroRows, startingDim
+  );
+  for (int i = 0; i < numberOfZeroRows; i ++) {
     for (int j = 0; j < startingDim; j ++) {
       matRelationBetweenStartingVariables.elements[i][j] =
-      oldBasisTransformed.elements[i + numNonZeroRows][j];
+      oldBasisTransformed.elements[i + numberOfNonZeroRows][j];
     }
   }
   Vectors<Rational> eigenSpace;
@@ -1550,7 +1552,7 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
   LargeIntegerUnsigned scaleThis, scaleOther;
   scaleThis = this->denominator / oldDenominator;
   scaleOther = this->denominator / other.denominator;
-  int oldNumRows = this->basis.numberOfRows;
+  int oldNumberOfRows = this->basis.numberOfRows;
   LargeInteger scale;
   scale = scaleThis;
   this->basis *= scale;
@@ -1559,10 +1561,10 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
     dimension,
     true
   );
-  for (int i = oldNumRows; i < this->basis.numberOfRows; i ++) {
+  for (int i = oldNumberOfRows; i < this->basis.numberOfRows; i ++) {
     for (int j = 0; j < this->basis.numberOfColumns; j ++) {
       this->basis.elements[i][j] =
-      other.basis.elements[i - oldNumRows][j] * scaleOther;
+      other.basis.elements[i - oldNumberOfRows][j] * scaleOther;
     }
   }
   this->reduce();

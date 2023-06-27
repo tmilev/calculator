@@ -1467,23 +1467,24 @@ bool RationalFraction<Coefficient>::getRelations(
   }
   List<Polynomial<Rational> > groebnerBasis;
   groebnerBasis = inputElements;
-  int numStartingGenerators = inputElements.size;
-  int numStartingVariables = 0;
+  int startingGenerators = inputElements.size;
+  int totalStartingVariables = 0;
   for (int i = 0; i < inputElements.size; i ++) {
-    numStartingVariables =
+    totalStartingVariables =
     MathRoutines::maximum(
-      numStartingVariables, inputElements[0].minimalNumberOfVariables()
+      totalStartingVariables,
+      inputElements[0].minimalNumberOfVariables()
     );
   }
   Polynomial<Rational> currentGenerator;
-  for (int i = 0; i < numStartingGenerators; i ++) {
+  for (int i = 0; i < startingGenerators; i ++) {
     Polynomial<Rational>& currentPoly = groebnerBasis[i];
     currentPoly.setNumberOfVariablesSubstituteDeletedByOne(
-      numStartingVariables + numStartingGenerators
+      totalStartingVariables + startingGenerators
     );
     currentGenerator.makeDegreeOne(
-      numStartingVariables + numStartingGenerators,
-      i + numStartingVariables,
+      totalStartingVariables + startingGenerators,
+      i + totalStartingVariables,
       1
     );
     outputGeneratorLabels[i] = currentGenerator;
@@ -1502,7 +1503,7 @@ bool RationalFraction<Coefficient>::getRelations(
   for (int i = 0; i < groebnerBasis.size; i ++) {
     Polynomial<Rational>& currentPoly = groebnerBasis[i];
     bool bad = false;
-    for (int j = 0; j < numStartingVariables; j ++) {
+    for (int j = 0; j < totalStartingVariables; j ++) {
       if (currentPoly.maximumPowerOfVariableIndex(j) > 0) {
         bad = true;
         break;

@@ -1115,20 +1115,20 @@ public:
     out << "<br>List size: " << this->size;
     out << "<br>Hash size: " << this->hashBuckets.size;
     int maxHashSize = 0;
-    int numNonZeroHashes = 0;
+    int totalNonZeroHashes = 0;
     for (int i = 0; i < this->hashBuckets.size; i ++) {
       if (maxHashSize < this->hashBuckets[i].size) {
         maxHashSize = this->hashBuckets[i].size;
       }
       if (this->hashBuckets[i].size > 0) {
-        numNonZeroHashes ++;
+        totalNonZeroHashes ++;
       }
     }
     out << "<br>Max hash array size: " << maxHashSize;
     out
     << "<br>Average hash array size: "
     << (static_cast<double>(this->size)) / (
-      static_cast<double>(numNonZeroHashes)
+      static_cast<double>(totalNonZeroHashes)
     );
     return out.str();
   }

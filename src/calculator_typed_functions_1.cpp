@@ -2102,10 +2102,10 @@ bool CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger(
       calculator, "Attempting to raise non-square matrix to power"
     );
   }
-  LargeInteger expectedNumTerms;
-  expectedNumTerms = matrix.numberOfColumns;
-  expectedNumTerms.raiseToPower(power);
-  if (expectedNumTerms > 10000) {
+  LargeInteger expectedNumberOfTerms;
+  expectedNumberOfTerms = matrix.numberOfColumns;
+  expectedNumberOfTerms.raiseToPower(power);
+  if (expectedNumberOfTerms > 10000) {
     return
     calculator
     << "The expected number terms in the result of the exponentiation "
@@ -2117,7 +2117,7 @@ bool CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger(
     << ")^"
     << power
     << "="
-    << expectedNumTerms
+    << expectedNumberOfTerms
     << ". I have been instructed to proceed only "
     << "if the expected number of terms is fewer than 10000. ";
   }
@@ -2698,25 +2698,25 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  int numRowsLeft = - 1;
-  int numColsLeft = - 1;
-  int numRowsRight = - 1;
-  int numColsRight = - 1;
+  int totalRowsLeft = - 1;
+  int totalColumnsLeft = - 1;
+  int totalRowsRight = - 1;
+  int totalColumnsRight = - 1;
   const Expression& left = input[1];
   const Expression& right = input[2];
   if (
-    !left.isMatrix(&numRowsLeft, &numColsLeft) ||
-    !input[2].isMatrix(&numRowsRight, &numColsRight)
+    !left.isMatrix(&totalRowsLeft, &totalColumnsLeft) ||
+    !input[2].isMatrix(&totalRowsRight, &totalColumnsRight)
   ) {
     return false;
   }
-  if (numColsLeft != numRowsRight) {
+  if (totalColumnsLeft != totalRowsRight) {
     return
     calculator
     << "WARNING: I encountered a product of a matrix with "
-    << numColsLeft
+    << totalColumnsLeft
     << " columns by a matrix with "
-    << numRowsRight
+    << totalRowsRight
     << " rows. ";
   }
   if (
@@ -3391,17 +3391,20 @@ bool CalculatorFunctionsBinaryOps::addMatrixToMatrix(
   }
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
-  int leftNumRows = - 1,
-  leftNumCols = - 1,
-  rightNumRows = - 1,
-  rightNumCols = - 1;
+  int leftNumberOfRows = - 1;
+  int leftNumberOfColumns = - 1;
+  int rightNumberOfRows = - 1;
+  int rightNumberOfColumns = - 1;
   if (
-    !leftE.isMatrix(&leftNumRows, &leftNumCols) ||
-    !rightE.isMatrix(&rightNumRows, &rightNumCols)
+    !leftE.isMatrix(&leftNumberOfRows, &leftNumberOfColumns) ||
+    !rightE.isMatrix(&rightNumberOfRows, &rightNumberOfColumns)
   ) {
     return false;
   }
-  if ((leftNumRows != rightNumRows) || (leftNumCols != rightNumCols)) {
+  if ((leftNumberOfRows != rightNumberOfRows) || (
+      leftNumberOfColumns != rightNumberOfColumns
+    )
+  ) {
     return false;
   }
   Matrix<Expression> leftMatrix, rightMatrix;

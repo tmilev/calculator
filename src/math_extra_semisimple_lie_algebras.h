@@ -743,12 +743,12 @@ public:
   );
   bool freudenthalEvalMeDominantWeightsOnly(
     CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero,
-    int upperBoundNumDominantWeights,
+    int upperBoundTotalDominantWeights,
     std::string* outputDetails
   );
   bool freudenthalEvaluateMeFullCharacter(
     CharacterSemisimpleLieAlgebraModule<Coefficient>& outputCharOwnerSetToZero,
-    int upperBoundNumDominantWeights,
+    int upperBoundTotalDominantWeights,
     std::string* outputDetails
   );
   std::string toStringFullCharacterWeightsTable();

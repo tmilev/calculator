@@ -163,7 +163,7 @@ public:
   bool addChildAtomOnTop(int operationIndex);
   void getBlocksOfCommutativity(HashedList<Expression>& inputOutputList) const;
   bool splitProduct(
-    int numDesiredMultiplicandsLeft,
+    int totalDesiredMultiplicandsLeft,
     Expression& outputLeftMultiplicand,
     Expression& outputRightMultiplicand
   ) const;
@@ -1264,8 +1264,8 @@ class CalculatorParser;
 class SyntacticElement {
 public:
   int controlIndex;
-  int numNonBoundVariablesInherited;
-  int numBoundVariablesInherited;
+  int totalNonBoundVariablesInherited;
+  int totalBoundVariablesInherited;
   Expression data;
   List<Expression> dataList;
   std::string errorString;
@@ -1277,9 +1277,9 @@ public:
     this->controlIndex = 0;
     // controlIndex = 0 *MUST* point to the empty control sequence.
     this->errorString = "";
-    this->numNonBoundVariablesInherited = - 1;
+    this->totalNonBoundVariablesInherited = - 1;
     // - 1 stands for unknown
-    this->numBoundVariablesInherited = - 1;
+    this->totalBoundVariablesInherited = - 1;
     // - 1 stands for unknown
   }
   std::string getIntegerStringCrashIfNot(CalculatorParser& owner);
@@ -2604,8 +2604,8 @@ public:
   bool getMatrixExpressionsFromArguments(
     const Expression& input,
     Matrix<Expression>& output,
-    int desiredNumRows = - 1,
-    int desiredNumCols = - 1
+    int desiredRowCount = - 1,
+    int desiredColumnCount = - 1
   );
   void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool accountRule(

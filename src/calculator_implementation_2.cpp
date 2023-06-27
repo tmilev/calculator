@@ -709,7 +709,7 @@ bool Calculator::expressionMatchesPattern(
     return false;
   }
   bool isGoodRegularOrder = true;
-  int numMatchedExpressionsAtStart = matchedExpressions.size();
+  int matchedExpressionsAtStart = matchedExpressions.size();
   for (int i = 0; i < pattern.size(); i ++) {
     if (
       !(
@@ -729,8 +729,8 @@ bool Calculator::expressionMatchesPattern(
     if (!input.startsWith(pattern.owner->opPlus())) {
       return false;
     }
-    matchedExpressions.values.setSize(numMatchedExpressionsAtStart);
-    matchedExpressions.keys.setSize(numMatchedExpressionsAtStart);
+    matchedExpressions.values.setSize(matchedExpressionsAtStart);
+    matchedExpressions.keys.setSize(matchedExpressionsAtStart);
     for (int i = 1; i < pattern.size(); i ++) {
       if (
         !this->expressionMatchesPattern(

@@ -179,8 +179,8 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   }
   outputWeightsSimpleCoords.clear();
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
-  int numTotalWeightsFound = 0;
-  int numPosRoots = this->ambientWeyl->rootsOfBorel.size;
+  int totalWeightsFound = 0;
+  int positiveRootCount = this->ambientWeyl->rootsOfBorel.size;
   Vector<Rational>
   currentWeight,
   currentWeightRaisedToDominantWRTAmbientAlgebra;
@@ -191,7 +191,7 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
     // double startCycleTime = global.getElapsedSeconds();
     if (
       upperBoundDominantWeights > 0 &&
-      numTotalWeightsFound > upperBoundDominantWeights
+      totalWeightsFound > upperBoundDominantWeights
     ) {
       break;
     }
@@ -200,7 +200,7 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
     HashedList<Vector<Rational> >& currentHashes =
     outputWeightsByHeight[bufferIndexShift];
     for (int lowest = 0; lowest < currentHashes.size; lowest ++) {
-      for (int i = 0; i < numPosRoots; i ++) {
+      for (int i = 0; i < positiveRootCount; i ++) {
         currentWeight = currentHashes[lowest];
         currentWeight -= this->ambientWeyl->rootsOfBorel[i];
         if (this->isDominantWeight(currentWeight)) {
@@ -221,7 +221,7 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
                 currentWeight
               )
             ) {
-              numTotalWeightsFound ++;
+              totalWeightsFound ++;
               outputWeightsByHeight[currentIndexShift].adjustHashes();
             }
           }
@@ -235,7 +235,7 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   out
   << " Total number of dominant weights: "
   << outputWeightsSimpleCoords.size;
-  if (numTotalWeightsFound >= upperBoundDominantWeights) {
+  if (totalWeightsFound >= upperBoundDominantWeights) {
     out
     << "<hr>This message is generated either because the number of "
     << "weights has exceeded the hard-coded RAM memory limits, or because "
@@ -244,7 +244,7 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
     << "make sure to send an angry email to the author(s).";
   }
   outputDetails = out.str();
-  return (numTotalWeightsFound <= upperBoundDominantWeights);
+  return (totalWeightsFound <= upperBoundDominantWeights);
 }
 
 std::string HtmlRoutines::getSliderSpanStartsHidden(
@@ -640,8 +640,8 @@ bool Expression::assignMatrixExpressions(
 bool Calculator::getMatrixExpressionsFromArguments(
   const Expression& input,
   Matrix<Expression>& output,
-  int desiredNumRows,
-  int desiredNumCols
+  int desiredRowCount,
+  int desiredColumnCount
 ) {
   STACK_TRACE("Calculator::getMatrixExpressionsFromArguments");
   if (!input.isList()) {
@@ -651,7 +651,7 @@ bool Calculator::getMatrixExpressionsFromArguments(
   inputModified.setChildAtomValue(0, this->opSequence());
   return
   this->getMatrixExpressions(
-    inputModified, output, desiredNumRows, desiredNumCols
+    inputModified, output, desiredRowCount, desiredColumnCount
   );
 }
 

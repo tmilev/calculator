@@ -8,7 +8,7 @@
 void GlobalStatistics::checkPointerCounters() {
   if (
     GlobalStatistics::globalPointerCounter >
-    GlobalStatistics::cgiLimitRAMuseNumPointersInList
+    GlobalStatistics::limitTotalPointersInList
   ) {
     // *** Deadlock alert: critical section start ***
     global.mutexParallelComputingCrash.lockMe();
@@ -22,7 +22,7 @@ void GlobalStatistics::checkPointerCounters() {
     global.fatal
     << "This may or may not be an error: the number of pointers "
     << "allocated by the program exceeded the allowed <b>limit of "
-    << GlobalStatistics::cgiLimitRAMuseNumPointersInList
+    << GlobalStatistics::limitTotalPointersInList
     << ".</b>"
     << global.fatal;
   }

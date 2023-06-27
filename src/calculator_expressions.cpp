@@ -4425,9 +4425,9 @@ bool Expression::toStringMatrix(
     out << "\\left(";
   }
   if (!format->flagUsePmatrix) {
-    int numCols = input.getNumberOfColumns();
+    int numberOfColumns = input.getNumberOfColumns();
     out << "\\begin{array}{";
-    for (int i = 0; i < numCols; i ++) {
+    for (int i = 0; i < numberOfColumns; i ++) {
       out << "c";
     }
     out << "} ";

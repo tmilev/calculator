@@ -20,21 +20,21 @@ int Partition::fulton61z() const {
   return acc;
   /*
 int acc = 1;
-  List<int> nums;
+  List<int> numbers;
   List<int> counts;
   for (int i = 0; i < this->p.size; i ++) {
-    int numdex = nums.getIndex(this->p[i]);
-    if (numdex == - 1) {
-      nums.addOnTop(this->p[i]);
+    int numbersdex = numbers.getIndex(this->p[i]);
+    if (numbersdex == - 1) {
+      numbers.addOnTop(this->p[i]);
       counts.addOnTop(1);
     } else {
-      counts[numdex] += 1;
+      counts[numbersdex] += 1;
     }
   }
-  for (int i = 0; i < nums.size; i ++) {
+  for (int i = 0; i < numbers.size; i ++) {
     int acci = 1;
     for (int j = 0; j < counts[i]; j ++)
-      acci *= nums[i];
+      acci *= numbers[i];
     for (int j = 1; j < counts[i]; j ++)
       acci *= j;
     acc *= acci;
@@ -76,7 +76,7 @@ void Partition::fromListInt(const List<int>& in, int lastElement) {
   }
 }
 
-void Partition::GetPartitions(List<Partition>& out, int n) {
+void Partition::getPartitions(List<Partition>& out, int n) {
   out.setSize(0);
   if (n == 0) {
     out.setSize(1);
@@ -198,7 +198,7 @@ void Partition::getAllStandardTableaux(List<Tableau>& out) const {
 void Partition::testAllSpechtModules(int n) {
   STACK_TRACE("Partition::testAllSpechtModules");
   List<Partition> partitions;
-  Partition::GetPartitions(partitions, n);
+  Partition::getPartitions(partitions, n);
   int fac = 1;
   for (int i = 1; i <= n; i ++) {
     fac *= i;
@@ -871,7 +871,7 @@ computeCCSizesAndRepresentativesByFormulaImplementation(
   G.flagCCRepresentativesComputed = true;
   int N = G.generators.size + 1;
   List<Partition> parts;
-  Partition::GetPartitions(parts, N);
+  Partition::getPartitions(parts, N);
   G.conjugacyClasses.setSize(parts.size);
   int facn = MathRoutines::factorial(N);
   for (int i = 0; i < parts.size; i ++) {
@@ -905,7 +905,7 @@ std::string PermutationGroupData::toString() {
 
 void PermutationGroupData::computeSpechtModules() {
   List<Partition> ps;
-  Partition::GetPartitions(ps, this->group->generators.size + 1);
+  Partition::getPartitions(ps, this->group->generators.size + 1);
   this->group->irreducibleRepresentations.setSize(ps.size);
   for (int i = 0; i < ps.size; i ++) this->spechtModuleOfPartition(
     ps[i], this->group->irreducibleRepresentations[i]
@@ -1416,10 +1416,10 @@ void HyperoctahedralGroup::allSpechtModules() {
 void HyperoctahedralGroupData::allSpechtModules() {
   for (int p = 0; p <= this->dimension; p ++) {
     List<Partition> nps;
-    Partition::GetPartitions(nps, p);
+    Partition::getPartitions(nps, p);
     for (int npi = 0; npi < nps.size; npi ++) {
       List<Partition> pps;
-      Partition::GetPartitions(pps, this->dimension - p);
+      Partition::getPartitions(pps, this->dimension - p);
       for (int ppi = 0; ppi < pps.size; ppi ++) {
         GroupRepresentation<
           FiniteGroup<ElementHyperoctahedralGroupR2>, Rational

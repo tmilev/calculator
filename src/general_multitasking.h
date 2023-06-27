@@ -81,7 +81,7 @@ class GlobalStatistics {
 public:
   static long long globalPointerCounter;
   static long long pointerCounterPeakRamUse;
-  static long long cgiLimitRAMuseNumPointersInList;
+  static long long limitTotalPointersInList;
   static bool flagUngracefulExitInitiated;
   static unsigned int numberOfListsCreated;
   static unsigned int numberOfListResizesTotal;

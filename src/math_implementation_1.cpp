@@ -669,24 +669,24 @@ void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
 ) {
   ElementUniversalEnveloping<Coefficient> result;
   result.makeZero(*this->owner);
-  bool Found = true;
-  int numPosRoots = this->owner->getNumberOfPositiveRoots();
-  while (Found) {
-    Found = false;
-    for (int j = numPosRoots - 1; j >= 0; j --) {
+  bool found = true;
+  int numberOfPositiveRoots = this->owner->getNumberOfPositiveRoots();
+  while (found) {
+    found = false;
+    for (int j = numberOfPositiveRoots - 1; j >= 0; j --) {
       this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(
-        j, numPosRoots - 1
+        j, numberOfPositiveRoots - 1
       );
       this->simplify(ringUnit);
       this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(
-        j, numPosRoots - 1
+        j, numberOfPositiveRoots - 1
       );
       if (
         this->modOutFDRelationsExperimental(
           highestWeightInSimpleCoordinates, ringUnit, ringZero
         )
       ) {
-        Found = true;
+        found = true;
       }
     }
   }
@@ -695,37 +695,37 @@ void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
 
 template <class Coefficient>
 bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
-  MonomialUniversalEnveloping<Coefficient> tempMon;
+  MonomialUniversalEnveloping<Coefficient> monomial;
   ElementUniversalEnveloping<Coefficient> result;
   result.makeZero(*this->owner);
-  int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
+  int numberOfPositiveRoots = this->getOwner().getNumberOfPositiveRoots();
   int rank = this->getOwner().getRank();
   Coefficient coefficient;
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnveloping<Coefficient>& currentMon = this->objects[i];
     coefficient = this->coefficients[i];
-    tempMon.owner = currentMon.owner;
-    tempMon.powers.size = 0;
-    tempMon.generatorsIndices.size = 0;
+    monomial.owner = currentMon.owner;
+    monomial.powers.size = 0;
+    monomial.generatorsIndices.size = 0;
     for (int j = 0; j < currentMon.powers.size; j ++) {
       int power;
       if (!currentMon.powers[j].isSmallInteger(&power)) {
         return false;
       }
       int generator = currentMon.generatorsIndices[j];
-      if (generator < numPosRoots) {
-        generator = 2 * numPosRoots + rank - 1 - generator;
-      } else if (generator >= numPosRoots + rank) {
-        generator = - generator + 2 * numPosRoots + rank - 1;
+      if (generator < numberOfPositiveRoots) {
+        generator = 2 * numberOfPositiveRoots + rank - 1 - generator;
+      } else if (generator >= numberOfPositiveRoots + rank) {
+        generator = - generator + 2 * numberOfPositiveRoots + rank - 1;
       }
-      tempMon.multiplyByGeneratorPowerOnTheRight(
+      monomial.multiplyByGeneratorPowerOnTheRight(
         generator, currentMon.powers[j]
       );
       if (power % 2 == 1) {
         coefficient *= - 1;
       }
     }
-    result.addMonomial(tempMon, coefficient);
+    result.addMonomial(monomial, coefficient);
   }
   *this = result;
   return true;
@@ -857,12 +857,12 @@ std::string ElementUniversalEnveloping<Coefficient>::isInProperSubmodule(
   orbit.reserve(1000);
   ElementUniversalEnveloping<Coefficient> element;
   int dimension = this->getOwner().getRank();
-  int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
+  int totalPositiveRoots = this->getOwner().getNumberOfPositiveRoots();
   orbit.addOnTop(*this);
   for (int i = 0; i < orbit.size; i ++) {
     for (int j = 0; j < dimension; j ++) {
       element.makeOneGenerator(
-        j + numPosRoots + dimension, *this->owner, ringUnit
+        j + totalPositiveRoots + dimension, *this->owner, ringUnit
       );
       element *= orbit[i];
       element.simplify(ringUnit);
@@ -948,11 +948,11 @@ void BranchingData::initializePart1NoSubgroups() {
   WeylGroupData& largeWeylGroup =
   this->homomorphism.coDomainAlgebra().weylGroup;
   WeylGroupData& smallWeylGroup = this->homomorphism.domainAlgebra().weylGroup;
-  int numB3NegGenerators =
+  int numberOfB3NegativeGenerators =
   this->homomorphism.coDomainAlgebra().getNumberOfPositiveRoots();
-  int numG2NegGenerators =
+  int numberOfG2NegativeGenerators =
   this->homomorphism.domainAlgebra().getNumberOfPositiveRoots();
-  for (int i = 0; i < numB3NegGenerators; i ++) {
+  for (int i = 0; i < numberOfB3NegativeGenerators; i ++) {
     const Vector<Rational>& currentWeight = largeWeylGroup.rootSystem[i];
     bool isInNilradical = false;
     for (int k = 0; k < this->inducing.cardinalitySelection; k ++) {
@@ -970,7 +970,7 @@ void BranchingData::initializePart1NoSubgroups() {
       this->indicesNilradicalLarge.addOnTop(i);
     }
   }
-  for (int i = 0; i < numG2NegGenerators; i ++) {
+  for (int i = 0; i < numberOfG2NegativeGenerators; i ++) {
     const Vector<Rational>& currentWeight = smallWeylGroup.rootSystem[i];
     bool isInNilradical = false;
     for (

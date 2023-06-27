@@ -265,8 +265,15 @@ public:
 // simple database implementation that supports concurrent reads,
 // writes and locks.
 class LocalDatabase {
+  // A once-per-database start random id. Do not log this to the console.
+  List<unsigned char> randomId;
+  List<unsigned char> randomIdHash;
 public:
-    int processIdDatabase;
+  int processId;
+  int socket;
+  int port;
+  // A shortened version of randomId. You can log this one.
+  std::string idLoggable;
   static std::string folder();
   bool findOneWithOptions(
     const QueryExact& query,
@@ -303,7 +310,8 @@ public:
   void createHashIndex(
     const std::string& collectionName, const std::string& key
   );
-  void initializeServer();
+  void initializeForkAndRun();
+  void run();
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
   );
@@ -380,8 +388,8 @@ public:
       std::string& userRole,
       std::string& userGroup,
       std::stringstream& comments,
-      int& outputNumNewUsers,
-      int& outputNumUpdatedUsers
+      int& outputNumberOfNewUsers,
+      int& outputNumberOfUpdatedUsers
     );
     bool loadUserInformation(
       UserCalculatorData& output, std::stringstream* commentsOnFailure
@@ -391,8 +399,8 @@ public:
 
   User user;
   // TODO(tmilev): Rename this to fallbackDatabase.
-  FallbackDatabase localDatabase;
-  LocalDatabase database;
+  FallbackDatabase fallbackDatabase;
+  LocalDatabase localDatabase;
   class Mongo {
   public:
     // The following variable has type mongoc_client_t.

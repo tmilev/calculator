@@ -1038,8 +1038,8 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
   currentComponent[0].scalarProduct(
     currentComponent[0], this->ambientBilinearForm
   );
-  int numLength1 = 1;
-  int numLength2 = 0;
+  int numberOfLength1 = 1;
+  int numberOfLength2 = 0;
   for (int i = 1; i < currentComponent.size; i ++) {
     if (
       currentComponent[i].scalarProduct(
@@ -1047,26 +1047,26 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       ) ==
       length1
     ) {
-      numLength1 ++;
+      numberOfLength1 ++;
     } else {
-      numLength2 ++;
+      numberOfLength2 ++;
       length2 =
       currentComponent[i].scalarProduct(
         currentComponent[i], this->ambientBilinearForm
       );
     }
   }
-  if (numLength2 == 0) {
+  if (numberOfLength2 == 0) {
     // type A
     outputType.makeArbitrary(
       'A',
-      numLength1,
+      numberOfLength1,
       DynkinSimpleType::getDefaultLongRootLengthSquared('A') / length1
     );
   } else {
     if (length1 < length2) {
       MathRoutines::swap(length1, length2);
-      MathRoutines::swap(numLength1, numLength2);
+      MathRoutines::swap(numberOfLength1, numberOfLength2);
       currentEnds.swapTwoIndices(0, 1);
     }
     // <-so far we made sure the first length is long
@@ -1074,9 +1074,9 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     // comes last
     // This is handled at the very end of this function (outside all the if
     // clauses).
-    if (numLength1 == numLength2) {
+    if (numberOfLength1 == numberOfLength2) {
       // B2, C2, F4 or G2
-      if (numLength1 == 2) {
+      if (numberOfLength1 == 2) {
         outputType.makeArbitrary(
           'F',
           4,
@@ -1096,7 +1096,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
         );
       }
     } else {
-      if (numLength1 > numLength2) {
+      if (numberOfLength1 > numberOfLength2) {
         outputType.makeArbitrary(
           'B',
           currentComponent.size,
@@ -1918,7 +1918,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
 std::string GeneralizedVermaModuleCharacters::
 computeMultiplicitiesLargerAlgebraHighestWeight(
   Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords,
-  Vector<Rational>& parabolicSel
+  Vector<Rational>& parabolicSelection
 ) {
   std::stringstream out;
   WeylGroupData& largeWeylGroup =
@@ -1927,11 +1927,11 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   if (!largeWeylGroup.isOfSimpleType('B', 3)) {
     return "Error: algebra is not so(7).";
   }
-  this->initFromHomomorphism(parabolicSel, this->homomorphism);
+  this->initFromHomomorphism(parabolicSelection, this->homomorphism);
   this->transformToWeylProjectiveStep1();
   this->transformToWeylProjectiveStep2();
-  Vector<Rational> highestWeightLargerAlgSimpleCoords;
-  highestWeightLargerAlgSimpleCoords =
+  Vector<Rational> highestWeightLargerAlgSimpleCoordinates;
+  highestWeightLargerAlgSimpleCoordinates =
   largeWeylGroup.getSimpleCoordinatesFromFundamental(
     highestWeightLargerAlgebraFundamentalCoords
   );
@@ -1963,12 +1963,12 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   Vectors<Rational> translationsProjectedFinal;
   translationsProjectedFinal.setSize(this->linearOperators.size);
   this->linearOperators[0].actOnVectorColumn(
-    highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]
+    highestWeightLargerAlgSimpleCoordinates, translationsProjectedFinal[0]
   );
   out
   << "<br>Input so(7)-highest weight: "
-  << highestWeightLargerAlgSimpleCoords.toString();
-  out << "<br>Input parabolics selections: " << parabolicSel.toString();
+  << highestWeightLargerAlgSimpleCoordinates.toString();
+  out << "<br>Input parabolics selections: " << parabolicSelection.toString();
   out
   << "<br>the argument translations: "
   << this->translationsProjectedBasisChanged.toString();
@@ -2010,7 +2010,8 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   - translationsProjectedFinal[0];
   for (int i = 0; i < this->linearOperators.size; i ++) {
     this->linearOperators[i].actOnVectorColumn(
-      highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]
+      highestWeightLargerAlgSimpleCoordinates,
+      translationsProjectedFinal[i]
     );
     translationsProjectedFinal[i] +=
     this->translationsProjectedBasisChanged[i];
@@ -2145,8 +2146,8 @@ void GeneralizedVermaModuleCharacters::incrementComputation(
 GeneralizedVermaModuleCharacters::GeneralizedVermaModuleCharacters() {
   this->UpperLimitChambersForDebugPurposes = - 1;
   this->computationPhase = 0;
-  this->NumProcessedConesParam = 0;
-  this->NumProcessedExtremaEqualOne = 0;
+  this->numberOfProcessedConesParameters = 0;
+  this->numberOfProcessedExtremaEqualToOne = 0;
   this->numberNonZeroMultiplicities = 0;
   this->weylLarger = nullptr;
   this->weylSmaller = nullptr;
@@ -2607,7 +2608,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   << tempStream.str()
   << "}}\\\\\n";
   out << "Inequlities& $m(x_1,x_2, y_1, y_2, y_3)$\\endhead\n";
-  int numFoundChambers = 0;
+  int totalFoundChambers = 0;
   List<int> displayIndicesprojectivizedChambers;
   this->projectivizedChamber.checkIsRefinedOrCrash();
   for (
@@ -2615,12 +2616,12 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   ) {
     QuasiPolynomial& currentMultiplicity = this->multiplicities[i];
     if (!currentMultiplicity.isEqualToZero()) {
-      numFoundChambers ++;
+      totalFoundChambers ++;
       out
       << "\\hline\\multicolumn{2}{c}{Chamber "
-      << numFoundChambers
+      << totalFoundChambers
       << "}\\\\\n";
-      displayIndicesprojectivizedChambers.addOnTop(numFoundChambers);
+      displayIndicesprojectivizedChambers.addOnTop(totalFoundChambers);
       out
       << this->prepareReportOneCone(
         format, this->projectivizedChamber.refinedCones[i]
@@ -2633,7 +2634,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
     }
   }
   out << "\\end{longtable}\n\n\n Multiplicity free chambers \n";
-  numFoundChambers = 0;
+  totalFoundChambers = 0;
   out << "\n\\begin{longtable}{cc} ";
   out
   << "normals& Multiplicity of module with highest "
@@ -2667,7 +2668,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
         }
       }
       if (indexMultFreeChamber!= - 1) {
-        numFoundChambers++;
+        totalFoundChambers++;
         out << "\\hline\\multicolumn{2}{c}{Chamber " << DisplayIndicesprojectivizedChambers.objects[i] << "}\\\\\n";
         out << this->prepareReportOneCone(format, this->projectivezedChambersSplitByMultFreeWalls.objects[indexMultFreeChamber]) << "&";
         out << multiplicity.toString(false, true, format) << "\\\\\n";
@@ -2676,7 +2677,7 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   }*/
   out
   << "Total number of chambers with multiplicity 1 or less: "
-  << numFoundChambers;
+  << totalFoundChambers;
   out << "\\end{longtable}\n\n\n\n";
   out << "\\end{document}";
   return out.str();
@@ -2686,15 +2687,15 @@ void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
   STACK_TRACE(
     "GeneralizedVermaModuleCharacters::inititializeMaximumComputation"
   );
-  this->maximumComputation.numNonParaM = 2;
+  this->maximumComputation.numberOfNonParameters = 2;
   this->maximumComputation.conesLargerDimension.reserve(
     this->projectivizedChamber.refinedCones.size()
   );
-  this->maximumComputation.LPtoMaximizeLargerDim.reserve(
+  this->maximumComputation.lPtoMaximizeLargerDim.reserve(
     this->multiplicities.size
   );
   this->maximumComputation.conesLargerDimension.setSize(0);
-  this->maximumComputation.LPtoMaximizeLargerDim.setSize(0);
+  this->maximumComputation.lPtoMaximizeLargerDim.setSize(0);
   Lattice ZnLattice;
   int affineDimension = 5;
   ZnLattice.makeZn(affineDimension);
@@ -2716,7 +2717,7 @@ void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
       global.fatal << "This should not happen. " << global.fatal;
     }
     this->maximumComputation.conesLargerDimension.addOnTop(currentCLS);
-    this->maximumComputation.LPtoMaximizeLargerDim.addOnTop(latticePtoMax);
+    this->maximumComputation.lPtoMaximizeLargerDim.addOnTop(latticePtoMax);
     this->numberNonZeroMultiplicities ++;
     std::stringstream out;
     out
@@ -2804,20 +2805,20 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromNonParametricArray(
 ) {
   // Reminder: the very last variable comes from the projectivization and
   // contributes to the translation only!
-  int numNonParams = nonParameters.size;
+  int numberOfNonParameters = nonParameters.size;
   output.initialize(
-    numberOfParameters + numNonParams - 1, numberOfParameters - 1
+    numberOfParameters + numberOfNonParameters - 1, numberOfParameters - 1
   );
-  outputTranslation.makeZero(numberOfParameters + numNonParams - 1);
+  outputTranslation.makeZero(numberOfParameters + numberOfNonParameters - 1);
   output.makeZero();
-  for (int l = 0; l < numNonParams; l ++) {
+  for (int l = 0; l < numberOfNonParameters; l ++) {
     for (int k = 0; k < numberOfParameters - 1; k ++) {
       output.elements[l][k] = nonParameters[l][k];
     }
     outputTranslation[l] = *nonParameters[l].lastObject();
   }
   for (int l = 0; l < numberOfParameters - 1; l ++) {
-    output.elements[l + numNonParams][l] = 1;
+    output.elements[l + numberOfNonParameters][l] = 1;
   }
 }
 

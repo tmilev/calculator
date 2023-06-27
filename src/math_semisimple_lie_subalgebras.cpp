@@ -649,37 +649,37 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
     return "";
   }
   std::stringstream out;
-  int numIsotypicallyCompleteNilrads = 0;
-  int numFailingConeCondition = 0;
-  int numNoLinfRelFound = 0;
-  int numNonCentralizerConditionWithConeCondition = 0;
+  int totalIsotypicallyCompleteNilradicals = 0;
+  int numberOfFailingConeConditions = 0;
+  int numberOfNoLinfRelationsFound = 0;
+  int numberOfNonCentralizerConditionWithConeCondition = 0;
   int totalBadParabolics = 0;
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
-    numIsotypicallyCompleteNilrads +=
+    totalIsotypicallyCompleteNilradicals +=
     this->subalgebras.values[i].fernandoKacNilradicalCandidates.size;
-    numFailingConeCondition +=
+    numberOfFailingConeConditions +=
     this->subalgebras.values[i].numberOfConeIntersections;
-    numNoLinfRelFound +=
+    numberOfNoLinfRelationsFound +=
     this->subalgebras.values[i].numberOfCasesNoLInfiniteRelationFound;
-    numNonCentralizerConditionWithConeCondition +=
+    numberOfNonCentralizerConditionWithConeCondition +=
     this->subalgebras.values[i].
     numberOfCentralizerConditionFailsConeConditionHolds;
     totalBadParabolics += this->subalgebras.values[i].numberOfBadParabolics;
   }
   out
   << "<br>There are "
-  << numIsotypicallyCompleteNilrads
+  << totalIsotypicallyCompleteNilradicals
   << " possible isotypic nilradical extensions "
   << "of the primal subalgebras. Of them "
-  << numFailingConeCondition
+  << numberOfFailingConeConditions
   << " have intersecting cones. Of the remaining "
-  << numIsotypicallyCompleteNilrads - numFailingConeCondition
+  << totalIsotypicallyCompleteNilradicals - numberOfFailingConeConditions
   << " nilradical extensions with non-intersecting cones, "
-  << numIsotypicallyCompleteNilrads -
-  numFailingConeCondition -
-  numNonCentralizerConditionWithConeCondition
+  << totalIsotypicallyCompleteNilradicals -
+  numberOfFailingConeConditions -
+  numberOfNonCentralizerConditionWithConeCondition
   << " satisfy(ies) the centralizer condition and "
-  << numNonCentralizerConditionWithConeCondition
+  << numberOfNonCentralizerConditionWithConeCondition
   << " fail(s) the centralizer condition.";
   if (totalBadParabolics > 0) {
     out
@@ -694,25 +694,25 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
   } else {
     out
     << "<br><span style='color:blue'> In each of "
-    << numIsotypicallyCompleteNilrads -
-    numFailingConeCondition -
-    numNonCentralizerConditionWithConeCondition
+    << totalIsotypicallyCompleteNilradicals -
+    numberOfFailingConeConditions -
+    numberOfNonCentralizerConditionWithConeCondition
     << " case(s) when the centralizer condition holds, "
     << "the parabolic subalgebra in the centralizer "
     << "with Levi types A and C extends "
     << "to parabolic subalgebra of the ambient "
     << "Lie algebra whose Levi types are A and C only. </span>";
   }
-  if (numFailingConeCondition > 0) {
-    if (numNoLinfRelFound > 0) {
+  if (numberOfFailingConeConditions > 0) {
+    if (numberOfNoLinfRelationsFound > 0) {
       out
       << "<br><span style='color:red'>In "
-      << numNoLinfRelFound
+      << numberOfNoLinfRelationsFound
       << " cases no L-infinite relation was found. </span>";
     } else {
       out
       << "<br><span style='color:blue'> In each of "
-      << numFailingConeCondition
+      << numberOfFailingConeConditions
       << " case(s) of intersecting cones, an "
       << "L-infinite relation was found. </span>";
     }
@@ -730,16 +730,16 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(
     return "";
   }
   std::stringstream out;
-  int numIsotypicallyCompleteNilrads = 0;
-  int numFailingConeCondition = 0;
-  int numNoLinfRelFound = 0;
+  int numberOfIsotypicallyCompleteNilradicals = 0;
+  int numberOfFailingConeCondition = 0;
+  int numberNoLinfRelationsFound = 0;
   int totalBadParabolics = 0;
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
-    numIsotypicallyCompleteNilrads +=
+    numberOfIsotypicallyCompleteNilradicals +=
     this->subalgebras.values[i].fernandoKacNilradicalCandidates.size;
-    numFailingConeCondition +=
+    numberOfFailingConeCondition +=
     this->subalgebras.values[i].numberOfConeIntersections;
-    numNoLinfRelFound +=
+    numberNoLinfRelationsFound +=
     this->subalgebras.values[i].numberOfCasesNoLInfiniteRelationFound;
     totalBadParabolics += this->subalgebras.values[i].numberOfBadParabolics;
   }
@@ -758,19 +758,19 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebrasSummaryLaTeX(
   << "}. ";
   out
   << "Number of isotypically complete nilradicals: "
-  << numIsotypicallyCompleteNilrads
+  << numberOfIsotypicallyCompleteNilradicals
   << ", of them "
-  << numFailingConeCondition
+  << numberOfFailingConeCondition
   << " fail the cone condition.";
-  if (numNoLinfRelFound == 0) {
+  if (numberNoLinfRelationsFound == 0) {
     out
     << "<br>In all "
-    << numFailingConeCondition
+    << numberOfFailingConeCondition
     << " cases, an $\\mathfrak{l}$-infinite relation was found. ";
   } else {
     out
     << "<br>In "
-    << numNoLinfRelFound
+    << numberNoLinfRelationsFound
     << " cases, no L-infinite relation was found. <br>";
   }
   out << "}\\\\\n<br>\n";
@@ -1165,17 +1165,17 @@ std::string SemisimpleSubalgebras::toStringSl2s(FormatExpressions* format) {
     return "";
   }
   std::stringstream out;
-  int numComputedOrbits = 0;
+  int totalComputedOrbits = 0;
   for (int i = 0; i < this->orbits.size; i ++) {
     if (this->orbits[i].flagOrbitIsBuffered) {
-      numComputedOrbits ++;
+      totalComputedOrbits ++;
     }
   }
   out
   << "<hr>Of the "
   << this->orbits.size
   << " h element conjugacy classes "
-  << numComputedOrbits
+  << totalComputedOrbits
   << " had their Weyl group automorphism orbits computed and buffered. "
   << "The h elements and their computed orbit sizes follow. ";
   out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
@@ -3842,7 +3842,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
   this->owner->subalgebrasNonDefaultCartanAndScale.values[
     this->indexNonEmbeddedMeNonStandardCartan
   ];
-  this->totalNumUnknownsNoCentralizer = 0;
+  this->totalUnknownsNoCentralizer = 0;
   if (this->cartanElementsSubalgebra.size == 0) {
     global.fatal
     << "The number of involved H's cannot be zero. "
@@ -3861,7 +3861,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
     << global.fatal;
   }
   for (int i = 0; i < this->involvedNegativeGenerators.size; i ++) {
-    this->totalNumUnknownsNoCentralizer +=
+    this->totalUnknownsNoCentralizer +=
     this->involvedNegativeGenerators[i].size;
   }
   if (this->weylNonEmbedded->rootSystem.size == 0) {
@@ -3869,8 +3869,8 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
     << "The root system of the candidate subalgebra has not been computed "
     << global.fatal;
   }
-  this->totalNumUnknownsNoCentralizer *= 2;
-  this->totalNumUnknownsWithCentralizer = this->totalNumUnknownsNoCentralizer;
+  this->totalUnknownsNoCentralizer *= 2;
+  this->totalUnknownsWithCentralizer = this->totalUnknownsNoCentralizer;
   this->unknownNegativeGenerators.setSize(
     this->involvedNegativeGenerators.size
   );
@@ -3920,7 +3920,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
       << this->toString(nullptr, false)
       << global.fatal;
     }
-    this->totalNumUnknownsWithCentralizer +=
+    this->totalUnknownsWithCentralizer +=
     rankCentralizer * this->getAmbientWeyl().getDimension() + 1;
     this->unknownCartanCentralizerBasis.setSize(rankCentralizer);
   }
@@ -3977,7 +3977,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
     Polynomial<AlgebraicNumber> determinant, determinantMultiplier;
     determinant.makeDeterminantFromSquareMatrix(centralizerCartanVars);
     determinantMultiplier.makeMonomial(
-      this->totalNumUnknownsWithCentralizer - 1, 1, 1
+      this->totalUnknownsWithCentralizer - 1, 1, 1
     );
     determinant *= determinantMultiplier;
     determinant += - Rational(1);
@@ -4073,10 +4073,11 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
     this->flagSystemGroebnerBasisFound = false;
     this->flagSystemProvedToHaveNoSolution = false;
     if (this->owner->flagAttemptToSolveSystems) {
-      long long int startNumOps = Rational::totalArithmeticOperations();
+      long long int startNumberOfOperations =
+      Rational::totalArithmeticOperations();
       this->attemptToSolveSystem();
       this->totalArithmeticOpsToSolveSystem +=
-      Rational::totalArithmeticOperations() - startNumOps;
+      Rational::totalArithmeticOperations() - startNumberOfOperations;
     }
   } else {
     this->flagSystemGroebnerBasisFound = false;
@@ -4958,8 +4959,8 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->flagCentralizerIsWellChosen = false;
   this->flagCentralizerTypeIsComputed = false;
   this->flagUsedInducingSubalgebraRealization = true;
-  this->totalNumUnknownsNoCentralizer = 0;
-  this->totalNumUnknownsWithCentralizer = 0;
+  this->totalUnknownsNoCentralizer = 0;
+  this->totalUnknownsWithCentralizer = 0;
   this->totalArithmeticOpsToSolveSystem = 0;
   this->numberOfConeIntersections = - 1;
   this->numberOfCasesNoLInfiniteRelationFound = - 1;
@@ -6838,7 +6839,7 @@ getGenericNegativeGeneratorLinearCombination(
     offsetIndex += this->involvedNegativeGenerators[i].size;
   }
   this->getGenericLinearCombination(
-    this->totalNumUnknownsWithCentralizer,
+    this->totalUnknownsWithCentralizer,
     offsetIndex,
     this->involvedNegativeGenerators[indexNegativeGenerators],
     output
@@ -6851,7 +6852,7 @@ getGenericCartanCentralizerLinearCombination(
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
 ) {
   int offsetIndex =
-  this->totalNumUnknownsNoCentralizer +
+  this->totalUnknownsNoCentralizer +
   indexCartanCentralizerGenerator * this->getAmbientWeyl().getDimension();
   List<ChevalleyGenerator> elementsOfCartan;
   elementsOfCartan.setSize(this->getAmbientWeyl().getDimension());
@@ -6861,7 +6862,7 @@ getGenericCartanCentralizerLinearCombination(
     elementsOfCartan[i].owner = &this->getAmbientSemisimpleLieAlgebra();
   }
   this->getGenericLinearCombination(
-    this->totalNumUnknownsWithCentralizer,
+    this->totalUnknownsWithCentralizer,
     offsetIndex,
     elementsOfCartan,
     output
@@ -6877,9 +6878,9 @@ getGenericPositiveGeneratorLinearCombination(
   for (int i = 0; i < indexPositiveGenerators; i ++) {
     offsetIndex += this->involvedPositiveGenerators[i].size;
   }
-  offsetIndex += this->totalNumUnknownsNoCentralizer / 2;
+  offsetIndex += this->totalUnknownsNoCentralizer / 2;
   this->getGenericLinearCombination(
-    this->totalNumUnknownsWithCentralizer,
+    this->totalUnknownsWithCentralizer,
     offsetIndex,
     this->involvedPositiveGenerators[indexPositiveGenerators],
     output
@@ -10415,7 +10416,7 @@ std::string CandidateSemisimpleSubalgebra::toString(
     );
   }
   if (this->flagCentralizerIsWellChosen && weightsAreCoordinated) {
-    int numZeroWeights = 0;
+    int numberOfZeroWeights = 0;
     out
     << "<br>The number of zero weights w.r.t. the "
     << "Cartan subalgebra minus the dimension "
@@ -10423,16 +10424,16 @@ std::string CandidateSemisimpleSubalgebra::toString(
     for (int i = 0; i < this->modules.size; i ++) {
       for (int j = 0; j < this->weightsModulesNONprimal[i].size; j ++) {
         if (this->weightsModulesNONprimal[i][j].isEqualToZero()) {
-          numZeroWeights += this->modules[i].size;
+          numberOfZeroWeights += this->modules[i].size;
         }
       }
     }
     out
-    << numZeroWeights
+    << numberOfZeroWeights
     << " - "
     << this->centralizerRank
     << "="
-    << ((this->centralizerRank - numZeroWeights) *(- 1)).toString()
+    << ((this->centralizerRank - numberOfZeroWeights) *(- 1)).toString()
     << ".";
   }
   if (this->flagSystemSolved && !shortReportOnly) {

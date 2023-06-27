@@ -3,10 +3,10 @@
 #define header_webserver_ALREADY_INCLUDED
 
 #include "multiprocessing.h"
-#include "system_functions_global_objects.h"
 #include "transport_layer_security.h"
 
 class WebServer;
+class Listener;
 
 class WebWorker {
 public:
@@ -225,7 +225,7 @@ public:
 
 class WebServer {
 public:
-  static const int maxNumPendingConnections;
+  static const int maximumPendingConnections;
   // how many pending connections queue will hold
   int listeningSocketHTTP;
   int listeningSocketHTTPSOpenSSL;
@@ -233,7 +233,7 @@ public:
   int listeningSocketHTTPSDefault;
   int lastListeningSocket;
   int highestSocketNumber;
-  int maximumNumberOfWorkersPerIPAdress;
+  int maximumWorkersPerIPAdress;
   int maximumTotalUsedWorkers;
   class Statististics {
   public:
@@ -324,6 +324,16 @@ public:
   bool checkConsistency();
   int daemon();
   int run();
+  // Runs the main loop once.
+  // When false is returned, then the main loop should be exited.
+  // False will be returned:
+  // 1) in the worker process and
+  // 2) if the server encounters a fatal error.
+  bool runOnce(
+    Listener& listener,
+    long long& previousReportedNumberOfSelects,
+    int& returnCode
+  );
   // Wraps the system level fork() call.
   // Addionally computes a
   // unique [with probability ~1] process id and
@@ -331,7 +341,8 @@ public:
   // for the child and parent processes.
   bool createProcessMutex();
   void computeActiveWorkerId();
-  int forkProcess();
+  int forkWorkerProcess();
+  int forkProcessAndAcquireRandomness();
   int forkRaw();
   void initializeRandomBytes();
   void writeVersionJSFile();
@@ -345,15 +356,18 @@ public:
   bool initializePrepareWebServerAll();
   void initializeSignals();
   bool initializeBindToPorts();
-  bool initializeBindToOnePort(const std::string& desiredPort, int& outputListeningSocket
-  , int &outputActualPort);
+  bool initializeBindToOnePort(
+    const std::string& desiredPort,
+    int& outputListeningSocket,
+    int& outputActualPort
+  );
   void initializePortsITry();
   void initializeListeningSockets();
   void initializeSSL();
   bool sslServerSideHandShake(std::stringstream* commentsOnFailure);
   static void terminateProcessId(int processId);
   void terminateChildSystemCall(int i);
-  void processOneChildMessage(int childIndex, int& outputNumInUse);
+  void processOneChildMessage(int childIndex, int& outputTotalInUse);
   void recycleChildrenIfPossible();
   void recycleOneChild(int childIndex, int& numberInUse);
   void handleTooManyConnections(const std::string& incomingUserAddress);

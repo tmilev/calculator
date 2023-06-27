@@ -516,7 +516,7 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(
           out
           << "Characteristic poly standard representation: "
           << characteristicPolynomial.toString(&charPolyFormat);
-          int numClassesSameCharPoly = 0;
+          int totalClassesSameCharPoly = 0;
           for (
             int j = 0; j < this->
             characterPolynomialsConjugacyClassesStandardRepresentation.size; j
@@ -528,13 +528,13 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(
               ] ==
               characteristicPolynomial
             ) {
-              numClassesSameCharPoly ++;
+              totalClassesSameCharPoly ++;
             }
           }
-          if (numClassesSameCharPoly > 1) {
+          if (totalClassesSameCharPoly > 1) {
             out
             << " The characteristic polynomial is the same as that of "
-            << numClassesSameCharPoly
+            << totalClassesSameCharPoly
             << " conjugacy classes, numbers: ";
             for (
               int j = 0; j < this->
@@ -1018,9 +1018,10 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
     outputSubset->clear();
     outputSubset->addOnTop(currentElt);
   }
-  int numGens = this->weylGroup->getDimension() + outerGenerators.size;
+  int numberOfGenerators =
+  this->weylGroup->getDimension() + outerGenerators.size;
   for (int i = 0; i < output.size; i ++) {
-    for (int j = 0; j < numGens; j ++) {
+    for (int j = 0; j < numberOfGenerators; j ++) {
       if (j < this->weylGroup->getDimension()) {
         currentRoot = output[i];
         this->weylGroup->reflectSimple(j, currentRoot);
@@ -1780,9 +1781,9 @@ getClassFunctionMatrix(
   this->ownerGroup->
   checkInitializationFiniteDimensionalRepresentationComputation();
   outputMatrix.makeZeroMatrix(this->getDimension());
-  int numClasses = this->ownerGroup->conjugacyClassCount();
+  int totalClasses = this->ownerGroup->conjugacyClassCount();
   ProgressReport report;
-  for (int cci = 0; cci < numClasses; cci ++) {
+  for (int cci = 0; cci < totalClasses; cci ++) {
     if (inputCharacter[cci] == 0) {
       continue;
     }
@@ -1822,7 +1823,7 @@ getClassFunctionMatrix(
             << " Computing conjugacy class "
             << currentCC.indicesEltsInOwner[i] + 1
             << " (total num classes is "
-            << numClasses
+            << totalClasses
             << ").";
             report.report(reportstream.str());
           }
@@ -1834,7 +1835,7 @@ getClassFunctionMatrix(
         << "<br>Class function matrix of conjugacy class "
         << cci + 1
         << " (total num classes is "
-        << numClasses
+        << totalClasses
         << ") computed to be: "
         << this->classFunctionMatrices[cci].toString();
         report.report(reportstream.str());
@@ -2099,7 +2100,7 @@ getAllDominantWeightsHWFDIM(
   }
   outputWeightsSimpleCoords.clear();
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
-  int numTotalWeightsFound = 0;
+  int totalWeightsFound = 0;
   Vector<Coefficient> currentWeight;
   for (
     int lowestUnexploredHeightDiff = 0; lowestUnexploredHeightDiff <=
@@ -2107,7 +2108,7 @@ getAllDominantWeightsHWFDIM(
   ) {
     if (
       upperBoundDominantWeights > 0 &&
-      numTotalWeightsFound > upperBoundDominantWeights
+      totalWeightsFound > upperBoundDominantWeights
     ) {
       break;
     }
@@ -2129,7 +2130,7 @@ getAllDominantWeightsHWFDIM(
               currentWeight
             )
           ) {
-            numTotalWeightsFound ++;
+            totalWeightsFound ++;
             outputWeightsByHeight[currentIndexShift].adjustHashes();
           }
         }
@@ -2142,7 +2143,7 @@ getAllDominantWeightsHWFDIM(
   out
   << " Total number of dominant weights: "
   << outputWeightsSimpleCoords.size;
-  if (numTotalWeightsFound >= upperBoundDominantWeights) {
+  if (totalWeightsFound >= upperBoundDominantWeights) {
     out
     << "<hr>This message is generated either because the number of "
     << "weights has exceeded the hard-coded RAM memory limits, or because "
@@ -2151,7 +2152,7 @@ getAllDominantWeightsHWFDIM(
     << "to send an angry email to the author(s).";
   }
   outputDetails = out.str();
-  return numTotalWeightsFound <= upperBoundDominantWeights;
+  return totalWeightsFound <= upperBoundDominantWeights;
 }
 
 template <class Coefficient>
@@ -2680,7 +2681,7 @@ computeIrreducibleRepresentationsTodorsVersion() {
   GroupRepresentationCarriesAllMatrices<
     FiniteGroup<ElementWeylGroup>, Rational
   > newRep;
-  int NumClasses = this->conjugacyClassCount();
+  int totalClasses = this->conjugacyClassCount();
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
   decompositionNewRep;
   ProgressReport report1;
@@ -2690,7 +2691,7 @@ computeIrreducibleRepresentationsTodorsVersion() {
   // standard rep.
   for (
     int i = 0; i < appendOnlyIrrepsList.size &&
-    this->irreducibleRepresentations.size != NumClasses; i ++
+    this->irreducibleRepresentations.size != totalClasses; i ++
   ) {
     for (int j = 0; j < initialcount; j ++) {
       if (report1.tickAndWantReport()) {
@@ -2826,8 +2827,8 @@ decomposeTodorsVersionRecursive(
   this->ownerGroup->
   checkInitializationFiniteDimensionalRepresentationComputation();
   this->getCharacter();
-  Coefficient sumOfNumComponentsSquared = this->getNumberOfComponents();
-  if (sumOfNumComponentsSquared == 0) {
+  Coefficient sumOfNumberOfComponentsSquared = this->getNumberOfComponents();
+  if (sumOfNumberOfComponentsSquared == 0) {
     global.fatal
     << "A module has character "
     << this->character.toString()
@@ -2836,7 +2837,7 @@ decomposeTodorsVersionRecursive(
     << this->toString()
     << global.fatal;
   }
-  if (sumOfNumComponentsSquared == 1) {
+  if (sumOfNumberOfComponentsSquared == 1) {
     int i = this->ownerGroup->characterTable.sortedGetIndex(this->character);
     if (i == - 1) {
       this->ownerGroup->addIrreducibleRepresentation(*this);
@@ -2874,9 +2875,9 @@ decomposeTodorsVersionRecursive(
   }
   // chop off already known pieces:
   for (int i = 0; i < appendOnlyIrrepsList.size; i ++) {
-    Coefficient NumIrrepsOfType =
+    Coefficient numberOfIrreducibleRepresentationsOfType =
     this->character.innerProduct(appendOnlyIrrepsList[i].getCharacter());
-    if (NumIrrepsOfType != 0) {
+    if (numberOfIrreducibleRepresentationsOfType != 0) {
       this->ownerGroup->
       checkInitializationFiniteDimensionalRepresentationComputation();
       {
@@ -2885,7 +2886,7 @@ decomposeTodorsVersionRecursive(
         << "<hr>\ncontains irrep "
         << appendOnlyIrrepsList[i].character.toString()
         << " with multiplicity "
-        << NumIrrepsOfType
+        << numberOfIrreducibleRepresentationsOfType
         << "\n";
         reportStream
         << "<hr>\nGetting class f-n matrix from character: "
@@ -2918,10 +2919,12 @@ decomposeTodorsVersionRecursive(
         appendOnlyIrrepsList[i].character
       );
       outputIrrepMults.addMonomial(
-        this->ownerGroup->characterTable[ci], NumIrrepsOfType
+        this->ownerGroup->characterTable[ci],
+        numberOfIrreducibleRepresentationsOfType
       );
       remainingCharacter -=
-      appendOnlyIrrepsList[i].character * NumIrrepsOfType;
+      appendOnlyIrrepsList[i].character *
+      numberOfIrreducibleRepresentationsOfType;
       {
         std::stringstream reportStream;
         reportStream
@@ -2975,10 +2978,10 @@ decomposeTodorsVersionRecursive(
   if (remainingVectorSpace.size == 0) {
     return true;
   }
-  int NumClasses = this->ownerGroup->conjugacyClassCount();
+  int numberOfClasses = this->ownerGroup->conjugacyClassCount();
   ClassFunction<WeylGroupData::WeylGroupBase, Coefficient> virtualChar;
   List<Vectors<Coefficient> > subRepresentationBasis;
-  for (int cfi = NumClasses - 1; cfi >= 0; cfi --) {
+  for (int cfi = numberOfClasses - 1; cfi >= 0; cfi --) {
     virtualChar.makeZero(*this->ownerGroup);
     virtualChar[cfi] = 1;
     this->getClassFunctionMatrix(virtualChar, splittingOperatorMatrix);

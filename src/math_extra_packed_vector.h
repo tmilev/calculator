@@ -3,7 +3,6 @@
 #define header_math_extra_packed_vector_ALREADY_INCLUDED
 
 #include "json.h"
-#include "math_extra_vector_space.h"
 #include "math_extra_finite_groups_implementation.h"
 
 template <typename scalar>

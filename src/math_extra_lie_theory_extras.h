@@ -179,11 +179,11 @@ public:
   WeylGroupData* weylSmaller;
   WeylGroupData* weylLarger;
   int computationPhase;
-  int NumProcessedConesParam;
-  int NumProcessedExtremaEqualOne;
+  int numberOfProcessedConesParameters;
+  int numberOfProcessedExtremaEqualToOne;
   std::string computeMultiplicitiesLargerAlgebraHighestWeight(
     Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords,
-    Vector<Rational>& parabolicSel
+    Vector<Rational>& parabolicSelection
   );
   std::string checkMultiplicitiesVsOrbits();
   std::string elementToStringMultiplicitiesReport();

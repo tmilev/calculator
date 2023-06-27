@@ -1115,8 +1115,8 @@ public:
 
 class ConeLatticeAndShiftMaxComputation {
 public:
-  int numNonParaM;
-  int numProcessedNonParam;
+  int numberOfNonParameters;
+  int numberOfProcessedNonParameters;
   List<ConeCollection> complexStartingPerRepresentative;
   List<ConeCollection> complexRefinedPerRepresentative;
   List<List<Vectors<Rational> > > maximaCandidates;
@@ -1130,8 +1130,8 @@ public:
   List<List<ConeCollection> > finalMaximaChambers;
   List<List<List<int> > > finalMaximaChambersIndicesMaxFunctions;
   List<bool> isInfinity;
-  Vectors<Rational> LPtoMaximizeLargerDim;
-  Vectors<Rational> LPtoMaximizeSmallerDim;
+  Vectors<Rational> lPtoMaximizeLargerDim;
+  Vectors<Rational> lPtoMaximizeSmallerDim;
   std::string toString(FormatExpressions* format = nullptr);
   void initialize(
     Vector<Rational>& inequalities,

@@ -375,7 +375,7 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation
   if ((letters.size == 1) && (letters[0] == 'A')) {
     int rank = ranks[0];
     List<Partition> partitions;
-    Partition::GetPartitions(partitions, rank + 1);
+    Partition::getPartitions(partitions, rank + 1);
     for (int i = 0; i < partitions.size; i ++) {
       GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> irrep;
       partitions[i].spechtModuleMatricesOfTranspositionsjjplusone(
@@ -1432,20 +1432,20 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   formatSupressUpperIndexOne.flagSupressDynkinIndexOne = true;
   DynkinSimpleType simpleType;
   std::stringstream mainTableStream;
-  int numParabolicClasses = 0,
-  numNonParabolicPseudoParabolic = 0,
-  numNonPseudoParabolic = 0;
+  int numberOfParabolicClasses = 0,
+  numberOfNonParabolicPseudoParabolic = 0,
+  numberOfNonPseudoParabolic = 0;
   for (int i = 0; i < inputSubgroups.size; i ++) {
     SubgroupDataRootReflections& currentSG = inputSubgroups[i];
     if (!currentSG.flagIsParabolic && !currentSG.flagIsExtendedParabolic) {
-      numNonPseudoParabolic ++;
+      numberOfNonPseudoParabolic ++;
       continue;
     }
     if (currentSG.flagIsParabolic) {
-      numParabolicClasses ++;
+      numberOfParabolicClasses ++;
     }
     if (!currentSG.flagIsParabolic && currentSG.flagIsExtendedParabolic) {
-      numNonParabolicPseudoParabolic ++;
+      numberOfNonParabolicPseudoParabolic ++;
     }
   }
   // check for repeating signatures
@@ -1456,17 +1456,17 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
     fullSignSig[i].setSize(inputSubgroups.size);
     pseudoSignSig[i].setSize(
-      numParabolicClasses + numNonParabolicPseudoParabolic
+      numberOfParabolicClasses + numberOfNonParabolicPseudoParabolic
     );
-    parabolicSignSig[i].setSize(numParabolicClasses);
+    parabolicSignSig[i].setSize(numberOfParabolicClasses);
     for (int j = 0; j < inputSubgroups.size; j ++) {
       fullSignSig[i][j] = (
         inputSubgroups[j].tauSignature[i] == 0 ? 0 : 1
       );
-      if (j < numParabolicClasses + numNonParabolicPseudoParabolic) {
+      if (j < numberOfParabolicClasses + numberOfNonParabolicPseudoParabolic) {
         pseudoSignSig[i][j] = fullSignSig[i][j];
       }
-      if (j < numParabolicClasses) {
+      if (j < numberOfParabolicClasses) {
         parabolicSignSig[i][j] = fullSignSig[i][j];
       }
     }
@@ -1577,23 +1577,23 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   }
   // end of check for repeating signatures
   int startIndex = 0;
-  int numColsPerPage = 25;
+  int numberOfColumnsPerPage = 25;
   int startIndexNextCol = 0;
   for (;;) {
     startIndex = startIndexNextCol;
     if (startIndex >= inputSubgroups.size) {
       break;
     }
-    startIndexNextCol = startIndex + numColsPerPage;
+    startIndexNextCol = startIndex + numberOfColumnsPerPage;
     if (startIndexNextCol - inputSubgroups.size > - 3) {
       startIndexNextCol = inputSubgroups.size;
     }
     mainTableStream << "\n<br>\n\\begin{longtable}{c|";
     for (int i = startIndex; i < startIndexNextCol; i ++) {
-      if (i == numParabolicClasses) {
+      if (i == numberOfParabolicClasses) {
         mainTableStream << "|";
       }
-      if (i == numParabolicClasses + numNonParabolicPseudoParabolic) {
+      if (i == numberOfParabolicClasses + numberOfNonParabolicPseudoParabolic) {
         mainTableStream << "|";
       }
       mainTableStream << "p{0.275cm}";
@@ -1605,11 +1605,11 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
     << "}Multiplicity of the sign representation "
     << "over the classes of root subgroups. "
     << "There are "
-    << numParabolicClasses
+    << numberOfParabolicClasses
     << " parabolic subgroup classes, "
-    << numNonParabolicPseudoParabolic
+    << numberOfNonParabolicPseudoParabolic
     << " pseudo-parabolic subgroup classes that are not parabolic, and "
-    << numNonPseudoParabolic
+    << numberOfNonPseudoParabolic
     << " non-pseudo-parabolic subgroup classes. \n<br>\n"
     << "}\\\\ ";
     for (int i = startIndex; i < startIndexNextCol; i ++) {
@@ -1626,7 +1626,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
       if (!currentSG.flagIsParabolic && currentSG.flagIsExtendedParabolic) {
         mainTableStream
         << "&${\\widehat{\\mathfrak{ p}}}_{"
-        << i - numParabolicClasses + 1
+        << i - numberOfParabolicClasses + 1
         << "}$";
       }
     }
@@ -1747,8 +1747,9 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   << " \\begin{document}\\begin{landscape}\n<br>\n\n<br>\n\n<br>\n\n<br>\n";
   out << "{\\tiny \n<br>\n \\renewcommand{\\arraystretch}{0}%\n<br>\n";
   out << "\\begin{longtable}{r|";
-  int numIrreps = this->group.characterTable[0].data.size;
-  for (int i = 0; i < numIrreps; i ++) {
+  int numberOfIrreducibleRepresentations =
+  this->group.characterTable[0].data.size;
+  for (int i = 0; i < numberOfIrreducibleRepresentations; i ++) {
     out << "r";
   }
   out
@@ -1762,7 +1763,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   << this->group.characterTable[0].data.size
   << "}{c}{Conjugacy class $\\#$}\\\\<br>\n";
   out << "Irrep label";
-  for (int i = 0; i < numIrreps; i ++) {
+  for (int i = 0; i < numberOfIrreducibleRepresentations; i ++) {
     out << "&$" << i + 1 << "$";
   }
   out << "\\\\\\hline<br>\n";
@@ -1813,7 +1814,7 @@ public:
   List<int> tuple;
   int sumTuple;
   int sumPartition;
-  int MaxNumCachedKostkaNumbers;
+  int maximumCachedKostkaNumbers;
   LargeInteger value;
   //  bool incrementReturnFalseIfPastLast();
   bool initTableaux(std::stringstream* comments = nullptr);
@@ -1859,7 +1860,7 @@ bool KostkaNumber::operator==(const KostkaNumber& other) const {
 }
 
 KostkaNumber::KostkaNumber() {
-  this->MaxNumCachedKostkaNumbers = 10000;
+  this->maximumCachedKostkaNumbers = 10000;
 }
 
 std::string KostkaNumber::toString() {
@@ -1979,7 +1980,7 @@ bool KostkaNumber::compute(
       } else if (!ancestor.compute(kostkaNumberCache, comments)) {
         return false;
       } else {
-        if (kostkaNumberCache->size < this->MaxNumCachedKostkaNumbers) {
+        if (kostkaNumberCache->size < this->maximumCachedKostkaNumbers) {
           kostkaNumberCache->addOnTop(ancestor);
         }
       }
@@ -2001,8 +2002,8 @@ std::string KostkaNumber::GetTypeBParabolicSignMultiplicityTable(int rank) {
   List<Partition> partitionsParabolics;
   Pair<Partition, Partition> currentPartition;
   for (int i = 0; i <= rank; i ++) {
-    Partition::GetPartitions(partitionsLeft, i);
-    Partition::GetPartitions(partitionsRight, rank - i);
+    Partition::getPartitions(partitionsLeft, i);
+    Partition::getPartitions(partitionsRight, rank - i);
     partitionsParabolics.addListOnTop(partitionsRight);
     for (int j = 0; j < partitionsLeft.size; j ++) {
       for (int k = 0; k < partitionsRight.size; k ++) {
@@ -2381,7 +2382,7 @@ bool CalculatorFunctionsWeylGroup::signSignatureRootSubsystemsFromKostkaNumbers
     if ((false)) {
       int permutationSize = rank + 1;
       List<Partition> partitions, partitionsTransposed;
-      Partition::GetPartitions(partitions, permutationSize);
+      Partition::getPartitions(partitions, permutationSize);
       partitionsTransposed.setSize(partitions.size);
       for (int i = 0; i < partitions.size; i ++) {
         partitionsTransposed[i] = partitions[i];

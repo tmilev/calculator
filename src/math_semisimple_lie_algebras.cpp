@@ -2010,16 +2010,16 @@ void SemisimpleLieAlgebra::orderSSalgebraForHWbfComputation() {
 }
 
 void SemisimpleLieAlgebra::orderStandardAscending() {
-  int numGens = this->getNumberOfGenerators();
-  for (int i = 0; i < numGens; i ++) {
+  int numberOfGenerators = this->getNumberOfGenerators();
+  for (int i = 0; i < numberOfGenerators; i ++) {
     this->universalEnvelopingGeneratorOrder[i] = i;
   }
 }
 
 void SemisimpleLieAlgebra::orderStandardDescending() {
-  int numGens = this->getNumberOfGenerators();
-  for (int i = 0; i < numGens; i ++) {
-    this->universalEnvelopingGeneratorOrder[i] = numGens - i - 1;
+  int numberOfGenerators = this->getNumberOfGenerators();
+  for (int i = 0; i < numberOfGenerators; i ++) {
+    this->universalEnvelopingGeneratorOrder[i] = numberOfGenerators - i - 1;
   }
 }
 

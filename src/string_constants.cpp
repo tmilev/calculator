@@ -209,7 +209,8 @@ std::string DatabaseStrings::labelSectionsTaught = "sectionsTaught";
 std::string DatabaseStrings::tableEmailInfo = "emailInfo";
 std::string DatabaseStrings::labelLastActivationEmailTime =
 "lastActivationEmailTime";
-std::string DatabaseStrings::labelNumActivationEmails = "numActivationEmails";
+std::string DatabaseStrings::labelTotalActivationEmails =
+"numActivationEmails";
 std::string DatabaseStrings::tableDeleted = "deleted";
 std::string DatabaseStrings::anyField = "${any}";
 std::string DatabaseStrings::objectSelector = "${number}";

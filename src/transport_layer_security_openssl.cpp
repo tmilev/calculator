@@ -379,8 +379,8 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
     << global.fatal;
   }
   this->setSocketAddToStack(inputSocketID);
-  int maxNumHandshakeTries = 4;
-  for (int i = 0; i < maxNumHandshakeTries; i ++) {
+  int maximumHandshakeTries = 4;
+  for (int i = 0; i < maximumHandshakeTries; i ++) {
     this->errorCode = SSL_connect(this->sslData);
     this->flagSSLHandshakeSuccessful = false;
     if (this->errorCode != 1) {
@@ -409,14 +409,14 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
           *commentsOnFailure
           << "No error reported, this shouldn't happen. <br>";
         }
-        maxNumHandshakeTries = 1;
+        maximumHandshakeTries = 1;
         break;
       case SSL_ERROR_ZERO_RETURN:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << "The TLS/SSL connection has been closed (possibly cleanly). <br>";
         }
-        maxNumHandshakeTries = 1;
+        maximumHandshakeTries = 1;
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
@@ -440,7 +440,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
           << " Application callback set by SSL_CTX_set_client_cert_cb(): "
           << "repeat needed (not implemented).  <br>";
         }
-        maxNumHandshakeTries = 1;
+        maximumHandshakeTries = 1;
         break;
         // case SSL_ERROR_WANT_ASYNC:
         // logOpenSSL << Logger::red << "Asynchronous engine is still
@@ -453,7 +453,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
         << Logger::red
         << "Error: some I/O error occurred. <br>"
         << Logger::endL;
-        maxNumHandshakeTries = 1;
+        maximumHandshakeTries = 1;
         break;
       case SSL_ERROR_SSL:
         if (commentsOnFailure != nullptr) {
@@ -464,7 +464,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Unknown error. <br>";
         }
-        maxNumHandshakeTries = 1;
+        maximumHandshakeTries = 1;
         break;
       }
       if (commentsOnFailure != nullptr) {
@@ -646,9 +646,9 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
   }
 #ifdef MACRO_use_open_ssl
   this->setSocketAddToStack(inputSocketID);
-  int maxNumHandshakeTries = 3;
+  int maximumHandshakeTries = 3;
   this->flagSSLHandshakeSuccessful = false;
-  for (int i = 0; i < maxNumHandshakeTries; i ++) {
+  for (int i = 0; i < maximumHandshakeTries; i ++) {
     this->errorCode = SSL_accept(this->sslData);
     if (this->errorCode <= 0) {
       this->flagSSLHandshakeSuccessful = false;
@@ -664,7 +664,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
         << "Attempt "
         << i + 1
         << " out of "
-        << maxNumHandshakeTries
+        << maximumHandshakeTries
         << " failed. ";
       }
       ERR_print_errors_fp(stderr);
@@ -673,14 +673,14 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "No error reported, this shouldn't happen. ";
         }
-        maxNumHandshakeTries = 1;
+        maximumHandshakeTries = 1;
         break;
       case SSL_ERROR_ZERO_RETURN:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
           << "The TLS/SSL connection has been closed (possibly cleanly). ";
         }
-        maxNumHandshakeTries = 1;
+        maximumHandshakeTries = 1;
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
@@ -703,7 +703,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
           << "Application callback set by SSL_CTX_set_client_cert_cb(): "
           << "repeat needed (not implemented). ";
         }
-        maxNumHandshakeTries = 1;
+        maximumHandshakeTries = 1;
         break;
         // case SSL_ERROR_WANT_ASYNC:
         // logOpenSSL << Logger::red << "Asynchronous engine is still
@@ -715,7 +715,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Error: some I/O error occurred. ";
         }
-        maxNumHandshakeTries = 1;
+        maximumHandshakeTries = 1;
         break;
       case SSL_ERROR_SSL:
         if (commentsOnFailure != nullptr) {
@@ -726,7 +726,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure << "Unknown error. ";
         }
-        maxNumHandshakeTries = 1;
+        maximumHandshakeTries = 1;
         break;
       }
       if (commentsOnFailure != nullptr) {

@@ -111,7 +111,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   List<ModuleSSalgebra<RationalFraction<Rational> > > modules;
   modules.setSize(highestWeights.size);
   Vector<RationalFraction<Rational> > tempV;
-  int numStartingVars = hwContext.numberOfVariables();
+  int totalStartingVariables = hwContext.numberOfVariables();
   std::stringstream
   reportfourierTransformedCalculatorCommands,
   reportCalculatorCommands;
@@ -147,15 +147,15 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         true, genericElement, useNilWeight, ascending
       );
       weylFormat.polynomialAlphabet.setSize(
-        numStartingVars + elementsNegativeNilrad.size
+        totalStartingVariables + elementsNegativeNilrad.size
       );
       weylFormat.weylAlgebraLetters.setSize(
-        numStartingVars + elementsNegativeNilrad.size
+        totalStartingVariables + elementsNegativeNilrad.size
       );
       universalEnvelopingFormat.polynomialAlphabet.setSize(
-        numStartingVars + elementsNegativeNilrad.size
+        totalStartingVariables + elementsNegativeNilrad.size
       );
-      for (int k = 0; k < numStartingVars; k ++) {
+      for (int k = 0; k < totalStartingVariables; k ++) {
         weylFormat.weylAlgebraLetters[k] = "error";
       }
       std::string finalXletter = (xLetter == nullptr) ? "x" : *xLetter;
@@ -163,7 +163,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       "\\partial" :
       *partialLetter;
       for (
-        int k = numStartingVars; k < universalEnvelopingFormat.
+        int k = totalStartingVariables; k < universalEnvelopingFormat.
         polynomialAlphabet.size; k ++
       ) {
         std::stringstream tmpStream, tempstream2, tempstream3, tempStream4;
@@ -173,12 +173,16 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         << k - hwContext.numberOfVariables() + 1
         << "}";
         universalEnvelopingFormat.polynomialAlphabet[k] = tmpStream.str();
-        tempstream2 << finalXletter << "_{" << k - numStartingVars + 1 << "}";
-        tempstream3 << finalXletter << "_" << k - numStartingVars + 1;
+        tempstream2
+        << finalXletter
+        << "_{"
+        << k - totalStartingVariables + 1
+        << "}";
+        tempstream3 << finalXletter << "_" << k - totalStartingVariables + 1;
         tempStream4
         << finalPartialLetter
         << "_{"
-        << k - numStartingVars + 1
+        << k - totalStartingVariables + 1
         << "}";
         if (
           weylFormat.polynomialAlphabet.contains(tempstream2.str()) ||

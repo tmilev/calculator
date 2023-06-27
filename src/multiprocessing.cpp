@@ -203,7 +203,7 @@ int Pipe::writeWithTimeoutViaSelect(
   int fileDescriptor,
   const std::string& input,
   int timeOutInSeconds,
-  int maxNumTries,
+  int maximumTries,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Pipe::writeWithTimeoutViaSelect");
@@ -213,18 +213,18 @@ int Pipe::writeWithTimeoutViaSelect(
   timeval timeOut;
   timeOut.tv_sec = timeOutInSeconds;
   timeOut.tv_usec = 0;
-  int numFails = 0;
-  int numSelected = - 1;
+  int totalFails = 0;
+  int totalSelected = - 1;
   std::stringstream failStream;
   do {
-    if (numFails > maxNumTries) {
+    if (totalFails > maximumTries) {
       failStream
-      << maxNumTries
+      << maximumTries
       << " failed or timed-out select attempts on file descriptor: "
       << fileDescriptor;
       break;
     }
-    numSelected =
+    totalSelected =
     select(
       fileDescriptor + 1,
       nullptr,
@@ -238,9 +238,9 @@ int Pipe::writeWithTimeoutViaSelect(
     << ", select failed. Error message: "
     << strerror(errno)
     << ". \n";
-    numFails ++;
-  } while (numSelected < 0);
-  if (numSelected <= 0) {
+    totalFails ++;
+  } while (totalSelected < 0);
+  if (totalSelected <= 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << failStream.str();
     }
@@ -253,7 +253,7 @@ int Pipe::readWithTimeOutViaSelect(
   int fileDescriptor,
   List<char>& output,
   int timeOutInSeconds,
-  int maxNumTries,
+  int maximumTries,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Pipe::readWithTimeOutViaSelect");
@@ -271,18 +271,18 @@ int Pipe::readWithTimeOutViaSelect(
   timeval timeOut;
   timeOut.tv_sec = timeOutInSeconds;
   timeOut.tv_usec = 0;
-  int numFails = 0;
-  int numSelected = - 1;
+  int totalFails = 0;
+  int totalSelected = - 1;
   std::stringstream failStream;
   do {
-    if (numFails > maxNumTries) {
+    if (totalFails > maximumTries) {
       failStream
-      << maxNumTries
+      << maximumTries
       << " failed or timed-out select attempts on file descriptor: "
       << fileDescriptor;
       break;
     }
-    numSelected =
+    totalSelected =
     select(
       fileDescriptor + 1,
       &fileDescriptorContainer,
@@ -296,10 +296,9 @@ int Pipe::readWithTimeOutViaSelect(
     << ", select failed. Error message: "
     << strerror(errno)
     << ". \n";
-    numFails ++;
-  } while (numSelected < 0);
-  // numSelected == 0 most probably means timeout has expired.
-  if (numSelected <= 0) {
+    totalFails ++;
+  } while (totalSelected < 0);
+  if (totalSelected <= 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << failStream.str();
     }
@@ -317,11 +316,11 @@ int Pipe::readWithTimeOutViaSelect(
     if (bytesRead > 0) {
       return bytesRead;
     }
-    numFails ++;
-    if (numFails > maxNumTries) {
+    totalFails ++;
+    if (totalFails > maximumTries) {
       failStream
       << "Too many failed attempts: "
-      << maxNumTries
+      << maximumTries
       << " at reading from file descriptor: "
       << fileDescriptor
       << ". Error message: "
@@ -407,7 +406,7 @@ bool PipePrimitive::setWriteBlocking(bool dontCrashOnFail) {
 }
 
 int Pipe::writeNoInterrupts(int fileDescriptor, const std::string& input) {
-  int numAttempts = 0;
+  int totalAttempts = 0;
   for (;;) {
     int result = static_cast<int>(
       write(fileDescriptor, input.c_str(), input.size())
@@ -421,8 +420,8 @@ int Pipe::writeNoInterrupts(int fileDescriptor, const std::string& input) {
         << Logger::red
         << "Write operation interrupted, repeating. "
         << Logger::endL;
-        numAttempts ++;
-        if (numAttempts > 100) {
+        totalAttempts ++;
+        if (totalAttempts > 100) {
           global
           << Logger::red
           << "Write operation interrupted, more than 100 times, "
@@ -704,12 +703,12 @@ bool PipePrimitive::readOnceNoFailure(bool dontCrashOnFail) {
   this->buffer.setSize(bufferSize);
   // <-once the buffer is resized, this operation does no memory allocation and
   // is fast.
-  int numReadBytes = 0;
+  int totalReadBytes = 0;
   for (;;) {
-    numReadBytes = static_cast<int>(
+    totalReadBytes = static_cast<int>(
       read(this->pipeEnds[0], this->buffer.objects, bufferSize)
     );
-    if (numReadBytes >= 0) {
+    if (totalReadBytes >= 0) {
       break;
     }
     counter ++;
@@ -731,15 +730,15 @@ bool PipePrimitive::readOnceNoFailure(bool dontCrashOnFail) {
       return true;
     }
   }
-  if (numReadBytes > 150000) {
+  if (totalReadBytes > 150000) {
     global
     << Logger::red
     << this->toString()
     << "This is not supposed to happen: pipe read more than 150000 bytes. "
     << Logger::endL;
   }
-  if (numReadBytes > 0) {
-    this->buffer.setSize(numReadBytes);
+  if (totalReadBytes > 0) {
+    this->buffer.setSize(totalReadBytes);
     this->lastRead = this->buffer;
   }
   return true;

@@ -288,7 +288,7 @@ public:
   static bool convertHexToInteger(
     const std::string& input,
     LargeIntegerUnsigned& output,
-    int& outputNumLeadingZeroPairs
+    int& outputTotalLeadingZeroPairs
   );
   static std::string convertListUnsignedCharsToBase64(
     const List<unsigned char>& input, bool useBase64URL

@@ -286,11 +286,11 @@ commutingABntoBnAPlusLowerOrderAllowed(
       return true;
     }
   }
-  int numPosRoots = this->getOwner().weylGroup.rootsOfBorel.size;
+  int totalPositiveRoots = this->getOwner().weylGroup.rootsOfBorel.size;
   int dimension = this->getOwner().weylGroup.cartanSymmetric.numberOfRows;
   if (
-    rightGeneratorIndex >= numPosRoots &&
-    rightGeneratorIndex < numPosRoots + dimension
+    rightGeneratorIndex >= totalPositiveRoots &&
+    rightGeneratorIndex < totalPositiveRoots + dimension
   ) {
     return
     this->getOwner().lieBrackets.elements[leftGeneratorIndex][
@@ -495,35 +495,37 @@ highestWeightTransposeAntiAutomorphismBilinearForm(
 
 template <class Coefficient>
 bool ElementUniversalEnveloping<Coefficient>::applyTransposeAntiAutoOnMe() {
-  MonomialUniversalEnveloping<Coefficient> tempMon;
+  MonomialUniversalEnveloping<Coefficient> monomial;
   ElementUniversalEnveloping<Coefficient> result;
   result.makeZero(*this->owner);
-  int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
+  int totalPositiveRoots = this->getOwner().getNumberOfPositiveRoots();
   int rank = this->getOwner().getRank();
   Coefficient coefficient;
   this->checkNumberOfCoefficientsConsistency();
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialUniversalEnveloping<Coefficient>& currentMon = (*this)[i];
+    const MonomialUniversalEnveloping<Coefficient>& currentMonomial = (*this)[
+      i
+    ];
     coefficient = this->coefficients[i];
-    tempMon.owner = currentMon.owner;
-    tempMon.powers.size = 0;
-    tempMon.generatorsIndices.size = 0;
-    for (int j = currentMon.powers.size - 1; j >= 0; j --) {
+    monomial.owner = currentMonomial.owner;
+    monomial.powers.size = 0;
+    monomial.generatorsIndices.size = 0;
+    for (int j = currentMonomial.powers.size - 1; j >= 0; j --) {
       int power;
-      if (!currentMon.powers[j].isSmallInteger(&power)) {
+      if (!currentMonomial.powers[j].isSmallInteger(&power)) {
         return false;
       }
-      int generatorIndex = currentMon.generatorsIndices[j];
-      if (generatorIndex < numPosRoots) {
-        generatorIndex = 2 * numPosRoots + rank - 1 - generatorIndex;
-      } else if (generatorIndex >= numPosRoots + rank) {
-        generatorIndex = - generatorIndex + 2 * numPosRoots + rank - 1;
+      int generatorIndex = currentMonomial.generatorsIndices[j];
+      if (generatorIndex < totalPositiveRoots) {
+        generatorIndex = 2 * totalPositiveRoots + rank - 1 - generatorIndex;
+      } else if (generatorIndex >= totalPositiveRoots + rank) {
+        generatorIndex = - generatorIndex + 2 * totalPositiveRoots + rank - 1;
       }
-      tempMon.multiplyByGeneratorPowerOnTheRight(
-        generatorIndex, currentMon.powers[j]
+      monomial.multiplyByGeneratorPowerOnTheRight(
+        generatorIndex, currentMonomial.powers[j]
       );
     }
-    result.addMonomial(tempMon, coefficient);
+    result.addMonomial(monomial, coefficient);
   }
   *this = result;
   return true;
@@ -711,22 +713,22 @@ void MonomialUniversalEnveloping<Coefficient>::modOutVermaRelations(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  int numPosRoots = this->getOwner().getNumberOfPositiveRoots();
+  int totalPositiveRoots = this->getOwner().getNumberOfPositiveRoots();
   int dimension = this->getOwner().getRank();
   outputCoeff = ringUnit;
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --) {
     int indexCurrentGenerator = this->generatorsIndices[i];
-    if (indexCurrentGenerator >= numPosRoots + dimension) {
+    if (indexCurrentGenerator >= totalPositiveRoots + dimension) {
       this->makeOne(*this->owner);
       outputCoeff = ringZero;
       return;
     }
-    if (indexCurrentGenerator < numPosRoots) {
+    if (indexCurrentGenerator < totalPositiveRoots) {
       return;
     }
     if (
-      indexCurrentGenerator >= numPosRoots &&
-      indexCurrentGenerator < numPosRoots + dimension
+      indexCurrentGenerator >= totalPositiveRoots &&
+      indexCurrentGenerator < totalPositiveRoots + dimension
     ) {
       if (substitutionHiGoesToIthElement == 0) {
         this->makeOne(*this->owner);
@@ -737,7 +739,7 @@ void MonomialUniversalEnveloping<Coefficient>::modOutVermaRelations(
       if (!this->powers[i].isSmallInteger(&degree)) {
         return;
       }
-      int hIndex = indexCurrentGenerator - numPosRoots;
+      int hIndex = indexCurrentGenerator - totalPositiveRoots;
       Coefficient substitutedH;
       substitutedH = (*substitutionHiGoesToIthElement)[hIndex];
       MathRoutines::raiseToPower(substitutedH, degree, ringUnit);
@@ -851,8 +853,8 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
     root1.makeEi(dimension, i);
     // implementation without the ninja formula:
     //    killingForm.actOnVectorColumn(root1, root2);
-    //    element1.makeCartanGenerator(root1, numVars, owner);
-    //    element2.makeCartanGenerator(root2, numVars, owner);
+    //    element1.makeCartanGenerator(root1, vars, owner);
+    //    element2.makeCartanGenerator(root2, vars, owner);
     //    element1*= element2;
     //    *this+= element1;
     // Alternative implementation using a ninja formula I cooked up after
@@ -884,8 +886,8 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
     //     }
     //     rational +=2;
     //     rational = 1/rational;
-    //     element2.makeOneGeneratorCoefficientOne(opposite, numVars, owner);
-    //     element1.makeOneGeneratorCoefficientOne(root, numVars, owner);
+    //     element2.makeOneGeneratorCoefficientOne(opposite, vars, owner);
+    //     element1.makeOneGeneratorCoefficientOne(root, vars, owner);
     //     element2*= element1;
     //
     //     element2*= rational;
@@ -1100,23 +1102,23 @@ template <class Coefficient>
 void ElementUniversalEnveloping<Coefficient>::makeCartanGenerator(
   const Vector<Rational>& input, SemisimpleLieAlgebra& inputOwner
 ) {
-  MonomialUniversalEnveloping<Coefficient> tempMon;
+  MonomialUniversalEnveloping<Coefficient> monomial;
   this->makeZero(inputOwner);
-  tempMon.makeOne(inputOwner);
+  monomial.makeOne(inputOwner);
   int dimension = this->getOwner().weylGroup.cartanSymmetric.numberOfRows;
-  int numPosRoots = this->getOwner().weylGroup.rootsOfBorel.size;
-  tempMon.generatorsIndices.setSize(1);
-  tempMon.powers.setSize(1);
+  int totalPositiveRoots = this->getOwner().weylGroup.rootsOfBorel.size;
+  monomial.generatorsIndices.setSize(1);
+  monomial.powers.setSize(1);
   Coefficient tempCF;
   for (int i = 0; i < dimension; i ++) {
     if (!input[i].isEqualToZero()) {
-      (*tempMon.generatorsIndices.lastObject()) = i + numPosRoots;
-      *tempMon.powers.lastObject() = 1;
+      (*monomial.generatorsIndices.lastObject()) = i + totalPositiveRoots;
+      *monomial.powers.lastObject() = 1;
       tempCF = 1;
       // <- to facilitate type conversion
       tempCF *= input[i];
       // <- to facilitate type conversion we call extra assignment
-      this->addMonomial(tempMon, tempCF);
+      this->addMonomial(monomial, tempCF);
     }
   }
 }
@@ -2102,14 +2104,14 @@ commutingLeftIndexAroundRightIndexAllowed(
     if (rightPower.isSmallInteger(&tempInt)) {
       return true;
     }
-    int numPosRoots =
+    int totalPositiveRoots =
     this->owner->ownerSemisimpleLieAlgebra->weylGroup.rootsOfBorel.size;
     int dimension =
     this->owner->ownerSemisimpleLieAlgebra->weylGroup.cartanSymmetric.
     numberOfRows;
     if (
-      rightGeneratorIndex >= numPosRoots &&
-      rightGeneratorIndex < numPosRoots + dimension
+      rightGeneratorIndex >= totalPositiveRoots &&
+      rightGeneratorIndex < totalPositiveRoots + dimension
     ) {
       ElementSemisimpleLieAlgebra<Rational> element;
       this->owner->ownerSemisimpleLieAlgebra->lieBracket(
@@ -2469,21 +2471,21 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::modOutVermaRelations(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  int numPosRoots =
+  int numberOfPositiveRoots =
   this->owner->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
   int dimension = this->owner->ownerSemisimpleLieAlgebra->getRank();
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --) {
     int indexCurrentGenerator = this->generatorsIndices[i];
-    if (indexCurrentGenerator >= numPosRoots + dimension) {
+    if (indexCurrentGenerator >= numberOfPositiveRoots + dimension) {
       this->makeZero(ringZero, *this->owner);
       return;
     }
-    if (indexCurrentGenerator < numPosRoots) {
+    if (indexCurrentGenerator < numberOfPositiveRoots) {
       return;
     }
     if (
-      indexCurrentGenerator >= numPosRoots &&
-      indexCurrentGenerator < numPosRoots + dimension
+      indexCurrentGenerator >= numberOfPositiveRoots &&
+      indexCurrentGenerator < numberOfPositiveRoots + dimension
     ) {
       int degree = 0;
       if (!this->powers[i].isSmallInteger(degree)) {

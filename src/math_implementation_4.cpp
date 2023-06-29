@@ -497,8 +497,10 @@ std::string GlobalVariables::LogData::toStringProcessType() const {
     return "worker";
   case GlobalVariables::LogData::type::daemon:
     return "daemon";
+  case GlobalVariables::LogData::type::database:
+  return "database";
   default:
-    return "uknown process type";
+    return "unknown process type";
   }
 }
 

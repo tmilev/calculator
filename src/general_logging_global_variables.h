@@ -202,6 +202,8 @@ public:
       // This process type runs the calculator connections
       // and does the actual internet input/output.
       static const int worker = 4;
+      // This process runs the database.
+      static const int database = 5;
     };
 
     int logType;

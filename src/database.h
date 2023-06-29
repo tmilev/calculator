@@ -7,6 +7,8 @@
 
 class UserCalculator;
 class Database;
+// Forward declare a class that can listen to sockets.
+class Listener;
 
 // Stores a recipe for updating an item.
 // A typical item would be stored allong the lines of:
@@ -268,6 +270,8 @@ class LocalDatabase {
   // A once-per-database start random id. Do not log this to the console.
   List<unsigned char> randomId;
   List<unsigned char> randomIdHash;
+  // Map from listening sockets to ports.
+  MapList<int, std::string> allListeningSockets;
 public:
   int processId;
   int socket;
@@ -310,8 +314,14 @@ public:
   void createHashIndex(
     const std::string& collectionName, const std::string& key
   );
+  void listenToPort();
+  // Forks out a child process to run the database.
+  // Returns the process id of the child database to the parent
+  // and 0 to the child database process.
+  int forkOutDatabase();
   void initializeForkAndRun();
   void run();
+  bool runOneConnection(Listener& listener);
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
   );

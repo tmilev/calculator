@@ -116,7 +116,7 @@ void RootSubalgebra::getCoxeterPlane(
 }
 
 void RootSubalgebra::computeDynkinDiagramKAndCentralizer() {
-    this->simpleRootsReductiveSubalgebra = this->generatorsK;
+  this->simpleRootsReductiveSubalgebra = this->generatorsK;
   this->dynkinDiagram.computeDiagramTypeModifyInput(
     this->simpleRootsReductiveSubalgebra, this->getAmbientWeyl()
   );
@@ -1082,8 +1082,8 @@ bool RootSubalgebra::checkForSmallRelations(
 
 void RootSubalgebra::matrixToRelation(
   ConeRelation& output,
-  Matrix<Rational>& matA,
-  Matrix<Rational>& matX,
+  Matrix<Rational>& matrixA,
+  Matrix<Rational>& matrixX,
   int dimension,
   Vectors<Rational>& nilradicalRoots
 ) {
@@ -1093,28 +1093,28 @@ void RootSubalgebra::matrixToRelation(
   output.betas.size = 0;
   Vector<Rational> root;
   root.setSize(dimension);
-  matX.scaleToIntegralForMinimalRationalHeightNoSignChange();
-  if (matA.numberOfColumns != matX.numberOfRows) {
+  matrixX.scaleToIntegralForMinimalRationalHeightNoSignChange();
+  if (matrixA.numberOfColumns != matrixX.numberOfRows) {
     global.fatal
     << "Right matrix has different number of columns from "
     << "the number of rows of the left one. "
     << global.fatal;
   }
-  for (int i = 0; i < matA.numberOfColumns; i ++) {
-    if (!matX.elements[i][0].isEqualToZero()) {
+  for (int i = 0; i < matrixA.numberOfColumns; i ++) {
+    if (!matrixX.elements[i][0].isEqualToZero()) {
       for (int j = 0; j < dimension; j ++) {
-        root.objects[j].assign(matA.elements[j][i]);
+        root.objects[j].assign(matrixA.elements[j][i]);
       }
-      if (!(matX.elements[i][0].denominatorShort == 1)) {
+      if (!(matrixX.elements[i][0].denominatorShort == 1)) {
         global.fatal << "Matrix element not integer. " << global.fatal;
       }
       if (i < nilradicalRoots.size) {
         output.betas.addOnTop(root);
-        output.betaCoefficients.addOnTop(matX.elements[i][0]);
+        output.betaCoefficients.addOnTop(matrixX.elements[i][0]);
       } else {
         root.negate();
         output.alphas.addOnTop(root);
-        output.alphaCoefficients.addOnTop(matX.elements[i][0]);
+        output.alphaCoefficients.addOnTop(matrixX.elements[i][0]);
       }
     }
   }
@@ -1320,8 +1320,10 @@ void RootSubalgebra::ensureAlphasDontSumToRoot(
             int changedIndex = i;
             int otherIndex = j;
             Rational alpha1Coefficient;
-            Rational  alpha2Coefficient;
-            if (alpha1Coefficient.isGreaterThanOrEqualTo(alpha2Coefficient)) {
+            Rational alpha2Coefficient;
+            if (
+              alpha1Coefficient.isGreaterThanOrEqualTo(alpha2Coefficient)
+            ) {
               changedIndex = j;
               otherIndex = i;
             }
@@ -1785,9 +1787,11 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   return out.str();
 }
 
-bool RootSubalgebra::isGeneratingSingularVectors(int indexKModules, Vectors<Rational>& nilradicalRoots
+bool RootSubalgebra::isGeneratingSingularVectors(
+  int indexKModules, Vectors<Rational>& nilradicalRoots
 ) {
-  Vector<Rational>& currentRoot = this->highestWeightsPrimalSimple[indexKModules];
+  Vector<Rational>& currentRoot =
+  this->highestWeightsPrimalSimple[indexKModules];
   if (currentRoot.isEqualToZero()) {
     return false;
   }
@@ -4745,7 +4749,7 @@ computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
     );
   }
   bufferSubalgebras[recursionDepth].generatorsK =
-          bufferSubalgebras[recursionDepth - 1].generatorsK;
+  bufferSubalgebras[recursionDepth - 1].generatorsK;
   bufferSubalgebras[recursionDepth].owner = this;
   ProgressReport report;
   for (
@@ -4755,7 +4759,7 @@ computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
       bufferSubalgebras[recursionDepth - 1].highestWeightsPrimalSimple[k].
       isPositive()
     ) {
-        bufferSubalgebras[recursionDepth].generatorsK.addOnTop(
+      bufferSubalgebras[recursionDepth].generatorsK.addOnTop(
         bufferSubalgebras[recursionDepth - 1].highestWeightsPrimalSimple[k]
       );
       bufferSubalgebras[recursionDepth].computeDynkinDiagramKAndCentralizer();
@@ -4782,7 +4786,7 @@ computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
         addOnTopNoRepetition(indexSA);
       }
       bufferSubalgebras[recursionDepth].generatorsK.removeIndexSwapWithLast(
-                  bufferSubalgebras[recursionDepth].generatorsK.size - 1
+        bufferSubalgebras[recursionDepth].generatorsK.size - 1
       );
     }
   }
@@ -5425,7 +5429,7 @@ void RootSubalgebra::computeRootsOfK() {
   }
 }
 
-void ConeRelation::RelationOneSideToStringCoordForm(
+void ConeRelation::relationOneSideToStringCoordinateForm(
   std::string& output,
   List<Rational>& coefficients,
   Vectors<Rational>& roots,
@@ -5893,8 +5897,8 @@ void ConeRelation::getSumAlphas(Vector<Rational>& output, int dimension) {
 }
 
 void ConeRelation::sortRelation(RootSubalgebra& owner) {
-  this->ComputeKComponents(this->alphas, this->alphaKComponents, owner);
-  this->ComputeKComponents(this->betas, this->betaKComponents, owner);
+  this->computeKComponents(this->alphas, this->alphaKComponents, owner);
+  this->computeKComponents(this->betas, this->betaKComponents, owner);
   // bubble sort
   for (int i = 0; i < this->alphas.size; i ++) {
     for (int j = i + 1; j < this->alphas.size; j ++) {
@@ -5924,7 +5928,7 @@ void ConeRelation::sortRelation(RootSubalgebra& owner) {
   }
 }
 
-void ConeRelation::ComputeKComponents(
+void ConeRelation::computeKComponents(
   Vectors<Rational>& input,
   List<List<int> >& output,
   RootSubalgebra& owner
@@ -6084,14 +6088,14 @@ void ConeRelations::toString(
       out
       << "\\multicolumn{5}{c}{$\\varepsilon$-form~relative~to~"
       << "the~subalgebra~generated~by~$\\mathfrak{k}$~and~the~relation}\\\\\n";
-      this->objects[i].RelationOneSideToStringCoordForm(
+      this->objects[i].relationOneSideToStringCoordinateForm(
         coefficientString,
         this->objects[i].alphaCoefficients,
         tempAlphas,
         true
       );
       out << "\\multicolumn{5}{c}{" << coefficientString;
-      this->objects[i].RelationOneSideToStringCoordForm(
+      this->objects[i].relationOneSideToStringCoordinateForm(
         coefficientString,
         this->objects[i].betaCoefficients,
         tempBetas,

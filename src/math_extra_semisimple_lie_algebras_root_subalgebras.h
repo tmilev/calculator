@@ -78,12 +78,12 @@ public:
   bool leftSortedBiggerThanOrEqualToRight(
     List<int>& left, List<int>& right
   );
-  void ComputeKComponents(
+  void computeKComponents(
     Vectors<Rational>& input,
     List<List<int> >& output,
     RootSubalgebra& owner
   );
-  void RelationOneSideToStringCoordForm(
+  void relationOneSideToStringCoordinateForm(
     std::string& output,
     List<Rational>& coefficients,
     Vectors<Rational>& roots,
@@ -320,8 +320,8 @@ public:
   void computeCentralizerFromKModulesAndSortKModules();
   void matrixToRelation(
     ConeRelation& output,
-    Matrix<Rational>& matA,
-    Matrix<Rational>& matX,
+    Matrix<Rational>& matrixA,
+    Matrix<Rational>& matrixX,
     int dimension,
     Vectors<Rational>& nilradicalRoots
   );

@@ -4395,7 +4395,7 @@ int WebServer::run() {
   global.logs.serverMonitor.reset();
   global.logs.worker.reset();
   Database::get().initializeServer();
-  if (Database::get().localDatabase.processId == 0) {
+  if (Database::get().localDatabase.processId != 0) {
     // This is the database process.
     return 0;
   }
@@ -6229,6 +6229,7 @@ void LocalDatabase::initializeForkAndRun() {
   STACK_TRACE("LocalDatabase::initializeForkAndRun");
   this->listenToPort();
   if (this->forkOutDatabase() == 0) {
+
     close(this->socket);
     return;
   }

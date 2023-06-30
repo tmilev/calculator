@@ -353,22 +353,23 @@ bool ElementWeylAlgebra<Coefficient>::substitute(
   const PolynomialSubstitution<Rational>& substitutionDifferentialPart
 ) {
   STACK_TRACE("ElementWeylAlgebra::substitute");
-  Polynomial<Rational> differentialOperatorPart, polyPart;
+  Polynomial<Rational> differentialOperatorPart;
+  Polynomial<Rational> polyPart;
   MonomialWeylAlgebra monomial;
   ElementWeylAlgebra output;
   output.makeZero();
   Coefficient newCoefficient;
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialWeylAlgebra& currentMon = (*this)[i];
+    const MonomialWeylAlgebra& workingMonomial = (*this)[i];
     if (
-      !currentMon.polynomialPart.substitute(
+      !workingMonomial.polynomialPart.substitute(
         substitutionPolynomialPart, polyPart, Rational::one()
       )
     ) {
       return false;
     }
     if (
-      !currentMon.differentialPart.substitute(
+      !workingMonomial.differentialPart.substitute(
         substitutionDifferentialPart,
         differentialOperatorPart,
         Rational::one()
@@ -406,11 +407,11 @@ void ElementWeylAlgebra<Coefficient>::fourierTransform(
   output.makeZero();
   MonomialWeylAlgebra monomial;
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialWeylAlgebra& currentMon = (*this)[i];
+    const MonomialWeylAlgebra& workingMonomial = (*this)[i];
     if (
       !(
-        currentMon.polynomialPart.totalDegree() +
-        currentMon.differentialPart.totalDegree()
+        workingMonomial.polynomialPart.totalDegree() +
+        workingMonomial.differentialPart.totalDegree()
       ).isInteger(&totalDegree)
     ) {
       global.fatal
@@ -419,8 +420,8 @@ void ElementWeylAlgebra<Coefficient>::fourierTransform(
       << "non-integral exponents is not allowed. "
       << global.fatal;
     }
-    monomial.differentialPart = currentMon.polynomialPart;
-    monomial.polynomialPart = currentMon.differentialPart;
+    monomial.differentialPart = workingMonomial.polynomialPart;
+    monomial.polynomialPart = workingMonomial.differentialPart;
     coefficient = this->coefficients[i];
     if (totalDegree.isEven()) {
       coefficient *= - 1;
@@ -439,9 +440,9 @@ bool ElementWeylAlgebra<Coefficient>::actOnPolynomial(
   Rational currentCoefficient;
   for (int i = 0; i < this->size(); i ++) {
     for (int j = 0; j < actedUpon.size(); j ++) {
-      const MonomialPolynomial& currentMonomial = actedUpon[j];
+      const MonomialPolynomial& monomial = actedUpon[j];
       const MonomialWeylAlgebra& currentOpMon = (*this)[i];
-      resultMonomial = currentMonomial;
+      resultMonomial = monomial;
       currentCoefficient = actedUpon.coefficients[j];
       currentCoefficient *= this->coefficients[i];
       for (int k = 0; k < currentOpMon.minimalNumberOfVariables(); k ++) {

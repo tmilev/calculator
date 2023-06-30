@@ -368,13 +368,14 @@ bool LittelmannPath::minimaAreIntegral() {
   return true;
 }
 
-void LittelmannPath::makeFromWeightInSimpleCoords(
-  const Vector<Rational>& weightInSimpleCoords, WeylGroupData& inputOwner
+void LittelmannPath::makeFromweightInSimpleCoordinates(
+  const Vector<Rational>& weightInSimpleCoordinates,
+  WeylGroupData& inputOwner
 ) {
   this->owner = &inputOwner;
   this->waypoints.setSize(2);
   this->waypoints[0].makeZero(inputOwner.getDimension());
-  this->waypoints[1] = weightInSimpleCoords;
+  this->waypoints[1] = weightInSimpleCoordinates;
   this->simplify();
 }
 
@@ -588,28 +589,29 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) const {
-  List<ElementUniversalEnveloping<Coefficient> > tempBasis, elements;
+  List<ElementUniversalEnveloping<Coefficient> > tempBasis;
+  List<ElementUniversalEnveloping<Coefficient> > elements;
   tempBasis = basis;
   tempBasis.addOnTop(*this);
-  Vectors<Coefficient> tempCoords;
+  Vectors<Coefficient> coordinates;
   if (
     !this->getBasisFromSpanOfElements(
-      tempBasis, tempCoords, elements, ringUnit, ringZero
+      tempBasis, coordinates, elements, ringUnit, ringZero
     )
   ) {
     return false;
   }
   Vector<Coefficient> root;
-  root = *tempCoords.lastObject();
-  tempCoords.setSize(basis.size);
-  return root.getCoordinatesInBasis(tempCoords, output);
+  root = *coordinates.lastObject();
+  coordinates.setSize(basis.size);
+  return root.getCoordinatesInBasis(coordinates, output);
 }
 
 template <class Coefficient>
 template <class CoefficientTypeQuotientField>
 bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
   List<ElementUniversalEnveloping<Coefficient> >& elements,
-  Vectors<CoefficientTypeQuotientField>& outputCoords,
+  Vectors<CoefficientTypeQuotientField>& outputCoordinates,
   List<ElementUniversalEnveloping<Coefficient> >& outputBasis,
   const CoefficientTypeQuotientField& fieldUnit,
   const CoefficientTypeQuotientField& fieldZero
@@ -619,42 +621,42 @@ bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
   }
   ElementUniversalEnveloping<Coefficient> outputCorrespondingMonomials;
   outputCorrespondingMonomials.makeZero(*elements[0].owner);
-  Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
+  Vectors<CoefficientTypeQuotientField> outputCoordinatesBeforeReduction;
   for (int i = 0; i < elements.size; i ++) {
     for (int j = 0; j < elements[i].size; j ++) {
       outputCorrespondingMonomials.addOnTopNoRepetition(elements[i][j]);
     }
   }
-  outputCoordsBeforeReduction.setSize(elements.size);
+  outputCoordinatesBeforeReduction.setSize(elements.size);
   for (int i = 0; i < elements.size; i ++) {
     Vector<CoefficientTypeQuotientField>& currentList =
-    outputCoordsBeforeReduction[i];
+    outputCoordinatesBeforeReduction[i];
     currentList.makeZero(outputCorrespondingMonomials.size);
-    ElementUniversalEnveloping<Coefficient>& currentElt = elements[i];
-    for (int j = 0; j < currentElt.size; j ++) {
-      MonomialUniversalEnveloping<Coefficient>& currentMon = currentElt[j];
-      currentList[outputCorrespondingMonomials.getIndex(currentMon)] =
-      currentMon.coefficient;
+    ElementUniversalEnveloping<Coefficient>& currentElement = elements[i];
+    for (int j = 0; j < currentElement.size; j ++) {
+      MonomialUniversalEnveloping<Coefficient>& monomial = currentElement[j];
+      currentList[outputCorrespondingMonomials.getIndex(monomial)] =
+      monomial.coefficient;
     }
   }
   outputBasis.size = 0;
   outputBasis.reserve(elements.size);
-  Vectors<CoefficientTypeQuotientField> basisCoordForm;
-  basisCoordForm.reserve(elements.size);
+  Vectors<CoefficientTypeQuotientField> basisCoordinateForm;
+  basisCoordinateForm.reserve(elements.size);
   Selection selectedBasis;
-  outputCoordsBeforeReduction.SelectABasis(
-    basisCoordForm, fieldZero, selectedBasis
+  outputCoordinatesBeforeReduction.SelectABasis(
+    basisCoordinateForm, fieldZero, selectedBasis
   );
   for (int i = 0; i < selectedBasis.cardinalitySelection; i ++) {
     outputBasis.addOnTop(elements.objects[selectedBasis.elements[i]]);
   }
-  Matrix<Coefficient> bufferMat;
+  Matrix<Coefficient> bufferMatrix;
   Vectors<Coefficient> bufferVectors;
-  outputCoordsBeforeReduction.getCoordinatesInBasis(
-    basisCoordForm,
-    outputCoords,
+  outputCoordinatesBeforeReduction.getCoordinatesInBasis(
+    basisCoordinateForm,
+    outputCoordinates,
     bufferVectors,
-    bufferMat,
+    bufferMatrix,
     fieldUnit,
     fieldZero
   );
@@ -702,24 +704,25 @@ bool ElementUniversalEnveloping<Coefficient>::applyMinusTransposeAutoOnMe() {
   int rank = this->getOwner().getRank();
   Coefficient coefficient;
   for (int i = 0; i < this->size; i ++) {
-    MonomialUniversalEnveloping<Coefficient>& currentMon = this->objects[i];
+    MonomialUniversalEnveloping<Coefficient>& workingMonomial =
+    this->objects[i];
     coefficient = this->coefficients[i];
-    monomial.owner = currentMon.owner;
+    monomial.owner = workingMonomial.owner;
     monomial.powers.size = 0;
     monomial.generatorsIndices.size = 0;
-    for (int j = 0; j < currentMon.powers.size; j ++) {
+    for (int j = 0; j < workingMonomial.powers.size; j ++) {
       int power;
-      if (!currentMon.powers[j].isSmallInteger(&power)) {
+      if (!workingMonomial.powers[j].isSmallInteger(&power)) {
         return false;
       }
-      int generator = currentMon.generatorsIndices[j];
+      int generator = workingMonomial.generatorsIndices[j];
       if (generator < numberOfPositiveRoots) {
         generator = 2 * numberOfPositiveRoots + rank - 1 - generator;
       } else if (generator >= numberOfPositiveRoots + rank) {
         generator = - generator + 2 * numberOfPositiveRoots + rank - 1;
       }
       monomial.multiplyByGeneratorPowerOnTheRight(
-        generator, currentMon.powers[j]
+        generator, workingMonomial.powers[j]
       );
       if (power % 2 == 1) {
         coefficient *= - 1;
@@ -888,24 +891,24 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(
   ElementUniversalEnveloping<Rational>& output
 ) {
   output.makeZero(*this->owner);
-  MonomialUniversalEnveloping<Rational> tempMon;
+  MonomialUniversalEnveloping<Rational> workingMonomial;
   Rational coefficient;
   for (int i = 0; i < this->size; i ++) {
-    MonomialUniversalEnveloping<Coefficient>& currentMon = this->objects[i];
-    tempMon.makeOne(*this->owner);
+    MonomialUniversalEnveloping<Coefficient>& monomial = this->objects[i];
+    workingMonomial.makeOne(*this->owner);
     if (!this->coefficients[i].isConstant(coefficient)) {
       return false;
     }
-    for (int j = 0; j < currentMon.powers.size; j ++) {
+    for (int j = 0; j < monomial.powers.size; j ++) {
       Rational constantPower;
-      if (!currentMon.powers[j].isConstant(constantPower)) {
+      if (!monomial.powers[j].isConstant(constantPower)) {
         return false;
       }
-      tempMon.multiplyByGeneratorPowerOnTheRight(
-        currentMon.generatorsIndices[j], constantPower
+      workingMonomial.multiplyByGeneratorPowerOnTheRight(
+        monomial.generatorsIndices[j], constantPower
       );
     }
-    output.addMonomial(tempMon, Coefficient(1));
+    output.addMonomial(workingMonomial, Coefficient(1));
   }
   return true;
 }
@@ -1158,14 +1161,14 @@ getGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output) {
 }
 
 std::string LittelmannPath::toString(
-  bool useSimpleCoords, bool useArrows, bool includeDominance
+  bool useSimpleCoordinates, bool useArrows, bool includeDominance
 ) const {
   if (this->waypoints.size == 0) {
     return "0";
   }
   std::stringstream out;
   for (int i = 0; i < this->waypoints.size; i ++) {
-    if (useSimpleCoords) {
+    if (useSimpleCoordinates) {
       out << this->waypoints[i].toString();
     } else {
       out

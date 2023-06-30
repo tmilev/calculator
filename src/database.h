@@ -7,6 +7,7 @@
 
 class UserCalculator;
 class Database;
+
 // Forward declare a class that can listen to sockets.
 class Listener;
 

@@ -391,16 +391,16 @@ void SemisimpleLieAlgebraOrdered::initialize(
     owner.getNumberOfGenerators(), owner.getNumberOfGenerators()
   );
   this->chevalleyGeneratorsInCurrentCoordinates.makeZero();
-  Vector<Rational> coordsInCurrentBasis;
-  ElementSemisimpleLieAlgebra<Rational> currentElt;
+  Vector<Rational> coordinatesInCurrentBasis;
+  ElementSemisimpleLieAlgebra<Rational> currentElement;
   for (int i = 0; i < owner.getNumberOfGenerators(); i ++) {
-    currentElt.makeGenerator(i, owner);
-    currentElt.getCoordinatesInBasis(
-      this->elementOrder, coordsInCurrentBasis
+    currentElement.makeGenerator(i, owner);
+    currentElement.getCoordinatesInBasis(
+      this->elementOrder, coordinatesInCurrentBasis
     );
-    for (int j = 0; j < coordsInCurrentBasis.size; j ++) {
+    for (int j = 0; j < coordinatesInCurrentBasis.size; j ++) {
       this->chevalleyGeneratorsInCurrentCoordinates.elements[j][i] =
-      coordsInCurrentBasis[j];
+      coordinatesInCurrentBasis[j];
     }
   }
 }

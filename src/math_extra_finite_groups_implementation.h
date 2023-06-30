@@ -1273,7 +1273,8 @@ bool WeylGroupData::isDominantWeight(const Vector<Coefficient>& weight) {
 
 template <class Coefficient>
 Coefficient WeylGroupData::weylDimensionFormulaSimpleCoordinates(
-  Vector<Coefficient>& weightInSimpleCoords, const Coefficient& ringUnit
+  Vector<Coefficient>& weightInSimpleCoordinates,
+  const Coefficient& ringUnit
 ) {
   Coefficient result, buffer;
   Vector<Coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;
@@ -1284,7 +1285,7 @@ Coefficient WeylGroupData::weylDimensionFormulaSimpleCoordinates(
   for (int i = 0; i < this->rootsOfBorel.size; i ++) {
     rootOfBorelNewRing = this->rootsOfBorel[i];
     // <-type conversion here!
-    sumWithRho = rhoOverNewRing + weightInSimpleCoords;
+    sumWithRho = rhoOverNewRing + weightInSimpleCoordinates;
     buffer = this->rootScalarCartanRoot(sumWithRho, rootOfBorelNewRing);
     buffer /= this->rootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
     result *= buffer;
@@ -1294,26 +1295,30 @@ Coefficient WeylGroupData::weylDimensionFormulaSimpleCoordinates(
 
 template <class Coefficient>
 Vector<Coefficient> WeylGroupData::getFundamentalCoordinatesFromSimple(
-  const Vector<Coefficient>& inputInFundamentalCoords
+  const Vector<Coefficient>& inputInFundamentalCoordinates
 ) {
   Matrix<Rational>& fundamentalCoordinates =
-  *this->getMatrixSimpleToFundamentalCoords();
-  Vector<Coefficient> result = inputInFundamentalCoords;
+  *this->getMatrixsimpleToFundamentalCoordinates();
+  Vector<Coefficient> result = inputInFundamentalCoordinates;
   fundamentalCoordinates.actOnVectorColumn(result, Coefficient::zero());
   return result;
 }
 
 template <class Coefficient>
 Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromEpsilon(
-  const Vector<Coefficient>& inputInEpsCoords
+  const Vector<Coefficient>& inputInEpsilonCoordinates
 ) {
-  Vectors<Rational> simpleBasis, simpleBasisEpsCoords;
+  Vectors<Rational> simpleBasis;
+  Vectors<Rational> simpleBasisEpsilonCoordinates;
   simpleBasis.makeEiBasis(this->getDimension());
-  this->getEpsilonCoordinates(simpleBasis, simpleBasisEpsCoords);
+  this->getEpsilonCoordinates(simpleBasis, simpleBasisEpsilonCoordinates);
   Vector<Coefficient> result;
   result.setSize(this->getDimension());
-  for (int i = 0; i < simpleBasisEpsCoords.size; i ++) {
-    result[i] = simpleBasisEpsCoords[i].scalarEuclidean(inputInEpsCoords);
+  for (int i = 0; i < simpleBasisEpsilonCoordinates.size; i ++) {
+    result[i] =
+    simpleBasisEpsilonCoordinates[i].scalarEuclidean(
+      inputInEpsilonCoordinates
+    );
   }
   Matrix<Rational> invertedCartanSymmetric = this->cartanSymmetric;
   invertedCartanSymmetric.invert();
@@ -1323,63 +1328,64 @@ Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromEpsilon(
 
 template <class Coefficient>
 Vector<Coefficient> WeylGroupData::getFundamentalCoordinatesFromEpsilon(
-  const Vector<Coefficient>& inputInEpsCoords
+  const Vector<Coefficient>& inputInEpsilonCoordinates
 ) {
   return
   this->getFundamentalCoordinatesFromSimple(
-    this->getSimpleCoordinatesFromEpsilon(inputInEpsCoords)
+    this->getSimpleCoordinatesFromEpsilon(inputInEpsilonCoordinates)
   );
 }
 
 template <class Coefficient>
 Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
-  const Vector<Coefficient>& inputInFundamentalCoords,
+  const Vector<Coefficient>& inputInFundamentalCoordinates,
   const Coefficient& zero
 ) {
   Matrix<Rational>& transitionMatrix =
-  *this->getMatrixFundamentalToSimpleCoords();
+  *this->getMatrixfundamentalToSimpleCoordinates();
   Vector<Coefficient> result;
-  result = inputInFundamentalCoords;
+  result = inputInFundamentalCoordinates;
   transitionMatrix.actOnVectorColumn(result, zero);
   return result;
 }
 
 template <class Coefficient>
 Vectors<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
-  const Vectors<Coefficient>& inputInFundamentalCoords,
+  const Vectors<Coefficient>& inputInFundamentalCoordinates,
   const Coefficient& zero
 ) {
   Matrix<Rational>& transitionMatrix =
-  *this->getMatrixFundamentalToSimpleCoords();
+  *this->getMatrixfundamentalToSimpleCoordinates();
   Vectors<Coefficient> result;
-  result = inputInFundamentalCoords;
+  result = inputInFundamentalCoordinates;
   transitionMatrix.actOnVectorsColumn(result, zero);
   return result;
 }
 
 template <class Coefficient>
-Coefficient WeylGroupData::weylDimFormulaFundamentalCoords(
-  Vector<Coefficient>& weightFundamentalCoords
+Coefficient WeylGroupData::weylDimFormulaFundamentalCoordinates(
+  Vector<Coefficient>& weightFundamentalCoordinates
 ) {
-  Vector<Coefficient> weightInSimpleCoords;
-  weightInSimpleCoords =
+  Vector<Coefficient> weightInSimpleCoordinates;
+  weightInSimpleCoordinates =
   this->getSimpleCoordinatesFromFundamental(
-    weightFundamentalCoords, Coefficient::zero()
+    weightFundamentalCoordinates, Coefficient::zero()
   );
-  return this->weylDimensionFormulaSimpleCoordinates(weightInSimpleCoords);
+  return
+  this->weylDimensionFormulaSimpleCoordinates(weightInSimpleCoordinates);
 }
 
 template <class Coefficient>
 bool WeylGroupData::freudenthalFormula(
-  Vector<Coefficient>& inputHWfundamentalCoords,
-  HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoords,
-  List<Coefficient>& outputMultsSimpleCoords,
+  Vector<Coefficient>& inputHighestWeightFundamentalCoordinates,
+  HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoordinates,
+  List<Coefficient>& outputMultiplicitiesSimpleCoordinates,
   std::string* outputDetails,
-  int UpperBoundFreudenthal
+  int upperBoundFreudenthal
 ) {
   STACK_TRACE("WeylGroupData::freudenthalFormula");
-  for (int i = 0; i < inputHWfundamentalCoords.size; i ++) {
-    if (inputHWfundamentalCoords[i] < 0) {
+  for (int i = 0; i < inputHighestWeightFundamentalCoordinates.size; i ++) {
+    if (inputHighestWeightFundamentalCoordinates[i] < 0) {
       if (outputDetails != nullptr) {
         *outputDetails =
         "The highest weight is not dominant and "
@@ -1391,53 +1397,57 @@ bool WeylGroupData::freudenthalFormula(
   this->computeRho(true);
   Vectors<Rational> eiBasis;
   eiBasis.makeEiBasis(this->getDimension());
-  List<bool> Explored;
-  Vector<Coefficient> hwSimpleCoords =
-  this->getSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
+  List<bool> explored;
+  Vector<Coefficient> highestWeightSimpleCoordinates =
+  this->getSimpleCoordinatesFromFundamental(
+    inputHighestWeightFundamentalCoordinates
+  );
   if (
     !this->getAllDominantWeightsHWFDIM(
-      hwSimpleCoords,
-      outputDominantWeightsSimpleCoords,
-      UpperBoundFreudenthal,
+      highestWeightSimpleCoordinates,
+      outputDominantWeightsSimpleCoordinates,
+      upperBoundFreudenthal,
       outputDetails
     )
   ) {
     return false;
   }
-  Explored.initializeFillInObject(
-    outputDominantWeightsSimpleCoords.size, false
+  explored.initializeFillInObject(
+    outputDominantWeightsSimpleCoordinates.size, false
   );
-  outputMultsSimpleCoords.setSize(outputDominantWeightsSimpleCoords.size);
+  outputMultiplicitiesSimpleCoordinates.setSize(
+    outputDominantWeightsSimpleCoordinates.size
+  );
   Vector<Coefficient> currentWeight;
   Vector<Coefficient> currentDominantRepresentative;
   Vector<Coefficient> convertor;
   Coefficient hwPlusRhoSquared;
-  convertor = hwSimpleCoords;
+  convertor = highestWeightSimpleCoordinates;
   convertor += this->rho;
   // <-implicit type conversion here!!!!
   hwPlusRhoSquared = this->rootScalarCartanRoot(convertor, convertor);
-  outputMultsSimpleCoords[0] = 1;
-  Explored[0] = true;
+  outputMultiplicitiesSimpleCoordinates[0] = 1;
+  explored[0] = true;
   Coefficient bufferCoefficient;
   ProgressReport report;
-  for (int k = 1; k < outputDominantWeightsSimpleCoords.size; k ++) {
-    Explored[k] = true;
-    Coefficient& currentAccumulator = outputMultsSimpleCoords[k];
+  for (int k = 1; k < outputDominantWeightsSimpleCoordinates.size; k ++) {
+    explored[k] = true;
+    Coefficient& currentAccumulator = outputMultiplicitiesSimpleCoordinates[k];
     currentAccumulator = 0;
     for (int j = 0; j < this->rootsOfBorel.size; j ++) {
       for (int i = 1;; i ++) {
-        currentWeight = outputDominantWeightsSimpleCoords[k];
+        currentWeight = outputDominantWeightsSimpleCoordinates[k];
         currentWeight += this->rootsOfBorel[j] * i;
         currentDominantRepresentative = currentWeight;
         this->raiseToDominantWeight(currentDominantRepresentative);
         int index =
-        outputDominantWeightsSimpleCoords.getIndex(
+        outputDominantWeightsSimpleCoordinates.getIndex(
           currentDominantRepresentative
         );
         if (index == - 1) {
           break;
         }
-        if (!Explored[index]) {
+        if (!explored[index]) {
           if (outputDetails != nullptr) {
             std::stringstream errorLog;
             errorLog
@@ -1452,12 +1462,12 @@ bool WeylGroupData::freudenthalFormula(
         }
         bufferCoefficient =
         this->rootScalarCartanRoot(currentWeight, this->rootsOfBorel[j]);
-        bufferCoefficient *= outputMultsSimpleCoords[index];
+        bufferCoefficient *= outputMultiplicitiesSimpleCoordinates[index];
         currentAccumulator += bufferCoefficient;
       }
     }
     currentAccumulator *= 2;
-    convertor = outputDominantWeightsSimpleCoords[k];
+    convertor = outputDominantWeightsSimpleCoordinates[k];
     convertor += this->rho;
     bufferCoefficient = hwPlusRhoSquared;
     bufferCoefficient -= this->rootScalarCartanRoot(convertor, convertor);
@@ -1466,7 +1476,7 @@ bool WeylGroupData::freudenthalFormula(
       << "This is a programming or a mathematical error. "
       << "I get that the denominator in the Freundenthal formula is zero. "
       << "The highest weight is "
-      << inputHWfundamentalCoords.toString()
+      << inputHighestWeightFundamentalCoordinates.toString()
       << ". The Weyl group details follow. "
       << this->toString()
       << global.fatal;
@@ -1477,7 +1487,7 @@ bool WeylGroupData::freudenthalFormula(
     << " Computed the multiplicities of "
     << k + 1
     << " out of "
-    << outputDominantWeightsSimpleCoords.size
+    << outputDominantWeightsSimpleCoordinates.size
     << " dominant weights in the support.";
     report.report(out.str());
   }
@@ -1486,36 +1496,38 @@ bool WeylGroupData::freudenthalFormula(
 
 template <class Coefficient>
 bool WeylGroupData::getAllDominantWeightsHWFDIM(
-  Vector<Coefficient>& highestWeightSimpleCoords,
-  HashedList<Vector<Coefficient> >& outputWeightsSimpleCoords,
+  Vector<Coefficient>& highestWeightSimpleCoordinates,
+  HashedList<Vector<Coefficient> >& outputWeightsSimpleCoordinates,
   int upperBoundDominantWeights,
   std::string* outputDetails
 ) {
   std::stringstream out;
   Vector<Coefficient> highestWeightTrue;
-  highestWeightTrue = highestWeightSimpleCoords;
+  highestWeightTrue = highestWeightSimpleCoordinates;
   this->raiseToDominantWeight(highestWeightTrue);
-  Vector<Coefficient> highestWeightFundCoords =
+  Vector<Coefficient> highestWeightFundamentalCoordinates =
   this->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  if (!highestWeightFundCoords.sumCoordinates().isSmallInteger()) {
+  if (
+    !highestWeightFundamentalCoordinates.sumCoordinates().isSmallInteger()
+  ) {
     if (outputDetails != nullptr) {
       out
       << "<hr> The highest weight you gave in simple coordinates: "
-      << highestWeightSimpleCoords.toString()
+      << highestWeightSimpleCoordinates.toString()
       << " which equals "
-      << highestWeightFundCoords.toString()
+      << highestWeightFundamentalCoordinates.toString()
       << " in fundamental coordinates is not integral dominant.<br>";
       *outputDetails = out.str();
     }
     return false;
   }
-  int topHeightSimpleCoords = static_cast<int>(
-    highestWeightSimpleCoords.getVectorRational().sumCoordinates().
+  int topHeightSimpleCoordinates = static_cast<int>(
+    highestWeightSimpleCoordinates.getVectorRational().sumCoordinates().
     getDoubleValue()
   ) +
   1;
-  if (topHeightSimpleCoords < 0) {
-    topHeightSimpleCoords = 0;
+  if (topHeightSimpleCoordinates < 0) {
+    topHeightSimpleCoordinates = 0;
   }
   List<HashedList<Vector<Coefficient> > > outputWeightsByHeight;
   int topHeightRootSystem =
@@ -1526,15 +1538,15 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
   for (int i = 0; i < topHeightRootSystemPlusOne; i ++) {
     outputWeightsByHeight[i].setHashSize(finalHashSize);
   }
-  outputWeightsSimpleCoords.clear();
-  outputWeightsSimpleCoords.setHashSize(10000);
+  outputWeightsSimpleCoordinates.clear();
+  outputWeightsSimpleCoordinates.setHashSize(10000);
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
   int numberOfTotalWeightsFound = 0;
   int numberOfPositiveRoots = this->rootsOfBorel.size;
   Vector<Coefficient> currentWeight;
   for (
     int lowestUnexploredHeightDiff = 0; lowestUnexploredHeightDiff <=
-    topHeightSimpleCoords; lowestUnexploredHeightDiff ++
+    topHeightSimpleCoordinates; lowestUnexploredHeightDiff ++
   ) {
     if (
       upperBoundDominantWeights > 0 &&
@@ -1566,8 +1578,8 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
         }
       }
     }
-    outputWeightsSimpleCoords.addListOnTop(currentHashes);
-    outputWeightsSimpleCoords.adjustHashes();
+    outputWeightsSimpleCoordinates.addListOnTop(currentHashes);
+    outputWeightsSimpleCoordinates.adjustHashes();
     currentHashes.clear();
     if (
       numberOfTotalWeightsFound > upperBoundDominantWeights &&
@@ -1582,7 +1594,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
   if (outputDetails != nullptr) {
     out
     << " Total number of dominant weights: "
-    << outputWeightsSimpleCoords.size;
+    << outputWeightsSimpleCoordinates.size;
     *outputDetails = out.str();
   }
   return true;
@@ -2023,8 +2035,8 @@ isDominantWeight(const Vector<Coefficient>& weight) {
 template <class Coefficient>
 Coefficient
 SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
-weylDimensionFormulaInnerSimpleCoords(
-  const Vector<Coefficient>& weightInnerSimpleCoords,
+weylDimensionFormulaInnerSimpleCoordinates(
+  const Vector<Coefficient>& weightInnerSimpleCoordinates,
   const Coefficient& ringUnit
 ) {
   STACK_TRACE(
@@ -2046,7 +2058,7 @@ weylDimensionFormulaInnerSimpleCoords(
   for (int i = 0; i < this->rootsOfBorel.size; i ++) {
     rootOfBorelNewRing = this->rootsOfBorel[i];
     // <-type conversion here!
-    sumWithRho = rhoOverNewRing + weightInnerSimpleCoords;
+    sumWithRho = rhoOverNewRing + weightInnerSimpleCoordinates;
     buffer =
     this->ambientWeyl->rootScalarCartanRoot(sumWithRho, rootOfBorelNewRing);
     buffer /=
@@ -2061,8 +2073,8 @@ weylDimensionFormulaInnerSimpleCoords(
 template <class Coefficient>
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 getAllDominantWeightsHWFDIM(
-  Vector<Coefficient>& highestWeightSimpleCoords,
-  HashedList<Vector<Coefficient> >& outputWeightsSimpleCoords,
+  Vector<Coefficient>& highestWeightSimpleCoordinates,
+  HashedList<Vector<Coefficient> >& outputWeightsSimpleCoordinates,
   int upperBoundDominantWeights,
   std::string& outputDetails
 ) {
@@ -2073,15 +2085,15 @@ getAllDominantWeightsHWFDIM(
   std::stringstream out;
   this->checkInitialization();
   this->computeRootSubsystem();
-  Vector<Coefficient> highestWeightTrue = highestWeightSimpleCoords;
+  Vector<Coefficient> highestWeightTrue = highestWeightSimpleCoordinates;
   Vectors<Rational> basisEi;
   int dimension = this->ambientWeyl->getDimension();
   basisEi.makeEiBasis(dimension);
   this->raiseToDominantWeightInner(highestWeightTrue);
-  Vector<Coefficient> highestWeightFundCoords =
+  Vector<Coefficient> highestWeightFundamentalCoordinates =
   this->ambientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
   int topHeightSimpleCoordinates = static_cast<int>(
-    highestWeightSimpleCoords.getVectorRational().sumCoordinates().
+    highestWeightSimpleCoordinates.getVectorRational().sumCoordinates().
     getDoubleValue()
   ) +
   1;
@@ -2098,7 +2110,7 @@ getAllDominantWeightsHWFDIM(
   for (int i = 0; i < topHeightRootSystemPlusOne; i ++) {
     outputWeightsByHeight[i].setHashSize(finalHashSize);
   }
-  outputWeightsSimpleCoords.clear();
+  outputWeightsSimpleCoordinates.clear();
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
   int totalWeightsFound = 0;
   Vector<Coefficient> currentWeight;
@@ -2136,13 +2148,13 @@ getAllDominantWeightsHWFDIM(
         }
       }
     }
-    outputWeightsSimpleCoords.addListOnTop(currentHashes);
-    outputWeightsSimpleCoords.adjustHashes();
+    outputWeightsSimpleCoordinates.addListOnTop(currentHashes);
+    outputWeightsSimpleCoordinates.adjustHashes();
     currentHashes.clear();
   }
   out
   << " Total number of dominant weights: "
-  << outputWeightsSimpleCoords.size;
+  << outputWeightsSimpleCoordinates.size;
   if (totalWeightsFound >= upperBoundDominantWeights) {
     out
     << "<hr>This message is generated either because the number of "
@@ -2239,9 +2251,9 @@ generateOrbitReturnFalseIfTruncated(
 template <class Coefficient>
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 freudenthalFormulaIrrepIsWRTLeviPart(
-  const Vector<Coefficient>& inputHWfundamentalCoords,
-  HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoordS,
-  List<Coefficient>& outputMultsSimpleCoords,
+  const Vector<Coefficient>& inputHighestWeightFundamentalCoordinates,
+  HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoordinates,
+  List<Coefficient>& outputMultiplicitiesSimpleCoordinates,
   std::string& outputDetails,
   int upperBoundFreudenthal
 ) {
@@ -2254,33 +2266,37 @@ freudenthalFormulaIrrepIsWRTLeviPart(
   Vector<Rational> eiVect;
   List<bool> Explored;
   Coefficient ringZero;
-  ringZero = inputHWfundamentalCoords[0].zero();
+  ringZero = inputHighestWeightFundamentalCoordinates[0].zero();
   // ///////////////////////
-  Vector<Coefficient> hwSimpleCoordsLeviPart, hwSimpleCoordsNilPart;
-  hwSimpleCoordsLeviPart = inputHWfundamentalCoords;
-  hwSimpleCoordsNilPart = inputHWfundamentalCoords;
-  for (int i = 0; i < hwSimpleCoordsLeviPart.size; i ++) {
-    eiVect.makeEi(hwSimpleCoordsLeviPart.size, i);
+  Vector<Coefficient>
+  highestWeightSimpleCoordinatesLeviPart,
+  highestWeightSimpleCoordinatesNilPart;
+  highestWeightSimpleCoordinatesLeviPart =
+  inputHighestWeightFundamentalCoordinates;
+  highestWeightSimpleCoordinatesNilPart =
+  inputHighestWeightFundamentalCoordinates;
+  for (int i = 0; i < highestWeightSimpleCoordinatesLeviPart.size; i ++) {
+    eiVect.makeEi(highestWeightSimpleCoordinatesLeviPart.size, i);
     if (!this->rootsOfBorel.contains(eiVect)) {
-      hwSimpleCoordsLeviPart[i] = ringZero;
+      highestWeightSimpleCoordinatesLeviPart[i] = ringZero;
     } else {
-      hwSimpleCoordsNilPart[i] = ringZero;
+      highestWeightSimpleCoordinatesNilPart[i] = ringZero;
     }
   }
-  hwSimpleCoordsLeviPart =
+  highestWeightSimpleCoordinatesLeviPart =
   this->ambientWeyl->getSimpleCoordinatesFromFundamental(
-    hwSimpleCoordsLeviPart
+    highestWeightSimpleCoordinatesLeviPart
   );
-  hwSimpleCoordsNilPart =
+  highestWeightSimpleCoordinatesNilPart =
   this->ambientWeyl->getSimpleCoordinatesFromFundamental(
-    hwSimpleCoordsNilPart
+    highestWeightSimpleCoordinatesNilPart
   );
   // /////////////////////////
-  HashedList<Vector<Coefficient> > outputDomWeightsSimpleCoordsLeviPart;
+  HashedList<Vector<Coefficient> > outputDomWeightsSimpleCoordinatesLeviPart;
   if (
     !this->getAllDominantWeightsHWFDIM(
-      hwSimpleCoordsLeviPart,
-      outputDomWeightsSimpleCoordsLeviPart,
+      highestWeightSimpleCoordinatesLeviPart,
+      outputDomWeightsSimpleCoordinatesLeviPart,
       upperBoundFreudenthal,
       outputDetails
     )
@@ -2295,9 +2311,11 @@ freudenthalFormulaIrrepIsWRTLeviPart(
     return false;
   }
   Explored.initializeFillInObject(
-    outputDomWeightsSimpleCoordsLeviPart.size, false
+    outputDomWeightsSimpleCoordinatesLeviPart.size, false
   );
-  outputMultsSimpleCoords.setSize(outputDomWeightsSimpleCoordsLeviPart.size);
+  outputMultiplicitiesSimpleCoordinates.setSize(
+    outputDomWeightsSimpleCoordinatesLeviPart.size
+  );
   Vector<Coefficient> currentWeight, currentDominantRepresentative;
   Vector<Coefficient> rho;
   rho = this->getRho();
@@ -2305,26 +2323,28 @@ freudenthalFormulaIrrepIsWRTLeviPart(
   Coefficient hwPlusRhoSquared;
   hwPlusRhoSquared =
   this->ambientWeyl->rootScalarCartanRoot(
-    hwSimpleCoordsLeviPart + rho, hwSimpleCoordsLeviPart + rho
+    highestWeightSimpleCoordinatesLeviPart + rho,
+    highestWeightSimpleCoordinatesLeviPart + rho
   );
   Explored[0] = true;
-  outputMultsSimpleCoords[0] = 1;
+  outputMultiplicitiesSimpleCoordinates[0] = 1;
   Vector<Coefficient> convertor;
   Coefficient bufferCoeff;
   ProgressReport report;
-  for (int k = 1; k < outputDomWeightsSimpleCoordsLeviPart.size; k ++) {
+  for (int k = 1; k < outputDomWeightsSimpleCoordinatesLeviPart.size; k ++) {
     Explored[k] = true;
-    Coefficient& currentAccum = outputMultsSimpleCoords[k];
+    Coefficient& currentAccum = outputMultiplicitiesSimpleCoordinates[k];
     currentAccum = 0;
     for (int j = 0; j < this->rootsOfBorel.size; j ++) {
       for (int i = 1;; i ++) {
         convertor = this->rootsOfBorel[j];
         convertor *= i;
-        currentWeight = outputDomWeightsSimpleCoordsLeviPart[k] + convertor;
+        currentWeight =
+        outputDomWeightsSimpleCoordinatesLeviPart[k] + convertor;
         currentDominantRepresentative = currentWeight;
         this->raiseToDominantWeightInner(currentDominantRepresentative);
         int index =
-        outputDomWeightsSimpleCoordsLeviPart.getIndex(
+        outputDomWeightsSimpleCoordinatesLeviPart.getIndex(
           currentDominantRepresentative
         );
         if (index == - 1) {
@@ -2346,7 +2366,7 @@ freudenthalFormulaIrrepIsWRTLeviPart(
         // <-implicit type conversion here!
         bufferCoeff =
         this->ambientWeyl->rootScalarCartanRoot(currentWeight, convertor);
-        bufferCoeff *= outputMultsSimpleCoords[index];
+        bufferCoeff *= outputMultiplicitiesSimpleCoordinates[index];
         currentAccum += bufferCoeff;
       }
     }
@@ -2354,8 +2374,8 @@ freudenthalFormulaIrrepIsWRTLeviPart(
     bufferCoeff = hwPlusRhoSquared;
     bufferCoeff -=
     this->ambientWeyl->rootScalarCartanRoot(
-      outputDomWeightsSimpleCoordsLeviPart[k] + rho,
-      outputDomWeightsSimpleCoordsLeviPart[k] + rho
+      outputDomWeightsSimpleCoordinatesLeviPart[k] + rho,
+      outputDomWeightsSimpleCoordinatesLeviPart[k] + rho
     );
     // bufferCoeff now holds the denominator participating in the Freudenthal
     // formula.
@@ -2370,17 +2390,18 @@ freudenthalFormulaIrrepIsWRTLeviPart(
     << " Computed the multiplicities of "
     << k + 1
     << " out of "
-    << outputDomWeightsSimpleCoordsLeviPart.size
+    << outputDomWeightsSimpleCoordinatesLeviPart.size
     << " dominant weights in the support.";
     report.report(out.str());
   }
-  outputDominantWeightsSimpleCoordS.clear();
-  outputDominantWeightsSimpleCoordS.setExpectedSize(
-    outputDomWeightsSimpleCoordsLeviPart.size
+  outputDominantWeightsSimpleCoordinates.clear();
+  outputDominantWeightsSimpleCoordinates.setExpectedSize(
+    outputDomWeightsSimpleCoordinatesLeviPart.size
   );
-  for (int i = 0; i < outputDomWeightsSimpleCoordsLeviPart.size; i ++) {
-    outputDominantWeightsSimpleCoordS.addOnTop(
-      outputDomWeightsSimpleCoordsLeviPart[i] + hwSimpleCoordsNilPart
+  for (int i = 0; i < outputDomWeightsSimpleCoordinatesLeviPart.size; i ++) {
+    outputDominantWeightsSimpleCoordinates.addOnTop(
+      outputDomWeightsSimpleCoordinatesLeviPart[i] +
+      highestWeightSimpleCoordinatesNilPart
     );
   }
   return true;

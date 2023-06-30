@@ -332,7 +332,7 @@ std::string SemisimpleLieAlgebra::toHTML(
   << this->weylGroup.cartanSymmetric.getDeterminant().toString();
   Vectors<Rational> fundamentalWeights, fundamentalWeightsEpsForm;
   this->weylGroup.getFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
-  Vectors<Rational> simpleBasis, simplebasisEpsCoords;
+  Vectors<Rational> simpleBasis, simpleBasisEpsilonCoordinates;
   out << "<hr> Half sum of positive roots: " << this->weylGroup.rho.toString();
   Vector<Rational> root;
   this->weylGroup.getEpsilonCoordinates(this->weylGroup.rho, root);
@@ -378,14 +378,16 @@ std::string SemisimpleLieAlgebra::toHTML(
   << "does not equal the  corresponding symmetric Cartan matrix. "
   << "<table>";
   simpleBasis.makeEiBasis(this->weylGroup.getDimension());
-  this->weylGroup.getEpsilonCoordinates(simpleBasis, simplebasisEpsCoords);
+  this->weylGroup.getEpsilonCoordinates(
+    simpleBasis, simpleBasisEpsilonCoordinates
+  );
   std::stringstream simpleBasisStream;
   simpleBasisStream << "\\begin{array}{rcl}";
-  for (int i = 0; i < simplebasisEpsCoords.size; i ++) {
+  for (int i = 0; i < simpleBasisEpsilonCoordinates.size; i ++) {
     simpleBasisStream
     << simpleBasis[i].toString(&latexFormatWithFractions)
     << "&=&"
-    << simplebasisEpsCoords[i].toStringEpsilonFormat(
+    << simpleBasisEpsilonCoordinates[i].toStringEpsilonFormat(
       &latexFormatWithFractions
     )
     << "\\\\";
@@ -1118,7 +1120,7 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
   RootSubalgebra rootSubalgebra;
   //  rootSubalgebra.initialize(*this);
   int dimension = this->weylGroup.cartanSymmetric.numberOfRows;
-  rootSubalgebra.genK.makeEiBasis(dimension);
+  rootSubalgebra.generatorsK.makeEiBasis(dimension);
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
   automorphisms;
   rootSubalgebra.generateAutomorphismsPreservingBorel(automorphisms);

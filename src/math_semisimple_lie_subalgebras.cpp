@@ -1913,7 +1913,9 @@ getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
   } else {
     this->makeCandidateSubalgebra(input, subalgebraToBeModified);
   }
-  Vector<Rational> newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords;
+  Vector<Rational>
+  newSimpleRoot,
+  highestRootInSimpleRootModuleSimpleCoordinates;
   WeylGroupData& weyl = *subalgebraToBeModified.weylNonEmbedded;
   weyl.computeRho(true);
   subalgebraToBeModified.checkCandidateInitialization();
@@ -1940,14 +1942,14 @@ getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
   weyl.computeExtremeRootInTheSameKMod(
     simpleBasisOld,
     newSimpleRoot,
-    highestRootInSimpleRootModuleSimpleCoords,
+    highestRootInSimpleRootModuleSimpleCoordinates,
     true
   );
   result.setSize(newRank - 1);
   for (int i = 0; i < simpleBasisOld.size; i ++) {
     result[i] =
     weyl.rootScalarCartanRoot(
-      highestRootInSimpleRootModuleSimpleCoords, simpleBasisOld[i]
+      highestRootInSimpleRootModuleSimpleCoordinates, simpleBasisOld[i]
     ) *
     2 /
     weyl.rootScalarCartanRoot(simpleBasisOld[i], simpleBasisOld[i]);
@@ -3691,21 +3693,21 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
 template <class Coefficient>
 int CharacterSemisimpleLieAlgebraModule<Coefficient>::
 getIndexExtremeWeightRelativeToWeyl(WeylGroupData& weyl) const {
-  HashedList<Vector<Coefficient> > weightsSimpleCoords;
-  weightsSimpleCoords.setExpectedSize(this->size());
+  HashedList<Vector<Coefficient> > weightsSimpleCoordinates;
+  weightsSimpleCoordinates.setExpectedSize(this->size());
   for (int i = 0; i < this->size(); i ++) {
-    weightsSimpleCoords.addOnTop(
+    weightsSimpleCoordinates.addOnTop(
       weyl.getSimpleCoordinatesFromFundamental((*this)[i].
         weightFundamentalCoordinates
       )
     );
   }
-  for (int i = 0; i < weightsSimpleCoords.size; i ++) {
+  for (int i = 0; i < weightsSimpleCoordinates.size; i ++) {
     bool isGood = true;
     for (int j = 0; j < weyl.rootsOfBorel.size; j ++) {
       if (
-        weightsSimpleCoords.contains((
-            weightsSimpleCoords[i] + weyl.rootsOfBorel[j]
+        weightsSimpleCoordinates.contains((
+            weightsSimpleCoordinates[i] + weyl.rootsOfBorel[j]
           )
         )
       ) {
@@ -4993,7 +4995,7 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
   this->modulesIsotypicallyMerged[rightIndex];
   ElementSemisimpleLieAlgebra<AlgebraicNumber> lieBracket;
   ProgressReport report;
-  Vector<AlgebraicNumber> coordsInFullBasis;
+  Vector<AlgebraicNumber> coordinatesInFullBasis;
   output.setSize(0);
   if (
     this->fullBasisByModules.size !=
@@ -5014,7 +5016,7 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
     }
     bool tempbool =
     lieBracket.getCoordinatesInBasis(
-      this->fullBasisByModules, coordsInFullBasis
+      this->fullBasisByModules, coordinatesInFullBasis
     );
     if (!tempbool) {
       global.fatal
@@ -5024,8 +5026,8 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
       << lieBracket.toString()
       << global.fatal;
     }
-    for (int i = 0; i < coordsInFullBasis.size; i ++) {
-      if (!coordsInFullBasis[i].isEqualToZero()) {
+    for (int i = 0; i < coordinatesInFullBasis.size; i ++) {
+      if (!coordinatesInFullBasis[i].isEqualToZero()) {
         output.addOnTopNoRepetition(this->fullBasisOwnerModules[i]);
       }
     }
@@ -6298,12 +6300,12 @@ computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors() {
     "CandidateSemisimpleSubalgebra::"
     "computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors"
   );
-  HashedList<Vector<Rational> > weightsCartanRestrictedDualCoords;
+  HashedList<Vector<Rational> > weightsCartanRestrictedDualCoordinates;
   this->computePrimalModuleDecompositionHighestWeights(
-    weightsCartanRestrictedDualCoords
+    weightsCartanRestrictedDualCoordinates
   );
   this->computePrimalModuleDecompositionHighestWeightVectors(
-    weightsCartanRestrictedDualCoords
+    weightsCartanRestrictedDualCoordinates
   );
   this->computePrimalModuleDecompositionHighestWeightsLastPart();
 }
@@ -6931,14 +6933,14 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
   STACK_TRACE("CandidateSemisimpleSubalgebra::computeCharacter");
   this->checkCandidateInitialization();
   this->weylNonEmbedded->computeRho(true);
-  Weight<Rational> tempMon;
-  tempMon.weightFundamentalCoordinates.makeZero(
+  Weight<Rational> monomial;
+  monomial.weightFundamentalCoordinates.makeZero(
     this->weylNonEmbedded->getDimension()
   );
-  tempMon.owner = nullptr;
+  monomial.owner = nullptr;
   this->characterFundamentalCoordinatesRelativeToCartan.makeZero();
   this->characterFundamentalCoordinatesRelativeToCartan.addMonomial(
-    tempMon, this->getAmbientSemisimpleLieAlgebra().getRank()
+    monomial, this->getAmbientSemisimpleLieAlgebra().getRank()
   );
   List<DynkinSimpleType> dynkinTypes;
   this->weylNonEmbedded->dynkinType.getTypesWithMults(dynkinTypes);
@@ -6969,14 +6971,14 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
         size; j ++
       ) {
         counter ++;
-        tempMon.weightFundamentalCoordinates[counter] = (
+        monomial.weightFundamentalCoordinates[counter] = (
           this->getAmbientWeyl().rootScalarCartanRoot(
             this->getAmbientWeyl().rootSystem[k],
             this->cartanElementsScaledToActByTwo[counter]
           )
         );
         if (
-          !tempMon.weightFundamentalCoordinates[counter].isInteger()
+          !monomial.weightFundamentalCoordinates[counter].isInteger()
         ) {
           if (!allowBadCharacter) {
             global.fatal
@@ -6991,13 +6993,12 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
       }
     }
     this->characterFundamentalCoordinatesRelativeToCartan.addMonomial(
-      tempMon, 1
+      monomial, 1
     );
   }
-  CharacterSemisimpleLieAlgebraModule<Rational>
-  totalCharacter,
-  freudenthalChar,
-  outputChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> totalCharacter;
+  CharacterSemisimpleLieAlgebraModule<Rational> freudenthalChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> outputChar;
   totalCharacter = this->characterFundamentalCoordinatesRelativeToCartan;
   SemisimpleLieAlgebra* nonEmbeddedMe =
   &(*this->owner->subalgebrasNonEmbedded).values[
@@ -7031,10 +7032,10 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
       }
     }
     freudenthalChar.makeZero();
-    tempMon = totalCharacter[currentIndex];
-    tempMon.owner = nonEmbeddedMe;
+    monomial = totalCharacter[currentIndex];
+    monomial.owner = nonEmbeddedMe;
     freudenthalChar.addMonomial(
-      tempMon, totalCharacter.coefficients[currentIndex]
+      monomial, totalCharacter.coefficients[currentIndex]
     );
     this->characterNonPrimalFundamentalCoordinates.addMonomial(
       totalCharacter[currentIndex],
@@ -7061,7 +7062,8 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
   return true;
 }
 
-void SlTwoSubalgebra::toStringModuleDecompositionMinimalContainingRegularSAs(
+void SlTwoSubalgebra::
+toStringModuleDecompositionMinimalContainingRegularSubalgebras(
   bool useLatex,
   bool useHtml,
   SlTwoSubalgebras& owner,
@@ -7905,13 +7907,15 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
   dimensionContainingRegularSubalgebra;
   List<int> bufferHighestWeights;
   Rational scalarProduct;
-  Vectors<Rational> coordsInPreferredSimpleBasis;
+  Vectors<Rational> coordinatesInPreferredSimpleBasis;
   positiveRootsContainingRegularSubalgebra.getCoordinatesInBasis(
-    this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis
+    this->preferredAmbientSimpleBasis, coordinatesInPreferredSimpleBasis
   );
   for (int k = 0; k < positiveRootsContainingRegularSubalgebra.size; k ++) {
     scalarProduct =
-    this->hCharacteristic.scalarEuclidean(coordsInPreferredSimpleBasis[k]);
+    this->hCharacteristic.scalarEuclidean(
+      coordinatesInPreferredSimpleBasis[k]
+    );
     if (scalarProduct.denominatorShort != 1) {
       global.fatal << "Characteristic must be integer. " << global.fatal;
     }
@@ -7920,7 +7924,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
       << "The scalar product of the h-Characteristic "
       << this->hCharacteristic.toString()
       << " with the simple root "
-      << coordsInPreferredSimpleBasis[k].toString()
+      << coordinatesInPreferredSimpleBasis[k].toString()
       << " is larger than "
       << positiveRootsContainingRegularSubalgebra.size * 2
       << ". The affected sl(2) subalgebra is "
@@ -7982,7 +7986,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
           << ". <br>The preferred simple basis is <br>"
           << this->preferredAmbientSimpleBasis.toString()
           << ". The coordinates relative to the preferred simple basis are<br>"
-          << coordsInPreferredSimpleBasis.toString()
+          << coordinatesInPreferredSimpleBasis.toString()
           << " The starting weights list is <br>"
           << outputModuleDimensions
           << ". "
@@ -8002,7 +8006,7 @@ void SlTwoSubalgebras::toStringModuleDecompositionMinimalContainingRegularSAs(
   std::string tempS;
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    (*this)[i].toStringModuleDecompositionMinimalContainingRegularSAs(
+    (*this)[i].toStringModuleDecompositionMinimalContainingRegularSubalgebras(
       useLatex, useHtml, *this, tempS
     );
     out << tempS;
@@ -8456,7 +8460,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(
       << "</span>";
       out << closeTag << "</td>";
       Vector<Rational> tempV;
-      this->matMultiplyFundCoordsToGetSimple.actOnVectorColumn(
+      this->matrixMultiplyFundamentalCoordinatesToGetSimple.actOnVectorColumn(
         this->weightsModulesPrimal[indexModule][j], tempV
       );
       out
@@ -11067,18 +11071,18 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   }
   matrixFundamentalCoordinatesSimple = bilinearFormInverted;
   matrixFundamentalCoordinatesSimple *= diagonalMatrix;
-  this->matMultiplyFundCoordsToGetSimple = bilinearFormInverted;
-  this->matMultiplyFundCoordsToGetSimple *= diagMatrix2;
+  this->matrixMultiplyFundamentalCoordinatesToGetSimple = bilinearFormInverted;
+  this->matrixMultiplyFundamentalCoordinatesToGetSimple *= diagMatrix2;
   this->bilinearFormFundamentalPrimal = matrixFundamentalCoordinatesSimple;
   this->bilinearFormFundamentalPrimal.transpose();
   this->bilinearFormFundamentalPrimal *= this->bilinearFormSimplePrimal;
   this->bilinearFormFundamentalPrimal *= matrixFundamentalCoordinatesSimple;
-  /*  this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.initialize(this->getAmbientWeyl().getDimension(), this->getPrimalRank());
+  /*  this->inducedEmbeddingPrimalFundamentalCoordinatesIntoSimpleAmbientCoordinates.initialize(this->getAmbientWeyl().getDimension(), this->getPrimalRank());
   for (int i = 0; i < this->getRank(); i ++)
-    this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit
+    this->inducedEmbeddingPrimalFundamentalCoordinatesIntoSimpleAmbientCoordinates.assignVectorToColumnKeepOtherColsIntactNoInit
     (i, this->hs[i]);
   for (int i = this->getRank(); i < this->getPrimalRank(); i ++)
-    this->inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.assignVectorToColumnKeepOtherColsIntactNoInit
+    this->inducedEmbeddingPrimalFundamentalCoordinatesIntoSimpleAmbientCoordinates.assignVectorToColumnKeepOtherColsIntactNoInit
     (i, this->CartanOfCentralizer[i-this->getRank()]);
 */
 }

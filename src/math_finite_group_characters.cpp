@@ -1044,7 +1044,7 @@ void SubgroupDataRootReflections::initializeGenerators() {
   this->subgroupData.subgroupContent->generators.setSize(d);
   ElementWeylGroup currentReflection;
   for (int i = 0; i < d; i ++) {
-    currentReflection.MakeRootReflection(
+    currentReflection.makeRootReflection(
       this->generatingSimpleRoots[i], *this->weylData
     );
     this->subgroupData.generatorPreimages[i] =

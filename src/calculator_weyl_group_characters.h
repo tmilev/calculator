@@ -10,7 +10,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool useFundCoords,
+    bool useFundamentalCoordinates,
     bool useRho
   );
   static bool weylRaiseToMaximallyDominant(

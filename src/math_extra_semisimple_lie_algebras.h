@@ -648,8 +648,8 @@ public:
     << global.fatal;
   }
   void accountSingleWeight(
-    const Vector<Rational>& currentWeightSimpleCoords,
-    const Vector<Rational>& otherHighestWeightSimpleCoords,
+    const Vector<Rational>& currentWeightSimpleCoordinates,
+    const Vector<Rational>& otherhighestWeightSimpleCoordinates,
     Rational& multiplicity,
     CharacterSemisimpleLieAlgebraModule<Coefficient>& outputAccum
   ) const;
@@ -733,7 +733,7 @@ public:
   }
   void getDual(CharacterSemisimpleLieAlgebraModule<Coefficient>& output) const;
   void makeFromWeight(
-    const Vector<Coefficient>& inputWeightSimpleCoords,
+    const Vector<Coefficient>& inputweightSimpleCoordinates,
     SemisimpleLieAlgebra* inputOwner
   );
   bool splitCharacterOverReductiveSubalgebra(

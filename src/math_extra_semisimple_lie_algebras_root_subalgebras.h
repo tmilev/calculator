@@ -180,7 +180,7 @@ public:
   FinitelyGeneratedMatrixMonoid<Rational>
   outerSAautosExtendingToAmbientAutosGenerators;
   FinitelyGeneratedMatrixMonoid<Rational> outerSAautos;
-  Vectors<Rational> genK;
+  Vectors<Rational> generatorsK;
   Vectors<Rational> simpleRootsReductiveSubalgebra;
   Vectors<Rational> simpleBasisKScaledToActByTwo;
   Vectors<Rational> simpleBasisKInOrderOfGeneration;
@@ -191,10 +191,10 @@ public:
   Vectors<Rational> testedRootsAlpha;
   Vectors<Rational> centralizerRoots;
   Vectors<Rational> simpleBasisCentralizerRoots;
-  Vectors<Rational> SimpleBasisKEpsCoords;
-  Vectors<Rational> SimpleBasisgEpsCoords;
-  List<Vectors<Rational> > kModulesKepsCoords;
-  List<Vectors<Rational> > kModulesgEpsCoords;
+  Vectors<Rational> simpleBasisKEpsilonCoordinates;
+  Vectors<Rational> simpleBasisgEpsilonCoordinates;
+  List<Vectors<Rational> > kModulesKEpsilonCoordinates;
+  List<Vectors<Rational> > kModulesGEpsilonCoordinates;
   List<Vectors<Rational> > positiveRootsKConnectedComponents;
   List<Selection> kEnumerations;
   List<int> kComponentRanks;
@@ -245,7 +245,7 @@ public:
   computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators(
   );
   bool isGeneratingSingularVectors(
-    int indexKmod, Vectors<Rational>& nilradicalRoots
+    int indexKModules, Vectors<Rational>& nilradicalRoots
   );
   bool rootIsInCentralizer(const Vector<Rational>& input);
   bool isSubalgebraBorelHighest(const Vector<Rational>& input);
@@ -333,9 +333,9 @@ public:
   bool indexIsCompatibleWithPrevious(
     int startIndex,
     int recursionDepth,
-    List<List<List<int> > >& multTable,
+    List<List<List<int> > >& multiplicityTable,
     List<Selection>& impliedSelections,
-    List<int>& oppositeKmods,
+    List<int>& oppositeKModules,
     RootSubalgebras& owner
   );
   bool isAnIsomorphism(
@@ -347,12 +347,12 @@ public:
     Vectors<Rational>* additionalRange
   );
   bool listHasNonSelectedIndexLowerThanGiven(
-    int index, List<int>& tempList, Selection& tempSel
+    int index, List<int>& input, Selection& selection
   );
   void generatePossibleNilradicalsRecursive(
-    List<List<List<int> > >& multTable,
+    List<List<List<int> > >& multiplicityTable,
     List<Selection>& impliedSelections,
-    List<int>& oppositeKmods,
+    List<int>& oppositeKModules,
     RootSubalgebras& owner,
     int indexInOwner
   );
@@ -386,7 +386,7 @@ public:
   );
   bool rootsDefineSubalgebra(Vectors<Rational>& roots);
   void generateKModuleLieBracketTable(
-    List<List<List<int> > >& output, List<int>& oppositeKmods
+    List<List<List<int> > >& output, List<int>& oppositeKModules
   );
   void kModuleLieBracketKModule(
     int index1,
@@ -751,7 +751,7 @@ public:
   std::string toStringKostantSekiguchiTripleStandardRealization() const;
   void getInvolvedPositiveGenerators(List<ChevalleyGenerator>& output);
   void getInvolvedNegativeGenerators(List<ChevalleyGenerator>& output);
-  void toStringModuleDecompositionMinimalContainingRegularSAs(
+  void toStringModuleDecompositionMinimalContainingRegularSubalgebras(
     bool useLatex,
     bool useHtml,
     SlTwoSubalgebras& owner,

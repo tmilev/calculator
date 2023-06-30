@@ -1951,15 +1951,14 @@ convertModularPolynomialToIntegerPolynomial(
   Polynomial<LargeInteger> intermediate;
   intermediate.makeZero();
   for (int i = 0; i < inputModCurrentPrime.coefficients.size; i ++) {
-    MonomialPolynomial currentMonomial = MonomialPolynomial(0, i);
+    MonomialPolynomial monomial = MonomialPolynomial(0, i);
     LargeInteger a = inputModCurrentPrime.coefficients[i];
-    LargeInteger b =
-    inputModProductOfModuliSoFar.getCoefficientOf(currentMonomial);
+    LargeInteger b = inputModProductOfModuliSoFar.getCoefficientOf(monomial);
     LargeInteger x =
     b + (a - b) * this->oneModCurrentPrimeZeroModPreviousProduct;
     // x is the desired number.
     x %= this->product;
-    intermediate.addMonomial(currentMonomial, x);
+    intermediate.addMonomial(monomial, x);
   }
   output.makeZero();
   for (int i = 0; i < intermediate.size(); i ++) {

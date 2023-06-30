@@ -356,10 +356,12 @@ public:
   bool initializePrepareWebServerAll();
   void initializeSignals();
   bool initializeBindToPorts();
-  bool initializeBindToOnePort(const std::string& desiredPort,
+  bool initializeBindToOnePort(
+    const std::string& desiredPort,
     int& outputListeningSocket,
-    int& outputActualPort
-  , bool blockWhenWaitingToAccept);
+    int& outputActualPort,
+    bool blockWhenWaitingToAccept
+  );
   void initializePortsITry();
   void initializeListeningSockets();
   void initializeSSL();

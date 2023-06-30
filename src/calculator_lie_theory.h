@@ -33,7 +33,7 @@ public:
   static bool highestWeightVectorCommon(
     Calculator& calculator,
     Expression& output,
-    Vector<RationalFraction<Rational> >& highestWeightFundCoords,
+    Vector<RationalFraction<Rational> >& highestWeightFundamentalCoordinates,
     Selection& selectionParSel,
     ExpressionContext& hwContext,
     SemisimpleLieAlgebra* owner,

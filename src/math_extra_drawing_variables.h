@@ -173,7 +173,7 @@ public:
   double graphicsUnit;
   int frameLengthInMilliseconds;
   bool flagRotatingPreservingAngles;
-  bool flagAnimatingMovingCoordSystem;
+  bool flagAnimatingMovingCoordinateSystem;
   enum TextStyles {
     TextStyleNormal,
     TextStyleInvisible,

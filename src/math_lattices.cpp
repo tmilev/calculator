@@ -879,7 +879,9 @@ bool Lattice::findOnePreimageInLatticeOf(
   thisBasis.assignMatrixRows(this->basisRationalForm);
   linearMap.actOnVectorsColumn(thisBasis, Rational(0));
   bool result =
-  input.getIntegralCoordsInBasisIfTheyExist(thisBasis, output, 1, - 1, 0);
+  input.getIntegralCoordinatesInBasisIfTheyExist(
+    thisBasis, output, 1, - 1, 0
+  );
   Matrix<Rational> matrix;
   matrix = this->basisRationalForm;
   matrix.transpose();
@@ -890,11 +892,10 @@ bool Lattice::findOnePreimageInLatticeOf(
 void Lattice::intersectWithPreimageOfLattice(
   const Matrix<Rational>& linearMap, const Lattice& other
 ) {
-  Vectors<Rational>
-  startingBasis,
-  imageStartingBasis,
-  basisImageIntersection,
-  imageBasisInImageStartingBasisCoords;
+  Vectors<Rational> startingBasis;
+  Vectors<Rational> imageStartingBasis;
+  Vectors<Rational> basisImageIntersection;
+  Vectors<Rational> imageBasisInImageStartingBasisCoordinates;
   Vectors<Rational> resultNonKernelPart, result, roots;
   startingBasis.assignMatrixRows(this->basisRationalForm);
   linearMap.actOnVectorsColumn(startingBasis, imageStartingBasis);
@@ -902,35 +903,34 @@ void Lattice::intersectWithPreimageOfLattice(
   imageLattice.makeFromRoots(imageStartingBasis);
   imageLattice.intersectWith(other);
   basisImageIntersection.assignMatrixRows(imageLattice.basisRationalForm);
-  Vectors<Rational>
-  tempBasisImageIntersection,
-  tempImageStartingBasis,
-  tempImageBasisInImageStartingBasisCoords;
+  Vectors<Rational> tempBasisImageIntersection;
+  Vectors<Rational> tempImageStartingBasis;
+  Vectors<Rational> tempimageBasisInImageStartingBasisCoordinates;
   basisImageIntersection = tempBasisImageIntersection;
   imageStartingBasis = tempImageStartingBasis;
   bool tempBool =
-  tempBasisImageIntersection.getIntegralCoordsInBasisIfTheyExist(
+  tempBasisImageIntersection.getIntegralCoordinatesInBasisIfTheyExist(
     tempImageStartingBasis,
-    tempImageBasisInImageStartingBasisCoords,
+    tempimageBasisInImageStartingBasisCoordinates,
     Rational(1),
     Rational(- 1),
     Rational(0)
   );
-  imageBasisInImageStartingBasisCoords = (
-    tempImageBasisInImageStartingBasisCoords
+  imageBasisInImageStartingBasisCoordinates = (
+    tempimageBasisInImageStartingBasisCoordinates
   );
   if (!tempBool) {
     global.fatal
     << "Coordinates not integral when they should be. "
     << global.fatal;
   }
-  resultNonKernelPart.setSize(imageBasisInImageStartingBasisCoords.size);
+  resultNonKernelPart.setSize(imageBasisInImageStartingBasisCoordinates.size);
   for (int i = 0; i < resultNonKernelPart.size; i ++) {
     Vector<Rational>& currentRoot = resultNonKernelPart[i];
     currentRoot.makeZero(this->getDimension());
     for (int j = 0; j < startingBasis.size; j ++) {
       currentRoot +=
-      startingBasis[j] * imageBasisInImageStartingBasisCoords[i][j];
+      startingBasis[j] * imageBasisInImageStartingBasisCoordinates[i][j];
     }
   }
   Lattice kernelPart;

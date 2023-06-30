@@ -608,9 +608,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
       return false;
     }
   }
-  Vector<Polynomial<Rational> >
-  highestWeightFundamentalCoordinates,
-  highestWeightsimpleCoords;
+  Vector<Polynomial<Rational> > highestWeightFundamentalCoordinates;
+  Vector<Polynomial<Rational> > highestWeightSimpleCoordinates;
   ExpressionContext context(calculator);
   if (
     !calculator.getVector(
@@ -625,13 +624,13 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   }
   WeylGroupData weyl;
   weyl.makeFromDynkinType(dynkinType);
-  highestWeightsimpleCoords = highestWeightFundamentalCoordinates;
+  highestWeightSimpleCoordinates = highestWeightFundamentalCoordinates;
   highestWeightFundamentalCoordinates =
-  weyl.getFundamentalCoordinatesFromSimple(highestWeightsimpleCoords);
+  weyl.getFundamentalCoordinatesFromSimple(highestWeightSimpleCoordinates);
   std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > highestWeights;
   FormatExpressions format = context.getFormat();
-  highestWeights.addOnTop(highestWeightsimpleCoords);
+  highestWeights.addOnTop(highestWeightSimpleCoordinates);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroupAutomorphisms outerAutomophisms;
   outerAutomophisms.weylGroup = &weyl;
@@ -661,17 +660,17 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   << "<td>Epsilon coords</td><td>Fundamental coords</td>";
   out << "</tr>";
   bool useMathTag = outputOrbit.size < 150;
-  Matrix<Rational> epsCoordMat;
+  Matrix<Rational> epsilonCoordinateMatrix;
   Polynomial<Rational> zero;
-  weyl.dynkinType.getEpsilonMatrix(epsCoordMat);
+  weyl.dynkinType.getEpsilonMatrix(epsilonCoordinateMatrix);
   for (int i = 0; i < outputOrbit.size; i ++) {
     format.simpleRootLetter = "\\alpha";
     format.fundamentalWeightLetter = "\\psi";
     std::string orbitEltString = outputOrbit[i].toString(&format);
-    Vector<Polynomial<Rational> > epsVect = outputOrbit[i];
-    epsCoordMat.actOnVectorColumn(epsVect, zero);
-    std::string orbitEltStringEpsilonCoords =
-    epsVect.toStringLetterFormat("\\varepsilon", &format);
+    Vector<Polynomial<Rational> > epsilonVector = outputOrbit[i];
+    epsilonCoordinateMatrix.actOnVectorColumn(epsilonVector, zero);
+    std::string orbitEltStringEpsilonCoordinates =
+    epsilonVector.toStringLetterFormat("\\varepsilon", &format);
     std::string weightEltString =
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).
     toStringLetterFormat(format.fundamentalWeightLetter, &format);
@@ -694,8 +693,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     << "</td><td>"
     << (
       useMathTag ?
-      HtmlRoutines::getMathNoDisplay(orbitEltStringEpsilonCoords) :
-      orbitEltStringEpsilonCoords
+      HtmlRoutines::getMathNoDisplay(orbitEltStringEpsilonCoordinates) :
+      orbitEltStringEpsilonCoordinates
     )
     << "</td><td>"
     << (
@@ -708,7 +707,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     << "$"
     << outerAutomophisms.allElements[i].toString(&format)
     << "$ & $"
-    << orbitEltStringEpsilonCoords
+    << orbitEltStringEpsilonCoordinates
     << "$ & $"
     << weightEltString
     << "$ & $"
@@ -756,7 +755,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool useFundCoords,
+  bool useFundamentalCoordinates,
   bool useRho
 ) {
   STACK_TRACE("CalculatorFunctionsWeylGroup::weylOrbit");
@@ -773,17 +772,17 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     return false;
   }
   Vector<Polynomial<Rational> > highestWeightFundamentalCoordinates;
-  Vector<Polynomial<Rational> > highestWeightSimpleCoords;
+  Vector<Polynomial<Rational> > highestWeightSimpleCoordinates;
   Vector<Polynomial<Rational> > currentWeight;
   Polynomial<Rational> zero;
   WeylGroupData& weyl = semisimpleLieAlgebra.content->weylGroup;
-  if (!useFundCoords) {
-    highestWeightSimpleCoords = weight;
+  if (!useFundamentalCoordinates) {
+    highestWeightSimpleCoordinates = weight;
     highestWeightFundamentalCoordinates =
     weyl.getFundamentalCoordinatesFromSimple(weight);
   } else {
     highestWeightFundamentalCoordinates = weight;
-    highestWeightSimpleCoords =
+    highestWeightSimpleCoordinates =
     weyl.getSimpleCoordinatesFromFundamental(weight, zero);
   }
   std::stringstream out, latexReport;
@@ -791,7 +790,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   FormatExpressions format;
   semisimpleLieAlgebra.context.getFormat(format);
   //  format.fundamentalWeightLetter ="\\psi";
-  highestWeights.addOnTop(highestWeightSimpleCoords);
+  highestWeights.addOnTop(highestWeightSimpleCoordinates);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   HashedList<ElementWeylGroup> orbitGeneratingSet;
   Polynomial<Rational> exponent;
@@ -849,7 +848,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   for (int i = 0; i < outputOrbit.size; i ++) {
     for (int j = 0; j < weyl.rootsOfBorel.size; j ++) {
       currentWeight = outputOrbit[i];
-      currentElt.MakeRootReflection(weyl.rootsOfBorel[j], weyl);
+      currentElt.makeRootReflection(weyl.rootsOfBorel[j], weyl);
       if (useRho) {
         currentWeight += weyl.rho;
       }
@@ -889,7 +888,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     std::string orbitElementString = outputOrbit[i].toString(&format);
     Vector<Polynomial<Rational> > epsilonVector = outputOrbit[i];
     epsilonCoordinatesMatrix.actOnVectorColumn(epsilonVector, zero);
-    std::string orbitEltStringEpsilonCoords =
+    std::string orbitEltStringEpsilonCoordinates =
     epsilonVector.toStringLetterFormat("\\varepsilon", &format);
     std::string weightElementString =
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).
@@ -911,8 +910,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     << "</td><td>"
     << (
       useMathTag ?
-      HtmlRoutines::getMathNoDisplay(orbitEltStringEpsilonCoords) :
-      orbitEltStringEpsilonCoords
+      HtmlRoutines::getMathNoDisplay(orbitEltStringEpsilonCoordinates) :
+      orbitEltStringEpsilonCoordinates
     )
     << "</td><td>"
     << (
@@ -925,7 +924,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     << "$"
     << orbitGeneratingSet[i].toString(&format)
     << "$ & $"
-    << orbitEltStringEpsilonCoords
+    << orbitEltStringEpsilonCoordinates
     << "$ & $"
     << weightElementString
     << "$ & $"
@@ -934,7 +933,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     )
     << "$\\\\\n<br>";
     if (useRho) {
-      currentWeight = highestWeightSimpleCoords;
+      currentWeight = highestWeightSimpleCoordinates;
       standardElt.makeOne(*semisimpleLieAlgebra.content);
       bool isGood = true;
       for (
@@ -2629,13 +2628,13 @@ void MonomialMacdonald::generateMyOrbit(
   STACK_TRACE("MonomialMacdonald::generateMyOrbit");
   output.clear();
   output.addOnTop(*this);
-  MonomialMacdonald currentMon;
+  MonomialMacdonald monomialMacdonald;
   Rational coefficient;
   for (int i = 0; i < output.size; i ++) {
     for (int j = 0; j < this->owner->getRank(); j ++) {
-      currentMon = output[i];
-      currentMon.actOnMeSimpleReflection(j, coefficient);
-      output.addOnTopNoRepetition(currentMon);
+      monomialMacdonald = output[i];
+      monomialMacdonald.actOnMeSimpleReflection(j, coefficient);
+      output.addOnTopNoRepetition(monomialMacdonald);
     }
   }
 }

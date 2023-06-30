@@ -29,8 +29,8 @@ struct BranchingData {
   List<ElementSemisimpleLieAlgebra<Rational> > nilradicalSmall;
   List<ElementSemisimpleLieAlgebra<Rational> >
   nilradicalModuloPreimageNilradical;
-  Vectors<RationalFraction<Rational> > outputWeightsFundCoordS;
-  Vectors<RationalFraction<Rational> > outputWeightsSimpleCoords;
+  Vectors<RationalFraction<Rational> > outputWeightsFundamentalCoordinates;
+  Vectors<RationalFraction<Rational> > outputWeightsSimpleCoordinates;
   Vectors<RationalFraction<Rational> > g2Weights;
   Vectors<RationalFraction<Rational> > g2DualWeights;
   Vectors<RationalFraction<Rational> > leviEigenSpace;
@@ -182,12 +182,12 @@ public:
   int numberOfProcessedConesParameters;
   int numberOfProcessedExtremaEqualToOne;
   std::string computeMultiplicitiesLargerAlgebraHighestWeight(
-    Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords,
+    Vector<Rational>& highestWeightLargerAlgebraFundamentalCoordinates,
     Vector<Rational>& parabolicSelection
   );
   std::string checkMultiplicitiesVsOrbits();
   std::string elementToStringMultiplicitiesReport();
-  void incrementComputation(Vector<Rational>& parabolicSel);
+  void incrementComputation(Vector<Rational>& parabolicSelection);
   std::string prepareReport();
   GeneralizedVermaModuleCharacters();
   bool checkInitialization() const;
@@ -465,8 +465,8 @@ public:
   template <class CoefficientTypeQuotientField>
   static void getBasisFromSpanOfElements(
     List<ElementUniversalEnvelopingOrdered<Coefficient> >& elements,
-    Vectors<CoefficientTypeQuotientField>& outputCoords,
-    List<ElementUniversalEnvelopingOrdered<Coefficient> >& outputTheBasis,
+    Vectors<CoefficientTypeQuotientField>& outputCoordinates,
+    List<ElementUniversalEnvelopingOrdered<Coefficient> >& outputBasis,
     const CoefficientTypeQuotientField& fieldUnit,
     const CoefficientTypeQuotientField& fieldZero
   );
@@ -554,9 +554,9 @@ public:
     outputWasMultipliedBy = ringUnit;
     Coefficient currentCoeff;
     for (int i = 0; i < this->size; i ++) {
-      MonomialUniversalEnvelopingOrdered<Coefficient>& currentMon =
+      MonomialUniversalEnvelopingOrdered<Coefficient>& monomial =
       this->objects[i];
-      currentMon.Coefficient.clearDenominators(currentCoeff);
+      monomial.Coefficient.clearDenominators(currentCoeff);
       for (int j = 0; j < this->size; j ++) {
         if (j != i) {
           this->objects[j].coefficient *= currentCoeff;
@@ -592,7 +592,7 @@ public:
   static void getBasisFromSpanOfElements(
     List<ElementVermaModuleOrdered<Coefficient> >& elements,
     Vectors<RationalFraction<Rational> >& outputCoordinates,
-    List<ElementVermaModuleOrdered>& outputTheBasis,
+    List<ElementVermaModuleOrdered>& outputBasis,
     const RationalFraction<Rational>& rationalFractionOne,
     const RationalFraction<Rational>& rationalFractionZero
   );

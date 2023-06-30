@@ -1034,7 +1034,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   ) {
     AlgebraicNumber& currentCoefficient =
     minusMinimalPolynomialMinusMaximalMonomial.coefficients[i];
-    const MonomialPolynomial& currentMonomial =
+    const MonomialPolynomial& monomial =
     minusMinimalPolynomialMinusMaximalMonomial[i];
     this->getMultiplicationBy(
       currentCoefficient, currentCoefficientMatrixForm
@@ -1047,8 +1047,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
       }
       generatorMatrix.addMonomial(
         MonomialMatrix(
-          currentMonomial.totalDegreeInt() * startingDimension +
-          relationRowIndex,
+          monomial.totalDegreeInt() * startingDimension + relationRowIndex,
           startingDimension *(degreeMinimialPolynomial - 1) +
           relationColumnIndex
         ),

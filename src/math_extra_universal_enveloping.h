@@ -320,7 +320,7 @@ public:
   template <class CoefficientTypeQuotientField>
   static bool getBasisFromSpanOfElements(
     List<ElementUniversalEnveloping<Coefficient> >& elements,
-    Vectors<CoefficientTypeQuotientField>& outputCoords,
+    Vectors<CoefficientTypeQuotientField>& outputCoordinates,
     List<ElementUniversalEnveloping<Coefficient> >& outputBasis,
     const CoefficientTypeQuotientField& fieldUnit,
     const CoefficientTypeQuotientField& fieldZero

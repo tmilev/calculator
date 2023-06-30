@@ -528,13 +528,13 @@ bool CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly(
     << "element to weight corresponding to different Weyl group.";
   }
   Polynomial<Rational> zero;
-  Vector<Polynomial<Rational> > weightSimpleCoords =
+  Vector<Polynomial<Rational> > weightSimpleCoordinates =
   element.owner->getSimpleCoordinatesFromFundamental(
     weight.weightFundamentalCoordinates, zero
   );
-  element.actOn(weightSimpleCoords);
+  element.actOn(weightSimpleCoordinates);
   weight.weightFundamentalCoordinates =
-  element.owner->getFundamentalCoordinatesFromSimple(weightSimpleCoords);
+  element.owner->getFundamentalCoordinatesFromSimple(weightSimpleCoordinates);
   return
   output.assignValueWithContext(
     calculator, weight, inputConverted[2].getContext()
@@ -548,7 +548,8 @@ bool CalculatorFunctionsBinaryOps::multiplyEllipticCurveElements(
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  ElementEllipticCurve<Rational> left, right;
+  ElementEllipticCurve<Rational> left;
+  ElementEllipticCurve<Rational> right;
   if (
     !input[1].isOfType(&left) || !input[2].isOfType(&right)
   ) {
@@ -570,7 +571,8 @@ bool CalculatorFunctionsBinaryOps::multiplyEllipticCurveElementsZmodP(
   if (!input.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  ElementEllipticCurve<ElementZmodP> left, right;
+  ElementEllipticCurve<ElementZmodP> left;
+  ElementEllipticCurve<ElementZmodP> right;
   if (
     !input[1].isOfType(&left) || !input[2].isOfType(&right)
   ) {

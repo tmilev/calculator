@@ -4251,15 +4251,15 @@ linearSpanContainsGetFirstLinearCombination(
     listCopy, 0, seedMonomials, &rowOperations
   );
   LinearCombinationTemplate remainderFromInput = input;
-  TemplateMonomial currentMon;
+  TemplateMonomial monomial;
   Coefficient coefficientMinimialMonomial, coefficientInRemainder;
   outputFirstLinearCombination.makeZero(listCopy.size);
   for (int i = 0; i < listCopy.size; i ++) {
     if (listCopy[i].isEqualToZero()) {
       break;
     }
-    listCopy[i].getMinimalMonomial(currentMon, coefficientMinimialMonomial);
-    coefficientInRemainder = remainderFromInput.getCoefficientOf(currentMon);
+    listCopy[i].getMinimalMonomial(monomial, coefficientMinimialMonomial);
+    coefficientInRemainder = remainderFromInput.getCoefficientOf(monomial);
     outputFirstLinearCombination[i] = coefficientInRemainder;
     outputFirstLinearCombination[i] /= coefficientMinimialMonomial;
     remainderFromInput -= listCopy[i] * outputFirstLinearCombination[i];
@@ -4305,34 +4305,35 @@ gaussianEliminationByRows(
     }
   }
   MemorySaving<HashedList<TemplateMonomial> > bufferMonomials;
-  HashedList<TemplateMonomial>& allMons = seedMonomials ==
+  HashedList<TemplateMonomial>& allMonomials = seedMonomials ==
   0 ? bufferMonomials.getElement() : *seedMonomials;
   if (seedMonomials == 0) {
     int topBoundNumberOfMonomials = 0;
     for (int i = 0; i < toBeEliminated.size; i ++) {
       topBoundNumberOfMonomials += toBeEliminated[i].size();
     }
-    allMons.setExpectedSize(topBoundNumberOfMonomials);
+    allMonomials.setExpectedSize(topBoundNumberOfMonomials);
   }
   for (int i = 0; i < toBeEliminated.size; i ++) {
-    allMons.addOnTopNoRepetition(toBeEliminated[i].monomials);
+    allMonomials.addOnTopNoRepetition(toBeEliminated[i].monomials);
   }
-  allMons.quickSortAscending();
-  FormatExpressions tempFormat;
-  tempFormat.flagUseHTML = true;
-  tempFormat.flagUseLatex = true;
+  allMonomials.quickSortAscending();
+  FormatExpressions format;
+  format.flagUseHTML = true;
+  format.flagUseLatex = true;
   if (madeARowSwitch != nullptr) {
     *madeARowSwitch = false;
   }
   int currentRowIndex = 0;
   Coefficient accumulator, negated;
   for (
-    int i = 0; i < allMons.size && currentRowIndex < toBeEliminated.size; i ++
+    int i = 0; i < allMonomials.size && currentRowIndex < toBeEliminated.size;
+    i ++
   ) {
-    const TemplateMonomial& currentMon = allMons[i];
+    const TemplateMonomial& monomial = allMonomials[i];
     int goodRow = currentRowIndex;
     for (; goodRow < toBeEliminated.size; goodRow ++) {
-      if (toBeEliminated[goodRow].monomials.contains(currentMon)) {
+      if (toBeEliminated[goodRow].monomials.contains(monomial)) {
         break;
       }
     }
@@ -4353,7 +4354,7 @@ gaussianEliminationByRows(
     }
     LinearCombination<TemplateMonomial, Coefficient>& currentPivot =
     toBeEliminated[currentRowIndex];
-    int columnIndex = currentPivot.monomials.getIndex(currentMon);
+    int columnIndex = currentPivot.monomials.getIndex(monomial);
     if (columnIndex == - 1) {
       global.fatal
       << "An internal check at the "
@@ -4379,7 +4380,7 @@ gaussianEliminationByRows(
       }
       LinearCombination<TemplateMonomial, Coefficient>& currentOther =
       toBeEliminated[j];
-      int otherColumnIndex = currentOther.monomials.getIndex(currentMon);
+      int otherColumnIndex = currentOther.monomials.getIndex(monomial);
       if (otherColumnIndex != - 1) {
         accumulator = currentOther.coefficients[otherColumnIndex];
         currentOther.subtractOtherTimesCoefficient(
@@ -4535,9 +4536,9 @@ class LaTeXProcedures {
 public:
   static const int scaleFactor = 40;
   // In centimeters.
-  static const int figureCenterCoordSystemX = 4;
+  static const int figureCenterCoordinateSystemX = 4;
   // In centimeters.
-  static const int figureCenterCoordSystemY = 8;
+  static const int figureCenterCoordinateSystemY = 8;
   // In centimeters.
   static const int textPrintCenteringAdjustmentX = 3;
   static const int textPrintCenteringAdjustmentY = 3;
@@ -6255,15 +6256,16 @@ public:
   }
   WeylGroupData* owner;
   Vectors<Rational> waypoints;
-  void makeFromWeightInSimpleCoords(
-    const Vector<Rational>& weightInSimpleCoords,
+  void makeFromweightInSimpleCoordinates(
+    const Vector<Rational>& weightInSimpleCoordinates,
     WeylGroupData& inputOwner
   );
   void makeFromWaypoints(
-    Vectors<Rational>& weightsInSimpleCoords, WeylGroupData& inputOwner
+    Vectors<Rational>& weightsinSimpleCoordinates,
+    WeylGroupData& inputOwner
   ) {
     this->owner = &inputOwner;
-    this->waypoints = weightsInSimpleCoords;
+    this->waypoints = weightsinSimpleCoordinates;
     this->simplify();
   }
   void actByFAlpha(int indexAlpha);
@@ -6294,7 +6296,7 @@ public:
   std::string generateOrbitAndAnimate();
   bool minimaAreIntegral();
   std::string toString(
-    bool useSimpleCoords = true,
+    bool useSimpleCoordinates = true,
     bool useArrows = true,
     bool includeDominance = false
   ) const;
@@ -7038,17 +7040,17 @@ std::ostream& operator<<(
   }
   std::string coefficientString;
   std::string monomialString;
-  List<TemplateMonomial> sortedMons;
-  sortedMons = collection.monomials;
-  sortedMons.quickSortDescending();
-  for (int i = 0; i < sortedMons.size; i ++) {
-    TemplateMonomial& currentMon = sortedMons[i];
-    std::stringstream tempStream;
+  List<TemplateMonomial> sortedMonomials;
+  sortedMonomials = collection.monomials;
+  sortedMonomials.quickSortDescending();
+  for (int i = 0; i < sortedMonomials.size; i ++) {
+    TemplateMonomial& monomial = sortedMonomials[i];
+    std::stringstream termStream;
     Coefficient& coefficient =
-    collection.coefficients[collection.monomials.getIndex(currentMon)];
-    tempStream << coefficient;
-    coefficientString = tempStream.str();
-    monomialString = currentMon.toString();
+    collection.coefficients[collection.monomials.getIndex(monomial)];
+    termStream << coefficient;
+    coefficientString = termStream.str();
+    monomialString = monomial.toString();
     if (coefficientString == "1" && monomialString != "1") {
       coefficientString = "";
     }

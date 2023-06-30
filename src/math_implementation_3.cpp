@@ -7502,7 +7502,7 @@ bool ElementWeylGroup::isIdentity() {
   return this->generatorsLastAppliedFirst.size == 0;
 }
 
-void ElementWeylGroup::MakeRootReflection(
+void ElementWeylGroup::makeRootReflection(
   const Vector<Rational>& mustBeRoot, WeylGroupData& inputWeyl
 ) {
   *this =
@@ -7768,8 +7768,8 @@ Matrix<Rational> WeylGroupData::getMatrixStandardRepresentation(
 }
 
 void WeylGroupData::reset() {
-  this->fundamentalToSimpleCoords.initialize(0, 0);
-  this->simpleToFundamentalCoords.initialize(0, 0);
+  this->fundamentalToSimpleCoordinates.initialize(0, 0);
+  this->simpleToFundamentalCoordinates.initialize(0, 0);
   this->matrixSendsSimpleVectorsToEpsilonVectors.freeMemory();
   this->flagFundamentalToSimpleMatricesAreComputed = false;
   this->flagIrrepsAreComputed = false;
@@ -8325,17 +8325,19 @@ std::string WeylGroupData::toStringRootsAndRootReflections(
   out
   << "<table><tr><td>Simple basis coordinates</td><td>Epsilon coordinates</td>"
   << "<td>Reflection w.r.t. root</td></tr>";
-  Vectors<Rational> rootSystemEpsCoords;
-  this->getEpsilonCoordinates(this->rootSystem, rootSystemEpsCoords);
+  Vectors<Rational> rootSystemEpsilonCoordinates;
+  this->getEpsilonCoordinates(
+    this->rootSystem, rootSystemEpsilonCoordinates
+  );
   ElementWeylGroup currentRootReflection;
   for (int i = 0; i < this->rootSystem.size; i ++) {
     const Vector<Rational>& current = this->rootSystem[i];
-    currentRootReflection.MakeRootReflection(current, *this);
+    currentRootReflection.makeRootReflection(current, *this);
     out
     << "<tr><td>"
     << current.toString()
     << "</td><td>"
-    << rootSystemEpsCoords[i].toStringLetterFormat("e")
+    << rootSystemEpsilonCoordinates[i].toStringLetterFormat("e")
     << "</td>"
     << "<td>"
     << HtmlRoutines::getMathNoDisplay(currentRootReflection.toString())
@@ -8571,7 +8573,7 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
   Matrix<Rational> epsilonMatrix;
   DynkinDiagramRootSubalgebra tempDyn;
   Vectors<Rational> simpleBasis;
-  Vectors<Rational> coordsInNewBasis;
+  Vectors<Rational> coordinatesInNewBasis;
   simpleBasis = generators;
   tempDyn.computeDiagramTypeModifyInput(simpleBasis, *this);
   bool tempBool = true;
@@ -8595,11 +8597,11 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
     basisChange.directSumWith(epsilonMatrix, Rational(0));
   }
   simpleBasis.assignListList(tempDyn.simpleBasesConnectedComponents);
-  coordsInNewBasis.setSize(input.size);
+  coordinatesInNewBasis.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
-    input[i].getCoordinatesInBasis(simpleBasis, coordsInNewBasis[i]);
+    input[i].getCoordinatesInBasis(simpleBasis, coordinatesInNewBasis[i]);
   }
-  basisChange.actOnVectorsColumn(coordsInNewBasis, output);
+  basisChange.actOnVectorsColumn(coordinatesInNewBasis, output);
 }
 
 void WeylGroupData::getEpsilonCoordinates(
@@ -9039,8 +9041,8 @@ void WeylGroupData::drawRootSystem(
 }
 
 std::string WeylGroupData::generateWeightSupportMethod1(
-  Vector<Rational>& highestWeightSimpleCoords,
-  Vectors<Rational>& outputWeightsSimpleCoords,
+  Vector<Rational>& highestWeightSimpleCoordinates,
+  Vectors<Rational>& outputWeightsSimpleCoordinates,
   int upperBoundWeights
 ) {
   HashedList<Vector<Rational> > dominantWeights;
@@ -9051,15 +9053,15 @@ std::string WeylGroupData::generateWeightSupportMethod1(
   int upperBoundInt =
   MathRoutines::maximum(static_cast<int>(upperBoundDouble), 10000);
   // int upperBoundInt = 10000;
-  Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
+  Vector<Rational> highestWeightTrue = highestWeightSimpleCoordinates;
   this->raiseToDominantWeight(highestWeightTrue);
   std::stringstream out;
-  if (highestWeightTrue != highestWeightSimpleCoords) {
+  if (highestWeightTrue != highestWeightSimpleCoordinates) {
     out
     << "<br>The input weight is not highest... "
     << "using the highest weight in the same orbit instead. "
     << "Your input in simple coordinates was: "
-    << highestWeightSimpleCoords.toString()
+    << highestWeightSimpleCoordinates.toString()
     << ".<br> ";
   }
   out
@@ -9069,7 +9071,7 @@ std::string WeylGroupData::generateWeightSupportMethod1(
   std::string tempS;
   bool isTrimmed =
   !this->getAllDominantWeightsHWFDIM(
-    highestWeightSimpleCoords, dominantWeights, upperBoundInt, &tempS
+    highestWeightSimpleCoordinates, dominantWeights, upperBoundInt, &tempS
   );
   out << tempS << "<br>";
   if (isTrimmed) {
@@ -9114,7 +9116,7 @@ std::string WeylGroupData::generateWeightSupportMethod1(
   if (!isTrimmed && finalWeights.size < 10000) {
     out << "All weights were computed and are drawn. <br>";
   }
-  outputWeightsSimpleCoords = finalWeights;
+  outputWeightsSimpleCoordinates = finalWeights;
   return out.str();
 }
 
@@ -10435,9 +10437,9 @@ void LaTeXProcedures::drawTextDirectly(
   y1 /= LaTeXProcedures::scaleFactor;
   output
   << "\\put("
-  << x1 - LaTeXProcedures::figureCenterCoordSystemX
+  << x1 - LaTeXProcedures::figureCenterCoordinateSystemX
   << ", "
-  << LaTeXProcedures::figureCenterCoordSystemY - y1
+  << LaTeXProcedures::figureCenterCoordinateSystemY - y1
   << "){\\tiny{"
   << text
   << "}}";
@@ -10473,14 +10475,14 @@ void LaTeXProcedures::drawline(
   << "\\psline[linewidth = 0.3pt, linecolor ="
   << tempS
   << "]("
-  << x1 - LaTeXProcedures::figureCenterCoordSystemX
+  << x1 - LaTeXProcedures::figureCenterCoordinateSystemX
   << ", "
-  << LaTeXProcedures::figureCenterCoordSystemY - y1
+  << LaTeXProcedures::figureCenterCoordinateSystemY - y1
   << ")"
   << "("
-  << x2 - LaTeXProcedures::figureCenterCoordSystemX
+  << x2 - LaTeXProcedures::figureCenterCoordinateSystemX
   << ", "
-  << LaTeXProcedures::figureCenterCoordSystemY - y2
+  << LaTeXProcedures::figureCenterCoordinateSystemY - y2
   << ")\n";
 }
 

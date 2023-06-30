@@ -1811,7 +1811,7 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
   this->remainderRescaledAlgebraic /= additionalMultiple;
   this->numberOfSystemVariables = 0;
   Polynomial<AlgebraicNumber> currentSummand;
-  MonomialPolynomial currentMon;
+  MonomialPolynomial monomial;
   this->polynomialThatMustVanish.makeZero();
   this->polynomialThatMustVanish -= remainderRescaledAlgebraic;
   this->numerators.setSize(
@@ -1836,10 +1836,10 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
         totalDegree(); j ++
       ) {
         this->numberOfSystemVariables ++;
-        currentMon.makeEi(this->numberOfSystemVariables);
-        currentMon.setVariable(0, j);
-        this->numerators[i][k].addMonomial(currentMon, 1);
-        currentSummand.addMonomial(currentMon, 1);
+        monomial.makeEi(this->numberOfSystemVariables);
+        monomial.setVariable(0, j);
+        this->numerators[i][k].addMonomial(monomial, 1);
+        currentSummand.addMonomial(monomial, 1);
       }
       for (
         int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities.size
@@ -5730,22 +5730,24 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   cosineDoubleExpression.makeOX(
     calculator, calculator.opCos(), trigonometricArgumentDouble
   );
-  Expression
-  outputCandidate,
-  currentSummandE,
-  currentCommandListE,
-  currentSubE,
-  currentIntegrandE,
-  currentIntegrandNonPolynomializedE,
-  currentIntegral,
-  currentIntegralComputation,
-  currentIntegrandSinePart,
-  currentIntegrandCosinePart,
-  newVarE,
-  newResultE,
-  currentE,
-  currentCF;
-  Expression oneE, twoE, threeE, powerE;
+  Expression outputCandidate;
+  Expression currentSummandE;
+  Expression currentCommandListE;
+  Expression currentSubE;
+  Expression currentIntegrandE;
+  Expression currentIntegrandNonPolynomializedE;
+  Expression currentIntegral;
+  Expression currentIntegralComputation;
+  Expression currentIntegrandSinePart;
+  Expression currentIntegrandCosinePart;
+  Expression newVarE;
+  Expression newResultE;
+  Expression currentE;
+  Expression currentCF;
+  Expression oneE;
+  Expression twoE;
+  Expression threeE;
+  Expression powerE;
   oneE.assignValue(calculator, 1);
   twoE.assignValue(calculator, 2);
   threeE.assignValue(calculator, 3);
@@ -5753,11 +5755,12 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   newVarE = calculator.getNewAtom();
   newResultE = calculator.getNewAtom();
   for (int i = 0; i < trigonometricPolynomial.size(); i ++) {
-    const MonomialPolynomial& currentMon = trigonometricPolynomial[i];
-    int powerSine = - 1, powerCosine = - 1;
+    const MonomialPolynomial& monomial = trigonometricPolynomial[i];
+    int powerSine = - 1;
+    int powerCosine = - 1;
     if (
-      !currentMon(0).isSmallInteger(&powerSine) ||
-      !currentMon(1).isSmallInteger(&powerCosine)
+      !monomial(0).isSmallInteger(&powerSine) ||
+      !monomial(1).isSmallInteger(&powerCosine)
     ) {
       return false;
     }
@@ -5920,22 +5923,24 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   secantExpression.makeOX(
     calculator, calculator.opSec(), trigonometricArgument
   );
-  Expression
-  outputCandidate,
-  currentSummandE,
-  currentCommandListE,
-  currentSubE,
-  currentIntegrandE,
-  currentIntegrandNonPolynomializedE,
-  currentIntegral,
-  currentIntegralComputation,
-  currentIntegrandTanPart,
-  currentIntegrandSecPart,
-  newVarE,
-  newResultE,
-  currentE,
-  currentCF;
-  Expression oneE, twoE, threeE, powerE;
+  Expression outputCandidate;
+  Expression currentSummandE;
+  Expression currentCommandListE;
+  Expression currentSubE;
+  Expression currentIntegrandE;
+  Expression currentIntegrandNonPolynomializedE;
+  Expression currentIntegral;
+  Expression currentIntegralComputation;
+  Expression currentIntegrandTanPart;
+  Expression currentIntegrandSecPart;
+  Expression newVarE;
+  Expression newResultE;
+  Expression currentE;
+  Expression currentCF;
+  Expression oneE;
+  Expression twoE;
+  Expression threeE;
+  Expression powerE;
   oneE.assignValue(calculator, 1);
   twoE.assignValue(calculator, 2);
   threeE.assignValue(calculator, 3);
@@ -5943,11 +5948,12 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   newVarE = calculator.getNewAtom();
   newResultE = calculator.getNewAtom();
   for (int i = 0; i < trigonometrixPolynomial.size(); i ++) {
-    const MonomialPolynomial& currentMon = trigonometrixPolynomial[i];
-    int powerTan = - 1, powerSec = - 1;
+    const MonomialPolynomial& monomial = trigonometrixPolynomial[i];
+    int powerTan = - 1;
+    int powerSec = - 1;
     if (
-      !currentMon(0).isSmallInteger(&powerTan) ||
-      !currentMon(1).isSmallInteger(&powerSec)
+      !monomial(0).isSmallInteger(&powerTan) ||
+      !monomial(1).isSmallInteger(&powerSec)
     ) {
       return false;
     }

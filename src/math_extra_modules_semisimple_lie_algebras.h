@@ -412,7 +412,7 @@ public:
   );
   bool makeFromHW(
     SemisimpleLieAlgebra& inputAlgebra,
-    Vector<Coefficient>& HWFundCoords,
+    Vector<Coefficient>& highestWeightFundamentalCoordinates,
     const Selection& selNonSelectedAreElementsLevi,
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
@@ -430,7 +430,7 @@ public:
   }
   void getAdActionHomogenousElt(
     ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
-    Vector<Rational>& weightUEEltSimpleCoords,
+    Vector<Rational>& weightUEElementSimpleCoordinates,
     List<List<ElementUniversalEnveloping<Coefficient> > >&
     outputSortedByArgumentWeight,
     const Coefficient& ringUnit,
@@ -440,7 +440,7 @@ public:
     ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
     List<List<ElementUniversalEnveloping<Coefficient> > >&
     outputSortedByArgumentWeight,
-    Vector<Rational>& weightUEEltSimpleCoords,
+    Vector<Rational>& weightUEElementSimpleCoordinates,
     MatrixTensor<Coefficient>& output,
     const Coefficient& ringUnit,
     const Coefficient& ringZero
@@ -474,7 +474,7 @@ public:
     Selection& splittingParablicSelection,
     List<ElementUniversalEnveloping<Coefficient> >* outputEigenVectors =
     nullptr,
-    Vectors<Coefficient>* outputWeightsFundCoords = nullptr,
+    Vectors<Coefficient>* outputWeightsFundamentalCoordinates = nullptr,
     Vectors<Coefficient>* outputEigenSpace = nullptr,
     CharacterSemisimpleLieAlgebraModule<Coefficient>* outputChar = nullptr
   );
@@ -483,7 +483,7 @@ public:
     Selection& LeviInSmall,
     List<ElementUniversalEnveloping<Coefficient> >* outputEigenVectors =
     nullptr,
-    Vectors<Coefficient>* outputWeightsFundCoords = nullptr,
+    Vectors<Coefficient>* outputWeightsFundamentalCoordinates = nullptr,
     Vectors<Coefficient>* outputEigenSpace = nullptr,
     std::stringstream* comments = nullptr
   );
@@ -514,7 +514,7 @@ public:
   // Universal enveloping,
   // i.e. inputElt is not allowed to have non-small integer exponents.
   bool getActionGeneralizedVermaModuleAsDifferentialOperator(
-    ElementSemisimpleLieAlgebra<Rational>& inputElt,
+    ElementSemisimpleLieAlgebra<Rational>& inputElement,
     QuasiDifferentialOperator<Rational>& output,
     bool useNilWeight,
     bool ascending

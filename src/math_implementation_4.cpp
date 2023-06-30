@@ -498,7 +498,7 @@ std::string GlobalVariables::LogData::toStringProcessType() const {
   case GlobalVariables::LogData::type::daemon:
     return "daemon";
   case GlobalVariables::LogData::type::database:
-  return "database";
+    return "database";
   default:
     return "unknown process type";
   }
@@ -1919,7 +1919,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
 
 std::string GeneralizedVermaModuleCharacters::
 computeMultiplicitiesLargerAlgebraHighestWeight(
-  Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords,
+  Vector<Rational>& highestWeightLargerAlgebraFundamentalCoordinates,
   Vector<Rational>& parabolicSelection
 ) {
   std::stringstream out;
@@ -1935,7 +1935,7 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   Vector<Rational> highestWeightLargerAlgSimpleCoordinates;
   highestWeightLargerAlgSimpleCoordinates =
   largeWeylGroup.getSimpleCoordinatesFromFundamental(
-    highestWeightLargerAlgebraFundamentalCoords
+    highestWeightLargerAlgebraFundamentalCoordinates
   );
   Vector<Rational> root;
   DrawingVariables drawOps;
@@ -2085,14 +2085,14 @@ std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
 }
 
 void GeneralizedVermaModuleCharacters::incrementComputation(
-  Vector<Rational>& parabolicSel
+  Vector<Rational>& parabolicSelection
 ) {
   std::stringstream out;
-  this->parabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSel;
+  this->parabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSelection;
   switch (this->computationPhase) {
   case 0:
     //      this->parser.hmm.MakeG2InB3(this->parser);
-    this->initFromHomomorphism(parabolicSel, this->homomorphism);
+    this->initFromHomomorphism(parabolicSelection, this->homomorphism);
     this->transformToWeylProjectiveStep1();
     // out <<
     // global.indicatorVariables.StatusString1;

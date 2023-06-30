@@ -967,12 +967,12 @@ bool CalculatorConversions::expressionFromElementSemisimpleLieAlgebraRationals(
   );
   LinearCombination<Expression, Rational> monomials;
   monomials.makeZero();
-  Expression currentMon;
+  Expression monomial;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::expressionFromChevalleyGenerator(
-      calculator, input[i], currentMon
+      calculator, input[i], monomial
     );
-    monomials.addMonomial(currentMon, input.coefficients[i]);
+    monomials.addMonomial(monomial, input.coefficients[i]);
   }
   return output.makeSum(calculator, monomials);
 }
@@ -983,12 +983,12 @@ bool CalculatorConversions::expressionFromDynkinType(
   STACK_TRACE("CalculatorConversions::expressionFromDynkinType");
   LinearCombination<Expression, AlgebraicNumber> monomials;
   monomials.makeZero();
-  Expression currentMonomial;
+  Expression monomial;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::expressionFromDynkinSimpleType(
-      calculator, input[i], currentMonomial
+      calculator, input[i], monomial
     );
-    monomials.addMonomial(currentMonomial, input.coefficients[i]);
+    monomials.addMonomial(monomial, input.coefficients[i]);
   }
   return output.makeSum(calculator, monomials);
 }
@@ -1005,13 +1005,13 @@ expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
   );
   LinearCombination<Expression, AlgebraicNumber> monomials;
   monomials.makeZero();
-  Expression currentMonomial;
+  Expression monomial;
   for (int i = 0; i < input.size(); i ++) {
     CalculatorConversions::expressionFromChevalleyGenerator(
-      calculator, input[i], currentMonomial
+      calculator, input[i], monomial
     );
     input.coefficients[i].checkConsistency();
-    monomials.addMonomial(currentMonomial, input.coefficients[i]);
+    monomials.addMonomial(monomial, input.coefficients[i]);
   }
   return output.makeSum(calculator, monomials);
 }
@@ -1758,17 +1758,17 @@ bool CalculatorConversions::expressionFromElementUniversalEnveloping(
   LinearCombination<Expression, RationalFraction<Rational> >
   elementUniversalEnveloping;
   elementUniversalEnveloping.makeZero();
-  Expression currentMonE;
+  Expression monomial;
   for (int i = 0; i < input.size(); i ++) {
     if (
       !CalculatorConversions::expressionFromMonomialUniversalEnveloping(
-        calculator, input[i], currentMonE, inputContext
+        calculator, input[i], monomial, inputContext
       )
     ) {
       return calculator << "<hr>Failed to store " << input.toString();
     }
     elementUniversalEnveloping.addMonomial(
-      currentMonE, input.coefficients[i]
+      monomial, input.coefficients[i]
     );
   }
   return output.makeSum(calculator, elementUniversalEnveloping);
@@ -1842,9 +1842,9 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   output.makeZero();
   ExpressionContext context = polynomialFormWithContext.context;
   for (int j = 0; j < polynomialForm.size(); j ++) {
-    const MonomialPolynomial& currentMon = polynomialForm[j];
+    const MonomialPolynomial& monomial = polynomialForm[j];
     int chevalleyGeneratorIndex = 0;
-    if (!currentMon.isOneLetterFirstDegree(&chevalleyGeneratorIndex)) {
+    if (!monomial.isOneLetterFirstDegree(&chevalleyGeneratorIndex)) {
       return
       calculator
       << "<hr>Failed to convert semisimple Lie algebra input to linear poly: "
@@ -1956,14 +1956,14 @@ bool CalculatorConversions::elementUniversalEnveloping(
   ExpressionContext context = polynomial.context;
   HashedList<Expression> polynomialVariables;
   for (int j = 0; j < polynomial.content.size(); j ++) {
-    const MonomialPolynomial& currentMon = polynomial.content[j];
+    const MonomialPolynomial& monomial = polynomial.content[j];
     currentSummand.makeConstant(
       polynomial.content.coefficients[j], owner
     );
     currentMultiplicandRFpartMon.makeOne();
-    for (int i = 0; i < currentMon.minimalNumberOfVariables(); i ++) {
+    for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
       int power = - 1;
-      if (!currentMon(i).isSmallInteger(&power)) {
+      if (!monomial(i).isSmallInteger(&power)) {
         return
         calculator
         << "<hr>Failed to convert one of the exponents appearing in "
@@ -1973,8 +1973,8 @@ bool CalculatorConversions::elementUniversalEnveloping(
       if (power == 0) {
         continue;
       }
-      Expression singleChevGenE = context.getVariable(i);
-      if (!singleChevGenE.isListNElements(2)) {
+      Expression singleChevalleyGeneratorExpression = context.getVariable(i);
+      if (!singleChevalleyGeneratorExpression.isListNElements(2)) {
         return
         calculator
         << "<hr>Failed to convert "
@@ -1983,20 +1983,20 @@ bool CalculatorConversions::elementUniversalEnveloping(
       }
       std::string letter;
       if (
-        !singleChevGenE[0].isOperation(&letter) ||
-        !singleChevGenE[1].isSmallInteger(
+        !singleChevalleyGeneratorExpression[0].isOperation(&letter) ||
+        !singleChevalleyGeneratorExpression[1].isSmallInteger(
           &chevalleyGenerator.generatorIndex
         )
       ) {
         return
         calculator
         << "<hr>Failed to convert summand "
-        << singleChevGenE.toString()
+        << singleChevalleyGeneratorExpression.toString()
         << " to Chevalley generator of "
         << owner.toStringLieAlgebraName();
       }
       bool isGood = true;
-      bool isHonestElementUE = true;
+      bool isHonestElementUniversalEnveloping = true;
       if (letter == "g") {
         chevalleyGenerator.generatorIndex =
         owner.getGeneratorFromDisplayIndex(chevalleyGenerator.generatorIndex);
@@ -2018,17 +2018,17 @@ bool CalculatorConversions::elementUniversalEnveloping(
           owner.getNumberOfPositiveRoots() - 1;
         }
       } else {
-        isHonestElementUE = false;
+        isHonestElementUniversalEnveloping = false;
       }
       if (!isGood) {
         return
         calculator
         << "<hr>Failed to convert summand "
-        << singleChevGenE.toString()
+        << singleChevalleyGeneratorExpression.toString()
         << " to Chevalley generator of "
         << owner.toStringLieAlgebraName();
       }
-      if (isHonestElementUE) {
+      if (isHonestElementUniversalEnveloping) {
         currentMultiplicand.makeOneGenerator(
           chevalleyGenerator.generatorIndex, owner, Rational::one()
         );
@@ -2036,7 +2036,9 @@ bool CalculatorConversions::elementUniversalEnveloping(
         currentSummand *= currentMultiplicand;
       } else {
         int variableIndex =
-        polynomialVariables.addNoRepetitionOrReturnIndexFirst(singleChevGenE);
+        polynomialVariables.addNoRepetitionOrReturnIndexFirst(
+          singleChevalleyGeneratorExpression
+        );
         currentMultiplicandRFpartMon.setVariable(variableIndex, power);
       }
     }

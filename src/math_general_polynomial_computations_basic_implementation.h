@@ -256,9 +256,9 @@ Coefficient Polynomial<Coefficient>::evaluate(
   STACK_TRACE("Polynomial::evaluate");
   Coefficient output = zero;
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialPolynomial& currentMonomial = (*this)[i];
+    const MonomialPolynomial& monomial = (*this)[i];
     Coefficient accumulator = this->coefficients[i];
-    currentMonomial.evaluateAccumulate(input, accumulator);
+    monomial.evaluateAccumulate(input, accumulator);
     output += accumulator;
   }
   return output;
@@ -614,18 +614,20 @@ Matrix<Coefficient> Polynomial<Coefficient>::evaluateUnivariatePolynomial(
 ) {
   // for univariate polynomials only
   STACK_TRACE("Polynomial::evaluateUnivariatePolynomial");
-  Matrix<Coefficient> output, element, idMat;
+  Matrix<Coefficient> output;
+  Matrix<Coefficient> element;
+  Matrix<Coefficient> idMat;
   idMat.makeIdentityMatrix(input.numberOfColumns);
   output.makeZeroMatrix(input.numberOfColumns);
   for (int i = 0; i < this->size; i ++) {
-    const MonomialPolynomial& currentMon = (*this)[i];
+    const MonomialPolynomial& monomial = (*this)[i];
     int numberOfCycles = 0;
-    if (!currentMon(0).isSmallInteger(&numberOfCycles)) {
+    if (!monomial(0).isSmallInteger(&numberOfCycles)) {
       global.fatal
       << "Attempting to evaluate a polynomial whose "
       << i + 1
       << "^{th} variable is raised to the power "
-      << currentMon(0).toString()
+      << monomial(0).toString()
       << ". Raising variables to power is allowed "
       << "only if the power is a small integer. "
       << "If the user has requested such an operation, "
@@ -671,11 +673,9 @@ void Polynomial<Coefficient>::scaleToPositiveMonomialExponents(
   outputIWasMultipliedBy.makeOne();
   for (int i = 0; i < numberOfVariables; i ++) {
     for (int j = 0; j < this->size(); j ++) {
-      const MonomialPolynomial& currentMonomial = (*this)[j];
+      const MonomialPolynomial& monomial = (*this)[j];
       Rational currentScale =
-      MathRoutines::minimum(
-        outputIWasMultipliedBy(i), currentMonomial(i)
-      );
+      MathRoutines::minimum(outputIWasMultipliedBy(i), monomial(i));
       outputIWasMultipliedBy.setVariable(i, currentScale);
     }
   }
@@ -1267,12 +1267,12 @@ bool Polynomial<Coefficient>::differential(
   int numberOfVariables = this->minimalNumberOfVariables();
   output.setSize(numberOfVariables);
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialPolynomial& currentMonomial = this->monomials[i];
+    const MonomialPolynomial& monomial = this->monomials[i];
     const Coefficient& currentCoefficient = this->coefficients[i];
-    int currentNumberOfVariables = currentMonomial.minimalNumberOfVariables();
+    int currentNumberOfVariables = monomial.minimalNumberOfVariables();
     for (int j = 0; j < currentNumberOfVariables; j ++) {
       Coefficient newCoefficient = currentCoefficient;
-      Rational power = currentMonomial(j);
+      Rational power = monomial(j);
       LargeInteger powerInteger;
       if (!power.isInteger(&powerInteger)) {
         if (comments != nullptr) {
@@ -1281,7 +1281,7 @@ bool Polynomial<Coefficient>::differential(
         return false;
       }
       newCoefficient *= power;
-      MonomialPolynomial newMonomial = currentMonomial;
+      MonomialPolynomial newMonomial = monomial;
       power -= 1;
       newMonomial.setVariable(j, power);
       output[j].addMonomial(newMonomial, newCoefficient);

@@ -438,7 +438,6 @@ public:
   std::string displayApplicationNoCache;
   std::string IPAdressCaller;
   bool flagUseMathTags;
-  MemorySaving<DynkinDiagramRootSubalgebra> dynGetEpsCoords;
   class Crasher {
   public:
     std::stringstream crashReport;

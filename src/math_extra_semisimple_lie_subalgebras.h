@@ -111,9 +111,9 @@ public:
   Vectors<Rational> hsScaledToActByTwoInOrderOfCreation;
   Matrix<Rational> bilinearFormSimplePrimal;
   Matrix<Rational> bilinearFormFundamentalPrimal;
-  Matrix<Rational> inducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords;
-  Matrix<Rational> inducedEmbeddingPrimalFundCoordsIntoFundAmbientCoords;
-  Matrix<Rational> matMultiplyFundCoordsToGetSimple;
+  Matrix<Rational>
+  inducedEmbeddingPrimalFundamentalCoordinatesIntoSimpleAmbientCoordinates;
+  Matrix<Rational> matrixMultiplyFundamentalCoordinatesToGetSimple;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > positiveGenerators;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > negativeGenerators;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > basis;

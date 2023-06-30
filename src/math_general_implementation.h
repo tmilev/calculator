@@ -287,11 +287,11 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
     return;
   }
   output.makeZero();
-  TemplateMonomial currentMonomial;
+  TemplateMonomial monomial;
   for (int i = 0; i < this->size(); i ++) {
-    currentMonomial = this->monomials[i];
-    currentMonomial *= other;
-    output.addMonomial(currentMonomial, this->coefficients[i]);
+    monomial = this->monomials[i];
+    monomial *= other;
+    output.addMonomial(monomial, this->coefficients[i]);
   }
 }
 
@@ -345,7 +345,7 @@ void MatrixTensor<Coefficient>::operator*=(
   MatrixTensor<Coefficient> result;
   result.setExpectedSize(maximumMonomialsFinal);
   Coefficient currentCoefficient;
-  MonomialMatrix currentMonomial;
+  MonomialMatrix monomial;
   for (int i = 0; i < other.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
       if (report2.tickAndWantReport()) {
@@ -362,14 +362,14 @@ void MatrixTensor<Coefficient>::operator*=(
         << ". ";
         report2.report(reportStream2.str());
       }
-      currentMonomial = (*this)[j];
-      currentMonomial *= other[i];
-      if (currentMonomial.isZeroMonomial()) {
+      monomial = (*this)[j];
+      monomial *= other[i];
+      if (monomial.isZeroMonomial()) {
         continue;
       }
       currentCoefficient = this->coefficients[j];
       currentCoefficient *= other.coefficients[i];
-      result.addMonomial(currentMonomial, currentCoefficient);
+      result.addMonomial(monomial, currentCoefficient);
     }
   }
   *this = result;

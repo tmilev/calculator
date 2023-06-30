@@ -531,7 +531,7 @@ public:
     const Vector<Rational>& inputRhoImage, WeylGroupData& inputWeyl
   );
   void makeSimpleReflection(int simpleRootIndex, WeylGroupData& inputWeyl);
-  void MakeRootReflection(
+  void makeRootReflection(
     const Vector<Rational>& mustBeRoot, WeylGroupData& inputWeyl
   );
   void makeCanonical();
@@ -647,8 +647,8 @@ class GroupRepresentationCarriesAllMatrices;
 class SubgroupDataRootReflections;
 
 class WeylGroupData {
-  Matrix<Rational> fundamentalToSimpleCoords;
-  Matrix<Rational> simpleToFundamentalCoords;
+  Matrix<Rational> fundamentalToSimpleCoordinates;
+  Matrix<Rational> simpleToFundamentalCoordinates;
   MemorySaving<Matrix<Rational> > matrixSendsSimpleVectorsToEpsilonVectors;
   bool flagFundamentalToSimpleMatricesAreComputed;
   void computeFundamentalToSimpleMatrices() {
@@ -657,10 +657,11 @@ class WeylGroupData {
     }
     Vectors<Rational> fundamentalBasis;
     this->getFundamentalWeightsInSimpleCoordinates(fundamentalBasis);
-    this->fundamentalToSimpleCoords.assignVectorsToRows(fundamentalBasis);
-    this->fundamentalToSimpleCoords.transpose();
-    this->simpleToFundamentalCoords = this->fundamentalToSimpleCoords;
-    this->simpleToFundamentalCoords.invert();
+    this->fundamentalToSimpleCoordinates.assignVectorsToRows(fundamentalBasis);
+    this->fundamentalToSimpleCoordinates.transpose();
+    this->simpleToFundamentalCoordinates =
+    this->fundamentalToSimpleCoordinates;
+    this->simpleToFundamentalCoordinates.invert();
     this->flagFundamentalToSimpleMatricesAreComputed = true;
   }
   bool loadConjugacyClasses();
@@ -792,7 +793,7 @@ public:
     Vectors<Rational>& vectors, Vector<Rational>& input
   );
   void getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
-    List<Vector<Rational> >& outputHighestWeightsFundCoords,
+    List<Vector<Rational> >& outputHighestWeightsFundamentalCoordinates,
     int inputDimBound
   );
   Rational getLongestRootLengthSquared() const;
@@ -812,50 +813,50 @@ public:
   bool isOfSimpleType(char desiredType, int desiredRank) const {
     return this->dynkinType.isSimpleOfType(desiredType, desiredRank);
   }
-  Matrix<Rational>* getMatrixFundamentalToSimpleCoords() {
+  Matrix<Rational>* getMatrixfundamentalToSimpleCoordinates() {
     this->computeFundamentalToSimpleMatrices();
-    return &this->fundamentalToSimpleCoords;
+    return &this->fundamentalToSimpleCoordinates;
   }
-  Matrix<Rational>* getMatrixSimpleToFundamentalCoords() {
+  Matrix<Rational>* getMatrixsimpleToFundamentalCoordinates() {
     this->computeFundamentalToSimpleMatrices();
-    return &this->simpleToFundamentalCoords;
+    return &this->simpleToFundamentalCoordinates;
   }
   template <class Coefficient>
   Vector<Coefficient> getSimpleCoordinatesFromFundamental(
-    const Vector<Coefficient>& inputInFundamentalCoords,
+    const Vector<Coefficient>& inputInFundamentalCoordinates,
     const Coefficient& zero = Coefficient::zero()
   );
   template <class Coefficient>
   Vectors<Coefficient> getSimpleCoordinatesFromFundamental(
-    const Vectors<Coefficient>& inputInFundamentalCoords,
+    const Vectors<Coefficient>& inputInFundamentalCoordinates,
     const Coefficient& zero = Coefficient::zero()
   );
   template <class Coefficient>
   Vector<Coefficient> getFundamentalCoordinatesFromSimple(
-    const Vector<Coefficient>& inputInSimpleCoords
+    const Vector<Coefficient>& inputInSimpleCoordinates
   );
   template <class Coefficient>
   Vector<Coefficient> getFundamentalCoordinatesFromEpsilon(
-    const Vector<Coefficient>& inputInEpsCoords
+    const Vector<Coefficient>& inputInEpsilonCoordinates
   );
   template <class Coefficient>
   Vector<Coefficient> getSimpleCoordinatesFromEpsilon(
-    const Vector<Coefficient>& inputInEpsCoords
+    const Vector<Coefficient>& inputInEpsilonCoordinates
   );
   template <class Coefficient>
   Vector<Coefficient> getDualCoordinatesFromSimple(
-    const Vector<Coefficient>& inputInSimpleCoords
+    const Vector<Coefficient>& inputInSimpleCoordinates
   ) {
     return
     this->getDualCoordinatesFromFundamental(
-      this->getFundamentalCoordinatesFromSimple(inputInSimpleCoords)
+      this->getFundamentalCoordinatesFromSimple(inputInSimpleCoordinates)
     );
   }
   template <class Coefficient>
   Vector<Coefficient> getDualCoordinatesFromFundamental(
-    const Vector<Coefficient>& inputInFundamentalCoords
+    const Vector<Coefficient>& inputInFundamentalCoordinates
   ) {
-    Vector<Coefficient> result = inputInFundamentalCoords;
+    Vector<Coefficient> result = inputInFundamentalCoordinates;
     if (result.size != this->getDimension()) {
       global.fatal
       << "The input fundamental weight has "
@@ -895,12 +896,12 @@ public:
   }
   template <class Coefficient>
   Coefficient weylDimensionFormulaSimpleCoordinates(
-    Vector<Coefficient>& weightInSimpleCoords,
+    Vector<Coefficient>& weightInSimpleCoordinates,
     const Coefficient& ringUnit = 1
   );
   template <class Coefficient>
-  Coefficient weylDimFormulaFundamentalCoords(
-    Vector<Coefficient>& weightFundamentalCoords
+  Coefficient weylDimFormulaFundamentalCoordinates(
+    Vector<Coefficient>& weightFundamentalCoordinates
   );
   template <class Coefficient>
   void raiseToDominantWeight(
@@ -984,23 +985,23 @@ public:
   );
   template <class Coefficient>
   bool getAllDominantWeightsHWFDIM(
-    Vector<Coefficient>& highestWeightSimpleCoords,
-    HashedList<Vector<Coefficient> >& outputWeightsSimpleCoords,
+    Vector<Coefficient>& highestWeightSimpleCoordinates,
+    HashedList<Vector<Coefficient> >& outputWeightsSimpleCoordinates,
     int upperBoundDominantWeights,
     std::string* outputDetails
   );
   template <class Coefficient>
   bool freudenthalFormula(
-    Vector<Coefficient>& inputHWfundamentalCoords,
-    HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoords,
-    List<Coefficient>& outputMultsSimpleCoords,
+    Vector<Coefficient>& inputHighestWeightFundamentalCoordinates,
+    HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoordinates,
+    List<Coefficient>& outputMultiplicitiesSimpleCoordinates,
     std::string* outputDetails,
-    int UpperBoundFreudenthal
+    int upperBoundFreudenthal
   );
   void getWeylChamber(Cone& output);
   std::string generateWeightSupportMethod1(
-    Vector<Rational>& highestWeightSimpleCoords,
-    Vectors<Rational>& outputWeightsSimpleCoords,
+    Vector<Rational>& highestWeightSimpleCoordinates,
+    Vectors<Rational>& outputWeightsSimpleCoordinates,
     int upperBoundWeights
   );
   void getIntegralLatticeInSimpleCoordinates(Lattice& output);
@@ -2515,9 +2516,9 @@ public:
   );
   template <class Coefficient>
   bool freudenthalFormulaIrrepIsWRTLeviPart(
-    const Vector<Coefficient>& inputHWfundamentalCoords,
-    HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoords,
-    List<Coefficient>& outputMultsSimpleCoordS,
+    const Vector<Coefficient>& inputHighestWeightFundamentalCoordinates,
+    HashedList<Vector<Coefficient> >& outputDominantWeightsSimpleCoordinates,
+    List<Coefficient>& outputMultiplicitiesSimpleCoordinates,
     std::string& outputDetails,
     int upperBoundFreudenthal
   );
@@ -2532,15 +2533,15 @@ public:
     int upperLimitNumberOfElements
   );
   bool getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
-    Vector<Rational>& highestWeightSimpleCoords,
-    HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
+    Vector<Rational>& highestWeightSimpleCoordinates,
+    HashedList<Vector<Rational> >& outputWeightsSimpleCoordinates,
     int upperBoundDominantWeights,
     std::string& outputDetails
   );
   template <class Coefficient>
   bool getAllDominantWeightsHWFDIM(
-    Vector<Coefficient>& highestWeightSimpleCoords,
-    HashedList<Vector<Coefficient> >& outputWeightsSimpleCoords,
+    Vector<Coefficient>& highestWeightSimpleCoordinates,
+    HashedList<Vector<Coefficient> >& outputWeightsSimpleCoordinates,
     int upperBoundDominantWeights,
     std::string& outputDetails
   );
@@ -2559,8 +2560,8 @@ public:
     const Vector<Coefficient>& weight, int generatorIndex
   );
   template <class Coefficient>
-  Coefficient weylDimensionFormulaInnerSimpleCoords(
-    const Vector<Coefficient>& weightInnerSimpleCoords,
+  Coefficient weylDimensionFormulaInnerSimpleCoordinates(
+    const Vector<Coefficient>& weightInnerSimpleCoordinates,
     const Coefficient& ringUnit = Coefficient::one()
   );
   void findQuotientRepresentatives(int upperLimit);

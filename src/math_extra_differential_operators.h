@@ -223,12 +223,14 @@ std::string QuasiDifferentialOperator<Coefficient>::toString(
   }
   MatrixTensor<ElementWeylAlgebra<Rational> > reordered;
   reordered.makeZero();
-  ElementWeylAlgebra<Rational> tempP;
+  ElementWeylAlgebra<Rational> polynomial;
   for (int i = 0; i < this->size(); i ++) {
-    const QuasiDifferentialMononomial& currentMon = (*this)[i];
-    tempP.makeZero();
-    tempP.addMonomial(currentMon.weylMonomial, this->coefficients[i]);
-    reordered.addMonomial(currentMon.matrixMonomial, tempP);
+    const QuasiDifferentialMononomial& monomial = (*this)[i];
+    polynomial.makeZero();
+    polynomial.addMonomial(
+      monomial.weylMonomial, this->coefficients[i]
+    );
+    reordered.addMonomial(monomial.matrixMonomial, polynomial);
   }
   std::string result = reordered.toString(format);
   if (result == "0" && this->size() != 0) {

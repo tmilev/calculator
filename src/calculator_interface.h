@@ -3255,7 +3255,7 @@ public:
   bool getTypeWeight(
     Calculator& calculator,
     const Expression& input,
-    Vector<Coefficient>& outputWeightSimpleCoords,
+    Vector<Coefficient>& outputWeightSimpleCoordinates,
     WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra
   );
   template <class Coefficient>
@@ -3263,7 +3263,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    Vector<Coefficient>& outputWeightHWFundcoords,
+    Vector<Coefficient>& outputHighestWeightFundamentalCoordinates,
     Selection& outputInducingSelection,
     WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra
   );
@@ -4379,7 +4379,7 @@ template <class Coefficient>
 bool Calculator::getTypeWeight(
   Calculator& calculator,
   const Expression& input,
-  Vector<Coefficient>& outputWeightSimpleCoords,
+  Vector<Coefficient>& outputWeightSimpleCoordinates,
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra
 ) {
   STACK_TRACE("Calculator::getTypeWeight");
@@ -4408,7 +4408,7 @@ bool Calculator::getTypeWeight(
   if (
     !calculator.getVector<Coefficient>(
       middleExpression,
-      outputWeightSimpleCoords,
+      outputWeightSimpleCoordinates,
       &outputAmbientSemisimpleLieAlgebra.context,
       ambientSemisimpleLieAlgebra->getRank()
     )
@@ -4456,7 +4456,7 @@ bool Calculator::getTypeHighestWeightParabolic(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  Vector<Coefficient>& outputWeightHWFundcoords,
+  Vector<Coefficient>& outputHighestWeightFundamentalCoordinates,
   Selection& outputInducingSelection,
   WithContext<SemisimpleLieAlgebra*>& outputAmbientSemisimpleLieAlgebra
 ) {
@@ -4484,7 +4484,7 @@ bool Calculator::getTypeHighestWeightParabolic(
   if (
     !calculator.getVector<Coefficient>(
       middleExpression,
-      outputWeightHWFundcoords,
+      outputHighestWeightFundamentalCoordinates,
       &outputAmbientSemisimpleLieAlgebra.context,
       ambientSemisimpleLieAlgebra->getRank()
     )
@@ -4525,8 +4525,12 @@ bool Calculator::getTypeHighestWeightParabolic(
     outputInducingSelection.initialize(
       ambientSemisimpleLieAlgebra->getRank()
     );
-    for (int i = 0; i < outputWeightHWFundcoords.size; i ++) {
-      if (!outputWeightHWFundcoords[i].isSmallInteger()) {
+    for (
+      int i = 0; i < outputHighestWeightFundamentalCoordinates.size; i ++
+    ) {
+      if (
+        !outputHighestWeightFundamentalCoordinates[i].isSmallInteger()
+      ) {
         outputInducingSelection.addSelectionAppendNewIndex(i);
       }
     }

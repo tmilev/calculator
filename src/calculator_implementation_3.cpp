@@ -130,17 +130,17 @@ makeParabolicFromSelectionSimpleRoots(
   const Vector<Rational>& zeroesMeanSimpleRootSpaceIsInParabolic,
   int upperLimitNumberOfElements
 ) {
-  Selection tempSel;
-  tempSel = zeroesMeanSimpleRootSpaceIsInParabolic;
+  Selection selection;
+  selection = zeroesMeanSimpleRootSpaceIsInParabolic;
   this->makeParabolicFromSelectionSimpleRoots(
-    inputWeyl, tempSel, upperLimitNumberOfElements
+    inputWeyl, selection, upperLimitNumberOfElements
   );
 }
 
 bool SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
-  Vector<Rational>& highestWeightSimpleCoords,
-  HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
+  Vector<Rational>& highestWeightSimpleCoordinates,
+  HashedList<Vector<Rational> >& outputWeightsSimpleCoordinates,
   int upperBoundDominantWeights,
   std::string& outputDetails
 ) {
@@ -150,22 +150,24 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   );
   this->checkInitialization();
   std::stringstream out;
-  Vector<Rational> highestWeightTrue = highestWeightSimpleCoords;
+  Vector<Rational> highestWeightTrue = highestWeightSimpleCoordinates;
   Vectors<Rational> basisEi;
   int dimension = this->ambientWeyl->getDimension();
   basisEi.makeEiBasis(dimension);
   this->raiseToDominantWeightInner(highestWeightTrue);
-  Vector<Rational> highestWeightFundCoords =
+  Vector<Rational> highestWeightFundamentalCoordinates =
   this->ambientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  if (!highestWeightFundCoords.sumCoordinates().isSmallInteger()) {
+  if (
+    !highestWeightFundamentalCoordinates.sumCoordinates().isSmallInteger()
+  ) {
     return false;
   }
-  int topHeightSimpleCoords = static_cast<int>(
-    highestWeightSimpleCoords.sumCoordinates().getDoubleValue()
+  int topHeightSimpleCoordinates = static_cast<int>(
+    highestWeightSimpleCoordinates.sumCoordinates().getDoubleValue()
   ) +
   1;
-  if (topHeightSimpleCoords < 0) {
-    topHeightSimpleCoords = 0;
+  if (topHeightSimpleCoordinates < 0) {
+    topHeightSimpleCoordinates = 0;
   }
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;
   int topHeightRootSystem =
@@ -177,16 +179,15 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   for (int i = 0; i < topHeightRootSystemPlusOne; i ++) {
     outputWeightsByHeight[i].setHashSize(finalHashSize);
   }
-  outputWeightsSimpleCoords.clear();
+  outputWeightsSimpleCoordinates.clear();
   outputWeightsByHeight[0].addOnTop(highestWeightTrue);
   int totalWeightsFound = 0;
   int positiveRootCount = this->ambientWeyl->rootsOfBorel.size;
-  Vector<Rational>
-  currentWeight,
-  currentWeightRaisedToDominantWRTAmbientAlgebra;
+  Vector<Rational> currentWeight;
+  Vector<Rational> currentWeightRaisedToDominantWRTAmbientAlgebra;
   for (
     int lowestUnexploredHeightDiff = 0; lowestUnexploredHeightDiff <=
-    topHeightSimpleCoords; lowestUnexploredHeightDiff ++
+    topHeightSimpleCoordinates; lowestUnexploredHeightDiff ++
   ) {
     // double startCycleTime = global.getElapsedSeconds();
     if (
@@ -228,13 +229,13 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
         }
       }
     }
-    outputWeightsSimpleCoords.addListOnTop(currentHashes);
-    outputWeightsSimpleCoords.adjustHashes();
+    outputWeightsSimpleCoordinates.addListOnTop(currentHashes);
+    outputWeightsSimpleCoordinates.adjustHashes();
     currentHashes.clear();
   }
   out
   << " Total number of dominant weights: "
-  << outputWeightsSimpleCoords.size;
+  << outputWeightsSimpleCoordinates.size;
   if (totalWeightsFound >= upperBoundDominantWeights) {
     out
     << "<hr>This message is generated either because the number of "
@@ -452,17 +453,17 @@ void BranchingData::resetOutputData() {
   this->eigenVectorsLevi.setSize(0);
   this->outputEigenWords.setSize(0);
   this->g2Weights.setSize(0);
-  this->outputWeightsFundCoordS.setSize(0);
+  this->outputWeightsFundamentalCoordinates.setSize(0);
   this->characterDifferences.clear();
 }
 
 void WeylGroupData::
 getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
-  List<Vector<Rational> >& outputHighestWeightsFundCoords,
+  List<Vector<Rational> >& outputHighestWeightsFundamentalCoordinates,
   int inputDimBound
 ) {
   if (inputDimBound < 1) {
-    outputHighestWeightsFundCoords.setSize(0);
+    outputHighestWeightsFundamentalCoordinates.setSize(0);
     return;
   }
   HashedList<Vector<Rational> > output;
@@ -475,14 +476,14 @@ getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
     current = output[i];
     for (int k = 0; k < this->getDimension(); k ++) {
       current[k] += 1;
-      dimension = this->weylDimFormulaFundamentalCoords(current);
+      dimension = this->weylDimFormulaFundamentalCoordinates(current);
       if (dimension < dimBound) {
         output.addOnTopNoRepetition(current);
       }
       current[k] -= 1;
     }
   }
-  outputHighestWeightsFundCoords = output;
+  outputHighestWeightsFundamentalCoordinates = output;
 }
 
 bool Expression::assignMatrixExpressions(

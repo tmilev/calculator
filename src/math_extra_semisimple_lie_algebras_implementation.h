@@ -16,15 +16,17 @@ std::string Weight<Coefficient>::toString(FormatExpressions* format) const {
       return
       this->weightFundamentalCoordinates.toStringLetterFormat("\\psi", format);
     }
-    Vector<Coefficient> weightEpsCoords, weightSimpleCoords;
-    weightSimpleCoords =
+    Vector<Coefficient> weightEpsilonCoordinates;
+    Vector<Coefficient> weightSimpleCoordinates;
+    weightSimpleCoordinates =
     this->owner->weylGroup.getSimpleCoordinatesFromFundamental(
       this->weightFundamentalCoordinates, Coefficient::zero()
     );
     this->owner->weylGroup.getEpsilonCoordinates(
-      weightSimpleCoords, weightEpsCoords
+      weightSimpleCoordinates, weightEpsilonCoordinates
     );
-    return weightEpsCoords.toStringLetterFormat("\\varepsilon", format);
+    return
+    weightEpsilonCoordinates.toStringLetterFormat("\\varepsilon", format);
   }
   bool useOmega = true;
   std::string oldCustomPlus;
@@ -60,8 +62,8 @@ std::string Weight<Coefficient>::toString(FormatExpressions* format) const {
 
 template <class Coefficient>
 void Weight<Coefficient>::accountSingleWeight(
-  const Vector<Rational>& currentWeightSimpleCoords,
-  const Vector<Rational>& otherHighestWeightSimpleCoords,
+  const Vector<Rational>& currentWeightSimpleCoordinates,
+  const Vector<Rational>& otherhighestWeightSimpleCoordinates,
   Rational& multiplicity,
   CharacterSemisimpleLieAlgebraModule<Coefficient>& outputAccum
 ) const {
@@ -70,8 +72,8 @@ void Weight<Coefficient>::accountSingleWeight(
   // page 142, exercise 9.
   STACK_TRACE("Weight_CoefficientType::accountSingleWeight");
   this->checkNonZeroOwner();
-  Vector<Rational> dominant = currentWeightSimpleCoords;
-  dominant += otherHighestWeightSimpleCoords;
+  Vector<Rational> dominant = currentWeightSimpleCoordinates;
+  dominant += otherhighestWeightSimpleCoordinates;
   WeylGroupData& weylGroup = this->owner->weylGroup;
   dominant += weylGroup.rho;
   int sign;
@@ -115,25 +117,33 @@ std::string Weight<Coefficient>::tensorAndDecompose(
   std::string tempS;
   output.makeZero();
   WeylGroupData& weylGrouop = this->owner->weylGroup;
-  Vector<Rational> leftHWFundCoords;
-  leftHWFundCoords = this->weightFundamentalCoordinates;
-  Vector<Rational> rightHWFundCoords;
-  rightHWFundCoords = other.weightFundamentalCoordinates;
+  Vector<Rational> lefthighestWeightFundamentalCoordinates;
+  lefthighestWeightFundamentalCoordinates = this->weightFundamentalCoordinates;
+  Vector<Rational> righthighestWeightFundamentalCoordinates;
+  righthighestWeightFundamentalCoordinates =
+  other.weightFundamentalCoordinates;
   Rational leftTotalDim =
-  weylGrouop.weylDimFormulaFundamentalCoords(leftHWFundCoords);
+  weylGrouop.weylDimFormulaFundamentalCoordinates(
+    lefthighestWeightFundamentalCoordinates
+  );
   Rational rightTotalDim =
-  weylGrouop.weylDimFormulaFundamentalCoords(rightHWFundCoords);
+  weylGrouop.weylDimFormulaFundamentalCoordinates(
+    righthighestWeightFundamentalCoordinates
+  );
   if (leftTotalDim > rightTotalDim) {
     MathRoutines::swap(leftTotalDim, rightTotalDim);
-    MathRoutines::swap(leftHWFundCoords, rightHWFundCoords);
+    MathRoutines::swap(
+      lefthighestWeightFundamentalCoordinates,
+      righthighestWeightFundamentalCoordinates
+    );
   }
-  HashedList<Vector<Coefficient> > weightsLeftSimpleCoords;
-  List<Rational> multsLeft;
+  HashedList<Vector<Coefficient> > weightsLeftSimpleCoordinates;
+  List<Rational> multiplicitiesLeft;
   if (
     !weylGrouop.freudenthalFormula(
-      leftHWFundCoords,
-      weightsLeftSimpleCoords,
-      multsLeft,
+      lefthighestWeightFundamentalCoordinates,
+      weightsLeftSimpleCoordinates,
+      multiplicitiesLeft,
       &tempS,
       1000000
     )
@@ -142,26 +152,31 @@ std::string Weight<Coefficient>::tensorAndDecompose(
     return errorLog.str();
   }
   HashedList<Vector<Coefficient> > currentOrbit;
-  const int OrbitSizeHardLimit = 10000000;
-  Vector<Rational> rightHWSimpleCoords =
-  weylGrouop.getSimpleCoordinatesFromFundamental(rightHWFundCoords, zero);
+  const int orbitSizeHardLimit = 10000000;
+  Vector<Rational> righthighestWeightSimpleCoordinates =
+  weylGrouop.getSimpleCoordinatesFromFundamental(
+    righthighestWeightFundamentalCoordinates, zero
+  );
   Vectors<Rational> roots;
   roots.setSize(1);
-  for (int i = 0; i < weightsLeftSimpleCoords.size; i ++) {
-    roots[0] = weightsLeftSimpleCoords[i];
+  for (int i = 0; i < weightsLeftSimpleCoordinates.size; i ++) {
+    roots[0] = weightsLeftSimpleCoordinates[i];
     weylGrouop.generateOrbit(
-      roots, false, currentOrbit, false, 0, 0, OrbitSizeHardLimit
+      roots, false, currentOrbit, false, 0, 0, orbitSizeHardLimit
     );
-    if (currentOrbit.size >= OrbitSizeHardLimit) {
+    if (currentOrbit.size >= orbitSizeHardLimit) {
       errorLog
       << "Error: orbit layer size exceeded hard-coded limit of "
-      << OrbitSizeHardLimit
+      << orbitSizeHardLimit
       << ".";
       return errorLog.str();
     }
     for (int j = 0; j < currentOrbit.size; j ++) {
       this->accountSingleWeight(
-        currentOrbit[j], rightHWSimpleCoords, multsLeft[i], output
+        currentOrbit[j],
+        righthighestWeightSimpleCoordinates,
+        multiplicitiesLeft[i],
+        output
       );
     }
   }
@@ -250,16 +265,16 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::getDual(
 
 template <class Coefficient>
 void CharacterSemisimpleLieAlgebraModule<Coefficient>::makeFromWeight(
-  const Vector<Coefficient>& inputWeightSimpleCoords,
+  const Vector<Coefficient>& inputweightSimpleCoordinates,
   SemisimpleLieAlgebra* inputOwner
 ) {
   this->makeZero();
-  if (inputWeightSimpleCoords.size != inputOwner->getRank()) {
+  if (inputweightSimpleCoordinates.size != inputOwner->getRank()) {
     global.fatal
     << "Attempting to create a character from highest weight in simple coords "
-    << inputWeightSimpleCoords.toString()
+    << inputweightSimpleCoordinates.toString()
     << "("
-    << inputWeightSimpleCoords.size
+    << inputweightSimpleCoordinates.size
     << " coordinates) while the owner semisimple "
     << " Lie algebra is of rank "
     << (inputOwner->getRank())
@@ -269,7 +284,7 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::makeFromWeight(
   monomial.owner = inputOwner;
   monomial.weightFundamentalCoordinates =
   inputOwner->weylGroup.getFundamentalCoordinatesFromSimple(
-    inputWeightSimpleCoords
+    inputweightSimpleCoordinates
   );
   this->addMonomial(monomial, 1);
 }
@@ -293,7 +308,7 @@ freudenthalEvalMeDominantWeightsOnly(
   }
   this->checkNonZeroOwner();
   outputCharOwnerSetToZero.makeZero();
-  Vector<Coefficient> currentWeightFundCoords;
+  Vector<Coefficient> currentweightFundamentalCoordinates;
   List<Coefficient> currentMults;
   HashedList<Vector<Coefficient> > currentWeights;
   std::stringstream localErrors, localDetails;
@@ -302,10 +317,11 @@ freudenthalEvalMeDominantWeightsOnly(
   tempMon.owner = nullptr;
   Coefficient bufferCoeff;
   for (int i = 0; i < this->size(); i ++) {
-    currentWeightFundCoords = (*this)[i].weightFundamentalCoordinates;
+    currentweightFundamentalCoordinates = (*this)[i].
+    weightFundamentalCoordinates;
     if (
       !this->getOwner()->weylGroup.freudenthalFormula(
-        currentWeightFundCoords,
+        currentweightFundamentalCoordinates,
         currentWeights,
         currentMults,
         &localDetail,
@@ -564,10 +580,10 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
 ) {
   STACK_TRACE("CharacterSemisimpleLieAlgebraModule::drawMe");
   this->checkNonZeroOwner();
-  CharacterSemisimpleLieAlgebraModule<Coefficient> CharCartan;
+  CharacterSemisimpleLieAlgebraModule<Coefficient> characteristicCartan;
   bool result =
   this->freudenthalEvalMeDominantWeightsOnly(
-    CharCartan, upperBoundWeights, &outputDetails
+    characteristicCartan, upperBoundWeights, &outputDetails
   );
   std::stringstream out;
   WeylGroupData& weylGroup = this->getOwner()->weylGroup;
@@ -576,12 +592,12 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
   Vectors<Coefficient> dominantWeightsNonHashed;
   HashedList<Vector<Coefficient> > finalWeights;
   Vector<Rational> convertor;
-  for (int i = 0; i < CharCartan.size(); i ++) {
-    const Weight<Coefficient>& currentMon = CharCartan[i];
+  for (int i = 0; i < characteristicCartan.size(); i ++) {
+    const Weight<Coefficient>& monomial = characteristicCartan[i];
     dominantWeightsNonHashed.size = 0;
     dominantWeightsNonHashed.addOnTop(
       weylGroup.getSimpleCoordinatesFromFundamental(
-        currentMon.weightFundamentalCoordinates
+        monomial.weightFundamentalCoordinates
       )
     );
     bool isTrimmed =
@@ -608,7 +624,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
       if (useMultiplicities) {
         drawingVariables.drawTextAtVector(
           convertor,
-          CharCartan.coefficients[i].toString(),
+          characteristicCartan.coefficients[i].toString(),
           "black",
           drawingVariables.fontSizeNormal
         );
@@ -731,20 +747,21 @@ splitCharacterOverReductiveSubalgebra(
   SemisimpleLieAlgebra& smallAlgebra = inputData.homomorphism.domainAlgebra();
   Vectors<Rational>& embeddingsSimpleEiGoesTo =
   inputData.homomorphism.imagesCartanDomain;
-  CharacterSemisimpleLieAlgebraModule
-  charAmbientFDWeyl,
-  remainingCharProjected,
-  remainingCharDominantLevI;
-  Weight<Coefficient> tempMon, localHighest;
+  CharacterSemisimpleLieAlgebraModule charAmbientFDWeyl;
+  CharacterSemisimpleLieAlgebraModule remainingCharProjected;
+  CharacterSemisimpleLieAlgebraModule remainingCharDominantLevI;
+  Weight<Coefficient> tempMon;
+  Weight<Coefficient> localHighest;
   List<Coefficient> tempMults;
   HashedList<Vector<Coefficient> > tempHashedRoots;
-  Coefficient bufferCoeff, highestCoeff;
+  Coefficient bufferCoeff;
+  Coefficient highestCoeff;
   for (int i = 0; i < this->size(); i ++) {
-    const Weight<Coefficient>& currentMon = (*this)[i];
+    const Weight<Coefficient>& monomial = (*this)[i];
     if (
       !inputData.weylGroupFiniteDimensional.
       freudenthalFormulaIrrepIsWRTLeviPart(
-        currentMon.weightFundamentalCoordinates,
+        monomial.weightFundamentalCoordinates,
         tempHashedRoots,
         tempMults,
         tempS,
@@ -814,12 +831,13 @@ splitCharacterOverReductiveSubalgebra(
     remainingCharDominantLevI.toString(&format)
   );
   remainingCharProjected.makeZero();
-  Vector<Coefficient> fundCoordsSmaller, inSimpleCoords;
-  fundCoordsSmaller.setSize(
+  Vector<Coefficient> fundamentalCoordinatesSmaller;
+  Vector<Coefficient> inSimpleCoordinates;
+  fundamentalCoordinatesSmaller.setSize(
     weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension()
   );
   for (int i = 0; i < remainingCharDominantLevI.size(); i ++) {
-    inSimpleCoords =
+    inSimpleCoordinates =
     weylGroup.getSimpleCoordinatesFromFundamental(
       remainingCharDominantLevI[i].weightFundamentalCoordinates
     );
@@ -827,16 +845,16 @@ splitCharacterOverReductiveSubalgebra(
       int j = 0; j < weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(
       ); j ++
     ) {
-      fundCoordsSmaller[j] =
+      fundamentalCoordinatesSmaller[j] =
       weylGroup.rootScalarCartanRoot(
-        inSimpleCoords, embeddingsSimpleEiGoesTo[j]
+        inSimpleCoordinates, embeddingsSimpleEiGoesTo[j]
       );
-      fundCoordsSmaller[j] /=
+      fundamentalCoordinatesSmaller[j] /=
       weylGroupFiniteDimensionalSmall.ambientWeyl->cartanSymmetric(j, j) /
       2;
     }
     tempMon.owner = &smallAlgebra;
-    tempMon.weightFundamentalCoordinates = fundCoordsSmaller;
+    tempMon.weightFundamentalCoordinates = fundamentalCoordinatesSmaller;
     remainingCharProjected.addMonomial(
       tempMon, remainingCharDominantLevI.coefficients[i]
     );
@@ -1256,8 +1274,8 @@ void LinearMapSemisimpleLieAlgebra<Coefficient>::getMatrix(
     ElementSemisimpleLieAlgebra<Coefficient>& current =
     this->imagesChevalleyGenerators[i];
     for (int j = 0; j < current.size(); j ++) {
-      const ChevalleyGenerator& currentMonomial = current.monomials[j];
-      int rowIndex = currentMonomial.generatorIndex;
+      const ChevalleyGenerator& monomial = current.monomials[j];
+      int rowIndex = monomial.generatorIndex;
       output(rowIndex, i) = current.coefficients[j];
     }
   }

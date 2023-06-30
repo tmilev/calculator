@@ -34,7 +34,7 @@ void DrawingVariables::initDrawingVariables() {
   this->defaultHtmlWidth = 400;
   this->initialize();
   this->initializeDimensions(2);
-  this->flagAnimatingMovingCoordSystem = false;
+  this->flagAnimatingMovingCoordinateSystem = false;
 }
 
 void DrawingVariables::drawCoordinateSystemBuffer(int dimension) {
@@ -586,7 +586,7 @@ void DrawingVariables::initialize() {
   this->clickToleranceY = 5;
   this->selectedCircleMinus2noneMinus1Center = - 2;
   this->flagRotatingPreservingAngles = true;
-  this->flagAnimatingMovingCoordSystem = false;
+  this->flagAnimatingMovingCoordinateSystem = false;
 }
 
 double DrawingVariables::getAngleFromXandY(double x, double y) {

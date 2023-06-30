@@ -445,7 +445,7 @@ public:
       (*this)[i] = 0;
     }
   }
-  bool getIntegralCoordsInBasisIfTheyExist(
+  bool getIntegralCoordinatesInBasisIfTheyExist(
     const Vectors<Coefficient>& inputBasis,
     Vector<Coefficient>& output,
     Matrix<Coefficient>& bufferMatGaussianEliminationCC,
@@ -936,9 +936,9 @@ public:
   }
   bool getCoordinatesInBasis(
     const Vectors<Coefficient>& inputBasis,
-    Vectors<Coefficient>& outputCoords
+    Vectors<Coefficient>& outputCoordinates
   ) const;
-  bool getIntegralCoordsInBasisIfTheyExist(
+  bool getIntegralCoordinatesInBasisIfTheyExist(
     const Vectors<Coefficient>& inputBasis,
     Vectors<Coefficient>& output,
     const Coefficient& ringUnit,
@@ -952,7 +952,7 @@ public:
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
       if (
-        !this->objects[i].getIntegralCoordsInBasisIfTheyExist(
+        !this->objects[i].getIntegralCoordinatesInBasisIfTheyExist(
           inputBasis,
           output.objects[i],
           bufferMatGaussianEliminationCC,
@@ -967,7 +967,7 @@ public:
     }
     return result;
   }
-  bool getIntegralCoordsInBasisIfTheyExist(
+  bool getIntegralCoordinatesInBasisIfTheyExist(
     const Vectors<Coefficient>& inputBasis,
     Vectors<Coefficient>& output,
     Matrix<Coefficient>& bufferMatGaussianEliminationCC,
@@ -980,7 +980,7 @@ public:
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
       if (
-        !this->objects[i].getIntegralCoordsInBasisIfTheyExist(
+        !this->objects[i].getIntegralCoordinatesInBasisIfTheyExist(
           inputBasis,
           output.objects[i],
           bufferMatGaussianEliminationCC,
@@ -1272,15 +1272,15 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
 template <class Coefficient>
 bool Vectors<Coefficient>::getCoordinatesInBasis(
   const Vectors<Coefficient>& inputBasis,
-  Vectors<Coefficient>& outputCoords
+  Vectors<Coefficient>& outputCoordinates
 ) const {
   STACK_TRACE("Vectors::getCoordinatesInBasis");
-  outputCoords.setSize(this->size);
+  outputCoordinates.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
     if (
       !(
         this->operator[](i).getCoordinatesInBasis(
-          inputBasis, outputCoords[i]
+          inputBasis, outputCoordinates[i]
         )
       )
     ) {
@@ -1291,7 +1291,7 @@ bool Vectors<Coefficient>::getCoordinatesInBasis(
 }
 
 template <class Coefficient>
-bool Vector<Coefficient>::getIntegralCoordsInBasisIfTheyExist(
+bool Vector<Coefficient>::getIntegralCoordinatesInBasisIfTheyExist(
   const Vectors<Coefficient>& inputBasis,
   Vector<Coefficient>& output,
   Matrix<Coefficient>& bufferMatGaussianEliminationCC,

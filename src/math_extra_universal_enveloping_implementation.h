@@ -503,26 +503,26 @@ bool ElementUniversalEnveloping<Coefficient>::applyTransposeAntiAutoOnMe() {
   Coefficient coefficient;
   this->checkNumberOfCoefficientsConsistency();
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialUniversalEnveloping<Coefficient>& currentMonomial = (*this)[
+    const MonomialUniversalEnveloping<Coefficient>& startingMonomial = (*this)[
       i
     ];
     coefficient = this->coefficients[i];
-    monomial.owner = currentMonomial.owner;
+    monomial.owner = startingMonomial.owner;
     monomial.powers.size = 0;
     monomial.generatorsIndices.size = 0;
-    for (int j = currentMonomial.powers.size - 1; j >= 0; j --) {
+    for (int j = startingMonomial.powers.size - 1; j >= 0; j --) {
       int power;
-      if (!currentMonomial.powers[j].isSmallInteger(&power)) {
+      if (!startingMonomial.powers[j].isSmallInteger(&power)) {
         return false;
       }
-      int generatorIndex = currentMonomial.generatorsIndices[j];
+      int generatorIndex = startingMonomial.generatorsIndices[j];
       if (generatorIndex < totalPositiveRoots) {
         generatorIndex = 2 * totalPositiveRoots + rank - 1 - generatorIndex;
       } else if (generatorIndex >= totalPositiveRoots + rank) {
         generatorIndex = - generatorIndex + 2 * totalPositiveRoots + rank - 1;
       }
       monomial.multiplyByGeneratorPowerOnTheRight(
-        generatorIndex, currentMonomial.powers[j]
+        generatorIndex, startingMonomial.powers[j]
       );
     }
     result.addMonomial(monomial, coefficient);
@@ -934,13 +934,13 @@ void ElementUniversalEnveloping<Coefficient>::substituteInCoefficients(
   const Coefficient& ringZero
 ) {
   ElementUniversalEnveloping<Coefficient> endResult;
-  MonomialUniversalEnveloping<Coefficient> currentMon;
+  MonomialUniversalEnveloping<Coefficient> monomial;
   endResult.makeZero(*this->owner);
   Coefficient tempCF;
   for (int i = 0; i < this->size; i ++) {
-    currentMon = this->objects[i];
+    monomial = this->objects[i];
     this->coefficients[i].substitute(polynomialSubstitution);
-    endResult.addMonomial(currentMon, tempCF);
+    endResult.addMonomial(monomial, tempCF);
   }
   endResult.simplify(ringUnit, ringZero);
   this->operator=(endResult);
@@ -1082,18 +1082,18 @@ void ElementUniversalEnveloping<Coefficient>::getCoordinateFormOfSpanOfElements
     }
   }
   outputCoordinates.setSize(elements.size);
-  Polynomial<Rational> ZeroPoly;
-  ZeroPoly.makeZero();
+  Polynomial<Rational> zeroPoly;
+  zeroPoly.makeZero();
   for (int i = 0; i < elements.size; i ++) {
     Vector<Coefficient>& current = outputCoordinates[i];
     current.initializeFillInObject(
-      outputCorrespondingMonomials.size, ZeroPoly
+      outputCorrespondingMonomials.size, zeroPoly
     );
-    ElementUniversalEnveloping& currentElt = elements[i];
-    for (int j = 0; j < currentElt.size; j ++) {
-      MonomialUniversalEnveloping<Coefficient>& currentMon = currentElt[j];
-      current[outputCorrespondingMonomials.getIndex(currentMon)] =
-      currentElt.coefficients[j];
+    ElementUniversalEnveloping& currentElement = elements[i];
+    for (int j = 0; j < currentElement.size; j ++) {
+      MonomialUniversalEnveloping<Coefficient>& monomial = currentElement[j];
+      current[outputCorrespondingMonomials.getIndex(monomial)] =
+      currentElement.coefficients[j];
     }
   }
 }
@@ -1218,18 +1218,19 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::getCoordinatesInBasis(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) const {
-  List<ElementUniversalEnvelopingOrdered<Coefficient> > tempBasis, elements;
+  List<ElementUniversalEnvelopingOrdered<Coefficient> > tempBasis;
+  List<ElementUniversalEnvelopingOrdered<Coefficient> > elements;
   tempBasis = basis;
   tempBasis.addOnTop(*this);
-  Vectors<Coefficient> tempCoords;
+  Vectors<Coefficient> coordinates;
   this->getBasisFromSpanOfElements(
-    tempBasis, tempCoords, elements, ringUnit, ringZero
+    tempBasis, coordinates, elements, ringUnit, ringZero
   );
   Vector<Coefficient> lastRoot;
-  lastRoot = *tempCoords.lastObject();
-  tempCoords.setSize(basis.size);
+  lastRoot = *coordinates.lastObject();
+  coordinates.setSize(basis.size);
   return
-  lastRoot.getCoordinatesInBasis(tempCoords, output, ringUnit, ringZero);
+  lastRoot.getCoordinatesInBasis(coordinates, output, ringUnit, ringZero);
 }
 
 template <class Coefficient>
@@ -1249,19 +1250,19 @@ getCoordinateFormOfSpanOfElements(
     }
   }
   outputCoordinates.setSize(elements.size);
-  Polynomial<Rational> ZeroPoly;
-  ZeroPoly.makeZero();
+  Polynomial<Rational> zeroPoly;
+  zeroPoly.makeZero();
   for (int i = 0; i < elements.size; i ++) {
     Vector<Polynomial<Coefficient> >& current = outputCoordinates[i];
     current.initializeFillInObject(
-      outputCorrespondingMonomials.size, ZeroPoly
+      outputCorrespondingMonomials.size, zeroPoly
     );
-    ElementUniversalEnvelopingOrdered& currentElt = elements[i];
-    for (int j = 0; j < currentElt.size; j ++) {
-      MonomialUniversalEnvelopingOrdered<Coefficient>& currentMon =
-      currentElt[j];
-      current.objects[outputCorrespondingMonomials.getIndex(currentMon)] =
-      currentMon.coefficient;
+    ElementUniversalEnvelopingOrdered& currentElement = elements[i];
+    for (int j = 0; j < currentElement.size; j ++) {
+      MonomialUniversalEnvelopingOrdered<Coefficient>& monomial =
+      currentElement[j];
+      current.objects[outputCorrespondingMonomials.getIndex(monomial)] =
+      monomial.coefficient;
     }
   }
 }
@@ -1281,12 +1282,12 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::substitutionCoefficients(
   PolynomialSubstitution<Rational>& substitution
 ) {
   ElementUniversalEnvelopingOrdered<Coefficient> endResult;
-  MonomialUniversalEnvelopingOrdered<Coefficient> currentMon;
+  MonomialUniversalEnvelopingOrdered<Coefficient> monomial;
   endResult.makeZero(*this->owner);
   for (int i = 0; i < this->size; i ++) {
-    currentMon = (*this)[i];
-    currentMon.substitutionCoefficients(substitution);
-    endResult.addMonomial(currentMon);
+    monomial = (*this)[i];
+    monomial.substitutionCoefficients(substitution);
+    endResult.addMonomial(monomial);
   }
   this->operator=(endResult);
 }
@@ -1312,14 +1313,14 @@ void ElementUniversalEnveloping<Coefficient>::multiplyBy(
   ElementUniversalEnveloping<Coefficient> output;
   output.setExpectedSize(this->size);
   output.makeZero(*this->owner);
-  MonomialUniversalEnveloping<Coefficient> tempMon;
-  Coefficient newCoeff;
+  MonomialUniversalEnveloping<Coefficient> monomial;
+  Coefficient newCoefficient;
   for (int i = 0; i < this->size; i ++) {
-    tempMon = (*this)[i];
-    tempMon *= standsOnTheRight;
-    newCoeff = this->coefficients[i];
-    newCoeff *= coefficient;
-    output.addMonomial(tempMon, newCoeff);
+    monomial = (*this)[i];
+    monomial *= standsOnTheRight;
+    newCoefficient = this->coefficients[i];
+    newCoefficient *= coefficient;
+    output.addMonomial(monomial, newCoefficient);
   }
   *this = output;
 }
@@ -1356,7 +1357,7 @@ template <class Coefficient>
 void ElementVermaModuleOrdered<Coefficient>::getBasisFromSpanOfElements(
   List<ElementVermaModuleOrdered>& elements,
   Vectors<RationalFraction<Rational> >& outputCoordinates,
-  List<ElementVermaModuleOrdered>& outputTheBasis,
+  List<ElementVermaModuleOrdered>& outputBasis,
   const RationalFraction<Rational>& rationalFractionOne,
   const RationalFraction<Rational>& rationalFractionZero
 ) {
@@ -1375,10 +1376,10 @@ void ElementVermaModuleOrdered<Coefficient>::getBasisFromSpanOfElements(
     rationalFractionZero,
     global
   );
-  outputTheBasis.setSize(basisUniversalEnvelopingForm.size);
+  outputBasis.setSize(basisUniversalEnvelopingForm.size);
   for (int i = 0; i < basisUniversalEnvelopingForm.size; i ++) {
-    outputTheBasis[i].elementInternal = basisUniversalEnvelopingForm[i];
-    outputTheBasis[i].substitutionNthElementIsImageNthCoordinateSimpleBasis =
+    outputBasis[i].elementInternal = basisUniversalEnvelopingForm[i];
+    outputBasis[i].substitutionNthElementIsImageNthCoordinateSimpleBasis =
     elements[0].substitutionNthElementIsImageNthCoordinateSimpleBasis;
   }
 }
@@ -1504,8 +1505,8 @@ template <class CoefficientTypeQuotientField>
 void ElementUniversalEnvelopingOrdered<Coefficient>::getBasisFromSpanOfElements
 (
   List<ElementUniversalEnvelopingOrdered<Coefficient> >& elements,
-  Vectors<CoefficientTypeQuotientField>& outputCoords,
-  List<ElementUniversalEnvelopingOrdered<Coefficient> >& outputTheBasis,
+  Vectors<CoefficientTypeQuotientField>& outputCoordinates,
+  List<ElementUniversalEnvelopingOrdered<Coefficient> >& outputBasis,
   const CoefficientTypeQuotientField& fieldUnit,
   const CoefficientTypeQuotientField& fieldZero
 ) {
@@ -1514,46 +1515,45 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::getBasisFromSpanOfElements
   }
   ElementUniversalEnvelopingOrdered<Coefficient> outputCorrespondingMonomials;
   outputCorrespondingMonomials.makeZero(*elements[0].owner);
-  Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
+  Vectors<CoefficientTypeQuotientField> outputCoordinatesBeforeReduction;
   for (int i = 0; i < elements.size; i ++) {
     for (int j = 0; j < elements[i].size; j ++) {
       outputCorrespondingMonomials.addOnTopNoRepetition(elements[i][j]);
     }
   }
-  outputCoordsBeforeReduction.setSize(elements.size);
+  outputCoordinatesBeforeReduction.setSize(elements.size);
   for (int i = 0; i < elements.size; i ++) {
     Vector<CoefficientTypeQuotientField>& currentList =
-    outputCoordsBeforeReduction[i];
+    outputCoordinatesBeforeReduction[i];
     currentList.makeZero(outputCorrespondingMonomials.size, fieldZero);
-    ElementUniversalEnvelopingOrdered<Coefficient>& currentElt = elements[i];
-    for (int j = 0; j < currentElt.size; j ++) {
-      MonomialUniversalEnvelopingOrdered<Coefficient>& currentMon =
-      currentElt[j];
-      currentList.objects[
-        outputCorrespondingMonomials.getIndex(currentMon)
-      ] =
-      currentMon.coefficient;
+    ElementUniversalEnvelopingOrdered<Coefficient>& currentElement =
+    elements[i];
+    for (int j = 0; j < currentElement.size; j ++) {
+      MonomialUniversalEnvelopingOrdered<Coefficient>& monomial =
+      currentElement[j];
+      currentList.objects[outputCorrespondingMonomials.getIndex(monomial)] =
+      monomial.coefficient;
     }
   }
-  outputTheBasis.size = 0;
-  outputTheBasis.reserve(elements.size);
+  outputBasis.size = 0;
+  outputBasis.reserve(elements.size);
   Vectors<CoefficientTypeQuotientField> basisCoordForm;
   basisCoordForm.reserve(elements.size);
   Selection selectedBasis;
-  outputCoordsBeforeReduction.ComputeDebugString();
-  outputCoordsBeforeReduction.SelectABasis(
+  outputCoordinatesBeforeReduction.ComputeDebugString();
+  outputCoordinatesBeforeReduction.SelectABasis(
     basisCoordForm, fieldZero, selectedBasis
   );
   for (int i = 0; i < selectedBasis.cardinalitySelection; i ++) {
-    outputTheBasis.addOnTop(elements[selectedBasis.elements[i]]);
+    outputBasis.addOnTop(elements[selectedBasis.elements[i]]);
   }
-  Matrix<Coefficient> bufferMat;
+  Matrix<Coefficient> bufferMatrix;
   Vectors<Coefficient> bufferVectors;
-  outputCoordsBeforeReduction.getCoordinatesInBasis(
+  outputCoordinatesBeforeReduction.getCoordinatesInBasis(
     basisCoordForm,
-    outputCoords,
+    outputCoordinates,
     bufferVectors,
-    bufferMat,
+    bufferMatrix,
     fieldUnit,
     fieldZero
   );

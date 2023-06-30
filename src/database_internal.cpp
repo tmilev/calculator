@@ -1,5 +1,12 @@
 #include "database.h"
 #include "string_constants.h"
+#include <sys/wait.h>//<-waitpid f-n here
+#include <netdb.h> //<-addrinfo and related data structures defined here
+#include <arpa/inet.h> // <- inet_ntop declared here (ntop = network to presentation)
+#include <unistd.h>
+#include <sys/stat.h>//<-for file statistics
+#include <fcntl.h>//<-setting flags of file descriptors
+#include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
 
 std::string LocalDatabase::folder() {
   return "database/" + DatabaseStrings::databaseName + "/";
@@ -72,6 +79,36 @@ bool LocalDatabase::findOneFromSome(
   (void) findOrQueries;
   (void) output;
   (void) commentsOnFailure;
+  struct addrinfo hints;
+  memset(&hints, 0, sizeof hints);
+  // make sure the struct is empty
+  hints.ai_family = AF_UNSPEC;
+  // don't care IPv4 or IPv6
+  hints.ai_socktype = SOCK_STREAM;
+  // TCP stream sockets
+  hints.ai_flags = AI_PASSIVE;
+  // fill in my IP for me
+  struct addrinfo* serverInfo = nullptr;
+  std::stringstream portStream;
+  portStream << this->port;
+  int status =
+  getaddrinfo(
+    "localhost", portStream.str().c_str(), &hints, &serverInfo
+  );
+  if (status == - 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to get addrinfo. ";
+    }
+    return false;
+  }
+  status =
+  connect(this->socket, serverInfo->ai_addr, serverInfo->ai_addrlen);
+  if (status != 0) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to connect to database. ";
+    }
+    return false;
+  }
   global.fatal
   << "LocalDatabase::findOneFromSome: not implemented yet. "
   << global.fatal;

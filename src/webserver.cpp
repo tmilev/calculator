@@ -6229,7 +6229,6 @@ void LocalDatabase::initializeForkAndRun() {
   STACK_TRACE("LocalDatabase::initializeForkAndRun");
   this->listenToPort();
   if (this->forkOutDatabase() == 0) {
-
     close(this->socket);
     return;
   }

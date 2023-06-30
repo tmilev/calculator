@@ -539,6 +539,7 @@ bool Database::findOneFromSome(
       findOrQueries, output, commentsOnFailure
     );
   case DatabaseType::internal:
+    return
     this->localDatabase.findOneFromSome(
       findOrQueries, output, commentsOnFailure
     );

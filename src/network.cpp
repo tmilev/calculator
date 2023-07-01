@@ -286,7 +286,9 @@ bool Listener::initializeBindToOnePort(
         << ", desired port: "
         << Logger::yellow
         << desiredPort
-        << ". Socket to listen to: " << outputListeningSocket << ". "
+        << ". Socket to listen to: "
+        << outputListeningSocket
+        << ". "
         << Logger::endL;
       }
     }

@@ -153,10 +153,12 @@ SOURCES_RELATIVE_PATH=\
     crypto_sha3.cpp \
     crypto_test.cpp \
     database.cpp \
+    database_user.cpp \
     database_test.cpp \
     database_fallback.cpp \
     database_internal.cpp \
     database_problem_data.cpp \
+    email_user.cpp \
     date_time_wrappers.cpp \
     exam_routines.cpp \
     global_objects.cpp \

@@ -414,7 +414,6 @@ public:
   // TODO(tmilev): Rename this to fallbackDatabase.
   FallbackDatabase fallbackDatabase;
   LocalDatabase localDatabase;
-
   bool findFromJSON(
     const QueryExact& findQuery,
     List<JSData>& output,

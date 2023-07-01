@@ -4,9 +4,6 @@
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
 
-
-
-
 ProblemData::ProblemData() {
   this->randomSeed = 0;
   this->flagRandomSeedGiven = false;

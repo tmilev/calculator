@@ -61,9 +61,9 @@ bool LocalDatabase::updateOne(
   (void) findQuery;
   (void) updateQuery;
   (void) commentsOnFailure;
-    if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "LocalDatabase::updateOne not implemented yet. ";
-    }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "LocalDatabase::updateOne not implemented yet. ";
+  }
   return false;
 }
 
@@ -110,8 +110,7 @@ bool LocalDatabase::findOneFromSome(
       << "LocalDatabase::findOneFromSome: failed to connect to database. ";
     }
     global
-    <<
-    "DEBUG: LocalDatabase::findOneFromSome: "
+    << "DEBUG: LocalDatabase::findOneFromSome: "
     << "failed to connect to database. port: "
     << this->port
     << "socket: "
@@ -172,7 +171,7 @@ bool LocalDatabase::updateOneFromSome(
 void LocalDatabase::listenToPort() {
   STACK_TRACE("LocalDatabase::listenToPort");
   if (
- !   Listener::initializeBindToOnePort(
+    !Listener::initializeBindToOnePort(
       "0", this->socketDatabaseServer, this->port, true
     )
   ) {

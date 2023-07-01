@@ -4145,7 +4145,10 @@ int WebServer::run() {
   global.logs.serverMonitor.reset();
   global.logs.worker.reset();
   Database::get().initializeServer();
-  if (global.databaseType == DatabaseType::internal&&  Database::get().localDatabase.processId != 0) {
+  if (
+    global.databaseType == DatabaseType::internal &&
+    Database::get().localDatabase.processId != 0
+  ) {
     // This is the database process.
     return 0;
   }
@@ -5284,32 +5287,31 @@ void GlobalVariables::configurationProcess() {
     DatabaseStrings::databaseName = "local";
     global.configuration[Configuration::database] = "local";
   }
-
   if (global.flagDebugLogin) {
     global
     << Logger::purple
     << "************************"
     << Logger::endL
     << Logger::red
-    << "WARNING: debug login is on. "
-;
+    << "WARNING: debug login is on. ";
     if (global.databaseType == DatabaseType::internal) {
-        global << Logger::green
-        << "Set database name to 'test'. "
-        << Logger::endL
-        << Logger::purple
-        << "************************"
-        << Logger::endL;
-        DatabaseStrings::databaseName = "test";
-
-    }else{
-        global.databaseType = DatabaseType::fallback;
-        global << Logger::green
-        << "Set database to fallback database. "
-        << Logger::endL
-        << Logger::purple
-        << "************************"
-        << Logger::endL;
+      global
+      << Logger::green
+      << "Set database name to 'test'. "
+      << Logger::endL
+      << Logger::purple
+      << "************************"
+      << Logger::endL;
+      DatabaseStrings::databaseName = "test";
+    } else {
+      global.databaseType = DatabaseType::fallback;
+      global
+      << Logger::green
+      << "Set database to fallback database. "
+      << Logger::endL
+      << Logger::purple
+      << "************************"
+      << Logger::endL;
     }
   }
   if (

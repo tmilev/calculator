@@ -239,7 +239,10 @@ void WebClient::initialize() {
   this->flagDoUseGET = true;
   this->buffer.initializeFillInObject(50000, 0);
   Connector& connector = this->connectorContainer.getElement();
-  connector.initialize("127.0.0.1",  global.configuration[Configuration::portHTTP].stringValue);
+  connector.initialize(
+    "127.0.0.1",
+    global.configuration[Configuration::portHTTP].stringValue
+  );
 }
 
 WebClient::~WebClient() {

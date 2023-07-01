@@ -1,4 +1,4 @@
-#include "calculator.h"
+#include "calculator_interface.h"
 #include "string_constants.h"
 
 bool Calculator::Test::all() {

@@ -331,6 +331,68 @@ public:
   LocalDatabase();
 };
 
+class DatabaseUser {
+private:
+  bool firstLoginOfAdmin(
+    UserCalculatorData& incoming,
+    UserCalculator& userInDatabase,
+    std::stringstream* commentsOnFailure
+  );
+public:
+  Database* owner;
+  bool logoutViaDatabase();
+  bool loginViaDatabase(
+    UserCalculatorData& user, std::stringstream* commentsOnFailure
+  );
+  bool loginNoDatabaseSupport(
+    UserCalculatorData& user, std::stringstream* commentsGeneral
+  );
+  bool loginViaGoogleTokenCreateNewAccountIfNeeded(
+    UserCalculatorData& user,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral,
+    bool& tokenIsGood
+  );
+  bool setPassword(
+    const std::string& inputUsername,
+    const std::string& inputNewPassword,
+    std::string& outputAuthenticationToken,
+    std::stringstream& comments
+  );
+  bool userExists(
+    const std::string& inputUsername, std::stringstream& comments
+  );
+  bool userDefaultHasInstructorRights();
+  // TODO(tmilev): refactor down to database-only operations.
+  static bool sendActivationEmail(
+    const std::string& emailList,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral,
+    std::stringstream* commentsGeneralSensitive
+  );
+  // TODO(tmilev): refactor down to database-only operations.
+  static bool sendActivationEmail(
+    const List<std::string>& emails,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneral,
+    std::stringstream* commentsGeneralSensitive
+  );
+  // TODO(tmilev): refactor down to database-only operations.
+  bool addUsersFromEmails(
+    const std::string& emailList,
+    const std::string& userPasswords,
+    std::string& userRole,
+    std::string& userGroup,
+    std::stringstream& comments,
+    int& outputNumberOfNewUsers,
+    int& outputNumberOfUpdatedUsers
+  );
+  bool loadUserInformation(
+    UserCalculatorData& output, std::stringstream* commentsOnFailure
+  );
+  DatabaseUser();
+};
+
 class Database {
 public:
   bool flagInitializedServer;
@@ -348,69 +410,9 @@ public:
     const std::string& collectionName, const std::string& key
   );
   static std::string toString();
-  class User {
-  private:
-    bool firstLoginOfAdmin(
-      UserCalculatorData& incoming,
-      UserCalculator& userInDatabase,
-      std::stringstream* commentsOnFailure
-    );
-  public:
-    Database* owner;
-    bool logoutViaDatabase();
-    bool loginViaDatabase(
-      UserCalculatorData& user, std::stringstream* commentsOnFailure
-    );
-    bool loginNoDatabaseSupport(
-      UserCalculatorData& user, std::stringstream* commentsGeneral
-    );
-    bool loginViaGoogleTokenCreateNewAccountIfNeeded(
-      UserCalculatorData& user,
-      std::stringstream* commentsOnFailure,
-      std::stringstream* commentsGeneral,
-      bool& tokenIsGood
-    );
-    bool setPassword(
-      const std::string& inputUsername,
-      const std::string& inputNewPassword,
-      std::string& outputAuthenticationToken,
-      std::stringstream& comments
-    );
-    bool userExists(
-      const std::string& inputUsername, std::stringstream& comments
-    );
-    bool userDefaultHasInstructorRights();
-    // TODO(tmilev): refactor down to database-only operations.
-    static bool sendActivationEmail(
-      const std::string& emailList,
-      std::stringstream* commentsOnFailure,
-      std::stringstream* commentsGeneral,
-      std::stringstream* commentsGeneralSensitive
-    );
-    // TODO(tmilev): refactor down to database-only operations.
-    static bool sendActivationEmail(
-      const List<std::string>& emails,
-      std::stringstream* commentsOnFailure,
-      std::stringstream* commentsGeneral,
-      std::stringstream* commentsGeneralSensitive
-    );
-    // TODO(tmilev): refactor down to database-only operations.
-    bool addUsersFromEmails(
-      const std::string& emailList,
-      const std::string& userPasswords,
-      std::string& userRole,
-      std::string& userGroup,
-      std::stringstream& comments,
-      int& outputNumberOfNewUsers,
-      int& outputNumberOfUpdatedUsers
-    );
-    bool loadUserInformation(
-      UserCalculatorData& output, std::stringstream* commentsOnFailure
-    );
-    User();
-  };
 
-  User user;
+
+  DatabaseUser user;
   // TODO(tmilev): Rename this to fallbackDatabase.
   FallbackDatabase fallbackDatabase;
   LocalDatabase localDatabase;

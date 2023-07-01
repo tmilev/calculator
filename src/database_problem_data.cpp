@@ -1,6 +1,3 @@
-#include "database.h"
-#include "crypto_calculator.h"
-#include "webserver.h"
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
 

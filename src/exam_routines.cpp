@@ -8,6 +8,7 @@
 #include <iomanip>
 #include "database.h"
 #include "string_constants.h"
+#include "crypto_calculator.h"
 
 std::string CalculatorHTML::stringScoredQuizzes = "Quiz";
 std::string CalculatorHTML::stringPracticE = "Practice";
@@ -1934,8 +1935,6 @@ std::string CalculatorHTML::cleanUpFileName(const std::string& inputLink) {
     firstMeaningfulChar, lastMeaningfulChar - firstMeaningfulChar + 1
   );
 }
-
-#include "crypto.h"
 
 std::string CalculatorHTML::getDeadlineNoInheritance(const std::string& id) {
   STACK_TRACE("CalculatorHTML::getDeadlineNoInheritance");

@@ -1,5 +1,5 @@
 #include "crypto_public_domain.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 
 extern CryptoPublicDomain bootStrapCrypto;
 CryptoPublicDomain bootStrapCrypto;

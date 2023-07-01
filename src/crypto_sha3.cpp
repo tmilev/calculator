@@ -1,4 +1,4 @@
-#include "crypto.h"
+#include "crypto_calculator.h"
 
 // Reference:
 // Wikipedia's page on SHA3:

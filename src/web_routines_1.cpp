@@ -1,7 +1,7 @@
 #include "calculator_inner_functions.h"
 #include "general_time_date.h"
 #include "webserver.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,6 +15,7 @@
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
 #include "web_client.h"
+#include "network_calculator.h"
 
 class WebServerMonitor {
 public:
@@ -112,9 +113,9 @@ void WebServerMonitor::monitor(
   global
   << Logger::blue
   << "Pinging "
-  << webCrawler.addressToConnectTo
+  << webCrawler.connectorContainer.getElement().addressToConnectTo
   << " at port/service "
-  << webCrawler.portOrService
+  << webCrawler.connectorContainer.getElement().portOrService
   << " every "
   << (microsecondsToSleep / 1000000)
   << " second(s). "
@@ -141,9 +142,9 @@ void WebServerMonitor::monitor(
       global
       << Logger::red
       << "Connection monitor: ping of "
-      << webCrawler.addressToConnectTo
+      << webCrawler.connectorContainer.getElement().addressToConnectTo
       << " at port/service "
-      << webCrawler.portOrService
+      << webCrawler.connectorContainer.getElement().portOrService
       << " failed. GM time: "
       << now.toStringGM()
       << ", local time: "
@@ -222,17 +223,11 @@ void WebServerMonitor::stop() {
 
 WebClient::WebClient() {
   this->flagInitialized = false;
-  this->socketInteger = - 1;
-  this->serverOtherSide = nullptr;
-  this->serverInfo = nullptr;
   this->lastNumberOfBytesRead = 0;
 }
 
 void WebClient::freeAddressInfo() {
-  if (this->serverInfo != nullptr) {
-    freeaddrinfo(this->serverInfo);
-  }
-  this->serverInfo = nullptr;
+  this->connectorContainer.getElement().freeAddressInformation();
 }
 
 void WebClient::initialize() {
@@ -243,9 +238,10 @@ void WebClient::initialize() {
   STACK_TRACE("WebCrawler::initialize");
   this->flagDoUseGET = true;
   buffer.initializeFillInObject(50000, 0);
-  this->portOrService =
+  Connector& container = this->connectorContainer.getElement();
+  container.portOrService =
   global.configuration[Configuration::portHTTP].stringValue;
-  this->addressToConnectTo = "127.0.0.1";
+  container.addressToConnectTo = "127.0.0.1";
 }
 
 WebClient::~WebClient() {
@@ -257,9 +253,8 @@ void WebClient::closeEverything() {
     return;
   }
   this->flagInitialized = false;
-  close(this->socketInteger);
-  this->socketInteger = - 1;
-  this->freeAddressInfo();
+  this->connectorContainer.getElement().closeSocket();
+  this->connectorContainer.getElement().freeAddressInformation();
 }
 
 void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
@@ -267,180 +262,51 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
   std::stringstream reportStream;
   this->lastTransaction = "";
   this->lastTransactionErrors = "";
-  memset(&this->hints, 0, sizeof this->hints);
-  // make sure the struct is empty
-  this->hints.ai_family = AF_UNSPEC;
-  // don't care IPv4 or IPv6
-  this->hints.ai_socktype = SOCK_STREAM;
-  // TCP stream sockets
-  this->hints.ai_flags = AI_PASSIVE;
-  // fill in my IP for me
-  this->serverInfo = nullptr;
-  int status =
-  getaddrinfo(
-    this->addressToConnectTo.c_str(),
-    this->portOrService.c_str(),
-    &hints,
-    &this->serverInfo
+  Connector& connector = this->connectorContainer.getElement();
+  connector.initialize(this->peerAddress, this->desiredPortOrService);
+  if (!connector.connectWrapper()) {
+    this->lastTransactionErrors = connector.lastTransactionErrors;
+    return;
+  }
+  std::string getMessage =
+  "GET /cgi-bin/calculator?request=" + pingAuthentication;
+  std::stringstream errorStream1;
+  int numberOfBytesWritten =
+  Pipe::writeWithTimeoutViaSelect(
+    connector.socketInteger, getMessage, 1, 10, &errorStream1
   );
-  if (status != 0) {
-    this->lastTransactionErrors =
-    "Could not find address: getaddrinfo error: ";
-    this->lastTransactionErrors += gai_strerror(status);
-    this->freeAddressInfo();
-    return;
-  }
-  if (this->serverInfo == nullptr) {
-    this->lastTransactionErrors = "Server info is zero";
-    return;
-  }
-  struct addrinfo* p = nullptr;
-  // will point to the results
-  this->socketInteger = - 1;
-  char ipString[INET6_ADDRSTRLEN];
-  int numberOfBytesWritten = - 1;
-  for (
-    p = this->serverInfo; p != nullptr;
-    p = p->ai_next,
-    close(this->socketInteger)
+  if (
+    static_cast<unsigned>(numberOfBytesWritten) != getMessage.size()
   ) {
-    void* adress = nullptr;
-    this->socketInteger = - 1;
-    // get the pointer to the address itself,
-    // different fields in IPv4 and IPv6:
-    if (p->ai_family == AF_INET) {
-      // IPv4
-      struct sockaddr_in* ipv4 = reinterpret_cast<struct sockaddr_in*>(
-        p->ai_addr
-      );
-      adress = &(ipv4->sin_addr);
-      reportStream << "IPv4: ";
-    } else {
-      // IPv6
-      struct sockaddr_in6* ipv6 = reinterpret_cast<struct sockaddr_in6*>(
-        p->ai_addr
-      );
-      adress = &(ipv6->sin6_addr);
-      reportStream << "IPv6: ";
-    }
-    // convert the IP to a string and print it:
-    inet_ntop(p->ai_family, adress, ipString, sizeof ipString);
-    reportStream << this->addressToConnectTo << ": " << ipString << "<br>";
-    this->socketInteger =
-    socket(
-      this->serverInfo->ai_family,
-      this->serverInfo->ai_socktype,
-      this->serverInfo->ai_protocol
-    );
-    int connectionResult = - 1;
-    if (this->socketInteger < 0) {
-      this->lastTransactionErrors = "Failed to create socket ";
-      continue;
-    } else {
-      fd_set fdConnectSockets;
-      FD_ZERO(&fdConnectSockets);
-      FD_SET(this->socketInteger, &fdConnectSockets);
-      timeval timeOut;
-      timeOut.tv_sec = 1;
-      timeOut.tv_usec = 0;
-      int totalPingFails = 0;
-      int totalSelected = 0;
-      std::stringstream failStream;
-      do {
-        if (totalPingFails > 10) {
-          break;
-        }
-        totalSelected =
-        select(
-          this->socketInteger + 1,
-          &fdConnectSockets,
-          nullptr,
-          nullptr,
-          &timeOut
-        );
-        failStream
-        << "While pinging, select failed. Error message: "
-        << strerror(errno)
-        << ". \n";
-        totalPingFails ++;
-      } while (totalSelected < 0);
-      if (totalSelected <= 0) {
-        global << Logger::red << failStream.str() << Logger::endL;
-        reportStream
-        << failStream.str()
-        << "Could not connect through port. select returned: "
-        << totalSelected;
-        connectionResult = - 1;
-      } else {
-        connectionResult =
-        connect(
-          this->socketInteger,
-          this->serverInfo->ai_addr,
-          this->serverInfo->ai_addrlen
-        );
-      }
-    }
-    if (connectionResult == - 1) {
-      reportStream
-      << "<br>Failed to connect: address: "
-      << this->addressToConnectTo
-      << " port: "
-      << this->portOrService
-      << ". ";
-      this->lastTransactionErrors = reportStream.str();
-      close(this->socketInteger);
-      continue;
-    } else {
-      reportStream
-      << "<br>connected: "
-      << this->addressToConnectTo
-      << " port: "
-      << this->portOrService
-      << ". ";
-    }
-    std::string getMessage =
-    "GET /cgi-bin/calculator?request=" + pingAuthentication;
-    std::stringstream errorStream1;
-    numberOfBytesWritten =
-    Pipe::writeWithTimeoutViaSelect(
-      this->socketInteger, getMessage, 1, 10, &errorStream1
-    );
-    if (
-      static_cast<unsigned>(numberOfBytesWritten) != getMessage.size()
-    ) {
-      this->lastTransactionErrors +=
-      "\nERROR writing to socket. " + errorStream1.str();
-      close(this->socketInteger);
-      continue;
-    }
-    std::stringstream errorStream2;
-    this->lastNumberOfBytesRead =
-    Pipe::readWithTimeOutViaSelect(
-      this->socketInteger, this->buffer, 1, 10, &errorStream2
-    );
-    if (this->lastNumberOfBytesRead < 0) {
-      this->lastTransactionErrors +=
-      "ERROR reading from socket. " + errorStream2.str();
-      close(this->socketInteger);
-      continue;
-    }
-    std::string readString;
-    readString.assign(
-      buffer.objects,
-      static_cast<unsigned>(this->lastNumberOfBytesRead)
-    );
-    reportStream
-    << "Wrote "
-    << numberOfBytesWritten
-    << ", read "
-    << this->lastNumberOfBytesRead
-    << " bytes: "
-    << readString
-    << ". ";
-    this->lastTransaction = reportStream.str();
-    close(this->socketInteger);
+    this->lastTransactionErrors +=
+    "\nERROR writing to socket. " + errorStream1.str();
+    connector.closeSocket();
   }
-  this->freeAddressInfo();
+  std::stringstream errorStream2;
+  this->lastNumberOfBytesRead =
+  Pipe::readWithTimeOutViaSelect(
+    connector.socketInteger, this->buffer, 1, 10, &errorStream2
+  );
+  if (this->lastNumberOfBytesRead < 0) {
+    this->lastTransactionErrors +=
+    "ERROR reading from socket. " + errorStream2.str();
+    connector.closeSocket();
+  }
+  std::string readString;
+  readString.assign(
+    buffer.objects,
+    static_cast<unsigned>(this->lastNumberOfBytesRead)
+  );
+  reportStream
+  << "Wrote "
+  << numberOfBytesWritten
+  << ", read "
+  << this->lastNumberOfBytesRead
+  << " bytes: "
+  << readString
+  << ". ";
+  this->lastTransaction = reportStream.str();
+  connector.closeEverything();
 }
 
 void WebClient::fetchWebPage(
@@ -455,181 +321,15 @@ void WebClient::fetchWebPage(
 #ifdef MACRO_use_open_ssl
   this->lastTransaction = "";
   this->lastTransactionErrors = "";
-  memset(&this->hints, 0, sizeof this->hints);
-  // make sure the struct is empty
-  this->hints.ai_family = AF_UNSPEC;
-  // don't care IPv4 or IPv6
-  this->hints.ai_socktype = SOCK_STREAM;
-  // TCP stream sockets
-  this->hints.ai_flags = AI_PASSIVE;
-  // fill in my IP for me
-  this->serverInfo = nullptr;
-  int status =
-  getaddrinfo(
-    this->serverToConnectTo.c_str(),
-    this->portOrService.c_str(),
-    &hints,
-    &this->serverInfo
-  );
-  if (status != 0) {
-    this->lastTransactionErrors = "Error calling getaddrinfo: ";
-    this->lastTransactionErrors += gai_strerror(status);
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << this->lastTransactionErrors
-      << ". "
-      << "Server: "
-      << this->serverToConnectTo
-      << ", port or service: "
-      << this->portOrService
-      << ". ";
-    }
-    this->freeAddressInfo();
+  Connector& connector = this->connectorContainer.getElement();
+  connector.initialize(this->peerAddress, this->desiredPortOrService);
+  if (!connector.connectWrapper()) {
+    this->lastTransactionErrors = connector.lastTransactionErrors;
     return;
   }
-  if (this->serverInfo == nullptr) {
-    this->lastTransactionErrors = "Server info is zero";
-    return;
-  }
-  struct addrinfo* p = nullptr;
-  // will point to the results
-  this->socketInteger = - 1;
-  char ipString[INET6_ADDRSTRLEN];
-  timeval timeOut;
-  for (
-    p = this->serverInfo; p != nullptr;
-    p = p->ai_next,
-    close(this->socketInteger)
-  ) {
-    void* address = nullptr;
-    this->socketInteger = - 1;
-    // get the pointer to the address itself,
-    // different fields in IPv4 and IPv6:
-    if (p->ai_family == AF_INET) {
-      // IPv4
-      struct sockaddr_in* ipv4 = reinterpret_cast<struct sockaddr_in*>(
-        p->ai_addr
-      );
-      address = &(ipv4->sin_addr);
-      if (commentsGeneral != nullptr) {
-        *commentsGeneral << "IPv4: ";
-      }
-    } else {
-      // IPv6
-      struct sockaddr_in6* ipv6 = reinterpret_cast<struct sockaddr_in6*>(
-        p->ai_addr
-      );
-      address = &(ipv6->sin6_addr);
-      if (commentsGeneral != nullptr) {
-        *commentsGeneral << "IPv6: ";
-      }
-    }
-    // convert the IP to a string and print it:
-    inet_ntop(p->ai_family, address, ipString, sizeof ipString);
-    //    std::string ipString()
-    if (commentsGeneral != nullptr) {
-      *commentsGeneral
-      << this->addressToConnectTo
-      << ": "
-      << ipString
-      << "<br>";
-    }
-    this->socketInteger =
-    socket(
-      this->serverInfo->ai_family,
-      this->serverInfo->ai_socktype,
-      this->serverInfo->ai_protocol
-    );
-    int connectionResult = - 1;
-    if (this->socketInteger < 0) {
-      this->lastTransactionErrors = "failed to create socket ";
-      continue;
-    } else {
-      fd_set fdConnectSockets;
-      FD_ZERO(&fdConnectSockets);
-      FD_SET(this->socketInteger, &fdConnectSockets);
-      timeOut.tv_sec = 1;
-      timeOut.tv_usec = 0;
-      int totalPingFails = 0;
-      int totalSelected = 0;
-      std::stringstream failStream;
-      do {
-        if (totalPingFails > 10) {
-          break;
-        }
-        totalSelected =
-        select(
-          this->socketInteger + 1,
-          &fdConnectSockets,
-          nullptr,
-          nullptr,
-          &timeOut
-        );
-        failStream
-        << "While pinging, select failed. Error message: "
-        << strerror(errno)
-        << ". \n";
-        totalPingFails ++;
-      } while (totalSelected < 0);
-      if (totalSelected <= 0) {
-        global << Logger::red << failStream.str() << Logger::endL;
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << failStream.str()
-          << "Could not connect through port. select returned: "
-          << totalSelected;
-        }
-        connectionResult = - 1;
-      } else {
-        connectionResult =
-        connect(
-          this->socketInteger,
-          this->serverInfo->ai_addr,
-          this->serverInfo->ai_addrlen
-        );
-      }
-      timeOut.tv_sec = 3;
-      // 5 Secs Timeout
-      timeOut.tv_usec = 0;
-      // Not initialize'ing this can cause strange errors
-      setsockopt(
-        connectionResult,
-        SOL_SOCKET,
-        SO_RCVTIMEO,
-        static_cast<void*>(&timeOut),
-        sizeof(timeval)
-      );
-    }
-    if (connectionResult == - 1) {
-      std::stringstream errorStream;
-      errorStream
-      << "Failed to connect: address: "
-      << this->addressToConnectTo
-      << " port: "
-      << this->portOrService
-      << ".<br>";
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << errorStream.str();
-      }
-      this->lastTransactionErrors = errorStream.str();
-      close(this->socketInteger);
-      continue;
-    } else {
-      if (commentsGeneral != nullptr) {
-        *commentsGeneral
-        << "connected: "
-        << this->addressToConnectTo
-        << " port: "
-        << this->portOrService
-        << ". <hr>";
-      }
-    }
-    this->fetchWebPagePart2(commentsOnFailure, commentsGeneral);
-    this->transportLayerSecurity.removeLastSocket();
-    close(this->socketInteger);
-    break;
-  }
-  this->freeAddressInfo();
+  this->fetchWebPagePart2(commentsOnFailure, commentsGeneral);
+  this->transportLayerSecurity.removeLastSocket();
+  connector.closeEverything();
 #endif //Macro_use_openssl
 }
 
@@ -642,23 +342,24 @@ void WebClient::fetchWebPagePart2(
   (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
   std::stringstream messageHeader, continueHeader;
+  Connector& connector = this->connectorContainer.getElement();
   if (this->flagDoUseGET) {
     messageHeader
     << "GET "
-    << this->addressToConnectTo
+    << this->url
     << " HTTP/1.0"
     << "\r\n"
     << "Host: "
-    << this->serverToConnectTo
+    << connector.addressToConnectTo
     << "\r\n\r\n";
   } else {
     messageHeader
     << "POST "
-    << this->addressToConnectTo
+    << this->url
     << " HTTP/1.0"
     << "\r\n"
     << "Host: "
-    << this->serverToConnectTo;
+    << connector.addressToConnectTo;
     messageHeader << "\r\nContent-length: " << this->postMessageToSend.size();
     messageHeader << "\r\n\r\n";
     messageHeader << this->postMessageToSend;
@@ -666,7 +367,7 @@ void WebClient::fetchWebPagePart2(
   this->transportLayerSecurity.getOpenSSLData().checkCanInitializeToClient();
   if (
     !this->transportLayerSecurity.handShakeIAmClientNoSocketCleanup(
-      this->socketInteger, commentsOnFailure, commentsGeneral
+      connector.socketInteger, commentsOnFailure, commentsGeneral
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -838,25 +539,18 @@ bool CalculatorFunctions::fetchWebPageGET(
     << "Fetching web page expects 3 arguments: "
     << "server, service/port, and webpage. ";
   }
-  if (!input[1].isOfType(&webClient.serverToConnectTo)) {
-    webClient.serverToConnectTo = input[1].toString();
+  if (!input[1].isOfType(&webClient.peerAddress)) {
+    webClient.peerAddress = input[1].toString();
   }
-  if (!input[2].isOfType(&webClient.portOrService)) {
-    webClient.portOrService = input[2].toString();
+  if (!input[2].isOfType(&webClient.desiredPortOrService)) {
+    webClient.desiredPortOrService = input[2].toString();
   }
-  if (!input[3].isOfType(&webClient.addressToConnectTo)) {
-    webClient.addressToConnectTo = input[3].toString();
+  if (!input[3].isOfType(&webClient.url)) {
+    webClient.peerAddress = input[3].toString();
   }
   std::stringstream out;
   webClient.flagDoUseGET = true;
-  out
-  << "Server:  "
-  << webClient.serverToConnectTo
-  << " port: "
-  << webClient.portOrService
-  << " resource: "
-  << webClient.addressToConnectTo
-  << "<br>";
+  out << webClient.toString();
   webClient.fetchWebPage(&out, &out);
   out
   << "<br>"
@@ -884,27 +578,20 @@ bool CalculatorFunctions::fetchWebPagePOST(
     << "Fetching web page expects 4 arguments: "
     << "server, service/port, webpage and message to post. ";
   }
-  if (!input[1].isOfType(&crawler.serverToConnectTo)) {
-    crawler.serverToConnectTo = input[1].toString();
+  if (!input[1].isOfType(&crawler.peerAddress)) {
+    crawler.peerAddress = input[1].toString();
   }
-  if (!input[2].isOfType(&crawler.portOrService)) {
-    crawler.portOrService = input[2].toString();
+  if (!input[2].isOfType(&crawler.desiredPortOrService)) {
+    crawler.desiredPortOrService = input[2].toString();
   }
-  if (!input[3].isOfType(&crawler.addressToConnectTo)) {
-    crawler.addressToConnectTo = input[3].toString();
+  if (!input[3].isOfType(&crawler.url)) {
+    crawler.url = input[3].toString();
   }
   if (!input[4].isOfType(&crawler.postMessageToSend)) {
     crawler.postMessageToSend = input[4].toString();
   }
   std::stringstream out;
-  out
-  << "Server:  "
-  << crawler.serverToConnectTo
-  << " port: "
-  << crawler.portOrService
-  << " resource: "
-  << crawler.addressToConnectTo
-  << "<br>";
+  out << crawler.toString() << "<br>";
   crawler.flagDoUseGET = false;
   crawler.fetchWebPage(&out, &out);
   out
@@ -913,6 +600,18 @@ bool CalculatorFunctions::fetchWebPagePOST(
   << "<hr>"
   << crawler.lastTransaction;
   return output.assignValue(calculator, out.str());
+}
+
+std::string WebClient::toString() const {
+  std::stringstream out;
+  out
+  << "Peer:  "
+  << this->peerAddress
+  << " port: "
+  << this->desiredPortOrService
+  << " url: "
+  << this->url;
+  return out.str();
 }
 
 bool CalculatorFunctions::fetchKnownPublicKeys(
@@ -938,9 +637,9 @@ void WebClient::updatePublicKeys(
   std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("WebCrawler::updatePublicKeys");
-  this->serverToConnectTo = "www.googleapis.com";
-  this->portOrService = "https";
-  this->addressToConnectTo = "https://www.googleapis.com/oauth2/v3/certs";
+  this->peerAddress = "www.googleapis.com";
+  this->desiredPortOrService = "https";
+  this->url = "https://www.googleapis.com/oauth2/v3/certs";
   this->flagDoUseGET = true;
   if (commentsGeneral != nullptr) {
     *commentsGeneral << "<hr>" << "Updating public keys <hr>";
@@ -1164,10 +863,10 @@ bool WebClient::verifyRecaptcha(
   << "secret="
   << secret;
   this->flagDoUseGET = true;
-  this->addressToConnectTo = "https://www.google.com/recaptcha/api/siteverify";
-  this->addressToConnectTo += "?" + messageToSendStream.str();
-  this->serverToConnectTo = "www.google.com";
-  this->portOrService = "https";
+  this->url = "https://www.google.com/recaptcha/api/siteverify";
+  this->url += "?" + messageToSendStream.str();
+  this->peerAddress = "www.google.com";
+  this->desiredPortOrService = "https";
   this->postMessageToSend = messageToSendStream.str();
   this->fetchWebPage(commentsOnFailure, commentsGeneralSensitive);
   std::string response = this->bodyReceived;

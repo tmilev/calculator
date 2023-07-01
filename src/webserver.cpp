@@ -4,7 +4,7 @@
 #include "calculator_problem_storage.h"
 #include "web_api.h"
 #include "string_constants.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include <sys/wait.h>//<-waitpid f-n here
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop = network to presentation)
@@ -16,6 +16,7 @@
 #include "signals_infrastructure.h"
 #include "web_client.h"
 #include "calculator_problem_storage.h"
+#include "network_calculator.h"
 
 const std::string WebServer::Statististics::pingRequestsString =
 "pingRequests";
@@ -27,14 +28,6 @@ WebServer& GlobalVariables::server() {
   static WebServer result;
   return result;
 }
-
-class SystemFunctions {
-public:
-  static void* getIncomingAddress(sockaddr* sa);
-  static void segfaultSigaction[[noreturn]](
-    int signal, siginfo_t* si, void* arg
-  );
-};
 
 SignalsInfrastructure& SignalsInfrastructure::signals() {
   static SignalsInfrastructure result;
@@ -401,8 +394,6 @@ void WebWorker::sendAllBytesNoHeaders() {
   }
   global << "... done." << Logger::endL;
 }
-
-const int WebServer::maximumPendingConnections = 1000000;
 
 void SystemFunctions::segfaultSigaction[[noreturn]](
   int signal, siginfo_t* si, void* arg
@@ -2920,7 +2911,6 @@ WebServer::WebServer() {
   this->listeningSocketHTTPSDefault = - 1;
   this->listeningSocketHTTPSOpenSSL = - 1;
   this->highestSocketNumber = - 1;
-  this->flagReapingChildren = false;
   this->maximumWorkersPerIPAdress = 64;
   this->maximumTotalUsedWorkers = 120;
   this->webServerPingIntervalInSeconds = 10;
@@ -2947,7 +2937,6 @@ void WebServer::signal_SIGCHLD_handler(int s) {
   if (global.flagServerDetailedLog) {
     global << "Detail: webServer received SIGCHLD signal. " << Logger::endL;
   }
-  global.server().flagReapingChildren = true;
   global.server().reapChildren();
 }
 
@@ -3487,7 +3476,7 @@ void WebServer::initializeListeningSockets() {
     if (
       listen(
         this->allListeningSockets.keys[i],
-        WebServer::maximumPendingConnections
+        Listener::maximumPendingConnections
       ) ==
       - 1
     ) {
@@ -3863,7 +3852,7 @@ void WebServer::recycleChildrenIfPossible() {
 }
 
 bool WebServer::initializePrepareWebServerAll() {
-  STACK_TRACE("WebServer::initPrepareWebServerAll");
+  STACK_TRACE("WebServer::initializePrepareWebServerAll");
   this->initializePortsITry();
   if (!this->initializeBindToPorts()) {
     return false;
@@ -3873,122 +3862,11 @@ bool WebServer::initializePrepareWebServerAll() {
   return true;
 }
 
-bool WebServer::initializeBindToOnePort(
-  const std::string& desiredPort,
-  int& outputListeningSocket,
-  int& outputActualPort,
-  bool blockWhenWaitingToAccept
-) {
-  STACK_TRACE("WebServer::initializeBindToOnePort");
-  addrinfo hints;
-  addrinfo* servinfo = nullptr;
-  addrinfo* p = nullptr;
-  int yes = 1;
-  int rv;
-  memset(&hints, 0, sizeof hints);
-  hints.ai_family = AF_UNSPEC;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags = AI_PASSIVE;
-  // Use my IP.
-  // Loop through all the results and bind to the first we can.
-  rv = getaddrinfo(nullptr, desiredPort.c_str(), &hints, &servinfo);
-  if (rv != 0) {
-    global << "getaddrinfo failed: " << gai_strerror(rv) << Logger::endL;
-    return false;
-  }
-  outputListeningSocket = - 1;
-  for (p = servinfo; p != nullptr; p = p->ai_next) {
-    outputListeningSocket =
-    socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-    if (outputListeningSocket == - 1) {
-      global << "Error: socket failed.\n";
-      continue;
-    }
-    if (
-      setsockopt(
-        outputListeningSocket,
-        SOL_SOCKET,
-        SO_REUSEADDR,
-        &yes,
-        sizeof(int)
-      ) ==
-      - 1
-    ) {
-      global.fatal
-      << "Error: setsockopt failed, error: \n"
-      << strerror(errno)
-      << global.fatal;
-    }
-    if (bind(outputListeningSocket, p->ai_addr, p->ai_addrlen) == - 1) {
-      close(outputListeningSocket);
-      outputListeningSocket = - 1;
-      global
-      << "Error: bind failed at port: "
-      << desiredPort
-      << ". Error: "
-      << this->toStringLastErrorDescription()
-      << Logger::endL;
-      continue;
-    }
-    struct sockaddr_in serverAddress;
-    unsigned int serverAddressLength = 0;
-    if (
-      getsockname(
-        outputListeningSocket, (sockaddr*) & serverAddress,
-        &serverAddressLength
-      ) ==
-      - 1
-    ) {
-      global
-      << Logger::red
-      << "Error: failed to find socket name. "
-      << Logger::endL;
-    } else {
-      outputActualPort = ntohs(serverAddress.sin_port);
-      std::stringstream listeningPortString;
-      listeningPortString << outputActualPort;
-      if (desiredPort == "0") {
-        global
-        << "Listening on port: "
-        << Logger::red
-        << listeningPortString.str()
-        << Logger::normalColor
-        << ", desired port: "
-        << Logger::yellow
-        << desiredPort
-        << Logger::endL;
-      }
-    }
-    if (blockWhenWaitingToAccept) {
-      break;
-    }
-    int setFlagCounter = 0;
-    while (fcntl(outputListeningSocket, F_SETFL, O_NONBLOCK) != 0) {
-      if (++ setFlagCounter > 10) {
-        global.fatal
-        << "Error: failed to set non-blocking status to listening socket. "
-        << global.fatal;
-      }
-    }
-    break;
-  }
-  freeaddrinfo(servinfo);
-  // all done with this structure
-  if (outputListeningSocket == - 1) {
-    global.fatal
-    << "Failed to bind to port: "
-    << desiredPort
-    << ". "
-    << global.fatal;
-  }
-  return true;
-}
-
 bool WebServer::initializeBindToPorts() {
   STACK_TRACE("WebServer::initializeBindToPorts");
   int unusedPort = 0;
   if (
-    !this->initializeBindToOnePort(
+    !Listener::initializeBindToOnePort(
       this->portHTTP, this->listeningSocketHTTP, unusedPort, false
     )
   ) {
@@ -4003,7 +3881,7 @@ bool WebServer::initializeBindToPorts() {
   bool flagBuiltInTLSAvailable = false;
   if (flagBuiltInTLSAvailable) {
     if (
-      !this->initializeBindToOnePort(
+      !Listener::initializeBindToOnePort(
         this->portHTTPSBuiltIn,
         this->listeningSocketHTTPSBuiltIn,
         unusedPort,
@@ -4015,7 +3893,7 @@ bool WebServer::initializeBindToPorts() {
   }
   if (global.flagSSLAvailable) {
     if (
-      !this->initializeBindToOnePort(
+      !Listener::initializeBindToOnePort(
         this->portHTTPSOpenSSL,
         this->listeningSocketHTTPSOpenSSL,
         unusedPort,
@@ -4039,7 +3917,7 @@ bool WebServer::initializeBindToPorts() {
     const std::string& port = this->additionalPorts.keys[i];
     int& socket = this->additionalPorts.values[i];
     if (
-      !this->initializeBindToOnePort(port, socket, unusedPort, false)
+      !Listener::initializeBindToOnePort(port, socket, unusedPort, false)
     ) {
       return false;
     }
@@ -4152,131 +4030,6 @@ void WebServer::writeVersionJSFile() {
   fileStream << out.str();
 }
 
-// Class not included in header for portability reasons
-// - the header needs not to know of
-// the fd_set and sockaddr_storage structures.
-class Listener {
-public:
-  fd_set fdSetListenSockets;
-  int highestSocketNumber;
-  MapList<int, std::string>* allListeningSockets;
-  sockaddr_storage theirAddress;
-  // connector's address information
-  char userAddressBuffer[INET6_ADDRSTRLEN];
-  std::string userAddress;
-  void zeroSocketSet();
-  Listener(
-    int inputHighestSocketNumber,
-    MapList<int, std::string>* inputListeningSockets
-  ) {
-    this->highestSocketNumber = inputHighestSocketNumber;
-    this->allListeningSockets = inputListeningSockets;
-  }
-  int acceptWrapper();
-  void selectWrapper();
-  void computeUserAddress();
-};
-
-void Listener::zeroSocketSet() {
-  FD_ZERO(&this->fdSetListenSockets);
-  for (int i = 0; i < this->allListeningSockets->size(); i ++) {
-    FD_SET(
-      this->allListeningSockets->keys[i], &this->fdSetListenSockets
-    );
-  }
-  if (global.flagServerDetailedLog) {
-    global
-    << Logger::red
-    << "Detail: About to enter select loop. "
-    << Logger::endL;
-  }
-}
-
-void Listener::selectWrapper() {
-  while (true) {
-    int selectResult =
-    select(
-      this->highestSocketNumber + 1,
-      &this->fdSetListenSockets,
-      nullptr,
-      nullptr,
-      nullptr
-    );
-    if (selectResult != - 1) {
-      return;
-    }
-    if (global.server().flagReapingChildren) {
-      if (global.flagServerDetailedLog) {
-        global
-        << Logger::yellow
-        << "Interrupted select loop by child exit signal. "
-        << Logger::endL;
-      }
-      global.server().flagReapingChildren = false;
-    } else {
-      global
-      << Logger::red
-      << "select failed: this is not expected. Error message: "
-      << strerror(errno)
-      << Logger::endL;
-    }
-    global.server().statistics.failedSelectsSoFar ++;
-  }
-}
-
-int Listener::acceptWrapper() {
-  STACK_TRACE("Listener::acceptWrapper");
-  socklen_t sin_size = sizeof(this->theirAddress);
-  if (this->allListeningSockets->size() == 0) {
-    global << "Unexpected empty set of listening sockets. " << Logger::endL;
-  }
-  for (int i = this->allListeningSockets->size() - 1; i >= 0; i --) {
-    int currentListeningSocket = this->allListeningSockets->keys[i];
-    if (!FD_ISSET(currentListeningSocket, &this->fdSetListenSockets)) {
-      continue;
-    }
-    int result =
-    accept(
-      currentListeningSocket,
-      reinterpret_cast<struct sockaddr*>(&this->theirAddress),
-      &sin_size
-    );
-    if (result >= 0) {
-      global.server().lastListeningSocket = currentListeningSocket;
-      global
-      << Logger::green
-      << "Connection candidate "
-      << global.server().statistics.allConnections + 1
-      << ". "
-      << "Connected via listening socket "
-      << currentListeningSocket
-      << " on socket: "
-      << result
-      << Logger::endL;
-      return result;
-    } else {
-      global
-      << Logger::red
-      << "This is not supposed to happen: accept failed. Error: "
-      << global.server().toStringLastErrorDescription()
-      << Logger::endL;
-    }
-  }
-  return - 1;
-}
-
-void Listener::computeUserAddress() {
-  inet_ntop(
-    this->theirAddress.ss_family,
-    SystemFunctions::getIncomingAddress(
-      reinterpret_cast<struct sockaddr*>(&this->theirAddress)
-    ),
-    this->userAddressBuffer,
-    sizeof this->userAddressBuffer
-  );
-  this->userAddress = this->userAddressBuffer;
-}
-
 TransportLayerSecurity& TransportLayerSecurity::defaultTLS_READ_ONLY() {
   return global.server().transportLayerSecurity;
 }
@@ -4302,7 +4055,7 @@ int WebServer::daemon() {
   int pidChild = - 1;
   while (true) {
     if (pidChild < 0) {
-      pidChild = this->forkRaw();
+      pidChild = ForkCreator::forkRaw();
       if (pidChild == 0) {
         // Child process.
         global << Logger::orange
@@ -4405,7 +4158,7 @@ int WebServer::run() {
   "ping" + Crypto::Random::getRandomHexStringLeaveMemoryTrace(20);
   if (global.flagLocalhostConnectionMonitor) {
     global << Logger::green << "Start monitor process." << Logger::endL;
-    this->processIdServer = this->forkRaw();
+    this->processIdServer = ForkCreator::forkRaw();
     if (this->processIdServer < 0) {
       global.fatal << "Failed to create server process. " << global.fatal;
     }
@@ -6173,89 +5926,4 @@ JSData ActAsWebServerOnly::toJSON() {
   result[Configuration::ActAsWebServer::certificateFile] =
   this->certificateFile;
   return result;
-}
-
-void LocalDatabase::listenToPort() {
-  STACK_TRACE("LocalDatabase::listenToPort");
-  if (
-    !global.server().initializeBindToOnePort(
-      "0", this->socket, this->port, true
-    )
-  ) {
-    global.fatal << "Failed to bind to port 0. " << global.fatal;
-  }
-  global
-  << "Database initialized, listening on port: "
-  << this->port
-  << ", socket: "
-  << this->socket
-  << "."
-  << Logger::endL;
-  if (listen(this->socket, WebServer::maximumPendingConnections) == - 1) {
-    global.fatal
-    << "Failed to listen on database socket: "
-    << this->socket
-    << global.fatal;
-  }
-}
-
-int LocalDatabase::forkOutDatabase() {
-  STACK_TRACE("LocalDatabase::forkOutDatabase");
-  Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(
-    this->randomId, 24
-  );
-  this->idLoggable =
-  Crypto::convertListUnsignedCharsToHexFormat(this->randomId, 0, false);
-  this->idLoggable =
-  this->idLoggable.substr(0, 4) +
-  "_" +
-  this->idLoggable.substr(this->idLoggable.size() - 4, 4);
-  global << "Database session id: " << this->idLoggable << Logger::endL;
-  this->processId = global.server().forkProcessAndAcquireRandomness();
-  if (this->processId == - 1) {
-    global.fatal << "Failed to start database. " << global.fatal;
-  }
-  if (this->processId != 0) {
-    // This is the parent process.
-    return this->processId;
-  }
-  global.logs.logType = GlobalVariables::LogData::type::database;
-  Crypto::computeSha3_256(this->randomId, this->randomIdHash);
-  this->randomId.clear();
-  return 0;
-}
-
-void LocalDatabase::initializeForkAndRun() {
-  STACK_TRACE("LocalDatabase::initializeForkAndRun");
-  this->listenToPort();
-  if (this->forkOutDatabase() == 0) {
-    close(this->socket);
-    return;
-  }
-  this->run();
-}
-
-void LocalDatabase::run() {
-  STACK_TRACE("LocalDatabase::run");
-  std::stringstream portStream;
-  portStream << this->port;
-  this->allListeningSockets.setKeyValue(this->socket, portStream.str());
-  Listener listener(this->socket, &this->allListeningSockets);
-  while (this->runOneConnection(listener)) {}
-}
-
-bool LocalDatabase::runOneConnection(Listener& listener) {
-  STACK_TRACE("LocalDatabase::runOneConnection");
-  listener.zeroSocketSet();
-  listener.selectWrapper();
-  int newConnectedSocket = listener.acceptWrapper();
-  if (newConnectedSocket == - 1) {
-    global
-    << Logger::red
-    << "Database failed to accept connection"
-    << Logger::endL;
-    global << Logger::yellow << strerror(errno) << Logger::endL;
-    return true;
-  }
-  return true;
 }

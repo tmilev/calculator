@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include "math_extra_modules_semisimple_lie_algebras.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include "math_vector_partition_functions.h"
 #include "math_lattices.h"
 

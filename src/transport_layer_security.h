@@ -11,7 +11,7 @@
 // sudo apt-get install libssl-dev
 // on opensuse:
 // sudo yast -i libopenssl-devel
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include "general_logging_global_variables.h"
 
 class TransportLayerSecurity;

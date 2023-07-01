@@ -1,7 +1,7 @@
 #include "general_lists.h"
 #include "math_general.h"
 #include "math_extra_drawing_variables.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include "calculator_interface.h"
 
 void DrawingVariables::toJSON(JSData& output) {

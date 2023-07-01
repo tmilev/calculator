@@ -3,7 +3,7 @@
 #include "calculator_inner_typed_functions.h"
 #include "math_extra_drawing_variables.h"
 #include "calculator_html_functions.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include "web_api.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include <cmath>

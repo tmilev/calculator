@@ -1,7 +1,7 @@
 #include "general_logging_global_variables.h"
 #include "database.h"
 #include "string_constants.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 
 std::string FallbackDatabase::jsonLocation() {
   return "database/" + DatabaseStrings::databaseName + "/database.json";

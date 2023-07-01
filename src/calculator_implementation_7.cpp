@@ -4,7 +4,7 @@
 #include "math_extra_weyl_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_modules_semisimple_lie_algebras_implementation.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include "web_api.h"
 #include "math_extra_latex_routines.h"
 #include "source_code_formatter.h"

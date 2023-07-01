@@ -1,5 +1,5 @@
 #include "abstract_syntax_notation_one_decoder.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include "math_extra_algebraic_numbers.h"
 
 bool PrivateKeyRSA::Test::all() {

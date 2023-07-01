@@ -2,7 +2,7 @@
 #include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
 #include "general_strings.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include <unistd.h> //<- close, open defined here
 
 #ifdef MACRO_use_open_ssl

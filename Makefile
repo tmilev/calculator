@@ -213,6 +213,7 @@ SOURCES_RELATIVE_PATH=\
     math_semisimple_lie_subalgebras.cpp \
     multiprocessing.cpp \
     multitasking.cpp \
+    network.cpp \
     random_system.cpp \
     source_code_formatter.cpp \
     string_constants.cpp \

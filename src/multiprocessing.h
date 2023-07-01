@@ -5,6 +5,12 @@
 #include "math_general.h"
 #include "system_functions_global_objects.h"
 
+class ForkCreator {
+public:
+  static int forkProcessAndAcquireRandomness();
+  static int forkRaw();
+};
+
 // This is a basic wrapper around linux unnamed pipes.
 class PipePrimitive {
 public:

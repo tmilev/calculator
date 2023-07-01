@@ -275,7 +275,8 @@ class LocalDatabase {
   MapList<int, std::string> allListeningSockets;
 public:
   int processId;
-  int socket;
+  int socketDatabaseServer;
+  int socketDatabaseClient;
   int port;
   // A shortened version of randomId. You can log this one.
   std::string idLoggable;
@@ -320,6 +321,7 @@ public:
   // Returns the process id of the child database to the parent
   // and 0 to the child database process.
   int forkOutDatabase();
+  void initializeClient();
   void initializeForkAndRun();
   void run();
   bool runOneConnection(Listener& listener);

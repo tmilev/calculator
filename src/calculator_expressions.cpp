@@ -6,7 +6,7 @@
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "calculator_html_functions.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include "math_extra_elliptic_curves_implementation.h"
 #include <cmath>
 #include "math_rational_function_implementation.h"

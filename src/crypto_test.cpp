@@ -1,4 +1,4 @@
-#include "crypto.h"
+#include "crypto_calculator.h"
 
 bool Crypto::Test::all() {
   Crypto::Test::sha256();

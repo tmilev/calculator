@@ -1,12 +1,7 @@
 #include "database.h"
 #include "string_constants.h"
-#include <sys/wait.h>//<-waitpid f-n here
-#include <netdb.h> //<-addrinfo and related data structures defined here
-#include <arpa/inet.h> // <- inet_ntop declared here (ntop = network to presentation)
-#include <unistd.h>
-#include <sys/stat.h>//<-for file statistics
-#include <fcntl.h>//<-setting flags of file descriptors
-#include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
+#include "network_calculator.h"
+#include "crypto_calculator.h"
 
 std::string LocalDatabase::folder() {
   return "database/" + DatabaseStrings::databaseName + "/";
@@ -24,7 +19,8 @@ void LocalDatabase::createHashIndex(
 
 LocalDatabase::LocalDatabase() {
   this->processId = - 1;
-  this->socket = - 1;
+  this->socketDatabaseServer = - 1;
+  this->socketDatabaseClient = - 1;
   this->port = - 1;
 }
 
@@ -101,12 +97,25 @@ bool LocalDatabase::findOneFromSome(
     }
     return false;
   }
+  //  this->socketDatabaseClient = socket()
   status =
-  connect(this->socket, serverInfo->ai_addr, serverInfo->ai_addrlen);
+  connect(
+    this->socketDatabaseClient,
+    serverInfo->ai_addr,
+    serverInfo->ai_addrlen
+  );
   if (status != 0) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to connect to database. ";
+      *commentsOnFailure
+      << "LocalDatabase::findOneFromSome: failed to connect to database. ";
     }
+    global
+    <<
+    "DEBUG: LocalDatabase::findOneFromSome: failed to connect to database. port: "
+    << this->port
+    << "socket: "
+    << this->socketDatabaseServer
+    << Logger::endL;
     return false;
   }
   global.fatal
@@ -157,4 +166,103 @@ bool LocalDatabase::updateOneFromSome(
   << "LocalDatabase::updateOneFromSome: not implemented yet. "
   << global.fatal;
   return false;
+}
+
+void LocalDatabase::listenToPort() {
+  STACK_TRACE("LocalDatabase::listenToPort");
+  if (
+    Listener::initializeBindToOnePort(
+      "0", this->socketDatabaseServer, this->port, true
+    )
+  ) {
+    global.fatal << "Failed to bind to port 0. " << global.fatal;
+  }
+  global
+  << "Database initialized, listening on port: "
+  << this->port
+  << ", socket: "
+  << this->socketDatabaseServer
+  << "."
+  << Logger::endL;
+  if (
+    listen(
+      this->socketDatabaseServer, Listener::maximumPendingConnections
+    ) ==
+    - 1
+  ) {
+    global.fatal
+    << "Failed to listen on database socket: "
+    << this->socketDatabaseServer
+    << global.fatal;
+  }
+}
+
+int LocalDatabase::forkOutDatabase() {
+  STACK_TRACE("LocalDatabase::forkOutDatabase");
+  Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(
+    this->randomId, 24
+  );
+  this->idLoggable =
+  Crypto::convertListUnsignedCharsToHexFormat(this->randomId, 0, false);
+  this->idLoggable =
+  this->idLoggable.substr(0, 4) +
+  "_" +
+  this->idLoggable.substr(this->idLoggable.size() - 4, 4);
+  global << "Database session id: " << this->idLoggable << Logger::endL;
+  this->processId = ForkCreator::forkProcessAndAcquireRandomness();
+  if (this->processId == - 1) {
+    global.fatal << "Failed to start database. " << global.fatal;
+  }
+  if (this->processId != 0) {
+    // This is the parent process.
+    return this->processId;
+  }
+  global.logs.logType = GlobalVariables::LogData::type::database;
+  Crypto::computeSha3_256(this->randomId, this->randomIdHash);
+  this->randomId.clear();
+  return 0;
+}
+
+void LocalDatabase::initializeForkAndRun() {
+  STACK_TRACE("LocalDatabase::initializeForkAndRun");
+  this->listenToPort();
+  if (this->forkOutDatabase() == 0) {
+    this->initializeClient();
+    return;
+  }
+  this->run();
+}
+
+void LocalDatabase::initializeClient() {
+  close(this->socketDatabaseServer);
+  this->socketDatabaseServer = - 1;
+}
+
+void LocalDatabase::run() {
+  STACK_TRACE("LocalDatabase::run");
+  std::stringstream portStream;
+  portStream << this->port;
+  this->allListeningSockets.setKeyValue(
+    this->socketDatabaseServer, portStream.str()
+  );
+  Listener listener(
+    this->socketDatabaseServer, &this->allListeningSockets
+  );
+  while (this->runOneConnection(listener)) {}
+}
+
+bool LocalDatabase::runOneConnection(Listener& listener) {
+  STACK_TRACE("LocalDatabase::runOneConnection");
+  listener.zeroSocketSet();
+  listener.selectWrapper();
+  int newConnectedSocket = listener.acceptWrapper();
+  if (newConnectedSocket == - 1) {
+    global
+    << Logger::red
+    << "Database failed to accept connection"
+    << Logger::endL;
+    global << Logger::yellow << strerror(errno) << Logger::endL;
+    return true;
+  }
+  return true;
 }

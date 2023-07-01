@@ -8,7 +8,7 @@
 #include <sys/prctl.h> //<- prctl here
 #include <signal.h> // <-signals here
 
-int WebServer::forkRaw() {
+int ForkCreator::forkRaw() {
   return fork();
 }
 
@@ -18,13 +18,13 @@ int WebServer::forkWorkerProcess() {
     return - 1;
   }
   this->computeActiveWorkerId();
-  return this->forkProcessAndAcquireRandomness();
+  return ForkCreator::forkProcessAndAcquireRandomness();
 }
 
-int WebServer::forkProcessAndAcquireRandomness() {
+int ForkCreator::forkProcessAndAcquireRandomness() {
   // timer taken at server level:
   int64_t millisecondsAtfork = global.getElapsedMilliseconds();
-  int result = this->forkRaw();
+  int result = ForkCreator::forkRaw();
   // We need to make sure that the child retains no information
   // about the server's random bytes, and similarly the server
   // has no information on the child's random bytes.
@@ -81,14 +81,14 @@ int WebServer::forkProcessAndAcquireRandomness() {
 
 #else
 
-int WebServer::forkProcess() {
+int ForkCreator::forkProcess() {
   global.fatal
   << "In forkProcess(): Process forks are not allowed when running under wasm."
   << global.fatal;
   return - 1;
 }
 
-int WebServer::forkRaw() {
+int ForkCreator::forkRaw() {
   global.fatal
   << "In forkRaw(): process forks are not allowed when running under wasm."
   << global.fatal;

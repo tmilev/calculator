@@ -225,7 +225,6 @@ public:
 
 class WebServer {
 public:
-  static const int maximumPendingConnections;
   // how many pending connections queue will hold
   int listeningSocketHTTP;
   int listeningSocketHTTPSOpenSSL;
@@ -262,7 +261,6 @@ public:
   int previousServerStatReport;
   int previousServerStatDetailedReport;
   int processIdServer;
-  bool flagReapingChildren;
   bool flagDeallocated;
   std::string pingAuthentication;
   TransportLayerSecurity transportLayerSecurity;
@@ -342,8 +340,6 @@ public:
   bool createProcessMutex();
   void computeActiveWorkerId();
   int forkWorkerProcess();
-  int forkProcessAndAcquireRandomness();
-  int forkRaw();
   void initializeRandomBytes();
   void writeVersionJSFile();
   WebWorker& getActiveWorker();
@@ -356,12 +352,6 @@ public:
   bool initializePrepareWebServerAll();
   void initializeSignals();
   bool initializeBindToPorts();
-  bool initializeBindToOnePort(
-    const std::string& desiredPort,
-    int& outputListeningSocket,
-    int& outputActualPort,
-    bool blockWhenWaitingToAccept
-  );
   void initializePortsITry();
   void initializeListeningSockets();
   void initializeSSL();

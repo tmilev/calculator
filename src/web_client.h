@@ -4,13 +4,18 @@
 
 #include "transport_layer_security.h"
 
+// Forward-declared for maximum portability.
+class Connector;
+
 class WebClient {
 public:
   TransportLayerSecurity transportLayerSecurity;
-  int socketInteger;
-  std::string portOrService;
-  std::string addressToConnectTo;
-  std::string serverToConnectTo;
+  // The peer address, along the lines of http://google.com.
+  std::string peerAddress;
+  // The full address, along the lines of https://google.com/index.html.
+  std::string url;
+  // A service such as https.
+  std::string desiredPortOrService;
   std::string postMessageToSend;
   std::string lastTransactionErrors;
   std::string lastTransaction;
@@ -24,10 +29,7 @@ public:
   LargeInteger expectedLength;
   List<char> buffer;
   int lastNumberOfBytesRead;
-  struct sockaddr_in serverAddress;
-  struct hostent* serverOtherSide;
-  struct addrinfo hints;
-  struct addrinfo* serverInfo;
+  MemorySaving<Connector> connectorContainer;
   WebClient();
   ~WebClient();
   void closeEverything();
@@ -52,6 +54,7 @@ public:
     std::stringstream* commentsGeneralNONsensitive,
     std::stringstream* commentsGeneralSensitive
   );
+  std::string toString() const;
 };
 
 #endif

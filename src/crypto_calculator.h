@@ -1,6 +1,6 @@
 
-#ifndef header_crypto_ALREADY_INCLUDED
-#define header_crypto_ALREADY_INCLUDED
+#ifndef header_crypto_calculator_ALREADY_INCLUDED
+#define header_crypto_calculator_ALREADY_INCLUDED
 
 #include "general_lists.h"
 #include "general_logging_global_variables.h"
@@ -548,4 +548,4 @@ public:
   );
 };
 
-#endif // header_crypto_ALREADY_INCLUDED
+#endif // header_crypto_calculator_ALREADY_INCLUDED

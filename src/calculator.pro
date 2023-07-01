@@ -36,7 +36,7 @@ HEADERS += \
     calculator_inner_typed_functions.h \
     calculator_interface.h \
     calculator_weyl_group_characters.h \
-    crypto.h \
+    crypto_calculator.h \
     database.h \
     general_database_system_independent.h \
     general_file_operations_encodings.h \
@@ -52,6 +52,7 @@ HEADERS += \
     math_extra_polynomial_factorization.h \
     math_lattices.h \
     math_vector_partition_functions.h \
+    network.h \
     progress_report.h \
     signals_infrastructure.h \
     web_api.h \
@@ -88,6 +89,7 @@ HEADERS += \
     math_subsets_selections.h \
     math_vectors.h \
     multiprocessing.h \
+    network_calculator.h \
     source_code_formatter.h \
     string_constants.h \
     system_functions_global_objects.h \
@@ -177,6 +179,7 @@ SOURCES += \
     math_vector_partition_functions.cpp \
     multiprocessing.cpp \
     multitasking.cpp \
+    network.cpp \
     random.cpp \
     random_system.cpp \
     source_code_formatter.cpp \

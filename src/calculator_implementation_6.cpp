@@ -7,7 +7,7 @@
 #include "calculator_html_interpretation.h"
 #include "math_extra_drawing_variables.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
-#include "crypto.h"
+#include "crypto_calculator.h"
 #include "abstract_syntax_notation_one_decoder.h"
 #include "math_extra_elliptic_curves_implementation.h"
 #include "transport_layer_security.h"

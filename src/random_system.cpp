@@ -1,4 +1,4 @@
-#include "crypto.h"
+#include "crypto_calculator.h"
 
 // sys/random.h is missing from older distros/kernels.
 // #include <sys/random.h>

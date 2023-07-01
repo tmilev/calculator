@@ -9,7 +9,7 @@
 #include "calculator_html_functions.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "database.h"
-#include "calculator_database_mongo.h"
+#include "calculator_database.h"
 #include "string_constants.h"
 
 // This file lists calculator functions and various hard-coded rules.

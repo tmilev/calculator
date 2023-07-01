@@ -53,11 +53,10 @@ ifeq ($(wasm), 1)
     # No pthread
     LDFLAGS=$(OPTIMIZATION_FLAGS)
     LDFLAGS+=-s LLD_REPORT_UNDEFINED -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]' -s EXPORTED_FUNCTIONS='["_callCalculator", "_free"]'
-    $(info [1;31mWeb assembly: turning off ssl and mongoDB.[0m) 
+    $(info [1;31mWeb assembly: turning off ssl.[0m) 
     TARGET=calculator_html/web_assembly/calculator.js
     OBJECT_FILE_OUTPUT=bin/wasm/
     nossl=1
-    noMongo=1
 else
     LDFLAGS=-pthread $(OPTIMIZATION_FLAGS)
 endif
@@ -73,29 +72,6 @@ endif
 ########################
 ## We include mysql and ssl depending on their availability
 ## This code may need more work in the future
-ifeq ($(noMongo), 1)
-$(info [1;31mNo mongoDB requested.[0m) 
-else
-mongoLocation =
-ifneq ($(wildcard /usr/share/lintian/overrides/libmongoc-1.0-0),) 
-  mongoLocation=/usr/share/lintian/overrides
-endif
-ifneq ($(wildcard /usr/local/lib/libmongoc-1.0.so),) #location of mongoC in Ubuntu
-  mongoLocation=/usr/local/lib
-endif
-ifneq ($(mongoLocation),)
-  CFLAGS+=-I/usr/include/libmongoc-1.0
-  CFLAGS+=-I/usr/include/libbson-1.0
-  CFLAGS+=-I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
-  CFLAGS+=-DMACRO_use_MongoDB
-#  LDFLAGS+= -L/usr/local/lib
-  LIBRARIES_INCLUDED_AT_THE_END+=-L/$(mongoLocation) -lmongoc-1.0 -lbson-1.0
-$(info [1;32mMongo found.[0m) 
-else
-$(info [1;31mNOT FOUND: Mongo.[0m The calculator will run using a fallback database.)
-noMongo=1
-endif
-endif
 
 ifeq ($(nossl), 1)
 $(info [1;33mNo openssl requested.[0m) 
@@ -178,9 +154,9 @@ SOURCES_RELATIVE_PATH=\
     crypto_test.cpp \
     database.cpp \
     database_test.cpp \
-    database_mongo.cpp \
     database_fallback.cpp \
     database_internal.cpp \
+    database_problem_data.cpp \
     date_time_wrappers.cpp \
     exam_routines.cpp \
     global_objects.cpp \

@@ -608,9 +608,6 @@ std::string WebWorker::getDatabaseDeleteOneItem() {
   if (Database::get().deleteOneEntry(inputParsed, &commentsStream)) {
     return "success";
   }
-  if (global.databaseType != DatabaseType::externalMongo) {
-    commentsStream << "No external database available.";
-  }
   return commentsStream.str();
 }
 
@@ -4148,7 +4145,7 @@ int WebServer::run() {
   global.logs.serverMonitor.reset();
   global.logs.worker.reset();
   Database::get().initializeServer();
-  if (Database::get().localDatabase.processId != 0) {
+  if (global.databaseType == DatabaseType::internal&&  Database::get().localDatabase.processId != 0) {
     // This is the database process.
     return 0;
   }
@@ -4598,9 +4595,6 @@ void WebServer::figureOutOperatingSystem() {
 
 void WebServer::checkSystemInstallationOpenSSL() {
   STACK_TRACE("WebServer::checkSystemInstallationOpenSSL");
-  if (global.databaseType != DatabaseType::externalMongo) {
-    return;
-  }
   if (
     global.configuration["openSSL"].elementType !=
     JSData::Token::tokenUndefined
@@ -4643,12 +4637,6 @@ void WebServer::checkSystemInstallationOpenSSL() {
 void WebServer::checkDatabaseSetup() {
   STACK_TRACE("WebServer::checkMongoDatabaseSetup");
   switch (global.databaseType) {
-  case DatabaseType::externalMongo:
-    global
-    << Logger::green
-    << "Compiled with mongo DB support. "
-    << Logger::endL;
-    break;
   case DatabaseType::internal:
     global
     << Logger::blue
@@ -5290,21 +5278,39 @@ void GlobalVariables::configurationProcess() {
   isTrueRepresentationInJSON();
   global.flagDebugLogin =
   global.configuration[Configuration::debugLogin].isTrueRepresentationInJSON();
+  DatabaseStrings::databaseName =
+  global.configuration[Configuration::database].stringValue;
+  if (DatabaseStrings::databaseName == "") {
+    DatabaseStrings::databaseName = "local";
+    global.configuration[Configuration::database] = "local";
+  }
+
   if (global.flagDebugLogin) {
-    global.databaseType = DatabaseType::fallback;
     global
     << Logger::purple
     << "************************"
     << Logger::endL
     << Logger::red
     << "WARNING: debug login is on. "
-    << Logger::green
-    << "This can only run with fallback database. "
-    << "I am turning off regular database right away."
-    << Logger::endL
-    << Logger::purple
-    << "************************"
-    << Logger::endL;
+;
+    if (global.databaseType == DatabaseType::internal) {
+        global << Logger::green
+        << "Set database name to 'test'. "
+        << Logger::endL
+        << Logger::purple
+        << "************************"
+        << Logger::endL;
+        DatabaseStrings::databaseName = "test";
+
+    }else{
+        global.databaseType = DatabaseType::fallback;
+        global << Logger::green
+        << "Set database to fallback database. "
+        << Logger::endL
+        << Logger::purple
+        << "************************"
+        << Logger::endL;
+    }
   }
   if (
     global.configuration[Configuration::disableDatabaseLogEveryoneAsAdmin].
@@ -5326,12 +5332,6 @@ void GlobalVariables::configurationProcess() {
     << Logger::purple
     << "************************"
     << Logger::endL;
-  }
-  DatabaseStrings::databaseName =
-  global.configuration[Configuration::database].stringValue;
-  if (DatabaseStrings::databaseName == "") {
-    DatabaseStrings::databaseName = "local";
-    global.configuration[Configuration::database] = "local";
   }
   if (
     global.configuration[Configuration::serverAutoMonitor].

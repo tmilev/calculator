@@ -125,9 +125,11 @@ class Authenticator {
       loginInfo += "<b style='color:red'>Https off.</b>";
     }
     let database = parsedAuthentication[pathnames.urlFields.requests.database];
+    if (database === undefined || database === null) {
+      database = "?";
+    }
     if (database === "local") {
       database = "<b style='color:green'>local database</b>";
-
     }
     let databaseInfo = document.getElementById(
       ids.domElements.divLoginPanelDatabaseInfo,

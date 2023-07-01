@@ -414,74 +414,7 @@ public:
   // TODO(tmilev): Rename this to fallbackDatabase.
   FallbackDatabase fallbackDatabase;
   LocalDatabase localDatabase;
-  class Mongo {
-  public:
-    // The following variable has type mongoc_client_t.
-    // This type is not forward declared due to compiler errors such as:
-    // error: using typedef-name ‘mongoc_client_t’ after ‘struct’.
-    void* client;
-    // The following variable has type mongoc_client_t.
-    // Not declared for reasons similar to the above.
-    void* database;
-    Database* owner;
-    bool flagInitialized;
-    std::string convertErrorToString(void* bson_error_t_pointer);
-    bool initialize();
-    void shutdown();
-    bool deleteDatabase(std::stringstream* commentsOnFailure);
-    void createHashIndex(
-      const std::string& collectionName, const std::string& key
-    );
-    bool fetchCollectionNames(
-      List<std::string>& output, std::stringstream* commentsOnFailure
-    );
-    static bool findOneWithOptions(
-      const QueryExact& query,
-      const QueryResultOptions& options,
-      JSData& output,
-      std::stringstream* commentsOnFailure,
-      std::stringstream* commentsGeneralNonSensitive = nullptr
-    );
-    static bool findOneFromSome(
-      const List<QueryExact>& findOrQueries,
-      JSData& output,
-      std::stringstream* commentsOnFailure
-    );
-    static bool getOrFindQuery(
-      const List<QueryExact>& input,
-      std::string& output,
-      std::stringstream* commentsOnFailure = nullptr
-    );
-    static bool findFromJSONWithOptions(
-      const QueryExact& findQuery,
-      List<JSData>& output,
-      const QueryResultOptions& options,
-      int maximumOutputItems,
-      long long* totalItems,
-      std::stringstream* commentsOnFailure,
-      std::stringstream* commentsGeneralNonSensitive
-    );
-    bool updateOneFromSome(
-      const List<QueryExact>& findOrQueries,
-      const QuerySet& updateQuery,
-      std::stringstream* commentsOnFailure = nullptr
-    );
-    bool updateOne(
-      const QueryExact& findQuery,
-      const QuerySet& updateQuery,
-      std::stringstream* commentsOnFailure = nullptr
-    );
-    bool updateOneFromQueryString(
-      const std::string& collectionName,
-      const std::string& findQuery,
-      const std::string& updateQuery,
-      std::stringstream* commentsOnFailure = nullptr
-    );
-    Mongo();
-    ~Mongo();
-  };
 
-  Mongo mongoDB;
   bool findFromJSON(
     const QueryExact& findQuery,
     List<JSData>& output,

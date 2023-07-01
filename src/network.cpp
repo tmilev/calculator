@@ -226,6 +226,7 @@ bool Listener::initializeBindToOnePort(
     return false;
   }
   outputListeningSocket = - 1;
+  global << "DEBUG: about to enter bind loop" << Logger::endL;
   for (p = servinfo; p != nullptr; p = p->ai_next) {
     outputListeningSocket =
     socket(p->ai_family, p->ai_socktype, p->ai_protocol);
@@ -278,13 +279,14 @@ bool Listener::initializeBindToOnePort(
       listeningPortString << outputActualPort;
       if (desiredPort == "0") {
         global
-        << "Listening on port: "
+        << "Bound to port: "
         << Logger::red
         << listeningPortString.str()
         << Logger::normalColor
         << ", desired port: "
         << Logger::yellow
         << desiredPort
+        << ". Socket to listen to: " << outputListeningSocket << ". "
         << Logger::endL;
       }
     }
@@ -295,14 +297,14 @@ bool Listener::initializeBindToOnePort(
     while (fcntl(outputListeningSocket, F_SETFL, O_NONBLOCK) != 0) {
       if (++ setFlagCounter > 10) {
         global.fatal
-        << "Error: failed to set non-blocking status to listening socket. "
+        << "Error: failed to set non-blocking status to bound socket. "
         << global.fatal;
       }
     }
     break;
   }
   freeaddrinfo(servinfo);
-  // all done with this structure
+  // All done with servinfo.
   if (outputListeningSocket == - 1) {
     global.fatal
     << "Failed to bind to port: "

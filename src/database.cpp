@@ -7,6 +7,18 @@
 std::string EmailRoutines::webAdress = "";
 std::string EmailRoutines::sendEmailFrom = "";
 
+std::string UserCalculatorData::toStringFindQueries() const {
+  List<QueryExact> queries = getFindMeFromUserNameQuery();
+  std::stringstream out;
+  out << "Queries to try: ";
+  for (int i = 0; i < queries.size; i ++) {
+    out << queries[i].toString();
+    if (i != queries.size - 1) {
+      out << ", ";
+    }
+  }
+  return out.str();
+}
 bool Database::User::setPassword(
   const std::string& inputUsername,
   const std::string& inputNewPassword,
@@ -27,6 +39,31 @@ bool Database::User::setPassword(
   return result;
 }
 
+bool Database::User::loadUserInformation(
+  UserCalculatorData& output, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::User::loadUserInformation");
+  if (output.username == "" && output.email == "") {
+    return false;
+  }
+  JSData userEntry;
+  if (
+    !this->owner->findOneFromSome(
+      output.getFindMeFromUserNameQuery(), userEntry, nullptr
+    )
+  ) {
+    if (global.flagDebugLogin) {
+      global.comments
+      << output.toStringFindQueries()
+      << output.toStringSecure();
+    }
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Could not find username/email. ";
+    }
+    return false;
+  }
+  return output.loadFromJSON(userEntry);
+}
 bool Database::User::userExists(
   const std::string& inputUsername, std::stringstream& comments
 ) {
@@ -246,6 +283,267 @@ bool QueryExact::fromJSON(
   return true;
 }
 
+
+
+bool Database::matchesPattern(
+  const List<std::string>& fieldLabel,
+  const List<std::string>& pattern
+) {
+  STACK_TRACE("Database::matchesPattern");
+  if (fieldLabel.size != pattern.size) {
+    return false;
+  }
+  for (int i = 0; i < pattern.size; i ++) {
+    if (pattern[i] == DatabaseStrings::anyField) {
+      continue;
+    }
+    if (pattern[i] == DatabaseStrings::objectSelector) {
+      continue;
+    }
+    if (fieldLabel[i] != pattern[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Database::isDeleteable(
+  const List<std::string>& labels,
+  List<std::string>** outputPattern,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::isDeleteable");
+  for (int i = 0; i < global.databaseModifiableFields.size; i ++) {
+    if (
+      Database::matchesPattern(
+        labels, global.databaseModifiableFields[i]
+      )
+    ) {
+      if (outputPattern != nullptr) {
+        *outputPattern = &global.databaseModifiableFields[i];
+      }
+      return true;
+    }
+  }
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    << "Labels: "
+    << labels.toStringCommaDelimited()
+    << " do not match any modifiable field pattern. ";
+  }
+  return false;
+}
+
+bool Database::getLabels(
+  const JSData& fieldEntries,
+  List<std::string>& labels,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::getLabels");
+  labels.setSize(0);
+  for (int i = 0; i < fieldEntries.listObjects.size; i ++) {
+    if (
+      fieldEntries.listObjects[i].elementType != JSData::Token::tokenString
+    ) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "Label index "
+        << i
+        << " is not of type string as required. ";
+      }
+      return false;
+    }
+    labels.addOnTop(fieldEntries.listObjects[i].stringValue);
+  }
+  return true;
+}
+
+bool Database::isDeleteable(
+  const JSData& entry,
+  List<std::string>** outputPattern,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::isDeleteable");
+  if (
+    entry.elementType != JSData::Token::tokenObject ||
+    !entry.hasKey(DatabaseStrings::labelFields)
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      <<
+      "The labels json is required to be an object of the form {fields: [tableName, objectId,...]}. "
+      ;
+    }
+    return false;
+  }
+  List<std::string> labels;
+  if (
+    !Database::getLabels(
+      entry.objects.getValueNoFail("fields"),
+      labels,
+      commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  return Database::isDeleteable(labels, outputPattern, commentsOnFailure);
+}
+
+bool Database::deleteOneEntry(
+  const JSData& entry, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::deleteOneEntry");
+  if (!global.userDefaultHasAdminRights()) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Only logged-in admins can delete DB entries.";
+    }
+    return false;
+  }
+  List<std::string>* labelTypes = nullptr;
+  if (!isDeleteable(entry, &labelTypes, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Entry: "
+      << entry.toString(nullptr)
+      << " not deleteable.";
+    }
+    return false;
+  }
+  List<std::string> labels;
+  if (
+    !Database::getLabels(
+      entry.objects.getValueNoFail(DatabaseStrings::labelFields),
+      labels,
+      commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  if (labels.size < 2) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      <<
+      "When deleting an object, it needs at least two labels: table name and objectid. "
+      << "Your input appears to have only "
+      << labels.size
+      << " entries: "
+      << labels.toStringCommaDelimited()
+      << ". ";
+    }
+    return false;
+  }
+  QueryExact findQuery(
+    labels[0],
+    List<std::string>({
+        DatabaseStrings::labelId, DatabaseStrings::objectSelectorMongo
+      }
+    ),
+    labels[1]
+  );
+  std::string tableName = labels[0];
+  if (labels.size == 0) {
+    return this->deleteOneEntryById(findQuery, commentsOnFailure);
+  }
+  return
+  Database::deleteOneEntryUnsetUnsecure(findQuery, labels, commentsOnFailure);
+}
+
+bool Database::deleteOneEntryById(
+  const QueryExact& findQuery, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::deleteOneEntryById");
+#ifdef MACRO_use_MongoDB
+  JSData foundItem;
+  if (!this->findOne(findQuery, foundItem, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Query: "
+      << findQuery.toJSON().toString(nullptr)
+      << " returned no hits in table: "
+      << findQuery.collection;
+    }
+    return false;
+  }
+  MongoQuery queryInsertIntoDeletedTable;
+  JSData deletedEntry;
+  deletedEntry["deleted"] = foundItem;
+  queryInsertIntoDeletedTable.collectionName = DatabaseStrings::tableDeleted;
+  if (
+    !queryInsertIntoDeletedTable.insertOne(deletedEntry, commentsOnFailure)
+  ) {
+    return false;
+  }
+  MongoQuery query;
+  query.findQuery = findQuery.toJSON().toString(nullptr);
+  query.collectionName = findQuery.collection;
+  return query.removeOne(commentsOnFailure);
+#else
+  (void) findQuery;
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    << "deleteOneEntryById: project compiled without mongoDB support. ";
+  }
+  return false;
+#endif
+}
+
+bool Database::deleteOneEntryUnsetUnsecure(
+  const QueryExact& findQuery,
+  List<std::string>& selector,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::deleteOneEntryUnsetUnsecure");
+#ifdef MACRO_use_MongoDB
+  std::string selectorString = QueryExact::getLabelFromNestedLabels(selector);
+  JSData foundItem;
+  QueryResultOptions options;
+  options.fieldsToProjectTo.addListOnTop(selector);
+  options.fieldsToProjectTo.addOnTop(selectorString);
+  bool didFindItem =
+  Database::get().findOneWithOptions(
+    findQuery, options, foundItem, commentsOnFailure, nullptr
+  );
+  if (!didFindItem) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Query: "
+      << findQuery.toJSON().toString(nullptr)
+      << " returned no hits in table: "
+      << findQuery.collection;
+    }
+    return false;
+  }
+  MongoQuery queryBackUp;
+  queryBackUp.collectionName = DatabaseStrings::tableDeleted;
+  JSData backUp;
+  backUp["deleted"] = foundItem;
+  if (!queryBackUp.insertOne(backUp, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to insert backup: "
+      << backUp.toString(nullptr);
+    }
+    return false;
+  }
+  MongoQuery query;
+  query.findQuery = findQuery.toJSON().toString(nullptr);
+  query.collectionName = findQuery.collection;
+  std::stringstream updateQueryStream;
+  updateQueryStream << "{\"$unset\": {\"" << selectorString << "\":\"\"}}";
+  query.updateQuery = updateQueryStream.str();
+  return query.updateOneNoOptions(commentsOnFailure);
+#else
+  (void) findQuery;
+  (void) selector;
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    <<
+    "deleteOneEntryUnsetUnsecure: project compiled without mongoDB support. ";
+  }
+  return false;
+#endif
+}
+
 bool Database::convertJSONToJSONMongo(
   const JSData& input,
   JSData& output,
@@ -374,15 +672,6 @@ bool Database::findOneWithOptions(
   STACK_TRACE("Database::findOneWithOptions");
   (void) commentsGeneralNonSensitive;
   switch (global.databaseType) {
-  case DatabaseType::externalMongo:
-    return
-    Database::get().mongoDB.findOneWithOptions(
-      query,
-      options,
-      output,
-      commentsOnFailure,
-      commentsGeneralNonSensitive
-    );
   case DatabaseType::internal:
     return
     Database::get().localDatabase.findOneWithOptions(
@@ -438,9 +727,6 @@ std::string Database::toString() {
     out
     << "No database: everyone is admin. "
     << DatabaseStrings::errorDatabaseDisabled;
-    break;
-  case DatabaseType::externalMongo:
-    out << "Current database: MongoDB. ";
     break;
   case DatabaseType::fallback:
     out << "Current database: Fallback. ";
@@ -503,8 +789,6 @@ bool Database::updateOne(
       << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
-  case DatabaseType::externalMongo:
-    return this->mongoDB.updateOne(findQuery, dataToMerge, commentsOnFailure);
   case DatabaseType::fallback:
     return
     this->fallbackDatabase.updateOne(
@@ -530,9 +814,6 @@ bool Database::findOneFromSome(
       << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
-  case DatabaseType::externalMongo:
-    return
-    this->mongoDB.findOneFromSome(findOrQueries, output, commentsOnFailure);
   case DatabaseType::fallback:
     return
     this->fallbackDatabase.findOneFromSome(
@@ -557,8 +838,6 @@ bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
       << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
-  case DatabaseType::externalMongo:
-    return this->mongoDB.deleteDatabase(commentsOnFailure);
   case DatabaseType::fallback:
     return this->fallbackDatabase.deleteDatabase(commentsOnFailure);
   case DatabaseType::internal:
@@ -575,9 +854,6 @@ void Database::createHashIndex(
   switch (global.databaseType) {
   case DatabaseType::noDatabaseEveryoneIsAdmin:
     return;
-  case DatabaseType::externalMongo:
-    this->mongoDB.createHashIndex(collectionName, key);
-    return;
   case DatabaseType::fallback:
     this->fallbackDatabase.createHashIndex(collectionName, key);
     return;
@@ -593,9 +869,6 @@ bool Database::initializeWorker() {
     return true;
   }
   switch (global.databaseType) {
-  case DatabaseType::externalMongo:
-    this->mongoDB.initialize();
-    break;
   default:
     break;
   }
@@ -686,17 +959,6 @@ bool Database::findFromJSONWithOptions(
       << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
-  case DatabaseType::externalMongo:
-    return
-    Database::Mongo::findFromJSONWithOptions(
-      findQuery,
-      output,
-      options,
-      maximumOutputItems,
-      totalItems,
-      commentsOnFailure,
-      commentsGeneralNonSensitive
-    );
   case DatabaseType::fallback:
     return
     Database::get().fallbackDatabase.findFromJSONWithOptions(
@@ -750,9 +1012,6 @@ bool Database::initializeServer() {
     DatabaseStrings::databaseName = "local";
     this->localDatabase.initializeForkAndRun();
     return false;
-  case DatabaseType::externalMongo:
-    DatabaseStrings::databaseName = "calculator";
-    return true;
   }
   return false;
 }
@@ -772,9 +1031,6 @@ bool Database::fetchCollectionNames(
       << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
-  case DatabaseType::externalMongo:
-    return
-    Database::get().mongoDB.fetchCollectionNames(output, commentsOnFailure);
   case DatabaseType::fallback:
     return
     Database::get().fallbackDatabase.fetchCollectionNames(
@@ -1088,117 +1344,6 @@ void GlobalVariables::initModifiableDatabaseFields() {
   outputFile << "module.exports = {modifiableDatabaseData};";
 }
 
-ProblemData::ProblemData() {
-  this->randomSeed = 0;
-  this->flagRandomSeedGiven = false;
-  this->totalCorrectlyAnswered = 0;
-  this->totalSubmissions = 0;
-  this->expectedNumberOfAnswersFromDB = 0;
-  this->knownNumberOfAnswersFromHD = - 1;
-  this->flagProblemWeightIsOK = false;
-}
-
-std::string ProblemData::toStringAvailableAnswerIds() {
-  std::stringstream out;
-  out << "Available answer ids: ";
-  for (int i = 0; i < this->answers.size(); i ++) {
-    out << this->answers.values[i].answerId;
-    if (i != this->answers.size() - 1) {
-      out << ", ";
-    }
-  }
-  return out.str();
-}
-
-bool ProblemDataAdministrative::getWeightFromCourse(
-  const std::string& courseNonURLed,
-  Rational& output,
-  std::string* outputAsGivenByInstructor
-) {
-  STACK_TRACE("ProblemDataAdministrative::getWeightFromCourse");
-  if (!this->problemWeightsPerCourse.contains(courseNonURLed)) {
-    return false;
-  }
-  std::string tempString;
-  if (outputAsGivenByInstructor == nullptr) {
-    outputAsGivenByInstructor = &tempString;
-  }
-  *outputAsGivenByInstructor =
-  this->problemWeightsPerCourse.getValueCreateEmpty(courseNonURLed);
-  return output.assignStringFailureAllowed(*outputAsGivenByInstructor);
-}
-
-std::string ProblemDataAdministrative::toString() const {
-  std::stringstream out;
-  out << this->deadlinesPerSection.toStringHtml();
-  out << this->problemWeightsPerCourse.toStringHtml();
-  return out.str();
-}
-
-bool ProblemData::checkConsistency() const {
-  STACK_TRACE("ProblemData::checkConsistency");
-  for (int i = 0; i < this->answers.size(); i ++) {
-    if (
-      StringRoutines::stringTrimWhiteSpace(
-        this->answers.values[i].answerId
-      ) ==
-      ""
-    ) {
-      global.fatal
-      << "This is not supposed to happen: empty answer id."
-      << global.fatal;
-    }
-  }
-  return true;
-}
-
-bool ProblemData::checkConsistencyMathQuillIds() const {
-  STACK_TRACE("ProblemData::checkConsistencyMathQuillIds");
-  for (int i = 0; i < this->answers.size(); i ++) {
-    if (
-      StringRoutines::stringTrimWhiteSpace(
-        this->answers.values[i].idMathEquationField
-      ) ==
-      ""
-    ) {
-      std::stringstream errorStream;
-      errorStream
-      << "This is not supposed to happen: empty idMQField. The answer id is: "
-      << this->answers.values[i].answerId
-      << "<br>"
-      << this->toString()
-      << "<hr>Answer information: "
-      << this->toString()
-      << "<br>";
-      global.fatal << errorStream.str() << global.fatal;
-    }
-  }
-  return true;
-}
-
-std::string ProblemData::toString() const {
-  std::stringstream out;
-  out << "Problem data. " << "Random seed: " << this->randomSeed;
-  if (this->flagRandomSeedGiven) {
-    out << " (given)";
-  }
-  out << ". <br>";
-  for (int i = 0; i < this->answers.size(); i ++) {
-    Answer& currentA = this->answers.values[i];
-    out << "AnswerId: " << currentA.answerId;
-    out << ", numCorrectSubmissions: " << currentA.numberOfCorrectSubmissions;
-    out << ", numSubmissions: " << currentA.numberOfSubmissions;
-    out << ", firstCorrectAnswer: ";
-    if (currentA.firstCorrectAnswerClean == "") {
-      out << "[none yet], ";
-    } else {
-      out << "[" << currentA.firstCorrectAnswerClean << "], ";
-    }
-    out << "<br>";
-  }
-  out << "Administrator data: " << this->adminData.toString();
-  return out.str();
-}
 
 UserCalculator::UserCalculator() {
   this->flagNewAuthenticationTokenComputedUserNeedsIt = false;
@@ -1512,66 +1657,6 @@ void UserCalculator::setProblemData(
   this->problemData.setKeyValue(problemName, inputData);
 }
 
-std::string ProblemData::store() {
-  STACK_TRACE("ProblemData::store");
-  std::stringstream out;
-  if (this->flagRandomSeedGiven) {
-    out << "randomSeed=" << this->randomSeed;
-  }
-  for (int i = 0; i < this->answers.size(); i ++) {
-    Answer& currentA = this->answers.values[i];
-    if (this->flagRandomSeedGiven || i != 0) {
-      out << "&";
-    }
-    out
-    << HtmlRoutines::convertStringToURLString(currentA.answerId, false)
-    << "=";
-    std::stringstream questionsStream;
-    questionsStream
-    << "numCorrectSubmissions="
-    << currentA.numberOfCorrectSubmissions
-    << "&numSubmissions="
-    << currentA.numberOfSubmissions
-    << "&firstCorrectAnswer="
-    << HtmlRoutines::convertStringToURLString(
-      currentA.firstCorrectAnswerClean, false
-    );
-    out
-    << HtmlRoutines::convertStringToURLString(
-      questionsStream.str(), false
-    );
-  }
-  return out.str();
-}
-
-JSData ProblemData::storeJSON() const {
-  STACK_TRACE("ProblemData::storeJSON");
-  JSData result;
-  result.elementType = JSData::Token::tokenObject;
-  if (this->flagRandomSeedGiven) {
-    std::stringstream stringConverter;
-    stringConverter << this->randomSeed;
-    // Store random seed as string to avoid type conversion issues.
-    result[WebAPI::Problem::randomSeed] = stringConverter.str();
-  }
-  for (int i = 0; i < this->answers.size(); i ++) {
-    Answer& currentA = this->answers.values[i];
-    JSData currentAnswerJSON;
-    currentAnswerJSON["numCorrectSubmissions"] =
-    std::to_string(currentA.numberOfCorrectSubmissions);
-    currentAnswerJSON["numSubmissions"] =
-    std::to_string(currentA.numberOfSubmissions);
-    currentAnswerJSON["firstCorrectAnswer"] =
-    HtmlRoutines::convertStringToURLString(
-      currentA.firstCorrectAnswerClean, false
-    );
-    result[
-      HtmlRoutines::convertStringToURLString(currentA.answerId, false)
-    ] =
-    currentAnswerJSON;
-  }
-  return result;
-}
 
 bool UserCalculator::shouldCommentOnMissingUser() {
   if (this->username.size() < 4) {
@@ -1789,165 +1874,33 @@ bool Database::User::sendActivationEmail(
   return result;
 }
 
-bool ProblemData::loadFromOldFormat(
-  const std::string& inputData, std::stringstream& commentsOnFailure
+bool Database::updateOneFromSome(
+  const List<QueryExact>& findOrQueries,
+  const QuerySet& updateQuery,
+  std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("ProblemData::loadFromOldFormat");
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > mapStrings;
-  if (
-    !HtmlRoutines::chopPercentEncodedString(
-      inputData, mapStrings, commentsOnFailure
-    )
-  ) {
+  switch (global.databaseType) {
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Database::updateOneFromSome failed. "
+      << DatabaseStrings::errorDatabaseDisabled;
+    }
     return false;
-  }
-  this->points = 0;
-  this->totalCorrectlyAnswered = 0;
-  this->totalSubmissions = 0;
-  this->flagRandomSeedGiven = false;
-  if (global.userRequestRequiresLoadingRealExamData()) {
-    if (mapStrings.contains(WebAPI::Problem::randomSeed)) {
-      global.comments << "Loading random seed from old format.";
-      this->randomSeed = static_cast<uint32_t>(
-        atoi(
-          mapStrings.getValueCreateEmpty(WebAPI::Problem::randomSeed).c_str()
-        )
-      );
-      this->flagRandomSeedGiven = true;
-    }
-  }
-  this->answers.clear();
-  bool result = true;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > currentQuestionMap;
-  for (int i = 0; i < mapStrings.size(); i ++) {
-    if (mapStrings.keys[i] == WebAPI::Problem::randomSeed) {
-      continue;
-    }
-    Answer answer;
-    answer.answerId = mapStrings.keys[i];
-    this->answers.setKeyValue(answer.answerId, answer);
-    Answer& currentA = *this->answers.values.lastObject();
-    std::string currentQuestion =
-    HtmlRoutines::convertURLStringToNormal(mapStrings.values[i], false);
-    result =
-    HtmlRoutines::chopPercentEncodedString(
-      currentQuestion, currentQuestionMap, commentsOnFailure
+  case DatabaseType::fallback:
+    return
+    this->fallbackDatabase.updateOneFromSome(
+      findOrQueries, updateQuery, commentsOnFailure
     );
-    if (!result) {
-      commentsOnFailure
-      << "Failed to interpret as key-value pair: "
-      << currentQuestion
-      << ". ";
-      continue;
-    }
-    if (currentQuestionMap.contains("numCorrectSubmissions")) {
-      currentA.numberOfCorrectSubmissions =
-      atoi(
-        currentQuestionMap.getValueCreateEmpty("numCorrectSubmissions").c_str()
-      );
-    }
-    if (currentQuestionMap.contains("numSubmissions")) {
-      currentA.numberOfSubmissions =
-      atoi(
-        currentQuestionMap.getValueCreateEmpty("numSubmissions").c_str()
-      );
-    }
-    if (currentQuestionMap.contains("firstCorrectAnswer")) {
-      currentA.firstCorrectAnswerURLed =
-      currentQuestionMap.getValueCreateEmpty("firstCorrectAnswer");
-      currentA.firstCorrectAnswerClean =
-      HtmlRoutines::convertURLStringToNormal(
-        currentA.firstCorrectAnswerURLed, false
-      );
-      currentA.firstCorrectAnswerURLed =
-      HtmlRoutines::convertStringToURLString(
-        currentA.firstCorrectAnswerClean, false
-      );
-      // url-encoding back the cleaned up answer:
-      // this protects from the possibility that
-      // currentA.firstCorrectAnswerURLed was not encoded properly.
-    }
+  case DatabaseType::internal:
+    return
+    this->localDatabase.updateOneFromSome(
+      findOrQueries, updateQuery, commentsOnFailure
+    );
   }
-  //  this->checkConsistency();
-  return result;
+  global.fatal << "This piece of code should be unreachable. " << global.fatal;
+  return false;
 }
-
-bool ProblemData::loadFromJSON(
-  const JSData& inputData, std::stringstream& commentsOnFailure
-) {
-  STACK_TRACE("ProblemData::loadFromJSON");
-  (void) commentsOnFailure;
-  this->points = 0;
-  this->totalCorrectlyAnswered = 0;
-  this->totalSubmissions = 0;
-  this->flagRandomSeedGiven = false;
-  this->randomSeed = - 1;
-  if (global.userRequestRequiresLoadingRealExamData()) {
-    if (inputData.objects.contains(WebAPI::Problem::randomSeed)) {
-      this->randomSeed = static_cast<uint32_t>(
-        atoi(
-          inputData.objects.getValueNoFail(WebAPI::Problem::randomSeed).
-          stringValue.c_str()
-        )
-      );
-      this->flagRandomSeedGiven = true;
-    }
-  }
-  this->answers.clear();
-  bool result = true;
-  for (int i = 0; i < inputData.objects.size(); i ++) {
-    if (inputData.objects.keys[i] == WebAPI::Problem::randomSeed) {
-      continue;
-    }
-    Answer newAnswer;
-    newAnswer.answerId = inputData.objects.keys[i];
-    this->answers.setKeyValue(newAnswer.answerId, newAnswer);
-    Answer& currentA = *this->answers.values.lastObject();
-    JSData currentQuestionJSON = inputData.objects.values[i];
-    if (currentQuestionJSON.objects.contains("numCorrectSubmissions")) {
-      currentA.numberOfCorrectSubmissions =
-      atoi(
-        currentQuestionJSON.objects.getValueNoFail("numCorrectSubmissions").
-        stringValue.c_str()
-      );
-    }
-    if (currentQuestionJSON.objects.contains("numSubmissions")) {
-      currentA.numberOfSubmissions =
-      atoi(
-        currentQuestionJSON.objects.getValueNoFail("numSubmissions").
-        stringValue.c_str()
-      );
-    }
-    if (currentQuestionJSON.objects.contains("firstCorrectAnswer")) {
-      currentA.firstCorrectAnswerURLed =
-      currentQuestionJSON.objects.getValueNoFail("firstCorrectAnswer").
-      stringValue;
-      currentA.firstCorrectAnswerClean =
-      HtmlRoutines::convertURLStringToNormal(
-        currentA.firstCorrectAnswerURLed, false
-      );
-      currentA.firstCorrectAnswerURLed =
-      HtmlRoutines::convertStringToURLString(
-        currentA.firstCorrectAnswerClean, false
-      );
-      // url-encoding back the cleaned up answer:
-      // this protects from the possibility that
-      // currentA.firstCorrectAnswerURLed was not encoded properly,
-      // say, by an older version of the calculator
-    }
-  }
-  //  this->checkConsistency();
-  return result;
-}
-
 bool UserCalculator::interpretDatabaseProblemData(
   const std::string& information, std::stringstream& commentsOnFailure
 ) {
@@ -2721,16 +2674,6 @@ bool Database::User::loginViaGoogleTokenCreateNewAccountIfNeeded(
 bool Database::User::loginNoDatabaseSupport(
   UserCalculatorData& user, std::stringstream* commentsGeneral
 ) {
-  if (global.databaseType == DatabaseType::externalMongo) {
-    if (commentsGeneral != nullptr) {
-      *commentsGeneral
-      << "Database support is available, yet "
-      << "you requested no-database login. "
-      << "The command 'make -j10 noMongo=1' compiles "
-      << "the calculator without database support.";
-    }
-    return false;
-  }
   if (!global.hasDisabledDatabaseEveryoneIsAdmin()) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
@@ -2956,4 +2899,85 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   );
   output = out.str();
   return true;
+}
+
+
+QuerySet::QuerySet() {
+  this->value.elementType = JSData::Token::tokenObject;
+}
+
+void QuerySet::makeFromRecursive(
+  const JSData& input,
+  List<std::string>& nestedLabels,
+  QuerySet& output
+) {
+  if (input.objects.size() == 0 && input.listObjects.size == 0) {
+    std::string key = QueryExact::getLabelFromNestedLabels(nestedLabels);
+    output.value.setKeyValue(key, input);
+    return;
+  }
+  for (const std::string& key : input.objects.keys) {
+    nestedLabels.addOnTop(key);
+    QuerySet::makeFromRecursive(
+      input.objects.getValueNoFail(key), nestedLabels, output
+    );
+    nestedLabels.removeLastObject();
+  }
+  for (int i = 0; i < input.listObjects.size; i ++) {
+    std::stringstream out;
+    out << i;
+    nestedLabels.addOnTop(out.str());
+    QuerySet::makeFromRecursive(
+      input.listObjects[i], nestedLabels, output
+    );
+    nestedLabels.removeLastObject();
+  }
+}
+
+QuerySet QuerySet::makeFrom(const JSData& inputValue) {
+  QuerySet result;
+  List<std::string> nestedLabels;
+  QuerySet::makeFromRecursive(inputValue, nestedLabels, result);
+  return result;
+}
+
+std::string QuerySet::toStringDebug() const {
+  std::stringstream out;
+  JSData jsonSetMongo;
+  if (!this->toJSONSetMongo(jsonSetMongo, &out)) {
+    return out.str();
+  }
+  out << jsonSetMongo.toString(nullptr);
+  return out.str();
+}
+
+bool QuerySet::toJSONSetMongo(
+  JSData& output, std::stringstream* commentsOnFailure
+) const {
+  (void) commentsOnFailure;
+  output.reset(JSData::Token::Token::tokenObject);
+  output["$set"] = this->value;
+  return true;
+}
+
+void QueryResultOptions::makeProjection(const List<std::string>& fields) {
+  this->fieldsToProjectTo = fields;
+}
+
+JSData QueryResultOptions::toJSON() const {
+  JSData result, fields;
+  result.reset(JSData::Token::tokenObject);
+  bool found = false;
+  for (int i = 0; i < this->fieldsToProjectTo.size; i ++) {
+    fields[this->fieldsToProjectTo[i]] = 1;
+    found = true;
+  }
+  for (int i = 0; i < this->fieldsProjectedAway.size; i ++) {
+    fields[this->fieldsProjectedAway[i]] = 0;
+    found = true;
+  }
+  if (found) {
+    result["projection"] = fields;
+  }
+  return result;
 }

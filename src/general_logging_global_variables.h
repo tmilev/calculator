@@ -125,15 +125,6 @@ enum DatabaseType {
   // Work in progress.
   // An internal database, stored in plain json files.
   internal,
-  // [Deprecated]. Use an external mongoDB database.
-  // This is deprecated: maintaining a mongoDB
-  // turned out to be very time consuming and not
-  // portable at all, hence we went for a
-  // simple internal database.
-  // Until the internal database is fully functional,
-  // you may still want to use this option, if
-  // you can manage to set up MongoDB on your own.
-  externalMongo,
   // Do not use a database. Login will work as if everyone is administrator.
   // No data can be stored in the system.
   noDatabaseEveryoneIsAdmin

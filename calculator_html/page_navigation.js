@@ -37,6 +37,7 @@ class User {
     this.sectionComputed = "";
     this.flagDatabaseInactiveEveryoneIsAdmin = false;
     this.debugLoginProcess = false;
+    this.debugLogin = false;
   }
 
   isLoggedIn() {
@@ -745,7 +746,7 @@ class Page {
       }
     }
     let pages = document.getElementsByClassName("divPage");
-    for (let i = 0; i < pages.length; i++){
+    for (let i = 0; i < pages.length; i++) {
       pages[i].classList.remove("divPageMainMenuCollapsed");
     }
     menuDiv.classList.remove("divMainMenuCollapsed");
@@ -784,7 +785,7 @@ class Page {
       ids.domElements.divProfilePicture
     ).classList.add(
       "profilePictureContainerCollapsed"
-    );    
+    );
   }
 
   initializeButtons() {

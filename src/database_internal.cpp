@@ -61,10 +61,34 @@ bool LocalDatabase::updateOne(
   (void) findQuery;
   (void) updateQuery;
   (void) commentsOnFailure;
+  Connector connector;
+  connector.initialize("127.0.0.1", this->port);
+  if (!connector.connectWrapper(commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to connect to database. ";
+    }
+    return false;
+  }
+  QueryFindAndUpdate queryFindAndUpdate;
+  queryFindAndUpdate.find = findQuery;
+  queryFindAndUpdate.update = updateQuery;
+  std::string payload =
+  this->toPayLoad(queryFindAndUpdate.toJSON().toString());
+  std::string result;
+  if (!connector.sendAndReceive(payload, result)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to send payload to database. ";
+    }
+    return false;
+  }
   if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "LocalDatabase::updateOne not implemented yet. ";
+    *commentsOnFailure << "DEBUG: result so far: " << result;
   }
   return false;
+}
+
+std::string LocalDatabase::toPayLoad(const std::string& input) {
+  return input;
 }
 
 bool LocalDatabase::findOneFromSome(
@@ -76,6 +100,10 @@ bool LocalDatabase::findOneFromSome(
   (void) output;
   (void) commentsOnFailure;
   struct addrinfo hints;
+  if (commentsOnFailure != nullptr) {
+    global << "DEBUG: not implemented yet. " << Logger::endL;
+  }
+  return false;
   memset(&hints, 0, sizeof hints);
   // make sure the struct is empty
   hints.ai_family = AF_UNSPEC;
@@ -170,9 +198,11 @@ bool LocalDatabase::updateOneFromSome(
 
 void LocalDatabase::listenToPort() {
   STACK_TRACE("LocalDatabase::listenToPort");
+  this->port = "8177";
+  int actualPort = 0;
   if (
     !Listener::initializeBindToOnePort(
-      "0", this->socketDatabaseServer, this->port, true
+      this->port, this->socketDatabaseServer, actualPort, true
     )
   ) {
     global.fatal << "Failed to bind to port 0. " << global.fatal;
@@ -180,6 +210,8 @@ void LocalDatabase::listenToPort() {
   global
   << "Database initialized, listening on port: "
   << this->port
+  << " mapped to port: "
+  << actualPort
   << ", socket: "
   << this->socketDatabaseServer
   << "."
@@ -248,7 +280,9 @@ void LocalDatabase::run() {
   Listener listener(
     this->socketDatabaseServer, &this->allListeningSockets
   );
-  while (this->runOneConnection(listener)) {}
+  while (this->runOneConnection(listener)) {
+    global << "DEBUG: database received! " << Logger::endL;
+  }
 }
 
 bool LocalDatabase::runOneConnection(Listener& listener) {

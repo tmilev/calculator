@@ -1302,17 +1302,14 @@ QuerySet QuerySet::makeFrom(const JSData& inputValue) {
 std::string QuerySet::toStringDebug() const {
   std::stringstream out;
   JSData jsonSetMongo;
-  if (!this->toJSONSetMongo(jsonSetMongo, &out)) {
+  if (!this->toJSON(jsonSetMongo)) {
     return out.str();
   }
   out << jsonSetMongo.toString(nullptr);
   return out.str();
 }
 
-bool QuerySet::toJSONSetMongo(
-  JSData& output, std::stringstream* commentsOnFailure
-) const {
-  (void) commentsOnFailure;
+bool QuerySet::toJSON(JSData& output) const {
   output.reset(JSData::Token::Token::tokenObject);
   output["$set"] = this->value;
   return true;
@@ -1337,5 +1334,13 @@ JSData QueryResultOptions::toJSON() const {
   if (found) {
     result["projection"] = fields;
   }
+  return result;
+}
+
+JSData QueryFindAndUpdate::toJSON() const {
+  JSData result;
+  result["find"] = this->find.toJSON();
+  JSData update;
+  result["update"] = this->update.toJSON(update);
   return result;
 }

@@ -4257,7 +4257,7 @@ bool WebServer::runOnce(
     << this->statistics.allConnections
     << Logger::endL;
   }
-  if (reportCount - previousServerStatDetailedReport > 499) {
+  if (reportCount - this->previousServerStatDetailedReport > 499) {
     this->previousServerStatDetailedReport = reportCount;
     global << this->toStringStatusForLogFile() << Logger::endL;
   }
@@ -4268,8 +4268,6 @@ bool WebServer::runOnce(
     << "This is not supposed to to happen: select succeeded "
     << "but I found no set socket. "
     << Logger::endL;
-  }
-  if (newConnectedSocket < 0) {
     if (global.flagServerDetailedLog) {
       global
       << "Detail: newConnectedSocket is negative: "

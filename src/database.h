@@ -42,9 +42,7 @@ public:
   JSData value;
   QuerySet();
   static QuerySet makeFrom(const JSData& inputValue);
-  bool toJSONSetMongo(
-    JSData& output, std::stringstream* commentsOnFailure
-  ) const;
+  bool toJSON(JSData& output) const;
   std::string toStringDebug() const;
   class Test {
   public:
@@ -264,6 +262,13 @@ public:
   bool isEmpty() const;
 };
 
+class QueryFindAndUpdate {
+public:
+  QuerySet update;
+  QueryExact find;
+  JSData toJSON() const;
+};
+
 // Work in progress. When done, this will be a self contained
 // simple database implementation that supports concurrent reads,
 // writes and locks.
@@ -277,7 +282,7 @@ public:
   int processId;
   int socketDatabaseServer;
   int socketDatabaseClient;
-  int port;
+  std::string port;
   // A shortened version of randomId. You can log this one.
   std::string idLoggable;
   static std::string folder();
@@ -329,6 +334,7 @@ public:
     List<std::string>& output, std::stringstream* commentsOnFailure
   );
   LocalDatabase();
+  std::string toPayLoad(const std::string& input);
 };
 
 class DatabaseUser {
@@ -410,8 +416,6 @@ public:
     const std::string& collectionName, const std::string& key
   );
   static std::string toString();
-
-
   DatabaseUser user;
   // TODO(tmilev): Rename this to fallbackDatabase.
   FallbackDatabase fallbackDatabase;

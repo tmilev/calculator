@@ -265,8 +265,9 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
   this->lastTransactionErrors = "";
   Connector& connector = this->connectorContainer.getElement();
   connector.initialize(this->peerAddress, this->desiredPortOrService);
-  if (!connector.connectWrapper()) {
-    this->lastTransactionErrors = connector.lastTransactionErrors;
+  std::stringstream comments;
+  if (!connector.connectWrapper(&comments)) {
+    this->lastTransactionErrors = comments.str();
     return;
   }
   std::string getMessage =
@@ -324,8 +325,8 @@ void WebClient::fetchWebPage(
   this->lastTransactionErrors = "";
   Connector& connector = this->connectorContainer.getElement();
   connector.initialize(this->peerAddress, this->desiredPortOrService);
-  if (!connector.connectWrapper()) {
-    this->lastTransactionErrors = connector.lastTransactionErrors;
+  if (!connector.connectWrapper(commentsOnFailure)) {
+    this->lastTransactionErrors = commentsOnFailure->str();
     return;
   }
   this->fetchWebPagePart2(commentsOnFailure, commentsGeneral);

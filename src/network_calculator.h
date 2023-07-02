@@ -50,25 +50,38 @@ public:
 // A wrapper around the data structures needed to connect()
 class Connector {
 public:
+  std::string name;
   struct addrinfo hints;
-  struct sockaddr_in serverAddress;
-  struct hostent* serverOtherSide;
-  struct addrinfo* serverInfo;
+  struct sockaddr_in peerAddress;
+  struct addrinfo* peer;
   int socketInteger;
   std::string addressToConnectTo;
   std::string portOrService;
-  std::string lastTransactionErrors;
   Connector();
   ~Connector();
   void initialize(
     const std::string& inputAddressToConnectTo,
     const std::string& inputPortOrService
   );
-  bool connectWrapper();
-  bool oneConnectionAttempt(addrinfo* peer);
+  void initialize(const std::string& inputAddressToConnectTo, int port);
+  bool connectWrapper(std::stringstream* commentsOnError);
+  bool oneConnectionAttempt(
+    addrinfo* peer, std::stringstream* commentsOnFailure
+  );
   void freeAddressInformation();
   void closeSocket();
   void closeEverything();
+  bool sendAndReceive(const std::string& payload, std::string& output);
+  bool sendWrapper(const std::string& payload);
+  bool sendWrapper(const List<char>& payload);
+  bool sendOnce(
+    const List<char>& payload,
+    int& inputOutputSentSoFar,
+    int numberOfTries = 5
+  );
+  bool receive(std::string& output);
+  std::string toString() const;
+  static std::string toStringOneAddrInfo(addrinfo* address);
 };
 
 class SystemFunctions {

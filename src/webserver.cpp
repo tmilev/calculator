@@ -4147,7 +4147,7 @@ int WebServer::run() {
   Database::get().initializeServer();
   if (
     global.databaseType == DatabaseType::internal &&
-    Database::get().localDatabase.processId != 0
+    Database::get().localDatabase.processId == 0
   ) {
     // This is the database process.
     return 0;

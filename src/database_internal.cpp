@@ -75,6 +75,7 @@ bool LocalDatabase::updateOne(
   std::string payload =
   this->toPayLoad(queryFindAndUpdate.toJSON().toString());
   std::string result;
+  global << "DEBUG: before send and receive!!!" << Logger::endL;
   if (!connector.sendAndReceive(payload, result)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to send payload to database. ";
@@ -258,7 +259,7 @@ int LocalDatabase::forkOutDatabase() {
 void LocalDatabase::initializeForkAndRun() {
   STACK_TRACE("LocalDatabase::initializeForkAndRun");
   this->listenToPort();
-  if (this->forkOutDatabase() == 0) {
+  if (this->forkOutDatabase() > 0) {
     this->initializeClient();
     return;
   }
@@ -280,9 +281,11 @@ void LocalDatabase::run() {
   Listener listener(
     this->socketDatabaseServer, &this->allListeningSockets
   );
-  while (this->runOneConnection(listener)) {
-    global << "DEBUG: database received! " << Logger::endL;
+  global << "DEBUG: about to start database main loop" << Logger::endL;
+  while (true) {
+    this->runOneConnection(listener);
   }
+  global << "Exit database main loop" << Logger::endL;
 }
 
 bool LocalDatabase::runOneConnection(Listener& listener) {
@@ -298,5 +301,15 @@ bool LocalDatabase::runOneConnection(Listener& listener) {
     global << Logger::yellow << strerror(errno) << Logger::endL;
     return true;
   }
+  ReceiverInternal receiver(newConnectedSocket);
+  if (!receiver.recieveWithLengthHeader()) {
+    return false;
+  }
+  Crypto::convertBytesToString(receiver.received, this->lastRequestBytes);
+  return this->executeAndSend();
+}
+
+bool LocalDatabase::executeAndSend() {
+  STACK_TRACE("LocalDatabase::executeAndSend");
   return true;
 }

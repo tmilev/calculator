@@ -838,7 +838,7 @@ bool Crypto::convertBase64ToString(
   ) {
     return false;
   }
-  Crypto::convertBitStreamToString(byteList, output);
+  Crypto::convertBytesToString(byteList, output);
   return true;
 }
 
@@ -907,7 +907,7 @@ bool Crypto::convertBase64ToBitStream(
   return true;
 }
 
-void Crypto::convertBitStreamToString(
+void Crypto::convertBytesToString(
   const List<unsigned char>& input, std::string& output
 ) {
   STACK_TRACE("Crypto::convertBitStreamToString");
@@ -1067,7 +1067,7 @@ uint64_t Crypto::rightRotateAsIfBigEndian64(
   return left | right;
 }
 
-void Crypto::convertUint32ToUcharBigendiaN(
+void Crypto::convertUnsignedInt32ToUnsignedCharBigendian(
   uint32_t input, List<unsigned char>& output
 ) {
   output.setSize(4);
@@ -1480,11 +1480,11 @@ void Crypto::convertStringToListUInt32BigendianZeroPad(
     for (int j = 0; j < 4; j ++) {
       converter[j] = (i * 4 + j < input.size) ? input[i * 4 + j] : 0;
     }
-    output[i] = Crypto::getUInt32FromCharBigendian(converter);
+    output[i] = Crypto::convertListByteToUnsignedInt32(converter);
   }
 }
 
-uint32_t Crypto::getUInt32FromCharBigendian(
+uint32_t Crypto::convertListByteToUnsignedInt32(
   const List<unsigned char>& input
 ) {
   uint32_t result = input[0];
@@ -1548,7 +1548,7 @@ void Crypto::computeSha1(
       inputStringPreprocessed[i * 4 + 3]
     );
     inputStringUint32.addOnTop(
-      Crypto::getUInt32FromCharBigendian(convertorToUint32)
+      Crypto::convertListByteToUnsignedInt32(convertorToUint32)
     );
   }
   List<uint32_t> currentChunk;
@@ -2062,7 +2062,7 @@ void Crypto::computeSha2xx(
     convertorToUint32[2] = inputPreprocessed[i * 4 + 2];
     convertorToUint32[3] = inputPreprocessed[i * 4 + 3];
     inputStringUint32.addOnTop(
-      Crypto::getUInt32FromCharBigendian(convertorToUint32)
+      Crypto::convertListByteToUnsignedInt32(convertorToUint32)
     );
   }
   List<uint32_t> currentChunk;

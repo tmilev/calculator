@@ -5,7 +5,7 @@
 // The classes in this header are not portable.
 // Do not include this header in other calculator headers,
 // but only in .cpp files.
-#include "multiprocessing.h"
+#include "general_maps.h"
 #include <sys/wait.h>//<-waitpid f-n here
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop = network to presentation)
@@ -47,7 +47,34 @@ public:
   static std::string toStringLastErrorDescription();
 };
 
-// A wrapper around the data structures needed to connect()
+// Sends bytes to a cooperating executable running on the same machine.
+// Expected to handle failure and timeouts, but not malicious attacks.
+class ReceiverInternal {
+public:
+  int connectedSocket;
+  List<unsigned char> received;
+  ReceiverInternal(int inputConnectedSocket);
+  bool recieveWithLengthHeader();
+};
+
+// Receiver of bytes from a cooperating executable running on the same machine.
+// Expected to handle failure and timeouts, but not malicious attacks.
+class SenderInternal {
+public:
+  std::string name;
+  int connectedSocket;
+  SenderInternal(int inputConnectedSocket);
+  bool sendWithLengthHeader(const std::string& payload);
+  bool sendWithLengthHeader(const List<unsigned char>& payload);
+  bool sendRaw(const List<unsigned char>& payload);
+  bool sendOnce(
+    const List<unsigned char>& payload,
+    int& inputOutputSentSoFar,
+    int numberOfTries = 5
+  );
+};
+
+// A wrapper around the data structures needed to connect().
 class Connector {
 public:
   std::string name;
@@ -72,13 +99,8 @@ public:
   void closeSocket();
   void closeEverything();
   bool sendAndReceive(const std::string& payload, std::string& output);
-  bool sendWrapper(const std::string& payload);
-  bool sendWrapper(const List<char>& payload);
-  bool sendOnce(
-    const List<char>& payload,
-    int& inputOutputSentSoFar,
-    int numberOfTries = 5
-  );
+  bool sendWithLengthHeader(const std::string& payload);
+  bool sendWithLengthHeader(const List<unsigned char>& payload);
   bool receive(std::string& output);
   std::string toString() const;
   static std::string toStringOneAddrInfo(addrinfo* address);

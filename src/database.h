@@ -278,6 +278,8 @@ class LocalDatabase {
   List<unsigned char> randomIdHash;
   // Map from listening sockets to ports.
   MapList<int, std::string> allListeningSockets;
+  std::string lastRequestBytes;
+  JSData lastRequest;
 public:
   int processId;
   int socketDatabaseServer;
@@ -330,6 +332,7 @@ public:
   void initializeForkAndRun();
   void run();
   bool runOneConnection(Listener& listener);
+  bool executeAndSend();
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
   );

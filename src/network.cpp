@@ -251,54 +251,14 @@ bool Connector::oneConnectionAttempt(
   return true;
 }
 
-bool Connector::sendWrapper(const std::string& payload) {
-  List<char> payloadCharacters;
-  Crypto::convertStringToListBytesSigned(payload, payloadCharacters);
-  return this->sendWrapper(payloadCharacters);
+bool Connector::sendWithLengthHeader(const std::string& payload) {
+  SenderInternal sender(this->socketInteger);
+  return sender.sendWithLengthHeader(payload);
 }
 
-bool Connector::sendWrapper(const List<char>& payload) {
-  if (payload.size == 0) {
-    return true;
-  }
-  int totalSent = 0;
-  while (this->sendOnce(payload, totalSent)) {
-    if (totalSent >= payload.size) {
-      break;
-    }
-  }
-  return totalSent >= payload.size;
-}
-
-bool Connector::sendOnce(
-  const List<char>& payload,
-  int& inputOutputSentSoFar,
-  int numberOfTries
-) {
-  int remaining = payload.size - inputOutputSentSoFar;
-  for (int i = 0; i < numberOfTries; i ++) {
-    int sent =
-    send(
-      this->socketInteger,
-      &payload[inputOutputSentSoFar],
-      static_cast<unsigned>(remaining),
-      0
-    );
-    if (sent < 0) {
-      global
-      << Logger::red
-      << "Connector ["
-      << this->name
-      << "] failed to send bytes "
-      << i + 1
-      << " times. "
-      << Logger::endL;
-      continue;
-    }
-    inputOutputSentSoFar += sent;
-    return true;
-  }
-  return false;
+bool Connector::sendWithLengthHeader(const List<unsigned char>& payload) {
+  SenderInternal sender(this->socketInteger);
+  return sender.sendWithLengthHeader(payload);
 }
 
 bool Connector::receive(std::string& output) {
@@ -308,7 +268,7 @@ bool Connector::receive(std::string& output) {
 bool Connector::sendAndReceive(
   const std::string& payload, std::string& output
 ) {
-  if (!this->sendWrapper(payload)) {
+  if (!this->sendWithLengthHeader(payload)) {
     return false;
   }
   return this->receive(output);
@@ -522,4 +482,123 @@ void Listener::computeUserAddress() {
     sizeof this->userAddressBuffer
   );
   this->userAddress = this->userAddressBuffer;
+}
+
+ReceiverInternal::ReceiverInternal(int inputConnectedSocket) {
+  this->connectedSocket = inputConnectedSocket;
+}
+
+bool ReceiverInternal::recieveWithLengthHeader() {
+  int expectedTotal = - 1;
+  List<unsigned char> buffer;
+  // The buffer size is larger than the maximum expected size,
+  // so hopefully we will receive the entire buffer with a single read.
+  const int bufferSize = 1048576;
+  buffer.setSize(bufferSize);
+  int totalReceived = 0;
+  int totalFailures = 0;
+  while (totalReceived < expectedTotal || expectedTotal == - 1) {
+    int receivedBytes =
+    recv(connectedSocket, this->received.objects, bufferSize, 0);
+    if (receivedBytes < 0) {
+      global
+      << "DEBUG: "
+      << Logger::red
+      << "Failed to receive"
+      << Logger::endL;
+      totalFailures ++;
+    }
+    if (totalFailures >= 10) {
+      global
+      << "DEBUG: "
+      << Logger::red
+      << "Too many failures to receive. "
+      << strerror(errno)
+      << Logger::endL;
+      return false;
+    }
+    totalReceived += receivedBytes;
+    this->received.addListOnTop(buffer);
+    if (totalReceived >= 4 && expectedTotal < 0) {
+      expectedTotal = static_cast<int>(
+        Crypto::convertListByteToUnsignedInt32(this->received)
+      );
+      if (expectedTotal < 0 || expectedTotal > 1000000) {
+        global << "Payload too big. " << Logger::endL;
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+SenderInternal::SenderInternal(int inputConnectedSocket) {
+  this->connectedSocket = inputConnectedSocket;
+}
+
+bool SenderInternal::sendWithLengthHeader(const std::string& payload) {
+  List<unsigned char> payloadCharacters;
+  Crypto::convertStringToListBytes(payload, payloadCharacters);
+  return this->sendWithLengthHeader(payloadCharacters);
+}
+
+bool SenderInternal::sendWithLengthHeader(
+  const List<unsigned char>& payload
+) {
+  List<unsigned char> payloadWithLength;
+  uint32_t size = static_cast<uint32_t>(payload.size);
+  Crypto::convertUnsignedInt32ToUnsignedCharBigendian(size, payloadWithLength);
+  payloadWithLength.addListOnTop(payload);
+  return this->sendRaw(payloadWithLength);
+}
+
+bool SenderInternal::sendRaw(const List<unsigned char>& payload) {
+  if (payload.size == 0) {
+    return true;
+  }
+  int totalSent = 0;
+  while (this->sendOnce(payload, totalSent)) {
+    if (totalSent >= payload.size) {
+      break;
+    }
+  }
+  global
+  << "Sent "
+  << totalSent
+  << " bytes through "
+  << this->name
+  << ". "
+  << Logger::endL;
+  return totalSent >= payload.size;
+}
+
+bool SenderInternal::sendOnce(
+  const List<unsigned char>& payload,
+  int& inputOutputSentSoFar,
+  int numberOfTries
+) {
+  int remaining = payload.size - inputOutputSentSoFar;
+  for (int i = 0; i < numberOfTries; i ++) {
+    int sent =
+    send(
+      this->connectedSocket,
+      &payload[inputOutputSentSoFar],
+      static_cast<unsigned>(remaining),
+      0
+    );
+    if (sent < 0) {
+      global
+      << Logger::red
+      << "Connector ["
+      << this->name
+      << "] failed to send bytes "
+      << i + 1
+      << " times. "
+      << Logger::endL;
+      continue;
+    }
+    inputOutputSentSoFar += sent;
+    return true;
+  }
+  return false;
 }

@@ -218,7 +218,7 @@ public:
   );
   static std::string convertStringToBase64Standard(const std::string& input);
   static std::string convertStringToBase64URL(const std::string& input);
-  static uint32_t getUInt32FromCharBigendian(
+  static uint32_t convertListByteToUnsignedInt32(
     const List<unsigned char>& input
   );
   static void convertStringToListUInt32BigendianZeroPad(
@@ -227,7 +227,7 @@ public:
   static void convertStringToListUInt32BigendianZeroPad(
     const std::string& input, List<uint32_t>& output
   );
-  static void convertUint32ToUcharBigendiaN(
+  static void convertUnsignedInt32ToUnsignedCharBigendian(
     uint32_t input, List<unsigned char>& output
   );
   static void convertListUint32ToListUcharBigendian(
@@ -336,7 +336,7 @@ public:
   static bool getCharFromBase58(uint32_t input, char& output);
   static bool get6BitFromChar(unsigned char input, uint32_t& output);
   static char getCharFrom6Bit(uint32_t input, bool useBase64URL);
-  static void convertBitStreamToString(
+  static void convertBytesToString(
     const List<unsigned char>& input, std::string& output
   );
   static void convertStringToListBytes(

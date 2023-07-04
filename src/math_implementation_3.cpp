@@ -772,7 +772,7 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
     // We convert the code point to the 4-byte bigendian sequence that
     // represents the integer. 
     List<unsigned char> fourBytes;
-    Crypto::convertUint32ToUcharBigendiaN(input, fourBytes);
+    Crypto::convertUnsignedInt32ToUnsignedCharBigendian(input, fourBytes);
     out << fourBytes[0] << fourBytes[1] << fourBytes[2] << fourBytes[3];
     return out.str();
   }

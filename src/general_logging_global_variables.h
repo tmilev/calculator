@@ -167,8 +167,6 @@ enum DatabaseType {
 class GlobalVariables {
   MutexRecursiveWrapper mutexReturnBytes;
 public:
-  MutexRecursiveWrapper mutexWebWorkerPipeWritelock;
-  MutexRecursiveWrapper mutexWebWorkerPipeReadlock;
   MutexRecursiveWrapper mutexParallelComputingCrash;
   MutexRecursiveWrapper mutexRegisterNewThread;
   GlobalVariables();

@@ -64,7 +64,7 @@ public:
   void makeProjection(const List<std::string>& fields);
 };
 
-class FallbackDatabase {
+class DatabaseFallback {
 private:
   bool initialized;
   bool updateOneNolocks(
@@ -104,7 +104,7 @@ public:
 
   MapReferences<
     std::string,
-    FallbackDatabase::Index,
+  DatabaseFallback::Index,
     HashFunctions::hashFunction<std::string>
   > indices;
   static std::string jsonLocation();
@@ -176,7 +176,7 @@ public:
     std::stringstream* commentsGeneralNonSensitive
   );
   std::string toStringIndices() const;
-  FallbackDatabase();
+  DatabaseFallback();
 };
 
 // Stores a query for an item.
@@ -272,7 +272,7 @@ public:
 // Work in progress. When done, this will be a self contained
 // simple database implementation that supports concurrent reads,
 // writes and locks.
-class LocalDatabase {
+class DatabaseLocal {
   // A once-per-database start random id. Do not log this to the console.
   List<unsigned char> randomId;
   List<unsigned char> randomIdHash;
@@ -280,6 +280,8 @@ class LocalDatabase {
   MapList<int, std::string> allListeningSockets;
   std::string lastRequestBytes;
   JSData lastRequest;
+  Pipe clientToServer;
+  Pipe serverToClient;
 public:
   int processId;
   int socketDatabaseServer;
@@ -323,24 +325,23 @@ public:
   void createHashIndex(
     const std::string& collectionName, const std::string& key
   );
-  void listenToPort();
+  void listenToSocket();
   // Forks out a child process to run the database.
   // Returns the process id of the child database to the parent
   // and 0 to the child database process.
   int forkOutDatabase();
-  void initializeClient();
   void initializeForkAndRun();
   void run();
   bool runOneConnection(Listener& listener);
-  bool executeAndSend();
+  bool executeAndSend(int connectedSocket);
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
   );
-  LocalDatabase();
+  DatabaseLocal();
   std::string toPayLoad(const std::string& input);
 };
 
-class DatabaseUser {
+class UserOfDatabase {
 private:
   bool firstLoginOfAdmin(
     UserCalculatorData& incoming,
@@ -399,7 +400,7 @@ public:
   bool loadUserInformation(
     UserCalculatorData& output, std::stringstream* commentsOnFailure
   );
-  DatabaseUser();
+  UserOfDatabase();
 };
 
 class Database {
@@ -419,10 +420,10 @@ public:
     const std::string& collectionName, const std::string& key
   );
   static std::string toString();
-  DatabaseUser user;
+  UserOfDatabase user;
   // TODO(tmilev): Rename this to fallbackDatabase.
-  FallbackDatabase fallbackDatabase;
-  LocalDatabase localDatabase;
+  DatabaseFallback fallbackDatabase;
+  DatabaseLocal localDatabase;
   bool findFromJSON(
     const QueryExact& findQuery,
     List<JSData>& output,

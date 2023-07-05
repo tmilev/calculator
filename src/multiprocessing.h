@@ -126,7 +126,7 @@ public:
   }
 };
 
-// This is an unnamed pipe with which may be shared by two or more processes
+// This is an unnamed pipe which may be shared by two or more processes
 // and by more than one thread in each process.
 // Multiple processes may try to send bytes through the pipe.
 // A writer to the pipe may lock access to the pipe via mutexPipe lock.
@@ -139,6 +139,7 @@ public:
   PipePrimitive pipe;
   PipePrimitive metaData;
   MutexProcess mutexPipe;
+  MutexRecursiveWrapper threadLock;
   bool flagDeallocated;
   std::string name;
   std::string getLastRead() {

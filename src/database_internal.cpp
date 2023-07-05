@@ -3,11 +3,11 @@
 #include "network_calculator.h"
 #include "crypto_calculator.h"
 
-std::string LocalDatabase::folder() {
+std::string DatabaseLocal::folder() {
   return "database/" + DatabaseStrings::databaseName + "/";
 }
 
-void LocalDatabase::createHashIndex(
+void DatabaseLocal::createHashIndex(
   const std::string& collectionName, const std::string& key
 ) {
   (void) collectionName;
@@ -17,14 +17,14 @@ void LocalDatabase::createHashIndex(
   << global.fatal;
 }
 
-LocalDatabase::LocalDatabase() {
+DatabaseLocal::DatabaseLocal() {
   this->processId = - 1;
   this->socketDatabaseServer = - 1;
   this->socketDatabaseClient = - 1;
-  this->port = - 1;
+  this->port = "8177";
 }
 
-bool LocalDatabase::fetchCollectionNames(
+bool DatabaseLocal::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   (void) output;
@@ -35,7 +35,7 @@ bool LocalDatabase::fetchCollectionNames(
   return false;
 }
 
-bool LocalDatabase::findOneWithOptions(
+bool DatabaseLocal::findOneWithOptions(
   const QueryExact& query,
   const QueryResultOptions& options,
   JSData& output,
@@ -53,7 +53,7 @@ bool LocalDatabase::findOneWithOptions(
   return false;
 }
 
-bool LocalDatabase::updateOne(
+bool DatabaseLocal::updateOne(
   const QueryExact& findQuery,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
@@ -61,7 +61,8 @@ bool LocalDatabase::updateOne(
   (void) findQuery;
   (void) updateQuery;
   (void) commentsOnFailure;
-  Connector connector;
+  Connector connector("database_client_connector");
+global << "DEBUG: connector for port: " << this->port << Logger::endL;
   connector.initialize("127.0.0.1", this->port);
   if (!connector.connectWrapper(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -88,15 +89,16 @@ bool LocalDatabase::updateOne(
   return false;
 }
 
-std::string LocalDatabase::toPayLoad(const std::string& input) {
+std::string DatabaseLocal::toPayLoad(const std::string& input) {
   return input;
 }
 
-bool LocalDatabase::findOneFromSome(
+bool DatabaseLocal::findOneFromSome(
   const List<QueryExact>& findOrQueries,
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
+    return false;
   (void) findOrQueries;
   (void) output;
   (void) commentsOnFailure;
@@ -104,7 +106,6 @@ bool LocalDatabase::findOneFromSome(
   if (commentsOnFailure != nullptr) {
     global << "DEBUG: not implemented yet. " << Logger::endL;
   }
-  return false;
   memset(&hints, 0, sizeof hints);
   // make sure the struct is empty
   hints.ai_family = AF_UNSPEC;
@@ -114,11 +115,9 @@ bool LocalDatabase::findOneFromSome(
   hints.ai_flags = AI_PASSIVE;
   // fill in my IP for me
   struct addrinfo* serverInfo = nullptr;
-  std::stringstream portStream;
-  portStream << this->port;
   int status =
   getaddrinfo(
-    "localhost", portStream.str().c_str(), &hints, &serverInfo
+    "localhost", this->port.c_str(), &hints, &serverInfo
   );
   if (status == - 1) {
     if (commentsOnFailure != nullptr) {
@@ -153,7 +152,7 @@ bool LocalDatabase::findOneFromSome(
   return false;
 }
 
-bool LocalDatabase::deleteDatabase(std::stringstream* commentsOnFailure) {
+bool DatabaseLocal::deleteDatabase(std::stringstream* commentsOnFailure) {
   (void) commentsOnFailure;
   global.fatal
   << "LocalDatabase::deleteDatabase: not implemented yet."
@@ -161,7 +160,7 @@ bool LocalDatabase::deleteDatabase(std::stringstream* commentsOnFailure) {
   return false;
 }
 
-bool LocalDatabase::findFromJSONWithOptions(
+bool DatabaseLocal::findFromJSONWithOptions(
   const QueryExact& findQuery,
   List<JSData>& output,
   const QueryResultOptions& options,
@@ -183,7 +182,7 @@ bool LocalDatabase::findFromJSONWithOptions(
   return false;
 }
 
-bool LocalDatabase::updateOneFromSome(
+bool DatabaseLocal::updateOneFromSome(
   const List<QueryExact>& findOrQueries,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
@@ -197,8 +196,8 @@ bool LocalDatabase::updateOneFromSome(
   return false;
 }
 
-void LocalDatabase::listenToPort() {
-  STACK_TRACE("LocalDatabase::listenToPort");
+void DatabaseLocal::listenToSocket() {
+  STACK_TRACE("LocalDatabase::listenToSocket");
   this->port = "8177";
   int actualPort = 0;
   if (
@@ -230,7 +229,7 @@ void LocalDatabase::listenToPort() {
   }
 }
 
-int LocalDatabase::forkOutDatabase() {
+int DatabaseLocal::forkOutDatabase() {
   STACK_TRACE("LocalDatabase::forkOutDatabase");
   Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(
     this->randomId, 24
@@ -256,28 +255,30 @@ int LocalDatabase::forkOutDatabase() {
   return 0;
 }
 
-void LocalDatabase::initializeForkAndRun() {
+void DatabaseLocal::initializeForkAndRun() {
   STACK_TRACE("LocalDatabase::initializeForkAndRun");
-  this->listenToPort();
+  if (! this->clientToServer.createMe("database_client_to_server") || !
+  this->serverToClient.createMe("database_server_to_client")){
+      global.fatal << "Failed to create database send+receive pipes." << global.fatal;
+  }
   if (this->forkOutDatabase() > 0) {
-    this->initializeClient();
+      // This is the parent process that will ultimately become the client.
     return;
   }
   this->run();
 }
 
-void LocalDatabase::initializeClient() {
-  close(this->socketDatabaseServer);
-  this->socketDatabaseServer = - 1;
-}
 
-void LocalDatabase::run() {
+
+
+void DatabaseLocal::run() {
   STACK_TRACE("LocalDatabase::run");
   std::stringstream portStream;
   portStream << this->port;
   this->allListeningSockets.setKeyValue(
     this->socketDatabaseServer, portStream.str()
   );
+  this->listenToSocket();
   Listener listener(
     this->socketDatabaseServer, &this->allListeningSockets
   );
@@ -288,7 +289,7 @@ void LocalDatabase::run() {
   global << "Exit database main loop" << Logger::endL;
 }
 
-bool LocalDatabase::runOneConnection(Listener& listener) {
+bool DatabaseLocal::runOneConnection(Listener& listener) {
   STACK_TRACE("LocalDatabase::runOneConnection");
   listener.zeroSocketSet();
   listener.selectWrapper();
@@ -301,15 +302,21 @@ bool LocalDatabase::runOneConnection(Listener& listener) {
     global << Logger::yellow << strerror(errno) << Logger::endL;
     return true;
   }
-  ReceiverInternal receiver(newConnectedSocket);
+  ReceiverInternal receiver(newConnectedSocket, "database_receiver");
   if (!receiver.recieveWithLengthHeader()) {
     return false;
   }
   Crypto::convertBytesToString(receiver.received, this->lastRequestBytes);
-  return this->executeAndSend();
+  return this->executeAndSend(newConnectedSocket);
 }
 
-bool LocalDatabase::executeAndSend() {
+bool DatabaseLocal::executeAndSend(int connectedSocket) {
   STACK_TRACE("LocalDatabase::executeAndSend");
-  return true;
+  SenderInternal sender(connectedSocket, "database_sender");
+  return
+  sender.sendWithLengthHeader(
+    "execute and send not implemented yet. Last request received: " +
+    this->lastRequestBytes +
+    "\n"
+  );
 }

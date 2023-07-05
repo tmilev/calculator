@@ -52,8 +52,9 @@ public:
 class ReceiverInternal {
 public:
   int connectedSocket;
+  std::string name;
   List<unsigned char> received;
-  ReceiverInternal(int inputConnectedSocket);
+  ReceiverInternal(int inputConnectedSocket, const std::string& inputName);
   bool recieveWithLengthHeader();
 };
 
@@ -63,7 +64,7 @@ class SenderInternal {
 public:
   std::string name;
   int connectedSocket;
-  SenderInternal(int inputConnectedSocket);
+  SenderInternal(int inputConnectedSocket, const std::string& displayName);
   bool sendWithLengthHeader(const std::string& payload);
   bool sendWithLengthHeader(const List<unsigned char>& payload);
   bool sendRaw(const List<unsigned char>& payload);
@@ -84,6 +85,7 @@ public:
   int socketInteger;
   std::string addressToConnectTo;
   std::string portOrService;
+  Connector(const std::string& displayName);
   Connector();
   ~Connector();
   void initialize(

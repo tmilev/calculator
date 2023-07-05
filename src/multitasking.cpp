@@ -1,6 +1,6 @@
+// Include needed for the destructor of FormatExpressions.
 #include "math_general.h"
 #include "general_logging_global_variables.h"
-#include "system_functions_global_objects.h"
 #include <assert.h>
 #include <mutex>
 #include "progress_report.h"

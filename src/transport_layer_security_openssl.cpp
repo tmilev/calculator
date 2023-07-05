@@ -331,11 +331,11 @@ void TransportLayerSecurityOpenSSL::clearErrorQueue(
     }
   }
   for (;;) {
-    errorCode = ERR_get_error();
-    if (errorCode == 0) {
+    this->errorCode = ERR_get_error();
+    if (this->errorCode == 0) {
       return;
     }
-    ERR_error_string(errorCode, buffer);
+    ERR_error_string(this->errorCode, buffer);
     std::string errorString(buffer);
     global << Logger::red << errorString << Logger::endL;
   }

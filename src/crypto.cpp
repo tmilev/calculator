@@ -910,7 +910,7 @@ bool Crypto::convertBase64ToBitStream(
 void Crypto::convertBytesToString(
   const List<unsigned char>& input, std::string& output
 ) {
-  STACK_TRACE("Crypto::convertBitStreamToString");
+  STACK_TRACE("Crypto::convertBytesToString");
   output.clear();
   output.reserve(static_cast<unsigned>(input.size));
   for (int i = 0; i < input.size; i ++) {

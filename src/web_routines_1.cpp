@@ -110,6 +110,7 @@ void WebServerMonitor::monitor(
   fileStream.close();
   WebClient webCrawler;
   webCrawler.initialize();
+  webCrawler.connectorContainer.getElement().name = "web_crawler_connector";
   global
   << Logger::blue
   << "Pinging "

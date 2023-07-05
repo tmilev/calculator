@@ -17,7 +17,7 @@ std::string UserCalculatorData::toStringFindQueries() const {
   return out.str();
 }
 
-bool DatabaseUser::setPassword(
+bool UserOfDatabase::setPassword(
   const std::string& inputUsername,
   const std::string& inputNewPassword,
   std::string& outputAuthenticationToken,
@@ -37,7 +37,7 @@ bool DatabaseUser::setPassword(
   return result;
 }
 
-bool DatabaseUser::loadUserInformation(
+bool UserOfDatabase::loadUserInformation(
   UserCalculatorData& output, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseUser::loadUserInformation");
@@ -63,7 +63,7 @@ bool DatabaseUser::loadUserInformation(
   return output.loadFromJSON(userEntry);
 }
 
-bool DatabaseUser::userExists(
+bool UserOfDatabase::userExists(
   const std::string& inputUsername, std::stringstream& comments
 ) {
   STACK_TRACE("DatabaseUser::userExists");
@@ -79,7 +79,7 @@ bool DatabaseUser::userExists(
   return allUsers.size > 0;
 }
 
-bool DatabaseUser::userDefaultHasInstructorRights() {
+bool UserOfDatabase::userDefaultHasInstructorRights() {
   STACK_TRACE("DatabaseUser::userDefaultHasInstructorRights");
   if (global.userDefaultHasAdminRights()) {
     return true;
@@ -93,7 +93,7 @@ bool DatabaseUser::userDefaultHasInstructorRights() {
   global.userDefault.userRole == UserCalculator::Roles::teacher;
 }
 
-bool DatabaseUser::logoutViaDatabase() {
+bool UserOfDatabase::logoutViaDatabase() {
   STACK_TRACE("DatabaseUser::logoutViaDatabase");
   if (!global.flagLoggedIn) {
     return true;
@@ -106,7 +106,7 @@ bool DatabaseUser::logoutViaDatabase() {
   return true;
 }
 
-DatabaseUser::DatabaseUser() {
+UserOfDatabase::UserOfDatabase() {
   this->owner = nullptr;
 }
 
@@ -583,7 +583,7 @@ std::string UserCalculator::getSelectedRowEntry(const std::string& key) {
   return this->selectedRowFieldsUnsafe[index];
 }
 
-bool DatabaseUser::sendActivationEmail(
+bool UserOfDatabase::sendActivationEmail(
   const std::string& emailList,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
@@ -593,12 +593,12 @@ bool DatabaseUser::sendActivationEmail(
   List<std::string> emails;
   StringRoutines::stringSplitDefaultDelimiters(emailList, emails);
   return
-  DatabaseUser::sendActivationEmail(
+      UserOfDatabase::sendActivationEmail(
     emails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
   );
 }
 
-bool DatabaseUser::sendActivationEmail(
+bool UserOfDatabase::sendActivationEmail(
   const List<std::string>& emails,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
@@ -964,7 +964,7 @@ bool UserCalculator::storeProblemData(
   );
 }
 
-bool DatabaseUser::addUsersFromEmails(
+bool UserOfDatabase::addUsersFromEmails(
   const std::string& emailList,
   const std::string& userPasswords,
   std::string& userRole,
@@ -1098,7 +1098,7 @@ bool DatabaseUser::addUsersFromEmails(
       commentsGeneralSensitive = &comments;
     }
     if (
-      !DatabaseUser::sendActivationEmail(
+        !UserOfDatabase::sendActivationEmail(
         emails, &comments, &comments, commentsGeneralSensitive
       )
     ) {
@@ -1136,7 +1136,7 @@ bool UserCalculator::getActivationAddress(
   );
 }
 
-bool DatabaseUser::loginViaGoogleTokenCreateNewAccountIfNeeded(
+bool UserOfDatabase::loginViaGoogleTokenCreateNewAccountIfNeeded(
   UserCalculatorData& user,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
@@ -1146,7 +1146,7 @@ bool DatabaseUser::loginViaGoogleTokenCreateNewAccountIfNeeded(
   (void) user;
   (void) commentsGeneral;
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
-    return DatabaseUser::loginNoDatabaseSupport(user, commentsGeneral);
+    return UserOfDatabase::loginNoDatabaseSupport(user, commentsGeneral);
   }
   STACK_TRACE("DatabaseUser::loginViaGoogleTokenCreateNewAccountIfNeeded");
   UserCalculator userWrapper;
@@ -1221,7 +1221,7 @@ bool DatabaseUser::loginViaGoogleTokenCreateNewAccountIfNeeded(
   return true;
 }
 
-bool DatabaseUser::loginNoDatabaseSupport(
+bool UserOfDatabase::loginNoDatabaseSupport(
   UserCalculatorData& user, std::stringstream* commentsGeneral
 ) {
   if (!global.hasDisabledDatabaseEveryoneIsAdmin()) {
@@ -1249,12 +1249,12 @@ bool DatabaseUser::loginNoDatabaseSupport(
   return true;
 }
 
-bool DatabaseUser::loginViaDatabase(
+bool UserOfDatabase::loginViaDatabase(
   UserCalculatorData& user, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseUser::loginViaDatabase");
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
-    return DatabaseUser::loginNoDatabaseSupport(user, commentsOnFailure);
+    return UserOfDatabase::loginNoDatabaseSupport(user, commentsOnFailure);
   }
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(user);
@@ -1311,7 +1311,7 @@ bool DatabaseUser::loginViaDatabase(
   return this->firstLoginOfAdmin(user, userWrapper, commentsOnFailure);
 }
 
-bool DatabaseUser::firstLoginOfAdmin(
+bool UserOfDatabase::firstLoginOfAdmin(
   UserCalculatorData& incoming,
   UserCalculator& userInDatabase,
   std::stringstream* commentsOnFailure

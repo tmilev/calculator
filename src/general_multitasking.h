@@ -2,11 +2,12 @@
 #ifndef header_general_multitasking_ALREADY_INCLUDED
 #define header_general_multitasking_ALREADY_INCLUDED
 
-#include "macros.h"
+#include <sstream>
 
 // The documentation of pthreads.h can be found at:
 // https://computing.llnl.gov/tutorials/pthreads/#MutexOverview
-// The below class is a wrapper for mutexes. All system dependent machinery for
+// The class below is a wrapper for mutexes.
+// All system dependent machinery for
 // mutexes should be put here.
 // MutexRecursiveWrapper specification:
 // The mutex has two states: locked and unlocked.
@@ -16,7 +17,7 @@
 // 1) First, if the mutex is unlocked, the mutex state changes to
 // locked and execution of the caller continues.
 // The preceding two operations are atomic: if the mutex happens to be
-// unlocked, no other processor instruction
+// unlocked, no other instruction
 // can be executed before the mutex's state is changed to locked.
 // 2) Second, if the mutex is locked, the calling thread must pause execution,
 // without consuming computational/processor power.

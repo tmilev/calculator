@@ -440,8 +440,7 @@ int Pipe::writeNoInterrupts(int fileDescriptor, const std::string& input) {
 void Pipe::readLoop(List<char>& output) {
   STACK_TRACE("Pipe::readLoop");
   this->checkConsistency();
-  MutexRecursiveWrapper& safetyFirst = global.mutexWebWorkerPipeReadlock;
-  safetyFirst.lockMe();
+  MutexlockGuard guard(this->threadLock);
   // Prevent threads from locking one another.
   this->metaData.lastRead.setSize(0);
   this->metaData.readOnceNoFailure(true);
@@ -457,7 +456,6 @@ void Pipe::readLoop(List<char>& output) {
     this->pipe.readOnceNoFailure(true);
     output.addListOnTop(this->pipe.lastRead);
   }
-  safetyFirst.unlockMe();
   // Prevent threads from locking one another.
 }
 
@@ -465,7 +463,7 @@ void Pipe::writeOnceAfterEmptying(
   const std::string& toBeSent, bool dontCrashOnFail
 ) {
   STACK_TRACE("Pipe::writeOnceAfterEmptying");
-  MutexlockGuard safety(global.mutexWebWorkerPipeWritelock);
+  MutexlockGuard safety(this->threadLock);
   this->mutexPipe.lock();
   this->pipe.readOnceNoFailure(dontCrashOnFail);
   this->pipe.lastRead.setSize(0);
@@ -663,6 +661,7 @@ bool Pipe::createMe(const std::string& inputPipeName) {
     this->release();
     return false;
   }
+  this->threadLock.initializeIfNeeded();
   return true;
 }
 
@@ -746,8 +745,7 @@ bool PipePrimitive::readOnceNoFailure(bool dontCrashOnFail) {
 
 void Pipe::readOnceWithoutEmptying(bool dontCrashOnFail) {
   STACK_TRACE("Pipe::readOnceWithoutEmptying");
-  MutexRecursiveWrapper& safetyFirst = global.mutexWebWorkerPipeReadlock;
-  MutexlockGuard guard(safetyFirst);
+  MutexlockGuard guard(this->threadLock);
   // guard from other threads.
   this->mutexPipe.lock();
   this->pipe.readOnceNoFailure(dontCrashOnFail);
@@ -762,9 +760,8 @@ void Pipe::readOnceWithoutEmptying(bool dontCrashOnFail) {
 void Pipe::readOnce(bool dontCrashOnFail) {
   STACK_TRACE("Pipe::readOnce");
   this->checkConsistency();
-  MutexRecursiveWrapper& safetyFirst = global.mutexWebWorkerPipeReadlock;
-  MutexlockGuard guard(safetyFirst);
-  // guard from other threads.
+  // Guard from other threads.
+  MutexlockGuard guard(this->threadLock);
   MutexProcesslockGuard lock(this->mutexPipe);
   this->mutexPipe.lock();
   this->pipe.readOnceNoFailure(dontCrashOnFail);

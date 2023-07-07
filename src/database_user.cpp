@@ -1081,9 +1081,9 @@ bool UserOfDatabase::addUsersFromEmails(
       }
       JSData activatedJSON;
       activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
-      this->owner->updateOneFromSome(
-        findUser, QuerySet::makeFrom(activatedJSON), &comments
-      );
+      QuerySet activatedSet;
+      activatedSet.fromJSONNoFail(activatedJSON);
+      this->owner->updateOneFromSome(findUser, activatedSet, &comments);
       if (currentUser.email != "") {
         currentUser.computeAndStoreActivationStats(&comments, &comments);
       }
@@ -1391,10 +1391,9 @@ bool UserCalculator::storeToDatabase(
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
   JSData setUser = this->toJSON();
-  return
-  Database::get().updateOne(
-    findUser, QuerySet::makeFrom(setUser), commentsOnFailure
-  );
+  QuerySet doSetUser;
+  doSetUser.fromJSONNoFail(setUser);
+  return Database::get().updateOne(findUser, doSetUser, commentsOnFailure);
 }
 
 bool UserCalculator::getActivationAddressFromActivationToken(

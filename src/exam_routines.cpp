@@ -457,8 +457,8 @@ bool CalculatorHTML::storeProblemDeadlines(
     DatabaseStrings::labelDeadlinesSchema,
     global.userDefault.deadlineSchema
   );
-  QuerySet updateQuery =
-  QuerySet::makeFrom(this->toJSONDeadlines(toStore));
+  QuerySet updateQuery;
+  updateQuery.fromJSONNoFail(this->toJSONDeadlines(toStore));
   if (
     !Database::get().updateOne(
       deadlineSchema, updateQuery, commentsOnFailure

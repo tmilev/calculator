@@ -577,6 +577,7 @@ bool PipePrimitive::writeOnceNoFailure(
   const std::string& toBeSent, int offset, bool dontCrashOnFail
 ) {
   STACK_TRACE("PipePrimitive::writeOnceNoFailure");
+  global << "DEBUG: got to here write0" << Logger::endL;
   if (this->pipeEnds[1] == - 1) {
     global
     << Logger::yellow

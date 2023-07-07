@@ -332,9 +332,12 @@ public:
   static std::string labelCalculatorInput;
   // Errors.
   static std::string errorDatabaseDisabled;
-  // Database request/result fields.
+  // Database result fields.
   static std::string resultSuccess;
   static std::string resultComments;
+  // Database request fields.
+  static std::string requestType;
+  static std::string requestContent;
 };
 
 #endif // header_string_constants_ALREADY_INCLUDED

@@ -2842,15 +2842,15 @@ int ProblemData::getExpectedNumberOfAnswers(
     DatabaseStrings::labelProblemFileName,
     problemName
   );
-  JSData newDBentry;
-  newDBentry[DatabaseStrings::labelProblemFileName] = problemName;
+  JSData newDatabaseEntry;
+  newDatabaseEntry[DatabaseStrings::labelProblemFileName] = problemName;
   std::stringstream stringConverter;
   stringConverter << this->knownNumberOfAnswersFromHD;
-  newDBentry[DatabaseStrings::labelProblemTotalQuestions] =
+  newDatabaseEntry[DatabaseStrings::labelProblemTotalQuestions] =
   stringConverter.str();
-  Database::get().updateOne(
-    findEntry, QuerySet::makeFrom(newDBentry), &commentsOnFailure
-  );
+  QuerySet updateQuery;
+  updateQuery.fromJSONNoFail(newDatabaseEntry);
+  Database::get().updateOne(findEntry, updateQuery, &commentsOnFailure);
   return this->knownNumberOfAnswersFromHD;
 }
 

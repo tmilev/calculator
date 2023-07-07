@@ -1292,11 +1292,21 @@ void QuerySet::makeFromRecursive(
   }
 }
 
-QuerySet QuerySet::makeFrom(const JSData& inputValue) {
-  QuerySet result;
+void QuerySet::fromJSONNoFail(const JSData& inputValue) {
+  std::stringstream comments;
+  bool mustBeTrue = this->fromJSON(inputValue, &comments);
+  if (!mustBeTrue) {
+    global.fatal << "From json failed. " << comments.str() << global.fatal;
+  }
+}
+
+bool QuerySet::fromJSON(
+  const JSData& inputValue, std::stringstream* commentsOnFailure
+) {
   List<std::string> nestedLabels;
-  QuerySet::makeFromRecursive(inputValue, nestedLabels, result);
-  return result;
+  QuerySet::makeFromRecursive(inputValue, nestedLabels, *this);
+  (void) commentsOnFailure;
+  return true;
 }
 
 std::string QuerySet::toStringDebug() const {
@@ -1320,7 +1330,8 @@ void QueryResultOptions::makeProjection(const List<std::string>& fields) {
 }
 
 JSData QueryResultOptions::toJSON() const {
-  JSData result, fields;
+  JSData result;
+  JSData fields;
   result.reset(JSData::Token::tokenObject);
   bool found = false;
   for (int i = 0; i < this->fieldsToProjectTo.size; i ++) {
@@ -1343,4 +1354,13 @@ JSData QueryFindAndUpdate::toJSON() const {
   JSData update;
   result["update"] = this->update.toJSON(update);
   return result;
+}
+
+bool QueryFindAndUpdate::fromJSON(
+  JSData& input, std::stringstream* commentsOnFailure
+) {
+  if (!this->find.fromJSON(input["find"], commentsOnFailure)) {
+    return false;
+  }
+  return this->update.fromJSON(input["update"], commentsOnFailure);
 }

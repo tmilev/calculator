@@ -1995,11 +1995,9 @@ std::string WebWorker::getChangePasswordPagePartOne(
   );
   JSData userInfo;
   userInfo[DatabaseStrings::labelEmail] = claimedEmail;
-  if (
-    !Database::get().updateOne(
-      findUser, QuerySet::makeFrom(userInfo), &out
-    )
-  ) {
+  QuerySet querySet;
+  querySet.fromJSONNoFail(userInfo);
+  if (!Database::get().updateOne(findUser, querySet, &out)) {
     out
     << "\n<b style ='color:red'>"
     << "Could not store your email (database is down?). </b>";

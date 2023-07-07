@@ -41,7 +41,10 @@ public:
   // dots are expected to be %-encoded.
   JSData value;
   QuerySet();
-  static QuerySet makeFrom(const JSData& inputValue);
+  bool fromJSON(
+    const JSData& inputValue, std::stringstream* commentsOnFailure
+  );
+  void fromJSONNoFail(const JSData& inputValue);
   bool toJSON(JSData& output) const;
   std::string toStringDebug() const;
   class Test {
@@ -267,6 +270,7 @@ public:
   QuerySet update;
   QueryExact find;
   JSData toJSON() const;
+  bool fromJSON(JSData& input, std::stringstream* commentsOnFailure);
 };
 
 class DatabaseInternalConnection {
@@ -279,17 +283,35 @@ public:
 };
 
 class DatabaseInternalResult {
-public:
   JSData content;
+public:
+  bool success;
+  std::string comments;
   bool fromJSON(
     const std::string& input, std::stringstream* commentsOnFailure
   );
+  JSData toJSON();
   bool isSuccess(std::stringstream* commentsOnFalse) const;
+  DatabaseInternalResult();
 };
 
 class DatabaseInternalRequest {
+  JSData contentReader;
+  bool fromJSData(std::stringstream* commentsOnFailure);
 public:
-  JSData query;
+  enum Type {
+    unknown, findAndUpdate,
+  };
+  Type requestType;
+  QueryFindAndUpdate queryFindAndUpdate;
+  bool fromJSON(
+    const std::string& input, std::stringstream* commentsOnFailure
+  );
+  void toJSON(JSData& output) const;
+  JSData toJSON() const;
+  std::string toStringForDebugging() const;
+  static std::string typeToString(DatabaseInternalRequest::Type input);
+  DatabaseInternalRequest();
 };
 
 // Work in progress. When done, this will be a self contained
@@ -307,6 +329,8 @@ class DatabaseInternal {
   bool receiveInClientFromServer(
     DatabaseInternalResult& output, std::stringstream* commentsOnFailure
   );
+  PipePrimitive& currentServerToClient();
+  PipePrimitive& currentClientToServer();
 public:
   int processId;
   int currentWorkerId;

@@ -116,7 +116,9 @@ bool Connector::connectWrapper(std::stringstream* commentsOnError) {
   if (status != 0) {
     if (commentsOnError != nullptr) {
       *commentsOnError
-      << "Could not find address: " << this->addressToConnectTo << " getaddrinfo error: "
+      << "Could not find address: "
+      << this->addressToConnectTo
+      << " getaddrinfo error: "
       << gai_strerror(status);
     }
     this->freeAddressInformation();
@@ -257,34 +259,6 @@ bool Connector::oneConnectionAttempt(
   return true;
 }
 
-bool Connector::sendWithLengthHeader(const std::string& payload) {
-  SenderInternal sender(this->socketInteger, this->name);
-  return sender.sendWithLengthHeader(payload);
-}
-
-bool Connector::sendWithLengthHeader(const List<unsigned char>& payload) {
-  SenderInternal sender(this->socketInteger, this->name);
-  return sender.sendWithLengthHeader(payload);
-}
-
-bool Connector::receive(std::string& output) {
-  ReceiverInternal receiver(this->socketInteger, this->name);
-  if (!receiver.recieveWithLengthHeader()) {
-    return false;
-  }
-  Crypto::convertBytesToString(receiver.received, output);
-  return true;
-}
-
-bool Connector::sendAndReceive(
-  const std::string& payload, std::string& output
-) {
-  if (!this->sendWithLengthHeader(payload)) {
-    return false;
-  }
-  return this->receive(output);
-}
-
 std::string Listener::toStringLastErrorDescription() {
   std::stringstream out;
   out << strerror(errno) << ". ";
@@ -297,7 +271,7 @@ bool Listener::initializeBindToOnePort(
   int& outputActualPort,
   bool blockWhenWaitingToAccept
 ) {
-  STACK_TRACE("WebServer::initializeBindToOnePort");
+  STACK_TRACE("Listener::initializeBindToOnePort");
   addrinfo hints;
   addrinfo* servinfo = nullptr;
   addrinfo* p = nullptr;
@@ -493,158 +467,4 @@ void Listener::computeUserAddress() {
     sizeof this->userAddressBuffer
   );
   this->userAddress = this->userAddressBuffer;
-}
-
-ReceiverInternal::ReceiverInternal(int inputConnectedSocket, const std::string &inputName) {
-  this->connectedSocket = inputConnectedSocket;
-    this->name = inputName;
-}
-
-bool ReceiverInternal::recieveWithLengthHeader() {
-    STACK_TRACE("ReceiverInternal::recieveWithLengthHeader");
-  int expectedTotal = - 1;
-  List<unsigned char> buffer;
-  // The buffer size is larger than the maximum expected size,
-  // so hopefully we will receive the entire buffer with a single read.
-  const int bufferSize = 1048576;
-  buffer.setSize(bufferSize);
-  int totalReceived = 0;
-  int totalFailures = 0;
-  while (totalReceived < expectedTotal || expectedTotal == - 1) {
-    int receivedBytes =
-    recv(this->connectedSocket, this->received.objects, bufferSize, 0);
-    if (receivedBytes < 0) {
-      totalFailures ++;
-      global
-      << Logger::red
-      << "Failed to receive on "
-      << this->name
- << " "
-      << totalFailures
-      << " times: on socket: "
-      << this->connectedSocket << ". "
-      << strerror(errno)
-      << ". "
-      << Logger::endL;
-      if (totalFailures >= 10) {
-        global
-        << "DEBUG: "
-        << Logger::red
-        << "Too many failures to receive. "
-        << strerror(errno)
-        << Logger::endL;
-        return false;
-      }
-      continue;
-    }
-    global
-    << "DEBUG: received "
-    << receivedBytes
-    << " bytes. "
-    << Logger::endL;
-    totalReceived += receivedBytes;
-    this->received.addListOnTop(buffer);
-    if (totalReceived >= 4 && expectedTotal < 0) {
-      expectedTotal = static_cast<int>(
-        Crypto::convertListByteToUnsignedInt32(this->received)
-      );
-      global
-      << "DEBUG: expected total: "
-      << expectedTotal
-      << " total received:  "
-      << totalReceived
-      << Logger::endL;
-      if (expectedTotal < 0 || expectedTotal > 1000000) {
-        global << "Payload too big. " << Logger::endL;
-        return false;
-      }
-    }
-  }
-  global
-  << "DEBUG: finished receiving! "
-  << this->received.size
-  << " bytes. "
-  << Logger::endL;
-  return true;
-}
-
-SenderInternal::SenderInternal(
-  int inputConnectedSocket, const std::string& displayName
-) {
-  this->connectedSocket = inputConnectedSocket;
-  this->name = displayName;
-}
-
-bool SenderInternal::sendWithLengthHeader(const std::string& payload) {
-  global << "DEBUG: about to send through: " << this->name <<": " << payload << Logger::endL;
-  List<unsigned char> payloadCharacters;
-  Crypto::convertStringToListBytes(payload, payloadCharacters);
-  return this->sendWithLengthHeader(payloadCharacters);
-}
-
-bool SenderInternal::sendWithLengthHeader(
-  const List<unsigned char>& payload
-) {
-  List<unsigned char> payloadWithLength;
-  uint32_t size = static_cast<uint32_t>(payload.size + 4);
-  Crypto::convertUnsignedInt32ToUnsignedCharBigendian(size, payloadWithLength);
-  payloadWithLength.addListOnTop(payload);
-  return this->sendRaw(payloadWithLength);
-}
-
-bool SenderInternal::sendRaw(const List<unsigned char>& payload) {
-  if (payload.size == 0) {
-    return true;
-  }
-  global
-  << "DEBUG: about to send: "
-  << payload.size
-  << " bytes through "
-  << this->name
-  << Logger::endL;
-  int totalSent = 0;
-  while (this->sendOnce(payload, totalSent)) {
-    if (totalSent >= payload.size) {
-      break;
-    }
-  }
-  global
-  << "Sent "
-  << totalSent
-  << " bytes through "
-  << this->name
-  << ". "
-  << Logger::endL;
-  return totalSent >= payload.size;
-}
-
-bool SenderInternal::sendOnce(
-  const List<unsigned char>& payload,
-  int& inputOutputSentSoFar,
-  int numberOfTries
-) {
-  int remaining = payload.size - inputOutputSentSoFar;
-  for (int i = 0; i < numberOfTries; i ++) {
-    int sent =
-    send(
-      this->connectedSocket,
-      &payload[inputOutputSentSoFar],
-      static_cast<unsigned>(remaining),
-      0
-    );
-    if (sent < 0) {
-      global
-      << Logger::red
-      << "Connector ["
-      << this->name
-      << "] failed to send bytes "
-      << i + 1
-      << " times. "
-      << Logger::endL;
-      continue;
-    }
-    inputOutputSentSoFar += sent;
-    return true;
-  }
-  return false;
 }

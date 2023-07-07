@@ -2908,8 +2908,12 @@ WebServer::WebServer() {
   this->listeningSocketHTTPSDefault = - 1;
   this->listeningSocketHTTPSOpenSSL = - 1;
   this->highestSocketNumber = - 1;
-  this->maximumWorkersPerIPAdress = 64;
-  this->maximumTotalUsedWorkers = 120;
+  this->maximumWorkersPerIPAdress = 9;
+  // We need to open several pipes for each worker.
+  // There's an upper limit for the number of pipes/files we can have open
+  // increasing this to 84 and more is known to crash on ubuntu with default
+  // user limits.
+  this->maximumTotalUsedWorkers = 40;
   this->webServerPingIntervalInSeconds = 10;
   this->previousServerStatReport = 0;
   this->previousServerStatDetailedReport = 0;
@@ -3071,7 +3075,8 @@ bool WebServer::createNewActiveWorker() {
   this->getActiveWorker().release();
   this->allWorkers[this->activeWorker].flagInUse = false;
   // <-until everything is initialized, we cannot be in use.
-  std::stringstream stowstream, wtosStream;
+  std::stringstream stowstream;
+  std::stringstream wtosStream;
   stowstream << "S->W" << this->activeWorker + 1 << ": ";
   wtosStream << "W" << this->activeWorker + 1 << "->S: ";
   std::string stow = stowstream.str();
@@ -3122,13 +3127,6 @@ bool WebServer::createNewActiveWorker() {
     << "\n";
     return this->emergencyRemoval_LastCreatedWorker();
   }
-  global
-  << Logger::green
-  << "Allocated new worker & plumbing data structures. "
-  << "Total worker data structures: "
-  << this->allWorkers.size
-  << ". "
-  << Logger::endL;
   this->allWorkers[this->activeWorker].workerId = "";
   this->allWorkers[this->activeWorker].flagInUse = true;
   this->allWorkers[this->activeWorker].flagExited = false;
@@ -4144,7 +4142,7 @@ int WebServer::run() {
   global.logs.server.reset();
   global.logs.serverMonitor.reset();
   global.logs.worker.reset();
-  Database::get().initializeServer();
+  Database::get().initializeServer(this->maximumTotalUsedWorkers);
   if (
     global.databaseType == DatabaseType::internal &&
     Database::get().localDatabase.processId == 0
@@ -4197,6 +4195,16 @@ int WebServer::run() {
     this->highestSocketNumber, &this->allListeningSockets
   );
   int returnCode = 0;
+  // Allocate all workers to make sure all pipes are allocated.
+  // The number of open pipes can be limited, so it's best to allocate those
+  // up front.
+  for (int i = 0; i < this->maximumTotalUsedWorkers; i ++) {
+    this->createNewActiveWorker();
+    this->activeWorker = - 1;
+  }
+  for (int i = 0; i < this->maximumTotalUsedWorkers; i ++) {
+    this->allWorkers[i].flagInUse = false;
+  }
   while (
     this->runOnce(listener, previousReportedNumberOfSelects, returnCode)
   ) {}
@@ -4322,6 +4330,7 @@ bool WebServer::runOnce(
     << " second(s). <br>"
     << Logger::endL;
   }
+  Database::get().localDatabase.currentWorkerId = this->activeWorker;
   int incomingPID = this->forkWorkerProcess();
   // creates an almost identical copy of this process.
   // <- Please don't assign directly to this->getActiveWorker().ProcessPID.
@@ -5656,7 +5665,7 @@ int WebServer::mainConsoleHelp() {
 
 int WebServer::mainCommandLine() {
   STACK_TRACE("WebServer::mainCommandLine");
-  if (!Database::get().initializeServer()) {
+  if (!Database::get().initializeServer(1)) {
     global.fatal << "Failed to initialize database. " << global.fatal;
   }
   Calculator& calculator = global.calculator().getElement();

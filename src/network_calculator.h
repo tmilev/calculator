@@ -47,34 +47,6 @@ public:
   static std::string toStringLastErrorDescription();
 };
 
-// Sends bytes to a cooperating executable running on the same machine.
-// Expected to handle failure and timeouts, but not malicious attacks.
-class ReceiverInternal {
-public:
-  int connectedSocket;
-  std::string name;
-  List<unsigned char> received;
-  ReceiverInternal(int inputConnectedSocket, const std::string& inputName);
-  bool recieveWithLengthHeader();
-};
-
-// Receiver of bytes from a cooperating executable running on the same machine.
-// Expected to handle failure and timeouts, but not malicious attacks.
-class SenderInternal {
-public:
-  std::string name;
-  int connectedSocket;
-  SenderInternal(int inputConnectedSocket, const std::string& displayName);
-  bool sendWithLengthHeader(const std::string& payload);
-  bool sendWithLengthHeader(const List<unsigned char>& payload);
-  bool sendRaw(const List<unsigned char>& payload);
-  bool sendOnce(
-    const List<unsigned char>& payload,
-    int& inputOutputSentSoFar,
-    int numberOfTries = 5
-  );
-};
-
 // A wrapper around the data structures needed to connect().
 class Connector {
 public:
@@ -100,10 +72,6 @@ public:
   void freeAddressInformation();
   void closeSocket();
   void closeEverything();
-  bool sendAndReceive(const std::string& payload, std::string& output);
-  bool sendWithLengthHeader(const std::string& payload);
-  bool sendWithLengthHeader(const List<unsigned char>& payload);
-  bool receive(std::string& output);
   std::string toString() const;
   static std::string toStringOneAddrInfo(addrinfo* address);
 };

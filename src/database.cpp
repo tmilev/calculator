@@ -874,7 +874,7 @@ bool Database::findFromJSONWithOptions(
   return false;
 }
 
-bool Database::initializeServer() {
+bool Database::initializeServer(int maximumConnections) {
   STACK_TRACE("Database::initializeServer");
   this->user.owner = this;
   this->fallbackDatabase.owner = this;
@@ -898,7 +898,7 @@ bool Database::initializeServer() {
     return true;
   case DatabaseType::internal:
     DatabaseStrings::databaseName = "local";
-    this->localDatabase.initializeForkAndRun();
+    this->localDatabase.initializeForkAndRun(maximumConnections);
     return false;
   }
   return false;

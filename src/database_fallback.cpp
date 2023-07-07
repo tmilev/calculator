@@ -24,7 +24,7 @@ bool DatabaseFallback::deleteDatabase(std::stringstream* commentsOnFailure) {
   if (
     !FileOperations::
     writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
-              DatabaseFallback::jsonLocation(),
+      DatabaseFallback::jsonLocation(),
       "{}",
       true,
       true,
@@ -410,7 +410,7 @@ void DatabaseFallback::initialize() {
 void DatabaseFallback::createHashIndex(
   const std::string& collectionName, const std::string& key
 ) {
-    DatabaseFallback::Index newIndex;
+  DatabaseFallback::Index newIndex;
   newIndex.collection = collectionName;
   newIndex.label = key;
   newIndex.collectionAndLabelCache = newIndex.collectionAndLabel();
@@ -472,7 +472,7 @@ void DatabaseFallback::indexOneRecord(
   }
   for (int i = 0; i < entry.objects.size(); i ++) {
     std::string indexLabel =
-            DatabaseFallback::Index::collectionAndLabelStatic(
+    DatabaseFallback::Index::collectionAndLabelStatic(
       collection, entry.objects.keys[i]
     );
     if (!this->indices.contains(indexLabel)) {
@@ -496,7 +496,7 @@ bool DatabaseFallback::storeDatabase(std::stringstream* commentsOnFailure) {
   return
   FileOperations::
   writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
-              DatabaseFallback::jsonLocation(),
+    DatabaseFallback::jsonLocation(),
     this->databaseContent.toString(nullptr),
     true,
     true,
@@ -509,7 +509,7 @@ bool DatabaseFallback::readDatabase(std::stringstream* commentsOnFailure) {
   if (
     !FileOperations::
     loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-              DatabaseFallback::jsonLocation(),
+      DatabaseFallback::jsonLocation(),
       database,
       true,
       true,
@@ -521,7 +521,7 @@ bool DatabaseFallback::readDatabase(std::stringstream* commentsOnFailure) {
     }
     if (
       !FileOperations::fileExistsVirtual(
-                DatabaseFallback::jsonLocation(), true, true, commentsOnFailure
+        DatabaseFallback::jsonLocation(), true, true, commentsOnFailure
       )
     ) {
       global

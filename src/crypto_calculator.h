@@ -307,14 +307,14 @@ public:
     int byteWidthLineBreakZeroForNone,
     bool useHtml
   );
-  static std::string convertListCharsToHex(
-    const List<char>& input,
-    int byteWidthLineBreakZeroForNone,
-    bool useHtml
-  );
   static bool convertListCharsToHex(
     const List<char>& input,
     std::string& output,
+    int byteWidthLineBreakZeroForNone,
+    bool useHtml
+  );
+  static std::string convertListCharsToHex(
+    const List<char>& input,
     int byteWidthLineBreakZeroForNone,
     bool useHtml
   );
@@ -336,8 +336,11 @@ public:
   static bool getCharFromBase58(uint32_t input, char& output);
   static bool get6BitFromChar(unsigned char input, uint32_t& output);
   static char getCharFrom6Bit(uint32_t input, bool useBase64URL);
-  static void convertBytesToString(
+  static void convertListUnsignedCharsToString(
     const List<unsigned char>& input, std::string& output
+  );
+  static void convertListCharsToString(
+    const List<char>& input, std::string& output
   );
   static void convertStringToListBytes(
     const std::string& input, List<unsigned char>& output

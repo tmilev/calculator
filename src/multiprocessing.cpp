@@ -102,10 +102,10 @@ bool PipePrimitive::createMe(
     << "FAILED to create pipe: "
     << this->name
     << ". "
+    << strerror(errno)
     << Logger::endL;
     this->release();
     global.server().stop();
-    // return false;
   }
   if (!readEndBlocks) {
     if (!this->setReadNonBlocking(dontCrashOnFail)) {
@@ -249,28 +249,56 @@ int Pipe::writeWithTimeoutViaSelect(
   return Pipe::writeNoInterrupts(fileDescriptor, input);
 }
 
-int Pipe::readWithTimeOutViaSelect(
+bool Pipe::readWithTimeOutViaSelectOneFileDescriptor(
   int fileDescriptor,
   List<char>& output,
-  int timeOutInSeconds,
+  int bufferSize,
+  int timeOutInSecondsNonPositiveForNoTimeLimit,
+  int maximumTries,
+  std::stringstream* commentsOnFailure
+) {
+  int unused = 0;
+  return
+  readWithTimeOutViaSelect(
+    List<int>({fileDescriptor}),
+    output,
+    unused,
+    bufferSize,
+    timeOutInSecondsNonPositiveForNoTimeLimit,
+    maximumTries,
+    commentsOnFailure
+  );
+}
+
+bool Pipe::readWithTimeOutViaSelect(
+  const List<int>& fileDescriptors,
+  List<char>& output,
+  int& outputFileDescriptor,
+  int bufferSize,
+  int timeOutInSecondsNonPositiveForNoTimeLimit,
   int maximumTries,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Pipe::readWithTimeOutViaSelect");
-  if (fileDescriptor < 0) {
+  if (fileDescriptors.size == 0) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Attempting to read from a negative file descriptor: "
-      << fileDescriptor;
+      *commentsOnFailure << "Empty file descriptors not allowed. ";
     }
-    return - 1;
+    return false;
   }
   fd_set fileDescriptorContainer;
   FD_ZERO(&fileDescriptorContainer);
-  FD_SET(fileDescriptor, &fileDescriptorContainer);
-  timeval timeOut;
-  timeOut.tv_sec = timeOutInSeconds;
-  timeOut.tv_usec = 0;
+  int maximumFileDescriptor = 0;
+  for (int i = 0; i < fileDescriptors.size; i ++) {
+    FD_SET(fileDescriptors[i], &fileDescriptorContainer);
+    maximumFileDescriptor =
+    MathRoutines::maximum(fileDescriptors[i], maximumFileDescriptor);
+  }
+  timeval timeOutContainer;
+  timeOutContainer.tv_sec = timeOutInSecondsNonPositiveForNoTimeLimit;
+  timeOutContainer.tv_usec = 0;
+  timeval* timeOut = timeOutInSecondsNonPositiveForNoTimeLimit >
+  0 ? &timeOutContainer : nullptr;
   int totalFails = 0;
   int totalSelected = - 1;
   std::stringstream failStream;
@@ -278,21 +306,21 @@ int Pipe::readWithTimeOutViaSelect(
     if (totalFails > maximumTries) {
       failStream
       << maximumTries
-      << " failed or timed-out select attempts on file descriptor: "
-      << fileDescriptor;
+      << " failed or timed-out select attempts on file descriptor(s): "
+      << fileDescriptors;
       break;
     }
     totalSelected =
     select(
-      fileDescriptor + 1,
+      maximumFileDescriptor + 1,
       &fileDescriptorContainer,
       nullptr,
       nullptr,
-      &timeOut
+      timeOut
     );
     failStream
-    << "While select-reading from file descriptor: "
-    << fileDescriptor
+    << "While select-reading from file descriptor(s): "
+    << fileDescriptors
     << ", select failed. Error message: "
     << strerror(errno)
     << ". \n";
@@ -302,19 +330,33 @@ int Pipe::readWithTimeOutViaSelect(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << failStream.str();
     }
-    return - 1;
+    return false;
   }
+  outputFileDescriptor = 0;
+  for (int i = 0; i < fileDescriptors.size; i ++) {
+    if (FD_ISSET(fileDescriptors[i], &fileDescriptorContainer)) {
+      outputFileDescriptor = fileDescriptors[i];
+      break;
+    }
+  }
+  global
+  << "Found file descriptor: "
+  << outputFileDescriptor
+  << ". "
+  << Logger::endL;
+  output.setSize(bufferSize);
   int bytesRead = - 1;
   do {
     bytesRead = static_cast<int>(
       read(
-        fileDescriptor,
+        outputFileDescriptor,
         output.objects,
         static_cast<unsigned>(output.size - 1)
       )
     );
     if (bytesRead > 0) {
-      return bytesRead;
+      output.setSize(bytesRead);
+      return true;
     }
     totalFails ++;
     if (totalFails > maximumTries) {
@@ -322,17 +364,17 @@ int Pipe::readWithTimeOutViaSelect(
       << "Too many failed attempts: "
       << maximumTries
       << " at reading from file descriptor: "
-      << fileDescriptor
+      << outputFileDescriptor
       << ". Error message: "
       << strerror(errno)
       << ".\n";
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << failStream.str();
       }
-      return - 1;
+      return true;
     }
   } while (bytesRead <= 0);
-  return bytesRead;
+  return true;
 }
 
 bool PipePrimitive::setPipeFlagsNoFailure(
@@ -388,7 +430,7 @@ bool PipePrimitive::setReadBlocking(bool dontCrashOnFail) {
 bool PipePrimitive::setPipeWriteNonBlockingIfFailThenCrash(
   bool dontCrashOnFail
 ) {
-  STACK_TRACE("Pipe::setPipeWriteNonBlockingIfFailThenCrash");
+  STACK_TRACE("PipePrimitive::setPipeWriteNonBlockingIfFailThenCrash");
   bool result = this->setPipeFlagsNoFailure(O_NONBLOCK, 1, dontCrashOnFail);
   if (result) {
     this->flagWriteEndBlocks = false;
@@ -397,7 +439,7 @@ bool PipePrimitive::setPipeWriteNonBlockingIfFailThenCrash(
 }
 
 bool PipePrimitive::setWriteBlocking(bool dontCrashOnFail) {
-  STACK_TRACE("Pipe::SetPipeWriteBlockingIfFailThenCrash");
+  STACK_TRACE("PipePrimitive::setWriteBlocking");
   bool result = this->setPipeFlagsNoFailure(0, 1, dontCrashOnFail);
   if (result) {
     this->flagWriteEndBlocks = true;
@@ -437,8 +479,8 @@ int Pipe::writeNoInterrupts(int fileDescriptor, const std::string& input) {
   //  return - 1;
 }
 
-void Pipe::readLoop(List<char>& output) {
-  STACK_TRACE("Pipe::readLoop");
+bool Pipe::readFullMessage(List<char>& output) {
+  STACK_TRACE("Pipe::readFullMessage");
   this->checkConsistency();
   MutexlockGuard guard(this->threadLock);
   // Prevent threads from locking one another.
@@ -457,9 +499,10 @@ void Pipe::readLoop(List<char>& output) {
     output.addListOnTop(this->pipe.lastRead);
   }
   // Prevent threads from locking one another.
+  return true;
 }
 
-void Pipe::writeOnceAfterEmptying(
+bool Pipe::writeOnceAfterEmptying(
   const std::string& toBeSent, bool dontCrashOnFail
 ) {
   STACK_TRACE("Pipe::writeOnceAfterEmptying");
@@ -467,8 +510,9 @@ void Pipe::writeOnceAfterEmptying(
   this->mutexPipe.lock();
   this->pipe.readOnceNoFailure(dontCrashOnFail);
   this->pipe.lastRead.setSize(0);
-  this->pipe.writeOnceNoFailure(toBeSent, 0, dontCrashOnFail);
+  bool result = this->pipe.writeOnceNoFailure(toBeSent, 0, dontCrashOnFail);
   this->mutexPipe.unlock();
+  return result;
 }
 
 bool PipePrimitive::readOnceWithoutEmptying(bool dontCrashOnFail) {
@@ -532,7 +576,7 @@ bool PipePrimitive::handleFailedWriteReturnFalse(
 bool PipePrimitive::writeOnceNoFailure(
   const std::string& toBeSent, int offset, bool dontCrashOnFail
 ) {
-  STACK_TRACE("PipePrimitive::writeNoFailure");
+  STACK_TRACE("PipePrimitive::writeOnceNoFailure");
   if (this->pipeEnds[1] == - 1) {
     global
     << Logger::yellow
@@ -547,7 +591,8 @@ bool PipePrimitive::writeOnceNoFailure(
     << offset
     << "; toBeSent string has size: "
     << toBeSent.size()
-    << ". ";
+    << ". "
+    << global.fatal;
   }
   unsigned remaining = static_cast<unsigned>(
     toBeSent.size() - static_cast<unsigned>(offset)
@@ -557,8 +602,9 @@ bool PipePrimitive::writeOnceNoFailure(
   }
   int maximumBadAttempts = 30;
   this->numberOfBytesLastWrite = 0;
-  int numBadAttempts = 0;
+  int numberOfBadAttempts = 0;
   for (;;) {
+    global << "DEBUG: about to write!" << Logger::endL;
     this->numberOfBytesLastWrite = static_cast<int>(
       write(
         this->pipeEnds[1],
@@ -566,6 +612,15 @@ bool PipePrimitive::writeOnceNoFailure(
         remaining
       )
     );
+    global
+    << "DEBUG: wrote OK! to fd: "
+    << this->pipeEnds[1]
+    << " with read end: "
+    << this->pipeEnds[0]
+    << " wrote: "
+    << this->numberOfBytesLastWrite
+    << "bytes."
+    << Logger::endL;
     if (this->numberOfBytesLastWrite < 0) {
       if (
         errno == EAI_AGAIN ||
@@ -573,11 +628,11 @@ bool PipePrimitive::writeOnceNoFailure(
         errno == EINTR ||
         errno == EIO
       ) {
-        numBadAttempts ++;
-        if (numBadAttempts > maximumBadAttempts) {
+        numberOfBadAttempts ++;
+        if (numberOfBadAttempts > maximumBadAttempts) {
           return
           this->handleFailedWriteReturnFalse(
-            toBeSent, dontCrashOnFail, numBadAttempts
+            toBeSent, dontCrashOnFail, numberOfBadAttempts
           );
         }
         continue;
@@ -750,22 +805,23 @@ void Pipe::readOnceWithoutEmptying(bool dontCrashOnFail) {
   this->mutexPipe.lock();
   this->pipe.readOnceNoFailure(dontCrashOnFail);
   if (this->pipe.lastRead.size > 0) {
-    std::string tempS;
-    tempS = this->getLastRead();
-    this->pipe.writeOnceNoFailure(tempS, 0, dontCrashOnFail);
+    std::string output;
+    output = this->getLastRead();
+    this->pipe.writeOnceNoFailure(output, 0, dontCrashOnFail);
   }
   this->mutexPipe.unlock();
 }
 
-void Pipe::readOnce(bool dontCrashOnFail) {
+bool Pipe::readOnce(bool dontCrashOnFail) {
   STACK_TRACE("Pipe::readOnce");
   this->checkConsistency();
   // Guard from other threads.
   MutexlockGuard guard(this->threadLock);
   MutexProcesslockGuard lock(this->mutexPipe);
   this->mutexPipe.lock();
-  this->pipe.readOnceNoFailure(dontCrashOnFail);
+  bool result = this->pipe.readOnceNoFailure(dontCrashOnFail);
   this->mutexPipe.unlock();
+  return result;
 }
 
 Logger::Logger() {

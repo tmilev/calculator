@@ -287,8 +287,13 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
   }
   std::stringstream errorStream2;
   this->lastNumberOfBytesRead =
-  Pipe::readWithTimeOutViaSelect(
-    connector.socketInteger, this->buffer, 1, 10, &errorStream2
+  Pipe::readWithTimeOutViaSelectOneFileDescriptor(
+    connector.socketInteger,
+    this->buffer,
+    10000,
+    1,
+    10,
+    &errorStream2
   );
   if (this->lastNumberOfBytesRead < 0) {
     this->lastTransactionErrors +=

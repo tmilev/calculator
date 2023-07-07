@@ -323,7 +323,7 @@ public:
   int daemon();
   int run();
   // Runs the main loop once.
-  // When false is returned, then the main loop should be exited.
+  // When false is returned, the main loop should be exited.
   // False will be returned:
   // 1) in the worker process and
   // 2) if the server encounters a fatal error.

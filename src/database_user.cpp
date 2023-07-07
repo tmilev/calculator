@@ -593,7 +593,7 @@ bool UserOfDatabase::sendActivationEmail(
   List<std::string> emails;
   StringRoutines::stringSplitDefaultDelimiters(emailList, emails);
   return
-      UserOfDatabase::sendActivationEmail(
+  UserOfDatabase::sendActivationEmail(
     emails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
   );
 }
@@ -1098,7 +1098,7 @@ bool UserOfDatabase::addUsersFromEmails(
       commentsGeneralSensitive = &comments;
     }
     if (
-        !UserOfDatabase::sendActivationEmail(
+      !UserOfDatabase::sendActivationEmail(
         emails, &comments, &comments, commentsGeneralSensitive
       )
     ) {

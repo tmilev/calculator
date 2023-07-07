@@ -104,7 +104,7 @@ public:
 
   MapReferences<
     std::string,
-  DatabaseFallback::Index,
+    DatabaseFallback::Index,
     HashFunctions::hashFunction<std::string>
   > indices;
   static std::string jsonLocation();
@@ -269,26 +269,36 @@ public:
   JSData toJSON() const;
 };
 
+class DatabaseInternalConnection {
+public:
+  int indexInOwner;
+  List<char> lastRequestBytes;
+  std::string lastRequestString;
+  JSData lastRequest;
+  PipePrimitive clientToServer;
+  PipePrimitive serverToClient;
+  DatabaseInternalConnection();
+  void create(int inputIndexInOwner);
+};
+
 // Work in progress. When done, this will be a self contained
 // simple database implementation that supports concurrent reads,
 // writes and locks.
-class DatabaseLocal {
-  // A once-per-database start random id. Do not log this to the console.
-  List<unsigned char> randomId;
-  List<unsigned char> randomIdHash;
+class DatabaseInternal {
   // Map from listening sockets to ports.
-  MapList<int, std::string> allListeningSockets;
-  std::string lastRequestBytes;
-  JSData lastRequest;
-  Pipe clientToServer;
-  Pipe serverToClient;
+  ListReferences<DatabaseInternalConnection> connections;
+  MapList<int, int> mapFromReadEndsToWorkerIds;
+  List<int> readEnds;
+  List<char> buffer;
 public:
   int processId;
-  int socketDatabaseServer;
-  int socketDatabaseClient;
-  std::string port;
-  // A shortened version of randomId. You can log this one.
-  std::string idLoggable;
+  int currentWorkerId;
+  int maximumMessageSize;
+  bool sendAndReceiveFromClientToServer(
+    const std::string& input, std::string& output
+  );
+  bool sendFromClientToServer(const std::string& input);
+  bool receiveInClientFromServer(std::string& output);
   static std::string folder();
   bool findOneWithOptions(
     const QueryExact& query,
@@ -325,19 +335,21 @@ public:
   void createHashIndex(
     const std::string& collectionName, const std::string& key
   );
-  void listenToSocket();
   // Forks out a child process to run the database.
   // Returns the process id of the child database to the parent
   // and 0 to the child database process.
   int forkOutDatabase();
-  void initializeForkAndRun();
+  void initializeForkAndRun(int maximumConnections);
+  // Not fully implemented yet, do not use.
+  // When implemented, would listen on socket and read write.
+  // Reads/writes using basic pipes.
   void run();
-  bool runOneConnection(Listener& listener);
-  bool executeAndSend(int connectedSocket);
+  bool runOneConnection();
+  bool executeAndSend();
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
   );
-  DatabaseLocal();
+  DatabaseInternal();
   std::string toPayLoad(const std::string& input);
 };
 
@@ -413,7 +425,7 @@ public:
   // Implemented as function rather than static member to
   // avoid the static initalization order fiasco.
   static Database& get();
-  bool initializeServer();
+  bool initializeServer(int maximumConnections);
   bool initializeWorker();
   bool checkInitialization();
   void createHashIndex(
@@ -423,7 +435,7 @@ public:
   UserOfDatabase user;
   // TODO(tmilev): Rename this to fallbackDatabase.
   DatabaseFallback fallbackDatabase;
-  DatabaseLocal localDatabase;
+  DatabaseInternal localDatabase;
   bool findFromJSON(
     const QueryExact& findQuery,
     List<JSData>& output,

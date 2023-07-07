@@ -838,7 +838,7 @@ bool Crypto::convertBase64ToString(
   ) {
     return false;
   }
-  Crypto::convertBytesToString(byteList, output);
+  Crypto::convertListUnsignedCharsToString(byteList, output);
   return true;
 }
 
@@ -907,7 +907,13 @@ bool Crypto::convertBase64ToBitStream(
   return true;
 }
 
-void Crypto::convertBytesToString(
+void Crypto::convertListCharsToString(
+  const List<char>& input, std::string& output
+) {
+  output = std::string(input.objects, input.size);
+}
+
+void Crypto::convertListUnsignedCharsToString(
   const List<unsigned char>& input, std::string& output
 ) {
   STACK_TRACE("Crypto::convertBytesToString");

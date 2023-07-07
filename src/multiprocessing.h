@@ -130,7 +130,7 @@ public:
 // and by more than one thread in each process.
 // Multiple processes may try to send bytes through the pipe.
 // A writer to the pipe may lock access to the pipe via mutexPipe lock.
-// TheMutexPipe lock has a (pipe-based) mechanism for locking out other
+// mutexPipe lock has a (pipe-based) mechanism for locking out other
 // processes and
 // a mutex-based mechanism for locking out other threads within the same
 // process.
@@ -145,9 +145,16 @@ public:
   std::string getLastRead() {
     return this->pipe.getLastRead();
   }
-  void readOnce(bool dontCrashOnFail);
+  // Executes a single read on the pipe.
+  // Can only read the amount of bytes that fit in a buffer.
+  bool readOnce(bool dontCrashOnFail);
   void readOnceWithoutEmptying(bool dontCrashOnFail);
-  void readLoop(List<char>& output);
+  // Reads a completed message in a read loop.
+  // The counterpart sender sends the length of
+  // the message through the metaData pipe.
+  // The counterpart sender is expected to cooperate,
+  // and in particular to run on the same machine.
+  bool readFullMessage(List<char>& output);
   static int writeNoInterrupts(
     int fileDescriptor, const std::string& input
   );
@@ -158,14 +165,24 @@ public:
     int maximumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
-  static int readWithTimeOutViaSelect(
+  static bool readWithTimeOutViaSelectOneFileDescriptor(
     int fileDescriptor,
     List<char>& output,
-    int timeOutInSeconds,
+    int bufferSize,
+    int timeOutInSecondsNonPositiveForNoTimeLimit,
     int maximumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
-  void writeOnceAfterEmptying(
+  static bool readWithTimeOutViaSelect(
+    const List<int>& fileDescriptors,
+    List<char>& output,
+    int& outputFileDescriptor,
+    int bufferSize,
+    int timeOutInSecondsNonPositiveForNoTimeLimit,
+    int maximumTries = 10,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool writeOnceAfterEmptying(
     const std::string& toBeSent, bool dontCrashOnFail
   );
   std::string toString() const;

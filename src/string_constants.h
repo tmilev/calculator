@@ -278,9 +278,9 @@ public:
 
 class DatabaseStrings {
 public:
-  // calculator credentials for database use
+  // Calculator credentials for database use.
   static std::string databaseName;
-  // user column names
+  // User column names.
   static std::string labelUserId;
   static std::string labelUsername;
   static std::string labelEmail;
@@ -293,11 +293,11 @@ public:
   static std::string labelTimeOfActivationTokenCreation;
   static std::string labelTimeOfAuthenticationTokenCreation;
   static std::string tableUsers;
-  // email info
+  // Email information.
   static std::string tableEmailInfo;
   static std::string labelLastActivationEmailTime;
   static std::string labelTotalActivationEmails;
-  // course info column names
+  // Course information column names.
   static std::string labelCurrentCourses;
   static std::string labelSection;
   static std::string labelDeadlinesSchema;
@@ -308,30 +308,33 @@ public:
   // deadlines info
   static std::string labelDeadlines;
   static std::string tableDeadlines;
-  // problem weights info
+  // Problem weights information
   static std::string tableProblemWeights;
   static std::string labelProblemWeight;
-  // problem information
+  // Problem information.
   static std::string tableProblemInformation;
   static std::string labelProblemTotalQuestions;
-  // deleted fields
+  // Deleted fields.
   static std::string anyField;
   static std::string labelFields;
   static std::string labelTable;
   static std::string objectSelector;
   static std::string objectSelectorMongo;
   static std::string labelId;
-  // deleted info
+  // Deleted information
   static std::string tableDeleted;
-  // app info
+  // App information.
   static std::string labelCurrentPage;
   static std::string labelPageSignUp;
   static std::string labelPageAccount;
   static std::string labelPageActivateAccount;
   static std::string labelCalculatorRequest;
   static std::string labelCalculatorInput;
-  // errors
+  // Errors.
   static std::string errorDatabaseDisabled;
+  // Database request/result fields.
+  static std::string resultSuccess;
+  static std::string resultComments;
 };
 
 #endif // header_string_constants_ALREADY_INCLUDED

@@ -51,31 +51,66 @@ bool DatabaseInternal::findOneWithOptions(
   return false;
 }
 
+bool DatabaseInternalResult::isSuccess(std::stringstream* commentsOnFalse)
+const {
+  if (
+    !this->content.objects.contains(DatabaseStrings::resultSuccess)
+  ) {
+    if (commentsOnFalse != nullptr) {
+      *commentsOnFalse
+      << "Missing result success entry: "
+      << DatabaseStrings::resultSuccess
+      << ". Database result: "
+      << this->content.toString();
+    }
+    return false;
+  }
+  JSData successValue =
+  this->content.objects.getValueNoFail(DatabaseStrings::resultSuccess);
+  if (successValue.isTrueRepresentationInJSON()) {
+    return true;
+  }
+  if (
+    commentsOnFalse != nullptr &&
+    this->content.objects.contains(DatabaseStrings::resultComments)
+  ) {
+    *commentsOnFalse
+    << this->content.objects.getValueNoFail(DatabaseStrings::resultComments).
+    toString();
+  }
+  return false;
+}
+
+bool DatabaseInternalResult::fromJSON(
+  const std::string& input, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("DatabaseInternalResult::fromJSON");
+  return this->content.parse(input, true, commentsOnFailure);
+}
+
 bool DatabaseInternal::updateOne(
   const QueryExact& findQuery,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
-  (void) findQuery;
-  (void) updateQuery;
-  (void) commentsOnFailure;
+  STACK_TRACE("DatabaseInternal::updateOne");
   QueryFindAndUpdate queryFindAndUpdate;
   queryFindAndUpdate.find = findQuery;
   queryFindAndUpdate.update = updateQuery;
-  std::string payload =
-  this->toPayLoad(queryFindAndUpdate.toJSON().toString());
-  std::string result;
-  if (!this->sendAndReceiveFromClientToServer(payload, result)) {
+  DatabaseInternalResult result;
+  DatabaseInternalRequest request;
+  request.query = queryFindAndUpdate.toJSON();
+  if (
+    !this->sendAndReceiveFromClientToServer(
+      request, result, commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to send payload to database. ";
     }
     return false;
   }
-  global << "DEBUG: got to here!!!! Result: " << result << Logger::endL;
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure << "DEBUG: result so far: " << result;
-  }
-  return false;
+  return result.isSuccess(commentsOnFailure);
 }
 
 std::string DatabaseInternal::toPayLoad(const std::string& input) {
@@ -162,56 +197,58 @@ void DatabaseInternal::initializeForkAndRun(int maximumConnections) {
 }
 
 bool DatabaseInternal::sendAndReceiveFromClientToServer(
-  const std::string& input, std::string& output
+  const DatabaseInternalRequest& input,
+  DatabaseInternalResult& output,
+  std::stringstream* commentsOnFailure
 ) {
-  if (!this->sendFromClientToServer(input)) {
+  if (
+    !this->sendFromClientToServer(
+      input.query.toString(), commentsOnFailure
+    )
+  ) {
     return false;
   }
-  return this->receiveInClientFromServer(output);
+  return this->receiveInClientFromServer(output, commentsOnFailure);
 }
 
-bool DatabaseInternal::sendFromClientToServer(const std::string& input) {
-  global
-  << "DEBUG: current worker id: "
-  << this->currentWorkerId
-  << Logger::endL;
+bool DatabaseInternal::sendFromClientToServer(
+  const std::string& input, std::stringstream* commentsOnFailure
+) {
   DatabaseInternalConnection& connection =
   this->connections[this->currentWorkerId];
-  global
-  << "DEBUG: about to send: "
-  << input.size()
-  << " bytes. "
-  << Logger::endL;
   bool result = connection.clientToServer.writeOnceNoFailure(input, 0, true);
-  global << "DEBUG: sent OK: " << input.size() << " bytes. " << Logger::endL;
+  if (!result && commentsOnFailure != nullptr) {
+    *commentsOnFailure << "Failed to send bytes to database. ";
+  }
   return result;
 }
 
-bool DatabaseInternal::receiveInClientFromServer(std::string& output) {
+bool DatabaseInternal::receiveInClientFromServer(
+  DatabaseInternalResult& output, std::stringstream* commentsOnFailure
+) {
   DatabaseInternalConnection& connection =
   this->connections[this->currentWorkerId];
-  global
-  << "DEBUG: About to read server to client on read end: "
-  << connection.serverToClient.pipeEnds[0]
-  << Logger::endL;
   bool result = connection.serverToClient.readOnceNoFailure(true);
-  global
-  << "DEBUG:  read: done: "
-  << connection.serverToClient.buffer.size
-  << Logger::endL;
-  Crypto::convertListCharsToString(connection.serverToClient.buffer, output);
-  return result;
+  if (!result) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to receive database result. ";
+    }
+    return false;
+  }
+  std::string stringBuffer;
+  Crypto::convertListCharsToString(
+    connection.serverToClient.buffer, stringBuffer
+  );
+  return output.fromJSON(stringBuffer, commentsOnFailure);
 }
 
 void DatabaseInternal::run() {
   STACK_TRACE("DatabaseInternal::run");
   int totalRuns = 0;
   for (int i = 0; i < this->connections.size; i ++) {
-      int readEnd =       this->connections[i].clientToServer.pipeEnds[0];
-
-    this->readEnds.addOnTop(readEnd
-    );
-      this->mapFromReadEndsToWorkerIds.setKeyValue(readEnd, i);
+    int readEnd = this->connections[i].clientToServer.pipeEnds[0];
+    this->readEnds.addOnTop(readEnd);
+    this->mapFromReadEndsToWorkerIds.setKeyValue(readEnd, i);
   }
   while (true) {
     totalRuns ++;
@@ -236,7 +273,8 @@ bool DatabaseInternal::runOneConnection() {
     global << "DEBUG: failed to read!!!" << Logger::endL;
     return false;
   }
-  this->currentWorkerId = this->mapFromReadEndsToWorkerIds.getValueNoFail(fileDescriptor);
+  this->currentWorkerId =
+  this->mapFromReadEndsToWorkerIds.getValueNoFail(fileDescriptor);
   global
   << "DEBUG: read OK!!! Read: "
   << this->buffer.size

@@ -272,13 +272,24 @@ public:
 class DatabaseInternalConnection {
 public:
   int indexInOwner;
-  List<char> lastRequestBytes;
-  std::string lastRequestString;
-  JSData lastRequest;
   PipePrimitive clientToServer;
   PipePrimitive serverToClient;
   DatabaseInternalConnection();
   void create(int inputIndexInOwner);
+};
+
+class DatabaseInternalResult {
+public:
+  JSData content;
+  bool fromJSON(
+    const std::string& input, std::stringstream* commentsOnFailure
+  );
+  bool isSuccess(std::stringstream* commentsOnFalse) const;
+};
+
+class DatabaseInternalRequest {
+public:
+  JSData query;
 };
 
 // Work in progress. When done, this will be a self contained
@@ -290,15 +301,21 @@ class DatabaseInternal {
   MapList<int, int> mapFromReadEndsToWorkerIds;
   List<int> readEnds;
   List<char> buffer;
+  bool sendFromClientToServer(
+    const std::string& input, std::stringstream* commentsOnFailure
+  );
+  bool receiveInClientFromServer(
+    DatabaseInternalResult& output, std::stringstream* commentsOnFailure
+  );
 public:
   int processId;
   int currentWorkerId;
   int maximumMessageSize;
   bool sendAndReceiveFromClientToServer(
-    const std::string& input, std::string& output
+    const DatabaseInternalRequest& input,
+    DatabaseInternalResult& output,
+    std::stringstream* commentsOnFailure
   );
-  bool sendFromClientToServer(const std::string& input);
-  bool receiveInClientFromServer(std::string& output);
   static std::string folder();
   bool findOneWithOptions(
     const QueryExact& query,

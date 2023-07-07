@@ -226,6 +226,8 @@ std::string DatabaseStrings::labelPageAccount = "account";
 std::string DatabaseStrings::labelPageActivateAccount = "activateAccount";
 std::string DatabaseStrings::errorDatabaseDisabled =
 "Database disabled explicitly by server configuration. ";
+std::string DatabaseStrings::resultComments = "comments";
+std::string DatabaseStrings::resultSuccess = "success";
 std::string Configuration::processMonitoringBanned = "processMonitoringBanned";
 std::string Configuration::monitorPingTime = "monitorPingTime";
 std::string Configuration::millisecondsReplyAfterComputation =

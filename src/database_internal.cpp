@@ -3,6 +3,8 @@
 #include "network_calculator.h"
 #include "crypto_calculator.h"
 
+HashedList<std::string> DatabaseInternalServer::allowedCollectionNames;
+
 std::string DatabaseInternal::folder() {
   return "database/" + DatabaseStrings::databaseName + "/";
 }
@@ -22,7 +24,7 @@ DatabaseInternal::DatabaseInternal() {
   this->maximumMessageSize = 65536;
 }
 
-bool DatabaseInternal::fetchCollectionNames(
+bool DatabaseInternalClient::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   (void) output;
@@ -33,7 +35,11 @@ bool DatabaseInternal::fetchCollectionNames(
   return false;
 }
 
-bool DatabaseInternal::findOneWithOptions(
+DatabaseInternalClient::DatabaseInternalClient() {
+  this->owner = nullptr;
+}
+
+bool DatabaseInternalClient::findOneWithOptions(
   const QueryExact& query,
   const QueryResultOptions& options,
   JSData& output,
@@ -51,7 +57,7 @@ bool DatabaseInternal::findOneWithOptions(
   return false;
 }
 
-bool DatabaseInternal::updateOne(
+bool DatabaseInternalClient::updateOne(
   const QueryExact& findQuery,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
@@ -65,7 +71,7 @@ bool DatabaseInternal::updateOne(
   request.queryFindAndUpdate = queryFindAndUpdate;
   request.requestType = DatabaseInternalRequest::Type::findAndUpdate;
   if (
-    !this->sendAndReceiveFromClientToServer(
+    !this->owner->sendAndReceiveFromClientToServer(
       request, result, commentsOnFailure
     )
   ) {
@@ -81,7 +87,7 @@ std::string DatabaseInternal::toPayLoad(const std::string& input) {
   return input;
 }
 
-bool DatabaseInternal::findOneFromSome(
+bool DatabaseInternalClient::findOneFromSome(
   const List<QueryExact>& findOrQueries,
   JSData& output,
   std::stringstream* commentsOnFailure
@@ -97,7 +103,7 @@ bool DatabaseInternal::deleteDatabase(std::stringstream* commentsOnFailure) {
   return false;
 }
 
-bool DatabaseInternal::findFromJSONWithOptions(
+bool DatabaseInternalClient::findFromJSONWithOptions(
   const QueryExact& findQuery,
   List<JSData>& output,
   const QueryResultOptions& options,
@@ -119,7 +125,7 @@ bool DatabaseInternal::findFromJSONWithOptions(
   return false;
 }
 
-bool DatabaseInternal::updateOneFromSome(
+bool DatabaseInternalClient::updateOneFromSome(
   const List<QueryExact>& findOrQueries,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
@@ -153,6 +159,8 @@ void DatabaseInternal::initializeForkAndRun(int maximumConnections) {
   for (int i = 0; i < maximumConnections; i ++) {
     this->connections[i].create(i);
   }
+  this->client.owner = this;
+  this->server.owner = this;
   if (this->forkOutDatabase() > 0) {
     // This is the parent process that will ultimately become the client.
     return;
@@ -215,6 +223,7 @@ void DatabaseInternal::run() {
     this->readEnds.addOnTop(readEnd);
     this->mapFromReadEndsToWorkerIds.setKeyValue(readEnd, i);
   }
+  this->server.initializeLoadFromHardDrive();
   while (true) {
     totalRuns ++;
     global << "DEBUG: total database runs:  " << totalRuns << Logger::endL;
@@ -257,11 +266,24 @@ bool DatabaseInternal::executeAndSend() {
       result.toJSON().toString(), 0, true
     );
   }
-  std::string temp =
-  "{\"success\":false,\"comments\":\"Not implemented yet. " +
-  request.toStringForDebugging() +
-  "\"}";
-  return this->currentServerToClient().writeOnceNoFailure(temp, 0, true);
+  result.success = false;
+  switch (request.requestType) {
+  case DatabaseInternalRequest::Type::findAndUpdate:
+    result.success =
+    this->server.findAndUpdate(
+      request.queryFindAndUpdate, &commentsOnFailure
+    );
+    break;
+  default:
+    break;
+  }
+  if (!result.success) {
+    result.comments = commentsOnFailure.str();
+  }
+  return
+  this->currentServerToClient().writeOnceNoFailure(
+    result.toJSON().toString(), 0, true
+  );
 }
 
 PipePrimitive& DatabaseInternal::currentServerToClient() {
@@ -367,13 +389,13 @@ bool DatabaseInternalRequest::fromJSON(
 
 void DatabaseInternalRequest::toJSON(JSData& output) const {
   output = JSData();
+  output[DatabaseStrings::requestType] =
+  this->typeToString(this->requestType);
   if (this->requestType == DatabaseInternalRequest::Type::findAndUpdate) {
-    output[DatabaseStrings::requestType] = "findAndUpdate";
     output[DatabaseStrings::requestContent] =
     this->queryFindAndUpdate.toJSON();
     return;
   }
-  output[DatabaseStrings::requestType] = "unknown";
 }
 
 JSData DatabaseInternalRequest::toJSON() const {
@@ -384,7 +406,7 @@ JSData DatabaseInternalRequest::toJSON() const {
 
 std::string DatabaseInternalRequest::toStringForDebugging() const {
   std::stringstream out;
-  out << "request: " << this->requestType;
+  out << "request: " << this->typeToString(this->requestType);
   return out.str();
 }
 
@@ -425,4 +447,101 @@ bool DatabaseInternalRequest::fromJSData(
     << this->contentReader.toString();
   }
   return false;
+}
+
+DatabaseInternalServer::DatabaseInternalServer() {
+  this->owner = nullptr;
+}
+
+bool DatabaseInternalServer::findAndUpdate(
+  QueryFindAndUpdate& input, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("DatabaseInternalServer::findAndUpdate");
+  if (!this->ensureCollection(input.find.collection)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Collection name not recognized: "
+      << input.find.collection;
+    }
+    return false;
+  }
+  return false;
+}
+
+void DatabaseInternalServer::initializeLoadFromHardDrive() {
+  STACK_TRACE("DatabaseInternalServer::initializeLoadFromHardDrive");
+  this->allowedCollectionNames.addOnTop(DatabaseStrings::tableDeadlines);
+  this->allowedCollectionNames.addOnTop(DatabaseStrings::tableDeleted);
+  this->allowedCollectionNames.addOnTop(DatabaseStrings::tableEmailInfo);
+  this->allowedCollectionNames.addOnTop(
+    DatabaseStrings::tableProblemInformation
+  );
+  this->allowedCollectionNames.addOnTop(DatabaseStrings::tableUsers);
+  this->allowedCollectionNames.addOnTop(DatabaseStrings::tableProblemWeights);
+  this->loadCollectionList();
+}
+
+bool DatabaseInternalServer::ensureCollection(
+  const std::string& collectionName
+) {
+  if (this->collections.contains(collectionName)) {
+    return true;
+  }
+  if (!this->allowedCollectionNames.contains(collectionName)) {
+    return false;
+  }
+  this->collections.getValueCreateEmpty(collectionName);
+  this->storeCollectionList();
+}
+
+void DatabaseInternalServer::loadCollectionList() {
+  STACK_TRACE("DatabaseInternalServer::readCollectionList");
+}
+
+void DatabaseInternalServer::storeEverything() {
+  STACK_TRACE("DatabaseInternalServer::storeEverything");
+}
+
+void DatabaseInternalServer::storeCollectionList() {
+  JSData collectionsData;
+  for (const std::string& collectionName : this->collections.keys) {
+    collectionsData[collectionName] =
+    this->collections.getValueNoFail(collectionName).toJSONSchema();
+  }
+  JSData collectionsDataForStorage;
+  Database::convertJSONToJSONMongo(
+    collectionsData, collectionsDataForStorage, nullptr
+  );
+  std::string filename = this->collectionsSchemaFileName();
+  std::stringstream commentsOnFailure;
+  if (
+    !FileOperations::writeFileVirtual(
+      filename, collectionsDataForStorage.toString(), &commentsOnFailure
+    )
+  ) {
+    global
+    << Logger::red
+    << "Failed to store collections list! Data may be lost. "
+    << Logger::endL;
+  }
+}
+
+std::string DatabaseInternalServer::collectionsSchemaFileName() const {
+  return this->owner->folder() + "collections.json";
+}
+
+JSData DatabaseCollection::toJSONSchema() const {
+  JSData result;
+  JSData index;
+  index.makeEmptyArray();
+  JSData labelId;
+  labelId = DatabaseStrings::labelId;
+  index.listObjects.addOnTop(labelId);
+  for (const std::string& indexEntry : this->userDefinedIndexableLabels) {
+    JSData entry;
+    entry = indexEntry;
+    index.listObjects.addOnTop(entry);
+  }
+  result["index"] = index;
+  return result;
 }

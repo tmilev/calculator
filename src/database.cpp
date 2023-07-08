@@ -314,8 +314,8 @@ bool Database::deleteOneEntry(
   if (labels.size < 2) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      <<
-      "When deleting an object, it needs at least two labels: table name and objectid. "
+      << "When deleting an object, it needs at least "
+      << "two labels: table name and objectid. "
       << "Your input appears to have only "
       << labels.size
       << " entries: "
@@ -326,10 +326,7 @@ bool Database::deleteOneEntry(
   }
   QueryExact findQuery(
     labels[0],
-    List<std::string>({
-        DatabaseStrings::labelId, DatabaseStrings::objectSelectorMongo
-      }
-    ),
+    List<std::string>({DatabaseStrings::labelId}),
     labels[1]
   );
   std::string tableName = labels[0];
@@ -429,8 +426,8 @@ bool Database::deleteOneEntryUnsetUnsecure(
   (void) selector;
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure
-    <<
-    "deleteOneEntryUnsetUnsecure: project compiled without mongoDB support. ";
+    << "deleteOneEntryUnsetUnsecure: "
+    << "project compiled without mongoDB support. ";
   }
   return false;
 #endif
@@ -566,7 +563,7 @@ bool Database::findOneWithOptions(
   switch (global.databaseType) {
   case DatabaseType::internal:
     return
-    Database::get().localDatabase.findOneWithOptions(
+    Database::get().localDatabase.client.findOneWithOptions(
       query,
       options,
       output,
@@ -684,7 +681,9 @@ bool Database::updateOne(
     );
   case DatabaseType::internal:
     return
-    this->localDatabase.updateOne(findQuery, dataToMerge, commentsOnFailure);
+    this->localDatabase.client.updateOne(
+      findQuery, dataToMerge, commentsOnFailure
+    );
   }
   return false;
 }
@@ -709,7 +708,7 @@ bool Database::findOneFromSome(
     );
   case DatabaseType::internal:
     return
-    this->localDatabase.findOneFromSome(
+    this->localDatabase.client.findOneFromSome(
       findOrQueries, output, commentsOnFailure
     );
   }
@@ -860,7 +859,7 @@ bool Database::findFromJSONWithOptions(
     );
   case DatabaseType::internal:
     return
-    Database::get().localDatabase.findFromJSONWithOptions(
+    Database::get().localDatabase.client.findFromJSONWithOptions(
       findQuery,
       output,
       options,
@@ -926,7 +925,7 @@ bool Database::fetchCollectionNames(
     );
   case DatabaseType::internal:
     return
-    Database::get().localDatabase.fetchCollectionNames(
+    Database::get().localDatabase.client.fetchCollectionNames(
       output, commentsOnFailure
     );
   }
@@ -1252,7 +1251,7 @@ bool Database::updateOneFromSome(
     );
   case DatabaseType::internal:
     return
-    this->localDatabase.updateOneFromSome(
+    this->localDatabase.client.updateOneFromSome(
       findOrQueries, updateQuery, commentsOnFailure
     );
   }

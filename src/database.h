@@ -314,33 +314,37 @@ public:
   DatabaseInternalRequest();
 };
 
-// Work in progress. When done, this will be a self contained
-// simple database implementation that supports concurrent reads,
-// writes and locks.
-class DatabaseInternal {
-  // Map from listening sockets to ports.
-  ListReferences<DatabaseInternalConnection> connections;
-  MapList<int, int> mapFromReadEndsToWorkerIds;
-  List<int> readEnds;
-  List<char> buffer;
-  bool sendFromClientToServer(
-    const std::string& input, std::stringstream* commentsOnFailure
-  );
-  bool receiveInClientFromServer(
-    DatabaseInternalResult& output, std::stringstream* commentsOnFailure
-  );
-  PipePrimitive& currentServerToClient();
-  PipePrimitive& currentClientToServer();
+class DatabaseInternal;
+
+// A table/collection in the database.
+class DatabaseCollection {
 public:
-  int processId;
-  int currentWorkerId;
-  int maximumMessageSize;
-  bool sendAndReceiveFromClientToServer(
-    const DatabaseInternalRequest& input,
-    DatabaseInternalResult& output,
-    std::stringstream* commentsOnFailure
+  // User-defined entries by which objects should be indexed.
+  List<std::string> userDefinedIndexableLabels;
+  JSData toJSONSchema() const;
+};
+
+class DatabaseInternalServer {
+public:
+  DatabaseInternal* owner;
+  MapReferences<std::string, DatabaseCollection> collections;
+  static HashedList<std::string> allowedCollectionNames;
+  DatabaseInternalServer();
+  void initializeLoadFromHardDrive();
+  void loadCollectionList();
+  void storeEverything();
+  bool ensureCollection(const std::string& collectionName);
+  bool findAndUpdate(
+    QueryFindAndUpdate& input, std::stringstream* commentsOnFailure
   );
-  static std::string folder();
+  void storeCollectionList();
+  std::string collectionsSchemaFileName() const;
+};
+
+class DatabaseInternalClient {
+public:
+  DatabaseInternal* owner;
+  DatabaseInternalClient();
   bool findOneWithOptions(
     const QueryExact& query,
     const QueryResultOptions& options,
@@ -372,24 +376,64 @@ public:
     const QuerySet& updateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
+  bool fetchCollectionNames(
+    List<std::string>& output, std::stringstream* commentsOnFailure
+  );
+};
+
+// A self contained
+// simple database implementation.
+// Forks out into multiple: processes - future client(s) and server.
+// Clients and server read/write to/from number of pre-allocated file
+// descriptors (currently, linux pipes).
+class DatabaseInternal {
+  // Map from listening sockets to ports.
+  ListReferences<DatabaseInternalConnection> connections;
+  MapList<int, int> mapFromReadEndsToWorkerIds;
+  List<int> readEnds;
+  List<char> buffer;
+  bool sendFromClientToServer(
+    const std::string& input, std::stringstream* commentsOnFailure
+  );
+  bool receiveInClientFromServer(
+    DatabaseInternalResult& output, std::stringstream* commentsOnFailure
+  );
+  PipePrimitive& currentServerToClient();
+  PipePrimitive& currentClientToServer();
+public:
+  int processId;
+  int currentWorkerId;
+  int maximumMessageSize;
+  DatabaseInternalClient client;
+  DatabaseInternalServer server;
+  bool sendAndReceiveFromClientToServer(
+    const DatabaseInternalRequest& input,
+    DatabaseInternalResult& output,
+    std::stringstream* commentsOnFailure
+  );
+  static std::string folder();
   bool deleteDatabase(std::stringstream* commentsOnFailure);
   void createHashIndex(
     const std::string& collectionName, const std::string& key
   );
-  // Forks out a child process to run the database.
-  // Returns the process id of the child database to the parent
-  // and 0 to the child database process.
+  // Forks out a child process to be the database server.
+  // Returns the process id of the database server to the parent
+  // and 0 to the child server database process.
   int forkOutDatabase();
   void initializeForkAndRun(int maximumConnections);
-  // Not fully implemented yet, do not use.
-  // When implemented, would listen on socket and read write.
-  // Reads/writes using basic pipes.
+  // Runs the main server loop which listens to a number of
+  // file descriptors from all database clients.
   void run();
+  // Processes a request from a single client.
+  // As of writing, this will execute the entire operation, locking out the DB
+  // for all other processes. Since we expect the db read/write operations to
+  // be extremely quick, we do not expect a performance penalty for the blocked
+  // waiting clients.
+  // Should that change, please move the handling of client requests to
+  // separate thread(s).
   bool runOneConnection();
+  // Executes one single operation and sends the result back.
   bool executeAndSend();
-  bool fetchCollectionNames(
-    List<std::string>& output, std::stringstream* commentsOnFailure
-  );
   DatabaseInternal();
   std::string toPayLoad(const std::string& input);
 };

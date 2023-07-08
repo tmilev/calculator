@@ -214,7 +214,6 @@ std::string DatabaseStrings::labelTotalActivationEmails =
 std::string DatabaseStrings::tableDeleted = "deleted";
 std::string DatabaseStrings::anyField = "${any}";
 std::string DatabaseStrings::objectSelector = "${number}";
-std::string DatabaseStrings::objectSelectorMongo = "$oid";
 std::string DatabaseStrings::labelFields = "fields";
 std::string DatabaseStrings::labelTable = "table";
 std::string DatabaseStrings::labelId = "_id";

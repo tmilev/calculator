@@ -125,7 +125,7 @@ bool DatabaseFallback::updateOneNolocks(
   if (index == - 1) {
     index = this->databaseContent[findQuery.collection].listObjects.size;
     JSData incoming = findQuery.toJSONCombineLabelsAndValue();
-    incoming[DatabaseStrings::labelId][DatabaseStrings::objectSelectorMongo] =
+    incoming[DatabaseStrings::labelId] =
     Crypto::Random::getRandomHexStringLeaveMemoryTrace(12);
     this->databaseContent[findQuery.collection].listObjects.addOnTop(incoming);
   }

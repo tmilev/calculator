@@ -319,7 +319,6 @@ public:
   static std::string labelFields;
   static std::string labelTable;
   static std::string objectSelector;
-  static std::string objectSelectorMongo;
   static std::string labelId;
   // Deleted information
   static std::string tableDeleted;

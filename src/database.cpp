@@ -58,6 +58,37 @@ JSData QueryExact::toJSON() const {
   return result;
 }
 
+bool QueryExact::fromJSON(
+  const JSData& source, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("QueryExact::fromJSON");
+  (void) commentsOnFailure;
+  this->nestedLabels.clear();
+  this->exactValue = JSData();
+  this->selectAny = false;
+  JSData findQuery = source;
+  this->collection = findQuery[DatabaseStrings::labelCollection].stringValue;
+  if (this->collection == "") {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Empty collection not allowed.";
+    }
+    return false;
+  }
+  JSData nestedKeySource = findQuery[DatabaseStrings::labelKey];
+  for (const JSData& key : nestedKeySource.listObjects) {
+    std::string label = key.stringValue;
+    if (label == "") {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Empty label not allowed.";
+      }
+      return false;
+    }
+    this->nestedLabels.addOnTop(label);
+  }
+  this->exactValue = findQuery[DatabaseStrings::labelValue];
+  return true;
+}
+
 JSData QueryExact::toJSONCombineKeysAndValue() const {
   JSData result;
   result.elementType = JSData::Token::tokenObject;
@@ -85,6 +116,10 @@ void QueryExact::setLabelsValue(
   this->nestedLabels = labels;
 }
 
+std::string QueryExact::concatenateNestedLabels() const {
+  return StringRoutines::join(this->nestedLabels, ",");
+}
+
 void QueryExact::setLabelValue(
   const std::string& label, const std::string& desiredValue
 ) {
@@ -106,27 +141,6 @@ bool QueryExact::fromString(
     return false;
   }
   return this->fromJSON(querySource, commentsOnFailure);
-}
-
-bool QueryExact::fromJSON(
-  const JSData& source, std::stringstream* commentsOnFailure
-) {
-  STACK_TRACE("QueryExact::fromJSON");
-  (void) commentsOnFailure;
-  this->nestedLabels.clear();
-  this->exactValue = JSData();
-  this->selectAny = false;
-  JSData findQuery = source;
-  this->collection = findQuery[DatabaseStrings::labelCollection].stringValue;
-  if (this->collection == "") {
-    return true;
-  }
-  std::string nestedKeySource = findQuery["key"].stringValue;
-  std::string desiredValue = findQuery["value"].stringValue;
-  StringRoutines::splitExcludeDelimiter(
-    nestedKeySource, '.', this->nestedLabels
-  );
-  return true;
 }
 
 bool Database::matchesPattern(
@@ -1120,6 +1134,15 @@ bool QuerySetOnce::fromJSON(
   return true;
 }
 
+void QuerySetOnce::updateOneEntry(JSData& modified) const {
+  STACK_TRACE("QuerySetOnce::updateOneEntry");
+  JSData* output = &modified;
+  for (int i = 0; i < this->nestedLabels.size - 1; i ++) {
+    output = &((*output)[this->nestedLabels[i]]);
+  }
+  output->setKeyValue(*this->nestedLabels.lastObject(), this->value);
+}
+
 QuerySet::QuerySet() {}
 
 void QuerySet::fromJSONNoFail(const JSData& inputValue) {
@@ -1194,19 +1217,9 @@ std::string QuerySet::toStringDebug() const {
 JSData QuerySet::toJSON() const {
   JSData result;
   result.makeEmptyArray();
-  global
-  << Logger::yellow
-  << "To return: "
-  << result.toString()
-  << Logger::endL;
   for (const QuerySetOnce& set : this->data) {
     result.listObjects.addOnTop(set.toJSON());
   }
-  global
-  << Logger::yellow
-  << "To return: "
-  << result.toString()
-  << Logger::endL;
   return result;
 }
 
@@ -1232,6 +1245,12 @@ bool QuerySet::fromJSON(
   return true;
 }
 
+void QuerySet::mergeData(JSData& toMergeInto) const {
+  for (const QuerySetOnce& set : this->data) {
+    set.updateOneEntry(toMergeInto);
+  }
+}
+
 void QueryResultOptions::makeProjection(const List<std::string>& fields) {
   this->fieldsToProjectTo = fields;
 }
@@ -1255,11 +1274,14 @@ JSData QueryResultOptions::toJSON() const {
   return result;
 }
 
+QueryFindAndUpdate::QueryFindAndUpdate() {
+  this->createIfNotFound = false;
+}
+
 JSData QueryFindAndUpdate::toJSON() const {
   JSData result;
   result["find"] = this->find.toJSON();
   result["update"] = this->update.toJSON();
-  global << Logger::blue << result.toString();
   return result;
 }
 

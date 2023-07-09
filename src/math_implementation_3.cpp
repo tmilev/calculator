@@ -1569,8 +1569,18 @@ void FileOperations::initializeFoldersULTRASensitive() {
     "crashes/", "results/crashes/"
   );
   folderSubstitutionsULTRASensitive.setKeyValue("calculator", "calculator");
-  folderSubstitutionsULTRASensitive.setKeyValue("database/", "database/");
-  folderSubstitutionsULTRASensitive.setKeyValue("/database/", "/database/");
+  folderSubstitutionsULTRASensitive.setKeyValue(
+    "database_internal/", "database_internal/"
+  );
+  folderSubstitutionsULTRASensitive.setKeyValue(
+    "/database_internal/", "/database_internal/"
+  );
+  folderSubstitutionsULTRASensitive.setKeyValue(
+    "database_fallback/", "database_fallback/"
+  );
+  folderSubstitutionsULTRASensitive.setKeyValue(
+    "/database_fallback/", "/database_fallback/"
+  );
 }
 
 void FileOperations::initializeFoldersSensitive() {

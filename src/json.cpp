@@ -275,6 +275,22 @@ int JSData::getKeyIndex(const std::string& key) const {
   return this->objects.getIndex(key);
 }
 
+bool JSData::hasNestedKey(
+  const List<std::string>& nestedKeys, JSData* whichValue
+) const {
+  const JSData* current = this;
+  for (const std::string& label : nestedKeys) {
+    if (!current->hasKey(label)) {
+      return false;
+    }
+    current = &(*current).objects.getValueNoFail(label);
+  }
+  if (whichValue != nullptr) {
+    *whichValue = *current;
+  }
+  return true;
+}
+
 void JSData::setKeyValue(const std::string& key, const JSData& value) {
   (*this)[key] = value;
 }

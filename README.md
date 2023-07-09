@@ -42,12 +42,6 @@ make -j10
 ```
 The -j10 flag tells the compiler to use 10 parallel compilation jobs. Adjust the number 10 to whatever is appropriate for your system (-j10 should work on a 4Gb RAM laptop).
 
-2.2. The build above assumes you have openssl and mongoDB installed on your system, but should work even if those are absent. 
-If it doesn't, please do let us know by posting a bug report here.
-To explicitly request a build without mongoDB and openSSL, use the following.
-```
-make -j10 nossl=1 noMongo=1
-```
 
 The calculator-algebra.org site runs, at the time of writing, with 
 ```
@@ -113,8 +107,7 @@ calculator-algebra.org runs Ubuntu and compiles out of the box. We expect all ve
 - The calculator was successfully built and ran on a Windows 10 Linux subsystem. This was a single run on localhost.
 - We will add your Linux flavor upon request. We may need your help with your package manager. 
 2. **git**. needed to download the source. 
-3. [Optional] **mongoDB development libraries**. Without [mongoDB](https://www.mongodb.com/), the calculator will not be able to provide any login services, and some "administator-only" functions may be missing.
-4. [Optional] **openssl development libraries**. Without [openSSL](https://www.openssl.org/), the calculator will not be able to provide any login services, and some "administator-only" functions may be missing.
+3. [Optional] **openssl development libraries**. Without [openSSL](https://www.openssl.org/), the calculator will not be able to provide any login services, and some "administator-only" functions may be missing.
 
 ### Port redirect with ip tables
 

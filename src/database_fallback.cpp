@@ -83,7 +83,7 @@ bool DatabaseFallback::updateOne(
     }
     return false;
   }
-  MutexProcesslockGuard guardDB(this->access);
+  MutexProcesslockGuard guardDatabase(this->access);
   if (!this->readAndIndexDatabase(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read and index database. ";
@@ -129,33 +129,9 @@ bool DatabaseFallback::updateOneNolocks(
     Crypto::Random::getRandomHexStringLeaveMemoryTrace(12);
     this->databaseContent[findQuery.collection].listObjects.addOnTop(incoming);
   }
-  for (const QuerySetOnce& set : dataToMerge.data) {
-    JSData* modified =
-    &(this->databaseContent[findQuery.collection][index]);
-    if (
-      !this->updateOneEntry(
-        *modified, set.nestedLabels, set.value, commentsOnFailure
-      )
-    ) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool DatabaseFallback::updateOneEntry(
-  JSData& modified,
-  const List<std::string>& labels,
-  const JSData& value,
-  std::stringstream* commentsOnFailure
-) {
-  STACK_TRACE("FallbackDatabase::updateOneEntry");
-  (void) commentsOnFailure;
-  JSData* output = &modified;
-  for (int i = 0; i < labels.size - 1; i ++) {
-    output = &((*output)[labels[i]]);
-  }
-  output->setKeyValue(labels[labels.size - 1], value);
+  dataToMerge.mergeData(
+    this->databaseContent[findQuery.collection][index]
+  );
   return true;
 }
 

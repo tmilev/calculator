@@ -17,6 +17,7 @@ public:
   JSData value;
   JSData toJSON() const;
   bool fromJSON(const JSData& data, std::stringstream* commentsOnStream);
+  void updateOneEntry(JSData& toBeModified) const;
 };
 
 // Stores a recipe for updating an item.
@@ -63,6 +64,7 @@ public:
   void fromJSONNoFail(const JSData& inputValue);
   JSData toJSON() const;
   std::string toStringDebug() const;
+  void mergeData(JSData& toMergeInto) const;
   class Test {
   public:
     static bool all();
@@ -249,6 +251,8 @@ public:
     const List<std::string>& desiredLabels,
     const std::string& desiredValue
   );
+  // Concatenates the nested labels with a comma separator.
+  std::string concatenateNestedLabels() const;
   void setLabelValue(
     const std::string& label, const std::string& desiredValue
   );
@@ -277,8 +281,10 @@ class QueryFindAndUpdate {
 public:
   QuerySet update;
   QueryExact find;
+  bool createIfNotFound;
   JSData toJSON() const;
   bool fromJSON(JSData& input, std::stringstream* commentsOnFailure);
+  QueryFindAndUpdate();
 };
 
 class DatabaseInternalConnection {
@@ -324,29 +330,88 @@ public:
 
 class DatabaseInternal;
 
+class DatabaseInternalIndex {
+public:
+  List<std::string> nestedKeys;
+  MapList<std::string, std::string> keyValueToObjectId;
+  MapList<std::string, std::string> objectIdToKeyValue;
+  JSData toJSON() const;
+  bool fromJSON(const JSData& input, std::stringstream* commentsOnFailure);
+};
+
 // A table/collection in the database.
 class DatabaseCollection {
 public:
   // User-defined entries by which objects should be indexed.
-  List<std::string> userDefinedIndexableLabels;
+  MapReferences<std::string, DatabaseInternalIndex> indices;
+  bool indicesLoaded;
+  std::string name;
+  DatabaseInternal* owner;
   JSData toJSONSchema() const;
+  bool loadIndicesFromHardDrive(std::stringstream* commentsOnFailure);
+  bool storeIndicesToHardDrive(std::stringstream* commentsOnFailure);
+  void toJSONIndices(JSData& output) const;
+  DatabaseCollection();
+  void initialize(
+    const std::string& inputName, DatabaseInternal* inputOwner
+  );
 };
 
 class DatabaseInternalServer {
 public:
   DatabaseInternal* owner;
   MapReferences<std::string, DatabaseCollection> collections;
-  static HashedList<std::string> allowedCollectionNames;
   DatabaseInternalServer();
-  void initializeLoadFromHardDrive();
-  void loadCollectionList();
+  bool initializeLoadFromHardDrive(std::stringstream* commentsOnFailure);
   void storeEverything();
-  bool ensureCollection(const std::string& collectionName);
+  bool ensureCollection(
+    const std::string& collectionName,
+    const List<std::string>& indexableKeys
+  );
   bool findAndUpdate(
     QueryFindAndUpdate& input, std::stringstream* commentsOnFailure
   );
   void storeCollectionList();
   std::string collectionsSchemaFileName() const;
+  bool findOneWithOptions(
+    const QueryExact& query,
+    const QueryResultOptions& options,
+    JSData& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool findObjectId(
+    const QueryExact& query,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool createObject(
+    const JSData& initialValue,
+    const std::string& collectionName,
+    std::string& outputObjectId,
+    std::stringstream* commentsOnFailure
+  );
+  bool loadObject(
+    const std::string& objectId,
+    const std::string& collectionName,
+    JSData& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool storeObject(
+    const std::string& objectId,
+    const std::string& collectionName,
+    const JSData& data,
+    std::stringstream* commentsOnFailure
+  );
+  void objectExists(
+    const std::string& objectId,
+    const std::string& collectionName,
+    bool& output,
+    bool& outputFailed,
+    std::stringstream* commentsOnFailure
+  );
+  std::string objectFilename(
+    const std::string& objectId, const std::string& collectionName
+  );
 };
 
 class DatabaseInternalClient {
@@ -400,6 +465,8 @@ class DatabaseInternal {
   MapList<int, int> mapFromReadEndsToWorkerIds;
   List<int> readEnds;
   List<char> buffer;
+  bool failedToInitialize;
+  std::string initializationError;
   bool sendFromClientToServer(
     const std::string& input, std::stringstream* commentsOnFailure
   );

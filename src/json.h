@@ -112,6 +112,9 @@ public:
   bool hasCompositeKeyValueNull(
     const std::string& key, std::stringstream* commentsOnFailure
   ) const;
+  bool hasNestedKey(
+    const List<std::string>& nestedKeys, JSData* whichValue = nullptr
+  ) const;
   void setKeyValue(const std::string& key, const JSData& value);
   int getKeyIndex(const std::string& key) const;
   void makeEmptyArray();

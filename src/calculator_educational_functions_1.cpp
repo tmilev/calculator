@@ -578,7 +578,8 @@ JSData CompareExpressions::toJSON() const {
 JSData ProblemWithSolution::toJSON() {
   JSData result;
   result[WebAPI::Result::SolutionData::input] = this->toBeSolved.toString();
-  JSData stepsJSON = JSData::makeEmptyArray();
+  JSData stepsJSON;
+  stepsJSON.JSData::makeEmptyArray();
   for (int i = 0; i < this->steps.size; i ++) {
     stepsJSON[i] = this->steps[i].toJSON();
   }

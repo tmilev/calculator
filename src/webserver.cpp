@@ -1942,7 +1942,8 @@ std::string WebWorker::getChangePasswordPagePartOne(
     out << "Activation email is empty. ";
     return out.str();
   }
-  std::string actualEmailActivationToken, usernameAssociatedWithToken;
+  std::string actualEmailActivationToken;
+  std::string usernameAssociatedWithToken;
   if (global.userDefault.email == claimedEmail) {
     out
     << "\n<b style ='color:green'>Email "
@@ -1955,8 +1956,8 @@ std::string WebWorker::getChangePasswordPagePartOne(
     DatabaseStrings::labelEmail,
     claimedEmail
   );
-  QuerySet emailInfo;
-  if (!Database::get().findOne(findEmail, emailInfo.value, &out)) {
+  JSData emailValue;
+  if (!Database::get().findOne(findEmail, emailValue, &out)) {
     out
     << "\n<b style ='color:red'>"
     << "Failed to fetch email activation token for email: "
@@ -1965,9 +1966,9 @@ std::string WebWorker::getChangePasswordPagePartOne(
     return out.str();
   }
   usernameAssociatedWithToken =
-  emailInfo.value[DatabaseStrings::labelUsername].stringValue;
+  emailValue[DatabaseStrings::labelUsername].stringValue;
   actualEmailActivationToken =
-  emailInfo.value[DatabaseStrings::labelActivationToken].stringValue;
+  emailValue[DatabaseStrings::labelActivationToken].stringValue;
   if (actualEmailActivationToken != claimedActivationToken) {
     out
     << "\n<b style ='color:red'>Bad activation token. "
@@ -1980,8 +1981,14 @@ std::string WebWorker::getChangePasswordPagePartOne(
     << "Activation token was issued for another user. </b>";
     return out.str();
   }
-  emailInfo.value[DatabaseStrings::labelActivationToken] = "";
-  if (!Database::get().updateOne(findEmail, emailInfo, &out)) {
+  QuerySet emailSet;
+  emailSet.addKeyValueStringPair(
+    DatabaseStrings::labelUsername, usernameAssociatedWithToken
+  );
+  emailSet.addKeyValueStringPair(
+    DatabaseStrings::labelActivationToken, actualEmailActivationToken
+  );
+  if (!Database::get().updateOne(findEmail, emailSet, &out)) {
     out
     << "\n<b style ='color:red'>"
     << "Could not reset the activation token (database is down?). "

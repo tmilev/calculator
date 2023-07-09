@@ -317,7 +317,9 @@ public:
   // Deleted fields.
   static std::string anyField;
   static std::string labelFields;
-  static std::string labelTable;
+  static std::string labelCollection;
+  static std::string labelKey;
+  static std::string labelValue;
   static std::string objectSelector;
   static std::string labelId;
   // Deleted information

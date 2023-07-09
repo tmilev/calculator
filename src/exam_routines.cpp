@@ -269,11 +269,13 @@ QuerySet CalculatorHTML::toQuerySetProblemWeights(
     }
     JSData currentWeight;
     currentWeight[DatabaseStrings::labelProblemWeight] = currentProblemJSON;
-    std::string key =
-    QueryExact::getLabelFromNestedLabels(
-      DatabaseStrings::labelProblemWeight, currentProblemName
+    output.addNestedKeyValuePair(
+      List<std::string>({
+          DatabaseStrings::labelProblemWeight, currentProblemName
+        }
+      ),
+      currentWeight
     );
-    output.value[key] = currentWeight;
   }
   return output;
 }

@@ -107,7 +107,7 @@ bool DatabaseFallback::updateOneNolocks(
   const QuerySet& dataToMerge,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FallbackDatabase::updateOneNolocks");
+  STACK_TRACE("DatabaseFallback::updateOneNolocks");
   if (!this->hasCollection(findQuery.collection, commentsOnFailure)) {
     return false;
   }
@@ -124,26 +124,17 @@ bool DatabaseFallback::updateOneNolocks(
   }
   if (index == - 1) {
     index = this->databaseContent[findQuery.collection].listObjects.size;
-    JSData incoming = findQuery.toJSONCombineLabelsAndValue();
+    JSData incoming = findQuery.toJSONCombineKeysAndValue();
     incoming[DatabaseStrings::labelId] =
     Crypto::Random::getRandomHexStringLeaveMemoryTrace(12);
     this->databaseContent[findQuery.collection].listObjects.addOnTop(incoming);
   }
-  const MapReferences<
-    std::string, JSData, HashFunctions::hashFunction<std::string>
-  >& objects =
-  dataToMerge.value.objects;
-  for (const std::string& key : objects.keys) {
+  for (const QuerySetOnce& set : dataToMerge.data) {
     JSData* modified =
     &(this->databaseContent[findQuery.collection][index]);
-    List<std::string> labels;
-    StringRoutines::splitExcludeDelimiter(key, '.', labels);
     if (
       !this->updateOneEntry(
-        *modified,
-        labels,
-        objects.getValueNoFail(key),
-        commentsOnFailure
+        *modified, set.nestedLabels, set.value, commentsOnFailure
       )
     ) {
       return false;
@@ -209,7 +200,7 @@ bool DatabaseFallback::findOne(
     return false;
   }
   output = this->databaseContent[query.collection][index];
-  return Database::convertJSONMongoToJSON(output, output, commentsOnFailure);
+  return true;
 }
 
 bool DatabaseFallback::findFromJSONWithOptions(
@@ -301,13 +292,7 @@ bool DatabaseFallback::findIndexOneNolocksMinusOneNotFound(
     return false;
   }
   std::string key;
-  std::string value;
-  if (!query.getMongoKeyValue(key, value)) {
-    if (commentsOnNotFound != nullptr) {
-      *commentsOnNotFound << "Failed to extract key-value pair from query. ";
-    }
-    return false;
-  }
+  key = StringRoutines::join(query.nestedLabels, ",");
   if (!this->indices.contains(key)) {
     if (commentsOnNotFound != nullptr) {
       *commentsOnNotFound
@@ -321,6 +306,7 @@ bool DatabaseFallback::findIndexOneNolocksMinusOneNotFound(
   }
   DatabaseFallback::Index& currentIndex =
   this->indices.getValueCreateEmpty(key);
+  std::string value;
   int currentLocationIndex = currentIndex.locations.getIndex(value);
   if (currentLocationIndex == - 1) {
     if (commentsOnNotFound != nullptr) {

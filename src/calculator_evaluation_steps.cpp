@@ -288,7 +288,8 @@ JSData Calculator::ExpressionHistoryEnumerator::Step::toJSON() {
   JSData result;
   result[WebAPI::Result::SolutionData::transformation] =
   this->content.toString();
-  JSData annotationJSON = JSData::makeEmptyArray();
+  JSData annotationJSON;
+  annotationJSON.makeEmptyArray();
   for (int i = 0; i < this->annotations.size; i ++) {
     annotationJSON[i] = this->annotations[i];
   }

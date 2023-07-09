@@ -2075,7 +2075,11 @@ std::string WebAPIResponse::addTeachersSections() {
       currentTeacher.username
     );
     QuerySet setQuery;
-    setQuery.value[DatabaseStrings::labelSectionsTaught] = desiredSectionsList;
+    JSData desiredSectionListJSON;
+    desiredSectionListJSON = desiredSectionsList;
+    setQuery.addKeyValuePair(
+      DatabaseStrings::labelSectionsTaught, desiredSectionListJSON
+    );
     if (!Database::get().updateOne(findQuery, setQuery, &out)) {
       out
       << "<span style='color:red'>Failed to store course info of instructor: "

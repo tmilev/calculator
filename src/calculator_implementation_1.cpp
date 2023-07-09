@@ -1,16 +1,5 @@
 #include "calculator_interface.h"
-#include "calculator_weyl_group_characters.h"
-#include "calculator_inner_typed_functions.h"
-#include "math_general_implementation.h"
 #include "math_extra_semisimple_lie_algebras.h"
-#include "math_extra_universal_enveloping_implementation.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h"
-
-// undefined reference to `WeylGroupRepresentation<Rational>::reset()
-#include "math_extra_finite_groups_implementation.h"
-#include "math_rational_function_implementation.h"
 #include "string_constants.h"
 #include <cmath>
 #include <cfloat>
@@ -888,7 +877,8 @@ JSData Plot::plotJSON(Calculator& owner) {
 }
 
 void PlotObject::writeParameters(JSData& output) {
-  JSData parameters = JSData::makeEmptyArray();
+  JSData parameters;
+  parameters.makeEmptyArray();
   for (int i = 0; i < this->parametersInPlayJS.size; i ++) {
     parameters[i] =
     HtmlRoutines::getJavascriptVariable(this->parametersInPlayJS[i]);
@@ -912,7 +902,7 @@ void PlotObject::writeParameters(JSData& output) {
 
 void PlotObject::writeVariables(JSData& output) {
   STACK_TRACE("PlotObject::writeVariables");
-  JSData arguments = JSData::makeEmptyArray();
+  JSData arguments = JSData::emptyArray();
   for (int i = 0; i < this->variablesInPlayJS.size; i ++) {
     arguments[i] =
     HtmlRoutines::getJavascriptVariable(this->variablesInPlayJS[i]);
@@ -984,9 +974,9 @@ JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
   JSData result;
   result[PlotObject::Labels::manifoldImmersion] =
   this->manifoldImmersionFunctionsJS();
-  JSData variableRange = JSData::makeEmptyArray();
+  JSData variableRange = JSData::emptyArray();
   for (int i = 0; i < 2; i ++) {
-    JSData currentRange = JSData::makeEmptyArray();
+    JSData currentRange = JSData::emptyArray();
     for (int j = 0; j < this->variableRangesJS.size; j ++) {
       if (i < this->variableRangesJS[j].size) {
         currentRange[j] = this->variableRangesJS[j][i];
@@ -997,7 +987,7 @@ JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
     variableRange[i] = currentRange;
   }
   result[PlotObject::Labels::variableRange] = variableRange;
-  JSData segmentRange = JSData::makeEmptyArray();
+  JSData segmentRange = JSData::emptyArray();
   for (int i = 0; i < this->numberOfSegmentsJS.size; i ++) {
     segmentRange[i] = this->numberOfSegmentsJS[i];
   }
@@ -1139,9 +1129,9 @@ JSData PlotObject::toJSONPoints() {
 
 JSData PlotObject::toJSONPointsJavascript() {
   STACK_TRACE("PlotObject::toJSONPointsJavascript");
-  JSData points = JSData::makeEmptyArray();
+  JSData points = JSData::emptyArray();
   for (int i = 0; i < this->pointsJS.numberOfRows; i ++) {
-    JSData onePoint = JSData::makeEmptyArray();
+    JSData onePoint = JSData::emptyArray();
     for (int j = 0; j < this->pointsJS.numberOfColumns; j ++) {
       onePoint[j] = this->pointsJS(i, j);
     }
@@ -1175,13 +1165,13 @@ JSData Plot::getComputeViewWindow() {
 JSData Plot::getSetViewWindow() {
   JSData result;
   result[PlotObject::Labels::plotType] = "setViewWindow";
-  JSData lowLeft = JSData::makeEmptyArray();
-  JSData topRight = JSData::makeEmptyArray();
+  JSData lowLeft = JSData::emptyArray();
+  JSData topRight = JSData::emptyArray();
   lowLeft[0] = this->lowX * 1.10;
   lowLeft[1] = this->lowY * 1.10;
   topRight[0] = this->highX * 1.10;
   topRight[1] = this->highY * 1.10;
-  JSData window = JSData::makeEmptyArray();
+  JSData window = JSData::emptyArray();
   window[0] = lowLeft;
   window[1] = topRight;
   result[PlotObject::Labels::viewWindow] = window;
@@ -1256,7 +1246,7 @@ JSData Plot::plotJSON3d(Calculator& owner) {
     plotUpdaters[currentBox.getSliderName()] = this->getCanvasName();
   }
   result["plotUpdaters"] = plotUpdaters;
-  JSData objects3D = JSData::makeEmptyArray();
+  JSData objects3D = JSData::emptyArray();
   for (int i = 0; i < this->plotObjects.size; i ++) {
     PlotObject& current = this->plotObjects[i];
     objects3D.listObjects.addOnTop(current.toJSON());
@@ -1305,7 +1295,7 @@ JSData Plot::plotJSON2d(Calculator& owner) {
     );
     result["plotUpdaters"][i] = currentBox.getSliderName();
   }
-  JSData plotObjects = JSData::makeEmptyArray();
+  JSData plotObjects = JSData::emptyArray();
   if (this->flagIncludeCoordinateSystem) {
     plotObjects.listObjects.addOnTop(this->getCoordinateSystem());
   }

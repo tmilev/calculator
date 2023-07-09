@@ -78,7 +78,7 @@ public:
   bool operator!=(const JSData& other) const;
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
-  JSData getValue(const std::string& key);
+  JSData getValue(const std::string& key) const;
   bool mergeInMe(
     const JSData& input, std::stringstream* commentsOnFailure
   );
@@ -114,7 +114,8 @@ public:
   ) const;
   void setKeyValue(const std::string& key, const JSData& value);
   int getKeyIndex(const std::string& key) const;
-  static JSData makeEmptyArray();
+  void makeEmptyArray();
+  static JSData emptyArray();
   JSData();
   ~JSData();
   JSData(const JSData& other);

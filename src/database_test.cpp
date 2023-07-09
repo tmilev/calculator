@@ -136,31 +136,18 @@ bool QuerySet::Test::basics(DatabaseType databaseType) {
   find.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
   find.exactValue = "ttt";
   QuerySet updater;
-  JSData found;
-  updater.value.parseNoFail(
-    "{" +
-    DatabaseStrings::labelUsername +
-    ":\"ttt\", " +
-    QueryExact::getLabelFromNestedLabels(
-      List<std::string>({"a", "b", "c"})
-    ) +
-    ": \"123\"}",
-    true
+  updater.fromJSONStringNoFail(
+    "[{key:[\"username\"], value:\"ttt\"}, "
+    "{key:[\"a\", \"b\", \"c\"], value:\"123\"}]"
   );
   QuerySet::Test::updateNoFail(find, updater);
+  JSData found;
   QuerySet::Test::findNoFail(find, found);
   JSData expected;
   expected.parseNoFail("{username:\"ttt\",a:{b:{c:\"123\"}}}", true);
   QuerySet::Test::matchKeyValue(found, expected);
-  updater.value.parseNoFail(
-    "{" +
-    DatabaseStrings::labelUsername +
-    ":\"ttt\", " +
-    QueryExact::getLabelFromNestedLabels(
-      List<std::string>({"$set", "a.b", "$set.a.b"})
-    ) +
-    ": \"123\"}",
-    true
+  updater.fromJSONStringNoFail(
+    "[{key:[\"$set\", \"a.b\",\"$set.a.b\"], value:\"123\"}]"
   );
   QuerySet::Test::updateNoFail(find, updater);
   QuerySet::Test::findNoFail(find, found);

@@ -504,10 +504,14 @@ bool UserCalculator::resetAuthenticationToken(
     this->username
   );
   QuerySet setUser;
-  setUser.value[DatabaseStrings::labelAuthenticationToken] =
-  this->actualAuthenticationToken;
-  setUser.value[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] =
-  now.timeStringNonReadable;
+  setUser.addKeyValueStringPair(
+    DatabaseStrings::labelAuthenticationToken,
+    this->actualAuthenticationToken
+  );
+  setUser.addKeyValueStringPair(
+    DatabaseStrings::labelTimeOfAuthenticationTokenCreation,
+    now.timeStringNonReadable
+  );
   Database::get().updateOne(findUser, setUser, commentsOnFailure);
   this->flagNewAuthenticationTokenComputedUserNeedsIt = true;
   return true;
@@ -528,8 +532,9 @@ bool UserCalculator::setPassword(std::stringstream* commentsOnFailure) {
     this->username
   );
   QuerySet setUser;
-  setUser.value[DatabaseStrings::labelPassword] =
-  this->enteredHashedSaltedPassword;
+  setUser.addKeyValueStringPair(
+    DatabaseStrings::labelPassword, this->enteredHashedSaltedPassword
+  );
   return Database::get().updateOne(findUser, setUser, commentsOnFailure);
 }
 
@@ -736,8 +741,9 @@ bool UserCalculator::computeAndStoreActivationToken(
     this->username
   );
   QuerySet updateUser;
-  updateUser.value[DatabaseStrings::labelActivationToken] =
-  this->actualActivationToken;
+  updateUser.addKeyValueStringPair(
+    DatabaseStrings::labelActivationToken, this->actualActivationToken
+  );
   if (
     !Database::get().updateOne(findUserQuery, updateUser, commentsOnFailure)
   ) {
@@ -843,8 +849,9 @@ bool UserCalculator::computeAndStoreActivationStats(
   }
   QueryExact findQueryInUsers(DatabaseStrings::tableUsers, "", "");
   QuerySet updateUser;
-  updateUser.value[DatabaseStrings::labelTimeOfActivationTokenCreation] =
-  now.toString();
+  updateUser.addKeyValueStringPair(
+    DatabaseStrings::labelTimeOfActivationTokenCreation, now.toString()
+  );
   if (this->userId != "") {
     findQueryInUsers.setLabelValue(
       DatabaseStrings::labelUserId, this->userId
@@ -872,14 +879,22 @@ bool UserCalculator::computeAndStoreActivationStats(
     return false;
   }
   QuerySet emailStatQuery;
-  emailStatQuery.value[DatabaseStrings::labelLastActivationEmailTime] =
-  now.toString();
-  emailStatQuery.value[DatabaseStrings::labelTotalActivationEmails] =
-  totalActivationsThisEmail.toString();
-  emailStatQuery.value[DatabaseStrings::labelActivationToken] =
-  this->actualActivationToken;
-  emailStatQuery.value[DatabaseStrings::labelUsername] = this->username;
-  emailStatQuery.value[DatabaseStrings::labelEmail] = this->email;
+  emailStatQuery.addKeyValueStringPair(
+    DatabaseStrings::labelLastActivationEmailTime, now.toString()
+  );
+  emailStatQuery.addKeyValueStringPair(
+    DatabaseStrings::labelTotalActivationEmails,
+    totalActivationsThisEmail.toString()
+  );
+  emailStatQuery.addKeyValueStringPair(
+    DatabaseStrings::labelActivationToken, this->actualActivationToken
+  );
+  emailStatQuery.addKeyValueStringPair(
+    DatabaseStrings::labelUsername, this->username
+  );
+  emailStatQuery.addKeyValueStringPair(
+    DatabaseStrings::labelEmail, this->email
+  );
   if (
     !Database::get().updateOne(findEmail, emailStatQuery, commentsOnFailure)
   ) {
@@ -953,11 +968,10 @@ bool UserCalculator::storeProblemData(
   }
   const ProblemData& problem = this->problemData.getValueNoFail(fileName);
   QuerySet update;
-  std::string key =
-  QueryExact::getLabelFromNestedLabels(
-    DatabaseStrings::labelProblemDataJSON, fileName
+  update.addNestedKeyValuePair(
+    List<std::string>({DatabaseStrings::labelProblemDataJSON, fileName}),
+    problem.storeJSON()
   );
-  update.value[key] = problem.storeJSON();
   return
   Database::get().updateOneFromSome(
     this->getFindMeFromUserNameQuery(), update, commentsOnFailure
@@ -1015,7 +1029,7 @@ bool UserOfDatabase::addUsersFromEmails(
     } else {
       currentUser.email = emails[i];
     }
-    QuerySet currentUserData;
+    JSData currentUserData;
     List<QueryExact> findUser;
     findUser.addOnTop(
       QueryExact(
@@ -1032,9 +1046,7 @@ bool UserOfDatabase::addUsersFromEmails(
       )
     );
     if (
-      !this->owner->findOneFromSome(
-        findUser, currentUserData.value, &comments
-      )
+      !this->owner->findOneFromSome(findUser, currentUserData, &comments)
     ) {
       if (!currentUser.exists(&comments)) {
         if (!currentUser.storeToDatabase(false, &comments)) {
@@ -1045,15 +1057,17 @@ bool UserOfDatabase::addUsersFromEmails(
           outputNumberOfNewUsers ++;
         }
       }
+      QuerySet setUser;
+      setUser.addValue(currentUserData);
       if (isEmail) {
-        this->owner->updateOneFromSome(findUser, currentUserData, &comments);
+        this->owner->updateOneFromSome(findUser, setUser, &comments);
       }
     } else {
       outputNumberOfUpdatedUsers ++;
       // currentUser may have its updated entries modified by the functions
       // above.
       QuerySet setUser;
-      setUser.value = currentUser.toJSON();
+      setUser.addValue(currentUser.toJSON());
       if (
         !this->owner->updateOneFromSome(findUser, setUser, &comments)
       ) {
@@ -1392,7 +1406,7 @@ bool UserCalculator::storeToDatabase(
   }
   JSData setUser = this->toJSON();
   QuerySet doSetUser;
-  doSetUser.fromJSONNoFail(setUser);
+  doSetUser.addValue(this->toJSON());
   return Database::get().updateOne(findUser, doSetUser, commentsOnFailure);
 }
 

@@ -48,82 +48,34 @@ std::string QueryExact::toString() const {
   return out.str();
 }
 
-JSData QueryExact::toJSONCombineLabelsAndValue() const {
-  JSData result;
-  JSData* current = &result;
-  JSData unknown;
-  std::string label;
-  for (int i = 0; i < this->nestedLabels.size - 1; i ++) {
-    label = Database::convertStringToMongoKeyString(this->nestedLabels[i]);
-    (*current)[label] = unknown;
-    current = &((*current)[label]);
-  }
-  label =
-  Database::convertStringToMongoKeyString(
-    *this->nestedLabels.lastObject()
-  );
-  (*current)[label] = this->exactValue;
-  return result;
-}
-
 JSData QueryExact::toJSON() const {
   JSData result;
-  if (this->nestedLabels.size == 0 && this->selectAny) {
-    result.elementType = JSData::Token::tokenObject;
-    return result;
-  }
-  JSData encodedKeys;
-  if (!Database::convertJSONToJSONMongo(this->exactValue, encodedKeys)) {
-    global
-    << Logger::red
-    << "Failed to convert find query to mongoDB encoding. "
-    << Logger::endL;
-    result.elementType = JSData::Token::tokenNull;
-    return result;
-  }
-  result.elementType = JSData::Token::tokenObject;
-  result[this->getLabel()] = encodedKeys;
+  JSData key;
+  key = this->nestedLabels;
+  result[DatabaseStrings::labelKey] = key;
+  result[DatabaseStrings::labelValue] = this->exactValue;
+  result[DatabaseStrings::labelCollection] = this->collection;
   return result;
 }
 
-std::string QueryExact::getLabelFromNestedLabels(
-  const std::string& first, const std::string& second
-) {
-  return
-  QueryExact::getLabelFromNestedLabels(
-    List<std::string>({first, second})
-  );
-}
-
-std::string QueryExact::getLabelFromNestedLabels(
-  const List<std::string>& nestedLabels
-) {
-  std::stringstream out;
-  for (int i = 0; i < nestedLabels.size; i ++) {
-    std::string currentKey =
-    Database::convertStringToMongoKeyString(nestedLabels[i]);
-    out << currentKey;
-    if (i != nestedLabels.size - 1) {
-      out << ".";
+JSData QueryExact::toJSONCombineKeysAndValue() const {
+  JSData result;
+  result.elementType = JSData::Token::tokenObject;
+  if (this->nestedLabels.size == 0) {
+    return result;
+  }
+  JSData nullObject;
+  JSData* current = &result;
+  std::string label;
+  for (int i = 0; i < this->nestedLabels.size; i ++) {
+    label = this->nestedLabels[i];
+    (*current)[label] = nullObject;
+    if (i != this->nestedLabels.size - 1) {
+      current = &(*current)[label];
     }
   }
-  return out.str();
-}
-
-std::string QueryExact::getLabel() const {
-  return this->getLabelFromNestedLabels(this->nestedLabels);
-}
-
-bool QueryExact::getMongoKeyValue(
-  std::string& outputKey, std::string& outputValue
-) const {
-  std::stringstream out;
-  if (this->nestedLabels.size == 0) {
-    return false;
-  }
-  out << this->collection << "." << this->getLabel();
-  outputKey = out.str();
-  return this->exactValue.isString(&outputValue);
+  (*current)[label] = this->exactValue;
+  return result;
 }
 
 void QueryExact::setLabelsValue(
@@ -165,7 +117,7 @@ bool QueryExact::fromJSON(
   this->exactValue = JSData();
   this->selectAny = false;
   JSData findQuery = source;
-  this->collection = findQuery[DatabaseStrings::labelTable].stringValue;
+  this->collection = findQuery[DatabaseStrings::labelCollection].stringValue;
   if (this->collection == "") {
     return true;
   }
@@ -431,124 +383,6 @@ bool Database::deleteOneEntryUnsetUnsecure(
   }
   return false;
 #endif
-}
-
-bool Database::convertJSONToJSONMongo(
-  const JSData& input,
-  JSData& output,
-  std::stringstream* commentsOnFailure
-) {
-  if (&input == &output) {
-    JSData inputCopy = input;
-    return
-    Database::convertJSONToJSONMongo(inputCopy, output, commentsOnFailure);
-  }
-  return
-  Database::convertJSONToJSONEncodeKeys(
-    input, output, 0, true, commentsOnFailure
-  );
-}
-
-bool Database::convertJSONMongoToJSON(
-  const JSData& input,
-  JSData& output,
-  std::stringstream* commentsOnFailure
-) {
-  if (&input == &output) {
-    JSData inputCopy = input;
-    return
-    Database::convertJSONMongoToJSON(inputCopy, output, commentsOnFailure);
-  }
-  return
-  Database::convertJSONToJSONEncodeKeys(
-    input, output, 0, false, commentsOnFailure
-  );
-}
-
-bool Database::convertJSONToJSONEncodeKeys(
-  const JSData& input,
-  JSData& output,
-  int recursionDepth,
-  bool encodeOverDecode,
-  std::stringstream* commentsOnFailure
-) {
-  static const int maximumRecursionDepth = 100;
-  if (recursionDepth > maximumRecursionDepth) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Input json is too deeply nested, maximum depth: "
-      << maximumRecursionDepth
-      << ". ";
-    }
-    return false;
-  }
-  output.reset(input.elementType);
-  if (input.elementType == JSData::Token::tokenArray) {
-    for (int i = 0; i < input.listObjects.size; i ++) {
-      JSData nextItem;
-      if (
-        !Database::convertJSONToJSONEncodeKeys(
-          input.listObjects[i],
-          nextItem,
-          recursionDepth + 1,
-          encodeOverDecode,
-          commentsOnFailure
-        )
-      ) {
-        return false;
-      }
-      output.listObjects.addOnTop(nextItem);
-    }
-    return true;
-  }
-  if (input.elementType != JSData::Token::tokenObject) {
-    output = input;
-    return true;
-  }
-  for (int i = 0; i < input.objects.size(); i ++) {
-    JSData nextItem;
-    if (
-      !Database::convertJSONToJSONEncodeKeys(
-        input.objects.values[i],
-        nextItem,
-        recursionDepth + 1,
-        encodeOverDecode,
-        commentsOnFailure
-      )
-    ) {
-      return false;
-    }
-    std::string key;
-    if (encodeOverDecode) {
-      key =
-      Database::convertStringToMongoKeyString(input.objects.keys[i]);
-    } else {
-      key =
-      HtmlRoutines::convertURLStringToNormal(
-        input.objects.keys[i], false
-      );
-    }
-    output[key] = nextItem;
-  }
-  return true;
-}
-
-std::string Database::convertStringToMongoKeyString(
-  const std::string& input
-) {
-  std::stringstream out;
-  for (unsigned int i = 0; i < input.size(); i ++) {
-    if (
-      HtmlRoutines::isRepresentedByItselfInURLs(input[i]) && input[i] != '.'
-    ) {
-      out << input[i];
-    } else {
-      out << "%";
-      int x = input[i];
-      out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
-    }
-  }
-  return out.str();
 }
 
 bool Database::findOneWithOptions(
@@ -995,7 +829,7 @@ JSData Database::toJSONFetchItem(
     return this->toJSONDatabaseCollection(findQuery.collection);
   }
   JSData result;
-  result[DatabaseStrings::labelTable] = findQuery.collection;
+  result[DatabaseStrings::labelCollection] = findQuery.collection;
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
@@ -1259,37 +1093,34 @@ bool Database::updateOneFromSome(
   return false;
 }
 
-QuerySet::QuerySet() {
-  this->value.elementType = JSData::Token::tokenObject;
+JSData QuerySetOnce::toJSON() const {
+  JSData result;
+  JSData key;
+  key = this->nestedLabels;
+  result[DatabaseStrings::labelKey] = key;
+  result[DatabaseStrings::labelValue] = this->value;
+  return result;
 }
 
-void QuerySet::makeFromRecursive(
-  const JSData& input,
-  List<std::string>& nestedLabels,
-  QuerySet& output
+bool QuerySetOnce::fromJSON(
+  const JSData& data, std::stringstream* commentsOnStream
 ) {
-  if (input.objects.size() == 0 && input.listObjects.size == 0) {
-    std::string key = QueryExact::getLabelFromNestedLabels(nestedLabels);
-    output.value.setKeyValue(key, input);
-    return;
+  if (!data.hasKey(DatabaseStrings::labelValue)) {
+    if (commentsOnStream != nullptr) {
+      *commentsOnStream << "The missing value entry is mandatory.";
+    }
+    return false;
   }
-  for (const std::string& key : input.objects.keys) {
-    nestedLabels.addOnTop(key);
-    QuerySet::makeFromRecursive(
-      input.objects.getValueNoFail(key), nestedLabels, output
-    );
-    nestedLabels.removeLastObject();
+  this->value = data.getValue(DatabaseStrings::labelValue);
+  this->nestedLabels.clear();
+  JSData keys = data.getValue(DatabaseStrings::labelKey);
+  for (const JSData& key : keys.listObjects) {
+    this->nestedLabels.addOnTop(key.stringValue);
   }
-  for (int i = 0; i < input.listObjects.size; i ++) {
-    std::stringstream out;
-    out << i;
-    nestedLabels.addOnTop(out.str());
-    QuerySet::makeFromRecursive(
-      input.listObjects[i], nestedLabels, output
-    );
-    nestedLabels.removeLastObject();
-  }
+  return true;
 }
+
+QuerySet::QuerySet() {}
 
 void QuerySet::fromJSONNoFail(const JSData& inputValue) {
   std::stringstream comments;
@@ -1299,28 +1130,105 @@ void QuerySet::fromJSONNoFail(const JSData& inputValue) {
   }
 }
 
-bool QuerySet::fromJSON(
-  const JSData& inputValue, std::stringstream* commentsOnFailure
+void QuerySet::fromJSONStringNoFail(const std::string& inputValue) {
+  std::stringstream comments;
+  bool mustBeTrue = this->fromJSONString(inputValue, &comments);
+  if (!mustBeTrue) {
+    global.fatal
+    << "Failed to create query from input: "
+    << inputValue
+    << ". "
+    << global.fatal;
+  }
+}
+
+bool QuerySet::fromJSONString(
+  const std::string& inputValue, std::stringstream* commentsOnFailure
 ) {
-  List<std::string> nestedLabels;
-  QuerySet::makeFromRecursive(inputValue, nestedLabels, *this);
-  (void) commentsOnFailure;
-  return true;
+  JSData input;
+  if (!input.parse(inputValue, true, commentsOnFailure)) {
+    return false;
+  }
+  return this->fromJSON(input, commentsOnFailure);
+}
+
+void QuerySet::addKeyValueStringPair(
+  const std::string& key, const std::string& value
+) {
+  QuerySetOnce querySetOnce;
+  querySetOnce.nestedLabels.addOnTop(key);
+  querySetOnce.value = value;
+  this->data.addOnTop(querySetOnce);
+}
+
+void QuerySet::addKeyValuePair(
+  const std::string& key, const JSData& value
+) {
+  QuerySetOnce querySetOnce;
+  querySetOnce.nestedLabels.addOnTop(key);
+  querySetOnce.value = value;
+  this->data.addOnTop(querySetOnce);
+}
+
+void QuerySet::addNestedKeyValuePair(
+  const List<std::string>& nestedKeys, const JSData& value
+) {
+  QuerySetOnce querySetOnce;
+  querySetOnce.nestedLabels = nestedKeys;
+  querySetOnce.value = value;
+  this->data.addOnTop(querySetOnce);
+}
+
+void QuerySet::addValue(const JSData& value) {
+  QuerySetOnce querySetOnce;
+  querySetOnce.value = value;
+  this->data.addOnTop(querySetOnce);
 }
 
 std::string QuerySet::toStringDebug() const {
   std::stringstream out;
-  JSData jsonSetMongo;
-  if (!this->toJSON(jsonSetMongo)) {
-    return out.str();
-  }
-  out << jsonSetMongo.toString(nullptr);
+  out << this->toJSON().toString(nullptr);
   return out.str();
 }
 
-bool QuerySet::toJSON(JSData& output) const {
-  output.reset(JSData::Token::Token::tokenObject);
-  output["$set"] = this->value;
+JSData QuerySet::toJSON() const {
+  JSData result;
+  result.makeEmptyArray();
+  global
+  << Logger::yellow
+  << "To return: "
+  << result.toString()
+  << Logger::endL;
+  for (const QuerySetOnce& set : this->data) {
+    result.listObjects.addOnTop(set.toJSON());
+  }
+  global
+  << Logger::yellow
+  << "To return: "
+  << result.toString()
+  << Logger::endL;
+  return result;
+}
+
+bool QuerySet::fromJSON(
+  const JSData& inputValue, std::stringstream* commentsOnFailure
+) {
+  if (inputValue.elementType != JSData::Token::tokenArray) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "QuerySet must be encoded as an array. Your input: "
+      << inputValue.toString();
+    }
+    return false;
+  }
+  this->data.clear();
+  for (const JSData& entry : inputValue.listObjects) {
+    QuerySetOnce querySetOnce;
+    if (!querySetOnce.fromJSON(entry, commentsOnFailure)) {
+      return false;
+    }
+    this->data.addOnTop(querySetOnce);
+  }
   return true;
 }
 
@@ -1350,8 +1258,8 @@ JSData QueryResultOptions::toJSON() const {
 JSData QueryFindAndUpdate::toJSON() const {
   JSData result;
   result["find"] = this->find.toJSON();
-  JSData update;
-  result["update"] = this->update.toJSON(update);
+  result["update"] = this->update.toJSON();
+  global << Logger::blue << result.toString();
   return result;
 }
 

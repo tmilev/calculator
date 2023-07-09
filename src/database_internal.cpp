@@ -259,6 +259,12 @@ bool DatabaseInternal::executeAndSend() {
   Crypto::convertListCharsToString(this->buffer, requestString);
   std::stringstream commentsOnFailure;
   if (!request.fromJSON(requestString, &commentsOnFailure)) {
+    global
+    << "DEBUG: NOT parsed "
+    << request.toJSON()
+    << " from "
+    << requestString
+    << Logger::endL;
     result.comments = commentsOnFailure.str();
     result.success = false;
     return
@@ -266,6 +272,12 @@ bool DatabaseInternal::executeAndSend() {
       result.toJSON().toString(), 0, true
     );
   }
+  global
+  << "DEBUG: parsed "
+  << request.toJSON()
+  << " from "
+  << requestString
+  << Logger::endL;
   result.success = false;
   switch (request.requestType) {
   case DatabaseInternalRequest::Type::findAndUpdate:
@@ -461,7 +473,9 @@ bool DatabaseInternalServer::findAndUpdate(
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Collection name not recognized: "
-      << input.find.collection;
+      << input.find.collection
+      << ". Your query: "
+      << input.toJSON().toString();
     }
     return false;
   }
@@ -492,6 +506,7 @@ bool DatabaseInternalServer::ensureCollection(
   }
   this->collections.getValueCreateEmpty(collectionName);
   this->storeCollectionList();
+  return true;
 }
 
 void DatabaseInternalServer::loadCollectionList() {
@@ -508,15 +523,11 @@ void DatabaseInternalServer::storeCollectionList() {
     collectionsData[collectionName] =
     this->collections.getValueNoFail(collectionName).toJSONSchema();
   }
-  JSData collectionsDataForStorage;
-  Database::convertJSONToJSONMongo(
-    collectionsData, collectionsDataForStorage, nullptr
-  );
   std::string filename = this->collectionsSchemaFileName();
   std::stringstream commentsOnFailure;
   if (
     !FileOperations::writeFileVirtual(
-      filename, collectionsDataForStorage.toString(), &commentsOnFailure
+      filename, collectionsData.toString(), &commentsOnFailure
     )
   ) {
     global

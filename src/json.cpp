@@ -78,7 +78,7 @@ JSData& JSData::operator[](int i) {
   return this->listObjects[i];
 }
 
-JSData JSData::getValue(const std::string& key) {
+JSData JSData::getValue(const std::string& key) const {
   int index = this->getKeyIndex(key);
   if (index != - 1) {
     return this->objects.values[index];
@@ -326,10 +326,14 @@ bool JSData::isTrueRepresentationInJSON() {
   return this->stringValue == "true";
 }
 
-JSData JSData::makeEmptyArray() {
+JSData JSData::emptyArray() {
   JSData result;
-  result.elementType = JSData::Token::tokenArray;
+  result.makeEmptyArray();
   return result;
+}
+
+void JSData::makeEmptyArray() {
+  this->reset(JSData::Token::tokenArray);
 }
 
 bool JSData::isString(std::string* whichString) const {

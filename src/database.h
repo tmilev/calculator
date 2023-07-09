@@ -11,41 +11,57 @@ class Database;
 // Forward declare a class that can listen to sockets.
 class Listener;
 
+class QuerySetOnce {
+public:
+  List<std::string> nestedLabels;
+  JSData value;
+  JSData toJSON() const;
+  bool fromJSON(const JSData& data, std::stringstream* commentsOnStream);
+};
+
 // Stores a recipe for updating an item.
 // A typical item would be stored allong the lines of:
 // {
 //   "collection1": [
 //     {
-//       keyId:"id1", value1: {
-//         key1: "XX", key2: "YY", "nasty%2fencoded%2fkey": "AA"
+//       key1: "id1",
+//       key2: {
+//         subkey1: "XX",
+//         subkey2: "YY"
 //       }
 //     },
-//     {keyId:"id2", value1: {key1: "XX", key2: "ZZ"}},
+//     {
+//       key1: "id2",
+//       key2: {
+//         subkey1: "XX",
+//         subkey2: "ZZ"
+//       }
+//     },
 //   ]
 // }
 class QuerySet {
 private:
-  static void makeFromRecursive(
-    const JSData& input,
-    List<std::string>& nestedLabels,
-    QuerySet& output
-  );
 public:
-  // Key-value pairs to be set.
-  // 1. All keys that contain dots are regarded as sub-field selectors.
-  // The query:
-  // nestedLabels=[]
-  // value = {"key1.value1": "XXY"}
-  // will set the value1.key1 sub-key of an item.
-  // 2. All keys of this json that do not contain
-  // dots are expected to be %-encoded.
-  JSData value;
+  List<QuerySetOnce> data;
+  // Adds a single string key with a single string value.
+  void addKeyValueStringPair(
+    const std::string& key, const std::string& value
+  );
+  void addKeyValuePair(const std::string& key, const JSData& value);
+  void addNestedKeyValuePair(
+    const List<std::string>& nestedKeys, const JSData& value
+  );
+  void addValue(const JSData& value);
   QuerySet();
   bool fromJSON(
     const JSData& inputValue, std::stringstream* commentsOnFailure
   );
+  bool fromJSONString(
+    const std::string& inputValue, std::stringstream* commentsOnFailure
+  );
+  void fromJSONStringNoFail(const std::string& inputValue);
   void fromJSONNoFail(const JSData& inputValue);
-  bool toJSON(JSData& output) const;
+  JSData toJSON() const;
   std::string toStringDebug() const;
   class Test {
   public:
@@ -187,37 +203,39 @@ public:
 // {
 //   "collection1": [
 //     {
-//       keyId:"id1", value1: {
-//         key1: "XX", key2: "YY", "nasty%2fencoded%2fkey": "AA"
+//       key1: "id1",
+//       key2: {
+//         subkey1: "XX",
+//         subkey2: "YY"
 //       }
 //     },
-//     {keyId:"id2", value1: {key1: "XX", key2: "ZZ"}},
+//     {
+//       key1: "id2",
+//       key2: {
+//         subkey1: "XX",
+//         subkey2: "ZZ"
+//       }
+//     },
 //   ]
 // }
 // Example 1.
-// Item {keyId:"id1", value1: {key1: "XX", key2: "YY"}} is selected with:
+// Item {key1:"id1", key2: {subkey1: "XX", subkey2: "YY"}} is selected with:
 // collection = "collection1"
-// nestedLabels = ["keyId"]
+// nestedLabels = ["key1"]
 // value = "id1"
 //
 // Example 2.
-// Item {keyId:"id1", value1: {key1: "XX", key2: "YY"}} can also be selected
+// Item {key1:"id1", key2: {subkey1: "XX", subkey2: "YY"}} can also be selected
 // with:
 // collection = "collection1"
-// nestedLabels = ["value1", "key2"]
+// nestedLabels = ["key2", "subkey2"]
 // value = "YY"
-//
-// Important. All keys in our database are expected to not contain a dot,
-// as that conflicts with MongoDB's syntax for selection of sub-JSON.
-// To ensure that, all keys in our database are assumed to be %-encoded.
-// Final values [leaf nodes when representing our JSON as a tree]
-// in our database are allowed to contain dots and need not be %-encoded.
 class QueryExact {
 public:
   std::string collection;
-  // Labels, stored in non-encoded form.
+  // Labels.
   List<std::string> nestedLabels;
-  // Exact values we are looking for. All keys must be %-encoded.
+  // Exact value we are looking for.
   JSData exactValue;
   bool selectAny;
   QueryExact();
@@ -237,24 +255,14 @@ public:
   void setLabelsValue(
     const List<std::string>& labels, const std::string& desiredValue
   );
-  bool getMongoKeyValue(
-    std::string& outputKey, std::string& outputValue
-  ) const;
-  std::string getLabel() const;
-  static std::string getLabelFromNestedLabels(
-    const List<std::string>& nestedLabels
-  );
-  static std::string getLabelFromNestedLabels(
-    const std::string& first, const std::string& second
-  );
+  JSData toJSON() const;
   // Returns a combination of the labels and value into JSON format,
   // ignoring the collection name.
   // In the example of
-  // nestedLabels = ["keyId"]
-  // value = "id1",
-  // this will return {"keyId": "id1"}
-  JSData toJSONCombineLabelsAndValue() const;
-  JSData toJSON() const;
+  // nestedLabels = ["key1", "subkey2"]
+  // value = {subkey3: "XX"},
+  // this will return {"key1": {subkey2: {subkey3: "XX"}}}
+  JSData toJSONCombineKeysAndValue() const;
   bool fromString(
     const std::string& input, std::stringstream* commentsOnFailure
   );
@@ -629,24 +637,6 @@ public:
   );
   static QueryResultOptions getStandardProjectors(
     const std::string& collectionName
-  );
-  static std::string convertStringToMongoKeyString(const std::string& input);
-  static bool convertJSONMongoToJSON(
-    const JSData& input,
-    JSData& output,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  static bool convertJSONToJSONMongo(
-    const JSData& input,
-    JSData& output,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  static bool convertJSONToJSONEncodeKeys(
-    const JSData& input,
-    JSData& output,
-    int recursionDepth,
-    bool encodeOverDecode,
-    std::stringstream* commentsOnFailure
   );
   bool deleteDatabase(std::stringstream* commentsOnFailure);
   class Test {

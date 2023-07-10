@@ -1405,6 +1405,7 @@ bool UserCalculator::storeToDatabase(
     DatabaseStrings::labelUsername,
     this->username
   );
+
   if (this->enteredPassword != "" && doSetPassword) {
     this->computeHashedSaltedPassword();
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;

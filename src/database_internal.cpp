@@ -181,7 +181,9 @@ bool DatabaseInternal::sendAndReceiveFromClientToServer(
   ) {
     return false;
   }
-  return this->receiveInClientFromServer(output, commentsOnFailure);
+bool result = this->receiveInClientFromServer(output, commentsOnFailure);
+  global << "DEBUG: received OK!" << Logger::endL;
+  return result;
 }
 
 bool DatabaseInternal::sendFromClientToServer(
@@ -201,7 +203,10 @@ bool DatabaseInternal::receiveInClientFromServer(
 ) {
   DatabaseInternalConnection& connection =
   this->connections[this->currentWorkerId];
+  global << "DEBUG: client: about to read!" << Logger::endL;
+
   bool result = connection.serverToClient.readOnceNoFailure(true);
+  global << "DEBUG: client: read done!" << Logger::endL;
   if (!result) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to receive database result. ";
@@ -297,10 +302,14 @@ bool DatabaseInternal::executeAndSend() {
   if (!result.success) {
     result.comments = commentsOnFailure.str();
   }
-  return
+
+  global << "DEBUG: about to send from server to client" << Logger::endL;
+  result.success=
   this->currentServerToClient().writeOnceNoFailure(
     result.toJSON().toString(), 0, true
   );
+  global << "DEBUG: about to send from server to client: DONE!!!!" << Logger::endL;
+  return result.success;
 }
 
 PipePrimitive& DatabaseInternal::currentServerToClient() {
@@ -459,9 +468,6 @@ bool DatabaseInternalRequest::fromJSData(
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure
     << "DatabaseInternalRequest::fromJSData: unknown request type. ";
-    *commentsOnFailure
-    << "DEBUG: failed to get from "
-    << this->contentReader.toString();
   }
   return false;
 }
@@ -548,6 +554,7 @@ bool DatabaseInternalServer::findAndUpdate(
         initialValue, collectionName, objectId, commentsOnFailure
       )
     ) {
+      global << "DEBUG: object created FAILED!" << Logger::endL;
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "DatabaseInternalServer::findAndUpdate: failed to create object. ";
@@ -555,6 +562,7 @@ bool DatabaseInternalServer::findAndUpdate(
       return false;
     }
   }
+  global << "DEBUG: object created alright!" << Logger::endL;
   JSData object;
   if (
     !this->loadObject(objectId, collectionName, object, commentsOnFailure)
@@ -565,9 +573,12 @@ bool DatabaseInternalServer::findAndUpdate(
     }
     return false;
   }
+  global << "DEBUG: about to merge data!!!" <<Logger::endL;
   input.update.mergeData(object);
-  return
-  this->storeObject(objectId, collectionName, object, commentsOnFailure);
+  global << "DEBUG: merge data done! about to store object!" <<Logger::endL;
+bool result =  this->storeObject(objectId, collectionName, object, commentsOnFailure);
+  global << "DEBUG: store done!! result: " << result <<Logger::endL;
+  return result;
 }
 
 bool DatabaseInternalServer::storeObject(
@@ -577,6 +588,7 @@ bool DatabaseInternalServer::storeObject(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::storeObject");
+  global << "Writing object id: " << objectId << ", " << collectionName << Logger::endL;
   if (!this->collections.contains(collectionName)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -584,7 +596,7 @@ bool DatabaseInternalServer::storeObject(
     }
     return false;
   }
-  DatabaseCollection collection =
+  DatabaseCollection& collection =
   this->collections.getValueNoFailNonConst(collectionName);
   std::string fileName = this->objectFilename(objectId, collectionName);
   std::string content = data.toString();
@@ -598,6 +610,7 @@ bool DatabaseInternalServer::storeObject(
   // Until (if ever) there is a solid incentive
   // to make object writes failure very
   // resilient, let us leave this as is.
+  global << "DEBUG: before write! 0" << Logger::endL;
   if (
     !FileOperations::
     writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
@@ -611,6 +624,7 @@ bool DatabaseInternalServer::storeObject(
   }
   // Update the indices with the new found object
   bool found = false;
+  global << "DEBUG: before write! 1" << Logger::endL;
   for (DatabaseInternalIndex& index : collection.indices.values) {
     JSData primaryKeyValueJSON;
     if (!data.hasNestedKey(index.nestedKeys, &primaryKeyValueJSON)) {
@@ -638,7 +652,9 @@ bool DatabaseInternalServer::storeObject(
   // range for under 100k records.
   // This can be optimized to have approximately constant run time.
   // Please do so if there is a solid incentive.
+  global << "DEBUG: before write! 2 found: " << found << Logger::endL;
   if (found) {
+    global << "DEBUG: store index to hard drive 1!" << Logger::endL;
     if (!collection.storeIndicesToHardDrive(commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
@@ -648,6 +664,7 @@ bool DatabaseInternalServer::storeObject(
       return false;
     }
   }
+  global << "DEBUG: before write! return" << Logger::endL;
   return true;
 }
 
@@ -692,20 +709,11 @@ bool DatabaseInternalServer::createObject(
   this->collections.getValueNoFailNonConst(collectionName);
   bool foundPrimaryKey = false;
   for (DatabaseInternalIndex& index : collection.indices.values) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "DEBUG: index name: "
-      << index.nestedKeys
-      << "<br>";
-    }
     JSData primaryKeyValueJSON;
     if (
       !initialValue.hasNestedKey(index.nestedKeys, &primaryKeyValueJSON)
     ) {
       continue;
-    }
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "DEBUG: testing for " << index.nestedKeys;
     }
     std::string primaryKeyValue = primaryKeyValueJSON.stringValue;
     if (primaryKeyValue != "") {
@@ -821,6 +829,7 @@ bool DatabaseInternalServer::ensureCollection(
   collection.initialize(collectionName, this->owner);
   for (const std::string& key : indexableKeys) {
     DatabaseInternalIndex& index = collection.indices.getValueCreateEmpty(key);
+    index.collectionName = collectionName;
     index.nestedKeys.addOnTop(key);
   }
   return true;
@@ -960,6 +969,16 @@ bool DatabaseCollection::storeIndicesToHardDrive(
     return false;
   }
   return true;
+}
+
+DatabaseInternalIndex::DatabaseInternalIndex(){
+
+}
+
+std::string DatabaseInternalIndex::toString()const{
+  std::stringstream out;
+  out << "index: {" << this->collectionName << ": " << this->nestedKeys.toStringCommaDelimited() << "}";
+  return out.str();
 }
 
 JSData DatabaseInternalIndex::toJSON() const {

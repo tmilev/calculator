@@ -26,9 +26,10 @@ public:
   }
 };
 
-// class ListReferences is to be used in the same way as class List.
-// The essential difference between ListReferences and List is in the way the
-// objects are
+// class ListReferences is a list of objects used similarly to class List.
+// The essential differences between ListReferences and List are:
+// 1) ListReferences cannot be copied themselves.
+// 2) the way the objects are
 // stored in memory. A copy of each object of ListReferences
 // is allocated with an individual copy constructor (call of new Object; rather
 // than new Object[size];),
@@ -54,6 +55,13 @@ public:
 // List. Whenever in doubt, use ListReferences.
 template <class Object>
 class ListReferences {
+  // Copying a list of references with copy constructor is forbidden.
+  // This would violate the basic code contract of the class: pointers
+  // to objects allocated in this class can be safely passed around.
+  // If you copied this class and removed the old copy,
+  // and someone already has a pointer coming from the old copy,
+  // that pointer will be used after free.
+  ListReferences(const ListReferences<Object>&);
   friend std::ostream& operator<<(
     std::ostream& output, const ListReferences<Object>& input
   ) {

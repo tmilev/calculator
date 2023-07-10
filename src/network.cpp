@@ -109,10 +109,6 @@ bool Connector::connectWrapper(std::stringstream* commentsOnError) {
     &this->hints,
     &this->peer
   );
-  global
-  << "DEBUG: got address info from: "
-  << this->portOrService
-  << Logger::endL;
   if (status != 0) {
     if (commentsOnError != nullptr) {
       *commentsOnError
@@ -225,9 +221,6 @@ bool Connector::oneConnectionAttempt(
     << totalSelected;
     connectionResult = - 1;
   } else {
-    reportStream
-    << "DEBUG: immediately before connect(). Socki: "
-    << this->socketInteger;
     connectionResult =
     connect(
       this->socketInteger,
@@ -290,10 +283,6 @@ bool Listener::initializeBindToOnePort(
     return false;
   }
   outputListeningSocket = - 1;
-  global
-  << "DEBUG: about to enter bind loop: desiired port: "
-  << desiredPort
-  << Logger::endL;
   for (p = servinfo; p != nullptr; p = p->ai_next) {
     outputListeningSocket =
     socket(p->ai_family, p->ai_socktype, p->ai_protocol);

@@ -577,7 +577,6 @@ bool PipePrimitive::writeOnceNoFailure(
   const std::string& toBeSent, int offset, bool dontCrashOnFail
 ) {
   STACK_TRACE("PipePrimitive::writeOnceNoFailure");
-  global << "DEBUG: got to here write0" << Logger::endL;
   if (this->pipeEnds[1] == - 1) {
     global
     << Logger::yellow
@@ -605,7 +604,6 @@ bool PipePrimitive::writeOnceNoFailure(
   this->numberOfBytesLastWrite = 0;
   int numberOfBadAttempts = 0;
   for (;;) {
-    global << "DEBUG: about to write!" << Logger::endL;
     this->numberOfBytesLastWrite = static_cast<int>(
       write(
         this->pipeEnds[1],
@@ -613,15 +611,6 @@ bool PipePrimitive::writeOnceNoFailure(
         remaining
       )
     );
-    global
-    << "DEBUG: wrote OK! to fd: "
-    << this->pipeEnds[1]
-    << " with read end: "
-    << this->pipeEnds[0]
-    << " wrote: "
-    << this->numberOfBytesLastWrite
-    << "bytes."
-    << Logger::endL;
     if (this->numberOfBytesLastWrite < 0) {
       if (
         errno == EAI_AGAIN ||

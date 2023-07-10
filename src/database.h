@@ -332,11 +332,14 @@ class DatabaseInternal;
 
 class DatabaseInternalIndex {
 public:
+  std::string  collectionName;
   List<std::string> nestedKeys;
   MapList<std::string, std::string> keyValueToObjectId;
   MapList<std::string, std::string> objectIdToKeyValue;
   JSData toJSON() const;
   bool fromJSON(const JSData& input, std::stringstream* commentsOnFailure);
+  std::string toString()const;
+  DatabaseInternalIndex();
 };
 
 // A table/collection in the database.

@@ -1,4 +1,3 @@
-#include "calculator_inner_functions.h"
 #include "calculator_html_functions.h"
 #include "database.h"
 #include "general_time_date.h"
@@ -429,7 +428,9 @@ bool CalculatorHTML::storeProblemWeights(
   );
   QuerySet updateQuery = this->toQuerySetProblemWeights(toStore);
   if (
-    !Database::get().updateOne(weightFinder, updateQuery, commentsOnFailure)
+    !Database::get().updateOne(
+      weightFinder, updateQuery, true, commentsOnFailure
+    )
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to update weight schema. ";
@@ -463,7 +464,7 @@ bool CalculatorHTML::storeProblemDeadlines(
   updateQuery.fromJSONNoFail(this->toJSONDeadlines(toStore));
   if (
     !Database::get().updateOne(
-      deadlineSchema, updateQuery, commentsOnFailure
+      deadlineSchema, updateQuery, true, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {

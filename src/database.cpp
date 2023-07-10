@@ -506,6 +506,7 @@ bool Database::findOne(
 bool Database::updateOne(
   const QueryExact& findQuery,
   const QuerySet& dataToMerge,
+  bool createIfNotFound,
   std::stringstream* commentsOnFailure
 ) {
   if (findQuery.isEmpty()) {
@@ -530,7 +531,7 @@ bool Database::updateOne(
   case DatabaseType::internal:
     return
     this->localDatabase.client.updateOne(
-      findQuery, dataToMerge, commentsOnFailure
+      findQuery, dataToMerge, createIfNotFound, commentsOnFailure
     );
   }
   return false;
@@ -1136,6 +1137,10 @@ bool QuerySetOnce::fromJSON(
 
 void QuerySetOnce::updateOneEntry(JSData& modified) const {
   STACK_TRACE("QuerySetOnce::updateOneEntry");
+  if (this->nestedLabels.size == 0) {
+    modified = this->value;
+    return;
+  }
   JSData* output = &modified;
   for (int i = 0; i < this->nestedLabels.size - 1; i ++) {
     output = &((*output)[this->nestedLabels[i]]);
@@ -1282,6 +1287,7 @@ JSData QueryFindAndUpdate::toJSON() const {
   JSData result;
   result["find"] = this->find.toJSON();
   result["update"] = this->update.toJSON();
+  result["createIfNotFound"] = this->createIfNotFound;
   return result;
 }
 
@@ -1290,6 +1296,10 @@ bool QueryFindAndUpdate::fromJSON(
 ) {
   if (!this->find.fromJSON(input["find"], commentsOnFailure)) {
     return false;
+  }
+  this->createIfNotFound = false;
+  if (input["createIfNotFound"].isTrueRepresentationInJSON()) {
+    this->createIfNotFound = true;
   }
   return this->update.fromJSON(input["update"], commentsOnFailure);
 }

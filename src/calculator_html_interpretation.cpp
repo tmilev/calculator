@@ -2080,7 +2080,9 @@ std::string WebAPIResponse::addTeachersSections() {
     setQuery.addKeyValuePair(
       DatabaseStrings::labelSectionsTaught, desiredSectionListJSON
     );
-    if (!Database::get().updateOne(findQuery, setQuery, &out)) {
+    if (
+      !Database::get().updateOne(findQuery, setQuery, true, &out)
+    ) {
       out
       << "<span style='color:red'>Failed to store course info of instructor: "
       << teachers[i]
@@ -2854,7 +2856,9 @@ int ProblemData::getExpectedNumberOfAnswers(
   stringConverter.str();
   QuerySet updateQuery;
   updateQuery.fromJSONNoFail(newDatabaseEntry);
-  Database::get().updateOne(findEntry, updateQuery, &commentsOnFailure);
+  Database::get().updateOne(
+    findEntry, updateQuery, true, &commentsOnFailure
+  );
   return this->knownNumberOfAnswersFromHD;
 }
 

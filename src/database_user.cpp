@@ -512,7 +512,7 @@ bool UserCalculator::resetAuthenticationToken(
     DatabaseStrings::labelTimeOfAuthenticationTokenCreation,
     now.timeStringNonReadable
   );
-  Database::get().updateOne(findUser, setUser, commentsOnFailure);
+  Database::get().updateOne(findUser, setUser, true, commentsOnFailure);
   this->flagNewAuthenticationTokenComputedUserNeedsIt = true;
   return true;
 }
@@ -535,7 +535,8 @@ bool UserCalculator::setPassword(std::stringstream* commentsOnFailure) {
   setUser.addKeyValueStringPair(
     DatabaseStrings::labelPassword, this->enteredHashedSaltedPassword
   );
-  return Database::get().updateOne(findUser, setUser, commentsOnFailure);
+  return
+  Database::get().updateOne(findUser, setUser, false, commentsOnFailure);
 }
 
 bool UserCalculator::isAcceptableCharDatabaseInput(char character) {
@@ -745,7 +746,9 @@ bool UserCalculator::computeAndStoreActivationToken(
     DatabaseStrings::labelActivationToken, this->actualActivationToken
   );
   if (
-    !Database::get().updateOne(findUserQuery, updateUser, commentsOnFailure)
+    !Database::get().updateOne(
+      findUserQuery, updateUser, true, commentsOnFailure
+    )
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Setting activation token failed. ";
@@ -870,7 +873,7 @@ bool UserCalculator::computeAndStoreActivationStats(
   }
   if (
     !Database::get().updateOne(
-      findQueryInUsers, updateUser, commentsOnFailure
+      findQueryInUsers, updateUser, true, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -896,7 +899,9 @@ bool UserCalculator::computeAndStoreActivationStats(
     DatabaseStrings::labelEmail, this->email
   );
   if (
-    !Database::get().updateOne(findEmail, emailStatQuery, commentsOnFailure)
+    !Database::get().updateOne(
+      findEmail, emailStatQuery, true, commentsOnFailure
+    )
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Unexpected failure to update email stats. ";
@@ -1330,7 +1335,7 @@ bool UserOfDatabase::firstLoginOfAdmin(
   UserCalculator& userInDatabase,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseUser::firstLoginOfAdmin");
+  STACK_TRACE("UserOfDatabase::firstLoginOfAdmin");
   if (userInDatabase.username != WebAPI::userDefaultAdmin) {
     return false;
   }
@@ -1407,7 +1412,8 @@ bool UserCalculator::storeToDatabase(
   JSData setUser = this->toJSON();
   QuerySet doSetUser;
   doSetUser.addValue(this->toJSON());
-  return Database::get().updateOne(findUser, doSetUser, commentsOnFailure);
+  return
+  Database::get().updateOne(findUser, doSetUser, true, commentsOnFailure);
 }
 
 bool UserCalculator::getActivationAddressFromActivationToken(

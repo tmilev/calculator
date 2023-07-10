@@ -351,6 +351,7 @@ public:
   bool loadIndicesFromHardDrive(std::stringstream* commentsOnFailure);
   bool storeIndicesToHardDrive(std::stringstream* commentsOnFailure);
   void toJSONIndices(JSData& output) const;
+  std::string fileNameIndex() const;
   DatabaseCollection();
   void initialize(
     const std::string& inputName, DatabaseInternal* inputOwner
@@ -442,6 +443,7 @@ public:
   bool updateOne(
     const QueryExact& findQuery,
     const QuerySet& updateQuery,
+    bool createIfNotFound,
     std::stringstream* commentsOnFailure = nullptr
   );
   bool updateOneFromSome(
@@ -640,7 +642,8 @@ public:
   bool updateOne(
     const QueryExact& findQuery,
     const QuerySet& dataToMerge,
-    std::stringstream* commentsOnFailure = nullptr
+    bool createIfNotFound,
+    std::stringstream* commentsOnFailure
   );
   bool updateOneFromSome(
     const List<QueryExact>& findOrQueries,

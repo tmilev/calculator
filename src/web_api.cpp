@@ -363,7 +363,9 @@ bool WebAPIResponse::processChangePassword(
   QuerySet doSetQuery;
   doSetQuery.fromJSONNoFail(setQuery);
   if (
-    !Database::get().updateOne(findQuery, doSetQuery, &commentsOnFailure)
+    !Database::get().updateOne(
+      findQuery, doSetQuery, false, &commentsOnFailure
+    )
   ) {
     result[WebAPI::Result::error] =
     "Failed to set activationToken: " + commentsOnFailure.str();

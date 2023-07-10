@@ -78,7 +78,7 @@ bool QuerySet::Test::all() {
 
 void QuerySet::Test::updateNoFail(QueryExact& find, QuerySet updater) {
   std::stringstream comments;
-  if (!Database::get().updateOne(find, updater, &comments)) {
+  if (!Database::get().updateOne(find, updater, true, &comments)) {
     global.fatal
     << "Failed to update using finder:\n"
     << find.toString()

@@ -58,12 +58,14 @@ bool DatabaseInternalClient::findOneWithOptions(
 bool DatabaseInternalClient::updateOne(
   const QueryExact& findQuery,
   const QuerySet& updateQuery,
+  bool createIfNotFound,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseInternal::updateOne");
+  STACK_TRACE("DatabaseInternalClient::updateOne");
   QueryFindAndUpdate queryFindAndUpdate;
   queryFindAndUpdate.find = findQuery;
   queryFindAndUpdate.update = updateQuery;
+  queryFindAndUpdate.createIfNotFound = createIfNotFound;
   DatabaseInternalResult result;
   DatabaseInternalRequest request;
   request.queryFindAndUpdate = queryFindAndUpdate;
@@ -640,8 +642,8 @@ bool DatabaseInternalServer::storeObject(
     if (!collection.storeIndicesToHardDrive(commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
-        << "Failed to update the databse index. "
-        << "However, your object was stored.";
+        << "Failed to update the database index. "
+        << "However, your object was stored. ";
       }
       return false;
     }
@@ -654,7 +656,22 @@ bool DatabaseInternalServer::loadObject(
   const std::string& collectionName,
   JSData& output,
   std::stringstream* commentsOnFailure
-) {}
+) {
+  std::string filename = this->objectFilename(objectId, collectionName);
+  std::string content;
+  if (
+    !FileOperations::
+    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
+      filename, content, true, true, commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Object not present: " << objectId;
+    }
+    return false;
+  }
+  return output.parse(content, true, commentsOnFailure);
+}
 
 bool DatabaseInternalServer::createObject(
   const JSData& initialValue,
@@ -675,11 +692,20 @@ bool DatabaseInternalServer::createObject(
   this->collections.getValueNoFailNonConst(collectionName);
   bool foundPrimaryKey = false;
   for (DatabaseInternalIndex& index : collection.indices.values) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "DEBUG: index name: "
+      << index.nestedKeys
+      << "<br>";
+    }
     JSData primaryKeyValueJSON;
     if (
       !initialValue.hasNestedKey(index.nestedKeys, &primaryKeyValueJSON)
     ) {
       continue;
+    }
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "DEBUG: testing for " << index.nestedKeys;
     }
     std::string primaryKeyValue = primaryKeyValueJSON.stringValue;
     if (primaryKeyValue != "") {
@@ -690,7 +716,9 @@ bool DatabaseInternalServer::createObject(
   if (!foundPrimaryKey) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "DatabaseInternalServer::createObject: failed to find primary key. ";
+      << "DatabaseInternalServer::createObject: failed to find primary key: "
+      << initialValue.toString()
+      << ". ";
     }
     return false;
   }
@@ -793,7 +821,7 @@ bool DatabaseInternalServer::ensureCollection(
   collection.initialize(collectionName, this->owner);
   for (const std::string& key : indexableKeys) {
     DatabaseInternalIndex& index = collection.indices.getValueCreateEmpty(key);
-    index.nestedKeys = indexableKeys;
+    index.nestedKeys.addOnTop(key);
   }
   return true;
 }
@@ -856,12 +884,17 @@ bool DatabaseInternalIndex::fromJSON(
       }
       return false;
     }
-    this->objectIdToKeyValue.setKeyValue(key, value.stringValue);
-    if (value.stringValue != "") {
-      this->keyValueToObjectId.setKeyValue(value.stringValue, key);
+    std::string valueString = value.stringValue;
+    this->objectIdToKeyValue.setKeyValue(key, valueString);
+    if (valueString != "") {
+      this->keyValueToObjectId.setKeyValue(valueString, key);
     }
   }
   return true;
+}
+
+std::string DatabaseCollection::fileNameIndex() const {
+  return this->owner->folder() + this->name + ".json";
 }
 
 bool DatabaseCollection::loadIndicesFromHardDrive(
@@ -871,7 +904,7 @@ bool DatabaseCollection::loadIndicesFromHardDrive(
   if (this->indicesLoaded) {
     return true;
   }
-  std::string filename = this->owner->folder() + this->name;
+  std::string filename = this->fileNameIndex();
   std::string contentString;
   if (
     !FileOperations::
@@ -907,18 +940,31 @@ bool DatabaseCollection::loadIndicesFromHardDrive(
 bool DatabaseCollection::storeIndicesToHardDrive(
   std::stringstream* commentsOnFailure
 ) {
-  std::string filename = this->owner->folder() + this->name;
+  std::string filename = this->fileNameIndex();
   JSData content;
   this->toJSONIndices(content);
-  return
-  FileOperations::
-  writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
-    filename, content.toString(), true, true, commentsOnFailure
-  );
+  if (
+    !FileOperations::
+    writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
+      filename, content.toString(), true, true, commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to store the index of "
+      << this->name
+      << " to filename: "
+      << filename
+      << ". ";
+    }
+    return false;
+  }
+  return true;
 }
 
 JSData DatabaseInternalIndex::toJSON() const {
   JSData result;
+  result.elementType = JSData::Token::tokenObject;
   for (int i = 0; i < this->objectIdToKeyValue.size(); i ++) {
     result[this->objectIdToKeyValue.keys[i]] =
     this->objectIdToKeyValue.values[i];

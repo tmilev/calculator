@@ -1988,7 +1988,7 @@ std::string WebWorker::getChangePasswordPagePartOne(
   emailSet.addKeyValueStringPair(
     DatabaseStrings::labelActivationToken, actualEmailActivationToken
   );
-  if (!Database::get().updateOne(findEmail, emailSet, &out)) {
+  if (!Database::get().updateOne(findEmail, emailSet, true, &out)) {
     out
     << "\n<b style ='color:red'>"
     << "Could not reset the activation token (database is down?). "
@@ -2004,7 +2004,7 @@ std::string WebWorker::getChangePasswordPagePartOne(
   userInfo[DatabaseStrings::labelEmail] = claimedEmail;
   QuerySet querySet;
   querySet.fromJSONNoFail(userInfo);
-  if (!Database::get().updateOne(findUser, querySet, &out)) {
+  if (!Database::get().updateOne(findUser, querySet, true, &out)) {
     out
     << "\n<b style ='color:red'>"
     << "Could not store your email (database is down?). </b>";
@@ -2913,7 +2913,7 @@ WebServer::WebServer() {
   this->listeningSocketHTTPSDefault = - 1;
   this->listeningSocketHTTPSOpenSSL = - 1;
   this->highestSocketNumber = - 1;
-  this->maximumWorkersPerIPAdress = 9;
+  this->maximumWorkersPerIPAdress = 24;
   // We need to open several pipes for each worker.
   // There's an upper limit for the number of pipes/files we can have open
   // increasing this to 84 and more is known to crash on ubuntu with default
@@ -3551,7 +3551,7 @@ void WebServer::terminateChildSystemCall(int i) {
     if (global.flagServerDetailedLog) {
       global
       << "Detail: "
-      << " killing child index: "
+      << "killing child index: "
       << i
       << "."
       << Logger::endL;

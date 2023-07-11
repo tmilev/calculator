@@ -89,7 +89,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool AllGenerators,
+    bool allGenerators,
     bool useNilWeight,
     bool ascending
   );

@@ -275,7 +275,7 @@ getActionGeneratorIndex(int generatorIndex) {
 }
 
 template <class Coefficient>
-void ModuleSSalgebra<Coefficient>::getMatrixHomogenousElt(
+void ModuleSSalgebra<Coefficient>::getMatrixHomogenousElement(
   ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
   List<List<ElementUniversalEnveloping<Coefficient> > >&
   outputSortedByArgumentWeight,
@@ -284,8 +284,8 @@ void ModuleSSalgebra<Coefficient>::getMatrixHomogenousElt(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  STACK_TRACE("ModuleSSalgebra::getMatrixHomogenousElt");
-  this->getAdActionHomogenousElt(
+  STACK_TRACE("ModuleSSalgebra::getMatrixHomogenousElement");
+  this->getAdActionHomogenousElement(
     inputHomogeneous,
     weightUEElementSimpleCoordinates,
     outputSortedByArgumentWeight,
@@ -652,10 +652,10 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   this->highestWeightFundamentalCoordinatesBaseField;
   highestWeightFundamentalCoordinatesNilPart -=
   this->highestWeightFiniteDimensionalPartFundamentalCoordinates;
-  ElementUniversalEnveloping<Coefficient> currentElt, element;
+  ElementUniversalEnveloping<Coefficient> currentElement, element;
   for (int j = 0; j < finalEigenSpace.size; j ++) {
     out << "<tr><td>";
-    currentElt.makeZero(this->getOwner());
+    currentElement.makeZero(this->getOwner());
     Vector<Coefficient>& currentVect = finalEigenSpace[j];
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
@@ -663,7 +663,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
         element.makeZero(this->getOwner());
         element.addMonomial(this->generatingWordsNonReduced[i], 1);
         element *= currentVect[i];
-        currentElt += element;
+        currentElement += element;
         lastNonZeroIndex = i;
       }
     }
@@ -681,17 +681,17 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     << "$&$"
     << currentVect.toStringLetterFormat("m")
     << "$";
-    if (currentElt.size() > 1) {
+    if (currentElement.size() > 1) {
       out << "(";
     }
     if (outputEigenVectors != 0) {
-      outputEigenVectors->addOnTop(currentElt);
+      outputEigenVectors->addOnTop(currentElement);
     }
     if (outputWeightsFundamentalCoordinates != 0) {
       outputWeightsFundamentalCoordinates->addOnTop(currentWeight);
     }
-    out << currentElt.toString(&global.defaultFormat.getElement());
-    if (currentElt.size() > 1) {
+    out << currentElement.toString(&global.defaultFormat.getElement());
+    if (currentElement.size() > 1) {
       out << ")";
     }
     out << " v_\\lambda";
@@ -1382,7 +1382,7 @@ void ModuleSSalgebra<Coefficient>::reset() {
 }
 
 template <class Coefficient>
-void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElt(
+void ModuleSSalgebra<Coefficient>::getAdActionHomogenousElement(
   ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
   Vector<Rational>& weightUEElementSimpleCoordinates,
   List<List<ElementUniversalEnveloping<Coefficient> > >&
@@ -1506,7 +1506,7 @@ bool ElementTensorsGeneralizedVermas<Coefficient>::multiplyOnTheLeft(
         }
         tempOutput.addMonomial(singleMonomial, this->coefficients[j]);
       }
-      tempOutput.multiplyMeByUEEltOnTheLeft(element);
+      tempOutput.multiplyMeByUEElementOnTheLeft(element);
       output = tempOutput;
       return true;
     }
@@ -1580,7 +1580,7 @@ void ElementTensorsGeneralizedVermas<Coefficient>::multiplyByElementLieAlg(
     for (int j = 0; j < monomial.monomials.size; j ++) {
       element.makeZero();
       element.addMonomial(monomial.monomials[j], ringUnit);
-      element.multiplyMeByUEEltOnTheLeft(generator);
+      element.multiplyMeByUEElementOnTheLeft(generator);
       for (int k = 0; k < element.size(); k ++) {
         coefficient = this->coefficients[i];
         coefficient *= element.coefficients[k];
@@ -1673,7 +1673,7 @@ const {
   out
   << "<table><tr><td>Monomial label</td>"
   << "<td>Definition</td><td>Littelmann path string</td></tr>";
-  ElementWeylGroup tempWelt;
+  ElementWeylGroup tempWElement;
   int wordCounter = 0;
   SimpleReflection aGen;
   for (int i = 0; i < this->generatingWordsGrouppedByWeight.size; i ++) {
@@ -1683,7 +1683,7 @@ const {
     this->generatingWordsIntegersGrouppedByWeight[i];
     for (int j = 0; j < currentList.size; j ++) {
       wordCounter ++;
-      tempWelt.generatorsLastAppliedFirst.setSize(
+      tempWElement.generatorsLastAppliedFirst.setSize(
         currentListInt[j].generatorsIndices.size
       );
       for (
@@ -1694,7 +1694,7 @@ const {
           1 -
           currentListInt[j].generatorsIndices[k]
         );
-        tempWelt.generatorsLastAppliedFirst[k] = aGen;
+        tempWElement.generatorsLastAppliedFirst[k] = aGen;
       }
       out
       << "<tr><td>m_{ "
@@ -1702,7 +1702,7 @@ const {
       << "} </td><td>"
       << currentList[j].toString(&global.defaultFormat.getElement())
       << " v_\\lambda</td><td>"
-      << tempWelt.toString()
+      << tempWElement.toString()
       << "</td> </tr>";
     }
   }
@@ -1765,12 +1765,12 @@ const {
     List<MonomialUniversalEnveloping<Coefficient> >& currentList =
     this->generatingWordsGrouppedByWeight[k];
     for (int i = 0; i < currentList.size; i ++) {
-      MonomialUniversalEnveloping<Coefficient>& currentElt = currentList[i];
+      MonomialUniversalEnveloping<Coefficient>& currentElement = currentList[i];
       out
       << "<br>monomial "
       << i + 1
       << ": "
-      << currentElt.toString(&global.defaultFormat.getElement());
+      << currentElement.toString(&global.defaultFormat.getElement());
     }
     out
     << "; Matrix of Shapovalov form associated to current weight level: <br> "
@@ -1857,13 +1857,13 @@ bool ModuleSSalgebra<Coefficient>::isNotInLevi(int generatorIndex) {
 }
 
 template <class Coefficient>
-void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
+void ModuleSSalgebra<Coefficient>::getGenericUnMinusElement(
   bool shiftPowersByNumberOfVariablesBaseField,
   ElementUniversalEnveloping<RationalFraction<Rational> >& output,
   bool useNilWeight,
   bool ascending
 ) {
-  STACK_TRACE("ModuleSSalgebra::getGenericUnMinusElt");
+  STACK_TRACE("ModuleSSalgebra::getGenericUnMinusElement");
   List<ElementUniversalEnveloping<Coefficient> > elementsNilradical;
   this->getElementsNilradical(
     elementsNilradical, true, useNilWeight, ascending
@@ -1888,13 +1888,13 @@ void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
 }
 
 template <class Coefficient>
-void ModuleSSalgebra<Coefficient>::getGenericUnMinusElt(
+void ModuleSSalgebra<Coefficient>::getGenericUnMinusElement(
   bool shiftPowersByNumberOfVariablesBaseField,
   ElementUniversalEnveloping<Polynomial<Rational> >& output,
   bool useNilWeight,
   bool ascending
 ) {
-  STACK_TRACE("ModuleSSalgebra::getGenericUnMinusElt");
+  STACK_TRACE("ModuleSSalgebra::getGenericUnMinusElement");
   List<ElementUniversalEnveloping<Coefficient> > elementsNilradical;
   this->getElementsNilradical(
     elementsNilradical, true, nullptr, useNilWeight, ascending
@@ -1937,7 +1937,7 @@ getActionGeneralizedVermaModuleAsDifferentialOperator(
   );
   ElementUniversalEnveloping<Polynomial<Rational> > genericElement;
   ElementUniversalEnveloping<Polynomial<Rational> > result;
-  this->getGenericUnMinusElt(true, genericElement, useNilWeight, ascending);
+  this->getGenericUnMinusElement(true, genericElement, useNilWeight, ascending);
   result.assignElementLieAlgebra(inputElement, *this->owner, 1);
   Polynomial<Rational> onePolynomial;
   onePolynomial.makeConstant(1);
@@ -2103,22 +2103,22 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     finalEigenSpace.makeEiBasis(this->getDimension());
   }
   for (int i = 0; i < invertedLeviInSmall.cardinalitySelection; i ++) {
-    ElementSemisimpleLieAlgebra<Rational>& currentElt =
+    ElementSemisimpleLieAlgebra<Rational>& currentElement =
     homomorphism.imagesPositiveSimpleChevalleyGenerators[
       invertedLeviInSmall.elements[i]
     ];
     MatrixTensor<Coefficient> currentOp, matrix;
     currentOp.makeZero();
-    for (int j = 0; j < currentElt.size(); j ++) {
-      matrix = this->getActionGeneratorIndex(currentElt[j].generatorIndex);
-      matrix *= currentElt.coefficients[j];
+    for (int j = 0; j < currentElement.size(); j ++) {
+      matrix = this->getActionGeneratorIndex(currentElement[j].generatorIndex);
+      matrix *= currentElement.coefficients[j];
       currentOp += matrix;
     }
     std::stringstream tempStream3;
     double timeAtStart1 = global.getElapsedSeconds();
     tempStream3
     << "Computing eigenspace corresponding to "
-    << currentElt.toString()
+    << currentElement.toString()
     << "...";
     report.report(tempStream3.str());
     Matrix<Coefficient> currentOpMat;
@@ -2136,7 +2136,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
       double timeAtStart2 = global.getElapsedSeconds();
       tempStream4
       << "Intersecting with eigenspace corresponding to "
-      << currentElt.toString()
+      << currentElement.toString()
       << "...";
       tempSpace1 = finalEigenSpace;
       report.report(tempStream4.str());
@@ -2168,13 +2168,13 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   this->highestWeightFundamentalCoordinatesBaseField;
   highestWeightFundamentalCoordinatesNilradicalPart -=
   this->highestWeightFiniteDimensionalPartFundamentalCoordinates;
-  ElementUniversalEnveloping<Coefficient> currentElt, element;
+  ElementUniversalEnveloping<Coefficient> currentElement, element;
   if (outputEigenVectors != nullptr) {
     outputEigenVectors->setSize(0);
   }
   for (int j = 0; j < finalEigenSpace.size; j ++) {
     out << "<tr><td>";
-    currentElt.makeZero(this->getOwner());
+    currentElement.makeZero(this->getOwner());
     Vector<Coefficient>& currentVect = finalEigenSpace[j];
     int lastNonZeroIndex = - 1;
     for (int i = 0; i < currentVect.size; i ++) {
@@ -2182,7 +2182,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
         element.makeZero(this->getOwner());
         element.addMonomial(this->generatingWordsNonReduced[i], 1);
         element *= currentVect[i];
-        currentElt += element;
+        currentElement += element;
         lastNonZeroIndex = i;
       }
     }
@@ -2201,17 +2201,17 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     << "$&$"
     << currentVect.toStringLetterFormat("m")
     << "$";
-    if (currentElt.size() > 1) {
+    if (currentElement.size() > 1) {
       out << "(";
     }
     if (outputEigenVectors != nullptr) {
-      outputEigenVectors->addOnTop(currentElt);
+      outputEigenVectors->addOnTop(currentElement);
     }
     if (outputWeightsFundamentalCoordinates != nullptr) {
       outputWeightsFundamentalCoordinates->addOnTop(currentWeight);
     }
-    out << currentElt.toString(&global.defaultFormat.getElement());
-    if (currentElt.size() > 1) {
+    out << currentElement.toString(&global.defaultFormat.getElement());
+    if (currentElement.size() > 1) {
       out << ")";
     }
     out << " v_\\lambda";
@@ -2349,13 +2349,13 @@ void MonomialTensorGeneralizedVermas<Coefficient>::operator=(
 }
 
 template <class Coefficient>
-void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
+void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEElementOnTheLeft(
   const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping,
   ElementSumGeneralizedVermas<Coefficient>& output
 ) const {
   STACK_TRACE(
     "MonomialGeneralizedVerma::"
-    "multiplyMeByUEEltOnTheLeft"
+    "multiplyMeByUEElementOnTheLeft"
   );
   MonomialGeneralizedVerma<Coefficient> monomial;
   output.makeZero();
@@ -2392,17 +2392,17 @@ void MonomialGeneralizedVerma<Coefficient>::multiplyMeByUEEltOnTheLeft(
 }
 
 template <class Coefficient>
-void ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEEltOnTheLeft(
+void ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEElementOnTheLeft(
   const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping
 ) {
   STACK_TRACE(
-    "ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEEltOnTheLeft"
+    "ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEElementOnTheLeft"
   );
   ElementSumGeneralizedVermas<Coefficient> buffer;
   ElementSumGeneralizedVermas<Coefficient> accumulator;
   accumulator.makeZero();
   for (int i = 0; i < this->size(); i ++) {
-    (*this)[i].multiplyMeByUEEltOnTheLeft(elementUniversalEnveloping, buffer);
+    (*this)[i].multiplyMeByUEElementOnTheLeft(elementUniversalEnveloping, buffer);
     buffer *= this->coefficients[i];
     accumulator += buffer;
   }

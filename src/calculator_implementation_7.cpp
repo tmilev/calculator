@@ -2615,13 +2615,13 @@ bool CalculatorFunctionsListsAndSets::listUnion(
   if (!input.startsWith(calculator.opUnion())) {
     return false;
   }
-  int numElts = 1;
+  int numberOfElements = 1;
   for (int i = 1; i < input.size(); i ++) {
     if (!input[i].isSequenceNElements()) {
       return false;
     }
   }
-  output.reset(calculator, numElts);
+  output.reset(calculator, numberOfElements);
   output.addChildAtomOnTop(calculator.opSequence());
   for (int i = 1; i < input.size(); i ++) {
     for (int j = 1; j < input[i].size(); j ++) {
@@ -2656,17 +2656,17 @@ bool CalculatorFunctionsListsAndSets::unionNoRepetition(
   if (!input.isList()) {
     return false;
   }
-  int numElts = 1;
+  int numberOfElements = 1;
   for (int i = 1; i < input.size(); i ++) {
     if (!input[i].isListStartingWithAtom(calculator.opSequence())) {
       return false;
     } else {
-      numElts += input[i].size() - 1;
+      numberOfElements += input[i].size() - 1;
     }
   }
   HashedList<Expression> unionHashedList;
   List<int> indices;
-  unionHashedList.setExpectedSize(numElts);
+  unionHashedList.setExpectedSize(numberOfElements);
   for (int i = 1; i < input.size(); i ++) {
     for (int j = 1; j < input[i].size(); j ++) {
       unionHashedList.addOnTopNoRepetition(input[i][j]);
@@ -2676,7 +2676,7 @@ bool CalculatorFunctionsListsAndSets::unionNoRepetition(
   for (int i = 0; i < unionHashedList.size; i ++) {
     indices[i] = calculator.addChildExpression(unionHashedList[i]);
   }
-  output.setExpectedSize(numElts);
+  output.setExpectedSize(numberOfElements);
   output.reset(calculator, indices.size + 1);
   output.addChildAtomOnTop(calculator.opSequence());
   output.addChildIndices(indices);

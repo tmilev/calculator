@@ -90,7 +90,7 @@ public:
   static Vector<double> getVectorDouble(Vector<Rational>& input);
   template <class Type>
   static bool generateVectorSpaceClosedWithRespectToOperation(
-    List<Type>& inputOutputElts,
+    List<Type>& inputOutputElements,
     int upperDimensionBound,
     void(*binaryOperation)(
       const Type& left, const Type& right, Type& output

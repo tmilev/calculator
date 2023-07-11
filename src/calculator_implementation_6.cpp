@@ -2268,22 +2268,22 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
     << "Failed to extract variable form "
     << yDefE.toString();
   }
-  ElementEllipticCurve<ElementZmodP> eltZmodP;
-  ElementEllipticCurve<Rational> eltRational;
-  eltZmodP.flagInfinity = false;
-  eltRational.flagInfinity = false;
+  ElementEllipticCurve<ElementZmodP> elementZmodP;
+  ElementEllipticCurve<Rational> elementRational;
+  elementZmodP.flagInfinity = false;
+  elementRational.flagInfinity = false;
   bool isRational = true;
   bool isElementZmodP = true;
-  if (!xDefE[2].isOfType(&eltRational.xCoordinate)) {
+  if (!xDefE[2].isOfType(&elementRational.xCoordinate)) {
     isRational = false;
   }
-  if (!yDefE[2].isOfType(&eltRational.yCoordinate)) {
+  if (!yDefE[2].isOfType(&elementRational.yCoordinate)) {
     isRational = false;
   }
-  if (!xDefE[2].isOfType(&eltZmodP.xCoordinate)) {
+  if (!xDefE[2].isOfType(&elementZmodP.xCoordinate)) {
     isElementZmodP = false;
   }
-  if (!yDefE[2].isOfType(&eltZmodP.yCoordinate)) {
+  if (!yDefE[2].isOfType(&elementZmodP.yCoordinate)) {
     isElementZmodP = false;
   }
   if (!isRational && !isElementZmodP) {
@@ -2295,7 +2295,7 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
     << yDefE[2].toString();
   }
   if (isElementZmodP) {
-    if (eltZmodP.xCoordinate.modulus != eltZmodP.yCoordinate.modulus) {
+    if (elementZmodP.xCoordinate.modulus != elementZmodP.yCoordinate.modulus) {
       return calculator << "The two base coordinates have different moduli. ";
     }
   }
@@ -2382,7 +2382,7 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   Rational coefficientXLinear = - polynomial.getCoefficientOf(xLinear);
   Rational constCoefficient = - polynomial.constantTerm();
   EllipticCurveWeierstrassNormalForm& curveConstants =
-  isRational ? eltRational.owner : eltZmodP.owner;
+  isRational ? elementRational.owner : elementZmodP.owner;
   if (
     !coefficientXLinear.isInteger(&curveConstants.linearCoefficient) ||
     !constCoefficient.isInteger(&curveConstants.constantTerm)
@@ -2414,10 +2414,10 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   context.addVariable(xE);
   context.addVariable(yE);
   if (isRational) {
-    return output.assignValueWithContext(calculator, eltRational, context);
+    return output.assignValueWithContext(calculator, elementRational, context);
   }
   if (isElementZmodP) {
-    return output.assignValueWithContext(calculator, eltZmodP, context);
+    return output.assignValueWithContext(calculator, elementZmodP, context);
   }
   return false;
 }

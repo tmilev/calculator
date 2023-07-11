@@ -404,7 +404,7 @@ std::string LittelmannPath::toStringIndicesToCalculatorOutput(
 bool LittelmannPath::generateOrbit(
   List<LittelmannPath>& output,
   List<List<int> >& outputOperators,
-  int upperBoundNumElts,
+  int upperBoundNumberOfElements,
   Selection* parabolicNonSelectedAreInLeviPart
 ) {
   HashedList<LittelmannPath> hashedOutput;
@@ -413,8 +413,8 @@ bool LittelmannPath::generateOrbit(
   outputOperators.setSize(1);
   outputOperators[0].setSize(0);
   List<int> currentSequence;
-  if (upperBoundNumElts > 0) {
-    currentSequence.reserve(upperBoundNumElts);
+  if (upperBoundNumberOfElements > 0) {
+    currentSequence.reserve(upperBoundNumberOfElements);
   }
   LittelmannPath currentPath;
   bool result = true;
@@ -431,7 +431,7 @@ bool LittelmannPath::generateOrbit(
     int lowestNonExplored = 0; lowestNonExplored < hashedOutput.size;
     lowestNonExplored ++
   ) {
-    if (upperBoundNumElts > 0 && upperBoundNumElts < hashedOutput.size) {
+    if (upperBoundNumberOfElements > 0 && upperBoundNumberOfElements < hashedOutput.size) {
       result = false;
       break;
     } else {
@@ -525,10 +525,10 @@ modOutFDRelationsExperimental(
     if (indexCurrentGenerator >= numberOfPositiveRoots) {
       return false;
     }
-    ElementSemisimpleLieAlgebra<Rational>& currentElt =
+    ElementSemisimpleLieAlgebra<Rational>& currentElement =
     this->owner->elementOrder[indexCurrentGenerator];
     if (
-      !currentElt.getCartanPart().isEqualToZero() || currentElt.size() > 1
+      !currentElement.getCartanPart().isEqualToZero() || currentElement.size() > 1
     ) {
       return false;
     }
@@ -538,7 +538,7 @@ modOutFDRelationsExperimental(
     }
     int rootIndex =
     this->owner->ownerSemisimpleLieAlgebra->getRootIndexFromGenerator(
-      currentElt[0].generatorIndex
+      currentElement[0].generatorIndex
     );
     const Vector<Rational>& currentRoot = weyl.rootSystem[rootIndex];
     for (int j = 0; j < power; j ++) {
@@ -998,11 +998,11 @@ void BranchingData::initializePart1NoSubgroups() {
   this->weightsNilModPreNil = this->weightsNilradicalLarge;
   Vector<Rational> proj;
   for (int i = 0; i < this->nilradicalSmall.size; i ++) {
-    ElementSemisimpleLieAlgebra<Rational>& eltImage =
+    ElementSemisimpleLieAlgebra<Rational>& elementImage =
     this->homomorphism.imagesAllChevalleyGenerators[
       this->indicesNilradicalSmall[i]
     ];
-    int index = this->nilradicalModuloPreimageNilradical.getIndex(eltImage);
+    int index = this->nilradicalModuloPreimageNilradical.getIndex(elementImage);
     if (index != - 1) {
       this->nilradicalModuloPreimageNilradical.removeIndexSwapWithLast(index);
       this->weightsNilModPreNil.removeIndexSwapWithLast(index);

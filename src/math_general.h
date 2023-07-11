@@ -6290,7 +6290,7 @@ public:
   bool generateOrbit(
     List<LittelmannPath>& output,
     List<List<int> >& outputOperators,
-    int upperBoundNumElts,
+    int upperBoundNumberOfElements,
     Selection* parabolicNonSelectedAreInLeviPart = nullptr
   );
   std::string generateOrbitAndAnimate();

@@ -1751,14 +1751,14 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct,
+    CalculatorFunctionsBinaryOps::multiplyElementHypOctByElementHypOct,
     this->builtInCode<ElementHyperoctahedralGroupR2>(),
     this->builtInCode<ElementHyperoctahedralGroupR2>(),
     "Multiplies two elements of hyperoctahedral groups. ",
     "s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0); "
     "t = MakeElementHyperOctahedral{}((1, 3), 0, 0, 0); "
     "s * t * s * t",
-    "CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct",
+    "CalculatorFunctionsBinaryOps::multiplyElementHypOctByElementHypOct",
     "MultiplyElementHyperOctahedralByElementHyperOctahedral",
     experimentalNoTest
   );
@@ -1781,12 +1781,12 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt,
+    CalculatorFunctionsBinaryOps::multiplyCoxeterElementByCoxeterElement,
     this->builtInCode<ElementWeylGroup>(),
     this->builtInCode<ElementWeylGroup>(),
     "Multiplies two Weyl group elements if possible. ",
     "x = MakeElementWeylGroup{}(A_2, 1); x*x",
-    "CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt",
+    "CalculatorFunctionsBinaryOps::multiplyCoxeterElementByCoxeterElement",
     "MultiplyWeylGroupElementByWeylGroupElement",
     standardOptions
   );
@@ -1861,8 +1861,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "v=HeighestWeightVector{}(G_2, (1,0),(0,0));\n"
     "2/5 v;\n(3/4 v)\\otimes v;\n"
     "3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)",
-    "CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor",
-    "MultiplyAnyByEltTensor",
+    "CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor",
+    "MultiplyAnyByElementTensor",
     standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
@@ -1880,7 +1880,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "z = Polynomial{}y;\n"
     "v = HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "(2*z) v;\n",
-    "CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor",
+    "CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor",
     "MultiplyPolynomialByElementTensorGeneralVermaModule",
     standardOptions
   );
@@ -1899,7 +1899,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "z = Polynomial{}y;\n"
     "v = HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "1/z v",
-    "CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor",
+    "CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor",
     "MultiplyAnyByTensor",
     standardOptions
   );
@@ -1916,14 +1916,14 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "h_{{i}}= CartanGenerator{}(X, i);\n"
     "z= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
     "h_1 v; \nh_2 v;\n g_1 g_{- 1} v ",
-    "CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor",
+    "CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor",
     "MultiplyElementUniversalEnvelopingRational"
     "FunctionByElementTensorGeneralizedVermaModule",
     standardOptions
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly,
+    CalculatorFunctionsBinaryOps::multiplyWeylGroupElementByWeightPolynomial,
     this->builtInCode<ElementWeylGroup>(),
     this->opWeightLieAlgPoly(),
     "Element of Weyl group action on a weight. ",
@@ -1932,7 +1932,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "x = Polynomial{}x;\n"
     "\\mu = x\\varepsilon_1;\n"
     "s_1s_2s_3s_2s_1 \\mu",
-    "CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly",
+    "CalculatorFunctionsBinaryOps::multiplyWeylGroupElementByWeightPolynomial",
     "MultiplyWeylGroupElementByWeightLieAlgebraPolynomial",
     standardOptions
   );

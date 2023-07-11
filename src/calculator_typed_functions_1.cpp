@@ -46,11 +46,12 @@ addElementZModPOrRationalToElementZModPOrRational(
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat(
+bool CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat"
+    "CalculatorFunctionsBinaryOps::"
+      "multiplyElementZmodPorRationalByElementZmodPorRational"
   );
   if (!input.isListNElements(3)) {
     return false;
@@ -85,11 +86,11 @@ bool CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat(
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat(
+bool CalculatorFunctionsBinaryOps::divideElementZmodPorRationalByElementZmodPorRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat"
+    "CalculatorFunctionsBinaryOps::divideElementZmodPorRationalByElementZmodPorRational"
   );
   if (!input.isListNElements(3)) {
     return false;
@@ -207,22 +208,22 @@ divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational(
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct(
+bool CalculatorFunctionsBinaryOps::multiplyElementHypOctByElementHypOct(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct");
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyElementHypOctByElementHypOct");
   if (!input.isListNElements(3)) {
     return false;
   }
-  ElementHyperoctahedralGroupR2 outElt, left, right;
+  ElementHyperoctahedralGroupR2 outElement, left, right;
   if (
     !input[1].isOfType<ElementHyperoctahedralGroupR2>(&left) ||
     !input[2].isOfType<ElementHyperoctahedralGroupR2>(&right)
   ) {
     return false;
   }
-  outElt = left * right;
-  return output.assignValue(calculator, outElt);
+  outElement = left * right;
+  return output.assignValue(calculator, outElement);
 }
 
 bool CalculatorFunctionsBinaryOps::multiplyAlgebraicNumberByAlgebraicNumber(
@@ -313,10 +314,10 @@ bool CalculatorFunctionsBinaryOps::multiplyRationalByRational(
   return output.assignValue(calculator, leftR* rightR);
 }
 
-bool CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt(
+bool CalculatorFunctionsBinaryOps::multiplyCoxeterElementByCoxeterElement(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt");
+  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyCoxeterElementByCoxeterElement");
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -491,11 +492,11 @@ multiplyRationalOrPolynomialByWeightPolynomial(
   );
 }
 
-bool CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly(
+bool CalculatorFunctionsBinaryOps::multiplyWeylGroupElementByWeightPolynomial(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly"
+    "CalculatorFunctionsBinaryOps::multiplyWeylGroupElementByWeightPolynomial"
   );
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
@@ -629,30 +630,30 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor(
     return false;
   }
   const ElementTensorsGeneralizedVermas<RationalFraction<Rational> >&
-  rightEltETGVM =
+  rightElementETGVM =
   inputConverted[2].getValue<
     ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
   >();
-  ElementTensorsGeneralizedVermas<RationalFraction<Rational> > outputElt;
-  if (rightEltETGVM.isEqualToZero()) {
+  ElementTensorsGeneralizedVermas<RationalFraction<Rational> > outputElement;
+  if (rightElementETGVM.isEqualToZero()) {
     output = inputConverted[2];
     return true;
   }
   semisimpleLieAlgebra.orderNilradicalNilWeightAscending(
-    rightEltETGVM.getOwnerModule().parabolicSelectionNonSelectedAreElementsLevi
+    rightElementETGVM.getOwnerModule().parabolicSelectionNonSelectedAreElementsLevi
   );
   semisimpleLieAlgebra.flagHasNilradicalOrder = true;
   RationalFraction<Rational> one(Rational::one());
   if (
-    !rightEltETGVM.multiplyOnTheLeft(
-      element.content, outputElt, semisimpleLieAlgebra, one
+    !rightElementETGVM.multiplyOnTheLeft(
+      element.content, outputElement, semisimpleLieAlgebra, one
     )
   ) {
     return false;
   }
   return
   output.assignValueWithContext(
-    calculator, outputElt, inputConverted[2].getContext()
+    calculator, outputElement, inputConverted[2].getContext()
   );
 }
 

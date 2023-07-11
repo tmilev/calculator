@@ -411,8 +411,8 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder(
   List<ElementSemisimpleLieAlgebra<Rational> > defaultOrder;
   defaultOrder.setSize(owner.getNumberOfGenerators());
   for (int i = 0; i < defaultOrder.size; i ++) {
-    ElementSemisimpleLieAlgebra<Rational>& currentElt = defaultOrder[i];
-    currentElt.makeGenerator(i, owner);
+    ElementSemisimpleLieAlgebra<Rational>& currentElement = defaultOrder[i];
+    currentElement.makeGenerator(i, owner);
   }
   this->initialize(defaultOrder, owner);
 }
@@ -469,15 +469,15 @@ void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
   Vectors<Rational> rootForm;
   rootForm.setSize(elements.size);
   for (int i = 0; i < elements.size; i ++) {
-    ElementSemisimpleLieAlgebra& currentElt = elements[i];
-    currentElt.toVectorNegativeRootSpacesFirst(rootForm[i]);
+    ElementSemisimpleLieAlgebra& currentElement = elements[i];
+    currentElement.toVectorNegativeRootSpacesFirst(rootForm[i]);
   }
   rootForm.chooseABasis();
   outputBasis.setSize(rootForm.size);
   for (int i = 0; i < rootForm.size; i ++) {
-    ElementSemisimpleLieAlgebra& currentElt = outputBasis[i];
-    currentElt.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
-      rootForm[i], (*currentElt.ownerArray)[currentElt.indexOfOwnerAlgebra]
+    ElementSemisimpleLieAlgebra& currentElement = outputBasis[i];
+    currentElement.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
+      rootForm[i], (*currentElement.ownerArray)[currentElement.indexOfOwnerAlgebra]
     );
   }
 }
@@ -924,9 +924,9 @@ std::string SlTwoInSlN::pairTwoIndices(
   List<Matrix<Rational> > tempDecomposition;
   for (int i = 0; i < leftElements.size; i ++) {
     for (int j = 0; j < rightElements.size; j ++) {
-      Matrix<Rational>& leftElt = leftElements[i];
-      Matrix<Rational>& rightElt = rightElements[j];
-      Matrix<Rational>::lieBracket(leftElt, rightElt, matrix);
+      Matrix<Rational>& leftElement = leftElements[i];
+      Matrix<Rational>& rightElement = rightElements[j];
+      Matrix<Rational>::lieBracket(leftElement, rightElement, matrix);
       if (!matrix.isEqualToZero()) {
         this->extractHighestWeightVectorsFromVector(
           matrix, tempDecomposition, HighestWeightsContainingModules
@@ -947,9 +947,9 @@ std::string SlTwoInSlN::pairTwoIndices(
             << newLine
             << beginMath
             << "["
-            << leftElt.toString(&latexFormat)
+            << leftElement.toString(&latexFormat)
             << ", "
-            << rightElt.toString(&latexFormat)
+            << rightElement.toString(&latexFormat)
             << "] ="
             << matrix.toString(&latexFormat)
             << endMath;

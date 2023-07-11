@@ -638,8 +638,8 @@ bool JSData::tokenizePrependOneDummyElement(
   STACK_TRACE("JSData::tokenizePrependOneDummyElement");
   output.setSize(0);
   output.setExpectedSize(static_cast<int>(input.size()));
-  JSData emptyElt;
-  output.addOnTop(emptyElt);
+  JSData emptyElement;
+  output.addOnTop(emptyElement);
   for (unsigned i = 0; i < input.size(); i ++) {
     if (
       !this->readstringConsumeNextCharacter(
@@ -743,9 +743,9 @@ bool JSData::parse(
     return false;
   }
   List<JSData> readingStack;
-  JSData emptyElt;
+  JSData emptyElement;
   for (int i = 0; i < this->numberOfEmptyTokensAtStart; i ++) {
-    readingStack.addOnTop(emptyElt);
+    readingStack.addOnTop(emptyElement);
   }
   readingStack.addOnTop(inputTokens[1]);
   for (int i = 1;;) {

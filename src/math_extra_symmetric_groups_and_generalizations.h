@@ -1393,10 +1393,10 @@ bool FiniteGroup<elementSomeGroup>::areConjugate(
   int yi = this->elements.getIndex(y);
   for (int i = 0; i < this->conjugacyClasses.size; i ++) {
     if (
-      this->conjugacyClasses[i].indicesEltsInOwner.sortedContains(xi)
+      this->conjugacyClasses[i].indicesElementsInOwner.sortedContains(xi)
     ) {
       if (
-        this->conjugacyClasses[i].indicesEltsInOwner.sortedContains(yi)
+        this->conjugacyClasses[i].indicesElementsInOwner.sortedContains(yi)
       ) {
         return true;
       }
@@ -1470,7 +1470,7 @@ computeConjugacyClassesSizesRepresentativesWords() {
     this->conjugacyClasses[i].representative =
     this->elements[components[i][0]];
     this->conjugacyClasses[i].size = components[i].size;
-    this->conjugacyClasses[i].indicesEltsInOwner = components[i];
+    this->conjugacyClasses[i].indicesElementsInOwner = components[i];
     this->conjugacyClasses[i].representativeIndex = components[i][0];
     if (this->flagWordsComputed) {
       this->getWord(
@@ -1816,7 +1816,7 @@ void FiniteGroup<elementSomeGroup>::verifyCCSizesAndRepresentativesFormula() {
       GG.elements.getIndex(this->conjugacyClasses[i].representative);
       for (int gci = 0; gci < GG.conjugacyClasses.size; gci ++) {
         if (
-          GG.conjugacyClasses[gci].indicesEltsInOwner.sortedContains(cri)
+          GG.conjugacyClasses[gci].indicesElementsInOwner.sortedContains(cri)
         ) {
           gcc = gci;
           break;

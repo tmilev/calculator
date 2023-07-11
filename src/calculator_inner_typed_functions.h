@@ -87,7 +87,7 @@ public:
   static bool addWeightToWeight(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool multiplyEltHypOctByEltHypOct(
+  static bool multiplyElementHypOctByElementHypOct(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction(
@@ -111,7 +111,7 @@ public:
   static bool multiplyLittlemannRootOperatorByLakshmibaiSeshadriPath(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool multiplyEltZmodPorRatByEltZmodPorRat(
+  static bool multiplyElementZmodPorRationalByElementZmodPorRational(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool multiplyAnyScalarByMatrix(
@@ -171,7 +171,7 @@ public:
   static bool multiplyDoubleOrRationalByDoubleOrRational(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool multiplyCoxeterEltByCoxeterElt(
+  static bool multiplyCoxeterElementByCoxeterElement(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool powerWeylGroupElementByInteger(
@@ -198,7 +198,7 @@ public:
   static bool multiplyRationalOrPolynomialByWeightPolynomial(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool multiplyWeylGroupEltByWeightPoly(
+  static bool multiplyWeylGroupElementByWeightPolynomial(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool lieBracketOfMatrices(
@@ -238,7 +238,7 @@ public:
   divideRationalFractionOrPolynomialOrRationalByRationalFractionOrPolynomial(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool divideEltZmodPorRatByEltZmodPorRat(
+  static bool divideElementZmodPorRationalByElementZmodPorRational(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool powerMatrixBuiltInBySmallInteger(

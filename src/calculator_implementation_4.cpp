@@ -719,25 +719,25 @@ bool CalculatorBasics::timesToFunctionApplication(
   if (input.size() < 2) {
     return false;
   }
-  const Expression& firstElt = input[1];
-  if (!firstElt.isBuiltInAtom()) {
-    if (!firstElt.startsWith(calculator.opPower(), 3)) {
+  const Expression& firstElement = input[1];
+  if (!firstElement.isBuiltInAtom()) {
+    if (!firstElement.startsWith(calculator.opPower(), 3)) {
       return false;
     }
-    if (!firstElt[1].isAtomWhoseExponentsAreInterpretedAsFunction()) {
+    if (!firstElement[1].isAtomWhoseExponentsAreInterpretedAsFunction()) {
       return false;
     }
   }
-  if (firstElt.isAtomNotInterpretedAsFunction()) {
+  if (firstElement.isAtomNotInterpretedAsFunction()) {
     return false;
   }
-  const Expression& secondElt = input[2];
+  const Expression& secondElement = input[2];
   if (
-    secondElt.isSequenceNElements() ||
-    secondElt.startsWith(calculator.opIntervalOpen())
+    secondElement.isSequenceNElements() ||
+    secondElement.startsWith(calculator.opIntervalOpen())
   ) {
-    output = secondElt;
-    return output.setChild(0, firstElt);
+    output = secondElement;
+    return output.setChild(0, firstElement);
   }
   calculator.checkInputNotSameAsOutput(input, output);
   output.reset(calculator);
@@ -2315,11 +2315,11 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
   bool isBad = ((*this->currentSyntacticStack).size >
     this->numberOfEmptyTokensStart + 1
   );
-  SyntacticElement& lastSyntacticElt =
+  SyntacticElement& lastSyntacticElement =
   *(*this->currentSyntacticStack).lastObject();
   if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1
   ) {
-    if (lastSyntacticElt.controlIndex != this->conExpression()) {
+    if (lastSyntacticElement.controlIndex != this->conExpression()) {
       isBad = true;
     }
   }
@@ -2337,9 +2337,9 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
       *this->currentSyntacticStack
     ).size; i ++
   ) {
-    SyntacticElement& currentElt = (*this->currentSyntacticStack)[i];
+    SyntacticElement& currentElement = (*this->currentSyntacticStack)[i];
     if (ignoreCommandEnclosures) {
-      if (currentElt.isCommandEnclosure()) {
+      if (currentElement.isCommandEnclosure()) {
         continue;
       }
     }
@@ -2347,7 +2347,7 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
     << "<td style='vertical-align:top;background-color:"
     << ((counter % 2 == 0) ? "#FAFAFA" : "#F0F0F0")
     << "'>"
-    << currentElt.toStringHumanReadable(*this, includeLispifiedExpressions)
+    << currentElement.toStringHumanReadable(*this, includeLispifiedExpressions)
     << "</td>";
     counter ++;
   }

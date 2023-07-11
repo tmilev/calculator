@@ -183,25 +183,25 @@ void QuasiDifferentialOperator<Coefficient>::operator*=(
   const QuasiDifferentialOperator<Coefficient>& standsOnTheRight
 ) {
   QuasiDifferentialOperator<Coefficient> output;
-  ElementWeylAlgebra<Rational> leftElt, rightElt;
+  ElementWeylAlgebra<Rational> leftElement, rightElement;
   QuasiDifferentialMononomial outputMon;
   output.makeZero();
   for (int j = 0; j < standsOnTheRight.size(); j ++) {
-    rightElt.makeZero();
-    rightElt.addMonomial(
+    rightElement.makeZero();
+    rightElement.addMonomial(
       standsOnTheRight[j].weylMonomial,
       standsOnTheRight.coefficients[j]
     );
     for (int i = 0; i < this->size(); i ++) {
-      leftElt.makeZero();
-      leftElt.addMonomial((*this)[i].weylMonomial, this->coefficients[i]
+      leftElement.makeZero();
+      leftElement.addMonomial((*this)[i].weylMonomial, this->coefficients[i]
       );
       outputMon.matrixMonomial = (*this)[i].matrixMon;
       outputMon.matrixMonomial *= standsOnTheRight[j].matrixMon;
-      leftElt *= rightElt;
-      for (int k = 0; k < leftElt.size(); k ++) {
-        outputMon.weylMonomial = leftElt[k];
-        output.addMonomial(outputMon, leftElt.coefficients[k]);
+      leftElement *= rightElement;
+      for (int k = 0; k < leftElement.size(); k ++) {
+        outputMon.weylMonomial = leftElement[k];
+        output.addMonomial(outputMon, leftElement.coefficients[k]);
       }
     }
   }

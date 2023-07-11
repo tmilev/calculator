@@ -69,7 +69,7 @@ public:
   bool checkNoErrors(std::stringstream* commentsOnFailure);
   bool checkProblemsOpen(std::stringstream* commentsOnFailure);
   bool checkTopicPdfs(std::stringstream* commentsOnFailure);
-  void addTopic(TopicElement& inputElt, int index);
+  void addTopic(TopicElement& inputElement, int index);
   std::string toString() const;
   void initializeElementTypes();
   TopicLine extractLine(const std::string& inputNonTrimmed);
@@ -362,7 +362,7 @@ public:
       const SyntacticElementHTML& left, const SyntacticElementHTML& right
     );
     bool setTagClassFromOpenTag(SyntacticElementHTML& output);
-    bool isStateModifierApplyIfYes(SyntacticElementHTML& inputElt);
+    bool isStateModifierApplyIfYes(SyntacticElementHTML& inputElement);
   };
 
   Parser parser;

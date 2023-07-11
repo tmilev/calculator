@@ -58,9 +58,9 @@ ElementWeylGroup WeylGroupData::simpleConjugation(
   int i, const ElementWeylGroup& vv
 ) {
   (void) vv;
-  ElementWeylGroup eltSimpleReflection;
-  eltSimpleReflection.makeSimpleReflection(i, *this);
-  return eltSimpleReflection * this->group.elements[i] * eltSimpleReflection;
+  ElementWeylGroup elementSimpleReflection;
+  elementSimpleReflection.makeSimpleReflection(i, *this);
+  return elementSimpleReflection * this->group.elements[i] * elementSimpleReflection;
 }
 
 template <typename elementSomeGroup>
@@ -1593,7 +1593,7 @@ Matrix<Rational> CharacterFunctions::getClassMatrix(
     } else {
       for (ci = 0; ci < group.conjugacyClassCount(); ci ++) {
         if (
-          group.conjugacyClasses[ci].indicesEltsInOwner.sortedContains(yi)
+          group.conjugacyClasses[ci].indicesElementsInOwner.sortedContains(yi)
         ) {
           M.elements[t][ci] += 1;
           break;

@@ -734,15 +734,15 @@ void RootSubalgebra::computeHighestVectorsHighestWeights() {
   this->highestWeightsPrimalSimple.setSize(0);
   this->highestVectors.setSize(0);
   this->highestWeightsNonPrimalFundamental.setSize(0);
-  ElementSemisimpleLieAlgebra<Rational> currentElt;
+  ElementSemisimpleLieAlgebra<Rational> currentElement;
   List<Vector<Rational> >& ambientRootSystem =
   this->getAmbientWeyl().rootSystem;
   for (int i = 0; i < ambientRootSystem.size; i ++) {
     if (this->isSubalgebraBorelHighest(ambientRootSystem[i])) {
-      currentElt.makeGGenerator(
+      currentElement.makeGGenerator(
         ambientRootSystem[i], this->getOwnerLieAlgebra()
       );
-      this->highestVectors.addOnTop(currentElt);
+      this->highestVectors.addOnTop(currentElement);
       this->highestWeightsPrimalSimple.addOnTop(ambientRootSystem[i]);
       this->highestWeightsNonPrimalFundamental.addOnTop(
         this->getFundamentalCoordinatessOverSubalgebraSemisimplePart(
@@ -758,12 +758,12 @@ void RootSubalgebra::computeHighestVectorsHighestWeights() {
   Vector<Rational> zeroRoot;
   zeroRoot.makeZero(this->simpleRootsReductiveSubalgebra.size);
   for (int i = 0; i < cartanCentralizer.size; i ++) {
-    currentElt.makeCartanGenerator(
+    currentElement.makeCartanGenerator(
       cartanCentralizer[i], this->getOwnerLieAlgebra()
     );
-    this->highestVectors.addOnTop(currentElt);
+    this->highestVectors.addOnTop(currentElement);
     this->highestWeightsPrimalSimple.addOnTop(
-      currentElt.getRootIMustBeWeight()
+      currentElement.getRootIMustBeWeight()
     );
     this->highestWeightsNonPrimalFundamental.addOnTop(zeroRoot);
   }
@@ -3673,7 +3673,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   rootsScalarProduct2HnonRaised.reserve(
     this->positiveRootsReductiveSubalgebra.size
   );
-  ElementWeylGroup raisingElt;
+  ElementWeylGroup raisingElement;
   selectionRootsWithZeroCharacteristic.initialize(relativeDimension);
   Matrix<Rational> invertedRelativeKillingForm;
   invertedRelativeKillingForm.initialize(relativeDimension, relativeDimension);
@@ -3783,16 +3783,16 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       }
     }
     this->getAmbientWeyl().raiseToDominantWeight(
-      characteristicH, nullptr, nullptr, &raisingElt
+      characteristicH, nullptr, nullptr, &raisingElement
     );
     reflectedSimpleBasisK = this->simpleRootsReductiveSubalgebra;
     for (int k = 0; k < reflectedSimpleBasisK.size; k ++) {
-      this->getAmbientWeyl().actOn(raisingElt, reflectedSimpleBasisK[k]);
+      this->getAmbientWeyl().actOn(raisingElement, reflectedSimpleBasisK[k]);
     }
     sl2.rootsWithScalar2WithH = rootsScalarProduct2HnonRaised;
     for (int k = 0; k < sl2.rootsWithScalar2WithH.size; k ++) {
       this->getAmbientWeyl().actOn(
-        raisingElt, sl2.rootsWithScalar2WithH[k]
+        raisingElement, sl2.rootsWithScalar2WithH[k]
       );
     }
     for (int i = 0; i < sl2.rootsWithScalar2WithH.size; i ++) {
@@ -3808,7 +3808,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         << " simplebasisK: "
         << this->simpleRootsReductiveSubalgebra.toString()
         << "raised by: "
-        << raisingElt.toString()
+        << raisingElement.toString()
         << " to get: "
         << reflectedSimpleBasisK.toString()
         << " theSl2.RootsWithScalar2WithH: "

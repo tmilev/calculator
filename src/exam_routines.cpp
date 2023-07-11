@@ -685,13 +685,13 @@ void CalculatorHTML::loadCurrentProblemItem(
 }
 
 bool CalculatorHTML::Parser::isStateModifierApplyIfYes(
-  SyntacticElementHTML& inputElt
+  SyntacticElementHTML& inputElement
 ) {
   STACK_TRACE("CalculatorHTML::Parser::isStateModifierApplyIfYes");
-  if (inputElt.syntacticRole != "command") {
+  if (inputElement.syntacticRole != "command") {
     return false;
   }
-  std::string tagClass = inputElt.getTagClass();
+  std::string tagClass = inputElement.getTagClass();
   return false;
 }
 
@@ -2204,14 +2204,14 @@ std::string CalculatorHTML::toStringInterprettedCommands(
   std::stringstream out;
   out << "<table>";
   int commandCounter = calculator.programExpression.size() - 1;
-  for (int eltCounter = elements.size - 1; eltCounter > 0; eltCounter --) {
-    SyntacticElementHTML& currentElt = elements[eltCounter];
-    std::string currentEltString =
-    currentElt.getTagClass() + "[" + currentElt.content.substr(0, 10) + "...]";
-    if (!currentElt.isInterpretedByCalculatorOnGeneration()) {
+  for (int elementCounter = elements.size - 1; elementCounter > 0; elementCounter --) {
+    SyntacticElementHTML& currentElement = elements[elementCounter];
+    std::string currentElementString =
+    currentElement.getTagClass() + "[" + currentElement.content.substr(0, 10) + "...]";
+    if (!currentElement.isInterpretedByCalculatorOnGeneration()) {
       out
       << "<tr><td>"
-      << currentEltString
+      << currentElementString
       << "</td>"
       << "<td>"
       << calculator.programExpression[commandCounter].toString()
@@ -2224,7 +2224,7 @@ std::string CalculatorHTML::toStringInterprettedCommands(
       calculator.programExpression[commandCounter].toString();
       out
       << "<tr><td>"
-      << currentEltString
+      << currentElementString
       << "</td><td>"
       << currentString
       << "</td></tr>";
@@ -2471,7 +2471,7 @@ std::string CalculatorHTML::Parser::toStringParsingStack(
   STACK_TRACE("CalculatorHTML::Parser::toStringParsingStack");
   std::stringstream out;
   out
-  << "#Non-dummy elts: "
+  << "#Non-dummy elements: "
   << stack.size - SyntacticElementHTML::parsingDummyElements
   << ". ";
   for (
@@ -4322,19 +4322,19 @@ TopicElementParser::TopicElementParser() {
   this->maximumTopics = 10000;
 }
 
-void TopicElementParser::addTopic(TopicElement& inputElt, int index) {
+void TopicElementParser::addTopic(TopicElement& inputElement, int index) {
   STACK_TRACE("TopicElementParser::addTopic");
-  if (this->topics.contains(inputElt.id)) {
+  if (this->topics.contains(inputElement.id)) {
     std::stringstream out;
     out
     << index
     << ". [Error] Element id: "
-    << inputElt.id
+    << inputElement.id
     << " already present. ";
-    inputElt.id = out.str();
-    inputElt.title = out.str();
+    inputElement.id = out.str();
+    inputElement.title = out.str();
   }
-  this->topics.setKeyValue(inputElt.id, inputElt);
+  this->topics.setKeyValue(inputElement.id, inputElement);
 }
 
 void TopicElement::makeError(const std::string& message) {
@@ -4950,35 +4950,35 @@ void TopicElementParser::computeTopicHierarchyPartOne() {
 void TopicElementParser::computeTopicHierarchyPartTwo() {
   STACK_TRACE("TopicElementParser::computeTopicHierarchyPartTwo");
   for (int i = this->topics.size() - 1; i >= 0; i --) {
-    TopicElement& currentElt = this->topics.values[i];
-    if (currentElt.problemFileName != "") {
+    TopicElement& currentElement = this->topics.values[i];
+    if (currentElement.problemFileName != "") {
       continue;
     }
-    if (currentElt.type == TopicElement::types::topic) {
-      currentElt.totalSubSectionsUnderME = 0;
-      currentElt.totalSubSectionsUnderMeIncludingEmptySubsections = 0;
-      currentElt.flagContainsProblemsNotInSubsection = false;
+    if (currentElement.type == TopicElement::types::topic) {
+      currentElement.totalSubSectionsUnderME = 0;
+      currentElement.totalSubSectionsUnderMeIncludingEmptySubsections = 0;
+      currentElement.flagContainsProblemsNotInSubsection = false;
       continue;
     }
-    currentElt.flagContainsProblemsNotInSubsection = false;
-    currentElt.totalSubSectionsUnderME = 0;
-    for (int j = 0; j < currentElt.immediateChildren.size; j ++) {
+    currentElement.flagContainsProblemsNotInSubsection = false;
+    currentElement.totalSubSectionsUnderME = 0;
+    for (int j = 0; j < currentElement.immediateChildren.size; j ++) {
       TopicElement& currentChild =
-      this->topics.values[currentElt.immediateChildren[j]];
+      this->topics.values[currentElement.immediateChildren[j]];
       if (currentChild.type == TopicElement::types::topic) {
-        currentElt.totalSubSectionsUnderME ++;
-        currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
+        currentElement.totalSubSectionsUnderME ++;
+        currentElement.totalSubSectionsUnderMeIncludingEmptySubsections ++;
       } else if (currentChild.problemFileName != "") {
-        currentElt.flagContainsProblemsNotInSubsection = true;
+        currentElement.flagContainsProblemsNotInSubsection = true;
       } else {
-        currentElt.totalSubSectionsUnderME +=
+        currentElement.totalSubSectionsUnderME +=
         currentChild.totalSubSectionsUnderME;
-        currentElt.totalSubSectionsUnderMeIncludingEmptySubsections +=
+        currentElement.totalSubSectionsUnderMeIncludingEmptySubsections +=
         currentChild.totalSubSectionsUnderMeIncludingEmptySubsections;
       }
     }
-    if (currentElt.flagContainsProblemsNotInSubsection) {
-      currentElt.totalSubSectionsUnderMeIncludingEmptySubsections ++;
+    if (currentElement.flagContainsProblemsNotInSubsection) {
+      currentElement.totalSubSectionsUnderMeIncludingEmptySubsections ++;
     }
   }
   this->checkConsistencyParsed();

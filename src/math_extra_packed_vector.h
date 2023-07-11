@@ -268,17 +268,17 @@ void AnotherWeylGroup<scalar, templateVector>::computeRho() {
       continue;
     }
     this->rootSystem.addOnTop(vi);
-    List<int> newelts;
+    List<int> newElements;
     templateVector w;
-    newelts.addOnTop(this->rootSystem.getIndex(vi));
-    while (newelts.size > 0) {
-      int i = newelts.popLastObject();
+    newElements.addOnTop(this->rootSystem.getIndex(vi));
+    while (newElements.size > 0) {
+      int i = newElements.popLastObject();
       for (int si = 0; si < this->rank; si ++) {
         this->simpleReflection(si, this->rootSystem[i], w);
         if (this->rootSystem.getIndex(w) == - 1) {
           this->rootSystem.addOnTop(w);
           int j = this->rootSystem.getIndex(w);
-          newelts.addOnTop(j);
+          newElements.addOnTop(j);
         }
       }
     }
@@ -314,17 +314,17 @@ void AnotherWeylGroup<scalar, templateVector>::computeAllElements() {
   }
   global.comments << "(twiceRho is " << this->twiceRho << ")" << "\n";
   templateVector w;
-  List<int> newelts;
+  List<int> newElements;
   this->rhoOrbit.addOnTop(twiceRho);
-  newelts.addOnTop(this->rhoOrbit.getIndex(twiceRho));
-  while (newelts.size > 0) {
-    int i = newelts.popLastObject();
+  newElements.addOnTop(this->rhoOrbit.getIndex(twiceRho));
+  while (newElements.size > 0) {
+    int i = newElements.popLastObject();
     for (int si = 0; si < this->rank; si ++) {
       this->simpleReflection(si, this->rhoOrbit[i], w);
       if (this->rhoOrbit.getIndex(w) == - 1) {
         this->rhoOrbit.addOnTop(w);
         int j = this->rhoOrbit.getIndex(w);
-        newelts.addOnTop(j);
+        newElements.addOnTop(j);
       }
     }
   }

@@ -4564,17 +4564,17 @@ bool Expression::makeMatrix(
   STACK_TRACE("Expression::makeMatrix");
   Matrix<Expression> matrixExpressions;
   matrixExpressions.initialize(input.numberOfRows, input.numberOfColumns);
-  Expression currentElt;
+  Expression currentElement;
   for (int i = 0; i < input.numberOfRows; i ++) {
     for (int j = 0; j < input.numberOfColumns; j ++) {
       if (inputContext == nullptr) {
-        currentElt.assignValue(owner, input(i, j));
+        currentElement.assignValue(owner, input(i, j));
       } else {
-        currentElt.assignValueWithContext(
+        currentElement.assignValueWithContext(
           owner, input(i, j), *inputContext
         );
       }
-      matrixExpressions(i, j) = currentElt;
+      matrixExpressions(i, j) = currentElement;
     }
   }
   return

@@ -1495,8 +1495,8 @@ bool LaTeXCrawler::buildTopicList(
   processedCount = 0;
   this->addSlidesOnTop(topicParser.slidesSourcesHeaders);
   for (int i = 0; i < topicParser.topics.topics.size(); i ++) {
-    TopicElement& currentElt = topicParser.topics.topics.values[i];
-    if (currentElt.sourceSlides.size == 0) {
+    TopicElement& currentElement = topicParser.topics.topics.values[i];
+    if (currentElement.sourceSlides.size == 0) {
       continue;
     }
     std::stringstream reportStream;
@@ -1514,8 +1514,8 @@ bool LaTeXCrawler::buildTopicList(
     this->slideFileNamesVirtualWithPath.setSize(
       topicParser.slidesSourcesHeaders.size
     );
-    this->addSlidesOnTop(currentElt.sourceSlides);
-    this->desiredPresentationTitle = currentElt.title;
+    this->addSlidesOnTop(currentElement.sourceSlides);
+    this->desiredPresentationTitle = currentElement.title;
     this->flagForceSlideRebuild = true;
     this->flagProjectorMode = false;
     this->flagAddSlideToSVN = false;

@@ -354,9 +354,9 @@ void MonomialUniversalEnveloping<Coefficient>::commuteAnBtoBAnPlusLowerOrder(
   }
   MonomialUniversalEnveloping<Coefficient> startMon;
   startMon = monomial;
-  ElementSemisimpleLieAlgebra<Rational> adAToTheIthOfB, aElt;
+  ElementSemisimpleLieAlgebra<Rational> adAToTheIthOfB, aElement;
   adAToTheIthOfB.makeGenerator(rightGeneratorIndeX, *this->owner);
-  aElt.makeGenerator(leftGeneratorIndeX, *this->owner);
+  aElement.makeGenerator(leftGeneratorIndeX, *this->owner);
   // Formula realized:
   // a^n b =\sum_{i = 0}^\infty \binom{n}{i} (\ad a)^i (b)a^{n-i}
   // Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand
@@ -387,7 +387,7 @@ void MonomialUniversalEnveloping<Coefficient>::commuteAnBtoBAnPlusLowerOrder(
     acquiredCoefficienT *= leftPower;
     acquiredCoefficienT /= powerDroP;
     leftPower -= 1;
-    this->getOwner().lieBracket(aElt, adAToTheIthOfB, adAToTheIthOfB);
+    this->getOwner().lieBracket(aElement, adAToTheIthOfB, adAToTheIthOfB);
   } while (
     !adAToTheIthOfB.isEqualToZero() && !acquiredCoefficienT.isEqualToZero()
   );
@@ -430,9 +430,9 @@ void MonomialUniversalEnveloping<Coefficient>::commuteABntoBnAPlusLowerOrder(
   );
   MonomialUniversalEnveloping<Coefficient> startMon;
   startMon = monomial;
-  ElementSemisimpleLieAlgebra<Rational> adResult, element, rightGeneratorElt;
+  ElementSemisimpleLieAlgebra<Rational> adResult, element, rightGeneratorElement;
   adResult.makeGenerator(leftGeneratorIndex, *this->owner);
-  rightGeneratorElt.makeGenerator(rightGeneratorIndex, *this->owner);
+  rightGeneratorElement.makeGenerator(rightGeneratorIndex, *this->owner);
   // Formula realized:
   // a b^n  &= &\sum_{i = 0}^\infty b^{n-i}(-\ad b)^i (a) \binom{n}{i} .
   // Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand
@@ -458,7 +458,7 @@ void MonomialUniversalEnveloping<Coefficient>::commuteABntoBnAPlusLowerOrder(
     }
     acquiredCoefficient *= rightPower;
     rightPower -= 1;
-    this->getOwner().lieBracket(adResult, rightGeneratorElt, element);
+    this->getOwner().lieBracket(adResult, rightGeneratorElement, element);
     adResult = element;
     powerDrop ++;
     acquiredCoefficient /= powerDrop;
@@ -605,7 +605,7 @@ highestWeightTransposeAntiAutomorphismBilinearForm(
   accumulator,
   intermediate,
   element,
-  startingElt;
+  startingElement;
   List<int> oldOrder = this->getOwner().universalEnvelopingGeneratorOrder;
   int numberOfPositiveRoots = this->getOwner().getNumberOfPositiveRoots();
   for (int i = 0; i < numberOfPositiveRoots; i ++) {
@@ -616,7 +616,7 @@ highestWeightTransposeAntiAutomorphismBilinearForm(
   constMon.makeOne(this->getOwner());
   if (logStream != nullptr) {
     *logStream
-    << "left eltement transposed: "
+    << "left element transposed: "
     << taLeft.toString(&global.defaultFormat.getElement())
     << "<br>";
     *logStream
@@ -624,24 +624,24 @@ highestWeightTransposeAntiAutomorphismBilinearForm(
     << right.toString(&global.defaultFormat.getElement())
     << "<br>";
   }
-  startingElt = right;
-  startingElt.simplify(ringUnit);
+  startingElement = right;
+  startingElement.simplify(ringUnit);
   if (logStream != nullptr) {
     *logStream
     << "right element after simplification: "
-    << startingElt.toString(&global.defaultFormat.getElement())
+    << startingElement.toString(&global.defaultFormat.getElement())
     << "<br>";
   }
-  startingElt.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit);
+  startingElement.modOutVermaRelations(substitutionHiGoesToIthElement, ringUnit);
   if (logStream != nullptr) {
     *logStream
     << "right element after Verma rels: "
-    << startingElt.toString(&global.defaultFormat.getElement())
+    << startingElement.toString(&global.defaultFormat.getElement())
     << "<br>";
   }
   Coefficient leftMonCoeff;
   for (int j = 0; j < taLeft.size(); j ++) {
-    intermediate = startingElt;
+    intermediate = startingElement;
     const MonomialUniversalEnveloping<Coefficient>& leftMon = taLeft[j];
     leftMonCoeff = taLeft.coefficients[j];
     int power;
@@ -1478,14 +1478,14 @@ std::string ElementVermaModuleOrdered<Coefficient>::toString(
 
 template <class Coefficient>
 void ElementVermaModuleOrdered<Coefficient>::actOnMe(
-  const ElementSemisimpleLieAlgebra<Rational>& actingElt,
+  const ElementSemisimpleLieAlgebra<Rational>& actingElement,
   ElementVermaModuleOrdered<Coefficient>& output,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) const {
   ElementUniversalEnvelopingOrdered<Coefficient> element;
   element.assignElementLieAlgebra(
-    actingElt, ringUnit, ringZero, *this->elementInternal.owner
+    actingElement, ringUnit, ringZero, *this->elementInternal.owner
   );
   element.lieBracketOnTheRight(
     this->elementInternal, output.elementInternal
@@ -1950,7 +1950,7 @@ commuteConsecutiveIndicesRightIndexAroundLeft(
   ElementSemisimpleLieAlgebra<Rational> adResulT, element, leftElement;
   this->owner->assignGeneratorCoefficientOne(rightGeneratorIndeX, adResulT);
   this->owner->assignGeneratorCoefficientOne(leftGeneratorIndeX, leftElement);
-  // tempLefttElt.ComputeDebugString(*this->owner, false, false);
+  // tempLefttElement.ComputeDebugString(*this->owner, false, false);
   Vector<Rational> coefficients;
   do {
     this->owner->getLinearCombinationFrom(adResulT, coefficients);
@@ -2048,12 +2048,12 @@ commuteConsecutiveIndicesLeftIndexAroundRight(
   );
   MonomialUniversalEnvelopingOrdered startMon, tempMon2;
   startMon = tempMon;
-  ElementSemisimpleLieAlgebra<Rational> adResult, element, tempRightElt;
+  ElementSemisimpleLieAlgebra<Rational> adResult, element, temprightElement;
   this->owner->assignGeneratorCoefficientOne(leftGeneratorIndex, adResult);
   this->owner->assignGeneratorCoefficientOne(
-    rightGeneratorIndex, tempRightElt
+    rightGeneratorIndex, temprightElement
   );
-  //  tempRightElt.ComputeDebugString(*this->owner, false, false);
+  //  temprightElement.ComputeDebugString(*this->owner, false, false);
   Vector<Rational> coefficients;
   do {
     this->owner->getLinearCombinationFrom(adResult, coefficients);
@@ -2080,7 +2080,7 @@ commuteConsecutiveIndicesLeftIndexAroundRight(
     acquiredCoefficient *= rightPower;
     rightPower -= 1;
     this->owner->ownerSemisimpleLieAlgebra->lieBracket(
-      adResult, tempRightElt, element
+      adResult, temprightElement, element
     );
     adResult = element;
     powerDrop ++;

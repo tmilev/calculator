@@ -7888,11 +7888,11 @@ void WeylGroupData::getSignRepresentation(
   this->group.checkInitializationConjugacyClasses();
   output.initialize(this->group);
   output.basis.makeEiBasis(1);
-  ElementWeylGroup currentElt;
+  ElementWeylGroup currentElement;
   for (int i = 0; i < this->getDimension(); i ++) {
-    currentElt.makeSimpleReflection(i, *this);
+    currentElement.makeSimpleReflection(i, *this);
     output.generators[i].makeIdentityMatrix(1);
-    output.generators[i] *= currentElt.sign();
+    output.generators[i] *= currentElement.sign();
   }
   output.getCharacter();
 }
@@ -8077,12 +8077,12 @@ bool WeylGroupData::operator==(const WeylGroupData& other) const {
 void WeylGroupData::actOnRootByGroupElement(
   int index, Vector<Rational>& root, bool rhoAction, bool useMinusRho
 ) {
-  const ElementWeylGroup& currentElt = this->group.elements[index];
+  const ElementWeylGroup& currentElement = this->group.elements[index];
   for (
-    int i = currentElt.generatorsLastAppliedFirst.size - 1; i >= 0; i --
+    int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
   ) {
     this->reflectSimple(
-      currentElt.generatorsLastAppliedFirst[i].index,
+      currentElement.generatorsLastAppliedFirst[i].index,
       root,
       rhoAction,
       useMinusRho
@@ -8723,7 +8723,7 @@ void WeylGroupData::getExtremeElementInOrbit(
     *stabilizerFound = false;
   }
   Rational scalarProduct;
-  ElementWeylGroup eltSimplReflection;
+  ElementWeylGroup elementSimplReflection;
   for (bool found = true; found;) {
     found = false;
     for (int i = 0; i < this->getDimension(); i ++) {
@@ -8750,8 +8750,8 @@ void WeylGroupData::getExtremeElementInOrbit(
           this->reflectMinusRhoSimple(i, inputOutput);
         }
         if (outputWeylElement != nullptr) {
-          eltSimplReflection.makeSimpleReflection(i, *this);
-          *outputWeylElement = eltSimplReflection *(*outputWeylElement);
+          elementSimplReflection.makeSimpleReflection(i, *this);
+          *outputWeylElement = elementSimplReflection *(*outputWeylElement);
         }
         if (sign != nullptr) {
           *sign *= - 1;
@@ -8833,13 +8833,13 @@ void WeylGroupData::getCoxeterPlane(
   }
   ElementWeylGroup element;
   this->getCoxeterElement(element);
-  Matrix<Rational> matCoxeterElt, matrix;
-  this->getMatrixStandardRepresentation(element, matCoxeterElt);
-  matrix = matCoxeterElt;
+  Matrix<Rational> matrixCoxeterElement, matrix;
+  this->getMatrixStandardRepresentation(element, matrixCoxeterElement);
+  matrix = matrixCoxeterElement;
   int coxeterNumber =
   this->rootSystem.lastObject()->sumCoordinates().numeratorShort + 1;
   for (int i = 0; i < coxeterNumber - 1; i ++) {
-    matrix.multiplyOnTheLeft(matCoxeterElt);
+    matrix.multiplyOnTheLeft(matrixCoxeterElement);
   }
   Complex<double> eigenValue;
   eigenValue.realPart =
@@ -8848,11 +8848,11 @@ void WeylGroupData::getCoxeterPlane(
   FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
   Matrix<Complex<double> > eigenMat;
   eigenMat.initialize(
-    matCoxeterElt.numberOfRows, matCoxeterElt.numberOfColumns
+    matrixCoxeterElement.numberOfRows, matrixCoxeterElement.numberOfColumns
   );
   for (int i = 0; i < eigenMat.numberOfRows; i ++) {
     for (int j = 0; j < eigenMat.numberOfColumns; j ++) {
-      eigenMat.elements[i][j] = matCoxeterElt.elements[i][j].getDoubleValue();
+      eigenMat.elements[i][j] = matrixCoxeterElement.elements[i][j].getDoubleValue();
       if (i == j) {
         eigenMat.elements[i][i] -= eigenValue;
       }
@@ -9135,11 +9135,11 @@ bool WeylGroupData::isEigenSpaceGeneratorCoxeterElement(
 ) {
   ElementWeylGroup element;
   this->getCoxeterElement(element);
-  Matrix<Rational> matCoxeterElt;
-  this->getMatrixStandardRepresentation(element, matCoxeterElt);
+  Matrix<Rational> matrixCoxeterElement;
+  this->getMatrixStandardRepresentation(element, matrixCoxeterElement);
   Vector<Rational> root = input;
   for (int i = 0; i < this->getDimension(); i ++) {
-    matCoxeterElt.actOnVectorColumn(root);
+    matrixCoxeterElement.actOnVectorColumn(root);
   }
   return root == input;
 }
@@ -9460,9 +9460,9 @@ toString(std::string& output, bool displayElements) {
     for (int i = 0; i < this->allElements.size; i ++) {
       const
       ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-      & currentElt =
+      & currentElement =
       this->allElements[i];
-      body << currentElt.toString(nullptr) << "\\\\";
+      body << currentElement.toString(nullptr) << "\\\\";
     }
     body << "\\end{array}";
     out << HtmlRoutines::getMathNoDisplay(body.str());

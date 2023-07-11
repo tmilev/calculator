@@ -143,7 +143,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       Polynomial<Rational> Pone, Pzero;
       Pone.makeOne();
       Pzero.makeZero();
-      currentModule.getGenericUnMinusElt(
+      currentModule.getGenericUnMinusElement(
         true, genericElement, useNilWeight, ascending
       );
       weylFormat.polynomialAlphabet.setSize(
@@ -687,18 +687,18 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
   );
   for (int k = 0; k < g2B3Data.g2Weights.size; k ++) {
     ElementSumGeneralizedVermas<RationalFraction<Rational> >&
-    currentTensorEltLevi =
+    currentTensorElementLevi =
     g2B3Data.eigenVectorsLevi[k];
     ElementSumGeneralizedVermas<RationalFraction<Rational> >&
-    currentTensorEltEigen =
+    currentTensorElementEigen =
     g2B3Data.eigenVectors[k];
-    ElementUniversalEnveloping<RationalFraction<Rational> >& currentUEelt =
+    ElementUniversalEnveloping<RationalFraction<Rational> >& currentUEElement =
     g2B3Data.elementsUniversalEnveloping[k];
-    currentTensorEltLevi = highestWeightVector;
-    currentTensorEltLevi.multiplyMeByUEEltOnTheLeft(
+    currentTensorElementLevi = highestWeightVector;
+    currentTensorElementLevi.multiplyMeByUEElementOnTheLeft(
       g2B3Data.outputEigenWords[k]
     );
-    currentTensorEltEigen = currentTensorEltLevi;
+    currentTensorElementEigen = currentTensorElementLevi;
     if (g2B3Data.inducing.cardinalitySelection > 0) {
       for (int j = 0; j < g2B3Data.g2Weights.size; j ++) {
         weightDifference = g2B3Data.g2Weights[j] - g2B3Data.g2Weights[k];
@@ -710,7 +710,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
           );
           g2CasimirCopy -= element;
           g2CasimirCopy *= Rational(12);
-          currentTensorEltEigen.multiplyMeByUEEltOnTheLeft(g2CasimirCopy);
+          currentTensorElementEigen.multiplyMeByUEElementOnTheLeft(g2CasimirCopy);
           charDiff = g2B3Data.allCharacters[j];
           charDiff -= *g2B3Data.allCharacters.lastObject();
           g2B3Data.characterDifferences.addOnTopNoRepetition(charDiff);
@@ -718,17 +718,17 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
       }
     }
     RationalFraction<Rational> scale =
-    currentTensorEltEigen.scaleNormalizeLeadingMonomial(nullptr);
+    currentTensorElementEigen.scaleNormalizeLeadingMonomial(nullptr);
     if (!scale.isConstant(&g2B3Data.additionalMultipliers[k])) {
       global.fatal
       << "This is unexpected: the scale is not a constant. "
       << global.fatal;
     }
-    currentTensorEltEigen.extractElementUniversalEnveloping(
-      currentUEelt, *currentModule.owner
+    currentTensorElementEigen.extractElementUniversalEnveloping(
+      currentUEElement, *currentModule.owner
     );
-    currentUEelt.highestWeightTransposeAntiAutomorphismBilinearForm(
-      currentUEelt,
+    currentUEElement.highestWeightTransposeAntiAutomorphismBilinearForm(
+      currentUEElement,
       g2B3Data.shapovalovProducts[k],
       &currentModule.highestWeightDualCoordinatesBaseField,
       one,
@@ -1054,11 +1054,10 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
-  Calculator& calculator,
+bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool AllGenerators,
+  bool allGenerators,
   bool useNilWeight,
   bool ascending
 ) {
@@ -1070,8 +1069,8 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   Expression truncatedInput = input;
   if (truncatedInput.size() > 4) {
-    int numEltsToCut = truncatedInput.size() - 4;
-    for (int i = 0; i < numEltsToCut; i ++) {
+    int numberOfElementsToCut = truncatedInput.size() - 4;
+    for (int i = 0; i < numberOfElementsToCut; i ++) {
       truncatedInput.removeLastChild();
     }
   }
@@ -1115,7 +1114,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
     semisimpleLieAlgebra.context,
     parabolicSelection,
     semisimpleLieAlgebra.content,
-    AllGenerators,
+    allGenerators,
     &letterString,
     &partialString,
     &exponentLetterString,
@@ -2286,7 +2285,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     element.makeHighestWeightVector(generalizedModule, rationalFractionOne);
     element.tensorOnTheRight(element);
     element *= - 1;
-    std::string startingEltString = element.toString(&tempFormat);
+    std::string startingElementString = element.toString(&tempFormat);
     std::stringstream tempStream;
     std::stringstream tempStream2;
     tempStream << "\\begin{array}{l}";
@@ -2322,9 +2321,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
       tempStream << "\\cdot";
       tempStream2 << " $\\cdot$ ";
     }
-    tempStream << "(" << startingEltString << ")";
+    tempStream << "(" << startingElementString << ")";
     tempStream << "\\end{array}";
-    tempStream2 << " $(" << startingEltString << ")$ ";
+    tempStream2 << " $(" << startingElementString << ")$ ";
     RationalFraction<Rational> scale =
     element.scaleNormalizeLeadingMonomial(nullptr);
     Rational scaleRational;
@@ -5598,14 +5597,14 @@ bool CalculatorLieTheory::casimirWithRespectToLevi(
 
 template <class Type>
 bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
-  List<Type>& inputOutputElts,
+  List<Type>& inputOutputElements,
   int upperDimensionBound,
   void(*binaryOperation)(
     const Type& left, const Type& right, Type& output
   )
 ) {
   STACK_TRACE("MathRoutines::generateVectorSpaceClosedWithRespectToOperation");
-  inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
+  inputOutputElements[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElements);
   Type operationResult;
   ProgressReport report1(1);
   ProgressReport report2(20);
@@ -5614,21 +5613,21 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
       "Extending vector space to closed with respect to binary operation. "
     );
   }
-  List<Type> eltementsForGaussianElimination = inputOutputElts;
-  for (int i = 0; i < inputOutputElts.size; i ++) {
-    for (int j = i; j < inputOutputElts.size; j ++) {
+  List<Type> elementsForGaussianElimination = inputOutputElements;
+  for (int i = 0; i < inputOutputElements.size; i ++) {
+    for (int j = i; j < inputOutputElements.size; j ++) {
       binaryOperation(
-        inputOutputElts[i], inputOutputElts[j], operationResult
+        inputOutputElements[i], inputOutputElements[j], operationResult
       );
-      // int oldNumElts = inputOutputElts.size;
-      eltementsForGaussianElimination.addOnTop(operationResult);
-      eltementsForGaussianElimination[0].
-      gaussianEliminationByRowsDeleteZeroRows(eltementsForGaussianElimination);
-      if (eltementsForGaussianElimination.size > inputOutputElts.size) {
-        inputOutputElts.addOnTop(operationResult);
+      // int oldNumberOfElements = inputOutputElements.size;
+      elementsForGaussianElimination.addOnTop(operationResult);
+      elementsForGaussianElimination[0].
+      gaussianEliminationByRowsDeleteZeroRows(elementsForGaussianElimination);
+      if (elementsForGaussianElimination.size > inputOutputElements.size) {
+        inputOutputElements.addOnTop(operationResult);
       }
       if (
-        upperDimensionBound > 0 && inputOutputElts.size > upperDimensionBound
+        upperDimensionBound > 0 && inputOutputElements.size > upperDimensionBound
       ) {
         return false;
       }
@@ -5640,12 +5639,12 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
         << " and "
         << j + 1
         << " out of "
-        << inputOutputElts.size;
+        << inputOutputElements.size;
         report2.report(reportStream.str());
       }
     }
   }
-  inputOutputElts[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
+  inputOutputElements[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElements);
   return true;
 }
 

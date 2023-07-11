@@ -110,10 +110,10 @@ computeAllGeneratorImagesFromSimple() {
   HashedList<ElementWeylGroup> elementsExplored;
   elementsExplored.setExpectedSize(this->ownerGroup->elements.size);
   this->elementImages[0].makeIdentityMatrix(this->getDimension());
-  ElementWeylGroup currentElt;
+  ElementWeylGroup currentElement;
   int rank = this->ownerGroup->getDimension();
-  currentElt.makeIdentity(*this->ownerGroup);
-  elementsExplored.addOnTop(currentElt);
+  currentElement.makeIdentity(*this->ownerGroup);
+  elementsExplored.addOnTop(currentElement);
   List<ElementWeylGroup> generators;
   generators.setSize(rank);
   for (int i = 0; i < rank; i ++) {
@@ -123,14 +123,14 @@ computeAllGeneratorImagesFromSimple() {
     int indexParentElement =
     this->ownerGroup->elements.getIndex(elementsExplored[i]);
     for (int j = 0; j < rank; j ++) {
-      currentElt = generators[j] * elementsExplored[i];
-      if (!elementsExplored.contains(currentElt)) {
-        int indexCurrentElt = this->ownerGroup->elements.getIndex(currentElt);
-        this->elementIsComputed[indexCurrentElt] = true;
+      currentElement = generators[j] * elementsExplored[i];
+      if (!elementsExplored.contains(currentElement)) {
+        int indexCurrentElement = this->ownerGroup->elements.getIndex(currentElement);
+        this->elementIsComputed[indexCurrentElement] = true;
         this->elementImages[indexParentElement].multiplyOnTheLeft(
-          this->generators[j], this->elementImages[indexCurrentElt]
+          this->generators[j], this->elementImages[indexCurrentElement]
         );
-        elementsExplored.addOnTop(currentElt);
+        elementsExplored.addOnTop(currentElement);
       }
     }
   }
@@ -152,23 +152,23 @@ computeAllElementImages() {
   elementsExplored.clear();
   elementsExplored.setExpectedSize(this->ownerGroup->elements.size);
   this->elementImages[0].makeIdentityMatrix(this->getDimension());
-  auto currentElt = this->ownerGroup->generators[0];
-  currentElt.makeIdentity(this->ownerGroup->generators[0]);
+  auto currentElement = this->ownerGroup->generators[0];
+  currentElement.makeIdentity(this->ownerGroup->generators[0]);
   int rank = this->ownerGroup->generators.size;
   auto& generators = this->ownerGroup->generators;
-  elementsExplored.addOnTop(currentElt);
+  elementsExplored.addOnTop(currentElement);
   for (int i = 0; i < elementsExplored.size; i ++) {
     int indexParentElement =
     this->ownerGroup->elements.getIndex(elementsExplored[i]);
     for (int j = 0; j < rank; j ++) {
-      currentElt = generators[j] * elementsExplored[i];
-      if (!elementsExplored.contains(currentElt)) {
-        int indexCurrentElt = this->ownerGroup->elements.getIndex(currentElt);
-        this->elementIsComputed[indexCurrentElt] = true;
+      currentElement = generators[j] * elementsExplored[i];
+      if (!elementsExplored.contains(currentElement)) {
+        int indexCurrentElement = this->ownerGroup->elements.getIndex(currentElement);
+        this->elementIsComputed[indexCurrentElement] = true;
         this->elementImages[indexParentElement].multiplyOnTheLeft(
-          this->generators[j], this->elementImages[indexCurrentElt]
+          this->generators[j], this->elementImages[indexCurrentElement]
         );
-        elementsExplored.addOnTop(currentElt);
+        elementsExplored.addOnTop(currentElement);
       }
     }
   }
@@ -666,12 +666,12 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
   for (int i = 0; i < outputOrbit.size; i ++) {
     format.simpleRootLetter = "\\alpha";
     format.fundamentalWeightLetter = "\\psi";
-    std::string orbitEltString = outputOrbit[i].toString(&format);
+    std::string orbitElementString = outputOrbit[i].toString(&format);
     Vector<Polynomial<Rational> > epsilonVector = outputOrbit[i];
     epsilonCoordinateMatrix.actOnVectorColumn(epsilonVector, zero);
-    std::string orbitEltStringEpsilonCoordinates =
+    std::string orbitElementStringEpsilonCoordinates =
     epsilonVector.toStringLetterFormat("\\varepsilon", &format);
-    std::string weightEltString =
+    std::string weightElementString =
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).
     toStringLetterFormat(format.fundamentalWeightLetter, &format);
     out
@@ -687,29 +687,29 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitOuterSimple(
     << "</td><td>"
     << (
       useMathTag ?
-      HtmlRoutines::getMathNoDisplay(orbitEltString) :
-      orbitEltString
+      HtmlRoutines::getMathNoDisplay(orbitElementString) :
+      orbitElementString
     )
     << "</td><td>"
     << (
       useMathTag ?
-      HtmlRoutines::getMathNoDisplay(orbitEltStringEpsilonCoordinates) :
-      orbitEltStringEpsilonCoordinates
+      HtmlRoutines::getMathNoDisplay(orbitElementStringEpsilonCoordinates) :
+      orbitElementStringEpsilonCoordinates
     )
     << "</td><td>"
     << (
       useMathTag ?
-      HtmlRoutines::getMathNoDisplay(weightEltString) :
-      weightEltString
+      HtmlRoutines::getMathNoDisplay(weightElementString) :
+      weightElementString
     )
     << "</td>";
     latexReport
     << "$"
     << outerAutomophisms.allElements[i].toString(&format)
     << "$ & $"
-    << orbitEltStringEpsilonCoordinates
+    << orbitElementStringEpsilonCoordinates
     << "$ & $"
-    << weightEltString
+    << weightElementString
     << "$ & $"
     << (outputOrbit[0] - outputOrbit[i]).toStringLetterFormat(
       format.simpleRootLetter, &format
@@ -824,7 +824,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     out << "<td>Homomorphism generator candidate</td>";
   }
   out << "</tr>";
-  MonomialUniversalEnveloping<Polynomial<Rational> > standardElt;
+  MonomialUniversalEnveloping<Polynomial<Rational> > standardElement;
   LargeInteger tempInt;
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsilonCoordinatesMatrix;
@@ -842,17 +842,17 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     toStringLetterFormat("\\psi") +
     "$";
   }
-  ElementWeylGroup currentElt;
+  ElementWeylGroup currentElement;
   Vector<Polynomial<Rational> > differenceVector;
   Rational currentCoordDifference;
   for (int i = 0; i < outputOrbit.size; i ++) {
     for (int j = 0; j < weyl.rootsOfBorel.size; j ++) {
       currentWeight = outputOrbit[i];
-      currentElt.makeRootReflection(weyl.rootsOfBorel[j], weyl);
+      currentElement.makeRootReflection(weyl.rootsOfBorel[j], weyl);
       if (useRho) {
         currentWeight += weyl.rho;
       }
-      weyl.actOn(currentElt, currentWeight);
+      weyl.actOn(currentElement, currentWeight);
       if (useRho) {
         currentWeight -= weyl.rho;
       }
@@ -888,7 +888,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     std::string orbitElementString = outputOrbit[i].toString(&format);
     Vector<Polynomial<Rational> > epsilonVector = outputOrbit[i];
     epsilonCoordinatesMatrix.actOnVectorColumn(epsilonVector, zero);
-    std::string orbitEltStringEpsilonCoordinates =
+    std::string orbitElementStringEpsilonCoordinates =
     epsilonVector.toStringLetterFormat("\\varepsilon", &format);
     std::string weightElementString =
     weyl.getFundamentalCoordinatesFromSimple(outputOrbit[i]).
@@ -910,8 +910,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     << "</td><td>"
     << (
       useMathTag ?
-      HtmlRoutines::getMathNoDisplay(orbitEltStringEpsilonCoordinates) :
-      orbitEltStringEpsilonCoordinates
+      HtmlRoutines::getMathNoDisplay(orbitElementStringEpsilonCoordinates) :
+      orbitElementStringEpsilonCoordinates
     )
     << "</td><td>"
     << (
@@ -924,7 +924,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     << "$"
     << orbitGeneratingSet[i].toString(&format)
     << "$ & $"
-    << orbitEltStringEpsilonCoordinates
+    << orbitElementStringEpsilonCoordinates
     << "$ & $"
     << weightElementString
     << "$ & $"
@@ -934,7 +934,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
     << "$\\\\\n<br>";
     if (useRho) {
       currentWeight = highestWeightSimpleCoordinates;
-      standardElt.makeOne(*semisimpleLieAlgebra.content);
+      standardElement.makeOne(*semisimpleLieAlgebra.content);
       bool isGood = true;
       for (
         int j = orbitGeneratingSet[i].generatorsLastAppliedFirst.size - 1; j >=
@@ -953,7 +953,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
             break;
           }
         }
-        standardElt.multiplyByGeneratorPowerOnTheLeft(
+        standardElement.multiplyByGeneratorPowerOnTheLeft(
           semisimpleLieAlgebra.content->getNumberOfPositiveRoots() -
           simpleIndex -
           1,
@@ -963,7 +963,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
       out << "<td>";
       if (isGood) {
         out
-        << HtmlRoutines::getMathNoDisplay(standardElt.toString(&format));
+        << HtmlRoutines::getMathNoDisplay(standardElement.toString(&format));
       } else {
         out << "-";
       }

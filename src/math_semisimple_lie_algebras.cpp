@@ -1172,18 +1172,18 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
             int leftIndex = this->weylGroup.rootSystem.getIndex(left);
             int rightIndex = this->weylGroup.rootSystem.getIndex(right);
             if (!nonExplored.selected[rightIndex]) {
-              ElementSemisimpleLieAlgebra<Rational>& leftDomainElt =
+              ElementSemisimpleLieAlgebra<Rational>& leftDomainElement =
               domain[leftIndex];
-              ElementSemisimpleLieAlgebra<Rational>& rightDomainElt =
+              ElementSemisimpleLieAlgebra<Rational>& rightDomainElement =
               domain[rightIndex];
               this->lieBracket(
-                leftDomainElt, rightDomainElt, domain[index]
+                leftDomainElement, rightDomainElement, domain[index]
               );
-              ElementSemisimpleLieAlgebra<Rational>& leftRangeElt =
+              ElementSemisimpleLieAlgebra<Rational>& leftRangeElement =
               range[leftIndex];
-              ElementSemisimpleLieAlgebra<Rational>& rightRangeElt =
+              ElementSemisimpleLieAlgebra<Rational>& rightRangeElement =
               range[rightIndex];
-              this->lieBracket(leftRangeElt, rightRangeElt, range[index]);
+              this->lieBracket(leftRangeElement, rightRangeElement, range[index]);
               nonExplored.removeSelection(index);
             }
           }
@@ -1550,15 +1550,15 @@ void HomomorphismSemisimpleLieAlgebra::getMapSmallCartanDualToLargeCartanDual(
     this->coDomainAlgebra().getRank(),
     this->domainAlgebra().getRank()
   );
-  ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
+  ElementSemisimpleLieAlgebra<Rational> domainElement, imageElement;
   for (int i = 0; i < this->domainAlgebra().getRank(); i ++) {
-    domainElt.makeCartanGenerator(
+    domainElement.makeCartanGenerator(
       Vector<Rational>::getEi(this->domainAlgebra().getRank(), i),
       this->domainAlgebra()
     );
-    this->applyHomomorphism(domainElt, imageElt);
+    this->applyHomomorphism(domainElement, imageElement);
     output.assignVectorToColumnKeepOtherColsIntactNoInit(
-      i, imageElt.getCartanPart()
+      i, imageElement.getCartanPart()
     );
   }
 }

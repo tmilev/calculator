@@ -19,7 +19,7 @@ public:
     output << generator.toString();
     return output;
   }
-  void multiplyMeByUEEltOnTheLeft(
+  void multiplyMeByUEElementOnTheLeft(
     const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping,
     ElementSumGeneralizedVermas<Coefficient>& output
   ) const;
@@ -100,7 +100,7 @@ class ElementSumGeneralizedVermas: public LinearCombination<
   MonomialGeneralizedVerma<Coefficient>, Coefficient
 > {
 public:
-  void multiplyMeByUEEltOnTheLeft(
+  void multiplyMeByUEElementOnTheLeft(
     const ElementUniversalEnveloping<Coefficient>& elementUniversalEnveloping
   );
   unsigned int hashFunction() const {
@@ -428,7 +428,7 @@ public:
     }
     return *this->owner;
   }
-  void getAdActionHomogenousElt(
+  void getAdActionHomogenousElement(
     ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
     Vector<Rational>& weightUEElementSimpleCoordinates,
     List<List<ElementUniversalEnveloping<Coefficient> > >&
@@ -436,7 +436,7 @@ public:
     const Coefficient& ringUnit,
     const Coefficient& ringZero
   );
-  void getMatrixHomogenousElt(
+  void getMatrixHomogenousElement(
     ElementUniversalEnveloping<Coefficient>& inputHomogeneous,
     List<List<ElementUniversalEnveloping<Coefficient> > >&
     outputSortedByArgumentWeight,
@@ -497,13 +497,13 @@ public:
   );
   bool isNotInLevi(int generatorIndex);
   bool isNotInParabolic(int generatorIndex);
-  void getGenericUnMinusElt(
+  void getGenericUnMinusElement(
     bool shiftPowersByNumberOfVariablesBaseField,
     ElementUniversalEnveloping<Polynomial<Rational> >& output,
     bool useNilWeight,
     bool ascending
   );
-  void getGenericUnMinusElt(
+  void getGenericUnMinusElement(
     bool shiftPowersByNumberOfVariablesBaseField,
     ElementUniversalEnveloping<RationalFraction<Rational> >& output,
     bool useNilWeight,
@@ -512,7 +512,7 @@ public:
   // The input of the following function is supposed to be an honest element of
   // the
   // Universal enveloping,
-  // i.e. inputElt is not allowed to have non-small integer exponents.
+  // i.e. inputElement is not allowed to have non-small integer exponents.
   bool getActionGeneralizedVermaModuleAsDifferentialOperator(
     ElementSemisimpleLieAlgebra<Rational>& inputElement,
     QuasiDifferentialOperator<Rational>& output,

@@ -3123,9 +3123,9 @@ std::string WebAPIResponse::getScoresInCoursePage() {
   << scores.problem.topics.topics.size()
   << ");\n";
   for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
-    TopicElement& currentElt = scores.problem.topics.topics.values[i];
+    TopicElement& currentElement = scores.problem.topics.topics.values[i];
     out << "studentScoresInHomePage[" << i << "] = new Object;\n";
-    if (currentElt.flagSubproblemHasNoWeight) {
+    if (currentElement.flagSubproblemHasNoWeight) {
       out << "studentScoresInHomePage[" << i << "].weightsOK = false;\n";
     } else {
       out << "studentScoresInHomePage[" << i << "].weightsOK = true;\n";
@@ -3175,44 +3175,44 @@ std::string WebAPIResponse::toStringUserScores() {
   << "<table class =\"scoreTable\"><tr><th rowspan =\"3\">User</th>"
   << "<th rowspan =\"3\">Section</th><th rowspan =\"3\"> Total score</th>";
   for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
-    TopicElement& currentElt = scores.problem.topics.topics.values[i];
+    TopicElement& currentElement = scores.problem.topics.topics.values[i];
     if (
-      currentElt.problemFileName != "" ||
-      currentElt.type != TopicElement::types::chapter
+      currentElement.problemFileName != "" ||
+      currentElement.type != TopicElement::types::chapter
     ) {
       continue;
     }
     int numberOfColumns =
-    currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
+    currentElement.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan =\"" << numberOfColumns << "\"";
     if (
-      currentElt.totalSubSectionsUnderME == 0 &&
-      currentElt.flagContainsProblemsNotInSubsection
+      currentElement.totalSubSectionsUnderME == 0 &&
+      currentElement.flagContainsProblemsNotInSubsection
     ) {
       out << " rowspan =\"3\"";
     }
-    out << ">" << currentElt.title << "</td>";
+    out << ">" << currentElement.title << "</td>";
   }
   out << "</tr>\n";
   out << "<tr>";
   for (int i = 0; i < scores.problem.topics.topics.size(); i ++) {
-    TopicElement& currentElt = scores.problem.topics.topics.values[i];
+    TopicElement& currentElement = scores.problem.topics.topics.values[i];
     if (
-      currentElt.problemFileName != "" ||
-      currentElt.type != TopicElement::types::section
+      currentElement.problemFileName != "" ||
+      currentElement.type != TopicElement::types::section
     ) {
       continue;
     }
     int numberOfColumns =
-    currentElt.totalSubSectionsUnderMeIncludingEmptySubsections;
+    currentElement.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan =\"" << numberOfColumns << "\"";
     if (
-      currentElt.totalSubSectionsUnderME == 0 &&
-      currentElt.flagContainsProblemsNotInSubsection
+      currentElement.totalSubSectionsUnderME == 0 &&
+      currentElement.flagContainsProblemsNotInSubsection
     ) {
       out << " rowspan =\"2\"";
     }
-    out << ">" << currentElt.title << "</td>";
+    out << ">" << currentElement.title << "</td>";
   }
   out << "</tr>\n";
   out << "<tr>";

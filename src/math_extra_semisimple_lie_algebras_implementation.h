@@ -406,9 +406,9 @@ void SemisimpleLieAlgebra::getCommonCentralizer(
   commonAdjointOperator.getZeroEigenSpace(outputV);
   outputCentralizingElements.setSize(outputV.size);
   for (int i = 0; i < outputV.size; i ++) {
-    ElementSemisimpleLieAlgebra<Coefficient>& currentElt =
+    ElementSemisimpleLieAlgebra<Coefficient>& currentElement =
     outputCentralizingElements[i];
-    currentElt.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
+    currentElement.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
       outputV[i], *this
     );
   }

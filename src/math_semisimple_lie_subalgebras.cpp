@@ -3964,16 +3964,16 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
   }
   if (this->unknownCartanCentralizerBasis.size > 0) {
     Matrix<Polynomial<AlgebraicNumber> > centralizerCartanVars;
-    Vectors<Polynomial<AlgebraicNumber> > centralizerCartanElts;
-    centralizerCartanElts.setSize(this->unknownCartanCentralizerBasis.size);
+    Vectors<Polynomial<AlgebraicNumber> > centralizerCartanElements;
+    centralizerCartanElements.setSize(this->unknownCartanCentralizerBasis.size);
     for (int i = 0; i < this->unknownCartanCentralizerBasis.size; i ++) {
       this->getGenericCartanCentralizerLinearCombination(
         i, this->unknownCartanCentralizerBasis[i]
       );
-      centralizerCartanElts[i] =
+      centralizerCartanElements[i] =
       this->unknownCartanCentralizerBasis[i].getCartanPart();
     }
-    centralizerCartanElts.getGramMatrix(
+    centralizerCartanElements.getGramMatrix(
       centralizerCartanVars, &this->getAmbientWeyl().cartanSymmetric
     );
     Polynomial<AlgebraicNumber> determinant, determinantMultiplier;
@@ -5389,23 +5389,23 @@ bool NilradicalCandidate::isCommutingSelectionNilradicalElements(
       if (i == j) {
         continue;
       }
-      ElementSemisimpleLieAlgebra<AlgebraicNumber>& rightEltPositive =
+      ElementSemisimpleLieAlgebra<AlgebraicNumber>& rightElementPositive =
       this->nilradical[inputNilradicalSelection.elements[j]];
-      ElementSemisimpleLieAlgebra<AlgebraicNumber>& rightEltNegative =
+      ElementSemisimpleLieAlgebra<AlgebraicNumber>& rightElementNegative =
       this->nilradicalElementOpposites[
         inputNilradicalSelection.elements[j]
       ];
       this->owner->getAmbientSemisimpleLieAlgebra().lieBracket(
-        leftElement, rightEltPositive, mustBeZero
+        leftElement, rightElementPositive, mustBeZero
       );
       if (!mustBeZero.isEqualToZero()) {
         return false;
       }
-      if (rightEltNegative.isEqualToZero()) {
+      if (rightElementNegative.isEqualToZero()) {
         return false;
       }
       this->owner->getAmbientSemisimpleLieAlgebra().lieBracket(
-        leftElement, rightEltNegative, mustBeZero
+        leftElement, rightElementNegative, mustBeZero
       );
       if (!mustBeZero.isEqualToZero()) {
         return false;
@@ -6812,7 +6812,7 @@ bool CandidateSemisimpleSubalgebra::verifySolution(
     currentNegative.substituteInCoefficients(substitution);
     currentPositive.substituteInCoefficients(substitution);
     this->negativeGenerators[i] = currentNegative;
-    // <-implicit type conversion here, will crash if currentNegElt has
+    // <-implicit type conversion here, will crash if currentNegativeElement has
     // non-const coefficients
     this->positiveGenerators[i] = currentPositive;
     // <-implicit type conversion here, will crash if currentNegElt has

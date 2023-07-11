@@ -584,7 +584,7 @@ public:
     const Coefficient& ringUnit
   );
   void actOnMe(
-    const ElementSemisimpleLieAlgebra<Rational>& actingElt,
+    const ElementSemisimpleLieAlgebra<Rational>& actingElement,
     ElementVermaModuleOrdered<Coefficient>& output,
     const Coefficient& ringUnit,
     const Coefficient& ringZero

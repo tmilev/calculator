@@ -13,12 +13,12 @@ std::string FinitelyGeneratedMatrixMonoid<Coefficient>::toString(
   out << "Number of generators: " << this->generators.size;
   out << "<br>Number of elements: " << this->elements.size;
   out << "<br>The elements follow.";
-  int numEltstoDisplay = this->elements.size;
-  if (numEltstoDisplay > 100) {
+  int numberOfElementsToDisplay = this->elements.size;
+  if (numberOfElementsToDisplay > 100) {
     out << "<b>Displaying only the first " << 100 << " elements.</b>";
-    numEltstoDisplay = 100;
+    numberOfElementsToDisplay = 100;
   }
-  for (int i = 0; i < numEltstoDisplay; i ++) {
+  for (int i = 0; i < numberOfElementsToDisplay; i ++) {
     out << "<br>" << this->elements[i].toStringMatrixForm(format);
   }
   return out.str();
@@ -557,14 +557,14 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(
         continue;
       }
       out << " The elements of the class are: ";
-      int numEltsToDisplay = this->conjugacyClasses[i].elements.size;
+      int numberOfElementsToDisplay = this->conjugacyClasses[i].elements.size;
       if (this->conjugacyClasses[i].elements.size > 10) {
         out << " too many, displaying the first 10 elements only: ";
-        numEltsToDisplay = 10;
+        numberOfElementsToDisplay = 10;
       }
-      for (int j = 0; j < numEltsToDisplay; j ++) {
+      for (int j = 0; j < numberOfElementsToDisplay; j ++) {
         out << this->conjugacyClasses[i].elements[j].toString(format);
-        if (j != numEltsToDisplay - 1) {
+        if (j != numberOfElementsToDisplay - 1) {
           out << ", ";
         }
       }
@@ -640,13 +640,13 @@ void FiniteGroup<elementSomeGroup>::computeGeneratorsConjugacyClasses() {
   }
   this->unionGeneratorsCC.clear();
   this->unionGeneratorsCC.addOnTopNoRepetition(this->generators);
-  elementSomeGroup currentElt;
+  elementSomeGroup currentElement;
   for (int i = 0; i < this->unionGeneratorsCC.size; i ++) {
     for (int j = 0; j < this->generators.size; j ++) {
       elementSomeGroup::conjugationAction(
-        this->generators[j], this->unionGeneratorsCC[i], currentElt
+        this->generators[j], this->unionGeneratorsCC[i], currentElement
       );
-      this->unionGeneratorsCC.addOnTopNoRepetition(currentElt);
+      this->unionGeneratorsCC.addOnTopNoRepetition(currentElement);
     }
   }
   this->flagGeneratorsConjugacyClassesComputed = true;
@@ -842,8 +842,8 @@ computeConjugacyClassSizesAndRepresentativesWithOrbitIterator() {
   this->characterPolynomialsConjugacyClassesStandardRepresentation.clear();
   this->conjugacyClasses.setSize(0);
   this->sizePrivate = 0;
-  elementSomeGroup currentElt;
-  currentElt.makeIdentity(this->generators[0]);
+  elementSomeGroup currentElement;
+  currentElement.makeIdentity(this->generators[0]);
   static int recursionCount = 0;
   recursionCount ++;
   if (recursionCount > 100) {
@@ -851,7 +851,7 @@ computeConjugacyClassSizesAndRepresentativesWithOrbitIterator() {
     << "Recursion too deep: something is very wrong. "
     << global.fatal;
   }
-  this->registerConjugacyClass(currentElt, false);
+  this->registerConjugacyClass(currentElement, false);
   this->computeConjugacyClassesRepresentatives();
   recursionCount --;
   this->flagCCRepresentativesComputed = true;
@@ -869,7 +869,7 @@ computeConjugacyClassesFromConjugacyClassIndicesInAllElements(
   this->conjugacyClasses.setSize(ccIndices.size);
   for (int i = 0; i < ccIndices.size; i ++) {
     this->conjugacyClasses[i].size = ccIndices[i].size;
-    this->conjugacyClasses[i].indicesEltsInOwner = ccIndices[i];
+    this->conjugacyClasses[i].indicesElementsInOwner = ccIndices[i];
     this->conjugacyClasses[i].elements.setSize(ccIndices[i].size);
     for (int j = 0; j < ccIndices[i].size; j ++) {
       this->conjugacyClasses[i].elements[j] =
@@ -1006,17 +1006,17 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
     output.addOnTop(weights[i]);
   }
   Vector<Coefficient> currentRoot;
-  ElementWeylGroupAutomorphisms currentElt;
+  ElementWeylGroupAutomorphisms currentElement;
   int numberOfElementsToReserve =
   MathRoutines::minimum(upperLimitNumberOfElements, 1000000);
   output.setExpectedSize(numberOfElementsToReserve);
   ProgressReport report(3000);
   SimpleReflectionOrOuterAutomorphism generatorsOuterGroup;
   if (outputSubset != nullptr) {
-    currentElt.makeIdentity(*this);
+    currentElement.makeIdentity(*this);
     outputSubset->setExpectedSize(numberOfElementsToReserve);
     outputSubset->clear();
-    outputSubset->addOnTop(currentElt);
+    outputSubset->addOnTop(currentElement);
   }
   int numberOfGenerators =
   this->weylGroup->getDimension() + outerGenerators.size;
@@ -1032,13 +1032,13 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
       }
       if (output.addOnTopNoRepetition(currentRoot)) {
         if (outputSubset != nullptr) {
-          currentElt.makeIdentity(*this);
+          currentElement.makeIdentity(*this);
           generatorsOuterGroup.makeSimpleReflection(j);
-          currentElt.generatorsLastAppliedFirst.addOnTop(generatorsOuterGroup);
-          currentElt.generatorsLastAppliedFirst.addListOnTop((*outputSubset)[i]
+          currentElement.generatorsLastAppliedFirst.addOnTop(generatorsOuterGroup);
+          currentElement.generatorsLastAppliedFirst.addListOnTop((*outputSubset)[i]
             .generatorsLastAppliedFirst
           );
-          outputSubset->addOnTop(currentElt);
+          outputSubset->addOnTop(currentElement);
         }
       }
       if (upperLimitNumberOfElements > 0) {
@@ -1145,7 +1145,7 @@ bool WeylGroupData::generateOrbit(
     output.addOnTopNoRepetition(weights[i]);
   }
   Vector<Coefficient> currentRoot;
-  ElementWeylGroup currentElt;
+  ElementWeylGroup currentElement;
   if (expectedOrbitSize <= 0) {
     if (
       !this->group.getSize().isIntegerFittingInInt(&expectedOrbitSize)
@@ -1168,10 +1168,10 @@ bool WeylGroupData::generateOrbit(
       expectedOrbitSize =
       MathRoutines::minimum(upperLimitNumberOfElements, expectedOrbitSize);
     }
-    currentElt.makeIdentity(*this);
+    currentElement.makeIdentity(*this);
     outputSubset->setExpectedSize(expectedOrbitSize);
     outputSubset->clear();
-    outputSubset->addOnTop(currentElt);
+    outputSubset->addOnTop(currentElement);
   }
   ProgressReport report(1000);
   SimpleReflection simpleReflection;
@@ -1197,14 +1197,14 @@ bool WeylGroupData::generateOrbit(
       }
       if (output.addOnTopNoRepetition(currentRoot)) {
         if (outputSubset != nullptr) {
-          currentElt.generatorsLastAppliedFirst.setSize(1);
+          currentElement.generatorsLastAppliedFirst.setSize(1);
           simpleReflection.makeSimpleReflection(j);
-          currentElt.generatorsLastAppliedFirst[0] = simpleReflection;
-          currentElt.generatorsLastAppliedFirst.addListOnTop((*outputSubset)[i]
+          currentElement.generatorsLastAppliedFirst[0] = simpleReflection;
+          currentElement.generatorsLastAppliedFirst.addListOnTop((*outputSubset)[i]
             .generatorsLastAppliedFirst
           );
-          currentElt.makeCanonical();
-          outputSubset->addOnTop(currentElt);
+          currentElement.makeCanonical();
+          outputSubset->addOnTop(currentElement);
         }
       }
       if (upperLimitNumberOfElements > 0) {
@@ -1823,17 +1823,17 @@ getClassFunctionMatrix(
         );
         for (int i = 0; i < currentCC.elements.size; i ++) {
           if (
-            !this->elementIsComputed[currentCC.indicesEltsInOwner[i]]
+            !this->elementIsComputed[currentCC.indicesElementsInOwner[i]]
           ) {
             this->computeAllElementImages();
           }
           this->classFunctionMatrices[cci] +=
-          this->elementImages[currentCC.indicesEltsInOwner[i]];
+          this->elementImages[currentCC.indicesElementsInOwner[i]];
           if (report.tickAndWantReport()) {
             std::stringstream reportstream;
             reportstream
             << " Computing conjugacy class "
-            << currentCC.indicesEltsInOwner[i] + 1
+            << currentCC.indicesElementsInOwner[i] + 1
             << " (total num classes is "
             << totalClasses
             << ").";

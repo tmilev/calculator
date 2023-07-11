@@ -3989,23 +3989,24 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat,
+      CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational,
     this->opRational(),
     this->builtInCode<ElementZmodP>(),
     "Multiplies elements of Z_p. ",
     "(2 mod 7) * 3",
-    "CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat",
+    "CalculatorFunctionsBinaryOps::"
+      "multiplyElementZmodPorRationalByElementZmodPorRational",
     "MultiplyRationalByElementZmodP",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat,
+      CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational,
     this->builtInCode<ElementZmodP>(),
     this->builtInCode<ElementZmodP>(),
     "Multiplies elements of Z_p. ",
     "(2 mod 7) * 3",
-    "CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat",
+    "CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational",
     "MultiplyElementZmodPByElementZModP",
     innerStandard
   );
@@ -4691,12 +4692,12 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-    CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat,
+      CalculatorFunctionsBinaryOps::divideElementZmodPorRationalByElementZmodPorRational,
     this->builtInCode<ElementZmodP>(),
     this->builtInCode<ElementZmodP>(),
     "Divides elements of Z/pZ. ",
     "(2 mod  7) / (3 mod 7)",
-    "CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat",
+    "CalculatorFunctionsBinaryOps::divideElementZmodPorRationalByElementZmodPorRational",
     "DivideElementZmodPByElementZModP",
     innerStandard
   );

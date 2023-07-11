@@ -174,7 +174,7 @@ public:
       this->flagElementsComputed = false;
     }
     LargeInteger size;
-    List<int> indicesEltsInOwner;
+    List<int> indicesElementsInOwner;
     int representativeIndex;
     List<elementSomeGroup> elements;
     elementSomeGroup representative;
@@ -1061,7 +1061,7 @@ public:
   );
   void getLowestElementInOrbit(
     Vector<Rational>& inputOutput,
-    ElementWeylGroup* outputWeylElt,
+    ElementWeylGroup* outputWeylElement,
     Vectors<Rational>& bufferEiBAsis,
     bool rhoAction,
     bool useMinusRho,
@@ -1070,7 +1070,7 @@ public:
   ) {
     this->getExtremeElementInOrbit(
       inputOutput,
-      outputWeylElt,
+      outputWeylElement,
       bufferEiBAsis,
       true,
       rhoAction,

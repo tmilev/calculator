@@ -78,19 +78,19 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
   std::stringstream out;
   bool previousWasInteger = false;
   for (int i = 0; i < elements.size; i ++) {
-    SyntacticElement& currentElt = elements[i];
-    if (currentElt.controlIndex == calculator.parser.conVariable()) {
+    SyntacticElement& currentElement = elements[i];
+    if (currentElement.controlIndex == calculator.parser.conVariable()) {
       calculator.evaluateExpression(
-        calculator, currentElt.data, evaluatedE
+        calculator, currentElement.data, evaluatedE
       );
       out << evaluatedE.toString();
       continue;
     }
-    if (currentElt.controlIndex == calculator.parser.conInteger()) {
+    if (currentElement.controlIndex == calculator.parser.conInteger()) {
       if (!previousWasInteger) {
         out << "{";
       }
-      out << currentElt.data.toString();
+      out << currentElement.data.toString();
       previousWasInteger = true;
       continue;
     }
@@ -98,7 +98,7 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
       out << "}";
     }
     previousWasInteger = false;
-    out << calculator.parser.controlSequences[currentElt.controlIndex];
+    out << calculator.parser.controlSequences[currentElement.controlIndex];
   }
   if (previousWasInteger) {
     out << "}";

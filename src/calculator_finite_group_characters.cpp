@@ -1263,14 +1263,18 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
     << "<br>s_{"
     << i + 1
     << "}=MatrixRationals"
-    << groupGeneratedByMatrices.generators[i].toStringMatrixForm(&currentFormat)
+    << groupGeneratedByMatrices.generators[i].toStringMatrixForm(
+      &currentFormat
+    )
     << ";";
     out
     << "<br>s_"
     << i + 1
     << " = "
     << HtmlRoutines::getMathNoDisplay(
-      groupGeneratedByMatrices.generators[i].toStringMatrixForm(&currentFormat)
+      groupGeneratedByMatrices.generators[i].toStringMatrixForm(
+        &currentFormat
+      )
     );
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";
@@ -1305,7 +1309,9 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
         << HtmlRoutines::getMathNoDisplay(elementNameStream.str())
         << "</td><td>"
         << HtmlRoutines::getMathNoDisplay(
-          groupGeneratedByMatrices.elements[i].toStringMatrixForm(&currentFormat)
+          groupGeneratedByMatrices.elements[i].toStringMatrixForm(
+            &currentFormat
+          )
         )
         << "</td></tr>";
       }

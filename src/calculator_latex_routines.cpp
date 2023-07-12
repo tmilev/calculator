@@ -1177,9 +1177,9 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
       return false;
     }
   }
-  std::stringstream tempStream;
+  std::stringstream currentStream;
   if (commentsOnFailure == nullptr) {
-    commentsOnFailure = &tempStream;
+    commentsOnFailure = &currentStream;
   }
   std::stringstream crawlingResult;
   std::fstream fileStream;

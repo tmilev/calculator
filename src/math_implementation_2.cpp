@@ -787,9 +787,9 @@ const {
       out << "]";
     }
     for (int i = this->digits.size - 2; i >= 0; i --) {
-      std::stringstream tempStream;
-      tempStream << this->digits[i];
-      tempS = tempStream.str();
+      std::stringstream currentStream;
+      currentStream << this->digits[i];
+      tempS = currentStream.str();
       if (tempS[0] == '-') {
         out << "[";
       }

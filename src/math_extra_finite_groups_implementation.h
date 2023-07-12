@@ -1943,17 +1943,17 @@ toString(FormatExpressions* format) const {
   std::stringstream forYourCopyConvenience;
   for (int i = 0; i < rank; i ++) {
     if (i < this->generators.size) {
-      std::stringstream tempStream;
-      tempStream
+      std::stringstream currentStream;
+      currentStream
       << "s_"
       << i + 1
       << "=MatrixRationals{}"
       << this->generators[i].toString(format)
       << "; \\\\\n";
-      forYourCopyConvenience << tempStream.str();
+      forYourCopyConvenience << currentStream.str();
       out
       << HtmlRoutines::getMathNoDisplay(
-        "\\begin{array}{l}" + tempStream.str() + "\\end{array}", 3000
+        "\\begin{array}{l}" + currentStream.str() + "\\end{array}", 3000
       );
     } else {
       out << "Simple generator " << i + 1 << "} not computed ";

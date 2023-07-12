@@ -9041,8 +9041,8 @@ void WeylGroupData::drawRootSystem(
     highlightLabels[1] = (- this->rootsOfBorel[i]).toString();
     output.drawHighlightGroup(highlightGroup, highlightLabels, "gray", 5);
   }
-  std::stringstream tempStream;
-  tempStream << this->dynkinType.getWeylGroupName();
+  std::stringstream currentStream;
+  currentStream << this->dynkinType.getWeylGroupName();
   if (this->getDimension() == 2 && predefinedProjectionPlane != nullptr) {
     twoPlane[1][0] = 1;
     twoPlane[1][1] = 0;
@@ -11922,11 +11922,13 @@ bool ConeCollection::drawMeLastCoordinateAffine(
     ) {
       result = false;
     }
-    std::stringstream tempStream;
-    tempStream << i + 1;
+    std::stringstream currentStream;
+    currentStream << i + 1;
     Vector<Rational> point = this->nonRefinedCones[i].internalPoint();
     point.makeAffineUsingLastCoordinate();
-    drawingVariables.drawTextAtVector(point, tempStream.str(), "black");
+    drawingVariables.drawTextAtVector(
+      point, currentStream.str(), "black"
+    );
   }
   return result;
 }
@@ -12804,8 +12806,8 @@ void PiecewiseQuasipolynomial::drawMe(
     this->projectivizedComplex.refinedCones[i].drawMeLastCoordinateAffine(
       false, drawingVariables, format, chamberWallColor
     );
-    std::stringstream tempStream;
-    tempStream << i + 1;
+    std::stringstream currentStream;
+    currentStream << i + 1;
     Vector<Rational> root =
     this->projectivizedComplex.refinedCones[i].internalPoint();
     root.makeAffineUsingLastCoordinate();
@@ -13165,13 +13167,13 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
     this->finalRougherLattice.intersectWith(
       this->conesLargerDimension[i].lattice
     );
-    std::stringstream tempStream;
-    tempStream
+    std::stringstream currentStream;
+    currentStream
     << "intersecing lattice "
     << i + 1
     << " out of "
     << this->conesLargerDimension.size;
-    report.report(tempStream.str());
+    report.report(currentStream.str());
   }
   this->finalRepresentatives.size = 0;
   Vectors<Rational> roots;
@@ -13182,14 +13184,17 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep3() {
     this->conesLargerDimension[i].lattice.getAllRepresentativesProjectingDownTo
     (this->finalRougherLattice, roots2, roots);
     this->finalRepresentatives.addOnTopNoRepetition(roots);
-    std::stringstream tempStream;
-    tempStream
+    std::stringstream currentStream;
+    currentStream
     << "Computing representative "
     << i + 1
     << " out of "
     << this->conesLargerDimension.size;
-    tempStream << "\nSo far " << this->finalRepresentatives.size << " found.";
-    report2.report(tempStream.str());
+    currentStream
+    << "\nSo far "
+    << this->finalRepresentatives.size
+    << " found.";
+    report2.report(currentStream.str());
   }
   this->complexStartingPerRepresentative.setSize(
     this->finalRepresentatives.size
@@ -13226,13 +13231,13 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
       this->complexStartingPerRepresentative[i].refinedCones.values,
       true
     );
-    std::stringstream tempStream;
-    tempStream
+    std::stringstream currentStream;
+    currentStream
     << "Processing representative "
     << i + 1
     << " out of "
     << this->finalRepresentatives.size;
-    report.report(tempStream.str());
+    report.report(currentStream.str());
     currentComplex.refineByNormals();
     this->maximaCandidates[i].setSize(currentComplex.refinedCones.size());
     for (int j = 0; j < currentComplex.refinedCones.size(); j ++) {
@@ -13308,19 +13313,19 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1() {
       }
       this->conesLargerDimension.size --;
       this->lPtoMaximizeLargerDim.size --;
-      std::stringstream tempStream1, tempStream2, tempStream3;
-      tempStream1
+      std::stringstream currentStream1, currentStream2, currentStream3;
+      currentStream1
       << "Processing "
       << this->numberOfProcessedNonParameters + 1
       << " out of "
       << this->numberOfNonParameters;
-      tempStream2 << "Remaining cones: " << this->conesLargerDimension.size;
-      tempStream3
+      currentStream2 << "Remaining cones: " << this->conesLargerDimension.size;
+      currentStream3
       << "Cones smaller dim total: "
       << this->conesSmallerDimension.size;
-      report1.report(tempStream1.str());
-      report2.report(tempStream2.str());
-      report3.report(tempStream3.str());
+      report1.report(currentStream1.str());
+      report2.report(currentStream2.str());
+      report3.report(currentStream3.str());
     }
     this->lPtoMaximizeLargerDim = this->lPtoMaximizeSmallerDim;
     this->conesLargerDimension = this->conesSmallerDimension;
@@ -13417,11 +13422,11 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   }
   ProgressReport report;
   if (outputAppend.size >= 10) {
-    std::stringstream tempStream;
-    tempStream
+    std::stringstream currentStream;
+    currentStream
     << "<hr><hr><hr><hr>The bad cone:"
     << this->projectivizedCone.toString(&format);
-    report.report(tempStream.str());
+    report.report(currentStream.str());
   }
   ConeCollection complexBeforeProjection;
   complexBeforeProjection.initialize();

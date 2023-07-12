@@ -6560,17 +6560,17 @@ computePrimalModuleDecompositionHighestWeightsLastPart() {
     int i = 0; i < this->characterFormat.getElement().vectorSpaceEiBasisNames.
     size; i ++
   ) {
-    std::stringstream tempStream;
+    std::stringstream currentStream;
     if (i < rank) {
-      tempStream << "\\omega_{" << i + 1 << "}";
+      currentStream << "\\omega_{" << i + 1 << "}";
     } else {
-      tempStream << "\\psi";
+      currentStream << "\\psi";
       if (this->cartanOfCentralizer.size > 1) {
-        tempStream << "_{" << i - rank + 1 << "}";
+        currentStream << "_{" << i - rank + 1 << "}";
       }
     }
     this->characterFormat.getElement().vectorSpaceEiBasisNames[i] =
-    tempStream.str();
+    currentStream.str();
   }
   int numberOfModules = 0;
   for (int i = 0; i < this->modules.size; i ++) {
@@ -7464,8 +7464,8 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
   }
   ProgressReport report;
   for (int i = 0; i < output.rootSubalgebras.subalgebras.size; i ++) {
-    std::stringstream tempStream;
-    tempStream
+    std::stringstream currentStream;
+    currentStream
     << "\nExploring root subalgebra "
     << output.rootSubalgebras.subalgebras[i].dynkinDiagram.toString()
     << " ("
@@ -7473,7 +7473,7 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
     << " out of "
     << output.rootSubalgebras.subalgebras.size
     << ")\n";
-    report.report(tempStream.str());
+    report.report(currentStream.str());
     output.rootSubalgebras.subalgebras[i].
     getSsl2SubalgebrasAppendListNoRepetition(
       output, i, computeRealForm, algebraicClosure
@@ -8415,14 +8415,14 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(
   FormatExpressions charFormat;
   charFormat.vectorSpaceEiBasisNames.setSize(this->getPrimalRank());
   for (int i = 0; i < this->getRank(); i ++) {
-    std::stringstream tempStream;
-    tempStream << "\\\\omega_{" << i + 1 << "}";
-    charFormat.vectorSpaceEiBasisNames[i] = tempStream.str();
+    std::stringstream currentStream;
+    currentStream << "\\\\omega_{" << i + 1 << "}";
+    charFormat.vectorSpaceEiBasisNames[i] = currentStream.str();
   }
   for (int i = this->getRank(); i < this->getPrimalRank(); i ++) {
-    std::stringstream tempStream;
-    tempStream << "\\\\psi_{" << i + 1 << "}";
-    charFormat.vectorSpaceEiBasisNames[i] = tempStream.str();
+    std::stringstream currentStream;
+    currentStream << "\\\\psi_{" << i + 1 << "}";
+    charFormat.vectorSpaceEiBasisNames[i] = currentStream.str();
   }
   for (int i = 0; i < currentModule.size; i ++) {
     out << "<table style =\\\"border:1px solid #000;\\\">";
@@ -8812,15 +8812,15 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecomposition(
       } else {
         out << "<td>";
       }
-      std::stringstream tempStream;
-      tempStream
+      std::stringstream currentStream;
+      currentStream
       << "V_{"
       << this->highestWeightsPrimal[i].toStringLetterFormat(
         "\\omega", &characterFormat
       )
       << "} ";
       out
-      << HtmlRoutines::getMathNoDisplay(tempStream.str())
+      << HtmlRoutines::getMathNoDisplay(currentStream.str())
       << " &rarr; "
       << this->highestWeightsPrimal[i].toString();
       out << "</td>";
@@ -9043,13 +9043,17 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
     << this->coneIntersection.toStringLetterFormat("w");
     out << "<br> ";
     FormatExpressions currentFormat;
-    currentFormat.vectorSpaceEiBasisNames.setSize(this->coneIntersection.size);
+    currentFormat.vectorSpaceEiBasisNames.setSize(
+      this->coneIntersection.size
+    );
     for (int j = 0; j < this->nilradicalWeights.size; j ++) {
       currentFormat.vectorSpaceEiBasisNames[j] =
       this->nilradicalWeights[j].toString();
     }
     for (int j = 0; j < this->nonFernandoKacHighestWeights.size; j ++) {
-      currentFormat.vectorSpaceEiBasisNames[j + this->nilradicalWeights.size] =
+      currentFormat.vectorSpaceEiBasisNames[
+        j + this->nilradicalWeights.size
+      ] =
       this->nonFernandoKacHighestWeights[j].toString();
     }
     out << this->coneIntersection.toStringLetterFormat("w", &currentFormat);
@@ -9069,7 +9073,9 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
       << this->getConeStrongIntersectionWeight().toString();
       out
       << "<br>"
-      << this->coneStrongIntersection.toStringLetterFormat("w", &currentFormat);
+      << this->coneStrongIntersection.toStringLetterFormat(
+        "w", &currentFormat
+      );
       out << "<br>The involved nilradical elements: " << "<br><table><tr>";
       for (int i = 0; i < this->nilradicalWeights.size; i ++) {
         if (this->coneStrongIntersection[i] != 0) {
@@ -9119,7 +9125,9 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
         int j = 0; j < this->
         nonFernandoKacHighestWeightVectorsStrongRelativeToSubset.size; j ++
       ) {
-        currentFormat.vectorSpaceEiBasisNames[j + this->nilradicalSubset.size] =
+        currentFormat.vectorSpaceEiBasisNames[
+          j + this->nilradicalSubset.size
+        ] =
         this->nonFernandoKacHighestWeightVectorsStrongRelativeToSubsetWeights[
           j
         ].toString();
@@ -9442,7 +9450,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
         out << "\\end{tabular}\\\\\n<br>";
         out << "&& Relevant Lie brackets: ";
         ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
-        std::stringstream tempStream;
+        std::stringstream currentStream;
         for (
           int j = 0; j < currentNilradical.nilradicalSubset.size; j ++
         ) {
@@ -9451,7 +9459,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
             j, relevantBracketsLeft, relevantBracketsRight, relevantBrackets
           );
           for (int k = 0; k < relevantBrackets.size; k ++) {
-            tempStream
+            currentStream
             << "$["
             << relevantBracketsLeft[k].toString()
             << ", "
@@ -9475,7 +9483,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
                 ],
                 element
               );
-              tempStream
+              currentStream
               << "$["
               << currentNilradical.nilradicalSubset[j].toString()
               << ", "
@@ -9488,19 +9496,10 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
             }
           }
         }
-        std::string tempS = tempStream.str();
+        std::string tempS = currentStream.str();
         tempS.resize(tempS.size() - 2);
         out << tempS;
       }
-      // for (int j = 0; j <
-      // currentNilradical.nonFernandoKacHighestWeights.size; j ++)
-      // { out << " $" <<
-      // currentNilradical.nonFernandoKacHighestWeights[j]
-      // .toStringLetterFormat("\\omega",
-      // &currentFormat) << "$";
-      //      if (j != currentNilradical.nonFernandoKacHighestWeights.size- 1)
-      //        out << ", ";
-      //    }
     }
     out << "\\end{longtable}";
   }
@@ -9671,13 +9670,13 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTable(
   out << "</tr>";
   out << "</table>";
   out << "<br>modules corresponding to the semisimple subalgebra: ";
-  Vector<Rational> subalgebraVector, tempV;
+  Vector<Rational> subalgebraVector, currentVector;
   subalgebraVector.makeZero(this->nilradicalPairingTable.size);
   for (int i = 0; i < this->subalgebraModules.size; i ++) {
-    tempV.makeEi(
+    currentVector.makeEi(
       this->nilradicalPairingTable.size, this->subalgebraModules[i]
     );
-    subalgebraVector += tempV;
+    subalgebraVector += currentVector;
   }
   out << subalgebraVector.toStringLetterFormat("V");
   out << "<br><table><tr><td>modules</td>";
@@ -9686,9 +9685,7 @@ std::string CandidateSemisimpleSubalgebra::toStringPairingTable(
     characterFormat = this->characterFormat.getElementConst();
   }
   for (int i = 0; i < this->nilradicalPairingTable.size; i ++) {
-    out << "<td><b>" << "W_{" << i + 1 << "}" // << "=" <<
-    // this->primalChar[i].toString(&characterFormat)
-    << "</b></td>";
+    out << "<td><b>" << "W_{" << i + 1 << "}" << "</b></td>";
   }
   out << "</tr>";
   for (int i = 0; i < this->nilradicalPairingTable.size; i ++) {
@@ -9769,7 +9766,8 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(
   List<DynkinSimpleType> simpleTypes;
   this->weylNonEmbedded->dynkinType.getTypesWithMults(simpleTypes);
   FormatExpressions currentFormat;
-  currentFormat.ambientWeylLetter = this->getAmbientWeyl().dynkinType[0].letter;
+  currentFormat.ambientWeylLetter =
+  this->getAmbientWeyl().dynkinType[0].letter;
   currentFormat.ambientCartanSymmetricInverseScale =
   this->getAmbientWeyl().dynkinType[0].cartanSymmetricInverseScale;
   out << "<br>Elements Cartan subalgebra scaled to act by two by components: ";
@@ -10153,7 +10151,10 @@ std::string CandidateSemisimpleSubalgebra::toStringSystem(
   }
   out << "<br>The above system after transformation.  ";
   for (int i = 0; i < this->transformedSystem.size; i ++) {
-    out << "<br>" << this->transformedSystem[i].toString(&currentFormat) << "= 0";
+    out
+    << "<br>"
+    << this->transformedSystem[i].toString(&currentFormat)
+    << "= 0";
   }
   if (!this->flagSystemGroebnerBasisFound) {
     out
@@ -11038,12 +11039,11 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   }
   // //////////////
   this->bilinearFormSimplePrimal = this->weylNonEmbedded->cartanSymmetric;
-  Matrix<Rational>
-  centralizerPart,
-  matrixFundamentalCoordinatesSimple,
-  diagonalMatrix,
-  diagMatrix2,
-  bilinearFormInverted;
+  Matrix<Rational> centralizerPart;
+  Matrix<Rational> matrixFundamentalCoordinatesSimple;
+  Matrix<Rational> diagonalMatrix;
+  Matrix<Rational> diagMatrix2;
+  Matrix<Rational> bilinearFormInverted;
   this->cartanOfCentralizer.getGramMatrix(
     centralizerPart, &this->owner->owner->weylGroup.cartanSymmetric
   );

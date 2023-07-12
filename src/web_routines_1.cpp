@@ -412,7 +412,6 @@ void WebClient::fetchWebPagePart2(
   }
   unsigned bodyStart = 0;
   int totalCrLfs = 0;
-  // std::stringstream tempStream;
   for (; bodyStart < this->headerReceived.size(); bodyStart ++) {
     if (totalCrLfs >= 4) {
       break;

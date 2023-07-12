@@ -253,14 +253,14 @@ std::string SemisimpleLieAlgebra::toHTML(
   << ".<br>";
   if (!verbose) {
     out << "<br>To get extra details: ";
-    std::stringstream tempStream;
-    tempStream
+    std::stringstream currentStream;
+    currentStream
     << "PrintSemisimpleLieAlgebra{}("
     << this->weylGroup.dynkinType
     << ")";
     out
     << HtmlRoutines::getCalculatorComputationAnchorSameURL(
-      tempStream.str(), ""
+      currentStream.str(), ""
     )
     << "<br>";
   } else {

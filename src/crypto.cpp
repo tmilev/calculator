@@ -2051,13 +2051,6 @@ void Crypto::computeSha2xx(
   Crypto::convertUint64toBigendianListUnsignedCharAppendResult(
     messageLength, inputPreprocessed
   );
-  // //////////////////////
-  //  std::stringstream tempSTream;
-  //  for (unsigned i = 0; i < inputStringPreprocessed.size(); i ++)
-  //  {
-  //    tempSTream << std::hex << inputStringPreprocessed[i];
-  //  }
-  // /////////////////////
   List<unsigned char> convertorToUint32;
   List<uint32_t> inputStringUint32;
   inputStringUint32.reserve(1 + inputPreprocessed.size / 4);

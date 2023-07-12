@@ -934,10 +934,10 @@ splitCharacterOverReductiveSubalgebra(
       getSimpleCoordinatesFromFundamental(
         output[i].weightFundamentalCoordinates
       ).getVectorRational();
-      std::stringstream tempStream;
-      tempStream << output.coefficients[i].toString();
+      std::stringstream currentStream;
+      currentStream << output.coefficients[i].toString();
       drawingVariables1.drawTextAtVector(
-        leftRoot, tempStream.str(), "black"
+        leftRoot, currentStream.str(), "black"
       );
       for (
         int j = 1; j < weylGroupFiniteDimensionalSmall.ambientWeyl->group.

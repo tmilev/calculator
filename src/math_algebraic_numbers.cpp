@@ -1768,7 +1768,8 @@ std::string AlgebraicNumber::toString(FormatExpressions* format) const {
   }
   std::stringstream out;
   FormatExpressions currentFormat;
-  currentFormat.vectorSpaceEiBasisNames = this->owner->displayNamesBasisElements;
+  currentFormat.vectorSpaceEiBasisNames =
+  this->owner->displayNamesBasisElements;
   if (format != nullptr) {
     currentFormat.flagUseFrac = format->flagUseFrac;
   }

@@ -4632,9 +4632,9 @@ public:
   Coefficient realPart;
   std::string toString(FormatExpressions* unused = nullptr) const {
     (void) unused;
-    std::stringstream tempStream;
-    tempStream << *this;
-    return tempStream.str();
+    std::stringstream currentStream;
+    currentStream << *this;
+    return currentStream.str();
   }
   friend std::iostream& operator<<(
     std::iostream& output, const Complex<Coefficient>& input

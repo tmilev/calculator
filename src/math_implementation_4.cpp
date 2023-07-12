@@ -1845,9 +1845,9 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       out << "\nChamber " << i + 1 << " with internal point " << this->pfs.chambersOld.objects[i]->InternalPoint.toString() << " the quasipoly is: " << currentQPNoSub.toString(false, false);
       for (int k = 0; k< this->linearOperators.size; k++) {
         QuasiPolynomial& currentQPSub = this->qPsSubstituted.objects[i].objects[k];
-        std::stringstream tempStream;
-        tempStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
-        global.indicatorVariables.ProgressReportStrings[0] = tempStream.str();
+        std::stringstream currentStream;
+        currentStream << "Processing chamber " << i + 1 << " linear operator " << k+ 1;
+        global.indicatorVariables.ProgressReportStrings[0] = currentStream.str();
         global.makeReport();
         currentQPNoSub.substitution(this->linearOperatorsExtended.objects[k], this->translationsProjectedBasisChanged[k], this->ExtendedIntegralLatticeMatForM, currentQPSub);
         out << "; after substitution we get: " << currentQPSub.toString(false, false);
@@ -1885,15 +1885,15 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
         tempQP *= this->coefficients[k];
         currentSum += tempQP;
       }
-      std::stringstream tempStream;
-      tempStream << " Chamber " << i + 1 << " translation " << k + 1;
-      report.report(tempStream.str());
+      std::stringstream currentStream;
+      currentStream << " Chamber " << i + 1 << " translation " << k + 1;
+      report.report(currentStream.str());
     }
     if (!currentSum.isEqualToZero()) {
       this->numberNonZeroMultiplicities ++;
     }
-    std::stringstream tempStream;
-    tempStream
+    std::stringstream currentStream;
+    currentStream
     << " So far "
     << i + 1
     << " out of "
@@ -1901,7 +1901,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
     << " processed "
     << this->numberNonZeroMultiplicities
     << " non-zero total.";
-    report2.report(tempStream.str());
+    report2.report(currentStream.str());
     out
     << "\nChamber "
     << i + 1
@@ -2190,7 +2190,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   //  SSalgebraModuleOld tempM;
   input.computeHomomorphismFromImagesSimpleChevalleyGenerators(nullptr);
   global.fatal << "Not implemented. " << global.fatal;
-  //  tempM.InduceFromEmbedding(tempStream, input);
+  //  tempM.InduceFromEmbedding(currentStream, input);
   input.getWeightsGmodKInSimpleCoordinatesK(this->gModKNegativeWeights);
   // this->log << "weights of g mod k: " <<
   // this->GmodKnegativeWeights.toString();
@@ -2579,8 +2579,8 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
   << "\\caption{multiplicities of "
   << "generalized Verma modules $m(x_1,x_2, y_1, y_2, y_3)$"
   << " for $\\gop$ with Dynkin diagram";
-  std::stringstream tempStream;
-  tempStream << "(";
+  std::stringstream currentStream;
+  currentStream << "(";
   for (
     int i = 0; i < this->parabolicLeviPartRootSpacesZeroStandsForSelected.
     numberOfElements; i ++
@@ -2588,24 +2588,24 @@ std::string GeneralizedVermaModuleCharacters::prepareReport() {
     if (
       this->parabolicLeviPartRootSpacesZeroStandsForSelected.selected[i]
     ) {
-      tempStream << "+";
+      currentStream << "+";
     } else {
-      tempStream << "0";
+      currentStream << "0";
     }
     if (
       i !=
       this->parabolicLeviPartRootSpacesZeroStandsForSelected.numberOfElements -
       1
     ) {
-      tempStream << ",";
+      currentStream << ",";
     }
   }
-  tempStream << ")";
+  currentStream << ")";
   out
   << "$"
-  << tempStream.str()
+  << currentStream.str()
   << "$ \\label{table"
-  << tempStream.str()
+  << currentStream.str()
   << "}}\\\\\n";
   out << "Inequlities& $m(x_1,x_2, y_1, y_2, y_3)$\\endhead\n";
   int totalFoundChambers = 0;

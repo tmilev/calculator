@@ -166,39 +166,46 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         int k = totalStartingVariables; k < universalEnvelopingFormat.
         polynomialAlphabet.size; k ++
       ) {
-        std::stringstream tmpStream, tempstream2, tempstream3, tempStream4;
-        tmpStream
+        std::stringstream
+        currentStream,
+        currentStream2,
+        currentStream3,
+        currentStream4;
+        currentStream
         << universalEnvelopingFormat.polynomialDefaultLetter
         << "_{"
         << k - hwContext.numberOfVariables() + 1
         << "}";
-        universalEnvelopingFormat.polynomialAlphabet[k] = tmpStream.str();
-        tempstream2
+        universalEnvelopingFormat.polynomialAlphabet[k] = currentStream.str();
+        currentStream2
         << finalXletter
         << "_{"
         << k - totalStartingVariables + 1
         << "}";
-        tempstream3 << finalXletter << "_" << k - totalStartingVariables + 1;
-        tempStream4
+        currentStream3
+        << finalXletter
+        << "_"
+        << k - totalStartingVariables + 1;
+        currentStream4
         << finalPartialLetter
         << "_{"
         << k - totalStartingVariables + 1
         << "}";
         if (
-          weylFormat.polynomialAlphabet.contains(tempstream2.str()) ||
-          weylFormat.polynomialAlphabet.contains(tempstream3.str())
+          weylFormat.polynomialAlphabet.contains(currentStream2.str()) ||
+          weylFormat.polynomialAlphabet.contains(currentStream3.str())
         ) {
           return
           output.assignError(
             calculator,
             "Error: the variable " +
-            tempstream2.str() +
+            currentStream2.str() +
             " is reserved for me: you are not "
             "allowed to use it as a coordinate of the highest weight. "
           );
         }
-        weylFormat.polynomialAlphabet[k] = tempstream2.str();
-        weylFormat.weylAlgebraLetters[k] = tempStream4.str();
+        weylFormat.polynomialAlphabet[k] = currentStream2.str();
+        weylFormat.weylAlgebraLetters[k] = currentStream4.str();
       }
       out
       << "<tr><td>General monomial in U(n_-):</td><td>"
@@ -2289,9 +2296,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     element.tensorOnTheRight(element);
     element *= - 1;
     std::string startingElementString = element.toString(&currentFormat);
-    std::stringstream tempStream;
-    std::stringstream tempStream2;
-    tempStream << "\\begin{array}{l}";
+    std::stringstream currentStream;
+    std::stringstream currentStream2;
+    currentStream << "\\begin{array}{l}";
     bool found = false;
     for (int j = 0; j < centralCharacters.size; j ++) {
       Vector<RationalFraction<Rational> > otherWeightSimpleCoordinates =
@@ -2312,21 +2319,21 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
           rationalFractionOne
         );
         element = element2;
-        tempStream
+        currentStream
         << "(i(\\bar c)- ("
         << centralCharacters[j].toString()
         << ") )\\\\";
-        tempStream2 << " $(\\bar c-p_" << j + 1 << ") $ ";
+        currentStream2 << " $(\\bar c-p_" << j + 1 << ") $ ";
         found = true;
       }
     }
     if (found) {
-      tempStream << "\\cdot";
-      tempStream2 << " $\\cdot$ ";
+      currentStream << "\\cdot";
+      currentStream2 << " $\\cdot$ ";
     }
-    tempStream << "(" << startingElementString << ")";
-    tempStream << "\\end{array}";
-    tempStream2 << " $(" << startingElementString << ")$ ";
+    currentStream << "(" << startingElementString << ")";
+    currentStream << "\\end{array}";
+    currentStream2 << " $(" << startingElementString << ")$ ";
     RationalFraction<Rational> scale =
     element.scaleNormalizeLeadingMonomial(nullptr);
     Rational scaleRational;
@@ -2343,7 +2350,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     getFundamentalCoordinatesFromSimple(currentHighestWeightSimpleCoordinates).
     toStringLetterFormat("\\psi")
     << "</td><td>"
-    << HtmlRoutines::getMathNoDisplay(tempStream.str())
+    << HtmlRoutines::getMathNoDisplay(currentStream.str())
     << "</td><td>"
     << scaleRational.toString()
     << "</td>";
@@ -2353,7 +2360,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     getFundamentalCoordinatesFromSimple(currentHighestWeightSimpleCoordinates).
     toStringLetterFormat("\\psi")
     << "$ &  "
-    << tempStream2.str()
+    << currentStream2.str()
     << " &"
     << scaleRational.toString();
     Polynomial<Rational> currentGreatestCommonDivisor;

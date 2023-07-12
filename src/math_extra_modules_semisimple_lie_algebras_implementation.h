@@ -92,13 +92,13 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
     this->cachedTraces.addOnTop(result);
   }
   if (progressReport != nullptr && this->cachedPairs.size < 500000) {
-    std::stringstream tempStream;
-    tempStream
+    std::stringstream currentStream;
+    currentStream
     << "Number of cached pairs: "
     << this->cachedPairs.size
     << " at recursion depth "
     << global.customStackTrace.size;
-    progressReport->report(tempStream.str());
+    progressReport->report(currentStream.str());
   }
   return result;
 }
@@ -139,9 +139,9 @@ highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
   this->applyTransposeAntiAutomorphism(pair.object1);
   Rational result = this->highestWeightTrace(pair, progressReport);
   if (progressReport != nullptr) {
-    std::stringstream tempStream;
-    tempStream << this->cachedPairs.size << " total cached pairs";
-    progressReport->report(tempStream.str());
+    std::stringstream currentStream;
+    currentStream << this->cachedPairs.size << " total cached pairs";
+    progressReport->report(currentStream.str());
   }
   return result;
 }
@@ -520,9 +520,11 @@ splitOverLeviMonomialsEncodeHighestWeight(
       outputWeylSubgroup.drawContour(
         root, drawingVariables, "#a0a000", 1000
       );
-      std::stringstream tempStream;
-      tempStream << output.coefficients[i].toString();
-      drawingVariables.drawTextAtVector(root, tempStream.str(), "black");
+      std::stringstream currentStream;
+      currentStream << output.coefficients[i].toString();
+      drawingVariables.drawTextAtVector(
+        root, currentStream.str(), "black"
+      );
     }
     out
     << "<hr>"
@@ -1026,14 +1028,14 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
           }
           MatrixTensor<Coefficient>& matrix =
           this->getActionGeneratorIndex(index);
-          std::stringstream tempStream;
-          tempStream
+          std::stringstream currentStream;
+          currentStream
           << "computing action simple generator index "
           << (2 * k - 1) *(j + 1)
           << " ... ";
-          report.report(tempStream.str());
-          tempStream << " done!";
-          report.report(tempStream.str());
+          report.report(currentStream.str());
+          currentStream << " done!";
+          report.report(currentStream.str());
           if (outputReport != nullptr) {
             if (this->getDimension() < 50) {
               out2
@@ -1096,8 +1098,8 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
     currentBF.initialize(currentWordList.size, currentWordList.size);
     for (int i = 0; i < currentWordList.size; i ++) {
       for (int j = i; j < currentWordList.size; j ++) {
-        std::stringstream tempStream;
-        tempStream
+        std::stringstream currentStream;
+        currentStream
         << " Computing Shapovalov form layer "
         << l
         << " out of "
@@ -1113,7 +1115,7 @@ void ModuleSSalgebra<Coefficient>::intermediateStepForMakeFromHW(
         highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
           currentWordListInt[i], currentWordListInt[j], &report2
         );
-        report.report(tempStream.str());
+        report.report(currentStream.str());
         if (i != j) {
           currentBF.elements[j][i] = currentBF.elements[i][j];
         }
@@ -1246,8 +1248,8 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
         << "<br>Something is wrong with the algorithm, a check fails! "
         << global.fatal;
       } else {
-        std::stringstream tempStream;
-        tempStream
+        std::stringstream currentStream;
+        currentStream
         << "tested index "
         << i + 1
         << " out of "
@@ -1256,7 +1258,7 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
         << j + 1
         << " out of "
         << this->getOwner().getNumberOfGenerators();
-        report.report(tempStream.str());
+        report.report(currentStream.str());
       }
     }
   }
@@ -1312,14 +1314,14 @@ void ModuleSSalgebra<Coefficient>::expressAsLinearCombinationHomogenousElement(
   this->generatingWordsGrouppedByWeight[indexInputBasis];
   scalarProducts.setSize(inputBasis.size);
   for (int i = 0; i < inputBasis.size; i ++) {
-    std::stringstream tempStream;
+    std::stringstream currentStream;
     inputHomogeneous.highestWeightTransposeAntiAutomorphismBilinearForm(
       inputBasis[i],
       scalarProducts[i],
       &substitutionHiGoesToIthElement,
       ringUnit,
       ringZero,
-      &tempStream
+      &currentStream
     );
   }
   this->bilinearFormsInverted[indexInputBasis].actOnVectorColumn(
@@ -2085,14 +2087,14 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     out << tempS;
   }
   out << "<br>Parabolic selection: " << LeviInSmall.toString();
-  std::stringstream tempStream1;
-  tempStream1
+  std::stringstream currentStream1;
+  currentStream1
   << "Started splitting the f.d. part of the "
   << homomorphism.coDomainAlgebra().toStringLieAlgebraName()
   << "-module with highest weight in fund coords "
   << this->character[0].weightFundamentalCoordinates.toString();
   ProgressReport report;
-  report.report(tempStream1.str());
+  report.report(currentStream1.str());
   List<List<Vector<Coefficient> > > eigenSpacesPerSimpleGenerator;
   Selection invertedLeviInSmall;
   invertedLeviInSmall = LeviInSmall;
@@ -2122,41 +2124,41 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
       matrix *= currentElement.coefficients[j];
       currentOp += matrix;
     }
-    std::stringstream tempStream3;
+    std::stringstream currentStream3;
     double timeAtStart1 = global.getElapsedSeconds();
-    tempStream3
+    currentStream3
     << "Computing eigenspace corresponding to "
     << currentElement.toString()
     << "...";
-    report.report(tempStream3.str());
+    report.report(currentStream3.str());
     Matrix<Coefficient> currentOpMat;
     currentOp.getMatrix(currentOpMat, this->getDimension());
     currentOpMat.getZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
-    tempStream3
+    currentStream3
     << " done in "
     << global.getElapsedSeconds() - timeAtStart1
     << " seconds. ";
-    report.report(tempStream3.str());
+    report.report(currentStream3.str());
     if (i == 0) {
       finalEigenSpace = eigenSpacesPerSimpleGenerator[i];
     } else {
-      std::stringstream tempStream4;
+      std::stringstream currentStream4;
       double timeAtStart2 = global.getElapsedSeconds();
-      tempStream4
+      currentStream4
       << "Intersecting with eigenspace corresponding to "
       << currentElement.toString()
       << "...";
       tempSpace1 = finalEigenSpace;
-      report.report(tempStream4.str());
+      report.report(currentStream4.str());
       tempSpace2 = eigenSpacesPerSimpleGenerator[i];
       finalEigenSpace.intersectTwoLinearSpaces(
         tempSpace1, tempSpace2, finalEigenSpace
       );
-      tempStream4
+      currentStream4
       << " done in "
       << global.getElapsedSeconds() - timeAtStart2
       << " seconds. ";
-      report.report(tempStream4.str());
+      report.report(currentStream4.str());
     }
   }
   out << "<br>Eigenvectors: <table>";

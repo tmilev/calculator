@@ -8034,17 +8034,17 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
   }
   outHtml << "<br>";
   for (int i = 0; i < rValues.size; i ++) {
-    std::stringstream tempStream;
-    tempStream
+    std::stringstream currentStream;
+    currentStream
     << "\\rput[t]("
     << std::fixed
     << rValues[i].getDoubleValue()
     << ",-0.03)"
     << "{$";
     if (rValues[i].isInteger()) {
-      tempStream << rValues[i].toString();
+      currentStream << rValues[i].toString();
     } else {
-      tempStream
+      currentStream
       << "\\frac{"
       << rValues[i].getNumerator().toString()
       << "}"
@@ -8052,9 +8052,9 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
       << rValues[i].getDenominator().toString()
       << "}";
     }
-    tempStream << "$}";
-    outHtml << tempStream.str();
-    outTex << tempStream.str();
+    currentStream << "$}";
+    outHtml << currentStream.str();
+    outTex << currentStream.str();
   }
   outHtml << "<br>";
   PlotObject plot;

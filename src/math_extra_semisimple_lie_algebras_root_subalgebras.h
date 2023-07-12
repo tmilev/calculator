@@ -122,7 +122,6 @@ public:
   void toString(
     std::string& output, RootSubalgebras& owners, bool useLatex
   );
-  void ComputeDebugString(RootSubalgebras& owners);
   void writeToFile(std::fstream& output);
   void readFromFile(std::fstream& input, RootSubalgebras& owner);
   void addRelationNoRepetition(ConeRelation& input, RootSubalgebras& owners);

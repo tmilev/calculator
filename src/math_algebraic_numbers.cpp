@@ -1725,17 +1725,17 @@ const {
   STACK_TRACE("AlgebraicClosureRationals::toString");
   (void) format;
   std::stringstream out;
-  FormatExpressions tempFormat;
-  tempFormat.flagUseHTML = false;
-  tempFormat.flagUseLatex = true;
+  FormatExpressions currentFormat;
+  currentFormat.flagUseHTML = false;
+  currentFormat.flagUseLatex = true;
   if (this->latestBasis.size == 1) {
     out << HtmlRoutines::getMathNoDisplay("\\mathbb Q");
     return out.str();
   }
   if (this->flagIsQuadraticRadicalExtensionRationals) {
-    return this->toStringQuadraticRadical(&tempFormat);
+    return this->toStringQuadraticRadical(&currentFormat);
   }
-  return this->toStringFull(&tempFormat);
+  return this->toStringFull(&currentFormat);
 }
 
 bool AlgebraicNumber::isRational(Rational* whichRational) const {
@@ -1767,15 +1767,15 @@ std::string AlgebraicNumber::toString(FormatExpressions* format) const {
     return this->element.coefficients[0].toString(format);
   }
   std::stringstream out;
-  FormatExpressions tempFormat;
-  tempFormat.vectorSpaceEiBasisNames = this->owner->displayNamesBasisElements;
+  FormatExpressions currentFormat;
+  currentFormat.vectorSpaceEiBasisNames = this->owner->displayNamesBasisElements;
   if (format != nullptr) {
-    tempFormat.flagUseFrac = format->flagUseFrac;
+    currentFormat.flagUseFrac = format->flagUseFrac;
   }
-  tempFormat.flagUseHTML = false;
+  currentFormat.flagUseHTML = false;
   VectorSparse<Rational> additiveVector;
   this->owner->getAdditionTo(*this, additiveVector);
-  out << additiveVector.toString(&tempFormat);
+  out << additiveVector.toString(&currentFormat);
   // << "~ in~ the~ field~ " << this->owner->toString();
   if (
     this->basisIndex < this->owner->basisInjections.size - 1 &&
@@ -1795,18 +1795,18 @@ const {
     return this->element.coefficients[0].toString(format);
   }
   std::stringstream out;
-  FormatExpressions tempFormat;
+  FormatExpressions currentFormat;
   int dimension = this->owner->basisInjections[this->basisIndex].size;
-  tempFormat.vectorSpaceEiBasisNames.setSize(dimension);
+  currentFormat.vectorSpaceEiBasisNames.setSize(dimension);
   for (int i = 0; i < dimension; i ++) {
     std::stringstream letter;
     letter << "e_{" << this->basisIndex + 1 << ", " << i + 1 << "}";
-    tempFormat.vectorSpaceEiBasisNames[i] = letter.str();
+    currentFormat.vectorSpaceEiBasisNames[i] = letter.str();
   }
   if (format != nullptr) {
-    tempFormat.flagUseFrac = format->flagUseFrac;
+    currentFormat.flagUseFrac = format->flagUseFrac;
   }
-  out << this->element.toString(&tempFormat);
+  out << this->element.toString(&currentFormat);
   // << "~ in~ the~ field~ " << this->owner->toString();
   return out.str();
 }

@@ -1911,8 +1911,6 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
     << "\nThe chamber is: "
     << this->projectivizedChamber.refinedCones[i].toString(&format);
   }
-  //  this->projectivizedChamber.ComputeDebugString();
-  //  out << "\n\n" << this->projectivizedChamber.DebugString;
   report.report(out.str());
   this->multiplicitiesMaxOutputReport2 << out.str();
 }

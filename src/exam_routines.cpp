@@ -2204,10 +2204,16 @@ std::string CalculatorHTML::toStringInterprettedCommands(
   std::stringstream out;
   out << "<table>";
   int commandCounter = calculator.programExpression.size() - 1;
-  for (int elementCounter = elements.size - 1; elementCounter > 0; elementCounter --) {
+  for (
+    int elementCounter = elements.size - 1; elementCounter > 0; elementCounter
+    --
+  ) {
     SyntacticElementHTML& currentElement = elements[elementCounter];
     std::string currentElementString =
-    currentElement.getTagClass() + "[" + currentElement.content.substr(0, 10) + "...]";
+    currentElement.getTagClass() +
+    "[" +
+    currentElement.content.substr(0, 10) +
+    "...]";
     if (!currentElement.isInterpretedByCalculatorOnGeneration()) {
       out
       << "<tr><td>"

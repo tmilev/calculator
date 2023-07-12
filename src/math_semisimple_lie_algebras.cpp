@@ -577,7 +577,6 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
   );
   this->computedChevalleyConstants.makeZero(false);
   Selection nonExploredRoots;
-  this->flagAnErrorHasOccurredTimeToPanic = false;
   Vectors<Rational>& positiveRoots = this->weylGroup.rootsOfBorel;
   nonExploredRoots.makeFullSelection(positiveRoots.size);
   Vector<Rational> root;
@@ -641,13 +640,14 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
       this->weylGroup.rootSystem.getIndex(- smallRoot1);
       if (height.isGreaterThan(currentHeight)) {
         smallRoot2 = root - smallRoot1;
-        int SecondPosIndex = this->weylGroup.rootSystem.getIndex(smallRoot2);
-        if (firstPositiveIndex < SecondPosIndex) {
+        int secondPositiveIndex =
+        this->weylGroup.rootSystem.getIndex(smallRoot2);
+        if (firstPositiveIndex < secondPositiveIndex) {
           int secondNegativeIndex =
           this->weylGroup.rootSystem.getIndex(- smallRoot2);
           if (firstIndexFirstPositiveChoice == - 1) {
             firstIndexFirstPositiveChoice = firstPositiveIndex;
-            secondIndexFirstPositiveChoice = SecondPosIndex;
+            secondIndexFirstPositiveChoice = secondPositiveIndex;
             int power;
             this->getMaxQForWhichBetaMinusQAlphaisARoot(
               smallRoot1, smallRoot2, power
@@ -972,18 +972,16 @@ void SemisimpleLieAlgebra::computeOneChevalleyConstant(
 
 bool SemisimpleLieAlgebra::testForConsistency() {
   FormatExpressions& format = global.defaultFormat.getElement();
-  ElementSemisimpleLieAlgebra<Rational>
-  g1,
-  g2,
-  g3,
-  g23,
-  g31,
-  g12,
-  g123,
-  g231,
-  g312,
-  temp;
-  // this->ComputeDebugString(false, false, global);
+  ElementSemisimpleLieAlgebra<Rational> g1;
+  ElementSemisimpleLieAlgebra<Rational> g2;
+  ElementSemisimpleLieAlgebra<Rational> g3;
+  ElementSemisimpleLieAlgebra<Rational> g23;
+  ElementSemisimpleLieAlgebra<Rational> g31;
+  ElementSemisimpleLieAlgebra<Rational> g12;
+  ElementSemisimpleLieAlgebra<Rational> g123;
+  ElementSemisimpleLieAlgebra<Rational> g231;
+  ElementSemisimpleLieAlgebra<Rational> g312;
+  ElementSemisimpleLieAlgebra<Rational> temp;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     g1.makeGenerator(i, *this);
     for (int j = 0; j < this->getNumberOfGenerators(); j ++) {
@@ -1183,7 +1181,9 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
               range[leftIndex];
               ElementSemisimpleLieAlgebra<Rational>& rightRangeElement =
               range[rightIndex];
-              this->lieBracket(leftRangeElement, rightRangeElement, range[index]);
+              this->lieBracket(
+                leftRangeElement, rightRangeElement, range[index]
+              );
               nonExplored.removeSelection(index);
             }
           }
@@ -1341,21 +1341,21 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
   int numberofGenerators = this->domainAlgebra().getNumberOfGenerators();
   nonComputed.initialize(numberofGenerators);
   nonComputed.makeFullSelection();
-  List<ElementSemisimpleLieAlgebra<Rational> > tempDomain, tempRange;
-  tempDomain.setSize(numberofGenerators);
-  tempRange.setSize(numberofGenerators);
+  List<ElementSemisimpleLieAlgebra<Rational> > currentDomain, currentRange;
+  currentDomain.setSize(numberofGenerators);
+  currentRange.setSize(numberofGenerators);
   Vector<Rational> simpleRoot;
   for (int i = 0; i < domainRank; i ++) {
     simpleRoot.makeEi(domainRank, i);
     int index = this->domainAlgebra().getGeneratorIndexFromRoot(simpleRoot);
     int indexNegative =
     this->domainAlgebra().getGeneratorIndexFromRoot(- simpleRoot);
-    tempDomain[index].makeGGenerator(simpleRoot, this->domainAlgebra());
-    tempDomain[indexNegative].makeGGenerator(
+    currentDomain[index].makeGGenerator(simpleRoot, this->domainAlgebra());
+    currentDomain[indexNegative].makeGGenerator(
       - simpleRoot, this->domainAlgebra()
     );
-    tempRange[index] = this->imagesPositiveSimpleChevalleyGenerators[i];
-    tempRange[indexNegative] =
+    currentRange[index] = this->imagesPositiveSimpleChevalleyGenerators[i];
+    currentRange[indexNegative] =
     this->imagesNegativeSimpleChevalleyGenerators[i];
     nonComputed.removeSelection(index);
     nonComputed.removeSelection(indexNegative);
@@ -1390,18 +1390,18 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
           continue;
         }
         ElementSemisimpleLieAlgebra<Rational>& leftDomainElement =
-        tempDomain[leftIndex];
+        currentDomain[leftIndex];
         ElementSemisimpleLieAlgebra<Rational>& rightDomainElement =
-        tempDomain[rightIndex];
+        currentDomain[rightIndex];
         this->domainAlgebra().lieBracket(
-          leftDomainElement, rightDomainElement, tempDomain[index]
+          leftDomainElement, rightDomainElement, currentDomain[index]
         );
         ElementSemisimpleLieAlgebra<Rational>& leftRangeElement =
-        tempRange[leftIndex];
+        currentRange[leftIndex];
         ElementSemisimpleLieAlgebra<Rational>& rightRangeElement =
-        tempRange[rightIndex];
+        currentRange[rightIndex];
         this->coDomainAlgebra().lieBracket(
-          leftRangeElement, rightRangeElement, tempRange[index]
+          leftRangeElement, rightRangeElement, currentRange[index]
         );
         nonComputed.removeSelection(index);
         break;
@@ -1416,22 +1416,22 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
     int rightIndex =
     this->domainAlgebra().getGeneratorIndexFromRoot(- simpleRoot);
     this->domainAlgebra().lieBracket(
-      tempDomain[leftIndex],
-      tempDomain[rightIndex],
-      tempDomain[numberOfPositiveRoots + i]
+      currentDomain[leftIndex],
+      currentDomain[rightIndex],
+      currentDomain[numberOfPositiveRoots + i]
     );
     this->coDomainAlgebra().lieBracket(
-      tempRange[leftIndex],
-      tempRange[rightIndex],
-      tempRange[numberOfPositiveRoots + i]
+      currentRange[leftIndex],
+      currentRange[rightIndex],
+      currentRange[numberOfPositiveRoots + i]
     );
   }
   Vectors<Rational> vectorsLeft, vectorsRight;
-  vectorsLeft.setSize(tempDomain.size);
-  vectorsRight.setSize(tempDomain.size);
-  for (int i = 0; i < tempRange.size; i ++) {
-    tempDomain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
-    tempRange[i].toVectorNegativeRootSpacesFirst(
+  vectorsLeft.setSize(currentDomain.size);
+  vectorsRight.setSize(currentDomain.size);
+  for (int i = 0; i < currentRange.size; i ++) {
+    currentDomain[i].toVectorNegativeRootSpacesFirst(vectorsLeft[i]);
+    currentRange[i].toVectorNegativeRootSpacesFirst(
       vectorsRight[i], this->coDomainAlgebra()
     );
   }
@@ -1440,8 +1440,8 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
     vectorsLeft, vectorsRight
   );
   Vector<Rational> imageRoot;
-  this->domainAllChevalleyGenerators.setSize(tempDomain.size);
-  this->imagesAllChevalleyGenerators.setSize(tempDomain.size);
+  this->domainAllChevalleyGenerators.setSize(currentDomain.size);
+  this->imagesAllChevalleyGenerators.setSize(currentDomain.size);
   for (
     int i = 0; i < this->domainAlgebra().getNumberOfGenerators(); i ++
   ) {
@@ -1882,9 +1882,9 @@ std::string SemisimpleLieAlgebra::getStringFromChevalleyGenerator(
   int index, FormatExpressions* polynomialFormat
 ) const {
   std::stringstream out;
-  MemorySaving<FormatExpressions> tempFormat;
+  MemorySaving<FormatExpressions> currentFormat;
   if (polynomialFormat == nullptr) {
-    polynomialFormat = &tempFormat.getElement();
+    polynomialFormat = &currentFormat.getElement();
   }
   if (this->isGeneratorFromCartan(index)) {
     out

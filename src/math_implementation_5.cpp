@@ -16,15 +16,15 @@ std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
     return "1";
   }
   std::stringstream out;
-  FormatExpressions tempFormat;
+  FormatExpressions currentFormat;
   if (format == nullptr) {
-    tempFormat.polynomialDefaultLetter = "\\partial";
+    currentFormat.polynomialDefaultLetter = "\\partial";
   } else {
-    tempFormat.polynomialDefaultLetter = format->weylAlgebraDefaultLetter;
-    tempFormat.polynomialAlphabet = format->weylAlgebraLetters;
+    currentFormat.polynomialDefaultLetter = format->weylAlgebraDefaultLetter;
+    currentFormat.polynomialAlphabet = format->weylAlgebraLetters;
   }
   std::string firstS = this->polynomialPart.toString(format);
-  std::string secondS = this->differentialPart.toString(&tempFormat);
+  std::string secondS = this->differentialPart.toString(&currentFormat);
   if (firstS != "1") {
     out << firstS;
   }
@@ -477,7 +477,9 @@ void ElementSemisimpleLieAlgebra<Coefficient>::getBasisFromSpanOfElements(
   for (int i = 0; i < rootForm.size; i ++) {
     ElementSemisimpleLieAlgebra& currentElement = outputBasis[i];
     currentElement.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
-      rootForm[i], (*currentElement.ownerArray)[currentElement.indexOfOwnerAlgebra]
+      rootForm[i], (*currentElement.ownerArray)[
+        currentElement.indexOfOwnerAlgebra
+      ]
     );
   }
 }
@@ -1366,9 +1368,9 @@ bool Cone::isInInterior(const Vector<Rational>& point) const {
 std::string MonomialPolynomial::toString(FormatExpressions* polynomialFormat)
 const {
   std::stringstream out;
-  MemorySaving<FormatExpressions> tempFormat;
+  MemorySaving<FormatExpressions> formatContainer;
   if (polynomialFormat == nullptr) {
-    polynomialFormat = &tempFormat.getElement();
+    polynomialFormat = &formatContainer.getElement();
   }
   if (this->isConstant()) {
     return "1";

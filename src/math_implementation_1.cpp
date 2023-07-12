@@ -431,7 +431,10 @@ bool LittelmannPath::generateOrbit(
     int lowestNonExplored = 0; lowestNonExplored < hashedOutput.size;
     lowestNonExplored ++
   ) {
-    if (upperBoundNumberOfElements > 0 && upperBoundNumberOfElements < hashedOutput.size) {
+    if (
+      upperBoundNumberOfElements > 0 &&
+      upperBoundNumberOfElements < hashedOutput.size
+    ) {
       result = false;
       break;
     } else {
@@ -528,7 +531,8 @@ modOutFDRelationsExperimental(
     ElementSemisimpleLieAlgebra<Rational>& currentElement =
     this->owner->elementOrder[indexCurrentGenerator];
     if (
-      !currentElement.getCartanPart().isEqualToZero() || currentElement.size() > 1
+      !currentElement.getCartanPart().isEqualToZero() ||
+      currentElement.size() > 1
     ) {
       return false;
     }
@@ -775,14 +779,14 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
     intermediateAccum.modOutVermaRelations(
       &global, substitutionHiGoesToIthElement, ringUnit, ringZero
     );
-    MonomialUniversalEnveloping<Coefficient>& rightMon = MTright[j];
+    MonomialUniversalEnveloping<Coefficient>& rightMonomial = MTright[j];
     Coefficient& rightMonCoeff = MTright.coefficients[j];
     int power;
-    for (int i = rightMon.powers.size - 1; i >= 0; i --) {
-      if (rightMon.powers[i].isSmallInteger(&power)) {
+    for (int i = rightMonomial.powers.size - 1; i >= 0; i --) {
+      if (rightMonomial.powers[i].isSmallInteger(&power)) {
         for (int k = 0; k < power; k ++) {
           element.makeOneGenerator(
-            rightMon.generatorsIndices[i],
+            rightMonomial.generatorsIndices[i],
             *this->owners,
             this->indexInOwners,
             ringUnit
@@ -1002,7 +1006,8 @@ void BranchingData::initializePart1NoSubgroups() {
     this->homomorphism.imagesAllChevalleyGenerators[
       this->indicesNilradicalSmall[i]
     ];
-    int index = this->nilradicalModuloPreimageNilradical.getIndex(elementImage);
+    int index =
+    this->nilradicalModuloPreimageNilradical.getIndex(elementImage);
     if (index != - 1) {
       this->nilradicalModuloPreimageNilradical.removeIndexSwapWithLast(index);
       this->weightsNilModPreNil.removeIndexSwapWithLast(index);

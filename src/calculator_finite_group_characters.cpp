@@ -125,10 +125,12 @@ computeAllGeneratorImagesFromSimple() {
     for (int j = 0; j < rank; j ++) {
       currentElement = generators[j] * elementsExplored[i];
       if (!elementsExplored.contains(currentElement)) {
-        int indexCurrentElement = this->ownerGroup->elements.getIndex(currentElement);
+        int indexCurrentElement =
+        this->ownerGroup->elements.getIndex(currentElement);
         this->elementIsComputed[indexCurrentElement] = true;
         this->elementImages[indexParentElement].multiplyOnTheLeft(
-          this->generators[j], this->elementImages[indexCurrentElement]
+          this->generators[j],
+          this->elementImages[indexCurrentElement]
         );
         elementsExplored.addOnTop(currentElement);
       }
@@ -163,10 +165,12 @@ computeAllElementImages() {
     for (int j = 0; j < rank; j ++) {
       currentElement = generators[j] * elementsExplored[i];
       if (!elementsExplored.contains(currentElement)) {
-        int indexCurrentElement = this->ownerGroup->elements.getIndex(currentElement);
+        int indexCurrentElement =
+        this->ownerGroup->elements.getIndex(currentElement);
         this->elementIsComputed[indexCurrentElement] = true;
         this->elementImages[indexParentElement].multiplyOnTheLeft(
-          this->generators[j], this->elementImages[indexCurrentElement]
+          this->generators[j],
+          this->elementImages[indexCurrentElement]
         );
         elementsExplored.addOnTop(currentElement);
       }
@@ -963,7 +967,9 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
       out << "<td>";
       if (isGood) {
         out
-        << HtmlRoutines::getMathNoDisplay(standardElement.toString(&format));
+        << HtmlRoutines::getMathNoDisplay(
+          standardElement.toString(&format)
+        );
       } else {
         out << "-";
       }
@@ -1213,9 +1219,9 @@ weylGroupIrrepsAndCharTableComputeFromScratch(
   WeylGroupData& groupData = output.getValueNonConst<WeylGroupData>();
   groupData.computeInitialIrreducibleRepresentations();
   groupData.group.computeIrreducibleRepresentationsTodorsVersion();
-  FormatExpressions tempFormat;
-  tempFormat.flagUseLatex = true;
-  tempFormat.flagUseHTML = false;
+  FormatExpressions currentFormat;
+  currentFormat.flagUseLatex = true;
+  currentFormat.flagUseHTML = false;
   std::stringstream out;
   out << "Character table: ";
   out << groupData.group.prettyPrintCharacterTable();
@@ -1225,9 +1231,9 @@ weylGroupIrrepsAndCharTableComputeFromScratch(
   ) {
     out
     << "<hr>"
-    << groupData.group.irreducibleRepresentations[i].toString(&tempFormat);
+    << groupData.group.irreducibleRepresentations[i].toString(&currentFormat);
   }
-  out << groupData.toString(&tempFormat);
+  out << groupData.toString(&currentFormat);
   return output.assignValue(calculator, out.str());
 }
 
@@ -1249,22 +1255,22 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
   dynkinType.getOuterAutosGeneratorsActOnVectorColumn(
     groupGeneratedByMatrices.generators
   );
-  FormatExpressions tempFormat;
-  tempFormat.flagUseLatex = true;
-  tempFormat.flagUseHTML = false;
+  FormatExpressions currentFormat;
+  currentFormat.flagUseLatex = true;
+  currentFormat.flagUseHTML = false;
   for (int i = 0; i < groupGeneratedByMatrices.generators.size; i ++) {
     outCommand
     << "<br>s_{"
     << i + 1
     << "}=MatrixRationals"
-    << groupGeneratedByMatrices.generators[i].toStringMatrixForm(&tempFormat)
+    << groupGeneratedByMatrices.generators[i].toStringMatrixForm(&currentFormat)
     << ";";
     out
     << "<br>s_"
     << i + 1
     << " = "
     << HtmlRoutines::getMathNoDisplay(
-      groupGeneratedByMatrices.generators[i].toStringMatrixForm(&tempFormat)
+      groupGeneratedByMatrices.generators[i].toStringMatrixForm(&currentFormat)
     );
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";
@@ -1299,7 +1305,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOuterAutoGeneratorsPrint(
         << HtmlRoutines::getMathNoDisplay(elementNameStream.str())
         << "</td><td>"
         << HtmlRoutines::getMathNoDisplay(
-          groupGeneratedByMatrices.elements[i].toStringMatrixForm(&tempFormat)
+          groupGeneratedByMatrices.elements[i].toStringMatrixForm(&currentFormat)
         )
         << "</td></tr>";
       }

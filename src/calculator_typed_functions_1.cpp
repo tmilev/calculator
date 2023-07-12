@@ -46,12 +46,13 @@ addElementZModPOrRationalToElementZModPOrRational(
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational(
+bool CalculatorFunctionsBinaryOps::
+multiplyElementZmodPorRationalByElementZmodPorRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
     "CalculatorFunctionsBinaryOps::"
-      "multiplyElementZmodPorRationalByElementZmodPorRational"
+    "multiplyElementZmodPorRationalByElementZmodPorRational"
   );
   if (!input.isListNElements(3)) {
     return false;
@@ -86,7 +87,8 @@ bool CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPo
   return false;
 }
 
-bool CalculatorFunctionsBinaryOps::divideElementZmodPorRationalByElementZmodPorRational(
+bool CalculatorFunctionsBinaryOps::
+divideElementZmodPorRationalByElementZmodPorRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
@@ -211,7 +213,9 @@ divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational(
 bool CalculatorFunctionsBinaryOps::multiplyElementHypOctByElementHypOct(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyElementHypOctByElementHypOct");
+  STACK_TRACE(
+    "CalculatorFunctionsBinaryOps::multiplyElementHypOctByElementHypOct"
+  );
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -317,7 +321,9 @@ bool CalculatorFunctionsBinaryOps::multiplyRationalByRational(
 bool CalculatorFunctionsBinaryOps::multiplyCoxeterElementByCoxeterElement(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyCoxeterElementByCoxeterElement");
+  STACK_TRACE(
+    "CalculatorFunctionsBinaryOps::multiplyCoxeterElementByCoxeterElement"
+  );
   if (!input.isListNElements(3)) {
     return false;
   }
@@ -640,7 +646,8 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor(
     return true;
   }
   semisimpleLieAlgebra.orderNilradicalNilWeightAscending(
-    rightElementETGVM.getOwnerModule().parabolicSelectionNonSelectedAreElementsLevi
+    rightElementETGVM.getOwnerModule().
+    parabolicSelectionNonSelectedAreElementsLevi
   );
   semisimpleLieAlgebra.flagHasNilradicalOrder = true;
   RationalFraction<Rational> one(Rational::one());
@@ -910,13 +917,13 @@ bool CalculatorFunctionsBinaryOps::multiplyLRObyLRO(
   ) {
     return false;
   }
-  const MonomialTensor<int, HashFunctions::hashFunction>& leftMon =
+  const MonomialTensor<int, HashFunctions::hashFunction>& leftMonomial =
   output.getValue<MonomialTensor<int, HashFunctions::hashFunction> >();
-  const MonomialTensor<int, HashFunctions::hashFunction>& rightMon =
+  const MonomialTensor<int, HashFunctions::hashFunction>& rightMonomial =
   rightCopy.getValue<MonomialTensor<int, HashFunctions::hashFunction> >();
   MonomialTensor<int, HashFunctions::hashFunction> result;
-  result = leftMon;
-  result *= rightMon;
+  result = leftMonomial;
+  result *= rightMonomial;
   for (int i = 0; i < result.generatorsIndices.size; i ++) {
     if (result.powers[i] > 100000 || result.powers[i] < 0) {
       return

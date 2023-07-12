@@ -1473,7 +1473,7 @@ preparePartialFractionExpressionSummands() {
   Expression currentDenominatorNoPowerMonic;
   Expression currentDen;
   Expression currentPartialFractionNoCoefficient;
-  Expression currentPFWithCoeff;
+  Expression currentPFWithCoefficient;
   Expression coeffE;
   this->partialFractionSummands.setSize(0);
   Polynomial<AlgebraicNumber> denominatorRescaled;
@@ -1537,9 +1537,9 @@ preparePartialFractionExpressionSummands() {
       currentPartialFractionNoCoefficient = currentNumerator;
       currentPartialFractionNoCoefficient /= currentDen;
       coeffE.assignValue(*this->owner, currentCoefficient);
-      currentPFWithCoeff = coeffE * currentPartialFractionNoCoefficient;
-      currentPFWithCoeff.checkConsistencyRecursively();
-      this->partialFractionSummands.addOnTop(currentPFWithCoeff);
+      currentPFWithCoefficient = coeffE * currentPartialFractionNoCoefficient;
+      currentPFWithCoefficient.checkConsistencyRecursively();
+      this->partialFractionSummands.addOnTop(currentPFWithCoefficient);
     }
   }
   if (!this->quotient.isEqualToZero()) {
@@ -1549,7 +1549,7 @@ preparePartialFractionExpressionSummands() {
     );
     if (
       !CalculatorConversions::functionExpressionFromPolynomial<Rational>(
-        *this->owner, currentPFpolyForm, currentPFWithCoeff
+        *this->owner, currentPFpolyForm, currentPFWithCoefficient
       )
     ) {
       *this->owner
@@ -1558,8 +1558,8 @@ preparePartialFractionExpressionSummands() {
       << " to expression. This shouldn't happen. ";
       return false;
     }
-    currentPFWithCoeff.checkConsistencyRecursively();
-    this->partialFractionSummands.addOnTop(currentPFWithCoeff);
+    currentPFWithCoefficient.checkConsistencyRecursively();
+    this->partialFractionSummands.addOnTop(currentPFWithCoefficient);
   }
   return true;
 }
@@ -1582,9 +1582,9 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
   Expression currentDenominatorNoPowerMonic;
   Expression currentDen;
   Expression currentIntegrand;
-  Expression currentIntegralNoCoeff;
-  Expression currentIntegralWithCoeff;
-  Expression coeffE;
+  Expression currentIntegralNoCoefficient;
+  Expression currentIntegralWithCoefficient;
+  Expression coefficientExpression;
   this->integralSummands.setSize(0);
   Polynomial<AlgebraicNumber> denominatorRescaled;
   Polynomial<AlgebraicNumber> numeratorRescaled;
@@ -1643,16 +1643,17 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
       }
       currentIntegrand = currentNumerator;
       currentIntegrand /= currentDen;
-      currentIntegralNoCoeff.makeIntegral(
+      currentIntegralNoCoefficient.makeIntegral(
         *this->owner,
         this->integrationSetE,
         currentIntegrand,
         this->context.getVariable(0)
       );
-      coeffE.assignValue(*this->owner, currentCoefficient);
-      currentIntegralWithCoeff = coeffE * currentIntegralNoCoeff;
-      currentIntegralWithCoeff.checkConsistencyRecursively();
-      this->integralSummands.addOnTop(currentIntegralWithCoeff);
+      coefficientExpression.assignValue(*this->owner, currentCoefficient);
+      currentIntegralWithCoefficient =
+      coefficientExpression * currentIntegralNoCoefficient;
+      currentIntegralWithCoefficient.checkConsistencyRecursively();
+      this->integralSummands.addOnTop(currentIntegralWithCoefficient);
     }
   }
   if (!this->quotient.isEqualToZero()) {
@@ -1671,14 +1672,14 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
       << " to expression. This shouldn't happen. ";
       return false;
     }
-    currentIntegralWithCoeff.makeIntegral(
+    currentIntegralWithCoefficient.makeIntegral(
       *this->owner,
       this->integrationSetE,
       currentIntegrand,
       this->context.getVariable(0)
     );
-    currentIntegralWithCoeff.checkConsistencyRecursively();
-    this->integralSummands.addOnTop(currentIntegralWithCoeff);
+    currentIntegralWithCoefficient.checkConsistencyRecursively();
+    this->integralSummands.addOnTop(currentIntegralWithCoefficient);
   }
   this->integralSum.makeSum(*this->owner, this->integralSummands);
   this->integralSum.checkConsistencyRecursively();
@@ -6189,7 +6190,7 @@ bool CalculatorFunctionsDifferentiation::diffdivDiffxToDifferentiation(
   }
   bool hasArgument = false;
   bool hasExtraCF = false;
-  Expression argument, extraCoeff;
+  Expression argument, extraCoefficient;
   if (input[1] != "Differential" && input[1] != "d") {
     if (!input[1].startsWith(calculator.opDifferential())) {
       return false;
@@ -6199,7 +6200,7 @@ bool CalculatorFunctionsDifferentiation::diffdivDiffxToDifferentiation(
     }
     argument = input[1][1];
     if (input[1].size() == 3) {
-      extraCoeff = input[1][2];
+      extraCoefficient = input[1][2];
       hasExtraCF = true;
     }
     hasArgument = true;
@@ -6218,7 +6219,7 @@ bool CalculatorFunctionsDifferentiation::diffdivDiffxToDifferentiation(
   }
   if (hasExtraCF) {
     Expression outputCopy = output;
-    output = extraCoeff * outputCopy;
+    output = extraCoefficient * outputCopy;
   }
   return true;
 }

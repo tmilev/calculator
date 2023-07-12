@@ -2295,7 +2295,9 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
     << yDefE[2].toString();
   }
   if (isElementZmodP) {
-    if (elementZmodP.xCoordinate.modulus != elementZmodP.yCoordinate.modulus) {
+    if (
+      elementZmodP.xCoordinate.modulus != elementZmodP.yCoordinate.modulus
+    ) {
       return calculator << "The two base coordinates have different moduli. ";
     }
   }
@@ -2414,7 +2416,8 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   context.addVariable(xE);
   context.addVariable(yE);
   if (isRational) {
-    return output.assignValueWithContext(calculator, elementRational, context);
+    return
+    output.assignValueWithContext(calculator, elementRational, context);
   }
   if (isElementZmodP) {
     return output.assignValueWithContext(calculator, elementZmodP, context);

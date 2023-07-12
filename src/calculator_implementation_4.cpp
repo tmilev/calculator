@@ -888,7 +888,7 @@ bool Calculator::collectCoefficientsPowersVariables(
   List<Expression> summands, currentMultiplicands, remainingMultiplicands;
   Calculator& calculator = *input.owner;
   calculator.collectOpands(input, calculator.opPlus(), summands);
-  Expression currentCoeff;
+  Expression currentCoefficient;
   outputPositionIiscoeffXtoIth.makeZero();
   for (int i = 0; i < summands.size; i ++) {
     calculator.collectOpands(
@@ -900,13 +900,13 @@ bool Calculator::collectCoefficientsPowersVariables(
       remainingMultiplicands = currentMultiplicands;
       remainingMultiplicands.removeIndexShiftDown(j);
       if (remainingMultiplicands.size == 0) {
-        currentCoeff.assignValue(calculator, 1);
+        currentCoefficient.assignValue(calculator, 1);
       } else {
-        currentCoeff.makeProduct(calculator, remainingMultiplicands);
+        currentCoefficient.makeProduct(calculator, remainingMultiplicands);
       }
       if (currentE == variable) {
         outputPositionIiscoeffXtoIth.addMonomial(
-          MonomialVector(1), currentCoeff
+          MonomialVector(1), currentCoefficient
         );
         found = true;
         break;
@@ -916,7 +916,7 @@ bool Calculator::collectCoefficientsPowersVariables(
         if (currentE[1] == variable) {
           if (currentE[2].isSmallInteger(&power)) {
             outputPositionIiscoeffXtoIth.addMonomial(
-              MonomialVector(power), currentCoeff
+              MonomialVector(power), currentCoefficient
             );
             found = true;
             break;
@@ -2347,7 +2347,9 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
     << "<td style='vertical-align:top;background-color:"
     << ((counter % 2 == 0) ? "#FAFAFA" : "#F0F0F0")
     << "'>"
-    << currentElement.toStringHumanReadable(*this, includeLispifiedExpressions)
+    << currentElement.toStringHumanReadable(
+      *this, includeLispifiedExpressions
+    )
     << "</td>";
     counter ++;
   }

@@ -644,7 +644,9 @@ void FiniteGroup<elementSomeGroup>::computeGeneratorsConjugacyClasses() {
   for (int i = 0; i < this->unionGeneratorsCC.size; i ++) {
     for (int j = 0; j < this->generators.size; j ++) {
       elementSomeGroup::conjugationAction(
-        this->generators[j], this->unionGeneratorsCC[i], currentElement
+        this->generators[j],
+        this->unionGeneratorsCC[i],
+        currentElement
       );
       this->unionGeneratorsCC.addOnTopNoRepetition(currentElement);
     }
@@ -1034,9 +1036,12 @@ bool WeylGroupAutomorphisms::generateOuterOrbit(
         if (outputSubset != nullptr) {
           currentElement.makeIdentity(*this);
           generatorsOuterGroup.makeSimpleReflection(j);
-          currentElement.generatorsLastAppliedFirst.addOnTop(generatorsOuterGroup);
-          currentElement.generatorsLastAppliedFirst.addListOnTop((*outputSubset)[i]
-            .generatorsLastAppliedFirst
+          currentElement.generatorsLastAppliedFirst.addOnTop(
+            generatorsOuterGroup
+          );
+          currentElement.generatorsLastAppliedFirst.addListOnTop((
+              *outputSubset
+            )[i].generatorsLastAppliedFirst
           );
           outputSubset->addOnTop(currentElement);
         }
@@ -1200,8 +1205,9 @@ bool WeylGroupData::generateOrbit(
           currentElement.generatorsLastAppliedFirst.setSize(1);
           simpleReflection.makeSimpleReflection(j);
           currentElement.generatorsLastAppliedFirst[0] = simpleReflection;
-          currentElement.generatorsLastAppliedFirst.addListOnTop((*outputSubset)[i]
-            .generatorsLastAppliedFirst
+          currentElement.generatorsLastAppliedFirst.addListOnTop((
+              *outputSubset
+            )[i].generatorsLastAppliedFirst
           );
           currentElement.makeCanonical();
           outputSubset->addOnTop(currentElement);
@@ -1428,7 +1434,7 @@ bool WeylGroupData::freudenthalFormula(
   hwPlusRhoSquared = this->rootScalarCartanRoot(convertor, convertor);
   outputMultiplicitiesSimpleCoordinates[0] = 1;
   explored[0] = true;
-  Coefficient bufferCoefficient;
+  Coefficient bufferCoefficienticient;
   ProgressReport report;
   for (int k = 1; k < outputDominantWeightsSimpleCoordinates.size; k ++) {
     explored[k] = true;
@@ -1460,18 +1466,20 @@ bool WeylGroupData::freudenthalFormula(
           }
           return false;
         }
-        bufferCoefficient =
+        bufferCoefficienticient =
         this->rootScalarCartanRoot(currentWeight, this->rootsOfBorel[j]);
-        bufferCoefficient *= outputMultiplicitiesSimpleCoordinates[index];
-        currentAccumulator += bufferCoefficient;
+        bufferCoefficienticient *=
+        outputMultiplicitiesSimpleCoordinates[index];
+        currentAccumulator += bufferCoefficienticient;
       }
     }
     currentAccumulator *= 2;
     convertor = outputDominantWeightsSimpleCoordinates[k];
     convertor += this->rho;
-    bufferCoefficient = hwPlusRhoSquared;
-    bufferCoefficient -= this->rootScalarCartanRoot(convertor, convertor);
-    if (bufferCoefficient == 0) {
+    bufferCoefficienticient = hwPlusRhoSquared;
+    bufferCoefficienticient -=
+    this->rootScalarCartanRoot(convertor, convertor);
+    if (bufferCoefficienticient == 0) {
       global.fatal
       << "This is a programming or a mathematical error. "
       << "I get that the denominator in the Freundenthal formula is zero. "
@@ -1481,7 +1489,7 @@ bool WeylGroupData::freudenthalFormula(
       << this->toString()
       << global.fatal;
     }
-    currentAccumulator /= bufferCoefficient;
+    currentAccumulator /= bufferCoefficienticient;
     std::stringstream out;
     out
     << " Computed the multiplicities of "
@@ -1607,7 +1615,7 @@ void WeylGroupData::reflectBetaWithRespectToAlpha(
   bool rhoAction,
   Vector<Coefficient>& output
 ) const {
-  Coefficient bufferCoefficient;
+  Coefficient bufferCoefficienticient;
   Coefficient alphaShift;
   Coefficient lengthA;
   Vector<Coefficient> result;
@@ -1622,23 +1630,23 @@ void WeylGroupData::reflectBetaWithRespectToAlpha(
   }
   for (int i = 0; i < this->cartanSymmetric.numberOfRows; i ++) {
     for (int j = 0; j < this->cartanSymmetric.numberOfColumns; j ++) {
-      bufferCoefficient = result[j];
-      bufferCoefficient *= alpha[i];
-      bufferCoefficient *= this->cartanSymmetric.elements[i][j] *(- 2);
-      alphaShift += bufferCoefficient;
-      bufferCoefficient = alpha[i];
-      bufferCoefficient *= alpha[j];
-      bufferCoefficient *= this->cartanSymmetric.elements[i][j];
-      lengthA += bufferCoefficient;
+      bufferCoefficienticient = result[j];
+      bufferCoefficienticient *= alpha[i];
+      bufferCoefficienticient *= this->cartanSymmetric.elements[i][j] *(- 2);
+      alphaShift += bufferCoefficienticient;
+      bufferCoefficienticient = alpha[i];
+      bufferCoefficienticient *= alpha[j];
+      bufferCoefficienticient *= this->cartanSymmetric.elements[i][j];
+      lengthA += bufferCoefficienticient;
     }
   }
   alphaShift /= lengthA;
   output.setSize(this->cartanSymmetric.numberOfRows);
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    bufferCoefficient = alphaShift;
-    bufferCoefficient *= alpha[i];
-    bufferCoefficient += result[i];
-    output[i] = bufferCoefficient;
+    bufferCoefficienticient = alphaShift;
+    bufferCoefficienticient *= alpha[i];
+    bufferCoefficienticient += result[i];
+    output[i] = bufferCoefficienticient;
   }
   if (rhoAction) {
     output -= this->rho;
@@ -2329,7 +2337,7 @@ freudenthalFormulaIrrepIsWRTLeviPart(
   Explored[0] = true;
   outputMultiplicitiesSimpleCoordinates[0] = 1;
   Vector<Coefficient> convertor;
-  Coefficient bufferCoeff;
+  Coefficient bufferCoefficienticient;
   ProgressReport report;
   for (int k = 1; k < outputDomWeightsSimpleCoordinatesLeviPart.size; k ++) {
     Explored[k] = true;
@@ -2364,27 +2372,29 @@ freudenthalFormulaIrrepIsWRTLeviPart(
         }
         convertor = this->rootsOfBorel[j];
         // <-implicit type conversion here!
-        bufferCoeff =
+        bufferCoefficienticient =
         this->ambientWeyl->rootScalarCartanRoot(currentWeight, convertor);
-        bufferCoeff *= outputMultiplicitiesSimpleCoordinates[index];
-        currentAccum += bufferCoeff;
+        bufferCoefficienticient *=
+        outputMultiplicitiesSimpleCoordinates[index];
+        currentAccum += bufferCoefficienticient;
       }
     }
     currentAccum *= 2;
-    bufferCoeff = hwPlusRhoSquared;
-    bufferCoeff -=
+    bufferCoefficienticient = hwPlusRhoSquared;
+    bufferCoefficienticient -=
     this->ambientWeyl->rootScalarCartanRoot(
       outputDomWeightsSimpleCoordinatesLeviPart[k] + rho,
       outputDomWeightsSimpleCoordinatesLeviPart[k] + rho
     );
-    // bufferCoeff now holds the denominator participating in the Freudenthal
+    // bufferCoefficient now holds the denominator participating in the
+    // Freudenthal
     // formula.
-    if (bufferCoeff.isEqualToZero()) {
+    if (bufferCoefficienticient.isEqualToZero()) {
       global.fatal
       << "Coefficient must not be zero at this point. "
       << global.fatal;
     }
-    currentAccum /= bufferCoeff;
+    currentAccum /= bufferCoefficienticient;
     std::stringstream out;
     out
     << " Computed the multiplicities of "
@@ -2752,14 +2762,14 @@ computeIrreducibleRepresentationsTodorsVersion() {
       << "\n<br>\n"
       << this->irreducibleRepresentations[i].character.toString();
     }
-    FormatExpressions tempFormat;
-    tempFormat.flagUseLatex = true;
+    FormatExpressions currentFormat;
+    currentFormat.flagUseLatex = true;
     for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
       reportStream
       << "<hr>irrep "
       << i + 1
       << "<br>"
-      << this->irreps_grcam[i].toString(&tempFormat);
+      << this->irreps_grcam[i].toString(&currentFormat);
     }
     report1.report(reportStream.str());
   }

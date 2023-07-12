@@ -3965,7 +3965,9 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
   if (this->unknownCartanCentralizerBasis.size > 0) {
     Matrix<Polynomial<AlgebraicNumber> > centralizerCartanVars;
     Vectors<Polynomial<AlgebraicNumber> > centralizerCartanElements;
-    centralizerCartanElements.setSize(this->unknownCartanCentralizerBasis.size);
+    centralizerCartanElements.setSize(
+      this->unknownCartanCentralizerBasis.size
+    );
     for (int i = 0; i < this->unknownCartanCentralizerBasis.size; i ++) {
       this->getGenericCartanCentralizerLinearCombination(
         i, this->unknownCartanCentralizerBasis[i]
@@ -6812,7 +6814,8 @@ bool CandidateSemisimpleSubalgebra::verifySolution(
     currentNegative.substituteInCoefficients(substitution);
     currentPositive.substituteInCoefficients(substitution);
     this->negativeGenerators[i] = currentNegative;
-    // <-implicit type conversion here, will crash if currentNegativeElement has
+    // <-implicit type conversion here, will crash if currentNegativeElement
+    // has
     // non-const coefficients
     this->positiveGenerators[i] = currentPositive;
     // <-implicit type conversion here, will crash if currentNegElt has
@@ -9039,23 +9042,23 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
     << "<br>Cone intersection: "
     << this->coneIntersection.toStringLetterFormat("w");
     out << "<br> ";
-    FormatExpressions tempFormat;
-    tempFormat.vectorSpaceEiBasisNames.setSize(this->coneIntersection.size);
+    FormatExpressions currentFormat;
+    currentFormat.vectorSpaceEiBasisNames.setSize(this->coneIntersection.size);
     for (int j = 0; j < this->nilradicalWeights.size; j ++) {
-      tempFormat.vectorSpaceEiBasisNames[j] =
+      currentFormat.vectorSpaceEiBasisNames[j] =
       this->nilradicalWeights[j].toString();
     }
     for (int j = 0; j < this->nonFernandoKacHighestWeights.size; j ++) {
-      tempFormat.vectorSpaceEiBasisNames[j + this->nilradicalWeights.size] =
+      currentFormat.vectorSpaceEiBasisNames[j + this->nilradicalWeights.size] =
       this->nonFernandoKacHighestWeights[j].toString();
     }
-    out << this->coneIntersection.toStringLetterFormat("w", &tempFormat);
+    out << this->coneIntersection.toStringLetterFormat("w", &currentFormat);
     if (this->flagNilradicalConesStronglyIntersect) {
       for (
         int j = 0; j < this->nonFernandoKacHighestWeightsStronglyTwoSided.size;
         j ++
       ) {
-        tempFormat.vectorSpaceEiBasisNames[
+        currentFormat.vectorSpaceEiBasisNames[
           j + this->nilradicalWeights.size
         ] =
         this->nonFernandoKacHighestWeightsStronglyTwoSided[j].toString();
@@ -9066,7 +9069,7 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
       << this->getConeStrongIntersectionWeight().toString();
       out
       << "<br>"
-      << this->coneStrongIntersection.toStringLetterFormat("w", &tempFormat);
+      << this->coneStrongIntersection.toStringLetterFormat("w", &currentFormat);
       out << "<br>The involved nilradical elements: " << "<br><table><tr>";
       for (int i = 0; i < this->nilradicalWeights.size; i ++) {
         if (this->coneStrongIntersection[i] != 0) {
@@ -9105,18 +9108,18 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
       this->flagComputedRelativelyStrongIntersections &&
       this->flagLinfiniteRelFound
     ) {
-      tempFormat.vectorSpaceEiBasisNames.setSize(
+      currentFormat.vectorSpaceEiBasisNames.setSize(
         this->coneRelativelyStrongIntersection.size
       );
       for (int j = 0; j < this->nilradicalSubset.size; j ++) {
-        tempFormat.vectorSpaceEiBasisNames[j] =
+        currentFormat.vectorSpaceEiBasisNames[j] =
         this->nilradicalSubsetWeights[j].toString();
       }
       for (
         int j = 0; j < this->
         nonFernandoKacHighestWeightVectorsStrongRelativeToSubset.size; j ++
       ) {
-        tempFormat.vectorSpaceEiBasisNames[j + this->nilradicalSubset.size] =
+        currentFormat.vectorSpaceEiBasisNames[j + this->nilradicalSubset.size] =
         this->nonFernandoKacHighestWeightVectorsStrongRelativeToSubsetWeights[
           j
         ].toString();
@@ -9140,7 +9143,7 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
       out
       << "<br>Relation: "
       << this->coneRelativelyStrongIntersection.toStringLetterFormat(
-        "w", &tempFormat
+        "w", &currentFormat
       );
     }
     if (this->flagLinfiniteRelFound) {
@@ -9309,9 +9312,9 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
     << "\\caption{Nilradicals\\label{tableNilrads} }\\\\ "
     << "$ \\mathfrak n _{\\mathfrak l} "
     << "$ & Cones intersect & Cone intersection ";
-    FormatExpressions tempFormat;
+    FormatExpressions currentFormat;
     if (!this->characterFormat.isZeroPointer()) {
-      tempFormat = this->characterFormat.getElementConst();
+      currentFormat = this->characterFormat.getElementConst();
     }
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >
     relevantBracketsLeft,
@@ -9360,7 +9363,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
             nonFernandoKacHighestWeightVectorsStrongRelativeToSubsetWeights[j]
             *
             coefficient
-          ).toStringLetterFormat("\\omega", &tempFormat)
+          ).toStringLetterFormat("\\omega", &currentFormat)
           << "$";
           out << " & ";
           if (
@@ -9383,7 +9386,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
           out
           << "$"
           << (currentNilradical.nilradicalSubsetWeights[j] * coefficient).
-          toStringLetterFormat("\\omega", &tempFormat)
+          toStringLetterFormat("\\omega", &currentFormat)
           << "$";
           out << " & ";
           if (j != currentNilradical.nilradicalSubsetWeights.size - 1) {
@@ -9494,7 +9497,7 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
       // { out << " $" <<
       // currentNilradical.nonFernandoKacHighestWeights[j]
       // .toStringLetterFormat("\\omega",
-      // &tempFormat) << "$";
+      // &currentFormat) << "$";
       //      if (j != currentNilradical.nonFernandoKacHighestWeights.size- 1)
       //        out << ", ";
       //    }
@@ -9765,9 +9768,9 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(
   bool useHtml = format == nullptr ? true : format->flagUseHTML;
   List<DynkinSimpleType> simpleTypes;
   this->weylNonEmbedded->dynkinType.getTypesWithMults(simpleTypes);
-  FormatExpressions tempFormat;
-  tempFormat.ambientWeylLetter = this->getAmbientWeyl().dynkinType[0].letter;
-  tempFormat.ambientCartanSymmetricInverseScale =
+  FormatExpressions currentFormat;
+  currentFormat.ambientWeylLetter = this->getAmbientWeyl().dynkinType[0].letter;
+  currentFormat.ambientCartanSymmetricInverseScale =
   this->getAmbientWeyl().dynkinType[0].cartanSymmetricInverseScale;
   out << "<br>Elements Cartan subalgebra scaled to act by two by components: ";
   if (this->cartanSubalgebrasByComponentScaledToActByTwo.size == 0) {
@@ -9780,11 +9783,11 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(
     if (useLaTeX && useHtml) {
       out
       << HtmlRoutines::getMathNoDisplay(
-        simpleTypes[i].toString(&tempFormat), 1000
+        simpleTypes[i].toString(&currentFormat), 1000
       )
       << ": ";
     } else {
-      out << simpleTypes[i].toString(&tempFormat) << ":";
+      out << simpleTypes[i].toString(&currentFormat) << ":";
     }
     for (
       int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].
@@ -10144,13 +10147,13 @@ std::string CandidateSemisimpleSubalgebra::toStringSystem(
   << "Character ambient Lie algebra: "
   << this->characterFundamentalCoordinatesRelativeToCartan.toString();
   out << "<br>A necessary system to realize the candidate subalgebra.  ";
-  FormatExpressions tempFormat;
+  FormatExpressions currentFormat;
   for (int i = 0; i < this->systemToSolve.size; i ++) {
-    out << "<br>" << this->systemToSolve[i].toString(&tempFormat) << "= 0";
+    out << "<br>" << this->systemToSolve[i].toString(&currentFormat) << "= 0";
   }
   out << "<br>The above system after transformation.  ";
   for (int i = 0; i < this->transformedSystem.size; i ++) {
-    out << "<br>" << this->transformedSystem[i].toString(&tempFormat) << "= 0";
+    out << "<br>" << this->transformedSystem[i].toString(&currentFormat) << "= 0";
   }
   if (!this->flagSystemGroebnerBasisFound) {
     out
@@ -10376,14 +10379,14 @@ std::string CandidateSemisimpleSubalgebra::toString(
     << "'>Detailed information on isotypical nilradicals. </a><hr>";
   }
   out << this->toStringGenerators(format);
-  FormatExpressions tempFormat;
-  tempFormat.flagUseLatex = true;
-  tempFormat.flagUseFrac = true;
-  tempFormat.flagUseHTML = false;
+  FormatExpressions currentFormat;
+  currentFormat.flagUseLatex = true;
+  currentFormat.flagUseFrac = true;
+  currentFormat.flagUseHTML = false;
   out << "<br>Cartan symmetric matrix: ";
   out
   << HtmlRoutines::getMathNoDisplay(
-    this->weylNonEmbedded->cartanSymmetric.toString(&tempFormat)
+    this->weylNonEmbedded->cartanSymmetric.toString(&currentFormat)
   );
   out
   << "<br>Scalar products of elements of "
@@ -10391,7 +10394,7 @@ std::string CandidateSemisimpleSubalgebra::toString(
   << "(co-symmetric Cartan matrix): ";
   out
   << HtmlRoutines::getMathNoDisplay(
-    this->weylNonEmbedded->coCartanSymmetric.toString(&tempFormat)
+    this->weylNonEmbedded->coCartanSymmetric.toString(&currentFormat)
   );
   if (this->owner->flagRealForms) {
     out << "<br>" << this->wConjecture.toString(*this);

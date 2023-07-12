@@ -245,7 +245,6 @@ private:
   // <-semisimple Lie algebra can't be moved once created.
   // <-Too many objects have pointers to it.
 public:
-  bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroupData weylGroup;
   // We fix the usual linear space basis for our Lie algebra.
   // The basis consists of Chevalley generators (weight elements),

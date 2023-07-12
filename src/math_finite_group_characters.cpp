@@ -60,7 +60,9 @@ ElementWeylGroup WeylGroupData::simpleConjugation(
   (void) vv;
   ElementWeylGroup elementSimpleReflection;
   elementSimpleReflection.makeSimpleReflection(i, *this);
-  return elementSimpleReflection * this->group.elements[i] * elementSimpleReflection;
+  return
+  elementSimpleReflection * this->group.elements[i] *
+  elementSimpleReflection;
 }
 
 template <typename elementSomeGroup>

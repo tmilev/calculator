@@ -178,7 +178,6 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
       false;
       baseVariables.elements[leavingVariableRow] = enteringVariable;
       baseVariables.selected[enteringVariable] = true;
-      // BaseVariables.ComputeDebugString();
       for (int i = 0; i < workingMatrix.numberOfRows; i ++) {
         if (
           !workingMatrix.elements[i][baseVariables.elements[i]].isEqualTo(1)

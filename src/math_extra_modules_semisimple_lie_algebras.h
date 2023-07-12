@@ -161,9 +161,9 @@ public:
     const MonomialTensorGeneralizedVermas<Coefficient>& other
   ) {
     if (this == &other) {
-      MonomialTensorGeneralizedVermas<Coefficient> tempMon1;
-      tempMon1 = other;
-      *this *= tempMon1;
+      MonomialTensorGeneralizedVermas<Coefficient> monomial1;
+      monomial1 = other;
+      *this *= monomial1;
       return;
     }
     this->monomials.addListOnTop(other.monomials);
@@ -251,8 +251,8 @@ class ModuleSSalgebra {
   Selection computedGeneratorActions;
   Rational
   highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
-    const MonomialTensor<int, HashFunctions::hashFunction>& leftMon,
-    const MonomialTensor<int, HashFunctions::hashFunction>& rightMon,
+    const MonomialTensor<int, HashFunctions::hashFunction>& leftMonomial,
+    const MonomialTensor<int, HashFunctions::hashFunction>& rightMonomial,
     ProgressReport* progressReport = nullptr
   );
   Rational highestWeightTrace(

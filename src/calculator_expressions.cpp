@@ -2489,15 +2489,15 @@ bool Expression::operator>(const Expression& other) const {
   if (!leftEvalsToDouble && rightEvalsToDouble) {
     return true;
   }
-  Rational leftCoeff, rightCoeff;
-  Expression leftMon, rightMon;
-  this->getCoefficientMultiplicandForm(leftCoeff, leftMon);
-  other.getCoefficientMultiplicandForm(rightCoeff, rightMon);
-  if (leftMon == rightMon) {
-    bool result = leftCoeff > rightCoeff;
+  Rational leftCoefficient, rightCoefficient;
+  Expression leftMonomial, rightMonomial;
+  this->getCoefficientMultiplicandForm(leftCoefficient, leftMonomial);
+  other.getCoefficientMultiplicandForm(rightCoefficient, rightMonomial);
+  if (leftMonomial == rightMonomial) {
+    bool result = leftCoefficient > rightCoefficient;
     return result;
   }
-  bool result = leftMon.greaterThanNoCoefficient(rightMon);
+  bool result = leftMonomial.greaterThanNoCoefficient(rightMonomial);
   return result;
 }
 
@@ -4885,9 +4885,9 @@ std::string Expression::toStringWithStartingExpression(
   std::stringstream outTrue;
   std::string input;
   bool isFinal = true;
-  MemorySaving<FormatExpressions> tempFormat;
+  MemorySaving<FormatExpressions> formatContainer;
   if (format == nullptr) {
-    format = &tempFormat.getElement();
+    format = &formatContainer.getElement();
     format->flagExpressionIsFinal = true;
   }
   isFinal = format->flagExpressionIsFinal;
@@ -5431,9 +5431,9 @@ std::string Expression::toString(
   JSData* outputJS
 ) const {
   STACK_TRACE("Expression::toString");
-  MemorySaving<FormatExpressions> tempFormat;
+  MemorySaving<FormatExpressions> formatContainer;
   if (format == nullptr) {
-    format = &tempFormat.getElement();
+    format = &formatContainer.getElement();
     format->flagUseQuotes = false;
   }
   if (this->owner != nullptr) {
@@ -6189,9 +6189,9 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
   std::stringstream out;
   Rational rational;
   if (this->isOfType<Rational>(&rational)) {
-    FormatExpressions tempFormat;
-    tempFormat.flagUseFrac = false;
-    return rational.toString(&tempFormat);
+    FormatExpressions currentFormat;
+    currentFormat.flagUseFrac = false;
+    return rational.toString(&currentFormat);
   } else if (this->isOperationGiven(this->owner->opPi())) {
     return "\u03C0";
   } else if (this->startsWith(this->owner->opPlus(), 3)) {

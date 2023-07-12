@@ -3989,24 +3989,27 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-      CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational,
+    CalculatorFunctionsBinaryOps::
+    multiplyElementZmodPorRationalByElementZmodPorRational,
     this->opRational(),
     this->builtInCode<ElementZmodP>(),
     "Multiplies elements of Z_p. ",
     "(2 mod 7) * 3",
     "CalculatorFunctionsBinaryOps::"
-      "multiplyElementZmodPorRationalByElementZmodPorRational",
+    "multiplyElementZmodPorRationalByElementZmodPorRational",
     "MultiplyRationalByElementZmodP",
     innerStandard
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-      CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational,
+    CalculatorFunctionsBinaryOps::
+    multiplyElementZmodPorRationalByElementZmodPorRational,
     this->builtInCode<ElementZmodP>(),
     this->builtInCode<ElementZmodP>(),
     "Multiplies elements of Z_p. ",
     "(2 mod 7) * 3",
-    "CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational",
+    "CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational"
+    ,
     "MultiplyElementZmodPByElementZModP",
     innerStandard
   );
@@ -4692,12 +4695,14 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "/",
-      CalculatorFunctionsBinaryOps::divideElementZmodPorRationalByElementZmodPorRational,
+    CalculatorFunctionsBinaryOps::
+    divideElementZmodPorRationalByElementZmodPorRational,
     this->builtInCode<ElementZmodP>(),
     this->builtInCode<ElementZmodP>(),
     "Divides elements of Z/pZ. ",
     "(2 mod  7) / (3 mod 7)",
-    "CalculatorFunctionsBinaryOps::divideElementZmodPorRationalByElementZmodPorRational",
+    "CalculatorFunctionsBinaryOps::divideElementZmodPorRationalByElementZmodPorRational"
+    ,
     "DivideElementZmodPByElementZModP",
     innerStandard
   );

@@ -181,7 +181,7 @@ bool DatabaseInternal::sendAndReceiveFromClientToServer(
   ) {
     return false;
   }
-bool result = this->receiveInClientFromServer(output, commentsOnFailure);
+  bool result = this->receiveInClientFromServer(output, commentsOnFailure);
   global << "DEBUG: received OK!" << Logger::endL;
   return result;
 }
@@ -204,7 +204,6 @@ bool DatabaseInternal::receiveInClientFromServer(
   DatabaseInternalConnection& connection =
   this->connections[this->currentWorkerId];
   global << "DEBUG: client: about to read!" << Logger::endL;
-
   bool result = connection.serverToClient.readOnceNoFailure(true);
   global << "DEBUG: client: read done!" << Logger::endL;
   if (!result) {
@@ -302,13 +301,14 @@ bool DatabaseInternal::executeAndSend() {
   if (!result.success) {
     result.comments = commentsOnFailure.str();
   }
-
   global << "DEBUG: about to send from server to client" << Logger::endL;
-  result.success=
+  result.success =
   this->currentServerToClient().writeOnceNoFailure(
     result.toJSON().toString(), 0, true
   );
-  global << "DEBUG: about to send from server to client: DONE!!!!" << Logger::endL;
+  global
+  << "DEBUG: about to send from server to client: DONE!!!!"
+  << Logger::endL;
   return result.success;
 }
 
@@ -573,11 +573,12 @@ bool DatabaseInternalServer::findAndUpdate(
     }
     return false;
   }
-  global << "DEBUG: about to merge data!!!" <<Logger::endL;
+  global << "DEBUG: about to merge data!!!" << Logger::endL;
   input.update.mergeData(object);
-  global << "DEBUG: merge data done! about to store object!" <<Logger::endL;
-bool result =  this->storeObject(objectId, collectionName, object, commentsOnFailure);
-  global << "DEBUG: store done!! result: " << result <<Logger::endL;
+  global << "DEBUG: merge data done! about to store object!" << Logger::endL;
+  bool result =
+  this->storeObject(objectId, collectionName, object, commentsOnFailure);
+  global << "DEBUG: store done!! result: " << result << Logger::endL;
   return result;
 }
 
@@ -588,7 +589,12 @@ bool DatabaseInternalServer::storeObject(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::storeObject");
-  global << "Writing object id: " << objectId << ", " << collectionName << Logger::endL;
+  global
+  << "Writing object id: "
+  << objectId
+  << ", "
+  << collectionName
+  << Logger::endL;
   if (!this->collections.contains(collectionName)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -971,13 +977,16 @@ bool DatabaseCollection::storeIndicesToHardDrive(
   return true;
 }
 
-DatabaseInternalIndex::DatabaseInternalIndex(){
+DatabaseInternalIndex::DatabaseInternalIndex() {}
 
-}
-
-std::string DatabaseInternalIndex::toString()const{
+std::string DatabaseInternalIndex::toString() const {
   std::stringstream out;
-  out << "index: {" << this->collectionName << ": " << this->nestedKeys.toStringCommaDelimited() << "}";
+  out
+  << "index: {"
+  << this->collectionName
+  << ": "
+  << this->nestedKeys.toStringCommaDelimited()
+  << "}";
   return out.str();
 }
 

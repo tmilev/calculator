@@ -477,7 +477,6 @@ void RootSubalgebra::possibleNilradicalComputation(
     this->makeProgressReportpossibleNilradicalComputation(owner);
     return;
   }
-  // this->ComputeDebugString();
   if (this->flagFirstRoundCounting) {
     this->totalSubalgebras = this->numberOfNilradicalsAllowed;
   }
@@ -3787,7 +3786,9 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     );
     reflectedSimpleBasisK = this->simpleRootsReductiveSubalgebra;
     for (int k = 0; k < reflectedSimpleBasisK.size; k ++) {
-      this->getAmbientWeyl().actOn(raisingElement, reflectedSimpleBasisK[k]);
+      this->getAmbientWeyl().actOn(
+        raisingElement, reflectedSimpleBasisK[k]
+      );
     }
     sl2.rootsWithScalar2WithH = rootsScalarProduct2HnonRaised;
     for (int k = 0; k < sl2.rootsWithScalar2WithH.size; k ++) {
@@ -6114,8 +6115,8 @@ void ConeRelations::toString(
     out << footer;
   }
   if (this->flagIncludeSubalgebraDataInDebugString) {
-    FormatExpressions tempFormat;
-    out << "\n\n\\newpage" << owners.toString(&tempFormat);
+    FormatExpressions currentFormat;
+    out << "\n\n\\newpage" << owners.toString(&currentFormat);
   }
   output = out.str();
 }

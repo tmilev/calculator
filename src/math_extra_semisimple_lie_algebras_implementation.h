@@ -92,14 +92,14 @@ void Weight<Coefficient>::accountSingleWeight(
   if (!weylGroup.isDominantWeight(dominant)) {
     return;
   }
-  Weight<Rational> tempMon;
-  tempMon.owner = this->owner;
-  tempMon.weightFundamentalCoordinates =
+  Weight<Rational> monomial;
+  monomial.owner = this->owner;
+  monomial.weightFundamentalCoordinates =
   weylGroup.getFundamentalCoordinatesFromSimple(dominant);
   Coefficient coeffChange;
   coeffChange = multiplicity;
   coeffChange *= sign;
-  outputAccum.addMonomial(tempMon, coeffChange);
+  outputAccum.addMonomial(monomial, coeffChange);
 }
 
 template <class Coefficient>
@@ -206,8 +206,8 @@ freudenthalEvaluateMeFullCharacter(
   Vectors<Rational> vector;
   HashedList<Vector<Coefficient> > orbit;
   vector.setSize(1);
-  Weight<Coefficient> tempMon;
-  tempMon.owner = nullptr;
+  Weight<Coefficient> monomial;
+  monomial.owner = nullptr;
   for (int i = 0; i < domChar.size(); i ++) {
     vector[0] =
     this->getOwner()->weylGroup.getSimpleCoordinatesFromFundamental(
@@ -233,12 +233,12 @@ freudenthalEvaluateMeFullCharacter(
     }
     int orbitSize = orbit.size;
     for (int j = 0; j < orbitSize; j ++) {
-      tempMon.weightFundamentalCoordinates =
+      monomial.weightFundamentalCoordinates =
       this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(
         orbit[j]
       );
       outputCharOwnerSetToZero.addMonomial(
-        tempMon, domChar.coefficients[i]
+        monomial, domChar.coefficients[i]
       );
     }
   }
@@ -313,9 +313,9 @@ freudenthalEvalMeDominantWeightsOnly(
   HashedList<Vector<Coefficient> > currentWeights;
   std::stringstream localErrors, localDetails;
   std::string localDetail;
-  Weight<Coefficient> tempMon;
-  tempMon.owner = nullptr;
-  Coefficient bufferCoeff;
+  Weight<Coefficient> monomial;
+  monomial.owner = nullptr;
+  Coefficient bufferCoefficient;
   for (int i = 0; i < this->size(); i ++) {
     currentweightFundamentalCoordinates = (*this)[i].
     weightFundamentalCoordinates;
@@ -347,13 +347,13 @@ freudenthalEvalMeDominantWeightsOnly(
       << localDetail;
     }
     for (int j = 0; j < currentWeights.size; j ++) {
-      tempMon.weightFundamentalCoordinates =
+      monomial.weightFundamentalCoordinates =
       this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(
         currentWeights[j]
       );
-      bufferCoeff = this->coefficients[i];
-      bufferCoeff *= currentMults[j];
-      outputCharOwnerSetToZero.addMonomial(tempMon, bufferCoeff);
+      bufferCoefficient = this->coefficients[i];
+      bufferCoefficient *= currentMults[j];
+      outputCharOwnerSetToZero.addMonomial(monomial, bufferCoefficient);
     }
   }
   if (outputDetails != nullptr) {
@@ -677,10 +677,10 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::makeTrivial(
   SemisimpleLieAlgebra& inputOwner
 ) {
   this->makeZero();
-  Weight<Rational> tempMon;
-  tempMon.owner = &inputOwner;
-  tempMon.weightFundamentalCoordinates.makeZero(inputOwner.getRank());
-  this->addMonomial(tempMon, 1);
+  Weight<Rational> monomial;
+  monomial.owner = &inputOwner;
+  monomial.weightFundamentalCoordinates.makeZero(inputOwner.getRank());
+  this->addMonomial(monomial, 1);
 }
 
 template <class Coefficient>
@@ -750,11 +750,11 @@ splitCharacterOverReductiveSubalgebra(
   CharacterSemisimpleLieAlgebraModule charAmbientFDWeyl;
   CharacterSemisimpleLieAlgebraModule remainingCharProjected;
   CharacterSemisimpleLieAlgebraModule remainingCharDominantLevI;
-  Weight<Coefficient> tempMon;
+  Weight<Coefficient> workingMonomial;
   Weight<Coefficient> localHighest;
   List<Coefficient> tempMults;
   HashedList<Vector<Coefficient> > tempHashedRoots;
-  Coefficient bufferCoeff;
+  Coefficient bufferCoefficient;
   Coefficient highestCoeff;
   for (int i = 0; i < this->size(); i ++) {
     const Weight<Coefficient>& monomial = (*this)[i];
@@ -774,12 +774,12 @@ splitCharacterOverReductiveSubalgebra(
       return false;
     }
     for (int j = 0; j < tempHashedRoots.size; j ++) {
-      bufferCoeff = this->coefficients[i];
-      tempMon.weightFundamentalCoordinates =
+      bufferCoefficient = this->coefficients[i];
+      workingMonomial.weightFundamentalCoordinates =
       weylGroup.getFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
-      tempMon.owner = this->getOwner();
-      bufferCoeff *= tempMults[j];
-      charAmbientFDWeyl.addMonomial(tempMon, bufferCoeff);
+      workingMonomial.owner = this->getOwner();
+      bufferCoefficient *= tempMults[j];
+      charAmbientFDWeyl.addMonomial(workingMonomial, bufferCoefficient);
     }
   }
   Vectors<Coefficient> orbitDom;
@@ -806,17 +806,17 @@ splitCharacterOverReductiveSubalgebra(
       }
       return false;
     }
-    tempMon.owner = this->getOwner();
+    workingMonomial.owner = this->getOwner();
     for (int k = 0; k < orbitDom.size; k ++) {
       if (
         weylGroupFiniteDimensionalSmallAsSubgroupInLarge.isDominantWeight(
           orbitDom[k]
         )
       ) {
-        tempMon.weightFundamentalCoordinates =
+        workingMonomial.weightFundamentalCoordinates =
         weylGroup.getFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevI.addMonomial(
-          tempMon, charAmbientFDWeyl.coefficients[i]
+          workingMonomial, charAmbientFDWeyl.coefficients[i]
         );
       }
     }
@@ -853,10 +853,11 @@ splitCharacterOverReductiveSubalgebra(
       weylGroupFiniteDimensionalSmall.ambientWeyl->cartanSymmetric(j, j) /
       2;
     }
-    tempMon.owner = &smallAlgebra;
-    tempMon.weightFundamentalCoordinates = fundamentalCoordinatesSmaller;
+    workingMonomial.owner = &smallAlgebra;
+    workingMonomial.weightFundamentalCoordinates =
+    fundamentalCoordinatesSmaller;
     remainingCharProjected.addMonomial(
-      tempMon, remainingCharDominantLevI.coefficients[i]
+      workingMonomial, remainingCharDominantLevI.coefficients[i]
     );
   }
   Vector<Coefficient> simpleGeneratorBaseField;
@@ -868,15 +869,15 @@ splitCharacterOverReductiveSubalgebra(
       for (
         int i = 0; i < weylGroupFiniteDimensionalSmall.rootsOfBorel.size; i ++
       ) {
-        tempMon = localHighest;
+        workingMonomial = localHighest;
         simpleGeneratorBaseField =
         weylGroupFiniteDimensionalSmall.rootsOfBorel[i];
         // <- implicit type conversion here!
-        tempMon.weightFundamentalCoordinates +=
+        workingMonomial.weightFundamentalCoordinates +=
         weylGroupFiniteDimensionalSmall.ambientWeyl->
         getFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
-        if (remainingCharProjected.monomials.contains(tempMon)) {
-          localHighest = tempMon;
+        if (remainingCharProjected.monomials.contains(workingMonomial)) {
+          localHighest = workingMonomial;
           Found = true;
         }
       }
@@ -901,13 +902,15 @@ splitCharacterOverReductiveSubalgebra(
       return false;
     }
     for (int i = 0; i < tempHashedRoots.size; i ++) {
-      tempMon.owner = &smallAlgebra;
-      tempMon.weightFundamentalCoordinates =
+      workingMonomial.owner = &smallAlgebra;
+      workingMonomial.weightFundamentalCoordinates =
       weylGroupFiniteDimensionalSmall.ambientWeyl->
       getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
-      bufferCoeff = tempMults[i];
-      bufferCoeff *= highestCoeff;
-      remainingCharProjected.subtractMonomial(tempMon, bufferCoeff);
+      bufferCoefficient = tempMults[i];
+      bufferCoefficient *= highestCoeff;
+      remainingCharProjected.subtractMonomial(
+        workingMonomial, bufferCoefficient
+      );
     }
   }
   format.fundamentalWeightLetter = "\\psi";

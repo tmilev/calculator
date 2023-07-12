@@ -252,7 +252,6 @@ public:
   List<int> generatorsIndices;
   List<Coefficient> powers;
   Coefficient coefficient;
-  static bool flagAnErrorHasOccurredTimeToPanic;
   void multiplyBy(
     const MonomialUniversalEnveloping<Coefficient>& other,
     ElementUniversalEnvelopingOrdered<Coefficient>& output
@@ -373,10 +372,6 @@ public:
 };
 
 template <class Coefficient>
-bool MonomialUniversalEnvelopingOrdered<Coefficient>::
-flagAnErrorHasOccurredTimeToPanic =
-false;
-template <class Coefficient>
 class ElementUniversalEnvelopingOrdered: public HashedList<
   MonomialUniversalEnvelopingOrdered<Coefficient>
 > {
@@ -442,9 +437,9 @@ public:
     const Coefficient& coeff, SemisimpleLieAlgebraOrdered& inputOwner
   ) {
     this->makeZero(inputOwner);
-    MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
-    tempMon.makeConstant(coeff, inputOwner);
-    this->addMonomial(tempMon);
+    MonomialUniversalEnvelopingOrdered<Coefficient> monomial;
+    monomial.makeConstant(coeff, inputOwner);
+    this->addMonomial(monomial);
   }
   void simplify(
     const Coefficient& ringUnit = 1, const Coefficient& ringZero = 0
@@ -486,12 +481,12 @@ public:
     if (this->size != 1) {
       return false;
     }
-    MonomialUniversalEnvelopingOrdered<Coefficient>& tempMon =
+    MonomialUniversalEnvelopingOrdered<Coefficient>& monomial =
     this->objects[0];
-    if (!tempMon.Coefficient.isEqualToOne()) {
+    if (!monomial.Coefficient.isEqualToOne()) {
       return false;
     }
-    if (tempMon.generatorsIndices.size != 1) {
+    if (monomial.generatorsIndices.size != 1) {
       return false;
     }
     return true;
@@ -519,11 +514,11 @@ public:
     const ElementUniversalEnvelopingOrdered<OtherCoefficientType>& other
   ) {
     this->makeZero(*other.owner);
-    MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
+    MonomialUniversalEnvelopingOrdered<Coefficient> monomial;
     this->reserve(other.size);
     for (int i = 0; i < other.size; i ++) {
-      tempMon.assignChangeCoefficientType(other[i]);
-      this->addMonomial(tempMon);
+      monomial.assignChangeCoefficientType(other[i]);
+      this->addMonomial(monomial);
     }
   }
   void operator+=(const ElementUniversalEnvelopingOrdered& other);
@@ -552,17 +547,17 @@ public:
     Coefficient& outputWasMultipliedBy, const Coefficient& ringUnit
   ) {
     outputWasMultipliedBy = ringUnit;
-    Coefficient currentCoeff;
+    Coefficient currentCoefficient;
     for (int i = 0; i < this->size; i ++) {
       MonomialUniversalEnvelopingOrdered<Coefficient>& monomial =
       this->objects[i];
-      monomial.Coefficient.clearDenominators(currentCoeff);
+      monomial.Coefficient.clearDenominators(currentCoefficient);
       for (int j = 0; j < this->size; j ++) {
         if (j != i) {
-          this->objects[j].coefficient *= currentCoeff;
+          this->objects[j].coefficient *= currentCoefficient;
         }
       }
-      outputWasMultipliedBy *= currentCoeff;
+      outputWasMultipliedBy *= currentCoefficient;
     }
   }
 };

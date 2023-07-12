@@ -3060,10 +3060,10 @@ template <typename Coefficient>
 std::ostream& operator<<(
   std::ostream& out, const PolynomialUnivariateDense<Coefficient>& p
 ) {
-  FormatExpressions tempFormat;
-  tempFormat.polynomialAlphabet.setSize(1);
-  tempFormat.polynomialAlphabet[0] = "q";
-  return out << p.toString(&tempFormat);
+  FormatExpressions currentFormat;
+  currentFormat.polynomialAlphabet.setSize(1);
+  currentFormat.polynomialAlphabet[0] = "q";
+  return out << p.toString(&currentFormat);
 }
 
 template <typename elementSomeGroup>

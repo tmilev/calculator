@@ -8848,11 +8848,13 @@ void WeylGroupData::getCoxeterPlane(
   FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
   Matrix<Complex<double> > eigenMat;
   eigenMat.initialize(
-    matrixCoxeterElement.numberOfRows, matrixCoxeterElement.numberOfColumns
+    matrixCoxeterElement.numberOfRows,
+    matrixCoxeterElement.numberOfColumns
   );
   for (int i = 0; i < eigenMat.numberOfRows; i ++) {
     for (int j = 0; j < eigenMat.numberOfColumns; j ++) {
-      eigenMat.elements[i][j] = matrixCoxeterElement.elements[i][j].getDoubleValue();
+      eigenMat.elements[i][j] =
+      matrixCoxeterElement.elements[i][j].getDoubleValue();
       if (i == j) {
         eigenMat.elements[i][i] -= eigenValue;
       }
@@ -12880,7 +12882,6 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
   // The following for loop is for self-check purposes only.
   // Comment it out as soon as
   // the code has been tested sufficiently.
-  bool firstFail = true;
   for (
     int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
   ) {
@@ -12892,58 +12893,7 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
     Rational altResult =
     this->quasiPolynomials[i].evaluate(affineInput, comments);
     if (result != altResult) {
-      if ((false)) {
-        if (!firstFail) {
-          break;
-        }
-        FormatExpressions tempFormat;
-        global.comments
-        << "<hr>Error!!! Failed on chamber "
-        << index + 1
-        << " and "
-        << i + 1;
-        global.comments
-        << "<br>Evaluating at point "
-        << affineInput.toString()
-        << "<br>";
-        global.comments
-        << "<br>Chamber "
-        << index + 1
-        << ": "
-        << this->projectivizedComplex.refinedCones[index].toString(
-          &tempFormat
-        );
-        global.comments
-        << "<br>QP: "
-        << this->quasiPolynomials[index].toString();
-        global.comments << "<br>value: " << result.toString();
-        global.comments
-        << "<br><br>Chamber "
-        << i + 1
-        << ": "
-        << this->projectivizedComplex.refinedCones[i].toString(&tempFormat);
-        global.comments << "<br>QP: " << this->quasiPolynomials[i].toString();
-        global.comments << "<br>value: " << altResult.toString();
-        if (firstFail) {
-          DrawingVariables tempDV;
-          global.comments
-          << "<br><b>Point of failure: "
-          << affineInput.toString()
-          << "</b>";
-          // this->drawMe(tempDV);
-          this->projectivizedComplex.drawMeLastCoordinateAffine(
-            true, tempDV, tempFormat
-          );
-          tempDV.drawCircleAtVectorBufferRational(affineInput, "black", 5);
-          tempDV.drawCircleAtVectorBufferRational(affineInput, "black", 10);
-          tempDV.drawCircleAtVectorBufferRational(affineInput, "red", 4);
-          global.comments
-          << tempDV.getHTMLDiv(
-            this->projectivizedComplex.getDimension() - 1, true
-          );
-        }
-        firstFail = false;
-      }
+      global.fatal << "Different values of quasipolynomials. " << global.fatal;
     }
   }
   return result;
@@ -13330,7 +13280,6 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep5() {
 }
 
 void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1() {
-  FormatExpressions tempFormat;
   ProgressReport report1;
   ProgressReport report2;
   ProgressReport report3;
@@ -15424,9 +15373,9 @@ std::string Cone::toString(FormatExpressions* format) const {
   if (useLatex) {
     out << "\\[";
   }
-  FormatExpressions tempFormat;
+  FormatExpressions formatContainer;
   if (format == nullptr) {
-    format = &tempFormat;
+    format = &formatContainer;
   }
   out
   << this->getAllNormals().toLatexInequalities(lastVarIsConstant, *format);

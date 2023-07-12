@@ -4264,10 +4264,10 @@ bool Expression::makeSum(
   if (summands.isEqualToZero()) {
     return this->assignValue<Rational>(calculator, 0);
   }
-  List<Expression> summandsWithCoeff;
-  summandsWithCoeff.setSize(summands.size());
+  List<Expression> summandsWithCoefficient;
+  summandsWithCoefficient.setSize(summands.size());
   for (int i = 0; i < summands.size(); i ++) {
-    Expression& current = summandsWithCoeff[i];
+    Expression& current = summandsWithCoefficient[i];
     if (summands[i] == oneE) {
       current.assignValue(calculator, summands.coefficients[i]);
     } else if (!(summands.coefficients[i] == 1)) {
@@ -4279,19 +4279,19 @@ bool Expression::makeSum(
       current = summands[i];
     }
   }
-  if (summandsWithCoeff.size < 5) {
-    for (int i = 0; i < summandsWithCoeff.size; i ++) {
-      for (int j = i; j < summandsWithCoeff.size; j ++) {
+  if (summandsWithCoefficient.size < 5) {
+    for (int i = 0; i < summandsWithCoefficient.size; i ++) {
+      for (int j = i; j < summandsWithCoefficient.size; j ++) {
         if (
-          summandsWithCoeff[i] > summandsWithCoeff[j] &&
-          summandsWithCoeff[j] > summandsWithCoeff[i]
+          summandsWithCoefficient[i] > summandsWithCoefficient[j] &&
+          summandsWithCoefficient[j] > summandsWithCoefficient[i]
         ) {
           global.fatal
           << "Bad comparison "
           << "function: each of the expressions "
-          << summandsWithCoeff[i].toString()
+          << summandsWithCoefficient[i].toString()
           << " and "
-          << summandsWithCoeff[j].toString()
+          << summandsWithCoefficient[j].toString()
           << " is reported to be greater than the other. "
           << global.fatal;
         }
@@ -4299,7 +4299,9 @@ bool Expression::makeSum(
     }
   }
   return
-  this->makeOXdotsX(calculator, calculator.opPlus(), summandsWithCoeff);
+  this->makeOXdotsX(
+    calculator, calculator.opPlus(), summandsWithCoefficient
+  );
 }
 
 template <class Type>

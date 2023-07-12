@@ -612,7 +612,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
     weightSimpleCoordinates, &g2B3Data.homomorphism.coDomainAlgebra()
   );
   g2B3Data.smallCharacterFiniteDimensionalPart.makeZero();
-  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > tempMon;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > monomial;
   for (int i = 0; i < g2B3Data.outputWeightsSimpleCoordinates.size; i ++) {
     Vector<RationalFraction<Rational> >& currentWeight =
     g2B3Data.outputWeightsSimpleCoordinates[i];
@@ -639,10 +639,10 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
       currentG2DualWeight, currentG2Weight, zero
     );
     // <-g2weight is now computed;
-    tempMon.makeFromWeight(
+    monomial.makeFromWeight(
       currentG2Weight, &g2B3Data.homomorphism.domainAlgebra()
     );
-    g2B3Data.smallCharacterFiniteDimensionalPart += tempMon;
+    g2B3Data.smallCharacterFiniteDimensionalPart += monomial;
   }
   ElementUniversalEnveloping<RationalFraction<Rational> >
   g2Casimir,
@@ -710,7 +710,9 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
           );
           g2CasimirCopy -= element;
           g2CasimirCopy *= Rational(12);
-          currentTensorElementEigen.multiplyMeByUEElementOnTheLeft(g2CasimirCopy);
+          currentTensorElementEigen.multiplyMeByUEElementOnTheLeft(
+            g2CasimirCopy
+          );
           charDiff = g2B3Data.allCharacters[j];
           charDiff -= *g2B3Data.allCharacters.lastObject();
           g2B3Data.characterDifferences.addOnTopNoRepetition(charDiff);
@@ -812,7 +814,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
   LittelmannPath hwPath;
   List<LittelmannPath> tempList;
   List<List<int> > integerStrings;
-  MonomialTensor<int, HashFunctions::hashFunction> tempMon;
+  MonomialTensor<int, HashFunctions::hashFunction> monomial;
   DynkinType currentType;
   for (int i = 0; i < ranks.size; i ++) {
     currentType.makeSimpleType(weylLetters[i], ranks[i]);
@@ -896,10 +898,10 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
       report.report(reportStream.str());
       for (int k = 0; k < integerStrings.size; k ++) {
         LittelmannPath& currentPath = tempList[k];
-        tempMon = integerStrings[k];
-        tempMon.generatorsIndices.reverseElements();
-        tempMon.powers.reverseElements();
-        if (!currentPath.isAdaptedString(tempMon)) {
+        monomial = integerStrings[k];
+        monomial.generatorsIndices.reverseElements();
+        monomial.powers.reverseElements();
+        if (!currentPath.isAdaptedString(monomial)) {
           foundBad = true;
           break;
         }
@@ -1054,7 +1056,8 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(Calculator& calculator,
+bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   bool allGenerators,
@@ -2158,12 +2161,12 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   casimir.makeCasimir(*semisimpleLieAlgebra.content);
   Vector<RationalFraction<Rational> > currentHighestWeightSimpleCoordinates;
   Vector<RationalFraction<Rational> > currentHighestWeightDualCoordinates;
-  FormatExpressions tempFormat;
-  tempFormat.maximumLineLength = 60;
-  tempFormat.flagUseLatex = true;
-  tempFormat.fundamentalWeightLetter = "\\psi";
-  tempFormat.customPlusSign = "\\oplus ";
-  hwContext.getFormat(tempFormat);
+  FormatExpressions currentFormat;
+  currentFormat.maximumLineLength = 60;
+  currentFormat.flagUseLatex = true;
+  currentFormat.fundamentalWeightLetter = "\\psi";
+  currentFormat.customPlusSign = "\\oplus ";
+  hwContext.getFormat(currentFormat);
   out
   << "<br>Character of finite dimensional module:"
   << HtmlRoutines::getMathNoDisplay(finiteDimensionalCharacter.toString());
@@ -2176,7 +2179,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     << "<br>The finite dimensional character "
     << "split over the levi component:"
     << HtmlRoutines::getMathNoDisplay(
-      finiteDimensionalLeviSplit.toString(&tempFormat)
+      finiteDimensionalLeviSplit.toString(&currentFormat)
     );
   }
   std::stringstream latexReport1;
@@ -2190,9 +2193,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   << generalizedModule.parabolicSelectionNonSelectedAreElementsLevi.toString()
   << "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ "
   << "$\\mu+\\gamma$ & Action of $\\bar c$\\\\\\hline";
-  tempFormat.customPlusSign = "";
-  tempFormat.chevalleyGGeneratorLetter = "\\bar{g}";
-  tempFormat.chevalleyHGeneratorLetter = "\\bar{h}";
+  currentFormat.customPlusSign = "";
+  currentFormat.chevalleyGGeneratorLetter = "\\bar{g}";
+  currentFormat.chevalleyHGeneratorLetter = "\\bar{h}";
   finiteDimensionalLeviSplitShifted.makeZero();
   Weight<RationalFraction<Rational> > monomial;
   monomial.owner = semisimpleLieAlgebra.content;
@@ -2220,17 +2223,17 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     << finiteDimensionalLeviSplitShifted[i].weightFundamentalCoordinates.
     toStringLetterFormat("\\psi")
     << "</td><td>"
-    << currentChar.toString(&tempFormat)
+    << currentChar.toString(&currentFormat)
     << "</td></tr>";
     latexReport1
     << " $"
     << finiteDimensionalLeviSplitShifted[i].weightFundamentalCoordinates.
-    toStringLetterFormat("\\psi", &tempFormat)
+    toStringLetterFormat("\\psi", &currentFormat)
     << "$"
     << "&$p_{"
     << i + 1
     << "}=$ $"
-    << currentChar.toString(&tempFormat)
+    << currentChar.toString(&currentFormat)
     << "$\\\\<br>";
   }
   out << "</table>";
@@ -2285,7 +2288,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     element.makeHighestWeightVector(generalizedModule, rationalFractionOne);
     element.tensorOnTheRight(element);
     element *= - 1;
-    std::string startingElementString = element.toString(&tempFormat);
+    std::string startingElementString = element.toString(&currentFormat);
     std::stringstream tempStream;
     std::stringstream tempStream2;
     tempStream << "\\begin{array}{l}";
@@ -2355,7 +2358,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     << scaleRational.toString();
     Polynomial<Rational> currentGreatestCommonDivisor;
     Polynomial<Rational> currentRationalFraction;
-    tempFormat.maximumLineLength = 80;
+    currentFormat.maximumLineLength = 80;
     if (numberOfVariables == 1) {
       scale = element.scaleNormalizeLeadingMonomial(nullptr);
       scale.getNumerator(currentGreatestCommonDivisor);
@@ -2365,17 +2368,17 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
       out
       << "<td>"
       << HtmlRoutines::getMathNoDisplay(
-        currentGreatestCommonDivisor.toString(&tempFormat)
+        currentGreatestCommonDivisor.toString(&currentFormat)
       )
       << "</td>";
     }
     out
     << "<td>"
-    << HtmlRoutines::getMathNoDisplay(element.toString(&tempFormat))
+    << HtmlRoutines::getMathNoDisplay(element.toString(&currentFormat))
     << "</td>";
     latexReport2
     << "&$\\begin{array}{l}"
-    << element.toString(&tempFormat)
+    << element.toString(&currentFormat)
     << "\\end{array}$\\\\<br>";
     if (numberOfVariables == 1) {
       currentRationalFraction = currentGreatestCommonDivisor;
@@ -2383,7 +2386,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
       out
       << "<td>"
       << HtmlRoutines::getMathNoDisplay(
-        "\\begin{array}{l}" + element.toString(&tempFormat) + "\\end{array}"
+        "\\begin{array}{l}" + element.toString(&currentFormat) + "\\end{array}"
       )
       << "</td>";
     }
@@ -5323,15 +5326,15 @@ bool CalculatorLieTheory::computePairingTablesAndFKFTsubalgebras(
   std::fstream file;
   std::string fileName;
   fileName = "FKFTcomputation.html";
-  FormatExpressions tempFormat;
-  tempFormat.flagUseHTML = true;
-  tempFormat.flagUseLatex = true;
-  tempFormat.flagUseHTML = true;
-  tempFormat.flagCandidateSubalgebraShortReportOnly = false;
+  FormatExpressions currentFormat;
+  currentFormat.flagUseHTML = true;
+  currentFormat.flagUseLatex = true;
+  currentFormat.flagUseHTML = true;
+  currentFormat.flagCandidateSubalgebraShortReportOnly = false;
   FileOperations::openFileCreateIfNotPresentVirtual(
     file, "output/" + fileName, false, true, false
   );
-  file << subalgebras.toString(&tempFormat, false);
+  file << subalgebras.toString(&currentFormat, false);
   std::stringstream out;
   out
   << "<a href='"
@@ -5604,7 +5607,9 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
   )
 ) {
   STACK_TRACE("MathRoutines::generateVectorSpaceClosedWithRespectToOperation");
-  inputOutputElements[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElements);
+  inputOutputElements[0].gaussianEliminationByRowsDeleteZeroRows(
+    inputOutputElements
+  );
   Type operationResult;
   ProgressReport report1(1);
   ProgressReport report2(20);
@@ -5621,13 +5626,14 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
       );
       // int oldNumberOfElements = inputOutputElements.size;
       elementsForGaussianElimination.addOnTop(operationResult);
-      elementsForGaussianElimination[0].
-      gaussianEliminationByRowsDeleteZeroRows(elementsForGaussianElimination);
+      elementsForGaussianElimination[0].gaussianEliminationByRowsDeleteZeroRows
+      (elementsForGaussianElimination);
       if (elementsForGaussianElimination.size > inputOutputElements.size) {
         inputOutputElements.addOnTop(operationResult);
       }
       if (
-        upperDimensionBound > 0 && inputOutputElements.size > upperDimensionBound
+        upperDimensionBound > 0 &&
+        inputOutputElements.size > upperDimensionBound
       ) {
         return false;
       }
@@ -5644,7 +5650,9 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
       }
     }
   }
-  inputOutputElements[0].gaussianEliminationByRowsDeleteZeroRows(inputOutputElements);
+  inputOutputElements[0].gaussianEliminationByRowsDeleteZeroRows(
+    inputOutputElements
+  );
   return true;
 }
 

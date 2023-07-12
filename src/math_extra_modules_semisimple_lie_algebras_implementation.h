@@ -119,14 +119,15 @@ void ModuleSSalgebra<Coefficient>::applyTransposeAntiAutomorphism(
 template <class Coefficient>
 Rational ModuleSSalgebra<Coefficient>::
 highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
-  const MonomialTensor<int, HashFunctions::hashFunction>& leftMon,
-  const MonomialTensor<int, HashFunctions::hashFunction>& rightMon,
+  const MonomialTensor<int, HashFunctions::hashFunction>& leftMonomial,
+  const MonomialTensor<int, HashFunctions::hashFunction>& rightMonomial,
   ProgressReport* progressReport
 ) {
   STACK_TRACE("ModuleSSalgebra<Coefficient>::hwtaabfSimpleGensOnly");
-  const MonomialTensor<int, HashFunctions::hashFunction>* left = &leftMon;
-  const MonomialTensor<int, HashFunctions::hashFunction>* right = &rightMon;
-  if (leftMon > rightMon) {
+  const MonomialTensor<int, HashFunctions::hashFunction>* left = &leftMonomial;
+  const MonomialTensor<int, HashFunctions::hashFunction>* right =
+  &rightMonomial;
+  if (leftMonomial > rightMonomial) {
     MathRoutines::swap(left, right);
   }
   Pair<
@@ -366,24 +367,23 @@ splitOverLeviMonomialsEncodeHighestWeight(
   );
   complementGroup.computeRootSubsystem();
   out << outputWeylSubgroup.toString(false);
-  CharacterSemisimpleLieAlgebraModule
-  charAmbientFDWeyl,
-  remainingCharDominantLevi;
+  CharacterSemisimpleLieAlgebraModule charAmbientFDWeyl;
+  CharacterSemisimpleLieAlgebraModule remainingCharDominantLevi;
   finiteDimensionalWeyl.makeParabolicFromSelectionSimpleRoots(
     this->getOwner()->weylGroup,
     parabolicSelectionFiniteDimensionalInducingPart,
     1
   );
-  Weight<Coefficient> tempMon;
+  Weight<Coefficient> currentMonomial;
   Weight<Coefficient> localHighest;
   List<Coefficient> tempMults;
   HashedList<Vector<Coefficient> > tempHashedRoots;
   WeylGroupData& weylGroup = this->getOwner()->weylGroup;
   charAmbientFDWeyl.makeZero();
-  Coefficient bufferCoeff;
+  Coefficient bufferCoefficient;
   Coefficient highestCoeff;
   out << "Starting character: " << this->toString();
-  tempMon.owner = this->getOwner();
+  currentMonomial.owner = this->getOwner();
   for (int i = 0; i < this->size(); i ++) {
     const Weight<Coefficient>& monomial = (*this)[i];
     if (
@@ -401,16 +401,16 @@ splitOverLeviMonomialsEncodeHighestWeight(
       return false;
     }
     for (int j = 0; j < tempHashedRoots.size; j ++) {
-      bufferCoeff = this->coefficients[i];
-      tempMon.weightFundamentalCoordinates =
+      bufferCoefficient = this->coefficients[i];
+      currentMonomial.weightFundamentalCoordinates =
       weylGroup.getFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
-      bufferCoeff *= tempMults[j];
-      charAmbientFDWeyl.addMonomial(tempMon, bufferCoeff);
+      bufferCoefficient *= tempMults[j];
+      charAmbientFDWeyl.addMonomial(currentMonomial, bufferCoefficient);
     }
   }
   remainingCharDominantLevi.makeZero();
   Vectors<Coefficient> orbitDom;
-  tempMon.owner = this->getOwner();
+  currentMonomial.owner = this->getOwner();
   for (int i = 0; i < charAmbientFDWeyl.size(); i ++) {
     orbitDom.setSize(0);
     if (
@@ -435,10 +435,10 @@ splitOverLeviMonomialsEncodeHighestWeight(
     }
     for (int k = 0; k < orbitDom.size; k ++) {
       if (outputWeylSubgroup.isDominantWeight(orbitDom[k])) {
-        tempMon.weightFundamentalCoordinates =
+        currentMonomial.weightFundamentalCoordinates =
         weylGroup.getFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevi.addMonomial(
-          tempMon, charAmbientFDWeyl.coefficients[i]
+          currentMonomial, charAmbientFDWeyl.coefficients[i]
         );
       }
     }
@@ -453,15 +453,17 @@ splitOverLeviMonomialsEncodeHighestWeight(
     for (bool found = true; found;) {
       found = false;
       for (int i = 0; i < outputWeylSubgroup.simpleRootsInner.size; i ++) {
-        tempMon = localHighest;
+        currentMonomial = localHighest;
         simpleGeneratorBaseField = outputWeylSubgroup.simpleRootsInner[i];
         // <- implicit type conversion here!
-        tempMon.weightFundamentalCoordinates +=
+        currentMonomial.weightFundamentalCoordinates +=
         this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(
           simpleGeneratorBaseField
         );
-        if (remainingCharDominantLevi.monomials.contains(tempMon)) {
-          localHighest = tempMon;
+        if (
+          remainingCharDominantLevi.monomials.contains(currentMonomial)
+        ) {
+          localHighest = currentMonomial;
           found = true;
         }
       }
@@ -486,12 +488,14 @@ splitOverLeviMonomialsEncodeHighestWeight(
       return false;
     }
     for (int i = 0; i < tempHashedRoots.size; i ++) {
-      tempMon.owner = this->getOwner();
-      tempMon.weightFundamentalCoordinates =
+      currentMonomial.owner = this->getOwner();
+      currentMonomial.weightFundamentalCoordinates =
       weylGroup.getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
-      bufferCoeff = tempMults[i];
-      bufferCoeff *= highestCoeff;
-      remainingCharDominantLevi.subtractMonomial(tempMon, bufferCoeff);
+      bufferCoefficient = tempMults[i];
+      bufferCoefficient *= highestCoeff;
+      remainingCharDominantLevi.subtractMonomial(
+        currentMonomial, bufferCoefficient
+      );
     }
   }
   out
@@ -912,11 +916,11 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     this->generatingWordsIntegersGrouppedByWeight[i].size = 0;
   }
   MonomialUniversalEnveloping<Coefficient> currentNonReducedElement;
-  MonomialTensor<int, HashFunctions::hashFunction> tempMonInt;
+  MonomialTensor<int, HashFunctions::hashFunction> monomialInt;
   for (int i = 0; i < this->allPaths.size; i ++) {
     List<int>& currentPath = generatorsIndices[i];
     currentNonReducedElement.makeOne(this->getOwner());
-    tempMonInt.makeConstant();
+    monomialInt.makeConstant();
     for (int j = currentPath.size - 1; j >= 0; j --) {
       int index = currentPath[j];
       if (index > 0) {
@@ -926,7 +930,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
         this->getOwner().getGeneratorFromDisplayIndex(index),
         ringUnit
       );
-      tempMonInt.multiplyByGeneratorPowerOnTheRight(
+      monomialInt.multiplyByGeneratorPowerOnTheRight(
         this->getOwner().getGeneratorFromDisplayIndex(index), 1
       );
     }
@@ -945,7 +949,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
     this->generatingWordsGrouppedByWeight[index].addOnTop(
       currentNonReducedElement
     );
-    this->generatingWordsIntegersGrouppedByWeight[index].addOnTop(tempMonInt);
+    this->generatingWordsIntegersGrouppedByWeight[index].addOnTop(monomialInt);
   }
   this->generatingWordsNonReduced.clear();
   this->generatingWordsNonReduced.setExpectedSize(this->allPaths.size);
@@ -1280,16 +1284,16 @@ void ModuleSSalgebra<Coefficient>::getFDchar(
   if (this->highestWeightFundamentalCoordinatesBaseField.size <= 0) {
     return;
   }
-  Weight<Coefficient> tempMon;
-  tempMon.owner = &this->getOwner();
+  Weight<Coefficient> monomial;
+  monomial.owner = &this->getOwner();
   WeylGroupData& weylGroup = this->getOwner().weylGroup;
   for (int i = 0; i < this->moduleWeightsSimpleCoordinates.size; i ++) {
-    tempMon.weightFundamentalCoordinates =
+    monomial.weightFundamentalCoordinates =
     weylGroup.getFundamentalCoordinatesFromSimple(
       this->moduleWeightsSimpleCoordinates[i]
     );
     output.addMonomial(
-      tempMon, this->generatingWordsGrouppedByWeight[i].size
+      monomial, this->generatingWordsGrouppedByWeight[i].size
     );
   }
 }
@@ -1521,8 +1525,8 @@ void ElementTensorsGeneralizedVermas<Coefficient>::makeHighestWeightVector(
   ModuleSSalgebra<Coefficient>& inputOwner, const Coefficient& ringUnit
 ) {
   MonomialTensorGeneralizedVermas<Coefficient> tensorMon;
-  Coefficient currentCoeff;
-  currentCoeff = ringUnit;
+  Coefficient currentCoefficient;
+  currentCoefficient = ringUnit;
   tensorMon.monomials.setSize(1);
   MonomialGeneralizedVerma<Coefficient>& monomial = tensorMon.monomials[0];
   monomial.indexFDVector = inputOwner.generatingWordsNonReduced.size - 1;
@@ -1765,7 +1769,8 @@ const {
     List<MonomialUniversalEnveloping<Coefficient> >& currentList =
     this->generatingWordsGrouppedByWeight[k];
     for (int i = 0; i < currentList.size; i ++) {
-      MonomialUniversalEnveloping<Coefficient>& currentElement = currentList[i];
+      MonomialUniversalEnveloping<Coefficient>& currentElement =
+      currentList[i];
       out
       << "<br>monomial "
       << i + 1
@@ -1937,7 +1942,9 @@ getActionGeneralizedVermaModuleAsDifferentialOperator(
   );
   ElementUniversalEnveloping<Polynomial<Rational> > genericElement;
   ElementUniversalEnveloping<Polynomial<Rational> > result;
-  this->getGenericUnMinusElement(true, genericElement, useNilWeight, ascending);
+  this->getGenericUnMinusElement(
+    true, genericElement, useNilWeight, ascending
+  );
   result.assignElementLieAlgebra(inputElement, *this->owner, 1);
   Polynomial<Rational> onePolynomial;
   onePolynomial.makeConstant(1);
@@ -2110,7 +2117,8 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     MatrixTensor<Coefficient> currentOp, matrix;
     currentOp.makeZero();
     for (int j = 0; j < currentElement.size(); j ++) {
-      matrix = this->getActionGeneratorIndex(currentElement[j].generatorIndex);
+      matrix =
+      this->getActionGeneratorIndex(currentElement[j].generatorIndex);
       matrix *= currentElement.coefficients[j];
       currentOp += matrix;
     }
@@ -2402,7 +2410,9 @@ void ElementSumGeneralizedVermas<Coefficient>::multiplyMeByUEElementOnTheLeft(
   ElementSumGeneralizedVermas<Coefficient> accumulator;
   accumulator.makeZero();
   for (int i = 0; i < this->size(); i ++) {
-    (*this)[i].multiplyMeByUEElementOnTheLeft(elementUniversalEnveloping, buffer);
+    (*this)[i].multiplyMeByUEElementOnTheLeft(
+      elementUniversalEnveloping, buffer
+    );
     buffer *= this->coefficients[i];
     accumulator += buffer;
   }

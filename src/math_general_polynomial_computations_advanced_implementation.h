@@ -296,10 +296,10 @@ std::string GroebnerBasisComputation<Coefficient>::toStringLetterOrder() const {
     variables[i].makeEi(i, 1);
   }
   variables.quickSortAscending(&this->polynomialOrder.monomialOrder);
-  FormatExpressions tempFormat = this->format;
+  FormatExpressions currentFormat = this->format;
   out << "\\(";
   for (int i = numberOfVariables - 1; i >= 0; i --) {
-    out << variables[i].toString(&tempFormat);
+    out << variables[i].toString(&currentFormat);
     if (i != 0) {
       out << " > ";
     }

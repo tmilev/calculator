@@ -262,9 +262,9 @@ public:
     const Coefficient& coefficient, SemisimpleLieAlgebra& inputOwner
   ) {
     this->makeZero(inputOwner);
-    MonomialUniversalEnveloping<Coefficient> tempMon;
-    tempMon.makeOne(inputOwner);
-    this->addMonomial(tempMon, coefficient);
+    MonomialUniversalEnveloping<Coefficient> monomial;
+    monomial.makeOne(inputOwner);
+    this->addMonomial(monomial, coefficient);
   }
   void simplify(const Coefficient& ringUnit = Coefficient::one());
   int minimalNumberOfVariables() const {
@@ -380,12 +380,12 @@ public:
   void assign(const ElementUniversalEnveloping<otherType>& other) {
     this->owners = other.owners;
     this->indexInOwners = other.indexInOwners;
-    MonomialUniversalEnveloping<Coefficient> tempMon;
+    MonomialUniversalEnveloping<Coefficient> monomial;
     Coefficient coefficient;
     for (int i = 0; i < other.size; i ++) {
-      tempMon = other[i];
+      monomial = other[i];
       coefficient = other.coefficients[i];
-      this->addMonomial(tempMon, coefficient);
+      this->addMonomial(monomial, coefficient);
     }
   }
   void operator=(const Rational& other) {

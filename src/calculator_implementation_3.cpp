@@ -335,20 +335,20 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   }
   out << "</table>";
   LittelmannPath lastPath = orbit[0];
-  LittelmannPath tempPath;
-  MonomialTensor<int, HashFunctions::hashFunction> tempMon;
-  tempMon = *generators.lastObject();
-  tempMon.generatorsIndices.reverseElements();
-  tempMon.powers.reverseElements();
+  LittelmannPath path;
+  MonomialTensor<int, HashFunctions::hashFunction> monomial;
+  monomial = *generators.lastObject();
+  monomial.generatorsIndices.reverseElements();
+  monomial.powers.reverseElements();
   out << "<table>";
-  for (int i = tempMon.generatorsIndices.size - 1; i >= 1; i --) {
-    int curInd = - tempMon.generatorsIndices[i] - 1;
-    int nextInd = - tempMon.generatorsIndices[i - 1] - 1;
-    for (int k = 0; k < tempMon.powers[i]; k ++) {
+  for (int i = monomial.generatorsIndices.size - 1; i >= 1; i --) {
+    int curInd = - monomial.generatorsIndices[i] - 1;
+    int nextInd = - monomial.generatorsIndices[i - 1] - 1;
+    for (int k = 0; k < monomial.powers[i]; k ++) {
       lastPath.actByFAlpha(curInd);
     }
-    tempPath = lastPath;
-    tempPath.actByEAlpha(nextInd);
+    path = lastPath;
+    path.actByEAlpha(nextInd);
     out
     << "<tr><td> e_"
     << nextInd + 1
@@ -356,11 +356,11 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
     << lastPath.toString()
     << ") =</td>"
     << "<td>"
-    << tempPath.toString()
+    << path.toString()
     << "</td>";
     for (int j = 0; j < this->owner->getDimension(); j ++) {
-      tempPath = lastPath;
-      tempPath.actByEAlpha(j);
+      path = lastPath;
+      path.actByEAlpha(j);
       out
       << "<td> e_"
       << j + 1
@@ -368,7 +368,7 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
       << lastPath.toString()
       << ")=</td>"
       << "<td>"
-      << tempPath.toString()
+      << path.toString()
       << "</td>";
     }
     out << "</tr>";
@@ -380,28 +380,28 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   << "<td>path</td>"
   << "<td>e operators with non-zero action.</td>";
   for (int i = 0; i < generators.size; i ++) {
-    tempPath = orbit[i];
-    tempMon = generators[i];
-    tempMon.generatorsIndices.reverseElements();
-    tempMon.powers.reverseElements();
-    bool isadapted = tempPath.isAdaptedString(tempMon);
+    path = orbit[i];
+    monomial = generators[i];
+    monomial.generatorsIndices.reverseElements();
+    monomial.powers.reverseElements();
+    bool isadapted = path.isAdaptedString(monomial);
     out
     << "<tr><td>"
-    << tempMon.toString()
+    << monomial.toString()
     << "</td><td>"
     << (isadapted ? "is adapted to" : "is not adapted to")
     << "</td><td>"
-    << tempPath.toString()
+    << path.toString()
     << "</td><td>";
     for (int j = 0; j < this->owner->getDimension(); j ++) {
-      tempPath = orbit[i];
-      tempPath.actByEFDisplayIndex(j + 1);
-      if (!tempPath.isEqualToZero()) {
+      path = orbit[i];
+      path.actByEFDisplayIndex(j + 1);
+      if (!path.isEqualToZero()) {
         out << "e_{" << j + 1 << "}, ";
       }
-      tempPath = orbit[i];
-      tempPath.actByEFDisplayIndex(- j - 1);
-      if (!tempPath.isEqualToZero()) {
+      path = orbit[i];
+      path.actByEFDisplayIndex(- j - 1);
+      if (!path.isEqualToZero()) {
         out << "e_{" << - j - 1 << "}, ";
       }
     }
@@ -422,12 +422,11 @@ void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   &this->objectContainer.getLieAlgebraCreateIfNotPresent(b3Type);
   output.coDomainAlgebra().computeChevalleyConstants();
   output.domainAlgebra().computeChevalleyConstants();
-  ElementSemisimpleLieAlgebra<Rational>
-  g_2,
-  g_1plusg_3,
-  g_m2,
-  g_m1plusg_m3,
-  element;
+  ElementSemisimpleLieAlgebra<Rational> g_2;
+  ElementSemisimpleLieAlgebra<Rational> g_1plusg_3;
+  ElementSemisimpleLieAlgebra<Rational> g_m2;
+  ElementSemisimpleLieAlgebra<Rational> g_m1plusg_m3;
+  ElementSemisimpleLieAlgebra<Rational> element;
   g_2.makeGenerator(13, output.coDomainAlgebra());
   g_m2.makeGenerator(7, output.coDomainAlgebra());
   g_1plusg_3.makeGenerator(12, output.coDomainAlgebra());

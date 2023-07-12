@@ -5888,16 +5888,16 @@ bool Expression::isElementaryObject() const {
 }
 
 bool Expression::isBuiltInType(std::string* outputWhichOperation) const {
-  std::string tempS;
+  std::string currentString;
   if (!this->startsWith()) {
     return false;
   }
-  if (!(*this)[0].isOperation(&tempS)) {
+  if (!(*this)[0].isOperation(&currentString)) {
     return false;
   }
-  if (this->owner->allBuiltInTypes.contains(tempS)) {
+  if (this->owner->allBuiltInTypes.contains(currentString)) {
     if (outputWhichOperation != nullptr) {
-      *outputWhichOperation = tempS;
+      *outputWhichOperation = currentString;
     }
     return true;
   }

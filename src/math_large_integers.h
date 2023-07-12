@@ -261,9 +261,9 @@ public:
   void toString(std::string& output) const;
   std::string toString(FormatExpressions* format = nullptr) const {
     (void) format;
-    std::string tempS;
-    this->toString(tempS);
-    return tempS;
+    std::string currentString;
+    this->toString(currentString);
+    return currentString;
   }
   bool isIntegerFittingInInt(int* whichInt);
   bool isPositive() const {

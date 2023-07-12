@@ -454,18 +454,18 @@ public:
     const Coefficient& negativeOne,
     const Coefficient& ringZero
   );
-  void GetVectorsPerpendicularTo(Vectors<Coefficient>& output) {
-    int Pivot = - 1;
-    if (!this->findIndexFirstNonZeroCoordinateFromTheLeft(Pivot)) {
+  void getVectorsPerpendicularTo(Vectors<Coefficient>& output) {
+    int pivot = - 1;
+    if (!this->findIndexFirstNonZeroCoordinateFromTheLeft(pivot)) {
       output.makeEiBasis(this->size);
       return;
     }
     output.setSize(this->size - 1);
     for (int i = 0; i < this->size; i ++) {
-      if (i != Pivot) {
+      if (i != pivot) {
         Vector<Coefficient>& current = output.objects[i];
         current.makeEi(this->size, i);
-        current.objects[Pivot] -= this->objects[i];
+        current.objects[pivot] -= this->objects[i];
       }
     }
   }
@@ -521,8 +521,8 @@ public:
       this->objects[i] /= other;
     }
   }
-  template <class otherType>
-  void operator+=(const Vector<otherType>& other) {
+  template <class OtherType>
+  void operator+=(const Vector<OtherType>& other) {
     for (int i = 0; i < this->size; i ++) {
       (*this)[i] += other[i];
     }
@@ -570,8 +570,8 @@ public:
     }
     return false;
   }
-  template <class otherType>
-  void operator-=(const Vector<otherType>& other) {
+  template <class OtherType>
+  void operator-=(const Vector<OtherType>& other) {
     if (this->size != other.size) {
       global.fatal
       << "Subtracting vectors with different dimensions. "
@@ -604,8 +604,8 @@ public:
     }
     return *this;
   }
-  template <class otherType>
-  Vector<Coefficient>& operator=(const Vector<otherType>& other) {
+  template <class OtherType>
+  Vector<Coefficient>& operator=(const Vector<OtherType>& other) {
     if (this == reinterpret_cast<const Vector<Coefficient>*>(&other)) {
       return *this;
     }
@@ -615,8 +615,8 @@ public:
     }
     return *this;
   }
-  template <class otherType>
-  Vector<Coefficient>& operator=(const List<otherType>& other) {
+  template <class OtherType>
+  Vector<Coefficient>& operator=(const List<OtherType>& other) {
     this->setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->objects[i] = other[i];
@@ -733,7 +733,7 @@ public:
   std::string toStringEpsilonForm(
     bool useLatex, bool useHtml, bool makeTable
   ) {
-    std::string tempS;
+    std::string currentString;
     std::stringstream out;
     if (useLatex) {
       useHtml = false;
@@ -745,14 +745,14 @@ public:
       out << "\\begin{array}{l}";
     }
     for (int i = 0; i < this->size; i ++) {
-      tempS = this->objects[i].toStringEpsilonFormat();
+      currentString = this->objects[i].toStringEpsilonFormat();
       if (useHtml && makeTable) {
         out << "<tr><td>";
       }
       if (!useLatex && useHtml) {
         out << "(";
       }
-      out << tempS;
+      out << currentString;
       if (!useLatex && useHtml) {
         out << ")";
       }
@@ -817,10 +817,10 @@ public:
   }
   std::string toLinearCombinationString() {
     std::stringstream out;
-    std::string tempS;
+    std::string currentString;
     for (int i = 0; i < this->size; i ++) {
-      this->objects[i].toString(tempS);
-      out << tempS;
+      this->objects[i].toString(currentString);
+      out << currentString;
       if (i != this->size - 1) {
         out << " + ";
       }

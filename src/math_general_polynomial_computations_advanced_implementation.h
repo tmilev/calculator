@@ -682,23 +682,23 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
 ) {
   int numberOfVariables = this->systemSolution.size;
   MonomialPolynomial monomial;
-  Polynomial<Coefficient> tempP;
+  Polynomial<Coefficient> polynomial;
   Coefficient coefficient;
   for (int i = 0; i < inputSystem.size; i ++) {
-    tempP = inputSystem[i];
+    polynomial = inputSystem[i];
     for (int j = 0; j < numberOfVariables; j ++) {
       monomial.makeEi(j, 1, numberOfVariables);
-      int indexTempM = tempP.monomials.getIndex(monomial);
-      if (indexTempM == - 1) {
+      int indexOfMonomial = polynomial.monomials.getIndex(monomial);
+      if (indexOfMonomial == - 1) {
         continue;
       }
-      coefficient = tempP.coefficients[indexTempM];
-      tempP.subtractMonomial(monomial, coefficient);
+      coefficient = polynomial.coefficients[indexOfMonomial];
+      polynomial.subtractMonomial(monomial, coefficient);
       bool isGood = true;
-      for (int k = 0; k < tempP.size(); k ++) {
-        if (!(tempP[k](j) == 0)) {
+      for (int k = 0; k < polynomial.size(); k ++) {
+        if (!(polynomial[k](j) == 0)) {
           isGood = false;
-          tempP.addMonomial(monomial, coefficient);
+          polynomial.addMonomial(monomial, coefficient);
           break;
         }
       }
@@ -706,20 +706,22 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
         continue;
       }
       outputSub.makeIdentitySubstitution(numberOfVariables);
-      outputSub[j] = tempP;
+      outputSub[j] = polynomial;
       coefficient *= - 1;
       outputSub[j] /= coefficient;
       return true;
     }
     int oneVarIndex;
-    if (tempP.isOneVariableNonConstantPolynomial(&oneVarIndex)) {
+    if (polynomial.isOneVariableNonConstantPolynomial(&oneVarIndex)) {
       if (this->flagUsingAlgebraicClosure && this->algebraicClosure != 0) {
-        if (this->getOneVariablePolynomialSolution(tempP, coefficient)) {
+        if (
+          this->getOneVariablePolynomialSolution(polynomial, coefficient)
+        ) {
           outputSub.makeIdentitySubstitution(numberOfVariables);
           outputSub[oneVarIndex].makeConstant(coefficient);
           // check our work:
-          tempP.substitute(outputSub, 1);
-          if (!tempP.isEqualToZero()) {
+          polynomial.substitute(outputSub, 1);
+          if (!polynomial.isEqualToZero()) {
             global.fatal
             << "I was solving the polynomial equation "
             << inputSystem[i].toString()
@@ -727,7 +729,7 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
             << outputSub.toString()
             << ". However, after carrying out the "
             << "substitution in the polynomial, I got "
-            << tempP.toString()
+            << polynomial.toString()
             << ". "
             << global.fatal;
           }
@@ -803,9 +805,9 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
   PolynomialSubstitution<Coefficient>& finalSubstitution
 ) {
   STACK_TRACE("PolynomialSystem::backSubstituteIntoSinglePolynomial");
-  Polynomial<Coefficient> tempP;
-  tempP.makeMonomial(index, 1, 1);
-  if (substitution == tempP) {
+  Polynomial<Coefficient> polynomial;
+  polynomial.makeMonomial(index, 1, 1);
+  if (substitution == polynomial) {
     return;
   }
   substitution.substitute(finalSubstitution, 1);
@@ -1207,12 +1209,12 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
     }
     if (this->shouldReport()) {
       std::stringstream out;
-      MonomialPolynomial tempMon(i);
+      MonomialPolynomial monomial(i);
       out
       << "The system has the single monomial: "
       << monomial.toString(&this->format())
       << "<br>Trying case:<br>"
-      << tempMon.toString(&this->format())
+      << monomial.toString(&this->format())
       << "= 0;";
       report1.report(out.str());
     }
@@ -2796,9 +2798,9 @@ getSpacedMonomialsWithHighlightLaTeX(
     }
     std::stringstream highlightHeadStream;
     std::stringstream highlightTailStream;
-    MonomialPolynomial tempM;
-    tempM.makeOne();
-    int monIndex = this->allMonomials.getIndex(tempM);
+    MonomialPolynomial monomial;
+    monomial.makeOne();
+    int monIndex = this->allMonomials.getIndex(monomial);
     if (slidesAdditionalHighlight != nullptr && monIndex != - 1) {
       if ((*slidesAdditionalHighlight)[monIndex] > 0) {
         highlightHeadStream

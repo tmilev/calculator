@@ -10,7 +10,7 @@
 std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   STACK_TRACE("SemisimpleLieAlgebra::toString");
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   Vector<Rational> root;
   Vector<Rational> root2;
   int numberOfRoots = this->weylGroup.rootSystem.size;
@@ -57,10 +57,10 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   << "[\\bullet, \\bullet]\n";
   for (int i = 0; i < numberOfRoots + dimension; i ++) {
     element1.makeGenerator(i, *this);
-    tempS = element1.toString(format);
-    htmlStream << "<td>" << tempS << "</td>";
+    currentString = element1.toString(format);
+    htmlStream << "<td>" << currentString << "</td>";
     tableLateXStream << " & ";
-    tableLateXStream << tempS;
+    tableLateXStream << currentString;
   }
   tableLateXStream << "\\\\\n";
   htmlStream << "</tr>";
@@ -73,16 +73,16 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
     tableLateXStream << root2.toStringLetterFormat("\\varepsilon") << "&";
     htmlStream << "<td>" << root2.toStringLetterFormat("e") << "</td>";
     element1.makeGenerator(i, *this);
-    tempS = element1.toString(format);
-    tableLateXStream << tempS;
-    htmlStream << "<td>" << tempS << "</td>";
+    currentString = element1.toString(format);
+    tableLateXStream << currentString;
+    htmlStream << "<td>" << currentString << "</td>";
     for (int j = 0; j < numberOfRoots + dimension; j ++) {
       element2.makeGenerator(j, *this);
       this->lieBracket(element1, element2, element3);
-      tempS = element3.toString(format);
+      currentString = element3.toString(format);
       tableLateXStream << "& ";
-      tableLateXStream << tempS;
-      htmlStream << "<td>" << tempS << "</td>";
+      tableLateXStream << currentString;
+      htmlStream << "<td>" << currentString << "</td>";
     }
     htmlStream << "</tr>";
     tableLateXStream << "\\\\\n";
@@ -403,25 +403,25 @@ std::string SemisimpleLieAlgebra::toHTML(
     )
   ) {
     if (tempSimpleType.cartanSymmetricInverseScale == 1) {
-      Matrix<Rational> tempM, tempM2;
-      this->weylGroup.dynkinType.getEpsilonMatrix(tempM);
-      tempM2 = tempM;
-      tempM2.transpose();
-      tempM2.multiplyOnTheRight(tempM);
-      tempM2 *= 2 /
+      Matrix<Rational> monomial, monomial2;
+      this->weylGroup.dynkinType.getEpsilonMatrix(monomial);
+      monomial2 = monomial;
+      monomial2.transpose();
+      monomial2.multiplyOnTheRight(monomial);
+      monomial2 *= 2 /
       tempSimpleType.getEpsilonRealizationLongRootLengthSquared();
-      if (!(tempM2 == this->weylGroup.cartanSymmetric)) {
+      if (!(monomial2 == this->weylGroup.cartanSymmetric)) {
         global.fatal
         << "This is a (non-critical) programming error: "
         << "the epsilon coordinates of the vectors are incorrect. "
         << "Please fix function DynkinType::getEpsilonMatrix. "
         << "The matrix of the epsilon coordinates is "
-        << tempM.toString()
+        << monomial.toString()
         << ", the Symmetric Cartan matrix is "
         << this->weylGroup.cartanSymmetric.toString()
         << ", and the "
         << "transpose of the epsilon matrix times the epsilon matrix: "
-        << tempM2.toString()
+        << monomial2.toString()
         << ". "
         << global.fatal;
       }

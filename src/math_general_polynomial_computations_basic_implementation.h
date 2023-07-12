@@ -15,7 +15,7 @@ bool MonomialPolynomial::substitute(
   if (this->isConstant()) {
     return true;
   }
-  Polynomial<Coefficient> tempPoly;
+  Polynomial<Coefficient> polynomial;
   for (int i = 0; i < this->monomialBody.size; i ++) {
     if (this->monomialBody[i] == 0) {
       continue;
@@ -39,9 +39,9 @@ bool MonomialPolynomial::substitute(
       this->monomialBody[i] < 0
     ) {
       if (substitution[i].isMonomialCoefficientOne()) {
-        MonomialPolynomial tempMon = substitution[i][0];
-        tempMon.raiseToPower(this->monomialBody[i]);
-        output *= tempMon;
+        MonomialPolynomial monomial = substitution[i][0];
+        monomial.raiseToPower(this->monomialBody[i]);
+        output *= monomial;
         continue;
       }
       global.comments
@@ -53,9 +53,9 @@ bool MonomialPolynomial::substitute(
       << GlobalVariables::Crasher::getStackTraceEtcErrorMessageHTML();
       return false;
     }
-    tempPoly = substitution[i];
-    tempPoly.raiseToPower(exponent, one);
-    output *= tempPoly;
+    polynomial = substitution[i];
+    polynomial.raiseToPower(exponent, one);
+    output *= polynomial;
   }
   return true;
 }
@@ -216,9 +216,9 @@ void Polynomial<Coefficient>::makeDegreeOne(
   int numberOfVariables, int nonZeroIndex, const Coefficient& coefficient
 ) {
   this->makeZero();
-  MonomialPolynomial tempM;
-  tempM.makeEi(nonZeroIndex, 1, numberOfVariables);
-  this->addMonomial(tempM, coefficient);
+  MonomialPolynomial monomial;
+  monomial.makeEi(nonZeroIndex, 1, numberOfVariables);
+  this->addMonomial(monomial, coefficient);
 }
 
 template <class Coefficient>
@@ -231,11 +231,11 @@ void Polynomial<Coefficient>::makeDegreeOne(
 ) {
   (void) numberOfVariables;
   this->makeZero();
-  MonomialPolynomial tempM;
-  tempM.makeEi(nonZeroIndex1);
-  this->addMonomial(tempM, coefficient1);
-  tempM.makeEi(nonZeroIndex2);
-  this->addMonomial(tempM, coefficient2);
+  MonomialPolynomial monomial;
+  monomial.makeEi(nonZeroIndex1);
+  this->addMonomial(monomial, coefficient1);
+  monomial.makeEi(nonZeroIndex2);
+  this->addMonomial(monomial, coefficient2);
 }
 
 template <class Coefficient>
@@ -787,16 +787,16 @@ Polynomial<Coefficient> Polynomial<Coefficient>::operator-(
 
 template <class Coefficient>
 void Polynomial<Coefficient>::operator-=(int x) {
-  MonomialPolynomial tempMon;
-  tempMon.makeOne();
-  this->subtractMonomial(tempMon, x);
+  MonomialPolynomial monomial;
+  monomial.makeOne();
+  this->subtractMonomial(monomial, x);
 }
 
 template <class Coefficient>
 void Polynomial<Coefficient>::operator-=(const Coefficient& other) {
-  MonomialPolynomial tempMon;
-  tempMon.makeOne();
-  this->subtractMonomial(tempMon, other);
+  MonomialPolynomial monomial;
+  monomial.makeOne();
+  this->subtractMonomial(monomial, other);
 }
 
 template <class Coefficient>
@@ -856,10 +856,10 @@ template <class Coefficient>
 void Polynomial<Coefficient>::operator/=(
   const Polynomial<Coefficient>& other
 ) {
-  Polynomial<Coefficient> tempMe = *this;
-  Polynomial<Coefficient> tempRemainder;
-  tempMe.divideBy(
-    other, *this, tempRemainder, &MonomialPolynomial::orderDefault()
+  Polynomial<Coefficient> monomial = *this;
+  Polynomial<Coefficient> remainder;
+  monomial.divideBy(
+    other, *this, remainder, &MonomialPolynomial::orderDefault()
   );
 }
 
@@ -1095,7 +1095,7 @@ void Polynomial<Coefficient>::assignMinimalPolynomial(
   Vector<Coefficient> vectorPowers;
   Vector<Coefficient> firstDependentPower;
   Polynomial<Coefficient> currentFactor;
-  MonomialPolynomial tempM;
+  MonomialPolynomial monomial;
   for (int i = 0; i < dimension; i ++) {
     vectorPowers.makeEi(dimension, i);
     basis.setSize(0);
@@ -1113,11 +1113,11 @@ void Polynomial<Coefficient>::assignMinimalPolynomial(
     currentFactor.setExpectedSize(basis.size + 1);
     currentFactor.makeZero();
     for (int i = 0; i < basis.size; i ++) {
-      tempM.makeEi(0, i, 1);
-      currentFactor.addMonomial(tempM, - firstDependentPower[i]);
+      monomial.makeEi(0, i, 1);
+      currentFactor.addMonomial(monomial, - firstDependentPower[i]);
     }
-    tempM.makeEi(0, basis.size, 1);
-    currentFactor.addMonomial(tempM, 1);
+    monomial.makeEi(0, basis.size, 1);
+    currentFactor.addMonomial(monomial, 1);
     *this = MathRoutines::leastCommonMultiple(*this, currentFactor);
   }
   this->scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
@@ -1190,9 +1190,9 @@ template <class Coefficient>
 void Polynomial<Coefficient>::constantTerm(
   Coefficient& output, const Coefficient& ringZero
 ) const {
-  MonomialPolynomial tempM;
-  tempM.makeOne();
-  int i = this->monomials.getIndex(tempM);
+  MonomialPolynomial monomial;
+  monomial.makeOne();
+  int i = this->monomials.getIndex(monomial);
   if (i == - 1) {
     output = ringZero;
   } else {
@@ -1224,9 +1224,9 @@ template <class Coefficient>
 void Polynomial<Coefficient>::coefficientInFrontOfLinearTermVariableIndex(
   int index, Coefficient& output
 ) {
-  MonomialPolynomial tempM;
-  tempM.makeEi(index);
-  int i = this->monomials.getIndex(tempM);
+  MonomialPolynomial monomial;
+  monomial.makeEi(index);
+  int i = this->monomials.getIndex(monomial);
   if (i == - 1) {
     output = 0;
   } else {

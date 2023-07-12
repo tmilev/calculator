@@ -6090,10 +6090,11 @@ isPossibleNilradicalCarryOutSelectionImplications(
 ) {
   if (this->fernandoKacNilradicalCandidates.size > 100) {
     if (logStream != nullptr) {
-      std::string tempS = logStream->str();
-      if (tempS.size() > 2) {
+      std::string currentString = logStream->str();
+      if (currentString.size() > 2) {
         if (
-          tempS[tempS.size() - 1] != '.' || tempS[tempS.size() - 2] != '.'
+          currentString[currentString.size() - 1] != '.' ||
+          currentString[currentString.size() - 2] != '.'
         ) {
           *logStream
           << "<br>... number of nilradicals found exceeds 100, "
@@ -7044,10 +7045,10 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
       totalCharacter[currentIndex],
       totalCharacter.coefficients[currentIndex]
     );
-    std::string tempS;
+    std::string currentString;
     bool tempBool =
     freudenthalChar.freudenthalEvaluateMeFullCharacter(
-      outputChar, - 1, &tempS
+      outputChar, - 1, &currentString
     );
     if (!tempBool && !allowBadCharacter) {
       global.fatal
@@ -7055,7 +7056,7 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
       << "via the Freudenthal formula on a relatively small example, namely "
       << freudenthalChar.toString()
       << ". The failure message was: "
-      << tempS
+      << currentString
       << ". This shouldn't happen. "
       << global.fatal;
       return false;
@@ -7073,7 +7074,7 @@ toStringModuleDecompositionMinimalContainingRegularSubalgebras(
   std::string& output
 ) const {
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   if (useLatex) {
     out << "$";
   }
@@ -7105,7 +7106,7 @@ toStringModuleDecompositionMinimalContainingRegularSubalgebras(
     owner.rootSubalgebras.subalgebras[
       this->indicesMinimalContainingRootSubalgebras[k]
     ];
-    tempS = rootSubalgebra.dynkinDiagram.toString();
+    currentString = rootSubalgebra.dynkinDiagram.toString();
     if (useHtml) {
       out << "<td align='center'>";
     }
@@ -7231,7 +7232,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
     return "sl(2) subalgebra not initialized.";
   }
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   out
   << "<a name ='sl2index"
   << this->indexInContainer
@@ -7239,7 +7240,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   << this->hCharacteristic.toString()
   << "</a>";
   out << "<br>Length of the weight dual to h: " << this->lengthHSquared;
-  tempS = this->preferredAmbientSimpleBasis.toString();
+  currentString = this->preferredAmbientSimpleBasis.toString();
   std::string virtualPath = "";
   std::string htmlPathServer = "";
   // bool usePNG = false;
@@ -7255,7 +7256,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   if (useHtml) {
     out << "<br>";
   }
-  out << "\nSimple basis ambient algebra w.r.t defining h: " << tempS;
+  out << "\nSimple basis ambient algebra w.r.t defining h: " << currentString;
   if (useHtml) {
     out << "<br>";
   }
@@ -8006,13 +8007,13 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
 void SlTwoSubalgebras::toStringModuleDecompositionMinimalContainingRegularSAs(
   std::string& output, bool useLatex, bool useHtml
 ) {
-  std::string tempS;
+  std::string currentString;
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
     (*this)[i].toStringModuleDecompositionMinimalContainingRegularSubalgebras(
-      useLatex, useHtml, *this, tempS
+      useLatex, useHtml, *this, currentString
     );
-    out << tempS;
+    out << currentString;
     if (useHtml) {
       out << "\n<br>";
     }
@@ -8290,17 +8291,17 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
 }
 
 std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
-  std::string tempS;
+  std::string currentString;
   std::stringstream out;
   std::stringstream body;
   bool useHtml = format == nullptr ? true : format->flagUseHTML;
   for (int i = 0; i < this->size; i ++) {
-    tempS = (*this)[i].toString(format);
+    currentString = (*this)[i].toString(format);
     //  body<< "Index " << i << ": ";
     if (useHtml) {
       body << "<br>";
     }
-    body << tempS;
+    body << currentString;
     if (useHtml) {
       body << "<hr>";
     }
@@ -9496,9 +9497,9 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
             }
           }
         }
-        std::string tempS = currentStream.str();
-        tempS.resize(tempS.size() - 2);
-        out << tempS;
+        std::string currentString = currentStream.str();
+        currentString.resize(currentString.size() - 2);
+        out << currentString;
       }
     }
     out << "\\end{longtable}";

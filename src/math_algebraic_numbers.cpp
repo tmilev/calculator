@@ -98,7 +98,7 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
   vectorActedOnSel.initialize(this->quadraticRadicals.size);
   resultVectorSel.initialize(this->quadraticRadicals.size);
   Rational coefficient;
-  MonomialMatrix tempM;
+  MonomialMatrix monomial;
   do {
     coefficient = 1;
     for (int i = 0; i < this->quadraticRadicals.size; i ++) {
@@ -114,11 +114,11 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
       }
     }
     resultVectorSel.computeIndicesFromSelection();
-    tempM.makeEij(
+    monomial.makeEij(
       this->getIndexFromRadicalSelection(resultVectorSel),
       this->getIndexFromRadicalSelection(vectorActedOnSel)
     );
-    output.addMonomial(tempM, coefficient);
+    output.addMonomial(monomial, coefficient);
   } while (vectorActedOnSel.incrementReturnFalseIfPastLast());
 }
 

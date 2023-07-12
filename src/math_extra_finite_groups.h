@@ -3046,14 +3046,14 @@ template <class Coefficient>
 std::string PolynomialUnivariateDense<Coefficient>::toString(
   FormatExpressions* format
 ) const {
-  Polynomial<Coefficient> tempP;
-  tempP.makeZero();
-  MonomialPolynomial tempM;
+  Polynomial<Coefficient> polynomial;
+  polynomial.makeZero();
+  MonomialPolynomial monomial;
   for (int i = 0; i < this->data.size; i ++) {
-    tempM.makeEi(0, i, 1);
-    tempP.addMonomial(tempM, this->data[i]);
+    monomial.makeEi(0, i, 1);
+    polynomial.addMonomial(monomial, this->data[i]);
   }
-  return tempP.toString(format);
+  return polynomial.toString(format);
 }
 
 template <typename Coefficient>

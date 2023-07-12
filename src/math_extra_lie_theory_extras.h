@@ -384,9 +384,9 @@ private:
 public:
   void toString(std::string& output, FormatExpressions* PolyFormatLocal) const;
   std::string toString(FormatExpressions* format) const {
-    std::string tempS;
-    this->toString(tempS, format);
-    return tempS;
+    std::string currentString;
+    this->toString(currentString, format);
+    return currentString;
   }
   bool needsParenthesisForMultiplication() const {
     return this->size > 1;

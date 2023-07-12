@@ -765,16 +765,16 @@ void LargeIntegerUnsigned::dividePositive(
 std::string LargeIntegerUnsigned::toString(FormatExpressions* format) const {
   (void) format;
   // to avoid unused paramater warning
-  std::string tempS;
-  this->toString(tempS);
-  return tempS;
+  std::string currentString;
+  this->toString(currentString);
+  return currentString;
 }
 
 void LargeIntegerUnsigned::toStringLargeElementDecimal(std::string& output)
 const {
   std::stringstream out;
   if (this->carryOverBound == 1000000000 || this->carryOverBound == 10) {
-    std::string tempS;
+    std::string currentString;
     int numberOfZeroesInCarryOver = 9;
     if (this->carryOverBound == 10) {
       numberOfZeroesInCarryOver = 1;
@@ -789,17 +789,19 @@ const {
     for (int i = this->digits.size - 2; i >= 0; i --) {
       std::stringstream currentStream;
       currentStream << this->digits[i];
-      tempS = currentStream.str();
-      if (tempS[0] == '-') {
+      currentString = currentStream.str();
+      if (currentString[0] == '-') {
         out << "[";
       }
       int numberOfZeroesToPad =
-      numberOfZeroesInCarryOver - static_cast<signed>(tempS.length());
+      numberOfZeroesInCarryOver - static_cast<signed>(
+        currentString.length()
+      );
       for (int j = 0; j < numberOfZeroesToPad; j ++) {
         out << "0";
       }
-      out << tempS;
-      if (tempS[0] == '-') {
+      out << currentString;
+      if (currentString[0] == '-') {
         out << "]";
       }
     }
@@ -1455,15 +1457,15 @@ bool LargeInteger::isEven() const {
 }
 
 void LargeInteger::writeToFile(std::fstream& output) {
-  std::string tempS;
-  this->toString(tempS);
-  output << tempS;
+  std::string currentString;
+  this->toString(currentString);
+  output << currentString;
 }
 
 void LargeInteger::readFromFile(std::fstream& input) {
-  std::string tempS;
-  input >> tempS;
-  this->assignString(tempS);
+  std::string currentString;
+  input >> currentString;
+  this->assignString(currentString);
 }
 
 void LargeInteger::assignString(const std::string& input) {
@@ -1585,9 +1587,9 @@ void LargeInteger::toString(std::string& output) const {
   if (this->sign == - 1) {
     out << "-";
   }
-  std::string tempS;
-  this->value.toString(tempS);
-  out << tempS;
+  std::string currentString;
+  this->value.toString(currentString);
+  out << currentString;
   output = out.str();
 }
 
@@ -1800,9 +1802,9 @@ void Rational::invert() {
 }
 
 void Rational::readFromFile(std::istream& input) {
-  std::string tempS;
-  input >> tempS;
-  this->assignString(tempS);
+  std::string currentString;
+  input >> currentString;
+  this->assignString(currentString);
 }
 
 void Rational::multiplyByInteger(int x) {
@@ -2466,12 +2468,12 @@ std::string Rational::toString(FormatExpressions* format) const {
       out << "/" << this->denominatorShort;
     }
   } else {
-    std::string tempS;
-    this->extended->numerator.toString(tempS);
-    out << tempS;
-    this->extended->denominator.toString(tempS);
-    if (tempS != "1") {
-      out << "/" << tempS;
+    std::string currentString;
+    this->extended->numerator.toString(currentString);
+    out << currentString;
+    this->extended->denominator.toString(currentString);
+    if (currentString != "1") {
+      out << "/" << currentString;
     }
   }
   return out.str();

@@ -489,11 +489,11 @@ bool LittelmannPath::generateOrbit(
 std::string LittelmannPath::toStringOperatorSequenceStartingOnMe(
   List<int>& input
 ) {
-  MonomialTensor<Rational> tempMon;
-  tempMon = input;
-  tempMon.generatorsIndices.reverseElements();
-  tempMon.powers.reverseElements();
-  return tempMon.toString();
+  MonomialTensor<Rational> monomial;
+  monomial = input;
+  monomial.generatorsIndices.reverseElements();
+  monomial.powers.reverseElements();
+  return monomial.toString();
 }
 
 template <class Coefficient>
@@ -567,20 +567,20 @@ modOutFDRelationsExperimental(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
+  MonomialUniversalEnvelopingOrdered<Coefficient> monomial;
   ElementUniversalEnvelopingOrdered<Coefficient> output;
   output.makeZero(*this->owner);
   bool result = true;
   for (int i = 0; i < this->size; i ++) {
-    tempMon = this->objects[i];
+    monomial = this->objects[i];
     if (
-      !tempMon.modOutFDRelationsExperimental(
+      !monomial.modOutFDRelationsExperimental(
         highestWeightSimpleCoordinates, ringUnit, ringZero
       )
     ) {
       result = false;
     }
-    output.addMonomial(tempMon);
+    output.addMonomial(monomial);
   }
   this->operator=(output);
   return result;

@@ -241,9 +241,9 @@ public:
       return;
     }
     if (this == &standsOnTheRight) {
-      MonomialTensor<Coefficient, inputHashFunction> tempMon;
-      tempMon = standsOnTheRight;
-      (*this) *= (tempMon);
+      MonomialTensor<Coefficient, inputHashFunction> monomial;
+      monomial = standsOnTheRight;
+      (*this) *= (monomial);
       return;
     }
     this->generatorsIndices.setExpectedSize(
@@ -1979,7 +1979,7 @@ void Matrix<Coefficient>::multiplyOnTheLeft(
 template <typename Element>
 std::string Matrix<Element>::toStringWithBlocks(List<int>& blocks) {
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   out << "\\left(\\begin{array}{";
   int offset = 0;
   int blockIndex = 0;
@@ -1999,8 +1999,8 @@ std::string Matrix<Element>::toStringWithBlocks(List<int>& blocks) {
   blockIndex = 0;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
-      tempS = this->elements[i][j].toString();
-      out << tempS;
+      currentString = this->elements[i][j].toString();
+      out << currentString;
       if (j != this->numberOfColumns - 1) {
         out << " & ";
       }
@@ -2951,18 +2951,18 @@ public:
     output += other;
     return output;
   }
-  void makeConstant(const Coefficient& coeff) {
-    TemplateMonomial tempM;
-    tempM.makeOne();
-    this->addMonomial(tempM, coeff);
+  void makeConstant(const Coefficient& coefficient) {
+    TemplateMonomial monomial;
+    monomial.makeOne();
+    this->addMonomial(monomial, coefficient);
   }
   void makeOne() {
     this->makeConstant(1);
   }
   void operator+=(const Coefficient& other) {
-    TemplateMonomial tempM;
-    tempM.makeOne();
-    this->addMonomial(tempM, other);
+    TemplateMonomial monomial;
+    monomial.makeOne();
+    this->addMonomial(monomial, other);
   }
   void operator-=(const Coefficient& other) {
     TemplateMonomial monomial;
@@ -3327,9 +3327,9 @@ public:
     List<MonomialPolynomial>::Comparator* monomialOrder
   ) const;
   void addConstant(const Coefficient& constantTerm) {
-    MonomialPolynomial tempMon;
-    tempMon.makeOne();
-    this->addMonomial(tempMon, constantTerm);
+    MonomialPolynomial monomial;
+    monomial.makeOne();
+    this->addMonomial(monomial, constantTerm);
   }
   void shiftVariableIndicesToTheRight(int variableIndexShift);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables);
@@ -5101,7 +5101,7 @@ void Matrix<Coefficient>::getZeroEigenSpaceModifyMe(
 template <class Coefficient>
 std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   bool useLaTeX = false;
   bool useHtml = false;
   bool makeTable = false;
@@ -5119,11 +5119,11 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
     out << "<table>";
   }
   for (int i = 0; i < this->size; i ++) {
-    tempS = this->objects[i].toString(format);
+    currentString = this->objects[i].toString(format);
     if (useHtml && makeTable) {
       out << "<tr><td>";
     }
-    out << tempS;
+    out << currentString;
     if (!makeTable && i != this->size - 1) {
       out << ", ";
     }

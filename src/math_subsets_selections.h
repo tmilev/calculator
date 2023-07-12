@@ -117,9 +117,9 @@ class SelectionWithMultiplicities {
 public:
   void toString(std::string& output);
   std::string toString() {
-    std::string tempS;
-    this->toString(tempS);
-    return tempS;
+    std::string currentString;
+    this->toString(currentString);
+    return currentString;
   }
   List<int> elements;
   List<int> multiplicities;

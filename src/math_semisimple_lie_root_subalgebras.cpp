@@ -313,10 +313,10 @@ void RootSubalgebra::readLieBracketTableAndOppositeKModulesFromFile(
   List<List<List<int> > >& outMultTable,
   List<int>& outOpposites
 ) {
-  std::string tempS;
+  std::string currentString;
   int reader = 0;
   int size = 0;
-  input >> tempS >> size;
+  input >> currentString >> size;
   outMultTable.setSize(size);
   outOpposites.setSize(size);
   for (int i = 0; i < size; i ++) {
@@ -329,11 +329,11 @@ void RootSubalgebra::readLieBracketTableAndOppositeKModulesFromFile(
       }
     }
   }
-  input >> tempS;
+  input >> currentString;
   for (int i = 0; i < outMultTable.size; i ++) {
     input >> outOpposites[i];
   }
-  if (tempS != "opposites:") {
+  if (currentString != "opposites:") {
     global.fatal << "Error reading from file. " << global.fatal;
   }
 }
@@ -518,13 +518,13 @@ void RootSubalgebra::possibleNilradicalComputation(
           tempK.addOnTop(this->positiveRootsReductiveSubalgebra.objects[i]);
         }
         if (Vectors<Rational>::conesIntersect(empNilradical, tempOthers, owner.ambientWeyl.cartanSymmetric.numberOfRows)) {
-          Vectors<Rational> roots; std::stringstream out; std::string tempS;
+          Vectors<Rational> roots; std::stringstream out; std::string currentString;
           this->ambientWeyl.getEpsilonCoordinates(tempNilradical, roots);
-          roots.toStringEpsilonForm(tempS, true, false, false);
-          out << tempS;
+          roots.toStringEpsilonForm(currentString, true, false, false);
+          out << currentString;
           this->ambientWeyl.getEpsilonCoordinates(tempK, roots);
-          roots.toStringEpsilonForm(tempS, true, false, false);
-          out << "\n\n" << tempS;
+          roots.toStringEpsilonForm(currentString, true, false, false);
+          out << "\n\n" << currentString;
           owner.ReportStringNonNilradicalParabolic = out.str();
         }
       }*/
@@ -1150,34 +1150,6 @@ void RootSubalgebra::extractRelations(
     relation.fixRightHandSide(*this, nilradicalRoots);
     relation.makeLookCivilized(*this);
     relation.computeRelationString(owner, true, true);
-    if ((false)) {
-      if (relation.diagram.toString() == "C^{2}_3") {
-        Selection tempSel;
-        tempSel.initialize(kSingular.size);
-        LargeInteger tempNum = MathRoutines::nChooseK(kSingular.size, 2);
-        for (int i = 0; i < tempNum; i ++) {
-          tempSel.incrementSelectionFixedCardinalityReturnFalseIfPastLast(2);
-          relation.alphas.setSize(2);
-          relation.alphaCoefficients.setSize(2);
-          relation.betas.size = 0;
-          relation.betaCoefficients.size = 0;
-          for (int j = 0; j < tempSel.cardinalitySelection; j ++) {
-            relation.alphas[j] = kSingular[tempSel.elements[j]];
-          }
-          if (
-            relation.isStrictlyWeaklyProhibiting(
-              *this, nilradicalRoots, owner, indexInOwner
-            )
-          ) {
-            break;
-          }
-        }
-        if (!relation.checkForBugs(*this, nilradicalRoots)) {
-          global.fatal << "check for bugs failed. " << global.fatal;
-        }
-      }
-      owner.badRelations.addOnTop(relation);
-    }
   }
 }
 
@@ -1875,18 +1847,18 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(
       int x =
       linearCombination.findLeastCommonMultipleDenominatorsTruncateToInt();
       linearCombination *= - x;
-      std::string tempS;
+      std::string currentString;
       if (
         this->linearCombinationToString(
-          allRoots[i], x, linearCombination, tempS
+          allRoots[i], x, linearCombination, currentString
         )
       ) {
-        out << tempS << "\n";
+        out << currentString << "\n";
         counter ++;
         if (
           this->lowestWeightsPrimalSimple.getIndex(allRoots[i]) != - 1
         ) {
-          out2 << tempS << "\n";
+          out2 << currentString << "\n";
         }
       }
     }
@@ -1895,8 +1867,8 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(
   << "\\multicolumn{2}{|c|}{Number of relations: "
   << counter
   << " }\\\\\\hline";
-  std::string tempS = out.str();
-  out2 << "\n\n" << tempS;
+  std::string currentString = out.str();
+  out2 << "\n\n" << currentString;
   if (doEnumeration) {
     this->testedRootsAlpha = this->lowestWeightsPrimalSimple;
     this->doKRootsEnumeration();
@@ -1976,24 +1948,24 @@ bool RootSubalgebra::linearCombinationToString(
     return false;
   }
   std::stringstream out;
-  std::string tempS = alphaRoot.toString();
-  out << "(" << tempS << ")&$";
+  std::string currentString = alphaRoot.toString();
+  out << "(" << currentString << ")&$";
   out << coefficient << "\\alpha_" << dimension + 1;
   for (int i = 0; i < dimension; i ++) {
     // if (linComb.coordinates[i].isEqualToZero())
     //  return false;
-    tempS = linearCombination[i].toString();
-    if (tempS != "0") {
-      if (tempS == "- 1" || tempS == "-1") {
-        tempS = "-";
+    currentString = linearCombination[i].toString();
+    if (currentString != "0") {
+      if (currentString == "- 1" || currentString == "-1") {
+        currentString = "-";
       }
-      if (tempS == "1") {
-        tempS = "+";
+      if (currentString == "1") {
+        currentString = "+";
       }
-      if (!(tempS[0] == '+') && !(tempS[0] == '-')) {
-        tempS.insert(0, "+");
+      if (!(currentString[0] == '+') && !(currentString[0] == '-')) {
+        currentString.insert(0, "+");
       }
-      out << tempS << "\\beta_" << i + 1;
+      out << currentString << "\\beta_" << i + 1;
     }
   }
   out << "= 0$\\\\";
@@ -2655,8 +2627,10 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
         }
       }
       if (foundBadCombination) {
-        std::string tempS;
-        this->linearCombinationToString(testedRootAlpha, x, linComb, tempS);
+        std::string currentString;
+        this->linearCombinationToString(
+          testedRootAlpha, x, linComb, currentString
+        );
       }
     }
   }
@@ -4307,7 +4281,7 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
   int amountToProcess
 ) {
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   // W'' stands for the graph isomorphisms of C(k_ss) extending to
   // Vector<Rational>
   // system isomorphisms of the entire algebra.
@@ -4341,16 +4315,16 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
     if (useHtml) {
       out << "<td>";
     }
-    tempS = current.dynkinDiagram.toString();
-    out << tempS;
+    currentString = current.dynkinDiagram.toString();
+    out << currentString;
     if (useHtml) {
       out << "</td><td>";
     }
     if (useLatex) {
       out << " & ";
     }
-    tempS = current.centralizerDiagram.toString();
-    out << tempS;
+    currentString = current.centralizerDiagram.toString();
+    out << currentString;
     if (useHtml) {
       out << "</td><td>";
     }
@@ -5004,7 +4978,7 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
   Vectors<Rational> roots, roots2;
   std::stringstream out;
   std::stringstream out2;
-  std::string tempS;
+  std::string currentString;
   int totalNonSolvableNonReductive = 0;
   char simpleType;
   int rank;
@@ -5084,8 +5058,8 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
       currentRootSubalgebra.getAmbientWeyl().getEpsilonCoordinates(
         currentRootSubalgebra.positiveRootsReductiveSubalgebra, roots2
       );
-      tempS = roots2.toStringEpsilonForm(true, false, false);
-      out << " $\\Delta^+(\\mathfrak{k})=$ " << tempS;
+      currentString = roots2.toStringEpsilonForm(true, false, false);
+      out << " $\\Delta^+(\\mathfrak{k})=$ " << currentString;
       if (includeMatrixForm) {
         out << "\n\n\\noindent\\rule{\\textwidth}{0.3pt}\n\n";
       } else {
@@ -5106,8 +5080,8 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
               ]
             );
           }
-          this->toStringRootSpaces(tempS, includeMatrixForm, roots);
-          out << tempS << "\n";
+          this->toStringRootSpaces(currentString, includeMatrixForm, roots);
+          out << currentString << "\n";
           if (totalNonReductiveCurrent % 2 == 0) {
             out << "\n\n";
             if (!includeMatrixForm) {
@@ -5129,8 +5103,8 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
   << "root subalgebras not satisfying the cone condition is: "
   << totalNonSolvableNonReductive
   << "\n\n";
-  tempS = out.str();
-  out2 << tempS;
+  currentString = out.str();
+  out2 << currentString;
   output = out2.str();
 }
 
@@ -5139,7 +5113,7 @@ void RootSubalgebras::toStringRootSpaces(
   bool includeMatrixForm,
   Vectors<Rational>& input
 ) {
-  std::string tempS;
+  std::string currentString;
   std::stringstream out;
   Vectors<Rational> epsilonCoordinates;
   Matrix<int> matrix;
@@ -5293,9 +5267,9 @@ void RootSubalgebras::toStringRootSpaces(
   int totalNilradicalRootSpaces = 0;
   for (int i = 0; i < epsilonCoordinates.size; i ++) {
     Vector<Rational>& currentRoot = epsilonCoordinates[i];
-    tempS = currentRoot.toStringEpsilonFormat();
+    currentString = currentRoot.toStringEpsilonFormat();
     if (!epsilonCoordinates.contains(- currentRoot)) {
-      out << tempS << ", ";
+      out << currentString << ", ";
       totalNilradicalRootSpaces ++;
     }
     if (includeMatrixForm) {

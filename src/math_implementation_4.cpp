@@ -1625,9 +1625,9 @@ unsigned int AffineCone::hashFunction() const {
 void AffineHyperplanes::toString(std::string& output) {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    std::string tempS;
-    this->objects[i].toString(tempS);
-    out << "index: " << i << " " << tempS << "\n";
+    std::string currentString;
+    this->objects[i].toString(currentString);
+    out << "index: " << i << " " << currentString << "\n";
   }
   output = out.str();
 }
@@ -1954,12 +1954,13 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
     drawOps.basisProjectionPlane[1], drawOps.basisProjectionPlane[0]
   );
   drawOps.graphicsUnit = 50;
-  PiecewiseQuasipolynomial
-  startingPolynomial,
-  substitutedPolynomial,
-  accumulator;
-  std::string tempS;
-  startingPolynomial.makeVPF(this->gModKNegativeWeightsBasisChanged, tempS);
+  PiecewiseQuasipolynomial startingPolynomial;
+  PiecewiseQuasipolynomial substitutedPolynomial;
+  PiecewiseQuasipolynomial accumulator;
+  std::string currentString;
+  startingPolynomial.makeVPF(
+    this->gModKNegativeWeightsBasisChanged, currentString
+  );
   Vectors<Rational> translationsProjectedFinal;
   translationsProjectedFinal.setSize(this->linearOperators.size);
   this->linearOperators[0].actOnVectorColumn(
@@ -1977,7 +1978,9 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   << "multiplication by - 1, and basis "
   << "change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].toString();
-  startingPolynomial.makeVPF(this->gModKNegativeWeightsBasisChanged, tempS);
+  startingPolynomial.makeVPF(
+    this->gModKNegativeWeightsBasisChanged, currentString
+  );
   drawOps.drawCoordinateSystemBuffer(2);
   Cone smallWeylChamber;
   Matrix<Rational> invertedCartan;
@@ -2187,10 +2190,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   Vector<Rational> startingWeight, projectedWeight;
   FormatExpressions format;
   global.fatal << "Not implemented. " << global.fatal;
-  //  SSalgebraModuleOld tempM;
   input.computeHomomorphismFromImagesSimpleChevalleyGenerators(nullptr);
   global.fatal << "Not implemented. " << global.fatal;
-  //  tempM.InduceFromEmbedding(currentStream, input);
   input.getWeightsGmodKInSimpleCoordinatesK(this->gModKNegativeWeights);
   // this->log << "weights of g mod k: " <<
   // this->GmodKnegativeWeights.toString();

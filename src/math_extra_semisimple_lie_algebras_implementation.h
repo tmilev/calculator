@@ -114,7 +114,7 @@ std::string Weight<Coefficient>::tensorAndDecompose(
   STACK_TRACE("Weight_CoefficientType::tensorAndDecompose");
   this->checkNonZeroOwner();
   std::stringstream errorLog;
-  std::string tempS;
+  std::string currentString;
   output.makeZero();
   WeylGroupData& weylGrouop = this->owner->weylGroup;
   Vector<Rational> lefthighestWeightFundamentalCoordinates;
@@ -144,11 +144,11 @@ std::string Weight<Coefficient>::tensorAndDecompose(
       lefthighestWeightFundamentalCoordinates,
       weightsLeftSimpleCoordinates,
       multiplicitiesLeft,
-      &tempS,
+      &currentString,
       1000000
     )
   ) {
-    errorLog << "Freudenthal formula generated error: " << tempS;
+    errorLog << "Freudenthal formula generated error: " << currentString;
     return errorLog.str();
   }
   HashedList<Vector<Coefficient> > currentOrbit;
@@ -254,12 +254,12 @@ void CharacterSemisimpleLieAlgebraModule<Coefficient>::getDual(
     thisCopy.getDual(output);
     return;
   }
-  Weight<Coefficient> tempM;
+  Weight<Coefficient> monomial;
   output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
-    tempM = (*this)[i];
-    tempM.weightFundamentalCoordinates.negate();
-    output.addMonomial(tempM, this->coefficients[i]);
+    monomial = (*this)[i];
+    monomial.weightFundamentalCoordinates.negate();
+    output.addMonomial(monomial, this->coefficients[i]);
   }
 }
 
@@ -736,7 +736,7 @@ splitCharacterOverReductiveSubalgebra(
   this->checkNonZeroOwner();
   WeylGroupData& weylGroup = this->getOwner()->weylGroup;
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   inputData.initializeAfterParabolicSelectionAndHomomorphism();
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms&
   weylGroupFiniteDimensionalSmallAsSubgroupInLarge =
@@ -764,12 +764,12 @@ splitCharacterOverReductiveSubalgebra(
         monomial.weightFundamentalCoordinates,
         tempHashedRoots,
         tempMults,
-        tempS,
+        currentString,
         10000
       )
     ) {
       if (report != nullptr) {
-        *report = tempS;
+        *report = currentString;
       }
       return false;
     }
@@ -892,12 +892,12 @@ splitCharacterOverReductiveSubalgebra(
         localHighest.weightFundamentalCoordinates,
         tempHashedRoots,
         tempMults,
-        tempS,
+        currentString,
         10000
       )
     ) {
       if (report != nullptr) {
-        *report = tempS;
+        *report = currentString;
       }
       return false;
     }
@@ -920,8 +920,8 @@ splitCharacterOverReductiveSubalgebra(
   << HtmlRoutines::getMathNoDisplay(output.toString(&format));
   if (report != nullptr) {
     DrawingVariables drawingVariables1;
-    std::string tempS;
-    output.drawMeNoMultiplicities(tempS, drawingVariables1, 10000);
+    std::string currentString;
+    output.drawMeNoMultiplicities(currentString, drawingVariables1, 10000);
     Vector<Rational> leftRoot;
     Vector<Rational> rightRoot;
     weylGroupFiniteDimensionalSmall.ambientWeyl->group.computeAllElements(

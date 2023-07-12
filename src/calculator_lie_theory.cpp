@@ -1270,7 +1270,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
               int charcounter1 = 0; charcounter1 < g2inB3Data.
               characterDifferences.size; charcounter1 ++
             ) {
-              std::string tempS = g2inB3Data.format.customPlusSign;
+              std::string currentString = g2inB3Data.format.customPlusSign;
               g2inB3Data.format.customPlusSign = "";
               out
               << "A_{"
@@ -1283,7 +1283,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
               if (charcounter1 != g2inB3Data.characterDifferences.size - 1) {
                 out << "<br>";
               }
-              g2inB3Data.format.customPlusSign = tempS;
+              g2inB3Data.format.customPlusSign = currentString;
             }
             out << "</td> ";
           }
@@ -1362,20 +1362,26 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
         )
         << "\\end{array}$ \n";
         if (!isFD) {
-          std::string tempS1 =
+          std::string currentString1 =
           g2inB3Data.getStringCasimirProjector(eigenIndexcounter, 12);
-          std::string tempS2 =
+          std::string currentString2 =
           "(" +
           g2inB3Data.elementsUniversalEnveloping[eigenIndexcounter].toString(
             &g2inB3Data.format
           ) +
           ")\\cdot v_\\lambda";
-          out << "<td>" << HtmlRoutines::getMathNoDisplay(tempS1) << "</td>";
+          out
+          << "<td>"
+          << HtmlRoutines::getMathNoDisplay(currentString1)
+          << "</td>";
           out
           << "<td>"
           << g2inB3Data.additionalMultipliers[eigenIndexcounter].toString()
           << "</td>";
-          out << "<td>" << HtmlRoutines::getMathNoDisplay(tempS2) << "</td>";
+          out
+          << "<td>"
+          << HtmlRoutines::getMathNoDisplay(currentString2)
+          << "</td>";
           out
           << "<td>"
           << g2inB3Data.shapovalovProducts[eigenIndexcounter].toString(
@@ -1410,11 +1416,11 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
           }
           latexTable
           << "& $\\begin{array}{l}"
-          << tempS1
+          << currentString1
           << "\\end{array}$"
           << "&"
           << "$\\begin{array}{l}"
-          << tempS2
+          << currentString2
           << "\\end{array}$";
         }
         latexTable << "\\\\ \n <br>\n";

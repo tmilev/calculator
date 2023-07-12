@@ -7955,7 +7955,7 @@ void WeylGroupData::perturbWeightToRegularWithRespectToRootSystem(
     Rational maxMovement = 0;
     Rational scalarProduct1;
     Rational scalarProduct2;
-    Rational tempMaxMovement;
+    Rational currentMaximumMovement;
     for (int i = 0; i < this->rootsOfBorel.size; i ++) {
       this->rootScalarCartanRoot(
         badRoot, this->rootsOfBorel[i], scalarProduct1
@@ -7967,11 +7967,12 @@ void WeylGroupData::perturbWeightToRegularWithRespectToRootSystem(
           !scalarProduct2.isEqualToZero()
         )
       ) {
-        tempMaxMovement = scalarProduct2 / scalarProduct1;
-        tempMaxMovement.AssignAbsoluteValue();
-        if ((tempMaxMovement < maxMovement) || maxMovement.isEqualToZero()
+        currentMaximumMovement = scalarProduct2 / scalarProduct1;
+        currentMaximumMovement.AssignAbsoluteValue();
+        if ((currentMaximumMovement < maxMovement) ||
+          maxMovement.isEqualToZero()
         ) {
-          maxMovement = tempMaxMovement;
+          maxMovement = currentMaximumMovement;
         }
       }
     }
@@ -9080,12 +9081,15 @@ std::string WeylGroupData::generateWeightSupportMethod1(
   << "The highest weight in simple coordinates is: "
   << highestWeightTrue.toString()
   << ".<br>";
-  std::string tempS;
+  std::string currentString;
   bool isTrimmed =
   !this->getAllDominantWeightsHWFDIM(
-    highestWeightSimpleCoordinates, dominantWeights, upperBoundInt, &tempS
+    highestWeightSimpleCoordinates,
+    dominantWeights,
+    upperBoundInt,
+    &currentString
   );
-  out << tempS << "<br>";
+  out << currentString << "<br>";
   if (isTrimmed) {
     out
     << "Trimmed the # of dominant weights - upper bound is "
@@ -9742,20 +9746,20 @@ void KazhdanLusztigPolynomials::writeKLCoeffsToFile(
 ) {
   output.clear();
   output << "Top_index: " << topIndex << "\n";
-  std::string tempS;
-  this->kazhdanLuzstigCoefficientsToString(KLcoeff, tempS);
-  output << tempS;
+  std::string currentString;
+  this->kazhdanLuzstigCoefficientsToString(KLcoeff, currentString);
+  output << currentString;
 }
 
 int KazhdanLusztigPolynomials::readKLCoeffsFromFile(
   std::fstream& input, List<int>& output
 ) {
-  std::string tempS;
+  std::string currentString;
   int topIndex;
-  input >> tempS >> topIndex;
+  input >> currentString >> topIndex;
   output.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
-    input >> tempS >> output[i];
+    input >> currentString >> output[i];
   }
   return topIndex;
 }
@@ -10185,7 +10189,7 @@ int KazhdanLusztigPolynomials::computeProductfromSimpleReflectionsActionList(
 }
 
 void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
-  Polynomial<Rational> Accum, tempP1, tempP2;
+  Polynomial<Rational> accumulator, tempP1, tempP2;
   if (x == y) {
     this->kazhdanLuzstigPolynomials[x][y].makeOne();
     return;
@@ -10194,18 +10198,18 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
     this->kazhdanLuzstigPolynomials[x][y].makeZero();
     return;
   }
-  Accum.makeZero();
-  MonomialPolynomial tempM;
+  accumulator.makeZero();
+  MonomialPolynomial monomial;
   for (int i = 0; i < this->size; i ++) {
     if (
       this->indexGreaterThanIndex(i, x) && this->indexGEQIndex(y, i)
     ) {
       tempP1.makeZero();
       for (int j = 0; j < this->rPolynomials[x][i].size(); j ++) {
-        tempM = this->rPolynomials[x][i][j];
-        tempM.invert();
+        monomial = this->rPolynomials[x][i][j];
+        monomial.invert();
         tempP1.addMonomial(
-          tempM, this->rPolynomials[x][i].coefficients[j]
+          monomial, this->rPolynomials[x][i].coefficients[j]
         );
       }
       int sign = 0;
@@ -10245,7 +10249,7 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
         << " which hasn't been computed yet. "
         << global.fatal;
       }
-      Accum += tempP1;
+      accumulator += tempP1;
     }
   }
   this->kazhdanLuzstigPolynomials[x][y].makeZero();
@@ -10253,13 +10257,13 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
   this->weylGroup->group.elements[y].generatorsLastAppliedFirst.size -
   this->weylGroup->group.elements[x].generatorsLastAppliedFirst.size;
   lengthDiff /= 2;
-  for (int i = 0; i < Accum.size(); i ++) {
-    if (Accum[i].hasPositiveOrZeroExponents()) {
-      tempM = Accum[i];
-      tempM.setVariable(0, tempM[0] * - 1);
-      tempM.multiplyByVariable(0, lengthDiff);
+  for (int i = 0; i < accumulator.size(); i ++) {
+    if (accumulator[i].hasPositiveOrZeroExponents()) {
+      monomial = accumulator[i];
+      monomial.setVariable(0, monomial[0] * - 1);
+      monomial.multiplyByVariable(0, lengthDiff);
       this->kazhdanLuzstigPolynomials[x][y].addMonomial(
-        tempM, Accum.coefficients[i]
+        monomial, accumulator.coefficients[i]
       );
     }
   }
@@ -10475,17 +10479,19 @@ void LaTeXProcedures::drawline(
   x2 /= LaTeXProcedures::scaleFactor;
   y1 /= LaTeXProcedures::scaleFactor;
   y2 /= LaTeXProcedures::scaleFactor;
-  std::string tempS;
+  std::string currentString;
   if (
     penStyle == static_cast<unsigned>(DrawOptions::PenStyle::dashed)
   ) {
-    tempS = "lightgray";
+    currentString = "lightgray";
   } else {
-    LaTeXProcedures::getStringFromColorIndex(colorIndex, tempS, drawInput);
+    LaTeXProcedures::getStringFromColorIndex(
+      colorIndex, currentString, drawInput
+    );
   }
   output
   << "\\psline[linewidth = 0.3pt, linecolor ="
-  << tempS
+  << currentString
   << "]("
   << x1 - LaTeXProcedures::figureCenterCoordinateSystemX
   << ", "
@@ -13016,10 +13022,10 @@ void Cone::transformToWeylProjective(ConeCollection& owner) {
 void ConeCollection::transformToWeylProjective() {
   /* this->ambientWeyl.getElement().computeAllElements();
   this->log << this->ambientWeyl.getElement().toString();
-  std::string tempS;
-  this->toString(tempS);
+  std::string currentString;
+  this->toString(currentString);
   this->log << "\nWeyl chamber: " << this->WeylChamber.toString() << "\n";
-  this->log << tempS;
+  this->log << currentString;
   this->NewHyperplanesToSliceWith.size = 0;
   this->hyperplanes.size = 0;
   Vector<Rational> wallToSliceWith;
@@ -13061,8 +13067,8 @@ void ConeCollection::transformToWeylProjective() {
   this->GetWeylChamberWallsForCharacterComputation(roots);
   this->TheGlobalConeNormals.addListOnTop(roots);
   this->log << "the global cone normals: " << this->TheGlobalConeNormals.toString();
-  this->toString(tempS);
-  this->log << tempS;
+  this->toString(currentString);
+  this->log << currentString;
   global.indicatorVariables.StatusString1NeedsRefresh = true;
   global.indicatorVariables.StatusString1= this->log.str();
   global.makeReport();*/

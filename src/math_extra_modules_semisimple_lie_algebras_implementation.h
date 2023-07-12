@@ -337,7 +337,7 @@ splitOverLeviMonomialsEncodeHighestWeight(
   );
   this->checkNonZeroOwner();
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   if (
     this->getOwner()->getRank() != splittingParabolicSelection.numberOfElements
   ) {
@@ -391,12 +391,12 @@ splitOverLeviMonomialsEncodeHighestWeight(
         monomial.weightFundamentalCoordinates,
         tempHashedRoots,
         tempMults,
-        tempS,
+        currentString,
         10000
       )
     ) {
       if (report != nullptr) {
-        *report = tempS;
+        *report = currentString;
       }
       return false;
     }
@@ -478,12 +478,12 @@ splitOverLeviMonomialsEncodeHighestWeight(
         localHighest.weightFundamentalCoordinates,
         tempHashedRoots,
         tempMults,
-        tempS,
+        currentString,
         10000
       )
     ) {
       if (report != nullptr) {
-        *report = tempS;
+        *report = currentString;
       }
       return false;
     }
@@ -503,8 +503,8 @@ splitOverLeviMonomialsEncodeHighestWeight(
   << HtmlRoutines::getMathNoDisplay(output.toString());
   if (report != nullptr) {
     DrawingVariables drawingVariables;
-    std::string tempS;
-    this->drawMeNoMultiplicities(tempS, drawingVariables, 10000);
+    std::string currentString;
+    this->drawMeNoMultiplicities(currentString, drawingVariables, 10000);
     Vector<Rational> root;
     out
     << "<hr>In the following weight visualization, "
@@ -2081,11 +2081,7 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
     }
     return;
   }
-  std::string tempS;
   std::stringstream out;
-  if (comments != nullptr) {
-    out << tempS;
-  }
   out << "<br>Parabolic selection: " << LeviInSmall.toString();
   std::stringstream currentStream1;
   currentStream1

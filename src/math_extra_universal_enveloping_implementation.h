@@ -795,7 +795,7 @@ std::string MonomialUniversalEnveloping<Coefficient>::toString(
   FormatExpressions* format
 ) const {
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   if (this->owner == nullptr) {
     return "(Error:Programming:NonInitializedMonomial)";
   }
@@ -805,8 +805,9 @@ std::string MonomialUniversalEnveloping<Coefficient>::toString(
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     Coefficient& power = this->powers[i];
     int index = this->generatorsIndices[i];
-    tempS = this->getOwner().getStringFromChevalleyGenerator(index, format);
-    out << tempS;
+    currentString =
+    this->getOwner().getStringFromChevalleyGenerator(index, format);
+    out << currentString;
     if (!power.isEqualToOne()) {
       out << "^";
       out << "{";
@@ -906,8 +907,6 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
   }
   *this /= weylGroup.getKillingDividedByTraceRatio();
   // check that the ninja formula is correct:
-  //  FormatExpressions tempPolyFormat;
-  //  tempPolyFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   // this->DebugString= out.str();
   //  Vector<Rational> root;
   //  for (int i = 0; i < dimension; i ++)
@@ -1459,18 +1458,18 @@ std::string ElementVermaModuleOrdered<Coefficient>::toString(
   const FormatExpressions& format
 ) const {
   std::stringstream out;
-  std::string tempS =
+  std::string currentString =
   MathRoutines::toStringBrackets(this->elementInternal, format);
-  if (tempS.size() > 1) {
+  if (currentString.size() > 1) {
     out << "(";
   }
-  if (tempS != "1") {
-    out << tempS;
+  if (currentString != "1") {
+    out << currentString;
   }
-  if (tempS.size() > 1) {
+  if (currentString.size() > 1) {
     out << ")";
   }
-  if (tempS != "0") {
+  if (currentString != "0") {
     out << " v";
   }
   return out.str();
@@ -1993,14 +1992,14 @@ commuteConsecutiveIndicesLeftIndexAroundRight(
     return;
   }
   output.makeZero(*this->owner);
-  MonomialUniversalEnvelopingOrdered tempMon;
-  tempMon.makeZero(ringZero, *this->owner);
-  tempMon.powers.setExpectedSize(this->generatorsIndices.size + 2);
-  tempMon.generatorsIndices.setExpectedSize(
+  MonomialUniversalEnvelopingOrdered monomial;
+  monomial.makeZero(ringZero, *this->owner);
+  monomial.powers.setExpectedSize(this->generatorsIndices.size + 2);
+  monomial.generatorsIndices.setExpectedSize(
     this->generatorsIndices.size + 2
   );
-  tempMon.powers.size = 0;
-  tempMon.generatorsIndices.size = 0;
+  monomial.powers.size = 0;
+  monomial.generatorsIndices.size = 0;
   int rightGeneratorIndex = this->generatorsIndices.objects[index + 1];
   int leftGeneratorIndex = this->generatorsIndices.objects[index];
   Coefficient rightPower, leftPower;
@@ -2010,18 +2009,18 @@ commuteConsecutiveIndicesLeftIndexAroundRight(
   int powerDrop = 0;
   Coefficient acquiredCoefficient;
   acquiredCoefficient = this->Coefficient;
-  tempMon.coefficient = this->Coefficient;
+  monomial.coefficient = this->Coefficient;
   for (int i = 0; i < index; i ++) {
-    tempMon.multiplyByGeneratorPowerOnTheRight(
+    monomial.multiplyByGeneratorPowerOnTheRight(
       this->generatorsIndices.objects[i],
       this->powers.objects[i]
     );
   }
-  tempMon.multiplyByGeneratorPowerOnTheRight(
+  monomial.multiplyByGeneratorPowerOnTheRight(
     this->generatorsIndices.objects[index], leftPower
   );
-  MonomialUniversalEnvelopingOrdered startMon, tempMon2;
-  startMon = tempMon;
+  MonomialUniversalEnvelopingOrdered startMon, monomial2;
+  startMon = monomial;
   ElementSemisimpleLieAlgebra<Rational> adResult, element, temprightElement;
   this->owner->assignGeneratorCoefficientOne(leftGeneratorIndex, adResult);
   this->owner->assignGeneratorCoefficientOne(
@@ -2033,21 +2032,21 @@ commuteConsecutiveIndicesLeftIndexAroundRight(
     for (int i = 0; i < coefficients.size; i ++) {
       if (coefficients[i] != 0) {
         int newGeneratorIndex = i;
-        tempMon = startMon;
-        tempMon.multiplyByGeneratorPowerOnTheRight(
+        monomial = startMon;
+        monomial.multiplyByGeneratorPowerOnTheRight(
           rightGeneratorIndex, rightPower
         );
-        tempMon.coefficient = acquiredCoefficient;
-        tempMon.coefficient *= coefficients[i];
-        tempMon.multiplyByGeneratorPowerOnTheRight(
+        monomial.coefficient = acquiredCoefficient;
+        monomial.coefficient *= coefficients[i];
+        monomial.multiplyByGeneratorPowerOnTheRight(
           newGeneratorIndex, ringUnit
         );
         for (int i = index + 2; i < this->generatorsIndices.size; i ++) {
-          tempMon.multiplyByGeneratorPowerOnTheRight(
+          monomial.multiplyByGeneratorPowerOnTheRight(
             this->generatorsIndices[i], this->powers[i]
           );
         }
-        output.addOnTop(tempMon);
+        output.addOnTop(monomial);
       }
     }
     acquiredCoefficient *= rightPower;
@@ -2176,40 +2175,41 @@ std::string MonomialUniversalEnvelopingOrdered<Coefficient>::toString(
     return "0";
   }
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   if (this->generatorsIndices.size > 0) {
-    tempS = MathRoutines::toStringBrackets(this->Coefficient, format);
-    if (tempS == "1") {
-      tempS = "";
+    currentString =
+    MathRoutines::toStringBrackets(this->Coefficient, format);
+    if (currentString == "1") {
+      currentString = "";
     }
-    if (tempS == "- 1" || tempS == "-1") {
-      tempS = "-";
+    if (currentString == "- 1" || currentString == "-1") {
+      currentString = "-";
     }
   } else {
-    tempS = this->Coefficient.toString(format);
+    currentString = this->Coefficient.toString(format);
   }
-  out << tempS;
+  out << currentString;
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     Coefficient& power = this->powers[i];
     int index = this->generatorsIndices[i];
     bool usebrackets = false;
-    tempS =
+    currentString =
     this->owner->ownerSemisimpleLieAlgebra->getStringFromChevalleyGenerator(
       index, format
     );
     if (usebrackets) {
       out << "(";
     }
-    out << tempS;
+    out << currentString;
     if (usebrackets) {
       out << ")";
     }
-    tempS = power.toString(format);
-    if (tempS != "1") {
+    currentString = power.toString(format);
+    if (currentString != "1") {
       out << "^";
       // if (useLatex)
       out << "{";
-      out << tempS;
+      out << currentString;
       // if (useLatex)
       out << "}";
     }
@@ -2224,7 +2224,7 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::toString(
   std::string& output, FormatExpressions* PolyFormatLocal
 ) const {
   std::stringstream out;
-  std::string tempS;
+  std::string currentString;
   if (this->size == 0) {
     out << "0";
   }
@@ -2232,15 +2232,15 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::toString(
   for (int i = 0; i < this->size; i ++) {
     MonomialUniversalEnvelopingOrdered<Coefficient>& current =
     this->objects[i];
-    tempS = current.toString(PolyFormatLocal);
+    currentString = current.toString(PolyFormatLocal);
     if (i != 0) {
-      if (tempS.size() > 0) {
-        if (tempS[0] != '-') {
+      if (currentString.size() > 0) {
+        if (currentString[0] != '-') {
           out << '+';
         }
       }
     }
-    out << tempS;
+    out << currentString;
     if ((static_cast<int>(out.tellp())) - indexCharacterAtLastLineBreak > 150
     ) {
       indexCharacterAtLastLineBreak = out.tellp();
@@ -2324,17 +2324,17 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::assignElementLieAlgebra(
   inputOwner.chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(
     elementRootForm, ringZero
   );
-  MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
-  tempMon.makeZero(ringZero, inputOwner);
-  tempMon.generatorsIndices.setSize(1);
-  tempMon.powers.setSize(1);
-  tempMon.powers.objects[0] = ringUnit;
+  MonomialUniversalEnvelopingOrdered<Coefficient> monomial;
+  monomial.makeZero(ringZero, inputOwner);
+  monomial.generatorsIndices.setSize(1);
+  monomial.powers.setSize(1);
+  monomial.powers.objects[0] = ringUnit;
   for (int index = 0; index < elementRootForm.size; index ++) {
     if (elementRootForm.objects[index] != 0) {
-      tempMon.coefficient = ringUnit;
-      tempMon.coefficient *= elementRootForm.objects[index];
-      tempMon.generatorsIndices[0] = index;
-      this->addOnTop(tempMon);
+      monomial.coefficient = ringUnit;
+      monomial.coefficient *= elementRootForm.objects[index];
+      monomial.generatorsIndices[0] = index;
+      this->addOnTop(monomial);
     }
   }
 }
@@ -2405,15 +2405,15 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::modOutVermaRelationsOld(
   const PolynomialSubstitution<Rational>& highestWeightSub,
   const Coefficient& ringUnit
 ) {
-  MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
+  MonomialUniversalEnvelopingOrdered<Coefficient> monomial;
   ElementUniversalEnvelopingOrdered<Coefficient> output;
   output.makeZero(*this->owner);
   for (int i = 0; i < this->size; i ++) {
-    tempMon = this->objects[i];
-    tempMon.modOutVermaRelationsOld(
+    monomial = this->objects[i];
+    monomial.modOutVermaRelationsOld(
       substitutionHighestWeightWithZeroes, highestWeightSub, ringUnit
     );
-    output.addMonomial(tempMon);
+    output.addMonomial(monomial);
   }
   this->operator=(output);
 }
@@ -2424,15 +2424,15 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::modOutVermaRelations(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
-  MonomialUniversalEnvelopingOrdered<Coefficient> tempMon;
+  MonomialUniversalEnvelopingOrdered<Coefficient> monomial;
   ElementUniversalEnvelopingOrdered<Coefficient> output;
   output.makeZero(*this->owner);
   for (int i = 0; i < this->size; i ++) {
-    tempMon = this->objects[i];
-    tempMon.modOutVermaRelations(
+    monomial = this->objects[i];
+    monomial.modOutVermaRelations(
       substitutionHiGoesToIthElement, ringUnit, ringZero
     );
-    output.addMonomial(tempMon);
+    output.addMonomial(monomial);
   }
   this->operator=(output);
 }

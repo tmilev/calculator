@@ -10,6 +10,7 @@ class Database;
 
 // Forward declare a class that can listen to sockets.
 class Listener;
+class QueryExact;
 
 class QuerySetOnce {
 public:
@@ -83,121 +84,6 @@ public:
   List<std::string> fieldsProjectedAway;
   JSData toJSON() const;
   void makeProjection(const List<std::string>& fields);
-};
-
-class DatabaseFallback {
-private:
-  bool initialized;
-  bool updateOneNolocks(
-    const QueryExact& findQuery,
-    const QuerySet& updateQuery,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  bool updateOneEntry(
-    JSData& modified,
-    const List<std::string>& labels,
-    const JSData& value,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-public:
-  Database* owner;
-  MutexProcess access;
-  HashedList<std::string> knownCollections;
-  HashedList<std::string> knownIndices;
-  JSData databaseContent;
-  class Index {
-  public:
-    // Collection A, label B is denoted as A.B.
-    // Dots in the labels and collections are forbidden.
-    std::string collection;
-    std::string label;
-    std::string collectionAndLabelCache;
-    MapList<
-      std::string,
-      List<int32_t>,
-      HashFunctions::hashFunction<std::string>
-    > locations;
-    static std::string collectionAndLabelStatic(
-      const std::string& inputCollection, const std::string& inputLabel
-    );
-    std::string collectionAndLabel();
-  };
-
-  MapReferences<
-    std::string,
-    DatabaseFallback::Index,
-    HashFunctions::hashFunction<std::string>
-  > indices;
-  static std::string jsonLocation();
-  bool deleteDatabase(std::stringstream* commentsOnFailure);
-  bool updateOne(
-    const QueryExact& findQuery,
-    const QuerySet& updateQuery,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  bool updateOneFromSome(
-    const List<QueryExact>& findOrQueries,
-    const QuerySet& updateQuery,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  bool findOne(
-    const QueryExact& query,
-    JSData& output,
-    std::stringstream* commentsOnFailure
-  );
-  bool findOneWithOptions(
-    const QueryExact& query,
-    const QueryResultOptions& options,
-    JSData& output,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneralNonSensitive = nullptr
-  );
-  // Return indicates query success / failure.
-  // When the element isn't found but otherwise there were
-  // no problems with the query, true will be returned with
-  // output set to [].
-  bool findIndexOneNolocksMinusOneNotFound(
-    const QueryExact& query,
-    int& output,
-    std::stringstream* commentsOnNotFound
-  );
-  bool fetchCollectionNames(
-    List<std::string>& output, std::stringstream* commentsOnFailure
-  );
-  void createHashIndex(
-    const std::string& collectionName, const std::string& key
-  );
-  bool hasCollection(
-    const std::string& collection, std::stringstream* commentsOnFailure
-  );
-  bool storeDatabase(std::stringstream* commentsOnFailure);
-  bool readDatabase(std::stringstream* commentsOnFailure);
-  bool readAndIndexDatabase(std::stringstream* commentsOnFailure);
-  bool readAndIndexDatabaseWithLockGuard(
-    std::stringstream* commentsOnFailure
-  );
-  bool indexDatabase(std::stringstream* commentsOnFailure);
-  const JSData& getFullCollection(const std::string& collection);
-  void indexOneRecord(
-    const JSData& entry, int32_t row, const std::string& collection
-  );
-  void initialize();
-  bool findOneFromSome(
-    const List<QueryExact>& findOrQueries,
-    JSData& output,
-    std::stringstream* commentsOnFailure
-  );
-  bool findFromJSONWithOptions(
-    const QueryExact& findQuery,
-    List<JSData>& output,
-    const QueryResultOptions& options,
-    int maximumOutputItems,
-    long long* totalItems,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneralNonSensitive
-  );
-  std::string toStringIndices() const;
-  DatabaseFallback();
 };
 
 // Stores a query for an item.
@@ -277,6 +163,128 @@ public:
   bool isEmpty() const;
 };
 
+class QueryOneOfExactly {
+public:
+  List<QueryExact> queries;
+  bool fromJSON(const JSData& input, std::stringstream* commentsOnFailure);
+  JSData toJSON() const;
+};
+
+class DatabaseFallback {
+private:
+  bool initialized;
+  bool updateOneNolocks(
+    const QueryExact& findQuery,
+    const QuerySet& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool updateOneEntry(
+    JSData& modified,
+    const List<std::string>& labels,
+    const JSData& value,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+public:
+  Database* owner;
+  MutexProcess access;
+  HashedList<std::string> knownCollections;
+  HashedList<std::string> knownIndices;
+  JSData databaseContent;
+  class Index {
+  public:
+    // Collection A, label B is denoted as A.B.
+    // Dots in the labels and collections are forbidden.
+    std::string collection;
+    std::string label;
+    std::string collectionAndLabelCache;
+    MapList<
+      std::string,
+      List<int32_t>,
+      HashFunctions::hashFunction<std::string>
+    > locations;
+    static std::string collectionAndLabelStatic(
+      const std::string& inputCollection, const std::string& inputLabel
+    );
+    std::string collectionAndLabel();
+  };
+
+  MapReferences<
+    std::string,
+    DatabaseFallback::Index,
+    HashFunctions::hashFunction<std::string>
+  > indices;
+  static std::string jsonLocation();
+  bool deleteDatabase(std::stringstream* commentsOnFailure);
+  bool updateOne(
+    const QueryExact& findQuery,
+    const QuerySet& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool updateOneFromSome(
+    const QueryOneOfExactly& findOrQueries,
+    const QuerySet& updateQuery,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool findOne(
+    const QueryExact& query,
+    JSData& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool findOneWithOptions(
+    const QueryExact& query,
+    const QueryResultOptions& options,
+    JSData& output,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneralNonSensitive = nullptr
+  );
+  // Return indicates query success / failure.
+  // When the element isn't found but otherwise there were
+  // no problems with the query, true will be returned with
+  // output set to [].
+  bool findIndexOneNolocksMinusOneNotFound(
+    const QueryExact& query,
+    int& output,
+    std::stringstream* commentsOnNotFound
+  );
+  bool fetchCollectionNames(
+    List<std::string>& output, std::stringstream* commentsOnFailure
+  );
+  void createHashIndex(
+    const std::string& collectionName, const std::string& key
+  );
+  bool hasCollection(
+    const std::string& collection, std::stringstream* commentsOnFailure
+  );
+  bool storeDatabase(std::stringstream* commentsOnFailure);
+  bool readDatabase(std::stringstream* commentsOnFailure);
+  bool readAndIndexDatabase(std::stringstream* commentsOnFailure);
+  bool readAndIndexDatabaseWithLockGuard(
+    std::stringstream* commentsOnFailure
+  );
+  bool indexDatabase(std::stringstream* commentsOnFailure);
+  const JSData& getFullCollection(const std::string& collection);
+  void indexOneRecord(
+    const JSData& entry, int32_t row, const std::string& collection
+  );
+  void initialize();
+  bool findOneFromSome(
+    const QueryOneOfExactly& findOrQueries,
+    JSData& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool findFromJSONWithOptions(
+    const QueryExact& findQuery,
+    List<JSData>& output,
+    const QueryResultOptions& options,
+    int maximumOutputItems,
+    long long* totalItems,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneralNonSensitive
+  );
+  std::string toStringIndices() const;
+  DatabaseFallback();
+};
+
 class QueryFindAndUpdate {
 public:
   QuerySet update;
@@ -297,14 +305,16 @@ public:
 };
 
 class DatabaseInternalResult {
-  JSData content;
+  JSData reader;
 public:
+  JSData content;
   bool success;
   std::string comments;
   bool fromJSON(
     const std::string& input, std::stringstream* commentsOnFailure
   );
   JSData toJSON();
+  void writeContent(JSData& output);
   bool isSuccess(std::stringstream* commentsOnFalse) const;
   DatabaseInternalResult();
 };
@@ -314,10 +324,11 @@ class DatabaseInternalRequest {
   bool fromJSData(std::stringstream* commentsOnFailure);
 public:
   enum Type {
-    unknown, findAndUpdate,
+    unknown, findAndUpdate, findOneFromSome
   };
   Type requestType;
   QueryFindAndUpdate queryFindAndUpdate;
+  QueryOneOfExactly queryOneOfExactly;
   bool fromJSON(
     const std::string& input, std::stringstream* commentsOnFailure
   );
@@ -354,6 +365,7 @@ public:
   bool loadIndicesFromHardDrive(std::stringstream* commentsOnFailure);
   bool storeIndicesToHardDrive(std::stringstream* commentsOnFailure);
   void toJSONIndices(JSData& output) const;
+  JSData  toJSONIndices() const;
   std::string fileNameIndex() const;
   DatabaseCollection();
   void initialize(
@@ -380,6 +392,11 @@ public:
   bool findOneWithOptions(
     const QueryExact& query,
     const QueryResultOptions& options,
+    JSData& output,
+    std::stringstream* commentsOnFailure
+  );
+  bool findOneFromSome(
+    const QueryOneOfExactly& query,
     JSData& output,
     std::stringstream* commentsOnFailure
   );
@@ -430,7 +447,7 @@ public:
     std::stringstream* commentsGeneralNonSensitive = nullptr
   );
   bool findOneFromSome(
-    const List<QueryExact>& findOrQueries,
+    const QueryOneOfExactly& findOrQueries,
     JSData& output,
     std::stringstream* commentsOnFailure
   );
@@ -450,7 +467,7 @@ public:
     std::stringstream* commentsOnFailure = nullptr
   );
   bool updateOneFromSome(
-    const List<QueryExact>& findOrQueries,
+    const QueryOneOfExactly& findOrQueries,
     const QuerySet& updateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
@@ -638,7 +655,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool findOneFromSome(
-    const List<QueryExact>& alternatives,
+    const QueryOneOfExactly& alternatives,
     JSData& output,
     std::stringstream* commentsOnFailure = nullptr
   );
@@ -649,7 +666,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool updateOneFromSome(
-    const List<QueryExact>& findOrQueries,
+    const QueryOneOfExactly& findOrQueries,
     const QuerySet& updateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );

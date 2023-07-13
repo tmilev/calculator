@@ -5,7 +5,7 @@
 #include "general_lists.h"
 #include "json.h"
 
-class QueryExact;
+class QueryOneOfExactly;
 
 class UserCalculatorData {
 public:
@@ -81,7 +81,7 @@ public:
   // password hashes.
   std::string toStringSecure();
   std::string toStringCourseInfo();
-  List<QueryExact> getFindMeFromUserNameQuery() const;
+  void getFindMeFromUserNameQuery(QueryOneOfExactly& output) const;
   std::string toStringFindQueries() const;
 };
 

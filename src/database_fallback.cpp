@@ -40,13 +40,13 @@ bool DatabaseFallback::deleteDatabase(std::stringstream* commentsOnFailure) {
 }
 
 bool DatabaseFallback::findOneFromSome(
-  const List<QueryExact>& findOrQueries,
+  const QueryOneOfExactly& findOrQueries,
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("FallbackDatabase::findOneFromSome");
-  for (int i = 0; i < findOrQueries.size; i ++) {
-    if (this->findOne(findOrQueries[i], output, commentsOnFailure)) {
+  for (const QueryExact& query : findOrQueries.queries) {
+    if (this->findOne(query, output, commentsOnFailure)) {
       return true;
     }
   }
@@ -54,13 +54,13 @@ bool DatabaseFallback::findOneFromSome(
 }
 
 bool DatabaseFallback::updateOneFromSome(
-  const List<QueryExact>& findOrQueries,
+  const QueryOneOfExactly& findOrQueries,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("FallbackDatabase::updateOneFromSome");
   JSData unusedOutput;
-  for (const QueryExact& query : findOrQueries) {
+  for (const QueryExact& query : findOrQueries.queries) {
     if (!this->findOne(query, unusedOutput, commentsOnFailure)) {
       continue;
     }

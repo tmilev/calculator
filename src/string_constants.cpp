@@ -229,6 +229,7 @@ std::string DatabaseStrings::errorDatabaseDisabled =
 "Database disabled explicitly by server configuration. ";
 std::string DatabaseStrings::resultComments = "comments";
 std::string DatabaseStrings::resultSuccess = "success";
+std::string DatabaseStrings::resultContent = "content";
 std::string DatabaseStrings::requestContent = "content";
 std::string DatabaseStrings::requestType = "type";
 std::string Configuration::processMonitoringBanned = "processMonitoringBanned";

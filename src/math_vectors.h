@@ -96,11 +96,11 @@ public:
   std::string toStringEpsilonFormat(FormatExpressions* format = nullptr) const {
     return this->toStringLetterFormat("\\varepsilon", format);
   }
-  template <class otherType>
+  template <class OtherType>
   static void scalarProduct(
     const Vector<Coefficient>& v1,
     const Vector<Coefficient>& v2,
-    const Matrix<otherType>& bilinearForm,
+    const Matrix<OtherType>& bilinearForm,
     Coefficient& result
   ) {
     if (
@@ -136,11 +136,11 @@ public:
       result += rowAccumulator;
     }
   }
-  template <class otherType>
+  template <class OtherType>
   static Coefficient scalarProduct(
     const Vector<Coefficient>& r1,
     const Vector<Coefficient>& r2,
-    const Matrix<otherType>& bilinearForm
+    const Matrix<OtherType>& bilinearForm
   ) {
     Coefficient result;
     Vector<Coefficient>::scalarProduct(r1, r2, bilinearForm, result);
@@ -1135,8 +1135,8 @@ public:
       this->objects[i] = other.objects[i];
     }
   }
-  template <class otherType>
-  void operator=(const List<Vector<otherType> >& other) {
+  template <class OtherType>
+  void operator=(const List<Vector<OtherType> >& other) {
     this->setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->objects[i] = other[i];

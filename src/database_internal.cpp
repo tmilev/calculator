@@ -88,11 +88,29 @@ std::string DatabaseInternal::toPayLoad(const std::string& input) {
 }
 
 bool DatabaseInternalClient::findOneFromSome(
-  const List<QueryExact>& findOrQueries,
+  const QueryOneOfExactly& findOrQueries,
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-  return false;
+  STACK_TRACE("DatabaseInternalClient::findOneFromSome");
+  DatabaseInternalResult result;
+  DatabaseInternalRequest request;
+  request.requestType = DatabaseInternalRequest::Type::findOneFromSome;
+  request.queryOneOfExactly = findOrQueries;
+  if (
+    !this->owner->sendAndReceiveFromClientToServer(
+      request, result, commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to send payload to database. ";
+    }
+    return false;
+  }
+  if (result.success) {
+    result.writeContent(output);
+  }
+  return result.success;
 }
 
 bool DatabaseInternal::deleteDatabase(std::stringstream* commentsOnFailure) {
@@ -126,7 +144,7 @@ bool DatabaseInternalClient::findFromJSONWithOptions(
 }
 
 bool DatabaseInternalClient::updateOneFromSome(
-  const List<QueryExact>& findOrQueries,
+  const QueryOneOfExactly& findOrQueries,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
@@ -295,6 +313,12 @@ bool DatabaseInternal::executeAndSend() {
       request.queryFindAndUpdate, &commentsOnFailure
     );
     break;
+  case DatabaseInternalRequest::Type::findOneFromSome:
+    result.success =
+    this->server.findOneFromSome(
+      request.queryOneOfExactly, result.content, &commentsOnFailure
+    );
+    break;
   default:
     break;
   }
@@ -343,28 +367,28 @@ DatabaseInternalConnection::DatabaseInternalConnection() {
 bool DatabaseInternalResult::isSuccess(std::stringstream* commentsOnFalse)
 const {
   if (
-    !this->content.objects.contains(DatabaseStrings::resultSuccess)
+    !this->reader.objects.contains(DatabaseStrings::resultSuccess)
   ) {
     if (commentsOnFalse != nullptr) {
       *commentsOnFalse
       << "Missing result success entry: "
       << DatabaseStrings::resultSuccess
       << ". Database result: "
-      << this->content.toString();
+      << this->reader.toString();
     }
     return false;
   }
   JSData successValue =
-  this->content.objects.getValueNoFail(DatabaseStrings::resultSuccess);
+  this->reader.objects.getValueNoFail(DatabaseStrings::resultSuccess);
   if (successValue.isTrueRepresentationInJSON()) {
     return true;
   }
   if (
     commentsOnFalse != nullptr &&
-    this->content.objects.contains(DatabaseStrings::resultComments)
+    this->reader.objects.contains(DatabaseStrings::resultComments)
   ) {
     *commentsOnFalse
-    << this->content.objects.getValueNoFail(DatabaseStrings::resultComments).
+    << this->reader.objects.getValueNoFail(DatabaseStrings::resultComments).
     toString();
   }
   return false;
@@ -378,8 +402,12 @@ bool DatabaseInternalResult::fromJSON(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalResult::fromJSON");
-  if (this->content.parse(input, true, commentsOnFailure)) {
+  if (this->reader.parse(input, true, commentsOnFailure)) {
     return true;
+  }
+  this->content = JSData();
+  if (this->reader.hasKey(DatabaseStrings::resultContent)) {
+    this->content = this->reader[DatabaseStrings::resultContent];
   }
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure << "Failed to parse database result. ";
@@ -389,10 +417,14 @@ bool DatabaseInternalResult::fromJSON(
 
 JSData DatabaseInternalResult::toJSON() {
   STACK_TRACE("DatabaseInternalResult::toJSON");
-  this->content = JSData();
-  this->content[DatabaseStrings::resultSuccess] = this->success;
-  this->content[DatabaseStrings::resultComments] = this->comments;
-  return this->content;
+  this->reader = JSData();
+  this->reader[DatabaseStrings::resultSuccess] = this->success;
+  this->reader[DatabaseStrings::resultComments] = this->comments;
+  return this->reader;
+}
+
+void DatabaseInternalResult::writeContent(JSData& output) {
+  output = this->content;
 }
 
 DatabaseInternalRequest::DatabaseInternalRequest() {
@@ -422,6 +454,10 @@ void DatabaseInternalRequest::toJSON(JSData& output) const {
     this->queryFindAndUpdate.toJSON();
     return;
   }
+  if (this->requestType == DatabaseInternalRequest::Type::findOneFromSome) {
+    output[DatabaseStrings::requestContent] = this->queryOneOfExactly.toJSON();
+    return;
+  }
 }
 
 JSData DatabaseInternalRequest::toJSON() const {
@@ -442,6 +478,8 @@ std::string DatabaseInternalRequest::typeToString(
   switch (input) {
   case DatabaseInternalRequest::Type::findAndUpdate:
     return "findAndUpdate";
+  case DatabaseInternalRequest::Type::findOneFromSome:
+    return "fineOneFromSome";
   case DatabaseInternalRequest::Type::unknown:
     return "unknown";
   }
@@ -465,6 +503,17 @@ bool DatabaseInternalRequest::fromJSData(
       commentsOnFailure
     );
   }
+  if (
+    this->contentReader[DatabaseStrings::requestType].stringValue ==
+    "fineOneFromSome"
+  ) {
+    this->requestType = DatabaseInternalRequest::Type::findOneFromSome;
+    return
+    this->queryOneOfExactly.fromJSON(
+      this->contentReader[DatabaseStrings::requestContent],
+      commentsOnFailure
+    );
+  }
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure
     << "DatabaseInternalRequest::fromJSData: unknown request type. ";
@@ -483,13 +532,46 @@ bool DatabaseInternalServer::findOneWithOptions(
   std::stringstream* commentsOnFailure
 ) {}
 
+bool DatabaseInternalServer::findOneFromSome(
+  const QueryOneOfExactly& query,
+  JSData& output,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("DatabaseInternalServer::findOneFromSome");
+  global << Logger::red << "DEBUG: findOneFromSome! size: "  << query.queries.size<< query.toJSON().toString() << Logger::endL;
+  std::string objectId;
+  for (const QueryExact& queryExact : query.queries) {
+    if (
+      !DatabaseInternalServer::findObjectId(
+        queryExact, objectId, commentsOnFailure
+      )
+    ) {
+      global << "DEBUG: did not find object id! " << queryExact.toJSON().toString() << Logger::endL;
+
+      continue;
+    }
+    if (objectId == "") {
+      global << "DEBUG: object id empty " << queryExact.toJSON().toString() << Logger::endL;
+      continue;
+    }
+    global << "DEBUG: found! object id! " << objectId<< Logger::endL;
+    return
+    DatabaseInternalServer::loadObject(
+      objectId, queryExact.collection, output, commentsOnFailure
+    );
+  }
+  return false;
+}
+
 bool DatabaseInternalServer::findObjectId(
   const QueryExact& query,
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::findObjectId");
+  global << "DEBUG: inside find o id: " << query.toJSON().toString()<< Logger::endL;
   if (!this->collections.contains(query.collection)) {
+    global << "DEBUG: uknown collection: " << query.collection << Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Unknown collection: " << query.collection << ". ";
     }
@@ -498,7 +580,9 @@ bool DatabaseInternalServer::findObjectId(
   DatabaseCollection& collection =
   this->collections.getValueNoFailNonConst(query.collection);
   std::string concatenatedLabels = query.concatenateNestedLabels();
+  global << "DEBUG: concat labels: " << concatenatedLabels << Logger::endL;
   if (!collection.indices.contains(concatenatedLabels)) {
+    global << "DEBUG: no index! " << concatenatedLabels << Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Attempt to search using a non-indexed key: "
@@ -508,6 +592,7 @@ bool DatabaseInternalServer::findObjectId(
     return false;
   }
   std::string desiredValue = query.exactValue.stringValue;
+  global << "DEBUG: desired value: " << desiredValue << Logger::endL;
   if (desiredValue == "") {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -518,8 +603,10 @@ bool DatabaseInternalServer::findObjectId(
     }
     return false;
   }
+  global << "DEBUG: About to search concat labels: " << concatenatedLabels << Logger::endL;
   DatabaseInternalIndex& index =
   collection.indices.getValueNoFailNonConst(concatenatedLabels);
+  global << "DEBUG: in index: : " << index.toJSON() << Logger::endL;
   output = index.keyValueToObjectId.getValue(desiredValue, "");
   return true;
 }
@@ -818,10 +905,20 @@ bool DatabaseInternalServer::initializeLoadFromHardDrive(
     DatabaseStrings::tableProblemWeights,
     List<std::string>({DatabaseStrings::labelId})
   );
+  global << "DEBUG:" << Logger::blue << "Must load: " << this->collections.values.size << " collections. " << Logger::endL;
   for (DatabaseCollection& collection : this->collections.values) {
     if (!collection.loadIndicesFromHardDrive(commentsOnFailure)) {
-      return false;
+      global << Logger::red << "Failed to load indices from the hard drive. "
+             << Logger::green << "This is OK if running the calculator for the first time. " << Logger::endL
+             ;
+      if (commentsOnFailure!=0){
+            global << commentsOnFailure->str();
+
+          }
+      continue;
     }
+    global << "DEBUG:" << Logger::blue << "load: " << collection.toJSONIndices() <<Logger::endL;
+
   }
   return true;
 }
@@ -886,27 +983,6 @@ DatabaseCollection::DatabaseCollection() {
   this->owner = nullptr;
 }
 
-bool DatabaseInternalIndex::fromJSON(
-  const JSData& input, std::stringstream* commentsOnFailure
-) {
-  STACK_TRACE("DatabaseInternalIndex::fromJSON");
-  for (int i = 0; i < input.objects.size(); i ++) {
-    std::string key = input.objects.keys[i];
-    JSData& value = input.objects.values[i];
-    if (value.elementType != JSData::Token::tokenString) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Key is not string. ";
-      }
-      return false;
-    }
-    std::string valueString = value.stringValue;
-    this->objectIdToKeyValue.setKeyValue(key, valueString);
-    if (valueString != "") {
-      this->keyValueToObjectId.setKeyValue(valueString, key);
-    }
-  }
-  return true;
-}
 
 std::string DatabaseCollection::fileNameIndex() const {
   return this->owner->folder() + this->name + ".json";
@@ -949,6 +1025,9 @@ bool DatabaseCollection::loadIndicesFromHardDrive(
       return false;
     }
   }
+  JSData temp;
+  this->toJSONIndices(temp);
+  global << Logger::green << "DEBUG: read index: " << temp.toString() << Logger::endL;
   return true;
 }
 
@@ -990,6 +1069,29 @@ std::string DatabaseInternalIndex::toString() const {
   return out.str();
 }
 
+bool DatabaseInternalIndex::fromJSON(
+    const JSData& input, std::stringstream* commentsOnFailure
+    ) {
+  STACK_TRACE("DatabaseInternalIndex::fromJSON");
+  for (int i = 0; i < input.objects.size(); i ++) {
+    std::string key = input.objects.keys[i];
+    JSData& value = input.objects.values[i];
+    if (value.elementType != JSData::Token::tokenString) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Key is not string. ";
+      }
+      return false;
+    }
+    std::string valueString = value.stringValue;
+    this->objectIdToKeyValue.setKeyValue(key, valueString);
+    if (valueString != "") {
+      this->keyValueToObjectId.setKeyValue(valueString, key);
+    }
+  }
+  return true;
+}
+
+
 JSData DatabaseInternalIndex::toJSON() const {
   JSData result;
   result.elementType = JSData::Token::tokenObject;
@@ -999,7 +1101,11 @@ JSData DatabaseInternalIndex::toJSON() const {
   }
   return result;
 }
-
+JSData DatabaseCollection::toJSONIndices() const {
+  JSData result;
+  this->toJSONIndices(result);
+  return result;
+}
 void DatabaseCollection::toJSONIndices(JSData& output) const {
   output.reset(JSData::Token::tokenObject);
   for (int i = 0; i < this->indices.size(); i ++) {

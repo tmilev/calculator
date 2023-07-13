@@ -339,6 +339,7 @@ public:
   // Database request fields.
   static std::string requestType;
   static std::string requestContent;
+  static std::string resultContent;
 };
 
 #endif // header_string_constants_ALREADY_INCLUDED

@@ -5,12 +5,13 @@
 #include "string_constants.h"
 
 std::string UserCalculatorData::toStringFindQueries() const {
-  List<QueryExact> queries = getFindMeFromUserNameQuery();
+  QueryOneOfExactly queries;
+  getFindMeFromUserNameQuery(queries);
   std::stringstream out;
   out << "Queries to try: ";
-  for (int i = 0; i < queries.size; i ++) {
-    out << queries[i].toString();
-    if (i != queries.size - 1) {
+  for (int i = 0; i < queries.queries.size; i ++) {
+    out << queries.queries[i].toString();
+    if (i != queries.queries.size - 1) {
       out << ", ";
     }
   }
@@ -23,7 +24,7 @@ bool UserOfDatabase::setPassword(
   std::string& outputAuthenticationToken,
   std::stringstream& comments
 ) {
-  STACK_TRACE("DatabaseUser::setPassword");
+  STACK_TRACE("UserOfDatabase::setPassword");
   if (!global.flagLoggedIn) {
     comments << "Changing passwords allowed for logged-in users only. ";
     return false;
@@ -40,16 +41,14 @@ bool UserOfDatabase::setPassword(
 bool UserOfDatabase::loadUserInformation(
   UserCalculatorData& output, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseUser::loadUserInformation");
+  STACK_TRACE("UserOfDatabase::loadUserInformation");
   if (output.username == "" && output.email == "") {
     return false;
   }
   JSData userEntry;
-  if (
-    !this->owner->findOneFromSome(
-      output.getFindMeFromUserNameQuery(), userEntry, nullptr
-    )
-  ) {
+  QueryOneOfExactly queries;
+  output.getFindMeFromUserNameQuery(queries);
+  if (!this->owner->findOneFromSome(queries, userEntry, nullptr)) {
     if (global.flagDebugLogin) {
       global.comments
       << output.toStringFindQueries()
@@ -66,7 +65,7 @@ bool UserOfDatabase::loadUserInformation(
 bool UserOfDatabase::userExists(
   const std::string& inputUsername, std::stringstream& comments
 ) {
-  STACK_TRACE("DatabaseUser::userExists");
+  STACK_TRACE("UserOfDatabase::userExists");
   if (!global.flagLoggedIn) {
     return false;
   }
@@ -80,7 +79,7 @@ bool UserOfDatabase::userExists(
 }
 
 bool UserOfDatabase::userDefaultHasInstructorRights() {
-  STACK_TRACE("DatabaseUser::userDefaultHasInstructorRights");
+  STACK_TRACE("UserOfDatabase::userDefaultHasInstructorRights");
   if (global.userDefaultHasAdminRights()) {
     return true;
   }
@@ -94,7 +93,7 @@ bool UserOfDatabase::userDefaultHasInstructorRights() {
 }
 
 bool UserOfDatabase::logoutViaDatabase() {
-  STACK_TRACE("DatabaseUser::logoutViaDatabase");
+  STACK_TRACE("UserOfDatabase::logoutViaDatabase");
   if (!global.flagLoggedIn) {
     return true;
   }
@@ -563,7 +562,7 @@ bool UserCalculator::isAcceptableCharDatabaseInput(char character) {
 bool UserCalculator::isAcceptableDatabaseInput(
   const std::string& input, std::stringstream* comments
 ) {
-  STACK_TRACE("UserCalculator::IsAcceptableDatabaseInput");
+  STACK_TRACE("UserCalculator::isAcceptableDatabaseInput");
   for (unsigned i = 0; i < input.size(); i ++) {
     if (!UserCalculator::isAcceptableCharDatabaseInput(input[i])) {
       if (comments != nullptr) {
@@ -595,7 +594,7 @@ bool UserOfDatabase::sendActivationEmail(
   std::stringstream* commentsGeneral,
   std::stringstream* commentsGeneralSensitive
 ) {
-  STACK_TRACE("DatabaseUser::sendActivationEmail");
+  STACK_TRACE("UserOfDatabase::sendActivationEmail");
   List<std::string> emails;
   StringRoutines::stringSplitDefaultDelimiters(emailList, emails);
   return
@@ -610,7 +609,7 @@ bool UserOfDatabase::sendActivationEmail(
   std::stringstream* commentsGeneral,
   std::stringstream* commentsGeneralSensitive
 ) {
-  STACK_TRACE("DatabaseUser::sendActivationEmail");
+  STACK_TRACE("UserOfDatabase::sendActivationEmail");
   UserCalculator currentUser;
   bool result = true;
   for (int i = 0; i < emails.size; i ++) {
@@ -718,10 +717,9 @@ bool UserCalculator::interpretDatabaseProblemDataJSON(
 bool UserCalculator::exists(std::stringstream* comments) {
   STACK_TRACE("UserCalculator::exists");
   JSData notUsed;
-  return
-  Database::get().findOneFromSome(
-    this->getFindMeFromUserNameQuery(), notUsed, comments
-  );
+  QueryOneOfExactly queries;
+  this->getFindMeFromUserNameQuery(queries);
+  return Database::get().findOneFromSome(queries, notUsed, comments);
 }
 
 bool UserCalculator::computeAndStoreActivationToken(
@@ -934,15 +932,16 @@ bool UserCalculator::computeAndStoreActivationStats(
   return true;
 }
 
-List<QueryExact> UserCalculatorData::getFindMeFromUserNameQuery() const {
-  List<QueryExact> result;
+void UserCalculatorData::getFindMeFromUserNameQuery(QueryOneOfExactly& output)
+const {
+  output.queries.clear();
   if (this->username != "") {
     QueryExact findByUsername(
       DatabaseStrings::tableUsers,
       DatabaseStrings::labelUsername,
       this->username
     );
-    result.addOnTop(findByUsername);
+    output.queries.addOnTop(findByUsername);
   }
   if (this->email != "") {
     QueryExact findByEmail(
@@ -950,14 +949,13 @@ List<QueryExact> UserCalculatorData::getFindMeFromUserNameQuery() const {
       DatabaseStrings::labelEmail,
       this->email
     );
-    result.addOnTop(findByEmail);
+    output.queries.addOnTop(findByEmail);
   }
-  if (result.size == 0) {
+  if (output.queries.size == 0) {
     global.fatal
     << "User with find query not allowed to have neither username nor email. "
     << global.fatal;
   }
-  return result;
 }
 
 bool UserCalculator::storeProblemData(
@@ -977,10 +975,10 @@ bool UserCalculator::storeProblemData(
     List<std::string>({DatabaseStrings::labelProblemDataJSON, fileName}),
     problem.storeJSON()
   );
+  QueryOneOfExactly queries;
+  this->getFindMeFromUserNameQuery(queries);
   return
-  Database::get().updateOneFromSome(
-    this->getFindMeFromUserNameQuery(), update, commentsOnFailure
-  );
+  Database::get().updateOneFromSome(queries, update, commentsOnFailure);
 }
 
 bool UserOfDatabase::addUsersFromEmails(
@@ -992,7 +990,7 @@ bool UserOfDatabase::addUsersFromEmails(
   int& outputNumberOfNewUsers,
   int& outputNumberOfUpdatedUsers
 ) {
-  STACK_TRACE("DatabaseUser::addUsersFromEmails");
+  STACK_TRACE("UserOfDatabase::addUsersFromEmails");
   global.millisecondsMaxComputation = 100000;
   // 100 seconds
   global.millisecondsReplyAfterComputation = 200000;
@@ -1035,15 +1033,15 @@ bool UserOfDatabase::addUsersFromEmails(
       currentUser.email = emails[i];
     }
     JSData currentUserData;
-    List<QueryExact> findUser;
-    findUser.addOnTop(
+    QueryOneOfExactly findUser;
+    findUser.queries.addOnTop(
       QueryExact(
         DatabaseStrings::tableUsers,
         DatabaseStrings::labelUsername,
         currentUser.username
       )
     );
-    findUser.addOnTop(
+    findUser.queries.addOnTop(
       QueryExact(
         DatabaseStrings::tableUsers,
         DatabaseStrings::labelEmail,
@@ -1167,7 +1165,7 @@ bool UserOfDatabase::loginViaGoogleTokenCreateNewAccountIfNeeded(
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return UserOfDatabase::loginNoDatabaseSupport(user, commentsGeneral);
   }
-  STACK_TRACE("DatabaseUser::loginViaGoogleTokenCreateNewAccountIfNeeded");
+  STACK_TRACE("UserOfDatabase::loginViaGoogleTokenCreateNewAccountIfNeeded");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(user);
   if (userWrapper.enteredGoogleToken == "") {
@@ -1271,7 +1269,7 @@ bool UserOfDatabase::loginNoDatabaseSupport(
 bool UserOfDatabase::loginViaDatabase(
   UserCalculatorData& user, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseUser::loginViaDatabase");
+  STACK_TRACE("UserOfDatabase::loginViaDatabase");
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return UserOfDatabase::loginNoDatabaseSupport(user, commentsOnFailure);
   }

@@ -538,7 +538,7 @@ bool Database::updateOne(
 }
 
 bool Database::findOneFromSome(
-  const List<QueryExact>& findOrQueries,
+  const QueryOneOfExactly& findOrQueries,
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
@@ -1081,7 +1081,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
 }
 
 bool Database::updateOneFromSome(
-  const List<QueryExact>& findOrQueries,
+  const QueryOneOfExactly& findOrQueries,
   const QuerySet& updateQuery,
   std::stringstream* commentsOnFailure
 ) {
@@ -1302,4 +1302,37 @@ bool QueryFindAndUpdate::fromJSON(
     this->createIfNotFound = true;
   }
   return this->update.fromJSON(input["update"], commentsOnFailure);
+}
+
+JSData QueryOneOfExactly::toJSON() const {
+  STACK_TRACE("QueryOneOfExactly::toJSON");
+  JSData result;
+  JSData queryJSON;
+  queryJSON.makeEmptyArray();
+  for (const QueryExact& query : this->queries) {
+    queryJSON.listObjects.addOnTop(query.toJSON());
+  }
+  result["findMany"] = queryJSON;
+  return result;
+}
+
+bool QueryOneOfExactly::fromJSON(
+  const JSData& input, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("QueryOneOfExactly::fromJSON");
+  if (!input.hasKey("findMany")) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Missing key findMany.";
+    }
+    return false;
+  }
+  const JSData& findMany = input.objects.getValueNoFail("findMany");
+  for (const JSData& query : findMany.listObjects) {
+    QueryExact queryExact;
+    if (!queryExact.fromJSON(query, commentsOnFailure)) {
+      return false;
+    }
+    this->queries.addOnTop(queryExact);
+  }
+  return true;
 }

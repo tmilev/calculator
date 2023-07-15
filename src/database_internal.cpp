@@ -83,6 +83,16 @@ bool DatabaseInternalClient::updateOne(
   return result.isSuccess(commentsOnFailure);
 }
 
+std::string DatabaseInternal::toStringInitializationErrors() const{
+
+  std::stringstream out;
+  out << "Database not initialized correctly.<br>";
+  for (int i=0 ; i < this->initializationErrors.size; i ++) {
+    out << this->initializationErrors[i] << "\n";
+  }
+  return out.str();
+}
+
 std::string DatabaseInternal::toPayLoad(const std::string& input) {
   return input;
 }
@@ -186,6 +196,13 @@ void DatabaseInternal::initializeForkAndRun(int maximumConnections) {
   this->run();
 }
 
+void DatabaseInternal::accountInitializationError(const std::string& error){
+  if (this->initializationErrors.size > 20){
+    return;
+  }
+  this->initializationErrors.addOnTop(error);
+}
+
 bool DatabaseInternal::sendAndReceiveFromClientToServer(
   const DatabaseInternalRequest& input,
   DatabaseInternalResult& output,
@@ -200,7 +217,6 @@ bool DatabaseInternal::sendAndReceiveFromClientToServer(
     return false;
   }
   bool result = this->receiveInClientFromServer(output, commentsOnFailure);
-  global << "DEBUG: received OK!" << Logger::endL;
   return result;
 }
 
@@ -239,19 +255,14 @@ bool DatabaseInternal::receiveInClientFromServer(
 
 void DatabaseInternal::run() {
   STACK_TRACE("DatabaseInternal::run");
-  int totalRuns = 0;
   for (int i = 0; i < this->connections.size; i ++) {
     int readEnd = this->connections[i].clientToServer.pipeEnds[0];
     this->readEnds.addOnTop(readEnd);
     this->mapFromReadEndsToWorkerIds.setKeyValue(readEnd, i);
   }
-  std::stringstream commentsOnFailure;
-  this->failedToInitialize =
-  this->server.initializeLoadFromHardDrive(&commentsOnFailure);
-  this->initializationError = commentsOnFailure.str();
+  this->failedToInitialize =!
+  this->server.initializeLoadFromHardDrive();
   while (true) {
-    totalRuns ++;
-    global << "DEBUG: total database runs:  " << totalRuns << Logger::endL;
     this->runOneConnection();
   }
   global << "Exit database main loop. " << Logger::endL;
@@ -271,6 +282,7 @@ bool DatabaseInternal::runOneConnection() {
   ) {
     return false;
   }
+  global << "DEBUG: successfully read: " << this->buffer.size << " bytes. " << Logger::endL;
   this->currentWorkerId =
   this->mapFromReadEndsToWorkerIds.getValueNoFail(fileDescriptor);
   return this->executeAndSend();
@@ -281,7 +293,7 @@ bool DatabaseInternal::executeAndSend() {
   DatabaseInternalResult result;
   if (this->failedToInitialize) {
     result.success = false;
-    result.comments = this->failedToInitialize;
+    result.comments = this->toStringInitializationErrors();
     return
     this->currentServerToClient().writeOnceNoFailure(
       result.toJSON().toString(), 0, true
@@ -294,6 +306,7 @@ bool DatabaseInternal::executeAndSend() {
   if (!request.fromJSON(requestString, &commentsOnFailure)) {
     result.comments = commentsOnFailure.str();
     result.success = false;
+    global << Logger::red << "DEBUG: request: bad json: " << requestString << Logger::endL;
     return
     this->currentServerToClient().writeOnceNoFailure(
       result.toJSON().toString(), 0, true
@@ -325,7 +338,7 @@ bool DatabaseInternal::executeAndSend() {
   if (!result.success) {
     result.comments = commentsOnFailure.str();
   }
-  global << "DEBUG: about to send from server to client" << Logger::endL;
+  global << "DEBUG: about to send from server to client: " << result.toJSON() << Logger::endL;
   result.success =
   this->currentServerToClient().writeOnceNoFailure(
     result.toJSON().toString(), 0, true
@@ -538,7 +551,12 @@ bool DatabaseInternalServer::findOneFromSome(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::findOneFromSome");
-  global << Logger::red << "DEBUG: findOneFromSome! size: "  << query.queries.size<< query.toJSON().toString() << Logger::endL;
+  global
+  << Logger::red
+  << "DEBUG: findOneFromSome! size: "
+  << query.queries.size
+  << query.toJSON().toString()
+  << Logger::endL;
   std::string objectId;
   for (const QueryExact& queryExact : query.queries) {
     if (
@@ -546,15 +564,20 @@ bool DatabaseInternalServer::findOneFromSome(
         queryExact, objectId, commentsOnFailure
       )
     ) {
-      global << "DEBUG: did not find object id! " << queryExact.toJSON().toString() << Logger::endL;
-
+      global
+      << "DEBUG: did not find object id! "
+      << queryExact.toJSON().toString()
+      << Logger::endL;
       continue;
     }
     if (objectId == "") {
-      global << "DEBUG: object id empty " << queryExact.toJSON().toString() << Logger::endL;
+      global
+      << "DEBUG: object id empty "
+      << queryExact.toJSON().toString()
+      << Logger::endL;
       continue;
     }
-    global << "DEBUG: found! object id! " << objectId<< Logger::endL;
+    global << "DEBUG: found! object id! " << objectId << Logger::endL;
     return
     DatabaseInternalServer::loadObject(
       objectId, queryExact.collection, output, commentsOnFailure
@@ -569,7 +592,10 @@ bool DatabaseInternalServer::findObjectId(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::findObjectId");
-  global << "DEBUG: inside find o id: " << query.toJSON().toString()<< Logger::endL;
+  global
+  << "DEBUG: inside find o id: "
+  << query.toJSON().toString()
+  << Logger::endL;
   if (!this->collections.contains(query.collection)) {
     global << "DEBUG: uknown collection: " << query.collection << Logger::endL;
     if (commentsOnFailure != nullptr) {
@@ -603,10 +629,13 @@ bool DatabaseInternalServer::findObjectId(
     }
     return false;
   }
-  global << "DEBUG: About to search concat labels: " << concatenatedLabels << Logger::endL;
+  global
+  << "DEBUG: About to search concat labels: "
+  << concatenatedLabels
+  << Logger::endL;
   DatabaseInternalIndex& index =
   collection.indices.getValueNoFailNonConst(concatenatedLabels);
-  global << "DEBUG: in index: : " << index.toJSON() << Logger::endL;
+  global << "DEBUG: in index: : " << index.collectionName << ": " << index.toJSON() << Logger::endL;
   output = index.keyValueToObjectId.getValue(desiredValue, "");
   return true;
 }
@@ -636,6 +665,7 @@ bool DatabaseInternalServer::findAndUpdate(
   if (objectId == "" && createIfNotFound) {
     // Empty object id. Create the new object.
     JSData initialValue = input.find.toJSONCombineKeysAndValue();
+    global << Logger::yellow<< "DEBUG: about to create object!!!!!!!!" << Logger::endL;
     if (
       !this->createObject(
         initialValue, collectionName, objectId, commentsOnFailure
@@ -717,8 +747,9 @@ bool DatabaseInternalServer::storeObject(
   }
   // Update the indices with the new found object
   bool found = false;
-  global << "DEBUG: before write! 1" << Logger::endL;
+  global << "DEBUG: before index loop: "<< collection.toJSONIndices().toString() << Logger::endL;
   for (DatabaseInternalIndex& index : collection.indices.values) {
+    global << "DEBUG: Processing index: " << index.toString() << Logger::endL;
     JSData primaryKeyValueJSON;
     if (!data.hasNestedKey(index.nestedKeys, &primaryKeyValueJSON)) {
       continue;
@@ -789,6 +820,7 @@ bool DatabaseInternalServer::createObject(
   std::string& outputObjectId,
   std::stringstream* commentsOnFailure
 ) {
+  global << "DEBUG: about to creat e object " << initialValue.toString() << Logger::endL;
   if (!this->collections.contains(collectionName)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -800,26 +832,40 @@ bool DatabaseInternalServer::createObject(
   }
   DatabaseCollection & collection =
   this->collections.getValueNoFailNonConst(collectionName);
+  for (int i =0 ;i < this->collections.size(); i ++){
+    global << "DEBUG: collection: " << this->collections.values[i].toJSONIndices() << Logger::endL;
+  }
   bool foundPrimaryKey = false;
+  global << Logger::purple<< "DEBUG: collection: " << this->toStringIndices() << Logger::endL;
   for (DatabaseInternalIndex& index : collection.indices.values) {
+    global << "DEBUG: index: coli name:: " << index.toString() << ": "  << index.toJSON().toString()  << Logger::endL;
+    global << "DEBUG: da nested key: inidex: " << index.toString() << Logger::endL;
     JSData primaryKeyValueJSON;
     if (
       !initialValue.hasNestedKey(index.nestedKeys, &primaryKeyValueJSON)
     ) {
+      global << "DEBUG: no nested key: " << index.nestedKeys.toStringCommaDelimited() << Logger::endL;
       continue;
     }
     std::string primaryKeyValue = primaryKeyValueJSON.stringValue;
+    global << "DEBUG: yes nested key! " << initialValue.toString() << " prim key: "<< primaryKeyValueJSON
+           << " nested keys: " << index.nestedKeys.toStringCommaDelimited() << " string: " << primaryKeyValue << Logger::endL;
     if (primaryKeyValue != "") {
       foundPrimaryKey = true;
       break;
     }
   }
   if (!foundPrimaryKey) {
+    global << Logger::yellow       << "DatabaseInternalServer::createObject: "
+           << "input record: is missing a primay id. Indices:"
+           << collection.toJSONIndices()
+           <<Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "DatabaseInternalServer::createObject: failed to find primary key: "
-      << initialValue.toString()
-      << ". ";
+      << "DatabaseInternalServer::createObject: "
+          << "input record: is missing a primay id. "
+      ;
+
     }
     return false;
   }
@@ -853,6 +899,18 @@ bool DatabaseInternalServer::createObject(
   );
 }
 
+std::string DatabaseInternalServer::toStringIndices()const{
+  std::stringstream out;
+  for (int i = 0; i < this->collections.size(); i ++){
+    out << "collection: [" << this->collections.keys[i] << "]:"
+        << this->collections.values[i].toStringIndices();
+    if (i != this->collections.size()-1){
+      out << ", ";
+    }
+  }
+  return out.str();
+}
+
 std::string DatabaseInternalServer::objectFilename(
   const std::string& objectId, const std::string& collectionName
 ) {
@@ -873,7 +931,6 @@ void DatabaseInternalServer::objectExists(
 }
 
 bool DatabaseInternalServer::initializeLoadFromHardDrive(
-  std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::initializeLoadFromHardDrive");
   this->ensureCollection(
@@ -905,21 +962,18 @@ bool DatabaseInternalServer::initializeLoadFromHardDrive(
     DatabaseStrings::tableProblemWeights,
     List<std::string>({DatabaseStrings::labelId})
   );
-  global << "DEBUG:" << Logger::blue << "Must load: " << this->collections.values.size << " collections. " << Logger::endL;
   for (DatabaseCollection& collection : this->collections.values) {
-    if (!collection.loadIndicesFromHardDrive(commentsOnFailure)) {
-      global << Logger::red << "Failed to load indices from the hard drive. "
-             << Logger::green << "This is OK if running the calculator for the first time. " << Logger::endL
-             ;
-      if (commentsOnFailure!=0){
-            global << commentsOnFailure->str();
-
-          }
+    if (!collection.loadIndicesFromHardDrive(false)) {
+      global
+      << Logger::red
+      << "Failed to load indices from the hard drive. "
+      << Logger::green
+      << "This is OK if running the calculator for the first time. "
+      << Logger::endL;
       continue;
     }
-    global << "DEBUG:" << Logger::blue << "load: " << collection.toJSONIndices() <<Logger::endL;
-
   }
+  global <<Logger::purple << "DEBUG: Loaded indices: " << this->toStringIndices() << Logger::endL;
   return true;
 }
 
@@ -934,7 +988,14 @@ bool DatabaseInternalServer::ensureCollection(
     DatabaseInternalIndex& index = collection.indices.getValueCreateEmpty(key);
     index.collectionName = collectionName;
     index.nestedKeys.addOnTop(key);
+    global << "DEBUG: ensure collection: " <<  index.collectionName<< Logger::endL;
+    global << "DEBUG: nested keys: " <<  index.nestedKeys.toStringCommaDelimited()<< Logger::endL;
+
   }
+  for (DatabaseInternalIndex& index : collection.indices.values) {
+    global << "DEBUG: Loaded index: " << index.toString() << Logger::endL;
+  }
+  global << "DEBUG: ensure collection END: " << collection.toJSONIndices().toString() << Logger::endL;
   return true;
 }
 
@@ -983,51 +1044,78 @@ DatabaseCollection::DatabaseCollection() {
   this->owner = nullptr;
 }
 
-
 std::string DatabaseCollection::fileNameIndex() const {
   return this->owner->folder() + this->name + ".json";
 }
 
-bool DatabaseCollection::loadIndicesFromHardDrive(
-  std::stringstream* commentsOnFailure
+std::string DatabaseCollection::toStringIndices()const{
+  std::stringstream out;
+  out << "collection name: [" << this->name << "]: {"
+      ;
+  for (int i = 0; i < this->indices.size(); i ++){
+    out <<"["<< this->indices.keys[i] << "]: [" << this->indices.values[i].toString() << "]";
+  }
+  out << "}";
+  return out.str();
+}
+
+bool DatabaseCollection::loadIndicesFromHardDrive(bool clearPreExistingIndices
 ) {
   STACK_TRACE("DatabaseCollection::loadIndicesFromHardDrive");
   if (this->indicesLoaded) {
     return true;
   }
+  global << Logger::red << "DEBUG: in loading: name: " << this->name << Logger::endL;
   std::string filename = this->fileNameIndex();
   std::string contentString;
+  std::stringstream commentsOnFailure;
+  if (!FileOperations::fileExistsVirtual(filename, true, true, nullptr)){
+    global << Logger::red << "Missing index file: " << filename
+           << Logger::endL
+           << "I assume this is the first run and "
+              << "will try to generate the index for you. " << Logger::endL;
+    if (!    this->storeIndicesToHardDrive(&commentsOnFailure)) {
+      global << Logger::red << "Failed to store indices to the hard drive. " << Logger::endL;
+      this->owner->accountInitializationError(commentsOnFailure.str() + "Failed to store indices to the hard drive. " );
+      return false;
+    }
+  }
   if (
     !FileOperations::
     loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-      filename, contentString, true, true, commentsOnFailure
+      filename, contentString, true, true, &commentsOnFailure
     )
   ) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to load indices from hard drive.";
-    }
+    this->owner->accountInitializationError(commentsOnFailure.str());
+    global << Logger::red << "Error loading file: " << filename << Logger::endL;
     return false;
   }
-  this->indices.clear();
+  if (clearPreExistingIndices){
+    this->indices.clear();
+  }
   JSData content;
-  if (!content.parse(contentString, true, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to parse indices from hard drive.";
-    }
+  if (!content.parse(contentString, true, &commentsOnFailure)) {
+    this->owner->accountInitializationError(commentsOnFailure.str());
     return false;
   }
   for (int i = 0; i < content.objects.size(); i ++) {
+    std::string indexCombinedKey=    content.objects.keys[i];
     DatabaseInternalIndex& index =
-    this->indices.getValueCreateEmpty(content.objects.keys[i]);
+    this->indices.getValueCreateEmpty(indexCombinedKey);
     if (
-      !index.fromJSON(content.objects.values[i], commentsOnFailure)
+        !index.fromJSON(content.objects.values[i],this->name, &commentsOnFailure)
     ) {
+      this->owner->accountInitializationError(commentsOnFailure.str());
       return false;
     }
   }
   JSData temp;
   this->toJSONIndices(temp);
-  global << Logger::green << "DEBUG: read index: " << temp.toString() << Logger::endL;
+  global
+  << Logger::green
+  << "DEBUG: read index: "
+  << temp.toString()
+  << Logger::endL;
   return true;
 }
 
@@ -1070,9 +1158,10 @@ std::string DatabaseInternalIndex::toString() const {
 }
 
 bool DatabaseInternalIndex::fromJSON(
-    const JSData& input, std::stringstream* commentsOnFailure
-    ) {
+    const JSData& input,const std::string& collectionName, std::stringstream* commentsOnFailure
+) {
   STACK_TRACE("DatabaseInternalIndex::fromJSON");
+  this->collectionName = collectionName;
   for (int i = 0; i < input.objects.size(); i ++) {
     std::string key = input.objects.keys[i];
     JSData& value = input.objects.values[i];
@@ -1091,21 +1180,23 @@ bool DatabaseInternalIndex::fromJSON(
   return true;
 }
 
-
 JSData DatabaseInternalIndex::toJSON() const {
   JSData result;
   result.elementType = JSData::Token::tokenObject;
+
   for (int i = 0; i < this->objectIdToKeyValue.size(); i ++) {
     result[this->objectIdToKeyValue.keys[i]] =
     this->objectIdToKeyValue.values[i];
   }
   return result;
 }
+
 JSData DatabaseCollection::toJSONIndices() const {
   JSData result;
   this->toJSONIndices(result);
   return result;
 }
+
 void DatabaseCollection::toJSONIndices(JSData& output) const {
   output.reset(JSData::Token::tokenObject);
   for (int i = 0; i < this->indices.size(); i ++) {

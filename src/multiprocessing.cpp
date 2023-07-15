@@ -339,11 +339,6 @@ bool Pipe::readWithTimeOutViaSelect(
       break;
     }
   }
-  global
-  << "Found file descriptor: "
-  << outputFileDescriptor
-  << ". "
-  << Logger::endL;
   output.setSize(bufferSize);
   int bytesRead = - 1;
   do {

@@ -348,7 +348,7 @@ public:
   MapList<std::string, std::string> keyValueToObjectId;
   MapList<std::string, std::string> objectIdToKeyValue;
   JSData toJSON() const;
-  bool fromJSON(const JSData& input, std::stringstream* commentsOnFailure);
+  bool fromJSON(const JSData& input, const std::string& collectionName, std::stringstream* commentsOnFailure);
   std::string toString() const;
   DatabaseInternalIndex();
 };
@@ -362,10 +362,11 @@ public:
   std::string name;
   DatabaseInternal* owner;
   JSData toJSONSchema() const;
-  bool loadIndicesFromHardDrive(std::stringstream* commentsOnFailure);
+  bool loadIndicesFromHardDrive(bool clearPreExistingIndices);
   bool storeIndicesToHardDrive(std::stringstream* commentsOnFailure);
   void toJSONIndices(JSData& output) const;
-  JSData  toJSONIndices() const;
+  JSData toJSONIndices() const;
+  std::string toStringIndices()const;
   std::string fileNameIndex() const;
   DatabaseCollection();
   void initialize(
@@ -378,7 +379,7 @@ public:
   DatabaseInternal* owner;
   MapReferences<std::string, DatabaseCollection> collections;
   DatabaseInternalServer();
-  bool initializeLoadFromHardDrive(std::stringstream* commentsOnFailure);
+  bool initializeLoadFromHardDrive();
   void storeEverything();
   bool ensureCollection(
     const std::string& collectionName,
@@ -433,6 +434,7 @@ public:
   std::string objectFilename(
     const std::string& objectId, const std::string& collectionName
   );
+  std::string toStringIndices()const;
 };
 
 class DatabaseInternalClient {
@@ -488,7 +490,6 @@ class DatabaseInternal {
   List<int> readEnds;
   List<char> buffer;
   bool failedToInitialize;
-  std::string initializationError;
   bool sendFromClientToServer(
     const std::string& input, std::stringstream* commentsOnFailure
   );
@@ -497,12 +498,14 @@ class DatabaseInternal {
   );
   PipePrimitive& currentServerToClient();
   PipePrimitive& currentClientToServer();
+  List<std::string >initializationErrors;
 public:
   int processId;
   int currentWorkerId;
   int maximumMessageSize;
   DatabaseInternalClient client;
   DatabaseInternalServer server;
+  void accountInitializationError(const std::string &error);
   bool sendAndReceiveFromClientToServer(
     const DatabaseInternalRequest& input,
     DatabaseInternalResult& output,
@@ -533,6 +536,7 @@ public:
   bool executeAndSend();
   DatabaseInternal();
   std::string toPayLoad(const std::string& input);
+  std::string  toStringInitializationErrors()const;
 };
 
 class UserOfDatabase {

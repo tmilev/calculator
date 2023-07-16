@@ -81,7 +81,7 @@ public:
   // password hashes.
   std::string toStringSecure();
   std::string toStringCourseInfo();
-  void getFindMeFromUserNameQuery(QueryOneOfExactly& output) const;
+  void findMeFromUserNameQuery(QueryOneOfExactly& output) const;
   std::string toStringFindQueries() const;
 };
 

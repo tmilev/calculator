@@ -710,8 +710,11 @@ bool WebWorker::loginProcedure(
   std::stringstream* comments
 ) {
   STACK_TRACE("WebWorker::loginProcedure");
+  global.comments << "DEBUG:  login sequence start! " ;
+
   global.flagLoggedIn = false;
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
+    global.comments << "DEBUG:  everyone admin! " ;
     global.flagLoggedIn = true;
     return true;
   }
@@ -758,7 +761,10 @@ bool WebWorker::loginProcedure(
   // form.submit() works!
   // <-Incoming pluses must be re-coded as spaces (%20).
   user.flagEnteredPassword = (user.enteredPassword != "");
+  global.comments << "DEBUG:  before enter pass check! " ;
+
   if (user.flagEnteredPassword) {
+    global.comments << "DEBUG:  pass entered branch! " ;
     user.flagMustLogin = true;
     user.enteredGoogleToken = "";
     user.enteredAuthenticationToken = "";
@@ -783,6 +789,7 @@ bool WebWorker::loginProcedure(
       << "authentication token and google token ignored. ";
     }
   }
+  global.comments << "DEBUG:  got to here! " ;
   if (user.username != "") {
     user.enteredGoogleToken = "";
   }
@@ -802,6 +809,7 @@ bool WebWorker::loginProcedure(
     user.enteredActivationToken == "" &&
     user.enteredGoogleToken == ""
   ) {
+    global.comments << "DEBUG:  nothing good entered! " ;
     return !user.flagMustLogin;
   }
   if (!global.flagUsingSSLinCurrentConnection) {
@@ -828,6 +836,7 @@ bool WebWorker::loginProcedure(
   if (changingPass) {
     user.enteredAuthenticationToken = "";
   }
+  global.comments << "DEBUG: before main login sequence. " ;
   if (doAttemptGoogleTokenLogin) {
     bool tokenIsGood = false;
     global.flagLoggedIn =
@@ -888,7 +897,7 @@ bool WebWorker::loginProcedure(
   user.clearAuthenticationTokenAndPassword();
   if (shouldDisplayMessage) {
     argumentProcessingFailureComments
-    << "Invalid user and/or authentication. ";
+    << "\nInvalid user and/or authentication. ";
   }
   arguments.setKeyValue(
     DatabaseStrings::labelPassword,
@@ -2637,6 +2646,7 @@ int WebWorker::serveClient() {
   ) {
     global.setWebInput("error", argumentProcessingFailureComments.str());
   }
+  global.comments << "DEBUG: part 0";
   if (
     this->response.serveResponseFalseIfUnrecognized(
       argumentProcessingFailureComments, comments

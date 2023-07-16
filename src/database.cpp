@@ -1260,6 +1260,13 @@ void QueryResultOptions::makeProjection(const List<std::string>& fields) {
   this->fieldsToProjectTo = fields;
 }
 
+void QueryResultOptions::applyProjection(JSData& input, JSData& output) const {
+  if (input.hasNestedKey(this->fieldsToProjectTo, &output)) {
+    return;
+  }
+  output = JSData();
+}
+
 JSData QueryResultOptions::toJSON() const {
   JSData result;
   JSData fields;

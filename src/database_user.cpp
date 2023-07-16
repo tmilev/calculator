@@ -6,9 +6,9 @@
 
 std::string UserCalculatorData::toStringFindQueries() const {
   QueryOneOfExactly queries;
-  getFindMeFromUserNameQuery(queries);
+  this->findMeFromUserNameQuery(queries);
   std::stringstream out;
-  out << "Queries to try: ";
+  out << "userFind query: ";
   for (int i = 0; i < queries.queries.size; i ++) {
     out << queries.queries[i].toString();
     if (i != queries.queries.size - 1) {
@@ -47,15 +47,17 @@ bool UserOfDatabase::loadUserInformation(
   }
   JSData userEntry;
   QueryOneOfExactly queries;
-  output.getFindMeFromUserNameQuery(queries);
+  output.findMeFromUserNameQuery(queries);
   if (!this->owner->findOneFromSome(queries, userEntry, nullptr)) {
-    if (global.flagDebugLogin) {
-      global.comments
-      << output.toStringFindQueries()
-      << output.toStringSecure();
-    }
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not find username/email. ";
+      if (global.flagDebugLogin) {
+        *commentsOnFailure
+        << output.toStringFindQueries()
+        << ". "
+        << output.toStringSecure()
+        << ". ";
+      }
     }
     return false;
   }
@@ -580,7 +582,7 @@ bool UserCalculator::isAcceptableDatabaseInput(
 }
 
 std::string UserCalculator::getSelectedRowEntry(const std::string& key) {
-  STACK_TRACE("UserCalculator::GetSelectedRowEntry");
+  STACK_TRACE("UserCalculator::getSelectedRowEntry");
   int index = this->selectedRowFieldNamesUnsafe.getIndex(key);
   if (index == - 1) {
     return "";
@@ -718,7 +720,7 @@ bool UserCalculator::exists(std::stringstream* comments) {
   STACK_TRACE("UserCalculator::exists");
   JSData notUsed;
   QueryOneOfExactly queries;
-  this->getFindMeFromUserNameQuery(queries);
+  this->findMeFromUserNameQuery(queries);
   return Database::get().findOneFromSome(queries, notUsed, comments);
 }
 
@@ -932,7 +934,7 @@ bool UserCalculator::computeAndStoreActivationStats(
   return true;
 }
 
-void UserCalculatorData::getFindMeFromUserNameQuery(QueryOneOfExactly& output)
+void UserCalculatorData::findMeFromUserNameQuery(QueryOneOfExactly& output)
 const {
   output.queries.clear();
   if (this->username != "") {
@@ -976,7 +978,7 @@ bool UserCalculator::storeProblemData(
     problem.storeJSON()
   );
   QueryOneOfExactly queries;
-  this->getFindMeFromUserNameQuery(queries);
+  this->findMeFromUserNameQuery(queries);
   return
   Database::get().updateOneFromSome(queries, update, commentsOnFailure);
 }
@@ -1270,6 +1272,7 @@ bool UserOfDatabase::loginViaDatabase(
   UserCalculatorData& user, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("UserOfDatabase::loginViaDatabase");
+  global.comments << "DEBUG: inside login via database";
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return UserOfDatabase::loginNoDatabaseSupport(user, commentsOnFailure);
   }

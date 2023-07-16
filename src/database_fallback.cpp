@@ -146,7 +146,7 @@ bool DatabaseFallback::findOneWithOptions(
   if (options.toJSON().objects.size() > 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "Fallback database does not suppor non-empty query options. "
+      << "Fallback database does not support non-empty query options. "
       << options.toJSON();
     }
     return false;

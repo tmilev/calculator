@@ -84,6 +84,7 @@ public:
   List<std::string> fieldsProjectedAway;
   JSData toJSON() const;
   void makeProjection(const List<std::string>& fields);
+  void applyProjection(JSData& input, JSData& output) const;
 };
 
 // Stores a query for an item.
@@ -348,7 +349,11 @@ public:
   MapList<std::string, std::string> keyValueToObjectId;
   MapList<std::string, std::string> objectIdToKeyValue;
   JSData toJSON() const;
-  bool fromJSON(const JSData& input, const std::string& collectionName, std::stringstream* commentsOnFailure);
+  bool fromJSON(
+    const JSData& input,
+    const std::string& collectionName,
+    std::stringstream* commentsOnFailure
+  );
   std::string toString() const;
   DatabaseInternalIndex();
 };
@@ -366,7 +371,7 @@ public:
   bool storeIndicesToHardDrive(std::stringstream* commentsOnFailure);
   void toJSONIndices(JSData& output) const;
   JSData toJSONIndices() const;
-  std::string toStringIndices()const;
+  std::string toStringIndices() const;
   std::string fileNameIndex() const;
   DatabaseCollection();
   void initialize(
@@ -434,7 +439,7 @@ public:
   std::string objectFilename(
     const std::string& objectId, const std::string& collectionName
   );
-  std::string toStringIndices()const;
+  std::string toStringIndices() const;
 };
 
 class DatabaseInternalClient {
@@ -498,14 +503,17 @@ class DatabaseInternal {
   );
   PipePrimitive& currentServerToClient();
   PipePrimitive& currentClientToServer();
-  List<std::string >initializationErrors;
+  List<std::string> initializationErrors;
 public:
   int processId;
   int currentWorkerId;
   int maximumMessageSize;
   DatabaseInternalClient client;
   DatabaseInternalServer server;
-  void accountInitializationError(const std::string &error);
+  void accountInitializationError(const std::string& error);
+  // Sends data from the client process to the server process.
+  // The data sent here will be received by
+  // DatabaseInternal::runOneConnection.
   bool sendAndReceiveFromClientToServer(
     const DatabaseInternalRequest& input,
     DatabaseInternalResult& output,
@@ -536,7 +544,7 @@ public:
   bool executeAndSend();
   DatabaseInternal();
   std::string toPayLoad(const std::string& input);
-  std::string  toStringInitializationErrors()const;
+  std::string toStringInitializationErrors() const;
 };
 
 class UserOfDatabase {

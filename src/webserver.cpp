@@ -2269,57 +2269,6 @@ bool WebWorker::correctRequestsBEFORELoginReturnFalseIfModified() {
   return !modified;
 }
 
-bool WebWorker::redirectIfPasswordIsGiven(
-  std::stringstream& argumentProcessingFailureComments
-) {
-  STACK_TRACE("WebWorker::redirectIfPasswordIsGiven");
-  UserCalculatorData& user = global.userDefault;
-  if (!user.flagEnteredPassword) {
-    return false;
-  }
-  if (
-    global.requestType == WebAPI::Request::changePassword ||
-    global.requestType == WebAPI::Request::activateAccountJSON
-  ) {
-    return false;
-  }
-  std::stringstream redirectedAddress;
-  if (this->addressComputed == global.displayNameExecutable) {
-    redirectedAddress
-    << global.displayNameExecutable
-    << "?request="
-    << global.requestType
-    << "&";
-  } else {
-    redirectedAddress << this->addressComputed << "?";
-  }
-  for (int i = 0; i < global.webArguments.size(); i ++) {
-    if (
-      global.webArguments.keys[i] == DatabaseStrings::labelPassword ||
-      global.webArguments.keys[i] == "request" ||
-      global.webArguments.keys[i] == "googleToken" ||
-      global.webArguments.keys[i] == "G_AUTHUSER_H" ||
-      global.webArguments.keys[i] == "activationToken"
-    ) {
-      continue;
-    }
-    redirectedAddress
-    << global.webArguments.keys[i]
-    << "="
-    << global.webArguments.values[i]
-    << "&";
-  }
-  if (argumentProcessingFailureComments.str() != "") {
-    redirectedAddress
-    << "error="
-    << HtmlRoutines::convertStringToURLString(
-      argumentProcessingFailureComments.str(), false
-    )
-    << "&";
-  }
-  this->redirect(redirectedAddress.str());
-  return true;
-}
 
 void WebWorker::redirect(const std::string& address) {
   std::stringstream headerStream;
@@ -2605,10 +2554,6 @@ int WebWorker::serveClient() {
   isNotModified = this->correctRequestsAFTERLoginReturnFalseIfModified();
   if (!isNotModified) {
     comments << this->toStringAddressRequest() << ": modified after login. ";
-  }
-  if (this->redirectIfPasswordIsGiven(argumentProcessingFailureComments)) {
-    this->sendPending();
-    return 0;
   }
   user.flagStopIfNoLogin = (
     !global.flagLoggedIn &&

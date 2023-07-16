@@ -120,9 +120,6 @@ public:
   );
   bool correctRequestsBEFORELoginReturnFalseIfModified();
   bool correctRequestsAFTERLoginReturnFalseIfModified();
-  bool redirectIfPasswordIsGiven(
-    std::stringstream& argumentProcessingFailureComments
-  );
   void redirect(const std::string& address);
   bool extractArgumentsFromMessage(
     const std::string& input,

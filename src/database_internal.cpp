@@ -252,6 +252,7 @@ bool DatabaseInternal::receiveInClientFromServer(
   Crypto::convertListCharsToString(
     connection.serverToClient.buffer, stringBuffer
   );
+  global.comments << "DEBUG: received: " << stringBuffer << ". ";
   return output.fromJSON(stringBuffer, commentsOnFailure);
 }
 
@@ -324,6 +325,7 @@ bool DatabaseInternal::executeAndSend() {
     this->server.findOneFromSome(
       request.queryOneOfExactly, result.content, &commentsOnFailure
     );
+    global << "DEBUG: found! : " << result.content << Logger::endL;
     break;
   default:
     break;
@@ -424,6 +426,9 @@ JSData DatabaseInternalResult::toJSON() {
   this->reader = JSData();
   this->reader[DatabaseStrings::resultSuccess] = this->success;
   this->reader[DatabaseStrings::resultComments] = this->comments;
+  if (this->content.elementType != JSData::Token::tokenUndefined && this->content.elementType != JSData::Token::tokenNull){
+  this->reader[DatabaseStrings::resultContent] = this->content;
+  }
   return this->reader;
 }
 
@@ -541,7 +546,6 @@ bool DatabaseInternalServer::findOneWithOptions(
   JSData& output,
   std::stringstream* commentsOnFailure
 ) {
-
   return false;
 }
 
@@ -563,10 +567,13 @@ bool DatabaseInternalServer::findOneFromSome(
     if (objectId == "") {
       continue;
     }
-    return
+    bool result =
     DatabaseInternalServer::loadObject(
       objectId, queryExact.collection, output, commentsOnFailure
     );
+    global << Logger::purple <<  "DEBUG: loaded object for query: " << query.toJSON().toString()
+           << " and the obje: " << output.toString() << Logger::endL;
+    return result;
   }
   return false;
 }

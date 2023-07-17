@@ -710,11 +710,10 @@ bool WebWorker::loginProcedure(
   std::stringstream* comments
 ) {
   STACK_TRACE("WebWorker::loginProcedure");
-  global.comments << "DEBUG:  login sequence start! " ;
-
+  global.comments << "DEBUG:  login sequence start! ";
   global.flagLoggedIn = false;
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
-    global.comments << "DEBUG:  everyone admin! " ;
+    global.comments << "DEBUG:  everyone admin! ";
     global.flagLoggedIn = true;
     return true;
   }
@@ -761,10 +760,9 @@ bool WebWorker::loginProcedure(
   // form.submit() works!
   // <-Incoming pluses must be re-coded as spaces (%20).
   user.flagEnteredPassword = (user.enteredPassword != "");
-  global.comments << "DEBUG:  before enter pass check! " ;
-
+  global.comments << "DEBUG:  before enter pass check! ";
   if (user.flagEnteredPassword) {
-    global.comments << "DEBUG:  pass entered branch! " ;
+    global.comments << "DEBUG:  pass entered branch! ";
     user.flagMustLogin = true;
     user.enteredGoogleToken = "";
     user.enteredAuthenticationToken = "";
@@ -789,7 +787,7 @@ bool WebWorker::loginProcedure(
       << "authentication token and google token ignored. ";
     }
   }
-  global.comments << "DEBUG:  got to here! " ;
+  global.comments << "DEBUG:  got to here! ";
   if (user.username != "") {
     user.enteredGoogleToken = "";
   }
@@ -809,7 +807,7 @@ bool WebWorker::loginProcedure(
     user.enteredActivationToken == "" &&
     user.enteredGoogleToken == ""
   ) {
-    global.comments << "DEBUG:  nothing good entered! " ;
+    global.comments << "DEBUG:  nothing good entered! ";
     return !user.flagMustLogin;
   }
   if (!global.flagUsingSSLinCurrentConnection) {
@@ -831,12 +829,12 @@ bool WebWorker::loginProcedure(
   } else if (user.username == "") {
     return !user.flagMustLogin;
   }
-  bool changingPass = global.requestType == WebAPI::Request::changePassword ||
+  bool changingPassword = global.requestType == WebAPI::Request::changePassword ||
   global.requestType == WebAPI::Request::activateAccountJSON;
-  if (changingPass) {
+  if (changingPassword) {
     user.enteredAuthenticationToken = "";
   }
-  global.comments << "DEBUG: before main login sequence. " ;
+  global.comments << "DEBUG: before main login sequence. ";
   if (doAttemptGoogleTokenLogin) {
     bool tokenIsGood = false;
     global.flagLoggedIn =
@@ -853,6 +851,7 @@ bool WebWorker::loginProcedure(
     user.enteredPassword != "" ||
     user.enteredActivationToken != ""
   ) {
+    global.comments << "DEBUG: in login via database ";
     global.flagLoggedIn =
     Database().get().user.loginViaDatabase(
       user, &argumentProcessingFailureComments
@@ -2269,7 +2268,6 @@ bool WebWorker::correctRequestsBEFORELoginReturnFalseIfModified() {
   return !modified;
 }
 
-
 void WebWorker::redirect(const std::string& address) {
   std::stringstream headerStream;
   headerStream << "Location: " << address;
@@ -2463,19 +2461,19 @@ int WebWorker::serveClient() {
     global.web.actAsWebServerOnlyForTheseHosts.contains(this->hostNoPort)
   ) {
     global.web.flagIsStandaloneWebserver = true;
-    const ActAsWebServerOnly& config =
+    const ActAsWebServerOnly& configuration =
     global.web.actAsWebServerOnlyForTheseHosts.getValueNoFail(
       this->hostNoPort
     );
     if (
-      global.web.port != config.portHTTP && global.web.port != config.portHTTPS
+      global.web.port != configuration.portHTTP && global.web.port != configuration.portHTTPS
     ) {
       std::stringstream redirectAddressStart;
       redirectAddressStart
       << "https://"
       << this->hostNoPort
       << ":"
-      << config.portHTTPS;
+      << configuration.portHTTPS;
       std::string redirectAddress =
       FileOperations::addPaths(
         redirectAddressStart.str(), this->addressComputed
@@ -2483,7 +2481,7 @@ int WebWorker::serveClient() {
       this->redirect(redirectAddress);
       return 0;
     }
-    this->addressComputed = config.adjustURL(this->addressComputed);
+    this->addressComputed = configuration.adjustURL(this->addressComputed);
     return this->processFolderOrFile(false);
   }
   std::stringstream argumentProcessingFailureComments;

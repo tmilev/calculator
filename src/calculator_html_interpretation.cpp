@@ -1053,7 +1053,6 @@ void WebAPIResponse::getJSDataUserInfo(
 ) {
   STACK_TRACE("WebAPIReponse::getJSDataUserInfo");
   global.comments << "DEBUG: got to here!";
-
   outputAppend["linkApp"] = WebAPIResponse::youHaveReachedTheBackend;
   outputAppend[WebAPI::Result::loginDisabledEveryoneIsAdmin] =
   global.hasDisabledDatabaseEveryoneIsAdmin();

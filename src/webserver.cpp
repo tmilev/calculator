@@ -576,9 +576,11 @@ JSData WebWorker::getDatabaseJSON() {
   );
   if (operation == WebAPI::DatabaseParameters::fetch) {
     result = Database::get().toJSONDatabaseFetch(findQuery);
+  } else if (operation == WebAPI::DatabaseParameters::allTables) {
+    result = Database::get().toJSONDatabaseCollection("");
   } else {
     result[WebAPI::Result::error] =
-    "Uknown database operation: " + operation + ". ";
+    "Unknown database operation: " + operation + ". ";
   }
   if (global.userDebugFlagOn()) {
     result["databaseOperation"] = operation;
@@ -710,10 +712,8 @@ bool WebWorker::loginProcedure(
   std::stringstream* comments
 ) {
   STACK_TRACE("WebWorker::loginProcedure");
-  global.comments << "DEBUG:  login sequence start! ";
   global.flagLoggedIn = false;
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
-    global.comments << "DEBUG:  everyone admin! ";
     global.flagLoggedIn = true;
     return true;
   }
@@ -760,9 +760,7 @@ bool WebWorker::loginProcedure(
   // form.submit() works!
   // <-Incoming pluses must be re-coded as spaces (%20).
   user.flagEnteredPassword = (user.enteredPassword != "");
-  global.comments << "DEBUG:  before enter pass check! ";
   if (user.flagEnteredPassword) {
-    global.comments << "DEBUG:  pass entered branch! ";
     user.flagMustLogin = true;
     user.enteredGoogleToken = "";
     user.enteredAuthenticationToken = "";
@@ -787,7 +785,6 @@ bool WebWorker::loginProcedure(
       << "authentication token and google token ignored. ";
     }
   }
-  global.comments << "DEBUG:  got to here! ";
   if (user.username != "") {
     user.enteredGoogleToken = "";
   }
@@ -807,7 +804,6 @@ bool WebWorker::loginProcedure(
     user.enteredActivationToken == "" &&
     user.enteredGoogleToken == ""
   ) {
-    global.comments << "DEBUG:  nothing good entered! ";
     return !user.flagMustLogin;
   }
   if (!global.flagUsingSSLinCurrentConnection) {
@@ -829,12 +825,12 @@ bool WebWorker::loginProcedure(
   } else if (user.username == "") {
     return !user.flagMustLogin;
   }
-  bool changingPassword = global.requestType == WebAPI::Request::changePassword ||
+  bool changingPassword = global.requestType == WebAPI::Request::changePassword
+  ||
   global.requestType == WebAPI::Request::activateAccountJSON;
   if (changingPassword) {
     user.enteredAuthenticationToken = "";
   }
-  global.comments << "DEBUG: before main login sequence. ";
   if (doAttemptGoogleTokenLogin) {
     bool tokenIsGood = false;
     global.flagLoggedIn =
@@ -851,7 +847,6 @@ bool WebWorker::loginProcedure(
     user.enteredPassword != "" ||
     user.enteredActivationToken != ""
   ) {
-    global.comments << "DEBUG: in login via database ";
     global.flagLoggedIn =
     Database().get().user.loginViaDatabase(
       user, &argumentProcessingFailureComments
@@ -2466,7 +2461,8 @@ int WebWorker::serveClient() {
       this->hostNoPort
     );
     if (
-      global.web.port != configuration.portHTTP && global.web.port != configuration.portHTTPS
+      global.web.port != configuration.portHTTP &&
+      global.web.port != configuration.portHTTPS
     ) {
       std::stringstream redirectAddressStart;
       redirectAddressStart
@@ -2589,7 +2585,6 @@ int WebWorker::serveClient() {
   ) {
     global.setWebInput("error", argumentProcessingFailureComments.str());
   }
-  global.comments << "DEBUG: part 0";
   if (
     this->response.serveResponseFalseIfUnrecognized(
       argumentProcessingFailureComments, comments

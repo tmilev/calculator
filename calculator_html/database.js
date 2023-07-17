@@ -237,21 +237,24 @@ function updateTables(parsed, /** @type {HTMLElement} */ output) {
 
 function updateDatabasePageResetCurrentTable() {
   storage.storage.variables.database.findQuery.setAndStore("{}");
-  updateDatabasePage();
+  updateDatabasePage(pathnames.urlFields.database.allTables);
 }
 
-function updateDatabasePage() {
+function updateDatabasePage(/** @type{string?} */ requestedOperation) {
   let page = window.calculator.mainPage;
   if (!page.isLoggedIn()) {
     let element = document.getElementById(ids.domElements.divDatabaseOutput);
     miscellaneous.writeHTML(element, "<b>Not logged-in.</b>");
     return;
   }
+  if (requestedOperation === undefined || requestedOperation === null) {
+    requestedOperation = pathnames.urlFields.database.fetch;
+  }
   let findQuery = page.storage.variables.database.findQuery.getValue();
   let url = "";
   url += `${pathnames.urls.calculatorAPI}?`;
   url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
-  url += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
+  url += `${pathnames.urlFields.database.operation}=${requestedOperation}&`;
   url += `${pathnames.urlFields.database.findQuery}=${findQuery}&`;
   submitRequests.submitGET({
     url: url,

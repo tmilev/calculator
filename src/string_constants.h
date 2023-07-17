@@ -208,6 +208,7 @@ public:
     static std::string projector;
     static std::string operation;
     static std::string fetch;
+    static std::string allTables;
   };
 
   struct Calculator {

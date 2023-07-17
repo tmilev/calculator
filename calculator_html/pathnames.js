@@ -109,6 +109,7 @@ const urlFields = {
     table: "table",
     findQueryAndProjector: "findQueryAndProjector",
     findQuery: "findQuery",
+    allTables: "allTables",
     projector: "projector",
   },
   debugFlag: "debugFlag",

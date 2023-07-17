@@ -12,7 +12,7 @@ Database::Test::Test(DatabaseType databaseType) {
   global.flagServerForkedIntoWorker = true;
   DatabaseStrings::databaseName = "test";
   Database::get().initializeServer(10);
-  Database::get().initializeWorker();
+  Database::get().initializeClient();
 }
 
 bool Database::Test::all() {

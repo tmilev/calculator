@@ -48,9 +48,7 @@ bool UserOfDatabase::loadUserInformation(
   JSData userEntry;
   QueryOneOfExactly queries;
   output.findMeFromUserNameQuery(queries);
-  global.comments << "DEBUG: about to find using: " << queries.toJSON().toString() << ". ";
   if (!this->owner->findOneFromSome(queries, userEntry, nullptr)) {
-    global.comments << "DEBUG: NOT FOUND!!!!!!!!!!! ";
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not find username/email. ";
       if (global.flagDebugLogin) {
@@ -63,7 +61,6 @@ bool UserOfDatabase::loadUserInformation(
     }
     return false;
   }
-  global.comments << "DEBUG: found OK!!!" << "User entry: " << userEntry.toString();
   return output.loadFromJSON(userEntry);
 }
 
@@ -1275,7 +1272,6 @@ bool UserOfDatabase::loginViaDatabase(
   UserCalculatorData& user, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("UserOfDatabase::loginViaDatabase");
-  global.comments << "DEBUG: inside login via database";
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return UserOfDatabase::loginNoDatabaseSupport(user, commentsOnFailure);
   }

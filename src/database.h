@@ -267,7 +267,8 @@ public:
   void indexOneRecord(
     const JSData& entry, int32_t row, const std::string& collection
   );
-  void initialize();
+  void initializeServer();
+  bool initializeClient();
   bool findOneFromSome(
     const QueryOneOfExactly& findOrQueries,
     JSData& output,
@@ -325,7 +326,7 @@ class DatabaseInternalRequest {
   bool fromJSData(std::stringstream* commentsOnFailure);
 public:
   enum Type {
-    unknown, findAndUpdate, findOneFromSome
+    unknown, findAndUpdate, findOneFromSome, fetchCollectionNames
   };
   Type requestType;
   QueryFindAndUpdate queryFindAndUpdate;
@@ -410,6 +411,9 @@ public:
     const QueryExact& query,
     std::string& output,
     std::stringstream* commentsOnFailure
+  );
+  bool fetchCollectionNames(
+    JSData& output, std::stringstream* commentsOnFailure
   );
   bool createObject(
     const JSData& initialValue,
@@ -521,9 +525,6 @@ public:
   );
   static std::string folder();
   bool deleteDatabase(std::stringstream* commentsOnFailure);
-  void createHashIndex(
-    const std::string& collectionName, const std::string& key
-  );
   // Forks out a child process to be the database server.
   // Returns the process id of the database server to the parent
   // and 0 to the child server database process.
@@ -620,11 +621,8 @@ public:
   // avoid the static initalization order fiasco.
   static Database& get();
   bool initializeServer(int maximumConnections);
-  bool initializeWorker();
+  bool initializeClient();
   bool checkInitialization();
-  void createHashIndex(
-    const std::string& collectionName, const std::string& key
-  );
   static std::string toString();
   UserOfDatabase user;
   // TODO(tmilev): Rename this to fallbackDatabase.
@@ -717,6 +715,7 @@ public:
     JSData& row, const std::string& oneLabel
   );
   JSData toJSONDatabaseCollection(const std::string& currentTable);
+  JSData toJSONAllCollections();
   JSData toJSONDatabaseFetch(const std::string& findQueryAndProjector);
   static bool getLabels(
     const JSData& fieldEntries,

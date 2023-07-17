@@ -13,6 +13,7 @@ std::string WebAPI::DatabaseParameters::findQuery = "findQuery";
 std::string WebAPI::DatabaseParameters::projector = "projector";
 std::string WebAPI::DatabaseParameters::operation = "databaseOperation";
 std::string WebAPI::DatabaseParameters::fetch = "databaseFetch";
+std::string WebAPI::DatabaseParameters::allTables = "allTables";
 std::string WebAPI::Result::error = "error";
 std::string WebAPI::Result::status = "status";
 std::string WebAPI::Result::running = "running";

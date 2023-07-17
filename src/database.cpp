@@ -583,31 +583,25 @@ bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
   return false;
 }
 
-void Database::createHashIndex(
-  const std::string& collectionName, const std::string& key
-) {
-  STACK_TRACE("Database::createHashIndex");
-  switch (global.databaseType) {
-  case DatabaseType::noDatabaseEveryoneIsAdmin:
-    return;
-  case DatabaseType::fallback:
-    this->fallbackDatabase.createHashIndex(collectionName, key);
-    return;
-  case DatabaseType::internal:
-    this->localDatabase.createHashIndex(collectionName, key);
-    return;
-  }
-}
-
-bool Database::initializeWorker() {
-  STACK_TRACE("Database::initializeWorker");
+bool Database::initializeClient() {
+  STACK_TRACE("Database::initializeClient");
   if (this->flagInitializedWorker) {
     return true;
   }
+  this->flagInitializedWorker = true;
   switch (global.databaseType) {
-  default:
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    return true;
+  case DatabaseType::fallback:
+    return this->fallbackDatabase.initializeClient();
     break;
+  case DatabaseType::internal:
+    return true;
   }
+  return true;
+}
+
+bool DatabaseFallback::initializeClient() {
   this->createHashIndex(
     DatabaseStrings::tableUsers, DatabaseStrings::labelUsername
   );
@@ -633,7 +627,6 @@ bool Database::initializeWorker() {
   this->createHashIndex(
     DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername
   );
-  this->flagInitializedWorker = true;
   return true;
 }
 
@@ -742,7 +735,7 @@ bool Database::initializeServer(int maximumConnections) {
     << "**SLOW** "
     << "fall-back JSON storage."
     << Logger::endL;
-    this->fallbackDatabase.initialize();
+    this->fallbackDatabase.initializeServer();
     return true;
   case DatabaseType::internal:
     DatabaseStrings::databaseName = "local";
@@ -756,7 +749,7 @@ bool Database::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::fetchCollectionNames");
-  if (!Database::get().initializeWorker()) {
+  if (!Database::get().initializeClient()) {
     return false;
   }
   switch (global.databaseType) {
@@ -918,30 +911,38 @@ void Database::correctDataFromLabels(
   (*toBeModified) = StringRoutines::shortenInsertDots(value, 12);
 }
 
+JSData Database::toJSONAllCollections() {
+  STACK_TRACE("Database::toJSONAllCollections");
+  JSData result;
+  std::stringstream out;
+  result["currentTable"] = "";
+  if (global.userDebugFlagOn() != 0) {
+    result[WebAPI::Result::comments] =
+    "Requested table empty, returning list of tables. ";
+  }
+  List<std::string> collectionNamesList;
+  if (!Database::fetchCollectionNames(collectionNamesList, &out)) {
+    result["error"] = out.str();
+    return result;
+  }
+  JSData collectionNames;
+  collectionNames.elementType = JSData::Token::tokenArray;
+  collectionNames.listObjects.setSize(collectionNamesList.size);
+  for (int i = 0; i < collectionNamesList.size; i ++) {
+    collectionNames[i] = collectionNamesList[i];
+  }
+  result["collections"] = collectionNames;
+  return result;
+}
+
 JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   STACK_TRACE("Database::toJSONDatabaseCollection");
+  if (currentTable == "") {
+    return this->toJSONAllCollections();
+  }
   JSData result;
   std::stringstream out;
   result["currentTable"] = currentTable;
-  if (currentTable == "") {
-    if (global.userDebugFlagOn() != 0) {
-      result[WebAPI::Result::comments] =
-      "Requested table empty, returning list of tables. ";
-    }
-    List<std::string> collectionNamesList;
-    if (Database::fetchCollectionNames(collectionNamesList, &out)) {
-      JSData collectionNames;
-      collectionNames.elementType = JSData::Token::tokenArray;
-      collectionNames.listObjects.setSize(collectionNamesList.size);
-      for (int i = 0; i < collectionNamesList.size; i ++) {
-        collectionNames[i] = collectionNamesList[i];
-      }
-      result["collections"] = collectionNames;
-    } else {
-      result["error"] = out.str();
-    }
-    return result;
-  }
   QueryExact findQuery;
   QueryResultOptions projector;
   projector = Database::getStandardProjectors(currentTable);

@@ -343,7 +343,7 @@ DatabaseFallback::DatabaseFallback() {
   this->initialized = false;
 }
 
-void DatabaseFallback::initialize() {
+void DatabaseFallback::initializeServer() {
   if (this->initialized) {
     return;
   }

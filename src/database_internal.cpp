@@ -6,16 +6,6 @@ std::string DatabaseInternal::folder() {
   return "database_internal/" + DatabaseStrings::databaseName + "/";
 }
 
-void DatabaseInternal::createHashIndex(
-  const std::string& collectionName, const std::string& key
-) {
-  (void) collectionName;
-  (void) key;
-  global.fatal
-  << "DatabaseInternal::createHashIndex: not implemented yet. "
-  << global.fatal;
-}
-
 DatabaseInternal::DatabaseInternal() {
   this->processId = - 1;
   this->maximumMessageSize = 65536;
@@ -25,12 +15,26 @@ DatabaseInternal::DatabaseInternal() {
 bool DatabaseInternalClient::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
-  (void) output;
-  (void) commentsOnFailure;
-  global.fatal
-  << "DatabaseInternal::fetchCollectionNames: not implemented yet. "
-  << global.fatal;
-  return false;
+  DatabaseInternalResult result;
+  DatabaseInternalRequest request;
+  request.requestType = DatabaseInternalRequest::Type::fetchCollectionNames;
+  if (
+    !this->owner->sendAndReceiveFromClientToServer(
+      request, result, commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to send payload to database. ";
+    }
+    return false;
+  }
+  if (result.success) {
+    output.clear();
+    for (const JSData& content : result.content.listObjects) {
+      output.addOnTop(content.stringValue);
+    }
+  }
+  return result.success;
 }
 
 DatabaseInternalClient::DatabaseInternalClient() {
@@ -252,7 +256,6 @@ bool DatabaseInternal::receiveInClientFromServer(
   Crypto::convertListCharsToString(
     connection.serverToClient.buffer, stringBuffer
   );
-  global.comments << "DEBUG: received: " << stringBuffer << ". ";
   return output.fromJSON(stringBuffer, commentsOnFailure);
 }
 
@@ -325,7 +328,11 @@ bool DatabaseInternal::executeAndSend() {
     this->server.findOneFromSome(
       request.queryOneOfExactly, result.content, &commentsOnFailure
     );
-    global << "DEBUG: found! : " << result.content << Logger::endL;
+    break;
+  case DatabaseInternalRequest::Type::fetchCollectionNames:
+    global << "DEBUG: do fetching!" << Logger::endL;
+    result.success =
+    this->server.fetchCollectionNames(result.content, &commentsOnFailure);
     break;
   default:
     break;
@@ -426,8 +433,11 @@ JSData DatabaseInternalResult::toJSON() {
   this->reader = JSData();
   this->reader[DatabaseStrings::resultSuccess] = this->success;
   this->reader[DatabaseStrings::resultComments] = this->comments;
-  if (this->content.elementType != JSData::Token::tokenUndefined && this->content.elementType != JSData::Token::tokenNull){
-  this->reader[DatabaseStrings::resultContent] = this->content;
+  if (
+    this->content.elementType != JSData::Token::tokenUndefined &&
+    this->content.elementType != JSData::Token::tokenNull
+  ) {
+    this->reader[DatabaseStrings::resultContent] = this->content;
   }
   return this->reader;
 }
@@ -497,8 +507,12 @@ std::string DatabaseInternalRequest::typeToString(
     return "fineOneFromSome";
   case DatabaseInternalRequest::Type::unknown:
     return "unknown";
+  case DatabaseInternalRequest::Type::fetchCollectionNames:
+    return "fetchCollectionNames";
   }
-  global.fatal << "This should be unreachable. " << global.fatal;
+  global.fatal
+  << "Unhandled case in DatabaseInternalRequest::typeToString. "
+  << global.fatal;
   return "";
 }
 
@@ -540,6 +554,15 @@ DatabaseInternalServer::DatabaseInternalServer() {
   this->owner = nullptr;
 }
 
+bool DatabaseInternalServer::fetchCollectionNames(
+  JSData& output, std::stringstream* commentsOnFailure
+) {
+  (void) commentsOnFailure;
+  global << Logger::purple << "DEBUG: collection names: " << this->collections.keys << Logger::endL ;
+   output = this->collections.keys;
+  return true;
+}
+
 bool DatabaseInternalServer::findOneWithOptions(
   const QueryExact& query,
   const QueryResultOptions& options,
@@ -571,8 +594,6 @@ bool DatabaseInternalServer::findOneFromSome(
     DatabaseInternalServer::loadObject(
       objectId, queryExact.collection, output, commentsOnFailure
     );
-    global << Logger::purple <<  "DEBUG: loaded object for query: " << query.toJSON().toString()
-           << " and the obje: " << output.toString() << Logger::endL;
     return result;
   }
   return false;

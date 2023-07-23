@@ -2,7 +2,7 @@
 #ifndef header_string_constants_ALREADY_INCLUDED
 #define header_string_constants_ALREADY_INCLUDED
 
-#include "macros.h"
+#include <sstream>
 
 class MainFlags {
 public:
@@ -341,6 +341,8 @@ public:
   static std::string requestType;
   static std::string requestContent;
   static std::string resultContent;
+  static std::string error;
+  static std::string maximumNumberOfItems;
 };
 
 #endif // header_string_constants_ALREADY_INCLUDED

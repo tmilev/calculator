@@ -6,7 +6,7 @@
 
 std::string UserCalculatorData::toStringFindQueries() const {
   QueryOneOfExactly queries;
-  this->findMeFromUserNameQuery(queries);
+  this->getFindMeQuery(queries);
   std::stringstream out;
   out << "userFind query: ";
   for (int i = 0; i < queries.queries.size; i ++) {
@@ -45,10 +45,18 @@ bool UserOfDatabase::loadUserInformation(
   if (output.username == "" && output.email == "") {
     return false;
   }
-  JSData userEntry;
+  List<JSData> allUsers;
   QueryOneOfExactly queries;
-  output.findMeFromUserNameQuery(queries);
-  if (!this->owner->findOneFromSome(queries, userEntry, nullptr)) {
+  output.getFindMeQuery(queries);
+  if (!this->owner->find(queries, nullptr, allUsers, nullptr)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Could not read users from the database. "
+      << "The database/website must be down. ";
+    }
+    return false;
+  }
+  if (allUsers.size == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Could not find username/email. ";
       if (global.flagDebugLogin) {
@@ -61,23 +69,16 @@ bool UserOfDatabase::loadUserInformation(
     }
     return false;
   }
-  return output.loadFromJSON(userEntry);
-}
-
-bool UserOfDatabase::userExists(
-  const std::string& inputUsername, std::stringstream& comments
-) {
-  STACK_TRACE("UserOfDatabase::userExists");
-  if (!global.flagLoggedIn) {
+  if (allUsers.size > 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Found more than one user with your username/email! "
+      << "This should not be possible. "
+      << "Please file a bug report at our bug tracker!";
+    }
     return false;
   }
-  QueryExact userQuery;
-  userQuery.collection = DatabaseStrings::tableUsers;
-  userQuery.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
-  userQuery.exactValue = inputUsername;
-  List<JSData> allUsers;
-  this->owner->findFromJSON(userQuery, allUsers, - 1, nullptr, &comments);
-  return allUsers.size > 0;
+  return output.loadFromJSON(allUsers[0]);
 }
 
 bool UserOfDatabase::userDefaultHasInstructorRights() {
@@ -252,11 +253,11 @@ bool UserCalculator::loadFromDatabase(
       this->deadlineSchema
     );
     JSData outDeadlinesQuery;
-    if (
-      Database::get().findOne(
-        findDeadlines, outDeadlinesQuery, commentsGeneral
-      )
-    ) {
+    bool found =
+    Database::get().findExactlyOne(
+      findDeadlines, nullptr, outDeadlinesQuery, commentsGeneral
+    );
+    if (found) {
       this->deadlines = outDeadlinesQuery[DatabaseStrings::labelDeadlines];
     }
   }
@@ -267,11 +268,11 @@ bool UserCalculator::loadFromDatabase(
       this->problemWeightSchema
     );
     JSData outProblemWeightsQuery;
-    if (
-      Database::get().findOne(
-        findProblemWeights, outProblemWeightsQuery, commentsGeneral
-      )
-    ) {
+    bool found =
+    Database::get().findExactlyOne(
+      findProblemWeights, nullptr, outProblemWeightsQuery, commentsGeneral
+    );
+    if (found) {
       this->problemWeights =
       outProblemWeightsQuery[DatabaseStrings::labelProblemWeight];
     }
@@ -716,12 +717,15 @@ bool UserCalculator::interpretDatabaseProblemDataJSON(
   return result;
 }
 
-bool UserCalculator::exists(std::stringstream* comments) {
+void UserCalculator::exists(
+  bool& outputExists, bool& databaseIsOK, std::stringstream* comments
+) {
   STACK_TRACE("UserCalculator::exists");
-  JSData notUsed;
-  QueryOneOfExactly queries;
-  this->findMeFromUserNameQuery(queries);
-  return Database::get().findOneFromSome(queries, notUsed, comments);
+  List<JSData> allUsers;
+  QueryOneOfExactly query;
+  this->getFindMeQuery(query);
+  databaseIsOK = Database::get().find(query, nullptr, allUsers, comments);
+  outputExists = allUsers.size == 1;
 }
 
 bool UserCalculator::computeAndStoreActivationToken(
@@ -805,15 +809,19 @@ bool UserCalculator::computeAndStoreActivationStats(
     DatabaseStrings::labelEmail,
     this->email
   );
-  JSData emailStat;
-  if (
-    !Database::get().findOne(findEmail, emailStat, commentsOnFailure)
-  ) {
+  List<JSData> allEmailStats;
+  bool success =
+  Database::get().find(findEmail, nullptr, allEmailStats, commentsOnFailure);
+  if (!success) {
+    return false;
+  }
+  if (allEmailStats.size == 0) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "No recorded previous attempts to activate this email. ";
     }
   }
+  JSData emailStat = allEmailStats[0];
   std::string lastEmailTime, emailCountForThisEmail;
   lastEmailTime =
   emailStat[DatabaseStrings::labelLastActivationEmailTime].stringValue;
@@ -934,8 +942,7 @@ bool UserCalculator::computeAndStoreActivationStats(
   return true;
 }
 
-void UserCalculatorData::findMeFromUserNameQuery(QueryOneOfExactly& output)
-const {
+void UserCalculatorData::getFindMeQuery(QueryOneOfExactly& output) const {
   output.queries.clear();
   if (this->username != "") {
     QueryExact findByUsername(
@@ -978,7 +985,7 @@ bool UserCalculator::storeProblemData(
     problem.storeJSON()
   );
   QueryOneOfExactly queries;
-  this->findMeFromUserNameQuery(queries);
+  this->getFindMeQuery(queries);
   return
   Database::get().updateOneFromSome(queries, update, commentsOnFailure);
 }
@@ -1050,17 +1057,18 @@ bool UserOfDatabase::addUsersFromEmails(
         currentUser.email
       )
     );
-    if (
-      !this->owner->findOneFromSome(findUser, currentUserData, &comments)
-    ) {
-      if (!currentUser.exists(&comments)) {
-        if (!currentUser.storeToDatabase(false, &comments)) {
-          comments << "Failed to create user: " << currentUser.username;
-          result = false;
-          continue;
-        } else {
-          outputNumberOfNewUsers ++;
-        }
+    List<JSData> allUsers;
+    if (!this->owner->find(findUser, nullptr, allUsers, &comments)) {
+      comments << "Database error! ";
+      return false;
+    }
+    if (allUsers.size == 0) {
+      if (!currentUser.storeToDatabase(false, &comments)) {
+        comments << "Failed to create user: " << currentUser.username;
+        result = false;
+        continue;
+      } else {
+        outputNumberOfNewUsers ++;
       }
       QuerySet setUser;
       setUser.addValue(currentUserData);
@@ -1205,7 +1213,16 @@ bool UserOfDatabase::loginViaGoogleTokenCreateNewAccountIfNeeded(
   }
   userWrapper.email = data.getValue("email").stringValue;
   userWrapper.username = "";
-  if (!userWrapper.exists(commentsOnFailure)) {
+  bool userExists = false;
+  bool databaseIsOK = false;
+  userWrapper.exists(userExists, databaseIsOK, commentsOnFailure);
+  if (!databaseIsOK) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Database failure. ";
+    }
+    return false;
+  }
+  if (userExists) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "User with email "
@@ -1342,7 +1359,14 @@ bool UserOfDatabase::firstLoginOfAdmin(
   if (userInDatabase.enteredPassword == "") {
     return false;
   }
-  if (userInDatabase.exists(nullptr)) {
+  bool userExists = false;
+  bool databaseIsOK = false;
+  userInDatabase.exists(userExists, databaseIsOK, nullptr);
+  if (!databaseIsOK) {
+    *commentsOnFailure << "Database seems to be down. ";
+    return false;
+  }
+  if (userExists) {
     return false;
   }
   // We have admin login.

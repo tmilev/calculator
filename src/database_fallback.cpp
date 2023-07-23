@@ -39,14 +39,16 @@ bool DatabaseFallback::deleteDatabase(std::stringstream* commentsOnFailure) {
   return true;
 }
 
-bool DatabaseFallback::findOneFromSome(
+bool DatabaseFallback::find(
   const QueryOneOfExactly& findOrQueries,
-  JSData& output,
+  const QueryResultOptions* options,
+  List<JSData>& output,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("FallbackDatabase::findOneFromSome");
+  STACK_TRACE("FallbackDatabase::find");
+  output.clear();
   for (const QueryExact& query : findOrQueries.queries) {
-    if (this->findOne(query, output, commentsOnFailure)) {
+    if (this->findOnce(query, options, output, commentsOnFailure)) {
       return true;
     }
   }
@@ -59,12 +61,14 @@ bool DatabaseFallback::updateOneFromSome(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("FallbackDatabase::updateOneFromSome");
-  JSData unusedOutput;
+  List<JSData> found;
   for (const QueryExact& query : findOrQueries.queries) {
-    if (!this->findOne(query, unusedOutput, commentsOnFailure)) {
-      continue;
+    if (!this->findOnce(query, nullptr, found, commentsOnFailure)) {
+      return false;
     }
-    return this->updateOne(query, updateQuery, commentsOnFailure);
+    if (found.size > 0) {
+      return this->updateOne(query, updateQuery, commentsOnFailure);
+    }
   }
   return false;
 }
@@ -135,28 +139,10 @@ bool DatabaseFallback::updateOneNolocks(
   return true;
 }
 
-bool DatabaseFallback::findOneWithOptions(
+bool DatabaseFallback::findOnce(
   const QueryExact& query,
-  const QueryResultOptions& options,
-  JSData& output,
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneralNonSensitive
-) {
-  (void) commentsGeneralNonSensitive;
-  if (options.toJSON().objects.size() > 0) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Fallback database does not support non-empty query options. "
-      << options.toJSON();
-    }
-    return false;
-  }
-  return findOne(query, output, commentsOnFailure);
-}
-
-bool DatabaseFallback::findOne(
-  const QueryExact& query,
-  JSData& output,
+  const QueryResultOptions* options,
+  List<JSData>& output,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("FallbackDatabase::findOne");
@@ -175,15 +161,15 @@ bool DatabaseFallback::findOne(
   if (index < 0) {
     return false;
   }
-  output = this->databaseContent[query.collection][index];
+  output.clear();
+  output.addOnTop(this->databaseContent[query.collection][index]);
   return true;
 }
 
-bool DatabaseFallback::findFromJSONWithOptions(
+bool DatabaseFallback::findManyFromJSONWithOptions(
   const QueryExact& findQuery,
   List<JSData>& output,
   const QueryResultOptions& options,
-  int maximumOutputItems,
   long long* totalItems,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive
@@ -207,7 +193,9 @@ bool DatabaseFallback::findFromJSONWithOptions(
   int i = 0;
   for (const JSData& record : records) {
     i ++;
-    if (i > maximumOutputItems && maximumOutputItems >= 0) {
+    if (
+      i > findQuery.maximumNumberOfItems && findQuery.maximumNumberOfItems >= 0
+    ) {
       return true;
     }
     output.addOnTop(record);

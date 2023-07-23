@@ -106,7 +106,7 @@ const urlFields = {
   database: {
     operation: "databaseOperation",
     fetch: "databaseFetch",
-    table: "table",
+    collection: "collection",
     findQueryAndProjector: "findQueryAndProjector",
     findQuery: "findQuery",
     allTables: "allTables",

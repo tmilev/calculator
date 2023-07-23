@@ -2,7 +2,7 @@
 #include "string_constants.h"
 
 QueryExact::QueryExact() {
-  this->selectAny = false;
+  this->maximumNumberOfItems = 1;
 }
 
 QueryExact::QueryExact(
@@ -13,7 +13,7 @@ QueryExact::QueryExact(
   this->collection = desiredCollection;
   this->nestedLabels.addOnTop(label);
   this->exactValue = desiredValue;
-  this->selectAny = false;
+  this->maximumNumberOfItems = 1;
 }
 
 QueryExact::QueryExact(
@@ -25,7 +25,7 @@ QueryExact::QueryExact(
   this->exactValue = desiredValue;
   this->nestedLabels.setSize(0);
   this->nestedLabels.addListOnTop(desiredLabels);
-  this->selectAny = false;
+  this->maximumNumberOfItems = 1;
 }
 
 bool QueryExact::isEmpty() const {
@@ -65,7 +65,7 @@ bool QueryExact::fromJSON(
   (void) commentsOnFailure;
   this->nestedLabels.clear();
   this->exactValue = JSData();
-  this->selectAny = false;
+  this->maximumNumberOfItems = 1;
   JSData findQuery = source;
   this->collection = findQuery[DatabaseStrings::labelCollection].stringValue;
   if (this->collection == "") {
@@ -73,6 +73,11 @@ bool QueryExact::fromJSON(
       *commentsOnFailure << "Empty collection not allowed.";
     }
     return false;
+  }
+  if (findQuery.hasKey(DatabaseStrings::maximumNumberOfItems)) {
+    findQuery[DatabaseStrings::maximumNumberOfItems].isIntegerFittingInInt(
+      &this->maximumNumberOfItems
+    );
   }
   JSData nestedKeySource = findQuery[DatabaseStrings::labelKey];
   for (const JSData& key : nestedKeySource.listObjects) {
@@ -131,6 +136,7 @@ void QueryExact::setLabelValue(
 bool QueryExact::fromString(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("QueryExact::fromString");
   JSData querySource;
   if (!querySource.parse(input, false, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -399,34 +405,41 @@ bool Database::deleteOneEntryUnsetUnsecure(
 #endif
 }
 
-bool Database::findOneWithOptions(
-  const QueryExact& query,
-  const QueryResultOptions& options,
+bool Database::findExactlyOne(
+  const QueryOneOfExactly& query,
+  const QueryResultOptions* options,
   JSData& output,
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneralNonSensitive
+  std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("Database::findOneWithOptions");
-  (void) commentsGeneralNonSensitive;
+  List<JSData> all;
+  if (!this->find(query, options, all, commentsOnFailure)) {
+    return false;
+  }
+  if (all.size != 1) {
+    return false;
+  }
+  output = all[0];
+  return true;
+}
+
+bool Database::find(
+  const QueryOneOfExactly& query,
+  const QueryResultOptions* options,
+  List<JSData>& output,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::find");
   switch (global.databaseType) {
   case DatabaseType::internal:
     return
-    Database::get().localDatabase.client.findOneWithOptions(
-      query,
-      options,
-      output,
-      commentsOnFailure,
-      commentsGeneralNonSensitive
+    Database::get().localDatabase.client.find(
+      query, options, output, commentsOnFailure
     );
     return false;
   case DatabaseType::fallback:
     return
-    Database::fallbackDatabase.findOneWithOptions(
-      query,
-      options,
-      output,
-      commentsOnFailure,
-      commentsGeneralNonSensitive
+    Database::fallbackDatabase.find(
+      query, options, output, commentsOnFailure
     );
   case DatabaseType::noDatabaseEveryoneIsAdmin:
     if (commentsOnFailure != nullptr) {
@@ -491,18 +504,6 @@ bool Database::checkInitialization() {
   return true;
 }
 
-bool Database::findOne(
-  const QueryExact& query,
-  JSData& output,
-  std::stringstream* commentsOnFailure
-) {
-  QueryResultOptions emptyOptions;
-  return
-  this->findOneWithOptions(
-    query, emptyOptions, output, commentsOnFailure, nullptr
-  );
-}
-
 bool Database::updateOne(
   const QueryExact& findQuery,
   const QuerySet& dataToMerge,
@@ -534,34 +535,6 @@ bool Database::updateOne(
       findQuery, dataToMerge, createIfNotFound, commentsOnFailure
     );
   }
-  return false;
-}
-
-bool Database::findOneFromSome(
-  const QueryOneOfExactly& findOrQueries,
-  JSData& output,
-  std::stringstream* commentsOnFailure
-) {
-  switch (global.databaseType) {
-  case DatabaseType::noDatabaseEveryoneIsAdmin:
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Database::findOneFromSome failed. "
-      << DatabaseStrings::errorDatabaseDisabled;
-    }
-    return false;
-  case DatabaseType::fallback:
-    return
-    this->fallbackDatabase.findOneFromSome(
-      findOrQueries, output, commentsOnFailure
-    );
-  case DatabaseType::internal:
-    return
-    this->localDatabase.client.findOneFromSome(
-      findOrQueries, output, commentsOnFailure
-    );
-  }
-  global.fatal << "This should be unreachable. " << global.fatal;
   return false;
 }
 
@@ -628,91 +601,6 @@ bool DatabaseFallback::initializeClient() {
     DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername
   );
   return true;
-}
-
-bool Database::findFromJSONWithProjection(
-  const QueryExact& findQuery,
-  List<JSData>& output,
-  List<std::string>& fieldsToProjectTo,
-  int maxOutputItems,
-  long long* totalItems,
-  std::stringstream* commentsOnFailure
-) {
-  QueryResultOptions options;
-  options.makeProjection(fieldsToProjectTo);
-  return
-  Database::findFromJSONWithOptions(
-    findQuery,
-    output,
-    options,
-    maxOutputItems,
-    totalItems,
-    commentsOnFailure
-  );
-}
-
-bool Database::findFromJSON(
-  const QueryExact& findQuery,
-  List<JSData>& output,
-  int maxOutputItems,
-  long long* totalItems,
-  std::stringstream* commentsOnFailure
-) {
-  QueryResultOptions options;
-  return
-  Database::findFromJSONWithOptions(
-    findQuery,
-    output,
-    options,
-    maxOutputItems,
-    totalItems,
-    commentsOnFailure
-  );
-}
-
-bool Database::findFromJSONWithOptions(
-  const QueryExact& findQuery,
-  List<JSData>& output,
-  const QueryResultOptions& options,
-  int maximumOutputItems,
-  long long* totalItems,
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneralNonSensitive
-) {
-  STACK_TRACE("Database::findFromJSONWithOptions");
-  switch (global.databaseType) {
-  case DatabaseType::noDatabaseEveryoneIsAdmin:
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Database::findFromJSONWithOptions fail. "
-      << DatabaseStrings::errorDatabaseDisabled;
-    }
-    return false;
-  case DatabaseType::fallback:
-    return
-    Database::get().fallbackDatabase.findFromJSONWithOptions(
-      findQuery,
-      output,
-      options,
-      maximumOutputItems,
-      totalItems,
-      commentsOnFailure,
-      commentsGeneralNonSensitive
-    );
-  case DatabaseType::internal:
-    return
-    Database::get().localDatabase.client.findFromJSONWithOptions(
-      findQuery,
-      output,
-      options,
-      maximumOutputItems,
-      totalItems,
-      commentsOnFailure,
-      commentsGeneralNonSensitive
-    );
-  }
-  global.fatal << "This should be unreachable. " << global.fatal;
-  return false;
 }
 
 bool Database::initializeServer(int maximumConnections) {
@@ -783,13 +671,15 @@ bool Database::fetchTable(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::fetchTable");
-  QueryExact findQuery;
+  if (totalItems != nullptr) {
+    *totalItems = - 1;
+  }
+  QueryOneOfExactly query;
+  QueryExact oneQuery;
   List<JSData> rowsJSON;
-  findQuery.selectAny = true;
-  findQuery.collection = tableName;
-  Database::get().findFromJSON(
-    findQuery, rowsJSON, 200, totalItems, commentsOnFailure
-  );
+  oneQuery.maximumNumberOfItems = 200;
+  oneQuery.collection = tableName;
+  Database::get().find(query, nullptr, rowsJSON, commentsOnFailure);
   HashedList<std::string> labels;
   for (int i = 0; i < rowsJSON.size; i ++) {
     for (int j = 0; j < rowsJSON[i].objects.size(); j ++) {
@@ -820,9 +710,10 @@ JSData Database::toJSONDatabaseFetch(
   QueryResultOptions projector;
   std::stringstream commentsOnFailure;
   if (!queryExact.fromString(findQueryAndProjector, &commentsOnFailure)) {
-    result["error"] = commentsOnFailure.str();
+    result[DatabaseStrings::error] = commentsOnFailure.str();
     return result;
   }
+  global.comments << "DEBUG: got to here!";
   return Database::get().toJSONFetchItem(queryExact, projector);
 }
 
@@ -841,22 +732,10 @@ JSData Database::toJSONFetchItem(
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
-  std::stringstream* commentsPointer = nullptr;
-  bool flagDebuggingAdmin = global.userDefaultIsDebuggingAdmin();
-  if (flagDebuggingAdmin) {
-    commentsPointer = &comments;
-  }
-  if (
-    !Database::findFromJSONWithOptions(
-      findQuery,
-      rowsJSON,
-      projector,
-      200,
-      &totalItems,
-      &comments,
-      commentsPointer
-    )
-  ) {
+  global.comments << "DEBUG: about to find from: " << findQuery.toString();
+  QueryOneOfExactly query;
+  query.queries.addOnTop(findQuery);
+  if (!Database::find(query, &projector, rowsJSON, &comments)) {
     result["error"] = comments.str();
     return result;
   }
@@ -864,6 +743,7 @@ JSData Database::toJSONFetchItem(
   JSData rows;
   rows.elementType = JSData::Token::tokenArray;
   rows.listObjects = rowsJSON;
+  bool flagDebuggingAdmin = global.userDefaultIsDebuggingAdmin();
   if (flagDebuggingAdmin) {
     result["findQuery"] = findQuery.toJSON();
   }
@@ -921,6 +801,7 @@ JSData Database::toJSONAllCollections() {
     "Requested table empty, returning list of tables. ";
   }
   List<std::string> collectionNamesList;
+  global.comments << "DEBUG: here i am";
   if (!Database::fetchCollectionNames(collectionNamesList, &out)) {
     result["error"] = out.str();
     return result;
@@ -940,34 +821,27 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   if (currentTable == "") {
     return this->toJSONAllCollections();
   }
+  global.comments << "DEBUG: got to here so far collection";
   JSData result;
-  std::stringstream out;
+  std::stringstream comments;
   result["currentTable"] = currentTable;
   QueryExact findQuery;
   QueryResultOptions projector;
   projector = Database::getStandardProjectors(currentTable);
   findQuery.collection = currentTable;
-  findQuery.selectAny = true;
+  findQuery.maximumNumberOfItems = 200;
+  QueryOneOfExactly query(findQuery);
   List<JSData> rowsJSON;
   long long totalItems = 0;
-  std::stringstream comments;
   std::stringstream* commentsPointer = nullptr;
   bool flagDebuggingAdmin = global.userDefaultIsDebuggingAdmin();
   if (flagDebuggingAdmin) {
     commentsPointer = &comments;
   }
-  if (
-    !Database::findFromJSONWithOptions(
-      findQuery,
-      rowsJSON,
-      projector,
-      200,
-      &totalItems,
-      &out,
-      commentsPointer
-    )
-  ) {
-    result["error"] = out.str();
+  global.comments << "DEBUG: About to find with opts!";
+  if (!Database::find(query, &projector, rowsJSON, &comments)) {
+    global.comments << "DEBUG: About to find return false!";
+    result["error"] = comments.str();
     return result;
   }
   Database::correctData(rowsJSON);
@@ -1310,6 +1184,12 @@ bool QueryFindAndUpdate::fromJSON(
     this->createIfNotFound = true;
   }
   return this->update.fromJSON(input["update"], commentsOnFailure);
+}
+
+QueryOneOfExactly::QueryOneOfExactly() {}
+
+QueryOneOfExactly::QueryOneOfExactly(const QueryExact& query) {
+  this->queries.addOnTop(query);
 }
 
 JSData QueryOneOfExactly::toJSON() const {

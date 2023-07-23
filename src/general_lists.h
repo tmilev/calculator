@@ -129,6 +129,8 @@ class ListIterator;
 template <class Object>
 class List;
 template <class Object>
+class ListReferences;
+template <class Object>
 class ListZeroAfterUse;
 template <class Object>
 class Matrix;
@@ -910,6 +912,7 @@ public:
       this->objects[i] = right.objects[i];
     }
   }
+  void operator=(const ListReferences<Object>& right);
   template <class otherObjectType>
   void operator=(const List<otherObjectType>& right) {
     this->setSize(right.size);

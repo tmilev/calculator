@@ -561,7 +561,8 @@ JSData WebWorker::getDatabaseJSON() {
     return result;
   }
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
-    result["error"] = "Database not available (cannot get database info). ";
+    result[WebAPI::Result::error] =
+    "Database not available (cannot get database info). ";
     return result;
   }
   std::string operation =
@@ -574,6 +575,7 @@ JSData WebWorker::getDatabaseJSON() {
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::DatabaseParameters::projector), false
   );
+  global.comments << "DEBUG: Hi world! findquery: " << findQuery;
   if (operation == WebAPI::DatabaseParameters::fetch) {
     result = Database::get().toJSONDatabaseFetch(findQuery);
   } else if (operation == WebAPI::DatabaseParameters::allTables) {
@@ -1959,8 +1961,9 @@ std::string WebWorker::getChangePasswordPagePartOne(
     DatabaseStrings::labelEmail,
     claimedEmail
   );
-  JSData emailValue;
-  if (!Database::get().findOne(findEmail, emailValue, &out)) {
+  List<JSData> allEmails;
+  bool success = Database::get().find(findEmail, nullptr, allEmails, &out);
+  if (!success) {
     out
     << "\n<b style ='color:red'>"
     << "Failed to fetch email activation token for email: "
@@ -1968,6 +1971,15 @@ std::string WebWorker::getChangePasswordPagePartOne(
     << " </b>";
     return out.str();
   }
+  if (allEmails.size != 1) {
+    out
+    << "\n<b style ='color:red'>"
+    << "No activation token for email: "
+    << claimedEmail
+    << "on record </b>";
+    return out.str();
+  }
+  JSData& emailValue = allEmails[0];
   usernameAssociatedWithToken =
   emailValue[DatabaseStrings::labelUsername].stringValue;
   actualEmailActivationToken =

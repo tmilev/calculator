@@ -372,7 +372,9 @@ public:
   bool shouldCommentOnMissingUser();
   bool resetAuthenticationToken(std::stringstream* commentsOnFailure);
   bool setPassword(std::stringstream* commentsOnFailure);
-  bool exists(std::stringstream* comments);
+  void exists(
+    bool& outputExists, bool& databaseIsOK, std::stringstream* comments
+  );
   bool storeToDatabase(
     bool doSetPassword, std::stringstream* commentsOnFailure
   );

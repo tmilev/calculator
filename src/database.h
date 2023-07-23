@@ -126,7 +126,8 @@ public:
   List<std::string> nestedLabels;
   // Exact value we are looking for.
   JSData exactValue;
-  bool selectAny;
+  // Maximum number of elements to select.
+  int maximumNumberOfItems;
   QueryExact();
   QueryExact(
     const std::string& desiredCollection,
@@ -169,6 +170,8 @@ public:
   List<QueryExact> queries;
   bool fromJSON(const JSData& input, std::stringstream* commentsOnFailure);
   JSData toJSON() const;
+  QueryOneOfExactly();
+  QueryOneOfExactly(const QueryExact& query);
 };
 
 class DatabaseFallback {
@@ -226,17 +229,17 @@ public:
     const QuerySet& updateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool findOne(
+  bool findOnce(
     const QueryExact& query,
-    JSData& output,
+    const QueryResultOptions* options,
+    List<JSData>& output,
     std::stringstream* commentsOnFailure
   );
-  bool findOneWithOptions(
-    const QueryExact& query,
-    const QueryResultOptions& options,
-    JSData& output,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneralNonSensitive = nullptr
+  bool find(
+    const QueryOneOfExactly& query,
+    const QueryResultOptions* options,
+    List<JSData>& output,
+    std::stringstream* commentsOnFailure
   );
   // Return indicates query success / failure.
   // When the element isn't found but otherwise there were
@@ -269,16 +272,15 @@ public:
   );
   void initializeServer();
   bool initializeClient();
-  bool findOneFromSome(
+  bool findFromSome(
     const QueryOneOfExactly& findOrQueries,
-    JSData& output,
+    List<JSData>& output,
     std::stringstream* commentsOnFailure
   );
-  bool findFromJSONWithOptions(
+  bool findManyFromJSONWithOptions(
     const QueryExact& findQuery,
     List<JSData>& output,
     const QueryResultOptions& options,
-    int maximumOutputItems,
     long long* totalItems,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneralNonSensitive
@@ -309,14 +311,14 @@ public:
 class DatabaseInternalResult {
   JSData reader;
 public:
-  JSData content;
+  List<JSData> content;
   bool success;
   std::string comments;
   bool fromJSON(
     const std::string& input, std::stringstream* commentsOnFailure
   );
   JSData toJSON();
-  void writeContent(JSData& output);
+  void writeContent(List<JSData>& output);
   bool isSuccess(std::stringstream* commentsOnFalse) const;
   DatabaseInternalResult();
 };
@@ -326,7 +328,7 @@ class DatabaseInternalRequest {
   bool fromJSData(std::stringstream* commentsOnFailure);
 public:
   enum Type {
-    unknown, findAndUpdate, findOneFromSome, fetchCollectionNames
+    unknown, findAndUpdate, find, fetchCollectionNames
   };
   Type requestType;
   QueryFindAndUpdate queryFindAndUpdate;
@@ -338,6 +340,7 @@ public:
   JSData toJSON() const;
   std::string toStringForDebugging() const;
   static std::string typeToString(DatabaseInternalRequest::Type input);
+  static Type stringToType(const std::string& input);
   DatabaseInternalRequest();
 };
 
@@ -347,16 +350,13 @@ class DatabaseInternalIndex {
 public:
   std::string collectionName;
   List<std::string> nestedKeys;
-  MapList<std::string, std::string> keyValueToObjectId;
+  MapList<std::string, HashedList<std::string> > keyValueToObjectIds;
   MapList<std::string, std::string> objectIdToKeyValue;
   JSData toJSON() const;
-  bool fromJSON(
-    const JSData& input,
-    const std::string& collectionName,
-    std::stringstream* commentsOnFailure
-  );
+  bool fromJSON(const JSData& input, const std::string& collectionName);
   std::string toString() const;
   DatabaseInternalIndex();
+  void computeKeyValueToObjectIds();
 };
 
 // A table/collection in the database.
@@ -366,6 +366,9 @@ public:
   MapReferences<std::string, DatabaseInternalIndex> indices;
   bool indicesLoaded;
   std::string name;
+  // A map from the object ids to the records that are loaded in RAM.
+  // This is empty at the start and is loaded on demand.
+  MapList<std::string, JSData> loadedRecords;
   DatabaseInternal* owner;
   JSData toJSONSchema() const;
   bool loadIndicesFromHardDrive(bool clearPreExistingIndices);
@@ -396,24 +399,19 @@ public:
   );
   void storeCollectionList();
   std::string collectionsSchemaFileName() const;
-  bool findOneWithOptions(
-    const QueryExact& query,
-    const QueryResultOptions& options,
-    JSData& output,
-    std::stringstream* commentsOnFailure
-  );
-  bool findOneFromSome(
+  bool find(
     const QueryOneOfExactly& query,
-    JSData& output,
+    const QueryResultOptions* options,
+    List<JSData>& output,
     std::stringstream* commentsOnFailure
   );
-  bool findObjectId(
+  bool findObjectIds(
     const QueryExact& query,
-    std::string& output,
+    List<std::string>& output,
     std::stringstream* commentsOnFailure
   );
   bool fetchCollectionNames(
-    JSData& output, std::stringstream* commentsOnFailure
+    List<JSData>& output, std::stringstream* commentsOnFailure
   );
   bool createObject(
     const JSData& initialValue,
@@ -450,26 +448,11 @@ class DatabaseInternalClient {
 public:
   DatabaseInternal* owner;
   DatabaseInternalClient();
-  bool findOneWithOptions(
-    const QueryExact& query,
-    const QueryResultOptions& options,
-    JSData& output,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneralNonSensitive = nullptr
-  );
-  bool findOneFromSome(
-    const QueryOneOfExactly& findOrQueries,
-    JSData& output,
-    std::stringstream* commentsOnFailure
-  );
-  bool findFromJSONWithOptions(
-    const QueryExact& findQuery,
+  bool find(
+    const QueryOneOfExactly& query,
+    const QueryResultOptions* options,
     List<JSData>& output,
-    const QueryResultOptions& options,
-    int maximumOutputItems,
-    long long* totalItems,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneralNonSensitive
+    std::stringstream* commentsOnFailure
   );
   bool updateOne(
     const QueryExact& findQuery,
@@ -487,10 +470,9 @@ public:
   );
 };
 
-// A self contained
-// simple database implementation.
-// Forks out into multiple: processes - future client(s) and server.
-// Clients and server read/write to/from number of pre-allocated file
+// A self contained simple database.
+// Forks out into multiple processes - future client(s) and server.
+// Clients and server communicate through pre-allocated file
 // descriptors (currently, linux pipes).
 class DatabaseInternal {
   // Map from listening sockets to ports.
@@ -576,9 +558,6 @@ public:
     std::string& outputAuthenticationToken,
     std::stringstream& comments
   );
-  bool userExists(
-    const std::string& inputUsername, std::stringstream& comments
-  );
   bool userDefaultHasInstructorRights();
   // TODO(tmilev): refactor down to database-only operations.
   static bool sendActivationEmail(
@@ -628,46 +607,23 @@ public:
   // TODO(tmilev): Rename this to fallbackDatabase.
   DatabaseFallback fallbackDatabase;
   DatabaseInternal localDatabase;
-  bool findFromJSON(
-    const QueryExact& findQuery,
+  // Finds the first object(s) up to a limit
+  // that satisfy the query.
+  // Returns false if there's a database error.
+  bool find(
+    const QueryOneOfExactly& query,
+    const QueryResultOptions* options,
     List<JSData>& output,
-    int maxOutputItems = - 1,
-    long long* totalItems = nullptr,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  static bool findFromJSONWithProjection(
-    const QueryExact& findQuery,
-    List<JSData>& output,
-    List<std::string>& fieldsToProjectTo,
-    int maxOutputItems = - 1,
-    long long* totalItems = nullptr,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  static bool findFromJSONWithOptions(
-    const QueryExact& findQuery,
-    List<JSData>& output,
-    const QueryResultOptions& options,
-    int maximumOutputItems = - 1,
-    long long* totalItems = nullptr,
-    std::stringstream* commentsOnFailure = nullptr,
-    std::stringstream* commentsGeneralNonSensitive = nullptr
-  );
-  bool findOneWithOptions(
-    const QueryExact& query,
-    const QueryResultOptions& options,
-    JSData& output,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneralNonSensitive = nullptr
-  );
-  bool findOne(
-    const QueryExact& query,
-    JSData& output,
     std::stringstream* commentsOnFailure
   );
-  bool findOneFromSome(
-    const QueryOneOfExactly& alternatives,
+  // Finds exactly one item that matches the query.
+  // Will return false both on a database error and when
+  // the number of items found is not exactly 1.
+  bool findExactlyOne(
+    const QueryOneOfExactly& query,
+    const QueryResultOptions* options,
     JSData& output,
-    std::stringstream* commentsOnFailure = nullptr
+    std::stringstream* commentsOnFailure
   );
   bool updateOne(
     const QueryExact& findQuery,

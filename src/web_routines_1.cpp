@@ -943,7 +943,15 @@ bool WebAPIResponse::processForgotLogin() {
     result[WebAPI::Result::comments] = out.str();
     return global.response.writeResponse(result, false);
   }
-  if (!user.exists(&out)) {
+  bool userExists = false;
+  bool databaseIsOK = false;
+  user.exists(userExists, databaseIsOK, &out);
+  if (!databaseIsOK) {
+    out << "Database is down. ";
+    result[WebAPI::Result::error] = out.str();
+    return global.response.writeResponse(result, false);
+  }
+  if (!userExists) {
     out
     << "We failed to find your email: "
     << user.email
@@ -1015,7 +1023,15 @@ JSData WebWorker::getSignUpRequestResult() {
     result[WebAPI::Result::comments] = generalCommentsStream.str();
     return result;
   }
-  if (user.exists(nullptr)) {
+  bool userExists = false;
+  bool databaseIsOK = false;
+  user.exists(userExists, databaseIsOK, nullptr);
+  if (!databaseIsOK) {
+    errorStream << "Database is down. ";
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
+    return result;
+  } else if (!userExists) {
     errorStream
     << "Either the username ("
     << user.username

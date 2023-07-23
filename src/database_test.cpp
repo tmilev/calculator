@@ -92,7 +92,12 @@ void QuerySet::Test::updateNoFail(QueryExact& find, QuerySet updater) {
 
 void QuerySet::Test::findNoFail(QueryExact& find, JSData& result) {
   std::stringstream comments;
-  if (!Database::get().findOne(find, result, &comments)) {
+  List<JSData> output;
+  QueryOneOfExactly wrapperQuery;
+  wrapperQuery.queries.addOnTop(find);
+  bool success =
+  Database::get().find(wrapperQuery, nullptr, output, &comments);
+  if (!success || output.size != 1) {
     global.fatal
     << "Failed to find updated:\n"
     << find.toString()
@@ -100,6 +105,7 @@ void QuerySet::Test::findNoFail(QueryExact& find, JSData& result) {
     << comments.str()
     << global.fatal;
   }
+  result = output[0];
 }
 
 void QuerySet::Test::matchKeyValue(

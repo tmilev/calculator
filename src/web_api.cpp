@@ -321,12 +321,19 @@ bool WebAPIResponse::processChangePassword(
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("email"), false
   );
+  List<JSData> list;
   if (newEmail != "") {
     JSData notUsed;
     QueryExact queryEmailTaken(
       DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail
     );
-    if (Database::get().findOne(queryEmailTaken, notUsed, nullptr)) {
+    bool success =
+    Database::get().find(queryEmailTaken, nullptr, list, nullptr);
+    if (!success) {
+      result[WebAPI::Result::error] = "Database operation failed. ";
+      return global.response.writeResponse(result);
+    }
+    if (list.size > 0) {
       result[WebAPI::Result::error] =
       "It appears the email is already taken. ";
       return global.response.writeResponse(result);

@@ -273,20 +273,21 @@ bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
   userQuery.collection = DatabaseStrings::tableUsers;
   userQuery.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
   userQuery.exactValue = WebAPI::userDefaultAdmin;
-  JSData recordedProblem;
+  List<JSData> recordedProblems;
   std::stringstream comments;
-  if (
-    !Database::get().findOne(userQuery, recordedProblem, &comments)
-  ) {
+  bool success =
+  Database::get().find(userQuery, nullptr, recordedProblems, &comments);
+  if (!success) {
     global.fatal << "Failed to find admin user. " << global.fatal;
   }
   std::string randomSeed =
-  recordedProblem[DatabaseStrings::labelProblemDataJSON][sample]["randomSeed"].
-  stringValue;
+  recordedProblems[0][DatabaseStrings::labelProblemDataJSON][sample][
+    "randomSeed"
+  ].stringValue;
   if (randomSeed == "") {
     global.fatal
     << "Expected non-empty random seed in problem record:\n"
-    << recordedProblem.toString()
+    << recordedProblems.toString()
     << global.fatal;
   }
   return true;

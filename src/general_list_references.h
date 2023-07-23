@@ -368,4 +368,12 @@ public:
   }
 };
 
+template <class Object>
+void List<Object>::operator=(const ListReferences<Object>& other) {
+  this->clear();
+  for (const Object& object : other) {
+    this->addOnTop(object);
+  }
+}
+
 #endif // header_general_list_references_ALREADY_INCLUDED

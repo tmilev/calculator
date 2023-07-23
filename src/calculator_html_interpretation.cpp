@@ -2454,26 +2454,26 @@ JSData WebAPIResponse::getAccountsPageJSON(
   QueryExact findStudents;
   List<JSData> students;
   List<JSData> admins;
-  long long totalStudents;
   findStudents.collection = DatabaseStrings::tableUsers;
   findStudents.nestedLabels.addOnTop(DatabaseStrings::labelInstructor);
   findStudents.exactValue = global.userDefault.username;
-  List<std::string> columnsToRetain;
-  columnsToRetain.addOnTop(DatabaseStrings::labelUsername);
-  columnsToRetain.addOnTop(DatabaseStrings::labelEmail);
-  columnsToRetain.addOnTop(DatabaseStrings::labelActivationToken);
-  columnsToRetain.addOnTop(DatabaseStrings::labelCurrentCourses);
-  columnsToRetain.addOnTop(DatabaseStrings::labelInstructor);
-  columnsToRetain.addOnTop(DatabaseStrings::labelSection);
-  columnsToRetain.addOnTop(DatabaseStrings::labelSemester);
+  QueryResultOptions columnsToRetain;
+  columnsToRetain.fieldsToProjectTo.addOnTop(DatabaseStrings::labelUsername);
+  columnsToRetain.fieldsToProjectTo.addOnTop(DatabaseStrings::labelEmail);
+  columnsToRetain.fieldsToProjectTo.addOnTop(
+    DatabaseStrings::labelActivationToken
+  );
+  columnsToRetain.fieldsToProjectTo.addOnTop(
+    DatabaseStrings::labelCurrentCourses
+  );
+  columnsToRetain.fieldsToProjectTo.addOnTop(
+    DatabaseStrings::labelInstructor
+  );
+  columnsToRetain.fieldsToProjectTo.addOnTop(DatabaseStrings::labelSection);
+  columnsToRetain.fieldsToProjectTo.addOnTop(DatabaseStrings::labelSemester);
   if (
-    !Database::findFromJSONWithProjection(
-      findStudents,
-      students,
-      columnsToRetain,
-      - 1,
-      &totalStudents,
-      &commentsOnFailure
+    !Database::get().find(
+      findStudents, &columnsToRetain, students, &commentsOnFailure
     )
   ) {
     output["error"] =
@@ -2485,13 +2485,8 @@ JSData WebAPIResponse::getAccountsPageJSON(
   findAdmins.nestedLabels.addOnTop(DatabaseStrings::labelUserRole);
   findAdmins.exactValue = UserCalculator::Roles::administator;
   if (
-    !Database::findFromJSONWithProjection(
-      findAdmins,
-      admins,
-      columnsToRetain,
-      - 1,
-      nullptr,
-      &commentsOnFailure
+    !Database::get().find(
+      findAdmins, &columnsToRetain, admins, &commentsOnFailure
     )
   ) {
     output["error"] =
@@ -2772,14 +2767,16 @@ int ProblemData::getExpectedNumberOfAnswers(
   }
   if (global.problemExpectedNumberOfAnswers.size() == 0) {
     List<JSData> result;
-    List<std::string> fields;
-    fields.addOnTop(DatabaseStrings::labelProblemFileName);
-    fields.addOnTop(DatabaseStrings::labelProblemTotalQuestions);
+    QueryResultOptions options;
+    options.fieldsToProjectTo.addOnTop(DatabaseStrings::labelProblemFileName);
+    options.fieldsToProjectTo.addOnTop(
+      DatabaseStrings::labelProblemTotalQuestions
+    );
     QueryExact findProblemInfo;
     findProblemInfo.collection = DatabaseStrings::tableProblemInformation;
     if (
-      Database::findFromJSONWithProjection(
-        findProblemInfo, result, fields, - 1, nullptr, &commentsOnFailure
+      Database::get().find(
+        findProblemInfo, &options, result, &commentsOnFailure
       )
     ) {
       for (int i = 0; i < result.size; i ++) {

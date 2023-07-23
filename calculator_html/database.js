@@ -14,7 +14,6 @@ const storage = require('./storage');
 
 class DatabasePage {
   constructor() {
-
   }
   initialize() {
     let tableButtons = document.getElementById(
@@ -100,7 +99,7 @@ function queryFromCollection(
   collection,
 ) {
   let result = {};
-  result[pathnames.urlFields.database.table] = collection;
+  result[pathnames.urlFields.database.collection] = collection;
   return result;
 }
 
@@ -201,8 +200,9 @@ function updateDatabasePageCallback(incoming, unused) {
     );
     output.appendChild(
       transformer.getTableFromObject(
-        parsed.rows, optionsDatabase, {
-        table: findQuery[pathnames.urlFields.database.table],
+        parsed.rows,
+        optionsDatabase, {
+        table: findQuery[pathnames.urlFields.database.collection],
       })
     );
   } else {
@@ -210,7 +210,11 @@ function updateDatabasePageCallback(incoming, unused) {
   }
 }
 
-function updateTables(parsed, /** @type {HTMLElement} */ output) {
+function updateTables(
+  parsed,
+  /** @type {HTMLElement} */
+  output,
+) {
   if (parsed.collections === null || parsed.collections === undefined) {
     let errorDiv = document.createElement("b");
     errorDiv.style.color = "red";
@@ -233,7 +237,6 @@ function updateTables(parsed, /** @type {HTMLElement} */ output) {
   }
   output.appendChild(table);
 }
-
 
 function updateDatabasePageResetCurrentTable() {
   storage.storage.variables.database.findQuery.setAndStore("{}");

@@ -29,9 +29,6 @@ bool DatabaseInternalClient::fetchCollectionNames(
     }
     return false;
   }
-  global.comments
-  << "DEBUG: Received from server: "
-  << result.toJSON().toString();
   if (result.success) {
     output.clear();
     for (const JSData& element : result.content) {
@@ -93,6 +90,7 @@ bool DatabaseInternalClient::find(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalClient::find");
+  (void) options;
   DatabaseInternalResult result;
   DatabaseInternalRequest request;
   request.requestType = DatabaseInternalRequest::Type::find;
@@ -275,10 +273,6 @@ bool DatabaseInternal::executeAndSend() {
       result.toJSON().toString(), 0, true
     );
   }
-  global.comments
-  << "DEBUG: incoming: "
-  << result.toJSON().toString()
-  << " . ";
   result.success = false;
   List<JSData> output;
   switch (request.requestType) {
@@ -566,6 +560,7 @@ bool DatabaseInternalServer::find(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::find");
+  (void) options;
   List<std::string> currentObjectIds;
   HashedList<std::string> allObjectIds;
   JSData loader;
@@ -623,6 +618,18 @@ bool DatabaseInternalServer::findObjectIds(
   }
   DatabaseCollection& collection =
   this->collections.getValueNoFailNonConst(query.collection);
+  if (query.nestedLabels.size == 0) {
+    output.clear();
+    DatabaseInternalIndex& index = collection.indexOfObjectIds();
+    int numberOfItems =
+    MathRoutines::minimum(
+      query.maximumNumberOfItems, index.objectIdToKeyValue.size()
+    );
+    for (int i = 0; i < numberOfItems; i ++) {
+      output.addOnTop(index.objectIdToKeyValue.keys[i]);
+    }
+    return true;
+  }
   std::string concatenatedLabels = query.concatenateNestedLabels();
   if (!collection.indices.contains(concatenatedLabels)) {
     if (commentsOnFailure != nullptr) {
@@ -1031,6 +1038,10 @@ void DatabaseInternalServer::storeCollectionList() {
 
 std::string DatabaseInternalServer::collectionsSchemaFileName() const {
   return this->owner->folder() + "collections.json";
+}
+
+DatabaseInternalIndex& DatabaseCollection::indexOfObjectIds() {
+  return this->indices.getValueNoFailNonConst(DatabaseStrings::labelId);
 }
 
 void DatabaseCollection::initialize(

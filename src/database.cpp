@@ -55,6 +55,7 @@ JSData QueryExact::toJSON() const {
   result[DatabaseStrings::labelKey] = key;
   result[DatabaseStrings::labelValue] = this->exactValue;
   result[DatabaseStrings::labelCollection] = this->collection;
+  result[DatabaseStrings::maximumNumberOfItems] = this->maximumNumberOfItems;
   return result;
 }
 
@@ -444,7 +445,7 @@ bool Database::find(
   case DatabaseType::noDatabaseEveryoneIsAdmin:
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "Error: findOneWithOptions failed. "
+      << "Error: find failed. "
       << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
@@ -723,7 +724,7 @@ JSData Database::toJSONFetchItem(
   if (findQuery.collection == "") {
     return this->toJSONDatabaseCollection("");
   }
-  if (findQuery.collection != "" && findQuery.nestedLabels.size == 0) {
+  if (findQuery.nestedLabels.size == 0) {
     return this->toJSONDatabaseCollection(findQuery.collection);
   }
   JSData result;

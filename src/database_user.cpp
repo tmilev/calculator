@@ -943,6 +943,7 @@ bool UserCalculator::computeAndStoreActivationStats(
 }
 
 void UserCalculatorData::getFindMeQuery(QueryOneOfExactly& output) const {
+  STACK_TRACE("UserCalculatorData::getFindMeQuery");
   output.queries.clear();
   if (this->username != "") {
     QueryExact findByUsername(
@@ -1169,13 +1170,13 @@ bool UserOfDatabase::loginViaGoogleTokenCreateNewAccountIfNeeded(
   std::stringstream* commentsGeneral,
   bool& tokenIsGood
 ) {
+  STACK_TRACE("UserOfDatabase::loginViaGoogleTokenCreateNewAccountIfNeeded");
   (void) commentsOnFailure;
   (void) user;
   (void) commentsGeneral;
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return UserOfDatabase::loginNoDatabaseSupport(user, commentsGeneral);
   }
-  STACK_TRACE("UserOfDatabase::loginViaGoogleTokenCreateNewAccountIfNeeded");
   UserCalculator userWrapper;
   userWrapper.::UserCalculatorData::operator=(user);
   if (userWrapper.enteredGoogleToken == "") {
@@ -1304,11 +1305,11 @@ bool UserOfDatabase::loginViaDatabase(
     commentsOnFailure != nullptr
   ) {
     *commentsOnFailure
-    << "<b> Authentication of user: "
+    << "Authentication of user: "
     << userWrapper.username
     << " with token "
     << userWrapper.enteredAuthenticationToken
-    << " failed. </b>";
+    << " failed. ";
   }
   if (userWrapper.enteredActivationToken != "") {
     if (
@@ -1330,9 +1331,9 @@ bool UserOfDatabase::loginViaDatabase(
         }
       } else if (commentsOnFailure != nullptr) {
         if (userWrapper.actualActivationToken != "error") {
-          *commentsOnFailure << "<b>Account already activated. </b>";
+          *commentsOnFailure << "Account already activated. ";
         } else {
-          *commentsOnFailure << "<b>An error during activation ocurred.</b>";
+          *commentsOnFailure << "An error during activation ocurred. ";
         }
       }
     } else {
@@ -1374,12 +1375,12 @@ bool UserOfDatabase::firstLoginOfAdmin(
   // This is the first login, so let's set the admin account.
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure
-    << "<b>First login of user default "
-    << "(= default administator account): setting password.</b> ";
+    << "First login of user default "
+    << "(= default administator account): setting password. ";
   }
   global
   << Logger::yellow
-  << "First login of user default: setting password."
+  << "First login of user default: setting password. "
   << Logger::endL;
   userInDatabase.actualActivationToken = "activated";
   userInDatabase.userRole = UserCalculator::Roles::administator;

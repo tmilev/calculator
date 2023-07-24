@@ -386,6 +386,7 @@ public:
   JSData toJSONIndices() const;
   std::string toStringIndices() const;
   std::string fileNameIndex() const;
+  DatabaseInternalIndex& indexOfObjectIds();
   DatabaseCollection();
   void initialize(
     const std::string& inputName, DatabaseInternal* inputOwner

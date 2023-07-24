@@ -16,13 +16,9 @@ bool DatabaseInternalClient::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalClient::fetchCollectionNames");
-  global << "DEBUG: inside: client " << Logger::endL;
   DatabaseInternalResult result;
   DatabaseInternalRequest request;
   request.requestType = DatabaseInternalRequest::Type::fetchCollectionNames;
-  global.comments
-  << "DEBUG: Inside client. Send and receive: "
-  << request.requestType;
   if (
     !this->owner->sendAndReceiveFromClientToServer(
       request, result, commentsOnFailure
@@ -33,13 +29,15 @@ bool DatabaseInternalClient::fetchCollectionNames(
     }
     return false;
   }
+  global.comments
+  << "DEBUG: Received from server: "
+  << result.toJSON().toString();
   if (result.success) {
     output.clear();
     for (const JSData& element : result.content) {
       output.addOnTop(element.stringValue);
     }
   }
-  global.comments << "DEBUG: result: " << result.content.toString();
   return result.success;
 }
 
@@ -179,9 +177,6 @@ bool DatabaseInternal::sendAndReceiveFromClientToServer(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternal::sendAndReceiveFromClientToServer");
-  global.comments
-  << "DEBUG: About to send and receive: "
-  << input.toJSON().toString();
   if (
     !this->sendFromClientToServer(
       input.toJSON().toString(), commentsOnFailure
@@ -280,6 +275,10 @@ bool DatabaseInternal::executeAndSend() {
       result.toJSON().toString(), 0, true
     );
   }
+  global.comments
+  << "DEBUG: incoming: "
+  << result.toJSON().toString()
+  << " . ";
   result.success = false;
   List<JSData> output;
   switch (request.requestType) {
@@ -299,7 +298,6 @@ bool DatabaseInternal::executeAndSend() {
     );
     break;
   case DatabaseInternalRequest::Type::fetchCollectionNames:
-    global << "DEBUG: do fetching!" << Logger::endL;
     result.success =
     this->server.fetchCollectionNames(result.content, &commentsOnFailure);
     break;
@@ -308,6 +306,10 @@ bool DatabaseInternal::executeAndSend() {
   }
   if (!result.success) {
     result.comments = commentsOnFailure.str();
+  }
+  std::string extraGlobalComments = global.comments.getCurrentReset();
+  if (extraGlobalComments != "") {
+    result.comments += extraGlobalComments;
   }
   result.success =
   this->currentServerToClient().writeOnceNoFailure(
@@ -553,11 +555,6 @@ bool DatabaseInternalServer::fetchCollectionNames(
   List<JSData>& output, std::stringstream* commentsOnFailure
 ) {
   (void) commentsOnFailure;
-  global
-  << Logger::purple
-  << "DEBUG: collection names: "
-  << this->collections.keys
-  << Logger::endL;
   output = this->collections.keys;
   return true;
 }
@@ -738,7 +735,7 @@ bool DatabaseInternalServer::storeObject(
   global
   << "Writing object id: "
   << objectId
-  << ", "
+  << " in collection: "
   << collectionName
   << Logger::endL;
   if (!this->collections.contains(collectionName)) {
@@ -773,48 +770,43 @@ bool DatabaseInternalServer::storeObject(
     }
     return false;
   }
+  bool shouldStore =
+  collection.updateObjectInIndexReturnTrueIfChanged(objectId, data);
+  // We store the entire index to the hard drive.
+  // This has run time of O(number of records), and should run in low
+  // millisecond range for under 10k records.
+  // This can be optimized to have approximately constant run time.
+  // Please do so if there is a solid incentive.
+  if (!shouldStore) {
+    return true;
+  }
+  if (!collection.storeIndicesToHardDrive(commentsOnFailure)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to update the database index. "
+      << "However, your object was stored. ";
+    }
+    return false;
+  }
+  return true;
+}
+
+bool DatabaseCollection::updateObjectInIndexReturnTrueIfChanged(
+  const std::string& objectId, const JSData& data
+) {
   // Update the indices with the new found object
   bool found = false;
-  for (DatabaseInternalIndex& index : collection.indices.values) {
+  for (DatabaseInternalIndex& index : this->indices.values) {
     JSData primaryKeyValueJSON;
     if (!data.hasNestedKey(index.nestedKeys, &primaryKeyValueJSON)) {
       continue;
     }
-    std::string primaryKeyValue = primaryKeyValueJSON.stringValue;
-    if (primaryKeyValue == "") {
-      continue;
-    }
-    std::string previousValue =
-    index.objectIdToKeyValue.getValue(objectId, "");
-    if (previousValue == primaryKeyValue) {
-      continue;
-    }
-    found = true;
-    HashedList<std::string>& keys =
-    index.keyValueToObjectIds.getValueCreateEmpty(previousValue);
-    if (index.keyValueToObjectIds.contains(previousValue)) {
-      keys.removeFirstOccurenceSwapWithLast(objectId);
-    }
-    index.objectIdToKeyValue.setKeyValue(objectId, primaryKeyValue);
-    keys.addOnTop(primaryKeyValue);
+    std::string incomingValue = primaryKeyValueJSON.stringValue;
+    bool change = false;
+    index.setObjectIdValue(objectId, incomingValue, change);
+    found = found || change;
   }
-  // We store the entire index to the hard drive.
-  // This has run time of O(number of records), and should run in low
-  // millisecond
-  // range for under 100k records.
-  // This can be optimized to have approximately constant run time.
-  // Please do so if there is a solid incentive.
-  if (found) {
-    if (!collection.storeIndicesToHardDrive(commentsOnFailure)) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure
-        << "Failed to update the database index. "
-        << "However, your object was stored. ";
-      }
-      return false;
-    }
-  }
-  return true;
+  return found;
 }
 
 bool DatabaseInternalServer::loadObject(
@@ -1214,6 +1206,41 @@ bool DatabaseInternalIndex::fromJSON(
   }
   this->computeKeyValueToObjectIds();
   return true;
+}
+
+void DatabaseInternalIndex::removeObjectId(
+  const std::string& objectId, const std::string& previousValue
+) {
+  if (!this->keyValueToObjectIds.contains(previousValue)) {
+    return;
+  }
+  HashedList<std::string>& objectIdContainer =
+  this->keyValueToObjectIds.getValueNoFailNonConst(previousValue);
+  objectIdContainer.removeFirstOccurenceSwapWithLast(objectId);
+  if (objectIdContainer.size == 0) {
+    this->keyValueToObjectIds.removeKey(previousValue);
+  }
+}
+
+void DatabaseInternalIndex::setObjectIdValue(
+  const std::string& objectId,
+  const std::string& newValue,
+  bool& outputValueChanged
+) {
+  outputValueChanged = false;
+  if (this->objectIdToKeyValue.contains(objectId)) {
+    std::string previousValue =
+    this->objectIdToKeyValue.getValueNoFail(objectId);
+    if (previousValue == newValue) {
+      return;
+    }
+    this->removeObjectId(objectId, previousValue);
+  }
+  outputValueChanged = true;
+  this->objectIdToKeyValue.setKeyValue(objectId, newValue);
+  HashedList<std::string>& objectIdContainer =
+  this->keyValueToObjectIds.getValueCreateEmpty(newValue);
+  objectIdContainer.addOnTopNoRepetition(objectId);
 }
 
 void DatabaseInternalIndex::computeKeyValueToObjectIds() {

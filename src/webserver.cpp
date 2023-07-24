@@ -575,7 +575,6 @@ JSData WebWorker::getDatabaseJSON() {
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::DatabaseParameters::projector), false
   );
-  global.comments << "DEBUG: Hi world! findquery: " << findQuery;
   if (operation == WebAPI::DatabaseParameters::fetch) {
     result = Database::get().toJSONDatabaseFetch(findQuery);
   } else if (operation == WebAPI::DatabaseParameters::allTables) {

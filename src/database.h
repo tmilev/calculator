@@ -355,6 +355,15 @@ public:
   JSData toJSON() const;
   bool fromJSON(const JSData& input, const std::string& collectionName);
   std::string toString() const;
+  // Sets an object id to a given value.
+  void setObjectIdValue(
+    const std::string& objectId,
+    const std::string& newValue,
+    bool& outputValueChanged
+  );
+  void removeObjectId(
+    const std::string& objectId, const std::string& previousValue
+  );
   DatabaseInternalIndex();
   void computeKeyValueToObjectIds();
 };
@@ -380,6 +389,9 @@ public:
   DatabaseCollection();
   void initialize(
     const std::string& inputName, DatabaseInternal* inputOwner
+  );
+  bool updateObjectInIndexReturnTrueIfChanged(
+    const std::string& objectId, const JSData& data
   );
 };
 

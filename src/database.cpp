@@ -713,7 +713,6 @@ JSData Database::toJSONDatabaseFetch(
     result[DatabaseStrings::error] = commentsOnFailure.str();
     return result;
   }
-  global.comments << "DEBUG: got to here!";
   return Database::get().toJSONFetchItem(queryExact, projector);
 }
 
@@ -732,7 +731,6 @@ JSData Database::toJSONFetchItem(
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
-  global.comments << "DEBUG: about to find from: " << findQuery.toString();
   QueryOneOfExactly query;
   query.queries.addOnTop(findQuery);
   if (!Database::find(query, &projector, rowsJSON, &comments)) {
@@ -801,7 +799,6 @@ JSData Database::toJSONAllCollections() {
     "Requested table empty, returning list of tables. ";
   }
   List<std::string> collectionNamesList;
-  global.comments << "DEBUG: here i am";
   if (!Database::fetchCollectionNames(collectionNamesList, &out)) {
     result["error"] = out.str();
     return result;
@@ -821,7 +818,6 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   if (currentTable == "") {
     return this->toJSONAllCollections();
   }
-  global.comments << "DEBUG: got to here so far collection";
   JSData result;
   std::stringstream comments;
   result["currentTable"] = currentTable;
@@ -838,9 +834,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   if (flagDebuggingAdmin) {
     commentsPointer = &comments;
   }
-  global.comments << "DEBUG: About to find with opts!";
   if (!Database::find(query, &projector, rowsJSON, &comments)) {
-    global.comments << "DEBUG: About to find return false!";
     result["error"] = comments.str();
     return result;
   }

@@ -62,39 +62,32 @@
   <span id="calculatorDefaultsEnabled"></span>
   <div id="divDefaultApplication">
     <div id="divLoginPage" class="divPage">
-      <div class="centerHorizontallyInPageContainer">
-        <div class="centerVerticallyInPageContainer">
-          <div class="divCenteredItem divVisible" id="divLoginCalculatorPanel">
-            <b>Local account:</b><br><br>
-            <form>
-              <input class="textInputUsername" type="text" id="inputUsername" name="username" placeholder="username"
-                required><br>
-              <input class="textInputUsername" type="password" id="inputPassword" name="password" placeholder="password"
-                autocomplete="on"><br>
-            </form>
-            <button class="buttonSelectPage" id="buttonLogin">Login</button><br>
-            <button class="buttonSignUp" id="buttonSignUp">Sign up</button><br>
-            <button class="buttonSignUp" id="buttonForgotLogin">Forgot login</button><br>
-          </div>
-          <div class="divCenteredItem">
-            <a href="#" id="linkLogout" class="linkLogoutInactive linkStandardButtonLike">Log out</a>
-          </div>
-          <div class="divCenteredItem">
-            <b>Google login:</b>
-            <script src="https://accounts.google.com/gsi/client" async defer></script>
-            <div id="g_id_onload"
-              data-client_id="538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com"
-              data-callback="googleSignIn" data-auto_select="false">
-            </div>
-            <div class="g_id_signin" data-type="standard">Google unavailable (did page fully load? Internet?).</div>
-          </div>
-          <div class="divCenteredItem">
-          </div>
-          <div class="divCenteredItem">
-            <div id="spanLoginStatus" style="width: 190px; text-align: center"></div>
-            <div id="spanLoginStatusExtra" style="width: 190px; text-align: center"></div>
-          </div>
+      <div class="divCenteredItem divVisible" id="divLoginCalculatorPanel">
+        <b>Local account:</b><br><br>
+        <form>
+          <input class="textInputUsername" type="text" id="inputUsername" name="username" placeholder="username"
+            required><br>
+          <input class="textInputUsername" type="password" id="inputPassword" name="password" placeholder="password"
+            autocomplete="on"><br>
+        </form>
+        <button class="buttonStandard" id="buttonLogin">Login</button><br>
+        <button class="buttonSignUp" id="buttonSignUp">Sign up</button><br>
+        <button class="buttonSignUp" id="buttonForgotLogin">Forgot login</button><br>
+      </div>
+      <div class="divCenteredItem">
+        <a href="#" id="linkLogout" class="linkLogoutInactive linkStandardButtonLike">Log out</a>
+      </div>
+      <div class="divCenteredItem">
+        <b>Google login:</b>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <div id="g_id_onload" data-client_id="538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com"
+          data-callback="googleSignIn" data-auto_select="false">
         </div>
+        <div class="g_id_signin" data-type="standard">Google unavailable (did page fully load? Internet?).</div>
+      </div>
+      <div>
+        <div id="spanLoginStatus" style="text-align: center"></div>
+        <div id="spanLoginStatusExtra" style="text-align: center"></div>
       </div>
     </div>
     <div id="divSolvePage" class="divPage">

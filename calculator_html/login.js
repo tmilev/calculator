@@ -158,13 +158,11 @@ class Authenticator {
         parsedAuthentication[pathnames.urlFields.result.error] = "";
       }
     }
+    let spanLoginExtra = document.getElementById(
+      ids.domElements.pages.login.spanLoginStatusExtra
+    );
+    miscellaneous.writeHtmlElementsFromCommentsAndErrors(parsedAuthentication, spanLoginExtra);
     if (!success) {
-      if (page.user.debugLoginIsOn()) {
-        let spanLoginExtra = document.getElementById(
-          ids.domElements.pages.login.spanLoginStatusExtra
-        );
-        miscellaneous.writeHtmlElementsFromCommentsAndErrors(parsedAuthentication, spanLoginExtra);
-      }
       if (loginErrorMessage !== undefined && loginErrorMessage !== "") {
         miscellaneous.writeHTML(spanLoginStatus, loginErrorMessage);
       }

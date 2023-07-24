@@ -1361,6 +1361,10 @@ bool UserOfDatabase::firstLoginOfAdmin(
   }
   bool userExists = false;
   bool databaseIsOK = false;
+  global.comments << "DEBUG: user exists ?. ";
+  if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << "DEBuG: user exists?   comments?";
+  }
   userInDatabase.exists(userExists, databaseIsOK, nullptr);
   if (!databaseIsOK) {
     *commentsOnFailure << "Database seems to be down. ";

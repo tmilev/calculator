@@ -107,6 +107,8 @@ bool DatabaseInternalClient::find(
   }
   if (result.success) {
     result.writeContent(output);
+  } else if (commentsOnFailure != nullptr) {
+    *commentsOnFailure << result.comments;
   }
   return result.success;
 }
@@ -305,11 +307,10 @@ bool DatabaseInternal::executeAndSend() {
   if (extraGlobalComments != "") {
     result.comments += extraGlobalComments;
   }
-  result.success =
+  return
   this->currentServerToClient().writeOnceNoFailure(
     result.toJSON().toString(), 0, true
   );
-  return result.success;
 }
 
 PipePrimitive& DatabaseInternal::currentServerToClient() {
@@ -390,6 +391,7 @@ bool DatabaseInternalResult::fromJSON(
   }
   this->success =
   this->reader[DatabaseStrings::resultSuccess].isTrueRepresentationInJSON();
+  this->comments = this->reader[DatabaseStrings::resultComments].stringValue;
   return true;
 }
 

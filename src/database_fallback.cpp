@@ -48,11 +48,11 @@ bool DatabaseFallback::find(
   STACK_TRACE("FallbackDatabase::find");
   output.clear();
   for (const QueryExact& query : findOrQueries.queries) {
-    if (this->findOnce(query, options, output, commentsOnFailure)) {
-      return true;
+    if (!this->findOnce(query, options, output, commentsOnFailure)) {
+      return false;
     }
   }
-  return false;
+  return true;
 }
 
 bool DatabaseFallback::updateOneFromSome(

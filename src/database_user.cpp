@@ -1005,7 +1005,8 @@ bool UserOfDatabase::addUsersFromEmails(
   // 100 seconds
   global.millisecondsReplyAfterComputation = 200000;
   // 200 seconds
-  List<std::string> emails, passwords;
+  List<std::string> emails;
+  List<std::string> passwords;
   StringRoutines::stringSplitDefaultDelimiters(emailList, emails);
   StringRoutines::stringSplitDefaultDelimiters(userPasswords, passwords);
   if (passwords.size > 0) {
@@ -1051,13 +1052,15 @@ bool UserOfDatabase::addUsersFromEmails(
         currentUser.username
       )
     );
-    findUser.queries.addOnTop(
-      QueryExact(
-        DatabaseStrings::tableUsers,
-        DatabaseStrings::labelEmail,
-        currentUser.email
-      )
-    );
+    if (currentUser.email != "") {
+      findUser.queries.addOnTop(
+        QueryExact(
+          DatabaseStrings::tableUsers,
+          DatabaseStrings::labelEmail,
+          currentUser.email
+        )
+      );
+    }
     List<JSData> allUsers;
     if (!this->owner->find(findUser, nullptr, allUsers, &comments)) {
       comments << "Database error! ";

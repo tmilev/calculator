@@ -55,24 +55,6 @@ bool DatabaseFallback::find(
   return true;
 }
 
-bool DatabaseFallback::updateOneFromSome(
-  const QueryOneOfExactly& findOrQueries,
-  const QuerySet& updateQuery,
-  std::stringstream* commentsOnFailure
-) {
-  STACK_TRACE("FallbackDatabase::updateOneFromSome");
-  List<JSData> found;
-  for (const QueryExact& query : findOrQueries.queries) {
-    if (!this->findOnce(query, nullptr, found, commentsOnFailure)) {
-      return false;
-    }
-    if (found.size > 0) {
-      return this->updateOne(query, updateQuery, commentsOnFailure);
-    }
-  }
-  return false;
-}
-
 bool DatabaseFallback::updateOne(
   const QueryExact& findQuery,
   const QuerySet& dataToMerge,

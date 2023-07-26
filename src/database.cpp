@@ -950,34 +950,6 @@ void GlobalVariables::initModifiableDatabaseFields() {
   outputFile << "module.exports = {modifiableDatabaseData};";
 }
 
-bool Database::updateOneFromSome(
-  const QueryOneOfExactly& findOrQueries,
-  const QuerySet& updateQuery,
-  std::stringstream* commentsOnFailure
-) {
-  switch (global.databaseType) {
-  case DatabaseType::noDatabaseEveryoneIsAdmin:
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Database::updateOneFromSome failed. "
-      << DatabaseStrings::errorDatabaseDisabled;
-    }
-    return false;
-  case DatabaseType::fallback:
-    return
-    this->fallbackDatabase.updateOneFromSome(
-      findOrQueries, updateQuery, commentsOnFailure
-    );
-  case DatabaseType::internal:
-    return
-    this->localDatabase.client.updateOneFromSome(
-      findOrQueries, updateQuery, commentsOnFailure
-    );
-  }
-  global.fatal << "This piece of code should be unreachable. " << global.fatal;
-  return false;
-}
-
 JSData QuerySetOnce::toJSON() const {
   JSData result;
   JSData key;
@@ -1197,6 +1169,22 @@ JSData QueryOneOfExactly::toJSON() const {
   }
   result["findMany"] = queryJSON;
   return result;
+}
+
+std::string QueryOneOfExactly::collection() const {
+  std::string collection = "";
+  for (const QueryExact& query : this->queries) {
+    if (query.collection == "") {
+      return "";
+    }
+    if (collection == "") {
+      collection = query.collection;
+    }
+    if (collection != query.collection) {
+      return "";
+    }
+  }
+  return collection;
 }
 
 bool QueryOneOfExactly::fromJSON(

@@ -6,7 +6,7 @@
 
 std::string UserCalculatorData::toStringFindQueries() const {
   QueryOneOfExactly queries;
-  this->getFindMeQuery(queries);
+  this->getFindMeQueryByUsernameOrEmail(queries);
   std::stringstream out;
   out << "userFind query: ";
   for (int i = 0; i < queries.queries.size; i ++) {
@@ -47,7 +47,7 @@ bool UserOfDatabase::loadUserInformation(
   }
   List<JSData> allUsers;
   QueryOneOfExactly queries;
-  output.getFindMeQuery(queries);
+  output.getFindMeQueryByUsernameOrEmail(queries);
   if (!this->owner->find(queries, nullptr, allUsers, nullptr)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -723,7 +723,7 @@ void UserCalculator::exists(
   STACK_TRACE("UserCalculator::exists");
   List<JSData> allUsers;
   QueryOneOfExactly query;
-  this->getFindMeQuery(query);
+  this->getFindMeQueryByUsernameOrEmail(query);
   databaseIsOK = Database::get().find(query, nullptr, allUsers, comments);
   outputExists = allUsers.size == 1;
 }
@@ -942,7 +942,19 @@ bool UserCalculator::computeAndStoreActivationStats(
   return true;
 }
 
-void UserCalculatorData::getFindMeQuery(QueryOneOfExactly& output) const {
+void UserCalculatorData::getFindMeQueryByUsername(QueryExact& output) const {
+  STACK_TRACE("UserCalculatorData::getFindMeQuery");
+  output =
+  QueryExact(
+    DatabaseStrings::tableUsers,
+    DatabaseStrings::labelUsername,
+    this->username
+  );
+}
+
+void UserCalculatorData::getFindMeQueryByUsernameOrEmail(
+  QueryOneOfExactly& output
+) const {
   STACK_TRACE("UserCalculatorData::getFindMeQuery");
   output.queries.clear();
   if (this->username != "") {
@@ -985,10 +997,9 @@ bool UserCalculator::storeProblemData(
     List<std::string>({DatabaseStrings::labelProblemDataJSON, fileName}),
     problem.storeJSON()
   );
-  QueryOneOfExactly queries;
-  this->getFindMeQuery(queries);
-  return
-  Database::get().updateOneFromSome(queries, update, commentsOnFailure);
+  QueryExact query;
+  this->getFindMeQueryByUsername(query);
+  return Database::get().updateOne(query, update, false, commentsOnFailure);
 }
 
 bool UserOfDatabase::addUsersFromEmails(
@@ -1044,16 +1055,16 @@ bool UserOfDatabase::addUsersFromEmails(
       currentUser.email = emails[i];
     }
     JSData currentUserData;
-    QueryOneOfExactly findUser;
-    findUser.queries.addOnTop(
-      QueryExact(
-        DatabaseStrings::tableUsers,
-        DatabaseStrings::labelUsername,
-        currentUser.username
-      )
+    QueryOneOfExactly findUserByUsernameOrEmail;
+    QueryExact findUserByUsername =
+    QueryExact(
+      DatabaseStrings::tableUsers,
+      DatabaseStrings::labelUsername,
+      currentUser.username
     );
+    findUserByUsernameOrEmail.queries.addOnTop(findUserByUsername);
     if (currentUser.email != "") {
-      findUser.queries.addOnTop(
+      findUserByUsernameOrEmail.queries.addOnTop(
         QueryExact(
           DatabaseStrings::tableUsers,
           DatabaseStrings::labelEmail,
@@ -1062,7 +1073,11 @@ bool UserOfDatabase::addUsersFromEmails(
       );
     }
     List<JSData> allUsers;
-    if (!this->owner->find(findUser, nullptr, allUsers, &comments)) {
+    if (
+      !this->owner->find(
+        findUserByUsernameOrEmail, nullptr, allUsers, &comments
+      )
+    ) {
       comments << "Database error! ";
       return false;
     }
@@ -1077,7 +1092,9 @@ bool UserOfDatabase::addUsersFromEmails(
       QuerySet setUser;
       setUser.addValue(currentUserData);
       if (isEmail) {
-        this->owner->updateOneFromSome(findUser, setUser, &comments);
+        this->owner->updateOne(
+          findUserByUsername, setUser, true, &comments
+        );
       }
     } else {
       outputNumberOfUpdatedUsers ++;
@@ -1086,7 +1103,9 @@ bool UserOfDatabase::addUsersFromEmails(
       QuerySet setUser;
       setUser.addValue(currentUser.toJSON());
       if (
-        !this->owner->updateOneFromSome(findUser, setUser, &comments)
+        !this->owner->updateOne(
+          findUserByUsername, setUser, false, &comments
+        )
       ) {
         result = false;
       }
@@ -1114,7 +1133,9 @@ bool UserOfDatabase::addUsersFromEmails(
       activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
       QuerySet activatedSet;
       activatedSet.fromJSONNoFail(activatedJSON);
-      this->owner->updateOneFromSome(findUser, activatedSet, &comments);
+      this->owner->updateOne(
+        findUserByUsername, activatedSet, false, &comments
+      );
       if (currentUser.email != "") {
         currentUser.computeAndStoreActivationStats(&comments, &comments);
       }

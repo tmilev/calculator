@@ -121,20 +121,6 @@ bool DatabaseInternal::deleteDatabase(std::stringstream* commentsOnFailure) {
   return false;
 }
 
-bool DatabaseInternalClient::updateOneFromSome(
-  const QueryOneOfExactly& findOrQueries,
-  const QuerySet& updateQuery,
-  std::stringstream* commentsOnFailure
-) {
-  (void) findOrQueries;
-  (void) updateQuery;
-  (void) commentsOnFailure;
-  global.fatal
-  << "DatabaseInternal::updateOneFromSome: not implemented yet. "
-  << global.fatal;
-  return false;
-}
-
 int DatabaseInternal::forkOutDatabase() {
   STACK_TRACE("DatabaseInternal::forkOutDatabase");
   this->processId = ForkCreator::forkProcessAndAcquireRandomness();
@@ -621,7 +607,6 @@ bool DatabaseInternalServer::findObjectIds(
   DatabaseCollection& collection =
   this->collections.getValueNoFailNonConst(query.collection);
   if (query.nestedLabels.size == 0) {
-    output.clear();
     DatabaseInternalIndex& index = collection.indexOfObjectIds();
     int numberOfItems =
     MathRoutines::minimum(

@@ -170,6 +170,7 @@ public:
   List<QueryExact> queries;
   bool fromJSON(const JSData& input, std::stringstream* commentsOnFailure);
   JSData toJSON() const;
+  std::string collection() const;
   QueryOneOfExactly();
   QueryOneOfExactly(const QueryExact& query);
 };
@@ -221,11 +222,6 @@ public:
   bool deleteDatabase(std::stringstream* commentsOnFailure);
   bool updateOne(
     const QueryExact& findQuery,
-    const QuerySet& updateQuery,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  bool updateOneFromSome(
-    const QueryOneOfExactly& findOrQueries,
     const QuerySet& updateQuery,
     std::stringstream* commentsOnFailure = nullptr
   );
@@ -473,11 +469,6 @@ public:
     bool createIfNotFound,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool updateOneFromSome(
-    const QueryOneOfExactly& findOrQueries,
-    const QuerySet& updateQuery,
-    std::stringstream* commentsOnFailure = nullptr
-  );
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
   );
@@ -643,11 +634,6 @@ public:
     const QuerySet& dataToMerge,
     bool createIfNotFound,
     std::stringstream* commentsOnFailure
-  );
-  bool updateOneFromSome(
-    const QueryOneOfExactly& findOrQueries,
-    const QuerySet& updateQuery,
-    std::stringstream* commentsOnFailure = nullptr
   );
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure

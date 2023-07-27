@@ -175,116 +175,6 @@ public:
   QueryOneOfExactly(const QueryExact& query);
 };
 
-class DatabaseFallback {
-private:
-  bool initialized;
-  bool updateOneNolocks(
-    const QueryExact& findQuery,
-    const QuerySet& updateQuery,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  bool updateOneEntry(
-    JSData& modified,
-    const List<std::string>& labels,
-    const JSData& value,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-public:
-  Database* owner;
-  MutexProcess access;
-  HashedList<std::string> knownCollections;
-  HashedList<std::string> knownIndices;
-  JSData databaseContent;
-  class Index {
-  public:
-    // Collection A, label B is denoted as A.B.
-    // Dots in the labels and collections are forbidden.
-    std::string collection;
-    std::string label;
-    std::string collectionAndLabelCache;
-    MapList<
-      std::string,
-      List<int32_t>,
-      HashFunctions::hashFunction<std::string>
-    > locations;
-    static std::string collectionAndLabelStatic(
-      const std::string& inputCollection, const std::string& inputLabel
-    );
-    std::string collectionAndLabel();
-  };
-
-  MapReferences<
-    std::string,
-    DatabaseFallback::Index,
-    HashFunctions::hashFunction<std::string>
-  > indices;
-  static std::string jsonLocation();
-  bool deleteDatabase(std::stringstream* commentsOnFailure);
-  bool updateOne(
-    const QueryExact& findQuery,
-    const QuerySet& updateQuery,
-    std::stringstream* commentsOnFailure = nullptr
-  );
-  bool findOnce(
-    const QueryExact& query,
-    const QueryResultOptions* options,
-    List<JSData>& output,
-    std::stringstream* commentsOnFailure
-  );
-  bool find(
-    const QueryOneOfExactly& query,
-    const QueryResultOptions* options,
-    List<JSData>& output,
-    std::stringstream* commentsOnFailure
-  );
-  // Return indicates query success / failure.
-  // When the element isn't found but otherwise there were
-  // no problems with the query, true will be returned with
-  // output set to [].
-  bool findIndexOneNolocksMinusOneNotFound(
-    const QueryExact& query,
-    int& output,
-    std::stringstream* commentsOnNotFound
-  );
-  bool fetchCollectionNames(
-    List<std::string>& output, std::stringstream* commentsOnFailure
-  );
-  void createHashIndex(
-    const std::string& collectionName, const std::string& key
-  );
-  bool hasCollection(
-    const std::string& collection, std::stringstream* commentsOnFailure
-  );
-  bool storeDatabase(std::stringstream* commentsOnFailure);
-  bool readDatabase(std::stringstream* commentsOnFailure);
-  bool readAndIndexDatabase(std::stringstream* commentsOnFailure);
-  bool readAndIndexDatabaseWithLockGuard(
-    std::stringstream* commentsOnFailure
-  );
-  bool indexDatabase(std::stringstream* commentsOnFailure);
-  const JSData& getFullCollection(const std::string& collection);
-  void indexOneRecord(
-    const JSData& entry, int32_t row, const std::string& collection
-  );
-  void initializeServer();
-  bool initializeClient();
-  bool findFromSome(
-    const QueryOneOfExactly& findOrQueries,
-    List<JSData>& output,
-    std::stringstream* commentsOnFailure
-  );
-  bool findManyFromJSONWithOptions(
-    const QueryExact& findQuery,
-    List<JSData>& output,
-    const QueryResultOptions& options,
-    long long* totalItems,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneralNonSensitive
-  );
-  std::string toStringIndices() const;
-  DatabaseFallback();
-};
-
 class QueryFindAndUpdate {
 public:
   QuerySet update;
@@ -451,6 +341,8 @@ public:
     const std::string& objectId, const std::string& collectionName
   );
   std::string toStringIndices() const;
+  // Converts the entire database to JSON.
+  JSData toJSONStoreEntireDatabase();
 };
 
 class DatabaseInternalClient {
@@ -493,11 +385,23 @@ class DatabaseInternal {
   );
   PipePrimitive& currentServerToClient();
   PipePrimitive& currentClientToServer();
+  // An interprocess mutex to be used in fallback mode, so that
+  // different clients can read/write from the database
+  // with data races. The mutex will only be initialized in fallback mode.
+  MutexProcess mutexFallbackDatabase;
   List<std::string> initializationErrors;
 public:
   int processId;
   int currentWorkerId;
   int maximumMessageSize;
+  // 1. When this is false, the client and server are
+  // in different processes and communicate through a pipe
+  // which syncronizes concurrent database calls.
+  // 2. When this is true, the client and the server are
+  // in the same process. The database reads and writes
+  // use an inter-process mutex to lock the database
+  // for exclusive use to prevent data races.
+  bool flagIsFallback;
   DatabaseInternalClient client;
   DatabaseInternalServer server;
   void accountInitializationError(const std::string& error);
@@ -515,6 +419,7 @@ public:
   // Returns the process id of the database server to the parent
   // and 0 to the child server database process.
   int forkOutDatabase();
+  void initializeAsFallback();
   void initializeForkAndRun(int maximumConnections);
   // Runs the main server loop which listens to a number of
   // file descriptors from all database clients.
@@ -528,9 +433,10 @@ public:
   // separate thread(s).
   bool runOneConnection();
   // Executes one single operation and sends the result back.
+  void execute(DatabaseInternalResult& output);
+  bool send(DatabaseInternalResult& result);
   bool executeAndSend();
   DatabaseInternal();
-  std::string toPayLoad(const std::string& input);
   std::string toStringInitializationErrors() const;
 };
 
@@ -612,13 +518,12 @@ public:
   // Implemented as function rather than static member to
   // avoid the static initalization order fiasco.
   static Database& get();
-  bool initializeServer(int maximumConnections);
-  bool initializeClient();
+  bool initialize(int maximumConnections);
   bool checkInitialization();
   static std::string toString();
   UserOfDatabase user;
   // TODO(tmilev): Rename this to fallbackDatabase.
-  DatabaseFallback fallbackDatabase;
+  DatabaseInternal fallbackDatabase;
   DatabaseInternal localDatabase;
   // Finds the first object(s) up to a limit
   // that satisfy the query.

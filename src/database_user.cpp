@@ -945,7 +945,7 @@ bool UserCalculator::computeAndStoreActivationStats(
 }
 
 void UserCalculatorData::getFindMeQueryByUsername(QueryExact& output) const {
-  STACK_TRACE("UserCalculatorData::getFindMeQuery");
+  STACK_TRACE("UserCalculatorData::getFindMeQueryByUsername");
   output =
   QueryExact(
     DatabaseStrings::tableUsers,
@@ -957,7 +957,7 @@ void UserCalculatorData::getFindMeQueryByUsername(QueryExact& output) const {
 void UserCalculatorData::getFindMeQueryByUsernameOrEmail(
   QueryOneOfExactly& output
 ) const {
-  STACK_TRACE("UserCalculatorData::getFindMeQuery");
+  STACK_TRACE("UserCalculatorData::getFindMeQueryByUsernameOrEmail");
   output.queries.clear();
   if (this->username != "") {
     QueryExact findByUsername(

@@ -10,6 +10,7 @@ DatabaseInternal::DatabaseInternal() {
   this->processId = - 1;
   this->maximumMessageSize = 65536;
   this->failedToInitialize = true;
+  this->flagIsFallback = false;
 }
 
 bool DatabaseInternalClient::fetchCollectionNames(
@@ -79,10 +80,6 @@ std::string DatabaseInternal::toStringInitializationErrors() const {
   return out.str();
 }
 
-std::string DatabaseInternal::toPayLoad(const std::string& input) {
-  return input;
-}
-
 bool DatabaseInternalClient::find(
   const QueryOneOfExactly& findOrQueries,
   const QueryResultOptions* options,
@@ -133,6 +130,11 @@ int DatabaseInternal::forkOutDatabase() {
   }
   global.logs.logType = GlobalVariables::LogData::type::database;
   return 0;
+}
+
+void DatabaseInternal::initializeAsFallback() {
+  this->flagIsFallback = true;
+  this->mutexFallbackDatabase.createMe("DatabaseMutex", false);
 }
 
 void DatabaseInternal::initializeForkAndRun(int maximumConnections) {
@@ -238,65 +240,68 @@ bool DatabaseInternal::runOneConnection() {
   return this->executeAndSend();
 }
 
-bool DatabaseInternal::executeAndSend() {
-  STACK_TRACE("DatabaseInternal::executeAndSend");
-  DatabaseInternalResult result;
+void DatabaseInternal::execute(DatabaseInternalResult& output) {
+  STACK_TRACE("DatabaseInternal::execute");
   if (this->failedToInitialize) {
-    result.success = false;
-    result.comments = this->toStringInitializationErrors();
-    return
-    this->currentServerToClient().writeOnceNoFailure(
-      result.toJSON().toString(), 0, true
-    );
+    output.success = false;
+    output.comments = this->toStringInitializationErrors();
+    return;
   }
   DatabaseInternalRequest request;
   std::string requestString;
   Crypto::convertListCharsToString(this->buffer, requestString);
   std::stringstream commentsOnFailure;
   if (!request.fromJSON(requestString, &commentsOnFailure)) {
-    result.comments = commentsOnFailure.str();
-    result.success = false;
-    return
-    this->currentServerToClient().writeOnceNoFailure(
-      result.toJSON().toString(), 0, true
-    );
+    output.comments = commentsOnFailure.str();
+    output.success = false;
+    return;
   }
-  result.success = false;
-  List<JSData> output;
+  output.success = false;
   switch (request.requestType) {
   case DatabaseInternalRequest::Type::findAndUpdate:
-    result.success =
+    output.success =
     this->server.findAndUpdate(
       request.queryFindAndUpdate, &commentsOnFailure
     );
     break;
   case DatabaseInternalRequest::Type::find:
-    result.success =
+    output.success =
     this->server.find(
       request.queryOneOfExactly,
       nullptr,
-      result.content,
+      output.content,
       &commentsOnFailure
     );
     break;
   case DatabaseInternalRequest::Type::fetchCollectionNames:
-    result.success =
-    this->server.fetchCollectionNames(result.content, &commentsOnFailure);
+    output.success =
+    this->server.fetchCollectionNames(output.content, &commentsOnFailure);
     break;
   default:
     break;
   }
-  if (!result.success) {
-    result.comments = commentsOnFailure.str();
+  if (!output.success) {
+    output.comments = commentsOnFailure.str();
   }
   std::string extraGlobalComments = global.comments.getCurrentReset();
   if (extraGlobalComments != "") {
-    result.comments += extraGlobalComments;
+    output.comments += extraGlobalComments;
   }
+}
+
+bool DatabaseInternal::send(DatabaseInternalResult& result) {
+  STACK_TRACE("DatabaseInternal::send");
   return
   this->currentServerToClient().writeOnceNoFailure(
     result.toJSON().toString(), 0, true
   );
+}
+
+bool DatabaseInternal::executeAndSend() {
+  STACK_TRACE("DatabaseInternal::executeAndSend");
+  DatabaseInternalResult result;
+  this->execute(result);
+  return this->send(result);
 }
 
 PipePrimitive& DatabaseInternal::currentServerToClient() {
@@ -1025,6 +1030,11 @@ void DatabaseInternalServer::storeCollectionList() {
 
 std::string DatabaseInternalServer::collectionsSchemaFileName() const {
   return this->owner->folder() + "collections.json";
+}
+
+JSData DatabaseInternalServer::toJSONStoreEntireDatabase() {
+  global.fatal << "Please implement." << global.fatal;
+  return JSData();
 }
 
 DatabaseInternalIndex& DatabaseCollection::indexOfObjectIds() {

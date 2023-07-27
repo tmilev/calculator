@@ -433,13 +433,13 @@ bool Database::find(
   switch (global.databaseType) {
   case DatabaseType::internal:
     return
-    Database::get().localDatabase.client.find(
+    this->localDatabase.client.find(
       query, options, output, commentsOnFailure
     );
     return false;
   case DatabaseType::fallback:
     return
-    Database::fallbackDatabase.find(
+    this->fallbackDatabase.client.find(
       query, options, output, commentsOnFailure
     );
   case DatabaseType::noDatabaseEveryoneIsAdmin:
@@ -527,8 +527,8 @@ bool Database::updateOne(
     return false;
   case DatabaseType::fallback:
     return
-    this->fallbackDatabase.updateOne(
-      findQuery, dataToMerge, commentsOnFailure
+    this->fallbackDatabase.client.updateOne(
+      findQuery, dataToMerge, createIfNotFound, commentsOnFailure
     );
   case DatabaseType::internal:
     return
@@ -557,57 +557,9 @@ bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
   return false;
 }
 
-bool Database::initializeClient() {
-  STACK_TRACE("Database::initializeClient");
-  if (this->flagInitializedWorker) {
-    return true;
-  }
-  this->flagInitializedWorker = true;
-  switch (global.databaseType) {
-  case DatabaseType::noDatabaseEveryoneIsAdmin:
-    return true;
-  case DatabaseType::fallback:
-    return this->fallbackDatabase.initializeClient();
-    break;
-  case DatabaseType::internal:
-    return true;
-  }
-  return true;
-}
-
-bool DatabaseFallback::initializeClient() {
-  this->createHashIndex(
-    DatabaseStrings::tableUsers, DatabaseStrings::labelUsername
-  );
-  this->createHashIndex(
-    DatabaseStrings::tableUsers, DatabaseStrings::labelEmail
-  );
-  this->createHashIndex(
-    DatabaseStrings::tableUsers, DatabaseStrings::labelInstructor
-  );
-  this->createHashIndex(
-    DatabaseStrings::tableUsers, DatabaseStrings::labelUserRole
-  );
-  this->createHashIndex(
-    DatabaseStrings::tableUsers,
-    DatabaseStrings::labelProblemDataJSON +
-    "." +
-    DatabaseStrings::labelProblemFileName
-  );
-  this->createHashIndex(
-    DatabaseStrings::tableProblemInformation,
-    DatabaseStrings::labelProblemFileName
-  );
-  this->createHashIndex(
-    DatabaseStrings::tableDeleted, DatabaseStrings::labelUsername
-  );
-  return true;
-}
-
-bool Database::initializeServer(int maximumConnections) {
+bool Database::initialize(int maximumConnections) {
   STACK_TRACE("Database::initializeServer");
   this->user.owner = this;
-  this->fallbackDatabase.owner = this;
   this->flagInitializedServer = true;
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
     return true;
@@ -624,7 +576,7 @@ bool Database::initializeServer(int maximumConnections) {
     << "**SLOW** "
     << "fall-back JSON storage."
     << Logger::endL;
-    this->fallbackDatabase.initializeServer();
+    this->fallbackDatabase.initializeAsFallback();
     return true;
   case DatabaseType::internal:
     DatabaseStrings::databaseName = "local";
@@ -638,9 +590,6 @@ bool Database::fetchCollectionNames(
   List<std::string>& output, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::fetchCollectionNames");
-  if (!Database::get().initializeClient()) {
-    return false;
-  }
   switch (global.databaseType) {
   case DatabaseType::noDatabaseEveryoneIsAdmin:
     if (commentsOnFailure != nullptr) {
@@ -651,7 +600,7 @@ bool Database::fetchCollectionNames(
     return false;
   case DatabaseType::fallback:
     return
-    Database::get().fallbackDatabase.fetchCollectionNames(
+    Database::get().fallbackDatabase.client.fetchCollectionNames(
       output, commentsOnFailure
     );
   case DatabaseType::internal:

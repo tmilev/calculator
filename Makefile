@@ -155,7 +155,6 @@ SOURCES_RELATIVE_PATH=\
     database.cpp \
     database_user.cpp \
     database_test.cpp \
-    database_fallback.cpp \
     database_internal.cpp \
     database_problem_data.cpp \
     email_user.cpp \

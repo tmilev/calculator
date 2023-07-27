@@ -11,8 +11,7 @@ Database::Test::Test(DatabaseType databaseType) {
   global.databaseType = databaseType;
   global.flagServerForkedIntoWorker = true;
   DatabaseStrings::databaseName = "test";
-  Database::get().initializeServer(10);
-  Database::get().initializeClient();
+  Database::get().initialize(10);
 }
 
 bool Database::Test::all() {
@@ -48,7 +47,7 @@ bool Database::Test::deleteDatabase() {
 
 void Database::Test::initializeForDatabaseOperations() {
   STACK_TRACE("Database::Test::initializeForDatabaseOperations");
-  Database::get().initializeServer(10);
+  Database::get().initialize(10);
   Crypto::Random::initializeRandomBytesForTesting();
 }
 

@@ -4106,7 +4106,7 @@ int WebServer::run() {
   global.logs.server.reset();
   global.logs.serverMonitor.reset();
   global.logs.worker.reset();
-  Database::get().initializeServer(this->maximumTotalUsedWorkers);
+  Database::get().initialize(this->maximumTotalUsedWorkers);
   if (
     global.databaseType == DatabaseType::internal &&
     Database::get().localDatabase.processId == 0
@@ -5629,7 +5629,7 @@ int WebServer::mainConsoleHelp() {
 
 int WebServer::mainCommandLine() {
   STACK_TRACE("WebServer::mainCommandLine");
-  if (!Database::get().initializeServer(1)) {
+  if (!Database::get().initialize(1)) {
     global.fatal << "Failed to initialize database. " << global.fatal;
   }
   Calculator& calculator = global.calculator().getElement();

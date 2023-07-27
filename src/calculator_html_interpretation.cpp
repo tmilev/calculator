@@ -2145,9 +2145,9 @@ std::string WebAPIResponse::addUserEmails(
     userPasswords,
     userRole,
     userGroup,
-    comments,
     numberOfNewUsers,
-    numberOfUpdatedUsers
+    numberOfUpdatedUsers,
+    &comments
   );
   if (createdUsers) {
     out

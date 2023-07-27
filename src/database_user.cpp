@@ -425,9 +425,11 @@ void UserCalculator::setProblemData(
 }
 
 bool UserCalculator::shouldCommentOnMissingUser() {
-  if (this->username.size() < 4) {
-    return true;
+  static bool shouldComment = true;
+  if (this->username.size() >= 4 || !shouldComment) {
+    return false;
   }
+  shouldComment = false;
   return
   this->username == WebAPI::userDefaultAdmin ||
   this->username == "admin" ||
@@ -1007,9 +1009,9 @@ bool UserOfDatabase::addUsersFromEmails(
   const std::string& userPasswords,
   std::string& userRole,
   std::string& userGroup,
-  std::stringstream& comments,
   int& outputNumberOfNewUsers,
-  int& outputNumberOfUpdatedUsers
+  int& outputNumberOfUpdatedUsers,
+  std::stringstream* comments
 ) {
   STACK_TRACE("UserOfDatabase::addUsersFromEmails");
   global.millisecondsMaxComputation = 100000;
@@ -1020,9 +1022,9 @@ bool UserOfDatabase::addUsersFromEmails(
   List<std::string> passwords;
   StringRoutines::stringSplitDefaultDelimiters(emailList, emails);
   StringRoutines::stringSplitDefaultDelimiters(userPasswords, passwords);
-  if (passwords.size > 0) {
-    if (passwords.size != emails.size) {
-      comments
+  if (passwords.size > 0 && passwords.size != emails.size) {
+    if (comments != nullptr) {
+      *comments
       << "Different number of usernames/emails and passwords: "
       << emails.size
       << " emails and "
@@ -1033,131 +1035,177 @@ bool UserOfDatabase::addUsersFromEmails(
       return false;
     }
   }
-  UserCalculator currentUser;
-  bool result = true;
-  bool doSendEmails = false;
   outputNumberOfNewUsers = 0;
   outputNumberOfUpdatedUsers = 0;
   for (int i = 0; i < emails.size; i ++) {
-    currentUser.reset();
-    currentUser.username = emails[i];
-    currentUser.courseInDB =
-    global.getWebInput(WebAPI::Problem::courseHome);
-    currentUser.sectionInDB = userGroup;
-    currentUser.instructorInDB = global.userDefault.username;
-    currentUser.email = emails[i];
-    currentUser.userRole = userRole;
-    bool isEmail = true;
-    if (emails[i].find('@') == std::string::npos) {
-      isEmail = false;
-      currentUser.email = "";
-    } else {
-      currentUser.email = emails[i];
+    std::string password = "";
+    if (password.size() > 0) {
+      password = passwords[i];
     }
-    JSData currentUserData;
-    QueryOneOfExactly findUserByUsernameOrEmail;
-    QueryExact findUserByUsername =
-    QueryExact(
-      DatabaseStrings::tableUsers,
-      DatabaseStrings::labelUsername,
-      currentUser.username
-    );
-    findUserByUsernameOrEmail.queries.addOnTop(findUserByUsername);
-    if (currentUser.email != "") {
-      findUserByUsernameOrEmail.queries.addOnTop(
-        QueryExact(
-          DatabaseStrings::tableUsers,
-          DatabaseStrings::labelEmail,
-          currentUser.email
-        )
-      );
-    }
-    List<JSData> allUsers;
     if (
-      !this->owner->find(
-        findUserByUsernameOrEmail, nullptr, allUsers, &comments
+      !UserOfDatabase::addOneUser(
+        emails[i],
+        password,
+        userRole,
+        userGroup,
+        outputNumberOfNewUsers,
+        outputNumberOfUpdatedUsers,
+        comments
       )
     ) {
-      comments << "Database error! ";
       return false;
     }
-    if (allUsers.size == 0) {
-      if (!currentUser.storeToDatabase(false, &comments)) {
-        comments << "Failed to create user: " << currentUser.username;
-        result = false;
-        continue;
-      } else {
-        outputNumberOfNewUsers ++;
-      }
-      QuerySet setUser;
-      setUser.addValue(currentUserData);
-      if (isEmail) {
-        this->owner->updateOne(
-          findUserByUsername, setUser, true, &comments
-        );
-      }
-    } else {
-      outputNumberOfUpdatedUsers ++;
-      // currentUser may have its updated entries modified by the functions
-      // above.
-      QuerySet setUser;
-      setUser.addValue(currentUser.toJSON());
-      if (
-        !this->owner->updateOne(
-          findUserByUsername, setUser, false, &comments
-        )
-      ) {
-        result = false;
-      }
-    }
-    if (passwords.size == 0 || passwords.size != emails.size) {
-      if (
-        currentUser.actualHashedSaltedPassword == "" &&
-        currentUser.actualAuthenticationToken == ""
-      ) {
-        if (!currentUser.computeAndStoreActivationToken(&comments)) {
-          result = false;
-        }
-      }
-    } else {
-      currentUser.enteredPassword =
-      HtmlRoutines::convertStringToURLString(passwords[i], false);
-      // <-Passwords are ONE-LAYER url-encoded
-      // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how
-      // form.submit() works!
-      // <-Incoming pluses must be re-coded as spaces (%20).
-      if (!currentUser.setPassword(&comments)) {
-        result = false;
-      }
-      JSData activatedJSON;
-      activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
-      QuerySet activatedSet;
-      activatedSet.fromJSONNoFail(activatedJSON);
-      this->owner->updateOne(
-        findUserByUsername, activatedSet, false, &comments
-      );
-      if (currentUser.email != "") {
-        currentUser.computeAndStoreActivationStats(&comments, &comments);
-      }
-    }
   }
-  if (!result) {
-    comments << "<br>Failed to create all users. ";
-  }
+  bool doSendEmails = false;
+  bool result = true;
   if (doSendEmails) {
     std::stringstream* commentsGeneralSensitive = nullptr;
     if (global.userDefaultHasAdminRights()) {
-      commentsGeneralSensitive = &comments;
+      commentsGeneralSensitive = comments;
     }
     if (
       !UserOfDatabase::sendActivationEmail(
-        emails, &comments, &comments, commentsGeneralSensitive
+        emails, comments, comments, commentsGeneralSensitive
       )
     ) {
       result = false;
     }
   }
   return result;
+}
+
+bool UserOfDatabase::addOneUser(
+  const std::string& userNameOrEmail,
+  const std::string& password,
+  std::string& userRole,
+  std::string& userGroup,
+  int& outputNumberOfNewUsers,
+  int& outputNumberOfUpdatedUsers,
+  std::stringstream* commentsOnFailure
+) {
+  UserCalculator currentUser;
+  currentUser.username = userNameOrEmail;
+  currentUser.email = userNameOrEmail;
+  // If it looks like email, assume it's email.
+  // The user addition comes from admin user,
+  // so let's trust the input within reason.
+  if (!EmailRoutines::isOKEmail(currentUser.email, commentsOnFailure)) {
+    // Not an email.
+    currentUser.email = "";
+  }
+  currentUser.courseInDB = global.getWebInput(WebAPI::Problem::courseHome);
+  currentUser.sectionInDB = userGroup;
+  currentUser.instructorInDB = global.userDefault.username;
+  currentUser.userRole = userRole;
+  JSData currentUserData;
+  QueryOneOfExactly findUserByUsernameOrEmail;
+  QueryExact findUserByUsername =
+  QueryExact(
+    DatabaseStrings::tableUsers,
+    DatabaseStrings::labelUsername,
+    currentUser.username
+  );
+  findUserByUsernameOrEmail.queries.addOnTop(findUserByUsername);
+  if (currentUser.email != "") {
+    findUserByUsernameOrEmail.queries.addOnTop(
+      QueryExact(
+        DatabaseStrings::tableUsers,
+        DatabaseStrings::labelEmail,
+        currentUser.email
+      )
+    );
+  }
+  List<JSData> allUsers;
+  if (
+    !this->owner->find(
+      findUserByUsernameOrEmail, nullptr, allUsers, commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Database error! ";
+    }
+    return false;
+  }
+  if (allUsers.size == 0) {
+    if (!currentUser.storeToDatabase(false, commentsOnFailure)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "Failed to create user: "
+        << currentUser.username;
+      }
+      return false;
+    } else {
+      outputNumberOfNewUsers ++;
+    }
+    QuerySet setUser;
+    setUser.addValue(currentUserData);
+    if (currentUser.email != "") {
+      this->owner->updateOne(
+        findUserByUsername, setUser, true, commentsOnFailure
+      );
+    }
+  } else {
+    outputNumberOfUpdatedUsers ++;
+    // currentUser may have its updated entries modified by the functions
+    // above.
+    QuerySet setUser;
+    setUser.addValue(currentUser.toJSON());
+    if (
+      !this->owner->updateOne(
+        findUserByUsername, setUser, false, commentsOnFailure
+      )
+    ) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "Failed to update user: "
+        << currentUser.username;
+      }
+      return false;
+    }
+  }
+  if (password == "") {
+    if (
+      currentUser.actualHashedSaltedPassword == "" &&
+      currentUser.actualAuthenticationToken == ""
+    ) {
+      if (!currentUser.computeAndStoreActivationToken(commentsOnFailure)) {
+        if (commentsOnFailure != nullptr) {
+          *commentsOnFailure
+          << "Failed to store activation token: "
+          << currentUser.username;
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+  currentUser.enteredPassword =
+  HtmlRoutines::convertStringToURLString(password, false);
+  // <-Passwords are ONE-LAYER url-encoded
+  // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how
+  // form.submit() works!
+  // <-Incoming pluses must be re-coded as spaces (%20).
+  if (!currentUser.setPassword(commentsOnFailure)) {
+    return false;
+  }
+  JSData activatedJSON;
+  activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
+  QuerySet activatedSet;
+  activatedSet.fromJSONNoFail(activatedJSON);
+  if (
+    !this->owner->updateOne(
+      findUserByUsername, activatedSet, false, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  if (currentUser.email == "") {
+    return true;
+  }
+  return
+  currentUser.computeAndStoreActivationStats(
+    commentsOnFailure, commentsOnFailure
+  );
 }
 
 bool UserCalculator::getActivationAddress(

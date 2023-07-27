@@ -583,14 +583,23 @@ public:
     const std::string& userPasswords,
     std::string& userRole,
     std::string& userGroup,
-    std::stringstream& comments,
     int& outputNumberOfNewUsers,
-    int& outputNumberOfUpdatedUsers
+    int& outputNumberOfUpdatedUsers,
+    std::stringstream* comments
   );
   bool loadUserInformation(
     UserCalculatorData& output, std::stringstream* commentsOnFailure
   );
   UserOfDatabase();
+  bool addOneUser(
+    const std::string& userNameOrEmail,
+    const std::string& password,
+    std::string& userRole,
+    std::string& userGroup,
+    int& outputNumberOfNewUsers,
+    int& outputNumberOfUpdatedUsers,
+    std::stringstream* commentsOnFailure
+  );
 };
 
 class Database {

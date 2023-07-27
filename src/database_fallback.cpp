@@ -128,6 +128,7 @@ bool DatabaseFallback::findOnce(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("FallbackDatabase::findOne");
+  (void) options;
   MutexProcesslockGuard guardDB(this->access);
   if (!this->readAndIndexDatabase(commentsOnFailure)) {
     return false;

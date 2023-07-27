@@ -3,7 +3,7 @@
 #include "crypto_calculator.h"
 
 std::string DatabaseInternal::folder() {
-  return "database_internal/" + DatabaseStrings::databaseName + "/";
+  return "database/" + DatabaseStrings::databaseName + "/";
 }
 
 DatabaseInternal::DatabaseInternal() {

@@ -569,7 +569,7 @@ bool Database::initialize(int maximumConnections) {
     // should be unreachable.
     return true;
   case DatabaseType::fallback:
-    DatabaseStrings::databaseName = "local";
+    DatabaseStrings::databaseName = "fallback";
     global
     << Logger::red
     << "Using "

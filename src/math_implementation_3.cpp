@@ -1570,16 +1570,10 @@ void FileOperations::initializeFoldersULTRASensitive() {
   );
   folderSubstitutionsULTRASensitive.setKeyValue("calculator", "calculator");
   folderSubstitutionsULTRASensitive.setKeyValue(
-    "database_internal/", "database_internal/"
+    "database/", "database/"
   );
   folderSubstitutionsULTRASensitive.setKeyValue(
-    "/database_internal/", "/database_internal/"
-  );
-  folderSubstitutionsULTRASensitive.setKeyValue(
-    "database_fallback/", "database_fallback/"
-  );
-  folderSubstitutionsULTRASensitive.setKeyValue(
-    "/database_fallback/", "/database_fallback/"
+    "/database/", "/database/"
   );
 }
 

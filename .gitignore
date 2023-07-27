@@ -23,8 +23,7 @@ certificates*
 LogFiles*
 
 database-backups*
-database_fallback/*
-database_internal/
+database/*
 test/test_database.json
 
 bin/*

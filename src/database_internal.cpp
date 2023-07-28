@@ -152,6 +152,7 @@ void DatabaseInternal::initializeAsFallback() {
   this->initializeCommon();
   this->flagIsFallback = true;
   this->mutexFallbackDatabase.createMe("DatabaseMutex", false);
+  this->failedToInitialize = !this->server.initializeLoadFromHardDrive();
 }
 
 void DatabaseInternal::initializeForkAndRun(int maximumConnections) {

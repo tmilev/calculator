@@ -1127,6 +1127,7 @@ void RootSubalgebra::extractRelations(
   int indexInOwner,
   Vectors<Rational>& kSingular
 ) {
+  (void) kSingular;
   int dimension = this->getOwnerLieAlgebra().getRank();
   Vector<Rational> root;
   root.makeZero(dimension);

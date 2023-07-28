@@ -130,6 +130,8 @@ class Authenticator {
     }
     if (database === "local") {
       database = "<b style='color:green'>local database</b>";
+    } else if (database === "fallback") {
+      database = "<b style='color:red'>fallback database</b>";
     }
     let databaseInfo = document.getElementById(
       ids.domElements.divLoginPanelDatabaseInfo,

@@ -4609,7 +4609,7 @@ void WebServer::checkSystemInstallationOpenSSL() {
 }
 
 void WebServer::checkDatabaseSetup() {
-  STACK_TRACE("WebServer::checkMongoDatabaseSetup");
+  STACK_TRACE("WebServer::checkDatabaseSetup");
   switch (global.databaseType) {
   case DatabaseType::internal:
     global
@@ -5258,6 +5258,14 @@ void GlobalVariables::configurationProcess() {
     DatabaseStrings::databaseName = "local";
     global.configuration[Configuration::database] = "local";
   }
+  if (
+    DatabaseStrings::databaseName == "fallback" ||
+    DatabaseStrings::databaseName == "fallBack"
+  ) {
+    DatabaseStrings::databaseName = "fallback";
+    global.configuration[Configuration::database] = "fallback";
+    global.databaseType = DatabaseType::fallback;
+  }
   if (global.flagDebugLogin) {
     global
     << Logger::purple
@@ -5266,24 +5274,19 @@ void GlobalVariables::configurationProcess() {
     << Logger::red
     << "WARNING: debug login is on. ";
     if (global.databaseType == DatabaseType::internal) {
-      global
-      << Logger::green
-      << "Set database name to 'test'. "
-      << Logger::endL
-      << Logger::purple
-      << "************************"
-      << Logger::endL;
-      DatabaseStrings::databaseName = "test";
+      DatabaseStrings::databaseName += "_debug";
     } else {
-      global.databaseType = DatabaseType::fallback;
-      global
-      << Logger::green
-      << "Set database to fallback database. "
-      << Logger::endL
-      << Logger::purple
-      << "************************"
-      << Logger::endL;
+      DatabaseStrings::databaseName += "_debug";
     }
+    global
+    << Logger::green
+    << "Set database name to: ["
+    << DatabaseStrings::databaseName
+    << "]. "
+    << Logger::endL
+    << Logger::purple
+    << "************************"
+    << Logger::endL;
   }
   if (
     global.configuration[Configuration::disableDatabaseLogEveryoneAsAdmin].

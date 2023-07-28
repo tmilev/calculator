@@ -21,7 +21,7 @@ bool DatabaseInternalClient::fetchCollectionNames(
   DatabaseInternalRequest request;
   request.requestType = DatabaseInternalRequest::Type::fetchCollectionNames;
   if (
-    !this->owner->sendAndReceiveFromClientToServer(
+    !this->owner->sendAndReceiveFromClient(
       request, result, commentsOnFailure
     )
   ) {
@@ -59,7 +59,7 @@ bool DatabaseInternalClient::updateOne(
   request.queryFindAndUpdate = queryFindAndUpdate;
   request.requestType = DatabaseInternalRequest::Type::findAndUpdate;
   if (
-    !this->owner->sendAndReceiveFromClientToServer(
+    !this->owner->sendAndReceiveFromClient(
       request, result, commentsOnFailure
     )
   ) {
@@ -80,6 +80,15 @@ std::string DatabaseInternal::toStringInitializationErrors() const {
   return out.str();
 }
 
+bool DatabaseInternalClient::checkInitialization() {
+  if (this->owner == nullptr) {
+    global.fatal
+    << "Database internal client has non-initialized owner. "
+    << global.fatal;
+  }
+  return true;
+}
+
 bool DatabaseInternalClient::find(
   const QueryOneOfExactly& findOrQueries,
   const QueryResultOptions* options,
@@ -87,13 +96,14 @@ bool DatabaseInternalClient::find(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalClient::find");
+  this->checkInitialization();
   (void) options;
   DatabaseInternalResult result;
   DatabaseInternalRequest request;
   request.requestType = DatabaseInternalRequest::Type::find;
   request.queryOneOfExactly = findOrQueries;
   if (
-    !this->owner->sendAndReceiveFromClientToServer(
+    !this->owner->sendAndReceiveFromClient(
       request, result, commentsOnFailure
     )
   ) {
@@ -132,19 +142,25 @@ int DatabaseInternal::forkOutDatabase() {
   return 0;
 }
 
+void DatabaseInternal::initializeCommon() {
+  this->client.owner = this;
+  this->server.owner = this;
+}
+
 void DatabaseInternal::initializeAsFallback() {
+  STACK_TRACE("DatabaseInternal::initializeAsFallback");
+  this->initializeCommon();
   this->flagIsFallback = true;
   this->mutexFallbackDatabase.createMe("DatabaseMutex", false);
 }
 
 void DatabaseInternal::initializeForkAndRun(int maximumConnections) {
   STACK_TRACE("DatabaseInternal::initializeForkAndRun");
+  this->initializeCommon();
   this->connections.setSize(maximumConnections);
   for (int i = 0; i < maximumConnections; i ++) {
     this->connections[i].create(i);
   }
-  this->client.owner = this;
-  this->server.owner = this;
   if (this->forkOutDatabase() > 0) {
     // This is the parent process that will ultimately become the client.
     return;
@@ -159,26 +175,69 @@ void DatabaseInternal::accountInitializationError(const std::string& error) {
   this->initializationErrors.addOnTop(error);
 }
 
-bool DatabaseInternal::sendAndReceiveFromClientToServer(
+bool DatabaseInternal::sendAndReceiveFromClient(
   const DatabaseInternalRequest& input,
   DatabaseInternalResult& output,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternal::sendAndReceiveFromClientToServer");
+  std::string inputMessage;
+  std::string outputMessage;
+  inputMessage = input.toJSON().toString();
   if (
-    !this->sendFromClientToServer(
-      input.toJSON().toString(), commentsOnFailure
+    !this->sendAndReceiveFromClientInternal(
+      inputMessage, outputMessage, commentsOnFailure
     )
   ) {
     return false;
   }
-  bool result = this->receiveInClientFromServer(output, commentsOnFailure);
-  return result;
+  return output.fromJSON(outputMessage, commentsOnFailure);
+}
+
+bool DatabaseInternal::sendAndReceiveFromClientInternal(
+  const std::string& input,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
+  if (this->flagIsFallback) {
+    return
+    this->sendAndReceiveFromClientToServerFallbackWithProcessMutex(
+      input, output
+    );
+  }
+  return
+  this->sendAndReceiveFromClientToServerThroughPipe(
+    input, output, commentsOnFailure
+  );
+}
+
+bool DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex
+(const std::string& input, std::string& output) {
+  STACK_TRACE(
+    "DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex"
+  );
+  MutexProcesslockGuard guard(this->mutexFallbackDatabase);
+  Crypto::convertStringToListBytesSigned(input, this->buffer);
+  this->executeGetString(output);
+  return true;
+}
+
+bool DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe(
+  const std::string& input,
+  std::string& output,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe");
+  if (!this->sendFromClientToServer(input, commentsOnFailure)) {
+    return false;
+  }
+  return this->receiveInClientFromServer(output, commentsOnFailure);
 }
 
 bool DatabaseInternal::sendFromClientToServer(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("DatabaseInternal::sendFromClientToServer");
   DatabaseInternalConnection& connection =
   this->connections[this->currentWorkerId];
   bool result = connection.clientToServer.writeOnceNoFailure(input, 0, true);
@@ -189,7 +248,7 @@ bool DatabaseInternal::sendFromClientToServer(
 }
 
 bool DatabaseInternal::receiveInClientFromServer(
-  DatabaseInternalResult& output, std::stringstream* commentsOnFailure
+  std::string& output, std::stringstream* commentsOnFailure
 ) {
   DatabaseInternalConnection& connection =
   this->connections[this->currentWorkerId];
@@ -200,11 +259,10 @@ bool DatabaseInternal::receiveInClientFromServer(
     }
     return false;
   }
-  std::string stringBuffer;
   Crypto::convertListCharsToString(
-    connection.serverToClient.buffer, stringBuffer
+    connection.serverToClient.buffer, output
   );
-  return output.fromJSON(stringBuffer, commentsOnFailure);
+  return true;
 }
 
 void DatabaseInternal::run() {
@@ -240,7 +298,13 @@ bool DatabaseInternal::runOneConnection() {
   return this->executeAndSend();
 }
 
-void DatabaseInternal::execute(DatabaseInternalResult& output) {
+void DatabaseInternal::executeGetString(std::string& output) {
+  DatabaseInternalResult result;
+  this->executeGetResult(result);
+  output = result.toJSON().toString();
+}
+
+void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
   STACK_TRACE("DatabaseInternal::execute");
   if (this->failedToInitialize) {
     output.success = false;
@@ -289,19 +353,16 @@ void DatabaseInternal::execute(DatabaseInternalResult& output) {
   }
 }
 
-bool DatabaseInternal::send(DatabaseInternalResult& result) {
-  STACK_TRACE("DatabaseInternal::send");
-  return
-  this->currentServerToClient().writeOnceNoFailure(
-    result.toJSON().toString(), 0, true
-  );
+bool DatabaseInternal::sendFromServerToClient(const std::string& message) {
+  STACK_TRACE("DatabaseInternal::sendFromServerToClient");
+  return this->currentServerToClient().writeOnceNoFailure(message, 0, true);
 }
 
 bool DatabaseInternal::executeAndSend() {
   STACK_TRACE("DatabaseInternal::executeAndSend");
-  DatabaseInternalResult result;
-  this->execute(result);
-  return this->send(result);
+  std::string result;
+  this->executeGetString(result);
+  return this->sendFromServerToClient(result);
 }
 
 PipePrimitive& DatabaseInternal::currentServerToClient() {

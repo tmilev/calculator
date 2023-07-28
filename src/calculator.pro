@@ -139,7 +139,6 @@ SOURCES += \
     crypto_test.cpp \
     database.cpp \
     database_user.cpp \
-    database_fallback.cpp \
     database_internal.cpp \
     database_calculator.cpp \
     database_problem_data.cpp \

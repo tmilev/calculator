@@ -364,6 +364,7 @@ public:
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
   );
+  bool checkInitialization();
 };
 
 // A self contained simple database.
@@ -381,7 +382,7 @@ class DatabaseInternal {
     const std::string& input, std::stringstream* commentsOnFailure
   );
   bool receiveInClientFromServer(
-    DatabaseInternalResult& output, std::stringstream* commentsOnFailure
+    std::string& output, std::stringstream* commentsOnFailure
   );
   PipePrimitive& currentServerToClient();
   PipePrimitive& currentClientToServer();
@@ -405,13 +406,30 @@ public:
   DatabaseInternalClient client;
   DatabaseInternalServer server;
   void accountInitializationError(const std::string& error);
-  // Sends data from the client process to the server process.
-  // The data sent here will be received by
-  // DatabaseInternal::runOneConnection.
-  bool sendAndReceiveFromClientToServer(
+  // Sends data from the database client to the database server.
+  bool sendAndReceiveFromClient(
     const DatabaseInternalRequest& input,
     DatabaseInternalResult& output,
     std::stringstream* commentsOnFailure
+  );
+  bool sendAndReceiveFromClientInternal(
+    const std::string& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
+  // Sends data from the client process to the server process.
+  // The data sent here will be received by
+  // DatabaseInternal::runOneConnection.
+  bool sendAndReceiveFromClientToServerThroughPipe(
+    const std::string& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
+  // A fallback method where all server computation is carried in
+  // the current client process. All other client processes are locked away
+  // with a process mutex.
+  bool sendAndReceiveFromClientToServerFallbackWithProcessMutex(
+    const std::string& input, std::string& output
   );
   static std::string folder();
   bool deleteDatabase(std::stringstream* commentsOnFailure);
@@ -419,6 +437,7 @@ public:
   // Returns the process id of the database server to the parent
   // and 0 to the child server database process.
   int forkOutDatabase();
+  void initializeCommon();
   void initializeAsFallback();
   void initializeForkAndRun(int maximumConnections);
   // Runs the main server loop which listens to a number of
@@ -433,8 +452,9 @@ public:
   // separate thread(s).
   bool runOneConnection();
   // Executes one single operation and sends the result back.
-  void execute(DatabaseInternalResult& output);
-  bool send(DatabaseInternalResult& result);
+  void executeGetResult(DatabaseInternalResult& output);
+  void executeGetString(std::string& output);
+  bool sendFromServerToClient(const std::string& message);
   bool executeAndSend();
   DatabaseInternal();
   std::string toStringInitializationErrors() const;

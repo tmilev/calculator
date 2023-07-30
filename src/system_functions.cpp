@@ -229,25 +229,56 @@ std::string externalCommandReturnStandardOut(
   return result;
 }
 
+class Popener {
+public:
+  FILE* reader;
+  Popener();
+  int readAll(const std::string& inputCommand);
+  int free();
+  ~Popener();
+};
+
+Popener::Popener() {
+  this->reader = nullptr;
+}
+
+Popener::~Popener() {
+  this->free();
+}
+
+int Popener::free() {
+  if (this->reader == nullptr) {
+    return 0;
+  }
+  int result = pclose(this->reader);
+  this->reader = nullptr;
+  return result;
+}
+
 int externalCommandStreamOutput(const std::string& inputCommand) {
   std::string inputCommandWithRedirection = inputCommand + " 2>&1";
-  std::shared_ptr<FILE> reader(
-    popen(inputCommandWithRedirection.c_str(), "r"), pclose
-  );
-  if (!reader) {
+  Popener popener;
+  return popener.readAll(inputCommandWithRedirection);
+}
+
+int Popener::readAll(const std::string& command) {
+  this->free();
+  this->reader = popen(command.c_str(), "r");
+  if (this->reader == nullptr) {
     global << Logger::red << "Failed to create pipe. " << Logger::endL;
     return - 1;
   }
   const int bufferSize = 20000;
   char buffer[bufferSize];
-  while (!feof(reader.get())) {
-    char* incoming = fgets(buffer, bufferSize, reader.get());
+  std::cout << "DEBUG: here here\n";
+  while (!feof(this->reader)) {
+    char* incoming = fgets(buffer, bufferSize, this->reader);
     if (incoming != nullptr) {
       std::string result(buffer);
       std::cout << result;
     }
   }
-  int result = pclose(reader.get());
+  int result = this->free();
   if (result != 0) {
     global << Logger::red << strerror(errno) << Logger::endL;
   }

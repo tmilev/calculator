@@ -43,13 +43,12 @@ void initializeGlobalObjects() {
   global.pointerExternalCommandNoOutput = &externalCommandNoOutput;
   global.pointerExternalCommandReturnOutput =
   &externalCommandReturnStandardOut;
+  global << "DEBUG: initialization done?" << Logger::endL;
   global.pointerExternalCommandStream = &externalCommandStreamOutput;
   global.pointerCallChDir = &callChDirWrapper;
 }
 
 void HtmlRoutines::makeReportIndicatorFile(const std::string& input) {
-  static int counter = - 1;
-  counter ++;
   std::fstream file;
   FileOperations::openFileCreateIfNotPresentVirtual(
     file, "result/output.html", false, true, false

@@ -10,13 +10,24 @@ Database::Test::Test(DatabaseType databaseType) {
   this->maintainerDatabaseName.initialize(Database::name);
   global.databaseType = databaseType;
   global.flagServerForkedIntoWorker = true;
-  Database::name = "test";
+  switch (databaseType) {
+  case DatabaseType::internal:
+    Database::name = "test_internal";
+    break;
+  case DatabaseType::fallback:
+    Database::name = "test_fallback";
+    break;
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    Database::name = "bad_folder_name";
+    break;
+  }
   Database::get().initialize(10);
 }
 
 bool Database::Test::all() {
   STACK_TRACE("Database::Test::all");
   Database::Test::basics(DatabaseType::fallback);
+  global << "DEBUG: got to here" << Logger::endL;
   Database::Test::basics(DatabaseType::internal);
   return true;
 }
@@ -35,6 +46,7 @@ bool Database::Test::basics(DatabaseType databaseType) {
 
 bool Database::Test::deleteDatabase() {
   std::stringstream commentsOnFailure;
+  global << "DEBug: here" << Logger::endL;
   if (!Database::get().shutdown(&commentsOnFailure)) {
     global.fatal
     << Logger::red
@@ -42,6 +54,7 @@ bool Database::Test::deleteDatabase() {
     << commentsOnFailure.str()
     << global.fatal;
   }
+  global << "DEBug: shutdown OK" << Logger::endL;
   std::string folderToRemove;
   FileOperations::getPhysicalFileNameFromVirtual(
     DatabaseInternal::folder(),
@@ -50,6 +63,7 @@ bool Database::Test::deleteDatabase() {
     true,
     &commentsOnFailure
   );
+  global << "DEBug: about to external command " << Logger::endL;
   global.externalCommandStream("rm -rf " + folderToRemove);
   return true;
 }
@@ -79,8 +93,11 @@ bool Database::Test::createAdminAccount() {
 }
 
 bool QuerySet::Test::all() {
+  global << "DEBUG: got to here" << Logger::endL;
   QuerySet::Test::basics(DatabaseType::fallback);
+  global << "DEBUG: got to here2" << Logger::endL;
   QuerySet::Test::basics(DatabaseType::internal);
+  global << "DEBUG: got to here3" << Logger::endL;
   return true;
 }
 
@@ -142,13 +159,17 @@ void QuerySet::Test::matchKeyValue(
 }
 
 bool QuerySet::Test::basics(DatabaseType databaseType) {
+  STACK_TRACE("QuerySet::Test::basics");
   Database::Test tester(databaseType);
+  global << "DEBUG: got to here3" << Logger::endL;
   tester.deleteDatabase();
+  global << "DEBUG: got to here next" << Logger::endL;
   tester.initializeForDatabaseOperations();
   QueryExact find;
   find.collection = DatabaseStrings::tableUsers;
   find.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
   find.exactValue = "ttt";
+  global << "DEBUG: got to here123" << Logger::endL;
   QuerySet updater;
   updater.fromJSONStringNoFail(
     "[{key:[\"username\"], value:\"ttt\"}, "

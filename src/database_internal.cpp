@@ -9,8 +9,9 @@ std::string DatabaseInternal::folder() {
 DatabaseInternal::DatabaseInternal() {
   this->processId = - 1;
   this->maximumMessageSize = 65536;
-  this->failedToInitialize = true;
+  this->flagFailedToInitialize = true;
   this->flagIsFallback = false;
+  this->flagIsRunning = false;
 }
 
 bool DatabaseInternalClient::fetchCollectionNames(
@@ -170,7 +171,7 @@ void DatabaseInternal::initializeAsFallback() {
     << "Failed to create fallback database process mutex. "
     << global.fatal;
   }
-  this->failedToInitialize = !this->server.initializeLoadFromHardDrive();
+  this->flagFailedToInitialize = !this->server.initializeLoadFromHardDrive();
 }
 
 void DatabaseInternal::initializeForkAndRun(int maximumConnections) {
@@ -292,8 +293,9 @@ void DatabaseInternal::run() {
     this->readEnds.addOnTop(readEnd);
     this->mapFromReadEndsToWorkerIds.setKeyValue(readEnd, i);
   }
-  this->failedToInitialize = !this->server.initializeLoadFromHardDrive();
-  while (true) {
+  this->flagFailedToInitialize = !this->server.initializeLoadFromHardDrive();
+  this->flagIsRunning = true;
+  while (this->flagIsRunning) {
     this->runOneConnection();
   }
   global << "Exit database main loop. " << Logger::endL;
@@ -326,7 +328,7 @@ void DatabaseInternal::executeGetString(std::string& output) {
 
 void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
   STACK_TRACE("DatabaseInternal::executeGetResult");
-  if (this->failedToInitialize) {
+  if (this->flagFailedToInitialize) {
     output.success = false;
     output.comments = this->toStringInitializationErrors();
     return;
@@ -362,7 +364,7 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
     this->server.fetchCollectionNames(output.content, &commentsOnFailure);
     break;
   case DatabaseInternalRequest::Type::shutdown:
-    output.success = this->server.shutdown(&commentsOnFailure);
+    output.success = this->server.shutdown();
     break;
   case DatabaseInternalRequest::Type::unknown:
     break;
@@ -558,6 +560,14 @@ DatabaseInternalRequest::Type DatabaseInternalRequest::stringToType(
   ) {
     return DatabaseInternalRequest::Type::fetchCollectionNames;
   }
+  if (
+    input ==
+    DatabaseInternalRequest::typeToString(
+      DatabaseInternalRequest::Type::shutdown
+    )
+  ) {
+    return DatabaseInternalRequest::Type::shutdown;
+  }
   return DatabaseInternalRequest::Type::unknown;
 }
 
@@ -607,7 +617,9 @@ bool DatabaseInternalRequest::fromJSData(
     );
   case DatabaseInternalRequest::Type::fetchCollectionNames:
     return true;
-  default:
+  case DatabaseInternalRequest::Type::shutdown:
+    return true;
+  case DatabaseInternalRequest::Type::unknown:
     break;
   }
   if (commentsOnFailure != nullptr) {
@@ -629,9 +641,11 @@ bool DatabaseInternalServer::fetchCollectionNames(
   return true;
 }
 
-bool DatabaseInternalServer::shutdown(std::stringstream* commentsOnFailure) {
+bool DatabaseInternalServer::shutdown() {
   STACK_TRACE("DatabaseInternalServer::shutdown");
+  global << Logger::red << "Database shutdown started." << Logger::endL;
   this->collections.clear();
+  this->owner->flagIsRunning = false;
   return true;
 }
 

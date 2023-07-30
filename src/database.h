@@ -298,7 +298,7 @@ public:
   );
   void storeCollectionList();
   std::string collectionsSchemaFileName() const;
-  bool shutdown(std::stringstream* commentsOnFailure);
+  bool shutdown();
   bool find(
     const QueryOneOfExactly& query,
     const QueryResultOptions* options,
@@ -382,7 +382,7 @@ class DatabaseInternal {
   MapList<int, int> mapFromReadEndsToWorkerIds;
   List<int> readEnds;
   List<char> buffer;
-  bool failedToInitialize;
+  bool flagFailedToInitialize;
   bool sendFromClientToServer(
     const std::string& input, std::stringstream* commentsOnFailure
   );
@@ -408,6 +408,7 @@ public:
   // use an inter-process mutex to lock the database
   // for exclusive use to prevent data races.
   bool flagIsFallback;
+  bool flagIsRunning;
   DatabaseInternalClient client;
   DatabaseInternalServer server;
   void accountInitializationError(const std::string& error);

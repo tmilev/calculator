@@ -417,7 +417,8 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
-  // Sends data from the client process to the server process.
+  // Sends data from the client process to
+  // the database server process.
   // The data sent here will be received by
   // DatabaseInternal::runOneConnection.
   bool sendAndReceiveFromClientToServerThroughPipe(
@@ -425,8 +426,10 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
-  // A fallback method where all server computation is carried in
-  // the current client process. All other client processes are locked away
+  // A fallback method where all server
+  // computation is carried in
+  // the current client process.
+  // All other client processes are locked away
   // with a process mutex.
   bool sendAndReceiveFromClientToServerFallbackWithProcessMutex(
     const std::string& input, std::string& output

@@ -181,7 +181,7 @@ bool DatabaseInternal::sendAndReceiveFromClient(
   DatabaseInternalResult& output,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseInternal::sendAndReceiveFromClientToServer");
+  STACK_TRACE("DatabaseInternal::sendAndReceiveFromClient");
   std::string inputMessage;
   std::string outputMessage;
   inputMessage = input.toJSON().toString();
@@ -218,6 +218,7 @@ bool DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex
     "DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex"
   );
   MutexProcesslockGuard guard(this->mutexFallbackDatabase);
+  (void) guard;
   Crypto::convertStringToListBytesSigned(input, this->buffer);
   this->executeGetString(output);
   return true;
@@ -306,7 +307,7 @@ void DatabaseInternal::executeGetString(std::string& output) {
 }
 
 void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
-  STACK_TRACE("DatabaseInternal::execute");
+  STACK_TRACE("DatabaseInternal::executeGetResult");
   if (this->failedToInitialize) {
     output.success = false;
     output.comments = this->toStringInitializationErrors();
@@ -348,10 +349,7 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
   if (!output.success) {
     output.comments = commentsOnFailure.str();
   }
-  std::string extraGlobalComments = global.comments.getCurrentReset();
-  if (extraGlobalComments != "") {
-    output.comments += extraGlobalComments;
-  }
+  output.comments += global.comments.getCurrentReset();
 }
 
 bool DatabaseInternal::sendFromServerToClient(const std::string& message) {
@@ -686,6 +684,11 @@ bool DatabaseInternalServer::findObjectIds(
   }
   std::string concatenatedLabels = query.concatenateNestedLabels();
   if (!collection.indices.contains(concatenatedLabels)) {
+    global
+    << Logger::red
+    << "Attempt to search using a non-indexed key: "
+    << concatenatedLabels
+    << ". ";
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Attempt to search using a non-indexed key: "
@@ -694,6 +697,8 @@ bool DatabaseInternalServer::findObjectIds(
     }
     return false;
   }
+  DatabaseInternalIndex& index =
+  collection.indices.getValueNoFailNonConst(concatenatedLabels);
   std::string desiredValue = query.exactValue.stringValue;
   if (desiredValue == "") {
     if (commentsOnFailure != nullptr) {
@@ -710,8 +715,6 @@ bool DatabaseInternalServer::findObjectIds(
     }
     return false;
   }
-  DatabaseInternalIndex& index =
-  collection.indices.getValueNoFailNonConst(concatenatedLabels);
   if (index.keyValueToObjectIds.contains(desiredValue)) {
     output.addListOnTop(
       index.keyValueToObjectIds.getValueNoFail(desiredValue)
@@ -842,6 +845,12 @@ bool DatabaseInternalServer::storeObject(
     return true;
   }
   if (!collection.storeIndicesToHardDrive(commentsOnFailure)) {
+    global
+    << Logger::red
+    << "Unexpected failure to store the indices of collection "
+    << collectionName
+    << "."
+    << Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Failed to update the database index. "
@@ -1205,12 +1214,19 @@ bool DatabaseCollection::storeIndicesToHardDrive(
   std::string filename = this->fileNameIndex();
   JSData content;
   this->toJSONIndices(content);
+  std::string contentString = content.toString();
   if (
     !FileOperations::
     writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
-      filename, content.toString(), true, true, commentsOnFailure
+      filename, contentString, true, true, commentsOnFailure
     )
   ) {
+    global
+    << Logger::red
+    << "Failed to write the index file for collection: "
+    << this->name
+    << ". "
+    << Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Failed to store the index of "

@@ -151,7 +151,11 @@ void DatabaseInternal::initializeAsFallback() {
   STACK_TRACE("DatabaseInternal::initializeAsFallback");
   this->initializeCommon();
   this->flagIsFallback = true;
-  this->mutexFallbackDatabase.createMe("DatabaseMutex", false);
+  if (!this->mutexFallbackDatabase.createMe("DatabaseMutex", false)) {
+    global.fatal
+    << "Failed to create fallback database process mutex. "
+    << global.fatal;
+  }
   this->failedToInitialize = !this->server.initializeLoadFromHardDrive();
 }
 

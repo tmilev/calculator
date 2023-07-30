@@ -214,7 +214,7 @@ class DatabaseInternalRequest {
   bool fromJSData(std::stringstream* commentsOnFailure);
 public:
   enum Type {
-    unknown, findAndUpdate, find, fetchCollectionNames
+    unknown, findAndUpdate, find, fetchCollectionNames, shutdown
   };
   Type requestType;
   QueryFindAndUpdate queryFindAndUpdate;
@@ -298,6 +298,7 @@ public:
   );
   void storeCollectionList();
   std::string collectionsSchemaFileName() const;
+  bool shutdown(std::stringstream* commentsOnFailure);
   bool find(
     const QueryOneOfExactly& query,
     const QueryResultOptions* options,
@@ -365,6 +366,10 @@ public:
     List<std::string>& output, std::stringstream* commentsOnFailure
   );
   bool checkInitialization();
+  // Deletes the database. Only allowed for the two
+  // allow-listed database names:
+  // fallback_test and local_test.
+  bool shutdown(std::stringstream* commentsOnFailure);
 };
 
 // A self contained simple database.
@@ -435,7 +440,6 @@ public:
     const std::string& input, std::string& output
   );
   static std::string folder();
-  bool deleteDatabase(std::stringstream* commentsOnFailure);
   // Forks out a child process to be the database server.
   // Returns the process id of the database server to the parent
   // and 0 to the child server database process.
@@ -535,14 +539,15 @@ class Database {
 public:
   bool flagInitializedServer;
   bool flagInitializedWorker;
+  static std::string name;
   List<std::string> modifyableColumns;
   int databaseInstanceCountMustBeOneOrZero;
   // Get global database instance.
   // Implemented as function rather than static member to
   // avoid the static initalization order fiasco.
-  static Database& get();
   bool initialize(int maximumConnections);
   bool checkInitialization();
+  static Database& get();
   static std::string toString();
   UserOfDatabase user;
   // TODO(tmilev): Rename this to fallbackDatabase.
@@ -631,7 +636,7 @@ public:
   static QueryResultOptions getStandardProjectors(
     const std::string& collectionName
   );
-  bool deleteDatabase(std::stringstream* commentsOnFailure);
+  bool shutdown(std::stringstream* commentsOnFailure);
   class Test {
   public:
     StateMaintainer<bool> maintainServerForkFlag;

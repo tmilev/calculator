@@ -5252,17 +5252,17 @@ void GlobalVariables::configurationProcess() {
   isTrueRepresentationInJSON();
   global.flagDebugLogin =
   global.configuration[Configuration::debugLogin].isTrueRepresentationInJSON();
-  DatabaseStrings::databaseName =
-  global.configuration[Configuration::database].stringValue;
-  if (DatabaseStrings::databaseName == "") {
-    DatabaseStrings::databaseName = "local";
+  Database::name = global.configuration[Configuration::database].stringValue;
+  if (Database::name == "") {
+    Database::name = "local";
     global.configuration[Configuration::database] = "local";
   }
   if (
-    DatabaseStrings::databaseName == "fallback" ||
-    DatabaseStrings::databaseName == "fallBack"
+    Database::name == "fallback" ||
+    Database::name == "fallBack" ||
+    Database::name == "Fallback"
   ) {
-    DatabaseStrings::databaseName = "fallback";
+    Database::name = "fallback";
     global.configuration[Configuration::database] = "fallback";
     global.databaseType = DatabaseType::fallback;
   }
@@ -5272,17 +5272,7 @@ void GlobalVariables::configurationProcess() {
     << "************************"
     << Logger::endL
     << Logger::red
-    << "WARNING: debug login is on. ";
-    if (global.databaseType == DatabaseType::internal) {
-      DatabaseStrings::databaseName += "_debug";
-    } else {
-      DatabaseStrings::databaseName += "_debug";
-    }
-    global
-    << Logger::green
-    << "Set database name to: ["
-    << DatabaseStrings::databaseName
-    << "]. "
+    << "WARNING: debug login is on. "
     << Logger::endL
     << Logger::purple
     << "************************"

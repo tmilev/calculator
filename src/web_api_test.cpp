@@ -6,7 +6,7 @@
 #include "calculator_html_interpretation.h"
 
 bool WebAPIResponse::Test::all() {
-  StateMaintainer<std::string> databaseName(DatabaseStrings::databaseName);
+  StateMaintainer<std::string> databaseName(Database::name);
   WebAPIResponse::Test::scoredQuiz(DatabaseType::fallback);
   WebAPIResponse::Test::scoredQuiz(DatabaseType::internal);
   WebAPIResponse::Test::solveJSON();

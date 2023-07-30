@@ -191,7 +191,6 @@ std::string DatabaseStrings::labelTimeOfAuthenticationTokenCreation =
 "authenticationCreationTime";
 std::string DatabaseStrings::labelEmail = "email";
 std::string DatabaseStrings::tableUsers = "users";
-std::string DatabaseStrings::databaseName = "local";
 std::string DatabaseStrings::tableDeadlines = "deadlines";
 std::string DatabaseStrings::labelDeadlines = "deadlines";
 std::string DatabaseStrings::labelSection = "studentSection";

@@ -279,8 +279,6 @@ public:
 
 class DatabaseStrings {
 public:
-  // Calculator credentials for database use.
-  static std::string databaseName;
   // User column names.
   static std::string labelUserId;
   static std::string labelUsername;

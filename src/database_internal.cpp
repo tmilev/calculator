@@ -3,7 +3,7 @@
 #include "crypto_calculator.h"
 
 std::string DatabaseInternal::folder() {
-  return "database/" + DatabaseStrings::databaseName + "/";
+  return "database/" + Database::name + "/";
 }
 
 DatabaseInternal::DatabaseInternal() {
@@ -120,12 +120,26 @@ bool DatabaseInternalClient::find(
   return result.success;
 }
 
-bool DatabaseInternal::deleteDatabase(std::stringstream* commentsOnFailure) {
-  (void) commentsOnFailure;
-  global.fatal
-  << "DatabaseInternal::deleteDatabase: not implemented yet."
-  << global.fatal;
-  return false;
+bool DatabaseInternalClient::shutdown(std::stringstream* commentsOnFailure) {
+  STACK_TRACE("DatabaseInternalClient::shutdown");
+  this->checkInitialization();
+  DatabaseInternalResult result;
+  DatabaseInternalRequest request;
+  request.requestType = DatabaseInternalRequest::Type::shutdown;
+  if (
+    !this->owner->sendAndReceiveFromClient(
+      request, result, commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to send payload to database. ";
+    }
+    return false;
+  }
+  if (!result.success) {
+    *commentsOnFailure << result.comments;
+  }
+  return result.success;
 }
 
 int DatabaseInternal::forkOutDatabase() {
@@ -347,7 +361,10 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
     output.success =
     this->server.fetchCollectionNames(output.content, &commentsOnFailure);
     break;
-  default:
+  case DatabaseInternalRequest::Type::shutdown:
+    output.success = this->server.shutdown(&commentsOnFailure);
+    break;
+  case DatabaseInternalRequest::Type::unknown:
     break;
   }
   if (!output.success) {
@@ -556,6 +573,8 @@ std::string DatabaseInternalRequest::typeToString(
     return "unknown";
   case DatabaseInternalRequest::Type::fetchCollectionNames:
     return "fetchCollectionNames";
+  case DatabaseInternalRequest::Type::shutdown:
+    return "shutdown";
   default:
     break;
   }
@@ -607,6 +626,12 @@ bool DatabaseInternalServer::fetchCollectionNames(
 ) {
   (void) commentsOnFailure;
   output = this->collections.keys;
+  return true;
+}
+
+bool DatabaseInternalServer::shutdown(std::stringstream* commentsOnFailure) {
+  STACK_TRACE("DatabaseInternalServer::shutdown");
+  this->collections.clear();
   return true;
 }
 

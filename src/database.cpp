@@ -1,6 +1,8 @@
 #include "database.h"
 #include "string_constants.h"
 
+std::string Database::name = "local";
+
 QueryExact::QueryExact() {
   this->maximumNumberOfItems = 1;
 }
@@ -485,7 +487,7 @@ std::string Database::toString() {
   case DatabaseType::internal:
     out << "Currrent database: internal. ";
   }
-  out << "Database name: [" << DatabaseStrings::databaseName << "]";
+  out << "Database name: [" << Database::name << "]";
   return out.str();
 }
 
@@ -539,19 +541,19 @@ bool Database::updateOne(
   return false;
 }
 
-bool Database::deleteDatabase(std::stringstream* commentsOnFailure) {
+bool Database::shutdown(std::stringstream* commentsOnFailure) {
   switch (global.databaseType) {
   case DatabaseType::noDatabaseEveryoneIsAdmin:
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "Database::deleteDatabase failed. "
+      << "Database::shutdown failed. "
       << DatabaseStrings::errorDatabaseDisabled;
     }
     return false;
   case DatabaseType::fallback:
-    return this->fallbackDatabase.deleteDatabase(commentsOnFailure);
+    return this->fallbackDatabase.client.shutdown(commentsOnFailure);
   case DatabaseType::internal:
-    return this->localDatabase.deleteDatabase(commentsOnFailure);
+    return this->localDatabase.client.shutdown(commentsOnFailure);
   }
   global.fatal << "This should be unreachable. " << global.fatal;
   return false;
@@ -569,7 +571,6 @@ bool Database::initialize(int maximumConnections) {
     // should be unreachable.
     return true;
   case DatabaseType::fallback:
-    DatabaseStrings::databaseName = "fallback";
     global
     << Logger::red
     << "Using "
@@ -579,7 +580,6 @@ bool Database::initialize(int maximumConnections) {
     this->fallbackDatabase.initializeAsFallback();
     return true;
   case DatabaseType::internal:
-    DatabaseStrings::databaseName = "local";
     this->localDatabase.initializeForkAndRun(maximumConnections);
     return false;
   }

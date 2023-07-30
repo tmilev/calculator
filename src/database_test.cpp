@@ -7,10 +7,10 @@ std::string Database::Test::adminPassword = "111";
 Database::Test::Test(DatabaseType databaseType) {
   this->maintainServerForkFlag.initialize(global.flagServerForkedIntoWorker);
   this->maintainerDatabase.initialize(global.databaseType);
-  this->maintainerDatabaseName.initialize(DatabaseStrings::databaseName);
+  this->maintainerDatabaseName.initialize(Database::name);
   global.databaseType = databaseType;
   global.flagServerForkedIntoWorker = true;
-  DatabaseStrings::databaseName = "test";
+  Database::name = "test";
   Database::get().initialize(10);
 }
 
@@ -35,13 +35,22 @@ bool Database::Test::basics(DatabaseType databaseType) {
 
 bool Database::Test::deleteDatabase() {
   std::stringstream commentsOnFailure;
-  if (!Database::get().deleteDatabase(&commentsOnFailure)) {
-    global
+  if (!Database::get().shutdown(&commentsOnFailure)) {
+    global.fatal
     << Logger::red
     << "Failed to delete database: "
     << commentsOnFailure.str()
-    << Logger::endL;
+    << global.fatal;
   }
+  std::string folderToRemove;
+  FileOperations::getPhysicalFileNameFromVirtual(
+    DatabaseInternal::folder(),
+    folderToRemove,
+    true,
+    true,
+    &commentsOnFailure
+  );
+  global.externalCommandStream("rm -rf " + folderToRemove);
   return true;
 }
 

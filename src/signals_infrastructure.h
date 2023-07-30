@@ -10,6 +10,7 @@ public:
   struct sigaction SignalFPE;
   struct sigaction SignalChild;
   struct sigaction SignalINT;
+  struct sigaction SignalSIGHUP;
   sigset_t allSignals;
   sigset_t oldSignals;
   bool flagSignalsAreBlocked;
@@ -19,6 +20,9 @@ public:
   void blockSignals();
   void unblockSignals();
   void initializeSignals();
+  void initializeOneSignal(
+    int signal, struct sigaction& output, void(*handler)(int)
+  );
   static SignalsInfrastructure& signals();
 };
 

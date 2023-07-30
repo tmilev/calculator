@@ -2,12 +2,16 @@
 #ifndef header_multiprocessing_ALREADY_INCLUDED
 #define header_multiprocessing_ALREADY_INCLUDED
 
-#include "math_general.h"
-#include "system_functions_global_objects.h"
+#include "general_lists.h"
+#include "general_memory_saving.h"
 
 class ForkCreator {
 public:
-  static int forkProcessAndAcquireRandomness();
+  // Forks out a process. If sighUpOnParentDeath is false,
+  // then parent death will send SIGKILL to the child.
+  // Else, if sighUpOnParentDeath is true, the milder SIGHUP
+  // will be sent instead;
+  static int forkProcessAndAcquireRandomness(bool sighUpOnParentDeath = false);
   static int forkRaw();
 };
 

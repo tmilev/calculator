@@ -1,6 +1,8 @@
 #include "database.h"
 #include "string_constants.h"
 #include "crypto_calculator.h"
+#include "general_file_operations_encodings.h"
+#include "signals_infrastructure.h"
 
 std::string DatabaseInternal::folder() {
   return "database/" + Database::name + "/";
@@ -145,7 +147,7 @@ bool DatabaseInternalClient::shutdown(std::stringstream* commentsOnFailure) {
 
 int DatabaseInternal::forkOutDatabase() {
   STACK_TRACE("DatabaseInternal::forkOutDatabase");
-  this->processId = ForkCreator::forkProcessAndAcquireRandomness();
+  this->processId = ForkCreator::forkProcessAndAcquireRandomness(true);
   if (this->processId == - 1) {
     global.fatal << "Failed to start database. " << global.fatal;
   }
@@ -286,6 +288,15 @@ bool DatabaseInternal::receiveInClientFromServer(
   return true;
 }
 
+void DatabaseInternal::shutdownUnexpectedly(int unused) {
+  (void) unused;
+  if (global.databaseType != DatabaseType::internal) {
+    return;
+  }
+  global << Logger::red << "Received parent death signal. " << Logger::endL;
+  Database::get().localDatabase.client.shutdown(nullptr);
+}
+
 void DatabaseInternal::run() {
   STACK_TRACE("DatabaseInternal::run");
   for (int i = 0; i < this->connections.size; i ++) {
@@ -295,6 +306,18 @@ void DatabaseInternal::run() {
   }
   this->flagFailedToInitialize = !this->server.initializeLoadFromHardDrive();
   this->flagIsRunning = true;
+  // TODO(tmilev): As of writing, I have not been able to trigger the signal
+  // handlers below.
+  // I see no danger in keeping these as they are here.
+  static struct sigaction hangUpSignal;
+  static struct sigaction interruptSignal;
+  SignalsInfrastructure::signals().initializeOneSignal(
+    SIGHUP, hangUpSignal, DatabaseInternal::shutdownUnexpectedly
+  );
+  SignalsInfrastructure::signals().initializeOneSignal(
+    SIGINT, interruptSignal, DatabaseInternal::shutdownUnexpectedly
+  );
+  // End of suspicious signal handling.
   while (this->flagIsRunning) {
     this->runOneConnection();
   }

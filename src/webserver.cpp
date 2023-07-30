@@ -17,6 +17,7 @@
 #include "web_client.h"
 #include "calculator_problem_storage.h"
 #include "network_calculator.h"
+#include "system_functions_global_objects.h"
 
 const std::string WebServer::Statististics::pingRequestsString =
 "pingRequests";
@@ -3912,6 +3913,24 @@ bool WebServer::initializeBindToPorts() {
 
 void WebServer::initializeSignals() {
   SignalsInfrastructure::signals().initializeSignals();
+}
+
+void SignalsInfrastructure::initializeOneSignal(
+  int signal, struct sigaction& output, void(*handler)(int)
+) {
+  if (sigemptyset(&output.sa_mask) == - 1) {
+    global.fatal
+    << "Failed to initialize signal mask. Crashing to let you know. "
+    << global.fatal;
+  }
+  output.sa_sigaction = nullptr;
+  output.sa_handler = handler;
+  if (sigaction(signal, &output, nullptr) == - 1) {
+    global.fatal
+    << "Failed to register handler. "
+    << "Crashing to let you know. "
+    << global.fatal;
+  }
 }
 
 void SignalsInfrastructure::initializeSignals() {

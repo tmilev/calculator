@@ -3,7 +3,7 @@
 #define header_calculator_functions_polynomial_ALREADY_INCLUDED
 
 #include "calculator_interface.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general.h"
 
 class CalculatorFunctionsPolynomial {
 public:

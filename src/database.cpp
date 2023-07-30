@@ -1,5 +1,9 @@
 #include "database.h"
 #include "string_constants.h"
+#include "general_logging_global_variables.h"
+#include "general_strings.h"
+#include "web_api.h"
+#include "general_file_operations_encodings.h"
 
 std::string Database::name = "local";
 

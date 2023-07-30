@@ -4,6 +4,7 @@
 
 #include "general_database_system_independent.h"
 #include "multiprocessing.h"
+#include "general_logging_global_variables.h"
 
 class UserCalculator;
 class Database;
@@ -464,6 +465,9 @@ public:
   void executeGetString(std::string& output);
   bool sendFromServerToClient(const std::string& message);
   bool executeAndSend();
+  // Used to shut down the database process when the parent
+  // process dies or the process receives a sigint.
+  static void shutdownUnexpectedly(int unused);
   DatabaseInternal();
   std::string toStringInitializationErrors() const;
 };

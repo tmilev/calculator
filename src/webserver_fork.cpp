@@ -21,7 +21,7 @@ int WebServer::forkWorkerProcess() {
   return ForkCreator::forkProcessAndAcquireRandomness();
 }
 
-int ForkCreator::forkProcessAndAcquireRandomness() {
+int ForkCreator::forkProcessAndAcquireRandomness(bool sighUpOnParentDeath) {
   // timer taken at server level:
   int64_t millisecondsAtfork = global.getElapsedMilliseconds();
   int result = ForkCreator::forkRaw();
@@ -40,11 +40,11 @@ int ForkCreator::forkProcessAndAcquireRandomness() {
   //
   // 3. Since the child forgot 256 bits of entropy from the parent,
   // it has 256 bits entropy difference from its the parent.
-  // Since the parent keeps on acquiring more entropy from the timer,
+  // Since the parent keeps on acquiring more randomness from the timer,
   // this difference grows further over time.
   if (result > 0) {
     // Parent process.
-    // Forget previous random bytes, and gain a little extra entropy.
+    // Forget previous random bytes, and gain a little extra randomness.
     Crypto::Random::acquireAdditionalRandomness(millisecondsAtfork);
   } else if (result == 0) {
     global.logs.logType = GlobalVariables::LogData::type::worker;
@@ -53,12 +53,16 @@ int ForkCreator::forkProcessAndAcquireRandomness() {
     global.randomBytesCurrent.setSize(
       static_cast<signed>(global.maximumExtractedRandomBytes)
     );
-    // Forget previous random bytes, and gain a little extra entropy.
+    // Forget previous random bytes, and gain a little extra randomness.
     Crypto::Random::acquireAdditionalRandomness(millisecondsAtfork);
     // Set death signal of the parent trigger death signal of the child.
     // If the parent process was killed before the prctl executed,
     // this will not work.
-    int success = prctl(PR_SET_PDEATHSIG, SIGKILL);
+    int deathSignal = SIGKILL;
+    if (sighUpOnParentDeath) {
+      deathSignal = SIGHUP;
+    }
+    int success = prctl(PR_SET_PDEATHSIG, deathSignal);
     if (success == - 1) {
       global
       << Logger::red

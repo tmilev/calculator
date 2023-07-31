@@ -197,13 +197,8 @@ int GlobalVariables::externalCommandStream(const std::string& systemCommand) {
     << Logger::endL;
     return - 1;
   }
-  std::cout
-  << "DEBUG: here so far: "
-  << this->pointerExternalCommandStream
-  << "\n";
   // Usually this is the non-member function int externalCommandStream():
   int exitCode = this->pointerExternalCommandStream(systemCommand);
-  global << "DEBUG: so far so far" << Logger::endL;
   if (exitCode != 0) {
     global
     << Logger::red
@@ -278,7 +273,6 @@ GlobalVariables::GlobalVariables() {
   this->millisecondsReplyAfterComputation = 7000;
   this->pointerExternalCommandReturnOutput = nullptr;
   this->pointerExternalCommandNoOutput = nullptr;
-  std::cout << "DEBUG: set pointer to zero\n";
   this->pointerExternalCommandStream = nullptr;
   this->pointerCallChDir = nullptr;
   this->flagServerForkedIntoWorker = false;

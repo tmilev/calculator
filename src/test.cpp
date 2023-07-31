@@ -185,6 +185,11 @@ void Test::run() {
   if (this->shouldTest(Test::Suites::wasm)) {
     GlobalVariables::Test::webAssemblyBuild();
   }
+  if (this->shouldTest(Test::Suites::database)) {
+    // This special test can only run once per
+    // test executable, and it must run last.
+    Database::Test::noShutdownSignal();
+  }
   global << Logger::green << "All tests passed. " << Logger::endL;
 }
 

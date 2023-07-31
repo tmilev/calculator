@@ -43,7 +43,6 @@ void initializeGlobalObjects() {
   global.pointerExternalCommandNoOutput = &externalCommandNoOutput;
   global.pointerExternalCommandReturnOutput =
   &externalCommandReturnStandardOut;
-  global << "DEBUG: initialization done?" << Logger::endL;
   global.pointerExternalCommandStream = &externalCommandStreamOutput;
   global.pointerCallChDir = &callChDirWrapper;
 }

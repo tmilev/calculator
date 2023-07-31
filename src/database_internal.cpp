@@ -173,7 +173,6 @@ void DatabaseInternal::initializeAsFallback() {
     << "Failed to create fallback database process mutex. "
     << global.fatal;
   }
-  this->flagFailedToInitialize = !this->server.initializeLoadFromHardDrive();
 }
 
 void DatabaseInternal::initializeForkAndRun(int maximumConnections) {
@@ -239,6 +238,9 @@ bool DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex
     "DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex"
   );
   MutexProcesslockGuard guard(this->mutexFallbackDatabase);
+  // Read the entire DB from file:
+  // the fallback database is slow.
+  this->flagFailedToInitialize = !this->server.initializeLoadFromHardDrive();
   (void) guard;
   Crypto::convertStringToListBytesSigned(input, this->buffer);
   this->executeGetString(output);
@@ -306,9 +308,6 @@ void DatabaseInternal::run() {
   }
   this->flagFailedToInitialize = !this->server.initializeLoadFromHardDrive();
   this->flagIsRunning = true;
-  // TODO(tmilev): As of writing, I have not been able to trigger the signal
-  // handlers below.
-  // I see no danger in keeping these as they are here.
   static struct sigaction hangUpSignal;
   static struct sigaction interruptSignal;
   SignalsInfrastructure::signals().initializeOneSignal(
@@ -317,11 +316,12 @@ void DatabaseInternal::run() {
   SignalsInfrastructure::signals().initializeOneSignal(
     SIGINT, interruptSignal, DatabaseInternal::shutdownUnexpectedly
   );
-  // End of suspicious signal handling.
+  global << Logger::purple << "Database main loop start." << Logger::endL;
   while (this->flagIsRunning) {
     this->runOneConnection();
   }
-  global << "Exit database main loop. " << Logger::endL;
+  global << Logger::purple << "Exit database main loop. " << Logger::endL;
+  std::exit(0);
 }
 
 bool DatabaseInternal::runOneConnection() {

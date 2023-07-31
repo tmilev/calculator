@@ -648,12 +648,18 @@ public:
     StateMaintainer<DatabaseType> maintainerDatabase;
     StateMaintainer<std::string> maintainerDatabaseName;
     static std::string adminPassword;
+    // A special test that does not shutdown the database correctly.
+    // This test is only allowed to run once per test executable run.
+    // It test what happens when the parent process exits early,
+    // without shutting the database down.
+    static bool noShutdownSignal();
     static bool all();
     static bool basics(DatabaseType databaseType);
-    bool deleteDatabase();
-    void initializeForDatabaseOperations();
-    bool createAdminAccount();
+    static bool deleteDatabase();
+    static bool createAdminAccount();
     Test(DatabaseType databaseType);
+    ~Test();
+    static void startDatabase(DatabaseType databaseType);
   };
 
   Database();

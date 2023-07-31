@@ -270,7 +270,6 @@ int Popener::readAll(const std::string& command) {
   }
   const int bufferSize = 20000;
   char buffer[bufferSize];
-  std::cout << "DEBUG: here here\n";
   while (!feof(this->reader)) {
     char* incoming = fgets(buffer, bufferSize, this->reader);
     if (incoming != nullptr) {

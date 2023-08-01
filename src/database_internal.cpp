@@ -1206,9 +1206,12 @@ std::string DatabaseInternalServer::collectionsSchemaFileName() const {
   return this->owner->folder() + "collections.json";
 }
 
-JSData DatabaseInternalServer::toJSONStoreEntireDatabase() {
-  global.fatal << "Please implement." << global.fatal;
-  return JSData();
+JSData DatabaseInternalServer::toJSONDatabase() {
+  JSData result;
+  for (DatabaseCollection& collection: this->collections.values)  {
+    result[collection.name] = collection.toJSON();
+  }
+  return result;
 }
 
 DatabaseInternalIndex& DatabaseCollection::indexOfObjectIds() {
@@ -1460,6 +1463,26 @@ JSData DatabaseInternalIndex::toJSON() const {
 JSData DatabaseCollection::toJSONIndices() const {
   JSData result;
   this->toJSONIndices(result);
+  return result;
+}
+
+JSData DatabaseCollection::toJSON() const{
+  if (!this->indices.contains(DatabaseStrings::labelId)) {
+    return JSData();
+  }
+  std::stringstream commentsOnFailure;
+  const DatabaseInternalIndex& index = this->indices.getValueNoFail(DatabaseStrings::labelId);
+  JSData result;
+  result.makeEmptyArray();
+  for (const std::string& key : index.objectIdToKeyValue.keys) {
+    JSData object;
+    if (!    this->owner->server.loadObject(key, this->name, object, &commentsOnFailure)){
+      global << Logger::red << "Failed to load object: " << key <<". " << commentsOnFailure.str() << Logger::endL;
+    }
+    object[DatabaseStrings::labelId] = key;
+    result.listObjects.addOnTop(object);
+
+  }
   return result;
 }
 

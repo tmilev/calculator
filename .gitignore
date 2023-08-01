@@ -22,7 +22,7 @@ certificates*
 
 LogFiles*
 
-database-backups*
+database_backups*
 database/*
 test/test_database.json
 

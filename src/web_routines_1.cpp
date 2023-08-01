@@ -40,7 +40,7 @@ WebServerMonitor::WebServerMonitor() {
 }
 
 void WebServerMonitor::backupDatabaseIfNeeded() {
-  STACK_TRACE("WebServer::BackupDatabaseIfNeeded");
+  STACK_TRACE("WebServer::backupDatabaseIfNeeded");
   if (
     this->timeAtLastBackup > 0 &&
     global.getElapsedSeconds() - this->timeAtLastBackup < (24* 3600)

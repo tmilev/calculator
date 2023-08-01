@@ -236,15 +236,15 @@ bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
   global.webArguments[WebAPI::Problem::fileName] = sample;
   global.requestType = WebAPI::Frontend::scoredQuiz;
   std::string databaseBeforeFirstRun =
-  Database::get().fallbackDatabase.server.toJSONStoreEntireDatabase().toString(
+  Database::get().fallbackDatabase.server.toJSONDatabase().toString(
   );
   JSData resultFirst = WebAPIResponse::getExamPageJSON();
   std::string databaseAfterFirstRun =
-  Database::get().fallbackDatabase.server.toJSONStoreEntireDatabase().toString(
+  Database::get().fallbackDatabase.server.toJSONDatabase().toString(
   );
   JSData resultSecond = WebAPIResponse::getExamPageJSON();
   std::string afterSecondRun =
-  Database::get().fallbackDatabase.server.toJSONStoreEntireDatabase().toString(
+  Database::get().fallbackDatabase.server.toJSONDatabase().toString(
   );
   if (resultFirst != resultSecond) {
     global.fatal

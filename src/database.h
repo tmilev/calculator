@@ -271,6 +271,7 @@ public:
   bool storeIndicesToHardDrive(std::stringstream* commentsOnFailure);
   void toJSONIndices(JSData& output) const;
   JSData toJSONIndices() const;
+  JSData toJSON() const;
   std::string toStringIndices() const;
   std::string fileNameIndex() const;
   DatabaseInternalIndex& indexOfObjectIds();
@@ -344,7 +345,8 @@ public:
   );
   std::string toStringIndices() const;
   // Converts the entire database to JSON.
-  JSData toJSONStoreEntireDatabase();
+  JSData toJSONDatabase();
+  bool writeDatabase();
 };
 
 class DatabaseInternalClient {

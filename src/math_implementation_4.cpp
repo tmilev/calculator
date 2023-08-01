@@ -7,7 +7,7 @@
 #include "system_functions_global_objects.h"
 #include "string_constants.h"
 
-std::string UserCalculatorData::Roles::administator = "admin";
+std::string UserCalculatorData::Roles::administrator = "admin";
 std::string UserCalculatorData::Roles::student = "student";
 std::string UserCalculatorData::Roles::instructor = "instructor";
 std::string UserCalculatorData::Roles::teacher = "teacher";
@@ -523,14 +523,14 @@ bool GlobalVariables::userDefaultHasAdminRights() {
   }
   return
   this->flagLoggedIn && (
-    this->userDefault.userRole == UserCalculatorData::Roles::administator
+    this->userDefault.userRole == UserCalculatorData::Roles::administrator
   );
 }
 
 bool GlobalVariables::userDefaultHasProblemComposingRights() {
   return
   this->flagLoggedIn && (
-    this->userDefault.userRole == UserCalculatorData::Roles::administator ||
+    this->userDefault.userRole == UserCalculatorData::Roles::administrator ||
     this->userDefault.userRole == UserCalculatorData::Roles::teacher
   );
 }

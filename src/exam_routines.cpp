@@ -1732,7 +1732,7 @@ bool CalculatorHTML::prepareSectionList(
   this->flagSectionsPrepared = true;
   if (
     this->currentUser.sectionsTaught.size == 0 || (
-      this->currentUser.userRole != UserCalculator::Roles::administator &&
+      this->currentUser.userRole != UserCalculator::Roles::administrator &&
       this->currentUser.userRole != UserCalculator::Roles::teacher
     )
   ) {

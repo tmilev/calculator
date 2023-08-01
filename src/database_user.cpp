@@ -90,7 +90,7 @@ bool UserOfDatabase::userDefaultHasInstructorRights() {
     return false;
   }
   return
-  global.userDefault.userRole == UserCalculator::Roles::administator ||
+  global.userDefault.userRole == UserCalculator::Roles::administrator ||
   global.userDefault.userRole == UserCalculator::Roles::instructor ||
   global.userDefault.userRole == UserCalculator::Roles::teacher;
 }
@@ -375,7 +375,7 @@ JSData UserCalculatorData::toJSON() {
 bool UserCalculatorData::computeCourseInformation() {
   STACK_TRACE("UserCalculatorData::computeCourseInformation");
   bool isAdmin = (
-    this->userRole == UserCalculator::Roles::administator &&
+    this->userRole == UserCalculator::Roles::administrator &&
     this->username == global.userDefault.username
   );
   if (
@@ -1349,7 +1349,7 @@ bool UserOfDatabase::loginNoDatabaseSupport(
   // (or have troubles accessing it for some reason)
   // can still use the administrator functions of the calculator, for example,
   // modify problem files from the one-page app.
-  user.userRole = UserCalculatorData::Roles::administator;
+  user.userRole = UserCalculatorData::Roles::administrator;
   user.actualAuthenticationToken = "compiledWithoutDatabaseSupport";
   if (commentsGeneral != nullptr) {
     *commentsGeneral
@@ -1448,14 +1448,14 @@ bool UserOfDatabase::firstLoginOfAdmin(
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure
     << "First login of user default "
-    << "(= default administator account): setting password. ";
+    << "(= default administrator account): setting password. ";
   }
   global
   << Logger::yellow
   << "First login of user default: setting password. "
   << Logger::endL;
   userInDatabase.actualActivationToken = "activated";
-  userInDatabase.userRole = UserCalculator::Roles::administator;
+  userInDatabase.userRole = UserCalculator::Roles::administrator;
   if (!userInDatabase.storeToDatabase(true, commentsOnFailure)) {
     global << Logger::red << "Failed to store default's pass to database. ";
     if (commentsOnFailure != nullptr) {

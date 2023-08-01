@@ -11,7 +11,7 @@ class QueryOneOfExactly;
 class UserCalculatorData {
 public:
   struct Roles {
-    static std::string administator;
+    static std::string administrator;
     static std::string student;
     static std::string instructor;
     static std::string teacher;

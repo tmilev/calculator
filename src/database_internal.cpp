@@ -788,6 +788,7 @@ bool DatabaseInternalServer::findObjectIds(
     << Logger::red
     << "Attempt to search using a non-indexed key: "
     << concatenatedLabels
+            << " in collection: " << collection.name
     << ". ";
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -1024,8 +1025,10 @@ bool DatabaseInternalServer::createObject(
     if (
       !initialValue.hasNestedKey(index.nestedKeys, &primaryKeyValueJSON)
     ) {
+      global << "DEBUG: initial value: " << initialValue.toString() << " has no primary key: " << index.nestedKeys.toStringCommaDelimited() << Logger::endL;
       continue;
     }
+
     std::string primaryKeyValue = primaryKeyValueJSON.stringValue;
     if (primaryKeyValue != "") {
       foundPrimaryKey = true;
@@ -1036,13 +1039,13 @@ bool DatabaseInternalServer::createObject(
     global
     << Logger::yellow
     << "DatabaseInternalServer::createObject: "
-    << "input record: is missing a primay id. Indices:"
+        << "input record: " << initialValue.toString() << " is missing a primary id. Indices:"
     << collection.toJSONIndices()
     << Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "DatabaseInternalServer::createObject: "
-      << "input record: is missing a primay id. ";
+      << "input record: is missing a primary id. ";
     }
     return false;
   }
@@ -1114,7 +1117,7 @@ bool DatabaseInternalServer::initializeLoadFromHardDrive() {
   STACK_TRACE("DatabaseInternalServer::initializeLoadFromHardDrive");
   this->ensureCollection(
     DatabaseStrings::tableDeadlines,
-    List<std::string>({DatabaseStrings::labelId})
+      List<std::string>({DatabaseStrings::labelId, DatabaseStrings::labelDeadlinesSchema})
   );
   this->ensureCollection(
     DatabaseStrings::tableDeleted,
@@ -1139,7 +1142,7 @@ bool DatabaseInternalServer::initializeLoadFromHardDrive() {
   );
   this->ensureCollection(
     DatabaseStrings::tableProblemWeights,
-    List<std::string>({DatabaseStrings::labelId})
+      List<std::string>({DatabaseStrings::labelId, DatabaseStrings::labelProblemWeightsSchema})
   );
   for (DatabaseCollection& collection : this->collections.values) {
     if (!collection.loadIndicesFromHardDrive(false)) {
@@ -1217,6 +1220,8 @@ void DatabaseCollection::initialize(
 ) {
   this->name = inputName;
   this->owner = inputOwner;
+  this->indices.clear();
+  this->loadedRecords.clear();
 }
 
 DatabaseCollection::DatabaseCollection() {
@@ -1437,6 +1442,7 @@ void DatabaseInternalIndex::computeKeyValueToObjectIds() {
     const std::string& valueForObject = this->objectIdToKeyValue.values[i];
     HashedList<std::string>& objectIds =
     this->keyValueToObjectIds.getValueCreateEmpty(valueForObject);
+    objectIds.clear();
     objectIds.addOnTopNoRepetition(objectId);
   }
 }

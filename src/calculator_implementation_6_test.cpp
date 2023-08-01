@@ -638,7 +638,7 @@ databaseTester(databaseType) {
   this->maintainTimePointer.initialize(global.timePointer);
   global.timePointer = global.timeMockForTests;
   global.flagLoggedIn = true;
-  global.userDefault.userRole = UserCalculatorData::Roles::administator;
+  global.userDefault.userRole = UserCalculatorData::Roles::administrator;
   global.userDefault.username = WebAPI::userDefaultAdmin;
   global.flagUsingSSLinCurrentConnection = true;
 }

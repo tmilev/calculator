@@ -491,7 +491,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
       out
       <<
-      "<br>Logged-in as administator with debug flag on => printing error details. "
+      "<br>Logged-in as administrator with debug flag on "
+             <<"=> printing error details. "
       << interpreterWithAdvice.outputHTMLString
       << "<br>"
       << interpreterWithAdvice.outputCommentsString;
@@ -2483,7 +2484,7 @@ JSData WebAPIResponse::getAccountsPageJSON(
   QueryExact findAdmins;
   findAdmins.collection = DatabaseStrings::tableUsers;
   findAdmins.nestedLabels.addOnTop(DatabaseStrings::labelUserRole);
-  findAdmins.exactValue = UserCalculator::Roles::administator;
+  findAdmins.exactValue = UserCalculator::Roles::administrator;
   if (
     !Database::get().find(
       findAdmins, &columnsToRetain, admins, &commentsOnFailure
@@ -3314,7 +3315,7 @@ std::string WebAPIResponse::toStringUserDetails(
     return out.str();
   }
   std::string userRole =
-  adminsOnly ? UserCalculator::Roles::administator : "student";
+  adminsOnly ? UserCalculator::Roles::administrator : "student";
   std::string idAddressTextarea = "inputAddUsers" + userRole;
   std::string idExtraTextarea = "inputAddExtraInfo" + userRole;
   std::string idOutput = "idOutput" + userRole;

@@ -465,7 +465,7 @@ Transforms \sum\limits_{b}^c* a to (\sum\limits_b^c){} a.
 ```
 Transforms integral notation into an integral expression. 
 
-*/* [DivideElementZmodPByElementZModP] {CalculatorFunctionsBinaryOps::divideEltZmodPorRatByEltZmodPorRat}. 
+*/* [DivideElementZmodPByElementZModP] {CalculatorFunctionsBinaryOps::divideElementZmodPorRationalByElementZmodPorRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282%20mod%20%207%29%20%2f%20%283%20mod%207%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2 mod  7) / (3 mod 7)
@@ -743,14 +743,14 @@ d/dx (1/x)
 ```
 Replaces Differentiate{}(x)*a by Differentiate{}(x, a).
 
-*\** [MultiplyRationalByElementZmodP] {CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat}. 
+*\** [MultiplyRationalByElementZmodP] {CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282%20mod%207%29%20%2a%203%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2 mod 7) * 3
 ```
 Multiplies elements of Z_p. 
 
-*\** [MultiplyElementZmodPByElementZModP] {CalculatorFunctionsBinaryOps::multiplyEltZmodPorRatByEltZmodPorRat}. 
+*\** [MultiplyElementZmodPByElementZModP] {CalculatorFunctionsBinaryOps::multiplyElementZmodPorRationalByElementZmodPorRational}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%282%20mod%207%29%20%2a%203%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 (2 mod 7) * 3
@@ -1164,7 +1164,7 @@ h * g
 ```
 Multiplies two elements of elliptic curves.
 
-*\** [MultiplyElementHyperOctahedralByElementHyperOctahedral] {CalculatorFunctionsBinaryOps::multiplyEltHypOctByEltHypOct}. 
+*\** [MultiplyElementHyperOctahedralByElementHyperOctahedral] {CalculatorFunctionsBinaryOps::multiplyElementHypOctByElementHypOct}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s%20%3d%20MakeElementHyperOctahedral%7b%7d%28%281%2c%202%29%2c%201%2c%200%2c%200%29%3b%20t%20%3d%20MakeElementHyperOctahedral%7b%7d%28%281%2c%203%29%2c%200%2c%200%2c%200%29%3b%20s%20%2a%20t%20%2a%20s%20%2a%20t%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s = MakeElementHyperOctahedral{}((1, 2), 1, 0, 0); t = MakeElementHyperOctahedral{}((1, 3), 0, 0, 0); s * t * s * t
@@ -1180,7 +1180,7 @@ x * y
 ```
 Multiplies two semisimple Lie algebra finite dimensional characters and decomposes using the Brauer-Klimyk formula, Humphreys J. Introduction to Lie algebras and representation theory, page 142, exercise 9. 
 
-*\** [MultiplyWeylGroupElementByWeylGroupElement] {CalculatorFunctionsBinaryOps::multiplyCoxeterEltByCoxeterElt}. 
+*\** [MultiplyWeylGroupElementByWeylGroupElement] {CalculatorFunctionsBinaryOps::multiplyCoxeterElementByCoxeterElement}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22x%20%3d%20MakeElementWeylGroup%7b%7d%28A_2%2c%201%29%3b%20x%2ax%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 x = MakeElementWeylGroup{}(A_2, 1); x*x
@@ -1213,7 +1213,7 @@ g_{{i}}= ChevalleyGenerator{}(F_1, i);h_{{i}}= CartanGenerator{}(F_1, i) ;
 ```
 Multiplies elment Universal enveloping by element universal enveloping algebra.
 
-*\** [MultiplyAnyByEltTensor] {CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor}. 
+*\** [MultiplyAnyByElementTensor] {CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnv%3dHeighestWeightVector%7b%7d%28G_2%2c%20%281%2c0%29%2c%280%2c0%29%29%3b%5cn2%2f5%20v%3b%5cn%283%2f4%20v%29%5c%5cotimes%20v%3b%5cn3%2f4%20%28v%5c%5cotimes%20v%29%3b%5cn%283%2f4%20v%29%5c%5cotimes%20v-3%2f4%20%28v%5c%5cotimes%20v%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
@@ -1227,7 +1227,7 @@ v=HeighestWeightVector{}(G_2, (1,0),(0,0));
 ```
 Handles multiplying rational number by an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
-*\** [MultiplyPolynomialByElementTensorGeneralVermaModule] {CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor}. 
+*\** [MultiplyPolynomialByElementTensorGeneralVermaModule] {CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%20%3d%20Polynomial%7b%7dy%3b%5cnv%20%3d%20HeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cn%282%2az%29%20v%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
@@ -1240,7 +1240,7 @@ v = HeighestWeightVector{}(G_2, (z,1),(1,0));
 ```
 Handles multiplying polynomial by an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
-*\** [MultiplyAnyByTensor] {CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor}. 
+*\** [MultiplyAnyByTensor] {CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%20%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%20%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%20%3d%20Polynomial%7b%7dy%3b%5cnv%20%3d%20HeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cn1%2fz%20v%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
@@ -1252,7 +1252,7 @@ v = HeighestWeightVector{}(G_2, (z,1),(1,0));
 ```
 Handles multiplying rational function number by an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
-*\** [MultiplyElementUniversalEnvelopingRationalFunctionByElementTensorGeneralizedVermaModule] {CalculatorFunctionsBinaryOps::multiplyAnyByEltTensor}. 
+*\** [MultiplyElementUniversalEnvelopingRationalFunctionByElementTensorGeneralizedVermaModule] {CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X%20%3d%20G_2%3b%5cng_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28X%2ci%29%3b%5cnh_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28X%2c%20i%29%3b%5cnz%3d%20Polynomial%7b%7dy%3b%5cnv%3dHeighestWeightVector%7b%7d%28G_2%2c%20%28z%2c1%29%2c%281%2c0%29%29%3b%5cnh_1%20v%3b%20%5cnh_2%20v%3b%5cn%20g_1%20g_%7b-%201%7d%20v%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 X = G_2;
@@ -1266,7 +1266,7 @@ h_2 v;
 ```
 Handles acting by element Universal enveloping on an element of tensor product of generalized Verma modules. Not fully tested and documented at the moment. Will get more documented in the future. 
 
-*\** [MultiplyWeylGroupElementByWeightLieAlgebraPolynomial] {CalculatorFunctionsBinaryOps::multiplyWeylGroupEltByWeightPoly}. 
+*\** [MultiplyWeylGroupElementByWeightLieAlgebraPolynomial] {CalculatorFunctionsBinaryOps::multiplyWeylGroupElementByWeightPolynomial}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22s_%7b%7ba%7d%7d%3dMakeElementWeylGroup%28B_3%2c%20a%29%3b%5cn%5c%5cvarepsilon_%7b%7ba%7d%7d%20%3d%20MakeWeight%7b%7d%28B_3%2c%20a%2c%20epsilon%29%3b%5cnx%20%3d%20Polynomial%7b%7dx%3b%5cn%5c%5cmu%20%3d%20x%5c%5cvarepsilon_1%3b%5cns_1s_2s_3s_2s_1%20%5c%5cmu%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 s_{{a}}=MakeElementWeylGroup(B_3, a);

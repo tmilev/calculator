@@ -695,7 +695,7 @@ public:
     public:
       Database::Test databaseTester;
       Setup(DatabaseType databaseType);
-      bool deleteDatabaseSetupAll();
+      bool setupAll();
     };
   };
 };

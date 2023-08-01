@@ -229,8 +229,9 @@ bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
   << Logger::blue
   << Database::toString()
   << Logger::endL;
+  Database::Test::deleteDatabase();
   Course::Test::Setup setup(databaseType);
-  setup.deleteDatabaseSetupAll();
+  setup.setupAll();
   std::string sample = "test/problems/interval_notation_1.html";
   global.webArguments[WebAPI::Problem::fileName] = sample;
   global.requestType = WebAPI::Frontend::scoredQuiz;

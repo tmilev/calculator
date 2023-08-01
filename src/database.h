@@ -367,9 +367,9 @@ public:
     List<std::string>& output, std::stringstream* commentsOnFailure
   );
   bool checkInitialization();
-  // Deletes the database. Only allowed for the two
-  // allow-listed database names:
-  // fallback_test and local_test.
+  // Shuts the database down gracefully.
+// Do not use in SIGHUP and other abnormal shutdowns: this function
+// must not run on the server process.
   bool shutdown(std::stringstream* commentsOnFailure);
 };
 
@@ -467,7 +467,8 @@ public:
   bool executeAndSend();
   // Used to shut down the database process when the parent
   // process dies or the process receives a sigint.
-  static void shutdownUnexpectedly(int unused);
+  void shutdownUnexpectedly();
+  static void shutdownUnexpectedlyStatic(int unused);
   DatabaseInternal();
   std::string toStringInitializationErrors() const;
 };

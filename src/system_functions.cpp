@@ -277,11 +277,7 @@ int Popener::readAll(const std::string& command) {
       std::cout << result;
     }
   }
-  int result = this->free();
-  if (result != 0) {
-    global << Logger::red << strerror(errno) << Logger::endL;
-  }
-  return result;
+  return this->free();
 }
 
 #else

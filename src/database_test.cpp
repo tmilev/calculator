@@ -39,8 +39,11 @@ Database::Test::~Test() {
 
 bool Database::Test::all() {
   STACK_TRACE("Database::Test::all");
+  global << "DEBUG: start fallback"<< Logger::endL;
   Database::Test::basics(DatabaseType::fallback);
+  global << "DEBUG: start internal" << Logger::endL;
   Database::Test::basics(DatabaseType::internal);
+  global << "DEBUG: finish internal" << Logger::endL;
   return true;
 }
 
@@ -50,17 +53,19 @@ bool Database::Test::basics(DatabaseType databaseType) {
   << "Testing default database. "
   << Database::toString()
   << Logger::endL;
+  Database::Test::deleteDatabase();
   Database::Test tester(databaseType);
-  tester.deleteDatabase();
   global << "DEBUG: about to create admin account. " << Logger::endL;
   tester.createAdminAccount();
   return true;
 }
 
 bool Database::Test::noShutdownSignal() {
-  global << "DEBUG: no shutdown signal start. " << Logger::endL;
+  global << "Database: starting database that will not be shutdown correctly. " << Logger::endL;
   Database::Test::startDatabase(DatabaseType::internal);
   Database::Test::createAdminAccount();
+  global << "Database: premature exit without shutdown. "
+            <<"The database should still shutdown correctly." << Logger::endL;
   std::exit(0);
   return true;
 }
@@ -168,8 +173,8 @@ void QuerySet::Test::matchKeyValue(
 
 bool QuerySet::Test::basics(DatabaseType databaseType) {
   STACK_TRACE("QuerySet::Test::basics");
+  Database::Test::deleteDatabase();
   Database::Test tester(databaseType);
-  tester.deleteDatabase();
   QueryExact find;
   find.collection = DatabaseStrings::tableUsers;
   find.nestedLabels.addOnTop(DatabaseStrings::labelUsername);

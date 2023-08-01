@@ -139,7 +139,9 @@ bool DatabaseInternalClient::shutdown(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  if (!result.success) {
+  if (result.success) {
+    this->owner->flagIsRunning = false;
+  }else{
     *commentsOnFailure << result.comments;
   }
   return result.success;
@@ -162,7 +164,9 @@ int DatabaseInternal::forkOutDatabase() {
 void DatabaseInternal::initializeCommon() {
   this->client.owner = this;
   this->server.owner = this;
+  this->flagIsRunning = true;
 }
+
 
 void DatabaseInternal::initializeAsFallback() {
   STACK_TRACE("DatabaseInternal::initializeAsFallback");
@@ -210,6 +214,9 @@ bool DatabaseInternal::sendAndReceiveFromClient(
       inputMessage, outputMessage, commentsOnFailure
     )
   ) {
+    if (commentsOnFailure != nullptr){
+      global << "Failed to send and receive from client.\n"<< commentsOnFailure->str()<<Logger::endL;
+    }
     return false;
   }
   return output.fromJSON(outputMessage, commentsOnFailure);
@@ -220,6 +227,14 @@ bool DatabaseInternal::sendAndReceiveFromClientInternal(
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
+  if (!this->flagIsRunning){
+    // Do not send messages to a non-running database.
+    if (commentsOnFailure != nullptr){
+      *commentsOnFailure << "Database not running. ";
+    }
+    return false;
+  }
+
   if (this->flagIsFallback) {
     return
     this->sendAndReceiveFromClientToServerFallbackWithProcessMutex(
@@ -237,6 +252,8 @@ bool DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex
   STACK_TRACE(
     "DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex"
   );
+  global << "DEBUG: Fall back here! about to lock mutex" << Logger::endL;
+
   MutexProcesslockGuard guard(this->mutexFallbackDatabase);
   // Read the entire DB from file:
   // the fallback database is slow.
@@ -253,9 +270,15 @@ bool DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe");
+  global << "DEBUG: about to send through pipe! " << input << Logger::endL;
   if (!this->sendFromClientToServer(input, commentsOnFailure)) {
+    if (commentsOnFailure != nullptr){
+      global << "Failed to send from DB client to server.\n"
+             << commentsOnFailure->str() << Logger::endL;
+    }
     return false;
   }
+  global << "DEBUG: about to receive through pipe!" << Logger::endL;
   return this->receiveInClientFromServer(output, commentsOnFailure);
 }
 
@@ -290,13 +313,22 @@ bool DatabaseInternal::receiveInClientFromServer(
   return true;
 }
 
-void DatabaseInternal::shutdownUnexpectedly(int unused) {
+void DatabaseInternal::shutdownUnexpectedlyStatic(int unused){
   (void) unused;
   if (global.databaseType != DatabaseType::internal) {
     return;
   }
+  Database::get().localDatabase.shutdownUnexpectedly();
+}
+
+void DatabaseInternal::shutdownUnexpectedly(){
   global << Logger::red << "Received parent death signal. " << Logger::endL;
-  Database::get().localDatabase.client.shutdown(nullptr);
+  this->flagIsRunning = false;
+  for (DatabaseInternalConnection& connection: this->connections){
+    connection.clientToServer.release();
+    connection.serverToClient.release();
+
+  }
 }
 
 void DatabaseInternal::run() {
@@ -311,12 +343,13 @@ void DatabaseInternal::run() {
   static struct sigaction hangUpSignal;
   static struct sigaction interruptSignal;
   SignalsInfrastructure::signals().initializeOneSignal(
-    SIGHUP, hangUpSignal, DatabaseInternal::shutdownUnexpectedly
+    SIGHUP, hangUpSignal, DatabaseInternal::shutdownUnexpectedlyStatic
   );
   SignalsInfrastructure::signals().initializeOneSignal(
-    SIGINT, interruptSignal, DatabaseInternal::shutdownUnexpectedly
+    SIGINT, interruptSignal, DatabaseInternal::shutdownUnexpectedlyStatic
   );
   global << Logger::purple << "Database main loop start." << Logger::endL;
+  global << "DEBUG: isrunning: " << this->flagIsRunning << Logger::endL;
   while (this->flagIsRunning) {
     this->runOneConnection();
   }
@@ -366,6 +399,7 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
     return;
   }
   output.success = false;
+  global << "DEBUG: just received: " << requestString << Logger::endL;
   switch (request.requestType) {
   case DatabaseInternalRequest::Type::findAndUpdate:
     output.success =

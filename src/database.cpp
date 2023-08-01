@@ -555,8 +555,18 @@ bool Database::shutdown(std::stringstream* commentsOnFailure) {
     }
     return false;
   case DatabaseType::fallback:
+    if (!this->fallbackDatabase.flagIsRunning){
+      // The database shutdown is already started.
+      return true;
+    }
     return this->fallbackDatabase.client.shutdown(commentsOnFailure);
   case DatabaseType::internal:
+    if (!this->localDatabase.flagIsRunning){
+      // The database is already shutdown.
+      // The database shutdown is already started.
+      // The server is in a different process and my not have fully shutdown yet.
+      return true;
+    }
     return this->localDatabase.client.shutdown(commentsOnFailure);
   }
   global.fatal << "This should be unreachable. " << global.fatal;

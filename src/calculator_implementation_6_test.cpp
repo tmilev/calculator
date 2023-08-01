@@ -643,8 +643,7 @@ databaseTester(databaseType) {
   global.flagUsingSSLinCurrentConnection = true;
 }
 
-bool Course::Test::Setup::deleteDatabaseSetupAll() {
-  this->databaseTester.deleteDatabase();
+bool Course::Test::Setup::setupAll() {
   this->databaseTester.createAdminAccount();
   global.userDefault.computeCourseInformation();
   global.webArguments.setKeyValue(
@@ -666,6 +665,7 @@ bool Course::Test::Setup::deleteDatabaseSetupAll() {
 
 bool Course::Test::setDeadlines(DatabaseType databaseType) {
   STACK_TRACE("Course::Test::setDeadlines");
+  Database::Test::deleteDatabase();
   Course::Test::Setup setup(databaseType);
   global.setWebInput(
     WebAPI::Frontend::problemFileName,
@@ -687,7 +687,7 @@ bool Course::Test::setDeadlines(DatabaseType databaseType) {
   global.setWebInput(
     DatabaseStrings::labelUsername, WebAPI::userDefaultAdmin
   );
-  setup.deleteDatabaseSetupAll();
+  setup.setupAll();
   std::string deadlineResult = WebAPIResponse::setProblemDeadline();
   if (!StringRoutines::stringContains(deadlineResult, "Modified")) {
     global.fatal

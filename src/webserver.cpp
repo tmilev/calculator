@@ -4050,7 +4050,7 @@ int WebServer::daemon() {
       // Child exited.
       pidChild = - 1;
       if (exitStatus != 0) {
-        global << Logger::red ;
+        global << Logger::red;
       } else {
         global << Logger::green;
       }

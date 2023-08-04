@@ -370,8 +370,8 @@ public:
   );
   bool checkInitialization();
   // Shuts the database down gracefully.
-// Do not use in SIGHUP and other abnormal shutdowns: this function
-// must not run on the server process.
+  // Do not use in SIGHUP and other abnormal shutdowns: this function
+  // must not run on the server process.
   bool shutdown(std::stringstream* commentsOnFailure);
 };
 

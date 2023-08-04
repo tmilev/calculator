@@ -233,6 +233,51 @@ JSData CalculatorHTML::toJSONDeadlines(
   return output;
 }
 
+QuerySet CalculatorHTML::toQuerySetDeadlines(
+  MapList<
+    std::string,
+    ProblemData,
+    HashFunctions::hashFunction<std::string>
+  >& inputProblemInfo
+) {
+  STACK_TRACE("CalculatorHTML::toJSONDeadlines");
+  QuerySet output;
+  for (int i = 0; i < inputProblemInfo.size(); i ++) {
+    ProblemDataAdministrative& currentProblem =
+    inputProblemInfo.values[i].adminData;
+    if (currentProblem.deadlinesPerSection.size() == 0) {
+      continue;
+    }
+    std::string currentProblemName = inputProblemInfo.keys[i];
+    JSData currentProblemJSON;
+    for (
+      int j = 0; j < currentProblem.deadlinesPerSection.size(); j ++
+    ) {
+      std::string currentDeadline =
+      StringRoutines::stringTrimWhiteSpace(
+        currentProblem.deadlinesPerSection.values[j]
+      );
+      if (currentDeadline == "") {
+        continue;
+      }
+      std::string currentSection =
+      StringRoutines::stringTrimWhiteSpace(
+        currentProblem.deadlinesPerSection.keys[j]
+      );
+      currentProblemJSON[DatabaseStrings::labelDeadlines][currentSection] =
+      currentDeadline;
+    }
+    output.addNestedKeyValuePair(
+      List<std::string>({
+          DatabaseStrings::labelDeadlines, currentProblemName,
+        }
+      ),
+      currentProblemJSON
+    );
+  }
+  return output;
+}
+
 QuerySet CalculatorHTML::toQuerySetProblemWeights(
   MapList<
     std::string,
@@ -460,8 +505,7 @@ bool CalculatorHTML::storeProblemDeadlines(
     DatabaseStrings::labelDeadlinesSchema,
     global.userDefault.deadlineSchema
   );
-  QuerySet updateQuery;
-  updateQuery.fromJSONNoFail(this->toJSONDeadlines(toStore));
+  QuerySet updateQuery = this->toQuerySetDeadlines(toStore);
   if (
     !Database::get().updateOne(
       deadlineSchema, updateQuery, true, commentsOnFailure

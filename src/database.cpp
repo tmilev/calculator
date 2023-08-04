@@ -555,16 +555,17 @@ bool Database::shutdown(std::stringstream* commentsOnFailure) {
     }
     return false;
   case DatabaseType::fallback:
-    if (!this->fallbackDatabase.flagIsRunning){
+    if (!this->fallbackDatabase.flagIsRunning) {
       // The database shutdown is already started.
       return true;
     }
     return this->fallbackDatabase.client.shutdown(commentsOnFailure);
   case DatabaseType::internal:
-    if (!this->localDatabase.flagIsRunning){
+    if (!this->localDatabase.flagIsRunning) {
       // The database is already shutdown.
       // The database shutdown is already started.
-      // The server is in a different process and my not have fully shutdown yet.
+      // The server is in a different process and my not have fully shutdown
+      // yet.
       return true;
     }
     return this->localDatabase.client.shutdown(commentsOnFailure);
@@ -956,6 +957,7 @@ void QuerySetOnce::updateOneEntry(JSData& modified) const {
 QuerySet::QuerySet() {}
 
 void QuerySet::fromJSONNoFail(const JSData& inputValue) {
+  STACK_TRACE("QuerySet::fromJSONNoFail");
   std::stringstream comments;
   bool mustBeTrue = this->fromJSON(inputValue, &comments);
   if (!mustBeTrue) {
@@ -1036,6 +1038,7 @@ JSData QuerySet::toJSON() const {
 bool QuerySet::fromJSON(
   const JSData& inputValue, std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("QuerySet::fromJSON");
   if (inputValue.elementType != JSData::Token::tokenArray) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure

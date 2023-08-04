@@ -141,7 +141,7 @@ bool DatabaseInternalClient::shutdown(std::stringstream* commentsOnFailure) {
   }
   if (result.success) {
     this->owner->flagIsRunning = false;
-  }else{
+  } else {
     *commentsOnFailure << result.comments;
   }
   return result.success;
@@ -166,7 +166,6 @@ void DatabaseInternal::initializeCommon() {
   this->server.owner = this;
   this->flagIsRunning = true;
 }
-
 
 void DatabaseInternal::initializeAsFallback() {
   STACK_TRACE("DatabaseInternal::initializeAsFallback");
@@ -214,8 +213,11 @@ bool DatabaseInternal::sendAndReceiveFromClient(
       inputMessage, outputMessage, commentsOnFailure
     )
   ) {
-    if (commentsOnFailure != nullptr){
-      global << "Failed to send and receive from client.\n"<< commentsOnFailure->str()<<Logger::endL;
+    if (commentsOnFailure != nullptr) {
+      global
+      << "Failed to send and receive from client.\n"
+      << commentsOnFailure->str()
+      << Logger::endL;
     }
     return false;
   }
@@ -227,14 +229,13 @@ bool DatabaseInternal::sendAndReceiveFromClientInternal(
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
-  if (!this->flagIsRunning){
+  if (!this->flagIsRunning) {
     // Do not send messages to a non-running database.
-    if (commentsOnFailure != nullptr){
+    if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Database not running. ";
     }
     return false;
   }
-
   if (this->flagIsFallback) {
     return
     this->sendAndReceiveFromClientToServerFallbackWithProcessMutex(
@@ -252,8 +253,6 @@ bool DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex
   STACK_TRACE(
     "DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex"
   );
-  global << "DEBUG: Fall back here! about to lock mutex" << Logger::endL;
-
   MutexProcesslockGuard guard(this->mutexFallbackDatabase);
   // Read the entire DB from file:
   // the fallback database is slow.
@@ -270,15 +269,15 @@ bool DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe");
-  global << "DEBUG: about to send through pipe! " << input << Logger::endL;
   if (!this->sendFromClientToServer(input, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr){
-      global << "Failed to send from DB client to server.\n"
-             << commentsOnFailure->str() << Logger::endL;
+    if (commentsOnFailure != nullptr) {
+      global
+      << "Failed to send from DB client to server.\n"
+      << commentsOnFailure->str()
+      << Logger::endL;
     }
     return false;
   }
-  global << "DEBUG: about to receive through pipe!" << Logger::endL;
   return this->receiveInClientFromServer(output, commentsOnFailure);
 }
 
@@ -313,7 +312,7 @@ bool DatabaseInternal::receiveInClientFromServer(
   return true;
 }
 
-void DatabaseInternal::shutdownUnexpectedlyStatic(int unused){
+void DatabaseInternal::shutdownUnexpectedlyStatic(int unused) {
   (void) unused;
   if (global.databaseType != DatabaseType::internal) {
     return;
@@ -321,13 +320,12 @@ void DatabaseInternal::shutdownUnexpectedlyStatic(int unused){
   Database::get().localDatabase.shutdownUnexpectedly();
 }
 
-void DatabaseInternal::shutdownUnexpectedly(){
+void DatabaseInternal::shutdownUnexpectedly() {
   global << Logger::red << "Received parent death signal. " << Logger::endL;
   this->flagIsRunning = false;
-  for (DatabaseInternalConnection& connection: this->connections){
+  for (DatabaseInternalConnection& connection : this->connections) {
     connection.clientToServer.release();
     connection.serverToClient.release();
-
   }
 }
 
@@ -349,7 +347,6 @@ void DatabaseInternal::run() {
     SIGINT, interruptSignal, DatabaseInternal::shutdownUnexpectedlyStatic
   );
   global << Logger::purple << "Database main loop start." << Logger::endL;
-  global << "DEBUG: isrunning: " << this->flagIsRunning << Logger::endL;
   while (this->flagIsRunning) {
     this->runOneConnection();
   }
@@ -399,7 +396,6 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
     return;
   }
   output.success = false;
-  global << "DEBUG: just received: " << requestString << Logger::endL;
   switch (request.requestType) {
   case DatabaseInternalRequest::Type::findAndUpdate:
     output.success =
@@ -788,7 +784,8 @@ bool DatabaseInternalServer::findObjectIds(
     << Logger::red
     << "Attempt to search using a non-indexed key: "
     << concatenatedLabels
-            << " in collection: " << collection.name
+    << " in collection: "
+    << collection.name
     << ". ";
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -1025,10 +1022,8 @@ bool DatabaseInternalServer::createObject(
     if (
       !initialValue.hasNestedKey(index.nestedKeys, &primaryKeyValueJSON)
     ) {
-      global << "DEBUG: initial value: " << initialValue.toString() << " has no primary key: " << index.nestedKeys.toStringCommaDelimited() << Logger::endL;
       continue;
     }
-
     std::string primaryKeyValue = primaryKeyValueJSON.stringValue;
     if (primaryKeyValue != "") {
       foundPrimaryKey = true;
@@ -1039,7 +1034,9 @@ bool DatabaseInternalServer::createObject(
     global
     << Logger::yellow
     << "DatabaseInternalServer::createObject: "
-        << "input record: " << initialValue.toString() << " is missing a primary id. Indices:"
+    << "input record: "
+    << initialValue.toString()
+    << " is missing a primary id. Indices:"
     << collection.toJSONIndices()
     << Logger::endL;
     if (commentsOnFailure != nullptr) {
@@ -1117,7 +1114,10 @@ bool DatabaseInternalServer::initializeLoadFromHardDrive() {
   STACK_TRACE("DatabaseInternalServer::initializeLoadFromHardDrive");
   this->ensureCollection(
     DatabaseStrings::tableDeadlines,
-      List<std::string>({DatabaseStrings::labelId, DatabaseStrings::labelDeadlinesSchema})
+    List<std::string>({
+        DatabaseStrings::labelId, DatabaseStrings::labelDeadlinesSchema
+      }
+    )
   );
   this->ensureCollection(
     DatabaseStrings::tableDeleted,
@@ -1142,7 +1142,11 @@ bool DatabaseInternalServer::initializeLoadFromHardDrive() {
   );
   this->ensureCollection(
     DatabaseStrings::tableProblemWeights,
-      List<std::string>({DatabaseStrings::labelId, DatabaseStrings::labelProblemWeightsSchema})
+    List<std::string>({
+        DatabaseStrings::labelId,
+        DatabaseStrings::labelProblemWeightsSchema
+      }
+    )
   );
   for (DatabaseCollection& collection : this->collections.values) {
     if (!collection.loadIndicesFromHardDrive(false)) {
@@ -1208,7 +1212,7 @@ std::string DatabaseInternalServer::collectionsSchemaFileName() const {
 
 JSData DatabaseInternalServer::toJSONDatabase() {
   JSData result;
-  for (DatabaseCollection& collection: this->collections.values)  {
+  for (DatabaseCollection& collection : this->collections.values) {
     result[collection.name] = collection.toJSON();
   }
   return result;
@@ -1466,22 +1470,32 @@ JSData DatabaseCollection::toJSONIndices() const {
   return result;
 }
 
-JSData DatabaseCollection::toJSON() const{
+JSData DatabaseCollection::toJSON() const {
   if (!this->indices.contains(DatabaseStrings::labelId)) {
     return JSData();
   }
   std::stringstream commentsOnFailure;
-  const DatabaseInternalIndex& index = this->indices.getValueNoFail(DatabaseStrings::labelId);
+  const DatabaseInternalIndex& index =
+  this->indices.getValueNoFail(DatabaseStrings::labelId);
   JSData result;
   result.makeEmptyArray();
   for (const std::string& key : index.objectIdToKeyValue.keys) {
     JSData object;
-    if (!    this->owner->server.loadObject(key, this->name, object, &commentsOnFailure)){
-      global << Logger::red << "Failed to load object: " << key <<". " << commentsOnFailure.str() << Logger::endL;
+    if (
+      !this->owner->server.loadObject(
+        key, this->name, object, &commentsOnFailure
+      )
+    ) {
+      global
+      << Logger::red
+      << "Failed to load object: "
+      << key
+      << ". "
+      << commentsOnFailure.str()
+      << Logger::endL;
     }
     object[DatabaseStrings::labelId] = key;
     result.listObjects.addOnTop(object);
-
   }
   return result;
 }

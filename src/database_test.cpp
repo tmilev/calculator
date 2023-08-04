@@ -19,7 +19,6 @@ void Database::Test::startDatabase(DatabaseType databaseType) {
     Database::name = "bad_folder_name";
     break;
   }
-  global << "DEBUG: to start db: " << Database::name << Logger::endL;
   Crypto::Random::initializeRandomBytesForTesting();
   Database::get().initialize(10);
 }
@@ -32,18 +31,13 @@ Database::Test::Test(DatabaseType databaseType) {
 }
 
 Database::Test::~Test() {
-  global << "DEBUG: in destructor! " << Logger::endL;
   Database::get().shutdown(nullptr);
-  global << "DEBUG: out of destructor! " << Logger::endL;
 }
 
 bool Database::Test::all() {
   STACK_TRACE("Database::Test::all");
-  global << "DEBUG: start fallback"<< Logger::endL;
   Database::Test::basics(DatabaseType::fallback);
-  global << "DEBUG: start internal" << Logger::endL;
   Database::Test::basics(DatabaseType::internal);
-  global << "DEBUG: finish internal" << Logger::endL;
   return true;
 }
 
@@ -55,17 +49,20 @@ bool Database::Test::basics(DatabaseType databaseType) {
   << Logger::endL;
   Database::Test::deleteDatabase();
   Database::Test tester(databaseType);
-  global << "DEBUG: about to create admin account. " << Logger::endL;
   tester.createAdminAccount();
   return true;
 }
 
 bool Database::Test::noShutdownSignal() {
-  global << "Database: starting database that will not be shutdown correctly. " << Logger::endL;
+  global
+  << "Database: starting database that will not be shutdown correctly. "
+  << Logger::endL;
   Database::Test::startDatabase(DatabaseType::internal);
   Database::Test::createAdminAccount();
-  global << "Database: premature exit without shutdown. "
-            <<"The database should still shutdown correctly." << Logger::endL;
+  global
+  << "Database: premature exit without shutdown. "
+  << "The database should still shutdown correctly."
+  << Logger::endL;
   std::exit(0);
   return true;
 }

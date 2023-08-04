@@ -516,6 +516,13 @@ public:
       HashFunctions::hashFunction<std::string>
     >& inputProblemInfo
   );
+  QuerySet toQuerySetDeadlines(
+    MapList<
+      std::string,
+      ProblemData,
+      HashFunctions::hashFunction<std::string>
+    >& inputProblemInfo
+  );
   JSData toJSONDeadlines(
     MapList<
       std::string,

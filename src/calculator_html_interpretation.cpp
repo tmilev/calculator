@@ -490,9 +490,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     << "</b>";
     if (global.userDefaultHasAdminRights() && global.userDebugFlagOn()) {
       out
-      <<
-      "<br>Logged-in as administrator with debug flag on "
-             <<"=> printing error details. "
+      << "<br>Logged-in as administrator with debug flag on "
+      << "=> printing error details. "
       << interpreterWithAdvice.outputHTMLString
       << "<br>"
       << interpreterWithAdvice.outputCommentsString;

@@ -650,6 +650,7 @@ public:
     StateMaintainer<bool> maintainServerForkFlag;
     StateMaintainer<DatabaseType> maintainerDatabase;
     StateMaintainer<std::string> maintainerDatabaseName;
+    DatabaseType databaseType;
     static std::string adminPassword;
     // A special test that does not shutdown the database correctly.
     // This test is only allowed to run once per test executable run.
@@ -658,11 +659,12 @@ public:
     static bool noShutdownSignal();
     static bool all();
     static bool basics(DatabaseType databaseType);
-    static bool deleteDatabase();
+    bool deleteDatabase();
     static bool createAdminAccount();
-    Test(DatabaseType databaseType);
+    Test(DatabaseType inputDatabaseType);
     ~Test();
     static void startDatabase(DatabaseType databaseType);
+    static std::string testDatabaseName(DatabaseType databaseType);
   };
 
   Database();

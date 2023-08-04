@@ -229,7 +229,6 @@ bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
   << Logger::blue
   << Database::toString()
   << Logger::endL;
-  Database::Test::deleteDatabase();
   Course::Test::Setup setup(databaseType);
   setup.setupAll();
   std::string sample = "test/problems/interval_notation_1.html";

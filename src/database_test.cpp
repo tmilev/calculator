@@ -5,33 +5,39 @@
 
 std::string Database::Test::adminPassword = "111";
 
+std::string Database::Test::testDatabaseName(DatabaseType databaseType) {
+  switch (databaseType) {
+  case DatabaseType::internal:
+    return "test_local";
+  case DatabaseType::fallback:
+    return  "test_fallback";
+  case DatabaseType::noDatabaseEveryoneIsAdmin:
+    return "bad_folder_name";
+
+  }
+  return "";
+
+}
+
 void Database::Test::startDatabase(DatabaseType databaseType) {
   global.databaseType = databaseType;
   global.flagServerForkedIntoWorker = true;
-  switch (databaseType) {
-  case DatabaseType::internal:
-    Database::name = "test_internal";
-    break;
-  case DatabaseType::fallback:
-    Database::name = "test_fallback";
-    break;
-  case DatabaseType::noDatabaseEveryoneIsAdmin:
-    Database::name = "bad_folder_name";
-    break;
-  }
   Crypto::Random::initializeRandomBytesForTesting();
+  Database::name = Database::Test::testDatabaseName(databaseType);
   Database::get().initialize(10);
 }
 
-Database::Test::Test(DatabaseType databaseType) {
+Database::Test::Test(DatabaseType inputDatabaseType) {
+  this->databaseType = inputDatabaseType;
   this->maintainServerForkFlag.initialize(global.flagServerForkedIntoWorker);
   this->maintainerDatabase.initialize(global.databaseType);
   this->maintainerDatabaseName.initialize(Database::name);
-  Database::Test::startDatabase(databaseType);
+  Database::Test::startDatabase(inputDatabaseType);
 }
 
 Database::Test::~Test() {
   Database::get().shutdown(nullptr);
+  this->deleteDatabase();
 }
 
 bool Database::Test::all() {
@@ -47,7 +53,6 @@ bool Database::Test::basics(DatabaseType databaseType) {
   << "Testing default database. "
   << Database::toString()
   << Logger::endL;
-  Database::Test::deleteDatabase();
   Database::Test tester(databaseType);
   tester.createAdminAccount();
   return true;
@@ -72,13 +77,20 @@ bool Database::Test::deleteDatabase() {
   if (!Database::get().shutdown(&commentsOnFailure)) {
     global.fatal
     << Logger::red
-    << "Failed to delete database: "
+    << "Failed to shutdown database: "
     << commentsOnFailure.str()
     << global.fatal;
   }
+  if (Database::name != "test_fallback" && Database::name != "test_local") {
+    // In case we have a code mess up,
+    // let us not accidentally delete the main database sitting on the
+    // developer's machine.
+    global.fatal << "Database deletion is allowed only for test_fallback and test_local."
+                 << global.fatal;
+  }
   std::string folderToRemove;
   FileOperations::getPhysicalFileNameFromVirtual(
-    DatabaseInternal::folder(),
+      DatabaseInternal::folder(),
     folderToRemove,
     true,
     true,
@@ -170,7 +182,6 @@ void QuerySet::Test::matchKeyValue(
 
 bool QuerySet::Test::basics(DatabaseType databaseType) {
   STACK_TRACE("QuerySet::Test::basics");
-  Database::Test::deleteDatabase();
   Database::Test tester(databaseType);
   QueryExact find;
   find.collection = DatabaseStrings::tableUsers;

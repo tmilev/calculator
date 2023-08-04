@@ -665,7 +665,6 @@ bool Course::Test::Setup::setupAll() {
 
 bool Course::Test::setDeadlines(DatabaseType databaseType) {
   STACK_TRACE("Course::Test::setDeadlines");
-  Database::Test::deleteDatabase();
   Course::Test::Setup setup(databaseType);
   global.setWebInput(
     WebAPI::Frontend::problemFileName,

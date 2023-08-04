@@ -5,7 +5,7 @@
 #include "signals_infrastructure.h"
 
 std::string DatabaseInternal::folder() {
-  return "database/" +Database::name + "/";
+  return "database/" + Database::name + "/";
 }
 
 DatabaseInternal::DatabaseInternal() {

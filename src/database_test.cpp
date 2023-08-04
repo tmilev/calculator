@@ -10,13 +10,11 @@ std::string Database::Test::testDatabaseName(DatabaseType databaseType) {
   case DatabaseType::internal:
     return "test_local";
   case DatabaseType::fallback:
-    return  "test_fallback";
+    return "test_fallback";
   case DatabaseType::noDatabaseEveryoneIsAdmin:
     return "bad_folder_name";
-
   }
   return "";
-
 }
 
 void Database::Test::startDatabase(DatabaseType databaseType) {
@@ -85,12 +83,13 @@ bool Database::Test::deleteDatabase() {
     // In case we have a code mess up,
     // let us not accidentally delete the main database sitting on the
     // developer's machine.
-    global.fatal << "Database deletion is allowed only for test_fallback and test_local."
-                 << global.fatal;
+    global.fatal
+    << "Database deletion is allowed only for test_fallback and test_local."
+    << global.fatal;
   }
   std::string folderToRemove;
   FileOperations::getPhysicalFileNameFromVirtual(
-      DatabaseInternal::folder(),
+    DatabaseInternal::folder(),
     folderToRemove,
     true,
     true,

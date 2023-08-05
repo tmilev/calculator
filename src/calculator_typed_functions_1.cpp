@@ -4,6 +4,7 @@
 #include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_rational_function_implementation.h"
+#include "math_extra_universal_enveloping_implementation.h"
 
 bool CalculatorFunctionsBinaryOps::
 addElementZModPOrRationalToElementZModPOrRational(

@@ -3,6 +3,7 @@
 #define header_math_extra_differential_operators_ALREADY_INCLUDED
 
 #include "math_general.h"
+#include "progress_report.h"
 
 class QuasiDifferentialMononomial {
   friend std::ostream& operator<<(

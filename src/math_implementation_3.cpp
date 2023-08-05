@@ -13,6 +13,7 @@
 #include "crypto_calculator.h"
 #include "math_vector_partition_functions.h"
 #include "math_lattices.h"
+#include "general_strings.h"
 
 // The below gives upper limit to the amount of pointers
 // that are allowed to be allocated by the program. Can be changed dynamically.
@@ -852,7 +853,10 @@ std::string StringRoutines::Conversions::unescapeJavascriptLike(
       MathRoutines::convertHumanReadableHexToCharValue(input[i + 2]);
       char right =
       MathRoutines::convertHumanReadableHexToCharValue(input[i + 3]);
-      if (left == - 1 || right == - 1) {
+      if (
+        left == StringRoutines::notAllowedInStrings ||
+        right == StringRoutines::notAllowedInStrings
+      ) {
         // Sequence not a byte encoding: "\xPQ".
         out << "\\";
         continue;
@@ -876,7 +880,12 @@ std::string StringRoutines::Conversions::unescapeJavascriptLike(
     MathRoutines::convertHumanReadableHexToCharValue(input[i + 4]);
     char hex3 =
     MathRoutines::convertHumanReadableHexToCharValue(input[i + 5]);
-    if (hex0 == - 1 || hex1 == - 1 || hex2 == - 1 || hex3 == - 1) {
+    if (
+      hex0 == StringRoutines::notAllowedInStrings ||
+      hex1 == StringRoutines::notAllowedInStrings ||
+      hex2 == StringRoutines::notAllowedInStrings ||
+      hex3 == StringRoutines::notAllowedInStrings
+    ) {
       // Sequence not a two-byte encoding: "\u010P".
       out << "\\";
       continue;
@@ -2496,7 +2505,7 @@ char MathRoutines::convertHumanReadableHexToCharValue(char input) {
   if ('a' <= input && input <= 'f') {
     return 10 + input - 'a';
   }
-  return - 1;
+  return StringRoutines::notAllowedInStrings;
 }
 
 unsigned int MathRoutines::hashListStrings(

@@ -10,6 +10,7 @@ class Matrix;
 
 class StringRoutines {
 public:
+  static const char notAllowedInStrings = static_cast<char>(- 1);
   static bool stringBeginsWith(
     const std::string& input,
     const std::string& desiredBeginning,

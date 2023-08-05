@@ -6,6 +6,7 @@
 #include "math_extra_drawing_variables.h"
 #include "string_constants.h"
 #include "math_extra_algebraic_numbers.h"
+#include "math_extra_finite_groups_implementation.h"
 
 std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   STACK_TRACE("SemisimpleLieAlgebra::toString");

@@ -3198,8 +3198,6 @@ std::string WebServer::toStringConnectionSummary() {
   << "Timed-out connections are excluded. ";
   out
   << "<hr>"
-  << "<b>The following policies are quite "
-  << "strict and will be relaxed in the future.</b><br>"
   << this->maximumTotalUsedWorkers
   << " global maximum of simultaneous non-closed connections allowed. "
   << "When the limit is exceeded, "

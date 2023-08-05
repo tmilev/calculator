@@ -85,9 +85,11 @@ int ForkCreator::forkProcessAndAcquireRandomness(bool sighUpOnParentDeath) {
 
 #else
 
-int ForkCreator::forkProcess() {
+int ForkCreator::forkProcessAndAcquireRandomness(bool sighUpOnParentDeath) {
+  (void) sighUpOnParentDeath;
   global.fatal
-  << "In forkProcess(): Process forks are not allowed when running under wasm."
+  << "In forkProcessAndAcquireRandomness(): "
+  << "Process forks are not allowed when running under wasm."
   << global.fatal;
   return - 1;
 }

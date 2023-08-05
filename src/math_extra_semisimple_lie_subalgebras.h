@@ -4,6 +4,7 @@
 
 #include "math_general.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
+#include "math_extra_algebraic_numbers.h"
 
 class SemisimpleSubalgebras;
 class CandidateSemisimpleSubalgebra;

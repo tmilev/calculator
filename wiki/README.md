@@ -171,7 +171,7 @@ SolveFor(x,MakeExpression( \det a));
 
 
 ### Define your own function
-Define a two-variable function and evaluate it. Evaluation/substitution need not be numerical. {} Syntax is used to denote function application - carefully chosen so it has no visible artifacts in LaTeX (recall that in math texts, function application vs multiplication is implied from context, not from the notation).
+Define a two-variable function and evaluate it. Evaluation/substitution need not be numerical. The syntax `{}` is used to denote function application - carefully chosen so it has no visible artifacts in LaTeX (recall that in math texts, function application vs multiplication is implied from context, not from the notation). 
 ```
 f{}({{a}}, {{b}}) = 1/(a+b); 
 f{}(2,3); 
@@ -186,6 +186,8 @@ A= FunctionToMatrix(f,10,10);
 \det A
 ```
 [f{}({{a}}, {{b}}) = 1/(a+b);A= FunctionToMatrix(f,10,10);\det A](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22f%7B%7D(%7B%7Ba%7D%7D%2C%20%7B%7Bb%7D%7D)%20%3D%201%2F(a%2Bb)%3B%5CnA%3D%20FunctionToMatrix(f%2C10%2C10)%3B%5Cn%5C%5Cdet%20A%22%7D)
+
+The syntax `{{ a }}` in the example above means "any a". In math, that the `a` in `{{a}}` is called a bound variable. Thus, the syntax `f{}({{a}},{{b}});` would match `f{}(2,3)`, `f{}(x,y)`, etc. If we were to drop the `{{}}` curly braces, then `f{}(a,b)` would only match the letters `a` and `b`.
 
 Recursive functions just work. Here's the Fibonacci sequence.
 ```
@@ -265,8 +267,6 @@ FactorPolynomialOverRationals(169 x^{11}-312 x^{10}+430 x^{9}-524 x^{8}+595 x^{7
 ```
 
 [FactorPolynomialOverRationals(169 x^{11}-312 x^{10}+430 x^{9}-524 x^{8}+595 x^{7}-644 x^{6}+581 x^{5}-440 x^{4}+318 x^{3}-214 x^{2}+127 x-56)](https://calculator-algebra.org:8166/#%7B%22currentPage%22%3A%22calculator%22%2C%22calculatorInput%22%3A%22FactorPolynomialOverRationals(169%20x%5E%7B11%7D-312%20x%5E%7B10%7D%2B430%20x%5E%7B9%7D-524%20x%5E%7B8%7D%2B595%20x%5E%7B7%7D-644%20x%5E%7B6%7D%2B581%20x%5E%7B5%7D-440%20x%5E%7B4%7D%2B318%20x%5E%7B3%7D-214%20x%5E%7B2%7D%2B127%20x-56)%22%2C%22monitoring%22%3A%22true%22%7D)
-
-... to be continued.
 
 
 ## Code comments. 

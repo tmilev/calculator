@@ -748,6 +748,7 @@ bool DatabaseInternalServer::find(
       }
       return false;
     }
+    loader[DatabaseStrings::labelId] = objectId;
     output.addOnTop(loader);
   }
   return true;

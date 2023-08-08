@@ -202,7 +202,7 @@ function updateDatabasePageCallback(incoming, unused) {
       transformer.getTableFromObject(
         parsed.rows,
         optionsDatabase, {
-        table: findQuery[pathnames.urlFields.database.collection],
+        collection: findQuery[pathnames.urlFields.database.collection],
       })
     );
   } else {

@@ -77,7 +77,7 @@ bool QueryExact::fromJSON(
   this->collection = findQuery[DatabaseStrings::labelCollection].stringValue;
   if (this->collection == "") {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Empty collection not allowed.";
+      *commentsOnFailure << "Empty collection not allowed. ";
     }
     return false;
   }

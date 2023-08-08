@@ -42,11 +42,11 @@ let statistics = new Statistics();
 class CompositeDataKey {
   constructor(
     /** @type {string} */
-    tableName,
+    collection,
     /** @type {Array.<Object>} */
     labels,
   ) {
-    this.tableName = tableName;
+    this.collection = collection;
     this.labels = labels;
   }
 
@@ -68,7 +68,7 @@ class CompositeDataKey {
 
   copy() {
     return new CompositeDataKey(
-      this.tableName,
+      this.collection,
       this.labels.slice(),
     );
   }
@@ -90,7 +90,7 @@ class CompositeDataKeyAndValue {
 
   toObject() {
     return {
-      "table": this.key.tableName,
+      "collection": this.key.collection,
       "key": this.key.toStringLabels(),
       "value": this.value,
     };
@@ -152,7 +152,7 @@ class DataProcessorCollection {
     processor,
   ) {
     const key = processor.selector;
-    if (key.tableName != selector.tableName) {
+    if (key.collection != selector.collection) {
       return null;
     }
     if (key.labels.length > selector.labels.length) {
@@ -176,7 +176,7 @@ class DataProcessorCollection {
 class JSONToHTML {
   constructor() {
     /** @type {String} */
-    this.tableName = "";
+    this.collection = "";
     this.ambientObject = null;
     this.labelsRows = null;
     /** @type {DataProcessorCollection?} */
@@ -389,7 +389,7 @@ class JSONToHTML {
     input,
     /** @type {DataProcessorCollection} */
     selectors,
-    /** @type {{table: String, forceRowLayout: Boolean}} */
+    /** @type {{collection: String, forceRowLayout: Boolean}} */
     optionsModified,
   ) {
     this.inputParsed = input;
@@ -400,8 +400,8 @@ class JSONToHTML {
     if (optionsModified === null || typeof optionsModified !== "object") {
       optionsModified = {};
     }
-    if (typeof optionsModified.table === "string") {
-      this.tableName = optionsModified.table;
+    if (typeof optionsModified.collection === "string") {
+      this.collection = optionsModified.collection;
     }
     let forceRowLayout = false;
     if (optionsModified.forceRowLayout === true) {
@@ -456,7 +456,7 @@ class JSONToHTML {
     if (this.labelsRows === null) {
       return this.getTableHorizontallyLaidFromJSON(
         inputJSON,
-        new CollectionRowSelector(this.tableName, [], "", []),
+        new CollectionRowSelector(this.collection, [], "", []),
       );
     }
     let header = table.createTHead();
@@ -492,22 +492,21 @@ class JSONToHTML {
     let idColumn = this.labelsRows.idColumn;
     if (
       idColumn !== -1 &&
-      this.tableName !== "" &&
-      this.tableName !== undefined &&
-      row[idColumn] !== undefined &&
-      row[idColumn]["$oid"] !== undefined
+      this.collection !== "" &&
+      this.collection !== undefined &&
+      row[idColumn] !== undefined
     ) {
       let rowLabels = new CompositeDataKey(
-        this.tableName,
-        ["_id", "$oid"],
+        this.collection,
+        ["_id"],
       );
       ambientRowSelector = new CompositeDataKeyAndValue(
-        rowLabels, row[idColumn]["$oid"],
+        rowLabels, row[idColumn],
       );
     }
     for (let j = 0; j < this.labelsRows.labels.length; j++) {
       let label = this.labelsRows.labels[j];
-      let selector = new CompositeDataKey(this.tableName, [label]);
+      let selector = new CompositeDataKey(this.collection, [label]);
       let content = this.getTableHorizontallyLaidFromJSON(
         row[j],
         selector,
@@ -526,17 +525,18 @@ function getLabelsRows(input) {
   };
   let labelFinder = {};
   for (let i = 0; i < input.length; i++) {
-    if (typeof input[i] !== "object") {
+    let element = input[i];
+    if (typeof element !== "object") {
       return null;
     }
-    for (let label in input[i]) {
+    for (let label in element) {
       labelFinder[label] = true;
     }
   }
   result.labels = Object.keys(labelFinder).sort();
-  for (let counterLabel = 0; counterLabel < result.labels.length; counterLabel++) {
-    if (result.labels[counterLabel] === "_id") {
-      result.idColumn = counterLabel;
+  for (let i = 0; i < result.labels.length; i++) {
+    if (result.labels[i] === "_id") {
+      result.idColumn = i;
       break;
     }
   }
@@ -544,8 +544,8 @@ function getLabelsRows(input) {
     let currentInputItem = input[i];
     result.rows.push([]);
     let currentOutputItem = result.rows[result.rows.length - 1];
-    for (let counterLabel = 0; counterLabel < result.labels.length; counterLabel++) {
-      let label = result.labels[counterLabel];
+    for (let i = 0; i < result.labels.length; i++) {
+      let label = result.labels[i];
       if (label in currentInputItem) {
         currentOutputItem.push(currentInputItem[label]);
       } else {

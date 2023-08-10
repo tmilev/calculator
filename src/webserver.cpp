@@ -4753,6 +4753,7 @@ bool ArgumentAnalyzer::setServer() {
 }
 
 bool ArgumentAnalyzer::setLoadDatabase() {
+  global.runMode = GlobalVariables::RunMode::loadDatabase;
   return true;
 }
 
@@ -5665,6 +5666,7 @@ int WebServer::mainConsoleHelp() {
 
 int WebServer::mainCommandLine() {
   STACK_TRACE("WebServer::mainCommandLine");
+  global.databaseType = DatabaseType::noDatabaseEveryoneIsAdmin;
   if (!Database::get().initialize(1)) {
     global.fatal << "Failed to initialize database. " << global.fatal;
   }

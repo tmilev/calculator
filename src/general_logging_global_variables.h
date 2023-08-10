@@ -281,6 +281,9 @@ public:
     // Setting this flag will turn off web server
     // self-pinging.
     daemonMonitor,
+    // Command to load a stored database.
+    // ./calculator load_database database_backups/backup/calc
+    loadDatabase,
   };
   RunMode runMode;
   bool flagRunServerOnEmptyCommandLine;

@@ -2,8 +2,7 @@
 #ifndef header_source_code_formatter_ALREADY_INCLUDED
 #define header_source_code_formatter_ALREADY_INCLUDED
 
-#include "macros.h"
-#include "general_list_references.h"
+#include "general_lists.h"
 #include "general_maps.h"
 
 class CodeFormatter {

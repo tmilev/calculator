@@ -371,10 +371,6 @@ public:
   std::string toStringConnectionSummary();
   static void turnProcessMonitoringOn();
   static void turnProcessMonitoringOff();
-  static int main(int argc, char** argv);
-  static int mainWithoutExceptions(int argc, char** argv);
-  static int mainConsoleHelp();
-  static int mainCommandLine();
 };
 
 #endif // header_webserver_ALREADY_INCLUDED

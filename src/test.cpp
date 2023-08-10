@@ -71,12 +71,6 @@ int mainTest(List<std::string>& inputArguments) {
   return 0;
 }
 
-int mainFormat() {
-  SignalsInfrastructure::signals().initializeSignals();
-  CodeFormatter::formatCalculatorInPlace();
-  return 0;
-}
-
 void Test::run() {
   STACK_TRACE("Test::run");
   global

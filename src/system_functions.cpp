@@ -53,13 +53,13 @@ public:
   TimeoutThread();
   void reset();
   void run();
-  bool HandleComputationTimer();
-  bool HandleMaxComputationTime();
-  bool HandleEverythingIsDone();
-  bool HandleComputationTimeout();
+  bool handleComputationTimer();
+  bool handleMaxComputationTime();
+  bool handleEverythingIsDone();
+  bool handleComputationTimeout();
 };
 
-bool TimeoutThread::HandleComputationTimer() {
+bool TimeoutThread::handleComputationTimer() {
   if (global.flagComputationStarted) {
     if (global.millisecondsComputationStart < 0) {
       global.millisecondsComputationStart = global.getElapsedMilliseconds();
@@ -73,7 +73,7 @@ bool TimeoutThread::HandleComputationTimer() {
   return false;
 }
 
-bool TimeoutThread::HandleMaxComputationTime() {
+bool TimeoutThread::handleMaxComputationTime() {
   if (global.millisecondsMaxComputation <= 0) {
     return false;
   }
@@ -134,9 +134,9 @@ bool TimeoutThread::HandleMaxComputationTime() {
   return true;
 }
 
-bool TimeoutThread::HandleComputationTimeout() {
+bool TimeoutThread::handleComputationTimeout() {
   STACK_TRACE("TimerThreadData::HandleComputationTimeout");
-  if (!global.flagRunningBuiltInWebServer) {
+  if (global.runMode != GlobalVariables::RunMode::builtInWebServer) {
     return false;
   }
   if (global.millisecondsReplyAfterComputation <= 0) {
@@ -155,7 +155,7 @@ bool TimeoutThread::HandleComputationTimeout() {
   return false;
 }
 
-bool TimeoutThread::HandleEverythingIsDone() {
+bool TimeoutThread::handleEverythingIsDone() {
   return global.flagComputationFinishedAllOutputSentClosing;
 }
 
@@ -176,15 +176,15 @@ void TimeoutThread::run() {
   for (;;) {
     this->counter ++;
     global.checkConsistency();
-    this->HandleComputationTimer();
+    this->handleComputationTimer();
     global.fallAsleep(this->intervalBetweenChecksInMilliseconds);
-    this->HandleComputationTimeout();
+    this->handleComputationTimeout();
     // Will crash if max computation time is exceeded.
     // This loop will never be exited;
     // the program will terminate wit
-    this->HandleMaxComputationTime();
+    this->handleMaxComputationTime();
     // Only standard exit of the loop.
-    if (this->HandleEverythingIsDone()) {
+    if (this->handleEverythingIsDone()) {
       break;
     }
   }

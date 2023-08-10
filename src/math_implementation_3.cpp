@@ -279,11 +279,7 @@ GlobalVariables::GlobalVariables() {
   this->flagServerForkedIntoWorker = false;
   this->flagComputationComplete = false;
   this->flagComputationFinishedAllOutputSentClosing = false;
-  this->flagRunningConsoleTest = false;
-  this->flagRunningConsoleRegular = false;
-  this->flagRunningBuiltInWebServer = false;
-  this->flagRunningWebAssembly = false;
-  this->flagRunningConsoleHelp = false;
+  this->runMode = GlobalVariables::RunMode::consoleRegular;
   this->flagLoggedIn = false;
   this->flagLogInAttempted = false;
   this->flagServerDetailedLog = false;
@@ -296,9 +292,7 @@ GlobalVariables::GlobalVariables() {
   this->flagRequestComingLocally = false;
   this->databaseType = DatabaseType::internal;
   this->flagLocalhostConnectionMonitor = true;
-  this->flagDaemonMonitor = false;
   this->flagUseMathTags = false;
-  this->flagRunningFormatCode = false;
   this->timePointer = GlobalVariables::timeInternal;
 }
 

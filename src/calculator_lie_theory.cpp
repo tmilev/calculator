@@ -6454,7 +6454,8 @@ bool CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk(
   STACK_TRACE("CalculatorLieTheory::writeSemisimpleLieAlgebraToHardDisk");
   calculator.checkInputNotSameAsOutput(input, output);
   if (
-    !global.userDefaultHasAdminRights() && !global.flagRunningConsoleTest
+    !global.userDefaultHasAdminRights() &&
+    global.runMode != GlobalVariables::RunMode::consoleTest
   ) {
     return
     output.assignError(

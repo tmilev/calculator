@@ -22,7 +22,10 @@ GlobalVariables::Crasher::Crasher() {
 }
 
 void GlobalVariables::Crasher::firstRun() {
-  if (!this->flagCrashInitiated && global.flagRunningBuiltInWebServer) {
+  if (
+    !this->flagCrashInitiated &&
+    global.runMode == GlobalVariables::RunMode::builtInWebServer
+  ) {
     double elapsedSeconds = global.getElapsedSeconds();
     this->crashReportHtml
     << "\n<b style = 'color:red'>Crash</b> "
@@ -113,7 +116,7 @@ void GlobalVariables::Crasher::writeCrashFile() {
     this->crashReportConsolE << "GlobalVariables.flagNotAllocated is true. ";
     return;
   }
-  if (global.flagRunningWebAssembly) {
+  if (global.runMode == GlobalVariables::RunMode::webAssembly) {
     this->crashReportHtml << "Crash while running web assembly.";
     this->crashReportConsolE << "Crash while running web assembly.";
     return;
@@ -619,7 +622,10 @@ void GlobalVariables::makeReport() {
     return;
   }
   std::string reportString;
-  if (this->flagRunningConsoleRegular || this->flagRunningConsoleTest) {
+  if (
+    global.runMode == GlobalVariables::RunMode::consoleRegular ||
+    global.runMode == GlobalVariables::RunMode::consoleTest
+  ) {
     reportString = this->toStringProgressReportConsole();
   } else {
     reportString = this->toStringProgressReportNoThreadData(true);

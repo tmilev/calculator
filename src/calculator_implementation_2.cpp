@@ -1693,7 +1693,7 @@ void Calculator::evaluateCommands() {
   STACK_TRACE("Calculator::evaluateCommands");
   std::stringstream out;
   if (this->parser.syntaxErrors != "") {
-    if (!global.flagRunningConsoleRegular) {
+    if (global.runMode != GlobalVariables::RunMode::consoleRegular) {
       out << "<hr><b>Syntax errors encountered</b><br>";
     } else {
       out
@@ -1710,7 +1710,7 @@ void Calculator::evaluateCommands() {
   this->flagAbortComputationASAP = false;
   this->comments.clear();
   ProgressReport report;
-  if (!global.flagRunningConsoleRegular) {
+  if (global.runMode != GlobalVariables::RunMode::consoleRegular) {
     report.report("Evaluating expressions, current expression stack:\n");
   }
   this->evaluateExpression(
@@ -1732,7 +1732,7 @@ void Calculator::evaluateCommands() {
   global.defaultFormat.getElement().flagLatexDetailsInHtml =
   this->flagWriteLatexPlots;
   global.defaultFormat.getElement().flagExpressionIsFinal = true;
-  if (global.flagRunningConsoleRegular) {
+  if (global.runMode == GlobalVariables::RunMode::consoleRegular) {
     this->evaluateCommandsConsoleOutput(startingExpression, out);
   } else if (!this->flagDisplayFullExpressionTree) {
     this->evaluateCommandsStandardOutput(startingExpression, out);
@@ -1763,7 +1763,10 @@ void Calculator::evaluateCommands() {
   }
   this->outputCommentsString = commentsStream.str();
   this->output[WebAPI::Result::comments] = this->outputCommentsString;
-  if (global.flagRunningConsoleRegular && this->comments.str() != "") {
+  if (
+    global.runMode == GlobalVariables::RunMode::consoleRegular &&
+    this->comments.str() != ""
+  ) {
     this->outputHTMLString += this->outputCommentsString;
   }
 }

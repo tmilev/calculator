@@ -8,7 +8,7 @@
 int WebAssembly::numberOfMainLoopCalls = 0;
 extern "C" {
   char* callCalculator(char* inputBuffer) {
-    global.flagRunningWebAssembly = true;
+    global.runMode = GlobalVariables::RunMode::webAssembly;
     initializeGlobalObjects();
     std::string input(inputBuffer);
     Calculator calculator;
@@ -27,7 +27,7 @@ extern "C" {
 int WebAssembly::main(int argc, char** argv) {
   (void) argc;
   (void) argv;
-  global.flagRunningWebAssembly = true;
+  global.runMode = GlobalVariables::RunMode::webAssembly;
   std::cout
   << "Web assembly main function does nothing; exiting."
   << std::endl;

@@ -386,7 +386,7 @@ bool CalculatorHTML::Test::builtIn(
     << ". Random seed: "
     << this->randomSeed
     << ".";
-    if (global.flagRunningConsoleTest) {
+    if (global.runMode == GlobalVariables::RunMode::consoleTest) {
       global << reportStream.str() << Logger::endL;
     }
     report.report(reportStream.str());
@@ -395,7 +395,7 @@ bool CalculatorHTML::Test::builtIn(
     }
     if (!currentTest.flagSuccess) {
       badSoFar ++;
-      if (global.flagRunningConsoleTest) {
+      if (global.runMode == GlobalVariables::RunMode::consoleTest) {
         global
         << Logger::red
         << "Failure @ index: "
@@ -411,18 +411,16 @@ bool CalculatorHTML::Test::builtIn(
         << HtmlRoutines::getProblemURLRelative(currentTest.fileName)
         << Logger::endL;
       }
-    } else {
-      if (global.flagRunningConsoleTest) {
-        global
-        << Logger::green
-        << "Success @ index: "
-        << i
-        << ". "
-        << "Elapsed ms: "
-        << global.getElapsedMilliseconds()
-        << ". "
-        << Logger::endL;
-      }
+    } else if (global.runMode == GlobalVariables::RunMode::consoleTest) {
+      global
+      << Logger::green
+      << "Success @ index: "
+      << i
+      << ". "
+      << "Elapsed ms: "
+      << global.getElapsedMilliseconds()
+      << ". "
+      << Logger::endL;
     }
   }
   this->errorComments += commentsOnFailure.str();

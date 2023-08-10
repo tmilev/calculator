@@ -4204,7 +4204,7 @@ bool Expression::toStringEndStatement(
   if (
     createTable == false &&
     format != nullptr &&
-    !global.flagRunningConsoleRegular
+    global.runMode != GlobalVariables::RunMode::consoleRegular
   ) {
     createSingleTable = format->flagMakingExpressionTableWithLatex;
     format->flagMakingExpressionTableWithLatex = false;

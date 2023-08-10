@@ -4705,15 +4705,12 @@ bool WebServer::analyzeMainArgumentsTimeString(
 }
 
 void WebServer::initializeBuildFlags() {
-  global.flagRunningConsoleRegular = false;
-  global.flagRunningConsoleTest = false;
 #ifdef MACRO_use_open_ssl
   global.flagSSLAvailable = true;
 #endif
 #ifdef MACRO_use_MongoDB
   global.flagDatabaseExternal = true;
 #endif
-  global.flagRunningBuiltInWebServer = false;
 }
 
 std::string MainFlags::server = "server";
@@ -4723,6 +4720,7 @@ std::string MainFlags::help = "help";
 std::string MainFlags::pathExecutable = "path_executable";
 std::string MainFlags::configurationFile = "configuration_file";
 std::string MainFlags::test = "test";
+std::string MainFlags::loadDatabase = "load_database";
 class ArgumentAnalyzer {
 public:
   int currentIndex;
@@ -4733,19 +4731,18 @@ public:
   bool setTest();
   bool setPathExecutable();
   bool setConfigurationFile();
+  bool setLoadDatabase();
   bool processCommandLineConfigurations(std::string& input);
 };
 
 bool ArgumentAnalyzer::setFormat() {
-  global.flagRunningFormatCode = true;
+  global.runMode = GlobalVariables::RunMode::formatCode;
   return false;
 }
 
 bool ArgumentAnalyzer::setServer() {
   std::string timeLimitString;
-  global.flagRunningBuiltInWebServer = true;
-  global.flagRunningConsoleRegular = false;
-  global.flagRunningConsoleTest = false;
+  global.runMode = GlobalVariables::RunMode::builtInWebServer;
   if (this->currentIndex + 1 < global.programArguments.size) {
     timeLimitString = global.programArguments[this->currentIndex + 1];
     if (WebServer::analyzeMainArgumentsTimeString(timeLimitString)) {
@@ -4755,10 +4752,12 @@ bool ArgumentAnalyzer::setServer() {
   return true;
 }
 
+bool ArgumentAnalyzer::setLoadDatabase() {
+  return true;
+}
+
 bool ArgumentAnalyzer::setTest() {
-  global.flagRunningConsoleTest = true;
-  global.flagRunningConsoleRegular = false;
-  global.flagRunningBuiltInWebServer = false;
+  global.runMode = GlobalVariables::RunMode::consoleTest;
   global.configurationFileName =
   "/configuration/configuration_for_testing.json";
   return true;
@@ -4824,12 +4823,15 @@ bool ArgumentAnalyzer::processOneArgument() {
   if (current == MainFlags::server) {
     return this->setServer();
   }
+  if (current == MainFlags::loadDatabase) {
+    return this->setLoadDatabase();
+  }
   if (current == MainFlags::help && this->currentIndex == 1) {
-    global.flagRunningConsoleHelp = true;
+    global.runMode = GlobalVariables::RunMode::consoleHelp;
     return true;
   }
   if (current == MainFlags::daemon && this->currentIndex == 1) {
-    global.flagDaemonMonitor = true;
+    global.runMode = GlobalVariables::RunMode::daemonMonitor;
     return true;
   }
   if (current == MainFlags::test) {
@@ -4854,7 +4856,7 @@ void WebServer::analyzeMainArguments(int argC, char** argv) {
   for (int i = 0; i < argC; i ++) {
     global.programArguments[i] = argv[i];
   }
-  global.flagRunningConsoleRegular = true;
+  global.runMode = GlobalVariables::RunMode::consoleRegular;
   if (argC == 0) {
     return;
   }
@@ -5319,7 +5321,7 @@ void GlobalVariables::configurationProcess() {
   if (
     global.configuration[Configuration::serverAutoMonitor].
     isTrueRepresentationInJSON() &&
-    global.flagDaemonMonitor
+    global.runMode == GlobalVariables::RunMode::daemonMonitor
   ) {
     global
     << Logger::green
@@ -5331,13 +5333,14 @@ void GlobalVariables::configurationProcess() {
   if (
     global.configuration[Configuration::serverAutoMonitor].
     isTrueRepresentationInJSON() &&
-    !global.flagDaemonMonitor
+    global.runMode != GlobalVariables::RunMode::daemonMonitor
   ) {
     global.flagLocalhostConnectionMonitor = true;
   } else {
     global.flagLocalhostConnectionMonitor = false;
     if (
-      !global.flagRunningConsoleRegular && !global.flagRunningConsoleTest
+      global.runMode != GlobalVariables::RunMode::consoleRegular &&
+      global.runMode != GlobalVariables::RunMode::consoleTest
     ) {
       global
       << Logger::red
@@ -5378,7 +5381,8 @@ void GlobalVariables::configurationProcess() {
   global.flagCachingInternalFilesOn =
   !global.configuration["serverRAMCachingOff"].isTrueRepresentationInJSON();
   if (
-    !global.flagCachingInternalFilesOn && global.flagRunningBuiltInWebServer
+    !global.flagCachingInternalFilesOn &&
+    global.runMode == GlobalVariables::RunMode::builtInWebServer
   ) {
     global
     << Logger::purple
@@ -5401,7 +5405,7 @@ void GlobalVariables::configurationProcess() {
   global.configuration["runServerOnEmptyCommandLine"].
   isTrueRepresentationInJSON();
   if (
-    global.flagRunningConsoleRegular &&
+    global.runMode == GlobalVariables::RunMode::consoleRegular &&
     global.programArguments.size == 1 &&
     global.flagRunServerOnEmptyCommandLine
   ) {
@@ -5410,8 +5414,7 @@ void GlobalVariables::configurationProcess() {
     << "runServerOnEmptyCommandLine is set to true => "
     << "Starting server with default configuration. "
     << Logger::endL;
-    global.flagRunningBuiltInWebServer = true;
-    global.flagRunningConsoleRegular = false;
+    global.runMode = GlobalVariables::RunMode::builtInWebServer;
     global.millisecondsMaxComputation = 30000;
     // 30 seconds, default
   }
@@ -5526,72 +5529,7 @@ int WebServer::main(int argc, char** argv) {
   global.initThreadsExecutableStart();
   STACK_TRACE("main");
   try {
-    // Initializations basic (timer, ...).
-    initializeGlobalObjects();
-    // Initializations of build flags.
-    global.server().WebServer::initializeBuildFlags();
-    // Process executable arguments.
-    // May set the value of
-    // global.PathProjectBaseUserInputOrDeduced.
-    global.server().analyzeMainArguments(argc, argv);
-    if (global.flagRunningConsoleHelp) {
-      return WebServer::mainConsoleHelp();
-    }
-    // Initializes server base path
-    // using global.PathProjectBaseUserInputOrDeduced.
-    global.initDefaultFolderAndFileNames();
-    // Ensure the server path coincides with the current
-    // directory.
-    global.changeDirectory(global.physicalPathProjectBase);
-    // Initializes folder locations needed by logging facilities.
-    FileOperations::initializeFoldersSensitive();
-    global
-    << Logger::green
-    << "Project base folder: "
-    << Logger::blue
-    << global.physicalPathProjectBase
-    << Logger::endL;
-    global
-    << Logger::green
-    << "Current folder: "
-    << Logger::blue
-    << FileOperations::getCurrentFolder()
-    << Logger::endL;
-    // compute configuration file location.
-    // load the configuration file.
-    global.configurationLoad();
-    // compute various flags and settings from the desired configuration.
-    // Correct bad configuration settings if any.
-    global.configurationProcess();
-    // Store back the config file if it changed.
-    global.configurationStore();
-    if (global.millisecondsMaxComputation > 0) {
-      global.millisecondsNoPingBeforeChildIsPresumedDead =
-      global.millisecondsMaxComputation + 20000;
-      // + 20 seconds
-    } else {
-      global.millisecondsNoPingBeforeChildIsPresumedDead = - 1;
-    }
-    // Uses the configuration file.
-    // Calls again global.server().InitializeMainFoldersSensitive();
-    global.server().initializeMainAll();
-    global
-    << "Computation timeout: "
-    << Logger::red
-    << global.millisecondsMaxComputation
-    << " ms."
-    << Logger::endL;
-    if (global.flagDaemonMonitor) {
-      return global.server().daemon();
-    } else if (global.flagRunningBuiltInWebServer) {
-      return global.server().run();
-    } else if (global.flagRunningConsoleTest) {
-      return mainTest(global.programArguments);
-    } else if (global.flagRunningFormatCode) {
-      return mainFormat();
-    } else {
-      return WebServer::mainCommandLine();
-    }
+    return WebServer::mainWithoutExceptions(argc, argv);
   } catch(...) {
     global.fatal
     << "Exception caught: something very wrong has happened. "
@@ -5603,15 +5541,85 @@ int WebServer::main(int argc, char** argv) {
   return - 1;
 }
 
+int WebServer::mainWithoutExceptions(int argc, char** argv) {
+  // Initializations basic (timer, ...).
+  initializeGlobalObjects();
+  // Initializations of build flags.
+  global.server().WebServer::initializeBuildFlags();
+  // Process executable arguments.
+  // May set the value of
+  // global.PathProjectBaseUserInputOrDeduced.
+  global.server().analyzeMainArguments(argc, argv);
+  if (global.runMode == GlobalVariables::RunMode::consoleHelp) {
+    return WebServer::mainConsoleHelp();
+  }
+  // Initializes server base path
+  // using global.PathProjectBaseUserInputOrDeduced.
+  global.initDefaultFolderAndFileNames();
+  // Ensure the server path coincides with the current
+  // directory.
+  global.changeDirectory(global.physicalPathProjectBase);
+  // Initializes folder locations needed by logging facilities.
+  FileOperations::initializeFoldersSensitive();
+  global
+  << Logger::green
+  << "Project base folder: "
+  << Logger::blue
+  << global.physicalPathProjectBase
+  << Logger::endL;
+  global
+  << Logger::green
+  << "Current folder: "
+  << Logger::blue
+  << FileOperations::getCurrentFolder()
+  << Logger::endL;
+  // compute configuration file location.
+  // load the configuration file.
+  global.configurationLoad();
+  // compute various flags and settings from the desired configuration.
+  // Correct bad configuration settings if any.
+  global.configurationProcess();
+  // Store back the config file if it changed.
+  global.configurationStore();
+  if (global.millisecondsMaxComputation > 0) {
+    global.millisecondsNoPingBeforeChildIsPresumedDead =
+    global.millisecondsMaxComputation + 20000;
+    // + 20 seconds
+  } else {
+    global.millisecondsNoPingBeforeChildIsPresumedDead = - 1;
+  }
+  // Uses the configuration file.
+  // Calls again global.server().InitializeMainFoldersSensitive();
+  global.server().initializeMainAll();
+  global
+  << "Computation timeout: "
+  << Logger::red
+  << global.millisecondsMaxComputation
+  << " ms."
+  << Logger::endL;
+  switch (global.runMode) {
+  case GlobalVariables::RunMode::daemonMonitor:
+    return global.server().daemon();
+  case GlobalVariables::RunMode::builtInWebServer:
+    return global.server().run();
+  case GlobalVariables::RunMode::consoleTest:
+    return mainTest(global.programArguments);
+  case GlobalVariables::RunMode::formatCode:
+    return mainFormat();
+  default:
+    return WebServer::mainCommandLine();
+  }
+}
+
 int WebServer::mainConsoleHelp() {
   std::cout << "All flags are optional.\n";
-  std::cout << "run the server with:\n";
+  std::cout << "Option 1. Run the calculator as a web server.\n";
   std::cout
   << "calculator "
   << MainFlags::server
   << " [[max_seconds_per_computation]] "
   << MainFlags::configurationFile
-  << " [[configuration_file_name]]"
+  << " [[configuration_file_name]] "
   << MainFlags::pathExecutable
   << " [[custom_path_to_run_from]]"
   << "\n";
@@ -5632,8 +5640,26 @@ int WebServer::mainConsoleHelp() {
   << MainFlags::pathExecutable
   << " \"./\""
   << "\n";
-  std::cout << "run unit tests with:\n";
+  std::cout << "Option 2. Run the calculator test suite.\n";
   std::cout << "calculator " << MainFlags::test << "\n";
+  std::cout
+  <<
+  "Option 3. Run the calculator in restart-when-rebuilt mode. Ideal for development.\n"
+  ;
+  std::cout << "calculator " << MainFlags::daemon << "\n";
+  std::cout << "Option 4. Run the calculator's source code auto-formatter.\n";
+  std::cout << "calculator " << MainFlags::format << "\n";
+  std::cout
+  << "Option 5. Load a stored database from a folder.\n"
+  <<
+  "Your current database will be backed up before the new database is loaded.\n"
+  << "All backups are written to folder database_backups/\n";
+  std::cout
+  << "calculator "
+  << MainFlags::loadDatabase
+  << " [[folder_name]]\n";
+  std::cout << "Option 6. Display this help message again.\n";
+  std::cout << "calculator " << MainFlags::help << "\n";
   return 0;
 }
 

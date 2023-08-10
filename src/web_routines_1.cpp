@@ -1105,7 +1105,7 @@ bool GlobalVariables::Response::writeResponse(
 ) {
   MutexlockGuard guard(global.mutexReturnBytes);
   STACK_TRACE("WebWorker::writeResponse");
-  if (!global.flagRunningBuiltInWebServer) {
+  if (global.runMode != GlobalVariables::RunMode::builtInWebServer) {
     if (!isCrash) {
       global << incoming.toString();
     }

@@ -251,16 +251,38 @@ public:
   int64_t millisecondsNoPingBeforeChildIsPresumedDead;
   int64_t millisecondsReplyAfterComputation;
   int64_t millisecondsComputationStart;
-  //  bool flagLogInterprocessCommunication;
-  // flags: what mode are we running in?
-  bool flagRunningConsoleHelp;
-  bool flagRunningConsoleRegular;
-  bool flagRunningConsoleTest;
-  bool flagRunningBuiltInWebServer;
-  bool flagRunningWebAssembly;
-  bool flagRunningFormatCode;
-  // bool flagTesting;
-  // webserver flags and variables
+  // RunMode: what mode are we running in?
+  // The run mode comes from the
+  // first argument of the calculator executable.
+  enum RunMode {
+    // Command to display the command line help.
+    // ./calculator help
+    consoleHelp,
+    // Command to run the server using std::cin for input.
+    // ./calculator
+    consoleRegular,
+    // Command to run the the test suite of the calculator.
+    // ./calculator test
+    consoleTest,
+    // Command to run the built in web server (this is the standard run mode).
+    // ./calculator server
+    builtInWebServer,
+    // Command to run with web assembly. Cannot be started from the command
+    // line
+    // but can be initiated with the main function that comes with the
+    // web assembly build.
+    webAssembly,
+    // Command to run the calculator code autoformatter.
+    // ./calculator format
+    formatCode,
+    // If this flag is set, the calculator should run as a
+    // daemon that spawns worker calculator processes
+    // and monitors their deaths.
+    // Setting this flag will turn off web server
+    // self-pinging.
+    daemonMonitor,
+  };
+  RunMode runMode;
   bool flagRunServerOnEmptyCommandLine;
   bool flagCachingInternalFilesOn;
   bool flagServerDetailedLog;
@@ -286,12 +308,6 @@ public:
   // process that will periodically ping the main calculator
   // server.
   bool flagLocalhostConnectionMonitor;
-  // If this flag is set, the calculator should run as a
-  // daemon that spawns worker calculator processes
-  // and monitors their deaths.
-  // Setting this flag will turn off web server
-  // self-pinging.
-  bool flagDaemonMonitor;
   std::string buildVersionSimple;
   std::string buildHeadHashWithServerTime;
   std::string operatingSystem;

@@ -13,6 +13,7 @@ public:
   static std::string test;
   static std::string help;
   static std::string daemon;
+  static std::string loadDatabase;
 };
 
 class WebAPI {

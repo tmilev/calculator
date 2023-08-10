@@ -1197,9 +1197,16 @@ Logger& Logger::logString(const std::string& input) {
 Logger& Logger::logSpecialSymbol(const LoggerSpecialSymbols& input) {
   this->initializeIfNeeded();
   this->checkLogSize();
-  bool doUseColors = global.flagRunningBuiltInWebServer ||
-  global.flagRunningConsoleRegular ||
-  global.flagRunningConsoleTest;
+  bool doUseColors = false;
+  switch (global.runMode) {
+  case GlobalVariables::RunMode::builtInWebServer:
+  case GlobalVariables::RunMode::consoleRegular:
+  case GlobalVariables::RunMode::consoleTest:
+    doUseColors = true;
+    break;
+  default:
+    break;
+  }
   switch (input) {
   case Logger::endL:
     std::cout << this->getStampShort() << this->bufferStandardOutput;

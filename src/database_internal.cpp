@@ -1111,44 +1111,49 @@ void DatabaseInternalServer::objectExists(
   outputFailed = false;
 }
 
+void DatabaseInternalServer::ensureStandardCollectionIndices(){
+  STACK_TRACE("DatabaseInternalServer::ensureStandardCollectionIndices");
+  this->ensureCollection(
+      DatabaseStrings::tableDeadlines,
+      List<std::string>({
+          DatabaseStrings::labelId, DatabaseStrings::labelDeadlinesSchema
+      }
+                        )
+      );
+  this->ensureCollection(
+      DatabaseStrings::tableDeleted,
+      List<std::string>({DatabaseStrings::labelId})
+      );
+  this->ensureCollection(
+      DatabaseStrings::tableEmailInfo,
+      List<std::string>({DatabaseStrings::labelId})
+      );
+  this->ensureCollection(
+      DatabaseStrings::tableProblemInformation,
+      List<std::string>({DatabaseStrings::labelId})
+      );
+  this->ensureCollection(
+      DatabaseStrings::tableUsers,
+      List<std::string>({
+          DatabaseStrings::labelId,
+          DatabaseStrings::labelUsername,
+          DatabaseStrings::labelEmail
+      }
+                        )
+      );
+  this->ensureCollection(
+      DatabaseStrings::tableProblemWeights,
+      List<std::string>({
+          DatabaseStrings::labelId,
+          DatabaseStrings::labelProblemWeightsSchema
+      }
+                        )
+      );
+}
+
 bool DatabaseInternalServer::initializeLoadFromHardDrive() {
   STACK_TRACE("DatabaseInternalServer::initializeLoadFromHardDrive");
-  this->ensureCollection(
-    DatabaseStrings::tableDeadlines,
-    List<std::string>({
-        DatabaseStrings::labelId, DatabaseStrings::labelDeadlinesSchema
-      }
-    )
-  );
-  this->ensureCollection(
-    DatabaseStrings::tableDeleted,
-    List<std::string>({DatabaseStrings::labelId})
-  );
-  this->ensureCollection(
-    DatabaseStrings::tableEmailInfo,
-    List<std::string>({DatabaseStrings::labelId})
-  );
-  this->ensureCollection(
-    DatabaseStrings::tableProblemInformation,
-    List<std::string>({DatabaseStrings::labelId})
-  );
-  this->ensureCollection(
-    DatabaseStrings::tableUsers,
-    List<std::string>({
-        DatabaseStrings::labelId,
-        DatabaseStrings::labelUsername,
-        DatabaseStrings::labelEmail
-      }
-    )
-  );
-  this->ensureCollection(
-    DatabaseStrings::tableProblemWeights,
-    List<std::string>({
-        DatabaseStrings::labelId,
-        DatabaseStrings::labelProblemWeightsSchema
-      }
-    )
-  );
+  this->ensureStandardCollectionIndices();
   for (DatabaseCollection& collection : this->collections.values) {
     if (!collection.loadIndicesFromHardDrive(false)) {
       global

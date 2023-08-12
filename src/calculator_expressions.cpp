@@ -1,16 +1,7 @@
-#include "calculator.h"
-#include "math_extra_weyl_algebras_implementation.h"
-#include "math_extra_universal_enveloping_implementation.h"
-#include "math_extra_modules_semisimple_lie_algebras_implementation.h"
 #include "math_extra_semisimple_lie_algebras_implementation.h"
-#include "math_extra_finite_groups_implementation.h"
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "calculator_html_functions.h"
-#include "crypto_calculator.h"
-#include "math_extra_elliptic_curves_implementation.h"
-#include <cmath>
 #include "math_rational_function_implementation.h"
-#include "string_constants.h"
 
 // If you get a specialization after instantiation error:
 // the following template specialization funcitons must appear

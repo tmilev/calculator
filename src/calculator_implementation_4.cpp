@@ -1,4 +1,4 @@
-#include "calculator.h"
+#include "calculator_interface.h"
 #include "math_general_implementation.h"
 #include "math_extra_weyl_algebras_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"

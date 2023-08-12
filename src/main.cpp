@@ -239,11 +239,18 @@ int MainFunctions::mainLoadDatabase() {
     return -1;
 
   }
-  if (global.programArguments.size <1){
-    global << "The database name is missing. "<< Logger::endL;
-    return -1;
+  if (global.programArguments.size <3){
+    global << "No database provided. Not loading anything. "
+           << Logger::green
+           <<"Your database should have still been backed up." << Logger::endL;
+    return 0;
   }
-  if (!DatabaseLoader::loadDatabase(global.programArguments[0])){
+  std::string databaseName = global.programArguments[2];
+  global << "Loading database " << Logger::red << "local" << Logger::normalColor<< " from: " << Logger::purple << databaseName << Logger::endL;
+
+  std::stringstream comments;
+  if (!DatabaseLoader::loadDatabase(databaseName, comments)){
+    global << "Error loading database. " << Logger::endL << comments.str();
     return -1;
   }
   return 0;

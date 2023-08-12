@@ -1214,7 +1214,9 @@ std::string DatabaseInternalServer::collectionsSchemaFileName() const {
 JSData DatabaseInternalServer::toJSONDatabase() {
   JSData result;
   for (DatabaseCollection& collection : this->collections.values) {
-    result[collection.name] = collection.toJSON();
+    JSData collectionJSON;
+    collection.toJSON(collectionJSON);
+    result[collection.name] = collectionJSON;
   }
   return result;
 }
@@ -1471,15 +1473,14 @@ JSData DatabaseCollection::toJSONIndices() const {
   return result;
 }
 
-JSData DatabaseCollection::toJSON() const {
+void DatabaseCollection::toJSON(JSData& result) const {
+  result.makeEmptyArray();
   if (!this->indices.contains(DatabaseStrings::labelId)) {
-    return JSData();
+    return ;
   }
   std::stringstream commentsOnFailure;
   const DatabaseInternalIndex& index =
   this->indices.getValueNoFail(DatabaseStrings::labelId);
-  JSData result;
-  result.makeEmptyArray();
   for (const std::string& key : index.objectIdToKeyValue.keys) {
     JSData object;
     if (
@@ -1498,7 +1499,6 @@ JSData DatabaseCollection::toJSON() const {
     object[DatabaseStrings::labelId] = key;
     result.listObjects.addOnTop(object);
   }
-  return result;
 }
 
 void DatabaseCollection::toJSONIndices(JSData& output) const {

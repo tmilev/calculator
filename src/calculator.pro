@@ -139,6 +139,7 @@ SOURCES += \
     crypto_public_domain.cpp \
     crypto_test.cpp \
     database.cpp \
+    database_backup.cpp \
     database_user.cpp \
     database_internal.cpp \
     database_calculator.cpp \

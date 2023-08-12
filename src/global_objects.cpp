@@ -7,21 +7,21 @@
 GlobalVariables global;
 
 std::string GlobalVariables::getDateForLogFiles() {
-  static std::string tempDate;
-  if (tempDate != "") {
-    return tempDate;
+  static std::string date;
+  if (date != "") {
+    return date;
   }
   TimeWrapper now;
   now.assignLocalTime();
   std::stringstream out;
   out << "GM_" << now.toStringGM();
-  tempDate = out.str();
-  for (unsigned i = 0; i < tempDate.size(); i ++) {
-    if (tempDate[i] == ' ') {
-      tempDate[i] = '_';
+  date = out.str();
+  for (unsigned i = 0; i < date.size(); i ++) {
+    if (date[i] == ' ') {
+      date[i] = '_';
     }
   }
-  return tempDate;
+  return date;
 }
 
 std::string GlobalVariables::getTimeGM() {

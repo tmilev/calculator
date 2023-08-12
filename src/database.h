@@ -271,7 +271,7 @@ public:
   bool storeIndicesToHardDrive(std::stringstream* commentsOnFailure);
   void toJSONIndices(JSData& output) const;
   JSData toJSONIndices() const;
-  JSData toJSON() const;
+  void toJSON(JSData& result) const;
   std::string toStringIndices() const;
   std::string fileNameIndex() const;
   DatabaseInternalIndex& indexOfObjectIds();
@@ -669,6 +669,12 @@ public:
 
   Database();
   ~Database();
+};
+
+class DatabaseLoader{
+public:
+static  bool writeBackup();
+  static  bool loadDatabase(const std::string& databaseName);
 };
 
 #endif // header_database_ALREADY_INCLUDED

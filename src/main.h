@@ -9,6 +9,7 @@ public:
   static int mainConsoleHelp();
   static int mainCommandLine();
   static int mainFormat();
+  static int mainLoadDatabase();
 };
 
 #endif // header_main_ALREADY_INCLUDED

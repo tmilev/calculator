@@ -103,6 +103,8 @@ int MainFunctions::mainWithoutExceptions(int argc, char** argv) {
     return mainTest(global.programArguments);
   case GlobalVariables::RunMode::formatCode:
     return MainFunctions::mainFormat();
+  case GlobalVariables::RunMode::loadDatabase:
+    return MainFunctions::mainLoadDatabase();
   default:
     return MainFunctions::mainCommandLine();
   }
@@ -141,16 +143,15 @@ int MainFunctions::mainConsoleHelp() {
   std::cout << "Option 2. Run the calculator test suite.\n";
   std::cout << "calculator " << MainFlags::test << "\n";
   std::cout
-  <<
-  "Option 3. Run the calculator in restart-when-rebuilt mode. Ideal for development.\n"
-  ;
+  << "Option 3. Run the calculator in restart-when-rebuilt mode. "
+  << "Ideal for development.\n";
   std::cout << "calculator " << MainFlags::daemon << "\n";
   std::cout << "Option 4. Run the calculator's source code auto-formatter.\n";
   std::cout << "calculator " << MainFlags::format << "\n";
   std::cout
   << "Option 5. Load a stored database from a folder.\n"
-  <<
-  "Your current database will be backed up before the new database is loaded.\n"
+  << "Your current database will be backed "
+  << "up before the new database is loaded.\n"
   << "All backups are written to folder database_backups/\n";
   std::cout
   << "calculator "
@@ -230,5 +231,20 @@ int MainFunctions::mainCommandLine() {
 int MainFunctions::mainFormat() {
   SignalsInfrastructure::signals().initializeSignals();
   CodeFormatter::formatCalculatorInPlace();
+  return 0;
+}
+
+int MainFunctions::mainLoadDatabase() {
+  if (!  DatabaseLoader::writeBackup()){
+    return -1;
+
+  }
+  if (global.programArguments.size <1){
+    global << "The database name is missing. "<< Logger::endL;
+    return -1;
+  }
+  if (!DatabaseLoader::loadDatabase(global.programArguments[0])){
+    return -1;
+  }
   return 0;
 }

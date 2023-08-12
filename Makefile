@@ -157,6 +157,7 @@ SOURCES_RELATIVE_PATH=\
     database_test.cpp \
     database_internal.cpp \
     database_problem_data.cpp \
+    database_backup.cpp \
     email_user.cpp \
     date_time_wrappers.cpp \
     exam_routines.cpp \

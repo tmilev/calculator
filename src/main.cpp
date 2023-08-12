@@ -235,23 +235,31 @@ int MainFunctions::mainFormat() {
 }
 
 int MainFunctions::mainLoadDatabase() {
-  if (!  DatabaseLoader::writeBackup()){
-    return -1;
-
+  if (!DatabaseLoader::writeBackup()) {
+    return - 1;
   }
-  if (global.programArguments.size <3){
-    global << "No database provided. Not loading anything. "
-           << Logger::green
-           <<"Your database should have still been backed up." << Logger::endL;
+  if (global.programArguments.size < 3) {
+    global
+    << "No database provided. Not loading anything. "
+    << Logger::green
+    << "Your database should have still been backed up."
+    << Logger::endL;
     return 0;
   }
   std::string databaseName = global.programArguments[2];
-  global << "Loading database " << Logger::red << "local" << Logger::normalColor<< " from: " << Logger::purple << databaseName << Logger::endL;
-
+  global
+  << "Loading database "
+  << Logger::red
+  << "local"
+  << Logger::normalColor
+  << " from: "
+  << Logger::purple
+  << databaseName
+  << Logger::endL;
   std::stringstream comments;
-  if (!DatabaseLoader::loadDatabase(databaseName, comments)){
+  if (!DatabaseLoader::loadDatabase(databaseName, comments)) {
     global << "Error loading database. " << Logger::endL << comments.str();
-    return -1;
+    return - 1;
   }
   return 0;
 }

@@ -1252,8 +1252,8 @@ Logger& Logger::logSpecialSymbol(const LoggerSpecialSymbols& input) {
     }
     logFile << this->closeTagHtml();
     return *this;
-     default:
-    break   ;
+  default:
+    break;
   }
   return *this;
 }

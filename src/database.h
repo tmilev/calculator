@@ -672,20 +672,46 @@ public:
   ~Database();
 };
 
-class DatabaseLoader{
+class DatabaseLoader {
 public:
-  std::string folderName;
+  std::string fileName;
+  static bool writeBackup();
+  static bool loadDatabase(
+    const std::string& databaseName, std::stringstream& comments
+  );
+  bool doLoadDatabase(
+    const std::string& databaseName, std::stringstream& comments
+  );
+  bool loadFromJSON(JSData& input, std::stringstream& comments);
+  bool loadOneCollectionFromJSON(
+    const std::string& collectionName,
+    JSData& input,
+    std::stringstream& comments
+  );
+};
+
+// A temporary class to convert a mongo database dump to a json.
+// May be deleted in the future once we're done with mongoDB.
+class MongoDatabaseDumpToJSONConverter {
+public:
   List<std::string> collectionFileNames;
-static  bool writeBackup();
-  static  bool loadDatabase(const std::string& databaseName, std::stringstream& comments);
-bool doLoadDatabase(const std::string& databaseName, std::stringstream& comments);
-  bool loadOneCollection(const std::string& collectionFileName, std::stringstream& comments);
-bool loadOneCollectionFromJSON(const std::string& collectionName, JSData& input, std::stringstream& comments);
-// Loads a collection from file content.
-  // 1. Supports loading json proper by simple parsing.
-  // 2. Supports newline-separated json records.
-  // This is the export format of mongoDB as of writing.
-bool collectionJSONFromFileContent(const std::string& input, JSData& output, std::stringstream& comments);
+  bool load(
+    const std::string& folderName,
+    JSData& output,
+    std::stringstream& commentsOnFailure
+  );
+  bool loadOneCollection(
+    const std::string& collectionFileName,
+    JSData& output,
+    std::stringstream& comments
+  );
+  // Loads a collection from file content.
+  // Expects newline-separated json records.
+  bool collectionFromFileContent(
+    const std::string& input,
+    JSData& output,
+    std::stringstream& comments
+  );
 };
 
 #endif // header_database_ALREADY_INCLUDED

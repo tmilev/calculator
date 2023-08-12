@@ -1111,44 +1111,44 @@ void DatabaseInternalServer::objectExists(
   outputFailed = false;
 }
 
-void DatabaseInternalServer::ensureStandardCollectionIndices(){
+void DatabaseInternalServer::ensureStandardCollectionIndices() {
   STACK_TRACE("DatabaseInternalServer::ensureStandardCollectionIndices");
   this->ensureCollection(
-      DatabaseStrings::tableDeadlines,
-      List<std::string>({
-          DatabaseStrings::labelId, DatabaseStrings::labelDeadlinesSchema
+    DatabaseStrings::tableDeadlines,
+    List<std::string>({
+        DatabaseStrings::labelId, DatabaseStrings::labelDeadlinesSchema
       }
-                        )
-      );
+    )
+  );
   this->ensureCollection(
-      DatabaseStrings::tableDeleted,
-      List<std::string>({DatabaseStrings::labelId})
-      );
+    DatabaseStrings::tableDeleted,
+    List<std::string>({DatabaseStrings::labelId})
+  );
   this->ensureCollection(
-      DatabaseStrings::tableEmailInfo,
-      List<std::string>({DatabaseStrings::labelId})
-      );
+    DatabaseStrings::tableEmailInfo,
+    List<std::string>({DatabaseStrings::labelId})
+  );
   this->ensureCollection(
-      DatabaseStrings::tableProblemInformation,
-      List<std::string>({DatabaseStrings::labelId})
-      );
+    DatabaseStrings::tableProblemInformation,
+    List<std::string>({DatabaseStrings::labelId})
+  );
   this->ensureCollection(
-      DatabaseStrings::tableUsers,
-      List<std::string>({
-          DatabaseStrings::labelId,
-          DatabaseStrings::labelUsername,
-          DatabaseStrings::labelEmail
+    DatabaseStrings::tableUsers,
+    List<std::string>({
+        DatabaseStrings::labelId,
+        DatabaseStrings::labelUsername,
+        DatabaseStrings::labelEmail
       }
-                        )
-      );
+    )
+  );
   this->ensureCollection(
-      DatabaseStrings::tableProblemWeights,
-      List<std::string>({
-          DatabaseStrings::labelId,
-          DatabaseStrings::labelProblemWeightsSchema
+    DatabaseStrings::tableProblemWeights,
+    List<std::string>({
+        DatabaseStrings::labelId,
+        DatabaseStrings::labelProblemWeightsSchema
       }
-                        )
-      );
+    )
+  );
 }
 
 bool DatabaseInternalServer::initializeLoadFromHardDrive() {
@@ -1481,7 +1481,7 @@ JSData DatabaseCollection::toJSONIndices() const {
 void DatabaseCollection::toJSON(JSData& result) const {
   result.makeEmptyArray();
   if (!this->indices.contains(DatabaseStrings::labelId)) {
-    return ;
+    return;
   }
   std::stringstream commentsOnFailure;
   const DatabaseInternalIndex& index =

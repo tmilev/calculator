@@ -6,6 +6,10 @@
 #include "math_rational_function_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h"
 
+// Excluding this breaks the optimize=1 build
+// as of writing.
+#include "math_extra_modules_semisimple_lie_algebras_implementation.h"
+
 bool CalculatorFunctionsBinaryOps::
 addElementZModPOrRationalToElementZModPOrRational(
   Calculator& calculator, const Expression& input, Expression& output

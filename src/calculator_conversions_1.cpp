@@ -4,6 +4,11 @@
 #include "math_rational_function_implementation.h"
 #include "calculator_lie_theory.h"
 
+// As of writing,
+// removing this include breaks the optimize=1 build,
+// but not the non-optimized build.
+#include "math_extra_universal_enveloping_implementation.h"
+
 // Start WithContext specializations.
 template < >
 bool WithContext<Polynomial<Rational> >::toExpression(

@@ -4,13 +4,13 @@
 JSData Calculator::OperationHandlers::toJSON() {
   JSData result;
   JSData currentFunctionListDirect;
-  currentFunctionListDirect.elementType = JSData::Token::tokenArray;
+  currentFunctionListDirect.elementType = JSData::Type::tokenArray;
   for (int i = 0; i < this->handlers.size; i ++) {
     Function& currentHandler = this->handlers[i];
     currentFunctionListDirect.listObjects.addOnTop(currentHandler.toJSON());
   }
   JSData currentFunctionListComposite;
-  currentFunctionListComposite.elementType = JSData::Token::tokenArray;
+  currentFunctionListComposite.elementType = JSData::Type::tokenArray;
   for (int i = 0; i < this->compositeHandlers.size; i ++) {
     Function& currentHandler = this->compositeHandlers[i];
     currentFunctionListComposite.listObjects.addOnTop(
@@ -37,7 +37,7 @@ JSData Calculator::Examples::toJSONFunctionHandlersAndExamples() {
 
 JSData Calculator::Examples::toJSONExamples() {
   JSData result;
-  result.elementType = JSData::Token::tokenObject;
+  result.elementType = JSData::Type::tokenObject;
   List<std::string> fileNames;
   if (!FileOperations::getFolderFileNamesVirtual("examples/", fileNames)) {
     result[WebAPI::Result::error] = "Failed to open examples";
@@ -65,7 +65,7 @@ JSData Calculator::Examples::toJSONExamples() {
 JSData Calculator::Examples::toJSONFunctionHandlers() {
   STACK_TRACE("Calculator::Examples::toJSONFunctionHandlers");
   JSData examples;
-  examples.elementType = JSData::Token::tokenObject;
+  examples.elementType = JSData::Type::tokenObject;
   MapReferences<
     std::string,
     MemorySaving<OperationHandlers>,
@@ -1806,7 +1806,7 @@ void Calculator::evaluateCommandsStandardOutput(
   this->objectContainer.resetSliders();
   this->objectContainer.resetPlots();
   JSData result;
-  result.elementType = JSData::Token::tokenObject;
+  result.elementType = JSData::Type::tokenObject;
   std::string resultString =
   this->programExpression.toString(
     &global.defaultFormat.getElement(),

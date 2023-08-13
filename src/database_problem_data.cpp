@@ -148,7 +148,7 @@ std::string ProblemData::store() {
 JSData ProblemData::storeJSON() const {
   STACK_TRACE("ProblemData::storeJSON");
   JSData result;
-  result.elementType = JSData::Token::tokenObject;
+  result.elementType = JSData::Type::tokenObject;
   if (this->flagRandomSeedGiven) {
     std::stringstream stringConverter;
     stringConverter << this->randomSeed;

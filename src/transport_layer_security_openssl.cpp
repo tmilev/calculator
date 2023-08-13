@@ -110,9 +110,9 @@ initializeSSLKeyFilesSelfSignedCreateOnDemand() {
   << " -days 3001 ";
   if (
     global.configuration["openSSLSubject"].elementType !=
-    JSData::Token::tokenUndefined &&
+    JSData::Type::tokenUndefined &&
     global.configuration["openSSLSubject"].elementType ==
-    JSData::Token::tokenString
+    JSData::Type::tokenString
   ) {
     command << "-subj " << global.configuration["openSSLSubject"].stringValue;
     // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"

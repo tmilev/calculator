@@ -4208,8 +4208,8 @@ bool Expression::toStringEndStatement(
   }
   std::string currentOutput;
   if (outputJS != nullptr) {
-    (*outputJS)["input"].elementType = JSData::Token::tokenArray;
-    (*outputJS)["output"].elementType = JSData::Token::tokenArray;
+    (*outputJS)["input"].elementType = JSData::Type::tokenArray;
+    (*outputJS)["output"].elementType = JSData::Type::tokenArray;
   }
   for (int i = 1; i < this->size(); i ++) {
     const Expression expression = (*this)[i];
@@ -5488,7 +5488,7 @@ std::string Expression::toString(
     );
   }
   if (outputJS != nullptr) {
-    if (outputJS->elementType == JSData::Token::tokenUndefined) {
+    if (outputJS->elementType == JSData::Type::tokenUndefined) {
       (*outputJS) = out.str();
     }
   }

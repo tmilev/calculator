@@ -123,7 +123,7 @@ bool DatabaseLoader::loadOneCollectionFromJSON(
 ) {
   STACK_TRACE("DatabaseLoader::loadOneCollectionFromJSON");
   DatabaseInternalServer& database = Database::get().localDatabase.server;
-  if (input.elementType != JSData::Token::tokenArray) {
+  if (input.elementType != JSData::Type::tokenArray) {
     return false;
   }
   DatabaseCollection& collection =

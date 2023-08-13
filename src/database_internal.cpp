@@ -978,7 +978,7 @@ bool DatabaseInternalServer::findObjectIds(
   std::string desiredValue = query.exactValue.stringValue;
   if (desiredValue == "") {
     if (commentsOnFailure != nullptr) {
-      if (query.exactValue.elementType == JSData::Token::tokenString) {
+      if (query.exactValue.elementType == JSData::Type::tokenString) {
         *commentsOnFailure << "Searching by empty string is not allowed. ";
       } else {
         *commentsOnFailure
@@ -1641,7 +1641,7 @@ void DatabaseInternalIndex::computeKeyValueToObjectIds() {
 
 JSData DatabaseInternalIndex::toJSON() const {
   JSData result;
-  result.elementType = JSData::Token::tokenObject;
+  result.elementType = JSData::Type::tokenObject;
   for (int i = 0; i < this->objectIdToKeyValue.size(); i ++) {
     result[this->objectIdToKeyValue.keys[i]] =
     this->objectIdToKeyValue.values[i];
@@ -1684,7 +1684,7 @@ void DatabaseCollection::toJSON(JSData& result) const {
 }
 
 void DatabaseCollection::toJSONIndices(JSData& output) const {
-  output.reset(JSData::Token::tokenObject);
+  output.reset(JSData::Type::tokenObject);
   for (int i = 0; i < this->indices.size(); i ++) {
     output[this->indices.keys[i]] = this->indices.values[i].toJSON();
   }

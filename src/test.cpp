@@ -22,6 +22,7 @@ public:
     static const std::string topiclists;
     static const std::string freecalc;
     static const std::string calculator;
+    static const std::string json;
     static const std::string polynomial;
     static const std::string basic;
     static const std::string courses;
@@ -58,6 +59,7 @@ const std::string Test::Suites::topiclists = "topiclists";
 const std::string Test::Suites::calculator = "calculator";
 const std::string Test::Suites::polynomial = "polynomial";
 const std::string Test::Suites::build = "build";
+const std::string Test::Suites::json = "json";
 const std::string Test::Suites::wasm = "wasm";
 const std::string Test::Suites::basic = "basic";
 const std::string Test::Suites::API = "api";
@@ -86,10 +88,13 @@ void Test::run() {
     Database::Test::all();
     global << Logger::green << "Database tests completed." << Logger::endL;
   }
+  if (this->shouldTest(Test::Suites::json)) {
+    JSData::Test::all();
+    global << Logger::green << "Json tests completed." << Logger::endL;
+  }
   if (this->shouldTest(Test::Suites::basic)) {
     AlgebraicNumber::Test::all();
     StringRoutines::Test::all();
-    JSData::Test::all();
     Expression::Test::all();
     LargeIntegerUnsigned::Test::all();
     Rational::Test::all();

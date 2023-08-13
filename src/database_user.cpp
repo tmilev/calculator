@@ -317,7 +317,7 @@ bool UserCalculatorData::loadFromJSON(JSData& input) {
     this->actualHashedSaltedPassword, false
   );
   JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
-  if (sectionsTaughtList.elementType == JSData::Token::tokenArray) {
+  if (sectionsTaughtList.elementType == JSData::Type::tokenArray) {
     for (int i = 0; i < sectionsTaughtList.listObjects.size; i ++) {
       this->sectionsTaught.addOnTop(
         sectionsTaughtList.listObjects[i].stringValue
@@ -341,11 +341,9 @@ JSData UserCalculatorData::toJSON() {
   result[DatabaseStrings::labelTimeOfAuthenticationTokenCreation] =
   this->timeOfAuthenticationTokenCreation;
   result[DatabaseStrings::labelProblemDataJSON] = this->problemDataJSON;
-  if (
-    this->problemDataJSON.elementType == JSData::Token::tokenUndefined
-  ) {
+  if (this->problemDataJSON.elementType == JSData::Type::tokenUndefined) {
     result[DatabaseStrings::labelProblemDataJSON].elementType =
-    JSData::Token::tokenObject;
+    JSData::Type::tokenObject;
     result[DatabaseStrings::labelProblemDataJSON].objects.clear();
   }
   result[DatabaseStrings::labelPassword] = this->actualHashedSaltedPassword;
@@ -355,7 +353,7 @@ JSData UserCalculatorData::toJSON() {
   result[DatabaseStrings::labelSection] = this->sectionInDB;
   result[DatabaseStrings::labelCurrentCourses] = this->courseInDB;
   JSData sectionsTaughtList;
-  sectionsTaughtList.elementType = JSData::Token::tokenArray;
+  sectionsTaughtList.elementType = JSData::Type::tokenArray;
   for (int i = 0; i < this->sectionsTaught.size; i ++) {
     sectionsTaughtList[i] = this->sectionsTaught[i];
   }
@@ -364,7 +362,7 @@ JSData UserCalculatorData::toJSON() {
     JSData& currentValue = result.objects.values[i];
     if (
       currentValue.stringValue == "" &&
-      currentValue.elementType == JSData::Token::tokenString
+      currentValue.elementType == JSData::Type::tokenString
     ) {
       result.objects.removeKey(result.objects.keys[i]);
     }
@@ -1230,7 +1228,7 @@ bool UserOfDatabase::loginViaGoogleTokenCreateNewAccountIfNeeded(
     return false;
   }
   if (
-    data.getValue("email").elementType != JSData::Token::tokenString
+    data.getValue("email").elementType != JSData::Type::tokenString
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure

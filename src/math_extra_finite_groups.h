@@ -1740,7 +1740,7 @@ JSData GroupRepresentation<someGroup, Coefficient>::toJSON() {
   if (this->flagCharacterIsComputed) {
     out["character"] = this->character.data;
   } else {
-    out["character"].elementType = JSData::Token::tokenNull;
+    out["character"].elementType = JSData::Type::tokenNull;
   }
   for (int i = 0; i < generators.size; i ++) {
     out["generators"][i] = generators[i];

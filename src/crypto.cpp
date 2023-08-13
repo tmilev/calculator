@@ -6,6 +6,8 @@
 #include "math_extra_algebraic_numbers.h"
 #include <iomanip>
 
+List<PublicKeyRSA> Crypto::knownCertificates;
+
 void Crypto::Random::getRandomBytesSecureInternal(
   ListZeroAfterUse<unsigned char>& output, int numberOfBytesMax32
 ) {
@@ -2298,7 +2300,7 @@ bool PublicKeyRSA::loadFromJSON(
     << "<hr>Loading certificate from: "
     << input.toString(nullptr);
   }
-  if (input.elementType != JSData::Token::tokenObject) {
+  if (input.elementType != JSData::Type::tokenObject) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Can't load certificate: JSON not of type object. ";
@@ -2345,8 +2347,6 @@ bool PublicKeyRSA::loadFromModulusAndExponentStrings(
   return true;
 }
 
-List<PublicKeyRSA> Crypto::knownCertificates;
-
 bool Crypto::loadOneKnownCertificate(
   const std::string& input,
   std::stringstream* commentsOnFailure,
@@ -2362,10 +2362,10 @@ bool Crypto::loadOneKnownCertificate(
   }
   PublicKeyRSA currentCert;
   bool isGood = false;
-  if (certificateJSON.elementType == JSData::Token::tokenObject) {
+  if (certificateJSON.elementType == JSData::Type::tokenObject) {
     if (certificateJSON.hasKey("keys")) {
       JSData keys = certificateJSON.getValue("keys");
-      if (keys.elementType == JSData::Token::tokenArray) {
+      if (keys.elementType == JSData::Type::tokenArray) {
         isGood = true;
         for (int i = 0; i < keys.listObjects.size; i ++) {
           if (

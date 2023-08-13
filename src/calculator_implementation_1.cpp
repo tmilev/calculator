@@ -1271,7 +1271,7 @@ JSData Plot::plotJSON2d(Calculator& owner) {
   result[Plot::Labels::controlsName] = controls;
   result[Plot::Labels::layerContainerName] = layerContainerId;
   result[Plot::Labels::messagesName] = messages;
-  result["plotUpdaters"].elementType = JSData::Token::tokenArray;
+  result["plotUpdaters"].elementType = JSData::Type::tokenArray;
   if (!this->flagPlotShowJavascriptOnly) {
     result["noControls"] = owner.flagPlotNoControls;
   }

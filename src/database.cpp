@@ -119,7 +119,7 @@ bool QueryExact::extractNestedKeysFromJSON(
 
 JSData QueryExact::toJSONCombineKeysAndValue() const {
   JSData result;
-  result.elementType = JSData::Token::tokenObject;
+  result.elementType = JSData::Type::tokenObject;
   if (this->nestedLabels.size == 0) {
     return result;
   }
@@ -230,7 +230,7 @@ bool Database::getLabels(
   labels.setSize(0);
   for (int i = 0; i < fieldEntries.listObjects.size; i ++) {
     if (
-      fieldEntries.listObjects[i].elementType != JSData::Token::tokenString
+      fieldEntries.listObjects[i].elementType != JSData::Type::tokenString
     ) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
@@ -252,7 +252,7 @@ bool Database::isDeleteable(
 ) {
   STACK_TRACE("Database::isDeleteable");
   if (
-    entry.elementType != JSData::Token::tokenObject ||
+    entry.elementType != JSData::Type::tokenObject ||
     !entry.hasKey(DatabaseStrings::labelFields)
   ) {
     if (commentsOnFailure != nullptr) {
@@ -719,7 +719,7 @@ JSData Database::toJSONFetchItem(
   }
   Database::correctData(rowsJSON);
   JSData rows;
-  rows.elementType = JSData::Token::tokenArray;
+  rows.elementType = JSData::Type::tokenArray;
   rows.listObjects = rowsJSON;
   bool flagDebuggingAdmin = global.userDefaultIsDebuggingAdmin();
   if (flagDebuggingAdmin) {
@@ -784,7 +784,7 @@ JSData Database::toJSONAllCollections() {
     return result;
   }
   JSData collectionNames;
-  collectionNames.elementType = JSData::Token::tokenArray;
+  collectionNames.elementType = JSData::Type::tokenArray;
   collectionNames.listObjects.setSize(collectionNamesList.size);
   for (int i = 0; i < collectionNamesList.size; i ++) {
     collectionNames[i] = collectionNamesList[i];
@@ -815,7 +815,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   }
   Database::correctData(rowsJSON);
   JSData rows;
-  rows.elementType = JSData::Token::tokenArray;
+  rows.elementType = JSData::Type::tokenArray;
   rows.listObjects = rowsJSON;
   result["rows"] = rows;
   result["totalRows"] = static_cast<int>(totalItems);
@@ -1037,7 +1037,7 @@ bool QuerySet::fromJSON(
   const JSData& inputValue, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("QuerySet::fromJSON");
-  if (inputValue.elementType != JSData::Token::tokenArray) {
+  if (inputValue.elementType != JSData::Type::tokenArray) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "QuerySet must be encoded as an array. Your input: "

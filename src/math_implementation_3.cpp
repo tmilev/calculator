@@ -11482,7 +11482,7 @@ std::string HtmlRoutines::toHtmlLatexLiteralWithCopy(
 
 std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
   STACK_TRACE("HtmlRoutines::toHtmlTableRowsFromJSON");
-  if (input.elementType == JSData::Token::tokenObject) {
+  if (input.elementType == JSData::Type::tokenObject) {
     std::stringstream out;
     out << "<table class = \"tableDatabaseItem\">";
     for (int i = 0; i < input.objects.size(); i ++) {
@@ -11498,7 +11498,7 @@ std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
     out << "</table>";
     return out.str();
   }
-  if (input.elementType == JSData::Token::tokenArray) {
+  if (input.elementType == JSData::Type::tokenArray) {
     std::stringstream out;
     out << "<table class='tableDatabaseItem'>";
     for (int i = 0; i < input.objects.size(); i ++) {

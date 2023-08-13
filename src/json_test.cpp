@@ -1,5 +1,5 @@
 #include "json.h"
-#include "math_general.h"
+#include "general_logging_global_variables.h"
 
 bool JSData::Test::all() {
   STACK_TRACE("JSData::Test::all");
@@ -39,6 +39,13 @@ bool JSData::Test::recode() {
   );
   toRecode.addOnTop(
     List<std::string>({
+        "[true, false, null, \"\", {a:\"b\"}, 4.0, -4.0, 1234, -123, - 123]",
+        ""
+      }
+    )
+  );
+  toRecode.addOnTop(
+    List<std::string>({
         "{\"resultHtml\":\"&lt;!-- --&gt;\\na\"}",
         "{\"resultHtml\":\"&lt;!-- --&gt;\\na\"}"
       }
@@ -57,9 +64,9 @@ bool JSData::Test::recodeOnce(
   JSData parser;
   std::string input = pair[0];
   std::stringstream commentsOnFailure;
-  if (!parser.parse(input, relaxedInput, &commentsOnFailure)) {
+  if (!parser.parse(input, relaxedInput, &commentsOnFailure, false)) {
     global.fatal
-    << "Failed to decode "
+    << "Failed to decode:\n"
     << pair[0]
     << "\nComments: "
     << commentsOnFailure.str()

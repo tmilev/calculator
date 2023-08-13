@@ -724,7 +724,7 @@ bool Calculator::getMatrixExpressions(
 }
 
 bool Calculator::Test::processOneTest(JSData& input) {
-  if (input["input"].elementType != JSData::Token::tokenString) {
+  if (input["input"].elementType != JSData::Type::tokenString) {
     global << Logger::red << "Input command is missing. " << Logger::endL;
     return false;
   }
@@ -740,7 +740,7 @@ bool Calculator::Test::processOneTest(JSData& input) {
     global << Logger::red << reportStream.str() << Logger::endL;
     return false;
   }
-  if (input["output"].elementType != JSData::Token::tokenString) {
+  if (input["output"].elementType != JSData::Type::tokenString) {
     global
     << Logger::red
     << "Command: "
@@ -788,7 +788,7 @@ bool Calculator::Test::loadTestStrings(std::stringstream* commentsOnFailure) {
     }
     return false;
   }
-  if (this->storedResults.elementType != JSData::Token::tokenArray) {
+  if (this->storedResults.elementType != JSData::Type::tokenArray) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Test json is not an array. ";
     }
@@ -818,7 +818,7 @@ bool Calculator::Test::writeTestStrings(
 ) {
   STACK_TRACE("Calculator::Test::writeTestStrings");
   JSData result;
-  result.elementType = JSData::Token::tokenArray;
+  result.elementType = JSData::Type::tokenArray;
   result.listObjects.setSize(this->commands.size());
   for (int i = 0; i < this->commands.size(); i ++) {
     JSData nextEntry;

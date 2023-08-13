@@ -165,6 +165,7 @@ SOURCES_RELATIVE_PATH=\
     global_test.cpp \
     html_snippets.cpp \
     json.cpp \
+    json_parsing.cpp \
     json_test.cpp \
     general_strings_test.cpp \
     math_algebraic_numbers.cpp \

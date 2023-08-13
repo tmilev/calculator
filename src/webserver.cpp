@@ -3631,9 +3631,9 @@ void WebServer::processOneChildMessage(int childIndex, int& outputTotalInUse) {
   this->statistics.workersNormallyExited ++;
   if (
     workerMessage[WebServer::Statististics::allRequestsString].elementType ==
-    JSData::Token::tokenLargeInteger &&
+    JSData::Type::tokenLargeInteger &&
     workerMessage[WebServer::Statististics::pingRequestsString].elementType ==
-    JSData::Token::tokenLargeInteger
+    JSData::Type::tokenLargeInteger
   ) {
     int incomingAllRequests =
     workerMessage[WebServer::Statististics::allRequestsString].integerValue.
@@ -3650,7 +3650,7 @@ void WebServer::processOneChildMessage(int childIndex, int& outputTotalInUse) {
   if (
     workerMessage[WebServer::Statististics::standaloneServerRequestsString].
     elementType ==
-    JSData::Token::tokenLargeInteger
+    JSData::Type::tokenLargeInteger
   ) {
     int incomingStandaloneRequests =
     workerMessage[WebServer::Statististics::standaloneServerRequestsString].
@@ -4592,8 +4592,7 @@ void WebServer::figureOutOperatingSystem() {
 void WebServer::checkSystemInstallationOpenSSL() {
   STACK_TRACE("WebServer::checkSystemInstallationOpenSSL");
   if (
-    global.configuration["openSSL"].elementType !=
-    JSData::Token::tokenUndefined
+    global.configuration["openSSL"].elementType != JSData::Type::tokenUndefined
   ) {
     return;
   }
@@ -4657,7 +4656,7 @@ void WebServer::checkFreecalcSetup() {
   STACK_TRACE("WebServer::checkFreecalcSetup");
   if (
     global.configuration["freecalcSetup"].elementType !=
-    JSData::Token::tokenUndefined
+    JSData::Type::tokenUndefined
   ) {
     return;
   }
@@ -4854,7 +4853,7 @@ bool ArgumentAnalyzer::processOneArgument() {
 
 void WebServer::analyzeMainArguments(int argC, char** argv) {
   STACK_TRACE("WebServer::analyzeMainArguments");
-  global.configurationCommandLine.reset(JSData::Token::tokenObject);
+  global.configurationCommandLine.reset(JSData::Type::tokenObject);
   if (argC < 0) {
     argC = 0;
   }
@@ -5461,7 +5460,7 @@ void GlobalVariables::configurationProcess() {
   }
   if (
     global.configuration[Configuration::gitRepository].elementType ==
-    JSData::Token::tokenString
+    JSData::Type::tokenString
   ) {
     HtmlRoutines::gitRepository =
     global.configuration[Configuration::gitRepository].stringValue;
@@ -5511,8 +5510,8 @@ void GlobalVariables::configurationProcess() {
     );
     webServerOnly[key] = subServerConfiguration.toJSON();
   }
-  if (webServerOnly.elementType != JSData::Token::tokenObject) {
-    webServerOnly.elementType = JSData::Token::tokenObject;
+  if (webServerOnly.elementType != JSData::Type::tokenObject) {
+    webServerOnly.elementType = JSData::Type::tokenObject;
   }
   List<List<std::string> > folderVirtualLinksDefault =
   FileOperations::initializeFolderVirtualLinksDefaults();

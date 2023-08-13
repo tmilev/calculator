@@ -151,6 +151,7 @@ SOURCES += \
     global_objects.cpp \
     html_snippets.cpp \
     json.cpp \
+    json_parsing.cpp \
     math_algebraic_numbers.cpp \
     math_algebraic_numbers_test.cpp \
     math_elliptic_curves.cpp \

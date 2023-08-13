@@ -16,30 +16,17 @@ class LargeInteger;
 
 class JSData {
 public:
-  static const int numberOfEmptyTokensAtStart = 6;
-  struct Token {
-    static const char tokenUndefined = 0;
-    static const char tokenNull = 1;
-    static const char tokenBool = 2;
-    static const char tokenFloat = 3;
-    static const char tokenString = 4;
-    static const char tokenArray = 5;
-    static const char tokenObject = 6;
-    static const char tokenLargeInteger = 7;
-    static const char tokenOpenBrace = 8;
-    static const char tokenCloseBrace = 9;
-    static const char tokenOpenBracket = 10;
-    static const char tokenCloseBracket = 11;
-    static const char tokenColon = 12;
-    static const char tokenComma = 13;
-    static const char tokenError = 14;
-    static const char tokenBackslash = 15;
-    static const char tokenQuoteUnclosedEscapeAtEnd = 16;
-    static const char tokenQuoteUnclosedStandard = 17;
-    static const char tokenUnknown = 18;
+  enum Type {
+    tokenUndefined,
+    tokenNull,
+    tokenBool,
+    tokenFloat,
+    tokenString,
+    tokenArray,
+    tokenObject,
+    tokenLargeInteger,
   };
-
-  char elementType;
+  JSData::Type elementType;
   bool booleanValue;
   double floatValue;
   std::string stringValue;
@@ -63,7 +50,7 @@ public:
   template <typename any>
   void operator=(const List<any>& other) {
     this->reset();
-    this->elementType = JSData::Token::tokenArray;
+    this->elementType = JSData::Type::tokenArray;
     this->listObjects.setSize(other.size);
     for (int i = 0; i < other.size; i ++) {
       this->listObjects[i] = other[i];
@@ -130,7 +117,7 @@ public:
   bool isString(std::string* whichString) const;
   // parsing
   bool isValidElement();
-  void reset(char inputType = JSData::Token::tokenUndefined);
+  void reset(Type inputType = JSData::Type::tokenUndefined);
   class PrintOptions {
   public:
     bool useNewLine;
@@ -145,37 +132,19 @@ public:
   std::stringstream& intoStream(
     std::stringstream& out, const JSData::PrintOptions* optionsIncoming
   ) const;
-  bool tokenizePrependOneDummyElement(
-    const std::string& input,
-    List<JSData>& output,
-    bool relaxedInput,
-    std::stringstream* commentsOnFailure
-  );
   static bool convertTwoByteHexToUnsignedChar(
     unsigned char inputLeft,
     unsigned char inputRight,
     unsigned char& output,
     std::stringstream* commentsOnFailure
   );
-  static bool readstringConsumeUnicodeFourHexAppendUtf8(
-    std::string& output,
-    unsigned& currentIndex,
-    const std::string& input,
-    std::stringstream* commentsOnFailure
-  );
-  bool readstringConsumeNextCharacter(
-    List<JSData>& readingStack,
-    unsigned& currentIndex,
-    const std::string& input,
-    std::stringstream* commentsOnFailure
-  );
   void parseNoFail(const std::string& json, bool relaxedInput = false);
   bool parse(
     const std::string& json,
     bool relaxedInput = false,
-    std::stringstream* commentsOnFailure = nullptr
+    std::stringstream* commentsOnFailure = nullptr,
+    bool useHTMLInComments = false
   );
-  bool tryToComputeType(std::stringstream* commentsOnFailure);
   static void filterColumnsJSDataObjectList(
     List<JSData>& inputOutput,
     const List<std::string>& columnsToPreserve
@@ -193,7 +162,60 @@ public:
   };
 };
 
+// Helper class used when parsing jsons. Holds either a fully parsed json
+// or a syntactic element.
+class JSONWithTokens {
+public:
+  static const int numberOfEmptyTokensAtStart = 6;
+  enum Token {
+    tokenUnknown,
+    tokenJSON,
+    tokenOpenBrace,
+    tokenCloseBrace,
+    tokenOpenBracket,
+    tokenCloseBracket,
+    tokenColon,
+    tokenComma,
+    tokenString,
+    tokenParsingStart,
+    tokenParsingEnd,
+    tokenError,
+    tokenBackslash,
+    tokenQuoteUnclosedEscapeAtEnd,
+    tokenQuoteUnclosedStandard,
+  };
+  MemorySaving<JSData> container;
+  JSONWithTokens::Token token;
+  std::string source;
+  JSData& content();
+  bool isJSON() const;
+  JSONWithTokens();
+  std::string toString() const;
+  std::string toString(bool useHTML) const;
+  std::string toStringToken(bool useHTML) const;
+  bool tryToComputeType(std::stringstream* commentsOnFailure);
+  static bool tokenize(
+    const std::string& input,
+    List<JSONWithTokens>& output,
+    bool relaxedInput,
+    std::stringstream* commentsOnFailure
+  );
+  static bool readstringConsumeNextCharacter(
+    List<JSONWithTokens>& readingStack,
+    unsigned& currentIndex,
+    const std::string& input,
+    std::stringstream* commentsOnFailure
+  );
+  static bool readstringConsumeUnicodeFourHexAppendUtf8(
+    std::string& output,
+    unsigned& currentIndex,
+    const std::string& input,
+    std::stringstream* commentsOnFailure
+  );
+};
+
 std::ostream& operator<<(std::ostream& out, const JSData& data);
+std::ostream& operator<<(std::ostream& out, const JSONWithTokens& data);
 
 template <typename Coefficient>
 void JSData::operator=(const Vector<Coefficient>& other) {

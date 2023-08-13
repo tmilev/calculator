@@ -771,7 +771,7 @@ bool BuilderApplication::loadJavascriptFileNames(
     }
     return false;
   }
-  if (reader.elementType != JSData::Token::tokenArray) {
+  if (reader.elementType != JSData::Type::tokenArray) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Build json not of type list. ";
     }
@@ -779,7 +779,7 @@ bool BuilderApplication::loadJavascriptFileNames(
   }
   for (int i = 0; i < reader.listObjects.size; i ++) {
     const JSData& current = reader.listObjects[i];
-    if (current.elementType != JSData::Token::tokenString) {
+    if (current.elementType != JSData::Type::tokenString) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Found non-string source javascript file. ";
       }
@@ -986,7 +986,7 @@ JSData CourseList::toJSON() {
   if (this->errorMessage != "") {
     output[WebAPI::Result::error] = this->errorMessage;
   }
-  output["courses"].elementType = JSData::Token::tokenArray;
+  output["courses"].elementType = JSData::Type::tokenArray;
   for (int i = 0; i < this->allCourses.size; i ++) {
     Course& currentCourse = this->allCourses[i];
     output["courses"].listObjects.addOnTop(currentCourse.toJSON());
@@ -1109,7 +1109,7 @@ void WebAPIResponse::getJSDataUserInfo(
     global.userDefault.deadlineSchema, false
   );
   JSData sectionsTaught;
-  sectionsTaught.elementType = JSData::Token::tokenArray;
+  sectionsTaught.elementType = JSData::Type::tokenArray;
   for (int i = 0; i < global.userDefault.sectionsTaught.size; i ++) {
     JSData nextSection;
     nextSection =
@@ -1208,7 +1208,7 @@ JSData WebAPIResponse::getExamPageJSON() {
   if (problem.flagLoadedSuccessfully) {
     output["answers"] = problem.getEditorBoxesHTML();
     JSData scripts;
-    scripts = JSData::Token::tokenArray;
+    scripts = JSData::Type::tokenArray;
     scripts.listObjects.setSize(problem.scripts.size());
     for (int i = 0; i < problem.scripts.size(); i ++) {
       scripts[problem.scripts.keys[i]] =
@@ -1302,7 +1302,7 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
     autocompleteKeyWords.addOnTopNoRepetition(editedFile.autoCompleteExtras);
   }
   JSData autoCompleteWordsJS;
-  autoCompleteWordsJS.elementType = JSData::Token::tokenArray;
+  autoCompleteWordsJS.elementType = JSData::Type::tokenArray;
   for (int i = 0; i < autocompleteKeyWords.size; i ++) {
     autoCompleteWordsJS[i] = autocompleteKeyWords[i];
   }
@@ -2009,7 +2009,7 @@ std::string WebAPIResponse::addTeachersSections() {
   }
   if (
     inputParsed[WebAPI::Request::teachers].elementType !=
-    JSData::Token::tokenString
+    JSData::Type::tokenString
   ) {
     out
     << "<b style='color:red'>Failed to extract key "
@@ -2019,7 +2019,7 @@ std::string WebAPIResponse::addTeachersSections() {
   }
   if (
     inputParsed[WebAPI::Request::sections].elementType !=
-    JSData::Token::tokenString
+    JSData::Type::tokenString
   ) {
     out
     << "<b style='color:red'>Failed to find key "

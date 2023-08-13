@@ -12,6 +12,7 @@ public:
   // Else, if sighUpOnParentDeath is true, the milder SIGHUP
   // will be sent instead;
   static int forkProcessAndAcquireRandomness(bool sighUpOnParentDeath = false);
+  // Returns 0 in the child, the pid of the child in the parent.
   static int forkRaw();
 };
 

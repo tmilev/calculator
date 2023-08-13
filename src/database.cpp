@@ -864,13 +864,13 @@ std::string Database::toHtmlDatabaseCollection(
 
 void GlobalVariables::initialize() {
   this->logs.worker.fileName =
+  "/LogFiles/logs/" + GlobalVariables::getDateForLogFiles() + "/workers.html";
+  this->logs.server.fileName =
+  "/LogFiles/logs/" + GlobalVariables::getDateForLogFiles() + "/server.html";
+  this->logs.serverMonitor.fileName =
   "/LogFiles/logs/" +
   GlobalVariables::getDateForLogFiles() +
-  "/logCommon.html";
-  this->logs.server.fileName =
-  "/LogFiles/logs/" + GlobalVariables::getDateForLogFiles() + "/global.html";
-  this->logs.serverMonitor.fileName =
-  "/LogFiles/logs/" + GlobalVariables::getDateForLogFiles() + "/global.html";
+  "/servermonitor.html";
 }
 
 void GlobalVariables::initModifiableDatabaseFields() {

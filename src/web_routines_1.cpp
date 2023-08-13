@@ -142,11 +142,11 @@ void WebServerMonitor::monitor(
       totalConsecutiveFailedPings ++;
       global
       << Logger::red
-      << "Connection monitor: ping of "
+      << "Connection monitor: ping of ["
       << webCrawler.connectorContainer.getElement().addressToConnectTo
-      << " at port/service "
+      << "] at port/service ["
       << webCrawler.connectorContainer.getElement().portOrService
-      << " failed. GM time: "
+      << "] failed. GM time: "
       << now.toStringGM()
       << ", local time: "
       << now.toStringLocal()
@@ -239,11 +239,9 @@ void WebClient::initialize() {
   STACK_TRACE("WebCrawler::initialize");
   this->flagDoUseGET = true;
   this->buffer.initializeFillInObject(50000, 0);
-  Connector& connector = this->connectorContainer.getElement();
-  connector.initialize(
-    "127.0.0.1",
-    global.configuration[Configuration::portHTTP].stringValue
-  );
+  this->peerAddress = "127.0.0.1";
+  this->desiredPortOrService =
+  global.configuration[Configuration::portHTTP].stringValue;
 }
 
 WebClient::~WebClient() {
@@ -260,7 +258,7 @@ void WebClient::closeEverything() {
 }
 
 void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
-  STACK_TRACE("WebCrawler::PingCalculatorStatus");
+  STACK_TRACE("WebClient::pingCalculatorStatus");
   std::stringstream reportStream;
   this->lastTransaction = "";
   this->lastTransactionErrors = "";

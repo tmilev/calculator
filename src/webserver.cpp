@@ -4142,6 +4142,10 @@ int WebServer::run() {
       global.fatal << "Failed to create server process. " << global.fatal;
     }
     if (this->processIdServer > 0) {
+      // This is the parent process.
+      // The parent process monitors the child process.
+      // The child process is the server that does all the useful work.
+      // The parent process only does monitoring.
       global.logs.logType = GlobalVariables::LogData::type::serverMonitor;
       global.flagIsChildProcess = true;
       monitorWebServer(this->processIdServer, this->pingAuthentication);
@@ -4150,6 +4154,7 @@ int WebServer::run() {
       // if it can't.
       return 0;
     }
+    // This is the child process.
   }
   global.logs.logType = GlobalVariables::LogData::type::server;
   this->initializeSignals();
@@ -5341,7 +5346,8 @@ void GlobalVariables::configurationProcess() {
     global.flagLocalhostConnectionMonitor = false;
     if (
       global.runMode != GlobalVariables::RunMode::consoleRegular &&
-      global.runMode != GlobalVariables::RunMode::consoleTest
+      global.runMode != GlobalVariables::RunMode::consoleTest &&
+      global.runMode != GlobalVariables::RunMode::daemonMonitor
     ) {
       global
       << Logger::red

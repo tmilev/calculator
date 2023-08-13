@@ -464,9 +464,11 @@ QueryResultOptions Database::getStandardProjectors(
 ) {
   QueryResultOptions result;
   if (collectionName == DatabaseStrings::tableUsers) {
+    // Hard-coded exceptions. The following fields tend to be large.
     result.fieldsProjectedAway.addOnTop(
       DatabaseStrings::labelProblemDataJSON
     );
+    result.fieldsProjectedAway.addOnTop("problemData");
   }
   return result;
 }
@@ -665,18 +667,16 @@ bool Database::fetchTable(
   return true;
 }
 
-JSData Database::toJSONDatabaseFetch(
-  const std::string& findQueryAndProjector
-) {
+JSData Database::toJSONDatabaseFetch(const std::string& findQuery) {
   STACK_TRACE("Database::toJSONDatabaseFetch");
   JSData result;
   QueryExact queryExact;
-  QueryResultOptions projector;
   std::stringstream commentsOnFailure;
-  if (!queryExact.fromString(findQueryAndProjector, &commentsOnFailure)) {
+  if (!queryExact.fromString(findQuery, &commentsOnFailure)) {
     result[DatabaseStrings::error] = commentsOnFailure.str();
     return result;
   }
+  QueryResultOptions projector;
   return Database::get().toJSONFetchItem(queryExact, projector);
 }
 
@@ -1050,32 +1050,34 @@ void QueryResultOptions::makeProjection(const List<std::string>& fields) {
   this->fieldsToProjectTo = fields;
 }
 
-void QueryResultOptions::applyProjection(const JSData& input, JSData& output) const {
-  if (&input==& output){
-    JSData inputCopy ;
-    inputCopy= input;
+void QueryResultOptions::applyProjection(
+  const JSData& input, JSData& output
+) const {
+  if (&input == &output) {
+    JSData inputCopy;
+    inputCopy = input;
     this->applyProjection(inputCopy, output);
     return;
   }
-  for (const std::string& field: this->fieldsToProjectTo){
-    if (!input.hasKey(field )){
+  for (const std::string& field : this->fieldsToProjectTo) {
+    if (!input.hasKey(field)) {
       continue;
     }
     output[field] = input.objects.getValueNoFail(field);
-
   }
-
-  if (this->fieldsToProjectTo.size > 0){
+  if (this->fieldsToProjectTo.size > 0) {
     return;
   }
   output = input;
-  for (const std::string& field : this->fieldsProjectedAway){
+  for (const std::string& field : this->fieldsProjectedAway) {
     output.objects.removeKey(field);
   }
 }
 
-bool QueryResultOptions::isNonTrivial()const{
-  return this->fieldsProjectedAway.size > 0 || this->fieldsToProjectTo.size > 0;
+bool QueryResultOptions::isNonTrivial() const {
+  return
+  this->fieldsProjectedAway.size > 0 ||
+  this->fieldsToProjectTo.size > 0;
 }
 
 JSData QueryResultOptions::toJSON() const {
@@ -1085,22 +1087,29 @@ JSData QueryResultOptions::toJSON() const {
   return result;
 }
 
-bool QueryResultOptions::fromJSON(const JSData& input, std::stringstream* commentsOnFailure){
+bool QueryResultOptions::fromJSON(
+  const JSData& input, std::stringstream* commentsOnFailure
+) {
   JSData inputCopy = input;
   this->fieldsProjectedAway.clear();
   this->fieldsToProjectTo.clear();
-  for (JSData& field: inputCopy[DatabaseStrings::requestProjectAwayFrom].listObjects){
-    if (field.stringValue == ""){
-      if (commentsOnFailure != nullptr){
+  for (
+    JSData& field :
+    inputCopy[DatabaseStrings::requestProjectAwayFrom].listObjects
+  ) {
+    if (field.stringValue == "") {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Empty projection field not allowed. ";
       }
       return false;
     }
     this->fieldsProjectedAway.addOnTop(field.stringValue);
   }
-  for (JSData& field: inputCopy[DatabaseStrings::requestProjectInto].listObjects){
-    if (field.stringValue == ""){
-      if (commentsOnFailure != nullptr){
+  for (
+    JSData& field : inputCopy[DatabaseStrings::requestProjectInto].listObjects
+  ) {
+    if (field.stringValue == "") {
+      if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Empty projection field not allowed. ";
       }
       return false;

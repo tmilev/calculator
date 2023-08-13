@@ -342,7 +342,6 @@ public:
   static std::string requestOptions;
   static std::string requestProjectAwayFrom;
   static std::string requestProjectInto;
-
   static std::string resultContent;
   static std::string messageId;
   static std::string messageHandle;

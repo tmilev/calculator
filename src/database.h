@@ -85,8 +85,8 @@ public:
   List<std::string> fieldsToProjectTo;
   List<std::string> fieldsProjectedAway;
   JSData toJSON() const;
-  bool fromJSON(const JSData& input, std::stringstream* commentsOnFailure) ;
-  bool isNonTrivial()const;
+  bool fromJSON(const JSData& input, std::stringstream* commentsOnFailure);
+  bool isNonTrivial() const;
   void makeProjection(const List<std::string>& fields);
   void applyProjection(const JSData& input, JSData& output) const;
 };
@@ -232,14 +232,20 @@ class DatabaseInternalRequest {
   bool fromJSData(std::stringstream* commentsOnFailure);
 public:
   enum Type {
-    unknown, findAndUpdate, find, fetchCollectionNames, shutdown,getLargeMessage,
+    unknown,
+    findAndUpdate,
+    find,
+    fetchCollectionNames,
+    shutdown,
+    getLargeMessage,
   };
   Type requestType;
   QueryFindAndUpdate queryFindAndUpdate;
   QueryOneOfExactly queryOneOfExactly;
   QueryResultOptions options;
   // Used to fetch the result of a previously executed query
-  // that was too large to receive in one go. Holds a process-unique id of the message.
+  // that was too large to receive in one go. Holds a process-unique id of the
+  // message.
   LargeInteger messageId;
   // Holds teh location of the stored message. May be expired.
   int messageHandle;
@@ -350,12 +356,12 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool storeObject(
-      const std::string& objectId,
-      const std::string& collectionName,
-      const JSData& data,
-      bool storeUpdatedIndexToHardDrive,
-      std::stringstream* commentsOnFailure
-      );
+    const std::string& objectId,
+    const std::string& collectionName,
+    const JSData& data,
+    bool storeUpdatedIndexToHardDrive,
+    std::stringstream* commentsOnFailure
+  );
   void objectExists(
     const std::string& objectId,
     const std::string& collectionName,
@@ -399,12 +405,10 @@ public:
 };
 
 class DatabaseLargeMessage {
-
 public:
   LargeInteger messageId;
   std::string content;
   int bytesSent;
-
 };
 
 // A self contained simple database.
@@ -419,7 +423,6 @@ class DatabaseInternal {
   List<char> buffer;
   MapReferences<int, DatabaseLargeMessage> largeMessages;
   LargeInteger largeMessageCount;
-
   bool flagFailedToInitialize;
   // An interprocess mutex to be used in fallback mode, so that
   // different clients can read/write from the database
@@ -434,7 +437,6 @@ class DatabaseInternal {
   );
   PipePrimitive& currentServerToClient();
   PipePrimitive& currentClientToServer();
-
 public:
   int processId;
   int currentWorkerId;
@@ -452,15 +454,15 @@ public:
   DatabaseInternalServer server;
   void accountInitializationError(const std::string& error);
   bool sendAndReceiveFromClientFull(
-      const DatabaseInternalRequest& input,
-      DatabaseInternalResult& output,
-      std::stringstream* commentsOnFailure
-      );
+    const DatabaseInternalRequest& input,
+    DatabaseInternalResult& output,
+    std::stringstream* commentsOnFailure
+  );
   bool sendAndReceiveFromClientInternal(
-      const std::string& input,
-      std::string& output,
-      std::stringstream* commentsOnFailure
-      );
+    const std::string& input,
+    std::string& output,
+    std::stringstream* commentsOnFailure
+  );
   // Sends data from the client process to
   // the database server process.
   // The data sent here will be received by
@@ -501,7 +503,9 @@ public:
   bool runOneConnection();
   // Executes one single operation and sends the result back.
   void executeGetResult(DatabaseInternalResult& output);
-  void fetchLargeMessage(DatabaseInternalRequest& input, DatabaseInternalResult& output);
+  void fetchLargeMessage(
+    DatabaseInternalRequest& input, DatabaseInternalResult& output
+  );
   void executeGetString(std::string& output);
   bool executeAndSend();
   // Used to shut down the database process when the parent
@@ -658,7 +662,7 @@ public:
   );
   JSData toJSONDatabaseCollection(const std::string& currentTable);
   JSData toJSONAllCollections();
-  JSData toJSONDatabaseFetch(const std::string& findQueryAndProjector);
+  JSData toJSONDatabaseFetch(const std::string& findQuery);
   static bool getLabels(
     const JSData& fieldEntries,
     List<std::string>& labels,
@@ -726,7 +730,11 @@ public:
     JSData& input,
     std::stringstream& comments
   );
-  bool loadOneObject(DatabaseCollection& collection, JSData& input, std::stringstream& comments);
+  bool loadOneObject(
+    DatabaseCollection& collection,
+    JSData& input,
+    std::stringstream& comments
+  );
 };
 
 // A temporary class to convert a mongo database dump to a json.
@@ -735,7 +743,7 @@ class MongoDatabaseDumpToJSONConverter {
 public:
   List<std::string> collectionFileNames;
   bool load(
-    const std::string& folderName,
+    const std::string& folderNameFromUser,
     JSData& output,
     std::stringstream& commentsOnFailure
   );

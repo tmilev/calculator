@@ -104,9 +104,10 @@ bool DatabaseInternalClient::find(
   DatabaseInternalRequest request;
   request.requestType = DatabaseInternalRequest::Type::find;
   request.queryOneOfExactly = findOrQueries;
-  if (options != nullptr)
-  {  request.options=*options;
-  }if (
+  if (options != nullptr) {
+    request.options = *options;
+  }
+  if (
     !this->owner->sendAndReceiveFromClientFull(
       request, result, commentsOnFailure
     )
@@ -225,10 +226,10 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
     }
     return false;
   }
-  if (!output.fromJSON(outputMessage, commentsOnFailure)){
+  if (!output.fromJSON(outputMessage, commentsOnFailure)) {
     return false;
   }
-  if (output.messageId  <=0 || output.messageSize <=0) {
+  if (output.messageId <= 0 || output.messageSize <= 0) {
     // Not a large message.
     return true;
   }
@@ -238,28 +239,31 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
   chunkRequest.messageId = output.messageId;
   chunkRequest.requestType = DatabaseInternalRequest::Type::getLargeMessage;
   // The chunk size should be larger than 40000, the
-  // maximumRuns computed below is smaller than the actual expected maximum runs
+  // maximumRuns computed below is smaller than the actual expected maximum
+  // runs
   // if everything runs fine.
   int maximumRuns = output.messageSize / 40000;
   std::string fullMessage;
-  for (int i = 0; i < maximumRuns; i ++){
-    outputMessage="";
+  for (int i = 0; i < maximumRuns; i ++) {
+    outputMessage = "";
     inputMessage = chunkRequest.toJSON().toString();
-    bool chunkOK=
+    bool chunkOK =
     this->sendAndReceiveFromClientInternal(
-            inputMessage, outputMessage, commentsOnFailure
-            );
-    if (!chunkOK        ) {
+      inputMessage, outputMessage, commentsOnFailure
+    );
+    if (!chunkOK) {
       if (commentsOnFailure != nullptr) {
         global
-            << "Failed to send and receive from client.\n"
-            << commentsOnFailure->str()
-            << Logger::endL;
+        << "Failed to send and receive from client.\n"
+        << commentsOnFailure->str()
+        << Logger::endL;
       }
       return false;
     }
     fullMessage += outputMessage;
-    if (fullMessage.size() >= static_cast<unsigned long>( output.messageSize)){
+    if (
+      fullMessage.size() >= static_cast<unsigned long>(output.messageSize)
+    ) {
       // Full message received.
       break;
     }
@@ -419,30 +423,29 @@ bool DatabaseInternal::runOneConnection() {
 void DatabaseInternal::executeGetString(std::string& output) {
   DatabaseInternalResult result;
   this->executeGetResult(result);
-  if (result.nextChunk.size() > 0){
+  if (result.nextChunk.size() > 0) {
     // The message is a chunk of a large message.
     // We send it raw.
     output = result.nextChunk;
     return;
   }
   output = result.toJSON().toString();
-  if (output.size() <= 65000){
-    return  ;
+  if (output.size() <= 65000) {
+    return;
   }
   // The message is too large.
-    this->largeMessageCount++;
+  this->largeMessageCount ++;
   DatabaseInternalResult handle;
-    handle.success = true;
-    handle.messageId = this->largeMessageCount;
-    handle.messageSize = output.size();
-
-handle.messageHandle =  this->largeMessageCount % this->largeMessages.size();
-    DatabaseLargeMessage & largeMessage = this->largeMessages.getValueNoFailNonConst(handle.messageHandle);
+  handle.success = true;
+  handle.messageId = this->largeMessageCount;
+  handle.messageSize = output.size();
+  handle.messageHandle = this->largeMessageCount % this->largeMessages.size();
+  DatabaseLargeMessage& largeMessage =
+  this->largeMessages.getValueNoFailNonConst(handle.messageHandle);
   largeMessage.content = output;
-    largeMessage.messageId = handle.messageId;
+  largeMessage.messageId = handle.messageId;
   largeMessage.bytesSent = 0;
-    output = handle.toJSON().toString();
-
+  output = handle.toJSON().toString();
 }
 
 void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
@@ -473,7 +476,7 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
     output.success =
     this->server.find(
       request.queryOneOfExactly,
-      & request.options,
+      &request.options,
       output.content,
       &commentsOnFailure
     );
@@ -486,8 +489,6 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
     output.success = this->server.shutdown();
     break;
   case DatabaseInternalRequest::Type::getLargeMessage:
-
-
     this->fetchLargeMessage(request, output);
     break;
   case DatabaseInternalRequest::Type::unknown:
@@ -496,13 +497,13 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
   if (!output.success) {
     output.comments = commentsOnFailure.str();
   }
-
   output.comments += global.comments.getCurrentReset();
 }
 
-
-void DatabaseInternal::fetchLargeMessage(DatabaseInternalRequest& input, DatabaseInternalResult& output){
-  if (input.messageId <= 0){
+void DatabaseInternal::fetchLargeMessage(
+  DatabaseInternalRequest& input, DatabaseInternalResult& output
+) {
+  if (input.messageId <= 0) {
     output.success = false;
     output.comments = "Message id must be positive";
     return;
@@ -511,26 +512,24 @@ void DatabaseInternal::fetchLargeMessage(DatabaseInternalRequest& input, Databas
   if (messageHandle < 0) {
     messageHandle += this->largeMessages.size();
   }
-  DatabaseLargeMessage& message = this->largeMessages.getValueNoFailNonConst(messageHandle);
-  if (message.messageId != input.messageId){
+  DatabaseLargeMessage& message =
+  this->largeMessages.getValueNoFailNonConst(messageHandle);
+  if (message.messageId != input.messageId) {
     output.success = false;
     output.comments = "Message handle is stale. ";
     return;
   }
   // Sending in chunks of 65000.
-  if (static_cast<unsigned long> (message.bytesSent )>= message.content.size()) {
+  if (
+    static_cast<unsigned long>(message.bytesSent) >= message.content.size()
+  ) {
     output.success = false;
-    output.comments ="Message already sent fully.";
+    output.comments = "Message already sent fully.";
     return;
   }
   output.nextChunk = message.content.substr(message.bytesSent, 65000);
-
   message.bytesSent += output.nextChunk.size();
-
 }
-
-
-
 
 bool DatabaseInternal::sendFromServerToClient(const std::string& message) {
   STACK_TRACE("DatabaseInternal::sendFromServerToClient");
@@ -604,8 +603,8 @@ const {
 
 DatabaseInternalResult::DatabaseInternalResult() {
   this->success = false;
-  this->messageId = -1;
-  this->messageHandle=-1;
+  this->messageId = - 1;
+  this->messageHandle = - 1;
 }
 
 bool DatabaseInternalResult::fromJSON(
@@ -624,9 +623,12 @@ bool DatabaseInternalResult::fromJSON(
   }
   this->success =
   this->reader[DatabaseStrings::resultSuccess].isTrueRepresentationInJSON();
-  this->reader[DatabaseStrings::messageHandle].integerValue.getElement().isIntegerFittingInInt(&this->messageHandle );
-  this->messageId =  this->reader[DatabaseStrings::messageId].integerValue.getElement();
-   this->reader[DatabaseStrings::messageSize].integerValue.getElement().isIntegerFittingInInt(&this->messageSize );
+  this->reader[DatabaseStrings::messageHandle].integerValue.getElement().
+  isIntegerFittingInInt(&this->messageHandle);
+  this->messageId =
+  this->reader[DatabaseStrings::messageId].integerValue.getElement();
+  this->reader[DatabaseStrings::messageSize].integerValue.getElement().
+  isIntegerFittingInInt(&this->messageSize);
   this->comments = this->reader[DatabaseStrings::resultComments].stringValue;
   return true;
 }
@@ -636,12 +638,12 @@ JSData DatabaseInternalResult::toJSON() {
   this->reader = JSData();
   this->reader[DatabaseStrings::resultSuccess] = this->success;
   this->reader[DatabaseStrings::resultComments] = this->comments;
-  if (this->messageId > 0 ){
-    this->reader[DatabaseStrings:: messageId] = this->messageId;
-    this->reader[DatabaseStrings:: messageHandle] = this->messageHandle;
+  if (this->messageId > 0) {
+    this->reader[DatabaseStrings::messageId] = this->messageId;
+    this->reader[DatabaseStrings::messageHandle] = this->messageHandle;
     this->reader[DatabaseStrings::messageSize] = this->messageSize;
-
-  } else {  this->reader[DatabaseStrings::resultContent] = this->content;
+  } else {
+    this->reader[DatabaseStrings::resultContent] = this->content;
   }
   return this->reader;
 }
@@ -679,13 +681,14 @@ void DatabaseInternalRequest::toJSON(JSData& output) const {
   }
   if (this->requestType == DatabaseInternalRequest::Type::find) {
     output[DatabaseStrings::requestContent] = this->queryOneOfExactly.toJSON();
-    if (this->options.isNonTrivial()){
-    output[DatabaseStrings::requestOptions] = this->options.toJSON();
-    }    return;
+    if (this->options.isNonTrivial()) {
+      output[DatabaseStrings::requestOptions] = this->options.toJSON();
+    }
+    return;
   }
-  if (this->requestType == DatabaseInternalRequest::Type::getLargeMessage){
+  if (this->requestType == DatabaseInternalRequest::Type::getLargeMessage) {
     output[DatabaseStrings::messageHandle] = this->messageHandle;
-    output [DatabaseStrings::messageId] = this->messageId;
+    output[DatabaseStrings::messageId] = this->messageId;
   }
 }
 
@@ -742,7 +745,12 @@ DatabaseInternalRequest::Type DatabaseInternalRequest::stringToType(
   ) {
     return DatabaseInternalRequest::Type::shutdown;
   }
-  if (input == DatabaseInternalRequest::typeToString(DatabaseInternalRequest::Type::getLargeMessage)){
+  if (
+    input ==
+    DatabaseInternalRequest::typeToString(
+      DatabaseInternalRequest::Type::getLargeMessage
+    )
+  ) {
     return DatabaseInternalRequest::Type::getLargeMessage;
   }
   return DatabaseInternalRequest::Type::unknown;
@@ -787,20 +795,28 @@ bool DatabaseInternalRequest::fromJSData(
       commentsOnFailure
     );
   case DatabaseInternalRequest::Type::find:
-    if (this->contentReader.hasKey(DatabaseStrings::requestOptions)){
-    if (!   this->options.fromJSON(this->contentReader[DatabaseStrings::requestOptions], commentsOnFailure)){
+    if (this->contentReader.hasKey(DatabaseStrings::requestOptions)) {
+      if (
+        !this->options.fromJSON(
+          this->contentReader[DatabaseStrings::requestOptions],
+          commentsOnFailure
+        )
+      ) {
         return false;
-    }
+      }
     }
     return
     this->queryOneOfExactly.fromJSON(
       this->contentReader[DatabaseStrings::requestContent],
       commentsOnFailure
-               ) ;
+    );
   case DatabaseInternalRequest::Type::getLargeMessage:
-    this->messageHandle =this->contentReader[DatabaseStrings::messageHandle].integerValue.getElement().getIntValueTruncated();
-    this->messageId = this->contentReader[DatabaseStrings::messageId].integerValue.getElement();
-        return true;
+    this->messageHandle =
+    this->contentReader[DatabaseStrings::messageHandle].integerValue.getElement
+    ().getIntValueTruncated();
+    this->messageId =
+    this->contentReader[DatabaseStrings::messageId].integerValue.getElement();
+    return true;
   case DatabaseInternalRequest::Type::fetchCollectionNames:
     return true;
   case DatabaseInternalRequest::Type::shutdown:
@@ -882,10 +898,11 @@ bool DatabaseInternalServer::find(
       return false;
     }
     loader[DatabaseStrings::labelId] = objectId;
-    if (options!= nullptr){
-      if (options->isNonTrivial()){
-      options->applyProjection(loader, loader);
-      }    }
+    if (options != nullptr) {
+      if (options->isNonTrivial()) {
+        options->applyProjection(loader, loader);
+      }
+    }
     output.addOnTop(loader);
   }
   return true;
@@ -1021,13 +1038,17 @@ bool DatabaseInternalServer::findAndUpdate(
   }
   input.update.mergeData(object);
   bool result =
-  this->storeObject(objectId, collectionName, object,true, commentsOnFailure);
+  this->storeObject(
+    objectId, collectionName, object, true, commentsOnFailure
+  );
   return result;
 }
 
-bool DatabaseInternalServer::storeObject(const std::string& objectId,
+bool DatabaseInternalServer::storeObject(
+  const std::string& objectId,
   const std::string& collectionName,
-  const JSData& data, bool storeUpdatedIndexToHardDrive,
+  const JSData& data,
+  bool storeUpdatedIndexToHardDrive,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::storeObject");
@@ -1209,7 +1230,7 @@ bool DatabaseInternalServer::createObject(
   objectCopy[DatabaseStrings::labelId] = outputObjectId;
   return
   this->storeObject(
-    outputObjectId, collectionName, objectCopy,true, commentsOnFailure
+    outputObjectId, collectionName, objectCopy, true, commentsOnFailure
   );
 }
 
@@ -1318,8 +1339,6 @@ bool DatabaseInternalServer::ensureCollection(
   }
   return true;
 }
-
-
 
 std::string DatabaseInternalServer::collectionsSchemaFileName() const {
   return this->owner->folder() + "collections.json";

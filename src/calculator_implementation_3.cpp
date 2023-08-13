@@ -1,8 +1,10 @@
 #include "calculator_interface.h"
 #include "math_subsets_selections.h"
 #include "math_extra_finite_groups_implementation.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h"
+// Include required by web assembly build as of writing.
+#include "math_rational_function_implementation.h"
 #include "string_constants.h"
+#include "math_extra_drawing_variables.h"
 
 // If you get the C++ multiple definition error:
 // - Try moving template *EXPLICIT* specializations (i.e. template <>)

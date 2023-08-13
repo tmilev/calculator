@@ -48,50 +48,67 @@ bool Database::Test::all() {
   return true;
 }
 
-bool Database::Test::loadFromJSON(){
+bool Database::Test::loadFromJSON() {
   STACK_TRACE("Database::Test::loadFromJSON");
-  StateMaintainer<std::string> maintainerDatabaseName (Database::name);
+  StateMaintainer<std::string> maintainerDatabaseName(Database::name);
   StateMaintainer<DatabaseType> maintainerDatabaseType(global.databaseType);
   global.databaseType = DatabaseType::internal;
+  Database::name = Database::Test::testDatabaseName(global.databaseType);
   std::stringstream comments;
   bool mustBeTrue =
   DatabaseLoader::loadDatabase("test/database/test_local.json", comments);
-  if (!mustBeTrue){
-    global.fatal << "Loading test database failed. "  << comments.str()<< global.fatal;
+  if (!mustBeTrue) {
+    global.fatal
+    << "Loading test database failed. "
+    << comments.str()
+    << global.fatal;
   }
-  Database::name = Database::Test::testDatabaseName(global.databaseType);
-  DatabaseInternalServer &server = Database::get().localDatabase.server;
+  DatabaseInternalServer& server = Database::get().localDatabase.server;
   QueryExact query;
   query.nestedLabels.addOnTop(DatabaseStrings::labelId);
   // The id from file test/database/test.json
   query.exactValue = "d739b82f2492ed095fa15a52";
   query.collection = "users";
   List<std::string> objectIds;
-  if (!  server.findObjectIds(query, objectIds, &comments)){
+  if (!server.findObjectIds(query, objectIds, &comments)) {
     global.fatal << "Failed to find object ids. " << global.fatal;
   }
-  if (objectIds[0]!= query.exactValue.stringValue || objectIds.size != 1){
-    global.fatal <<  "Got: " << objectIds.toStringCommaDelimited() << "\nexpected:\n[" << query.exactValue << "]" << global.fatal;
-
+  if (
+    objectIds[0] != query.exactValue.stringValue || objectIds.size != 1
+  ) {
+    global.fatal
+    << "Got: "
+    << objectIds.toStringCommaDelimited()
+    << "\nexpected:\n["
+    << query.exactValue
+    << "]"
+    << global.fatal;
   }
   JSData user;
-mustBeTrue =  server.loadObject(query.exactValue.stringValue, query.collection, user, &comments );
-  if (!mustBeTrue){
-    global .fatal<< "Failed to load object: " << query.toString() << global.fatal;
+  mustBeTrue =
+  server.loadObject(
+    query.exactValue.stringValue, query.collection, user, &comments
+  );
+  if (!mustBeTrue) {
+    global.fatal
+    << "Failed to load object: "
+    << query.toString()
+    << ". "
+    << comments.str()
+    << global.fatal;
   }
-  if (user["username"].stringValue != "default"){
+  if (user["username"].stringValue != "default") {
     global.fatal << "Failed to load the default username. " << global.fatal;
   }
-
   return true;
 }
 
 bool Database::Test::findWithOptions(DatabaseType databaseType) {
   STACK_TRACE("Database::Test::basics");
   global
-      << "Testing default database. "
-      << Database::toString()
-      << Logger::endL;
+  << "Testing default database. "
+  << Database::toString()
+  << Logger::endL;
   Database::Test tester(databaseType);
   tester.createAdminAccount();
   QueryExact queryExact;
@@ -103,13 +120,16 @@ bool Database::Test::findWithOptions(DatabaseType databaseType) {
   QueryResultOptions options;
   options.fieldsProjectedAway.addOnTop("_id");
   List<JSData> result;
-  Database::get().find(query, & options, result, nullptr);
+  Database::get().find(query, &options, result, nullptr);
   JSData admin = result[0];
-  if (admin["username"].stringValue!= "default") {
+  if (admin["username"].stringValue != "default") {
     global.fatal << "Failed to find expected admin username. " << global.fatal;
   }
-  if (admin.objects.keys.contains("_id")){
-    global.fatal << "Options failed to exclude the _id entry. Loaded object: " << admin.toString() << global.fatal;
+  if (admin.objects.keys.contains("_id")) {
+    global.fatal
+    << "Options failed to exclude the _id entry. Loaded object: "
+    << admin.toString()
+    << global.fatal;
   }
   return true;
 }

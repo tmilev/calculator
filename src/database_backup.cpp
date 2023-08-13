@@ -237,6 +237,7 @@ bool DatabaseLoader::correctUser(
     }
     inputOutput["problemDataJSON"][probNameNoWhiteSpace] = reader.storeJSON();
   }
+  inputOutput.objects.removeKey("problemData");
   return true;
 }
 

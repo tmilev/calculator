@@ -42,6 +42,8 @@ bool Database::Test::all() {
   STACK_TRACE("Database::Test::all");
   Database::Test::basics(DatabaseType::fallback);
   Database::Test::basics(DatabaseType::internal);
+  Database::Test::findWithOptions(DatabaseType::fallback);
+  Database::Test::findWithOptions(DatabaseType::internal);
   Database::Test::loadFromJSON();
   return true;
 }
@@ -81,6 +83,34 @@ mustBeTrue =  server.loadObject(query.exactValue.stringValue, query.collection, 
     global.fatal << "Failed to load the default username. " << global.fatal;
   }
 
+  return true;
+}
+
+bool Database::Test::findWithOptions(DatabaseType databaseType) {
+  STACK_TRACE("Database::Test::basics");
+  global
+      << "Testing default database. "
+      << Database::toString()
+      << Logger::endL;
+  Database::Test tester(databaseType);
+  tester.createAdminAccount();
+  QueryExact queryExact;
+  queryExact.exactValue = "default";
+  queryExact.nestedLabels.addOnTop("username");
+  queryExact.collection = "users";
+  QueryOneOfExactly query;
+  query.queries.addOnTop(queryExact);
+  QueryResultOptions options;
+  options.fieldsProjectedAway.addOnTop("_id");
+  List<JSData> result;
+  Database::get().find(query, & options, result, nullptr);
+  JSData admin = result[0];
+  if (admin["username"].stringValue!= "default") {
+    global.fatal << "Failed to find expected admin username. " << global.fatal;
+  }
+  if (admin.objects.keys.contains("_id")){
+    global.fatal << "Options failed to exclude the _id entry. Loaded object: " << admin.toString() << global.fatal;
+  }
   return true;
 }
 

@@ -85,8 +85,10 @@ public:
   List<std::string> fieldsToProjectTo;
   List<std::string> fieldsProjectedAway;
   JSData toJSON() const;
+  bool fromJSON(const JSData& input, std::stringstream* commentsOnFailure) ;
+  bool isNonTrivial()const;
   void makeProjection(const List<std::string>& fields);
-  void applyProjection(JSData& input, JSData& output) const;
+  void applyProjection(const JSData& input, JSData& output) const;
 };
 
 // Stores a query for an item.
@@ -235,6 +237,7 @@ public:
   Type requestType;
   QueryFindAndUpdate queryFindAndUpdate;
   QueryOneOfExactly queryOneOfExactly;
+  QueryResultOptions options;
   // Used to fetch the result of a previously executed query
   // that was too large to receive in one go. Holds a process-unique id of the message.
   LargeInteger messageId;
@@ -693,6 +696,7 @@ public:
     static bool noShutdownSignal();
     static bool all();
     static bool basics(DatabaseType databaseType);
+    static bool findWithOptions(DatabaseType databaseType);
     static bool loadFromJSON();
     bool deleteDatabase();
     static bool createAdminAccount();

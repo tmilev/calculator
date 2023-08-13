@@ -697,7 +697,6 @@ JSData Database::toJSONFetchItem(
   std::stringstream comments;
   QueryOneOfExactly query;
   query.queries.addOnTop(findQuery);
-  global.comments << "DEBUG: got to here!";
   if (!Database::find(query, &projector, rowsJSON, &comments)) {
     result["error"] = comments.str();
     return result;
@@ -794,28 +793,11 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   QueryOneOfExactly query(findQuery);
   List<JSData> rowsJSON;
   long long totalItems = 0;
-  std::stringstream* commentsPointer = nullptr;
-  bool flagDebuggingAdmin = global.userDefaultIsDebuggingAdmin();
-  if (flagDebuggingAdmin) {
-    commentsPointer = &comments;
-  }
   if (!Database::find(query, &projector, rowsJSON, &comments)) {
     result["error"] = comments.str();
     return result;
   }
   Database::correctData(rowsJSON);
-  if (rowsJSON.size == 0) {
-    result = Database::toJSONDatabaseCollection("");
-    if (flagDebuggingAdmin) {
-      std::stringstream moreComments;
-      moreComments
-      << "First query returned 0 rows, fetching all tables instead. ";
-      result["moreComments"] = moreComments.str();
-      result["commentsOnFirstQuery"] = commentsPointer->str();
-      result["currentTableRawOriginal"] = currentTable;
-    }
-    return result;
-  }
   JSData rows;
   rows.elementType = JSData::Token::tokenArray;
   rows.listObjects = rowsJSON;
@@ -1068,30 +1050,64 @@ void QueryResultOptions::makeProjection(const List<std::string>& fields) {
   this->fieldsToProjectTo = fields;
 }
 
-void QueryResultOptions::applyProjection(JSData& input, JSData& output) const {
-  if (input.hasNestedKey(this->fieldsToProjectTo, &output)) {
+void QueryResultOptions::applyProjection(const JSData& input, JSData& output) const {
+  if (&input==& output){
+    JSData inputCopy ;
+    inputCopy= input;
+    this->applyProjection(inputCopy, output);
     return;
   }
-  output = JSData();
+  for (const std::string& field: this->fieldsToProjectTo){
+    if (!input.hasKey(field )){
+      continue;
+    }
+    output[field] = input.objects.getValueNoFail(field);
+
+  }
+
+  if (this->fieldsToProjectTo.size > 0){
+    return;
+  }
+  output = input;
+  for (const std::string& field : this->fieldsProjectedAway){
+    output.objects.removeKey(field);
+  }
+}
+
+bool QueryResultOptions::isNonTrivial()const{
+  return this->fieldsProjectedAway.size > 0 || this->fieldsToProjectTo.size > 0;
 }
 
 JSData QueryResultOptions::toJSON() const {
   JSData result;
-  JSData fields;
-  result.reset(JSData::Token::tokenObject);
-  bool found = false;
-  for (int i = 0; i < this->fieldsToProjectTo.size; i ++) {
-    fields[this->fieldsToProjectTo[i]] = 1;
-    found = true;
-  }
-  for (int i = 0; i < this->fieldsProjectedAway.size; i ++) {
-    fields[this->fieldsProjectedAway[i]] = 0;
-    found = true;
-  }
-  if (found) {
-    result["projection"] = fields;
-  }
+  result[DatabaseStrings::requestProjectAwayFrom] = this->fieldsProjectedAway;
+  result[DatabaseStrings::requestProjectInto] = this->fieldsToProjectTo;
   return result;
+}
+
+bool QueryResultOptions::fromJSON(const JSData& input, std::stringstream* commentsOnFailure){
+  JSData inputCopy = input;
+  this->fieldsProjectedAway.clear();
+  this->fieldsToProjectTo.clear();
+  for (JSData& field: inputCopy[DatabaseStrings::requestProjectAwayFrom].listObjects){
+    if (field.stringValue == ""){
+      if (commentsOnFailure != nullptr){
+        *commentsOnFailure << "Empty projection field not allowed. ";
+      }
+      return false;
+    }
+    this->fieldsProjectedAway.addOnTop(field.stringValue);
+  }
+  for (JSData& field: inputCopy[DatabaseStrings::requestProjectInto].listObjects){
+    if (field.stringValue == ""){
+      if (commentsOnFailure != nullptr){
+        *commentsOnFailure << "Empty projection field not allowed. ";
+      }
+      return false;
+    }
+    this->fieldsToProjectTo.addOnTop(field.stringValue);
+  }
+  return true;
 }
 
 QueryFindAndUpdate::QueryFindAndUpdate() {

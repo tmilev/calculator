@@ -2117,12 +2117,13 @@ void List<Object>::expandArrayOnTop(int increase) {
   Object* newArray = 0;
   try {
     newArray = new Object[this->actualSize + increase];
-  } catch(std::bad_alloc&) {
+  } catch(std::bad_alloc& e) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
     << "Memory allocation failure: failed to allocate "
     << this->actualSize + increase
-    << " objects. ";
+    << " objects. "
+    << e.what();
     fatalCrash(commentsOnCrash.str());
   }
 #ifdef AllocationLimitsSafeguard

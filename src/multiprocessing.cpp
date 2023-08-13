@@ -520,7 +520,7 @@ bool PipePrimitive::readOnceWithoutEmptying(bool dontCrashOnFail) {
   if (!this->readOnceNoFailure(dontCrashOnFail)) {
     return false;
   }
-  if (this->getLastRead().size() <= 0){
+  if (this->getLastRead().size() <= 0) {
     return true;
   }
   return
@@ -543,7 +543,9 @@ bool PipePrimitive::writeOnceAfterEmptying(
 }
 
 bool PipePrimitive::handleFailedWriteReturnFalse(
-  const std::string& toBeSent, bool dontCrashOnFail, int numBadAttempts
+  const std::string& toBeSent,
+  bool dontCrashOnFail,
+  int numberOfBadAttempts
 ) {
   std::stringstream errorStream;
   errorStream
@@ -553,7 +555,7 @@ bool PipePrimitive::handleFailedWriteReturnFalse(
   << StringRoutines::shortenInsertDots(toBeSent, 200)
   << "] onto: "
   << this->toString()
-  << numBadAttempts
+  << numberOfBadAttempts
   << " or more times. Last error: "
   << strerror(errno)
   << ". ";
@@ -562,7 +564,7 @@ bool PipePrimitive::handleFailedWriteReturnFalse(
     global.fatal
     << "Failed write on: "
     << this->toString()
-    << numBadAttempts
+    << numberOfBadAttempts
     << " or more times. Last error: "
     << strerror(errno)
     << ". "

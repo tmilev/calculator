@@ -48,7 +48,7 @@ public:
   bool flagUseECB;
   bool flagUseCTR;
   int numberOfBits;
-  // NumBits can be 256, 192 or 128.
+  // numberOfBits can be 256, 192 or 128.
   int keyExpSize;
   int keyLength;
   uint8_t RoundKey[maxKeyExpSize];
@@ -67,7 +67,7 @@ public:
   // state - array holding the intermediate results during decryption.
   typedef uint8_t state_t[4][4];
   AESContext();
-  void setNumberOfBits(int inputNumBits);
+  void setNumberOfBits(int inputNumberOfBits);
   // buffer size MUST be multiple of blockLength;
   // Suggest https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS7 for
   // padding scheme
@@ -121,8 +121,8 @@ public:
   static void xOrWithIv(uint8_t* buf, uint8_t* Iv);
 };
 
-void AESContext::setNumberOfBits(int inputNumBits) {
-  this->numberOfBits = inputNumBits;
+void AESContext::setNumberOfBits(int inputNumberOfBits) {
+  this->numberOfBits = inputNumberOfBits;
   if (
     this->numberOfBits != 256 &&
     this->numberOfBits != 192 &&
@@ -130,7 +130,7 @@ void AESContext::setNumberOfBits(int inputNumBits) {
   ) {
     global.fatal
     << "Bad number of bits: "
-    << inputNumBits
+    << inputNumberOfBits
     << " for AES cipher. Allowed inputs: 256, 192, 128. "
     << global.fatal;
   }

@@ -525,22 +525,10 @@ bool CalculatorHTML::loadDatabaseInfo(std::stringstream& comments) {
   if (!this->prepareSectionList(comments)) {
     return false;
   }
-  if (
-    this->currentUser.problemDataJSON.objects.size() != 0 ||
-    this->currentUser.problemDataString == ""
-  ) {
+  if (this->currentUser.problemDataJSON.objects.size() != 0) {
     if (
       !this->currentUser.interpretDatabaseProblemDataJSON(
         this->currentUser.problemDataJSON, comments
-      )
-    ) {
-      comments << "Failed to interpret user's problem saved data. ";
-      return false;
-    }
-  } else {
-    if (
-      !this->currentUser.interpretDatabaseProblemData(
-        this->currentUser.problemDataString, comments
       )
     ) {
       comments << "Failed to interpret user's problem saved data. ";

@@ -59,7 +59,9 @@ public:
   );
   bool readOnceWithoutEmptying(bool dontCrashOnFail);
   bool handleFailedWriteReturnFalse(
-    const std::string& toBeSent, bool dontCrashOnFail, int numBadAttempts
+    const std::string& toBeSent,
+    bool dontCrashOnFail,
+    int numberOfBadAttempts
   );
   std::string toString() const;
   PipePrimitive();

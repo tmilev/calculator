@@ -714,7 +714,7 @@ JSData Database::toJSONFetchItem(
   QueryOneOfExactly query;
   query.queries.addOnTop(findQuery);
   if (!Database::find(query, &projector, rowsJSON, &comments)) {
-    result["error"] = comments.str();
+    result["error"] = "Failure in toJSONFetchItem. " + comments.str();
     return result;
   }
   Database::correctData(rowsJSON);

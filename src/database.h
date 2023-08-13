@@ -728,16 +728,17 @@ public:
   bool doLoadDatabase(
     const std::string& databaseName, std::stringstream& comments
   );
-  bool loadJSONFromHardDrive(std::stringstream& comments
-                );
+  bool loadJSONFromHardDrive(std::stringstream& comments);
   // Used to correct database errors due to software updates.
   // When we updated from mysql -> mongoDB -> our own built in
   // database, we made changes in the schema. The following function
   // is used to correct errors due to schema changes.
   // Once the errors are all fixed, we shall change the function to a noop,
   // but will keep the mechanism for future use.
-  void correctDatabaseJSON();
-  void correctUser(JSData& inputOutput);
+  bool correctDatabaseJSON(std::stringstream& commentsOnFailure);
+  bool correctUser(
+    JSData& inputOutput, std::stringstream& commentsOnFailure
+  );
   bool loadFromJSON(JSData& input, std::stringstream& comments);
   bool loadOneCollectionFromJSON(
     const std::string& collectionName,

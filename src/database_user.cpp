@@ -648,51 +648,6 @@ bool UserOfDatabase::sendActivationEmail(
   return result;
 }
 
-bool UserCalculator::interpretDatabaseProblemData(
-  const std::string& information, std::stringstream& commentsOnFailure
-) {
-  STACK_TRACE("UserCalculator::interpretDatabaseProblemData");
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > mapStrings;
-  if (
-    !HtmlRoutines::chopPercentEncodedString(
-      information, mapStrings, commentsOnFailure
-    )
-  ) {
-    return false;
-  }
-  this->problemData.clear();
-  this->problemData.setExpectedSize(mapStrings.size());
-  bool result = true;
-  ProblemData reader;
-  std::string probNameNoWhiteSpace;
-  for (int i = 0; i < mapStrings.size(); i ++) {
-    if (
-      !reader.loadFromOldFormat(
-        HtmlRoutines::convertURLStringToNormal(
-          mapStrings.values[i], false
-        ),
-        commentsOnFailure
-      )
-    ) {
-      result = false;
-      continue;
-    }
-    probNameNoWhiteSpace =
-    StringRoutines::stringTrimWhiteSpace(
-      HtmlRoutines::convertURLStringToNormal(mapStrings.keys[i], false)
-    );
-    if (probNameNoWhiteSpace == "") {
-      continue;
-    }
-    this->problemData.setKeyValue(probNameNoWhiteSpace, reader);
-  }
-  return result;
-}
-
 bool UserCalculator::interpretDatabaseProblemDataJSON(
   const JSData& data, std::stringstream& commentsOnFailure
 ) {

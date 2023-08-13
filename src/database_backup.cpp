@@ -3,6 +3,7 @@
 #include "general_file_operations_encodings.h"
 #include "general_strings.h"
 #include "string_constants.h"
+#include "calculator_problem_storage.h"
 
 bool DatabaseLoader::writeBackup() {
   STACK_TRACE("DatabaseLoader::writeBackup");
@@ -46,63 +47,57 @@ bool DatabaseLoader::doLoadDatabase(
   STACK_TRACE("DatabaseLoader::loadDatabase");
   this->fileName = databaseName;
   global << "Loading database from: " << this->fileName << Logger::endL;
-  if (! this->loadJSONFromHardDrive(comments)){
+  if (!this->loadJSONFromHardDrive(comments)) {
     return false;
   }
-
-  this->correctDatabaseJSON();
+  if (!this->correctDatabaseJSON(comments)) {
+    return false;
+  }
   return this->loadFromJSON(this->databaseJSON, comments);
 }
 
-
-bool DatabaseLoader::loadJSONFromHardDrive(
-    std::stringstream& comments
-    ) {
+bool DatabaseLoader::loadJSONFromHardDrive(std::stringstream& comments) {
   // TODO(tmilev): this snippet is deprecated. Delete soon.
-// if (!StringRoutines::stringEndsWith(this->fileName, ".json")) {
+  // if (!StringRoutines::stringEndsWith(this->fileName, ".json")) {
   // MongoDatabaseDumpToJSONConverter converter;
   // return converter.load(this->fileName, databaseJSON, comments);
- // }
-
-
-
-    std::string jsonString;
+  // }
+  std::string jsonString;
   int64_t startingTime = global.getElapsedMilliseconds();
-    if (
-        !FileOperations::
-        loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-            this->fileName, jsonString, true, true, &comments
-            )
-        ) {
-      return false;
-    }
-    bool result = databaseJSON.parse(jsonString, true, &comments);
-    int64_t elapsed = global.getElapsedMilliseconds() - startingTime;
-    int64_t size = jsonString.size();
+  if (
+    !FileOperations::
+    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
+      this->fileName, jsonString, true, true, &comments
+    )
+  ) {
+    return false;
+  }
+  bool result = databaseJSON.parse(jsonString, true, &comments);
+  int64_t elapsed = global.getElapsedMilliseconds() - startingTime;
+  int64_t size = jsonString.size();
+  global
+  << "Parsed json of size: "
+  << Logger::blue
+  << jsonString.size()
+  << " bytes"
+  << Logger::normalColor
+  << " in "
+  << Logger::purple
+  << elapsed
+  << Logger::normalColor
+  << " milliseconds. "
+  << Logger::endL;
+  if (elapsed != 0) {
+    int64_t speed = size / elapsed;
     global
-        << "Parsed json of size: "
-        << Logger::blue
-        << jsonString.size()
-        << " bytes"
-        << Logger::normalColor
-        << " in "
-        << Logger::purple
-        << elapsed
-        << Logger::normalColor
-        << " milliseconds. "
-        << Logger::endL;
-    if (elapsed != 0) {
-     int64_t speed =size/ elapsed;
-      global
-          << "Speed: "
-          << Logger::red
-          << "~"
-          << speed
-          << " bytes/ms. "
-          << Logger::endL;
-    }
-    return result;
-
+    << "Speed: "
+    << Logger::red
+    << "~"
+    << speed
+    << " bytes/ms. "
+    << Logger::endL;
+  }
+  return result;
 }
 
 bool DatabaseLoader::loadFromJSON(
@@ -184,20 +179,65 @@ bool DatabaseLoader::loadOneObject(
   return true;
 }
 
-void DatabaseLoader::correctDatabaseJSON(){
+bool DatabaseLoader::correctDatabaseJSON(
+  std::stringstream& commentsOnFailure
+) {
   JSData& users = this->databaseJSON["users"];
-  for (JSData& user: users.listObjects){
-    this->correctUser(user);
+  for (JSData& user : users.listObjects) {
+    if (!this->correctUser(user, commentsOnFailure)) {
+      return false;
+    }
   }
+  return true;
 }
 
-void DatabaseLoader::correctUser(JSData& inputOutput){
-  if (!inputOutput.objects.contains("problemData")){
-    return;
+bool DatabaseLoader::correctUser(
+  JSData& inputOutput, std::stringstream& commentsOnFailure
+) {
+  if (!inputOutput.objects.contains("problemData")) {
+    return true;
   }
-  global << "Correct user: " << Logger::green << inputOutput["username"] << Logger::endL;
-
-
+  global
+  << "Correct user: "
+  << Logger::green
+  << inputOutput["username"]
+  << Logger::endL;
+  std::string data = inputOutput["problemData"].stringValue;
+  MapList<
+    std::string,
+    std::string,
+    HashFunctions::hashFunction<std::string>
+  > mapStrings;
+  if (
+    !HtmlRoutines::chopPercentEncodedString(
+      data, mapStrings, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  ProblemData reader;
+  std::string probNameNoWhiteSpace;
+  for (int i = 0; i < mapStrings.size(); i ++) {
+    if (
+      !reader.loadFromOldFormatDeprecated(
+        HtmlRoutines::convertURLStringToNormal(
+          mapStrings.values[i], false
+        ),
+        commentsOnFailure
+      )
+    ) {
+      return false;
+    }
+    probNameNoWhiteSpace =
+    StringRoutines::stringTrimWhiteSpace(
+      HtmlRoutines::convertURLStringToNormal(mapStrings.keys[i], false)
+    );
+    if (probNameNoWhiteSpace == "") {
+      continue;
+    }
+    inputOutput["problemDataJSON"][probNameNoWhiteSpace] = reader.storeJSON();
+  }
+  return true;
 }
 
 bool MongoDatabaseDumpToJSONConverter::load(

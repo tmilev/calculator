@@ -242,7 +242,8 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
   // maximumRuns computed below is smaller than the actual expected maximum
   // runs
   // if everything runs fine.
-  int maximumRuns = output.messageSize / 40000;
+  unsigned long expectedSize = static_cast<unsigned long>(output.messageSize);
+  int maximumRuns = expectedSize / 40000 + 10;
   std::string fullMessage;
   for (int i = 0; i < maximumRuns; i ++) {
     outputMessage = "";
@@ -253,6 +254,11 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
     );
     if (!chunkOK) {
       if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "Internal failure while receiving "
+        << "chunked message of expected size: "
+        << expectedSize
+        << ". ";
         global
         << "Failed to send and receive from client.\n"
         << commentsOnFailure->str()
@@ -261,14 +267,31 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
       return false;
     }
     fullMessage += outputMessage;
-    if (
-      fullMessage.size() >= static_cast<unsigned long>(output.messageSize)
-    ) {
+    if (fullMessage.size() >= expectedSize) {
       // Full message received.
       break;
     }
   }
-  return output.fromJSON(fullMessage, commentsOnFailure);
+  // Failure should not happen here, but is possible due to:
+  // 1. Code errors:
+  // - this has happened during development;
+  // - has             not happened in our official server with our knowledge;
+  // - hopefully has never happened in our official server.
+  // 2. If the message handle expired, which should be possible
+  // in theory if the database is flooded with requests.
+  // The data may contain sensitive information such as password hashes.
+  // Do not display parsing error comments: please pass nullptr
+  // for the error comments.
+  bool result = output.fromJSON(fullMessage, nullptr);
+  if (result != true && commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    << "Internal database error while moving large message of size: "
+    << fullMessage.size()
+    << ", with expected size: "
+    << expectedSize
+    << ". ";
+  }
+  return result;
 }
 
 bool DatabaseInternal::sendAndReceiveFromClientInternal(
@@ -1154,7 +1177,33 @@ bool DatabaseInternalServer::loadObject(
     }
     return false;
   }
-  return output.parse(content, true, commentsOnFailure);
+  // Objects may contain password hashes.
+  // When parsed correctly, these fields are sanitized away:
+  // they trimmed down so that only the first few and
+  // last few characters are displayed.
+  // However, if for some reason we have issues parsing the json
+  // - for example, bug in our json parsing library -
+  // we may accidentally leak the password hash in the
+  // error message.
+  // To be on the safe side, let us suppress the error message.
+  // So, please pass nullptr for the "comments" error message argument.
+  if (!output.parse(content, true, nullptr)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to parse object id: "
+      << objectId
+      << ". Not displaying the exact parsing issue for sercurity reasons. ";
+    }
+    global
+    << Logger::red
+    << "Failed to parse objectId: "
+    << objectId
+    << " in collection: "
+    << collectionName
+    << Logger::endL;
+    return false;
+  }
+  return true;
 }
 
 bool DatabaseInternalServer::createObject(

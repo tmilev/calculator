@@ -232,7 +232,7 @@ public:
   ProblemData();
   bool checkConsistency() const;
   bool checkConsistencyMathQuillIds() const;
-  bool loadFromOldFormat(
+  bool loadFromOldFormatDeprecated(
     const std::string& inputData, std::stringstream& commentsOnFailure
   );
   bool loadFromJSON(
@@ -345,9 +345,6 @@ public:
   );
   void setProblemData(
     const std::string& problemName, const ProblemData& inputData
-  );
-  bool interpretDatabaseProblemData(
-    const std::string& information, std::stringstream& commentsOnFailure
   );
   bool interpretDatabaseProblemDataJSON(
     const JSData& data, std::stringstream& commentsOnFailure

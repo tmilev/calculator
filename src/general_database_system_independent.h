@@ -26,7 +26,6 @@ public:
   std::string enteredActivationToken;
   std::string enteredAuthenticationToken;
   std::string actualAuthenticationToken;
-  std::string problemDataString;
   JSData problemDataJSON;
   // Plain text password. Keep in memory as little as possible.
   // zero bytes as soon as enteredHashedSaltedPassword is computed.

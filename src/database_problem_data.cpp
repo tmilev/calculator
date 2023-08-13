@@ -174,10 +174,10 @@ JSData ProblemData::storeJSON() const {
   return result;
 }
 
-bool ProblemData::loadFromOldFormat(
+bool ProblemData::loadFromOldFormatDeprecated(
   const std::string& inputData, std::stringstream& commentsOnFailure
 ) {
-  STACK_TRACE("ProblemData::loadFromOldFormat");
+  STACK_TRACE("ProblemData::loadFromOldFormatDeprecated");
   MapList<
     std::string,
     std::string,

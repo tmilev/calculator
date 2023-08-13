@@ -197,14 +197,14 @@ void LaTeXCrawler::buildFreecalc() {
       continue;
     }
     int leftBracketsMinusRight = 0;
-    int numBallancedBracketGroups = 0;
+    int numberOfBallancedBracketGroups = 0;
     std::string lectureNumber;
     bool recordingLectureNumber = false;
     for (unsigned i = 0; i < buffer.size(); i ++) {
       if (buffer[i] == '}') {
         leftBracketsMinusRight --;
         if (leftBracketsMinusRight == 0) {
-          numBallancedBracketGroups ++;
+          numberOfBallancedBracketGroups ++;
           if (recordingLectureNumber) {
             break;
           }
@@ -212,7 +212,8 @@ void LaTeXCrawler::buildFreecalc() {
       }
       if (buffer[i] == '{') {
         leftBracketsMinusRight ++;
-        if (leftBracketsMinusRight == 1 && numBallancedBracketGroups == 2) {
+        if (leftBracketsMinusRight == 1 && numberOfBallancedBracketGroups == 2)
+        {
           recordingLectureNumber = true;
         }
       }

@@ -853,7 +853,7 @@ bool Crypto::convertBase64ToBitStream(
   output.setSize(0);
   uint32_t stack = 0;
   uint32_t sixBitDigit = 0;
-  int numBitsInStack = 0;
+  int numberOfBitsInStack = 0;
   for (unsigned i = 0; i < input.size(); i ++) {
     bool isGood =
     Crypto::get6BitFromChar(
@@ -864,8 +864,8 @@ bool Crypto::convertBase64ToBitStream(
     }
     if (!isGood && input[i] == '=') {
       stack = 0;
-      numBitsInStack += 6;
-      numBitsInStack %= 8;
+      numberOfBitsInStack += 6;
+      numberOfBitsInStack %= 8;
       continue;
     }
     if (!isGood) {
@@ -879,27 +879,27 @@ bool Crypto::convertBase64ToBitStream(
     }
     stack *= 64;
     stack += sixBitDigit;
-    numBitsInStack += 6;
-    if (numBitsInStack == 12) {
+    numberOfBitsInStack += 6;
+    if (numberOfBitsInStack == 12) {
       output.addOnTop(static_cast<unsigned char>(stack / 16));
-      numBitsInStack = 4;
+      numberOfBitsInStack = 4;
       stack = stack % 16;
     }
-    if (numBitsInStack == 8) {
+    if (numberOfBitsInStack == 8) {
       output.addOnTop(static_cast<unsigned char>(stack));
-      numBitsInStack = 0;
+      numberOfBitsInStack = 0;
       stack = 0;
     }
-    if (numBitsInStack == 10) {
+    if (numberOfBitsInStack == 10) {
       output.addOnTop(static_cast<unsigned char>(stack / 4));
-      numBitsInStack = 2;
+      numberOfBitsInStack = 2;
       stack = stack % 4;
     }
   }
-  if (commentsGeneral != nullptr && numBitsInStack != 0) {
+  if (commentsGeneral != nullptr && numberOfBitsInStack != 0) {
     *commentsGeneral
     << "<br>Base64: input corresponds modulo 8 to "
-    << numBitsInStack
+    << numberOfBitsInStack
     << " bits. Perhaps the input was "
     << "not padded correctly with = signs. The input: "
     << input;

@@ -46,27 +46,63 @@ bool DatabaseLoader::doLoadDatabase(
   STACK_TRACE("DatabaseLoader::loadDatabase");
   this->fileName = databaseName;
   global << "Loading database from: " << this->fileName << Logger::endL;
-  JSData databaseJSON;
-  if (StringRoutines::stringEndsWith(this->fileName, ".json")) {
-    std::string jsonString;
-    if (
-      !FileOperations::
-      loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-        this->fileName, jsonString, true, true, &comments
-      )
-    ) {
-      return false;
-    }
-    if (!databaseJSON.parse(jsonString, true, &comments)) {
-      return false;
-    }
-  } else {
-    MongoDatabaseDumpToJSONConverter converter;
-    if (!converter.load(this->fileName, databaseJSON, comments)) {
-      return false;
-    }
+  if (! this->loadJSONFromHardDrive(comments)){
+    return false;
   }
-  return this->loadFromJSON(databaseJSON, comments);
+
+  this->correctDatabaseJSON();
+  return this->loadFromJSON(this->databaseJSON, comments);
+}
+
+
+bool DatabaseLoader::loadJSONFromHardDrive(
+    std::stringstream& comments
+    ) {
+  // TODO(tmilev): this snippet is deprecated. Delete soon.
+// if (!StringRoutines::stringEndsWith(this->fileName, ".json")) {
+  // MongoDatabaseDumpToJSONConverter converter;
+  // return converter.load(this->fileName, databaseJSON, comments);
+ // }
+
+
+
+    std::string jsonString;
+  int64_t startingTime = global.getElapsedMilliseconds();
+    if (
+        !FileOperations::
+        loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
+            this->fileName, jsonString, true, true, &comments
+            )
+        ) {
+      return false;
+    }
+    bool result = databaseJSON.parse(jsonString, true, &comments);
+    int64_t elapsed = global.getElapsedMilliseconds() - startingTime;
+    int64_t size = jsonString.size();
+    global
+        << "Parsed json of size: "
+        << Logger::blue
+        << jsonString.size()
+        << " bytes"
+        << Logger::normalColor
+        << " in "
+        << Logger::purple
+        << elapsed
+        << Logger::normalColor
+        << " milliseconds. "
+        << Logger::endL;
+    if (elapsed != 0) {
+     int64_t speed =size/ elapsed;
+      global
+          << "Speed: "
+          << Logger::red
+          << "~"
+          << speed
+          << " bytes/ms. "
+          << Logger::endL;
+    }
+    return result;
+
 }
 
 bool DatabaseLoader::loadFromJSON(
@@ -146,6 +182,22 @@ bool DatabaseLoader::loadOneObject(
     return false;
   }
   return true;
+}
+
+void DatabaseLoader::correctDatabaseJSON(){
+  JSData& users = this->databaseJSON["users"];
+  for (JSData& user: users.listObjects){
+    this->correctUser(user);
+  }
+}
+
+void DatabaseLoader::correctUser(JSData& inputOutput){
+  if (!inputOutput.objects.contains("problemData")){
+    return;
+  }
+  global << "Correct user: " << Logger::green << inputOutput["username"] << Logger::endL;
+
+
 }
 
 bool MongoDatabaseDumpToJSONConverter::load(

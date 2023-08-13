@@ -719,6 +719,7 @@ public:
 
 class DatabaseLoader {
 public:
+  JSData databaseJSON;
   std::string fileName;
   static bool writeBackup();
   static bool loadDatabase(
@@ -727,6 +728,16 @@ public:
   bool doLoadDatabase(
     const std::string& databaseName, std::stringstream& comments
   );
+  bool loadJSONFromHardDrive(std::stringstream& comments
+                );
+  // Used to correct database errors due to software updates.
+  // When we updated from mysql -> mongoDB -> our own built in
+  // database, we made changes in the schema. The following function
+  // is used to correct errors due to schema changes.
+  // Once the errors are all fixed, we shall change the function to a noop,
+  // but will keep the mechanism for future use.
+  void correctDatabaseJSON();
+  void correctUser(JSData& inputOutput);
   bool loadFromJSON(JSData& input, std::stringstream& comments);
   bool loadOneCollectionFromJSON(
     const std::string& collectionName,
@@ -742,6 +753,8 @@ public:
 
 // A temporary class to convert a mongo database dump to a json.
 // May be deleted in the future once we're done with mongoDB.
+// TODO(tmilev): this class has served its purpose and is deprecated.
+// Delete soon.
 class MongoDatabaseDumpToJSONConverter {
 public:
   List<std::string> collectionFileNames;

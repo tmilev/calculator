@@ -520,6 +520,9 @@ bool PipePrimitive::readOnceWithoutEmptying(bool dontCrashOnFail) {
   if (!this->readOnceNoFailure(dontCrashOnFail)) {
     return false;
   }
+  if (this->getLastRead().size() <= 0){
+    return true;
+  }
   return
   this->writeOnceNoFailure(this->getLastRead(), 0, dontCrashOnFail);
 }

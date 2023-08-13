@@ -270,7 +270,8 @@ std::string GlobalVariables::toHTMLTopCommandLinuxSystem() {
   STACK_TRACE("GlobalVariables::toHTMLTopCommandLinuxSystem");
   std::string topString = this->externalCommandReturnOutput("top -b -n 1 -s");
   std::stringstream out;
-  std::string lineString, wordString;
+  std::string lineString;
+  std::string wordString;
   std::stringstream topStream(topString);
   for (int i = 0; i < 4; i ++) {
     std::getline(topStream, lineString);

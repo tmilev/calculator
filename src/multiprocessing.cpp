@@ -89,12 +89,10 @@ bool PipePrimitive::checkConsistency() {
   return true;
 }
 
-bool PipePrimitive::createMe(
-  const std::string& inputPipeName,
+bool PipePrimitive::createMe(const std::string& inputPipeName,
   bool readEndBlocks,
   bool writeEndBlocks,
-  bool dontCrashOnFail
-) {
+  bool dontCrashOnFail) {
   this->name = inputPipeName;
   if (pipe(this->pipeEnds.objects) < 0) {
     global
@@ -682,6 +680,7 @@ bool Pipe::resetNoAllocation() {
 bool Pipe::createMe(const std::string& inputPipeName) {
   this->checkConsistency();
   this->release();
+
   this->name = inputPipeName;
   if (
     !this->pipe.createMe("pipe[" + inputPipeName + "]", false, false, true)
@@ -738,14 +737,13 @@ bool PipePrimitive::readOnceNoFailure(bool dontCrashOnFail) {
     return false;
   }
   int counter = 0;
-  const unsigned int bufferSize = 200000;
-  this->buffer.setSize(bufferSize);
+  this->buffer.setSize(this->bufferSize);
   // <-once the buffer is resized, this operation does no memory allocation and
   // is fast.
   int totalReadBytes = 0;
   for (;;) {
     totalReadBytes = static_cast<int>(
-      read(this->pipeEnds[0], this->buffer.objects, bufferSize)
+        read(this->pipeEnds[0], this->buffer.objects,this-> bufferSize)
     );
     if (totalReadBytes >= 0) {
       break;

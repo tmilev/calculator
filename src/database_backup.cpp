@@ -2,6 +2,7 @@
 #include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
 #include "general_strings.h"
+#include "string_constants.h"
 
 bool DatabaseLoader::writeBackup() {
   STACK_TRACE("DatabaseLoader::writeBackup");
@@ -43,7 +44,7 @@ bool DatabaseLoader::doLoadDatabase(
   const std::string& databaseName, std::stringstream& comments
 ) {
   STACK_TRACE("DatabaseLoader::loadDatabase");
-  this->fileName = "database_backups/" + databaseName;
+  this->fileName =  databaseName;
   global << "Loading database from: " << this->fileName << Logger::endL;
   JSData databaseJSON;
   if (StringRoutines::stringEndsWith(this->fileName, ".json")) {
@@ -69,12 +70,62 @@ bool DatabaseLoader::doLoadDatabase(
 }
 
 bool DatabaseLoader::loadFromJSON(
-  JSData& input, std::stringstream& comments
-) {
+    JSData& input, std::stringstream& comments
+    ) {
   DatabaseInternalServer& database = Database::get().localDatabase.server;
   database.ensureStandardCollectionIndices();
+  for (const std::string& collectionName : input.objects.keys){
+    JSData& content = input[collectionName];
+    if (!this->loadOneCollectionFromJSON(collectionName, content, comments)){
+      return false;
+    }
+  }
+  return true;
 }
 
+bool DatabaseLoader::loadOneCollectionFromJSON(
+    const std::string& collectionName,
+    JSData& input,
+    std::stringstream& comments
+    ) {
+  STACK_TRACE("DatabaseLoader::loadOneCollectionFromJSON");
+  DatabaseInternalServer& database = Database::get().localDatabase.server;
+  if (input.elementType != JSData::Token::tokenArray){
+    return false;
+  }
+  DatabaseCollection& collection = database.collections.getValueCreateEmpty(collectionName);
+  int counter = 0;
+  for (JSData& object : input.listObjects){
+    if (!this->loadOneObject(collection, object, comments)){
+      return false;
+    }
+    counter ++;
+    global << "Loaded object " << counter << " out of " << input.listObjects.size << Logger::endL;
+
+  }
+return  collection.storeIndicesToHardDrive(&comments);
+}
+bool
+DatabaseLoader::loadOneObject(DatabaseCollection& collection, JSData& input, std::stringstream& comments)
+{
+  STACK_TRACE("DatabaseLoader::loadOneObject");
+  std::string objectId;
+    objectId = input[DatabaseStrings::labelId].stringValue ;
+  if (objectId == "") {
+    // If the object comes from a deprecated use of mongoDB, it's id may be here:
+    objectId= input["_id"]["$oid"].stringValue;
+  }
+  if (objectId == ""){
+    comments << "Failed to load object:\n" << input.toString();
+    return false;
+  }
+  collection.updateObjectInIndexReturnTrueIfChanged(objectId, input);
+  DatabaseInternalServer& database= Database::get().localDatabase.server;
+  if (!  database.storeObject(objectId, collection.name, input, false,&comments)){
+    return false;
+  }
+  return true;
+}
 bool MongoDatabaseDumpToJSONConverter::load(
   const std::string& folderName,
   JSData& output,
@@ -100,9 +151,10 @@ bool MongoDatabaseDumpToJSONConverter::load(
   }
   global << "Found collections: " << this->collectionFileNames << Logger::endL;
   output.reset();
-  for (const std::string& collectionName : this->collectionFileNames) {
+  for (const std::string& collectionFileName : this->collectionFileNames) {
+
     JSData currentCollection;
-    std::string fileName = folderName + collectionName;
+    std::string fileName = folderName + collectionFileName;
     if (
       !this->loadOneCollection(
         fileName, currentCollection, commentsOnFailure
@@ -110,6 +162,9 @@ bool MongoDatabaseDumpToJSONConverter::load(
     ) {
       return false;
     }
+    List<std::string> split;
+    StringRoutines::splitExcludeDelimiter(collectionFileName,'.',split);
+    std::string collectionName = split[0];
     output[collectionName] = currentCollection;
   }
   return true;

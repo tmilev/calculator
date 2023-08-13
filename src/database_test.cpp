@@ -42,6 +42,45 @@ bool Database::Test::all() {
   STACK_TRACE("Database::Test::all");
   Database::Test::basics(DatabaseType::fallback);
   Database::Test::basics(DatabaseType::internal);
+  Database::Test::loadFromJSON();
+  return true;
+}
+
+bool Database::Test::loadFromJSON(){
+  STACK_TRACE("Database::Test::loadFromJSON");
+  StateMaintainer<std::string> maintainerDatabaseName (Database::name);
+  StateMaintainer<DatabaseType> maintainerDatabaseType(global.databaseType);
+  global.databaseType = DatabaseType::internal;
+  std::stringstream comments;
+  bool mustBeTrue =
+  DatabaseLoader::loadDatabase("test/database/test_local.json", comments);
+  if (!mustBeTrue){
+    global.fatal << "Loading test database failed. "  << comments.str()<< global.fatal;
+  }
+  Database::name = Database::Test::testDatabaseName(global.databaseType);
+  DatabaseInternalServer &server = Database::get().localDatabase.server;
+  QueryExact query;
+  query.nestedLabels.addOnTop(DatabaseStrings::labelId);
+  // The id from file test/database/test.json
+  query.exactValue = "d739b82f2492ed095fa15a52";
+  query.collection = "users";
+  List<std::string> objectIds;
+  if (!  server.findObjectIds(query, objectIds, &comments)){
+    global.fatal << "Failed to find object ids. " << global.fatal;
+  }
+  if (objectIds[0]!= query.exactValue.stringValue || objectIds.size != 1){
+    global.fatal <<  "Got: " << objectIds.toStringCommaDelimited() << "\nexpected:\n[" << query.exactValue << "]" << global.fatal;
+
+  }
+  JSData user;
+mustBeTrue =  server.loadObject(query.exactValue.stringValue, query.collection, user, &comments );
+  if (!mustBeTrue){
+    global .fatal<< "Failed to load object: " << query.toString() << global.fatal;
+  }
+  if (user["username"].stringValue != "default"){
+    global.fatal << "Failed to load the default username. " << global.fatal;
+  }
+
   return true;
 }
 

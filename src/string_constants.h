@@ -340,6 +340,9 @@ public:
   static std::string requestType;
   static std::string requestContent;
   static std::string resultContent;
+  static std::string messageId;
+  static std::string messageHandle;
+  static std::string messageSize;
   static std::string error;
   static std::string maximumNumberOfItems;
 };

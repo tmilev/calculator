@@ -5,6 +5,7 @@
 #include "general_database_system_independent.h"
 #include "multiprocessing.h"
 #include "general_logging_global_variables.h"
+#include "math_large_integers.h"
 
 class UserCalculator;
 class Database;
@@ -201,6 +202,20 @@ public:
   List<JSData> content;
   bool success;
   std::string comments;
+  // Used when an output message is too large.
+  // When that happens, the message bytes will contain a json in which
+  // success will be set to true,
+  // and the messageId will be set to the present value.
+  // The message id does not expire for the duration of the server process.
+  LargeInteger messageId;
+  // Location of the message in the message buffer.
+  // May be expired if multiple messageIds are stored.
+  int messageHandle;
+  // Total message size.
+  int messageSize;
+  // A chunk of a raw large message, to be sent next.
+  std::string nextChunk;
+  int bytesSentSoFar;
   bool fromJSON(
     const std::string& input, std::stringstream* commentsOnFailure
   );
@@ -215,11 +230,16 @@ class DatabaseInternalRequest {
   bool fromJSData(std::stringstream* commentsOnFailure);
 public:
   enum Type {
-    unknown, findAndUpdate, find, fetchCollectionNames, shutdown
+    unknown, findAndUpdate, find, fetchCollectionNames, shutdown,getLargeMessage,
   };
   Type requestType;
   QueryFindAndUpdate queryFindAndUpdate;
   QueryOneOfExactly queryOneOfExactly;
+  // Used to fetch the result of a previously executed query
+  // that was too large to receive in one go. Holds a process-unique id of the message.
+  LargeInteger messageId;
+  // Holds teh location of the stored message. May be expired.
+  int messageHandle;
   bool fromJSON(
     const std::string& input, std::stringstream* commentsOnFailure
   );
@@ -290,7 +310,6 @@ public:
   MapReferences<std::string, DatabaseCollection> collections;
   DatabaseInternalServer();
   bool initializeLoadFromHardDrive();
-  void storeEverything();
   void ensureStandardCollectionIndices();
   bool ensureCollection(
     const std::string& collectionName,
@@ -299,7 +318,6 @@ public:
   bool findAndUpdate(
     QueryFindAndUpdate& input, std::stringstream* commentsOnFailure
   );
-  void storeCollectionList();
   std::string collectionsSchemaFileName() const;
   bool shutdown();
   bool find(
@@ -329,11 +347,12 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool storeObject(
-    const std::string& objectId,
-    const std::string& collectionName,
-    const JSData& data,
-    std::stringstream* commentsOnFailure
-  );
+      const std::string& objectId,
+      const std::string& collectionName,
+      const JSData& data,
+      bool storeUpdatedIndexToHardDrive,
+      std::stringstream* commentsOnFailure
+      );
   void objectExists(
     const std::string& objectId,
     const std::string& collectionName,
@@ -376,6 +395,15 @@ public:
   bool shutdown(std::stringstream* commentsOnFailure);
 };
 
+class DatabaseLargeMessage {
+
+public:
+  LargeInteger messageId;
+  std::string content;
+  int bytesSent;
+
+};
+
 // A self contained simple database.
 // Forks out into multiple processes - future client(s) and server.
 // Clients and server communicate through pre-allocated file
@@ -386,7 +414,15 @@ class DatabaseInternal {
   MapList<int, int> mapFromReadEndsToWorkerIds;
   List<int> readEnds;
   List<char> buffer;
+  MapReferences<int, DatabaseLargeMessage> largeMessages;
+  LargeInteger largeMessageCount;
+
   bool flagFailedToInitialize;
+  // An interprocess mutex to be used in fallback mode, so that
+  // different clients can read/write from the database
+  // with data races. The mutex will only be initialized in fallback mode.
+  MutexProcess mutexFallbackDatabase;
+  List<std::string> initializationErrors;
   bool sendFromClientToServer(
     const std::string& input, std::stringstream* commentsOnFailure
   );
@@ -395,11 +431,7 @@ class DatabaseInternal {
   );
   PipePrimitive& currentServerToClient();
   PipePrimitive& currentClientToServer();
-  // An interprocess mutex to be used in fallback mode, so that
-  // different clients can read/write from the database
-  // with data races. The mutex will only be initialized in fallback mode.
-  MutexProcess mutexFallbackDatabase;
-  List<std::string> initializationErrors;
+
 public:
   int processId;
   int currentWorkerId;
@@ -416,17 +448,16 @@ public:
   DatabaseInternalClient client;
   DatabaseInternalServer server;
   void accountInitializationError(const std::string& error);
-  // Sends data from the database client to the database server.
-  bool sendAndReceiveFromClient(
-    const DatabaseInternalRequest& input,
-    DatabaseInternalResult& output,
-    std::stringstream* commentsOnFailure
-  );
+  bool sendAndReceiveFromClientFull(
+      const DatabaseInternalRequest& input,
+      DatabaseInternalResult& output,
+      std::stringstream* commentsOnFailure
+      );
   bool sendAndReceiveFromClientInternal(
-    const std::string& input,
-    std::string& output,
-    std::stringstream* commentsOnFailure
-  );
+      const std::string& input,
+      std::string& output,
+      std::stringstream* commentsOnFailure
+      );
   // Sends data from the client process to
   // the database server process.
   // The data sent here will be received by
@@ -436,6 +467,8 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
+  // Sends data from the server process to the client process.
+  bool sendFromServerToClient(const std::string& message);
   // A fallback method where all server
   // computation is carried in
   // the current client process.
@@ -465,8 +498,8 @@ public:
   bool runOneConnection();
   // Executes one single operation and sends the result back.
   void executeGetResult(DatabaseInternalResult& output);
+  void fetchLargeMessage(DatabaseInternalRequest& input, DatabaseInternalResult& output);
   void executeGetString(std::string& output);
-  bool sendFromServerToClient(const std::string& message);
   bool executeAndSend();
   // Used to shut down the database process when the parent
   // process dies or the process receives a sigint.
@@ -660,6 +693,7 @@ public:
     static bool noShutdownSignal();
     static bool all();
     static bool basics(DatabaseType databaseType);
+    static bool loadFromJSON();
     bool deleteDatabase();
     static bool createAdminAccount();
     Test(DatabaseType inputDatabaseType);
@@ -688,6 +722,7 @@ public:
     JSData& input,
     std::stringstream& comments
   );
+  bool loadOneObject(DatabaseCollection& collection, JSData& input, std::stringstream& comments);
 };
 
 // A temporary class to convert a mongo database dump to a json.

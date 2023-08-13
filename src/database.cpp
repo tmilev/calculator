@@ -442,7 +442,6 @@ bool Database::find(
     this->localDatabase.client.find(
       query, options, output, commentsOnFailure
     );
-    return false;
   case DatabaseType::fallback:
     return
     this->fallbackDatabase.client.find(
@@ -698,6 +697,7 @@ JSData Database::toJSONFetchItem(
   std::stringstream comments;
   QueryOneOfExactly query;
   query.queries.addOnTop(findQuery);
+  global.comments << "DEBUG: got to here!";
   if (!Database::find(query, &projector, rowsJSON, &comments)) {
     result["error"] = comments.str();
     return result;

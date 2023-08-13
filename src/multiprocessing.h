@@ -27,6 +27,10 @@ public:
   bool flagDeallocated;
   std::string name;
   int numberOfBytesLastWrite;
+  // By observation, write a maximum of 2^16 bytes at a time.
+  // So, there is no point in allocating more than 65536 bytes;
+  // let's allocate an extra byte by default.
+  const int bufferSize = 65537;
   void release();
   bool createMe(
     const std::string& inputPipeName,

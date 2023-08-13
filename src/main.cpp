@@ -258,7 +258,7 @@ int MainFunctions::mainLoadDatabase() {
   << Logger::endL;
   std::stringstream comments;
   if (!DatabaseLoader::loadDatabase(databaseName, comments)) {
-    global << "Error loading database. " << Logger::endL << comments.str();
+    global << Logger::red << "Error loading database. " <<Logger::endL << comments.str() << Logger::endL;
     return - 1;
   }
   return 0;

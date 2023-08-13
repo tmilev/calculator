@@ -51,7 +51,7 @@ void WebServerMonitor::backupDatabaseIfNeeded() {
   commandStream
   << "mongodump --db calculator --archive ="
   << global.physicalPathProjectBase
-  << "database-backups/dbBackup"
+  << "database_backups/mongo"
   << global.getDateForLogFiles()
   << ".mongo";
   global
@@ -101,7 +101,7 @@ void WebServerMonitor::monitor(
     true
   );
   fileStream
-  << "<a href=\"/LogFiles/"
+  << "<a href=\"/LogFiles/logs/"
   << GlobalVariables::getDateForLogFiles()
   << "/\">"
   << GlobalVariables::getDateForLogFiles()

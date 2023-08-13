@@ -3255,7 +3255,7 @@ std::string WebServer::toStringStatusAll() {
   << "<a href='/LogFiles/server_starts_and_unexpected_restarts.html'>"
   << "Log files</a><br>";
   out
-  << "<a href='/LogFiles/"
+  << "<a href='/LogFiles/logs/"
   << GlobalVariables::getDateForLogFiles()
   << "/'>"
   << "Current log files</a><hr>";

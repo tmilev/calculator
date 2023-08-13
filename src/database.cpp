@@ -70,7 +70,6 @@ bool QueryExact::fromJSON(
 ) {
   STACK_TRACE("QueryExact::fromJSON");
   (void) commentsOnFailure;
-  this->nestedLabels.clear();
   this->exactValue = JSData();
   this->maximumNumberOfItems = 1;
   JSData findQuery = source;
@@ -87,7 +86,25 @@ bool QueryExact::fromJSON(
     );
   }
   JSData nestedKeySource = findQuery[DatabaseStrings::labelKey];
-  for (const JSData& key : nestedKeySource.listObjects) {
+  if (
+    !this->extractNestedKeysFromJSON(nestedKeySource, commentsOnFailure)
+  ) {
+    return false;
+  }
+  this->exactValue = findQuery[DatabaseStrings::labelValue];
+  return true;
+}
+
+bool QueryExact::extractNestedKeysFromJSON(
+  const JSData& input, std::stringstream* commentsOnFailure
+) {
+  this->nestedLabels.clear();
+  std::string singleKey;
+  if (input.isString(&singleKey)) {
+    this->nestedLabels.addOnTop(singleKey);
+    return true;
+  }
+  for (const JSData& key : input.listObjects) {
     std::string label = key.stringValue;
     if (label == "") {
       if (commentsOnFailure != nullptr) {
@@ -97,7 +114,6 @@ bool QueryExact::fromJSON(
     }
     this->nestedLabels.addOnTop(label);
   }
-  this->exactValue = findQuery[DatabaseStrings::labelValue];
   return true;
 }
 
@@ -716,7 +732,7 @@ JSData Database::toJSONFetchItem(
 
 void Database::correctData(List<JSData>& toBeCorrected) {
   for (int i = 0; i < toBeCorrected.size; i ++) {
-    correctData(toBeCorrected[i]);
+    Database::correctData(toBeCorrected[i]);
   }
 }
 

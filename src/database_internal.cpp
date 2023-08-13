@@ -209,7 +209,7 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
   DatabaseInternalResult& output,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseInternal::sendAndReceiveFromClient");
+  STACK_TRACE("DatabaseInternal::sendAndReceiveFromClientFull");
   std::string inputMessage;
   std::string outputMessage;
   inputMessage = input.toJSON().toString();

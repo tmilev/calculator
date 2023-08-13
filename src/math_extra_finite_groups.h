@@ -794,7 +794,7 @@ public:
   );
   void getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
     List<Vector<Rational> >& outputHighestWeightsFundamentalCoordinates,
-    int inputDimBound
+    int inputDimensionBound
   );
   Rational getLongestRootLengthSquared() const;
   static unsigned int hashFunction(const WeylGroupData& input) {

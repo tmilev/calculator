@@ -132,6 +132,10 @@ bool DatabaseLoader::loadOneObject(
     << input.toString();
     return false;
   }
+  input[DatabaseStrings::labelId] = objectId;
+  // bool unused=false;
+  // collection.indexOfObjectIds().setObjectIdValue(objectId, objectId,
+  // unused);
   collection.updateObjectInIndexReturnTrueIfChanged(objectId, input);
   DatabaseInternalServer& database = Database::get().localDatabase.server;
   if (

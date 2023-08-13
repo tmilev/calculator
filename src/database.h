@@ -124,6 +124,9 @@ public:
 // nestedLabels = ["key2", "subkey2"]
 // value = "YY"
 class QueryExact {
+  bool extractNestedKeysFromJSON(
+    const JSData& input, std::stringstream* commentsOnFailure
+  );
 public:
   std::string collection;
   // Labels.

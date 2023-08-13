@@ -1,6 +1,7 @@
 #include "calculator_interface.h"
 #include "math_subsets_selections.h"
 #include "math_extra_finite_groups_implementation.h"
+
 // Include required by web assembly build as of writing.
 #include "math_rational_function_implementation.h"
 #include "string_constants.h"
@@ -455,9 +456,9 @@ void BranchingData::resetOutputData() {
 void WeylGroupData::
 getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
   List<Vector<Rational> >& outputHighestWeightsFundamentalCoordinates,
-  int inputDimBound
+  int inputDimensionBound
 ) {
-  if (inputDimBound < 1) {
+  if (inputDimensionBound < 1) {
     outputHighestWeightsFundamentalCoordinates.setSize(0);
     return;
   }
@@ -466,7 +467,7 @@ getHighestWeightsAllRepresentationsDimensionLessThanOrEqualTo(
   current.makeZero(this->getDimension());
   output.addOnTop(current);
   Rational dimension;
-  Rational dimBound = inputDimBound + 1;
+  Rational dimBound = inputDimensionBound + 1;
   for (int i = 0; i < output.size; i ++) {
     current = output[i];
     for (int k = 0; k < this->getDimension(); k ++) {
@@ -877,7 +878,8 @@ bool Calculator::automatedTest(
 }
 
 bool Calculator::Test::processResults() {
-  std::stringstream commentsOnFailure, out;
+  std::stringstream commentsOnFailure;
+  std::stringstream out;
   if (!this->loadTestStrings(&commentsOnFailure)) {
     global
     << Logger::red
@@ -905,11 +907,10 @@ bool Calculator::Test::processResults() {
       << commentsOnFailure2.str();
     }
   }
-  std::stringstream
-  goodCommands,
-  unknownCommands,
-  badCommands,
-  badCommandsConsole;
+  std::stringstream goodCommands;
+  std::stringstream unknownCommands;
+  std::stringstream badCommands;
+  std::stringstream badCommandsConsole;
   this->inconsistencies = 0;
   if (
     this->startIndex > 0 || this->lastIndexNotTested < this->commands.size()
@@ -923,7 +924,8 @@ bool Calculator::Test::processResults() {
   }
   for (int i = this->startIndex; i < this->lastIndexNotTested; i ++) {
     Calculator::Test::OneTest& currentTest = this->commands.values[i];
-    std::stringstream currentLine, currentLineConsole;
+    std::stringstream currentLine;
+    std::stringstream currentLineConsole;
     currentLine << "<tr>";
     currentLine << "<td style = 'min-width:25px;'>" << i << "</td>";
     currentLineConsole << "Test " << i << "\n";

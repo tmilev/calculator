@@ -40,8 +40,10 @@ function callbackFetchProblemData(
 ) {
   let outputPanel = new panels.PanelExpandable(output);
   let problemData = [];
+  let commentDiv = document.createElement("div");
   try {
     let inputParsed = JSON.parse(input);
+    miscellaneous.writeHtmlFromCommentsAndErrors(inputParsed, commentDiv);
     let problemDataRaw = inputParsed.rows[0].problemDataJSON;
     for (let label in problemDataRaw) {
       let incomingProblem = {
@@ -58,8 +60,11 @@ function callbackFetchProblemData(
   }
   let transformer = new jsonToHtml.JSONToHTML();
   let resultHTML = transformer.getTableFromObject(problemData);
+  let resultWithCommments = document.createElement("div");
+  resultWithCommments.appendChild(commentDiv);
+  resultWithCommments.appendChild(resultHTML);
   outputPanel.initialize(false);
-  outputPanel.setPanelContent(resultHTML);
+  outputPanel.setPanelContent(resultWithCommments);
 }
 
 function fetchProblemData(

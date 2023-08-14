@@ -2437,7 +2437,7 @@
   },
   {
     "input":"TestJSON(\"{a:1, b: false,}\");\nTestJSON(\"{\\\"a\\\":\\\"\\\\\\\"\\\"}\");",
-    "output":"(\"Input:<br>{a:1, b: false,}<hr>Output: <br>{\\\"a\\\":1,\\\"b\\\":false}<hr>Extra comments: Failed to compute the type of the JSData element: unknown. Will attempt to auto-correct your json input. \";\"Input:<br>{\\\"a\\\":\\\"\\\\\\\"\\\"}<hr>Output: <br>{\\\"a\\\":\\\"\\\\\\\"\\\"}\")"
+    "output":"(\"Input:<br>{a:1, b: false,}<hr>Output: <br>{\\\"a\\\":1,\\\"b\\\":false}<hr>Extra comments: Failed to compute the type of the JSData element: unknown[a]. Will attempt to auto-correct your json input. \";\"Input:<br>{\\\"a\\\":\\\"\\\\\\\"\\\"}<hr>Output: <br>{\\\"a\\\":\\\"\\\\\\\"\\\"}\")"
   },
   {
     "input":"a = b;\nPrintRuleStack{}0;\nc = d; PrintRuleStack{}0; ",

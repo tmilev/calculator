@@ -2,9 +2,9 @@
 #ifndef header_calculator_problem_storage_ALREADY_INCLUDED
 #define header_calculator_problem_storage_ALREADY_INCLUDED
 
-#include "calculator_interface.h"
 #include "general_time_date.h"
 #include "general_database_system_independent.h"
+#include "math_large_integers.h"
 
 class SyntacticElementHTML {
 public:

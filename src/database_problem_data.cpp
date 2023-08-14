@@ -1,5 +1,7 @@
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
+#include "general_strings.h"
+#include "web_api.h"
 
 ProblemData::ProblemData() {
   this->randomSeed = 0;

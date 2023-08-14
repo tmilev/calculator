@@ -240,9 +240,11 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
   chunkRequest.requestType = DatabaseInternalRequest::Type::getLargeMessage;
   // The chunk size should be larger than 40000, the
   // maximumRuns computed below is smaller than the actual expected maximum
-  // runs
-  // if everything runs fine.
+  // runs if everything runs fine.
   unsigned long expectedSize = static_cast<unsigned long>(output.messageSize);
+  // Warning: without the extra + constant this may get rounded down wrongly.
+  // +1 should be enough, but +10 should be good enough in case something
+  // unexpected happens with the pipe read/write.
   int maximumRuns = expectedSize / 40000 + 10;
   std::string fullMessage;
   for (int i = 0; i < maximumRuns; i ++) {

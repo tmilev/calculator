@@ -3,6 +3,9 @@
 #include "calculator_html_functions.h"
 #include "math_rational_function_implementation.h"
 
+// Required by linker as of writing.
+#include "math_extra_elliptic_curves_implementation.h"
+
 // If you get a specialization after instantiation error:
 // the following template specialization funcitons must appear
 // here and nowhere else (discovered through extremely painful

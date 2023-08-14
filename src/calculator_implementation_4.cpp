@@ -12,6 +12,9 @@
 #include <cmath>
 #include <cfloat>
 
+// Required by linker when using optimize=1.
+#include "math_extra_elliptic_curves_implementation.h"
+
 Calculator::Calculator() {
   this->parser.initialize(this);
   this->numberOfOutputFiles = 0;

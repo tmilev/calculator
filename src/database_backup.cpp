@@ -4,6 +4,7 @@
 #include "general_strings.h"
 #include "string_constants.h"
 #include "calculator_problem_storage.h"
+#include "web_api.h"
 
 bool DatabaseLoader::writeBackup() {
   STACK_TRACE("DatabaseLoader::writeBackup");
@@ -293,7 +294,7 @@ bool MongoDatabaseDumpToJSONConverter::loadOneCollection(
   JSData& output,
   std::stringstream& comments
 ) {
-  STACK_TRACE("DatabaseLoader::loadOneCollection");
+  STACK_TRACE("MongoDatabaseDumpToJSONConverter::loadOneCollection");
   List<std::string> split;
   StringRoutines::splitExcludeDelimiter(collectionFileName, '.', split);
   std::string collectionName = split[0];

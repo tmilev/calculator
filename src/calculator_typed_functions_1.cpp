@@ -6,6 +6,9 @@
 #include "math_rational_function_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h"
 
+// Required by linker as of writing:
+#include "math_extra_elliptic_curves_implementation.h"
+
 // Excluding this breaks the optimize=1 build
 // as of writing.
 #include "math_extra_modules_semisimple_lie_algebras_implementation.h"

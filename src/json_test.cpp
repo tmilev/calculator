@@ -111,8 +111,8 @@ bool JSData::Test::recodeRelaxed() {
   toRecode.addOnTop(List<std::string>({"{a: 1}", "{\"a\":1}"}));
   toRecode.addOnTop(
     List<std::string>({
-        "[true, false, null, \"\", {\"a\":\"b\"}, 4.0, 4.1,-4.0,-4.01, 1234, -123, - 123]"
-        ,
+        "[true, false, null, \"\", {\"a\":\"b\"}, "
+        "4.0, 4.1,-4.0,-4.01, 1234, -123, - 123]",
         "[true,false,null,\"\",{\"a\":\"b\"},4,4.1,-4,-4.01,1234,-123,-123]"
       }
     )
@@ -154,7 +154,7 @@ bool JSData::Test::decodeEscapedUnicode() {
 }
 
 bool JSData::Test::badInput() {
-  STACK_TRACE("JSData::Test::testBadInput");
+  STACK_TRACE("JSData::Test::badInput");
   // first element is string input, second element
   // is expected recoded output.
   List<std::string> broken = List<std::string>({"{", "ab", "]", ""});

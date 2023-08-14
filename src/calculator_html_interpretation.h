@@ -5,6 +5,8 @@
 #include "general_lists.h"
 #include "database.h"
 #include "calculator_problem_storage.h"
+#include "math_subsets_selections.h"
+#include "calculator_interface.h"
 #include <ctime>
 
 class CalculatorHTML;

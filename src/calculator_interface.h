@@ -4,14 +4,13 @@
 
 #include "math_general.h"
 #include "math_extra_finite_groups.h"
-#include "math_extra_graph.h"
 #include "math_extra_algebraic_numbers.h"
 #include "general_list_references.h"
 #include "math_extra_semisimple_lie_subalgebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_extra_modules_semisimple_lie_algebras.h"
 #include "math_extra_symmetric_groups_and_generalizations.h"
-#include "math_extra_elliptic_curves_implementation.h"
+#include "math_extra_elliptic_curves.h"
 
 template <class builtIn>
 class WithContext;

@@ -114,7 +114,7 @@ public:
   bool isIntegerFittingInInt(int* whichInteger);
   bool isTrueRepresentationInJSON();
   bool isListOfStrings(List<std::string>* whichStrings);
-  bool isString(std::string* whichString) const;
+  bool isString(std::string* whichString = nullptr) const;
   // parsing
   bool isValidElement();
   void reset(Type inputType = JSData::Type::tokenUndefined);
@@ -176,7 +176,6 @@ public:
     tokenCloseBracket,
     tokenColon,
     tokenComma,
-    tokenString,
     tokenParsingStart,
     tokenParsingEnd,
     tokenError,
@@ -211,6 +210,10 @@ public:
     unsigned& currentIndex,
     const std::string& input,
     std::stringstream* commentsOnFailure
+  );
+  static std::string toStringTokens(const List<JSONWithTokens>& stack);
+  static std::string toStringReadingStack(
+    const List<JSONWithTokens>& stack
   );
 };
 

@@ -2588,8 +2588,8 @@ bool Rational::assignStringFailureAllowed(const std::string& input) {
     return true;
   }
   int sign = 1;
-  int ReaderDigit = - 1;
-  Rational readerDen = 1;
+  int readerDigit = - 1;
+  Rational readerDenominator = 1;
   unsigned positionInString = 0;
   for (; positionInString < input.size(); positionInString ++) {
     if (input[positionInString] == '-') {
@@ -2605,26 +2605,29 @@ bool Rational::assignStringFailureAllowed(const std::string& input) {
     }
   }
   for (; positionInString < input.size(); positionInString ++) {
-    if (MathRoutines::isDigit(input[positionInString], &ReaderDigit)) {
+    if (MathRoutines::isDigit(input[positionInString], &readerDigit)) {
       *this *= 10;
-      *this += ReaderDigit;
-    }
-    if (input[positionInString] == '/') {
+      *this += readerDigit;
+    } else if (input[positionInString] == '/') {
       positionInString ++;
-      readerDen = 0;
+      readerDenominator = 0;
       break;
+    } else {
+      return false;
     }
   }
   for (; positionInString < input.size(); positionInString ++) {
-    if (MathRoutines::isDigit(input[positionInString], &ReaderDigit)) {
-      readerDen *= 10;
-      readerDen += ReaderDigit;
+    if (MathRoutines::isDigit(input[positionInString], &readerDigit)) {
+      readerDenominator *= 10;
+      readerDenominator += readerDigit;
+    } else {
+      return false;
     }
   }
-  if (readerDen.isEqualToZero()) {
+  if (readerDenominator.isEqualToZero()) {
     return false;
   }
-  *this /= readerDen;
+  *this /= readerDenominator;
   *this *= sign;
   return true;
 }

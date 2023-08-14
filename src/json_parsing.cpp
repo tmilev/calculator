@@ -24,10 +24,6 @@ bool JSData::parse(
       return false;
     }
   }
-  global
-  << "DEBUG: tokens so far: "
-  << inputTokens.toStringCommaDelimited()
-  << Logger::endL;
   if (inputTokens.size == 1) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "The empty string is not valid json.";
@@ -36,6 +32,7 @@ bool JSData::parse(
   }
   List<JSONWithTokens> readingStack;
   JSONWithTokens emptyElement;
+  emptyElement.token = JSONWithTokens::tokenParsingStart;
   for (int i = 0; i < JSONWithTokens::numberOfEmptyTokensAtStart; i ++) {
     readingStack.addOnTop(emptyElement);
   }
@@ -48,8 +45,10 @@ bool JSData::parse(
     JSONWithTokens& thirdToLast = readingStack[fourthToLastIndex + 1];
     JSONWithTokens& fourthToLast = readingStack[fourthToLastIndex];
     if (
-      fourthToLast.token == JSONWithTokens::Token::tokenOpenBrace &&
-      thirdToLast.token == JSONWithTokens::Token::tokenString &&
+      fourthToLast.token == JSONWithTokens::Token::tokenOpenBrace && (
+        thirdToLast.token == JSONWithTokens::Token::tokenJSON &&
+        thirdToLast.content().isString()
+      ) &&
       secondToLast.token == JSONWithTokens::Token::tokenColon &&
       last.isJSON()
     ) {
@@ -67,7 +66,7 @@ bool JSData::parse(
       last.isJSON()
     ) {
       fourthToLast.content().objects.setKeyValue(
-        thirdToLast.content().stringValue, last.content()
+        thirdToLast.source, last.content()
       );
       readingStack.setSize(readingStack.size - 3);
       continue;
@@ -120,7 +119,6 @@ bool JSData::parse(
       last.token == JSONWithTokens::Token::tokenParsingEnd
     ) {
       readingStack.removeLastObject();
-      readingStack.removeIndexSwapWithLast(readingStack.size - 2);
       continue;
     }
     i ++;
@@ -158,11 +156,11 @@ bool JSData::parse(
         << readingStack[i].toString(true)
         << "\n<br>\n";
       }
-      if (commentsOnFailure != nullptr && !useHTMLInComments) {
-        *commentsOnFailure
-        << "Failed to parse your input. Stack state: "
-        << readingStack;
-      }
+    }
+    if (commentsOnFailure != nullptr && !useHTMLInComments) {
+      *commentsOnFailure
+      << "Failed to parse your input. Stack state: "
+      << JSONWithTokens::toStringReadingStack(readingStack);
     }
     return false;
   }
@@ -507,6 +505,7 @@ bool JSONWithTokens::tokenize(
   }
   JSONWithTokens endToken;
   endToken.token = JSONWithTokens::Token::tokenParsingEnd;
+  output.addOnTop(endToken);
   return true;
 }
 
@@ -627,9 +626,6 @@ std::string JSONWithTokens::toStringToken(bool useHTML) const {
   case JSONWithTokens::Token::tokenJSON:
     out << "{JSON}";
     break;
-  case JSONWithTokens::Token::tokenString:
-    out << "string[" << this->source << "]";
-    break;
   case JSONWithTokens::Token::tokenParsingStart:
     out << "start";
     break;
@@ -654,7 +650,8 @@ bool JSONWithTokens::readstringConsumeNextCharacter(
       return true;
     }
     if (next == '"') {
-      last.token = JSONWithTokens::Token::tokenString;
+      last.token = JSONWithTokens::Token::tokenJSON;
+      last.content() = last.source;
       return true;
     }
     last.source.push_back(next);
@@ -842,6 +839,27 @@ bool JSONWithTokens::readstringConsumeUnicodeFourHexAppendUtf8(
   output += utf8Conversion;
   currentIndex += 4;
   return true;
+}
+
+std::string JSONWithTokens::toStringTokens(
+  const List<JSONWithTokens>& stack
+) {
+  std::stringstream out;
+  for (JSONWithTokens& element : stack) {
+    out << element.toString();
+  }
+  return out.str();
+}
+
+std::string JSONWithTokens::toStringReadingStack(
+  const List<JSONWithTokens>& stack
+) {
+  return
+  toStringTokens(
+    stack.sliceCopy(
+      JSONWithTokens::numberOfEmptyTokensAtStart, stack.size
+    )
+  );
 }
 
 std::ostream& operator<<(std::ostream& out, const JSONWithTokens& data) {

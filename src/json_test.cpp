@@ -4,6 +4,7 @@
 bool JSData::Test::all() {
   STACK_TRACE("JSData::Test::all");
   JSData::Test::recode();
+  JSData::Test::recodeRelaxed();
   JSData::Test::badInput();
   JSData::Test::decodeEscapedUnicode();
   return true;
@@ -36,13 +37,6 @@ bool JSData::Test::recode() {
   );
   toRecode.addOnTop(
     List<std::string>({"{\"\n\r\":\"\n\r\"}", "{\"\\n\\r\":\"\\n\\r\"}"})
-  );
-  toRecode.addOnTop(
-    List<std::string>({
-        "[true, false, null, \"\", {a:\"b\"}, 4.0, -4.0, 1234, -123, - 123]",
-        ""
-      }
-    )
   );
   toRecode.addOnTop(
     List<std::string>({
@@ -115,6 +109,17 @@ bool JSData::Test::recodeRelaxed() {
   // is expected recoded output.
   List<List<std::string> > toRecode;
   toRecode.addOnTop(List<std::string>({"{a: 1}", "{\"a\":1}"}));
+  toRecode.addOnTop(
+    List<std::string>({
+        "[true, false, null, \"\", {\"a\":\"b\"}, 4.0, 4.1,-4.0,-4.01, 1234, -123, - 123]"
+        ,
+        "[true,false,null,\"\",{\"a\":\"b\"},4,4.1,-4,-4.01,1234,-123,-123]"
+      }
+    )
+  );
+  toRecode.addOnTop(
+    List<std::string>({"{a: 1, b:\"c\"}", "{\"a\":1,\"b\":\"c\"}"})
+  );
   for (int i = 0; i < toRecode.size; i ++) {
     JSData::Test::recodeOnce(toRecode[i], true);
   }

@@ -91,7 +91,7 @@ div.problemNavigation {
   /*  border: 1px solid black;*/
 }
 
-textarea.textareaCalculatorMain {
+.textareaCalculatorMain {
   white-space: normal;
   resize: auto;
   width: 300px;

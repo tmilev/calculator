@@ -20,6 +20,12 @@ class CalculatorEquationEditor {
     this.slider = document.getElementById(
       ids.domElements.pages.calculator.equationEditorFontSizeSlider
     );
+    /** @type {HTMLTextAreaElement|null} */
+    this.textBox = null;
+    /** @type {HTMLElement|null} */
+    this.commentsElement = null;
+    // Set this to true to disable the action of writeComments().
+    this.ignoreComments = true;
   }
 
   initialize() {
@@ -44,24 +50,27 @@ class CalculatorEquationEditor {
     )
     pauseButton.style.display = "none";
 
-    let inputMain = this.inputMainTextbox();
-    inputMain.addEventListener("keypress", (e) => {
+    this.textBox = this.calculatorPanel.getPureLatexElement();
+    this.commentsElement = document.getElementById(
+      ids.domElements.pages.calculator.editorCommentsDebug,
+    );
+    this.textBox.addEventListener("keypress", (e) => {
       this.keyPressHandler(e);
     });
-    inputMain.addEventListener("keyup", (e) => {
+    this.textBox.addEventListener("keyup", (e) => {
       autocompleter.suggestWord();
       this.writeIntoEquationEditor();
     });
-    inputMain.addEventListener("keydown", (e) => {
+    this.textBox.addEventListener("keydown", (e) => {
       autocompleter.suggestWord();
       this.writeIntoEquationEditor();
       autocompleter.arrowAction(e);
     });
-    inputMain.addEventListener("mouseup", (e) => {
+    this.textBox.addEventListener("mouseup", (e) => {
       autocompleter.suggestWord();
       this.writeIntoEquationEditor();
     });
-    inputMain.addEventListener("input", (e) => {
+    this.textBox.addEventListener("input", (e) => {
       autocompleter.suggestWord();
       this.writeIntoEquationEditor();
     });
@@ -91,24 +100,6 @@ class CalculatorEquationEditor {
     return true;
   }
 
-  isKeyWordStartKnownToMathQuill(input) {
-    for (let i = 0; i < keyWordsKnownToMathQuill.length; i++) {
-      if (keyWordsKnownToMathQuill[i].startsWith(input)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  isKeyWordEndKnownToMathQuill(input) {
-    for (let i = 0; i < keyWordsKnownToMathQuill.length; i++) {
-      if (keyWordsKnownToMathQuill[i].endsWith(input)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   accountCalculatorDelimiterReturnMustEndSelection(
     character, calculatorSeparatorCounts,
   ) {
@@ -121,49 +112,46 @@ class CalculatorEquationEditor {
     return calculatorSeparatorCounts.leftSeparators > calculatorSeparatorCounts.rightSeparators;
   }
 
-  commentsElement() {
-    return document.getElementById(
-      ids.domElements.pages.calculator.editorCommentsDebug,
-    );
-  }
-
   writeIntoEquationEditor() {
     if (this.calculatorPanel.equationEditor === null) {
       return;
     }
     this.ignoreNextEditorEvent = true;
-    let textBox = this.inputMainTextbox();
-    if (textBox.value.length > 10000) {
+    if (this.textBox.value.length > 10000) {
       this.flagCalculatorInputOK = false;
       miscellaneous.writeHTML(
-        this.commentsElement(),
+        this.commentsElement,
         "<b style ='color:red'>Formula too big </b>",
       );
       return;
     }
-    this.commentsElement().textContent = "";
-    this.extractor.extract(textBox.value, textBox.selectionEnd);
+    this.commentsElement.textContent = "";
+    this.extractor.extract(this.textBox.value, this.textBox.selectionEnd);
     this.flagCalculatorInputOK = true;
     this.calculatorPanel.equationEditor.writeLatex(this.extractor.middleEditedString);
     this.ignoreNextEditorEvent = false;
+    this.writeComments();
   }
 
   equationEditorChangeCallback() {
     if (!this.flagCalculatorInputOK) {
       return;
     }
-    const textBox = this.inputMainTextbox();
     let content = this.calculatorPanel.equationEditor.rootNode.toLatex();
     this.extractor.middleEditedString = initializeButtons.processMathQuillLatex(content);
-    textBox.value =
+    this.textBox.value =
       this.extractor.leftString +
       this.extractor.middleEditedString +
       this.extractor.rightString;
+    this.writeComments();
   }
 
-  /** @return {HTMLTextAreaElement} */
-  inputMainTextbox() {
-    return this.calculatorPanel.getPureLatexElement();
+  writeComments() {
+    if (this.ignoreComments) {
+      return;
+    }
+    this.commentsElement.textContent = "";
+    this.commentsElement.appendChild(this.extractor.getCommentHTML());
   }
 }
 
@@ -183,7 +171,10 @@ class EditorInputExtractor {
     /** 
      * @type {number} 
      * The right end of the selection, equal to the index of the right 
-     * cursor needed to enclose our selection.
+     * cursor needed to enclose our selection. Note that the 
+     * largest possible value for the index of the cursor is
+     * equal to the length of the string, so 1 larger than 
+     * the largest index of a character in the string.
      */
     this.rightIndex = - 1;
     /** 
@@ -205,7 +196,10 @@ class EditorInputExtractor {
     this.rightDelimiters = {
       ")": true,
       "}": true,
-    }
+    };
+    this.commentsElement = document.getElementById(
+      ids.domElements.pages.calculator.editorCommentsDebug
+    );
   }
 
   extract(
@@ -219,16 +213,16 @@ class EditorInputExtractor {
     this.doExtract();
   }
 
-  commentsElement() {
-    return document.getElementById(
-      ids.domElements.pages.calculator.editorCommentsDebug,
-    );
-  }
-
   toStringDebug() {
     return `cursor: ${this.cursorPosition}, ` +
       `left: ${this.leftString}, leftIndex: ${this.leftIndex}, ` +
       `middle: ${this.middleEditedString}, right: ${this.rightString}, ` +
+      `rightIndex: ${this.rightIndex}`;
+  }
+
+  toStringDebugShort() {
+    return `cursor: ${this.cursorPosition}, ` +
+      `leftIndex: ${this.leftIndex}, ` +
       `rightIndex: ${this.rightIndex}`;
   }
 
@@ -247,10 +241,10 @@ class EditorInputExtractor {
     this.leftString = this.rawInput.substring(0, this.leftIndex);
     this.middleEditedString = this.rawInput.substring(
       this.leftIndex,
-      this.rightIndex - this.leftIndex,
+      this.rightIndex,
     );
     this.rightString = this.rawInput.substring(this.rightIndex);
-    this.commentsElement().textContent = "";
+    this.commentsElement.textContent = "";
   }
 
   growReturnFalseWhenDone() {
@@ -277,7 +271,7 @@ class EditorInputExtractor {
 
   expandRight() {
     if (this.rightIndex >= this.rawInput.length) {
-      this.foundRightEnd = true
+      this.foundRightEnd = true;
       return false;
     }
     if (this.foundRightEnd && this.openLeftDelimiters <= 0) {
@@ -345,6 +339,31 @@ class EditorInputExtractor {
     }
     this.leftIndex--;
     return true;
+  }
+
+  getCommentHTML() {
+    let result = document.createElement("div");
+    let left = document.createElement("span");
+    left.textContent = this.leftString;
+    let selected = document.createElement("b");
+    selected.style.color = "red";
+    selected.textContent = this.middleEditedString;
+    let right = document.createElement("span");
+    right.textContent = this.rightString;
+    result.appendChild(left);
+    result.appendChild(selected);
+    result.appendChild(right);
+    let separator = document.createElement("hr");
+    let fullText = document.createElement("span");
+    fullText.textContent = this.rawInput;
+    result.appendChild(separator);
+    result.appendChild(fullText);
+    let anotherSeparator = document.createElement("hr");
+    let debugString = document.createElement("span");
+    debugString.textContent = this.toStringDebugShort();
+    result.appendChild(anotherSeparator);
+    result.appendChild(debugString);
+    return result;
   }
 }
 

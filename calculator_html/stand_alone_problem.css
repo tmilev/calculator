@@ -7,7 +7,7 @@
   --box-shadow-buttonAnswer: none;
   --box-shadow-buttonDefault: none;
   --box-shadow-buttonMQ: none;
-  --default-font-family: 'Google Sans',Roboto,Arial,sans-serif;
+  --default-font-family: 'Google Sans', Roboto, Arial, sans-serif;
   --default-answer-button-width: 80px;
   --default-button-letter-spacing: 0.25px;
   --default-button-font-weight: 500;
@@ -27,7 +27,7 @@ span.calculatorAtom {
 }
 
 calculatorCompositeAtom {
-  color:green;
+  color: green;
 }
 
 calculatorNavigation {
@@ -42,7 +42,7 @@ calculatorNavigation {
 }
 
 calculatorNavigation:after {
-  clear:both;
+  clear: both;
 }
 
 tiny {
@@ -61,7 +61,7 @@ tiny {
 div.spanFileInfo {
   display: inline-block;
   border-radius: 3px;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   text-align: left;
   white-space: nowrap;
@@ -85,15 +85,15 @@ div.problemTitleContainer {
 div.problemNavigation {
   display: inline-block;
   border-radius: 3px;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   text-align: center;
   white-space: nowrap;
-/*  border: 1px solid black;*/
+  /*  border: 1px solid black;*/
 }
 
-textarea.textareaCalculatorMain {
-  white-space:normal;
+.textareaCalculatorMain {
+  white-space: normal;
   resize: auto;
   width: 300px;
   height: 100px;
@@ -104,11 +104,11 @@ textarea.textAreaStudentPoints {
 }
 
 .calculatorHidden {
-  display:none;
+  display: none;
 }
 
 .calculatorCommentBeforeSubmission {
-  display:none;
+  display: none;
 }
 
 td.tableCellMQfield {
@@ -119,16 +119,16 @@ td.tableCellMQfield {
 }
 
 .calculatorMQfieldEnclosure {
-  display:inline-block;
-  background-color:white;
+  display: inline-block;
+  background-color: white;
   padding: 0px;
 }
 
 sectionSelection {
-  position:fixed;
+  position: fixed;
   background: silver;
-  bottom:0;
-  right:0;
+  bottom: 0;
+  right: 0;
 }
 
 button.buttonNavigationStandard {
@@ -171,7 +171,7 @@ button.buttonShowExpandMQPanel:hover {
   border-radius: 3px;
   transition: all 2s;
   border: none;
-  color:red;
+  color: red;
   box-shadow: var(--box-shadow-buttonDefault);
   width: var(--default-answer-button-width);
   font: var(--default-font-family);
@@ -188,7 +188,7 @@ button.buttonShowExpandMQPanel:hover {
   transition: all 2s;
   box-shadow: none;
   border: none;
-  color:green;
+  color: green;
   box-shadow: var(--box-shadow-buttonDefault);
   width: var(--default-answer-button-width);
   font: var(--default-font-family);
@@ -199,7 +199,7 @@ button.buttonShowExpandMQPanel:hover {
 }
 
 .buttonSubmit:hover {
-  background-color:#878787;
+  background-color: #878787;
 }
 
 .buttonPreview {
@@ -209,7 +209,7 @@ button.buttonShowExpandMQPanel:hover {
   box-shadow: var(--box-shadow-buttonPreview);
   transition: all 2s;
   border: none;
-  color:green;
+  color: green;
   box-shadow: var(--box-shadow-buttonDefault);
   width: var(--default-answer-button-width);
   font: var(--default-font-family);
@@ -220,17 +220,17 @@ button.buttonShowExpandMQPanel:hover {
 }
 
 .buttonPreview:hover {
-  background-color:#878787;
+  background-color: #878787;
 }
 
 .buttonAnswer {
   border-radius: 3px;
   transition: all 2s;
-  padding:3px;
+  padding: 3px;
   margin: 3px;
   box-shadow: none;
   border: none;
-  color:green;
+  color: green;
   box-shadow: var(--box-shadow-buttonDefault);
   width: var(--default-answer-button-width);
   font: var(--default-font-family);
@@ -241,7 +241,7 @@ button.buttonShowExpandMQPanel:hover {
 }
 
 .buttonAnswer:hover {
-  background-color:#878787;
+  background-color: #878787;
 }
 
 button.accordionLikeIndividual {
@@ -258,7 +258,8 @@ button.accordionLikeIndividual {
   transition: 0.6s;
 }
 
-button.accordionLikeIndividual.active, button.accordionLikeIndividual:hover {
+button.accordionLikeIndividual.active,
+button.accordionLikeIndividual:hover {
   background-color: #ddd;
 }
 
@@ -278,7 +279,8 @@ button.accordionLikeProblemWeight {
   transition: 0.6s;
 }
 
-button.accordionLikeProblemWeight.active, button.accordionLikeProblemWeight:hover {
+button.accordionLikeProblemWeight.active,
+button.accordionLikeProblemWeight:hover {
   background-color: #ddd;
 }
 
@@ -298,7 +300,8 @@ button.accordionLike {
   transition: 0.6s;
 }
 
-button.accordionLike.active, button.accordionLike:hover {
+button.accordionLike.active,
+button.accordionLike:hover {
   background-color: #ddd;
 }
 
@@ -318,7 +321,8 @@ button.accordion {
   transition: 0.6s;
 }
 
-button.accordion.active, button.accordion:hover {
+button.accordion.active,
+button.accordion:hover {
   background-color: #dfdfdf;
 }
 
@@ -329,7 +333,7 @@ button.accordion:after {
 }
 
 button.buttonStandard {
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   border-radius: 3px;
   display: inline;
@@ -347,7 +351,7 @@ button.buttonStandard:hover {
 }
 
 button.buttonSaveEdit {
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -368,7 +372,7 @@ button.buttonSaveEdit:hover {
 }
 
 button.buttonClone {
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   border-radius: 3px;
   display: inline;
@@ -411,7 +415,9 @@ answerCalculatorHighlight {
   /*max-width: 200px;*/
 }
 
-span.panelAnswer table, tr, td {
+span.panelAnswer table,
+tr,
+td {
   margin-left: 0px;
   padding-left: 0px;
   border-collapse: collapse;
@@ -452,7 +458,7 @@ span.panelAnswer:hover .mq-editable-field.mq-math-mode {
 }
 
 span.panel {
-  display:none;
+  display: none;
   padding: 0 0px;
   background-color: white;
   max-height: 0;
@@ -480,16 +486,17 @@ button.buttonToggleTopics {
   padding: 2px;
   background-color: #efefef;
   border-radius: 3px;
-  background-repeat:no-repeat;
+  background-repeat: no-repeat;
   box-shadow: var(--box-shadow-buttonDefault);
   border: none;
-  cursor:pointer;
+  cursor: pointer;
   overflow: hidden;
-  outline:none;
+  outline: none;
   transition: 0.6s;
 }
 
-button.buttonToggleTopics.active, button.buttonToggleTopics:hover {
+button.buttonToggleTopics.active,
+button.buttonToggleTopics:hover {
   background-color: #d0d0d0;
 }
 
@@ -504,15 +511,16 @@ button.studentScoresButton {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  background-repeat:no-repeat;
+  background-repeat: no-repeat;
   border: none;
-  cursor:pointer;
+  cursor: pointer;
   overflow: hidden;
-  outline:none;
+  outline: none;
   transition: 0.6s;
 }
 
-button.studentScoresButton.active, button.studentScoresButton:hover {
+button.studentScoresButton.active,
+button.studentScoresButton:hover {
   background-color: #d0d0d0;
 }
 
@@ -523,7 +531,7 @@ span.studentScoresContent {
 
 panelStudentScores {
   display: inline-block;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   background-color: #fafafa;
   -moz-border-radius: 3px;
@@ -535,7 +543,7 @@ panelStudentScores {
 
 panelCourseInfo {
   display: inline-block;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   background-color: #fafafa;
   -moz-border-radius: 3px;
@@ -596,16 +604,16 @@ a.linkProgressReport {
 #divCalculatorExamplesContainer {
   overflow: auto;
   display: inline-block;
-  vertical-align:top;
-  white-space:nowrap;
+  vertical-align: top;
+  white-space: nowrap;
 }
 
 #idAutocompletePanel {
   overflow: none;
   display: inline-block;
   max-height: 150px;
-  vertical-align:top;
-  white-space:nowrap;
+  vertical-align: top;
+  white-space: nowrap;
 }
 
 #idAutocompleteSpan {
@@ -638,7 +646,7 @@ td.cellCalculatorInput {
   margin-bottom: 5px;
   margin-top: 5px;
   margin-right: 20px;
-  margin-left:  5px;
+  margin-left: 5px;
   min-width: 200px;
   vertical-align: top;
 }
@@ -652,7 +660,7 @@ td.cellCalculatorResult {
   margin-bottom: 5px;
   margin-top: 5px;
   margin-right: 5px;
-  margin-left:  20px;
+  margin-left: 20px;
   min-width: 200px;
   vertical-align: top;
 }
@@ -726,7 +734,7 @@ div.divMainMenu {
   width: 10%;
   position: absolute;
   right: 0.8%;
-  overflow:auto;
+  overflow: auto;
 }
 
 div.divMainMenuCollapsed {
@@ -874,7 +882,8 @@ table.tableItem {
   width: 100%;
 }
 
-table.tableItem td, table.tableItem th {
+table.tableItem td,
+table.tableItem th {
   text-align: left;
   padding-left: 0px;
 }
@@ -912,7 +921,8 @@ table.lectureMaterials {
   counter-reset: rowNumber;
 }
 
-table.lectureMaterials td, table.lectureMaterials th {
+table.lectureMaterials td,
+table.lectureMaterials th {
   border: 1px solid #dfdfdf;
   text-align: left;
   padding-left: 8px;
@@ -936,6 +946,7 @@ table.lectureMaterials col:nth-child(3) {
 table.lectureMaterials tr:nth-child(odd) {
   background-color: #fafafa;
 }
+
 table.lectureMaterials th {
   padding-top: 12px;
   padding-bottom: 12px;
@@ -958,7 +969,8 @@ table.topicList {
   counter-reset: rowNumber;
 }
 
-table.topicList td, table.topicList th {
+table.topicList td,
+table.topicList th {
   border: 1px solid #dfdfdf;
   text-align: left;
   padding-left: 8px;
@@ -1013,7 +1025,7 @@ a.linkInfo {
 }
 
 a.linkStandardButtonLike {
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
@@ -1029,7 +1041,7 @@ a.linkStandardButtonLike:hover {
 
 span.problemLinkSelectedPractice {
   display: inline-block;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -1039,7 +1051,7 @@ span.problemLinkSelectedPractice {
 
 span.problemLinkSelectedQuiz {
   display: inline-block;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -1049,7 +1061,7 @@ span.problemLinkSelectedQuiz {
 }
 
 a.problemLinkQuiz {
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
@@ -1065,7 +1077,7 @@ a.problemLinkQuiz:hover {
 }
 
 a.problemLinkPractice {
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
@@ -1080,7 +1092,7 @@ a.problemLinkPractice:hover {
 }
 
 a.slidesLink {
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
@@ -1096,7 +1108,7 @@ a.slidesLink:hover {
 
 a.videoLink {
   display: inline-block;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   background-color: #efefef;
   -moz-border-radius: 3px;
@@ -1112,7 +1124,7 @@ a.videoLink:hover {
 
 a.linkForgotLoginPass {
   display: inline-block;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   font-size: 1.25em;
   text-decoration: none;
@@ -1129,7 +1141,7 @@ a.linkForgotLoginPass:hover {
 
 a.linkSignUp {
   display: inline-block;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   font-size: 1.25em;
   text-decoration: none;
@@ -1146,7 +1158,7 @@ a.linkSignUp:hover {
 
 button.courseButton {
   display: inline-block;
-  margin:  10px;
+  margin: 10px;
   padding: 3px;
   background-color: #ccffcc;
   -moz-border-radius: 7px;
@@ -1260,7 +1272,7 @@ div.divSmall {
   font-size: x-small;
 }
 
-form.formLogin > * {
+form.formLogin>* {
   font-size: 1.1em;
 }
 
@@ -1300,7 +1312,7 @@ button.buttonSelectPage {
   transition: 1.5s;
   width: 100%;
   white-space: nowrap;
-  cursor:pointer;
+  cursor: pointer;
   transition: all 1.5s;
 }
 
@@ -1358,7 +1370,7 @@ reviewProblem {
 
 panelProblemLinkStyleSelection {
   display: inline-block;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   background-color: #eaeaea;
   -moz-border-radius: 3px;
@@ -1374,7 +1386,7 @@ panelProblemLinkStyleSelection:hover {
 
 span.currentCourseIndicator {
   display: inline-block;
-  margin:  3px;
+  margin: 3px;
   padding: 3px;
   background-color: #eaeaea;
   -moz-border-radius: 3px;
@@ -1394,7 +1406,7 @@ span.currentCourseIndicator {
   width: 100%;
 }
 
-.g-signin2 > div {
+.g-signin2>div {
   margin: 0 auto;
 }
 
@@ -1421,7 +1433,7 @@ span.currentCourseIndicator {
 
 /* Hide default HTML checkbox */
 .switch input {
-  display:none;
+  display: none;
 }
 
 /* The slider */
@@ -1449,15 +1461,15 @@ span.currentCourseIndicator {
   transition: .4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #2196F3;
 }
 
-input:focus + .slider {
+input:focus+.slider {
   box-shadow: 0 0 1px #2196F3;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   -webkit-transform: translateX(11px);
   -ms-transform: translateX(11px);
   transform: translateX(12px);
@@ -1504,12 +1516,12 @@ input:checked + .slider:before {
 }
 
 /* On mouse-over, add a grey background color */
-.containerRadioButton:hover input ~ .radioMark {
+.containerRadioButton:hover input~.radioMark {
   background-color: #ccc;
 }
 
 /* When the radio button is checked, add a blue background */
-.containerRadioButton input:checked ~ .radioMark {
+.containerRadioButton input:checked~.radioMark {
   background-color: lightskyblue;
 }
 
@@ -1521,7 +1533,7 @@ input:checked + .slider:before {
 }
 
 /* Show the indicator (dot/circle) when checked */
-.containerRadioButton input:checked ~ .radioMark:after {
+.containerRadioButton input:checked~.radioMark:after {
   display: block;
 }
 
@@ -1555,7 +1567,7 @@ span.hexContainerStandard {
 div.hexContainerStandardWidth {
   display: inline-block;
   word-break: break-all;
-  max-height:1000px;
+  max-height: 1000px;
   max-width: 1000px;
   padding: 0px;
   font-family: 'Courier New', Courier, monospace;
@@ -1580,7 +1592,7 @@ span.abstractSyntaxOneAnnotation {
 }
 
 span.abstractSyntaxOneHeader:hover {
-  background-color:lightgray;
+  background-color: lightgray;
 }
 
 span.abstractSyntaxOneLeadingByte:hover {
@@ -1598,7 +1610,7 @@ span.abstractSyntaxOneElement {
   word-break: break-all;
 }
 
-div.abstractSyntaxOneElementTree div.abstractSyntaxOneElementTree  {
+div.abstractSyntaxOneElementTree div.abstractSyntaxOneElementTree {
   border-left: solid 1px black;
   word-break: break-all;
   padding-left: 5px
@@ -1623,7 +1635,7 @@ span.abstractSyntaxOneContent:hover {
   text-align: center;
   padding: 5px 0;
   border-radius: 6px;
-   /* Position the tooltip text - see examples below! */
+  /* Position the tooltip text - see examples below! */
   position: absolute;
   top: 40px;
   left: 0px;
@@ -1643,7 +1655,8 @@ span.spanStringDifferent {
   color: red
 }
 
-table.tableBorderStandard, table.tableBorderStandard td{
+table.tableBorderStandard,
+table.tableBorderStandard td {
   border-collapse: collapse;
   border: 1px solid;
 }

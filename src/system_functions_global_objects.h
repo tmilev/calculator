@@ -1,4 +1,3 @@
-
 #ifndef header_system_functions_global_objects_ALREADY_INCLUDED
 #define header_system_functions_global_objects_ALREADY_INCLUDED
 

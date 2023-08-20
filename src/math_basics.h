@@ -1,4 +1,3 @@
-
 #ifndef header_math_basics_ALREADY_INCLUDED
 #define header_math_basics_ALREADY_INCLUDED
 

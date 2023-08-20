@@ -1,4 +1,3 @@
-
 #ifndef header_math_extra_packed_vector_implementation_ALREADY_INCLUDED
 #define header_math_extra_packed_vector_implementation_ALREADY_INCLUDED
 

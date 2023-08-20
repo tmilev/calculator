@@ -1,4 +1,3 @@
-
 #ifndef header_math_extra_symmetric_groups_and_generalizations_ALREADY_INCLUDED
 #define header_math_extra_symmetric_groups_and_generalizations_ALREADY_INCLUDED
 

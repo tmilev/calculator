@@ -1,4 +1,3 @@
-
 #ifndef header_calculator_weyl_group_character_ALREADY_INCLUDED
 #define header_calculator_weyl_group_character_ALREADY_INCLUDED
 

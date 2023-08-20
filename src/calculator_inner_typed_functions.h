@@ -1,4 +1,3 @@
-
 #ifndef header_calculator_inner_typed_functions_ALREADY_INCLUDED
 #define header_calculator_inner_typed_functions_ALREADY_INCLUDED
 

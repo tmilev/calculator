@@ -581,6 +581,9 @@ std::string CodeFormatter::Element::format() {
 }
 
 void CodeFormatter::Element::formatDefault(std::stringstream& out) {
+  if (this->type == CodeFormatter::Element::Type::Dummy) {
+    return;
+  }
   for (int i = 0; i < this->whiteSpaceBefore; i ++) {
     out << " ";
   }
@@ -1843,7 +1846,10 @@ bool CodeFormatter::formatCPPDirectory(
   if (directory[directory.size() - 1] != '/') {
     directory += "/";
   }
-  List<std::string> allFiles, newFileNames, oldFileNames, allFileExtensions;
+  List<std::string> allFiles;
+  List<std::string> newFileNames;
+  List<std::string> oldFileNames;
+  List<std::string> allFileExtensions;
   if (
     !FileOperations::getFolderFileNamesVirtual(
       directory, allFiles, &allFileExtensions, false, false, comments

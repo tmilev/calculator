@@ -1,4 +1,3 @@
-
 #ifndef header_database_ALREADY_INCLUDED
 #define header_database_ALREADY_INCLUDED
 

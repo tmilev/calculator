@@ -1,4 +1,3 @@
-
 #ifndef header_general_test_ALREADY_INCLUDED
 #define header_general_test_ALREADY_INCLUDED
 

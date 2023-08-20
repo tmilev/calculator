@@ -1,4 +1,3 @@
-
 #ifndef header_crypto_public_domain_ALREADY_INCLUDED
 #define header_crypto_public_domain_ALREADY_INCLUDED
 

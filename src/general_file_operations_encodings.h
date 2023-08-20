@@ -1,4 +1,3 @@
-
 #ifndef header_general_file_operations_encodings_ALREADY_INCLUDED
 #define header_general_file_operations_encodings_ALREADY_INCLUDED
 

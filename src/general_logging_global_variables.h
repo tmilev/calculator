@@ -1,4 +1,3 @@
-
 #ifndef header_general_logging_global_variables_ALREADY_INCLUDED
 #define header_general_logging_global_variables_ALREADY_INCLUDED
 

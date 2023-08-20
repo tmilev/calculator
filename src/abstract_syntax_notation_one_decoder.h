@@ -1,4 +1,3 @@
-
 #ifndef header_abstract_syntax_notation_one_decoder_ALREADY_INCLUDED
 #define header_abstract_syntax_notation_one_decoder_ALREADY_INCLUDED
 

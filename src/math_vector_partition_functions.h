@@ -1,4 +1,3 @@
-
 #ifndef header_math_vector_partition_functions_ALREADY_INCLUDED
 #define header_math_vector_partition_functions_ALREADY_INCLUDED
 

@@ -1,4 +1,3 @@
-
 #ifndef header_network_calculator_ALREADY_INCLUDED
 #define header_network_calculator_ALREADY_INCLUDED
 

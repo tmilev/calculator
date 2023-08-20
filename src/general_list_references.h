@@ -1,4 +1,3 @@
-
 #ifndef header_general_list_references_ALREADY_INCLUDED
 #define header_general_list_references_ALREADY_INCLUDED
 

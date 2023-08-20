@@ -1,4 +1,3 @@
-
 #ifndef header_web_assembly_ALREADY_INCLUDED
 #define header_web_assembly_ALREADY_INCLUDED
 

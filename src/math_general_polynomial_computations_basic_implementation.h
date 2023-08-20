@@ -1,4 +1,3 @@
-
 #ifndef header_math_general_polynomial_computations_basic_implementation_ALREADY_INCLUDED
 #define header_math_general_polynomial_computations_basic_implementation_ALREADY_INCLUDED
 

@@ -1,4 +1,3 @@
-
 #ifndef header_math_extra_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
 #define header_math_extra_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
 

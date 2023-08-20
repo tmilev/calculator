@@ -1,4 +1,3 @@
-
 /*
  * Adapted by Pieter Wuille in 2012; all changes are in the public domain
  *

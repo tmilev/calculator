@@ -1,4 +1,3 @@
-
 #ifndef header_crypto_calculator_ALREADY_INCLUDED
 #define header_crypto_calculator_ALREADY_INCLUDED
 

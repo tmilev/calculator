@@ -43,7 +43,7 @@ std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
   std::stringstream fileName;
   std::stringstream systemCommand1;
   std::stringstream systemCommand2;
-  std::stringstream  systemCommand3;
+  std::stringstream systemCommand3;
   fileName << "defaultOutput" << HashFunctions::hashFunction(fileContent);
   if (
     !FileOperations::openFileCreateIfNotPresentVirtual(
@@ -457,14 +457,17 @@ bool CalculatorBasics::multiplyAtoXtimesAtoYequalsAtoXplusY(
           Rational leftRational;
           Rational rightRational;
           if (!isGood) {
-            if ((*left)[2].isOfType<Rational>(&leftRational) && (*right)[2].isOfType<
-                Rational
-              >(&rightRational)
+            if ((*left)[2].isOfType<Rational>(&leftRational) && (*right)[2].
+              isOfType<Rational>(&rightRational)
             ) {
-              if (leftRational.isInteger() && !rightRational.isInteger()) {
+              if (
+                leftRational.isInteger() && !rightRational.isInteger()
+              ) {
                 isGood = true;
               }
-              if (!leftRational.isInteger() && rightRational.isInteger()) {
+              if (
+                !leftRational.isInteger() && rightRational.isInteger()
+              ) {
                 isGood = true;
               }
             }

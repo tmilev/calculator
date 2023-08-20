@@ -1,4 +1,3 @@
-
 #ifndef header_calculator_html_functions_ALREADY_INCLUDED
 #define header_calculator_html_functions_ALREADY_INCLUDED
 

@@ -1,4 +1,3 @@
-
 #ifndef header_math_rational_function_implementation_ALREADY_INCLUDED
 #define header_math_rational_function_implementation_ALREADY_INCLUDED
 

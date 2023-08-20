@@ -1,4 +1,3 @@
-
 #ifndef header_general_strings_ALREADY_INCLUDED
 #define header_general_strings_ALREADY_INCLUDED
 

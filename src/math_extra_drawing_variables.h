@@ -1,4 +1,3 @@
-
 #ifndef header_math_extra_drawing_variables_ALREADY_INCLUDED
 #define header_math_extra_drawing_variables_ALREADY_INCLUDED
 

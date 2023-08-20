@@ -1,4 +1,3 @@
-
 #ifndef header_serialization_basic_ALREADY_INCLUDED
 #define header_serialization_basic_ALREADY_INCLUDED
 

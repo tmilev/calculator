@@ -1,4 +1,3 @@
-
 #ifndef header_math_extra_finite_groups_ALREADY_INCLUDED
 #define header_math_extra_finite_groups_ALREADY_INCLUDED
 

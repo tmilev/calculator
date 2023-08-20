@@ -1,4 +1,3 @@
-
 #ifndef header_math_subsets_selections_ALREADY_INCLUDED
 #define header_math_subsets_selections_ALREADY_INCLUDED
 

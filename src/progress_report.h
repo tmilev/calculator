@@ -1,4 +1,3 @@
-
 #ifndef header_progress_report_ALREADY_INCLUDED
 #define header_progress_report_ALREADY_INCLUDED
 

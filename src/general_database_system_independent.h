@@ -1,4 +1,3 @@
-
 #ifndef header_general_database_system_independent_ALREADY_INCLUDED
 #define header_general_database_system_independent_ALREADY_INCLUDED
 

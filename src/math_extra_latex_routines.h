@@ -1,4 +1,3 @@
-
 #ifndef header_math_extra_latex_routines_ALREADY_INCLUDED
 #define header_math_extra_latex_routines_ALREADY_INCLUDED
 

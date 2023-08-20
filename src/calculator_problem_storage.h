@@ -1,4 +1,3 @@
-
 #ifndef header_calculator_problem_storage_ALREADY_INCLUDED
 #define header_calculator_problem_storage_ALREADY_INCLUDED
 

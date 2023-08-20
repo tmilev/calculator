@@ -1,4 +1,3 @@
-
 #ifndef header_math_extra_lie_theory_extras_ALREADY_INCLUDED
 #define header_math_extra_lie_theory_extras_ALREADY_INCLUDED
 

@@ -1,4 +1,3 @@
-
 #ifndef header_source_code_formatter_ALREADY_INCLUDED
 #define header_source_code_formatter_ALREADY_INCLUDED
 

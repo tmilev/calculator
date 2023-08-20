@@ -1,4 +1,3 @@
-
 #ifndef header_string_constants_ALREADY_INCLUDED
 #define header_string_constants_ALREADY_INCLUDED
 

@@ -17,7 +17,9 @@ class CalculatorEquationEditor {
     this.keyPressHandler = keyPressHandler;
     this.theLaTeXString = null;
     this.extractor = new EditorInputExtractor();
-    this.slider = document.getElementById(ids.domElements.pages.calculator.equationEditorFontSizeSlider);
+    this.slider = document.getElementById(
+      ids.domElements.pages.calculator.equationEditorFontSizeSlider
+    );
   }
 
   initialize() {
@@ -32,7 +34,9 @@ class CalculatorEquationEditor {
       },
     });
     this.calculatorPanel.initialize();
-    let pauseButton = document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle);
+    let pauseButton = document.getElementById(
+      ids.domElements.pages.calculator.monitoring.buttonPauseToggle
+    );
     pauseButton.addEventListener(
       "click", () => {
         processMonitoring.monitor.togglePause();
@@ -77,11 +81,11 @@ class CalculatorEquationEditor {
     editor.writeDebugInfo(null);
   }
 
-  isSeparatorCharacter(theChar) {
-    if (theChar[0] >= 'a' && theChar[0] <= 'z') {
+  isSeparatorCharacter(inputCharacter) {
+    if (inputCharacter[0] >= 'a' && inputCharacter[0] <= 'z') {
       return false;
     }
-    if (theChar[0] >= 'A' && theChar[0] <= 'Z') {
+    if (inputCharacter[0] >= 'A' && inputCharacter[0] <= 'Z') {
       return false;
     }
     return true;
@@ -105,7 +109,9 @@ class CalculatorEquationEditor {
     return false;
   }
 
-  accountCalculatorDelimiterReturnMustEndSelection(character, calculatorSeparatorCounts) {
+  accountCalculatorDelimiterReturnMustEndSelection(
+    character, calculatorSeparatorCounts,
+  ) {
     if (character in this.calculatorSeparatorLeftDelimiters) {
       calculatorSeparatorCounts.leftSeparators++;
     }
@@ -146,9 +152,13 @@ class CalculatorEquationEditor {
     if (!this.flagCalculatorInputOK) {
       return;
     }
+    const textBox = this.inputMainTextbox();
     let content = this.calculatorPanel.equationEditor.rootNode.toLatex();
     this.extractor.middleEditedString = initializeButtons.processMathQuillLatex(content);
-    this.inputMainTextbox().value = this.extractor.leftString + this.extractor.middleEditedString + this.extractor.rightString;
+    textBox.value =
+      this.extractor.leftString +
+      this.extractor.middleEditedString +
+      this.extractor.rightString;
   }
 
   /** @return {HTMLTextAreaElement} */
@@ -168,11 +178,19 @@ class EditorInputExtractor {
     /** @type {string} */
     this.rightString = "";
     /** @type {number} */
-    this.caretPosition = 0;
+    this.cursorPosition = 0;
 
-    /** @type {number} The right end of the selection, equal to the index of the right caret needed to enclose our selection.*/
+    /** 
+     * @type {number} 
+     * The right end of the selection, equal to the index of the right 
+     * cursor needed to enclose our selection.
+     */
     this.rightIndex = - 1;
-    /** @type {number} The left end of the selection, equal to index of the left caret needed to enclose our selection. */
+    /** 
+     * @type {number} 
+     * The left end of the selection, equal to index of the left 
+     * cursor needed to enclose our selection. 
+     */
     this.leftIndex = - 1;
     /** @type {number} */
     this.openLeftDelimiters = 0;
@@ -194,10 +212,10 @@ class EditorInputExtractor {
     /** @type {string} */
     inputLatex,
     /** @type {number} */
-    caretPosition,
+    cursorPosition,
   ) {
     this.rawInput = inputLatex;
-    this.caretPosition = caretPosition;
+    this.cursorPosition = cursorPosition;
     this.doExtract();
   }
 
@@ -208,12 +226,15 @@ class EditorInputExtractor {
   }
 
   toStringDebug() {
-    return `caret: ${this.caretPosition}, left: ${this.leftString}, leftIndex: ${this.leftIndex} middle: ${this.middleEditedString}, right: ${this.rightString}, rightIndex: ${this.rightIndex}`;
+    return `cursor: ${this.cursorPosition}, ` +
+      `left: ${this.leftString}, leftIndex: ${this.leftIndex}, ` +
+      `middle: ${this.middleEditedString}, right: ${this.rightString}, ` +
+      `rightIndex: ${this.rightIndex}`;
   }
 
   initializeIndices() {
-    this.leftIndex = this.caretPosition;
-    this.rightIndex = this.caretPosition;
+    this.leftIndex = this.cursorPosition;
+    this.rightIndex = this.cursorPosition;
     this.openLeftDelimiters = 0;
     this.openRightDelimiters = 0;
     this.foundRightEnd = false;
@@ -224,7 +245,10 @@ class EditorInputExtractor {
     while (this.growReturnFalseWhenDone()) {
     }
     this.leftString = this.rawInput.substring(0, this.leftIndex);
-    this.middleEditedString = this.rawInput.substring(this.leftIndex, this.rightIndex - this.leftIndex);
+    this.middleEditedString = this.rawInput.substring(
+      this.leftIndex,
+      this.rightIndex - this.leftIndex,
+    );
     this.rightString = this.rawInput.substring(this.rightIndex);
     this.commentsElement().textContent = "";
   }
@@ -289,7 +313,11 @@ class EditorInputExtractor {
     }
     let nextCharacter = this.rawInput[this.leftIndex - 1];
     if (nextCharacter in this.leftDelimiters) {
-      if (this.foundRightEnd && this.openLeftDelimiters === 0 && this.openRightDelimiters === 0) {
+      if (
+        this.foundRightEnd &&
+        this.openLeftDelimiters === 0 &&
+        this.openRightDelimiters === 0
+      ) {
         return false;
       }
       if (this.openRightDelimiters > 0) {
@@ -307,7 +335,11 @@ class EditorInputExtractor {
       return true;
     }
     if (nextCharacter === ";") {
-      if (this.foundRightEnd && this.openLeftDelimiters === 0 && this.openRightDelimiters === 0) {
+      if (
+        this.foundRightEnd &&
+        this.openLeftDelimiters === 0 &&
+        this.openRightDelimiters === 0
+      ) {
         return false;
       }
     }

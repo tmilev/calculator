@@ -10,7 +10,7 @@
 #include "crypto_calculator.h"
 
 std::string CalculatorHTML::stringScoredQuizzes = "Quiz";
-std::string CalculatorHTML::stringPracticE = "Practice";
+std::string CalculatorHTML::stringPractice = "Practice";
 std::string CalculatorHTML::stringProblemLink = "Problem";
 std::string SyntacticElementHTML::Tags::filler = "filler";
 std::string SyntacticElementHTML::Tags::command = "command";
@@ -26,6 +26,8 @@ std::string SyntacticElementHTML::Tags::calculatorSolutionEnd =
 "calculatorSolutionEnd";
 std::string SyntacticElementHTML::Tags::calculatorExamProblem =
 "calculatorExamProblem";
+std::string SyntacticElementHTML::Tags::commentsBeforeSubmission =
+"calculatorCommentsBeforeSubmission";
 std::string SyntacticElementHTML::Tags::calculatorAnswer = "calculatorAnswer";
 std::string SyntacticElementHTML::Tags::hardCodedAnswer = "answer";
 std::string SyntacticElementHTML::Tags::answerCalculatorHighlight =
@@ -39,6 +41,7 @@ calculatorClasses;
 HashedList<std::string, HashFunctions::hashFunction> CalculatorHTML::Parser::
 calculatorClassesAnswerFields;
 int SyntacticElementHTML::parsingDummyElements = 8;
+int TopicElement::scoreButtonCounter = 0;
 
 CalculatorHTML::CalculatorHTML() {
   this->numberOfInterpretationAttempts = 0;
@@ -856,11 +859,11 @@ std::string CalculatorHTML::toStringLinkFromFileName(
     StringRoutines::stringEndsWith(fileName, ".txt")
   ) {
     out
-    << "<a href=\""
+    << "<a href='"
     << global.displayNameExecutable
     << "?request=template&"
     << refStreamNoRequest.str()
-    << "\">"
+    << "'>"
     << "Home"
     << "</a> ";
     return out.str();
@@ -881,17 +884,17 @@ std::string CalculatorHTML::toStringLinkFromFileName(
   }
   if (!global.userGuestMode()) {
     out
-    << "<b><a class =\"problemLinkQuiz\" href=\""
+    << "<b><a class='problemLinkQuiz' href='"
     << refStreamForReal.str()
-    << "\">"
+    << "'>"
     << CalculatorHTML::stringScoredQuizzes
     << "</a></b>";
   }
   out
-  << "<a class =\"problemLinkPractice\" href=\""
+  << "<a class='problemLinkPractice' href='"
   << refStreamExercise.str()
-  << "\">"
-  << CalculatorHTML::stringPracticE
+  << "'>"
+  << CalculatorHTML::stringPractice
   << "</a>";
   return out.str();
 }
@@ -1326,7 +1329,7 @@ bool SyntacticElementHTML::isCommentBeforeSubmission() {
     return false;
   }
   std::string tagClass = this->getTagClass();
-  return tagClass == "calculatorCommentsBeforeSubmission";
+  return tagClass == SyntacticElementHTML::Tags::commentsBeforeSubmission;
 }
 
 bool SyntacticElementHTML::isCommentBeforeInterpretation() {
@@ -1796,9 +1799,9 @@ void CalculatorHTML::interpretManageClass(SyntacticElementHTML& inputOutput) {
   }
   std::stringstream out;
   out
-  << "<a href=\""
+  << "<a href='"
   << global.displayNameExecutable
-  << "?request=accounts\"> Manage accounts</a>";
+  << "?request=accounts'> Manage accounts</a>";
   inputOutput.interpretedCommand = out.str();
 }
 
@@ -1824,55 +1827,54 @@ bool CalculatorHTML::computeAnswerRelatedStrings(
     << this->problemData.toStringAvailableAnswerIds()
     << global.fatal;
   }
-  Answer& currentA = this->problemData.answers.values[index];
+  Answer& currentAnswer = this->problemData.answers.values[index];
   if (index < this->answerHighlights.size) {
-    currentA.htmlAnswerHighlight = this->answerHighlights[index];
+    currentAnswer.htmlAnswerHighlight = this->answerHighlights[index];
   } else {
-    currentA.htmlAnswerHighlight = "";
+    currentAnswer.htmlAnswerHighlight = "";
   }
-  std::string& answerId = currentA.answerId;
-  currentA.idAnswerPanel = "spanAnswerPanel" + answerId;
+  std::string& answerId = currentAnswer.answerId;
+  currentAnswer.idAnswerPanel = "spanAnswerPanel" + answerId;
   this->numberOfAnswerIdsMathquilled ++;
-  currentA.idVerificationSpan = "verification" + answerId;
-  currentA.idSpanSolution = "solution" + answerId;
-  currentA.idMathEquationField = answerId + "MQSpanId";
-  currentA.idMQFieldLocation = answerId + "MQSpanIdLocation";
-  if (currentA.idMQButtonPanelLocation == "") {
-    currentA.idMQButtonPanelLocation = answerId + "MQbuttonPanel";
+  currentAnswer.idVerificationSpan = "verification" + answerId;
+  currentAnswer.idSpanSolution = "solution" + answerId;
+  currentAnswer.idMathEquationField = answerId + "MathSpanId";
+  if (currentAnswer.idMathButtonPanelLocation == "") {
+    currentAnswer.idMathButtonPanelLocation = answerId + "MathButtonPanel";
   }
   std::stringstream previewAnswerStream;
   previewAnswerStream
   << "previewAnswers('"
   << answerId
   << "', '"
-  << currentA.idVerificationSpan
+  << currentAnswer.idVerificationSpan
   << "');";
-  currentA.properties.clear();
+  currentAnswer.properties.clear();
   for (int i = 0; i < inputOutput.properties.size(); i ++) {
     if (inputOutput.properties.keys[i] == "id") {
       continue;
     }
-    currentA.properties.setKeyValue(
+    currentAnswer.properties.setKeyValue(
       inputOutput.properties.keys[i],
       inputOutput.properties.values[i]
     );
   }
-  currentA.javascriptPreviewAnswer = previewAnswerStream.str();
-  currentA.idButtonSubmit = "buttonSubmit" + answerId;
-  currentA.idButtonInterpret = "buttonInterpret" + answerId;
-  currentA.idButtonAnswer = "buttonAnswer" + answerId;
-  currentA.idButtonSolution = "buttonSolution" + answerId;
+  currentAnswer.javascriptPreviewAnswer = previewAnswerStream.str();
+  currentAnswer.idButtonSubmit = "buttonSubmit" + answerId;
+  currentAnswer.idButtonInterpret = "buttonInterpret" + answerId;
+  currentAnswer.idButtonAnswer = "buttonAnswer" + answerId;
+  currentAnswer.idButtonSolution = "buttonSolution" + answerId;
   std::stringstream verifyStream;
-  int totalCorrectSubmissions = currentA.numberOfCorrectSubmissions;
-  int totalSubmissions = currentA.numberOfSubmissions;
+  int totalCorrectSubmissions = currentAnswer.numberOfCorrectSubmissions;
+  int totalSubmissions = currentAnswer.numberOfSubmissions;
   if (
     global.requestType == "scoredQuiz" ||
     global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
     if (totalCorrectSubmissions > 0) {
       verifyStream
-      << "<b style =\"color:green\">Correctly answered: \\("
-      << currentA.firstCorrectAnswerClean
+      << "<b style='color:green'>Correctly answered: \\("
+      << currentAnswer.firstCorrectAnswerClean
       << "\\) </b> ";
       if (totalSubmissions > 0) {
         verifyStream
@@ -1886,7 +1888,7 @@ bool CalculatorHTML::computeAnswerRelatedStrings(
       verifyStream << totalSubmissions << " attempt(s) so far. ";
     }
   }
-  currentA.htmlSpanVerifyAnswer = verifyStream.str();
+  currentAnswer.htmlSpanVerifyAnswer = verifyStream.str();
   return true;
 }
 
@@ -1977,17 +1979,17 @@ std::string CalculatorHTML::getDeadlineNoInheritance(const std::string& id) {
   if (!this->currentUser.problemData.contains(id)) {
     return "";
   }
-  ProblemDataAdministrative& currentProb =
+  ProblemDataAdministrative& currentProblem =
   this->currentUser.problemData.getValueCreateNoInitialization((id)).adminData;
   if (
-    !currentProb.deadlinesPerSection.contains(
+    !currentProblem.deadlinesPerSection.contains(
       this->currentUser.sectionComputed
     )
   ) {
     return "";
   }
   return
-  currentProb.deadlinesPerSection.getValueCreateEmpty(
+  currentProblem.deadlinesPerSection.getValueCreateEmpty(
     this->currentUser.sectionComputed
   );
 }
@@ -2054,7 +2056,8 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
     out << "<span style='color:orange'>No deadline yet</span>";
     return out.str();
   }
-  TimeWrapper now, deadline;
+  TimeWrapper now;
+  TimeWrapper deadline;
   // <-needs a fix for different time formats.
   // <-For the time being, we hard-code it to month/day/year format (no time to
   // program it better).
@@ -2062,11 +2065,7 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
   if (!deadline.assignMonthDayYear(currentDeadline, badDateStream)) {
     out << "<span style='color:red'>" << badDateStream.str() << "</span>";
   }
-  //  out << "deadline.date: " << deadline.time.tm_mday;
   now.assignLocalTime();
-  //  out << "Now: " << asctime (&now.time) << " mktime: " << mktime(&now.time)
-  // << " deadline: " << asctime(&deadline.time) << " mktime: " <<
-  // mktime(&deadline.time);
   double secondsTillDeadline =
   deadline.subtractAnotherTimeFromMeInSeconds(now) + 7 * 3600;
   std::stringstream hoursTillDeadlineStream;
@@ -2085,7 +2084,7 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
   if (!deadlineHasPassed) {
     if (deadlineIsNear) {
       hoursTillDeadlineStream
-      << "<span style =\"color:red\">"
+      << "<span style='color:red'>"
       << TimeWrapper::toStringSecondsToDaysHoursSecondsString(
         secondsTillDeadline, false, true
       )
@@ -2515,10 +2514,7 @@ std::string CalculatorHTML::Parser::toStringParsingStack(
   for (
     int i = SyntacticElementHTML::parsingDummyElements; i < stack.size; i ++
   ) {
-    out
-    << "<span style ='color:"
-    << ((i % 2 == 0) ? "orange" : "blue")
-    << "'>";
+    out << "<span style='color:" << ((i % 2 == 0) ? "orange" : "blue") << "'>";
     std::string content = stack[i].toStringDebug();
     if (content.size() == 0) {
       content = "<b>empty</b>";
@@ -2679,7 +2675,9 @@ void CalculatorHTML::Parser::initBuiltInSpanClasses() {
     );
     this->calculatorClasses.addOnTop("calculatorHidden");
     this->calculatorClasses.addOnTop("calculatorCommentsBeforeInterpretation");
-    this->calculatorClasses.addOnTop("calculatorCommentsBeforeSubmission");
+    this->calculatorClasses.addOnTop(
+      SyntacticElementHTML::Tags::commentsBeforeSubmission
+    );
     this->calculatorClasses.addOnTop(
       SyntacticElementHTML::Tags::calculatorAnswer
     );
@@ -2734,7 +2732,7 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
   this->splittingChars.addOnTop('\t');
   this->splittingChars.addOnTop('\n');
   while (reader.get(currentChar)) {
-    if (splittingChars.contains(currentChar)) {
+    if (this->splittingChars.contains(currentChar)) {
       if (word != "") {
         elements.addOnTop(word);
       }
@@ -2753,7 +2751,8 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
   }
   this->initBuiltInSpanClasses();
   this->elementStack.setSize(0);
-  SyntacticElementHTML dummy, element;
+  SyntacticElementHTML dummy;
+  SyntacticElementHTML element;
   dummy.content = "";
   dummy.syntacticRole = SyntacticElementHTML::Tags::filler;
   element.syntacticRole = "command";
@@ -3448,26 +3447,26 @@ bool CalculatorHTML::prepareAnswerElements(std::stringstream& comments) {
       if (index == - 1) {
         continue;
       }
-      Answer& currentA = this->problemData.answers.values[index];
+      Answer& currentAnswer = this->problemData.answers.values[index];
       std::string tagClass = this->content[i].getTagClass();
       if (
         tagClass == "calculatorButtonSubmit" ||
         tagClass == "calculatorButtonInterpret" ||
         tagClass == "calculatorButtonGiveUp"
       ) {
-        currentA.flagAutoGenerateSubmitButtons = false;
+        currentAnswer.flagAutoGenerateSubmitButtons = false;
       }
       if (tagClass == "calculatorButtonSolution") {
-        currentA.flagAutoGenerateButtonSolution = false;
+        currentAnswer.flagAutoGenerateButtonSolution = false;
       }
       if (tagClass == "calculatorMQField") {
-        currentA.flagAutoGenerateMQfield = false;
+        currentAnswer.flagAutoGenerateMQfield = false;
       }
       if (tagClass == "calculatorMQButtonPanel") {
-        currentA.flagAutoGenerateMQButtonPanel = false;
+        currentAnswer.flagAutoGenerateMQButtonPanel = false;
       }
       if (tagClass == "calculatorAnswerVerification") {
-        currentA.flagAutoGenerateVerificationField = false;
+        currentAnswer.flagAutoGenerateVerificationField = false;
       }
     }
   }
@@ -3475,7 +3474,9 @@ bool CalculatorHTML::prepareAnswerElements(std::stringstream& comments) {
 }
 
 bool CalculatorHTML::extractOneAnswerId(
-  SyntacticElementHTML& input, std::stringstream* comments
+  SyntacticElementHTML& input,
+  HashedList<std::string>& answerIdsSoFar,
+  std::stringstream* comments
 ) {
   STACK_TRACE("CalculatorHTML::extractOneAnswerId");
   if (!input.isAnswer()) {
@@ -3497,6 +3498,7 @@ bool CalculatorHTML::extractOneAnswerId(
     newAnswer.answerId = currentId;
     this->problemData.answers.setKeyValue(currentId, newAnswer);
   }
+  answerIdsSoFar.addOnTopNoRepetition(currentId);
   Answer& current = this->problemData.answers.getValueCreateEmpty(currentId);
   if (current.flagAnswerVerificationFound) {
     if (comments != nullptr) {
@@ -3508,7 +3510,7 @@ bool CalculatorHTML::extractOneAnswerId(
     return false;
   }
   current.flagAnswerVerificationFound = true;
-  current.mathQuillPanelOptions = input.getKeyValue("buttons");
+  current.inputPanelOptions = input.getKeyValue("buttons");
   return true;
 }
 
@@ -3570,10 +3572,12 @@ bool CalculatorHTML::processSolutions(std::stringstream* comments) {
 }
 
 bool CalculatorHTML::extractAnswerIdsOnce(
-  SyntacticElementHTML& element, std::stringstream* comments
+  SyntacticElementHTML& element,
+  HashedList<std::string>& answerIdsSoFar,
+  std::stringstream* comments
 ) {
   STACK_TRACE("CalculatorHTML::extractAnswerIdsOnce");
-  if (!this->extractOneAnswerId(element, comments)) {
+  if (!this->extractOneAnswerId(element, answerIdsSoFar, comments)) {
     return false;
   }
   if (element.isAnswer()) {
@@ -3589,7 +3593,7 @@ bool CalculatorHTML::extractAnswerIdsOnce(
   }
   std::string nameOfTag = element.getAnswerIdOfOwner();
   if (nameOfTag == "") {
-    int numberOfIdsSoFar = this->problemData.answers.size();
+    int numberOfIdsSoFar = answerIdsSoFar.size;
     if (numberOfIdsSoFar == 0) {
       if (comments != nullptr) {
         *comments
@@ -3608,9 +3612,8 @@ bool CalculatorHTML::extractAnswerIdsOnce(
       }
       return false;
     }
-    element.setKeyValue(
-      "name", *this->problemData.answers.keys.lastObject()
-    );
+    std::string incomingName = *answerIdsSoFar.lastObject();
+    element.setKeyValue("name", incomingName);
     nameOfTag = element.getAnswerIdOfOwner();
   }
   if (nameOfTag == "") {
@@ -3626,13 +3629,16 @@ bool CalculatorHTML::extractAnswerIdsOnce(
 
 bool CalculatorHTML::extractAnswerIds(std::stringstream* comments) {
   STACK_TRACE("CalculatorHTML::extractAnswerIds");
-  // we shouldn't clear this->problemData.answers: it may contain
+  // We shouldn't clear this->problemData.answers: it may contain
   // outdated information loaded from the database. We don't want to loose that
   // info
   // (say we renamed an answerId but students have already stored answers using
   // the old answerId...).
+  HashedList<std::string> answerIds;
   for (int i = 0; i < this->content.size; i ++) {
-    if (!this->extractAnswerIdsOnce(this->content[i], comments)) {
+    if (
+      !this->extractAnswerIdsOnce(this->content[i], answerIds, comments)
+    ) {
       return false;
     }
   }
@@ -3817,9 +3823,9 @@ JSData CalculatorHTML::getEditorBoxesHTML() {
     currentAnswerJS[answerLabels::idEquationEditorElement] =
     currentAnswer.idMathEquationField;
     currentAnswerJS[answerLabels::idButtonContainer] =
-    currentAnswer.idMQButtonPanelLocation;
+    currentAnswer.idMathButtonPanelLocation;
     currentAnswerJS[answerLabels::mathQuillPanelOptions] =
-    currentAnswer.mathQuillPanelOptions;
+    currentAnswer.inputPanelOptions;
     currentAnswerJS[answerLabels::idPureLatex] = currentAnswer.answerId;
     currentAnswerJS[answerLabels::idButtonSubmit] =
     currentAnswer.idButtonSubmit;
@@ -4054,7 +4060,7 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
   outHeadPt2 << this->topicListJavascriptWithTag;
   this->interpretAnswerElements(comments);
   this->problemData.checkConsistency();
-  this->problemData.checkConsistencyMathQuillIds();
+  this->problemData.checkConsistencyMathIds();
   std::string tagClass;
   for (int i = 0; i < this->content.size; i ++) {
     if (this->content[i].shouldShow()) {
@@ -4115,8 +4121,6 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
     }
   }
   this->computeBodyDebugString();
-  std::stringstream navigationAndEditTagStream;
-  this->outputProblemNavigatioN = navigationAndEditTagStream.str();
   this->outputHtmlBodyNoTag = outBody.str();
   this->outputHtmlHeadNoTag = outHeadPt2.str();
   return true;
@@ -4241,7 +4245,7 @@ std::string CalculatorHTML::toStringProblemScoreFull(
       }
     }
   } else {
-    out << "<b style =\"color:brown\">No submissions.</b>";
+    out << "<b style='color:brown'>No submissions.</b>";
   }
   return out.str();
 }
@@ -4402,7 +4406,7 @@ void TopicElement::reset() {
   this->problemFileName = "";
   this->error = "";
   this->immediateChildren.setSize(0);
-  this->totalSubSectionsUnderME = 0;
+  this->totalSubSectionsUnderMe = 0;
   this->totalSubSectionsUnderMeIncludingEmptySubsections = 0;
   this->flagContainsProblemsNotInSubsection = false;
   this->flagHasLectureTag = true;
@@ -4993,24 +4997,24 @@ void TopicElementParser::computeTopicHierarchyPartTwo() {
       continue;
     }
     if (currentElement.type == TopicElement::types::topic) {
-      currentElement.totalSubSectionsUnderME = 0;
+      currentElement.totalSubSectionsUnderMe = 0;
       currentElement.totalSubSectionsUnderMeIncludingEmptySubsections = 0;
       currentElement.flagContainsProblemsNotInSubsection = false;
       continue;
     }
     currentElement.flagContainsProblemsNotInSubsection = false;
-    currentElement.totalSubSectionsUnderME = 0;
+    currentElement.totalSubSectionsUnderMe = 0;
     for (int j = 0; j < currentElement.immediateChildren.size; j ++) {
       TopicElement& currentChild =
       this->topics.values[currentElement.immediateChildren[j]];
       if (currentChild.type == TopicElement::types::topic) {
-        currentElement.totalSubSectionsUnderME ++;
+        currentElement.totalSubSectionsUnderMe ++;
         currentElement.totalSubSectionsUnderMeIncludingEmptySubsections ++;
       } else if (currentChild.problemFileName != "") {
         currentElement.flagContainsProblemsNotInSubsection = true;
       } else {
-        currentElement.totalSubSectionsUnderME +=
-        currentChild.totalSubSectionsUnderME;
+        currentElement.totalSubSectionsUnderMe +=
+        currentChild.totalSubSectionsUnderMe;
         currentElement.totalSubSectionsUnderMeIncludingEmptySubsections +=
         currentChild.totalSubSectionsUnderMeIncludingEmptySubsections;
       }
@@ -5150,8 +5154,6 @@ void CalculatorHTML::interpretJavascripts(SyntacticElementHTML& inputOutput) {
   std::string javascriptName =
   StringRoutines::stringTrimWhiteSpace(inputOutput.content);
 }
-
-int TopicElement::scoreButtonCounter = 0;
 
 bool CalculatorHTML::computeTopicListAndPointsEarned(
   std::stringstream& commentsOnFailure

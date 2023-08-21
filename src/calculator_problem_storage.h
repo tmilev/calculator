@@ -23,6 +23,7 @@ public:
     static std::string answerCalculatorHighlight;
     static std::string answerCalculatorHighlightStart;
     static std::string answerCalculatorHighlightEnd;
+    static std::string commentsBeforeSubmission;
   };
 
   int indexInOwner;
@@ -155,12 +156,11 @@ public:
   std::string htmlSpanVerifyAnswer;
   std::string htmlAnswerHighlight;
   // ////////////////////////////////////
-  std::string mathQuillPanelOptions;
+  std::string inputPanelOptions;
   // ////////////////////////////////////
   std::string idSpanSolution;
   std::string idMathEquationField;
-  std::string idMQFieldLocation;
-  std::string idMQButtonPanelLocation;
+  std::string idMathButtonPanelLocation;
   std::string currentAnswerURLed;
   std::string currentAnswerClean;
   std::string firstCorrectAnswerURLed;
@@ -230,7 +230,7 @@ public:
   );
   ProblemData();
   bool checkConsistency() const;
-  bool checkConsistencyMathQuillIds() const;
+  bool checkConsistencyMathIds() const;
   bool loadFromOldFormatDeprecated(
     const std::string& inputData, std::stringstream& commentsOnFailure
   );

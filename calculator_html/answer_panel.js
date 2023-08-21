@@ -11,8 +11,8 @@ const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 function writeHTML(
   /** @type {HtmlElement} */ element,
   /** @type {string} */ htmlContent,
-) { 
-  miscellaneous.writeHTML(element, htmlContent);  
+) {
+  miscellaneous.writeHTML(element, htmlContent);
 }
 
 class AnswerPanel {

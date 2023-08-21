@@ -3080,7 +3080,7 @@ public:
     bool loadTestStrings(std::stringstream* commentsOnFailure);
     bool writeTestStrings(std::stringstream* commentsOnFailure);
     bool processOneTest(JSData& input);
-    static bool all();
+    static bool all(bool updateABTestFile);
     static bool cacheWorks();
     static bool loopDetection();
     static bool loopDetectionCycle();
@@ -3090,7 +3090,9 @@ public:
     static bool parseQuotes(Calculator& ownerInitialized);
     static bool parseAllExamples(Calculator& ownerInitialized);
     static bool parseConsumeQuote(Calculator& ownerInitialized);
-    static bool builtInFunctionsABTest(Calculator& ownerInitialized);
+    static bool builtInFunctionsABTest(
+      Calculator& ownerInitialized, bool updateABTestFile
+    );
     static bool checkBuiltInInitializations(Calculator& ownerInitialized);
     void initialize();
     bool calculatorTestRun();

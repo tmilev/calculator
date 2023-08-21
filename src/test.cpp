@@ -3,7 +3,6 @@
 #include "database.h"
 #include "calculator_html_interpretation.h"
 #include "signals_infrastructure.h"
-#include "source_code_formatter.h"
 #include "calculator_inner_functions.h"
 #include "string_constants.h"
 
@@ -173,7 +172,7 @@ void Test::run() {
       }
     }
     Calculator::Examples::Test::all();
-    Calculator::Test::all();
+    Calculator::Test::all(Test::flagUpdateABTests);
   }
   if (this->shouldTest(Test::Suites::problems)) {
     CalculatorHTML::Test::all();

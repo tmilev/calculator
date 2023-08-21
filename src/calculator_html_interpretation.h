@@ -131,7 +131,7 @@ public:
   List<int> parentTopics;
   List<int> immediateChildren;
   int indexInParent;
-  int totalSubSectionsUnderME;
+  int totalSubSectionsUnderMe;
   int totalSubSectionsUnderMeIncludingEmptySubsections;
   std::string id;
   // <- For problems the id is the problem file name. For all other topic
@@ -246,7 +246,7 @@ public:
   List<List<std::string> > timeIntermediateComments;
   UserCalculator currentUser;
   static std::string stringScoredQuizzes;
-  static std::string stringPracticE;
+  static std::string stringPractice;
   static std::string stringProblemLink;
   List<std::string> slidesSourcesHeaders;
   List<std::string> sourcesHomeworkHeaders;
@@ -270,7 +270,6 @@ public:
 
   std::string outputHtmlBodyNoTag;
   std::string outputHtmlHeadNoTag;
-  std::string outputProblemNavigatioN;
   std::string outputDeadlineString;
   std::string outputProblemLabel;
   std::string outputProblemTitle;
@@ -402,11 +401,15 @@ public:
     std::stringstream* comments
   );
   bool extractAnswerIdsOnce(
-    SyntacticElementHTML& element, std::stringstream* comments
+    SyntacticElementHTML& element,
+    HashedList<std::string>& answerIdsSoFar,
+    std::stringstream* comments
   );
   bool extractAnswerIds(std::stringstream* comments);
   bool extractOneAnswerId(
-    SyntacticElementHTML& input, std::stringstream* comments
+    SyntacticElementHTML& input,
+    HashedList<std::string>& answerIdsSoFar,
+    std::stringstream* comments
   );
   bool interpretHtml(std::stringstream* comments);
   bool interpretHtmlOneAttempt(

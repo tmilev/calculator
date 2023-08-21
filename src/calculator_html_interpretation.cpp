@@ -106,7 +106,8 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
-  std::stringstream answerCommands, answerCommandsNoEnclosures;
+  std::stringstream answerCommands;
+  std::stringstream answerCommandsNoEnclosures;
   answerCommands
   << Calculator::Functions::Names::commandEnclosure
   << "{}("
@@ -119,7 +120,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   interpreter.evaluate(answerCommands.str());
   if (interpreter.parser.syntaxErrors != "") {
     out
-    << "<b style = 'color:red'>Failed to compose the solution. "
+    << "<b style='color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
     << "<br>"
     << CalculatorHTML::bugsGenericMessage
@@ -132,7 +133,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   }
   if (interpreter.flagAbortComputationASAP) {
     out
-    << "<b style = 'color:red'>Failed to compose the solution. "
+    << "<b style='color:red'>Failed to compose the solution. "
     << "Likely there is a bug with the problem. </b>"
     << "<br>"
     << CalculatorHTML::bugsGenericMessage
@@ -194,9 +195,9 @@ std::string WebAPIResponse::setProblemWeight() {
   if (
     problem.mergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)
   ) {
-    out << "<b style = 'color:green'>Modified.</b>";
+    out << "<b style='color:green'>Modified.</b>";
   } else {
-    out << "<b style = 'color:red'>" << commentsOnFailure.str() << "</b>";
+    out << "<b style='color:red'>" << commentsOnFailure.str() << "</b>";
   }
   return out.str();
 }
@@ -221,10 +222,10 @@ std::string WebAPIResponse::setProblemDeadline() {
     )
   ) {
     out
-    << "<b style ='color:green'>Modified. </b>"
+    << "<b style='color:green'>Modified. </b>"
     << global.comments.getCurrentReset();
   } else {
-    out << "<b style ='color:red'>" << commentsOnFailure.str() << "</b>";
+    out << "<b style='color:red'>" << commentsOnFailure.str() << "</b>";
   }
   return out.str();
 }
@@ -279,23 +280,31 @@ std::string WebAPIResponse::getCommentsInterpretation(
   if (indexShift >= interpreterWithAdvice.programExpression.size()) {
     return "";
   }
-  const Expression& currentE =
+  const Expression& currentExpression =
   interpreterWithAdvice.programExpression[indexShift][1];
   bool resultIsPlot = false;
-  if (!currentE.startsWith(interpreterWithAdvice.opCommandSequence())) {
+  if (
+    !currentExpression.startsWith(
+      interpreterWithAdvice.opCommandSequence()
+    )
+  ) {
     out
-    << WebAPIResponse::getSanitizedComment(currentE, format, resultIsPlot);
+    << WebAPIResponse::getSanitizedComment(
+      currentExpression, format, resultIsPlot
+    );
     return out.str();
   }
-  std::string currentS;
-  for (int i = 1; i < currentE.size(); i ++) {
-    currentS =
-    WebAPIResponse::getSanitizedComment(currentE[i], format, resultIsPlot);
-    if (StringRoutines::stringTrimWhiteSpace(currentS) == "") {
+  std::string currentString;
+  for (int i = 1; i < currentExpression.size(); i ++) {
+    currentString =
+    WebAPIResponse::getSanitizedComment(
+      currentExpression[i], format, resultIsPlot
+    );
+    if (StringRoutines::stringTrimWhiteSpace(currentString) == "") {
       continue;
     }
-    out << currentS;
-    if (i != currentE.size() - 1 && !resultIsPlot) {
+    out << currentString;
+    if (i != currentExpression.size() - 1 && !resultIsPlot) {
       out << "<br>";
     }
   }
@@ -339,7 +348,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   << "\\)"
   << "\n<br>\n";
   CalculatorHTML problem;
-  std::stringstream errorStream, comments;
+  std::stringstream errorStream;
+  std::stringstream comments;
   problem.loadCurrentProblemItem(
     global.userRequestRequiresLoadingRealExamData(),
     global.getWebInput(WebAPI::Problem::randomSeed),
@@ -411,19 +421,20 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   FormatExpressions format;
   format.flagUseLatex = true;
   format.flagUsePmatrix = true;
-  const Expression& studentAnswerNoContextE =
+  const Expression& studentAnswerNoContextExpression =
   interpreter.programExpression[interpreter.programExpression.size() - 1];
   out << "<b style='color:magenta'>Interpreting as:</b><br>";
   out
   << "\\(\\displaystyle "
-  << studentAnswerNoContextE.toString(&format)
+  << studentAnswerNoContextExpression.toString(&format)
   << "\\)";
   Calculator interpreterWithAdvice;
   interpreterWithAdvice.flagUseLnInsteadOfLog = true;
   interpreterWithAdvice.initialize(Calculator::Mode::educational);
   interpreterWithAdvice.flagWriteLatexPlots = false;
   interpreterWithAdvice.flagPlotNoControls = true;
-  std::stringstream calculatorInputStream, calculatorInputStreamNoEnclosures;
+  std::stringstream calculatorInputStream;
+  std::stringstream calculatorInputStreamNoEnclosures;
   calculatorInputStream
   << Calculator::Functions::Names::commandEnclosure
   << "{}("
@@ -665,7 +676,8 @@ void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
 bool BuilderApplication::fileNameAllowedToBeMissing(
   const std::string& input
 ) {
-  // External dependency. The calculator must be capable of running without it.
+  // External dependency.
+  // The calculator must be capable of running without it.
   if (input == "/calculator_html/external/build/output-min.js") {
     return true;
   }
@@ -973,8 +985,8 @@ bool CourseList::load() {
     )
   ) {
     commentsOnFailure
-    <<
-    "Failed to fetch available courses from /coursesavailable/default.txt. ";
+    << "Failed to fetch available courses "
+    << "from /coursesavailable/default.txt. ";
     this->errorMessage = commentsOnFailure.str();
     return false;
   }
@@ -1833,7 +1845,9 @@ void AnswerCheckerNoProblem::computeVerificationString() {
     FormatExpressions format;
     out
     << "<tr><td>"
-    << WebAPIResponse::getCommentsInterpretation(interpreter, 3, format)
+    << WebAPIResponse::getCommentsInterpretation(
+      this->interpreter, 3, format
+    )
     << "</td></tr>\n";
   }
   out << "<tr><td>Your answer was: ";
@@ -2353,27 +2367,32 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   format.flagUseLatex = true;
   format.flagUsePmatrix = true;
   bool isFirst = true;
-  const Expression& currentE =
+  const Expression& currentExpression =
   interpreter.programExpression[interpreter.programExpression.size() - 1][1];
-  if (!currentE.startsWith(interpreter.opCommandSequence())) {
-    out << "\\(\\displaystyle " << currentE.toString(&format) << "\\)";
+  if (!currentExpression.startsWith(interpreter.opCommandSequence())) {
+    out
+    << "\\(\\displaystyle "
+    << currentExpression.toString(&format)
+    << "\\)";
     if (outputNakedAnswer != nullptr) {
-      *outputNakedAnswer = currentE.toString(&format);
+      *outputNakedAnswer = currentExpression.toString(&format);
     }
     result[WebAPI::Problem::answerGenerationSuccess] = "true";
     if (answerGenerationSuccess != nullptr) {
       *answerGenerationSuccess = true;
     }
   } else {
-    for (int j = 1; j < currentE.size(); j ++) {
+    for (int j = 1; j < currentExpression.size(); j ++) {
       if (
-        currentE[j].startsWith(interpreter.opRulesOff()) ||
-        currentE[j].startsWith(interpreter.opRulesOn())
+        currentExpression[j].startsWith(interpreter.opRulesOff()) ||
+        currentExpression[j].startsWith(interpreter.opRulesOn())
       ) {
         continue;
       }
       std::string stringAnswer;
-      if (currentE[j].isOfType<std::string>(&stringAnswer)) {
+      if (
+        currentExpression[j].isOfType<std::string>(&stringAnswer)
+      ) {
         if (
           StringRoutines::stringBeginsWith(
             stringAnswer, "Approximations have been"
@@ -2389,14 +2408,17 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       format.flagIncludeExtraHtmlDescriptionsInPlots = false;
       format.flagUseQuotes = false;
       format.flagUseLatex = true;
-      if (currentE[j].isOfType<std::string>()) {
-        out << currentE[j].getValue<std::string>();
+      if (currentExpression[j].isOfType<std::string>()) {
+        out << currentExpression[j].getValue<std::string>();
       } else {
-        out << "\\(\\displaystyle " << currentE[j].toString(&format) << "\\)";
+        out
+        << "\\(\\displaystyle "
+        << currentExpression[j].toString(&format)
+        << "\\)";
       }
       if (isFirst) {
         if (outputNakedAnswer != nullptr) {
-          *outputNakedAnswer = currentE[j].toString(&format);
+          *outputNakedAnswer = currentExpression[j].toString(&format);
         }
         result[WebAPI::Problem::answerGenerationSuccess] = "true";
         if (answerGenerationSuccess != nullptr) {
@@ -3183,7 +3205,7 @@ std::string WebAPIResponse::toStringUserScores() {
     currentElement.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan =\"" << numberOfColumns << "\"";
     if (
-      currentElement.totalSubSectionsUnderME == 0 &&
+      currentElement.totalSubSectionsUnderMe == 0 &&
       currentElement.flagContainsProblemsNotInSubsection
     ) {
       out << " rowspan =\"3\"";
@@ -3204,7 +3226,7 @@ std::string WebAPIResponse::toStringUserScores() {
     currentElement.totalSubSectionsUnderMeIncludingEmptySubsections;
     out << "<td colspan =\"" << numberOfColumns << "\"";
     if (
-      currentElement.totalSubSectionsUnderME == 0 &&
+      currentElement.totalSubSectionsUnderMe == 0 &&
       currentElement.flagContainsProblemsNotInSubsection
     ) {
       out << " rowspan =\"2\"";

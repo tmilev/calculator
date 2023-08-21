@@ -1,7 +1,7 @@
 #include "calculator_interface.h"
 #include "string_constants.h"
 
-bool Calculator::Test::all() {
+bool Calculator::Test::all(bool updateABTestFile) {
   Calculator tester;
   tester.initialize(Calculator::Mode::full);
   Calculator::Test::parseConsumeQuote(tester);
@@ -12,7 +12,7 @@ bool Calculator::Test::all() {
   Calculator::Test::parseAllExamples(tester);
   Calculator::Test::numberOfTestFunctions(tester);
   Calculator::Test::parseDecimal(tester);
-  Calculator::Test::builtInFunctionsABTest(tester);
+  Calculator::Test::builtInFunctionsABTest(tester, updateABTestFile);
   return true;
 }
 
@@ -223,11 +223,13 @@ Calculator::Test::OneTest::OneTest() {
   this->requresAdminAccess = false;
 }
 
-bool Calculator::Test::builtInFunctionsABTest(Calculator& ownerInitialized) {
+bool Calculator::Test::builtInFunctionsABTest(
+  Calculator& ownerInitialized, bool updateABTestFile
+) {
   Calculator::Test test(ownerInitialized);
   test.initialize();
   global.userInputStringIfAvailable = "";
-  if (!test.calculatorTestRun()) {
+  if (!test.calculatorTestRun() && !updateABTestFile) {
     std::stringstream crashFileWriteReport;
     std::stringstream crashFile;
     crashFile

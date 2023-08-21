@@ -67,8 +67,8 @@ bool ProblemData::checkConsistency() const {
   return true;
 }
 
-bool ProblemData::checkConsistencyMathQuillIds() const {
-  STACK_TRACE("ProblemData::checkConsistencyMathQuillIds");
+bool ProblemData::checkConsistencyMathIds() const {
+  STACK_TRACE("ProblemData::checkConsistencyMathIds");
   for (int i = 0; i < this->answers.size(); i ++) {
     if (
       StringRoutines::stringTrimWhiteSpace(
@@ -78,7 +78,8 @@ bool ProblemData::checkConsistencyMathQuillIds() const {
     ) {
       std::stringstream errorStream;
       errorStream
-      << "This is not supposed to happen: empty idMQField. The answer id is: "
+      << "This is not supposed to happen: "
+      << "empty idMathEquationField. The answer id is: "
       << this->answers.values[i].answerId
       << "<br>"
       << this->toString()

@@ -77,7 +77,6 @@ public:
   bool processTemplateJSON();
   bool processLoginUserInfo(const std::string& comments);
   bool processSelectCourseJSON();
-  bool processExamPageInterpreter();
   bool processLogout();
   bool processSignUp();
   bool processForgotLogin();

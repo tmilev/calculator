@@ -457,8 +457,6 @@ public:
   std::string toStringDrawWeightsHelper(
     int indexModule, const Vector<Rational>& weight
   ) const;
-  // std::string ToStringDrawWeightsVersion2(FormatExpressions* format =
-  // nullptr) const;
   bool operator>(const CandidateSemisimpleSubalgebra& other) const;
 };
 

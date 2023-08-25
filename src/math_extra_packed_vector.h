@@ -29,11 +29,7 @@ public:
   static unsigned int hashFunction(const PackedVector<scalar>& in);
 };
 
-// In particular, scalar likes to be int
-// Note by Todor: we have to think of a technical way to merge your code with
-// WeylGroup.
-// I think adding a templateVector like you did should be straightforward.
-// For the time being I will not proceed with a merge.
+// In particular, scalar likes to be int.
 template <typename scalar, typename templateVector>
 class AnotherWeylGroup {
   // compat WeylGroup
@@ -113,11 +109,11 @@ void AnotherWeylGroup<scalar, templateVector>::simpleReflection(
   for (int j = 0; j < this->rank; j ++) {
     x += this->unrationalCartanSymmetric.elements[i][j] * v[j];
   }
-  // so, under ordinary circumstances, this is just out[i] -= x;
+  // So, under ordinary circumstances, this is just out[i] -= x;
   // silent corruption occurs if UnrationalCartanSymmetric.elements[i][i] does
   // not belong to {1, 2}
   // and scalar can't deal with division properly
-  // fortunately this only happens in G_2
+  // fortunately this only happens in G_2.
   v[i] -= x * 2 / unrationalCartanSymmetric.elements[i][i];
 }
 

@@ -5617,8 +5617,6 @@ void WebWorker::queueBytesForSendingNoHeader(
   STACK_TRACE("WebWorker::queueBytesForSendingNoHeader");
   (void) mustSendAll;
   this->remainingBytesToSend.addListOnTop(bytesToSend);
-  //  if (this->remainingBytesToSend.size >= 1024 * 512 || mustSendAll)
-  //    this->SendAllBytes();
 }
 
 bool WebWorker::writeToBody(const std::string& stringToSend) {

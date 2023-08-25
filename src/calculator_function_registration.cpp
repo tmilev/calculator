@@ -904,6 +904,7 @@ void Calculator::initializeFunctionsStandard() {
     "in one variable to fourier fraction form. ",
     "A = cos(2x)/(cos^3 x - sin^3 x);\n"
     "FourierFractionForm A;\n"
+    "FourierFractionForm( (1+tan(theta))/(1-tan(theta))- tan (2theta)- sec(2theta))"
     "",
     "CalculatorFunctionsTrigonometry::fourierFractionForm",
     "FourierFractionForm",

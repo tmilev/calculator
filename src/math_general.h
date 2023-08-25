@@ -2850,6 +2850,7 @@ public:
     this->checkNumberOfCoefficientsConsistency();
   }
   // Returns the number by which the linear combination was multiplied.
+  // Returns zero if the input is zero.
   Coefficient scaleNormalizeLeadingMonomial(
     const typename List<TemplateMonomial>::Comparator* monomialOrder
   ) {

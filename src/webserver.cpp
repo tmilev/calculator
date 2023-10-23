@@ -4721,7 +4721,7 @@ std::string MainFlags::server = "server";
 std::string MainFlags::format = "format";
 std::string MainFlags::daemon = "daemon";
 std::string MainFlags::help = "help";
-std::string MainFlags::pathExecutable = "path_executable";
+std::string MainFlags::basePath = "base_path";
 std::string MainFlags::configurationFile = "configuration_file";
 std::string MainFlags::test = "test";
 std::string MainFlags::loadDatabase = "load_database";
@@ -4733,7 +4733,7 @@ public:
   bool setFormat();
   bool setServer();
   bool setTest();
-  bool setPathExecutable();
+  bool setBasePath();
   bool setConfigurationFile();
   bool setLoadDatabase();
   bool processCommandLineConfigurations(std::string& input);
@@ -4768,7 +4768,7 @@ bool ArgumentAnalyzer::setTest() {
   return true;
 }
 
-bool ArgumentAnalyzer::setPathExecutable() {
+bool ArgumentAnalyzer::setBasePath() {
   if (this->currentIndex + 1 >= global.programArguments.size) {
     global
     << Logger::red
@@ -4777,7 +4777,7 @@ bool ArgumentAnalyzer::setPathExecutable() {
     return false;
   }
   this->currentIndex ++;
-  global.pathExecutableUserInputOrDeduced =
+  global.pathBaseUserInputOrDeduced =
   global.programArguments[this->currentIndex];
   return true;
 }
@@ -4842,8 +4842,8 @@ bool ArgumentAnalyzer::processOneArgument() {
   if (current == MainFlags::test) {
     return this->setTest();
   }
-  if (current == MainFlags::pathExecutable) {
-    return this->setPathExecutable();
+  if (current == MainFlags::basePath) {
+    return this->setBasePath();
   }
   if (current == MainFlags::configurationFile) {
     return this->setConfigurationFile();
@@ -4865,8 +4865,9 @@ void WebServer::analyzeMainArguments(int argC, char** argv) {
   if (argC == 0) {
     return;
   }
-  global.pathExecutableUserInputOrDeduced = global.programArguments[0];
+  global.pathBaseUserInputOrDeduced = global.programArguments[0];
   if (argC < 2) {
+    global.runMode = GlobalVariables::RunMode::builtInWebServer;
     return;
   }
   ArgumentAnalyzer arguments;
@@ -4876,7 +4877,6 @@ void WebServer::analyzeMainArguments(int argC, char** argv) {
         Configuration::portHTTP,
         Configuration::portHTTPSOpenSSL,
         Configuration::serverAutoMonitor,
-
       }
     )
   );
@@ -5088,7 +5088,6 @@ void WebServer::initializeMainFoldersInstructorSpecific() {
       Configuration::courseTemplates,
       Configuration::coursesAvailable,
       Configuration::problemsFolder,
-
     }
   );
   for (int i = 0; i < incoming.size; i ++) {

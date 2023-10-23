@@ -22,7 +22,8 @@ bool JSData::Test::recode() {
   toRecode.addOnTop(List<std::string>({"[1, \"\"]", "[1,\"\"]"}));
   toRecode.addOnTop(
     List<std::string>({
-        "{\"a\":\"b\", \"c\": [\"d\",5]}", "{\"a\":\"b\",\"c\":[\"d\",5]}"
+        "{\"a\":\"b\", \"c\": [\"d\",5]}",
+        "{\"a\":\"b\",\"c\":[\"d\",5]}"
       }
     )
   );

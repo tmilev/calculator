@@ -889,6 +889,10 @@ void Logger::flush() {
   logFile.clear();
 }
 
+std::string Logger::consolePurple() {
+  return "\x1b[1;35m";
+}
+
 std::string Logger::consoleBlue() {
   return "\x1b[1;34m";
 }

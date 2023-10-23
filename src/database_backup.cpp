@@ -6,7 +6,7 @@
 #include "calculator_problem_storage.h"
 #include "web_api.h"
 
-bool DatabaseLoader::writeBackup() {
+bool DatabaseLoader::writeBackup(std::string& outputLoadDatabaseCommand) {
   STACK_TRACE("DatabaseLoader::writeBackup");
   std::stringstream comments;
   Database::name = "local";
@@ -16,6 +16,10 @@ bool DatabaseLoader::writeBackup() {
   "database_backups/automated_backups/" +
   global.getDateForLogFiles() +
   "/local.json";
+  std::string jsonPhysicalFilename;
+  FileOperations::getPhysicalFileNameFromVirtual(
+    jsonName, jsonPhysicalFilename, true, true, nullptr
+  );
   std::string content = database.toJSONDatabase().toString();
   if (
     !FileOperations::
@@ -26,29 +30,30 @@ bool DatabaseLoader::writeBackup() {
     global << "Failed to write database: " << jsonName << Logger::endL;
     return false;
   }
-  global
-  << Logger::green
-  << "Backed up your current database in: "
-  << Logger::purple
-  << jsonName
-  << Logger::endL;
+  outputLoadDatabaseCommand =
+  "./calculator load_database " + jsonPhysicalFilename;
+  global << "Backed up your current database in: " << jsonName << Logger::endL;
   return true;
 }
 
 bool DatabaseLoader::loadDatabase(
-  const std::string& databaseName, std::stringstream& comments
+  const std::string& databaseName,
+  bool usePhysicalFilename,
+  std::stringstream& comments
 ) {
   DatabaseLoader loader;
-  return loader.doLoadDatabase(databaseName, comments);
+  return loader.doLoadDatabase(databaseName, usePhysicalFilename, comments);
 }
 
 bool DatabaseLoader::doLoadDatabase(
-  const std::string& databaseName, std::stringstream& comments
+  const std::string& databaseName,
+  bool usePhysicalFilename,
+  std::stringstream& comments
 ) {
   STACK_TRACE("DatabaseLoader::loadDatabase");
   this->fileName = databaseName;
   global << "Loading database from: " << this->fileName << Logger::endL;
-  if (!this->loadJSONFromHardDrive(comments)) {
+  if (!this->loadJSONFromHardDrive(comments, usePhysicalFilename)) {
     return false;
   }
   if (!this->correctDatabaseJSON(comments)) {
@@ -57,21 +62,28 @@ bool DatabaseLoader::doLoadDatabase(
   return this->loadFromJSON(this->databaseJSON, comments);
 }
 
-bool DatabaseLoader::loadJSONFromHardDrive(std::stringstream& comments) {
-  // TODO(tmilev): this snippet is deprecated. Delete soon.
-  // if (!StringRoutines::stringEndsWith(this->fileName, ".json")) {
-  // MongoDatabaseDumpToJSONConverter converter;
-  // return converter.load(this->fileName, databaseJSON, comments);
-  // }
+bool DatabaseLoader::loadJSONFromHardDrive(
+  std::stringstream& comments, bool usePhysicalFileName
+) {
   std::string jsonString;
   int64_t startingTime = global.getElapsedMilliseconds();
-  if (
-    !FileOperations::
-    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-      this->fileName, jsonString, true, true, &comments
-    )
-  ) {
-    return false;
+  if (usePhysicalFileName) {
+    if (
+      !FileOperations::loadFileToStringUnsecure(
+        this->fileName, jsonString, &comments
+      )
+    ) {
+      return false;
+    }
+  } else {
+    if (
+      !FileOperations::
+      loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
+        this->fileName, jsonString, true, true, &comments
+      )
+    ) {
+      return false;
+    }
   }
   bool result = databaseJSON.parse(jsonString, true, &comments);
   int64_t elapsed = global.getElapsedMilliseconds() - startingTime;
@@ -239,122 +251,5 @@ bool DatabaseLoader::correctUser(
     inputOutput["problemDataJSON"][probNameNoWhiteSpace] = reader.storeJSON();
   }
   inputOutput.objects.removeKey("problemData");
-  return true;
-}
-
-bool MongoDatabaseDumpToJSONConverter::load(
-  const std::string& folderNameFromUser,
-  JSData& output,
-  std::stringstream& commentsOnFailure
-) {
-  STACK_TRACE("MongoDatabaseDumpToJSONConverter::load");
-  std::string folderName = folderNameFromUser;
-  if (!StringRoutines::stringEndsWith(folderName, "/")) {
-    folderName += "/";
-  }
-  FileOperations::getFolderFileNamesVirtual(
-    folderName,
-    this->collectionFileNames,
-    nullptr,
-    true,
-    true,
-    &commentsOnFailure
-  );
-  for (int i = 0; i < this->collectionFileNames.size; i ++) {
-    if (
-      this->collectionFileNames[i] == ".." ||
-      this->collectionFileNames[i] == "."
-    ) {
-      this->collectionFileNames.removeIndexShiftDown(i);
-      i --;
-    }
-  }
-  global << "Found collections: " << this->collectionFileNames << Logger::endL;
-  output.reset();
-  for (const std::string& collectionFileName : this->collectionFileNames) {
-    JSData currentCollection;
-    std::string fileName = folderName + collectionFileName;
-    if (
-      !this->loadOneCollection(
-        fileName, currentCollection, commentsOnFailure
-      )
-    ) {
-      return false;
-    }
-    List<std::string> split;
-    StringRoutines::splitExcludeDelimiter(collectionFileName, '.', split);
-    std::string collectionName = split[0];
-    output[collectionName] = currentCollection;
-  }
-  return true;
-}
-
-bool MongoDatabaseDumpToJSONConverter::loadOneCollection(
-  const std::string& collectionFileName,
-  JSData& output,
-  std::stringstream& comments
-) {
-  STACK_TRACE("MongoDatabaseDumpToJSONConverter::loadOneCollection");
-  List<std::string> split;
-  StringRoutines::splitExcludeDelimiter(collectionFileName, '.', split);
-  std::string collectionName = split[0];
-  std::string contentString;
-  if (
-    !FileOperations::
-    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-      collectionFileName, contentString, true, true, &comments
-    )
-  ) {
-    return false;
-  }
-  int64_t startingTime = global.getElapsedMilliseconds();
-  bool result =
-  this->collectionFromFileContent(contentString, output, comments);
-  int64_t elapsed = global.getElapsedMilliseconds() - startingTime;
-  int64_t speed = contentString.size();
-  global
-  << "Parsed json of size: "
-  << Logger::blue
-  << contentString.size()
-  << " bytes"
-  << Logger::normalColor
-  << " in "
-  << Logger::purple
-  << elapsed
-  << Logger::normalColor
-  << " milliseconds. "
-  << Logger::endL;
-  if (elapsed != 0) {
-    speed /= elapsed;
-    global
-    << "Speed: "
-    << Logger::red
-    << "~"
-    << speed
-    << " bytes/ms. "
-    << Logger::endL;
-  }
-  return result;
-}
-
-bool MongoDatabaseDumpToJSONConverter::collectionFromFileContent(
-  const std::string& input,
-  JSData& output,
-  std::stringstream& comments
-) {
-  STACK_TRACE(
-    "MongoDatabaseDumpToJSONConverter::collectionJSONFromFileContent"
-  );
-  output.makeEmptyArray();
-  List<std::string> recordStrings;
-  StringRoutines::splitExcludeDelimiter(input, '\n', recordStrings);
-  for (const std::string& recordString : recordStrings) {
-    JSData record;
-    if (!record.parse(recordString, true, &comments)) {
-      comments << "Failed to parse json. ";
-      return false;
-    }
-    output.listObjects.addOnTop(record);
-  }
   return true;
 }

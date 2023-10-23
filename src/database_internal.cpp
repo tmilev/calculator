@@ -1324,7 +1324,8 @@ void DatabaseInternalServer::ensureStandardCollectionIndices() {
   this->ensureCollection(
     DatabaseStrings::tableDeadlines,
     List<std::string>({
-        DatabaseStrings::labelId, DatabaseStrings::labelDeadlinesSchema
+        DatabaseStrings::labelId,
+        DatabaseStrings::labelDeadlinesSchema
       }
     )
   );

@@ -1,6 +1,6 @@
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
-#include "source_code_formatter.h" 
+#include "source_code_formatter.h"
 #include "general_strings.h"
 #include "web_api.h"
 #include "math_basics.h"
@@ -1112,14 +1112,19 @@ bool CodeFormatter::Element::computeIndentationCurlyBraceCommaDelimitedList() {
   this->children[0].computeIndentation();
   this->children[0].newLinesAfter = 1;
   int indentationChildren = this->indentationLevel + this->owner->tabLength;
-  for (int i = 1; i < this->children.size - 1; i ++) {
-    this->children[i].indentationLevel = indentationChildren;
-    this->children[i].computeIndentation();
-    if (
-      this->children[i].content == "," || i == this->children.size - 2
-    ) {
-      this->children[i].newLinesAfter = 1;
+  CodeFormatter::Element& list = this->children[1];
+  list.indentationLevel = indentationChildren;
+  list.computeIndentation();
+  for (int i = 0; i < list.children.size; i ++) {
+    CodeFormatter::Element& child = list.children[i];
+    if (child.content == ",") {
+      child.rightMostAtomUnderMe()->newLinesAfter = 1;
     }
+  }
+  list.indentationLevel = indentationChildren;
+  list.computeIndentation();
+  if (list.children.size > 0) {
+    list.children.lastObject()->rightMostAtomUnderMe()->newLinesAfter = 1;
   }
   this->children.lastObject()->indentationLevel = this->indentationLevel;
   this->children.lastObject()->computeIndentation();
@@ -2010,12 +2015,25 @@ CodeFormatter::CodeFormatter() {
     List<std::string>({"*", "&"})
   );
   List<std::string> relations = List<std::string>({
-      "=", "==", ">=", ">", "<=", "!=", "*=", "+=", "-=", "/=", "^="
+      "=",
+      "==",
+      ">=",
+      ">",
+      "<=",
+      "!=",
+      "*=",
+      "+=",
+      "-=",
+      "/=",
+      "^="
     }
   );
   List<std::string> andAndOr = List<std::string>({"&&", "||"});
   List<std::string> arithmeticOperations = List<std::string>({
-      "+", "-", "/", "*"
+      "+",
+      "-",
+      "/",
+      "*"
     }
   );
   List<std::string> bitShift = List<std::string>({"<<", ">>"});
@@ -2173,7 +2191,13 @@ CodeFormatter::CodeFormatter() {
   );
   this->typeKeyWords.addListOnTop(
     List<std::string>({
-        "bool", "void", "char", "signed", "unsigned", "int", "long"
+        "bool",
+        "void",
+        "char",
+        "signed",
+        "unsigned",
+        "int",
+        "long"
       }
     )
   );

@@ -453,11 +453,11 @@ void GlobalVariables::initFoldersProjectBase(
 }
 
 void GlobalVariables::initDefaultFolderAndFileNames() {
-  this->initFoldersProjectBase(global.pathExecutableUserInputOrDeduced);
+  this->initFoldersProjectBase(global.pathBaseUserInputOrDeduced);
   this->physicalNameFolderExecutable = this->physicalPathProjectBase;
   this->physicalNameExecutableNoPath =
   FileOperations::getFileNameFromFileNameWithPath(
-    global.pathExecutableUserInputOrDeduced
+    global.pathBaseUserInputOrDeduced
   );
   this->physicalNameExecutableWithPath =
   this->physicalNameFolderExecutable + this->physicalNameExecutableNoPath;

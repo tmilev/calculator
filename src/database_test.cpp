@@ -56,7 +56,9 @@ bool Database::Test::loadFromJSON() {
   Database::name = Database::Test::testDatabaseName(global.databaseType);
   std::stringstream comments;
   bool mustBeTrue =
-  DatabaseLoader::loadDatabase("test/database/test_local.json", comments);
+  DatabaseLoader::loadDatabase(
+    "test/database/test_local.json", false, comments
+  );
   if (!mustBeTrue) {
     global.fatal
     << "Loading test database failed. "
@@ -66,7 +68,7 @@ bool Database::Test::loadFromJSON() {
   DatabaseInternalServer& server = Database::get().localDatabase.server;
   QueryExact query;
   query.nestedLabels.addOnTop(DatabaseStrings::labelId);
-  // The id from file test/database/test.json
+  // The id from file test/database/test_local.json
   query.exactValue = "d739b82f2492ed095fa15a52";
   query.collection = "users";
   List<std::string> objectIds;

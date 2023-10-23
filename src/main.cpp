@@ -112,53 +112,116 @@ int MainFunctions::mainWithoutExceptions(int argc, char** argv) {
 
 int MainFunctions::mainConsoleHelp() {
   STACK_TRACE("MainFunctions::mainConsoleHelp");
-  std::cout << "All flags are optional.\n";
-  std::cout << "Option 1. Run the calculator as a web server.\n";
+  std::string indent = "  ";
+  std::cout << "Run the calculator as a web server.\n";
   std::cout
+  << Logger::consoleGreen()
   << "calculator "
   << MainFlags::server
   << " [[max_seconds_per_computation]] "
   << MainFlags::configurationFile
   << " [[configuration_file_name]] "
-  << MainFlags::pathExecutable
+  << MainFlags::basePath
   << " [[custom_path_to_run_from]]"
-  << "\n";
-  std::cout << "Examples:\n";
-  std::cout << "run as server with defaults:\n";
-  std::cout << "./calculator\n";
-  std::cout << "run as server with custom computation timeout:\n";
-  std::cout << "./calculator server 200\n";
+  << "\n"
+  << Logger::consoleNormal();
+  std::cout << indent << "Examples.\n";
+  std::cout << indent << "Run as server with defaults:\n";
   std::cout
-  << "run as server with custom timeout, "
-  << "custom base path and custom configuration file:\n";
+  << indent
+  << Logger::consolePurple()
+  << "./calculator\n"
+  << Logger::consoleNormal();
   std::cout
+  << indent
+  << "Run as server with computation timeout of 200 seconds:\n";
+  std::cout
+  << indent
+  << Logger::consolePurple()
+  << "./calculator server 200\n"
+  << Logger::consoleNormal();
+  std::cout
+  << indent
+  << "Run as server with timeout of 50 seconds, "
+  << "custom base path and custom configuration file.\n"
+  << indent
+  << "By default, the base path is the location of the executable.\n"
+  << indent
+  <<
+  "All database backups and other server data is stored in a sub-folder of the base path.\n"
+  ;
+  std::cout
+  << indent
+  << Logger::consolePurple()
   << "./calculator "
   << MainFlags::server
   << " 50 "
   << MainFlags::configurationFile
   << " \"./configuration/configuration.json\" "
-  << MainFlags::pathExecutable
+  << MainFlags::basePath
   << " \"./\""
-  << "\n";
-  std::cout << "Option 2. Run the calculator test suite.\n";
-  std::cout << "calculator " << MainFlags::test << "\n";
+  << "\n"
+  << Logger::consoleNormal();
+  std::cout << "\nRun the calculator test suite.\n";
   std::cout
-  << "Option 3. Run the calculator in restart-when-rebuilt mode. "
-  << "Ideal for development.\n";
-  std::cout << "calculator " << MainFlags::daemon << "\n";
-  std::cout << "Option 4. Run the calculator's source code auto-formatter.\n";
-  std::cout << "calculator " << MainFlags::format << "\n";
+  << Logger::consoleGreen()
+  << "calculator "
+  << MainFlags::test
+  << "\n"
+  << Logger::consoleNormal();
+  std::cout << "\nRun the calculator in restart-when-rebuilt mode.\\n";
+  std::cout << indent << "Ideal for development.\n";
   std::cout
-  << "Option 5. Load a stored database from a folder.\n"
+  << Logger::consoleGreen()
+  << "calculator "
+  << MainFlags::daemon
+  << "\n"
+  << Logger::consoleNormal();
+  std::cout << "\nRun the calculator's source code auto-formatter.\n";
+  std::cout
+  << Logger::consoleGreen()
+  << "calculator "
+  << MainFlags::format
+  << "\n"
+  << Logger::consoleNormal();
+  std::cout
+  <<
+  "\nBackup the current database and load a different database from a folder.\n"
+  << indent
   << "Your current database will be backed "
   << "up before the new database is loaded.\n"
+  << indent
+  <<
+  "Leave [[folder_name]] empty to backup the current database without loading a new one.\n"
+  << indent
   << "All backups are written to folder database_backups/\n";
   std::cout
+  << Logger::consoleGreen()
   << "calculator "
   << MainFlags::loadDatabase
-  << " [[folder_name]]\n";
-  std::cout << "Option 6. Display this help message again.\n";
-  std::cout << "calculator " << MainFlags::help << "\n";
+  << " [[folder_name]]\n"
+  << Logger::consoleNormal();
+  std::cout
+  << indent
+  << "Examples.\n"
+  << indent
+  << "Store the current database to a json file without loading a new one.\n"
+  << indent
+  << Logger::consolePurple()
+  << "./calculator load_database\n"
+  << Logger::consoleNormal()
+  << indent
+  << "Load the test database.\n"
+  << indent
+  << Logger::consolePurple()
+  << "./calculator load_database ./test/database/test_local.json\n"
+  << Logger::consoleNormal();
+  std::cout << "\nDisplay this help message again.\n";
+  std::cout
+  << Logger::consoleGreen()
+  << "calculator "
+  << MainFlags::help
+  << "\n";
   return 0;
 }
 
@@ -235,7 +298,8 @@ int MainFunctions::mainFormat() {
 }
 
 int MainFunctions::mainLoadDatabase() {
-  if (!DatabaseLoader::writeBackup()) {
+  std::string backupReloadCommand;
+  if (!DatabaseLoader::writeBackup(backupReloadCommand)) {
     return - 1;
   }
   if (global.programArguments.size < 3) {
@@ -257,14 +321,23 @@ int MainFunctions::mainLoadDatabase() {
   << databaseName
   << Logger::endL;
   std::stringstream comments;
-  if (!DatabaseLoader::loadDatabase(databaseName, comments)) {
+  bool exitCode = 0;
+  if (!DatabaseLoader::loadDatabase(databaseName, true, comments)) {
     global
     << Logger::red
     << "Error loading database. "
     << Logger::endL
     << comments.str()
     << Logger::endL;
-    return - 1;
+    exitCode = - 1;
   }
-  return 0;
+  global
+  << Logger::green
+  << "To re-load back the database you just backed up "
+  << "and overwrote, use:"
+  << Logger::endL
+  << Logger::purple
+  << backupReloadCommand
+  << Logger::endL;
+  return exitCode;
 }

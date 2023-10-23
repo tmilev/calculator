@@ -272,7 +272,8 @@ QuerySet CalculatorHTML::toQuerySetDeadlines(
     }
     output.addNestedKeyValuePair(
       List<std::string>({
-          DatabaseStrings::labelDeadlines, currentProblemName,
+          DatabaseStrings::labelDeadlines,
+          currentProblemName,
         }
       ),
       currentProblemJSON
@@ -318,7 +319,8 @@ QuerySet CalculatorHTML::toQuerySetProblemWeights(
     currentWeight[DatabaseStrings::labelProblemWeight] = currentProblemJSON;
     output.addNestedKeyValuePair(
       List<std::string>({
-          DatabaseStrings::labelProblemWeight, currentProblemName
+          DatabaseStrings::labelProblemWeight,
+          currentProblemName
         }
       ),
       currentWeight

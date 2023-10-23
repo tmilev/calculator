@@ -8410,7 +8410,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     plot.pointsDouble.setSize(xCoordinates.size);
     for (int i = 0; i < xCoordinates.size; i ++) {
       plot.pointsDouble[i] = List<double>({
-          xCoordinates[i][1], yCoordinates[i][1]
+          xCoordinates[i][1],
+          yCoordinates[i][1]
         }
       );
     }

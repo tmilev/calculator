@@ -720,14 +720,29 @@ class DatabaseLoader {
 public:
   JSData databaseJSON;
   std::string fileName;
-  static bool writeBackup();
+  // Writes a database backup in a json file.
+  // When successful, will write the calculator command needed
+  // to load this backup into variable [outputLoadDatabaseCommand].
+  static bool writeBackup(std::string& outputLoadDatabaseCommand);
+  // Loads the database from a json file.
+  // - databaseName is the file name of the database.
+  // - usePhysicalFilename. If you set this to true,
+  //   we use the physical file name of your json as is.
+  //   If you set to false, we will prepend the server base folder.
   static bool loadDatabase(
-    const std::string& databaseName, std::stringstream& comments
+    const std::string& databaseName,
+    bool usePhysicalFilename,
+    std::stringstream& comments
   );
+  // Loads the database from
   bool doLoadDatabase(
-    const std::string& databaseName, std::stringstream& comments
+    const std::string& databaseName,
+    bool usePhysicalFilename,
+    std::stringstream& comments
   );
-  bool loadJSONFromHardDrive(std::stringstream& comments);
+  bool loadJSONFromHardDrive(
+    std::stringstream& comments, bool usePhysicalFileName
+  );
   // Used to correct database errors due to software updates.
   // When we updated from mysql -> mongoDB -> our own built in
   // database, we made changes in the schema. The following function
@@ -747,32 +762,6 @@ public:
   bool loadOneObject(
     DatabaseCollection& collection,
     JSData& input,
-    std::stringstream& comments
-  );
-};
-
-// A temporary class to convert a mongo database dump to a json.
-// May be deleted in the future once we're done with mongoDB.
-// TODO(tmilev): this class has served its purpose and is deprecated.
-// Delete soon.
-class MongoDatabaseDumpToJSONConverter {
-public:
-  List<std::string> collectionFileNames;
-  bool load(
-    const std::string& folderNameFromUser,
-    JSData& output,
-    std::stringstream& commentsOnFailure
-  );
-  bool loadOneCollection(
-    const std::string& collectionFileName,
-    JSData& output,
-    std::stringstream& comments
-  );
-  // Loads a collection from file content.
-  // Expects newline-separated json records.
-  bool collectionFromFileContent(
-    const std::string& input,
-    JSData& output,
     std::stringstream& comments
   );
 };

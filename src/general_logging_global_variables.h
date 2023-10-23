@@ -70,9 +70,9 @@ public:
   static std::string consoleBlue();
   static std::string consoleYellow();
   static std::string consoleGreen();
-  static std::string purpleConsole();
-  static std::string cyanConsole();
-  static std::string orangeConsole();
+  static std::string consolePurple();
+  static std::string consoleCyan();
+  static std::string consoleOrange();
   static std::string consoleNormal();
   std::string getStamp();
   std::string getStampShort();
@@ -429,7 +429,7 @@ public:
   std::string relativePhysicalNameCrashReport;
   std::string relativePhysicalNameOptionalProgressReport;
   std::string relativePhysicalNameOptionalResult;
-  std::string pathExecutableUserInputOrDeduced;
+  std::string pathBaseUserInputOrDeduced;
   std::string physicalPathProjectBase;
   std::string physicalPathServerBase;
   std::string physicalNameFolderExecutable;

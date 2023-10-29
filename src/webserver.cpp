@@ -163,12 +163,10 @@ bool WebWorker::receiveAll() {
   ) /
   1000;
   // The following formula ensures that all receive timeouts take 1 second less
-  // than
-  // millisecondsReplyAfterComputation. This gives ample time (1 second) for
-  // the
-  // calculator
-  // to take reset the computation time counter. This prevents the
-  // reply-after-computation
+  // than millisecondsReplyAfterComputation. This gives ample time (1 second)
+  // for the calculator to take reset the computation time counter. This
+  // prevents
+  // the reply-after-computation
   // mechanism from racing with browser clients that keep connections open
   // without closing.
   tv.tv_sec = (secondsReplyAfter - 1) / (maximumFailedReceives + 1);
@@ -215,7 +213,6 @@ bool WebWorker::receiveAll() {
         out << "Too many failed receives, aborting. ";
         this->error = out.str();
       }
-      numberOfBytesInBuffer = 0;
       return false;
     }
   }
@@ -240,8 +237,9 @@ bool WebWorker::receiveAll() {
   // <- needed else the length error check will pop.
   if (this->contentLength > 10000000) {
     this->checkConsistency();
-    error =
-    "Content-length parsed to be more than 10 million bytes, aborting.";
+    this->error =
+    "Content-length parsed to be "
+    "more than 10 million bytes, aborting.";
     global << this->error << Logger::endL;
     this->displayUserInput = this->error;
     return false;

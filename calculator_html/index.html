@@ -169,7 +169,20 @@
             <tr>
               <td>
                 <input type="hidden" name="request" id="request" value="compute">
-                <textarea class="textareaCalculatorMain" rows="3" cols="30" id="mainInputID"></textarea>
+                <div class="textareaCalculatorMain" id="mainInputID" contenteditable="true"
+                  style="border: 1px solid;font-family: monospace; padding: 3px; display: block; overflow-y: auto;overflow-x: auto;">
+                </div>
+                <span id="idAutocompletePanel">
+                  <span id="idAutocompleteHints" style="font-size: x-small">
+                    Ctrl+space = autocomplete; Ctrl+arrow = select
+                  </span>
+                  <button id="buttonAutocompleteHide" title="hide autocomplete menu">X</button>
+                  <br>
+                  <div id="idAutocompleteSpan" style="display:block; overflow:auto;" height="100px">
+                    <div id="inputAutocompleteList" list="autocomplete"></div>
+                  </div>
+                  <span id="idAutocompleteDebug"></span>
+                </span>
                 <br>
                 <button id="buttonGoCalculatorPage" class="buttonPreview"
                   title="Shift + Enter = shortcut from input text box. " name="Go">Go</button>
@@ -203,18 +216,7 @@
                 <span id="spanDebugCalculatorPage">
                 </span>
               </td>
-              <td>
-                <span id="idAutocompletePanel">
-                  <span id="idAutocompleteHints" style="font-size: x-small">
-                    Ctrl+space = autocomplete; Ctrl+arrow = select
-                  </span>
-                  <br>
-                  <div id="idAutocompleteSpan" style="display:block; overflow:auto;" height="100px">
-                    <div id="inputAutocompleteList" list="autocomplete"></div>
-                  </div>
-                  <span id="idAutocompleteDebug"></span>
-                </span>
-              </td>
+
             </tr>
           </table>
           <div id="divCalculatorPageDebugComments"></div>

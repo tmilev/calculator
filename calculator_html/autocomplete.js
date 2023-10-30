@@ -19,7 +19,7 @@ class WordWithHighlight {
   /** @return {HTMLElement} */
   toHTML(
     /** @type {boolean} */
-    isHighlighted, 
+    isHighlighted,
     /** @type {Function} */
     clickHandler,
   ) {
@@ -51,8 +51,8 @@ class Autocompleter {
     this.debugCounter = 0;
     /** @type {Array.<string>} */
     this.autoCompleteDictionaryByKey = [];
-    /** @type {string} */
-    this.currentText = "";
+    /** @type {HTMLDivElement} */
+    this.inputElement = null;
     /** @type {Array.<string>} */
     this.suggestions = [];
     /** @type {Array.<WordWithHighlight>} */
@@ -82,9 +82,9 @@ class Autocompleter {
     ) {
       return;
     }
-    this.currentText = document.getElementById(ids.domElements.pages.calculator.inputMain);
+    this.inputElement = document.getElementById(ids.domElements.pages.calculator.inputMain);
     this.indexInAutocomplete = - 1;
-    this.lastWord = new String;
+    this.lastWord = "";
     for (let i = 0; i < autoCompleteDictionary.length; i++) {
       this.autoCompleteDictionaryLowerCase.push(autoCompleteDictionary[i].toLowerCase());
     }
@@ -94,7 +94,7 @@ class Autocompleter {
     return true;
   }
 
-  suggestWord() { 
+  suggestWord() {
     this.initialize();
     this.getLastWord();
     if (this.oldLastWord === this.lastWord) {
@@ -170,28 +170,28 @@ class Autocompleter {
   }
 
   getLastWord() {
-    let lastWordReversed = "";
-    let cursorPosition = this.currentText.selectionEnd;
+    let lastWordReversedArray = [];
+    let caretPosition = this.inputElement.selectionEnd;
+    let elementText = this.inputElement.textContent;
     this.lastWordStart = - 1;
-    let i = cursorPosition - 1;
+    let i = caretPosition - 1;
     for (; i >= 0; i--) {
-      if (this.isSeparator(this.currentText.value[i])) {
+      if (this.isSeparator(elementText[i])) {
         break;
       }
-      lastWordReversed += this.currentText.value[i];
+      lastWordReversedArray.push(elementText[i]);
     }
-    this.lastWord = "";
+    this.lastWord = lastWordReversedArray.reverse().join("");
     this.lastWordStart = i;
-    for (i = lastWordReversed.length - 1; i >= 0; i--) {
-      this.lastWord += lastWordReversed[i];
-    }
-    for (i = cursorPosition; i < this.currentText.value.length; i++) {
-      if (this.isSeparator(this.currentText.value[i])) {
+    let suffix = [];
+    for (i = caretPosition; i < elementText.length; i++) {
+      if (this.isSeparator(elementText[i])) {
         break;
       } else {
-        this.lastWord += this.currentText.value[i];
+        suffix.push(elementText[i]);
       }
     }
+    this.lastWord += suffix.join("");
     this.debugCounter++;
   }
 
@@ -230,7 +230,7 @@ class Autocompleter {
     this.suggestions.length = [];
     this.suggestionsHighlighted = [];
   }
-  
+
   displaySuggestions() {
     this.autocompleteElement.textContent = '';
     if (this.suggestionsHighlighted.length > 0) {
@@ -260,7 +260,7 @@ class Autocompleter {
     this.autocompleteElement.textContent = '';
     this.replaceLastWord();
   }
-  
+
   replaceLastWord() {
     if (this.suggestions.length <= 0) {
       return;
@@ -271,22 +271,23 @@ class Autocompleter {
     ) {
       return;
     }
-    this.currentText.value = this.currentText.value.substring(0, this.lastWordStart + 1) + this.suggestions[this.indexInAutocomplete] +
-      this.currentText.value.substring(1 + this.lastWordStart + this.lastWord.length);
+    let text = this.inputElement.textContent;
+    this.inputElement.textContent = text.substring(0, this.lastWordStart + 1) + this.suggestions[this.indexInAutocomplete] +
+      text.substring(1 + this.lastWordStart + this.lastWord.length);
     this.setCursorPosition(this.lastWordStart + this.suggestions[this.indexInAutocomplete].length + 1);
   }
-  
-  setCursorPosition(caretPos) {
-    if (this.currentText.createTextRange) {
-      let range = this.currentText.createTextRange();
-      range.move('character', caretPos);
+
+  setCursorPosition(caretPosition) {
+    if (this.inputElement.createTextRange) {
+      let range = this.inputElement.createTextRange();
+      range.move('character', caretPosition);
       range.select();
     } else {
-      if (this.currentText.selectionStart) {
-        this.currentText.focus();
-        this.currentText.setSelectionRange(caretPos, caretPos);
+      if (this.inputElement.selectionStart) {
+        this.inputElement.focus();
+        this.inputElement.setSelectionRange(caretPosition, caretPosition);
       } else {
-        this.currentText.focus();
+        this.inputElement.focus();
       }
     }
   }

@@ -603,6 +603,8 @@ a.linkProgressReport {
 #idAutocompleteSpan {
   overflow: auto;
   max-height: 100px;
+  position: absolute;
+  /*  left: 10px;*/
 }
 
 .tableCalculatorInputs {

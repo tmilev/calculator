@@ -143,8 +143,8 @@ class RequestWithProgress {
     this.xhr.onload = () => {
       this.responseStandard();
     }
-    this.xhr.onerror = (e) => { 
-      this.errorStandard(e);      
+    this.xhr.onerror = (e) => {
+      this.errorStandard(e);
     }
   }
 

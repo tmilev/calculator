@@ -115,7 +115,7 @@ class AtomHandler {
   }
 
   /** @return {HTMLElement} */
-  toHTMLInfo() { 
+  toHTMLInfo() {
     let result = document.createElement("div");
     let countElement = document.createElement("span");
     countElement.textContent = `(${this.index + 1} out of ${this.totalRules})`;
@@ -135,7 +135,7 @@ class AtomHandler {
     if (this.experimental) {
       let element = document.createElement("b");
       element.textContent = "(experimental)";
-      result.appendChild(element);      
+      result.appendChild(element);
     }
     if (!this.cacheable) {
       let element = document.createElement("b");
@@ -165,7 +165,7 @@ class AtomHandler {
     result.classList.add("hiddenClass");
     return result;
   }
-  
+
   /** @return {HTMLElement} */
   toHTML(
     /** @type {Calculator} */
@@ -205,7 +205,7 @@ class Splitter {
   initialize() {
     this.element.addEventListener('mousedown', (mouseEvent) => {
       this.onMouseDown(mouseEvent);
-    });    
+    });
     this.parentElement.addEventListener('mousemove', (mouseEvent) => {
       this.onMouseMove(mouseEvent);
     });
@@ -282,7 +282,7 @@ class Calculator {
   processOneFunctionAtom(handlers) {
     if (handlers === undefined || handlers === null) {
       throw new Error("Bad handlers");
-    } 
+    }
     let result = document.createElement("div");
     for (let i = 0; i < handlers.length; i++) {
       let handler = new AtomHandler();
@@ -350,7 +350,7 @@ class Calculator {
     if (event.keyCode !== 13 || !event.shiftKey) {
       return;
     }
-    this.submitComputation();
+    this.submitComputationAndStore();
     event.preventDefault();
   }
 
@@ -386,7 +386,7 @@ class Calculator {
     /** @type {string} */
     value,
   ) {
-    this.splitter.setHeight(value);    
+    this.splitter.setHeight(value);
   }
 
   toggleEquationEditor() {
@@ -418,7 +418,7 @@ class Calculator {
       button.textContent = '\u25BE';
     }
   }
- 
+
   downloadExamples() {
     let url = "";
     url += pathnames.urls.calculatorAPI;
@@ -461,7 +461,7 @@ class Calculator {
       return;
     }
     buttonGo.addEventListener('click', () => {
-      this.submitComputation();
+      this.submitComputationAndStore();
     });
     let buttonLinkLatex = document.getElementById(
       ids.domElements.pages.calculator.buttonCopyLatexLink
@@ -519,9 +519,9 @@ class Calculator {
     let toBeEscaped = "%\\_{}#";
     let toBeEscapedMap = {};
     for (let i = 0; i < toBeEscaped.length; i++) {
-      toBeEscapedMap[toBeEscaped[i]] = true;      
+      toBeEscapedMap[toBeEscaped[i]] = true;
     }
-    for (let i = 0; i < input.length; i++){
+    for (let i = 0; i < input.length; i++) {
       let current = input[i];
       if (current in toBeEscapedMap) {
         result.push("\\" + current);
@@ -547,22 +547,26 @@ class Calculator {
 
   selectCalculatorPage() {
     this.initialize();
-    this.submitComputation();
+    this.submitComputationWithoutStoring();
   }
 
-  submitComputation() {
+  submitComputationAndStore() {
+    this.submitComputationWithoutStoring();
+    storage.storage.variables.calculator.input.setAndStore(
+      this.lastSubmittedInput
+    );
+  }
+
+  submitComputationWithoutStoring() {
     processMonitoring.monitor.clearTimeout();
     let calculatorInput = document.getElementById(
       ids.domElements.pages.calculator.inputMain
-    ).value;
+    ).textContent;
     if (calculatorInput === this.lastSubmittedInput) {
       return;
     }
     this.lastSubmittedInput = calculatorInput;
     // submitComputationPartTwo is called by a callback in the function below:
-    storage.storage.variables.calculator.input.setAndStore(
-      this.lastSubmittedInput
-    );
   }
 
   /** @return {String} */
@@ -764,7 +768,7 @@ class Calculator {
           150,
           false,
           "",
-          true, 
+          true,
           true,
         ));
       }
@@ -872,7 +876,7 @@ class Calculator {
     );
     this.flagTypeset = true;
   }
-  
+
   resizePanel(
     /** @type {equationEditor.EquationEditor} */
     editor,

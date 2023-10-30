@@ -5,6 +5,7 @@ const initializeButtons = require("./initialize_buttons");
 const ids = require("./ids_dom_elements");
 const processMonitoring = require("./process_monitoring");
 const miscellaneous = require("./miscellaneous_frontend");
+const equationEditor = require("./equation_editor/src/equation_editor");
 
 class CalculatorEquationEditor {
   constructor(
@@ -20,7 +21,7 @@ class CalculatorEquationEditor {
     this.slider = document.getElementById(
       ids.domElements.pages.calculator.equationEditorFontSizeSlider
     );
-    /** @type {HTMLTextAreaElement|null} */
+    /** @type {HTMLDivElement|null} */
     this.textBox = null;
     /** @type {HTMLElement|null} */
     this.commentsElement = null;
@@ -50,7 +51,7 @@ class CalculatorEquationEditor {
     )
     pauseButton.style.display = "none";
 
-    this.textBox = this.calculatorPanel.getPureLatexElement();
+    this.textBox = document.getElementById(ids.domElements.pages.calculator.inputMain);
     this.commentsElement = document.getElementById(
       ids.domElements.pages.calculator.editorCommentsDebug,
     );
@@ -117,7 +118,7 @@ class CalculatorEquationEditor {
       return;
     }
     this.ignoreNextEditorEvent = true;
-    if (this.textBox.value.length > 10000) {
+    if (this.textBox.textContent.length > 10000) {
       this.flagCalculatorInputOK = false;
       miscellaneous.writeHTML(
         this.commentsElement,
@@ -126,7 +127,8 @@ class CalculatorEquationEditor {
       return;
     }
     this.commentsElement.textContent = "";
-    this.extractor.extract(this.textBox.value, this.textBox.selectionEnd);
+    const cursorInformation = new equationEditor.CursorInformation(this.textBox);
+    this.extractor.extract(this.textBox.textContent, cursorInformation.positionCursor);
     this.flagCalculatorInputOK = true;
     this.calculatorPanel.equationEditor.writeLatex(this.extractor.middleEditedString);
     this.ignoreNextEditorEvent = false;
@@ -139,7 +141,7 @@ class CalculatorEquationEditor {
     }
     let content = this.calculatorPanel.equationEditor.rootNode.toLatex();
     this.extractor.middleEditedString = initializeButtons.processMathQuillLatex(content);
-    this.textBox.value =
+    this.textBox.textContent =
       this.extractor.leftString +
       this.extractor.middleEditedString +
       this.extractor.rightString;
@@ -208,6 +210,15 @@ class EditorInputExtractor {
     /** @type {number} */
     cursorPosition,
   ) {
+    if (
+      cursorPosition === null ||
+      cursorPosition === undefined ||
+      cursorPosition < 0 ||
+      cursorPosition > inputLatex.length + 1
+    ) {
+      console.log("Invalid caretPositionValue.");
+      return;
+    }
     this.rawInput = inputLatex;
     this.cursorPosition = cursorPosition;
     this.doExtract();

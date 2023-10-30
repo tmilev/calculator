@@ -108,8 +108,8 @@ class Solver {
     let inputCalculator = `SolveJSON(${input})`;
     let mainInput = document.getElementById(ids.domElements.pages.calculator.inputMain);
     if (mainInput !== null) {
-      mainInput.value = inputCalculator;
-      calculator.calculator.submitComputation();
+      mainInput.textContent = inputCalculator;
+      calculator.calculator.submitComputationAndStore();
     }
     // Will trigger solveFromStorage; 
     // injection of the method happens in Page.initializeStorageCallbacks.

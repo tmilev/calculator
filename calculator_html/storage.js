@@ -3,6 +3,7 @@ const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
 const cookies = require("./cookies");
 const configuration = require("./configuration");
+const miscellaneous = require("./miscellaneous_frontend");
 
 class StorageVariable {
   constructor(
@@ -128,10 +129,14 @@ class StorageVariable {
     if (updateAssociatedInput !== true) {
       return;
     }
-    if (this.associatedDOMId !== null && this.associatedDOMId !== undefined && this.associatedDOMId !== "") {
+    if (
+      this.associatedDOMId !== null &&
+      this.associatedDOMId !== undefined &&
+      this.associatedDOMId !== ""
+    ) {
       let element = document.getElementById(this.associatedDOMId);
       if (element !== null) {
-        element.value = this.value;
+        element.textContent = this.value;
       }
     }
     if (this.callbackSetValueFromStorage !== null) {

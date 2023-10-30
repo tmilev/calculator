@@ -6626,27 +6626,15 @@ class MathNode {
     /** @type {boolean} */
     shiftHeld,
   ) {
-    let previousPosition = this.positionCursorBeforeKeyEvents;
-    let selection = window.getSelection();
-    let range = null;
-    let rangeClone = null;
-    if (selection.rangeCount > 0) {
-      range = selection.getRangeAt(0);
-    } else {
-      range = document.createRange();
-    }
-    rangeClone = range.cloneRange();
-    rangeClone.selectNodeContents(this.element);
-    rangeClone.setEnd(range.endContainer, range.endOffset);
-    this.positionCursorBeforeKeyEvents =
-      rangeClone.toString().length;  // range.endOffset;
-    this.selectionLength = range.toString().length;
+    let cursorInformation = new CursorInformation(this.element, this.positionCursorBeforeKeyEvents);
+    this.positionCursorBeforeKeyEvents = cursorInformation.positionCursor;
+    this.selectionLength = cursorInformation.selectionLength;
     this.equationEditor.setLastFocused(this);
     this.equationEditor.positionDebugString =
       `Computed position: ${this.positionCursorBeforeKeyEvents}.`;
-    this.equationEditor.positionDebugString += `Range: [${range}], clone: [${rangeClone}], previous position: ${previousPosition}.`;
+    this.equationEditor.positionDebugString += cursorInformation.debugString;
     this.equationEditor.positionDebugString +=
-      `end offset: ${range.endOffset}, start offset: ${range.startOffset}`;
+      `end offset: ${cursorInformation.endOffset}, start offset: ${cursorInformation.startOffset}`;
     this.equationEditor.writeDebugInfo(null);
   }
 
@@ -12936,6 +12924,28 @@ class EquationEditorButtonPanel {
   }
 }
 
+/** A read-only class whose constructor computes information about the current cursor position. */
+class CursorInformation {
+  constructor(/** @type {HTMLElement?} */ element, /** @type{number} */ previousPosition) {
+    let selection = window.getSelection();
+    let range = null;
+    let rangeClone = null;
+    if (selection.rangeCount > 0) {
+      range = selection.getRangeAt(0);
+    } else {
+      range = document.createRange();
+    }
+    rangeClone = range.cloneRange();
+    rangeClone.selectNodeContents(element);
+    rangeClone.setEnd(range.endContainer, range.endOffset);
+    this.positionCursor = rangeClone.toString().length;
+    this.selectionLength = range.toString().length;
+    this.endOffset = range.endOffset;
+    this.startOffset = range.startOffset;
+    this.debugString = `Range: [${range}], clone: [${rangeClone}], previous position: ${previousPosition}.`;
+  }
+}
+
 /** @type {MathNodeFactory!} */
 let mathNodeFactory = new MathNodeFactory();
 
@@ -12954,6 +12964,7 @@ if (module === undefined) {
 }
 
 module.exports = {
+  CursorInformation,
   typeset,
   EquationEditor,
   EquationEditorButtonFactory,

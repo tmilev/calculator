@@ -8437,14 +8437,10 @@ class MathNode {
       collapseToStart = true;
       this.setRangeStart(range, 0);
     }
-    // console.log(`Position: ${position}, range ${range}, collapseToStart:
-    // ${collapseToStart} start offset: ${range.startOffset}, end offset:
-    // ${range.endOffset}, text len: ${this.element.textContent.length}`);
     range.collapse(collapseToStart);
     this.equationEditor.resetSelectionDOM();
     selection.addRange(range);
     this.positionCursorBeforeKeyEvents = position;
-    //    this.element.focus();
   }
 
   /** @return {boolean} */

@@ -1,4 +1,5 @@
 "use strict";
+const equationEditor = require("./equation_editor/src/equation_editor");
 const ids = require("./ids_dom_elements");
 const autoCompleteDictionary = require("./autocomplete_keywords").autoCompleteDictionary;
 
@@ -65,6 +66,18 @@ class Autocompleter {
     this.autocompleteHintsElement = document.getElementById(
       ids.domElements.pages.calculator.divAutocompleteHints
     );
+    /** @type {HTMLElement} */
+    this.autocompletePanel = document.getElementById(
+      ids.domElements.pages.calculator.divAutocompletePanel
+    );
+    const button = document.getElementById(
+      ids.domElements.pages.calculator.buttonAutocompleteHide
+    );
+    button.addEventListener(
+      "click", () => {
+        this.hideAutocompletePanel();
+      }
+    );
     this.indexInAutocomplete = - 1;
     this.lastWordStart = - 1;
     this.lastWord = "";
@@ -127,11 +140,28 @@ class Autocompleter {
       this.suggestions.push(autoCompleteDictionary[i]);
       this.suggestionsHighlighted.push(nextWord);
     }
-    if (this.suggestions.length > 0) {
-      this.autocompleteHintsElement.style.visibility = "visible";
-    }
     this.indexInAutocomplete = 0;
     this.displaySuggestions();
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    const rect = range.getClientRects()[0];
+    if (this.suggestions.length > 0) {
+      this.autocompletePanel.style.display = "";
+      let autoCompleteWidth = this.autocompletePanel.getBoundingClientRect().width;
+      let inputWidth = this.inputElement.getBoundingClientRect().width;
+      let desiredX = rect.x;
+      if (rect.x + autoCompleteWidth > inputWidth) {
+        desiredX = inputWidth - autoCompleteWidth;
+      }
+      this.autocompletePanel.style.left = desiredX;
+      this.autocompletePanel.style.top = rect.y + 20;
+    } else {
+      this.hideAutocompletePanel();
+    }
+  }
+
+  hideAutocompletePanel() {
+    this.autocompletePanel.style.display = "none";
   }
 
   arrowAction(event) {
@@ -171,7 +201,7 @@ class Autocompleter {
 
   getLastWord() {
     let lastWordReversedArray = [];
-    let caretPosition = this.inputElement.selectionEnd;
+    let caretPosition = new equationEditor.CursorInformation(this.inputElement).positionCursor;
     let elementText = this.inputElement.textContent;
     this.lastWordStart = - 1;
     let i = caretPosition - 1;
@@ -229,6 +259,7 @@ class Autocompleter {
     this.indexInAutocomplete = - 1;
     this.suggestions.length = [];
     this.suggestionsHighlighted = [];
+    this.hideAutocompletePanel();
   }
 
   displaySuggestions() {
@@ -275,6 +306,7 @@ class Autocompleter {
     this.inputElement.textContent = text.substring(0, this.lastWordStart + 1) + this.suggestions[this.indexInAutocomplete] +
       text.substring(1 + this.lastWordStart + this.lastWord.length);
     this.setCursorPosition(this.lastWordStart + this.suggestions[this.indexInAutocomplete].length + 1);
+    this.hideAutocompletePanel();
   }
 
   setCursorPosition(caretPosition) {
@@ -282,14 +314,25 @@ class Autocompleter {
       let range = this.inputElement.createTextRange();
       range.move('character', caretPosition);
       range.select();
-    } else {
-      if (this.inputElement.selectionStart) {
-        this.inputElement.focus();
-        this.inputElement.setSelectionRange(caretPosition, caretPosition);
-      } else {
-        this.inputElement.focus();
-      }
+      return;
     }
+    let selection = window.getSelection();
+    this.inputElement.focus();
+    let range = document.createRange();
+    let collapseToStart = false;
+    if (caretPosition >= this.inputElement.textContent.length) {
+      collapseToStart = false;
+      range.selectNodeContents(this.inputElement);
+    } else if (caretPosition > 0) {
+      collapseToStart = false;
+      range.setStart(this.inputElement.childNodes[0], caretPosition)
+    } else {
+      collapseToStart = true;
+      range.setStart(this.inputElement.childNodes[0], 0);
+    }
+    range.collapse(collapseToStart);
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 }
 

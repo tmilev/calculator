@@ -172,13 +172,13 @@
                 <div class="textareaCalculatorMain" id="mainInputID" contenteditable="true"
                   style="border: 1px solid;font-family: monospace; padding: 3px; display: block; overflow-y: auto;overflow-x: auto;">
                 </div>
-                <span id="idAutocompletePanel">
-                  <span id="idAutocompleteHints" style="font-size: x-small">
-                    Ctrl+space = autocomplete; Ctrl+arrow = select
-                  </span>
-                  <button id="buttonAutocompleteHide" title="hide autocomplete menu">X</button>
-                  <br>
-                  <div id="idAutocompleteSpan" style="display:block; overflow:auto;" height="100px">
+                <span id="idAutocompletePanel" style="max-width: 300px; display: none;">
+                  <div id="idAutocompleteHints" style="font-size: x-small; width: 100%;">
+                    <button id="buttonAutocompleteHide" title="hide autocomplete menu"
+                      style="font-size: x-small; position: absolute; right: 0;">&#x2715</button>
+                  </div><br>
+                  <div id="idAutocompleteSpan" style="display:block; overflow:auto;" height="100px"
+                    title="Arrow: select, Enter: autocomplete, Esc: hide, Shift+Enter: submit.">
                     <div id="inputAutocompleteList" list="autocomplete"></div>
                   </div>
                   <span id="idAutocompleteDebug"></span>

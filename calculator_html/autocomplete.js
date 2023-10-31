@@ -165,11 +165,18 @@ class Autocompleter {
   }
 
   arrowAction(event) {
-    if (event.ctrlKey !== true) {
+    if (event.keyCode === 13) {
+      // 32-space bar, 13-enter key, 9-tab key
+      this.replaceLastWord();
+      event.preventDefault();
+      event.stopPropagation();
       return;
     }
-    if (event.keyCode === 32) {//32-space bar, 13-enter key, 9-tab key
-      this.replaceLastWord();
+    if (event.keyCode === 27) {
+      // Escape key.
+      this.hideAutocompletePanel();
+      event.stopPropagation();
+      return;
     }
     if (event.keyCode === 38) {//up arrow
       this.indexInAutocomplete--;

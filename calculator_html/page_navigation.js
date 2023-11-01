@@ -74,9 +74,11 @@ class User {
 
   makeFromUserInfo(inputData) {
     let page = window.calculator.mainPage;
-    // Please note: the authentication token is silently set through the cookie headers.
+    // Please note: the authentication token is
+    // silently set through the cookie headers.
     // Please do not take explicit action as
-    // inputdata.authenticationToken may not contain the authentication token.
+    // inputdata.authenticationToken may not 
+    // contain the authentication token.
     // not ok: page.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
     page.storage.variables.user.name.setAndStore(inputData.username);
     mainPage().storage.variables.user.role.setAndStore(inputData.userRole);
@@ -248,7 +250,11 @@ class Page {
     };
     this.defaultPage = "calculator";
     this.currentPage = "";
-    if (document.getElementById(ids.domElements.applicationIdentifiers.compareExpressions)) {
+    if (
+      document.getElementById(
+        ids.domElements.applicationIdentifiers.compareExpressions
+      )
+    ) {
       this.defaultPage = "compareExpressions";
     }
     this.storage = storage;
@@ -285,6 +291,9 @@ class Page {
   }
 
   initializeStorageCallbacks() {
+    this.storage.variables.calculator.splitterInputOutput.callbackOnValueChange = (value) => {
+      calculatorPage.calculator.changeSplitterInputOutput(value);
+    }
     this.storage.variables.currentPage.callbackOnValueChange = (value) => {
       this.selectPage(value);
     };
@@ -343,7 +352,12 @@ class Page {
   }
 
   initHandlers() {
-    window.addEventListener("hashchange", this.storage.loadSettings.bind(this.storage));
+    window.addEventListener("hashchange", () => {
+      this.storage.loadSettings();
+    });
+    window.addEventListener("popstate", () => {
+      this.storage.loadSettings();
+    });
     let monitor = document.getElementById(ids.domElements.switch.monitoring);
     if (monitor !== null) {
       monitor.addEventListener("change", () => {
@@ -768,7 +782,10 @@ class Page {
     }
     for (let i = 3; i < menuDiv.childNodes.length; i++) {
       let currentNode = menuDiv.childNodes[i];
-      if (currentNode.nodeName === "DIV" || currentNode.nodeName === "div") {
+      if (
+        currentNode.nodeName === "DIV" ||
+        currentNode.nodeName === "div"
+      ) {
         currentNode.style.display = "none";
       }
     }

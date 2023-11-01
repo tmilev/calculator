@@ -7,7 +7,8 @@ const miscellaneous = require("./miscellaneous_frontend");
 
 class StorageVariable {
   constructor(
-    /** @type @{{
+    /** 
+     * @type{{
      * name: string, 
      * nameURL: string, 
      * nameCookie: string, 
@@ -48,10 +49,14 @@ class StorageVariable {
       "showInURLOnPages",
       "defaultValue",
     ];
-    for (let counterLabel = 0; counterLabel < labelsToRead.length; counterLabel++) {
-      let currentLabel = labelsToRead[counterLabel];
+    for (let i = 0; i < labelsToRead.length; i++) {
+      let currentLabel = labelsToRead[i];
       let incoming = inputs[currentLabel];
-      if (incoming !== "" && incoming !== null && incoming !== undefined) {
+      if (
+        incoming !== "" &&
+        incoming !== null &&
+        incoming !== undefined
+      ) {
         this[currentLabel] = incoming;
       }
     }
@@ -107,7 +112,11 @@ class StorageVariable {
     updateURL,
   ) {
     if (Storage !== undefined || localStorage !== undefined) {
-      if (this.nameLocalStorage !== "" && this.nameLocalStorage !== null && this.nameLocalStorage !== undefined) {
+      if (
+        this.nameLocalStorage !== "" &&
+        this.nameLocalStorage !== null &&
+        this.nameLocalStorage !== undefined
+      ) {
         localStorage[this.nameLocalStorage] = this.value;
       }
     }
@@ -163,10 +172,14 @@ class StorageVariable {
     if (!changed) {
       return;
     }
-    if (this.callbackOnValueChange === null || this.callbackOnValueChange === undefined) {
+    if (
+      this.callbackOnValueChange === null ||
+      this.callbackOnValueChange === undefined
+    ) {
       return;
     }
-    // Calling function with timeout ensures the current function sequence is finished first.
+    // Calling function with timeout ensures 
+    // the current function sequence is finished first.
     setTimeout(() => {
       this.callbackOnValueChange(this.value);
     }, 0);

@@ -15,6 +15,7 @@ class WordWithHighlight {
     this.left = left;
     this.highlighted = highlighted;
     this.right = right;
+    this.autocompleteActive = false;
   }
 
   /** @return {HTMLElement} */
@@ -162,11 +163,15 @@ class Autocompleter {
 
   hideAutocompletePanel() {
     this.autocompletePanel.style.display = "none";
+    this.autocompleteActive = false;
   }
 
   arrowAction(event) {
+    if (event.shiftKey === true || !this.autocompleteActive) {
+      return;
+    }
+    // 32-space bar, 13-enter key, 9-tab key
     if (event.keyCode === 13) {
-      // 32-space bar, 13-enter key, 9-tab key
       this.replaceLastWord();
       event.preventDefault();
       event.stopPropagation();
@@ -289,6 +294,7 @@ class Autocompleter {
       );
       this.autocompleteElement.appendChild(next);
     }
+    this.autocompleteActive = this.suggestionsHighlighted.length > 0;
   }
 
   handleClick(

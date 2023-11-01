@@ -240,10 +240,10 @@ class Splitter {
     if (y < 100) {
       y = 100;
     }
-    this.setHeight(y - 10);
     storage.storage.variables.calculator.splitterInputOutput.setAndStore(
       y - 10, false, false
     );
+    this.setHeight(y - 10);
   }
 
   setHeight(y) {
@@ -454,6 +454,9 @@ class Calculator {
     this.initializeToggleExamples();
     this.initializeToggleEditor();
     this.splitter.initialize();
+    this.changeSplitterInputOutput(
+      storage.storage.variables.calculator.splitterInputOutput.getValue()
+    );
     let buttonGo = document.getElementById(
       ids.domElements.pages.calculator.buttonGoCalculatorPage
     );
@@ -547,26 +550,22 @@ class Calculator {
 
   selectCalculatorPage() {
     this.initialize();
-    this.submitComputationWithoutStoring();
   }
 
   submitComputationAndStore() {
-    this.submitComputationWithoutStoring();
-    storage.storage.variables.calculator.input.setAndStore(
-      this.lastSubmittedInput
-    );
-  }
-
-  submitComputationWithoutStoring() {
     processMonitoring.monitor.clearTimeout();
     let calculatorInput = document.getElementById(
       ids.domElements.pages.calculator.inputMain
     ).textContent;
+    // Replace all non-breaking spaces with breaking spaces.
+    calculatorInput = calculatorInput.split("\u00A0").join(" ");
     if (calculatorInput === this.lastSubmittedInput) {
       return;
     }
     this.lastSubmittedInput = calculatorInput;
-    // submitComputationPartTwo is called by a callback in the function below:
+    storage.storage.variables.calculator.input.setAndStore(
+      this.lastSubmittedInput
+    );
   }
 
   /** @return {String} */

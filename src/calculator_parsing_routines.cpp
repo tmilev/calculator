@@ -1514,16 +1514,11 @@ void CalculatorParser::parseFillDictionary(
     if (!this->shouldSplitOutsideQuotes(current, lookAheadChar)) {
       continue;
     }
-    bool mustInterpretAsVariable = false;
-    if (
-      this->controlSequences.contains(current) && !mustInterpretAsVariable
-    ) {
+    if (this->controlSequences.contains(current)) {
       currentElement.controlIndex = this->controlSequences.getIndex(current);
       currentElement.data.reset(*this->owner);
       output.addOnTop(currentElement);
-    } else if (
-      MathRoutines::hasDecimalDigitsOnly(current) && !mustInterpretAsVariable
-    ) {
+    } else if (MathRoutines::hasDecimalDigitsOnly(current)) {
       currentElement.data.assignValue(*this->owner, current);
       currentElement.controlIndex = this->conInteger();
       output.addOnTop(currentElement);

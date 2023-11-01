@@ -285,9 +285,6 @@ class Page {
   }
 
   initializeStorageCallbacks() {
-    this.storage.variables.calculator.splitterInputOutput.callbackOnValueChange = (value) => {
-      calculatorPage.calculator.changeSplitterInputOutput(value);
-    }
     this.storage.variables.currentPage.callbackOnValueChange = (value) => {
       this.selectPage(value);
     };

@@ -524,7 +524,7 @@ class InputPanelData {
       this.addKeySequence(["^", "\\circ"], "^\u2218");
     }
     if (this.flagButtons.newtonsMethod.selected || includeAll) {
-      this.addLatexCommand(["NewtonsMethod(\\cursor,,)"], "Newton", { fontSize: "6px" });
+      this.addLatexCommand("NewtonsMethod(\\cursor,,)", "Newton", { fontSize: "6px" });
     }
   }
 

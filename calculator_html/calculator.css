@@ -91,11 +91,17 @@ div.problemNavigation {
   /*  border: 1px solid black;*/
 }
 
-.textareaCalculatorMain {
-  white-space: normal;
+#mainInputID {
   resize: auto;
   width: 300px;
   height: 100px;
+  border: 1px solid;
+  font-family: monospace;
+  padding: 3px;
+  display: block;
+  overflow-y: auto;
+  overflow-x: auto;
+  white-space: pre-wrap;
 }
 
 textarea.textAreaStudentPoints {

@@ -1633,6 +1633,16 @@ class LaTeXConstants {
       // Special command reserved for indicating the
       // cursor position when the latex is used in an editable box.
       'cursor': '\\cursor',
+      // Same as the above.
+      // On the web, caret means the same as cursor.
+      // However, we say "blinking cursor" rather than blinking caret,
+      // so this web terminology is dubious. Historically,
+      // caret seems to refer to the under-carret style of cursor
+      // that goes below the text like this.
+      //                               ^
+      // The confusion is complete. So, simply treat caret and
+      // cursor as synonyms.
+      'caret': '\\cursor',
       // Special command reserved for generation of input box.
       'formInput': '\\formInput',
       'end': '\\end',

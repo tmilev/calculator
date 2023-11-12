@@ -52,6 +52,11 @@ class CalculatorEquationEditor {
     pauseButton.style.display = "none";
 
     this.textBox = document.getElementById(ids.domElements.pages.calculator.inputMain);
+    const isChrome = navigator.userAgent.includes("Chrome");
+    if (!isChrome) {
+      this.textBox.contentEditable = true;
+    }
+
     this.commentsElement = document.getElementById(
       ids.domElements.pages.calculator.editorCommentsDebug,
     );

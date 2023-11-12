@@ -554,9 +554,10 @@ class Calculator {
 
   submitComputationAndStore() {
     processMonitoring.monitor.clearTimeout();
-    let calculatorInput = document.getElementById(
+    let element = document.getElementById(
       ids.domElements.pages.calculator.inputMain
-    ).textContent;
+    )
+    let calculatorInput = element.innerText;
     // Replace all non-breaking spaces with breaking spaces.
     calculatorInput = calculatorInput.split("\u00A0").join(" ");
     if (calculatorInput === this.lastSubmittedInput) {

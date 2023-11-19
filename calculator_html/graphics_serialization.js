@@ -67,7 +67,7 @@ class SliderUpdater {
       return;
     }
     this.sliders[sliderName] = slider;
-  } 
+  }
 }
 
 class GraphicsSerialization {
@@ -133,7 +133,9 @@ class GraphicsSerialization {
           layerContainer,
         );
       case "threeDimensional":
-        return this.threeDimensionalGraphics(input, canvas, controls, messages, sliders);
+        return this.threeDimensionalGraphics(
+          input, canvas, controls, messages, sliders, layerContainer,
+        );
       default:
         throw `Unknown graphics type ${graphicsType}.`;
     }
@@ -218,7 +220,7 @@ class GraphicsSerialization {
     canvas.initialize();
     if (equationEditor !== null) {
       equationEditor.canvasTwoDContext = canvas.surface;
-    } 
+    }
     return this.plotTwoDimensionalGraphics(
       canvas,
       input,
@@ -240,9 +242,13 @@ class GraphicsSerialization {
     /** @type {HTMLElement} */
     messages,
     /** @type {SliderUpdater} */
-    sliders
+    sliders,
+    /** @type {HTMLElement|undefined} */
+    layerContainer,
   ) {
-    let canvas = new CanvasThreeD(canvasElement, controls, messages);
+    let canvas = new CanvasThreeD(
+      canvasElement, controls, messages, layerContainer,
+    );
     canvas.initialize();
     return this.plotThreeDimensionalGraphics(canvas, input, sliders);
   }
@@ -314,9 +320,9 @@ class GraphicsSerialization {
       canvas.setBoundingBoxAsDefaultViewWindow();
     }
     canvas.redraw();
-    return canvas;    
+    return canvas;
   }
-  
+
   oneTwoDimensionalObjectWithLabel(
     plot,
     /** @type {CanvasTwoD} */
@@ -331,7 +337,7 @@ class GraphicsSerialization {
     if (layer === null || layer === undefined) {
       layer = "";
     }
-    for (let i = objectsAtStart; i < canvas.drawObjects.length; i++){
+    for (let i = objectsAtStart; i < canvas.drawObjects.length; i++) {
       canvas.layers.push(layer);
     }
   }
@@ -339,7 +345,7 @@ class GraphicsSerialization {
   oneTwoDimensionalObject(
     plot,
     /** @type {CanvasTwoD} */
-    canvas, 
+    canvas,
     /** @type {SliderUpdater} */
     sliderUpdater,
   ) {
@@ -357,7 +363,7 @@ class GraphicsSerialization {
     let viewWindow = plot[this.labels.viewWindow];
     let variableAndParameterNames = this.getArguments(plot);
 
-    let parameterNames = this.getParameters(plot); 
+    let parameterNames = this.getParameters(plot);
     let parameterValues = canvas.parameterValues;
 
     let variableRanges = plot[this.labels.variableRanges];
@@ -478,7 +484,7 @@ class GraphicsSerialization {
         return;
       case "pathFilled":
         canvas.drawPathFilled(points, color, colorFill);
-        // no break is intentional: we want to execute the next case.
+      // no break is intentional: we want to execute the next case.
       case "path":
       case "pathParametric":
       case "segment":
@@ -498,8 +504,8 @@ class GraphicsSerialization {
         return;
       case "escapeMap":
         let functionX =
-           this.functionFromBodyAndArguments(
-             coordinateFunctions[0], variableAndParameterNames,
+          this.functionFromBodyAndArguments(
+            coordinateFunctions[0], variableAndParameterNames,
           );
         let functionY =
           this.functionFromBodyAndArguments(
@@ -515,7 +521,7 @@ class GraphicsSerialization {
       case "latex":
         canvas.drawLatex(
           this.interpretListStringsAsNumbersOrFunctions(
-             onePoint, parameterNames, parameterValues,
+            onePoint, parameterNames, parameterValues,
           ),
           text,
         );
@@ -545,12 +551,16 @@ class GraphicsSerialization {
     let variableNames = this.getArguments(plot);
     let parameterNames = this.getParameters(plot);
     let parameterValues = canvas.parameterValues;
+    let layer = plot[this.labels.layerLabel];
+    if (layer === undefined || layer === null) {
+      layer = "";
+    }
     switch (plotType) {
       case "segment":
-        canvas.drawLineCreate(points[0], points[1], color, lineWidth);
+        canvas.drawLineCreate(points[0], points[1], color, lineWidth, layer);
         return;
       case "label":
-        canvas.drawTextCreate(point, text, color);
+        canvas.drawTextCreate(point, text, color, layer);
         return;
       case "setProjectionScreen":
         canvas.screenBasisUserDefault = plot["projectionScreen"];
@@ -567,7 +577,7 @@ class GraphicsSerialization {
             coordinateFunctions[2], this.getArguments(plot),
           ),
         ];
-        let curveImmersion = (p,q) => {
+        let curveImmersion = (p, q) => {
           return [
             coordinates[0](p, q),
             coordinates[1](p, q),
@@ -628,6 +638,7 @@ class GraphicsSerialization {
           colorBack,
           colorContour,
           lineWidth,
+          layer,
         );
         return;
       default:
@@ -653,9 +664,9 @@ class GraphicsSerialization {
   ) {
     let definingFunction = this.functionFromBodyAndArguments(
       `"use strict"; return (${input});`, inputParameters,
-    ); 
+    );
     if (inputParameters.length === 0) {
-      return definingFunction(parameterValues);      
+      return definingFunction(parameterValues);
     }
     return definingFunction;
   }

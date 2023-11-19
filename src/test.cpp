@@ -157,9 +157,9 @@ void Test::run() {
       << "About to erase the test file name."
       << Logger::endL;
       global << "Enter y or Y to confirm: " << Logger::endL;
-      std::string userInput;
-      std::cin >> userInput;
-      if (userInput == "y" || userInput == "Y") {
+      std::cin.ignore();
+      int userChar = getchar();
+      if (userChar == static_cast<int>('y') || userChar ==static_cast<int>( 'Y')) {
         FileOperations::deleteFileVirtual(
           WebAPI::Calculator::testFileNameVirtual, nullptr
         );

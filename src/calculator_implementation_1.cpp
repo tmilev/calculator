@@ -714,7 +714,10 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
     std::string canvasId = this->getCanvasName();
     std::string controlsId = canvasId + "Controls";
     std::string messagesId = canvasId + "Messages";
+    std::string layerContainer = canvasId + "LayerContainer";
+    result[Plot::Labels::layerContainerName] = layerContainer;
     out
+    << "<span class='canvasAndLayers'>"
     << "<canvas width='"
     << this->desiredHtmlWidthInPixels
     << "' height='"
@@ -724,7 +727,11 @@ std::string Plot::getPlotHtml3d(Calculator& owner) {
     << canvasId
     << "'"
     << ">"
-    << "Your browser does not support the HTML5 canvas tag.</canvas><br>"
+    << "Your browser does not support the HTML5 canvas tag.</canvas>"
+    << "<span name='"
+    << layerContainer
+    << "'></span>"
+    << "<br>"
     << "<span name='"
     << controlsId
     << "'></span>"
@@ -1198,7 +1205,8 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
   JSData result = this->plotJSON2d(owner);
   if (!this->flagPlotShowJavascriptOnly) {
     out
-    << "<span class='canvasAndLayers'><canvas width='"
+    << "<span class='canvasAndLayers'>"
+    << "<canvas width='"
     << this->desiredHtmlWidthInPixels
     << "' height='"
     << this->desiredHtmlHeightInPixels

@@ -42,7 +42,7 @@ function vectorScalarVector(s, t) {
   let result = 0;
   if (s.length !== t.length) {
     drawing.calculatorError(
-        `Scalar product of vectors of different length: ${s} and ${t}.`);
+      `Scalar product of vectors of different length: ${s} and ${t}.`);
   }
   for (let i = 0; i < s.length; i++) {
     result += s[i] * t[i];
@@ -155,7 +155,7 @@ function vectorNormalize(vector) {
  * @return {boolean}
  */
 function vectorIsZero(
-    vector,
+  vector,
 ) {
   for (let i = 0; i < vector.length; i++) {
     if (vector[i] !== 0) {
@@ -225,8 +225,7 @@ function colorRGBToHex(r, g, b) {
  * @return {string}
  */
 function colorRGBToString(inputRGB) {
-  return `rgb(${inputRGB[0].toString()},${inputRGB[1].toString()},${
-      inputRGB[2].toString()})`;
+  return `rgb(${inputRGB[0].toString()},${inputRGB[1].toString()},${inputRGB[2].toString()})`;
 }
 
 /**
@@ -446,7 +445,7 @@ function numberFromNumberOfInfinity(input) {
   if (typeof input === 'string') {
     let inputString = /** @type {string} */ (input);
     if (inputString.toLowerCase() === 'infinity' ||
-        inputString.toLowerCase() === 'minusInfinity') {
+      inputString.toLowerCase() === 'minusInfinity') {
       return 0;
     }
     return parseInt(input, 10);
@@ -483,8 +482,8 @@ class PointsTwoD {
    * @param {string} inputColor desired point color.
    */
   constructor(
-      inputPoints,
-      inputColor,
+    inputPoints,
+    inputColor,
   ) {
     this.pointsComputer = inputPoints;
     this.location = [];
@@ -498,15 +497,15 @@ class PointsTwoD {
    * 
    * @param {CanvasTwoD} canvas the canvas.
    */
-  updatePoints(canvas) { 
+  updatePoints(canvas) {
     this.location = [];
-    for (let i = 0; i < this.pointsComputer.length; i++){
+    for (let i = 0; i < this.pointsComputer.length; i++) {
       let point = []
-      for (let j = 0; j < this.pointsComputer[i].length; j++){
+      for (let j = 0; j < this.pointsComputer[i].length; j++) {
         point.push(canvas.evaluateNumberOrParameter(this.pointsComputer[i][j]));
       }
       this.location.push(point);
-    }    
+    }
   }
 
   /**
@@ -573,8 +572,8 @@ class CurveTwoD {
    * @param {string} letter used for external parameters given by sliders.
    */
   constructor(
-      inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
-      inputColor, inputLineWidth) {
+    inputCoordinateFunctions, inputLeftPt, inputRightPt, inputNumSegments,
+    inputColor, inputLineWidth) {
     /** @type {!Array.<!Function>} */
     this.coordinateFunctions = inputCoordinateFunctions;
     /** @type {number|function(number):number} */
@@ -582,7 +581,7 @@ class CurveTwoD {
     /** @type {number|function(number):number} */
     this.rightPointComputer = inputRightPt;
     /** @type {number|function(number):number} */
-    this.numberOfSegmentsComputer = inputNumSegments;    
+    this.numberOfSegmentsComputer = inputNumSegments;
     /** @type {number} */
     this.leftPt = 0;
     /** @type {number} */
@@ -666,7 +665,7 @@ class CurveTwoD {
     for (let i = 0; i < this.numSegments; i++) {
       let ratio = i / (this.numSegments - 1);
       argumentT =
-          this.leftPt * (1 - ratio) + this.rightPt * ratio;  //<- this way of
+        this.leftPt * (1 - ratio) + this.rightPt * ratio;  //<- this way of
       // computing x introduces smaller numerical errors.
       // For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
       // If not careful with rounding errors,
@@ -678,12 +677,11 @@ class CurveTwoD {
       y = this.coordinateFunctions[1](argumentT, canvas.parameterValues);
       if (!isFinite(y) || !isFinite(x)) {
         console.log(
-            `Failed to evaluate: ${this.coordinateFunctions} at x = ${x}`);
+          `Failed to evaluate: ${this.coordinateFunctions} at x = ${x}`);
       }
       if (Math.abs(y) > 100000 || Math.abs(x) > 100000) {
         if (!skippedValues) {
-          console.log(`Curve point: [${x}, ${
-              y}] is too large, skipping. Further errors suppressed.`);
+          console.log(`Curve point: [${x}, ${y}] is too large, skipping. Further errors suppressed.`);
         }
         skippedValues = true;
         continue;
@@ -898,7 +896,7 @@ class AxesGrid {
    *
    * @param {!Array.<!Array.<number>>} unused output bounding box.
    */
-  accountBoundingBox(unused, unused2) {}
+  accountBoundingBox(unused, unused2) { }
 
   /**
    * Draws the object onto the given canvas.
@@ -932,13 +930,13 @@ class AxesGrid {
     let ceilTop = Math.ceil(top);
     let distanceBetweenMarks = 30;
     let DeltaHorizontal = Math.max(
-        1,
-        Math.floor(
-            (ceilRight - floorLeft) / (canvas.width / distanceBetweenMarks)));
+      1,
+      Math.floor(
+        (ceilRight - floorLeft) / (canvas.width / distanceBetweenMarks)));
     let DeltaVertical = Math.max(
-        1,
-        Math.floor(
-            (ceilTop - floorBottom) / (canvas.height / distanceBetweenMarks)));
+      1,
+      Math.floor(
+        (ceilTop - floorBottom) / (canvas.height / distanceBetweenMarks)));
     let Delta = Math.max(DeltaHorizontal, DeltaVertical);
     surface.beginPath();
     for (let i = floorLeft; i <= ceilRight; i += Delta) {
@@ -986,8 +984,8 @@ class PlotTwoD {
    * @param {number} inputLineWidth line width of the graph.
    */
   constructor(
-      inputFunction, leftPoint, rightPoint, numberOfSegments, inputColor,
-      inputLineWidth) {
+    inputFunction, leftPoint, rightPoint, numberOfSegments, inputColor,
+    inputLineWidth) {
     this.functionPlotted = inputFunction;
     /** @type {number} */
     this.leftPoint = numberFromNumberOfInfinity(leftPoint);
@@ -1070,13 +1068,13 @@ class PlotTwoD {
       y = this.functionPlotted(x);
       if (!isFinite(y)) {
         console.log(
-            'Failed to evaluate: ' + this.functionPlotted + ' at x = ' + x);
+          'Failed to evaluate: ' + this.functionPlotted + ' at x = ' + x);
       }
       if (Math.abs(y) > 10000) {
         if (!skippedValues) {
           console.log(
-              'Function result: ' + y +
-              ' is too large, skipping. Further errors suppressed.');
+            'Function result: ' + y +
+            ' is too large, skipping. Further errors suppressed.');
         }
         skippedValues = true;
         continue;
@@ -1125,11 +1123,11 @@ class TextPlotTwoD {
 
   /**  
    * Recomputes the text location
-   * @param { CanvasTwoD } canvas output bounding box.
+   * @param {CanvasTwoD} canvas output bounding box.
    */
   updateLocation(canvas) {
     this.location = [];
-    for (let i = 0; i < this.locationComputer.length; i++){
+    for (let i = 0; i < this.locationComputer.length; i++) {
       this.location.push(
         canvas.evaluateNumberOrParameter(this.locationComputer[i]),
       );
@@ -1210,7 +1208,7 @@ class LatexPlotTwoD {
   drawNoFinish(canvas, startByMoving) {
     let coordinates = canvas.coordinatesMathToScreen(this.location);
     if (canvas.latexPlotFunction !== null) {
-      canvas.latexPlotFunction( coordinates, this.text);
+      canvas.latexPlotFunction(coordinates, this.text);
     }
   }
 
@@ -1318,7 +1316,7 @@ class EscapeMap {
    */
   constructor(functionX, functionY, parametersOnTheGraph, mandelbrotMode) {
     this.functionX = functionX;
-    this.functionY = functionY; 
+    this.functionY = functionY;
     this.lastImageData = null;
     this.ignoreNextComputation = true;
     this.boundingBoxEntries = [];
@@ -1370,8 +1368,8 @@ class EscapeMap {
       [31, 246, 31],
       [31, 255, 31],
       //
-      [60,  255, 255],
-      [90,  255, 255],
+      [60, 255, 255],
+      [90, 255, 255],
       [120, 255, 255],
       [150, 255, 255],
       [180, 255, 255],
@@ -1387,7 +1385,7 @@ class EscapeMap {
   /**
    * @param { CanvasTwoD } canvas owning the plot.
    */
-  updateParameters(canvas) { 
+  updateParameters(canvas) {
     for (let i = 0; i < this.indicesOfSelectablePoints.length; i++) {
       let index = this.indicesOfSelectablePoints[i];
       /** @type {SelectablePointTwoD} */
@@ -1432,7 +1430,7 @@ class EscapeMap {
       return [x, y];
     }
   }
-  
+
   /** 
    * Computes a bounding box  
    * 
@@ -1451,14 +1449,14 @@ class EscapeMap {
         q[1] = y;
         x = this.parametersOnTheGraph[0];
         y = this.parametersOnTheGraph[1];
-      } 
+      }
       let point = this.scaleToFindEscapingPoints(x, y, p, q);
       this.boundingBoxEntries.push(
-        point,   
+        point,
       );
     }
   }
-  
+
   /**
    * Same as draw but required to satisfy interface.
    *
@@ -1495,14 +1493,14 @@ class EscapeMap {
   iterateMap(x0, y0, p, q) {
     let x = x0;
     let y = y0;
-    for (let i = 1; i < 34; i ++) {
+    for (let i = 1; i < 34; i++) {
       let newX = this.functionX(x, y, p, q);
       let newY = this.functionY(x, y, p, q);
       x = newX;
       y = newY;
       let deltaX = x - x0;
       let deltaY = y - y0;
-      let rho = deltaX * deltaX + deltaY * deltaY; 
+      let rho = deltaX * deltaX + deltaY * deltaY;
       if (isNaN(rho)) {
         return i;
       }
@@ -1512,7 +1510,7 @@ class EscapeMap {
     }
     return 0;
   }
-  
+
   /**
    * Converts a number from 0 to 33 to a color.
    * 
@@ -1570,8 +1568,8 @@ class EscapeMap {
           q[0] = x;
           q[1] = y;
           x = this.parametersOnTheGraph[0];
-          y = this.parametersOnTheGraph[1]; 
-        } 
+          y = this.parametersOnTheGraph[1];
+        }
         let escapeColorTriple = this.escapeColor(x, y, p, q);
         this.lastImageData.data[i * canvas.width * 4 + j * 4 + 0] = escapeColorTriple[0];
         this.lastImageData.data[i * canvas.width * 4 + j * 4 + 1] = escapeColorTriple[1];
@@ -1623,9 +1621,9 @@ class EscapeMap {
       }
       if (Math.abs(coordinates[0]) > 1000 || Math.abs(coordinates[1]) > 1000) {
         break;
-      } 
+      }
       points.push(coordinates);
-    } 
+    }
     surface.beginPath();
     surface.strokeStyle = "red";
     surface.lineWidth = 3;
@@ -1672,14 +1670,14 @@ class VectorFieldTwoD {
    * @param {number} inputLineWidth line width.
    */
   constructor(
-      inputField,
-      inputIsDirectionField,
-      inputLowLeft,
-      inputHighRight,
-      inputNumSegmentsXY,
-      inputDesiredLengthDirectionVectors,
-      inputColor,
-      inputLineWidth,
+    inputField,
+    inputIsDirectionField,
+    inputLowLeft,
+    inputHighRight,
+    inputNumSegmentsXY,
+    inputDesiredLengthDirectionVectors,
+    inputColor,
+    inputLineWidth,
   ) {
     /** @type {!Function} */
     this.theField = inputField;
@@ -1736,13 +1734,13 @@ class VectorFieldTwoD {
       for (let j = 0; j < this.numSegmentsXY[1]; j++) {
         let theRatioY = j / (this.numSegmentsXY[1] - 1);
         let y =
-            this.lowLeft[1] * (1 - theRatioY) + this.highRight[1] * theRatioY;
+          this.lowLeft[1] * (1 - theRatioY) + this.highRight[1] * theRatioY;
         let vector = this.theField(x, y);
         if (this.isDirectionField) {
           if (vectorLength(vector) !== 0) {
             vectorTimesScalar(
-                vector,
-                this.desiredLengthDirectionVectors * 1 / vectorLength(vector));
+              vector,
+              this.desiredLengthDirectionVectors * 1 / vectorLength(vector));
           }
         }
         let headMath = [x + vector[0] / 2, y + vector[1] / 2];
@@ -1846,7 +1844,7 @@ class PlotFillTwoD {
    * @param {!Array.<!Array.<number>>} unused output bounding box.
    * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(unused, canvas) {}
+  accountBoundingBox(unused, canvas) { }
 
   /**
    * Same as draw but used to satisfy an interface.
@@ -1866,7 +1864,7 @@ class PlotFillTwoD {
   draw(canvas) {
     let surface = canvas.surface;
     let objects = canvas.drawObjects;
-    let tempCounter = canvas.numDrawnObjects;
+    let tempCounter = canvas.drawnObjects;
     surface.beginPath();
     let firstRun = true;
     for (tempCounter++; tempCounter < objects.length; tempCounter++) {
@@ -1879,9 +1877,9 @@ class PlotFillTwoD {
     }
     surface.fillStyle = colorRGBToString(this.color);
     surface.fill();
-    for (canvas.numDrawnObjects++; canvas.numDrawnObjects < objects.length;
-         canvas.numDrawnObjects++) {
-      let currentO = objects[canvas.numDrawnObjects];
+    for (canvas.drawnObjects++; canvas.drawnObjects < objects.length;
+      canvas.drawnObjects++) {
+      let currentO = objects[canvas.drawnObjects];
       if (currentO.type === 'plotFillFinish') {
         break;
       }
@@ -1901,20 +1899,20 @@ class PlotFillFinishTwoD {
    * @param {!Array.<!Array.<number>>} unused used.
    * @param {CanvasTwoD} canvas output bounding box.
    */
-  accountBoundingBox(unused, canvas) {}
+  accountBoundingBox(unused, canvas) { }
 
   /**
    * Unused.
    * @param {!CanvasTwoD} canvas unused.
    * @param {boolean} unused unused.
    */
-  drawNoFinish(canvas, unused) {}
+  drawNoFinish(canvas, unused) { }
 
   /**
    * Unused.
    * @param {!CanvasTwoD} canvas unused.
    */
-  draw(canvas) {}
+  draw(canvas) { }
 }
 
 /**
@@ -1988,7 +1986,7 @@ class CanvasTwoD {
       this.spanControls = null;
     }
     /** @type {number} */
-    this.numDrawnObjects = 0;
+    this.drawnObjects = 0;
     this.boundingBoxMath = [[-0.1, -0.1], [0.1, 0.1]];
     /** @type {number} */
     this.width = inputCanvas.width;
@@ -2243,7 +2241,7 @@ class CanvasTwoD {
       parametersOnTheGraph,
       mandelbrotMode,
     );
-    this.drawObjects.push(newPlot);    
+    this.drawObjects.push(newPlot);
     for (let i = 0; i + 1 < parametersOnTheGraph.length; i += 2) {
       let selectablePoint = new SelectablePointTwoD(
         parametersOnTheGraph[i], parametersOnTheGraph[i + 1], "red",
@@ -2252,7 +2250,7 @@ class CanvasTwoD {
       newPlot.indicesOfSelectablePoints.push(this.drawObjects.length);
       this.drawObjects.push(selectablePoint);
     }
-    this.additionalMouseMoveListeners.push((x,y) => {
+    this.additionalMouseMoveListeners.push((x, y) => {
       newPlot.mouseMove(this, x, y);
     });
   }
@@ -2347,13 +2345,13 @@ class CanvasTwoD {
     let centerViewWindowMath = vectorPlusVector(leftLowPt, rightUpPt);
     vectorTimesScalar(centerViewWindowMath, 0.5);
     let centerViewWindowScreen =
-        this.coordinatesMathToScreen(centerViewWindowMath);
+      this.coordinatesMathToScreen(centerViewWindowMath);
     this.centerX += this.centerCanvasX - centerViewWindowScreen[0];
     this.centerY += this.centerCanvasY - centerViewWindowScreen[1];
   }
 
   /** Clears the graphics. */
-  clear() { 
+  clear() {
     this.drawObjects = [];
     this.additionalMouseMoveListeners = [];
     this.visibility = null;
@@ -2371,7 +2369,7 @@ class CanvasTwoD {
     if (!(label in this.visibility)) {
       return true;
     }
-    return this.visibility[label];    
+    return this.visibility[label];
   }
 
   initializeVisibility() {
@@ -2387,7 +2385,7 @@ class CanvasTwoD {
     }
     this.layerContainer.textContent = "";
     for (let i = 0; i < this.layers.length; i++) {
-      this.visibility[this.layers[i]] = true; 
+      this.visibility[this.layers[i]] = true;
     }
     for (let layer in this.visibility) {
       if (layer === "") {
@@ -2414,18 +2412,18 @@ class CanvasTwoD {
     this.redrawStart = new Date().getTime();
     let surface = this.surface;
     surface.clearRect(0, 0, this.width, this.height);
-    for (this.numDrawnObjects = 0;
-         this.numDrawnObjects < this.drawObjects.length;
-      this.numDrawnObjects++) {
-      if (!this.isVisible(this.numDrawnObjects)) {
+    for (this.drawnObjects = 0;
+      this.drawnObjects < this.drawObjects.length;
+      this.drawnObjects++) {
+      if (!this.isVisible(this.drawnObjects)) {
         continue;
       }
-      this.drawObjects[this.numDrawnObjects].draw(this);
+      this.drawObjects[this.drawnObjects].draw(this);
     }
     let redrawTime = new Date().getTime();
     if (this.flagShowPerformance) {
       this.textPerformance =
-          'Redraw time (ms): ' + (redrawTime - this.redrawStart);
+        'Redraw time (ms): ' + (redrawTime - this.redrawStart);
       this.showMessages();
     }
   }
@@ -2436,8 +2434,7 @@ class CanvasTwoD {
     this.screenBasisOrthonormal[1] = [0, 1];
     this.textProjectionInfo = '';
     this.textProjectionInfo +=
-        `<br>e1: ${this.screenBasisOrthonormal[0]} <br>e2: ${
-            this.screenBasisOrthonormal[1]}`;
+      `<br>e1: ${this.screenBasisOrthonormal[0]} <br>e2: ${this.screenBasisOrthonormal[1]}`;
   }
 
   /**
@@ -2474,10 +2471,10 @@ class CanvasTwoD {
         /** @type {!Canvas2DContext} */ (this.canvasContainer.getContext('2d'));
     this.canvasContainer.addEventListener('DOMMouseScroll', (e) => {
       this.mouseWheelHandler(e);
-    }, {passive: false});
+    }, { passive: false });
     this.canvasContainer.addEventListener('mousewheel', (e) => {
       this.mouseWheelHandler(e);
-    }, {passive: false});
+    }, { passive: false });
     this.canvasContainer.addEventListener('mousedown', (e) => {
       this.clickHandler(e);
     }, true);
@@ -2535,7 +2532,7 @@ class CanvasTwoD {
     let output = this.screenBasisOrthonormal[0].slice();
     vectorTimesScalar(output, input[0]);
     vectorAddVectorTimesScalar(
-        output, this.screenBasisOrthonormal[1], input[1]);
+      output, this.screenBasisOrthonormal[1], input[1]);
     return output;
   }
 
@@ -2694,7 +2691,7 @@ class CanvasTwoD {
   mouseMovePan() {
     if (this.selectedElement === 'origin') {
       this.panAfterCursor();
-    } 
+    }
     this.redrawFinish = new Date().getTime();
     this.redrawTime = this.redrawFinish - this.redrawStart;
   }
@@ -2713,7 +2710,7 @@ class CanvasTwoD {
    */
   panAfterCursor() {
     let difference =
-        vectorMinusVector(this.mousePosition, this.clickedPosition);
+      vectorMinusVector(this.mousePosition, this.clickedPosition);
     this.centerX += difference[0] * this.scale;
     this.centerY -= difference[1] * this.scale;
     this.redraw();
@@ -2731,9 +2728,9 @@ class CanvasTwoD {
    */
   pointsWithinClickTolerance(leftXY, rightXY) {
     let squaredDistance =
-        ((leftXY[0] - rightXY[0]) * (leftXY[0] - rightXY[0]) +
-         (leftXY[1] - rightXY[1]) * (leftXY[1] - rightXY[1])) *
-        this.scale;
+      ((leftXY[0] - rightXY[0]) * (leftXY[0] - rightXY[0]) +
+        (leftXY[1] - rightXY[1]) * (leftXY[1] - rightXY[1])) *
+      this.scale;
     return squaredDistance < 1;
   }
 
@@ -2747,7 +2744,7 @@ class CanvasTwoD {
    */
   canvasClick(screenX, screenY) {
     this.clickedPosition =
-        this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
+      this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
     this.mousePosition = [];
     this.selectedElement = 'origin';
     for (let i = 0; i < this.indicesOfSelectablePoints.length; i++) {
@@ -2761,7 +2758,7 @@ class CanvasTwoD {
         break;
       }
     }
-    
+
     if (this.flagShowPerformance) {
       this.logStatus();
     }
@@ -2784,7 +2781,7 @@ class CanvasTwoD {
     this.spanMessages.textContent = '';
     if (this.textPerformance != '') {
       this.spanMessages.appendChild(
-          document.createTextNode(this.textPerformance));
+        document.createTextNode(this.textPerformance));
       this.spanMessages.appendChild(document.createElement('br'));
     }
     if (this.textErrors !== '') {
@@ -2792,10 +2789,10 @@ class CanvasTwoD {
     }
     this.spanMessages.appendChild(document.createTextNode(this.textMouseInfo));
     this.spanMessages.appendChild(
-        document.createTextNode(this.textProjectionInfo));
+      document.createTextNode(this.textProjectionInfo));
     if (this.textPatchInfo !== '') {
       this.spanMessages.appendChild(
-          document.createTextNode(this.textPatchInfo));
+        document.createTextNode(this.textPatchInfo));
     }
   }
 
@@ -2829,8 +2826,8 @@ class CurveThreeD {
    * @param {number} inputLineWidth the line width of the curve.
    */
   constructor(
-      inputCoordinateFunctions, inputLeftPoint, inputRightPoint,
-      inputNumberOfSegments, inputColor, inputLineWidth) {
+    inputCoordinateFunctions, inputLeftPoint, inputRightPoint,
+    inputNumberOfSegments, inputColor, inputLineWidth) {
     /** @type {function(number):!Array.<number>} */
     this.coordinateFunctions = inputCoordinateFunctions;
     /** @type {number} */
@@ -2887,7 +2884,7 @@ class CurveThreeD {
     for (let i = 0; i < this.numSegments; i++) {
       let ratio = i / (this.numSegments - 1);
       argumentT =
-          this.leftPoint * (1 - ratio) + this.rightPoint * ratio;  //<- this way of
+        this.leftPoint * (1 - ratio) + this.rightPoint * ratio;  //<- this way of
       // computing x introduces smaller numerical errors.
       // For example, suppose you plot sqrt(1-x^2) from - 1 to 1.
       // If not careful with rounding errors,
@@ -2899,7 +2896,7 @@ class CurveThreeD {
       y = this.coordinateFunctions[1](argumentT);
       if (!isFinite(y) || !isFinite(x)) {
         console.log(
-            `Failed to evaluate: ${this.coordinateFunctions} at x = ${x}`);
+          `Failed to evaluate: ${this.coordinateFunctions} at x = ${x}`);
       }
       if (Math.abs(y) > 100000 || Math.abs(x) > 100000) {
         if (!skippedValues) {
@@ -2956,17 +2953,17 @@ class Surface {
    * @param {number} inputContourWidth the line width of the contour.
    */
   constructor(
-      inputXYZFunction,
-      inputUVBox,
-      inputPatchDimensions,
-      colorFront,
-      colorBack,
-      colorContour,
-      inputContourWidth,
+    inputXYZFunction,
+    inputUVBox,
+    inputPatchDimensions,
+    colorFront,
+    colorBack,
+    colorContour,
+    inputContourWidth,
   ) {
     this.xyzFun = inputXYZFunction;
     /** @type {Array.<!Array.<number>>} */
-    this.uvBox = [[0,0], [0,0]];
+    this.uvBox = [[0, 0], [0, 0]];
     /** @type {!Array.<number>} */
     this.patchDimensions = [0, 0];
     /** @type {!Array.< !Array.< number | function (Array.<number>): number >>} */
@@ -3018,7 +3015,7 @@ class SegmentInThreeD {
   constructor(leftPt, rightPt, inputColor, inputLineWidth) {
     this.leftPt = leftPt;
     this.rightPt = rightPt;
-    this.color = inputColor; 
+    this.color = inputColor;
     this.lineWidth = inputLineWidth;
   }
 
@@ -3102,7 +3099,7 @@ class Contour {
   constructor(inputPoints, inputColor, inputLineWidth) {
     /** @type {!Array.<!Array<number>>} */
     this.points = inputPoints.slice();
-    this.thePointsMathScreen = [];
+    this.pointsMathScreen = [];
     /** @type {!Array.<number>} */
     this.color = colorToRGB(inputColor);
     /** @type {!Object.<number,boolean>} */
@@ -3125,6 +3122,120 @@ class TextInThreeD {
     this.location = location;
     this.text = text;
     this.color = color;
+  }
+}
+
+class VisibilityLayersThreeD {
+  constructor(
+    /** @type {Canvas} */
+    owner,
+    /** @type {HTMLElement|undefined|null} */
+    layerContainer,
+  ) {
+    this.owner = owner;
+    /** @type {Array.<string>} */
+    this.sufraceLayers = [];
+    /** @type {Array.<string>} */
+    this.segmentLayers = [];
+    /** @type {Array.<string>} */
+    this.curveLayers = [];
+    /** @type {Array.<string>} */
+    this.textLayers = [];
+    /** @type {HTMLElement|null} */
+    this.layerContainer = null;
+    if (layerContainer !== undefined) {
+      this.layerContainer = layerContainer;
+    }
+    /** @type {Object.<string, boolean>|null} */
+    this.visibility = null;
+  }
+
+  isVisibleWithRespectTo(
+    /** @type {number} */
+    objectIndex,
+    /** @type {Array.<string>} */
+    objectLabels
+  ) {
+    if (objectIndex >= objectLabels.length) {
+      return true;
+    }
+    let label = objectLabels[objectIndex];
+    if (!(label in this.visibility)) {
+      return true;
+    }
+    return this.visibility[label];
+  }
+
+  isVisibleSurface(
+    /** @type {number} */
+    index,
+  ) {
+    return this.isVisibleWithRespectTo(index, this.sufraceLayers);
+  }
+
+  /** @return {boolean} */
+  isVisibleSegment(
+    /** @type {number} */
+    index,
+  ) {
+    return this.isVisibleWithRespectTo(index, this.segmentLayers);
+  }
+
+  isVisibleCurve(
+    /** @type {number} */
+    index,
+  ) {
+    return this.isVisibleWithRespectTo(index, this.curveLayers);
+  }
+
+  isVisibleText(
+    /** @type {number} */
+    index,
+  ) {
+    return this.isVisibleWithRespectTo(index, this.textLayers);
+  }
+
+  addLayers(
+    /** @type {Array.<string>} */
+    layerContainer,
+  ) {
+    for (let layer of layerContainer) {
+      this.visibility[layer] = true;
+    }
+  }
+
+  createCheckboxes() {
+    if (this.visibility !== null) {
+      return;
+    }
+    this.visibility = {};
+    if (
+      this.layerContainer === null ||
+      this.layerContainer === undefined
+    ) {
+      return;
+    }
+    this.layerContainer.textContent = "";
+    this.addLayers(this.sufraceLayers);
+    this.addLayers(this.segmentLayers);
+    this.addLayers(this.curveLayers);
+    this.addLayers(this.textLayers);
+    for (let layer in this.visibility) {
+      if (layer === "") {
+        continue;
+      }
+      const child = document.createElement("input");
+      child.type = "checkbox";
+      child.checked = true;
+      child.addEventListener(
+        "change", () => {
+          this.visibility[layer] = child.checked;
+          this.owner.recomputeAndRedraw();
+        });
+      this.layerContainer.appendChild(child);
+      this.layerContainer.appendChild(document.createTextNode(layer));
+      this.layerContainer.appendChild(document.createElement("br"));
+    }
   }
 }
 
@@ -3181,11 +3292,14 @@ class Canvas {
    *     controls.
    * @param {?HTMLElement} messages A Dom element in which to write debug
    *     information.
+   * @param {HTMLElement|null|undefined} layerContainer A container for the 
+   *     layer checkboxes.
    */
   constructor(
-      inputCanvas,
-      controls,
-      messages,
+    inputCanvas,
+    controls,
+    messages,
+    layerContainer,
   ) {
     this.canvasContainer = inputCanvas;
     this.spanControls = controls;
@@ -3193,10 +3307,11 @@ class Canvas {
     this.all3dObjects = {
       /** @type {!Array.<!Patch>} */
       allPatches: [],
+      /** @type {!Array.<!Contour>} */
       allContours: [],
       points: [],
       /** @type {!Array.<!TextInThreeD>} */
-      theLabels: [],
+      labels: [],
     };
     /** 
      * These objects are "high-level" objects that 
@@ -3292,6 +3407,7 @@ class Canvas {
     this.parameterValues = [];
     /** @type {!Object.<string, number>} */
     this.parameterNames = {};
+    this.visibility = new VisibilityLayersThreeD(this, layerContainer);
   }
 
   /**
@@ -3357,7 +3473,7 @@ class Canvas {
     this.all3dObjects.allPatches = [];
     this.all3dObjects.allContours = [];
     this.all3dObjects.points = [];
-    this.all3dObjects.theLabels = [];
+    this.all3dObjects.labels = [];
     this.constructControls();
     this.computeBasis();
     if (this.zBuffer.length === 0) {
@@ -3371,10 +3487,12 @@ class Canvas {
    * @param {!Array.<number>} location [x,y,z]-location of the label.
    * @param {string} text text of the label
    * @param {string} color color of the text.
+   * @param {string} layer the layer in which to draw the object.
    */
-  drawTextCreate(location, text, color) {
+  drawTextCreate(location, text, color, layer) {
     let element = new TextInThreeD(location, text, color);
     this.highLevel3dObjects.texts.push(element);
+    this.visibility.textLayers.push(layer);
     this.drawText(element);
   }
 
@@ -3384,7 +3502,7 @@ class Canvas {
    * @param {TextInThreeD} element The element to draw.
    */
   drawText(element) {
-    this.all3dObjects.theLabels.push(element);
+    this.all3dObjects.labels.push(element);
   }
 
   /**
@@ -3392,9 +3510,11 @@ class Canvas {
    * drawn with a dashed line.
    *
    * @param {!CurveThreeD} curve [x,y,z]-location of the label.
+   * @param {string} layer The layer of the object.
    */
-  drawCurveCreate(curve) {
+  drawCurveCreate(curve, layer) {
     this.highLevel3dObjects.curves.push(curve);
+    this.visibility.curveLayers.push(layer);
     this.drawCurve(curve);
   }
 
@@ -3408,7 +3528,7 @@ class Canvas {
     let contourPoints = new Array(curve.numSegments + 1);
     for (let i = 0; i < curve.numSegments + 1; i++) {
       let ratio = i / curve.numSegments;
-      let leftEvaluated = this.evaluateNumberOrParameter(curve.leftPoint); 
+      let leftEvaluated = this.evaluateNumberOrParameter(curve.leftPoint);
       let rightEvaluated = this.evaluateNumberOrParameter(curve.rightPoint);
       let argumentValue = leftEvaluated * (1 - ratio) + rightEvaluated * ratio;
       contourPoints[i] = curve.coordinateFunctions(
@@ -3416,7 +3536,7 @@ class Canvas {
       );
     }
     this.all3dObjects.allContours.push(
-        new Contour(contourPoints, curve.color, curve.lineWidth));
+      new Contour(contourPoints, curve.color, curve.lineWidth));
   }
 
   /**
@@ -3429,7 +3549,7 @@ class Canvas {
    */
   drawPatchStraight(base, edge1, edge2, color) {
     this.all3dObjects.allPatches.push(
-        new Patch(base, edge1, edge2, color, color));
+      new Patch(base, edge1, edge2, color, color));
     let patchIndex = this.all3dObjects.allPatches.length - 1;
     let patch = this.all3dObjects.allPatches[patchIndex];
     patch.index = patchIndex;
@@ -3470,9 +3590,11 @@ class Canvas {
    * @param {!Array.<number>} rightPt [x,y,z]-coordinates of the first point.
    * @param {string} inputColor color of the points.
    * @param {number} inputLineWidth line width.
+   * @param {string} layer the layer in which to draw the object.
    */
-  drawLineCreate(leftPt, rightPt, inputColor, inputLineWidth) {
+  drawLineCreate(leftPt, rightPt, inputColor, inputLineWidth, layer) {
     let segment = new SegmentInThreeD(leftPt, rightPt, inputColor, inputLineWidth);
+    this.visibility.segmentLayers.push(layer);
     this.highLevel3dObjects.segments.push(segment);
     this.drawLine(segment);
   }
@@ -3531,12 +3653,12 @@ class Canvas {
    * @private
    */
   computeContour(contour) {
-    if (contour.thePointsMathScreen.length !== contour.points.length) {
-      contour.thePointsMathScreen = new Array(contour.points.length);
+    if (contour.pointsMathScreen.length !== contour.points.length) {
+      contour.pointsMathScreen = new Array(contour.points.length);
     }
     for (let i = 0; i < contour.points.length; i++) {
-      contour.thePointsMathScreen[i] =
-          this.coordsProjectMathToMathScreen2d(contour.points[i]);
+      contour.pointsMathScreen[i] =
+        this.coordsProjectMathToMathScreen2d(contour.points[i]);
     }
   }
 
@@ -3553,44 +3675,44 @@ class Canvas {
    */
   pointRelativeToPatch(point, patch) {
     if (vectorLength(patch.normalScreen1) < 0.00001 ||
-        vectorLength(patch.normalScreen2) < 0.00001 ||
-        vectorLength(patch.normal) < 0.00001) {
+      vectorLength(patch.normalScreen2) < 0.00001 ||
+      vectorLength(patch.normal) < 0.00001) {
       return 0;
     }
     if (vectorScalarVector(
-            vectorMinusVector(point, patch.base), patch.normalScreen1) *
-            vectorScalarVector(
-                vectorMinusVector(patch.internalPoint, patch.base),
-                patch.normalScreen1) >
-        0) {
+      vectorMinusVector(point, patch.base), patch.normalScreen1) *
+      vectorScalarVector(
+        vectorMinusVector(patch.internalPoint, patch.base),
+        patch.normalScreen1) >
+      0) {
       if (vectorScalarVector(
-              vectorMinusVector(point, patch.vEnd), patch.normalScreen1) *
-              vectorScalarVector(
-                  vectorMinusVector(patch.internalPoint, patch.vEnd),
-                  patch.normalScreen1) >
-          0) {
+        vectorMinusVector(point, patch.vEnd), patch.normalScreen1) *
+        vectorScalarVector(
+          vectorMinusVector(patch.internalPoint, patch.vEnd),
+          patch.normalScreen1) >
+        0) {
         if (vectorScalarVector(
-                vectorMinusVector(point, patch.base), patch.normalScreen2) *
-                vectorScalarVector(
-                    vectorMinusVector(patch.internalPoint, patch.base),
-                    patch.normalScreen2) >
-            0) {
+          vectorMinusVector(point, patch.base), patch.normalScreen2) *
+          vectorScalarVector(
+            vectorMinusVector(patch.internalPoint, patch.base),
+            patch.normalScreen2) >
+          0) {
           if (vectorScalarVector(
-                  vectorMinusVector(point, patch.vEnd), patch.normalScreen2) *
-                  vectorScalarVector(
-                      vectorMinusVector(patch.internalPoint, patch.vEnd),
-                      patch.normalScreen2) >
-              0) {
+            vectorMinusVector(point, patch.vEnd), patch.normalScreen2) *
+            vectorScalarVector(
+              vectorMinusVector(patch.internalPoint, patch.vEnd),
+              patch.normalScreen2) >
+            0) {
             if (vectorScalarVector(
-                    vectorMinusVector(point, patch.base), patch.normal) *
-                    vectorScalarVector(this.screenNormal, patch.normal) <=
-                0) {
+              vectorMinusVector(point, patch.base), patch.normal) *
+              vectorScalarVector(this.screenNormal, patch.normal) <=
+              0) {
               return -1;
             }
             if (vectorScalarVector(
-                    vectorMinusVector(point, patch.base), patch.normal) *
-                    vectorScalarVector(this.screenNormal, patch.normal) >=
-                0) {
+              vectorMinusVector(point, patch.base), patch.normal) *
+              vectorScalarVector(this.screenNormal, patch.normal) >=
+              0) {
               return 1;
             }
           }
@@ -3663,7 +3785,7 @@ class Canvas {
     if (
       this.selectedElement !== 'default' ||
       this.selectedElement === undefined ||
-      this.selectedVector === [] ||
+      this.selectedVector.length === 0 ||
       this.selectedVector === undefined
     ) {
       return;
@@ -3707,13 +3829,13 @@ class Canvas {
       return;
     }
     let surface = this.surface;
-    let thePts = contour.points;
-    let currentPt = this.coordinatesMathToScreen(thePts[0]);
+    let contourPoints = contour.points;
+    let currentPt = this.coordinatesMathToScreen(contourPoints[0]);
     if (this.flagRoundContours) {
       vectorRound(currentPt);
     }
     let oldIsInForeGround =
-        this.pointIsInForeGround(contour.points[0], contour.adjacentPatches);
+      this.pointIsInForeGround(contour.points[0], contour.adjacentPatches);
     let newIsInForeground = true;
     let dashIsOn = false;
     surface.beginPath();
@@ -3726,10 +3848,10 @@ class Canvas {
       surface.lineWidth = 1;
     }
     surface.moveTo(currentPt[0], currentPt[1]);
-    this.numContourPoints += thePts.length;
-    for (let i = 1; i < thePts.length; i++) {
+    this.numContourPoints += contourPoints.length;
+    for (let i = 1; i < contourPoints.length; i++) {
       newIsInForeground =
-          this.pointIsInForeGround(contour.points[i], contour.adjacentPatches);
+        this.pointIsInForeGround(contour.points[i], contour.adjacentPatches);
       if (!newIsInForeground && !oldIsInForeGround && !dashIsOn) {
         if (i > 1) {
           surface.stroke();
@@ -3748,7 +3870,7 @@ class Canvas {
         surface.moveTo(currentPt[0], currentPt[1]);
         dashIsOn = false;
       }
-      currentPt = this.coordinatesMathToScreen(thePts[i]);
+      currentPt = this.coordinatesMathToScreen(contourPoints[i]);
       if (this.flagRoundContours) {
         vectorRound(currentPt);
       }
@@ -3758,7 +3880,7 @@ class Canvas {
     surface.stroke();
     /////////////////
     if (this.flagDebugLabelPatches) {
-      currentPt = this.coordinatesMathToScreen(thePts[4]);
+      currentPt = this.coordinatesMathToScreen(contourPoints[4]);
       if (this.flagRoundContours) {
         vectorRound(currentPt);
       }
@@ -3778,33 +3900,33 @@ class Canvas {
   paintOnePatch(patch) {
     let surface = this.surface;
     let visibilityScalarProd =
-        vectorScalarVector(this.screenNormal, patch.normal);
+      vectorScalarVector(this.screenNormal, patch.normal);
     let depthScalarProd =
-        vectorScalarVector(this.screenNormal, patch.internalPoint);
+      vectorScalarVector(this.screenNormal, patch.internalPoint);
     let depthRatio = (depthScalarProd - this.boundingSegmentZ[0]) /
-            (this.boundingSegmentZ[1] - this.boundingSegmentZ[0]) -
-        0.5;
+      (this.boundingSegmentZ[1] - this.boundingSegmentZ[0]) -
+      0.5;
     // depthRatio is a number between -0.5 and 0.5 measuring how deep is the
     // patch relative to the center of the picture
     let colorFactor = 1 + depthRatio * this.colorDepthFactor;
     if (visibilityScalarProd >= 0) {
       surface.fillStyle =
-          colorRGBToString(colorScale(patch.colorUV, colorFactor));
+        colorRGBToString(colorScale(patch.colorUV, colorFactor));
     } else {
       surface.fillStyle =
-          colorRGBToString(colorScale(patch.colorVU, colorFactor));
+        colorRGBToString(colorScale(patch.colorVU, colorFactor));
     }
     surface.beginPath();
     let first = true;
     for (let i = 0; i < patch.adjacentContours.length; i++) {
       let currentContour =
-          this.all3dObjects.allContours[patch.adjacentContours[i]];
+        this.all3dObjects.allContours[patch.adjacentContours[i]];
       for (let j = 0; j < currentContour.points.length; j++) {
         let theIndex = (patch.traversalOrder[i] === -1) ?
-            j :
-            currentContour.points.length - j - 1;
+          j :
+          currentContour.points.length - j - 1;
         let coordinates =
-            this.coordinatesMathToScreen(currentContour.points[theIndex]);
+          this.coordinatesMathToScreen(currentContour.points[theIndex]);
         if (this.flagRoundPatches) {
           vectorRound(coordinates);
         }
@@ -3915,7 +4037,7 @@ class Canvas {
    */
   coordsMathScreenToBufferIndicesROWSFloat(input) {
     return this.zBufferRowCount * (input - this.boundingBoxMathScreen[0][1]) /
-        (this.boundingBoxMathScreen[1][1] - this.boundingBoxMathScreen[0][1]);
+      (this.boundingBoxMathScreen[1][1] - this.boundingBoxMathScreen[0][1]);
   }
 
   /**
@@ -3929,7 +4051,7 @@ class Canvas {
    */
   coordsMathScreenToBufferIndicesROWS(input) {
     let result =
-        Math.floor(this.coordsMathScreenToBufferIndicesROWSFloat(input));
+      Math.floor(this.coordsMathScreenToBufferIndicesROWSFloat(input));
     if (result >= this.zBufferRowCount) {
       result--;
     }
@@ -3946,7 +4068,7 @@ class Canvas {
    */
   coordsMathScreenToBufferIndicesCOLSFloat(input) {
     return (this.zBufferColCount) * (input - this.boundingBoxMathScreen[0][0]) /
-        (this.boundingBoxMathScreen[1][0] - this.boundingBoxMathScreen[0][0]);
+      (this.boundingBoxMathScreen[1][0] - this.boundingBoxMathScreen[0][0]);
   }
 
   /**
@@ -3960,7 +4082,7 @@ class Canvas {
    */
   coordsMathScreenToBufferIndicesCOLS(input) {
     let result =
-        Math.floor(this.coordsMathScreenToBufferIndicesCOLSFloat(input));
+      Math.floor(this.coordsMathScreenToBufferIndicesCOLSFloat(input));
     if (result >= this.zBufferColCount) {
       result--;
     }
@@ -3981,10 +4103,10 @@ class Canvas {
     let row = this.coordsMathScreenToBufferIndicesROWS(input[1]);
     let col = this.coordsMathScreenToBufferIndicesCOLS(input[0]);
     if (row < 0 || row >= this.zBufferRowCount || col < 0 ||
-        col >= this.zBufferColCount) {
+      col >= this.zBufferColCount) {
       console.log(
-          'point with math-screen coords: ' + input +
-          ' is out of the bounding box');
+        'point with math-screen coords: ' + input +
+        ' is out of the bounding box');
     }
     return [row, col];
   }
@@ -4001,7 +4123,7 @@ class Canvas {
       return;
     }
     let bufferCoords = this.coordsMathScreenToBufferIndices(
-        this.coordsProjectMathToMathScreen2d(point));
+      this.coordsProjectMathToMathScreen2d(point));
     // If there were no rounding errors, row would be equal
     // to bufferCoords[0]. However since there will be rounding errors,
     // the row is passed instead as an argument.
@@ -4027,9 +4149,9 @@ class Canvas {
   accountEdgeInBufferStrip(base, edgeVector) {
     let end = vectorPlusVector(base, edgeVector);
     let lowFloat = this.coordsMathScreenToBufferIndicesROWSFloat(
-        this.coordsProjectMathToMathScreen2d(base)[1]);
+      this.coordsProjectMathToMathScreen2d(base)[1]);
     let highFloat = this.coordsMathScreenToBufferIndicesROWSFloat(
-        this.coordsProjectMathToMathScreen2d(end)[1]);
+      this.coordsProjectMathToMathScreen2d(end)[1]);
     if (lowFloat > highFloat) {
       let minusEdge = edgeVector.slice();
       vectorTimesScalar(minusEdge, -1);
@@ -4045,7 +4167,7 @@ class Canvas {
     for (let i = Math.ceil(lowFloat); i < highFloat; i++) {
       currentPoint = base.slice();
       vectorAddVectorTimesScalar(
-          currentPoint, edgeVector, (i - lowFloat) / (highFloat - lowFloat));
+        currentPoint, edgeVector, (i - lowFloat) / (highFloat - lowFloat));
       this.accountOnePointMathCoordsInBufferStrip(i, currentPoint);
       this.accountOnePointMathCoordsInBufferStrip(i - 1, currentPoint);
     }
@@ -4078,7 +4200,7 @@ class Canvas {
     this.accountEdgeInBufferStrip(patch.v2, patch.edge1);
     for (let i = low; i <= high; i++) {
       for (let j = this.zBufferIndexStrip[i][0];
-           j <= this.zBufferIndexStrip[i][1]; j++) {
+        j <= this.zBufferIndexStrip[i][1]; j++) {
         if (i === -1 || j === -1) {
           continue;
         }
@@ -4164,11 +4286,11 @@ class Canvas {
     }
     this.computeBoundingBox();
     this.bufferDeltaX =
-        (this.boundingBoxMathScreen[1][0] - this.boundingBoxMathScreen[0][0]) /
-        this.zBufferColCount;
+      (this.boundingBoxMathScreen[1][0] - this.boundingBoxMathScreen[0][0]) /
+      this.zBufferColCount;
     this.bufferDeltaY =
-        (this.boundingBoxMathScreen[1][1] - this.boundingBoxMathScreen[0][1]) /
-        this.zBufferRowCount;
+      (this.boundingBoxMathScreen[1][1] - this.boundingBoxMathScreen[0][1]) /
+      this.zBufferRowCount;
     for (let i = 0; i < allPatches.length; i++) {
       this.accountOnePatch(i);
     }
@@ -4187,7 +4309,7 @@ class Canvas {
    * @private
    */
   computePatchOrderOneContourPoint(patch, contour, ptIndex) {
-    let pointMathScreen = contour.thePointsMathScreen[ptIndex];
+    let pointMathScreen = contour.pointsMathScreen[ptIndex];
     let point = contour.points[ptIndex];
     let indices = this.coordsMathScreenToBufferIndices(pointMathScreen);
     let currentBuffer = this.zBuffer[indices[0]][indices[1]];
@@ -4197,7 +4319,7 @@ class Canvas {
         continue;
       }
       if (patch.patchesAboveMe.indexOf(currentBuffer[i]) >= 0 ||
-          patch.patchesBelowMe.indexOf(currentBuffer[i]) >= 0) {
+        patch.patchesBelowMe.indexOf(currentBuffer[i]) >= 0) {
         continue;
       }
       let otherPatch = allPatches[currentBuffer[i]];
@@ -4223,9 +4345,9 @@ class Canvas {
     let allContours = this.all3dObjects.allContours;
     for (let i = 0; i < patch.adjacentContours.length; i++) {
       for (let j = 0; j < allContours[patch.adjacentContours[i]].points.length;
-           j++) {
+        j++) {
         this.computePatchOrderOneContourPoint(
-            patch, allContours[patch.adjacentContours[i]], j);
+          patch, allContours[patch.adjacentContours[i]], j);
       }
     }
   }
@@ -4327,10 +4449,10 @@ class Canvas {
       if (deepestNonAccountedIndex === -1) {
         deepestNonAccountedIndex = i;
         minDepth =
-            vectorScalarVector(this.screenNormal, allPatches[i].internalPoint);
+          vectorScalarVector(this.screenNormal, allPatches[i].internalPoint);
       }
       let currentDepth =
-          vectorScalarVector(this.screenNormal, allPatches[i].internalPoint);
+        vectorScalarVector(this.screenNormal, allPatches[i].internalPoint);
       if (currentDepth < minDepth) {
         minDepth = currentDepth;
         deepestNonAccountedIndex = i;
@@ -4450,9 +4572,9 @@ class Canvas {
     this.textProjectionInfo += `<br>e1: ${this.screenBasisOrthonormal[0]}`;
     this.textProjectionInfo += `<br>e2: ${this.screenBasisOrthonormal[1]}`;
     this.textProjectionInfo +=
-        `<br>selected e1: ${this.selectedScreenBasisOrthonormal[0]}`;
+      `<br>selected e1: ${this.selectedScreenBasisOrthonormal[0]}`;
     this.textProjectionInfo +=
-        `<br>selected e2: ${this.selectedScreenBasisOrthonormal[1]}`;
+      `<br>selected e2: ${this.selectedScreenBasisOrthonormal[1]}`;
   }
 
   /**
@@ -4479,25 +4601,25 @@ class Canvas {
     this.resetViewNoRedraw();
     this.computeBoundingBox();
     let leftLowScreen =
-        this.coordsMathScreenToScreen(this.boundingBoxMathScreen[0]);
+      this.coordsMathScreenToScreen(this.boundingBoxMathScreen[0]);
     let rightUpScreen =
-        this.coordsMathScreenToScreen(this.boundingBoxMathScreen[1]);
+      this.coordsMathScreenToScreen(this.boundingBoxMathScreen[1]);
     let desiredHeight = Math.abs(rightUpScreen[1] - leftLowScreen[1]) * 1.05;
     let desiredWidth = Math.abs(rightUpScreen[0] - leftLowScreen[0]) * 1.05;
     let candidateScaleHeight = this.scale * this.height / desiredHeight;
     let candidateScaleWidth = this.scale * this.width / desiredWidth;
     this.scale = Math.min(candidateScaleHeight, candidateScaleWidth);
     let newViewWindowCenterMath = vectorPlusVector(
-        this.boundingBoxMathScreen[0], this.boundingBoxMathScreen[1]);
+      this.boundingBoxMathScreen[0], this.boundingBoxMathScreen[1]);
     vectorTimesScalar(newViewWindowCenterMath, 0.5);
     let newCenterViewWindowScreenRescaled =
-        this.coordsMathScreenToScreen(newViewWindowCenterMath);
+      this.coordsMathScreenToScreen(newViewWindowCenterMath);
     let oldCenterViewWindowMathScreenRescaled =
-        this.coordsMathScreenToScreen(this.lastCenterScreen);
+      this.coordsMathScreenToScreen(this.lastCenterScreen);
     this.centerX = this.centerX + oldCenterViewWindowMathScreenRescaled[0] -
-        newCenterViewWindowScreenRescaled[0];
+      newCenterViewWindowScreenRescaled[0];
     this.centerY = this.centerY + oldCenterViewWindowMathScreenRescaled[1] -
-        newCenterViewWindowScreenRescaled[1];
+      newCenterViewWindowScreenRescaled[1];
     this.defaultCenterX = this.centerX;
     this.defaultCenterY = this.centerY;
     this.scaleDefault = this.scale;
@@ -4567,7 +4689,7 @@ class Canvas {
     let output = this.screenBasisOrthonormal[0].slice();
     vectorTimesScalar(output, coordinates[0]);
     vectorAddVectorTimesScalar(
-        output, this.screenBasisOrthonormal[1], coordinates[1]);
+      output, this.screenBasisOrthonormal[1], coordinates[1]);
     return output;
   }
 
@@ -4617,11 +4739,11 @@ class Canvas {
   coordsProjectToMathScreen3d(vector) {
     let output = this.screenBasisOrthonormal[0].slice();
     vectorTimesScalar(
-        output, vectorScalarVector(vector, this.screenBasisOrthonormal[0]));
+      output, vectorScalarVector(vector, this.screenBasisOrthonormal[0]));
     vectorAddVectorTimesScalar(
-        output,
-        this.screenBasisOrthonormal[1],
-        vectorScalarVector(vector, this.screenBasisOrthonormal[1]),
+      output,
+      this.screenBasisOrthonormal[1],
+      vectorScalarVector(vector, this.screenBasisOrthonormal[1]),
     );
     return output;
   }
@@ -4636,12 +4758,12 @@ class Canvas {
   coordsProjectToSelectedMathScreen3d(vector) {
     let output = this.selectedScreenBasisOrthonormal[0].slice();
     vectorTimesScalar(
-        output,
-        vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[0]));
+      output,
+      vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[0]));
     vectorAddVectorTimesScalar(
-        output,
-        this.selectedScreenBasisOrthonormal[1],
-        vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[1]),
+      output,
+      this.selectedScreenBasisOrthonormal[1],
+      vectorScalarVector(vector, this.selectedScreenBasisOrthonormal[1]),
     );
     return output;
   }
@@ -4657,10 +4779,10 @@ class Canvas {
   coordinatesMathToScreen(vector) {
     return [
       this.scale * vectorScalarVector(vector, this.screenBasisOrthonormal[0]) +
-          this.centerX,
+      this.centerX,
       (-1) * this.scale *
-              vectorScalarVector(vector, this.screenBasisOrthonormal[1]) +
-          this.centerY
+      vectorScalarVector(vector, this.screenBasisOrthonormal[1]) +
+      this.centerY
     ];
   }
 
@@ -4675,13 +4797,13 @@ class Canvas {
   coordsMathToSelectedScreen(vector) {
     return [
       this.scale *
-              vectorScalarVector(
-                  vector, this.selectedScreenBasisOrthonormal[0]) +
-          this.centerX,
+      vectorScalarVector(
+        vector, this.selectedScreenBasisOrthonormal[0]) +
+      this.centerX,
       (-1) * this.scale *
-              vectorScalarVector(
-                  vector, this.selectedScreenBasisOrthonormal[1]) +
-          this.centerY
+      vectorScalarVector(
+        vector, this.selectedScreenBasisOrthonormal[1]) +
+      this.centerY
     ];
   }
 
@@ -4725,7 +4847,7 @@ class Canvas {
    */
   coordsScreenAbsoluteToMathScreen(screenX, screenY) {
     return this.coordsScreenToMathScreen(
-        this.coordsScreenAbsoluteToScreen(screenX, screenY));
+      this.coordsScreenAbsoluteToScreen(screenX, screenY));
   }
 
   /**
@@ -4769,10 +4891,10 @@ class Canvas {
     vectorAddVectorTimesScalar(vComponent, projection, -1);
     projection = orthoBasis1.slice();
     vectorTimesScalar(
-        projection, Math.cos(angle) * scal1 - Math.sin(angle) * scal2);
+      projection, Math.cos(angle) * scal1 - Math.sin(angle) * scal2);
     vectorAddVectorTimesScalar(
-        projection, orthoBasis2,
-        Math.sin(angle) * scal1 + Math.sin(angle) * scal2);
+      projection, orthoBasis2,
+      Math.sin(angle) * scal1 + Math.sin(angle) * scal2);
     return vectorPlusVector(vComponent, projection);
   }
 
@@ -4819,8 +4941,8 @@ class Canvas {
     vectorNormalize(this.unitRay);
     this.rayComponent = this.unitRay.slice();
     vectorTimesScalar(
-        this.rayComponent,
-        vectorScalarVector(this.mousePosition, this.unitRay));
+      this.rayComponent,
+      vectorScalarVector(this.mousePosition, this.unitRay));
     let osculatingOldX = vectorLength(this.clickedPosition);
     let osculatingOldCos = osculatingOldX / vectorLength(this.selectedVector);
     let osculatingNewX = vectorScalarVector(this.mousePosition, this.unitRay);
@@ -4834,11 +4956,11 @@ class Canvas {
     let newE1 = this.selectedScreenBasisOrthonormal[0].slice();
     let newE2 = this.selectedScreenBasisOrthonormal[1].slice();
     newE1 = this.rotateOutOfPlane(
-        newE1, this.selectedScreenProjectionNormalized,
-        this.selectedScreenNormal, this.angleNormal);
+      newE1, this.selectedScreenProjectionNormalized,
+      this.selectedScreenNormal, this.angleNormal);
     newE2 = this.rotateOutOfPlane(
-        newE2, this.selectedScreenProjectionNormalized,
-        this.selectedScreenNormal, this.angleNormal);
+      newE2, this.selectedScreenProjectionNormalized,
+      this.selectedScreenNormal, this.angleNormal);
     this.screenBasisUser[0] = newE1.slice();
     this.screenBasisUser[1] = newE2.slice();
     this.computeBasis();
@@ -4894,7 +5016,7 @@ class Canvas {
       return;
     }
     this.mousePosition = this.coordsScreenAbsoluteToMathScreen(
-        this.screenXY[0], this.screenXY[1]);
+      this.screenXY[0], this.screenXY[1]);
     this.infoMouseCompute();
     // this.infoPatchesCompute();
     this.infoProjectionCompute();
@@ -4916,7 +5038,7 @@ class Canvas {
    */
   panAfterCursor() {
     let difference =
-        vectorMinusVector(this.mousePosition, this.clickedPosition);
+      vectorMinusVector(this.mousePosition, this.clickedPosition);
     this.centerX += difference[0] * this.scale;
     this.centerY -= difference[1] * this.scale;
     this.redraw();
@@ -4933,9 +5055,9 @@ class Canvas {
    */
   pointsWithinClickTolerance(leftXY, rightXY) {
     let squaredDistance =
-        ((leftXY[0] - rightXY[0]) * (leftXY[0] - rightXY[0]) +
-         (leftXY[1] - rightXY[1]) * (leftXY[1] - rightXY[1])) *
-        this.scale;
+      ((leftXY[0] - rightXY[0]) * (leftXY[0] - rightXY[0]) +
+        (leftXY[1] - rightXY[1]) * (leftXY[1] - rightXY[1])) *
+      this.scale;
     return squaredDistance < 7;
   }
 
@@ -4951,7 +5073,7 @@ class Canvas {
    */
   canvasClick(screenX, screenY, event) {
     this.clickedPosition =
-        this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
+      this.coordsScreenAbsoluteToMathScreen(screenX, screenY);
     this.mousePosition = [];
     let mustSelectOrigin = true;
     if (event !== undefined) {
@@ -4965,7 +5087,7 @@ class Canvas {
       }
     }
     if (this.pointsWithinClickTolerance(this.clickedPosition, [0, 0]) ||
-        mustSelectOrigin) {
+      mustSelectOrigin) {
       this.selectedElement = 'origin';
     } else {
       this.selectedElement = 'default';
@@ -4991,15 +5113,15 @@ class Canvas {
    */
   computeSelectedVector() {
     this.selectedScreenProjectionNormalized =
-        this.coordsInjectMathScreen2dToMath3d(this.clickedPosition);
+      this.coordsInjectMathScreen2dToMath3d(this.clickedPosition);
     this.selectedVector = this.selectedScreenProjectionNormalized.slice();
     vectorNormalize(this.selectedScreenProjectionNormalized);
     this.selectedScreenNormal = this.screenNormal;
     let lengthSelectedVector =
-        vectorScalarVector(this.selectedVector, this.selectedVector);
+      vectorScalarVector(this.selectedVector, this.selectedVector);
     if (lengthSelectedVector < 0.5) {
       vectorTimesScalar(
-          this.selectedVector, 1 / Math.sqrt(lengthSelectedVector));
+        this.selectedVector, 1 / Math.sqrt(lengthSelectedVector));
     }
     this.selectedScreenBasisOrthonormal = [
       this.screenBasisOrthonormal[0].slice(),
@@ -5022,18 +5144,18 @@ class Canvas {
     this.spanMessages.textContent = '';
     if (this.textPerformance !== '') {
       this.spanMessages.appendChild(
-          document.createTextNode(this.textPerformance));
+        document.createTextNode(this.textPerformance));
     }
     if (this.textErrors !== '') {
       this.spanMessages.appendChild(document.createTextNode(this.textErrors));
     }
     this.spanMessages.appendChild(document.createTextNode(this.textMouseInfo));
     this.spanMessages.appendChild(
-        document.createTextNode(this.textProjectionInfo));
+      document.createTextNode(this.textProjectionInfo));
 
     if (this.textPatchInfo !== '') {
       this.spanMessages.appendChild(
-          document.createTextNode(this.textPatchInfo));
+        document.createTextNode(this.textPatchInfo));
     }
   }
 
@@ -5110,48 +5232,58 @@ class Canvas {
     this.textMouseInfo = '';
     let allPatches = this.all3dObjects.allPatches;
     if (this.numAccountedPatches < allPatches.length) {
-      this.textMouseInfo += `Error: only ${
-          this.numAccountedPatches} out of `;
-      this.textMouseInfo += `${
-          this.all3dObjects.allPatches
-              .length} patches accounted. \n`;
+      this.textMouseInfo += `Error: only ${this.numAccountedPatches} out of `;
+      this.textMouseInfo += `${this.all3dObjects.allPatches
+        .length} patches accounted. \n`;
     }
     this.textMouseInfo += `time last redraw: ${this.redrawTime} ms `;
     this.textMouseInfo += `(~${(1000 / this.redrawTime).toFixed(1)} f.p.s.)`;
     this.textMouseInfo += `\nselected element: ${this.selectedElement}`;
     this.textMouseInfo +=
-        `\nmouse coordinates: ${vectorToString(this.screenXY)}`;
+      `\nmouse coordinates: ${vectorToString(this.screenXY)}`;
     this.textMouseInfo +=
-        `\n2d coordinates: ${vectorToString(this.mousePosition)}`;
+      `\n2d coordinates: ${vectorToString(this.mousePosition)}`;
     this.textMouseInfo += `\nclicked coordinates: ${this.clickedPosition}`;
     this.textMouseInfo += `\ndelta of position: ${this.positionDelta}`;
     this.textMouseInfo += `\nray component of mouse: ${this.rayComponent}`;
     this.textMouseInfo += `\nselected vector: ${this.selectedVector}`;
     this.textMouseInfo +=
-        `\nnormal angle change: ${this.angleNormal.toFixed(3)}`;
+      `\nnormal angle change: ${this.angleNormal.toFixed(3)}`;
     this.textMouseInfo +=
-        ` (${(this.angleNormal * 180 / Math.PI).toFixed(1)} deg)`;
+      ` (${(this.angleNormal * 180 / Math.PI).toFixed(1)} deg)`;
     this.textMouseInfo += ` = ${this.oldAngleNormal.toFixed(3)}`;
     this.textMouseInfo +=
-        ` (${(this.oldAngleNormal * 180 / Math.PI).toFixed(1)} deg)`;
+      ` (${(this.oldAngleNormal * 180 / Math.PI).toFixed(1)} deg)`;
     this.textMouseInfo += `- ${this.newAngleNormal.toFixed(3)} `;
     this.textMouseInfo +=
-        `(${(this.newAngleNormal * 180 / Math.PI).toFixed(1)} deg)`;
+      `(${(this.newAngleNormal * 180 / Math.PI).toFixed(1)} deg)`;
   }
 
   /** Recomputes parametric objects and redraws the surface. */
   recomputeAndRedraw() {
     this.clear();
     for (let i = 0; i < this.highLevel3dObjects.surfaces.length; i++) {
+      if (!this.visibility.isVisibleSurface(i)) {
+        continue;
+      }
       this.drawSurface(this.highLevel3dObjects.surfaces[i]);
     }
     for (let i = 0; i < this.highLevel3dObjects.segments.length; i++) {
+      if (!this.visibility.isVisibleSegment(i)) {
+        continue;
+      }
       this.drawLine(this.highLevel3dObjects.segments[i]);
     }
     for (let i = 0; i < this.highLevel3dObjects.curves.length; i++) {
+      if (!this.visibility.isVisibleCurve(i)) {
+        continue;
+      }
       this.drawCurve(this.highLevel3dObjects.curves[i]);
     }
     for (let i = 0; i < this.highLevel3dObjects.texts.length; i++) {
+      if (!this.visibility.isVisibleText(i)) {
+        continue;
+      }
       this.drawText(this.highLevel3dObjects.texts[i]);
     }
     this.redraw();
@@ -5159,11 +5291,12 @@ class Canvas {
 
   /** Redraws the 3d scene. */
   redraw() {
+    this.visibility.createCheckboxes();
     this.redrawStart = new Date().getTime();
     let allContours = this.all3dObjects.allContours;
     let allPatches = this.all3dObjects.allPatches;
     let points = this.all3dObjects.points;
-    let theLabels = this.all3dObjects.theLabels;
+    let labels = this.all3dObjects.labels;
     let surface = this.surface;
     surface.clearRect(0, 0, this.width, this.height);
     for (let i = 0; i < allPatches.length; i++) {
@@ -5180,17 +5313,18 @@ class Canvas {
       this.paintZbuffer();
     }
     let paintBuffersTime = new Date().getTime();
-    let numPainted = 0;
+    let numberOfPainted = 0;
     for (let i = 0; i < this.patchOrder.length; i++) {
       if (this.patchOrder[i] !== -1) {
-        this.paintOnePatch(allPatches[this.patchOrder[i]]);
-        numPainted++;
+        let indexToPaint = this.patchOrder[i];
+        this.paintOnePatch(allPatches[indexToPaint]);
+        numberOfPainted++;
       }
     }
     for (let i = 0; i < this.patchIsAccounted.length; i++) {
       if (this.patchIsAccounted[i] === 0) {
         this.paintOnePatch(allPatches[i]);
-        numPainted++;
+        numberOfPainted++;
       }
     }
     let paintPatchTime = new Date().getTime();
@@ -5203,32 +5337,31 @@ class Canvas {
     for (let i = 0; i < points.length; i++) {
       this.paintOnePoint(points[i]);
     }
-    for (let i = 0; i < theLabels.length; i++) {
-      this.paintText(theLabels[i]);
+    for (let i = 0; i < labels.length; i++) {
+      this.paintText(labels[i]);
     }
     this.paintMouseInfo();
     let redrawTime = new Date().getTime();
     if (this.flagShowPerformance) {
       this.textPerformance = '';
-
       this.textPerformance +=
-          `Redraw time (ms): ${(redrawTime - this.redrawStart)}=<br>`;
+        `Redraw time (ms): ${(redrawTime - this.redrawStart)}=<br>`;
       this.textPerformance +=
-          `${computePatchesTime - this.redrawStart} (compute patches) + `;
+        `${computePatchesTime - this.redrawStart} (compute patches) + `;
       this.textPerformance +=
-          (computeContoursTime - computePatchesTime) + ' (compute contours) + ';
+        (computeContoursTime - computePatchesTime) + ' (compute contours) + ';
       this.textPerformance +=
-          (computeBuffersTime - computeContoursTime) + ' (compute buffers) + ';
+        (computeBuffersTime - computeContoursTime) + ' (compute buffers) + ';
       this.textPerformance +=
-          (paintBuffersTime - computeBuffersTime) + '<br>(paint buffers) + ';
+        (paintBuffersTime - computeBuffersTime) + '<br>(paint buffers) + ';
       this.textPerformance += (paintPatchTime - paintBuffersTime) +
-          '<br> (paint ' + numPainted + ' patche(s)) + <br>';
+        '<br> (paint ' + numberOfPainted + ' patche(s)) + <br>';
       this.textPerformance += (paintContourTime - paintPatchTime) + ' (paint ' +
-          allContours.length + ' contour(s) with ';
+        allContours.length + ' contour(s) with ';
       this.textPerformance += this.numContourPoints + ' points in ' +
-          this.numContourPaths + ' sub-paths) + ';
+        this.numContourPaths + ' sub-paths) + ';
       this.textPerformance +=
-          (redrawTime - paintContourTime) + ' (paint all else). ';
+        (redrawTime - paintContourTime) + ' (paint all else). ';
     }
     this.showMessages();
   }
@@ -5248,15 +5381,17 @@ class Canvas {
    * @param {string} colorBack color of the back of the patch.
    * @param {string} colorContour color of the patch contour.
    * @param {number} inputContourWidth the line width of the contour.
+   * @param {string|null|undefined} layer the layer of the object.
    */
   drawSurfaceCreate(
-      inputXYZFunction,
-      inputUVBox,
-      inputPatchDimensions,
-      colorFront,
-      colorBack,
-      colorContour,
-      inputContourWidth,
+    inputXYZFunction,
+    inputUVBox,
+    inputPatchDimensions,
+    colorFront,
+    colorBack,
+    colorContour,
+    inputContourWidth,
+    layer,
   ) {
     let surface = new Surface(
       inputXYZFunction,
@@ -5268,6 +5403,7 @@ class Canvas {
       inputContourWidth,
     );
     this.highLevel3dObjects.surfaces.push(surface);
+    this.visibility.sufraceLayers.push(layer);
     this.drawSurface(surface);
   }
 
@@ -5316,7 +5452,7 @@ class Canvas {
         let edge1 = vectorMinusVector(v1, base);
         let edge2 = vectorMinusVector(v2, base);
         let incomingPatch = new Patch(
-            base, edge1, edge2, surface.colors.colorUV, surface.colors.colorVU);
+          base, edge1, edge2, surface.colors.colorUV, surface.colors.colorVU);
         incomingPatch.adjacentContours = new Array(4);
         incomingPatch.traversalOrder = [1, 1, 1, 1];
         incomingPatch.index = allPatches.length;
@@ -5336,22 +5472,22 @@ class Canvas {
           contourPoints[k] = surface.xyzFun(currentU, currentV, this.parameterValues);
         }
         let incomingContour = new Contour(
-            contourPoints, surface.colors.colorContour, surface.contourWidth);
+          contourPoints, surface.colors.colorContour, surface.contourWidth);
         incomingContour.index = allContours.length;
         if (i > 0) {
           incomingContour
-              .adjacentPatches[firstPatchIndex + numVsegments * (i - 1) + j] =
-              true;
+            .adjacentPatches[firstPatchIndex + numVsegments * (i - 1) + j] =
+            true;
           allPatches[firstPatchIndex + numVsegments * (i - 1) + j]
-              .adjacentContours[2] = allContours.length;
+            .adjacentContours[2] = allContours.length;
           allPatches[firstPatchIndex + numVsegments * (i - 1) + j]
-              .traversalOrder[2] = -1;
+            .traversalOrder[2] = -1;
         }
         if (i < numUsegments) {
           incomingContour
-              .adjacentPatches[firstPatchIndex + numVsegments * i + j] = true;
+            .adjacentPatches[firstPatchIndex + numVsegments * i + j] = true;
           allPatches[firstPatchIndex + numVsegments * i + j]
-              .adjacentContours[0] = allContours.length;
+            .adjacentContours[0] = allContours.length;
         }
         allContours.push(incomingContour);
       }
@@ -5364,22 +5500,22 @@ class Canvas {
           contourPoints[k] = surface.xyzFun(currentU, currentV, this.parameterValues);
         }
         let incomingContour = new Contour(
-            contourPoints, surface.colors.colorContour, surface.contourWidth);
+          contourPoints, surface.colors.colorContour, surface.contourWidth);
         incomingContour.index = allContours.length;
         if (j > 0) {
           incomingContour
-              .adjacentPatches[firstPatchIndex + numVsegments * i + j - 1] =
-              true;
+            .adjacentPatches[firstPatchIndex + numVsegments * i + j - 1] =
+            true;
           allPatches[firstPatchIndex + numVsegments * i + j - 1]
-              .adjacentContours[1] = allContours.length;
+            .adjacentContours[1] = allContours.length;
         }
         if (j < numVsegments) {
           incomingContour
-              .adjacentPatches[firstPatchIndex + numVsegments * i + j] = true;
+            .adjacentPatches[firstPatchIndex + numVsegments * i + j] = true;
           allPatches[firstPatchIndex + numVsegments * i + j]
-              .adjacentContours[3] = allContours.length;
+            .adjacentContours[3] = allContours.length;
           allPatches[firstPatchIndex + numVsegments * i + j].traversalOrder[3] =
-              -1;
+            -1;
         }
         allContours.push(incomingContour);
       }
@@ -5419,10 +5555,10 @@ class Drawing {
   mouseWheelCommon(e) {
     e.preventDefault();
     e.stopPropagation();
-    let theWheelDelta = e.detail ? e.detail * -1 : e.wheelDelta / 40;
-    let theIncrement = 0.6;
+    let wheelDelta = e.detail ? e.detail * -1 : e.wheelDelta / 40;
+    let increment = 0.6;
     return {
-      delta: theWheelDelta * theIncrement,
+      delta: wheelDelta * increment,
       x: e.clientX,
       y: e.clientY,
     };

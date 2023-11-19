@@ -36,7 +36,7 @@ $(info Optimization flag selected. [1;31mThis may slow down compilation a great
 OPTIMIZATION_FLAGS+=-O2
 endif
 
-CFLAGS=-Wpedantic -Wall -Wextra $(OPTIMIZATION_FLAGS) -c -pthread
+CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x $(OPTIMIZATION_FLAGS) -c -pthread
 LIBRARIES_INCLUDED_AT_THE_END=
 compiler=g++
 TARGET=calculator

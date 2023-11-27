@@ -3384,6 +3384,11 @@ void WebServer::initializePortsITry() {
   this->portHTTPSBuiltIn =
   global.configuration[Configuration::portHTTPSBuiltIn].stringValue;
   this->portHTTPSDefault = this->portHTTPSOpenSSL;
+  global << "DEBUG: port built in: " << this->portHTTPSBuiltIn << Logger::endL;
+  if (this->portHTTPSBuiltIn != "") {
+    global << "DEBUG: set available true " << Logger::endL;
+    this->transportLayerSecurity.flagBuiltInTLSAvailable = true;
+  }
   for (
     const ActAsWebServerOnly& configuration :
     global.web.actAsWebServerOnlyForTheseHosts.values
@@ -3834,8 +3839,7 @@ bool WebServer::initializeBindToPorts() {
   << "http://localhost:"
   << this->portHTTP
   << Logger::endL;
-  bool flagBuiltInTLSAvailable = false;
-  if (flagBuiltInTLSAvailable) {
+  if (this->portHTTPSBuiltIn != "") {
     if (
       !Listener::initializeBindToOnePort(
         this->portHTTPSBuiltIn,
@@ -4166,11 +4170,12 @@ int WebServer::run() {
   this->writeVersionJSFile();
   global.initModifiableDatabaseFields();
   HtmlRoutines::loadStrings();
-  this->initializeSSL();
-  this->transportLayerSecurity.initializeNonThreadSafeOnFirstCall(true);
   if (!this->initializePrepareWebServerAll()) {
     return 1;
   }
+  // Must initialize after ports were computed: we use the presence of the
+  // https port to determine whether built in ssl should try to run.
+  this->initializeSSL();
   global << Logger::purple << "waiting for connections..." << Logger::endL;
   this->statistics.successfulSelectsSoFar = 0;
   this->statistics.failedSelectsSoFar = 0;
@@ -5488,10 +5493,8 @@ void GlobalVariables::configurationProcess() {
   ) {
     global.configuration[Configuration::portHTTPSOpenSSL] = "8166";
   }
-  if (
-    global.configuration[Configuration::portHTTPSBuiltIn].stringValue == ""
-  ) {
-    global.configuration[Configuration::portHTTPSBuiltIn] = "8177";
+  if (!global.configuration.hasKey(Configuration::portHTTPSBuiltIn)) {
+    global.configuration[Configuration::portHTTPSBuiltIn] = "";
   }
   global.flagUseMathTags =
   global.configuration[Configuration::useMathTags].isTrueRepresentationInJSON(

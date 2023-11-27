@@ -30,8 +30,8 @@ bool TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey(
   static bool alreadyRan = false;
   if (alreadyRan) {
     global.fatal
-    <<
-    "Call TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey only once please. "
+    << "Call TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey "
+    << "only once please. "
     << global.fatal;
   }
   alreadyRan = true;
@@ -45,9 +45,15 @@ bool TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey(
     )
   ) {
     if (commentsOnFailure != nullptr) {
-      *commentsOnFailure << "Failed to load key file. ";
+      *commentsOnFailure
+      << "Failed to load private key file: "
+      << this->owner->selfSigned.privateKeyFileNamePhysical;
     }
     return false;
   }
+  global
+  << "Loaded private key from: "
+  << this->owner->selfSigned.privateKeyFileNamePhysical
+  << Logger::endL;
   return this->privateKey.loadFromPEM(certificateContent, commentsOnFailure);
 }

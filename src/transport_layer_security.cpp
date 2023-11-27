@@ -31,9 +31,10 @@ TransportLayerSecurityConfiguration::certificateFolder + "additional/";
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
   this->flagInitialized = false;
+  this->flagUseBuiltInTlS = false;
+  this->flagBuiltInTLSAvailable = false;
   this->openSSLData.owner = this;
   this->readBufferStandardSize = 100000;
-  this->flagUseBuiltInTlS = false;
   this->server.owner = this;
   this->currentListeningSocket = - 1;
 }
@@ -70,8 +71,11 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
       this->openSSLData.initializeOneCertificate(this->selfSigned);
     }
     this->initializeAdditionalCertificates();
-    bool flagBuiltInTLSAvailable = false;
-    if (flagBuiltInTLSAvailable) {
+    global
+    << "DEBUG: flagBuiltInTLSAvailable:"
+    << flagBuiltInTLSAvailable
+    << Logger::endL;
+    if (this->flagBuiltInTLSAvailable) {
       this->server.initialize();
     }
   } else {
@@ -362,6 +366,15 @@ bool TransportLayerSecurityServer::initializeAll(
 void TransportLayerSecurityServer::initialize() {
   this->initializeCipherSuites();
   this->initializeExtensions();
+  std::stringstream commentsOnFailure;
+  if (!this->loadSelfSignedPEMPrivateKey(&commentsOnFailure)) {
+    global
+    << Logger::red
+    << "Failed to load private key. Comments: "
+    << commentsOnFailure.str()
+    << Logger::endL;
+    this->owner->flagBuiltInTLSAvailable = false;
+  }
 }
 
 TransportLayerSecurityServer::NetworkSpoofer::NetworkSpoofer() {

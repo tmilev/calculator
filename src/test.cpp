@@ -159,7 +159,9 @@ void Test::run() {
       global << "Enter y or Y to confirm: " << Logger::endL;
       std::cin.ignore();
       int userChar = getchar();
-      if (userChar == static_cast<int>('y') || userChar ==static_cast<int>( 'Y')) {
+      if (
+        userChar == static_cast<int>('y') || userChar == static_cast<int>('Y')
+      ) {
         FileOperations::deleteFileVirtual(
           WebAPI::Calculator::testFileNameVirtual, nullptr
         );

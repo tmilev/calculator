@@ -1,8 +1,6 @@
 #include "transport_layer_security.h"
 #include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
-#include "general_strings.h"
-#include "crypto_calculator.h"
 #include <unistd.h> //<- close, open defined here
 
 #ifdef MACRO_use_open_ssl
@@ -267,8 +265,6 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
     << "Your certificate file exists by I failed to load it. "
     << input.certificateFileNamePhysical
     << global.fatal;
-  } else {
-    global << "Stand-alone certificate loaded." << Logger::endL;
   }
   global
   << Logger::green
@@ -293,6 +289,12 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
     << input.certificateFileNamePhysical
     << global.fatal;
   }
+  global
+  << Logger::green
+  << "Loaded private key from: "
+  << Logger::endL
+  << input.privateKeyFileNamePhysical
+  << Logger::endL;
   global.flagCertificatesAreOfficiallySigned = true;
 #else
   global << Logger::red << "Openssl not available." << Logger::endL;

@@ -1913,7 +1913,8 @@ void PrivateKeyRSA::signBytesPadPKCS1(
   STACK_TRACE("PrivateKeyRSA::signBytesPadPKCS1");
   List<unsigned char> inputHashedPadded;
   this->hashAndPadPKCS1(input, hash, inputHashedPadded);
-  ElementZmodP element, one;
+  ElementZmodP element;
+  ElementZmodP one;
   if (this->publicKey.modulus.isEqualToZero()) {
     global.fatal << "Public key modulus is zero. " << global.fatal;
   }

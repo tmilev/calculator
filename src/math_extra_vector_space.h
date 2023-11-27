@@ -77,17 +77,17 @@ template <typename Coefficient>
 void Basis<Coefficient>::computeGramMatrix() {
   int r = basis.numberOfRows;
   int d = basis.numberOfColumns;
-  gramMatrix.makeZeroMatrix(r);
+  this->gramMatrix.makeZeroMatrix(r);
   for (int i = 0; i < r; i ++) {
     for (int j = 0; j < r; j ++) {
       for (int k = 0; k < d; k ++) {
-        gramMatrix.elements[i][j] +=
-        basis.elements[i][k] * basis.elements[j][k];
+        this->gramMatrix.elements[i][j] +=
+        this->basis.elements[i][k] * basis.elements[j][k];
       }
     }
   }
-  gramMatrix.invert();
-  haveGramMatrix = true;
+  this->gramMatrix.invert();
+  this->haveGramMatrix = true;
 }
 
 template <typename Coefficient>
@@ -101,7 +101,7 @@ Vector<Coefficient> Basis<Coefficient>::putInBasis(
     input.getCoordinatesInBasis(basisVectorForm, output);
     return output;
   } else {
-    if (!haveGramMatrix) {
+    if (!this->haveGramMatrix) {
       computeGramMatrix();
     }
     return gramMatrix *(basis* input);
@@ -112,7 +112,7 @@ template <typename Coefficient>
 Matrix<Coefficient> Basis<Coefficient>::putInBasis(
   const Matrix<Coefficient>& input
 ) {
-  if (!haveGramMatrix) {
+  if (!this->haveGramMatrix) {
     computeGramMatrix();
   }
   return gramMatrix *(basis* input);
@@ -395,7 +395,7 @@ template <typename Coefficient>
 bool VectorSpace<Coefficient>::operator==(
   const VectorSpace<Coefficient>& other
 ) const {
-  return fastbasis == other.fastbasis;
+  return this->fastbasis == other.fastbasis;
 }
 
 template <typename Coefficient>
@@ -404,11 +404,11 @@ Vector<Coefficient> VectorSpace<Coefficient>::getBasisVector(int i) const {
     global.fatal << "Bad vector index. " << global.fatal;
   }
   Vector<Coefficient> out;
-  if (basis.basis.numberOfRows > i) {
-    basis.basis.getVectorFromRow(i, out);
+  if (this->basis.basis.numberOfRows > i) {
+    this->basis.basis.getVectorFromRow(i, out);
     return out;
   }
-  fastbasis.getVectorFromRow(i, out);
+  this->fastbasis.getVectorFromRow(i, out);
   return out;
 }
 
@@ -419,7 +419,7 @@ const {
     global.fatal << "Vector index too large. " << global.fatal;
   }
   Vector<Coefficient> out;
-  fastbasis.getVectorFromRow(i, out);
+  this->fastbasis.getVectorFromRow(i, out);
   return out;
 }
 

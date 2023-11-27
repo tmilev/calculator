@@ -28,8 +28,7 @@ class TransportLayerSecurityConfiguration {
   static const std::string selfSignedPrivateKey;
   // Contains the string "certificates/additional/".
   // Similar to the certificatesFolder, but has additional certificates to be
-  // used
-  // by stand-alone web server configurations.
+  // used by stand-alone web server configurations.
   static const std::string additionalCertificateFolder;
   void readCertificateFilename();
   void readPrivateKeyFilename();
@@ -657,6 +656,7 @@ public:
   bool flagIsServer;
   bool flagInitialized;
   bool flagUseBuiltInTlS;
+  bool flagBuiltInTLSAvailable;
   TransportLayerSecurityOpenSSL openSSLData;
   TransportLayerSecurityServer server;
   List<char> readBuffer;

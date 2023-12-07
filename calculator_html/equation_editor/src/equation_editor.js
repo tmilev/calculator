@@ -12148,7 +12148,7 @@ class MathTagData {
   }
 }
 
-class MathTagCoverter {
+class MathTagConverter {
   constructor(
     /**
      * @type {{
@@ -12451,6 +12451,21 @@ class MathTagCoverter {
   }
 }
 
+/**  
+ * Typesets a dom element, converting all latex entries to 
+ * dom elements that look like math.
+ * 
+ * toBeModified is the html element whose .textContent is to be processed.
+ * callbackEquationCreation is the callback function to use when 
+ * the equation is created.
+ * options are additional options passed to the typesetter.
+ *  
+ * sanitizeLatexSource: whether to convert the original latex to parsed one.
+ * removeDisplayStyle: whether to remove \\displaystyle from latex source.
+ * logTiming: whether to log in the console timing statistics.
+ * extraAttributes: an string-key string-value object.
+ * 
+ */
 function typeset(
   /** @type {HTMLElement!} */
   toBeModified,
@@ -12464,16 +12479,12 @@ function typeset(
    * svgAndDOM: boolean,
    * extraAttributes: Object<string, string>!}}
    */
-  // sanitizeLatexSource: whether to convert the original latex to parsed one.
-  // removeDisplayStyle: whether to remove \\displaystyle from latex source.
-  // logTiming: whether to log in the console timing statistics.
-  // extraAttributes: an string-key string-value object.
   options,
 ) {
   if (callbackEquationCreation === undefined) {
     callbackEquationCreation = null;
   }
-  new MathTagCoverter(
+  new MathTagConverter(
     options,
   )
     .typeset(

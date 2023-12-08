@@ -12149,6 +12149,19 @@ class MathTagData {
 }
 
 class MathTagConverter {
+  /**
+   * Sets the options for the math tag converter.
+   * Accepts a single argument options, that is an object.
+   * The expected keys of the object are the following.
+   *
+   * sanitizeLatexSource: whether to convert the original latex to parsed
+   *  one.
+   * removeDisplayStyle: whether to remove \\displaystyle from latex
+   *  source. logTiming: whether to log in the console timing statistics.
+   * svgAndDOM: generate both a DOM and an SVG equation side-by side. Use
+   *  for debugging only. svgOnly: use svg instead of DOM output.
+   * extraAttributes: an string-key string-value object.
+   */
   constructor(
     /**
      * @type {{
@@ -12161,12 +12174,6 @@ class MathTagConverter {
      * copyButton: (boolean|undefined),
      * extraAttributes: (Object.<string, string>!|undefined)}|undefined}
      */
-    // sanitizeLatexSource: whether to convert the original latex to parsed
-    // one. removeDisplayStyle: whether to remove \\displaystyle from latex
-    // source. logTiming: whether to log in the console timing statistics.
-    // svgAndDOM: generate both a DOM and an SVG equation side-by side. Use
-    // for debugging only. svgOnly: use svg instead of DOM output.
-    // extraAttributes: an string-key string-value object.
     options,
   ) {
     if (options === null || options === undefined) {
@@ -12464,7 +12471,6 @@ class MathTagConverter {
  * removeDisplayStyle: whether to remove \\displaystyle from latex source.
  * logTiming: whether to log in the console timing statistics.
  * extraAttributes: an string-key string-value object.
- * 
  */
 function typeset(
   /** @type {HTMLElement!} */

@@ -199,6 +199,12 @@ class Splitter {
     this.parentElement = document.getElementById(
       ids.domElements.pages.calculator.divCalculatorMainInputOutput
     );
+    this.calculatorOutput = document.getElementById(
+      ids.domElements.pages.calculator.divCalculatorMainOutput
+    );
+    this.calculatorInput = document.getElementById(
+      ids.domElements.pages.calculator.divCalculatorMainInput
+    );
     this.resizing = false;
   }
 
@@ -237,9 +243,6 @@ class Splitter {
     }
     let xy = this.getXY(mouseEvent);
     let y = xy.y;
-    if (y < 100) {
-      y = 100;
-    }
     storage.storage.variables.calculator.splitterInputOutput.setAndStore(
       y - 10, false, false
     );
@@ -247,10 +250,19 @@ class Splitter {
   }
 
   setHeight(y) {
-    let mainOutput = document.getElementById(
-      ids.domElements.pages.calculator.divCalculatorMainInput
-    );
-    mainOutput.style.height = y;
+    let heightParent = this.parentElement.getBoundingClientRect().height;
+    if (y > heightParent - 100) {
+      y = heightParent - 100;
+    }
+    if (y < 90) {
+      y = 90;
+    }
+    this.calculatorInput.style.height = y;
+    let remainingHeight = heightParent - y;
+    if (remainingHeight < 100) {
+      remainingHeight = 100;
+    }
+    this.calculatorOutput.style.height = remainingHeight;
   }
 }
 

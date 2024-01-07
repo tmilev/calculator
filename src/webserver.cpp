@@ -3384,9 +3384,7 @@ void WebServer::initializePortsITry() {
   this->portHTTPSBuiltIn =
   global.configuration[Configuration::portHTTPSBuiltIn].stringValue;
   this->portHTTPSDefault = this->portHTTPSOpenSSL;
-  global << "DEBUG: port built in: " << this->portHTTPSBuiltIn << Logger::endL;
   if (this->portHTTPSBuiltIn != "") {
-    global << "DEBUG: set available true " << Logger::endL;
     this->transportLayerSecurity.flagBuiltInTLSAvailable = true;
   }
   for (

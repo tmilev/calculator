@@ -71,10 +71,6 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
       this->openSSLData.initializeOneCertificate(this->selfSigned);
     }
     this->initializeAdditionalCertificates();
-    global
-    << "DEBUG: flagBuiltInTLSAvailable:"
-    << flagBuiltInTLSAvailable
-    << Logger::endL;
     if (this->flagBuiltInTLSAvailable) {
       this->server.initialize();
     }

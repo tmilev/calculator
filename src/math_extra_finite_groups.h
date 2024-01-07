@@ -115,22 +115,19 @@ public:
 //
 // Assumptions on the FiniteGroup:
 // 1. The finite group has a small number of conjugacy classes. Z/10000000Z is
-// not OK
+// not OK.
 //
 // An uninitialized element is expected to be the identity element to the
-// extend
-// possible.
+// extend possible.
 // Two uninitialized elements can be expected to multiply,
 // an an uninitialized element can multiply by an initialized element and where
 // needed thereby discover what group it belongs to. Equality and sorting
-// operators
-// and the hashFunction need to know what the identity is representation
-// It should hash to 0 and sort first.
+// operators and the hashFunction need to know what the identity is
+// representation. It should hash to 0 and sort first.
 //
 // Elements generally know of a faithful representation, which may by
-// reducible,
-// especially over a group that isn't their entire group they want to belong
-// to.
+// reducible, especially over a group that isn't their entire group they want
+// to belong to.
 // That is the representation they give the characteristic polynomial for.
 // At present, however, ElementZ2N gives the charpoly for one of its
 // one-dimensional

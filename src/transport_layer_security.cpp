@@ -255,6 +255,7 @@ void TransportLayerSecurityServer::addSupportedCipher(int inputId) {
 }
 
 void TransportLayerSecurityServer::initializeExtensions() {
+  STACK_TRACE("TransportLayerSecurityServer::initializeExtensions");
   // Extension specification should be available here:
   // https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml
   this->extensionNames.setKeyValue(
@@ -282,6 +283,7 @@ void TransportLayerSecurityServer::initializeExtensions() {
 }
 
 void TransportLayerSecurityServer::initializeCipherSuites() {
+  STACK_TRACE("TransportLayerSecurityServer::initializeCipherSuites");
   if (this->cipherSuiteNames.size() != 0) {
     return;
   }
@@ -360,6 +362,7 @@ bool TransportLayerSecurityServer::initializeAll(
 }
 
 void TransportLayerSecurityServer::initialize() {
+  STACK_TRACE("TransportLayerSecurityServer::initialize");
   this->initializeCipherSuites();
   this->initializeExtensions();
   std::stringstream commentsOnFailure;

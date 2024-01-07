@@ -27,12 +27,16 @@ bool TransportLayerSecurityServer::loadSelfSignedPEMCertificate(
 bool TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey(
   std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey");
   static bool alreadyRan = false;
   if (alreadyRan) {
     global.fatal
     << "Call TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey "
     << "only once please. "
     << global.fatal;
+  }
+  if (this->owner == nullptr) {
+    global.fatal << "Uninitialized TLS." << global.fatal;
   }
   alreadyRan = true;
   std::string certificateContent;

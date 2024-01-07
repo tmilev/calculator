@@ -74,7 +74,8 @@ bool SSLRecord::Test::all() {
 
 bool SSLRecord::Test::serialization() {
   STACK_TRACE("SSLRecord::Test::serialization");
-  TransportLayerSecurityServer server;
+  TransportLayerSecurity tls;
+  TransportLayerSecurityServer& server = tls.server;
   server.initialize();
   server.session.initialize();
   if (!SSLRecord::Test::serializationClientHello(server)) {

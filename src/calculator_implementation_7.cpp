@@ -59,7 +59,8 @@ bool CalculatorFunctionsCrypto::testTLSDecodeSSLRecord(
   if (!input[1].isOfType(&inputString)) {
     return false;
   }
-  TransportLayerSecurityServer testServer;
+  TransportLayerSecurity tls;
+  TransportLayerSecurityServer& testServer = tls.server;
   std::stringstream commentsOnFailure;
   if (
     !Crypto::convertHexToListUnsignedChar(
@@ -68,7 +69,7 @@ bool CalculatorFunctionsCrypto::testTLSDecodeSSLRecord(
   ) {
     return calculator << commentsOnFailure.str();
   }
-  testServer.initialize();
+  testServer.initializeAllExceptPrivateKeys();
   bool success = testServer.decodeSSLRecord(&commentsOnFailure);
   std::stringstream out;
   if (!success) {

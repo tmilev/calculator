@@ -72,7 +72,7 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
     }
     this->initializeAdditionalCertificates();
     if (this->flagBuiltInTLSAvailable) {
-      this->server.initialize();
+      this->server.initializeAllUseSelfSignedPrivateKeys();
     }
   } else {
     this->openSSLData.initializeSSLClient();
@@ -333,7 +333,7 @@ bool TransportLayerSecurityServer::initializeAll(
   std::stringstream* commentsOnError
 ) {
   STACK_TRACE("TransportLayerSecurityServer::initializeAll");
-  this->initialize();
+  this->initializeAllExceptPrivateKeys();
   if (
     !this->privateKey.loadFromPEM(privateKeyPEMEncoded, commentsOnError)
   ) {
@@ -361,18 +361,54 @@ bool TransportLayerSecurityServer::initializeAll(
   return true;
 }
 
-void TransportLayerSecurityServer::initialize() {
-  STACK_TRACE("TransportLayerSecurityServer::initialize");
+void TransportLayerSecurityServer::initializeAllExceptPrivateKeys() {
+  STACK_TRACE("TransportLayerSecurityServer::initializeAllExceptPrivateKeys");
   this->initializeCipherSuites();
   this->initializeExtensions();
+}
+
+void TransportLayerSecurityServer::initializeAllUseSelfSignedPrivateKeys() {
   std::stringstream commentsOnFailure;
-  if (!this->loadSelfSignedPEMPrivateKey(&commentsOnFailure)) {
+  std::string privateKeyContent;
+  if (
+    !this->loadSelfSignedPEMPrivateKeyContent(
+      &commentsOnFailure, privateKeyContent
+    )
+  ) {
     global
     << Logger::red
     << "Failed to load private key. Comments: "
     << commentsOnFailure.str()
     << Logger::endL;
     this->owner->flagBuiltInTLSAvailable = false;
+    return;
+  }
+  std::string certificateContent;
+  if (
+    !this->loadSelfSignedPEMCertificateContent(
+      &commentsOnFailure, certificateContent
+    )
+  ) {
+    global
+    << Logger::red
+    << "Failed to load certificate content. Comments: "
+    << commentsOnFailure.str()
+    << Logger::endL;
+    this->owner->flagBuiltInTLSAvailable = false;
+    return;
+  }
+  if (
+    !this->initializeAll(
+      privateKeyContent, certificateContent, &commentsOnFailure
+    )
+  ) {
+    global
+    << Logger::red
+    << "Failed to load private key. Comments: "
+    << commentsOnFailure.str()
+    << Logger::endL;
+    this->owner->flagBuiltInTLSAvailable = false;
+    return;
   }
 }
 

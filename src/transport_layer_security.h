@@ -611,12 +611,13 @@ public:
   List<SSLRecord> outgoingRecords;
   CipherSuiteSpecification getCipherNoFailure(int inputId);
   void addSupportedCipher(int inputId);
+  void initializeAllUseSelfSignedPrivateKeys();
   bool initializeAll(
     const std::string& privateKeyPEMEncoded,
     const std::string& serverCertificatePEMEncoded,
     std::stringstream* commentsOnError
   );
-  void initialize();
+  void initializeAllExceptPrivateKeys();
   void initializeCipherSuites();
   void initializeExtensions();
   TransportLayerSecurityServer();
@@ -640,6 +641,14 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool loadSelfSignedPEMCertificate(std::stringstream* commentsOnFailure);
+  bool loadSelfSignedPEMCertificateContent(
+    std::stringstream* commentsOnFailure,
+    std::string& certificateContent
+  );
+  bool loadSelfSignedPEMPrivateKeyContent(
+    std::stringstream* commentsOnFailure,
+    std::string& outputPrivateKeyContent
+  );
   bool loadSelfSignedPEMPrivateKey(std::stringstream* commentsOnFailure);
 };
 

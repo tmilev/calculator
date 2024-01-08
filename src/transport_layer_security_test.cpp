@@ -76,7 +76,7 @@ bool SSLRecord::Test::serialization() {
   STACK_TRACE("SSLRecord::Test::serialization");
   TransportLayerSecurity tls;
   TransportLayerSecurityServer& server = tls.server;
-  server.initialize();
+  server.initializeAllExceptPrivateKeys();
   server.session.initialize();
   if (!SSLRecord::Test::serializationClientHello(server)) {
     global.fatal << "Failed serialization of client hello. " << global.fatal;

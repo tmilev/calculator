@@ -2,13 +2,25 @@
 #include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
 #include "crypto_calculator.h"
-#include "abstract_syntax_notation_one_decoder.h"
 #include <unistd.h> //<- close, open defined here
 
 bool TransportLayerSecurityServer::loadSelfSignedPEMCertificate(
   std::stringstream* commentsOnFailure
 ) {
   std::string certificateContent;
+  if (
+    !this->loadSelfSignedPEMCertificateContent(
+      commentsOnFailure, certificateContent
+    )
+  ) {
+    return false;
+  }
+  return this->certificate.loadFromPEM(certificateContent, commentsOnFailure);
+}
+
+bool TransportLayerSecurityServer::loadSelfSignedPEMCertificateContent(
+  std::stringstream* commentsOnFailure, std::string& certificateContent
+) {
   if (
     !FileOperations::loadFileToStringUnsecure(
       this->owner->selfSigned.certificateFileNamePhysical,
@@ -21,17 +33,20 @@ bool TransportLayerSecurityServer::loadSelfSignedPEMCertificate(
     }
     return false;
   }
-  return this->certificate.loadFromPEM(certificateContent, commentsOnFailure);
+  return true;
 }
 
-bool TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey(
-  std::stringstream* commentsOnFailure
+bool TransportLayerSecurityServer::loadSelfSignedPEMPrivateKeyContent(
+  std::stringstream* commentsOnFailure,
+  std::string& outputPrivateKeyContent
 ) {
-  STACK_TRACE("TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey");
+  STACK_TRACE(
+    "TransportLayerSecurityServer::loadSelfSignedPEMPrivateKeyContent"
+  );
   static bool alreadyRan = false;
   if (alreadyRan) {
     global.fatal
-    << "Call TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey "
+    << "Call TransportLayerSecurityServer::loadSelfSignedPEMPrivateKeyContent "
     << "only once please. "
     << global.fatal;
   }
@@ -39,12 +54,10 @@ bool TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey(
     global.fatal << "Uninitialized TLS." << global.fatal;
   }
   alreadyRan = true;
-  std::string certificateContent;
-  std::string certificateContentStripped;
   if (
     !FileOperations::loadFileToStringUnsecure(
       this->owner->selfSigned.privateKeyFileNamePhysical,
-      certificateContent,
+      outputPrivateKeyContent,
       commentsOnFailure
     )
   ) {
@@ -59,5 +72,20 @@ bool TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey(
   << "Loaded private key from: "
   << this->owner->selfSigned.privateKeyFileNamePhysical
   << Logger::endL;
-  return this->privateKey.loadFromPEM(certificateContent, commentsOnFailure);
+  return true;
+}
+
+bool TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey(
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("TransportLayerSecurityServer::loadSelfSignedPEMPrivateKey");
+  std::string privateKeyContent;
+  if (
+    !this->loadSelfSignedPEMPrivateKeyContent(
+      commentsOnFailure, privateKeyContent
+    )
+  ) {
+    return false;
+  }
+  return this->privateKey.loadFromPEM(privateKeyContent, commentsOnFailure);
 }

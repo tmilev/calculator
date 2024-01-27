@@ -1,7 +1,7 @@
 #ifndef header_math_basics_ALREADY_INCLUDED
 #define header_math_basics_ALREADY_INCLUDED
 
-#include "general_logging_global_variables.h"
+#include "general_lists.h"
 
 class MathRoutines {
 public:

@@ -3,6 +3,7 @@
 
 #include "math_general.h"
 #include "progress_report.h"
+#include "web_api.h"
 
 template <class Coefficient>
 void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(

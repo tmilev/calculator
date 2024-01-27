@@ -7,7 +7,6 @@
 #include "math_vectors.h"
 #include "math_subsets_selections.h"
 #include "general_file_operations_encodings.h"
-#include "web_api.h"
 
 // An externally defined class used to plot Dynkin diagrams.
 class Plot;

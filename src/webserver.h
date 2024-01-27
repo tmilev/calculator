@@ -3,6 +3,7 @@
 
 #include "multiprocessing.h"
 #include "transport_layer_security.h"
+#include "web_api.h"
 
 class WebServer;
 class Listener;

@@ -3,6 +3,7 @@
 
 #include "math_extra_algebraic_numbers.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_general_implementation.h"
 
 template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::
@@ -2232,7 +2233,7 @@ bool PolynomialFactorizationCantorZassenhaus<
     PolynomialConversions::convertToPolynomial(divisor, divisorConverted);
     *comments
     << "Found divisor \\("
-    << this->one.toStringPolynomiaL(
+    << this->one.toStringPolynomial(
       divisorConverted, &this->output->format
     )
     << "\\) by taking gcd with \\("
@@ -2481,7 +2482,7 @@ bool PolynomialFactorizationCantorZassenhaus<
       << "^{"
       << i + 1
       << "} - 1}{2}} = "
-      << this->one.toStringPolynomiaL(converted, &this->output->format)
+      << this->one.toStringPolynomial(converted, &this->output->format)
       << "\\mod "
       << currentPolynomial.modulus()->toString(&this->output->format)
       << "\\)";

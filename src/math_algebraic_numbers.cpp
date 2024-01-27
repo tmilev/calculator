@@ -1907,7 +1907,7 @@ std::string ElementZmodP::toStringModP(const LargeIntegerUnsigned& modulus) {
   return out.str();
 }
 
-std::string ElementZmodP::toStringPolynomiaL(
+std::string ElementZmodP::toStringPolynomial(
   const Polynomial<ElementZmodP>& input, FormatExpressions* format
 ) const {
   std::stringstream out;

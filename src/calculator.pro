@@ -44,6 +44,7 @@ HEADERS += \
     math_basics.h \
     math_extra_polynomial_factorization.h \
     math_lattices.h \
+    math_modular_arithmetic.h \
     math_vector_partition_functions.h \
     network.h \
     progress_report.h \

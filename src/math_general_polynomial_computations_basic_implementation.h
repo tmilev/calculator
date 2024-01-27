@@ -2,6 +2,7 @@
 #define header_math_general_polynomial_computations_basic_implementation_ALREADY_INCLUDED
 
 #include "math_general.h"
+#include "web_api.h"
 
 template <class Coefficient>
 bool MonomialPolynomial::substitute(

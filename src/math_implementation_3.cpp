@@ -1,4 +1,5 @@
 #include "general_lists.h"
+#include "general_file_operations_encodings.h"
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"

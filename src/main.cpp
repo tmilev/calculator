@@ -1,6 +1,8 @@
+#include <iostream>
 #include "main.h"
 #include "web_assembly.h"
 #include "general_logging_global_variables.h"
+#include "general_file_operations_encodings.h"
 #include "webserver.h"
 #include "general_test.h"
 #include "system_functions_global_objects.h"

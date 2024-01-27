@@ -3,6 +3,7 @@
 #include "calculator_inner_functions.h"
 #include "calculator_functions_polynomial.h"
 #include "calculator_inner_typed_functions.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
 
 void Calculator::initializeFunctionsScientificBasic() {
   STACK_TRACE("Calculator::initializeFunctionsScientificBasic");

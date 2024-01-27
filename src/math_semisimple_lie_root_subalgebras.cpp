@@ -2,6 +2,7 @@
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 #include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
+#include "general_file_operations_encodings.h"
 
 void RootSubalgebra::getCoxeterElement(Matrix<Rational>& output) {
   int dimension = this->getAmbientWeyl().getDimension();

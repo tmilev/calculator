@@ -2,6 +2,7 @@
 #define header_math_extra_universal_enveloping_implementation_ALREADY_INCLUDED
 
 #include "math_extra_universal_enveloping.h"
+#include "math_extra_lie_theory_extras.h"
 
 template <class Coefficient>
 Coefficient SemisimpleLieAlgebra::getKillingFormProductWRTLevi(

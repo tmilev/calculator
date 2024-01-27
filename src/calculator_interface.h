@@ -10,6 +10,8 @@
 #include "math_extra_modules_semisimple_lie_algebras.h"
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_extra_elliptic_curves.h"
+#include "math_rational_function.h"
+#include "math_vector_partition_functions.h"
 
 template <class builtIn>
 class WithContext;

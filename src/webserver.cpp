@@ -1,23 +1,23 @@
-#include "webserver.h"
-#include "calculator_interface.h"
-#include "database.h"
-#include "calculator_problem_storage.h"
-#include "web_api.h"
-#include "string_constants.h"
-#include "crypto_calculator.h"
-#include <sys/wait.h>//<-waitpid f-n here
-#include <netdb.h> //<-addrinfo and related data structures defined here
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop = network to presentation)
-#include <unistd.h>
-#include <sys/stat.h>//<-for file statistics
 #include <fcntl.h>//<-setting flags of file descriptors
+#include <netdb.h> //<-addrinfo and related data structures defined here
 #include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
-#include "assert.h"
-#include "signals_infrastructure.h"
-#include "web_client.h"
+#include <sys/stat.h>//<-for file statistics
+#include <sys/wait.h>//<-waitpid f-n here
+#include <unistd.h>
+#include <iostream>
+#include "calculator_interface.h"
 #include "calculator_problem_storage.h"
+#include "crypto_calculator.h"
+#include "database.h"
+#include "general_file_operations_encodings.h"
+#include "signals_infrastructure.h"
 #include "network_calculator.h"
+#include "string_constants.h"
 #include "system_functions_global_objects.h"
+#include "web_api.h"
+#include "web_client.h"
+#include "webserver.h"
 
 const std::string WebServer::Statististics::pingRequestsString =
 "pingRequests";

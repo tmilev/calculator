@@ -3,6 +3,7 @@
 #include "calculator_inner_typed_functions.h"
 #include "math_rational_function_implementation.h"
 #include "calculator_lie_theory.h"
+#include "general_file_operations_encodings.h"
 
 // As of writing,
 // removing this include breaks the optimize=1 build,

@@ -1,8 +1,7 @@
 #ifndef header_system_functions_global_objects_ALREADY_INCLUDED
 #define header_system_functions_global_objects_ALREADY_INCLUDED
 
-#include <iostream>
-#include "general_list_references.h"
+#include <string>
 
 #ifndef __DATE__
 #define __DATE__ " unknown date "

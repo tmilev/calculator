@@ -5,6 +5,7 @@
 #include <sys/select.h> // <- fdset here.
 #include "webserver.h"
 #include <iostream>
+#include "general_file_operations_encodings.h"
 
 std::string MutexProcess::currentProcessName = "S: ";
 

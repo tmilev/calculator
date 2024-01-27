@@ -4,6 +4,7 @@
 #include "serialization_basic.h"
 #include "transport_layer_security.h"
 #include "string_constants.h"
+#include "general_file_operations_encodings.h"
 
 // Putting this in the header file currently breaks the linking for this
 // particular tag.

@@ -1,4 +1,5 @@
 #include "crypto_calculator.h"
+#include "general_file_operations_encodings.h"
 #include "transport_layer_security.h"
 #include "database.h"
 #include "calculator_html_interpretation.h"
@@ -6,6 +7,7 @@
 #include "calculator_inner_functions.h"
 #include "string_constants.h"
 #include <iostream>
+#include "web_api.h"
 
 class Test {
 public:

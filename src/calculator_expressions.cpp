@@ -2,6 +2,7 @@
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "calculator_html_functions.h"
 #include "math_rational_function_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
 
 // Required by linker as of writing.
 #include "math_extra_elliptic_curves_implementation.h"

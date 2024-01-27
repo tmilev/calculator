@@ -8,6 +8,8 @@
 // To install openssl:
 // 1. Debian rodete: 
 // sudo apt-get install libssl-dev
+// 2. opensuse:
+// sudo yast -i libopenssl-devel
 #include <openssl/rsa.h>
 #include <openssl/crypto.h>
 #include <openssl/x509.h>

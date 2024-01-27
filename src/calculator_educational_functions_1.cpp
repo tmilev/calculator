@@ -2,6 +2,7 @@
 #include "calculator_educational_functions_1.h"
 #include "calculator_inner_functions.h"
 #include "string_constants.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
 
 bool UnivariateEquation::getSolutions(
   Calculator& calculator, Expression& output

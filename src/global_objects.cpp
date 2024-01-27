@@ -3,6 +3,7 @@
 #include "calculator_interface.h"
 #include "general_logging_global_variables.h"
 #include "general_time_date.h"
+#include "general_file_operations_encodings.h"
 
 GlobalVariables global;
 

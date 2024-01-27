@@ -4,12 +4,7 @@
 #include "general_lists.h"
 #include "serialization_basic.h"
 #include "math_extra_elliptic_curves.h"
-#include "math_extra_algebraic_numbers.h"
-
-// installation of these headers in ubuntu:
-// sudo apt-get install libssl-dev
-// on opensuse:
-// sudo yast -i libopenssl-devel
+#include "math_modular_arithmetic.h"
 #include "crypto_calculator.h"
 #include "general_logging_global_variables.h"
 

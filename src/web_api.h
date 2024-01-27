@@ -2,7 +2,6 @@
 #define header_web_api_ALREADY_INCLUDED
 
 #include "general_logging_global_variables.h"
-#include "general_maps.h"
 
 class JSData;
 

@@ -17,6 +17,7 @@
 #include "string_constants.h"
 #include "web_client.h"
 #include "network_calculator.h"
+#include "general_file_operations_encodings.h"
 
 class WebServerMonitor {
 public:

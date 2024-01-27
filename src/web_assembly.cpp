@@ -4,6 +4,7 @@
 #include "string_constants.h"
 #include "system_functions_global_objects.h"
 #include <string.h>
+#include <iostream>
 
 int WebAssembly::numberOfMainLoopCalls = 0;
 extern "C" {

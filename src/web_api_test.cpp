@@ -4,6 +4,7 @@
 #include "string_constants.h"
 #include "database.h"
 #include "calculator_html_interpretation.h"
+#include "general_file_operations_encodings.h"
 
 bool WebAPIResponse::Test::all() {
   StateMaintainer<std::string> databaseName(Database::name);

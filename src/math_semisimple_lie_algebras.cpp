@@ -1,3 +1,4 @@
+#include "general_file_operations_encodings.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 #include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h"

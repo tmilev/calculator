@@ -1,7 +1,6 @@
 #ifndef header_math_extra_latex_routines_ALREADY_INCLUDED
 #define header_math_extra_latex_routines_ALREADY_INCLUDED
 
-#include "general_list_references.h"
 #include "json.h"
 
 class LaTeXCrawler {

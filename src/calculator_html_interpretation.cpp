@@ -1,9 +1,10 @@
-#include "calculator_html_interpretation.h"
-#include "web_api.h"
-#include "database.h"
 #include <iomanip>
-#include "string_constants.h"
 #include "calculator_educational_functions_1.h"
+#include "calculator_html_interpretation.h"
+#include "database.h"
+#include "general_file_operations_encodings.h"
+#include "string_constants.h"
+#include "web_api.h"
 
 const std::string CalculatorHTML::bugsGenericMessage =
 "Please take a screenshot, copy the link address and send those along "

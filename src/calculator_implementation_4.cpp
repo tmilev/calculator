@@ -11,6 +11,7 @@
 #include "math_extra_differential_operators.h"
 #include <cmath>
 #include <cfloat>
+#include "general_file_operations_encodings.h"
 
 // Required by linker when using optimize=1.
 #include "math_extra_elliptic_curves_implementation.h"

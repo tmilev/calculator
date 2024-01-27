@@ -2,7 +2,6 @@
 #define header_math_extra_weyl_algebras_implementation_ALREADY_INCLUDED
 
 #include "math_general.h"
-#include "math_extra_algebraic_numbers.h"
 
 template <class Coefficient>
 bool ElementWeylAlgebra<Coefficient>::isPolynomial(

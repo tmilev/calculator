@@ -1,6 +1,9 @@
 #include "calculator_html_interpretation.h"
-#include "string_constants.h"
 #include "calculator_inner_functions.h"
+#include "general_file_operations_encodings.h"
+#include "html_routines.h"
+#include "string_constants.h"
+#include "web_api.h"
 
 CalculatorHTML::Test::Test() {
   this->filesToInterpret = 0;

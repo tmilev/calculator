@@ -8,6 +8,7 @@
 
 #ifndef MACRO_use_wasm
 
+#include "general_logging_global_variables.h"
 #include <linux/random.h> // <- GRND_NONBLOCK defined here.
 
 void Crypto::Random::initializeRandomBytesForTesting() {

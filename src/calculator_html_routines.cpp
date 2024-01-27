@@ -1,4 +1,3 @@
-#include "calculator.h"
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
 #include "calculator_html_functions.h"

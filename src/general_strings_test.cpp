@@ -1,7 +1,7 @@
 #include "general_strings.h"
 #include "general_logging_global_variables.h"
 #include "crypto_calculator.h"
-#include "macros.h"
+#include "globals.h"
 
 bool StringRoutines::Test::all() {
   StringRoutines::Conversions::Test::all();

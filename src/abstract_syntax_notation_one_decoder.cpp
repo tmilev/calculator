@@ -1,6 +1,5 @@
 #include "abstract_syntax_notation_one_decoder.h"
 #include "crypto_calculator.h"
-#include "math_extra_algebraic_numbers.h"
 #include "math_general_implementation.h"
 #include "serialization_basic.h"
 #include "transport_layer_security.h"

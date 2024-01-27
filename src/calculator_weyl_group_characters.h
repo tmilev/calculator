@@ -1,7 +1,7 @@
 #ifndef header_calculator_weyl_group_character_ALREADY_INCLUDED
 #define header_calculator_weyl_group_character_ALREADY_INCLUDED
 
-#include "calculator.h"
+#include "calculator_interface.h"
 
 class CalculatorFunctionsWeylGroup {
 public:

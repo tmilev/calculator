@@ -6,6 +6,7 @@
 #include "general_maps.h"
 #include "general_database_system_independent.h"
 #include <thread>
+#include <fstream>
 
 // Forward-declared class webserver.
 class WebServer;

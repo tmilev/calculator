@@ -1,7 +1,7 @@
 #ifndef header_calculator_lie_theory_ALREADY_INCLUDED
 #define header_calculator_lie_theory_ALREADY_INCLUDED
 
-#include "calculator.h"
+#include "calculator_interface.h"
 
 class CalculatorLieTheory {
 public:

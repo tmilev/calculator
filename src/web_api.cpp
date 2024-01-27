@@ -2,7 +2,6 @@
 #include "general_logging_global_variables.h"
 #include "string_constants.h"
 #include "webserver.h"
-#include "calculator.h"
 #include "database.h"
 #include "calculator_problem_storage.h"
 #include "math_extra_latex_routines.h"

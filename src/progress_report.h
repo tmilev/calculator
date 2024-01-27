@@ -1,7 +1,7 @@
 #ifndef header_progress_report_ALREADY_INCLUDED
 #define header_progress_report_ALREADY_INCLUDED
 
-#include "macros.h"
+#include "globals.h"
 #include "general_multitasking.h"
 
 class ProgressReport {

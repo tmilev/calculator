@@ -19,7 +19,6 @@ HEADERS += \
     abstract_syntax_notation_one_decoder.h \
     calculator.h \
     calculator.h \
-    calculator_database.h \
     calculator_educational_functions_1.h \
     calculator_html_functions.h \
     calculator_html_interpretation.h \
@@ -51,7 +50,6 @@ HEADERS += \
     signals_infrastructure.h \
     web_api.h \
     json.h \
-    macros.h \
     math_extra_algebraic_numbers.h \
     math_extra_drawing_variables.h \
     math_extra_elliptic_curves.h \

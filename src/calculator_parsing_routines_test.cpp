@@ -1,5 +1,6 @@
 #include "calculator_interface.h"
 #include "string_constants.h"
+#include <iostream>
 
 bool Calculator::Test::all(bool updateABTestFile) {
   Calculator tester;

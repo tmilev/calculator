@@ -4,6 +4,7 @@
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <sys/select.h> // <- fdset here.
 #include "webserver.h"
+#include <iostream>
 
 std::string MutexProcess::currentProcessName = "S: ";
 

@@ -1,4 +1,3 @@
-#include "calculator.h"
 #include "calculator_inner_typed_functions.h"
 #include "calculator_functions_polynomial.h"
 #include "math_rational_function_implementation.h"

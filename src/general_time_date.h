@@ -1,7 +1,7 @@
 #ifndef header_general_time_date_ALREADY_INCLUDED
 #define header_general_time_date_ALREADY_INCLUDED
 
-#include "macros.h"
+#include <sstream>
 #include <ctime>
 
 class TimeWrapper {

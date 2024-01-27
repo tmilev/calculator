@@ -1,7 +1,8 @@
 #include "crypto_calculator.h"
 #include "math_general_implementation.h"
-#include "general_list_references.h"
 #include "general_file_operations_encodings.h"
+#include "general_list_references.h"
+#include "general_logging_global_variables.h"
 #include "json.h"
 #include "math_extra_algebraic_numbers.h"
 #include <iomanip>

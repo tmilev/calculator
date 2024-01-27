@@ -31,6 +31,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 
 */
 #include "crypto_public_domain.h"
+#include "general_logging_global_variables.h"
 
 class AESContext {
 public:

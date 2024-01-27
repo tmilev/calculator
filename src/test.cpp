@@ -5,6 +5,7 @@
 #include "signals_infrastructure.h"
 #include "calculator_inner_functions.h"
 #include "string_constants.h"
+#include <iostream>
 
 class Test {
 public:

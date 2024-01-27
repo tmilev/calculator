@@ -1,4 +1,4 @@
-#include "calculator.h"
+#include  "calculator_interface.h"
 
 std::string SyntacticElement::getIntegerStringCrashIfNot(
   CalculatorParser& owner

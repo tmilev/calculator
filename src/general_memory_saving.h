@@ -1,7 +1,7 @@
 #ifndef header_memory_saving_ALREADY_INCLUDED
 #define header_memory_saving_ALREADY_INCLUDED
 
-#include "macros.h"
+#include "globals.h"
 #include "general_list_references.h"
 
 // This is a wrapper-allocate-on-first-use around a regular object.

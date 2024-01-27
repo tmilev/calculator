@@ -2,7 +2,6 @@
 #define header_crypto_calculator_ALREADY_INCLUDED
 
 #include "general_lists.h"
-#include "general_logging_global_variables.h"
 #include "math_large_integers.h"
 #include "json.h"
 #include "abstract_syntax_notation_one_decoder.h"

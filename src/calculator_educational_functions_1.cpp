@@ -1,7 +1,7 @@
+#include "globals.h"
 #include "calculator_educational_functions_1.h"
 #include "calculator_inner_functions.h"
 #include "string_constants.h"
-#include "macros.h"
 
 bool UnivariateEquation::getSolutions(
   Calculator& calculator, Expression& output

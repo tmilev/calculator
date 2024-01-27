@@ -1,4 +1,5 @@
 #include "crypto_calculator.h"
+#include "general_logging_global_variables.h"
 
 bool Crypto::Test::all() {
   Crypto::Test::sha256();

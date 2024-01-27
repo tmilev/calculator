@@ -4,6 +4,7 @@
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_extra_graph.h"
 #include "calculator_weyl_group_characters.h"
+#include "calculator_interface.h"
 
 template < >
 List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::Comparator*

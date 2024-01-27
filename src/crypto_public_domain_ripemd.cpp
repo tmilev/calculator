@@ -41,6 +41,7 @@
  * According to http://www.users.zetnet.co.uk/hopwood/crypto/scan/md.html:
  *   "RIPEMD-160 is big-bit-endian, little-byte-endian, and left-justified."
  */
+#include "crypto_calculator.h"
 #include "crypto_public_domain.h"
 #include "general_logging_global_variables.h"
 #include <stdint.h>

@@ -1,10 +1,10 @@
 #include "database.h"
 #include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
-#include "general_strings.h"
 #include "string_constants.h"
 #include "calculator_problem_storage.h"
-#include "web_api.h"
+#include "html_routines.h"
+#include "general_strings.h"
 
 bool DatabaseLoader::writeBackup(std::string& outputLoadDatabaseCommand) {
   STACK_TRACE("DatabaseLoader::writeBackup");

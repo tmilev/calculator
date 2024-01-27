@@ -39,6 +39,7 @@ HEADERS += \
     general_multitasking.h \
     general_test.h \
     general_time_date.h \
+    html_routines.h \
     main.h \
     math_basics.h \
     math_extra_polynomial_factorization.h \

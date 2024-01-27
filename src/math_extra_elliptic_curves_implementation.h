@@ -2,7 +2,6 @@
 #define header_math_extra_elliptic_curves_implementation_ALREADY_INCLUDED
 
 #include "math_extra_elliptic_curves.h"
-#include "math_extra_algebraic_numbers.h"
 
 template <typename Coefficient>
 unsigned int ElementEllipticCurve<Coefficient>::hashFunction(

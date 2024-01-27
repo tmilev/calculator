@@ -3,6 +3,7 @@
 #include "webserver.h"
 #include "calculator_problem_storage.h"
 #include "string_constants.h"
+#include "html_routines.h"
 
 std::string EmailRoutines::webAdress = "";
 std::string EmailRoutines::sendEmailFrom = "";

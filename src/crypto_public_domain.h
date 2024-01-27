@@ -1,7 +1,7 @@
 #ifndef header_crypto_public_domain_ALREADY_INCLUDED
 #define header_crypto_public_domain_ALREADY_INCLUDED
 
-#include "crypto_calculator.h"
+#include "general_lists.h"
 
 // Class CryptoPublicDomain serves the same purpose as
 // class Crypto, but excludes all code not written

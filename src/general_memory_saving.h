@@ -2,7 +2,7 @@
 #define header_memory_saving_ALREADY_INCLUDED
 
 #include "globals.h"
-#include "general_list_references.h"
+#include "general_multitasking.h"
 
 // This is a wrapper-allocate-on-first-use around a regular object.
 template <class Object>

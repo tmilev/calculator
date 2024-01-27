@@ -50,45 +50,40 @@ private:
   //      at the cost of leaving data entry non-used for non-atomic expressions.
   // 2. Basic building blocks
   // 2.1. A frozen expression is a list whose first entry is an atom equal to
-  // Freeze.
+  //      Freeze.
   // 2.2. A sequence is a list whose first entry is an atom equal to Sequence.
   // 2.3. A bound variable is a list with two atomic entries, the first of
-  // which
-  //      equals Bind.
+  //      which equals Bind.
   // 2.4. An error is a list with two entries whose first entry is an atom
-  // equal
-  // to Error, and whose second entry is a string.
+  // equal to Error, and whose second entry is a string.
   // *Note that Calculator::opList() is required to equal zero for reasons of
   // program speed.
   // This is GUARANTEED, and you MAY assume it.
   // If you want to have a list of mathematical objects, use the Sequence
   // data structure. A sequence is a List whose first entry is an atom whose
-  // value
-  // is Sequence = Calculator::opSequence().
+  // value is Sequence = Calculator::opSequence().
   //
   // -------------------------------------------------------
   //
   // Expressions of built-in types.
   // 1. Expressions of built-in types represent hard-coded C++ types.
   // 2. An expression is said to be of built-in type if it is a list of 2 or 3
-  // elements
-  //    starting with an atom
-  // equal to one of a set of hard-coded names, and ending in an atom whose
-  // value
-  // is an integer that uniquely (up to operator==) identifies a C++ structure
-  // with the corresponding type.
+  //    elements starting with an atom equal to one of a set of hard-coded
+  //    names, and ending in an atom whose value
+  //    is an integer that uniquely (up to operator==) identifies a C++
+  //    structure with the corresponding type.
   // 3. A context is a list of 1 or more elements starting with the atom
-  // Context. If a context has only one child (which must then be
-  // equal to the atom Context), then we say that we have an "empty context".
+  //    Context. If a context has only one child (which must then be
+  //    equal to the atom Context), then we say that we have an
+  //    "empty context".
   // 4. An expression is said to have context if it is a list of at least two
-  // elements, the second element of which is a context.
+  //    elements, the second element of which is a context.
   // 5. If an expression of built-in type has 3 children, the middle child
-  // must be a context. If an expression of built-in type has 2 children, we
-  // say
-  // that the expression does not have context.
+  //    must be a context. If an expression of built-in type has 2 children, we
+  //    say that the expression does not have context.
   // 6. Two expressions of built-in type with equal types and C++ identifiers,
-  // one having a context that is empty, and the other having no context,
-  // are considered to represent one and the same element.
+  //    one having a context that is empty, and the other having no context,
+  //    are considered to represent one and the same element.
   // -------------------------------------------------------
   // -------------------------------------------------------
   // -------------------------------------------------------

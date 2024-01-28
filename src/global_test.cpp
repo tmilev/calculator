@@ -7,7 +7,8 @@ bool GlobalVariables::Test::all() {
 }
 
 bool GlobalVariables::Test::webAssemblyBuild() {
-  int wasmResult = global.externalCommandNoOutput("make -j20 wasm=1", true);
+  int wasmResult =
+  global.externalCommandNoOutput("make -j20 wasm=1 optimize=1", true);
   if (wasmResult != 0) {
     global << Logger::red << "Wasm make was not successful. " << Logger::endL;
   }
@@ -24,7 +25,7 @@ bool GlobalVariables::Test::builds() {
   // This is the most restrictive build allowed:
   int result =
   global.externalCommandNoOutput(
-    "make -j20 noMongo=1 nossl=1 noPublicDomain=1", true
+    "make -j20 noMongo=1 nossl=1 noPublicDomain=1 optimize=1", true
   );
   if (result != 0) {
     global

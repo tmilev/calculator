@@ -3,6 +3,7 @@
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 #include "math_general_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks web assembly build.
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
 
 void RootSubalgebra::getCoxeterElement(Matrix<Rational>& output) {

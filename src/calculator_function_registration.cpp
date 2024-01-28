@@ -4,6 +4,7 @@
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
 #include "math_general.h"
+#include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks web assembly build.
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 
 // This file lists calculator functions and various hard-coded rules.

@@ -877,6 +877,7 @@ bool CodeFormatter::Element::computeIndentationReturnedExpression() {
 }
 
 bool CodeFormatter::Element::computeIndentation() {
+  STACK_TRACE("CodeFormatter::Element::computeIndentation");
   if (this->parent == nullptr) {
     // This must be the top level element.
     for (int i = 0; i < this->children.size; i ++) {
@@ -1971,8 +1972,8 @@ bool CodeFormatter::formatCPPSourceCode(
   this->processor.consumeElements();
   std::stringstream out;
   this->normalizeBinaryOperationsRecursively(this->processor.code);
-  this->wirePointersRecursively(this->processor.code, nullptr, - 1);
   this->sortHeaders(this->processor.code);
+  this->wirePointersRecursively(this->processor.code, nullptr, - 1);
   if (logDebugInfo && comments != nullptr) {
     *comments << "<b>Parsing log follows.</b><br>" << this->processor.debugLog;
   }
@@ -5028,6 +5029,8 @@ void CodeFormatter::collectMultiArguments(
 }
 
 void CodeFormatter::sortHeaders(CodeFormatter::Element& current) {
+  STACK_TRACE("CodeFormatter::sortHeaders");
+  global << "DEBUG: sort headers!!!" << Logger::endL;
   if (current.type == CodeFormatter::Element::TopLevel){
     CodeFormatter::sortHeadersInTopLevel(current);
     return;
@@ -5038,7 +5041,8 @@ void CodeFormatter::sortHeaders(CodeFormatter::Element& current) {
 }
 
 void CodeFormatter::sortHeadersInTopLevel(CodeFormatter::Element& topLevel){
-
+  STACK_TRACE("CodeFormatter::sortHeadersInTopLevel");
+  global << "DEBUG: found top level element!!!!"<< Logger::endL;
   List<CodeFormatter::Element> nonProcessedChildren = topLevel.children;
   topLevel.children.clear();
   for (CodeFormatter::Element& child: topLevel.children ){
@@ -5053,8 +5057,12 @@ void CodeFormatter::sortHeadersInTopLevel(CodeFormatter::Element& topLevel){
 }
 
 void CodeFormatter:: addTopLevelElementsSorted(CodeFormatter::Element& topLevel, List<CodeFormatter::Element>& elements){
+  STACK_TRACE("CodeFormatter::addTopLevelElementsSorted");
   elements.quickSortAscending();
-  topLevel.children.addListOnTop(elements);
+  for (CodeFormatter::Element& element : elements){
+    element.indexInParent = topLevel.children.size;
+    topLevel.addChild(element);
+  }
 }
 
 

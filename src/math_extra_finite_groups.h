@@ -2,9 +2,9 @@
 #define header_math_extra_finite_groups_ALREADY_INCLUDED
 
 #include "general_lists.h"
-#include "math_general.h"
-#include "math_extra_vector_space.h"
 #include "json.h"
+#include "math_extra_vector_space.h"
+#include "math_general.h"
 
 // To do: move Weyl groups to this file. Eliminate all redundant code and
 // organize nicely.

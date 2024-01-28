@@ -1,11 +1,11 @@
-#include "math_general_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "calculator_interface.h"
+#include "calculator_weyl_group_characters.h"
 #include "math_extra_finite_groups.h"
 #include "math_extra_finite_groups_implementation.h"
-#include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_extra_graph.h"
-#include "calculator_weyl_group_characters.h"
-#include "calculator_interface.h"
+#include "math_extra_symmetric_groups_and_generalizations.h"
+#include "math_general_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
 
 template < >
 List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::Comparator*

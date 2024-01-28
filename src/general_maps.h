@@ -1,8 +1,8 @@
 #ifndef header_general_maps_ALREADY_INCLUDED
 #define header_general_maps_ALREADY_INCLUDED
 
-#include "general_lists.h"
 #include "general_list_references.h"
+#include "general_lists.h"
 
 // A key-value container (map) that preserves the order of
 // insertion of the input keys.

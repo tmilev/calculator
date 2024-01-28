@@ -1,12 +1,12 @@
 #ifndef header_transport_layer_security_ALREADY_INCLUDED
 #define header_transport_layer_security_ALREADY_INCLUDED
 
+#include "crypto_calculator.h"
 #include "general_lists.h"
-#include "serialization_basic.h"
+#include "general_logging_global_variables.h"
 #include "math_extra_elliptic_curves.h"
 #include "math_modular_arithmetic.h"
-#include "crypto_calculator.h"
-#include "general_logging_global_variables.h"
+#include "serialization_basic.h"
 
 class TransportLayerSecurity;
 

@@ -1,8 +1,8 @@
 #ifndef header_math_extra_universal_enveloping_ALREADY_INCLUDED
 #define header_math_extra_universal_enveloping_ALREADY_INCLUDED
 
-#include "math_general.h"
 #include "math_extra_semisimple_lie_algebras.h"
+#include "math_general.h"
 
 template <class Coefficient>
 class MonomialUniversalEnveloping: public MonomialTensor<Coefficient> {

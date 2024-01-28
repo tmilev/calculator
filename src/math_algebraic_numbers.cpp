@@ -1,8 +1,8 @@
-#include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_extra_algebraic_numbers.h"
-#include "math_subsets_selections.h"
 #include "math_general_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_subsets_selections.h"
 
 const int ElementZmodP::maximumModulusForUserFacingPolynomialDivision = 10000;
 

@@ -1,14 +1,14 @@
 #include "calculator_html_functions.h"
-#include "database.h"
-#include "general_time_date.h"
 #include "calculator_html_interpretation.h"
-#include "web_api.h"
-#include "math_extra_latex_routines.h"
-#include <iomanip>
-#include "database.h"
-#include "string_constants.h"
 #include "crypto_calculator.h"
+#include "database.h"
+#include "database.h"
 #include "general_file_operations_encodings.h"
+#include "general_time_date.h"
+#include "math_extra_latex_routines.h"
+#include "string_constants.h"
+#include "web_api.h"
+#include <iomanip>
 
 std::string CalculatorHTML::stringScoredQuizzes = "Quiz";
 std::string CalculatorHTML::stringPractice = "Practice";

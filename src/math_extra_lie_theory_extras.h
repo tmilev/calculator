@@ -1,9 +1,9 @@
 #ifndef header_math_extra_lie_theory_extras_ALREADY_INCLUDED
 #define header_math_extra_lie_theory_extras_ALREADY_INCLUDED
 
+#include "math_extra_modules_semisimple_lie_algebras.h"
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_rational_function.h"
-#include "math_extra_modules_semisimple_lie_algebras.h"
 #include "math_vector_partition_functions.h"
 
 // The following data is isolated in a struct because it is

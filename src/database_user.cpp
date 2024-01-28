@@ -1,9 +1,9 @@
-#include "database.h"
-#include "crypto_calculator.h"
-#include "webserver.h"
 #include "calculator_problem_storage.h"
-#include "string_constants.h"
+#include "crypto_calculator.h"
+#include "database.h"
 #include "html_routines.h"
+#include "string_constants.h"
+#include "webserver.h"
 
 std::string UserCalculatorData::toStringFindQueries() const {
   QueryOneOfExactly queries;

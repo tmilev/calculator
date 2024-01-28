@@ -2,10 +2,10 @@
 #define header_math_extra_symmetric_groups_and_generalizations_ALREADY_INCLUDED
 
 #include "general_lists.h"
-#include "math_general.h"
-#include "math_extra_graph.h"
 #include "math_extra_finite_groups.h"
 #include "math_extra_finite_groups_implementation.h"
+#include "math_extra_graph.h"
+#include "math_general.h"
 
 // Dense bases for sparse spaces
 // should this carry around the

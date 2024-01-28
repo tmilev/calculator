@@ -1,7 +1,7 @@
 #include "general_lists.h"
-#include "math_general_implementation.h"
-#include "math_general.h"
 #include "math_extra_algebraic_numbers.h"
+#include "math_general.h"
+#include "math_general_implementation.h"
 
 List<unsigned int> LargeIntegerUnsigned::precomputedPrimesSmallerThan15Bits;
 const unsigned int HashConstants::primeConstants[HashConstants::size] =

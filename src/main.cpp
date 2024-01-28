@@ -1,16 +1,16 @@
-#include <iostream>
-#include "main.h"
-#include "web_assembly.h"
-#include "general_logging_global_variables.h"
-#include "general_file_operations_encodings.h"
-#include "webserver.h"
-#include "general_test.h"
-#include "system_functions_global_objects.h"
-#include "signals_infrastructure.h"
-#include "string_constants.h"
-#include "database.h"
 #include "calculator_interface.h"
+#include "database.h"
+#include "general_file_operations_encodings.h"
+#include "general_logging_global_variables.h"
+#include "general_test.h"
+#include "main.h"
+#include "signals_infrastructure.h"
 #include "source_code_formatter.h"
+#include "string_constants.h"
+#include "system_functions_global_objects.h"
+#include "web_assembly.h"
+#include "webserver.h"
+#include <iostream>
 
 int main(int argc, char** argv) {
   bool useWasm = false;

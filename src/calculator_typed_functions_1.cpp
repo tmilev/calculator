@@ -1,10 +1,10 @@
 #include "calculator_inner_typed_functions.h"
-#include "math_general_implementation.h"
-#include "math_extra_weyl_algebras_implementation.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_finite_groups_implementation.h"
-#include "math_rational_function_implementation.h"
+#include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_universal_enveloping_implementation.h"
+#include "math_extra_weyl_algebras_implementation.h"
+#include "math_general_implementation.h"
+#include "math_rational_function_implementation.h"
 
 // Required by linker as of writing:
 #include "math_extra_elliptic_curves_implementation.h"

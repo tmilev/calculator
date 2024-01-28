@@ -1,6 +1,6 @@
+#include "calculator_html_functions.h"
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
-#include "calculator_html_functions.h"
 
 bool CalculatorHtmlFunctions::userInputBox(
   Calculator& calculator, const Expression& input, Expression& output

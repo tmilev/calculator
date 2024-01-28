@@ -1,7 +1,7 @@
 #include "json.h"
 #include "math_general.h"
-#include <sys/stat.h>
 #include <cassert>
+#include <sys/stat.h>
 
 void JSData::operator=(const LargeInteger& other) {
   this->reset();

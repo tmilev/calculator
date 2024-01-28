@@ -1,5 +1,5 @@
-#include "json.h"
 #include "general_logging_global_variables.h"
+#include "json.h"
 
 bool JSData::Test::all() {
   STACK_TRACE("JSData::Test::all");

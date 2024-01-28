@@ -1,7 +1,7 @@
-#include "math_lattices.h"
+#include "math_extra_drawing_variables.h"
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_extra_drawing_variables.h"
+#include "math_lattices.h"
 
 const int Lattice::maximumPointsToDraw = 1024;
 

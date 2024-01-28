@@ -1,13 +1,13 @@
-#include "transport_layer_security.h"
+#include "abstract_syntax_notation_one_decoder.h"
+#include "crypto_calculator.h"
 #include "general_logging_global_variables.h"
 #include "html_routines.h"
-#include "crypto_calculator.h"
-#include "abstract_syntax_notation_one_decoder.h"
 #include "serialization_basic.h"
-#include <unistd.h> //<- close, open defined here
-#include <netdb.h> //<-addrinfo and related data structures defined here
+#include "transport_layer_security.h"
 #include <iomanip>
+#include <netdb.h> //<-addrinfo and related data structures defined here
 #include <sys/time.h> // <- timeval
+#include <unistd.h> //<- close, open defined here
 
 // http://stackoverflow.com/questions/10175812/how-to-create-a-self-signed-certificate-with-openssl
 // openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem

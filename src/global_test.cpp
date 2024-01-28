@@ -1,5 +1,5 @@
-#include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
+#include "general_logging_global_variables.h"
 
 bool GlobalVariables::Test::all() {
   GlobalVariables::Test::builds();

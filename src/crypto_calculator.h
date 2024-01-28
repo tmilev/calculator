@@ -1,10 +1,10 @@
 #ifndef header_crypto_calculator_ALREADY_INCLUDED
 #define header_crypto_calculator_ALREADY_INCLUDED
 
-#include "general_lists.h"
-#include "math_large_integers.h"
-#include "json.h"
 #include "abstract_syntax_notation_one_decoder.h"
+#include "general_lists.h"
+#include "json.h"
+#include "math_large_integers.h"
 
 class PublicKeyRSA {
 public:

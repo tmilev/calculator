@@ -1,14 +1,10 @@
 #include "crypto_calculator.h"
+#include "general_logging_global_variables.h"
 
-// sys/random.h is missing from older distros/kernels.
-// #include <sys/random.h>
-// Used in place of sys/random.h:
-#include <unistd.h> // <- syscall defined here.
 #include <syscall.h> // <- SYS_getrandom defined here.
+#include <unistd.h> // <- syscall defined here.
 
 #ifndef MACRO_use_wasm
-
-#include "general_logging_global_variables.h"
 #include <linux/random.h> // <- GRND_NONBLOCK defined here.
 
 void Crypto::Random::initializeRandomBytesForTesting() {

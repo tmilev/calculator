@@ -1,10 +1,10 @@
-#include "web_assembly.h"
-#include "general_logging_global_variables.h"
 #include "calculator_interface.h"
+#include "general_logging_global_variables.h"
 #include "string_constants.h"
 #include "system_functions_global_objects.h"
-#include <string.h>
+#include "web_assembly.h"
 #include <iostream>
+#include <string.h>
 
 int WebAssembly::numberOfMainLoopCalls = 0;
 extern "C" {

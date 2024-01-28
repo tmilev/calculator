@@ -5,13 +5,13 @@
 // Do not include this header in other calculator headers,
 // but only in .cpp files.
 #include "general_maps.h"
-#include <sys/wait.h>//<-waitpid f-n here
-#include <netdb.h> //<-addrinfo and related data structures defined here
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop = network to presentation)
-#include <unistd.h>
-#include <sys/stat.h>//<-for file statistics
 #include <fcntl.h>//<-setting flags of file descriptors
+#include <netdb.h> //<-addrinfo and related data structures defined here
 #include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
+#include <sys/stat.h>//<-for file statistics
+#include <sys/wait.h>//<-waitpid f-n here
+#include <unistd.h>
 
 // A wrapper around a listening socket.
 // This class works on linux only because of

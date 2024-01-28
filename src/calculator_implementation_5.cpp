@@ -1,7 +1,7 @@
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
-#include "math_extra_drawing_variables.h"
 #include "crypto_calculator.h"
+#include "math_extra_drawing_variables.h"
 #include "web_api.h"
 #include <cmath>
 

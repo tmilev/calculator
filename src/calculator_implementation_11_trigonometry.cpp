@@ -1,6 +1,6 @@
 #include "calculator_inner_functions.h"
-#include "math_rational_function_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_rational_function_implementation.h"
 
 bool CalculatorFunctionsTrigonometry::sinExact(
   Calculator& calculator, const Expression& input, Expression& output

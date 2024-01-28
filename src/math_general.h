@@ -4,8 +4,8 @@
 #include "general_logging_global_variables.h"
 #include "general_strings.h"
 #include "math_large_integers.h"
-#include "math_vectors.h"
 #include "math_subsets_selections.h"
+#include "math_vectors.h"
 
 // An externally defined class used to plot Dynkin diagrams.
 class Plot;

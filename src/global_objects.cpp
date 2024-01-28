@@ -1,9 +1,9 @@
-#include "system_functions_global_objects.h"
-#include "webserver.h"
 #include "calculator_interface.h"
+#include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
 #include "general_time_date.h"
-#include "general_file_operations_encodings.h"
+#include "system_functions_global_objects.h"
+#include "webserver.h"
 
 GlobalVariables global;
 

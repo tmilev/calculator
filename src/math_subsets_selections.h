@@ -2,8 +2,8 @@
 #define header_math_subsets_selections_ALREADY_INCLUDED
 
 #include "general_lists.h"
-#include "math_vectors.h"
 #include "general_memory_saving.h"
+#include "math_vectors.h"
 
 class Selection {
 public:

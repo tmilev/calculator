@@ -1,9 +1,9 @@
-#include "math_extra_latex_routines.h"
+#include "calculator_html_interpretation.h"
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
-#include "web_api.h"
 #include "general_strings.h"
-#include "calculator_html_interpretation.h"
+#include "math_extra_latex_routines.h"
+#include "web_api.h"
 
 bool LaTeXCrawler::isInCrawlableFolder(
   const std::string& folderName, std::stringstream* commentsOnFailure

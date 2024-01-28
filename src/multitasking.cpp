@@ -1,9 +1,9 @@
 // Include needed for the destructor of FormatExpressions.
-#include "math_general.h"
 #include "general_logging_global_variables.h"
+#include "math_general.h"
+#include "progress_report.h"
 #include <assert.h>
 #include <mutex>
-#include "progress_report.h"
 
 void GlobalStatistics::checkPointerCounters() {
   if (

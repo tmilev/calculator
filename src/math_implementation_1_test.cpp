@@ -1,7 +1,7 @@
-#include "math_general.h"
+#include "calculator_interface.h"
 #include "crypto_calculator.h"
 #include "math_extra_algebraic_numbers.h"
-#include "calculator_interface.h"
+#include "math_general.h"
 #include "math_rational_function_implementation.h"
 
 bool LargeIntegerUnsigned::Test::serializationToHex(

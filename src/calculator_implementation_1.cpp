@@ -1,8 +1,8 @@
 #include "calculator_interface.h"
 #include "math_extra_semisimple_lie_algebras.h"
 #include "string_constants.h"
-#include <cmath>
 #include <cfloat>
+#include <cmath>
 
 std::string PlotObject::Labels::point = "point";
 std::string PlotObject::Labels::path = "path";

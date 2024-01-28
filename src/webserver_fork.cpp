@@ -4,9 +4,9 @@
 // This is not intended to work with web assembly.
 #ifndef MACRO_use_wasm
 
-#include <unistd.h>
-#include <sys/prctl.h> //<- prctl here
 #include <signal.h> // <-signals here
+#include <sys/prctl.h> //<- prctl here
+#include <unistd.h>
 
 int ForkCreator::forkRaw() {
   return fork();

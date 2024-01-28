@@ -1,6 +1,6 @@
 #include "math_extra_drawing_variables.h"
-#include "progress_report.h"
 #include "math_general_implementation.h"
+#include "progress_report.h"
 
 std::string DrawingVariables::typeCircleAtVector = "circleAtVector";
 std::string DrawingVariables::typePath = "path";

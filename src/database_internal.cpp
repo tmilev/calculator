@@ -1,8 +1,8 @@
-#include "database.h"
-#include "string_constants.h"
 #include "crypto_calculator.h"
+#include "database.h"
 #include "general_file_operations_encodings.h"
 #include "signals_infrastructure.h"
+#include "string_constants.h"
 
 std::string DatabaseInternal::folder() {
   return "database/" + Database::name + "/";

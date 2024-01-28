@@ -1,10 +1,10 @@
 #include "abstract_syntax_notation_one_decoder.h"
 #include "crypto_calculator.h"
+#include "general_file_operations_encodings.h"
 #include "math_general_implementation.h"
 #include "serialization_basic.h"
-#include "transport_layer_security.h"
 #include "string_constants.h"
-#include "general_file_operations_encodings.h"
+#include "transport_layer_security.h"
 
 // Putting this in the header file currently breaks the linking for this
 // particular tag.

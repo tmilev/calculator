@@ -1,10 +1,10 @@
-#include "web_api.h"
-#include "json.h"
-#include "general_logging_global_variables.h"
-#include "string_constants.h"
-#include "database.h"
 #include "calculator_html_interpretation.h"
+#include "database.h"
 #include "general_file_operations_encodings.h"
+#include "general_logging_global_variables.h"
+#include "json.h"
+#include "string_constants.h"
+#include "web_api.h"
 
 bool WebAPIResponse::Test::all() {
   StateMaintainer<std::string> databaseName(Database::name);

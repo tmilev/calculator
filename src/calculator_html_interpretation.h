@@ -1,11 +1,11 @@
 #ifndef header_calculator_html_interpretation_ALREADY_INCLUDED
 #define header_calculator_html_interpretation_ALREADY_INCLUDED
 
-#include "general_lists.h"
-#include "database.h"
-#include "calculator_problem_storage.h"
-#include "math_subsets_selections.h"
 #include "calculator_interface.h"
+#include "calculator_problem_storage.h"
+#include "database.h"
+#include "general_lists.h"
+#include "math_subsets_selections.h"
 #include <ctime>
 
 class CalculatorHTML;

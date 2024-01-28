@@ -1,6 +1,6 @@
-#include "general_strings.h"
-#include "general_logging_global_variables.h"
 #include "crypto_calculator.h"
+#include "general_logging_global_variables.h"
+#include "general_strings.h"
 #include "globals.h"
 
 bool StringRoutines::Test::all() {

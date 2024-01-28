@@ -1,13 +1,13 @@
-#include "crypto_calculator.h"
-#include "general_file_operations_encodings.h"
-#include "transport_layer_security.h"
-#include "database.h"
 #include "calculator_html_interpretation.h"
-#include "signals_infrastructure.h"
 #include "calculator_inner_functions.h"
+#include "crypto_calculator.h"
+#include "database.h"
+#include "general_file_operations_encodings.h"
+#include "signals_infrastructure.h"
 #include "string_constants.h"
-#include <iostream>
+#include "transport_layer_security.h"
 #include "web_api.h"
+#include <iostream>
 
 class Test {
 public:

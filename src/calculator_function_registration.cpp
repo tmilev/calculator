@@ -1,8 +1,8 @@
-#include "calculator_inner_typed_functions.h"
-#include "calculator_inner_functions.h"
-#include "calculator_functions_polynomial.h"
 #include "calculator_educational_functions_1.h"
+#include "calculator_functions_polynomial.h"
 #include "calculator_html_functions.h"
+#include "calculator_inner_functions.h"
+#include "calculator_inner_typed_functions.h"
 
 // This file lists calculator functions and various hard-coded rules.
 // Hard-coded functions and operators.

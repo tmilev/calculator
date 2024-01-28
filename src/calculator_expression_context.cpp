@@ -1,6 +1,6 @@
 #include "calculator_interface.h"
-#include "math_extra_weyl_algebras_implementation.h"
 #include "math_extra_modules_semisimple_lie_algebras_implementation.h"
+#include "math_extra_weyl_algebras_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_modular_arithmetic.h"
 #include "math_rational_function_implementation.h"

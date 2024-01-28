@@ -1,6 +1,6 @@
-#include "calculator_inner_functions.h"
-#include "calculator_html_functions.h"
 #include "calculator_educational_functions_1.h"
+#include "calculator_html_functions.h"
+#include "calculator_inner_functions.h"
 
 void Calculator::initializeFunctionsExtra() {
   STACK_TRACE("Calculator::initializeFunctionsExtra");

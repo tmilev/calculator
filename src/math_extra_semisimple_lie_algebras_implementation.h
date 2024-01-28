@@ -1,10 +1,10 @@
 #ifndef header_math_extra_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
 #define header_math_extra_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
 
-#include "math_extra_semisimple_lie_algebras.h"
-#include "math_extra_lie_theory_extras.h" // error: invalid use of incomplete type ‘struct BranchingData’
-#include "math_extra_drawing_variables.h"
 #include "html_routines.h"
+#include "math_extra_drawing_variables.h"
+#include "math_extra_lie_theory_extras.h" // error: invalid use of incomplete type ‘struct BranchingData’
+#include "math_extra_semisimple_lie_algebras.h"
 
 template <class Coefficient>
 std::string Weight<Coefficient>::toString(FormatExpressions* format) const {

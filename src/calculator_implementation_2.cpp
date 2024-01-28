@@ -1,6 +1,6 @@
 #include "calculator_interface.h"
-#include "string_constants.h"
 #include "general_file_operations_encodings.h"
+#include "string_constants.h"
 
 JSData Calculator::OperationHandlers::toJSON() {
   JSData result;

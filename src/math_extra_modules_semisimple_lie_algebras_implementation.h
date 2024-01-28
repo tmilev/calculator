@@ -1,14 +1,14 @@
 #ifndef header_math_extra_modules_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
 #define header_math_extra_modules_semisimple_lie_algebras_implementation_ALREADY_INCLUDED
 
-#include "math_extra_modules_semisimple_lie_algebras.h"
-#include "math_extra_drawing_variables.h"
+#include "html_routines.h"
 #include "math_extra_differential_operators.h"
-#include "math_rational_function.h"
+#include "math_extra_drawing_variables.h"
+#include "math_extra_modules_semisimple_lie_algebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_extra_universal_enveloping_implementation.h"
+#include "math_rational_function.h"
 #include "progress_report.h"
-#include "html_routines.h"
 
 template <class Coefficient>
 Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(

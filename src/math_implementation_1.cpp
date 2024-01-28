@@ -1,10 +1,10 @@
-#include "math_extra_finite_groups_implementation.h"
 #include "general_lists.h"
-#include "math_general.h"
-#include "math_extra_universal_enveloping.h"
-#include "math_extra_semisimple_lie_algebras.h"
-#include "math_vector_partition_functions.h"
+#include "math_extra_finite_groups_implementation.h"
 #include "math_extra_lie_theory_extras.h"
+#include "math_extra_semisimple_lie_algebras.h"
+#include "math_extra_universal_enveloping.h"
+#include "math_general.h"
+#include "math_vector_partition_functions.h"
 
 void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   int generatorIndex,

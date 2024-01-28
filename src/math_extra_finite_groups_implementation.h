@@ -1,10 +1,10 @@
 #ifndef header_math_extra_finite_groups_implementation_ALREADY_INCLUDED
 #define header_math_extra_finite_groups_implementation_ALREADY_INCLUDED
 
+#include "html_routines.h"
 #include "math_extra_finite_groups.h"
 #include "math_extra_graph.h"
 #include "progress_report.h"
-#include "html_routines.h"
 
 template <class Coefficient>
 std::string FinitelyGeneratedMatrixMonoid<Coefficient>::toString(

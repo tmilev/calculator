@@ -1,6 +1,6 @@
-#include "transport_layer_security.h"
-#include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
+#include "general_logging_global_variables.h"
+#include "transport_layer_security.h"
 #include <unistd.h> //<- close, open defined here
 
 #ifdef MACRO_use_open_ssl
@@ -10,12 +10,12 @@
 // sudo apt-get install libssl-dev
 // 2. opensuse:
 // sudo yast -i libopenssl-devel
-#include <openssl/rsa.h>
 #include <openssl/crypto.h>
-#include <openssl/x509.h>
-#include <openssl/pem.h>
-#include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
+#include <openssl/ssl.h>
+#include <openssl/x509.h>
 
 #endif
 

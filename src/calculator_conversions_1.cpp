@@ -1,9 +1,9 @@
-#include "math_extra_weyl_algebras_implementation.h"
-#include "calculator_interface.h"
 #include "calculator_inner_typed_functions.h"
-#include "math_rational_function_implementation.h"
+#include "calculator_interface.h"
 #include "calculator_lie_theory.h"
 #include "general_file_operations_encodings.h"
+#include "math_extra_weyl_algebras_implementation.h"
+#include "math_rational_function_implementation.h"
 
 // As of writing,
 // removing this include breaks the optimize=1 build,

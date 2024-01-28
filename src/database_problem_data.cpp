@@ -1,8 +1,8 @@
 #include "calculator_problem_storage.h"
-#include "string_constants.h"
+#include "general_logging_global_variables.h"
 #include "general_strings.h"
 #include "html_routines.h"
-#include "general_logging_global_variables.h"
+#include "string_constants.h"
 
 ProblemData::ProblemData() {
   this->randomSeed = 0;

@@ -1,20 +1,20 @@
-#include "general_lists.h"
+#include "crypto_calculator.h"
 #include "general_file_operations_encodings.h"
-#include "math_general_implementation.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
-#include "math_extra_finite_groups_implementation.h"
-#include "math_extra_symmetric_groups_and_generalizations.h"
+#include "general_lists.h"
+#include "general_strings.h"
 #include "math_extra_drawing_variables.h"
-#include "string_constants.h"
+#include "math_extra_finite_groups_implementation.h"
+#include "math_extra_modules_semisimple_lie_algebras.h"
+#include "math_extra_symmetric_groups_and_generalizations.h"
+#include "math_general_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_lattices.h"
 #include "math_rational_function.h"
+#include "math_vector_partition_functions.h"
+#include "string_constants.h"
 #include <dirent.h>
 #include <unistd.h>
-#include "math_extra_modules_semisimple_lie_algebras.h"
-#include "crypto_calculator.h"
-#include "math_vector_partition_functions.h"
-#include "math_lattices.h"
-#include "general_strings.h"
 
 // The below gives upper limit to the amount of pointers
 // that are allowed to be allocated by the program. Can be changed dynamically.

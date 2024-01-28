@@ -1,8 +1,8 @@
-#include "transport_layer_security.h"
-#include "general_logging_global_variables.h"
-#include "general_file_operations_encodings.h"
-#include "crypto_calculator.h"
 #include "abstract_syntax_notation_one_decoder.h"
+#include "crypto_calculator.h"
+#include "general_file_operations_encodings.h"
+#include "general_logging_global_variables.h"
+#include "transport_layer_security.h"
 
 std::string SSLRecord::Test::sampleClientHelloHex =
 "1603010200010001fc03031e70e7e6d1ccf06a234cf5b6f4c"

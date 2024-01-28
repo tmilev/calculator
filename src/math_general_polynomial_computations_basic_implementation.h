@@ -1,8 +1,8 @@
 #ifndef header_math_general_polynomial_computations_basic_implementation_ALREADY_INCLUDED
 #define header_math_general_polynomial_computations_basic_implementation_ALREADY_INCLUDED
 
-#include "math_general.h"
 #include "html_routines.h"
+#include "math_general.h"
 
 template <class Coefficient>
 bool MonomialPolynomial::substitute(

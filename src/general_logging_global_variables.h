@@ -1,12 +1,12 @@
 #ifndef header_general_logging_global_variables_ALREADY_INCLUDED
 #define header_general_logging_global_variables_ALREADY_INCLUDED
 
-#include "general_lists.h"
-#include "general_list_references.h"
-#include "general_maps.h"
 #include "general_database_system_independent.h"
-#include <thread>
+#include "general_list_references.h"
+#include "general_lists.h"
+#include "general_maps.h"
 #include <fstream>
+#include <thread>
 
 // Forward-declared class webserver.
 class WebServer;

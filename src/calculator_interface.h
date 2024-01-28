@@ -1,15 +1,15 @@
 #ifndef header_calculator_interface_ALREADY_INCLUDED
 #define header_calculator_interface_ALREADY_INCLUDED
 
-#include "math_general.h"
-#include "math_extra_finite_groups.h"
-#include "math_extra_algebraic_numbers.h"
 #include "general_list_references.h"
-#include "math_extra_semisimple_lie_subalgebras.h"
-#include "math_extra_universal_enveloping.h"
-#include "math_extra_modules_semisimple_lie_algebras.h"
-#include "math_extra_symmetric_groups_and_generalizations.h"
+#include "math_extra_algebraic_numbers.h"
 #include "math_extra_elliptic_curves.h"
+#include "math_extra_finite_groups.h"
+#include "math_extra_modules_semisimple_lie_algebras.h"
+#include "math_extra_semisimple_lie_subalgebras.h"
+#include "math_extra_symmetric_groups_and_generalizations.h"
+#include "math_extra_universal_enveloping.h"
+#include "math_general.h"
 #include "math_rational_function.h"
 #include "math_vector_partition_functions.h"
 

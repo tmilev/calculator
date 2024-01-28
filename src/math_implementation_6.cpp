@@ -1,6 +1,6 @@
-#include "math_general_polynomial_computations_advanced_implementation.h"
-#include "math_general_implementation.h"
 #include "math_extra_polynomial_factorization.h"
+#include "math_general_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
 
 template < >
 void PolynomialConversions::convertToPolynomial(

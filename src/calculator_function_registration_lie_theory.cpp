@@ -1,7 +1,7 @@
-#include "calculator_lie_theory.h"
-#include "calculator_weyl_group_characters.h"
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
+#include "calculator_lie_theory.h"
+#include "calculator_weyl_group_characters.h"
 
 void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   STACK_TRACE("Calculator::initializeFunctionsSemisimpleLieAlgebras");

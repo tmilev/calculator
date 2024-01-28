@@ -1,11 +1,11 @@
-#include "web_api.h"
-#include "general_logging_global_variables.h"
-#include "string_constants.h"
-#include "webserver.h"
-#include "database.h"
-#include "calculator_problem_storage.h"
-#include "math_extra_latex_routines.h"
 #include "calculator_educational_functions_1.h"
+#include "calculator_problem_storage.h"
+#include "database.h"
+#include "general_logging_global_variables.h"
+#include "math_extra_latex_routines.h"
+#include "string_constants.h"
+#include "web_api.h"
+#include "webserver.h"
 
 std::string WebAPIResponse::youHaveReachedTheBackend =
 "You've reached the calculator's backend. ";

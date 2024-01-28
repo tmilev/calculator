@@ -1,9 +1,9 @@
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
-#include "source_code_formatter.h"
 #include "general_strings.h"
 #include "html_routines.h"
 #include "math_basics.h"
+#include "source_code_formatter.h"
 
 CodeFormatter::Element::Element() {
   this->indentationLevel = 0;
@@ -1366,7 +1366,8 @@ bool CodeFormatter::Element::computeIndentationQuote() {
   return true;
 }
 
-bool CodeFormatter::Element::operator>(const CodeFormatter::Element& other)const{
+bool CodeFormatter::Element::operator>(const CodeFormatter::Element& other)
+const {
   if (this->type > other.type) {
     return true;
   }
@@ -1379,16 +1380,16 @@ bool CodeFormatter::Element::operator>(const CodeFormatter::Element& other)const
   if (this->content < other.content) {
     return false;
   }
-  for (int i =0 ; i < this->children.size; i ++){
-    if (i >= other.children.size){
+  for (int i = 0; i < this->children.size; i ++) {
+    if (i >= other.children.size) {
       return true;
     }
-    CodeFormatter::Element& child = this->children[i];
+    CodeFormatter::Element & child = this->children[i];
     CodeFormatter::Element& otherChild = other.children[i];
-                                         if (child  >otherChild){
+    if (child > otherChild) {
       return true;
     }
-                                         if ( otherChild>child) {
+    if (otherChild > child) {
       return false;
     }
   }
@@ -5030,23 +5031,21 @@ void CodeFormatter::collectMultiArguments(
 
 void CodeFormatter::sortHeaders(CodeFormatter::Element& current) {
   STACK_TRACE("CodeFormatter::sortHeaders");
-  global << "DEBUG: sort headers!!!" << Logger::endL;
-  if (current.type == CodeFormatter::Element::TopLevel){
+  if (current.type == CodeFormatter::Element::TopLevel) {
     CodeFormatter::sortHeadersInTopLevel(current);
     return;
   }
-  for (CodeFormatter::Element& child : current.children){
+  for (CodeFormatter::Element& child : current.children) {
     CodeFormatter::sortHeaders(child);
   }
 }
 
-void CodeFormatter::sortHeadersInTopLevel(CodeFormatter::Element& topLevel){
+void CodeFormatter::sortHeadersInTopLevel(CodeFormatter::Element& topLevel) {
   STACK_TRACE("CodeFormatter::sortHeadersInTopLevel");
-  global << "DEBUG: found top level element!!!!"<< Logger::endL;
   List<CodeFormatter::Element> toBeProcessed = topLevel.children;
   List<CodeFormatter::Element> includeString;
   topLevel.children.clear();
-  for (CodeFormatter::Element& child: toBeProcessed){
+  for (CodeFormatter::Element& child : toBeProcessed) {
     if (child.type == CodeFormatter::Element::Type::IncludeLine) {
       includeString.addOnTop(child);
       continue;
@@ -5058,16 +5057,18 @@ void CodeFormatter::sortHeadersInTopLevel(CodeFormatter::Element& topLevel){
   this->addTopLevelElementsSorted(topLevel, includeString);
 }
 
-void CodeFormatter:: addTopLevelElementsSorted(CodeFormatter::Element& topLevel, List<CodeFormatter::Element>& elements){
+void CodeFormatter::addTopLevelElementsSorted(
+  CodeFormatter::Element& topLevel,
+  List<CodeFormatter::Element>& elements
+) {
   STACK_TRACE("CodeFormatter::addTopLevelElementsSorted");
   elements.quickSortAscending();
-  for (CodeFormatter::Element& element : elements){
+  for (CodeFormatter::Element& element : elements) {
     element.indexInParent = topLevel.children.size;
     topLevel.addChild(element);
   }
   elements.clear();
 }
-
 
 void CodeFormatter::normalizeBinaryOperationsRecursively(
   CodeFormatter::Element& current

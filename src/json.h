@@ -1,9 +1,9 @@
 #ifndef header_json_ALREADY_INCLUDED
 #define header_json_ALREADY_INCLUDED
 
-#include "general_memory_saving.h"
 #include "general_list_references.h"
 #include "general_maps.h"
+#include "general_memory_saving.h"
 
 // struct JSHashData;
 class Rational;

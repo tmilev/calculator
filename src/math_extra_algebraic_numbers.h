@@ -1,8 +1,8 @@
 #ifndef header_math_extra_algebraic_numbers_ALREADY_INCLUDED
 #define header_math_extra_algebraic_numbers_ALREADY_INCLUDED
 
-#include "math_general.h"
 #include "math_extra_polynomial_factorization.h"
+#include "math_general.h"
 #include "math_modular_arithmetic.h"
 
 class AlgebraicClosureRationals;

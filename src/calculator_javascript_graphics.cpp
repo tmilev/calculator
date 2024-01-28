@@ -1,8 +1,8 @@
-#include "general_lists.h"
-#include "math_general.h"
-#include "math_extra_drawing_variables.h"
-#include "crypto_calculator.h"
 #include "calculator_interface.h"
+#include "crypto_calculator.h"
+#include "general_lists.h"
+#include "math_extra_drawing_variables.h"
+#include "math_general.h"
 
 void DrawingVariables::toJSON(JSData& output) {
   output.makeEmptyArray();

@@ -1,10 +1,10 @@
-#include "html_routines.h"
-#include "general_logging_global_variables.h"
 #include "general_file_operations_encodings.h"
-#include <iomanip>
-#include "string_constants.h"
+#include "general_logging_global_variables.h"
 #include "general_strings.h"
+#include "html_routines.h"
 #include "math_basics.h"
+#include "string_constants.h"
+#include <iomanip>
 
 std::string HtmlRoutines::latexWithCopyButton = "latexWithCopyButton";
 std::string HtmlRoutines::gitRepository =

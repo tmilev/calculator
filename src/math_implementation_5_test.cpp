@@ -1,6 +1,6 @@
-#include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
 #include "calculator_interface.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
 
 bool MonomialPolynomial::Test::all() {
   return MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition();

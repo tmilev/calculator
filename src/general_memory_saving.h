@@ -1,8 +1,8 @@
 #ifndef header_memory_saving_ALREADY_INCLUDED
 #define header_memory_saving_ALREADY_INCLUDED
 
-#include "globals.h"
 #include "general_multitasking.h"
+#include "globals.h"
 
 // This is a wrapper-allocate-on-first-use around a regular object.
 template <class Object>

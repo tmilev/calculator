@@ -1,10 +1,10 @@
-#include "calculator_inner_typed_functions.h"
 #include "calculator_functions_polynomial.h"
-#include "math_rational_function_implementation.h"
-#include "math_extra_polynomial_factorization.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "calculator_inner_typed_functions.h"
 #include "math_extra_algebraic_numbers.h"
+#include "math_extra_polynomial_factorization.h"
 #include "math_general_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_rational_function_implementation.h"
 
 template < >
 bool CalculatorConversions::getPolynomial<Rational>(

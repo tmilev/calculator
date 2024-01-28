@@ -5,11 +5,10 @@
 #include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 #include "math_extra_universal_enveloping.h"
-#include "math_extra_universal_enveloping_implementation.h" // undefined reference to `ElementUniversalEnveloping<RationalFunctionOld>::makeZero(SemisimpleLieAlgebra&)'
 #include "math_general.h"
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_rational_function_implementation.h"
+#include "math_rational_function.h"
 
 std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
   if (this->isConstant()) {

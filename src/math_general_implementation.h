@@ -26,8 +26,8 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
     << "number of columns different from number of rows. "
     << global.fatal;
   }
-  int dim = this->numberOfColumns;
-  for (int i = 0; i < dim; i ++) {
+  int dimension = this->numberOfColumns;
+  for (int i = 0; i < dimension; i ++) {
     pivotIndex = this->findPivot(i, i);
     if (pivotIndex == - 1) {
       output = ringZero;
@@ -44,7 +44,12 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
     if (doReport) {
       if (report.tickAndWantReport()) {
         std::stringstream reportStream;
-        reportStream << "Pivot row " << i + 1 << " out of " << dim << ": ";
+        reportStream
+        << "Pivot row "
+        << i + 1
+        << " out of "
+        << dimension
+        << ": ";
         for (
           int colCounter = 0; colCounter < this->numberOfColumns; colCounter ++
         ) {
@@ -56,7 +61,7 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
         report.report(reportStream.str());
       }
     }
-    for (int j = i + 1; j < dim; j ++) {
+    for (int j = i + 1; j < dimension; j ++) {
       if (!this->elements[j][i].isEqualToZero()) {
         scalar = this->elements[j][i];
         scalar.negate();
@@ -70,9 +75,9 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
             << ", row "
             << j
             << " out of "
-            << dim
+            << dimension
             << " times  "
-            << dim
+            << dimension
             << " total.";
             report2.report(reportStream.str());
           }

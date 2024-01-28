@@ -1,9 +1,11 @@
 #include "math_extra_finite_groups_implementation.h"
+#include "math_extra_finite_groups_implementation.h"
 #include "math_extra_graph.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h" // WeylGroup::getSignSignatureAllRootSubsystems
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_general.h"
 #include "math_general_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
 
 template < >
 List<ElementWeylGroup>::Comparator* FormatExpressions::getMonomialOrder<

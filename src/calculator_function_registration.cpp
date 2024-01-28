@@ -3,6 +3,7 @@
 #include "calculator_html_functions.h"
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
 
 // This file lists calculator functions and various hard-coded rules.
 // Hard-coded functions and operators.

@@ -55,7 +55,6 @@ HEADERS += \
     math_extra_algebraic_numbers.h \
     math_extra_drawing_variables.h \
     math_extra_elliptic_curves.h \
-    math_extra_elliptic_curves_implementation.h \
     math_extra_finite_groups.h \
     math_extra_finite_groups_implementation.h \
     math_extra_graph.h \
@@ -72,7 +71,6 @@ HEADERS += \
     math_extra_symmetric_groups_and_generalizations.h \
     math_extra_tree.h \
     math_extra_universal_enveloping.h \
-    math_extra_universal_enveloping_implementation.h \
     math_extra_vector_space.h \
     math_general.h \
     math_general_implementation.h \
@@ -96,7 +94,6 @@ HEADERS += \
     calculator_problem_storage.h \
     crypto_public_domain.h \
     math_rational_function.h \
-    math_rational_function_implementation.h \
     calculator_functions_polynomial.h \
     math_extra_differential_operators.h \
     calculator_lie_theory.h

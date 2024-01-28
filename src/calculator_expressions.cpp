@@ -1,11 +1,11 @@
-#include "calculator_html_functions.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h"
+#include "calculator_interface.h"
+#include "math_extra_elliptic_curves.h"
+#include "math_extra_semisimple_lie_algebras.h"
+#include "math_extra_semisimple_lie_algebras_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 #include "math_extra_symmetric_groups_and_generalizations.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_rational_function_implementation.h"
-
-// Required by linker as of writing.
-#include "math_extra_elliptic_curves_implementation.h"
+#include "math_general.h"
+#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
+#include "math_rational_function.h"
 
 // If you get a specialization after instantiation error:
 // the following template specialization funcitons must appear

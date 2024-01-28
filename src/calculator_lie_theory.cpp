@@ -4,12 +4,11 @@
 #include "math_extra_differential_operators.h"
 #include "math_extra_modules_semisimple_lie_algebras_implementation.h"
 #include "math_extra_semisimple_lie_algebras_implementation.h"
-#include "math_extra_universal_enveloping_implementation.h"
-#include "math_weyl_algebras.h"
-#include "math_general_implementation.h"
+#include "math_extra_universal_enveloping.h"
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
-#include "math_rational_function_implementation.h"
+#include "math_rational_function.h"
+#include "math_weyl_algebras.h"
 
 template < >
 unsigned int HashFunctions::hashFunction(

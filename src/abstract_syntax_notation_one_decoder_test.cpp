@@ -1,5 +1,6 @@
 #include "crypto_calculator.h"
 #include "general_logging_global_variables.h"
+
 bool PrivateKeyRSA::Test::all() {
   PrivateKeyRSA::Test::loadFromPEMFile();
   PrivateKeyRSA::Test::loadFromPEM();

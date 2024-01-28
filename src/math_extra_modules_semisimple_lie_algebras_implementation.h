@@ -6,7 +6,6 @@
 #include "math_extra_drawing_variables.h"
 #include "math_extra_modules_semisimple_lie_algebras.h"
 #include "math_extra_universal_enveloping.h"
-#include "math_extra_universal_enveloping_implementation.h"
 #include "math_rational_function.h"
 #include "progress_report.h"
 

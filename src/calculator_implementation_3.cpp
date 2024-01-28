@@ -6,7 +6,7 @@
 // Include required by web assembly build as of writing.
 #include "math_extra_drawing_variables.h"
 #include "math_extra_lie_theory_extras.h"
-#include "math_rational_function_implementation.h"
+#include "math_rational_function.h"
 #include "string_constants.h"
 
 // If you get the C++ multiple definition error:

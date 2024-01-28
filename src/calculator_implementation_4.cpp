@@ -1,20 +1,18 @@
 #include "calculator_interface.h"
 #include "general_file_operations_encodings.h"
 #include "math_extra_differential_operators.h"
+#include "math_extra_elliptic_curves.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_modules_semisimple_lie_algebras_implementation.h"
 #include "math_extra_semisimple_lie_algebras_implementation.h"
-#include "math_extra_universal_enveloping_implementation.h"
-#include "math_weyl_algebras.h"
+#include "math_extra_universal_enveloping.h"
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_rational_function_implementation.h"
+#include "math_rational_function.h"
+#include "math_weyl_algebras.h"
 #include "string_constants.h"
 #include <cfloat>
 #include <cmath>
-
-// Required by linker when using optimize=1.
-#include "math_extra_elliptic_curves_implementation.h"
 
 Calculator::Calculator() {
   this->parser.initialize(this);

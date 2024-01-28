@@ -3,6 +3,7 @@
 #include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 #include "math_general_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
 
 void RootSubalgebra::getCoxeterElement(Matrix<Rational>& output) {
   int dimension = this->getAmbientWeyl().getDimension();

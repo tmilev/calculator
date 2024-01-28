@@ -1,7 +1,7 @@
 #include "calculator_educational_functions_1.h"
 #include "calculator_inner_functions.h"
 #include "globals.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 #include "string_constants.h"
 
 bool UnivariateEquation::getSolutions(

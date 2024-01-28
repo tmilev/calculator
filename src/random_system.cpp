@@ -1,10 +1,10 @@
 #include "crypto_calculator.h"
 #include "general_logging_global_variables.h"
-
 #include <syscall.h> // <- SYS_getrandom defined here.
 #include <unistd.h> // <- syscall defined here.
 
 #ifndef MACRO_use_wasm
+
 #include <linux/random.h> // <- GRND_NONBLOCK defined here.
 
 void Crypto::Random::initializeRandomBytesForTesting() {

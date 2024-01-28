@@ -1,13 +1,12 @@
 #include "calculator_inner_typed_functions.h"
+#include "math_extra_elliptic_curves.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_semisimple_lie_algebras_implementation.h"
-#include "math_extra_universal_enveloping_implementation.h"
-#include "math_weyl_algebras.h"
+#include "math_extra_universal_enveloping.h"
 #include "math_general_implementation.h"
-#include "math_rational_function_implementation.h"
-
-// Required by linker as of writing:
-#include "math_extra_elliptic_curves_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_rational_function.h"
+#include "math_weyl_algebras.h"
 
 // Excluding this breaks the optimize=1 build
 // as of writing.

@@ -1,12 +1,16 @@
 #include "general_file_operations_encodings.h"
+#include "general_lists.h"
 #include "math_extra_algebraic_numbers.h"
 #include "math_extra_drawing_variables.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
-#include "math_extra_universal_enveloping_implementation.h"
+#include "math_extra_universal_enveloping.h"
+#include "math_general_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_rational_function_implementation.h"
+#include "math_rational_function.h"
+#include "math_subsets_selections.h"
+#include "math_vectors.h"
 #include "string_constants.h"
 
 std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {

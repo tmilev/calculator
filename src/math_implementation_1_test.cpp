@@ -2,7 +2,7 @@
 #include "crypto_calculator.h"
 #include "math_extra_algebraic_numbers.h"
 #include "math_general.h"
-#include "math_rational_function_implementation.h"
+#include "math_rational_function.h"
 
 bool LargeIntegerUnsigned::Test::serializationToHex(
   const LargeIntegerUnsigned& input

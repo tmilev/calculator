@@ -4,8 +4,8 @@
 #include "math_general.h"
 #include "math_lattices.h"
 #include "math_weyl_algebras.h"
-class PartialFractions;
 
+class PartialFractions;
 
 class Cone {
   void computeVerticesFromNormals();

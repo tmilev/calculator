@@ -2,6 +2,7 @@
 #define header_math_extra_semisimple_lie_algebras_ALREADY_INCLUDED
 
 #include "math_extra_finite_groups.h"
+#include "math_vectors.h"
 
 class Plot;
 class CartanInvolution;

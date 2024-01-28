@@ -6171,7 +6171,6 @@ public:
   int numberOfPartitionsByEnumeration();
 };
 
-
 class LittelmannPath {
 public:
   friend std::ostream& operator<<(

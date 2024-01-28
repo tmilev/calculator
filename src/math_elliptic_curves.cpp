@@ -1,5 +1,5 @@
 #include "math_extra_algebraic_numbers.h"
-#include "math_extra_elliptic_curves_implementation.h"
+#include "math_extra_elliptic_curves.h"
 
 unsigned int EllipticCurveWeierstrassNormalForm::hashFunction(
   const EllipticCurveWeierstrassNormalForm& input

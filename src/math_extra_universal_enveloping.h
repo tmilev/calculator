@@ -418,4 +418,42 @@ public:
   }
 };
 
+template <class Coefficient>
+void ElementUniversalEnveloping<Coefficient>::makeZero(
+  SemisimpleLieAlgebra& inputOwner
+) {
+  this->::LinearCombination<
+    MonomialUniversalEnveloping<Coefficient>, Coefficient
+  >::makeZero();
+  this->owner = &inputOwner;
+}
+
+template <class Coefficient>
+void ElementUniversalEnveloping<Coefficient>::substitute(
+  const PolynomialSubstitution<Rational>& polynomialSubstitution
+) {
+  ElementUniversalEnveloping<Coefficient> output;
+  output.makeZero(*this->owner);
+  MonomialUniversalEnveloping<Coefficient> monomial;
+  Coefficient tempCF;
+  for (int i = 0; i < this->size(); i ++) {
+    monomial = (*this)[i];
+    monomial.substitute(polynomialSubstitution);
+    tempCF = this->coefficients[i];
+    tempCF.substitute(polynomialSubstitution, 1, nullptr);
+    output.addMonomial(monomial, tempCF);
+  }
+  *this = output;
+}
+
+template <class Coefficient>
+void MonomialUniversalEnveloping<Coefficient>::substitute(
+  const PolynomialSubstitution<Rational>& substitution
+) {
+  for (int i = 0; i < this->generatorsIndices.size; i ++) {
+    this->powers[i].substitute(substitution, 1, nullptr);
+  }
+  this->simplifyEqualConsecutiveGenerators(0);
+}
+
 #endif // header_math_extra_universal_enveloping_ALREADY_INCLUDED

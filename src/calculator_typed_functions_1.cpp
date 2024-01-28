@@ -1,16 +1,13 @@
 #include "calculator_inner_typed_functions.h"
 #include "math_extra_elliptic_curves.h"
 #include "math_extra_finite_groups_implementation.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h"
+#include "math_extra_modules_semisimple_lie_algebras.h"
+#include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_general_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 #include "math_rational_function.h"
 #include "math_weyl_algebras.h"
-
-// Excluding this breaks the optimize=1 build
-// as of writing.
-#include "math_extra_modules_semisimple_lie_algebras_implementation.h"
 
 bool CalculatorFunctionsBinaryOps::
 addElementZModPOrRationalToElementZModPOrRational(
@@ -27,7 +24,8 @@ addElementZModPOrRationalToElementZModPOrRational(
   const Expression* rightE;
   leftE = &input[1];
   rightE = &input[2];
-  ElementZmodP element1, element2;
+  ElementZmodP element1;
+  ElementZmodP element2;
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
     if (leftE->isOfType<ElementZmodP>(&element1)) {
       if (rightE->isOfType<ElementZmodP>(&element2)) {
@@ -68,7 +66,8 @@ multiplyElementZmodPorRationalByElementZmodPorRational(
   const Expression* rightE;
   leftE = &input[1];
   rightE = &input[2];
-  ElementZmodP element1, element2;
+  ElementZmodP element1;
+  ElementZmodP element2;
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
     if (leftE->isOfType<ElementZmodP>(&element1)) {
       if (rightE->isOfType<ElementZmodP>(&element2)) {
@@ -108,7 +107,8 @@ divideElementZmodPorRationalByElementZmodPorRational(
   const Expression* rightE;
   leftE = &input[1];
   rightE = &input[2];
-  ElementZmodP element1, element2;
+  ElementZmodP element1;
+  ElementZmodP element2;
   for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
     if (leftE->isOfType<ElementZmodP>(&element1)) {
       if (rightE->isOfType<ElementZmodP>(&element2)) {
@@ -168,7 +168,8 @@ bool CalculatorFunctionsBinaryOps::addStringToString(
   if (input.size() != 3) {
     return false;
   }
-  std::string left, right;
+  std::string left;
+  std::string right;
   if (
     !input[1].isOfType(&left) || !input[2].isOfType(&right)
   ) {
@@ -188,7 +189,8 @@ divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational(
   if (!input.isListNElements(3)) {
     return false;
   }
-  AlgebraicNumber leftAN, rightAN;
+  AlgebraicNumber leftAN;
+  AlgebraicNumber rightAN;
   Rational rationalValue;
   if (!input[1].isOfType(&leftAN)) {
     if (!input[2].isOfType(&rightAN)) {
@@ -226,7 +228,9 @@ bool CalculatorFunctionsBinaryOps::multiplyElementHypOctByElementHypOct(
   if (!input.isListNElements(3)) {
     return false;
   }
-  ElementHyperoctahedralGroupR2 outElement, left, right;
+  ElementHyperoctahedralGroupR2 outElement;
+  ElementHyperoctahedralGroupR2 left;
+  ElementHyperoctahedralGroupR2 right;
   if (
     !input[1].isOfType<ElementHyperoctahedralGroupR2>(&left) ||
     !input[2].isOfType<ElementHyperoctahedralGroupR2>(&right)
@@ -280,7 +284,8 @@ bool CalculatorFunctionsBinaryOps::addAlgebraicNumberToAlgebraicNumber(
   if (!input.isListNElements(3)) {
     return false;
   }
-  AlgebraicNumber leftAN, rightAN;
+  AlgebraicNumber leftAN;
+  AlgebraicNumber rightAN;
   Rational rationalValue;
   if (!input[1].isOfType(&leftAN)) {
     if (!input[2].isOfType(&rightAN)) {
@@ -334,7 +339,8 @@ bool CalculatorFunctionsBinaryOps::multiplyCoxeterElementByCoxeterElement(
   if (!input.isListNElements(3)) {
     return false;
   }
-  ElementWeylGroup leftR, rightR;
+  ElementWeylGroup leftR;
+  ElementWeylGroup rightR;
   if (
     !input[1].isOfType(&leftR) || !input[2].isOfType(&rightR)
   ) {

@@ -1,9 +1,8 @@
 #include "calculator_functions_polynomial.h"
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
-#include "calculator_lie_theory.h"
 #include "calculator_weyl_group_characters.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 
 void Calculator::initializeFunctionsScientificBasic() {
   STACK_TRACE("Calculator::initializeFunctionsScientificBasic");

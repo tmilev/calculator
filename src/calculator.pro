@@ -61,11 +61,9 @@ HEADERS += \
     math_extra_latex_routines.h \
     math_extra_lie_theory_extras.h \
     math_extra_modules_semisimple_lie_algebras.h \
-    math_extra_modules_semisimple_lie_algebras_implementation.h \
     math_extra_packed_vector.h \
     math_extra_packed_vector_implementation.h \
     math_extra_semisimple_lie_algebras.h \
-    math_extra_semisimple_lie_algebras_implementation.h \
     math_extra_semisimple_lie_algebras_root_subalgebras.h \
     math_extra_semisimple_lie_subalgebras.h \
     math_extra_symmetric_groups_and_generalizations.h \

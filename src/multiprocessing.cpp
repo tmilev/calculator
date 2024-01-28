@@ -4,8 +4,8 @@
 #include <fcntl.h> //<- setting of flags for pipes and the like (example: making a pipe non-blocking).
 #include <iostream>
 #include <netdb.h> //<-addrinfo and related data structures defined here
-#include <sys/select.h> // <- fdset here.
 #include <unistd.h>
+#include <sys/select.h> // IWYU pragma: keep: may break WASM build.
 
 std::string MutexProcess::currentProcessName = "S: ";
 

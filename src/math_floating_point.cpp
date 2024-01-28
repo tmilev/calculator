@@ -1,4 +1,4 @@
-#include "math_general.h"
+#include "math_basics.h"
 #include <math.h>
 
 double FloatingPoint::sqrtFloating(double argument) {

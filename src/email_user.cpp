@@ -1,10 +1,7 @@
 #include "calculator_problem_storage.h"
-#include "crypto_calculator.h"
-#include "database.h"
 #include "general_file_operations_encodings.h"
+#include "general_logging_global_variables.h"
 #include "html_routines.h"
-#include "string_constants.h"
-#include "webserver.h"
 
 std::string EmailRoutines::webAdress = "";
 std::string EmailRoutines::sendEmailFrom = "";

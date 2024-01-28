@@ -1,7 +1,6 @@
 #include "json.h"
-#include "math_extra_finite_groups_implementation.h"
-#include "math_extra_symmetric_groups_and_generalizations.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_extra_finite_groups.h"
+#include "math_extra_finite_groups_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 
 void ElementWeylGroup::makeFromReadableReflections(
   WeylGroupData& input,

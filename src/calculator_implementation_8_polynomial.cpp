@@ -3,7 +3,7 @@
 #include "math_extra_algebraic_numbers.h"
 #include "math_extra_polynomial_factorization.h"
 #include "math_general_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 #include "math_rational_function.h"
 
 template < >

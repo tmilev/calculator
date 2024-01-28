@@ -1,6 +1,7 @@
 #include "calculator_inner_functions_vector_partition_function_1.h"
 #include "math_extra_drawing_variables.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general.h"
+#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 
 bool CalculatorFunctionsVectorPartitionFunction::
 vectorPartitionFunctionFormulaElementary(

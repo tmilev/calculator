@@ -20,7 +20,10 @@ extern "C" {
     result[WebAPI::Result::commentsGlobal] = global.comments.getCurrentReset();
     std::string resultString = result.toString();
     char* buffer = new char[resultString.size() + 1];
-    strcpy(buffer, resultString.c_str());
+    for (unsigned i = 0; i < resultString.size(); i ++) {
+      buffer[i] = resultString[i];
+    }
+    buffer[resultString.size()] = '\0';
     return buffer;
   }
 }

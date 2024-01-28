@@ -1,6 +1,6 @@
-#include "calculator_interface.h"
 #include "crypto_calculator.h"
 #include "general_lists.h"
+#include "html_routines.h"
 #include "math_extra_drawing_variables.h"
 #include "math_general.h"
 

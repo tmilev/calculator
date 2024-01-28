@@ -1,12 +1,10 @@
 #include "calculator_interface.h"
 #include "general_file_operations_encodings.h"
-#include "math_extra_finite_groups_implementation.h"
-#include "math_subsets_selections.h"
-
-// Include required by web assembly build as of writing.
 #include "math_extra_drawing_variables.h"
+#include "math_extra_finite_groups_implementation.h"
 #include "math_extra_lie_theory_extras.h"
 #include "math_rational_function.h"
+#include "math_subsets_selections.h"
 #include "string_constants.h"
 
 // If you get the C++ multiple definition error:

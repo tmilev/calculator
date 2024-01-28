@@ -1,7 +1,6 @@
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
 #include "transport_layer_security.h"
-#include <unistd.h> //<- close, open defined here
 
 #ifdef MACRO_use_open_ssl
 

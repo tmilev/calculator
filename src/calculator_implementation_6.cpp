@@ -1,18 +1,16 @@
 #include "abstract_syntax_notation_one_decoder.h"
-#include "calculator_html_functions.h"
 #include "calculator_html_interpretation.h"
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
 #include "crypto_calculator.h"
+#include "html_routines.h"
 #include "math_extra_drawing_variables.h"
 #include "math_extra_elliptic_curves.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h"
 #include "math_general_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 #include "math_rational_function.h"
 #include "string_constants.h"
 #include "transport_layer_security.h"
-#include "web_api.h"
 #include <iomanip>
 
 std::string CalculatorHTML::toStringLinkFromProblem(

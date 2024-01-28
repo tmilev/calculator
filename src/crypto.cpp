@@ -3,8 +3,8 @@
 #include "general_list_references.h"
 #include "general_logging_global_variables.h"
 #include "json.h"
-#include "math_extra_algebraic_numbers.h"
 #include "math_general_implementation.h"
+#include "math_modular_arithmetic.h"
 #include <iomanip>
 
 List<PublicKeyRSA> Crypto::knownCertificates;

@@ -3,12 +3,9 @@
 #include "math_extra_drawing_variables.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_lie_theory_extras.h"
-#include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_general.h"
-#include "math_general_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
 #include "string_constants.h"
-#include "system_functions_global_objects.h"
 #include <iostream>
 
 std::string UserCalculatorData::Roles::administrator = "admin";

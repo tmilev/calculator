@@ -1,7 +1,6 @@
 #include "html_routines.h"
 #include "json.h"
 #include "math_general.h"
-#include <cassert>
 #include <sys/stat.h>
 
 bool JSData::parse(

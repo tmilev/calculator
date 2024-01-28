@@ -1,5 +1,4 @@
 #include "calculator_inner_functions.h"
-#include "system_functions_global_objects.h"
 #include "webserver.h"
 
 bool CalculatorFunctionsCrypto::x509CertificateServer(

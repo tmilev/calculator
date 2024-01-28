@@ -1,6 +1,6 @@
 #include "calculator_interface.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_general.h"
+#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
 
 bool MonomialPolynomial::Test::all() {
   return MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition();
@@ -25,7 +25,12 @@ bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinitionOne(
 }
 
 bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition() {
-  MonomialPolynomial xOne, xTwo, xOneSquared, xTwoSquared, xOneXtwo, one;
+  MonomialPolynomial xOne;
+  MonomialPolynomial xTwo;
+  MonomialPolynomial xOneSquared;
+  MonomialPolynomial xTwoSquared;
+  MonomialPolynomial xOneXtwo;
+  MonomialPolynomial one;
   one.makeOne();
   xOne.makeEi(0, 1);
   xTwo.makeEi(1, 1);

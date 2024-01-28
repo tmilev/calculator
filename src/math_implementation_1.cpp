@@ -1,6 +1,7 @@
 #include "general_lists.h"
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_lie_theory_extras.h"
+#include "math_extra_modules_semisimple_lie_algebras.h" // IWYU pragma: keep: breaks the build.
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_general.h"

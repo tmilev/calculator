@@ -1,7 +1,7 @@
 #include "calculator_interface.h"
 #include "math_extra_elliptic_curves.h"
 #include "math_extra_semisimple_lie_algebras.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
+#include "math_extra_semisimple_lie_algebras.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_general.h"
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.

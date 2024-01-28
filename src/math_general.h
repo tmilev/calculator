@@ -3343,7 +3343,12 @@ public:
   int totalDegreeInt() const;
   bool isEqualToOne() const;
   bool isMonomialCoefficientOne() const;
-  bool isOneLetterFirstDegree(int* whichLetter = nullptr) const;
+  bool isOneLetterFirstDegree(int* whichLetter = nullptr) const {
+    if (this->size() != 1) {
+      return false;
+    }
+    return (*this)[0].isOneLetterFirstDegree(whichLetter);
+  }
   bool isConstant(Coefficient* whichConstant = nullptr) const;
   bool isNegative() const;
   bool isLinearNoConstantTerm();
@@ -3406,7 +3411,11 @@ public:
   void operator/=(const Coefficient& other);
   template <class otherType>
   void operator*=(const otherType& other);
-  void operator=(const Polynomial<Coefficient>& other);
+  void operator=(const Polynomial<Coefficient>& other) {
+    this->::LinearCombination<MonomialPolynomial, Coefficient>::operator=(
+      other
+    );
+  }
   template <class otherType>
   void operator=(const Polynomial<otherType>& other);
   void operator=(const Coefficient& other);

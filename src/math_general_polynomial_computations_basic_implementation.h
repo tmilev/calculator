@@ -370,14 +370,6 @@ bool Polynomial<Coefficient>::isMonomialCoefficientOne() const {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::isOneLetterFirstDegree(int* whichLetter) const {
-  if (this->size() != 1) {
-    return false;
-  }
-  return (*this)[0].isOneLetterFirstDegree(whichLetter);
-}
-
-template <class Coefficient>
 bool Polynomial<Coefficient>::isConstant(Coefficient* whichConstant) const {
   if (this->size() > 1) {
     return false;
@@ -883,13 +875,6 @@ void Polynomial<Coefficient>::operator*=(const otherType& other) {
   this->::LinearCombination<MonomialPolynomial, Coefficient>::operator*=(
     other
   );
-}
-
-template <class Coefficient>
-void Polynomial<Coefficient>::operator=(
-  const Polynomial<Coefficient>& other
-) {
-  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator=(other);
 }
 
 template <class Coefficient>

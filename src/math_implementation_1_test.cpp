@@ -1,6 +1,5 @@
 #include "calculator_interface.h"
 #include "crypto_calculator.h"
-#include "math_extra_algebraic_numbers.h"
 #include "math_general.h"
 #include "math_rational_function.h"
 

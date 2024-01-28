@@ -137,6 +137,7 @@ void GlobalVariables::joinAllThreads() {
 }
 
 GlobalVariables::~GlobalVariables() {
+  (MemorySaving<FormatExpressions>) this->defaultFormat;
   this->flagDeallocated = true;
 }
 

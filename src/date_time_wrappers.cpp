@@ -1,6 +1,7 @@
 #include "general_lists.h"
+#include "general_strings.h"
 #include "general_time_date.h"
-#include "math_general.h"
+#include "math_basics.h"
 
 TimeWrapper::TimeWrapper() {
   this->timeGM.tm_gmtoff = 0;

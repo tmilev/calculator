@@ -1,6 +1,7 @@
 #include "calculator_interface.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_extra_algebraic_numbers.h"
+#include "math_extra_polynomial_factorization.h"
+#include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks the build.
 
 bool PolynomialFactorizationFiniteFields::Test::all() {
   STACK_TRACE("PolynomialFactorizationFiniteFields::Test::all");

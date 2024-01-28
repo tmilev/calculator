@@ -1,10 +1,11 @@
 #include "general_file_operations_encodings.h"
 #include "math_extra_finite_groups_implementation.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h"
+#include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_semisimple_lie_subalgebras.h"
 #include "math_general_implementation.h"
-#include "math_general_polynomial_computations_advanced_implementation.h"
+#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
 #include "math_subsets_selections.h"
+#include "math_vector_partition_functions.h"
 
 template < >
 List<DynkinSimpleType>::Comparator* FormatExpressions::getMonomialOrder<

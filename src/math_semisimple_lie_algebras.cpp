@@ -1,13 +1,11 @@
 #include "general_file_operations_encodings.h"
 #include "general_lists.h"
-#include "math_extra_algebraic_numbers.h"
 #include "math_extra_drawing_variables.h"
 #include "math_extra_finite_groups_implementation.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h"
+#include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 #include "math_extra_universal_enveloping.h"
-#include "math_general_implementation.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
+#include "math_general_implementation.h" // IWYU pragma: keep: breaks the build.
 #include "math_rational_function.h"
 #include "math_subsets_selections.h"
 #include "math_vectors.h"
@@ -21,7 +19,9 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   Vector<Rational> root2;
   int numberOfRoots = this->weylGroup.rootSystem.size;
   int dimension = this->weylGroup.cartanSymmetric.numberOfRows;
-  ElementSemisimpleLieAlgebra<Rational> element1, element2, element3;
+  ElementSemisimpleLieAlgebra<Rational> element1;
+  ElementSemisimpleLieAlgebra<Rational> element2;
+  ElementSemisimpleLieAlgebra<Rational> element3;
   std::string hLetter = "h";
   std::string gLetter = "g";
   if (format != nullptr) {

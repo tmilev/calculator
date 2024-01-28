@@ -1,14 +1,10 @@
 #include "general_lists.h"
-#include "math_extra_algebraic_numbers.h"
 #include "math_extra_differential_operators.h"
 #include "math_extra_finite_groups_implementation.h"
-#include "math_extra_semisimple_lie_algebras_implementation.h"
-#include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
+#include "math_extra_lie_theory_extras.h"
+#include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_general.h"
-#include "math_general_implementation.h"
-#include "math_general_polynomial_computations_basic_implementation.h"
-#include "math_rational_function.h"
 
 std::string MonomialWeylAlgebra::toString(FormatExpressions* format) const {
   if (this->isConstant()) {
@@ -57,7 +53,8 @@ getMatrixOfElement(
   & input,
   Matrix<Rational>& outputMatrix
 ) const {
-  Vectors<Rational> startBasis, imageBasis;
+  Vectors<Rational> startBasis;
+  Vectors<Rational> imageBasis;
   startBasis.makeEiBasis(this->ambientWeyl->getDimension());
   this->actByElement(input, startBasis, imageBasis);
   outputMatrix.assignVectorsToRows(imageBasis);

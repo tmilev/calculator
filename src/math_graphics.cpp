@@ -1,5 +1,7 @@
+#include "html_routines.h"
 #include "math_extra_drawing_variables.h"
-#include "math_general_implementation.h"
+#include "math_general.h"
+#include "math_general_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 #include "progress_report.h"
 
 std::string DrawingVariables::typeCircleAtVector = "circleAtVector";

@@ -44,9 +44,6 @@
 #include "crypto_calculator.h"
 #include "crypto_public_domain.h"
 #include "general_logging_global_variables.h"
-#include <stdint.h>
-#include <stdint.h>
-#include <string.h>
 
 bool Crypto::flagRIPEMDBigEndian = false;
 class Ripemd160State {

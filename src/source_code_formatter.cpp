@@ -5043,18 +5043,19 @@ void CodeFormatter::sortHeaders(CodeFormatter::Element& current) {
 void CodeFormatter::sortHeadersInTopLevel(CodeFormatter::Element& topLevel){
   STACK_TRACE("CodeFormatter::sortHeadersInTopLevel");
   global << "DEBUG: found top level element!!!!"<< Logger::endL;
-  List<CodeFormatter::Element> nonProcessedChildren = topLevel.children;
+  List<CodeFormatter::Element> toBeProcessed = topLevel.children;
+  List<CodeFormatter::Element> includeString;
   topLevel.children.clear();
-  for (CodeFormatter::Element& child: topLevel.children ){
+  for (CodeFormatter::Element& child: toBeProcessed){
     if (child.type == CodeFormatter::Element::Type::IncludeLine) {
-      nonProcessedChildren.addOnTop(child);
+      includeString.addOnTop(child);
       continue;
     }
-    this->addTopLevelElementsSorted(topLevel, nonProcessedChildren);
+    this->addTopLevelElementsSorted(topLevel, includeString);
     child.indexInParent = topLevel.children.size;
     topLevel.children.addOnTop(child);
   }
-  this->addTopLevelElementsSorted(topLevel, nonProcessedChildren);
+  this->addTopLevelElementsSorted(topLevel, includeString);
 }
 
 void CodeFormatter:: addTopLevelElementsSorted(CodeFormatter::Element& topLevel, List<CodeFormatter::Element>& elements){

@@ -5051,6 +5051,7 @@ void CodeFormatter::sortHeadersInTopLevel(CodeFormatter::Element& topLevel){
       continue;
     }
     this->addTopLevelElementsSorted(topLevel, nonProcessedChildren);
+    child.indexInParent = topLevel.children.size;
     topLevel.children.addOnTop(child);
   }
   this->addTopLevelElementsSorted(topLevel, nonProcessedChildren);
@@ -5063,6 +5064,7 @@ void CodeFormatter:: addTopLevelElementsSorted(CodeFormatter::Element& topLevel,
     element.indexInParent = topLevel.children.size;
     topLevel.addChild(element);
   }
+  elements.clear();
 }
 
 

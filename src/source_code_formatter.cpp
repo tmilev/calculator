@@ -1365,6 +1365,35 @@ bool CodeFormatter::Element::computeIndentationQuote() {
   return true;
 }
 
+bool CodeFormatter::Element::operator>(const CodeFormatter::Element& other)const{
+  if (this->type > other.type) {
+    return true;
+  }
+  if (this->type < other.type) {
+    return false;
+  }
+  if (this->content > other.content) {
+    return true;
+  }
+  if (this->content < other.content) {
+    return false;
+  }
+  for (int i =0 ; i < this->children.size; i ++){
+    if (i >= other.children.size){
+      return true;
+    }
+    CodeFormatter::Element& child = this->children[i];
+    CodeFormatter::Element& otherChild = other.children[i];
+                                         if (child  >otherChild){
+      return true;
+    }
+                                         if ( otherChild>child) {
+      return false;
+    }
+  }
+  return false;
+}
+
 bool CodeFormatter::Element::computeIndentationIfWantsCodeBlock() {
   if (this->children.size >= 2) {
     this->children[1].whiteSpaceBefore = 1;
@@ -1943,6 +1972,7 @@ bool CodeFormatter::formatCPPSourceCode(
   std::stringstream out;
   this->normalizeBinaryOperationsRecursively(this->processor.code);
   this->wirePointersRecursively(this->processor.code, nullptr, - 1);
+  this->sortHeaders(this->processor.code);
   if (logDebugInfo && comments != nullptr) {
     *comments << "<b>Parsing log follows.</b><br>" << this->processor.debugLog;
   }
@@ -4996,6 +5026,37 @@ void CodeFormatter::collectMultiArguments(
   output.addOnTop(middle);
   this->collectMultiArguments(operatorName, current.children[2], output);
 }
+
+void CodeFormatter::sortHeaders(CodeFormatter::Element& current) {
+  if (current.type == CodeFormatter::Element::TopLevel){
+    CodeFormatter::sortHeadersInTopLevel(current);
+    return;
+  }
+  for (CodeFormatter::Element& child : current.children){
+    CodeFormatter::sortHeaders(child);
+  }
+}
+
+void CodeFormatter::sortHeadersInTopLevel(CodeFormatter::Element& topLevel){
+
+  List<CodeFormatter::Element> nonProcessedChildren = topLevel.children;
+  topLevel.children.clear();
+  for (CodeFormatter::Element& child: topLevel.children ){
+    if (child.type == CodeFormatter::Element::Type::IncludeLine) {
+      nonProcessedChildren.addOnTop(child);
+      continue;
+    }
+    this->addTopLevelElementsSorted(topLevel, nonProcessedChildren);
+    topLevel.children.addOnTop(child);
+  }
+  this->addTopLevelElementsSorted(topLevel, nonProcessedChildren);
+}
+
+void CodeFormatter:: addTopLevelElementsSorted(CodeFormatter::Element& topLevel, List<CodeFormatter::Element>& elements){
+  elements.quickSortAscending();
+  topLevel.children.addListOnTop(elements);
+}
+
 
 void CodeFormatter::normalizeBinaryOperationsRecursively(
   CodeFormatter::Element& current

@@ -6,7 +6,13 @@
 
 class CodeFormatter {
 public:
+
   class Element {
+    friend std::ostream& operator<< (std::ostream& output, const CodeFormatter::Element& toBePrinted){
+      output << toBePrinted.toString();
+      return output;
+    }
+
   public:
     enum Type {
       Dummy,
@@ -187,6 +193,7 @@ public:
     void toStringContentOnly(std::stringstream& out) const;
     std::string toStringContentOnly() const;
     Element();
+    bool operator>(const CodeFormatter::Element& other)const;
     void clear();
     void appendType(
       const CodeFormatter::Element& other,
@@ -452,6 +459,9 @@ private:
   bool isOperatorSuitableForNormalization(
     const CodeFormatter::Element& element
   );
+  void sortHeaders(CodeFormatter::Element& current);
+  void sortHeadersInTopLevel(CodeFormatter::Element& topLevel);
+  void addTopLevelElementsSorted(CodeFormatter::Element& topLevel, List<CodeFormatter::Element>& elements);
   void normalizeBinaryOperationsRecursively(CodeFormatter::Element& current);
   void correctMultiArguments(CodeFormatter::Element& inputOutput);
   void collectMultiArguments(

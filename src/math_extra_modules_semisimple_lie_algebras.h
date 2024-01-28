@@ -3,6 +3,7 @@
 
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_general.h"
+#include "math_weyl_algebras.h"
 
 template <class Coefficient>
 class MonomialGeneralizedVerma {

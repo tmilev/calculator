@@ -2,6 +2,77 @@
 #define header_math_extra_weyl_algebras_implementation_ALREADY_INCLUDED
 
 #include "math_general.h"
+template <class Coefficient>
+class ElementWeylAlgebra: public LinearCombination<
+                               MonomialWeylAlgebra, Coefficient
+                               > {
+public:
+  unsigned int hashFunction() const {
+    return
+        this->::LinearCombination<MonomialWeylAlgebra, Coefficient>::hashFunction(
+            );
+  }
+  static unsigned int hashFunction(const ElementWeylAlgebra& input) {
+    return input.hashFunction();
+  }
+  void makeGEpsPlusEpsInTypeD(int i, int j, int numberOfVariables);
+  void makeGEpsMinusEpsInTypeD(int i, int j, int numberOfVariables);
+  void makeGMinusEpsMinusEpsInTypeD(int i, int j, int numberOfVariables);
+  void makexixj(int i, int j);
+  void makexi(int i);
+  void makedi(int i);
+  void makedidj(int i, int j);
+  void makexidj(int i, int j);
+  static void getStandardOrderDifferentialOperatorCorrespondingToNRaisedTo(
+      const Rational& inputRationalPower,
+      int indexVariable,
+      ElementWeylAlgebra& outputDifferentialOperator,
+      Polynomial<Rational>& outputDenominator
+      );
+  void fourierTransform(ElementWeylAlgebra<Coefficient>& output) const;
+  bool actOnPolynomial(Polynomial<Rational>& actedUpon) const;
+  void multiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
+  static void lieBracket(
+      const ElementWeylAlgebra& left,
+      const ElementWeylAlgebra& right,
+      ElementWeylAlgebra& output
+      );
+  void lieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft);
+  void lieBracketOnTheLeftMakeReport(
+      const ElementWeylAlgebra& standsOnTheLeft
+      );
+  void lieBracketOnTheRightMakeReport(
+      const ElementWeylAlgebra& standsOnTheRight
+      );
+  void lieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight);
+  bool substitute(
+      const PolynomialSubstitution<Rational>& substitutionPolynomialPart,
+      const PolynomialSubstitution<Rational>& substitutionDifferentialPart
+      );
+  void makeOne() {
+    MonomialWeylAlgebra monomial;
+    monomial.polynomialPart.makeOne();
+    monomial.differentialPart.makeOne();
+    this->makeZero();
+    this->addMonomial(monomial, 1);
+  }
+  bool isPolynomial(Polynomial<Coefficient>* whichPolynomial = 0) const;
+  bool hasNonSmallPositiveIntegerDerivation() const;
+  void raiseToPower(int power);
+  void multiplyTwoMonomials(
+      const MonomialWeylAlgebra& left,
+      const MonomialWeylAlgebra& right,
+      ElementWeylAlgebra& output
+      ) const;
+  void assignPolynomial(const Polynomial<Rational>& input);
+  void operator=(const std::string& input);
+  void operator*=(const Coefficient& other) {
+    this->LinearCombination<MonomialWeylAlgebra, Coefficient>::operator*=(
+        other
+        );
+  }
+  void operator*=(const ElementWeylAlgebra& other);
+};
 
 template <class Coefficient>
 bool ElementWeylAlgebra<Coefficient>::isPolynomial(

@@ -3,6 +3,7 @@
 
 #include "math_general.h"
 #include "progress_report.h"
+#include "math_weyl_algebras.h"
 
 class QuasiDifferentialMononomial {
   friend std::ostream& operator<<(

@@ -46,6 +46,7 @@ HEADERS += \
     math_lattices.h \
     math_modular_arithmetic.h \
     math_vector_partition_functions.h \
+    math_weyl_algebras.h \
     network.h \
     progress_report.h \
     signals_infrastructure.h \
@@ -73,7 +74,6 @@ HEADERS += \
     math_extra_universal_enveloping.h \
     math_extra_universal_enveloping_implementation.h \
     math_extra_vector_space.h \
-    math_extra_weyl_algebras_implementation.h \
     math_general.h \
     math_general_implementation.h \
     math_general_polynomial_computations_advanced_implementation.h \

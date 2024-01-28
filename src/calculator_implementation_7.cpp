@@ -6,7 +6,7 @@
 #include "math_extra_latex_routines.h"
 #include "math_extra_modules_semisimple_lie_algebras_implementation.h"
 #include "math_extra_polynomial_factorization.h"
-#include "math_extra_weyl_algebras_implementation.h"
+#include "math_weyl_algebras.h"
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h"
 #include "math_rational_function_implementation.h"

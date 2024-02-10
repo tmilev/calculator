@@ -157,6 +157,10 @@ bool Database::Test::noShutdownSignal() {
   << "Database: premature exit without shutdown. "
   << "The database should still shutdown correctly."
   << Logger::endL;
+  global
+  << Logger::green
+  << "If you get a database shutdown message, then all tests passed. "
+  << Logger::endL;
   std::exit(0);
   return true;
 }

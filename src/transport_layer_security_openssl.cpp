@@ -641,7 +641,7 @@ int TransportLayerSecurityOpenSSL::sslWrite(
 bool TransportLayerSecurityOpenSSL::handShakeIamServer(
   int inputSocketID, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("WebServer::handShakeIamServer");
+  STACK_TRACE("TransportLayerSecurityOpenSSL::handShakeIamServer");
   (void) inputSocketID;
   (void) commentsOnFailure;
   if (this->sslData == nullptr) {

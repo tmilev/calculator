@@ -371,7 +371,7 @@ public:
   SSLContent();
   static std::string getType(unsigned char token);
   void resetExceptOwner();
-  TransportLayerSecurityServer& GetServer() const;
+  TransportLayerSecurityServer& getServer() const;
   bool checkInitialization() const;
   Logger::StringHighligher getStringHighlighter();
   bool decode(std::stringstream* commentsOnFailure);

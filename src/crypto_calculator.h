@@ -194,7 +194,7 @@ class Crypto {
   // To do: make sure all crypto functions zero their buffers.
 public:
   static const int RIPEMD160LengthInBytes = 20;
-  static const int LengthSha3DefaultInBytes = 32;
+  static const int lengthSha3DefaultInBytes = 32;
   static bool flagRIPEMDBigEndian;
   static List<PublicKeyRSA> knownCertificates;
   static List<uint32_t> kArraySha2xx;

@@ -134,21 +134,17 @@ bool TransportLayerSecurity::sslReadLoop(
     this->readOnce(
       - 1, outputError, commentsGeneral, includeNoErrorInComments
     );
-    if (numberOfBytes > 0) {
-      next.assign(
-        this->readBuffer.objects,
-        static_cast<unsigned>(numberOfBytes)
-      );
-      output += next;
-      if (expectedLength <= 0) {
-        break;
-      } else {
-        if (expectedLength <= static_cast<int>(output.size())) {
-          break;
-        }
-      }
+    if (numberOfBytes < 0) {
+      continue;
     }
-    if (numberOfBytes == 0) {
+    next.assign(
+      this->readBuffer.objects, static_cast<unsigned>(numberOfBytes)
+    );
+    output += next;
+    if (expectedLength <= 0) {
+      break;
+    }
+    if (expectedLength <= static_cast<int>(output.size())) {
       break;
     }
   }
@@ -233,7 +229,7 @@ CipherSuiteSpecification TransportLayerSecurityServer::getCipherNoFailure(
 ) {
   if (inputId == 0) {
     global.fatal
-    << "zero cipher suite specification not allowed here. "
+    << "Zero cipher suite specification not allowed here. "
     << global.fatal;
   }
   if (!this->cipherSuiteNames.contains(inputId)) {
@@ -578,9 +574,9 @@ bool TransportLayerSecurityServer::readBytesOnce(
   }
   struct timeval tv;
   tv.tv_sec = 5;
-  // 5 Secs Timeout
+  // 5 seconds timeout.
   tv.tv_usec = 0;
-  // Not initialize'ing this can cause strange errors
+  // Initialization.
   setsockopt(
     this->session.socketId,
     SOL_SOCKET,
@@ -601,7 +597,7 @@ bool TransportLayerSecurityServer::readBytesOnce(
     this->incomingBytes.setSize(numberOfBytesInBuffer);
   }
   global
-  << "Read bytes:\n"
+  << "DEBUG: Read bytes:\n"
   << Crypto::convertListUnsignedCharsToHexFormat(
     this->incomingBytes, 40, false
   )
@@ -609,7 +605,7 @@ bool TransportLayerSecurityServer::readBytesOnce(
   return numberOfBytesInBuffer > 0;
 }
 
-TransportLayerSecurityServer& SSLContent::GetServer() const {
+TransportLayerSecurityServer& SSLContent::getServer() const {
   return *this->owner->owner;
 }
 
@@ -893,7 +889,7 @@ void SSLContent::writeBytesHandshakeCertificate(
   Serialization::LengthWriterThreeBytes writeLengthFirstCertificate(
     output, annotations, "certificateBody"
   );
-  this->GetServer().certificate.writeBytesASN1(output, annotations);
+  this->getServer().certificate.writeBytesASN1(output, annotations);
 }
 
 void SSLContent::writeBytesHandshakeSecretExchange(
@@ -2164,6 +2160,12 @@ bool TransportLayerSecurityServer::decodeSSLRecord(
   if (!this->lastRead.decode(commentsOnFailure)) {
     return false;
   }
+  global
+  << "DEBUG: decoded ssl record OK."
+  << Logger::endL
+  << "DEBUG: Message: "
+  << this->lastRead.toString()
+  << Logger::endL;
   return true;
 }
 

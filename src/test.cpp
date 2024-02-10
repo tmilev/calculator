@@ -193,7 +193,6 @@ void Test::run() {
     // test executable, and it must run last.
     Database::Test::noShutdownSignal();
   }
-  global << Logger::green << "All tests passed. " << Logger::endL;
 }
 
 bool Test::shouldTest(const std::string& testSuite) {

@@ -1424,21 +1424,21 @@ bool UserOfDatabase::firstLoginOfAdmin(
 void UserCalculator::computeHashedSaltedPassword() {
   STACK_TRACE("UserCalculator::computeHashedSaltedPassword");
   this->usernameHashedPlusPassWordHashed.resize(
-    Crypto::LengthSha3DefaultInBytes* 2
+    Crypto::lengthSha3DefaultInBytes* 2
   );
   List<unsigned char> hasher;
   Crypto::computeSha3_256(this->enteredPassword, hasher);
   // <-careful copying entered password around. We want to avoid leaving
   // passwords in non-zeroed memory, even if properly
   // freed (to the extent possible and practical).
-  for (unsigned i = 0; i < Crypto::LengthSha3DefaultInBytes; i ++) {
+  for (unsigned i = 0; i < Crypto::lengthSha3DefaultInBytes; i ++) {
     this->usernameHashedPlusPassWordHashed[
-      i + Crypto::LengthSha3DefaultInBytes
+      i + Crypto::lengthSha3DefaultInBytes
     ] =
     static_cast<char>(hasher[i]);
   }
   Crypto::computeSha3_256(this->username, hasher);
-  for (unsigned i = 0; i < Crypto::LengthSha3DefaultInBytes; i ++) {
+  for (unsigned i = 0; i < Crypto::lengthSha3DefaultInBytes; i ++) {
     this->usernameHashedPlusPassWordHashed[i] = static_cast<char>(hasher[i]);
   }
   this->enteredHashedSaltedPassword =

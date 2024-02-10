@@ -3382,7 +3382,12 @@ public:
   int maximumPowerOfVariableIndex(int variableIndex);
   bool operator<=(const Coefficient& other) const;
   bool operator<(const Coefficient& other) const;
-  bool operator>(const Polynomial<Coefficient>& other) const;
+  bool operator>(const Polynomial<Coefficient>& other) const {
+    return
+    this->::LinearCombination<MonomialPolynomial, Coefficient>::operator>(
+      other
+    );
+  }
   bool operator<=(const Polynomial<Coefficient>& other) const;
   static bool isGEQCompareByTopMonomialTotalDegThenLexicographic(
     const Polynomial<Coefficient>& left,

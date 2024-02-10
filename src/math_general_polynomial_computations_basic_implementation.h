@@ -707,14 +707,6 @@ bool Polynomial<Coefficient>::operator<(const Coefficient& other) const {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::operator>(
-  const Polynomial<Coefficient>& other
-) const {
-  return
-  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator>(other);
-}
-
-template <class Coefficient>
 bool Polynomial<Coefficient>::
 isGEQCompareByTopMonomialTotalDegThenLexicographic(
   const Polynomial<Coefficient>& left,

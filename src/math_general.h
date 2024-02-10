@@ -3397,7 +3397,9 @@ public:
     const Polynomial<Coefficient>& left,
     const Polynomial<Coefficient>& right
   );
-  bool isEqualTo(const Polynomial<Coefficient>& p) const;
+  bool isEqualTo(const Polynomial<Coefficient>& p) const {
+    return *this == p;
+  }
   Polynomial<Coefficient> operator+(const Polynomial<Coefficient>& other)
   const;
   Polynomial<Coefficient> operator-(const Polynomial<Coefficient>& other)

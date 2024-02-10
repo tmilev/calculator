@@ -747,11 +747,6 @@ isGEQCompareByTopMonomialLexicographicLastVarStrongest(
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::isEqualTo(const Polynomial<Coefficient>& p) const {
-  return *this == p;
-}
-
-template <class Coefficient>
 Polynomial<Coefficient> Polynomial<Coefficient>::operator+(
   const Polynomial<Coefficient>& other
 ) const {

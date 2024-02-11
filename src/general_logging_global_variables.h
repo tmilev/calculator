@@ -115,7 +115,8 @@ struct ActAsWebServerOnly {
   std::string certificateFile;
   std::string adjustURL(const std::string& url) const;
   bool fromJSON(JSData& input);
-  JSData toJSON();
+  JSData toJSON() const;
+  std::string toString() const;
 };
 
 enum DatabaseType {

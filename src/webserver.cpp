@@ -4168,10 +4168,15 @@ int WebServer::run() {
   this->writeVersionJSFile();
   global.initModifiableDatabaseFields();
   HtmlRoutines::loadStrings();
+  // Must run before port binding: create openSSL configurations.
+  this->transportLayerSecurity.initializeAdditionalCertificates();
+  // Bind to all ports and create a map from ports to different openSSL
+  // configurations.
   if (!this->initializePrepareWebServerAll()) {
     return 1;
   }
-  // Must initialize after ports were computed: we use the presence of the
+  // Must initialize the openSSL configurations
+  // after ports were computed: we use the presence of the
   // https port to determine whether built in ssl should try to run.
   this->initializeSSL();
   global << Logger::purple << "waiting for connections..." << Logger::endL;
@@ -5723,7 +5728,11 @@ bool ActAsWebServerOnly::fromJSON(JSData& input) {
   return true;
 }
 
-JSData ActAsWebServerOnly::toJSON() {
+std::string ActAsWebServerOnly::toString() const {
+  return this->toJSON().toString();
+}
+
+JSData ActAsWebServerOnly::toJSON() const {
   JSData result;
   result[Configuration::ActAsWebServer::portHTTP] = this->portHTTP;
   result[Configuration::ActAsWebServer::portHTTPS] = this->portHTTPS;

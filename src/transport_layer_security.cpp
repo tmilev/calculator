@@ -70,7 +70,6 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
       this->openSSLData.initializeSSLKeyFilesSelfSignedCreateOnDemand();
       this->openSSLData.initializeOneCertificate(this->selfSigned);
     }
-    this->initializeAdditionalCertificates();
     if (this->flagBuiltInTLSAvailable) {
       this->server.initializeAllUseSelfSignedPrivateKeys();
     }
@@ -2383,7 +2382,7 @@ bool TransportLayerSecurityServer::replyToClientHello(
     }
     return false;
   }
-  global << "Wrote ssl records successfully. " << Logger::endL;
+  global << "DEBUG: Wrote ssl records successfully. " << Logger::endL;
   return true;
 }
 

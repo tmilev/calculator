@@ -2137,6 +2137,8 @@ bool PrivateKeyRSA::loadFromASNEncoded(
 bool X509Certificate::loadFromPEM(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("X509Certificate::loadFromPEM");
+  this->source = input;
   std::string certificateContentStripped;
   // see ASN1_item_d2i_bio for decoding.
   certificateContentStripped = StringRoutines::stringTrimWhiteSpace(input);
@@ -2184,15 +2186,15 @@ bool X509Certificate::loadFromPEM(
 }
 
 bool X509Certificate::loadFromPEMFile(
-  const std::string& input, std::stringstream* commentsOnFailure
+  const std::string& inputFilenameVirtual,
+  std::stringstream* commentsOnFailure
 ) {
-  std::string certificateContent;
   // No access to sensitive folders here, so this cannot be used for the
   // server's certificate.
   // For server's certificate, use TransportLayerSecurity::loadPEMCertificate.
   if (
     !FileOperations::loadFileToStringVirtual(
-      input, certificateContent, false, commentsOnFailure
+      inputFilenameVirtual, this->source, false, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -2200,7 +2202,7 @@ bool X509Certificate::loadFromPEMFile(
     }
     return false;
   }
-  return this->loadFromPEM(certificateContent, commentsOnFailure);
+  return this->loadFromPEM(this->source, commentsOnFailure);
 }
 
 std::string TBSCertificateInfo::Organization::toString() {

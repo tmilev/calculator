@@ -77,8 +77,11 @@ public:
   void initializeSSLLibrary();
   void initializeSSLServer();
   void initializeSSL(bool isServer);
-  void initializeSSLServerCertificatesSelfSigned();
-  void initializeOneCertificate(TransportLayerSecurityConfiguration& input);
+  // Loads one certificate. The certificate is primary
+  // if it is used by the calculator server.
+  void initializeOneCertificate(
+    TransportLayerSecurityConfiguration& input, bool isPrimary
+  );
   void initializeSSLClient();
   void reset();
   void clearErrorQueue(int numberOfTransferredBytes);

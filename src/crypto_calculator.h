@@ -154,6 +154,7 @@ public:
   ASNElement signatureAlgorithmId;
   TBSCertificateInfo information;
   ASNElement signatureValue;
+  std::string source;
   List<unsigned char> sourceBinary;
   ASNElement sourceASN;
   ASNElement recodedASN;
@@ -166,7 +167,8 @@ public:
   };
 
   bool loadFromPEMFile(
-    const std::string& input, std::stringstream* commentsOnFailure
+    const std::string& inputFilenameVirtual,
+    std::stringstream* commentsOnFailure
   );
   bool loadFromPEM(
     const std::string& input, std::stringstream* commentsOnFailure

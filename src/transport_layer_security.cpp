@@ -1,5 +1,6 @@
 #include "abstract_syntax_notation_one_decoder.h"
 #include "crypto_calculator.h"
+#include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
 #include "html_routines.h"
 #include "serialization_basic.h"
@@ -69,7 +70,7 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
     this->official.makeOfficialKeyAndCertificate();
     this->selfSigned.makeSelfSignedKeyAndCertificate();
     this->openSSLData.initializeSSLServer();
-    this->openSSLData.initializeOneCertificate(this->official);
+    this->openSSLData.initializeOneCertificate(this->official, true);
     if (this->openSSLData.hasOKCertificates()) {
       global
       << Logger::green
@@ -81,7 +82,7 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
       << "Official certificates not found. Trying self-signed ones. "
       << Logger::endL;
       this->openSSLData.initializeSSLKeyFilesSelfSignedCreateOnDemand();
-      this->openSSLData.initializeOneCertificate(this->selfSigned);
+      this->openSSLData.initializeOneCertificate(this->selfSigned, true);
     }
     if (this->flagBuiltInTLSAvailable) {
       this->server.initializeAllUseSelfSignedPrivateKeys();
@@ -115,7 +116,7 @@ bool TransportLayerSecurity::initializeAdditionalCertificates() {
     configurationTransport.makeFromAdditionalKeyAndCertificate(
       configuration.privateKeyFile, configuration.certificateFile
     );
-    newSSLServer.initializeOneCertificate(configurationTransport);
+    newSSLServer.initializeOneCertificate(configurationTransport, false);
   }
   return true;
 }
@@ -2518,7 +2519,9 @@ bool TransportLayerSecurityServer::handShakeIamServer(
 bool TransportLayerSecurityServer::initializeCertificatesSelfSigned(
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("TransportLayerSecurity::initializeCertificatesSelfSigned");
+  STACK_TRACE(
+    "TransportLayerSecurityServer::initializeCertificatesSelfSigned"
+  );
   this->owner->openSSLData.initializeSSLKeyFilesSelfSignedCreateOnDemand();
   global
   << Logger::purple

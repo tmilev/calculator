@@ -185,30 +185,6 @@ void TransportLayerSecurityOpenSSL::initializeSSL(bool isServer) {
 #endif // MACRO_use_open_ssl
 }
 
-void TransportLayerSecurityOpenSSL::initializeSSLServerCertificatesSelfSigned()
-{
-  STACK_TRACE(
-    "TransportLayerSecurityOpenSSL::initializeSSLServerCertificatesSelfSigned"
-  );
-  if (this->hasOKCertificates()) {
-    return;
-  }
-  if (this->owner->selfSigned.privateKeyFileNamePhysical == "") {
-    this->owner->selfSigned.makeSelfSignedKeyAndCertificate();
-  }
-  global
-  << Logger::purple
-  << "Using self-signed certificate: "
-  << Logger::yellow
-  << this->owner->selfSigned.certificateFileNamePhysical
-  << Logger::endL
-  << "Private key: "
-  << Logger::red
-  << this->owner->selfSigned.privateKeyFileNamePhysical
-  << Logger::endL;
-  this->initializeOneCertificate(this->owner->selfSigned);
-}
-
 bool TransportLayerSecurityOpenSSL::hasOKCertificates() {
   return
   this->configuration.certificateFileNamePhysical != "" &&
@@ -216,9 +192,9 @@ bool TransportLayerSecurityOpenSSL::hasOKCertificates() {
 }
 
 void TransportLayerSecurityOpenSSL::initializeOneCertificate(
-  TransportLayerSecurityConfiguration& input
+  TransportLayerSecurityConfiguration& input, bool isPrimary
 ) {
-  STACK_TRACE("TransportLayerSecurityOpenSSL::initializeCertificates");
+  STACK_TRACE("TransportLayerSecurityOpenSSL::initializeOneCertificate");
   if (this->hasOKCertificates()) {
     return;
   }
@@ -236,6 +212,39 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
     << input.privateKeyFileNamePhysical
     << global.fatal;
     return;
+  }
+  if (isPrimary) {
+    std::stringstream commentsOnFailure;
+    std::string certificateContent;
+    if (
+      !FileOperations::loadFileToStringUnsecure(
+        input.certificateFileNamePhysical,
+        certificateContent,
+        &commentsOnFailure
+      )
+    ) {
+      global.fatal
+      << "Failed to load primary certificate: ["
+      << input.certificateFileNamePhysical
+      << "]."
+      << global.fatal;
+    }
+    if (
+      !this->owner->server.certificate.loadFromPEM(
+        certificateContent, &commentsOnFailure
+      )
+    ) {
+      global
+      << Logger::red
+      << "Internal TLS library "
+      << Logger::green
+      << "(not openSSL)"
+      << Logger::red
+      << " failed to load the  server certificate from: "
+      << Logger::normalColor
+      << certificateContent
+      << Logger::endL;
+    }
   }
   this->configuration = input;
 #ifdef MACRO_use_open_ssl
@@ -806,8 +815,10 @@ void TransportLayerSecurityConfiguration::readCertificateFilename() {
     return;
   }
   std::string result;
+  std::string certificateFileNameVirtual =
+  this->certificateFolder + authorityCertificate;
   FileOperations::getPhysicalFileNameFromVirtual(
-    this->certificateFolder + authorityCertificate,
+    certificateFileNameVirtual,
     this->certificateFileNamePhysical,
     true,
     true,

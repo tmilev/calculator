@@ -6,12 +6,11 @@ bool CalculatorFunctionsCrypto::x509CertificateServer(
 ) {
   STACK_TRACE("CalculatorFunctionsCrypto::x509CertificateServer");
   (void) input;
-  std::string result =
-  Crypto::convertListUnsignedCharsToBase64(
-    global.server().transportLayerSecurity.server.certificate.sourceBinary,
-    false
+  return
+  output.assignValue(
+    calculator,
+    global.server().transportLayerSecurity.server.certificate.source
   );
-  return output.assignValue(calculator, result);
 }
 
 bool CalculatorFunctionsCrypto::x509CertificateDecode(

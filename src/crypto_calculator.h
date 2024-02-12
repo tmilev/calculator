@@ -157,6 +157,7 @@ public:
   List<unsigned char> sourceBinary;
   ASNElement sourceASN;
   ASNElement recodedASN;
+  List<unsigned char> cachedServerHandshakeCertificateMessage;
   class Test {
   public:
     static bool all();

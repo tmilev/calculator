@@ -160,18 +160,28 @@ void Test::run() {
       << "About to erase the test file name."
       << Logger::endL;
       global << "Enter y or Y to confirm: " << Logger::endL;
-      std::cin.ignore();
       int userChar = getchar();
+      std::cin.ignore();
       if (
         userChar == static_cast<int>('y') || userChar == static_cast<int>('Y')
       ) {
+        std::stringstream comments;
+        bool success =
         FileOperations::deleteFileVirtual(
-          WebAPI::Calculator::testFileNameVirtual, nullptr
+          WebAPI::Calculator::testFileNameVirtual, &comments
         );
+        if (!success) {
+          global.fatal
+          << "Failed to erase WebAPI::Calculator::testFileNameVirtual. "
+          << comments.str()
+          << global.fatal;
+        }
         global << Logger::blue << " test file deleted. " << Logger::endL;
       } else {
         global
         << Logger::green
+        << "Got input: "
+        << userChar
         << " test file deletion aborted. "
         << Logger::endL;
       }

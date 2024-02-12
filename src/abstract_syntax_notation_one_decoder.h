@@ -292,7 +292,7 @@ public:
     // Used exclusively for type matching.
   };
 
-  // A class to write fixed lenght encodings.
+  // A class to write fixed length encodings.
   // The class carries out all useful work in its destructor.
   class WriterObjectFixedLength {
   private:

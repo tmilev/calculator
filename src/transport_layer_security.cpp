@@ -27,6 +27,19 @@ TransportLayerSecurityConfiguration::certificateFolder + "key.pem";
 const std::string TransportLayerSecurityConfiguration::
 additionalCertificateFolder =
 TransportLayerSecurityConfiguration::certificateFolder + "additional/";
+std::string SSLContent::JSLabels::incomingRandom = "incomingRandom";
+std::string SSLContent::JSLabels::outgoingRandom = "outgoingRandom";
+std::string SSLContent::JSLabels::version = "version";
+std::string SSLContent::JSLabels::length = "length";
+std::string SSLContent::JSLabels::cipherSpecLength = "cipherSpecLength";
+std::string SSLContent::JSLabels::sessionId = "sessionId";
+std::string SSLContent::JSLabels::extensionsLength = "extensionsLength";
+std::string SSLContent::JSLabels::compressionMethod = "compressionMethod";
+std::string SSLContent::JSLabels::extensions = "extensions";
+std::string SSLContent::JSLabels::renegotiate = "renegotiate";
+std::string SSLContent::JSLabels::OCSPrequest = "OCSPrequest";
+std::string SSLContent::JSLabels::signedCertificateTimestampRequest =
+"signedCertificateTimestampRequest";
 
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
@@ -353,6 +366,12 @@ bool TransportLayerSecurityServer::initializeAll(
     }
     return false;
   }
+  SSLRecord serverHandshakeCertificateMessage;
+  serverHandshakeCertificateMessage.owner = this;
+  serverHandshakeCertificateMessage.prepareServerHello2Certificate();
+  serverHandshakeCertificateMessage.writeBytes(
+    this->certificate.cachedServerHandshakeCertificateMessage, nullptr
+  );
   return true;
 }
 
@@ -443,7 +462,8 @@ bool TransportLayerSecurityServer::writeSSLRecords(
   for (int i = 0; i < input.size; i ++) {
     input[i].writeBytes(this->outgoingBytes, nullptr);
   }
-  return this->writeBytesOnce(this->outgoingBytes, commentsOnFailure);
+  bool result = this->writeBytesOnce(this->outgoingBytes, commentsOnFailure);
+  return result;
 }
 
 bool TransportLayerSecurityServer::writeBytesOnce(
@@ -649,7 +669,7 @@ Logger::StringHighligher SSLContent::getStringHighlighter() {
   return result;
 }
 
-std::string SSLContent::ToStringVersion() const {
+std::string SSLContent::toStringVersion() const {
   List<char> twoBytes;
   twoBytes.setSize(2);
   twoBytes[0] = static_cast<char>(this->version / 256);
@@ -659,24 +679,29 @@ std::string SSLContent::ToStringVersion() const {
   return out.str();
 }
 
-std::string SSLContent::JSLabels::incomingRandom = "incomingRandom";
-std::string SSLContent::JSLabels::outgoingRandom = "outgoingRandom";
-std::string SSLContent::JSLabels::version = "version";
-std::string SSLContent::JSLabels::length = "length";
-std::string SSLContent::JSLabels::cipherSpecLength = "cipherSpecLength";
-std::string SSLContent::JSLabels::sessionId = "sessionId";
-std::string SSLContent::JSLabels::extensionsLength = "extensionsLength";
-std::string SSLContent::JSLabels::compressionMethod = "compressionMethod";
-std::string SSLContent::JSLabels::extensions = "extensions";
-std::string SSLContent::JSLabels::renegotiate = "renegotiate";
-std::string SSLContent::JSLabels::OCSPrequest = "OCSPrequest";
-std::string SSLContent::JSLabels::signedCertificateTimestampRequest =
-"signedCertificateTimestampRequest";
+std::string SSLContent::toStringType() const {
+  std::stringstream out;
+  switch (this->contentType) {
+  case SSLContent::tokens::certificate:
+    out << "Certificate";
+    break;
+  case SSLContent::tokens::serverHello:
+    out << "ServerHello";
+    break;
+  case SSLContent::tokens::serverKeyExchange:
+    out << "ServerKeyExchange";
+    break;
+  default:
+    out << "Content type: " << static_cast<int>(this->contentType);
+    break;
+  }
+  return out.str();
+}
 
 JSData SSLContent::toJSON() const {
   STACK_TRACE("SSLHello::toJSON");
   JSData result;
-  result[SSLContent::JSLabels::version] = this->ToStringVersion();
+  result[SSLContent::JSLabels::version] = this->toStringVersion();
   result[SSLContent::JSLabels::length] = this->length;
   result[SSLContent::JSLabels::cipherSpecLength] = this->cipherSpecLength;
   result[SSLContent::JSLabels::sessionId] =
@@ -772,7 +797,7 @@ void SSLContent::writeBytesHandshakeServerHello(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) const {
-  STACK_TRACE("SSLHello::writeBytesHandshakeServerHello");
+  STACK_TRACE("SSLContent::writeBytesHandshakeServerHello");
   if (this->contentType != SSLContent::tokens::serverHello) {
     global.fatal
     << "Not allowed to serialize non server-hello content as server hello. "
@@ -821,7 +846,7 @@ void TransportLayerSecurityServer::Session::writeNamedCurveAndPublicKey(
   std::stringstream shouldNotBeNeeded;
   List<unsigned char> publicKeyBytes;
   bool mustBeTrue =
-  this->ephemerealPublicKey.xCoordinate.value.writeBigEndianFixedNumberOfBytes(
+  this->ephemeralPublicKey.xCoordinate.value.writeBigEndianFixedNumberOfBytes(
     publicKeyBytes, 32, &shouldNotBeNeeded
   );
   Serialization::writeOneByteLengthFollowedByBytes(
@@ -875,11 +900,28 @@ void SSLContent::writeBytesHandshakeCertificate(
   List<unsigned char>& output,
   List<Serialization::Marker>* annotations
 ) const {
-  STACK_TRACE("SSLHello::writeBytesHandshakeCertificate");
+  STACK_TRACE("SSLContent::writeBytesHandshakeCertificate");
   if (this->contentType != SSLContent::tokens::certificate) {
     global.fatal
     << "Not allowed to serialize non-certificate content as certificate. "
     << global.fatal;
+  }
+  TransportLayerSecurityServer& server = this->getServer();
+  if (server.certificate.cachedServerHandshakeCertificateMessage.size > 0) {
+    output.addListOnTop(
+      server.certificate.cachedServerHandshakeCertificateMessage
+    );
+    global
+    << "DEBUG: FROM HASH: wrote certificate: "
+    << server.certificate.cachedServerHandshakeCertificateMessage.size
+    << " cached bytes. Certificate details: "
+    << server.certificate.toString()
+    << Logger::endL;
+    global
+    << "DEBUG: with hex: "
+    << server.certificate.toHex()
+    << Logger::endL;
+    return;
   }
   this->writeType(output, annotations);
   Serialization::LengthWriterThreeBytes writeLength(
@@ -888,7 +930,12 @@ void SSLContent::writeBytesHandshakeCertificate(
   Serialization::LengthWriterThreeBytes writeLengthFirstCertificate(
     output, annotations, "certificateBody"
   );
-  this->getServer().certificate.writeBytesASN1(output, annotations);
+  server.certificate.writeBytesASN1(output, annotations);
+  global
+  << "DEBUG: Wrote certificate: "
+  << server.certificate.toString()
+  << Logger::endL;
+  global << "DEBUG: with hex: " << server.certificate.toHex() << Logger::endL;
 }
 
 void SSLContent::writeBytesHandshakeSecretExchange(
@@ -936,7 +983,7 @@ void SSLContent::writeBytesHandshakeClientHello(
 List<unsigned char>& SSLContent::getMyRandomBytes() const {
   if (
     this->owner->owner->session.myRandomBytes.size !=
-    this->LengthRandomBytesInSSLHello
+    this->lengthRandomBytesInSSLHello
   ) {
     global.fatal
     << "Writing non-initialized SSL hello forbidden. "
@@ -1125,7 +1172,7 @@ bool SSLContent::decode(std::stringstream* commentsOnFailure) {
   if (
     !Serialization::readBytesFixedLength(
       this->owner->incomingBytes,
-      this->LengthRandomBytesInSSLHello,
+      this->lengthRandomBytesInSSLHello,
       this->owner->offsetDecoded,
       incomingRandomBytes,
       commentsOnFailure
@@ -1711,7 +1758,7 @@ void Serialization::writeNByteUnsigned(
   if (input > 0) {
     global.fatal
     << "Input has more significant "
-    << "digits than the number of bytes allow. "
+    << "digits than the number of bytes allowed. "
     << global.fatal;
   }
   inputOutputOffset += byteCountOfLength;
@@ -2032,6 +2079,17 @@ JSData SSLRecord::toJSONSerialization() {
   return result;
 }
 
+std::string SSLRecord::toStringTypeAndContentType() const {
+  std::stringstream out;
+  out
+  << "["
+  << this->toStringType()
+  << ", "
+  << this->content.toStringType()
+  << "]";
+  return out.str();
+}
+
 std::string SSLRecord::toStringType() const {
   switch (this->recordType) {
   case SSLRecord::tokens::alert:
@@ -2223,9 +2281,7 @@ bool TransportLayerSecurityServer::Session::computeAndSignEphemerealKey(
     "TransportLayerSecurityServer::Session::computeAndSignEphemerealKey"
   );
   (void) commentsOnError;
-  Crypto::Random::getRandomLargeIntegerSecure(
-    this->ephemerealPrivateKey, 32
-  );
+  Crypto::Random::getRandomLargeIntegerSecure(this->ephemeralPrivateKey, 32);
   this->chosenEllipticCurve =
   CipherSuiteSpecification::EllipticCurveSpecification::secp256k1;
   this->chosenEllipticCurveName = "secp256k1";
@@ -2248,7 +2304,7 @@ bool SSLContent::prepareServerHello3ServerKeyExchange(
 ) {
   STACK_TRACE("SSLContent::PrepareServerHello3SecretNegotiation");
   this->contentType = SSLContent::tokens::serverKeyExchange;
-  if (this->owner->owner->session.ephemerealPrivateKey != 0) {
+  if (this->owner->owner->session.ephemeralPrivateKey != 0) {
     if (commentsOnError != nullptr) {
       *commentsOnError
       << "Private key already generated for this session. "
@@ -2261,7 +2317,7 @@ bool SSLContent::prepareServerHello3ServerKeyExchange(
   ) {
     return false;
   }
-  // this->owner->owner->session.ephemerealPublicKey.
+  // this->owner->owner->session.ephemeralPublicKey.
   return true;
 }
 
@@ -2356,10 +2412,9 @@ bool SSLRecord::prepareServerHello3SecretExchange(
 }
 
 bool TransportLayerSecurityServer::replyToClientHello(
-  int inputSocketID, std::stringstream* commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   (void) commentsOnFailure;
-  (void) inputSocketID;
   this->outgoingRecords.setSize(0);
   this->serverHelloStart.prepareServerHello1Start(this->lastRead);
   this->serverHelloCertificate.prepareServerHello2Certificate();
@@ -2376,7 +2431,7 @@ bool TransportLayerSecurityServer::replyToClientHello(
   }
   this->outgoingBytes.setSize(0);
   if (!this->writeSSLRecords(this->outgoingRecords, commentsOnFailure)) {
-    global << "Error replying to client hello. ";
+    global << "Error replying to client hello. " << Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Error replying to client hello. ";
     }
@@ -2417,9 +2472,9 @@ void TransportLayerSecurityServer::Session::initialize() {
   this->chosenEllipticCurve = 0;
   this->chosenEllipticCurveName = "";
   Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(
-    this->myRandomBytes, SSLContent::LengthRandomBytesInSSLHello
+    this->myRandomBytes, SSLContent::lengthRandomBytesInSSLHello
   );
-  this->ephemerealPrivateKey = 0;
+  this->ephemeralPrivateKey = 0;
   this->serverName.setSize(0);
   this->bytesToSign.setSize(0);
   this->signature.setSize(0);
@@ -2449,9 +2504,7 @@ bool TransportLayerSecurityServer::handShakeIamServer(
     return false;
   }
   success =
-  TransportLayerSecurityServer::replyToClientHello(
-    inputSocketID, commentsOnFailure
-  );
+  TransportLayerSecurityServer::replyToClientHello(commentsOnFailure);
   if (!success) {
     global << Logger::red << commentsOnFailure->str() << Logger::endL;
     if (this->spoofer.flagDoSpoof) {

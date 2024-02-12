@@ -760,7 +760,8 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     CalculatorFunctionsCrypto::x509CertificateServer,
     "",
     "Returns the base 64 encoding of the X509 certificate of this server. ",
-    "X509CertificateServerBase64 0; ",
+    "X509CertificateServerBase64 0;\n"
+    "X509CertificateDecode X509CertificateServerBase64 0",
     "CalculatorFunctionsCrypto::X509CertificateServerBase64",
     "X509CertificateServerBase64",
     innerNoTest
@@ -769,9 +770,10 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     "X509CertificateDecode",
     CalculatorFunctionsCrypto::x509CertificateDecode,
     "",
-    "Decodes raw X509 certificate to a string. ",
+    "Decodes a X509 certificate (the content of a .crt file, starts with -----BEGIN CERTIFICATE-----) to a string. "
+    ,
     "%HideLHS\n"
-    "X509CertificateDecode ConvertBase64ToString\n"
+    "X509CertificateDecode\n"
     "LoadFileIntoString(\"test/certificate_self_signed.pem\")",
     "CalculatorFunctionsCrypto::x509CertificateDecode",
     "X509CertificateDecode",

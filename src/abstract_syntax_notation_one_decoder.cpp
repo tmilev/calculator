@@ -1134,22 +1134,16 @@ WriterObjectFixedLength() {
   int actualBytesNeededForLength =
   this->getReservedBytesForLength(this->totalByteLength);
   if (actualBytesNeededForLength > this->reservedBytesForLength) {
-    global
-    << Logger::red
-    << "Wrong number of reserved bytes for sequence writer. "
-    << "This is non-fatal but affects negatively performance. "
-    << Logger::endL;
+    // Wrong number of reserved bytes for sequence writer.
+    // This is non-fatal but affects negatively performance.
     this->outputPointer->shiftUpExpandOnTopRepeated(
       this->offset + 1,
       actualBytesNeededForLength - this->reservedBytesForLength
     );
   }
   if (actualBytesNeededForLength < this->reservedBytesForLength) {
-    global
-    << Logger::red
-    << "Wrong number of reserved bytes for sequence writer. "
-    << "This is non-fatal but affects negatively performance. "
-    << Logger::endL;
+    // Wrong number of reserved bytes for sequence writer.
+    // This is non-fatal but affects negatively performance.
     this->outputPointer->removeIndicesShiftDown(
       this->offset + 1,
       this->reservedBytesForLength - actualBytesNeededForLength
@@ -2148,32 +2142,34 @@ bool X509Certificate::loadFromPEM(
   certificateContentStripped = StringRoutines::stringTrimWhiteSpace(input);
   std::string beginCertificate = "-----BEGIN CERTIFICATE-----";
   std::string endCertificate = "-----END CERTIFICATE-----";
+  std::string certificateContentNoHeader;
   if (
     !StringRoutines::stringBeginsWith(
       certificateContentStripped,
       beginCertificate,
-      &certificateContentStripped
+      &certificateContentNoHeader
     )
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad certificate start. ";
     }
-    return false;
+    certificateContentNoHeader = certificateContentStripped;
   }
+  std::string certificateContentNoFooter;
   if (
     !StringRoutines::stringEndsWith(
-      certificateContentStripped,
+      certificateContentNoHeader,
       endCertificate,
-      &certificateContentStripped
+      &certificateContentNoFooter
     )
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Bad certificate end. ";
     }
-    return false;
+    certificateContentNoFooter = certificateContentNoHeader;
   }
   certificateContentStripped =
-  StringRoutines::stringTrimWhiteSpace(certificateContentStripped);
+  StringRoutines::stringTrimWhiteSpace(certificateContentNoFooter);
   if (
     !Crypto::convertBase64ToBitStream(
       certificateContentStripped,

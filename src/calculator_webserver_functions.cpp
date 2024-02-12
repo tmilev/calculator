@@ -18,18 +18,13 @@ bool CalculatorFunctionsCrypto::x509CertificateDecode(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsCrypto::x509CertificateDecode");
-  std::string binary;
-  if (!input[1].isOfType(&binary)) {
+  std::string base64;
+  if (!input[1].isOfType(&base64)) {
     return output.assignError(calculator, "Input is not a string. ");
   }
   X509Certificate certificate;
-  certificate.sourceBinary = binary;
   std::stringstream commentsOnError;
-  if (
-    !certificate.loadFromASNEncoded(
-      certificate.sourceBinary, &commentsOnError
-    )
-  ) {
+  if (!certificate.loadFromPEM(base64, &commentsOnError)) {
     return output.assignValue(calculator, commentsOnError.str());
   }
   std::stringstream out;

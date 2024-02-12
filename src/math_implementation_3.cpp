@@ -3203,7 +3203,8 @@ bool StringRoutines::stringBeginsWith(
   const std::string& desiredBeginning,
   std::string* outputStringEnd
 ) {
-  std::string actualBeginning, stringEnd;
+  std::string actualBeginning;
+  std::string stringEnd;
   StringRoutines::splitStringInTwo(
     input,
     static_cast<int>(desiredBeginning.size()),

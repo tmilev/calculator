@@ -302,7 +302,7 @@ public:
   bool flagRenegotiate;
   bool flagIncomingRandomIncluded;
   bool flagOutgoingRandomIncluded;
-  static const int LengthRandomBytesInSSLHello = 32;
+  static const int lengthRandomBytesInSSLHello = 32;
   List<SSLHelloExtension> extensions;
   List<unsigned char> sessionId;
   List<unsigned char> challenge;
@@ -388,7 +388,8 @@ public:
     std::stringstream* commentsOnError
   );
   JSData toJSON() const;
-  std::string ToStringVersion() const;
+  std::string toStringVersion() const;
+  std::string toStringType() const;
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
   void writeBytes(
@@ -447,14 +448,14 @@ class SSLRecord {
 public:
   class tokens {
   public:
+    // 22 in hex is 0x16:
     static const unsigned char handshake = 22;
-    // 0x16
+    // 20 in hex is 0x14:
     static const unsigned char changeCipherSpec = 20;
-    // 0x14
+    // 21 in hex is 0x15
     static const unsigned char alert = 21;
-    // 0x15
+    // 23 in hex is 0x17
     static const unsigned char applicationData = 23;
-    // 0x17
     static const unsigned char unknown = 0;
   };
 
@@ -490,6 +491,7 @@ public:
   std::string toHtml(int id);
   std::string toString() const;
   std::string toStringType() const;
+  std::string toStringTypeAndContentType() const;
   JSData toJSONSerialization();
   JSData toJSON();
   void prepareServerHello1Start(SSLRecord& clientHello);
@@ -527,6 +529,8 @@ public:
     List<SSLRecord> incomingMessages;
     List<std::string> errorsOnOutgoing;
     List<std::string> errorsOnIncoming;
+    // A cached byte serialization of the server handshake certificate message.
+    // This message does not change once computed.
     int currentInputMessageIndex;
     NetworkSpoofer();
     bool readBytesOnce(std::stringstream* commentsOnError);
@@ -566,8 +570,8 @@ public:
     List<unsigned char> bytesToSign;
     List<unsigned char> signature;
     List<SignatureAlgorithmSpecification> incomingAlgorithmSpecifications;
-    LargeIntegerUnsigned ephemerealPrivateKey;
-    ElementEllipticCurve<ElementZmodP> ephemerealPublicKey;
+    LargeIntegerUnsigned ephemeralPrivateKey;
+    ElementEllipticCurve<ElementZmodP> ephemeralPublicKey;
     List<unsigned char> serverName;
     List<CipherSuiteSpecification> incomingCiphers;
     std::string toStringChosenCipher();
@@ -621,9 +625,7 @@ public:
   );
   bool readBytesOnce(std::stringstream* commentsOnError);
   bool decodeSSLRecord(std::stringstream* commentsOnFailure);
-  bool replyToClientHello(
-    int inputSocketID, std::stringstream* commentsOnFailure
-  );
+  bool replyToClientHello(std::stringstream* commentsOnFailure);
   bool readBytesDecodeOnce(std::stringstream* commentsOnFailure);
   bool writeBytesOnce(
     List<unsigned char>& input, std::stringstream* commentsOnFailure

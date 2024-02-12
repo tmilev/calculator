@@ -165,7 +165,7 @@ public:
       this->offset = output.size;
       int expectedSize = output.size;
       Serialization::writeNByteUnsigned(
-        numberOfBytes, 0, output, expectedSize
+        this->numberOfBytes, 0, output, expectedSize
       );
       if (this->outputMarkers != nullptr) {
         this->markerOffset = this->outputMarkers->size;
@@ -175,13 +175,13 @@ public:
           )
         );
         this->outputMarkers->addOnTop(
-          Serialization::Marker(this->offset, numberOfBytes, label)
+          Serialization::Marker(this->offset, this->numberOfBytes, label)
         );
       }
     }
     ~LengthWriterNBytes() {
       int totalLength =
-      this->outputPointer->size - this->offset - numberOfBytes;
+      this->outputPointer->size - this->offset - this->numberOfBytes;
       Serialization::writeNByteUnsigned(
         this->numberOfBytes,
         static_cast<unsigned int>(totalLength),

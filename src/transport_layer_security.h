@@ -248,6 +248,43 @@ public:
   std::string getSignatureAlgorithmName();
 };
 
+// An ssl error/warning message.
+class SSLAlert {
+public:
+  // Importance 0 = not an error.
+  // Importance 1 = warning.
+  // Importance 2 = fatal.
+  unsigned char importance;
+  unsigned char type;
+  void clear();
+  std::string toString() const;
+  class Tokens {
+  public:
+    static const unsigned char unexpectedMessage = 10;
+    static const unsigned char badRecordMac = 20;
+    static const unsigned char decryptionFailed = 21;
+    static const unsigned char recordOverflow = 22;
+    static const unsigned char decompression_failure = 0;
+    static const unsigned char handshakeFailure = 40;
+    static const unsigned char badCertificate = 42;
+    static const unsigned char unsupportedCertificate = 43;
+    static const unsigned char certificateRevoked = 44;
+    static const unsigned char certificateExpired = 45;
+    static const unsigned char certificateUnknown = 46;
+    static const unsigned char illegalParameter = 47;
+    static const unsigned char unknownCA = 48;
+    static const unsigned char accessDenied = 49;
+    static const unsigned char decodeError = 50;
+    static const unsigned char decryptError = 51;
+    static const unsigned char exportRestriction = 60;
+    static const unsigned char protocolVersion = 70;
+    static const unsigned char insufficientSecurity = 71;
+    static const unsigned char internalError = 80;
+    static const unsigned char userCanceled = 90;
+    static const unsigned char noRenegotiation = 100;
+  };
+};
+
 // At the time of writing, a list of extensions **should** be available here:
 // https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml
 // Please DO update the documentation if that stops being the case.
@@ -371,13 +408,15 @@ public:
   };
 
   static const unsigned char namedCurve = 3;
+  SSLAlert alert;
   SSLContent();
   static std::string getType(unsigned char token);
   void resetExceptOwner();
   TransportLayerSecurityServer& getServer() const;
   bool checkInitialization() const;
   Logger::StringHighligher getStringHighlighter();
-  bool decode(std::stringstream* commentsOnFailure);
+  bool decodeHandshakeRecord(std::stringstream* commentsOnFailure);
+  bool decodeAlertRecord(std::stringstream* commentsOnFailure);
   bool decodeSupportedCiphers(std::stringstream* commentsOnFailure);
   bool decodeExtensions(std::stringstream* commentsOnFailure);
   bool processExtensions(std::stringstream* commentsOnFailure);

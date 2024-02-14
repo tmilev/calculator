@@ -1,6 +1,5 @@
 #include "abstract_syntax_notation_one_decoder.h"
 #include "crypto_calculator.h"
-#include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
 #include "html_routines.h"
 #include "serialization_basic.h"
@@ -664,6 +663,7 @@ void SSLContent::resetExceptOwner() {
   this->extensions.setSize(0);
   this->sessionId.setSize(0);
   this->challenge.setSize(0);
+  this->alert.clear();
 }
 
 SSLContent::SSLContent() {
@@ -704,6 +704,9 @@ std::string SSLContent::toStringVersion() const {
 
 std::string SSLContent::toStringType() const {
   std::stringstream out;
+  if (this->alert.importance != 0) {
+    out << this->alert.toString();
+  }
   switch (this->contentType) {
   case SSLContent::tokens::certificate:
     out << "Certificate";
@@ -742,6 +745,32 @@ JSData SSLContent::toJSON() const {
   result[SSLContent::JSLabels::extensions] = extensionsObject;
   result[SSLContent::JSLabels::renegotiate] = this->flagRenegotiate;
   return result;
+}
+
+void SSLAlert::clear() {
+  this->type = 0;
+  this->importance = 0;
+}
+
+std::string SSLAlert::toString() const {
+  std::stringstream out;
+  out << "Alert " << static_cast<int>(this->importance);
+  if (this->importance == 2) {
+    out << " (fatal)";
+  }
+  out << ". ";
+  switch (this->type) {
+  case SSLAlert::Tokens::decryptError:
+    out << "Decryption error. ";
+    break;
+  case SSLAlert::Tokens::decodeError:
+    out << "Decode error. ";
+    break;
+  default:
+    out << "Unknown type: " << static_cast<int>(this->type) << ". ";
+    break;
+  }
+  return out.str();
 }
 
 unsigned int CipherSuiteSpecification::hashFunction(
@@ -972,11 +1001,6 @@ void SSLContent::writeBytesHandshakeCertificate(
     output, annotations, "certificateBody"
   );
   server.certificate.writeBytesASN1(output, annotations);
-  global
-  << "DEBUG: Wrote certificate: "
-  << server.certificate.toString()
-  << Logger::endL;
-  global << "DEBUG: with hex: " << server.certificate.toHex() << Logger::endL;
 }
 
 void SSLContent::writeBytesHandshakeSecretExchange(
@@ -1157,8 +1181,32 @@ void SSLContent::writeBytesExtensionsOnly(
   }
 }
 
-bool SSLContent::decode(std::stringstream* commentsOnFailure) {
-  STACK_TRACE("SSLContent::decode");
+bool SSLContent::decodeAlertRecord(std::stringstream* commentsOnFailure) {
+  STACK_TRACE("SSLContent::decodeAlertRecord");
+  this->alert.clear();
+  if (
+    this->owner->offsetDecoded + 2 > this->owner->incomingBytes.size
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Too few bytes in the record: need 2 bytes at offset "
+      << this->owner->offsetDecoded
+      << ", got: "
+      << this->owner->incomingBytes.size
+      << ".";
+    }
+    return false;
+  }
+  this->alert.importance =
+  this->owner->incomingBytes[this->owner->offsetDecoded];
+  this->owner->offsetDecoded ++;
+  this->alert.type = this->owner->incomingBytes[this->owner->offsetDecoded];
+  this->owner->offsetDecoded ++;
+  return true;
+}
+
+bool SSLContent::decodeHandshakeRecord(std::stringstream* commentsOnFailure) {
+  STACK_TRACE("SSLContent::decodeHelloRecord");
   if (this->owner->incomingBytes.size == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Empty message. ";
@@ -2187,18 +2235,18 @@ bool SSLRecord::decode(std::stringstream* commentsOnFailure) {
   this->recordType = this->incomingBytes[this->offsetDecoded];
   this->offsetDecoded ++;
   if (
-    this->recordType != SSLRecord::tokens::handshake // &&
-    //    this->recordType != SSLRecord::tokens::alert &&
+    this->recordType != SSLRecord::tokens::handshake &&
+    this->recordType != SSLRecord::tokens::alert // &&
     //    this->recordType != SSLRecord::tokens::applicationData &&
     //    this->recordType != SSLRecord::tokens::changeCipherSpec
   ) {
-    this->recordType = SSLRecord::tokens::unknown;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Unknown record type: " << static_cast<int>(
-        this->incomingBytes[this->offsetDecoded]
+        this->recordType
       )
       << ". ";
     }
+    this->recordType = SSLRecord::tokens::unknown;
     return false;
   }
   if (
@@ -2238,7 +2286,9 @@ bool SSLRecord::decode(std::stringstream* commentsOnFailure) {
 bool SSLRecord::decodeBody(std::stringstream* commentsOnFailure) {
   switch (this->recordType) {
   case SSLRecord::tokens::handshake:
-    return this->content.decode(commentsOnFailure);
+    return this->content.decodeHandshakeRecord(commentsOnFailure);
+  case SSLRecord::tokens::alert:
+    return this->content.decodeAlertRecord(commentsOnFailure);
   default:
     break;
   }
@@ -2277,6 +2327,11 @@ bool TransportLayerSecurityServer::readBytesDecodeOnce(
     }
     return false;
   }
+  global
+  << "DEBUG: read "
+  << Crypto::convertListUnsignedCharsToHex(this->incomingBytes)
+  << Logger::endL;
+  this->lastRead.resetExceptOwner();
   this->lastRead.incomingBytes = this->incomingBytes;
   if (!this->decodeSSLRecord(commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -2284,6 +2339,9 @@ bool TransportLayerSecurityServer::readBytesDecodeOnce(
     }
     return false;
   }
+  global
+  << "DEBUG: got message: "
+  << this->lastRead.toStringTypeAndContentType();
   return true;
 }
 
@@ -2408,6 +2466,9 @@ void SSLContent::prepareServerHandshake1ServerHello(SSLContent& clientHello) {
 
 void SSLRecord::resetExceptOwner() {
   this->content.resetExceptOwner();
+  this->offsetDecoded = 0;
+  this->recordType = SSLRecord::tokens::unknown;
+  this->version = 0;
   this->incomingBytes.setSize(0);
 }
 
@@ -2556,6 +2617,15 @@ bool TransportLayerSecurityServer::handShakeIamServer(
   }
   success =
   TransportLayerSecurityServer::replyToClientHello(commentsOnFailure);
+  if (!success) {
+    global << Logger::red << commentsOnFailure->str() << Logger::endL;
+    if (this->spoofer.flagDoSpoof) {
+      this->spoofer.errorsOnOutgoing.addOnTop(commentsOnFailure->str());
+    }
+    return false;
+  }
+  success =
+  TransportLayerSecurityServer::readBytesDecodeOnce(commentsOnFailure);
   if (!success) {
     global << Logger::red << commentsOnFailure->str() << Logger::endL;
     if (this->spoofer.flagDoSpoof) {

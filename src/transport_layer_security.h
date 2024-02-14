@@ -383,9 +383,9 @@ public:
   bool processExtensions(std::stringstream* commentsOnFailure);
   // https://tls.ulfheim.net
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art059
-  void prepareServerHello1Start(SSLContent& clientHello);
+  void prepareServerHandshake1ServerHello(SSLContent& clientHello);
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art061
-  void prepareServerHello2Certificate();
+  void prepareServerHandshake2Certificate();
   // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art060
   bool prepareServerHello3ServerKeyExchange(
     std::stringstream* commentsOnError
@@ -412,6 +412,10 @@ public:
     List<Serialization::Marker>* annotations
   ) const;
   void writeBytesHandshakeServerHello(
+    List<unsigned char>& output,
+    List<Serialization::Marker>* annotations
+  ) const;
+  void writeBytesHandshakeServerHelloDone(
     List<unsigned char>& output,
     List<Serialization::Marker>* annotations
   ) const;
@@ -497,11 +501,12 @@ public:
   std::string toStringTypeAndContentType() const;
   JSData toJSONSerialization();
   JSData toJSON();
-  void prepareServerHello1Start(SSLRecord& clientHello);
-  void prepareServerHello2Certificate();
-  bool prepareServerHello3SecretExchange(
+  void prepareServerHandshake1ServerHello(SSLRecord& clientHello);
+  void prepareServerHandshake2Certificate();
+  bool prepareServerHandshake3SecretExchange(
     std::stringstream* commentsOnFailure
   );
+  void prepareServerHandshake4ServerHelloDone();
   void writeBytes(
     List<unsigned char>& output,
     List<Serialization::Marker>* annotations
@@ -580,7 +585,7 @@ public:
     std::string toStringChosenCipher();
     JSData toJSON();
     Session();
-    bool computeAndSignEphemerealKey(std::stringstream* commentsOnError);
+    bool computeAndSignEphemeralKey(std::stringstream* commentsOnError);
     bool chooseCipher(std::stringstream* commentsOnFailure);
     void initialize();
     bool setIncomingRandomBytes(
@@ -608,6 +613,7 @@ public:
   SSLRecord serverHelloStart;
   SSLRecord serverHelloCertificate;
   SSLRecord serverHelloKeyExchange;
+  SSLRecord serverHelloDone;
   List<unsigned char> incomingBytes;
   List<unsigned char> outgoingBytes;
   List<SSLRecord> outgoingRecords;

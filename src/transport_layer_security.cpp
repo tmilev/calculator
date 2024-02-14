@@ -369,10 +369,13 @@ bool TransportLayerSecurityServer::initializeAll(
   }
   SSLRecord serverHandshakeCertificateMessage;
   serverHandshakeCertificateMessage.owner = this;
-  serverHandshakeCertificateMessage.prepareServerHello2Certificate();
-  serverHandshakeCertificateMessage.writeBytes(
-    this->certificate.cachedServerHandshakeCertificateMessage, nullptr
-  );
+  serverHandshakeCertificateMessage.prepareServerHandshake2Certificate();
+  List<unsigned char> cacheComputer;
+  // Use a cache computer: we don't want
+  // this->certificate.cachedServerHandshakeCertificateMessage.size to change
+  // while we write the bytes.
+  serverHandshakeCertificateMessage.writeBytes(cacheComputer, nullptr);
+  this->certificate.cachedServerHandshakeCertificateMessage = cacheComputer;
   return true;
 }
 
@@ -442,6 +445,7 @@ TransportLayerSecurityServer::TransportLayerSecurityServer() {
   this->serverHelloCertificate.owner = this;
   this->serverHelloKeyExchange.owner = this;
   this->serverHelloStart.owner = this;
+  this->serverHelloDone.owner = this;
   this->spoofer.owner = this;
   this->owner = nullptr;
 }
@@ -462,8 +466,18 @@ bool TransportLayerSecurityServer::writeSSLRecords(
   this->outgoingBytes.setSize(0);
   for (int i = 0; i < input.size; i ++) {
     input[i].writeBytes(this->outgoingBytes, nullptr);
+    global
+    << "DEBUG: at record "
+    << i + 1
+    << "of type "
+    << input[i].toStringTypeAndContentType()
+    << " have: "
+    << this->outgoingBytes.size
+    << " bytes."
+    << Logger::endL;
   }
   bool result = this->writeBytesOnce(this->outgoingBytes, commentsOnFailure);
+  global << "DEBUG: wrote all the bytes!" << Logger::endL;
   return result;
 }
 
@@ -495,6 +509,14 @@ bool TransportLayerSecurityServer::writeBytesOnce(
       *commentsOnFailure << "Error receiving bytes. " << strerror(errno);
     }
   }
+  global
+  << "DEBUG: Sent"
+  << numberOfBytesSent
+  << " Bytes out of "
+  << input.size
+  << ":"
+  << Crypto::convertListUnsignedCharsToHex(input)
+  << Logger::endL;
   return numberOfBytesSent >= 0;
 }
 
@@ -789,6 +811,8 @@ void SSLContent::writeBytes(
     return SSLContent::writeBytesHandshakeServerHello(output, annotations);
   case SSLContent::tokens::certificate:
     return SSLContent::writeBytesHandshakeCertificate(output, annotations);
+  case SSLContent::tokens::serverHelloDone:
+    return SSLContent::writeBytesHandshakeServerHelloDone(output, annotations);
   case SSLContent::tokens::serverKeyExchange:
     return SSLContent::writeBytesHandshakeSecretExchange(output, annotations);
   }
@@ -817,12 +841,28 @@ void SSLContent::writeBytesHandshakeServerHello(
   this->writeBytesExtensionsOnly(output, annotations);
 }
 
+void SSLContent::writeBytesHandshakeServerHelloDone(
+  List<unsigned char>& output,
+  List<Serialization::Marker>* annotations
+) const {
+  STACK_TRACE("SSLContent::writeBytesHandshakeServerHelloDone");
+  if (this->contentType != SSLContent::tokens::serverHelloDone) {
+    global.fatal
+    << "Not allowed to serialize non server-hello content as server hello. "
+    << global.fatal;
+  }
+  this->writeType(output, annotations);
+  global << "DEBUG: in hello done, type:  " << this->toStringType();
+}
+
 std::string SSLContent::getType(unsigned char token) {
   switch (token) {
   case SSLContent::tokens::certificate:
     return "certificate";
   case SSLContent::tokens::serverKeyExchange:
     return "server key exchange";
+  case SSLContent::tokens::serverHelloDone:
+    return "server hello done";
   default:
     return "unknown";
   }
@@ -2268,18 +2308,18 @@ std::string CipherSuiteSpecification::toString() const {
 }
 
 // https://commandlinefanatic.com/cgi-bin/showarticle.cgi?article=art061
-void SSLContent::prepareServerHello2Certificate() {
-  STACK_TRACE("SSLContent::prepareServerHello2Certificate");
+void SSLContent::prepareServerHandshake2Certificate() {
+  STACK_TRACE("SSLContent::prepareServerHandshake2Certificate");
   this->checkInitialization();
   this->version = 3 * 256 + 3;
   this->contentType = SSLContent::tokens::certificate;
 }
 
-bool TransportLayerSecurityServer::Session::computeAndSignEphemerealKey(
+bool TransportLayerSecurityServer::Session::computeAndSignEphemeralKey(
   std::stringstream* commentsOnError
 ) {
   STACK_TRACE(
-    "TransportLayerSecurityServer::Session::computeAndSignEphemerealKey"
+    "TransportLayerSecurityServer::Session::computeAndSignEphemeralKey"
   );
   (void) commentsOnError;
   Crypto::Random::getRandomLargeIntegerSecure(this->ephemeralPrivateKey, 32);
@@ -2303,7 +2343,7 @@ bool TransportLayerSecurityServer::Session::computeAndSignEphemerealKey(
 bool SSLContent::prepareServerHello3ServerKeyExchange(
   std::stringstream* commentsOnError
 ) {
-  STACK_TRACE("SSLContent::PrepareServerHello3SecretNegotiation");
+  STACK_TRACE("SSLContent::prepareServerHello3ServerKeyExchange");
   this->contentType = SSLContent::tokens::serverKeyExchange;
   if (this->owner->owner->session.ephemeralPrivateKey != 0) {
     if (commentsOnError != nullptr) {
@@ -2314,7 +2354,7 @@ bool SSLContent::prepareServerHello3ServerKeyExchange(
     return false;
   }
   if (
-    !this->owner->owner->session.computeAndSignEphemerealKey(commentsOnError)
+    !this->owner->owner->session.computeAndSignEphemeralKey(commentsOnError)
   ) {
     return false;
   }
@@ -2347,8 +2387,8 @@ bool TransportLayerSecurityServer::Session::chooseCipher(
   return true;
 }
 
-void SSLContent::prepareServerHello1Start(SSLContent& clientHello) {
-  STACK_TRACE("SSLContent::prepareServerHello1Start");
+void SSLContent::prepareServerHandshake1ServerHello(SSLContent& clientHello) {
+  STACK_TRACE("SSLContent::prepareServerHandshake1ServerHello");
   this->checkInitialization();
   this->version = 3 * 256 + 3;
   this->contentType = SSLContent::tokens::serverHello;
@@ -2371,23 +2411,23 @@ void SSLRecord::resetExceptOwner() {
   this->incomingBytes.setSize(0);
 }
 
-void SSLRecord::prepareServerHello1Start(SSLRecord& clientHello) {
+void SSLRecord::prepareServerHandshake1ServerHello(SSLRecord& clientHello) {
   this->resetExceptOwner();
   this->recordType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
-  this->content.prepareServerHello1Start(clientHello.content);
+  this->content.prepareServerHandshake1ServerHello(clientHello.content);
   this->owner->outgoingRecords.addOnTop(*this);
 }
 
-void SSLRecord::prepareServerHello2Certificate() {
+void SSLRecord::prepareServerHandshake2Certificate() {
   this->resetExceptOwner();
   this->recordType = SSLRecord::tokens::handshake;
   this->version = 3 * 256 + 1;
-  this->content.prepareServerHello2Certificate();
+  this->content.prepareServerHandshake2Certificate();
   this->owner->outgoingRecords.addOnTop(*this);
 }
 
-bool SSLRecord::prepareServerHello3SecretExchange(
+bool SSLRecord::prepareServerHandshake3SecretExchange(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("SSLRecord::prepareServerHello3SecretExchange");
@@ -2412,15 +2452,22 @@ bool SSLRecord::prepareServerHello3SecretExchange(
   return success;
 }
 
+void SSLRecord::prepareServerHandshake4ServerHelloDone() {
+  this->recordType = SSLRecord::tokens::handshake;
+  this->version = 3 * 256 + 1;
+  this->content.contentType = SSLContent::tokens::serverHelloDone;
+  this->owner->outgoingRecords.addOnTop(*this);
+}
+
 bool TransportLayerSecurityServer::replyToClientHello(
   std::stringstream* commentsOnFailure
 ) {
   (void) commentsOnFailure;
-  this->outgoingRecords.setSize(0);
-  this->serverHelloStart.prepareServerHello1Start(this->lastRead);
-  this->serverHelloCertificate.prepareServerHello2Certificate();
+  this->outgoingRecords.clear();
+  this->serverHelloStart.prepareServerHandshake1ServerHello(this->lastRead);
+  this->serverHelloCertificate.prepareServerHandshake2Certificate();
   if (
-    !this->serverHelloKeyExchange.prepareServerHello3SecretExchange(
+    !this->serverHelloKeyExchange.prepareServerHandshake3SecretExchange(
       commentsOnFailure
     )
   ) {
@@ -2430,6 +2477,9 @@ bool TransportLayerSecurityServer::replyToClientHello(
     }
     return false;
   }
+  global << "DEBUG: before prepare hello done" << Logger::endL;
+  this->serverHelloDone.prepareServerHandshake4ServerHelloDone();
+  global << "DEBUG: AFTER prepare hello done" << Logger::endL;
   this->outgoingBytes.setSize(0);
   if (!this->writeSSLRecords(this->outgoingRecords, commentsOnFailure)) {
     global << "Error replying to client hello. " << Logger::endL;

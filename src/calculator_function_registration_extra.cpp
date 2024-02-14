@@ -756,14 +756,14 @@ void Calculator::initializeFunctionsCryptoAndEncoding() {
     innerExperimental
   );
   this->addOperationHandler(
-    "X509CertificateServerBase64",
+    "X509CertificateServer",
     CalculatorFunctionsCrypto::x509CertificateServer,
     "",
-    "Returns the base 64 encoding of the X509 certificate of this server. ",
-    "X509CertificateServerBase64 0;\n"
-    "X509CertificateDecode X509CertificateServerBase64 0",
-    "CalculatorFunctionsCrypto::X509CertificateServerBase64",
-    "X509CertificateServerBase64",
+    "Returns the source ofo the X509 certificate of this server. ",
+    "X509CertificateServer 0;\n"
+    "X509CertificateDecode X509CertificateServer 0",
+    "CalculatorFunctionsCrypto::X509CertificateServer",
+    "X509CertificateServer",
     innerNoTest
   );
   this->addOperationHandler(

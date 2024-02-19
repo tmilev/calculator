@@ -465,18 +465,11 @@ bool TransportLayerSecurityServer::writeSSLRecords(
   this->outgoingBytes.setSize(0);
   for (int i = 0; i < input.size; i ++) {
     input[i].writeBytes(this->outgoingBytes, nullptr);
-    global
-    << "DEBUG: at record "
-    << i + 1
-    << "of type "
-    << input[i].toStringTypeAndContentType()
-    << " have: "
-    << this->outgoingBytes.size
-    << " bytes."
-    << Logger::endL;
+    if (i == 0) {
+      break;
+    }
   }
   bool result = this->writeBytesOnce(this->outgoingBytes, commentsOnFailure);
-  global << "DEBUG: wrote all the bytes!" << Logger::endL;
   return result;
 }
 
@@ -881,7 +874,6 @@ void SSLContent::writeBytesHandshakeServerHelloDone(
     << global.fatal;
   }
   this->writeType(output, annotations);
-  global << "DEBUG: in hello done, type:  " << this->toStringType();
 }
 
 std::string SSLContent::getType(unsigned char token) {
@@ -981,16 +973,6 @@ void SSLContent::writeBytesHandshakeCertificate(
     output.addListOnTop(
       server.certificate.cachedServerHandshakeCertificateMessage
     );
-    global
-    << "DEBUG: FROM HASH: wrote certificate: "
-    << server.certificate.cachedServerHandshakeCertificateMessage.size
-    << " cached bytes. Certificate details: "
-    << server.certificate.toString()
-    << Logger::endL;
-    global
-    << "DEBUG: with hex: "
-    << server.certificate.toHex()
-    << Logger::endL;
     return;
   }
   this->writeType(output, annotations);
@@ -2308,12 +2290,6 @@ bool TransportLayerSecurityServer::decodeSSLRecord(
   if (!this->lastRead.decode(commentsOnFailure)) {
     return false;
   }
-  global
-  << "DEBUG: decoded ssl record OK."
-  << Logger::endL
-  << "DEBUG: Message: "
-  << this->lastRead.toString()
-  << Logger::endL;
   return true;
 }
 
@@ -2327,10 +2303,6 @@ bool TransportLayerSecurityServer::readBytesDecodeOnce(
     }
     return false;
   }
-  global
-  << "DEBUG: read "
-  << Crypto::convertListUnsignedCharsToHex(this->incomingBytes)
-  << Logger::endL;
   this->lastRead.resetExceptOwner();
   this->lastRead.incomingBytes = this->incomingBytes;
   if (!this->decodeSSLRecord(commentsOnFailure)) {
@@ -2339,9 +2311,6 @@ bool TransportLayerSecurityServer::readBytesDecodeOnce(
     }
     return false;
   }
-  global
-  << "DEBUG: got message: "
-  << this->lastRead.toStringTypeAndContentType();
   return true;
 }
 
@@ -2538,9 +2507,7 @@ bool TransportLayerSecurityServer::replyToClientHello(
     }
     return false;
   }
-  global << "DEBUG: before prepare hello done" << Logger::endL;
   this->serverHelloDone.prepareServerHandshake4ServerHelloDone();
-  global << "DEBUG: AFTER prepare hello done" << Logger::endL;
   this->outgoingBytes.setSize(0);
   if (!this->writeSSLRecords(this->outgoingRecords, commentsOnFailure)) {
     global << "Error replying to client hello. " << Logger::endL;
@@ -2549,7 +2516,10 @@ bool TransportLayerSecurityServer::replyToClientHello(
     }
     return false;
   }
-  global << "DEBUG: Wrote ssl records successfully. " << Logger::endL;
+  global
+  << "DEBUG: sent bytes: "
+  << Crypto::convertListUnsignedCharsToHex(this->outgoingBytes)
+  << Logger::endL;
   return true;
 }
 
@@ -2633,6 +2603,9 @@ bool TransportLayerSecurityServer::handShakeIamServer(
     }
     return false;
   }
+  global
+  << "DEBUG: last read: "
+  << this->lastRead.toStringTypeAndContentType();
   return false;
 }
 

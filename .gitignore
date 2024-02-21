@@ -70,3 +70,8 @@ package-lock.json
 emsdk
 .qtc_clangd/
 
+Makefile
+Makefile.in
+configdata.pm
+configuration.h
+src/openssl/*

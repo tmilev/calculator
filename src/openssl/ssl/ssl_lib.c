@@ -2346,6 +2346,7 @@ int ssl_read_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
 
 int SSL_read(SSL *s, void *buf, int num)
 {
+    printf("\n\n\n\nDEBUG: HI WORLD!!!!!!!!!!!!!!!!!!!!!!!\n\n\n\n");
     int ret;
     size_t readbytes;
 

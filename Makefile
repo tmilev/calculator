@@ -95,7 +95,7 @@ endif
 
 ifneq ($(sslLocation),)
   CFLAGS+=-DMACRO_use_open_ssl 
-  LIBRARIES_INCLUDED_AT_THE_END+=-lssl -lcrypto # WARNING believe it or not, the libraries must come AFTER the executable name
+#  LIBRARIES_INCLUDED_AT_THE_END+= -lssl -lcrypto # WARNING believe it or not, the libraries must come AFTER the executable name
 $(info [1;32mOpenssl found.[0m) 
 else
 $(info [1;31mNOT FOUND: Openssl.[0m Login+database won't run.) 
@@ -245,7 +245,7 @@ DIRECTORIES=$(dir $(OBJECTS))
 all: bin_calculator 
 
 bin_calculator: $(OBJECTS)
-	$(compiler) $(LDFLAGS) $(OBJECTS) -o $(TARGET) $(LIBRARIES_INCLUDED_AT_THE_END)
+	$(compiler) -I/home/todor/math/courses_calculator/calculator/src/openssl/include/  $(LDFLAGS) $(OBJECTS) -o $(TARGET) -L/home/todor/math/courses_calculator/calculator/src/openssl/ -lssl -lcrypto
 
 test: bin_calculator
 	time ./calculator test

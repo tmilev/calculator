@@ -1806,6 +1806,7 @@ struct ssl_connection_st {
     size_t server_cert_type_len;
 };
 
+
 # define SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, c) \
     ((ssl) == NULL ? NULL                         \
      : ((ssl)->type == SSL_TYPE_SSL_CONNECTION    \
@@ -1818,25 +1819,8 @@ struct ssl_connection_st {
     SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, const)
 # define SSL_CONNECTION_GET_CTX(sc) ((sc)->ssl.ctx)
 # define SSL_CONNECTION_GET_SSL(sc) (&(sc)->ssl)
-# ifndef OPENSSL_NO_QUIC
-#  include "quic/quic_local.h"
-#  define SSL_CONNECTION_FROM_SSL_int(ssl, c)                      \
-    ((ssl) == NULL ? NULL                                          \
-     : ((ssl)->type == SSL_TYPE_SSL_CONNECTION                     \
-        ? (c SSL_CONNECTION *)(ssl)                                \
-        : ((ssl)->type == SSL_TYPE_QUIC_CONNECTION                 \
-           ? (c SSL_CONNECTION *)((c QUIC_CONNECTION *)(ssl))->tls \
-           : NULL)))
-#  define SSL_CONNECTION_FROM_SSL(ssl) \
-    SSL_CONNECTION_FROM_SSL_int(ssl, SSL_CONNECTION_NO_CONST)
-#  define SSL_CONNECTION_FROM_CONST_SSL(ssl) \
-    SSL_CONNECTION_FROM_SSL_int(ssl, const)
-# else
-#  define SSL_CONNECTION_FROM_SSL(ssl) \
-    SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, SSL_CONNECTION_NO_CONST)
-#  define SSL_CONNECTION_FROM_CONST_SSL(ssl) \
-    SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, const)
-# endif
+
+
 
 /*
  * Structure containing table entry of values associated with the signature
@@ -3062,5 +3046,13 @@ long ossl_ctrl_internal(SSL *s, int cmd, long larg, void *parg, int no_quic);
 #define OSSL_QUIC_PERMITTED_OPTIONS             \
     (OSSL_QUIC_PERMITTED_OPTIONS_CONN |         \
      OSSL_QUIC_PERMITTED_OPTIONS_STREAM)
+
+
+
+# ifndef OPENSSL_NO_QUIC
+#include "quic/quic_local.h"
+# endif
+SSL_CONNECTION* SSL_CONNECTION_FROM_SSL(SSL* ssl);
+SSL_CONNECTION* SSL_CONNECTION_FROM_CONST_SSL(const SSL* ssl);
 
 #endif

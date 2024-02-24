@@ -28,6 +28,35 @@
 #include "internal/ktls.h"
 #include "quic/quic_local.h"
 
+SSL_CONNECTION* SSL_CONNECTION_FROM_SSL(SSL* ssl){
+  if (ssl == NULL){
+    return NULL;
+  }
+
+  if (ssl->type == SSL_TYPE_SSL_CONNECTION){
+    return ssl;
+  }
+  if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
+    return  (SSL_CONNECTION *)(( QUIC_CONNECTION *)(ssl))->tls;
+  }
+  return NULL;
+}
+
+SSL_CONNECTION* SSL_CONNECTION_FROM_CONST_SSL(const SSL* ssl){
+  if (ssl == NULL){
+    return NULL;
+  }
+  if (ssl->type == SSL_TYPE_SSL_CONNECTION){
+    return ssl;
+  }
+  if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
+    return  (SSL_CONNECTION *)(( QUIC_CONNECTION *)(ssl))->tls;
+  }
+  return NULL;
+}
+
+
+
 static int ssl_undefined_function_3(SSL_CONNECTION *sc, unsigned char *r,
                                     unsigned char *s, size_t t, size_t *u)
 {
@@ -2170,6 +2199,7 @@ int SSL_get_async_status(SSL *s, int *status)
 
 int SSL_accept(SSL *s)
 {
+    printf("\n\nDEBUG: at ssl accept\n\n");
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC

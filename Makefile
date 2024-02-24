@@ -245,7 +245,8 @@ DIRECTORIES=$(dir $(OBJECTS))
 all: bin_calculator 
 
 bin_calculator: $(OBJECTS)
-	$(compiler) -I/home/todor/math/courses_calculator/calculator/src/openssl/include/ -L/home/todor/math/courses_calculator/calculator/src/openssl/  $(LDFLAGS) $(OBJECTS) -o $(TARGET)  -l:libssl.a -l :libcrypto.a
+	cd src/openssl && make -j20
+	$(compiler) -I./src/openssl/include/ -L./src/openssl/  $(LDFLAGS) $(OBJECTS) -o $(TARGET)  -l:libssl.a -l :libcrypto.a
 
 test: bin_calculator
 	time ./calculator test

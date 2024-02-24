@@ -24,6 +24,34 @@
 #include "helpers/ssltestlib.h"
 #include "testutil.h"
 
+
+SSL_CONNECTION* SSL_CONNECTION_FROM_SSL(SSL* ssl){
+  if (ssl == NULL){
+    return NULL;
+  }
+
+  if (ssl->type == SSL_TYPE_SSL_CONNECTION){
+    return ssl;
+  }
+  if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
+    return  (SSL_CONNECTION *)(( QUIC_CONNECTION *)(ssl))->tls;
+  }
+  return NULL;
+}
+
+SSL_CONNECTION* SSL_CONNECTION_FROM_CONST_SSL(const SSL* ssl){
+  if (ssl == NULL){
+    return NULL;
+  }
+  if (ssl->type == SSL_TYPE_SSL_CONNECTION){
+    return ssl;
+  }
+  if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
+    return  (SSL_CONNECTION *)(( QUIC_CONNECTION *)(ssl))->tls;
+  }
+  return NULL;
+}
+
 struct async_ctrs {
     unsigned int rctr;
     unsigned int wctr;

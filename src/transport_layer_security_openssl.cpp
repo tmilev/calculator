@@ -698,14 +698,14 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
       case SSL_ERROR_WANT_WRITE:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
-          << " During regular I/O: repeat needed (not implemented). ";
+          << "During regular I/O: repeat needed (not implemented). ";
         }
         break;
       case SSL_ERROR_WANT_CONNECT:
       case SSL_ERROR_WANT_ACCEPT:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
-          << " During handshake negotiations: "
+          << "During handshake negotiations: "
           << "repeat needed (not implemented). ";
         }
         break;

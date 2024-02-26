@@ -2199,17 +2199,22 @@ int SSL_get_async_status(SSL *s, int *status)
 
 int SSL_accept(SSL *s)
 {
-    printf("\n\nDEBUG: at ssl accept\n\n");
+    printf("DEBUG: at ssl accept\n");
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
-    if (IS_QUIC(s))
+    printf("DEBUG: yes quic.\n");
+
+    if (IS_QUIC(s)){
+        printf("DEBUG: IS QUIC\n");
         return s->method->ssl_accept(s);
+    }
 #endif
 
-    if (sc == NULL)
+    if (sc == NULL){
         return 0;
-
+    }
+    printf("DEBUG: using handshake function.\n");
     if (sc->handshake_func == NULL) {
         /* Not properly initialized yet */
         SSL_set_accept_state(s);
@@ -2377,7 +2382,7 @@ int ssl_read_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
 int SSL_read(SSL *s, void *buf, int num)
 {
 
-    printf("\n\n\n\n\nDEBUG: hi world!!!!!!!!!!!!!!!!!!!!!!!\n\n\n\n\n");
+    printf("DEBUG: inside SSL_read.");
     int ret;
     size_t readbytes;
 

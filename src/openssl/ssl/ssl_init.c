@@ -23,9 +23,16 @@ static void ssl_library_stop(void);
 
 static CRYPTO_ONCE ssl_base = CRYPTO_ONCE_STATIC_INIT;
 static int ssl_base_inited = 0;
-DEFINE_RUN_ONCE_STATIC(ossl_init_ssl_base)
-{
+
+static int ossl_init_ssl_base(void);
+static int ossl_init_ssl_base_ossl_ret_ = 0;
+static void ossl_init_ssl_base_ossl_(void) {
+  ossl_init_ssl_base_ossl_ret_ = ossl_init_ssl_base();
+}
+
+static int ossl_init_ssl_base(void) {
 #ifndef OPENSSL_NO_COMP
+  printf("DEBUG: no compression here!");
     OSSL_TRACE(INIT, "ossl_init_ssl_base: "
                "SSL_COMP_get_compression_methods()\n");
     /*
@@ -105,18 +112,19 @@ int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings)
         return 0;
     }
 
-    opts |= OPENSSL_INIT_ADD_ALL_CIPHERS
-         |  OPENSSL_INIT_ADD_ALL_DIGESTS;
-#ifndef OPENSSL_NO_AUTOLOAD_CONFIG
-    if ((opts & OPENSSL_INIT_NO_LOAD_CONFIG) == 0)
+    opts |= OPENSSL_INIT_ADD_ALL_CIPHERS | OPENSSL_INIT_ADD_ALL_DIGESTS;
+    printf("DEBUG: inside no autoload");
+    if ((opts & OPENSSL_INIT_NO_LOAD_CONFIG) == 0) {
         opts |= OPENSSL_INIT_LOAD_CONFIG;
-#endif
+    }
 
-    if (!OPENSSL_init_crypto(opts, settings))
-        return 0;
+    if (!OPENSSL_init_crypto(opts, settings)) {
+      return 0;
+    }
 
-    if (!RUN_ONCE(&ssl_base, ossl_init_ssl_base))
-        return 0;
+    if (!RUN_ONCE_CRYPTO_THREAD_run_once(&ssl_base, ossl_init_ssl_base_ossl_, ossl_init_ssl_base_ossl_ret_)) {
+      return 0;
+    }
 
     if ((opts & OPENSSL_INIT_NO_LOAD_SSL_STRINGS)
         && !RUN_ONCE_ALT(&ssl_strings, ossl_init_no_load_ssl_strings,

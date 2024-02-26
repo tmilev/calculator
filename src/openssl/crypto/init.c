@@ -52,8 +52,16 @@ static CRYPTO_THREAD_LOCAL in_init_config_local;
 
 static CRYPTO_ONCE base = CRYPTO_ONCE_STATIC_INIT;
 static int base_inited = 0;
-DEFINE_RUN_ONCE_STATIC(ossl_init_base)
-{
+
+
+
+static int ossl_init_base(void);
+static int ossl_init_base_ossl_ret_ = 0;
+static void ossl_init_base_ossl_(void) {
+  ossl_init_base_ossl_ret_ = ossl_init_base();
+}
+
+static int ossl_init_base(void) {
     /* no need to init trace */
 
     OSSL_TRACE(INIT, "ossl_init_base: setting up stop handlers\n");
@@ -515,8 +523,10 @@ int OPENSSL_init_crypto(uint64_t opts, const OPENSSL_INIT_SETTINGS *settings)
      * If we remain the only caller of err_shelve_state() the recursion should
      * perhaps be removed, but if in doubt, it can be left in place.
      */
-    if (!RUN_ONCE(&base, ossl_init_base))
+//    if (! Crytp)
+    if (!RUN_ONCE(&base, ossl_init_base)) {
         return 0;
+    }
 
     if (opts & OPENSSL_INIT_BASE_ONLY)
         return 1;

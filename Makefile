@@ -245,7 +245,7 @@ DIRECTORIES=$(dir $(OBJECTS))
 all: bin_calculator 
 
 bin_calculator: $(OBJECTS)
-	cd src/openssl && make -j20
+	$(MAKE) -C src/openssl  
 	$(compiler) -I./src/openssl/include/ -L./src/openssl/  $(LDFLAGS) $(OBJECTS) -o $(TARGET)  -l:libssl.a -l :libcrypto.a
 
 test: bin_calculator

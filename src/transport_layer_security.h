@@ -709,7 +709,7 @@ public:
   // would be the client.
   bool flagIsServer;
   bool flagInitialized;
-  bool flagUseBuiltInTlS;
+  bool flagUseBuiltInTLS;
   bool flagBuiltInTLSAvailable;
   TransportLayerSecurityOpenSSL openSSLData;
   TransportLayerSecurityServer server;

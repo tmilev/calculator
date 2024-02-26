@@ -4402,17 +4402,17 @@ void WebServer::computeSSLFlags() {
   global.flagUsingSSLinCurrentConnection = false;
   if (this->lastListeningSocket == this->listeningSocketHTTPSBuiltIn) {
     global.flagUsingSSLinCurrentConnection = true;
-    this->transportLayerSecurity.flagUseBuiltInTlS = true;
+    this->transportLayerSecurity.flagUseBuiltInTLS = true;
   } else if (this->lastListeningSocket == this->listeningSocketHTTPSOpenSSL) {
     global.flagUsingSSLinCurrentConnection = true;
-    this->transportLayerSecurity.flagUseBuiltInTlS = false;
+    this->transportLayerSecurity.flagUseBuiltInTLS = false;
   } else if (
     this->transportLayerSecurity.socketsToAdditionalConfigurations.contains(
       this->lastListeningSocket
     )
   ) {
     global.flagUsingSSLinCurrentConnection = true;
-    this->transportLayerSecurity.flagUseBuiltInTlS = false;
+    this->transportLayerSecurity.flagUseBuiltInTLS = false;
   }
   this->getActiveWorker().flagUsingSSLInWorkerProcess =
   global.flagUsingSSLinCurrentConnection;

@@ -44,7 +44,7 @@ std::string SSLContent::JSLabels::signedCertificateTimestampRequest =
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
   this->flagInitialized = false;
-  this->flagUseBuiltInTlS = false;
+  this->flagUseBuiltInTLS = false;
   this->flagBuiltInTLSAvailable = false;
   this->openSSLData.owner = this;
   this->readBufferStandardSize = 100000;
@@ -2637,7 +2637,7 @@ bool TransportLayerSecurityServer::initializeCertificatesSelfSigned(
 bool TransportLayerSecurity::handShakeIamServer(
   int inputSocketID, std::stringstream* commentsOnFailure
 ) {
-  if (!this->flagUseBuiltInTlS) {
+  if (!this->flagUseBuiltInTLS) {
     return
     this->getOpenSSLData().handShakeIamServer(
       inputSocketID, commentsOnFailure

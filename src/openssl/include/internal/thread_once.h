@@ -130,13 +130,7 @@
     (CRYPTO_THREAD_run_once(once, init##_ossl_) ? init##_ossl_ret_ : 0)
 
 
-static int RUN_ONCE_CRYPTO_THREAD_run_once(CRYPTO_ONCE *once, void (*init)(void), int badInitialization){
-  int result = CRYPTO_THREAD_run_once(once, init);
-  if (result ==0) {
-    return result;
-  }
-  return badInitialization;
-}
+int RUN_ONCE_CRYPTO_THREAD_run_once(CRYPTO_ONCE *once, void (*init)(void), int* resultOfFirstRun);
 
 /*
  * RUN_ONCE_ALT - use CRYPTO_THREAD_run_once, to run an alternative initialiser

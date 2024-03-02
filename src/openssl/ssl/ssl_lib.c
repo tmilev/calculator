@@ -2199,14 +2199,11 @@ int SSL_get_async_status(SSL *s, int *status)
 
 int SSL_accept(SSL *s)
 {
-    printf("DEBUG: at ssl accept\n");
     SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
-    printf("DEBUG: yes quic.\n");
 
     if (IS_QUIC(s)){
-        printf("DEBUG: IS QUIC\n");
         return s->method->ssl_accept(s);
     }
 #endif
@@ -2214,7 +2211,6 @@ int SSL_accept(SSL *s)
     if (sc == NULL){
         return 0;
     }
-    printf("DEBUG: using handshake function.\n");
     if (sc->handshake_func == NULL) {
         /* Not properly initialized yet */
         SSL_set_accept_state(s);
@@ -2382,7 +2378,6 @@ int ssl_read_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
 int SSL_read(SSL *s, void *buf, int num)
 {
 
-    printf("DEBUG: inside SSL_read.");
     int ret;
     size_t readbytes;
 
@@ -3897,10 +3892,9 @@ SSL_CTX *SSL_CTX_new_ex(OSSL_LIB_CTX *libctx, const char *propq,
         ERR_raise(ERR_LIB_SSL, SSL_R_NULL_SSL_METHOD_PASSED);
         return NULL;
     }
-
-    if (!OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, NULL))
+    if (!OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, NULL)){
         return NULL;
-
+    }
     /* Doing this for the run once effect */
     if (SSL_get_ex_data_X509_STORE_CTX_idx() < 0) {
         ERR_raise(ERR_LIB_SSL, SSL_R_X509_VERIFICATION_SETUP_PROBLEMS);

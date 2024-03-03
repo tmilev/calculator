@@ -1200,8 +1200,8 @@ typedef struct cert_pkey_st CERT_PKEY;
 struct ssl_st {
     int type;
     SSL_CTX *ctx;
-    const SSL_METHOD *defltmeth;
-    const SSL_METHOD *method;
+    const struct ssl_method_st *defltmeth;
+    const struct ssl_method_st *method;
     CRYPTO_REF_COUNT references;
     CRYPTO_RWLOCK *lock;
     /* extra application data */
@@ -1812,11 +1812,16 @@ struct ssl_connection_st {
      : ((ssl)->type == SSL_TYPE_SSL_CONNECTION    \
        ? (c SSL_CONNECTION *)(ssl)                \
        : NULL))
-# define SSL_CONNECTION_NO_CONST
-# define SSL_CONNECTION_FROM_SSL_ONLY(ssl) \
-    SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, SSL_CONNECTION_NO_CONST)
 # define SSL_CONNECTION_FROM_CONST_SSL_ONLY(ssl) \
-    SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, const)
+SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, const)
+//# define SSL_CONNECTION_FROM_SSL_ONLY(ssl) \
+//    SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, SSL_CONNECTION_NO_CONST)
+
+
+struct   ssl_connection_st * SSL_CONNECTION_FROM_SSL_ONLY(struct ssl_st* s) ;
+
+
+# define SSL_CONNECTION_NO_CONST
 # define SSL_CONNECTION_GET_CTX(sc) ((sc)->ssl.ctx)
 # define SSL_CONNECTION_GET_SSL(sc) (&(sc)->ssl)
 

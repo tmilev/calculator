@@ -24,6 +24,16 @@
 #include <netinet/sctp.h>
 #endif
 
+struct   ssl_connection_st * SSL_CONNECTION_FROM_SSL_ONLY(struct ssl_st* ssl) {
+  if (ssl == NULL) {
+    return NULL;
+  }
+  if (ssl->type != SSL_TYPE_SSL_CONNECTION) {
+    return NULL;
+  }
+  return (struct ssl_connection_st*) ssl;
+}
+
 HANDSHAKE_RESULT *HANDSHAKE_RESULT_new(void)
 {
     HANDSHAKE_RESULT *ret;

@@ -16,6 +16,16 @@
 #define IVLEN   12
 #define KEYLEN  16
 
+struct   ssl_connection_st * SSL_CONNECTION_FROM_SSL_ONLY(struct ssl_st* ssl) {
+  if (ssl == NULL) {
+    return NULL;
+  }
+  if (ssl->type != SSL_TYPE_SSL_CONNECTION) {
+    return NULL;
+  }
+  return (struct ssl_connection_st*) ssl;
+}
+
 /*
  * Based on the test vectors available in:
  * https://tools.ietf.org/html/draft-ietf-tls-tls13-vectors-06

@@ -34,6 +34,7 @@ SSL_CONNECTION* SSL_CONNECTION_FROM_SSL(SSL* ssl){
   }
 
   if (ssl->type == SSL_TYPE_SSL_CONNECTION){
+    printf("DEBUG: Regular ssl connection\n");
     return ssl;
   }
   if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
@@ -2204,6 +2205,7 @@ int SSL_accept(SSL *s)
 #ifndef OPENSSL_NO_QUIC
 
     if (IS_QUIC(s)){
+        printf("DEBUG: is quick!!!!!");
         return s->method->ssl_accept(s);
     }
 #endif
@@ -2212,9 +2214,12 @@ int SSL_accept(SSL *s)
         return 0;
     }
     if (sc->handshake_func == NULL) {
+        printf("DEBUG: not initialized yet!!!!!");
+
         /* Not properly initialized yet */
         SSL_set_accept_state(s);
     }
+    printf("DEBUG: ssl do handshake here!!!!!!");
 
     return SSL_do_handshake(s);
 }
@@ -4780,9 +4785,32 @@ int SSL_do_handshake(SSL *s)
     return ret;
 }
 
+
+//# define SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, c) \
+//((ssl) == NULL ? NULL                         \
+//               : ((ssl)->type == SSL_TYPE_SSL_CONNECTION    \
+//                      ? (c SSL_CONNECTION *)(ssl)                \
+//                      : NULL))
+//# define SSL_CONNECTION_FROM_CONST_SSL_ONLY(ssl) \
+    SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, const)
+    //# define SSL_CONNECTION_FROM_SSL_ONLY(ssl) \
+    //    SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, SSL_CONNECTION_NO_CONST)
+
+
+struct   ssl_connection_st * SSL_CONNECTION_FROM_SSL_ONLY(struct ssl_st* ssl) {
+    if (ssl == NULL) {
+        return NULL;
+    }
+    if (ssl->type != SSL_TYPE_SSL_CONNECTION) {
+        return NULL;
+    }
+    return (struct ssl_connection_st*) ssl;
+}
+
+
 void SSL_set_accept_state(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+ struct   ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s)) {

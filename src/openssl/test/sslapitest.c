@@ -54,6 +54,16 @@
 # define OSSL_NO_USABLE_TLS1_3
 #endif
 
+struct   ssl_connection_st * SSL_CONNECTION_FROM_SSL_ONLY(struct ssl_st* ssl) {
+  if (ssl == NULL) {
+    return NULL;
+  }
+  if (ssl->type != SSL_TYPE_SSL_CONNECTION) {
+    return NULL;
+  }
+  return (struct ssl_connection_st*) ssl;
+}
+
 /* Defined in tls-provider.c */
 int tls_provider_init(const OSSL_CORE_HANDLE *handle,
                       const OSSL_DISPATCH *in,

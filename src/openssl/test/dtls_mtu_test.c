@@ -20,7 +20,19 @@
 /* for SSL_READ_ETM() */
 #include "../ssl/ssl_local.h"
 
+struct   ssl_connection_st * SSL_CONNECTION_FROM_SSL_ONLY(struct ssl_st* ssl) {
+  if (ssl == NULL) {
+    return NULL;
+  }
+  if (ssl->type != SSL_TYPE_SSL_CONNECTION) {
+    return NULL;
+  }
+  return (struct ssl_connection_st*) ssl;
+}
+
 static int debug = 0;
+
+
 
 static unsigned int clnt_psk_callback(SSL *ssl, const char *hint,
                                       char *ident, unsigned int max_ident_len,

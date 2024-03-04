@@ -13,6 +13,7 @@
 #include <openssl/objects.h>
 #include "internal/nelem.h"
 #include "ssl_local.h"
+#include "../include/internal/packet.h"
 #include <openssl/md5.h>
 #include <openssl/dh.h>
 #include <openssl/rand.h>
@@ -3255,7 +3256,7 @@ void ssl_sort_cipher_list(void)
     qsort(ssl3_scsvs, SSL3_NUM_SCSVS, sizeof(ssl3_scsvs[0]), cipher_compare);
 }
 
-static int sslcon_undefined_function_1(SSL_CONNECTION *sc, unsigned char *r,
+static int sslcon_undefined_function_1(struct ssl_connection_st *sc, unsigned char *r,
                                        size_t s, const char *t, size_t u,
                                        const unsigned char *v, size_t w, int x)
 {
@@ -3306,7 +3307,7 @@ const SSL_CIPHER *ssl3_get_cipher(unsigned int u)
         return NULL;
 }
 
-int ssl3_set_handshake_header(SSL_CONNECTION *s, WPACKET *pkt, int htype)
+int ssl3_set_handshake_header(struct ssl_connection_st *s, WPACKET *pkt, int htype)
 {
     /* No header in the event of a CCS */
     if (htype == SSL3_MT_CHANGE_CIPHER_SPEC)
@@ -3320,7 +3321,7 @@ int ssl3_set_handshake_header(SSL_CONNECTION *s, WPACKET *pkt, int htype)
     return 1;
 }
 
-int ssl3_handshake_write(SSL_CONNECTION *s)
+int ssl3_handshake_write(struct ssl_connection_st *s)
 {
     return ssl3_do_write(s, SSL3_RT_HANDSHAKE);
 }
@@ -3328,7 +3329,7 @@ int ssl3_handshake_write(SSL_CONNECTION *s)
 int ssl3_new(SSL *s)
 {
 #ifndef OPENSSL_NO_SRP
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -3345,7 +3346,7 @@ int ssl3_new(SSL *s)
 
 void ssl3_free(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -3383,7 +3384,7 @@ void ssl3_free(SSL *s)
 
 int ssl3_clear(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
     int flags;
 
     if (sc == NULL)
@@ -3431,7 +3432,7 @@ int ssl3_clear(SSL *s)
 #ifndef OPENSSL_NO_SRP
 static char *srp_password_from_info_cb(SSL *s, void *arg)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -3445,7 +3446,7 @@ static int ssl3_set_req_cert_type(CERT *c, const unsigned char *p, size_t len);
 long ssl3_ctrl(SSL *s, int cmd, long larg, void *parg)
 {
     int ret = 0;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return ret;
@@ -3784,7 +3785,7 @@ long ssl3_ctrl(SSL *s, int cmd, long larg, void *parg)
 long ssl3_callback_ctrl(SSL *s, int cmd, void (*fp) (void))
 {
     int ret = 0;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return ret;
@@ -4178,7 +4179,7 @@ int ssl3_put_cipher_by_char(const SSL_CIPHER *c, WPACKET *pkt, size_t *len)
  *
  * Returns the selected cipher or NULL when no common ciphers.
  */
-const SSL_CIPHER *ssl3_choose_cipher(SSL_CONNECTION *s, STACK_OF(SSL_CIPHER) *clnt,
+const SSL_CIPHER *ssl3_choose_cipher(struct ssl_connection_st *s, STACK_OF(SSL_CIPHER) *clnt,
                                      STACK_OF(SSL_CIPHER) *srvr)
 {
     const SSL_CIPHER *c, *ret = NULL;
@@ -4374,7 +4375,7 @@ const SSL_CIPHER *ssl3_choose_cipher(SSL_CONNECTION *s, STACK_OF(SSL_CIPHER) *cl
     return ret;
 }
 
-int ssl3_get_req_cert_type(SSL_CONNECTION *s, WPACKET *pkt)
+int ssl3_get_req_cert_type(struct ssl_connection_st *s, WPACKET *pkt)
 {
     uint32_t alg_k, alg_a = 0;
 
@@ -4444,7 +4445,7 @@ static int ssl3_set_req_cert_type(CERT *c, const unsigned char *p, size_t len)
 int ssl3_shutdown(SSL *s)
 {
     int ret;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -4498,7 +4499,7 @@ int ssl3_shutdown(SSL *s)
 
 int ssl3_write(SSL *s, const void *buf, size_t len, size_t *written)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -4515,7 +4516,7 @@ static int ssl3_read_internal(SSL *s, void *buf, size_t len, int peek,
                               size_t *readbytes)
 {
     int ret;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -4558,13 +4559,15 @@ int ssl3_peek(SSL *s, void *buf, size_t len, size_t *readbytes)
 
 int ssl3_renegotiate(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
-    if (sc == NULL)
+    if (sc == NULL) {
         return 0;
+    }
 
-    if (sc->handshake_func == NULL)
+    if (sc->handshake_func == NULL){
         return 1;
+    }
 
     sc->s3.renegotiate = 1;
     return 1;
@@ -4581,10 +4584,11 @@ int ssl3_renegotiate(SSL *s)
 int ssl3_renegotiate_check(SSL *s, int initok)
 {
     int ret = 0;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
-    if (sc == NULL)
+    if (sc == NULL) {
         return 0;
+    }
 
     if (sc->s3.renegotiate) {
         if (!RECORD_LAYER_read_pending(&sc->rlayer)
@@ -4611,20 +4615,23 @@ int ssl3_renegotiate_check(SSL *s, int initok)
  *
  * If PSK and using SHA384 for TLS < 1.2 switch to default.
  */
-long ssl_get_algorithm2(SSL_CONNECTION *s)
+long ssl_get_algorithm2(struct ssl_connection_st *s)
 {
     long alg2;
     SSL *ssl = SSL_CONNECTION_GET_SSL(s);
 
-    if (s->s3.tmp.new_cipher == NULL)
+    if (s->s3.tmp.new_cipher == NULL) {
         return -1;
+    }
     alg2 = s->s3.tmp.new_cipher->algorithm2;
     if (ssl->method->ssl3_enc->enc_flags & SSL_ENC_FLAG_SHA256_PRF) {
-        if (alg2 == (SSL_HANDSHAKE_MAC_DEFAULT | TLS1_PRF))
+        if (alg2 == (SSL_HANDSHAKE_MAC_DEFAULT | TLS1_PRF)){
             return SSL_HANDSHAKE_MAC_SHA256 | TLS1_PRF_SHA256;
+        }
     } else if (s->s3.tmp.new_cipher->algorithm_mkey & SSL_PSK) {
-        if (alg2 == (SSL_HANDSHAKE_MAC_SHA384 | TLS1_PRF_SHA384))
+        if (alg2 == (SSL_HANDSHAKE_MAC_SHA384 | TLS1_PRF_SHA384)) {
             return SSL_HANDSHAKE_MAC_DEFAULT | TLS1_PRF;
+        }
     }
     return alg2;
 }
@@ -4633,7 +4640,7 @@ long ssl_get_algorithm2(SSL_CONNECTION *s)
  * Fill a ClientRandom or ServerRandom field of length len. Returns <= 0 on
  * failure, 1 on success.
  */
-int ssl_fill_hello_random(SSL_CONNECTION *s, int server,
+int ssl_fill_hello_random(struct ssl_connection_st *s, int server,
                           unsigned char *result, size_t len,
                           DOWNGRADE dgrd)
 {
@@ -4657,20 +4664,22 @@ int ssl_fill_hello_random(SSL_CONNECTION *s, int server,
 
     if (ret > 0) {
         if (!ossl_assert(sizeof(tls11downgrade) < len)
-                || !ossl_assert(sizeof(tls12downgrade) < len))
+            || !ossl_assert(sizeof(tls12downgrade) < len)) {
              return 0;
-        if (dgrd == DOWNGRADE_TO_1_2)
+        }
+        if (dgrd == DOWNGRADE_TO_1_2) {
             memcpy(result + len - sizeof(tls12downgrade), tls12downgrade,
                    sizeof(tls12downgrade));
-        else if (dgrd == DOWNGRADE_TO_1_1)
+        } else if (dgrd == DOWNGRADE_TO_1_1) {
             memcpy(result + len - sizeof(tls11downgrade), tls11downgrade,
                    sizeof(tls11downgrade));
+        }
     }
 
     return ret;
 }
 
-int ssl_generate_master_secret(SSL_CONNECTION *s, unsigned char *pms,
+int ssl_generate_master_secret(struct ssl_connection_st *s, unsigned char *pms,
                                size_t pmslen, int free_pms)
 {
     unsigned long alg_k = s->s3.tmp.new_cipher->algorithm_mkey;
@@ -4695,10 +4704,11 @@ int ssl_generate_master_secret(SSL_CONNECTION *s, unsigned char *pms,
             goto err;
         t = pskpms;
         s2n(pmslen, t);
-        if (alg_k & SSL_kPSK)
-            memset(t, 0, pmslen);
-        else
-            memcpy(t, pms, pmslen);
+        if (alg_k & SSL_kPSK){
+          memset(t, 0, pmslen);
+        } else {
+          memcpy(t, pms, pmslen);
+        }
         t += pmslen;
         s2n(psklen, t);
         memcpy(t, s->s3.tmp.psk, psklen);
@@ -4743,14 +4753,15 @@ int ssl_generate_master_secret(SSL_CONNECTION *s, unsigned char *pms,
 }
 
 /* Generate a private key from parameters */
-EVP_PKEY *ssl_generate_pkey(SSL_CONNECTION *s, EVP_PKEY *pm)
+EVP_PKEY *ssl_generate_pkey(struct ssl_connection_st *s, EVP_PKEY *pm)
 {
     EVP_PKEY_CTX *pctx = NULL;
     EVP_PKEY *pkey = NULL;
     SSL_CTX *sctx = SSL_CONNECTION_GET_CTX(s);
 
-    if (pm == NULL)
-        return NULL;
+    if (pm == NULL) {
+      return NULL;
+    }
     pctx = EVP_PKEY_CTX_new_from_pkey(sctx->libctx, pm, sctx->propq);
     if (pctx == NULL)
         goto err;
@@ -4767,7 +4778,7 @@ EVP_PKEY *ssl_generate_pkey(SSL_CONNECTION *s, EVP_PKEY *pm)
 }
 
 /* Generate a private key from a group ID */
-EVP_PKEY *ssl_generate_pkey_group(SSL_CONNECTION *s, uint16_t id)
+EVP_PKEY *ssl_generate_pkey_group(struct ssl_connection_st *s, uint16_t id)
 {
     SSL_CTX *sctx = SSL_CONNECTION_GET_CTX(s);
     const TLS_GROUP_INFO *ginf = tls1_group_id_lookup(sctx, id);
@@ -4808,7 +4819,7 @@ EVP_PKEY *ssl_generate_pkey_group(SSL_CONNECTION *s, uint16_t id)
 /*
  * Generate parameters from a group ID
  */
-EVP_PKEY *ssl_generate_param_group(SSL_CONNECTION *s, uint16_t id)
+EVP_PKEY *ssl_generate_param_group(struct ssl_connection_st *s, uint16_t id)
 {
     SSL_CTX *sctx = SSL_CONNECTION_GET_CTX(s);
     EVP_PKEY_CTX *pctx = NULL;
@@ -4840,7 +4851,7 @@ EVP_PKEY *ssl_generate_param_group(SSL_CONNECTION *s, uint16_t id)
 }
 
 /* Generate secrets from pms */
-int ssl_gensecret(SSL_CONNECTION *s, unsigned char *pms, size_t pmslen)
+int ssl_gensecret(struct ssl_connection_st *s, unsigned char *pms, size_t pmslen)
 {
     int rv = 0;
 
@@ -4866,7 +4877,7 @@ int ssl_gensecret(SSL_CONNECTION *s, unsigned char *pms, size_t pmslen)
 }
 
 /* Derive secrets for ECDH/DH */
-int ssl_derive(SSL_CONNECTION *s, EVP_PKEY *privkey, EVP_PKEY *pubkey, int gensecret)
+int ssl_derive(struct ssl_connection_st *s, EVP_PKEY *privkey, EVP_PKEY *pubkey, int gensecret)
 {
     int rv = 0;
     unsigned char *pms = NULL;
@@ -4920,7 +4931,7 @@ int ssl_derive(SSL_CONNECTION *s, EVP_PKEY *privkey, EVP_PKEY *pubkey, int gense
 }
 
 /* Decapsulate secrets for KEM */
-int ssl_decapsulate(SSL_CONNECTION *s, EVP_PKEY *privkey,
+int ssl_decapsulate(struct ssl_connection_st *s, EVP_PKEY *privkey,
                     const unsigned char *ct, size_t ctlen,
                     int gensecret)
 {
@@ -4971,7 +4982,7 @@ int ssl_decapsulate(SSL_CONNECTION *s, EVP_PKEY *privkey,
     return rv;
 }
 
-int ssl_encapsulate(SSL_CONNECTION *s, EVP_PKEY *pubkey,
+int ssl_encapsulate(struct ssl_connection_st *s, EVP_PKEY *pubkey,
                     unsigned char **ctp, size_t *ctlenp,
                     int gensecret)
 {
@@ -5034,7 +5045,7 @@ int ssl_encapsulate(SSL_CONNECTION *s, EVP_PKEY *pubkey,
 
 const char *SSL_get0_group_name(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
     unsigned int id;
 
     if (sc == NULL)

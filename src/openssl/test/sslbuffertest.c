@@ -25,7 +25,7 @@
 #include "testutil.h"
 
 
-SSL_CONNECTION* SSL_CONNECTION_FROM_SSL(SSL* ssl){
+ struct ssl_connection_st* SSL_CONNECTION_FROM_SSL( SSL* ssl){
   if (ssl == NULL){
     return NULL;
   }
@@ -34,12 +34,12 @@ SSL_CONNECTION* SSL_CONNECTION_FROM_SSL(SSL* ssl){
     return ssl;
   }
   if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
-    return  (SSL_CONNECTION *)(( QUIC_CONNECTION *)(ssl))->tls;
+    return  (struct ssl_connection_st *)(( QUIC_CONNECTION *)(ssl))->tls;
   }
   return NULL;
 }
 
-SSL_CONNECTION* SSL_CONNECTION_FROM_CONST_SSL(const SSL* ssl){
+const struct ssl_connection_st* SSL_CONNECTION_FROM_CONST_SSL( const SSL* ssl){
   if (ssl == NULL){
     return NULL;
   }
@@ -47,7 +47,7 @@ SSL_CONNECTION* SSL_CONNECTION_FROM_CONST_SSL(const SSL* ssl){
     return ssl;
   }
   if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
-    return  (SSL_CONNECTION *)(( QUIC_CONNECTION *)(ssl))->tls;
+    return  (struct ssl_connection_st *)(( QUIC_CONNECTION *)(ssl))->tls;
   }
   return NULL;
 }
@@ -64,7 +64,7 @@ static SSL_CTX *clientctx = NULL;
 
 static int checkbuffers(SSL *s, int isalloced)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
     OSSL_RECORD_LAYER *rrl = sc->rlayer.rrl;
     OSSL_RECORD_LAYER *wrl = sc->rlayer.wrl;
 

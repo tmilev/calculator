@@ -61,7 +61,7 @@ void ssl_session_calculate_timeout(SSL_SESSION *ss)
 SSL_SESSION *SSL_get_session(const SSL *ssl)
 /* aka SSL_get0_session; gets 0 objects, just returns a copy of the pointer */
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
 
     if (sc == NULL)
         return NULL;
@@ -324,7 +324,7 @@ static int def_generate_session_id(SSL *ssl, unsigned char *id,
     return 0;
 }
 
-int ssl_generate_session_id(SSL_CONNECTION *s, SSL_SESSION *ss)
+int ssl_generate_session_id(struct ssl_connection_st *s, SSL_SESSION *ss)
 {
     unsigned int tmp;
     GEN_SESSION_CB cb = def_generate_session_id;
@@ -411,7 +411,7 @@ int ssl_generate_session_id(SSL_CONNECTION *s, SSL_SESSION *ss)
     return 1;
 }
 
-int ssl_get_new_session(SSL_CONNECTION *s, int session)
+int ssl_get_new_session(struct ssl_connection_st *s, int session)
 {
     /* This gets used by clients and servers. */
 
@@ -467,7 +467,7 @@ int ssl_get_new_session(SSL_CONNECTION *s, int session)
     return 1;
 }
 
-SSL_SESSION *lookup_sess_in_cache(SSL_CONNECTION *s,
+SSL_SESSION *lookup_sess_in_cache(struct ssl_connection_st *s,
                                   const unsigned char *sess_id,
                                   size_t sess_id_len)
 {
@@ -552,7 +552,7 @@ SSL_SESSION *lookup_sess_in_cache(SSL_CONNECTION *s,
  *   - Both for new and resumed sessions, s->ext.ticket_expected is set to 1
  *     if the server should issue a new session ticket (to 0 otherwise).
  */
-int ssl_get_prev_session(SSL_CONNECTION *s, CLIENTHELLO_MSG *hello)
+int ssl_get_prev_session(struct ssl_connection_st *s, CLIENTHELLO_MSG *hello)
 {
     /* This is used only by servers. */
 
@@ -856,7 +856,7 @@ int SSL_SESSION_up_ref(SSL_SESSION *ss)
 
 int SSL_set_session(SSL *s, SSL_SESSION *session)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1096,7 +1096,7 @@ int SSL_set_session_secret_cb(SSL *s,
                               tls_session_secret_cb_fn tls_session_secret_cb,
                               void *arg)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1109,7 +1109,7 @@ int SSL_set_session_secret_cb(SSL *s,
 int SSL_set_session_ticket_ext_cb(SSL *s, tls_session_ticket_ext_cb_fn cb,
                                   void *arg)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1121,7 +1121,7 @@ int SSL_set_session_ticket_ext_cb(SSL *s, tls_session_ticket_ext_cb_fn cb,
 
 int SSL_set_session_ticket_ext(SSL *s, void *ext_data, int ext_len)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1198,7 +1198,7 @@ void SSL_CTX_flush_sessions(SSL_CTX *s, long t)
     sk_SSL_SESSION_pop_free(sk, SSL_SESSION_free);
 }
 
-int ssl_clear_bad_session(SSL_CONNECTION *s)
+int ssl_clear_bad_session(struct ssl_connection_st *s)
 {
     if ((s->session != NULL) &&
         !(s->shutdown & SSL_SENT_SHUTDOWN) &&

@@ -76,7 +76,9 @@ void TransportLayerSecurityOpenSSL::initializeSSLLibrary() {
     << commentsOnError.str()
     << Logger::endL;
   }
-  TransportLayerSecurityOpenSSL::methodGlobal = SSLv23_method();
+  // TLS_method() <--> = SSLv23_method().
+  // SSLv23_method is the obfuscated official documentation.
+  TransportLayerSecurityOpenSSL::methodGlobal = TLS_method();
   TransportLayerSecurityOpenSSL::contextGlobal =
   SSL_CTX_new(TransportLayerSecurityOpenSSL::methodGlobal);
   if (TransportLayerSecurityOpenSSL::contextGlobal == nullptr) {

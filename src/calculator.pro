@@ -184,6 +184,7 @@ HEADERS += \
     openssl/include/crypto/asyncerr.h \
     openssl/include/crypto/bioerr.h \
     openssl/include/crypto/bn.h \
+    openssl/include/crypto/bn_conf.h \
     openssl/include/crypto/bn_conf.h.in \
     openssl/include/crypto/bn_dh.h \
     openssl/include/crypto/bn_srp.h \
@@ -208,6 +209,7 @@ HEADERS += \
     openssl/include/crypto/dherr.h \
     openssl/include/crypto/dsa.h \
     openssl/include/crypto/dsaerr.h \
+    openssl/include/crypto/dso_conf.h \
     openssl/include/crypto/dso_conf.h.in \
     openssl/include/crypto/ec.h \
     openssl/include/crypto/ecerr.h \
@@ -293,6 +295,7 @@ HEADERS += \
     openssl/include/internal/packet.h \
     openssl/include/internal/packet_quic.h \
     openssl/include/internal/param_build_set.h \
+    openssl/include/internal/param_names.h \
     openssl/include/internal/params.h \
     openssl/include/internal/passphrase.h \
     openssl/include/internal/priority_queue.h \
@@ -350,12 +353,15 @@ HEADERS += \
     openssl/include/openssl/__DECC_INCLUDE_EPILOGUE.H \
     openssl/include/openssl/__DECC_INCLUDE_PROLOGUE.H \
     openssl/include/openssl/aes.h \
+    openssl/include/openssl/asn1.h \
     openssl/include/openssl/asn1.h.in \
     openssl/include/openssl/asn1_mac.h \
     openssl/include/openssl/asn1err.h \
+    openssl/include/openssl/asn1t.h \
     openssl/include/openssl/asn1t.h.in \
     openssl/include/openssl/async.h \
     openssl/include/openssl/asyncerr.h \
+    openssl/include/openssl/bio.h \
     openssl/include/openssl/bio.h.in \
     openssl/include/openssl/bioerr.h \
     openssl/include/openssl/blowfish.h \
@@ -366,27 +372,35 @@ HEADERS += \
     openssl/include/openssl/camellia.h \
     openssl/include/openssl/cast.h \
     openssl/include/openssl/cmac.h \
+    openssl/include/openssl/cmp.h \
     openssl/include/openssl/cmp.h.in \
     openssl/include/openssl/cmp_util.h \
     openssl/include/openssl/cmperr.h \
+    openssl/include/openssl/cms.h \
     openssl/include/openssl/cms.h.in \
     openssl/include/openssl/cmserr.h \
     openssl/include/openssl/comp.h \
     openssl/include/openssl/comperr.h \
+    openssl/include/openssl/conf.h \
     openssl/include/openssl/conf.h.in \
     openssl/include/openssl/conf_api.h \
     openssl/include/openssl/conferr.h \
+    openssl/include/openssl/configuration.h \
     openssl/include/openssl/configuration.h.in \
     openssl/include/openssl/conftypes.h \
     openssl/include/openssl/core.h \
     openssl/include/openssl/core_dispatch.h \
+    openssl/include/openssl/core_names.h \
     openssl/include/openssl/core_names.h.in \
     openssl/include/openssl/core_object.h \
+    openssl/include/openssl/crmf.h \
     openssl/include/openssl/crmf.h.in \
     openssl/include/openssl/crmferr.h \
+    openssl/include/openssl/crypto.h \
     openssl/include/openssl/crypto.h.in \
     openssl/include/openssl/cryptoerr.h \
     openssl/include/openssl/cryptoerr_legacy.h \
+    openssl/include/openssl/ct.h \
     openssl/include/openssl/ct.h.in \
     openssl/include/openssl/cterr.h \
     openssl/include/openssl/decoder.h \
@@ -408,12 +422,15 @@ HEADERS += \
     openssl/include/openssl/encodererr.h \
     openssl/include/openssl/engine.h \
     openssl/include/openssl/engineerr.h \
+    openssl/include/openssl/err.h \
     openssl/include/openssl/err.h.in \
+    openssl/include/openssl/ess.h \
     openssl/include/openssl/ess.h.in \
     openssl/include/openssl/esserr.h \
     openssl/include/openssl/evp.h \
     openssl/include/openssl/evperr.h \
     openssl/include/openssl/fips_names.h \
+    openssl/include/openssl/fipskey.h \
     openssl/include/openssl/fipskey.h.in \
     openssl/include/openssl/hmac.h \
     openssl/include/openssl/hpke.h \
@@ -422,6 +439,7 @@ HEADERS += \
     openssl/include/openssl/idea.h \
     openssl/include/openssl/kdf.h \
     openssl/include/openssl/kdferr.h \
+    openssl/include/openssl/lhash.h \
     openssl/include/openssl/lhash.h.in \
     openssl/include/openssl/macros.h \
     openssl/include/openssl/md2.h \
@@ -432,9 +450,11 @@ HEADERS += \
     openssl/include/openssl/obj_mac.h \
     openssl/include/openssl/objects.h \
     openssl/include/openssl/objectserr.h \
+    openssl/include/openssl/ocsp.h \
     openssl/include/openssl/ocsp.h.in \
     openssl/include/openssl/ocsperr.h \
     openssl/include/openssl/opensslconf.h \
+    openssl/include/openssl/opensslv.h \
     openssl/include/openssl/opensslv.h.in \
     openssl/include/openssl/ossl_typ.h \
     openssl/include/openssl/param_build.h \
@@ -442,8 +462,10 @@ HEADERS += \
     openssl/include/openssl/pem.h \
     openssl/include/openssl/pem2.h \
     openssl/include/openssl/pemerr.h \
+    openssl/include/openssl/pkcs12.h \
     openssl/include/openssl/pkcs12.h.in \
     openssl/include/openssl/pkcs12err.h \
+    openssl/include/openssl/pkcs7.h \
     openssl/include/openssl/pkcs7.h.in \
     openssl/include/openssl/pkcs7err.h \
     openssl/include/openssl/prov_ssl.h \
@@ -458,12 +480,15 @@ HEADERS += \
     openssl/include/openssl/ripemd.h \
     openssl/include/openssl/rsa.h \
     openssl/include/openssl/rsaerr.h \
+    openssl/include/openssl/safestack.h \
     openssl/include/openssl/safestack.h.in \
     openssl/include/openssl/seed.h \
     openssl/include/openssl/self_test.h \
     openssl/include/openssl/sha.h \
+    openssl/include/openssl/srp.h \
     openssl/include/openssl/srp.h.in \
     openssl/include/openssl/srtp.h \
+    openssl/include/openssl/ssl.h \
     openssl/include/openssl/ssl.h.in \
     openssl/include/openssl/ssl2.h \
     openssl/include/openssl/ssl3.h \
@@ -480,12 +505,16 @@ HEADERS += \
     openssl/include/openssl/tserr.h \
     openssl/include/openssl/txt_db.h \
     openssl/include/openssl/types.h \
+    openssl/include/openssl/ui.h \
     openssl/include/openssl/ui.h.in \
     openssl/include/openssl/uierr.h \
     openssl/include/openssl/whrlpool.h \
+    openssl/include/openssl/x509.h \
     openssl/include/openssl/x509.h.in \
+    openssl/include/openssl/x509_vfy.h \
     openssl/include/openssl/x509_vfy.h.in \
     openssl/include/openssl/x509err.h \
+    openssl/include/openssl/x509v3.h \
     openssl/include/openssl/x509v3.h.in \
     openssl/include/openssl/x509v3err.h \
     openssl/ms/uplink.h \

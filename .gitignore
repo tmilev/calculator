@@ -92,3 +92,5 @@ src/openssl/util/wrap.pl
 src/openssl/apps/CA.pl
 src/openssl/apps/openssl
 src/openssl/apps/tsget.pl
+
+src/openssl/test-runs/

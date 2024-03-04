@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include "ssl_local.h"
+#include "statem/statem_local.h"
 #include "internal/e_os.h"
 #include <openssl/objects.h>
 #include <openssl/x509v3.h>
@@ -27,8 +28,9 @@
 #include "internal/refcount.h"
 #include "internal/ktls.h"
 #include "quic/quic_local.h"
+#include "internal/dane.h"
 
-SSL_CONNECTION* SSL_CONNECTION_FROM_SSL(SSL* ssl){
+struct ssl_connection_st* SSL_CONNECTION_FROM_SSL(SSL* ssl){
   if (ssl == NULL){
     return NULL;
   }
@@ -38,38 +40,38 @@ SSL_CONNECTION* SSL_CONNECTION_FROM_SSL(SSL* ssl){
     return ssl;
   }
   if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
-    return  (SSL_CONNECTION *)(( QUIC_CONNECTION *)(ssl))->tls;
+    return  (struct ssl_connection_st *)(( QUIC_CONNECTION *)(ssl))->tls;
   }
   return NULL;
 }
 
-SSL_CONNECTION* SSL_CONNECTION_FROM_CONST_SSL(const SSL* ssl){
+const struct ssl_connection_st* SSL_CONNECTION_FROM_CONST_SSL(const SSL* ssl){
   if (ssl == NULL){
     return NULL;
   }
   if (ssl->type == SSL_TYPE_SSL_CONNECTION){
-    return ssl;
+    return (const struct ssl_connection_st*) ssl;
   }
   if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
-    return  (SSL_CONNECTION *)(( QUIC_CONNECTION *)(ssl))->tls;
+    return  (struct ssl_connection_st *)(( QUIC_CONNECTION *)(ssl))->tls;
   }
   return NULL;
 }
 
 
 
-static int ssl_undefined_function_3(SSL_CONNECTION *sc, unsigned char *r,
+static int ssl_undefined_function_3(struct ssl_connection_st *sc, unsigned char *r,
                                     unsigned char *s, size_t t, size_t *u)
 {
     return ssl_undefined_function(SSL_CONNECTION_GET_SSL(sc));
 }
 
-static int ssl_undefined_function_4(SSL_CONNECTION *sc, int r)
+static int ssl_undefined_function_4(struct ssl_connection_st *sc, int r)
 {
     return ssl_undefined_function(SSL_CONNECTION_GET_SSL(sc));
 }
 
-static size_t ssl_undefined_function_5(SSL_CONNECTION *sc, const char *r,
+static size_t ssl_undefined_function_5(struct ssl_connection_st *sc, const char *r,
                                        size_t s, unsigned char *t)
 {
     return ssl_undefined_function(SSL_CONNECTION_GET_SSL(sc));
@@ -80,14 +82,14 @@ static int ssl_undefined_function_6(int r)
     return ssl_undefined_function(NULL);
 }
 
-static int ssl_undefined_function_7(SSL_CONNECTION *sc, unsigned char *r,
+static int ssl_undefined_function_7(struct ssl_connection_st *sc, unsigned char *r,
                                     size_t s, const char *t, size_t u,
                                     const unsigned char *v, size_t w, int x)
 {
     return ssl_undefined_function(SSL_CONNECTION_GET_SSL(sc));
 }
 
-static int ssl_undefined_function_8(SSL_CONNECTION *sc)
+static int ssl_undefined_function_8(struct ssl_connection_st *sc)
 {
     return ssl_undefined_function(SSL_CONNECTION_GET_SSL(sc));
 }
@@ -208,7 +210,7 @@ static void dane_final(SSL_DANE *dane)
 /*
  * dane_copy - Copy dane configuration, sans verification state.
  */
-static int ssl_dane_dup(SSL_CONNECTION *to, SSL_CONNECTION *from)
+static int ssl_dane_dup(struct ssl_connection_st *to, struct ssl_connection_st *from)
 {
     int num;
     int i;
@@ -588,7 +590,7 @@ static int ssl_check_allowed_versions(int min_version, int max_version)
 void OPENSSL_VPROC_FUNC(void) {}
 #endif
 
-static int clear_record_layer(SSL_CONNECTION *s)
+static int clear_record_layer(struct ssl_connection_st *s)
 {
     int ret;
 
@@ -626,7 +628,7 @@ int SSL_clear(SSL *s)
 
 int ossl_ssl_connection_reset(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -782,7 +784,7 @@ int ossl_ssl_init(SSL *ssl, SSL_CTX *ctx, const SSL_METHOD *method, int type)
 
 SSL *ossl_ssl_connection_new_int(SSL_CTX *ctx, const SSL_METHOD *method)
 {
-    SSL_CONNECTION *s;
+    struct ssl_connection_st *s;
     SSL *ssl;
 
     s = OPENSSL_zalloc(sizeof(*s));
@@ -989,7 +991,7 @@ SSL *ossl_ssl_connection_new(SSL_CTX *ctx)
 
 int SSL_is_dtls(const SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (s->type == SSL_TYPE_QUIC_CONNECTION || s->type == SSL_TYPE_QUIC_XSO)
@@ -1004,7 +1006,7 @@ int SSL_is_dtls(const SSL *s)
 
 int SSL_is_tls(const SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (s->type == SSL_TYPE_QUIC_CONNECTION || s->type == SSL_TYPE_QUIC_XSO)
@@ -1054,7 +1056,7 @@ int SSL_CTX_set_session_id_context(SSL_CTX *ctx, const unsigned char *sid_ctx,
 int SSL_set_session_id_context(SSL *ssl, const unsigned char *sid_ctx,
                                unsigned int sid_ctx_len)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
         return 0;
@@ -1080,7 +1082,7 @@ int SSL_CTX_set_generate_session_id(SSL_CTX *ctx, GEN_SESSION_CB cb)
 
 int SSL_set_generate_session_id(SSL *ssl, GEN_SESSION_CB cb)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL || !CRYPTO_THREAD_write_lock(ssl->lock))
         return 0;
@@ -1100,7 +1102,7 @@ int SSL_has_matching_session_id(const SSL *ssl, const unsigned char *id,
      * by this SSL.
      */
     SSL_SESSION r, *p;
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
 
     if (sc == NULL || id_len > sizeof(r.session_id))
         return 0;
@@ -1123,7 +1125,7 @@ int SSL_CTX_set_purpose(SSL_CTX *s, int purpose)
 
 int SSL_set_purpose(SSL *s, int purpose)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1138,7 +1140,7 @@ int SSL_CTX_set_trust(SSL_CTX *s, int trust)
 
 int SSL_set_trust(SSL *s, int trust)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1148,7 +1150,7 @@ int SSL_set_trust(SSL *s, int trust)
 
 int SSL_set1_host(SSL *s, const char *hostname)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1164,7 +1166,7 @@ int SSL_set1_host(SSL *s, const char *hostname)
 
 int SSL_add1_host(SSL *s, const char *hostname)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1198,7 +1200,7 @@ int SSL_add1_host(SSL *s, const char *hostname)
 
 void SSL_set_hostflags(SSL *s, unsigned int flags)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -1208,7 +1210,7 @@ void SSL_set_hostflags(SSL *s, unsigned int flags)
 
 const char *SSL_get0_peername(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -1240,7 +1242,7 @@ unsigned long SSL_CTX_dane_clear_flags(SSL_CTX *ctx, unsigned long flags)
 int SSL_dane_enable(SSL *s, const char *basedomain)
 {
     SSL_DANE *dane;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1288,7 +1290,7 @@ int SSL_dane_enable(SSL *s, const char *basedomain)
 unsigned long SSL_dane_set_flags(SSL *ssl, unsigned long flags)
 {
     unsigned long orig;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
         return 0;
@@ -1302,7 +1304,7 @@ unsigned long SSL_dane_set_flags(SSL *ssl, unsigned long flags)
 unsigned long SSL_dane_clear_flags(SSL *ssl, unsigned long flags)
 {
     unsigned long orig;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
         return 0;
@@ -1316,7 +1318,7 @@ unsigned long SSL_dane_clear_flags(SSL *ssl, unsigned long flags)
 int SSL_get0_dane_authority(SSL *s, X509 **mcert, EVP_PKEY **mspki)
 {
     SSL_DANE *dane;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return -1;
@@ -1338,7 +1340,7 @@ int SSL_get0_dane_tlsa(SSL *s, uint8_t *usage, uint8_t *selector,
                        uint8_t *mtype, const unsigned char **data, size_t *dlen)
 {
     SSL_DANE *dane;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return -1;
@@ -1364,7 +1366,7 @@ int SSL_get0_dane_tlsa(SSL *s, uint8_t *usage, uint8_t *selector,
 
 SSL_DANE *SSL_get0_dane(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -1375,7 +1377,7 @@ SSL_DANE *SSL_get0_dane(SSL *s)
 int SSL_dane_tlsa_add(SSL *s, uint8_t usage, uint8_t selector,
                       uint8_t mtype, const unsigned char *data, size_t dlen)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1396,7 +1398,7 @@ int SSL_CTX_set1_param(SSL_CTX *ctx, X509_VERIFY_PARAM *vpm)
 
 int SSL_set1_param(SSL *ssl, X509_VERIFY_PARAM *vpm)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
         return 0;
@@ -1411,7 +1413,7 @@ X509_VERIFY_PARAM *SSL_CTX_get0_param(SSL_CTX *ctx)
 
 X509_VERIFY_PARAM *SSL_get0_param(SSL *ssl)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
         return NULL;
@@ -1421,7 +1423,7 @@ X509_VERIFY_PARAM *SSL_get0_param(SSL *ssl)
 
 void SSL_certs_clear(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -1455,7 +1457,7 @@ void SSL_free(SSL *s)
 
 void ossl_ssl_connection_free(SSL *ssl)
 {
-    SSL_CONNECTION *s;
+    struct ssl_connection_st *s;
 
     s = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
     if (s == NULL)
@@ -1548,7 +1550,7 @@ void ossl_ssl_connection_free(SSL *ssl)
 
 void SSL_set0_rbio(SSL *s, BIO *rbio)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s)) {
@@ -1567,7 +1569,7 @@ void SSL_set0_rbio(SSL *s, BIO *rbio)
 
 void SSL_set0_wbio(SSL *s, BIO *wbio)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s)) {
@@ -1637,7 +1639,7 @@ void SSL_set_bio(SSL *s, BIO *rbio, BIO *wbio)
 
 BIO *SSL_get_rbio(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -1652,7 +1654,7 @@ BIO *SSL_get_rbio(const SSL *s)
 
 BIO *SSL_get_wbio(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -1813,7 +1815,7 @@ int SSL_set_rfd(SSL *s, int fd)
 size_t SSL_get_finished(const SSL *s, void *buf, size_t count)
 {
     size_t ret = 0;
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1829,7 +1831,7 @@ size_t SSL_get_finished(const SSL *s, void *buf, size_t count)
 size_t SSL_get_peer_finished(const SSL *s, void *buf, size_t count)
 {
     size_t ret = 0;
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1843,7 +1845,7 @@ size_t SSL_get_peer_finished(const SSL *s, void *buf, size_t count)
 
 int SSL_get_verify_mode(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1853,7 +1855,7 @@ int SSL_get_verify_mode(const SSL *s)
 
 int SSL_get_verify_depth(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -1862,7 +1864,7 @@ int SSL_get_verify_depth(const SSL *s)
 }
 
 int (*SSL_get_verify_callback(const SSL *s)) (int, X509_STORE_CTX *) {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -1887,7 +1889,7 @@ int (*SSL_CTX_get_verify_callback(const SSL_CTX *ctx)) (int, X509_STORE_CTX *) {
 void SSL_set_verify(SSL *s, int mode,
                     int (*callback) (int ok, X509_STORE_CTX *ctx))
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -1899,7 +1901,7 @@ void SSL_set_verify(SSL *s, int mode,
 
 void SSL_set_verify_depth(SSL *s, int depth)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -1909,7 +1911,7 @@ void SSL_set_verify_depth(SSL *s, int depth)
 
 void SSL_set_read_ahead(SSL *s, int yes)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
     OSSL_PARAM options[2], *opts = options;
 
     if (sc == NULL)
@@ -1927,7 +1929,7 @@ void SSL_set_read_ahead(SSL *s, int yes)
 
 int SSL_get_read_ahead(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -1962,7 +1964,7 @@ int SSL_has_pending(const SSL *s)
      * That data may not result in any application data, or we may fail to parse
      * the records for some reason.
      */
-    const SSL_CONNECTION *sc;
+    const struct ssl_connection_st *sc;
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -2002,7 +2004,7 @@ X509 *SSL_get1_peer_certificate(const SSL *s)
 
 X509 *SSL_get0_peer_certificate(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -2016,7 +2018,7 @@ X509 *SSL_get0_peer_certificate(const SSL *s)
 STACK_OF(X509) *SSL_get_peer_cert_chain(const SSL *s)
 {
     STACK_OF(X509) *r;
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -2042,8 +2044,8 @@ int SSL_copy_session_id(SSL *t, const SSL *f)
 {
     int i;
     /* TODO(QUIC FUTURE): Not allowed for QUIC currently. */
-    SSL_CONNECTION *tsc = SSL_CONNECTION_FROM_SSL_ONLY(t);
-    const SSL_CONNECTION *fsc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(f);
+    struct ssl_connection_st *tsc = SSL_CONNECTION_FROM_SSL_ONLY(t);
+    const struct ssl_connection_st *fsc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(f);
 
     if (tsc == NULL || fsc == NULL)
         return 0;
@@ -2091,7 +2093,7 @@ int SSL_CTX_check_private_key(const SSL_CTX *ctx)
 /* Fix this function so that it takes an optional type parameter */
 int SSL_check_private_key(const SSL *ssl)
 {
-    const SSL_CONNECTION *sc;
+    const struct ssl_connection_st *sc;
 
     if ((sc = SSL_CONNECTION_FROM_CONST_SSL(ssl)) == NULL) {
         ERR_raise(ERR_LIB_SSL, ERR_R_PASSED_NULL_PARAMETER);
@@ -2111,7 +2113,7 @@ int SSL_check_private_key(const SSL *ssl)
 
 int SSL_waiting_for_async(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -2125,7 +2127,7 @@ int SSL_waiting_for_async(SSL *s)
 int SSL_get_all_async_fds(SSL *s, OSSL_ASYNC_FD *fds, size_t *numfds)
 {
     ASYNC_WAIT_CTX *ctx;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -2139,7 +2141,7 @@ int SSL_get_changed_async_fds(SSL *s, OSSL_ASYNC_FD *addfd, size_t *numaddfds,
                               OSSL_ASYNC_FD *delfd, size_t *numdelfds)
 {
     ASYNC_WAIT_CTX *ctx;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -2164,7 +2166,7 @@ int SSL_CTX_set_async_callback_arg(SSL_CTX *ctx, void *arg)
 
 int SSL_set_async_callback(SSL *s, SSL_async_callback_fn callback)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -2175,7 +2177,7 @@ int SSL_set_async_callback(SSL *s, SSL_async_callback_fn callback)
 
 int SSL_set_async_callback_arg(SSL *s, void *arg)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -2187,7 +2189,7 @@ int SSL_set_async_callback_arg(SSL *s, void *arg)
 int SSL_get_async_status(SSL *s, int *status)
 {
     ASYNC_WAIT_CTX *ctx;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -2200,7 +2202,7 @@ int SSL_get_async_status(SSL *s, int *status)
 
 int SSL_accept(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
 
@@ -2226,7 +2228,7 @@ int SSL_accept(SSL *s)
 
 int SSL_connect(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -2252,7 +2254,7 @@ long SSL_get_default_timeout(const SSL *s)
 static int ssl_async_wait_ctx_cb(void *arg)
 {
     SSL *s = (SSL *)arg;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -2264,7 +2266,7 @@ static int ssl_start_async_job(SSL *s, struct ssl_async_args *args,
                                int (*func) (void *))
 {
     int ret;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -2309,7 +2311,7 @@ static int ssl_io_intern(void *vargs)
     SSL *s;
     void *buf;
     size_t num;
-    SSL_CONNECTION *sc;
+    struct ssl_connection_st *sc;
 
     args = (struct ssl_async_args *)vargs;
     s = args->s;
@@ -2331,7 +2333,7 @@ static int ssl_io_intern(void *vargs)
 
 int ssl_read_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -2415,7 +2417,7 @@ int SSL_read_ex(SSL *s, void *buf, size_t num, size_t *readbytes)
 int SSL_read_early_data(SSL *s, void *buf, size_t num, size_t *readbytes)
 {
     int ret;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     /* TODO(QUIC 0RTT): 0-RTT support */
     if (sc == NULL || !sc->server) {
@@ -2470,7 +2472,7 @@ int SSL_read_early_data(SSL *s, void *buf, size_t num, size_t *readbytes)
 
 int SSL_get_early_data_status(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
 
     /* TODO(QUIC 0RTT): 0-RTT support */
     if (sc == NULL)
@@ -2481,7 +2483,7 @@ int SSL_get_early_data_status(const SSL *s)
 
 static int ssl_peek_internal(SSL *s, void *buf, size_t num, size_t *readbytes)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -2551,7 +2553,7 @@ int SSL_peek_ex(SSL *s, void *buf, size_t num, size_t *readbytes)
 
 int ssl_write_internal(SSL *s, const void *buf, size_t num, size_t *written)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -2602,7 +2604,7 @@ int ssl_write_internal(SSL *s, const void *buf, size_t num, size_t *written)
 ossl_ssize_t SSL_sendfile(SSL *s, int fd, off_t offset, size_t size, int flags)
 {
     ossl_ssize_t ret;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -2703,7 +2705,7 @@ int SSL_write_early_data(SSL *s, const void *buf, size_t num, size_t *written)
     int ret, early_data_state;
     size_t writtmp;
     uint32_t partialwrite;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     /* TODO(QUIC 0RTT): This will need special handling for QUIC */
     if (sc == NULL)
@@ -2782,7 +2784,7 @@ int SSL_shutdown(SSL *s)
      * calling it once is usually not enough, even if blocking I/O is used
      * (see ssl3_shutdown).
      */
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -2818,7 +2820,7 @@ int SSL_shutdown(SSL *s)
 
 int SSL_key_update(SSL *s, int updatetype)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -2856,7 +2858,7 @@ int SSL_key_update(SSL *s, int updatetype)
 
 int SSL_get_key_update_type(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -2873,7 +2875,7 @@ int SSL_get_key_update_type(const SSL *s)
  * Can we accept a renegotiation request?  If yes, set the flag and
  * return 1 if yes. If not, raise error and return 0.
  */
-static int can_renegotiate(const SSL_CONNECTION *sc)
+static int can_renegotiate(const struct ssl_connection_st *sc)
 {
     if (SSL_CONNECTION_IS_TLS13(sc)) {
         ERR_raise(ERR_LIB_SSL, SSL_R_WRONG_SSL_VERSION);
@@ -2890,7 +2892,7 @@ static int can_renegotiate(const SSL_CONNECTION *sc)
 
 int SSL_renegotiate(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -2905,7 +2907,7 @@ int SSL_renegotiate(SSL *s)
 
 int SSL_renegotiate_abbreviated(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -2920,7 +2922,7 @@ int SSL_renegotiate_abbreviated(SSL *s)
 
 int SSL_renegotiate_pending(const SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -2934,7 +2936,7 @@ int SSL_renegotiate_pending(const SSL *s)
 
 int SSL_new_session_ticket(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -2958,7 +2960,7 @@ long SSL_ctrl(SSL *s, int cmd, long larg, void *parg)
 long ossl_ctrl_internal(SSL *s, int cmd, long larg, void *parg, int no_quic)
 {
     long l;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -3263,7 +3265,7 @@ int ssl_cipher_ptr_id_cmp(const SSL_CIPHER *const *ap,
  */
 STACK_OF(SSL_CIPHER) *SSL_get_ciphers(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc != NULL) {
         if (sc->cipher_list != NULL) {
@@ -3277,7 +3279,7 @@ STACK_OF(SSL_CIPHER) *SSL_get_ciphers(const SSL *s)
 
 STACK_OF(SSL_CIPHER) *SSL_get_client_ciphers(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL || !sc->server)
         return NULL;
@@ -3288,7 +3290,7 @@ STACK_OF(SSL_CIPHER) *SSL_get1_supported_ciphers(SSL *s)
 {
     STACK_OF(SSL_CIPHER) *sk = NULL, *ciphers;
     int i;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -3316,7 +3318,7 @@ STACK_OF(SSL_CIPHER) *SSL_get1_supported_ciphers(SSL *s)
 
 /** return a STACK of the ciphers available for the SSL and in order of
  * algorithm id */
-STACK_OF(SSL_CIPHER) *ssl_get_ciphers_by_id(SSL_CONNECTION *s)
+STACK_OF(SSL_CIPHER) *ssl_get_ciphers_by_id(struct ssl_connection_st *s)
 {
     if (s != NULL) {
         if (s->cipher_list_by_id != NULL)
@@ -3402,7 +3404,7 @@ int SSL_CTX_set_cipher_list(SSL_CTX *ctx, const char *str)
 int SSL_set_cipher_list(SSL *s, const char *str)
 {
     STACK_OF(SSL_CIPHER) *sk;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -3426,7 +3428,7 @@ char *SSL_get_shared_ciphers(const SSL *s, char *buf, int size)
     STACK_OF(SSL_CIPHER) *clntsk, *srvrsk;
     const SSL_CIPHER *c;
     int i;
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -3480,7 +3482,7 @@ char *SSL_get_shared_ciphers(const SSL *s, char *buf, int size)
  */
 const char *SSL_get_servername(const SSL *s, const int type)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
     int server;
 
     if (sc == NULL)
@@ -3629,7 +3631,7 @@ int SSL_select_next_proto(unsigned char **out, unsigned char *outlen,
 void SSL_get0_next_proto_negotiated(const SSL *s, const unsigned char **data,
                                     unsigned *len)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL) {
         /* We have no other way to indicate error */
@@ -3743,7 +3745,7 @@ int SSL_set_alpn_protos(SSL *ssl, const unsigned char *protos,
                         unsigned int protos_len)
 {
     unsigned char *alpn;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
         return 1;
@@ -3790,7 +3792,7 @@ void SSL_CTX_set_alpn_select_cb(SSL_CTX *ctx,
 void SSL_get0_alpn_selected(const SSL *ssl, const unsigned char **data,
                             unsigned int *len)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
 
     if (sc == NULL) {
         /* We have no other way to indicate error */
@@ -3811,7 +3813,7 @@ int SSL_export_keying_material(SSL *s, unsigned char *out, size_t olen,
                                const unsigned char *context, size_t contextlen,
                                int use_context)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return -1;
@@ -3830,7 +3832,7 @@ int SSL_export_keying_material_early(SSL *s, unsigned char *out, size_t olen,
                                      const unsigned char *context,
                                      size_t contextlen)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return -1;
@@ -4293,7 +4295,7 @@ void *SSL_CTX_get_default_passwd_cb_userdata(SSL_CTX *ctx)
 
 void SSL_set_default_passwd_cb(SSL *s, pem_password_cb *cb)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -4303,7 +4305,7 @@ void SSL_set_default_passwd_cb(SSL *s, pem_password_cb *cb)
 
 void SSL_set_default_passwd_cb_userdata(SSL *s, void *u)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -4313,7 +4315,7 @@ void SSL_set_default_passwd_cb_userdata(SSL *s, void *u)
 
 pem_password_cb *SSL_get_default_passwd_cb(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -4323,7 +4325,7 @@ pem_password_cb *SSL_get_default_passwd_cb(SSL *s)
 
 void *SSL_get_default_passwd_cb_userdata(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -4358,7 +4360,7 @@ void SSL_CTX_set_cert_cb(SSL_CTX *c, int (*cb) (SSL *ssl, void *arg), void *arg)
 
 void SSL_set_cert_cb(SSL *s, int (*cb) (SSL *ssl, void *arg), void *arg)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -4366,7 +4368,7 @@ void SSL_set_cert_cb(SSL *s, int (*cb) (SSL *ssl, void *arg), void *arg)
     ssl_cert_set_cert_cb(sc->cert, cb, arg);
 }
 
-void ssl_set_masks(SSL_CONNECTION *s)
+void ssl_set_masks(struct ssl_connection_st *s)
 {
     CERT *c = s->cert;
     uint32_t *pvalid = s->s3.tmp.valid_flags;
@@ -4488,7 +4490,7 @@ void ssl_set_masks(SSL_CONNECTION *s)
     s->s3.tmp.mask_a = mask_a;
 }
 
-int ssl_check_srvr_ecc_cert_and_alg(X509 *x, SSL_CONNECTION *s)
+int ssl_check_srvr_ecc_cert_and_alg(X509 *x, struct ssl_connection_st *s)
 {
     if (s->s3.tmp.new_cipher->algorithm_auth & SSL_aECDSA) {
         /* key usage, if present, must allow signing */
@@ -4500,7 +4502,7 @@ int ssl_check_srvr_ecc_cert_and_alg(X509 *x, SSL_CONNECTION *s)
     return 1;                   /* all checks are ok */
 }
 
-int ssl_get_server_cert_serverinfo(SSL_CONNECTION *s,
+int ssl_get_server_cert_serverinfo(struct ssl_connection_st *s,
                                    const unsigned char **serverinfo,
                                    size_t *serverinfo_length)
 {
@@ -4515,7 +4517,7 @@ int ssl_get_server_cert_serverinfo(SSL_CONNECTION *s,
     return 1;
 }
 
-void ssl_update_cache(SSL_CONNECTION *s, int mode)
+void ssl_update_cache(struct ssl_connection_st *s, int mode)
 {
     int i;
 
@@ -4601,7 +4603,7 @@ const SSL_METHOD *SSL_get_ssl_method(const SSL *s)
 int SSL_set_ssl_method(SSL *s, const SSL_METHOD *meth)
 {
     int ret = 1;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     /* Not allowed for QUIC */
     if (sc == NULL
@@ -4639,7 +4641,7 @@ int ossl_ssl_get_error(const SSL *s, int i, int check_err)
     int reason;
     unsigned long l;
     BIO *bio;
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (i > 0)
         return SSL_ERROR_NONE;
@@ -4743,7 +4745,7 @@ static int ssl_do_handshake_intern(void *vargs)
 {
     struct ssl_async_args *args = (struct ssl_async_args *)vargs;
     SSL *s = args->s;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return -1;
@@ -4754,11 +4756,12 @@ static int ssl_do_handshake_intern(void *vargs)
 int SSL_do_handshake(SSL *s)
 {
     int ret = 1;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
-    if (IS_QUIC(s))
+    if (IS_QUIC(s)) {
         return ossl_quic_do_handshake(s);
+    }
 #endif
 
     if (sc->handshake_func == NULL) {
@@ -4784,18 +4787,6 @@ int SSL_do_handshake(SSL *s)
     }
     return ret;
 }
-
-
-//# define SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, c) \
-//((ssl) == NULL ? NULL                         \
-//               : ((ssl)->type == SSL_TYPE_SSL_CONNECTION    \
-//                      ? (c SSL_CONNECTION *)(ssl)                \
-//                      : NULL))
-//# define SSL_CONNECTION_FROM_CONST_SSL_ONLY(ssl) \
-    SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, const)
-    //# define SSL_CONNECTION_FROM_SSL_ONLY(ssl) \
-    //    SSL_CONNECTION_FROM_SSL_ONLY_int(ssl, SSL_CONNECTION_NO_CONST)
-
 
 struct   ssl_connection_st * SSL_CONNECTION_FROM_SSL_ONLY(struct ssl_st* ssl) {
     if (ssl == NULL) {
@@ -4829,7 +4820,7 @@ void SSL_set_accept_state(SSL *s)
 
 void SSL_set_connect_state(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct   ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s)) {
@@ -4904,7 +4895,7 @@ const char *ssl_protocol_to_string(int version)
 
 const char *SSL_get_version(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     /* We only support QUICv1 - so if its QUIC its QUICv1 */
@@ -4920,7 +4911,7 @@ const char *SSL_get_version(const SSL *s)
 
 __owur int SSL_get_handshake_rtt(const SSL *s, uint64_t *rtt)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return -1;
@@ -4968,8 +4959,8 @@ SSL *SSL_dup(SSL *s)
     SSL *ret;
     int i;
     /* TODO(QUIC FUTURE): Add a SSL_METHOD function for duplication */
-    SSL_CONNECTION *retsc;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *retsc;
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return NULL;
@@ -5077,7 +5068,7 @@ SSL *SSL_dup(SSL *s)
 
 X509 *SSL_get_certificate(const SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -5090,7 +5081,7 @@ X509 *SSL_get_certificate(const SSL *s)
 
 EVP_PKEY *SSL_get_privatekey(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -5119,7 +5110,7 @@ EVP_PKEY *SSL_CTX_get0_privatekey(const SSL_CTX *ctx)
 
 const SSL_CIPHER *SSL_get_current_cipher(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -5131,7 +5122,7 @@ const SSL_CIPHER *SSL_get_current_cipher(const SSL *s)
 
 const SSL_CIPHER *SSL_get_pending_cipher(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -5142,7 +5133,7 @@ const SSL_CIPHER *SSL_get_pending_cipher(const SSL *s)
 const COMP_METHOD *SSL_get_current_compression(const SSL *s)
 {
 #ifndef OPENSSL_NO_COMP
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
 
     if (sc == NULL)
         return NULL;
@@ -5156,7 +5147,7 @@ const COMP_METHOD *SSL_get_current_compression(const SSL *s)
 const COMP_METHOD *SSL_get_current_expansion(const SSL *s)
 {
 #ifndef OPENSSL_NO_COMP
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
 
     if (sc == NULL)
         return NULL;
@@ -5167,7 +5158,7 @@ const COMP_METHOD *SSL_get_current_expansion(const SSL *s)
 #endif
 }
 
-int ssl_init_wbio_buffer(SSL_CONNECTION *s)
+int ssl_init_wbio_buffer(struct ssl_connection_st *s)
 {
     BIO *bbio;
 
@@ -5190,7 +5181,7 @@ int ssl_init_wbio_buffer(SSL_CONNECTION *s)
     return 1;
 }
 
-int ssl_free_wbio_buffer(SSL_CONNECTION *s)
+int ssl_free_wbio_buffer(struct ssl_connection_st *s)
 {
     /* callers ensure s is never null */
     if (s->bbio == NULL)
@@ -5217,7 +5208,7 @@ int SSL_CTX_get_quiet_shutdown(const SSL_CTX *ctx)
 
 void SSL_set_quiet_shutdown(SSL *s, int mode)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     /* Not supported with QUIC */
     if (sc == NULL)
@@ -5228,7 +5219,7 @@ void SSL_set_quiet_shutdown(SSL *s, int mode)
 
 int SSL_get_quiet_shutdown(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
 
     /* Not supported with QUIC */
     if (sc == NULL)
@@ -5239,7 +5230,7 @@ int SSL_get_quiet_shutdown(const SSL *s)
 
 void SSL_set_shutdown(SSL *s, int mode)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     /* Not supported with QUIC */
     if (sc == NULL)
@@ -5250,7 +5241,7 @@ void SSL_set_shutdown(SSL *s, int mode)
 
 int SSL_get_shutdown(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL_ONLY(s);
 
 #ifndef OPENSSL_NO_QUIC
     /* QUIC: Just indicate whether the connection was shutdown cleanly. */
@@ -5266,7 +5257,7 @@ int SSL_get_shutdown(const SSL *s)
 
 int SSL_version(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     /* We only support QUICv1 - so if its QUIC its QUICv1 */
@@ -5281,7 +5272,7 @@ int SSL_version(const SSL *s)
 
 int SSL_client_version(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     /* We only support QUICv1 - so if its QUIC its QUICv1 */
@@ -5302,7 +5293,7 @@ SSL_CTX *SSL_get_SSL_CTX(const SSL *ssl)
 SSL_CTX *SSL_set_SSL_CTX(SSL *ssl, SSL_CTX *ctx)
 {
     CERT *new_cert;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
 
     /* TODO(QUIC FUTURE): Add support for QUIC */
     if (sc == NULL)
@@ -5445,7 +5436,7 @@ int SSL_CTX_load_verify_locations(SSL_CTX *ctx, const char *CAfile,
 void SSL_set_info_callback(SSL *ssl,
                            void (*cb) (const SSL *ssl, int type, int val))
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
         return;
@@ -5460,7 +5451,7 @@ void SSL_set_info_callback(SSL *ssl,
 void (*SSL_get_info_callback(const SSL *ssl)) (const SSL * /* ssl */ ,
                                                int /* type */ ,
                                                int /* val */ ) {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
 
     if (sc == NULL)
         return NULL;
@@ -5470,7 +5461,7 @@ void (*SSL_get_info_callback(const SSL *ssl)) (const SSL * /* ssl */ ,
 
 void SSL_set_verify_result(SSL *ssl, long arg)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
         return;
@@ -5480,7 +5471,7 @@ void SSL_set_verify_result(SSL *ssl, long arg)
 
 long SSL_get_verify_result(const SSL *ssl)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
 
     if (sc == NULL)
         return 0;
@@ -5490,7 +5481,7 @@ long SSL_get_verify_result(const SSL *ssl)
 
 size_t SSL_get_client_random(const SSL *ssl, unsigned char *out, size_t outlen)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
 
     if (sc == NULL)
         return 0;
@@ -5505,7 +5496,7 @@ size_t SSL_get_client_random(const SSL *ssl, unsigned char *out, size_t outlen)
 
 size_t SSL_get_server_random(const SSL *ssl, unsigned char *out, size_t outlen)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
 
     if (sc == NULL)
         return 0;
@@ -5581,7 +5572,7 @@ void SSL_CTX_set1_cert_store(SSL_CTX *ctx, X509_STORE *store)
 
 int SSL_want(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -5613,7 +5604,7 @@ int SSL_CTX_use_psk_identity_hint(SSL_CTX *ctx, const char *identity_hint)
 
 int SSL_use_psk_identity_hint(SSL *s, const char *identity_hint)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -5634,7 +5625,7 @@ int SSL_use_psk_identity_hint(SSL *s, const char *identity_hint)
 
 const char *SSL_get_psk_identity_hint(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL || sc->session == NULL)
         return NULL;
@@ -5644,7 +5635,7 @@ const char *SSL_get_psk_identity_hint(const SSL *s)
 
 const char *SSL_get_psk_identity(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL || sc->session == NULL)
         return NULL;
@@ -5654,7 +5645,7 @@ const char *SSL_get_psk_identity(const SSL *s)
 
 void SSL_set_psk_client_callback(SSL *s, SSL_psk_client_cb_func cb)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -5669,7 +5660,7 @@ void SSL_CTX_set_psk_client_callback(SSL_CTX *ctx, SSL_psk_client_cb_func cb)
 
 void SSL_set_psk_server_callback(SSL *s, SSL_psk_server_cb_func cb)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -5685,7 +5676,7 @@ void SSL_CTX_set_psk_server_callback(SSL_CTX *ctx, SSL_psk_server_cb_func cb)
 
 void SSL_set_psk_find_session_callback(SSL *s, SSL_psk_find_session_cb_func cb)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -5701,7 +5692,7 @@ void SSL_CTX_set_psk_find_session_callback(SSL_CTX *ctx,
 
 void SSL_set_psk_use_session_callback(SSL *s, SSL_psk_use_session_cb_func cb)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -5785,7 +5776,7 @@ int SSL_set_record_padding_callback(SSL *ssl,
                                                    size_t len, void *arg))
 {
     BIO *b;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
 
     if (sc == NULL)
         return 0;
@@ -5800,7 +5791,7 @@ int SSL_set_record_padding_callback(SSL *ssl,
 
 void SSL_set_record_padding_callback_arg(SSL *ssl, void *arg)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
         return;
@@ -5810,7 +5801,7 @@ void SSL_set_record_padding_callback_arg(SSL *ssl, void *arg)
 
 void *SSL_get_record_padding_callback_arg(const SSL *ssl)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(ssl);
 
     if (sc == NULL)
         return NULL;
@@ -5820,7 +5811,7 @@ void *SSL_get_record_padding_callback_arg(const SSL *ssl)
 
 int SSL_set_block_padding(SSL *ssl, size_t block_size)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL || (IS_QUIC(ssl) && block_size > 1))
         return 0;
@@ -5837,7 +5828,7 @@ int SSL_set_block_padding(SSL *ssl, size_t block_size)
 
 int SSL_set_num_tickets(SSL *s, size_t num_tickets)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -5849,7 +5840,7 @@ int SSL_set_num_tickets(SSL *s, size_t num_tickets)
 
 size_t SSL_get_num_tickets(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -5870,7 +5861,7 @@ size_t SSL_CTX_get_num_tickets(const SSL_CTX *ctx)
 }
 
 /* Retrieve handshake hashes */
-int ssl_handshake_hash(SSL_CONNECTION *s,
+int ssl_handshake_hash(struct ssl_connection_st *s,
                        unsigned char *out, size_t outlen,
                        size_t *hashlen)
 {
@@ -5906,7 +5897,7 @@ int ssl_handshake_hash(SSL_CONNECTION *s,
 
 int SSL_session_reused(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -5916,7 +5907,7 @@ int SSL_session_reused(const SSL *s)
 
 int SSL_is_server(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -5935,7 +5926,7 @@ void SSL_set_debug(SSL *s, int debug)
 
 void SSL_set_security_level(SSL *s, int level)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -5945,7 +5936,7 @@ void SSL_set_security_level(SSL *s, int level)
 
 int SSL_get_security_level(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -5958,7 +5949,7 @@ void SSL_set_security_callback(SSL *s,
                                           int op, int bits, int nid,
                                           void *other, void *ex))
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -5970,7 +5961,7 @@ int (*SSL_get_security_callback(const SSL *s)) (const SSL *s,
                                                 const SSL_CTX *ctx, int op,
                                                 int bits, int nid, void *other,
                                                 void *ex) {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -5980,7 +5971,7 @@ int (*SSL_get_security_callback(const SSL *s)) (const SSL *s,
 
 void SSL_set0_security_ex_data(SSL *s, void *ex)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return;
@@ -5990,7 +5981,7 @@ void SSL_set0_security_ex_data(SSL *s, void *ex)
 
 void *SSL_get0_security_ex_data(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -6042,7 +6033,7 @@ uint64_t SSL_CTX_get_options(const SSL_CTX *ctx)
 
 uint64_t SSL_get_options(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -6062,7 +6053,7 @@ uint64_t SSL_CTX_set_options(SSL_CTX *ctx, uint64_t op)
 
 uint64_t SSL_set_options(SSL *s, uint64_t op)
 {
-    SSL_CONNECTION *sc;
+    struct ssl_connection_st *sc;
     OSSL_PARAM options[2], *opts = options;
 
 #ifndef OPENSSL_NO_QUIC
@@ -6094,7 +6085,7 @@ uint64_t SSL_CTX_clear_options(SSL_CTX *ctx, uint64_t op)
 
 uint64_t SSL_clear_options(SSL *s, uint64_t op)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
     OSSL_PARAM options[2], *opts = options;
 
 #ifndef OPENSSL_NO_QUIC
@@ -6120,7 +6111,7 @@ uint64_t SSL_clear_options(SSL *s, uint64_t op)
 
 STACK_OF(X509) *SSL_get0_verified_chain(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -6174,7 +6165,7 @@ static int ct_move_scts(STACK_OF(SCT) **dst, STACK_OF(SCT) *src,
  * Look for data collected during ServerHello and parse if found.
  * Returns the number of SCTs extracted.
  */
-static int ct_extract_tls_extension_scts(SSL_CONNECTION *s)
+static int ct_extract_tls_extension_scts(struct ssl_connection_st *s)
 {
     int scts_extracted = 0;
 
@@ -6198,7 +6189,7 @@ static int ct_extract_tls_extension_scts(SSL_CONNECTION *s)
  * - 0 if no OCSP response exists or it contains no SCTs.
  * - A negative integer if an error occurs.
  */
-static int ct_extract_ocsp_response_scts(SSL_CONNECTION *s)
+static int ct_extract_ocsp_response_scts(struct ssl_connection_st *s)
 {
 # ifndef OPENSSL_NO_OCSP
     int scts_extracted = 0;
@@ -6249,7 +6240,7 @@ static int ct_extract_ocsp_response_scts(SSL_CONNECTION *s)
  * Return the number of SCTs extracted, or a negative integer if an error
  * occurs.
  */
-static int ct_extract_x509v3_extension_scts(SSL_CONNECTION *s)
+static int ct_extract_x509v3_extension_scts(struct ssl_connection_st *s)
 {
     int scts_extracted = 0;
     X509 *cert = s->session != NULL ? s->session->peer : NULL;
@@ -6274,7 +6265,7 @@ static int ct_extract_x509v3_extension_scts(SSL_CONNECTION *s)
  */
 const STACK_OF(SCT) *SSL_get0_peer_scts(SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return NULL;
@@ -6318,7 +6309,7 @@ static int ct_strict(const CT_POLICY_EVAL_CTX *ctx,
 int SSL_set_ct_validation_callback(SSL *s, ssl_ct_validation_cb callback,
                                    void *arg)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6369,7 +6360,7 @@ int SSL_CTX_set_ct_validation_callback(SSL_CTX *ctx,
 
 int SSL_ct_is_enabled(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6382,7 +6373,7 @@ int SSL_CTX_ct_is_enabled(const SSL_CTX *ctx)
     return ctx->ct_validation_callback != NULL;
 }
 
-int ssl_validate_ct(SSL_CONNECTION *s)
+int ssl_validate_ct(struct ssl_connection_st *s)
 {
     int ret = 0;
     X509 *cert = s->session != NULL ? s->session->peer : NULL;
@@ -6541,7 +6532,7 @@ void SSL_CTX_set_client_hello_cb(SSL_CTX *c, SSL_client_hello_cb_fn cb,
 
 int SSL_client_hello_isv2(SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6553,7 +6544,7 @@ int SSL_client_hello_isv2(SSL *s)
 
 unsigned int SSL_client_hello_get0_legacy_version(SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6565,7 +6556,7 @@ unsigned int SSL_client_hello_get0_legacy_version(SSL *s)
 
 size_t SSL_client_hello_get0_random(SSL *s, const unsigned char **out)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6579,7 +6570,7 @@ size_t SSL_client_hello_get0_random(SSL *s, const unsigned char **out)
 
 size_t SSL_client_hello_get0_session_id(SSL *s, const unsigned char **out)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6593,7 +6584,7 @@ size_t SSL_client_hello_get0_session_id(SSL *s, const unsigned char **out)
 
 size_t SSL_client_hello_get0_ciphers(SSL *s, const unsigned char **out)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6607,7 +6598,7 @@ size_t SSL_client_hello_get0_ciphers(SSL *s, const unsigned char **out)
 
 size_t SSL_client_hello_get0_compression_methods(SSL *s, const unsigned char **out)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6624,7 +6615,7 @@ int SSL_client_hello_get1_extensions_present(SSL *s, int **out, size_t *outlen)
     RAW_EXTENSION *ext;
     int *present;
     size_t num = 0, i;
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6663,7 +6654,7 @@ int SSL_client_hello_get_extension_order(SSL *s, uint16_t *exts, size_t *num_ext
 {
     RAW_EXTENSION *ext;
     size_t num = 0, i;
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6702,7 +6693,7 @@ int SSL_client_hello_get0_ext(SSL *s, unsigned int type, const unsigned char **o
 {
     size_t i;
     RAW_EXTENSION *r;
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6725,7 +6716,7 @@ int SSL_client_hello_get0_ext(SSL *s, unsigned int type, const unsigned char **o
 int SSL_free_buffers(SSL *ssl)
 {
     RECORD_LAYER *rl;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
 
     if (sc == NULL)
         return 0;
@@ -6739,7 +6730,7 @@ int SSL_free_buffers(SSL *ssl)
 int SSL_alloc_buffers(SSL *ssl)
 {
     RECORD_LAYER *rl;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
     if (sc == NULL)
         return 0;
@@ -6765,7 +6756,7 @@ SSL_CTX_keylog_cb_func SSL_CTX_get_keylog_callback(const SSL_CTX *ctx)
 }
 
 static int nss_keylog_int(const char *prefix,
-                          SSL_CONNECTION *sc,
+                          struct ssl_connection_st *sc,
                           const uint8_t *parameter_1,
                           size_t parameter_1_len,
                           const uint8_t *parameter_2,
@@ -6816,7 +6807,7 @@ static int nss_keylog_int(const char *prefix,
 
 }
 
-int ssl_log_rsa_client_key_exchange(SSL_CONNECTION *sc,
+int ssl_log_rsa_client_key_exchange(struct ssl_connection_st *sc,
                                     const uint8_t *encrypted_premaster,
                                     size_t encrypted_premaster_len,
                                     const uint8_t *premaster,
@@ -6836,7 +6827,7 @@ int ssl_log_rsa_client_key_exchange(SSL_CONNECTION *sc,
                           premaster_len);
 }
 
-int ssl_log_secret(SSL_CONNECTION *sc,
+int ssl_log_secret(struct ssl_connection_st *sc,
                    const char *label,
                    const uint8_t *secret,
                    size_t secret_len)
@@ -6851,7 +6842,7 @@ int ssl_log_secret(SSL_CONNECTION *sc,
 
 #define SSLV2_CIPHER_LEN    3
 
-int ssl_cache_cipherlist(SSL_CONNECTION *s, PACKET *cipher_suites, int sslv2format)
+int ssl_cache_cipherlist(struct ssl_connection_st *s, PACKET *cipher_suites, int sslv2format)
 {
     int n;
 
@@ -6921,7 +6912,7 @@ int SSL_bytes_to_cipher_list(SSL *s, const unsigned char *bytes, size_t len,
                              STACK_OF(SSL_CIPHER) **scsvs)
 {
     PACKET pkt;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -6931,7 +6922,7 @@ int SSL_bytes_to_cipher_list(SSL *s, const unsigned char *bytes, size_t len,
     return ossl_bytes_to_cipher_list(sc, &pkt, sk, scsvs, isv2format, 0);
 }
 
-int ossl_bytes_to_cipher_list(SSL_CONNECTION *s, PACKET *cipher_suites,
+int ossl_bytes_to_cipher_list(struct ssl_connection_st *s, PACKET *cipher_suites,
                               STACK_OF(SSL_CIPHER) **skp,
                               STACK_OF(SSL_CIPHER) **scsvs_out,
                               int sslv2format, int fatal)
@@ -7031,7 +7022,7 @@ uint32_t SSL_CTX_get_max_early_data(const SSL_CTX *ctx)
 
 int SSL_set_max_early_data(SSL *s, uint32_t max_early_data)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -7043,7 +7034,7 @@ int SSL_set_max_early_data(SSL *s, uint32_t max_early_data)
 
 uint32_t SSL_get_max_early_data(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -7065,7 +7056,7 @@ uint32_t SSL_CTX_get_recv_max_early_data(const SSL_CTX *ctx)
 
 int SSL_set_recv_max_early_data(SSL *s, uint32_t recv_max_early_data)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -7077,7 +7068,7 @@ int SSL_set_recv_max_early_data(SSL *s, uint32_t recv_max_early_data)
 
 uint32_t SSL_get_recv_max_early_data(const SSL *s)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -7085,7 +7076,7 @@ uint32_t SSL_get_recv_max_early_data(const SSL *s)
     return sc->recv_max_early_data;
 }
 
-__owur unsigned int ssl_get_max_send_fragment(const SSL_CONNECTION *sc)
+__owur unsigned int ssl_get_max_send_fragment(const struct ssl_connection_st *sc)
 {
     /* Return any active Max Fragment Len extension */
     if (sc->session != NULL && USE_MAX_FRAGMENT_LENGTH_EXT(sc->session))
@@ -7095,7 +7086,7 @@ __owur unsigned int ssl_get_max_send_fragment(const SSL_CONNECTION *sc)
     return sc->max_send_fragment;
 }
 
-__owur unsigned int ssl_get_split_send_fragment(const SSL_CONNECTION *sc)
+__owur unsigned int ssl_get_split_send_fragment(const struct ssl_connection_st *sc)
 {
     /* Return a value regarding an active Max Fragment Len extension */
     if (sc->session != NULL && USE_MAX_FRAGMENT_LENGTH_EXT(sc->session)
@@ -7113,7 +7104,7 @@ __owur unsigned int ssl_get_split_send_fragment(const SSL_CONNECTION *sc)
 int SSL_stateless(SSL *s)
 {
     int ret;
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return 0;
@@ -7144,7 +7135,7 @@ void SSL_CTX_set_post_handshake_auth(SSL_CTX *ctx, int val)
 
 void SSL_set_post_handshake_auth(SSL *ssl, int val)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
 
     if (sc == NULL)
         return;
@@ -7154,7 +7145,7 @@ void SSL_set_post_handshake_auth(SSL *ssl, int val)
 
 int SSL_verify_client_post_handshake(SSL *ssl)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(ssl);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(ssl);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(ssl)) {
@@ -7234,7 +7225,7 @@ void SSL_set_allow_early_data_cb(SSL *s,
                                  SSL_allow_early_data_cb_fn cb,
                                  void *arg)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
     if (sc == NULL)
         return;
@@ -7337,7 +7328,7 @@ void ssl_evp_md_free(const EVP_MD *md)
 
 int SSL_set0_tmp_dh_pkey(SSL *s, EVP_PKEY *dhpkey)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -7367,7 +7358,7 @@ int SSL_CTX_set0_tmp_dh_pkey(SSL_CTX *ctx, EVP_PKEY *dhpkey)
 /* QUIC-specific methods which are supported on QUIC connections only. */
 int SSL_handle_events(SSL *s)
 {
-    SSL_CONNECTION *sc;
+    struct ssl_connection_st *sc;
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -7391,7 +7382,7 @@ int SSL_handle_events(SSL *s)
 
 int SSL_get_event_timeout(SSL *s, struct timeval *tv, int *is_infinite)
 {
-    SSL_CONNECTION *sc;
+    struct ssl_connection_st *sc;
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -7413,7 +7404,7 @@ int SSL_get_event_timeout(SSL *s, struct timeval *tv, int *is_infinite)
 
 int SSL_get_rpoll_descriptor(SSL *s, BIO_POLL_DESCRIPTOR *desc)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -7428,7 +7419,7 @@ int SSL_get_rpoll_descriptor(SSL *s, BIO_POLL_DESCRIPTOR *desc)
 
 int SSL_get_wpoll_descriptor(SSL *s, BIO_POLL_DESCRIPTOR *desc)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
     if (IS_QUIC(s))
@@ -7736,7 +7727,7 @@ int SSL_add_expected_rpk(SSL *s, EVP_PKEY *rpk)
 
 EVP_PKEY *SSL_get0_peer_rpk(const SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL || sc->session == NULL)
         return NULL;
@@ -7745,7 +7736,7 @@ EVP_PKEY *SSL_get0_peer_rpk(const SSL *s)
 
 int SSL_get_negotiated_client_cert_type(const SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -7755,7 +7746,7 @@ int SSL_get_negotiated_client_cert_type(const SSL *s)
 
 int SSL_get_negotiated_server_cert_type(const SSL *s)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     if (sc == NULL)
         return 0;
@@ -7817,7 +7808,7 @@ static int set_cert_type(unsigned char **cert_type,
 
 int SSL_set1_client_cert_type(SSL *s, const unsigned char *val, size_t len)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     return set_cert_type(&sc->client_cert_type, &sc->client_cert_type_len,
                          val, len);
@@ -7825,7 +7816,7 @@ int SSL_set1_client_cert_type(SSL *s, const unsigned char *val, size_t len)
 
 int SSL_set1_server_cert_type(SSL *s, const unsigned char *val, size_t len)
 {
-    SSL_CONNECTION *sc = SSL_CONNECTION_FROM_SSL(s);
+    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
     return set_cert_type(&sc->server_cert_type, &sc->server_cert_type_len,
                          val, len);
@@ -7845,7 +7836,7 @@ int SSL_CTX_set1_server_cert_type(SSL_CTX *ctx, const unsigned char *val, size_t
 
 int SSL_get0_client_cert_type(const SSL *s, unsigned char **t, size_t *len)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (t == NULL || len == NULL)
         return 0;
@@ -7857,7 +7848,7 @@ int SSL_get0_client_cert_type(const SSL *s, unsigned char **t, size_t *len)
 
 int SSL_get0_server_cert_type(const SSL *s, unsigned char **t, size_t *len)
 {
-    const SSL_CONNECTION *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
+    const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
     if (t == NULL || len == NULL)
         return 0;

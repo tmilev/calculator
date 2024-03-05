@@ -11,12 +11,12 @@
 # define OPENSSL_MD2_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_MD2_H
 # endif
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # ifndef OPENSSL_NO_MD2
 #  include <stddef.h>

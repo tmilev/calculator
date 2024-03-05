@@ -12,8 +12,8 @@
 # define OPENSSL_CRMFERR_H
 # pragma once
 
-# include <openssl/opensslconf.h>
-# include <openssl/symhacks.h>
+# include "opensslconf.h"
+# include "symhacks.h"
 # include <openssl/cryptoerr_legacy.h>
 
 

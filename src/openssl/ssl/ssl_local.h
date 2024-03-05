@@ -16,17 +16,19 @@
 # include <stdlib.h>
 # include <time.h>
 # include <errno.h>
-# include "internal/common.h" /* for HAS_PREFIX */
+# include "../include/openssl/ssl.h"
+# include "../include/openssl/types.h"
 
-# include <openssl/buffer.h>
-# include <openssl/bio.h>
-# include <openssl/comp.h>
-# include <openssl/dsa.h>
-# include <openssl/err.h>
-# include <openssl/ssl.h>
-# include <openssl/async.h>
-# include <openssl/symhacks.h>
-# include <openssl/ct.h>
+# include "internal/statem.h"
+# include "../include/openssl/buffer.h"
+# include "../include/openssl/bio.h"
+# include "../include/openssl/comp.h"
+# include "../include/openssl/dsa.h"
+# include "../include/openssl/err.h"
+# include "../include/openssl/ssl.h"
+# include "../include/openssl/async.h"
+# include "../include/openssl/symhacks.h"
+# include "../include/openssl/ct.h"
 # include "internal/recordmethod.h"
 # include "internal/statem.h"
 # include "../include/internal/packet.h"

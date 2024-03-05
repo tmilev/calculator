@@ -14,19 +14,20 @@
 #include "statem_local.h"
 #include "internal/constant_time.h"
 #include "internal/cryptlib.h"
-#include <openssl/buffer.h>
-#include <openssl/rand.h>
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/dh.h>
-#include <openssl/rsa.h>
-#include <openssl/bn.h>
-#include <openssl/md5.h>
-#include <openssl/trace.h>
-#include <openssl/core_names.h>
-#include <openssl/asn1t.h>
-#include <openssl/comp.h>
+#include "../../include/openssl/types.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/dh.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/md5.h"
+#include "../../include/openssl/trace.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/openssl/asn1t.h"
+#include "../../include/openssl/comp.h"
 
 #define TICKET_NONCE_SIZE       8
 
@@ -61,42 +62,41 @@ static ossl_inline int received_client_cert(const SSL_CONNECTION *sc)
  * Return values are 1 for success (transition allowed) and  0 on error
  * (transition not allowed)
  */
-static int ossl_statem_server13_read_transition(SSL_CONNECTION *s, int mt)
-{
-    OSSL_STATEM *st = &s->statem;
+static int ossl_statem_server13_read_transition(struct ssl_connection_st  *s, int mt) {
+  OSSL_STATEM *st = &s->statem;
 
-    /*
-     * Note: There is no case for TLS_ST_BEFORE because at that stage we have
-     * not negotiated TLSv1.3 yet, so that case is handled by
-     * ossl_statem_server_read_transition()
-     */
-    switch (st->hand_state) {
-    default:
-        break;
+  /*
+   * Note: There is no case for TLS_ST_BEFORE because at that stage we have
+   * not negotiated TLSv1.3 yet, so that case is handled by
+   * ossl_statem_server_read_transition()
+   */
+  switch (st->hand_state) {
+  default:
+    break;
 
-    case TLS_ST_EARLY_DATA:
-        if (s->hello_retry_request == SSL_HRR_PENDING) {
-            if (mt == SSL3_MT_CLIENT_HELLO) {
-                st->hand_state = TLS_ST_SR_CLNT_HELLO;
-                return 1;
-            }
-            break;
-        } else if (s->ext.early_data == SSL_EARLY_DATA_ACCEPTED) {
-            if (mt == SSL3_MT_END_OF_EARLY_DATA) {
-                st->hand_state = TLS_ST_SR_END_OF_EARLY_DATA;
-                return 1;
-            }
-            break;
-        }
-        /* Fall through */
+  case TLS_ST_EARLY_DATA:
+    if (s->hello_retry_request == SSL_HRR_PENDING) {
+      if (mt == SSL3_MT_CLIENT_HELLO) {
+        st->hand_state = TLS_ST_SR_CLNT_HELLO;
+        return 1;
+      }
+      break;
+    } else if (s->ext.early_data == SSL_EARLY_DATA_ACCEPTED) {
+      if (mt == SSL3_MT_END_OF_EARLY_DATA) {
+        st->hand_state = TLS_ST_SR_END_OF_EARLY_DATA;
+        return 1;
+      }
+      break;
+    }
+    /* Fall through */
 
-    case TLS_ST_SR_END_OF_EARLY_DATA:
-    case TLS_ST_SW_FINISHED:
-        if (s->s3.tmp.cert_request) {
-            if (mt == SSL3_MT_CERTIFICATE) {
-                st->hand_state = TLS_ST_SR_CERT;
-                return 1;
-            }
+  case TLS_ST_SR_END_OF_EARLY_DATA:
+  case TLS_ST_SW_FINISHED:
+    if (s->s3.tmp.cert_request) {
+      if (mt == SSL3_MT_CERTIFICATE) {
+        st->hand_state = TLS_ST_SR_CERT;
+        return 1;
+      }
 #ifndef OPENSSL_NO_COMP_ALG
             if (mt == SSL3_MT_COMPRESSED_CERTIFICATE
                     && s->ext.compress_certificate_sent) {
@@ -176,30 +176,30 @@ static int ossl_statem_server13_read_transition(SSL_CONNECTION *s, int mt)
  * Return values are 1 for success (transition allowed) and  0 on error
  * (transition not allowed)
  */
-int ossl_statem_server_read_transition(SSL_CONNECTION *s, int mt)
-{
-    OSSL_STATEM *st = &s->statem;
+int ossl_statem_server_read_transition(SSL_CONNECTION *s, int mt) {
+  OSSL_STATEM *st = &s->statem;
 
-    if (SSL_CONNECTION_IS_TLS13(s)) {
-        if (!ossl_statem_server13_read_transition(s, mt))
-            goto err;
-        return 1;
+  if (SSL_CONNECTION_IS_TLS13(s)) {
+    if (!ossl_statem_server13_read_transition(s, mt)) {
+      goto err;
     }
+    return 1;
+  }
 
-    switch (st->hand_state) {
-    default:
-        break;
+  switch (st->hand_state) {
+  default:
+    break;
 
-    case TLS_ST_BEFORE:
-    case TLS_ST_OK:
-    case DTLS_ST_SW_HELLO_VERIFY_REQUEST:
-        if (mt == SSL3_MT_CLIENT_HELLO) {
-            st->hand_state = TLS_ST_SR_CLNT_HELLO;
-            return 1;
-        }
-        break;
+  case TLS_ST_BEFORE:
+  case TLS_ST_OK:
+  case DTLS_ST_SW_HELLO_VERIFY_REQUEST:
+    if (mt == SSL3_MT_CLIENT_HELLO) {
+      st->hand_state = TLS_ST_SR_CLNT_HELLO;
+      return 1;
+    }
+    break;
 
-    case TLS_ST_SW_SRVR_DONE:
+  case TLS_ST_SW_SRVR_DONE:
         /*
          * If we get a CKE message after a ServerDone then either
          * 1) We didn't request a Certificate

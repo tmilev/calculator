@@ -11,13 +11,13 @@
 # define OPENSSL_DH_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_DH_H
 # endif
 
-# include <openssl/opensslconf.h>
-# include <openssl/types.h>
+# include "opensslconf.h"
+# include "types.h"
 
 # ifdef  __cplusplus
 extern "C" {
@@ -83,11 +83,11 @@ int EVP_PKEY_CTX_get0_dh_kdf_ukm(EVP_PKEY_CTX *ctx, unsigned char **ukm);
 #  include <stdio.h>
 # endif
 # ifndef OPENSSL_NO_DH
-#  include <openssl/e_os2.h>
-#  include <openssl/bio.h>
+#  include "e_os2.h"
+#  include "bio.h"
 #  include <openssl/asn1.h>
 #  ifndef OPENSSL_NO_DEPRECATED_1_1_0
-#   include <openssl/bn.h>
+#   include "bn.h"
 #  endif
 #  include <openssl/dherr.h>
 

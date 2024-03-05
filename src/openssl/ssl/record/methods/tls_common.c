@@ -11,12 +11,12 @@
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#include <openssl/core_names.h>
+#include "../../../include/openssl/core_names.h"
 #include <openssl/comp.h>
 #include <openssl/ssl.h>
-#include "internal/e_os.h"
-#include "internal/packet.h"
-#include "internal/ssl3_cbc.h"
+#include "../../../include/internal/e_os.h"
+#include "../../../include/internal/packet.h"
+#include "../../../include/internal/ssl3_cbc.h"
 #include "../../ssl_local.h"
 #include "../record_local.h"
 #include "recmethod_local.h"

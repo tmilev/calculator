@@ -11,7 +11,7 @@
 # define OPENSSL_EVP_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_ENVELOPE_H
 # endif
@@ -22,12 +22,12 @@
 #  include <stdio.h>
 # endif
 
-# include <openssl/opensslconf.h>
-# include <openssl/types.h>
+# include "opensslconf.h"
+# include "types.h"
 # include <openssl/core.h>
 # include <openssl/core_dispatch.h>
-# include <openssl/symhacks.h>
-# include <openssl/bio.h>
+# include "symhacks.h"
+# include "bio.h"
 # include <openssl/evperr.h>
 # include <openssl/params.h>
 
@@ -41,7 +41,7 @@
 /* Default PKCS#5 iteration count */
 # define PKCS5_DEFAULT_ITER              2048
 
-# include <openssl/objects.h>
+# include "objects.h"
 
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define EVP_PK_RSA      0x0001

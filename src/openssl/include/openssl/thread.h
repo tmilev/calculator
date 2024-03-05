@@ -14,7 +14,7 @@
 # define OSSL_THREAD_SUPPORT_FLAG_THREAD_POOL (1U<<0)
 # define OSSL_THREAD_SUPPORT_FLAG_DEFAULT_SPAWN (1U<<1)
 
-# include <openssl/types.h>
+# include "types.h"
 
 # ifdef  __cplusplus
 extern "C" {

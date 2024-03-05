@@ -11,12 +11,12 @@
 # define OPENSSL_HMAC_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_HMAC_H
 # endif
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # include <openssl/evp.h>
 

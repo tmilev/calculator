@@ -12,7 +12,7 @@
 # define OSSL_HPKE_H
 # pragma once
 
-# include <openssl/types.h>
+# include "types.h"
 
 /* HPKE modes */
 # define OSSL_HPKE_MODE_BASE              0 /* Base mode  */

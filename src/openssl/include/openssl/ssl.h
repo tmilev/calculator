@@ -18,16 +18,16 @@
 # define OPENSSL_SSL_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_SSL_H
 # endif
 
-# include <openssl/e_os2.h>
+# include "e_os2.h"
 # include <openssl/e_ostime.h>
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 # include <openssl/comp.h>
-# include <openssl/bio.h>
+# include "bio.h"
 # ifndef OPENSSL_NO_DEPRECATED_1_1_0
 #  include <openssl/x509.h>
 #  include <openssl/crypto.h>
@@ -38,8 +38,8 @@
 # include <openssl/hmac.h>
 # include <openssl/async.h>
 
-# include <openssl/safestack.h>
-# include <openssl/symhacks.h>
+# include "safestack.h"
+# include "symhacks.h"
 # include <openssl/ct.h>
 # include <openssl/sslerr.h>
 # include <openssl/prov_ssl.h>

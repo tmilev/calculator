@@ -17,7 +17,7 @@
 #ifndef OPENSSL_CMP_H
 # define OPENSSL_CMP_H
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 # ifndef OPENSSL_NO_CMP
 
 #  include <openssl/crmf.h>
@@ -26,8 +26,8 @@
 #  include <openssl/http.h>
 
 /* explicit #includes not strictly needed since implied by the above: */
-#  include <openssl/types.h>
-#  include <openssl/safestack.h>
+#  include "types.h"
+#  include "safestack.h"
 #  include <openssl/x509.h>
 #  include <openssl/x509v3.h>
 

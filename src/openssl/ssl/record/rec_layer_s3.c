@@ -568,31 +568,31 @@ int ssl_release_record(SSL_CONNECTION *s, TLS_RECORD *rr, size_t length)
  */
 int ssl3_read_bytes(SSL *ssl, uint8_t type, uint8_t *recvd_type,
                     unsigned char *buf, size_t len,
-                    int peek, size_t *readbytes)
-{
-    int i, j, ret;
-    size_t n, curr_rec, totalbytes;
-    TLS_RECORD *rr;
-    void (*cb) (const SSL *ssl, int type2, int val) = NULL;
-    int is_tls13;
-    SSL_CONNECTION *s = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
+                    int peek, size_t *readbytes) {
+  printf("DEBUG: ssl3 read bytes!\n");
+  int i, j, ret;
+  size_t n, curr_rec, totalbytes;
+  TLS_RECORD *rr;
+  void (*cb) (const SSL *ssl, int type2, int val) = NULL;
+  int is_tls13;
+  SSL_CONNECTION *s = SSL_CONNECTION_FROM_SSL_ONLY(ssl);
 
-    is_tls13 = SSL_CONNECTION_IS_TLS13(s);
+  is_tls13 = SSL_CONNECTION_IS_TLS13(s);
 
-    if ((type != 0
-            && (type != SSL3_RT_APPLICATION_DATA)
-            && (type != SSL3_RT_HANDSHAKE))
-        || (peek && (type != SSL3_RT_APPLICATION_DATA))) {
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
-        return -1;
-    }
+  if ((type != 0
+          && (type != SSL3_RT_APPLICATION_DATA)
+          && (type != SSL3_RT_HANDSHAKE))
+      || (peek && (type != SSL3_RT_APPLICATION_DATA))) {
+    SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+    return -1;
+  }
 
     if ((type == SSL3_RT_HANDSHAKE) && (s->rlayer.handshake_fragment_len > 0))
         /* (partially) satisfy request from storage */
     {
-        unsigned char *src = s->rlayer.handshake_fragment;
-        unsigned char *dst = buf;
-        unsigned int k;
+      unsigned char *src = s->rlayer.handshake_fragment;
+      unsigned char *dst = buf;
+      unsigned int k;
 
         /* peek == 0 */
         n = 0;

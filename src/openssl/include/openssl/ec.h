@@ -12,13 +12,13 @@
 # define OPENSSL_EC_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_EC_H
 # endif
 
-# include <openssl/opensslconf.h>
-# include <openssl/types.h>
+# include "opensslconf.h"
+# include "types.h"
 
 # include <string.h>
 
@@ -93,9 +93,9 @@ const char *OSSL_EC_curve_nid2name(int nid);
 # endif
 # ifndef OPENSSL_NO_EC
 #  include <openssl/asn1.h>
-#  include <openssl/symhacks.h>
+#  include "symhacks.h"
 #  ifndef OPENSSL_NO_DEPRECATED_1_1_0
-#   include <openssl/bn.h>
+#   include "bn.h"
 #  endif
 #  include <openssl/ecerr.h>
 

@@ -20,18 +20,18 @@
 # define OPENSSL_SRP_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_SRP_H
 # endif
 
-#include <openssl/opensslconf.h>
+#include "opensslconf.h"
 
 #ifndef OPENSSL_NO_SRP
 # include <stdio.h>
 # include <string.h>
-# include <openssl/safestack.h>
-# include <openssl/bn.h>
+# include "safestack.h"
+# include "bn.h"
 # include <openssl/crypto.h>
 
 # ifdef  __cplusplus

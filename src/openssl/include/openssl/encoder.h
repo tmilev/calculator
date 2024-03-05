@@ -11,7 +11,7 @@
 # define OPENSSL_ENCODER_H
 # pragma once
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
@@ -19,7 +19,7 @@
 # include <stdarg.h>
 # include <stddef.h>
 # include <openssl/encodererr.h>
-# include <openssl/types.h>
+# include "types.h"
 # include <openssl/core.h>
 
 # ifdef __cplusplus

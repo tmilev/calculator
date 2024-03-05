@@ -13,7 +13,7 @@
 # pragma once
 
 # include <openssl/core.h>
-# include <openssl/bn.h>
+# include "bn.h"
 
 # ifdef  __cplusplus
 extern "C" {

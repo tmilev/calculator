@@ -15,12 +15,12 @@
 # define OPENSSL_BIO_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_BIO_H
 # endif
 
-# include <openssl/e_os2.h>
+# include "e_os2.h"
 
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>

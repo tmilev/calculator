@@ -11,12 +11,12 @@
 # define OPENSSL_SYMHACKS_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_SYMHACKS_H
 # endif
 
-# include <openssl/e_os2.h>
+# include "e_os2.h"
 
 /* Case insensitive linking causes problems.... */
 # if defined(OPENSSL_SYS_VMS)

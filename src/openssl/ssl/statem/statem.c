@@ -82,8 +82,9 @@ int SSL_in_init(const SSL *s)
 {
     const struct ssl_connection_st *sc = SSL_CONNECTION_FROM_CONST_SSL(s);
 
-    if (sc == NULL)
+    if (sc == NULL) {
         return 0;
+    }
 
     return sc->statem.in_init;
 }
@@ -299,26 +300,25 @@ int ossl_statem_connect(SSL *s)
 
 int ossl_statem_accept(SSL *s)
 {
-    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
+  struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
-    if (sc == NULL)
-        return -1;
-
-    return state_machine(sc, 1);
+  if (sc == NULL){
+    return -1;
+  }
+  printf("DEBUG: inside statem_accept\n");
+  return state_machine(sc, 1);
 }
 
 typedef void (*info_cb) (const SSL *, int, int);
 
-static info_cb get_callback(struct ssl_connection_st *s)
-{
-    SSL_CTX *sctx = SSL_CONNECTION_GET_CTX(s);
-
-    if (s->info_callback != NULL)
-        return s->info_callback;
-    else if (sctx->info_callback != NULL)
-        return sctx->info_callback;
-
-    return NULL;
+static info_cb get_callback(struct ssl_connection_st *s) {
+  SSL_CTX *sctx = SSL_CONNECTION_GET_CTX(s);
+  if (s->info_callback != NULL){
+    return s->info_callback;
+  } else if (sctx->info_callback != NULL) {
+    return sctx->info_callback;
+  }
+  return NULL;
 }
 
 /*
@@ -349,34 +349,36 @@ static info_cb get_callback(struct ssl_connection_st *s)
  *   1: Success
  * <=0: NBIO or error
  */
-static int state_machine(struct ssl_connection_st *s, int server)
-{
-    BUF_MEM *buf = NULL;
-    void (*cb) (const SSL *ssl, int type, int val) = NULL;
-    OSSL_STATEM *st = &s->statem;
-    int ret = -1;
-    int ssret;
-    SSL *ssl = SSL_CONNECTION_GET_SSL(s);
+static int state_machine(struct ssl_connection_st *s, int server) {
+  printf("DEBUG: ");
 
-    if (st->state == MSG_FLOW_ERROR) {
-        /* Shouldn't have been called if we're already in the error state */
-        return -1;
+  BUF_MEM *buf = NULL;
+  void (*cb) (const SSL *ssl, int type, int val) = NULL;
+  OSSL_STATEM *st = &s->statem;
+  int ret = -1;
+  int ssret;
+  SSL *ssl = SSL_CONNECTION_GET_SSL(s);
+
+  if (st->state == MSG_FLOW_ERROR) {
+      /* Shouldn't have been called if we're already in the error state */
+      return -1;
+  }
+
+  ERR_clear_error();
+  clear_sys_error();
+
+  cb = get_callback(s);
+
+  st->in_handshake++;
+  if (!SSL_in_init(ssl) || SSL_in_before(ssl)) {
+    /*
+     * If we are stateless then we already called SSL_clear() - don't do
+     * it again and clear the STATELESS flag itself.
+     */
+    if ((s->s3.flags & TLS1_FLAGS_STATELESS) == 0 && !SSL_clear(ssl)){
+      return -1;
     }
-
-    ERR_clear_error();
-    clear_sys_error();
-
-    cb = get_callback(s);
-
-    st->in_handshake++;
-    if (!SSL_in_init(ssl) || SSL_in_before(ssl)) {
-        /*
-         * If we are stateless then we already called SSL_clear() - don't do
-         * it again and clear the STATELESS flag itself.
-         */
-        if ((s->s3.flags & TLS1_FLAGS_STATELESS) == 0 && !SSL_clear(ssl))
-            return -1;
-    }
+  }
 #ifndef OPENSSL_NO_SCTP
     if (SSL_CONNECTION_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(ssl))) {
         /*
@@ -388,124 +390,125 @@ static int state_machine(struct ssl_connection_st *s, int server)
     }
 #endif
 
-    /* Initialise state machine */
-    if (st->state == MSG_FLOW_UNINITED
-            || st->state == MSG_FLOW_FINISHED) {
-        if (st->state == MSG_FLOW_UNINITED) {
-            st->hand_state = TLS_ST_BEFORE;
-            st->request_state = TLS_ST_BEFORE;
-        }
+  /* Initialise state machine */
+  if (
+    st->state == MSG_FLOW_UNINITED
+    || st->state == MSG_FLOW_FINISHED
+  ) {
+    if (st->state == MSG_FLOW_UNINITED) {
+        st->hand_state = TLS_ST_BEFORE;
+        st->request_state = TLS_ST_BEFORE;
+    }
 
-        s->server = server;
-        if (cb != NULL) {
-            if (SSL_IS_FIRST_HANDSHAKE(s) || !SSL_CONNECTION_IS_TLS13(s))
-                cb(ssl, SSL_CB_HANDSHAKE_START, 1);
-        }
+    s->server = server;
+    if (cb != NULL) {
+    if (SSL_IS_FIRST_HANDSHAKE(s) || !SSL_CONNECTION_IS_TLS13(s)) {
+        cb(ssl, SSL_CB_HANDSHAKE_START, 1);
+      }
+    }
+    /*
+     * Fatal errors in this block don't send an alert because we have
+     * failed to even initialise properly. Sending an alert is probably
+     * doomed to failure.
+     */
 
-        /*
-         * Fatal errors in this block don't send an alert because we have
-         * failed to even initialise properly. Sending an alert is probably
-         * doomed to failure.
-         */
+    if (SSL_CONNECTION_IS_DTLS(s)) {
+      if (
+        (s->version & 0xff00) != (DTLS1_VERSION & 0xff00) &&
+        (server || (s->version & 0xff00) != (DTLS1_BAD_VER & 0xff00))
+      ) {
+        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        goto end;
+      }
+    } else {
+      if ((s->version >> 8) != SSL3_VERSION_MAJOR) {
+        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        goto end;
+      }
+    }
+    if (!ssl_security(s, SSL_SECOP_VERSION, 0, s->version, NULL)) {
+      SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+      goto end;
+    }
 
-        if (SSL_CONNECTION_IS_DTLS(s)) {
-            if ((s->version & 0xff00) != (DTLS1_VERSION & 0xff00) &&
-                (server || (s->version & 0xff00) != (DTLS1_BAD_VER & 0xff00))) {
-                SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-                goto end;
-            }
-        } else {
-            if ((s->version >> 8) != SSL3_VERSION_MAJOR) {
-                SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-                goto end;
-            }
-        }
+    if (s->init_buf == NULL) {
+      if ((buf = BUF_MEM_new()) == NULL) {
+        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        goto end;
+      }
+      if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
+        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        goto end;
+      }
+      s->init_buf = buf;
+      buf = NULL;
+    }
 
-        if (!ssl_security(s, SSL_SECOP_VERSION, 0, s->version, NULL)) {
-            SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-            goto end;
-        }
+    s->init_num = 0;
 
-        if (s->init_buf == NULL) {
-            if ((buf = BUF_MEM_new()) == NULL) {
-                SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-                goto end;
-            }
-            if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
-                SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-                goto end;
-            }
-            s->init_buf = buf;
-            buf = NULL;
-        }
+    /*
+     * Should have been reset by tls_process_finished, too.
+     */
+    s->s3.change_cipher_spec = 0;
 
-        s->init_num = 0;
-
-        /*
-         * Should have been reset by tls_process_finished, too.
-         */
-        s->s3.change_cipher_spec = 0;
-
-        /*
-         * Ok, we now need to push on a buffering BIO ...but not with
-         * SCTP
-         */
+    /*
+     * Ok, we now need to push on a buffering BIO ...but not with
+     * SCTP
+     */
 #ifndef OPENSSL_NO_SCTP
-        if (!SSL_CONNECTION_IS_DTLS(s) || !BIO_dgram_is_sctp(SSL_get_wbio(ssl)))
+    if (!SSL_CONNECTION_IS_DTLS(s) || !BIO_dgram_is_sctp(SSL_get_wbio(ssl)))
 #endif
-            if (!ssl_init_wbio_buffer(s)) {
-                SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-                goto end;
-            }
+    if (!ssl_init_wbio_buffer(s)) {
+      SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+      goto end;
+    }
 
-        if ((SSL_in_before(ssl))
-                || s->renegotiate) {
-            if (!tls_setup_handshake(s)) {
-                /* SSLfatal() already called */
-                goto end;
-            }
+    if ((SSL_in_before(ssl)) || s->renegotiate) {
+      if (!tls_setup_handshake(s)) {
+          /* SSLfatal() already called */
+          goto end;
+      }
 
-            if (SSL_IS_FIRST_HANDSHAKE(s))
-                st->read_state_first_init = 1;
-        }
+      if (SSL_IS_FIRST_HANDSHAKE(s)) {
+        st->read_state_first_init = 1;
+      }
+    }
 
+    st->state = MSG_FLOW_WRITING;
+    init_write_state_machine(s);
+  }
+
+  while (st->state != MSG_FLOW_FINISHED) {
+    if (st->state == MSG_FLOW_READING) {
+      ssret = read_state_machine(s);
+      if (ssret == SUB_STATE_FINISHED) {
         st->state = MSG_FLOW_WRITING;
         init_write_state_machine(s);
+      } else {
+        /* NBIO or error */
+        goto end;
+      }
+    } else if (st->state == MSG_FLOW_WRITING) {
+      ssret = write_state_machine(s);
+      if (ssret == SUB_STATE_FINISHED) {
+        st->state = MSG_FLOW_READING;
+        init_read_state_machine(s);
+      } else if (ssret == SUB_STATE_END_HANDSHAKE) {
+        st->state = MSG_FLOW_FINISHED;
+      } else {
+        /* NBIO or error */
+        goto end;
+      }
+    } else {
+      /* Error */
+      check_fatal(s);
+      ERR_raise(ERR_LIB_SSL, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
+      goto end;
     }
-
-    while (st->state != MSG_FLOW_FINISHED) {
-        if (st->state == MSG_FLOW_READING) {
-            ssret = read_state_machine(s);
-            if (ssret == SUB_STATE_FINISHED) {
-                st->state = MSG_FLOW_WRITING;
-                init_write_state_machine(s);
-            } else {
-                /* NBIO or error */
-                goto end;
-            }
-        } else if (st->state == MSG_FLOW_WRITING) {
-            ssret = write_state_machine(s);
-            if (ssret == SUB_STATE_FINISHED) {
-                st->state = MSG_FLOW_READING;
-                init_read_state_machine(s);
-            } else if (ssret == SUB_STATE_END_HANDSHAKE) {
-                st->state = MSG_FLOW_FINISHED;
-            } else {
-                /* NBIO or error */
-                goto end;
-            }
-        } else {
-            /* Error */
-            check_fatal(s);
-            ERR_raise(ERR_LIB_SSL, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
-            goto end;
-        }
-    }
-
-    ret = 1;
-
- end:
-    st->in_handshake--;
+  }
+  ret = 1;
+  end:
+  st->in_handshake--;
 
 #ifndef OPENSSL_NO_SCTP
     if (SSL_CONNECTION_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(ssl))) {
@@ -518,14 +521,15 @@ static int state_machine(struct ssl_connection_st *s, int server)
     }
 #endif
 
-    BUF_MEM_free(buf);
-    if (cb != NULL) {
-        if (server)
-            cb(ssl, SSL_CB_ACCEPT_EXIT, ret);
-        else
-            cb(ssl, SSL_CB_CONNECT_EXIT, ret);
+  BUF_MEM_free(buf);
+  if (cb != NULL) {
+    if (server){
+      cb(ssl, SSL_CB_ACCEPT_EXIT, ret);
+    } else {
+      cb(ssl, SSL_CB_CONNECT_EXIT, ret);
     }
-    return ret;
+  }
+  return ret;
 }
 
 /*
@@ -579,164 +583,156 @@ static int grow_init_buf(struct ssl_connection_st *s, size_t size) {
  * control returns to the calling application. When this function is recalled we
  * will resume in the same state where we left off.
  */
-static SUB_STATE_RETURN read_state_machine(struct ssl_connection_st *s)
-{
-    OSSL_STATEM *st = &s->statem;
-    int ret, mt;
-    size_t len = 0;
-    int (*transition) (struct ssl_connection_st *s, int mt);
-    PACKET pkt;
-    MSG_PROCESS_RETURN(*process_message) (struct ssl_connection_st *s, PACKET *pkt);
-    WORK_STATE(*post_process_message) (struct ssl_connection_st *s, WORK_STATE wst);
-    size_t (*max_message_size) (struct ssl_connection_st *s);
-    void (*cb) (const SSL *ssl, int type, int val) = NULL;
-    SSL *ssl = SSL_CONNECTION_GET_SSL(s);
+static SUB_STATE_RETURN read_state_machine(struct ssl_connection_st *s) {
+  printf("DEBUG: read state machine here!\n");
+  OSSL_STATEM *st = &s->statem;
+  int ret, mt;
+  size_t len = 0;
+  int (*transition) (struct ssl_connection_st *s, int mt);
+  PACKET pkt;
+  MSG_PROCESS_RETURN(*process_message) (struct ssl_connection_st *s, PACKET *pkt);
+  WORK_STATE(*post_process_message) (struct ssl_connection_st *s, WORK_STATE wst);
+  size_t (*max_message_size) (struct ssl_connection_st *s);
+  void (*cb) (const SSL *ssl, int type, int val) = NULL;
+  SSL *ssl = SSL_CONNECTION_GET_SSL(s);
+  cb = get_callback(s);
+  if (s->server) {
+    transition = ossl_statem_server_read_transition;
+    process_message = ossl_statem_server_process_message;
+    max_message_size = ossl_statem_server_max_message_size;
+    post_process_message = ossl_statem_server_post_process_message;
+  } else {
+    transition = ossl_statem_client_read_transition;
+    process_message = ossl_statem_client_process_message;
+    max_message_size = ossl_statem_client_max_message_size;
+    post_process_message = ossl_statem_client_post_process_message;
+  }
+  if (st->read_state_first_init) {
+    s->first_packet = 1;
+    st->read_state_first_init = 0;
+  }
+  while (1) {
+    switch (st->read_state) {
+    case READ_STATE_HEADER:
+      /* Get the state the peer wants to move to */
+      if (SSL_CONNECTION_IS_DTLS(s)) {
+        /*
+         * In DTLS we get the whole message in one go - header and body
+         */
+        ret = dtls_get_message(s, &mt);
+      } else {
+        ret = tls_get_message_header(s, &mt);
+      }
 
-    cb = get_callback(s);
+      if (ret == 0) {
+        /* Could be non-blocking IO */
+        return SUB_STATE_ERROR;
+      }
 
-    if (s->server) {
-        transition = ossl_statem_server_read_transition;
-        process_message = ossl_statem_server_process_message;
-        max_message_size = ossl_statem_server_max_message_size;
-        post_process_message = ossl_statem_server_post_process_message;
-    } else {
-        transition = ossl_statem_client_read_transition;
-        process_message = ossl_statem_client_process_message;
-        max_message_size = ossl_statem_client_max_message_size;
-        post_process_message = ossl_statem_client_post_process_message;
-    }
-
-    if (st->read_state_first_init) {
-        s->first_packet = 1;
-        st->read_state_first_init = 0;
-    }
-
-    while (1) {
-        switch (st->read_state) {
-        case READ_STATE_HEADER:
-            /* Get the state the peer wants to move to */
-            if (SSL_CONNECTION_IS_DTLS(s)) {
-                /*
-                 * In DTLS we get the whole message in one go - header and body
-                 */
-                ret = dtls_get_message(s, &mt);
-            } else {
-                ret = tls_get_message_header(s, &mt);
-            }
-
-            if (ret == 0) {
-                /* Could be non-blocking IO */
-                return SUB_STATE_ERROR;
-            }
-
-            if (cb != NULL) {
-                /* Notify callback of an impending state change */
-                if (s->server)
-                    cb(ssl, SSL_CB_ACCEPT_LOOP, 1);
-                else
-                    cb(ssl, SSL_CB_CONNECT_LOOP, 1);
-            }
-            /*
-             * Validate that we are allowed to move to the new state and move
-             * to that state if so
-             */
-            if (!transition(s, mt))
-                return SUB_STATE_ERROR;
-
-            if (s->s3.tmp.message_size > max_message_size(s)) {
-                SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER,
-                         SSL_R_EXCESSIVE_MESSAGE_SIZE);
-                return SUB_STATE_ERROR;
-            }
-
-            /* dtls_get_message already did this */
-            if (!SSL_CONNECTION_IS_DTLS(s)
-                    && s->s3.tmp.message_size > 0
-                    && !grow_init_buf(s, s->s3.tmp.message_size
-                                         + SSL3_HM_HEADER_LENGTH)) {
-                SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_BUF_LIB);
-                return SUB_STATE_ERROR;
-            }
-
-            st->read_state = READ_STATE_BODY;
-            /* Fall through */
-
-        case READ_STATE_BODY:
-            if (SSL_CONNECTION_IS_DTLS(s)) {
-                /*
-                 * Actually we already have the body, but we give DTLS the
-                 * opportunity to do any further processing.
-                 */
-                ret = dtls_get_message_body(s, &len);
-            } else {
-                ret = tls_get_message_body(s, &len);
-            }
-            if (ret == 0) {
-                /* Could be non-blocking IO */
-                return SUB_STATE_ERROR;
-            }
-
-            s->first_packet = 0;
-            if (!PACKET_buf_init(&pkt, s->init_msg, len)) {
-                SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
-                return SUB_STATE_ERROR;
-            }
-            ret = process_message(s, &pkt);
-
-            /* Discard the packet data */
-            s->init_num = 0;
-
-            switch (ret) {
-            case MSG_PROCESS_ERROR:
-                check_fatal(s);
-                return SUB_STATE_ERROR;
-
-            case MSG_PROCESS_FINISHED_READING:
-                if (SSL_CONNECTION_IS_DTLS(s)) {
-                    dtls1_stop_timer(s);
-                }
-                return SUB_STATE_FINISHED;
-
-            case MSG_PROCESS_CONTINUE_PROCESSING:
-                st->read_state = READ_STATE_POST_PROCESS;
-                st->read_state_work = WORK_MORE_A;
-                break;
-
-            default:
-                st->read_state = READ_STATE_HEADER;
-                break;
-            }
-            break;
-
-        case READ_STATE_POST_PROCESS:
-            st->read_state_work = post_process_message(s, st->read_state_work);
-            switch (st->read_state_work) {
-            case WORK_ERROR:
-                check_fatal(s);
-                /* Fall through */
-            case WORK_MORE_A:
-            case WORK_MORE_B:
-            case WORK_MORE_C:
-                return SUB_STATE_ERROR;
-
-            case WORK_FINISHED_CONTINUE:
-                st->read_state = READ_STATE_HEADER;
-                break;
-
-            case WORK_FINISHED_STOP:
-                if (SSL_CONNECTION_IS_DTLS(s)) {
-                    dtls1_stop_timer(s);
-                }
-                return SUB_STATE_FINISHED;
-            }
-            break;
-
-        default:
-            /* Shouldn't happen */
-            SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
-            return SUB_STATE_ERROR;
+      if (cb != NULL) {
+        /* Notify callback of an impending state change */
+        if (s->server) {
+          cb(ssl, SSL_CB_ACCEPT_LOOP, 1);
+        } else {
+          cb(ssl, SSL_CB_CONNECT_LOOP, 1);
         }
+      }
+      /*
+       * Validate that we are allowed to move to the new state and move
+       * to that state if so
+       */
+      if (!transition(s, mt)){
+        return SUB_STATE_ERROR;
+      }
+      if (s->s3.tmp.message_size > max_message_size(s)) {
+        SSLfatal(s, SSL_AD_ILLEGAL_PARAMETER, SSL_R_EXCESSIVE_MESSAGE_SIZE);
+        return SUB_STATE_ERROR;
+      }
+
+      /* dtls_get_message already did this */
+      if (
+        !SSL_CONNECTION_IS_DTLS(s)
+        && s->s3.tmp.message_size > 0
+        && !grow_init_buf(s, s->s3.tmp.message_size + SSL3_HM_HEADER_LENGTH)
+      ) {
+        SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_BUF_LIB);
+        return SUB_STATE_ERROR;
+      }
+
+      st->read_state = READ_STATE_BODY;
+      /* Fall through */
+
+    case READ_STATE_BODY:
+      if (SSL_CONNECTION_IS_DTLS(s)) {
+        /*
+         * Actually we already have the body, but we give DTLS the
+         * opportunity to do any further processing.
+         */
+        ret = dtls_get_message_body(s, &len);
+      } else {
+        ret = tls_get_message_body(s, &len);
+      }
+      if (ret == 0) {
+        /* Could be non-blocking IO */
+        return SUB_STATE_ERROR;
+      }
+
+      s->first_packet = 0;
+      if (!PACKET_buf_init(&pkt, s->init_msg, len)) {
+        SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+        return SUB_STATE_ERROR;
+      }
+      ret = process_message(s, &pkt);
+
+      /* Discard the packet data */
+      s->init_num = 0;
+
+      switch (ret) {
+      case MSG_PROCESS_ERROR:
+        check_fatal(s);
+        return SUB_STATE_ERROR;
+
+      case MSG_PROCESS_FINISHED_READING:
+        if (SSL_CONNECTION_IS_DTLS(s)) {
+          dtls1_stop_timer(s);
+        }
+        return SUB_STATE_FINISHED;
+
+      case MSG_PROCESS_CONTINUE_PROCESSING:
+        st->read_state = READ_STATE_POST_PROCESS;
+        st->read_state_work = WORK_MORE_A;
+        break;
+      default:
+        st->read_state = READ_STATE_HEADER;
+        break;
+      }
+      break;
+    case READ_STATE_POST_PROCESS:
+      st->read_state_work = post_process_message(s, st->read_state_work);
+      switch (st->read_state_work) {
+      case WORK_ERROR:
+        check_fatal(s);
+        /* Fall through */
+      case WORK_MORE_A:
+      case WORK_MORE_B:
+      case WORK_MORE_C:
+        return SUB_STATE_ERROR;
+      case WORK_FINISHED_CONTINUE:
+        st->read_state = READ_STATE_HEADER;
+        break;
+      case WORK_FINISHED_STOP:
+        if (SSL_CONNECTION_IS_DTLS(s)) {
+          dtls1_stop_timer(s);
+        }
+        return SUB_STATE_FINISHED;
+      }
+      break;
+    default:
+      /* Shouldn't happen */
+      SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+      return SUB_STATE_ERROR;
     }
+  }
 }
 
 /*

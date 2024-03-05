@@ -11,12 +11,12 @@
 # define OPENSSL_RC2_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_RC2_H
 # endif
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # ifndef OPENSSL_NO_RC2
 #  ifdef  __cplusplus

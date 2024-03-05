@@ -245,7 +245,7 @@ int ossl_param_find_pidx(const char *s)
                         }
                         break;
                     case '\0':
-                        return PIDX_KDF_PARAM_DATA;
+                        return PIDX_OBJECT_PARAM_DATA;
                     }
                 }
             }
@@ -313,7 +313,7 @@ int ossl_param_find_pidx(const char *s)
                                 }
                                 break;
                             case '\0':
-                                return PIDX_STORE_PARAM_DIGEST;
+                                return PIDX_ALG_PARAM_DIGEST;
                             }
                         }
                     }
@@ -562,7 +562,7 @@ int ossl_param_find_pidx(const char *s)
                 break;
             case 'f':
                 if (strcmp("o", s + 3) == 0)
-                    return PIDX_PASSPHRASE_PARAM_INFO;
+                    return PIDX_KDF_PARAM_INFO;
                 break;
             case 'p':
                 if (strcmp("ut-type", s + 3) == 0)
@@ -729,7 +729,7 @@ int ossl_param_find_pidx(const char *s)
                         return PIDX_CIPHER_PARAM_KEYLEN;
                     break;
                 case '\0':
-                    return PIDX_MAC_PARAM_KEY;
+                    return PIDX_KDF_PARAM_KEY;
                 }
             }
         }
@@ -968,7 +968,7 @@ int ossl_param_find_pidx(const char *s)
                 return PIDX_CIPHER_PARAM_NUM;
             break;
         case '\0':
-            return PIDX_PKEY_PARAM_RSA_N;
+            return PIDX_KDF_PARAM_SCRYPT_N;
         }
         break;
     case 'o':
@@ -1165,7 +1165,7 @@ int ossl_param_find_pidx(const char *s)
                 return PIDX_PKEY_PARAM_PUB_KEY;
             break;
         case '\0':
-            return PIDX_KDF_PARAM_SCRYPT_P;
+            return PIDX_PKEY_PARAM_FFC_P;
         }
         break;
     case 'q':
@@ -1717,7 +1717,7 @@ int ossl_param_find_pidx(const char *s)
             }
             break;
         case '\0':
-            return PIDX_KDF_PARAM_SCRYPT_R;
+            return PIDX_KDF_PARAM_KBKDF_R;
         }
         break;
     case 's':
@@ -1745,7 +1745,7 @@ int ossl_param_find_pidx(const char *s)
                             return PIDX_PKEY_PARAM_RSA_PSS_SALTLEN;
                         break;
                     case '\0':
-                        return PIDX_KDF_PARAM_SALT;
+                        return PIDX_MAC_PARAM_SALT;
                     }
                 }
                 break;
@@ -2493,7 +2493,7 @@ int ossl_param_find_pidx(const char *s)
             break;
         case 'y':
             if (strcmp("pe", s + 2) == 0)
-                return PIDX_PKEY_PARAM_FFC_TYPE;
+                return PIDX_OBJECT_PARAM_TYPE;
         }
         break;
     case 'u':
@@ -2647,7 +2647,7 @@ int ossl_param_find_pidx(const char *s)
                         return PIDX_DIGEST_PARAM_XOFLEN;
                     break;
                 case '\0':
-                    return PIDX_MAC_PARAM_XOF;
+                    return PIDX_DIGEST_PARAM_XOF;
                 }
             }
             break;

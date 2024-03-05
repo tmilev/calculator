@@ -11,7 +11,7 @@
 # define OPENSSL_QUIC_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # include <openssl/ssl.h>
 
 # ifndef OPENSSL_NO_QUIC

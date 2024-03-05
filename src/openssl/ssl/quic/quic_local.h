@@ -11,14 +11,14 @@
 # define OSSL_QUIC_LOCAL_H
 
 # include <openssl/ssl.h>
-# include "internal/quic_ssl.h"       /* QUIC_CONNECTION */
+# include "../../include/internal/quic_ssl.h"       /* QUIC_CONNECTION */
 # include "internal/quic_txp.h"
 # include "internal/quic_statm.h"
 # include "internal/quic_demux.h"
 # include "internal/quic_record_rx.h"
 # include "internal/quic_tls.h"
 # include "internal/quic_fc.h"
-# include "internal/quic_stream.h"
+# include "quic_local.h"
 # include "internal/quic_channel.h"
 # include "internal/quic_reactor.h"
 # include "internal/quic_thread_assist.h"
@@ -36,10 +36,10 @@ struct quic_xso_st {
     struct ssl_st                   ssl;
 
     /* The connection this stream is associated with. Always non-NULL. */
-    QUIC_CONNECTION                 *conn;
+    struct quic_conn_st *conn;
 
     /* The stream object. Always non-NULL for as long as the XSO exists. */
-    QUIC_STREAM                     *stream;
+    struct quic_stream_st *stream;
 
     /*
      * Has this stream been logically configured into blocking mode? Only

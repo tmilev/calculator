@@ -16,12 +16,12 @@
 # define OPENSSL_OCSP_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_OCSP_H
 # endif
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 # include <openssl/http.h>
 # include <openssl/asn1.h>
 
@@ -61,7 +61,7 @@
 
 #  include <openssl/x509.h>
 #  include <openssl/x509v3.h>
-#  include <openssl/safestack.h>
+#  include "safestack.h"
 #  include <openssl/ocsperr.h>
 
 #  ifdef __cplusplus

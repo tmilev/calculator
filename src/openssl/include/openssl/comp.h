@@ -11,15 +11,15 @@
 # define OPENSSL_COMP_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_COMP_H
 # endif
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # ifndef OPENSSL_NO_COMP
-# include <openssl/crypto.h>
+# include "crypto.h"
 # include <openssl/comperr.h>
 # ifdef  __cplusplus
 extern "C" {

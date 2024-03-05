@@ -106,7 +106,7 @@ extern "C" {
 }
 # endif
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_OPENSSLV_H
 # endif

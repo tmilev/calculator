@@ -40,7 +40,7 @@ struct ssl_connection_st* SSL_CONNECTION_FROM_SSL(SSL* ssl){
     return ssl;
   }
   if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
-    return  (struct ssl_connection_st *)(( QUIC_CONNECTION *)(ssl))->tls;
+    return  (struct ssl_connection_st *)((  struct quic_conn_st *)(ssl))->tls;
   }
   return NULL;
 }
@@ -53,7 +53,7 @@ const struct ssl_connection_st* SSL_CONNECTION_FROM_CONST_SSL(const SSL* ssl){
     return (const struct ssl_connection_st*) ssl;
   }
   if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
-    return  (struct ssl_connection_st *)(( QUIC_CONNECTION *)(ssl))->tls;
+    return  (struct ssl_connection_st *)(( struct quic_conn_st *)(ssl))->tls;
   }
   return NULL;
 }
@@ -2200,30 +2200,25 @@ int SSL_get_async_status(SSL *s, int *status)
     return 1;
 }
 
-int SSL_accept(SSL *s)
-{
-    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
+int SSL_accept(SSL *s) {
+  struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
-
-    if (IS_QUIC(s)){
-        printf("DEBUG: is quick!!!!!");
-        return s->method->ssl_accept(s);
-    }
+  if (IS_QUIC(s)){
+    printf("DEBUG: is quick!!!!!");
+    return s->method->ssl_accept(s);
+  }
 #endif
-
-    if (sc == NULL){
-        return 0;
-    }
-    if (sc->handshake_func == NULL) {
-        printf("DEBUG: not initialized yet!!!!!");
-
-        /* Not properly initialized yet */
-        SSL_set_accept_state(s);
-    }
-    printf("DEBUG: ssl do handshake here!!!!!!");
-
-    return SSL_do_handshake(s);
+  if (sc == NULL){
+    return 0;
+  }
+  if (sc->handshake_func == NULL) {
+    printf("DEBUG: not initialized yet!!!!!");
+    /* Not properly initialized yet */
+    SSL_set_accept_state(s);
+  }
+  printf("DEBUG: ssl do handshake here!!!!!!");
+  return SSL_do_handshake(s);
 }
 
 int SSL_connect(SSL *s)
@@ -4162,8 +4157,9 @@ int SSL_CTX_up_ref(SSL_CTX *ctx)
 {
     int i;
 
-    if (CRYPTO_UP_REF(&ctx->references, &i) <= 0)
-        return 0;
+    if (CRYPTO_UP_REF(&ctx->references, &i) <= 0) {
+      return 0;
+    }
 
     REF_PRINT_COUNT("SSL_CTX", ctx);
     REF_ASSERT_ISNT(i < 2);
@@ -4753,88 +4749,79 @@ static int ssl_do_handshake_intern(void *vargs)
     return sc->handshake_func(s);
 }
 
-int SSL_do_handshake(SSL *s)
-{
-    int ret = 1;
-    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
+int SSL_do_handshake(SSL *s) {
+  int ret = 1;
+  struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
-    if (IS_QUIC(s)) {
-        return ossl_quic_do_handshake(s);
-    }
+  if (IS_QUIC(s)) {
+    return ossl_quic_do_handshake(s);
+  }
 #endif
+  printf("DEBUG: HANDSHAKE not quic!\n");
+  if (sc->handshake_func == NULL) {
+    ERR_raise(ERR_LIB_SSL, SSL_R_CONNECTION_TYPE_NOT_SET);
+    return -1;
+  }
+  ossl_statem_check_finish_init(sc, -1);
+  s->method->ssl_renegotiate_check(s, 0);
+  if (SSL_in_init(s) || SSL_in_before(s)) {
+    if ((sc->mode & SSL_MODE_ASYNC) && ASYNC_get_current_job() == NULL) {
+      struct ssl_async_args args;
 
-    if (sc->handshake_func == NULL) {
-        ERR_raise(ERR_LIB_SSL, SSL_R_CONNECTION_TYPE_NOT_SET);
-        return -1;
+      memset(&args, 0, sizeof(args));
+      args.s = s;
+
+      ret = ssl_start_async_job(s, &args, ssl_do_handshake_intern);
+    } else {
+      printf("DEBUG: not ASYNC!\n");
+      ret = sc->handshake_func(s);
     }
-
-    ossl_statem_check_finish_init(sc, -1);
-
-    s->method->ssl_renegotiate_check(s, 0);
-
-    if (SSL_in_init(s) || SSL_in_before(s)) {
-        if ((sc->mode & SSL_MODE_ASYNC) && ASYNC_get_current_job() == NULL) {
-            struct ssl_async_args args;
-
-            memset(&args, 0, sizeof(args));
-            args.s = s;
-
-            ret = ssl_start_async_job(s, &args, ssl_do_handshake_intern);
-        } else {
-            ret = sc->handshake_func(s);
-        }
-    }
-    return ret;
+  }
+  return ret;
 }
 
-struct   ssl_connection_st * SSL_CONNECTION_FROM_SSL_ONLY(struct ssl_st* ssl) {
-    if (ssl == NULL) {
-        return NULL;
-    }
-    if (ssl->type != SSL_TYPE_SSL_CONNECTION) {
-        return NULL;
-    }
-    return (struct ssl_connection_st*) ssl;
+struct ssl_connection_st* SSL_CONNECTION_FROM_SSL_ONLY(struct ssl_st* ssl) {
+  if (ssl == NULL) {
+    return NULL;
+  }
+  if (ssl->type != SSL_TYPE_SSL_CONNECTION) {
+    return NULL;
+  }
+  return (struct ssl_connection_st*) ssl;
 }
 
 
-void SSL_set_accept_state(SSL *s)
-{
- struct   ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
-
+void SSL_set_accept_state(SSL *s) {
+  struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 #ifndef OPENSSL_NO_QUIC
-    if (IS_QUIC(s)) {
-        ossl_quic_set_accept_state(s);
-        return;
-    }
+  if (IS_QUIC(s)) {
+    ossl_quic_set_accept_state(s);
+    return;
+  }
 #endif
-
-    sc->server = 1;
-    sc->shutdown = 0;
-    ossl_statem_clear(sc);
-    sc->handshake_func = s->method->ssl_accept;
-    /* Ignore return value. Its a void public API function */
-    clear_record_layer(sc);
+  sc->server = 1;
+  sc->shutdown = 0;
+  ossl_statem_clear(sc);
+  sc->handshake_func = s->method->ssl_accept;
+  /* Ignore return value. Its a void public API function */
+  clear_record_layer(sc);
 }
 
-void SSL_set_connect_state(SSL *s)
-{
-    struct   ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
-
+void SSL_set_connect_state(SSL *s) {
+  struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 #ifndef OPENSSL_NO_QUIC
-    if (IS_QUIC(s)) {
-        ossl_quic_set_connect_state(s);
-        return;
-    }
+  if (IS_QUIC(s)) {
+    ossl_quic_set_connect_state(s);
+    return;
+  }
 #endif
-
-    sc->server = 0;
-    sc->shutdown = 0;
-    ossl_statem_clear(sc);
-    sc->handshake_func = s->method->ssl_connect;
-    /* Ignore return value. Its a void public API function */
-    clear_record_layer(sc);
+  sc->server = 0;
+  sc->shutdown = 0;
+  ossl_statem_clear(sc);
+  sc->handshake_func = s->method->ssl_connect;
+  /* Ignore return value. Its a void public API function */
+  clear_record_layer(sc);
 }
 
 int ssl_undefined_function(SSL *s)

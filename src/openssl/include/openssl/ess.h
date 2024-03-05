@@ -16,9 +16,9 @@
 # define OPENSSL_ESS_H
 # pragma once
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
-# include <openssl/safestack.h>
+# include "safestack.h"
 # include <openssl/x509.h>
 # include <openssl/esserr.h>
 

@@ -11,18 +11,18 @@
 # define OPENSSL_DES_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_DES_H
 # endif
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # ifndef OPENSSL_NO_DES
 #  ifdef  __cplusplus
 extern "C" {
 #  endif
-#  include <openssl/e_os2.h>
+#  include "e_os2.h"
 
 #  ifndef OPENSSL_NO_DEPRECATED_3_0
 typedef unsigned int DES_LONG;

@@ -11,13 +11,13 @@
 # define OPENSSL_STORE_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_OSSL_STORE_H
 # endif
 
 # include <stdarg.h>
-# include <openssl/types.h>
+# include "types.h"
 # include <openssl/pem.h>
 # include <openssl/storeerr.h>
 

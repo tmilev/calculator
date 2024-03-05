@@ -135,23 +135,22 @@ int tls_close_construct_packet(SSL_CONNECTION *s, WPACKET *pkt, int htype)
     return 1;
 }
 
-int tls_setup_handshake(SSL_CONNECTION *s)
-{
+int tls_setup_handshake(SSL_CONNECTION *s) {
     int ver_min, ver_max, ok;
     SSL *ssl = SSL_CONNECTION_GET_SSL(s);
     SSL_CTX *sctx = SSL_CONNECTION_GET_CTX(s);
 
     if (!ssl3_init_finished_mac(s)) {
-        /* SSLfatal() already called */
-        return 0;
+      /* SSLfatal() already called */
+      return 0;
     }
-
+    printf("DEBUG: inside tls_setup_handshake.\n");
     /* Reset any extension flags */
     memset(s->ext.extflags, 0, sizeof(s->ext.extflags));
 
     if (ssl_get_min_max_version(s, &ver_min, &ver_max, NULL) != 0) {
-        SSLfatal(s, SSL_AD_PROTOCOL_VERSION, SSL_R_NO_PROTOCOLS_AVAILABLE);
-        return 0;
+      SSLfatal(s, SSL_AD_PROTOCOL_VERSION, SSL_R_NO_PROTOCOLS_AVAILABLE);
+      return 0;
     }
 
     /* Sanity check that we have MD5-SHA1 if we need it */
@@ -1532,8 +1531,8 @@ WORK_STATE tls_finish_handshake(SSL_CONNECTION *s, ossl_unused WORK_STATE wst,
     return WORK_FINISHED_STOP;
 }
 
-int tls_get_message_header(SSL_CONNECTION *s, int *mt)
-{
+int tls_get_message_header(SSL_CONNECTION *s, int *mt) {
+    printf("DEBUG: inside tls_get_message_header ");
     /* s->init_num < SSL3_HM_HEADER_LENGTH */
     int skip_message, i;
     uint8_t recvd_type;

@@ -11,7 +11,7 @@
 # define OPENSSL_MACROS_H
 # pragma once
 
-#include <openssl/opensslconf.h>
+#include "opensslconf.h"
 #include <openssl/opensslv.h>
 
 
@@ -84,7 +84,7 @@
  * Applications should use -DOPENSSL_API_COMPAT=<version> to suppress the
  * declarations of functions deprecated in or before <version>.  If this is
  * undefined, the value of the macro OPENSSL_CONFIGURED_API (defined in
- * <openssl/opensslconf.h>) is the default.
+ * "opensslconf.h") is the default.
  *
  * For any version number up until version 1.1.x, <version> is expected to be
  * the calculated version number 0xMNNFFPPSL.

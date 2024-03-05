@@ -8,8 +8,8 @@
  */
 
 #include <openssl/evp.h>
-#include <openssl/core_names.h>
-#include <openssl/rand.h>
+#include "../../../include/openssl/core_names.h"
+#include "../../../include/openssl/rand.h"
 #include <openssl/ssl.h>
 #include "internal/ssl3_cbc.h"
 #include "../../ssl_local.h"

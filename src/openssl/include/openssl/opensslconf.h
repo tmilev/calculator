@@ -12,6 +12,6 @@
 # pragma once
 
 # include <openssl/configuration.h>
-# include <openssl/macros.h>
+# include "macros.h"
 
 #endif  /* OPENSSL_OPENSSLCONF_H */

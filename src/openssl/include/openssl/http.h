@@ -12,9 +12,9 @@
 # define OPENSSL_HTTP_H
 # pragma once
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
-# include <openssl/bio.h>
+# include "bio.h"
 # include <openssl/asn1.h>
 # include <openssl/conf.h>
 

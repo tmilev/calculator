@@ -12,16 +12,16 @@
 # define OPENSSL_ENGINE_H
 # pragma once
 
-# include <openssl/macros.h>
+# include "macros.h"
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_ENGINE_H
 # endif
 
-# include <openssl/opensslconf.h>
+# include "opensslconf.h"
 
 # ifndef OPENSSL_NO_ENGINE
 #  ifndef OPENSSL_NO_DEPRECATED_1_1_0
-#   include <openssl/bn.h>
+#   include "bn.h"
 #   include <openssl/rsa.h>
 #   include <openssl/dsa.h>
 #   include <openssl/dh.h>
@@ -30,8 +30,8 @@
 #   include <openssl/ui.h>
 #   include <openssl/err.h>
 #  endif
-#  include <openssl/types.h>
-#  include <openssl/symhacks.h>
+#  include "types.h"
+#  include "symhacks.h"
 #  include <openssl/x509.h>
 #  include <openssl/engineerr.h>
 #  ifdef  __cplusplus

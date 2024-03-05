@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include <openssl/objects.h>
-#include "internal/nelem.h"
+#include "../include/internal/nelem.h"
 #include "ssl_local.h"
 #include "../include/internal/packet.h"
 #include <openssl/md5.h>
@@ -4583,30 +4583,37 @@ int ssl3_renegotiate(SSL *s)
  */
 int ssl3_renegotiate_check(SSL *s, int initok)
 {
-    int ret = 0;
-    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
+  printf("DEBUG: inside renegotiate check\n");
+  int ret = 0;
+  struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
-    if (sc == NULL) {
-        return 0;
-    }
+  if (sc == NULL) {
+      return 0;
+  }
 
-    if (sc->s3.renegotiate) {
-        if (!RECORD_LAYER_read_pending(&sc->rlayer)
-            && !RECORD_LAYER_write_pending(&sc->rlayer)
-            && (initok || !SSL_in_init(s))) {
-            /*
-             * if we are the server, and we have sent a 'RENEGOTIATE'
-             * message, we need to set the state machine into the renegotiate
-             * state.
-             */
-            ossl_statem_set_renegotiate(sc);
-            sc->s3.renegotiate = 0;
-            sc->s3.num_renegotiations++;
-            sc->s3.total_renegotiations++;
-            ret = 1;
-        }
+  if (sc->s3.renegotiate) {
+    printf("DEBUG: renegotiating!!!!\n");
+    if (
+      !RECORD_LAYER_read_pending(&sc->rlayer)
+      && !RECORD_LAYER_write_pending(&sc->rlayer)
+      && (initok || !SSL_in_init(s))
+    ) {
+      /*
+       * if we are the server, and we have sent a 'RENEGOTIATE'
+       * message, we need to set the state machine into the renegotiate
+       * state.
+       */
+      ossl_statem_set_renegotiate(sc);
+      sc->s3.renegotiate = 0;
+      sc->s3.num_renegotiations++;
+      sc->s3.total_renegotiations++;
+      ret = 1;
     }
-    return ret;
+  } else {
+    printf("DEBUG: NOT renegotiating!!!!\n");
+
+  }
+  return ret;
 }
 
 /*

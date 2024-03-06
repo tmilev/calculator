@@ -10,7 +10,7 @@
 /* We need to use some engine and HMAC deprecated APIs */
 #define OPENSSL_SUPPRESS_DEPRECATED
 
-#include <openssl/engine.h>
+#include "../include/openssl/engine.h"
 #include "ssl_local.h"
 
 /*

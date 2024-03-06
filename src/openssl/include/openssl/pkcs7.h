@@ -21,7 +21,7 @@
 #  define HEADER_PKCS7_H
 # endif
 
-# include <openssl/asn1.h>
+# include "asn1.h"
 # include "bio.h"
 # include "e_os2.h"
 

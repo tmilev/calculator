@@ -13,7 +13,7 @@
 # define OSSL_INTERNAL_SM3_H
 # pragma once
 
-# include <openssl/opensslconf.h>
+# include "../openssl/opensslconf.h"
 
 # ifdef OPENSSL_NO_SM3
 #  error SM3 is disabled.

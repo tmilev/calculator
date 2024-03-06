@@ -14,7 +14,7 @@
 #include "internal/cryptlib.h"
 #include <openssl/evp.h>
 #include <openssl/kdf.h>
-#include <openssl/core_names.h>
+#include "../include/openssl/core_names.h"
 
 #define TLS13_MAX_LABEL_LEN     249
 

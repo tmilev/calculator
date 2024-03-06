@@ -15,8 +15,8 @@
 #include "../quic/quic_local.h"
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
-#include <openssl/rand.h>
-#include <openssl/core_names.h>
+#include "../include/openssl/rand.h"
+#include "../include/openssl/core_names.h"
 #include "record_local.h"
 #include "internal/packet.h"
 

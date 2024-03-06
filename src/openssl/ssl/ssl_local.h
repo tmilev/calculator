@@ -12,14 +12,14 @@
 #ifndef OSSL_SSL_LOCAL_H
 # define OSSL_SSL_LOCAL_H
 
-# include "internal/e_os.h"              /* struct timeval for DTLS */
+# include "../include/internal/e_os.h"              /* struct timeval for DTLS */
 # include <stdlib.h>
 # include <time.h>
 # include <errno.h>
 # include "../include/openssl/ssl.h"
 # include "../include/openssl/types.h"
 
-# include "internal/statem.h"
+# include "../include/internal/statem.h"
 # include "../include/openssl/buffer.h"
 # include "../include/openssl/bio.h"
 # include "../include/openssl/comp.h"
@@ -29,16 +29,16 @@
 # include "../include/openssl/async.h"
 # include "../include/openssl/symhacks.h"
 # include "../include/openssl/ct.h"
-# include "internal/recordmethod.h"
-# include "internal/statem.h"
+# include "../include/internal/recordmethod.h"
+# include "../include/internal/statem.h"
 # include "../include/internal/packet.h"
-# include "internal/dane.h"
-# include "internal/refcount.h"
-# include "internal/tsan_assist.h"
-# include "internal/bio.h"
-# include "internal/ktls.h"
+# include "../include/internal/dane.h"
+# include "../include/internal/refcount.h"
+# include "../include/internal/tsan_assist.h"
+# include "../include/internal/bio.h"
+# include "../include/internal/ktls.h"
 # include "../include/internal/time.h"
-# include "internal/ssl.h"
+# include "../include/internal/ssl.h"
 # include "record/record.h"
 
 # ifdef OPENSSL_BUILD_SHLIBSSL

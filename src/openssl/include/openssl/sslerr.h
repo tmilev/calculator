@@ -14,7 +14,7 @@
 
 # include "opensslconf.h"
 # include "symhacks.h"
-# include <openssl/sslerr_legacy.h>
+# include "sslerr_legacy.h"
 
 
 
@@ -84,7 +84,7 @@
 # define SSL_R_COMPRESSION_ID_NOT_WITHIN_PRIVATE_RANGE    307
 # define SSL_R_COMPRESSION_LIBRARY_ERROR                  142
 # define SSL_R_CONNECTION_TYPE_NOT_SET                    144
-# define SSL_R_CONN_USE_ONLY                              356
+static const int SSL_R_CONN_USE_ONLY                              =356;
 # define SSL_R_CONTEXT_NOT_DANE_ENABLED                   167
 # define SSL_R_COOKIE_GEN_CALLBACK_FAILURE                400
 # define SSL_R_COOKIE_MISMATCH                            308

@@ -18,7 +18,7 @@
 
 # include <openssl/obj_mac.h>
 # include "bio.h"
-# include <openssl/asn1.h>
+# include "asn1.h"
 # include <openssl/objectserr.h>
 
 # define OBJ_NAME_TYPE_UNDEF             0x00

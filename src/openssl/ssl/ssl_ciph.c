@@ -13,10 +13,10 @@
 #include <ctype.h>
 #include <openssl/objects.h>
 #include <openssl/comp.h>
-#include <openssl/engine.h>
+#include "../include/openssl/engine.h"
 #include <openssl/crypto.h>
 #include <openssl/conf.h>
-#include <openssl/trace.h>
+#include "../include/openssl/trace.h"
 #include "internal/nelem.h"
 #include "ssl_local.h"
 #include "internal/thread_once.h"

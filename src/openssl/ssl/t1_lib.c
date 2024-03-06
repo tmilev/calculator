@@ -12,11 +12,11 @@
 #include <openssl/objects.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
-#include <openssl/core_names.h>
-#include <openssl/ocsp.h>
+#include "../include/openssl/core_names.h"
+#include "../include/openssl/ocsp.h"
 #include <openssl/conf.h>
-#include <openssl/x509v3.h>
-#include <openssl/dh.h>
+#include "../include/openssl/x509v3.h"
+#include "../include/openssl/dh.h"
 #include <openssl/bn.h>
 #include <openssl/provider.h>
 #include <openssl/param_build.h>
@@ -25,7 +25,7 @@
 #include "internal/tlsgroups.h"
 #include "ssl_local.h"
 #include "quic/quic_local.h"
-#include <openssl/ct.h>
+#include "../include/openssl/ct.h"
 
 static const SIGALG_LOOKUP *find_sig_alg(SSL_CONNECTION *s, X509 *x, EVP_PKEY *pkey);
 static int tls12_sigalg_allowed(const SSL_CONNECTION *s, int op, const SIGALG_LOOKUP *lu);

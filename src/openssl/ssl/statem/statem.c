@@ -12,8 +12,8 @@
 # include <spt_extensions.h> /* timeval */
 #endif
 
-#include "internal/cryptlib.h"
-#include <openssl/rand.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/rand.h"
 #include "../ssl_local.h"
 #include "statem_local.h"
 #include <assert.h>
@@ -190,46 +190,45 @@ void ossl_statem_fatal(struct ssl_connection_st *s, int al, int reason,
  *   1: Yes
  *   0: No
  */
-int ossl_statem_in_error(const struct ssl_connection_st *s)
-{
-    if (s->statem.state == MSG_FLOW_ERROR)
-        return 1;
+int ossl_statem_in_error(const struct ssl_connection_st *s) {
+  if (s->statem.state == MSG_FLOW_ERROR){
+    return 1;
+  }
 
-    return 0;
+  return 0;
 }
 
-void ossl_statem_set_in_init(struct ssl_connection_st *s, int init)
-{
-    s->statem.in_init = init;
-    if (s->rlayer.rrlmethod != NULL && s->rlayer.rrlmethod->set_in_init != NULL)
-        s->rlayer.rrlmethod->set_in_init(s->rlayer.rrl, init);
+void ossl_statem_set_in_init(struct ssl_connection_st *s, int init) {
+  s->statem.in_init = init;
+  if (s->rlayer.rrlmethod != NULL && s->rlayer.rrlmethod->set_in_init != NULL) {
+    s->rlayer.rrlmethod->set_in_init(s->rlayer.rrl, init);
+  }
 }
 
-int ossl_statem_get_in_handshake(struct ssl_connection_st *s)
-{
-    return s->statem.in_handshake;
+int ossl_statem_get_in_handshake(struct ssl_connection_st *s) {
+  return s->statem.in_handshake;
 }
 
-void ossl_statem_set_in_handshake(struct ssl_connection_st *s, int inhand)
-{
-    if (inhand)
-        s->statem.in_handshake++;
-    else
-        s->statem.in_handshake--;
+void ossl_statem_set_in_handshake(struct ssl_connection_st *s, int inhand) {
+  if (inhand) {
+    s->statem.in_handshake++;
+  } else {
+    s->statem.in_handshake--;
+  }
 }
 
 /* Are we in a sensible state to skip over unreadable early data? */
-int ossl_statem_skip_early_data(struct ssl_connection_st *s)
-{
-    if (s->ext.early_data != SSL_EARLY_DATA_REJECTED)
-        return 0;
+int ossl_statem_skip_early_data(struct ssl_connection_st *s) {
+  if (s->ext.early_data != SSL_EARLY_DATA_REJECTED) {
+    return 0;
+  }
 
-    if (!s->server
-            || s->statem.hand_state != TLS_ST_EARLY_DATA
-            || s->hello_retry_request == SSL_HRR_COMPLETE)
-        return 0;
-
-    return 1;
+  if (!s->server
+      || s->statem.hand_state != TLS_ST_EARLY_DATA
+      || s->hello_retry_request == SSL_HRR_COMPLETE) {
+    return 0;
+  }
+  return 1;
 }
 
 /*
@@ -240,69 +239,68 @@ int ossl_statem_skip_early_data(struct ssl_connection_st *s)
  * attempting to read data (SSL_read*()), or -1 if we are in SSL_do_handshake()
  * or similar.
  */
-void ossl_statem_check_finish_init(struct ssl_connection_st *s, int sending)
-{
-    if (sending == -1) {
-        if (s->statem.hand_state == TLS_ST_PENDING_EARLY_DATA_END
-                || s->statem.hand_state == TLS_ST_EARLY_DATA) {
-            ossl_statem_set_in_init(s, 1);
-            if (s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY) {
-                /*
-                 * SSL_connect() or SSL_do_handshake() has been called directly.
-                 * We don't allow any more writing of early data.
-                 */
-                s->early_data_state = SSL_EARLY_DATA_FINISHED_WRITING;
-            }
-        }
-    } else if (!s->server) {
-        if ((sending && (s->statem.hand_state == TLS_ST_PENDING_EARLY_DATA_END
-                      || s->statem.hand_state == TLS_ST_EARLY_DATA)
-                  && s->early_data_state != SSL_EARLY_DATA_WRITING)
-                || (!sending && s->statem.hand_state == TLS_ST_EARLY_DATA)) {
-            ossl_statem_set_in_init(s, 1);
-            /*
-             * SSL_write() has been called directly. We don't allow any more
-             * writing of early data.
-             */
-            if (sending && s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY)
-                s->early_data_state = SSL_EARLY_DATA_FINISHED_WRITING;
-        }
-    } else {
+void ossl_statem_check_finish_init(struct ssl_connection_st *s, int sending) {
+  if (sending == -1) {
+    if (s->statem.hand_state == TLS_ST_PENDING_EARLY_DATA_END
+          || s->statem.hand_state == TLS_ST_EARLY_DATA) {
+      ossl_statem_set_in_init(s, 1);
+      if (s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY) {
+          /*
+           * SSL_connect() or SSL_do_handshake() has been called directly.
+           * We don't allow any more writing of early data.
+           */
+        s->early_data_state = SSL_EARLY_DATA_FINISHED_WRITING;
+      }
+    }
+  } else if (!s->server) {
+    if (
+      (sending && (s->statem.hand_state == TLS_ST_PENDING_EARLY_DATA_END
+                  || s->statem.hand_state == TLS_ST_EARLY_DATA)
+              && s->early_data_state != SSL_EARLY_DATA_WRITING)
+            || (!sending && s->statem.hand_state == TLS_ST_EARLY_DATA)
+    ) {
+      ossl_statem_set_in_init(s, 1);
+      /*
+       * SSL_write() has been called directly. We don't allow any more
+       * writing of early data.
+       */
+      if (sending && s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY) {
+        s->early_data_state = SSL_EARLY_DATA_FINISHED_WRITING;
+      }
+    }
+  } else {
         if (s->early_data_state == SSL_EARLY_DATA_FINISHED_READING
                 && s->statem.hand_state == TLS_ST_EARLY_DATA)
             ossl_statem_set_in_init(s, 1);
     }
 }
 
-void ossl_statem_set_hello_verify_done(struct ssl_connection_st *s)
-{
-    s->statem.state = MSG_FLOW_UNINITED;
-    ossl_statem_set_in_init(s, 1);
-    /*
-     * This will get reset (briefly) back to TLS_ST_BEFORE when we enter
-     * state_machine() because |state| is MSG_FLOW_UNINITED, but until then any
-     * calls to SSL_in_before() will return false. Also calls to
-     * SSL_state_string() and SSL_state_string_long() will return something
-     * sensible.
-     */
-    s->statem.hand_state = TLS_ST_SR_CLNT_HELLO;
+void ossl_statem_set_hello_verify_done(struct ssl_connection_st *s) {
+  s->statem.state = MSG_FLOW_UNINITED;
+  ossl_statem_set_in_init(s, 1);
+  /*
+   * This will get reset (briefly) back to TLS_ST_BEFORE when we enter
+   * state_machine() because |state| is MSG_FLOW_UNINITED, but until then any
+   * calls to SSL_in_before() will return false. Also calls to
+   * SSL_state_string() and SSL_state_string_long() will return something
+   * sensible.
+   */
+  s->statem.hand_state = TLS_ST_SR_CLNT_HELLO;
 }
 
-int ossl_statem_connect(SSL *s)
-{
-    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
-
-    if (sc == NULL)
-        return -1;
-
-    return state_machine(sc, 0);
-}
-
-int ossl_statem_accept(SSL *s)
-{
+int ossl_statem_connect(SSL *s) {
   struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
-  if (sc == NULL){
+  if (sc == NULL) {
+    return -1;
+  }
+
+  return state_machine(sc, 0);
+}
+
+int ossl_statem_accept(SSL *s) {
+  struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
+  if (sc == NULL) {
     return -1;
   }
   printf("DEBUG: inside statem_accept\n");
@@ -350,7 +348,7 @@ static info_cb get_callback(struct ssl_connection_st *s) {
  * <=0: NBIO or error
  */
 static int state_machine(struct ssl_connection_st *s, int server) {
-  printf("DEBUG: ");
+  printf("DEBUG: state machine start,\n");
 
   BUF_MEM *buf = NULL;
   void (*cb) (const SSL *ssl, int type, int val) = NULL;

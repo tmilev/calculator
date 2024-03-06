@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/rand.h>
+#include "../include/openssl/rand.h"
 #include <openssl/err.h>
 #include "internal/quic_channel.h"
 #include "internal/quic_error.h"

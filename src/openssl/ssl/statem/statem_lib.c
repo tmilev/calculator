@@ -19,7 +19,7 @@
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
-#include <openssl/trace.h>
+#include "../include/openssl/trace.h"
 #include <openssl/encoder.h>
 
 /*

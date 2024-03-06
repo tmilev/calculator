@@ -12,7 +12,7 @@
 # define OSSL_INTERNAL_DSOERR_H
 # pragma once
 
-# include <openssl/opensslconf.h>
+# include "../openssl/opensslconf.h"
 # include <openssl/symhacks.h>
 
 # ifdef  __cplusplus

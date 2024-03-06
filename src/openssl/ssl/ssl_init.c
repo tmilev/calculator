@@ -12,7 +12,7 @@
 #include "internal/err.h"
 #include <openssl/crypto.h>
 #include <openssl/evp.h>
-#include <openssl/trace.h>
+#include "../include/openssl/trace.h"
 #include "ssl_local.h"
 #include "sslerr.h"
 #include "internal/thread_once.h"

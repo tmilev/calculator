@@ -23,7 +23,7 @@
 
 # ifndef OPENSSL_NO_DSA
 #  include "e_os2.h"
-#  include <openssl/asn1.h>
+#  include "asn1.h"
 #  include "bio.h"
 #  include "crypto.h"
 #  include "bn.h"

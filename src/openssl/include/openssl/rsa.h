@@ -18,7 +18,7 @@
 
 # include "opensslconf.h"
 
-# include <openssl/asn1.h>
+# include "asn1.h"
 # include "bio.h"
 # include "crypto.h"
 # include "types.h"

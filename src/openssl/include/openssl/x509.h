@@ -28,7 +28,7 @@
 # include <openssl/buffer.h>
 # include <openssl/evp.h>
 # include "bio.h"
-# include <openssl/asn1.h>
+# include "asn1.h"
 # include "safestack.h"
 # include <openssl/ec.h>
 

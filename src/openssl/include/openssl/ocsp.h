@@ -23,7 +23,7 @@
 
 # include "opensslconf.h"
 # include <openssl/http.h>
-# include <openssl/asn1.h>
+# include "asn1.h"
 
 /*
  * These definitions are outside the OPENSSL_NO_OCSP guard because although for

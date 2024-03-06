@@ -8,7 +8,7 @@
  */
 
 /* This is the C source file where we include this header directly */
-#include <openssl/sslerr_legacy.h>
+#include "../include/openssl/sslerr_legacy.h"
 #include "sslerr.h"
 
 #ifndef OPENSSL_NO_DEPRECATED_3_0

@@ -15,16 +15,16 @@
 #include "../ssl_local.h"
 #include "statem_local.h"
 #include <openssl/buffer.h>
-#include <openssl/rand.h>
+#include "../include/openssl/rand.h"
 #include <openssl/objects.h>
 #include <openssl/evp.h>
 #include <openssl/md5.h>
-#include <openssl/dh.h>
+#include "../include/openssl/dh.h"
 #include <openssl/rsa.h>
 #include <openssl/bn.h>
-#include <openssl/engine.h>
-#include <openssl/trace.h>
-#include <openssl/core_names.h>
+#include "../include/openssl/engine.h"
+#include "../include/openssl/trace.h"
+#include "../include/openssl/core_names.h"
 #include <openssl/param_build.h>
 #include "internal/cryptlib.h"
 

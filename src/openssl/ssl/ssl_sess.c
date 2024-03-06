@@ -13,8 +13,8 @@
 # include <spt_extensions.h> /* timeval */
 #endif
 #include <stdio.h>
-#include <openssl/rand.h>
-#include <openssl/engine.h>
+#include "../include/openssl/rand.h"
+#include "../include/openssl/engine.h"
 #include "internal/refcount.h"
 #include "internal/cryptlib.h"
 #include "ssl_local.h"

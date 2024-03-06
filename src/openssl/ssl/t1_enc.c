@@ -16,10 +16,10 @@
 #include <openssl/comp.h>
 #include <openssl/evp.h>
 #include <openssl/kdf.h>
-#include <openssl/rand.h>
+#include "../include/openssl/rand.h"
 #include <openssl/obj_mac.h>
-#include <openssl/core_names.h>
-#include <openssl/trace.h>
+#include "../include/openssl/core_names.h"
+#include "../include/openssl/trace.h"
 
 /* seed1 through seed5 are concatenated */
 static int tls1_PRF(SSL_CONNECTION *s,

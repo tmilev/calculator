@@ -13,7 +13,7 @@
 #include "internal/quic_wire_pkt.h"
 #include "../ssl_local.h"
 #include <openssl/kdf.h>
-#include <openssl/core_names.h>
+#include "../include/openssl/core_names.h"
 
 /*
  * QUIC Key Derivation Utilities

@@ -10,7 +10,7 @@
 #include "internal/e_os.h"
 #include <stdio.h>
 #include <openssl/objects.h>
-#include <openssl/rand.h>
+#include "../include/openssl/rand.h"
 #include "ssl_local.h"
 #include "internal/time.h"
 

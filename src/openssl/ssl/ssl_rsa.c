@@ -14,7 +14,7 @@
 #include <openssl/objects.h>
 #include <openssl/evp.h>
 #include <openssl/x509.h>
-#include <openssl/x509v3.h>
+#include "../include/openssl/x509v3.h"
 #include <openssl/pem.h>
 
 static int ssl_set_cert(CERT *c, X509 *x509, SSL_CTX *ctx);

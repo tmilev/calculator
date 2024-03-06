@@ -85,7 +85,7 @@ int EVP_PKEY_CTX_get0_dh_kdf_ukm(EVP_PKEY_CTX *ctx, unsigned char **ukm);
 # ifndef OPENSSL_NO_DH
 #  include "e_os2.h"
 #  include "bio.h"
-#  include <openssl/asn1.h>
+#  include "asn1.h"
 #  ifndef OPENSSL_NO_DEPRECATED_1_1_0
 #   include "bn.h"
 #  endif

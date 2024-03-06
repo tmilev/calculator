@@ -15,7 +15,7 @@
 # include "opensslconf.h"
 
 # include "bio.h"
-# include <openssl/asn1.h>
+# include "asn1.h"
 # include <openssl/conf.h>
 
 

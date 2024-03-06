@@ -16,8 +16,8 @@
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/store.h>
-#include <openssl/x509v3.h>
-#include <openssl/dh.h>
+#include "../include/openssl/x509v3.h"
+#include "../include/openssl/dh.h"
 #include <openssl/bn.h>
 #include <openssl/crypto.h>
 #include "internal/refcount.h"

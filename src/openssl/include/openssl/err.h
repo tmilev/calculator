@@ -27,8 +27,8 @@
 
 # include "types.h"
 # include "bio.h"
-# include <openssl/lhash.h>
-# include <openssl/cryptoerr_legacy.h>
+# include "lhash.h"
+# include "cryptoerr_legacy.h"
 
 #ifdef  __cplusplus
 extern "C" {

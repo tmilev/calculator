@@ -19,7 +19,7 @@
 # include "opensslconf.h"
 # include "bio.h"
 # include "safestack.h"
-# include <openssl/lhash.h>
+# include "lhash.h"
 
 # define DB_ERROR_OK                     0
 # define DB_ERROR_MALLOC                 1

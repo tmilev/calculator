@@ -24,7 +24,7 @@
 
 #include <openssl/evp.h>
 #ifndef FIPS_MODULE
-# include <openssl/md5.h>
+# include "../include/openssl/md5.h"
 #endif
 #include <openssl/sha.h>
 

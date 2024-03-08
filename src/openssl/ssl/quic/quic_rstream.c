@@ -6,7 +6,7 @@
 * in the file LICENSE in the source distribution or at
 * https://www.openssl.org/source/license.html
 */
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "internal/common.h"
 #include "internal/time.h"
 #include "internal/quic_stream.h"

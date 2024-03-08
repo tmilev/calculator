@@ -27,7 +27,7 @@
 #  include <openssl/crypto.h>
 # endif
 # include "safestack.h"
-# include <openssl/pem.h>
+# include "pem.h"
 # include "types.h"
 # include <openssl/uierr.h>
 

@@ -18,7 +18,7 @@
 
 # include <stdarg.h>
 # include "types.h"
-# include <openssl/pem.h>
+# include "pem.h"
 # include <openssl/storeerr.h>
 
 # ifdef  __cplusplus

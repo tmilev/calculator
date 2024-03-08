@@ -23,12 +23,12 @@
 #include "../include/openssl/ct.h"
 #include "../include/openssl/trace.h"
 #include "../include/openssl/core_names.h"
-#include "internal/cryptlib.h"
-#include "internal/nelem.h"
-#include "internal/refcount.h"
-#include "internal/ktls.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/nelem.h"
+#include "../include/internal/refcount.h"
+#include "../include/internal/ktls.h"
 #include "quic/quic_local.h"
-#include "internal/dane.h"
+#include "../include/internal/dane.h"
 
 struct ssl_connection_st* SSL_CONNECTION_FROM_SSL(SSL* ssl){
   if (ssl == NULL){

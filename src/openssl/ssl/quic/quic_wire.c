@@ -8,7 +8,7 @@
  */
 
 #include <openssl/macros.h>
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include "internal/quic_ssl.h"
 #include "internal/quic_vlint.h"
 #include "internal/quic_wire.h"

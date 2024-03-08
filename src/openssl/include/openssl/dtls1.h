@@ -16,7 +16,7 @@
 #  define HEADER_DTLS1_H
 # endif
 
-# include <openssl/prov_ssl.h>
+# include "prov_ssl.h"
 
 #ifdef  __cplusplus
 extern "C" {

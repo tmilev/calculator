@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "ssl_local.h"
 #include <openssl/evp.h>
-#include <openssl/md5.h>
+#include "../include/openssl/md5.h"
 #include "../include/openssl/core_names.h"
 #include "internal/cryptlib.h"
 

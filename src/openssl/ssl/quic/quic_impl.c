@@ -8,7 +8,7 @@
  */
 
 #include <openssl/macros.h>
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include <openssl/sslerr.h>
 #include <crypto/rand.h>
 #include "quic_local.h"

@@ -27,9 +27,9 @@
 # endif
 # include <stdarg.h>
 
-# include <openssl/crypto.h>
-# include <openssl/bioerr.h>
-# include <openssl/core.h>
+# include "crypto.h"
+# include "bioerr.h"
+# include "core.h"
 
 #ifdef  __cplusplus
 extern "C" {

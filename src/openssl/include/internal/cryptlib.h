@@ -22,7 +22,7 @@
 
 # include <openssl/crypto.h>
 # include <openssl/buffer.h>
-# include <openssl/bio.h>
+# include "bio.h"
 # include <openssl/asn1.h>
 # include <openssl/err.h>
 

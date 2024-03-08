@@ -10,7 +10,7 @@
 /* We need to use the deprecated RSA low level calls */
 #define OPENSSL_SUPPRESS_DEPRECATED
 
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/rsa.h>
 #include <openssl/ssl.h>
 

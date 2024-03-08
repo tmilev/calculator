@@ -19,7 +19,7 @@
 #include "../include/openssl/x509v3.h"
 #include "../include/openssl/dh.h"
 #include <openssl/bn.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include "internal/refcount.h"
 #include "ssl_local.h"
 #include "ssl_cert_table.h"

@@ -10,7 +10,7 @@
 #include "internal/e_os.h"
 
 #include "internal/err.h"
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include <openssl/evp.h>
 #include "../include/openssl/trace.h"
 #include "ssl_local.h"

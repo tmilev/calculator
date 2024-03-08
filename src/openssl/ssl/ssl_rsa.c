@@ -11,7 +11,7 @@
 #include "ssl_local.h"
 #include "internal/packet.h"
 #include <openssl/bio.h>
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include <openssl/evp.h>
 #include <openssl/x509.h>
 #include "../include/openssl/x509v3.h"

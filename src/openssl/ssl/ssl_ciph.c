@@ -11,10 +11,10 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include <openssl/comp.h>
 #include "../include/openssl/engine.h"
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include <openssl/conf.h>
 #include "../include/openssl/trace.h"
 #include "internal/nelem.h"

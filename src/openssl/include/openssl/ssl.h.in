@@ -25,25 +25,25 @@ use OpenSSL::stackhash qw(generate_stack_macros generate_const_stack_macros);
 # endif
 
 # include "e_os2.h"
-# include <openssl/e_ostime.h>
+# include "e_ostime.h"
 # include "opensslconf.h"
-# include <openssl/comp.h>
+# include "comp.h"
 # include "bio.h"
 # ifndef OPENSSL_NO_DEPRECATED_1_1_0
-#  include <openssl/x509.h>
-#  include <openssl/crypto.h>
-#  include <openssl/buffer.h>
+#  include "x509.h"
+#  include "crypto.h"
+#  include "buffer.h"
 # endif
-# include <openssl/lhash.h>
-# include <openssl/pem.h>
-# include <openssl/hmac.h>
-# include <openssl/async.h>
+# include "lhash.h"
+# include "pem.h"
+# include "hmac.h"
+# include "async.h"
 
 # include "safestack.h"
 # include "symhacks.h"
-# include <openssl/ct.h>
-# include <openssl/sslerr.h>
-# include <openssl/prov_ssl.h>
+# include "ct.h"
+# include "sslerr.h"
+# include "prov_ssl.h"
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
 # endif

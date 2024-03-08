@@ -16,9 +16,9 @@
 #include "statem_local.h"
 #include <openssl/buffer.h>
 #include "../include/openssl/rand.h"
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include <openssl/evp.h>
-#include <openssl/md5.h>
+#include "../include/openssl/md5.h"
 #include "../include/openssl/dh.h"
 #include <openssl/rsa.h>
 #include <openssl/bn.h>

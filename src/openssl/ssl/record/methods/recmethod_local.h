@@ -9,7 +9,7 @@
 
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "../../ssl_local.h"
 #include "../record_local.h"
 

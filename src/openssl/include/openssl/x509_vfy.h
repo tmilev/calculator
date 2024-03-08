@@ -29,7 +29,7 @@
 # endif
 
 # include "opensslconf.h"
-# include <openssl/lhash.h>
+# include "lhash.h"
 # include "bio.h"
 # include <openssl/crypto.h>
 # include "symhacks.h"

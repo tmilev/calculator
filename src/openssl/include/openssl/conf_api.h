@@ -16,7 +16,7 @@
 #  define HEADER_CONF_API_H
 # endif
 
-# include <openssl/lhash.h>
+# include "lhash.h"
 # include <openssl/conf.h>
 
 #ifdef  __cplusplus

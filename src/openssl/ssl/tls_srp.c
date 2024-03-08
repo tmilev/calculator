@@ -17,9 +17,9 @@
  */
 #define OPENSSL_SUPPRESS_DEPRECATED
 
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include "../include/openssl/rand.h"
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "ssl_local.h"
 
 #ifndef OPENSSL_NO_SRP

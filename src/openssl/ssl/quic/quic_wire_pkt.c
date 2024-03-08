@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "internal/common.h"
 #include "internal/quic_wire_pkt.h"
 

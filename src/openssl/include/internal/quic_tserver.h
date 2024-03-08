@@ -11,7 +11,7 @@
 # define OSSL_QUIC_TSERVER_H
 
 # include <openssl/ssl.h>
-# include <openssl/bio.h>
+# include "bio.h"
 # include "internal/quic_stream.h"
 # include "internal/quic_channel.h"
 # include "internal/statem.h"

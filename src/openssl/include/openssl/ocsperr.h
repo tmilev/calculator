@@ -14,7 +14,7 @@
 
 # include "opensslconf.h"
 # include "symhacks.h"
-# include <openssl/cryptoerr_legacy.h>
+# include "cryptoerr_legacy.h"
 
 
 # ifndef OPENSSL_NO_OCSP

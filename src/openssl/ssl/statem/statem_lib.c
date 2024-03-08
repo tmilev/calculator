@@ -15,7 +15,7 @@
 #include "statem_local.h"
 #include "internal/cryptlib.h"
 #include <openssl/buffer.h>
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>

@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "../../../include/openssl/core_names.h"
 #include <openssl/comp.h>
 #include <openssl/ssl.h>

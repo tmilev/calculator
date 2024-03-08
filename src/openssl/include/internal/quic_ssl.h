@@ -11,7 +11,7 @@
 # define OSSL_QUIC_SSL_H
 
 # include <openssl/ssl.h>
-# include <openssl/bio.h>
+# include "bio.h"
 # include "internal/quic_record_rx.h" /* OSSL_QRX */
 # include "internal/quic_ackm.h"      /* OSSL_ACKM */
 # include "internal/quic_channel.h"   /* QUIC_CHANNEL */

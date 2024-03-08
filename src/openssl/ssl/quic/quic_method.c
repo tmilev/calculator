@@ -8,7 +8,7 @@
  */
 
 #include <openssl/macros.h>
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include "quic_local.h"
 
 IMPLEMENT_quic_meth_func(OSSL_QUIC_ANY_VERSION,

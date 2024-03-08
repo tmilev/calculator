@@ -12,7 +12,7 @@
 #include "internal/quic_stream_map.h"
 #include "internal/quic_error.h"
 #include "internal/common.h"
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 
 #define MIN_CRYPTO_HDR_SIZE             3
 

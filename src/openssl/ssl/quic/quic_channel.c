@@ -8,7 +8,7 @@
  */
 
 #include "../include/openssl/rand.h"
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "internal/quic_channel.h"
 #include "internal/quic_error.h"
 #include "internal/quic_rx_depack.h"

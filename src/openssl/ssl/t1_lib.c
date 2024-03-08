@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include "../include/openssl/core_names.h"

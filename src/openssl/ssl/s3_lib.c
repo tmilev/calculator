@@ -10,17 +10,17 @@
  */
 
 #include <stdio.h>
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include "../include/internal/nelem.h"
 #include "ssl_local.h"
 #include "../include/internal/packet.h"
-#include <openssl/md5.h>
+#include "../include/openssl/md5.h"
 #include "../include/openssl/dh.h"
 #include "../include/openssl/rand.h"
 #include "../include/openssl/trace.h"
 #include "../include/openssl/x509v3.h"
 #include "../include/openssl/core_names.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 
 #define TLS13_NUM_CIPHERS       OSSL_NELEM(tls13_ciphers)
 #define SSL3_NUM_CIPHERS        OSSL_NELEM(ssl3_ciphers)

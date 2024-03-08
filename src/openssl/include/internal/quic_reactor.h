@@ -11,7 +11,7 @@
 
 # include "internal/time.h"
 # include "internal/sockets.h"
-# include <openssl/bio.h>
+# include "bio.h"
 
 # ifndef OPENSSL_NO_QUIC
 

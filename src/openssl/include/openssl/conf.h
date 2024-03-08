@@ -22,7 +22,7 @@
 # endif
 
 # include "bio.h"
-# include <openssl/lhash.h>
+# include "lhash.h"
 # include "safestack.h"
 # include "e_os2.h"
 # include "types.h"

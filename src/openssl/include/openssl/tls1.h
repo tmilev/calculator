@@ -20,7 +20,7 @@
 
 # include <openssl/buffer.h>
 # include <openssl/x509.h>
-# include <openssl/prov_ssl.h>
+# include "prov_ssl.h"
 
 #ifdef  __cplusplus
 extern "C" {

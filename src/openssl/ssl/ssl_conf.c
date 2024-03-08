@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include "ssl_local.h"
 #include <openssl/conf.h>
-#include <openssl/objects.h>
+#include "../include/openssl/objects.h"
 #include <openssl/decoder.h>
 #include <openssl/core_dispatch.h>
 #include "internal/nelem.h"

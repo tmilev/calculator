@@ -25,11 +25,11 @@
 #  include <openssl/opensslv.h>
 #  include "safestack.h"
 #  include <openssl/crmferr.h>
-#  include <openssl/x509v3.h> /* for GENERAL_NAME etc. */
+#  include "x509v3.h" /* for GENERAL_NAME etc. */
 
 /* explicit #includes not strictly needed since implied by the above: */
 #  include "types.h"
-#  include <openssl/x509.h>
+#  include "x509.h"
 
 #  ifdef __cplusplus
 extern "C" {

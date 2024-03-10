@@ -19,7 +19,7 @@
 # include "opensslconf.h"
 
 # include "safestack.h"
-# include <openssl/x509.h>
+# include "x509.h"
 # include <openssl/esserr.h>
 
 # ifdef  __cplusplus

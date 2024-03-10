@@ -16,7 +16,7 @@
 
 # include "bio.h"
 # include "asn1.h"
-# include <openssl/conf.h>
+# include "conf.h"
 
 
 # ifdef __cplusplus

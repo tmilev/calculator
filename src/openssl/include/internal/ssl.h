@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/ssl.h>
+#include "../openssl/ssl.h"
 
 #ifndef OSSL_INTERNAL_SSL_H
 # define OSSL_INTERNAL_SSL_H

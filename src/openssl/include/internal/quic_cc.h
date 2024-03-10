@@ -9,8 +9,8 @@
 #ifndef OSSL_QUIC_CC_H
 # define OSSL_QUIC_CC_H
 
-#include "openssl/params.h"
-#include "internal/time.h"
+#include "../openssl/params.h"
+#include "time.h"
 
 # ifndef OPENSSL_NO_QUIC
 

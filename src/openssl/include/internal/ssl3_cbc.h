@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/evp.h>
+#include "../openssl/evp.h"
 
 /* tls_pad.c */
 int ssl3_cbc_remove_padding_and_mac(size_t *reclen,

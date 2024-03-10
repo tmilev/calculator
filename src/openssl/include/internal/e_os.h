@@ -15,10 +15,10 @@
 
 # include "../openssl/e_os2.h"
 # include "../openssl/crypto.h"
-# include "../internal/numbers.h"   /* Ensure the definition of SIZE_MAX */
+# include "numbers.h"   /* Ensure the definition of SIZE_MAX */
 
 /*
- * <openssl/e_os2.h> contains what we can justify to make visible to the
+ * "../openssl/e_os2.h" contains what we can justify to make visible to the
  * outside; this file e_os.h is not part of the exported interface.
  */
 

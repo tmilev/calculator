@@ -12,12 +12,12 @@
 # pragma once
 
 # include <string.h>
-# include <openssl/bn.h>
-# include <openssl/buffer.h>
-# include <openssl/crypto.h>
-# include <openssl/e_os2.h>
+# include "../openssl/bn.h"
+# include "../openssl/buffer.h"
+# include "../openssl/crypto.h"
+# include "../openssl/e_os2.h"
 
-# include "internal/numbers.h"
+# include "numbers.h"
 
 typedef struct {
     /* Pointer to where we are currently reading from */

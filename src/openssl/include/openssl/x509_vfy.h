@@ -25,7 +25,7 @@
  * Protect against recursion, x509.h and x509_vfy.h each include the other.
  */
 # ifndef OPENSSL_X509_H
-#  include <openssl/x509.h>
+#  include "x509.h"
 # endif
 
 # include "opensslconf.h"

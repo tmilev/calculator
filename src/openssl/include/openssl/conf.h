@@ -26,7 +26,7 @@
 # include "safestack.h"
 # include "e_os2.h"
 # include "types.h"
-# include <openssl/conferr.h>
+# include "conferr.h"
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
 # endif

@@ -19,8 +19,8 @@
 # include "e_os2.h"
 # include "bio.h"
 # include "safestack.h"
-# include <openssl/evp.h>
-# include <openssl/x509.h>
+# include "evp.h"
+# include "x509.h"
 # include <openssl/pemerr.h>
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>

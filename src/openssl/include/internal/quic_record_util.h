@@ -10,8 +10,8 @@
 #ifndef OSSL_QUIC_RECORD_UTIL_H
 # define OSSL_QUIC_RECORD_UTIL_H
 
-# include <openssl/ssl.h>
-# include "internal/quic_types.h"
+# include "../openssl/ssl.h"
+# include "quic_types.h"
 
 # ifndef OPENSSL_NO_QUIC
 

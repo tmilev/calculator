@@ -20,7 +20,7 @@
 # ifndef OPENSSL_CRYPTO_H
 #  include "crypto.h"
 # endif
-# include <openssl/buffererr.h>
+# include "buffererr.h"
 
 
 #ifdef  __cplusplus

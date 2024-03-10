@@ -32,7 +32,7 @@
 #  endif
 #  include "types.h"
 #  include "symhacks.h"
-#  include <openssl/x509.h>
+#  include "x509.h"
 #  include <openssl/engineerr.h>
 #  ifdef  __cplusplus
 extern "C" {

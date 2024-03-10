@@ -11,13 +11,13 @@
 # define OSSL_INTERNAL_QUIC_STREAM_MAP_H
 # pragma once
 
-# include "internal/e_os.h"
-# include "internal/time.h"
-# include "internal/common.h"
-# include "internal/quic_types.h"
-# include "internal/quic_stream.h"
-# include "internal/quic_fc.h"
-# include <openssl/lhash.h>
+# include "e_os.h"
+# include "time.h"
+# include "common.h"
+# include "quic_types.h"
+# include "quic_stream.h"
+# include "quic_fc.h"
+# include "../openssl/lhash.h"
 
 # ifndef OPENSSL_NO_QUIC
 

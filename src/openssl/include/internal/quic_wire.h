@@ -11,10 +11,10 @@
 # define OSSL_INTERNAL_QUIC_WIRE_H
 # pragma once
 
-# include "internal/e_os.h"
-# include "internal/time.h"
-# include "internal/quic_types.h"
-# include "internal/packet_quic.h"
+# include "e_os.h"
+# include "time.h"
+# include "quic_types.h"
+# include "packet_quic.h"
 
 # ifndef OPENSSL_NO_QUIC
 

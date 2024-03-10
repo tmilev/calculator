@@ -10,16 +10,16 @@
 #ifndef OSSL_QUIC_TXP_H
 # define OSSL_QUIC_TXP_H
 
-# include <openssl/ssl.h>
-# include "internal/quic_types.h"
-# include "internal/quic_record_tx.h"
-# include "internal/quic_cfq.h"
-# include "internal/quic_txpim.h"
-# include "internal/quic_stream.h"
-# include "internal/quic_stream_map.h"
-# include "internal/quic_fc.h"
-# include "internal/bio_addr.h"
-# include "internal/time.h"
+# include "../openssl/ssl.h"
+# include "quic_types.h"
+# include "quic_record_tx.h"
+# include "quic_cfq.h"
+# include "quic_txpim.h"
+# include "quic_stream.h"
+# include "quic_stream_map.h"
+# include "quic_fc.h"
+# include "bio_addr.h"
+# include "time.h"
 
 # ifndef OPENSSL_NO_QUIC
 

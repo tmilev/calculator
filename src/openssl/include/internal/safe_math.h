@@ -11,7 +11,7 @@
 # define OSSL_INTERNAL_SAFE_MATH_H
 # pragma once
 
-# include <openssl/e_os2.h>              /* For 'ossl_inline' */
+# include "../openssl/e_os2.h"              /* For 'ossl_inline' */
 
 # ifndef OPENSSL_NO_BUILTIN_OVERFLOW_CHECKING
 #  ifdef __has_builtin

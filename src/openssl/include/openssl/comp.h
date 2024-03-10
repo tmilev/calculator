@@ -20,7 +20,7 @@
 
 # ifndef OPENSSL_NO_COMP
 # include "crypto.h"
-# include <openssl/comperr.h>
+# include "comperr.h"
 # ifdef  __cplusplus
 extern "C" {
 # endif

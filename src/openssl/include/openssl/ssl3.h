@@ -19,7 +19,7 @@
 
 # include <openssl/comp.h>
 # include <openssl/buffer.h>
-# include <openssl/evp.h>
+# include "evp.h"
 # include <openssl/ssl.h>
 
 #ifdef  __cplusplus

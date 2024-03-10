@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/comp.h>
+#include "../openssl/comp.h"
 
 void ossl_comp_zlib_cleanup(void);
 void ossl_comp_brotli_cleanup(void);

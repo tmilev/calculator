@@ -10,10 +10,10 @@
 #ifndef OSSL_QUIC_RECORD_TX_H
 # define OSSL_QUIC_RECORD_TX_H
 
-# include <openssl/ssl.h>
-# include "internal/quic_wire_pkt.h"
-# include "internal/quic_types.h"
-# include "internal/quic_record_util.h"
+# include "../openssl/ssl.h"
+# include "quic_wire_pkt.h"
+# include "quic_types.h"
+# include "quic_record_util.h"
 
 # ifndef OPENSSL_NO_QUIC
 

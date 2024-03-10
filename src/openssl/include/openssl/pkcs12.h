@@ -23,7 +23,7 @@
 
 # include "bio.h"
 # include <openssl/core.h>
-# include <openssl/x509.h>
+# include "x509.h"
 # include <openssl/pkcs12err.h>
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>

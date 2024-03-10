@@ -24,7 +24,7 @@
 # include "opensslconf.h"
 # include "types.h"
 # include "crypto.h"
-# include <openssl/bnerr.h>
+# include "bnerr.h"
 
 #ifdef  __cplusplus
 extern "C" {

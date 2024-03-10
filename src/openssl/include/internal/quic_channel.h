@@ -10,13 +10,13 @@
 #ifndef OSSL_QUIC_CHANNEL_H
 # define OSSL_QUIC_CHANNEL_H
 
-# include <openssl/ssl.h>
-# include "internal/quic_types.h"
-# include "internal/quic_stream_map.h"
-# include "internal/quic_reactor.h"
-# include "internal/quic_statm.h"
-# include "internal/time.h"
-# include "internal/thread.h"
+# include "../openssl/ssl.h"
+# include "quic_types.h"
+# include "quic_stream_map.h"
+# include "quic_reactor.h"
+# include "quic_statm.h"
+# include "time.h"
+# include "thread.h"
 
 # ifndef OPENSSL_NO_QUIC
 

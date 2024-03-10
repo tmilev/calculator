@@ -10,9 +10,9 @@
 #ifndef OSSL_QUIC_THREAD_ASSIST_H
 # define OSSL_QUIC_THREAD_ASSIST_H
 
-# include <openssl/ssl.h>
-# include "internal/thread.h"
-# include "internal/time.h"
+# include "../openssl/ssl.h"
+# include "thread.h"
+# include "time.h"
 
 # if defined(OPENSSL_NO_QUIC) || defined(OPENSSL_NO_THREAD_POOL)
 #  define OPENSSL_NO_QUIC_THREAD_ASSIST

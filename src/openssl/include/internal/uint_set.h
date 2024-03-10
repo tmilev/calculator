@@ -9,8 +9,8 @@
 #ifndef OSSL_UINT_SET_H
 # define OSSL_UINT_SET_H
 
-#include "openssl/params.h"
-#include "internal/list.h"
+#include "../openssl/params.h"
+#include "list.h"
 
 /*
  * uint64_t Integer Sets

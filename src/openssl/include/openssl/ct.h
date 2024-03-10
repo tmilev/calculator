@@ -26,7 +26,7 @@
 # ifndef OPENSSL_NO_CT
 # include "types.h"
 # include "safestack.h"
-# include <openssl/x509.h>
+# include "x509.h"
 # include <openssl/cterr.h>
 # ifdef  __cplusplus
 extern "C" {

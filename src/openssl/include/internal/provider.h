@@ -11,10 +11,10 @@
 # define OSSL_INTERNAL_PROVIDER_H
 # pragma once
 
-# include <openssl/core.h>
-# include <openssl/core_dispatch.h>
-# include "internal/dso.h"
-# include "internal/symhacks.h"
+# include "../openssl/core.h"
+# include "../openssl/core_dispatch.h"
+# include "dso.h"
+# include "symhacks.h"
 
 # ifdef __cplusplus
 extern "C" {

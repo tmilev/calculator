@@ -8,7 +8,7 @@
  */
 
 #include <stddef.h>
-#include <openssl/params.h>
+#include "../openssl/params.h"
 
 /*
  * Extract the parameter into an allocated buffer.

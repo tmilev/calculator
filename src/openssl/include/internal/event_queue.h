@@ -11,8 +11,8 @@
 # define OSSL_INTERNAL_EVENT_QUEUE_H
 # pragma once
 
-# include "internal/priority_queue.h"
-# include "internal/time.h"
+# include "priority_queue.h"
+# include "time.h"
 
 /*
  * Opaque type holding an event.

@@ -10,8 +10,8 @@
 #ifndef OSSL_QUIC_FC_H
 # define OSSL_QUIC_FC_H
 
-# include <openssl/ssl.h>
-# include "internal/time.h"
+# include "../openssl/ssl.h"
+# include "time.h"
 
 # ifndef OPENSSL_NO_QUIC
 

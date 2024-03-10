@@ -17,7 +17,7 @@
 # ifndef OPENSSL_NO_CMP
 
 #  include "macros.h"
-#  include <openssl/trace.h>
+#  include "trace.h"
 
 #  ifdef __cplusplus
 extern "C" {

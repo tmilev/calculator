@@ -9,8 +9,8 @@
 #ifndef OSSL_QUIC_REACTOR_H
 # define OSSL_QUIC_REACTOR_H
 
-# include "internal/time.h"
-# include "internal/sockets.h"
+# include "time.h"
+# include "sockets.h"
 # include "bio.h"
 
 # ifndef OPENSSL_NO_QUIC

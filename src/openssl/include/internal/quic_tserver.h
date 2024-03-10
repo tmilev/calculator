@@ -10,12 +10,12 @@
 #ifndef OSSL_QUIC_TSERVER_H
 # define OSSL_QUIC_TSERVER_H
 
-# include <openssl/ssl.h>
+# include "../openssl/ssl.h"
 # include "bio.h"
-# include "internal/quic_stream.h"
-# include "internal/quic_channel.h"
-# include "internal/statem.h"
-# include "internal/time.h"
+# include "quic_stream.h"
+# include "quic_channel.h"
+# include "statem.h"
+# include "time.h"
 
 # ifndef OPENSSL_NO_QUIC
 

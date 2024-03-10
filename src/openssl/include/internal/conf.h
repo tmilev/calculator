@@ -11,7 +11,7 @@
 # define OSSL_INTERNAL_CONF_H
 # pragma once
 
-# include <openssl/conf.h>
+# include "../openssl/conf.h"
 
 # define DEFAULT_CONF_MFLAGS \
     (CONF_MFLAGS_DEFAULT_SECTION | \

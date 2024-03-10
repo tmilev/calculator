@@ -11,14 +11,14 @@
 # define OSSL_INTERNAL_QUIC_STREAM_H
 # pragma once
 
-#include "internal/e_os.h"
-#include "internal/time.h"
-#include "internal/quic_types.h"
-#include "internal/quic_wire.h"
-#include "internal/quic_record_tx.h"
-#include "internal/quic_record_rx.h"
-#include "internal/quic_fc.h"
-#include "internal/quic_statm.h"
+#include "e_os.h"
+#include "time.h"
+#include "quic_types.h"
+#include "quic_wire.h"
+#include "quic_record_tx.h"
+#include "quic_record_rx.h"
+#include "quic_fc.h"
+#include "quic_statm.h"
 
 # ifndef OPENSSL_NO_QUIC
 

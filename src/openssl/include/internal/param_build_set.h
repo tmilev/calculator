@@ -11,9 +11,9 @@
 # define OSSL_INTERNAL_PARAM_BUILD_SET_H
 # pragma once
 
-# include <openssl/safestack.h>
-# include <openssl/param_build.h>
-# include "internal/cryptlib.h"
+# include "../openssl/safestack.h"
+# include "../openssl/param_build.h"
+# include "cryptlib.h"
 
 typedef union {
     OSSL_UNION_ALIGN;

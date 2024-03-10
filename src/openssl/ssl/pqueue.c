@@ -8,8 +8,7 @@
  */
 
 #include "ssl_local.h"
-#include <openssl/bn.h>
-
+#include "../include/openssl/bn.h"
 struct pqueue_st {
     pitem *items;
     int count;

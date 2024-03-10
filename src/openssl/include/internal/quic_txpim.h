@@ -10,10 +10,10 @@
 #ifndef OSSL_QUIC_TXPIM_H
 # define OSSL_QUIC_TXPIM_H
 
-# include <openssl/ssl.h>
-# include "internal/quic_types.h"
-# include "internal/quic_cfq.h"
-# include "internal/quic_ackm.h"
+# include "../openssl/ssl.h"
+# include "quic_types.h"
+# include "quic_cfq.h"
+# include "quic_ackm.h"
 
 # ifndef OPENSSL_NO_QUIC
 

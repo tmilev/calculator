@@ -11,7 +11,7 @@
 # define OSSL_INTERNAL_THREAD_ONCE_H
 # pragma once
 
-# include <openssl/crypto.h>
+# include "../openssl/crypto.h"
 
 /*
  * Initialisation of global data should never happen via "RUN_ONCE" inside the

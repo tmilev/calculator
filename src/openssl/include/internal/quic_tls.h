@@ -10,8 +10,8 @@
 #ifndef OSSL_QUIC_TLS_H
 # define OSSL_QUIC_TLS_H
 
-# include <openssl/ssl.h>
-# include "internal/quic_stream.h"
+# include "../openssl/ssl.h"
+# include "quic_stream.h"
 
 
 typedef struct quic_tls_st QUIC_TLS;

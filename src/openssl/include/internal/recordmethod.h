@@ -11,7 +11,7 @@
 # define OSSL_INTERNAL_RECORDMETHOD_H
 # pragma once
 
-# include <openssl/ssl.h>
+# include "../openssl/ssl.h"
 
 /*
  * We use the term "record" here to refer to a packet of data. Records are

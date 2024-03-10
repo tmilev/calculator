@@ -11,7 +11,7 @@
 # define OSSL_INTERNAL_SYMHACKS_H
 # pragma once
 
-# include <openssl/e_os2.h>
+# include "../openssl/e_os2.h"
 
 # if defined(OPENSSL_SYS_VMS)
 

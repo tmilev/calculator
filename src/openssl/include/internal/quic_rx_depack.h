@@ -10,7 +10,7 @@
 #ifndef OSSL_QUIC_RX_DEPACK_H
 # define OSSL_QUIC_RX_DEPACK_H
 
-# include "internal/quic_channel.h"
+# include "quic_channel.h"
 
 # ifndef OPENSSL_NO_QUIC
 

@@ -9,9 +9,9 @@
 
 #ifndef OSSL_INTERNAL_THREAD_ARCH_H
 # define OSSL_INTERNAL_THREAD_ARCH_H
-# include <openssl/configuration.h>
-# include <openssl/e_os2.h>
-# include "internal/time.h"
+# include "../openssl/configuration.h"
+# include "../openssl/e_os2.h"
+# include "time.h"
 
 # if defined(_WIN32)
 #  include <windows.h>
@@ -35,7 +35,7 @@
 #  define OPENSSL_THREADS_NONE
 # endif
 
-# include <openssl/crypto.h>
+# include "../openssl/crypto.h"
 
 typedef void CRYPTO_MUTEX;
 typedef void CRYPTO_CONDVAR;

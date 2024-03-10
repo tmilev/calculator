@@ -11,7 +11,7 @@
 # define OSSL_INTERNAL_DETERMINISTIC_NONCE_H
 # pragma once
 
-# include <openssl/bn.h>
+# include "../openssl/bn.h"
 
 int ossl_gen_deterministic_nonce_rfc6979(BIGNUM *out, const BIGNUM *q,
                                          const BIGNUM *priv,

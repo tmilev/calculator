@@ -11,7 +11,7 @@
 # define OSSL_INTERNAL_QUIC_VLINT_H
 # pragma once
 
-# include "internal/e_os.h"
+# include "e_os.h"
 
 # ifndef OPENSSL_NO_QUIC
 

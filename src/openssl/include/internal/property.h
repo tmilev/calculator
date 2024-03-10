@@ -12,7 +12,7 @@
 # define OSSL_INTERNAL_PROPERTY_H
 # pragma once
 
-# include "internal/cryptlib.h"
+# include "cryptlib.h"
 
 typedef struct ossl_method_store_st OSSL_METHOD_STORE;
 typedef struct ossl_property_list_st OSSL_PROPERTY_LIST;

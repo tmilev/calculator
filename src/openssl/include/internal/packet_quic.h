@@ -11,8 +11,8 @@
 # define OSSL_INTERNAL_PACKET_QUIC_H
 # pragma once
 
-# include "internal/packet.h"
-# include "internal/quic_vlint.h"
+# include "packet.h"
+# include "quic_vlint.h"
 
 # ifndef OPENSSL_NO_QUIC
 /*

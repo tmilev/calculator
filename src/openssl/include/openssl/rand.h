@@ -20,7 +20,7 @@
 # include "types.h"
 # include "e_os2.h"
 # include <openssl/randerr.h>
-# include <openssl/evp.h>
+# include "evp.h"
 
 #ifdef  __cplusplus
 extern "C" {

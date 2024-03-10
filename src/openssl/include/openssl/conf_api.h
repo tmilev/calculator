@@ -17,7 +17,7 @@
 # endif
 
 # include "lhash.h"
-# include <openssl/conf.h>
+# include "conf.h"
 
 #ifdef  __cplusplus
 extern "C" {

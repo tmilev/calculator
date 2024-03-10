@@ -22,7 +22,7 @@
 # endif
 
 # include "opensslconf.h"
-# include <openssl/http.h>
+# include "http.h"
 # include "asn1.h"
 
 /*
@@ -59,8 +59,8 @@
 
 # ifndef OPENSSL_NO_OCSP
 
-#  include <openssl/x509.h>
-#  include <openssl/x509v3.h>
+#  include "x509.h"
+#  include "x509v3.h"
 #  include "safestack.h"
 #  include <openssl/ocsperr.h>
 

@@ -11,8 +11,8 @@
 # define OSSL_INTERNAL_DSO_H
 # pragma once
 
-# include <openssl/crypto.h>
-# include "internal/dsoerr.h"
+# include "../openssl/crypto.h"
+# include "dsoerr.h"
 
 /* These values are used as commands to DSO_ctrl() */
 # define DSO_CTRL_GET_FLAGS      1

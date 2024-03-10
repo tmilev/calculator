@@ -246,7 +246,7 @@ static ossl_inline ossl_ssize_t ktls_sendfile(int s, int fd, off_t off,
 #   include <linux/socket.h>
 #   include <openssl/ssl3.h>
 #   include <openssl/tls1.h>
-#   include <openssl/evp.h>
+#   include "../openssl/evp.h"
 
 #   ifndef SOL_TLS
 #    define SOL_TLS 282

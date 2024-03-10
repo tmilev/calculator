@@ -11,8 +11,8 @@
 # define OSSL_INTERNAL_RING_BUF_H
 # pragma once
 
-# include <openssl/e_os2.h>              /* For 'ossl_inline' */
-# include "internal/safe_math.h"
+# include "../openssl/e_os2.h"              /* For 'ossl_inline' */
+# include "safe_math.h"
 
 /*
  * ==================================================================

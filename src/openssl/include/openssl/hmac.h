@@ -18,7 +18,7 @@
 
 # include "opensslconf.h"
 
-# include <openssl/evp.h>
+# include "evp.h"
 
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HMAC_MAX_MD_CBLOCK      200    /* Deprecated */

@@ -19,7 +19,7 @@
 # endif
 
 # include <openssl/buffer.h>
-# include <openssl/x509.h>
+# include "x509.h"
 # include "prov_ssl.h"
 
 #ifdef  __cplusplus

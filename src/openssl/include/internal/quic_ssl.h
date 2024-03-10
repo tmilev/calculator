@@ -10,11 +10,11 @@
 #ifndef OSSL_QUIC_SSL_H
 # define OSSL_QUIC_SSL_H
 
-# include <openssl/ssl.h>
+# include "../openssl/ssl.h"
 # include "bio.h"
-# include "internal/quic_record_rx.h" /* OSSL_QRX */
-# include "internal/quic_ackm.h"      /* OSSL_ACKM */
-# include "internal/quic_channel.h"   /* QUIC_CHANNEL */
+# include "quic_record_rx.h" /* OSSL_QRX */
+# include "quic_ackm.h"      /* OSSL_ACKM */
+# include "quic_channel.h"   /* QUIC_CHANNEL */
 
 # ifndef OPENSSL_NO_QUIC
 

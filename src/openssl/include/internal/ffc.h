@@ -11,13 +11,13 @@
 # define OSSL_INTERNAL_FFC_H
 # pragma once
 
-# include <openssl/core.h>
-# include <openssl/bn.h>
-# include <openssl/evp.h>
-# include <openssl/dh.h> /* Uses Error codes from DH */
-# include <openssl/params.h>
-# include <openssl/param_build.h>
-# include "internal/sizes.h"
+# include "../openssl/core.h"
+# include "../openssl/bn.h"
+# include "../openssl/evp.h"
+# include "../openssl/dh.h" /* Uses Error codes from DH */
+# include "../openssl/params.h"
+# include "../openssl/param_build.h"
+# include "sizes.h"
 
 /* Default value for gindex when canonical generation of g is not used */
 # define FFC_UNVERIFIABLE_GINDEX -1

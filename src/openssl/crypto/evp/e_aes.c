@@ -15,15 +15,15 @@
 
 #include <string.h>
 #include <assert.h>
-#include <openssl/opensslconf.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/opensslconf.h"
+#include "../include/openssl/crypto.h"
 #include <openssl/evp.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/aes.h>
 #include <openssl/rand.h>
 #include <openssl/cmac.h>
 #include "crypto/evp.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "crypto/modes.h"
 #include "crypto/siv.h"
 #include "crypto/aes_platform.h"

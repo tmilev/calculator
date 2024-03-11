@@ -17,7 +17,7 @@
 #include <openssl/asn1.h>
 #include <openssl/buffer.h>
 #include <openssl/ct.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 
 #include "ct_local.h"
 

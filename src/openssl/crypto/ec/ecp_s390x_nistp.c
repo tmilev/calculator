@@ -15,7 +15,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/rand.h>
 #include "ec_local.h"
 #include "s390x_arch.h"

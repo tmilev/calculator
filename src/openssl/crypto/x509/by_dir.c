@@ -17,7 +17,7 @@
 #endif
 
 #include "internal/e_os.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>

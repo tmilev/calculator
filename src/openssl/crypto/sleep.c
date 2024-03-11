@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include "internal/e_os.h"
 
 /* system-specific variants defining OSSL_sleep() */

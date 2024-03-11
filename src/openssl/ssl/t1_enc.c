@@ -11,13 +11,13 @@
 #include <stdio.h>
 #include "ssl_local.h"
 #include "record/record_local.h"
-#include "internal/ktls.h"
-#include "internal/cryptlib.h"
-#include <openssl/comp.h>
-#include <openssl/evp.h>
-#include <openssl/kdf.h>
+#include "../include/internal/ktls.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/comp.h"
+#include "../include/openssl/evp.h"
+#include "../include/openssl/kdf.h"
 #include "../include/openssl/rand.h"
-#include <openssl/obj_mac.h>
+#include "../include/openssl/obj_mac.h"
 #include "../include/openssl/core_names.h"
 #include "../include/openssl/trace.h"
 

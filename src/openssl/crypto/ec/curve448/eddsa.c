@@ -10,7 +10,7 @@
  * Originally written by Mike Hamburg
  */
 #include <string.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include <openssl/evp.h>
 #include "crypto/ecx.h"
 #include "curve448_local.h"

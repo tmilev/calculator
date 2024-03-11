@@ -21,7 +21,7 @@
 #  define HEADER_SAFESTACK_H
 # endif
 
-# include <openssl/stack.h>
+# include "stack.h"
 # include "e_os2.h"
 
 #ifdef __cplusplus

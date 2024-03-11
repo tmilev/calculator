@@ -11,7 +11,7 @@
 
 #include <openssl/core_names.h>
 #include <openssl/params.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/dh.h>
 #include "crypto/dh.h"
 #include "crypto/evp.h"

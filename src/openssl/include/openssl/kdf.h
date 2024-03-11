@@ -19,7 +19,7 @@
 # include <stdarg.h>
 # include <stddef.h>
 # include "types.h"
-# include <openssl/core.h>
+# include "core.h"
 
 # ifdef __cplusplus
 extern "C" {

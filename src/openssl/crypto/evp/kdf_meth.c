@@ -8,12 +8,12 @@
  */
 
 #include <openssl/evp.h>
-#include <openssl/err.h>
-#include <openssl/core.h>
-#include <openssl/core_dispatch.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/core.h"
+#include "../include/openssl/core_dispatch.h"
 #include <openssl/kdf.h>
-#include "internal/provider.h"
-#include "internal/core.h"
+#include "../include/internal/provider.h"
+#include "../include/internal/core.h"
 #include "crypto/evp.h"
 #include "evp_local.h"
 

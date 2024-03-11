@@ -9,7 +9,7 @@
 
 #include "internal/e_os.h"
 #include <openssl/e_os2.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/ui.h>
 
 #ifndef OPENSSL_NO_UI_CONSOLE
@@ -50,7 +50,7 @@
 # endif
 
 # include "ui_local.h"
-# include "internal/cryptlib.h"
+# include "../include/internal/cryptlib.h"
 
 # ifdef OPENSSL_SYS_VMS          /* prototypes for sys$whatever */
 #  include <starlet.h>

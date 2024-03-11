@@ -13,7 +13,7 @@
 #include <openssl/asn1t.h>
 #include <openssl/objects.h>
 #include <openssl/buffer.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "internal/numbers.h"
 #include "asn1_local.h"
 

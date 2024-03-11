@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/bio.h>
+#include "../include/openssl/bio.h"
 #include "../ssl_local.h"
 #include "internal/quic_wire_pkt.h"
 

@@ -20,7 +20,7 @@
 #include <errno.h>
 
 #include "bio_local.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 
 #if defined(OPENSSL_SYS_WINCE)
 #elif defined(OPENSSL_SYS_WIN32)
@@ -48,7 +48,7 @@ void *_malloc32(__size_t);
 #endif
 
 #include <openssl/buffer.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 
 #ifndef NO_SYSLOG
 

@@ -16,10 +16,10 @@
 #include <stdio.h>
 #include <openssl/x509.h>
 #include <openssl/asn1.h>
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include <openssl/core_names.h>
-#include <openssl/param_build.h>
-#include "internal/cryptlib.h"
+#include "../include/openssl/param_build.h"
+#include "../include/internal/cryptlib.h"
 #include "crypto/asn1.h"
 #include "crypto/dsa.h"
 #include "crypto/evp.h"

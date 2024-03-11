@@ -13,8 +13,8 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/bn.h>
-#include "internal/cryptlib.h"
+#include "../include/openssl/bn.h"
+#include "../include/internal/cryptlib.h"
 #include "dsa_local.h"
 #include "crypto/asn1_dsa.h"
 #include "crypto/dsa.h"

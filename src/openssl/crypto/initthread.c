@@ -7,12 +7,12 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/crypto.h>
-#include <openssl/core_dispatch.h>
-#include "crypto/cryptlib.h"
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/core_dispatch.h"
+#include "../include/crypto/cryptlib.h"
 #include "prov/providercommon.h"
-#include "internal/thread_once.h"
-#include "crypto/context.h"
+#include "../include/internal/thread_once.h"
+#include "../include/crypto/context.h"
 
 #ifdef FIPS_MODULE
 #include "prov/provider_ctx.h"

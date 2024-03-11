@@ -11,19 +11,19 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#include "internal/nelem.h"
-#include "internal/o_dir.h"
-#include <openssl/bio.h>
-#include <openssl/pem.h>
-#include <openssl/store.h>
+#include "../include/internal/nelem.h"
+#include "../include/internal/o_dir.h"
+#include "../include/openssl/bio.h"
+#include "../include/openssl/pem.h"
+#include "../include/openssl/store.h"
 #include "../include/openssl/x509v3.h"
 #include "../include/openssl/dh.h"
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include "../include/openssl/crypto.h"
-#include "internal/refcount.h"
+#include "../include/internal/refcount.h"
 #include "ssl_local.h"
 #include "ssl_cert_table.h"
-#include "internal/thread_once.h"
+#include "../include/internal/thread_once.h"
 #ifndef OPENSSL_NO_POSIX_IO
 # include <sys/stat.h>
 # ifdef _WIN32

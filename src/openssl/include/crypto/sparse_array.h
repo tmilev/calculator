@@ -12,7 +12,7 @@
 # define OSSL_CRYPTO_SPARSE_ARRAY_H
 # pragma once
 
-# include <openssl/e_os2.h>
+# include "../openssl/e_os2.h"
 
 # ifdef __cplusplus
 extern "C" {

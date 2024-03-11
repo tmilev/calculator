@@ -15,7 +15,7 @@
 
 #include <string.h>
 #include "ec_local.h"
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/asn1t.h>
 #include <openssl/objects.h>
 #include "internal/nelem.h"

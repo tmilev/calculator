@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "ssl_local.h"
 #include "statem/statem_local.h"
-#include "internal/e_os.h"
+#include "../include/internal/e_os.h"
 #include "../include/openssl/objects.h"
 #include "../include/openssl/x509v3.h"
 #include "../include/openssl/rand.h"

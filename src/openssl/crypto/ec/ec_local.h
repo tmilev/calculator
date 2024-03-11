@@ -12,7 +12,7 @@
 
 #include <openssl/obj_mac.h>
 #include <openssl/ec.h>
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include "internal/refcount.h"
 #include "crypto/ec.h"
 

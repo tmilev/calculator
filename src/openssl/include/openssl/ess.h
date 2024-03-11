@@ -20,7 +20,7 @@
 
 # include "safestack.h"
 # include "x509.h"
-# include <openssl/esserr.h>
+# include "esserr.h"
 
 # ifdef  __cplusplus
 extern "C" {

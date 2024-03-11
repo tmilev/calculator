@@ -12,7 +12,7 @@
 # pragma once
 
 #include "opensslconf.h"
-#include <openssl/opensslv.h>
+#include "opensslv.h"
 
 
 /* Helper macros for CPP string composition */

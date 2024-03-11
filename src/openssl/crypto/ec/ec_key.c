@@ -14,11 +14,11 @@
  */
 #include "internal/deprecated.h"
 
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <string.h>
 #include "ec_local.h"
 #include "internal/refcount.h"
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #ifndef FIPS_MODULE
 # include <openssl/engine.h>
 #endif

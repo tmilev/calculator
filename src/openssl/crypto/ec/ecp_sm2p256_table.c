@@ -21,7 +21,7 @@
  * x coordinate and four for the y. Both values are in little-endian order.
  */
 
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 
 #if defined(__GNUC__)
 __attribute((aligned(4096)))

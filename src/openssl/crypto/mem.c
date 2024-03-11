@@ -8,12 +8,12 @@
  */
 
 #include "internal/e_os.h"
-#include "internal/cryptlib.h"
-#include "crypto/cryptlib.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/crypto/cryptlib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 
 /*
  * the following pointers may be changed as long as 'allow_customize' is set
@@ -24,7 +24,7 @@ static CRYPTO_realloc_fn realloc_impl = CRYPTO_realloc;
 static CRYPTO_free_fn free_impl = CRYPTO_free;
 
 #if !defined(OPENSSL_NO_CRYPTO_MDEBUG) && !defined(FIPS_MODULE)
-# include "internal/tsan_assist.h"
+# include "../include/internal/tsan_assist.h"
 
 # ifdef TSAN_REQUIRES_LOCKING
 #  define INCREMENT(x) /* empty */

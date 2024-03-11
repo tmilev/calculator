@@ -15,7 +15,7 @@
 
 #include <openssl/types.h>
 #include <openssl/evp.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/rsa.h>
 #include <openssl/ec.h>
 #include "crypto/types.h"

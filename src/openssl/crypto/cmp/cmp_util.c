@@ -13,7 +13,7 @@
 #include <openssl/cmp_util.h>
 #include "cmp_local.h" /* just for decls of internal functions defined here */
 #include <openssl/cmperr.h>
-#include <openssl/err.h> /* should be implied by cmperr.h */
+#include "../include/openssl/err.h" /* should be implied by cmperr.h */
 #include <openssl/x509v3.h>
 
 /*

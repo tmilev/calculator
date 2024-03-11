@@ -9,13 +9,13 @@
 
 #include <stdio.h>
 #include "ssl_local.h"
-#include "internal/packet.h"
-#include <openssl/bio.h>
+#include "../include/internal/packet.h"
+#include "../include/openssl/bio.h"
 #include "../include/openssl/objects.h"
-#include <openssl/evp.h>
-#include <openssl/x509.h>
+#include "../include/openssl/evp.h"
+#include "../include/openssl/x509.h"
 #include "../include/openssl/x509v3.h"
-#include <openssl/pem.h>
+#include "../include/openssl/pem.h"
 
 static int ssl_set_cert(CERT *c, X509 *x509, SSL_CTX *ctx);
 static int ssl_set_pkey(CERT *c, EVP_PKEY *pkey, SSL_CTX *ctx);

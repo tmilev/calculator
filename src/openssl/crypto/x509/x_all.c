@@ -14,7 +14,7 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <openssl/buffer.h>
 #include <openssl/asn1.h>
 #include <openssl/evp.h>

@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include <openssl/ct.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/evp.h>
 #include <openssl/x509.h>
 

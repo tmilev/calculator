@@ -25,7 +25,7 @@
 # ifndef OPENSSL_NO_DEPRECATED_1_1_0
 #  include "bn.h"
 # endif
-# include <openssl/rsaerr.h>
+# include "rsaerr.h"
 # include "safestack.h"
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>

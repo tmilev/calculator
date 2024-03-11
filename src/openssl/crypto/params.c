@@ -10,8 +10,8 @@
 
 #include <string.h>
 #include <openssl/params.h>
-#include <openssl/err.h>
-#include "internal/thread_once.h"
+#include "../include/openssl/err.h"
+#include "../include/internal/thread_once.h"
 #include "internal/numbers.h"
 #include "internal/endian.h"
 #include "internal/params.h"

@@ -9,11 +9,11 @@
 
 #include <stdio.h>
 #include "ssl_local.h"
-#include <openssl/conf.h>
+#include "../include/openssl/conf.h"
 #include "../include/openssl/objects.h"
-#include <openssl/decoder.h>
-#include <openssl/core_dispatch.h>
-#include "internal/nelem.h"
+#include "../include/openssl/decoder.h"
+#include "../include/openssl/core_dispatch.h"
+#include "../include/internal/nelem.h"
 
 /*
  * structure holding name tables. This is used for permitted elements in lists

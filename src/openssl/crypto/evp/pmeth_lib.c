@@ -23,7 +23,7 @@
 #include <openssl/dh.h>
 #include <openssl/rsa.h>
 #include <openssl/kdf.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #ifndef FIPS_MODULE
 # include "crypto/asn1.h"
 #endif
@@ -32,7 +32,7 @@
 #include "crypto/ec.h"
 #include "internal/ffc.h"
 #include "internal/numbers.h"
-#include "internal/provider.h"
+#include "../include/internal/provider.h"
 #include "evp_local.h"
 
 #ifndef FIPS_MODULE

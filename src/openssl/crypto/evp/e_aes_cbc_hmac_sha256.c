@@ -16,13 +16,13 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 #include <openssl/evp.h>
 #include <openssl/objects.h>
 #include <openssl/aes.h>
 #include <openssl/sha.h>
 #include <openssl/rand.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "crypto/modes.h"
 #include "internal/constant_time.h"
 #include "crypto/evp.h"

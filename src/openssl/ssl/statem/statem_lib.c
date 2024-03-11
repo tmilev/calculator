@@ -14,13 +14,13 @@
 #include "../ssl_local.h"
 #include "statem_local.h"
 #include "internal/cryptlib.h"
-#include <openssl/buffer.h>
+#include "../include/openssl/buffer.h"
 #include "../include/openssl/objects.h"
-#include <openssl/evp.h>
-#include <openssl/rsa.h>
-#include <openssl/x509.h>
+#include "../include/openssl/evp.h"
+#include "../include/openssl/rsa.h"
+#include "../include/openssl/x509.h"
 #include "../include/openssl/trace.h"
-#include <openssl/encoder.h>
+#include "../include/openssl/encoder.h"
 
 /*
  * Map error codes to TLS/SSL alart types.

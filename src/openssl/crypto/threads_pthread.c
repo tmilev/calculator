@@ -10,8 +10,8 @@
 /* We need to use the OPENSSL_fork_*() deprecated APIs */
 #define OPENSSL_SUPPRESS_DEPRECATED
 
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
+#include "../include/openssl/crypto.h"
+#include "../include/internal/cryptlib.h"
 
 #if defined(__sun)
 # include <atomic.h>

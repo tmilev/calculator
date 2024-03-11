@@ -24,7 +24,7 @@
 # include "bio.h"
 # include "x509.h"
 # include "conf.h"
-# include <openssl/x509v3err.h>
+# include "x509v3err.h"
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
 # endif

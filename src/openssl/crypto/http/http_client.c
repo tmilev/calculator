@@ -15,7 +15,7 @@
 #include <string.h>
 #include <openssl/asn1.h>
 #include <openssl/evp.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/httperr.h>
 #include <openssl/cmperr.h>
 #include <openssl/buffer.h>

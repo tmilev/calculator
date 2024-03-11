@@ -17,10 +17,10 @@
 #include <string.h>
 #include <openssl/objects.h>
 #include "internal/comp.h"
-#include <openssl/err.h>
-#include "crypto/cryptlib.h"
-#include "internal/bio.h"
-#include "internal/thread_once.h"
+#include "../include/openssl/err.h"
+#include "../include/crypto/cryptlib.h"
+#include "../include/internal/bio.h"
+#include "../include/internal/thread_once.h"
 #include "comp_local.h"
 
 COMP_METHOD *COMP_zstd(void);

@@ -20,16 +20,16 @@
 
 # ifndef OPENSSL_NO_TS
 # include "symhacks.h"
-# include <openssl/buffer.h>
+# include "buffer.h"
 # include "evp.h"
 # include "bio.h"
 # include "asn1.h"
 # include "safestack.h"
-# include <openssl/rsa.h>
-# include <openssl/dsa.h>
-# include <openssl/dh.h>
-# include <openssl/tserr.h>
-# include <openssl/ess.h>
+# include "rsa.h"
+# include "dsa.h"
+# include "dh.h"
+# include "tserr.h"
+# include "ess.h"
 # include "x509.h"
 # include "x509v3.h"
 # ifndef OPENSSL_NO_STDIO

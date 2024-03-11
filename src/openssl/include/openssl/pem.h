@@ -21,7 +21,7 @@
 # include "safestack.h"
 # include "evp.h"
 # include "x509.h"
-# include <openssl/pemerr.h>
+# include "pemerr.h"
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
 # endif

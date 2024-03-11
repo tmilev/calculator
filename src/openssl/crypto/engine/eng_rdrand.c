@@ -10,15 +10,15 @@
 /* We need to use some engine deprecated APIs */
 #define OPENSSL_SUPPRESS_DEPRECATED
 
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 
 #include <stdio.h>
 #include <string.h>
 #include "crypto/engine.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <openssl/rand.h>
-#include <openssl/err.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/crypto.h"
 
 #if defined(__has_feature)
 # if __has_feature(memory_sanitizer)

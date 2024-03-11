@@ -9,8 +9,8 @@
 
 #include <string.h>
 #include <openssl/ocsp.h>
-#include <openssl/err.h>
-#include "internal/sizes.h"
+#include "../include/openssl/err.h"
+#include "../include/internal/sizes.h"
 #include "ocsp_local.h"
 
 static int ocsp_find_signer(X509 **psigner, OCSP_BASICRESP *bs,

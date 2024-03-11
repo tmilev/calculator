@@ -11,13 +11,13 @@
 #include <stdlib.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
-#include <openssl/core.h>
+#include "../include/openssl/core.h"
 #include <openssl/core_names.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
+#include "../include/openssl/crypto.h"
+#include "../include/internal/cryptlib.h"
 #include "internal/numbers.h"
-#include "internal/provider.h"
-#include "internal/core.h"
+#include "../include/internal/provider.h"
+#include "../include/internal/core.h"
 #include "crypto/evp.h"
 #include "evp_local.h"
 

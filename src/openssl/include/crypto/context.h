@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/core.h>
+#include "../openssl/core.h"
 
 void *ossl_provider_store_new(OSSL_LIB_CTX *);
 void *ossl_property_string_data_new(OSSL_LIB_CTX *);

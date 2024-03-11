@@ -40,7 +40,7 @@
 #include <openssl/e_os2.h>
 
 #include <string.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "ec_local.h"
 
 #include "internal/numbers.h"

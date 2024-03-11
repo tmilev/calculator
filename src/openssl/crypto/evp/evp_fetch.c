@@ -10,14 +10,14 @@
 #include <stddef.h>
 #include <openssl/types.h>
 #include <openssl/evp.h>
-#include <openssl/core.h>
-#include "internal/cryptlib.h"
-#include "internal/thread_once.h"
-#include "internal/property.h"
-#include "internal/core.h"
-#include "internal/provider.h"
-#include "internal/namemap.h"
-#include "crypto/decoder.h"
+#include "../include/openssl/core.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/thread_once.h"
+#include "../include/internal/property.h"
+#include "../include/internal/core.h"
+#include "../include/internal/provider.h"
+#include "../include/internal/namemap.h"
+#include "../include/crypto/decoder.h"
 #include "crypto/evp.h"    /* evp_local.h needs it */
 #include "evp_local.h"
 

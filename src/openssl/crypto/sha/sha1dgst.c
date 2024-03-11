@@ -13,8 +13,8 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/crypto.h>
-#include <openssl/opensslconf.h>
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/opensslconf.h"
 
 #include <openssl/opensslv.h>
 #include <openssl/evp.h>

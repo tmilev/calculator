@@ -11,10 +11,10 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <openssl/evp.h>
 #include <openssl/ec.h>
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 
 #ifndef OPENSSL_NO_DEPRECATED_3_0
 # ifndef OPENSSL_NO_STDIO

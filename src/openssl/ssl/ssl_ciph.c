@@ -12,15 +12,15 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "../include/openssl/objects.h"
-#include <openssl/comp.h>
+#include "../include/openssl/comp.h"
 #include "../include/openssl/engine.h"
 #include "../include/openssl/crypto.h"
-#include <openssl/conf.h>
+#include "../include/openssl/conf.h"
 #include "../include/openssl/trace.h"
-#include "internal/nelem.h"
+#include "../include/internal/nelem.h"
 #include "ssl_local.h"
-#include "internal/thread_once.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/thread_once.h"
+#include "../include/internal/cryptlib.h"
 
 /* NB: make sure indices in these tables match values above */
 

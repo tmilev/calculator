@@ -10,7 +10,7 @@
 /* This must be the first #include file */
 #include "async_local.h"
 
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 
 ASYNC_WAIT_CTX *ASYNC_WAIT_CTX_new(void)
 {

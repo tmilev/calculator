@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 
 #include "crypto/poly1305.h"
 

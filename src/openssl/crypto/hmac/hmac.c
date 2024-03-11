@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "internal/cryptlib.h"
-#include <openssl/opensslconf.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/opensslconf.h"
 #include <openssl/hmac.h>
 #include <openssl/core_names.h>
 #include "hmac_local.h"

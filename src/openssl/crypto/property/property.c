@@ -11,19 +11,19 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <openssl/crypto.h>
-#include "internal/core.h"
-#include "internal/property.h"
-#include "internal/provider.h"
-#include "internal/tsan_assist.h"
+#include "../include/openssl/crypto.h"
+#include "../include/internal/core.h"
+#include "../include/internal/property.h"
+#include "../include/internal/provider.h"
+#include "../include/internal/tsan_assist.h"
 #include "crypto/ctype.h"
-#include <openssl/lhash.h>
+#include "../include/openssl/lhash.h"
 #include <openssl/rand.h>
-#include "internal/thread_once.h"
+#include "../include/internal/thread_once.h"
 #include "crypto/lhash.h"
 #include "crypto/sparse_array.h"
 #include "property_local.h"
-#include "crypto/context.h"
+#include "../include/crypto/context.h"
 
 /*
  * The number of elements in the query cache before we initiate a flush.

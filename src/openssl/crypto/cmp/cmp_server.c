@@ -17,7 +17,7 @@
 
 /* explicit #includes not strictly needed since implied by the above: */
 #include <openssl/cmp.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 
 /* the context for the generic CMP server */
 struct ossl_cmp_srv_ctx_st

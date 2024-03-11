@@ -12,12 +12,12 @@
 #include <string.h>
 #include "internal/conf.h"
 #include "crypto/ctype.h"
-#include <openssl/crypto.h>
-#include <openssl/err.h>
-#include <openssl/conf.h>
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/err.h"
+#include "../include/openssl/conf.h"
 #include <openssl/conf_api.h>
 #include "conf_local.h"
-#include <openssl/lhash.h>
+#include "../include/openssl/lhash.h"
 
 static CONF_METHOD *default_CONF_method = NULL;
 

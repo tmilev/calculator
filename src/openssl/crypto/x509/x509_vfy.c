@@ -15,8 +15,8 @@
 #include <limits.h>
 
 #include "crypto/ctype.h"
-#include "internal/cryptlib.h"
-#include <openssl/crypto.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/crypto.h"
 #include <openssl/buffer.h>
 #include <openssl/evp.h>
 #include <openssl/asn1.h>

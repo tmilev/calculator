@@ -10,7 +10,7 @@
 
 #include "internal/deprecated.h"
 
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #ifndef OPENSSL_NO_ARIA
 # include <openssl/evp.h>
 # include <openssl/modes.h>

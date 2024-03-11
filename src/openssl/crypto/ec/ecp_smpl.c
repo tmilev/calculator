@@ -14,7 +14,7 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/symhacks.h>
 
 #include "ec_local.h"

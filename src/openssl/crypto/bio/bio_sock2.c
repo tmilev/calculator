@@ -15,7 +15,7 @@
 #include "internal/ktls.h"
 #include "internal/bio_tfo.h"
 
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 
 #ifndef OPENSSL_NO_SOCK
 # ifdef SO_MAXCONN

@@ -24,12 +24,12 @@
 
 # include "opensslconf.h"
 # include "types.h"
-# include <openssl/core.h>
-# include <openssl/core_dispatch.h>
+# include "core.h"
+# include "core_dispatch.h"
 # include "symhacks.h"
 # include "bio.h"
-# include <openssl/evperr.h>
-# include <openssl/params.h>
+# include "evperr.h"
+# include "params.h"
 
 # define EVP_MAX_MD_SIZE                 64/* longest known is SHA512 */
 # define EVP_MAX_KEY_LENGTH              64

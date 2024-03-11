@@ -26,7 +26,7 @@
 
 #include <string.h>
 
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "crypto/bn.h"
 #include "ec_local.h"
 #include "internal/refcount.h"

@@ -14,7 +14,7 @@
 # define OSSL_CRYPTO_ARIA_H
 # pragma once
 
-# include <openssl/opensslconf.h>
+# include "../openssl/opensslconf.h"
 
 # ifdef OPENSSL_NO_ARIA
 #  error ARIA is disabled.

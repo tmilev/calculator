@@ -20,12 +20,12 @@
 
 #include <openssl/pem.h>
 #include <openssl/rand.h>
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include <openssl/dsa.h>
 #include <openssl/rsa.h>
 #include <openssl/kdf.h>
 #include <openssl/core_names.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "crypto/pem.h"
 #include "crypto/evp.h"
 

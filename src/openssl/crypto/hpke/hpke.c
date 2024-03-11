@@ -16,7 +16,7 @@
 #include <openssl/hpke.h>
 #include <openssl/sha.h>
 #include <openssl/evp.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "internal/hpke_util.h"
 #include "internal/nelem.h"
 #include "internal/common.h"

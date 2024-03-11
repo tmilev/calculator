@@ -8,12 +8,12 @@
  */
 
 #include <assert.h>
-#include <openssl/bio.h>
-#include <openssl/ssl.h>
+#include "../include/openssl/bio.h"
+#include "../include/openssl/ssl.h"
 #include "../include/openssl/err.h"
 #include "../../../include/openssl/core_names.h"
-#include <openssl/comp.h>
-#include <openssl/ssl.h>
+#include "../include/openssl/comp.h"
+#include "../include/openssl/ssl.h"
 #include "../../../include/internal/e_os.h"
 #include "../../../include/internal/packet.h"
 #include "../../../include/internal/ssl3_cbc.h"

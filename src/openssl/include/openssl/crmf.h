@@ -22,9 +22,9 @@
 # include "opensslconf.h"
 
 # ifndef OPENSSL_NO_CRMF
-#  include <openssl/opensslv.h>
+#  include "opensslv.h"
 #  include "safestack.h"
-#  include <openssl/crmferr.h>
+#  include "crmferr.h"
 #  include "x509v3.h" /* for GENERAL_NAME etc. */
 
 /* explicit #includes not strictly needed since implied by the above: */

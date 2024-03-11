@@ -14,12 +14,12 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <openssl/asn1t.h>
 #include <openssl/x509.h>
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include <openssl/core_names.h>
-#include <openssl/param_build.h>
+#include "../include/openssl/param_build.h"
 #include "crypto/asn1.h"
 #include "crypto/evp.h"
 #include "crypto/rsa.h"

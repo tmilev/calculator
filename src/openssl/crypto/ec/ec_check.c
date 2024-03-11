@@ -14,7 +14,7 @@
 #include "internal/deprecated.h"
 
 #include "ec_local.h"
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 
 int EC_GROUP_check_named_curve(const EC_GROUP *group, int nist_only,
                                BN_CTX *ctx)

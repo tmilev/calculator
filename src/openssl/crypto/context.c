@@ -7,15 +7,15 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "crypto/cryptlib.h"
-#include <openssl/conf.h>
-#include "internal/thread_once.h"
-#include "internal/property.h"
-#include "internal/core.h"
-#include "internal/bio.h"
-#include "internal/provider.h"
-#include "crypto/decoder.h"
-#include "crypto/context.h"
+#include "../include/crypto/cryptlib.h"
+#include "../include/openssl/conf.h"
+#include "../include/internal/thread_once.h"
+#include "../include/internal/property.h"
+#include "../include/internal/core.h"
+#include "../include/internal/bio.h"
+#include "../include/internal/provider.h"
+#include "../include/crypto/decoder.h"
+#include "../include/crypto/context.h"
 
 struct ossl_lib_ctx_st {
     CRYPTO_RWLOCK *lock, *rand_crngt_lock;

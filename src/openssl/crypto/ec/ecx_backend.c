@@ -12,7 +12,7 @@
 #include <openssl/params.h>
 #include <openssl/ec.h>
 #include <openssl/rand.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #ifndef FIPS_MODULE
 # include <openssl/x509.h>
 #endif

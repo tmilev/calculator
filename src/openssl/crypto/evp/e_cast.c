@@ -14,7 +14,7 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_CAST
 # include <openssl/evp.h>

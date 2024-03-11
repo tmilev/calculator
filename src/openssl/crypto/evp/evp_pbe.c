@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <openssl/evp.h>
-#include <openssl/core.h>
+#include "../include/openssl/core.h"
 #include <openssl/core_names.h>
 #include <openssl/pkcs12.h>
 #include <openssl/x509.h>

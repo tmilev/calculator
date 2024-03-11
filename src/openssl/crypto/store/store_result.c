@@ -10,15 +10,15 @@
 #include "internal/e_os.h"
 #include <string.h>
 
-#include <openssl/core.h>
+#include "../include/openssl/core.h"
 #include <openssl/core_names.h>
 #include <openssl/core_object.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/pkcs12.h>
 #include <openssl/provider.h>
 #include <openssl/decoder.h>
 #include <openssl/store.h>
-#include "internal/provider.h"
+#include "../include/internal/provider.h"
 #include "internal/passphrase.h"
 #include "crypto/evp.h"
 #include "crypto/x509.h"

@@ -13,14 +13,14 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include <openssl/core_names.h>
 #ifndef FIPS_MODULE
 # include <openssl/engine.h>
 #endif
 #include <openssl/evp.h>
-#include <openssl/param_build.h>
-#include "internal/cryptlib.h"
+#include "../include/openssl/param_build.h"
+#include "../include/internal/cryptlib.h"
 #include "internal/refcount.h"
 #include "crypto/bn.h"
 #include "crypto/evp.h"

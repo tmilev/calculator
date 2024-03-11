@@ -9,13 +9,13 @@
  */
 
 #include <string.h>
-#include <openssl/err.h>
-#include <openssl/lhash.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/lhash.h"
 #include "internal/propertyerr.h"
-#include "internal/property.h"
-#include "internal/core.h"
+#include "../include/internal/property.h"
+#include "../include/internal/core.h"
 #include "property_local.h"
-#include "crypto/context.h"
+#include "../include/crypto/context.h"
 
 /*
  * Implement a property definition cache.

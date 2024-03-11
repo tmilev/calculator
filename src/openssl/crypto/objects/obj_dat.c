@@ -10,13 +10,13 @@
 #include <stdio.h>
 #include "crypto/ctype.h"
 #include <limits.h>
-#include "internal/cryptlib.h"
-#include "internal/thread_once.h"
-#include "internal/tsan_assist.h"
-#include <openssl/lhash.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/thread_once.h"
+#include "../include/internal/tsan_assist.h"
+#include "../include/openssl/lhash.h"
 #include <openssl/asn1.h>
 #include "crypto/objects.h"
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include "crypto/asn1.h"
 #include "obj_local.h"
 

@@ -18,9 +18,9 @@
 #include "crypto/sm2.h"
 #include "crypto/sm2err.h"
 #include "crypto/ec.h" /* ossl_ecdh_kdf_X9_63() */
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/evp.h>
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include <openssl/asn1.h>
 #include <openssl/asn1t.h>
 #include <string.h>

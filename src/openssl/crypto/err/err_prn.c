@@ -10,10 +10,10 @@
 #define OSSL_FORCE_ERR_STATE
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/crypto.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/crypto.h"
 #include <openssl/buffer.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "err_local.h"
 
 #define ERR_PRINT_BUF_SIZE 4096

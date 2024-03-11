@@ -10,9 +10,9 @@
 #include "../include/openssl/crypto.h"
 #include "../include/openssl/err.h"
 #include <assert.h>
-#include "internal/priority_queue.h"
-#include "internal/safe_math.h"
-#include "internal/numbers.h"
+#include "../include/internal/priority_queue.h"
+#include "../include/internal/safe_math.h"
+#include "../include/internal/numbers.h"
 
 OSSL_SAFE_MATH_UNSIGNED(size_t, size_t)
 

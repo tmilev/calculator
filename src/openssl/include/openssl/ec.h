@@ -103,7 +103,7 @@ const char *OSSL_EC_curve_nid2name(int nid);
 #   define OPENSSL_ECC_MAX_FIELD_BITS 661
 #  endif
 
-#  include <openssl/params.h>
+#  include "params.h"
 #  ifndef OPENSSL_NO_DEPRECATED_3_0
 typedef struct ec_method_st EC_METHOD;
 #  endif

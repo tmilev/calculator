@@ -12,7 +12,7 @@
 #include "internal/quic_record_tx.h"
 #include "internal/quic_wire_pkt.h"
 #include "../ssl_local.h"
-#include <openssl/kdf.h>
+#include "../include/openssl/kdf.h"
 #include "../include/openssl/core_names.h"
 
 /*

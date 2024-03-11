@@ -7,15 +7,15 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <openssl/asn1t.h>
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/cms.h>
 #include <openssl/rand.h>
 #include <openssl/aes.h>
-#include "internal/sizes.h"
+#include "../include/internal/sizes.h"
 #include "crypto/asn1.h"
 #include "cms_local.h"
 

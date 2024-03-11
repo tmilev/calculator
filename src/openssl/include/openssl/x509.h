@@ -25,21 +25,21 @@
 # include "e_os2.h"
 # include "types.h"
 # include "symhacks.h"
-# include <openssl/buffer.h>
+# include "buffer.h"
 # include "evp.h"
 # include "bio.h"
 # include "asn1.h"
 # include "safestack.h"
-# include <openssl/ec.h>
+# include "ec.h"
 
 # ifndef OPENSSL_NO_DEPRECATED_1_1_0
-#  include <openssl/rsa.h>
-#  include <openssl/dsa.h>
-#  include <openssl/dh.h>
+#  include "rsa.h"
+#  include "dsa.h"
+#  include "dh.h"
 # endif
 
-# include <openssl/sha.h>
-# include <openssl/x509err.h>
+# include "sha.h"
+# include "x509err.h"
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
 # endif

@@ -12,8 +12,8 @@
 # define OSSL_CRYPTO_PKCS12ERR_H
 # pragma once
 
-# include <openssl/opensslconf.h>
-# include <openssl/symhacks.h>
+# include "../openssl/opensslconf.h"
+# include "../openssl/symhacks.h"
 
 # ifdef  __cplusplus
 extern "C" {

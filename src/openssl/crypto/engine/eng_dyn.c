@@ -12,7 +12,7 @@
 
 #include "eng_local.h"
 #include "internal/dso.h"
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 
 /*
  * Shared libraries implementing ENGINEs for use by the "dynamic" ENGINE

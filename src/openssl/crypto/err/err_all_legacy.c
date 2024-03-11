@@ -21,7 +21,7 @@
 # include "crypto/cmserr.h"
 # include "crypto/comperr.h"
 # include "crypto/conferr.h"
-# include "crypto/cryptoerr.h"
+# include "../include/crypto/cryptoerr.h"
 # include "crypto/cterr.h"
 # include "crypto/dherr.h"
 # include "crypto/dsaerr.h"

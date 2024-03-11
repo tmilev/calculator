@@ -10,13 +10,13 @@
 #include <string.h>
 #include <stdarg.h>
 #include <openssl/evp.h>
-#include <openssl/err.h>
-#include <openssl/core.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/core.h"
 #include <openssl/core_names.h>
 #include <openssl/types.h>
 #include "internal/nelem.h"
 #include "crypto/evp.h"
-#include "internal/provider.h"
+#include "../include/internal/provider.h"
 #include "evp_local.h"
 
 EVP_MAC_CTX *EVP_MAC_CTX_new(EVP_MAC *mac)

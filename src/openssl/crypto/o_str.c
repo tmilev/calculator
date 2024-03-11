@@ -10,10 +10,10 @@
 #include "internal/e_os.h"
 #include <string.h>
 #include <limits.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include "crypto/ctype.h"
-#include "internal/cryptlib.h"
-#include "internal/thread_once.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/thread_once.h"
 
 #define DEFAULT_SEPARATOR ':'
 #define CH_ZERO '\0'

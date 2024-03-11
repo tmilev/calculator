@@ -12,7 +12,7 @@
 # pragma once
 
 # include "macros.h"
-# include <openssl/ssl.h>
+# include "ssl.h"
 
 # ifndef OPENSSL_NO_QUIC
 

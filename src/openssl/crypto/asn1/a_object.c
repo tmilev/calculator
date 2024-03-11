@@ -10,11 +10,11 @@
 #include <stdio.h>
 #include <limits.h>
 #include "crypto/ctype.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <openssl/buffer.h>
 #include <openssl/asn1.h>
 #include <openssl/objects.h>
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include "crypto/asn1.h"
 #include "asn1_local.h"
 

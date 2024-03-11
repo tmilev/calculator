@@ -13,7 +13,7 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/core_names.h>
 #ifndef FIPS_MODULE
 # include <openssl/x509.h>

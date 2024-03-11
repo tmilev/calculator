@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/ssl.h>
-#include <internal/quic_tserver.h>
+#include "../../include/openssl/ssl.h"
+#include "../../include/internal/quic_tserver.h"
 
 /* Type to represent the Fault Injector */
 typedef struct qtest_fault QTEST_FAULT;

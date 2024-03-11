@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "crypto/ctype.h"
 #include "bn_local.h"
 

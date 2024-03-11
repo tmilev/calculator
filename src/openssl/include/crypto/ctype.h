@@ -22,7 +22,7 @@
 # define OSSL_CRYPTO_CTYPE_H
 # pragma once
 
-# include <openssl/e_os2.h>
+# include "../openssl/e_os2.h"
 
 # define CTYPE_MASK_lower       0x1
 # define CTYPE_MASK_upper       0x2

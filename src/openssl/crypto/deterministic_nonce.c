@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include <openssl/evp.h>
 #include <openssl/core_names.h>
 #include <openssl/kdf.h>

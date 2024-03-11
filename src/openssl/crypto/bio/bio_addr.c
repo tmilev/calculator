@@ -25,12 +25,12 @@
 #include <string.h>
 
 #include "bio_local.h"
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 
 #ifndef OPENSSL_NO_SOCK
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/buffer.h>
-#include "internal/thread_once.h"
+#include "../include/internal/thread_once.h"
 
 CRYPTO_RWLOCK *bio_lookup_lock;
 static CRYPTO_ONCE bio_lookup_init = CRYPTO_ONCE_STATIC_INIT;

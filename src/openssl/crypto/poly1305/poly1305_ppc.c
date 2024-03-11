@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 #include <openssl/types.h>
 #include "crypto/poly1305.h"
 #include "crypto/ppc_arch.h"

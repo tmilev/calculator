@@ -6,7 +6,7 @@
  * in the file LICENSE in the source distribution or at
  * https://www.openssl.org/source/license.html
  */
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 
 #ifdef OPENSSL_SYS_UNIX
 # ifndef OPENSSL_NO_DEPRECATED_3_0

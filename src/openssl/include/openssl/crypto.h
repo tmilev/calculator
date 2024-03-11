@@ -32,11 +32,11 @@
 # endif
 
 # include "safestack.h"
-# include <openssl/opensslv.h>
+# include "opensslv.h"
 # include "types.h"
 # include "opensslconf.h"
-# include <openssl/cryptoerr.h>
-# include <openssl/core.h>
+# include "cryptoerr.h"
+# include "core.h"
 
 # ifdef CHARSET_EBCDIC
 #  include <openssl/ebcdic.h>
@@ -49,7 +49,7 @@
 # include "symhacks.h"
 
 # ifndef OPENSSL_NO_DEPRECATED_1_1_0
-#  include <openssl/opensslv.h>
+#  include "opensslv.h"
 # endif
 
 #ifdef  __cplusplus

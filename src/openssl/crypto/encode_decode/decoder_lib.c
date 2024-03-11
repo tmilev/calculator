@@ -16,10 +16,10 @@
 #include <openssl/pkcs12err.h>
 #include <openssl/x509err.h>
 #include <openssl/trace.h>
-#include "internal/bio.h"
-#include "internal/provider.h"
-#include "internal/namemap.h"
-#include "crypto/decoder.h"
+#include "../include/internal/bio.h"
+#include "../include/internal/provider.h"
+#include "../include/internal/namemap.h"
+#include "../include/crypto/decoder.h"
 #include "encoder_local.h"
 #include "internal/e_os.h"
 

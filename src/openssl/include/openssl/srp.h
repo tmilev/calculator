@@ -32,7 +32,7 @@
 # include <string.h>
 # include "safestack.h"
 # include "bn.h"
-# include <openssl/crypto.h>
+# include "crypto.h"
 
 # ifdef  __cplusplus
 extern "C" {

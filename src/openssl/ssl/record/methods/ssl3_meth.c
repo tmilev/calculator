@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/evp.h>
+#include "../include/openssl/evp.h"
 #include "../../../include/openssl/core_names.h"
 #include "internal/ssl3_cbc.h"
 #include "../../ssl_local.h"

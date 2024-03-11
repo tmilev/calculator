@@ -8,8 +8,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/bn.h>
-#include <openssl/err.h>
+#include "../include/openssl/bn.h"
+#include "../include/openssl/err.h"
 #include "rsa_local.h"
 
 void ossl_rsa_multip_info_free_ex(RSA_PRIME_INFO *pinfo)

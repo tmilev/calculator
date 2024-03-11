@@ -10,10 +10,10 @@
 #include <stdio.h>
 #include <errno.h>
 #include "../ssl_local.h"
-#include <openssl/evp.h>
-#include <openssl/buffer.h>
+#include "../include/openssl/evp.h"
+#include "../include/openssl/buffer.h"
 #include "record_local.h"
-#include "internal/packet.h"
+#include "../include/internal/packet.h"
 #include "internal/cryptlib.h"
 
 int DTLS_RECORD_LAYER_new(RECORD_LAYER *rl)

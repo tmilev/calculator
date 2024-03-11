@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 
 static int keep_alive(int keep_alive, int body_type)
 {

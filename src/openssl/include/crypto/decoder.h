@@ -11,7 +11,7 @@
 # define OSSL_CRYPTO_DECODER_H
 # pragma once
 
-# include <openssl/decoder.h>
+# include "../openssl/decoder.h"
 
 /*
  * These are specially made for the 'file:' provider-native loader, which

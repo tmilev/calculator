@@ -37,11 +37,11 @@
  * work which got its smarts from Daniel J. Bernstein's work on the same.
  */
 
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 
 #include <stdint.h>
 #include <string.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "ec_local.h"
 
 #include "internal/numbers.h"

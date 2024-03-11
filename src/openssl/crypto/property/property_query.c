@@ -8,7 +8,7 @@
  */
 
 #include "internal/propertyerr.h"
-#include "internal/property.h"
+#include "../include/internal/property.h"
 #include "property_local.h"
 
 static int property_idx_cmp(const void *keyp, const void *compare)

@@ -21,7 +21,7 @@ use OpenSSL::stackhash qw(generate_stack_macros);
 
 # include "safestack.h"
 # include "x509.h"
-# include <openssl/esserr.h>
+# include "esserr.h"
 
 # ifdef  __cplusplus
 extern "C" {

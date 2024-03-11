@@ -22,8 +22,8 @@
 #include <string.h>
 
 #include "bio_local.h"
-#include <openssl/err.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/crypto.h"
 
 static int bio_new(BIO *bio);
 static int bio_free(BIO *bio);

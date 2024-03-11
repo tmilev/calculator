@@ -16,17 +16,17 @@
 
 #include "internal/e_os.h"
 
-#include <openssl/crypto.h>
-#include <openssl/err.h>
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/err.h"
 #include <openssl/trace.h>
 #include <openssl/core_names.h>
 #include <openssl/provider.h>
-#include <openssl/param_build.h>
+#include "../include/openssl/param_build.h"
 #include <openssl/store.h>
-#include "internal/thread_once.h"
-#include "internal/cryptlib.h"
-#include "internal/provider.h"
-#include "internal/bio.h"
+#include "../include/internal/thread_once.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/provider.h"
+#include "../include/internal/bio.h"
 #include "crypto/store.h"
 #include "store_local.h"
 

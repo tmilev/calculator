@@ -18,7 +18,7 @@
 #include <openssl/asn1t.h>
 #include <openssl/cmp.h>
 #include <openssl/crmf.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/x509.h>
 
 /* Verify a message protected by signature according to RFC section 5.1.3.3 */

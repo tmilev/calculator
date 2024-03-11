@@ -15,7 +15,7 @@
 #define OPENSSL_SUPPRESS_DEPRECATED
 
 #ifndef OPENSSL_NO_SRP
-# include "internal/cryptlib.h"
+# include "../include/internal/cryptlib.h"
 # include <openssl/sha.h>
 # include <openssl/srp.h>
 # include <openssl/evp.h>

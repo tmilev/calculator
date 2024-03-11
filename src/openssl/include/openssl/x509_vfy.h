@@ -31,7 +31,7 @@
 # include "opensslconf.h"
 # include "lhash.h"
 # include "bio.h"
-# include <openssl/crypto.h>
+# include "crypto.h"
 # include "symhacks.h"
 
 #ifdef  __cplusplus

@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "internal/der.h"
 #include "crypto/bn.h"
 

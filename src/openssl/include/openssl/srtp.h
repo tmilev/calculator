@@ -22,7 +22,7 @@
 #  define HEADER_D1_SRTP_H
 # endif
 
-# include <openssl/ssl.h>
+# include "ssl.h"
 
 #ifdef  __cplusplus
 extern "C" {

@@ -18,7 +18,7 @@
 #  define HEADER_TLS1_H
 # endif
 
-# include <openssl/buffer.h>
+# include "buffer.h"
 # include "x509.h"
 # include "prov_ssl.h"
 

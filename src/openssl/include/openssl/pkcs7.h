@@ -27,7 +27,7 @@
 
 # include "symhacks.h"
 # include "types.h"
-# include <openssl/pkcs7err.h>
+# include "pkcs7err.h"
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
 # endif

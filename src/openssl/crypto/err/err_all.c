@@ -8,9 +8,9 @@
  */
 
 #include <stdio.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "crypto/err.h"
-#include "crypto/cryptoerr.h"
+#include "../include/crypto/cryptoerr.h"
 #include "crypto/asn1err.h"
 #include "crypto/bnerr.h"
 #include "crypto/ecerr.h"

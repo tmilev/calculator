@@ -11,10 +11,10 @@
 # define OSSL_CRYPTO_DH_H
 # pragma once
 
-# include <openssl/core.h>
-# include <openssl/params.h>
-# include <openssl/dh.h>
-# include "internal/ffc.h"
+# include "../openssl/core.h"
+# include "../openssl/params.h"
+# include "../openssl/dh.h"
+# include "../internal/ffc.h"
 
 DH *ossl_dh_new_by_nid_ex(OSSL_LIB_CTX *libctx, int nid);
 DH *ossl_dh_new_ex(OSSL_LIB_CTX *libctx);

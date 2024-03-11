@@ -15,9 +15,9 @@
 #include "crypto/sm2err.h"
 #include "crypto/ec.h" /* ossl_ec_group_do_inverse_ord() */
 #include "internal/numbers.h"
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/evp.h>
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include <string.h>
 
 int ossl_sm2_compute_z_digest(uint8_t *out,

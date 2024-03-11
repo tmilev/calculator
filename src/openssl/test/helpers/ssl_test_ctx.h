@@ -10,8 +10,8 @@
 #ifndef OSSL_TEST_SSL_TEST_CTX_H
 #define OSSL_TEST_SSL_TEST_CTX_H
 
-#include <openssl/conf.h>
-#include <openssl/ssl.h>
+#include "../../include/openssl/conf.h"
+#include "../../include/openssl/ssl.h"
 
 typedef enum {
     SSL_TEST_SUCCESS = 0,  /* Default */

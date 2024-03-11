@@ -16,10 +16,10 @@
 #  define HEADER_OBJECTS_H
 # endif
 
-# include <openssl/obj_mac.h>
+# include "obj_mac.h"
 # include "bio.h"
 # include "asn1.h"
-# include <openssl/objectserr.h>
+# include "objectserr.h"
 
 # define OBJ_NAME_TYPE_UNDEF             0x00
 # define OBJ_NAME_TYPE_MD_METH           0x01

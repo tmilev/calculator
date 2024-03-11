@@ -7,13 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/crypto.h>
-#include <openssl/core_dispatch.h>
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/core_dispatch.h"
 #include <openssl/evp.h>
-#include <openssl/err.h>
-#include "internal/provider.h"
+#include "../include/openssl/err.h"
+#include "../include/internal/provider.h"
 #include "internal/refcount.h"
-#include "internal/core.h"
+#include "../include/internal/core.h"
 #include "crypto/evp.h"
 #include "evp_local.h"
 

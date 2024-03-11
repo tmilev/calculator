@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <openssl/evp.h>
-#include <openssl/lhash.h>
+#include "../include/openssl/lhash.h"
 #include <openssl/trace.h>
 #include "eng_local.h"
 

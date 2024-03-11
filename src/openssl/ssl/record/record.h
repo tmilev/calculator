@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/core_dispatch.h>
-#include "internal/recordmethod.h"
+#include "../../include/openssl/core_dispatch.h"
+#include "../../include/internal/recordmethod.h"
 
 /*****************************************************************************
  *                                                                           *

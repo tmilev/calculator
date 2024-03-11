@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include <openssl/sha.h>
 #include <openssl/evp.h>
 #include "crypto/sha.h"

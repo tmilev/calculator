@@ -18,12 +18,12 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 
 #include <stdio.h>
 #include <time.h>
-#include "internal/cryptlib.h"
-#include <openssl/bn.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/bn.h"
 #include <openssl/rsa.h>
 
 RSA *RSA_generate_key(int bits, unsigned long e_value,

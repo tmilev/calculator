@@ -16,14 +16,14 @@
 # include <sys/stat.h>
 #endif
 
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include <openssl/rand.h>
 #include <openssl/buffer.h>
 

@@ -12,11 +12,11 @@
  * slurp this code if applications are using them directly.
  */
 
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 
 #include <stdio.h>
 #include <time.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "bn_local.h"
 
 BIGNUM *BN_generate_prime(BIGNUM *ret, int bits, int safe,

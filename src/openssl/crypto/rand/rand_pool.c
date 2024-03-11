@@ -9,11 +9,11 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "internal/cryptlib.h"
-#include <openssl/opensslconf.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/opensslconf.h"
 #include "crypto/rand.h"
 #include <openssl/engine.h>
-#include "internal/thread_once.h"
+#include "../include/internal/thread_once.h"
 #include "crypto/rand_pool.h"
 
 /*

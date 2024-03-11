@@ -18,8 +18,8 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
+#include "../include/openssl/crypto.h"
+#include "../include/internal/cryptlib.h"
 #include "crypto/engine.h"
 #include <openssl/pem.h>
 #include <openssl/evp.h>

@@ -16,8 +16,8 @@
  * "SECURE HEAP IMPLEMENTATION").
  */
 #include "internal/e_os.h"
-#include <openssl/crypto.h>
-#include <openssl/err.h>
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/err.h"
 
 #include <string.h>
 

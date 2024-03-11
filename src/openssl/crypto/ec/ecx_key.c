@@ -8,7 +8,7 @@
  */
 
 #include <string.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/proverr.h>
 #include "crypto/ecx.h"
 #include "internal/common.h" /* for ossl_assert() */

@@ -9,8 +9,8 @@
  */
 
 #include <string.h>
-#include <openssl/err.h>
-#include <openssl/cryptoerr.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/cryptoerr.h"
 #include <openssl/params.h>
 #include <openssl/types.h>
 #include <openssl/safestack.h>

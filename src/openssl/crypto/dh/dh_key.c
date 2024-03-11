@@ -14,7 +14,7 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "dh_local.h"
 #include "crypto/bn.h"
 #include "crypto/dh.h"

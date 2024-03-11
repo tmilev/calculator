@@ -7,13 +7,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/core_dispatch.h>
-#include "internal/thread_once.h"
+#include "../include/openssl/core_dispatch.h"
+#include "../include/internal/thread_once.h"
 #include "internal/refcount.h"
 #include <openssl/dsa.h>
 #include <openssl/engine.h>
 #include <openssl/evp.h>
-#include <openssl/lhash.h>
+#include "../include/openssl/lhash.h"
 #include <openssl/x509.h>
 #include <openssl/store.h>
 #include "internal/passphrase.h"

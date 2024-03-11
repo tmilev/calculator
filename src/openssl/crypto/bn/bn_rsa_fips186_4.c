@@ -23,7 +23,7 @@
  * included here.
  */
 #include <stdio.h>
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include "bn_local.h"
 #include "crypto/bn.h"
 #include "internal/nelem.h"

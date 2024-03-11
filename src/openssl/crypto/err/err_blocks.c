@@ -10,7 +10,7 @@
 #define OSSL_FORCE_ERR_STATE
 
 #include <string.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "err_local.h"
 
 void ERR_new(void)

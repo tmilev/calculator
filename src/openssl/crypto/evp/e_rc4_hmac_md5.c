@@ -13,15 +13,15 @@
  */
 #include "internal/deprecated.h"
 
-#include "internal/cryptlib.h"
-#include <openssl/opensslconf.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/opensslconf.h"
 
 #include <stdio.h>
 #include <string.h>
 
 #if !defined(OPENSSL_NO_RC4) && !defined(OPENSSL_NO_MD5)
 
-# include <openssl/crypto.h>
+# include "../include/openssl/crypto.h"
 # include <openssl/evp.h>
 # include <openssl/objects.h>
 # include <openssl/rc4.h>

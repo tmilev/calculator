@@ -18,7 +18,7 @@
 #ifndef FIPS_MODULE
 # include <openssl/engine.h>
 #endif
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "ec_local.h"
 
 

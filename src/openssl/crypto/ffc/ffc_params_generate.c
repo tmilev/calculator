@@ -27,7 +27,7 @@
 #include <string.h> /* memset */
 #include <openssl/sha.h> /* SHA_DIGEST_LENGTH */
 #include <openssl/rand.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/dherr.h>
 #include <openssl/dsaerr.h>
 #include "crypto/bn.h"

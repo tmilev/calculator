@@ -7,12 +7,12 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/namemap.h"
-#include <openssl/lhash.h>
-#include "crypto/lhash.h"      /* ossl_lh_strcasehash */
-#include "internal/tsan_assist.h"
-#include "internal/sizes.h"
-#include "crypto/context.h"
+#include "../include/internal/namemap.h"
+#include "../include/openssl/lhash.h"
+#include "../include/crypto/lhash.h"      /* ossl_lh_strcasehash */
+#include "../include/internal/tsan_assist.h"
+#include "../include/internal/sizes.h"
+#include "../include/crypto/context.h"
 
 /*-
  * The namenum entry

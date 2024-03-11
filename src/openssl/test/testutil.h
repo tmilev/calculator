@@ -11,13 +11,13 @@
 # define OSSL_TESTUTIL_H
 
 # include <stdarg.h>
-# include "internal/common.h" /* for HAS_PREFIX */
+# include "../include/internal/common.h" /* for HAS_PREFIX */
 
-# include <openssl/provider.h>
-# include <openssl/err.h>
-# include <openssl/e_os2.h>
-# include <openssl/bn.h>
-# include <openssl/x509.h>
+# include "../include/openssl/provider.h"
+# include "../include/openssl/err.h"
+# include "../include/openssl/e_os2.h"
+# include "../include/openssl/bn.h"
+# include "../include/openssl/x509.h"
 # include "opt.h"
 
 /*-

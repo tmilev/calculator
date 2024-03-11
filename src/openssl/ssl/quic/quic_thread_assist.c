@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/macros.h>
+#include "../include/openssl/macros.h"
 #include "quic_local.h"
 #include "internal/time.h"
 #include "internal/thread.h"

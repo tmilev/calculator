@@ -36,11 +36,11 @@
  * and Adam Langley's public domain 64-bit C implementation of curve25519
  */
 
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 
 #include <stdint.h>
 #include <string.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include "ec_local.h"
 
 #include "internal/numbers.h"

@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 #include <openssl/md4.h>
 
 void md4_block_data_order(MD4_CTX *c, const void *p, size_t num);

@@ -19,7 +19,7 @@
 # include <stdlib.h>
 # include "types.h"
 # include "e_os2.h"
-# include <openssl/randerr.h>
+# include "randerr.h"
 # include "evp.h"
 
 #ifdef  __cplusplus

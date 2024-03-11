@@ -9,7 +9,7 @@
 
 #include <string.h> /* memcpy */
 #include <openssl/core_names.h>
-#include <openssl/param_build.h>
+#include "../include/openssl/param_build.h"
 #include "crypto/rsa.h"
 #include "rsa_local.h"
 

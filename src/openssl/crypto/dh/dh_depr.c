@@ -15,11 +15,11 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/bn.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/bn.h"
 #include <openssl/dh.h>
 
 DH *DH_generate_parameters(int prime_len, int generator,

@@ -8,8 +8,8 @@
  */
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/crypto.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/crypto.h"
 #include <openssl/x509.h>
 
 const char *X509_get_default_private_dir(void)

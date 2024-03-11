@@ -7,14 +7,14 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include "crypto/store.h"
-#include "internal/core.h"
-#include "internal/namemap.h"
-#include "internal/property.h"
-#include "internal/provider.h"
+#include "../include/internal/core.h"
+#include "../include/internal/namemap.h"
+#include "../include/internal/property.h"
+#include "../include/internal/provider.h"
 #include "store_local.h"
-#include "crypto/context.h"
+#include "../include/crypto/context.h"
 
 int OSSL_STORE_LOADER_up_ref(OSSL_STORE_LOADER *loader)
 {

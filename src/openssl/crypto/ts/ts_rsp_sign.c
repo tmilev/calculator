@@ -12,9 +12,9 @@
 #include <openssl/objects.h>
 #include <openssl/ts.h>
 #include <openssl/pkcs7.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
-#include "internal/sizes.h"
+#include "../include/openssl/crypto.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/sizes.h"
 #include "internal/time.h"
 #include "crypto/ess.h"
 #include "ts_local.h"

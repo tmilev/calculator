@@ -11,14 +11,14 @@
 # define OSSL_CRYPTO_ASN1_H
 # pragma once
 
-# include <openssl/asn1.h>
-# include <openssl/core_dispatch.h> /* OSSL_FUNC_keymgmt_import() */
+# include "../openssl/asn1.h"
+# include "../openssl/core_dispatch.h" /* OSSL_FUNC_keymgmt_import() */
 
 /* Internal ASN1 structures and functions: not for application use */
 
 /* ASN1 public key method structure */
 
-#include <openssl/core.h>
+#include "../openssl/core.h"
 
 struct evp_pkey_asn1_method_st {
     int pkey_id;

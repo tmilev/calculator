@@ -12,9 +12,9 @@
 #include <openssl/objects.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
-#include <openssl/err.h>
-#include "internal/cryptlib.h"
-#include "internal/sizes.h"
+#include "../include/openssl/err.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/sizes.h"
 #include "crypto/evp.h"
 #include "pk7_local.h"
 

@@ -24,12 +24,12 @@
 # include "opensslconf.h"
 
 # ifndef OPENSSL_NO_DEPRECATED_1_1_0
-#  include <openssl/crypto.h>
+#  include "crypto.h"
 # endif
 # include "safestack.h"
 # include "pem.h"
 # include "types.h"
-# include <openssl/uierr.h>
+# include "uierr.h"
 
 /* For compatibility reasons, the macro OPENSSL_NO_UI is currently retained */
 # ifndef OPENSSL_NO_DEPRECATED_3_0

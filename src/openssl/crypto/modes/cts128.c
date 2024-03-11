@@ -8,7 +8,7 @@
  */
 
 #include <string.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include "crypto/modes.h"
 
 /*

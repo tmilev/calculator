@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 #include <limits.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "internal/numbers.h"
 #include <openssl/buffer.h>
 #include <openssl/asn1.h>

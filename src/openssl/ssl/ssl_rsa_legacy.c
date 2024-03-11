@@ -11,8 +11,8 @@
 #define OPENSSL_SUPPRESS_DEPRECATED
 
 #include "../include/openssl/err.h"
-#include <openssl/rsa.h>
-#include <openssl/ssl.h>
+#include "../include/openssl/rsa.h"
+#include "../include/openssl/ssl.h"
 
 int SSL_use_RSAPrivateKey(SSL *ssl, RSA *rsa)
 {

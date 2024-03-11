@@ -46,7 +46,7 @@
 #include <assert.h>
 
 #include <stdlib.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include <openssl/aes.h>
 #include "aes_local.h"
 

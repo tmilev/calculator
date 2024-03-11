@@ -10,14 +10,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #ifdef __APPLE__
 #include <sys/sysctl.h>
 #else
 #include <setjmp.h>
 #include <signal.h>
 #endif
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #ifdef _WIN32
 #include <windows.h>
 #else

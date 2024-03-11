@@ -8,7 +8,7 @@
  */
 
 #include <string.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/e_os2.h>
 
 static ossl_inline void err_get_slot(ERR_STATE *es)

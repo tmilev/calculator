@@ -17,7 +17,7 @@
 #include <openssl/asn1t.h>
 #include <openssl/cmp.h>
 #include <openssl/crmf.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/x509.h>
 
 OSSL_CMP_MSG *OSSL_CMP_MSG_new(OSSL_LIB_CTX *libctx, const char *propq)

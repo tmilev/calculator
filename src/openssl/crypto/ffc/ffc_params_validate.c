@@ -13,8 +13,8 @@
  * It calls the same functions as the generation as the code is very similar.
  */
 
-#include <openssl/err.h>
-#include <openssl/bn.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/bn.h"
 #include <openssl/dsaerr.h>
 #include <openssl/dherr.h>
 #include "internal/ffc.h"

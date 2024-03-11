@@ -22,7 +22,7 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/evp.h>
+#include "../include/openssl/evp.h"
 #ifndef FIPS_MODULE
 # include "../include/openssl/md5.h"
 #endif

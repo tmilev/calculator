@@ -28,9 +28,9 @@
 #  include "crypto.h"
 #  include "bn.h"
 #  ifndef OPENSSL_NO_DEPRECATED_1_1_0
-#   include <openssl/dh.h>
+#   include "dh.h"
 #  endif
-#  include <openssl/dsaerr.h>
+#  include "dsaerr.h"
 #  ifndef OPENSSL_NO_STDIO
 #   include <stdio.h>
 #  endif

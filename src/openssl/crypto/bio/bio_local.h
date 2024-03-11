@@ -68,8 +68,8 @@ struct bio_addrinfo_st {
 
 /* END BIO_ADDRINFO/BIO_ADDR stuff. */
 
-#include "internal/cryptlib.h"
-#include "internal/bio.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/bio.h"
 #include "internal/refcount.h"
 
 typedef struct bio_f_buffer_ctx_struct {

@@ -10,10 +10,10 @@
 
 #include <stdio.h>
 #include "ssl_local.h"
-#include <openssl/evp.h>
+#include "../include/openssl/evp.h"
 #include "../include/openssl/md5.h"
 #include "../include/openssl/core_names.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 
 static int ssl3_generate_key_block(SSL_CONNECTION *s, unsigned char *km, int num)
 {

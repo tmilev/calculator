@@ -10,7 +10,7 @@
 
 #include "internal/common.h" /* for HAS_PREFIX */
 #include <openssl/ebcdic.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/params.h>
 
 /*

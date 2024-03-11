@@ -13,8 +13,8 @@
  */
 #define OPENSSL_SUPPRESS_DEPRECATED
 
-#include <openssl/crypto.h>
-#include <openssl/err.h>
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/err.h"
 #include <openssl/ec.h>
 
 #ifndef OPENSSL_NO_DEPRECATED_3_0

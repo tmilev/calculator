@@ -42,7 +42,7 @@
  */
 #include "internal/deprecated.h"
 
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "wp_local.h"
 #include <string.h>
 

@@ -12,7 +12,7 @@
  * (2) University of Haifa, Israel
  */
 
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 #include "internal/common.h"
 #include "rsaz_exp.h"
 

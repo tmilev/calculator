@@ -18,9 +18,9 @@
 # endif
 # include <stdarg.h>
 # include <stddef.h>
-# include <openssl/encodererr.h>
+# include "encodererr.h"
 # include "types.h"
-# include <openssl/core.h>
+# include "core.h"
 
 # ifdef __cplusplus
 extern "C" {

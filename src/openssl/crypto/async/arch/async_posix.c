@@ -14,8 +14,8 @@
 
 # include <stddef.h>
 # include <unistd.h>
-# include <openssl/err.h>
-# include <openssl/crypto.h>
+# include "../include/openssl/err.h"
+# include "../include/openssl/crypto.h"
 
 #define STACKSIZE       32768
 

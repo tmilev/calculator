@@ -11,7 +11,7 @@
 
 #include "internal/deprecated.h"
 
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #ifndef OPENSSL_NO_SM4
 # include <openssl/evp.h>
 # include <openssl/modes.h>

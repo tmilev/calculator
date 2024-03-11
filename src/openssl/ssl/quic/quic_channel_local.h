@@ -1,12 +1,12 @@
 #ifndef OSSL_QUIC_CHANNEL_LOCAL_H
 # define OSSL_QUIC_CHANNEL_LOCAL_H
 
-# include "internal/quic_channel.h"
+# include "../../include/internal/quic_channel.h"
 
 # ifndef OPENSSL_NO_QUIC
 
-#  include <openssl/lhash.h>
-#  include "internal/list.h"
+#  include "../../include/openssl/lhash.h"
+#  include "../../include/internal/list.h"
 
 
 typedef struct quic_srt_elem_st QUIC_SRT_ELEM;

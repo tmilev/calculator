@@ -12,7 +12,7 @@
 #endif
 
 #include <openssl/ct.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/evp.h>
 #include <openssl/tls1.h>
 #include <openssl/x509.h>

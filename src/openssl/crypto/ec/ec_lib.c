@@ -17,9 +17,9 @@
 #include <string.h>
 #include <openssl/params.h>
 #include <openssl/core_names.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/opensslv.h>
-#include <openssl/param_build.h>
+#include "../include/openssl/param_build.h"
 #include "crypto/ec.h"
 #include "internal/nelem.h"
 #include "ec_local.h"

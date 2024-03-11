@@ -10,7 +10,7 @@
 #define OPENSSL_SUPPRESS_DEPRECATED
 
 #include <stdio.h>
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include "bn_local.h"
 
 /* X9.31 routines for prime derivation */

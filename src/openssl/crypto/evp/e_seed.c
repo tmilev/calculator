@@ -13,9 +13,9 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 #include <openssl/evp.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <string.h>
 #include <assert.h>
 #include <openssl/seed.h>

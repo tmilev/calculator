@@ -13,12 +13,12 @@
 #include <assert.h>
 #include "../ssl_local.h"
 #include "../quic/quic_local.h"
-#include <openssl/evp.h>
-#include <openssl/buffer.h>
+#include "../include/openssl/evp.h"
+#include "../include/openssl/buffer.h"
 #include "../include/openssl/rand.h"
 #include "../include/openssl/core_names.h"
 #include "record_local.h"
-#include "internal/packet.h"
+#include "../include/internal/packet.h"
 
 void RECORD_LAYER_init(RECORD_LAYER *rl, SSL_CONNECTION *s)
 {

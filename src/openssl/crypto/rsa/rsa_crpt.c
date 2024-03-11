@@ -14,8 +14,8 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
+#include "../include/openssl/crypto.h"
+#include "../include/internal/cryptlib.h"
 #include "crypto/bn.h"
 #include <openssl/rand.h>
 #include "rsa_local.h"

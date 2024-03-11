@@ -21,7 +21,7 @@
          defined(_M_AMD64) || defined(_M_X64))
 #  define RSAZ_ENABLED
 
-#  include <openssl/bn.h>
+#  include "../include/openssl/bn.h"
 #  include "internal/constant_time.h"
 #  include "bn_local.h"
 

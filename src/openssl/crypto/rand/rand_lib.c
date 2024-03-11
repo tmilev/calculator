@@ -10,27 +10,27 @@
 /* We need to use some engine deprecated APIs */
 #define OPENSSL_SUPPRESS_DEPRECATED
 
-#include <openssl/err.h>
-#include <openssl/opensslconf.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/opensslconf.h"
 #include <openssl/core_names.h>
-#include "internal/cryptlib.h"
-#include "internal/thread_once.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/thread_once.h"
 #include "crypto/rand.h"
-#include "crypto/cryptlib.h"
+#include "../include/crypto/cryptlib.h"
 #include "rand_local.h"
-#include "crypto/context.h"
+#include "../include/crypto/context.h"
 
 #ifndef FIPS_MODULE
 # include <stdio.h>
 # include <time.h>
 # include <limits.h>
-# include <openssl/conf.h>
+# include "../include/openssl/conf.h"
 # include <openssl/trace.h>
 # include <openssl/engine.h>
 # include "crypto/rand_pool.h"
 # include "prov/seeding.h"
 # include "internal/e_os.h"
-# include "internal/property.h"
+# include "../include/internal/property.h"
 
 # ifndef OPENSSL_NO_ENGINE
 /* non-NULL if default_RAND_meth is ENGINE-provided */

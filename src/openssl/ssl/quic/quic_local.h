@@ -10,18 +10,18 @@
 #ifndef OSSL_QUIC_LOCAL_H
 # define OSSL_QUIC_LOCAL_H
 
-# include <openssl/ssl.h>
+# include "../../include/openssl/ssl.h"
 # include "../../include/internal/quic_ssl.h"       /* QUIC_CONNECTION */
-# include "internal/quic_txp.h"
-# include "internal/quic_statm.h"
-# include "internal/quic_demux.h"
-# include "internal/quic_record_rx.h"
-# include "internal/quic_tls.h"
-# include "internal/quic_fc.h"
+# include "../../include/internal/quic_txp.h"
+# include "../../include/internal/quic_statm.h"
+# include "../../include/internal/quic_demux.h"
+# include "../../include/internal/quic_record_rx.h"
+# include "../../include/internal/quic_tls.h"
+# include "../../include/internal/quic_fc.h"
 # include "quic_local.h"
-# include "internal/quic_channel.h"
-# include "internal/quic_reactor.h"
-# include "internal/quic_thread_assist.h"
+# include "../../include/internal/quic_channel.h"
+# include "../../include/internal/quic_reactor.h"
+# include "../../include/internal/quic_thread_assist.h"
 # include "../ssl_local.h"
 
 # ifndef OPENSSL_NO_QUIC

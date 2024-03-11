@@ -17,10 +17,10 @@
 #  define HEADER_SSL3_H
 # endif
 
-# include <openssl/comp.h>
-# include <openssl/buffer.h>
+# include "comp.h"
+# include "buffer.h"
 # include "evp.h"
-# include <openssl/ssl.h>
+# include "ssl.h"
 
 #ifdef  __cplusplus
 extern "C" {

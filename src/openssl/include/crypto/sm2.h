@@ -13,12 +13,12 @@
 # define OSSL_CRYPTO_SM2_H
 # pragma once
 
-# include <openssl/opensslconf.h>
+# include "../openssl/opensslconf.h"
 
 # if !defined(OPENSSL_NO_SM2) && !defined(FIPS_MODULE)
 
-#  include <openssl/ec.h>
-#  include "crypto/types.h"
+#  include "../openssl/ec.h"
+#  include "../crypto/types.h"
 
 int ossl_sm2_key_private_check(const EC_KEY *eckey);
 

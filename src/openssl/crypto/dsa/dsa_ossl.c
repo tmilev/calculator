@@ -14,9 +14,9 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "crypto/bn.h"
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include <openssl/sha.h>
 #include "dsa_local.h"
 #include <openssl/asn1.h>

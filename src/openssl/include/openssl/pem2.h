@@ -15,5 +15,5 @@
 # ifndef OPENSSL_NO_DEPRECATED_3_0
 #  define HEADER_PEM2_H
 # endif
-# include <openssl/pemerr.h>
+# include "pemerr.h"
 #endif

@@ -27,7 +27,7 @@
 # include "types.h"
 # include "safestack.h"
 # include "x509.h"
-# include <openssl/cterr.h>
+# include "cterr.h"
 # ifdef  __cplusplus
 extern "C" {
 # endif

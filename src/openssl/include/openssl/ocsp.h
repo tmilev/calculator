@@ -62,7 +62,7 @@
 #  include "x509.h"
 #  include "x509v3.h"
 #  include "safestack.h"
-#  include <openssl/ocsperr.h>
+#  include "ocsperr.h"
 
 #  ifdef __cplusplus
 extern "C" {

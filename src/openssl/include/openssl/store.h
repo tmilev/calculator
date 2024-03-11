@@ -19,7 +19,7 @@
 # include <stdarg.h>
 # include "types.h"
 # include "pem.h"
-# include <openssl/storeerr.h>
+# include "storeerr.h"
 
 # ifdef  __cplusplus
 extern "C" {

@@ -58,7 +58,7 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include "wp_local.h"
 #include <string.h>
 

@@ -15,8 +15,8 @@
 #include <stdio.h>
 #include "../include/openssl/rand.h"
 #include "../include/openssl/engine.h"
-#include "internal/refcount.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/refcount.h"
+#include "../include/internal/cryptlib.h"
 #include "ssl_local.h"
 #include "statem/statem_local.h"
 

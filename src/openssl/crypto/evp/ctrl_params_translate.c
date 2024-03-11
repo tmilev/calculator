@@ -27,11 +27,11 @@
 /* This include gets us all the OSSL_PARAM key string macros */
 #include <openssl/core_names.h>
 
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/evperr.h>
 #include <openssl/params.h>
 #include "internal/nelem.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "internal/ffc.h"
 #include "crypto/evp.h"
 #include "crypto/dh.h"

@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <openssl/evp.h>
 #include <openssl/objects.h>
 #include <openssl/params.h>
@@ -24,8 +24,8 @@
 #include <openssl/dh.h>
 #include <openssl/ec.h>
 #include "crypto/evp.h"
-#include "crypto/cryptlib.h"
-#include "internal/provider.h"
+#include "../include/crypto/cryptlib.h"
+#include "../include/internal/provider.h"
 #include "evp_local.h"
 
 #if !defined(FIPS_MODULE)

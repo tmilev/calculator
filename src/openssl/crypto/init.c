@@ -11,10 +11,10 @@
 #define OPENSSL_SUPPRESS_DEPRECATED
 
 #include "internal/e_os.h"
-#include "crypto/cryptlib.h"
-#include <openssl/err.h>
+#include "../include/crypto/cryptlib.h"
+#include "../include/openssl/err.h"
 #include "crypto/rand.h"
-#include "internal/bio.h"
+#include "../include/internal/bio.h"
 #include <openssl/evp.h>
 #include "crypto/evp.h"
 #include "internal/conf.h"
@@ -26,7 +26,7 @@
 #include "crypto/objects.h"
 #include <stdlib.h>
 #include <assert.h>
-#include "internal/thread_once.h"
+#include "../include/internal/thread_once.h"
 #include "crypto/dso_conf.h"
 #include "internal/dso.h"
 #include "crypto/store.h"

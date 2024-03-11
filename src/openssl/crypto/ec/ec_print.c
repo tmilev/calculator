@@ -8,7 +8,7 @@
  */
 
 #include <string.h> /* strlen */
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include "ec_local.h"
 
 static const char *HEX_DIGITS = "0123456789ABCDEF";

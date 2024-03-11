@@ -7,15 +7,15 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/e_os.h"
+#include "../include/internal/e_os.h"
 
-#include "internal/err.h"
+#include "../include/internal/err.h"
 #include "../include/openssl/crypto.h"
-#include <openssl/evp.h>
+#include "../include/openssl/evp.h"
 #include "../include/openssl/trace.h"
 #include "ssl_local.h"
 #include "sslerr.h"
-#include "internal/thread_once.h"
+#include "../include/internal/thread_once.h"
 
 
 int RUN_ONCE_CRYPTO_THREAD_run_once(CRYPTO_ONCE *once, void (*init)(void), int* resultOfFirstRun){

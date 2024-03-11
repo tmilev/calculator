@@ -22,9 +22,9 @@
 # endif
 
 # include "bio.h"
-# include <openssl/core.h>
+# include "core.h"
 # include "x509.h"
-# include <openssl/pkcs12err.h>
+# include "pkcs12err.h"
 # ifndef OPENSSL_NO_STDIO
 #  include <stdio.h>
 # endif

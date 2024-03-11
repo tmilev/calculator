@@ -20,11 +20,11 @@
 /* explicit #includes not strictly needed since implied by the above: */
 #include <openssl/asn1t.h>
 #include <openssl/crmf.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/params.h>
 #include <openssl/core_names.h>
 
-#include "internal/sizes.h"
+#include "../include/internal/sizes.h"
 
 #include "crmf_local.h"
 

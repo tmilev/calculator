@@ -8,15 +8,15 @@
  */
 
 #include <assert.h>
-#include <openssl/crypto.h>
-#include <openssl/core_dispatch.h>
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/core_dispatch.h"
 #include <openssl/core_names.h>
 #include <openssl/provider.h>
 #include <openssl/evp.h>
-#include "internal/provider.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/provider.h"
+#include "../include/internal/cryptlib.h"
 #include "crypto/evp.h"
-#include "crypto/context.h"
+#include "../include/crypto/context.h"
 
 DEFINE_STACK_OF(OSSL_PROVIDER)
 

@@ -15,11 +15,11 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "internal/refcount.h"
-#include "internal/namemap.h"
-#include <openssl/bn.h>
-#include <openssl/err.h>
+#include "../include/internal/namemap.h"
+#include "../include/openssl/bn.h"
+#include "../include/openssl/err.h"
 #include <openssl/objects.h>
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
@@ -31,7 +31,7 @@
 # include <openssl/engine.h>
 #endif
 #include <openssl/params.h>
-#include <openssl/param_build.h>
+#include "../include/openssl/param_build.h"
 #include <openssl/encoder.h>
 #include <openssl/core_names.h>
 
@@ -47,7 +47,7 @@
 # include "crypto/asn1.h"
 # include "crypto/x509.h"
 #endif
-#include "internal/provider.h"
+#include "../include/internal/provider.h"
 #include "evp_local.h"
 
 static int pkey_set_type(EVP_PKEY *pkey, ENGINE *e, int type, const char *str,

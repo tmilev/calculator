@@ -11,12 +11,12 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "internal/nelem.h"
+#include "../../include/internal/nelem.h"
 
-#include <openssl/pkcs12.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/pem.h>
+#include "../../include/openssl/pkcs12.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/pem.h"
 
 #include "../testutil.h"
 

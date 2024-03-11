@@ -16,10 +16,10 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "internal/ffc.h"
 #include "dh_local.h"
-#include <openssl/bn.h>
+#include "../include/openssl/bn.h"
 #include <openssl/objects.h>
 #include "internal/nelem.h"
 #include "crypto/dh.h"

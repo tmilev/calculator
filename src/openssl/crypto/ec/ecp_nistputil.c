@@ -29,7 +29,7 @@
  */
 #include "internal/deprecated.h"
 
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 
 /*
  * Common utility functions for ecp_nistp224.c, ecp_nistp256.c, ecp_nistp521.c.

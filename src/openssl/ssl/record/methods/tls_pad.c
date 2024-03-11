@@ -8,7 +8,7 @@
  */
 
 #include "../../../include/openssl/rand.h"
-#include <openssl/evp.h>
+#include "../include/openssl/evp.h"
 
 #include "internal/constant_time.h"
 #include "internal/cryptlib.h"

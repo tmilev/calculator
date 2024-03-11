@@ -16,9 +16,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include <openssl/cmac.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 
 #define LOCAL_BUF_SIZE 2048
 struct CMAC_CTX_st {

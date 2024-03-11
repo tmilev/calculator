@@ -9,9 +9,9 @@
 
 /* Internal EVP utility functions */
 
-#include <openssl/core.h>
+#include "../include/openssl/core.h"
 #include <openssl/evp.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/asn1.h>        /* evp_local.h needs it */
 #include <openssl/safestack.h>   /* evp_local.h needs it */
 #include "crypto/evp.h"    /* evp_local.h needs it */

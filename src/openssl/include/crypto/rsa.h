@@ -11,9 +11,9 @@
 # define OSSL_INTERNAL_RSA_H
 # pragma once
 
-# include <openssl/core.h>
-# include <openssl/rsa.h>
-# include "crypto/types.h"
+# include "../openssl/core.h"
+# include "../openssl/rsa.h"
+# include "../crypto/types.h"
 
 #define RSA_MIN_MODULUS_BITS    512
 

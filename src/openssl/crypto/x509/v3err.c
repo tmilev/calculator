@@ -8,7 +8,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/x509v3err.h>
 #include "crypto/x509v3err.h"
 

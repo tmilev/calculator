@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/core_dispatch.h>
+#include "../include/openssl/core_dispatch.h"
 
 #define FAKE_PASSPHRASE "Passphrase Testing"
 

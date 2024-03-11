@@ -7,8 +7,8 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/bio.h>
-#include <openssl/ssl.h>
+#include "../../../include/openssl/bio.h"
+#include "../../../include/openssl/ssl.h"
 #include "../include/openssl/err.h"
 #include "../../ssl_local.h"
 #include "../record_local.h"

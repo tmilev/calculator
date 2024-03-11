@@ -16,10 +16,10 @@
  * If you wish to build this outside of OpenSSL, remove the following lines
  * and things should work as expected
  */
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 
 #include <openssl/bio.h>
-#include <openssl/lhash.h>
+#include "../include/openssl/lhash.h"
 #include "lhash_local.h"
 
 # ifndef OPENSSL_NO_STDIO

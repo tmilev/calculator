@@ -9,10 +9,10 @@
 
 #include <assert.h>
 #include <limits.h>
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 #include "internal/endian.h"
 #include "bn_local.h"
-#include <openssl/opensslconf.h>
+#include "../include/openssl/opensslconf.h"
 #include "internal/constant_time.h"
 
 /* This stuff appears to be completely unused, so is deprecated */

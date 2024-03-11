@@ -11,8 +11,8 @@
 #define OPENSSL_SUPPRESS_DEPRECATED
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/bn.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/bn.h"
 #include <openssl/evp.h>
 #include <openssl/objects.h>
 #include <openssl/decoder.h>
@@ -22,7 +22,7 @@
 #include "crypto/asn1.h"
 #include "crypto/evp.h"
 #include "internal/asn1.h"
-#include "internal/sizes.h"
+#include "../include/internal/sizes.h"
 
 static EVP_PKEY *
 d2i_PrivateKey_decoder(int keytype, EVP_PKEY **a, const unsigned char **pp,

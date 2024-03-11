@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include "bio_local.h"
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 
 #if !defined(OPENSSL_NO_STDIO)
 

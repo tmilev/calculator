@@ -7,6 +7,6 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/objects.h>
+#include "../openssl/objects.h"
 
 void ossl_obj_cleanup_int(void);

@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/ui.h>
 #include <openssl/params.h>
 #include <openssl/encoder.h>
@@ -15,9 +15,9 @@
 #include <openssl/provider.h>
 #include <openssl/safestack.h>
 #include <openssl/trace.h>
-#include "internal/provider.h"
-#include "internal/property.h"
-#include "internal/namemap.h"
+#include "../include/internal/provider.h"
+#include "../include/internal/property.h"
+#include "../include/internal/namemap.h"
 #include "crypto/evp.h"
 #include "encoder_local.h"
 

@@ -9,8 +9,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <openssl/conf.h>
-#include <openssl/err.h>
+#include "../include/openssl/conf.h"
+#include "../include/openssl/err.h"
 #include "internal/sslconf.h"
 #include "conf_local.h"
 

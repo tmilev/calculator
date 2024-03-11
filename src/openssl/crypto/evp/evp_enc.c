@@ -14,16 +14,16 @@
 #include <limits.h>
 #include <assert.h>
 #include <openssl/evp.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/rand.h>
 #ifndef FIPS_MODULE
 # include <openssl/engine.h>
 #endif
 #include <openssl/params.h>
 #include <openssl/core_names.h>
-#include "internal/cryptlib.h"
-#include "internal/provider.h"
-#include "internal/core.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/internal/provider.h"
+#include "../include/internal/core.h"
 #include "internal/safe_math.h"
 #include "crypto/evp.h"
 #include "evp_local.h"

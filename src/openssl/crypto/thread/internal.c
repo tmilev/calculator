@@ -10,7 +10,7 @@
 #include <openssl/configuration.h>
 #include <openssl/e_os2.h>
 #include <openssl/types.h>
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include <internal/thread.h>
 #include <internal/thread_arch.h>
 

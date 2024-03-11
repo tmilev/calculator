@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <openssl/crypto.h>
-#include <openssl/lhash.h>
-#include <openssl/err.h>
+#include "../include/openssl/crypto.h"
+#include "../include/openssl/lhash.h"
+#include "../include/openssl/err.h"
 #include "crypto/ctype.h"
 #include "crypto/lhash.h"
 #include "lhash_local.h"

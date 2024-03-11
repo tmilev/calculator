@@ -14,10 +14,10 @@
 #include <time.h>
 #include <sys/types.h>
 
-#include "internal/cryptlib.h"
+#include "../include/internal/cryptlib.h"
 
 #include <openssl/engine.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
 #include <openssl/x509.h>

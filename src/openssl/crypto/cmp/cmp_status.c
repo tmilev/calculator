@@ -19,7 +19,7 @@
 #include <time.h>
 #include <openssl/cmp.h>
 #include <openssl/crmf.h>
-#include <openssl/err.h> /* needed in case config no-deprecated */
+#include "../include/openssl/err.h" /* needed in case config no-deprecated */
 #include <openssl/engine.h>
 #include <openssl/evp.h>
 #include <openssl/objects.h>

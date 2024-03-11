@@ -7,11 +7,11 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/crypto.h>
+#include "../include/openssl/crypto.h"
 #include "crypto/rand.h"
 #include "crypto/dso_conf.h"
-#include "internal/thread_once.h"
-#include "internal/cryptlib.h"
+#include "../include/internal/thread_once.h"
+#include "../include/internal/cryptlib.h"
 #include "internal/e_os.h"
 #include "buildinf.h"
 

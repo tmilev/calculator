@@ -11,13 +11,13 @@
 #define OPENSSL_SUPPRESS_DEPRECATED
 
 #include <stdio.h>
-#include <openssl/crypto.h>
-#include "internal/cryptlib.h"
-#include <openssl/conf.h>
+#include "../include/openssl/crypto.h"
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/conf.h"
 #include <openssl/x509.h>
 #include <openssl/asn1.h>
 #include <openssl/engine.h>
-#include "internal/provider.h"
+#include "../include/internal/provider.h"
 #include "crypto/rand.h"
 #include "conf_local.h"
 

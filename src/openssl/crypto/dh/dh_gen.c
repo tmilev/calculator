@@ -24,8 +24,8 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include "internal/cryptlib.h"
-#include <openssl/bn.h>
+#include "../include/internal/cryptlib.h"
+#include "../include/openssl/bn.h"
 #include <openssl/sha.h>
 #include "crypto/dh.h"
 #include "crypto/security_bits.h"

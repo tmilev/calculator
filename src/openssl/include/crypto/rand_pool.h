@@ -12,7 +12,7 @@
 # pragma once
 
 # include <stdio.h>
-# include <openssl/rand.h>
+# include "../openssl/rand.h"
 
 /*
  * Maximum allocation size for RANDOM_POOL buffers

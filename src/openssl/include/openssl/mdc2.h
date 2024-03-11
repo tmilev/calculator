@@ -20,7 +20,7 @@
 
 # ifndef OPENSSL_NO_MDC2
 #  include <stdlib.h>
-#  include <openssl/des.h>
+#  include "des.h"
 #  ifdef  __cplusplus
 extern "C" {
 #  endif

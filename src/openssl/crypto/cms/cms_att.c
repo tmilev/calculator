@@ -10,7 +10,7 @@
 #include <openssl/asn1t.h>
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
-#include <openssl/err.h>
+#include "../include/openssl/err.h"
 #include <openssl/cms.h>
 #include "internal/nelem.h"
 #include "crypto/x509.h"

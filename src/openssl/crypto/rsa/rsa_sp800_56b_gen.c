@@ -8,9 +8,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/err.h>
-#include <openssl/bn.h>
-#include <openssl/core.h>
+#include "../include/openssl/err.h"
+#include "../include/openssl/bn.h"
+#include "../include/openssl/core.h"
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include "crypto/bn.h"

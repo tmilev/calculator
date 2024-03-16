@@ -1,3 +1,20 @@
+# Example builds commands.
+# 1. Build calculator with default settings, slowly:
+#    make
+# 2. Build calculator with default settings, 20 jobs in parallel (needs RAM):
+#    make -j20
+# 3. Build calculator with optimization:
+#    make -j20 optimize=1
+# 4. Build calculator with clang++. Requires clang++ be installed:
+#    make -j20 llvm=1
+# 5. Build calculator without openssl (no https, no login/passwords):
+#    make -j20 nossl=1
+# 6. Build calculator.wasm + files in calculator_html/web_assembly/.
+#    Requires web assembly toolkit:
+#    make -j20 wasm=1
+
+
+
 # 1. The -MMD -Mp flags create files that notify make about
 #    header dependencies so sources can be correctly rebuilt.  
 # 2. Use 'make clean' when changing compilation options.

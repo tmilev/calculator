@@ -556,6 +556,7 @@ public:
   public:
     static bool all();
     static bool builds();
+    static bool oneMakeBuild(const std::string & buildCommand);
     static bool webAssemblyBuild();
   };
 };

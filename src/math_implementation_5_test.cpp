@@ -1,6 +1,7 @@
 #include "calculator_interface.h"
 #include "math_general.h"
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
+#include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks the build.
 
 bool MonomialPolynomial::Test::all() {
   return MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition();

@@ -1,24 +1,17 @@
-# 1. The -O3 flag doesn't slow down builds too much, and it is
-# expected that this will be built on systems that use it, thus -march=native.
-# 2. The -MMD -Mp flags create files that notify make about
-# header dependencies so sources can be correctly rebuilt.  
-# A 'make clean'
-# is of course suggested when changing compilation options, not that something
-# bad will happen, but something bad is not guaranteed not to happen.
-# AllocationStatistics is a likely-to-be-deprecated
-# feature to notify the user with a glibc
-# prepared stack trace every time an object is allocated that crosses a
-# megabyte boundary, in order to find hot spots of massive memory allocation.
-# This needs -rdynamic due to implementation.
-# 
+# 1. The -MMD -Mp flags create files that notify make about
+#    header dependencies so sources can be correctly rebuilt.  
+# 2. Use 'make clean' when changing compilation options.
+# 3. AllocationStatistics is a likely-to-be-deprecated
+#    feature to notify the user with a glibc
+#    prepared stack trace every time an object is allocated that crosses a
+#    megabyte boundary, in order to find hot spots of massive memory allocation.
+#    This needs -rdynamic due to implementation.
 
 OPTIMIZATION_FLAGS=
-# Use native architecture instructions.
-# Did not notice significant difference in performance with / without the flag. 
-# Tested: compute 2019 factorial and openssl-send the result back.
-# 
-# OPTIMIZATION_FLAGS+=-march=native
 
+ifeq ($(optimize), 1)
+$(info Optimization flag selected. [1;31mThis may slow down compilation a great deal.[0m) 
+# Tested: compute 2019 factorial and openssl-send the result back.
 # - With O2 optimization. 
 # -- Speed: ~84ms to compute 2019 factorial and openssl-send the result back
 # on my current dev laptop. 
@@ -27,23 +20,27 @@ OPTIMIZATION_FLAGS=
 # -- Speed: ~121ms to compute 2019 factorial and openssl-send the result back.
 # -- Compilation time: 30 seconds.
 # -O3 "optimization" is known to break linkage, please DO NOT USE.
-#
 # Conclusion: O2 optimization speeds up computations by 40%, 
 # slows down compilation by a factor of three. 
-
-ifeq ($(optimize), 1)
-$(info Optimization flag selected. [1;31mThis may slow down compilation a great deal.[0m) 
 OPTIMIZATION_FLAGS+=-O2
 endif
 
-CFLAGS=-Wpedantic -Wall -Wextra -std=c++0x $(OPTIMIZATION_FLAGS) -c -pthread
+CFLAGS=-Wpedantic -Wall -Wextra $(OPTIMIZATION_FLAGS) -c -pthread
 LIBRARIES_INCLUDED_AT_THE_END=
 compiler=g++
 TARGET=calculator
 OBJECT_FILE_OUTPUT=bin/
 
 ifeq ($(llvm), 1)
-	compiler=clang-3.8
+	compiler=clang++
+    # CFLAGS+=-stdlib=libc++ -std=c++11
+	# On Ubuntu, install clang with: 
+	# sudo apt install clang 
+	# You will likely also need to install:
+    # sudo apt install libc++-dev
+    # sudo apt install libstdc++-dev
+else
+    CFLAGS+=-std=c++0x
 endif
 
 ifeq ($(wasm), 1)
@@ -68,38 +65,14 @@ ifeq ($(AllocationStatistics), 1)
 	LDFLAGS+=-rdynamic
 endif
 
-########################
-########################
-## We include mysql and ssl depending on their availability
-## This code may need more work in the future
+# Ssl dependencies.
 
 ifeq ($(nossl), 1)
 $(info [1;33mNo openssl requested.[0m) 
 else
-sslLocation=
-ifneq ($(wildcard /usr/lib64/libssl.so),)#location of ssl in CENTOS
-  sslLocation=found
-endif
-ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu x86
-  sslLocation=found
-endif
-ifneq ($(wildcard /usr/lib/arm-linux-gnueabihf/libssl.so),)#location of ssl in Ubuntu x86
-  sslLocation=found
-endif
-ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu x86
-  sslLocation=found
-endif
-ifneq ($(wildcard /lib/x86_64-linux-gnu/libssl3.so),)#location of ssl in Debian GNU/Linux rodete
-  sslLocation=found
-endif
-
-ifneq ($(sslLocation),)
   CFLAGS+=-DMACRO_use_open_ssl 
-#  LIBRARIES_INCLUDED_AT_THE_END+= -lssl -lcrypto # WARNING believe it or not, the libraries must come AFTER the executable name
+  LIBRARIES_INCLUDED_AT_THE_END+= -lssl -lcrypto # WARNING believe it or not, the libraries must come AFTER the executable name
 $(info [1;32mOpenssl found.[0m) 
-else
-$(info [1;31mNOT FOUND: Openssl.[0m Login+database won't run.) 
-endif
 endif
 ########################
 ########################
@@ -246,7 +219,7 @@ all: bin_calculator
 
 bin_calculator: $(OBJECTS)
 	$(MAKE) -C src/openssl  
-	$(compiler) -I./src/openssl/include/ -L./src/openssl/  $(LDFLAGS) $(OBJECTS) -o $(TARGET)  -l:libssl.a -l :libcrypto.a
+	$(compiler) -I./src/openssl/include/ -L./src/openssl/  $(LDFLAGS) $(OBJECTS) -o $(TARGET) $(LIBRARIES_INCLUDED_AT_THE_END)
 
 test: bin_calculator
 	time ./calculator test

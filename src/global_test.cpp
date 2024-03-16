@@ -15,35 +15,42 @@ bool GlobalVariables::Test::webAssemblyBuild() {
   return true;
 }
 
-bool GlobalVariables::Test::builds() {
+bool GlobalVariables::Test::oneMakeBuild(const std::string & buildCommand){
   global.externalCommandNoOutput("make clean", true);
   if (FileOperations::fileExistsVirtual("calculator")) {
     global.fatal
-    << "Command make clean did not remove the calculator executable. "
-    << global.fatal;
+        << "Command make clean did not remove the calculator executable. "
+        << global.fatal;
   }
   // This is the most restrictive build allowed:
   int result =
-  global.externalCommandNoOutput(
-    "make -j20 noMongo=1 nossl=1 noPublicDomain=1 optimize=1", true
-  );
+      global.externalCommandNoOutput(
+          buildCommand, true
+          );
   if (result != 0) {
     global
-    << Logger::red
-    << "Calculator most restrictive build generated errors. "
-    << Logger::endL;
+        << Logger::red
+        << "Calculator most restrictive build generated errors. "
+        << Logger::endL;
   }
   std::stringstream commentsOnFailure;
   if (
-    !FileOperations::fileExistsVirtual(
-      "calculator", true, true, &commentsOnFailure
-    )
-  ) {
+      !FileOperations::fileExistsVirtual(
+          "calculator", true, true, &commentsOnFailure
+          )
+      ) {
     global.fatal
-    << "Failed to build the calculator executable. "
-    << commentsOnFailure.str()
-    << global.fatal;
+        << "Failed to build the calculator executable. "
+        << commentsOnFailure.str()
+        << global.fatal;
   }
-  global.externalCommandNoOutput("make clean", true);
+
+  return true;
+}
+
+bool GlobalVariables::Test::builds() {
+
+  GlobalVariables::Test::oneMakeBuild("make -j20 noMongo=1 nossl=1 noPublicDomain=1 optimize=1");
+  GlobalVariables::Test::oneMakeBuild("make -j20 llvm=1");
   return true;
 }

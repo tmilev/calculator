@@ -303,7 +303,6 @@ int ossl_statem_accept(SSL *s) {
   if (sc == NULL) {
     return -1;
   }
-  printf("DEBUG: inside statem_accept\n");
   return state_machine(sc, 1);
 }
 
@@ -348,8 +347,6 @@ static info_cb get_callback(struct ssl_connection_st *s) {
  * <=0: NBIO or error
  */
 static int state_machine(struct ssl_connection_st *s, int server) {
-  printf("DEBUG: state machine start,\n");
-
   BUF_MEM *buf = NULL;
   void (*cb) (const SSL *ssl, int type, int val) = NULL;
   OSSL_STATEM *st = &s->statem;
@@ -582,7 +579,6 @@ static int grow_init_buf(struct ssl_connection_st *s, size_t size) {
  * will resume in the same state where we left off.
  */
 static SUB_STATE_RETURN read_state_machine(struct ssl_connection_st *s) {
-  printf("DEBUG: read state machine here!\n");
   OSSL_STATEM *st = &s->statem;
   int ret, mt;
   size_t len = 0;

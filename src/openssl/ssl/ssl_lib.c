@@ -36,7 +36,6 @@ struct ssl_connection_st* SSL_CONNECTION_FROM_SSL(SSL* ssl){
   }
 
   if (ssl->type == SSL_TYPE_SSL_CONNECTION){
-    printf("DEBUG: Regular ssl connection\n");
     return ssl;
   }
   if (ssl->type == SSL_TYPE_QUIC_CONNECTION){
@@ -2205,7 +2204,6 @@ int SSL_accept(SSL *s) {
 
 #ifndef OPENSSL_NO_QUIC
   if (IS_QUIC(s)){
-    printf("DEBUG: is quick!!!!!");
     return s->method->ssl_accept(s);
   }
 #endif
@@ -2213,11 +2211,9 @@ int SSL_accept(SSL *s) {
     return 0;
   }
   if (sc->handshake_func == NULL) {
-    printf("DEBUG: not initialized yet!!!!!");
     /* Not properly initialized yet */
     SSL_set_accept_state(s);
   }
-  printf("DEBUG: ssl do handshake here!!!!!!");
   return SSL_do_handshake(s);
 }
 
@@ -4758,7 +4754,6 @@ int SSL_do_handshake(SSL *s) {
     return ossl_quic_do_handshake(s);
   }
 #endif
-  printf("DEBUG: HANDSHAKE not quic!\n");
   if (sc->handshake_func == NULL) {
     ERR_raise(ERR_LIB_SSL, SSL_R_CONNECTION_TYPE_NOT_SET);
     return -1;
@@ -4774,7 +4769,6 @@ int SSL_do_handshake(SSL *s) {
 
       ret = ssl_start_async_job(s, &args, ssl_do_handshake_intern);
     } else {
-      printf("DEBUG: not ASYNC!\n");
       ret = sc->handshake_func(s);
     }
   }

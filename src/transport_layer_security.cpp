@@ -501,14 +501,6 @@ bool TransportLayerSecurityServer::writeBytesOnce(
       *commentsOnFailure << "Error receiving bytes. " << strerror(errno);
     }
   }
-  global
-  << "DEBUG: Sent"
-  << numberOfBytesSent
-  << " Bytes out of "
-  << input.size
-  << ":"
-  << Crypto::convertListUnsignedCharsToHex(input)
-  << Logger::endL;
   return numberOfBytesSent >= 0;
 }
 
@@ -630,12 +622,6 @@ bool TransportLayerSecurityServer::readBytesOnce(
   if (numberOfBytesInBuffer >= 0) {
     this->incomingBytes.setSize(numberOfBytesInBuffer);
   }
-  global
-  << "DEBUG: Read bytes:\n"
-  << Crypto::convertListUnsignedCharsToHexFormat(
-    this->incomingBytes, 40, false
-  )
-  << Logger::endL;
   return numberOfBytesInBuffer > 0;
 }
 
@@ -2516,10 +2502,6 @@ bool TransportLayerSecurityServer::replyToClientHello(
     }
     return false;
   }
-  global
-  << "DEBUG: sent bytes: "
-  << Crypto::convertListUnsignedCharsToHex(this->outgoingBytes)
-  << Logger::endL;
   return true;
 }
 
@@ -2603,9 +2585,6 @@ bool TransportLayerSecurityServer::handShakeIamServer(
     }
     return false;
   }
-  global
-  << "DEBUG: last read: "
-  << this->lastRead.toStringTypeAndContentType();
   return false;
 }
 

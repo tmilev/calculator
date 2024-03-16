@@ -569,7 +569,6 @@ int ssl_release_record(SSL_CONNECTION *s, TLS_RECORD *rr, size_t length)
 int ssl3_read_bytes(SSL *ssl, uint8_t type, uint8_t *recvd_type,
                     unsigned char *buf, size_t len,
                     int peek, size_t *readbytes) {
-  printf("DEBUG: ssl3 read bytes!\n");
   int i, j, ret;
   size_t n, curr_rec, totalbytes;
   TLS_RECORD *rr;

@@ -4362,13 +4362,13 @@ TestASN1Decode(ConvertBase64ToString(LoadFileIntoString("test/private_key.base64
 ```
 Tests decoding of abstract syntax one. 
 
-*X509CertificateServerBase64* [X509CertificateServerBase64] {CalculatorFunctionsCrypto::X509CertificateServerBase64}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X509CertificateServerBase64%200%3b%5cnX509CertificateDecode%20X509CertificateServerBase64%200%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*X509CertificateServer* [X509CertificateServer] {CalculatorFunctionsCrypto::X509CertificateServer}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22X509CertificateServer%200%3b%5cnX509CertificateDecode%20X509CertificateServer%200%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-X509CertificateServerBase64 0;
-X509CertificateDecode X509CertificateServerBase64 0
+X509CertificateServer 0;
+X509CertificateDecode X509CertificateServer 0
 ```
-Returns the base 64 encoding of the X509 certificate of this server. 
+Returns the source ofo the X509 certificate of this server. 
 
 *X509CertificateDecode* [X509CertificateDecode] {CalculatorFunctionsCrypto::x509CertificateDecode}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%25HideLHS%5cnX509CertificateDecode%5cnLoadFileIntoString%28%5c%22test%2fcertificate_self_signed.pem%5c%22%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

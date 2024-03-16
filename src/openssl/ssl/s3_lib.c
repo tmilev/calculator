@@ -4583,7 +4583,6 @@ int ssl3_renegotiate(SSL *s)
  */
 int ssl3_renegotiate_check(SSL *s, int initok)
 {
-  printf("DEBUG: inside renegotiate check\n");
   int ret = 0;
   struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 
@@ -4592,7 +4591,6 @@ int ssl3_renegotiate_check(SSL *s, int initok)
   }
 
   if (sc->s3.renegotiate) {
-    printf("DEBUG: renegotiating!!!!\n");
     if (
       !RECORD_LAYER_read_pending(&sc->rlayer)
       && !RECORD_LAYER_write_pending(&sc->rlayer)
@@ -4610,8 +4608,6 @@ int ssl3_renegotiate_check(SSL *s, int initok)
       ret = 1;
     }
   } else {
-    printf("DEBUG: NOT renegotiating!!!!\n");
-
   }
   return ret;
 }

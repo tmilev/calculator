@@ -144,7 +144,6 @@ int tls_setup_handshake(SSL_CONNECTION *s) {
       /* SSLfatal() already called */
       return 0;
     }
-    printf("DEBUG: inside tls_setup_handshake.\n");
     /* Reset any extension flags */
     memset(s->ext.extflags, 0, sizeof(s->ext.extflags));
 
@@ -1532,7 +1531,6 @@ WORK_STATE tls_finish_handshake(SSL_CONNECTION *s, ossl_unused WORK_STATE wst,
 }
 
 int tls_get_message_header(SSL_CONNECTION *s, int *mt) {
-    printf("DEBUG: inside tls_get_message_header ");
     /* s->init_num < SSL3_HM_HEADER_LENGTH */
     int skip_message, i;
     uint8_t recvd_type;

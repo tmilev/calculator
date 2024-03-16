@@ -245,7 +245,7 @@ int ossl_param_find_pidx(const char *s)
                         }
                         break;
                     case '\0':
-                        return PIDX_OBJECT_PARAM_DATA;
+                        return PIDX_KDF_PARAM_DATA;
                     }
                 }
             }
@@ -604,7 +604,7 @@ int ossl_param_find_pidx(const char *s)
                     return PIDX_CIPHER_PARAM_IVLEN;
                 break;
             case '\0':
-                return PIDX_MAC_PARAM_IV;
+                return PIDX_CIPHER_PARAM_IV;
             }
         }
         break;
@@ -729,7 +729,7 @@ int ossl_param_find_pidx(const char *s)
                         return PIDX_CIPHER_PARAM_KEYLEN;
                     break;
                 case '\0':
-                    return PIDX_KDF_PARAM_KEY;
+                    return PIDX_MAC_PARAM_KEY;
                 }
             }
         }
@@ -934,7 +934,7 @@ int ossl_param_find_pidx(const char *s)
             break;
         case 'a':
             if (strcmp("me", s + 2) == 0)
-                return PIDX_STORE_PARAM_ISSUER;
+                return PIDX_PROV_PARAM_NAME;
             break;
         case 'o':
             switch(s[2]) {
@@ -1717,7 +1717,7 @@ int ossl_param_find_pidx(const char *s)
             }
             break;
         case '\0':
-            return PIDX_KDF_PARAM_KBKDF_R;
+            return PIDX_KDF_PARAM_SCRYPT_R;
         }
         break;
     case 's':
@@ -1745,7 +1745,7 @@ int ossl_param_find_pidx(const char *s)
                             return PIDX_PKEY_PARAM_RSA_PSS_SALTLEN;
                         break;
                     case '\0':
-                        return PIDX_MAC_PARAM_SALT;
+                        return PIDX_KDF_PARAM_SALT;
                     }
                 }
                 break;
@@ -1807,7 +1807,7 @@ int ossl_param_find_pidx(const char *s)
                 break;
             case 'e':
                 if (strcmp("d", s + 3) == 0)
-                    return PIDX_KDF_PARAM_SEED;
+                    return PIDX_PKEY_PARAM_EC_SEED;
                 break;
             case 'r':
                 if (strcmp("ial", s + 3) == 0)
@@ -1820,7 +1820,7 @@ int ossl_param_find_pidx(const char *s)
             break;
         case 'i':
             if (strcmp("ze", s + 2) == 0)
-                return PIDX_MAC_PARAM_SIZE;
+                return PIDX_DRBG_PARAM_SIZE;
             break;
         case 'p':
             if (strcmp("eed", s + 2) == 0)
@@ -2119,7 +2119,7 @@ int ossl_param_find_pidx(const char *s)
                                         break;
                                     case 't':
                                         if (strcmp("ls", s + 9) == 0)
-                                            return PIDX_CAPABILITY_TLS_SIGALG_MAX_TLS;
+                                            return PIDX_CAPABILITY_TLS_GROUP_MAX_TLS;
                                     }
                                 }
                             }
@@ -2142,7 +2142,7 @@ int ossl_param_find_pidx(const char *s)
                                         break;
                                     case 't':
                                         if (strcmp("ls", s + 9) == 0)
-                                            return PIDX_CAPABILITY_TLS_GROUP_MIN_TLS;
+                                            return PIDX_CAPABILITY_TLS_SIGALG_MIN_TLS;
                                     }
                                 }
                             }
@@ -2493,7 +2493,7 @@ int ossl_param_find_pidx(const char *s)
             break;
         case 'y':
             if (strcmp("pe", s + 2) == 0)
-                return PIDX_OBJECT_PARAM_TYPE;
+                return PIDX_PKEY_PARAM_FFC_TYPE;
         }
         break;
     case 'u':
@@ -2623,7 +2623,7 @@ int ossl_param_find_pidx(const char *s)
             break;
         case 'e':
             if (strcmp("rsion", s + 2) == 0)
-                return PIDX_PROV_PARAM_VERSION;
+                return PIDX_KDF_PARAM_ARGON2_VERSION;
         }
         break;
     case 'x':

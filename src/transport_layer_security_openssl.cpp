@@ -56,11 +56,7 @@ void TransportLayerSecurityOpenSSL::initializeSSLLibrary() {
   std::stringstream commentsOnError;
   // This command loads error strings and initializes openSSL.
 #ifdef MACRO_use_open_ssl
-  int initialization = SSL_load_error_strings();
-  int truth = 1;
-  if (initialization != truth) {
-    global.fatal << "Failed to initialize openssl." << global.fatal;
-  }
+  SSL_load_error_strings();
   int loadedSuccessfully = OpenSSL_add_ssl_algorithms();
   if (!loadedSuccessfully) {
     global << Logger::red << commentsOnError.str() << Logger::endL;

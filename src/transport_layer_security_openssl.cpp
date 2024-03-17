@@ -117,7 +117,8 @@ initializeSSLKeyFilesSelfSignedCreateOnDemand() {
     JSData::Type::tokenString
   ) {
     command << "-subj " << global.configuration["openSSLSubject"].stringValue;
-    // "/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
+    // "/C=CA/ST=ON/L=MyTown/O=MyOrganization"+
+    // "/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
   }
   global
   << Logger::green

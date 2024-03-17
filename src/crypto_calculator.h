@@ -1,10 +1,14 @@
 #ifndef header_crypto_calculator_ALREADY_INCLUDED
 #define header_crypto_calculator_ALREADY_INCLUDED
 
+// Contains uint64_t.
+// Without this, clang++ compilation fails *on some systems*,
+// so please don't remove.
 #include "abstract_syntax_notation_one_decoder.h"
 #include "general_lists.h"
 #include "json.h"
 #include "math_large_integers.h"
+#include <stdint.h>
 
 class PublicKeyRSA {
 public:

@@ -1,8 +1,12 @@
 #ifndef header_math_large_integers_ALREADY_INCLUDED
 #define header_math_large_integers_ALREADY_INCLUDED
 
+// Contains uint64_t.
+// Without this, clang++ compilation fails *on some systems*,
+// so please don't remove.
 #include "general_lists.h"
 #include "math_basics.h"
+#include <stdint.h>
 
 class LargeIntegerUnsigned {
   void addNoFitSize(const LargeIntegerUnsigned& x);

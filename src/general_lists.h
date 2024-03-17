@@ -7,6 +7,11 @@
 #include <math.h>
 #include <string.h>
 
+// Contains uint32_t.
+// Without this, clang++ compilation fails *on some systems*,
+// so please don't remove.
+#include <stdint.h>
+
 // IMPORTANT.
 // Convention on Hash functions.
 // 1. C++ objects that represent mathematically equal objects

@@ -1,12 +1,9 @@
 #ifndef header_math_large_integers_ALREADY_INCLUDED
 #define header_math_large_integers_ALREADY_INCLUDED
 
-// Contains uint64_t.
-// Without this, clang++ compilation fails *on some systems*,
-// so please don't remove.
 #include "general_lists.h"
 #include "math_basics.h"
-#include <stdint.h>
+#include <stdint.h> // Contains uint64_t. Needed by clang++ on *some systems*.
 
 class LargeIntegerUnsigned {
   void addNoFitSize(const LargeIntegerUnsigned& x);
@@ -33,7 +30,7 @@ public:
   // The following must be less than or equal to the square root of
   // CarryOverBound.
   // It is used for quick multiplication of Rational-s.
-  // static const int SquareRootOfCarryOverBound =3;//<-for extreme "corner
+  // static const int SquareRootOfCarryOverBound =3; //<-for extreme "corner
   // case" testing
   static const int squareRootOfCarryOverBound = 31000;
   // 31000*31000=961000000<1000000000

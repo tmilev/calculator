@@ -5,12 +5,8 @@
 #include "globals.h"
 #include <algorithm>
 #include <math.h>
+#include <stdint.h> // Contains uint32_t. Needed by clang++ on *some systems*.
 #include <string.h>
-
-// Contains uint32_t.
-// Without this, clang++ compilation fails *on some systems*,
-// so please don't remove.
-#include <stdint.h>
 
 // IMPORTANT.
 // Convention on Hash functions.

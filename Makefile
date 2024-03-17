@@ -84,37 +84,44 @@ endif
 
 # Ssl dependencies.
 
-sslLocation=
+foundlocalssl=
+foundssl=
 ifeq ($(nossl), 1)
 $(info [1;33mNo openssl requested.[0m) 
 else
 ifneq ($(wildcard src/openssl/Makefile),)
   # Found a local openssl installation.
   # Ignore the system openssl libraries.
-  sslLocation=found
+  foundssl=found
+  foundlocalssl=found
   LDFLAGS+=-I./src/openssl/include/ -L./src/openssl/
 endif
+
 ifneq ($(wildcard /usr/lib64/libssl.so),)#location of ssl in CENTOS
-  sslLocation=found
+foundssl=found
 endif
 ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu x86
-  sslLocation=found
+foundssl=found
 endif
 ifneq ($(wildcard /usr/lib/arm-linux-gnueabihf/libssl.so),)#location of ssl in Ubuntu x86
-  sslLocation=found
+foundssl=found
 endif
 ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu x86
-  sslLocation=found
+foundssl=found
 endif
 ifneq ($(wildcard /lib/x86_64-linux-gnu/libssl3.so),)#location of ssl in Debian GNU/Linux rodete
-  sslLocation=found
+foundssl=found
 endif
 endif
 
-ifneq ($(sslLocation),)
+ifneq ($(foundssl),)
+ifneq ($(foundlocalssl),)
+  $(info [1;32mUsing *local* openssl.[0m) 
+else
+  $(info [1;32mUsing *system* openssl.[0m)   
+endif
   CFLAGS+=-DMACRO_use_open_ssl 
   LIBRARIES_INCLUDED_AT_THE_END+= -lssl -lcrypto # WARNING believe it or not, the libraries must come AFTER the executable name
-$(info [1;32mOpenssl found.[0m) 
 endif
 ########################
 ########################
@@ -256,11 +263,12 @@ DIRECTORIES=$(dir $(OBJECTS))
 # $(info Directories: $(DIRECTORIES))
 # $(info )
 
-
 all: bin_calculator 
 
 bin_calculator: $(OBJECTS)
-	$(MAKE) -C src/openssl  
+ifneq ($(foundlocalssl),)
+	$(MAKE) -C src/openssl
+endif
 	$(compiler) $(LDFLAGS) $(OBJECTS) -o $(TARGET) $(LIBRARIES_INCLUDED_AT_THE_END)
 
 test: bin_calculator

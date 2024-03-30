@@ -8,11 +8,11 @@
  */
 
 #include <stddef.h>
-#include <openssl/ct.h>
-#include <openssl/evp.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/safestack.h>
+#include "../../include/openssl/ct.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/x509v3.h"
+#include "../../include/openssl/safestack.h"
 
 /*
  * From RFC6962: opaque SerializedSCT<1..2^16-1>; struct { SerializedSCT

@@ -12,18 +12,18 @@
 #ifndef OSSL_CRYPTO_CMP_LOCAL_H
 # define OSSL_CRYPTO_CMP_LOCAL_H
 
-# include "../include/internal/cryptlib.h"
+# include "../../include/internal/cryptlib.h"
 
-# include <openssl/cmp.h>
-# include "../include/openssl/err.h"
+# include "../../include/openssl/cmp.h"
+# include "../../include/openssl/err.h"
 
 /* explicit #includes not strictly needed since implied by the above: */
-# include <openssl/crmf.h>
-# include <openssl/types.h>
-# include <openssl/safestack.h>
-# include <openssl/x509.h>
-# include <openssl/x509v3.h>
-# include "crypto/x509.h"
+# include "../../include/openssl/crmf.h"
+# include "../../include/openssl/types.h"
+# include "../../include/openssl/safestack.h"
+# include "../../include/openssl/x509.h"
+# include "../../include/openssl/x509v3.h"
+# include "../../include/crypto/x509.h"
 
 # define IS_NULL_DN(name) (X509_NAME_get_entry(name, 0) == NULL)
 

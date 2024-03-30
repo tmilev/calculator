@@ -106,7 +106,7 @@ bool Database::Test::loadFromJSON() {
 }
 
 bool Database::Test::findWithOptions(DatabaseType databaseType) {
-  STACK_TRACE("Database::Test::basics");
+  STACK_TRACE("Database::Test::findWithOptions");
   global
   << "Testing default database. "
   << Database::toString()

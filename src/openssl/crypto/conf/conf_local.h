@@ -7,5 +7,5 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/conftypes.h>
+#include "../../include/openssl/conftypes.h"
 void ossl_config_add_ssl_module(void);

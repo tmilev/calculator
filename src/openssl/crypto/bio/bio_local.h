@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/e_os.h"
-#include "internal/sockets.h"
-#include "internal/bio_addr.h"
+#include "../../include/internal/e_os.h"
+#include "../../include/internal/sockets.h"
+#include "../../include/internal/bio_addr.h"
 
 /* BEGIN BIO_ADDRINFO/BIO_ADDR stuff. */
 

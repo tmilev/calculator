@@ -12,8 +12,8 @@
 # define OSSL_E_LOADER_ATTIC_ERR_H
 # pragma once
 
-# include <openssl/opensslconf.h>
-# include <openssl/symhacks.h>
+# include "../include/openssl/opensslconf.h"
+# include "../include/openssl/symhacks.h"
 
 
 # define ATTICerr(f, r) ERR_ATTIC_error(0, (r), OPENSSL_FILE, OPENSSL_LINE)

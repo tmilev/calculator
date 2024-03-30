@@ -299,33 +299,33 @@ bool ProblemData::loadFromJSON(
     Answer newAnswer;
     newAnswer.answerId = inputData.objects.keys[i];
     this->answers.setKeyValue(newAnswer.answerId, newAnswer);
-    Answer& currentA = *this->answers.values.lastObject();
+    Answer& currentAnswer = *this->answers.values.lastObject();
     JSData currentQuestionJSON = inputData.objects.values[i];
     if (currentQuestionJSON.objects.contains("numCorrectSubmissions")) {
-      currentA.numberOfCorrectSubmissions =
+      currentAnswer.numberOfCorrectSubmissions =
       atoi(
         currentQuestionJSON.objects.getValueNoFail("numCorrectSubmissions").
         stringValue.c_str()
       );
     }
     if (currentQuestionJSON.objects.contains("numSubmissions")) {
-      currentA.numberOfSubmissions =
+      currentAnswer.numberOfSubmissions =
       atoi(
         currentQuestionJSON.objects.getValueNoFail("numSubmissions").
         stringValue.c_str()
       );
     }
     if (currentQuestionJSON.objects.contains("firstCorrectAnswer")) {
-      currentA.firstCorrectAnswerURLed =
+      currentAnswer.firstCorrectAnswerURLed =
       currentQuestionJSON.objects.getValueNoFail("firstCorrectAnswer").
       stringValue;
-      currentA.firstCorrectAnswerClean =
+      currentAnswer.firstCorrectAnswerClean =
       HtmlRoutines::convertURLStringToNormal(
-        currentA.firstCorrectAnswerURLed, false
+        currentAnswer.firstCorrectAnswerURLed, false
       );
-      currentA.firstCorrectAnswerURLed =
+      currentAnswer.firstCorrectAnswerURLed =
       HtmlRoutines::convertStringToURLString(
-        currentA.firstCorrectAnswerClean, false
+        currentAnswer.firstCorrectAnswerClean, false
       );
       // url-encoding back the cleaned up answer:
       // this protects from the possibility that
@@ -333,6 +333,5 @@ bool ProblemData::loadFromJSON(
       // say, by an older version of the calculator
     }
   }
-  //  this->checkConsistency();
   return result;
 }

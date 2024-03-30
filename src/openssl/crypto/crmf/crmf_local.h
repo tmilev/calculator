@@ -14,8 +14,8 @@
 #ifndef OSSL_CRYPTO_CRMF_LOCAL_H
 # define OSSL_CRYPTO_CRMF_LOCAL_H
 
-# include <openssl/crmf.h>
-# include "../include/openssl/err.h"
+# include "../../include/openssl/crmf.h"
+# include "../../include/openssl/err.h"
 
 /* explicit #includes not strictly needed since implied by the above: */
 # include <openssl/types.h>

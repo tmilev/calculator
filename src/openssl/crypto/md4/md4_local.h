@@ -9,8 +9,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "../include/openssl/opensslconf.h"
-#include <openssl/md4.h>
+#include "../../include/openssl/opensslconf.h"
+#include "../../include/openssl/md4.h"
 
 void md4_block_data_order(MD4_CTX *c, const void *p, size_t num);
 
@@ -31,7 +31,7 @@ void md4_block_data_order(MD4_CTX *c, const void *p, size_t num);
         } while (0)
 #define HASH_BLOCK_DATA_ORDER   md4_block_data_order
 
-#include "crypto/md32_common.h"
+#include "../../include/crypto/md32_common.h"
 
 /*-
 #define F(x,y,z)        (((x) & (y))  |  ((~(x)) & (z)))

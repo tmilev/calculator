@@ -8,10 +8,10 @@
  */
 
 #include <stdio.h>
-#include "../include/internal/cryptlib.h"
-#include "internal/dso.h"
-#include "crypto/dso_conf.h"
-#include "internal/refcount.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/dso.h"
+#include "../../include/crypto/dso_conf.h"
+#include "../../include/internal/refcount.h"
 
 /**********************************************************************/
 /* The low-level handle type used to refer to a loaded shared library */

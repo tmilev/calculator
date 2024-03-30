@@ -26,7 +26,7 @@ Calculator::ExpressionHistoryEnumerator::ExpressionHistoryEnumerator() {
 bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
   int incomingRecursionDepth, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("ExpressionHistoryEnumerator::computeRecursively");
+  STACK_TRACE("Calculator::ExpressionHistoryEnumerator::computeRecursively");
   this->recursionDepth = incomingRecursionDepth;
   if (recursionDepth > this->maximumRecursionDepth) {
     if (commentsOnFailure != nullptr) {

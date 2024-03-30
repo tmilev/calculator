@@ -10,7 +10,7 @@
  */
 
 #include <string.h>
-#include "internal/sm3.h"
+#include "../../include/internal/sm3.h"
 
 #define DATA_ORDER_IS_BIG_ENDIAN
 
@@ -51,7 +51,7 @@ void ossl_hwsm3_block_data_order(SM3_CTX *c, const void *p, size_t num);
 void ossl_sm3_block_data_order(SM3_CTX *c, const void *p, size_t num);
 void ossl_sm3_transform(SM3_CTX *c, const unsigned char *data);
 
-#include "crypto/md32_common.h"
+#include "../../include/crypto/md32_common.h"
 
 #ifndef PEDANTIC
 # if defined(__GNUC__) && __GNUC__>=2 && \

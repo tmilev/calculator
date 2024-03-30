@@ -10,11 +10,11 @@
 
 #include <stdlib.h>
 
-#include <openssl/obj_mac.h>
-#include <openssl/ec.h>
-#include "../include/openssl/bn.h"
-#include "internal/refcount.h"
-#include "crypto/ec.h"
+#include "../../include/openssl/obj_mac.h"
+#include "../../include/openssl/ec.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/internal/refcount.h"
+#include "../../include/crypto/ec.h"
 
 #if defined(__SUNPRO_C)
 # if __SUNPRO_C >= 0x520

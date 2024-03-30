@@ -168,12 +168,12 @@ void MathRoutines::lieBracket(
     MathRoutines::lieBracket(standsOnTheLeftNew, standsOnTheRightNew, output);
     return;
   }
-  Element tempE;
+  Element element;
   output = standsOnTheLeft;
   output *= standsOnTheRight;
-  tempE = standsOnTheRight;
-  tempE *= standsOnTheLeft;
-  output -= tempE;
+  element = standsOnTheRight;
+  element *= standsOnTheLeft;
+  output -= element;
 }
 
 bool Calculator::recursionDepthExceededHandleRoughly(
@@ -2614,14 +2614,14 @@ bool CalculatorBasics::meltBrackets(
   if (!input.startsWith(calculator.opCommandSequence())) {
     return false;
   }
-  int tempInt;
+  int change;
   int childIncrease = 0;
   bool found = false;
   for (int i = 0; i < input.size(); i ++) {
     const Expression& currentChild = input[i];
-    if (currentChild.isMeltable(&tempInt)) {
+    if (currentChild.isMeltable(&change)) {
       found = true;
-      childIncrease += tempInt - 1;
+      childIncrease += change - 1;
     }
   }
   if (!found) {

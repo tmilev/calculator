@@ -7,15 +7,15 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "../include/openssl/core_dispatch.h"
-#include <openssl/types.h>
-#include <openssl/safestack.h>
-#include <openssl/encoder.h>
-#include <openssl/decoder.h>
-#include "../include/internal/cryptlib.h"
-#include "internal/passphrase.h"
-#include "../include/internal/property.h"
-#include "internal/refcount.h"
+#include "../../include/openssl/core_dispatch.h"
+#include "../../include/openssl/types.h"
+#include "../../include/openssl/safestack.h"
+#include "../../include/openssl/encoder.h"
+#include "../../include/openssl/decoder.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/passphrase.h"
+#include "../../include/internal/property.h"
+#include "../../include/internal/refcount.h"
 
 struct ossl_endecode_base_st {
     OSSL_PROVIDER *prov;

@@ -35,8 +35,8 @@
 #ifndef OSSL_CRYPTO_SEED_LOCAL_H
 # define OSSL_CRYPTO_SEED_LOCAL_H
 
-# include <openssl/e_os2.h>
-# include <openssl/seed.h>
+# include "../../include/openssl/e_os2.h"
+# include "../../include/openssl/seed.h"
 
 # ifdef SEED_LONG               /* need 32-bit type */
 typedef unsigned long seed_word;

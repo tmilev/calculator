@@ -7,9 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "../include/openssl/core_dispatch.h"
-#include <openssl/pem.h>
-#include <openssl/encoder.h>
+#include "../../include/openssl/core_dispatch.h"
+#include "../../include/openssl/pem.h"
+#include "../../include/openssl/encoder.h"
 
 /*
  * Selectors, named according to the ASN.1 names used throughout libcrypto.

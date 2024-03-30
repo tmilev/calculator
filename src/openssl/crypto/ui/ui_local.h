@@ -10,8 +10,8 @@
 #ifndef OSSL_CRYPTO_UI_LOCAL_H
 # define OSSL_CRYPTO_UI_LOCAL_H
 
-# include <openssl/ui.h>
-# include "../include/openssl/crypto.h"
+# include "../../include/openssl/ui.h"
+# include "../../include/openssl/crypto.h"
 
 # ifdef _
 #  undef _

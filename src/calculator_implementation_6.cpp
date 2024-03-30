@@ -233,8 +233,7 @@ bool CalculatorFunctions::getSummand(
     return false;
   }
   Expression substitution = bottomBoundary;
-  Expression // oneE,
-  valueToSubWith;
+  Expression valueToSubWith;
   valueToSubWith = bottomBoundary[2] + input[2];
   substitution.setChild(2, valueToSubWith);
   Expression commandSequence(calculator);
@@ -329,7 +328,8 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   plotObject.yLow = lowLeft[1];
   plotObject.xHigh = upRight[0];
   plotObject.xLow = lowLeft[0];
-  List<std::string> lowLeftStrings, upRightStrings;
+  List<std::string> lowLeftStrings;
+  List<std::string> upRightStrings;
   lowLeft.toListStringsBasicType(lowLeftStrings);
   upRight.toListStringsBasicType(upRightStrings);
   plotObject.variableRangesJS.setSize(2);
@@ -371,7 +371,8 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   plotObject.manifoldImmersion.getFreeVariables(
     plotObject.variablesInPlay, true
   );
-  Expression xE, yE;
+  Expression xE;
+  Expression yE;
   xE.makeAtom(calculator, "x");
   yE.makeAtom(calculator, "y");
   if (plotObject.variablesInPlay.size == 0) {
@@ -441,7 +442,8 @@ bool CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256(
     << " is not a string. ";
   }
   std::stringstream out;
-  std::string modulusBase64, exponentBase64;
+  std::string modulusBase64;
+  std::string exponentBase64;
   if (
     !input[2].isOfType(&modulusBase64) || !input[3].isOfType(&exponentBase64)
   ) {
@@ -454,7 +456,8 @@ bool CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256(
     << " to base64 strings";
   }
   JSONWebToken webToken;
-  LargeIntegerUnsigned modulus, exponent;
+  LargeIntegerUnsigned modulus;
+  LargeIntegerUnsigned exponent;
   if (!webToken.assignString(tokenString, &out)) {
     return output.assignValue(calculator, out.str());
   }
@@ -587,7 +590,8 @@ bool CalculatorFunctionsEncoding::testJSON(
     inputString = input[1].toString();
   }
   JSData data;
-  std::stringstream comments, out;
+  std::stringstream comments;
+  std::stringstream out;
   if (!data.parse(inputString, true, &comments)) {
     return output.assignValue(calculator, comments.str());
   }
@@ -613,7 +617,8 @@ bool CalculatorFunctionsEncoding::convertBase64ToHex(
   if (!input[1].isOfType(&inputString)) {
     inputString = input[1].toString();
   }
-  std::string result, bitStream;
+  std::string result;
+  std::string bitStream;
   if (
     !Crypto::convertBase64ToString(
       inputString,
@@ -691,7 +696,9 @@ bool CalculatorFunctionsCrypto::testRSASign(
     << "Inputs do not appear to be prime. "
     << errorStream.str();
   }
-  List<unsigned char> message, paddedMessage, signature;
+  List<unsigned char> message;
+  List<unsigned char> paddedMessage;
+  List<unsigned char> signature;
   message = messageString;
   key.hashAndPadPKCS1(
     message,
@@ -711,7 +718,8 @@ bool CalculatorFunctionsCrypto::testRSASign(
   out
   << "<br>Signature:<br>"
   << Crypto::convertListUnsignedCharsToHex(signature);
-  ElementZmodP element, one;
+  ElementZmodP element;
+  ElementZmodP one;
   element.modulus = key.publicKey.modulus;
   one.makeOne(element.modulus);
   Crypto::convertListUnsignedCharsToLargeUnsignedIntegerBigEndian(
@@ -989,7 +997,9 @@ bool CalculatorFunctions::functionFactorInteger(
   if (complete) {
     return output.makeSequence(calculator, &result);
   } else {
-    Expression factorsSoFar, factorNext, numberLast;
+    Expression factorsSoFar;
+    Expression factorNext;
+    Expression numberLast;
     factorsSoFar.makeSequence(calculator, &result);
     factorNext.reset(calculator);
     factorNext.addChildAtomOnTop(opFactorInteger);
@@ -1034,7 +1044,8 @@ bool CalculatorFunctions::factorOutNumberContent(
     output = input[1];
     return true;
   }
-  Expression left, right;
+  Expression left;
+  Expression right;
   left.assignValue(calculator, scale);
   right.makeSum(calculator, linearCombination);
   output = left * right;
@@ -1065,7 +1076,9 @@ bool CalculatorFunctions::subList(
   if (boundVars.size == 0) {
     return output.makeSequence(calculator, nullptr);
   }
-  Expression substituted, toBeSubbed, subbedSimplified;
+  Expression substituted;
+  Expression toBeSubbed;
+  Expression subbedSimplified;
   toBeSubbed.reset(calculator);
   toBeSubbed.addChildAtomOnTop(calculator.opBind());
   toBeSubbed.addChildOnTop(boundVars[0]);
@@ -1192,14 +1205,16 @@ bool CalculatorFunctions::greaterThanOrEqualTo(
   }
   const Expression& left = input[1];
   const Expression& right = input[2];
-  Rational leftRat, rightRat;
+  Rational leftRat;
+  Rational rightRat;
   if (left.isRational(&leftRat) && right.isRational(&rightRat)) {
     if (leftRat >= rightRat) {
       return output.assignValue(calculator, 1);
     }
     return output.assignValue(calculator, 0);
   }
-  double leftD, rightD;
+  double leftD;
+  double rightD;
   if (
     left.evaluatesToDouble(&leftD) && right.evaluatesToDouble(&rightD)
   ) {
@@ -1220,14 +1235,16 @@ bool CalculatorFunctions::greaterThan(
   }
   const Expression& left = input[1];
   const Expression& right = input[2];
-  Rational leftRat, rightRat;
+  Rational leftRat;
+  Rational rightRat;
   if (left.isRational(&leftRat) && right.isRational(&rightRat)) {
     if (leftRat > rightRat) {
       return output.assignValue(calculator, 1);
     }
     return output.assignValue(calculator, 0);
   }
-  double leftD, rightD;
+  double leftD;
+  double rightD;
   if (
     left.evaluatesToDouble(&leftD) && right.evaluatesToDouble(&rightD)
   ) {
@@ -1311,7 +1328,10 @@ bool CalculatorFunctions::leftIntervalGreaterThanRight(
   if (!right.isIntervalRealLine()) {
     return left > right;
   }
-  double left1, right1, left2, right2;
+  double left1 = 0;
+  double right1 = 0;
+  double left2 = 0;
+  double right2 = 0;
   bool left1IsDouble = left[1].evaluatesToDouble(&left1);
   bool right1IsDouble = right[1].evaluatesToDouble(&right1);
   bool left2IsDouble = left[2].evaluatesToDouble(&left2);
@@ -1380,7 +1400,10 @@ bool CalculatorFunctionsIntervals::intersectIntervals(
   if (!rightE.isIntervalRealLine()) {
     return false;
   }
-  double left1 = 0, left2 = 0, right1 = 0, right2 = 0;
+  double left1 = 0;
+  double left2 = 0;
+  double right1 = 0;
+  double right2 = 0;
   if (
     !leftE[1].evaluatesToDouble(&left1) || !leftE[2].evaluatesToDouble(&left2)
   ) {
@@ -1397,8 +1420,10 @@ bool CalculatorFunctionsIntervals::intersectIntervals(
   }
   bool leftIsClosed = true;
   bool rightIsClosed = true;
-  Expression leftFinal, rightFinal;
-  double leftResult = 0, rightResult = 0;
+  Expression leftFinal;
+  Expression rightFinal;
+  double leftResult = 0;
+  double rightResult = 0;
   if (left1 < right1) {
     leftFinal = rightE[1];
     leftResult = right1;
@@ -1513,7 +1538,8 @@ bool CalculatorFunctionsIntervals::unionUnionIntervals(
     return false;
   }
   const Expression& rightE = input[2][1];
-  Expression middleUnion, middleUnionReduced;
+  Expression middleUnion;
+  Expression middleUnionReduced;
   middleUnion.makeXOX(calculator, calculator.opUnion(), leftE, rightE);
   if (
     !CalculatorFunctionsIntervals::unionIntervals(
@@ -1576,7 +1602,8 @@ bool CalculatorFunctionsIntervals::unionIntervals(
   }
   bool leftIsClosed = false;
   bool rightIsClosed = false;
-  Expression leftFinal, rightFinal;
+  Expression leftFinal;
+  Expression rightFinal;
   if (left1 < right1) {
     leftFinal = leftE[1];
     if (
@@ -1739,7 +1766,8 @@ bool CalculatorFunctions::compareIntervalsNumerically(
   if (!input[3].evaluatesToDouble(&precision)) {
     return calculator << "Could not extract precision from the last argument.";
   }
-  List<Expression> leftList, rightList;
+  List<Expression> leftList;
+  List<Expression> rightList;
   if (
     !calculator.collectOpands(
       input[1], calculator.opUnion(), leftList
@@ -1775,7 +1803,10 @@ bool CalculatorFunctions::compareIntervalsNumerically(
     if (leftList[i][0] != rightList[i][0]) {
       return output.assignValue(calculator, 0);
     }
-    double left1 = 0, left2 = 0, right1 = 0, right2 = 0;
+    double left1 = 0;
+    double left2 = 0;
+    double right1 = 0;
+    double right2 = 0;
     if (
       !leftList[i][1].evaluatesToDouble(&left1) ||
       !rightList[i][1].evaluatesToDouble(&right1)
@@ -1938,7 +1969,8 @@ bool CalculatorFunctions::distributeSqrt(
   if (!isGood) {
     return false;
   }
-  Expression leftE, rightE;
+  Expression leftE;
+  Expression rightE;
   leftE.makeXOX(
     calculator, calculator.opSqrt(), oneOverExponentE, base[1]
   );
@@ -2366,7 +2398,9 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
     << "Elliptic curve allowed to have max 4 terms, yours has: "
     << polynomial.size();
   }
-  MonomialPolynomial xCubed, xLinear, ySquared;
+  MonomialPolynomial xCubed;
+  MonomialPolynomial xLinear;
+  MonomialPolynomial ySquared;
   xCubed.makeEi(indexX, 3);
   xLinear.makeEi(indexX, 1);
   ySquared.makeEi(indexY, 2);
@@ -2793,7 +2827,9 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
     << "Diagonalization (Jordan normal form) "
     << "is allowed only for square matrices. ";
   }
-  Matrix<AlgebraicNumber> eigenMatrix, jordanNormalForm, eigenMatrixInverted;
+  Matrix<AlgebraicNumber> eigenMatrix;
+  Matrix<AlgebraicNumber> jordanNormalForm;
+  Matrix<AlgebraicNumber> eigenMatrixInverted;
   std::stringstream comments;
   if (
     !matrix.jordanNormalForm(
@@ -2810,10 +2846,9 @@ bool CalculatorFunctionsLinearAlgebra::diagonalizeMatrix(
     << comments.str();
   }
   List<Expression> result;
-  Expression
-  eigenMatrixExpression,
-  jordanNormalFormExpression,
-  eigenMatrixInvertedExpression;
+  Expression eigenMatrixExpression;
+  Expression jordanNormalFormExpression;
+  Expression eigenMatrixInvertedExpression;
   eigenMatrixExpression.makeMatrix(calculator, eigenMatrix);
   jordanNormalFormExpression.makeMatrix(calculator, jordanNormalForm);
   eigenMatrixInvertedExpression.makeMatrix(calculator, eigenMatrixInverted);
@@ -2833,7 +2868,8 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
   const Expression& leftE = input[1];
   const Expression& middleE = input[2];
   const Expression& rightE = input[3];
-  int numberOfRows, numberOfColumns;
+  int numberOfRows = 0;
+  int numberOfColumns = 0;
   if (
     !middleE.isIntegerFittingInInt(&numberOfRows) ||
     !rightE.isIntegerFittingInInt(&numberOfColumns)
@@ -2858,7 +2894,8 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
   }
   Matrix<Expression> resultMat;
   resultMat.initialize(numberOfRows, numberOfColumns);
-  Expression leftIE, rightIE;
+  Expression leftIE;
+  Expression rightIE;
   for (int i = 0; i < numberOfRows; i ++) {
     for (int j = 0; j < numberOfColumns; j ++) {
       leftIE.assignValue(calculator, i + 1);
@@ -3059,7 +3096,8 @@ bool CalculatorFunctions::isRational(
 bool CalculatorFunctions::freudenthalFull(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  Vector<Rational> hwFundamental, hwSimple;
+  Vector<Rational> hwFundamental;
+  Vector<Rational> hwSimple;
   Selection tempSel;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
@@ -3084,7 +3122,8 @@ bool CalculatorFunctions::freudenthalFull(
     return
     output.assignError(calculator, "Failed to extract highest weight. ");
   }
-  CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> startingChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> resultChar;
   hwSimple =
   semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(
     hwFundamental, Rational::zero()
@@ -3106,8 +3145,9 @@ bool CalculatorFunctions::freudenthalFull(
 bool CalculatorFunctions::freudenthalFormula(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  Vector<Rational> hwFundamental, hwSimple;
-  Selection tempSel;
+  Vector<Rational> hwFundamental;
+  Vector<Rational> hwSimple;
+  Selection selection;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
     !calculator.getTypeHighestWeightParabolic<Rational>(
@@ -3115,7 +3155,7 @@ bool CalculatorFunctions::freudenthalFormula(
       input,
       output,
       hwFundamental,
-      tempSel,
+      selection,
       semisimpleLieAlgebra
     )
   ) {
@@ -3127,11 +3167,12 @@ bool CalculatorFunctions::freudenthalFormula(
   if (output.isError()) {
     return true;
   }
-  if (tempSel.cardinalitySelection > 0) {
+  if (selection.cardinalitySelection > 0) {
     return
     output.assignError(calculator, "Failed to extract highest weight. ");
   }
-  CharacterSemisimpleLieAlgebraModule<Rational> startingChar, resultChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> startingChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> resultChar;
   hwSimple =
   semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(
     hwFundamental, Rational::zero()
@@ -3222,7 +3263,8 @@ bool CalculatorFunctions::jacobiSymbol(
   }
   const Expression& leftE = input[1];
   const Expression& rightE = input[2];
-  int leftInt, rightInt;
+  int leftInt = 0;
+  int rightInt = 0;
   if (
     !leftE.isSmallInteger(&leftInt) || !rightE.isSmallInteger(&rightInt)
   ) {

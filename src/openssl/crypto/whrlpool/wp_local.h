@@ -7,6 +7,6 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/whrlpool.h>
+#include "../../include/openssl/whrlpool.h"
 
 void whirlpool_block(WHIRLPOOL_CTX *, const void *, size_t);

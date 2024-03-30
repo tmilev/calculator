@@ -576,8 +576,8 @@ void DatabaseInternalConnection::create(int inputIndexInOwner) {
   this->indexInOwner = inputIndexInOwner;
   std::stringstream clientToServerName;
   std::stringstream serverToClientName;
-  clientToServerName << "database_client_to_server_" << indexInOwner;
-  serverToClientName << "database_server_to_client_" << indexInOwner;
+  clientToServerName << "database_client_to_server_" << this->indexInOwner;
+  serverToClientName << "database_server_to_client_" << this->indexInOwner;
   if (
     !this->clientToServer.createMe(
       clientToServerName.str(), true, false, false

@@ -12,8 +12,8 @@
 # define OSSL_E_AFALG_ERR_H
 # pragma once
 
-# include <openssl/opensslconf.h>
-# include <openssl/symhacks.h>
+# include "../include/openssl/opensslconf.h"
+# include "../include/openssl/symhacks.h"
 
 
 # define AFALGerr(f, r) ERR_AFALG_error(0, (r), OPENSSL_FILE, OPENSSL_LINE)

@@ -10,14 +10,14 @@
 #ifndef OSSL_CRYPTO_RAND_LOCAL_H
 # define OSSL_CRYPTO_RAND_LOCAL_H
 
-# include <openssl/aes.h>
-# include <openssl/evp.h>
-# include <openssl/sha.h>
-# include <openssl/hmac.h>
-# include <openssl/ec.h>
-# include <openssl/rand.h>
-# include "../include/internal/tsan_assist.h"
-# include "crypto/rand.h"
+# include "../../include/openssl/aes.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/sha.h"
+# include "../../include/openssl/hmac.h"
+# include "../../include/openssl/ec.h"
+# include "../../include/openssl/rand.h"
+# include "../../include/internal/tsan_assist.h"
+# include "../../include/crypto/rand.h"
 
 /* Default reseed intervals */
 # define PRIMARY_RESEED_INTERVAL                 (1 << 8)

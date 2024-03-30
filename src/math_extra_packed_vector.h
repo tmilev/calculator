@@ -32,18 +32,15 @@ public:
 // In particular, scalar likes to be int.
 template <typename scalar, typename templateVector>
 class AnotherWeylGroup {
-  // compat WeylGroup
   int sizePrivate;
 public:
   Matrix<Rational> cartanSymmetric;
   templateVector rho;
   List<templateVector> rootSystem;
   HashedList<templateVector> rhoOrbit;
-  // <-Note from Todor: I don't remember if I changed this to be a Hashed list.
   List<List<int> > conjugacyClasses;
   List<int> classMap;
   List<Matrix<Rational> > classMatrices;
-  // needed
   List<Vector<Rational> > characterTable;
   AnotherWeylGroup(): sizePrivate(- 1) {}
   int getRank() const;

@@ -6,7 +6,6 @@
 // Class CryptoPublicDomain serves the same purpose as
 // class Crypto, but excludes all code not written
 // specifically for the purposes of the calculator project.
-// however e
 class CryptoPublicDomain {
 public:
   static void computeRIPEMD160(

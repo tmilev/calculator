@@ -100,14 +100,17 @@ OSSL_TIME tls1_default_timeout(void)
     return ossl_seconds2time(60 * 60 * 2);
 }
 
-int tls1_new(SSL *s)
-{
-    if (!ssl3_new(s))
-        return 0;
-    if (!s->method->ssl_clear(s))
-        return 0;
+int tls1_new(SSL *s) {
+  // This function obfuscates handshake_func.
+  printf("DEBUG: inside tls1_new: is this handshake_func?");
 
-    return 1;
+  if (!ssl3_new(s)) {
+    return 0;
+  }
+  if (!s->method->ssl_clear(s)) {
+    return 0;
+  }
+  return 1;
 }
 
 void tls1_free(SSL *s)

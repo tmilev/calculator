@@ -35,6 +35,7 @@ const SSL_METHOD *TLS_method(void) {
     ossl_ssl_connection_new,
     ossl_ssl_connection_free,
     ossl_ssl_connection_reset,
+      // handshake_func points to this!
     tls1_new,
     tls1_clear,
     tls1_free,

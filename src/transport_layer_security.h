@@ -90,6 +90,9 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
+  bool shouldStopConnectionAttempts(
+    int attemptIndex, std::stringstream* commentsOnFailure
+  );
   int sslRead(
     List<char>& readBuffer,
     std::string* outputError,
@@ -109,6 +112,11 @@ public:
   void doSetSocket(int socketFileDescriptor);
   void setSocketAddToStack(int socketFileDescriptor);
   void removeLastSocket();
+  bool shouldContinueOnServerHandshakeError(
+    int attemptsSoFar,
+    int maximumAttempts,
+    std::stringstream* commentsOnFailure
+  );
   bool handShakeIamServer(
     int inputSocketID, std::stringstream* commentsOnFailure
   );

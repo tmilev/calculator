@@ -64,9 +64,9 @@ template <class Coefficient>
 bool Polynomial<Coefficient>::isOneVariableNonConstantPolynomial(
   int* whichVariable
 ) const {
-  int tempInt;
+  int unused = 0;
   if (whichVariable == nullptr) {
-    whichVariable = &tempInt;
+    whichVariable = &unused;
   }
   if (!this->isOneVariablePolynomial(whichVariable)) {
     return false;
@@ -97,9 +97,9 @@ Rational Polynomial<Coefficient>::rationalValue() {
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::isOneVariablePolynomial(int* whichVariable) const {
-  int tempInt;
+  int unused = 0;
   if (whichVariable == nullptr) {
-    whichVariable = &tempInt;
+    whichVariable = &unused;
   }
   *whichVariable = - 1;
   for (int i = 0; i < this->size(); i ++) {

@@ -2333,9 +2333,11 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
     }
     return false;
   }
-  Vectors<Rational> isoDomain, isoRange;
+  Vectors<Rational> isoDomain;
+  Vectors<Rational> isoRange;
   Permutation permComponentsCentralizer;
-  List<int> tempList, tempPermutation2;
+  List<int> tempList;
+  List<int> tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
   List<List<List<int> > > centralizerDiagramAutomorphisms;
   domainRootSubalgebra.centralizerDiagram.getAutomorphisms(
@@ -2367,11 +2369,11 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
     tempPermutation2
   );
   Matrix<Rational> rankComputer;
-  Selection tempSel;
+  Selection selection;
   for (int i = 0; i < domain.size; i ++) {
     isoDomain.addOnTop(domain[i]);
     if (
-      isoDomain.getRankElementSpan(&rankComputer, &tempSel) < isoDomain.size
+      isoDomain.getRankElementSpan(&rankComputer, &selection) < isoDomain.size
     ) {
       isoDomain.removeLastObject();
     } else {
@@ -2379,7 +2381,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
     }
   }
   if (
-    isoRange.getRankElementSpan(&rankComputer, &tempSel) < isoRange.size
+    isoRange.getRankElementSpan(&rankComputer, &selection) < isoRange.size
   ) {
     return false;
   }
@@ -2446,13 +2448,17 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
     outputAutomorphisms->simpleRootsInner.size = 0;
     outputAutomorphisms->simpleRootsInner = this->simpleBasisCentralizerRoots;
   }
-  Vectors<Rational> isoDomain, isoRange;
-  Permutation permComponents, permComponentsCentralizer;
-  List<int> tempList, tempPermutation1, tempPermutation2;
-  SelectionWithDifferentMaxMultiplicities tempAutos, tempAutosCentralizer;
-  List<List<List<int> > >
-  DiagramAutomorphisms,
-  CentralizerDiagramAutomorphisms;
+  Vectors<Rational> isoDomain;
+  Vectors<Rational> isoRange;
+  Permutation permComponents;
+  Permutation permComponentsCentralizer;
+  List<int> tempList;
+  List<int> tempPermutation1;
+  List<int> tempPermutation2;
+  SelectionWithDifferentMaxMultiplicities tempAutos;
+  SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
+  List<List<List<int> > > DiagramAutomorphisms;
+  List<List<List<int> > > CentralizerDiagramAutomorphisms;
   this->dynkinDiagram.getAutomorphisms(DiagramAutomorphisms);
   this->centralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
   tempAutos.initializePart1(DiagramAutomorphisms.size);
@@ -2482,8 +2488,8 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
     tempSize += tempList[i];
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);
-  int tempI1;
-  int totalAutomorphisms;
+  int tempI1 = 0;
+  int totalAutomorphisms = 0;
   tempI1 = permComponents.totalNumberSubsetsSmallInt();
   totalAutomorphisms = tempAutos.totalNumberSubsetsSmallInt();
   int tempI2 = permComponentsCentralizer.totalNumberSubsetsSmallInt();
@@ -2561,14 +2567,14 @@ void RootSubalgebra::doKRootsEnumeration() {
     this->positiveRootsKConnectedComponents.size
   );
   Matrix<Rational> rankComputer;
-  Selection tempSel;
+  Selection selection;
   for (int i = 0; i < this->positiveRootsKConnectedComponents.size; i ++) {
     this->kEnumerations[i].initialize(
       this->positiveRootsKConnectedComponents[i].size
     );
     this->kComponentRanks[i] =
     this->positiveRootsKConnectedComponents[i].getRankElementSpan(
-      &rankComputer, &tempSel
+      &rankComputer, &selection
     );
   }
   this->doKRootsEnumerationRecursively(0);
@@ -2800,11 +2806,11 @@ computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators()
   simpleBasisMatrixTimesCartanSymm.getZeroEigenSpaceModifyMe(
     basisOrthogonalRoots
   );
-  Vectors<Rational>
-  imagesWeightBasis,
-  weightBasis = this->simpleRootsReductiveSubalgebra;
+  Vectors<Rational> imagesWeightBasis;
+  Vectors<Rational> weightBasis = this->simpleRootsReductiveSubalgebra;
   weightBasis.addListOnTop(basisOrthogonalRoots);
-  Matrix<Rational> basisMatrixInverted, resultingOperator;
+  Matrix<Rational> basisMatrixInverted;
+  Matrix<Rational> resultingOperator;
   basisMatrixInverted.assignVectorsToColumns(weightBasis);
   basisMatrixInverted.invert();
   this->outerSAautos.generators.setSize(outerAutos.size);

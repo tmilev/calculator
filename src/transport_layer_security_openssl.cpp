@@ -90,7 +90,8 @@ void TransportLayerSecurityOpenSSL::initializeSSLLibrary() {
 bool TransportLayerSecurityOpenSSL::
 initializeSSLKeyFilesSelfSignedCreateOnDemand() {
   STACK_TRACE(
-    "TransportLayerSecurityOpenSSL::initializeSSLKeyFilesSelfSignedCreateOnDemand"
+    "TransportLayerSecurityOpenSSL::"
+    "initializeSSLKeyFilesSelfSignedCreateOnDemand"
   );
   if (!global.flagSSLAvailable) {
     return false;
@@ -375,6 +376,80 @@ void TransportLayerSecurityOpenSSL::doSetSocket(int socketFileDescriptor) {
 #endif // MACRO_use_open_ssl
 }
 
+bool TransportLayerSecurityOpenSSL::shouldStopConnectionAttempts(
+  int attemptIndex, std::stringstream* commentsOnFailure
+) {
+  if (this->errorCode == 0 && commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    << "Attempt "
+    << attemptIndex + 1
+    << ": SSL handshake not successful in a "
+    << "controlled fashion (errorCode = 0). ";
+  } else if (commentsOnFailure != nullptr) {
+    *commentsOnFailure
+    << "Attempt "
+    << attemptIndex + 1
+    << ": SSL handshake not successful with a fatal error with "
+    << "errorCode: "
+    << this->errorCode
+    << ". ";
+  }
+  switch (SSL_get_error(this->sslData, this->errorCode)) {
+  case SSL_ERROR_NONE:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "No error reported, this shouldn't happen. ";
+    }
+    return true;
+  case SSL_ERROR_ZERO_RETURN:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The TLS/SSL connection has been closed (possibly cleanly). ";
+    }
+    return true;
+  case SSL_ERROR_WANT_READ:
+  case SSL_ERROR_WANT_WRITE:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << " During regular I/O: repeat needed (not implemented). ";
+    }
+    break;
+  case SSL_ERROR_WANT_CONNECT:
+  case SSL_ERROR_WANT_ACCEPT:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << " During handshake negotiations: "
+      << "repeat needed (not implemented). ";
+    }
+    break;
+  case SSL_ERROR_WANT_X509_LOOKUP:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Application callback set by SSL_CTX_set_client_cert_cb(): "
+      << "repeat needed (not implemented). ";
+    }
+    return true;
+  case SSL_ERROR_SYSCALL:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << Logger::red
+      << "Error: some I/O error occurred. "
+      << Logger::endL;
+    }
+    return true;
+  case SSL_ERROR_SSL:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "A failure in the SSL library occurred. ";
+    }
+    break;
+  default:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Unknown error. ";
+    }
+    return true;
+  }
+  return false;
+}
+
 bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
   int inputSocketID,
   std::stringstream* commentsOnFailure,
@@ -386,6 +461,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
   this->freeSession();
   this->initializeSSLClient();
 #ifdef MACRO_use_open_ssl
+  // Obufscation of ossl_ssl_connection_new.
   this->sslData = SSL_new(this->contextGlobal);
   if (this->sslData == nullptr) {
     this->flagSSLHandshakeSuccessful = false;
@@ -396,119 +472,31 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
   }
   this->setSocketAddToStack(inputSocketID);
   int maximumHandshakeTries = 4;
+  this->flagSSLHandshakeSuccessful = false;
   for (int i = 0; i < maximumHandshakeTries; i ++) {
     this->errorCode = SSL_connect(this->sslData);
-    this->flagSSLHandshakeSuccessful = false;
-    if (this->errorCode != 1) {
-      if (this->errorCode == 0) {
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << "Attempt "
-          << i + 1
-          << ": SSL handshake not successful in a "
-          << "controlled fashion (errorCode = 0). <br>";
-        }
-      } else {
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << "Attempt "
-          << i + 1
-          << ": SSL handshake not successful with a fatal error with "
-          << "errorCode: "
-          << this->errorCode
-          << ". <br>";
-        }
-      }
-      switch (SSL_get_error(this->sslData, this->errorCode)) {
-      case SSL_ERROR_NONE:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << "No error reported, this shouldn't happen. <br>";
-        }
-        maximumHandshakeTries = 1;
-        break;
-      case SSL_ERROR_ZERO_RETURN:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << "The TLS/SSL connection has been closed (possibly cleanly). <br>";
-        }
-        maximumHandshakeTries = 1;
-        break;
-      case SSL_ERROR_WANT_READ:
-      case SSL_ERROR_WANT_WRITE:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << " During regular I/O: repeat needed (not implemented). <br>";
-        }
-        break;
-      case SSL_ERROR_WANT_CONNECT:
-      case SSL_ERROR_WANT_ACCEPT:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          <<
-          " During handshake negotiations: repeat needed (not implemented). <br> "
-          ;
-        }
-        break;
-      case SSL_ERROR_WANT_X509_LOOKUP:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << " Application callback set by SSL_CTX_set_client_cert_cb(): "
-          << "repeat needed (not implemented).  <br>";
-        }
-        maximumHandshakeTries = 1;
-        break;
-        // case SSL_ERROR_WANT_ASYNC:
-        // logOpenSSL << Logger::red << "Asynchronous engine is still
-        // processing
-        // data. <br>"
-        //  << Logger::endL;
-        //  break;
-      case SSL_ERROR_SYSCALL:
-        if (commentsOnFailure != nullptr) *commentsOnFailure
-        << Logger::red
-        << "Error: some I/O error occurred. <br>"
-        << Logger::endL;
-        maximumHandshakeTries = 1;
-        break;
-      case SSL_ERROR_SSL:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "A failure in the SSL library occurred. <br>";
-        }
-        break;
-      default:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Unknown error. <br>";
-        }
-        maximumHandshakeTries = 1;
-        break;
-      }
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Retrying connection in 0.5 seconds... <br>";
-      }
-      global.fallAsleep(500000);
-    } else {
+    if (this->errorCode == 1) {
       this->flagSSLHandshakeSuccessful = true;
       break;
     }
-  }
-  if (this->flagSSLHandshakeSuccessful) {
-    if (commentsGeneral != nullptr) {
-      *commentsGeneral
-      << "<span style ='color:green'>SSL handshake successful.</span>\n<br>\n";
+    if (this->shouldStopConnectionAttempts(i, commentsOnFailure)) {
+      break;
     }
-  } else {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Retrying connection in 0.5 seconds.";
+    }
+    global.fallAsleep(500000);
+  }
+  if (!this->flagSSLHandshakeSuccessful) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      << "<span style ='color:red'>SSL handshake failed.</span>\n<br>\n";
+      << "<span style='color:red'>SSL handshake failed.</span>\n<br>\n";
     }
     return false;
   }
-  // CHK_SSL(err).
-  // Get the cipher - opt.
-  // Get client's certificate (note: beware of dynamic allocation) - opt.
-  if ((false)) {
-    this->inspectCertificates(commentsOnFailure, commentsGeneral);
+  if (commentsGeneral != nullptr) {
+    *commentsGeneral
+    << "<span style='color:green'>SSL handshake successful.</span>\n<br>\n";
   }
   return true;
 #else
@@ -520,24 +508,24 @@ bool TransportLayerSecurityOpenSSL::inspectCertificates(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  STACK_TRACE("TransportLayerSecurity::inspectCertificates");
+  STACK_TRACE("TransportLayerSecurityOpenSSL::inspectCertificates");
   (void) commentsOnFailure;
   (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
   this->peer_certificate = SSL_get_peer_certificate(this->sslData);
   if (this->peer_certificate != nullptr) {
-    char* tempCharPtr = nullptr;
+    char* characterPointer = nullptr;
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "SSL connection using: "
       << SSL_get_cipher(this->sslData)
       << ".<br>\n";
     }
-    tempCharPtr =
+    characterPointer =
     X509_NAME_oneline(
       X509_get_subject_name(this->peer_certificate), nullptr, 0
     );
-    if (tempCharPtr == nullptr) {
+    if (characterPointer == nullptr) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "X509_NAME_oneline return null; "
@@ -545,9 +533,9 @@ bool TransportLayerSecurityOpenSSL::inspectCertificates(
       }
       return false;
     }
-    this->otherCertificateSubjectName = tempCharPtr;
-    free(tempCharPtr);
-    tempCharPtr = nullptr;
+    this->otherCertificateSubjectName = characterPointer;
+    free(characterPointer);
+    characterPointer = nullptr;
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "Peer certificate: "
@@ -555,11 +543,11 @@ bool TransportLayerSecurityOpenSSL::inspectCertificates(
       << this->otherCertificateSubjectName
       << "<br>\n";
     }
-    tempCharPtr =
+    characterPointer =
     X509_NAME_oneline(
       X509_get_issuer_name(this->peer_certificate), nullptr, 0
     );
-    if (tempCharPtr == nullptr) {
+    if (characterPointer == nullptr) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "X509_NAME_oneline return null; "
@@ -567,9 +555,9 @@ bool TransportLayerSecurityOpenSSL::inspectCertificates(
       }
       return false;
     }
-    this->otherCertificateIssuerName = tempCharPtr;
-    free(tempCharPtr);
-    tempCharPtr = nullptr;
+    this->otherCertificateIssuerName = characterPointer;
+    free(characterPointer);
+    characterPointer = nullptr;
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "Issuer name: "
@@ -651,6 +639,80 @@ int TransportLayerSecurityOpenSSL::sslWrite(
 #endif
 }
 
+bool TransportLayerSecurityOpenSSL::shouldContinueOnServerHandshakeError(
+  int attemptsSoFar,
+  int maximumAttempts,
+  std::stringstream* commentsOnFailure
+) {
+  if (commentsOnFailure != nullptr) {
+    if (this->errorCode == 0) {
+      *commentsOnFailure
+      << "OpenSSL handshake not successful in a controlled manner. ";
+    } else {
+      *commentsOnFailure
+      << "OpenSSL handshake not successful with a fatal error. ";
+    }
+    *commentsOnFailure
+    << "Attempt "
+    << attemptsSoFar
+    << " out of "
+    << maximumAttempts
+    << " failed. ";
+  }
+  ERR_print_errors_fp(stderr);
+  switch (SSL_get_error(this->sslData, this->errorCode)) {
+  case SSL_ERROR_NONE:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "No error reported, this shouldn't happen. ";
+    }
+    return false;
+  case SSL_ERROR_ZERO_RETURN:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The TLS/SSL connection has been closed (possibly cleanly). ";
+    }
+    return false;
+  case SSL_ERROR_WANT_READ:
+  case SSL_ERROR_WANT_WRITE:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "During regular I/O: repeat needed (not implemented). ";
+    }
+    break;
+  case SSL_ERROR_WANT_CONNECT:
+  case SSL_ERROR_WANT_ACCEPT:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "During handshake negotiations: "
+      << "repeat needed (not implemented). ";
+    }
+    break;
+  case SSL_ERROR_WANT_X509_LOOKUP:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Application callback set by SSL_CTX_set_client_cert_cb(): "
+      << "repeat needed (not implemented). ";
+    }
+    return false;
+  case SSL_ERROR_SYSCALL:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Error: some I/O error occurred. ";
+    }
+    return false;
+  case SSL_ERROR_SSL:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "A failure in the SSL library occurred. ";
+    }
+    break;
+  default:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Unknown error. ";
+    }
+    return false;
+  }
+  return true;
+}
+
 bool TransportLayerSecurityOpenSSL::handShakeIamServer(
   int inputSocketID, std::stringstream* commentsOnFailure
 ) {
@@ -665,94 +727,23 @@ bool TransportLayerSecurityOpenSSL::handShakeIamServer(
   int maximumHandshakeTries = 3;
   this->flagSSLHandshakeSuccessful = false;
   for (int i = 0; i < maximumHandshakeTries; i ++) {
+    global << "DEBUG: before ssl accept!!!" << Logger::endL;
     this->errorCode = SSL_accept(this->sslData);
-    if (this->errorCode <= 0) {
-      this->flagSSLHandshakeSuccessful = false;
-      if (commentsOnFailure != nullptr) {
-        if (this->errorCode == 0) {
-          *commentsOnFailure
-          << "OpenSSL handshake not successful in a controlled manner. ";
-        } else {
-          *commentsOnFailure
-          << "OpenSSL handshake not successful with a fatal error. ";
-        }
-        *commentsOnFailure
-        << "Attempt "
-        << i + 1
-        << " out of "
-        << maximumHandshakeTries
-        << " failed. ";
-      }
-      ERR_print_errors_fp(stderr);
-      switch (SSL_get_error(this->sslData, this->errorCode)) {
-      case SSL_ERROR_NONE:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "No error reported, this shouldn't happen. ";
-        }
-        maximumHandshakeTries = 1;
-        break;
-      case SSL_ERROR_ZERO_RETURN:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << "The TLS/SSL connection has been closed (possibly cleanly). ";
-        }
-        maximumHandshakeTries = 1;
-        break;
-      case SSL_ERROR_WANT_READ:
-      case SSL_ERROR_WANT_WRITE:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << "During regular I/O: repeat needed (not implemented). ";
-        }
-        break;
-      case SSL_ERROR_WANT_CONNECT:
-      case SSL_ERROR_WANT_ACCEPT:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << "During handshake negotiations: "
-          << "repeat needed (not implemented). ";
-        }
-        break;
-      case SSL_ERROR_WANT_X509_LOOKUP:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure
-          << "Application callback set by SSL_CTX_set_client_cert_cb(): "
-          << "repeat needed (not implemented). ";
-        }
-        maximumHandshakeTries = 1;
-        break;
-        // case SSL_ERROR_WANT_ASYNC:
-        // logOpenSSL << Logger::red << "Asynchronous engine is still
-        // processing
-        // data. "
-        //  << Logger::endL;
-        //  break;
-      case SSL_ERROR_SYSCALL:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Error: some I/O error occurred. ";
-        }
-        maximumHandshakeTries = 1;
-        break;
-      case SSL_ERROR_SSL:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "A failure in the SSL library occurred. ";
-        }
-        break;
-      default:
-        if (commentsOnFailure != nullptr) {
-          *commentsOnFailure << "Unknown error. ";
-        }
-        maximumHandshakeTries = 1;
-        break;
-      }
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Retrying connection in 0.5 seconds... ";
-      }
-      global.fallAsleep(500000);
-    } else {
+    if (this->errorCode > 0) {
       this->flagSSLHandshakeSuccessful = true;
       break;
     }
+    if (
+      !this->shouldContinueOnServerHandshakeError(
+        i + 1, maximumHandshakeTries, commentsOnFailure
+      )
+    ) {
+      break;
+    }
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Retrying connection in 0.5 seconds... ";
+    }
+    global.fallAsleep(500000);
   }
 #endif
   return this->flagSSLHandshakeSuccessful;
@@ -809,8 +800,8 @@ void TransportLayerSecurityConfiguration::readCertificateFilename() {
       << "The self-signed certificate, if present, "
       << "must be called "
       << this->selfSignedCertificate
-      << ". The other file with .crt extension will be assumed to be"
-      << " that of the signing authority. "
+      << ". The other file with .crt extension will be assumed to be "
+      << "that of the signing authority. "
       << global.fatal;
     }
     authorityCertificate = filesInCertificateFolder[i];
@@ -831,7 +822,7 @@ void TransportLayerSecurityConfiguration::readCertificateFilename() {
 }
 
 void TransportLayerSecurityConfiguration::readPrivateKeyFilename() {
-  STACK_TRACE("TransportLayerSecurity::keyOfficialPhysical");
+  STACK_TRACE("TransportLayerSecurityConfiguration::readPrivateKeyFilename");
   List<std::string> filesInCertificateFolder;
   List<std::string> extensions;
   FileOperations::getFolderFileNamesVirtual(
@@ -897,7 +888,10 @@ bool TransportLayerSecurityConfiguration::makeFromAdditionalKeyAndCertificate(
 }
 
 bool TransportLayerSecurityConfiguration::makeSelfSignedKeyAndCertificate() {
-  STACK_TRACE("TransportLayerSecurityOpenSSL::initSSLKeyFilesSelfSigned");
+  STACK_TRACE(
+    "TransportLayerSecurityConfiguration::"
+    "makeSelfSignedKeyAndCertificate"
+  );
   return
   FileOperations::getPhysicalFileNameFromVirtual(
     this->selfSignedCertificate,

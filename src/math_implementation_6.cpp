@@ -58,10 +58,12 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
   myCopy.scaleNormalizeLeadingMonomial(
     &MonomialPolynomial::orderDefault()
   );
-  Rational lowestTerm, highestCoefficient;
+  Rational lowestTerm;
+  Rational highestCoefficient;
   this->constantTerm(lowestTerm);
   if (lowestTerm == 0) {
-    Polynomial<Rational> x1, tempP;
+    Polynomial<Rational> x1;
+    Polynomial<Rational> tempP;
     x1.makeMonomial(0, 1, 1);
     myCopy.divideBy(x1, myCopy, tempP, monomialOrder);
     List<Rational> tempList;
@@ -82,8 +84,10 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
   Vector<Rational> vector;
   Rational value;
   vector.setSize(1);
-  List<int> divisorsH, divisorsS;
-  LargeInteger hT, lT;
+  List<int> divisorsH;
+  List<int> divisorsS;
+  LargeInteger hT;
+  LargeInteger lT;
   hT = highestCoefficient.getNumerator();
   lT = lowestTerm.getNumerator();
   if (
@@ -98,7 +102,8 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
       );
       value = myCopy.evaluate(vector);
       if (value == 0) {
-        Polynomial<Rational> divisor, remainder;
+        Polynomial<Rational> divisor;
+        Polynomial<Rational> remainder;
         divisor.makeDegreeOne(1, 0, 1, - vector[0]);
         myCopy.divideBy(divisor, myCopy, remainder, monomialOrder);
         output.addOnTop(vector[0]);
@@ -212,7 +217,8 @@ bool PolynomialFactorizationKronecker::oneFactor(
   Vectors<Rational> valuesLeftInterpolands;
   Vector<Rational> pointsOfInterpolationLeft;
   pointsOfInterpolationLeft.reserve(degreeLeft + 1);
-  Rational currentPrimePowerContribution, currentPointContribution;
+  Rational currentPrimePowerContribution;
+  Rational currentPointContribution;
   for (int i = 0; i <= degreeLeft; i ++) {
     pointsOfInterpolationLeft.addOnTop(allPointsOfEvaluation[i]);
   }
@@ -333,7 +339,9 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
   }
   MonomialPolynomial x(0, 1);
   MonomialPolynomial xSquared(0, 2);
-  Rational a, b, c;
+  Rational a;
+  Rational b;
+  Rational c;
   for (int i = 0; i < factorization.reduced.size; i ++) {
     Polynomial<Rational>& factor = factorization.reduced[i];
     c = factor.constantTerm(0);
@@ -844,7 +852,6 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     << "&&&&\\mod "
     << this->oneModular.modulus
     << "\\\\\n";
-;
     *comments
     << "Modulus: "
     << this->modulusHenselLift

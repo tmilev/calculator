@@ -1436,8 +1436,9 @@ void LargeIntegerUnsigned::assignFactorial(unsigned int x) {
   this->makeOne();
   List<unsigned int> primesBelowX;
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(x, primesBelowX);
-  LargeIntegerUnsigned tempInt, tempOne;
-  tempOne.makeOne();
+  LargeIntegerUnsigned powerOfPrime;
+  LargeIntegerUnsigned one;
+  one.makeOne();
   for (int i = 0; i < primesBelowX.size; i ++) {
     unsigned int prime = primesBelowX.objects[i];
     unsigned int powerOfThePrime = 0;
@@ -1446,9 +1447,9 @@ void LargeIntegerUnsigned::assignFactorial(unsigned int x) {
       powerOfThePrime += x / currentPower;
       currentPower *= prime;
     } while (currentPower <= x);
-    tempInt.assignShiftedUInt(prime, 0);
-    MathRoutines::raiseToPower(tempInt, powerOfThePrime, tempOne);
-    *this *= tempInt;
+    powerOfPrime.assignShiftedUInt(prime, 0);
+    MathRoutines::raiseToPower(powerOfPrime, powerOfThePrime, one);
+    *this *= powerOfPrime;
   }
 }
 
@@ -1964,9 +1965,9 @@ void Rational::assignFractionalValue() {
 }
 
 void Rational::assignLargeIntUnsigned(const LargeIntegerUnsigned& other) {
-  LargeInteger tempInt;
-  tempInt.assignLargeIntUnsigned(other);
-  this->assignLargeInteger(tempInt);
+  LargeInteger converter;
+  converter.assignLargeIntUnsigned(other);
+  this->assignLargeInteger(converter);
 }
 
 void Rational::assignLargeInteger(const LargeInteger& other) {

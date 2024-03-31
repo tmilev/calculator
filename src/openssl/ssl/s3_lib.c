@@ -4581,8 +4581,8 @@ int ssl3_renegotiate(SSL *s)
  * should do a renegotiation now and sets up the state machine for it. Otherwise
  * returns 0.
  */
-int ssl3_renegotiate_check(SSL *s, int initok)
-{
+int ssl3_renegotiate_check(SSL *s, int initok) {
+    printf("DEBUG: ssl3 negotiate_check here!\n");
   int ret = 0;
   struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL_ONLY(s);
 

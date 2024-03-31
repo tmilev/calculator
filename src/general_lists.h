@@ -2169,7 +2169,8 @@ void List<Object>::reverseRange(int rangeBegin, int rangeEnd) {
 
 template <class Object>
 void List<Object>::addOnTop(const Object& o) {
-  // <-Registering stack trace forbidden! Multithreading deadlock alert.
+  // <-Registering stack trace forbidden!
+  // Multithreading deadlock alert.
   if (this->size > this->actualSize) {
     std::stringstream commentsOnCrash;
     commentsOnCrash

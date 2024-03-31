@@ -740,17 +740,17 @@ int SSL_CTX_set_ssl_version(SSL_CTX *ctx, const SSL_METHOD *meth)
 }
 #endif
 
-SSL *SSL_new(SSL_CTX *ctx)
-{
-    if (ctx == NULL) {
-        ERR_raise(ERR_LIB_SSL, SSL_R_NULL_SSL_CTX);
-        return NULL;
-    }
-    if (ctx->method == NULL) {
-        ERR_raise(ERR_LIB_SSL, SSL_R_SSL_CTX_HAS_NO_DEFAULT_SSL_VERSION);
-        return NULL;
-    }
-    return ctx->method->ssl_new(ctx);
+SSL *SSL_new(SSL_CTX *ctx) {
+  if (ctx == NULL) {
+    ERR_raise(ERR_LIB_SSL, SSL_R_NULL_SSL_CTX);
+    return NULL;
+  }
+  if (ctx->method == NULL) {
+    ERR_raise(ERR_LIB_SSL, SSL_R_SSL_CTX_HAS_NO_DEFAULT_SSL_VERSION);
+    return NULL;
+  }
+  // Most likely points to ossl_ssl_connection_new.
+  return ctx->method->ssl_new(ctx);
 }
 
 int ossl_ssl_init(SSL *ssl, SSL_CTX *ctx, const SSL_METHOD *method, int type)
@@ -1890,12 +1890,14 @@ void SSL_set_verify(SSL *s, int mode,
 {
     struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
-    if (sc == NULL)
+    if (sc == NULL){
         return;
+    }
 
     sc->verify_mode = mode;
-    if (callback != NULL)
+    if (callback != NULL) {
         sc->verify_callback = callback;
+    }
 }
 
 void SSL_set_verify_depth(SSL *s, int depth)
@@ -2200,6 +2202,7 @@ int SSL_get_async_status(SSL *s, int *status)
 }
 
 int SSL_accept(SSL *s) {
+  printf("DEBUG: inside ssl accept!\n");
   struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
@@ -2217,24 +2220,23 @@ int SSL_accept(SSL *s) {
   return SSL_do_handshake(s);
 }
 
-int SSL_connect(SSL *s)
-{
-    struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
+int SSL_connect(SSL *s) {
+  struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
 
 #ifndef OPENSSL_NO_QUIC
-    if (IS_QUIC(s))
-        return s->method->ssl_connect(s);
+  if (IS_QUIC(s)){
+    return s->method->ssl_connect(s);
+  }
 #endif
 
-    if (sc == NULL)
-        return 0;
-
-    if (sc->handshake_func == NULL) {
-        /* Not properly initialized yet */
-        SSL_set_connect_state(s);
-    }
-
-    return SSL_do_handshake(s);
+  if (sc == NULL){
+    return 0;
+  }
+  if (sc->handshake_func == NULL) {
+    /* Not properly initialized yet */
+    SSL_set_connect_state(s);
+  }
+  return SSL_do_handshake(s);
 }
 
 long SSL_get_default_timeout(const SSL *s)
@@ -4759,6 +4761,9 @@ int SSL_do_handshake(SSL *s) {
     return -1;
   }
   ossl_statem_check_finish_init(sc, -1);
+
+  // ssl_renegotiate_check is most likely an obfuscation of
+  // ssl3_renegotiate_check
   s->method->ssl_renegotiate_check(s, 0);
   if (SSL_in_init(s) || SSL_in_before(s)) {
     if ((sc->mode & SSL_MODE_ASYNC) && ASYNC_get_current_job() == NULL) {

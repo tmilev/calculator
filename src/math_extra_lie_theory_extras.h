@@ -1941,9 +1941,9 @@ commutingLeftIndexAroundRightIndexAllowed(
   Coefficient& rightPower,
   int rightGeneratorIndex
 ) {
-  int tempInt;
-  if (leftPower.isSmallInteger(&tempInt)) {
-    if (rightPower.isSmallInteger(&tempInt)) {
+  int power = 0;
+  if (leftPower.isSmallInteger(&power)) {
+    if (rightPower.isSmallInteger(&power)) {
       return true;
     }
     int totalPositiveRoots =

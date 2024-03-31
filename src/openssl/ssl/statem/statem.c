@@ -299,6 +299,7 @@ int ossl_statem_connect(SSL *s) {
 }
 
 int ossl_statem_accept(SSL *s) {
+  printf("DEBUG: inside: ossl_statem_accept\n");
   struct ssl_connection_st *sc = SSL_CONNECTION_FROM_SSL(s);
   if (sc == NULL) {
     return -1;

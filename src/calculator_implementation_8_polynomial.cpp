@@ -302,7 +302,9 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments(
   Expression& output,
   bool includeComments
 ) {
-  STACK_TRACE("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
+  STACK_TRACE(
+    "CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments"
+  );
   WithContext<Polynomial<Rational> > polynomial;
   if (
     !CalculatorConversions::convert(calculator, input[1], polynomial)
@@ -591,7 +593,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(
 bool CalculatorFunctionsPolynomial::polynomialRelations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsPolynomial::groebner");
+  STACK_TRACE("CalculatorFunctionsPolynomial::polynomialRelations");
   Vector<Polynomial<Rational> > inputVector;
   if (input.size() < 3) {
     return

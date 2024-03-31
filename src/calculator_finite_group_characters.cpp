@@ -829,7 +829,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   }
   out << "</tr>";
   MonomialUniversalEnveloping<Polynomial<Rational> > standardElement;
-  LargeInteger tempInt;
+  LargeInteger largeInteger;
   bool useMathTag = outputOrbit.size < 150;
   Matrix<Rational> epsilonCoordinatesMatrix;
   weyl.dynkinType.getEpsilonMatrix(epsilonCoordinatesMatrix);
@@ -951,8 +951,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
         exponent *= 2;
         exponent /= weyl.cartanSymmetric.elements[simpleIndex][simpleIndex];
         exponent += Rational(1);
-        if (exponent.isInteger(&tempInt)) {
-          if (tempInt < 0) {
+        if (exponent.isInteger(&largeInteger)) {
+          if (largeInteger < 0) {
             isGood = false;
             break;
           }

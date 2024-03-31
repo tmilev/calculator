@@ -12,9 +12,7 @@
 # 6. Build calculator.wasm + files in calculator_html/web_assembly/.
 #    Requires web assembly toolkit:
 #    make -j20 wasm=1
-
-
-
+# Note.
 # 1. The -MMD -Mp flags create files that notify make about
 #    header dependencies so sources can be correctly rebuilt.  
 # 2. Use 'make clean' when changing compilation options.
@@ -78,51 +76,50 @@ endif
 
 
 ifeq ($(AllocationStatistics), 1)
-	CFLAGS+=-DAllocationStatistics
 	LDFLAGS+=-rdynamic
 endif
 
 # Ssl dependencies.
 
 foundlocalssl=
-foundssl=
+foundglobalssl=
 ifeq ($(nossl), 1)
 $(info [1;33mNo openssl requested.[0m) 
 else
 ifneq ($(wildcard src/openssl/Makefile),)
   # Found a local openssl installation.
   # Ignore the system openssl libraries.
-  foundssl=found
   foundlocalssl=found
   LDFLAGS+=-I./src/openssl/include/ -L./src/openssl/
 endif
 
 ifneq ($(wildcard /usr/lib64/libssl.so),)#location of ssl in CENTOS
-foundssl=found
+foundglobalssl=found
 endif
 ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu x86
-foundssl=found
+foundglobalssl=found
 endif
 ifneq ($(wildcard /usr/lib/arm-linux-gnueabihf/libssl.so),)#location of ssl in Ubuntu x86
-foundssl=found
+foundglobalssl=found
 endif
 ifneq ($(wildcard /usr/lib/x86_64-linux-gnu/libssl.so),)#location of ssl in Ubuntu x86
-foundssl=found
+foundglobalssl=found
 endif
 ifneq ($(wildcard /lib/x86_64-linux-gnu/libssl3.so),)#location of ssl in Debian GNU/Linux rodete
-foundssl=found
+foundglobalssl=found
 endif
 endif
 
-ifneq ($(foundssl),)
 ifneq ($(foundlocalssl),)
   $(info [1;32mUsing *local* openssl.[0m) 
-else
-  $(info [1;32mUsing *system* openssl.[0m)   
-endif
   CFLAGS+=-DMACRO_use_open_ssl 
-  LIBRARIES_INCLUDED_AT_THE_END+= -lssl -lcrypto # WARNING believe it or not, the libraries must come AFTER the executable name
+  LIBRARIES_INCLUDED_AT_THE_END+=-l:libssl.a -l:libcrypto.a # WARNING believe it or not, the libraries must come AFTER the executable name
+else ifneq ($(foundglobalssl),)
+  $(info [1;32mUsing *system* openssl.[0m) 
+  CFLAGS+=-DMACRO_use_open_ssl 
+  LIBRARIES_INCLUDED_AT_THE_END+=-lssl -lcrypto # WARNING believe it or not, the libraries must come AFTER the executable name
 endif
+
 ########################
 ########################
 

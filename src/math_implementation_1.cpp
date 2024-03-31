@@ -31,7 +31,8 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   }
   Vector<Rational> weight = this->getWeightOfGenerator(generatorIndex);
   outputMultiplyLieBracketsToGetGenerator = 1;
-  Vector<Rational> genWeight, newWeight;
+  Vector<Rational> genWeight;
+  Vector<Rational> newWeight;
   while (!weight.isEqualToZero()) {
     for (int i = 0; i < this->getRank(); i ++) {
       genWeight.makeEi(this->getRank(), i);
@@ -71,25 +72,24 @@ bool PartialFractions::argumentsAllowed(
   if (arguments.size < 1) {
     return false;
   }
-  Cone tempCone;
-  bool result = tempCone.createFromVertices(arguments);
-  if (tempCone.isEntireSpace()) {
+  Cone cone;
+  bool result = cone.createFromVertices(arguments);
+  if (cone.isEntireSpace()) {
     outputWhatWentWrong =
     "Error: the vectors you gave as input span the entire space.";
     return false;
   }
-  for (int i = 0; i < tempCone.vertices.size; i ++) {
+  for (int i = 0; i < cone.vertices.size; i ++) {
     if (
-      tempCone.isInCone(tempCone.vertices[i]) &&
-      tempCone.isInCone(- tempCone.vertices[i])
+      cone.isInCone(cone.vertices[i]) && cone.isInCone(- cone.vertices[i])
     ) {
       std::stringstream out;
       out
       << "Error: the Q_{>0} span of vectors you gave as "
       << "input contains zero (as it contains the vector "
-      << tempCone.vertices[i].toString()
+      << cone.vertices[i].toString()
       << " as well as its opposite vector "
-      << (- tempCone.vertices[i]).toString()
+      << (- cone.vertices[i]).toString()
       << "), hence the vector partition function is "
       << "can only take values infinity or zero. ";
       outputWhatWentWrong = out.str();

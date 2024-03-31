@@ -79,7 +79,6 @@ MutexRecursiveWrapper::~MutexRecursiveWrapper() {
 }
 
 bool MutexRecursiveWrapper::islockedUnsafeUseForWINguiOnly() {
-  // std::cout << "checking consistency from islockedUnsafeUseForWINguiOnly";
   this->checkConsistency();
   return this->flagUnsafeFlagForDebuggingIslocked;
 }

@@ -2373,7 +2373,7 @@ bool CodeFormatter::Processor::applyOneRule() {
       last.content == "ifdef" ||
       last.content == "ifndef" ||
       last.content == "else" ||
-      last.content == "endif"||
+      last.content == "endif" ||
       last.content == "if"
     )
   ) {
@@ -2389,12 +2389,20 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if (
-    secondToLast.type == CodeFormatter::Element::MacroLineStart &&
-    last.type == CodeFormatter::Element::EndLine
-  ) {
+      secondToLast.type == CodeFormatter::Element::MacroLineStart &&
+      last.type == CodeFormatter::Element::EndLine
+      ) {
+
+    if (secondToLast.children.size==0 && StringRoutines::stringEndsWith( secondToLast.content ,"\\")) {
+      this->lastRuleName = "extend macro line";
+      secondToLast.content += last.content;
+      return this->removeLast();
+    }
+    this->lastRuleName = "end macro line";
     secondToLast.type = CodeFormatter::Element::MacroLine;
     return this->removeLast();
   }
+
   if (
     secondToLast.type == CodeFormatter::Element::IncludeLineStart &&
     last.type != CodeFormatter::Element::EndLine
@@ -3243,6 +3251,16 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeBelowLast(2);
   }
   if (
+    secondToLast.type == CodeFormatter::Element::TypeAdjectiveKeyWord &&
+    last.type == CodeFormatter::Element::EnumKeyWord
+  ) {
+    this->lastRuleName = "typedef enum";
+    secondToLast.makeFrom2(
+      CodeFormatter::Element::EnumKeyWord, secondToLast, last
+    );
+    return this->removeLast();
+  }
+  if (
     thirdToLast.type == CodeFormatter::Element::EnumKeyWord &&
     secondToLast.isIdentifierOrAtom() && (
       last.type == CodeFormatter::Element::SemiColon ||
@@ -3254,6 +3272,24 @@ bool CodeFormatter::Processor::applyOneRule() {
       CodeFormatter::Element::EnumDeclaration, thirdToLast, secondToLast
     );
     return this->removeBelowLast(1);
+  }
+  if (
+    fourthToLast.type == CodeFormatter::Element::EnumKeyWord && (
+      thirdToLast.isExpressionOrAtom() ||
+      thirdToLast.type == CodeFormatter::Element::CurlyBraceCommaDelimitedList
+    ) &&
+    secondToLast.isIdentifierOrAtom() &&
+    last.type == CodeFormatter::Element::SemiColon
+  ) {
+    this->lastRuleName = "enum {} typename";
+    fourthToLast.makeFrom4(
+      CodeFormatter::Element::EnumDefinition,
+      fourthToLast,
+      thirdToLast,
+      secondToLast,
+      last
+    );
+    return this->removeLast(3);
   }
   if ((
       thirdToLast.type == CodeFormatter::Element::ClassDeclaration ||

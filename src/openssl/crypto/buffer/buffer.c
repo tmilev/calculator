@@ -38,17 +38,18 @@ BUF_MEM *BUF_MEM_new(void)
     return ret;
 }
 
-void BUF_MEM_free(BUF_MEM *a)
-{
-    if (a == NULL)
-        return;
-    if (a->data != NULL) {
-        if (a->flags & BUF_MEM_FLAG_SECURE)
-            OPENSSL_secure_clear_free(a->data, a->max);
-        else
-            OPENSSL_clear_free(a->data, a->max);
+void BUF_MEM_free(BUF_MEM *a) {
+  if (a == NULL) {
+    return;
+  }
+  if (a->data != NULL) {
+    if (a->flags & BUF_MEM_FLAG_SECURE) {
+      OPENSSL_secure_clear_free(a->data, a->max);
+    } else {
+      OPENSSL_clear_free(a->data, a->max);
     }
-    OPENSSL_free(a);
+  }
+  OPENSSL_free(a);
 }
 
 /* Allocate a block of secure memory; copy over old data if there

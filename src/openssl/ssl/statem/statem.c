@@ -318,6 +318,35 @@ static info_cb get_callback(struct ssl_connection_st *s) {
   return NULL;
 }
 
+int state_machine_wrap_up(struct ssl_connection_st *s, int server,BUF_MEM* buf , int result) {
+  OSSL_STATEM *st = &s->statem;
+  st->in_handshake--;
+  void (*cb) (const SSL *ssl, int type, int val) = get_callback(s);
+
+
+#ifndef OPENSSL_NO_SCTP
+  if (SSL_CONNECTION_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(ssl))) {
+    /*
+         * Notify SCTP BIO socket to leave handshake mode and allow stream
+         * identifier other than 0.
+         */
+    BIO_ctrl(SSL_get_wbio(ssl), BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
+             st->in_handshake, NULL);
+  }
+#endif
+
+  BUF_MEM_free(buf);
+  SSL *ssl = SSL_CONNECTION_GET_SSL(s);
+  if (cb != NULL) {
+    if (server){
+            cb(ssl, SSL_CB_ACCEPT_EXIT, result);
+    } else {
+            cb(ssl, SSL_CB_CONNECT_EXIT, result);
+    }
+  }
+  return result;
+}
+
 /*
  * The main message flow state machine. We start in the MSG_FLOW_UNINITED or
  * MSG_FLOW_FINISHED state and finish in MSG_FLOW_FINISHED. Valid states and
@@ -414,27 +443,27 @@ static int state_machine(struct ssl_connection_st *s, int server) {
         (server || (s->version & 0xff00) != (DTLS1_BAD_VER & 0xff00))
       ) {
         SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        goto end;
+        return state_machine_wrap_up(s, server, buf, ret);
       }
     } else {
       if ((s->version >> 8) != SSL3_VERSION_MAJOR) {
         SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        goto end;
+        return state_machine_wrap_up(s, server, buf, ret);
       }
     }
     if (!ssl_security(s, SSL_SECOP_VERSION, 0, s->version, NULL)) {
       SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-      goto end;
+      return state_machine_wrap_up(s, server, buf, ret);
     }
 
     if (s->init_buf == NULL) {
       if ((buf = BUF_MEM_new()) == NULL) {
         SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        goto end;
+        return state_machine_wrap_up(s, server, buf, ret);
       }
       if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
         SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        goto end;
+        return state_machine_wrap_up(s, server, buf, ret);
       }
       s->init_buf = buf;
       buf = NULL;
@@ -456,13 +485,13 @@ static int state_machine(struct ssl_connection_st *s, int server) {
 #endif
     if (!ssl_init_wbio_buffer(s)) {
       SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-      goto end;
+        return state_machine_wrap_up(s, server, buf, ret);
     }
 
     if ((SSL_in_before(ssl)) || s->renegotiate) {
       if (!tls_setup_handshake(s)) {
           /* SSLfatal() already called */
-          goto end;
+      return state_machine_wrap_up(s, server, buf, ret);
       }
 
       if (SSL_IS_FIRST_HANDSHAKE(s)) {
@@ -482,7 +511,7 @@ static int state_machine(struct ssl_connection_st *s, int server) {
         init_write_state_machine(s);
       } else {
         /* NBIO or error */
-        goto end;
+        return state_machine_wrap_up(s, server, buf, ret);
       }
     } else if (st->state == MSG_FLOW_WRITING) {
       ssret = write_state_machine(s);
@@ -493,39 +522,17 @@ static int state_machine(struct ssl_connection_st *s, int server) {
         st->state = MSG_FLOW_FINISHED;
       } else {
         /* NBIO or error */
-        goto end;
+        return state_machine_wrap_up(s, server, buf, ret);
       }
     } else {
       /* Error */
       check_fatal(s);
       ERR_raise(ERR_LIB_SSL, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
-      goto end;
+      return state_machine_wrap_up(s, server, buf, ret);
     }
   }
   ret = 1;
-  end:
-  st->in_handshake--;
-
-#ifndef OPENSSL_NO_SCTP
-    if (SSL_CONNECTION_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(ssl))) {
-        /*
-         * Notify SCTP BIO socket to leave handshake mode and allow stream
-         * identifier other than 0.
-         */
-        BIO_ctrl(SSL_get_wbio(ssl), BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
-                 st->in_handshake, NULL);
-    }
-#endif
-
-  BUF_MEM_free(buf);
-  if (cb != NULL) {
-    if (server){
-      cb(ssl, SSL_CB_ACCEPT_EXIT, ret);
-    } else {
-      cb(ssl, SSL_CB_CONNECT_EXIT, ret);
-    }
-  }
-  return ret;
+  return state_machine_wrap_up(s, server, buf, ret);
 }
 
 /*

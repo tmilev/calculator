@@ -347,7 +347,7 @@ int state_machine_wrap_up(struct ssl_connection_st *s, int server,BUF_MEM* buf ,
   return result;
 }
 
-int initialize_state_machine(struct ssl_connection_st *s, int server, BUF_MEM *buf, void (*cb) (const SSL *ssl, int type, int val)){
+int initialize_state_machine(struct ssl_connection_st *s, int server,   void (*cb) (const SSL *ssl, int type, int val)){
   OSSL_STATEM *st = &s->statem;
   SSL *ssl = SSL_CONNECTION_GET_SSL(s);
 
@@ -393,12 +393,17 @@ int initialize_state_machine(struct ssl_connection_st *s, int server, BUF_MEM *b
     }
 
     if (s->init_buf == NULL) {
-            if ((buf = BUF_MEM_new()) == NULL) {
+            BUF_MEM *buf = BUF_MEM_new();
+
+            if (buf == NULL) {
         SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        BUF_MEM_free(buf);
+
         return -1;
             }
             if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
         SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        BUF_MEM_free(buf);
         return -1;
             }
             s->init_buf = buf;
@@ -471,13 +476,12 @@ int initialize_state_machine(struct ssl_connection_st *s, int server, BUF_MEM *b
  */
 static int state_machine(struct ssl_connection_st *s, int server) {
   printf("DEBUG: inside statemachine!\n");
-  BUF_MEM *buf = NULL;
   void (*cb) (const SSL *ssl, int type, int val) = NULL;
   OSSL_STATEM *st = &s->statem;
   int ret = -1;
   int ssret;
   SSL *ssl = SSL_CONNECTION_GET_SSL(s);
-
+  BUF_MEM *buf=NULL;
   if (st->state == MSG_FLOW_ERROR) {
       /* Shouldn't have been called if we're already in the error state */
       return -1;
@@ -509,7 +513,7 @@ static int state_machine(struct ssl_connection_st *s, int server) {
     }
 #endif
 
-    int initialization = initialize_state_machine(s, server, buf, cb);
+    int initialization = initialize_state_machine(s, server,  cb);
     if (initialization != 1){
         return state_machine_wrap_up(s, server, buf, initialization);
     }

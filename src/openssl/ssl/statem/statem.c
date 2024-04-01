@@ -347,6 +347,100 @@ int state_machine_wrap_up(struct ssl_connection_st *s, int server,BUF_MEM* buf ,
   return result;
 }
 
+int initialize_state_machine(struct ssl_connection_st *s, int server, BUF_MEM *buf, void (*cb) (const SSL *ssl, int type, int val)){
+  OSSL_STATEM *st = &s->statem;
+  SSL *ssl = SSL_CONNECTION_GET_SSL(s);
+
+  /* Initialise state machine */
+  if (
+      st->state == MSG_FLOW_UNINITED
+      || st->state == MSG_FLOW_FINISHED
+      ) {
+    if (st->state == MSG_FLOW_UNINITED) {
+            st->hand_state = TLS_ST_BEFORE;
+            st->request_state = TLS_ST_BEFORE;
+    }
+
+    s->server = server;
+    if (cb != NULL) {
+            if (SSL_IS_FIRST_HANDSHAKE(s) || !SSL_CONNECTION_IS_TLS13(s)) {
+        cb(ssl, SSL_CB_HANDSHAKE_START, 1);
+            }
+    }
+    /*
+     * Fatal errors in this block don't send an alert because we have
+     * failed to even initialise properly. Sending an alert is probably
+     * doomed to failure.
+     */
+
+    if (SSL_CONNECTION_IS_DTLS(s)) {
+            if (
+                (s->version & 0xff00) != (DTLS1_VERSION & 0xff00) &&
+                (server || (s->version & 0xff00) != (DTLS1_BAD_VER & 0xff00))
+                ) {
+        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        return -1;
+            }
+    } else {
+            if ((s->version >> 8) != SSL3_VERSION_MAJOR) {
+        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        return -1;
+            }
+    }
+    if (!ssl_security(s, SSL_SECOP_VERSION, 0, s->version, NULL)) {
+            SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+            return -1;
+    }
+
+    if (s->init_buf == NULL) {
+            if ((buf = BUF_MEM_new()) == NULL) {
+        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        return -1;
+            }
+            if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
+        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        return -1;
+            }
+            s->init_buf = buf;
+            buf = NULL;
+    }
+
+    s->init_num = 0;
+
+    /*
+     * Should have been reset by tls_process_finished, too.
+     */
+    s->s3.change_cipher_spec = 0;
+
+    /*
+     * Ok, we now need to push on a buffering BIO ...but not with
+     * SCTP
+     */
+#ifndef OPENSSL_NO_SCTP
+    if (!SSL_CONNECTION_IS_DTLS(s) || !BIO_dgram_is_sctp(SSL_get_wbio(ssl)))
+#endif
+            if (!ssl_init_wbio_buffer(s)) {
+        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+        return -1;
+            }
+
+    if ((SSL_in_before(ssl)) || s->renegotiate) {
+            if (!tls_setup_handshake(s)) {
+        /* SSLfatal() already called */
+        return-1;
+            }
+
+            if (SSL_IS_FIRST_HANDSHAKE(s)) {
+        st->read_state_first_init = 1;
+            }
+    }
+
+    st->state = MSG_FLOW_WRITING;
+    init_write_state_machine(s);
+  }
+  return 1;
+}
+
 /*
  * The main message flow state machine. We start in the MSG_FLOW_UNINITED or
  * MSG_FLOW_FINISHED state and finish in MSG_FLOW_FINISHED. Valid states and
@@ -415,93 +509,11 @@ static int state_machine(struct ssl_connection_st *s, int server) {
     }
 #endif
 
-  /* Initialise state machine */
-  if (
-    st->state == MSG_FLOW_UNINITED
-    || st->state == MSG_FLOW_FINISHED
-  ) {
-    if (st->state == MSG_FLOW_UNINITED) {
-        st->hand_state = TLS_ST_BEFORE;
-        st->request_state = TLS_ST_BEFORE;
+    int initialization = initialize_state_machine(s, server, buf, cb);
+    if (initialization != 1){
+        return state_machine_wrap_up(s, server, buf, initialization);
     }
 
-    s->server = server;
-    if (cb != NULL) {
-    if (SSL_IS_FIRST_HANDSHAKE(s) || !SSL_CONNECTION_IS_TLS13(s)) {
-        cb(ssl, SSL_CB_HANDSHAKE_START, 1);
-      }
-    }
-    /*
-     * Fatal errors in this block don't send an alert because we have
-     * failed to even initialise properly. Sending an alert is probably
-     * doomed to failure.
-     */
-
-    if (SSL_CONNECTION_IS_DTLS(s)) {
-      if (
-        (s->version & 0xff00) != (DTLS1_VERSION & 0xff00) &&
-        (server || (s->version & 0xff00) != (DTLS1_BAD_VER & 0xff00))
-      ) {
-        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        return state_machine_wrap_up(s, server, buf, ret);
-      }
-    } else {
-      if ((s->version >> 8) != SSL3_VERSION_MAJOR) {
-        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        return state_machine_wrap_up(s, server, buf, ret);
-      }
-    }
-    if (!ssl_security(s, SSL_SECOP_VERSION, 0, s->version, NULL)) {
-      SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-      return state_machine_wrap_up(s, server, buf, ret);
-    }
-
-    if (s->init_buf == NULL) {
-      if ((buf = BUF_MEM_new()) == NULL) {
-        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        return state_machine_wrap_up(s, server, buf, ret);
-      }
-      if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
-        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        return state_machine_wrap_up(s, server, buf, ret);
-      }
-      s->init_buf = buf;
-      buf = NULL;
-    }
-
-    s->init_num = 0;
-
-    /*
-     * Should have been reset by tls_process_finished, too.
-     */
-    s->s3.change_cipher_spec = 0;
-
-    /*
-     * Ok, we now need to push on a buffering BIO ...but not with
-     * SCTP
-     */
-#ifndef OPENSSL_NO_SCTP
-    if (!SSL_CONNECTION_IS_DTLS(s) || !BIO_dgram_is_sctp(SSL_get_wbio(ssl)))
-#endif
-    if (!ssl_init_wbio_buffer(s)) {
-      SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        return state_machine_wrap_up(s, server, buf, ret);
-    }
-
-    if ((SSL_in_before(ssl)) || s->renegotiate) {
-      if (!tls_setup_handshake(s)) {
-          /* SSLfatal() already called */
-      return state_machine_wrap_up(s, server, buf, ret);
-      }
-
-      if (SSL_IS_FIRST_HANDSHAKE(s)) {
-        st->read_state_first_init = 1;
-      }
-    }
-
-    st->state = MSG_FLOW_WRITING;
-    init_write_state_machine(s);
-  }
 
   while (st->state != MSG_FLOW_FINISHED) {
     if (st->state == MSG_FLOW_READING) {

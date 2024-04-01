@@ -343,102 +343,96 @@ int state_machine_wrap_up(struct ssl_connection_st *s, int server, int result) {
   return result;
 }
 
-int initialize_state_machine(struct ssl_connection_st *s, int server,   void (*cb) (const SSL *ssl, int type, int val)){
+int initialize_state_machine(
+  struct ssl_connection_st *s,
+  int server,
+  void (*cb) (const SSL *ssl, int type, int val)
+) {
   OSSL_STATEM *st = &s->statem;
   SSL *ssl = SSL_CONNECTION_GET_SSL(s);
-  if (
-      st->state != MSG_FLOW_UNINITED
-      && st->state != MSG_FLOW_FINISHED
-      ) {
+  if (st->state != MSG_FLOW_UNINITED && st->state != MSG_FLOW_FINISHED) {
     return 1;
   }
-    if (st->state == MSG_FLOW_UNINITED) {
-            st->hand_state = TLS_ST_BEFORE;
-            st->request_state = TLS_ST_BEFORE;
+  if (st->state == MSG_FLOW_UNINITED) {
+    st->hand_state = TLS_ST_BEFORE;
+    st->request_state = TLS_ST_BEFORE;
+  }
+  s->server = server;
+  if (cb != NULL) {
+    if (SSL_IS_FIRST_HANDSHAKE(s) || !SSL_CONNECTION_IS_TLS13(s)) {
+      cb(ssl, SSL_CB_HANDSHAKE_START, 1);
     }
+  }
+  /*
+   * Fatal errors in this block don't send an alert because we have
+   * failed to even initialise properly. Sending an alert is probably
+   * doomed to failure.
+   */
 
-    s->server = server;
-    if (cb != NULL) {
-            if (SSL_IS_FIRST_HANDSHAKE(s) || !SSL_CONNECTION_IS_TLS13(s)) {
-        cb(ssl, SSL_CB_HANDSHAKE_START, 1);
-            }
+  if (SSL_CONNECTION_IS_DTLS(s)) {
+    if (
+      (s->version & 0xff00) != (DTLS1_VERSION & 0xff00) &&
+      (server || (s->version & 0xff00) != (DTLS1_BAD_VER & 0xff00))
+    ) {
+      SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+      return -1;
     }
-    /*
-     * Fatal errors in this block don't send an alert because we have
-     * failed to even initialise properly. Sending an alert is probably
-     * doomed to failure.
-     */
+  } else if ((s->version >> 8) != SSL3_VERSION_MAJOR) {
+    SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+    return -1;
+  }
 
-    if (SSL_CONNECTION_IS_DTLS(s)) {
-            if (
-                (s->version & 0xff00) != (DTLS1_VERSION & 0xff00) &&
-                (server || (s->version & 0xff00) != (DTLS1_BAD_VER & 0xff00))
-                ) {
-        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        return -1;
-            }
-    } else {
-            if ((s->version >> 8) != SSL3_VERSION_MAJOR) {
-        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        return -1;
-            }
+  if (!ssl_security(s, SSL_SECOP_VERSION, 0, s->version, NULL)) {
+    SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+    return -1;
+  }
+
+  if (s->init_buf == NULL) {
+    BUF_MEM *buf = BUF_MEM_new();
+    if (buf == NULL) {
+      SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+      BUF_MEM_free(buf);
+      return -1;
     }
-    if (!ssl_security(s, SSL_SECOP_VERSION, 0, s->version, NULL)) {
-            SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-            return -1;
+    if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
+      SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+      BUF_MEM_free(buf);
+      return -1;
     }
-
-    if (s->init_buf == NULL) {
-            BUF_MEM *buf = BUF_MEM_new();
-
-            if (buf == NULL) {
-        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        BUF_MEM_free(buf);
-
-        return -1;
-            }
-            if (!BUF_MEM_grow(buf, SSL3_RT_MAX_PLAIN_LENGTH)) {
-        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        BUF_MEM_free(buf);
-        return -1;
-            }
-            s->init_buf = buf;
-            buf = NULL;
-    }
-
-    s->init_num = 0;
-
-    /*
-     * Should have been reset by tls_process_finished, too.
-     */
-    s->s3.change_cipher_spec = 0;
-
-    /*
-     * Ok, we now need to push on a buffering BIO ...but not with
-     * SCTP
-     */
+    s->init_buf = buf;
+    buf = NULL;
+  }
+  s->init_num = 0;
+  /*
+   * Should have been reset by tls_process_finished, too.
+   */
+  s->s3.change_cipher_spec = 0;
+  /*
+   * Ok, we now need to push on a buffering BIO ...but not with
+   * SCTP
+   */
+  int connection_is_dtls_or_not_dgram_is_sctp = 1;
 #ifndef OPENSSL_NO_SCTP
-    if (!SSL_CONNECTION_IS_DTLS(s) || !BIO_dgram_is_sctp(SSL_get_wbio(ssl)))
+  if (!SSL_CONNECTION_IS_DTLS(s) || !BIO_dgram_is_sctp(SSL_get_wbio(ssl))) {
+    connection_is_dtls_or_not_dgram_is_sctp=0;
+  }
 #endif
-            if (!ssl_init_wbio_buffer(s)) {
-        SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
-        return -1;
-            }
+  if (!ssl_init_wbio_buffer(s) && connection_is_dtls_or_not_dgram_is_sctp) {
+    SSLfatal(s, SSL_AD_NO_ALERT, ERR_R_INTERNAL_ERROR);
+    return -1;
+  }
 
-    if ((SSL_in_before(ssl)) || s->renegotiate) {
-            if (!tls_setup_handshake(s)) {
-        /* SSLfatal() already called */
-        return-1;
-            }
-
-            if (SSL_IS_FIRST_HANDSHAKE(s)) {
-        st->read_state_first_init = 1;
-            }
+  if ((SSL_in_before(ssl)) || s->renegotiate) {
+    if (!tls_setup_handshake(s)) {
+      /* SSLfatal() already called */
+      return-1;
     }
-
-    st->state = MSG_FLOW_WRITING;
-    init_write_state_machine(s);
-
+    if (SSL_IS_FIRST_HANDSHAKE(s)) {
+      st->read_state_first_init = 1;
+    }
+  }
+  st->state = MSG_FLOW_WRITING;
+  init_write_state_machine(s);
   return 1;
 }
 
@@ -545,26 +539,21 @@ static int state_machine(struct ssl_connection_st *s, int server) {
 /*
  * Initialise the MSG_FLOW_READING sub-state machine
  */
-static void init_read_state_machine(struct ssl_connection_st *s)
-{
-    OSSL_STATEM *st = &s->statem;
-
-    st->read_state = READ_STATE_HEADER;
+static void init_read_state_machine(struct ssl_connection_st *s) {
+  OSSL_STATEM *st = &s->statem;
+  st->read_state = READ_STATE_HEADER;
 }
 
 static int grow_init_buf(struct ssl_connection_st *s, size_t size) {
-
-    size_t msg_offset = (char *)s->init_msg - s->init_buf->data;
-
-    if (!BUF_MEM_grow_clean(s->init_buf, (int)size))
-        return 0;
-
-    if (size < msg_offset)
-        return 0;
-
-    s->init_msg = s->init_buf->data + msg_offset;
-
-    return 1;
+  size_t msg_offset = (char *)s->init_msg - s->init_buf->data;
+  if (!BUF_MEM_grow_clean(s->init_buf, (int)size)) {
+    return 0;
+  }
+  if (size < msg_offset) {
+    return 0;
+  }
+  s->init_msg = s->init_buf->data + msg_offset;
+  return 1;
 }
 
 /*

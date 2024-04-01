@@ -2373,7 +2373,8 @@ bool CodeFormatter::Processor::applyOneRule() {
       last.content == "ifdef" ||
       last.content == "ifndef" ||
       last.content == "else" ||
-      last.content == "endif"
+      last.content == "endif"||
+      last.content == "if"
     )
   ) {
     secondToLast.content += last.content;

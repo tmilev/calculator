@@ -318,12 +318,10 @@ static info_cb get_callback(struct ssl_connection_st *s) {
   return NULL;
 }
 
-int state_machine_wrap_up(struct ssl_connection_st *s, int server,BUF_MEM* buf , int result) {
+int state_machine_wrap_up(struct ssl_connection_st *s, int server, int result) {
   OSSL_STATEM *st = &s->statem;
   st->in_handshake--;
   void (*cb) (const SSL *ssl, int type, int val) = get_callback(s);
-
-
 #ifndef OPENSSL_NO_SCTP
   if (SSL_CONNECTION_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(ssl))) {
     /*
@@ -334,8 +332,6 @@ int state_machine_wrap_up(struct ssl_connection_st *s, int server,BUF_MEM* buf ,
              st->in_handshake, NULL);
   }
 #endif
-
-  BUF_MEM_free(buf);
   SSL *ssl = SSL_CONNECTION_GET_SSL(s);
   if (cb != NULL) {
     if (server){
@@ -350,12 +346,12 @@ int state_machine_wrap_up(struct ssl_connection_st *s, int server,BUF_MEM* buf ,
 int initialize_state_machine(struct ssl_connection_st *s, int server,   void (*cb) (const SSL *ssl, int type, int val)){
   OSSL_STATEM *st = &s->statem;
   SSL *ssl = SSL_CONNECTION_GET_SSL(s);
-
-  /* Initialise state machine */
   if (
-      st->state == MSG_FLOW_UNINITED
-      || st->state == MSG_FLOW_FINISHED
+      st->state != MSG_FLOW_UNINITED
+      && st->state != MSG_FLOW_FINISHED
       ) {
+    return 1;
+  }
     if (st->state == MSG_FLOW_UNINITED) {
             st->hand_state = TLS_ST_BEFORE;
             st->request_state = TLS_ST_BEFORE;
@@ -442,7 +438,7 @@ int initialize_state_machine(struct ssl_connection_st *s, int server,   void (*c
 
     st->state = MSG_FLOW_WRITING;
     init_write_state_machine(s);
-  }
+
   return 1;
 }
 
@@ -478,13 +474,11 @@ static int state_machine(struct ssl_connection_st *s, int server) {
   printf("DEBUG: inside statemachine!\n");
   void (*cb) (const SSL *ssl, int type, int val) = NULL;
   OSSL_STATEM *st = &s->statem;
-  int ret = -1;
   int ssret;
   SSL *ssl = SSL_CONNECTION_GET_SSL(s);
-  BUF_MEM *buf=NULL;
   if (st->state == MSG_FLOW_ERROR) {
-      /* Shouldn't have been called if we're already in the error state */
-      return -1;
+    /* Shouldn't have been called if we're already in the error state */
+    return -1;
   }
 
   ERR_clear_error();
@@ -503,22 +497,20 @@ static int state_machine(struct ssl_connection_st *s, int server) {
     }
   }
 #ifndef OPENSSL_NO_SCTP
-    if (SSL_CONNECTION_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(ssl))) {
-        /*
-         * Notify SCTP BIO socket to enter handshake mode and prevent stream
-         * identifier other than 0.
-         */
-        BIO_ctrl(SSL_get_wbio(ssl), BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
-                 st->in_handshake, NULL);
-    }
+  if (SSL_CONNECTION_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(ssl))) {
+    /*
+     * Notify SCTP BIO socket to enter handshake mode and prevent stream
+     * identifier other than 0.
+     */
+    BIO_ctrl(SSL_get_wbio(ssl), BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
+             st->in_handshake, NULL);
+  }
 #endif
 
-    int initialization = initialize_state_machine(s, server,  cb);
-    if (initialization != 1){
-        return state_machine_wrap_up(s, server, buf, initialization);
-    }
-
-
+  int initialization = initialize_state_machine(s, server,  cb);
+  if (initialization != 1){
+    return state_machine_wrap_up(s, server,  initialization);
+  }
   while (st->state != MSG_FLOW_FINISHED) {
     if (st->state == MSG_FLOW_READING) {
       ssret = read_state_machine(s);
@@ -527,7 +519,7 @@ static int state_machine(struct ssl_connection_st *s, int server) {
         init_write_state_machine(s);
       } else {
         /* NBIO or error */
-        return state_machine_wrap_up(s, server, buf, ret);
+        return state_machine_wrap_up(s, server, -1);
       }
     } else if (st->state == MSG_FLOW_WRITING) {
       ssret = write_state_machine(s);
@@ -538,17 +530,16 @@ static int state_machine(struct ssl_connection_st *s, int server) {
         st->state = MSG_FLOW_FINISHED;
       } else {
         /* NBIO or error */
-        return state_machine_wrap_up(s, server, buf, ret);
+        return state_machine_wrap_up(s, server, -1);
       }
     } else {
       /* Error */
       check_fatal(s);
       ERR_raise(ERR_LIB_SSL, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
-      return state_machine_wrap_up(s, server, buf, ret);
+      return state_machine_wrap_up(s, server, -1);
     }
   }
-  ret = 1;
-  return state_machine_wrap_up(s, server, buf, ret);
+  return state_machine_wrap_up(s, server, 1);
 }
 
 /*

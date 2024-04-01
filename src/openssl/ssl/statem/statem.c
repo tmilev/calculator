@@ -347,6 +347,7 @@ static info_cb get_callback(struct ssl_connection_st *s) {
  * <=0: NBIO or error
  */
 static int state_machine(struct ssl_connection_st *s, int server) {
+  printf("DEBUG: inside statemachine!\n");
   BUF_MEM *buf = NULL;
   void (*cb) (const SSL *ssl, int type, int val) = NULL;
   OSSL_STATEM *st = &s->statem;

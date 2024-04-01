@@ -92,7 +92,6 @@ else
 ifneq ($(wildcard src/openssl/Makefile),)
   # Found a local openssl installation.
   # Ignore the system openssl libraries.
-  foundssl=found
   foundlocalssl=found
   LDFLAGS+=-I./src/openssl/include/ -L./src/openssl/
 endif
@@ -114,14 +113,16 @@ foundssl=found
 endif
 endif
 
-ifneq ($(foundssl),)
 ifneq ($(foundlocalssl),)
   $(info [1;32mUsing *local* openssl.[0m) 
-else
+  CFLAGS+=-DMACRO_use_open_ssl 
+  LIBRARIES_INCLUDED_AT_THE_END+= -l:libssl.a -l:libcrypto.a # WARNING believe it or not, the libraries must come AFTER the executable name
+else 
+ifneq ($(foundssl),)
   $(info [1;32mUsing *system* openssl.[0m)   
-endif
   CFLAGS+=-DMACRO_use_open_ssl 
   LIBRARIES_INCLUDED_AT_THE_END+= -lssl -lcrypto # WARNING believe it or not, the libraries must come AFTER the executable name
+endif
 endif
 ########################
 ########################

@@ -1216,6 +1216,7 @@ Logger& Logger::logSpecialSymbol(const LoggerSpecialSymbols& input) {
   case GlobalVariables::RunMode::consoleTest:
   case GlobalVariables::RunMode::formatCode:
   case GlobalVariables::RunMode::loadDatabase:
+  case GlobalVariables::RunMode::deploy:
     doUseColors = true;
     break;
   default:

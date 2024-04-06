@@ -589,7 +589,7 @@ int MainFunctions::mainDeploy() {
   StateMaintainerCurrentFolder maintainFolder;
   global.changeDirectory(global.physicalPathServerBase);
   std::stringstream branchName;
-  branchName << "deploy_" << year << "_";
+  branchName << "deployed_" << year << "_";
   if (month < 10) {
     branchName << "0";
   }
@@ -608,19 +608,49 @@ int MainFunctions::mainDeploy() {
     << "Perhaps the branch already exists? "
     << "I am continuing bravely. "
     << Logger::endL;
-    return 0;
   }
   std::string changeDiff =
-  global.externalCommandReturnOutput("git diff-index --quiet HEAD --");
+  global.externalCommandReturnOutput("git diff-index HEAD --");
   if (changeDiff != "") {
     global
     << Logger::red
-    << "Expected empty diff. "
-    << "Perhaps you have uncommited changes, "
+        << "Expected empty diff. " << Logger::endL
+        << "Your diff:\n"
+            << changeDiff
+    << "\nPerhaps you have uncommited changes, "
     << "or your git repository "
     << "is in an unexpected state (wrong folder?)."
     << Logger::endL;
-    return 0;
+//    return 0;
   }
+  global.externalCommandStream("git checkout "+ branchName.str());
+
+  std::stringstream sshCommand;
+  std::stringstream changeRemoteDirectory;
+  changeRemoteDirectory << "cd " << baseFolder;
+  std::string remoteGitPull = "git pull";
+  std::stringstream remoteCheckout;
+  remoteCheckout<< "git checkout " << branchName.str();
+  std::string remoteMake = "make -j5 optimize=1";
+  std::string remoteRestart = "sudo systemctl restart calculator";
+
+
+
+  List<std::string> remoteCommands = List<std::string>({
+                                                        changeRemoteDirectory.str(),
+      remoteGitPull
+      ,
+        remoteCheckout.str(),remoteMake,remoteRestart
+  });
+
+  // -t flag streams the output back.
+  sshCommand << "ssh -t" << username <<  "@" << url << "\"";
+  for (int i = 0; i < remoteCommands.size; i ++){
+    if (i != 0){
+      sshCommand << " && ";
+    }
+    sshCommand << remoteCommands[i];
+  }
+  global.externalCommandStream(sshCommand.str());
   return 0;
 }

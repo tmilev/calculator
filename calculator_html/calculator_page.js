@@ -250,6 +250,11 @@ class Splitter {
   }
 
   setHeight(y) {
+    if (y === "" || y === undefined || y === null) {
+      this.calculatorInput.style.height = "";
+      this.calculatorOutput.style.height = "";
+      return;
+    }
     let heightParent = this.parentElement.getBoundingClientRect().height;
     if (y > heightParent - 100) {
       y = heightParent - 100;

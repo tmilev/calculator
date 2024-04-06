@@ -227,9 +227,9 @@ void ossl_statem_check_finish_init(struct ssl_connection_st* s, int sending) {
       ossl_statem_set_in_init(s, 1);
       if (s->early_data_state == SSL_EARLY_DATA_WRITE_RETRY) {
         /*
-           * SSL_connect() or SSL_do_handshake() has been called directly.
-           * We don't allow any more writing of early data.
-           */
+         * SSL_connect() or SSL_do_handshake() has been called directly.
+         * We don't allow any more writing of early data.
+         */
         s->early_data_state = SSL_EARLY_DATA_FINISHED_WRITING;
       }
     }
@@ -311,9 +311,9 @@ int state_machine_wrap_up(
     SSL_CONNECTION_IS_DTLS(s) && BIO_dgram_is_sctp(SSL_get_wbio(ssl))
   ) {
     /*
-         * Notify SCTP BIO socket to leave handshake mode and allow stream
-         * identifier other than 0.
-         */
+     * Notify SCTP BIO socket to leave handshake mode and allow stream
+     * identifier other than 0.
+     */
     BIO_ctrl(
       SSL_get_wbio(ssl),
       BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE,
@@ -423,6 +423,38 @@ int initialize_state_machine(
   return 1;
 }
 
+int process_one_state(
+  struct ossl_statem_st* st, struct ssl_connection_st* s
+) {
+  if (st->state == MSG_FLOW_READING) {
+    int ssret = read_state_machine(s);
+    if (ssret == SUB_STATE_FINISHED) {
+      st->state = MSG_FLOW_WRITING;
+      init_write_state_machine(s);
+      return 1;
+    }
+    /* NBIO or error */
+    return - 1;
+  }
+  if (st->state == MSG_FLOW_WRITING) {
+    int ssret = write_state_machine(s);
+    if (ssret == SUB_STATE_FINISHED) {
+      st->state = MSG_FLOW_READING;
+      init_read_state_machine(s);
+      return 1;
+    } else if (ssret == SUB_STATE_END_HANDSHAKE) {
+      st->state = MSG_FLOW_FINISHED;
+      return 1;
+    }
+    /* NBIO or error */
+    return - 1;
+  }
+  // Should be unreachable.
+  check_fatal(s);
+  ERR_raise(ERR_LIB_SSL, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
+  return - 1;
+}
+
 /*
  * The main message flow state machine. We start in the MSG_FLOW_UNINITED or
  * MSG_FLOW_FINISHED state and finish in MSG_FLOW_FINISHED. Valid states and
@@ -455,7 +487,6 @@ static int state_machine(struct ssl_connection_st* s, int server) {
   printf("DEBUG: inside statemachine!\n");
   void(*cb)(const SSL* ssl, int type, int val) = NULL;
   OSSL_STATEM* st = &s->statem;
-  int ssret;
   SSL* ssl = SSL_CONNECTION_GET_SSL(s);
   if (st->state == MSG_FLOW_ERROR) {
     /* Shouldn't have been called if we're already in the error state */ return
@@ -495,27 +526,8 @@ static int state_machine(struct ssl_connection_st* s, int server) {
     return state_machine_wrap_up(s, server, initialization);
   }
   while (st->state != MSG_FLOW_FINISHED) {
-    if (st->state == MSG_FLOW_READING) {
-      ssret = read_state_machine(s);
-      if (ssret == SUB_STATE_FINISHED) {
-        st->state = MSG_FLOW_WRITING;
-        init_write_state_machine(s);
-      } else {
-        /* NBIO or error */ return state_machine_wrap_up(s, server, - 1);
-      }
-    } else if (st->state == MSG_FLOW_WRITING) {
-      ssret = write_state_machine(s);
-      if (ssret == SUB_STATE_FINISHED) {
-        st->state = MSG_FLOW_READING;
-        init_read_state_machine(s);
-      } else if (ssret == SUB_STATE_END_HANDSHAKE) {
-        st->state = MSG_FLOW_FINISHED;
-      } else {
-        /* NBIO or error */ return state_machine_wrap_up(s, server, - 1);
-      }
-    } else {
-      /* Error */ check_fatal(s);
-      ERR_raise(ERR_LIB_SSL, ERR_R_SHOULD_NOT_HAVE_BEEN_CALLED);
+    int loop_result = process_one_state(st, s);
+    if (loop_result == - 1) {
       return state_machine_wrap_up(s, server, - 1);
     }
   }

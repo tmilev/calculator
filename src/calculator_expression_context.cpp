@@ -110,12 +110,12 @@ Expression ExpressionContext::toExpressionSemisimpleLieAlgebra() const {
 }
 
 Expression ExpressionContext::toExpressionDifferntialOperators() const {
-  Expression diffVarsE(*this->owner);
-  diffVarsE.addChildAtomOnTop(this->owner->opWeylAlgebraVariables());
+  Expression expression(*this->owner);
+  expression.addChildAtomOnTop(this->owner->opWeylAlgebraVariables());
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
-    diffVarsE.addChildOnTop(this->differentialOperatorVariables[i]);
+    expression.addChildOnTop(this->differentialOperatorVariables[i]);
   }
-  return diffVarsE;
+  return expression;
 }
 
 Expression ExpressionContext::toExpressionPolynomialVariables() const {
@@ -211,13 +211,13 @@ std::string ExpressionContext::toString() const {
 Expression ExpressionContext::getVariable(int variableIndex) const {
   STACK_TRACE("ExpressionContext::getVariable");
   if (variableIndex < 0 || variableIndex >= this->variables.size) {
-    Expression errorE;
+    Expression error;
     std::stringstream out;
     out
     << "Context does not have variable index "
     << variableIndex + 1
     << ". ";
-    return errorE.assignError(*this->owner, out.str());
+    return error.assignError(*this->owner, out.str());
   }
   return this->variables[variableIndex];
 }
@@ -262,31 +262,32 @@ bool Expression::contextSetDifferentialOperatorVariable(
     << "on a non-context expression. "
     << global.fatal;
   }
-  Expression diffVarsE, polyVarsE;
-  diffVarsE.reset(*this->owner, 2);
-  diffVarsE.addChildAtomOnTop(this->owner->opWeylAlgebraVariables());
-  diffVarsE.addChildOnTop(differentialOperatorVariable);
-  polyVarsE.reset(*this->owner, 2);
-  polyVarsE.addChildAtomOnTop(this->owner->opPolynomialVariables());
-  polyVarsE.addChildOnTop(polynomialVariable);
+  Expression differentialPart;
+  Expression polynomialPart;
+  differentialPart.reset(*this->owner, 2);
+  differentialPart.addChildAtomOnTop(this->owner->opWeylAlgebraVariables());
+  differentialPart.addChildOnTop(differentialOperatorVariable);
+  polynomialPart.reset(*this->owner, 2);
+  polynomialPart.addChildAtomOnTop(this->owner->opPolynomialVariables());
+  polynomialPart.addChildOnTop(polynomialVariable);
   bool foundDiffVarsE = false;
   bool foundPolyVarsE = false;
   for (int i = 0; i < this->children.size; i ++) {
     if ((*this)[i].startsWith(this->owner->opWeylAlgebraVariables())
     ) {
-      this->setChild(i, diffVarsE);
+      this->setChild(i, differentialPart);
       foundDiffVarsE = true;
     } else if ((*this)[i].startsWith(this->owner->opPolynomialVariables())
     ) {
-      this->setChild(i, polyVarsE);
+      this->setChild(i, polynomialPart);
       foundPolyVarsE = true;
     }
   }
   if (!foundPolyVarsE) {
-    this->addChildOnTop(polyVarsE);
+    this->addChildOnTop(polynomialPart);
   }
   if (!foundDiffVarsE) {
-    this->addChildOnTop(diffVarsE);
+    this->addChildOnTop(differentialPart);
   }
   return true;
 }
@@ -424,6 +425,9 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
   Selection& differentialOperatorVariablesFound,
   ExpressionContext& outputContext
 ) const {
+  if (this->owner == nullptr){
+    return false;
+  }
   if (this->variables.size != this->differentialOperatorVariables.size) {
     return
     *this->owner

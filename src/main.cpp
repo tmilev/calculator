@@ -2,7 +2,6 @@
 #include "database.h"
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
-#include "general_test.h"
 #include "main.h"
 #include "signals_infrastructure.h"
 #include "source_code_formatter.h"
@@ -11,6 +10,8 @@
 #include "web_assembly.h"
 #include "webserver.h"
 #include <iostream>
+#include "math_large_integers.h"
+#include "general_time_date.h"
 
 int main(int argc, char** argv) {
   bool useWasm = false;
@@ -40,15 +41,49 @@ int MainFunctions::main(int argc, char** argv) {
   return - 1;
 }
 
+bool MainFunctions::analyzeMainArgumentsTimeString(
+    const std::string& timeLimitString
+    ) {
+  if (timeLimitString == "") {
+    return false;
+  }
+  Rational timeLimit;
+  if (!timeLimit.assignStringFailureAllowed(timeLimitString)) {
+    return false;
+  }
+  int timeLimitInt = 0;
+  if (timeLimit.isIntegerFittingInInt(&timeLimitInt)) {
+    global.millisecondsMaxComputation = timeLimitInt;
+    if (global.millisecondsMaxComputation <= 0) {
+      global.millisecondsMaxComputation = 0;
+    } else {
+      global.millisecondsMaxComputation *= 1000;
+    }
+  }
+  return true;
+}
+
+
+
+void MainFunctions::initializeBuildFlags() {
+#ifdef MACRO_use_open_ssl
+  global.flagSSLAvailable = true;
+#endif
+#ifdef MACRO_use_MongoDB
+  global.flagDatabaseExternal = true;
+#endif
+}
+
+
 int MainFunctions::mainWithoutExceptions(int argc, char** argv) {
   // Initializations basic (timer, ...).
   initializeGlobalObjects();
   // Initializations of build flags.
-  global.server().WebServer::initializeBuildFlags();
+  MainFunctions::initializeBuildFlags();
   // Process executable arguments.
   // May set the value of
   // global.PathProjectBaseUserInputOrDeduced.
-  global.server().analyzeMainArguments(argc, argv);
+  MainFunctions::analyzeMainArguments(argc, argv);
   if (global.runMode == GlobalVariables::RunMode::consoleHelp) {
     return MainFunctions::mainConsoleHelp();
   }
@@ -102,7 +137,9 @@ int MainFunctions::mainWithoutExceptions(int argc, char** argv) {
   case GlobalVariables::RunMode::builtInWebServer:
     return global.server().run();
   case GlobalVariables::RunMode::consoleTest:
-    return mainTest(global.programArguments);
+    return MainFunctions:: mainTest(global.programArguments);
+  case GlobalVariables::RunMode::deploy:
+    return MainFunctions::mainDeploy();
   case GlobalVariables::RunMode::formatCode:
     return MainFunctions::mainFormat();
   case GlobalVariables::RunMode::loadDatabase:
@@ -110,6 +147,186 @@ int MainFunctions::mainWithoutExceptions(int argc, char** argv) {
   default:
     return MainFunctions::mainCommandLine();
   }
+}
+
+
+std::string MainFlags::server = "server";
+std::string MainFlags::format = "format";
+std::string MainFlags::daemon = "daemon";
+std::string MainFlags::help = "help";
+std::string MainFlags::basePath = "base_path";
+std::string MainFlags::configurationFile = "configuration_file";
+std::string MainFlags::test = "test";
+std::string MainFlags::loadDatabase = "load_database";
+std::string MainFlags::deploy = "deploy";
+class ArgumentAnalyzer {
+public:
+  int currentIndex;
+  HashedList<std::string> commandLineConfigurations;
+  bool processOneArgument();
+  bool setFormat();
+  bool setServer();
+  bool setTest();
+  bool setBasePath();
+  bool setConfigurationFile();
+  bool setLoadDatabase();
+  bool setDeploy();
+  bool processCommandLineConfigurations(std::string& input);
+};
+
+
+
+bool ArgumentAnalyzer::setFormat() {
+  global.runMode = GlobalVariables::RunMode::formatCode;
+  return false;
+}
+
+bool ArgumentAnalyzer::setServer() {
+  std::string timeLimitString;
+  global.runMode = GlobalVariables::RunMode::builtInWebServer;
+  if (this->currentIndex + 1 < global.programArguments.size) {
+    timeLimitString = global.programArguments[this->currentIndex + 1];
+    if (MainFunctions::analyzeMainArgumentsTimeString(timeLimitString)) {
+      this->currentIndex ++;
+    }
+  }
+  return true;
+}
+
+bool ArgumentAnalyzer::setLoadDatabase() {
+  global.runMode = GlobalVariables::RunMode::loadDatabase;
+  return true;
+}
+
+bool ArgumentAnalyzer::setDeploy(){
+  global.runMode = GlobalVariables::RunMode::deploy;
+  return true;
+}
+
+bool ArgumentAnalyzer::setTest() {
+  global.runMode = GlobalVariables::RunMode::consoleTest;
+  global.configurationFileName =
+      "/configuration/configuration_for_testing.json";
+  return true;
+}
+
+bool ArgumentAnalyzer::setBasePath() {
+  if (this->currentIndex + 1 >= global.programArguments.size) {
+    global
+        << Logger::red
+        << "The executable path is missing. "
+        << Logger::endL;
+    return false;
+  }
+  this->currentIndex ++;
+  global.pathBaseUserInputOrDeduced =
+      global.programArguments[this->currentIndex];
+  return true;
+}
+
+bool ArgumentAnalyzer::setConfigurationFile() {
+  if (this->currentIndex + 1 >= global.programArguments.size) {
+    global
+        << Logger::red
+        << "The configuration filename is missing. "
+        << Logger::endL;
+    return false;
+  }
+  this->currentIndex ++;
+  global.configurationFileName = global.programArguments[this->currentIndex];
+  return true;
+}
+
+bool ArgumentAnalyzer::processCommandLineConfigurations(std::string& input) {
+  if (!this->commandLineConfigurations.contains(input)) {
+    return true;
+  }
+  if (this->currentIndex + 1 >= global.programArguments.size) {
+    global
+        << Logger::red
+        << "The configuration: "
+        << input
+        << " is missing. "
+        << Logger::endL;
+    return false;
+  }
+  this->currentIndex ++;
+  global.configurationCommandLine[input] =
+      global.programArguments[this->currentIndex];
+  return true;
+}
+
+bool ArgumentAnalyzer::processOneArgument() {
+  if (this->currentIndex >= global.programArguments.size) {
+    return false;
+  }
+  std::string current =
+      StringRoutines::stringTrimWhiteSpace(
+          global.programArguments[this->currentIndex]
+          );
+  if (current == MainFlags::format) {
+    return this->setFormat();
+  }
+  if (current == MainFlags::server) {
+    return this->setServer();
+  }
+  if (current == MainFlags::loadDatabase) {
+    return this->setLoadDatabase();
+  }
+  if (current ==MainFlags::deploy){
+    return this->setDeploy();
+  }
+  if (current == MainFlags::help && this->currentIndex == 1) {
+    global.runMode = GlobalVariables::RunMode::consoleHelp;
+    return true;
+  }
+  if (current == MainFlags::daemon && this->currentIndex == 1) {
+    global.runMode = GlobalVariables::RunMode::daemonMonitor;
+    return true;
+  }
+  if (current == MainFlags::test) {
+    return this->setTest();
+  }
+  if (current == MainFlags::basePath) {
+    return this->setBasePath();
+  }
+  if (current == MainFlags::configurationFile) {
+    return this->setConfigurationFile();
+  }
+  return this->processCommandLineConfigurations(current);
+}
+
+
+void MainFunctions::analyzeMainArguments(int argC, char** argv) {
+  STACK_TRACE("WebServer::analyzeMainArguments");
+  global.configurationCommandLine.reset(JSData::Type::tokenObject);
+  if (argC < 0) {
+    argC = 0;
+  }
+  global.programArguments.setSize(argC);
+  for (int i = 0; i < argC; i ++) {
+    global.programArguments[i] = argv[i];
+  }
+  global.runMode = GlobalVariables::RunMode::consoleRegular;
+  if (argC == 0) {
+    return;
+  }
+  global.pathBaseUserInputOrDeduced = global.programArguments[0];
+  if (argC < 2) {
+    global.runMode = GlobalVariables::RunMode::builtInWebServer;
+    return;
+  }
+  ArgumentAnalyzer arguments;
+  arguments.currentIndex = 1;
+  arguments.commandLineConfigurations.addListOnTop(
+      List<std::string>({
+          Configuration::portHTTP,
+          Configuration::portHTTPSOpenSSL,
+          Configuration::serverAutoMonitor,
+      }
+                        )
+      );
+  for (; arguments.processOneArgument(); arguments.currentIndex ++) {}
 }
 
 int MainFunctions::mainConsoleHelp() {
@@ -150,7 +367,8 @@ int MainFunctions::mainConsoleHelp() {
   << "By default, the base path is the location of the executable.\n"
   << indent
   <<
-  "All database backups and other server data is stored in a sub-folder of the base path.\n"
+  "All database backups and other server data "
+         <<"is stored in a sub-folder of the base path.\n"
   ;
   std::cout
   << indent
@@ -188,13 +406,15 @@ int MainFunctions::mainConsoleHelp() {
   << Logger::consoleNormal();
   std::cout
   <<
-  "\nBackup the current database and load a different database from a folder.\n"
+  "\nBackup the current database and load "
+         <<"a different database from a folder.\n"
   << indent
   << "Your current database will be backed "
   << "up before the new database is loaded.\n"
   << indent
   <<
-  "Leave [[folder_name]] empty to backup the current database without loading a new one.\n"
+  "Leave [[folder_name]] empty to backup the "
+         <<"current database without loading a new one.\n"
   << indent
   << "All backups are written to folder database_backups/\n";
   std::cout
@@ -342,4 +562,45 @@ int MainFunctions::mainLoadDatabase() {
   << backupReloadCommand
   << Logger::endL;
   return exitCode;
+}
+
+
+int MainFunctions::mainDeploy(){
+  // If any of the keys below are missing, they will be allocated now.
+  const std::string url  = global.configuration[Configuration::deploy][Configuration::Deploy::url] .stringValue ;
+  const std::string username  = global.configuration[Configuration::deploy][Configuration::Deploy::username] .stringValue ;
+  const std::string baseFolder  = global.configuration[Configuration::deploy][Configuration::Deploy::baseFolder] .stringValue ;
+  // If any keys are newly allocated, let us store these back to the configuration file.
+  // In this way, the maintainer of the configuration.json need not remember the name of each key.
+  // If the configuration json already has the keys, this will not update the file.
+  global.configurationStore();
+  if (url == "" || username =="" || baseFolder == "") {
+    global << Logger::red << "Failed to deploy: file configuration/configuration.json "
+           << "is missing the deploy.url, deploy.username or deploy.baseFolder keys."<< Logger::endL;
+    return 0;
+  }
+  TimeWrapper now;
+  now.assignLocalTime();
+  int year = 1900+ now.timeLocal.tm_year;
+  int month = 1+ now.timeLocal.tm_mon;
+  int day = now.timeLocal.tm_mday;
+  StateMaintainerCurrentFolder maintainFolder;
+  global.changeDirectory(global.physicalPathServerBase);
+  std::stringstream branchName;
+  branchName << "deploy_" << year << "_";
+  if (month < 10){
+    branchName << "0";
+  }
+  branchName << month << "_";
+  if (day < 10) {
+    branchName << "0";
+  }
+  branchName << day;
+
+  if (  global.externalCommandStream("git branch " + branchName.str())!= 0){
+    global << Logger::red << "Failed to execute git command. " << Logger::endL;
+    return 0;
+  }
+  return 0;
+
 }

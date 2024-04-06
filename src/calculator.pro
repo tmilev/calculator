@@ -37,7 +37,6 @@ HEADERS += \
     general_maps.h \
     general_memory_saving.h \
     general_multitasking.h \
-    general_test.h \
     general_time_date.h \
     html_routines.h \
     main.h \

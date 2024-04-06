@@ -7,6 +7,7 @@
 #include "string_constants.h"
 #include "transport_layer_security.h"
 #include "web_api.h"
+#include "main.h"
 #include <iostream>
 
 class Test {
@@ -66,7 +67,7 @@ const std::string Test::Suites::wasm = "wasm";
 const std::string Test::Suites::basic = "basic";
 const std::string Test::Suites::API = "api";
 
-int mainTest(List<std::string>& inputArguments) {
+int MainFunctions::mainTest(List<std::string>& inputArguments) {
   SignalsInfrastructure::signals().initializeSignals();
   Test tester;
   inputArguments.sliceInPlace(2, inputArguments.size - 2);

@@ -257,15 +257,18 @@ public:
   // first argument of the calculator executable.
   enum RunMode {
     // Command to display the command line help.
+    // Call with:
     // ./calculator help
     consoleHelp,
     // Command to run the server using std::cin for input.
     // ./calculator
     consoleRegular,
     // Command to run the the test suite of the calculator.
+    // Call with:
     // ./calculator test
     consoleTest,
     // Command to run the built in web server (this is the standard run mode).
+    // Call with:
     // ./calculator server
     builtInWebServer,
     // Command to run with web assembly. Cannot be started from the command
@@ -274,6 +277,7 @@ public:
     // web assembly build.
     webAssembly,
     // Command to run the calculator code autoformatter.
+    // Call with:
     // ./calculator format
     formatCode,
     // If this flag is set, the calculator should run as a
@@ -282,9 +286,13 @@ public:
     // Setting this flag will turn off web server
     // self-pinging.
     daemonMonitor,
-    // Command to load a stored database.
+    // Command to load a stored database. Call with:
     // ./calculator load_database database_backups/backup/calc
     loadDatabase,
+    // Command to deploy the calculator to a remote url through
+    // github. Call with:
+    // ./calculator deploy
+    deploy,
   };
   RunMode runMode;
   bool flagRunServerOnEmptyCommandLine;

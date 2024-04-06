@@ -294,10 +294,6 @@ public:
   static void checkSystemInstallationOpenSSL();
   static void checkDatabaseSetup();
   static void checkFreecalcSetup();
-  static void analyzeMainArguments(int argC, char** argv);
-  static bool analyzeMainArgumentsTimeString(
-    const std::string& timeLimitString
-  );
   void initializeBuildFlags();
   void initializeMainAll();
   void initializeMainHashes();

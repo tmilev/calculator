@@ -614,43 +614,46 @@ int MainFunctions::mainDeploy() {
   if (changeDiff != "") {
     global
     << Logger::red
-        << "Expected empty diff. " << Logger::endL
-        << "Your diff:\n"
-            << changeDiff
+    << "Expected empty diff. "
+    << Logger::endL
+    << "Your diff:\n"
+    << changeDiff
     << "\nPerhaps you have uncommited changes, "
     << "or your git repository "
     << "is in an unexpected state (wrong folder?)."
     << Logger::endL;
-//    return 0;
+    //    return 0;
   }
-  global.externalCommandStream("git checkout "+ branchName.str());
-
+  global.externalCommandStream("git checkout " + branchName.str());
+  global.externalCommandStream(
+    "git push --set-upstream origin " + branchName.str()
+  );
   std::stringstream sshCommand;
   std::stringstream changeRemoteDirectory;
-  changeRemoteDirectory << "cd " << baseFolder;
+  changeRemoteDirectory << "cd " << baseFolder << "/calculator/";
   std::string remoteGitPull = "git pull";
   std::stringstream remoteCheckout;
-  remoteCheckout<< "git checkout " << branchName.str();
+  remoteCheckout << "git checkout " << branchName.str();
   std::string remoteMake = "make -j5 optimize=1";
   std::string remoteRestart = "sudo systemctl restart calculator";
-
-
-
   List<std::string> remoteCommands = List<std::string>({
-                                                        changeRemoteDirectory.str(),
-      remoteGitPull
-      ,
-        remoteCheckout.str(),remoteMake,remoteRestart
-  });
-
+      changeRemoteDirectory.str(),
+      remoteGitPull,
+      remoteCheckout.str(),
+      remoteMake,
+      remoteRestart
+    }
+  );
   // -t flag streams the output back.
-  sshCommand << "ssh -t" << username <<  "@" << url << "\"";
-  for (int i = 0; i < remoteCommands.size; i ++){
-    if (i != 0){
+  sshCommand << "ssh -t " << username << "@" << url << " \"";
+  for (int i = 0; i < remoteCommands.size; i ++) {
+    if (i != 0) {
       sshCommand << " && ";
     }
     sshCommand << remoteCommands[i];
   }
+  sshCommand << "\"";
   global.externalCommandStream(sshCommand.str());
+  global.externalCommandStream("git checkout master");
   return 0;
 }

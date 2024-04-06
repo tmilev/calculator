@@ -269,14 +269,15 @@ public:
   static std::string sendEmailFrom;
   static std::string actAsWebServerForTheseHosts;
   static std::string deploy;
-  // Information needed to deploy the current master branch through github to a given URL.
+  // Information needed to deploy the current master branch through github to a
+  // given URL.
   // The deployment code is in MainFunctions::deploy.
   struct Deploy {
-
     static std::string username;
     static std::string url;
     static std::string baseFolder;
   };
+
   struct ActAsWebServer {
     static std::string portHTTP;
     static std::string portHTTPS;

@@ -288,7 +288,6 @@ std::string Configuration::ActAsWebServer::landingPage = "landingPage";
 std::string Configuration::ActAsWebServer::privateKeyFile = "privateKeyFile";
 std::string Configuration::ActAsWebServer::certificateFile = "certificateFile";
 std::string Configuration::deploy = "deploy";
-std::string Configuration::Deploy::username="username";
-std::string Configuration::Deploy::baseFolder="baseFolder";
-std::string Configuration::Deploy::url="url";
-
+std::string Configuration::Deploy::username = "username";
+std::string Configuration::Deploy::baseFolder = "baseFolder";
+std::string Configuration::Deploy::url = "url";

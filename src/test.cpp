@@ -3,11 +3,11 @@
 #include "crypto_calculator.h"
 #include "database.h"
 #include "general_file_operations_encodings.h"
+#include "main.h"
 #include "signals_infrastructure.h"
 #include "string_constants.h"
 #include "transport_layer_security.h"
 #include "web_api.h"
-#include "main.h"
 #include <iostream>
 
 class Test {

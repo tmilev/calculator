@@ -2389,11 +2389,13 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if (
-      secondToLast.type == CodeFormatter::Element::MacroLineStart &&
-      last.type == CodeFormatter::Element::EndLine
-      ) {
-
-    if (secondToLast.children.size==0 && StringRoutines::stringEndsWith( secondToLast.content ,"\\")) {
+    secondToLast.type == CodeFormatter::Element::MacroLineStart &&
+    last.type == CodeFormatter::Element::EndLine
+  ) {
+    if (
+      secondToLast.children.size == 0 &&
+      StringRoutines::stringEndsWith(secondToLast.content, "\\")
+    ) {
       this->lastRuleName = "extend macro line";
       secondToLast.content += last.content;
       return this->removeLast();
@@ -2402,7 +2404,6 @@ bool CodeFormatter::Processor::applyOneRule() {
     secondToLast.type = CodeFormatter::Element::MacroLine;
     return this->removeLast();
   }
-
   if (
     secondToLast.type == CodeFormatter::Element::IncludeLineStart &&
     last.type != CodeFormatter::Element::EndLine

@@ -2,7 +2,9 @@
 #include "database.h"
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
+#include "general_time_date.h"
 #include "main.h"
+#include "math_large_integers.h"
 #include "signals_infrastructure.h"
 #include "source_code_formatter.h"
 #include "string_constants.h"
@@ -10,8 +12,6 @@
 #include "web_assembly.h"
 #include "webserver.h"
 #include <iostream>
-#include "math_large_integers.h"
-#include "general_time_date.h"
 
 int main(int argc, char** argv) {
   bool useWasm = false;
@@ -42,8 +42,8 @@ int MainFunctions::main(int argc, char** argv) {
 }
 
 bool MainFunctions::analyzeMainArgumentsTimeString(
-    const std::string& timeLimitString
-    ) {
+  const std::string& timeLimitString
+) {
   if (timeLimitString == "") {
     return false;
   }
@@ -63,8 +63,6 @@ bool MainFunctions::analyzeMainArgumentsTimeString(
   return true;
 }
 
-
-
 void MainFunctions::initializeBuildFlags() {
 #ifdef MACRO_use_open_ssl
   global.flagSSLAvailable = true;
@@ -73,7 +71,6 @@ void MainFunctions::initializeBuildFlags() {
   global.flagDatabaseExternal = true;
 #endif
 }
-
 
 int MainFunctions::mainWithoutExceptions(int argc, char** argv) {
   // Initializations basic (timer, ...).
@@ -137,7 +134,7 @@ int MainFunctions::mainWithoutExceptions(int argc, char** argv) {
   case GlobalVariables::RunMode::builtInWebServer:
     return global.server().run();
   case GlobalVariables::RunMode::consoleTest:
-    return MainFunctions:: mainTest(global.programArguments);
+    return MainFunctions::mainTest(global.programArguments);
   case GlobalVariables::RunMode::deploy:
     return MainFunctions::mainDeploy();
   case GlobalVariables::RunMode::formatCode:
@@ -148,7 +145,6 @@ int MainFunctions::mainWithoutExceptions(int argc, char** argv) {
     return MainFunctions::mainCommandLine();
   }
 }
-
 
 std::string MainFlags::server = "server";
 std::string MainFlags::format = "format";
@@ -174,8 +170,6 @@ public:
   bool processCommandLineConfigurations(std::string& input);
 };
 
-
-
 bool ArgumentAnalyzer::setFormat() {
   global.runMode = GlobalVariables::RunMode::formatCode;
   return false;
@@ -198,7 +192,7 @@ bool ArgumentAnalyzer::setLoadDatabase() {
   return true;
 }
 
-bool ArgumentAnalyzer::setDeploy(){
+bool ArgumentAnalyzer::setDeploy() {
   global.runMode = GlobalVariables::RunMode::deploy;
   return true;
 }
@@ -206,30 +200,30 @@ bool ArgumentAnalyzer::setDeploy(){
 bool ArgumentAnalyzer::setTest() {
   global.runMode = GlobalVariables::RunMode::consoleTest;
   global.configurationFileName =
-      "/configuration/configuration_for_testing.json";
+  "/configuration/configuration_for_testing.json";
   return true;
 }
 
 bool ArgumentAnalyzer::setBasePath() {
   if (this->currentIndex + 1 >= global.programArguments.size) {
     global
-        << Logger::red
-        << "The executable path is missing. "
-        << Logger::endL;
+    << Logger::red
+    << "The executable path is missing. "
+    << Logger::endL;
     return false;
   }
   this->currentIndex ++;
   global.pathBaseUserInputOrDeduced =
-      global.programArguments[this->currentIndex];
+  global.programArguments[this->currentIndex];
   return true;
 }
 
 bool ArgumentAnalyzer::setConfigurationFile() {
   if (this->currentIndex + 1 >= global.programArguments.size) {
     global
-        << Logger::red
-        << "The configuration filename is missing. "
-        << Logger::endL;
+    << Logger::red
+    << "The configuration filename is missing. "
+    << Logger::endL;
     return false;
   }
   this->currentIndex ++;
@@ -243,16 +237,16 @@ bool ArgumentAnalyzer::processCommandLineConfigurations(std::string& input) {
   }
   if (this->currentIndex + 1 >= global.programArguments.size) {
     global
-        << Logger::red
-        << "The configuration: "
-        << input
-        << " is missing. "
-        << Logger::endL;
+    << Logger::red
+    << "The configuration: "
+    << input
+    << " is missing. "
+    << Logger::endL;
     return false;
   }
   this->currentIndex ++;
   global.configurationCommandLine[input] =
-      global.programArguments[this->currentIndex];
+  global.programArguments[this->currentIndex];
   return true;
 }
 
@@ -261,9 +255,9 @@ bool ArgumentAnalyzer::processOneArgument() {
     return false;
   }
   std::string current =
-      StringRoutines::stringTrimWhiteSpace(
-          global.programArguments[this->currentIndex]
-          );
+  StringRoutines::stringTrimWhiteSpace(
+    global.programArguments[this->currentIndex]
+  );
   if (current == MainFlags::format) {
     return this->setFormat();
   }
@@ -273,7 +267,7 @@ bool ArgumentAnalyzer::processOneArgument() {
   if (current == MainFlags::loadDatabase) {
     return this->setLoadDatabase();
   }
-  if (current ==MainFlags::deploy){
+  if (current == MainFlags::deploy) {
     return this->setDeploy();
   }
   if (current == MainFlags::help && this->currentIndex == 1) {
@@ -295,7 +289,6 @@ bool ArgumentAnalyzer::processOneArgument() {
   }
   return this->processCommandLineConfigurations(current);
 }
-
 
 void MainFunctions::analyzeMainArguments(int argC, char** argv) {
   STACK_TRACE("WebServer::analyzeMainArguments");
@@ -319,13 +312,13 @@ void MainFunctions::analyzeMainArguments(int argC, char** argv) {
   ArgumentAnalyzer arguments;
   arguments.currentIndex = 1;
   arguments.commandLineConfigurations.addListOnTop(
-      List<std::string>({
-          Configuration::portHTTP,
-          Configuration::portHTTPSOpenSSL,
-          Configuration::serverAutoMonitor,
+    List<std::string>({
+        Configuration::portHTTP,
+        Configuration::portHTTPSOpenSSL,
+        Configuration::serverAutoMonitor,
       }
-                        )
-      );
+    )
+  );
   for (; arguments.processOneArgument(); arguments.currentIndex ++) {}
 }
 
@@ -366,10 +359,8 @@ int MainFunctions::mainConsoleHelp() {
   << indent
   << "By default, the base path is the location of the executable.\n"
   << indent
-  <<
-  "All database backups and other server data "
-         <<"is stored in a sub-folder of the base path.\n"
-  ;
+  << "All database backups and other server data "
+  << "is stored in a sub-folder of the base path.\n";
   std::cout
   << indent
   << Logger::consolePurple()
@@ -405,16 +396,14 @@ int MainFunctions::mainConsoleHelp() {
   << "\n"
   << Logger::consoleNormal();
   std::cout
-  <<
-  "\nBackup the current database and load "
-         <<"a different database from a folder.\n"
+  << "\nBackup the current database and load "
+  << "a different database from a folder.\n"
   << indent
   << "Your current database will be backed "
   << "up before the new database is loaded.\n"
   << indent
-  <<
-  "Leave [[folder_name]] empty to backup the "
-         <<"current database without loading a new one.\n"
+  << "Leave [[folder_name]] empty to backup the "
+  << "current database without loading a new one.\n"
   << indent
   << "All backups are written to folder database_backups/\n";
   std::cout
@@ -564,31 +553,44 @@ int MainFunctions::mainLoadDatabase() {
   return exitCode;
 }
 
-
-int MainFunctions::mainDeploy(){
+int MainFunctions::mainDeploy() {
   // If any of the keys below are missing, they will be allocated now.
-  const std::string url  = global.configuration[Configuration::deploy][Configuration::Deploy::url] .stringValue ;
-  const std::string username  = global.configuration[Configuration::deploy][Configuration::Deploy::username] .stringValue ;
-  const std::string baseFolder  = global.configuration[Configuration::deploy][Configuration::Deploy::baseFolder] .stringValue ;
-  // If any keys are newly allocated, let us store these back to the configuration file.
-  // In this way, the maintainer of the configuration.json need not remember the name of each key.
-  // If the configuration json already has the keys, this will not update the file.
+  const std::string url =
+  global.configuration[Configuration::deploy][Configuration::Deploy::url].
+  stringValue;
+  const std::string username =
+  global.configuration[Configuration::deploy][
+    Configuration::Deploy::username
+  ].stringValue;
+  const std::string baseFolder =
+  global.configuration[Configuration::deploy][
+    Configuration::Deploy::baseFolder
+  ].stringValue;
+  // If any keys are newly allocated, let us store these back to the
+  // configuration file.
+  // In this way, the maintainer of the configuration.json need not remember
+  // the name of each key.
+  // If the configuration json already has the keys, this will not update the
+  // file.
   global.configurationStore();
-  if (url == "" || username =="" || baseFolder == "") {
-    global << Logger::red << "Failed to deploy: file configuration/configuration.json "
-           << "is missing the deploy.url, deploy.username or deploy.baseFolder keys."<< Logger::endL;
+  if (url == "" || username == "" || baseFolder == "") {
+    global
+    << Logger::red
+    << "Failed to deploy: file configuration/configuration.json "
+    << "is missing the deploy.url, deploy.username or deploy.baseFolder keys."
+    << Logger::endL;
     return 0;
   }
   TimeWrapper now;
   now.assignLocalTime();
-  int year = 1900+ now.timeLocal.tm_year;
-  int month = 1+ now.timeLocal.tm_mon;
+  int year = 1900 + now.timeLocal.tm_year;
+  int month = 1 + now.timeLocal.tm_mon;
   int day = now.timeLocal.tm_mday;
   StateMaintainerCurrentFolder maintainFolder;
   global.changeDirectory(global.physicalPathServerBase);
   std::stringstream branchName;
   branchName << "deploy_" << year << "_";
-  if (month < 10){
+  if (month < 10) {
     branchName << "0";
   }
   branchName << month << "_";
@@ -596,11 +598,29 @@ int MainFunctions::mainDeploy(){
     branchName << "0";
   }
   branchName << day;
-
-  if (  global.externalCommandStream("git branch " + branchName.str())!= 0){
-    global << Logger::red << "Failed to execute git command. " << Logger::endL;
+  if (
+    global.externalCommandStream("git branch " + branchName.str()) != 0
+  ) {
+    global
+    << Logger::red
+    << "Failed to execute git command. "
+    << Logger::green
+    << "Perhaps the branch already exists? "
+    << "I am continuing bravely. "
+    << Logger::endL;
+    return 0;
+  }
+  std::string changeDiff =
+  global.externalCommandReturnOutput("git diff-index --quiet HEAD --");
+  if (changeDiff != "") {
+    global
+    << Logger::red
+    << "Expected empty diff. "
+    << "Perhaps you have uncommited changes, "
+    << "or your git repository "
+    << "is in an unexpected state (wrong folder?)."
+    << Logger::endL;
     return 0;
   }
   return 0;
-
 }

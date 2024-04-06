@@ -4692,8 +4692,6 @@ void WebServer::checkFreecalcSetup() {
   global.configurationStore();
 }
 
-
-
 void WebServer::initializeMainHashes() {
   StateMaintainerCurrentFolder preserveCurrentFolder;
   if (global.buildVersionSimple == "") {

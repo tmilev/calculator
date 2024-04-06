@@ -265,7 +265,9 @@ bool Expression::contextSetDifferentialOperatorVariable(
   Expression differentialPart;
   Expression polynomialPart;
   differentialPart.reset(*this->owner, 2);
-  differentialPart.addChildAtomOnTop(this->owner->opWeylAlgebraVariables());
+  differentialPart.addChildAtomOnTop(
+    this->owner->opWeylAlgebraVariables()
+  );
   differentialPart.addChildOnTop(differentialOperatorVariable);
   polynomialPart.reset(*this->owner, 2);
   polynomialPart.addChildAtomOnTop(this->owner->opPolynomialVariables());
@@ -425,7 +427,7 @@ bool ExpressionContext::mergeDifferentialOperatorsOnce(
   Selection& differentialOperatorVariablesFound,
   ExpressionContext& outputContext
 ) const {
-  if (this->owner == nullptr){
+  if (this->owner == nullptr) {
     return false;
   }
   if (this->variables.size != this->differentialOperatorVariables.size) {

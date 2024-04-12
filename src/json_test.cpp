@@ -1,3 +1,5 @@
+#include "crypto_calculator.h"
+#include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
 #include "json.h"
 
@@ -7,6 +9,7 @@ bool JSData::Test::all() {
   JSData::Test::recodeRelaxed();
   JSData::Test::badInput();
   JSData::Test::decodeEscapedUnicode();
+  JSData::Test::loadLarger();
   return true;
 }
 
@@ -171,5 +174,43 @@ bool JSData::Test::badInput() {
       << global.fatal;
     }
   }
+  return true;
+}
+
+bool JSData::Test::loadLarger() {
+  STACK_TRACE("JSData::Test::loadLarger");
+  std::string input;
+  FileOperations::loadFileToStringVirtual(
+    "test/larger.json", input, false, nullptr
+  );
+  int64_t start = global.getElapsedMilliseconds();
+  JSData result;
+  bool mustParse = result.parse(input, false, nullptr, false);
+  if (!mustParse) {
+    global.fatal << "Failed to parse test/larger.json" << global.fatal;
+  }
+  int64_t loadDuration = global.getElapsedMilliseconds() - start;
+  global
+  << "Time to parse "
+  << input.size()
+  << " bytes to json: "
+  << loadDuration
+  << "ms."
+  << Logger::endL;
+  start = global.getElapsedMilliseconds();
+  std::string json = result.toString();
+  if (json != input) {
+    global.fatal
+    << "Recoded string does not coincide with input string. "
+    << global.fatal;
+  }
+  int64_t stringDuration = global.getElapsedMilliseconds() - start;
+  global
+  << "Time to encode json of size "
+  << json.size()
+  << " bytes to json: "
+  << stringDuration
+  << "ms."
+  << Logger::endL;
   return true;
 }

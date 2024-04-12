@@ -1912,7 +1912,7 @@ void List<Object>::slice(
   if (sizeOfSlice < 0) {
     sizeOfSlice = 0;
   }
-  if (sizeOfSlice  > this->size - startingIndex) {
+  if (sizeOfSlice > this->size - startingIndex) {
     sizeOfSlice = this->size - startingIndex;
   }
   if (output.size < sizeOfSlice) {

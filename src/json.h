@@ -158,6 +158,7 @@ public:
     static bool recodeRelaxed();
     static bool decodeEscapedUnicode();
     static bool badInput();
+    static bool loadLarger();
   };
 };
 

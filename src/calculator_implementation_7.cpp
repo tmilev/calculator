@@ -1147,6 +1147,105 @@ bool CalculatorFunctions::dereferenceSequenceStatements(
   return false;
 }
 
+void CalculatorFunctions::transformEqualityToExpressionInChildren(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctions::transformEqualityToExpressionInChildren");
+  if (&input == &output) {
+    Expression inputCopy = input;
+    transformEqualityToExpressionInChildren(calculator, inputCopy, output);
+    return;
+  }
+  output = input;
+  Expression correction;
+  for (int i = 0; i < input.size(); i ++) {
+    if (
+      CalculatorFunctions::functionEqualityToArithmeticExpression(
+        calculator, input[i], correction
+      )
+    ) {
+      output.setChild(i, correction);
+    }
+  }
+}
+
+bool CalculatorFunctions::solveSystem(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctions::solveSystem");
+  Expression inputCorrected;
+  CalculatorFunctions::transformEqualityToExpressionInChildren(
+    calculator, input, inputCorrected
+  );
+  Vector<Polynomial<Rational> > polynomialsRational;
+  ExpressionContext context(calculator);
+  if (
+    !calculator.getVectorFromFunctionArguments(
+      inputCorrected, polynomialsRational, &context, 0
+    )
+  ) {
+    return
+    output.assignError(calculator, "Failed to extract list of polynomials. ");
+  }
+  return
+  CalculatorFunctions::solvePolynomialSystem(
+    calculator, polynomialsRational, context, output, false, nullptr
+  );
+}
+
+bool CalculatorFunctions::solvePolynomialSystem(
+  Calculator& calculator,
+  const Vector<Polynomial<Rational> >& input,
+  ExpressionContext& context,
+  Expression& output,
+  bool startWithAlgebraicClosure,
+  List<int>* upperLimits
+) {
+  PolynomialSystem<AlgebraicNumber> system;
+  context.getFormat(system.groebner.format);
+  List<int> defaultUpperLimits = List<int>({201, 1000});
+  if (upperLimits == nullptr) {
+    upperLimits = &defaultUpperLimits;
+  }
+  Vector<Polynomial<AlgebraicNumber> > polynomials;
+  polynomials = input;
+  system.groebner.maximumPolynomialDivisions = (*upperLimits)[0];
+  system.groebner.maximumMonomialOperations = (*upperLimits)[1];
+  system.groebner.polynomialOrder.monomialOrder =
+  MonomialPolynomial::orderDefault();
+  system.algebraicClosure = &calculator.objectContainer.algebraicClosure;
+  system.flagTryDirectlySolutionOverAlgebraicClosure =
+  startWithAlgebraicClosure;
+  global.defaultFormat.getElement() = system.groebner.format;
+  system.flagUseTheMonomialBranchingOptimization = true;
+  system.solveSerreLikeSystem(polynomials);
+  std::stringstream out;
+  out << "<br>The context vars:<br>" << context.toString();
+  out
+  << "<br>The polynomials: "
+  << polynomials.toString(&system.groebner.format);
+  out
+  << "<br>Total number of polynomial computations: "
+  << system.numberOfSerreSystemComputations;
+  if (system.flagSystemProvenToHaveNoSolution) {
+    out << "<br>The system does not have a solution. ";
+  } else if (system.flagSystemProvenToHaveSolution) {
+    out << "<br>System proven to have solution. ";
+  }
+  if (!system.flagSystemProvenToHaveNoSolution) {
+    if (system.flagSystemSolvedOverBaseField) {
+      out
+      << "<br>One solution follows. "
+      << system.toStringSerreLikeSolution();
+    } else {
+      out
+      << "However, I was unable to find such a solution: "
+      << "my heuristics are not good enough.";
+    }
+  }
+  return output.assignValue(calculator, out.str());
+}
+
 bool CalculatorFunctions::solveSerreLikeSystem(
   Calculator& calculator,
   const Expression& input,
@@ -1199,66 +1298,37 @@ bool CalculatorFunctions::solveSerreLikeSystem(
       );
     }
   }
-  PolynomialSystem<AlgebraicNumber> system;
-  context.getFormat(system.groebner.format);
   List<int> upperLimits = List<int>({201, 1000});
   if (useUpperLimit) {
+    FormatExpressions format = context.getFormat();
     for (int i = 0; i < 2; i ++) {
       Rational upperLimitRat;
       if (!polynomialsRational[0].isConstant(&upperLimitRat)) {
         return
         calculator
         << "Failed to extract a constant from the first argument "
-        << polynomialsRational[0].toString(&system.format())
+        << polynomialsRational[0].toString(&format)
         << ". ";
       }
       if (!upperLimitRat.isIntegerFittingInInt(&upperLimits[i])) {
         return
         calculator
         << "Failed to extract a small integer from the first argument "
-        << upperLimitRat.toString(&system.groebner.format)
+        << upperLimitRat.toString(&format)
         << ". ";
       }
       polynomialsRational.popIndexShiftDown(0);
     }
   }
-  Vector<Polynomial<AlgebraicNumber> > polynomials;
-  polynomials = polynomialsRational;
-  system.groebner.maximumPolynomialDivisions = upperLimits[0];
-  system.groebner.maximumMonomialOperations = upperLimits[1];
-  system.groebner.polynomialOrder.monomialOrder =
-  MonomialPolynomial::orderDefault();
-  system.algebraicClosure = &calculator.objectContainer.algebraicClosure;
-  system.flagTryDirectlySolutionOverAlgebraicClosure =
-  startWithAlgebraicClosure;
-  global.defaultFormat.getElement() = system.groebner.format;
-  system.flagUseTheMonomialBranchingOptimization = true;
-  system.solveSerreLikeSystem(polynomials);
-  std::stringstream out;
-  out << "<br>The context vars:<br>" << context.toString();
-  out
-  << "<br>The polynomials: "
-  << polynomials.toString(&system.groebner.format);
-  out
-  << "<br>Total number of polynomial computations: "
-  << system.numberOfSerreSystemComputations;
-  if (system.flagSystemProvenToHaveNoSolution) {
-    out << "<br>The system does not have a solution. ";
-  } else if (system.flagSystemProvenToHaveSolution) {
-    out << "<br>System proven to have solution. ";
-  }
-  if (!system.flagSystemProvenToHaveNoSolution) {
-    if (system.flagSystemSolvedOverBaseField) {
-      out
-      << "<br>One solution follows. "
-      << system.toStringSerreLikeSolution();
-    } else {
-      out
-      << "However, I was unable to find such a solution: "
-      << "my heuristics are not good enough.";
-    }
-  }
-  return output.assignValue(calculator, out.str());
+  return
+  CalculatorFunctions::solvePolynomialSystem(
+    calculator,
+    polynomialsRational,
+    context,
+    output,
+    startWithAlgebraicClosure,
+    &upperLimits
+  );
 }
 
 bool CalculatorFunctionsAlgebraic::convertAlgebraicNumberToMatrix(

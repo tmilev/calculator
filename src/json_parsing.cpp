@@ -473,7 +473,7 @@ bool JSONWithTokens::tokenize(
   bool relaxedInput,
   std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("JSData::tokenizePrependOneDummyElement");
+  STACK_TRACE("JSONWithTokens::tokenize");
   output.setSize(0);
   int stringSize = static_cast<int>(input.size());
   // 1 million tokens maximum.

@@ -2209,33 +2209,82 @@ bool CalculatorParser::replaceEOXbyEX() {
   return true;
 }
 
-bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
+bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplitsPart2(
+  const std::string& currentVariable
+) {
+  STACK_TRACE(
+    "CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplitsPart2"
+  );
+  if (currentVariable.size() <= 1) {
+    return false;
+  }
+  List<std::string> split;
+  HashedList<std::string> splitVariableSet;
+  for (char character : currentVariable) {
+    std::string element(1, character);
+    split.addOnTop(element);
+    splitVariableSet.addOnTopNoRepetition(element);
+  }
+  if (split.size > 4) {
+    return false;
+  }
+  HashedList<std::string> splitWithoutAlphabetEnd = splitVariableSet;
+  splitWithoutAlphabetEnd.removeFirstOccurenceSwapWithLast("u");
+  splitWithoutAlphabetEnd.removeFirstOccurenceSwapWithLast("v");
+  splitWithoutAlphabetEnd.removeFirstOccurenceSwapWithLast("x");
+  splitWithoutAlphabetEnd.removeFirstOccurenceSwapWithLast("y");
+  splitWithoutAlphabetEnd.removeFirstOccurenceSwapWithLast("z");
+  if (splitWithoutAlphabetEnd.size == 0) {
+    return this->replaceVByVDotsVWith(split);
+  }
+  HashedList<std::string> splitWithoutAlphabetStart = splitVariableSet;
+  splitWithoutAlphabetStart.removeFirstOccurenceSwapWithLast("a");
+  splitWithoutAlphabetStart.removeFirstOccurenceSwapWithLast("b");
+  splitWithoutAlphabetStart.removeFirstOccurenceSwapWithLast("c");
+  if (splitWithoutAlphabetStart.size == 0) {
+    return this->replaceVByVDotsVWith(split);
+  }
+  return false;
+}
+
+bool CalculatorParser::replaceVByVDotsVWith(
+  const List<std::string>& variables
+) {
+  SyntacticElement newElement;
+  this->popTopSyntacticStack();
+  for (int i = 0; i < variables.size; i ++) {
+    newElement.data.makeAtom(
+      *this->owner,
+      this->owner->addOperationNoRepetitionOrReturnIndexFirst(variables[i])
+    );
+    newElement.controlIndex = this->controlSequences.getIndex(variables[i]);
+    if (newElement.controlIndex == - 1) {
+      newElement.controlIndex = this->conVariable();
+    }
+    (*this->currentSyntacticStack).addOnTop(newElement);
+  }
+  return true;
+}
+
+bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits(
+  const std::string& currentVariable
+) {
   STACK_TRACE(
     "CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits"
   );
-  SyntacticElement& currentElement = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    1
-  ];
-  const std::string& currentVar =
-  this->owner->operations.keys[currentElement.data.data];
-  if (!this->predefinedWordSplits.contains(currentVar)) {
-    global.fatal
-    << "Predefined word splits array does not contain the variable: "
-    << currentElement.data.toString()
-    << ". This should not happen in the body of this function. "
-    << global.fatal;
+  if (!this->predefinedWordSplits.contains(currentVariable)) {
+    return
+    this->replaceVbyVdotsVAccordingToPredefinedWordSplitsPart2(
+      currentVariable
+    );
   }
   List<std::string>& split =
-  this->predefinedWordSplits.getValueCreateEmpty(currentVar);
-  SyntacticElement newElement;
-  this->popTopSyntacticStack();
+  this->predefinedWordSplits.getValueCreateEmpty(currentVariable);
   if (!this->flagEncounteredSplit) {
     this->flagEncounteredSplit = true;
     *(this->owner)
     << "Predefined symbol replacement: replacing "
-    << currentVar
+    << currentVariable
     << " with the sequence of symbols "
     << split.toStringCommaDelimited()
     << ". If you do not want such replacements to take "
@@ -2246,18 +2295,7 @@ bool CalculatorParser::replaceVbyVdotsVAccordingToPredefinedWordSplits() {
     << "x y (the product of x and y) with xy "
     << "(a single variable whose name contains the letters x and y). ";
   }
-  for (int i = 0; i < split.size; i ++) {
-    newElement.data.makeAtom(
-      *this->owner,
-      this->owner->addOperationNoRepetitionOrReturnIndexFirst(split[i])
-    );
-    newElement.controlIndex = this->controlSequences.getIndex(split[i]);
-    if (newElement.controlIndex == - 1) {
-      newElement.controlIndex = this->conVariable();
-    }
-    (*this->currentSyntacticStack).addOnTop(newElement);
-  }
-  return true;
+  return this->replaceVByVDotsVWith(split);
 }
 
 bool CalculatorParser::replaceEEXBy_CofEE_X(int controlIndex) {
@@ -3547,12 +3585,12 @@ bool CalculatorParser::applyOneRule() {
   }
   if (this->owner->flagUsePredefinedWordSplits) {
     if (lastS == "Variable") {
-      if (
-        this->predefinedWordSplits.contains(
-          this->owner->operations.keys[lastE.data.data]
-        )
-      ) {
-        return this->replaceVbyVdotsVAccordingToPredefinedWordSplits();
+      const std::string& currentVariable =
+      this->owner->operations.keys[lastE.data.data];
+      bool replaced =
+      this->replaceVbyVdotsVAccordingToPredefinedWordSplits(currentVariable);
+      if (replaced) {
+        return true;
       }
     }
   }

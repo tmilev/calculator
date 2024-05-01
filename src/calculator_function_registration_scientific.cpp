@@ -329,6 +329,16 @@ void Calculator::initializeFunctionsScientificBasic() {
     innerStandard
   );
   this->addOperationHandler(
+    "SolveSystem",
+    CalculatorFunctions::solveSystem,
+    "",
+    "Attempts to heuristically find a polynomial system solution. ",
+    "SolveSystem(xy+z=40,xz+y=51,x+y+z=19) ",
+    "CalculatorFunctions::solveSystem",
+    "SolveSystem",
+    innerStandard
+  );
+  this->addOperationHandler(
     "FindOneSolutionSerreLikePolynomialSystem",
     CalculatorFunctions::solveSerreLikeSystemNoUpperLimit,
     "",
@@ -423,7 +433,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     CalculatorFunctions::solveSerreLikeSystemAlgebraic,
     "",
     "Same as FindOneSolutionSerreLikePolynomialSystem "
-    "but starts directly over algebraic closure. ",
+    "but starts directly over the algebraic closure. ",
     "FindOneSolutionSerreLikePolynomialSystemAlgebraic"
     "(x^2 + 1, y x z - 1, z^2 x + y - 1, w u)",
     "CalculatorFunctions::solveSerreLikeSystemAlgebraic",

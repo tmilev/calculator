@@ -1244,6 +1244,20 @@ public:
     bool useUpperLimit,
     bool startWithAlgebraicClosure
   );
+  static void transformEqualityToExpressionInChildren(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool solveSystem(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool solvePolynomialSystem(
+    Calculator& calculator,
+    const Vector<Polynomial<Rational> >& input,
+    ExpressionContext& context,
+    Expression& output,
+    bool startWithAlgebraicClosure,
+    List<int>* upperLimits = nullptr
+  );
   static bool solveSerreLikeSystemNoUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {

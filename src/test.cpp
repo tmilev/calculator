@@ -161,11 +161,10 @@ void Test::run() {
       << "About to erase the test file name."
       << Logger::endL;
       global << "Enter y or Y to confirm: " << Logger::endL;
-      int userChar = getchar();
+      int userCharInteger = getchar();
+      unsigned char userChar = static_cast<unsigned char>(userCharInteger);
       std::cin.ignore();
-      if (
-        userChar == static_cast<int>('y') || userChar == static_cast<int>('Y')
-      ) {
+      if (userChar == 'y' || userChar == 'Y') {
         std::stringstream comments;
         bool success =
         FileOperations::deleteFileVirtual(

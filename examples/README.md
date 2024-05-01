@@ -4732,6 +4732,13 @@ isNilpotent{}((0, 1), (0, 0))
 ```
 Computes whether a matrix is nilpotent. Recall an object X is nilpotent if there's a positive N with X^N=0. May/will be extended to work for an arbitrary object for which the term "nilpotent" makes sense. 
 
+*SolveSystem* [SolveSystem] {CalculatorFunctions::solveSystem}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22SolveSystem%28xy%2bz%3d40%2cxz%2by%3d51%2cx%2by%2bz%3d19%29%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+SolveSystem(xy+z=40,xz+y=51,x+y+z=19) 
+```
+Attempts to heuristically find a polynomial system solution. 
+
 *FindOneSolutionSerreLikePolynomialSystem* [FindOneSolutionSerreLikePolynomialSystem] {CalculatorFunctions::solveSerreLikeSystemNoUpperLimit}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FindOneSolutionSerreLikePolynomialSystem%7b%7d%28%5cnx_%7b12%7dx_%7b24%7d-x_%7b10%7dx_%7b22%7d-2x_%7b8%7dx_%7b20%7d-x_%7b7%7dx_%7b19%7d%2b%201%2c%20x_%7b11%7dx_%7b24%7d-x_%7b10%7dx_%7b23%7d-x_%7b8%7dx_%7b21%7d%2c%20x_%7b9%7dx_%7b24%7d-x_%7b8%7dx_%7b23%7d%2bx_%7b7%7dx_%7b21%7d%2c%20x_%7b6%7dx_%7b24%7d%2b2x_%7b5%7dx_%7b23%7d-x_%7b4%7dx_%7b22%7d%2b2x_%7b3%7dx_%7b21%7d-2x_%7b2%7dx_%7b20%7d-x_%7b1%7dx_%7b19%7d%2c%20x_%7b12%7dx_%7b23%7d-x_%7b11%7dx_%7b22%7d-x_%7b9%7dx_%7b20%7d%2c%20x_%7b11%7dx_%7b23%7d%2bx_%7b10%7dx_%7b22%7d%2bx_%7b8%7dx_%7b20%7d-%201%2c%20x_%7b9%7dx_%7b23%7d%2bx_%7b8%7dx_%7b22%7d-x_%7b7%7dx_%7b20%7d%2c%20x_%7b12%7dx_%7b21%7d-x_%7b11%7dx_%7b20%7d%2bx_%7b9%7dx_%7b19%7d%2c%20x_%7b11%7dx_%7b21%7d%2bx_%7b10%7dx_%7b20%7d-x_%7b8%7dx_%7b19%7d%2c%20x_%7b9%7dx_%7b21%7d%2bx_%7b8%7dx_%7b20%7d%2bx_%7b7%7dx_%7b19%7d-%201%2c%20x_%7b12%7dx_%7b18%7d%2b2x_%7b11%7dx_%7b17%7d-x_%7b10%7dx_%7b16%7d%2b2x_%7b9%7dx_%7b15%7d-2x_%7b8%7dx_%7b14%7d-x_%7b7%7dx_%7b13%7d%2c%20x_%7b6%7dx_%7b18%7d-x_%7b4%7dx_%7b16%7d-2x_%7b2%7dx_%7b14%7d%20-%20x_%7b1%7dx_%7b13%7d%20%2b%201%2c%20x_%7b5%7dx_%7b18%7d%2bx_%7b4%7dx_%7b17%7d%2bx_%7b2%7dx_%7b15%7d%2c%20x_%7b3%7dx_%7b18%7d%2bx_%7b2%7dx_%7b17%7d-x_%7b1%7dx_%7b15%7d%2c%20x_%7b6%7dx_%7b17%7d%2bx_%7b5%7dx_%7b16%7d%2bx_%7b3%7dx_%7b14%7d%2c%20x_%7b5%7dx_%7b17%7d%2bx_%7b4%7dx_%7b16%7d%2bx_%7b2%7dx_%7b14%7d%20-%201%2c%20x_%7b3%7dx_%7b17%7d%2bx_%7b2%7dx_%7b16%7d-x_%7b1%7dx_%7b14%7d%2c%20x_%7b6%7dx_%7b15%7d%2bx_%7b5%7dx_%7b14%7d-x_%7b3%7dx_%7b13%7d%2c%20x_%7b5%7dx_%7b15%7d%2bx_%7b4%7dx_%7b14%7d-x_%7b2%7dx_%7b13%7d%2c%20x_%7b3%7dx_%7b15%7d%2bx_%7b2%7dx_%7b14%7d%2bx_%7b1%7dx_%7b13%7d%20-%201%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
@@ -4754,7 +4761,7 @@ Same as FindOneSolutionSerreLikePolynomialSystem but the first argument gives up
 ```
 FindOneSolutionSerreLikePolynomialSystemAlgebraic(x^2 + 1, y x z - 1, z^2 x + y - 1, w u)
 ```
-Same as FindOneSolutionSerreLikePolynomialSystem but starts directly over algebraic closure. 
+Same as FindOneSolutionSerreLikePolynomialSystem but starts directly over the algebraic closure. 
 
 *FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit* [FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit] {CalculatorFunctions::solveSerreLikeSystemAlgebraicUpperLimit}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit%28%5cn10000%2c10000%2c%5cnx%5e2%2b%201%2c%20y%20x%20z%20-%201%2c%20z%5e2%20x%20%2by%20-%201%2c%20w%20u%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

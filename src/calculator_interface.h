@@ -2008,7 +2008,13 @@ private:
   }
   bool replaceXEXByE();
   bool replaceXEXYByEY();
-  bool replaceVbyVdotsVAccordingToPredefinedWordSplits();
+  bool replaceVbyVdotsVAccordingToPredefinedWordSplits(
+    const std::string& currentVariable
+  );
+  bool replaceVbyVdotsVAccordingToPredefinedWordSplitsPart2(
+    const std::string& currentVariable
+  );
+  bool replaceVByVDotsVWith(const List<std::string>& variables);
   bool replaceAXbyEX();
   bool replaceAXXbyEXX();
   bool replaceIntegerXbyEX();

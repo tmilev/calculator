@@ -102,6 +102,10 @@ class User {
 class Page {
   constructor() {
     window.calculator.mainPage = this;
+    this.appElement = document.getElementById(
+      ids.domElements.applicationIdentifiers.default
+    );
+
     this.pages = {
       login: {
         name: "login", //<-for autocomplete
@@ -271,6 +275,10 @@ class Page {
     let forgotLogin = document.getElementById(
       ids.domElements.pages.login.buttonForgotLogin
     );
+    if (forgotLogin === null) {
+      // No forgot login button.
+      return;
+    }
     forgotLogin.addEventListener("click", () => {
       this.selectPage(this.pages.forgotLogin.name);
     });
@@ -283,9 +291,14 @@ class Page {
   }
 
   initializeAccountButtons() {
-    document.getElementById(
+    const button = document.getElementById(
       ids.domElements.pages.activateAccount.buttonChangePassword
-    ).addEventListener("click", () => {
+    );
+    if (button === null) {
+      // No accordion buttons.
+      return;
+    }
+    button.addEventListener("click", () => {
       activateAccount.accountActivator.submitActivateAccountRequest();
     });
   }
@@ -420,6 +433,9 @@ class Page {
   }
 
   initializeCalculatorPage() {
+    if (this.appElement === null) {
+      return;
+    }
     this.initializeCalculatorPagePartOne();
     this.initializeCalculatorPagePartTwo();
   }
@@ -460,12 +476,8 @@ class Page {
     if (this.loginAttemptDesired()) {
       login.loginTry();
     }
-    let appElement = document.getElementById(ids.domElements.applicationIdentifiers.default);
-    if (appElement === null) {
-      return;
-    }
-    appElement.style.display = "";
-    appElement.className = "divOnePageApp";
+    this.appElement.style.display = "";
+    this.appElement.className = "divOnePageApp";
   }
 
   toStringProblem() {

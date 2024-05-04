@@ -188,7 +188,7 @@ class SolverSocratic {
   }
 
   solve() {
-    let url = "https://bloom-pa.googleapis.com/v1/solve:math?";
+    let url = "https://bloom-pa.googleapis.com/v1/math:info?";
     url += `key=${this.getKey()}&`;
     url += `query=2x`;
     submitRequest.submitGET({
@@ -202,7 +202,6 @@ class SolverSocratic {
     /** @type {string} */ text
   ) {
     this.socraticSolution.textContent = text;
-
   }
 }
 

@@ -71,13 +71,9 @@ class Autocompleter {
     this.autocompletePanel = document.getElementById(
       ids.domElements.pages.calculator.divAutocompletePanel
     );
-    const button = document.getElementById(
+
+    this.buttonAutocompleteHide = document.getElementById(
       ids.domElements.pages.calculator.buttonAutocompleteHide
-    );
-    button.addEventListener(
-      "click", () => {
-        this.hideAutocompletePanel();
-      }
     );
     this.indexInAutocomplete = - 1;
     this.lastWordStart = - 1;
@@ -92,10 +88,15 @@ class Autocompleter {
     this.initialized = true;
     if (
       autoCompleteDictionary === undefined ||
-      autoCompleteDictionary == null
+      autoCompleteDictionary === null
     ) {
       return;
     }
+    this.buttonAutocompleteHide.addEventListener(
+      "click", () => {
+        this.hideAutocompletePanel();
+      }
+    );
     this.inputElement = document.getElementById(ids.domElements.pages.calculator.inputMain);
     this.indexInAutocomplete = - 1;
     this.lastWord = "";

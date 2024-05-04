@@ -152,6 +152,7 @@ let domElements = {
   applicationIdentifiers: {
     default: "divDefaultApplication",
     compareExpressions: "divCompareExpressions",
+    solveSocratic: "solveSocratic",
   },
   compareExpressions: {
     mainPage: "divCompareExpressionsMainPage",

@@ -19,6 +19,10 @@ class DatabasePage {
     let tableButtons = document.getElementById(
       ids.domElements.pages.database.buttonTables
     );
+    if (tableButtons === null) {
+      // Database page not found.
+      return;
+    }
     tableButtons.addEventListener('click', () => {
       updateDatabasePageResetCurrentTable();
     });

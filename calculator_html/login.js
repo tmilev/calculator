@@ -14,9 +14,14 @@ class Authenticator {
       return;
     }
     this.flagInitialized = true;
-    document.getElementById(
+    const buttonLogin = document.getElementById(
       ids.domElements.pages.login.buttonLogin
-    ).addEventListener("click", () => {
+    );
+    if (buttonLogin === null) {
+      // No login page.
+      return;
+    }
+    buttonLogin.addEventListener("click", () => {
       this.loginCalculator();
     });
     this.passwordInput().addEventListener(

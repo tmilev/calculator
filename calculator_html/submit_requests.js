@@ -152,6 +152,7 @@ class RequestWithProgress {
     this.sendPrepare();
     this.xhr.open("GET", this.address, true);
     this.xhr.setRequestHeader('Accept', 'text/html');
+    this.xhr.setRequestHeader('Referrer-Policy', 'unsafe-url');
     this.details = addressToHtml(this.address);
     this.recordProgressStarted();
     this.xhr.send();

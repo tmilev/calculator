@@ -27,6 +27,8 @@ class SignUp {
     this.recaptchaIdForSignUp = null;
     this.grecaptcha = null;
     this.buttonsInitialized = false;
+    /** @type {HTMLButtonElement|null} */
+    this.submitSignUpButton = null;
   }
 
   signUp() {
@@ -59,11 +61,17 @@ class SignUp {
   initializeButtons() {
     if (this.buttonsInitialized === true) {
       return;
-    }  
+    }
     this.initializedButtons = true;
-    document.getElementById(
-      ids.domElements.pages.signUp.buttonSignUpStart
-    ).addEventListener('click', () => {
+    this.submitSignUpButton =
+      document.getElementById(
+        ids.domElements.pages.signUp.buttonSignUpStart
+      );
+    if (this.submitSignUpButton === null) {
+      console.log("Sign up page initialization skipped.");
+      return;
+    }
+    this.submitSignUpButton.addEventListener('click', () => {
       this.submitSignUpInfo();
     });
   }
@@ -118,7 +126,7 @@ class SignUp {
           "<b style ='color:red'>Please don't forget to solve the captcha. </b>",
         );
         return false;
-      } 
+      }
       let element = document.getElementById(
         ids.domElements.pages.signUp.signUpResult
       );
@@ -126,7 +134,7 @@ class SignUp {
         element,
         "<b style='color:red'>Debug login: recaptcha ignored.</b>",
       );
-    } 
+    }
     this.recaptchaIdForSignUp = null;
     url += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(token)}&`;
     submitRequests.submitGET({

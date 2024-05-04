@@ -6,9 +6,14 @@ const miscellaneous = require("./miscellaneous_frontend");
 
 class ManageAccountsPage {
   initialize() {
-    document.getElementById(
+    const buttonSetTeacher = document.getElementById(
       ids.domElements.pages.manageAccounts.buttonSetTeacher
-    ).addEventListener('click', () => {
+    );
+    if (buttonSetTeacher === null || buttonSetTeacher === undefined) {
+      // Did not find buttonSetTeacher, not initializing accounts page.
+      return;
+    }
+    buttonSetTeacher.addEventListener('click', () => {
       getTeachersStudents();
     });
     document.getElementById(
@@ -36,7 +41,7 @@ class ManageAccountsPage {
         'inputAddDefaultPasswordsStudent',
         'addUsers'
       );
-    });    
+    });
   }
 }
 

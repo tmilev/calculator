@@ -7,9 +7,14 @@ const miscellaneous = require("./miscellaneous_frontend");
 
 class AccountPage {
   initialize() {
-    document.getElementById(
+    const buttonChangePasswordFromAccountPage = document.getElementById(
       ids.domElements.pages.account.buttonChangePasswordFromAccountPage
-    ).addEventListener('click', () => {
+    );
+    if (buttonChangePasswordFromAccountPage === null) {
+      // Account page not found.
+      return;
+    }
+    buttonChangePasswordFromAccountPage.addEventListener('click', () => {
       submitChangePassRequest();
     });
     document.getElementById(

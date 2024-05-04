@@ -27,14 +27,21 @@ class Theme {
       "--box-shadow-buttonAnswer": "5px 5px 5px grey",
       "--box-shadow-buttonMQ": "3px 3px 3px grey",
     };
-    document.getElementById(
-      ids.domElements.pages.themes.radioThemeDefault
-    ).addEventListener("click", () => {
+    this.buttonRadioThemeDefault =
+      document.getElementById(
+        ids.domElements.pages.themes.radioThemeDefault
+      );
+    this.buttonRadioThemeExperimental = document.getElementById(
+      ids.domElements.pages.themes.radioThemeExperimental
+    )
+    if (this.buttonRadioThemeDefault === null) {
+      // Theme buttons not found.
+      return;
+    }
+    this.buttonRadioThemeDefault.addEventListener("click", () => {
       this.setFromRadioButton();
     });
-    document.getElementById(
-      ids.domElements.pages.themes.radioThemeExperimental
-    ).addEventListener("click", () => {
+    this.buttonRadioThemeExperimental.addEventListener("click", () => {
       this.setFromRadioButton();
     });
   }

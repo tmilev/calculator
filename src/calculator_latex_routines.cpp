@@ -283,8 +283,8 @@ void LaTeXCrawler::buildFreecalc() {
     << "Could not find any lecture or homework entries. Aborting.";
     return;
   }
-  std::stringstream LectureContentNoDocumentClassNoCurrentLecture;
-  std::stringstream LectureHeaderNoDocumentClass;
+  std::stringstream lectureContentWithoutHeaders;
+  std::stringstream lectureHeaderWithoutDocumentClass;
   inputFile.clear();
   inputFile.seekg(0);
   bool foundFirstLecture = false;
@@ -306,7 +306,7 @@ void LaTeXCrawler::buildFreecalc() {
           "\\newcommand{\\currentLecture}"
         )
       ) {
-        LectureContentNoDocumentClassNoCurrentLecture << buffer << "\n";
+        lectureContentWithoutHeaders << buffer << "\n";
       }
       if (this->flagBuildSingleSlides) {
         if (
@@ -332,7 +332,7 @@ void LaTeXCrawler::buildFreecalc() {
               StringRoutines::stringTrimWhiteSpace(buffer), "{beamer}"
             )
           ) {
-            LectureHeaderNoDocumentClass << buffer << "\n";
+            lectureHeaderWithoutDocumentClass << buffer << "\n";
           }
         }
       }
@@ -343,7 +343,7 @@ void LaTeXCrawler::buildFreecalc() {
       if (
         !StringRoutines::stringBeginsWith(buffer, "\\newcommand{\\currentHW}")
       ) {
-        LectureContentNoDocumentClassNoCurrentLecture << buffer << "\n";
+        lectureContentWithoutHeaders << buffer << "\n";
       }
     }
   }
@@ -386,7 +386,8 @@ void LaTeXCrawler::buildFreecalc() {
     lectureFileNameEnd =
     lectureFileNameEnd.substr(0, lectureFileNameEnd.size() - 4);
   }
-  std::stringstream executedCommands, resultTable;
+  std::stringstream executedCommands;
+  std::stringstream resultTable;
   std::string currentSysCommand;
   // "ch " + this->baseFolderStartFilePhysical+"\n\n\n\n";
   global.changeDirectory(this->baseFolderStartFilePhysical);
@@ -454,13 +455,13 @@ void LaTeXCrawler::buildFreecalc() {
       << "\\documentclass[handout]{beamer}\n\\newcommand{\\currentLecture}{"
       << this->lectureNumbers[i]
       << "}\n"
-      << LectureContentNoDocumentClassNoCurrentLecture.str();
+      << lectureContentWithoutHeaders.str();
     } else {
       workingFile
       << "\\newcommand{\\currentHW}{"
       << this->lectureNumbers[i]
       << "}\n"
-      << LectureContentNoDocumentClassNoCurrentLecture.str();
+      << lectureContentWithoutHeaders.str();
     }
     workingFile.close();
     currentSysCommand = "pdflatex --shell-escape " + this->fileNameWorkingCopy;
@@ -530,7 +531,7 @@ void LaTeXCrawler::buildFreecalc() {
     << "{beamer}\n\\newcommand{\\currentLecture}{"
     << lectureNumbers[i]
     << "}\n";
-    workingFile << LectureContentNoDocumentClassNoCurrentLecture.str();
+    workingFile << lectureContentWithoutHeaders.str();
     workingFile.close();
     currentSysCommand = "pdflatex --shell-escape " + this->fileNameWorkingCopy;
     executedCommands << "<br>" << currentSysCommand;
@@ -607,7 +608,7 @@ void LaTeXCrawler::buildFreecalc() {
       }
       workingFile << "{beamer}";
       workingFile
-      << LectureHeaderNoDocumentClass.str()
+      << lectureHeaderWithoutDocumentClass.str()
       << "\n"
       << this->slideTexInputCommands[i]
       << "\n"

@@ -289,7 +289,7 @@ public:
     SemisimpleLieAlgebraOrdered& owner
   );
   bool isEqualToZero() const {
-    return this->Coefficient.isEqualToZero();
+    return this->coefficient.isEqualToZero();
   }
   bool commutingLeftIndexAroundRightIndexAllowed(
     Coefficient& leftPower,
@@ -1095,14 +1095,14 @@ getElementUniversalEnveloping(
   ElementUniversalEnveloping<Coefficient> monomial;
   int index;
   int degree = 0;
-  accumulator.makeConstant(this->Coefficient, inputOwner);
+  accumulator.makeConstant(this->coefficient, inputOwner);
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     if (this->powers[i].isSmallInteger(&degree)) {
       monomial.assignElementLieAlgebra(
         this->owner->elementOrder[this->generatorsIndices[i]],
         inputOwner,
-        this->Coefficient.getOne(),
-        this->Coefficient.GetZero()
+        this->coefficient.getOne(),
+        this->coefficient.GetZero()
       );
       monomial.raiseToPower(degree);
       accumulator *= monomial;
@@ -1114,8 +1114,8 @@ getElementUniversalEnveloping(
         monomial.makeOneGeneratorCoefficientOne(
           index,
           inputOwner,
-          this->Coefficient.getOne(),
-          this->Coefficient.GetZero()
+          this->coefficient.getOne(),
+          this->coefficient.GetZero()
         );
         monomial[0].powers[0] = this->powers[i];
         accumulator *= monomial;
@@ -1132,7 +1132,7 @@ template <class Coefficient>
 void MonomialUniversalEnvelopingOrdered<Coefficient>::setNumberOfVariables(
   int newNumberOfVariables
 ) {
-  this->Coefficient.setNumberOfVariablesSubstituteDeletedByOne(
+  this->coefficient.setNumberOfVariablesSubstituteDeletedByOne(
     newNumberOfVariables
   );
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
@@ -1736,7 +1736,7 @@ switchConsecutiveIndicesIfTheyCommute(
     output.generatorsIndices.reserve(this->generatorsIndices.size);
     output.powers.reserve(this->generatorsIndices.size);
     output.makeZero(ringZero, *this->owner);
-    output.coefficient = this->Coefficient;
+    output.coefficient = this->coefficient;
     for (int i = 0; i < leftIndex; i ++) {
       output.multiplyByGeneratorPowerOnTheRight(
         this->generatorsIndices[i], this->powers[i]
@@ -1799,8 +1799,8 @@ commuteConsecutiveIndicesRightIndexAroundLeft(
   rightPower -= 1;
   int powerDroP = 0;
   Coefficient acquiredCoefficient;
-  acquiredCoefficient = this->Coefficient;
-  monomial.coefficient = this->Coefficient;
+  acquiredCoefficient = this->coefficient;
+  monomial.coefficient = this->coefficient;
   for (int i = 0; i < index; i ++) {
     monomial.multiplyByGeneratorPowerOnTheRight(
       this->generatorsIndices[i], this->powers[i]
@@ -1879,8 +1879,8 @@ commuteConsecutiveIndicesLeftIndexAroundRight(
   leftPower -= 1;
   int powerDrop = 0;
   Coefficient acquiredCoefficient;
-  acquiredCoefficient = this->Coefficient;
-  monomial.coefficient = this->Coefficient;
+  acquiredCoefficient = this->coefficient;
+  monomial.coefficient = this->coefficient;
   for (int i = 0; i < index; i ++) {
     monomial.multiplyByGeneratorPowerOnTheRight(
       this->generatorsIndices.objects[i],
@@ -1977,7 +1977,7 @@ template <class Coefficient>
 void MonomialUniversalEnvelopingOrdered<Coefficient>::makeZero(
   int numberOfVariables, SemisimpleLieAlgebraOrdered& inputOwner
 ) {
-  this->Coefficient.makeZero(numberOfVariables);
+  this->coefficient.makeZero(numberOfVariables);
   this->owner = &inputOwner;
   this->generatorsIndices.size = 0;
   this->powers.size = 0;
@@ -2049,7 +2049,7 @@ std::string MonomialUniversalEnvelopingOrdered<Coefficient>::toString(
   std::string currentString;
   if (this->generatorsIndices.size > 0) {
     currentString =
-    MathRoutines::toStringBrackets(this->Coefficient, format);
+    MathRoutines::toStringBrackets(this->coefficient, format);
     if (currentString == "1") {
       currentString = "";
     }
@@ -2057,7 +2057,7 @@ std::string MonomialUniversalEnvelopingOrdered<Coefficient>::toString(
       currentString = "-";
     }
   } else {
-    currentString = this->Coefficient.toString(format);
+    currentString = this->coefficient.toString(format);
   }
   out << currentString;
   for (int i = 0; i < this->generatorsIndices.size; i ++) {

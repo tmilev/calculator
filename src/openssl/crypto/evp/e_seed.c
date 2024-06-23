@@ -11,15 +11,15 @@
  * SEED low level APIs are deprecated for public use, but still ok for
  * internal use.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
-#include "../include/openssl/opensslconf.h"
-#include <openssl/evp.h>
-#include "../include/openssl/err.h"
+#include "../../include/openssl/opensslconf.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/err.h"
 #include <string.h>
 #include <assert.h>
-#include <openssl/seed.h>
-#include "crypto/evp.h"
+#include "../../include/openssl/seed.h"
+#include "../../include/crypto/evp.h"
 #include "evp_local.h"
 
 static int seed_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,

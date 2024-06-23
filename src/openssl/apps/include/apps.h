@@ -10,10 +10,10 @@
 #ifndef OSSL_APPS_H
 # define OSSL_APPS_H
 
-# include "internal/e_os.h" /* struct timeval for DTLS */
-# include "internal/common.h" /* for HAS_PREFIX */
-# include "internal/nelem.h"
-# include "internal/sockets.h" /* for openssl_fdset() */
+# include "../../include/internal/e_os.h" /* struct timeval for DTLS */
+# include "../../include/internal/common.h" /* for HAS_PREFIX */
+# include "../../include/internal/nelem.h"
+# include "../../include/internal/sockets.h" /* for openssl_fdset() */
 # include <assert.h>
 
 # include <stdarg.h>
@@ -23,16 +23,16 @@
 #  include <fcntl.h>
 # endif
 
-# include <openssl/e_os2.h>
-# include <openssl/types.h>
-# include <openssl/bio.h>
-# include <openssl/x509.h>
-# include <openssl/conf.h>
-# include <openssl/txt_db.h>
-# include <openssl/engine.h>
-# include <openssl/ocsp.h>
-# include <openssl/http.h>
-# include <signal.h>
+# include "../../include/openssl/e_os2.h"
+# include "../../include/openssl/types.h"
+# include "../../include/openssl/bio.h"
+# include "../../include/openssl/x509.h"
+# include "../../include/openssl/conf.h"
+# include "../../include/openssl/txt_db.h"
+# include "../../include/openssl/engine.h"
+# include "../../include/openssl/ocsp.h"
+# include "../../include/openssl/http.h"
+# include "../../include/signal.h"
 # include "apps_ui.h"
 # include "opt.h"
 # include "fmt.h"

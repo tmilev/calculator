@@ -11,17 +11,17 @@
  * DES low level APIs are deprecated for public use, but still ok for internal
  * use.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
 #include <stdio.h>
-#include "../include/internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_DES
 
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include "crypto/evp.h"
-# include <openssl/des.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../../include/crypto/evp.h"
+# include "../../include/openssl/des.h"
 # include "evp_local.h"
 
 static int desx_cbc_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,

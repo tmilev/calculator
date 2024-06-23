@@ -7,15 +7,15 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "../include/openssl/crypto.h"
-#include <openssl/evp.h>
-#include "../include/openssl/err.h"
-#include "../include/internal/cryptlib.h"
-#include "internal/refcount.h"
-#include "../include/internal/provider.h"
-#include "../include/internal/core.h"
-#include "internal/numbers.h"   /* includes SIZE_MAX */
-#include "crypto/evp.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/err.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/refcount.h"
+#include "../../include/internal/provider.h"
+#include "../../include/internal/core.h"
+#include "../../include/internal/numbers.h"   /* includes SIZE_MAX */
+#include "../../include/crypto/evp.h"
 #include "evp_local.h"
 
 static EVP_KEYEXCH *evp_keyexch_new(OSSL_PROVIDER *prov)

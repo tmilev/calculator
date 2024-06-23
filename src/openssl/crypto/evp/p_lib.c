@@ -11,43 +11,43 @@
  * DSA low level APIs are deprecated for public use, but still ok for
  * internal use.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
 #include <assert.h>
 #include <stdio.h>
-#include "../include/internal/cryptlib.h"
-#include "internal/refcount.h"
-#include "../include/internal/namemap.h"
-#include "../include/openssl/bn.h"
-#include "../include/openssl/err.h"
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include <openssl/rsa.h>
-#include <openssl/dsa.h>
-#include <openssl/dh.h>
-#include <openssl/ec.h>
-#include <openssl/cmac.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/refcount.h"
+#include "../../include/internal/namemap.h"
+#include "../../include/openssl/bn.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/dh.h"
+#include "../../include/openssl/ec.h"
+#include "../../include/openssl/cmac.h"
 #ifndef FIPS_MODULE
-# include <openssl/engine.h>
+# include "../../include/openssl/engine.h"
 #endif
-#include <openssl/params.h>
-#include "../include/openssl/param_build.h"
-#include <openssl/encoder.h>
-#include <openssl/core_names.h>
+#include "../../include/openssl/params.h"
+#include "../../include/openssl/param_build.h"
+#include "../../include/openssl/encoder.h"
+#include "../../include/openssl/core_names.h"
 
-#include "internal/numbers.h"   /* includes SIZE_MAX */
-#include "internal/ffc.h"
-#include "crypto/evp.h"
-#include "crypto/dh.h"
-#include "crypto/dsa.h"
-#include "crypto/ec.h"
-#include "crypto/ecx.h"
-#include "crypto/rsa.h"
+#include "../../include/internal/numbers.h"   /* includes SIZE_MAX */
+#include "../../include/internal/ffc.h"
+#include "../../include/crypto/evp.h"
+#include "../../include/crypto/dh.h"
+#include "../../include/crypto/dsa.h"
+#include "../../include/crypto/ec.h"
+#include "../../include/crypto/ecx.h"
+#include "../../include/crypto/rsa.h"
 #ifndef FIPS_MODULE
-# include "crypto/asn1.h"
-# include "crypto/x509.h"
+# include "../../include/crypto/asn1.h"
+# include "../../include/crypto/x509.h"
 #endif
-#include "../include/internal/provider.h"
+#include "../../include/internal/provider.h"
 #include "evp_local.h"
 
 static int pkey_set_type(EVP_PKEY *pkey, ENGINE *e, int type, const char *str,

@@ -11,25 +11,25 @@
  * EVP _meth_ APIs are deprecated for public use, but still ok for
  * internal use.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
 #include <stdio.h>
 #include <string.h>
-#include "../include/internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include <openssl/params.h>
-#include <openssl/core_names.h>
-#include <openssl/rsa.h>
-#include <openssl/dh.h>
-#include <openssl/ec.h>
-#include "crypto/evp.h"
-#include "../include/crypto/cryptlib.h"
-#include "../include/internal/provider.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/params.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/dh.h"
+#include "../../include/openssl/ec.h"
+#include "../../include/crypto/evp.h"
+#include "../../include/crypto/cryptlib.h"
+#include "../../include/internal/provider.h"
 #include "evp_local.h"
 
 #if !defined(FIPS_MODULE)
-# include "crypto/asn1.h"
+# include "../../include/crypto/asn1.h"
 
 int EVP_CIPHER_param_to_asn1(EVP_CIPHER_CTX *c, ASN1_TYPE *type)
 {

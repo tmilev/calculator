@@ -11,28 +11,28 @@
  * Low level key APIs (DH etc) are deprecated for public use, but still ok for
  * internal use.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #ifndef FIPS_MODULE
-# include <openssl/engine.h>
+# include "../../include/openssl/engine.h"
 #endif
-#include <openssl/evp.h>
-#include <openssl/core_names.h>
-#include <openssl/dh.h>
-#include <openssl/rsa.h>
-#include <openssl/kdf.h>
-#include "../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/openssl/dh.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/kdf.h"
+#include "../../include/internal/cryptlib.h"
 #ifndef FIPS_MODULE
-# include "crypto/asn1.h"
+# include "../../include/crypto/asn1.h"
 #endif
-#include "crypto/evp.h"
-#include "crypto/dh.h"
-#include "crypto/ec.h"
-#include "internal/ffc.h"
-#include "internal/numbers.h"
-#include "../include/internal/provider.h"
+#include "../../include/crypto/evp.h"
+#include "../../include/crypto/dh.h"
+#include "../../include/crypto/ec.h"
+#include "../../include/internal/ffc.h"
+#include "../../include/internal/numbers.h"
+#include "../../include/internal/provider.h"
 #include "evp_local.h"
 
 #ifndef FIPS_MODULE

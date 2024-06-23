@@ -9,12 +9,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include "../include/internal/cryptlib.h"
-#include "../include/internal/provider.h"
-#include "../include/internal/core.h"
-#include "crypto/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/provider.h"
+#include "../../include/internal/core.h"
+#include "../../include/crypto/evp.h"
 #include "evp_local.h"
 
 static int evp_kem_init(EVP_PKEY_CTX *ctx, int operation,

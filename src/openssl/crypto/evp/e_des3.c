@@ -11,16 +11,16 @@
  * DES low level APIs are deprecated for public use, but still ok for internal
  * use.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
 #include <stdio.h>
-#include "../include/internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #ifndef OPENSSL_NO_DES
-# include <openssl/objects.h>
-# include "crypto/evp.h"
-# include "crypto/sha.h"
-# include <openssl/des.h>
-# include <openssl/rand.h>
+# include "../../include/openssl/objects.h"
+# include "../../include/crypto/evp.h"
+# include "../../include/crypto/sha.h"
+# include "../../include/openssl/des.h"
+# include "../../include/openssl/rand.h"
 # include "evp_local.h"
 
 typedef struct {

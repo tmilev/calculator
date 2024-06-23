@@ -9,9 +9,9 @@
 
 #include <stdio.h>
 #include <limits.h>
-#include "../include/internal/cryptlib.h"
-#include <openssl/evp.h>
-#include "crypto/evp.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/crypto/evp.h"
 #include "evp_local.h"
 
 static unsigned char conv_ascii2bin(unsigned char a,

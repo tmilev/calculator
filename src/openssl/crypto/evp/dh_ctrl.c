@@ -7,14 +7,14 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
-#include <openssl/core_names.h>
-#include <openssl/params.h>
-#include "../include/openssl/err.h"
-#include <openssl/dh.h>
-#include "crypto/dh.h"
-#include "crypto/evp.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/openssl/params.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/dh.h"
+#include "../../include/crypto/dh.h"
+#include "../../include/crypto/evp.h"
 
 static int dh_paramgen_check(EVP_PKEY_CTX *ctx)
 {

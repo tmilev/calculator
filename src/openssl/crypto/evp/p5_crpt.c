@@ -9,11 +9,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/internal/cryptlib.h"
-#include <openssl/x509.h>
-#include <openssl/evp.h>
-#include <openssl/core_names.h>
-#include <openssl/kdf.h>
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/openssl/kdf.h"
 
 /*
  * Doesn't do anything now: Builtin PBE algorithms in static table.

@@ -8,16 +8,16 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
-#include "../include/internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #ifndef OPENSSL_NO_ARIA
-# include <openssl/evp.h>
-# include <openssl/modes.h>
-# include <openssl/rand.h>
-# include "crypto/aria.h"
-# include "crypto/evp.h"
-# include "crypto/modes.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/modes.h"
+# include "../../include/openssl/rand.h"
+# include "../../include/crypto/aria.h"
+# include "../../include/crypto/evp.h"
+# include "../../include/crypto/modes.h"
 # include "evp_local.h"
 
 /* ARIA subkey Structure */

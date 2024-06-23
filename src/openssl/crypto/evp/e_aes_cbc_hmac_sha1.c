@@ -12,20 +12,20 @@
  * use where we're using them to implement the higher level EVP interface, as is
  * the case here.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
 #include <stdio.h>
 #include <string.h>
-#include "../include/openssl/opensslconf.h"
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include <openssl/aes.h>
-#include <openssl/sha.h>
-#include <openssl/rand.h>
-#include "../include/internal/cryptlib.h"
-#include "crypto/modes.h"
-#include "crypto/evp.h"
-#include "internal/constant_time.h"
+#include "../../include/openssl/opensslconf.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/aes.h"
+#include "../../include/openssl/sha.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/crypto/modes.h"
+#include "../../include/crypto/evp.h"
+#include "../../include/internal/constant_time.h"
 #include "evp_local.h"
 
 typedef struct {

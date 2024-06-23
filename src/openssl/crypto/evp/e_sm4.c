@@ -9,15 +9,15 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
-#include "../include/internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #ifndef OPENSSL_NO_SM4
-# include <openssl/evp.h>
-# include <openssl/modes.h>
-# include "crypto/sm4.h"
-# include "crypto/evp.h"
-# include "crypto/sm4_platform.h"
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/modes.h"
+# include "../../include/crypto/sm4.h"
+# include "../../include/crypto/evp.h"
+# include "../../include/crypto/sm4_platform.h"
 # include "evp_local.h"
 
 typedef struct {

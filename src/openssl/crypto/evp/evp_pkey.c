@@ -9,16 +9,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/internal/cryptlib.h"
-#include <openssl/x509.h>
-#include <openssl/rand.h>
-#include <openssl/encoder.h>
-#include <openssl/decoder.h>
-#include "../include/internal/provider.h"
-#include "../include/internal/sizes.h"
-#include "crypto/asn1.h"
-#include "crypto/evp.h"
-#include "crypto/x509.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/encoder.h"
+#include "../../include/openssl/decoder.h"
+#include "../../include/internal/provider.h"
+#include "../../include/internal/sizes.h"
+#include "../../include/crypto/asn1.h"
+#include "../../include/crypto/evp.h"
+#include "../../include/crypto/x509.h"
 
 /* Extract a private key from a PKCS8 structure */
 

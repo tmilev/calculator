@@ -11,15 +11,15 @@
  * BF low level APIs are deprecated for public use, but still ok for internal
  * use.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
 #include <stdio.h>
-#include "../include/internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 #ifndef OPENSSL_NO_BF
-# include <openssl/evp.h>
-# include "crypto/evp.h"
-# include <openssl/objects.h>
-# include <openssl/blowfish.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/crypto/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../../include/openssl/blowfish.h"
 # include "evp_local.h"
 
 static int bf_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,

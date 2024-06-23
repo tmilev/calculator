@@ -7,12 +7,12 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/core_names.h>
-#include "../include/internal/cryptlib.h"
-#include "internal/nelem.h"
-#include "crypto/evp.h"
-#include "../include/internal/core.h"
-#include "../include/internal/provider.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/nelem.h"
+#include "../../include/crypto/evp.h"
+#include "../../include/internal/core.h"
+#include "../../include/internal/provider.h"
 #include "evp_local.h"
 
 /*

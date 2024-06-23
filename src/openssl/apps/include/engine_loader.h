@@ -9,7 +9,7 @@
 #ifndef HEADER_ENGINE_LOADER_H
 # define HEADER_ENGINE_LOADER_H
 
-# include <openssl/store.h>
+# include "../../include/openssl/store.h"
 
 /* this is a private URI scheme */
 # define ENGINE_SCHEME          "org.openssl.engine"

@@ -13,19 +13,19 @@
 #include <stdio.h>
 #include <limits.h>
 #include <assert.h>
-#include <openssl/evp.h>
-#include "../include/openssl/err.h"
-#include <openssl/rand.h>
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/rand.h"
 #ifndef FIPS_MODULE
-# include <openssl/engine.h>
+# include "../../include/openssl/engine.h"
 #endif
-#include <openssl/params.h>
-#include <openssl/core_names.h>
-#include "../include/internal/cryptlib.h"
-#include "../include/internal/provider.h"
-#include "../include/internal/core.h"
-#include "internal/safe_math.h"
-#include "crypto/evp.h"
+#include "../../include/openssl/params.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/provider.h"
+#include "../../include/internal/core.h"
+#include "../../include/internal/safe_math.h"
+#include "../../include/crypto/evp.h"
 #include "evp_local.h"
 
 OSSL_SAFE_MATH_SIGNED(int, int)

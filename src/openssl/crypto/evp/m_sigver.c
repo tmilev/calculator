@@ -8,12 +8,12 @@
  */
 
 #include <stdio.h>
-#include "../include/internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/objects.h>
-#include "crypto/evp.h"
-#include "../include/internal/provider.h"
-#include "internal/numbers.h"   /* includes SIZE_MAX */
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/crypto/evp.h"
+#include "../../include/internal/provider.h"
+#include "../../include/internal/numbers.h"   /* includes SIZE_MAX */
 #include "evp_local.h"
 
 #ifndef FIPS_MODULE

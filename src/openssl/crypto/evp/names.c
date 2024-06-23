@@ -8,13 +8,13 @@
  */
 
 #include <stdio.h>
-#include <openssl/evp.h>
-#include <openssl/kdf.h>
-#include <openssl/x509.h>
-#include "../include/internal/cryptlib.h"
-#include "../include/internal/namemap.h"
-#include "crypto/objects.h"
-#include "crypto/evp.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/kdf.h"
+#include "../../include/openssl/x509.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/namemap.h"
+#include "../../include/crypto/objects.h"
+#include "../../include/crypto/evp.h"
 
 int EVP_add_cipher(const EVP_CIPHER *c)
 {

@@ -11,18 +11,18 @@
 #define OPENSSL_SUPPRESS_DEPRECATED
 
 #include <stdio.h>
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include <openssl/ec.h>
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/ec.h"
 #ifndef FIPS_MODULE
-# include <openssl/engine.h>
+# include "../../include/openssl/engine.h"
 #endif
-#include <openssl/params.h>
-#include <openssl/core_names.h>
-#include "../include/internal/cryptlib.h"
-#include "../include/internal/provider.h"
-#include "../include/internal/core.h"
-#include "crypto/evp.h"
+#include "../../include/openssl/params.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/provider.h"
+#include "../../include/internal/core.h"
+#include "../../include/crypto/evp.h"
 #include "evp_local.h"
 
 static void cleanup_old_md_data(EVP_MD_CTX *ctx, int force)

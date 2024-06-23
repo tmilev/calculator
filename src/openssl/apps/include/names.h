@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/safestack.h>
+#include "../../include/openssl/safestack.h"
 
 /* Standard comparing function for names */
 int name_cmp(const char * const *a, const char * const *b);

@@ -9,9 +9,9 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <openssl/buffer.h>
-#include <openssl/evp.h>
-#include "../include/internal/bio.h"
+#include "../../include/openssl/buffer.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/internal/bio.h"
 
 /*
  * BIO_put and BIO_get both add to the digest, BIO_gets returns the digest

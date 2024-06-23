@@ -7,7 +7,7 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/param_build.h>
+#include "../../include/openssl/param_build.h"
 
 /* used by speed.c */
 EVP_PKEY *get_dsa(int);

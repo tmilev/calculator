@@ -8,11 +8,11 @@
  */
 
 #include <stdlib.h>
-#include <openssl/core_names.h>
-#include "../include/openssl/err.h"
-#include <openssl/dsa.h>
-#include <openssl/evp.h>
-#include "crypto/evp.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/crypto/evp.h"
 
 static int dsa_paramgen_check(EVP_PKEY_CTX *ctx)
 {

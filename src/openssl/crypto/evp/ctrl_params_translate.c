@@ -13,29 +13,29 @@
  * configured.  When we drop #legacy EVP_PKEYs, this source should be
  * possible to drop as well.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
 #include <string.h>
 
 /* The following includes get us all the EVP_PKEY_CTRL macros */
-#include <openssl/dh.h>
-#include <openssl/dsa.h>
-#include <openssl/ec.h>
-#include <openssl/rsa.h>
-#include <openssl/kdf.h>
+#include "../../include/openssl/dh.h"
+#include "../../include/openssl/dsa.h"
+#include "../../include/openssl/ec.h"
+#include "../../include/openssl/rsa.h"
+#include "../../include/openssl/kdf.h"
 
 /* This include gets us all the OSSL_PARAM key string macros */
-#include <openssl/core_names.h>
+#include "../../include/openssl/core_names.h"
 
-#include "../include/openssl/err.h"
-#include <openssl/evperr.h>
-#include <openssl/params.h>
-#include "internal/nelem.h"
-#include "../include/internal/cryptlib.h"
-#include "internal/ffc.h"
-#include "crypto/evp.h"
-#include "crypto/dh.h"
-#include "crypto/ec.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/evperr.h"
+#include "../../include/openssl/params.h"
+#include "../../include/internal/nelem.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/ffc.h"
+#include "../../include/crypto/evp.h"
+#include "../../include/crypto/dh.h"
+#include "../../include/crypto/ec.h"
 
 struct translation_ctx_st;       /* Forwarding */
 struct translation_st;           /* Forwarding */

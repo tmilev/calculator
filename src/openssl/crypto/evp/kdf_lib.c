@@ -10,14 +10,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/internal/cryptlib.h"
-#include <openssl/evp.h>
-#include <openssl/kdf.h>
-#include "../include/openssl/core.h"
-#include <openssl/core_names.h>
-#include "crypto/evp.h"
-#include "internal/numbers.h"
-#include "../include/internal/provider.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/kdf.h"
+#include "../../include/openssl/core.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/crypto/evp.h"
+#include "../../include/internal/numbers.h"
+#include "../../include/internal/provider.h"
 #include "evp_local.h"
 
 EVP_KDF_CTX *EVP_KDF_CTX_new(EVP_KDF *kdf)

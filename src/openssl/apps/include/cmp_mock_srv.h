@@ -11,10 +11,10 @@
 #ifndef OSSL_APPS_CMP_MOCK_SRV_H
 # define OSSL_APPS_CMP_MOCK_SRV_H
 
-# include <openssl/opensslconf.h>
+# include "../../include/openssl/opensslconf.h"
 # ifndef OPENSSL_NO_CMP
 
-#  include <openssl/cmp.h>
+#  include "../../include/openssl/cmp.h"
 
 OSSL_CMP_SRV_CTX *ossl_cmp_mock_srv_new(OSSL_LIB_CTX *libctx,
                                         const char *propq);

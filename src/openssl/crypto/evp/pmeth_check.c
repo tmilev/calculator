@@ -9,14 +9,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/internal/cryptlib.h"
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include "crypto/bn.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/openssl/objects.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/crypto/bn.h"
 #ifndef FIPS_MODULE
-# include "crypto/asn1.h"
+# include "../../include/crypto/asn1.h"
 #endif
-#include "crypto/evp.h"
+#include "../../include/crypto/evp.h"
 #include "evp_local.h"
 
 /*

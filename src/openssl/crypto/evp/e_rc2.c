@@ -11,17 +11,17 @@
  * RC2 low level APIs are deprecated for public use, but still ok for internal
  * use.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
 #include <stdio.h>
-#include "../include/internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_RC2
 
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include "crypto/evp.h"
-# include <openssl/rc2.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../../include/crypto/evp.h"
+# include "../../include/openssl/rc2.h"
 # include "evp_local.h"
 
 static int rc2_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,

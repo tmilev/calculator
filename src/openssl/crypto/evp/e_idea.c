@@ -15,13 +15,13 @@
 #include "internal/deprecated.h"
 
 #include <stdio.h>
-#include "../include/internal/cryptlib.h"
+#include "../../include/internal/cryptlib.h"
 
 #ifndef OPENSSL_NO_IDEA
-# include <openssl/evp.h>
-# include <openssl/objects.h>
-# include "crypto/evp.h"
-# include <openssl/idea.h>
+# include "../../include/openssl/evp.h"
+# include "../../include/openssl/objects.h"
+# include "../../include/crypto/evp.h"
+# include "../../include/openssl/idea.h"
 # include "evp_local.h"
 
 /* Can't use IMPLEMENT_BLOCK_CIPHER because IDEA_ecb_encrypt is different */

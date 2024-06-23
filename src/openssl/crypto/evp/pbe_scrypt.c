@@ -7,11 +7,11 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/evp.h>
-#include "../include/openssl/err.h"
-#include <openssl/kdf.h>
-#include <openssl/core_names.h>
-#include "internal/numbers.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/kdf.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/internal/numbers.h"
 
 #ifndef OPENSSL_NO_SCRYPT
 

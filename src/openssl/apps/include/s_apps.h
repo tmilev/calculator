@@ -7,10 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
-#include <openssl/opensslconf.h>
-
-#include <openssl/ssl.h>
-#include <openssl/srp.h>
+#include "../../include/openssl/opensslconf.h"
+#include "../../include/openssl/ssl.h"
+#include "../../include/openssl/srp.h"
 
 #define PORT            "4433"
 #define PROTOCOL        "tcp"

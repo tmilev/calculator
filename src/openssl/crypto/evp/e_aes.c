@@ -11,22 +11,22 @@
  * This file uses the low-level AES functions (which are deprecated for
  * non-internal use) in order to implement the EVP AES ciphers.
  */
-#include "internal/deprecated.h"
+#include "../../include/internal/deprecated.h"
 
 #include <string.h>
 #include <assert.h>
-#include "../include/openssl/opensslconf.h"
-#include "../include/openssl/crypto.h"
-#include <openssl/evp.h>
-#include "../include/openssl/err.h"
-#include <openssl/aes.h>
-#include <openssl/rand.h>
-#include <openssl/cmac.h>
-#include "crypto/evp.h"
-#include "../include/internal/cryptlib.h"
-#include "crypto/modes.h"
-#include "crypto/siv.h"
-#include "crypto/aes_platform.h"
+#include "../../include/openssl/opensslconf.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/err.h"
+#include "../../include/openssl/aes.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/cmac.h"
+#include "../../include/crypto/evp.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/crypto/modes.h"
+#include "../../include/crypto/siv.h"
+#include "../../include/crypto/aes_platform.h"
 #include "evp_local.h"
 
 typedef struct {

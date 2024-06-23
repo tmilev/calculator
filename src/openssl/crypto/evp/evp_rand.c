@@ -9,16 +9,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <openssl/evp.h>
-#include <openssl/rand.h>
-#include "../include/openssl/core.h"
-#include <openssl/core_names.h>
-#include "../include/openssl/crypto.h"
-#include "../include/internal/cryptlib.h"
-#include "internal/numbers.h"
-#include "../include/internal/provider.h"
-#include "../include/internal/core.h"
-#include "crypto/evp.h"
+#include "../../include/openssl/evp.h"
+#include "../../include/openssl/rand.h"
+#include "../../include/openssl/core.h"
+#include "../../include/openssl/core_names.h"
+#include "../../include/openssl/crypto.h"
+#include "../../include/internal/cryptlib.h"
+#include "../../include/internal/numbers.h"
+#include "../../include/internal/provider.h"
+#include "../../include/internal/core.h"
+#include "../../include/crypto/evp.h"
 #include "evp_local.h"
 
 struct evp_rand_st {

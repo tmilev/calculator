@@ -52,20 +52,6 @@ scalar PackedVector<scalar>::scalarProduct(
   return wBv;
 }
 
-/*
-template <typename scalar>
-scalar PackedVector<scalar>::scalarProduct(const PackedVector<scalar>& v, const PackedVector* B) const {
-  PackedVector<scalar> Bv;
-  Bv.makeZero();
-  for (int i = 0; i < this->size; i ++)
-    for (int j = 0; j < this->size; j ++)
-      Bv[i] += B[i][j]*v[j]
-  scalar wBv = 0;
-  for (int i = 0; i <B.numberOfRows; i ++)
-    wBv += this->data[i]*Bv[i];
-  return wBv;
-}
-*/
 template <typename scalar>
 scalar&PackedVector<scalar>::operator[](int i) {
   return this->data[i];

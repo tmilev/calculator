@@ -3202,6 +3202,11 @@ public:
     STACK_TRACE("Calculator::getVectorFromFunctionArguments");
     input.checkInitialization();
     Expression sequence = input;
+    if (
+      input.size() == 2 && input[1].startsWith(this->opCommandSequence())
+    ) {
+      sequence = input[1];
+    }
     if (sequence.isList()) {
       sequence.setChildAtomValue(0, this->opSequence());
     }

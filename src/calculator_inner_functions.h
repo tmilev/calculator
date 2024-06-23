@@ -1247,7 +1247,10 @@ public:
   static void transformEqualityToExpressionInChildren(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool solveSystem(
+  static bool solvePolynomialSystem(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool solve(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool solvePolynomialSystem(

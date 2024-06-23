@@ -484,13 +484,12 @@ int process_one_state(
  * <=0: NBIO or error
  */
 static int state_machine(struct ssl_connection_st* s, int server) {
-  printf("DEBUG: inside statemachine!\n");
   void(*cb)(const SSL* ssl, int type, int val) = NULL;
   OSSL_STATEM* st = &s->statem;
   SSL* ssl = SSL_CONNECTION_GET_SSL(s);
   if (st->state == MSG_FLOW_ERROR) {
-    /* Shouldn't have been called if we're already in the error state */ return
-    - 1;
+    // Shouldn't have been called if we're already in the error state.
+    return - 1;
   }
   ERR_clear_error();
   clear_sys_error();

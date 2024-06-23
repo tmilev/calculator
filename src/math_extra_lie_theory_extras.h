@@ -483,7 +483,7 @@ public:
     }
     MonomialUniversalEnvelopingOrdered<Coefficient>& monomial =
     this->objects[0];
-    if (!monomial.Coefficient.isEqualToOne()) {
+    if (!monomial.coefficient.isEqualToOne()) {
       return false;
     }
     if (monomial.generatorsIndices.size != 1) {
@@ -551,7 +551,7 @@ public:
     for (int i = 0; i < this->size; i ++) {
       MonomialUniversalEnvelopingOrdered<Coefficient>& monomial =
       this->objects[i];
-      monomial.Coefficient.clearDenominators(currentCoefficient);
+      monomial.coefficient.clearDenominators(currentCoefficient);
       for (int j = 0; j < this->size; j ++) {
         if (j != i) {
           this->objects[j].coefficient *= currentCoefficient;
@@ -1535,7 +1535,7 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::multiplyByNoSimplify(
   this->powers.reserve(
     other.generatorsIndices.size + this->generatorsIndices.size
   );
-  this->Coefficient.multiplyBy(other.coefficient);
+  this - coefficient.multiplyBy(other.coefficient);
   if (other.generatorsIndices.size == 0) {
     return;
   }
@@ -1594,7 +1594,7 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::operator*=(
   if (this == &other) {
     global.fatal << "Output and input are the same. " << global.fatal;
   }
-  this->Coefficient *= other.coefficient;
+  this->coefficient *= other.coefficient;
   for (int i = 0; i < other.generatorsIndices.size; i ++) {
     this->multiplyByGeneratorPowerOnTheRight(
       other.generatorsIndices[i], other.powers[i]

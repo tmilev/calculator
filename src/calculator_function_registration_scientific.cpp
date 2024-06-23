@@ -329,13 +329,26 @@ void Calculator::initializeFunctionsScientificBasic() {
     innerStandard
   );
   this->addOperationHandler(
-    "SolveSystem",
-    CalculatorFunctions::solveSystem,
+    "SolvePolynomialSystem",
+    CalculatorFunctions::solvePolynomialSystem,
     "",
     "Attempts to heuristically find a polynomial system solution. ",
-    "SolveSystem(xy+z=40,xz+y=51,x+y+z=19) ",
-    "CalculatorFunctions::solveSystem",
-    "SolveSystem",
+    "SolvePolynomialSystem(xy+z=40,xz+y=51,x+y+z=19) ;",
+    "CalculatorFunctions::SolvePolynomialSystem",
+    "SolvePolynomialSystem",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "Solve",
+    CalculatorFunctions::solve,
+    "",
+    "Attempts to heuristically find a polynomial system solution. "
+    "Same as SolvePolynomialSystem but may eventually be extended "
+    "to more types of equations/expressions.",
+    "Solve(xy+z=40,xz+y=51,x+y+z=19);\n"
+    "Solve(xy+z=40;xz+y=51;x+y+z=19);",
+    "CalculatorFunctions::solve",
+    "Solve",
     innerStandard
   );
   this->addOperationHandler(

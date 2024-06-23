@@ -4771,9 +4771,7 @@ int SSL_do_handshake(SSL *s) {
     } else {
       // The next line most likely leads to:
       (void) ossl_statem_accept;
-      printf("DEBUG: before handshake func\n");
       ret = sc->handshake_func(s);
-      printf("DEBUG: after handshake func\n");
     }
   }
   return ret;

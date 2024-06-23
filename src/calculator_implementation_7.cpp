@@ -1169,10 +1169,18 @@ void CalculatorFunctions::transformEqualityToExpressionInChildren(
   }
 }
 
-bool CalculatorFunctions::solveSystem(
+bool CalculatorFunctions::solve(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::solveSystem");
+  STACK_TRACE("CalculatorFunctions::solve");
+  return
+  CalculatorFunctions::solvePolynomialSystem(calculator, input, output);
+}
+
+bool CalculatorFunctions::solvePolynomialSystem(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctions::solvePolynomialSystem");
   Expression inputCorrected;
   CalculatorFunctions::transformEqualityToExpressionInChildren(
     calculator, input, inputCorrected

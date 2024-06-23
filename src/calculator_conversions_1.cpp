@@ -424,6 +424,10 @@ bool CalculatorConversions::convert<Polynomial<Rational> >(
   WithContext<Polynomial<Rational> >& output
 ) {
   int64_t startTime = global.getElapsedMilliseconds();
+  if (input.startsWith(calculator.opDefine())) {
+    const Expression difference = input[1] - input[2];
+    return CalculatorConversions::convert(calculator, difference, output);
+  }
   bool result =
   CalculatorConversions::functionPolynomial(
     calculator, input, output, - 1, - 1, false
@@ -431,8 +435,8 @@ bool CalculatorConversions::convert<Polynomial<Rational> >(
   int64_t ellapsedTime = global.getElapsedMilliseconds() - startTime;
   if (ellapsedTime > 100) {
     calculator
-    <<
-    "<b style='color:red'>Warning:</b> extraction of rational polynomial took too long: "
+    << "<b style='color:red'>Warning:</b> extraction "
+    << "of rational polynomial took too long: "
     << ellapsedTime
     << " ms.<br>";
   }

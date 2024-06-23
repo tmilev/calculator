@@ -19,7 +19,8 @@ public:
   bool flagRestrictedCentralizerConditionHoldS;
   bool flagParabolicACExtendsToParabolicAC;
   bool flagLinfiniteRelFound;
-  DynkinDiagramRootSubalgebra leviDiagramAmbient, leviDiagramSmall;
+  DynkinDiagramRootSubalgebra leviDiagramAmbient;
+  DynkinDiagramRootSubalgebra leviDiagramSmall;
   // 0->not selected; 1->selected; 2->undecided.
   List<int> nilradicalSelection;
   Vector<Rational> coneIntersection;

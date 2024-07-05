@@ -1135,7 +1135,7 @@ bool CalculatorConversions::loadKeysFromStatementList(
     std::string,
     Expression,
     HashFunctions::hashFunction<std::string>
-  >& output,
+  >& outputKeys,
   bool allowFailure,
   List<Expression>* outputNotAKeyValuePair,
   std::stringstream* commentsOnFailure
@@ -1154,15 +1154,36 @@ bool CalculatorConversions::loadKeysFromStatementList(
   ) {
     return false;
   }
-  output.clear();
+  outputKeys.clear();
   std::string keyName;
   for (int i = 0; i < outputExpressionFormat.keys.size; i ++) {
-    if (
-      !outputExpressionFormat.keys[i].isOfType<std::string>(&keyName)
-    ) {
-      keyName = outputExpressionFormat.keys[i].toString();
+    const Expression& key = outputExpressionFormat.keys[i];
+    const Expression& value = outputExpressionFormat.values[i];
+    if (key.isOfType<std::string>(&keyName)) {
+      outputKeys.setKeyValue(keyName, value);
+      continue;
     }
-    output.setKeyValue(keyName, outputExpressionFormat.values[i]);
+    keyName = key.toString();
+    if (key.isAtom() && keyName.size() >= 2) {
+      outputKeys.setKeyValue(keyName, value);
+      continue;
+    }
+    if (outputNotAKeyValuePair == nullptr) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "Unrecognized key: ["
+        << keyName
+        << "], value: "
+        << value.toString();
+      }
+      return false;
+    }
+    // Convert an expression along the lines of
+    // x=y
+    // to an expression along the lines of
+    // x-y.
+    const Expression difference = key - value;
+    outputNotAKeyValuePair->addOnTop(difference);
   }
   return true;
 }

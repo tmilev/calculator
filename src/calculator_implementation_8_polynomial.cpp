@@ -910,14 +910,18 @@ bool GroebnerComputationCalculator::initializeComputation() {
   this->desiredContext.initialize(*this->owner);
   MapList<std::string, Expression> configuration;
   List<Expression> polynomials;
-  CalculatorConversions::loadKeysFromStatementList(
-    *this->owner,
-    *this->input,
-    configuration,
-    true,
-    &polynomials,
-    nullptr
-  );
+  if (
+    !CalculatorConversions::loadKeysFromStatementList(
+      *this->owner,
+      *this->input,
+      configuration,
+      true,
+      &polynomials,
+      nullptr
+    )
+  ) {
+    return *this->owner << "Could not extract statement list. ";
+  }
   if (configuration.contains("upperLimit")) {
     Expression upperLimit = configuration.getValueNoFail("upperLimit");
     if (!upperLimit.isIntegerFittingInInt(&this->upperBound)) {
@@ -960,7 +964,7 @@ bool GroebnerComputationCalculator::initializeComputation() {
       - 1
     )
   ) {
-    return *this->owner << "Failed to extract polynomial expressions";
+    return *this->owner << "Failed to extract polynomial expressions. ";
   }
   for (int i = 0; i < this->extractedContext.numberOfVariables(); i ++) {
     Expression variable = this->extractedContext.getVariable(i);
@@ -988,6 +992,7 @@ bool GroebnerComputationCalculator::initializeComputation() {
 }
 
 bool GroebnerComputationCalculator::compute() {
+  STACK_TRACE("GroebnerComputationCalculator::compute");
   if (!this->initializeComputation()) {
     return false;
   }
@@ -1022,7 +1027,7 @@ bool GroebnerComputationCalculator::compute() {
       MonomialPolynomial::greaterThan_leftLargerWins
     );
   } else {
-    global.fatal << "Unexpected order value: " << order << global.fatal;
+    global.fatal << "Unexpected order value: " << this->order << global.fatal;
   }
   groebnerComputation.format.monomialOrder =
   groebnerComputation.polynomialOrder.monomialOrder;
@@ -1232,7 +1237,8 @@ bool CalculatorFunctionsPolynomial::divideExpressionsAsIfPolynomial(
   Polynomial<AlgebraicNumber> simplifiedDenominator;
   result.getDenominator(simplifiedDenominator);
   if (simplifiedDenominator.totalDegree() < denominatorDegree) {
-    Polynomial<AlgebraicNumber> quotient, remainder;
+    Polynomial<AlgebraicNumber> quotient;
+    Polynomial<AlgebraicNumber> remainder;
     denominator.content.divideBy(
       simplifiedDenominator, quotient, remainder, nullptr
     );

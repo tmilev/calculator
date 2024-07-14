@@ -703,7 +703,8 @@ void DrawingVariables::changeBasisPReserveAngles(double newX, double newY) {
   this->basisToDrawCirclesAt[this->selectedCircleMinus2noneMinus1Center];
   double selectedRootLength =
   this->bilinearForm.scalarProduct(selectedRoot, selectedRoot);
-  double oldX, oldY;
+  double oldX;
+  double oldY;
   this->getCoordinatesDrawingComputeAll(selectedRoot, oldX, oldY);
   oldX = (oldX - bufferCenterX) / bufferGraphicsUnit;
   oldY = (oldY - bufferCenterY) / bufferGraphicsUnit;

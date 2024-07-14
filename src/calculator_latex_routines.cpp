@@ -128,7 +128,7 @@ bool LaTeXCrawler::extractFileNamesFromRelativeFileName(
 }
 
 void LaTeXCrawler::buildFreecalc() {
-  STACK_TRACE("LaTeXcrawler::BuildFreecalc");
+  STACK_TRACE("LaTeXcrawler::buildFreecalc");
   StateMaintainerCurrentFolder preserveCurrentFolder;
   if (!global.userDefaultHasAdminRights()) {
     this->displayResult
@@ -403,7 +403,8 @@ void LaTeXCrawler::buildFreecalc() {
   << FileOperations::getCurrentFolder();
   std::string lectureProjectorFolder = "lectures_projector_" + folderEnd + "/";
   std::string printableFolder;
-  std::string slideProjectorFolder, slideHandoutFolder;
+  std::string slideProjectorFolder;
+  std::string slideHandoutFolder;
   if (!isLecture) {
     printableFolder = "homework_" + folderEnd + "/";
   } else {

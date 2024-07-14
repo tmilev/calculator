@@ -71,7 +71,8 @@ void QuasiPolynomial::substitute(
   output.ambientLatticeReduced.intersectWithPreimageOfLattice(
     mapFromNewSpaceToOldSpace, this->ambientLatticeReduced
   );
-  Vectors<Rational> allRepresentatives, imagesAllRepresentatives;
+  Vectors<Rational> allRepresentatives;
+  Vectors<Rational> imagesAllRepresentatives;
   bool tempBool =
   ambientLatticeNewSpace.getAllRepresentatives(
     output.ambientLatticeReduced, allRepresentatives
@@ -86,26 +87,26 @@ void QuasiPolynomial::substitute(
   substitution.setSize(this->minimalNumberOfVariables());
   Vector<Rational> root;
   for (int i = 0; i < substitution.size; i ++) {
-    Polynomial<Rational>& currentPoly = substitution[i];
+    Polynomial<Rational>& currentPolynomial = substitution[i];
     mapFromNewSpaceToOldSpace.getVectorFromRow(i, root);
-    currentPoly.makeLinearNoConstant(root);
+    currentPolynomial.makeLinearNoConstant(root);
   }
-  Polynomial<Rational> tempP;
+  Polynomial<Rational> polynomial;
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
-    tempP = this->valueOnEachLatticeShift[i];
-    bool tempB = tempP.substitute(substitution, Rational::one());
-    if (!tempB) {
+    polynomial = this->valueOnEachLatticeShift[i];
+    bool mustBeTrue = polynomial.substitute(substitution, Rational::one());
+    if (!mustBeTrue) {
       global.fatal
       << "Substitution "
       << substitution.toString()
       << " into polynomial "
-      << tempP.toString()
+      << polynomial.toString()
       << " failed but the current function does not handle this properly. "
       << global.fatal;
     }
     for (int j = 0; j < allRepresentatives.size; j ++) {
       if (imagesAllRepresentatives[j] == this->latticeShifts[i]) {
-        output.addLatticeShift(tempP, allRepresentatives[j]);
+        output.addLatticeShift(polynomial, allRepresentatives[j]);
       }
     }
   }
@@ -127,23 +128,23 @@ void QuasiPolynomial::substitute(
   for (int i = 0; i < substitution.size; i ++) {
     substitution[i].addConstant(- inputTranslationSubtractedFromArgument[i]);
   }
-  Polynomial<Rational> tempP;
+  Polynomial<Rational> polynomial;
   output.makeZeroLatticeZn(this->minimalNumberOfVariables());
   output.ambientLatticeReduced = this->ambientLatticeReduced;
   for (int i = 0; i < this->valueOnEachLatticeShift.size; i ++) {
-    tempP = this->valueOnEachLatticeShift[i];
-    bool tempB = tempP.substitute(substitution, Rational::one());
-    if (!tempB) {
+    polynomial = this->valueOnEachLatticeShift[i];
+    bool mustBeTrue = polynomial.substitute(substitution, Rational::one());
+    if (!mustBeTrue) {
       global.fatal
       << "Substitution "
       << substitution.toString()
       << " into polynomial "
-      << tempP.toString()
+      << polynomial.toString()
       << " failed but the current function does not handle this properly. "
       << global.fatal;
     }
     output.addLatticeShift(
-      tempP,
+      polynomial,
       this->latticeShifts[i] + inputTranslationSubtractedFromArgument
     );
   }
@@ -500,7 +501,7 @@ bool QuasiPolynomial::substitutionFewerVariables(
   output.valueOnEachLatticeShift.reserve(this->latticeShifts.size);
   output.latticeShifts.reserve(this->latticeShifts.size);
   Vector<Rational> root;
-  Polynomial<Rational> tempP;
+  Polynomial<Rational> valueOnShift;
   for (int i = 0; i < this->latticeShifts.size; i ++) {
     shiftMatrixForm.assignVectorColumn(this->latticeShifts[i]);
     shiftMatrixForm -= subLatticeShift;
@@ -511,18 +512,19 @@ bool QuasiPolynomial::substitutionFewerVariables(
       )
     ) {
       root.assignMatrixDetectRowOrColumn(shiftImage);
-      tempP = this->valueOnEachLatticeShift[i];
-      bool tempB = tempP.substitute(substitution, Rational::one());
-      if (!tempB) {
+      valueOnShift = this->valueOnEachLatticeShift[i];
+      bool shouldBeTrue =
+      valueOnShift.substitute(substitution, Rational::one());
+      if (!shouldBeTrue) {
         global.fatal
         << "Substitution "
         << substitution.toString()
         << " into polynomial "
-        << tempP.toString()
+        << valueOnShift.toString()
         << " failed but the current function does not handle this properly. "
         << global.fatal;
       }
-      output.addLatticeShift(tempP, root);
+      output.addLatticeShift(valueOnShift, root);
     }
   }
   return true;
@@ -897,7 +899,9 @@ void Lattice::intersectWithPreimageOfLattice(
   Vectors<Rational> imageStartingBasis;
   Vectors<Rational> basisImageIntersection;
   Vectors<Rational> imageBasisInImageStartingBasisCoordinates;
-  Vectors<Rational> resultNonKernelPart, result, roots;
+  Vectors<Rational> resultNonKernelPart;
+  Vectors<Rational> result;
+  Vectors<Rational> roots;
   startingBasis.assignMatrixRows(this->basisRationalForm);
   linearMap.actOnVectorsColumn(startingBasis, imageStartingBasis);
   Lattice imageLattice;
@@ -972,27 +976,30 @@ int Lattice::getMinimalIntegerScalarSendingVectorIntoLattice(
 
 void Lattice::intersectWith(const Lattice& other) {
   STACK_TRACE("Lattice::intersectWith");
-  Vectors<Rational> commonBasis, otherBasis, startBasis;
+  Vectors<Rational> commonBasis;
+  Vectors<Rational> otherBasis;
+  Vectors<Rational> startBasis;
   startBasis.assignMatrixRows(this->basisRationalForm);
   otherBasis.assignMatrixRows(other.basisRationalForm);
   startBasis.intersectTwoLinearSpaces(startBasis, otherBasis, commonBasis);
-  Lattice thisLatticeIntersected, otherLatticeIntersected;
+  Lattice thisLatticeIntersected;
+  Lattice otherLatticeIntersected;
   thisLatticeIntersected = *this;
   otherLatticeIntersected = other;
   thisLatticeIntersected.intersectWithLinearSubspaceSpannedBy(commonBasis);
   otherLatticeIntersected.intersectWithLinearSubspaceSpannedBy(commonBasis);
-  Vectors<Rational>
-  thisCommonBasis,
-  otherCommonBasis,
-  thisCommonCoordinates,
-  otherCommonCoordinates;
+  Vectors<Rational> thisCommonBasis;
+  Vectors<Rational> otherCommonBasis;
+  Vectors<Rational> thisCommonCoordinates;
+  Vectors<Rational> otherCommonCoordinates;
   thisCommonBasis.assignMatrixRows(thisLatticeIntersected.basisRationalForm);
   otherCommonBasis.assignMatrixRows(
     otherLatticeIntersected.basisRationalForm
   );
   thisCommonBasis.getCoordinatesInBasis(commonBasis, thisCommonCoordinates);
   otherCommonBasis.getCoordinatesInBasis(commonBasis, otherCommonCoordinates);
-  Lattice thisCommonCoordinatesLattice, otherCommonCoordinatesLattice;
+  Lattice thisCommonCoordinatesLattice;
+  Lattice otherCommonCoordinatesLattice;
   thisCommonCoordinatesLattice.makeFromRoots(thisCommonCoordinates);
   otherCommonCoordinatesLattice.makeFromRoots(otherCommonCoordinates);
   thisCommonCoordinatesLattice.intersectWithBothOfMaximalRank(
@@ -1018,7 +1025,8 @@ void Lattice::intersectWith(const Lattice& other) {
 }
 
 void Lattice::intersectWithBothOfMaximalRank(const Lattice& other) {
-  Lattice dualLatticeThis, dualLatticeOther;
+  Lattice dualLatticeThis;
+  Lattice dualLatticeOther;
   if (
     this->basis.numberOfRows != this->getDimension() ||
     this->getDimension() != other.getDimension() ||
@@ -1256,7 +1264,8 @@ getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
 void Lattice::intersectWithLinearSubspaceGivenByNormal(
   const Vector<Rational>& normal
 ) {
-  Vectors<Rational> startingBasis, resultBasis;
+  Vectors<Rational> startingBasis;
+  Vectors<Rational> resultBasis;
   startingBasis.assignMatrixRows(this->basisRationalForm);
   Vector<Rational> scalarProducts;
   scalarProducts.setSize(startingBasis.size);
@@ -1281,7 +1290,8 @@ void Lattice::intersectWithLinearSubspaceGivenByNormal(
   }
   scalarProducts.scaleNormalizeFirstNonZero();
   eigenSpacePlusOrthogonalComponent[pivotColumnIndex] = scalarProducts;
-  Lattice eigenLattice, znLattice;
+  Lattice eigenLattice;
+  Lattice znLattice;
   eigenLattice.makeFromRoots(eigenSpacePlusOrthogonalComponent);
   znLattice.makeZn(scalarProducts.size);
   znLattice.intersectWithBothOfMaximalRank(eigenLattice);
@@ -1357,10 +1367,9 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& substitution) {
     return false;
   }
   int startingDim = this->getDimension();
-  Matrix<Rational>
-  matrix,
-  oldBasisTransformed,
-  matRelationBetweenStartingVariables;
+  Matrix<Rational> matrix;
+  Matrix<Rational> oldBasisTransformed;
+  Matrix<Rational> matRelationBetweenStartingVariables;
   matrix = substitution;
   oldBasisTransformed = this->basisRationalForm;
   oldBasisTransformed.transpose();
@@ -1550,7 +1559,8 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
   LargeIntegerUnsigned::leastCommonMultiple(
     other.denominator, oldDenominator, this->denominator
   );
-  LargeIntegerUnsigned scaleThis, scaleOther;
+  LargeIntegerUnsigned scaleThis;
+  LargeIntegerUnsigned scaleOther;
   scaleThis = this->denominator / oldDenominator;
   scaleOther = this->denominator / other.denominator;
   int oldNumberOfRows = this->basis.numberOfRows;

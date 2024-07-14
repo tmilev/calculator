@@ -71,25 +71,24 @@ bool PartialFractions::argumentsAllowed(
   if (arguments.size < 1) {
     return false;
   }
-  Cone tempCone;
-  bool result = tempCone.createFromVertices(arguments);
-  if (tempCone.isEntireSpace()) {
+  Cone cone;
+  bool result = cone.createFromVertices(arguments);
+  if (cone.isEntireSpace()) {
     outputWhatWentWrong =
     "Error: the vectors you gave as input span the entire space.";
     return false;
   }
-  for (int i = 0; i < tempCone.vertices.size; i ++) {
+  for (int i = 0; i < cone.vertices.size; i ++) {
     if (
-      tempCone.isInCone(tempCone.vertices[i]) &&
-      tempCone.isInCone(- tempCone.vertices[i])
+      cone.isInCone(cone.vertices[i]) && cone.isInCone(- cone.vertices[i])
     ) {
       std::stringstream out;
       out
       << "Error: the Q_{>0} span of vectors you gave as "
       << "input contains zero (as it contains the vector "
-      << tempCone.vertices[i].toString()
+      << cone.vertices[i].toString()
       << " as well as its opposite vector "
-      << (- tempCone.vertices[i]).toString()
+      << (- cone.vertices[i]).toString()
       << "), hence the vector partition function is "
       << "can only take values infinity or zero. ";
       outputWhatWentWrong = out.str();
@@ -240,8 +239,8 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   int indexMinimalScalarProduct = - 1;
   WeylGroupData& weylGroup = *this->owner;
   Vector<Rational>& alpha = weylGroup.rootsOfBorel[indexAlpha];
-  Rational LengthAlpha = this->owner->rootScalarCartanRoot(alpha, alpha);
-  Vector<Rational> alphaScaled = alpha * 2 / LengthAlpha;
+  Rational lengthAlpha = this->owner->rootScalarCartanRoot(alpha, alpha);
+  Vector<Rational> alphaScaled = alpha * 2 / lengthAlpha;
   for (int i = 0; i < this->waypoints.size; i ++) {
     Rational scalarProduct =
     this->owner->rootScalarCartanRoot(this->waypoints[i], alphaScaled);
@@ -262,12 +261,12 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
   for (
     int i = this->waypoints.size - 1; i >= indexMinimalScalarProduct; i --
   ) {
-    Rational tempScalar =
+    Rational scalar =
     weylGroup.rootScalarCartanRoot(alphaScaled, this->waypoints[i]);
-    if (tempScalar >= minimalScalarProduct + 1) {
+    if (scalar >= minimalScalarProduct + 1) {
       succeedingIndex = i;
     }
-    if (tempScalar < minimalScalarProduct + 1) {
+    if (scalar < minimalScalarProduct + 1) {
       break;
     }
   }
@@ -291,7 +290,8 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
     Rational x = (minimalScalarProduct + 1 - s2) / (s1 - s2);
     this->waypoints[succeedingIndex] = (r1 - r2) * x + r2;
   }
-  Vector<Rational> diff, oldWayPoint;
+  Vector<Rational> diff;
+  Vector<Rational> oldWayPoint;
   oldWayPoint = this->waypoints[indexMinimalScalarProduct];
   Rational currentDist = 0;
   for (int i = 0; i < succeedingIndex - indexMinimalScalarProduct; i ++) {
@@ -315,8 +315,11 @@ void LittelmannPath::simplify() {
   if (this->waypoints.size == 0) {
     return;
   }
-  Vector<Rational> d1, d2;
-  Rational d11, d12, d22;
+  Vector<Rational> d1;
+  Vector<Rational> d2;
+  Rational d11;
+  Rational d12;
+  Rational d22;
   int leftIndex = 0;
   int rightIndex = 2;
   while (rightIndex < this->waypoints.size) {
@@ -596,14 +599,14 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) const {
-  List<ElementUniversalEnveloping<Coefficient> > tempBasis;
+  List<ElementUniversalEnveloping<Coefficient> > workingBasis;
   List<ElementUniversalEnveloping<Coefficient> > elements;
-  tempBasis = basis;
-  tempBasis.addOnTop(*this);
+  workingBasis = basis;
+  workingBasis.addOnTop(*this);
   Vectors<Coefficient> coordinates;
   if (
     !this->getBasisFromSpanOfElements(
-      tempBasis, coordinates, elements, ringUnit, ringZero
+      workingBasis, coordinates, elements, ringUnit, ringZero
     )
   ) {
     return false;
@@ -751,19 +754,21 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
   std::stringstream* logStream
 ) {
   output = ringZero;
-  ElementUniversalEnveloping<Coefficient> MTright;
-  MTright = right;
-  if (!MTright.applyMinusTransposeAutoOnMe()) {
+  ElementUniversalEnveloping<Coefficient> minusTransposeRight;
+  minusTransposeRight = right;
+  if (!minusTransposeRight.applyMinusTransposeAutoOnMe()) {
     return false;
   }
-  ElementUniversalEnveloping<Coefficient> Accum, intermediateAccum, element;
-  Accum.makeZero(*this->owners, this->indexInOwners);
+  ElementUniversalEnveloping<Coefficient> accumulator;
+  ElementUniversalEnveloping<Coefficient> intermediateAccum;
+  ElementUniversalEnveloping<Coefficient> element;
+  accumulator.makeZero(*this->owners, this->indexInOwners);
   MonomialUniversalEnveloping<Coefficient> constMon;
   constMon.makeConstant();
   if (logStream != nullptr) {
     *logStream
     << "backtraced elt: "
-    << MTright.toString(&global.defaultFormat.getElement())
+    << minusTransposeRight.toString(&global.defaultFormat.getElement())
     << "<br>";
     *logStream
     << "this element: "
@@ -782,8 +787,9 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
     intermediateAccum.modOutVermaRelations(
       &global, substitutionHiGoesToIthElement, ringUnit, ringZero
     );
-    MonomialUniversalEnveloping<Coefficient>& rightMonomial = MTright[j];
-    Coefficient& rightMonCoeff = MTright.coefficients[j];
+    MonomialUniversalEnveloping<Coefficient>& rightMonomial =
+    minusTransposeRight[j];
+    Coefficient& rightMonCoeff = minusTransposeRight.coefficients[j];
     int power;
     for (int i = rightMonomial.powers.size - 1; i >= 0; i --) {
       if (rightMonomial.powers[i].isSmallInteger(&power)) {
@@ -842,7 +848,7 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
       }
     }
     intermediateAccum *= rightMonCoeff;
-    Accum += intermediateAccum;
+    accumulator += intermediateAccum;
     int index = intermediateAccum.getIndex(constMon);
     if (index != - 1) {
       output += intermediateAccum.coefficients[index];
@@ -851,7 +857,7 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
   if (logStream != nullptr) {
     *logStream
     << "final UE element: "
-    << Accum.toString(&global.defaultFormat.getElement());
+    << accumulator.toString(&global.defaultFormat.getElement());
   }
   return true;
 }

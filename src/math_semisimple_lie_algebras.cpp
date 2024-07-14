@@ -49,7 +49,8 @@ std::string SemisimpleLieAlgebra::toString(FormatExpressions* format) {
   << " is its weight, and <br>"
   << HtmlRoutines::getMathNoDisplay("\\alpha_i")
   << " is the i^th simple root. ";
-  std::stringstream tableLateXStream, htmlStream;
+  std::stringstream tableLateXStream;
+  std::stringstream htmlStream;
   htmlStream
   << "<table><tr><td> roots simple coords </td><td>epsilon coordinates</td>"
   << "<td>[,]</td>";
@@ -246,7 +247,8 @@ std::string SemisimpleLieAlgebra::toHTML(
 ) {
   STACK_TRACE("SemisimpleLieAlgebra::toHTMLCalculator");
   std::stringstream out;
-  FormatExpressions format, latexFormat;
+  FormatExpressions format;
+  FormatExpressions latexFormat;
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   out
@@ -294,7 +296,8 @@ std::string SemisimpleLieAlgebra::toHTML(
       << "\\usepackage{longtable} <br>%Add to body: <br>"
       << "\\begin{longtable}{ccc}generator & root simple coord. "
       << "& root $\\varepsilon$-notation \\\\\\hline<br>\n";
-      Vector<Rational> root, root2;
+      Vector<Rational> root;
+      Vector<Rational> root2;
       ElementSemisimpleLieAlgebra<Rational> element1;
       for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
         element1.makeGenerator(i, *this);
@@ -336,9 +339,11 @@ std::string SemisimpleLieAlgebra::toHTML(
   out
   << "<br>The determinant of the symmetric Cartan matrix is: "
   << this->weylGroup.cartanSymmetric.getDeterminant().toString();
-  Vectors<Rational> fundamentalWeights, fundamentalWeightsEpsForm;
+  Vectors<Rational> fundamentalWeights;
+  Vectors<Rational> fundamentalWeightsEpsForm;
   this->weylGroup.getFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
-  Vectors<Rational> simpleBasis, simpleBasisEpsilonCoordinates;
+  Vectors<Rational> simpleBasis;
+  Vectors<Rational> simpleBasisEpsilonCoordinates;
   out << "<hr> Half sum of positive roots: " << this->weylGroup.rho.toString();
   Vector<Rational> root;
   this->weylGroup.getEpsilonCoordinates(this->weylGroup.rho, root);
@@ -400,22 +405,22 @@ std::string SemisimpleLieAlgebra::toHTML(
   }
   simpleBasisStream << "\\end{array}";
   out << "<br>" << HtmlRoutines::getMathNoDisplay(simpleBasisStream.str());
-  DynkinSimpleType tempSimpleType;
+  DynkinSimpleType simpleType;
   if (
     this->weylGroup.dynkinType.isSimple(
-      &tempSimpleType.letter,
-      &tempSimpleType.rank,
-      &tempSimpleType.cartanSymmetricInverseScale
+      &simpleType.letter,
+      &simpleType.rank,
+      &simpleType.cartanSymmetricInverseScale
     )
   ) {
-    if (tempSimpleType.cartanSymmetricInverseScale == 1) {
-      Matrix<Rational> monomial, monomial2;
+    if (simpleType.cartanSymmetricInverseScale == 1) {
+      Matrix<Rational> monomial;
+      Matrix<Rational> monomial2;
       this->weylGroup.dynkinType.getEpsilonMatrix(monomial);
       monomial2 = monomial;
       monomial2.transpose();
       monomial2.multiplyOnTheRight(monomial);
-      monomial2 *= 2 /
-      tempSimpleType.getEpsilonRealizationLongRootLengthSquared();
+      monomial2 *= 2 / simpleType.getEpsilonRealizationLongRootLengthSquared();
       if (!(monomial2 == this->weylGroup.cartanSymmetric)) {
         global.fatal
         << "This is a (non-critical) programming error: "
@@ -721,7 +726,9 @@ void SemisimpleLieAlgebra::computeLieBracketTable() {
   this->universalEnvelopingGeneratorOrder.initializeFillInObject(
     numberOfGenerators, - 1
   );
-  Vector<Rational> leftWeight, rightWeight, hRoot;
+  Vector<Rational> leftWeight;
+  Vector<Rational> rightWeight;
+  Vector<Rational> hRoot;
   for (int i = 0; i < numberOfGenerators; i ++) {
     leftWeight = this->getWeightOfGenerator(i);
     for (int j = i; j < numberOfGenerators; j ++) {
@@ -1347,7 +1354,8 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
   int numberofGenerators = this->domainAlgebra().getNumberOfGenerators();
   nonComputed.initialize(numberofGenerators);
   nonComputed.makeFullSelection();
-  List<ElementSemisimpleLieAlgebra<Rational> > currentDomain, currentRange;
+  List<ElementSemisimpleLieAlgebra<Rational> > currentDomain;
+  List<ElementSemisimpleLieAlgebra<Rational> > currentRange;
   currentDomain.setSize(numberofGenerators);
   currentRange.setSize(numberofGenerators);
   Vector<Rational> simpleRoot;
@@ -1432,7 +1440,8 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
       currentRange[numberOfPositiveRoots + i]
     );
   }
-  Vectors<Rational> vectorsLeft, vectorsRight;
+  Vectors<Rational> vectorsLeft;
+  Vectors<Rational> vectorsRight;
   vectorsLeft.setSize(currentDomain.size);
   vectorsRight.setSize(currentDomain.size);
   for (int i = 0; i < currentRange.size; i ++) {
@@ -1556,7 +1565,8 @@ void HomomorphismSemisimpleLieAlgebra::getMapSmallCartanDualToLargeCartanDual(
     this->coDomainAlgebra().getRank(),
     this->domainAlgebra().getRank()
   );
-  ElementSemisimpleLieAlgebra<Rational> domainElement, imageElement;
+  ElementSemisimpleLieAlgebra<Rational> domainElement;
+  ElementSemisimpleLieAlgebra<Rational> imageElement;
   for (int i = 0; i < this->domainAlgebra().getRank(); i ++) {
     domainElement.makeCartanGenerator(
       Vector<Rational>::getEi(this->domainAlgebra().getRank(), i),
@@ -1932,10 +1942,10 @@ void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightAscending(
   STACK_TRACE(
     "SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightDescending"
   );
-  Vector<Rational> tempVect;
-  tempVect = parabolicSelectionZeroMeansLeviPart;
+  Vector<Rational> vector;
+  vector = parabolicSelectionZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    if (this->getWeightOfGenerator(i).scalarEuclidean(tempVect) < 0) {
+    if (this->getWeightOfGenerator(i).scalarEuclidean(vector) < 0) {
       this->universalEnvelopingGeneratorOrder[i] =
       i - this->getNumberOfGenerators() * 5;
     }
@@ -1945,11 +1955,11 @@ void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightAscending(
 void SemisimpleLieAlgebra::orderNilradicalNilWeightAscending(
   const Selection& parSelZeroMeansLeviPart
 ) {
-  Vector<Rational> tempVect;
-  tempVect = parSelZeroMeansLeviPart;
+  Vector<Rational> currentVector;
+  currentVector = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     Rational translationCoeff =
-    this->getWeightOfGenerator(i).scalarEuclidean(tempVect) *
+    this->getWeightOfGenerator(i).scalarEuclidean(currentVector) *
     this->getNumberOfPositiveRoots();
     if (translationCoeff < 0) {
       this->universalEnvelopingGeneratorOrder[i] =
@@ -1961,16 +1971,17 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightAscending(
 void SemisimpleLieAlgebra::orderNilradicalNilWeightDescending(
   const Selection& parSelZeroMeansLeviPart
 ) {
-  Vector<Rational> tempVect;
-  tempVect = parSelZeroMeansLeviPart;
+  Vector<Rational> currentVector;
+  currentVector = parSelZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    Rational translationCoeff =
-    this->getWeightOfGenerator(i).scalarEuclidean(tempVect) *
+    Rational translationCoefficient =
+    this->getWeightOfGenerator(i).scalarEuclidean(currentVector) *
     this->getNumberOfPositiveRoots();
-    if (translationCoeff < 0) {
+    if (translationCoefficient < 0) {
       this->universalEnvelopingGeneratorOrder[i] =
       - i +
-      translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
+      translationCoefficient.numeratorShort * this->getNumberOfGenerators() *
+      5;
     }
   }
 }

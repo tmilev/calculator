@@ -108,7 +108,7 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
         baseVariables
       );
       Rational scalar;
-      Rational tempTotalChange;
+      Rational totalChange;
       if (
         workingMatrix.elements[leavingVariableRow][enteringVariable].
         isEqualToZero()
@@ -132,12 +132,12 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
         }
       }
       workingMatrix.rowTimesScalar(leavingVariableRow, scalar);
-      tempTotalChange.assign(maximumMovement);
-      tempTotalChange.multiplyBy(changeGradient);
+      totalChange.assign(maximumMovement);
+      totalChange.multiplyBy(changeGradient);
       matrixX[enteringVariable] += maximumMovement;
-      if (!tempTotalChange.isEqualToZero()) {
+      if (!totalChange.isEqualToZero()) {
         visitedVertices.clear();
-        globalGoal.subtract(tempTotalChange);
+        globalGoal.subtract(totalChange);
       } else {
         int index = visitedVertices.getIndex(baseVariables);
         if (index == - 1) {
@@ -259,7 +259,8 @@ bool CalculatorFunctions::zModP(
   if (!input.isListNElements(3)) {
     return false;
   }
-  Rational left, right;
+  Rational left;
+  Rational right;
   if (
     !input[1].isRational(&left) || !input[2].isRational(&right)
   ) {
@@ -351,7 +352,8 @@ bool CalculatorFunctions::conesIntersect(
     << coneNonStrictGens[i].toString()
     << ";";
   }
-  Vector<Rational> outputIntersection, outputSeparatingNormal;
+  Vector<Rational> outputIntersection;
+  Vector<Rational> outputSeparatingNormal;
   bool conesDoIntersect =
   coneNonStrictGens.conesIntersect(
     coneStrictGens,
@@ -499,7 +501,8 @@ bool CalculatorFunctions::printZnEnumeration(
   if (!input.isListNElements(3)) {
     return false;
   }
-  int grade, dimension;
+  int grade;
+  int dimension;
   if (
     !input[2].isSmallInteger(&grade) || !input[1].isSmallInteger(&dimension)
   ) {
@@ -510,7 +513,8 @@ bool CalculatorFunctions::printZnEnumeration(
   }
   SelectionPositiveIntegers selection;
   selection.initialize(dimension);
-  std::stringstream out2, out;
+  std::stringstream out2;
+  std::stringstream out;
   LargeIntegerUnsigned gradeLarge = static_cast<unsigned>(grade);
   int counter = 0;
   for (
@@ -552,7 +556,8 @@ bool CalculatorFunctions::perturbSplittingNormal(
     );
   }
   Matrix<Rational> matrix;
-  Vectors<Rational> nonStrictCone, vectorsToPerturbRelativeTo;
+  Vectors<Rational> nonStrictCone;
+  Vectors<Rational> vectorsToPerturbRelativeTo;
   if (
     !CalculatorConversions::functionGetMatrix(
       calculator,
@@ -724,7 +729,8 @@ bool CalculatorFunctions::interpolatePolynomial(
     << convertedE.toString();
   }
   Polynomial<Rational> interPoly;
-  Vector<Rational> arguments, values;
+  Vector<Rational> arguments;
+  Vector<Rational> values;
   pointsOfInterpoly.getVectorFromColumn(0, arguments);
   pointsOfInterpoly.getVectorFromColumn(1, values);
   interPoly.interpolate(arguments, values);

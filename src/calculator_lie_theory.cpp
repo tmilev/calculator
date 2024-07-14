@@ -56,12 +56,14 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   List<ElementUniversalEnveloping<Polynomial<Rational> > >
   elementsNegativeNilrad;
   ElementSemisimpleLieAlgebra<Rational> generator;
-  ElementUniversalEnveloping<Polynomial<Rational> >
-  genericElement,
-  actionOnGenericElement;
+  ElementUniversalEnveloping<Polynomial<Rational> > genericElement;
+  ElementUniversalEnveloping<Polynomial<Rational> > actionOnGenericElement;
   List<QuasiDifferentialOperator<Rational> > quasiDifferentialOperators;
-  FormatExpressions weylFormat, universalEnvelopingFormat;
-  std::stringstream out, latexReport, latexReport2;
+  FormatExpressions weylFormat;
+  FormatExpressions universalEnvelopingFormat;
+  std::stringstream out;
+  std::stringstream latexReport;
+  std::stringstream latexReport2;
   Polynomial<Rational> zero;
   Polynomial<Rational> one;
   one.makeConstant(Rational::one());
@@ -114,14 +116,14 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
   modules.setSize(highestWeights.size);
   Vector<RationalFraction<Rational> > tempV;
   int totalStartingVariables = hwContext.numberOfVariables();
-  std::stringstream
-  reportfourierTransformedCalculatorCommands,
-  reportCalculatorCommands;
+  std::stringstream reportfourierTransformedCalculatorCommands;
+  std::stringstream reportCalculatorCommands;
   long long totalAdditions = 0;
   long long currentAdditions = 0;
   long long totalMultiplications = 0;
   long long currentMultiplications = 0;
-  double totalTime = 0, currentTime = 0;
+  double totalTime = 0;
+  double currentTime = 0;
   for (int i = 0; i < highestWeights.size; i ++) {
     ModuleSSalgebra<RationalFraction<Rational> >& currentModule = modules[i];
     tempV = highestWeights[i];
@@ -142,9 +144,10 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       currentModule.getElementsNilradical(
         elementsNegativeNilrad, true, nullptr, useNilWeight, ascending
       );
-      Polynomial<Rational> Pone, Pzero;
-      Pone.makeOne();
-      Pzero.makeZero();
+      Polynomial<Rational> pOne;
+      Polynomial<Rational> pZero;
+      pOne.makeOne();
+      pZero.makeZero();
       currentModule.getGenericUnMinusElement(
         true, genericElement, useNilWeight, ascending
       );
@@ -168,11 +171,10 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         int k = totalStartingVariables; k < universalEnvelopingFormat.
         polynomialAlphabet.size; k ++
       ) {
-        std::stringstream
-        currentStream,
-        currentStream2,
-        currentStream3,
-        currentStream4;
+        std::stringstream currentStream;
+        std::stringstream currentStream2;
+        std::stringstream currentStream3;
+        std::stringstream currentStream4;
         currentStream
         << universalEnvelopingFormat.polynomialDefaultLetter
         << "_{"
@@ -249,7 +251,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       << "$";
       for (int j = 0; j < generatorsItry.size; j ++) {
         actionOnGenericElement.assignElementLieAlgebra(
-          generatorsItry[j], semisimpleLieAlgebra, Pone
+          generatorsItry[j], semisimpleLieAlgebra, pOne
         );
         actionOnGenericElement *= genericElement;
         semisimpleLieAlgebra.orderNilradical(
@@ -342,7 +344,8 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
     latexReport << "\\\\\\hline<br>";
     out << "</tr>";
     if (currentModule.getDimension() == 1) {
-      ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
+      ElementWeylAlgebra<Rational> diffOpPart;
+      ElementWeylAlgebra<Rational> transformedDO;
       reportfourierTransformedCalculatorCommands
       << "<hr>"
       << HtmlRoutines::getMathNoDisplay(
@@ -436,9 +439,10 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
 ) {
   STACK_TRACE("CalculatorLieTheory::highestWeightVectorCommon");
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
-  RationalFraction<Rational> RFOne, RFZero;
-  RFOne.makeOne();
-  RFZero.makeZero();
+  RationalFraction<Rational> one;
+  RationalFraction<Rational> zero;
+  one.makeOne();
+  zero.makeZero();
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFraction<Rational> > element;
   ListReferences<ModuleSSalgebra<RationalFraction<Rational> > >& allModules =
@@ -470,8 +474,8 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
       *owner,
       highestWeightFundamentalCoordinates,
       selectionParSel,
-      RFOne,
-      RFZero,
+      one,
+      zero,
       &report
     );
     if (Verbose) {
@@ -490,7 +494,7 @@ bool CalculatorLieTheory::highestWeightVectorCommon(
     << "Module has owner that is not what it should be. "
     << global.fatal;
   }
-  element.makeHighestWeightVector(currentModule, RFOne);
+  element.makeHighestWeightVector(currentModule, one);
   if (&element.getOwnerSemisimple() != owner) {
     global.fatal
     << "Just created an ElementTensorsGeneralizedVermas "
@@ -653,11 +657,10 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
     );
     g2B3Data.smallCharacterFiniteDimensionalPart += monomial;
   }
-  ElementUniversalEnveloping<RationalFraction<Rational> >
-  g2Casimir,
-  g2CasimirCopy,
-  imageCasimirInB3,
-  element;
+  ElementUniversalEnveloping<RationalFraction<Rational> > g2Casimir;
+  ElementUniversalEnveloping<RationalFraction<Rational> > g2CasimirCopy;
+  ElementUniversalEnveloping<RationalFraction<Rational> > imageCasimirInB3;
+  ElementUniversalEnveloping<RationalFraction<Rational> > element;
   g2Casimir.makeCasimir(g2B3Data.homomorphism.domainAlgebra());
   g2B3Data.allCharacters.setSize(
     g2B3Data.outputWeightsFundamentalCoordinates.size
@@ -818,8 +821,8 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
   << "\\usepackage{longtable}\\begin{document}<br>\n\n\n\n\n";
   latexReport << " \\begin{longtable}{|lllll|} ";
   ProgressReport report;
-  bool ConjectureBholds = true;
-  bool ConjectureCholds = true;
+  bool conjectureBholds = true;
+  bool conjectureCholds = true;
   LittelmannPath hwPath;
   List<LittelmannPath> tempList;
   List<List<int> > integerStrings;
@@ -932,12 +935,12 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
     }
   }
   latexReport << "\\end{longtable} \n\n\n\n";
-  if (ConjectureBholds) {
+  if (conjectureBholds) {
     latexReport << " Conjecture B holds for all computed entries.";
   } else {
     latexReport << "Conjecture B fails.";
   }
-  if (ConjectureCholds) {
+  if (conjectureCholds) {
     latexReport << "Conjecture C holds for all computed entries.";
   } else {
     latexReport << "Conjecture C fails.";
@@ -1204,7 +1207,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
   g2inB3Data.format.flagUseLatex = true;
   g2inB3Data.format.numberOfAmpersandsPerNewLineForLaTeX = 0;
   Expression tempExpression;
-  RationalFraction<Rational> rfZero, rfOne;
+  RationalFraction<Rational> rfZero;
+  RationalFraction<Rational> rfOne;
   rfZero.makeZero();
   rfOne.makeOne();
   latexTable2
@@ -1243,8 +1247,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
       ++
     ) {
       CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> >
-      tempChar;
-      tempChar.addMonomial(
+      character;
+      character.addMonomial(
         g2inB3Data.smallCharacterFiniteDimensionalPart[k],
         g2inB3Data.smallCharacterFiniteDimensionalPart.coefficients[k]
       );
@@ -1323,10 +1327,10 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
           << "<td rowspan =\""
           << multiplicity
           << " \">"
-          << tempChar.toString(&g2inB3Data.format)
+          << character.toString(&g2inB3Data.format)
           << "</td>";
           latexTable << "\\multirow{" << multiplicity << "}{*}{$";
-          latexTable << tempChar.toString(&g2inB3Data.format) << "$}";
+          latexTable << character.toString(&g2inB3Data.format) << "$}";
           latexTable << "&\\multirow{" << multiplicity << "}{*}{$";
           if (multiplicity > 1) {
             latexTable << multiplicity << "\\times";
@@ -1335,7 +1339,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
           simpleCoordinates =
           g2inB3Data.weylGroupFiniteDimensionalSmall.ambientWeyl->
           getSimpleCoordinatesFromFundamental(
-            tempChar[0].weightFundamentalCoordinates,
+            character[0].weightFundamentalCoordinates,
             RationalFraction<Rational>::zeroRational()
           );
           RationalFraction<Rational> dimension;
@@ -1393,7 +1397,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
           int index = - 1;
           numEigenVectors.isSmallInteger(&index);
           if (index - eigenIndexcounter - 1 > 0) {
-            List<Rational> tempList, tempList2;
+            List<Rational> tempList;
+            List<Rational> tempList2;
             latexTable2
             << " $v_{\\lambda,"
             << index - eigenIndexcounter - 1
@@ -1496,9 +1501,8 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
   if (output.isError()) {
     return true;
   }
-  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> >
-  character,
-  outputChar;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > character;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > outputChar;
   std::stringstream out;
   std::stringstream latexTable;
   bool isFD = (g3InB3Data.inducing.cardinalitySelection == 0);
@@ -1561,10 +1565,9 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
     << "\\endhead \\hline\n<br>";
   }
   g3InB3Data.format.flagUseLatex = true;
-  ElementUniversalEnveloping<RationalFraction<Rational> >
-  casimir,
-  centralCharacter,
-  resultChar;
+  ElementUniversalEnveloping<RationalFraction<Rational> > casimir;
+  ElementUniversalEnveloping<RationalFraction<Rational> > centralCharacter;
+  ElementUniversalEnveloping<RationalFraction<Rational> > resultChar;
   RationalFraction<Rational> minusOne(Rational(- 1));
   HashedList<ElementUniversalEnveloping<RationalFraction<Rational> > >
   centralCharacters;
@@ -1601,11 +1604,10 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
     out << "<td>" << outputChar.toString(&g3InB3Data.format) << "</td>";
     out << "<td>";
     g3InB3Data.format.customPlusSign = "\\oplus ";
-    Vector<RationalFraction<Rational> >
-    leftWeightSimple,
-    leftWeightDual,
-    rightWeightSimple,
-    rightWeightDual;
+    Vector<RationalFraction<Rational> > leftWeightSimple;
+    Vector<RationalFraction<Rational> > leftWeightDual;
+    Vector<RationalFraction<Rational> > rightWeightSimple;
+    Vector<RationalFraction<Rational> > rightWeightDual;
     centralCharacters.clear();
     for (int i = 0; i < outputChar.size(); i ++) {
       if (!outputChar.coefficients[i].isEqualToOne()) {
@@ -1807,9 +1809,10 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
       "second argument of " + input.toString() + " must be a small integer"
     );
   }
-  RationalFraction<Rational> RFOne, RFZero;
-  RFOne.makeOne();
-  RFZero.makeZero();
+  RationalFraction<Rational> one;
+  RationalFraction<Rational> zero;
+  one.makeOne();
+  zero.makeZero();
   Selection selInducing;
   selInducing.makeFullSelection(rank);
   int coefficient;
@@ -1884,7 +1887,8 @@ bool CalculatorLieTheory::killingForm(
     return false;
   }
   ExpressionContext context = leftE.getContext();
-  ElementUniversalEnveloping<RationalFraction<Rational> > left, right;
+  ElementUniversalEnveloping<RationalFraction<Rational> > left;
+  ElementUniversalEnveloping<RationalFraction<Rational> > right;
   if (
     !leftE.isOfType<
       ElementUniversalEnveloping<RationalFraction<Rational> >
@@ -1901,7 +1905,8 @@ bool CalculatorLieTheory::killingForm(
   if (&left.getOwner() != &right.getOwner()) {
     return false;
   }
-  ElementSemisimpleLieAlgebra<Rational> leftElement, rightElement;
+  ElementSemisimpleLieAlgebra<Rational> leftElement;
+  ElementSemisimpleLieAlgebra<Rational> rightElement;
   if (
     left.isLieAlgebraElementRational(leftElement) &&
     right.isLieAlgebraElementRational(rightElement)
@@ -3161,7 +3166,8 @@ CartanInvolution::CartanInvolution() {
 void CartanInvolution::setSimpleRootSwap(int indexLeft, int indexRight) {
   STACK_TRACE("CartanInvolution::setSimpleRootSwap");
   int rank = this->dynkinTypeAmbientNoFailure().getRank();
-  Vector<Rational> simpleLeft, simpleRight;
+  Vector<Rational> simpleLeft;
+  Vector<Rational> simpleRight;
   simpleLeft.makeEi(rank, indexLeft);
   simpleRight.makeEi(rank, indexRight);
   this->automorphism.imagesPositiveSimpleChevalleyGenerators[indexLeft].
@@ -3709,7 +3715,8 @@ void DynkinSimpleType::plotHorizontalChainOfRoots(
       output.drawLabel(center, (*labels)[i]);
     }
   }
-  Vector<Rational> left, right;
+  Vector<Rational> left;
+  Vector<Rational> right;
   left.makeZero(2);
   left[1] = verticalOffset;
   right = left;
@@ -3840,7 +3847,8 @@ void DynkinSimpleType::plotCn(
   if (rank < 2) {
     return;
   }
-  Vector<Rational> left, right;
+  Vector<Rational> left;
+  Vector<Rational> right;
   left.makeZero(2);
   left[0] =
   DynkinSimpleType::distanceBetweenRootCenters *(rank - 2) +
@@ -3862,7 +3870,8 @@ void DynkinSimpleType::plotBn(
   if (rank < 2) {
     return;
   }
-  Vector<Rational> left, right;
+  Vector<Rational> left;
+  Vector<Rational> right;
   left.makeZero(2);
   left[0] =
   DynkinSimpleType::distanceBetweenRootCenters *(rank - 2) +
@@ -3883,7 +3892,9 @@ void DynkinSimpleType::plotDn(
     return;
   }
   DynkinSimpleType::plotAn(output, rank - 2, filledRoots, verticalOffset);
-  Vector<Rational> bottomCenter, topCenter, lastAnCenter;
+  Vector<Rational> bottomCenter;
+  Vector<Rational> topCenter;
+  Vector<Rational> lastAnCenter;
   lastAnCenter.makeZero(2);
   lastAnCenter[1] = verticalOffset;
   lastAnCenter[0] = DynkinSimpleType::distanceBetweenRootCenters *(rank - 3);
@@ -3942,7 +3953,8 @@ void DynkinSimpleType::plotE6(Plot& output, int verticalOffset) {
   DynkinSimpleType::plotHorizontalChainOfRoots(
     output, 5, verticalOffset, nullptr, &labels
   );
-  Vector<Rational> left, right;
+  Vector<Rational> left;
+  Vector<Rational> right;
   left.makeZero(2);
   left[0] = DynkinSimpleType::distanceBetweenRootCenters * 2;
   left[1] = DynkinSimpleType::radiusOfRootCircle + verticalOffset;
@@ -3967,7 +3979,8 @@ void DynkinSimpleType::appendOneSingleConnectedRootToTheRight(
   const std::string& label,
   bool filled
 ) {
-  Vector<Rational> left, right;
+  Vector<Rational> left;
+  Vector<Rational> right;
   left.makeZero(2);
   left[0] = DynkinSimpleType::distanceBetweenRootCenters * segmentsSoFar;
   left[1] = verticalOffset;
@@ -4395,7 +4408,8 @@ bool CalculatorLieTheory::isReductiveLieSubalgebra(
 ) {
   STACK_TRACE("CalculatorLieTheory::isReductiveLieSubalgebra");
   SemisimpleLieAlgebra* ownerSemisimple = nullptr;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements, outputElements;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > elements;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > outputElements;
   if (
     !CalculatorLieTheory::elementsInSameLieAlgebra(
       calculator, input, output, ownerSemisimple, elements
@@ -4429,11 +4443,10 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
   format.flagUseHTML = true;
   format.flagUseLatex = false;
   format.flagUsePNG = true;
-  std::stringstream
-  outRootHtmlFileName,
-  outRootHtmlDisplayName,
-  outSltwoMainFile,
-  outKostantSekiguchi;
+  std::stringstream outRootHtmlFileName;
+  std::stringstream outRootHtmlDisplayName;
+  std::stringstream outSltwoMainFile;
+  std::stringstream outKostantSekiguchi;
   SemisimpleLieAlgebra::FileNames& fileNames =
   ownerLieAlgebra.content->fileNames;
   std::string displayFolder = fileNames.displayFolderName("output/");
@@ -4509,10 +4522,9 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   format.flagUseHTML = true;
   format.flagUseLatex = false;
   format.flagUsePNG = true;
-  std::stringstream
-  outRootHtmlFileName,
-  outRootHtmlDisplayName,
-  outSltwoMainFile;
+  std::stringstream outRootHtmlFileName;
+  std::stringstream outRootHtmlDisplayName;
+  std::stringstream outSltwoMainFile;
   std::string displayFolder =
   semisimpleLieAlgebra.content->fileNames.displayFolderName("output/");
   outSltwoMainFile
@@ -4817,8 +4829,10 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
       out << "Weyl group is too large for LaTeX. <br>";
     }
   } else {
-    std::stringstream outputFileContent, outputFileContent2;
-    std::string fileHasse, fileCosetGraph;
+    std::stringstream outputFileContent;
+    std::stringstream outputFileContent2;
+    std::string fileHasse;
+    std::string fileCosetGraph;
     bool useJavascript = (subgroup.allElements.size < 100);
     outputFileContent
     << "\\documentclass{article}\\usepackage[all,cmtip]{xy}"
@@ -5042,9 +5056,8 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
   << "<td>Character Verma given h.w.</td></tr>";
   invertedParabolicSelection = parabolicSelection;
   invertedParabolicSelection.invertSelection();
-  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> >
-  character,
-  currentChar;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > character;
+  CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> > currentChar;
   Weight<RationalFraction<Rational> > monomial;
   character.makeZero();
   FormatExpressions formatChars;
@@ -5678,7 +5691,8 @@ bool CalculatorLieTheory::canBeExtendedParabolicallyTo(
   if (!input.isListNElements(3)) {
     return false;
   }
-  DynkinType smallType, targetType;
+  DynkinType smallType;
+  DynkinType targetType;
   if (
     !CalculatorConversions::functionDynkinType(
       calculator, input[1], smallType
@@ -5713,7 +5727,8 @@ bool CalculatorLieTheory::getSymmetricCartan(
     << " to DynkinType.";
   }
   std::stringstream out;
-  Matrix<Rational> outputMat, outputCoMat;
+  Matrix<Rational> outputMat;
+  Matrix<Rational> outputCoMat;
   dynkinType.getCartanSymmetric(outputMat);
   dynkinType.getCoCartanSymmetric(outputCoMat);
   out
@@ -6252,7 +6267,6 @@ bool CalculatorLieTheory::characterSemisimpleLieAlgebraFiniteDimensional(
   Vector<Rational> highestWeight;
   Selection parSel;
   WithContext<SemisimpleLieAlgebra*> ownerSSLiealg;
-  Expression tempE, tempE2;
   if (
     !calculator.getTypeHighestWeightParabolic(
       calculator, input, output, highestWeight, parSel, ownerSSLiealg

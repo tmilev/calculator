@@ -58,16 +58,18 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
   myCopy.scaleNormalizeLeadingMonomial(
     &MonomialPolynomial::orderDefault()
   );
-  Rational lowestTerm, highestCoefficient;
+  Rational lowestTerm;
+  Rational highestCoefficient;
   this->constantTerm(lowestTerm);
   if (lowestTerm == 0) {
-    Polynomial<Rational> x1, tempP;
+    Polynomial<Rational> x1;
+    Polynomial<Rational> tempP;
     x1.makeMonomial(0, 1, 1);
     myCopy.divideBy(x1, myCopy, tempP, monomialOrder);
-    List<Rational> tempList;
-    bool result = myCopy.findOneVariableRationalRoots(tempList);
+    List<Rational> list;
+    bool result = myCopy.findOneVariableRationalRoots(list);
     output.addOnTop(0);
-    output.addListOnTop(tempList);
+    output.addListOnTop(list);
     return result;
   }
   if (this->isConstant()) {
@@ -82,8 +84,10 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
   Vector<Rational> vector;
   Rational value;
   vector.setSize(1);
-  List<int> divisorsH, divisorsS;
-  LargeInteger hT, lT;
+  List<int> divisorsH;
+  List<int> divisorsS;
+  LargeInteger hT;
+  LargeInteger lT;
   hT = highestCoefficient.getNumerator();
   lT = lowestTerm.getNumerator();
   if (
@@ -98,7 +102,8 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
       );
       value = myCopy.evaluate(vector);
       if (value == 0) {
-        Polynomial<Rational> divisor, remainder;
+        Polynomial<Rational> divisor;
+        Polynomial<Rational> remainder;
         divisor.makeDegreeOne(1, 0, 1, - vector[0]);
         myCopy.divideBy(divisor, myCopy, remainder, monomialOrder);
         output.addOnTop(vector[0]);
@@ -161,11 +166,12 @@ bool PolynomialFactorizationKronecker::oneFactor(
   int degreeLeft = degree / 2;
   Vector<Rational> allPointsOfEvaluation;
   List<List<LargeInteger> > primeFactorsAtPoints;
-  List<List<int> > primeFactorsMults;
-  Vector<Rational> valuesAtPoints, valuesAtRemainingPoints;
+  List<List<int> > primeFactorsMultiplicitiess;
+  Vector<Rational> valuesAtPoints;
+  Vector<Rational> valuesAtRemainingPoints;
   allPointsOfEvaluation.setSize(degree + 1);
   primeFactorsAtPoints.setSize(degreeLeft + 1);
-  primeFactorsMults.setSize(degreeLeft + 1);
+  primeFactorsMultiplicitiess.setSize(degreeLeft + 1);
   allPointsOfEvaluation[0] = 0;
   for (int i = 1; i < allPointsOfEvaluation.size; i ++) {
     allPointsOfEvaluation[i] = (i % 2 == 1) ? i / 2 + 1 : -(i / 2);
@@ -173,7 +179,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
   Vector<Rational> argument;
   argument.setSize(1);
   valuesAtPoints.setSize(allPointsOfEvaluation.size);
-  LargeInteger tempLI;
+  LargeInteger largeInteger;
   for (int i = 0; i < allPointsOfEvaluation.size; i ++) {
     argument[0] = allPointsOfEvaluation[i];
     valuesAtPoints[i] = this->current.evaluate(argument);
@@ -186,11 +192,11 @@ bool PolynomialFactorizationKronecker::oneFactor(
     if (i > degreeLeft) {
       continue;
     }
-    valuesAtPoints[i].isInteger(&tempLI);
+    valuesAtPoints[i].isInteger(&largeInteger);
     if (
-      !tempLI.value.factor(
+      !largeInteger.value.factor(
         primeFactorsAtPoints[i],
-        primeFactorsMults[i],
+        primeFactorsMultiplicitiess[i],
         0,
         3,
         commentsOnFailure
@@ -206,7 +212,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
       return false;
     }
     primeFactorsAtPoints[i].addOnTop(- 1);
-    primeFactorsMults[i].addOnTop(1);
+    primeFactorsMultiplicitiess[i].addOnTop(1);
   }
   Incrementable<Incrementable<SelectionOneItem> > divisorSelection;
   Vectors<Rational> valuesLeftInterpolands;
@@ -216,7 +222,7 @@ bool PolynomialFactorizationKronecker::oneFactor(
   for (int i = 0; i <= degreeLeft; i ++) {
     pointsOfInterpolationLeft.addOnTop(allPointsOfEvaluation[i]);
   }
-  divisorSelection.initializeFromMultiplicities(primeFactorsMults);
+  divisorSelection.initializeFromMultiplicities(primeFactorsMultiplicitiess);
   valuesLeftInterpolands.setSize(degreeLeft + 1);
   Polynomial<Rational>::getValuesLagrangeInterpolands(
     pointsOfInterpolationLeft, allPointsOfEvaluation, valuesLeftInterpolands
@@ -844,7 +850,6 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
     << "&&&&\\mod "
     << this->oneModular.modulus
     << "\\\\\n";
-;
     *comments
     << "Modulus: "
     << this->modulusHenselLift

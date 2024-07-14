@@ -7,7 +7,8 @@ bool LargeIntegerUnsigned::Test::serializationToHex(
   const LargeIntegerUnsigned& input
 ) {
   STACK_TRACE("LargeIntUnsigned::Test::serializationToHex");
-  std::string resultCryptoHex, resultByteSerializationHex;
+  std::string resultCryptoHex;
+  std::string resultByteSerializationHex;
   if (
     !Crypto::convertLargeUnsignedToHexSignificantDigitsFirst(
       input, 0, resultCryptoHex

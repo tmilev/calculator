@@ -478,7 +478,7 @@ void Calculator::initializeFunctionsScientificBasic() {
     "inherited from the comparison of the underlying expressions. "
     "The upper limit for polynomial computations is by default:"
     "10000. You can change that to, say, 100, "
-    "by adding upperLimit=100 to the list of arguments. "
+    "by adding upperLimit = 100 to the list of arguments. "
     "If you set upperLimit = -1 or another negative, this will run "
     "the algorithm with no computation upper limits. "
     "Please do not do run with upperLimit=-1 on our public "
@@ -488,6 +488,8 @@ void Calculator::initializeFunctionsScientificBasic() {
     "If you want to customize the order of variables, add an argument such "
     "as order=(y,x), to signify that the "
     "variable y is stronger than variable x. "
+    "If you want the computation carried out mod p for some prime p, "
+    "set modulus = p. "
     "The result comes out frozen to prevent the calculator "
     "from reordering the outputs. Unfreeze it with the "
     "Thaw command (see the examples)"
@@ -552,8 +554,9 @@ void Calculator::initializeFunctionsScientificBasic() {
     "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=5  );\n"
     "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (s,c,b,a));\n"
     "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\n"
+    "Thaw GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\n",
     "GroebnerLex(x y+z=40, x z+y=51, x+y+z=19);\n"
-    "Thaw GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));",
+    "GroebnerLex(x y+z=40, x z+y=51, x+y+z=19, modulus = 7);\n"
     "Calculator::groebnerLexicographic",
     "GroebnerLex",
     innerStandard

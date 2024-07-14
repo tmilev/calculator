@@ -211,7 +211,7 @@ bool CalculatorFunctionsCrypto::sha512(
 bool CalculatorFunctionsCrypto::sha256OfStringVerbose(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsCrypto::sha256OfString");
+  STACK_TRACE("CalculatorFunctionsCrypto::sha256OfStringVerbose");
   if (input.size() != 2) {
     return false;
   }
@@ -988,7 +988,8 @@ bool Calculator::getSumProductsExpressions(
   List<List<Expression> >& outputSumMultiplicands
 ) {
   STACK_TRACE("Calculator::getSumProductsExpressions");
-  List<Expression> summands, currentMultiplicands;
+  List<Expression> summands;
+  List<Expression> currentMultiplicands;
   outputSumMultiplicands.setSize(0);
   if (!this->collectOpands(inputSum, this->opPlus(), summands)) {
     return false;
@@ -1010,7 +1011,8 @@ bool CalculatorFunctions::coefficientOf(
     return false;
   }
   List<List<Expression> > summands;
-  List<Expression> currentListMultiplicands, survivingSummands;
+  List<Expression> currentListMultiplicands;
+  List<Expression> survivingSummands;
   Expression currentMultiplicand;
   if (input[2].startsWith(calculator.opDivide())) {
     Expression coefficientNumerator = input;
@@ -1493,8 +1495,10 @@ bool CalculatorFunctions::combineFractionsCommutative(
 class IntegralRationalFunctionComputation {
 public:
   WithContext<RationalFraction<Rational> > rationalFraction;
-  Polynomial<Rational> denominator, numerator;
-  Polynomial<Rational> quotient, remainder;
+  Polynomial<Rational> denominator;
+  Polynomial<Rational> numerator;
+  Polynomial<Rational> quotient;
+  Polynomial<Rational> remainder;
   List<Polynomial<Rational> > allFactors;
   Polynomial<AlgebraicNumber> polynomialThatMustVanish;
   Polynomial<AlgebraicNumber> remainderRescaledAlgebraic;
@@ -2298,11 +2302,10 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
   this->printoutPartialFractionsHtml
   << "<br>Here, by ``vanish'', we mean that "
   << "the coefficients in front of the powers of x must vanish.";
-  Matrix<AlgebraicNumber>
-  homogenousSystem,
-  systemHomogeneousForLaTeX,
-  constantTerms,
-  constantTermsForLaTeX;
+  Matrix<AlgebraicNumber> homogenousSystem;
+  Matrix<AlgebraicNumber> systemHomogeneousForLaTeX;
+  Matrix<AlgebraicNumber> constantTerms;
+  Matrix<AlgebraicNumber> constantTermsForLaTeX;
   Polynomial<AlgebraicNumber>::getLinearSystemFromLinearPolynomials(
     univariateThatMustVanish.coefficients, homogenousSystem, constantTerms
   );
@@ -2824,7 +2827,11 @@ bool CalculatorFunctionsDifferentiation::differentiateConstPower(
   if (!argument[2].isConstantNumber()) {
     return false;
   }
-  Expression monomial, term, exponent, basePrime, minusOne;
+  Expression monomial;
+  Expression term;
+  Expression exponent;
+  Expression basePrime;
+  Expression minusOne;
   minusOne.assignValue<Rational>(calculator, - 1);
   exponent.makeXOX(
     calculator, calculator.opPlus(), argument[2], minusOne
@@ -2867,10 +2874,9 @@ bool CalculatorFunctionsDifferentiation::differentiateAPowerB(
   if (!argument.startsWith(calculator.opPower(), 3)) {
     return false;
   }
-  Expression
-  logarithmBase,
-  exponentTimesLogBase,
-  derivativeExponentTimesLogBase;
+  Expression logarithmBase;
+  Expression exponentTimesLogBase;
+  Expression derivativeExponentTimesLogBase;
   logarithmBase.reset(calculator, 2);
   logarithmBase.addChildAtomOnTop(calculator.opLog());
   logarithmBase.addChildOnTop(argument[1]);
@@ -2958,19 +2964,24 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
     return output.makeAtom(calculator, calculator.opCos());
   }
   if (argument.isOperationGiven(calculator.opCos())) {
-    Expression mOneE, sinE;
+    Expression mOneE;
+    Expression sinE;
     mOneE.assignValue<Rational>(calculator, - 1);
     sinE.makeAtom(calculator, calculator.opSin());
     return output.makeXOX(calculator, calculator.opTimes(), mOneE, sinE);
   }
   if (argument.isOperationGiven(calculator.opTan())) {
-    Expression secE, twoE;
+    Expression secE;
+    Expression twoE;
     secE.makeAtom(calculator, calculator.opSec());
     twoE.assignValue(calculator, 2);
     return output.makeXOX(calculator, calculator.opPower(), secE, twoE);
   }
   if (argument.isOperationGiven(calculator.opCot())) {
-    Expression cscE, twoE, cscSquared, mOneE;
+    Expression cscE;
+    Expression twoE;
+    Expression cscSquared;
+    Expression mOneE;
     cscE.makeAtom(calculator, calculator.opCsc());
     twoE.assignValue(calculator, 2);
     cscSquared.makeXOX(calculator, calculator.opPower(), cscE, twoE);
@@ -2979,13 +2990,17 @@ bool CalculatorFunctionsDifferentiation::differentiateTrigAndInverseTrig(
     output.makeXOX(calculator, calculator.opTimes(), mOneE, cscSquared);
   }
   if (argument.isOperationGiven(calculator.opSec())) {
-    Expression tanE, secE;
+    Expression tanE;
+    Expression secE;
     tanE.makeAtom(calculator, calculator.opTan());
     secE.makeAtom(calculator, calculator.opSec());
     return output.makeXOX(calculator, calculator.opTimes(), tanE, secE);
   }
   if (argument.isOperationGiven(calculator.opCsc())) {
-    Expression cotE, cscE, mOneE, cotTimesCscE;
+    Expression cotE;
+    Expression cscE;
+    Expression mOneE;
+    Expression cotTimesCscE;
     cotE.makeAtom(calculator, calculator.opCot());
     cscE.makeAtom(calculator, calculator.opCsc());
     mOneE.assignValue(calculator, - 1);
@@ -3062,11 +3077,11 @@ bool CalculatorFunctions::compositeDifferentiateLog(
     return false;
   }
   calculator.checkInputNotSameAsOutput(input, output);
-  Expression OneE;
-  OneE.assignValue(calculator, 1);
+  Expression oneE;
+  oneE.assignValue(calculator, 1);
   output.reset(calculator, 2);
   return
-  output.makeXOX(calculator, calculator.opDivide(), OneE, input[1]);
+  output.makeXOX(calculator, calculator.opDivide(), oneE, input[1]);
 }
 
 bool CalculatorFunctions::divideByNumber(
@@ -3210,7 +3225,9 @@ bool CalculatorFunctions::associateAdivBdivCPowerD(
     return false;
   }
   calculator.checkInputNotSameAsOutput(input, output);
-  Expression numeratorE, numeratorLeftE, denominatorE;
+  Expression numeratorE;
+  Expression numeratorLeftE;
+  Expression denominatorE;
   output.reset(calculator, 3);
   numeratorLeftE.makeXOX(
     calculator,
@@ -3324,7 +3341,9 @@ bool CalculatorFunctionsDifferentiation::differentiateChainRule(
   }
   calculator.checkInputNotSameAsOutput(input, output);
   output.reset(calculator);
-  Expression multiplicandleft, multiplicandleftFunction, multiplicandright;
+  Expression multiplicandleft;
+  Expression multiplicandleftFunction;
+  Expression multiplicandright;
   multiplicandleftFunction.makeXOX(
     calculator,
     calculator.opDifferentiate(),
@@ -3371,7 +3390,8 @@ bool CalculatorFunctionsDifferentiation::differentiateAplusB(
   }
   calculator.checkInputNotSameAsOutput(input, output);
   output.reset(calculator);
-  Expression leftSummand, rightSummand;
+  Expression leftSummand;
+  Expression rightSummand;
   leftSummand.makeXOX(
     calculator,
     calculator.opDifferentiate(),
@@ -3412,7 +3432,9 @@ bool CalculatorFunctionsDifferentiation::differentiateAtimesB(
   }
   calculator.checkInputNotSameAsOutput(input, output);
   output.reset(calculator);
-  Expression changedMultiplicand, leftSummand, rightSummand;
+  Expression changedMultiplicand;
+  Expression leftSummand;
+  Expression rightSummand;
   changedMultiplicand.makeXOX(
     calculator,
     calculator.opDifferentiate(),
@@ -3505,16 +3527,15 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative(
   }
   calculator.checkInputNotSameAsOutput(input, output);
   output.reset(calculator);
-  Expression
-  denominatorBase,
-  eOne,
-  denominatorExponentPlusOne,
-  denominatorExponent,
-  changedMultiplicand,
-  leftSummand,
-  rightSummand,
-  denominatorFinal,
-  numerator;
+  Expression denominatorBase;
+  Expression eOne;
+  Expression denominatorExponentPlusOne;
+  Expression denominatorExponent;
+  Expression changedMultiplicand;
+  Expression leftSummand;
+  Expression rightSummand;
+  Expression denominatorFinal;
+  Expression numerator;
   eOne.assignValue(calculator, 1);
   bool denBaseFound = false;
   if (argument[2].startsWith(calculator.opPower(), 3)) {
@@ -3599,8 +3620,12 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative(
   }
   calculator.checkInputNotSameAsOutput(input, output);
   output.reset(calculator);
-  Expression changedMultiplicand, leftSummand, rightSummand;
-  Expression bInverse, bPrime, eMOne;
+  Expression changedMultiplicand;
+  Expression leftSummand;
+  Expression rightSummand;
+  Expression bInverse;
+  Expression bPrime;
+  Expression eMOne;
   eMOne.assignValue<Rational>(calculator, - 1);
   changedMultiplicand.makeXOX(
     calculator,
@@ -4564,8 +4589,9 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
     RationalFraction<Rational>::zeroRational()
   );
   int numberOfFoundPivots = 0;
-  std::stringstream out, outLaTeX;
-  RationalFraction<Rational> tempElement;
+  std::stringstream out;
+  std::stringstream outLaTeX;
+  RationalFraction<Rational> element;
   FormatExpressions format;
   context.getFormat(format);
   format.flagUseLatex = true;
@@ -4608,25 +4634,25 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
         << HtmlRoutines::getMathNoDisplay(outputMatrix.toString(&format));
         outLaTeX << "\\\\" << "$" << outputMatrix.toString(&format) << "$";
       }
-      tempElement = matrix(numberOfFoundPivots, i);
-      tempElement.invert();
-      if (tempElement != 1) {
+      element = matrix(numberOfFoundPivots, i);
+      element.invert();
+      if (element != 1) {
         out
         << "<br> multiply row number "
         << numberOfFoundPivots + 1
         << " by "
-        << tempElement.toString(&format)
+        << element.toString(&format)
         << ": ";
         outLaTeX
         << "& multiply row number "
         << numberOfFoundPivots + 1
         << " by $"
-        << tempElement.toString(&format)
+        << element.toString(&format)
         << "$. \\\\";
       }
-      matrix.rowTimesScalar(numberOfFoundPivots, tempElement);
-      outputMatrix.rowTimesScalar(numberOfFoundPivots, tempElement);
-      if (tempElement != 1) {
+      matrix.rowTimesScalar(numberOfFoundPivots, element);
+      outputMatrix.rowTimesScalar(numberOfFoundPivots, element);
+      if (element != 1) {
         extendedMatrix = matrix;
         extendedMatrix.appendMatrixOnTheRight(outputMatrix);
         out
@@ -4639,10 +4665,10 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
       for (int j = 0; j < matrix.numberOfRows; j ++) {
         if (j != numberOfFoundPivots) {
           if (!matrix.elements[j][i].isEqualToZero()) {
-            tempElement = matrix.elements[j][i];
-            tempElement.negate();
-            matrix.addTwoRows(numberOfFoundPivots, j, i, tempElement);
-            outputMatrix.addTwoRows(numberOfFoundPivots, j, 0, tempElement);
+            element = matrix.elements[j][i];
+            element.negate();
+            matrix.addTwoRows(numberOfFoundPivots, j, i, element);
+            outputMatrix.addTwoRows(numberOfFoundPivots, j, 0, element);
             if (!found) {
               out << "<br>";
               outLaTeX << "&";
@@ -4656,14 +4682,14 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
             << " Row index "
             << numberOfFoundPivots + 1
             << " times "
-            << tempElement.toString(&format)
+            << element.toString(&format)
             << " added to row index "
             << j + 1;
             outLaTeX
             << " Row index "
             << numberOfFoundPivots + 1
             << " times $"
-            << tempElement.toString(&format)
+            << element.toString(&format)
             << "$ added to row index "
             << j + 1
             << "\\\\";
@@ -4738,7 +4764,7 @@ bool CalculatorFunctions::invertMatrixVerbose(
   outputMatrix.makeIdentityMatrix(matrix.numberOfRows);
   int numberOfFoundPivots = 0;
   std::stringstream out;
-  Rational tempElement;
+  Rational element;
   FormatExpressions format;
   format.flagUseLatex = true;
   format.flagUseHTML = false;
@@ -4770,19 +4796,19 @@ bool CalculatorFunctions::invertMatrixVerbose(
         << "<br>"
         << HtmlRoutines::getMathNoDisplay(outputMatrix.toString(&format));
       }
-      tempElement = matrix.elements[numberOfFoundPivots][i];
-      tempElement.invert();
-      if (tempElement != 1) {
+      element = matrix.elements[numberOfFoundPivots][i];
+      element.invert();
+      if (element != 1) {
         out
         << "<br> multiply row "
         << numberOfFoundPivots + 1
         << " by "
-        << tempElement
+        << element
         << ": ";
       }
-      matrix.rowTimesScalar(numberOfFoundPivots, tempElement);
-      outputMatrix.rowTimesScalar(numberOfFoundPivots, tempElement);
-      if (tempElement != 1) {
+      matrix.rowTimesScalar(numberOfFoundPivots, element);
+      outputMatrix.rowTimesScalar(numberOfFoundPivots, element);
+      if (element != 1) {
         augmentedMatrix = matrix;
         augmentedMatrix.appendMatrixOnTheRight(outputMatrix);
         out
@@ -4794,10 +4820,10 @@ bool CalculatorFunctions::invertMatrixVerbose(
       for (int j = 0; j < matrix.numberOfRows; j ++) {
         if (j != numberOfFoundPivots) {
           if (!matrix.elements[j][i].isEqualToZero()) {
-            tempElement = matrix.elements[j][i];
-            tempElement.negate();
-            matrix.addTwoRows(numberOfFoundPivots, j, i, tempElement);
-            outputMatrix.addTwoRows(numberOfFoundPivots, j, 0, tempElement);
+            element = matrix.elements[j][i];
+            element.negate();
+            matrix.addTwoRows(numberOfFoundPivots, j, i, element);
+            outputMatrix.addTwoRows(numberOfFoundPivots, j, 0, element);
             if (!found) {
               out << "<br>";
             } else {
@@ -4808,7 +4834,7 @@ bool CalculatorFunctions::invertMatrixVerbose(
             << " Row index "
             << numberOfFoundPivots + 1
             << " times "
-            << tempElement
+            << element
             << " added to row index "
             << j + 1;
           }
@@ -5064,7 +5090,8 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb(
   STACK_TRACE(
     "CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb"
   );
-  Expression functionExpression, variable;
+  Expression functionExpression;
+  Expression variable;
   if (!input.isIndefiniteIntegralFdx(&variable, &functionExpression)) {
     return false;
   }
@@ -5083,7 +5110,8 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb(
   if (!N.isConstantNumber()) {
     return false;
   }
-  Expression a, b;
+  Expression a;
+  Expression b;
   const Expression& axPlusb = axPlusbPowerN[1];
   if (
     !CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(
@@ -5095,14 +5123,15 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb(
   if (!a.isConstantNumber() || !b.isConstantNumber()) {
     return false;
   }
-  Expression base, OneMinusN;
-  OneMinusN = N;
-  OneMinusN += - 1;
-  OneMinusN *= - 1;
-  base.makeXOX(calculator, calculator.opPower(), axPlusb, OneMinusN);
+  Expression base;
+  Expression oneMinusN;
+  oneMinusN = N;
+  oneMinusN += - 1;
+  oneMinusN *= - 1;
+  base.makeXOX(calculator, calculator.opPower(), axPlusb, oneMinusN);
   output = A;
   output /= a;
-  output /= OneMinusN;
+  output /= oneMinusN;
   output *= base;
   output.checkConsistencyRecursively();
   output.checkInitializationRecursively();
@@ -5189,7 +5218,8 @@ integrateRationalFunctionBuidingBlockIIaandIIIa(
     "CalculatorFunctionsIntegration::"
     "integrateRationalFunctionBuidingBlockIIaandIIIa"
   );
-  Expression functionExpression, x;
+  Expression functionExpression;
+  Expression x;
   if (!input.isIndefiniteIntegralFdx(&x, &functionExpression)) {
     return false;
   }
@@ -5197,7 +5227,11 @@ integrateRationalFunctionBuidingBlockIIaandIIIa(
     return false;
   }
   Expression denNoPower = functionExpression[2];
-  Expression a, b, c, A, B;
+  Expression a;
+  Expression b;
+  Expression c;
+  Expression A;
+  Expression B;
   if (
     !CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(
       denNoPower, x, a, b, c
@@ -5235,7 +5269,9 @@ integrateRationalFunctionBuidingBlockIIaandIIIa(
     << B.toString()
     << ". ";
   }
-  double approxa, approxb, approxc;
+  double approxa;
+  double approxb;
+  double approxc;
   if (
     !a.evaluatesToDouble(&approxa) ||
     !b.evaluatesToDouble(&approxb) ||
@@ -5251,8 +5287,12 @@ integrateRationalFunctionBuidingBlockIIaandIIIa(
   if (approxb * approxb >= approxa * approxc * 4) {
     return false;
   }
-  Expression xSquared, bSquared, aSquared;
-  Expression twoE, oneE, fourE;
+  Expression xSquared;
+  Expression bSquared;
+  Expression aSquared;
+  Expression twoE;
+  Expression oneE;
+  Expression fourE;
   oneE.assignValue(calculator, 1);
   twoE.assignValue(calculator, 2);
   fourE.assignValue(calculator, 4);
@@ -5335,7 +5375,9 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
     << ". ";
     return false;
   }
-  double approxa, approxb, approxc;
+  double approxa;
+  double approxb;
+  double approxc;
   if (
     !a.evaluatesToDouble(&approxa) ||
     !b.evaluatesToDouble(&approxb) ||
@@ -5350,8 +5392,12 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
   if (approxb * approxb >= approxa * approxc * 4) {
     return false;
   }
-  Expression xSquared, bSquared;
-  Expression twoE, oneE, threeE, fourE;
+  Expression xSquared;
+  Expression bSquared;
+  Expression twoE;
+  Expression oneE;
+  Expression threeE;
+  Expression fourE;
   oneE.assignValue(calculator, 1);
   twoE.assignValue(calculator, 2);
   threeE.assignValue(calculator, 3);
@@ -5360,11 +5406,10 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
   bSquared.makeXOX(calculator, calculator.opPower(), b, twoE);
   Expression monicQuadratic = xSquared + b * x + c;
   Expression D = c - bSquared / fourE;
-  Expression
-  remainingIntegral,
-  functionRemainingToIntegrate,
-  quadraticPowerOneMinusN,
-  quadraticPowerNMinusOne;
+  Expression remainingIntegral;
+  Expression functionRemainingToIntegrate;
+  Expression quadraticPowerOneMinusN;
+  Expression quadraticPowerNMinusOne;
   quadraticPowerOneMinusN.makeXOX(
     calculator,
     calculator.opPower(),
@@ -5421,7 +5466,11 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
     return false;
   }
   Expression denNoPower = functionExpression[2][1];
-  Expression a, b, c, A, B;
+  Expression a;
+  Expression b;
+  Expression c;
+  Expression A;
+  Expression B;
   if (
     !CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(
       denNoPower, x, a, b, c
@@ -5463,7 +5512,9 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
     << ". ";
     return false;
   }
-  double approxa, approxb, approxc;
+  double approxa;
+  double approxb;
+  double approxc;
   if (
     !a.evaluatesToDouble(&approxa) ||
     !b.evaluatesToDouble(&approxb) ||
@@ -5478,13 +5529,17 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
   if (approxb * approxb >= approxa * approxc * 4) {
     return false;
   }
-  Expression xSquared, bSquared, aSquared, apowerN;
-  Expression twoE, oneE, fourE;
-  Expression
-  remainingIntegral,
-  remainingFunctionToIntegrate,
-  quadraticPowerN,
-  quadraticPowerOneMinusN;
+  Expression xSquared;
+  Expression bSquared;
+  Expression aSquared;
+  Expression apowerN;
+  Expression twoE;
+  Expression oneE;
+  Expression fourE;
+  Expression remainingIntegral;
+  Expression remainingFunctionToIntegrate;
+  Expression quadraticPowerN;
+  Expression quadraticPowerOneMinusN;
   oneE.assignValue(calculator, 1);
   twoE.assignValue(calculator, 2);
   fourE.assignValue(calculator, 4);
@@ -5596,7 +5651,9 @@ bool CalculatorFunctionsIntegration::integratePullImaginaryUnit(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsIntegration::integratePullImaginaryUnit");
-  Expression functionExpression, variableExpression, integrationSetE;
+  Expression functionExpression;
+  Expression variableExpression;
+  Expression integrationSetE;
   if (
     !input.isIndefiniteIntegralFdx(
       &variableExpression, &functionExpression, &integrationSetE
@@ -5609,11 +5666,10 @@ bool CalculatorFunctionsIntegration::integratePullImaginaryUnit(
   if (variableExpression == iE) {
     return false;
   }
-  Expression
-  coefficientExpression,
-  noCoefficientIntegrand,
-  noImaginaryIntegrand,
-  outputIntegralNoCF;
+  Expression coefficientExpression;
+  Expression noCoefficientIntegrand;
+  Expression noImaginaryIntegrand;
+  Expression outputIntegralNoCF;
   functionExpression.getCoefficientMultiplicandForm(
     coefficientExpression, noCoefficientIntegrand
   );
@@ -5654,7 +5710,9 @@ bool CalculatorFunctionsIntegration::integrateSum(
   }
   List<Expression> integralsOfSummands;
   integralsOfSummands.setSize(functionExpression.size() - 1);
-  Expression newIntegralE, result, newSummand;
+  Expression newIntegralE;
+  Expression result;
+  Expression newSummand;
   for (int i = 1; i < functionExpression.size(); i ++) {
     newIntegralE.makeIntegral(
       calculator,
@@ -5744,7 +5802,9 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM");
-  Expression functionExpression, variableExpression, integrationSet;
+  Expression functionExpression;
+  Expression variableExpression;
+  Expression integrationSet;
   if (
     !input.isIndefiniteIntegralFdx(
       &variableExpression, &functionExpression, &integrationSet
@@ -5767,7 +5827,9 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
   if (numberOfVariables == 0) {
     return false;
   }
-  Expression sinPowerE, trigonometricArgument, cosPowerE;
+  Expression sinPowerE;
+  Expression trigonometricArgument;
+  Expression cosPowerE;
   sinPowerE.assignValue(calculator, 1);
   cosPowerE.assignValue(calculator, 1);
   bool firstIsSine = false;
@@ -5790,9 +5852,8 @@ bool CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM(
       }
     }
   }
-  Expression
-  trigonometricArgumentNoCoefficient,
-  trigonometricArgumentCoefficient;
+  Expression trigonometricArgumentNoCoefficient;
+  Expression trigonometricArgumentCoefficient;
   trigonometricArgument.getCoefficientMultiplicandForm(
     trigonometricArgumentCoefficient, trigonometricArgumentNoCoefficient
   );
@@ -5944,7 +6005,9 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM");
-  Expression functionExpression, variableExpression, integrationSet;
+  Expression functionExpression;
+  Expression variableExpression;
+  Expression integrationSet;
   if (
     !input.isIndefiniteIntegralFdx(
       &variableExpression, &functionExpression, &integrationSet
@@ -5968,7 +6031,9 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
   if (numberOfVariables == 0) {
     return false;
   }
-  Expression sinPowerE, trigonometricArgument, cosPowerE;
+  Expression sinPowerE;
+  Expression trigonometricArgument;
+  Expression cosPowerE;
   sinPowerE.assignValue(calculator, 1);
   cosPowerE.assignValue(calculator, 1);
   bool firstIsTan = false;
@@ -5991,9 +6056,8 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
       }
     }
   }
-  Expression
-  trigonometricArgumentNoCoefficient,
-  trigonometricArgumentCoefficient;
+  Expression trigonometricArgumentNoCoefficient;
+  Expression trigonometricArgumentCoefficient;
   trigonometricArgument.getCoefficientMultiplicandForm(
     trigonometricArgumentCoefficient, trigonometricArgumentNoCoefficient
   );
@@ -6001,7 +6065,8 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
     return false;
   }
   const Polynomial<Rational>& trigonometrixPolynomial = polynomial.content;
-  Expression tangentExpression, secantExpression;
+  Expression tangentExpression;
+  Expression secantExpression;
   tangentExpression.makeOX(
     calculator, calculator.opTan(), trigonometricArgument
   );
@@ -6167,13 +6232,15 @@ bool CalculatorFunctionsIntegration::integrateEpowerAxDiffX(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsIntegration::integrateEpowerAxDiffX");
-  Expression functionExpression, variableExpression;
+  Expression functionExpression;
+  Expression variableExpression;
   if (
     !input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression)
   ) {
     return false;
   }
-  Expression functionCoefficient, functionWithoutCoefficient;
+  Expression functionCoefficient;
+  Expression functionWithoutCoefficient;
   functionExpression.getCoefficientMultiplicandForm(
     functionCoefficient, functionWithoutCoefficient
   );
@@ -6187,7 +6254,8 @@ bool CalculatorFunctionsIntegration::integrateEpowerAxDiffX(
   ) {
     return false;
   }
-  Expression powerCoefficient, powerNoCoefficient;
+  Expression powerCoefficient;
+  Expression powerNoCoefficient;
   functionWithoutCoefficient[2].getCoefficientMultiplicandForm(
     powerCoefficient, powerNoCoefficient
   );
@@ -6274,7 +6342,8 @@ bool CalculatorFunctionsDifferentiation::diffdivDiffxToDifferentiation(
   }
   bool hasArgument = false;
   bool hasExtraCF = false;
-  Expression argument, extraCoefficient;
+  Expression argument;
+  Expression extraCoefficient;
   if (input[1] != "Differential" && input[1] != "d") {
     if (!input[1].startsWith(calculator.opDifferential())) {
       return false;
@@ -6315,7 +6384,8 @@ bool CalculatorFunctionsDifferentiation::ddivDxToDiffDivDiffx(
   if (!input.startsWith(calculator.opDivide(), 3)) {
     return false;
   }
-  std::string denominatorString, numeratorString;
+  std::string denominatorString;
+  std::string numeratorString;
   if (!input[1].isOperation(&numeratorString)) {
     return false;
   }
@@ -6338,7 +6408,9 @@ bool CalculatorFunctionsDifferentiation::ddivDxToDiffDivDiffx(
     denominatorString[k] = denominatorString[k + 1];
   }
   denominatorString.resize(denominatorString.size() - 1);
-  Expression numeratorE, denominatorE(calculator), rightDenE;
+  Expression numeratorE;
+  Expression denominatorE(calculator);
+  Expression rightDenE;
   numeratorE.makeAtom(calculator, calculator.opDifferential());
   rightDenE.makeAtom(
     calculator,
@@ -6420,15 +6492,18 @@ bool CalculatorFunctions::outerDivideReplaceAdivBpowerItimesBpowerJ(
   if (!input[1].startsWith(calculator.opDivide(), 3)) {
     return false;
   }
-  Expression denominatorBase, denominatorExponent;
-  Expression numeratorBase, numeratorExponent;
+  Expression denominatorBase;
+  Expression denominatorExponent;
+  Expression numeratorBase;
+  Expression numeratorExponent;
   input[1][2].getBaseExponentForm(denominatorBase, denominatorExponent);
   input[2].getBaseExponentForm(numeratorBase, numeratorExponent);
   if (denominatorBase != numeratorBase) {
     return false;
   }
   calculator.checkInputNotSameAsOutput(input, output);
-  Expression rightMultiplicand, rightMultiplicandExponent;
+  Expression rightMultiplicand;
+  Expression rightMultiplicandExponent;
   rightMultiplicandExponent.makeXOX(
     calculator,
     calculator.opMinus(),
@@ -7138,7 +7213,10 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
   if (input.size() != 7) {
     return calculator << "Euler method function takes 6 arguments";
   }
-  double xInitial, yInitial, leftEndpoint, rightEndpoint;
+  double xInitial;
+  double yInitial;
+  double leftEndpoint;
+  double rightEndpoint;
   int numberOfPoints;
   if (
     !input[2].evaluatesToDouble(&xInitial) ||
@@ -7339,7 +7417,8 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
   plot.yLow = - 0.5;
   plot.yHigh = 0.5;
   plot.coordinateFunctionsE.addOnTop(input);
-  std::stringstream outLatex, outHtml;
+  std::stringstream outLatex;
+  std::stringstream outHtml;
   outLatex
   << "\n\n%calculator input:"
   << input.toString()
@@ -7447,7 +7526,8 @@ bool CalculatorFunctionsPlot::plotViewRectangle(
   if (input.size() < 3) {
     return false;
   }
-  Vector<double> lowerLeft, upperRight;
+  Vector<double> lowerLeft;
+  Vector<double> upperRight;
   if (
     !calculator.getVectorDoubles(input[1], lowerLeft, 2) ||
     !calculator.getVectorDoubles(input[2], upperRight, 2)
@@ -7867,17 +7947,18 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
   upperEplot.removeChildShiftDown(1);
   Plot outputPlot;
   outputPlot.dimension = 2;
-  bool tempB =
+  bool plotSuccess =
   CalculatorFunctionsPlot::plot2D(calculator, lowerEplot, output);
-  if (!tempB || !output.isOfType<Plot>(&outputPlot)) {
+  if (!plotSuccess || !output.isOfType<Plot>(&outputPlot)) {
     return
     calculator
     << "<hr>Failed to get a plot from "
     << lowerEplot.toString()
     << ", not proceding with bar plot.";
   }
-  tempB = CalculatorFunctionsPlot::plot2D(calculator, upperEplot, output);
-  if (!tempB || !output.isOfType<Plot>()) {
+  plotSuccess =
+  CalculatorFunctionsPlot::plot2D(calculator, upperEplot, output);
+  if (!plotSuccess || !output.isOfType<Plot>()) {
     return
     calculator
     << "<hr>Failed to get a plot from "
@@ -8018,7 +8099,8 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
       "cyan"
     );
   }
-  std::stringstream outTex, outHtml;
+  std::stringstream outTex;
+  std::stringstream outHtml;
   for (int k = 0; k < 2; k ++) {
     for (int i = 0; i < xValues.size; i ++) {
       bool useNegativePattern = (fValuesLower[i] > fValuesUpper[i]);
@@ -8377,7 +8459,8 @@ bool CalculatorFunctionsPlot::plotParametricCurve(
     }
   }
   if (isGoodLatexWise && plot.dimension == 2) {
-    std::stringstream outLatex, outHtml;
+    std::stringstream outLatex;
+    std::stringstream outHtml;
     outLatex
     << "\\parametricplot[linecolor =\\fcColorGraph, plotpoints ="
     << numberOfPoints
@@ -8871,7 +8954,8 @@ bool CalculatorFunctions::highestWeightTransposeAntiAutomorphismBilinearForm(
     );
   }
   WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >
-  leftConverted,
+  leftConverted;
+  WithContext<ElementUniversalEnveloping<RationalFraction<Rational> > >
   rightConverted;
   if (
     !CalculatorConversions::convertWithoutComputation(
@@ -9980,10 +10064,9 @@ bool CalculatorFunctions::findProductDistanceModN(
     inputList[integersReduced[i]] = static_cast<unsigned>(integerList[i]);
     indexStack.addOnTop(integersReduced[i]);
   }
-  LargeIntegerUnsigned
-  currentIndexLarge,
-  currentDistance,
-  maxDistanceGenerated;
+  LargeIntegerUnsigned currentIndexLarge;
+  LargeIntegerUnsigned currentDistance;
+  LargeIntegerUnsigned maxDistanceGenerated;
   int currentIndex;
   ProgressReport report;
   std::stringstream reportstream;
@@ -10074,11 +10157,10 @@ bool CalculatorFunctions::solveProductSumEquationOverSetModN(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctions::solveProductSumEquationOverSetModN");
-  Expression
-  modulusExpression,
-  integersExpression,
-  productExpression,
-  sumExpression;
+  Expression modulusExpression;
+  Expression integersExpression;
+  Expression productExpression;
+  Expression sumExpression;
   if (
     !CalculatorConversions::loadKey(
       calculator, input, "theMod", modulusExpression

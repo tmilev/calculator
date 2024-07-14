@@ -883,6 +883,7 @@ private:
   // argument.
   ExpressionContext desiredContext;
   int upperBound;
+  LargeInteger modulus;
 public:
   Expression output;
   GroebnerComputationCalculator(
@@ -943,6 +944,16 @@ bool GroebnerComputationCalculator::initializeComputation() {
     }
     for (int i = 1; i < order.size(); i ++) {
       this->desiredContext.addVariable(order[i]);
+    }
+  }
+  if (configuration.contains("modulus")) {
+    if (
+      !configuration.getValueNoFail("modulus").isInteger(&this->modulus)
+    ) {
+      return
+      *this->owner
+      << "Error: could not extract modulus integer from "
+      << configuration.getValueNoFail("modulus").toString();
     }
   }
   if (this->upperBound > 1000000) {

@@ -278,13 +278,13 @@ void MeshTriangles::computeImplicitPlotPart2() {
       this->trianglesUsed[i] = false;
       continue;
     }
-    double val0 = this->getValueAtPoint(currentTriangle[0]);
-    double val1 = this->getValueAtPoint(currentTriangle[1]);
-    double val2 = this->getValueAtPoint(currentTriangle[2]);
-    double prod01 = val0 * val1;
-    double prod12 = val1 * val2;
-    double prod20 = val2 * val0;
-    if (prod01 > 0 && prod12 > 0 && prod20 > 0) {
+    double value0 = this->getValueAtPoint(currentTriangle[0]);
+    double value1 = this->getValueAtPoint(currentTriangle[1]);
+    double value2 = this->getValueAtPoint(currentTriangle[2]);
+    double product01 = value0 * value1;
+    double product12 = value1 * value2;
+    double product20 = value2 * value0;
+    if (product01 > 0 && product12 > 0 && product20 > 0) {
       this->trianglesUsed[i] = false;
       continue;
     }
@@ -297,19 +297,31 @@ void MeshTriangles::computeImplicitPlotPart2() {
       continue;
     }
     segment.setSize(0);
-    if (prod01 <= 0) {
+    if (product01 <= 0) {
       this->addPointFromVerticesValues(
-        segment, currentTriangle[0], currentTriangle[1], val0, val1
+        segment,
+        currentTriangle[0],
+        currentTriangle[1],
+        value0,
+        value1
       );
     }
-    if (prod12 <= 0) {
+    if (product12 <= 0) {
       this->addPointFromVerticesValues(
-        segment, currentTriangle[1], currentTriangle[2], val1, val2
+        segment,
+        currentTriangle[1],
+        currentTriangle[2],
+        value1,
+        value2
       );
     }
-    if (prod20 <= 0 && segment.size < 2) {
+    if (product20 <= 0 && segment.size < 2) {
       this->addPointFromVerticesValues(
-        segment, currentTriangle[2], currentTriangle[0], val2, val0
+        segment,
+        currentTriangle[2],
+        currentTriangle[0],
+        value2,
+        value0
       );
     }
     if (segment.size != 2) {
@@ -462,17 +474,17 @@ bool MeshTriangles::computePoints(
     << freeVariables.toStringCommaDelimited()
     << " and that is too many (2 max). ";
   }
-  Expression tempE;
+  Expression expression;
   if (freeVariables.size == 0) {
-    tempE.makeAtom(calculator, "x");
-    freeVariables.addOnTop(tempE);
+    expression.makeAtom(calculator, "x");
+    freeVariables.addOnTop(expression);
   }
   if (freeVariables.size == 1) {
-    tempE.makeAtom(calculator, "y");
-    if (freeVariables[0] == tempE) {
-      tempE.makeAtom(calculator, "x");
+    expression.makeAtom(calculator, "y");
+    if (freeVariables[0] == expression) {
+      expression.makeAtom(calculator, "x");
     }
-    freeVariables.addOnTop(tempE);
+    freeVariables.addOnTop(expression);
   }
   this->knownEs.addOnTopNoRepetitionMustBeNew(freeVariables[0]);
   this->knownEs.addOnTopNoRepetitionMustBeNew(freeVariables[1]);
@@ -576,7 +588,8 @@ bool CalculatorFunctionsIntegration::integratePullConstant(
   ) {
     return false;
   }
-  Expression functionCoefficient, functionNoCoefficient;
+  Expression functionCoefficient;
+  Expression functionNoCoefficient;
   functionExpression.getCoefficientMultiplicandForm(
     functionCoefficient, functionNoCoefficient
   );
@@ -631,12 +644,17 @@ bool CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared(
   if (!c.isPositiveNumber()) {
     return false;
   }
-  Expression squareRootedCoefficient, radicalSquared, radical;
+  Expression squareRootedCoefficient;
+  Expression radicalSquared;
+  Expression radical;
   squareRootedCoefficient.makeSqrt(calculator, a *(- 1));
   functionCoefficient *= squareRootedCoefficient;
   radicalSquared = c / a *(- 1);
   radical.makeSqrt(calculator, radicalSquared);
-  Expression rescaledArgument, arcCosPart, algSQRTPart, algPart;
+  Expression rescaledArgument;
+  Expression arcCosPart;
+  Expression algSQRTPart;
+  Expression algPart;
   rescaledArgument = variableExpression / radical;
   arcCosPart.makeOX(calculator, calculator.opArcCos(), rescaledArgument);
   arcCosPart *= radicalSquared / - 2;
@@ -651,7 +669,9 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsIntegration::integrateXpowerNePowerAx");
-  Expression functionExpression, variableExpression, setExpression;
+  Expression functionExpression;
+  Expression variableExpression;
+  Expression setExpression;
   if (
     !input.isIndefiniteIntegralFdx(
       &variableExpression, &functionExpression, &setExpression
@@ -666,8 +686,10 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
   // <- note: the seemingly odd order is intentional!
   Expression polyPartE = functionExpression[2];
   // <- note: the seemingly odd order is intentional!
-  Expression powerOfXE, powerOfEE;
-  Expression aE, bE;
+  Expression powerOfXE;
+  Expression powerOfEE;
+  Expression aE;
+  Expression bE;
   // exponent is of form aX+b
   powerOfXE.assignValue(calculator, 1);
   bool isGood = false;
@@ -712,7 +734,8 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
   if (!isGood) {
     return false;
   }
-  Expression remainingIntegrand, integralPart;
+  Expression remainingIntegrand;
+  Expression integralPart;
   remainingIntegrand.makeXOX(
     calculator,
     calculator.opPower(),
@@ -731,7 +754,9 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne");
-  Expression functionExpression, variableExpression, setExpression;
+  Expression functionExpression;
+  Expression variableExpression;
+  Expression setExpression;
   if (
     !input.isIndefiniteIntegralFdx(
       &variableExpression, &functionExpression, &setExpression
@@ -739,7 +764,8 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   ) {
     return false;
   }
-  Expression functionCoefficient, functionNoCoefficient;
+  Expression functionCoefficient;
+  Expression functionNoCoefficient;
   functionExpression.getCoefficientMultiplicandForm(
     functionCoefficient, functionNoCoefficient
   );
@@ -774,7 +800,9 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   variableChangeCoeffiicent.makeSqrt(calculator, (a / c) *(- 1));
   newVariableExpression = variableExpression * variableChangeCoeffiicent;
   functionCoefficient /= variableChangeCoeffiicent;
-  Expression algSQRTPart, algPart, lnPart;
+  Expression algSQRTPart;
+  Expression algPart;
+  Expression lnPart;
   algSQRTPart =
   newVariableExpression * newVariableExpression - calculator.expressionOne();
   algPart.makeSqrt(calculator, algSQRTPart);
@@ -789,7 +817,9 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctionsIntegration::integrateDefiniteIntegral");
-  Expression functionExpression, variableExpression, setExpression;
+  Expression functionExpression;
+  Expression variableExpression;
+  Expression setExpression;
   if (
     !input.isDefiniteIntegralOverIntervalFdx(
       &variableExpression, &functionExpression, &setExpression
@@ -810,7 +840,8 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   ) {
     return false;
   }
-  Expression indefiniteIntegral, indefiniteExpression;
+  Expression indefiniteIntegral;
+  Expression indefiniteExpression;
   indefiniteExpression.makeAtom(
     calculator, calculator.opIndefiniteIndicator()
   );
@@ -1117,15 +1148,16 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnStandard(
     return false;
   }
   const Expression& expression = input[1];
-  HashedList<Expression> allowedFreeVars, presentFreeVars;
-  allowedFreeVars.setExpectedSize(input.size() - 2);
-  presentFreeVars.setExpectedSize(input.size() - 2);
+  HashedList<Expression> allowedFreeVariables;
+  HashedList<Expression> presentFreeVariables;
+  allowedFreeVariables.setExpectedSize(input.size() - 2);
+  presentFreeVariables.setExpectedSize(input.size() - 2);
   for (int i = 2; i < input.size(); i ++) {
-    allowedFreeVars.addOnTopNoRepetition(input[i]);
+    allowedFreeVariables.addOnTopNoRepetition(input[i]);
   }
   std::stringstream out;
-  expression.getFreeVariables(presentFreeVars, true);
-  if (!allowedFreeVars.contains(presentFreeVars)) {
+  expression.getFreeVariables(presentFreeVariables, true);
+  if (!allowedFreeVariables.contains(presentFreeVariables)) {
     out << "<hr>";
     out
     << "Your expression:<br>\\("
@@ -1134,19 +1166,19 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnStandard(
     << "<br><b style ='color:red'>"
     << "contains the unexpected variable(s):</b><br><b>";
     bool found = false;
-    for (int i = 0; i < presentFreeVars.size; i ++) {
-      if (!allowedFreeVars.contains(presentFreeVars[i])) {
+    for (int i = 0; i < presentFreeVariables.size; i ++) {
+      if (!allowedFreeVariables.contains(presentFreeVariables[i])) {
         if (found) {
           out << ", ";
         }
         found = true;
-        out << presentFreeVars[i].toString();
+        out << presentFreeVariables[i].toString();
       }
     }
     out << "</b>.";
     out
     << "<br>The expected variables are: "
-    << allowedFreeVars.toStringCommaDelimited()
+    << allowedFreeVariables.toStringCommaDelimited()
     << ". ";
     out
     << "<br>Beware of typos such as:<br>[wrong:] "
@@ -1257,7 +1289,9 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
     return false;
   }
   const Expression& expression = input[1];
-  HashedList<Expression> mandatoryFreeVars, allowedFreeVars, presentFreeVars;
+  HashedList<Expression> mandatoryFreeVars;
+  HashedList<Expression> allowedFreeVars;
+  HashedList<Expression> presentFreeVars;
   if (input[2].isSequenceNElements()) {
     mandatoryFreeVars.setExpectedSize(input[2].size() - 1);
     for (int i = 1; i < input[2].size(); i ++) {
@@ -1567,7 +1601,8 @@ bool CalculatorFunctions::distributeExponent(
   if (!isGood) {
     return false;
   }
-  Expression leftE, rightE;
+  Expression leftE;
+  Expression rightE;
   leftE.makeXOX(
     calculator, calculator.opPower(), input[1][1], input[2]
   );
@@ -1587,7 +1622,9 @@ bool CalculatorFunctions::sqrt(
   Rational ratPower;
   if (input[1].isRational(&ratPower)) {
     if (ratPower != 0) {
-      Expression powerE, powerEreduced, exponentExpression;
+      Expression powerE;
+      Expression powerEreduced;
+      Expression exponentExpression;
       ratPower.invert();
       exponentExpression.assignValue(calculator, ratPower);
       powerE.makeXOX(

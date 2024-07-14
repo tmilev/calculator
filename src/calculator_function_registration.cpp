@@ -26,6 +26,10 @@ std::string Calculator::Functions::Names::turnOnRules = "TurnOnRules";
 std::string Calculator::Functions::Names::turnOffRules = "TurnOffRules";
 std::string Calculator::Functions::Names::Trigonometry::sine = "\\sin";
 std::string Calculator::Functions::Names::Trigonometry::cosine = "\\cos";
+std::string Calculator::Functions::Names::Polynomials::upperLimit =
+"upperLimit";
+std::string Calculator::Functions::Names::Polynomials::modulus = "modulus";
+std::string Calculator::Functions::Names::Polynomials::order = "order";
 // Naming conventions: please start all built-in calculator functions with
 // capital letter.
 // Exceptions are made for the following.

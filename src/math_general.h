@@ -2415,6 +2415,14 @@ std::iostream& operator<<(
   return output;
 }
 
+template <class SourceCoefficient, class TargetCoefficient>
+class CoefficientConverter{
+public:
+ virtual bool convert(const SourceCoefficient& input, TargetCoefficient& output)=0;
+};
+
+
+
 template <class TemplateMonomial, class Coefficient>
 std::ostream& operator<<(
   std::ostream& output,
@@ -2967,15 +2975,24 @@ public:
     monomial.makeOne();
     this->subtractMonomial(monomial, other);
   }
+  // Assigns a linear combination with one type of
+  // coefficients to a linear combination with the same
+  // monomials but a different coefficient type, using
+  // a given conversion function.
   template <class OtherType>
-  void assignOtherType(
-    const LinearCombination<TemplateMonomial, Coefficient>& other
+  bool assignOtherType(
+    const LinearCombination<TemplateMonomial, OtherType>& other,
+      CoefficientConverter<OtherType, Coefficient>& converter
   ) {
-    this->::HashedList<TemplateMonomial>::operator=(other);
-    this->coefficients.setSize(other.size);
-    for (int i = 0; i < other.size; i ++) {
-      this->coefficients[i] = other.coefficients[i];
+    this->monomials= other.monomials;
+    this->coefficients.setSize(other.size());
+    for (int i = 0; i < other.size(); i ++) {
+      if (!converter.convert(other.coefficients[i], this->coefficients[i])){
+        // Conversion failed.
+        return false;
+      }
     }
+    return true;
   }
   void operator-=(
     const LinearCombination<TemplateMonomial, Coefficient>& other
@@ -3423,12 +3440,20 @@ public:
       other
     );
   }
-  template <class otherType>
-  void operator=(const Polynomial<otherType>& other);
+  template <class OtherType>
+  void operator=(const Polynomial<OtherType>& other){
+      this->::LinearCombination<MonomialPolynomial, Coefficient>::operator=(other);
+  }
   void operator=(const Coefficient& other);
   void operator=(int other);
-  template <class otherType>
-  void assignOtherType(const Polynomial<otherType>& other);
+  template <class OtherType>
+  bool assignOtherType(
+      const Polynomial<OtherType>& other,
+      CoefficientConverter<OtherType, Coefficient>& converter){
+      return this->::LinearCombination<MonomialPolynomial, Coefficient>::assignOtherType(
+        other ,converter
+        );
+  }
   // Returns the coefficient a of a monomial of the form ax^k.
   Coefficient coefficientOfXPowerK(int variableIndex, int variablePower) {
     MonomialPolynomial monomial;

@@ -2240,6 +2240,13 @@ public:
         static std::string sine;
         static std::string cosine;
       };
+
+      class Polynomials {
+      public:
+        static std::string modulus;
+        static std::string upperLimit;
+        static std::string order;
+      };
     };
 
     Functions() {

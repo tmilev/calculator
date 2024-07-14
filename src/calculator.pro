@@ -41,6 +41,7 @@ HEADERS += \
     html_routines.h \
     main.h \
     math_basics.h \
+    math_conversions.h \
     math_extra_polynomial_factorization.h \
     math_lattices.h \
     math_modular_arithmetic.h \
@@ -733,6 +734,7 @@ SOURCES += \
     json_parsing.cpp \
     math_algebraic_numbers.cpp \
     math_algebraic_numbers_test.cpp \
+    math_conversions.cpp \
     math_elliptic_curves.cpp \
     math_finite_group_characters.cpp \
     math_floating_point.cpp \

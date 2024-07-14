@@ -865,31 +865,15 @@ void Polynomial<Coefficient>::operator*=(const otherType& other) {
 }
 
 template <class Coefficient>
-template <class otherType>
-void Polynomial<Coefficient>::operator=(const Polynomial<otherType>& other) {
-  this->::LinearCombination<MonomialPolynomial, Coefficient>::operator=(other);
-}
-
-template <class Coefficient>
 void Polynomial<Coefficient>::operator=(const Coefficient& other) {
   this->makeConstant(other);
 }
 
 template <class Coefficient>
 void Polynomial<Coefficient>::operator=(int other) {
-  Coefficient tempCF;
-  tempCF = other;
-  this->makeConstant(tempCF);
-}
-
-template <class Coefficient>
-template <class otherType>
-void Polynomial<Coefficient>::assignOtherType(
-  const Polynomial<otherType>& other
-) {
-  this->::LinearCombination<MonomialPolynomial, Coefficient>::assignOtherType(
-    other
-  );
+  Coefficient coefficient;
+  coefficient = other;
+  this->makeConstant(coefficient);
 }
 
 template <class Coefficient>

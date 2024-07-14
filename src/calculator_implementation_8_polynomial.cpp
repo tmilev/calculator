@@ -1,5 +1,6 @@
 #include "calculator_functions_polynomial.h"
 #include "calculator_inner_typed_functions.h"
+#include "math_conversions.h"
 #include "math_extra_algebraic_numbers.h"
 #include "math_extra_polynomial_factorization.h"
 #include "math_general_implementation.h"
@@ -872,6 +873,7 @@ private:
   const Expression* input;
   int order;
   Vector<Polynomial<Rational> > inputVector;
+  Vector<Polynomial<ElementZmodP> > inputVectorModP;
   // Comptutation context:
   // contains all involved variables, in ascending order
   // with respect to calculator sorting.
@@ -905,6 +907,10 @@ GroebnerComputationCalculator::GroebnerComputationCalculator(
 }
 
 bool GroebnerComputationCalculator::initializeComputation() {
+  STACK_TRACE("GroebnerComputationCalculator::initializeComputation");
+  this->inputVector.clear();
+  this->inputVectorModP.clear();
+  this->modulus = 0;
   if (input->size() < 3) {
     return *this->owner << "Function takes at least two arguments. ";
   }
@@ -923,7 +929,11 @@ bool GroebnerComputationCalculator::initializeComputation() {
   ) {
     return *this->owner << "Could not extract statement list. ";
   }
-  if (configuration.contains("upperLimit")) {
+  if (
+    configuration.contains(
+      Calculator::Functions::Names::Polynomials::upperLimit
+    )
+  ) {
     Expression upperLimit = configuration.getValueNoFail("upperLimit");
     if (!upperLimit.isIntegerFittingInInt(&this->upperBound)) {
       return
@@ -933,7 +943,11 @@ bool GroebnerComputationCalculator::initializeComputation() {
       << ". ";
     }
   }
-  if (configuration.contains("order")) {
+  if (
+    configuration.contains(
+      Calculator::Functions::Names::Polynomials::order
+    )
+  ) {
     Expression order = configuration.getValueNoFail("order");
     if (!order.isSequenceNElements()) {
       return
@@ -946,7 +960,11 @@ bool GroebnerComputationCalculator::initializeComputation() {
       this->desiredContext.addVariable(order[i]);
     }
   }
-  if (configuration.contains("modulus")) {
+  if (
+    configuration.contains(
+      Calculator::Functions::Names::Polynomials::modulus
+    )
+  ) {
     if (
       !configuration.getValueNoFail("modulus").isInteger(&this->modulus)
     ) {
@@ -999,6 +1017,21 @@ bool GroebnerComputationCalculator::initializeComputation() {
     }
     this->inputVector[i] = converter.content;
   }
+  if (this->modulus.isEqualToZero()) {
+    // We are computing over the rationals.
+    return true;
+  }
+  // We are computing with moduli.
+  // We need to convert all of our polynomials mod p.
+  ConverterOfRationalToZModP converter(this->modulus.value);
+  for (const Polynomial<Rational>& polynomial : this->inputVector) {
+    Polynomial<ElementZmodP> conversion;
+    if (!conversion.assignOtherType<Rational>(polynomial, converter)) {
+      // Failed to convert the coefficients of the polynomial.
+      return false;
+    }
+    this->inputVectorModP.addOnTop(conversion);
+  }
   return true;
 }
 
@@ -1033,7 +1066,7 @@ bool GroebnerComputationCalculator::compute() {
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_rightLargerWins
     );
-  } else if (order == MonomialPolynomial::Order::lexicographic) {
+  } else if (this->order == MonomialPolynomial::Order::lexicographic) {
     groebnerComputation.polynomialOrder.monomialOrder.setComparison(
       MonomialPolynomial::greaterThan_leftLargerWins
     );
@@ -1047,12 +1080,12 @@ bool GroebnerComputationCalculator::compute() {
   groebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
   std::stringstream out;
   out << "<hr>" << groebnerComputation.toStringLetterOrder();
-  out << "<br>Starting basis (" << inputVector.size << " elements): ";
-  for (int i = 0; i < inputVector.size; i ++) {
+  out << "<br>Starting basis (" << this->inputVector.size << " elements): ";
+  for (int i = 0; i < this->inputVector.size; i ++) {
     out
     << "<br>"
     << HtmlRoutines::getMathNoDisplay(
-      inputVector[i].toString(&groebnerComputation.format)
+      this->inputVector[i].toString(&groebnerComputation.format)
     );
   }
   if (success) {

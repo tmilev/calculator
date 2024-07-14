@@ -193,6 +193,7 @@ SOURCES_RELATIVE_PATH=\
     general_strings_test.cpp \
     math_algebraic_numbers.cpp \
     math_algebraic_numbers_test.cpp \
+    math_conversions.cpp \
     math_elliptic_curves.cpp \
     math_finite_group_characters.cpp \
     math_floating_point.cpp \

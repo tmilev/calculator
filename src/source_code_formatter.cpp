@@ -2170,6 +2170,9 @@ CodeFormatter::CodeFormatter() {
     "static", CodeFormatter::Element::TypeAdjectiveKeyWord
   );
   this->elementTypes.setKeyValue(
+    "virtual", CodeFormatter::Element::TypeAdjectiveKeyWord
+  );
+  this->elementTypes.setKeyValue(
     "extern", CodeFormatter::Element::TypeAdjectiveKeyWord
   );
   this->elementTypes.setKeyValue("do", CodeFormatter::Element::DoKeyWord);
@@ -3239,7 +3242,8 @@ bool CodeFormatter::Processor::applyOneRule() {
     ) && (
       last.type == CodeFormatter::Element::Comma ||
       last.type == CodeFormatter::Element::GreaterThan ||
-      last.type == CodeFormatter::Element::RightParenthesis
+      last.type == CodeFormatter::Element::RightParenthesis ||
+      last.type == CodeFormatter::Element::SemiColon
     )
   ) {
     this->lastRuleName = "typeAndIdentifier equals expression";

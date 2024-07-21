@@ -10,6 +10,7 @@ const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 const calculatorPageEditor = require("./calculator_page_editor");
 const equationEditor = require("./equation_editor/src/equation_editor");
 const startCalculatorWebAssemblyWorker = require("./web_assembly_worker");
+const splitter = require("./splitter_two_elements");
 
 function writeHTML(
   /** @type {HTMLElement} */ element,
@@ -190,86 +191,6 @@ class AtomHandler {
   }
 }
 
-class Splitter {
-  constructor() {
-    /** @type {HTMLElement} */
-    this.element = document.getElementById(
-      ids.domElements.pages.calculator.divCalculatorSplitter
-    );
-    this.parentElement = document.getElementById(
-      ids.domElements.pages.calculator.divCalculatorMainInputOutput
-    );
-    this.calculatorOutput = document.getElementById(
-      ids.domElements.pages.calculator.divCalculatorMainOutput
-    );
-    this.calculatorInput = document.getElementById(
-      ids.domElements.pages.calculator.divCalculatorMainInput
-    );
-    this.resizing = false;
-  }
-
-  initialize() {
-    this.element.addEventListener('mousedown', (mouseEvent) => {
-      this.onMouseDown(mouseEvent);
-    });
-    this.parentElement.addEventListener('mousemove', (mouseEvent) => {
-      this.onMouseMove(mouseEvent);
-    });
-    this.parentElement.addEventListener('mouseup', (mouseEvent) => {
-      this.onMouseUp(mouseEvent);
-    });
-  }
-
-  getXY(mouseEvent) {
-    return {
-      x: mouseEvent.clientX,
-      y: mouseEvent.clientY,
-    }
-  }
-
-  onMouseDown(mouseEvent) {
-    this.resizing = true;
-    mouseEvent.stopPropagation();
-  }
-
-  onMouseUp(mouseEvent) {
-    this.resizing = false;
-    mouseEvent.stopPropagation();
-  }
-
-  onMouseMove(mouseEvent) {
-    if (!this.resizing) {
-      return;
-    }
-    let xy = this.getXY(mouseEvent);
-    let y = xy.y;
-    storage.storage.variables.calculator.splitterInputOutput.setAndStore(
-      y - 10, false, false
-    );
-    this.setHeight(y - 10);
-  }
-
-  setHeight(y) {
-    if (y === "" || y === undefined || y === null) {
-      this.calculatorInput.style.height = "";
-      this.calculatorOutput.style.height = "";
-      return;
-    }
-    let heightParent = this.parentElement.getBoundingClientRect().height;
-    if (y > heightParent - 100) {
-      y = heightParent - 100;
-    }
-    if (y < 90) {
-      y = 90;
-    }
-    this.calculatorInput.style.height = y;
-    let remainingHeight = heightParent - y;
-    if (remainingHeight < 100) {
-      remainingHeight = 100;
-    }
-    this.calculatorOutput.style.height = remainingHeight;
-  }
-}
 
 class Calculator {
   constructor() {
@@ -292,7 +213,22 @@ class Calculator {
     this.editor = new calculatorPageEditor.CalculatorEquationEditor((event) => {
       this.submitCalculatorInputOnEnter(event);
     });
-    this.splitter = new Splitter();
+    this.splitterInputOutput = new splitter.Splitter(
+      ids.domElements.pages.calculator.divCalculatorSplitter,
+      ids.domElements.pages.calculator.divCalculatorMainInputOutput,
+      ids.domElements.pages.calculator.divCalculatorMainInput,
+      ids.domElements.pages.calculator.divCalculatorMainOutput,
+      storage.storage.variables.calculator.splitterInputOutput,
+      true,
+    );
+    this.splitterExamples = new splitter.Splitter(
+      ids.domElements.pages.calculator.divExamplesSplitter,
+      ids.domElements.pages.calculator.divCalculatorPage,
+      ids.domElements.pages.calculator.divCalculatorMainInputOutput,
+      ids.domElements.pages.calculator.examplesContainer,
+      storage.storage.variables.calculator.splitterExamples,
+      false,
+    );
   }
 
   /** @return {HTMLElement} */
@@ -386,24 +322,17 @@ class Calculator {
     );
     if (this.flagExamplesWantedShown) {
       writeHTML(button, "&#9660;")
-      calculatorElement.style.maxWidth = "85%";
+      // calculatorElement.style.maxWidth = "85%";
       examples.classList.remove("hiddenClass");
-      examplesContainer.style.height = "100%";
-      examplesContainer.style.maxHeight = "100%";
+      //examplesContainer.style.height = "100%";
+      //examplesContainer.style.maxHeight = "100%";
     } else {
       calculatorElement.style.maxWidth = "98%";
       writeHTML(button, "&#9656;")
       examples.classList.add("hiddenClass");
-      examplesContainer.style.height = "5%";
-      examplesContainer.style.maxHeight = "5%";
+      //examplesContainer.style.height = "5%";
+      //examplesContainer.style.maxHeight = "5%";
     }
-  }
-
-  changeSplitterInputOutput(
-    /** @type {string} */
-    value,
-  ) {
-    this.splitter.setHeight(value);
   }
 
   toggleEquationEditor() {
@@ -470,10 +399,8 @@ class Calculator {
     this.editor.initialize();
     this.initializeToggleExamples();
     this.initializeToggleEditor();
-    this.splitter.initialize();
-    this.changeSplitterInputOutput(
-      storage.storage.variables.calculator.splitterInputOutput.getValue()
-    );
+    this.splitterInputOutput.initialize();
+    this.splitterExamples.initialize();
     let buttonGo = document.getElementById(
       ids.domElements.pages.calculator.buttonGoCalculatorPage
     );

@@ -588,17 +588,18 @@ a.linkProgressReport {
   flex-direction: column;
 }
 
-#divSplitterBetweenCalculatorAndExamples:hover {
+#divExamplesSplitter:hover {
   border-left: 5px solid gray;
   opacity: 1;
 }
 
-#divSplitterBetweenCalculatorAndExamples {
+#divExamplesSplitter {
   box-sizing: border-box;
   height: 100%;
   width: 5px;
   min-width: 5px;
   max-width: 5px;
+  margin-right: 10px;
   opacity: 0.8;
   border-left: 2px solid #d0d0d0;
   cursor: col-resize;
@@ -609,9 +610,6 @@ a.linkProgressReport {
   overflow: auto;
   vertical-align: top;
   white-space: nowrap;
-  right: 0%;
-  top: 0%;
-  height: 100%;
 }
 
 #idAutocompletePanel {
@@ -652,7 +650,6 @@ table.tableCalculatorOutput {
 }
 
 .calculatorInputOutput {
-  /*  float: left;*/
   align-self: top;
 }
 
@@ -1758,12 +1755,10 @@ button.buttonSolve:hover {
 }
 
 #divCalculatorMainInput {
-  height: 25%;
   overflow: auto;
 }
 
 #divCalculatorMainOutput {
-  height: 75%;
   overflow: auto;
   vertical-align: top;
 }

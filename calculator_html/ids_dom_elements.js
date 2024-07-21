@@ -43,6 +43,7 @@ let domElements = {
       button: "buttonEditPage",
     },
     calculator: {
+      divCalculatorPage: "divCalculatorPage",
       editorComments: "calculatorEditorComments",
       editorCommentsDebug: "calculatorEditorDebug",
       equationEditorFontSizeSlider: "equationEditorFontSizeSlider",
@@ -70,6 +71,7 @@ let domElements = {
       divCalculatorMainInput: "divCalculatorMainInput",
       divCalculatorMainInputOutput: "divCalculatorMainInputOutput",
       divCalculatorSplitter: "divCalculatorSplitter",
+      divExamplesSplitter: "divExamplesSplitter",
       examples: "divCalculatorExamples",
       examplesContainer: "divCalculatorExamplesContainer",
       divDebugComments: "divCalculatorPageDebugComments",

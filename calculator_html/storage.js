@@ -359,6 +359,11 @@ class StorageCalculator {
           nameURL: "splitterInputOutput",
           nameLocalStorage: "splitterInputOutput",
         }),
+        splitterExamples: new StorageVariable({
+          name: "splitterExamples",
+          nameURL: "splitterExamples",
+          nameLocalStorage: "splitterExamples",
+        }),
         request: new StorageVariable({
           name: "calculatorRequest",
           nameURL: "calculatorRequest",
@@ -592,4 +597,5 @@ let storage = new StorageCalculator();
 
 module.exports = {
   storage,
+  StorageVariable,
 };

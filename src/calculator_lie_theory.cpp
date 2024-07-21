@@ -1206,7 +1206,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
   context.getFormat(g2inB3Data.format);
   g2inB3Data.format.flagUseLatex = true;
   g2inB3Data.format.numberOfAmpersandsPerNewLineForLaTeX = 0;
-  Expression tempExpression;
+  Expression expression;
   RationalFraction<Rational> rfZero;
   RationalFraction<Rational> rfOne;
   rfZero.makeZero();
@@ -1219,9 +1219,9 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
   for (int i = 0; i < highestWeights.size; i ++) {
     g2inB3Data.weightFundamentalCoordinates = highestWeights[i];
     CalculatorLieTheory::splitFDpartB3overG2inner(
-      calculator, g2inB3Data, tempExpression
+      calculator, g2inB3Data, expression
     );
-    timeReport << tempExpression.getValue<std::string>();
+    timeReport << expression.getValue<std::string>();
     RationalFraction<Rational> numEigenVectors;
     numEigenVectors = rfZero;
     for (

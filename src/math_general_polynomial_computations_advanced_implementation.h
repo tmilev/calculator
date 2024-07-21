@@ -147,21 +147,19 @@ generateSymmetricDifferenceCandidates() {
 
 template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasis(
-  List<Polynomial<Coefficient> >& inputOutput, bool rescaleLeadingMonomials
+  List<Polynomial<Coefficient> >& inputOutput,
+  bool rescaleLeadingMonomials
 ) {
   STACK_TRACE("GroebnerBasisComputation::transformToReducedGroebnerBasis");
   this->initializeForGroebnerComputation();
-
   this->basisCandidates = inputOutput;
-  if (rescaleLeadingMonomials){
+  if (rescaleLeadingMonomials) {
     for (int i = 0; i < this->basisCandidates.size; i ++) {
       this->basisCandidates[i].scaleNormalizeLeadingMonomial(
-          &MonomialPolynomial::orderDefault()
-          );
+        &MonomialPolynomial::orderDefault()
+      );
     }
-
   }
-
   ProgressReport reportStart("Groebner basis start");
   if (this->flagDoProgressReport) {
     reportStart.report(this->toStringStatusGroebnerBasisTransformation());
@@ -936,7 +934,7 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
 (List<Polynomial<Coefficient> >& inputSystem) {
   STACK_TRACE("PolynomialSystem::polynomialSystemSolutionSimplificationPhase");
   ProgressReport report1;
-  ProgressReport  report2;
+  ProgressReport report2;
   ProgressReport report3;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
@@ -969,7 +967,8 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
     }
     if (success && inputSystem.size > 0) {
       this->groebner.numberPolynomialDivisions = 0;
-      success = this->groebner.transformToReducedGroebnerBasis(inputSystem, false);
+      success =
+      this->groebner.transformToReducedGroebnerBasis(inputSystem, false);
     }
     if (!success) {
       inputSystem = oldSystem;

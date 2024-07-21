@@ -1488,17 +1488,17 @@ void Expression::substituteRecursivelyInChildren(
   if (!this->isSuitableForSubstitution()) {
     return;
   }
-  Expression tempE;
+  Expression expression;
   for (int i = 0; i < this->size(); i ++) {
     if (substitutions.contains((*this)[i])) {
       this->setChild(
         i, substitutions.getValueCreateEmpty((*this)[i])
       );
     } else {
-      tempE = (*this)[i];
-      tempE.substituteRecursivelyInChildren(substitutions);
-      if (!(tempE == (*this)[i])) {
-        this->setChild(i, tempE);
+      expression = (*this)[i];
+      expression.substituteRecursivelyInChildren(substitutions);
+      if (!(expression == (*this)[i])) {
+        this->setChild(i, expression);
       }
     }
   }
@@ -1520,15 +1520,17 @@ void Expression::substituteRecursivelyInChildren(
   if (!this->isSuitableForSubstitution()) {
     return;
   }
-  Expression tempE;
+  Expression expression;
   for (int i = 0; i < this->size(); i ++) {
     if (toBeSubstituted == (*this)[i]) {
       this->setChild(i, substituteWith);
     } else {
-      tempE = (*this)[i];
-      tempE.substituteRecursivelyInChildren(toBeSubstituted, substituteWith);
-      if (!(tempE == (*this)[i])) {
-        this->setChild(i, tempE);
+      expression = (*this)[i];
+      expression.substituteRecursivelyInChildren(
+        toBeSubstituted, substituteWith
+      );
+      if (!(expression == (*this)[i])) {
+        this->setChild(i, expression);
       }
     }
   }

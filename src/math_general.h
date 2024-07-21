@@ -1714,9 +1714,9 @@ bool Vectors<Coefficient>::conesIntersect(
   return true;
 }
 
-template <typename Element>
-void Matrix<Element>::resize(
-  int r, int c, bool preserveValues, const Element* const ringZero
+template <typename Coefficient>
+void Matrix<Coefficient>::resize(
+  int r, int c, bool preserveValues, const Coefficient* const ringZero
 ) {
   if (r < 0) {
     r = 0;
@@ -1732,19 +1732,19 @@ void Matrix<Element>::resize(
     this->numberOfColumns = c;
     return;
   }
-  Element** newElements = nullptr;
+  Coefficient** newElements = nullptr;
   int newActualNumberOfColumns =
   MathRoutines::maximum(this->actualNumberOfColumns, c);
   int newActualNumberOfRows =
   MathRoutines::maximum(this->actualNumberOfRows, r);
   if (r > this->actualNumberOfRows || c > this->actualNumberOfColumns) {
-    newElements = new Element*[newActualNumberOfRows];
+    newElements = new Coefficient*[newActualNumberOfRows];
 #ifdef AllocationLimitsSafeguard
     GlobalStatistics::globalPointerCounter += newActualNumberOfRows;
     GlobalStatistics::checkPointerCounters();
 #endif
     for (int i = 0; i < newActualNumberOfRows; i ++) {
-      newElements[i] = new Element[newActualNumberOfColumns];
+      newElements[i] = new Coefficient[newActualNumberOfColumns];
 #ifdef AllocationLimitsSafeguard
       GlobalStatistics::globalPointerCounter += newActualNumberOfColumns;
       GlobalStatistics::checkPointerCounters();
@@ -1847,8 +1847,8 @@ bool Vectors<Coefficient>::computeNormal(
   return true;
 }
 
-template <typename Element>
-void Matrix<Element>::operator=(const Matrix<Element>& m) {
+template <typename Coefficient>
+void Matrix<Coefficient>::operator=(const Matrix<Coefficient>& m) {
   if (this == &m) {
     return;
   }
@@ -1860,8 +1860,8 @@ void Matrix<Element>::operator=(const Matrix<Element>& m) {
   }
 }
 
-template <typename Element>
-void Matrix<Element>::releaseMemory() {
+template <typename Coefficient>
+void Matrix<Coefficient>::releaseMemory() {
   for (int i = 0; i < this->actualNumberOfRows; i ++) {
     delete[] this->elements[i];
   }
@@ -1973,8 +1973,8 @@ void Matrix<Coefficient>::multiplyOnTheLeft(
   }
 }
 
-template <typename Element>
-std::string Matrix<Element>::toStringWithBlocks(List<int>& blocks) {
+template <typename Coefficient>
+std::string Matrix<Coefficient>::toStringWithBlocks(List<int>& blocks) {
   std::stringstream out;
   std::string currentString;
   out << "\\left(\\begin{array}{";
@@ -2016,9 +2016,9 @@ std::string Matrix<Element>::toStringWithBlocks(List<int>& blocks) {
   return out.str();
 }
 
-template <typename Element>
-void Matrix<Element>::assignDirectSum(
-  Matrix<Element>& m1, Matrix<Element>& m2
+template <typename Coefficient>
+void Matrix<Coefficient>::assignDirectSum(
+  Matrix<Coefficient>& m1, Matrix<Coefficient>& m2
 ) {
   if (this == &m1 || this == &m2) {
     global.fatal
@@ -2045,14 +2045,14 @@ void Matrix<Element>::assignDirectSum(
   }
 }
 
-template <typename Element>
-void Matrix<Element>::assignTensorProduct(
-  const Matrix<Element>& left, const Matrix<Element>& right
+template <typename Coefficient>
+void Matrix<Coefficient>::assignTensorProduct(
+  const Matrix<Coefficient>& left, const Matrix<Coefficient>& right
 ) {
   // handle lazy programmers:
   if (this == &left || this == &right) {
-    Matrix<Element> leftCopy = left;
-    Matrix<Element> rightCopy = right;
+    Matrix<Coefficient> leftCopy = left;
+    Matrix<Coefficient> rightCopy = right;
     this->assignTensorProduct(leftCopy, rightCopy);
     return;
   }
@@ -2082,9 +2082,9 @@ void Matrix<Element>::assignTensorProduct(
   }
 }
 
-template <typename Element>
-void Matrix<Element>::directSumWith(
-  const Matrix<Element>& m2, const Element& ringZero
+template <typename Coefficient>
+void Matrix<Coefficient>::directSumWith(
+  const Matrix<Coefficient>& m2, const Coefficient& ringZero
 ) {
   int oldNumberOfRows = this->numberOfRows;
   int oldNumberOfColumns = this->numberOfColumns;
@@ -2109,8 +2109,8 @@ void Matrix<Element>::directSumWith(
   }
 }
 
-template <typename Element>
-int Matrix<Element>::findPivot(int columnIndex, int rowStartIndex) {
+template <typename Coefficient>
+int Matrix<Coefficient>::findPivot(int columnIndex, int rowStartIndex) {
   for (int i = rowStartIndex; i < this->numberOfRows; i ++) {
     if (!this->elements[i][columnIndex].isEqualToZero()) {
       return i;
@@ -2119,41 +2119,46 @@ int Matrix<Element>::findPivot(int columnIndex, int rowStartIndex) {
   return - 1;
 }
 
-template <typename Element>
-void Matrix<Element>::subtractRows(
+template <typename Coefficient>
+void Matrix<Coefficient>::subtractRows(
   int indexRowWeSubtractFrom,
   int indexSubtracted,
   int startColumnIndex,
-  const Element& scalar
+  const Coefficient& scalar
 ) {
-  Element tempElement;
+  Coefficient coefficient;
   for (int i = startColumnIndex; i < this->numberOfColumns; i ++) {
-    tempElement = this->elements[indexSubtracted][i];
-    tempElement *= scalar;
-    this->elements[indexRowWeSubtractFrom][i] -= tempElement;
+    coefficient = this->elements[indexSubtracted][i];
+    coefficient *= scalar;
+    this->elements[indexRowWeSubtractFrom][i] -= coefficient;
   }
 }
 
-template <typename Element>
-void Matrix<Element>::rowTimesScalar(int rowIndex, const Element& scalar) {
+template <typename Coefficient>
+void Matrix<Coefficient>::rowTimesScalar(
+  int rowIndex, const Coefficient& scalar
+) {
   for (int i = 0; i < this->numberOfColumns; i ++) {
     this->elements[rowIndex][i] *= scalar;
   }
 }
 
-template <typename Element>
-void Matrix<Element>::switchRows(int row1, int row2) {
+template <typename Coefficient>
+void Matrix<Coefficient>::switchRows(int row1, int row2) {
   if (row1 == row2) {
     return;
   }
-  Element * tmp = this->elements[row1];
+  Coefficient * swapper = this->elements[row1];
   this->elements[row1] = this->elements[row2];
-  this->elements[row2] = tmp;
+  this->elements[row2] = swapper;
 }
 
-template <typename Element>
-bool Matrix<Element>::solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
-  Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output
+template <typename Coefficient>
+bool Matrix<Coefficient>::
+solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
+  Matrix<Coefficient>& A,
+  Matrix<Coefficient>& b,
+  Matrix<Coefficient>& output
 ) {
   if (A.numberOfRows != b.numberOfRows) {
     global.fatal
@@ -2165,11 +2170,11 @@ bool Matrix<Element>::solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
   return A.rowEchelonFormToLinearSystemSolution(pivotPoints, b, output);
 }
 
-template <typename Element>
-bool Matrix<Element>::rowEchelonFormToLinearSystemSolution(
+template <typename Coefficient>
+bool Matrix<Coefficient>::rowEchelonFormToLinearSystemSolution(
   Selection& inputPivotPoints,
-  Matrix<Element>& inputRightHandSide,
-  Matrix<Element>& outputSolution
+  Matrix<Coefficient>& inputRightHandSide,
+  Matrix<Coefficient>& outputSolution
 ) {
   if (
     inputPivotPoints.numberOfElements != this->numberOfColumns ||
@@ -2198,14 +2203,14 @@ bool Matrix<Element>::rowEchelonFormToLinearSystemSolution(
   return true;
 }
 
-template <typename Element>
-void Matrix<Element>::gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
+template <typename Coefficient>
+void Matrix<Coefficient>::gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
   int firstNonProcessedRow,
   List<int>& outputPivotPointCols,
   Selection* outputNonPivotPoints__WarningSelectionNotInitialized
 ) {
   outputPivotPointCols.setSize(this->numberOfRows);
-  Element tempElement;
+  Coefficient coefficient;
   for (int i = firstNonProcessedRow; i < this->numberOfRows; i ++) {
     int currentPivotCol = - 1;
     for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -2216,14 +2221,14 @@ void Matrix<Element>::gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
     }
     outputPivotPointCols.objects[i] = currentPivotCol;
     if (currentPivotCol != - 1) {
-      tempElement = this->elements[i][currentPivotCol];
-      tempElement.invert();
-      this->rowTimesScalar(i, tempElement);
+      coefficient = this->elements[i][currentPivotCol];
+      coefficient.invert();
+      this->rowTimesScalar(i, coefficient);
       for (int j = 0; j < this->numberOfRows; j ++) {
         if (i != j) {
           if (!this->elements[j][i].isEqualToZero()) {
-            tempElement.assign(this->elements[j][i]);
-            this->subtractRows(j, i, 0, tempElement);
+            coefficient.assign(this->elements[j][i]);
+            this->subtractRows(j, i, 0, coefficient);
           }
         }
       }
@@ -2246,8 +2251,8 @@ void Matrix<Element>::gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
   }
 }
 
-template <typename Element>
-void Matrix<Element>::makeZero(const Element& ringZero) {
+template <typename Coefficient>
+void Matrix<Coefficient>::makeZero(const Coefficient& ringZero) {
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
       this->elements[i][j] = ringZero;
@@ -2255,11 +2260,11 @@ void Matrix<Element>::makeZero(const Element& ringZero) {
   }
 }
 
-template <typename Element>
-void Matrix<Element>::makeIdentity(
-  const Matrix<Element>& prototype,
-  const Element& ringZero,
-  const Element& ringOne
+template <typename Coefficient>
+void Matrix<Coefficient>::makeIdentity(
+  const Matrix<Coefficient>& prototype,
+  const Coefficient& ringZero,
+  const Coefficient& ringOne
 ) {
   this->initialize(prototype.numberOfRows, prototype.numberOfColumns);
   for (int i = 0; i < this->numberOfRows; i ++) {
@@ -2269,8 +2274,8 @@ void Matrix<Element>::makeIdentity(
   }
 }
 
-template <typename Element>
-void Matrix<Element>::initialize(
+template <typename Coefficient>
+void Matrix<Coefficient>::initialize(
   int desiredNumberOfRows, int desiredNumberOfColumns
 ) {
   this->resize(desiredNumberOfRows, desiredNumberOfColumns, false);
@@ -3914,7 +3919,8 @@ public:
     List<Polynomial<Coefficient> >& inputOutput
   );
   bool transformToReducedGroebnerBasis(
-    List<Polynomial<Coefficient> >& inputOutput, bool rescaleLeadingMonomials
+    List<Polynomial<Coefficient> >& inputOutput,
+    bool rescaleLeadingMonomials
   );
   void generateSymmetricDifferenceCandidates();
   void generateOneSymmetricDifferenceCandidate(

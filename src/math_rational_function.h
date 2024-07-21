@@ -1684,7 +1684,7 @@ bool RationalFraction<Coefficient>::getRelations(
   computation.polynomialOrder.monomialOrder.setComparison(
     MonomialPolynomial::greaterThan_leftLargerWins
   );
-  if (!computation.transformToReducedGroebnerBasis(groebnerBasis , false)) {
+  if (!computation.transformToReducedGroebnerBasis(groebnerBasis, false)) {
     comments << "Failed to find Groebner basis";
     return false;
   }

@@ -2004,8 +2004,12 @@
     "output":"isNilpotent{}\\left(\\left(0, 1\\right), \\left(0, 0\\right)\\right)"
   },
   {
-    "input":"SolveSystem(xy+z=40,xz+y=51,x+y+z=19) ",
+    "input":"SolvePolynomialSystem(xy+z=40,xz+y=51,x+y+z=19) ;",
     "output":"\"<br>The context vars:<br>Context. Variables: x, y, z. <br>The polynomials: (x y +z -40, x z +y -51, x +y +z -19)<br>Total number of polynomial computations: 58<br>System proven to have solution. <br>One solution follows.  x  = 6; y  = 27/5; z  = 38/5;\""
+  },
+  {
+    "input":"Solve(xy+z=40,xz+y=51,x+y+z=19);\nSolve(xy+z=40;xz+y=51;x+y+z=19);",
+    "output":"(\"<br>The context vars:<br>Context. Variables: x, y, z. <br>The polynomials: (x y +z -40, x z +y -51, x +y +z -19)<br>Total number of polynomial computations: 58<br>System proven to have solution. <br>One solution follows.  x  = 6; y  = 27/5; z  = 38/5;\";\"<br>The context vars:<br>Context. Variables: x, y, z. <br>The polynomials: (x y +z -40, x z +y -51, x +y +z -19)<br>Total number of polynomial computations: 58<br>System proven to have solution. <br>One solution follows.  x  = 6; y  = 27/5; z  = 38/5;\")"
   },
   {
     "input":"FindOneSolutionSerreLikePolynomialSystem{}(\nx_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19}, x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20}, x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}- 1, x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20}, x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19}, x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19}, x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}- 1, x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13}, x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14} - x_{1}x_{13} + 1, x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15}, x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15}, x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14}, x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14} - 1, x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14}, x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13} - 1)",
@@ -2024,12 +2028,12 @@
     "output":"\"<br>The context vars:<br>Context. Variables: u, w, x, y, z. <br>The polynomials: (x^2+1, x y z -1, x z^2+y -1, u w )<br>Total number of polynomial computations: 136<br>System proven to have solution. <br>One solution follows.  u  = 0; w  = 0; x  = e_{4}-e_{3}; y  = e_{2}; z  = -e_{3}+e_{2};\""
   },
   {
-    "input":"GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=10000 );\nGroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=5  );\nGroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (s,c,b,a));\nGroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\nThaw GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));",
-    "output":"(Freeze{}\\left(\\left(c^{2}+s^{2}+1, b-s^{4}-2 s^{2}-1, a-s^{4}\\right)\\right);Freeze{}\\left(\\left(b-c^{4}, a-s^{4}, s^{2}+c^{2}+1\\right)\\right);Freeze{}\\left(\\left(b^{2}-2 b a-2 b+a^{2}-2 a+1, 2 c^{2}+b-a+1, 2 s^{2}-b+a+1\\right)\\right);Freeze{}\\left(\\left(c^{2}+s^{2}+1, b-s^{4}-2 s^{2}-1, a-s^{4}\\right)\\right);\\left(s^{2}+c^{2}+1, -s^{4}-2 s^{2}+b-1, -s^{4}+a\\right))"
+    "input":"GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=10000 );\nGroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=5  );\nGroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (s,c,b,a));\nGroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\nThaw GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\nGroebnerLex(x y+z=40, x z+y=51, x+y+z=19);\nGroebnerLex(x y+z=40, x z+y=51, x+y+z=19, modulus = 7);\n",
+    "output":"(Freeze{}\\left(\\left(c^{2}+s^{2}+1, b-s^{4}-2 s^{2}-1, a-s^{4}\\right)\\right);Freeze{}\\left(\\left(c^{2}+s^{2}+1, b-s^{4}-2 s^{2}-1, a-s^{4}\\right)\\right);Freeze{}\\left(\\left(b^{2}-2 b a-2 b+a^{2}-2 a+1, 2 c^{2}+b-a+1, 2 s^{2}-b+a+1\\right)\\right);Freeze{}\\left(\\left(c^{2}+s^{2}+1, b-s^{4}-2 s^{2}-1, a-s^{4}\\right)\\right);\\left(s^{2}+c^{2}+1, -s^{4}-2 s^{2}+b-1, -s^{4}+a\\right);Freeze{}\\left(\\left(5 z^{2}-58 z+152, 3 y-2 z-1, 3 x+5 z-56\\right)\\right);Freeze{}\\left(\\left(z^{2}+z+(1 mod (7)), y+\\left((4 mod (7))\\right)z+(2 mod (7)), x+\\left((4 mod (7))\\right)z\\right)\\right))"
   },
   {
     "input":"GroebnerGrLex{}( a^2+b^2+ 1, x-a^4, y-b^4,upperLimit=10000 );\n GroebnerGrLex{}(a^2+b^2+ 1, x-a^4, y-b^4, upperLimit=5 )",
-    "output":"(Freeze{}\\left(\\left(x^{2}-2 x y+y^{2}-2 x-2 y+1, 2 b^{2}-x+y+1, 2 a^{2}+x-y+1\\right)\\right);Freeze{}\\left(\\left(b^{4}-y, a^{4}-x, b^{2}+a^{2}+1\\right)\\right))"
+    "output":"(Freeze{}\\left(\\left(x^{2}-2 x y+y^{2}-2 x-2 y+1, 2 b^{2}-x+y+1, 2 a^{2}+x-y+1\\right)\\right);Freeze{}\\left(\\left(x^{2}-2 x y+y^{2}-2 x-2 y+1, 2 b^{2}-x+y+1, 2 a^{2}+x-y+1\\right)\\right))"
   },
   {
     "input":"PolynomialRelationsUpperLimit{}(10000, s^2+c^2+ 1, s^4, c^4 );",

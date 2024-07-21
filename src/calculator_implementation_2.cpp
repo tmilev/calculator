@@ -1519,23 +1519,23 @@ Expression* Calculator::patternMatch(
   if (condition == nullptr) {
     return &expression;
   }
-  Expression tempExp = *condition;
-  tempExp.checkInitialization();
+  Expression specialization = *condition;
+  specialization.checkInitialization();
   if (logStream != nullptr) {
     (*logStream)
     << "<hr>Specializing condition pattern: "
-    << tempExp.toString();
+    << specialization.toString();
   }
-  this->specializeBoundVariables(tempExp, bufferPairs);
-  tempExp.checkInitialization();
+  this->specializeBoundVariables(specialization, bufferPairs);
+  specialization.checkInitialization();
   if (logStream != nullptr) {
     (*logStream)
     << "<hr>Specialized condition: "
-    << tempExp.toString()
+    << specialization.toString()
     << "; evaluating...";
   }
   Expression conditionResult;
-  this->evaluateExpression(*this, tempExp, conditionResult);
+  this->evaluateExpression(*this, specialization, conditionResult);
   if (logStream != nullptr) {
     (*logStream)
     << "<hr>The evaluated specialized condition: "

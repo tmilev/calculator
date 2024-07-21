@@ -1260,10 +1260,11 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   eigenSpacesPerSimpleGenerator.setSize(
     splittingParSelectedInLevi.cardinalitySelection
   );
-  Vectors<Coefficient> tempSpace1, tempSpace2;
-  MemorySaving<Vectors<Coefficient> > tempEigenVects;
+  Vectors<Coefficient> tempSpace1;
+  Vectors<Coefficient> tempSpace2;
+  MemorySaving<Vectors<Coefficient> > currentEigenVectors;
   Vectors<Coefficient>& finalEigenSpace = (outputEigenSpace == 0) ?
-  tempEigenVects.getElement() :
+  currentEigenVectors.getElement() :
   *outputEigenSpace;
   finalEigenSpace.makeEiBasis(this->getDimension());
   for (
@@ -2741,10 +2742,11 @@ void ModuleSSalgebra<Coefficient>::splitFDpartOverFKLeviRedSubalg(
   eigenSpacesPerSimpleGenerator.setSize(
     invertedLeviInSmall.cardinalitySelection
   );
-  Vectors<Coefficient> tempSpace1, tempSpace2;
-  MemorySaving<Vectors<Coefficient> > tempEigenVects;
+  Vectors<Coefficient> tempSpace1;
+  Vectors<Coefficient> tempSpace2;
+  MemorySaving<Vectors<Coefficient> > outputHolder;
   Vectors<Coefficient>& finalEigenSpace = (outputEigenSpace == nullptr) ?
-  tempEigenVects.getElement() :
+  outputHolder.getElement() :
   *outputEigenSpace;
   finalEigenSpace.setSize(0);
   if (invertedLeviInSmall.cardinalitySelection == 0) {

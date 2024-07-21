@@ -484,9 +484,9 @@ public:
     const Expression& left,
     const Expression& right
   ) {
-    Expression tempE;
-    tempE.makeXOX(owner, operation, left, right);
-    this->setChild(childIndex, tempE);
+    Expression expression;
+    expression.makeXOX(owner, operation, left, right);
+    this->setChild(childIndex, expression);
   }
   std::string lispify() const;
   bool toStringData(
@@ -4276,12 +4276,16 @@ bool Expression::makeSumFromLinearCombination(
   for (int i = 0; i < summands.size(); i ++) {
     Expression& current = summandsWithCoefficient[i];
     if (summands[i] == oneE) {
-      current.assignValueWithContext(calculator, summands.coefficients[i],emptyContext);
+      current.assignValueWithContext(
+        calculator, summands.coefficients[i], emptyContext
+      );
     } else if (!(summands.coefficients[i] == 1)) {
       current.reset(calculator, 3);
       current.addChildAtomOnTop(calculator.opTimes());
       Expression child;
-      child.assignValueWithContext(calculator, summands.coefficients[i], emptyContext);
+      child.assignValueWithContext(
+        calculator, summands.coefficients[i], emptyContext
+      );
       current.addChildOnTop(child);
       current.addChildOnTop(summands[i]);
     } else {
@@ -4308,7 +4312,6 @@ bool Expression::makeSumFromLinearCombination(
       }
     }
   }
-
   return
   this->makeOXdotsX(
     calculator, calculator.opPlus(), summandsWithCoefficient

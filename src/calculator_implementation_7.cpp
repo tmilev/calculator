@@ -2318,7 +2318,6 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
     homogenousSystem.toStringSystemLatex(
       &constantTerms, &this->currentFormat
     )
-
   );
   this->printoutPartialFractionsLatex
   << "In other words, we need to solve the following system. "

@@ -2753,12 +2753,12 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraWeight(
   if (input.size() != 4) {
     return false;
   }
-  Expression tempE;
+  Expression expression;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraWithContext;
   semisimpleLieAlgebraWithContext.content = nullptr;
   if (
     !CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
-      calculator, input[1], tempE, semisimpleLieAlgebraWithContext
+      calculator, input[1], expression, semisimpleLieAlgebraWithContext
     )
   ) {
     return calculator << "<hr>Failed to load semisimple Lie algebra";
@@ -2841,10 +2841,10 @@ bool CalculatorFunctionsWeylGroup::lieAlgebraRhoWeight(
   Weight<Polynomial<Rational> > resultWeight;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebraWithContext;
   semisimpleLieAlgebraWithContext.content = nullptr;
-  Expression tempE;
+  Expression expression;
   if (
     !CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
-      calculator, input[1], tempE, semisimpleLieAlgebraWithContext
+      calculator, input[1], expression, semisimpleLieAlgebraWithContext
     )
   ) {
     return calculator << "<hr>Failed to load semisimple Lie algebra. ";

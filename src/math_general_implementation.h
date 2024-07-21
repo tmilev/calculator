@@ -642,7 +642,6 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   int numberOfPivots = 0;
   int maximumMatrixRank =
   MathRoutines::minimum(this->numberOfRows, this->numberOfColumns);
-  Coefficient tempElement;
   if (outputNonPivotColumns != nullptr) {
     outputNonPivotColumns->initialize(this->numberOfColumns);
   }
@@ -668,6 +667,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     }
   }
   // Initialization done! Time to do actual work:
+  Coefficient coefficient;
   for (int i = 0; i < this->numberOfColumns; i ++) {
     if (numberOfPivots == maximumMatrixRank) {
       if (outputNonPivotColumns != nullptr) {
@@ -695,9 +695,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
           );
         } else {
           *humanReadableReport
-          << HtmlRoutines::getMathNoDisplay(
-            this->toStringLatex(format)
-          );
+          << HtmlRoutines::getMathNoDisplay(this->toStringLatex(format));
         }
         *humanReadableReport
         << "</td><td style='border-bottom:1pt solid black;'>"
@@ -739,17 +737,17 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
     if (carbonCopyMatrix != 0) {
       carbonCopyMatrix->switchRows(numberOfPivots, pivotIndex);
     }
-    tempElement = this->elements[numberOfPivots][i];
-    tempElement.invert();
-    this->rowTimesScalar(numberOfPivots, tempElement);
+    coefficient = this->elements[numberOfPivots][i];
+    coefficient.invert();
+    this->rowTimesScalar(numberOfPivots, coefficient);
     if (carbonCopyMatrix != 0) {
-      carbonCopyMatrix->rowTimesScalar(numberOfPivots, tempElement);
+      carbonCopyMatrix->rowTimesScalar(numberOfPivots, coefficient);
     }
     for (int j = 0; j < this->numberOfRows; j ++) {
       if (j != numberOfPivots) {
         if (!this->elements[j][i].isEqualToZero()) {
-          tempElement = this->elements[j][i];
-          tempElement.negate();
+          coefficient = this->elements[j][i];
+          coefficient.negate();
           if (report.tickAndWantReport()) {
             std::stringstream reportStream;
             reportStream
@@ -769,9 +767,9 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
             << this->numberOfRows;
             report.report(reportStream.str());
           }
-          this->addTwoRows(numberOfPivots, j, i, tempElement);
+          this->addTwoRows(numberOfPivots, j, i, coefficient);
           if (carbonCopyMatrix != 0) {
-            carbonCopyMatrix->addTwoRows(numberOfPivots, j, 0, tempElement);
+            carbonCopyMatrix->addTwoRows(numberOfPivots, j, 0, coefficient);
           }
         }
       }

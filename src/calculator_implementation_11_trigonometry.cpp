@@ -1333,7 +1333,9 @@ bool TrigonometricReduction::computeEulerFormExpression(
   Expression numeratorExpression;
   Expression denominatorExpression;
   numeratorExpression.makeSumFromLinearCombination(*this->owner, numerator);
-  denominatorExpression.makeSumFromLinearCombination(*this->owner, denominator);
+  denominatorExpression.makeSumFromLinearCombination(
+    *this->owner, denominator
+  );
   this->fourierFractionForm.makeXOX(
     *this->owner,
     this->owner->opDivide(),
@@ -1458,7 +1460,9 @@ bool TrigonometricReduction::eulerFormToTrigonometryFourierForm(
       currentArgument.addMonomial(term, leading(j));
     }
     Expression currentArgumentSummed;
-    currentArgumentSummed.makeSumFromLinearCombination(*this->owner, currentArgument);
+    currentArgumentSummed.makeSumFromLinearCombination(
+      *this->owner, currentArgument
+    );
     Expression sine;
     sine.makeOX(
       *this->owner, this->owner->opSin(), currentArgumentSummed
@@ -1616,7 +1620,9 @@ std::string TrigonometricReduction::TrigonometricFunction::toString() const {
     out << "cos(";
   }
   Expression sum;
-  sum.makeSumFromLinearCombination(*this->owner->owner, this->arguments);
+  sum.makeSumFromLinearCombination(
+    *this->owner->owner, this->arguments
+  );
   out << sum.toString();
   out << ")";
   return out.str();

@@ -12,8 +12,8 @@ private:
     const std::string& inputNoEncoding,
     const std::string& desiredAnchorTextEmptyForDefault
   );
-  static std::string getMathSpan(const std::string& input,
-    bool useDisplayStyle = false
+  static std::string getMathSpan(
+    const std::string& input, bool useDisplayStyle = false
   );
 public:
   static MapList<

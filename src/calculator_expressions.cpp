@@ -1783,9 +1783,9 @@ bool Expression::isIndefiniteIntegralFdx(
 ) const {
   STACK_TRACE("Expression::isIndefiniteIntegralFdx");
   this->checkConsistency();
-  Expression tempE;
+  Expression expression;
   if (integrationSet == nullptr) {
-    integrationSet = &tempE;
+    integrationSet = &expression;
   }
   if (
     !this->isIntegralFdx(
@@ -1805,9 +1805,9 @@ bool Expression::isDefiniteIntegralOverIntervalFdx(
 ) const {
   STACK_TRACE("Expression::isDefiniteIntegralOverIntervalFdx");
   this->checkConsistency();
-  Expression tempE;
+  Expression expression;
   if (integrationSet == nullptr) {
-    integrationSet = &tempE;
+    integrationSet = &expression;
   }
   if (
     !this->isIntegralFdx(
@@ -4164,10 +4164,7 @@ bool Expression::toStringEndStatementOneRow(
       // or the childString has already got all it's tags.
       currentOutput = childString;
     } else {
-      currentOutput =
-      HtmlRoutines::getMathNoDisplay(
-        childString
-      );
+      currentOutput = HtmlRoutines::getMathNoDisplay(childString);
     }
   }
   currentOutput += currentE.toStringAllSlidersInExpression();
@@ -4897,9 +4894,7 @@ std::string Expression::toStringWithStartingExpression(
       format->flagDontCollalpseProductsByUnits = true;
     }
     input =
-    HtmlRoutines::getMathNoDisplay(
-      startingExpression->toString(format)
-    );
+    HtmlRoutines::getMathNoDisplay(startingExpression->toString(format));
     if (format != nullptr) {
       format->flagDontCollalpseProductsByUnits = false;
     }
@@ -4909,10 +4904,7 @@ std::string Expression::toStringWithStartingExpression(
     if (this->requiresNoMathTags() && isFinal) {
       output = out.str();
     } else {
-      output =
-      HtmlRoutines::getMathNoDisplay(
-        out.str()
-      );
+      output = HtmlRoutines::getMathNoDisplay(out.str());
     }
     outTrue << "<td class='cellCalculatorResult'>" << output << "</td>";
     outTrue << "</tr>";
@@ -5998,7 +5990,7 @@ bool Expression::makeProduct(
 bool Expression::makeSum(
   Calculator& owner, const List<Expression>& summands
 ) {
-    STACK_TRACE("Expression::makeSum");
+  STACK_TRACE("Expression::makeSum");
   List<Expression> summandsWithoutZeroes;
   Rational rationalSum = 0;
   Rational current;
@@ -6015,7 +6007,7 @@ bool Expression::makeSum(
     );
   }
   if (summandsWithoutZeroes.size == 0) {
-    return this->assignValue(owner,Rational::zero());
+    return this->assignValue(owner, Rational::zero());
   }
   return
   this->makeXOXOdotsOX(owner, owner.opPlus(), summandsWithoutZeroes);

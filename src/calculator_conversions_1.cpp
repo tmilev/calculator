@@ -20,20 +20,21 @@ bool WithContext<Polynomial<Rational> >::toExpression(
 
 template < >
 bool WithContext<Polynomial<AlgebraicNumber> >::toExpression(
-    Calculator& calculator, Expression& output
-    ) {
+  Calculator& calculator, Expression& output
+) {
   CalculatorConversions::expressionFromPolynomial<AlgebraicNumber>(
-      calculator, this->content, output, &this->context
-      );
+    calculator, this->content, output, &this->context
+  );
   return true;
 }
+
 template < >
 bool WithContext<Polynomial<ElementZmodP> >::toExpression(
-    Calculator& calculator, Expression& output
-    ) {
+  Calculator& calculator, Expression& output
+) {
   CalculatorConversions::expressionFromPolynomial<ElementZmodP>(
-      calculator, this->content, output, &this->context
-      );
+    calculator, this->content, output, &this->context
+  );
   return true;
 }
 
@@ -1541,14 +1542,14 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   }
   WithContext<SemisimpleLieAlgebra*> ownerSemisimple;
   ownerSemisimple.content = nullptr;
-  Expression tempE;
+  Expression expression;
   ProgressReport report;
   std::stringstream reportStream;
   reportStream << "Extracting semisimple Lie algebra ... ";
   report.report(reportStream.str());
   if (
     !CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
-      calculator, ambientTypeE, tempE, ownerSemisimple
+      calculator, ambientTypeE, expression, ownerSemisimple
     )
   ) {
     return
@@ -1603,7 +1604,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
       !CalculatorConversions::candidateSubalgebraPrecomputed(
         calculator,
         subalgebrasE[i],
-        tempE,
+        expression,
         currentCandidate,
         subalgebras
       )
@@ -1804,7 +1805,8 @@ bool CalculatorConversions::expressionFromElementUniversalEnveloping(
       monomial, input.coefficients[i]
     );
   }
-  return output.makeSumFromLinearCombination(calculator, elementUniversalEnveloping);
+  return
+  output.makeSumFromLinearCombination(calculator, elementUniversalEnveloping);
 }
 
 bool CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients

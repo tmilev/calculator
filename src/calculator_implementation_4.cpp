@@ -1080,7 +1080,9 @@ bool Calculator::functionCollectSummandsCombine(
   if (!sumOverAlgebraicNumbers.isEqualToZero()) {
     sumOverAlgebraicNumbers.quickSortDescending();
     Expression algebraicSum;
-    algebraicSum.makeSumFromLinearCombination(calculator, sumOverAlgebraicNumbers);
+    algebraicSum.makeSumFromLinearCombination(
+      calculator, sumOverAlgebraicNumbers
+    );
     outputSum.addMonomial(algebraicSum, 1);
   }
   outputSum.quickSortDescending();
@@ -1119,9 +1121,9 @@ bool CalculatorBasics::associateExponentExponent(
   if (!isGood) {
     return false;
   }
-  Expression tempE;
-  tempE.makeProduct(calculator, input[1][2], input[2]);
-  output.makeXOX(calculator, opPower, input[1][1], tempE);
+  Expression expression;
+  expression.makeProduct(calculator, input[1][2], input[2]);
+  output.makeXOX(calculator, opPower, input[1][1], expression);
   return true;
 }
 
@@ -1221,17 +1223,20 @@ bool CalculatorBasics::minus(
   ) {
     return false;
   }
-  Expression tempE, minusOne;
+  Expression expression;
+  Expression minusOne;
   minusOne.assignValue(calculator, - 1);
   if (input.size() == 2) {
     output.makeXOX(
       calculator, calculator.opTimes(), minusOne, input[1]
     );
   } else {
-    tempE.makeXOX(
+    expression.makeXOX(
       calculator, calculator.opTimes(), minusOne, input[2]
     );
-    output.makeXOX(calculator, calculator.opPlus(), input[1], tempE);
+    output.makeXOX(
+      calculator, calculator.opPlus(), input[1], expression
+    );
   }
   return true;
 }

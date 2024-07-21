@@ -2106,7 +2106,9 @@ bool Expression::assignError(Calculator& owner, const std::string& error) {
   this->checkConsistency();
   std::string errorReplacedWhiteSpace =
   StringRoutines::replaceAll(error, " ", "~");
-  return this->addChildValueOnTop(errorReplacedWhiteSpace);
+  Expression errorNode;
+  errorNode.assignValue(owner, errorReplacedWhiteSpace);
+  return this->addChildOnTop(errorNode);
 }
 
 bool Expression::isSmallInteger(int* whichInteger) const {
@@ -4164,7 +4166,7 @@ bool Expression::toStringEndStatementOneRow(
     } else {
       currentOutput =
       HtmlRoutines::getMathNoDisplay(
-        childString, Expression::maximumCharactersInLatexPrintout
+        childString
       );
     }
   }
@@ -4896,8 +4898,7 @@ std::string Expression::toStringWithStartingExpression(
     }
     input =
     HtmlRoutines::getMathNoDisplay(
-      startingExpression->toString(format),
-      Expression::maximumCharactersInLatexPrintout
+      startingExpression->toString(format)
     );
     if (format != nullptr) {
       format->flagDontCollalpseProductsByUnits = false;
@@ -4910,7 +4911,7 @@ std::string Expression::toStringWithStartingExpression(
     } else {
       output =
       HtmlRoutines::getMathNoDisplay(
-        out.str(), Expression::maximumCharactersInLatexPrintout
+        out.str()
       );
     }
     outTrue << "<td class='cellCalculatorResult'>" << output << "</td>";
@@ -5997,7 +5998,7 @@ bool Expression::makeProduct(
 bool Expression::makeSum(
   Calculator& owner, const List<Expression>& summands
 ) {
-  STACK_TRACE("Expression::makeSum");
+    STACK_TRACE("Expression::makeSum");
   List<Expression> summandsWithoutZeroes;
   Rational rationalSum = 0;
   Rational current;
@@ -6014,7 +6015,7 @@ bool Expression::makeSum(
     );
   }
   if (summandsWithoutZeroes.size == 0) {
-    return this->assignValue(owner, 0);
+    return this->assignValue(owner,Rational::zero());
   }
   return
   this->makeXOXOdotsOX(owner, owner.opPlus(), summandsWithoutZeroes);

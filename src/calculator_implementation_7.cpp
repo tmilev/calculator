@@ -2267,7 +2267,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
   this->prepareNumerators();
   this->prepareFormatExpressions();
   this->printoutPartialFractionsHtml
-  << HtmlRoutines::getMathNoDisplay(this->stringRationalFunctionLatex, - 1);
+  << HtmlRoutines::getMathNoDisplay(this->stringRationalFunctionLatex);
   this->printoutPartialFractionsHtml
   << "<br><br>After clearing denominators, we get the equality: ";
   this->printoutPartialFractionsLatex
@@ -2275,7 +2275,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
   this->printoutPartialFractionsHtml
   << "<br><br>"
   << HtmlRoutines::getMathNoDisplay(
-    this->stringPolyIndentityNonSimplifiedLatex, - 1
+    this->stringPolyIndentityNonSimplifiedLatex
   );
   this->printoutPartialFractionsLatex
   << "\\["
@@ -2317,8 +2317,8 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
   << HtmlRoutines::getMathNoDisplay(
     homogenousSystem.toStringSystemLatex(
       &constantTerms, &this->currentFormat
-    ),
-    - 1
+    )
+
   );
   this->printoutPartialFractionsLatex
   << "In other words, we need to solve the following system. "
@@ -3801,7 +3801,7 @@ bool CalculatorFunctions::addTerms(
   }
   sum.quickSortDescending();
   CalculatorFunctions::Test::checkSorting(sum.monomials);
-  output.makeSum(calculator, sum);
+  output.makeSumFromLinearCombination(calculator, sum);
   if (output == input) {
     return false;
   }
@@ -6665,7 +6665,7 @@ bool CalculatorFunctions::atimesBpowerJplusEtcDivBpowerI(
       return false;
     }
   }
-  return output.makeSum(calculator, numeratorsNew);
+  return output.makeSumFromLinearCombination(calculator, numeratorsNew);
 }
 
 void Expression::getBlocksOfCommutativity(

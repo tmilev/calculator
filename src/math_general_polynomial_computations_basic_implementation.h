@@ -1303,7 +1303,7 @@ bool Polynomial<Coefficient>::differential(
 }
 
 template <class Coefficient>
-bool PolynomialOrder<Coefficient>::compareLeftGreaterThanRight(
+bool PolynomialOrder::compareLeftGreaterThanRight(
   const Polynomial<Coefficient>& left,
   const Polynomial<Coefficient>& right
 ) const {
@@ -1610,7 +1610,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
     if (this->owner->format.flagUseLatex) {
       out
       << HtmlRoutines::getMathNoDisplay(
-        this->owner->basis[i].element.toString(&format), - 1
+        this->owner->basis[i].element.toString(&format)
       );
     } else {
       out << this->owner->basis[i].element.toString(&format);

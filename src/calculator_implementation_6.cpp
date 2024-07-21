@@ -1047,7 +1047,7 @@ bool CalculatorFunctions::factorOutNumberContent(
   Expression left;
   Expression right;
   left.assignValue(calculator, scale);
-  right.makeSum(calculator, linearCombination);
+  right.makeSumFromLinearCombination(calculator, linearCombination);
   output = left * right;
   return true;
 }
@@ -2097,7 +2097,7 @@ bool CalculatorFunctions::scaleToLeadingUnit(
   LinearCombination<Expression, Rational> collection;
   calculator.functionCollectSummandsCombine(calculator, argument, collection);
   collection /= collection.getLeadingCoefficient(nullptr);
-  return output.makeSum(calculator, collection);
+  return output.makeSumFromLinearCombination(calculator, collection);
 }
 
 bool CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic(

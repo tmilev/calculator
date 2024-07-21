@@ -5733,9 +5733,9 @@ bool CalculatorLieTheory::getSymmetricCartan(
   dynkinType.getCoCartanSymmetric(outputCoMat);
   out
   << "Symmetric Cartan matrix: "
-  << HtmlRoutines::getMathNoDisplay(outputMat.toStringLatex(), 10000)
+  << HtmlRoutines::getMathNoDisplay(outputMat.toStringLatex())
   << "<br>Co-symmetric Cartan matrix: "
-  << HtmlRoutines::getMathNoDisplay(outputCoMat.toStringLatex(), 10000);
+  << HtmlRoutines::getMathNoDisplay(outputCoMat.toStringLatex());
   return output.assignValue(calculator, out.str());
 }
 

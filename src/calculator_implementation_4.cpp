@@ -1074,13 +1074,13 @@ bool Calculator::functionCollectSummandsCombine(
   if (!sumOverDoubles.isEqualToZero() && !hasNAN) {
     sumOverDoubles.quickSortDescending();
     Expression doubleSum;
-    doubleSum.makeSum(calculator, sumOverDoubles);
+    doubleSum.makeSumFromLinearCombination(calculator, sumOverDoubles);
     outputSum.addMonomial(doubleSum, 1);
   }
   if (!sumOverAlgebraicNumbers.isEqualToZero()) {
     sumOverAlgebraicNumbers.quickSortDescending();
     Expression algebraicSum;
-    algebraicSum.makeSum(calculator, sumOverAlgebraicNumbers);
+    algebraicSum.makeSumFromLinearCombination(calculator, sumOverAlgebraicNumbers);
     outputSum.addMonomial(algebraicSum, 1);
   }
   outputSum.quickSortDescending();

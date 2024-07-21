@@ -25,7 +25,6 @@ private:
     this->children.size = 0;
     this->data = - 1;
   }
-  static const int maximumCharactersInLatexPrintout = 200001;
   bool setChild(int childIndexInMe, int childIndexInOwner);
   bool evaluatesToScalarInternal() const;
   // Definitions.
@@ -359,14 +358,6 @@ public:
     return
     this->assignValueWithContext(owner, input.content, input.context);
   }
-  template <class Type>
-  bool addChildValueOnTop(const Type& inputValue) {
-    this->checkInitialization();
-    Expression child;
-    child.assignValue(*this->owner, inputValue);
-    child.checkConsistency();
-    return this->addChildOnTop(child);
-  }
   bool setContextAtLeastEqualTo(
     ExpressionContext& inputOutputMinContext,
     std::stringstream* commentsOnFailure
@@ -410,7 +401,7 @@ public:
     const Expression& variable
   );
   template <class Coefficient>
-  bool makeSum(
+  bool makeSumFromLinearCombination(
     Calculator& calculator,
     const LinearCombination<Expression, Coefficient>& summands
   );
@@ -4268,11 +4259,11 @@ bool CalculatorConversions::functionGetMatrixInternal(
 }
 
 template <class Coefficient>
-bool Expression::makeSum(
+bool Expression::makeSumFromLinearCombination(
   Calculator& calculator,
   const LinearCombination<Expression, Coefficient>& summands
 ) {
-  STACK_TRACE("Expression::makeSum");
+  STACK_TRACE("Expression::makeSumFromLinearCombination");
   Expression oneE;
   // used to record the constant term
   oneE.assignValue<Rational>(calculator, 1);
@@ -4280,20 +4271,24 @@ bool Expression::makeSum(
     return this->assignValue<Rational>(calculator, 0);
   }
   List<Expression> summandsWithCoefficient;
+  ExpressionContext emptyContext(calculator);
   summandsWithCoefficient.setSize(summands.size());
   for (int i = 0; i < summands.size(); i ++) {
     Expression& current = summandsWithCoefficient[i];
     if (summands[i] == oneE) {
-      current.assignValue(calculator, summands.coefficients[i]);
+      current.assignValueWithContext(calculator, summands.coefficients[i],emptyContext);
     } else if (!(summands.coefficients[i] == 1)) {
       current.reset(calculator, 3);
       current.addChildAtomOnTop(calculator.opTimes());
-      current.addChildValueOnTop(summands.coefficients[i]);
+      Expression child;
+      child.assignValueWithContext(calculator, summands.coefficients[i], emptyContext);
+      current.addChildOnTop(child);
       current.addChildOnTop(summands[i]);
     } else {
       current = summands[i];
     }
   }
+  // Consistency check, for small enough expressions.
   if (summandsWithCoefficient.size < 5) {
     for (int i = 0; i < summandsWithCoefficient.size; i ++) {
       for (int j = i; j < summandsWithCoefficient.size; j ++) {
@@ -4313,6 +4308,7 @@ bool Expression::makeSum(
       }
     }
   }
+
   return
   this->makeOXdotsX(
     calculator, calculator.opPlus(), summandsWithCoefficient
@@ -4638,7 +4634,9 @@ bool CalculatorConversions::expressionFromPolynomial(
         } else {
           currentBase.reset(calculator);
           currentBase.addChildAtomOnTop("x");
-          currentBase.addChildValueOnTop(Rational(j));
+          Expression element;
+          element.assignValue(calculator, Rational(j));
+          currentBase.addChildOnTop(element);
         }
         if (input[i](j) == 1) {
           currentMultTermExpression = currentBase;
@@ -4658,7 +4656,7 @@ bool CalculatorConversions::expressionFromPolynomial(
     }
     terms.addMonomial(currentTerm, input.coefficients[i]);
   }
-  return output.makeSum(calculator, terms);
+  return output.makeSumFromLinearCombination(calculator, terms);
 }
 
 template <class Coefficient>

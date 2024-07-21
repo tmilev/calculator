@@ -691,12 +691,12 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
         if (formatAsLinearSystem) {
           *humanReadableReport
           << HtmlRoutines::getMathNoDisplay(
-            this->toStringSystemLatex(carbonCopyMatrix, format), - 1
+            this->toStringSystemLatex(carbonCopyMatrix, format)
           );
         } else {
           *humanReadableReport
           << HtmlRoutines::getMathNoDisplay(
-            this->toStringLatex(format), - 1
+            this->toStringLatex(format)
           );
         }
         *humanReadableReport
@@ -795,7 +795,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
         *humanReadableReport
         << "<tr><td>"
         << HtmlRoutines::getMathNoDisplay(
-          this->toStringSystemLatex(carbonCopyMatrix, format), - 1
+          this->toStringSystemLatex(carbonCopyMatrix, format)
         )
         << "</td><td> Final result.</td></tr></table>\n\n\n\n";
       } else {

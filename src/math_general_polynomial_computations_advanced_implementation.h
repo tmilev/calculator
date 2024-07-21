@@ -147,11 +147,21 @@ generateSymmetricDifferenceCandidates() {
 
 template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasis(
-  List<Polynomial<Coefficient> >& inputOutput
+  List<Polynomial<Coefficient> >& inputOutput, bool rescaleLeadingMonomials
 ) {
   STACK_TRACE("GroebnerBasisComputation::transformToReducedGroebnerBasis");
   this->initializeForGroebnerComputation();
+
   this->basisCandidates = inputOutput;
+  if (rescaleLeadingMonomials){
+    for (int i = 0; i < this->basisCandidates.size; i ++) {
+      this->basisCandidates[i].scaleNormalizeLeadingMonomial(
+          &MonomialPolynomial::orderDefault()
+          );
+    }
+
+  }
+
   ProgressReport reportStart("Groebner basis start");
   if (this->flagDoProgressReport) {
     reportStart.report(this->toStringStatusGroebnerBasisTransformation());
@@ -925,7 +935,9 @@ template <class Coefficient>
 void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
 (List<Polynomial<Coefficient> >& inputSystem) {
   STACK_TRACE("PolynomialSystem::polynomialSystemSolutionSimplificationPhase");
-  ProgressReport report1, report2, report3;
+  ProgressReport report1;
+  ProgressReport  report2;
+  ProgressReport report3;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
     reportStream
@@ -957,7 +969,7 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
     }
     if (success && inputSystem.size > 0) {
       this->groebner.numberPolynomialDivisions = 0;
-      success = this->groebner.transformToReducedGroebnerBasis(inputSystem);
+      success = this->groebner.transformToReducedGroebnerBasis(inputSystem, false);
     }
     if (!success) {
       inputSystem = oldSystem;
@@ -1589,7 +1601,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   computation.polynomialOrder.monomialOrder =
   MonomialPolynomial::orderForGreatestCommonDivisor();
   computation.maximumMonomialOperations = - 1;
-  if (!computation.transformToReducedGroebnerBasis(basis)) {
+  if (!computation.transformToReducedGroebnerBasis(basis, false)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Unexpected: failed to transform to reduced "

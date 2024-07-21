@@ -893,8 +893,16 @@ public:
     const Expression& inputExpression,
     int inputOrder
   );
+  PolynomialOrder getOrder()const;
+  template <class Coefficient>
+  void initializeGrobnerComputation(GroebnerBasisComputation<Coefficient>& output);
   bool initializeComputation();
   bool compute();
+  // Prepares the final human readable outputs from the internal computation.
+  template <class Coefficient>
+  bool prepareResultAndReport(GroebnerBasisComputation<Coefficient>& groebnerComputation,const List<Polynomial<Coefficient>>& inputPolynomials,const  List<Polynomial<Coefficient>> &outputGroebner, bool success);
+  template <class Coefficient>
+  bool prepareFinalResult(const List<Polynomial<Coefficient>> &outputGroebner);
 };
 
 GroebnerComputationCalculator::GroebnerComputationCalculator(
@@ -1035,72 +1043,112 @@ bool GroebnerComputationCalculator::initializeComputation() {
   return true;
 }
 
+
+PolynomialOrder GroebnerComputationCalculator::getOrder()const{
+  PolynomialOrder result;
+
+  switch (this->order) {
+  case MonomialPolynomial::Order::gradedLexicographic:
+    result.monomialOrder.setComparison(
+        MonomialPolynomial::greaterThan_totalDegree_leftLargerWins
+        );
+
+    break;
+    case       MonomialPolynomial::Order::gradedReverseLexicographic
+:
+
+    result.monomialOrder.setComparison(
+        MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
+        );
+    break;
+    case MonomialPolynomial::Order::lexicographicOpposite:
+    result.monomialOrder.setComparison(
+        MonomialPolynomial::greaterThan_rightLargerWins
+        );
+    break;
+    case MonomialPolynomial::Order::lexicographic:
+    result.monomialOrder.setComparison(
+        MonomialPolynomial::greaterThan_leftLargerWins
+        );
+    break;
+
+  default:
+    global.fatal << "Unexpected order value: " << this->order << global.fatal;
+    break;
+  }
+  return result;
+}
+
+template <class Coefficient>
+void GroebnerComputationCalculator::initializeGrobnerComputation(GroebnerBasisComputation<Coefficient> & output){
+  this->desiredContext.getFormat(output.format);
+  this->desiredContext.getFormat(global.defaultFormat.getElement());
+  output.polynomialOrder = this->getOrder();
+  output.format.monomialOrder =
+      output.polynomialOrder.monomialOrder;
+  output.maximumMonomialOperations = this->upperBound;
+
+
+}
 bool GroebnerComputationCalculator::compute() {
   STACK_TRACE("GroebnerComputationCalculator::compute");
   if (!this->initializeComputation()) {
     return false;
   }
-  for (int i = 0; i < this->inputVector.size; i ++) {
-    this->inputVector[i].scaleNormalizeLeadingMonomial(
-      &MonomialPolynomial::orderDefault()
-    );
-  }
-  GroebnerBasisComputation<AlgebraicNumber> groebnerComputation;
-  this->desiredContext.getFormat(groebnerComputation.format);
-  this->desiredContext.getFormat(global.defaultFormat.getElement());
-  List<Polynomial<AlgebraicNumber> > outputGroebner;
-  outputGroebner = inputVector;
-  if (this->order == MonomialPolynomial::Order::gradedLexicographic) {
-    groebnerComputation.polynomialOrder.monomialOrder.setComparison(
-      MonomialPolynomial::greaterThan_totalDegree_leftLargerWins
-    );
-  } else if (
-    this->order == MonomialPolynomial::Order::gradedReverseLexicographic
-  ) {
-    groebnerComputation.polynomialOrder.monomialOrder.setComparison(
-      MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
-    );
-  } else if (
-    this->order == MonomialPolynomial::Order::lexicographicOpposite
-  ) {
-    groebnerComputation.polynomialOrder.monomialOrder.setComparison(
-      MonomialPolynomial::greaterThan_rightLargerWins
-    );
-  } else if (this->order == MonomialPolynomial::Order::lexicographic) {
-    groebnerComputation.polynomialOrder.monomialOrder.setComparison(
-      MonomialPolynomial::greaterThan_leftLargerWins
-    );
+
+  if (this->modulus.isEqualToZero()){
+    List<Polynomial<AlgebraicNumber> > inputGroebner;
+    List<Polynomial<AlgebraicNumber> > outputGroebner;
+
+    GroebnerBasisComputation<AlgebraicNumber> groebnerComputation;
+    groebnerComputation.polynomialOrder = this->getOrder();
+    inputGroebner = this->inputVector;
+    outputGroebner = this->inputVector;
+    bool success =
+        groebnerComputation.transformToReducedGroebnerBasis(outputGroebner, true);
+    return this->prepareResultAndReport<AlgebraicNumber>(groebnerComputation,inputGroebner,outputGroebner, success);
+
   } else {
-    global.fatal << "Unexpected order value: " << this->order << global.fatal;
+    List<Polynomial<ElementZmodP> > outputGroebner;
+    GroebnerBasisComputation<ElementZmodP> groebnerComputation;
+    groebnerComputation.polynomialOrder = this->getOrder();
+    outputGroebner = this->inputVectorModP;
+    bool success =
+        groebnerComputation.transformToReducedGroebnerBasis(outputGroebner, true);
+    return this->prepareResultAndReport<ElementZmodP>(groebnerComputation,this->inputVectorModP, outputGroebner,success);
+
   }
-  groebnerComputation.format.monomialOrder =
-  groebnerComputation.polynomialOrder.monomialOrder;
-  groebnerComputation.maximumMonomialOperations = this->upperBound;
-  bool success =
-  groebnerComputation.transformToReducedGroebnerBasis(outputGroebner);
+
+}
+template <class Coefficient>
+
+bool GroebnerComputationCalculator::prepareResultAndReport(GroebnerBasisComputation<Coefficient>& groebnerComputation, const List<Polynomial<Coefficient> >& inputPolynomials,
+                                                           const List<Polynomial<Coefficient>> &outputGroebner, bool success)
+{
+  STACK_TRACE("GroebnerComputationCalculator::prepareResultAndReport");
   std::stringstream out;
   out << "<hr>" << groebnerComputation.toStringLetterOrder();
-  out << "<br>Starting basis (" << this->inputVector.size << " elements): ";
-  for (int i = 0; i < this->inputVector.size; i ++) {
+  out << "<br>Starting basis (" << inputPolynomials.size << " elements): ";
+  for (const Polynomial<Coefficient> &polynomial : inputPolynomials) {
     out
-    << "<br>"
-    << HtmlRoutines::getMathNoDisplay(
-      this->inputVector[i].toString(&groebnerComputation.format)
-    );
+        << "<br>"
+        << HtmlRoutines::getMathNoDisplay(
+               polynomial.toString(&groebnerComputation.format)
+               );
   }
   if (success) {
     out
-    << "<br>Minimal Groebner basis with "
-    << outputGroebner.size
-    << " elements, computed using algorithm 1, using "
-    << groebnerComputation.numberPolynomialDivisions
-    << " polynomial divisions. ";
+        << "<br>Minimal Groebner basis with "
+        << outputGroebner.size
+        << " elements, computed using algorithm 1, using "
+        << groebnerComputation.numberPolynomialDivisions
+        << " polynomial divisions. ";
     for (int i = 0; i < outputGroebner.size; i ++) {
       out
-      << "<br> "
-      << HtmlRoutines::getMathNoDisplay(
-        outputGroebner[i].toString(&groebnerComputation.format)
-      );
+          << "<br> "
+          << HtmlRoutines::getMathNoDisplay(
+                 outputGroebner[i].toString(&groebnerComputation.format)
+                 );
     }
     out << "<br>Output in calculator-ready format: ";
     out << "<br>(";
@@ -1113,20 +1161,20 @@ bool GroebnerComputationCalculator::compute() {
     out << ")";
   } else {
     out
-    << "<br>Minimal Groebner basis not computed: "
-    << "exceeded the user-given limit of "
-    << this->upperBound
-    << " polynomial operations. ";
+        << "<br>Minimal Groebner basis not computed: "
+        << "exceeded the user-given limit of "
+        << this->upperBound
+        << " polynomial operations. ";
     out
-    << "<br>An intermediate non-Groebner basis containing total "
-    << groebnerComputation.basis.size
-    << " basis elements: ";
+        << "<br>An intermediate non-Groebner basis containing total "
+        << groebnerComputation.basis.size
+        << " basis elements: ";
     out << "<br>GroebnerLex{}(10000, <br>";
     for (int i = 0; i < groebnerComputation.basis.size; i ++) {
       out
-      << groebnerComputation.basis[i].element.toString(
-        &groebnerComputation.format
-      );
+          << groebnerComputation.basis[i].element.toString(
+                 &groebnerComputation.format
+                 );
       if (i != groebnerComputation.basis.size - 1) {
         out << ", <br>";
       }
@@ -1134,9 +1182,16 @@ bool GroebnerComputationCalculator::compute() {
     out << ");";
   }
   *this->owner << out.str();
+  return this->prepareFinalResult(outputGroebner);
+}
+
+template <class Coefficient>
+bool GroebnerComputationCalculator::prepareFinalResult(const List<Polynomial<Coefficient>>& outputGroebner)
+{  STACK_TRACE("GroebnerComputationCalculator::prepareFinalResult");
+
   List<Expression> elements;
   for (int i = 0; i < outputGroebner.size; i ++) {
-    WithContext<Polynomial<AlgebraicNumber> > element;
+    WithContext<Polynomial<Coefficient> > element;
     element.context = this->desiredContext;
     element.content = outputGroebner[i];
     Expression converted;

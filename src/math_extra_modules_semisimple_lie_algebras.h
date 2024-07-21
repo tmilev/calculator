@@ -1683,7 +1683,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
             if (this->getDimension() < 50) {
               out2
               << "<br>Matrix of elemenent in the m_i basis:<br>"
-              << HtmlRoutines::getMathNoDisplay(matrix.toString(), 5000);
+              << HtmlRoutines::getMathNoDisplay(matrix.toString());
             } else {
               out2
               << "<br>Matrix of elemenent in the m_i basis:<br>"
@@ -2385,7 +2385,7 @@ const {
         );
         out
         << HtmlRoutines::getMathNoDisplay(
-          outputMat.toString(&latexFormat), 5000
+          outputMat.toString(&latexFormat)
         )
         << " = ";
         out << this->actionsGeneratorsMatrix[i].toString();

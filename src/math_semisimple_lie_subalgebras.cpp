@@ -9797,7 +9797,7 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(
     if (useLaTeX && useHtml) {
       out
       << HtmlRoutines::getMathNoDisplay(
-        simpleTypes[i].toString(&currentFormat), 1000
+        simpleTypes[i].toString(&currentFormat)
       )
       << ": ";
     } else {
@@ -10270,7 +10270,7 @@ std::string CandidateSemisimpleSubalgebra::toStringGenerators(
   for (int i = 0; i < this->negativeGenerators.size; i ++) {
     out
     << HtmlRoutines::getMathNoDisplay(
-      this->negativeGenerators[i].toString(format), 2000
+      this->negativeGenerators[i].toString(format)
     );
     if (i != this->negativeGenerators.size - 1) {
       out << ", ";
@@ -10280,7 +10280,7 @@ std::string CandidateSemisimpleSubalgebra::toStringGenerators(
   for (int i = 0; i < this->positiveGenerators.size; i ++) {
     out
     << HtmlRoutines::getMathNoDisplay(
-      this->positiveGenerators[i].toString(format), 2000
+      this->positiveGenerators[i].toString(format)
     );
     if (i != this->positiveGenerators.size - 1) {
       out << ", ";
@@ -10425,8 +10425,7 @@ std::string CandidateSemisimpleSubalgebra::toString(
   << HtmlRoutines::getMathNoDisplay(
     this->characterNonPrimalFundamentalCoordinates.toString(
       &characterFormatNonConstant
-    ),
-    20000
+    )
   );
   if (this->cartanOfCentralizer.size > 0) {
     out
@@ -10435,8 +10434,7 @@ std::string CandidateSemisimpleSubalgebra::toString(
     << "(please note the order is not the same as above). ";
     out
     << HtmlRoutines::getMathNoDisplay(
-      this->primalCharacter.toString(&characterFormatNonConstant),
-      20000
+      this->primalCharacter.toString(&characterFormatNonConstant)
     );
   }
   if (this->flagCentralizerIsWellChosen && weightsAreCoordinated) {
@@ -11096,12 +11094,4 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
   this->bilinearFormFundamentalPrimal.transpose();
   this->bilinearFormFundamentalPrimal *= this->bilinearFormSimplePrimal;
   this->bilinearFormFundamentalPrimal *= matrixFundamentalCoordinatesSimple;
-  /*  this->inducedEmbeddingPrimalFundamentalCoordinatesIntoSimpleAmbientCoordinates.initialize(this->getAmbientWeyl().getDimension(), this->getPrimalRank());
-  for (int i = 0; i < this->getRank(); i ++)
-    this->inducedEmbeddingPrimalFundamentalCoordinatesIntoSimpleAmbientCoordinates.assignVectorToColumnKeepOtherColsIntactNoInit
-    (i, this->hs[i]);
-  for (int i = this->getRank(); i < this->getPrimalRank(); i ++)
-    this->inducedEmbeddingPrimalFundamentalCoordinatesIntoSimpleAmbientCoordinates.assignVectorToColumnKeepOtherColsIntactNoInit
-    (i, this->CartanOfCentralizer[i-this->getRank()]);
-*/
 }

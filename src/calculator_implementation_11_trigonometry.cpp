@@ -1072,7 +1072,7 @@ bool TrigonometricReduction::computeBaseTrigonometricForm(
     *this->owner
   );
   Expression numeratorExpression;
-  numeratorExpression.makeSum(
+  numeratorExpression.makeSumFromLinearCombination(
     *this->owner, this->numeratorBaseTrigonometric
   );
   if (denominator.isEqualToOne()) {
@@ -1080,7 +1080,7 @@ bool TrigonometricReduction::computeBaseTrigonometricForm(
     return true;
   }
   Expression denominatorExpression;
-  denominatorExpression.makeSum(
+  denominatorExpression.makeSumFromLinearCombination(
     *this->owner, this->denominatorBaseTrigonometric
   );
   this->baseTrigonometricForm.makeXOX(
@@ -1332,8 +1332,8 @@ bool TrigonometricReduction::computeEulerFormExpression(
   );
   Expression numeratorExpression;
   Expression denominatorExpression;
-  numeratorExpression.makeSum(*this->owner, numerator);
-  denominatorExpression.makeSum(*this->owner, denominator);
+  numeratorExpression.makeSumFromLinearCombination(*this->owner, numerator);
+  denominatorExpression.makeSumFromLinearCombination(*this->owner, denominator);
   this->fourierFractionForm.makeXOX(
     *this->owner,
     this->owner->opDivide(),
@@ -1458,7 +1458,7 @@ bool TrigonometricReduction::eulerFormToTrigonometryFourierForm(
       currentArgument.addMonomial(term, leading(j));
     }
     Expression currentArgumentSummed;
-    currentArgumentSummed.makeSum(*this->owner, currentArgument);
+    currentArgumentSummed.makeSumFromLinearCombination(*this->owner, currentArgument);
     Expression sine;
     sine.makeOX(
       *this->owner, this->owner->opSin(), currentArgumentSummed
@@ -1584,7 +1584,7 @@ void TrigonometricReduction::TrigonometricFunction::computeEulerFormExpression(
   );
   Expression sum;
   Calculator& calculator = *this->owner->owner;
-  sum.makeSum(calculator, this->arguments);
+  sum.makeSumFromLinearCombination(calculator, this->arguments);
   Expression plusExponent = calculator.expressionSquareRootNegativeOne() * sum;
   Expression minusExponent = calculator.expressionMinusOne() * plusExponent;
   Expression plusSummand;
@@ -1616,7 +1616,7 @@ std::string TrigonometricReduction::TrigonometricFunction::toString() const {
     out << "cos(";
   }
   Expression sum;
-  sum.makeSum(*this->owner->owner, this->arguments);
+  sum.makeSumFromLinearCombination(*this->owner->owner, this->arguments);
   out << sum.toString();
   out << ")";
   return out.str();

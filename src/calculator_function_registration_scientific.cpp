@@ -554,9 +554,9 @@ void Calculator::initializeFunctionsScientificBasic() {
     "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, upperLimit=5  );\n"
     "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (s,c,b,a));\n"
     "GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\n"
-    "Thaw GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\n",
+    "Thaw GroebnerLex{}(s^2+c^2+ 1, a-s^4, b-c^4, order = (a,b,c,s));\n"
     "GroebnerLex(x y+z=40, x z+y=51, x+y+z=19);\n"
-    "GroebnerLex(x y+z=40, x z+y=51, x+y+z=19, modulus = 7);\n"
+    "GroebnerLex(x y+z=40, x z+y=51, x+y+z=19, modulus = 7);\n",
     "Calculator::groebnerLexicographic",
     "GroebnerLex",
     innerStandard

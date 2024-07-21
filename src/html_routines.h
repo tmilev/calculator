@@ -12,9 +12,7 @@ private:
     const std::string& inputNoEncoding,
     const std::string& desiredAnchorTextEmptyForDefault
   );
-  static std::string getMathSpan(
-    const std::string& input,
-    int upperNumberOfCharacters = 10000,
+  static std::string getMathSpan(const std::string& input,
     bool useDisplayStyle = false
   );
 public:
@@ -126,9 +124,7 @@ public:
   );
   static const std::string& getJavascriptAceEditorScriptWithTags();
   static std::string getJavascriptVariable(const std::string& variableName);
-  static std::string getMathNoDisplay(
-    const std::string& input, int upperNumberOfCharacters = 10000
-  );
+  static std::string getMathNoDisplay(const std::string& input);
   static std::string getStyleButtonLikeHtml();
   static std::string clearNewLines(const std::string& inputString);
   static std::string backslashQuotes(const std::string& inputString);

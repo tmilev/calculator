@@ -3183,10 +3183,10 @@ public:
   }
 };
 
-template <class Coefficient>
 class PolynomialOrder {
 public:
   List<MonomialPolynomial>::Comparator monomialOrder;
+  template <class Coefficient>
   bool compareLeftGreaterThanRight(
     const Polynomial<Coefficient>& left,
     const Polynomial<Coefficient>& right
@@ -3880,7 +3880,7 @@ public:
 template <class Coefficient>
 class GroebnerBasisComputation {
 public:
-  PolynomialOrder<Coefficient> polynomialOrder;
+  PolynomialOrder polynomialOrder;
   Polynomial<Coefficient> remainderDivision;
   List<Polynomial<Coefficient> > quotients;
   List<Polynomial<Coefficient> > basisCandidates;
@@ -3914,7 +3914,7 @@ public:
     List<Polynomial<Coefficient> >& inputOutput
   );
   bool transformToReducedGroebnerBasis(
-    List<Polynomial<Coefficient> >& inputOutput
+    List<Polynomial<Coefficient> >& inputOutput, bool rescaleLeadingMonomials
   );
   void generateSymmetricDifferenceCandidates();
   void generateOneSymmetricDifferenceCandidate(

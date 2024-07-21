@@ -1954,7 +1954,7 @@ toString(FormatExpressions* format) const {
       forYourCopyConvenience << currentStream.str();
       out
       << HtmlRoutines::getMathNoDisplay(
-        "\\begin{array}{l}" + currentStream.str() + "\\end{array}", 3000
+        "\\begin{array}{l}" + currentStream.str() + "\\end{array}"
       );
     } else {
       out << "Simple generator " << i + 1 << "} not computed ";

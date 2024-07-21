@@ -20,11 +20,20 @@ bool WithContext<Polynomial<Rational> >::toExpression(
 
 template < >
 bool WithContext<Polynomial<AlgebraicNumber> >::toExpression(
-  Calculator& calculator, Expression& output
-) {
+    Calculator& calculator, Expression& output
+    ) {
   CalculatorConversions::expressionFromPolynomial<AlgebraicNumber>(
-    calculator, this->content, output, &this->context
-  );
+      calculator, this->content, output, &this->context
+      );
+  return true;
+}
+template < >
+bool WithContext<Polynomial<ElementZmodP> >::toExpression(
+    Calculator& calculator, Expression& output
+    ) {
+  CalculatorConversions::expressionFromPolynomial<ElementZmodP>(
+      calculator, this->content, output, &this->context
+      );
   return true;
 }
 
@@ -977,7 +986,7 @@ bool CalculatorConversions::expressionFromElementSemisimpleLieAlgebraRationals(
     );
     monomials.addMonomial(monomial, input.coefficients[i]);
   }
-  return output.makeSum(calculator, monomials);
+  return output.makeSumFromLinearCombination(calculator, monomials);
 }
 
 bool CalculatorConversions::expressionFromDynkinType(
@@ -993,7 +1002,7 @@ bool CalculatorConversions::expressionFromDynkinType(
     );
     monomials.addMonomial(monomial, input.coefficients[i]);
   }
-  return output.makeSum(calculator, monomials);
+  return output.makeSumFromLinearCombination(calculator, monomials);
 }
 
 bool CalculatorConversions::
@@ -1016,7 +1025,7 @@ expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
     input.coefficients[i].checkConsistency();
     monomials.addMonomial(monomial, input.coefficients[i]);
   }
-  return output.makeSum(calculator, monomials);
+  return output.makeSumFromLinearCombination(calculator, monomials);
 }
 
 bool CalculatorConversions::slTwoSubalgebraPrecomputed(
@@ -1031,12 +1040,12 @@ bool CalculatorConversions::slTwoSubalgebraPrecomputed(
     << " children, 4 expected. ";
   }
   const Expression& ownerExpression = input[1];
-  Expression tempE;
+  Expression expression;
   WithContext<SemisimpleLieAlgebra*> algebraWithContext;
   algebraWithContext.content = nullptr;
   if (
     !CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
-      calculator, ownerExpression, tempE, algebraWithContext
+      calculator, ownerExpression, expression, algebraWithContext
     )
   ) {
     return
@@ -1795,7 +1804,7 @@ bool CalculatorConversions::expressionFromElementUniversalEnveloping(
       monomial, input.coefficients[i]
     );
   }
-  return output.makeSum(calculator, elementUniversalEnveloping);
+  return output.makeSumFromLinearCombination(calculator, elementUniversalEnveloping);
 }
 
 bool CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients

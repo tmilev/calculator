@@ -256,22 +256,10 @@ std::string HtmlRoutines::getCalculatorComputationAnchorThisServer(
 
 std::string HtmlRoutines::getMathSpan(
   const std::string& input,
-  int upperNumberOfCharacters,
   bool useDisplayStyle
 ) {
   std::stringstream out;
-  if (
-    input.size() > static_cast<unsigned>(upperNumberOfCharacters) &&
-    upperNumberOfCharacters > 0
-  ) {
-    out
-    << "<b>LaTeX output is longer than "
-    << upperNumberOfCharacters
-    << " characters and I dare not use the equation editor. "
-    << "Here is the output as plain LaTeX.</b> "
-    << input;
-    return out.str();
-  }
+
   // Above 2^16 = 65536, observation of the behavior of
   // the google chrome browser shows that the
   // resulting text blob will not be packed into a single
@@ -297,9 +285,9 @@ std::string HtmlRoutines::getMathSpan(
 }
 
 std::string HtmlRoutines::getMathNoDisplay(
-  const std::string& input, int upperNumberOfCharacters
+  const std::string& input
 ) {
-  return HtmlRoutines::getMathSpan(input, upperNumberOfCharacters, false);
+  return HtmlRoutines::getMathSpan(input , false);
 }
 
 std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(

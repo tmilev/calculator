@@ -145,7 +145,7 @@ class CalculatorEquationEditor {
       return;
     }
     let content = this.calculatorPanel.equationEditor.rootNode.toLatex();
-    this.extractor.middleEditedString = initializeButtons.processMathQuillLatex(content);
+    this.extractor.middleEditedString = content;
     this.textBox.textContent =
       this.extractor.leftString +
       this.extractor.middleEditedString +

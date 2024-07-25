@@ -51,9 +51,13 @@ class ProblemCollection {
       console.log("Unexpected percent sign in problem id.");
     }
     // theProblemId is percent encoded, safe to embed in html.
-    let theProblemId = encodeURIComponent(problemData.id);
-    let element = document.getElementById(ids.domElements.problemPageContentContainer);
-    let currentProblem = this.getProblemByIdOrRegisterEmpty(theProblemId, element);
+    let problemId = encodeURIComponent(problemData.id);
+    let element = document.getElementById(
+      ids.domElements.problemPageContentContainer
+    );
+    let currentProblem = this.getProblemByIdOrRegisterEmpty(
+      problemId, element
+    );
     currentProblem.initializeInfo(problemData, null);
     return currentProblem;
   }
@@ -102,7 +106,9 @@ class ProblemCollection {
     writeTopicsToCoursePage();
     const writeTime = new Date().getTime() - startTime;
     if (writeTime > 1000) {
-      console.log(`Less than a second to generate html expected, needed ${writeTime} ms instead.`);
+      console.log(
+        `Less than a second to generate html expected, needed ${writeTime} ms instead.`
+      );
     }
   }
 
@@ -140,7 +146,9 @@ class ProblemCollection {
     let problem = getCurrentProblem();
     if (page.pages.problemPage.flagLoaded) {
       if (problem !== undefined && problem !== null) {
-        let problemNavigation = document.getElementById(problem.idNavigationProblemNotEntirePanel);
+        let problemNavigation = document.getElementById(
+          problem.idNavigationProblemNotEntirePanel
+        );
         if (problemNavigation !== null) {
           problemNavigation.textContent = "";
           let updatedContent = problem.getProblemNavigationContent();
@@ -151,7 +159,7 @@ class ProblemCollection {
       }
       return;
     }
-    let url;
+    let url = "";
     if (problem !== undefined && problem !== null) {
       let forReal = problem.flagForReal;
       url = `${pathnames.urls.calculatorAPI}?${problem.getCalculatorURLRequestFileCourseTopics(forReal)}`;
@@ -207,7 +215,9 @@ class ProblemCollection {
 
 function selectCurrentProblem(problemIdURLed, exerciseType) {
   let page = window.calculator.mainPage;
-  page.storage.variables.currentCourse.problemFileName.setAndStore(decodeURIComponent(problemIdURLed));
+  page.storage.variables.currentCourse.problemFileName.setAndStore(
+    decodeURIComponent(problemIdURLed)
+  );
   page.storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
   let problem = getCurrentProblem();
   problem.flagForReal = false;
@@ -219,7 +229,7 @@ function selectCurrentProblem(problemIdURLed, exerciseType) {
   }
   page.pages.problemPage.flagLoaded = false;
   // This will force a page reload.
-  page.currentPage = "";  
+  page.currentPage = "";
   page.selectPage(page.pages.problemPage.name);
 }
 
@@ -249,7 +259,9 @@ class Problem {
 
   setRandomSeedFromEnvironment() {
     let currentCourse = window.calculator.mainPage.storage.variables.currentCourse;
-    this.flagForReal = (currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON);
+    this.flagForReal = (
+      currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON
+    );
     let incomingRandomSeed = currentCourse.randomSeed.getValue();
     if (
       incomingRandomSeed === "" ||
@@ -531,7 +543,11 @@ class Problem {
       result += pathnames.urlFields.scoredQuizJSON;
     } else {
       result += pathnames.urlFields.exerciseJSON;
-      if (this.randomSeed !== null && this.randomSeed !== "" && this.randomSeed !== undefined) {
+      if (
+        this.randomSeed !== null &&
+        this.randomSeed !== "" &&
+        this.randomSeed !== undefined
+      ) {
         result += `&${pathnames.urlFields.randomSeed}=${this.randomSeed}`;
       }
     }
@@ -585,7 +601,9 @@ class Problem {
       return document.createTextNode("");
     }
     let nextProblem = allProblems.getProblemById(this.nextProblemId);
-    let nextURL = nextProblem.getAppAnchorRequestFileCourseTopics(hints.isScoredQuiz, false);
+    let nextURL = nextProblem.getAppAnchorRequestFileCourseTopics(
+      hints.isScoredQuiz, false
+    );
     let nextProblemTag = document.createElement("a");
     nextProblemTag.className = hints.linkType;
     nextProblemTag.href = `#${nextURL}`;
@@ -617,7 +635,9 @@ class Problem {
     miscellaneous.writeHTML(previousLink, "&#8592;");
     if (enabled) {
       let previousProblem = allProblems.getProblemById(this.previousProblemId);
-      let previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(hints.isScoredQuiz, false);
+      let previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(
+        hints.isScoredQuiz, false,
+      );
       previousLink.href = `#${previousURL}`;
       previousLink.addEventListener(
         "click",
@@ -635,7 +655,11 @@ class Problem {
   getProblemNavigationHints() {
     let page = window.calculator.mainPage;
     let result = new ProblemNavigationHints();
-    if (this.flagForReal && page.user.flagLoggedIn && !page.user.flagDatabaseInactiveEveryoneIsAdmin) {
+    if (
+      this.flagForReal &&
+      page.user.flagLoggedIn &&
+      !page.user.flagDatabaseInactiveEveryoneIsAdmin
+    ) {
       result.defaultRequest = pathnames.urlFields.scoredQuizJSON;
       result.linkType = "problemLinkQuiz";
       result.isScoredQuiz = true;
@@ -793,7 +817,9 @@ class Problem {
     } else if (this.type === "Section") {
       for (let i = 0; i < this.childrenIds.length; i++) {
         let currentSubSection = allProblems.getProblemById(this.childrenIds[i]);
-        miscellaneousFrontend.appendHtml(nextElement, currentSubSection.getHTMLSubSection());
+        miscellaneousFrontend.appendHtml(
+          nextElement, currentSubSection.getHTMLSubSection()
+        );
       }
     } else {
       miscellaneousFrontend.appendHtml(nextElement, this.getHTMLSubSection());
@@ -821,7 +847,9 @@ class Problem {
     } else {
       for (let i = 0; i < this.childrenIds.length; i++) {
         let currentSection = allProblems.getProblemById(this.childrenIds[i]);
-        miscellaneousFrontend.appendHtml(bodyChapterElement, currentSection.getHTMLSection());
+        miscellaneousFrontend.appendHtml(
+          bodyChapterElement, currentSection.getHTMLSection(),
+        );
       }
     }
     result.push(bodyChapterElement);
@@ -930,7 +958,9 @@ class Problem {
     this.outputElement.textContent = "";
     problemNavigation.setCurrentProblemAndUpdate(this);
     let contentArray = [];
-    miscellaneousFrontend.appendHtmlToArray(contentArray, this.badProblemExplanation);
+    miscellaneousFrontend.appendHtmlToArray(
+      contentArray, this.badProblemExplanation,
+    );
     let problemBody = document.createElement("span");
     miscellaneous.writeHTML(problemBody, this.decodedProblem + this.commentsProblem);
     contentArray.push(problemBody);
@@ -1115,7 +1145,7 @@ class Problem {
     result.appendChild(textArea);
     let button = document.createElement("button");
     let reportSpan = document.createElement("span");
-    button.addEventListener("click", () => { 
+    button.addEventListener("click", () => {
       this.modifyWeight(textArea, reportSpan);
     });
     button.textContent = "Modify";
@@ -1162,9 +1192,9 @@ class Problem {
 
     let button = document.createElement("button");
     button.className = "accordionLikeProblemWeight";
-    miscellaneous.writeHTML(button,`${this.toStringProblemWeight()} &#9666`);
+    miscellaneous.writeHTML(button, `${this.toStringProblemWeight()} &#9666`);
     button.name = this.problemId;
-    button.addEventListener("click", () => { 
+    button.addEventListener("click", () => {
       window.calculator.coursePage.toggleProblemWeights();
     });
     content.appendChild(button);
@@ -1253,7 +1283,11 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   let page = window.calculator.mainPage;
   let currentCourse = page.storage.variables.currentCourse;
   let exerciseType = currentCourse.exerciseType.getValue();
-  if (exerciseType === "" || exerciseType === null || exerciseType === undefined) {
+  if (
+    exerciseType === "" ||
+    exerciseType === null ||
+    exerciseType === undefined
+  ) {
     exerciseType = pathnames.urlFields.exerciseJSON;
     currentCourse.exerciseType.setAndStore(exerciseType);
   }
@@ -1276,10 +1310,12 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   return result;
 }
 
-function ProblemNavigationHints() {
-  this.linkType = "problemLinkPractice";
-  this.defaultRequest = pathnames.urlFields.exerciseJSON;
-  this.isScoredQuiz = false;
+class ProblemNavigationHints {
+  constructor() {
+    this.linkType = "problemLinkPractice";
+    this.defaultRequest = pathnames.urlFields.exerciseJSON;
+    this.isScoredQuiz = false;
+  }
 }
 
 class ProblemNavigation {
@@ -1316,13 +1352,18 @@ class ProblemNavigation {
       this.currentProblem.problemLabel !== "" &&
       this.currentProblem.problemLabel !== null
     ) {
-      problemTitleContainer.appendChild(document.createTextNode(this.currentProblem.problemLabel));
+      problemTitleContainer.appendChild(
+        document.createTextNode(this.currentProblem.problemLabel)
+      );
     }
-    problemTitleContainer.appendChild(document.createTextNode(this.currentProblem.title));
-
+    problemTitleContainer.appendChild(
+      document.createTextNode(this.currentProblem.title)
+    );
     this.infoBar.textContent = "";
     if (!window.calculator.mainPage.flagProblemPageOnly) {
-      this.infoBar.appendChild(this.currentProblem.getProblemNavigation());
+      this.infoBar.appendChild(
+        this.currentProblem.getProblemNavigation()
+      );
     }
 
     if (
@@ -1330,10 +1371,14 @@ class ProblemNavigation {
       this.currentProblem.links !== null
     ) {
       if (this.currentProblem.links.slides !== null) {
-        miscellaneousFrontend.appendHtml(problemTitle, this.currentProblem.links.slides);
+        miscellaneousFrontend.appendHtml(
+          problemTitle, this.currentProblem.links.slides,
+        );
       }
       if (this.currentProblem.links.video !== null) {
-        miscellaneousFrontend.appendHtml(problemTitle, this.currentProblem.links.video);
+        miscellaneousFrontend.appendHtml(
+          problemTitle, this.currentProblem.links.video,
+        );
       }
     }
     problemTitle.appendChild(this.currentProblem.getEditPanel());
@@ -1420,7 +1465,9 @@ function getHTMLfromTopics() {
     let currentProblem = allProblems.getProblemById(label);
     result.push(currentProblem.toHTMLChapter());
   }
-  let extraHtml = miscellaneousFrontend.htmlFromCommentsAndErrors(allProblems.topics);
+  let extraHtml = miscellaneousFrontend.htmlFromCommentsAndErrors(
+    allProblems.topics
+  );
   if (extraHtml !== "") {
     let extraNode = document.createElement("span");
     miscellaneous.writeHTML(extraNode, extraHtml);
@@ -1430,9 +1477,13 @@ function getHTMLfromTopics() {
 }
 
 function initializeDatePickers() {
-  let thePickers = document.getElementsByClassName("datePicker");
-  for (let counterPicker = 0; counterPicker < thePickers.length; counterPicker++) {
-    datePicker.createDatePicker(thePickers[counterPicker]);
+  let pickers = document.getElementsByClassName("datePicker");
+  for (
+    let counterPicker = 0;
+    counterPicker < pickers.length;
+    counterPicker++
+  ) {
+    datePicker.createDatePicker(pickers[counterPicker]);
   }
 }
 
@@ -1452,9 +1503,15 @@ function writeEditCoursePagePanel() {
   let panel = document.getElementById(ids.domElements.courseEditPanel);
   panel.textContent = "";
   let courseHome = page.storage.variables.currentCourse.courseHome.getValue()
-  panel.appendChild(editPage.getEditPanel(courseHome, page.hasInstructorRightsNotViewingAsStudent(), false));
+  const courseHomePanel = editPage.getEditPanel(
+    courseHome, page.hasInstructorRightsNotViewingAsStudent(), false,
+  );
+  panel.appendChild(courseHomePanel);
   let topicList = page.storage.variables.currentCourse.topicList.getValue();
-  panel.appendChild(editPage.getEditPanel(topicList, page.hasInstructorRightsNotViewingAsStudent(), false));
+  const topicListPanel = editPage.getEditPanel(
+    topicList, page.hasInstructorRightsNotViewingAsStudent(), false,
+  );
+  panel.appendChild(topicListPanel);
   if (
     allProblems.topics.topicBundleFile !== undefined &&
     allProblems.topics.topicBundleFile !== null &&
@@ -1466,7 +1523,12 @@ function writeEditCoursePagePanel() {
       counterTopicBundle++
     ) {
       let nextToEdit = allProblems.topics.topicBundleFile[counterTopicBundle];
-      panel.appendChild(editPage.getEditPanel(nextToEdit, page.hasInstructorRightsNotViewingAsStudent(), false));
+      const nextToEditPanel = editPage.getEditPanel(
+        nextToEdit,
+        page.hasInstructorRightsNotViewingAsStudent(),
+        false
+      );
+      panel.appendChild(nextToEditPanel);
     }
   }
 }
@@ -1485,7 +1547,9 @@ function writeTopicsToCoursePage() {
   let topicsElement = getTopicListElement();
   writeEditCoursePagePanel();
   let htmlContentElements = getHTMLfromTopics();
-  let extraComments = miscellaneousFrontend.htmlElementsFromCommentsAndErrors(allProblems.topics);
+  let extraComments = miscellaneousFrontend.htmlElementsFromCommentsAndErrors(
+    allProblems.topics
+  );
   miscellaneousFrontend.appendHtml(topicsElement, extraComments);
   miscellaneousFrontend.appendHtml(topicsElement, htmlContentElements);
   initializeProblemWeightsAndDeadlines();

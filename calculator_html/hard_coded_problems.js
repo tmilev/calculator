@@ -11,7 +11,7 @@ class HardCodedProblemCollection {
     /** @type {HardCodedProblem} */
     this.problems = [];
   }
-  
+
   create(
     /** @type {HTMLElement[]|string[]} */
     elements,
@@ -251,9 +251,8 @@ class HardCodedAnswer {
   }
 
   handleLatexChange() {
-    this.answerPanel.pureLatexElement.value = initializeButtons.processMathQuillLatex(
-      this.answerPanel.panel.equationEditor.rootNode.toLatex(),
-    );
+    this.answerPanel.pureLatexElement.value =
+      this.answerPanel.panel.equationEditor.rootNode.toLatex();
   }
 }
 

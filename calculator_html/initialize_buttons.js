@@ -10,41 +10,9 @@ const EquationEditorButtonFactory = require("./equation_editor/src/equation_edit
 const EquationEditorOptions = require("./equation_editor/src/equation_editor").EquationEditorOptions;
 const datePicker = require("./date_picker").datePicker;
 
-let charsToSplit = ['x', 'y'];
+const charsToSplit = ['x', 'y'];
 let panelsCollapseStatus = {};
 
-function processMathQuillLatex(inputText) {
-  for (let i = 0; i < inputText.length; i++) {
-    if (i + 1 < inputText.length) {
-      if ((inputText[i] === '_' || inputText[i] === '^') && inputText[i + 1] !== '{') {
-        inputText = inputText.slice(0, i + 1) + '{' + inputText[i + 1] + '}' + inputText.slice(i + 2);
-      }
-      if (inputText[i] === '\\' && inputText[i + 1] === '\\') {
-        inputText = inputText.slice(0, i + 2) + ' ' + inputText.slice(i + 2);
-      }
-    }
-  }
-  if (charsToSplit !== undefined) {
-    for (let i = 0; i < inputText.length - 1; i++) {
-      for (let j = 0; j < charsToSplit.length; j++) {
-        if (
-          inputText[i] === charsToSplit[j] && inputText[i + 1] !== ' ' &&
-          inputText[i + 1] !== '\\' && inputText[i + 1] !== '+' &&
-          inputText[i + 1] !== '*' && inputText[i + 1] !== '/' &&
-          inputText[i + 1] !== '-' && inputText[i + 1] !== '='
-        ) {
-          if (inputText[i] === 'x') {
-            if (inputText.slice(i - 5, i + 1) === 'matrix') {
-              continue;
-            }
-          }
-          inputText = inputText.slice(0, i + 1) + " " + inputText.slice(i + 1);
-        }
-      }
-    }
-  }
-  return inputText;
-}
 
 function initializeAccordionButtons() {
   ///initializing accordions
@@ -103,7 +71,8 @@ class InputPanelData {
     /**
      * @type {{
      * pureLatexElement?:HTMLElement|null,
-     * }} */
+     * }} 
+     */
     input,
   ) {
     /** @type {string} Id of component where the editor is placed.*/
@@ -123,7 +92,10 @@ class InputPanelData {
     this.idPureLatex = input.idPureLatex;
     /** @type {HTMLElement|null} */
     this.pureLatexElement = null;
-    if (input.pureLatexElement !== undefined && input.pureLatexElement !== null) {
+    if (
+      input.pureLatexElement !== undefined &&
+      input.pureLatexElement !== null
+    ) {
       this.pureLatexElement = input.pureLatexElement;
     }
     /** @type {EquationEditorButtonFactory[]} */
@@ -639,5 +611,4 @@ class InputPanelData {
 module.exports = {
   initializeAccordionButtons,
   InputPanelData,
-  processMathQuillLatex,
 };

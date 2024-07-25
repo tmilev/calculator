@@ -409,9 +409,7 @@ class AnswerPanel {
   }
 
   callbackLatexChange() {
-    this.pureLatexElement.value = initializeButtons.processMathQuillLatex(
-      this.panel.equationEditor.rootNode.toLatex()
-    );
+    this.pureLatexElement.value = this.panel.equationEditor.rootNode.toLatex();
     this.submitPreviewWithTimeOut();
     return;
   }

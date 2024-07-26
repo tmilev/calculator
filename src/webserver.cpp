@@ -4445,7 +4445,10 @@ bool WebWorker::runInitialize() {
       << "Ssl fail #: "
       << this->parent->statistics.allConnections
       << Logger::endL;
-      global << commentsOnFailure.str() << Logger::endL;
+      std::string comments = commentsOnFailure.str();
+      if (comments!= "") {
+      global << comments << Logger::endL;
+      }
       return false;
     }
   }

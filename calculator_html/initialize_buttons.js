@@ -8,42 +8,7 @@ const EquationEditorAction = require("./equation_editor/src/equation_editor").Eq
 const EquationEditor = require("./equation_editor/src/equation_editor").EquationEditor;
 const EquationEditorButtonFactory = require("./equation_editor/src/equation_editor").EquationEditorButtonFactory;
 const EquationEditorOptions = require("./equation_editor/src/equation_editor").EquationEditorOptions;
-const datePicker = require("./date_picker").datePicker;
 
-const charsToSplit = ['x', 'y'];
-let panelsCollapseStatus = {};
-
-
-function initializeAccordionButtons() {
-  ///initializing accordions
-  if (localStorage !== undefined) {
-    if (localStorage.panels !== undefined) {
-      panelsCollapseStatus = JSON.parse(localStorage.panels)
-      let props = Object.getOwnPropertyNames(panelsCollapseStatus);
-      for (let i = 0; i < props.length; i++) {
-        let current = panelsCollapseStatus[props[i]];
-        if (current.isCollapsed) {
-          panels.toggleHeight(document.getElementById(current.button), props[i]);
-        }
-      }
-    }
-  }
-  let acc = document.getElementsByClassName("accordion");
-  for (let i = 0; i < acc.length; i++) {
-    acc[i].onclick = function () {
-      if (this.firstLoad === undefined) {
-        this.firstLoad = true;
-        let deadlines = this.nextElementSibling.getElementsByClassName("modifyDeadlineInput");
-        for (let j = 0; j < deadlines.length; j++) {
-          datePicker.createDatePicker(deadlines[j].id);
-        }
-        this.nextElementSibling.style.display = "inline-block";
-      }
-      this.classList.toggle("active");
-      this.nextElementSibling.classList.toggle("show");
-    }
-  }
-}
 
 class ButtonCollection {
   constructor(
@@ -105,7 +70,10 @@ class InputPanelData {
       this.valueChangeHandler = input.valueChangeHandler;
     }
     this.buttonsPerLine = input.buttonsPerLine;
-    if (this.buttonsPerLine === null || this.buttonsPerLine === undefined) {
+    if (
+      this.buttonsPerLine === null ||
+      this.buttonsPerLine === undefined
+    ) {
       this.buttonsPerLine = 4;
     }
     this.flagRendered = false;
@@ -269,16 +237,24 @@ class InputPanelData {
 
   /** @return {HTMLElement|null} */
   getEditorContainer() {
-    if (this.equationEditorContainer !== null && this.equationEditorContainer !== undefined) {
+    if (
+      this.equationEditorContainer !== null &&
+      this.equationEditorContainer !== undefined
+    ) {
       return this.equationEditorContainer;
     }
-    this.equationEditorContainer = document.getElementById(this.idEquationEditorElement);
+    this.equationEditorContainer = document.getElementById(
+      this.idEquationEditorElement
+    );
     return this.equationEditorContainer;
   }
 
   /** @return {HTMLElement|null} */
   getPureLatexElement() {
-    if (this.pureLatexElement !== null && this.pureLatexElement !== undefined) {
+    if (
+      this.pureLatexElement !== null &&
+      this.pureLatexElement !== undefined
+    ) {
       return this.pureLatexElement;
     }
     this.pureLatexElement = document.getElementById(this.idPureLatex);
@@ -308,12 +284,15 @@ class InputPanelData {
     if (!this.flagCalculatorPanel && !this.flagAnswerPanel) {
       latexInput = this.getPureLatexElement();
     }
-    this.equationEditor = new EquationEditor(currentMQspan, new EquationEditorOptions({
-      latexInput: latexInput,
-      editHandler: (editor, node) => {
-        this.editLatexHook(editor, node);
-      },
-    }));
+    this.equationEditor = new EquationEditor(
+      currentMQspan,
+      new EquationEditorOptions({
+        latexInput: latexInput,
+        editHandler: (editor, node) => {
+          this.editLatexHook(editor, node);
+        },
+      })
+    );
     let forceShowAll = false;
     let forceShowNone = false;
     if (this.idEquationEditorElement === ids.domElements.pages.solve.editor) {
@@ -332,7 +311,10 @@ class InputPanelData {
     if (this.flagRendered) {
       return;
     }
-    if (this.equationEditor.container.offsetParent === null || this.equationEditor.container.offsetParent === undefined) {
+    if (
+      this.equationEditor.container.offsetParent === null ||
+      this.equationEditor.container.offsetParent === undefined
+    ) {
       return;
     }
     this.flagRendered = true;
@@ -419,7 +401,8 @@ class InputPanelData {
       this.addLatexCommand("-", "-");
       this.addLatexCommand("\\cdot", "*");
       this.addLatexCommand("\\frac{\\cursor}{}", "/");
-      this.addKeySequence(["/"], "(\u2022)/(\u2022)", { fontSize: "10px" }); // \u2022 = bullet.
+      // \u2022 = bullet.
+      this.addKeySequence(["/"], "(\u2022)/(\u2022)", { fontSize: "10px" });
       this.addLatexCommand("\\sqrt{\\cursor}", "\u221A");
       this.addKeySequence(["^"], "^");
       this.addKeySequence(["("], "(");
@@ -468,7 +451,11 @@ class InputPanelData {
     if (this.flagButtons.series.selected || noOptions || includeAll) {
       this.addLatexCommand("\\sum", "\u03A3");
       this.addLatexCommand("!", "!");
-      this.addLatexCommand("\\binom{\\cursor}{}", "binom", { fontSize: "7px" });
+      this.addLatexCommand(
+        "\\binom{\\cursor}{}",
+        "binom",
+        { fontSize: "7px" },
+      );
     }
     if (noOptions || includeAll) {
       this.addLatexCommand("\\circ", "\u2218");
@@ -482,10 +469,26 @@ class InputPanelData {
       this.addLatexCommand("\\in", "\u2208");
     }
     if (this.flagButtons.matrix.selected || includeAll) {
-      this.addLatexCommand("\\begin{pmatrix}\\cursor \\\\ \\end{pmatrix}", "2x1", { fontSize: "7px" });
-      this.addLatexCommand("\\begin{pmatrix}\\cursor \\\\ \\\\ \\end{pmatrix}", "3x1", { fontSize: "7px" });
-      this.addLatexCommand("\\begin{pmatrix}\\cursor & \\\\ & \\end{pmatrix}", "2x2", { fontSize: "7px" });
-      this.addLatexCommand("\\begin{pmatrix}\\cursor & & \\\\ & & \\\\ & & \\end{pmatrix}", "3x3", { fontSize: "7px" });
+      this.addLatexCommand(
+        "\\begin{pmatrix}\\cursor \\\\ \\end{pmatrix}",
+        "2x1",
+        { fontSize: "7px" },
+      );
+      this.addLatexCommand(
+        "\\begin{pmatrix}\\cursor \\\\ \\\\ \\end{pmatrix}",
+        "3x1",
+        { fontSize: "7px" },
+      );
+      this.addLatexCommand(
+        "\\begin{pmatrix}\\cursor & \\\\ & \\end{pmatrix}",
+        "2x2",
+        { fontSize: "7px" },
+      );
+      this.addLatexCommand(
+        "\\begin{pmatrix}\\cursor & & \\\\ & & \\\\ & & \\end{pmatrix}",
+        "3x3",
+        { fontSize: "7px" },
+      );
     }
     if (this.flagButtons.angles.selected || noOptions || includeAll) {
       this.addLatexCommand("\\alpha", "\u03B1");
@@ -609,6 +612,5 @@ class InputPanelData {
 }
 
 module.exports = {
-  initializeAccordionButtons,
   InputPanelData,
 };

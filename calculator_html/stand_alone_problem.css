@@ -695,12 +695,7 @@ textarea.calculatorAnswer {
   transition: 0.6s ease-in-out;
   opacity: 0;
   word-wrap: break-word;
-  width: 60px
-}
-
-textarea.calculatorAnswer.show {
-  opacity: 1;
-  max-height: 500px;
+  width: 60px;
 }
 
 textarea.currentFileNameArea {

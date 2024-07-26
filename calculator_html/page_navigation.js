@@ -812,7 +812,6 @@ class Page {
   }
 
   initializeButtons() {
-    initializeButtonsModule.initializeAccordionButtons();
     let buttonToggleMainMenu = document.getElementById(
       ids.domElements.menu.buttonToggleTheMainMenu
     );

@@ -26,7 +26,6 @@ class HardCodedProblemCollection {
       this.problems.push(incoming);
       incoming.create();
     }
-    initializeButtons.initializeAccordionButtons();
   }
 }
 

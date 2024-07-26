@@ -125,6 +125,20 @@ class AnswerPanel {
       let cell = row.insertCell();
       cell.appendChild(this.buttonDetails);
       cell.appendChild(this.pureLatexElement);
+      this.buttonDetails.addEventListener("click", () => {
+        if (
+          this.pureLatexElement.style.opacity === "" ||
+          this.pureLatexElement.style.opacity === 0 ||
+          this.pureLatexElement.style.opacity === "0" ||
+          this.pureLatexElement.style.opacity === undefined
+        ) {
+          this.pureLatexElement.style.opacity = "1";
+          this.pureLatexElement.style.maxHeight = "500px";
+        } else {
+          this.pureLatexElement.style.opacity = "0";
+          this.pureLatexElement.style.maxHeight = "0px";
+        }
+      });
     } else {
       let row = this.table.insertRow();
       row.insertCell().appendChild(this.onePanelQuestionAndAnswerField());
@@ -172,7 +186,6 @@ class AnswerPanel {
     this.submitPreviewWithTimeOut();
   }
 
-
   onePanelComputeHtmlElements() {
     if (this.flagForReal === true) {
       this.buttonAnswer = null;
@@ -218,7 +231,10 @@ class AnswerPanel {
     }
     this.editorEnclosure.appendChild(this.editorSpan);
     this.verificationSpan = document.createElement("span");
-    if (this.input.previousAnswers !== undefined && this.input.previousAnswers !== "") {
+    if (
+      this.input.previousAnswers !== undefined &&
+      this.input.previousAnswers !== ""
+    ) {
       miscellaneous.writeHTML(this.verificationSpan, this.input.previousAnswers);
     } else {
       if (this.layoutVertical === true) {
@@ -228,7 +244,11 @@ class AnswerPanel {
         );
       }
     }
-    if (this.flagForReal !== true && this.input.idSpanSolution !== undefined && this.input.idSpanSolution !== null) {
+    if (
+      this.flagForReal !== true &&
+      this.input.idSpanSolution !== undefined &&
+      this.input.idSpanSolution !== null
+    ) {
       this.solutionSpan = document.createElement("span");
     }
   }

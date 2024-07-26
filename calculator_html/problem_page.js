@@ -258,7 +258,7 @@ class Problem {
   }
 
   setRandomSeedFromEnvironment() {
-    let currentCourse = window.calculator.mainPage.storage.variables.currentCourse;
+    let currentCourse = storage.storage.variables.currentCourse;
     this.flagForReal = (
       currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON
     );
@@ -308,7 +308,10 @@ class Problem {
       this.outputElement.textContent = `Error parsing: ${e}. Failed to parse: ${input}`;
       return;
     }
-    if (problemData.crashReport !== undefined && problemData.crashReport !== null) {
+    if (
+      problemData.crashReport !== undefined &&
+      problemData.crashReport !== null
+    ) {
       let html = miscellaneousFrontend.htmlFromCommentsAndErrors(problemData);
       miscellaneous.writeHTML(this.outputElement, html);
       return;
@@ -386,7 +389,9 @@ class Problem {
       return;
     }
     for (let i = 0; i < problemData.children.length; i++) {
-      const currentChild = allProblems.createOrUpdateProblem(problemData.children[i]);
+      const currentChild = allProblems.createOrUpdateProblem(
+        problemData.children[i]
+      );
       this.totalChildren += currentChild.totalChildren + 1;
       this.childrenIds.push(currentChild.problemId);
     }
@@ -401,7 +406,9 @@ class Problem {
       userHasInstructorRights = page.user.hasInstructorRights();
     }
     this.badProblemExplanation = [];
-    if (!this.decodedProblem.includes(pathnames.urlFields.problem.failedToLoadProblem)) {
+    if (!this.decodedProblem.includes(
+      pathnames.urlFields.problem.failedToLoadProblem
+    )) {
       page.lastKnownGoodProblemFileName = this.fileName;
       return;
     }
@@ -443,7 +450,9 @@ class Problem {
     if (this.commentsProblem === undefined) {
       this.commentsProblem = "";
     }
-    this.commentsProblem += miscellaneousFrontend.htmlFromCommentsAndErrors(problemData);
+    this.commentsProblem += miscellaneousFrontend.htmlFromCommentsAndErrors(
+      problemData
+    );
     this.computeBadProblemExplanation();
     let answerVectors = problemData["answers"];
     if (answerVectors === undefined) {
@@ -555,7 +564,10 @@ class Problem {
   }
 
   getCalculatorURLRequestInput(
-    isScoredQuiz, inputFileName, inputCourseHome, inputTopicList
+    isScoredQuiz,
+    inputFileName,
+    inputCourseHome,
+    inputTopicList,
   ) {
     let result = "";
     result += this.getCalculatorURLRequestPartOne(isScoredQuiz) + "&";
@@ -962,7 +974,10 @@ class Problem {
       contentArray, this.badProblemExplanation,
     );
     let problemBody = document.createElement("span");
-    miscellaneous.writeHTML(problemBody, this.decodedProblem + this.commentsProblem);
+    miscellaneous.writeHTML(
+      problemBody,
+      this.decodedProblem + this.commentsProblem,
+    );
     contentArray.push(problemBody);
     miscellaneousFrontend.appendHtml(this.outputElement, contentArray);
     for (let i = 0; i < this.answerPanels.length; i++) {
@@ -970,7 +985,6 @@ class Problem {
       let answerElement = document.getElementById(answer.input.answerPanelId);
       answer.writeToElement(answerElement, this.outputElement);
     }
-    initializeButtons.initializeAccordionButtons();
     let elementWithScripts = null;
     try {
       elementWithScripts = dynamicJavascript.bootstrapAllScripts(this.outputElement);
@@ -1109,7 +1123,10 @@ class Problem {
       input.type = "date";
       input.className = "datePicker";
       input.name = `datePicker${this.problemId}`;
-      if (this.deadlines[i] !== "" && this.deadlines[i] !== undefined) {
+      if (
+        this.deadlines[i] !== "" &&
+        this.deadlines[i] !== undefined
+      ) {
         let deadline = this.deadlines[i];
         input.value = deadline;
       }
@@ -1204,7 +1221,10 @@ class Problem {
   }
 
   isSolvedForSure() {
-    if (this.correctlyAnswered === undefined || this.correctlyAnswered === NaN) {
+    if (
+      this.correctlyAnswered === undefined ||
+      this.correctlyAnswered === NaN
+    ) {
       return false;
     }
     if (
@@ -1220,7 +1240,10 @@ class Problem {
   toStringProblemWeight() {
     let result = "";
     let color = "brown";
-    if (this.correctlyAnswered !== undefined && this.correctlyAnswered !== NaN) {
+    if (
+      this.correctlyAnswered !== undefined &&
+      this.correctlyAnswered !== NaN
+    ) {
       if (this.isSolvedForSure()) {
         color = "green";
       }
@@ -1393,7 +1416,9 @@ function modifyWeight(id) {
 }
 
 function convertStringToLaTeXFileName(input) {
-  let result = encodeURIComponent(input.split(" ").join("-")).split("%").join("-");
+  let result = encodeURIComponent(
+    input.split(" ").join("-")
+  ).split("%").join("-");
   if (result.length === 0) {
     return "undefined";
   }
@@ -1598,7 +1623,9 @@ function getCurrentProblem() {
   ) {
     return null;
   }
-  let element = document.getElementById(ids.domElements.problemPageContentContainer);
+  let element = document.getElementById(
+    ids.domElements.problemPageContentContainer
+  );
   return allProblems.getProblemByIdOrRegisterEmpty(problemFileName, element);
 }
 

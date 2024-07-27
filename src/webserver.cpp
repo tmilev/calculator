@@ -4446,8 +4446,8 @@ bool WebWorker::runInitialize() {
       << this->parent->statistics.allConnections
       << Logger::endL;
       std::string comments = commentsOnFailure.str();
-      if (comments!= "") {
-      global << comments << Logger::endL;
+      if (comments != "") {
+        global << comments << Logger::endL;
       }
       return false;
     }

@@ -1,6 +1,5 @@
 const equationEditor = require("./equation_editor/src/equation_editor");
 const AnswerPanel = require("./answer_panel").AnswerPanel;
-const initializeButtons = require("./initialize_buttons");
 const submit = require("./submit_requests");
 const miscellaneous = require("./miscellaneous_frontend");
 const answerProcessing = require("./answer_processing");

@@ -432,6 +432,8 @@ class Problem {
   }
 
   initializeProblemContent(problemData) {
+    let page = window.calculator.mainPage;
+    const isLoggedIn = page.user.flagLoggedIn;
     if (pathnames.standardResponses.isNotLoggedInResponse(problemData)) {
       this.title = "";
       this.decodedProblem = "Not logged in. Please select practice mode or login.";
@@ -466,6 +468,7 @@ class Problem {
       this.answerPanels[i] = new AnswerPanel({
         problemId: this.problemId,
         forReal: this.flagForReal,
+        isLoggedIn: isLoggedIn,
         properties: currentVector.properties,
         previousAnswers: currentVector.previousAnswers,
         answerHighlight: currentVector.answerHighlight,

@@ -1,6 +1,5 @@
 const miscellaneous = require("./miscellaneous_frontend");
 const submitRequests = require("./submit_requests");
-const initializeButtons = require("./initialize_buttons");
 const InputPanelData = require("./initialize_buttons").InputPanelData;
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
@@ -24,7 +23,10 @@ class AnswerPanel {
      * mathQuillPanelOptions:string,
      * dontBootstrapButtons:boolean,
      * valueChangeHandler:function,
-     * idButtonAnswer:string}} */
+     * isLoggedIn: boolean,
+     * idButtonAnswer:string,
+     * problemId:string,
+     * randomSeed: number|null|undefined}} */
     input,
   ) {
     this.input = input;
@@ -37,6 +39,7 @@ class AnswerPanel {
     if (input["forReal"] === true) {
       this.flagForReal = true;
     }
+    this.isLoggedIn = input.isLoggedIn;
     this.idPureLatex = input.idPureLatex;
     this.problemId = input.problemId;
     /** @type {boolean} */
@@ -79,6 +82,8 @@ class AnswerPanel {
     this.editorSpan = null;
     /** @type {HTMLElement|null} */
     this.editorEnclosure = null;
+    /** @type {number|null|undefined} */
+    this.randomSeed = input.randomSeed;
   }
 
   writeToElement(
@@ -191,12 +196,18 @@ class AnswerPanel {
       this.buttonAnswer = null;
       this.htmlButtonSolution = null;
     } else {
-      if (this.input.idButtonAnswer !== undefined && this.input.idButtonAnswer !== null) {
+      if (
+        this.input.idButtonAnswer !== undefined &&
+        this.input.idButtonAnswer !== null
+      ) {
         this.buttonAnswer = document.createElement("button");
         this.buttonAnswer.textContent = "Answer";
         this.buttonAnswer.className = "buttonAnswer";
       }
-      if (this.input.idButtonSolution !== null && this.input.idButtonSolution !== undefined) {
+      if (
+        this.input.idButtonSolution !== null &&
+        this.input.idButtonSolution !== undefined
+      ) {
         this.buttonSolution = document.createElement("button");
         this.buttonSolution.textContent = "Solution";
         this.buttonSolution.className = "buttonSolution";
@@ -217,7 +228,10 @@ class AnswerPanel {
     this.pureLatexElement.className = "calculatorAnswer";
     this.buttonContainerMath = document.createElement("div");
     this.buttonContainerMath.className = "mqButtonPanel";
-    this.buttonContainerMath.setAttribute("buttons", this.input.mathQuillPanelOptions);
+    this.buttonContainerMath.setAttribute(
+      "buttons",
+      this.input.mathQuillPanelOptions,
+    );
     this.editorEnclosure = document.createElement("div");
     this.editorEnclosure.className = "calculatorMQfieldEnclosure";
     this.editorSpan = document.createElement("span");
@@ -235,7 +249,10 @@ class AnswerPanel {
       this.input.previousAnswers !== undefined &&
       this.input.previousAnswers !== ""
     ) {
-      miscellaneous.writeHTML(this.verificationSpan, this.input.previousAnswers);
+      miscellaneous.writeHTML(
+        this.verificationSpan,
+        this.input.previousAnswers,
+      );
     } else {
       if (this.layoutVertical === true) {
         miscellaneous.writeHTML(
@@ -304,7 +321,11 @@ class AnswerPanel {
   submitOrPreviewAnswersCallback(input) {
     let inputParsed = miscellaneous.jsonUnescapeParse(input);
     let resultHtml = "";
-    if (inputParsed.error !== undefined && inputParsed.error !== null && inputParsed.error !== "") {
+    if (
+      inputParsed.error !== undefined &&
+      inputParsed.error !== null &&
+      inputParsed.error !== ""
+    ) {
       resultHtml += `<b style = 'color:red'>Error.</b> ${inputParsed.error}`;
     }
     if (
@@ -352,16 +373,17 @@ class AnswerPanel {
 
   showSolution() {
     let request = "";
-    let page = window.calculator.mainPage;
-    let currentProblem = page.getProblemById(this.problemId);
     if (!this.flagForReal) {
-      if (page.isLoggedIn()) {
+      if (this.isLoggedIn) {
         request += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolution}&`;
       } else {
         request += `${pathnames.urlFields.request}=${pathnames.urlFields.problemSolutionNoLogin}&`;
       }
-      if (currentProblem.randomSeed !== undefined) {
-        request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+      if (
+        this.randomSeed !== undefined &&
+        this.randomSeed !== null
+      ) {
+        request += `${pathnames.urlFields.randomSeed}=${this.randomSeed}&`;
       }
     }
     this.submitOrPreviewAnswers(request);
@@ -369,56 +391,50 @@ class AnswerPanel {
 
   submitAnswers() {
     let request = "";
-    let page = window.calculator.mainPage;
-    let currentProblem = page.getProblemById(this.problemId);
-    if (page.isLoggedIn()) {
+    if (this.isLoggedIn) {
       if (this.flagForReal) {
         request = `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswers}`;
       } else {
         request += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercise}&`;
-        if (currentProblem.randomSeed !== undefined) {
-          request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
-        }
       }
     } else {
       request += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExerciseNoLogin}&`;
-      if (currentProblem.randomSeed !== undefined) {
-        request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
-      }
+    }
+    if (this.randomSeed !== undefined && this.randomSeed !== null) {
+      request += `${pathnames.urlFields.randomSeed}=${this.randomSeed}&`;
     }
     this.submitOrPreviewAnswers(request);
   }
 
   submitGiveUp() {
-    let page = window.calculator.mainPage;
-    let currentProblem = page.getProblemById(this.problemId);
     let request = "";
-    if (page.isLoggedIn()) {
+    if (this.isLoggedIn) {
       request += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUp}&`;
     } else {
       request += `${pathnames.urlFields.request}=${pathnames.urlFields.problemGiveUpNoLogin}&`;
     }
-    if (currentProblem.randomSeed === undefined) {
+    if (
+      this.randomSeed === undefined ||
+      this.randomSeed === null
+    ) {
       throw ("Random seed not supposed to be undefined. ");
     }
-    request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+    request += `${pathnames.urlFields.randomSeed}=${this.randomSeed}&`;
     this.submitOrPreviewAnswers(request);
   }
 
   submitPreview() {
-    let page = window.calculator.mainPage;
     let request = "";
-    let currentProblem = page.getProblemById(this.problemId);
-    if (page.isLoggedIn()) {
+    if (this.isLoggedIn) {
       if (this.flagForReal) {
         request += `${pathnames.urlFields.request}=${pathnames.urlFields.submitAnswersPreview}&`;
       } else {
         request += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreview}&`;
-        request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+        request += `${pathnames.urlFields.randomSeed}=${this.randomSeed}&`;
       }
     } else {
       request += `${pathnames.urlFields.request}=${pathnames.urlFields.submitExercisePreviewNoLogin}&`;
-      request += `${pathnames.urlFields.randomSeed}=${currentProblem.randomSeed}&`;
+      request += `${pathnames.urlFields.randomSeed}=${this.randomSeed}&`;
     }
     this.submitOrPreviewAnswers(request);
   }

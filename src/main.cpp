@@ -553,7 +553,44 @@ int MainFunctions::mainLoadDatabase() {
   return exitCode;
 }
 
+
+class Deployer{
+public:
+  static std::string gitBranchName();
+  int deploy();
+
+};
 int MainFunctions::mainDeploy() {
+  STACK_TRACE("MainFunctions::mainDeploy");
+  Deployer deployer;
+  return  deployer.deploy();
+}
+
+std::string Deployer::gitBranchName(){
+  TimeWrapper now;
+  now.assignLocalTime();
+  int year = 1900 + now.timeLocal.tm_year;
+  int month = 1 + now.timeLocal.tm_mon;
+  int day = now.timeLocal.tm_mday;
+  StateMaintainerCurrentFolder maintainFolder;
+  global.changeDirectory(global.physicalPathServerBase);
+  std::stringstream branchName;
+  branchName << "deploy_" << year << "_";
+  if (month < 10) {
+    branchName << "0";
+  }
+  branchName << month << "_";
+  if (day < 10) {
+    branchName << "0";
+  }
+  branchName << day;
+  return branchName.str();
+}
+
+
+
+int Deployer::deploy(){
+
   // If any of the keys below are missing, they will be allocated now.
   const std::string url =
   global.configuration[Configuration::deploy][Configuration::Deploy::url].
@@ -581,46 +618,37 @@ int MainFunctions::mainDeploy() {
     << Logger::endL;
     return 0;
   }
-  TimeWrapper now;
-  now.assignLocalTime();
-  int year = 1900 + now.timeLocal.tm_year;
-  int month = 1 + now.timeLocal.tm_mon;
-  int day = now.timeLocal.tm_mday;
-  StateMaintainerCurrentFolder maintainFolder;
-  global.changeDirectory(global.physicalPathServerBase);
-  std::stringstream branchName;
-  branchName << "deploy_" << year << "_";
-  if (month < 10) {
-    branchName << "0";
+  global.externalCommandStream("git checkout master");
+  std::string gitStatus =
+  global.externalCommandReturnOutput("git status");
+  if (StringRoutines::stringContains( gitStatus , "fatal:")) {
+    global
+    << Logger::red
+    << "Git status contained the string fatal:. "
+    << "Perhaps you are not in the correct folder? "
+    << Logger::endL;
+    return 0;
   }
-  branchName << month << "_";
-  if (day < 10) {
-    branchName << "0";
+  if (StringRoutines::stringContains( gitStatus , "not staged")) {
+    global<<Logger::red << "The `git status` command contains the phrase `not staged`. "
+           << "I assume you have non-staged commits, so aborting deployment. "
+           << Logger::endL << gitStatus;
+    return 0;
   }
-  branchName << day;
+  std::string branchName = this->gitBranchName();
+
   if (
-    global.externalCommandStream("git branch " + branchName.str()) != 0
-  ) {
+      global.externalCommandStream("git branch " + branchName) != 0
+      ) {
     global
-    << Logger::red
-    << "Failed to execute git command. "
-    << Logger::green
-    << "Perhaps the branch already exists? "
-    << "I am continuing bravely. "
-    << Logger::endL;
-    return 0;
+        << Logger::red
+        << "Failed to execute git command. "
+        << Logger::green
+        << "Perhaps the branch already exists? "
+        << "I am continuing bravely. "
+        << Logger::endL;
   }
-  std::string changeDiff =
-  global.externalCommandReturnOutput("git diff-index --quiet HEAD --");
-  if (changeDiff != "") {
-    global
-    << Logger::red
-    << "Expected empty diff. "
-    << "Perhaps you have uncommited changes, "
-    << "or your git repository "
-    << "is in an unexpected state (wrong folder?)."
-    << Logger::endL;
-    return 0;
-  }
+  global.externalCommandStream("git checkout "+branchName);
+
   return 0;
 }

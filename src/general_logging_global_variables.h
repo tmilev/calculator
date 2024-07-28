@@ -95,6 +95,7 @@ public:
   Logger& operator<<(const LoggerSpecialSymbols& input) {
     return this->logSpecialSymbol(input);
   }
+  bool shouldUseColors();
   Logger& logSpecialSymbol(const LoggerSpecialSymbols& input);
   void flush();
   template <typename Type>

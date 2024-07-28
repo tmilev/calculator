@@ -46,6 +46,14 @@ class Theme {
     });
   }
 
+  initializeThemes(themeId) {
+    let currentElement = document.getElementById(themeId);
+    if (currentElement !== null) {
+      currentElement.checked = true;
+    }
+    this.setFromRadioButton();
+  }
+
   setFromRadioButton() {
     let value = null;
     for (let label in ids.domElements.themeRadioButtons) {
@@ -62,19 +70,12 @@ class Theme {
       return;
     }
     storage.storage.variables.theme.setAndStore(value);
-  }
-
-  doChangeTheme(themeId) {
-    if (themeId === this.currentTheme) {
-      return;
-    }
-    this.currentTheme = themeId;
+    this.currentTheme = value;
     let currentSpec = this.themes[this.currentTheme];
     let root = document.documentElement;
     for (let label in currentSpec) {
       root.style.setProperty(label, currentSpec[label]);
     }
-    document.getElementById(this.currentTheme).checked = true;
   }
 }
 

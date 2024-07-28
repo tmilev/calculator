@@ -59,7 +59,10 @@ class StorageVariable {
 
   /** @return {boolean}  */
   isTrue() {
-    if (this.value === "true" || this.value === true) {
+    if (
+      this.value === "true" ||
+      this.value === true
+    ) {
       return true;
     }
     return false;
@@ -73,7 +76,10 @@ class StorageVariable {
   loadMe(hashParsed) {
     /** @type {string|null} */
     let candidate = null;
-    if ((Storage !== undefined || localStorage !== undefined) && this.nameLocalStorage !== "") {
+    if (
+      (Storage !== undefined || localStorage !== undefined) &&
+      this.nameLocalStorage !== ""
+    ) {
       let incoming = localStorage.getItem(this.nameLocalStorage);
       if (incoming !== "" && incoming !== null && incoming !== undefined) {
         candidate = incoming;
@@ -155,15 +161,11 @@ class StorageVariable {
     if (updateURL === undefined) {
       updateURL = true;
     }
-    let changed = (this.value !== newValue);
     this.value = newValue;
     if (!configuration.configuration.calculatorDefaultsEnabled) {
       return;
     }
     this.storeMe(updateURL, updateAssociatedInput);
-    if (!changed) {
-      return;
-    }
   }
 }
 
@@ -318,6 +320,7 @@ class StorageCalculator {
         name: "debugFlag",
         nameURL: "debugFlag",
         nameCookie: "debugFlag",
+        nameLocalStorage: "debugFlag",
         secure: true,
       }),
       flagStudentView: new StorageVariable({

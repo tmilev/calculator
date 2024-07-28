@@ -263,12 +263,6 @@ class Page {
       this.defaultPage = "compareExpressions";
     }
     this.storage = storage;
-    this.initializeSliders();
-    this.flagProblemPageOnly = false;
-    this.mainMenuExpandedLength = null;
-
-    this.initializeLoginPage();
-    this.initializeAccountButtons();
   }
 
   initializeLoginPage() {
@@ -305,17 +299,10 @@ class Page {
   }
 
   initializeSliders() {
-    this.updateDebugIndicators();
     this.setWebAssemblySlider();
-    this.storage.variables.calculator.monitoring.callbackOnValueChange = (value) => {
-      this.setMonitoringComponent();
-    };
-    this.storage.variables.theme.callbackOnValueChange = (value) => {
-      themes.theme.doChangeTheme(value);
-    };
-    this.storage.variables.solve.problemToAutoSolve.callbackOnValueChange = (value) => {
-      solve.solver.solveFromStorage(value);
-    };
+    this.initializeMonitoringComponent();
+    themes.theme.initializeThemes(storage.variables.theme.getValue());
+    this.initializeDebugSlider();
   }
 
   isLoggedIn() {
@@ -346,7 +333,7 @@ class Page {
     return false;
   }
 
-  initHandlers() {
+  initializeHandlers() {
     window.addEventListener("hashchange", () => {
       storage.loadSettings.loadSettings();
       this.selectPage(storage.variables.currentPage.getValue());
@@ -358,7 +345,7 @@ class Page {
     let monitor = document.getElementById(ids.domElements.switch.monitoring);
     if (monitor !== null) {
       monitor.addEventListener("change", () => {
-        this.toggleMonitoring();
+        this.setMonitoringComponent();
       });
     }
     let webAssembly = document.getElementById(
@@ -449,7 +436,7 @@ class Page {
     cookies.setCookie("useJSON", true, 300, false);
     this.initializeMenuBar();
     this.initBuildVersion();
-    this.initHandlers();
+    this.initializeHandlers();
     //////////////////////////////////////
     //////////////////////////////////////
     //Initialize global variables
@@ -459,6 +446,12 @@ class Page {
     this.logoutRequestFromUrl = null;
     this.locationRequestFromUrl = null;
     this.storage.loadSettings();
+
+    this.initializeSliders();
+    this.flagProblemPageOnly = false;
+    this.mainMenuExpandedLength = null;
+    this.initializeLoginPage();
+    this.initializeAccountButtons();
     this.hideOrUnhideMainMenu();
     this.hashHistory = [];
     this.lastKnownGoodProblemFileName = "";
@@ -481,11 +474,6 @@ class Page {
   initializeCalculatorPagePartTwo() {
     this.initializeButtons();
     mathTypeSet.typesetter.typesetSoft(ids.domElements.divMathjaxProblematicRender);
-    document.getElementById(
-      ids.domElements.sliderDebugFlag
-    ).addEventListener('change', () => {
-      this.setSwitchDebug();
-    });
     document.getElementById(
       ids.domElements.sliderStudentView
     ).addEventListener('change', () => {
@@ -511,28 +499,36 @@ class Page {
     }
   }
 
-  updateDebugIndicators() {
-    let sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
-    if (sliderDebug === null) {
-      return;
+  initializeDebugSlider() {
+    const slider = document.getElementById(
+      ids.domElements.sliderDebugFlag
+    );
+    if (storage.variables.flagDebug.isTrue()) {
+      slider.checked = true;
     }
-    let debugOn = this.storage.variables.flagDebug.isTrue();
-    sliderDebug.checked = debugOn;
-    let debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
-    if (debugOn) {
-      solve.solver.setDebugLogContainer();
-      miscellaneous.writeHTML(debugSpan, "Debug <b style='color:red'>on</b>");
-    } else {
-      solve.solver.setDebugLogContainer();
-      miscellaneous.writeHTML(debugSpan, "Debug <b style='color:green'>off</b>");
-    }
+    this.setSwitchDebug();
+    slider.addEventListener('change', () => {
+      this.setSwitchDebug();
+    });
   }
 
   setSwitchDebug() {
     let sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
-    this.storage.variables.flagDebug.setAndStore(sliderDebug.checked);
+    if (sliderDebug === null) {
+      return;
+    }
+    let debugOn = sliderDebug.checked;
     this.pages.problemPage.flagLoaded = false;
-    this.updateDebugIndicators();
+    let debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
+    if (debugOn) {
+      storage.variables.flagDebug.setAndStore("true");
+      solve.solver.setDebugLogContainer();
+      miscellaneous.writeHTML(debugSpan, "Debug <b style='color:red'>on</b>");
+    } else {
+      storage.variables.flagDebug.setAndStore("false");
+      solve.solver.setDebugLogContainer();
+      miscellaneous.writeHTML(debugSpan, "Debug <b style='color:green'>off</b>");
+    }
   }
 
   setSwitchStudentView() {
@@ -668,15 +664,6 @@ class Page {
     return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label, element);
   }
 
-  toggleMonitoring() {
-    let monitoring = this.storage.variables.calculator.monitoring;
-    if (monitoring.value !== "false") {
-      monitoring.setAndStore("false")
-    } else {
-      monitoring.setAndStore("true")
-    }
-  }
-
   /** @return {HTMLButtonElement} */
   pauseButton() {
     return document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle);
@@ -715,10 +702,24 @@ class Page {
     }
   }
 
+  initializeMonitoringComponent() {
+    let monitoringStorage = this.storage.variables.calculator.monitoring;
+    let monitor = document.getElementById(ids.domElements.switch.monitoring);
+    if (monitoringStorage.isTrue()) {
+      monitor.checked = true;
+    } else {
+      monitor.checked = false;
+    }
+    this.setMonitoringComponent();
+  }
+
   setMonitoringComponent() {
-    let monitoring = this.storage.variables.calculator.monitoring.value;
-    if (monitoring !== "false") {
-      monitoring = "true";
+    let monitoringStorage = this.storage.variables.calculator.monitoring;
+    let monitoring = document.getElementById(ids.domElements.switch.monitoring).checked;
+    if (monitoring) {
+      monitoringStorage.setAndStore("true");
+    } else {
+      monitoringStorage.setAndStore("false");
     }
     let monitorResult = document.getElementById(
       ids.domElements.pages.calculator.monitoring.spanStatus
@@ -727,11 +728,9 @@ class Page {
       return;
     }
     let pauseButton = this.pauseButton();
-    if (monitoring === "true") {
+    if (monitoring) {
       miscellaneous.writeHTML(monitorResult, "Monitor <b style='color:red'>on</b>");
-      document.getElementById(ids.domElements.switch.monitoring).checked = true;
     } else {
-      document.getElementById(ids.domElements.switch.monitoring).checked = false;
       miscellaneous.writeHTML(monitorResult, "Monitor <b style='color:green'>off</b>");
       pauseButton.style.display = "none";
     }

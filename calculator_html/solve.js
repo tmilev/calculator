@@ -109,7 +109,7 @@ class Solver {
     let mainInput = document.getElementById(ids.domElements.pages.calculator.inputMain);
     if (mainInput !== null) {
       mainInput.textContent = inputCalculator;
-      calculator.calculator.submitComputationAndStore();
+      calculator.calculator.submitComputationAndStore(true);
     }
     // Will trigger solveFromStorage; 
     // injection of the method happens in Page.initializeStorageCallbacks.

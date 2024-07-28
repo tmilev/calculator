@@ -12,7 +12,6 @@ const cookies = require("./cookies");
 const ids = require("./ids_dom_elements");
 const serverInformation = require("./server_information");
 const login = require("./login");
-const initializeButtonsModule = require("./initialize_buttons");
 const calculatorPage = require("./calculator_page");
 const signUp = require("./signup").signUp;
 const mathTypeSet = require("./math_typeset");
@@ -307,9 +306,7 @@ class Page {
 
   initializeSliders() {
     this.updateDebugIndicators();
-    this.storage.variables.calculator.input.callbackOnValueChange = (value) => {
-      calculatorPage.calculator.submitComputationPartTwo(value);
-    };
+    this.setWebAssemblySlider();
     this.storage.variables.calculator.monitoring.callbackOnValueChange = (value) => {
       this.setMonitoringComponent();
     };

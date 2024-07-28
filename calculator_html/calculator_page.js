@@ -303,7 +303,7 @@ class Calculator {
     if (event.keyCode !== 13 || !event.shiftKey) {
       return;
     }
-    this.submitComputationAndStore();
+    this.submitComputationAndStore(true);
     event.preventDefault();
   }
 
@@ -408,7 +408,7 @@ class Calculator {
       return;
     }
     buttonGo.addEventListener('click', () => {
-      this.submitComputationAndStore();
+      this.submitComputationAndStore(true);
     });
     let buttonLinkLatex = document.getElementById(
       ids.domElements.pages.calculator.buttonCopyLatexLink
@@ -494,9 +494,36 @@ class Calculator {
 
   selectCalculatorPage() {
     this.initialize();
+    this.submitComputationAndStore(false);
   }
 
-  submitComputationAndStore() {
+  updateSameAsPreviousInput(
+    /** @type {boolean} */
+    sameAsPrevious
+  ) {
+    const sameAsPreviousInputIndicator = document.getElementById(
+      ids.domElements.pages.calculator.monitoring.progressTimer
+    );
+    sameAsPreviousInputIndicator.textContent = "";
+    if (!sameAsPrevious) {
+      return;
+    }
+    const note = document.createElement("b");
+    note.style.display = "inline-block";
+    note.textContent = "Not sending: same as previous input.";
+    note.style.color = "orange";
+    note.style.transition = "1s";
+    note.style.backgroundColor = "lightgreen";
+    setTimeout(() => {
+      note.style.backgroundColor = "";
+    }, 0);
+    sameAsPreviousInputIndicator.appendChild(note);
+  }
+
+  submitComputationAndStore(
+    /** @type{boolean} */
+    updateSameAsPreviousIndicator
+  ) {
     processMonitoring.monitor.clearTimeout();
     let element = document.getElementById(
       ids.domElements.pages.calculator.inputMain
@@ -504,7 +531,11 @@ class Calculator {
     let calculatorInput = element.innerText;
     // Replace all non-breaking spaces with breaking spaces.
     calculatorInput = calculatorInput.split("\u00A0").join(" ");
-    if (calculatorInput === this.lastSubmittedInput) {
+    const sameAsPrevious = (calculatorInput === this.lastSubmittedInput);
+    this.updateSameAsPreviousInput(
+      sameAsPrevious && updateSameAsPreviousIndicator
+    );
+    if (sameAsPrevious) {
       return;
     }
     this.lastSubmittedInput = calculatorInput;

@@ -708,7 +708,8 @@ int Deployer::deploy() {
   << rebootServer
   << Logger::endL
   << Logger::green
-      << "Please enter your sudo password and press enter: " <<Logger::endL;
+  << "Please enter your sudo password and press enter: "
+  << Logger::endL;
   global.externalCommandStream(this->makeRemoteCommand(rebootServer));
   global.externalCommandStream("git checkout master");
   return 0;

@@ -473,7 +473,9 @@ class Page {
 
   initializeCalculatorPagePartTwo() {
     this.initializeButtons();
-    mathTypeSet.typesetter.typesetSoft(ids.domElements.divMathjaxProblematicRender);
+    mathTypeSet.typesetter.typesetSoft(
+      ids.domElements.divMathjaxProblematicRender
+    );
     document.getElementById(
       ids.domElements.sliderStudentView
     ).addEventListener('change', () => {
@@ -484,7 +486,9 @@ class Page {
   sectionSelect(sectionNumber) {
     this.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
     this.user.sectionComputed = this.user.sectionsTaught[sectionNumber];
-    let deadlineSpans = document.getElementsByClassName(ids.domElements.classSpanDeadlineContainer);
+    let deadlineSpans = document.getElementsByClassName(
+      ids.domElements.classSpanDeadlineContainer
+    );
     for (let i = 0; i < deadlineSpans.length; i++) {
       let currentDeadlineSpan = deadlineSpans[i];
       let currentDeadlineId = currentDeadlineSpan.id.substr(

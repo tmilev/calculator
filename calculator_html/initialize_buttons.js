@@ -202,7 +202,8 @@ class InputPanelData {
     this.mathQuillPanelOptions = input.mathQuillPanelOptions;
     this.flagAnswerPanel = input.flagAnswerPanel;
     this.flagCalculatorPanel = input.flagCalculatorPanel;
-    this.forReal = (input[pathnames.urlFields.problem.forReal] === true);
+    this.flagForReal = (input[pathnames.urlFields.problem.forReal] === true);
+    this.isLoggedIn = (input.isLoggedIn === true);
     //just in case we forget some entry above:
     for (let key in input) {
       if (!(key in this)) {

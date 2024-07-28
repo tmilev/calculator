@@ -511,6 +511,9 @@ class Calculator {
     storage.storage.variables.calculator.input.setAndStore(
       this.lastSubmittedInput
     );
+    this.submitComputationPartTwo(
+      this.lastSubmittedInput
+    );
   }
 
   /** @return {String} */
@@ -948,8 +951,6 @@ class Calculator {
   }
 
   submitComputationToBackend(input) {
-    //<- this function is called by a callback trigerred when calling
-    // page.storage.variables.calculator.input.setAndStore(...)
     let page = window.calculator.mainPage;
     let urlCopy = Object.assign({}, page.storage.urlObject);
     urlCopy.inputFocus = true;

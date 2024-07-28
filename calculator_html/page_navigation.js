@@ -79,7 +79,9 @@ class User {
     // Please do not take explicit action as
     // inputdata.authenticationToken may not 
     // contain the authentication token.
-    // not ok: page.storage.variables.user.authenticationToken.setAndStore(inputData.authenticationToken);
+    // not ok: 
+    // page.storage.variables.user.authenticationToken.
+    //   setAndStore(inputData.authenticationToken);
     page.storage.variables.user.name.setAndStore(inputData.username);
     mainPage().storage.variables.user.role.setAndStore(inputData.userRole);
     this.flagLoggedIn = true;
@@ -262,7 +264,7 @@ class Page {
       this.defaultPage = "compareExpressions";
     }
     this.storage = storage;
-    this.initializeStorageCallbacks();
+    this.initializeSliders();
     this.flagProblemPageOnly = false;
     this.mainMenuExpandedLength = null;
 
@@ -303,33 +305,19 @@ class Page {
     });
   }
 
-  initializeStorageCallbacks() {
-    this.storage.variables.currentPage.callbackOnValueChange = (value) => {
-      this.selectPage(value);
-    };
-    this.storage.variables.flagDebug.callbackOnValueChange = (value) => {
-      this.onDebugValueChange();
-    };
-    this.storage.variables.flagStudentView.callbackOnValueChange = (value) => {
-      this.onStudentViewChange();
-    };
+  initializeSliders() {
+    this.updateDebugIndicators();
     this.storage.variables.calculator.input.callbackOnValueChange = (value) => {
       calculatorPage.calculator.submitComputationPartTwo(value);
     };
     this.storage.variables.calculator.monitoring.callbackOnValueChange = (value) => {
       this.setMonitoringComponent();
     };
-    this.storage.variables.calculator.useWebAssembly.callbackOnValueChange = (value) => {
-      this.setWebAssemblySlider();
-    };
     this.storage.variables.theme.callbackOnValueChange = (value) => {
       themes.theme.doChangeTheme(value);
     };
     this.storage.variables.solve.problemToAutoSolve.callbackOnValueChange = (value) => {
       solve.solver.solveFromStorage(value);
-    };
-    this.storage.variables.solve.problemToAutoSolve.callbackSetValueFromStorage = (value) => {
-      solve.solver.setAutoSolveProblemBox(value);
     };
   }
 
@@ -363,10 +351,12 @@ class Page {
 
   initHandlers() {
     window.addEventListener("hashchange", () => {
-      this.storage.loadSettings();
+      storage.loadSettings.loadSettings();
+      this.selectPage(storage.variables.currentPage.getValue());
     });
     window.addEventListener("popstate", () => {
       this.storage.loadSettings();
+      this.selectPage(storage.variables.currentPage.getValue());
     });
     let monitor = document.getElementById(ids.domElements.switch.monitoring);
     if (monitor !== null) {
@@ -374,7 +364,9 @@ class Page {
         this.toggleMonitoring();
       });
     }
-    let webAssembly = document.getElementById(ids.domElements.switch.sliderWebAssembly);
+    let webAssembly = document.getElementById(
+      ids.domElements.switch.sliderWebAssembly
+    );
     if (webAssembly !== null) {
       webAssembly.addEventListener("change", () => {
         this.toggleWebAssembly();
@@ -382,7 +374,7 @@ class Page {
     }
   }
 
-  initMenuBar() {
+  initializeMenuBar() {
     for (let label in this.pages) {
       let page = this.pages[label];
       page.container = document.getElementById(page.id);
@@ -396,10 +388,18 @@ class Page {
       currentButton.pageToSelect = label;
       currentButton.addEventListener(
         "click", () => {
-          this.selectPage(label);
+          this.selectAndStorePage(label);
         }
       );
     }
+  }
+
+  selectAndStorePage(
+    /** @type {string} */
+    label
+  ) {
+    storage.variables.currentPage.setAndStore(label);
+    this.selectPage(label);
   }
 
   resetTopicProblems() {
@@ -450,7 +450,7 @@ class Page {
 
   initializeCalculatorPagePartOne() {
     cookies.setCookie("useJSON", true, 300, false);
-    this.initMenuBar();
+    this.initializeMenuBar();
     this.initBuildVersion();
     this.initHandlers();
     //////////////////////////////////////
@@ -514,7 +514,7 @@ class Page {
     }
   }
 
-  onDebugValueChange() {
+  updateDebugIndicators() {
     let sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
     if (sliderDebug === null) {
       return;
@@ -535,7 +535,7 @@ class Page {
     let sliderDebug = document.getElementById(ids.domElements.sliderDebugFlag);
     this.storage.variables.flagDebug.setAndStore(sliderDebug.checked);
     this.pages.problemPage.flagLoaded = false;
-    this.selectPage(this.storage.variables.currentPage.getValue());
+    this.updateDebugIndicators();
   }
 
   setSwitchStudentView() {
@@ -615,8 +615,6 @@ class Page {
       return;
     }
     this.currentPage = inputPage;
-
-    this.storage.variables.currentPage.setAndStore(inputPage);
     if (this.flagProblemPageOnly) {
       this.selectPageFunction(inputPage);
       return;
@@ -639,7 +637,10 @@ class Page {
       return;
     }
     selectedPage.container.style.display = "";
-    if (selectedPage.menuButtonId !== null && selectedPage.menuButtonId !== undefined) {
+    if (
+      selectedPage.menuButtonId !== null &&
+      selectedPage.menuButtonId !== undefined
+    ) {
       let button = document.getElementById(selectedPage.menuButtonId);
       if (button !== null) {
         button.classList.add("buttonSelectPageSelected");
@@ -653,7 +654,10 @@ class Page {
     inputPage,
   ) {
     let selectedPage = this.pages[inputPage];
-    if (selectedPage.selectFunction !== null && selectedPage.selectFunction !== undefined) {
+    if (
+      selectedPage.selectFunction !== null &&
+      selectedPage.selectFunction !== undefined
+    ) {
       selectedPage.selectFunction();
     }
   }
@@ -688,6 +692,7 @@ class Page {
     } else {
       webAssembly.setAndStore("false");
     }
+    this.setWebAssemblySlider();
   }
 
   setWebAssemblySlider() {

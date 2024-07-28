@@ -23,7 +23,7 @@ class ProblemCollection {
     /** @type {string} */
     this.nextProblemId = null;
     /** @type {Object<string, boolean>} */
-    this.theChapterIds = {};
+    this.chapterIds = {};
     this.topics = {};
   }
 
@@ -39,7 +39,7 @@ class ProblemCollection {
   }
 
   resetTopicProblems() {
-    this.theChapterIds = {};
+    this.chapterIds = {};
     this.topicProblems = {};
   }
 
@@ -50,7 +50,7 @@ class ProblemCollection {
     if (problemData.id.includes("%")) {
       console.log("Unexpected percent sign in problem id.");
     }
-    // theProblemId is percent encoded, safe to embed in html.
+    // problemId is percent encoded, safe to embed in html.
     let problemId = encodeURIComponent(problemData.id);
     let element = document.getElementById(
       ids.domElements.problemPageContentContainer
@@ -107,7 +107,7 @@ class ProblemCollection {
     const writeTime = new Date().getTime() - startTime;
     if (writeTime > 1000) {
       console.log(
-        `Less than a second to generate html expected, needed ${writeTime} ms instead.`
+        `Html generation took ${writeTime} ms, this is too slow.`
       );
     }
   }
@@ -162,7 +162,9 @@ class ProblemCollection {
     let url = "";
     if (problem !== undefined && problem !== null) {
       let forReal = problem.flagForReal;
-      url = `${pathnames.urls.calculatorAPI}?${problem.getCalculatorURLRequestFileCourseTopics(forReal)}`;
+      const api = pathnames.urls.calculatorAPI;
+      const urlParameters = problem.getCalculatorURLRequestFileCourseTopics(forReal);
+      url = `${api}?${urlParameters}`;
     } else {
       let problemFileName = storage.storage.variables.currentCourse.problemFileName.getValue();
       if (
@@ -213,12 +215,17 @@ class ProblemCollection {
   }
 }
 
-function selectCurrentProblem(problemIdURLed, exerciseType) {
+function selectCurrentProblem(
+  /** @type{string} */
+  problemIdURLed,
+  /** @type{string} */
+  exerciseType,
+) {
   let page = window.calculator.mainPage;
-  page.storage.variables.currentCourse.problemFileName.setAndStore(
+  storage.storage.variables.currentCourse.problemFileName.setAndStore(
     decodeURIComponent(problemIdURLed)
   );
-  page.storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
+  storage.storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
   let problem = getCurrentProblem();
   problem.flagForReal = false;
   if (
@@ -289,7 +296,10 @@ class Problem {
     this.answerPanels = [];
     this.title = problemData.title;
     this.fileName = problemData.fileName;
-    if (this.fileName === undefined || this.fileName === null) {
+    if (
+      this.fileName === undefined ||
+      this.fileName === null
+    ) {
       this.fileName = "";
     }
     if (window.calculator.mainPage.flagProblemPageOnly) {
@@ -305,7 +315,8 @@ class Problem {
     try {
       problemData = miscellaneous.jsonUnescapeParse(input);
     } catch (e) {
-      this.outputElement.textContent = `Error parsing: ${e}. Failed to parse: ${input}`;
+      this.outputElement.textContent =
+        `Error parsing: ${e}. Failed to parse: ${input}`;
       return;
     }
     if (
@@ -381,7 +392,7 @@ class Problem {
       this.queryHomework = "";
     }
     if (this.type === "Chapter") {
-      allProblems.theChapterIds[this.problemId] = true;
+      allProblems.chapterIds[this.problemId] = true;
     }
     // const secondPartTime = new Date().getTime();
     this.childrenIds = [];
@@ -467,7 +478,7 @@ class Problem {
       let currentVector = answerVectors[i];
       this.answerPanels[i] = new AnswerPanel({
         problemId: this.problemId,
-        forReal: this.flagForReal,
+        flagForReal: this.flagForReal,
         isLoggedIn: isLoggedIn,
         properties: currentVector.properties,
         previousAnswers: currentVector.previousAnswers,
@@ -741,7 +752,9 @@ class Problem {
       let randomSeedElement = document.createElement("span");
       randomSeedElement.id = ids.domElements.spanProblemLinkWithRandomSeed;
       let randomSeedAnchor = document.createElement("a");
-      randomSeedAnchor.href = "#" + this.getAppAnchorRequestFileCourseTopics(false, true);
+      randomSeedAnchor.href = "#" + this.getAppAnchorRequestFileCourseTopics(
+        false, true,
+      );
       randomSeedAnchor.textContent = this.randomSeed;
       randomSeedElement.appendChild(randomSeedAnchor);
       result.push(randomSeedElement);
@@ -1283,7 +1296,7 @@ class Problem {
     query
   ) {
     if (linkSpec.adminView === true) {
-      let studentView = window.calculator.mainPage.storage.variables.flagStudentView.getValue();
+      let studentView = storage.storage.variables.flagStudentView.getValue();
       if (studentView !== false && studentView !== "false") {
         return null;
       }
@@ -1306,8 +1319,7 @@ class Problem {
 }
 
 function getCalculatorURLRequestFileCourseTopicsFromStorage() {
-  let page = window.calculator.mainPage;
-  let currentCourse = page.storage.variables.currentCourse;
+  let currentCourse = storage.storage.variables.currentCourse;
   let exerciseType = currentCourse.exerciseType.getValue();
   if (
     exerciseType === "" ||
@@ -1414,8 +1426,8 @@ class ProblemNavigation {
 }
 
 function modifyWeight(id) {
-  let theProblemWeight = allProblems.allProblems[id];
-  theProblemWeight.modifyWeight();
+  let problemWeight = allProblems.allProblems[id];
+  problemWeight.modifyWeight();
 }
 
 function convertStringToLaTeXFileName(input) {
@@ -1489,7 +1501,7 @@ let linkHomework = [
 /** @return {HTMLElement[]} */
 function getHTMLfromTopics() {
   let result = [];
-  for (let label in allProblems.theChapterIds) {
+  for (let label in allProblems.chapterIds) {
     let currentProblem = allProblems.getProblemById(label);
     result.push(currentProblem.toHTMLChapter());
   }
@@ -1600,12 +1612,18 @@ function loadProblemIntoElement(
     problemElement = document.getElementById(problemElement);
   }
   let problemFileName = problemElement.getAttribute("problem");
-  let problem = allProblems.getProblemByIdOrRegisterEmpty(problemFileName, problemElement);
+  let problem = allProblems.getProblemByIdOrRegisterEmpty(
+    problemFileName, problemElement,
+  );
   problem.flagForReal = false;
   if (problemElement.getAttribute("forReal") === "true") {
     problem.flagForReal = true;
   }
-  let url = `${pathnames.urls.calculatorAPI}?${problem.getCalculatorURLRequestFileCourseTopics(problem.flagForReal)}`;
+  const endpoint = pathnames.urls.calculatorAPI;
+  const parameters = problem.getCalculatorURLRequestFileCourseTopics(
+    problem.flagForReal
+  );
+  let url = `${endpoint}?${parameters}`;
   submitRequests.submitGET({
     url: url,
     callback: (input, outputComponent) => {

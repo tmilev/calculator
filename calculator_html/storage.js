@@ -18,7 +18,6 @@ class StorageVariable {
      * secure: string, 
      * showInURLByDefault: boolean, 
      * showInURLOnPages: Object, 
-     * callbackOnValueChange: function,
      * defaultValue: boolean,
      * }} */
     inputs
@@ -33,10 +32,6 @@ class StorageVariable {
     this.secure = true;
     this.showInURLByDefault = false;
     this.defaultValue = "";
-    /** @type {Function|null} */
-    this.callbackOnValueChange = null;
-    /** @type {Function|null} */
-    this.callbackSetValueFromStorage = null;
     let labelsToRead = [
       "nameURL",
       "nameCookie",
@@ -148,9 +143,6 @@ class StorageVariable {
         element.textContent = this.value;
       }
     }
-    if (this.callbackSetValueFromStorage !== null) {
-      this.callbackSetValueFromStorage(this.value);
-    }
   }
 
   setAndStore(
@@ -172,17 +164,6 @@ class StorageVariable {
     if (!changed) {
       return;
     }
-    if (
-      this.callbackOnValueChange === null ||
-      this.callbackOnValueChange === undefined
-    ) {
-      return;
-    }
-    // Calling function with timeout ensures 
-    // the current function sequence is finished first.
-    setTimeout(() => {
-      this.callbackOnValueChange(this.value);
-    }, 0);
   }
 }
 

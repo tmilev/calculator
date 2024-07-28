@@ -18,7 +18,7 @@ class AnswerPanel {
   constructor(
     /**
      * @type{{
-     * forReal:boolean,
+     * flagForReal:boolean,
      * generateInterpretButton:boolean,
      * mathQuillPanelOptions:string,
      * dontBootstrapButtons:boolean,
@@ -35,10 +35,7 @@ class AnswerPanel {
     /** @type {HTMLElement|null} */
     this.problemElement = null;
     /** @type {boolean} */
-    this.flagForReal = false;
-    if (input["forReal"] === true) {
-      this.flagForReal = true;
-    }
+    this.flagForReal = (input.flagForReal === true);
     this.isLoggedIn = input.isLoggedIn;
     this.idPureLatex = input.idPureLatex;
     this.problemId = input.problemId;
@@ -92,7 +89,8 @@ class AnswerPanel {
     /** 
      * @type {HTMLElement} 
      * Element that contains the entire problem. 
-     * Used to update graphics scripts when the comments in the answer panel dictate it.
+     * Used to update graphics scripts when the comments 
+     * in the answer panel dictate it.
      */
     problemElement,
   ) {
@@ -186,7 +184,9 @@ class AnswerPanel {
 
   editLaTeX() {
     this.ignoreNextEditorEvent = true;
-    this.panel.equationEditor.writeLatex(this.panel.getPureLatexElement().value + ' ');
+    this.panel.equationEditor.writeLatex(
+      this.panel.getPureLatexElement().value + ' '
+    );
     this.ignoreNextEditorEvent = false;
     this.submitPreviewWithTimeOut();
   }
@@ -343,9 +343,13 @@ class AnswerPanel {
       if (resultHtml !== "") {
         resultHtml += "<br>";
       }
-      resultHtml += `<br><span style='font-size:x-small;float:right'>Computation time: ${timeComputation} ms</span>`;
+      resultHtml += "<br><span style='font-size:x-small;float:right'>" +
+        `Computation time: ${timeComputation} ms` +
+        "</span>";
     }
-    resultHtml += answerProcessing.htmlUserFriendlyResultComparisonErrorsOnly(inputParsed);
+    resultHtml += answerProcessing.htmlUserFriendlyResultComparisonErrorsOnly(
+      inputParsed
+    );
     resultHtml += miscellaneous.htmlFromCommentsAndErrors(inputParsed);
     miscellaneous.writeHTML(this.verificationSpan, resultHtml);
     typeset.typesetter.typesetSoft(this.verificationSpan, "");

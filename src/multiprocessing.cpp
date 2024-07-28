@@ -1206,7 +1206,7 @@ Logger& Logger::logString(const std::string& input) {
   return *this;
 }
 
-bool Logger::shouldUseColors(){
+bool Logger::shouldUseColors() {
   switch (global.runMode) {
   case GlobalVariables::RunMode::builtInWebServer:
   case GlobalVariables::RunMode::consoleRegular:
@@ -1218,7 +1218,6 @@ bool Logger::shouldUseColors(){
   default:
     return false;
   }
-
 }
 
 Logger& Logger::logSpecialSymbol(const LoggerSpecialSymbols& input) {

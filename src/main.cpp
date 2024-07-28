@@ -553,20 +553,22 @@ int MainFunctions::mainLoadDatabase() {
   return exitCode;
 }
 
-
-class Deployer{
+class Deployer {
 public:
   static std::string gitBranchName();
   int deploy();
-
+  std::string makeRemoteCommand(
+    const std::string& commandToBeEnclosedInSingleQuotes
+  );
 };
+
 int MainFunctions::mainDeploy() {
   STACK_TRACE("MainFunctions::mainDeploy");
   Deployer deployer;
-  return  deployer.deploy();
+  return deployer.deploy();
 }
 
-std::string Deployer::gitBranchName(){
+std::string Deployer::gitBranchName() {
   TimeWrapper now;
   now.assignLocalTime();
   int year = 1900 + now.timeLocal.tm_year;
@@ -575,7 +577,7 @@ std::string Deployer::gitBranchName(){
   StateMaintainerCurrentFolder maintainFolder;
   global.changeDirectory(global.physicalPathServerBase);
   std::stringstream branchName;
-  branchName << "deploy_" << year << "_";
+  branchName << "deployed_" << year << "_";
   if (month < 10) {
     branchName << "0";
   }
@@ -587,10 +589,29 @@ std::string Deployer::gitBranchName(){
   return branchName.str();
 }
 
+std::string Deployer::makeRemoteCommand(
+  const std::string& commandToBeEnclosedInSingleQuotes
+) {
+  const std::string url =
+  global.configuration[Configuration::deploy][Configuration::Deploy::url].
+  stringValue;
+  const std::string username =
+  global.configuration[Configuration::deploy][
+    Configuration::Deploy::username
+  ].stringValue;
+  std::stringstream result;
+  result
+  << "ssh -t "
+  << username
+  << "@"
+  << url
+  << " '"
+  << commandToBeEnclosedInSingleQuotes
+  << "'";
+  return result.str();
+}
 
-
-int Deployer::deploy(){
-
+int Deployer::deploy() {
   // If any of the keys below are missing, they will be allocated now.
   const std::string url =
   global.configuration[Configuration::deploy][Configuration::Deploy::url].
@@ -603,6 +624,15 @@ int Deployer::deploy(){
   global.configuration[Configuration::deploy][
     Configuration::Deploy::baseFolder
   ].stringValue;
+  global
+  << "About to deploy to: "
+  << Logger::purple
+  << url
+  << Logger::normalColor
+  << " with username: "
+  << Logger::orange
+  << username
+  << Logger::endL;
   // If any keys are newly allocated, let us store these back to the
   // configuration file.
   // In this way, the maintainer of the configuration.json need not remember
@@ -619,9 +649,8 @@ int Deployer::deploy(){
     return 0;
   }
   global.externalCommandStream("git checkout master");
-  std::string gitStatus =
-  global.externalCommandReturnOutput("git status");
-  if (StringRoutines::stringContains( gitStatus , "fatal:")) {
+  std::string gitStatus = global.externalCommandReturnOutput("git status");
+  if (StringRoutines::stringContains(gitStatus, "fatal:")) {
     global
     << Logger::red
     << "Git status contained the string fatal:. "
@@ -629,26 +658,58 @@ int Deployer::deploy(){
     << Logger::endL;
     return 0;
   }
-  if (StringRoutines::stringContains( gitStatus , "not staged")) {
-    global<<Logger::red << "The `git status` command contains the phrase `not staged`. "
-           << "I assume you have non-staged commits, so aborting deployment. "
-           << Logger::endL << gitStatus;
+  if (StringRoutines::stringContains(gitStatus, "not staged")) {
+    global
+    << Logger::red
+    << "The `git status` command contains the phrase `not staged`. "
+    << "I assume you have non-staged commits, so aborting deployment. "
+    << Logger::endL
+    << gitStatus;
     return 0;
   }
   std::string branchName = this->gitBranchName();
-
-  if (
-      global.externalCommandStream("git branch " + branchName) != 0
-      ) {
+  if (global.externalCommandStream("git branch " + branchName) != 0) {
     global
-        << Logger::red
-        << "Failed to execute git command. "
-        << Logger::green
-        << "Perhaps the branch already exists? "
-        << "I am continuing bravely. "
-        << Logger::endL;
+    << Logger::red
+    << "Failed to execute git command. "
+    << Logger::green
+    << "Perhaps the branch already exists? "
+    << "I am continuing bravely. "
+    << Logger::endL;
   }
-  global.externalCommandStream("git checkout "+branchName);
-
+  global.externalCommandStream("git checkout " + branchName);
+  global.externalCommandStream("git push --set-upstream origin " + branchName);
+  std::stringstream gitPullRemote;
+  gitPullRemote
+  << "cd courses_calculator/calculator && git pull && git checkout "
+  << branchName;
+  std::string sshGitPull = this->makeRemoteCommand(gitPullRemote.str());
+  std::string gitPullRemoteResult =
+  global.externalCommandReturnOutput(sshGitPull);
+  if (
+    StringRoutines::stringContains(
+      gitPullRemoteResult, "did not match any file"
+    )
+  ) {
+    global
+    << Logger::red
+    << "Found 'did not match any file' in the remote git pull command."
+    << Logger::endL
+    << "This is not expected, but I shall continue bravely.";
+  }
+  global << gitPullRemoteResult << Logger::endL;
+  std::string makeRemote =
+  "cd courses_calculator/calculator && make -j4 optimize=1";
+  global.externalCommandStream(this->makeRemoteCommand(makeRemote));
+  std::string rebootServer = "sudo systemctl restart calculator";
+  global
+  << "Executing the remote calculator reboot command: "
+  << Logger::purple
+  << rebootServer
+  << Logger::endL
+  << Logger::green
+  << "Please enter your sudo password and press enter: ";
+  global.externalCommandStream(this->makeRemoteCommand(rebootServer));
+  global.externalCommandStream("git checkout master");
   return 0;
 }

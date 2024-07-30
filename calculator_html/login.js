@@ -219,7 +219,6 @@ function logout() {
   page.user.hideProfilePicture();
   page.user.flagLoggedIn = false;
   page.user.sectionsTaught = [];
-  page.pages.problemPage.flagLoaded = false;
   document.getElementById("inputPassword").value = "";
   document.getElementById(ids.domElements.problemPageContentContainer).textContent = "";
   document.getElementById(ids.domElements.divCurrentCourseBody).textContent = "";

@@ -322,16 +322,11 @@ class Calculator {
     );
     if (this.flagExamplesWantedShown) {
       writeHTML(button, "&#9660;")
-      // calculatorElement.style.maxWidth = "85%";
       examples.classList.remove("hiddenClass");
-      //examplesContainer.style.height = "100%";
-      //examplesContainer.style.maxHeight = "100%";
     } else {
       calculatorElement.style.maxWidth = "98%";
       writeHTML(button, "&#9656;")
       examples.classList.add("hiddenClass");
-      //examplesContainer.style.height = "5%";
-      //examplesContainer.style.maxHeight = "5%";
     }
   }
 

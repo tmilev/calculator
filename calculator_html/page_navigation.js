@@ -164,7 +164,6 @@ class Page {
         menuButtonId: "buttonProblemPage",
         container: null,
         selectFunction: problemPage.updateProblemPage,
-        flagLoaded: false,
       },
       editPage: {
         name: "editPage",
@@ -335,11 +334,11 @@ class Page {
 
   initializeHandlers() {
     window.addEventListener("hashchange", () => {
-      storage.loadSettings.loadSettings();
+      storage.loadSettings();
       this.selectPage(storage.variables.currentPage.getValue());
     });
     window.addEventListener("popstate", () => {
-      this.storage.loadSettings();
+      storage.loadSettings();
       this.selectPage(storage.variables.currentPage.getValue());
     });
     let monitor = document.getElementById(ids.domElements.switch.monitoring);
@@ -522,7 +521,7 @@ class Page {
       return;
     }
     let debugOn = sliderDebug.checked;
-    this.pages.problemPage.flagLoaded = false;
+    problemPage.allProblems.flagLoaded = false;
     let debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
     if (debugOn) {
       storage.variables.flagDebug.setAndStore("true");
@@ -538,7 +537,7 @@ class Page {
   setSwitchStudentView() {
     let sliderStudentView = document.getElementById(ids.domElements.sliderStudentView);
     this.storage.variables.flagStudentView.setAndStore(sliderStudentView.checked);
-    this.pages.problemPage.flagLoaded = false;
+    problemPage.allProblems.flagLoaded = false;
     this.selectPage(this.storage.variables.currentPage.getValue());
   }
 

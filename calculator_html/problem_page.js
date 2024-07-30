@@ -3,7 +3,6 @@ const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 const editPage = require("./edit_page");
-const initializeButtons = require("./initialize_buttons");
 const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous_frontend");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
@@ -11,6 +10,7 @@ const datePicker = require("./date_picker").datePicker;
 const storage = require("./storage");
 const AnswerPanel = require("./answer_panel").AnswerPanel;
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
+const login = require("./login");
 
 class ProblemCollection {
   constructor() {
@@ -25,6 +25,7 @@ class ProblemCollection {
     /** @type {Object<string, boolean>} */
     this.chapterIds = {};
     this.topics = {};
+    this.flagLoaded = false;
   }
 
   /** @return {Problem} */
@@ -139,12 +140,11 @@ class ProblemCollection {
   updateProblemPage() {
     let page = window.calculator.mainPage;
     window.calculator.coursePage.selectCurrentCoursePage();
-    // page.pages.problemPage.flagLoaded is modified by the following
     // functions: selectCurrentProblem, logout, callbackClone,
     // the present function updateProblemPage
     /** @type {Problem} */
     let problem = getCurrentProblem();
-    if (page.pages.problemPage.flagLoaded) {
+    if (this.flagLoaded) {
       if (problem !== undefined && problem !== null) {
         let problemNavigation = document.getElementById(
           problem.idNavigationProblemNotEntirePanel
@@ -177,7 +177,7 @@ class ProblemCollection {
       }
       url = getCalculatorURLRequestFileCourseTopicsFromStorage();
     }
-    page.pages.problemPage.flagLoaded = true;
+    this.flagLoaded = true;
     submitRequests.submitGET({
       url: url,
       callback: (input, outputComponent) => {
@@ -234,10 +234,8 @@ function selectCurrentProblem(
   ) {
     problem.flagForReal = true;
   }
-  page.pages.problemPage.flagLoaded = false;
-  // This will force a page reload.
-  page.currentPage = "";
-  page.selectPage(page.pages.problemPage.name);
+  allProblems.flagLoaded = false;
+  allProblems.updateProblemPage();
 }
 
 class Problem {
@@ -280,7 +278,6 @@ class Problem {
       }
     }
     this.setRandomSeed(incomingRandomSeed);
-    currentCourse.randomSeed.value = "";
   }
 
   initializeBasic(problemData) {
@@ -394,7 +391,6 @@ class Problem {
     if (this.type === "Chapter") {
       allProblems.chapterIds[this.problemId] = true;
     }
-    // const secondPartTime = new Date().getTime();
     this.childrenIds = [];
     if (!Array.isArray(problemData.children)) {
       return;
@@ -1344,7 +1340,6 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   ) {
     result += `randomSeed=${environmentRandomSeed}&`;
   }
-  currentCourse.randomSeed.value = "";
   return result;
 }
 
@@ -1379,10 +1374,10 @@ class ProblemNavigation {
     if (this.infoBar === null) {
       return;
     }
-    let problemTitle = document.createElement("DIV");
+    let problemTitle = document.createElement("div");
     problemTitle.className = "problemTitle";
 
-    let problemTitleContainer = document.createElement("DIV");
+    let problemTitleContainer = document.createElement("div");
     problemTitleContainer.className = "problemTitleContainer";
     problemTitle.appendChild(problemTitleContainer);
     if (
@@ -1553,23 +1548,24 @@ function writeEditCoursePagePanel() {
   );
   panel.appendChild(topicListPanel);
   if (
-    allProblems.topics.topicBundleFile !== undefined &&
-    allProblems.topics.topicBundleFile !== null &&
-    allProblems.topics.topicBundleFile !== ""
+    allProblems.topics.topicBundleFile === undefined ||
+    allProblems.topics.topicBundleFile === null ||
+    allProblems.topics.topicBundleFile === ""
   ) {
-    for (
-      let counterTopicBundle = 0;
-      counterTopicBundle < allProblems.topics.topicBundleFile.length;
-      counterTopicBundle++
-    ) {
-      let nextToEdit = allProblems.topics.topicBundleFile[counterTopicBundle];
-      const nextToEditPanel = editPage.getEditPanel(
-        nextToEdit,
-        page.hasInstructorRightsNotViewingAsStudent(),
-        false
-      );
-      panel.appendChild(nextToEditPanel);
-    }
+    return;
+  }
+  for (
+    let i = 0;
+    i < allProblems.topics.topicBundleFile.length;
+    i++
+  ) {
+    let nextToEdit = allProblems.topics.topicBundleFile[i];
+    const nextToEditPanel = editPage.getEditPanel(
+      nextToEdit,
+      page.hasInstructorRightsNotViewingAsStudent(),
+      false
+    );
+    panel.appendChild(nextToEditPanel);
   }
 }
 
@@ -1583,7 +1579,6 @@ function processLoadedTopicsWriteToCoursePage(incomingTopics, result) {
 }
 
 function writeTopicsToCoursePage() {
-  let page = window.calculator.mainPage;
   let topicsElement = getTopicListElement();
   writeEditCoursePagePanel();
   let htmlContentElements = getHTMLfromTopics();
@@ -1594,7 +1589,7 @@ function writeTopicsToCoursePage() {
   miscellaneousFrontend.appendHtml(topicsElement, htmlContentElements);
   initializeProblemWeightsAndDeadlines();
   initializeDatePickers();
-  if (page.pages.problemPage.flagLoaded) {
+  if (allProblems.flagLoaded) {
     problemNavigation.writeToHTML();
   }
   typeset.typesetter.typesetSoft(topicsElement, "");
@@ -1675,6 +1670,5 @@ module.exports = {
   processLoadedTopicsWriteToCoursePage,
   processLoadedTopicsWriteToEditPage,
   writeEditCoursePagePanel,
-  selectCurrentProblem,
   modifyWeight,
 };

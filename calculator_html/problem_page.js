@@ -10,7 +10,6 @@ const datePicker = require("./date_picker").datePicker;
 const storage = require("./storage");
 const AnswerPanel = require("./answer_panel").AnswerPanel;
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
-const login = require("./login");
 
 class ProblemCollection {
   constructor() {
@@ -138,9 +137,8 @@ class ProblemCollection {
   }
 
   updateProblemPage() {
-    let page = window.calculator.mainPage;
     window.calculator.coursePage.selectCurrentCoursePage();
-    // functions: selectCurrentProblem, logout, callbackClone,
+    // functions: selectProblemById, logout, callbackClone,
     // the present function updateProblemPage
     /** @type {Problem} */
     let problem = getCurrentProblem();
@@ -215,7 +213,7 @@ class ProblemCollection {
   }
 }
 
-function selectCurrentProblem(
+function selectProblemById(
   /** @type{string} */
   problemIdURLed,
   /** @type{string} */
@@ -253,6 +251,8 @@ class Problem {
     this.outputElement = outputElement;
     /** @type {string} */
     this.title = "";
+    /** @type {string} */
+    this.randomSeed = "";
   }
 
   setRandomSeed(input) {
@@ -516,14 +516,15 @@ class Problem {
       courseHome: page.storage.variables.currentCourse.courseHome.getValue(),
       topicList: page.storage.variables.currentCourse.topicList.getValue(),
     };
-    if (includeRandomSeed) {
-      if (
-        this.randomSeed !== "" &&
-        this.randomSeed !== null &&
-        this.randomSeed !== undefined
-      ) {
-        requestJSON["randomSeed"] = this.randomSeed;
-      }
+    if (
+      includeRandomSeed &&
+      this.randomSeed !== "" &&
+      this.randomSeed !== null &&
+      this.randomSeed !== undefined
+    ) {
+      requestJSON["randomSeed"] = this.randomSeed;
+    } else {
+      requestJSON["randomSeed"] = "";
     }
     let stringifiedHash = page.storage.getPercentEncodedURL(requestJSON);
     return stringifiedHash;
@@ -568,6 +569,18 @@ class Problem {
         this.randomSeed !== undefined
       ) {
         result += `&${pathnames.urlFields.randomSeed}=${this.randomSeed}`;
+      } else {
+        const desiredRandomSeed = Math.floor(Math.random() * 10000000);
+        // The desiredRandomSeed may not yield a valid problem.
+        // If that is the case, the backend should iterate to the next seed.
+        // Here, "the next seed" is extracted from the desired one with
+        // a deterministic operation - can be as simple as adding one.
+        // This iteration happens until a valid problem is generated.
+        // If that happens, the desired random seed may not end up
+        // being used in the end, so we are not storing it in
+        // this.randomSeed. Rather, we will get the random seed
+        // bounced back (and possibly altered) from the backend.
+        result += `&${pathnames.urlFields.randomSeed}=${desiredRandomSeed}`;
       }
     }
     return result;
@@ -632,7 +645,7 @@ class Problem {
     nextProblemTag.addEventListener(
       "click",
       () => {
-        selectCurrentProblem(this.nextProblemId, hints.defaultRequest);
+        selectProblemById(this.nextProblemId, hints.defaultRequest);
       }
     );
     miscellaneous.writeHTML(nextProblemTag, "&#8594;");
@@ -664,7 +677,7 @@ class Problem {
       previousLink.addEventListener(
         "click",
         () => {
-          selectCurrentProblem(this.previousProblemId, hints.defaultRequest);
+          selectProblemById(this.previousProblemId, hints.defaultRequest);
         }
       );
     } else {
@@ -701,7 +714,7 @@ class Problem {
       practiceTag.className = "problemLinkPractice";
       practiceTag.href = "#" + practiceURL;
       practiceTag.addEventListener("click", () => {
-        selectCurrentProblem(this.problemId, "exerciseJSON");
+        selectProblemById(this.problemId, "exerciseJSON");
       });
       practiceTag.textContent = "Practice";
       result.push(practiceTag);
@@ -724,7 +737,7 @@ class Problem {
       quizTag.addEventListener(
         "click",
         () => {
-          selectCurrentProblem(this.problemId, "scoredQuizJSON");
+          selectProblemById(this.problemId, "scoredQuizJSON");
         }
       );
       quizTag.textContent = "Quiz";
@@ -936,7 +949,9 @@ class Problem {
     let page = window.calculator.mainPage;
     let nextCell = outputRow.insertCell(- 1);
     nextCell.className = "topicListTitle";
-    miscellaneous.writeHTML(nextCell, this.problemNumberString + " " + this.title);
+    miscellaneous.writeHTML(
+      nextCell, this.problemNumberString + " " + this.title
+    );
     nextCell = outputRow.insertCell(- 1);
     nextCell.className = "topicListMaterials";
     let materialLinks = this.getProblemMaterialLinks();
@@ -951,7 +966,7 @@ class Problem {
         nextElement.addEventListener(
           "click",
           () => {
-            selectCurrentProblem(this.problemId, "scoredQuizJSON");
+            selectProblemById(this.problemId, "scoredQuizJSON");
           }
         );
         nextElement.textContent = "Quiz";
@@ -964,7 +979,7 @@ class Problem {
       nextElement.addEventListener(
         "click",
         () => {
-          selectCurrentProblem(this.problemId, "exerciseJSON");
+          selectProblemById(this.problemId, "exerciseJSON");
         }
       );
       nextCell.appendChild(nextElement);
@@ -999,7 +1014,9 @@ class Problem {
     }
     let elementWithScripts = null;
     try {
-      elementWithScripts = dynamicJavascript.bootstrapAllScripts(this.outputElement);
+      elementWithScripts = dynamicJavascript.bootstrapAllScripts(
+        this.outputElement
+      );
     } catch (e) {
       console.log(e);
     }
@@ -1331,7 +1348,8 @@ function getCalculatorURLRequestFileCourseTopicsFromStorage() {
   let environmentRandomSeed = currentCourse.randomSeed.getValue();
   let result = "";
   result += `${pathnames.urls.calculatorAPI}?`;
-  result += `${pathnames.urlFields.request}=${exerciseType}&fileName=${fileName}&`;
+  result += `${pathnames.urlFields.request}=${exerciseType}&`;
+  result += `fileName=${fileName}&`;
   result += `topicList=${topicList}&courseHome=${courseHome}&`;
   if (
     environmentRandomSeed !== null &&

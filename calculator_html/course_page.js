@@ -9,21 +9,21 @@ const miscellaneous = require("./miscellaneous_frontend");
 function modifyDeadlines(incomingId) {
   let page = window.calculator.mainPage;
   let nameDatePicker = `datePicker${incomingId}`;
-  let theDates = document.getElementsByName(nameDatePicker);
+  let dates = document.getElementsByName(nameDatePicker);
   let jsonToSubmit = {};
   let idDecoded = decodeURIComponent(incomingId);
   jsonToSubmit[idDecoded] = {
     deadlines: {}
   };
 
-  for (let counterDates = 0; counterDates < theDates.length; counterDates++) {
-    let currentSection = page.user.sectionsTaught[counterDates];
-    jsonToSubmit[idDecoded].deadlines[currentSection] = theDates[counterDates].value;
+  for (let i = 0; i < dates.length; i++) {
+    let currentSection = page.user.sectionsTaught[i];
+    jsonToSubmit[idDecoded].deadlines[currentSection] = dates[i].value;
   }
   let url = "";
   url += `${pathnames.urls.calculatorAPI}?`;
   url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemDeadline}&`;
-  url += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(jsonToSubmit))}`;
+  url += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(jsonToSubmit))}&`;
   submitRequests.submitGET({
     url: url,
     progress: ids.domElements.spanProgressReportGeneral,
@@ -140,7 +140,7 @@ function selectCurrentCoursePage() {
     button.classList.add("buttonSelectPage", "buttonSlowTransition", "buttonFlash");
     button.style.width = "150px";
     button.textContent = "Please select course";
-    button.addEventListener("click", () => { 
+    button.addEventListener("click", () => {
       page.selectPage('selectCourse');
     });
     setTimeout(() => {

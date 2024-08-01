@@ -474,7 +474,8 @@ class StorageCalculator {
         this.urlObject = JSON.parse(this.currentHashDecoded);
       }
     } catch (e) {
-      console.log(`Failed to parse your url hash ${this.currentHashDecoded} obtained from ${this.currentHashRaw}.${e}.`);
+      console.log(`Failed to parse your hash: ${this.currentHashDecoded}`);
+      console.log(`Hash obtained from ${this.currentHashRaw}.${e}.`);
     }
   }
 
@@ -522,7 +523,7 @@ class StorageCalculator {
       recursionDepth = 0;
     }
     if (recursionDepth > 100) {
-      throw ("Recursion is too deeply nested. This must be a programming error. ");
+      throw ("Recursion too deeply nested: programming error?");
     }
     let result = {
     };
@@ -549,7 +550,11 @@ class StorageCalculator {
       if (!shouldShow) {
         return null;
       }
-      if (currentStorage.value === null || currentStorage.value == undefined || currentStorage.value == "") {
+      if (
+        currentStorage.value === null ||
+        currentStorage.value == undefined ||
+        currentStorage.value == ""
+      ) {
         return null;
       }
       result[urlName] = currentStorage.value;

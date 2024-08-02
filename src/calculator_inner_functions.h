@@ -793,6 +793,9 @@ public:
   static bool sqrt(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool sqrtApproximate(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool factorInteger(
     Calculator& calculator, const Expression& input, Expression& output
   );

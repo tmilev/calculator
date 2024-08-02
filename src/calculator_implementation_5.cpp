@@ -1612,6 +1612,53 @@ bool CalculatorFunctions::distributeExponent(
   return output.makeXOX(calculator, calculator.opTimes(), leftE, rightE);
 }
 
+bool CalculatorFunctions::sqrtApproximate(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctions::sqrtApproximate");
+  if (input.size() != 3) {
+    return false;
+  }
+  Rational rationalPower;
+  if (!input[1].isRational(&rationalPower)) {
+    return false;
+  }
+  if (rationalPower.isEqualToZero()) {
+    return
+    output.assignError(calculator, "0th square roots are not allowed. ");
+  }
+  rationalPower.invert();
+  double absoluteValueOfArgument = 0;
+  if (!input[2].evaluatesToDouble(&absoluteValueOfArgument)) {
+    return false;
+  }
+  bool isComplex = false;
+  if (absoluteValueOfArgument < 0) {
+    if (!rationalPower.isEqualTo(Rational(1, 2))) {
+      return false;
+    }
+    if (absoluteValueOfArgument < 0) {
+      absoluteValueOfArgument *= - 1;
+      isComplex = true;
+    }
+  }
+  if (rationalPower.isNegative() && absoluteValueOfArgument == 0) {
+    return
+    output.assignError(
+      calculator, "0 raised to a negative power is not allowed. "
+    );
+  }
+  double result =
+  FloatingPoint::power(
+    absoluteValueOfArgument, rationalPower.getDoubleValue()
+  );
+  output.assignValue(calculator, result);
+  if (isComplex) {
+    output *= calculator.expressionSquareRootNegativeOne();
+  }
+  return true;
+}
+
 bool CalculatorFunctions::sqrt(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -1619,14 +1666,14 @@ bool CalculatorFunctions::sqrt(
   if (input.size() != 3) {
     return false;
   }
-  Rational ratPower;
-  if (input[1].isRational(&ratPower)) {
-    if (ratPower != 0) {
+  Rational rationalPower;
+  if (input[1].isRational(&rationalPower)) {
+    if (rationalPower != 0) {
       Expression powerE;
       Expression powerEreduced;
       Expression exponentExpression;
-      ratPower.invert();
-      exponentExpression.assignValue(calculator, ratPower);
+      rationalPower.invert();
+      exponentExpression.assignValue(calculator, rationalPower);
       powerE.makeXOX(
         calculator,
         calculator.opPower(),

@@ -1194,6 +1194,7 @@ public:
     static Options nonCacheable();
     static Options compositeStandard();
     static Options approximation();
+    static Options approximationOffByDefault();
     static Options innerFreezesArguments();
     static Options innerInvisibleExperimental();
     static Options experimental();

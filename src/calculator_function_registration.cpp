@@ -100,6 +100,8 @@ void Calculator::initializeFunctionsStandard() {
   compositeStandard.flagIsCompositeHandler = true;
   compositeStandard.flagIsInner = true;
   Function::Options approximation = Function::Options::approximation();
+  Function::Options approximationOffByDefault =
+  Function::Options::approximationOffByDefault();
   this->addOperationHandler(
     Calculator::Functions::Names::setRandomSeed,
     CalculatorFunctions::setRandomSeed,
@@ -1539,9 +1541,9 @@ void Calculator::initializeFunctionsStandard() {
     "Round the floating point value of a number up to k digits."
     "The first argument is the number to round. "
     "The second argument is the number of digits to round to.",
-    "DoubleValue{}(3/7)",
+    "DoubleValue{}(3/7,3)",
     "CalculatorFunctions::evaluateToDoubleWithRounding",
-    "DoubleValue",
+    "DoubleValueWithRounding",
     innerStandard
   );
   this->addOperationHandler(
@@ -3062,12 +3064,29 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\sqrt",
+    CalculatorFunctions::sqrtApproximate,
+    "",
+    "Approximate the square root of a number over the reals. ",
+    "\\sqrt 2+\\sqrt 3;\n"
+    "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2;\n"
+    "TurnApproximations(0);\n"
+    "\\sqrt{2}+\\sqrt{3};\n"
+    "\\sqrt[-2]{0};\n"
+    "\\sqrt[3]{2}",
+    "CalculatorFunctions::sqrtApproximate",
+    "sqrtApproximate",
+    approximationOffByDefault
+  );
+  this->addOperationHandler(
+    "\\sqrt",
     CalculatorFunctions::sqrt,
     "",
     "Square root of a rational, "
     "implemented as algebraic extension of the rationals. ",
     "\\sqrt 2+\\sqrt 3;\n"
-    "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2",
+    "(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2;"
+    "TurnApproximations(0);"
+    "\\sqrt{2}+\\sqrt{3}",
     "CalculatorFunctions::sqrt",
     "sqrt",
     innerStandard

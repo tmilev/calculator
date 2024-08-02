@@ -1561,6 +1561,15 @@ Function::Options Function::Options::approximation() {
   return result;
 }
 
+Function::Options Function::Options::approximationOffByDefault() {
+  Function::Options result;
+  result.flagIsInner = true;
+  result.flagIsApproximation = true;
+  result.disabledByUserDefault = true;
+  result.disabledByUser = true;
+  return result;
+}
+
 Function::Options Function::Options::innerInvisible() {
   Function::Options result;
   result.flagIsInner = true;

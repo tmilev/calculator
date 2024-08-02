@@ -681,15 +681,15 @@ bool CalculatorParser::replaceOXEXEXEXByE() {
     ).size -
     2
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 4);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 4);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpr.addChildOnTop(leftE.data);
-  newExpr.addChildOnTop(middleE.data);
-  newExpr.addChildOnTop(rightE.data);
-  opElement.data = newExpr;
+  newExpression.addChildOnTop(leftE.data);
+  newExpression.addChildOnTop(middleE.data);
+  newExpression.addChildOnTop(rightE.data);
+  opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   return this->decreaseStackSetCharacterRanges(7);
 }
@@ -705,12 +705,12 @@ bool CalculatorParser::replaceSqrtEXByEX() {
     ).size -
     2
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(this->owner->opSqrt());
-  newExpr.addChildOnTop(this->owner->expressionTwo());
-  newExpr.addChildOnTop(argument.data);
-  left.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(this->owner->opSqrt());
+  newExpression.addChildOnTop(this->owner->expressionTwo());
+  newExpression.addChildOnTop(argument.data);
+  left.data = newExpression;
   left.controlIndex = this->conExpression();
   return this->decreaseStackExceptLast(1);
 }
@@ -719,12 +719,12 @@ bool CalculatorParser::replaceSqrtEXXByEXX() {
   int lastSize = (*this->currentSyntacticStack).size;
   SyntacticElement& left = (*this->currentSyntacticStack)[lastSize - 4];
   SyntacticElement& argument = (*this->currentSyntacticStack)[lastSize - 3];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(this->owner->opSqrt());
-  newExpr.addChildOnTop(this->owner->expressionTwo());
-  newExpr.addChildOnTop(argument.data);
-  left.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(this->owner->opSqrt());
+  newExpression.addChildOnTop(this->owner->expressionTwo());
+  newExpression.addChildOnTop(argument.data);
+  left.data = newExpression;
   left.controlIndex = this->conExpression();
   (*this->currentSyntacticStack)[lastSize - 3] = (
     *this->currentSyntacticStack
@@ -747,12 +747,12 @@ bool CalculatorParser::replaceSqrtXEXByEX() {
     ).size -
     2
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(this->owner->opSqrt());
-  newExpr.addChildOnTop(this->owner->expressionTwo());
-  newExpr.addChildOnTop(argument.data);
-  left.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(this->owner->opSqrt());
+  newExpression.addChildOnTop(this->owner->expressionTwo());
+  newExpression.addChildOnTop(argument.data);
+  left.data = newExpression;
   left.controlIndex = this->conExpression();
   return this->decreaseStackExceptLast(2);
 }
@@ -773,14 +773,14 @@ bool CalculatorParser::replaceOXEXEByE() {
     ).size -
     1
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 4);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 4);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpr.addChildOnTop(leftE.data);
-  newExpr.addChildOnTop(rightE.data);
-  opElement.data = newExpr;
+  newExpression.addChildOnTop(leftE.data);
+  newExpression.addChildOnTop(rightE.data);
+  opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   return this->decreaseStackSetCharacterRanges(4);
 }
@@ -801,14 +801,14 @@ bool CalculatorParser::replaceOXEXEXByEX() {
     ).size -
     2
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 4);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 4);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpr.addChildOnTop(leftE.data);
-  newExpr.addChildOnTop(rightE.data);
-  opElement.data = newExpr;
+  newExpression.addChildOnTop(leftE.data);
+  newExpression.addChildOnTop(rightE.data);
+  opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   return this->decreaseStackExceptLast(4);
 }
@@ -829,14 +829,14 @@ bool CalculatorParser::replaceOXEXEXXByEXX() {
     ).size -
     3
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 4);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 4);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpr.addChildOnTop(leftE.data);
-  newExpr.addChildOnTop(rightE.data);
-  opElement.data = newExpr;
+  newExpression.addChildOnTop(leftE.data);
+  newExpression.addChildOnTop(rightE.data);
+  opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   return this->decreaseStackExceptLastTwo(4);
 }
@@ -909,13 +909,13 @@ bool CalculatorParser::replaceOXEEXByEX() {
     ).size -
     2
   ];
-  Expression newExpr(*this->owner);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression(*this->owner);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpr.addChildOnTop(leftE.data);
-  newExpr.addChildOnTop(rightE.data);
-  opElement.data = newExpr;
+  newExpression.addChildOnTop(leftE.data);
+  newExpression.addChildOnTop(rightE.data);
+  opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   return this->decreaseStackExceptLast(3);
 }
@@ -941,15 +941,15 @@ bool CalculatorParser::replaceOXXEXEXEXByE() {
     ).size -
     2
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 4);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 4);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpr.addChildOnTop(leftE.data);
-  newExpr.addChildOnTop(middleE.data);
-  newExpr.addChildOnTop(rightE.data);
-  opElement.data = newExpr;
+  newExpression.addChildOnTop(leftE.data);
+  newExpression.addChildOnTop(middleE.data);
+  newExpression.addChildOnTop(rightE.data);
+  opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   this->decreaseStackSetCharacterRanges(8);
   return true;
@@ -966,13 +966,13 @@ bool CalculatorParser::replaceOXEXByEX() {
     ).size -
     2
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 2);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 2);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(left.controlIndex)
   );
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   left.controlIndex = this->conExpression();
   return this->decreaseStackExceptLast(2);
 }
@@ -1029,13 +1029,13 @@ bool CalculatorParser::replaceOXEByE() {
     ).size -
     1
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 2);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 2);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(left.controlIndex)
   );
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   left.controlIndex = this->conExpression();
   return this->decreaseStackSetCharacterRanges(2);
 }
@@ -1051,13 +1051,13 @@ bool CalculatorParser::replaceOEByE() {
     ).size -
     1
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 2);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 2);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(left.controlIndex)
   );
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   left.controlIndex = this->conExpression();
   return this->decreaseStackSetCharacterRanges(1);
 }
@@ -1076,13 +1076,13 @@ bool CalculatorParser::replaceOEXByEX() {
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceOEXByEX]";
   }
-  Expression newExpr;
-  newExpr.reset(*this->owner, 2);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 2);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(middle.controlIndex)
   );
-  newExpr.addChildOnTop(right.data);
-  middle.data = newExpr;
+  newExpression.addChildOnTop(right.data);
+  middle.data = newExpression;
   middle.controlIndex = this->conExpression();
   this->decreaseStackExceptLast(1);
   return true;
@@ -1201,13 +1201,13 @@ bool CalculatorParser::replaceOEXByE() {
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceOEXByE]";
   }
-  Expression newExpr;
-  newExpr.reset(*this->owner, 2);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 2);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(middle.controlIndex)
   );
-  newExpr.addChildOnTop(right.data);
-  middle.data = newExpr;
+  newExpression.addChildOnTop(right.data);
+  middle.data = newExpression;
   middle.controlIndex = this->conExpression();
   return this->decreaseStackSetCharacterRanges(2);
 }
@@ -1218,7 +1218,7 @@ bool CalculatorParser::replaceXXByEmptyString() {
     ).size -
     2
   ];
-  Expression newExpr;
+  Expression newExpression;
   left.data.assignValue(*this->owner, std::string(""));
   left.controlIndex = this->conExpression();
   return this->decreaseStackSetCharacterRanges(1);
@@ -1235,13 +1235,13 @@ bool CalculatorParser::replaceEOByE() {
     ).size -
     1
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 2);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 2);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(right.controlIndex)
   );
-  newExpr.addChildOnTop(left.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(left.data);
+  left.data = newExpression;
   left.controlIndex = this->conExpression();
   this->decreaseStackSetCharacterRanges(1);
   return true;
@@ -1449,7 +1449,9 @@ void CalculatorParser::parseConsumeQuote(
   unsigned int& indexOfLast,
   List<SyntacticElement>& output
 ) {
-  SyntacticElement quoteStart, quoteEnd, content;
+  SyntacticElement quoteStart;
+  SyntacticElement quoteEnd;
+  SyntacticElement content;
   quoteStart.controlIndex = this->conQuote();
   quoteEnd = quoteStart;
   content.controlIndex = this->conExpression();
@@ -1633,18 +1635,18 @@ replaceEXXSequenceXBy_Expression_with_E_instead_of_sequence() {
     ).size -
     5
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner);
-  newExpr.setExpectedSize(sequenceElement.data.size());
-  newExpr.addChildOnTop(functionExpressionlt.data);
+  Expression newExpression;
+  newExpression.reset(*this->owner);
+  newExpression.setExpectedSize(sequenceElement.data.size());
+  newExpression.addChildOnTop(functionExpressionlt.data);
   if (sequenceElement.data.isAtom()) {
-    newExpr.addChildOnTop(sequenceElement.data);
+    newExpression.addChildOnTop(sequenceElement.data);
   } else {
     for (int i = 1; i < sequenceElement.data.size(); i ++) {
-      newExpr.addChildOnTop(sequenceElement.data[i]);
+      newExpression.addChildOnTop(sequenceElement.data[i]);
     }
   }
-  functionExpressionlt.data = newExpr;
+  functionExpressionlt.data = newExpression;
   return this->decreaseStackSetCharacterRanges(4);
 }
 
@@ -2130,11 +2132,11 @@ bool CalculatorParser::replaceYXdotsXBySequenceYXdotsX(
     numberOfXs -
     1
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 2);
-  newExpr.addChildAtomOnTop(this->owner->opSequence());
-  newExpr.addChildOnTop(main.data);
-  main.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner, 2);
+  newExpression.addChildAtomOnTop(this->owner->opSequence());
+  newExpression.addChildOnTop(main.data);
+  main.data = newExpression;
   main.controlIndex = controlIndex;
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceYXdotsXBySequenceYXdotsX]";
@@ -2153,12 +2155,12 @@ bool CalculatorParser::replaceEXEBySequence(int controlIndex) {
     ).size -
     1
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(this->owner->opSequence());
-  newExpr.addChildOnTop(left.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(this->owner->opSequence());
+  newExpression.addChildOnTop(left.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   left.controlIndex = controlIndex;
   this->decreaseStackSetCharacterRanges(2);
   return true;
@@ -2175,14 +2177,14 @@ bool CalculatorParser::replaceEEBy_CofEE(int controlIndex) {
     ).size -
     1
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(controlIndex)
   );
-  newExpr.addChildOnTop(left.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(left.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   this->decreaseStackSetCharacterRanges(1);
   return true;
 }
@@ -2200,11 +2202,11 @@ bool CalculatorParser::replaceEOXbyEX() {
   ];
   int operation =
   this->getOperationIndexFromControlIndex(operationElement.controlIndex);
-  Expression newExpr;
-  newExpr.reset(*this->owner, 2);
-  newExpr.addChildAtomOnTop(operation);
-  newExpr.addChildOnTop(left.data);
-  left.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner, 2);
+  newExpression.addChildAtomOnTop(operation);
+  newExpression.addChildOnTop(left.data);
+  left.data = newExpression;
   this->decreaseStackExceptLast(1);
   return true;
 }
@@ -2312,14 +2314,14 @@ bool CalculatorParser::replaceEEXBy_CofEE_X(int controlIndex) {
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceEEXBy_CofEE_X]";
   }
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(controlIndex)
   );
-  newExpr.addChildOnTop(left.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(left.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   this->decreaseStackExceptLast(1);
   return true;
 }
@@ -2340,15 +2342,15 @@ bool CalculatorParser::replaceEXXEXEBy_CofEEE(int controlIndex) {
     ).size -
     1
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 4);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 4);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(controlIndex)
   );
-  newExpr.addChildOnTop(left.data);
-  newExpr.addChildOnTop(middle.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(left.data);
+  newExpression.addChildOnTop(middle.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   this->decreaseStackSetCharacterRanges(5);
   return true;
 }
@@ -2369,15 +2371,15 @@ bool CalculatorParser::replaceEXXEXEXBy_CofEEE_X(int controlIndex) {
     ).size -
     2
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 4);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 4);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(controlIndex)
   );
-  newExpr.addChildOnTop(left.data);
-  newExpr.addChildOnTop(middle.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(left.data);
+  newExpression.addChildOnTop(middle.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   this->decreaseStackExceptLast(5);
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceEXXEXEXBy_CofEEE_X]";
@@ -2396,14 +2398,14 @@ bool CalculatorParser::replaceUnderscoreEPowerEbyLimits() {
     ).size -
     1
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(this->owner->opLimitBoundary());
-  newExpr.addChildOnTop(bottom.data);
-  newExpr.addChildOnTop(top.data);
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(this->owner->opLimitBoundary());
+  newExpression.addChildOnTop(bottom.data);
+  newExpression.addChildOnTop(top.data);
   (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4
   ].data =
-  newExpr;
+  newExpression;
   (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4
   ].controlIndex =
   this->conExpression();
@@ -2449,14 +2451,14 @@ bool CalculatorParser::replaceXEXEXBy_CofEE(int operation) {
     ).size -
     5
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(operation)
   );
-  newExpr.addChildOnTop(lefT.data);
-  newExpr.addChildOnTop(right.data);
-  result.data = newExpr;
+  newExpression.addChildOnTop(lefT.data);
+  newExpression.addChildOnTop(right.data);
+  result.data = newExpression;
   result.controlIndex = this->conExpression();
   this->decreaseStackSetCharacterRanges(4);
   if (this->flagLogSyntaxRules) {
@@ -2496,11 +2498,11 @@ bool CalculatorParser::replaceEXdotsXbySsXdotsX(int numberOfDots) {
     this->nonBoundVariablesInContext.clear();
     this->boundVariablesInContext.clear();
   }
-  Expression newExpr;
-  newExpr.reset(*this->owner);
-  newExpr.addChildAtomOnTop(this->owner->opCommandSequence());
-  newExpr.addChildOnTop(left.data);
-  left.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner);
+  newExpression.addChildAtomOnTop(this->owner->opCommandSequence());
+  newExpression.addChildOnTop(left.data);
+  left.data = newExpression;
   left.controlIndex = this->conSequenceStatements();
   return true;
 }
@@ -2554,14 +2556,14 @@ bool CalculatorParser::replaceEXEByCofEE(int operation) {
     ).size -
     1
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(operation)
   );
-  newExpr.addChildOnTop(left.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(left.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   this->decreaseStackSetCharacterRanges(2);
   return true;
 }
@@ -2577,11 +2579,11 @@ bool CalculatorParser::replaceEXEXByEX() {
     ).size -
     2
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 2);
-  newExpr.addChildOnTop(left.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner, 2);
+  newExpression.addChildOnTop(left.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   this->decreaseStackExceptLast(2);
   return true;
 }
@@ -2659,14 +2661,14 @@ bool CalculatorParser::replaceEOEXByEX() {
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceEOEXByEX]";
   }
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(middle.controlIndex)
   );
-  newExpr.addChildOnTop(left.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(left.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   middle = *(*this->currentSyntacticStack).lastObject();
   this->decreaseStackExceptLast(2);
   return true;
@@ -2688,12 +2690,12 @@ bool CalculatorParser::replaceEXEXBy_OofEE_X(int operation) {
     ).size -
     2
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(operation);
-  newExpr.addChildOnTop(left.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(operation);
+  newExpression.addChildOnTop(left.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   middle = *(*this->currentSyntacticStack).lastObject();
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceEXEXBy_OofEE_X]";
@@ -2720,16 +2722,16 @@ bool CalculatorParser::replaceC1C2Eby_C2ofC1E() {
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceC1C2Eby_C2ofC1E]";
   }
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(middle.controlIndex)
   );
-  newExpr.addChildAtomOnTop(
+  newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(left.controlIndex)
   );
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   left.controlIndex = this->conExpression();
   return this->decreaseStackExceptLast(2);
 }
@@ -2750,12 +2752,12 @@ bool CalculatorParser::replaceXEEXBy_OofEE_X(int inputOperation) {
     ).size -
     2
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(inputOperation);
-  newExpr.addChildOnTop(middle.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(inputOperation);
+  newExpression.addChildOnTop(middle.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   left.controlIndex = this->conExpression();
   middle = *(*this->currentSyntacticStack).lastObject();
   if (this->flagLogSyntaxRules) {
@@ -2780,12 +2782,12 @@ bool CalculatorParser::replaceXEEBy_OofEE(int inputOperation) {
     ).size -
     3
   ];
-  Expression newExpr;
-  newExpr.reset(*this->owner, 3);
-  newExpr.addChildAtomOnTop(inputOperation);
-  newExpr.addChildOnTop(middle.data);
-  newExpr.addChildOnTop(right.data);
-  left.data = newExpr;
+  Expression newExpression;
+  newExpression.reset(*this->owner, 3);
+  newExpression.addChildAtomOnTop(inputOperation);
+  newExpression.addChildOnTop(middle.data);
+  newExpression.addChildOnTop(right.data);
+  left.data = newExpression;
   left.controlIndex = this->conExpression();
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceXEEBy_OofEE]";

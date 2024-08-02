@@ -1453,13 +1453,25 @@ Direct sum of two matrices, non-commutative.
 ```
 Evaluates the binomial coefficient if possible.
 
-Operator or function \sqrt is overloaded with 2 total handlers.
+Operator or function \sqrt is overloaded with 3 total handlers.
 
-*\sqrt* [sqrt] {CalculatorFunctions::sqrt}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%202%2b%5c%5csqrt%203%3b%5cn%28%5c%5csqrt%7b%7d2%2b%5c%5csqrt%7b%7d3%2b%5c%5csqrt%7b%7d6%29%5e2%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*\sqrt* [sqrtApproximate] {CalculatorFunctions::sqrtApproximate}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%202%2b%5c%5csqrt%203%3b%5cn%28%5c%5csqrt%7b%7d2%2b%5c%5csqrt%7b%7d3%2b%5c%5csqrt%7b%7d6%29%5e2%3b%5cnTurnApproximations%280%29%3b%5cn%5c%5csqrt%7b2%7d%2b%5c%5csqrt%7b3%7d%3b%5cn%5c%5csqrt%5b-2%5d%7b0%7d%3b%5cn%5c%5csqrt%5b3%5d%7b2%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 \sqrt 2+\sqrt 3;
-(\sqrt{}2+\sqrt{}3+\sqrt{}6)^2
+(\sqrt{}2+\sqrt{}3+\sqrt{}6)^2;
+TurnApproximations(0);
+\sqrt{2}+\sqrt{3};
+\sqrt[-2]{0};
+\sqrt[3]{2}
+```
+Approximate the square root of a number over the reals. 
+
+*\sqrt* [sqrt] {CalculatorFunctions::sqrt}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5csqrt%202%2b%5c%5csqrt%203%3b%5cn%28%5c%5csqrt%7b%7d2%2b%5c%5csqrt%7b%7d3%2b%5c%5csqrt%7b%7d6%29%5e2%3bTurnApproximations%280%29%3b%5c%5csqrt%7b2%7d%2b%5c%5csqrt%7b3%7d%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+\sqrt 2+\sqrt 3;
+(\sqrt{}2+\sqrt{}3+\sqrt{}6)^2;TurnApproximations(0);\sqrt{2}+\sqrt{3}
 ```
 Square root of a rational, implemented as algebraic extension of the rationals. 
 
@@ -3067,12 +3079,21 @@ Round(3/7)
 ```
 Round function.
 
+Operator or function DoubleValue is overloaded with 2 total handlers.
+
 *DoubleValue* [DoubleValue] {CalculatorFunctions::evaluateToDouble}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 DoubleValue{}(3/7)
 ```
-Double value of a rational number.
+Floating point value of a number.
+
+*DoubleValue* [DoubleValueWithRounding] {CalculatorFunctions::evaluateToDoubleWithRounding}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%2c3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+DoubleValue{}(3/7,3)
+```
+Round the floating point value of a number up to k digits.The first argument is the number to round. The second argument is the number of digits to round to.
 
 *ModP* [ModP] {CalculatorFunctions::zModP}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ModP%7b%7d%287%2c%203%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

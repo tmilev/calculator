@@ -1526,9 +1526,21 @@ void Calculator::initializeFunctionsStandard() {
     "DoubleValue",
     CalculatorFunctions::evaluateToDouble,
     "",
-    "Double value of a rational number.",
+    "Floating point value of a number.",
     "DoubleValue{}(3/7)",
     "CalculatorFunctions::evaluateToDouble",
+    "DoubleValue",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "DoubleValue",
+    CalculatorFunctions::evaluateToDoubleWithRounding,
+    "",
+    "Round the floating point value of a number up to k digits."
+    "The first argument is the number to round. "
+    "The second argument is the number of digits to round to.",
+    "DoubleValue{}(3/7)",
+    "CalculatorFunctions::evaluateToDoubleWithRounding",
     "DoubleValue",
     innerStandard
   );

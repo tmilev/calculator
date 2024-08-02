@@ -87,6 +87,10 @@ double FloatingPoint::floorFloating(double argument) {
   return floor(argument);
 }
 
+double FloatingPoint::round(double argument) {
+  return std::round(argument);
+}
+
 double FloatingPoint::power(double base, double exponent) {
   return pow(base, exponent);
 }

@@ -223,6 +223,7 @@ public:
   static double logFloating(double argument);
   static bool isNaN(const double& argument);
   static double floorFloating(double argument);
+  static double round(double argument);
   static std::string doubleToString(double input);
   static std::string doubleToString(double input, int precision);
 };

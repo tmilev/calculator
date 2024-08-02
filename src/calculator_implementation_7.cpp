@@ -8594,7 +8594,7 @@ bool CalculatorFunctions::evaluateToDouble(
 ) {
   STACK_TRACE("CalculatorFunctions::evaluateToDouble");
   if (input.size() != 2) {
-    // one argument expected.
+    // A single argument expected.
     return false;
   }
   double value = 0;
@@ -8602,6 +8602,39 @@ bool CalculatorFunctions::evaluateToDouble(
     return false;
   }
   return output.assignValue(calculator, value);
+}
+
+bool CalculatorFunctions::evaluateToDoubleWithRounding(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctions::evaluateToDoubleWithRounding");
+  if (input.size() != 3) {
+    // Two arguments expected.
+    return false;
+  }
+  int numberOfDigitsToRoundTo = 0;
+  if (!input[2].isSmallInteger(&numberOfDigitsToRoundTo)) {
+    return
+    calculator
+    << "Failed to extract number of digits "
+    << "to round to from "
+    << input[2]
+    << ".";
+  }
+  if (numberOfDigitsToRoundTo < 0 || numberOfDigitsToRoundTo > 10) {
+    numberOfDigitsToRoundTo = 2;
+    calculator
+    << "Will round up to 2 digits; you asked for "
+    << numberOfDigitsToRoundTo
+    << " but I only accept from 0 to 10 digits. ";
+  }
+  double value = 0;
+  if (!input[1].evaluatesToDouble(&value)) {
+    return false;
+  }
+  double tenPowerK = FloatingPoint::power(10, numberOfDigitsToRoundTo);
+  double rounded = FloatingPoint::round(value* tenPowerK) / tenPowerK;
+  return output.assignValue(calculator, rounded);
 }
 
 bool CalculatorFunctions::functionEvaluateToDouble(

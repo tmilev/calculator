@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -68,7 +69,7 @@
         <br>
         <form>
           <input class="textInputUsername" type="text" id="inputUsername" name="username" placeholder="username"
-            required>
+            autocomplete="on" required>
           <br>
           <input class="textInputUsername" type="password" id="inputPassword" name="password" placeholder="password"
             autocomplete="on">
@@ -85,7 +86,7 @@
         <b>Google login:</b>
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         <div id="g_id_onload" data-client_id="538605306594-n43754vb0m48ir84g8vp5uj2u7klern3.apps.googleusercontent.com"
-          data-callback="googleSignIn" data-auto_select="false">
+          data-callback="googleSignIn" data-auto_select="false" data-auto_prompt="false">
         </div>
         <div class="g_id_signin" data-type="standard">Google unavailable (did page fully load? Internet?).</div>
       </div>

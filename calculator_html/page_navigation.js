@@ -270,10 +270,16 @@ class Page {
     this.user.sectionsTaught = [];
   }
 
+  logoutCallbackAdditionalForNonAdmins() {
+    this.selectAndStorePage(this.pages.login.name);
+  }
+
   initializeLoginPage() {
     login.authenticator.initialize(() => {
       this.logoutCallbackAllUsers();
-    }, null);
+    }, () => {
+      this.logoutCallbackAdditionalForNonAdmins();
+    });
     let forgotLogin = document.getElementById(
       ids.domElements.pages.login.buttonForgotLogin
     );

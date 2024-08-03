@@ -212,13 +212,10 @@ class Authenticator {
       this.logoutCallbackAllUsers();
     }
     document.getElementById("inputPassword").value = "";
-    document.getElementById(ids.domElements.problemPageContentContainer).textContent = "";
-    document.getElementById(ids.domElements.divCurrentCourseBody).textContent = "";
     this.logoutPartTwo();
   }
 
   logoutPartTwo() {
-    let page = window.calculator.mainPage;
     if (this.oldUserRole === "admin") {
       this.reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
     } else {
@@ -241,7 +238,9 @@ class Authenticator {
       showLoginCalculatorButtons();
       toggleAccountPanels();
       setAdminPanels();
-      page.selectPage(page.pages.login.name);
+      if (this.logoutCallbackAdditionalForNonAdmins !== null) {
+        this.logoutCallbackAdditionalForNonAdmins();
+      }
     }
   }
 
@@ -283,13 +282,13 @@ function loginTry() {
 function toggleAccountPanels() {
   let page = window.calculator.mainPage;
   let accountPanels = document.getElementsByClassName("divAccountPanel");
-  for (let counterPanels = 0; counterPanels < accountPanels.length; counterPanels++) {
+  for (let i = 0; i < accountPanels.length; i++) {
     if (page.user.flagLoggedIn === true) {
-      accountPanels[counterPanels].classList.remove("divInvisible");
-      accountPanels[counterPanels].classList.add("divVisible");
+      accountPanels[i].classList.remove("divInvisible");
+      accountPanels[i].classList.add("divVisible");
     } else {
-      accountPanels[counterPanels].classList.remove("divVisible");
-      accountPanels[counterPanels].classList.add("divInvisible");
+      accountPanels[i].classList.remove("divVisible");
+      accountPanels[i].classList.add("divInvisible");
     }
   }
 }
@@ -299,13 +298,13 @@ function setAdminPanels() {
   let adminPanels = document.getElementsByClassName("divAdminPanel");
   let currentRole = page.user.getRole();
   let studentView = page.studentView();
-  for (let counterPanels = 0; counterPanels < adminPanels.length; counterPanels++) {
+  for (let i = 0; i < adminPanels.length; i++) {
     if (currentRole === "admin" && !studentView) {
-      adminPanels[counterPanels].classList.remove("divInvisible");
-      adminPanels[counterPanels].classList.add("divVisible");
+      adminPanels[i].classList.remove("divInvisible");
+      adminPanels[i].classList.add("divVisible");
     } else {
-      adminPanels[counterPanels].classList.remove("divVisible");
-      adminPanels[counterPanels].classList.add("divInvisible");
+      adminPanels[i].classList.remove("divVisible");
+      adminPanels[i].classList.add("divInvisible");
     }
   }
   let studentViewPanel = document.getElementById(ids.domElements.spanStudentViewPanel);
@@ -364,36 +363,24 @@ function hideLoginCalculatorButtons() {
 
 function showLogoutButton() {
   for (; ;) {
-    let theLogoutLinks = document.getElementsByClassName("linkLogoutInactive");
-    if (theLogoutLinks.length === 0) {
+    let logoutLinks = document.getElementsByClassName("linkLogoutInactive");
+    if (logoutLinks.length === 0) {
       break;
     }
-    theLogoutLinks[0].classList.add("linkLogoutActive");
-    theLogoutLinks[0].classList.remove("linkLogoutInactive");
+    logoutLinks[0].classList.add("linkLogoutActive");
+    logoutLinks[0].classList.remove("linkLogoutInactive");
   }
 }
 
 function hideLogoutButton() {
   for (; ;) {
-    let theLogoutLinks = document.getElementsByClassName("linkLogoutActive");
-    if (theLogoutLinks.length === 0) {
+    let logoutLinks = document.getElementsByClassName("linkLogoutActive");
+    if (logoutLinks.length === 0) {
       break;
     }
-    theLogoutLinks[0].classList.add("linkLogoutInactive");
-    theLogoutLinks[0].classList.remove("linkLogoutActive");
+    logoutLinks[0].classList.add("linkLogoutInactive");
+    logoutLinks[0].classList.remove("linkLogoutActive");
   }
-}
-
-function getQueryVariable(variable) {
-  let query = window.location.search.substring(1);
-  let vars = query.split('&');
-  for (let i = 0; i < vars.length; i++) {
-    let pair = vars[i].split('=');
-    if (decodeURIComponent(pair[0]) === variable) {
-      return decodeURIComponent(pair[1]);
-    }
-  }
-  return null;
 }
 
 let authenticator = new Authenticator();

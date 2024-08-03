@@ -4,9 +4,13 @@ const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const login = require('./login');
 const miscellaneous = require("./miscellaneous_frontend");
+const storage = require("./storage");
 
 class AccountPage {
-  initialize() {
+  constructor() {
+    this.mainPage = null;
+  }
+  initialize(mainPage) {
     const buttonChangePasswordFromAccountPage = document.getElementById(
       ids.domElements.pages.account.buttonChangePasswordFromAccountPage
     );
@@ -22,6 +26,7 @@ class AccountPage {
     ).addEventListener('click', () => {
       submitChangePassRequest();
     });
+    this.mainPage = mainPage;
   }
 }
 
@@ -58,13 +63,12 @@ function submitChangePassRequest() {
 }
 
 function updateAccountPage() {
-  let page = window.calculator.mainPage;
   let usernameInput = document.getElementById(
     ids.domElements.spanUserIdInAccountsPage
   );
   let emailSpan = document.getElementById(ids.domElements.spanOldEmail);
-  usernameInput.textContent = page.storage.variables.user.name.getValue();
-  emailSpan.textContent = page.storage.variables.user.email.getValue();
+  usernameInput.textContent = storage.variables.user.name.getValue();
+  emailSpan.textContent = storage.variables.user.email.getValue();
   let spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
   let table = document.createElement("table");
   let resultCell = document.createElement("th");
@@ -72,8 +76,11 @@ function updateAccountPage() {
   let row = table.insertRow();
   row.appendChild(resultCell);
   resultCell = document.createElement("th");
-  resultCell.textContent = page.user.getRole();
-  if (page.user.sectionsTaught.length > 0 && !page.studentView()) {
+  resultCell.textContent = this.mainPage.user.getRole();
+  if (
+    this.mainPage.user.sectionsTaught.length > 0 &&
+    !this.mainPage.studentView()
+  ) {
     row = table.insertRow();
     row.insertCell().appendChild(
       document.createTextNode(
@@ -82,7 +89,7 @@ function updateAccountPage() {
     );
     row.insertCell().appendChild(
       document.createTextNode(
-        page.user.sectionsTaught.join(", ")
+        this.mainPage.user.sectionsTaught.join(", ")
       )
     );
   }
@@ -95,16 +102,15 @@ function updateAccountPage() {
       document.createTextNode(second)
     );
   }
-  insertRow("Instructor: ", page.user.instructor);
-  insertRow("Section in database: ", page.user.sectionInDB);
-  insertRow("Section computed: ", page.user.sectionComputed);
-  insertRow("Deadline schema: ", page.user.deadlineSchema);
+  insertRow("Instructor: ", this.mainPage.user.instructor);
+  insertRow("Section in database: ", this.mainPage.user.sectionInDB);
+  insertRow("Section computed: ", this.mainPage.user.sectionComputed);
+  insertRow("Deadline schema: ", this.mainPage.user.deadlineSchema);
   spanExtraInfo.textContent = "";
   spanExtraInfo.appendChild(table);
 }
 
 let accountPage = new AccountPage();
-accountPage.initialize();
 
 module.exports = {
   accountPage,

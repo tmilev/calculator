@@ -464,6 +464,8 @@ class Page {
     this.flagProblemPageOnly = false;
     this.mainMenuExpandedLength = null;
     this.initializeLoginPage();
+    accountPage.accountPage.initialize(this);
+    editPage.problemEditor.initialize(this);
     this.initializeAccountButtons();
     this.hideOrUnhideMainMenu();
     this.hashHistory = [];

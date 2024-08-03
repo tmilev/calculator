@@ -1,10 +1,9 @@
 "use strict";
 const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
-// const calculatorPage = require('./calculator_page');
 const ids = require("./ids_dom_elements");
 const miscellaneous = require("./miscellaneous_frontend");
-const storage = require("./storage");
+const storage = require("./storage").storage;
 
 let editorAce = null;
 let aceEditorAutoCompletionWordList = {};
@@ -107,9 +106,9 @@ function getEditPanel(
   if (fileName === "" || fileName === undefined || fileName === null) {
     return document.createTextNode("");
   }
-  let result = document.createElement("DIV");
+  let result = document.createElement("div");
   result.className = "spanFileInfo";
-  let saveEdit = document.createElement("BUTTON");
+  let saveEdit = document.createElement("button");
   saveEdit.className = "buttonSaveEdit";
   saveEdit.style.width = "";
   if (withInstructorRights) {
@@ -129,7 +128,9 @@ function getEditPanel(
   let clonePanel = document.createElement("BUTTON");
   clonePanel.className = "accordionLike";
   miscellaneous.writeHTML(clonePanel, "Clone panel &#9666;");
-  clonePanel.addEventListener('click', window.calculator.editPage.toggleClonePanel.bind(null, clonePanel));
+  clonePanel.addEventListener('click', (ev) => {
+    toggleClonePanel(clonePanel);
+  });
   result.appendChild(clonePanel);
   let panelElement = document.createElement("span");
   panelElement.className = "panelDeadlines";
@@ -148,11 +149,15 @@ function callbackClone(input, output) {
   let inputParsed = JSON.parse(input);
   let errorFound = false;
   output.textContent = "";
-  if (inputParsed.error !== undefined && inputParsed.error !== "" && inputParsed !== null) {
+  if (
+    inputParsed.error !== undefined &&
+    inputParsed.error !== "" &&
+    inputParsed !== null
+  ) {
     errorFound = true;
     let errorMessage = document.createElement("b");
     errorMessage.style.color = "red";
-    errorMessage.textContent = "Error."; 
+    errorMessage.textContent = "Error.";
     output.appendChild(document.createTextNode(` ${inputParsed.error})`));
   }
   if (inputParsed.comments !== undefined && inputParsed.comments !== "") {
@@ -160,11 +165,11 @@ function callbackClone(input, output) {
   }
   if (!errorFound) {
     let button = document.createElement("button");
-    button.textContent = "Force-reload problem"; 
+    button.textContent = "Force-reload problem";
     button.className = "buttonStandard";
-    button.addEventListener("click", () => { 
-      window.calculator.mainPage.pages.problemPage.flagLoaded = false;
-      window.calculator.mainPage.selectPage('problemPage');
+    button.addEventListener("click", () => {
+      problemEditor.mainPage.pages.problemPage.flagLoaded = false;
+      problemEditor.mainPage.selectPage('problemPage');
     });
     output.appendChild(button);
   }
@@ -185,15 +190,15 @@ function handleClone(fileName, idCloneInput, idSpanClonePageReport) {
 }
 
 function storeEditedPage() {
-  let page = window.calculator.mainPage;
+  let page = problemEditor.mainPage;
   let url = "";
   url += `${pathnames.urls.calculatorAPI}?`;
   let queryParameters = "";
   queryParameters += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.modifyPage}`;
   let content = encodeURIComponent(editorAce.getValue());
   queryParameters += `&${pathnames.urlFields.requests.fileContent}=${content}`;
-  queryParameters += `&${pathnames.urlFields.problem.fileName}=${page.storage.variables.editor.currentlyEditedPage.getValue()}`;
-  page.pages.problemPage.flagLoaded = false;
+  queryParameters += `&${pathnames.urlFields.problem.fileName}=${storage.variables.editor.currentlyEditedPage.getValue()}`;
+  problemEditor.mainPage.pages.problemPage.flagLoaded = false;
   submitRequests.submitPOST({
     url: url,
     parameters: queryParameters,
@@ -209,7 +214,9 @@ function initEditorAce() {
   });
   saveButton.textContent = "Save";
   let editorElement = document.getElementById(ids.domElements.divEditorAce);
-  editorElement.addEventListener("keydown", window.calculator.editPage.ctrlSPressAceEditorHandler);
+  editorElement.addEventListener("keydown", (e) => {
+    ctrlSPressAceEditorHandler(e);
+  });
   editorAce = ace.edit(ids.domElements.divEditorAce);
 }
 
@@ -242,8 +249,8 @@ function selectEditPageCallback(
     if (parsedInput.content !== null && parsedInput.content !== undefined) {
       incomingContent = decodeURIComponent(parsedInput.content);
     }
-    let problemIdURLed = storage.storage.variables.editor.currentlyEditedPage.getValue();
-    storage.storage.variables.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
+    let problemIdURLed = storage.variables.editor.currentlyEditedPage.getValue();
+    storage.variables.currentCourse.fileName.setAndStore(decodeURIComponent(problemIdURLed));
     editorAce.getSession().setValue(incomingContent);
     editorAce.setTheme("ace/theme/chrome");
     editorAce.getSession().setMode("ace/mode/xml");
@@ -290,7 +297,7 @@ function getNavigationEditButton(problemId, contentHTML) {
 function writeNextPreviousEditButton(
   currentlyEditedPage,
 ) {
-  let page = window.calculator.mainPage;
+  let page = problemEditor.mainPage;
   let problem = page.getProblemByIdOrNull(currentlyEditedPage);
   if (problem === null) {
     return;
@@ -307,83 +314,103 @@ function writeNextPreviousEditButton(
   }
 }
 
+class ProblemEditor {
+  constructor() {
+    this.mainPage = null;
+  }
+  initialize(mainPage) {
+    this.mainPage = mainPage;
+  }
+
+  selectEditPage(
+    /** @type {string} */
+    currentlyEditedPage,
+    /** @type {boolean} Whether online edit is allowed. */
+    withInstructorRights,
+  ) {
+    if (withInstructorRights === undefined) {
+      withInstructorRights = this.mainPage.hasInstructorRightsNotViewingAsStudent();
+    }
+    let saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
+    if (withInstructorRights) {
+      saveButton.disabled = false;
+    } else {
+      saveButton.disabled = true;
+    }
+    let storageVariables = storage.variables;
+    let fileNameSources = [
+      storageVariables.editor.currentlyEditedPage,
+      storageVariables.currentCourse.problemFileName,
+      storageVariables.currentCourse.fileName,
+      storageVariables.currentCourse.courseHome,
+      storageVariables.currentCourse.topicList,
+    ];
+    for (let i = 0; i < fileNameSources.length; i++) {
+      if (
+        (typeof currentlyEditedPage) === "string" &&
+        currentlyEditedPage !== ""
+      ) {
+        break;
+      }
+      currentlyEditedPage = fileNameSources[i].getValue();
+    }
+    if (
+      currentlyEditedPage === undefined ||
+      currentlyEditedPage === null ||
+      currentlyEditedPage === ""
+    ) {
+      currentlyEditedPage = "/coursesavailable/default.txt";
+    }
+    storageVariables.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
+    if (!this.mainPage.flagProblemPageOnly) {
+      if (storage.variables.currentPage.getValue() !== this.mainPage.pages.editPage.name) {
+        this.mainPage.selectPage(this.mainPage.pages.editPage.name);
+        return;
+      }
+    }
+    writeNextPreviousEditButton(currentlyEditedPage);
+    let theTopicTextArea = document.getElementById(ids.domElements.textAreaTopicListEntry);
+    theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
+    theTopicTextArea.cols = currentlyEditedPage.length + 15;
+
+    let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requestEditPage}&`;
+    url += `${pathnames.urlFields.problem.fileName}=${storage.variables.editor.currentlyEditedPage.getValue()}`;
+    submitRequests.submitGET({
+      url: url,
+      callback: function (input) {
+        selectEditPageCallback(input, withInstructorRights);
+      },
+      progress: ids.domElements.spanProgressReportGeneral,
+    });
+  }
+}
+
 function selectEditPage(
   /** @type {string} */
   currentlyEditedPage,
   /** @type {boolean} Whether online edit is allowed. */
   withInstructorRights,
 ) {
-  let page = window.calculator.mainPage;
-  if (withInstructorRights === undefined) {
-    withInstructorRights = page.hasInstructorRightsNotViewingAsStudent();
-  }
-  let saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
-  if (withInstructorRights) {
-    saveButton.disabled = false;
-  } else {
-    saveButton.disabled = true;
-  }
-  let storageVariables = page.storage.variables;
-  let fileNameSources = [
-    storageVariables.editor.currentlyEditedPage,
-    storageVariables.currentCourse.problemFileName,
-    storageVariables.currentCourse.fileName,
-    storageVariables.currentCourse.courseHome,
-    storageVariables.currentCourse.topicList,
-  ];
-  for (let i = 0; i < fileNameSources.length; i++) {
-    if (
-      (typeof currentlyEditedPage) === "string" &&
-      currentlyEditedPage !== ""
-    ) {
-      break;
-    }
-    currentlyEditedPage = fileNameSources[i].getValue();
-  }
-  if (
-    currentlyEditedPage === undefined ||
-    currentlyEditedPage === null ||
-    currentlyEditedPage === ""
-  ) {
-    currentlyEditedPage = "/coursesavailable/default.txt";
-  }
-  storageVariables.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
-  if (!page.flagProblemPageOnly) {
-    if (page.storage.variables.currentPage.getValue() !== page.pages.editPage.name) {
-      page.selectPage(page.pages.editPage.name);
-      return;
-    }
-  }
-  writeNextPreviousEditButton(currentlyEditedPage);
-  let theTopicTextArea = document.getElementById(ids.domElements.textAreaTopicListEntry);
-  theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
-  theTopicTextArea.cols = currentlyEditedPage.length + 15;
-
-  let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requestEditPage}&`;
-  url += `${pathnames.urlFields.problem.fileName}=${page.storage.variables.editor.currentlyEditedPage.getValue()}`;
-  submitRequests.submitGET({
-    url: url,
-    callback: function (input) {
-      selectEditPageCallback(input, withInstructorRights);
-    },
-    progress: ids.domElements.spanProgressReportGeneral,
-  });
+  problemEditor.selectEditPage(currentlyEditedPage, withInstructorRights);
 }
 
 function toggleClonePanel(button) {
-  let thePanel = button.nextElementSibling;
-  if (thePanel.style.maxHeight === '200px') {
-    thePanel.style.opacity = '0';
-    thePanel.style.maxHeight = '0';
+  let panel = button.nextElementSibling;
+  if (panel.style.maxHeight === '200px') {
+    panel.style.opacity = '0';
+    panel.style.maxHeight = '0';
     miscellaneous.writeHTML(button, `Clone panel &#9666;`);
   } else {
-    thePanel.style.opacity = '1';
-    thePanel.style.maxHeight = '200px';
+    panel.style.opacity = '1';
+    panel.style.maxHeight = '200px';
     miscellaneous.writeHTML(button, `Clone panel &#9660;`);
   }
 }
 
+const problemEditor = new ProblemEditor();
+
 module.exports = {
+  problemEditor,
   aceEditorAutoCompletionWordList,
   editorAce,
   storeEditedPage,

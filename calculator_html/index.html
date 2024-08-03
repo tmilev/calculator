@@ -62,7 +62,7 @@
   <!--If you do not include an element with the id below, the javascript library will abstain from using your local storage.-->
   <span id="calculatorDefaultsEnabled"></span>
   <div id="divDefaultApplication">
-    <div id="divLoginPage" class="divPage">
+    <div id="divLoginPage" class="divPage" style="display: none;">
       <div class="divCenteredItem divVisible" id="divLoginCalculatorPanel">
         <b>Local account:</b>
         <br>
@@ -95,7 +95,7 @@
         <div id="spanLoginStatusExtra"></div>
       </div>
     </div>
-    <div id="divSolvePage" class="divPage">
+    <div id="divSolvePage" class="divPage" style="display: none;">
       <div class="centerHorizontally">
         Type your problem here [<b style="color:red">Experimental</b>].<br>
         <div class="centerHorizontally">
@@ -114,7 +114,7 @@
         <div id="solutionBox" style="font-size: 48px;"></div>
       </div>
     </div>
-    <div id="divSignUpPage" class="divPage">
+    <div id="divSignUpPage" class="divPage" style="display: none;">
       <table>
         <tr>
           <td>Desired user name:</td>
@@ -136,7 +136,7 @@
       <br>
       <span id="signUpResult"></span>
     </div>
-    <div id="divForgotLogin" class="divPage">
+    <div id="divForgotLogin" class="divPage" style="display: none;">
       <table>
         <tr>
           <td>Email:</td>
@@ -149,12 +149,12 @@
       <br>
       <span id="forgotLoginResult"></span>
     </div>
-    <div id="divProblemPage" class="divPage">
+    <div id="divProblemPage" class="divPage" style="display: none;">
       <div id="divProblemInfoBar" class="problemInfoBar"></div>
       <div id="divProblemPageContentContainer">
       </div>
     </div>
-    <div id="divEditPage" class="divPage">
+    <div id="divEditPage" class="divPage" style="display: none;">
       <span id="spanButtonPreviousEdit"></span><button id="buttonSaveEdit">Save</button>
       <span id="spanButtonNextEdit"></span>
       <span id="spanSubmitEditPageReport"></span><br>
@@ -163,13 +163,13 @@
       <div id="divEditorAce">
       </div>
     </div>
-    <div id="divCurrentCourse" class="divPage">
+    <div id="divCurrentCourse" class="divPage" style="display: none;">
       <div id="divCurrentCourseEditPanel"></div>
       <div id="divCurrentCourseBody"></div>
     </div>
-    <div id="divSelectCourse" class="divPage">
+    <div id="divSelectCourse" class="divPage" style="display: none;">
     </div>
-    <div id="divCalculatorPage" class="divPage">
+    <div id="divCalculatorPage" class="divPage" style="display: none;">
       <div id="divCalculatorMainInputOutput">
         <div id="divCalculatorMainInput">
           <table class="tableCalculatorInputs">
@@ -242,7 +242,7 @@
         </div>
       </div>
     </div>
-    <div id="divAboutPage" class="divPage">
+    <div id="divAboutPage" class="divPage" style="display: none;">
       <h2> Project mission</h2>
       The mission of the calculator project is, to the extent possible,
       <blockquote>
@@ -303,7 +303,7 @@
       If you have any questions [proposals, feature requests, ...] about this project, write me an email
       (todor.milev at google's email).
     </div>
-    <div id="divPrivacyPolicy" class="divPage">
+    <div id="divPrivacyPolicy" class="divPage" style="display: none;">
       <h1>Privacy Policy</h1>
       <p>Effective date: December 10, 2018</p>
       <p>calculator ("us", "we", or "our") operates the https://calculator-algebra.org website (the "Service").</p>
@@ -499,12 +499,12 @@
 
     </div>
 
-    <div id="divDatabase" class="divPage">
+    <div id="divDatabase" class="divPage" style="display: none;">
       <button class="buttonStandard" id="buttonTables">Tables</button>
       <span id="spanDatabaseComments"></span>
       <div id="divDatabaseOutput"> </div>
     </div>
-    <div id="divThemes" class="divPage">
+    <div id="divThemes" class="divPage" style="display: none;">
       <label class="containerRadioButton">
         Default
         <input type="radio" checked="checked" name="theme" id="radioThemeDefault"></input>
@@ -515,7 +515,7 @@
         <span class="radioMark"></span>
       </label>
     </div>
-    <div id="divAccount" class="divPage">
+    <div id="divAccount" class="divPage" style="display: none;">
       <form>
         <table>
           <!--Password change table, to avoid password not in a form warning-->
@@ -567,7 +567,7 @@
       <span id="spanUserExtraInfo"></span>
     </div>
 
-    <div id="divActivateAccount" class="divPage">
+    <div id="divActivateAccount" class="divPage" style="display: none;">
       <form>
         <!--Activate account form, avoid password field not in a form warning. -->
         <table>
@@ -605,7 +605,7 @@
       <span id="spanVerificationActivation"></span>
     </div>
 
-    <div id="divAccounts" class="divPage">
+    <div id="divAccounts" class="divPage" style="display: none;">
       <div id="idAccountsOutput">
         Assign section(s) to teacher(s).
         <br>
@@ -666,7 +666,7 @@
       </div>
     </div>
 
-    <div id="divServer" class="divPage">
+    <div id="divServer" class="divPage" style="display: none;">
       <div id="idServerStatus">
       </div>
     </div>

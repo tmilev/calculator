@@ -264,8 +264,16 @@ class Page {
     this.storage = storage;
   }
 
+  logoutCallbackAllUsers() {
+    this.user.hideProfilePicture();
+    this.user.flagLoggedIn = false;
+    this.user.sectionsTaught = [];
+  }
+
   initializeLoginPage() {
-    login.authenticator.initialize();
+    login.authenticator.initialize(() => {
+      this.logoutCallbackAllUsers();
+    }, null);
     let forgotLogin = document.getElementById(
       ids.domElements.pages.login.buttonForgotLogin
     );

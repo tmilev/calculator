@@ -3,16 +3,23 @@ const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 const miscellaneous = require("./miscellaneous_frontend");
+const storage = require("./storage").storage;
 
 class Authenticator {
   constructor() {
     this.flagInitialized = false;
+    this.logoutCallbackAllUsers = null;
+    this.logoutCallbackAdditionalForNonAdmins = null;
+    this.oldUserRole = "";
+    this.reloadPageTimer = null;
   }
 
-  initialize() {
+  initialize(inputLogoutCallbackAllUsers, inputLogoutCallbackNonAdmins) {
     if (this.flagInitialized === true) {
       return;
     }
+    this.logoutCallbackAllUsers = inputLogoutCallbackAllUsers;
+    this.logoutCallbackAdditionalForNonAdmins = inputLogoutCallbackNonAdmins;
     this.flagInitialized = true;
     const buttonLogin = document.getElementById(
       ids.domElements.pages.login.buttonLogin
@@ -38,12 +45,12 @@ class Authenticator {
     document.getElementById(
       ids.domElements.pages.login.linkLogout
     ).addEventListener('click', () => {
-      logout();
+      this.logout();
     });
     document.getElementById(
       ids.domElements.pages.login.linkLogoutTop
     ).addEventListener('click', () => {
-      logout();
+      this.logout();
     });
   }
 
@@ -66,12 +73,13 @@ class Authenticator {
   }
 
   loginCalculator() {
-    this.initialize();
     let password = this.passwordInput().value;
     this.passwordInput().value = "";
     let username = encodeURIComponent(this.usernameInput().value);
     let url = "";
-    url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
+    const request = pathnames.urlFields.request;
+    const userInfoJSON = pathnames.urlFields.requests.userInfoJSON;
+    url += `${pathnames.urls.calculatorAPI}?${request}=${userInfoJSON}&`;
     let parameters = `password=${password}&username=${username}&email=${username}`;
     submitRequests.submitPOST({
       url: url,
@@ -92,7 +100,9 @@ class Authenticator {
     incomingString,
     output,
   ) {
-    let spanLoginStatus = document.getElementById(ids.domElements.pages.login.spanLoginStatus);
+    let spanLoginStatus = document.getElementById(
+      ids.domElements.pages.login.spanLoginStatus
+    );
     spanLoginStatus.textContent = "";
     let page = window.calculator.mainPage;
     let success = false;
@@ -103,9 +113,12 @@ class Authenticator {
       success = true;
     }
     let loginInfo = "";
+    const loginDisabledEveryoneIsAdmin = parsedAuthentication[
+      pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin
+    ];
     if (
-      parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === "true" ||
-      parsedAuthentication[pathnames.urlFields.requests.loginDisabledEveryoneIsAdmin] === true
+      loginDisabledEveryoneIsAdmin === "true" ||
+      loginDisabledEveryoneIsAdmin === true
     ) {
       parsedAuthentication[pathnames.urlFields.username] = "anonymous";
       parsedAuthentication[pathnames.urlFields.userRole] = "admin";
@@ -113,16 +126,21 @@ class Authenticator {
       success = true;
       page.user.flagDatabaseInactiveEveryoneIsAdmin = true;
     }
+    const debugLogin = parsedAuthentication[
+      pathnames.urlFields.requests.debugLogin
+    ];
     if (
-      parsedAuthentication[pathnames.urlFields.requests.debugLogin] === "true" ||
-      parsedAuthentication[pathnames.urlFields.requests.debugLogin] === true
+      debugLogin === "true" || debugLogin === true
     ) {
       page.user.debugLogin = true;
       loginInfo += "<b style='color:red'>Debugging login</b>";
     }
+    const httpsSupport = parsedAuthentication[
+      pathnames.urlFields.requests.httpsSupport
+    ];
     if (
-      parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== "true" &&
-      parsedAuthentication[pathnames.urlFields.requests.httpsSupport] !== true
+      httpsSupport !== "true" &&
+      httpsSupport !== true
     ) {
       if (loginInfo !== "") {
         loginInfo += "<br>";
@@ -168,7 +186,9 @@ class Authenticator {
     let spanLoginExtra = document.getElementById(
       ids.domElements.pages.login.spanLoginStatusExtra
     );
-    miscellaneous.writeHtmlElementsFromCommentsAndErrors(parsedAuthentication, spanLoginExtra);
+    miscellaneous.writeHtmlElementsFromCommentsAndErrors(
+      parsedAuthentication, spanLoginExtra
+    );
     if (!success) {
       if (loginErrorMessage !== undefined && loginErrorMessage !== "") {
         miscellaneous.writeHTML(spanLoginStatus, loginErrorMessage);
@@ -182,75 +202,74 @@ class Authenticator {
       setAdminPanels();
     }
   }
-}
-
-function doReload() {
-  location.reload();
-}
-
-var reloadPageTimer = null;
-
-function reloadPage(reason, time) {
-  clearTimeout(reloadPageTimer);
-  reloadPageTimer = null;
-  if (time < 0) {
-    time = 0;
+  logout() {
+    storage.variables.user.name.setAndStore("");
+    storage.variables.user.authenticationToken.setAndStore("");
+    storage.variables.user.role.setAndStore("");
+    hideLogoutButton();
+    if (this.logoutCallbackAllUsers !== null) {
+      // Expected to hold require("page_navigation").mainPage().logoutCallbackAllUsers
+      this.logoutCallbackAllUsers();
+    }
+    document.getElementById("inputPassword").value = "";
+    document.getElementById(ids.domElements.problemPageContentContainer).textContent = "";
+    document.getElementById(ids.domElements.divCurrentCourseBody).textContent = "";
+    this.logoutPartTwo();
   }
-  let timeRemaining = time / 1000;
-  let element = document.getElementById("spanLoginStatus");
-  miscellaneous.writeHTML(
-    element,
-    `${reason} [in ${timeRemaining} (s)]`,
-  );
-  if (time <= 0) {
-    doReload();
-  } else {
-    reloadPageTimer = setTimeout(reloadPage.bind(null, reason, time - 1000), 1000);
+
+  logoutPartTwo() {
+    let page = window.calculator.mainPage;
+    if (this.oldUserRole === "admin") {
+      this.reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
+    } else {
+      let loginStatus = document.getElementById("spanLoginStatus");
+      let boldComponent = document.createElement("b");
+      let anchor = document.createElement("a");
+      boldComponent.appendChild(anchor);
+      anchor.href = '#';
+      anchor.addEventListener('click', () => {
+        this.reloadPage('<b>User requested reload. </b>', 0);
+      });
+      anchor.textContent = "Reload page";
+      let textNode = document.createElement("span");
+      miscellaneous.writeHTML(
+        textNode,
+        ` for complete logout (when <span style='color:red'>using public computer</span>).`,
+      );
+      loginStatus.appendChild(boldComponent);
+      loginStatus.appendChild(textNode);
+      showLoginCalculatorButtons();
+      toggleAccountPanels();
+      setAdminPanels();
+      page.selectPage(page.pages.login.name);
+    }
   }
-}
 
-var oldUserRole;
-function logout() {
-  let page = window.calculator.mainPage;
-  page.storage.variables.user.name.setAndStore("");
-  page.storage.variables.user.authenticationToken.setAndStore("");
-  page.storage.variables.user.role.setAndStore("");
-  hideLogoutButton();
-  page.user.hideProfilePicture();
-  page.user.flagLoggedIn = false;
-  page.user.sectionsTaught = [];
-  document.getElementById("inputPassword").value = "";
-  document.getElementById(ids.domElements.problemPageContentContainer).textContent = "";
-  document.getElementById(ids.domElements.divCurrentCourseBody).textContent = "";
-  logoutPartTwo();
-}
-
-function logoutPartTwo() {
-  let page = window.calculator.mainPage;
-  if (oldUserRole === "admin") {
-    reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
-  } else {
-    let loginStatus = document.getElementById("spanLoginStatus");
-    let boldComponent = document.createElement("b");
-    let anchor = document.createElement("a");
-    boldComponent.appendChild(anchor);
-    anchor.href = '#';
-    anchor.addEventListener('click', () => {
-      reloadPage('<b>User requested reload. </b>', 0);
-    });
-    anchor.textContent = "Reload page";
-    let textNode = document.createElement("span");
+  reloadPage(reason, time) {
+    clearTimeout(this.reloadPageTimer);
+    this.reloadPageTimer = null;
+    if (time < 0) {
+      time = 0;
+    }
+    let timeRemaining = time / 1000;
+    let element = document.getElementById("spanLoginStatus");
     miscellaneous.writeHTML(
-      textNode,
-      ` for complete logout (when <span style='color:red'>using public computer</span>).`,
+      element,
+      `${reason} [in ${timeRemaining} (s)]`,
     );
-    loginStatus.appendChild(boldComponent);
-    loginStatus.appendChild(textNode);
-    showLoginCalculatorButtons();
-    toggleAccountPanels();
-    setAdminPanels();
-    page.selectPage(page.pages.login.name);
+    if (time <= 0) {
+      this.doReload();
+      return;
+    }
+    this.reloadPageTimer = setTimeout(() => {
+      this.reloadPage(reason, time - 1000);
+    }, 1000);
   }
+
+  doReload() {
+    location.reload();
+  }
+
 }
 
 function loginTry() {
@@ -377,21 +396,10 @@ function getQueryVariable(variable) {
   return null;
 }
 
-function init() {
-  logoutRequestFromUrl = getQueryVariable("logout");
-  locationRequestFromUrl = getQueryVariable("location");
-  if (logoutRequestFromUrl === "true") {
-    logout();
-  }
-}
-
 let authenticator = new Authenticator();
 
 module.exports = {
   resetPagesNeedingReload,
-  reloadPage,
-  init,
-  logout,
   loginTry,
   setAdminPanels,
   onGoogleSignIn,

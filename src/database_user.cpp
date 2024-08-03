@@ -1249,7 +1249,7 @@ bool UserOfDatabase::loginViaGoogleTokenCreateNewAccountIfNeeded(
     }
     return false;
   }
-  if (userExists) {
+  if (!userExists) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
       << "User with email "
@@ -1258,6 +1258,9 @@ bool UserOfDatabase::loginViaGoogleTokenCreateNewAccountIfNeeded(
     }
     userWrapper.username = userWrapper.email;
     if (!userWrapper.storeToDatabase(false, commentsOnFailure)) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure << "Failed to store the user data. ";
+      }
       return false;
     }
     if (commentsGeneral != nullptr) {

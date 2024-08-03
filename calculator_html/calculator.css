@@ -775,7 +775,7 @@ div.divMainMenu {
   flex-direction: column;
   transition: all 1s;
   max-width: 120px;
-  width: 8%;
+  width: 120px;
   position: absolute;
   right: 0.8%;
   overflow: auto;
@@ -1503,35 +1503,45 @@ span.currentCourseIndicator {
   font-size: 100%;
 }
 
-/* The switch - the box around the slider */
+/* Hide default HTML checkbox */
+.switchInput {
+  display: none;
+}
+
 .switch {
   position: relative;
-  display: inline-block;
   width: 32px;
   height: 18px;
 }
 
-/* Hide default HTML checkbox */
-.switch input {
-  display: none;
-}
-
-/* The slider */
-.slider {
-  position: absolute;
+/* The slider. */
+.sliderBackground {
+  display: inline-block;
+  vertical-align: bottom;
+  margin-top: 4px;
+  display: inline-block;
   cursor: pointer;
-  top: 5;
-  left: 0;
-  right: 0;
-  bottom: -5;
+  height: 18px;
+  width: 32px;
   background-color: #ccc;
   -webkit-transition: .4s;
   transition: .4s;
+  border-radius: 10px;
 }
 
-.slider:before {
+.switchInput:checked+.sliderBackground {
+  background-color: #2196F3;
+}
+
+.switchInput:focus+.sliderBackground {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+.sliderBall {
+  display: inline-block;
   position: absolute;
   content: "";
+  top: 4px;
   height: 12px;
   width: 12px;
   left: 4px;
@@ -1539,30 +1549,15 @@ span.currentCourseIndicator {
   background-color: white;
   -webkit-transition: .4s;
   transition: .4s;
+  border-radius: 50%;
 }
 
-input:checked+.slider {
-  background-color: #2196F3;
-}
-
-input:focus+.slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-
-input:checked+.slider:before {
+.switchInput:checked+.sliderBackground+.sliderBall {
   -webkit-transform: translateX(11px);
   -ms-transform: translateX(11px);
   transform: translateX(12px);
 }
 
-/* Rounded sliders */
-.slider.round {
-  border-radius: 10px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
 
 /* Customize the label (the container) */
 .containerRadioButton {

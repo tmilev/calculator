@@ -303,7 +303,7 @@
       If you have any questions [proposals, feature requests, ...] about this project, write me an email
       (todor.milev at google's email).
     </div>
-    <div id="divPrivacyPolicy" class="divPage" style="display: none;">
+    <div id="divPrivacyPolicy" class="divPage">
       <h1>Privacy Policy</h1>
       <p>Effective date: December 10, 2018</p>
       <p>calculator ("us", "we", or "our") operates the https://calculator-algebra.org website (the "Service").</p>
@@ -709,16 +709,18 @@
       <div>
         <!--div monitor flag-->
         <label class="switch">
-          <input id="sliderMonitoring" type="checkbox">
-          <span class="slider round"></span>
+          <input id="sliderMonitoring" class="switchInput" type="checkbox">
+          <span class="sliderBackground"></span>
+          <span class="sliderBall"></span>
         </label>
         <span id="spanMonitoringStatus"></span>
         <!--div monitor flag-->
       </div>
       <div>
         <label class="switch">
-          <input id="sliderWebAssembly" type="checkbox">
-          <span class="slider round"></span>
+          <input id="sliderWebAssembly" class="switchInput" type="checkbox">
+          <span class="sliderBackground"></span>
+          <span class="sliderBall"></span>
         </label>
         <span id="spanWebAssemblyStatus"></span>
       </div>
@@ -726,16 +728,18 @@
         <div>
           <!--div containing debug flag-->
           <label class="switch">
-            <input id="sliderDebugFlag" type="checkbox">
-            <span class="slider round"></span>
+            <input id="sliderDebugFlag" class="switchInput" type="checkbox">
+            <span class="sliderBackground"></span>
+            <span class="sliderBall"></span>
           </label><span id="spanDebugFlagToggleReport">-</span>
         </div>
         <!--div containing debug flag-->
       </div>
       <div>
         <label class="switch">
-          <input id="sliderStudentView" type="checkbox">
-          <span class="slider round"></span>
+          <input id="sliderStudentView" class="switchInput" type="checkbox">
+          <span class="sliderBackground"></span>
+          <span class="sliderBall"></span>
         </label><span id="spanStudentViewToggleReport">-</span>
       </div>
 

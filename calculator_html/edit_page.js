@@ -287,7 +287,9 @@ function getNavigationEditButton(problemId, contentHTML) {
   }
   let navigationButton = document.createElement("button");
   navigationButton.addEventListener(
-    "click", selectEditPage.bind(null, problemId)
+    "click", () => {
+      selectEditPage(problemId, null);
+    }
   );
   navigationButton.className = "buttonNavigationStandard";
   miscellaneous.writeHTML(navigationButton, contentHTML);
@@ -328,7 +330,7 @@ class ProblemEditor {
     /** @type {boolean} Whether online edit is allowed. */
     withInstructorRights,
   ) {
-    if (withInstructorRights === undefined) {
+    if (withInstructorRights === undefined || withInstructorRights === null) {
       withInstructorRights = this.mainPage.hasInstructorRightsNotViewingAsStudent();
     }
     let saveButton = document.getElementById(ids.domElements.buttonSaveEdit);

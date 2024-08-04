@@ -39,10 +39,7 @@ class Splitter {
     this.parentElement.addEventListener('mouseup', (mouseEvent) => {
       this.onMouseUp(mouseEvent);
     });
-    const storedDimension = this.storageVariable.getValue();
-    if (storedDimension !== "") {
-      this.setDimension(Number(storedDimension));
-    }
+    this.setDimension(this.storageVariable.getValue());
   }
 
   getXY(mouseEvent) {
@@ -82,7 +79,15 @@ class Splitter {
 
   setDimension(dimension) {
     if (dimension === "" || dimension === undefined || dimension === null) {
-      return;
+      const neighbor1Box = this.neighbor1.getBoundingClientRect();
+      if (this.neighborsAreInRows) {
+        dimension = neighbor1Box.height;
+      } else {
+        dimension = neighbor1Box.width;
+      }
+    }
+    if (typeof dimension === "string") {
+      dimension = Number(dimension);
     }
     let dimensionParent = 0;
     let parentBounds = this.parentElement.getBoundingClientRect();

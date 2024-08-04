@@ -1542,11 +1542,10 @@ span.currentCourseIndicator {
   display: inline-block;
   position: absolute;
   content: "";
-  top: 4px;
+  left: 4px;
+  top: 3px;
   height: 12px;
   width: 12px;
-  left: 4px;
-  bottom: 3px;
   background-color: white;
   -webkit-transition: .4s;
   transition: .4s;
@@ -1556,7 +1555,7 @@ span.currentCourseIndicator {
 .switchInput:checked+.sliderBackground+.sliderBall {
   -webkit-transform: translateX(11px);
   -ms-transform: translateX(11px);
-  transform: translateX(12px);
+  transform: translateX(13px);
 }
 
 

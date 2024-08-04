@@ -23,7 +23,12 @@ class Splitter {
     this.storageVariable = storageVariable;
     this.resizing = false;
     this.neighborsAreInColumns = neighborsAreInColumns;
+    this.neighbor1.style.flexGrow = "0";
+    this.neighbor2.style.flexGrow = "0";
+    this.neighbor1.style.flexShrink = "0";
+    this.neighbor2.style.flexShrink = "0";
   }
+
   initialize() {
     this.element.addEventListener('mousedown', (mouseEvent) => {
       this.onMouseDown(mouseEvent);
@@ -34,22 +39,29 @@ class Splitter {
     this.parentElement.addEventListener('mouseup', (mouseEvent) => {
       this.onMouseUp(mouseEvent);
     });
-    this.setDimension(this.storageVariable.getValue());
+    const storedDimension = this.storageVariable.getValue();
+    if (storedDimension !== "") {
+      this.setDimension(Number(storedDimension));
+    }
   }
+
   getXY(mouseEvent) {
     return {
       x: mouseEvent.clientX,
       y: mouseEvent.clientY,
     }
   }
+
   onMouseDown(mouseEvent) {
     this.resizing = true;
     mouseEvent.stopPropagation();
   }
+
   onMouseUp(mouseEvent) {
     this.resizing = false;
     mouseEvent.stopPropagation();
   }
+
   onMouseMove(mouseEvent) {
     if (!this.resizing) {
       return;
@@ -61,28 +73,34 @@ class Splitter {
     } else {
       dimension = xy.x;
     }
+    dimension -= 10;
     this.storageVariable.setAndStore(
-      dimension - 10, false, false
+      dimension, false, false
     );
-    this.setDimension(dimension - 10);
+    this.setDimension(dimension);
   }
+
   setDimension(dimension) {
     if (dimension === "" || dimension === undefined || dimension === null) {
-      if (this.neighborsAreInColumns) {
-        this.neighbor1.style.height = "";
-        this.neighbor2.style.height = "";
-      } else {
-        this.neighbor1.style.width = "";
-        this.neighbor2.style.width = "";
-      }
       return;
     }
-    let rectangle = this.parentElement.getBoundingClientRect();
     let dimensionParent = 0;
+    let parentBounds = this.parentElement.getBoundingClientRect();
     if (this.neighborsAreInColumns) {
-      dimensionParent = rectangle.height;
+      dimensionParent = parentBounds.height;
+      if (dimensionParent < 500) {
+        // TODO: for some reason, as of writing, 
+        // the parent element is not fully sized
+        // vertically when
+        // this code first runs.
+        // May be a css bug or a peculiarity of how
+        // flexboxes work. 
+        // Fall back to
+        // the dimension of the window.
+        dimensionParent = window.innerHeight;
+      }
     } else {
-      dimensionParent = rectangle.width;
+      dimensionParent = parentBounds.width;
     }
     if (dimension > dimensionParent - 100) {
       dimension = dimensionParent - 100;
@@ -90,17 +108,7 @@ class Splitter {
     if (dimension < 90) {
       dimension = 90;
     }
-    let remainingDimension = dimensionParent - dimension;
-    if (remainingDimension < 100) {
-      remainingDimension = 100;
-    }
-    if (this.neighborsAreInColumns) {
-      this.neighbor1.style.height = dimension;
-      this.neighbor2.style.height = remainingDimension;
-    } else {
-      this.neighbor1.style.width = dimension;
-      this.neighbor2.style.width = remainingDimension;
-    }
+    this.neighbor1.style.flexBasis = `${dimension}px`;
   }
 }
 

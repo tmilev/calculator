@@ -275,11 +275,14 @@ class Page {
   }
 
   initializeLoginPage() {
-    login.authenticator.initialize(() => {
-      this.logoutCallbackAllUsers();
-    }, () => {
-      this.logoutCallbackAdditionalForNonAdmins();
-    });
+    login.authenticator.initialize(
+      () => {
+        this.logoutCallbackAllUsers();
+      }, () => {
+        this.logoutCallbackAdditionalForNonAdmins();
+      },
+      this
+    );
     let forgotLogin = document.getElementById(
       ids.domElements.pages.login.buttonForgotLogin
     );
@@ -372,6 +375,13 @@ class Page {
   }
 
   initializeMenuBar() {
+    const menuDiv = document.getElementById(
+      ids.domElements.menu.divMainMenuPanel
+    );
+    menuDiv.style.display = "";
+    this.hideOrUnhideMainMenu();
+    document.getElementById(ids.domElements.divLoading).style.display = "none";
+
     for (let label in this.pages) {
       let page = this.pages[label];
       page.container = document.getElementById(page.id);
@@ -466,8 +476,9 @@ class Page {
     this.initializeLoginPage();
     accountPage.accountPage.initialize(this);
     editPage.problemEditor.initialize(this);
+    database.databasePage.initialize(this);
     this.initializeAccountButtons();
-    this.hideOrUnhideMainMenu();
+    this.initializeMenuBar();
     this.hashHistory = [];
     this.lastKnownGoodProblemFileName = "";
     this.user = new User();
@@ -755,14 +766,6 @@ class Page {
     }
   }
 
-  toggleMenu() {
-    if (storage.variables.mainMenuIsHidden.isTrue()) {
-      this.unhideMainMenu();
-    } else {
-      this.hideMainMenu();
-    }
-  }
-
   hideOrUnhideMainMenu() {
     if (storage.variables.mainMenuIsHidden.isTrue()) {
       this.hideMainMenu();
@@ -785,7 +788,6 @@ class Page {
         currentNode.style.display = "";
       }
     }
-    let pages = document.getElementsByClassName("divPage");
     menuDiv.classList.remove("divMainMenuCollapsed");
     miscellaneous.writeHTML(toggleButton, "&#9660;");
     document.getElementById(
@@ -829,7 +831,7 @@ class Page {
       ids.domElements.menu.buttonToggleTheMainMenu
     );
     buttonToggleMainMenu.addEventListener('click', () => {
-      this.toggleMenu();
+      this.hideOrUnhideMainMenu();
     });
   }
 }

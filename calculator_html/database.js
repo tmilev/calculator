@@ -10,12 +10,14 @@ const DataProcessorCollection = require('./json_to_html').DataProcessorCollectio
 const DataTransformer = require('./json_to_html').DataTransformer;
 const miscellaneous = require("./miscellaneous_frontend");
 const panels = require('./panels');
-const storage = require('./storage');
+const storage = require('./storage').storage;
 
 class DatabasePage {
   constructor() {
+    this.mainPage = null;
   }
-  initialize() {
+  initialize(mainPage) {
+    this.mainPage = mainPage;
     let tableButtons = document.getElementById(
       ids.domElements.pages.database.buttonTables
     );
@@ -27,10 +29,31 @@ class DatabasePage {
       updateDatabasePageResetCurrentTable();
     });
   }
+  updateDatabasePage(/** @type{string?} */ requestedOperation) {
+    if (!this.mainPage.isLoggedIn()) {
+      let element = document.getElementById(ids.domElements.divDatabaseOutput);
+      miscellaneous.writeHTML(element, "<b>Not logged-in.</b>");
+      return;
+    }
+    if (requestedOperation === undefined || requestedOperation === null) {
+      requestedOperation = pathnames.urlFields.database.fetch;
+    }
+    let findQuery = storage.variables.database.findQuery.getValue();
+    let url = "";
+    url += `${pathnames.urls.calculatorAPI}?`;
+    url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
+    url += `${pathnames.urlFields.database.operation}=${requestedOperation}&`;
+    url += `${pathnames.urlFields.database.findQuery}=${findQuery}&`;
+    submitRequests.submitGET({
+      url: url,
+      progress: ids.domElements.spanProgressReportGeneral,
+      callback: updateDatabasePageCallback,
+    });
+  }
 }
 
 function clickDatabaseTable(findQuery) {
-  window.calculator.mainPage.storage.variables.database.findQuery.setAndStore(
+  storage.variables.database.findQuery.setAndStore(
     JSON.stringify(findQuery)
   );
   updateDatabasePage();
@@ -177,7 +200,7 @@ let optionsDatabase = new DataProcessorCollection([
 ]);
 
 function updateDatabasePageCallback(incoming, unused) {
-  let findQueryString = storage.storage.variables.database.findQuery.getValue();
+  let findQueryString = storage.variables.database.findQuery.getValue();
   let findQuery = {};
   try {
     findQuery = JSON.parse(findQueryString);
@@ -248,35 +271,15 @@ function updateTables(
 }
 
 function updateDatabasePageResetCurrentTable() {
-  storage.storage.variables.database.findQuery.setAndStore("{}");
+  storage.variables.database.findQuery.setAndStore("{}");
   updateDatabasePage(pathnames.urlFields.database.allTables);
 }
 
 function updateDatabasePage(/** @type{string?} */ requestedOperation) {
-  let page = window.calculator.mainPage;
-  if (!page.isLoggedIn()) {
-    let element = document.getElementById(ids.domElements.divDatabaseOutput);
-    miscellaneous.writeHTML(element, "<b>Not logged-in.</b>");
-    return;
-  }
-  if (requestedOperation === undefined || requestedOperation === null) {
-    requestedOperation = pathnames.urlFields.database.fetch;
-  }
-  let findQuery = page.storage.variables.database.findQuery.getValue();
-  let url = "";
-  url += `${pathnames.urls.calculatorAPI}?`;
-  url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
-  url += `${pathnames.urlFields.database.operation}=${requestedOperation}&`;
-  url += `${pathnames.urlFields.database.findQuery}=${findQuery}&`;
-  submitRequests.submitGET({
-    url: url,
-    progress: ids.domElements.spanProgressReportGeneral,
-    callback: updateDatabasePageCallback,
-  });
+  databasePage.updateDatabasePage(requestedOperation);
 }
 
 let databasePage = new DatabasePage();
-databasePage.initialize();
 
 module.exports = {
   databasePage,

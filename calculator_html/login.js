@@ -12,12 +12,18 @@ class Authenticator {
     this.logoutCallbackAdditionalForNonAdmins = null;
     this.oldUserRole = "";
     this.reloadPageTimer = null;
+    this.mainPage = null;
   }
 
-  initialize(inputLogoutCallbackAllUsers, inputLogoutCallbackNonAdmins) {
+  initialize(
+    inputLogoutCallbackAllUsers,
+    inputLogoutCallbackNonAdmins,
+    mainPage,
+  ) {
     if (this.flagInitialized === true) {
       return;
     }
+    this.mainPage = mainPage;
     this.logoutCallbackAllUsers = inputLogoutCallbackAllUsers;
     this.logoutCallbackAdditionalForNonAdmins = inputLogoutCallbackNonAdmins;
     this.flagInitialized = true;
@@ -104,7 +110,6 @@ class Authenticator {
       ids.domElements.pages.login.spanLoginStatus
     );
     spanLoginStatus.textContent = "";
-    let page = window.calculator.mainPage;
     let success = false;
     let loginErrorMessage = "";
     let parsedAuthentication = JSON.parse(incomingString);
@@ -124,7 +129,7 @@ class Authenticator {
       parsedAuthentication[pathnames.urlFields.userRole] = "admin";
       loginInfo += "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>"
       success = true;
-      page.user.flagDatabaseInactiveEveryoneIsAdmin = true;
+      this.mainPage.user.flagDatabaseInactiveEveryoneIsAdmin = true;
     }
     const debugLogin = parsedAuthentication[
       pathnames.urlFields.requests.debugLogin
@@ -132,7 +137,7 @@ class Authenticator {
     if (
       debugLogin === "true" || debugLogin === true
     ) {
-      page.user.debugLogin = true;
+      this.mainPage.user.debugLogin = true;
       loginInfo += "<b style='color:red'>Debugging login</b>";
     }
     const httpsSupport = parsedAuthentication[
@@ -168,7 +173,7 @@ class Authenticator {
     );
     miscellaneous.writeHTML(loginInfoComponent, loginInfo);
     if (success) {
-      page.user.makeFromUserInfo(parsedAuthentication);
+      this.mainPage.user.makeFromUserInfo(parsedAuthentication);
       toggleAccountPanels();
       setAdminPanels();
       hideLoginCalculatorButtons();
@@ -193,10 +198,10 @@ class Authenticator {
       if (loginErrorMessage !== undefined && loginErrorMessage !== "") {
         miscellaneous.writeHTML(spanLoginStatus, loginErrorMessage);
       }
-      page.storage.variables.user.authenticationToken.setAndStore("");
-      page.storage.variables.user.name.setAndStore("");
-      page.storage.variables.user.role.setAndStore("");
-      page.user.flagLoggedIn = false;
+      storage.variables.user.authenticationToken.setAndStore("");
+      storage.variables.user.name.setAndStore("");
+      storage.variables.user.role.setAndStore("");
+      this.mainPage.user.flagLoggedIn = false;
       showLoginCalculatorButtons();
       toggleAccountPanels();
       setAdminPanels();
@@ -280,10 +285,9 @@ function loginTry() {
 }
 
 function toggleAccountPanels() {
-  let page = window.calculator.mainPage;
   let accountPanels = document.getElementsByClassName("divAccountPanel");
   for (let i = 0; i < accountPanels.length; i++) {
-    if (page.user.flagLoggedIn === true) {
+    if (authenticator.mainPage.user.flagLoggedIn === true) {
       accountPanels[i].classList.remove("divInvisible");
       accountPanels[i].classList.add("divVisible");
     } else {

@@ -364,16 +364,17 @@ class ProblemEditor {
       currentlyEditedPage = "/coursesavailable/default.txt";
     }
     storageVariables.editor.currentlyEditedPage.setAndStore(currentlyEditedPage);
-    if (!this.mainPage.flagProblemPageOnly) {
-      if (storage.variables.currentPage.getValue() !== this.mainPage.pages.editPage.name) {
-        this.mainPage.selectPage(this.mainPage.pages.editPage.name);
-        return;
-      }
+    if (
+      !this.mainPage.flagProblemPageOnly &&
+      storage.variables.currentPage.getValue() !== this.mainPage.pages.editPage.name
+    ) {
+      this.mainPage.selectAndStorePage(this.mainPage.pages.editPage.name);
     }
+
     writeNextPreviousEditButton(currentlyEditedPage);
-    let theTopicTextArea = document.getElementById(ids.domElements.textAreaTopicListEntry);
-    theTopicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
-    theTopicTextArea.cols = currentlyEditedPage.length + 15;
+    let topicTextArea = document.getElementById(ids.domElements.textAreaTopicListEntry);
+    topicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
+    topicTextArea.cols = currentlyEditedPage.length + 15;
 
     let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requestEditPage}&`;
     url += `${pathnames.urlFields.problem.fileName}=${storage.variables.editor.currentlyEditedPage.getValue()}`;

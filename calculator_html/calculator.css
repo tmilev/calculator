@@ -581,7 +581,6 @@ a.linkProgressReport {
 
 #divCalculatorMainInputOutput {
   overflow: hidden;
-  height: 100%;
   width: 100%;
   max-width: 100%;
   display: flex;
@@ -610,6 +609,7 @@ a.linkProgressReport {
   overflow: auto;
   vertical-align: top;
   white-space: nowrap;
+  height: 100%;
 }
 
 #idAutocompletePanel {
@@ -742,32 +742,22 @@ body {
 }
 
 div.divOnePageApp {
-  /* class assigned to main one page container at run time. */
+  /* Class of top page container. */
   display: flex;
   flex-direction: row;
-  width: 100%;
-  height: 100%;
-  visibility: visible;
-  overflow: hidden;
+  align-items: stretch;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
-div.divPage {
-  width: 92%;
-  height: 100%;
+div.divAllPages {
   overflow: auto;
-  position: relative;
-}
-
-div.divPageMainMenuCollapsed {
-  width: 98%;
-  height: 100%;
-  overflow: auto;
-  position: relative;
-}
-
-#divCalculatorPage {
-  overflow: hidden;
-  display: inline-flex;
+  flex: 1;
+  margin-top: 5px;
+  margin-left: 5px;
 }
 
 div.divMainMenu {
@@ -776,8 +766,6 @@ div.divMainMenu {
   transition: all 1s;
   max-width: 120px;
   width: 120px;
-  position: absolute;
-  right: 0.8%;
   overflow: auto;
 }
 
@@ -788,6 +776,22 @@ div.divMainMenuCollapsed {
   flex-direction: column;
   transition: all 1s;
 }
+
+div.divPage {
+  height: 100%;
+  overflow: auto;
+  width: 100%;
+  position: relative;
+}
+
+
+#divCalculatorPage {
+  overflow: hidden;
+  display: inline-flex;
+  align-items: stretch;
+  height: 100%;
+}
+
 
 div.divMenuSeparator {
   font-size: small;
@@ -1000,8 +1004,8 @@ topicList {
   width: 100%;
 }
 
-#divCurrentCourse {
-  width: 90%;
+#divCurrentCourseBody {
+  overflow: auto;
 }
 
 table.topicList {

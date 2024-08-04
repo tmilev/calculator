@@ -786,9 +786,6 @@ class Page {
       }
     }
     let pages = document.getElementsByClassName("divPage");
-    for (let i = 0; i < pages.length; i++) {
-      pages[i].classList.remove("divPageMainMenuCollapsed");
-    }
     menuDiv.classList.remove("divMainMenuCollapsed");
     miscellaneous.writeHTML(toggleButton, "&#9660;");
     document.getElementById(
@@ -817,10 +814,6 @@ class Page {
       ) {
         currentNode.style.display = "none";
       }
-    }
-    let pages = document.getElementsByClassName("divPage");
-    for (let i = 0; i < pages.length; i++) {
-      pages[i].classList.add("divPageMainMenuCollapsed");
     }
     menuDiv.classList.add("divMainMenuCollapsed");
     miscellaneous.writeHTML(toggleButton, "&#9656;");

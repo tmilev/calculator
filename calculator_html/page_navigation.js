@@ -191,25 +191,9 @@ class Page {
     this.storage = storage;
   }
 
-  logoutCallbackAllUsers() {
-    this.user.hideProfilePicture();
-    this.user.flagLoggedIn = false;
-    this.user.sectionsTaught = [];
-  }
-
-  logoutCallbackAdditionalForNonAdmins() {
-    this.selectAndStorePage(this.pages.login.name);
-  }
 
   initializeLoginPage() {
-    login.authenticator.initialize(
-      () => {
-        this.logoutCallbackAllUsers();
-      }, () => {
-        this.logoutCallbackAdditionalForNonAdmins();
-      },
-      this
-    );
+    login.authenticator.initialize(this);
     let forgotLogin = document.getElementById(
       ids.domElements.pages.login.buttonForgotLogin
     );
@@ -405,6 +389,7 @@ class Page {
     editPage.problemEditor.initialize(this);
     database.databasePage.initialize(this);
     coursePage.courseSelector.initialize(this);
+    problemPage.allProblems.initialize(this);
     this.initializeAccountButtons();
     this.initializeMenuBar();
     this.hashHistory = [];
@@ -763,7 +748,6 @@ class Page {
     });
   }
 }
-
 
 /**
  * @return {Page}

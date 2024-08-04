@@ -7,7 +7,8 @@ const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous_frontend");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
 const datePicker = require("./date_picker").datePicker;
-const storage = require("./storage");
+const storage = require("./storage").storage;
+const globalUser = require("./user").globalUser;
 const AnswerPanel = require("./answer_panel").AnswerPanel;
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 
@@ -25,6 +26,11 @@ class ProblemCollection {
     this.chapterIds = {};
     this.topics = {};
     this.flagLoaded = false;
+    this.mainPage = null;
+  }
+
+  initialize(mainPage) {
+    this.mainPage = mainPage;
   }
 
   /** @return {Problem} */
@@ -136,6 +142,7 @@ class ProblemCollection {
     }
   }
 
+
   updateProblemPage() {
     window.calculator.coursePage.selectCurrentCoursePage();
     // functions: selectProblemById, logout, callbackClone,
@@ -143,18 +150,7 @@ class ProblemCollection {
     /** @type {Problem} */
     let problem = getCurrentProblem();
     if (this.flagLoaded) {
-      if (problem !== undefined && problem !== null) {
-        let problemNavigation = document.getElementById(
-          problem.idNavigationProblemNotEntirePanel
-        );
-        if (problemNavigation !== null) {
-          problemNavigation.textContent = "";
-          let updatedContent = problem.getProblemNavigationContent();
-          for (let i = 0; i < updatedContent.length; i++) {
-            problemNavigation.appendChild(updatedContent[i]);
-          }
-        }
-      }
+      problemNavigation.updateExceptTitle();
       return;
     }
     let url = "";
@@ -164,7 +160,7 @@ class ProblemCollection {
       const urlParameters = problem.getCalculatorURLRequestFileCourseTopics(forReal);
       url = `${api}?${urlParameters}`;
     } else {
-      let problemFileName = storage.storage.variables.currentCourse.problemFileName.getValue();
+      let problemFileName = storage.variables.currentCourse.problemFileName.getValue();
       if (
         problemFileName === "" ||
         problemFileName === undefined ||
@@ -198,9 +194,8 @@ class ProblemCollection {
       "buttonSelectPage", "buttonSlowTransition", "buttonFlash"
     );
     button.style.width = "150px";
-    const page = window.calculator.mainPage;
     button.addEventListener("click", () => {
-      page.selectPage('currentCourse');
+      this.mainPage.selectPage('currentCourse');
     });
     courseBody.appendChild(button);
     courseBody.appendChild(document.createElement("br"));
@@ -219,16 +214,15 @@ function selectProblemById(
   /** @type{string} */
   exerciseType,
 ) {
-  let page = window.calculator.mainPage;
-  storage.storage.variables.currentCourse.problemFileName.setAndStore(
+  storage.variables.currentCourse.problemFileName.setAndStore(
     decodeURIComponent(problemIdURLed)
   );
-  storage.storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
+  storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
   let problem = getCurrentProblem();
   problem.flagForReal = false;
   if (
     exerciseType === pathnames.urlFields.scoredQuizJSON &&
-    !page.user.flagDatabaseInactiveEveryoneIsAdmin
+    !globalUser.flagDatabaseInactiveEveryoneIsAdmin
   ) {
     problem.flagForReal = true;
   }
@@ -263,7 +257,7 @@ class Problem {
   }
 
   setRandomSeedFromEnvironment() {
-    let currentCourse = storage.storage.variables.currentCourse;
+    let currentCourse = storage.variables.currentCourse;
     this.flagForReal = (
       currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON
     );
@@ -283,12 +277,6 @@ class Problem {
   initializeBasic(problemData) {
     /** ProblemId is percent encoded, safe to embed in html. */
     this.problemId = encodeURIComponent(problemData.id);
-    /** 
-     * @type {string}
-     * This id is for problem navigation only, 
-     * does not include the entire panel.
-     */
-    this.idNavigationProblemNotEntirePanel = `navigationPanel${this.problemId}`;
     /** @type {AnswerPanel[]} */
     this.answerPanels = [];
     this.title = problemData.title;
@@ -610,17 +598,16 @@ class Problem {
   }
 
   /** @return {HTMLElement} */
-  getProblemNavigation() {
-    let result = document.createElement("div");
-    result.id = this.idNavigationProblemNotEntirePanel;
-    result.className = 'problemNavigation';
-    if (!window.calculator.mainPage.flagProblemPageOnly) {
-      let children = this.getProblemNavigationContent();
-      for (let i = 0; i < children.length; i++) {
-        result.append(children[i]);
-      }
+  getProblemNavigation(
+    /** @type {HTMLElement} */
+    containerToWriteTo
+  ) {
+    containerToWriteTo.textContent = "";
+    let children = this.getProblemNavigationContent();
+    for (let i = 0; i < children.length; i++) {
+      containerToWriteTo.append(children[i]);
     }
-    return result;
+    return containerToWriteTo;
   }
 
   /** @return {HTMLElement} */
@@ -688,12 +675,11 @@ class Problem {
 
   /** @return {ProblemNavigationHints} */
   getProblemNavigationHints() {
-    let page = window.calculator.mainPage;
     let result = new ProblemNavigationHints();
     if (
       this.flagForReal &&
-      page.user.flagLoggedIn &&
-      !page.user.flagDatabaseInactiveEveryoneIsAdmin
+      globalUser.flagLoggedIn &&
+      !globalUser.flagDatabaseInactiveEveryoneIsAdmin
     ) {
       result.defaultRequest = pathnames.urlFields.scoredQuizJSON;
       result.linkType = "problemLinkQuiz";
@@ -704,7 +690,6 @@ class Problem {
 
   /** @return {HTMLElement[]} */
   getProblemNavigationContent() {
-    let page = window.calculator.mainPage;
     let result = [];
     let hints = this.getProblemNavigationHints();
     result.push(this.getPreviousProblemButton(hints));
@@ -727,8 +712,8 @@ class Problem {
     }
     if (
       !this.flagForReal &&
-      page.user.flagLoggedIn &&
-      !page.user.flagDatabaseInactiveEveryoneIsAdmin
+      globalUser.flagLoggedIn &&
+      !globalUser.flagDatabaseInactiveEveryoneIsAdmin
     ) {
       let quizURL = this.getAppAnchorRequestFileCourseTopics(true, false);
       let quizTag = document.createElement("a");
@@ -776,6 +761,7 @@ class Problem {
     return result;
   }
 
+  /** @return {HTMLElement} */
   getEditPanel() {
     return editPage.getEditPanel(
       decodeURIComponent(this.problemId),
@@ -1284,7 +1270,9 @@ class Problem {
       result += `${numCorrectlyAnswered} out of ${totalQuestions}`;
       if (this.weight !== undefined && this.totalQuestions !== 0) {
         let problemWeightConverted = parseInt(this.weight);
-        let points = ((0.0 + this.correctlyAnswered * problemWeightConverted) / this.totalQuestions);
+        let points = (
+          0.0 + this.correctlyAnswered * problemWeightConverted
+        ) / this.totalQuestions;
         points = Number(points.toFixed(2));
         result += ` = ${points} pts`;
         if (this.correctlyAnswered < this.totalQuestions) {
@@ -1303,13 +1291,20 @@ class Problem {
 
   /** @return {HTMLElement} */
   getLinkFromSpec(
-    /** @type {{request: string, name: string, extension: string, options: string, download: boolean}} */
+    /** 
+     * @type {{
+     * request: string, 
+     * name: string, 
+     * extension: string, 
+     * options: string, 
+     * download: boolean}}
+     */
     linkSpec,
     /** @type {string} */
     query
   ) {
     if (linkSpec.adminView === true) {
-      let studentView = storage.storage.variables.flagStudentView.getValue();
+      let studentView = storage.variables.flagStudentView.getValue();
       if (studentView !== false && studentView !== "false") {
         return null;
       }
@@ -1332,7 +1327,7 @@ class Problem {
 }
 
 function getCalculatorURLRequestFileCourseTopicsFromStorage() {
-  let currentCourse = storage.storage.variables.currentCourse;
+  let currentCourse = storage.variables.currentCourse;
   let exerciseType = currentCourse.exerciseType.getValue();
   if (
     exerciseType === "" ||
@@ -1375,6 +1370,11 @@ class ProblemNavigation {
     this.currentProblem = null;
     /** @type {HTMLElement|null} */
     this.infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
+    this.flagProblemPageOnly = false;
+    /** @type{HTMLElement|null} */
+    this.editPanel = null;
+    /** @type{HTMLElement|null} */
+    this.problemNavigationSubpanel = null;
   }
 
   setCurrentProblemAndUpdate(
@@ -1411,11 +1411,9 @@ class ProblemNavigation {
       document.createTextNode(this.currentProblem.title)
     );
     this.infoBar.textContent = "";
-    if (!window.calculator.mainPage.flagProblemPageOnly) {
-      this.infoBar.appendChild(
-        this.currentProblem.getProblemNavigation()
-      );
-    }
+    this.problemNavigationSubpanel = document.createElement("div")
+    this.problemNavigationSubpanel.className = 'problemNavigation';
+    this.infoBar.appendChild(this.problemNavigationSubpanel);
 
     if (
       this.currentProblem.links !== undefined &&
@@ -1432,9 +1430,22 @@ class ProblemNavigation {
         );
       }
     }
-    problemTitle.appendChild(this.currentProblem.getEditPanel());
     this.infoBar.appendChild(problemTitle);
+    this.editPanel = document.createElement("div");
+    this.infoBar.appendChild(this.editPanel);
+    this.updateExceptTitle();
     typeset.typesetter.typesetSoft(this.infoBar, "");
+  }
+
+  updateExceptTitle() {
+    if (this.currentProblem === null) {
+      return;
+    }
+    this.editPanel.textContent = "";
+    this.editPanel.appendChild(this.currentProblem.getEditPanel());
+    if (!this.flagProblemPageOnly) {
+      this.currentProblem.getProblemNavigation(this.problemNavigationSubpanel)
+    }
   }
 }
 
@@ -1649,7 +1660,7 @@ function loadProblemIntoElement(
 
 /** @return {Problem|null} */
 function getCurrentProblem() {
-  let problemFileName = storage.storage.variables.currentCourse.problemFileName.getValue();
+  let problemFileName = storage.variables.currentCourse.problemFileName.getValue();
   if (
     problemFileName === "" ||
     problemFileName === null ||

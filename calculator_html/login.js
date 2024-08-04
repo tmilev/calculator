@@ -4,28 +4,20 @@ const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 const miscellaneous = require("./miscellaneous_frontend");
 const storage = require("./storage").storage;
+const globalUser = require("./user").globalUser;
 
 class Authenticator {
   constructor() {
     this.flagInitialized = false;
-    this.logoutCallbackAllUsers = null;
-    this.logoutCallbackAdditionalForNonAdmins = null;
-    this.oldUserRole = "";
     this.reloadPageTimer = null;
     this.mainPage = null;
   }
 
-  initialize(
-    inputLogoutCallbackAllUsers,
-    inputLogoutCallbackNonAdmins,
-    mainPage,
-  ) {
+  initialize(mainPage) {
     if (this.flagInitialized === true) {
       return;
     }
     this.mainPage = mainPage;
-    this.logoutCallbackAllUsers = inputLogoutCallbackAllUsers;
-    this.logoutCallbackAdditionalForNonAdmins = inputLogoutCallbackNonAdmins;
     this.flagInitialized = true;
     const buttonLogin = document.getElementById(
       ids.domElements.pages.login.buttonLogin
@@ -72,6 +64,7 @@ class Authenticator {
       ids.domElements.pages.login.inputPassword
     );
   }
+
   usernameInput() {
     return document.getElementById(
       ids.domElements.pages.login.inputUsername
@@ -86,7 +79,8 @@ class Authenticator {
     const request = pathnames.urlFields.request;
     const userInfoJSON = pathnames.urlFields.requests.userInfoJSON;
     url += `${pathnames.urls.calculatorAPI}?${request}=${userInfoJSON}&`;
-    let parameters = `password=${password}&username=${username}&email=${username}`;
+    let parameters = `password=${password}&` +
+      `username=${username}&email=${username}`;
     submitRequests.submitPOST({
       url: url,
       parameters: parameters,
@@ -114,7 +108,9 @@ class Authenticator {
     let loginErrorMessage = "";
     let parsedAuthentication = JSON.parse(incomingString);
     resetPagesNeedingReload();
-    if (pathnames.standardResponses.isLoggedInResponse(parsedAuthentication)) {
+    if (pathnames.standardResponses.isLoggedInResponse(
+      parsedAuthentication
+    )) {
       success = true;
     }
     let loginInfo = "";
@@ -127,9 +123,10 @@ class Authenticator {
     ) {
       parsedAuthentication[pathnames.urlFields.username] = "anonymous";
       parsedAuthentication[pathnames.urlFields.userRole] = "admin";
-      loginInfo += "<b style = 'color:red'>DB inactive,<br>everyone is admin.</b>"
+      loginInfo += "<b style = 'color:red'>DB inactive," +
+        "<br>everyone is admin.</b>";
       success = true;
-      this.mainPage.user.flagDatabaseInactiveEveryoneIsAdmin = true;
+      globalUser.flagDatabaseInactiveEveryoneIsAdmin = true;
     }
     const debugLogin = parsedAuthentication[
       pathnames.urlFields.requests.debugLogin
@@ -137,7 +134,7 @@ class Authenticator {
     if (
       debugLogin === "true" || debugLogin === true
     ) {
-      this.mainPage.user.debugLogin = true;
+      globalUser.debugLogin = true;
       loginInfo += "<b style='color:red'>Debugging login</b>";
     }
     const httpsSupport = parsedAuthentication[
@@ -178,7 +175,9 @@ class Authenticator {
       setAdminPanels();
       hideLoginCalculatorButtons();
       showLogoutButton();
-    } else if (pathnames.standardResponses.isNotLoggedInResponse(parsedAuthentication)) {
+    } else if (pathnames.standardResponses.isNotLoggedInResponse(
+      parsedAuthentication
+    )) {
       if (parsedAuthentication[
         pathnames.urlFields.result.error
       ] !== undefined) {
@@ -201,52 +200,47 @@ class Authenticator {
       storage.variables.user.authenticationToken.setAndStore("");
       storage.variables.user.name.setAndStore("");
       storage.variables.user.role.setAndStore("");
-      this.mainPage.user.flagLoggedIn = false;
+      globalUser.flagLoggedIn = false;
       showLoginCalculatorButtons();
       toggleAccountPanels();
       setAdminPanels();
     }
   }
+
   logout() {
     storage.variables.user.name.setAndStore("");
     storage.variables.user.authenticationToken.setAndStore("");
     storage.variables.user.role.setAndStore("");
     hideLogoutButton();
-    if (this.logoutCallbackAllUsers !== null) {
-      // Expected to hold require("page_navigation").mainPage().logoutCallbackAllUsers
-      this.logoutCallbackAllUsers();
-    }
+    globalUser.hideProfilePicture();
+    globalUser.flagLoggedIn = false;
+    globalUser.sectionsTaught = [];
     document.getElementById("inputPassword").value = "";
     this.logoutPartTwo();
   }
 
   logoutPartTwo() {
-    if (this.oldUserRole === "admin") {
-      this.reloadPage("<b>Logging out admin: mandatory page reload. </b>", 0);
-    } else {
-      let loginStatus = document.getElementById("spanLoginStatus");
-      let boldComponent = document.createElement("b");
-      let anchor = document.createElement("a");
-      boldComponent.appendChild(anchor);
-      anchor.href = '#';
-      anchor.addEventListener('click', () => {
-        this.reloadPage('<b>User requested reload. </b>', 0);
-      });
-      anchor.textContent = "Reload page";
-      let textNode = document.createElement("span");
-      miscellaneous.writeHTML(
-        textNode,
-        ` for complete logout (when <span style='color:red'>using public computer</span>).`,
-      );
-      loginStatus.appendChild(boldComponent);
-      loginStatus.appendChild(textNode);
-      showLoginCalculatorButtons();
-      toggleAccountPanels();
-      setAdminPanels();
-      if (this.logoutCallbackAdditionalForNonAdmins !== null) {
-        this.logoutCallbackAdditionalForNonAdmins();
-      }
-    }
+    let loginStatus = document.getElementById("spanLoginStatus");
+    let boldComponent = document.createElement("b");
+    let anchor = document.createElement("a");
+    boldComponent.appendChild(anchor);
+    anchor.href = '#';
+    anchor.addEventListener('click', () => {
+      this.reloadPage('<b>User requested reload. </b>', 0);
+    });
+    anchor.textContent = "Reload page";
+    let textNode = document.createElement("span");
+    miscellaneous.writeHTML(
+      textNode,
+      " for complete logout " +
+      "(when <span style='color:red'>using public computer</span>).",
+    );
+    loginStatus.appendChild(boldComponent);
+    loginStatus.appendChild(textNode);
+    showLoginCalculatorButtons();
+    toggleAccountPanels();
+    this.setAdminPanels();
+    this.mainPage.selectAndStorePage(this.mainPage.pages.login.name);
   }
 
   reloadPage(reason, time) {
@@ -274,11 +268,58 @@ class Authenticator {
     location.reload();
   }
 
+  setAdminPanels() {
+    let adminPanels = document.getElementsByClassName("divAdminPanel");
+    let currentRole = globalUser.getRole();
+    let studentView = this.mainPage.studentView();
+    for (let i = 0; i < adminPanels.length; i++) {
+      if (currentRole === "admin" && !studentView) {
+        adminPanels[i].classList.remove("divInvisible");
+        adminPanels[i].classList.add("divVisible");
+      } else {
+        adminPanels[i].classList.remove("divVisible");
+        adminPanels[i].classList.add("divInvisible");
+      }
+    }
+    let studentViewPanel = document.getElementById(
+      ids.domElements.spanStudentViewPanel
+    );
+    if (currentRole === "admin") {
+      studentViewPanel.classList.remove("divInvisible")
+      studentViewPanel.classList.add("divVisible");
+    } else {
+      studentViewPanel.classList.remove("divVisible");
+      studentViewPanel.classList.add("divInvisible");
+    }
+  }
+
+  onGoogleSignIn(googleUser) {
+    let token = googleUser.credential;
+    this.mainPage.user.googleToken = token;
+    this.mainPage.storage.variables.user.name.setAndStore("");
+    this.mainPage.user.googleProfile = window.calculator.jwt.decode(token);
+    this.mainPage.showProfilePicture();
+    showLogoutButton();
+    const api = pathnames.urls.calculatorAPI;
+    const request = pathnames.urlFields.request;
+    const userInfo = pathnames.urlFields.requests.userInfoJSON;
+    let url = "";
+    url += `${api}?${request}=${userInfo}&`;
+    url += `googleToken=${token}&`;
+    submitRequests.submitGET({
+      url: url,
+      callback: loginWithServerCallback,
+      progress: ids.domElements.spanProgressReportGeneral
+    });
+  }
 }
 
 function loginTry() {
+  const api = pathnames.urls.calculatorAPI;
+  const request = pathnames.urlFields.request;
+  const userInfoJson = pathnames.urlFields.requests.userInfoJSON;
   submitRequests.submitGET({
-    url: `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}`,
+    url: `${api}?${request}=${userInfoJson}`,
     callback: loginWithServerCallback,
     progress: ids.domElements.spanProgressReportGeneral
   });
@@ -287,7 +328,7 @@ function loginTry() {
 function toggleAccountPanels() {
   let accountPanels = document.getElementsByClassName("divAccountPanel");
   for (let i = 0; i < accountPanels.length; i++) {
-    if (authenticator.mainPage.user.flagLoggedIn === true) {
+    if (globalUser.flagLoggedIn === true) {
       accountPanels[i].classList.remove("divInvisible");
       accountPanels[i].classList.add("divVisible");
     } else {
@@ -298,27 +339,7 @@ function toggleAccountPanels() {
 }
 
 function setAdminPanels() {
-  let page = window.calculator.mainPage;
-  let adminPanels = document.getElementsByClassName("divAdminPanel");
-  let currentRole = page.user.getRole();
-  let studentView = page.studentView();
-  for (let i = 0; i < adminPanels.length; i++) {
-    if (currentRole === "admin" && !studentView) {
-      adminPanels[i].classList.remove("divInvisible");
-      adminPanels[i].classList.add("divVisible");
-    } else {
-      adminPanels[i].classList.remove("divVisible");
-      adminPanels[i].classList.add("divInvisible");
-    }
-  }
-  let studentViewPanel = document.getElementById(ids.domElements.spanStudentViewPanel);
-  if (currentRole === "admin") {
-    studentViewPanel.classList.remove("divInvisible")
-    studentViewPanel.classList.add("divVisible");
-  } else {
-    studentViewPanel.classList.remove("divVisible");
-    studentViewPanel.classList.add("divInvisible");
-  }
+  authenticator.setAdminPanels();
 }
 
 function resetPagesNeedingReload() {
@@ -332,37 +353,42 @@ function loginWithServerCallback(incomingString, result) {
 }
 
 function onGoogleSignIn(googleUser) {
-  let token = googleUser.credential;
-  let page = window.calculator.mainPage;
-  page.user.googleToken = token;
-  page.storage.variables.user.name.setAndStore("");
-  page.user.googleProfile = window.calculator.jwt.decode(token);
-  page.showProfilePicture();
-  showLogoutButton();
-  let url = "";
-  url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.userInfoJSON}&`;
-  url += `googleToken=${token}&`;
-  submitRequests.submitGET({
-    url: url,
-    callback: loginWithServerCallback,
-    progress: ids.domElements.spanProgressReportGeneral
-  });
+  authenticator.onGoogleSignIn(googleUser);
 }
 
 function showLoginCalculatorButtons() {
-  document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.remove("divInvisible");
-  document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.add("divVisible");
-  document.getElementById(ids.domElements.pages.login.userNameReport).classList.remove("divVisible");
-  document.getElementById(ids.domElements.pages.login.userNameReport).classList.add("divInvisible");
+  const loginIds = ids.domElements.pages.login;
+  document.getElementById(
+    loginIds.divLoginCalculatorPanel
+  ).classList.remove("divInvisible");
+  document.getElementById(
+    loginIds.divLoginCalculatorPanel
+  ).classList.add("divVisible");
+  document.getElementById(
+    loginIds.userNameReport
+  ).classList.remove("divVisible");
+  document.getElementById(
+    loginIds.userNameReport
+  ).classList.add("divInvisible");
 }
 
 function hideLoginCalculatorButtons() {
-  let page = window.calculator.mainPage;
-  document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.remove("divVisible");
-  document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel).classList.add("divInvisible");
-  document.getElementById(ids.domElements.pages.login.userNameReport).textContent = page.storage.variables.user.name.value;
-  document.getElementById(ids.domElements.pages.login.userNameReport).classList.remove("divInvisible");
-  document.getElementById(ids.domElements.pages.login.userNameReport).classList.add("divVisible");
+  const loginIds = ids.domElements.pages.login;
+  document.getElementById(
+    loginIds.divLoginCalculatorPanel
+  ).classList.remove("divVisible");
+  document.getElementById(
+    loginIds.divLoginCalculatorPanel
+  ).classList.add("divInvisible");
+  document.getElementById(
+    loginIds.userNameReport
+  ).textContent = storage.variables.user.name.value;
+  document.getElementById(
+    loginIds.userNameReport
+  ).classList.remove("divInvisible");
+  document.getElementById(
+    loginIds.userNameReport
+  ).classList.add("divVisible");
 }
 
 function showLogoutButton() {

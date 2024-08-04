@@ -1,3 +1,4 @@
+"use strict";
 const ids = require("./ids_dom_elements");
 const storage = require("./storage").storage;
 const miscellaneous = require("./miscellaneous_frontend");

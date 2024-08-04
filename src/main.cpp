@@ -678,6 +678,10 @@ int Deployer::deploy() {
     << Logger::endL;
   }
   global.externalCommandStream("git checkout " + branchName);
+  // If the branch already exists
+  // - say, from a previous update in the same day -
+  // then merge master into it.
+  global.externalCommandStream("git merge master ");
   global.externalCommandStream("git push --set-upstream origin " + branchName);
   std::stringstream gitPullRemote;
   gitPullRemote

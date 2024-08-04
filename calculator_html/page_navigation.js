@@ -24,81 +24,8 @@ const compareExpressions = require("./compare_expressions").compareExpressions;
 const compareExpressionsSocratic = require("./compare_expressions_socratic").compareExpressionsSocratic;
 const storage = require("./storage").storage;
 const miscellaneous = require("./miscellaneous_frontend");
+const user = require("./user");
 
-class User {
-  constructor() {
-    this.flagLoggedIn = false;
-    this.googleProfile = null;
-    this.sectionsTaught = [];
-    this.instructor = "";
-    this.sectionInDB = "";
-    this.deadlineSchema = "";
-    this.sectionComputed = "";
-    this.flagDatabaseInactiveEveryoneIsAdmin = false;
-    this.debugLoginProcess = false;
-    this.debugLogin = false;
-  }
-
-  isLoggedIn() {
-    return this.flagLoggedIn;
-  }
-
-  debugLoginIsOn() {
-    return (
-      this.flagDatabaseInactiveEveryoneIsAdmin === true ||
-      this.debugLogin === true
-    );
-  }
-
-  getRole() {
-    return mainPage().storage.variables.user.role.getValue();
-  }
-
-  hasAdminRights() {
-    return this.getRole() === "admin" && this.isLoggedIn();
-  }
-
-  hasProblemEditRights() {
-    return this.getRole() === "admin" && this.isLoggedIn();
-  }
-
-  hasInstructorRights() {
-    return this.getRole() === "admin" && this.isLoggedIn();
-  }
-
-  hideProfilePicture() {
-    document.getElementById(ids.domElements.divProfilePicture).classList.add("divInvisible");
-    document.getElementById(ids.domElements.divProfilePicture).classList.remove("divVisible");
-  }
-
-  makeFromUserInfo(inputData) {
-    let page = window.calculator.mainPage;
-    // Please note: the authentication token is
-    // silently set through the cookie headers.
-    // Please do not take explicit action as
-    // inputdata.authenticationToken may not 
-    // contain the authentication token.
-    // not ok: 
-    // page.storage.variables.user.authenticationToken.
-    //   setAndStore(inputData.authenticationToken);
-    page.storage.variables.user.name.setAndStore(inputData.username);
-    mainPage().storage.variables.user.role.setAndStore(inputData.userRole);
-    this.flagLoggedIn = true;
-    this.sectionsTaught = inputData.sectionsTaught;
-    this.instructor = inputData.instructor;
-    this.sectionInDB = inputData.studentSection;
-    this.sectionComputed = inputData.studentSection;
-    this.deadlineSchema = inputData.deadlineSchema;
-    let spanUser = document.getElementById(
-      ids.domElements.spanUserIdInAccountsPage
-    );
-    miscellaneous.writeHTML(spanUser, page.storage.variables.user.name.value);
-    let userName = document.getElementById(
-      ids.domElements.inputUsername
-    );
-    userName.value = page.storage.variables.user.name.value;
-  }
-}
 
 class Page {
   constructor() {
@@ -477,11 +404,12 @@ class Page {
     accountPage.accountPage.initialize(this);
     editPage.problemEditor.initialize(this);
     database.databasePage.initialize(this);
+    coursePage.courseSelector.initialize(this);
     this.initializeAccountButtons();
     this.initializeMenuBar();
     this.hashHistory = [];
     this.lastKnownGoodProblemFileName = "";
-    this.user = new User();
+    this.user = user.globalUser;
     this.aceEditorAutoCompletionWordList = [];
     this.flagDoSubmitCalculatorComputation = true;
     // Select page on first load

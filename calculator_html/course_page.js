@@ -5,6 +5,60 @@ const ids = require("./ids_dom_elements");
 const problemPage = require("./problem_page");
 const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous_frontend");
+const storage = require("./storage").storage;
+
+class CourseSelector {
+  constructor() {
+    this.mainPage = null;
+  }
+  initialize(mainPage) {
+    this.mainPage = mainPage;
+  }
+  selectCurrentCoursePage() {
+    let storageVariables = storage.variables;
+    let incomingCourse = storageVariables.currentCourse.courseHome.getValue();
+    let incomingTopicList = storageVariables.currentCourse.topicList.getValue();
+    if (
+      incomingCourse === null ||
+      incomingCourse === "" ||
+      incomingCourse === undefined
+    ) {
+      let courseBody = document.getElementById(ids.domElements.divCurrentCourseBody);
+      let button = document.createElement("button");
+      button.classList.add("buttonSelectPage", "buttonSlowTransition", "buttonFlash");
+      button.style.width = "150px";
+      button.textContent = "Please select course";
+      button.addEventListener("click", () => {
+        this.mainPage.selectPage('selectCourse');
+      });
+      setTimeout(() => {
+        button.classList.remove("buttonFlash");
+      }, 0);
+      courseBody.textContent = "";
+      courseBody.appendChild(button);
+      return;
+    }
+    if (lastLoadedCourse.courseHome === incomingCourse && lastLoadedCourse.topicList === incomingTopicList) {
+      return;
+    }
+    // The lastLoadedCourse variable may be reset on successful login. 
+    lastLoadedCourse.courseHome = incomingCourse;
+    lastLoadedCourse.topicList = incomingTopicList;
+    let topicRequest = "templateJSONNoLogin";
+    if (this.mainPage.user.flagLoggedIn) {
+      topicRequest = "templateJSON";
+    }
+    let url = "";
+    url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicRequest}&`;
+    url += `${pathnames.urlFields.problem.courseHome}=${incomingCourse}&`;
+    url += `${pathnames.urlFields.problem.topicList}=${incomingTopicList}`;
+    submitRequests.submitGET({
+      url: url,
+      callback: afterLoadCoursePage,
+      progress: ids.domElements.spanProgressReportGeneral
+    });
+  }
+}
 
 function modifyDeadlines(incomingId) {
   let page = window.calculator.mainPage;
@@ -126,52 +180,13 @@ let lastLoadedCourse = {
 };
 
 function selectCurrentCoursePage() {
-  let page = window.calculator.mainPage;
-  let storageVariables = page.storage.variables;
-  let incomingCourse = storageVariables.currentCourse.courseHome.getValue();
-  let incomingTopicList = storageVariables.currentCourse.topicList.getValue();
-  if (
-    incomingCourse === null ||
-    incomingCourse === "" ||
-    incomingCourse === undefined
-  ) {
-    let courseBody = document.getElementById(ids.domElements.divCurrentCourseBody);
-    let button = document.createElement("button");
-    button.classList.add("buttonSelectPage", "buttonSlowTransition", "buttonFlash");
-    button.style.width = "150px";
-    button.textContent = "Please select course";
-    button.addEventListener("click", () => {
-      page.selectPage('selectCourse');
-    });
-    setTimeout(() => {
-      button.classList.remove("buttonFlash");
-    }, 0);
-    courseBody.textContent = "";
-    courseBody.appendChild(button);
-    return;
-  }
-  if (lastLoadedCourse.courseHome === incomingCourse && lastLoadedCourse.topicList === incomingTopicList) {
-    return;
-  }
-  // The lastLoadedCourse variable may be reset on successful login. 
-  lastLoadedCourse.courseHome = incomingCourse;
-  lastLoadedCourse.topicList = incomingTopicList;
-  let topicRequest = "templateJSONNoLogin";
-  if (page.user.flagLoggedIn) {
-    topicRequest = "templateJSON";
-  }
-  let url = "";
-  url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicRequest}&`;
-  url += `${pathnames.urlFields.problem.courseHome}=${incomingCourse}&`;
-  url += `${pathnames.urlFields.problem.topicList}=${incomingTopicList}`;
-  submitRequests.submitGET({
-    url: url,
-    callback: afterLoadCoursePage,
-    progress: ids.domElements.spanProgressReportGeneral
-  });
+  courseSelector.selectCurrentCoursePage();
 }
 
+const courseSelector = new CourseSelector();
+
 module.exports = {
+  courseSelector,
   loadTopicList,
   lastLoadedCourse,
   modifyDeadlines,

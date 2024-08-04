@@ -13,7 +13,7 @@ class Splitter {
     /** @type{storage.StorageVariable} */
     storageVariable,
     /** @type{boolean} */
-    neighborsAreInColumns,
+    neighborsAreInRows,
   ) {
     /**@type{HTMLElement}*/
     this.element = document.getElementById(splitterId);
@@ -22,7 +22,7 @@ class Splitter {
     this.neighbor2 = document.getElementById(neighbor2Id);
     this.storageVariable = storageVariable;
     this.resizing = false;
-    this.neighborsAreInColumns = neighborsAreInColumns;
+    this.neighborsAreInRows = neighborsAreInRows;
     this.neighbor1.style.flexGrow = "0";
     this.neighbor2.style.flexGrow = "0";
     this.neighbor1.style.flexShrink = "0";
@@ -68,7 +68,7 @@ class Splitter {
     }
     let xy = this.getXY(mouseEvent);
     let dimension = 0;
-    if (this.neighborsAreInColumns) {
+    if (this.neighborsAreInRows) {
       dimension = xy.y;
     } else {
       dimension = xy.x;
@@ -86,7 +86,7 @@ class Splitter {
     }
     let dimensionParent = 0;
     let parentBounds = this.parentElement.getBoundingClientRect();
-    if (this.neighborsAreInColumns) {
+    if (this.neighborsAreInRows) {
       dimensionParent = parentBounds.height;
       if (dimensionParent < 500) {
         // TODO: for some reason, as of writing, 
@@ -108,7 +108,19 @@ class Splitter {
     if (dimension < 90) {
       dimension = 90;
     }
+    // TODO: overflowScrollBandAdjustment should be computed from context.
+    let overflowScrollBandAdjustment = 10;
+    if (!this.neighborsAreInRows) {
+      overflowScrollBandAdjustment = 20;
+    }
+    let remainingDimension = (
+      dimensionParent - dimension - overflowScrollBandAdjustment
+    );
+    if (remainingDimension < 20) {
+      remainingDimension = 20;
+    }
     this.neighbor1.style.flexBasis = `${dimension}px`;
+    this.neighbor2.style.flexBasis = `${remainingDimension}px`;
   }
 }
 

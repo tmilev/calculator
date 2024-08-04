@@ -609,6 +609,7 @@ a.linkProgressReport {
   overflow: auto;
   vertical-align: top;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 #idAutocompletePanel {
@@ -782,14 +783,12 @@ div.divPage {
   position: relative;
 }
 
-
 #divCalculatorPage {
   overflow: hidden;
   display: inline-flex;
   align-items: stretch;
   height: 100%;
 }
-
 
 div.divMenuSeparator {
   font-size: small;
@@ -1761,6 +1760,10 @@ button.buttonSolve:hover {
 #divCalculatorMainOutput {
   overflow: auto;
   vertical-align: top;
+  flex-grow: 0;
+  flex-shrink: 0;
+  max-height: fit-content;
+
 }
 
 .sliderStandard {

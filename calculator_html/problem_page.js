@@ -427,8 +427,7 @@ class Problem {
   }
 
   initializeProblemContent(problemData) {
-    let page = window.calculator.mainPage;
-    const isLoggedIn = page.user.flagLoggedIn;
+    const isLoggedIn = globalUser.flagLoggedIn;
     if (pathnames.standardResponses.isNotLoggedInResponse(problemData)) {
       this.title = "";
       this.decodedProblem = "Not logged in. Please select practice mode or login.";
@@ -492,17 +491,16 @@ class Problem {
     /** @type {boolean} */
     includeRandomSeed,
   ) {
-    let page = window.calculator.mainPage;
     let exerciseType = pathnames.urlFields.exerciseJSON;
-    if (isScoredQuiz && !page.user.flagDatabaseInactiveEveryoneIsAdmin) {
+    if (isScoredQuiz && !globalUser.flagDatabaseInactiveEveryoneIsAdmin) {
       exerciseType = pathnames.urlFields.scoredQuizJSON;
     }
     let requestJSON = {
-      currentPage: page.pages.problemPage.name,
+      currentPage: "problemPage",
       exerciseType: exerciseType,
       problemFileName: this.fileName,
-      courseHome: page.storage.variables.currentCourse.courseHome.getValue(),
-      topicList: page.storage.variables.currentCourse.topicList.getValue(),
+      courseHome: storage.variables.currentCourse.courseHome.getValue(),
+      topicList: storage.variables.currentCourse.topicList.getValue(),
     };
     if (
       includeRandomSeed &&
@@ -514,16 +512,15 @@ class Problem {
     } else {
       requestJSON["randomSeed"] = "";
     }
-    let stringifiedHash = page.storage.getPercentEncodedURL(requestJSON);
+    let stringifiedHash = storage.getPercentEncodedURL(requestJSON);
     return stringifiedHash;
   }
 
   getCalculatorURLFileCourseTopics() {
-    let page = window.calculator.mainPage;
     return this.getCalculatorURLInput(
       this.fileName,
-      page.storage.variables.currentCourse.courseHome.getValue(),
-      page.storage.variables.currentCourse.topicList.getValue(),
+      storage.variables.currentCourse.courseHome.getValue(),
+      storage.variables.currentCourse.topicList.getValue(),
     );
   }
 
@@ -541,13 +538,12 @@ class Problem {
     /** @type {boolean} */
     isScoredQuiz,
   ) {
-    let page = window.calculator.mainPage;
     let result = "";
     if (isScoredQuiz === undefined) {
       isScoredQuiz = this.flagForReal;
     }
     result += `${pathnames.urlFields.request}=`;
-    if (isScoredQuiz && !page.user.flagDatabaseInactiveEveryoneIsAdmin) {
+    if (isScoredQuiz && !globalUser.flagDatabaseInactiveEveryoneIsAdmin) {
       result += pathnames.urlFields.scoredQuizJSON;
     } else {
       result += pathnames.urlFields.exerciseJSON;
@@ -765,7 +761,7 @@ class Problem {
   getEditPanel() {
     return editPage.getEditPanel(
       decodeURIComponent(this.problemId),
-      this.hasInstructorRightsNotViewingAsStudent(),
+      globalUser.hasInstructorRightsNotViewingAsStudent(),
       true,
     );
   }
@@ -932,7 +928,6 @@ class Problem {
   getHTMLOneProblemTr(
     outputRow,
   ) {
-    let page = window.calculator.mainPage;
     let nextCell = outputRow.insertCell(- 1);
     nextCell.className = "topicListTitle";
     miscellaneous.writeHTML(
@@ -945,7 +940,7 @@ class Problem {
     nextCell = outputRow.insertCell(- 1);
     nextCell.className = "topicListPracticeQuiz";
     if (this.fileName !== "") {
-      if (page.user.flagLoggedIn) {
+      if (globalUser.flagLoggedIn) {
         let nextElement = document.createElement("a");
         nextElement.className = "problemLinkQuiz";
         nextElement.href = "#" + this.getAppAnchorRequestFileCourseTopics(true);
@@ -1014,21 +1009,15 @@ class Problem {
       });
   }
 
-  hasInstructorRightsNotViewingAsStudent() {
-    let page = window.calculator.mainPage;
-    return page.hasInstructorRightsNotViewingAsStudent();
-  }
-
   /** @return {HTMLElement} */
   toHTMLDeadlineElement() {
-    let page = window.calculator.mainPage;
     let result = document.createElement("span");
-    if (page.hasInstructorRightsNotViewingAsStudent()) {
+    if (globalUser.hasInstructorRightsNotViewingAsStudent()) {
       result.textContent = "Deadlines";
       return result;
     }
-    if (page.user.hasInstructorRights() && page.studentView()) {
-      let sectionIndex = page.storage.variables.currentSectionComputed.getValue();
+    if (globalUser.hasInstructorRights() && globalUser.studentView()) {
+      let sectionIndex = storage.variables.currentSectionComputed.getValue();
       this.deadlineString = this.deadlines[sectionIndex];
     }
     if (
@@ -1097,10 +1086,9 @@ class Problem {
 
   /** @return {HTMLElement} */
   toHTMLDeadlinePanel() {
-    let page = window.calculator.mainPage;
     let result = document.createElement("span");
     result.textContent = "";
-    if (!page.user.hasInstructorRights() || page.studentView()) {
+    if (!globalUser.hasInstructorRights() || globalUser.studentView()) {
       result.appendChild(this.toHTMLDeadlineElement());
       return result;
     }
@@ -1129,10 +1117,10 @@ class Problem {
     deadline.textContent = "Deadline";
     headerRow.appendChild(group);
     headerRow.appendChild(deadline);
-    for (let i = 0; i < page.user.sectionsTaught.length; i++) {
+    for (let i = 0; i < globalUser.sectionsTaught.length; i++) {
       let row = table.insertRow();
       let cell = row.insertCell();
-      cell.textContent = page.user.sectionsTaught[i];
+      cell.textContent = globalUser.sectionsTaught[i];
       let inputCell = row.insertCell();
       let input = document.createElement("input");
       input.type = "date";
@@ -1200,8 +1188,11 @@ class Problem {
       weight: incomingPoints
     };
     let url = "";
-    url += `${pathnames.urls.calculatorAPI}?`;
-    url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemWeight}&`;
+    const api = pathnames.urls.calculatorAPI;
+    const request = pathnames.urlFields.request;
+    const problemWeightQuery = pathnames.urlFields.requests.setProblemWeight;
+    url += `${api}?`;
+    url += `${request}=${problemWeightQuery}&`;
     url += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(modifyObject))}`;
     submitRequests.submitGET({
       url: url,
@@ -1212,12 +1203,11 @@ class Problem {
 
   /** @return {HTMLElement[]} */
   getProblemWeightContent() {
-    let page = window.calculator.mainPage;
     if (this.type !== "Problem" || this.fileName === "") {
       return [];
     }
     let content = document.createElement("span");
-    if (!page.user.hasInstructorRights() || page.studentView()) {
+    if (!globalUser.hasInstructorRights() || globalUser.studentView()) {
       miscellaneous.writeHTML(content, this.toStringProblemWeight());
       return [content];
     }
@@ -1282,8 +1272,11 @@ class Problem {
         result += ` = ? pts`;
       }
     }
-    let page = window.calculator.mainPage;
-    if (page.user.hasInstructorRights() && !page.studentView() && result === "") {
+    if (
+      globalUser.hasInstructorRights() &&
+      !globalUser.studentView() &&
+      result === ""
+    ) {
       result = "modify";
     }
     return `<b style = "color:${color}">${result}</b>`;
@@ -1304,13 +1297,15 @@ class Problem {
     query
   ) {
     if (linkSpec.adminView === true) {
-      let studentView = storage.variables.flagStudentView.getValue();
+      let studentView = globalUser.studentView();
       if (studentView !== false && studentView !== "false") {
         return null;
       }
     }
+    const api = pathnames.urls.calculatorAPI;
+    const request = pathnames.urlFields.request;
     let href = "";
-    href += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${linkSpec.request}&`;
+    href += `${api}?${request}=${linkSpec.request}&`;
     href += `${query}&${linkSpec.options}`;
     let result = document.createElement("a");
     result.className = "slidesLink";
@@ -1444,7 +1439,9 @@ class ProblemNavigation {
     this.editPanel.textContent = "";
     this.editPanel.appendChild(this.currentProblem.getEditPanel());
     if (!this.flagProblemPageOnly) {
-      this.currentProblem.getProblemNavigation(this.problemNavigationSubpanel)
+      this.currentProblem.getProblemNavigation(
+        this.problemNavigationSubpanel
+      );
     }
   }
 }
@@ -1542,12 +1539,8 @@ function getHTMLfromTopics() {
 
 function initializeDatePickers() {
   let pickers = document.getElementsByClassName("datePicker");
-  for (
-    let counterPicker = 0;
-    counterPicker < pickers.length;
-    counterPicker++
-  ) {
-    datePicker.createDatePicker(pickers[counterPicker]);
+  for (let i = 0; i < pickers.length; i++) {
+    datePicker.createDatePicker(pickers[i]);
   }
 }
 
@@ -1563,17 +1556,16 @@ function initializeProblemWeightsAndDeadlines() {
 }
 
 function writeEditCoursePagePanel() {
-  let page = window.calculator.mainPage;
   let panel = document.getElementById(ids.domElements.courseEditPanel);
   panel.textContent = "";
-  let courseHome = page.storage.variables.currentCourse.courseHome.getValue()
+  let courseHome = storage.variables.currentCourse.courseHome.getValue()
   const courseHomePanel = editPage.getEditPanel(
-    courseHome, page.hasInstructorRightsNotViewingAsStudent(), false,
+    courseHome, globalUser.hasInstructorRightsNotViewingAsStudent(), false,
   );
   panel.appendChild(courseHomePanel);
-  let topicList = page.storage.variables.currentCourse.topicList.getValue();
+  let topicList = storage.variables.currentCourse.topicList.getValue();
   const topicListPanel = editPage.getEditPanel(
-    topicList, page.hasInstructorRightsNotViewingAsStudent(), false,
+    topicList, globalUser.hasInstructorRightsNotViewingAsStudent(), false,
   );
   panel.appendChild(topicListPanel);
   if (
@@ -1591,7 +1583,7 @@ function writeEditCoursePagePanel() {
     let nextToEdit = allProblems.topics.topicBundleFile[i];
     const nextToEditPanel = editPage.getEditPanel(
       nextToEdit,
-      page.hasInstructorRightsNotViewingAsStudent(),
+      globalUser.hasInstructorRightsNotViewingAsStudent(),
       false
     );
     panel.appendChild(nextToEditPanel);

@@ -79,6 +79,14 @@ class User {
     );
     userName.value = storage.variables.user.name.value;
   }
+
+  studentView() {
+    return storage.variables.flagStudentView.isTrue();
+  }
+
+  hasInstructorRightsNotViewingAsStudent() {
+    return this.hasInstructorRights() && !this.studentView();
+  }
 }
 
 const globalUser = new User();

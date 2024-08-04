@@ -482,11 +482,11 @@ class Page {
   }
 
   hasInstructorRightsNotViewingAsStudent() {
-    return this.user.hasInstructorRights() && !this.studentView();
+    return this.user.hasInstructorRightsNotViewingAsStudent();
   }
 
   studentView() {
-    return this.storage.variables.flagStudentView.isTrue();
+    return this.user.studentView()
   }
 
   onStudentViewChange() {

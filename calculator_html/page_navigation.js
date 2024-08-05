@@ -360,7 +360,11 @@ class Page {
     if (this.storage.variables.currentPage.getValue() === this.pages.activateAccount.name) {
       return false;
     }
-    if (document.getElementById(ids.domElements.pages.login.divLoginCalculatorPanel) === null) {
+    if (
+      document.getElementById(
+        ids.domElements.pages.login.divLoginCalculatorPanel
+      ) === null
+    ) {
       return false;
     }
     return true;
@@ -414,11 +418,7 @@ class Page {
     mathTypeSet.typesetter.typesetSoft(
       ids.domElements.divMathjaxProblematicRender
     );
-    document.getElementById(
-      ids.domElements.sliderStudentView
-    ).addEventListener('change', () => {
-      this.setSwitchStudentView();
-    });
+    this.initializeStudentViewSlider();
   }
 
   sectionSelect(sectionNumber) {
@@ -461,7 +461,9 @@ class Page {
     }
     let debugOn = sliderDebug.checked;
     problemPage.allProblems.flagLoaded = false;
-    let debugSpan = document.getElementById(ids.domElements.spanDebugFlagToggleReport);
+    let debugSpan = document.getElementById(
+      ids.domElements.spanDebugFlagToggleReport
+    );
     if (debugOn) {
       storage.variables.flagDebug.setAndStore("true");
       solve.solver.setDebugLogContainer();
@@ -473,11 +475,27 @@ class Page {
     }
   }
 
+  initializeStudentViewSlider() {
+    let studentView = this.storage.variables.flagStudentView.isTrue();
+    let slider = document.getElementById(ids.domElements.sliderStudentView);
+    if (slider === null) {
+      return;
+    }
+    slider.checked = studentView;
+    slider.addEventListener('change', () => {
+      this.setSwitchStudentView();
+    });
+    this.onStudentViewChange();
+  }
+
   setSwitchStudentView() {
-    let sliderStudentView = document.getElementById(ids.domElements.sliderStudentView);
-    this.storage.variables.flagStudentView.setAndStore(sliderStudentView.checked);
-    problemPage.allProblems.flagLoaded = false;
-    this.selectPage(this.storage.variables.currentPage.getValue());
+    let sliderStudentView = document.getElementById(
+      ids.domElements.sliderStudentView
+    );
+    this.storage.variables.flagStudentView.setAndStore(
+      sliderStudentView.checked
+    );
+    this.onStudentViewChange();
   }
 
   hasInstructorRightsNotViewingAsStudent() {
@@ -490,17 +508,15 @@ class Page {
 
   onStudentViewChange() {
     let studentView = this.storage.variables.flagStudentView.isTrue();
-    let slider = document.getElementById(ids.domElements.sliderStudentView);
-    if (slider === null) {
-      return;
-    }
-    slider.checked = studentView;
 
-    let spanView = document.getElementById(ids.domElements.spanStudentViewFlagToggleReport);
+    let spanView = document.getElementById(
+      ids.domElements.spanStudentViewFlagToggleReport
+    );
     let radioPanel = document.getElementById(
       ids.domElements.spanStudentViewSectionSelectPanel
     );
     radioPanel.textContent = '';
+    problemPage.allProblems.flagLoaded = false;
     if (studentView) {
       spanView.textContent = "Student view";
       for (let i = 0; i < this.user.sectionsTaught.length; i++) {
@@ -516,7 +532,9 @@ class Page {
         });
         radioPanel.appendChild(input);
 
-        let counterFromStorage = parseInt(this.storage.variables.currentSectionComputed.getValue());
+        let counterFromStorage = parseInt(
+          this.storage.variables.currentSectionComputed.getValue()
+        );
         if (i === counterFromStorage) {
           input.checked = true;
         }
@@ -527,8 +545,15 @@ class Page {
     } else {
       spanView.textContent = "Admin view";
     }
-    login.resetPagesNeedingReload();
+    this.resetPagesNeedingReload();
     login.setAdminPanels();
+    this.selectPage(this.storage.variables.currentPage.getValue());
+  }
+
+  resetPagesNeedingReload() {
+    selectCourse.courseSelector.needsLoad = true;
+    coursePage.lastLoadedCourse.courseHome = null;
+    coursePage.lastLoadedCourse.topicList = null;
   }
 
   removeOneScript(scriptId) {
@@ -602,13 +627,17 @@ class Page {
   }
 
   getProblemById(label) {
-    let element = document.getElementById(ids.domElements.problemPageContentContainer);
+    let element = document.getElementById(
+      ids.domElements.problemPageContentContainer
+    );
     return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label, element);
   }
 
   /** @return {HTMLButtonElement} */
   pauseButton() {
-    return document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle);
+    return document.getElementById(
+      ids.domElements.pages.calculator.monitoring.buttonPauseToggle
+    );
   }
 
   toggleWebAssembly() {
@@ -626,20 +655,35 @@ class Page {
     if (webAssembly !== "true") {
       webAssembly = "false";
     }
-    let webAssemblyStatus = document.getElementById(ids.domElements.switch.spanWebAssemblyStatus);
-    let webAssemblySlider = document.getElementById(ids.domElements.switch.sliderWebAssembly);
+    let webAssemblyStatus = document.getElementById(
+      ids.domElements.switch.spanWebAssemblyStatus
+    );
+    let webAssemblySlider = document.getElementById(
+      ids.domElements.switch.sliderWebAssembly
+    );
     if (webAssemblyStatus === null) {
       return;
     }
-    let buttonGo = document.getElementById(ids.domElements.pages.calculator.buttonGoCalculatorPage);
+    let buttonGo = document.getElementById(
+      ids.domElements.pages.calculator.buttonGoCalculatorPage
+    );
 
     if (webAssembly === "true") {
       webAssemblySlider.checked = true;
-      miscellaneous.writeHTML(webAssemblyStatus, "Web assembly <b style='color:red'>ON</b>");
-      miscellaneous.writeHTML(buttonGo, "Go <b style='color:red'>wasm</b>");
+      miscellaneous.writeHTML(
+        webAssemblyStatus,
+        "Web assembly <b style='color:red'>ON</b>"
+      );
+      miscellaneous.writeHTML(
+        buttonGo,
+        "Go <b style='color:red'>wasm</b>"
+      );
     } else {
       webAssemblySlider.checked = false;
-      miscellaneous.writeHTML(webAssemblyStatus, "Web assembly <b style='color:green'>off</b>");
+      miscellaneous.writeHTML(
+        webAssemblyStatus,
+        "Web assembly <b style='color:green'>off</b>"
+      );
       buttonGo.textContent = "Go";
     }
   }
@@ -657,7 +701,9 @@ class Page {
 
   setMonitoringComponent() {
     let monitoringStorage = this.storage.variables.calculator.monitoring;
-    let monitoring = document.getElementById(ids.domElements.switch.monitoring).checked;
+    let monitoring = document.getElementById(
+      ids.domElements.switch.monitoring
+    ).checked;
     if (monitoring) {
       monitoringStorage.setAndStore("true");
     } else {
@@ -671,9 +717,15 @@ class Page {
     }
     let pauseButton = this.pauseButton();
     if (monitoring) {
-      miscellaneous.writeHTML(monitorResult, "Monitor <b style='color:red'>on</b>");
+      miscellaneous.writeHTML(
+        monitorResult,
+        "Monitor <b style='color:red'>on</b>"
+      );
     } else {
-      miscellaneous.writeHTML(monitorResult, "Monitor <b style='color:green'>off</b>");
+      miscellaneous.writeHTML(
+        monitorResult,
+        "Monitor <b style='color:green'>off</b>"
+      );
       pauseButton.style.display = "none";
     }
   }

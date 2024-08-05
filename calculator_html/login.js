@@ -107,7 +107,7 @@ class Authenticator {
     let success = false;
     let loginErrorMessage = "";
     let parsedAuthentication = JSON.parse(incomingString);
-    resetPagesNeedingReload();
+    this.mainPage.resetPagesNeedingReload();
     if (pathnames.standardResponses.isLoggedInResponse(
       parsedAuthentication
     )) {
@@ -123,8 +123,8 @@ class Authenticator {
     ) {
       parsedAuthentication[pathnames.urlFields.username] = "anonymous";
       parsedAuthentication[pathnames.urlFields.userRole] = "admin";
-      loginInfo += "<b style = 'color:red'>DB inactive," +
-        "<br>everyone is admin.</b>";
+      loginInfo += "<b style = 'color:red'>DB inactive,";
+      loginInfo += "<br>everyone is admin.</b>";
       success = true;
       globalUser.flagDatabaseInactiveEveryoneIsAdmin = true;
     }
@@ -149,7 +149,9 @@ class Authenticator {
       }
       loginInfo += "<b style='color:red'>Https off.</b>";
     }
-    let database = parsedAuthentication[pathnames.urlFields.requests.database];
+    let database = parsedAuthentication[
+      pathnames.urlFields.requests.database
+    ];
     if (database === undefined || database === null) {
       database = "?";
     }
@@ -170,11 +172,12 @@ class Authenticator {
     );
     miscellaneous.writeHTML(loginInfoComponent, loginInfo);
     if (success) {
-      this.mainPage.user.makeFromUserInfo(parsedAuthentication);
+      globalUser.makeFromUserInfo(parsedAuthentication);
       toggleAccountPanels();
       setAdminPanels();
       hideLoginCalculatorButtons();
       showLogoutButton();
+      this.mainPage.onStudentViewChange();
     } else if (pathnames.standardResponses.isNotLoggedInResponse(
       parsedAuthentication
     )) {
@@ -308,21 +311,29 @@ class Authenticator {
     url += `googleToken=${token}&`;
     submitRequests.submitGET({
       url: url,
-      callback: loginWithServerCallback,
+      callback: (input, output) => {
+        this.loginWithServerCallback(input, output);
+      },
+      progress: ids.domElements.spanProgressReportGeneral
+    });
+  }
+
+  loginTry() {
+    const api = pathnames.urls.calculatorAPI;
+    const request = pathnames.urlFields.request;
+    const userInfoJson = pathnames.urlFields.requests.userInfoJSON;
+    submitRequests.submitGET({
+      url: `${api}?${request}=${userInfoJson}`,
+      callback: (input, output) => {
+        this.loginWithServerCallback(input, output);
+      },
       progress: ids.domElements.spanProgressReportGeneral
     });
   }
 }
 
 function loginTry() {
-  const api = pathnames.urls.calculatorAPI;
-  const request = pathnames.urlFields.request;
-  const userInfoJson = pathnames.urlFields.requests.userInfoJSON;
-  submitRequests.submitGET({
-    url: `${api}?${request}=${userInfoJson}`,
-    callback: loginWithServerCallback,
-    progress: ids.domElements.spanProgressReportGeneral
-  });
+  authenticator.loginTry();
 }
 
 function toggleAccountPanels() {
@@ -340,16 +351,6 @@ function toggleAccountPanels() {
 
 function setAdminPanels() {
   authenticator.setAdminPanels();
-}
-
-function resetPagesNeedingReload() {
-  window.calculator.selectCourse.courseSelector.needsLoad = true;
-  window.calculator.coursePage.lastLoadedCourse.courseHome = null;
-  window.calculator.coursePage.lastLoadedCourse.topicList = null;
-}
-
-function loginWithServerCallback(incomingString, result) {
-  authenticator.loginWithServerCallback(incomingString);
 }
 
 function onGoogleSignIn(googleUser) {
@@ -416,7 +417,6 @@ function hideLogoutButton() {
 let authenticator = new Authenticator();
 
 module.exports = {
-  resetPagesNeedingReload,
   loginTry,
   setAdminPanels,
   onGoogleSignIn,

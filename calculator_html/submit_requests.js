@@ -116,7 +116,9 @@ class RequestWithProgress {
     this.isPost = isPost;
     this.progress = progress;
     if (this.progress === null || this.progress === undefined) {
-      this.progress = document.getElementById(ids.domElements.spanProgressReportGeneral);
+      this.progress = document.getElementById(
+        ids.domElements.spanProgressReportGeneral
+      );
     }
     this.output = output;
     this.callback = callback;
@@ -162,7 +164,10 @@ class RequestWithProgress {
     this.sendPrepare();
     this.storedParameters = parameters;
     this.xhr.open("POST", this.address, true);
-    this.xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    this.xhr.setRequestHeader(
+      "Content-type",
+      "application/x-www-form-urlencoded"
+    );
     if (typeof parameters === "string") {
       this.details = `POST ${this.address}<br>message: ${miscellaneous.shortenString(200, parameters)}`;
     }
@@ -277,7 +282,20 @@ class RequestWithProgress {
  *   Pass null or undefined if you don't want to show the result.
  */
 function submitGET(
-  /** @type {{url: string, callback: Function, progress: string, result: HTMLElement|string, panelOptions:{dontCollapsePanel:boolean, width:number}}} */
+  /** 
+   * @type {
+   * {
+   * url: string, 
+   * callback: Function, 
+   * progress: string, 
+   * result: HTMLElement|string, 
+   * panelOptions:{
+   * dontCollapsePanel:boolean, 
+   * width:number
+   * }
+   * }
+   * } 
+   */
   inputObject,
 ) {
   let address = correctAddress(inputObject.url);

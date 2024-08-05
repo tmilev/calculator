@@ -2781,6 +2781,52 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   return out.str();
 }
 
+void ProblemData::readExpectedNumberOfAnswersFromDatabase(
+  std::stringstream& commentsOnFailure
+) {
+  STACK_TRACE("ProblemData::readExpectedNumberOfAnswersFromDatabase");
+  if (global.problemExpectedNumberOfAnswers.size() != 0) {
+    // Expected number of answers is already computed.
+    return;
+  }
+  List<JSData> result;
+  QueryResultOptions options;
+  options.fieldsToProjectTo.addOnTop(DatabaseStrings::labelProblemFileName);
+  options.fieldsToProjectTo.addOnTop(
+    DatabaseStrings::labelProblemTotalQuestions
+  );
+  QueryExact findProblemInfo;
+  findProblemInfo.collection = DatabaseStrings::tableProblemInformation;
+  if (
+    !Database::get().find(
+      findProblemInfo, &options, result, &commentsOnFailure
+    )
+  ) {
+    return;
+  }
+  for (int i = 0; i < result.size; i ++) {
+    const std::string& currentProblemName =
+    result[i][DatabaseStrings::labelProblemFileName].stringValue;
+    if (currentProblemName == "") {
+      continue;
+    }
+    const std::string& expectedNumberOfAnswersString =
+    result[i][DatabaseStrings::labelProblemTotalQuestions].stringValue;
+    if (expectedNumberOfAnswersString == "") {
+      continue;
+    }
+    std::stringstream stringStream(expectedNumberOfAnswersString);
+    int numberOfAnswers = - 1;
+    stringStream >> numberOfAnswers;
+    if (numberOfAnswers == - 1) {
+      continue;
+    }
+    global.problemExpectedNumberOfAnswers.setKeyValue(
+      currentProblemName, numberOfAnswers
+    );
+  }
+}
+
 int ProblemData::getExpectedNumberOfAnswers(
   const std::string& problemName, std::stringstream& commentsOnFailure
 ) {
@@ -2788,43 +2834,7 @@ int ProblemData::getExpectedNumberOfAnswers(
   if (this->knownNumberOfAnswersFromHD != - 1) {
     return this->knownNumberOfAnswersFromHD;
   }
-  if (global.problemExpectedNumberOfAnswers.size() == 0) {
-    List<JSData> result;
-    QueryResultOptions options;
-    options.fieldsToProjectTo.addOnTop(DatabaseStrings::labelProblemFileName);
-    options.fieldsToProjectTo.addOnTop(
-      DatabaseStrings::labelProblemTotalQuestions
-    );
-    QueryExact findProblemInfo;
-    findProblemInfo.collection = DatabaseStrings::tableProblemInformation;
-    if (
-      Database::get().find(
-        findProblemInfo, &options, result, &commentsOnFailure
-      )
-    ) {
-      for (int i = 0; i < result.size; i ++) {
-        const std::string& currentProblemName =
-        result[i][DatabaseStrings::labelProblemFileName].stringValue;
-        if (currentProblemName == "") {
-          continue;
-        }
-        const std::string& expectedNumberOfAnswersString =
-        result[i][DatabaseStrings::labelProblemTotalQuestions].stringValue;
-        if (expectedNumberOfAnswersString == "") {
-          continue;
-        }
-        std::stringstream stringStream(expectedNumberOfAnswersString);
-        int numberOfAnswers = - 1;
-        stringStream >> numberOfAnswers;
-        if (numberOfAnswers == - 1) {
-          continue;
-        }
-        global.problemExpectedNumberOfAnswers.setKeyValue(
-          currentProblemName, numberOfAnswers
-        );
-      }
-    }
-  }
+  this->readExpectedNumberOfAnswersFromDatabase(commentsOnFailure);
   if (global.problemExpectedNumberOfAnswers.contains(problemName)) {
     return
     global.problemExpectedNumberOfAnswers.getValueCreate(problemName, 0);
@@ -2875,7 +2885,12 @@ int ProblemData::getExpectedNumberOfAnswers(
   newDatabaseEntry[DatabaseStrings::labelProblemTotalQuestions] =
   stringConverter.str();
   QuerySet updateQuery;
-  updateQuery.fromJSONNoFail(newDatabaseEntry);
+  updateQuery.addKeyValueStringPair(
+    DatabaseStrings::labelProblemTotalQuestions, stringConverter.str()
+  );
+  updateQuery.addKeyValueStringPair(
+    DatabaseStrings::labelProblemFileName, problemName
+  );
   Database::get().updateOne(
     findEntry, updateQuery, true, &commentsOnFailure
   );

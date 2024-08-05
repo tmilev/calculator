@@ -228,6 +228,9 @@ public:
   int getExpectedNumberOfAnswers(
     const std::string& problemName, std::stringstream& commentsOnFailure
   );
+  void readExpectedNumberOfAnswersFromDatabase(
+    std::stringstream& commentsOnFailure
+  );
   ProblemData();
   bool checkConsistency() const;
   bool checkConsistencyMathIds() const;

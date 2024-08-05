@@ -27,6 +27,7 @@ class ProblemCollection {
     this.topics = {};
     this.flagLoaded = false;
     this.mainPage = null;
+    this.lastKnownGoodProblemFileName = "";
   }
 
   initialize(mainPage) {
@@ -247,6 +248,7 @@ class Problem {
     this.title = "";
     /** @type {string} */
     this.randomSeed = "";
+    this.flagProblemPageOnly = false;
   }
 
   setRandomSeed(input) {
@@ -287,7 +289,7 @@ class Problem {
     ) {
       this.fileName = "";
     }
-    if (window.calculator.mainPage.flagProblemPageOnly) {
+    if (this.flagProblemPageOnly) {
       this.flagForReal = false;
     } else {
       this.setRandomSeedFromEnvironment();
@@ -395,22 +397,20 @@ class Problem {
   /** @return {HTMLElement[]} */
   computeBadProblemExplanation() {
     let userHasInstructorRights = true;
-    let pageLastKnownGoodProblemName = "";
     let page = window.calculator.mainPage;
-    if (!page.flagProblemPageOnly) {
+    if (!this.flagProblemPageOnly) {
       userHasInstructorRights = page.user.hasInstructorRights();
     }
     this.badProblemExplanation = [];
     if (!this.decodedProblem.includes(
       pathnames.urlFields.problem.failedToLoadProblem
     )) {
-      page.lastKnownGoodProblemFileName = this.fileName;
+      allProblems.lastKnownGoodProblemFileName = this.fileName;
       return;
     }
-    pageLastKnownGoodProblemName = page.lastKnownGoodProblemFileName;
     let badProblemExplanationPartOne = document.createElement("div");
     let html = "It appears your problem failed to load.<br>";
-    if (this.lastKnownGoodProblemFileName !== "" && userHasInstructorRights) {
+    if (allProblems.lastKnownGoodProblemFileName !== "" && userHasInstructorRights) {
       html += "Perhaps you may like to clone the last good known problem.<br>";
     }
     miscellaneous.writeHTML(badProblemExplanationPartOne, html);
@@ -418,7 +418,7 @@ class Problem {
     miscellaneousFrontend.appendHtmlToArray(
       this.badProblemExplanation,
       editPage.getClonePanel(
-        pageLastKnownGoodProblemName,
+        allProblems.lastKnownGoodProblemFileName,
         this.fileName
       ),
     );
@@ -652,7 +652,9 @@ class Problem {
     previousLink.className = hints.linkType;
     miscellaneous.writeHTML(previousLink, "&#8592;");
     if (enabled) {
-      let previousProblem = allProblems.getProblemById(this.previousProblemId);
+      let previousProblem = allProblems.getProblemById(
+        this.previousProblemId
+      );
       let previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(
         hints.isScoredQuiz, false,
       );
@@ -688,7 +690,11 @@ class Problem {
   getProblemNavigationContent() {
     let result = [];
     let hints = this.getProblemNavigationHints();
-    result.push(this.getPreviousProblemButton(hints));
+    // When the title is empty, the problem 
+    // is not attached to the current course.
+    if (this.title !== "") {
+      result.push(this.getPreviousProblemButton(hints));
+    }
     if (this.flagForReal) {
       let practiceURL = this.getAppAnchorRequestFileCourseTopics(false, false);
       let practiceTag = document.createElement("a");
@@ -732,7 +738,9 @@ class Problem {
         result.push(quizTag);
       }
     }
-    result.push(this.getNextProblemButton(hints));
+    if (this.title !== "") {
+      result.push(this.getNextProblemButton(hints));
+    }
     if (this.flagForReal !== true && this.flagForReal !== "true") {
       let scoresTag = document.createElement("b");
       scoresTag.style.color = "green";
@@ -1380,6 +1388,10 @@ class ProblemNavigation {
     this.writeToHTML();
   }
 
+  problemHasTitle() {
+    return this.currentProblem.title !== ""
+  }
+
   writeToHTML() {
     if (this.currentProblem === null) {
       return;
@@ -1402,9 +1414,16 @@ class ProblemNavigation {
         document.createTextNode(this.currentProblem.problemLabel)
       );
     }
-    problemTitleContainer.appendChild(
-      document.createTextNode(this.currentProblem.title)
-    );
+    if (this.problemHasTitle()) {
+      problemTitleContainer.appendChild(
+        document.createTextNode(this.currentProblem.title)
+      );
+    } else {
+      const title = document.createElement("b");
+      title.textContent = "Problem not part of the current course.";
+      title.style.color = "orange";
+      problemTitleContainer.appendChild(title);
+    }
     this.infoBar.textContent = "";
     this.problemNavigationSubpanel = document.createElement("div")
     this.problemNavigationSubpanel.className = 'problemNavigation';

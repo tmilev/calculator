@@ -343,7 +343,7 @@ function setAdminPanels() {
 }
 
 function resetPagesNeedingReload() {
-  window.calculator.selectCourse.pageSetup.needsLoad = true;
+  window.calculator.selectCourse.courseSelector.needsLoad = true;
   window.calculator.coursePage.lastLoadedCourse.courseHome = null;
   window.calculator.coursePage.lastLoadedCourse.topicList = null;
 }

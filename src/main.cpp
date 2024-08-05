@@ -291,7 +291,7 @@ bool ArgumentAnalyzer::processOneArgument() {
 }
 
 void MainFunctions::analyzeMainArguments(int argC, char** argv) {
-  STACK_TRACE("WebServer::analyzeMainArguments");
+  STACK_TRACE("MainFunctions::analyzeMainArguments");
   global.configurationCommandLine.reset(JSData::Type::tokenObject);
   if (argC < 0) {
     argC = 0;

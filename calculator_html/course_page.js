@@ -6,8 +6,9 @@ const problemPage = require("./problem_page");
 const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous_frontend");
 const storage = require("./storage").storage;
+const globalUser = require("./user").globalUser;
 
-class CourseSelector {
+class CoursePage {
   constructor() {
     this.mainPage = null;
   }
@@ -15,17 +16,23 @@ class CourseSelector {
     this.mainPage = mainPage;
   }
   selectCurrentCoursePage() {
-    let storageVariables = storage.variables;
-    let incomingCourse = storageVariables.currentCourse.courseHome.getValue();
-    let incomingTopicList = storageVariables.currentCourse.topicList.getValue();
+    let currentCourse = storage.variables.currentCourse;
+    let incomingCourse = currentCourse.courseHome.getValue();
+    let incomingTopicList = currentCourse.topicList.getValue();
     if (
       incomingCourse === null ||
       incomingCourse === "" ||
       incomingCourse === undefined
     ) {
-      let courseBody = document.getElementById(ids.domElements.divCurrentCourseBody);
+      let courseBody = document.getElementById(
+        ids.domElements.divCurrentCourseBody
+      );
       let button = document.createElement("button");
-      button.classList.add("buttonSelectPage", "buttonSlowTransition", "buttonFlash");
+      button.classList.add(
+        "buttonSelectPage",
+        "buttonSlowTransition",
+        "buttonFlash"
+      );
       button.style.width = "150px";
       button.textContent = "Please select course";
       button.addEventListener("click", () => {
@@ -38,7 +45,10 @@ class CourseSelector {
       courseBody.appendChild(button);
       return;
     }
-    if (lastLoadedCourse.courseHome === incomingCourse && lastLoadedCourse.topicList === incomingTopicList) {
+    if (
+      lastLoadedCourse.courseHome === incomingCourse &&
+      lastLoadedCourse.topicList === incomingTopicList
+    ) {
       return;
     }
     // The lastLoadedCourse variable may be reset on successful login. 
@@ -49,7 +59,8 @@ class CourseSelector {
       topicRequest = "templateJSON";
     }
     let url = "";
-    url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicRequest}&`;
+    const api = pathnames.urls.calculatorAPI;
+    url += `${api}?${pathnames.urlFields.request}=${topicRequest}&`;
     url += `${pathnames.urlFields.problem.courseHome}=${incomingCourse}&`;
     url += `${pathnames.urlFields.problem.topicList}=${incomingTopicList}`;
     submitRequests.submitGET({
@@ -61,7 +72,6 @@ class CourseSelector {
 }
 
 function modifyDeadlines(incomingId) {
-  let page = window.calculator.mainPage;
   let nameDatePicker = `datePicker${incomingId}`;
   let dates = document.getElementsByName(nameDatePicker);
   let jsonToSubmit = {};
@@ -71,13 +81,15 @@ function modifyDeadlines(incomingId) {
   };
 
   for (let i = 0; i < dates.length; i++) {
-    let currentSection = page.user.sectionsTaught[i];
+    let currentSection = globalUser.sectionsTaught[i];
     jsonToSubmit[idDecoded].deadlines[currentSection] = dates[i].value;
   }
   let url = "";
   url += `${pathnames.urls.calculatorAPI}?`;
-  url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.setProblemDeadline}&`;
-  url += `${pathnames.urlFields.mainInput}=${encodeURIComponent(JSON.stringify(jsonToSubmit))}&`;
+  const setProblemDeadline = pathnames.urlFields.requests.setProblemDeadline;
+  url += `${pathnames.urlFields.request}=${setProblemDeadline}&`;
+  const mainInput = encodeURIComponent(JSON.stringify(jsonToSubmit));
+  url += `${pathnames.urlFields.mainInput}=${mainInput}&`;
   submitRequests.submitGET({
     url: url,
     progress: ids.domElements.spanProgressReportGeneral,
@@ -124,19 +136,31 @@ function toggleProblemWeights() {
     }
   }
   for (let i = 0; i < buttons.length; i++) {
-    let currentProblem = problemPage.allProblems.getProblemById(buttons[i].name);
+    let currentProblem = problemPage.allProblems.getProblemById(
+      buttons[i].name
+    );
     if (!problemWeightsVisible) {
-      miscellaneous.writeHTML(buttons[i], `${currentProblem.toStringProblemWeight()} &#9660;`);
+      miscellaneous.writeHTML(
+        buttons[i],
+        `${currentProblem.toStringProblemWeight()} &#9660;`
+      );
     } else {
-      miscellaneous.writeHTML(buttons[i], `${currentProblem.toStringProblemWeight()} &#9666;`);
+      miscellaneous.writeHTML(
+        buttons[i],
+        `${currentProblem.toStringProblemWeight()} &#9666;`
+      );
     }
   }
   problemWeightsVisible = !problemWeightsVisible;
 }
 
 function afterLoadCoursePage(incoming, result) {
-  let courseBody = document.getElementById(ids.domElements.divCurrentCourseBody);
-  let coursePage = document.getElementById(ids.domElements.divCurrentCourse);
+  let courseBody = document.getElementById(
+    ids.domElements.divCurrentCourseBody
+  );
+  let coursePage = document.getElementById(
+    ids.domElements.divCurrentCourse
+  );
   miscellaneous.writeHTML(
     courseBody,
     miscellaneous.jsonParseGetHtmlStandard(incoming),
@@ -156,15 +180,15 @@ function afterLoadCoursePage(incoming, result) {
 }
 
 function loadTopicList(callback) {
-  let page = window.calculator.mainPage;
   let topicListRequest = "topicListJSONNoLogin";
-  if (page.isLoggedIn()) {
+  if (globalUser.isLoggedIn()) {
     topicListRequest = "topicListJSON";
   }
-  let topicName = page.storage.variables.currentCourse.topicList.getValue();
-  let courseHome = page.storage.variables.currentCourse.courseHome.getValue();
+  let topicName = storage.variables.currentCourse.topicList.getValue();
+  let courseHome = storage.variables.currentCourse.courseHome.getValue();
   let url = "";
-  url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${topicListRequest}&`;
+  const api = pathnames.urls.calculatorAPI;
+  url += `${api}?${pathnames.urlFields.request}=${topicListRequest}&`;
   url += `${pathnames.urlFields.problem.topicList}=${topicName}&`;
   url += `${pathnames.urlFields.problem.courseHome}=${courseHome}&`;
   submitRequests.submitGET({
@@ -180,13 +204,13 @@ let lastLoadedCourse = {
 };
 
 function selectCurrentCoursePage() {
-  courseSelector.selectCurrentCoursePage();
+  coursePage.selectCurrentCoursePage();
 }
 
-const courseSelector = new CourseSelector();
+const coursePage = new CoursePage();
 
 module.exports = {
-  courseSelector,
+  coursePage,
   loadTopicList,
   lastLoadedCourse,
   modifyDeadlines,

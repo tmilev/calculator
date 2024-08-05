@@ -376,7 +376,6 @@ class Page {
     //Initialize global variables
     //////////////////////////////////////
     //////////////////////////////////////
-    this.courses = {};
     this.logoutRequestFromUrl = null;
     this.locationRequestFromUrl = null;
     this.storage.loadSettings();
@@ -388,12 +387,12 @@ class Page {
     accountPage.accountPage.initialize(this);
     editPage.problemEditor.initialize(this);
     database.databasePage.initialize(this);
-    coursePage.courseSelector.initialize(this);
+    coursePage.coursePage.initialize(this);
+    selectCourse.courseSelector.initialize(this);
     problemPage.allProblems.initialize(this);
     this.initializeAccountButtons();
     this.initializeMenuBar();
     this.hashHistory = [];
-    this.lastKnownGoodProblemFileName = "";
     this.user = user.globalUser;
     this.aceEditorAutoCompletionWordList = [];
     this.flagDoSubmitCalculatorComputation = true;

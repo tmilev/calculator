@@ -1,11 +1,11 @@
 #include "calculator_inner_functions.h"
-#include "user.h"
 #include "crypto_calculator.h"
 #include "database.h"
 #include "general_file_operations_encodings.h"
 #include "general_time_date.h"
 #include "network_calculator.h"
 #include "string_constants.h"
+#include "user.h"
 #include "web_client.h"
 #include "webserver.h"
 #include <arpa/inet.h>

@@ -1,9 +1,9 @@
 #include "calculator_problem_storage.h"
-#include "user.h"
 #include "crypto_calculator.h"
 #include "database.h"
 #include "html_routines.h"
 #include "string_constants.h"
+#include "user.h"
 #include "webserver.h"
 
 std::string UserCalculatorData::toStringFindQueries() const {
@@ -958,7 +958,6 @@ bool UserCalculator::storeProblemData(
   this->getFindMeQueryByUsername(query);
   return Database::get().updateOne(query, update, false, commentsOnFailure);
 }
-
 
 bool UserCalculator::getActivationAddress(
   std::string& output, std::stringstream& comments

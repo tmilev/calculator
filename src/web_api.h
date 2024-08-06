@@ -90,28 +90,26 @@ public:
   static JSData clonePageResult();
   static std::string addTeachersSections();
   static std::string addUsersOrEmails(
-      const std::string& hostWebAddressWithPort
-      );
-static  bool addUsersFromData(
-      const std::string& emailList,
-      const std::string& userPasswords,
-      std::string& userRole,
-      std::string& userGroup,
-      int& outputNumberOfNewUsers,
-      int& outputNumberOfUpdatedUsers,
-      std::stringstream* comments
-      );
-
-static  bool addOneUser(
-      const std::string& userNameOrEmail,
-      const std::string& password,
-      std::string& desiredUserRole,
-      std::string& userGroup,
-      int& outputNumberOfNewUsers,
-      int& outputNumberOfUpdatedUsers,
-      std::stringstream* commentsOnFailure
-    );
-
+    const std::string& hostWebAddressWithPort
+  );
+  static bool addUsersFromData(
+    const std::string& emailList,
+    const std::string& userPasswords,
+    std::string& userRole,
+    std::string& userGroup,
+    int& outputNumberOfNewUsers,
+    int& outputNumberOfUpdatedUsers,
+    std::stringstream* comments
+  );
+  static bool addOneUser(
+    const std::string& userNameOrEmail,
+    const std::string& password,
+    std::string& desiredUserRole,
+    std::string& userGroup,
+    int& outputNumberOfNewUsers,
+    int& outputNumberOfUpdatedUsers,
+    std::stringstream* commentsOnFailure
+  );
   static JSData submitAnswersJSON(
     const std::string& inputRandomSeed,
     bool* outputIsCorrect,

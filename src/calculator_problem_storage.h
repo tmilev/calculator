@@ -246,5 +246,4 @@ public:
   std::string toStringAvailableAnswerIds();
 };
 
-
 #endif // header_calculator_problem_storage_ALREADY_INCLUDED

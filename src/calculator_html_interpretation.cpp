@@ -2155,7 +2155,7 @@ std::string WebAPIResponse::addUsersOrEmails(
   int numberOfNewUsers = 0;
   int numberOfUpdatedUsers = 0;
   bool createdUsers =
-      WebAPIResponse::addUsersFromData(
+  WebAPIResponse::addUsersFromData(
     inputEmails,
     userPasswords,
     userRole,

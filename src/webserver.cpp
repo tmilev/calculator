@@ -1,6 +1,5 @@
 #include "calculator_interface.h"
 #include "calculator_problem_storage.h"
-#include "user.h"
 #include "crypto_calculator.h"
 #include "database.h"
 #include "general_file_operations_encodings.h"
@@ -8,6 +7,7 @@
 #include "signals_infrastructure.h"
 #include "string_constants.h"
 #include "system_functions_global_objects.h"
+#include "user.h"
 #include "web_api.h"
 #include "web_client.h"
 #include "webserver.h"
@@ -2154,7 +2154,6 @@ JSData WebWorker::getClonePageResult() {
   this->setHeaderOKNoContentLength("");
   return WebAPIResponse::clonePageResult();
 }
-
 
 std::string WebAPIResponse::modifyProblemReport() {
   STACK_TRACE("WebWorker::modifyProblemReport");

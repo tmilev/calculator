@@ -95,8 +95,8 @@ public:
   static bool addUsersFromData(
     const std::string& emailList,
     const std::string& userPasswords,
-    std::string& userRole,
-    std::string& userGroup,
+    const std::string& userRole,
+    const std::string& userGroup,
     int& outputNumberOfNewUsers,
     int& outputNumberOfUpdatedUsers,
     std::stringstream* comments
@@ -104,8 +104,8 @@ public:
   static bool addOneUser(
     const std::string& userNameOrEmail,
     const std::string& password,
-    std::string& desiredUserRole,
-    std::string& userGroup,
+    const std::string& desiredUserRole,
+    const std::string& userGroup,
     int& outputNumberOfNewUsers,
     int& outputNumberOfUpdatedUsers,
     std::stringstream* commentsOnFailure
@@ -183,6 +183,7 @@ public:
     static bool all();
     static bool solveJSON();
     static bool compareExpressions();
+    static bool addUsersFromData();
   };
 };
 

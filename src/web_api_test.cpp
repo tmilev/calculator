@@ -12,6 +12,7 @@ bool WebAPIResponse::Test::all() {
   WebAPIResponse::Test::scoredQuiz(DatabaseType::internal);
   WebAPIResponse::Test::solveJSON();
   WebAPIResponse::Test::compareExpressions();
+  WebAPIResponse::Test::addUsersFromData();
   return true;
 }
 
@@ -188,6 +189,32 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
       << "Desired answer must be absent but was given. "
       << global.fatal;
     }
+  }
+  return true;
+}
+
+bool WebAPIResponse::Test::addUsersFromData() {
+  STACK_TRACE("WebAPIResponse::Test::addUsersFromData");
+  Database::Test tester(DatabaseType::internal);
+  Database::Test::createAdminAccount();
+  int numberOfNewUsers = 0;
+  int numberOfUpdatedUsers = 0;
+  std::stringstream comments;
+  bool mustBeTrue =
+  WebAPIResponse::addUsersFromData(
+    "student1,student2@example.com",
+    "111,222",
+    "student",
+    "1",
+    numberOfNewUsers,
+    numberOfUpdatedUsers,
+    &comments
+  );
+  if (!mustBeTrue) {
+    global.fatal
+    << "Failed to add users from data: "
+    << comments.str()
+    << global.fatal;
   }
   return true;
 }

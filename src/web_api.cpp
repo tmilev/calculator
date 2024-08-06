@@ -851,8 +851,8 @@ bool WebAPIResponse::processSubmitAnswerHardcoded() {
 bool WebAPIResponse::addUsersFromData(
   const std::string& emailList,
   const std::string& userPasswords,
-  std::string& userRole,
-  std::string& userGroup,
+  const std::string& userRole,
+  const std::string& userGroup,
   int& outputNumberOfNewUsers,
   int& outputNumberOfUpdatedUsers,
   std::stringstream* comments
@@ -921,8 +921,8 @@ bool WebAPIResponse::addUsersFromData(
 bool WebAPIResponse::addOneUser(
   const std::string& userNameOrEmail,
   const std::string& password,
-  std::string& desiredUserRole,
-  std::string& userGroup,
+  const std::string& desiredUserRole,
+  const std::string& userGroup,
   int& outputNumberOfNewUsers,
   int& outputNumberOfUpdatedUsers,
   std::stringstream* commentsOnFailure

@@ -2114,10 +2114,10 @@ std::string WebAPIResponse::addTeachersSections() {
   return out.str();
 }
 
-std::string WebAPIResponse::addUserEmails(
+std::string WebAPIResponse::addUsersOrEmails(
   const std::string& hostWebAddressWithPort
 ) {
-  STACK_TRACE("WebAPIReponse::addUserEmails");
+  STACK_TRACE("WebAPIReponse::addUsersOrEmails");
   (void) hostWebAddressWithPort;
   std::stringstream out;
   if (
@@ -2155,7 +2155,7 @@ std::string WebAPIResponse::addUserEmails(
   int numberOfNewUsers = 0;
   int numberOfUpdatedUsers = 0;
   bool createdUsers =
-  Database::get().user.addUsersFromEmails(
+      WebAPIResponse::addUsersFromData(
     inputEmails,
     userPasswords,
     userRole,

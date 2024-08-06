@@ -583,16 +583,6 @@ public:
     std::stringstream* commentsGeneral,
     std::stringstream* commentsGeneralSensitive
   );
-  // TODO(tmilev): refactor down to database-only operations.
-  bool addUsersFromEmails(
-    const std::string& emailList,
-    const std::string& userPasswords,
-    std::string& userRole,
-    std::string& userGroup,
-    int& outputNumberOfNewUsers,
-    int& outputNumberOfUpdatedUsers,
-    std::stringstream* comments
-  );
   bool loadUserInformation(
     UserCalculatorData& output, std::stringstream* commentsOnFailure
   );

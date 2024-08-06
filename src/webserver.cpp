@@ -1,5 +1,6 @@
 #include "calculator_interface.h"
 #include "calculator_problem_storage.h"
+#include "user.h"
 #include "crypto_calculator.h"
 #include "database.h"
 #include "general_file_operations_encodings.h"
@@ -2154,10 +2155,6 @@ JSData WebWorker::getClonePageResult() {
   return WebAPIResponse::clonePageResult();
 }
 
-std::string WebWorker::getAddUserEmails() {
-  STACK_TRACE("WebWorker::getAddUserEmails");
-  return WebAPIResponse::addUserEmails(this->hostWithPort);
-}
 
 std::string WebAPIResponse::modifyProblemReport() {
   STACK_TRACE("WebWorker::modifyProblemReport");

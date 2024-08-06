@@ -186,7 +186,6 @@ public:
   );
   JSData getDatabaseJSON();
   std::string getDatabaseDeleteOneItem();
-  std::string getAddUserEmails();
   void setHeaderOKNoContentLength(
     const std::string& extraHeader,
     const std::string& contentType = "application/json"

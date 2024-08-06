@@ -635,6 +635,7 @@ HEADERS += \
    #openssl/test/threadstest.h \
     progress_report.h \
     signals_infrastructure.h \
+  user.h \
     web_api.h \
     json.h \
     math_extra_algebraic_numbers.h \

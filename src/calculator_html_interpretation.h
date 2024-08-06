@@ -3,6 +3,7 @@
 
 #include "calculator_interface.h"
 #include "calculator_problem_storage.h"
+#include "user.h"
 #include "database.h"
 #include "general_lists.h"
 #include "math_subsets_selections.h"

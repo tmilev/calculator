@@ -5,6 +5,7 @@
 #include "string_constants.h"
 #include "web_api.h"
 #include "webserver.h"
+#include "user.h"
 
 std::string WebAPIResponse::youHaveReachedTheBackend =
 "You've reached the calculator's backend. ";
@@ -74,7 +75,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     ) &&
     global.flagLoggedIn
   ) {
-    return this->processAddUserEmails();
+    return this->processAddUsersOrEmails();
   } else if (
     global.requestType == WebAPI::Request::setTeacher && global.flagLoggedIn
   ) {
@@ -612,11 +613,11 @@ bool WebAPIResponse::processSetProblemDeadline() {
   return global.response.writeResponse(result);
 }
 
-bool WebAPIResponse::processAddUserEmails() {
-  STACK_TRACE("WebAPIResponse::processAddUserEmails");
+bool WebAPIResponse::processAddUsersOrEmails() {
+  STACK_TRACE("WebAPIResponse::processAddUsersOrEmails");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  result[WebAPI::Result::resultHtml] = this->owner->getAddUserEmails();
+  result[WebAPI::Result::resultHtml] =  WebAPIResponse::addUsersOrEmails(this->owner->hostWithPort) ;
   return global.response.writeResponse(result);
 }
 
@@ -844,4 +845,225 @@ bool WebAPIResponse::processSubmitAnswerHardcoded() {
   global.response.writeResponse(
     WebAPIResponse::submitAnswersHardcoded(true)
   );
+}
+
+
+bool WebAPIResponse::addUsersFromData(
+    const std::string& emailList,
+    const std::string& userPasswords,
+    std::string& userRole,
+    std::string& userGroup,
+    int& outputNumberOfNewUsers,
+    int& outputNumberOfUpdatedUsers,
+    std::stringstream* comments
+    ) {
+  STACK_TRACE("UserOfDatabase::addUsersFromEmails");
+  global.millisecondsMaxComputation = 100000;
+  // 100 seconds
+  global.millisecondsReplyAfterComputation = 200000;
+  // 200 seconds
+  List<std::string> emails;
+  List<std::string> passwords;
+  StringRoutines::stringSplitDefaultDelimiters(emailList, emails);
+  StringRoutines::stringSplitDefaultDelimiters(userPasswords, passwords);
+  if (passwords.size > 0 && passwords.size != emails.size) {
+    if (comments != nullptr) {
+      *comments
+          << "Different number of usernames/emails and passwords: "
+          << emails.size
+          << " emails and "
+          << passwords.size
+          << " passwords. "
+          << "If you want to enter usernames without password, "
+          << "you need to leave the password input box empty. ";
+      return false;
+    }
+  }
+  outputNumberOfNewUsers = 0;
+  outputNumberOfUpdatedUsers = 0;
+  for (int i = 0; i < emails.size; i ++) {
+    std::string password = "";
+    if (password.size() > 0) {
+      password = passwords[i];
+    }
+    if (
+        !WebAPIResponse::addOneUser(
+            emails[i],
+            password,
+            userRole,
+            userGroup,
+            outputNumberOfNewUsers,
+            outputNumberOfUpdatedUsers,
+            comments
+            )
+        ) {
+      return false;
+    }
+  }
+  bool doSendEmails = false;
+  bool result = true;
+  if (doSendEmails) {
+    std::stringstream* commentsGeneralSensitive = nullptr;
+    if (global.userDefaultHasAdminRights()) {
+      commentsGeneralSensitive = comments;
+    }
+    if (
+        !UserOfDatabase::sendActivationEmail(
+            emails, comments, comments, commentsGeneralSensitive
+            )
+        ) {
+      result = false;
+    }
+  }
+  return result;
+}
+
+bool WebAPIResponse::addOneUser(
+    const std::string& userNameOrEmail,
+    const std::string& password,
+    std::string& desiredUserRole,
+    std::string& userGroup,
+    int& outputNumberOfNewUsers,
+    int& outputNumberOfUpdatedUsers,
+    std::stringstream* commentsOnFailure
+    ) {
+  std::string email = userNameOrEmail;
+  // If it looks like email, assume it's email.
+  // The user addition comes from admin user,
+  // so let's trust the input within reason.
+  if (!EmailRoutines::isOKEmail(email, commentsOnFailure)) {
+    // Not an email.
+    email = "";
+  }
+  QueryOneOfExactly findUserByUsernameOrEmail;
+  QueryExact findUserByUsername =
+      QueryExact(
+          DatabaseStrings::tableUsers,
+          DatabaseStrings::labelUsername,
+          userNameOrEmail
+          );
+  findUserByUsernameOrEmail.queries.addOnTop(findUserByUsername);
+  if (email != "") {
+    findUserByUsernameOrEmail.queries.addOnTop(
+        QueryExact(
+            DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, email
+            )
+        );
+  }
+  List<JSData> allUsers;
+  if (Database::get().find
+      (
+          findUserByUsernameOrEmail, nullptr, allUsers, commentsOnFailure
+          )
+      ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Database error! ";
+    }
+    return false;
+  }
+  if (allUsers.size > 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+          << "Found more than one match for: ["
+          << userNameOrEmail
+          << "]. "
+          << "Something is wrong with the database entries, please "
+          << "contact an administrator of the site or file a bug report. "
+          << "For best results, take a screenshot of how you got this message.";
+    }
+    return false;
+  }
+  std::string userRole = desiredUserRole;
+  if (allUsers.size == 1) {
+    UserCalculator user;
+    if (!user.loadFromJSON(allUsers[0])) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+            << "I found an existing user: ["
+            << userNameOrEmail
+            << "] but failed to load the user's data from the database. "
+            << "Something is wrong with the database entries, please "
+            << "contact an administrator of the site or file a bug report.";
+      }
+      return false;
+    }
+    if (
+        user.userRole == UserCalculatorData::Roles::administrator &&
+        userRole != user.userRole
+        ) {
+      userRole = user.userRole;
+    }
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+          << "User "
+          << userNameOrEmail
+          << " is an administrator, so I am not downgrading the user's role to "
+          << desiredUserRole;
+    }
+    outputNumberOfUpdatedUsers ++;
+  } else {
+    outputNumberOfNewUsers ++;
+  }
+  UserCalculator currentUser;
+  currentUser.username = userNameOrEmail;
+  currentUser.email = email;
+  currentUser.courseInDB = global.getWebInput(WebAPI::Problem::courseHome);
+  currentUser.sectionInDB = userGroup;
+  currentUser.instructorInDB = global.userDefault.username;
+  currentUser.userRole = userRole;
+  QuerySet setUser;
+  setUser.addValue(currentUser.toJSON());
+  if (
+      !Database::get(). updateOne(
+          findUserByUsername, setUser, false, commentsOnFailure
+          )
+      ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to update user: " << currentUser.username;
+    }
+    return false;
+  }
+  if (password == "") {
+    if (
+        currentUser.actualHashedSaltedPassword == "" &&
+        currentUser.actualAuthenticationToken == ""
+        ) {
+      if (!currentUser.computeAndStoreActivationToken(commentsOnFailure)) {
+        if (commentsOnFailure != nullptr) {
+          *commentsOnFailure
+              << "Failed to store activation token: "
+              << currentUser.username;
+        }
+        return false;
+      }
+    }
+    return true;
+  }
+  currentUser.enteredPassword =
+      HtmlRoutines::convertStringToURLString(password, false);
+  // <-Passwords are ONE-LAYER url-encoded
+  // <-INCOMING pluses in passwords MUST be decoded as spaces, this is how
+  // form.submit() works!
+  // <-Incoming pluses must be re-coded as spaces (%20).
+  if (!currentUser.setPassword(commentsOnFailure)) {
+    return false;
+  }
+  JSData activatedJSON;
+  activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
+  QuerySet activatedSet;
+  activatedSet.fromJSONNoFail(activatedJSON);
+  if (
+      !Database::get().updateOne(
+          findUserByUsername, activatedSet, false, commentsOnFailure
+          )
+      ) {
+    return false;
+  }
+  if (currentUser.email == "") {
+    return true;
+  }
+  return
+      currentUser.computeAndStoreActivationStats(
+          commentsOnFailure, commentsOnFailure
+          );
 }

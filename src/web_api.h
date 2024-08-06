@@ -150,11 +150,6 @@ public:
   static JSData getAccountsPageJSON(
     const std::string& hostWebAddressWithPort
   );
-  static std::string toStringUserDetails(
-    bool adminsOnly,
-    List<JSData>& users,
-    const std::string& hostWebAddressWithPort
-  );
   static std::string toStringUserScores();
   static std::string toStringUserDetailsTable(
     bool adminsOnly,

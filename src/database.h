@@ -13,17 +13,8 @@ class Database;
 class Listener;
 class QueryExact;
 
-class QuerySetOnce {
-public:
-  List<std::string> nestedLabels;
-  JSData value;
-  JSData toJSON() const;
-  bool fromJSON(const JSData& data, std::stringstream* commentsOnStream);
-  void updateOneEntry(JSData& toBeModified) const;
-};
-
-// Stores a recipe for updating an item.
-// A typical item would be stored allong the lines of:
+// Stores a recipe for replacing one nested (sub-) key : value of an item.
+// Suppose we have a 1-collection database with two items:
 // {
 //   "collection1": [
 //     {
@@ -42,6 +33,37 @@ public:
 //     },
 //   ]
 // }
+//
+// To update an item:
+// 1) First we need to select one of the two items of collection1 
+// using a QueryExact (see below).
+// 2) Suppose we've selected the first item, whose key1 equals "id1".
+//
+// Example 2.1)
+// To update key1 to be id5 instead, use: { nestedLabels: ["key1"], value:
+// "id5"}
+// Example 2.2)
+// To update key2 to be a brand new data structure, use: 
+// { nestedLabels : ["key2"], value : "abc"},
+// to obtain: 
+// {key1: "id1", key2: "abc"}.
+// Example 2.3)
+// To update key2, subkey1, use: 
+// {nestedLabels: ["key2", "subkey1"], value = {a:"b"}}  
+// to obtain: 
+// {key1: "id1", key2: {subkey1:{a:"b"}, subkey2: "ZZ"}}
+// Note that in this example the "type" of subkey1 changes 
+// from a string to an object. 
+class QuerySetOnce {
+public:
+  List<std::string> nestedLabels;
+  JSData value;
+  JSData toJSON() const;
+  bool fromJSON(const JSData& data, std::stringstream* commentsOnStream);
+  void updateOneEntry(JSData& toBeModified) const;
+};
+
+// Stores a recipe for replacing multiple a (sub-) keys of an item.
 class QuerySet {
 private:
 public:

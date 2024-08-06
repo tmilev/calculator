@@ -2172,11 +2172,13 @@ std::string WebAPIResponse::addUserEmails(
     << numberOfUpdatedUsers
     << " user updates.</span> User roles: "
     << userRole;
-  } else out
-  << "<b style='color:red'>Failed to add all users.</b> "
-  << "Errors follow.<hr>"
-  << comments.str()
-  << "<hr>";
+  } else {
+    out
+    << "<b style='color:red'>Failed to add all users.</b> "
+    << "Errors follow.<hr>"
+    << comments.str()
+    << "<hr>";
+  }
   if (doSendEmails) {
     if (sentEmails) {
       out
@@ -3335,80 +3337,5 @@ std::string WebAPIResponse::toStringUserScores() {
     out << "</tr>";
   }
   out << "</table>";
-  return out.str();
-}
-
-std::string WebAPIResponse::toStringUserDetails(
-  bool adminsOnly,
-  List<JSData>& users,
-  const std::string& hostWebAddressWithPort
-) {
-  STACK_TRACE("WebAPIReponse::toStringUserDetails");
-  std::stringstream out;
-  if (!global.hasDisabledDatabaseEveryoneIsAdmin()) {
-    out
-    << "<b>Adding emails not available (database not present).</b> "
-    << DatabaseStrings::errorDatabaseDisabled;
-    return out.str();
-  }
-  std::string userRole =
-  adminsOnly ? UserCalculator::Roles::administrator : "student";
-  std::string idAddressTextarea = "inputAddUsers" + userRole;
-  std::string idExtraTextarea = "inputAddExtraInfo" + userRole;
-  std::string idOutput = "idOutput" + userRole;
-  std::string idPasswordTextarea = "inputAddDefaultPasswords" + userRole;
-  out << "<ul><li>Add <b>" << userRole << "(s)</b> here.</li> ";
-  out
-  << "<li>Added/updated users will have their current course set to: <br>"
-  << "<span class =\"currentCourseIndicator\">"
-  << HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::Problem::courseHome), false
-  )
-  << "</span></li>"
-  << "<li>To change course use "
-  << "the select course link in the top panel.</li>"
-  << "<li>List users with a comma/space bar"
-  << "/new line/tab/semicolumn separated list. </li>"
-  << "<li>List default passwords with a similarly separated list.</li> "
-  << "<li>If left blank, password(s) are not (re)set.</li> "
-  << "<li>If the password entries "
-  << "are not left blank and the number of passwords "
-  << "does not match the number of added users, "
-  << "the operation will fail (no users will be added).</li> "
-  << "</ul>\n";
-  out << "<textarea width =\"500px\" ";
-  out << "id =\"" << idAddressTextarea << "\"";
-  out << "placeholder =\"user list, comma, space or ; separated\">";
-  out << "</textarea>";
-  out << "<textarea width =\"500px\" ";
-  out << "id =\"" << idPasswordTextarea << "\"";
-  out << " placeholder =\"default passwords\">";
-  out << "</textarea>";
-  out << "<textarea width =\"500px\" ";
-  out << "id =\"" << idExtraTextarea << "\"";
-  out << " placeholder =\"section/class #\">";
-  out << "</textarea>";
-  out << "<br>";
-  out
-  << "<button class =\"normalButton\" onclick=\"addEmailsOrUsers("
-  << "'"
-  << idAddressTextarea
-  << "', '"
-  << "', '"
-  << idOutput
-  << "', '"
-  << userRole
-  << "', '"
-  << idExtraTextarea
-  << "', '"
-  << idPasswordTextarea
-  << "', 'addUsers'"
-  << " )\"> Add users</button> ";
-  out << "<br><span id =\"" << idOutput << "\">\n";
-  out
-  << WebAPIResponse::toStringUserDetailsTable(
-    adminsOnly, users, hostWebAddressWithPort
-  );
-  out << "</span>";
   return out.str();
 }

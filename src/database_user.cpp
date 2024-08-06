@@ -1031,41 +1031,32 @@ bool UserOfDatabase::addUsersFromEmails(
 bool UserOfDatabase::addOneUser(
   const std::string& userNameOrEmail,
   const std::string& password,
-  std::string& userRole,
+  std::string& desiredUserRole,
   std::string& userGroup,
   int& outputNumberOfNewUsers,
   int& outputNumberOfUpdatedUsers,
   std::stringstream* commentsOnFailure
 ) {
-  UserCalculator currentUser;
-  currentUser.username = userNameOrEmail;
-  currentUser.email = userNameOrEmail;
+  std::string email = userNameOrEmail;
   // If it looks like email, assume it's email.
   // The user addition comes from admin user,
   // so let's trust the input within reason.
-  if (!EmailRoutines::isOKEmail(currentUser.email, commentsOnFailure)) {
+  if (!EmailRoutines::isOKEmail(email, commentsOnFailure)) {
     // Not an email.
-    currentUser.email = "";
+    email = "";
   }
-  currentUser.courseInDB = global.getWebInput(WebAPI::Problem::courseHome);
-  currentUser.sectionInDB = userGroup;
-  currentUser.instructorInDB = global.userDefault.username;
-  currentUser.userRole = userRole;
-  JSData currentUserData;
   QueryOneOfExactly findUserByUsernameOrEmail;
   QueryExact findUserByUsername =
   QueryExact(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
-    currentUser.username
+    userNameOrEmail
   );
   findUserByUsernameOrEmail.queries.addOnTop(findUserByUsername);
-  if (currentUser.email != "") {
+  if (email != "") {
     findUserByUsernameOrEmail.queries.addOnTop(
       QueryExact(
-        DatabaseStrings::tableUsers,
-        DatabaseStrings::labelEmail,
-        currentUser.email
+        DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, email
       )
     );
   }
@@ -1080,42 +1071,67 @@ bool UserOfDatabase::addOneUser(
     }
     return false;
   }
-  if (allUsers.size == 0) {
-    if (!currentUser.storeToDatabase(false, commentsOnFailure)) {
+  if (allUsers.size > 1) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Found more than one match for: ["
+      << userNameOrEmail
+      << "]. "
+      << "Something is wrong with the database entries, please "
+      << "contact an administrator of the site or file a bug report. "
+      << "For best results, take a screenshot of how you got this message.";
+    }
+    return false;
+  }
+  std::string userRole = desiredUserRole;
+  if (allUsers.size == 1) {
+    UserCalculator user;
+    if (!user.loadFromJSON(allUsers[0])) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
-        << "Failed to create user: "
-        << currentUser.username;
+        << "I found an existing user: ["
+        << userNameOrEmail
+        << "] but failed to load the user's data from the database. "
+        << "Something is wrong with the database entries, please "
+        << "contact an administrator of the site or file a bug report.";
       }
       return false;
-    } else {
-      outputNumberOfNewUsers ++;
     }
-    QuerySet setUser;
-    setUser.addValue(currentUserData);
-    if (currentUser.email != "") {
-      this->owner->updateOne(
-        findUserByUsername, setUser, true, commentsOnFailure
-      );
-    }
-  } else {
-    outputNumberOfUpdatedUsers ++;
-    // currentUser may have its updated entries modified by the functions
-    // above.
-    QuerySet setUser;
-    setUser.addValue(currentUser.toJSON());
     if (
-      !this->owner->updateOne(
-        findUserByUsername, setUser, false, commentsOnFailure
-      )
+      user.userRole == UserCalculatorData::Roles::administrator &&
+      userRole != user.userRole
     ) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure
-        << "Failed to update user: "
-        << currentUser.username;
-      }
-      return false;
+      userRole = user.userRole;
     }
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "User "
+      << userNameOrEmail
+      << " is an administrator, so I am not downgrading the user's role to "
+      << desiredUserRole;
+    }
+    outputNumberOfUpdatedUsers ++;
+  } else {
+    outputNumberOfNewUsers ++;
+  }
+  UserCalculator currentUser;
+  currentUser.username = userNameOrEmail;
+  currentUser.email = email;
+  currentUser.courseInDB = global.getWebInput(WebAPI::Problem::courseHome);
+  currentUser.sectionInDB = userGroup;
+  currentUser.instructorInDB = global.userDefault.username;
+  currentUser.userRole = userRole;
+  QuerySet setUser;
+  setUser.addValue(currentUser.toJSON());
+  if (
+    !this->owner->updateOne(
+      findUserByUsername, setUser, false, commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to update user: " << currentUser.username;
+    }
+    return false;
   }
   if (password == "") {
     if (

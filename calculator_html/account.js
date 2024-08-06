@@ -4,7 +4,8 @@ const submitRequests = require("./submit_requests");
 const pathnames = require("./pathnames");
 const login = require('./login');
 const miscellaneous = require("./miscellaneous_frontend");
-const storage = require("./storage");
+const storage = require("./storage").storage;
+const globalUser = require("./user").globalUser;
 
 class AccountPage {
   constructor() {
@@ -76,10 +77,10 @@ function updateAccountPage() {
   let row = table.insertRow();
   row.appendChild(resultCell);
   resultCell = document.createElement("th");
-  resultCell.textContent = this.mainPage.user.getRole();
+  resultCell.textContent = globalUser.getRole();
   if (
-    this.mainPage.user.sectionsTaught.length > 0 &&
-    !this.mainPage.studentView()
+    globalUser.sectionsTaught.length > 0 &&
+    !globalUser.studentView()
   ) {
     row = table.insertRow();
     row.insertCell().appendChild(
@@ -89,7 +90,7 @@ function updateAccountPage() {
     );
     row.insertCell().appendChild(
       document.createTextNode(
-        this.mainPage.user.sectionsTaught.join(", ")
+        globalUser.sectionsTaught.join(", ")
       )
     );
   }
@@ -102,10 +103,10 @@ function updateAccountPage() {
       document.createTextNode(second)
     );
   }
-  insertRow("Instructor: ", this.mainPage.user.instructor);
-  insertRow("Section in database: ", this.mainPage.user.sectionInDB);
-  insertRow("Section computed: ", this.mainPage.user.sectionComputed);
-  insertRow("Deadline schema: ", this.mainPage.user.deadlineSchema);
+  insertRow("Instructor: ", globalUser.instructor);
+  insertRow("Section in database: ", globalUser.sectionInDB);
+  insertRow("Section computed: ", globalUser.sectionComputed);
+  insertRow("Deadline schema: ", globalUser.deadlineSchema);
   spanExtraInfo.textContent = "";
   spanExtraInfo.appendChild(table);
 }

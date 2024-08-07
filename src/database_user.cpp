@@ -7,7 +7,7 @@
 #include "webserver.h"
 
 std::string UserCalculatorData::toStringFindQueries() const {
-  QueryOneOfExactly queries;
+  QueryFindOneOf queries;
   this->getFindMeQueryByUsernameOrEmail(queries);
   std::stringstream out;
   out << "userFind query: ";
@@ -48,7 +48,7 @@ bool UserOfDatabase::loadUserInformation(
     return false;
   }
   List<JSData> allUsers;
-  QueryOneOfExactly queries;
+  QueryFindOneOf queries;
   output.getFindMeQueryByUsernameOrEmail(queries);
   if (!this->owner->find(queries, nullptr, allUsers, nullptr)) {
     if (commentsOnFailure != nullptr) {
@@ -249,7 +249,7 @@ bool UserCalculator::loadFromDatabase(
   }
   this->computeCourseInformation();
   if (this->deadlineSchema != "") {
-    QueryExact findDeadlines(
+    QueryFind findDeadlines(
       DatabaseStrings::tableDeadlines,
       DatabaseStrings::labelDeadlinesSchema,
       this->deadlineSchema
@@ -264,7 +264,7 @@ bool UserCalculator::loadFromDatabase(
     }
   }
   if (this->problemWeightSchema != "") {
-    QueryExact findProblemWeights(
+    QueryFind findProblemWeights(
       DatabaseStrings::tableProblemWeights,
       DatabaseStrings::labelProblemWeightsSchema,
       this->problemWeightSchema
@@ -502,12 +502,12 @@ bool UserCalculator::resetAuthenticationToken(
   );
   this->actualAuthenticationToken =
   Crypto::convertListUnsignedCharsToBase64(authenticationToken, true);
-  QueryExact findUser(
+  QueryFind findUser(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
     this->username
   );
-  QuerySet setUser;
+  QueryUpdate setUser;
   setUser.addKeyValueStringPair(
     DatabaseStrings::labelAuthenticationToken,
     this->actualAuthenticationToken
@@ -530,12 +530,12 @@ bool UserCalculator::setPassword(std::stringstream* commentsOnFailure) {
     return false;
   }
   this->computeHashedSaltedPassword();
-  QueryExact findUser(
+  QueryFind findUser(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
     this->username
   );
-  QuerySet setUser;
+  QueryUpdate setUser;
   setUser.addKeyValueStringPair(
     DatabaseStrings::labelPassword, this->enteredHashedSaltedPassword
   );
@@ -679,7 +679,7 @@ void UserCalculator::exists(
 ) {
   STACK_TRACE("UserCalculator::exists");
   List<JSData> allUsers;
-  QueryOneOfExactly query;
+  QueryFindOneOf query;
   this->getFindMeQueryByUsernameOrEmail(query);
   databaseIsOK = Database::get().find(query, nullptr, allUsers, comments);
   outputExists = allUsers.size == 1;
@@ -697,12 +697,12 @@ bool UserCalculator::computeAndStoreActivationToken(
   );
   this->actualActivationToken =
   Crypto::convertListUnsignedCharsToBase64(activationToken, true);
-  QueryExact findUserQuery(
+  QueryFind findUserQuery(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
     this->username
   );
-  QuerySet updateUser;
+  QueryUpdate updateUser;
   updateUser.addKeyValueStringPair(
     DatabaseStrings::labelActivationToken, this->actualActivationToken
   );
@@ -742,7 +742,8 @@ bool UserCalculator::computeAndStoreActivationStats(
       *commentsOnFailure
       << "The web address is missing: "
       << "the administrator of this instance of the calculator needs to "
-      << "set up entry webAddress in file configuraiton/configuration.json. ";
+      << "set up entry webAddress in file: "
+      << global.configurationFileName;
     }
     return false;
   }
@@ -761,7 +762,7 @@ bool UserCalculator::computeAndStoreActivationStats(
     }
     return false;
   }
-  QueryExact findEmail(
+  QueryFind findEmail(
     DatabaseStrings::tableEmailInfo,
     DatabaseStrings::labelEmail,
     this->email
@@ -777,9 +778,11 @@ bool UserCalculator::computeAndStoreActivationStats(
       *commentsGeneral
       << "No recorded previous attempts to activate this email. ";
     }
+    allEmailStats.addOnTop(JSData());
   }
   JSData emailStat = allEmailStats[0];
-  std::string lastEmailTime, emailCountForThisEmail;
+  std::string lastEmailTime;
+  std::string emailCountForThisEmail;
   lastEmailTime =
   emailStat[DatabaseStrings::labelLastActivationEmailTime].stringValue;
   emailCountForThisEmail =
@@ -815,8 +818,8 @@ bool UserCalculator::computeAndStoreActivationStats(
     << totalActivationsThisEmail.toString()
     << ". ";
   }
-  QueryExact findQueryInUsers(DatabaseStrings::tableUsers, "", "");
-  QuerySet updateUser;
+  QueryFind findQueryInUsers(DatabaseStrings::tableUsers, "", "");
+  QueryUpdate updateUser;
   updateUser.addKeyValueStringPair(
     DatabaseStrings::labelTimeOfActivationTokenCreation, now.toString()
   );
@@ -846,7 +849,7 @@ bool UserCalculator::computeAndStoreActivationStats(
     }
     return false;
   }
-  QuerySet emailStatQuery;
+  QueryUpdate emailStatQuery;
   emailStatQuery.addKeyValueStringPair(
     DatabaseStrings::labelLastActivationEmailTime, now.toString()
   );
@@ -899,10 +902,10 @@ bool UserCalculator::computeAndStoreActivationStats(
   return true;
 }
 
-void UserCalculatorData::getFindMeQueryByUsername(QueryExact& output) const {
+void UserCalculatorData::getFindMeQueryByUsername(QueryFind& output) const {
   STACK_TRACE("UserCalculatorData::getFindMeQueryByUsername");
   output =
-  QueryExact(
+  QueryFind(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
     this->username
@@ -910,12 +913,12 @@ void UserCalculatorData::getFindMeQueryByUsername(QueryExact& output) const {
 }
 
 void UserCalculatorData::getFindMeQueryByUsernameOrEmail(
-  QueryOneOfExactly& output
+  QueryFindOneOf& output
 ) const {
   STACK_TRACE("UserCalculatorData::getFindMeQueryByUsernameOrEmail");
   output.queries.clear();
   if (this->username != "") {
-    QueryExact findByUsername(
+    QueryFind findByUsername(
       DatabaseStrings::tableUsers,
       DatabaseStrings::labelUsername,
       this->username
@@ -923,7 +926,7 @@ void UserCalculatorData::getFindMeQueryByUsernameOrEmail(
     output.queries.addOnTop(findByUsername);
   }
   if (this->email != "") {
-    QueryExact findByEmail(
+    QueryFind findByEmail(
       DatabaseStrings::tableUsers,
       DatabaseStrings::labelEmail,
       this->email
@@ -949,12 +952,12 @@ bool UserCalculator::storeProblemData(
     << global.fatal;
   }
   const ProblemData& problem = this->problemData.getValueNoFail(fileName);
-  QuerySet update;
+  QueryUpdate update;
   update.addNestedKeyValuePair(
     List<std::string>({DatabaseStrings::labelProblemDataJSON, fileName}),
     problem.storeJSON()
   );
-  QueryExact query;
+  QueryFind query;
   this->getFindMeQueryByUsername(query);
   return Database::get().updateOne(query, update, false, commentsOnFailure);
 }
@@ -1251,7 +1254,7 @@ bool UserCalculator::storeToDatabase(
   bool doSetPassword, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("UserCalculator::storeToDatabase");
-  QueryExact findUser(
+  QueryFind findUser(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
     this->username
@@ -1261,7 +1264,7 @@ bool UserCalculator::storeToDatabase(
     this->actualHashedSaltedPassword = this->enteredHashedSaltedPassword;
   }
   JSData setUser = this->toJSON();
-  QuerySet doSetUser;
+  QueryUpdate doSetUser;
   doSetUser.addValue(this->toJSON());
   return
   Database::get().updateOne(findUser, doSetUser, true, commentsOnFailure);

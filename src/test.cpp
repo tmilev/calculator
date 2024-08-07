@@ -87,7 +87,7 @@ void Test::run() {
   << Logger::endL;
   global.millisecondsMaxComputation = 100000000;
   if (this->shouldTest(Test::Suites::database)) {
-    QuerySet::Test::all();
+    QueryUpdate::Test::all();
     Database::Test::all();
     global << Logger::green << "Database tests completed." << Logger::endL;
   }

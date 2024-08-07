@@ -323,7 +323,7 @@ bool WebAPIResponse::processChangePassword(
   List<JSData> list;
   if (newEmail != "") {
     JSData notUsed;
-    QueryExact queryEmailTaken(
+    QueryFind queryEmailTaken(
       DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail
     );
     bool success =
@@ -359,14 +359,14 @@ bool WebAPIResponse::processChangePassword(
     result[WebAPI::Result::error] = commentsOnFailure.str();
     return global.response.writeResponse(result);
   }
-  QueryExact findQuery(
+  QueryFind findQuery(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
     user.username
   );
   JSData setQuery;
   setQuery[DatabaseStrings::labelActivationToken] = "activated";
-  QuerySet doSetQuery;
+  QueryUpdate doSetQuery;
   doSetQuery.fromJSONNoFail(setQuery);
   if (
     !Database::get().updateOne(
@@ -941,9 +941,9 @@ bool WebAPIResponse::addOneUser(
       << "that is not an email and proceeding bravely. ";
     }
   }
-  QueryOneOfExactly findUserByUsernameOrEmail;
-  QueryExact findUserByUsername =
-  QueryExact(
+  QueryFindOneOf findUserByUsernameOrEmail;
+  QueryFind findUserByUsername =
+  QueryFind(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
     userNameOrEmail
@@ -951,7 +951,7 @@ bool WebAPIResponse::addOneUser(
   findUserByUsernameOrEmail.queries.addOnTop(findUserByUsername);
   if (email != "") {
     findUserByUsernameOrEmail.queries.addOnTop(
-      QueryExact(
+      QueryFind(
         DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, email
       )
     );
@@ -1017,11 +1017,11 @@ bool WebAPIResponse::addOneUser(
   currentUser.sectionInDB = userGroup;
   currentUser.instructorInDB = global.userDefault.username;
   currentUser.userRole = userRole;
-  QuerySet setUser;
-  setUser.addValue(currentUser.toJSON());
+  QueryUpdate updateUser;
+  updateUser.addValue(currentUser.toJSON());
   if (
     !Database::get().updateOne(
-      findUserByUsername, setUser, true, commentsOnFailure
+      findUserByUsername, updateUser, true, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -1054,13 +1054,13 @@ bool WebAPIResponse::addOneUser(
   if (!currentUser.setPassword(commentsOnFailure)) {
     return false;
   }
-  JSData activatedJSON;
-  activatedJSON[DatabaseStrings::labelActivationToken] = "activated";
-  QuerySet activatedSet;
-  activatedSet.fromJSONNoFail(activatedJSON);
+  QueryUpdate updateActivation;
+  updateActivation.addKeyValueStringPair(
+    DatabaseStrings::labelActivationToken, "activated"
+  );
   if (
     !Database::get().updateOne(
-      findUserByUsername, activatedSet, false, commentsOnFailure
+      findUserByUsername, updateActivation, false, commentsOnFailure
     )
   ) {
     return false;

@@ -8,11 +8,11 @@
 
 bool WebAPIResponse::Test::all() {
   StateMaintainer<std::string> databaseName(Database::name);
+  WebAPIResponse::Test::addUsersFromData();
   WebAPIResponse::Test::scoredQuiz(DatabaseType::fallback);
   WebAPIResponse::Test::scoredQuiz(DatabaseType::internal);
   WebAPIResponse::Test::solveJSON();
   WebAPIResponse::Test::compareExpressions();
-  WebAPIResponse::Test::addUsersFromData();
   return true;
 }
 
@@ -197,6 +197,12 @@ bool WebAPIResponse::Test::addUsersFromData() {
   STACK_TRACE("WebAPIResponse::Test::addUsersFromData");
   Database::Test tester(DatabaseType::internal);
   Database::Test::createAdminAccount();
+  StateMaintainer<int64_t> maintainMillisecondsMaxComputation(
+    global.millisecondsMaxComputation
+  );
+  StateMaintainer<int64_t> millisecondsReplyAfterComputation(
+    global.millisecondsReplyAfterComputation
+  );
   int numberOfNewUsers = 0;
   int numberOfUpdatedUsers = 0;
   std::stringstream comments;
@@ -214,6 +220,46 @@ bool WebAPIResponse::Test::addUsersFromData() {
     global.fatal
     << "Failed to add users from data: "
     << comments.str()
+    << global.fatal;
+  }
+  UserCalculator user;
+  user.username = "student1";
+  mustBeTrue = user.loadFromDatabase(nullptr, nullptr);
+  if (!mustBeTrue) {
+    global.fatal << "Failed to load student1 from database" << global.fatal;
+  }
+  std::string expectedPassword =
+  "DBCziaEqLNTPyS0MdT61CMdxg6ciXUFlrCwNUnx2UWQ=";
+  if (user.actualHashedSaltedPassword != expectedPassword) {
+    global.fatal
+    << "User student1 password: got: ["
+    << user.actualHashedSaltedPassword
+    << "], expected: ["
+    << expectedPassword
+    << "]"
+    << global.fatal;
+  }
+  if (user.email != "") {
+    global.fatal << "User student1 has wrong email." << global.fatal;
+  }
+  user.username = "student2@example.com";
+  mustBeTrue = user.loadFromDatabase(nullptr, nullptr);
+  if (!mustBeTrue) {
+    global.fatal << "Failed to load student1 from database" << global.fatal;
+  }
+  expectedPassword = "uqS7AvF_cZgwXVC6T_o2elF9vWmlrv8j84kRUU-ojoA=";
+  if (user.actualHashedSaltedPassword != expectedPassword) {
+    global.fatal
+    << "User student2@example.com password: got: ["
+    << user.actualHashedSaltedPassword
+    << "], expected: ["
+    << expectedPassword
+    << "]"
+    << global.fatal;
+  }
+  if (user.email != "student2@example.com") {
+    global.fatal
+    << "User student2@example.com has wrong email."
     << global.fatal;
   }
   return true;
@@ -297,7 +343,7 @@ bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
     << global.fatal;
   }
   JSData problemRecord;
-  QueryExact userQuery;
+  QueryFind userQuery;
   userQuery.collection = DatabaseStrings::tableUsers;
   userQuery.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
   userQuery.exactValue = WebAPI::userDefaultAdmin;

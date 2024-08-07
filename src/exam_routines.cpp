@@ -237,7 +237,7 @@ JSData CalculatorHTML::toJSONDeadlines(
   return output;
 }
 
-QuerySet CalculatorHTML::toQuerySetDeadlines(
+QueryUpdate CalculatorHTML::toQuerySetDeadlines(
   MapList<
     std::string,
     ProblemData,
@@ -245,7 +245,7 @@ QuerySet CalculatorHTML::toQuerySetDeadlines(
   >& inputProblemInfo
 ) {
   STACK_TRACE("CalculatorHTML::toJSONDeadlines");
-  QuerySet output;
+  QueryUpdate output;
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
     ProblemDataAdministrative& currentProblem =
     inputProblemInfo.values[i].adminData;
@@ -283,7 +283,7 @@ QuerySet CalculatorHTML::toQuerySetDeadlines(
   return output;
 }
 
-QuerySet CalculatorHTML::toQuerySetProblemWeights(
+QueryUpdate CalculatorHTML::toQuerySetProblemWeights(
   MapList<
     std::string,
     ProblemData,
@@ -291,7 +291,7 @@ QuerySet CalculatorHTML::toQuerySetProblemWeights(
   >& inputProblemInfo
 ) {
   STACK_TRACE("CalculatorHTML::toQuerySetProblemWeights");
-  QuerySet output;
+  QueryUpdate output;
   for (int i = 0; i < inputProblemInfo.size(); i ++) {
     ProblemDataAdministrative& currentProblem =
     inputProblemInfo.values[i].adminData;
@@ -471,13 +471,13 @@ bool CalculatorHTML::storeProblemWeights(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("CalculatorHTML::storeProblemWeights");
-  QueryExact weightFinder;
+  QueryFind weightFinder;
   weightFinder.collection = DatabaseStrings::tableProblemWeights;
   weightFinder.setLabelValue(
     DatabaseStrings::labelProblemWeightsSchema,
     global.userDefault.problemWeightSchema
   );
-  QuerySet updateQuery = this->toQuerySetProblemWeights(toStore);
+  QueryUpdate updateQuery = this->toQuerySetProblemWeights(toStore);
   if (
     !Database::get().updateOne(
       weightFinder, updateQuery, true, commentsOnFailure
@@ -505,13 +505,13 @@ bool CalculatorHTML::storeProblemDeadlines(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("CalculatorHTML::storeProblemDeadlines");
-  QueryExact deadlineSchema;
+  QueryFind deadlineSchema;
   deadlineSchema.collection = DatabaseStrings::tableDeadlines;
   deadlineSchema.setLabelValue(
     DatabaseStrings::labelDeadlinesSchema,
     global.userDefault.deadlineSchema
   );
-  QuerySet updateQuery = this->toQuerySetDeadlines(toStore);
+  QueryUpdate updateQuery = this->toQuerySetDeadlines(toStore);
   if (
     !Database::get().updateOne(
       deadlineSchema, updateQuery, true, commentsOnFailure

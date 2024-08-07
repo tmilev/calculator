@@ -2084,12 +2084,12 @@ std::string WebAPIResponse::addTeachersSections() {
       continue;
     }
     currentTeacher.sectionsTaught = desiredSectionsList;
-    QueryExact findQuery(
+    QueryFind findQuery(
       DatabaseStrings::tableUsers,
       DatabaseStrings::labelUsername,
       currentTeacher.username
     );
-    QuerySet setQuery;
+    QueryUpdate setQuery;
     JSData desiredSectionListJSON;
     desiredSectionListJSON = desiredSectionsList;
     setQuery.addKeyValuePair(
@@ -2476,7 +2476,7 @@ JSData WebAPIResponse::getAccountsPageJSON(
     return output;
   }
   std::stringstream commentsOnFailure;
-  QueryExact findStudents;
+  QueryFind findStudents;
   List<JSData> students;
   List<JSData> admins;
   findStudents.collection = DatabaseStrings::tableUsers;
@@ -2505,7 +2505,7 @@ JSData WebAPIResponse::getAccountsPageJSON(
     "Failed to load user info. Comments: " + commentsOnFailure.str();
     return output;
   }
-  QueryExact findAdmins;
+  QueryFind findAdmins;
   findAdmins.collection = DatabaseStrings::tableUsers;
   findAdmins.nestedLabels.addOnTop(DatabaseStrings::labelUserRole);
   findAdmins.exactValue = UserCalculator::Roles::administrator;
@@ -2797,7 +2797,7 @@ void ProblemData::readExpectedNumberOfAnswersFromDatabase(
   options.fieldsToProjectTo.addOnTop(
     DatabaseStrings::labelProblemTotalQuestions
   );
-  QueryExact findProblemInfo;
+  QueryFind findProblemInfo;
   findProblemInfo.collection = DatabaseStrings::tableProblemInformation;
   if (
     !Database::get().find(
@@ -2875,7 +2875,7 @@ int ProblemData::getExpectedNumberOfAnswers(
   << this->knownNumberOfAnswersFromHD
   << Logger::endL;
   this->expectedNumberOfAnswersFromDB = this->knownNumberOfAnswersFromHD;
-  QueryExact findEntry(
+  QueryFind findEntry(
     DatabaseStrings::tableProblemInformation,
     DatabaseStrings::labelProblemFileName,
     problemName
@@ -2886,7 +2886,7 @@ int ProblemData::getExpectedNumberOfAnswers(
   stringConverter << this->knownNumberOfAnswersFromHD;
   newDatabaseEntry[DatabaseStrings::labelProblemTotalQuestions] =
   stringConverter.str();
-  QuerySet updateQuery;
+  QueryUpdate updateQuery;
   updateQuery.addKeyValueStringPair(
     DatabaseStrings::labelProblemTotalQuestions, stringConverter.str()
   );

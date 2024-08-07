@@ -514,14 +514,14 @@ public:
     >& toStore,
     std::stringstream* commentsOnFailure
   );
-  QuerySet toQuerySetProblemWeights(
+  QueryUpdate toQuerySetProblemWeights(
     MapList<
       std::string,
       ProblemData,
       HashFunctions::hashFunction<std::string>
     >& inputProblemInfo
   );
-  QuerySet toQuerySetDeadlines(
+  QueryUpdate toQuerySetDeadlines(
     MapList<
       std::string,
       ProblemData,

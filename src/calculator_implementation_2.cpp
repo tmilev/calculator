@@ -1740,7 +1740,6 @@ void Calculator::evaluateCommands() {
   } else {
     this->evaluateCommandsDebugExpressionTreeOutput(startingExpression, out);
   }
-  // this->evaluateCommandsWriteJavascriptOutput();
   this->outputHTMLString = out.str();
   this->output[WebAPI::Result::resultHtml] = out.str();
   std::stringstream commentsStream;

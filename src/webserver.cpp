@@ -1,5 +1,4 @@
 #include "calculator_interface.h"
-#include "calculator_problem_storage.h"
 #include "crypto_calculator.h"
 #include "database.h"
 #include "general_file_operations_encodings.h"
@@ -1955,7 +1954,7 @@ std::string WebWorker::getChangePasswordPagePartOne(
     << " updated. </b>";
     return out.str();
   }
-  QueryExact findEmail(
+  QueryFind findEmail(
     DatabaseStrings::tableEmailInfo,
     DatabaseStrings::labelEmail,
     claimedEmail
@@ -1995,7 +1994,7 @@ std::string WebWorker::getChangePasswordPagePartOne(
     << "Activation token was issued for another user. </b>";
     return out.str();
   }
-  QuerySet emailSet;
+  QueryUpdate emailSet;
   emailSet.addKeyValueStringPair(
     DatabaseStrings::labelUsername, usernameAssociatedWithToken
   );
@@ -2009,14 +2008,14 @@ std::string WebWorker::getChangePasswordPagePartOne(
     << "</b>";
     return out.str();
   }
-  QueryExact findUser(
+  QueryFind findUser(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,
     global.userDefault.username
   );
   JSData userInfo;
   userInfo[DatabaseStrings::labelEmail] = claimedEmail;
-  QuerySet querySet;
+  QueryUpdate querySet;
   querySet.fromJSONNoFail(userInfo);
   if (!Database::get().updateOne(findUser, querySet, true, &out)) {
     out

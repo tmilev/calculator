@@ -47,8 +47,8 @@ DatabaseInternalClient::DatabaseInternalClient() {
 }
 
 bool DatabaseInternalClient::updateOne(
-  const QueryExact& findQuery,
-  const QuerySet& updateQuery,
+  const QueryFind& findQuery,
+  const QueryUpdate& updateQuery,
   bool createIfNotFound,
   std::stringstream* commentsOnFailure
 ) {
@@ -93,7 +93,7 @@ bool DatabaseInternalClient::checkInitialization() {
 }
 
 bool DatabaseInternalClient::find(
-  const QueryOneOfExactly& findOrQueries,
+  const QueryFindOneOf& findOrQueries,
   const QueryResultOptions* options,
   List<JSData>& output,
   std::stringstream* commentsOnFailure
@@ -877,7 +877,7 @@ bool DatabaseInternalServer::shutdown() {
 }
 
 bool DatabaseInternalServer::find(
-  const QueryOneOfExactly& query,
+  const QueryFindOneOf& query,
   const QueryResultOptions* options,
   List<JSData>& output,
   std::stringstream* commentsOnFailure
@@ -889,7 +889,7 @@ bool DatabaseInternalServer::find(
   JSData loader;
   std::string collection;
   for (int i = 0; i < query.queries.size; i ++) {
-    QueryExact& queryExact = query.queries[i];
+    QueryFind& queryExact = query.queries[i];
     if (i == 0) {
       collection = queryExact.collection;
     } else if (queryExact.collection != collection) {
@@ -934,7 +934,7 @@ bool DatabaseInternalServer::find(
 }
 
 bool DatabaseInternalServer::findObjectIds(
-  const QueryExact& query,
+  const QueryFind& query,
   List<std::string>& output,
   std::stringstream* commentsOnFailure
 ) {
@@ -966,7 +966,8 @@ bool DatabaseInternalServer::findObjectIds(
     << concatenatedLabels
     << " in collection: "
     << collection.name
-    << ". ";
+    << ". "
+    << Logger::endL;
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Attempt to search using a non-indexed key: "
@@ -1357,6 +1358,10 @@ void DatabaseInternalServer::ensureStandardCollectionIndices() {
         DatabaseStrings::labelProblemWeightsSchema
       }
     )
+  );
+  this->ensureCollection(
+    DatabaseStrings::tableEmailInfo,
+    List<std::string>({DatabaseStrings::labelEmail,})
   );
 }
 

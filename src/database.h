@@ -11,7 +11,7 @@ class Database;
 
 // Forward declare a class that can listen to sockets.
 class Listener;
-class QueryExact;
+class QueryFind;
 
 // Stores a recipe for replacing one nested (sub-) key : value of an item.
 // Suppose we have a 1-collection database with two items:
@@ -54,7 +54,7 @@ class QueryExact;
 // {key1: "id1", key2: {subkey1:{a:"b"}, subkey2: "ZZ"}}
 // Note that in this example the "type" of subkey1 changes 
 // from a string to an object. 
-class QuerySetOnce {
+class QueryUpdateOnce {
 public:
   List<std::string> nestedLabels;
   JSData value;
@@ -64,10 +64,10 @@ public:
 };
 
 // Stores a recipe for replacing multiple a (sub-) keys of an item.
-class QuerySet {
+class QueryUpdate {
 private:
 public:
-  List<QuerySetOnce> data;
+  List<QueryUpdateOnce> data;
   // Adds a single string key with a single string value.
   void addKeyValueStringPair(
     const std::string& key, const std::string& value
@@ -77,7 +77,7 @@ public:
     const List<std::string>& nestedKeys, const JSData& value
   );
   void addValue(const JSData& value);
-  QuerySet();
+  QueryUpdate();
   bool fromJSON(
     const JSData& inputValue, std::stringstream* commentsOnFailure
   );
@@ -93,8 +93,8 @@ public:
   public:
     static bool all();
     static bool basics(DatabaseType databaseType);
-    static void updateNoFail(QueryExact& find, QuerySet updater);
-    static void findNoFail(QueryExact& find, JSData& result);
+    static void updateNoFail(QueryFind& find, QueryUpdate updater);
+    static void findNoFail(QueryFind& find, JSData& result);
     static void matchKeyValue(
       const JSData& mustContain, const JSData& mustBeContained
     );
@@ -144,7 +144,7 @@ public:
 // collection = "collection1"
 // nestedLabels = ["key2", "subkey2"]
 // value = "YY"
-class QueryExact {
+class QueryFind {
   bool extractNestedKeysFromJSON(
     const JSData& input, std::stringstream* commentsOnFailure
   );
@@ -156,13 +156,13 @@ public:
   JSData exactValue;
   // Maximum number of elements to select.
   int maximumNumberOfItems;
-  QueryExact();
-  QueryExact(
+  QueryFind();
+  QueryFind(
     const std::string& desiredCollection,
     const std::string& label,
     const std::string& desiredValue
   );
-  QueryExact(
+  QueryFind(
     const std::string& desiredCollection,
     const List<std::string>& desiredLabels,
     const std::string& desiredValue
@@ -193,20 +193,20 @@ public:
   bool isEmpty() const;
 };
 
-class QueryOneOfExactly {
+class QueryFindOneOf {
 public:
-  List<QueryExact> queries;
+  List<QueryFind> queries;
   bool fromJSON(const JSData& input, std::stringstream* commentsOnFailure);
   JSData toJSON() const;
   std::string collection() const;
-  QueryOneOfExactly();
-  QueryOneOfExactly(const QueryExact& query);
+  QueryFindOneOf();
+  QueryFindOneOf(const QueryFind& query);
 };
 
 class QueryFindAndUpdate {
 public:
-  QuerySet update;
-  QueryExact find;
+  QueryUpdate update;
+  QueryFind find;
   bool createIfNotFound;
   JSData toJSON() const;
   bool fromJSON(JSData& input, std::stringstream* commentsOnFailure);
@@ -265,7 +265,7 @@ public:
   };
   Type requestType;
   QueryFindAndUpdate queryFindAndUpdate;
-  QueryOneOfExactly queryOneOfExactly;
+  QueryFindOneOf queryOneOfExactly;
   QueryResultOptions options;
   // Used to fetch the result of a previously executed query
   // that was too large to receive in one go. Holds a process-unique id of the
@@ -354,13 +354,13 @@ public:
   std::string collectionsSchemaFileName() const;
   bool shutdown();
   bool find(
-    const QueryOneOfExactly& query,
+    const QueryFindOneOf& query,
     const QueryResultOptions* options,
     List<JSData>& output,
     std::stringstream* commentsOnFailure
   );
   bool findObjectIds(
-    const QueryExact& query,
+    const QueryFind& query,
     List<std::string>& output,
     std::stringstream* commentsOnFailure
   );
@@ -407,14 +407,14 @@ public:
   DatabaseInternal* owner;
   DatabaseInternalClient();
   bool find(
-    const QueryOneOfExactly& query,
+    const QueryFindOneOf& query,
     const QueryResultOptions* options,
     List<JSData>& output,
     std::stringstream* commentsOnFailure
   );
   bool updateOne(
-    const QueryExact& findQuery,
-    const QuerySet& updateQuery,
+    const QueryFind& findQuery,
+    const QueryUpdate& updateQuery,
     bool createIfNotFound,
     std::stringstream* commentsOnFailure = nullptr
   );
@@ -587,15 +587,6 @@ public:
     UserCalculatorData& output, std::stringstream* commentsOnFailure
   );
   UserOfDatabase();
-  bool addOneUser(
-    const std::string& userNameOrEmail,
-    const std::string& password,
-    std::string& userRole,
-    std::string& userGroup,
-    int& outputNumberOfNewUsers,
-    int& outputNumberOfUpdatedUsers,
-    std::stringstream* commentsOnFailure
-  );
 };
 
 class Database {
@@ -620,7 +611,7 @@ public:
   // that satisfy the query.
   // Returns false if there's a database error.
   bool find(
-    const QueryOneOfExactly& query,
+    const QueryFindOneOf& query,
     const QueryResultOptions* options,
     List<JSData>& output,
     std::stringstream* commentsOnFailure
@@ -629,14 +620,14 @@ public:
   // Will return false both on a database error and when
   // the number of items found is not exactly 1.
   bool findExactlyOne(
-    const QueryOneOfExactly& query,
+    const QueryFindOneOf& query,
     const QueryResultOptions* options,
     JSData& output,
     std::stringstream* commentsOnFailure
   );
   bool updateOne(
-    const QueryExact& findQuery,
-    const QuerySet& dataToMerge,
+    const QueryFind& findQuery,
+    const QueryUpdate& dataToMerge,
     bool createIfNotFound,
     std::stringstream* commentsOnFailure
   );
@@ -654,16 +645,16 @@ public:
     const JSData& entry, std::stringstream* commentsOnFailure
   );
   bool deleteOneEntryById(
-    const QueryExact& findQuery, std::stringstream* commentsOnFailure
+    const QueryFind& findQuery, std::stringstream* commentsOnFailure
   );
   static bool deleteOneEntryUnsetUnsecure(
-    const QueryExact& findQuery,
+    const QueryFind& findQuery,
     List<std::string>& selector,
     std::stringstream* commentsOnFailure
   );
   std::string toHtmlDatabaseCollection(const std::string& currentTable);
   JSData toJSONFetchItem(
-    QueryExact& findQuery, QueryResultOptions& projector
+    QueryFind& findQuery, QueryResultOptions& projector
   );
   // Redacts object ids and hashes.
   static void correctData(JSData& row);

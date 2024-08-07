@@ -67,9 +67,6 @@ void MainFunctions::initializeBuildFlags() {
 #ifdef MACRO_use_open_ssl
   global.flagSSLAvailable = true;
 #endif
-#ifdef MACRO_use_MongoDB
-  global.flagDatabaseExternal = true;
-#endif
 }
 
 int MainFunctions::mainWithoutExceptions(int argc, char** argv) {

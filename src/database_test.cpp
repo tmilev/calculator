@@ -66,7 +66,7 @@ bool Database::Test::loadFromJSON() {
     << global.fatal;
   }
   DatabaseInternalServer& server = Database::get().localDatabase.server;
-  QueryExact query;
+  QueryFind query;
   query.nestedLabels.addOnTop(DatabaseStrings::labelId);
   // The id from file test/database/test_local.json
   query.exactValue = "d739b82f2492ed095fa15a52";
@@ -113,11 +113,11 @@ bool Database::Test::findWithOptions(DatabaseType databaseType) {
   << Logger::endL;
   Database::Test tester(databaseType);
   tester.createAdminAccount();
-  QueryExact queryExact;
+  QueryFind queryExact;
   queryExact.exactValue = "default";
   queryExact.nestedLabels.addOnTop("username");
   queryExact.collection = "users";
-  QueryOneOfExactly query;
+  QueryFindOneOf query;
   query.queries.addOnTop(queryExact);
   QueryResultOptions options;
   options.fieldsProjectedAway.addOnTop("_id");
@@ -211,13 +211,13 @@ bool Database::Test::createAdminAccount() {
   return true;
 }
 
-bool QuerySet::Test::all() {
-  QuerySet::Test::basics(DatabaseType::fallback);
-  QuerySet::Test::basics(DatabaseType::internal);
+bool QueryUpdate::Test::all() {
+  QueryUpdate::Test::basics(DatabaseType::fallback);
+  QueryUpdate::Test::basics(DatabaseType::internal);
   return true;
 }
 
-void QuerySet::Test::updateNoFail(QueryExact& find, QuerySet updater) {
+void QueryUpdate::Test::updateNoFail(QueryFind& find, QueryUpdate updater) {
   std::stringstream comments;
   if (!Database::get().updateOne(find, updater, true, &comments)) {
     global.fatal
@@ -231,10 +231,10 @@ void QuerySet::Test::updateNoFail(QueryExact& find, QuerySet updater) {
   }
 }
 
-void QuerySet::Test::findNoFail(QueryExact& find, JSData& result) {
+void QueryUpdate::Test::findNoFail(QueryFind& find, JSData& result) {
   std::stringstream comments;
   List<JSData> output;
-  QueryOneOfExactly wrapperQuery;
+  QueryFindOneOf wrapperQuery;
   wrapperQuery.queries.addOnTop(find);
   bool success =
   Database::get().find(wrapperQuery, nullptr, output, &comments);
@@ -249,7 +249,7 @@ void QuerySet::Test::findNoFail(QueryExact& find, JSData& result) {
   result = output[0];
 }
 
-void QuerySet::Test::matchKeyValue(
+void QueryUpdate::Test::matchKeyValue(
   const JSData& mustContain, const JSData& mustBeContained
 ) {
   JSData empty;
@@ -274,29 +274,29 @@ void QuerySet::Test::matchKeyValue(
   }
 }
 
-bool QuerySet::Test::basics(DatabaseType databaseType) {
-  STACK_TRACE("QuerySet::Test::basics");
+bool QueryUpdate::Test::basics(DatabaseType databaseType) {
+  STACK_TRACE("QueryUpdate::Test::basics");
   Database::Test tester(databaseType);
-  QueryExact find;
+  QueryFind find;
   find.collection = DatabaseStrings::tableUsers;
   find.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
   find.exactValue = "ttt";
-  QuerySet updater;
+  QueryUpdate updater;
   updater.fromJSONStringNoFail(
     "[{key:[\"username\"], value:\"ttt\"}, "
     "{key:[\"a\", \"b\", \"c\"], value:\"123\"}]"
   );
-  QuerySet::Test::updateNoFail(find, updater);
+  QueryUpdate::Test::updateNoFail(find, updater);
   JSData found;
-  QuerySet::Test::findNoFail(find, found);
+  QueryUpdate::Test::findNoFail(find, found);
   JSData expected;
   expected.parseNoFail("{username:\"ttt\",a:{b:{c:\"123\"}}}", true);
-  QuerySet::Test::matchKeyValue(found, expected);
+  QueryUpdate::Test::matchKeyValue(found, expected);
   updater.fromJSONStringNoFail(
     "[{key:[\"$set\", \"a.b\",\"$set.a.b\"], value:\"123\"}]"
   );
-  QuerySet::Test::updateNoFail(find, updater);
-  QuerySet::Test::findNoFail(find, found);
+  QueryUpdate::Test::updateNoFail(find, updater);
+  QueryUpdate::Test::findNoFail(find, found);
   expected.parseNoFail(
     "{"
     "username:\"ttt\",a:{b:{c:\"123\"}}, "
@@ -304,6 +304,6 @@ bool QuerySet::Test::basics(DatabaseType databaseType) {
     "}",
     true
   );
-  QuerySet::Test::matchKeyValue(found, expected);
+  QueryUpdate::Test::matchKeyValue(found, expected);
   return true;
 }

@@ -705,12 +705,12 @@ bool Course::Test::setDeadlines(DatabaseType databaseType) {
   );
   WebAPIResponse::setProblemDeadline();
   std::string wanted = "2000-00-00";
-  QueryExact finder;
+  QueryFind finder;
   finder.collection = DatabaseStrings::tableDeadlines;
   finder.nestedLabels.addOnTop(DatabaseStrings::labelDeadlinesSchema);
   finder.exactValue = "deadlinesdefaultCOURSE";
   JSData resultData;
-  QuerySet::Test::findNoFail(finder, resultData);
+  QueryUpdate::Test::findNoFail(finder, resultData);
   std::string result =
   resultData[DatabaseStrings::labelDeadlines][
     "test/problems/interval_notation_1.html"

@@ -7,11 +7,11 @@
 
 std::string Database::name = "local";
 
-QueryExact::QueryExact() {
+QueryFind::QueryFind() {
   this->maximumNumberOfItems = 1;
 }
 
-QueryExact::QueryExact(
+QueryFind::QueryFind(
   const std::string& desiredCollection,
   const std::string& label,
   const std::string& desiredValue
@@ -22,7 +22,7 @@ QueryExact::QueryExact(
   this->maximumNumberOfItems = 1;
 }
 
-QueryExact::QueryExact(
+QueryFind::QueryFind(
   const std::string& desiredCollection,
   const List<std::string>& desiredLabels,
   const std::string& desiredValue
@@ -34,7 +34,7 @@ QueryExact::QueryExact(
   this->maximumNumberOfItems = 1;
 }
 
-bool QueryExact::isEmpty() const {
+bool QueryFind::isEmpty() const {
   if (this->collection == "") {
     return true;
   }
@@ -44,7 +44,7 @@ bool QueryExact::isEmpty() const {
   return false;
 }
 
-std::string QueryExact::toString() const {
+std::string QueryFind::toString() const {
   std::stringstream out;
   out
   << "collection: "
@@ -54,7 +54,7 @@ std::string QueryExact::toString() const {
   return out.str();
 }
 
-JSData QueryExact::toJSON() const {
+JSData QueryFind::toJSON() const {
   JSData result;
   JSData key;
   key = this->nestedLabels;
@@ -65,10 +65,10 @@ JSData QueryExact::toJSON() const {
   return result;
 }
 
-bool QueryExact::fromJSON(
+bool QueryFind::fromJSON(
   const JSData& source, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("QueryExact::fromJSON");
+  STACK_TRACE("QueryFind::fromJSON");
   (void) commentsOnFailure;
   this->exactValue = JSData();
   this->maximumNumberOfItems = 1;
@@ -95,7 +95,7 @@ bool QueryExact::fromJSON(
   return true;
 }
 
-bool QueryExact::extractNestedKeysFromJSON(
+bool QueryFind::extractNestedKeysFromJSON(
   const JSData& input, std::stringstream* commentsOnFailure
 ) {
   this->nestedLabels.clear();
@@ -117,7 +117,7 @@ bool QueryExact::extractNestedKeysFromJSON(
   return true;
 }
 
-JSData QueryExact::toJSONCombineKeysAndValue() const {
+JSData QueryFind::toJSONCombineKeysAndValue() const {
   JSData result;
   result.elementType = JSData::Type::tokenObject;
   if (this->nestedLabels.size == 0) {
@@ -137,18 +137,18 @@ JSData QueryExact::toJSONCombineKeysAndValue() const {
   return result;
 }
 
-void QueryExact::setLabelsValue(
+void QueryFind::setLabelsValue(
   const List<std::string>& labels, const std::string& desiredValue
 ) {
   this->exactValue = desiredValue;
   this->nestedLabels = labels;
 }
 
-std::string QueryExact::concatenateNestedLabels() const {
+std::string QueryFind::concatenateNestedLabels() const {
   return StringRoutines::join(this->nestedLabels, ",");
 }
 
-void QueryExact::setLabelValue(
+void QueryFind::setLabelValue(
   const std::string& label, const std::string& desiredValue
 ) {
   this->exactValue = desiredValue;
@@ -156,10 +156,10 @@ void QueryExact::setLabelValue(
   this->nestedLabels[0] = label;
 }
 
-bool QueryExact::fromString(
+bool QueryFind::fromString(
   const std::string& input, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("QueryExact::fromString");
+  STACK_TRACE("QueryFind::fromString");
   JSData querySource;
   if (!querySource.parse(input, false, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -319,7 +319,7 @@ bool Database::deleteOneEntry(
     }
     return false;
   }
-  QueryExact findQuery(
+  QueryFind findQuery(
     labels[0],
     List<std::string>({DatabaseStrings::labelId}),
     labels[1]
@@ -333,90 +333,23 @@ bool Database::deleteOneEntry(
 }
 
 bool Database::deleteOneEntryById(
-  const QueryExact& findQuery, std::stringstream* commentsOnFailure
+  const QueryFind& findQuery, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::deleteOneEntryById");
-#ifdef MACRO_use_MongoDB
-  JSData foundItem;
-  if (!this->findOne(findQuery, foundItem, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Query: "
-      << findQuery.toJSON().toString(nullptr)
-      << " returned no hits in table: "
-      << findQuery.collection;
-    }
-    return false;
-  }
-  MongoQuery queryInsertIntoDeletedTable;
-  JSData deletedEntry;
-  deletedEntry["deleted"] = foundItem;
-  queryInsertIntoDeletedTable.collectionName = DatabaseStrings::tableDeleted;
-  if (
-    !queryInsertIntoDeletedTable.insertOne(deletedEntry, commentsOnFailure)
-  ) {
-    return false;
-  }
-  MongoQuery query;
-  query.findQuery = findQuery.toJSON().toString(nullptr);
-  query.collectionName = findQuery.collection;
-  return query.removeOne(commentsOnFailure);
-#else
   (void) findQuery;
   if (commentsOnFailure != nullptr) {
     *commentsOnFailure
     << "deleteOneEntryById: project compiled without mongoDB support. ";
   }
   return false;
-#endif
 }
 
 bool Database::deleteOneEntryUnsetUnsecure(
-  const QueryExact& findQuery,
+  const QueryFind& findQuery,
   List<std::string>& selector,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::deleteOneEntryUnsetUnsecure");
-#ifdef MACRO_use_MongoDB
-  std::string selectorString = QueryExact::getLabelFromNestedLabels(selector);
-  JSData foundItem;
-  QueryResultOptions options;
-  options.fieldsToProjectTo.addListOnTop(selector);
-  options.fieldsToProjectTo.addOnTop(selectorString);
-  bool didFindItem =
-  Database::get().findOneWithOptions(
-    findQuery, options, foundItem, commentsOnFailure, nullptr
-  );
-  if (!didFindItem) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Query: "
-      << findQuery.toJSON().toString(nullptr)
-      << " returned no hits in table: "
-      << findQuery.collection;
-    }
-    return false;
-  }
-  MongoQuery queryBackUp;
-  queryBackUp.collectionName = DatabaseStrings::tableDeleted;
-  JSData backUp;
-  backUp["deleted"] = foundItem;
-  if (!queryBackUp.insertOne(backUp, commentsOnFailure)) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Failed to insert backup: "
-      << backUp.toString(nullptr);
-    }
-    return false;
-  }
-  MongoQuery query;
-  query.findQuery = findQuery.toJSON().toString(nullptr);
-  query.collectionName = findQuery.collection;
-  std::stringstream updateQueryStream;
-  updateQueryStream << "{\"$unset\": {\"" << selectorString << "\":\"\"}}";
-  query.updateQuery = updateQueryStream.str();
-  return query.updateOneNoOptions(commentsOnFailure);
-#else
   (void) findQuery;
   (void) selector;
   if (commentsOnFailure != nullptr) {
@@ -425,11 +358,10 @@ bool Database::deleteOneEntryUnsetUnsecure(
     << "project compiled without mongoDB support. ";
   }
   return false;
-#endif
 }
 
 bool Database::findExactlyOne(
-  const QueryOneOfExactly& query,
+  const QueryFindOneOf& query,
   const QueryResultOptions* options,
   JSData& output,
   std::stringstream* commentsOnFailure
@@ -446,7 +378,7 @@ bool Database::findExactlyOne(
 }
 
 bool Database::find(
-  const QueryOneOfExactly& query,
+  const QueryFindOneOf& query,
   const QueryResultOptions* options,
   List<JSData>& output,
   std::stringstream* commentsOnFailure
@@ -529,8 +461,8 @@ bool Database::checkInitialization() {
 }
 
 bool Database::updateOne(
-  const QueryExact& findQuery,
-  const QuerySet& dataToMerge,
+  const QueryFind& findQuery,
+  const QueryUpdate& dataToMerge,
   bool createIfNotFound,
   std::stringstream* commentsOnFailure
 ) {
@@ -592,7 +524,7 @@ bool Database::shutdown(std::stringstream* commentsOnFailure) {
 }
 
 bool Database::initialize(int maximumConnections) {
-  STACK_TRACE("Database::initializeServer");
+  STACK_TRACE("Database::initialize");
   this->user.owner = this;
   this->flagInitializedServer = true;
   if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
@@ -656,8 +588,8 @@ bool Database::fetchTable(
   if (totalItems != nullptr) {
     *totalItems = - 1;
   }
-  QueryOneOfExactly query;
-  QueryExact oneQuery;
+  QueryFindOneOf query;
+  QueryFind oneQuery;
   List<JSData> rowsJSON;
   oneQuery.maximumNumberOfItems = 200;
   oneQuery.collection = tableName;
@@ -686,7 +618,7 @@ bool Database::fetchTable(
 JSData Database::toJSONDatabaseFetch(const std::string& findQuery) {
   STACK_TRACE("Database::toJSONDatabaseFetch");
   JSData result;
-  QueryExact queryExact;
+  QueryFind queryExact;
   std::stringstream commentsOnFailure;
   if (!queryExact.fromString(findQuery, &commentsOnFailure)) {
     result[DatabaseStrings::error] = commentsOnFailure.str();
@@ -697,7 +629,7 @@ JSData Database::toJSONDatabaseFetch(const std::string& findQuery) {
 }
 
 JSData Database::toJSONFetchItem(
-  QueryExact& findQuery, QueryResultOptions& projector
+  QueryFind& findQuery, QueryResultOptions& projector
 ) {
   STACK_TRACE("Database::toJSONFetchItem");
   if (findQuery.collection == "") {
@@ -711,7 +643,7 @@ JSData Database::toJSONFetchItem(
   List<JSData> rowsJSON;
   long long totalItems = 0;
   std::stringstream comments;
-  QueryOneOfExactly query;
+  QueryFindOneOf query;
   query.queries.addOnTop(findQuery);
   if (!Database::find(query, &projector, rowsJSON, &comments)) {
     result["error"] = "Failure in toJSONFetchItem. " + comments.str();
@@ -801,12 +733,12 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   JSData result;
   std::stringstream comments;
   result["currentTable"] = currentTable;
-  QueryExact findQuery;
+  QueryFind findQuery;
   QueryResultOptions projector;
   projector = Database::getStandardProjectors(currentTable);
   findQuery.collection = currentTable;
   findQuery.maximumNumberOfItems = 200;
-  QueryOneOfExactly query(findQuery);
+  QueryFindOneOf query(findQuery);
   List<JSData> rowsJSON;
   long long totalItems = 0;
   if (!Database::find(query, &projector, rowsJSON, &comments)) {
@@ -912,7 +844,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
   outputFile << "module.exports = {modifiableDatabaseData};";
 }
 
-JSData QuerySetOnce::toJSON() const {
+JSData QueryUpdateOnce::toJSON() const {
   JSData result;
   JSData key;
   key = this->nestedLabels;
@@ -921,7 +853,7 @@ JSData QuerySetOnce::toJSON() const {
   return result;
 }
 
-bool QuerySetOnce::fromJSON(
+bool QueryUpdateOnce::fromJSON(
   const JSData& data, std::stringstream* commentsOnStream
 ) {
   if (!data.hasKey(DatabaseStrings::labelValue)) {
@@ -939,8 +871,8 @@ bool QuerySetOnce::fromJSON(
   return true;
 }
 
-void QuerySetOnce::updateOneEntry(JSData& modified) const {
-  STACK_TRACE("QuerySetOnce::updateOneEntry");
+void QueryUpdateOnce::updateOneEntry(JSData& modified) const {
+  STACK_TRACE("QueryUpdateOnce::updateOneEntry");
   if (this->nestedLabels.size == 0) {
     modified = this->value;
     return;
@@ -952,10 +884,10 @@ void QuerySetOnce::updateOneEntry(JSData& modified) const {
   output->setKeyValue(*this->nestedLabels.lastObject(), this->value);
 }
 
-QuerySet::QuerySet() {}
+QueryUpdate::QueryUpdate() {}
 
-void QuerySet::fromJSONNoFail(const JSData& inputValue) {
-  STACK_TRACE("QuerySet::fromJSONNoFail");
+void QueryUpdate::fromJSONNoFail(const JSData& inputValue) {
+  STACK_TRACE("QueryUpdate::fromJSONNoFail");
   std::stringstream comments;
   bool mustBeTrue = this->fromJSON(inputValue, &comments);
   if (!mustBeTrue) {
@@ -963,7 +895,7 @@ void QuerySet::fromJSONNoFail(const JSData& inputValue) {
   }
 }
 
-void QuerySet::fromJSONStringNoFail(const std::string& inputValue) {
+void QueryUpdate::fromJSONStringNoFail(const std::string& inputValue) {
   std::stringstream comments;
   bool mustBeTrue = this->fromJSONString(inputValue, &comments);
   if (!mustBeTrue) {
@@ -975,7 +907,7 @@ void QuerySet::fromJSONStringNoFail(const std::string& inputValue) {
   }
 }
 
-bool QuerySet::fromJSONString(
+bool QueryUpdate::fromJSONString(
   const std::string& inputValue, std::stringstream* commentsOnFailure
 ) {
   JSData input;
@@ -985,58 +917,58 @@ bool QuerySet::fromJSONString(
   return this->fromJSON(input, commentsOnFailure);
 }
 
-void QuerySet::addKeyValueStringPair(
+void QueryUpdate::addKeyValueStringPair(
   const std::string& key, const std::string& value
 ) {
-  QuerySetOnce querySetOnce;
+  QueryUpdateOnce querySetOnce;
   querySetOnce.nestedLabels.addOnTop(key);
   querySetOnce.value = value;
   this->data.addOnTop(querySetOnce);
 }
 
-void QuerySet::addKeyValuePair(
+void QueryUpdate::addKeyValuePair(
   const std::string& key, const JSData& value
 ) {
-  QuerySetOnce querySetOnce;
+  QueryUpdateOnce querySetOnce;
   querySetOnce.nestedLabels.addOnTop(key);
   querySetOnce.value = value;
   this->data.addOnTop(querySetOnce);
 }
 
-void QuerySet::addNestedKeyValuePair(
+void QueryUpdate::addNestedKeyValuePair(
   const List<std::string>& nestedKeys, const JSData& value
 ) {
-  QuerySetOnce querySetOnce;
+  QueryUpdateOnce querySetOnce;
   querySetOnce.nestedLabels = nestedKeys;
   querySetOnce.value = value;
   this->data.addOnTop(querySetOnce);
 }
 
-void QuerySet::addValue(const JSData& value) {
-  QuerySetOnce querySetOnce;
+void QueryUpdate::addValue(const JSData& value) {
+  QueryUpdateOnce querySetOnce;
   querySetOnce.value = value;
   this->data.addOnTop(querySetOnce);
 }
 
-std::string QuerySet::toStringDebug() const {
+std::string QueryUpdate::toStringDebug() const {
   std::stringstream out;
   out << this->toJSON().toString(nullptr);
   return out.str();
 }
 
-JSData QuerySet::toJSON() const {
+JSData QueryUpdate::toJSON() const {
   JSData result;
   result.makeEmptyArray();
-  for (const QuerySetOnce& set : this->data) {
+  for (const QueryUpdateOnce& set : this->data) {
     result.listObjects.addOnTop(set.toJSON());
   }
   return result;
 }
 
-bool QuerySet::fromJSON(
+bool QueryUpdate::fromJSON(
   const JSData& inputValue, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("QuerySet::fromJSON");
+  STACK_TRACE("QueryUpdate::fromJSON");
   if (inputValue.elementType != JSData::Type::tokenArray) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -1047,7 +979,7 @@ bool QuerySet::fromJSON(
   }
   this->data.clear();
   for (const JSData& entry : inputValue.listObjects) {
-    QuerySetOnce querySetOnce;
+    QueryUpdateOnce querySetOnce;
     if (!querySetOnce.fromJSON(entry, commentsOnFailure)) {
       return false;
     }
@@ -1056,8 +988,8 @@ bool QuerySet::fromJSON(
   return true;
 }
 
-void QuerySet::mergeData(JSData& toMergeInto) const {
-  for (const QuerySetOnce& set : this->data) {
+void QueryUpdate::mergeData(JSData& toMergeInto) const {
+  for (const QueryUpdateOnce& set : this->data) {
     set.updateOneEntry(toMergeInto);
   }
 }
@@ -1160,27 +1092,27 @@ bool QueryFindAndUpdate::fromJSON(
   return this->update.fromJSON(input["update"], commentsOnFailure);
 }
 
-QueryOneOfExactly::QueryOneOfExactly() {}
+QueryFindOneOf::QueryFindOneOf() {}
 
-QueryOneOfExactly::QueryOneOfExactly(const QueryExact& query) {
+QueryFindOneOf::QueryFindOneOf(const QueryFind& query) {
   this->queries.addOnTop(query);
 }
 
-JSData QueryOneOfExactly::toJSON() const {
+JSData QueryFindOneOf::toJSON() const {
   STACK_TRACE("QueryOneOfExactly::toJSON");
   JSData result;
   JSData queryJSON;
   queryJSON.makeEmptyArray();
-  for (const QueryExact& query : this->queries) {
+  for (const QueryFind& query : this->queries) {
     queryJSON.listObjects.addOnTop(query.toJSON());
   }
   result["findMany"] = queryJSON;
   return result;
 }
 
-std::string QueryOneOfExactly::collection() const {
+std::string QueryFindOneOf::collection() const {
   std::string collection = "";
-  for (const QueryExact& query : this->queries) {
+  for (const QueryFind& query : this->queries) {
     if (query.collection == "") {
       return "";
     }
@@ -1194,7 +1126,7 @@ std::string QueryOneOfExactly::collection() const {
   return collection;
 }
 
-bool QueryOneOfExactly::fromJSON(
+bool QueryFindOneOf::fromJSON(
   const JSData& input, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("QueryOneOfExactly::fromJSON");
@@ -1206,7 +1138,7 @@ bool QueryOneOfExactly::fromJSON(
   }
   const JSData& findMany = input.objects.getValueNoFail("findMany");
   for (const JSData& query : findMany.listObjects) {
-    QueryExact queryExact;
+    QueryFind queryExact;
     if (!queryExact.fromJSON(query, commentsOnFailure)) {
       return false;
     }

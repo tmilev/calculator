@@ -572,6 +572,7 @@ class Page {
       inputPage = this.defaultPage;
     }
     if (inputPage === this.currentPage) {
+      this.selectPageFunction(inputPage);
       return;
     }
     this.currentPage = inputPage;

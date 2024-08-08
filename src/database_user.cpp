@@ -742,8 +742,9 @@ bool UserCalculator::computeAndStoreActivationStats(
       *commentsOnFailure
       << "The web address is missing: "
       << "the administrator of this instance of the calculator needs to "
-      << "set up entry webAddress in file: "
-      << global.configurationFileName;
+      << "set up entry webAddress in file: ["
+      << global.configurationFileName
+      << "]. ";
     }
     return false;
   }

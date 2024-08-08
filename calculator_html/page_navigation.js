@@ -325,12 +325,20 @@ class Page {
   }
 
   showProfilePicture() {
-    document.getElementById(ids.domElements.divProfilePicture).classList.remove("divInvisible");
-    document.getElementById(ids.domElements.divProfilePicture).classList.add("divVisible");
+    document.getElementById(
+      ids.domElements.divProfilePicture
+    ).classList.remove("divInvisible");
+    document.getElementById(
+      ids.domElements.divProfilePicture
+    ).classList.add("divVisible");
     if (this.user.googleProfile.picture === undefined) {
       return;
     }
-    if (document.getElementById(ids.domElements.divProfilePicture).children.length > 0) {
+    if (
+      document.getElementById(
+        ids.domElements.divProfilePicture
+      ).children.length > 0
+    ) {
       return;
     }
     try {

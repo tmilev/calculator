@@ -37,8 +37,8 @@ bool EmailRoutines::sendEmailWithMailGun(
       *commentsOnFailure
       << "Could not find mailgun key. "
       << "The key must be located in file: \n"
-      << "certificates/mailgun-api.txt\n"
-      << " The file must be uploaded manually to the server. ";
+      << "[certificates/mailgun-api.txt]. \n"
+      << "The file must be uploaded manually to the server. ";
     }
     return false;
   }
@@ -76,7 +76,8 @@ bool EmailRoutines::sendEmailWithMailGun(
   }
   // WARNING: calling command line
   // that includes user inputs.
-  // Those MUST be sanitized (else an attacker would use username with "
+  // Those MUST be sanitized,
+  // else an attacker would use username with "
   // characters
   // to execute arbitrary code.
   commandToExecute

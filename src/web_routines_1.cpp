@@ -817,12 +817,12 @@ bool Crypto::verifyJWTagainstKnownKeys(
   );
 }
 
-bool WebClient::verifyRecaptcha(
+bool WebAPIResponse::verifyRecaptcha(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNONsensitive,
   std::stringstream* commentsGeneralSensitive
 ) {
-  STACK_TRACE("WebClient::VerifyRecaptcha");
+  STACK_TRACE("WebAPIResponse::verifyRecaptcha");
   if (global.flagDebugLogin) {
     if (commentsGeneralNONsensitive != nullptr) {
       *commentsGeneralNONsensitive
@@ -869,14 +869,15 @@ bool WebClient::verifyRecaptcha(
   << "&"
   << "secret="
   << secret;
-  this->flagDoUseGET = true;
-  this->url = "https://www.google.com/recaptcha/api/siteverify";
-  this->url += "?" + messageToSendStream.str();
-  this->peerAddress = "www.google.com";
-  this->desiredPortOrService = "https";
-  this->postMessageToSend = messageToSendStream.str();
-  this->fetchWebPage(commentsOnFailure, commentsGeneralSensitive);
-  std::string response = this->bodyReceived;
+  WebClient webClient;
+  webClient.flagDoUseGET = true;
+  webClient.url = "https://www.google.com/recaptcha/api/siteverify";
+  webClient.url += "?" + messageToSendStream.str();
+  webClient.peerAddress = "www.google.com";
+  webClient.desiredPortOrService = "https";
+  webClient.postMessageToSend = messageToSendStream.str();
+  webClient.fetchWebPage(commentsOnFailure, commentsGeneralSensitive);
+  std::string response = webClient.bodyReceived;
   JSData jsonParser;
   if (!jsonParser.parse(response, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
@@ -929,6 +930,11 @@ bool WebAPIResponse::processForgotLogin() {
   STACK_TRACE("WebAPIResponse::processForgotLogin");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
+  return global.response.writeResponse(result, false);
+}
+
+void WebAPIResponse::forgotLogin(JSData& result) {
+  STACK_TRACE("WebAPIResponse::forgotLogin");
   std::stringstream out;
   if (!global.userDefaultHasAdminRights()) {
     Database::get().user.logoutViaDatabase();
@@ -938,10 +944,9 @@ bool WebAPIResponse::processForgotLogin() {
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("email"), false
   );
-  WebClient webClient;
-  if (!webClient.verifyRecaptcha(&out, &out, nullptr)) {
+  if (!WebAPIResponse::verifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::Result::comments] = out.str();
-    return global.response.writeResponse(result, false);
+    return;
   }
   bool userExists = false;
   bool databaseIsOK = false;
@@ -949,7 +954,7 @@ bool WebAPIResponse::processForgotLogin() {
   if (!databaseIsOK) {
     out << "Database is down. ";
     result[WebAPI::Result::error] = out.str();
-    return global.response.writeResponse(result, false);
+    return;
   }
   if (!userExists) {
     out
@@ -957,12 +962,12 @@ bool WebAPIResponse::processForgotLogin() {
     << user.email
     << " in our records. ";
     result[WebAPI::Result::comments] = out.str();
-    return global.response.writeResponse(result, false);
+    return;
   }
   if (!user.loadFromDatabase(&out, &out)) {
     out << "Failed to fetch user info for email: " << user.email << ". ";
     result[WebAPI::Result::comments] = out.str();
-    return global.response.writeResponse(result, false);
+    return;
   }
   out << "Your email is on record. ";
   std::stringstream commentsOnError;
@@ -970,103 +975,15 @@ bool WebAPIResponse::processForgotLogin() {
   if (global.flagDebugLogin) {
     out << "Setting email with debug information. ";
     success =
-    this->owner->doSetEmail(
-      user, &commentsOnError, &out, &commentsOnError
-    );
+    this->doSetEmail(user, &commentsOnError, &out, &commentsOnError);
   } else {
-    success =
-    this->owner->doSetEmail(user, &commentsOnError, &out, nullptr);
+    success = this->doSetEmail(user, &commentsOnError, &out, nullptr);
   }
   if (!success) {
     result[WebAPI::Result::error] = commentsOnError.str();
   }
   out << "Response time: " << global.getElapsedSeconds() << " second(s). ";
   result[WebAPI::Result::comments] = out.str();
-  return global.response.writeResponse(result, false);
-}
-
-JSData WebWorker::getSignUpRequestResult() {
-  STACK_TRACE("WebWorker::getSignUpRequestResult");
-  JSData result;
-  std::stringstream errorStream;
-  std::stringstream generalCommentsStream;
-  Database::get().user.logoutViaDatabase();
-  UserCalculator user;
-  user.username =
-  HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput("desiredUsername"), false
-  );
-  user.email =
-  HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput("email"), false
-  );
-  std::stringstream outputStream;
-  WebClient webClient;
-  if (
-    !webClient.verifyRecaptcha(
-      &errorStream, &generalCommentsStream, nullptr
-    )
-  ) {
-    result[WebAPI::Result::error] = errorStream.str();
-    result[WebAPI::Result::comments] = generalCommentsStream.str();
-    return result;
-  }
-  if (user.username == "") {
-    errorStream << "Empty username not allowed. ";
-    result[WebAPI::Result::error] = errorStream.str();
-    result[WebAPI::Result::comments] = generalCommentsStream.str();
-    return result;
-  }
-  if (!EmailRoutines::isOKEmail(user.email, &generalCommentsStream)) {
-    errorStream << "Your email address does not appear to be valid. ";
-    result[WebAPI::Result::error] = errorStream.str();
-    result[WebAPI::Result::comments] = generalCommentsStream.str();
-    return result;
-  }
-  bool userExists = false;
-  bool databaseIsOK = false;
-  user.exists(userExists, databaseIsOK, nullptr);
-  if (!databaseIsOK) {
-    errorStream << "Database is down. ";
-    result[WebAPI::Result::error] = errorStream.str();
-    result[WebAPI::Result::comments] = generalCommentsStream.str();
-    return result;
-  } else if (!userExists) {
-    errorStream
-    << "Either the username ("
-    << user.username
-    << ") or the email ("
-    << user.email
-    << ") you requested is already taken.";
-    result[WebAPI::Result::error] = errorStream.str();
-    result[WebAPI::Result::comments] = generalCommentsStream.str();
-    return result;
-  } else {
-    outputStream
-    << "Username ("
-    << user.username
-    << ") with email ("
-    << user.email
-    << ") is available.";
-  }
-  if (!user.storeToDatabase(false, &errorStream)) {
-    errorStream << "Failed to store error stream. ";
-    result[WebAPI::Result::error] = errorStream.str();
-    result[WebAPI::Result::comments] = generalCommentsStream.str();
-    result[WebAPI::Result::resultLabel] = outputStream.str();
-    return result;
-  }
-  std::stringstream* adminOutputStream = nullptr;
-  if (global.flagDebugLogin) {
-    adminOutputStream = &generalCommentsStream;
-  }
-  this->doSetEmail(
-    user, &errorStream, &generalCommentsStream, adminOutputStream
-  );
-  result[WebAPI::Result::error] = errorStream.str();
-  result[WebAPI::Result::comments] = generalCommentsStream.str();
-  result[WebAPI::Result::resultHtml] = outputStream.str();
-  return result;
 }
 
 bool WebWorker::writeToBodyJSON(const JSData& result) {

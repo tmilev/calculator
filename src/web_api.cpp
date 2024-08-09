@@ -5,6 +5,7 @@
 #include "string_constants.h"
 #include "user.h"
 #include "web_api.h"
+#include "web_client.h"
 #include "webserver.h"
 
 std::string WebAPIResponse::youHaveReachedTheBackend =
@@ -272,7 +273,7 @@ bool WebAPIResponse::processSignUp() {
   this->owner->setHeaderOKNoContentLength("");
   return
   global.response.writeResponse(
-    this->owner->getSignUpRequestResult(), false
+    WebAPIResponse::getSignUpRequestResult(), false
   );
 }
 
@@ -280,19 +281,27 @@ bool WebAPIResponse::processChangePassword(
   const std::string& reasonForNoAuthentication
 ) {
   STACK_TRACE("WebAPIResponse::processChangePassword");
-  (void) reasonForNoAuthentication;
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
+  WebAPIResponse::changePassword(result, reasonForNoAuthentication);
+  return global.response.writeResponse(result);
+}
+
+void WebAPIResponse::changePassword(
+  JSData& result, const std::string& reasonForNoAuthentication
+) {
+  STACK_TRACE("WebAPIResponse::changePassword");
+  (void) reasonForNoAuthentication;
   UserCalculatorData& user = global.userDefault;
   user.enteredAuthenticationToken = "";
   if (!global.flagUsingSSLinCurrentConnection) {
     result[WebAPI::Result::error] = "Please use secure connection.";
-    return global.response.writeResponse(result);
+    return;
   }
   if (!global.flagLoggedIn) {
     result[WebAPI::Result::error] =
     "Please enter (old) password [correctly]. " + reasonForNoAuthentication;
-    return global.response.writeResponse(result);
+    return;
   }
   std::string newPassword =
   HtmlRoutines::convertStringToURLString(
@@ -330,21 +339,21 @@ bool WebAPIResponse::processChangePassword(
     Database::get().find(queryEmailTaken, nullptr, list, nullptr);
     if (!success) {
       result[WebAPI::Result::error] = "Database operation failed. ";
-      return global.response.writeResponse(result);
+      return;
     }
     if (list.size > 0) {
       result[WebAPI::Result::error] =
       "It appears the email is already taken. ";
-      return global.response.writeResponse(result);
+      return;
     }
   }
   if (newPassword == "" && reenteredPassword == "" && newEmail != "") {
-    result = this->owner->setEmail(newEmail);
-    return global.response.writeResponse(result);
+    result = WebAPIResponse::setEmail(newEmail);
+    return;
   }
   if (newPassword != reenteredPassword) {
     result[WebAPI::Result::error] = "Passwords don't match. ";
-    return global.response.writeResponse(result);
+    return;
   }
   std::stringstream commentsOnFailure;
   std::string newAuthenticationToken;
@@ -357,7 +366,7 @@ bool WebAPIResponse::processChangePassword(
     )
   ) {
     result[WebAPI::Result::error] = commentsOnFailure.str();
-    return global.response.writeResponse(result);
+    return;
   }
   QueryFind findQuery(
     DatabaseStrings::tableUsers,
@@ -376,7 +385,7 @@ bool WebAPIResponse::processChangePassword(
   ) {
     result[WebAPI::Result::error] =
     "Failed to set activationToken: " + commentsOnFailure.str();
-    return global.response.writeResponse(result);
+    return;
   }
   std::stringstream out;
   out << "Password change successful.";
@@ -393,7 +402,96 @@ bool WebAPIResponse::processChangePassword(
     << "'\" />";
   }
   result[WebAPI::Result::resultHtml] = out.str();
-  return global.response.writeResponse(result);
+}
+
+JSData WebAPIResponse::setEmail(const std::string& input) {
+  STACK_TRACE("WebAPIResponse::setEmail");
+  (void) input;
+  JSData result;
+  if (global.hasDisabledDatabaseEveryoneIsAdmin()) {
+    result[WebAPI::Result::error] =
+    "Set email failed. " + DatabaseStrings::errorDatabaseDisabled;
+    return result;
+  }
+  std::stringstream out;
+  std::stringstream debugStream;
+  global.userDefault.email = input;
+  std::stringstream* adminOutputStream = nullptr;
+  std::stringstream errorStream;
+  if (global.flagDebugLogin) {
+    adminOutputStream = &errorStream;
+  }
+  if (
+    !WebAPIResponse::doSetEmail(
+      global.userDefault, &errorStream, &out, adminOutputStream
+    )
+  ) {
+    result[WebAPI::Result::error] = errorStream.str();
+  }
+  if (global.flagDebugLogin) {
+    out << "Debug login information. " << debugStream.str();
+  }
+  out << "Response time: " << global.getElapsedSeconds() << " second(s).";
+  result[WebAPI::Result::comments] = out.str();
+  return result;
+}
+
+bool WebAPIResponse::doSetEmail(
+  UserCalculatorData& inputOutputUser,
+  std::stringstream* commentsOnFailure,
+  std::stringstream* commentsGeneralNonSensitive,
+  std::stringstream* commentsGeneralSensitive
+) {
+  STACK_TRACE("WebWorker::doSetEmail");
+  (void) inputOutputUser;
+  (void) commentsOnFailure;
+  (void) commentsGeneralNonSensitive;
+  (void) commentsGeneralSensitive;
+  if (commentsGeneralNonSensitive != nullptr) {
+    *commentsGeneralNonSensitive
+    << "doSetEmail: project compiled without database support. ";
+  }
+  EmailRoutines email;
+  email.toEmail = inputOutputUser.email;
+  if (!email.isOKEmail(email.toEmail, commentsOnFailure)) {
+    return false;
+  }
+  UserCalculator userCopy;
+  userCopy.UserCalculatorData::operator=(inputOutputUser);
+  userCopy.email = inputOutputUser.email;
+  if (
+    !userCopy.computeAndStoreActivationEmailAndTokens(
+      commentsOnFailure, commentsGeneralNonSensitive
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to compute and store your activation email. ";
+    }
+    return false;
+  }
+  email.emailContent = userCopy.activationEmail;
+  email.subject = userCopy.activationEmailSubject;
+  if (commentsGeneralNonSensitive != nullptr) {
+    *commentsGeneralNonSensitive << "Sending email... ";
+  }
+  bool success =
+  email.sendEmailWithMailGun(
+    commentsOnFailure, commentsGeneralNonSensitive, commentsGeneralSensitive
+  );
+  if (commentsGeneralSensitive != nullptr) {
+    if (global.flagDebugLogin) {
+      *commentsGeneralSensitive
+      << "Content of sent email (debug login): "
+      << HtmlRoutines::convertStringToHtmlString(email.emailContent, true);
+    }
+  } else if (commentsGeneralNonSensitive != nullptr) {
+    *commentsGeneralNonSensitive << "Email content not displayed. ";
+  }
+  userCopy.clearAuthenticationTokenAndPassword();
+  userCopy.actualActivationToken = "";
+  inputOutputUser = userCopy;
+  return success;
 }
 
 void WebAPIResponse::initializeCalculatorComputation() {
@@ -1073,4 +1171,87 @@ bool WebAPIResponse::addOneUser(
   currentUser.computeAndStoreActivationStats(
     commentsOnFailure, commentsOnFailure
   );
+}
+
+JSData WebAPIResponse::getSignUpRequestResult() {
+  STACK_TRACE("WebWorker::getSignUpRequestResult");
+  JSData result;
+  std::stringstream errorStream;
+  std::stringstream generalCommentsStream;
+  Database::get().user.logoutViaDatabase();
+  UserCalculator user;
+  user.username =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput("desiredUsername"), false
+  );
+  user.email =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput("email"), false
+  );
+  std::stringstream outputStream;
+  if (
+    !WebAPIResponse::verifyRecaptcha(
+      &errorStream, &generalCommentsStream, nullptr
+    )
+  ) {
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
+    return result;
+  }
+  if (user.username == "") {
+    errorStream << "Empty username not allowed. ";
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
+    return result;
+  }
+  if (!EmailRoutines::isOKEmail(user.email, &generalCommentsStream)) {
+    errorStream << "Your email address does not appear to be valid. ";
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
+    return result;
+  }
+  bool userExists = false;
+  bool databaseIsOK = false;
+  user.exists(userExists, databaseIsOK, nullptr);
+  if (!databaseIsOK) {
+    errorStream << "Database is down. ";
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
+    return result;
+  } else if (!userExists) {
+    errorStream
+    << "Either the username ("
+    << user.username
+    << ") or the email ("
+    << user.email
+    << ") you requested is already taken.";
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
+    return result;
+  } else {
+    outputStream
+    << "Username ("
+    << user.username
+    << ") with email ("
+    << user.email
+    << ") is available.";
+  }
+  if (!user.storeToDatabase(false, &errorStream)) {
+    errorStream << "Failed to store error stream. ";
+    result[WebAPI::Result::error] = errorStream.str();
+    result[WebAPI::Result::comments] = generalCommentsStream.str();
+    result[WebAPI::Result::resultLabel] = outputStream.str();
+    return result;
+  }
+  std::stringstream* adminOutputStream = nullptr;
+  if (global.flagDebugLogin) {
+    adminOutputStream = &generalCommentsStream;
+  }
+  WebAPIResponse::doSetEmail(
+    user, &errorStream, &generalCommentsStream, adminOutputStream
+  );
+  result[WebAPI::Result::error] = errorStream.str();
+  result[WebAPI::Result::comments] = generalCommentsStream.str();
+  result[WebAPI::Result::resultHtml] = outputStream.str();
+  return result;
 }

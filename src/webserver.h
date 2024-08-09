@@ -96,13 +96,6 @@ public:
   int processFileDoesntExist(bool generateLinkToCalculatorOnMissingFile);
   int processFileCantOpen();
   int processFileTooLarge(long fileSize);
-  JSData setEmail(const std::string& input);
-  bool doSetEmail(
-    UserCalculatorData& inputOutputUser,
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneralNonSensitive,
-    std::stringstream* commentsGeneralSensitive
-  );
   int processgetAuthenticationToken(
     const std::string& reasonForNoAuthentication
   );
@@ -180,7 +173,6 @@ public:
     bool& outputDoShowPasswordChangeField
   );
   JSData getClonePageResult();
-  JSData getSignUpRequestResult();
   std::string getAuthenticationToken(
     const std::string& reasonForNoAuthentication = ""
   );

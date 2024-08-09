@@ -48,11 +48,6 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  bool verifyRecaptcha(
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneralNONsensitive,
-    std::stringstream* commentsGeneralSensitive
-  );
   std::string toString() const;
 };
 

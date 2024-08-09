@@ -626,7 +626,7 @@ bool UserOfDatabase::sendActivationEmail(
     << " ... ";
     currentUser.username = emails[i];
     currentUser.email = emails[i];
-    global.server().getActiveWorker().doSetEmail(
+    WebAPIResponse::doSetEmail(
       currentUser,
       commentsOnFailure,
       commentsGeneral,

@@ -13,6 +13,7 @@ bool WebAPIResponse::Test::all() {
   WebAPIResponse::Test::scoredQuiz(DatabaseType::internal);
   WebAPIResponse::Test::solveJSON();
   WebAPIResponse::Test::compareExpressions();
+  WebAPIResponse::Test::changePassword();
   return true;
 }
 
@@ -189,6 +190,22 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
       << "Desired answer must be absent but was given. "
       << global.fatal;
     }
+  }
+  return true;
+}
+
+bool WebAPIResponse::Test::changePassword() {
+  STACK_TRACE("WebAPIResponse::Test::changePassword");
+  Database::Test tester(DatabaseType::internal);
+  Database::Test::createAdminAccount();
+  StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
+  global.flagDebugLogin = true;
+  std::stringstream unused;
+  WebAPIResponse api;
+  JSData forgotLoginJson;
+  api.forgotLogin(forgotLoginJson);
+  if (forgotLoginJson.toString() != "") {
+    global.fatal << "Got login: " << forgotLoginJson << global.fatal;
   }
   return true;
 }

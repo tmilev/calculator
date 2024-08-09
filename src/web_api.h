@@ -79,6 +79,7 @@ public:
   bool processLogout();
   bool processSignUp();
   bool processForgotLogin();
+  void forgotLogin(JSData& result);
   bool processEditPageJSON(bool showSourceRelaxed);
   void reset(WebWorker& inputOwner);
   bool serveResponseFalseIfUnrecognized(
@@ -88,6 +89,22 @@ public:
   static std::string getHtmlTagWithManifest();
   static std::string modifyProblemReport();
   static JSData clonePageResult();
+  static void changePassword(
+    JSData& result, const std::string& reasonForNoAuthentication
+  );
+  static JSData setEmail(const std::string& input);
+  static bool doSetEmail(
+    UserCalculatorData& inputOutputUser,
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneralNonSensitive,
+    std::stringstream* commentsGeneralSensitive
+  );
+  static JSData getSignUpRequestResult();
+  static bool verifyRecaptcha(
+    std::stringstream* commentsOnFailure,
+    std::stringstream* commentsGeneralNONsensitive,
+    std::stringstream* commentsGeneralSensitive
+  );
   static std::string addTeachersSections();
   static std::string addUsersOrEmails(
     const std::string& hostWebAddressWithPort
@@ -184,6 +201,7 @@ public:
     static bool solveJSON();
     static bool compareExpressions();
     static bool addUsersFromData();
+    static bool changePassword();
   };
 };
 

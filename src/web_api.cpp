@@ -365,9 +365,10 @@ bool WebAPIResponse::processChangePassword(
     user.username
   );
   JSData setQuery;
-  setQuery[DatabaseStrings::labelActivationToken] = "activated";
   QueryUpdate doSetQuery;
-  doSetQuery.fromJSONNoFail(setQuery);
+  doSetQuery.addKeyValueStringPair(
+    DatabaseStrings::labelActivationToken, "activated"
+  );
   if (
     !Database::get().updateOne(
       findQuery, doSetQuery, false, &commentsOnFailure

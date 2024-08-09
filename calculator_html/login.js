@@ -135,7 +135,12 @@ class Authenticator {
       debugLogin === "true" || debugLogin === true
     ) {
       globalUser.debugLogin = true;
-      loginInfo += "<b style='color:red'>Debugging login</b>";
+      loginInfo += "<b style='color:purple;'>debugLogin is set. </b> " +
+        "<b style='color:red; font-size:30px' " +
+        "title='Set debugLogin to false in " +
+        "configuration/configuration.json to get rid of this message.'>" +
+        "Unsafe website. Do not create accounts or enter passwords." +
+        "</b>";
     }
     const httpsSupport = parsedAuthentication[
       pathnames.urlFields.requests.httpsSupport

@@ -74,16 +74,11 @@ function loadGlobals() {
   calculator.graphicsNDimensions = require("./graphics_n_dimensions");
   calculator.dynamicJavascript = require("./dynamic_javascript");
   calculator.processMonitoring = require("./process_monitoring");
-  calculator.pageNavigation = require("./page_navigation");
   calculator.equationEditor = require("./equation_editor/src/equation_editor");
   calculator.crypto = require("./crypto");
   // External dependencies:
   require("./external/build/output-min");
-  let pageModule = require("./page_navigation");
-  calculator.mainPage = new pageModule.Page();
-  if (calculator.flagRunMainPage) {
-    calculator.mainPage.initializeCalculatorPage();
-  }
+  calculator.pageNavigation = require("./page_navigation");
 }
 
 function initializeAndLoad() {

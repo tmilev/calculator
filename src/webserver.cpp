@@ -5103,7 +5103,10 @@ void GlobalVariables::configurationProcess() {
     << Logger::endL
     << Logger::red
     << "WARNING: debug login is on. "
+    << "**DO NOT TURN THIS ON** in production. "
+    << "It **WILL** leak password data. "
     << Logger::endL
+    << "This flag is purely intended for development purposes."
     << Logger::purple
     << "************************"
     << Logger::endL;

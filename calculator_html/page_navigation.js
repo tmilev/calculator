@@ -380,18 +380,12 @@ class Page {
 
   initializeCalculatorPagePartOne() {
     cookies.setCookie("useJSON", true, 300, false);
-    this.initializeMenuBar();
-    this.initBuildVersion();
-    this.initializeHandlers();
-    //////////////////////////////////////
-    //////////////////////////////////////
-    //Initialize global variables
-    //////////////////////////////////////
-    //////////////////////////////////////
     this.logoutRequestFromUrl = null;
     this.locationRequestFromUrl = null;
     this.storage.loadSettings();
-
+    this.initializeMenuBar();
+    this.initBuildVersion();
+    this.initializeHandlers();
     this.initializeSliders();
     this.flagProblemPageOnly = false;
     this.mainMenuExpandedLength = null;
@@ -403,7 +397,6 @@ class Page {
     selectCourse.courseSelector.initialize(this);
     problemPage.allProblems.initialize(this);
     this.initializeAccountButtons();
-    this.initializeMenuBar();
     this.hashHistory = [];
     this.user = user.globalUser;
     this.aceEditorAutoCompletionWordList = [];
@@ -639,7 +632,9 @@ class Page {
     let element = document.getElementById(
       ids.domElements.problemPageContentContainer
     );
-    return problemPage.allProblems.getProblemByIdOrRegisterEmpty(label, element);
+    return problemPage.allProblems.getProblemByIdOrRegisterEmpty(
+      label, element
+    );
   }
 
   /** @return {HTMLButtonElement} */
@@ -809,19 +804,28 @@ class Page {
   }
 }
 
+
 /**
  * @return {Page}
  */
 function mainPage() {
-  return window.calculator.mainPage;
+  return page;
 }
 
 /** @return {String} */
 function getCleanedUpURL(input) {
-  return mainPage().storage.getCleanedUpURL(input);
+  return storage.getCleanedUpURL(input);
 }
 
+const page = new Page();
+window.calculator.mainPage = page;
+if (window.calculator.flagRunMainPage) {
+  page.initializeCalculatorPage();
+}
+
+
 module.exports = {
+  page,
   Page,
   mainPage,
   getCleanedUpURL,

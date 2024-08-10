@@ -13,7 +13,7 @@ bool WebAPIResponse::Test::all() {
   WebAPIResponse::Test::scoredQuiz(DatabaseType::internal);
   WebAPIResponse::Test::solveJSON();
   WebAPIResponse::Test::compareExpressions();
-  WebAPIResponse::Test::changePassword();
+  WebAPIResponse::Test::forgotLogin();
   return true;
 }
 
@@ -194,18 +194,68 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
   return true;
 }
 
-bool WebAPIResponse::Test::changePassword() {
-  STACK_TRACE("WebAPIResponse::Test::changePassword");
+bool WebAPIResponse::Test::forgotLogin() {
+  STACK_TRACE("WebAPIResponse::Test::forgotLogin");
   Database::Test tester(DatabaseType::internal);
-  Database::Test::createAdminAccount();
+  Database::Test::createAdminAccount(true);
+  DatabaseUserRoutines blankUser;
+  global.userDefault.reset();
   StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
   global.flagDebugLogin = true;
   std::stringstream unused;
+  StateMaintainer<
+    MapList<
+      std::string,
+      std::string,
+      HashFunctions::hashFunction<std::string>
+    >
+  > maintainWebArgument(global.webArguments);
+  global.webArguments[DatabaseStrings::labelUsername] =
+  WebAPI::userDefaultAdmin;
+  global.webArguments[DatabaseStrings::labelEmail] =
+  "test.admin.user@calculator-algebra.org";
+  global.comments.resetComments();
   WebAPIResponse api;
   JSData forgotLoginJson;
   api.forgotLogin(forgotLoginJson);
-  if (forgotLoginJson.toString() != "") {
-    global.fatal << "Got login: " << forgotLoginJson << global.fatal;
+  if (forgotLoginJson.hasKey(WebAPI::Result::error)) {
+    global.fatal
+    << "Failed to change password: "
+    << forgotLoginJson
+    << global.fatal;
+  }
+  std::string globalComments = global.comments.getCurrentReset();
+  List<std::string> expectedStrings = List<std::string>({
+      std::string("noreply@mail2.noreply.calculator.algebra.org"),
+      std::string("dummy_mailgun_key")
+    }
+  );
+  for (const std::string& expected : expectedStrings) {
+    if (!StringRoutines::stringContains(globalComments, expected)) global.fatal
+    << "Change password: expected comment: ["
+    << expected
+    << "] not found in: "
+    << globalComments
+    << ". "
+    << global.fatal;
+  }
+  UserCalculator userLoader;
+  userLoader.email = "test.admin.user@calculator-algebra.org";
+  std::stringstream comments;
+  if (!userLoader.loadFromDatabase(&comments, &comments)) {
+    global.fatal << "Failed to load user from database!" << global.fatal;
+  }
+  unsigned expectedSize = 24;
+  if (userLoader.actualActivationToken.size() != expectedSize) {
+    global.fatal
+    << "Activation token: "
+    << userLoader.actualActivationToken
+    << " has "
+    << userLoader.actualActivationToken.size()
+    << " bytes instead of the expected "
+    << expectedSize
+    << ". "
+    << global.fatal;
   }
   return true;
 }
@@ -213,7 +263,7 @@ bool WebAPIResponse::Test::changePassword() {
 bool WebAPIResponse::Test::addUsersFromData() {
   STACK_TRACE("WebAPIResponse::Test::addUsersFromData");
   Database::Test tester(DatabaseType::internal);
-  Database::Test::createAdminAccount();
+  Database::Test::createAdminAccount(false);
   StateMaintainer<int64_t> maintainMillisecondsMaxComputation(
     global.millisecondsMaxComputation
   );

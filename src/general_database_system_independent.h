@@ -27,7 +27,7 @@ public:
   std::string actualAuthenticationToken;
   JSData problemDataJSON;
   // Plain text password. Keep in memory as little as possible.
-  // zero bytes as soon as enteredHashedSaltedPassword is computed.
+  // Zero all bytes as soon as enteredHashedSaltedPassword is computed.
   std::string enteredPassword;
   // At the moment, this is obtained via:
   // Base64url(Sha3(concatenate(user,password))).

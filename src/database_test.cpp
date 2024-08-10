@@ -30,12 +30,22 @@ Database::Test::Test(DatabaseType inputDatabaseType) {
   this->maintainServerForkFlag.initialize(global.flagServerForkedIntoWorker);
   this->maintainerDatabase.initialize(global.databaseType);
   this->maintainerDatabaseName.initialize(Database::name);
+  global
+  << "Unit test: starting database: "
+  << Database::name
+  << ". "
+  << Logger::endL;
   Database::Test::startDatabase(inputDatabaseType);
 }
 
 Database::Test::~Test() {
   Database::get().shutdown(nullptr);
   this->deleteDatabase();
+  global
+  << "Unit test: database deleted: "
+  << Database::name
+  << ". "
+  << Logger::endL;
 }
 
 bool Database::Test::all() {
@@ -112,7 +122,7 @@ bool Database::Test::findWithOptions(DatabaseType databaseType) {
   << Database::toString()
   << Logger::endL;
   Database::Test tester(databaseType);
-  tester.createAdminAccount();
+  tester.createAdminAccount(false);
   QueryFind queryExact;
   queryExact.exactValue = "default";
   queryExact.nestedLabels.addOnTop("username");
@@ -143,7 +153,7 @@ bool Database::Test::basics(DatabaseType databaseType) {
   << Database::toString()
   << Logger::endL;
   Database::Test tester(databaseType);
-  tester.createAdminAccount();
+  tester.createAdminAccount(false);
   return true;
 }
 
@@ -152,7 +162,7 @@ bool Database::Test::noShutdownSignal() {
   << "Database: starting database that will not be shutdown correctly. "
   << Logger::endL;
   Database::Test::startDatabase(DatabaseType::internal);
-  Database::Test::createAdminAccount();
+  Database::Test::createAdminAccount(false);
   global
   << "Database: premature exit without shutdown. "
   << "The database should still shutdown correctly."
@@ -194,11 +204,14 @@ bool Database::Test::deleteDatabase() {
   return true;
 }
 
-bool Database::Test::createAdminAccount() {
+bool Database::Test::createAdminAccount(bool withEmail) {
   STACK_TRACE("Database::Test::createAdminAccount");
   UserCalculatorData userData;
   userData.username = WebAPI::userDefaultAdmin;
   userData.enteredPassword = Database::Test::adminPassword;
+  if (withEmail) {
+    userData.email = "test.admin.user@calculator-algebra.org";
+  }
   std::stringstream commentsOnFailure;
   if (
     !Database::get().user.loginViaDatabase(userData, &commentsOnFailure)

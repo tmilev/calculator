@@ -645,7 +645,7 @@ databaseTester(databaseType) {
 }
 
 bool Course::Test::Setup::setupAll() {
-  this->databaseTester.createAdminAccount();
+  this->databaseTester.createAdminAccount(false);
   global.userDefault.computeCourseInformation();
   global.webArguments.setKeyValue(
     WebAPI::Request::teachersAndSections,

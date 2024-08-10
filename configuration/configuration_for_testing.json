@@ -11,7 +11,7 @@
   "monitorPingTime":10000000,
   "gitRepository":"https://github.com/tmilev/calculator",
   "webAddress":"localhost",
-  "sendEmailFrom":"noreply@example.com",
+  "sendEmailFrom":"noreply.calculator.algebra.org",
   "portHTTP":"8155",
   "portHTTPSOpenSSL":"8166",
   "portHTTPSBuiltIn":"8177",

@@ -201,7 +201,7 @@ public:
     static bool solveJSON();
     static bool compareExpressions();
     static bool addUsersFromData();
-    static bool changePassword();
+    static bool forgotLogin();
   };
 };
 

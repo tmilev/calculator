@@ -674,6 +674,8 @@ void UserCalculatorData::reset() {
   this->username = "";
   this->email = "";
   this->clearAuthenticationTokenAndPassword();
+  UserCalculatorData blank;
+  *this = blank;
 }
 
 void UserCalculatorData::clearPasswordFromMemory() {

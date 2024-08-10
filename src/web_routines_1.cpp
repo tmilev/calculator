@@ -958,9 +958,9 @@ void WebAPIResponse::forgotLogin(JSData& result) {
   }
   if (!userExists) {
     out
-    << "We failed to find your email: "
+    << "We failed to find your email: ["
     << user.email
-    << " in our records. ";
+    << "] in our records. ";
     result[WebAPI::Result::comments] = out.str();
     return;
   }
@@ -1021,7 +1021,7 @@ bool GlobalVariables::Response::writeResponse(
   const JSData& incoming, bool isCrash
 ) {
   MutexlockGuard guard(global.mutexReturnBytes);
-  STACK_TRACE("WebWorker::writeResponse");
+  STACK_TRACE("GlobalVariables::Response::writeResponse");
   if (global.runMode != GlobalVariables::RunMode::builtInWebServer) {
     if (!isCrash) {
       global << incoming.toString();

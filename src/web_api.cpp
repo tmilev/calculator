@@ -956,7 +956,7 @@ bool WebAPIResponse::addUsersFromData(
   int& outputNumberOfUpdatedUsers,
   std::stringstream* comments
 ) {
-  STACK_TRACE("UserOfDatabase::addUsersFromEmails");
+  STACK_TRACE("DatabaseUserRoutines::addUsersFromEmails");
   global.millisecondsMaxComputation = 100000;
   // 100 seconds
   global.millisecondsReplyAfterComputation = 200000;
@@ -1007,7 +1007,7 @@ bool WebAPIResponse::addUsersFromData(
       commentsGeneralSensitive = comments;
     }
     if (
-      !UserOfDatabase::sendActivationEmail(
+      !DatabaseUserRoutines::sendActivationEmail(
         emails, comments, comments, commentsGeneralSensitive
       )
     ) {

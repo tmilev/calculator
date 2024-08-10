@@ -121,11 +121,37 @@ struct ActAsWebServerOnly {
 };
 
 enum DatabaseType {
-  // A database that consists of a single json file, 100% overwritten with each
-  // database write. Suitable for unit tests only.
+  // An internal database that works in the same thread.
+  // Same as the internal database with the only exception of how
+  // i/o operations are carried out. In fallback mode,
+  // read/write operations are carried out in the same thread+process
+  // and use a global inter-process inter-thread lock to
+  // restrict the i/o operations of all other threads.
+  // In fallback mode, the entire database index is
+  // read by every new process.
+  // As of writing, our web server uses multiprocessing so
+  // this is prohibitively slow outside of unit tests.
   fallback,
-  // Work in progress.
   // An internal database, stored in plain json files.
+  // The json files contain the database index and all database files.
+  // The database runs on a dedicated single thread and single process.
+  // All ins and outs are carried via
+  // a message queue. The messages travel through linux pipe()'s
+  // and so do not pass through the tcp/ip stack of the system.
+  // We therefore do not need to worry about port safety or encryption.
+  //
+  // The json files in the database are stored unencrypted.
+  // Should the need for additional securty of the system arise,
+  // please implement encryption, while keeping in mind that
+  // the encrypting random seed must also be stored in a secure fashion,
+  // so must not be stored on the same machine.
+  // In other words, any encryption scheme would either require:
+  // 1) two servers, not on the same physical machine - increased complexity or
+  // 2) a server restart that can only be performed by person with knowledge of
+  // the cryptographic secret.
+  // Please keep in mind that in both cases, loss of the cryptographic secret
+  // would brick the database, which
+  // is way worse than leaking someone's mathematical queries!
   internal,
   // Do not use a database. Login will work as if everyone is administrator.
   // No data can be stored in the system.

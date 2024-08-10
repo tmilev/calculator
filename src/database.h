@@ -540,7 +540,7 @@ public:
   std::string toStringInitializationErrors() const;
 };
 
-class UserOfDatabase {
+class DatabaseUserRoutines {
 private:
   bool firstLoginOfAdmin(
     UserCalculatorData& incoming,
@@ -586,7 +586,7 @@ public:
   bool loadUserInformation(
     UserCalculatorData& output, std::stringstream* commentsOnFailure
   );
-  UserOfDatabase();
+  DatabaseUserRoutines();
 };
 
 class Database {
@@ -603,7 +603,7 @@ public:
   bool checkInitialization();
   static Database& get();
   static std::string toString();
-  UserOfDatabase user;
+  DatabaseUserRoutines user;
   // TODO(tmilev): Rename this to fallbackDatabase.
   DatabaseInternal fallbackDatabase;
   DatabaseInternal localDatabase;
@@ -708,7 +708,7 @@ public:
     static bool findWithOptions(DatabaseType databaseType);
     static bool loadFromJSON();
     bool deleteDatabase();
-    static bool createAdminAccount();
+    static bool createAdminAccount(bool withEmail);
     Test(DatabaseType inputDatabaseType);
     ~Test();
     static void startDatabase(DatabaseType databaseType);

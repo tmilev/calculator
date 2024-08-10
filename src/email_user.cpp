@@ -23,27 +23,28 @@ bool EmailRoutines::sendEmailWithMailGun(
     return false;
   }
   std::string mailGunKey;
-  if (
-    !FileOperations::
-    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-      "certificates/mailgun-api.txt",
-      mailGunKey,
-      true,
-      true,
-      commentsOnFailure
-    )
-  ) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Could not find mailgun key. "
-      << "The key must be located in file: \n"
-      << "[certificates/mailgun-api.txt]. \n"
-      << "The file must be uploaded manually to the server. ";
+  if (!global.flagDebugLogin) {
+    if (
+      !FileOperations::
+      loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
+        "certificates/mailgun-api.txt",
+        mailGunKey,
+        true,
+        true,
+        commentsOnFailure
+      )
+    ) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "Could not find mailgun key. "
+        << "The key must be located in file: \n"
+        << "[certificates/mailgun-api.txt]. \n"
+        << "The file must be uploaded manually to the server. ";
+      }
+      return false;
     }
-    return false;
-  }
-  if (mailGunKey.size() > 0) {
-    mailGunKey.resize(mailGunKey.size() - 1);
+  } else {
+    mailGunKey = "dummy_mailgun_key";
   }
   global
   << "Sending email via "

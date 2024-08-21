@@ -395,9 +395,9 @@ class Page {
     accountPage.accountPage.initialize(this);
     editPage.problemEditor.initialize(this);
     database.databasePage.initialize(this);
+    problemPage.allProblems.initialize(this, coursePage.coursePage);
     coursePage.coursePage.initialize(this);
     selectCourse.courseSelector.initialize(this);
-    problemPage.allProblems.initialize(this);
     this.initializeAccountButtons();
     this.hashHistory = [];
     this.user = user.globalUser;

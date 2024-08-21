@@ -512,7 +512,7 @@ class Problem {
     } else {
       requestJSON["randomSeed"] = "";
     }
-    let stringifiedHash = storage.getPercentEncodedURL(requestJSON);
+    let stringifiedHash = storage.objectToURL(requestJSON);
     return stringifiedHash;
   }
 
@@ -1682,7 +1682,9 @@ function getCurrentProblem() {
   let element = document.getElementById(
     ids.domElements.problemPageContentContainer
   );
-  return allProblems.getProblemByIdOrRegisterEmpty(problemFileName, element);
+  return allProblems.getProblemByIdOrRegisterEmpty(
+    problemFileName, element
+  );
 }
 
 /** @return {HTMLElement|null} */

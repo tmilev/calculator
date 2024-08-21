@@ -547,7 +547,7 @@ class Calculator {
       currentPage: "calculator",
       calculatorInput: input,
     };
-    let stringifiedHash = storage.getPercentEncodedURL(url);
+    let stringifiedHash = storage.objectToURL(url);
     return stringifiedHash;
   }
 
@@ -977,7 +977,7 @@ class Calculator {
   submitComputationToBackend(input) {
     let urlCopy = Object.assign({}, storage.urlObject);
     urlCopy.inputFocus = true;
-    let stringifiedHash = storage.getPercentEncodedURL(urlCopy);
+    let stringifiedHash = storage.objectToURL(urlCopy);
     let anchor = document.getElementById(
       ids.domElements.pages.calculator.anchorComputationLink
     );

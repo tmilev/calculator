@@ -19,7 +19,8 @@ class StorageVariable {
      * showInURLByDefault: boolean, 
      * showInURLOnPages: Object, 
      * defaultValue: boolean,
-     * }} */
+     * }}
+     */
     inputs
   ) {
     this.value = "";
@@ -81,13 +82,21 @@ class StorageVariable {
       this.nameLocalStorage !== ""
     ) {
       let incoming = localStorage.getItem(this.nameLocalStorage);
-      if (incoming !== "" && incoming !== null && incoming !== undefined) {
+      if (
+        incoming !== "" &&
+        incoming !== null &&
+        incoming !== undefined
+      ) {
         candidate = incoming;
       }
     }
     if (this.nameCookie !== "") {
       let incoming = cookies.getCookie(this.nameCookie);
-      if (incoming !== "" && incoming !== null && incoming !== undefined) {
+      if (
+        incoming !== "" &&
+        incoming !== null &&
+        incoming !== undefined
+      ) {
         candidate = incoming;
       }
     }
@@ -417,13 +426,25 @@ class StorageCalculator {
       }),
     };
     this.currentHashRaw = "";
-    this.currentHashDecoded = "";
     this.urlObject = {};
   }
 
   /** @return {string} */
-  getPercentEncodedURL(input) {
-    return encodeURIComponent(JSON.stringify(input));
+  objectToURL(input) {
+    const result = [];
+    for (const label in input) {
+      if (result.length > 0) {
+        result.push('&');
+      }
+      result.push(label);
+      let value = input[label];
+      if (typeof value !== "string") {
+        value = JSON.stringify(value);
+      }
+      result.push("=");
+      result.push(encodeURIComponent(value));
+    }
+    return result.join('');
   }
 
   /** @return {string} */
@@ -461,23 +482,68 @@ class StorageCalculator {
     }
     this.currentHashRaw = newHash;
     try {
-      this.currentHashDecoded = decodeURIComponent(this.currentHashRaw);
-      if (
-        this.currentHashDecoded.startsWith('#') ||
-        this.currentHashDecoded.startsWith("?")
-      ) {
-        this.currentHashDecoded = this.currentHashDecoded.slice(1);
-      }
-      if (this.currentHashDecoded === "") {
-        this.urlObject = {};
-      } else {
-        this.urlObject = JSON.parse(this.currentHashDecoded);
-      }
+      this.urlObject = this.computeUrlObjectFromURL();
     } catch (e) {
-      console.log(`Failed to parse your hash: ${this.currentHashDecoded}`);
       console.log(`Hash obtained from ${this.currentHashRaw}.${e}.`);
     }
   }
+
+  computeUrlObjectFromURL() {
+    // A first version of the calculator used to store
+    // input parameters as regular query parameters along the
+    // lines of ?parameter1=value1&parameter2=value2...
+    //
+    // The next version of the calculator stored input parameters
+    // as a uri-encoded json.
+    //
+    // The latest version of the calculator is migrating back to
+    // query parameters as these, although less flexible, make
+    // URLs easier to read. 
+    if (this.currentHashRaw === "") {
+      return {};
+    }
+    let currentHashDecoded = decodeURIComponent(this.currentHashRaw);
+    if (
+      currentHashDecoded.startsWith('#') ||
+      currentHashDecoded.startsWith("?")
+    ) {
+      currentHashDecoded = currentHashDecoded.slice(1);
+    }
+    if (currentHashDecoded.startsWith('{')) {
+      // The url is a json. 
+      return JSON.parse(currentHashDecoded);
+    }
+    // The url uses regular query parameters
+    return this.computeUrlObjectFromQueryParameters();
+  }
+
+  computeUrlObjectFromQueryParameters() {
+    let hashStripped = this.currentHashRaw;
+    if (hashStripped.startsWith('#') || hashStripped.startsWith('?')) {
+      hashStripped = hashStripped.slice(1);
+    }
+    const keyValuePairsEncoded = hashStripped.split("&");
+    const result = {};
+    for (const pair of keyValuePairsEncoded) {
+      this.writeOnePair(pair, result);
+    }
+    return result;
+  }
+
+  writeOnePair(
+    /** @type{string} */
+    pair,
+    /** @type{Object} */
+    writeInto
+  ) {
+    const split = pair.split("=");
+    if (split.length !== 2) {
+      console.log(`Failed to extract key-value pair from ${pair}`);
+      return;
+    }
+    writeInto[split[0]] = decodeURIComponent(split[1]);
+  }
+
 
   loadSettings() {
     if (!configuration.configuration.calculatorDefaultsEnabled) {
@@ -505,7 +571,7 @@ class StorageCalculator {
 
   setURL() {
     this.urlObject = this.computeURLRecursively(this.variables);
-    let incomingHashRaw = this.getPercentEncodedURL(this.urlObject);
+    let incomingHashRaw = this.objectToURL(this.urlObject);
 
     if (incomingHashRaw !== this.currentHashRaw) {
       let app = pathnames.urls.appWithCache;

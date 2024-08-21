@@ -1528,22 +1528,56 @@ void Calculator::initializeFunctionsStandard() {
     "DoubleValue",
     CalculatorFunctions::evaluateToDouble,
     "",
-    "Floating point value of a number.",
-    "DoubleValue{}(3/7)",
+    "Floating point value of a number. "
+    "Uses the built-in C++ floating point library.",
+    "DoubleValue{}(3/7);\n"
+    "DoubleValue{}(13!+0.1,0);",
     "CalculatorFunctions::evaluateToDouble",
     "DoubleValue",
     innerStandard
   );
   this->addOperationHandler(
     "DoubleValue",
-    CalculatorFunctions::evaluateToDoubleWithRounding,
+    CalculatorFunctions::evaluateToDoubleWithFixedDigits,
     "",
-    "Round the floating point value of a number up to k digits."
+    "Round the floating point value of "
+    "a number up to k <= 10 significant digits "
+    "after the decimal dot. "
     "The first argument is the number to round. "
-    "The second argument is the number of digits to round to.",
-    "DoubleValue{}(3/7,3)",
+    "The second argument is the number of significant digits to round to. "
+    "Using two significant digits, 0.00269 rounds to 0.0027. "
+    "Not to be confused with fixed digits: rounding 0.00269 to "
+    "two fixed digits rounds to 0.00. "
+    "Corner cases such as rounding of 0.0030 vs 0.003 "
+    "are left unspecified/specified-by-example. "
+    "Integers are not rounded further unless they "
+    "have very large absolute values. "
+    "Negatives are multiplied by -1, rounded, and then "
+    "multiplied back by -1. "
+    "Handles up to 100 zeroes after the decimal dot, "
+    "does nothing beyond that. ",
+    "DoubleValue{}(3/7,3);\n"
+    "DoubleValue{}(3/7777777,2);\n"
+    "DoubleValue{}(0.0030,2);\n"
+    "DoubleValue{}(3.0030,2);\n"
+    "DoubleValue{}(3/7777777,0);\n"
+    "DoubleValue{}(13!+0.1,0);\n"
+    "DoubleValue{}(3/7,100);\n"
+    "DoubleValue{}(3/7,-5);",
     "CalculatorFunctions::evaluateToDoubleWithRounding",
     "DoubleValueWithRounding",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "DoubleValueFixed",
+    CalculatorFunctions::evaluateToDoubleWithRounding,
+    "",
+    "Round the floating point value of a number up to k fixed digits."
+    "The first argument is the number to round. "
+    "The second argument is the number of digits to round to.",
+    "DoubleValueFixed{}(3/7,3)",
+    "CalculatorFunctions::evaluateToDoubleWithRounding",
+    "DoubleValueFixed",
     innerStandard
   );
   this->addOperationHandler(
@@ -3498,7 +3532,7 @@ void Calculator::initializeFunctionsStandard() {
     this->opRational(),
     "Adds double or rational to a double or rational approximately "
     "using the built-in cpp addition, returning double. ",
-    "DoubleValue{}(3.14159265358979323846) + 1",
+    "DoubleValue{}(3.14159265358979323846) + 1;\n",
     "CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational",
     "AddDoubleToRational",
     innerStandard

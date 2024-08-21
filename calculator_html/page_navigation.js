@@ -734,6 +734,15 @@ class Page {
     }
   }
 
+  toggleMainMenuHiddenStatus() {
+    if (storage.variables.mainMenuIsHidden.isTrue()) {
+      storage.variables.mainMenuIsHidden.setAndStore("false");
+    } else {
+      storage.variables.mainMenuIsHidden.setAndStore("true");
+    }
+    this.hideOrUnhideMainMenu();
+  }
+
   hideOrUnhideMainMenu() {
     if (storage.variables.mainMenuIsHidden.isTrue()) {
       this.hideMainMenu();
@@ -799,7 +808,7 @@ class Page {
       ids.domElements.menu.buttonToggleTheMainMenu
     );
     buttonToggleMainMenu.addEventListener('click', () => {
-      this.hideOrUnhideMainMenu();
+      this.toggleMainMenuHiddenStatus();
     });
   }
 }

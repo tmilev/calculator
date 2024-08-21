@@ -8604,6 +8604,55 @@ bool CalculatorFunctions::evaluateToDouble(
   return output.assignValue(calculator, value);
 }
 
+bool CalculatorFunctions::evaluateToDoubleWithFixedDigits(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctions::evaluateToDoubleWithFixedDigits");
+  if (input.size() != 3) {
+    // Need two arguments.
+    return false;
+  }
+  int numberOfDigitsToRoundTo = 0;
+  if (!input[2].isSmallInteger(&numberOfDigitsToRoundTo)) {
+    return
+    calculator
+    << "Failed to extract number of significant digits "
+    << "to round to from "
+    << input[2]
+    << ".";
+  }
+  if (numberOfDigitsToRoundTo < 0 || numberOfDigitsToRoundTo > 10) {
+    calculator
+    << "Will round up to 2 digits; you asked for "
+    << numberOfDigitsToRoundTo
+    << " but I only accept from 0 to 10 digits. ";
+    numberOfDigitsToRoundTo = 2;
+  }
+  double value = 0;
+  if (!input[1].evaluatesToDouble(&value)) {
+    return false;
+  }
+  int sign = 1;
+  if (value < 0) {
+    value = - value;
+    sign = - 1;
+  }
+  double tenPowerK = 1;
+  for (int k = 0; k < 100; k ++) {
+    double nextValue = value * 10;
+    if (nextValue >= 1) {
+      break;
+    }
+    tenPowerK *= 10;
+    value = nextValue;
+  }
+  double tenPowerKExtra = FloatingPoint::power(10, numberOfDigitsToRoundTo);
+  double rounded = FloatingPoint::round(value* tenPowerKExtra) / tenPowerK /
+  tenPowerKExtra *
+  sign;
+  return output.assignValue(calculator, rounded);
+}
+
 bool CalculatorFunctions::evaluateToDoubleWithRounding(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
@@ -8622,11 +8671,11 @@ bool CalculatorFunctions::evaluateToDoubleWithRounding(
     << ".";
   }
   if (numberOfDigitsToRoundTo < 0 || numberOfDigitsToRoundTo > 10) {
-    numberOfDigitsToRoundTo = 2;
     calculator
     << "Will round up to 2 digits; you asked for "
     << numberOfDigitsToRoundTo
     << " but I only accept from 0 to 10 digits. ";
+    numberOfDigitsToRoundTo = 2;
   }
   double value = 0;
   if (!input[1].evaluatesToDouble(&value)) {

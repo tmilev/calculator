@@ -1154,6 +1154,9 @@ public:
   static bool evaluateToDoubleWithRounding(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool evaluateToDoubleWithFixedDigits(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool functionEvaluateToDouble(
     Calculator& calculator, const Expression& input, Expression& output
   );

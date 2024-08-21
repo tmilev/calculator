@@ -68,7 +68,7 @@ bool CalculatorFunctions::testProblemInterpretation(
   if (input.size() != 4) {
     return
     calculator
-    << "I expected two arguments: "
+    << "I expected three arguments: "
     << "1) index of first problem to test, where "
     << "0 = start at beginning, 1 = start at second problem, etc.; "
     << "2) number of problems to test (0 or less = test all); "

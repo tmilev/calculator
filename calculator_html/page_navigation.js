@@ -406,8 +406,6 @@ class Page {
     if (this.loginAttemptDesired()) {
       login.loginTry();
     }
-    this.appElement.style.display = "";
-    this.appElement.className = "divOnePageApp";
   }
 
   toStringProblem() {

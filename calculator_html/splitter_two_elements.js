@@ -23,10 +23,6 @@ class Splitter {
     this.storageVariable = storageVariable;
     this.resizing = false;
     this.neighborsAreInRows = neighborsAreInRows;
-    this.neighbor1.style.flexGrow = "0";
-    this.neighbor2.style.flexGrow = "0";
-    this.neighbor1.style.flexShrink = "0";
-    this.neighbor2.style.flexShrink = "0";
   }
 
   initialize() {
@@ -124,6 +120,10 @@ class Splitter {
     if (remainingDimension < 20) {
       remainingDimension = 20;
     }
+    this.neighbor1.style.flexGrow = "0";
+    this.neighbor2.style.flexGrow = "0";
+    this.neighbor1.style.flexShrink = "0";
+    this.neighbor2.style.flexShrink = "0";
     this.neighbor1.style.flexBasis = `${dimension}px`;
     this.neighbor2.style.flexBasis = `${remainingDimension}px`;
   }

@@ -585,6 +585,7 @@ a.linkProgressReport {
   max-width: 100%;
   display: flex;
   flex-direction: column;
+  flex: 20;
 }
 
 #divExamplesSplitter:hover {
@@ -610,6 +611,7 @@ a.linkProgressReport {
   vertical-align: top;
   white-space: nowrap;
   box-sizing: border-box;
+  flex: 1;
 }
 
 #idAutocompletePanel {
@@ -1762,7 +1764,6 @@ button.buttonSolve:hover {
   flex-grow: 0;
   flex-shrink: 0;
   max-height: fit-content;
-
 }
 
 .sliderStandard {

@@ -365,7 +365,9 @@ class Page {
 
   /** @type {boolean} */
   loginAttemptDesired() {
-    if (this.storage.variables.currentPage.getValue() === this.pages.activateAccount.name) {
+    if (
+      storage.variables.currentPage.getValue() === this.pages.activateAccount.name
+    ) {
       return false;
     }
     if (

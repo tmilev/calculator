@@ -176,6 +176,7 @@ sectionSelection {
   margin: 3px;
   border: none;
   color: green;
+  cursor: pointer;
   width: 60px;
 }
 
@@ -1237,6 +1238,7 @@ button.courseButton {
   font-size: 2em;
   border-radius: 7px;
   transition: 1.2s;
+  cursor: pointer;
   text-decoration: none;
 }
 

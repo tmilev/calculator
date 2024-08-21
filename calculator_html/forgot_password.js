@@ -4,6 +4,7 @@ const pathnames = require("./pathnames");
 const submitRequests = require("./submit_requests");
 const miscellaneous = require("./miscellaneous_frontend");
 const signUp = require('./signup');
+const globalUser = require('./user').globalUser;
 
 function callbackForgotLogin(input, output) {
   if (typeof output === "string") {
@@ -13,8 +14,8 @@ function callbackForgotLogin(input, output) {
     let parsed = miscellaneous.jsonUnescapeParse(input);
     miscellaneous.writeHtmlFromCommentsAndErrors(parsed, output)
   } catch (e) {
-    output.textContent = e + " Received input: " +input;
-    
+    output.textContent = e + " Received input: " + input;
+
   }
 }
 
@@ -39,13 +40,13 @@ class ForgotLogin {
     let recaptchaElement = document.getElementById(
       ids.domElements.pages.forgotLogin.forgotLoginResult
     );
-    if (window.calculator.mainPage.user.debugLoginIsOn()) {
+    if (globalUser.debugLoginIsOn()) {
       miscellaneous.writeHTML(
         recaptchaElement,
         "<b style='color:blue'>Debugging login, recaptcha is off.</b>"
       );
       return;
-    }    
+    }
     if (this.grecaptcha === undefined || this.grecaptcha === null) {
       miscellaneous.writeHTML(
         recaptchaElement,
@@ -70,8 +71,8 @@ class ForgotLogin {
     }
   }
 
-  debugLogin() { 
-    return window.calculator.mainPage.user.debugLoginIsOn();
+  debugLogin() {
+    return globalUser.debugLoginIsOn();
   }
 
   submitForgotPassword() {
@@ -89,7 +90,7 @@ class ForgotLogin {
     } else if (!debugLogin) {
       token = this.grecaptcha.getResponse(this.recaptchaIdForForgotLogin);
     }
-    
+
     if (token === '' || token === null) {
       if (debugLogin) {
         let reportElement = document.getElementById(
@@ -100,9 +101,9 @@ class ForgotLogin {
           "<b style='color:blue'>Debug login: recaptcha ignored.</b>",
         );
       } else {
-        let element =document.getElementById(
-            ids.domElements.pages.forgotLogin.forgotLoginResult
-          );
+        let element = document.getElementById(
+          ids.domElements.pages.forgotLogin.forgotLoginResult
+        );
         miscellaneous.writeHTML(
           element,
           "<b style='color:red'>Please don't forget to solve the captcha.</b>",

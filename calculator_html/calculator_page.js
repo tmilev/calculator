@@ -5,7 +5,7 @@ const ids = require("./ids_dom_elements");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
 const panels = require("./panels");
 const processMonitoring = require("./process_monitoring");
-const storage = require("./storage");
+const storage = require("./storage").storage;
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 const calculatorPageEditor = require("./calculator_page_editor");
 const equationEditor = require("./equation_editor/src/equation_editor");
@@ -191,7 +191,6 @@ class AtomHandler {
   }
 }
 
-
 class Calculator {
   constructor() {
     this.parsedComputation = {};
@@ -218,7 +217,7 @@ class Calculator {
       ids.domElements.pages.calculator.divCalculatorMainInputOutput,
       ids.domElements.pages.calculator.divCalculatorMainInput,
       ids.domElements.pages.calculator.divCalculatorMainOutput,
-      storage.storage.variables.calculator.splitterInputOutput,
+      storage.variables.calculator.splitterInputOutput,
       true,
     );
     this.splitterExamples = new splitter.Splitter(
@@ -226,7 +225,7 @@ class Calculator {
       ids.domElements.pages.calculator.divCalculatorPage,
       ids.domElements.pages.calculator.divCalculatorMainInputOutput,
       ids.domElements.pages.calculator.examplesContainer,
-      storage.storage.variables.calculator.splitterExamples,
+      storage.variables.calculator.splitterExamples,
       false,
     );
   }
@@ -331,9 +330,9 @@ class Calculator {
   }
 
   toggleEquationEditor() {
-    let hideEditor = storage.storage.variables.calculator.hideEquationEditor.isTrue();
+    let hideEditor = storage.variables.calculator.hideEquationEditor.isTrue();
     hideEditor = !hideEditor;
-    storage.storage.variables.calculator.hideEquationEditor.setAndStore(
+    storage.variables.calculator.hideEquationEditor.setAndStore(
       hideEditor
     );
     this.doToggleEditor(hideEditor)
@@ -421,7 +420,7 @@ class Calculator {
     if (buttonExamples === null) {
       return;
     }
-    this.flagExamplesWantedShown = storage.storage.variables.calculator.examplesWantedShown.isTrue();
+    this.flagExamplesWantedShown = storage.variables.calculator.examplesWantedShown.isTrue();
     if (this.flagExamplesWantedShown) {
       this.setExamples(buttonExamples);
     }
@@ -432,7 +431,7 @@ class Calculator {
 
   toggleExamples() {
     this.flagExamplesWantedShown = !this.flagExamplesWantedShown;
-    storage.storage.variables.calculator.examplesWantedShown.setAndStore(
+    storage.variables.calculator.examplesWantedShown.setAndStore(
       this.flagExamplesWantedShown, true, false,
     );
     this.setExamples();
@@ -448,7 +447,7 @@ class Calculator {
     buttonToggleEditor.addEventListener('click', () => {
       this.toggleEquationEditor();
     });
-    let hideEditor = storage.storage.variables.calculator.hideEquationEditor.isTrue();
+    let hideEditor = storage.variables.calculator.hideEquationEditor.isTrue();
     this.doToggleEditor(hideEditor);
   }
 
@@ -534,7 +533,7 @@ class Calculator {
       return;
     }
     this.lastSubmittedInput = calculatorInput;
-    storage.storage.variables.calculator.input.setAndStore(
+    storage.variables.calculator.input.setAndStore(
       this.lastSubmittedInput
     );
     this.submitComputationPartTwo(
@@ -548,8 +547,7 @@ class Calculator {
       currentPage: "calculator",
       calculatorInput: input,
     };
-    let page = window.calculator.mainPage;
-    let stringifiedHash = page.storage.getPercentEncodedURL(url);
+    let stringifiedHash = storage.getPercentEncodedURL(url);
     return stringifiedHash;
   }
 
@@ -688,7 +686,7 @@ class Calculator {
     let commentsContainer = this.constructComments(inputParsed);
     inputOutputComments.appendChild(commentsContainer);
     if (
-      storage.storage.variables.flagDebug.isTrue() &&
+      storage.variables.flagDebug.isTrue() &&
       inputParsed.debug !== undefined
     ) {
       let debugComments = document.createElement("div");
@@ -952,7 +950,7 @@ class Calculator {
   }
 
   submitComputationPartTwo(input) {
-    if (storage.storage.variables.calculator.useWebAssembly.value === "true") {
+    if (storage.variables.calculator.useWebAssembly.value === "true") {
       this.submitComputationToWebAssembly(input);
       return;
     }
@@ -977,10 +975,9 @@ class Calculator {
   }
 
   submitComputationToBackend(input) {
-    let page = window.calculator.mainPage;
-    let urlCopy = Object.assign({}, page.storage.urlObject);
+    let urlCopy = Object.assign({}, storage.urlObject);
     urlCopy.inputFocus = true;
-    let stringifiedHash = page.storage.getPercentEncodedURL(urlCopy);
+    let stringifiedHash = storage.getPercentEncodedURL(urlCopy);
     let anchor = document.getElementById(
       ids.domElements.pages.calculator.anchorComputationLink
     );
@@ -1009,13 +1006,12 @@ class Calculator {
 
   getQueryStringSubmitStringAsMainInput(inputString, requestType) {
     let inputParams = '';
-    let page = window.calculator.mainPage;
     inputParams += `${pathnames.urlFields.request}=${requestType}&`;
     inputParams += `${pathnames.urlFields.requests.calculatorInput}=${encodeURIComponent(inputString)}&`;
-    if (page.storage.variables.flagDebug.isTrue()) {
+    if (storage.variables.flagDebug.isTrue()) {
       inputParams += `${pathnames.urlFields.debugFlag}=true&`;
     }
-    if (page.storage.variables.calculator.monitoring.value === "false") {
+    if (storage.variables.calculator.monitoring.value === "false") {
       inputParams += `${pathnames.urlFields.requests.monitoring}=false&`;
     } else {
       inputParams += `${pathnames.urlFields.requests.monitoring}=true&`;

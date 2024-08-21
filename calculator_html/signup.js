@@ -3,6 +3,7 @@ const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
 const miscellaneous = require("./miscellaneous_frontend");
+const globalUser = require('./user').globalUser;
 
 function getRecaptchaId() {
   let localRecaptcha = '6LcSSSAUAAAAAIx541eeGZLoKx8iJehZPGrJkrql';
@@ -91,7 +92,7 @@ class SignUp {
       );
       return;
     }
-    if (window.calculator.mainPage.user.debugLoginIsOn()) {
+    if (globalUser.debugLoginIsOn()) {
       miscellaneous.writeHTML(
         recaptchaElement,
         "<b style='color:blue'>Debugging login, recaptcha is off.</b>",
@@ -101,7 +102,7 @@ class SignUp {
   }
 
   submitSignUpInfo() {
-    let debugLogin = window.calculator.mainPage.user.debugLoginIsOn();
+    let debugLogin = globalUser.debugLoginIsOn();
 
     let token = "";
     if (this.grecaptcha === undefined || this.grecaptcha === null) {

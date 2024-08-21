@@ -78,11 +78,9 @@ function transitionDone(event) {
   if (this.transitionState === "collapsing") {
     this.style.display = "none";
     this.transitionState = "collapsed";
-    window.frontend.page.storeOneCollapsiblePanelSettings(this, true);
   } else if (this.transitionState === "expanding") {
     this.style.display = "";
     this.transitionState = "expanded";
-    window.frontend.page.storeOneCollapsiblePanelSettings(this, false);
   }
 }
 
@@ -243,7 +241,7 @@ class PanelExpandable {
       allowFullExpand = false;
     }
     this.panelLabel = document.createElement("span");
-    this.spanContainerButtons = document.createElement("span");    
+    this.spanContainerButtons = document.createElement("span");
     this.button = document.createElement("button");
     this.button.className = "buttonProgress";
     this.button.classList.add("accordionLikeIndividual");
@@ -368,13 +366,6 @@ function makePanelFromData(
   }
 }
 
-if (window.calculator === undefined) {
-  window.calculator = {};
-}
-
-if (window.calculator.panels === undefined) {
-  window.calculator.panels = {};
-}
 
 module.exports = {
   writeHTML,

@@ -3,6 +3,7 @@ const pathnames = require("./pathnames");
 const miscellaneous = require("./miscellaneous_frontend");
 const ids = require("./ids_dom_elements");
 const panels = require('./panels');
+const storage = require('./storage').storage;
 
 function convertStringToHtml(input) {
   let result = "";
@@ -70,7 +71,7 @@ function addressToHtml(
   }
   let content = "";
   content += `<a href='${address}' target ='_blank' class = 'linkProgressReport'>${convertStringToHtml(address)}</a>`;
-  if (window.calculator.mainPage.storage.variables.flagDebug.isTrue()) {
+  if (storage.variables.flagDebug.isTrue()) {
     content += `<br> <b>LaTeX link:</b> `;
     content += getLatexLink();
   }

@@ -38,7 +38,7 @@ class Authenticator {
     document.getElementById(
       ids.domElements.pages.login.buttonSignUp
     ).addEventListener('click', () => {
-      window.calculator.mainPage.selectPage('signUp');
+      this.mainPage.selectPage('signUp');
     });
     document.getElementById(
       ids.domElements.pages.login.linkLogout

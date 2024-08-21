@@ -30,8 +30,9 @@ class ProblemCollection {
     this.lastKnownGoodProblemFileName = "";
   }
 
-  initialize(mainPage) {
+  initialize(mainPage, coursePage) {
     this.mainPage = mainPage;
+    this.coursePage = coursePage;
   }
 
   /** @return {Problem} */
@@ -145,7 +146,7 @@ class ProblemCollection {
 
 
   updateProblemPage() {
-    window.calculator.coursePage.selectCurrentCoursePage();
+    this.coursePage.selectCurrentCoursePage();
     // functions: selectProblemById, logout, callbackClone,
     // the present function updateProblemPage
     /** @type {Problem} */
@@ -397,9 +398,8 @@ class Problem {
   /** @return {HTMLElement[]} */
   computeBadProblemExplanation() {
     let userHasInstructorRights = true;
-    let page = window.calculator.mainPage;
     if (!this.flagProblemPageOnly) {
-      userHasInstructorRights = page.user.hasInstructorRights();
+      userHasInstructorRights = globalUser.hasInstructorRights();
     }
     this.badProblemExplanation = [];
     if (!this.decodedProblem.includes(
@@ -1112,7 +1112,7 @@ class Problem {
     let panelDeadlines = document.createElement("span");
     panelDeadlines.className = "panelDeadlines";
     button.addEventListener("click", () => {
-      window.calculator.coursePage.toggleDeadline(
+      allProblems.coursePage.toggleDeadline(
         panelDeadlines, this.problemId, button,
       );
     });
@@ -1147,7 +1147,7 @@ class Problem {
     let buttonSet = document.createElement("button");
     buttonSet.textContent = "Set";
     buttonSet.addEventListener("click", () => {
-      window.calculator.coursePage.modifyDeadlines(this.problemId);
+      allProblems.coursePage.coursePage.modifyDeadlines(this.problemId);
     });
     panelDeadlines.appendChild(buttonSet);
     let report = document.createElement("span");
@@ -1225,7 +1225,7 @@ class Problem {
     miscellaneous.writeHTML(button, `${this.toStringProblemWeight()} &#9666`);
     button.name = this.problemId;
     button.addEventListener("click", () => {
-      window.calculator.coursePage.toggleProblemWeights();
+      allProblems.coursePage.toggleProblemWeights();
     });
     content.appendChild(button);
     content.appendChild(document.createElement("br"));

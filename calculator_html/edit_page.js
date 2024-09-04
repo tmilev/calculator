@@ -300,7 +300,7 @@ function writeNextPreviousEditButton(
   currentlyEditedPage,
 ) {
   let page = problemEditor.mainPage;
-  let problem = page.getProblemByIdOrNull(currentlyEditedPage);
+  let problem = page.getTopicElementByIdOrNull(currentlyEditedPage);
   if (problem === null) {
     return;
   }

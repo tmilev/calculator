@@ -5,7 +5,7 @@ const miscellaneous = require("./miscellaneous_frontend");
 const answerProcessing = require("./answer_processing");
 const pathnames = require("./pathnames");
 
-class HardCodedProblemCollection {
+class HardCodedTopicCollection {
   constructor() {
     /** @type {HardCodedProblem} */
     this.problems = [];
@@ -263,7 +263,7 @@ function create(
   hardCodedProblems.create(elements, server);
 }
 
-let hardCodedProblems = new HardCodedProblemCollection();
+let hardCodedProblems = new HardCodedTopicCollection();
 
 module.exports = {
   create,

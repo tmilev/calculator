@@ -191,7 +191,6 @@ class Page {
     this.storage = storage;
   }
 
-
   initializeLoginPage() {
     login.authenticator.initialize(this);
     let forgotLogin = document.getElementById(
@@ -236,7 +235,7 @@ class Page {
     if (this.flagProblemPageOnly) {
       return false;
     }
-    return this.user.isLoggedIn();
+    return user.globalUser.isLoggedIn();
   }
 
   initBuildVersion() {
@@ -320,8 +319,8 @@ class Page {
     this.selectPage(label);
   }
 
-  resetTopicProblems() {
-    problemPage.allProblems.resetTopicProblems();
+  resetAllTopicElements() {
+    problemPage.allTopics.resetAllTopicElements();
   }
 
   showProfilePicture() {
@@ -331,7 +330,7 @@ class Page {
     document.getElementById(
       ids.domElements.divProfilePicture
     ).classList.add("divVisible");
-    if (this.user.googleProfile.picture === undefined) {
+    if (user.globalUser.googleProfile.picture === undefined) {
       return;
     }
     if (
@@ -343,10 +342,10 @@ class Page {
     }
     try {
       let profilePicElement = document.createElement("IMG");
-      profilePicElement.setAttribute("src", this.user.googleProfile.picture);
-      profilePicElement.setAttribute("alt", this.user.googleProfile.name);
+      profilePicElement.setAttribute("src", user.globalUser.googleProfile.picture);
+      profilePicElement.setAttribute("alt", user.globalUser.googleProfile.name);
       profilePicElement.setAttribute("id", "imgProfilePicture");
-      profilePicElement.setAttribute("title", this.user.googleProfile.name);
+      profilePicElement.setAttribute("title", user.globalUser.googleProfile.name);
       profilePicElement.setAttribute("className", "profilePicture");
       //profilePicElement.setAttribute("width", 50);
       document.getElementById(ids.domElements.divProfilePicture).appendChild(profilePicElement);
@@ -355,12 +354,41 @@ class Page {
     }
   }
 
-  initializeCalculatorPage() {
+  initializePage() {
     if (this.appElement === null) {
       return;
     }
-    this.initializeCalculatorPagePartOne();
-    this.initializeCalculatorPagePartTwo();
+    cookies.setCookie("useJSON", true, 300, false);
+    this.logoutRequestFromUrl = null;
+    this.locationRequestFromUrl = null;
+    this.storage.loadSettings();
+    this.initializeMenuBar();
+    this.initBuildVersion();
+    this.initializeHandlers();
+    this.initializeSliders();
+    this.flagProblemPageOnly = false;
+    this.mainMenuExpandedLength = null;
+    this.initializeLoginPage();
+    accountPage.accountPage.initialize(this);
+    editPage.problemEditor.initialize(this);
+    database.databasePage.initialize(this);
+    this.initializeStudentViewSlider();
+    problemPage.allTopics.initialize(this, coursePage.coursePage);
+    coursePage.coursePage.initialize(this);
+    selectCourse.courseSelector.initialize(this);
+    this.initializeAccountButtons();
+    this.hashHistory = [];
+    this.aceEditorAutoCompletionWordList = [];
+    this.flagDoSubmitCalculatorComputation = true;
+    // Select page on first load
+    this.selectPage(this.storage.variables.currentPage.getValue());
+    if (this.loginAttemptDesired()) {
+      login.loginTry();
+    }
+    this.initializeButtons();
+    mathTypeSet.typesetter.typesetSoft(
+      ids.domElements.divMathjaxProblematicRender
+    );
   }
 
   /** @type {boolean} */
@@ -380,51 +408,13 @@ class Page {
     return true;
   }
 
-  initializeCalculatorPagePartOne() {
-    cookies.setCookie("useJSON", true, 300, false);
-    this.logoutRequestFromUrl = null;
-    this.locationRequestFromUrl = null;
-    this.storage.loadSettings();
-    this.initializeMenuBar();
-    this.initBuildVersion();
-    this.initializeHandlers();
-    this.initializeSliders();
-    this.flagProblemPageOnly = false;
-    this.mainMenuExpandedLength = null;
-    this.initializeLoginPage();
-    accountPage.accountPage.initialize(this);
-    editPage.problemEditor.initialize(this);
-    database.databasePage.initialize(this);
-    problemPage.allProblems.initialize(this, coursePage.coursePage);
-    coursePage.coursePage.initialize(this);
-    selectCourse.courseSelector.initialize(this);
-    this.initializeAccountButtons();
-    this.hashHistory = [];
-    this.user = user.globalUser;
-    this.aceEditorAutoCompletionWordList = [];
-    this.flagDoSubmitCalculatorComputation = true;
-    // Select page on first load
-    this.selectPage(this.storage.variables.currentPage.getValue());
-    if (this.loginAttemptDesired()) {
-      login.loginTry();
-    }
-  }
-
   toStringProblem() {
     return this.storage.toStringProblem();
   }
 
-  initializeCalculatorPagePartTwo() {
-    this.initializeButtons();
-    mathTypeSet.typesetter.typesetSoft(
-      ids.domElements.divMathjaxProblematicRender
-    );
-    this.initializeStudentViewSlider();
-  }
-
   sectionSelect(sectionNumber) {
     this.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
-    this.user.sectionComputed = this.user.sectionsTaught[sectionNumber];
+    user.globalUser.sectionComputed = user.globalUser.sectionsTaught[sectionNumber];
     let deadlineSpans = document.getElementsByClassName(
       ids.domElements.classSpanDeadlineContainer
     );
@@ -433,7 +423,7 @@ class Page {
       let currentDeadlineId = currentDeadlineSpan.id.substr(
         ids.stringResources.prefixDeadlineContainer.length
       );
-      let currentProblem = problemPage.allProblems[currentDeadlineId];
+      let currentProblem = problemPage.allTopics[currentDeadlineId];
       if (currentProblem === undefined) {
         continue;
       }
@@ -461,7 +451,7 @@ class Page {
       return;
     }
     let debugOn = sliderDebug.checked;
-    problemPage.allProblems.flagLoaded = false;
+    problemPage.allTopics.flagLoaded = false;
     let debugSpan = document.getElementById(
       ids.domElements.spanDebugFlagToggleReport
     );
@@ -486,7 +476,7 @@ class Page {
     slider.addEventListener('change', () => {
       this.setSwitchStudentView();
     });
-    this.onStudentViewChange();
+    this.writeStudentViewChange();
   }
 
   setSwitchStudentView() {
@@ -500,16 +490,15 @@ class Page {
   }
 
   hasInstructorRightsNotViewingAsStudent() {
-    return this.user.hasInstructorRightsNotViewingAsStudent();
+    return user.globalUser.hasInstructorRightsNotViewingAsStudent();
   }
 
   studentView() {
-    return this.user.studentView()
+    return user.globalUser.studentView()
   }
-
-  onStudentViewChange() {
+  
+  writeStudentViewChange() {
     let studentView = this.storage.variables.flagStudentView.isTrue();
-
     let spanView = document.getElementById(
       ids.domElements.spanStudentViewFlagToggleReport
     );
@@ -517,10 +506,10 @@ class Page {
       ids.domElements.spanStudentViewSectionSelectPanel
     );
     radioPanel.textContent = '';
-    problemPage.allProblems.flagLoaded = false;
+    problemPage.allTopics.flagLoaded = false;
     if (studentView) {
       spanView.textContent = "Student view";
-      for (let i = 0; i < this.user.sectionsTaught.length; i++) {
+      for (let i = 0; i < user.globalUser.sectionsTaught.length; i++) {
         radioPanel.appendChild(document.createElement("br"));
         let label = document.createElement("label");
         label.className = "containerRadioButton";
@@ -540,7 +529,7 @@ class Page {
           input.checked = true;
         }
         let radioMarkSpan = document.createElement("radioMark");
-        radioMarkSpan.textContent = this.user.sectionsTaught[i];
+        radioMarkSpan.textContent = user.globalUser.sectionsTaught[i];
         radioPanel.appendChild(radioMarkSpan)
       }
     } else {
@@ -548,6 +537,10 @@ class Page {
     }
     this.resetPagesNeedingReload();
     login.setAdminPanels();
+  }
+
+  onStudentViewChange() {
+    this.writeStudentViewChange();
     this.selectPage(this.storage.variables.currentPage.getValue());
   }
 
@@ -624,15 +617,15 @@ class Page {
     }
   }
 
-  getProblemByIdOrNull(label) {
-    return problemPage.allProblems.getProblemByIdOrNull(label);
+  getTopicElementByIdOrNull(label) {
+    return problemPage.allTopics.getTopicElementByIdOrNull(label);
   }
 
   getProblemById(label) {
     let element = document.getElementById(
       ids.domElements.problemPageContentContainer
     );
-    return problemPage.allProblems.getProblemByIdOrRegisterEmpty(
+    return problemPage.allTopics.getTopicElementByIdOrRegisterEmpty(
       label, element
     );
   }
@@ -829,7 +822,7 @@ function getCleanedUpURL(input) {
 const page = new Page();
 window.calculator.mainPage = page;
 if (window.calculator.flagRunMainPage) {
-  page.initializeCalculatorPage();
+  page.initializePage();
 }
 
 

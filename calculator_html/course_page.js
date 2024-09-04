@@ -55,7 +55,7 @@ class CoursePage {
     lastLoadedCourse.courseHome = incomingCourse;
     lastLoadedCourse.topicList = incomingTopicList;
     let topicRequest = "templateJSONNoLogin";
-    if (this.mainPage.user.flagLoggedIn) {
+    if (globalUser.flagLoggedIn) {
       topicRequest = "templateJSON";
     }
     let url = "";
@@ -69,6 +69,48 @@ class CoursePage {
       progress: ids.domElements.spanProgressReportGeneral
     });
   }
+
+  processLoadedTopicsWriteToCoursePage(incomingTopics) {
+    const startTime = new Date().getTime();
+    problemPage.allTopics.processLoadedTopics(incomingTopics);
+    this.writeTopicsToCoursePage();
+    const writeTime = new Date().getTime() - startTime;
+    if (writeTime > 1000) {
+      console.log(
+        `Html generation took ${writeTime} ms, this is too slow.`
+      );
+    }
+  }
+
+  writeTopicsToCoursePage() {
+    let topicsElement = this.getTopicListElement();
+    let htmlContentElements = problemPage.allTopics.getHTMLfromTopics();
+    problemPage.writeEditCoursePagePanel();
+    let extraComments = miscellaneous.htmlElementsFromCommentsAndErrors(
+      problemPage.allTopics.topics
+    );
+    miscellaneous.appendHtml(topicsElement, extraComments);
+    miscellaneous.appendHtml(topicsElement, htmlContentElements);
+    initializeProblemWeightsAndDeadlines();
+    initializeDatePickers();
+    if (problemPage.allTopics.flagLoaded) {
+      problemPage.problemNavigation.writeToHTML();
+    }
+    typeset.typesetter.typesetSoft(topicsElement, "");
+  }
+
+  /** @return {HTMLElement|null} */
+  getTopicListElement() {
+    let topics = document.getElementsByTagName("topicList");
+    if (topics.length === 0) {
+      topics = document.getElementsByClassName("topicList");
+    }
+    if (topics.length === 0) {
+      return null;
+    }
+    return topics[0];
+  }
+
 }
 
 function modifyDeadlines(incomingId) {
@@ -106,7 +148,7 @@ function toggleDeadline(
   /** @type {HTMLElement} */
   button,
 ) {
-  let problem = problemPage.allProblems.getProblemById(panelId);
+  let problem = problemPage.allTopics.getProblemById(panelId);
   if (deadline.style.maxHeight === '200px') {
     deadline.style.opacity = '0';
     deadline.style.maxHeight = '0';
@@ -136,7 +178,7 @@ function toggleProblemWeights() {
     }
   }
   for (let i = 0; i < buttons.length; i++) {
-    let currentProblem = problemPage.allProblems.getProblemById(
+    let currentProblem = problemPage.allTopics.getProblemById(
       buttons[i].name
     );
     if (!problemWeightsVisible) {
@@ -158,7 +200,7 @@ function afterLoadCoursePage(incoming, result) {
   let courseBody = document.getElementById(
     ids.domElements.divCurrentCourseBody
   );
-  let coursePage = document.getElementById(
+  let coursePageDiv = document.getElementById(
     ids.domElements.divCurrentCourse
   );
   miscellaneous.writeHTML(
@@ -171,15 +213,15 @@ function afterLoadCoursePage(incoming, result) {
       document.getElementsByTagName('title')[0].text = titleElements[0].text;
     }
   }
-  typeset.typesetter.typesetSoft(coursePage, "");
+  typeset.typesetter.typesetSoft(coursePageDiv, "");
   problemPage.writeEditCoursePagePanel();
-  if (problemPage.getTopicListElement() === null) {
+  if (coursePage.getTopicListElement() === null) {
     return;
   }
-  loadTopicList(problemPage.processLoadedTopicsWriteToCoursePage);
+  loadTopicList();
 }
 
-function loadTopicList(callback) {
+function loadTopicList() {
   let topicListRequest = "topicListJSONNoLogin";
   if (globalUser.isLoggedIn()) {
     topicListRequest = "topicListJSON";
@@ -193,7 +235,9 @@ function loadTopicList(callback) {
   url += `${pathnames.urlFields.problem.courseHome}=${courseHome}&`;
   submitRequests.submitGET({
     url: url,
-    callback: callback,
+    callback: (incoming) => {
+      coursePage.processLoadedTopicsWriteToCoursePage(incoming);
+    },
     progress: ids.domElements.spanProgressReportGeneral
   });
 }
@@ -205,6 +249,24 @@ let lastLoadedCourse = {
 
 function selectCurrentCoursePage() {
   coursePage.selectCurrentCoursePage();
+}
+
+function initializeDatePickers() {
+  let pickers = document.getElementsByClassName("datePicker");
+  for (let i = 0; i < pickers.length; i++) {
+    datePicker.createDatePicker(pickers[i]);
+  }
+}
+
+function initializeProblemWeightsAndDeadlines() {
+  let weights = document.getElementsByClassName('panelProblemWeights');
+  for (let i = 0; i < weights.length; i++) {
+    weights[i].style.maxHeight = '0px';
+  }
+  let deadlines = document.getElementsByClassName('panelDeadlines');
+  for (let i = 0; i < deadlines.length; i++) {
+    deadlines[i].style.maxHeight = '0px';
+  }
 }
 
 const coursePage = new CoursePage();

@@ -303,9 +303,9 @@ class Authenticator {
 
   onGoogleSignIn(googleUser) {
     let token = googleUser.credential;
-    this.mainPage.user.googleToken = token;
+    globalUser.googleToken = token;
     this.mainPage.storage.variables.user.name.setAndStore("");
-    this.mainPage.user.googleProfile = window.calculator.jwt.decode(token);
+    globalUser.googleProfile = window.calculator.jwt.decode(token);
     this.mainPage.showProfilePicture();
     showLogoutButton();
     const api = pathnames.urls.calculatorAPI;

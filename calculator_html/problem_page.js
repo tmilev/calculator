@@ -12,12 +12,12 @@ const globalUser = require("./user").globalUser;
 const AnswerPanel = require("./answer_panel").AnswerPanel;
 const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 
-class ProblemCollection {
+class TopicCollection {
   constructor() {
-    /** @type {Object<string,Problem>} */
-    this.topicProblems = {};
-    /** @type {Object<string,Problem>} */
+    /** @type {Object<string,TopicElement>} */
     this.allProblems = {};
+    /** @type {Object<string,TopicElement>} */
+    this.allTopics = {};
     /** @type {string} */
     this.previousProblemId = null;
     /** @type {string} */
@@ -35,24 +35,24 @@ class ProblemCollection {
     this.coursePage = coursePage;
   }
 
-  /** @return {Problem} */
+  /** @return {TopicElement} */
   getProblemById(
     /** @type {string} */
     label,
   ) {
-    if (!(label in this.allProblems)) {
+    if (!(label in this.allTopics)) {
       throw (`Error: problem label ${label} not found. `);
     }
-    return this.allProblems[label];
+    return this.allTopics[label];
   }
 
-  resetTopicProblems() {
+  resetAllTopicElements() {
     this.chapterIds = {};
-    this.topicProblems = {};
+    this.allTopics = {};
   }
 
-  /** @return {Problem} */
-  createOrUpdateProblem(
+  /** @return {TopicElement} */
+  createOrUpdateTopicElement(
     problemData,
   ) {
     if (problemData.id.includes("%")) {
@@ -63,7 +63,7 @@ class ProblemCollection {
     let element = document.getElementById(
       ids.domElements.problemPageContentContainer
     );
-    let currentProblem = this.getProblemByIdOrRegisterEmpty(
+    let currentProblem = this.getTopicElementByIdOrRegisterEmpty(
       problemId, element
     );
     currentProblem.initializeInfo(problemData, null);
@@ -77,53 +77,41 @@ class ProblemCollection {
     return encodeURIComponent(problemFileName);
   }
 
-  getProblemByIdOrNull(
+  getTopicElementByIdOrNull(
     problemFileName,
   ) {
     let label = this.normalizeFileName(problemFileName);
-    if (label in this.allProblems) {
-      return this.allProblems[label];
+    if (label in this.allTopics) {
+      return this.allTopics[label];
     }
     return null;
   }
 
-  /** @return {Problem} */
-  getProblemByIdOrRegisterEmpty(
+  /** @return {TopicElement} */
+  getTopicElementByIdOrRegisterEmpty(
     problemFileName,
     /** @type {HTMLElement} */
     outputElement,
   ) {
     // normalize the file name:
-    let problem = this.getProblemByIdOrNull(problemFileName);
+    let problem = this.getTopicElementByIdOrNull(problemFileName);
     if (problem !== null) {
       return problem;
     }
-    let incoming = new Problem(outputElement);
+    let incoming = new TopicElement(outputElement);
     let label = this.normalizeFileName(problemFileName);
     incoming.initializeBasic({
       id: label,
       fileName: problemFileName
     });
-    this.allProblems[label] = incoming;
+    this.allTopics[label] = incoming;
     return incoming;
-  }
-
-  processLoadedTopicsWriteToCoursePage(incomingTopics) {
-    const startTime = new Date().getTime();
-    this.processLoadedTopics(incomingTopics);
-    writeTopicsToCoursePage();
-    const writeTime = new Date().getTime() - startTime;
-    if (writeTime > 1000) {
-      console.log(
-        `Html generation took ${writeTime} ms, this is too slow.`
-      );
-    }
   }
 
   processLoadedTopics(incomingTopics) {
     const startTime = new Date().getTime();
     this.previousProblemId = null;
-    this.resetTopicProblems();
+    this.resetAllTopicElements();
     this.topics = miscellaneous.jsonUnescapeParse(incomingTopics);
     if (!Array.isArray(this.topics["children"])) {
       return;
@@ -131,7 +119,7 @@ class ProblemCollection {
     let totalChildren = 0;
     for (let i = 0; i < this.topics["children"].length; i++) {
       const currentChapter = this.topics["children"][i];
-      const problem = this.createOrUpdateProblem(currentChapter);
+      const problem = this.createOrUpdateTopicElement(currentChapter);
       totalChildren += problem.totalChildren;
     }
     const finalTime = new Date().getTime() - startTime;
@@ -149,7 +137,7 @@ class ProblemCollection {
     this.coursePage.selectCurrentCoursePage();
     // functions: selectProblemById, logout, callbackClone,
     // the present function updateProblemPage
-    /** @type {Problem} */
+    /** @type {TopicElement} */
     let problem = getCurrentProblem();
     if (this.flagLoaded) {
       problemNavigation.updateExceptTitle();
@@ -208,6 +196,25 @@ class ProblemCollection {
       button.classList.remove("buttonFlash");
     }, 100);
   }
+
+  /** @return {HTMLElement[]} */
+  getHTMLfromTopics() {
+    let result = [];
+    for (let label in this.chapterIds) {
+      let currentProblem = this.getProblemById(label);
+      result.push(currentProblem.toHTMLChapter());
+    }
+    let extraHtml = miscellaneousFrontend.htmlFromCommentsAndErrors(
+      allTopics.topics
+    );
+    if (extraHtml !== "") {
+      let extraNode = document.createElement("span");
+      miscellaneous.writeHTML(extraNode, extraHtml);
+      result.push(extraNode);
+    }
+    return result;
+  }
+
 }
 
 function selectProblemById(
@@ -228,11 +235,11 @@ function selectProblemById(
   ) {
     problem.flagForReal = true;
   }
-  allProblems.flagLoaded = false;
-  allProblems.updateProblemPage();
+  allTopics.flagLoaded = false;
+  allTopics.updateProblemPage();
 }
 
-class Problem {
+class TopicElement {
   constructor(
     /** @type {HTMLElement} */
     outputElement,
@@ -261,9 +268,8 @@ class Problem {
 
   setRandomSeedFromEnvironment() {
     let currentCourse = storage.variables.currentCourse;
-    this.flagForReal = (
-      currentCourse.exerciseType.getValue() !== pathnames.urlFields.exerciseJSON
-    );
+    const exerciseType = currentCourse.exerciseType.getValue();
+    this.flagForReal = (exerciseType !== pathnames.urlFields.exerciseJSON);
     let incomingRandomSeed = currentCourse.randomSeed.getValue();
     if (
       incomingRandomSeed === "" ||
@@ -277,13 +283,13 @@ class Problem {
     this.setRandomSeed(incomingRandomSeed);
   }
 
-  initializeBasic(problemData) {
+  initializeBasic(data) {
     /** ProblemId is percent encoded, safe to embed in html. */
-    this.problemId = encodeURIComponent(problemData.id);
+    this.problemId = encodeURIComponent(data["id"]);
     /** @type {AnswerPanel[]} */
     this.answerPanels = [];
-    this.title = problemData.title;
-    this.fileName = problemData.fileName;
+    this.title = data["title"];
+    this.fileName = data["fileName"];
     if (
       this.fileName === undefined ||
       this.fileName === null
@@ -358,16 +364,16 @@ class Problem {
       this.deadlineString = problemData.deadline;
     }
     if (this.fileName !== "") {
-      this.previousProblemId = allProblems.previousProblemId;
+      this.previousProblemId = allTopics.previousProblemId;
       if (
         this.previousProblemId !== null &&
         this.previousProblemId !== undefined &&
         this.previousProblemId !== ""
       ) {
-        let previousProblem = allProblems.allProblems[this.previousProblemId];
+        let previousProblem = allTopics.allTopics[this.previousProblemId];
         previousProblem.nextProblemId = this.problemId;
       }
-      allProblems.previousProblemId = this.problemId;
+      allTopics.previousProblemId = this.problemId;
     }
     this.problemNumberString = problemData.problemNumberString;
     this.video = problemData.video;
@@ -380,14 +386,14 @@ class Problem {
       this.queryHomework = "";
     }
     if (this.type === "Chapter") {
-      allProblems.chapterIds[this.problemId] = true;
+      allTopics.chapterIds[this.problemId] = true;
     }
     this.childrenIds = [];
     if (!Array.isArray(problemData.children)) {
       return;
     }
     for (let i = 0; i < problemData.children.length; i++) {
-      const currentChild = allProblems.createOrUpdateProblem(
+      const currentChild = allTopics.createOrUpdateTopicElement(
         problemData.children[i]
       );
       this.totalChildren += currentChild.totalChildren + 1;
@@ -405,12 +411,12 @@ class Problem {
     if (!this.decodedProblem.includes(
       pathnames.urlFields.problem.failedToLoadProblem
     )) {
-      allProblems.lastKnownGoodProblemFileName = this.fileName;
+      allTopics.lastKnownGoodProblemFileName = this.fileName;
       return;
     }
     let badProblemExplanationPartOne = document.createElement("div");
     let html = "It appears your problem failed to load.<br>";
-    if (allProblems.lastKnownGoodProblemFileName !== "" && userHasInstructorRights) {
+    if (allTopics.lastKnownGoodProblemFileName !== "" && userHasInstructorRights) {
       html += "Perhaps you may like to clone the last good known problem.<br>";
     }
     miscellaneous.writeHTML(badProblemExplanationPartOne, html);
@@ -418,7 +424,7 @@ class Problem {
     miscellaneousFrontend.appendHtmlToArray(
       this.badProblemExplanation,
       editPage.getClonePanel(
-        allProblems.lastKnownGoodProblemFileName,
+        allTopics.lastKnownGoodProblemFileName,
         this.fileName
       ),
     );
@@ -618,7 +624,7 @@ class Problem {
     ) {
       return document.createTextNode("");
     }
-    let nextProblem = allProblems.getProblemById(this.nextProblemId);
+    let nextProblem = allTopics.getProblemById(this.nextProblemId);
     let nextURL = nextProblem.getAppAnchorRequestFileCourseTopics(
       hints.isScoredQuiz, false
     );
@@ -652,7 +658,7 @@ class Problem {
     previousLink.className = hints.linkType;
     miscellaneous.writeHTML(previousLink, "&#8592;");
     if (enabled) {
-      let previousProblem = allProblems.getProblemById(
+      let previousProblem = allTopics.getProblemById(
         this.previousProblemId
       );
       let previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(
@@ -782,7 +788,7 @@ class Problem {
     nextElement.appendChild(table);
     table.className = "topicList";
     for (let i = 0; i < this.childrenIds.length; i++) {
-      let currentProblem = allProblems.getProblemById(this.childrenIds[i]);
+      let currentProblem = allTopics.getProblemById(this.childrenIds[i]);
       let row = table.insertRow(- 1);
       currentProblem.getHTMLOneProblemTr(row);
     }
@@ -814,7 +820,7 @@ class Problem {
   isProblemContainer() {
     if (this.childrenIds.length !== undefined) {
       if (this.childrenIds.length > 0) {
-        let currentProblem = allProblems.getProblemById(this.childrenIds[0]);
+        let currentProblem = allTopics.getProblemById(this.childrenIds[0]);
         if (currentProblem.type === "Problem") {
           return true;
         }
@@ -843,7 +849,7 @@ class Problem {
       miscellaneousFrontend.appendHtml(nextElement, this.getHTMLProblems());
     } else if (this.type === "Section") {
       for (let i = 0; i < this.childrenIds.length; i++) {
-        let currentSubSection = allProblems.getProblemById(this.childrenIds[i]);
+        let currentSubSection = allTopics.getProblemById(this.childrenIds[i]);
         miscellaneousFrontend.appendHtml(
           nextElement, currentSubSection.getHTMLSubSection()
         );
@@ -873,7 +879,7 @@ class Problem {
       }
     } else {
       for (let i = 0; i < this.childrenIds.length; i++) {
-        let currentSection = allProblems.getProblemById(this.childrenIds[i]);
+        let currentSection = allTopics.getProblemById(this.childrenIds[i]);
         miscellaneousFrontend.appendHtml(
           bodyChapterElement, currentSection.getHTMLSection(),
         );
@@ -1038,7 +1044,7 @@ class Problem {
         this.parentIdURLed !== undefined &&
         this.parentIdURLed !== ""
       ) {
-        let parentProblem = allProblems.getProblemById(this.parentIdURLed);
+        let parentProblem = allTopics.getProblemById(this.parentIdURLed);
         let inheritedResult = parentProblem.toHTMLDeadlineElement();
         if (inheritedResult.textContent !== "") {
           if (!inheritedResult.textContent.contains("[inherited]")) {
@@ -1112,7 +1118,7 @@ class Problem {
     let panelDeadlines = document.createElement("span");
     panelDeadlines.className = "panelDeadlines";
     button.addEventListener("click", () => {
-      allProblems.coursePage.toggleDeadline(
+      allTopics.coursePage.toggleDeadline(
         panelDeadlines, this.problemId, button,
       );
     });
@@ -1147,7 +1153,7 @@ class Problem {
     let buttonSet = document.createElement("button");
     buttonSet.textContent = "Set";
     buttonSet.addEventListener("click", () => {
-      allProblems.coursePage.coursePage.modifyDeadlines(this.problemId);
+      allTopics.coursePage.coursePage.modifyDeadlines(this.problemId);
     });
     panelDeadlines.appendChild(buttonSet);
     let report = document.createElement("span");
@@ -1225,7 +1231,7 @@ class Problem {
     miscellaneous.writeHTML(button, `${this.toStringProblemWeight()} &#9666`);
     button.name = this.problemId;
     button.addEventListener("click", () => {
-      allProblems.coursePage.toggleProblemWeights();
+      allTopics.coursePage.toggleProblemWeights();
     });
     content.appendChild(button);
     content.appendChild(document.createElement("br"));
@@ -1369,7 +1375,7 @@ class ProblemNavigationHints {
 
 class ProblemNavigation {
   constructor() {
-    /** @type {Problem} */
+    /** @type {TopicElement} */
     this.currentProblem = null;
     /** @type {HTMLElement|null} */
     this.infoBar = document.getElementById(ids.domElements.divProblemInfoBar);
@@ -1381,7 +1387,7 @@ class ProblemNavigation {
   }
 
   setCurrentProblemAndUpdate(
-    /** @type {Problem} */
+    /** @type {TopicElement} */
     inputProblem,
   ) {
     this.currentProblem = inputProblem;
@@ -1426,7 +1432,7 @@ class ProblemNavigation {
     }
     this.infoBar.textContent = "";
     this.problemNavigationSubpanel = document.createElement("div")
-    this.problemNavigationSubpanel.className = 'problemNavigation';
+    this.problemNavigationSubpanel.className = "problemNavigation";
     this.infoBar.appendChild(this.problemNavigationSubpanel);
 
     if (
@@ -1466,7 +1472,7 @@ class ProblemNavigation {
 }
 
 function modifyWeight(id) {
-  let problemWeight = allProblems.allProblems[id];
+  let problemWeight = allTopics.allTopics[id];
   problemWeight.modifyWeight();
 }
 
@@ -1538,42 +1544,6 @@ let linkHomework = [
   "homeworkTex",
 ];
 
-/** @return {HTMLElement[]} */
-function getHTMLfromTopics() {
-  let result = [];
-  for (let label in allProblems.chapterIds) {
-    let currentProblem = allProblems.getProblemById(label);
-    result.push(currentProblem.toHTMLChapter());
-  }
-  let extraHtml = miscellaneousFrontend.htmlFromCommentsAndErrors(
-    allProblems.topics
-  );
-  if (extraHtml !== "") {
-    let extraNode = document.createElement("span");
-    miscellaneous.writeHTML(extraNode, extraHtml);
-    result.push(extraNode);
-  }
-  return result;
-}
-
-function initializeDatePickers() {
-  let pickers = document.getElementsByClassName("datePicker");
-  for (let i = 0; i < pickers.length; i++) {
-    datePicker.createDatePicker(pickers[i]);
-  }
-}
-
-function initializeProblemWeightsAndDeadlines() {
-  let weights = document.getElementsByClassName('panelProblemWeights');
-  for (let i = 0; i < weights.length; i++) {
-    weights[i].style.maxHeight = '0px';
-  }
-  let deadlines = document.getElementsByClassName('panelDeadlines');
-  for (let i = 0; i < deadlines.length; i++) {
-    deadlines[i].style.maxHeight = '0px';
-  }
-}
-
 function writeEditCoursePagePanel() {
   let panel = document.getElementById(ids.domElements.courseEditPanel);
   panel.textContent = "";
@@ -1588,18 +1558,18 @@ function writeEditCoursePagePanel() {
   );
   panel.appendChild(topicListPanel);
   if (
-    allProblems.topics.topicBundleFile === undefined ||
-    allProblems.topics.topicBundleFile === null ||
-    allProblems.topics.topicBundleFile === ""
+    allTopics.topics.topicBundleFile === undefined ||
+    allTopics.topics.topicBundleFile === null ||
+    allTopics.topics.topicBundleFile === ""
   ) {
     return;
   }
   for (
     let i = 0;
-    i < allProblems.topics.topicBundleFile.length;
+    i < allTopics.topics.topicBundleFile.length;
     i++
   ) {
-    let nextToEdit = allProblems.topics.topicBundleFile[i];
+    let nextToEdit = allTopics.topics.topicBundleFile[i];
     const nextToEditPanel = editPage.getEditPanel(
       nextToEdit,
       globalUser.hasInstructorRightsNotViewingAsStudent(),
@@ -1610,33 +1580,18 @@ function writeEditCoursePagePanel() {
 }
 
 function processLoadedTopicsWriteToEditPage(incomingTopics, result) {
-  allProblems.processLoadedTopics(incomingTopics, result);
+  allTopics.processLoadedTopics(incomingTopics, result);
   editPage.selectEditPage(null);
 }
 
 function processLoadedTopicsWriteToCoursePage(incomingTopics, result) {
-  allProblems.processLoadedTopicsWriteToCoursePage(incomingTopics, result);
+  allTopics.processLoadedTopicsWriteToCoursePage(incomingTopics, result);
 }
 
-function writeTopicsToCoursePage() {
-  let topicsElement = getTopicListElement();
-  writeEditCoursePagePanel();
-  let htmlContentElements = getHTMLfromTopics();
-  let extraComments = miscellaneousFrontend.htmlElementsFromCommentsAndErrors(
-    allProblems.topics
-  );
-  miscellaneousFrontend.appendHtml(topicsElement, extraComments);
-  miscellaneousFrontend.appendHtml(topicsElement, htmlContentElements);
-  initializeProblemWeightsAndDeadlines();
-  initializeDatePickers();
-  if (allProblems.flagLoaded) {
-    problemNavigation.writeToHTML();
-  }
-  typeset.typesetter.typesetSoft(topicsElement, "");
-}
+
 
 function updateProblemPage() {
-  allProblems.updateProblemPage();
+  allTopics.updateProblemPage();
 }
 
 function loadProblemIntoElement(
@@ -1647,7 +1602,7 @@ function loadProblemIntoElement(
     problemElement = document.getElementById(problemElement);
   }
   let problemFileName = problemElement.getAttribute("problem");
-  let problem = allProblems.getProblemByIdOrRegisterEmpty(
+  let problem = allTopics.getTopicElementByIdOrRegisterEmpty(
     problemFileName, problemElement,
   );
   problem.flagForReal = false;
@@ -1669,7 +1624,7 @@ function loadProblemIntoElement(
   });
 }
 
-/** @return {Problem|null} */
+/** @return {TopicElement|null} */
 function getCurrentProblem() {
   let problemFileName = storage.variables.currentCourse.problemFileName.getValue();
   if (
@@ -1682,30 +1637,17 @@ function getCurrentProblem() {
   let element = document.getElementById(
     ids.domElements.problemPageContentContainer
   );
-  return allProblems.getProblemByIdOrRegisterEmpty(
+  return allTopics.getTopicElementByIdOrRegisterEmpty(
     problemFileName, element
   );
 }
 
-/** @return {HTMLElement|null} */
-function getTopicListElement() {
-  let topics = document.getElementsByTagName("topicList");
-  if (topics.length === 0) {
-    topics = document.getElementsByClassName("topicList");
-  }
-  if (topics.length === 0) {
-    return null;
-  }
-  return topics[0];
-}
-
 let problemNavigation = new ProblemNavigation();
-let allProblems = new ProblemCollection();
+let allTopics = new TopicCollection();
 
 module.exports = {
-  getTopicListElement,
-  Problem,
-  allProblems,
+  TopicElement,
+  allTopics,
   problemNavigation,
   updateProblemPage,
   loadProblemIntoElement,

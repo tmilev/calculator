@@ -148,7 +148,7 @@ function toggleDeadline(
   /** @type {HTMLElement} */
   button,
 ) {
-  let problem = problemPage.allTopics.getProblemById(panelId);
+  let problem = problemPage.allTopics.getTopicElementById(panelId);
   if (deadline.style.maxHeight === '200px') {
     deadline.style.opacity = '0';
     deadline.style.maxHeight = '0';
@@ -178,7 +178,7 @@ function toggleProblemWeights() {
     }
   }
   for (let i = 0; i < buttons.length; i++) {
-    let currentProblem = problemPage.allTopics.getProblemById(
+    let currentProblem = problemPage.allTopics.getTopicElementById(
       buttons[i].name
     );
     if (!problemWeightsVisible) {

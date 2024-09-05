@@ -4,6 +4,7 @@ const pathnames = require("./pathnames");
 const ids = require("./ids_dom_elements");
 const miscellaneous = require("./miscellaneous_frontend");
 const storage = require("./storage").storage;
+const globalUser = require("./user").globalUser;
 
 let editorAce = null;
 let aceEditorAutoCompletionWordList = {};
@@ -299,8 +300,7 @@ function getNavigationEditButton(problemId, contentHTML) {
 function writeNextPreviousEditButton(
   currentlyEditedPage,
 ) {
-  let page = problemEditor.mainPage;
-  let problem = page.getTopicElementByIdOrNull(currentlyEditedPage);
+  let problem = allTopics.getTopicElementById(currentlyEditedPage);
   if (problem === null) {
     return;
   }
@@ -319,9 +319,11 @@ function writeNextPreviousEditButton(
 class ProblemEditor {
   constructor() {
     this.mainPage = null;
+    this.allProblems = null;
   }
-  initialize(mainPage) {
+  initialize(mainPage, allProblems) {
     this.mainPage = mainPage;
+    this.allProblems = allProblems;
   }
 
   selectEditPage(
@@ -331,7 +333,7 @@ class ProblemEditor {
     withInstructorRights,
   ) {
     if (withInstructorRights === undefined || withInstructorRights === null) {
-      withInstructorRights = this.mainPage.hasInstructorRightsNotViewingAsStudent();
+      withInstructorRights = globalUser.hasInstructorRightsNotViewingAsStudent();
     }
     let saveButton = document.getElementById(ids.domElements.buttonSaveEdit);
     if (withInstructorRights) {

@@ -6,7 +6,6 @@ const editPage = require("./edit_page");
 const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous_frontend");
 const miscellaneousFrontend = require("./miscellaneous_frontend");
-const datePicker = require("./date_picker").datePicker;
 const storage = require("./storage").storage;
 const globalUser = require("./user").globalUser;
 const AnswerPanel = require("./answer_panel").AnswerPanel;
@@ -15,11 +14,9 @@ const dynamicJavascript = require("./dynamic_javascript").dynamicJavascript;
 class TopicCollection {
   constructor() {
     /** @type {Object<string,TopicElement>} */
-    this.allProblems = {};
-    /** @type {Object<string,TopicElement>} */
     this.allTopics = {};
     /** @type {string} */
-    this.previousProblemId = null;
+    this.lastLoadedProblemId = null;
     /** @type {string} */
     this.nextProblemId = null;
     /** @type {Object<string, boolean>} */
@@ -36,81 +33,71 @@ class TopicCollection {
   }
 
   /** @return {TopicElement} */
-  getProblemById(
+  getTopicElementById(
     /** @type {string} */
-    label,
+    normalizedTopicId,
   ) {
-    if (!(label in this.allTopics)) {
+    if (!(normalizedTopicId in this.allTopics)) {
       throw (`Error: problem label ${label} not found. `);
     }
-    return this.allTopics[label];
+    return this.allTopics[normalizedTopicId];
   }
 
   resetAllTopicElements() {
     this.chapterIds = {};
-    this.allTopics = {};
   }
 
   /** @return {TopicElement} */
-  createOrUpdateTopicElement(
+  updateOrCreateTopicElement(
     problemData,
   ) {
     if (problemData.id.includes("%")) {
       console.log("Unexpected percent sign in problem id.");
     }
     // problemId is percent encoded, safe to embed in html.
-    let problemId = encodeURIComponent(problemData.id);
-    let element = document.getElementById(
-      ids.domElements.problemPageContentContainer
+    const problemId = encodeURIComponent(problemData.id);
+    const fileName = problemData["fileName"];
+    if (fileName === undefined || fileName === null) {
+      fileName = "";
+    }
+    let currentProblem = this.getExistingTopicElementOrCreate(
+      problemId, fileName,
     );
-    let currentProblem = this.getTopicElementByIdOrRegisterEmpty(
-      problemId, element
-    );
-    currentProblem.initializeInfo(problemData, null);
+    currentProblem.initializeTopicElement(problemData, null);
     return currentProblem;
   }
 
   normalizeFileName(
-    problemFileName,
+    problemId,
   ) {
-    problemFileName = decodeURIComponent(problemFileName);
-    return encodeURIComponent(problemFileName);
-  }
-
-  getTopicElementByIdOrNull(
-    problemFileName,
-  ) {
-    let label = this.normalizeFileName(problemFileName);
-    if (label in this.allTopics) {
-      return this.allTopics[label];
-    }
-    return null;
+    return decodeURIComponent(encodeURIComponent(problemId));
   }
 
   /** @return {TopicElement} */
-  getTopicElementByIdOrRegisterEmpty(
-    problemFileName,
-    /** @type {HTMLElement} */
-    outputElement,
+  getExistingTopicElementOrCreate(
+    /** @type {string} */
+    nonNormalizedProblemId,
+    /** @type {string} */
+    fileName,
   ) {
-    // normalize the file name:
-    let problem = this.getTopicElementByIdOrNull(problemFileName);
-    if (problem !== null) {
-      return problem;
+    const problemId = this.normalizeFileName(nonNormalizedProblemId);
+    if (problemId in this.allTopics) {
+      return this.allTopics[problemId];
     }
-    let incoming = new TopicElement(outputElement);
-    let label = this.normalizeFileName(problemFileName);
-    incoming.initializeBasic({
-      id: label,
-      fileName: problemFileName
-    });
-    this.allTopics[label] = incoming;
-    return incoming;
+    const problem = new TopicElement(problemId, fileName);
+    this.allTopics[problemId] = problem;
+    if (problem.flagProblemPageOnly) {
+      problem.flagForReal = false;
+    } else {
+      problem.setRandomSeedFromEnvironment();
+    }
+
+    return problem;
   }
 
   processLoadedTopics(incomingTopics) {
     const startTime = new Date().getTime();
-    this.previousProblemId = null;
+    this.lastLoadedProblemId = null;
     this.resetAllTopicElements();
     this.topics = miscellaneous.jsonUnescapeParse(incomingTopics);
     if (!Array.isArray(this.topics["children"])) {
@@ -119,7 +106,7 @@ class TopicCollection {
     let totalChildren = 0;
     for (let i = 0; i < this.topics["children"].length; i++) {
       const currentChapter = this.topics["children"][i];
-      const problem = this.createOrUpdateTopicElement(currentChapter);
+      const problem = this.updateOrCreateTopicElement(currentChapter);
       totalChildren += problem.totalChildren;
     }
     const finalTime = new Date().getTime() - startTime;
@@ -132,13 +119,10 @@ class TopicCollection {
     }
   }
 
-
   updateProblemPage() {
     this.coursePage.selectCurrentCoursePage();
-    // functions: selectProblemById, logout, callbackClone,
-    // the present function updateProblemPage
     /** @type {TopicElement} */
-    let problem = getCurrentProblem();
+    let problem = this.getCurrentProblem();
     if (this.flagLoaded) {
       problemNavigation.updateExceptTitle();
       return;
@@ -201,7 +185,7 @@ class TopicCollection {
   getHTMLfromTopics() {
     let result = [];
     for (let label in this.chapterIds) {
-      let currentProblem = this.getProblemById(label);
+      let currentProblem = this.getTopicElementById(label);
       result.push(currentProblem.toHTMLChapter());
     }
     let extraHtml = miscellaneousFrontend.htmlFromCommentsAndErrors(
@@ -215,6 +199,20 @@ class TopicCollection {
     return result;
   }
 
+  /** @return {TopicElement|null} */
+  getCurrentProblem() {
+    let problemFileName = storage.variables.currentCourse.problemFileName.getValue();
+    if (
+      problemFileName === "" ||
+      problemFileName === null ||
+      problemFileName === undefined
+    ) {
+      return null;
+    }
+    return this.getExistingTopicElementOrCreate(
+      problemFileName, problemFileName
+    );
+  }
 }
 
 function selectProblemById(
@@ -227,7 +225,7 @@ function selectProblemById(
     decodeURIComponent(problemIdURLed)
   );
   storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
-  let problem = getCurrentProblem();
+  let problem = allTopics.getCurrentProblem();
   problem.flagForReal = false;
   if (
     exerciseType === pathnames.urlFields.scoredQuizJSON &&
@@ -241,22 +239,35 @@ function selectProblemById(
 
 class TopicElement {
   constructor(
-    /** @type {HTMLElement} */
-    outputElement,
+    /** @type {string} */
+    problemId, 
+    /** @type {string} */
+    fileName
   ) {
+    /** @type {string} */
+    this.problemId = problemId;
+    /** @type {string} */
+    this.fileName = fileName;
+    if (this.fileName === undefined || this.fileName === null) {
+      this.fileName = "";
+    }
     /** @type {string} */
     this.nextProblemId = "";
     /** @type {string} */
     this.previousProblemId = "";
     /** @type {number} */
     this.totalChildren = 0;
-    /** @type {HTMLElement} */
-    this.outputElement = outputElement;
+    /** @type {HTMLElement|null} */
+    this.outputElement = document.getElementById(
+      ids.domElements.problemPageContentContainer
+    );
     /** @type {string} */
     this.title = "";
     /** @type {string} */
     this.randomSeed = "";
     this.flagProblemPageOnly = false;
+    /** @type {AnswerPanel[]} */
+    this.answerPanels = [];
   }
 
   setRandomSeed(input) {
@@ -283,26 +294,6 @@ class TopicElement {
     this.setRandomSeed(incomingRandomSeed);
   }
 
-  initializeBasic(data) {
-    /** ProblemId is percent encoded, safe to embed in html. */
-    this.problemId = encodeURIComponent(data["id"]);
-    /** @type {AnswerPanel[]} */
-    this.answerPanels = [];
-    this.title = data["title"];
-    this.fileName = data["fileName"];
-    if (
-      this.fileName === undefined ||
-      this.fileName === null
-    ) {
-      this.fileName = "";
-    }
-    if (this.flagProblemPageOnly) {
-      this.flagForReal = false;
-    } else {
-      this.setRandomSeedFromEnvironment();
-    }
-  }
-
   writeProblemPage(input, outputComponent) {
     let problemData = null;
     this.outputElement.textContent = "";
@@ -325,16 +316,15 @@ class TopicElement {
   }
 
   /** @return {number} Number of children processed. */
-  initializeInfo(problemData, inputParentIdURLed) {
-    this.initializeBasic(problemData);
+  initializeTopicElement(problemData, inputParentIdURLed) {
     this.decodedProblem = "";
     this.commentsProblem = "";
     this.parentIdURLed = inputParentIdURLed;
-
     this.problemLabel = "";
     this.previousProblemId = "";
     this.nextProblemId = "";
     this.scriptIds = null;
+    this.title = problemData["title"];
     this.type = problemData.type;
     this.problemNumberString = problemData.problemNumberString;
     this.idTextareaPoints = `points${this.problemId}`;
@@ -364,7 +354,7 @@ class TopicElement {
       this.deadlineString = problemData.deadline;
     }
     if (this.fileName !== "") {
-      this.previousProblemId = allTopics.previousProblemId;
+      this.previousProblemId = allTopics.lastLoadedProblemId;
       if (
         this.previousProblemId !== null &&
         this.previousProblemId !== undefined &&
@@ -373,7 +363,7 @@ class TopicElement {
         let previousProblem = allTopics.allTopics[this.previousProblemId];
         previousProblem.nextProblemId = this.problemId;
       }
-      allTopics.previousProblemId = this.problemId;
+      allTopics.lastLoadedProblemId = this.problemId;
     }
     this.problemNumberString = problemData.problemNumberString;
     this.video = problemData.video;
@@ -393,7 +383,7 @@ class TopicElement {
       return;
     }
     for (let i = 0; i < problemData.children.length; i++) {
-      const currentChild = allTopics.createOrUpdateTopicElement(
+      const currentChild = allTopics.updateOrCreateTopicElement(
         problemData.children[i]
       );
       this.totalChildren += currentChild.totalChildren + 1;
@@ -440,7 +430,6 @@ class TopicElement {
       this.flagForReal = true;
       this.answerPanels = [];
     } else {
-      this.initializeBasic(problemData);
       let content = problemData[pathnames.urlFields.problem.content];
       try {
         this.decodedProblem = decodeURIComponent(content);
@@ -624,7 +613,7 @@ class TopicElement {
     ) {
       return document.createTextNode("");
     }
-    let nextProblem = allTopics.getProblemById(this.nextProblemId);
+    let nextProblem = allTopics.getTopicElementById(this.nextProblemId);
     let nextURL = nextProblem.getAppAnchorRequestFileCourseTopics(
       hints.isScoredQuiz, false
     );
@@ -658,7 +647,7 @@ class TopicElement {
     previousLink.className = hints.linkType;
     miscellaneous.writeHTML(previousLink, "&#8592;");
     if (enabled) {
-      let previousProblem = allTopics.getProblemById(
+      let previousProblem = allTopics.getTopicElementById(
         this.previousProblemId
       );
       let previousURL = previousProblem.getAppAnchorRequestFileCourseTopics(
@@ -788,7 +777,7 @@ class TopicElement {
     nextElement.appendChild(table);
     table.className = "topicList";
     for (let i = 0; i < this.childrenIds.length; i++) {
-      let currentProblem = allTopics.getProblemById(this.childrenIds[i]);
+      let currentProblem = allTopics.getTopicElementById(this.childrenIds[i]);
       let row = table.insertRow(- 1);
       currentProblem.getHTMLOneProblemTr(row);
     }
@@ -820,7 +809,7 @@ class TopicElement {
   isProblemContainer() {
     if (this.childrenIds.length !== undefined) {
       if (this.childrenIds.length > 0) {
-        let currentProblem = allTopics.getProblemById(this.childrenIds[0]);
+        let currentProblem = allTopics.getTopicElementById(this.childrenIds[0]);
         if (currentProblem.type === "Problem") {
           return true;
         }
@@ -849,7 +838,7 @@ class TopicElement {
       miscellaneousFrontend.appendHtml(nextElement, this.getHTMLProblems());
     } else if (this.type === "Section") {
       for (let i = 0; i < this.childrenIds.length; i++) {
-        let currentSubSection = allTopics.getProblemById(this.childrenIds[i]);
+        let currentSubSection = allTopics.getTopicElementById(this.childrenIds[i]);
         miscellaneousFrontend.appendHtml(
           nextElement, currentSubSection.getHTMLSubSection()
         );
@@ -879,7 +868,7 @@ class TopicElement {
       }
     } else {
       for (let i = 0; i < this.childrenIds.length; i++) {
-        let currentSection = allTopics.getProblemById(this.childrenIds[i]);
+        let currentSection = allTopics.getTopicElementById(this.childrenIds[i]);
         miscellaneousFrontend.appendHtml(
           bodyChapterElement, currentSection.getHTMLSection(),
         );
@@ -1044,7 +1033,7 @@ class TopicElement {
         this.parentIdURLed !== undefined &&
         this.parentIdURLed !== ""
       ) {
-        let parentProblem = allTopics.getProblemById(this.parentIdURLed);
+        let parentProblem = allTopics.getTopicElementById(this.parentIdURLed);
         let inheritedResult = parentProblem.toHTMLDeadlineElement();
         if (inheritedResult.textContent !== "") {
           if (!inheritedResult.textContent.contains("[inherited]")) {
@@ -1588,8 +1577,6 @@ function processLoadedTopicsWriteToCoursePage(incomingTopics, result) {
   allTopics.processLoadedTopicsWriteToCoursePage(incomingTopics, result);
 }
 
-
-
 function updateProblemPage() {
   allTopics.updateProblemPage();
 }
@@ -1602,9 +1589,10 @@ function loadProblemIntoElement(
     problemElement = document.getElementById(problemElement);
   }
   let problemFileName = problemElement.getAttribute("problem");
-  let problem = allTopics.getTopicElementByIdOrRegisterEmpty(
-    problemFileName, problemElement,
+  let problem = allTopics.getExistingTopicElementOrCreate(
+    problemFileName, problemFileName
   );
+  problem.outputElement = problemElement;
   problem.flagForReal = false;
   if (problemElement.getAttribute("forReal") === "true") {
     problem.flagForReal = true;
@@ -1622,24 +1610,6 @@ function loadProblemIntoElement(
     progress: ids.domElements.spanProgressReportGeneral,
     result: problemElement,
   });
-}
-
-/** @return {TopicElement|null} */
-function getCurrentProblem() {
-  let problemFileName = storage.variables.currentCourse.problemFileName.getValue();
-  if (
-    problemFileName === "" ||
-    problemFileName === null ||
-    problemFileName === undefined
-  ) {
-    return null;
-  }
-  let element = document.getElementById(
-    ids.domElements.problemPageContentContainer
-  );
-  return allTopics.getTopicElementByIdOrRegisterEmpty(
-    problemFileName, element
-  );
 }
 
 let problemNavigation = new ProblemNavigation();

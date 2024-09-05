@@ -370,7 +370,7 @@ class Page {
     this.mainMenuExpandedLength = null;
     this.initializeLoginPage();
     accountPage.accountPage.initialize(this);
-    editPage.problemEditor.initialize(this);
+    editPage.problemEditor.initialize(this, problemPage.allTopics);
     database.databasePage.initialize(this);
     this.initializeStudentViewSlider();
     problemPage.allTopics.initialize(this, coursePage.coursePage);
@@ -619,15 +619,6 @@ class Page {
 
   getTopicElementByIdOrNull(label) {
     return problemPage.allTopics.getTopicElementByIdOrNull(label);
-  }
-
-  getProblemById(label) {
-    let element = document.getElementById(
-      ids.domElements.problemPageContentContainer
-    );
-    return problemPage.allTopics.getTopicElementByIdOrRegisterEmpty(
-      label, element
-    );
   }
 
   /** @return {HTMLButtonElement} */

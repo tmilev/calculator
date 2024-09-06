@@ -55,7 +55,7 @@ class TopicCollection {
       console.log("Unexpected percent sign in problem id.");
     }
     // problemId is percent encoded, safe to embed in html.
-    const problemId = encodeURIComponent(problemData.id);
+    const problemId = problemData.id;
     const fileName = problemData["fileName"];
     if (fileName === undefined || fileName === null) {
       fileName = "";
@@ -67,20 +67,13 @@ class TopicCollection {
     return currentProblem;
   }
 
-  normalizeFileName(
-    problemId,
-  ) {
-    return decodeURIComponent(encodeURIComponent(problemId));
-  }
-
   /** @return {TopicElement} */
   getExistingTopicElementOrCreate(
     /** @type {string} */
-    nonNormalizedProblemId,
+    problemId,
     /** @type {string} */
     fileName,
   ) {
-    const problemId = this.normalizeFileName(nonNormalizedProblemId);
     if (problemId in this.allTopics) {
       return this.allTopics[problemId];
     }
@@ -117,6 +110,7 @@ class TopicCollection {
       logMessage += `at ${timePerChild.toFixed()} ms per child.`;
       console.log(logMessage);
     }
+    problemNavigation.writeToHTML();    
   }
 
   updateProblemPage() {
@@ -217,12 +211,12 @@ class TopicCollection {
 
 function selectProblemById(
   /** @type{string} */
-  problemIdURLed,
+  problemId,
   /** @type{string} */
   exerciseType,
 ) {
   storage.variables.currentCourse.problemFileName.setAndStore(
-    decodeURIComponent(problemIdURLed)
+    problemId
   );
   storage.variables.currentCourse.exerciseType.setAndStore(exerciseType);
   let problem = allTopics.getCurrentProblem();
@@ -244,6 +238,13 @@ class TopicElement {
     /** @type {string} */
     fileName
   ) {
+    if (fileName !== "" && problemId.includes("%")) {
+      console.log(
+        "Unusual problemId contains the % symbol. " +
+        "We either have an unusual file name or a %-encoding bug. " +
+        "The file name: " + problemId
+      );
+    }
     /** @type {string} */
     this.problemId = problemId;
     /** @type {string} */
@@ -520,12 +521,28 @@ class TopicElement {
   }
 
   getCalculatorURLInput(
-    inputFileName, inputCourseHome, inputTopicList,
+    /** @type {string} */
+    inputFileName,
+    /** @type {string} */
+    inputCourseHome,
+    /** @type {string} */
+    inputTopicList,
   ) {
     let result = "";
-    result += `fileName=${inputFileName}&`;
-    result += `courseHome=${inputCourseHome}&`;
-    result += `topicList=${inputTopicList}`;
+    if (
+      inputFileName.includes("%") ||
+      inputCourseHome.includes("%") ||
+      inputTopicList.includes("%")
+    ) {
+      console.log(
+        "The file name, course name or topic list contains the % sign. " +
+        "We may have an encoding error " +
+        "- or end users who like to use unusual symbols in their file names."
+      );
+    }
+    result += `fileName=${encodeURIComponent(inputFileName)}&`;
+    result += `courseHome=${encodeURIComponent(inputCourseHome)}&`;
+    result += `topicList=${encodeURIComponent(inputTopicList)}`;
     return result;
   }
 
@@ -1128,7 +1145,7 @@ class TopicElement {
       let input = document.createElement("input");
       input.type = "date";
       input.className = "datePicker";
-      input.name = `datePicker${this.problemId}`;
+      input.name = `datePicker`;
       if (
         this.deadlines[i] !== "" &&
         this.deadlines[i] !== undefined
@@ -1141,13 +1158,16 @@ class TopicElement {
     panelDeadlines.appendChild(table);
     let buttonSet = document.createElement("button");
     buttonSet.textContent = "Set";
-    buttonSet.addEventListener("click", () => {
-      allTopics.coursePage.coursePage.modifyDeadlines(this.problemId);
-    });
     panelDeadlines.appendChild(buttonSet);
     let report = document.createElement("span");
-    report.id = this.idModifyReportDeadline;
     panelDeadlines.appendChild(report);
+    buttonSet.addEventListener("click", () => {
+      allTopics.coursePage.modifyDeadlines(
+        this.problemId,
+        panelDeadlines,
+        report
+      );
+    });
     return result;
   }
 
@@ -1186,8 +1206,7 @@ class TopicElement {
   ) {
     let incomingPoints = textArea.value;
     let modifyObject = {};
-    let idDecoded = decodeURIComponent(this.problemId);
-    modifyObject[idDecoded] = {
+    modifyObject[this.problemId] = {
       weight: incomingPoints
     };
     let url = "";

@@ -7,10 +7,12 @@ const typeset = require("./math_typeset");
 const miscellaneous = require("./miscellaneous_frontend");
 const storage = require("./storage").storage;
 const globalUser = require("./user").globalUser;
+const datePicker = require("./date_picker").datePicker;
 
 class CoursePage {
   constructor() {
     this.mainPage = null;
+    this.problemWeightsVisible = false;
   }
   initialize(mainPage) {
     this.mainPage = mainPage;
@@ -111,89 +113,90 @@ class CoursePage {
     return topics[0];
   }
 
-}
-
-function modifyDeadlines(incomingId) {
-  let nameDatePicker = `datePicker${incomingId}`;
-  let dates = document.getElementsByName(nameDatePicker);
-  let jsonToSubmit = {};
-  let idDecoded = decodeURIComponent(incomingId);
-  jsonToSubmit[idDecoded] = {
-    deadlines: {}
-  };
-
-  for (let i = 0; i < dates.length; i++) {
-    let currentSection = globalUser.sectionsTaught[i];
-    jsonToSubmit[idDecoded].deadlines[currentSection] = dates[i].value;
-  }
-  let url = "";
-  url += `${pathnames.urls.calculatorAPI}?`;
-  const setProblemDeadline = pathnames.urlFields.requests.setProblemDeadline;
-  url += `${pathnames.urlFields.request}=${setProblemDeadline}&`;
-  const mainInput = encodeURIComponent(JSON.stringify(jsonToSubmit));
-  url += `${pathnames.urlFields.mainInput}=${mainInput}&`;
-  submitRequests.submitGET({
-    url: url,
-    progress: ids.domElements.spanProgressReportGeneral,
-    result: `deadlines${incomingId}`,
-  });
-}
-
-let problemWeightsVisible = false;
-
-function toggleDeadline(
-  /** @type {HTMLElement} */
-  deadline,
-  panelId,
-  /** @type {HTMLElement} */
-  button,
-) {
-  let problem = problemPage.allTopics.getTopicElementById(panelId);
-  if (deadline.style.maxHeight === '200px') {
-    deadline.style.opacity = '0';
-    deadline.style.maxHeight = '0';
-    button.textContent = "";
-    button.appendChild(problem.toHTMLDeadlineElement());
-    let arrowLeft = document.createTextNode(" \u25C2");
-    button.appendChild(arrowLeft);
-  } else {
-    deadline.style.opacity = '1';
-    deadline.style.maxHeight = '200px';
-    button.textContent = "";
-    button.appendChild(problem.toHTMLDeadlineElement())
-    button.appendChild(document.createTextNode(" \u25BE"));
-  }
-}
-
-function toggleProblemWeights() {
-  let weights = document.getElementsByClassName('panelProblemWeights');
-  let buttons = document.getElementsByClassName('accordionLikeProblemWeight');
-  for (let i = 0; i < weights.length; i++) {
-    if (!problemWeightsVisible) {
-      weights[i].style.opacity = '1';
-      weights[i].style.maxHeight = '200px';
+  toggleDeadline(
+    /** @type {HTMLElement} */
+    deadline,
+    panelId,
+    /** @type {HTMLElement} */
+    button,
+  ) {
+    let problem = problemPage.allTopics.getTopicElementById(panelId);
+    if (deadline.style.maxHeight === '200px') {
+      deadline.style.opacity = '0';
+      deadline.style.maxHeight = '0';
+      button.textContent = "";
+      button.appendChild(problem.toHTMLDeadlineElement());
+      let arrowLeft = document.createTextNode(" \u25C2");
+      button.appendChild(arrowLeft);
     } else {
-      weights[i].style.opacity = '0';
-      weights[i].style.maxHeight = '0';
+      deadline.style.opacity = '1';
+      deadline.style.maxHeight = '200px';
+      button.textContent = "";
+      button.appendChild(problem.toHTMLDeadlineElement())
+      button.appendChild(document.createTextNode(" \u25BE"));
     }
   }
-  for (let i = 0; i < buttons.length; i++) {
-    let currentProblem = problemPage.allTopics.getTopicElementById(
-      buttons[i].name
-    );
-    if (!problemWeightsVisible) {
-      miscellaneous.writeHTML(
-        buttons[i],
-        `${currentProblem.toStringProblemWeight()} &#9660;`
-      );
-    } else {
-      miscellaneous.writeHTML(
-        buttons[i],
-        `${currentProblem.toStringProblemWeight()} &#9666;`
-      );
+
+  toggleProblemWeights() {
+    let weights = document.getElementsByClassName('panelProblemWeights');
+    let buttons = document.getElementsByClassName('accordionLikeProblemWeight');
+    for (let i = 0; i < weights.length; i++) {
+      if (!this.problemWeightsVisible) {
+        weights[i].style.opacity = '1';
+        weights[i].style.maxHeight = '200px';
+      } else {
+        weights[i].style.opacity = '0';
+        weights[i].style.maxHeight = '0';
+      }
     }
+    for (let i = 0; i < buttons.length; i++) {
+      let currentProblem = problemPage.allTopics.getTopicElementById(
+        buttons[i].name
+      );
+      if (!this.problemWeightsVisible) {
+        miscellaneous.writeHTML(
+          buttons[i],
+          `${currentProblem.toStringProblemWeight()} &#9660;`
+        );
+      } else {
+        miscellaneous.writeHTML(
+          buttons[i],
+          `${currentProblem.toStringProblemWeight()} &#9666;`
+        );
+      }
+    }
+    this.problemWeightsVisible = !this.problemWeightsVisible;
   }
-  problemWeightsVisible = !problemWeightsVisible;
+  
+  modifyDeadlines(
+    /** @type {string} */
+    incomingId,
+    /** @type {HTMLElement} */
+    deadlinesPanel,
+    /** @type {HTMLElement} */
+    finalReport,
+  ) {
+    let dates = deadlinesPanel.getElementsByClassName("datePicker");
+    let jsonToSubmit = {};
+    jsonToSubmit[incomingId] = {
+      deadlines: {}
+    };
+    for (let i = 0; i < dates.length; i++) {
+      let currentSection = globalUser.sectionsTaught[i];
+      jsonToSubmit[incomingId].deadlines[currentSection] = dates[i].value;
+    }
+    let url = "";
+    url += `${pathnames.urls.calculatorAPI}?`;
+    const setProblemDeadline = pathnames.urlFields.requests.setProblemDeadline;
+    url += `${pathnames.urlFields.request}=${setProblemDeadline}&`;
+    const mainInput = encodeURIComponent(JSON.stringify(jsonToSubmit));
+    url += `${pathnames.urlFields.mainInput}=${mainInput}&`;
+    submitRequests.submitGET({
+      url: url,
+      progress: ids.domElements.spanProgressReportGeneral,
+      result: finalReport,
+    });
+  } 
 }
 
 function afterLoadCoursePage(incoming, result) {
@@ -275,8 +278,5 @@ module.exports = {
   coursePage,
   loadTopicList,
   lastLoadedCourse,
-  modifyDeadlines,
   selectCurrentCoursePage,
-  toggleDeadline,
-  toggleProblemWeights,
 };

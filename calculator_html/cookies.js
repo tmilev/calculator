@@ -1,27 +1,32 @@
 "use strict"
 function getCookie(cookieName) {
   let cookie = document.cookie.split(";");
+  const cookieNameEncoded = encodeURIComponent(cookieName);
   for (let i = 0; i < cookie.length; i++) {
-    let x = cookie[i].substr(0, cookie[i].indexOf("="));
-    let y = cookie[i].substr(cookie[i].indexOf("=") + 1);
-    x = x.replace(/^\s+|\s+$/g, "");
-    if (x === cookieName) {
-      return unescape(y);
+    let x = cookie[i].substring(0, cookie[i].indexOf("="));
+    let y = cookie[i].substring(cookie[i].indexOf("=") + 1);
+    x = encodeURIComponent(x);
+    if (x === cookieNameEncoded) {
+      return decodeURIComponent(y);
     }
   }
   return "";
 }
 
-function setCookie(theName, theValue, expiryDays, secure) {
+function setCookie(name, value, expiryDays, secure) {
   let expiryDate = new Date();
   expiryDate.setDate(expiryDate.getDate() + expiryDays);
-  if (theValue === true) {
-    theValue = "true";
+  if (value === true) {
+    value = "true";
   }
-  if (theValue === false) {
-    theValue = "false";
+  if (value === false) {
+    value = "false";
   }
-  let cookieValue = escape(theValue) + ((expiryDays === null) ? "" : "; expires =" + expiryDate.toUTCString());
+  let expiration = "";
+  if (expiryDate !== null && expiryDate !== undefined) {
+    expiration = "; expires =" + expiryDate.toUTCString();
+  }
+  let cookieValue = encodeURIComponent(value) + expiration;
   if (secure === undefined || secure === null || secure == "") {
     secure = true;
   }
@@ -29,7 +34,8 @@ function setCookie(theName, theValue, expiryDays, secure) {
     cookieValue += "; Secure";
   }
   cookieValue += "; SameSite=Strict";
-  document.cookie = `${theName}=${cookieValue}; Path=/;`;
+  const nameEncoded = encodeURIComponent(name);
+  document.cookie = `${nameEncoded}=${cookieValue}; Path=/;`;
 }
 
 module.exports = {

@@ -115,9 +115,9 @@ class TopicCollection {
 
   updateProblemPage() {
     this.coursePage.selectCurrentCoursePage();
-    /** @type {TopicElement} */
+    /** @type {TopicElement|null} */
     let problem = this.getCurrentProblem();
-    if (this.flagLoaded) {
+    if (problem !== null && problem.flagProblemDownloadStarted) {
       problemNavigation.updateExceptTitle();
       return;
     }
@@ -139,7 +139,7 @@ class TopicCollection {
       }
       url = getCalculatorURLRequestFileCourseTopicsFromStorage();
     }
-    this.flagLoaded = true;
+    problem.flagProblemDownloadStarted = true;
     submitRequests.submitGET({
       url: url,
       callback: (input, outputComponent) => {
@@ -269,6 +269,7 @@ class TopicElement {
     this.flagProblemPageOnly = false;
     /** @type {AnswerPanel[]} */
     this.answerPanels = [];
+    this.flagProblemDownloadStarted = false;
   }
 
   setRandomSeed(input) {

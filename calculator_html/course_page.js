@@ -13,6 +13,10 @@ class CoursePage {
   constructor() {
     this.mainPage = null;
     this.problemWeightsVisible = false;
+    /** @type {string|null} */
+    this.lastCourseHome = null;
+    /** @type {string|null} */
+    this.lastTopicList = null;    
   }
   initialize(mainPage) {
     this.mainPage = mainPage;
@@ -48,14 +52,14 @@ class CoursePage {
       return;
     }
     if (
-      lastLoadedCourse.courseHome === incomingCourse &&
-      lastLoadedCourse.topicList === incomingTopicList
+      this.lastCourseHome === incomingCourse &&
+      this.lastTopicList === incomingTopicList
     ) {
       return;
     }
-    // The lastLoadedCourse variable may be reset on successful login. 
-    lastLoadedCourse.courseHome = incomingCourse;
-    lastLoadedCourse.topicList = incomingTopicList;
+    // The this.lastCourseHome variable may be reset on successful login. 
+    this.lastCourseHome = incomingCourse;
+    this.lastTopicList = incomingTopicList;
     let topicRequest = "templateJSONNoLogin";
     if (globalUser.flagLoggedIn) {
       topicRequest = "templateJSON";
@@ -67,7 +71,9 @@ class CoursePage {
     url += `${pathnames.urlFields.problem.topicList}=${incomingTopicList}`;
     submitRequests.submitGET({
       url: url,
-      callback: afterLoadCoursePage,
+      callback: (incoming) => {
+        this.afterLoadCoursePage(incoming);
+      },
       progress: ids.domElements.spanProgressReportGeneral
     });
   }
@@ -197,58 +203,53 @@ class CoursePage {
       result: finalReport,
     });
   } 
-}
 
-function afterLoadCoursePage(incoming, result) {
-  let courseBody = document.getElementById(
-    ids.domElements.divCurrentCourseBody
-  );
-  let coursePageDiv = document.getElementById(
-    ids.domElements.divCurrentCourse
-  );
-  miscellaneous.writeHTML(
-    courseBody,
-    miscellaneous.jsonParseGetHtmlStandard(incoming),
-  );
-  let titleElements = courseBody.getElementsByTagName('title');
-  if (titleElements !== null && titleElements !== undefined) {
-    if (titleElements.length > 0) {
-      document.getElementsByTagName('title')[0].text = titleElements[0].text;
+  loadTopicList() {
+    let topicListRequest = "topicListJSONNoLogin";
+    if (globalUser.isLoggedIn()) {
+      topicListRequest = "topicListJSON";
     }
+    let topicName = storage.variables.currentCourse.topicList.getValue();
+    let courseHome = storage.variables.currentCourse.courseHome.getValue();
+    let url = "";
+    const api = pathnames.urls.calculatorAPI;
+    url += `${api}?${pathnames.urlFields.request}=${topicListRequest}&`;
+    url += `${pathnames.urlFields.problem.topicList}=${topicName}&`;
+    url += `${pathnames.urlFields.problem.courseHome}=${courseHome}&`;
+    submitRequests.submitGET({
+      url: url,
+      callback: (incoming) => {
+        this.processLoadedTopicsWriteToCoursePage(incoming);
+      },
+      progress: ids.domElements.spanProgressReportGeneral
+    });
   }
-  typeset.typesetter.typesetSoft(coursePageDiv, "");
-  problemPage.writeEditCoursePagePanel();
-  if (coursePage.getTopicListElement() === null) {
-    return;
-  }
-  loadTopicList();
-}
 
-function loadTopicList() {
-  let topicListRequest = "topicListJSONNoLogin";
-  if (globalUser.isLoggedIn()) {
-    topicListRequest = "topicListJSON";
+  afterLoadCoursePage(incoming, result) {
+    let courseBody = document.getElementById(
+      ids.domElements.divCurrentCourseBody
+    );
+    let coursePageDiv = document.getElementById(
+      ids.domElements.divCurrentCourse
+    );
+    miscellaneous.writeHTML(
+      courseBody,
+      miscellaneous.jsonParseGetHtmlStandard(incoming),
+    );
+    let titleElements = courseBody.getElementsByTagName('title');
+    if (titleElements !== null && titleElements !== undefined) {
+      if (titleElements.length > 0) {
+        document.getElementsByTagName('title')[0].text = titleElements[0].text;
+      }
+    }
+    typeset.typesetter.typesetSoft(coursePageDiv, "");
+    problemPage.writeEditCoursePagePanel();
+    if (this.getTopicListElement() === null) {
+      return;
+    }
+    this.loadTopicList();
   }
-  let topicName = storage.variables.currentCourse.topicList.getValue();
-  let courseHome = storage.variables.currentCourse.courseHome.getValue();
-  let url = "";
-  const api = pathnames.urls.calculatorAPI;
-  url += `${api}?${pathnames.urlFields.request}=${topicListRequest}&`;
-  url += `${pathnames.urlFields.problem.topicList}=${topicName}&`;
-  url += `${pathnames.urlFields.problem.courseHome}=${courseHome}&`;
-  submitRequests.submitGET({
-    url: url,
-    callback: (incoming) => {
-      coursePage.processLoadedTopicsWriteToCoursePage(incoming);
-    },
-    progress: ids.domElements.spanProgressReportGeneral
-  });
 }
-
-let lastLoadedCourse = {
-  courseHome: null,
-  topicList: null,
-};
 
 function selectCurrentCoursePage() {
   coursePage.selectCurrentCoursePage();
@@ -276,7 +277,5 @@ const coursePage = new CoursePage();
 
 module.exports = {
   coursePage,
-  loadTopicList,
-  lastLoadedCourse,
   selectCurrentCoursePage,
 };

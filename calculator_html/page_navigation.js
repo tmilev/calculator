@@ -546,8 +546,8 @@ class Page {
 
   resetPagesNeedingReload() {
     selectCourse.courseSelector.needsLoad = true;
-    coursePage.lastLoadedCourse.courseHome = null;
-    coursePage.lastLoadedCourse.topicList = null;
+    coursePage.coursePage.lastCourseHome = null;
+    coursePage.coursePage.lastTopicList = null;
   }
 
   removeOneScript(scriptId) {

@@ -61,6 +61,7 @@ class CoursePage {
     }
     // The this.lastCourseHome variable may be reset on successful login. 
     this.lastCourseHome = incomingCourse;
+    this.lastTopicList = incomingTopicList;
     let topicRequest = "templateJSONNoLogin";
     if (globalUser.flagLoggedIn) {
       topicRequest = "templateJSON";

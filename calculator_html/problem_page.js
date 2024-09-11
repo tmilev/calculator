@@ -125,10 +125,13 @@ class TopicCollection {
     if (problem !== undefined && problem !== null) {
       let forReal = problem.flagForReal;
       const api = pathnames.urls.calculatorAPI;
-      const urlParameters = problem.getCalculatorURLRequestFileCourseTopics(forReal);
+      const urlParameters = problem.getCalculatorURLRequestFileCourseTopics(
+        forReal
+      );
       url = `${api}?${urlParameters}`;
     } else {
-      let problemFileName = storage.variables.currentCourse.problemFileName.getValue();
+      const courseStorage = storage.variables.currentCourse;
+      let problemFileName = courseStorage.problemFileName.getValue();
       if (
         problemFileName === "" ||
         problemFileName === undefined ||
@@ -196,7 +199,8 @@ class TopicCollection {
 
   /** @return {TopicElement|null} */
   getCurrentProblem() {
-    let problemFileName = storage.variables.currentCourse.problemFileName.getValue();
+    const courseStorage = storage.variables.currentCourse;
+    let problemFileName = courseStorage.problemFileName.getValue();
     if (
       problemFileName === "" ||
       problemFileName === null ||

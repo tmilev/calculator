@@ -76,14 +76,18 @@ class Page {
         id: "divSelectCourse",
         menuButtonId: "buttonSelectCourse",
         container: null,
-        selectFunction: selectCourse.selectCoursePage,
+        selectFunction: () => {
+          selectCourse.courseSelector.selectCoursePage();          
+        },
       },
       currentCourse: {
         name: "currentCourse",
         id: "divCurrentCourse",
         menuButtonId: "buttonCurrentCourse",
         container: null,
-        selectFunction: coursePage.selectCurrentCoursePage,
+        selectFunction: () => {
+          coursePage.coursePage.selectCurrentCourse();
+        },
       },
       problemPage: {
         name: "problemPage",

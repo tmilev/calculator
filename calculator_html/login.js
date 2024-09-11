@@ -72,6 +72,11 @@ class Authenticator {
   }
 
   loginCalculator() {
+    if (globalUser.loginSequenceInProgress) {
+      this.spanLoginStatus().textContent = "<b style='color:red'>Login sequence already started.</b><br>Refresh the page to reset. ";
+      return;
+    }
+    globalUser.loginSequenceInProgress = true;
     let password = this.passwordInput().value;
     this.passwordInput().value = "";
     let username = encodeURIComponent(this.usernameInput().value);
@@ -95,14 +100,19 @@ class Authenticator {
     });
   }
 
+  spanLoginStatus() {
+    return document.getElementById(
+      ids.domElements.pages.login.spanLoginStatus
+    );
+  }
+
   loginWithServerCallback(
     /** @type {string} */
     incomingString,
     output,
   ) {
-    let spanLoginStatus = document.getElementById(
-      ids.domElements.pages.login.spanLoginStatus
-    );
+    globalUser.loginSequenceInProgress = false;
+    let spanLoginStatus = this.spanLoginStatus();
     spanLoginStatus.textContent = "";
     let success = false;
     let loginErrorMessage = "";

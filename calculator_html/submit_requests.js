@@ -284,18 +284,16 @@ class RequestWithProgress {
  */
 function submitGET(
   /** 
-   * @type {
-   * {
+   * @type {{
    * url: string, 
    * callback: Function, 
    * progress: string, 
    * result: HTMLElement|string, 
-   * panelOptions:{
-   * dontCollapsePanel:boolean, 
-   * width:number
+   * panelOptions: {
+   *   dontCollapsePanel:boolean, 
+   *   width:number
    * }
-   * }
-   * } 
+   * }} 
    */
   inputObject,
 ) {
@@ -319,7 +317,14 @@ function submitGET(
 }
 
 function submitPOST(
-  /** @type {{url: string, parameters: string, callback: Function, progress: string, result: string}} */
+  /** @type {{
+   * url: string, 
+   * parameters: string, 
+   * callback: Function, 
+   * progress: string, 
+   * result: string
+   * }}
+   */
   inputObject,
 ) {
   let address = correctAddress(inputObject.url);
@@ -331,7 +336,9 @@ function submitPOST(
   if (inputObject.panelOptions !== undefined) {
     panelOptions = inputObject.panelOptions;
   }
-  let request = new RequestWithProgress(address, result, true, progress, callback, panelOptions);
+  let request = new RequestWithProgress(
+    address, result, true, progress, callback, panelOptions
+  );
   request.sendPOST(parameters);
 }
 

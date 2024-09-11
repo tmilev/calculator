@@ -22,7 +22,11 @@ class CourseSelector {
     const course = this.courses[courseIndex];
     storage.variables.currentCourse.courseHome.setAndStore(course.courseHome);
     storage.variables.currentCourse.topicList.setAndStore(course.topicList);
-    this.mainPage.selectPage(this.mainPage.pages.currentCourse.name);
+  }
+
+  selectCourseAndSwitchPages(courseIndex) {
+    this.selectCourse(courseIndex);
+    this.mainPage.selectAndStorePage(this.mainPage.pages.currentCourse.name);
   }
 
   selectCoursePage() {
@@ -40,7 +44,6 @@ class CourseSelector {
       progress: ids.domElements.spanProgressReportGeneral,
     });
   }
-
 
   afterLoadSelectCoursePage(incomingPage) {
     this.courses = JSON.parse(incomingPage)["courses"];
@@ -79,11 +82,13 @@ class CourseSelector {
       }
       let editButton = document.createElement("button");
       editButton.className = "courseButton";
-      editButton.addEventListener("click", selectCourse.bind(null, i));
+      editButton.addEventListener("click", () => {
+        this.selectCourseAndSwitchPages(i);
+      });
       let editButtonInternal = "";
       editButtonInternal += `${currentCourse.title}`;
       if (isRoughDraft) {
-        editButtonInternal += "<b style = 'color:red; font-size: x-small'>" +
+        editButtonInternal += "<b style='color:red; font-size: x-small'>" +
           "rough draft</b>";
       }
       miscellaneousFrontend.writeHTML(editButton, editButtonInternal);
@@ -99,19 +104,8 @@ class CourseSelector {
   }
 }
 
-function selectCourse(courseIndex) {
-  courseSelector.selectCourse(courseIndex);
-}
-
-
-function selectCoursePage() {
-  courseSelector.selectCoursePage();
-}
-
 const courseSelector = new CourseSelector();
 
 module.exports = {
   courseSelector,
-  selectCoursePage,
-  selectCourse,
 };

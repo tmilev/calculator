@@ -9,6 +9,7 @@ const miscellaneous = require("./miscellaneous_frontend");
  */
 class User {
   constructor() {
+    this.loginSequenceInProgress = false;
     this.flagLoggedIn = false;
     this.googleProfile = null;
     this.sectionsTaught = [];

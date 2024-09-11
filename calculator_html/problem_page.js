@@ -114,11 +114,11 @@ class TopicCollection {
   }
 
   updateProblemPage() {
-    this.coursePage.selectCurrentCoursePage();
+    this.coursePage.selectCurrentCourse();
     /** @type {TopicElement|null} */
     let problem = this.getCurrentProblem();
     if (problem !== null && problem.flagProblemDownloadStarted) {
-      problemNavigation.updateExceptTitle();
+      // We are already downloading the problem.
       return;
     }
     let url = "";
@@ -143,6 +143,7 @@ class TopicCollection {
     submitRequests.submitGET({
       url: url,
       callback: (input, outputComponent) => {
+        problem.flagProblemDownloadStarted = false;
         problem.writeProblemPage(input, outputComponent);
       },
       progress: ids.domElements.spanProgressReportGeneral,

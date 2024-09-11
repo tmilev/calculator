@@ -18,10 +18,12 @@ class CoursePage {
     /** @type {string|null} */
     this.lastTopicList = null;    
   }
+  
   initialize(mainPage) {
     this.mainPage = mainPage;
   }
-  selectCurrentCoursePage() {
+
+  selectCurrentCourse() {
     let currentCourse = storage.variables.currentCourse;
     let incomingCourse = currentCourse.courseHome.getValue();
     let incomingTopicList = currentCourse.topicList.getValue();
@@ -59,7 +61,6 @@ class CoursePage {
     }
     // The this.lastCourseHome variable may be reset on successful login. 
     this.lastCourseHome = incomingCourse;
-    this.lastTopicList = incomingTopicList;
     let topicRequest = "templateJSONNoLogin";
     if (globalUser.flagLoggedIn) {
       topicRequest = "templateJSON";
@@ -72,7 +73,7 @@ class CoursePage {
     submitRequests.submitGET({
       url: url,
       callback: (incoming) => {
-        this.afterLoadCoursePage(incoming);
+        this.afterLoadCoursePage(incoming, incomingTopicList);
       },
       progress: ids.domElements.spanProgressReportGeneral
     });
@@ -92,6 +93,7 @@ class CoursePage {
 
   writeTopicsToCoursePage() {
     let topicsElement = this.getTopicListElement();
+    topicsElement.textContent = "";
     let htmlContentElements = problemPage.allTopics.getHTMLfromTopics();
     problemPage.writeEditCoursePagePanel();
     let extraComments = miscellaneous.htmlElementsFromCommentsAndErrors(
@@ -99,8 +101,8 @@ class CoursePage {
     );
     miscellaneous.appendHtml(topicsElement, extraComments);
     miscellaneous.appendHtml(topicsElement, htmlContentElements);
-    initializeProblemWeightsAndDeadlines();
-    initializeDatePickers();
+    this.initializeProblemWeightsAndDeadlines();
+    this.initializeDatePickers();
     if (problemPage.allTopics.flagLoaded) {
       problemPage.problemNavigation.writeToHTML();
     }
@@ -204,17 +206,16 @@ class CoursePage {
     });
   } 
 
-  loadTopicList() {
+  loadTopicList(desiredTopicList) {
     let topicListRequest = "topicListJSONNoLogin";
     if (globalUser.isLoggedIn()) {
       topicListRequest = "topicListJSON";
     }
-    let topicName = storage.variables.currentCourse.topicList.getValue();
     let courseHome = storage.variables.currentCourse.courseHome.getValue();
     let url = "";
     const api = pathnames.urls.calculatorAPI;
     url += `${api}?${pathnames.urlFields.request}=${topicListRequest}&`;
-    url += `${pathnames.urlFields.problem.topicList}=${topicName}&`;
+    url += `${pathnames.urlFields.problem.topicList}=${desiredTopicList}&`;
     url += `${pathnames.urlFields.problem.courseHome}=${courseHome}&`;
     submitRequests.submitGET({
       url: url,
@@ -225,7 +226,7 @@ class CoursePage {
     });
   }
 
-  afterLoadCoursePage(incoming, result) {
+  afterLoadCoursePage(incomingData, desiredTopicList) {
     let courseBody = document.getElementById(
       ids.domElements.divCurrentCourseBody
     );
@@ -234,7 +235,7 @@ class CoursePage {
     );
     miscellaneous.writeHTML(
       courseBody,
-      miscellaneous.jsonParseGetHtmlStandard(incoming),
+      miscellaneous.jsonParseGetHtmlStandard(incomingData),
     );
     let titleElements = courseBody.getElementsByTagName('title');
     if (titleElements !== null && titleElements !== undefined) {
@@ -244,32 +245,40 @@ class CoursePage {
     }
     typeset.typesetter.typesetSoft(coursePageDiv, "");
     problemPage.writeEditCoursePagePanel();
-    if (this.getTopicListElement() === null) {
+    const topicListElement = this.getTopicListElement(); 
+    if (topicListElement === null) {
       return;
     }
-    this.loadTopicList();
+    if (globalUser.loginSequenceInProgress) {
+      miscellaneous.writeHTML(
+        topicListElement,
+        "<b style='color:purple'>Waiting for login ...</b>"
+      );
+      return;
+    }
+    miscellaneous.writeHTML(
+      topicListElement,
+      "<b style='color:orange'>Loading topic list ...</b>"
+    );
+    this.loadTopicList(desiredTopicList);
   }
-}
 
-function selectCurrentCoursePage() {
-  coursePage.selectCurrentCoursePage();
-}
-
-function initializeDatePickers() {
-  let pickers = document.getElementsByClassName("datePicker");
-  for (let i = 0; i < pickers.length; i++) {
-    datePicker.createDatePicker(pickers[i]);
+   initializeDatePickers() {
+    let pickers = document.getElementsByClassName("datePicker");
+    for (let i = 0; i < pickers.length; i++) {
+      datePicker.createDatePicker(pickers[i]);
+    }
   }
-}
-
-function initializeProblemWeightsAndDeadlines() {
-  let weights = document.getElementsByClassName('panelProblemWeights');
-  for (let i = 0; i < weights.length; i++) {
-    weights[i].style.maxHeight = '0px';
-  }
-  let deadlines = document.getElementsByClassName('panelDeadlines');
-  for (let i = 0; i < deadlines.length; i++) {
-    deadlines[i].style.maxHeight = '0px';
+ 
+  initializeProblemWeightsAndDeadlines() {
+    let weights = document.getElementsByClassName('panelProblemWeights');
+    for (let i = 0; i < weights.length; i++) {
+      weights[i].style.maxHeight = '0px';
+    }
+    let deadlines = document.getElementsByClassName('panelDeadlines');
+    for (let i = 0; i < deadlines.length; i++) {
+      deadlines[i].style.maxHeight = '0px';
+    }
   }
 }
 
@@ -277,5 +286,4 @@ const coursePage = new CoursePage();
 
 module.exports = {
   coursePage,
-  selectCurrentCoursePage,
 };

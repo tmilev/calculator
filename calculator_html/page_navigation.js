@@ -33,7 +33,6 @@ class Page {
     this.appElement = document.getElementById(
       ids.domElements.applicationIdentifiers.default
     );
-
     this.pages = {
       login: {
         name: "login", //<-for autocomplete
@@ -243,7 +242,9 @@ class Page {
   }
 
   initBuildVersion() {
-    let buildVersion = document.getElementById(ids.domElements.calculatorBuildVersion);
+    let buildVersion = document.getElementById(
+      ids.domElements.calculatorBuildVersion
+    );
     if (buildVersion === null) {
       return;
     }
@@ -387,7 +388,7 @@ class Page {
     // Select page on first load
     this.selectPage(this.storage.variables.currentPage.getValue());
     if (this.loginAttemptDesired()) {
-      login.loginTry();
+      login.authenticator.loginTry();
     }
     this.initializeButtons();
     mathTypeSet.typesetter.typesetSoft(
@@ -412,13 +413,22 @@ class Page {
     return true;
   }
 
+  /** Callback for the logout mechanism. */
+  afterLogout() {
+    // Invalidate the course page topic list. 
+    // This should cause the course page to reload.
+    coursePage.coursePage.lastTopicList = null;
+  }
+
   toStringProblem() {
     return this.storage.toStringProblem();
   }
 
   sectionSelect(sectionNumber) {
     this.storage.variables.currentSectionComputed.setAndStore(sectionNumber);
-    user.globalUser.sectionComputed = user.globalUser.sectionsTaught[sectionNumber];
+    user.globalUser.sectionComputed = user.globalUser.sectionsTaught[
+      sectionNumber
+    ];
     let deadlineSpans = document.getElementsByClassName(
       ids.domElements.classSpanDeadlineContainer
     );
@@ -540,7 +550,7 @@ class Page {
       spanView.textContent = "Admin view";
     }
     this.resetPagesNeedingReload();
-    login.setAdminPanels();
+    login.authenticator.setAdminPanels();
   }
 
   onStudentViewChange() {
@@ -800,7 +810,6 @@ class Page {
     });
   }
 }
-
 
 /**
  * @return {Page}

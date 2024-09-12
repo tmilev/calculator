@@ -52,7 +52,9 @@ class Authenticator {
     });
   }
 
-  handlePasswordInputKeyPress(/** @type {KeyboardEvent} */ e) {
+  handlePasswordInputKeyPress(
+    /** @type {KeyboardEvent} */ e
+  ) {
     if (e.key !== "Enter") {
       return;
     }
@@ -73,7 +75,11 @@ class Authenticator {
 
   loginCalculator() {
     if (globalUser.loginSequenceInProgress) {
-      this.spanLoginStatus().textContent = "<b style='color:red'>Login sequence already started.</b><br>Refresh the page to reset. ";
+      const span = this.spanLoginStatus();
+      span.textContent = "<b style='color:red'>" +
+        "Login sequence already started." +
+        "</b>" +
+        "<br>Refresh the page to reset. ";
       return;
     }
     globalUser.loginSequenceInProgress = true;
@@ -188,10 +194,10 @@ class Authenticator {
     miscellaneous.writeHTML(loginInfoComponent, loginInfo);
     if (success) {
       globalUser.makeFromUserInfo(parsedAuthentication);
-      toggleAccountPanels();
-      setAdminPanels();
-      hideLoginCalculatorButtons();
-      showLogoutButton();
+      this.toggleAccountPanels();
+      this.setAdminPanels();
+      this.hideLoginCalculatorButtons();
+      this.showLogoutButton();
       this.mainPage.onStudentViewChange();
     } else if (pathnames.standardResponses.isNotLoggedInResponse(
       parsedAuthentication
@@ -219,25 +225,50 @@ class Authenticator {
       storage.variables.user.name.setAndStore("");
       storage.variables.user.role.setAndStore("");
       globalUser.flagLoggedIn = false;
-      showLoginCalculatorButtons();
-      toggleAccountPanels();
-      setAdminPanels();
+      this.showLoginCalculatorButtons();
+      this.toggleAccountPanels();
+      this.setAdminPanels();
     }
   }
+
+  toggleAccountPanels() {
+    let accountPanels = document.getElementsByClassName("divAccountPanel");
+    for (let i = 0; i < accountPanels.length; i++) {
+      if (globalUser.flagLoggedIn === true) {
+        accountPanels[i].classList.remove("divInvisible");
+        accountPanels[i].classList.add("divVisible");
+      } else {
+        accountPanels[i].classList.remove("divVisible");
+        accountPanels[i].classList.add("divInvisible");
+      }
+    }
+  } 
+
+  showLoginCalculatorButtons() {
+    const loginIds = ids.domElements.pages.login;
+    document.getElementById(
+      loginIds.divLoginCalculatorPanel
+    ).classList.remove("divInvisible");
+    document.getElementById(
+      loginIds.divLoginCalculatorPanel
+    ).classList.add("divVisible");
+    document.getElementById(
+      loginIds.userNameReport
+    ).classList.remove("divVisible");
+    document.getElementById(
+      loginIds.userNameReport
+    ).classList.add("divInvisible");
+  }  
 
   logout() {
     storage.variables.user.name.setAndStore("");
     storage.variables.user.authenticationToken.setAndStore("");
     storage.variables.user.role.setAndStore("");
-    hideLogoutButton();
+    this.hideLogoutButton();
     globalUser.hideProfilePicture();
     globalUser.flagLoggedIn = false;
     globalUser.sectionsTaught = [];
     document.getElementById("inputPassword").value = "";
-    this.logoutPartTwo();
-  }
-
-  logoutPartTwo() {
     let loginStatus = document.getElementById("spanLoginStatus");
     let boldComponent = document.createElement("b");
     let anchor = document.createElement("a");
@@ -255,9 +286,10 @@ class Authenticator {
     );
     loginStatus.appendChild(boldComponent);
     loginStatus.appendChild(textNode);
-    showLoginCalculatorButtons();
-    toggleAccountPanels();
+    this.showLoginCalculatorButtons();
+    this.toggleAccountPanels();
     this.setAdminPanels();
+    this.mainPage.afterLogout();
     this.mainPage.selectAndStorePage(this.mainPage.pages.login.name);
   }
 
@@ -317,7 +349,7 @@ class Authenticator {
     this.mainPage.storage.variables.user.name.setAndStore("");
     globalUser.googleProfile = window.calculator.jwt.decode(token);
     this.mainPage.showProfilePicture();
-    showLogoutButton();
+    this.showLogoutButton();
     const api = pathnames.urls.calculatorAPI;
     const request = pathnames.urlFields.request;
     const userInfo = pathnames.urlFields.requests.userInfoJSON;
@@ -345,95 +377,56 @@ class Authenticator {
       progress: ids.domElements.spanProgressReportGeneral
     });
   }
-}
 
-function loginTry() {
-  authenticator.loginTry();
-}
-
-function toggleAccountPanels() {
-  let accountPanels = document.getElementsByClassName("divAccountPanel");
-  for (let i = 0; i < accountPanels.length; i++) {
-    if (globalUser.flagLoggedIn === true) {
-      accountPanels[i].classList.remove("divInvisible");
-      accountPanels[i].classList.add("divVisible");
-    } else {
-      accountPanels[i].classList.remove("divVisible");
-      accountPanels[i].classList.add("divInvisible");
+  showLogoutButton() {
+    for (; ;) {
+      let logoutLinks = document.getElementsByClassName("linkLogoutInactive");
+      if (logoutLinks.length === 0) {
+        break;
+      }
+      logoutLinks[0].classList.add("linkLogoutActive");
+      logoutLinks[0].classList.remove("linkLogoutInactive");
     }
-  }
-}
+  }  
 
-function setAdminPanels() {
-  authenticator.setAdminPanels();
+  hideLoginCalculatorButtons() {
+    const loginIds = ids.domElements.pages.login;
+    document.getElementById(
+      loginIds.divLoginCalculatorPanel
+    ).classList.remove("divVisible");
+    document.getElementById(
+      loginIds.divLoginCalculatorPanel
+    ).classList.add("divInvisible");
+    document.getElementById(
+      loginIds.userNameReport
+    ).textContent = storage.variables.user.name.value;
+    document.getElementById(
+      loginIds.userNameReport
+    ).classList.remove("divInvisible");
+    document.getElementById(
+      loginIds.userNameReport
+    ).classList.add("divVisible");
+  }
+
+  hideLogoutButton() {
+    for (; ;) {
+      let logoutLinks = document.getElementsByClassName("linkLogoutActive");
+      if (logoutLinks.length === 0) {
+        break;
+      }
+      logoutLinks[0].classList.add("linkLogoutInactive");
+      logoutLinks[0].classList.remove("linkLogoutActive");
+    }
+  }  
 }
 
 function onGoogleSignIn(googleUser) {
   authenticator.onGoogleSignIn(googleUser);
 }
 
-function showLoginCalculatorButtons() {
-  const loginIds = ids.domElements.pages.login;
-  document.getElementById(
-    loginIds.divLoginCalculatorPanel
-  ).classList.remove("divInvisible");
-  document.getElementById(
-    loginIds.divLoginCalculatorPanel
-  ).classList.add("divVisible");
-  document.getElementById(
-    loginIds.userNameReport
-  ).classList.remove("divVisible");
-  document.getElementById(
-    loginIds.userNameReport
-  ).classList.add("divInvisible");
-}
-
-function hideLoginCalculatorButtons() {
-  const loginIds = ids.domElements.pages.login;
-  document.getElementById(
-    loginIds.divLoginCalculatorPanel
-  ).classList.remove("divVisible");
-  document.getElementById(
-    loginIds.divLoginCalculatorPanel
-  ).classList.add("divInvisible");
-  document.getElementById(
-    loginIds.userNameReport
-  ).textContent = storage.variables.user.name.value;
-  document.getElementById(
-    loginIds.userNameReport
-  ).classList.remove("divInvisible");
-  document.getElementById(
-    loginIds.userNameReport
-  ).classList.add("divVisible");
-}
-
-function showLogoutButton() {
-  for (; ;) {
-    let logoutLinks = document.getElementsByClassName("linkLogoutInactive");
-    if (logoutLinks.length === 0) {
-      break;
-    }
-    logoutLinks[0].classList.add("linkLogoutActive");
-    logoutLinks[0].classList.remove("linkLogoutInactive");
-  }
-}
-
-function hideLogoutButton() {
-  for (; ;) {
-    let logoutLinks = document.getElementsByClassName("linkLogoutActive");
-    if (logoutLinks.length === 0) {
-      break;
-    }
-    logoutLinks[0].classList.add("linkLogoutInactive");
-    logoutLinks[0].classList.remove("linkLogoutActive");
-  }
-}
-
 let authenticator = new Authenticator();
 
 module.exports = {
-  loginTry,
-  setAdminPanels,
   onGoogleSignIn,
   authenticator,
 };

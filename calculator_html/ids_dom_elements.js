@@ -203,7 +203,6 @@ let domElements = {
   divCalculatorMainInputOutput: "divCalculatorMainInputOutput",
   divCurrentCourse: "divCurrentCourse",
   divCurrentCourseBody: "divCurrentCourseBody",
-  divMathjaxProblematicRender: "divMathjaxProblematicRender",
   divLoginPanelInfo: "divLoginPanelInfo",
   divLoginPanelDatabaseInfo: "divLoginPanelDatabaseInfo",
   courseEditPanel: "divCurrentCourseEditPanel",

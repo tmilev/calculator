@@ -26,7 +26,6 @@ const storage = require("./storage").storage;
 const miscellaneous = require("./miscellaneous_frontend");
 const user = require("./user");
 
-
 class Page {
   constructor() {
     window.calculator.mainPage = this;
@@ -353,7 +352,9 @@ class Page {
       profilePicElement.setAttribute("title", user.globalUser.googleProfile.name);
       profilePicElement.setAttribute("className", "profilePicture");
       //profilePicElement.setAttribute("width", 50);
-      document.getElementById(ids.domElements.divProfilePicture).appendChild(profilePicElement);
+      document.getElementById(
+        ids.domElements.divProfilePicture
+      ).appendChild(profilePicElement);
     } catch (e) {
       console.log("Failed to set profile picture: " + e);
     }
@@ -391,15 +392,13 @@ class Page {
       login.authenticator.loginTry();
     }
     this.initializeButtons();
-    mathTypeSet.typesetter.typesetSoft(
-      ids.domElements.divMathjaxProblematicRender
-    );
   }
 
   /** @type {boolean} */
   loginAttemptDesired() {
+    const currentPage = storage.variables.currentPage;
     if (
-      storage.variables.currentPage.getValue() === this.pages.activateAccount.name
+      currentPage.getValue() === this.pages.activateAccount.name
     ) {
       return false;
     }
@@ -434,7 +433,7 @@ class Page {
     );
     for (let i = 0; i < deadlineSpans.length; i++) {
       let currentDeadlineSpan = deadlineSpans[i];
-      let currentDeadlineId = currentDeadlineSpan.id.substr(
+      let currentDeadlineId = currentDeadlineSpan.id.substring(
         ids.stringResources.prefixDeadlineContainer.length
       );
       let currentProblem = problemPage.allTopics[currentDeadlineId];
@@ -818,21 +817,14 @@ function mainPage() {
   return page;
 }
 
-/** @return {String} */
-function getCleanedUpURL(input) {
-  return storage.getCleanedUpURL(input);
-}
-
 const page = new Page();
 window.calculator.mainPage = page;
 if (window.calculator.flagRunMainPage) {
   page.initializePage();
 }
 
-
 module.exports = {
   page,
   Page,
   mainPage,
-  getCleanedUpURL,
 };

@@ -12433,10 +12433,10 @@ class MathTagConverter {
       /** @type {HTMLElement!} */
       let element = this.mathElementsDOM[this.typesetTotal];
       let elementSVG = this.mathElementsSVG[this.typesetTotal];
-      if (element['typeset'] === 'true') {
+      if (element.getAttribute('typeset') === 'true') {
         continue;
       }
-      element['typeset'] = 'true';
+      element.setAttribute('typeset', 'true');
       let startTime = (new Date()).getTime();
       mathFromElement(
         element,

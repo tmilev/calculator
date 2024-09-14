@@ -75,7 +75,7 @@ class Page {
         menuButtonId: "buttonSelectCourse",
         container: null,
         selectFunction: () => {
-          selectCourse.courseSelector.selectCoursePage();          
+          selectCourse.courseSelector.selectCoursePage();
         },
       },
       currentCourse: {
@@ -509,7 +509,7 @@ class Page {
   studentView() {
     return user.globalUser.studentView()
   }
-  
+
   writeStudentViewChange() {
     let studentView = this.storage.variables.flagStudentView.isTrue();
     let spanView = document.getElementById(

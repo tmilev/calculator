@@ -297,33 +297,15 @@ function getNavigationEditButton(problemId, contentHTML) {
   return navigationButton;
 }
 
-function writeNextPreviousEditButton(
-  currentlyEditedPage,
-) {
-  let problem = allTopics.getTopicElementById(currentlyEditedPage);
-  if (problem === null) {
-    return;
-  }
-  let previousButtonSpan = document.getElementById(ids.domElements.spanButtonPreviousEdit);
-  let nextButtonSpan = document.getElementById(ids.domElements.spanButtonNextEdit);
-  if (previousButtonSpan !== null) {
-    previousButtonSpan.textContent = "";
-    previousButtonSpan.appendChild(getPreviousEditButton(problem.previousProblemId));
-  }
-  if (nextButtonSpan !== null) {
-    nextButtonSpan.textContent = "";
-    nextButtonSpan.appendChild(getNextEditButton(problem.nextProblemId));
-  }
-}
 
 class ProblemEditor {
   constructor() {
     this.mainPage = null;
-    this.allProblems = null;
+    this.allTopics = null;
   }
-  initialize(mainPage, allProblems) {
+  initialize(mainPage, allTopics) {
     this.mainPage = mainPage;
-    this.allProblems = allProblems;
+    this.allTopics = allTopics;
   }
 
   selectEditPage(
@@ -373,7 +355,7 @@ class ProblemEditor {
       this.mainPage.selectAndStorePage(this.mainPage.pages.editPage.name);
     }
 
-    writeNextPreviousEditButton(currentlyEditedPage);
+    this.writeNextPreviousEditButton(currentlyEditedPage);
     let topicTextArea = document.getElementById(ids.domElements.textAreaTopicListEntry);
     topicTextArea.value = `Title: ${currentlyEditedPage}\nProblem: ${currentlyEditedPage}`;
     topicTextArea.cols = currentlyEditedPage.length + 15;
@@ -387,6 +369,25 @@ class ProblemEditor {
       },
       progress: ids.domElements.spanProgressReportGeneral,
     });
+  }
+
+  writeNextPreviousEditButton(
+    currentlyEditedPage,
+  ) {
+    const problem = this.allTopics.getTopicElementByIdOrNull(currentlyEditedPage);
+    if (problem === null) {
+      return;
+    }
+    let previousButtonSpan = document.getElementById(ids.domElements.spanButtonPreviousEdit);
+    let nextButtonSpan = document.getElementById(ids.domElements.spanButtonNextEdit);
+    if (previousButtonSpan !== null) {
+      previousButtonSpan.textContent = "";
+      previousButtonSpan.appendChild(getPreviousEditButton(problem.previousProblemId));
+    }
+    if (nextButtonSpan !== null) {
+      nextButtonSpan.textContent = "";
+      nextButtonSpan.appendChild(getNextEditButton(problem.nextProblemId));
+    }
   }
 }
 

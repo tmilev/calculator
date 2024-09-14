@@ -500,6 +500,7 @@ const knownTypes = {
 };
 
 class MathNodeFactory {
+
   /**
    * Constructs horizontal math.
    * @return {MathNodeHorizontalMath!}
@@ -3383,13 +3384,6 @@ class EquationEditor {
       this.rootNode.type.cursor = '';
       this.rootNode.type.minWidth = '';
     }
-    /**
-     * @type {boolean} whether there's a pending writeLatex event to be
-     * trigerred when the event is visible.
-     */
-    this.pendingWriteLatex = false;
-    /** @type {IntersectionObserver?} */
-    this.observer = null;
     /** @type {boolean} */
     this.preventEditorBlur = false;
     /** @type {boolean} */
@@ -3820,6 +3814,11 @@ class EquationEditor {
     this.writeLatex(inputContent);
   }
 
+  containerWidthIsZero() {
+    const boundingRectangle = this.container.getBoundingClientRect();
+    return boundingRectangle.width === 0;
+  }
+
   /** Writes latex to the currently-focused component. */
   writeLatex(
     /** @type {string} */
@@ -3828,48 +3827,9 @@ class EquationEditor {
     if (this.container === null) {
       throw new Error('Attempt to write to non-initialized equation editor.');
     }
-    if (this.observer === null) {
-      // Please note: Intersection observer is a recent addition to web
-      // browsers. It "fires events" when the visibility of an element changes.
-      // The purpose of this snippet is the following.
-      // Suppose we want to write latex to an element that is nested in another
-      // element with visibility:none. Then the getBoundingClientRect() bounding
-      // rectangles of all atoms in our editor will have zero dimensions, thus
-      // throwing off the typesetting computation. So, we need to postpone the
-      // writeLatex() function to the time when the element comes visible, hence
-      // the observer below. Please note: common sense suggests that
-      // this.container removed from the DOM tree, both this.container and the
-      // observer below will be garbage-collected. However, this has not been
-      // 100% tested to be the case. Since in most pages this.container will not
-      // be removed from the DOM tree, it seems that the question of garbage
-      // collection correctness can be ignored.
-      this.observer = new IntersectionObserver((unused1, unused2) => {
-        this.writeLatexPartTwo(latex);
-      }, {
-        root: document.documentElement,
-      });
-      this.observer.observe(this.container);
-    }
-    this.pendingWriteLatex = true;
     if (this.container.style.minWidth === '') {
       this.container.style.minWidth = '1px';
     }
-    this.writeLatexPartTwo(latex);
-  }
-
-  /** @return {boolean} */
-  writeLatexPartTwo(
-    /** @type {string} */
-    latex,
-  ) {
-    if (this.pendingWriteLatex !== true) {
-      return false;
-    }
-    let boundingRectangle = this.container.getBoundingClientRect();
-    if (boundingRectangle.width === 0) {
-      return false;
-    }
-    this.pendingWriteLatex = false;
     this.latexLastWritten = latex;
     this.rootNode.removeAllChildren();
     if (this.rootNode.element !== null) {
@@ -4334,6 +4294,33 @@ class EquationEditor {
 
   /** Updates the vertical alignment of the container DOM component. */
   updateAlignment() {
+    let renderingContainer = null;
+    let dummyRoot = null;
+    if (
+      this.containerWidthIsZero()
+    ) {
+      // The original container is not visible. 
+      // As the container has min width of 1px,
+      // this is likely due to its display being set to none.
+      // Let us create a temporary container that is visible.
+      renderingContainer = document.createElement("div");
+      dummyRoot = document.createElement("div");
+      const style = window.getComputedStyle(this.container);
+      // Copy the entire computed style of the original container.
+      renderingContainer.style = style;
+      // Ensure our new container is visible.
+      renderingContainer.style.display = 'hidden';
+      // Replace the root node with a dummy.
+      this.container.replaceChild(dummyRoot, this.rootNode.element);
+      // Attach the root node to our temporary holder. 
+      // After this, the root node dimensions will be computed correctly.
+      renderingContainer.appendChild(this.rootNode.element);
+      // We need to access the getBoundingClientRect() function of 
+      // the rendering container and its DOM subtree.
+      // The method does not run correctly unless the element is attached
+      // to a document body, so let us attach it, temporarily, here.
+      document.body.appendChild(renderingContainer);
+    }
     this.rootNode.computeBoundingBox();
     this.rootNode.doAlign();
     this.computeContainerDimensions();
@@ -4344,6 +4331,12 @@ class EquationEditor {
       this.container.style.verticalAlign = 'middle';
     } else {
       this.container.style.verticalAlign = 'sub';
+    }
+    if (dummyRoot !== null) {
+      // Remove our hidden rendering component from the document body.
+      document.body.removeChild(renderingContainer);
+      // Restore the root element to the (invisible) this.container.
+      this.container.replaceChild(this.rootNode.element, dummyRoot);
     }
   }
 

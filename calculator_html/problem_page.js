@@ -38,7 +38,18 @@ class TopicCollection {
     normalizedTopicId,
   ) {
     if (!(normalizedTopicId in this.allTopics)) {
-      throw (`Error: problem label ${label} not found. `);
+      throw (`Error: problem label ${normalizedTopicId} not found. `);
+    }
+    return this.allTopics[normalizedTopicId];
+  }
+
+  /** @return {TopicElement|null} */
+  getTopicElementByIdOrNull(
+    /** @type {string} */
+    normalizedTopicId,
+  ) {
+    if (!(normalizedTopicId in this.allTopics)) {
+      return null;
     }
     return this.allTopics[normalizedTopicId];
   }
@@ -110,7 +121,7 @@ class TopicCollection {
       logMessage += `at ${timePerChild.toFixed()} ms per child.`;
       console.log(logMessage);
     }
-    problemNavigation.writeToHTML();    
+    problemNavigation.writeToHTML();
   }
 
   updateProblemPage() {
@@ -239,7 +250,7 @@ function selectProblemById(
 class TopicElement {
   constructor(
     /** @type {string} */
-    problemId, 
+    problemId,
     /** @type {string} */
     fileName
   ) {

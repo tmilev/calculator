@@ -288,24 +288,28 @@ class StorageCalculator {
           name: "courseHome",
           nameCookie: "courseHome",
           nameURL: "courseHome",
+          nameLocalStorage: "courseHome",
           showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
         }),
         topicList: new StorageVariable({
           name: "topicList",
           nameCookie: "topicList",
           nameURL: "topicList",
+          nameLocalStorage: "topicList",
           showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
         }),
         fileName: new StorageVariable({
           name: "fileName",
           nameCookie: "fileName",
           nameURL: "fileName",
+          nameLocalStorage: "fileName",
           problemPage: pageNamesOnWhichToShowProblemURLs,
         }),
         problemFileName: new StorageVariable({
           name: "problemFileName",
           nameCookie: "problemFileName",
           nameURL: "problemFileName",
+          nameLocalStorage: "problemFileName",
           showInURLOnPages: pageNamesOnWhichToShowProblemURLs,
         }),
         exerciseType: new StorageVariable({

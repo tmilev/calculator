@@ -129,6 +129,7 @@ class MathNodeType {
   }
 }
 
+
 const knownTypeDefaults = {
   'width': '',
   'height': '',
@@ -498,6 +499,54 @@ const knownTypes = {
     'fontSizeRatio': 0.55,
   }),
 };
+
+class BaseLineComputer {
+  constructor() {
+    /** @type{Object.<string,number>} */
+    this.baselineHeights = {}
+  }
+  /** 
+   * Returns the baseline height: the height of the baseline
+   * as a proportion of the total height of the bounding box.
+   * 
+   * @param {string} fontFamily The font.
+   */
+  computeBaseline(
+    /** @type {string} */
+    fontFamily
+  ) {
+    if (!(fontFamily in this.baselineHeights)) {
+      this.baselineHeights[fontFamily] = this.computeBaselineHeightWithoutCache(
+        fontFamily
+      );
+    }
+    return this.baselineHeights[fontFamily];
+  }
+  computeBaselineHeightWithoutCache(
+    /** @type {string} */
+    fontFamily
+  ) {
+    // Computation inspired by
+    // https://stackoverflow.com/questions/20443220/how-to-absolutely-position-the-baseline-of-text-in-html
+    const container = document.createElement('div');
+    container.style.visibility = 'hidden';
+    container.style.fontFamily = fontFamily;
+    const zeroPixelA = document.createElement('span');
+    zeroPixelA.style.height = '0px';
+    zeroPixelA.textContent = 'A';
+    const largeA = document.createElement('span');
+    largeA.style.height = '999px';
+    largeA.textContent = 'A';
+    container.appendChild(zeroPixelA);
+    container.appendChild(largeA);
+    document.body.appendChild(container);
+    const largeBox = window.getComputedStyle(largeA);
+    const smallBox = window.getComputedStyle(zeroPixelA);
+    return smallBox.top / largeBox.height;
+  }
+}
+
+const baseLineComputer = new BaseLineComputer();
 
 class MathNodeFactory {
 
@@ -1544,7 +1593,7 @@ class LaTeXConstants {
     this.characterReplacingSelectionString =
       'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 +-*';
 
-    /** @type {Object<string, boolean>!} */
+    /** @type {Object.<string, boolean>!} */
     this.characterReplacingSelection = {};
     for (let i = 0; i < this.characterReplacingSelectionString.length; i++) {
       this.characterReplacingSelection[this.characterReplacingSelectionString
@@ -3002,7 +3051,7 @@ class EquationEditorOptions {
      * lineBreakWidth: (number|undefined),
      * logTiming: (boolean|undefined),
      * copyButton: (boolean|undefined),
-     * extraKeyHandlers: (?Object<string, function (!EquationEditor,
+     * extraKeyHandlers: (?Object.<string, function (!EquationEditor,
      * boolean)>|null|undefined), highlightStyle: ({ backgroundColor:
      * (string|undefined|null), outline:
      * (string|undefined|null)}|null|undefined),
@@ -3082,7 +3131,7 @@ class EquationEditorOptions {
 
     /** @type {boolean} */
     this.showLatexOnDoubleClick = !this.editable && !this.copyButton;
-    /** @type {?Object<string, function(!EquationEditor,boolean)>} */
+    /** @type {?Object.<string, function(!EquationEditor,boolean)>} */
     this.extraKeyHandlers = {};
     if (options.extraKeyHandlers !== undefined &&
       options.extraKeyHandlers !== null) {
@@ -3704,10 +3753,10 @@ class EquationEditor {
     this.containerSVG.appendChild(svgElement);
     this.containerSVG.style.width = this.containerDesiredWidth;
     this.containerSVG.style.height = this.containerDesiredHeight;
-    if (this.rootNode.boundingBox.needsMiddleAlignment) {
-      this.containerSVG.style.verticalAlign = 'middle';
-    } else {
-      this.containerSVG.style.verticalAlign = 'baseline';
+    this.containerSVG.style.verticalAlign = 'middle';
+    if (!this.rootNode.boundingBox.needsMiddleAlignment) {
+      // DO_NOT_SUBMit 
+
     }
   }
   /** Draws the math node on a canvas. */
@@ -4326,11 +4375,11 @@ class EquationEditor {
     this.computeContainerDimensions();
     this.container.style.height = `${this.containerDesiredHeight}px`;
     this.container.style.width = `${this.containerDesiredWidth}px`;
-    if (this.rootNode.boundingBox.needsMiddleAlignment &&
-      !this.options.editable) {
-      this.container.style.verticalAlign = 'middle';
-    } else {
-      this.container.style.verticalAlign = 'baseline';
+    this.container.style.verticalAlign = 'middle';
+    if (!this.rootNode.boundingBox.needsMiddleAlignment ||
+      this.options.editable) {
+
+
     }
     if (dummyRoot !== null) {
       // Remove our hidden rendering component from the document body.
@@ -9408,7 +9457,6 @@ class MathNodeRoot extends MathNode {
     }
     if (!this.boundingBox.needsMiddleAlignment) {
       this.computeDimensionsBaselineAlignment();
-      return;
     }
     let lineHeight = this.boundingBox.height;
     if (this.boundingBox.lineHeight > 0) {
@@ -9416,10 +9464,9 @@ class MathNodeRoot extends MathNode {
       lineHeight = this.boundingBox.lineHeight;
     }
     let bottomDistance = lineHeight - this.boundingBox.fractionLineHeight;
+    this.boundingBox.top = 0;
     if (bottomDistance > this.boundingBox.fractionLineHeight) {
       this.boundingBox.height += bottomDistance * 2 - lineHeight;
-      this.boundingBox.top +=
-        bottomDistance - this.boundingBox.fractionLineHeight;
       this.boundingBox.fractionLineHeight = bottomDistance;
     } else {
       this.boundingBox.height +=
@@ -9437,7 +9484,7 @@ class MathNodeRoot extends MathNode {
     if (box === null) {
       return;
     }
-    this.boundingBox.top = this.boundingBox.height - (box.top + box.height);
+    this.boundingBox.top = this.boundingBox.height / 2 - (box.top + box.height);
   }
 
   /** @return {BoundingBox!} */
@@ -12384,6 +12431,10 @@ class MathTagConverter {
       console.log('While converting mathtags, reached recursion depth limits');
       return;
     }
+    if (toBeModified.nodeType === Node.COMMENT_NODE) {
+      // Do not process comment nodes!
+      return;
+    }
     if (toBeModified.childNodes.length === 0) {
       this.processTextContent(/** @type {HTMLElement!} */(toBeModified));
       return;
@@ -12500,7 +12551,7 @@ function typeset(
    * removeDisplayStyle: boolean,
    * svgOnly: boolean,
    * svgAndDOM: boolean,
-   * extraAttributes: Object<string, string>!}}
+   * extraAttributes: Object.<string, string>!}}
    */
   options,
 ) {

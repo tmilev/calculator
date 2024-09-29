@@ -216,7 +216,7 @@ Typeset all math in the 'toBeTypeSet' tag.
 
   <h2>Test page for static math content.</h2>
   <button id="typeSetButton"
-    onclick="typeset(document.getElementById('mathTagTester'), null, {sanitizeLatexSource: false, removeDisplayStyle:false, logTiming: true, svgAndDOM: false, svgOnly: false});">typeset</button>
+    onclick="typeset(document.getElementById('mathTagTester'), null, {sanitizeLatexSource: false, removeDisplayStyle:false, logTiming: true, svgAndDOM: true, svgOnly: false});">typeset</button>
   <br>
   <span id="mathTagTester">
     Example content to be typeset follow.
@@ -224,12 +224,14 @@ Typeset all math in the 'toBeTypeSet' tag.
     Feel free to reorder examples as you see fit (if possible, arranged by categories and from simpler to more
     complicated).
     <ul>
-      <li><span style="font-family:'Times New Roman'; font-size:20px;"> Vertical alignment of expressions without
+      <li><span style="font-family:'Times New Roman'; font-size:36px;"> 36px vertical alignment without
           fraction lines inside
           non-math text:
-          \((x^2+3x)^2 \), where \(x=2y^2+3\) and \(y=z\).
+          \((x^2+3x)^2 \), where \(x=2y\cdot y \cdot y^2+zy+3\) and \(y=w\).
         </span>
       </li>
+      <li> Comment nodes should not be typeset (you shouldn't see anything after): <!-- \(x^2+1\) --></li>
+      <!--
 
       <li> A small table:
         \(
@@ -285,8 +287,8 @@ Typeset all math in the 'toBeTypeSet' tag.
       </li>
       <li> Limits \(\lim\limits_{x\to-\infty}x\),\(\lim\limits_{x\to-\infty}\frac{2}{x}\) \(\lim_{x\to 5^+} x\),
         \(\lim\limits_{x\to\pm\infty}\).</li>
-      <li> How are expressions such as \(((123+12)^{123})\) rendered and vertically when inlined?</li>
-      <li>Horizontal alignment trigonometry: \(sin(2\alpha)\), \(\sin (2x)\), \(\cos x\); for example \(\cos^2x\)</li>
+      <li> How are expressions such as \(((123+12)^{123})\) rendered and vertically aligned inline?</li>
+      <li> Horizontal alignment trigonometry: \(sin(2\alpha)\), \(\sin (2x)\), \(\cos x\); for example \(\cos^2x\)</li>
       <li> Absolute values in parentheses.
         \( (a+\frac{1}{2}|x|+c) \)
         \( (a+\frac{1}{2}\left|1+x\right|+c) \)
@@ -508,7 +510,7 @@ Typeset all math in the 'toBeTypeSet' tag.
         \frac{1}{15} & \frac{1}{16} & \frac{1}{17} & \frac{1}{18} & \frac{1}{19}\\ \frac{1}{11} & \frac{1}{12} &
         \frac{1}{13} & \frac{1}{14} & \frac{1}{15} & \frac{1}{16} & \frac{1}{17} & \frac{1}{18} & \frac{1}{19} &
         \frac{1}{20} \end{pmatrix}}\)
-      </li>
+      </li>-->
     </ul>
   </span>
 </body>

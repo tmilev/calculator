@@ -269,7 +269,7 @@ const knownTypes = {
     'width': 'auto',
     'height': 'auto',
     'minWidth': '4px',
-    'verticalAlign': 'text-bottom',
+    'verticalAlign': 'baseline',
     'overflow': 'hidden',
     'boxSizing': 'border-box',
   }),
@@ -334,7 +334,7 @@ const knownTypes = {
   horizontalMath: new MathNodeType({
     'type': 'horizontalMath',
     'whiteSpace': 'nowrap',
-    'verticalAlign': 'text-bottom',
+    'verticalAlign': 'baseline',
     'textAlign': 'center',
   }),
   verticalLineInTable: new MathNodeType({
@@ -3707,7 +3707,7 @@ class EquationEditor {
     if (this.rootNode.boundingBox.needsMiddleAlignment) {
       this.containerSVG.style.verticalAlign = 'middle';
     } else {
-      this.containerSVG.style.verticalAlign = 'text-bottom';
+      this.containerSVG.style.verticalAlign = 'baseline';
     }
   }
   /** Draws the math node on a canvas. */
@@ -4330,7 +4330,7 @@ class EquationEditor {
       !this.options.editable) {
       this.container.style.verticalAlign = 'middle';
     } else {
-      this.container.style.verticalAlign = 'sub';
+      this.container.style.verticalAlign = 'baseline';
     }
     if (dummyRoot !== null) {
       // Remove our hidden rendering component from the document body.
@@ -10898,8 +10898,14 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     /** @type {number} */
     fractionLineHeightEnclosed,
   ) {
+    /** 
+     * Measures how round are the parentheses. 
+     * The lower the number, the more round the parentheses appear.
+     * When the number is higher, the parentheses appear more straight.
+     */
+    const flatness = 3;
     this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
-    this.boundingBox.width = Math.min(this.boundingBox.height / 4, 20);
+    this.boundingBox.width = Math.min(this.boundingBox.height / flatness, 20);
     this.element.style.borderLeft = '';
     this.element.style.borderRight = '';
     let scale = this.scale();

@@ -216,7 +216,7 @@ Typeset all math in the 'toBeTypeSet' tag.
 
   <h2>Test page for static math content.</h2>
   <button id="typeSetButton"
-    onclick="typeset(document.getElementById('mathTagTester'), null, {sanitizeLatexSource: false, removeDisplayStyle:false, logTiming: true, svgAndDOM: true, svgOnly: false});">typeset</button>
+    onclick="typeset(document.getElementById('mathTagTester'), null, {sanitizeLatexSource: false, removeDisplayStyle:false, logTiming: true, svgAndDOM: false, svgOnly: false});">typeset</button>
   <br>
   <span id="mathTagTester">
     Example content to be typeset follow.
@@ -224,6 +224,35 @@ Typeset all math in the 'toBeTypeSet' tag.
     Feel free to reorder examples as you see fit (if possible, arranged by categories and from simpler to more
     complicated).
     <ul>
+      <li> A small table:
+        \(
+        (\begin{array}{c|c}1&2\\2&3\end{array}]
+        \)
+        \(
+        [\begin{array}{cc}1&2\\2&3\end{array})
+        \)
+      </li>
+      <li> Vertical lines in small tables. As of writing, multiple vertial lines are drawn on top of one another.
+        \(
+        \begin{array}{|c||c|||r|l|c|r|l|}
+        1&2&3&4&5&6&7\\
+        1&2&3&4&5&6&7
+        \end{array}
+        \)
+      </li>
+      <li> More vertical lines in small tables.
+        \(
+        \begin{array}{|l|c|r|||}
+        1&2&3\\
+        1&2&3
+        \end{array}
+        \begin{array}{c||c|||r|l|c|r|l}
+        1&2&3&4&5&6&7\\
+        1&2&3&4&5&6&7
+        \end{array}
+        \)
+
+      </li>
       <li>
         <span class="mathcalculator">\begin{align}x&y\\ x &z\end{align} </span>
       </li>
@@ -339,7 +368,6 @@ Typeset all math in the 'toBeTypeSet' tag.
         \end{array}}\\ &=&\displaystyle \lim\limits_{x \to -1} \frac{(\cancel{x+1})(x+3)}{(\cancel{x+1})(x+5)}
         &&\text{Allowed~to~substitute~}x=-1\\ &=&\displaystyle \frac{-1+3}{-1+5}\\ &=&\displaystyle \frac{1}{2}
         \end{array}\)</li>
-      <li> A small table: \((\begin{array}{c|c}1&2\\2&3\end{array}]\)\([\begin{array}{cc}1&2\\2&3\end{array})\)</li>
       <li> Array with equality:
         \( \begin{array}{rcl} \displaystyle a&=&\\&=&b\end{array} \)
       </li>

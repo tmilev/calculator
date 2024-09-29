@@ -4997,13 +4997,15 @@ class BoundingBox {
     /** @type {number} */
     columnIndex,
   ) {
+    const betweenColumns = 10;
+    const halfBetweenColumns = betweenColumns / 2;
     if (columnIndex < 0) {
       return 0;
     }
     if (columnIndex >= this.columnOffsets.length) {
-      return this.width;
+      return this.width + halfBetweenColumns;
     }
-    return this.columnOffsets[columnIndex];
+    return this.columnOffsets[columnIndex] - halfBetweenColumns;
   }
 
   /** @return {string} */
@@ -5685,7 +5687,13 @@ class MathNode {
     this.boundingBox.height = this.children[0].boundingBox.height;
   }
 
-  /** Computes the dimensions of a matrix. */
+  /** 
+   * Computes the dimensions of a matrix. 
+   * Computes the dimensions of the vertical bars that 
+   * separate the columns of the table, for example
+   * \begin{array}{c|c}1&2\\3&4\end{array} has a vertical
+   * line | separating the two columns.
+   */
   computeDimensionsMatrix() {
     this.boundingBox = new BoundingBox();
     this.boundingBox.height = this.children[0].boundingBox.height;
@@ -5694,6 +5702,9 @@ class MathNode {
       this.children[0].boundingBox.fractionLineHeight;
     this.boundingBox.needsMiddleAlignment = true;
     let table = this.children[0].children[1];
+    let firstRow = table.children[0];
+    let numberOfColumns = firstRow.children.length;
+    const betweenColumns = 10;
     for (let i = 1; i < this.children.length; i++) {
       let verticalBar = this.children[i];
       verticalBar.boundingBox.height = this.boundingBox.height;
@@ -5702,6 +5713,13 @@ class MathNode {
       let columnIndex = extraData.columnIndex;
       let offset = table.boundingBox.getColumnOffset(columnIndex);
       verticalBar.boundingBox.left = offset;
+      if (columnIndex === numberOfColumns) {
+        // We have a vertical line separator after the last column, 
+        // as in
+        // \begin{array}{cc|}1&2\end{array}
+        // Extend the bounding box width to get extra space.
+        this.boundingBox.width += betweenColumns / 2;
+      }
     }
   }
 

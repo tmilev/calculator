@@ -3419,6 +3419,10 @@ class EquationEditor {
     /** @type {HTMLElement?} */
     this.latexContainer = null;
     this.initializeContainer(this.container);
+    /** @type {HTMLElement} */
+    this.alignmentElement = document.createElement('div');
+    this.alignmentElement.style.display = 'inline-block';
+    this.container.appendChild(this.alignmentElement);
     this.initializeContainer(this.containerSVG);
     /** @type {number} */
     this.containerDesiredHeight = 0;
@@ -3753,10 +3757,9 @@ class EquationEditor {
     this.containerSVG.appendChild(svgElement);
     this.containerSVG.style.width = this.containerDesiredWidth;
     this.containerSVG.style.height = this.containerDesiredHeight;
-    this.containerSVG.style.verticalAlign = 'middle';
+    this.containerSVG.style.verticalAlign = 'baseline';
     if (!this.rootNode.boundingBox.needsMiddleAlignment) {
-      // DO_NOT_SUBMit 
-
+      // DO_NOT_SUBMIT
     }
   }
   /** Draws the math node on a canvas. */
@@ -4375,12 +4378,7 @@ class EquationEditor {
     this.computeContainerDimensions();
     this.container.style.height = `${this.containerDesiredHeight}px`;
     this.container.style.width = `${this.containerDesiredWidth}px`;
-    this.container.style.verticalAlign = 'middle';
-    if (!this.rootNode.boundingBox.needsMiddleAlignment ||
-      this.options.editable) {
-
-
-    }
+    this.container.style.verticalAlign = 'baseline';
     if (dummyRoot !== null) {
       // Remove our hidden rendering component from the document body.
       document.body.removeChild(renderingContainer);
@@ -8779,7 +8777,7 @@ class MathNode {
     let left = boundingBoxFromParent.left + this.boundingBox.left;
     let top = boundingBoxFromParent.top + this.boundingBox.top +
       this.boundingBox.fractionLineHeight;
-    canvas.textBaseline = 'middle';
+    canvas.textBaseline = 'baseline';
     let fontSize =
       this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     let fontFamily = this.equationEditor.getFontFamily();
@@ -9464,10 +9462,10 @@ class MathNodeRoot extends MathNode {
       lineHeight = this.boundingBox.lineHeight;
     }
     let bottomDistance = lineHeight - this.boundingBox.fractionLineHeight;
-    this.boundingBox.top = 0;
     if (bottomDistance > this.boundingBox.fractionLineHeight) {
       this.boundingBox.height += bottomDistance * 2 - lineHeight;
       this.boundingBox.fractionLineHeight = bottomDistance;
+      this.boundingBox.top = - this.boundingBox.fractionLineHeight;
     } else {
       this.boundingBox.height +=
         this.boundingBox.fractionLineHeight * 2 - lineHeight;
@@ -9484,7 +9482,7 @@ class MathNodeRoot extends MathNode {
     if (box === null) {
       return;
     }
-    this.boundingBox.top = this.boundingBox.height / 2 - (box.top + box.height);
+    this.boundingBox.top = this.boundingBox.height - (box.top + box.height);
   }
 
   /** @return {BoundingBox!} */

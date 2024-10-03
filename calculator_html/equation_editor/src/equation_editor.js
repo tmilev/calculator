@@ -503,46 +503,62 @@ const knownTypes = {
 class BaseLineComputer {
   constructor() {
     /** @type{Object.<string,number>} */
-    this.baselineHeights = {}
+    this.ratiosCache = {}
   }
+
   /** 
-   * Returns the baseline height: the height of the baseline
-   * as a proportion of the total height of the bounding box.
+   * Returns the ratio of the distance from the top 
+   * of the bounding box to the baseline to the total 
+   * bounding box height.
    * 
    * @param {string} fontFamily The font.
    */
-  computeBaseline(
+  distanceBaselineToTopDividedByHeight(
     /** @type {string} */
     fontFamily
   ) {
-    if (!(fontFamily in this.baselineHeights)) {
-      this.baselineHeights[fontFamily] = this.computeBaselineHeightWithoutCache(
+    if (!(fontFamily in this.ratiosCache)) {
+      this.ratiosCache[
+        fontFamily
+      ] = this.distanceBaselineToTopDividedByHeightWithoutCache(
         fontFamily
       );
     }
-    return this.baselineHeights[fontFamily];
+    return this.ratiosCache[fontFamily];
   }
-  computeBaselineHeightWithoutCache(
+  
+  distanceBaselineToTopDividedByHeightWithoutCache(
     /** @type {string} */
     fontFamily
   ) {
     // Computation inspired by
     // https://stackoverflow.com/questions/20443220/how-to-absolutely-position-the-baseline-of-text-in-html
     const container = document.createElement('div');
-    container.style.visibility = 'hidden';
+    container.style.top = '0px';
     container.style.fontFamily = fontFamily;
+    container.style.position = 'fixed';
     const zeroPixelA = document.createElement('span');
-    zeroPixelA.style.height = '0px';
+    zeroPixelA.style.fontSize = '0px';
+    zeroPixelA.style.verticalAlign = 'baseline';
+    zeroPixelA.style.display = 'inline-block';
     zeroPixelA.textContent = 'A';
     const largeA = document.createElement('span');
-    largeA.style.height = '999px';
+    largeA.style.fontSize = '100px';
+    largeA.style.verticalAlign = 'baseline';
+    largeA.style.display = 'inline-block';
     largeA.textContent = 'A';
     container.appendChild(zeroPixelA);
     container.appendChild(largeA);
+    // Append the dom to the document body.
+    // Without attaching the container to the body, 
+    // we won't be able to get accurate font metrics.
     document.body.appendChild(container);
-    const largeBox = window.getComputedStyle(largeA);
-    const smallBox = window.getComputedStyle(zeroPixelA);
-    return smallBox.top / largeBox.height;
+    const largeBox = largeA.getBoundingClientRect();
+    const smallBox = zeroPixelA.getBoundingClientRect();
+    const result = smallBox.top / largeBox.height;
+    // Clean up the DOM.
+    document.body.removeChild(container);
+    return result;
   }
 }
 
@@ -1122,7 +1138,7 @@ class MathNodeFactory {
     /** @type {string} */
     matrixEnvironment,
   ) {
-    const matrixTable = new MathNode(equationEditor, knownTypes.matrixTable);
+    const matrixTable = new MathNodeMatrixTable(equationEditor);
     for (let i = 0; i < rows; i++) {
       matrixTable.appendChild(this.matrixRow(equationEditor, columns));
     }
@@ -4330,7 +4346,7 @@ class EquationEditor {
   }
 
   /** Computes the dimensions of the DOM element container. */
-  computeContainerDimensions() {
+  alignContainer() {
     let boundingRectangle = this.rootNode.element.getBoundingClientRect();
     // Bounding box may not be computed correctly at this point in Firefox.
     this.containerDesiredHeight = Math.max(
@@ -4339,9 +4355,17 @@ class EquationEditor {
     if (this.options.editable) {
       this.containerDesiredHeight += 2;
     }
-    // Bounding box may not be computed correctly at this point in Firefox.
     this.containerDesiredWidth =
       Math.max(boundingRectangle.width, this.rootNode.boundingBox.width);
+    this.container.style.height = `${this.containerDesiredHeight}px`;
+    this.container.style.width = `${this.containerDesiredWidth}px`;
+    const distanceFromTopToBaseline = this.rootNode.boundingBox.distanceFromTopToBaseline;
+    if (distanceFromTopToBaseline !== null) {
+      let verticalAlign = distanceFromTopToBaseline ;
+      this.container.style.verticalAlign = `${verticalAlign}px`;
+    } else {
+      this.container.style.verticalAlign = 'middle';
+    }
   }
 
   /** Updates the vertical alignment of the container DOM component. */
@@ -4375,10 +4399,7 @@ class EquationEditor {
     }
     this.rootNode.computeBoundingBox();
     this.rootNode.doAlign();
-    this.computeContainerDimensions();
-    this.container.style.height = `${this.containerDesiredHeight}px`;
-    this.container.style.width = `${this.containerDesiredWidth}px`;
-    this.container.style.verticalAlign = 'baseline';
+    this.alignContainer();
     if (dummyRoot !== null) {
       // Remove our hidden rendering component from the document body.
       document.body.removeChild(renderingContainer);
@@ -5037,6 +5058,11 @@ class BoundingBox {
     this.widthBeforeTransform = -1;
     /** @type {number} */
     this.fontSizeInPixels = 0;
+    /** @type {number|null} */
+    // When set, measures the
+    // distance from the top of the box to the
+    // baseline of the text. 
+    this.distanceFromTopToBaseline = null;
   }
 
   /** @return {number} */
@@ -5734,92 +5760,6 @@ class MathNode {
     this.boundingBox.height = this.children[0].boundingBox.height;
   }
 
-  /** 
-   * Computes the dimensions of a matrix. 
-   * Computes the dimensions of the vertical bars that 
-   * separate the columns of the table, for example
-   * \begin{array}{c|c}1&2\\3&4\end{array} has a vertical
-   * line | separating the two columns.
-   */
-  computeDimensionsMatrix() {
-    this.boundingBox = new BoundingBox();
-    this.boundingBox.height = this.children[0].boundingBox.height;
-    this.boundingBox.width = this.children[0].boundingBox.width;
-    this.boundingBox.fractionLineHeight =
-      this.children[0].boundingBox.fractionLineHeight;
-    this.boundingBox.needsMiddleAlignment = true;
-    let table = this.children[0].children[1];
-    let firstRow = table.children[0];
-    let numberOfColumns = firstRow.children.length;
-    const betweenColumns = 10;
-    for (let i = 1; i < this.children.length; i++) {
-      let verticalBar = this.children[i];
-      verticalBar.boundingBox.height = this.boundingBox.height;
-      verticalBar.boundingBox.width = 1;
-      let extraData = /** @type {VerticalBarData!} */ (verticalBar.extraData);
-      let columnIndex = extraData.columnIndex;
-      let offset = table.boundingBox.getColumnOffset(columnIndex);
-      verticalBar.boundingBox.left = offset;
-      if (columnIndex === numberOfColumns) {
-        // We have a vertical line separator after the last column, 
-        // as in
-        // \begin{array}{cc|}1&2\end{array}
-        // Extend the bounding box width to get extra space.
-        this.boundingBox.width += betweenColumns / 2;
-      }
-    }
-  }
-
-  /** Computes the dimensions of a matrix table. */
-  computeDimensionsMatrixTable() {
-    this.boundingBox = new BoundingBox();
-    let betweenColumns = 10;
-    let betweenRows = 10;
-    if (this.children.length <= 0) {
-      // empty matrix;
-      this.boundingBox.height = betweenRows;
-      this.boundingBox.width = betweenColumns;
-      this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
-      return;
-    }
-    let firstRow = this.children[0];
-    let numberOfColumns = firstRow.children.length;
-    let numberOfRows = this.children.length;
-    let left = 0;
-    for (let i = 0; i < numberOfColumns; i++) {
-      this.boundingBox.columnOffsets.push(left);
-      let width = 0;
-      for (let j = 0; j < numberOfRows; j++) {
-        width = Math.max(width, this.children[j].children[i].boundingBox.width);
-      }
-      for (let j = 0; j < numberOfRows; j++) {
-        let child = this.children[j].children[i];
-        let extraShift = (width - child.boundingBox.width) / 2;
-        if (child.latexExtraStyle === 'l') {
-          extraShift = 0;
-        } else if (child.latexExtraStyle === 'r') {
-          extraShift = width - child.boundingBox.width;
-        }
-        child.boundingBox.left = left + extraShift;
-        child.computeBoundingBoxLeftSingleChild();
-      }
-      left += width + betweenColumns;
-    }
-    let rowWidth = left - betweenColumns;
-    let top = 0;
-    for (let i = 0; i < numberOfRows; i++) {
-      let row = this.children[i];
-      row.boundingBox = new BoundingBox();
-      row.mergeVerticalComponentsBoundingBoxesHorizontallyAlignedElements();
-      row.boundingBox.top = top;
-      row.boundingBox.width = rowWidth;
-      top += row.boundingBox.height + betweenRows;
-    }
-    this.boundingBox.height = top - betweenRows;
-    this.boundingBox.width = rowWidth;
-    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
-  }
-
   /** Computes the dimensions of a box under a radical sign. */
   computeDimensionsRadicalUnderBox() {
     this.computeDimensionsStandard();
@@ -5844,14 +5784,6 @@ class MathNode {
         'This case should be handled by MathNodeSqrt.computeDimensions()');
     }
     if (this.type.type === knownTypes.matrixRow.type) {
-      return;
-    }
-    if (this.type.type === knownTypes.matrixTable.type) {
-      this.computeDimensionsMatrixTable();
-      return;
-    }
-    if (this.type.type === knownTypes.matrix.type) {
-      this.computeDimensionsMatrix();
       return;
     }
     if (this.type.type === knownTypes.radicalUnderBox.type) {
@@ -9455,6 +9387,8 @@ class MathNodeRoot extends MathNode {
     }
     if (!this.boundingBox.needsMiddleAlignment) {
       this.computeDimensionsBaselineAlignment();
+      this.boundingBox.top = 0;
+      return;
     }
     let lineHeight = this.boundingBox.height;
     if (this.boundingBox.lineHeight > 0) {
@@ -9465,7 +9399,6 @@ class MathNodeRoot extends MathNode {
     if (bottomDistance > this.boundingBox.fractionLineHeight) {
       this.boundingBox.height += bottomDistance * 2 - lineHeight;
       this.boundingBox.fractionLineHeight = bottomDistance;
-      this.boundingBox.top = - this.boundingBox.fractionLineHeight;
     } else {
       this.boundingBox.height +=
         this.boundingBox.fractionLineHeight * 2 - lineHeight;
@@ -9482,7 +9415,10 @@ class MathNodeRoot extends MathNode {
     if (box === null) {
       return;
     }
-    this.boundingBox.top = this.boundingBox.height - (box.top + box.height);
+    const baselineFactor = baseLineComputer.distanceBaselineToTopDividedByHeight(
+      this.equationEditor.fontFamily
+    );
+    this.boundingBox.distanceFromTopToBaseline = box.top + box.height * baselineFactor;
   }
 
   /** @return {BoundingBox!} */
@@ -11484,6 +11420,65 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
   }
 }
 
+class MathNodeMatrixTable extends MathNode {
+  constructor(
+    /** @type {EquationEditor!} */
+    equationEditor,
+  ) {
+    super(equationEditor, knownTypes.matrixTable);
+  }
+
+  /** Computes the dimensions of a matrix table. */
+  computeDimensions() {
+    this.boundingBox = new BoundingBox();
+    let betweenColumns = 10;
+    let betweenRows = 10;
+    if (this.children.length <= 0) {
+      // empty matrix;
+      this.boundingBox.height = betweenRows;
+      this.boundingBox.width = betweenColumns;
+      this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+      return;
+    }
+    let firstRow = this.children[0];
+    let numberOfColumns = firstRow.children.length;
+    let numberOfRows = this.children.length;
+    let left = 0;
+    for (let i = 0; i < numberOfColumns; i++) {
+      this.boundingBox.columnOffsets.push(left);
+      let width = 0;
+      for (let j = 0; j < numberOfRows; j++) {
+        width = Math.max(width, this.children[j].children[i].boundingBox.width);
+      }
+      for (let j = 0; j < numberOfRows; j++) {
+        let child = this.children[j].children[i];
+        let extraShift = (width - child.boundingBox.width) / 2;
+        if (child.latexExtraStyle === 'l') {
+          extraShift = 0;
+        } else if (child.latexExtraStyle === 'r') {
+          extraShift = width - child.boundingBox.width;
+        }
+        child.boundingBox.left = left + extraShift;
+        child.computeBoundingBoxLeftSingleChild();
+      }
+      left += width + betweenColumns;
+    }
+    let rowWidth = left - betweenColumns;
+    let top = 0;
+    for (let i = 0; i < numberOfRows; i++) {
+      let row = this.children[i];
+      row.boundingBox = new BoundingBox();
+      row.mergeVerticalComponentsBoundingBoxesHorizontallyAlignedElements();
+      row.boundingBox.top = top;
+      row.boundingBox.width = rowWidth;
+      top += row.boundingBox.height + betweenRows;
+    }
+    this.boundingBox.height = top - betweenRows;
+    this.boundingBox.width = rowWidth;
+    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+  }
+}
+
 class MathNodeMatrix extends MathNode {
   constructor(
     /** @type {EquationEditor!} */
@@ -11493,6 +11488,42 @@ class MathNodeMatrix extends MathNode {
   ) {
     super(equationEditor, knownTypes.matrix);
     this.matrixEnvironment = matrixEnvironment;
+  }
+
+  /** 
+   * Computes the dimensions of a matrix. 
+   * Computes the dimensions of the vertical bars that 
+   * separate the columns of the table, for example
+   * \begin{array}{c|c}1&2\\3&4\end{array} has a vertical
+   * line | separating the two columns.
+   */
+  computeDimensions() {
+    this.boundingBox = new BoundingBox();
+    this.boundingBox.height = this.children[0].boundingBox.height;
+    this.boundingBox.width = this.children[0].boundingBox.width;
+    this.boundingBox.fractionLineHeight =
+      this.children[0].boundingBox.fractionLineHeight;
+    this.boundingBox.needsMiddleAlignment = true;
+    let table = this.children[0].children[1];
+    let firstRow = table.children[0];
+    let numberOfColumns = firstRow.children.length;
+    const betweenColumns = 10;
+    for (let i = 1; i < this.children.length; i++) {
+      let verticalBar = this.children[i];
+      verticalBar.boundingBox.height = this.boundingBox.height;
+      verticalBar.boundingBox.width = 1;
+      let extraData = /** @type {VerticalBarData!} */ (verticalBar.extraData);
+      let columnIndex = extraData.columnIndex;
+      let offset = table.boundingBox.getColumnOffset(columnIndex);
+      verticalBar.boundingBox.left = offset;
+      if (columnIndex === numberOfColumns) {
+        // We have a vertical line separator after the last column, 
+        // as in
+        // \begin{array}{cc|}1&2\end{array}
+        // Extend the bounding box width to get extra space.
+        this.boundingBox.width += betweenColumns / 2;
+      }
+    }
   }
 
   /** @return {LatexWithAnnotation!} */

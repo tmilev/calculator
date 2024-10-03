@@ -213,6 +213,14 @@ Typeset all math in the 'toBeTypeSet' tag.
   &lt;/html&gt; 
 </pre>
 
+Two dom elements that illustrate the height of a text's baseline.
+Two such elements are constructed internally once for each font in order
+to measure the ratio of the baseline height to the total height 
+of the bounding box of the font.
+<div style="white-space-collapse:discard;"> 
+  <span style="font-family: 'Courier New'; font-size: 0px; vertical-align: baseline; display: inline-block; border-bottom: 2px solid blue; padding: 0; margin: 0; min-width: 10px;">AAAA</span>
+  <span style="font-family: 'Courier New'; font-size: 100px; vertical-align: baseline; display: inline-block; border-bottom: 2px solid red; padding: 0; margin: 0;">A</span>
+</div>
 
   <h2>Test page for static math content.</h2>
   <button id="typeSetButton"

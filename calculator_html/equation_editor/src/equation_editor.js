@@ -3435,10 +3435,6 @@ class EquationEditor {
     /** @type {HTMLElement?} */
     this.latexContainer = null;
     this.initializeContainer(this.container);
-    /** @type {HTMLElement} */
-    this.alignmentElement = document.createElement('div');
-    this.alignmentElement.style.display = 'inline-block';
-    this.container.appendChild(this.alignmentElement);
     this.initializeContainer(this.containerSVG);
     /** @type {number} */
     this.containerDesiredHeight = 0;
@@ -3532,6 +3528,13 @@ class EquationEditor {
       inputContainer.style.margin = '2px';
       inputContainer.style.padding = '2px';
     }
+    /**
+     * The alignment element is needed to do correct vertical alignment.
+     * @type {HTMLElement}
+     */
+    const alignmentElement = document.createElement('div');
+    alignmentElement.style.display = 'inline-block';
+    inputContainer.appendChild(alignmentElement);
   }
 
   /**
@@ -3763,21 +3766,14 @@ class EquationEditor {
       return;
     }
     this.containerSVG.textContent = '';
-    // this.containerSVG.contentEditable = true;
+    this.initializeContainer(this.containerSVG);
     let graphicsWriter = new ScalableVectorGraphicsWriter();
     let svgElement = graphicsWriter.typeset(this.rootNode);
-    svgElement.style.display = 'inline-block';
     svgElement.style.position = 'absolute';
-    svgElement.style.left = `${this.rootNode.boundingBox.left}px`;
-    svgElement.style.top = `${this.rootNode.boundingBox.top}px`;
     this.containerSVG.appendChild(svgElement);
-    this.containerSVG.style.width = this.containerDesiredWidth;
-    this.containerSVG.style.height = this.containerDesiredHeight;
-    this.containerSVG.style.verticalAlign = 'baseline';
-    if (!this.rootNode.boundingBox.needsMiddleAlignment) {
-      // DO_NOT_SUBMIT
-    }
+    this.setContainerStyle(this.containerSVG);
   }
+
   /** Draws the math node on a canvas. */
   drawOnCanvas() {
     this.drawOnCanvasAtLocation([0, 0]);
@@ -4357,14 +4353,21 @@ class EquationEditor {
     }
     this.containerDesiredWidth =
       Math.max(boundingRectangle.width, this.rootNode.boundingBox.width);
-    this.container.style.height = `${this.containerDesiredHeight}px`;
-    this.container.style.width = `${this.containerDesiredWidth}px`;
+    this.setContainerStyle(this.container);
+  }
+
+  setContainerStyle(
+    /** @type {HTMLElement} */
+    targetContainer
+  ) {
+    targetContainer.style.height = `${this.containerDesiredHeight}px`;
+    targetContainer.style.width = `${this.containerDesiredWidth}px`;
     const distanceFromTopToBaseline = this.rootNode.boundingBox.distanceFromTopToBaseline;
     if (distanceFromTopToBaseline !== null) {
-      let verticalAlign = distanceFromTopToBaseline ;
-      this.container.style.verticalAlign = `${verticalAlign}px`;
+      let verticalAlign = distanceFromTopToBaseline;
+      targetContainer.style.verticalAlign = `${verticalAlign}px`;
     } else {
-      this.container.style.verticalAlign = 'middle';
+      targetContainer.style.verticalAlign = 'middle';
     }
   }
 
@@ -8483,7 +8486,7 @@ class MathNode {
     height += heightFromBox;
     text.setX(width);
     text.setY(height);
-    text.setAlignmentBaseline('text-after-edge');
+    text.setDominantBaseline("text-after-edge");
     text.setFontFamily(this.equationEditor.getFontFamily());
     let fontSize =
       this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
@@ -8783,10 +8786,13 @@ class ScalableVectorGraphicsTextElement extends ScalableVectorGraphicsBase {
   ) {
     this.element.setAttribute('y', y);
   }
-  setAlignmentBaseline(
-      /** @type {string} */ input,
+  setDominantBaseline(
+    /** @type {string} */ input,
   ) {
-    this.element.setAttribute('alignment-baseline', input);
+    // An older version of this code was using 
+    // "alignment-baseline" instead of "dominant-baseline".
+    // "alignment-baseline" appears to not be supported in Firefox.
+    this.element.setAttribute('dominant-baseline', input);    
   }
   setFontFamily(
     /** @type {string} */

@@ -8719,8 +8719,8 @@ class MathNode {
   ) {
     let left = boundingBoxFromParent.left + this.boundingBox.left;
     let top = boundingBoxFromParent.top + this.boundingBox.top +
-      this.boundingBox.distanceFromTopToFractionLine;
-    canvas.textBaseline = 'baseline';
+      this.boundingBox.height;
+    canvas.textBaseline = 'bottom';
     let fontSize =
       this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
     let fontFamily = this.equationEditor.getFontFamily();
@@ -9075,10 +9075,10 @@ class MathNodeFraction extends MathNode {
     canvas.beginPath();
     canvas.moveTo(
       fractionLine[0][0],
-      fractionLine[0][1] - this.extraSpaceBetweenNumeratorAndDenominator);
+      fractionLine[0][1]);
     canvas.lineTo(
       fractionLine[1][0],
-      fractionLine[1][1] - this.extraSpaceBetweenNumeratorAndDenominator);
+      fractionLine[1][1]);
     canvas.stroke();
   }
 

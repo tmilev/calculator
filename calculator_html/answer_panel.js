@@ -110,6 +110,21 @@ class AnswerPanel {
     this.panel.initialize();
   }
 
+  clickButtonDetails() {
+    if (
+      this.pureLatexElement.style.opacity === "" ||
+      this.pureLatexElement.style.opacity === 0 ||
+      this.pureLatexElement.style.opacity === "0" ||
+      this.pureLatexElement.style.opacity === undefined
+    ) {
+      this.pureLatexElement.style.opacity = "1";
+      this.pureLatexElement.style.maxHeight = "500px";
+    } else {
+      this.pureLatexElement.style.opacity = "0";
+      this.pureLatexElement.style.maxHeight = "0px";
+    }
+  }
+
   createTable() {
     this.layoutVertical = true;
     if (this.input.properties !== undefined) {
@@ -129,18 +144,7 @@ class AnswerPanel {
       cell.appendChild(this.buttonDetails);
       cell.appendChild(this.pureLatexElement);
       this.buttonDetails.addEventListener("click", () => {
-        if (
-          this.pureLatexElement.style.opacity === "" ||
-          this.pureLatexElement.style.opacity === 0 ||
-          this.pureLatexElement.style.opacity === "0" ||
-          this.pureLatexElement.style.opacity === undefined
-        ) {
-          this.pureLatexElement.style.opacity = "1";
-          this.pureLatexElement.style.maxHeight = "500px";
-        } else {
-          this.pureLatexElement.style.opacity = "0";
-          this.pureLatexElement.style.maxHeight = "0px";
-        }
+        this.clickButtonDetails();
       });
     } else {
       let row = this.table.insertRow();
@@ -234,14 +238,17 @@ class AnswerPanel {
     );
     this.editorEnclosure = document.createElement("div");
     this.editorEnclosure.className = "calculatorMQfieldEnclosure";
-    this.editorSpan = document.createElement("span");
-    this.editorSpan.style.fontFamily = "Times New Roman";
-    this.spanAnswerHighlight = document.createElement("span");
+    this.editorSpan = document.createElement("div");
+    this.spanAnswerHighlight = document.createElement("div");
     if (
       this.input.answerHighlight !== undefined &&
       this.input.answerHighlight !== null
     ) {
-      writeHTML(this.spanAnswerHighlight, this.input.answerHighlight);
+      /** @type {string} */
+      let answerHighlightTrimmed = this.input.answerHighlight;
+      answerHighlightTrimmed = answerHighlightTrimmed.trim();
+      writeHTML(this.spanAnswerHighlight, answerHighlightTrimmed);
+      this.spanAnswerHighlight.style.display = "inline-block";
     }
     this.editorEnclosure.appendChild(this.editorSpan);
     this.verificationSpan = document.createElement("span");
@@ -274,7 +281,9 @@ class AnswerPanel {
   onePanelQuestionAndAnswerField() {
     let result = document.createElement("table");
     let row = result.insertRow();
-    row.insertCell().appendChild(this.spanAnswerHighlight);
+    let cellAnswerHighlight = row.insertCell();
+    cellAnswerHighlight.className = "tableCellMQfield";
+    cellAnswerHighlight.appendChild(this.spanAnswerHighlight);
     let cell = row.insertCell();
     cell.appendChild(this.editorEnclosure);
     cell.className = "tableCellMQfield";

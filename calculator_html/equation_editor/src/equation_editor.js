@@ -12429,9 +12429,14 @@ class MathTagConverter {
       newChildren.push(document.createTextNode(remainingContent));
     }
     toBeModified.textContent = '';
-    let replacing = document.createElement('span');
-    for (let i = 0; i < newChildren.length; i++) {
-      replacing.appendChild(newChildren[i]);
+    let replacing;
+    if (newChildren.length > 1) {
+      replacing = document.createElement('span');
+      for (let i = 0; i < newChildren.length; i++) {
+        replacing.appendChild(newChildren[i]);
+      }
+    } else {
+      replacing = newChildren[0];
     }
     toBeModified.parentElement.replaceChild(replacing, toBeModified);
   }

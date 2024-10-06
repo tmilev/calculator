@@ -84,9 +84,21 @@
     editor.updateDOM();
     editor.rootNode.focus(- 1);
   }
+
+  function createInlinedEditor() {
+    const containerIds = ["inlinedEditor1", "inlinedEditor2", "inlinedEditor3", "inlinedEditor4"];
+    for (const containerId of containerIds) {
+      const container = document.getElementById(containerId);
+      if (container === null) {
+        continue;
+      }
+      const inlinedEditor = new EquationEditor(container, null);
+      inlinedEditor.updateDOM();
+    }
+  }
 </script>
 
-<body onload="createEditor()">
+<body onload="createEditor(); createInlinedEditor();">
   <h1>A self-contained math equation editor</h1>
   <div style='text-align: center;'>
     <div id='panel'> </div>
@@ -110,7 +122,6 @@
   <br>
   <canvas id="canvasContainer" style="border:1px solid #000000;" width="600" height="400"></canvas><br>
   <div id="debug" style="display:normal"></div>
-  <hr>
   <h2>How to use on your web site.</h2>
   Include the script <a
     href='https://github.com/tmilev/calculator/blob/master/calculator_html/equation_editor.js'>equation_editor.js</a> in
@@ -212,7 +223,21 @@ Typeset all math in the 'toBeTypeSet' tag.
   &lt;/body&gt;
   &lt;/html&gt; 
 </pre>
-
+  <h2> Testing</h2>
+  <h3> Test inlined equation editor.</h3>
+  This editor is inlined: <span id="inlinedEditor1"></span>.
+  <ul>
+    <li> This editor is inlined in a list: <span id="inlinedEditor2"></span>.</li>
+  </ul>
+  <table>
+    <trow>
+      <td>This editor is in a table cell:</td>
+      <td>
+        <div id="inlinedEditor3"></div>
+      </td>
+    </trow>
+  </table>
+  <h3>Baseline information</h3>
   Two dom elements that illustrate the height of a text's baseline.
   Two such elements are constructed internally once for each font in order
   to measure the ratio of the baseline height to the total height
@@ -224,9 +249,9 @@ Typeset all math in the 'toBeTypeSet' tag.
       style="font-family: 'Courier New'; font-size: 100px; vertical-align: baseline; display: inline-block; border-bottom: 2px solid red; padding: 0; margin: 0;">A</span>
   </div>
 
-  <h2>Test page for static math content.</h2>
+  <h3>Test page for static math content.</h3>
   <button id="typeSetButton"
-    onclick="typeset(document.getElementById('mathTagTester'), null, {sanitizeLatexSource: false, removeDisplayStyle:false, logTiming: true, svgAndDOM: true, svgOnly: false});">typeset</button>
+    onclick="typeset(document.getElementById('mathTagTester'), null, {sanitizeLatexSource: false, removeDisplayStyle:false, logTiming: true, svgOnly: false});">typeset</button>
   <br>
   <span id="mathTagTester">
     Example content to be typeset follow.
@@ -234,6 +259,7 @@ Typeset all math in the 'toBeTypeSet' tag.
     Feel free to reorder examples as you see fit (if possible, arranged by categories and from simpler to more
     complicated).
     <ul>
+      <li> Inlined editor against static math: \(f(x)=\)<span id="inlinedEditor4"> </span></li>
       <li> Comment nodes should not be typeset (you shouldn't see anything after): <!-- \(x^2+1\) --></li>
       <li> Fraction 1: \(\frac{2}{x+\frac{1}{x}}\)</li>
       <li> Fraction 2: \(\frac{2+\frac{1}{x}}{x}\)</li>

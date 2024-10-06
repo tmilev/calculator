@@ -54,7 +54,7 @@ class OneGraphicWithSliders {
     );
   }
 
-  redraw() { 
+  redraw() {
     graphicsSerialization.redrawFromJSON(this.canvas, this.graphics, this.owner.sliders);
   }
 }
@@ -101,7 +101,7 @@ class ElementWithScripts {
 
   accountOneScriptObject(script) {
     let scriptType = script[scriptTypeLabel];
-    this.addOneScript(scriptType, script);    
+    this.addOneScript(scriptType, script);
   }
 
   addOneScript(scriptType, content) {
@@ -128,7 +128,7 @@ class ElementWithScripts {
       this.accountOneScript(incomingScriptsInSpans[i]);
     }
     if (scripts !== undefined && scripts !== null) {
-      for (let i = 0; i < scripts.length; i++){
+      for (let i = 0; i < scripts.length; i++) {
         this.accountOneScriptObject(scripts[i]);
       }
     }
@@ -146,7 +146,7 @@ class ElementWithScripts {
     this.bootstrapLatexWithCopyButtons();
   }
 
-  bootstrapSliders() { 
+  bootstrapSliders() {
     for (let label in this.sliders.sliders) {
       let current = this.sliders.sliders[label];
       current.addEventListener("input", () => {
@@ -253,10 +253,10 @@ class ElementWithScripts {
   }
 
   bootstrapLatexWithCopyButtons() {
-    let domElements = this.element.getElementsByClassName("latexWithCopyButton");  
+    let domElements = this.element.getElementsByClassName("latexWithCopyButton");
     for (let i = 0; i < domElements.length; i++) {
       let element = domElements[i];
-      this.bootstrapOneLatexWithCopyButtons( element);
+      this.bootstrapOneLatexWithCopyButtons(element);
     }
   }
 
@@ -286,16 +286,16 @@ class ElementWithScripts {
     element.style.backgroundColor = "lightgreen";
     setTimeout(() => {
       element.style.backgroundColor = "";
-    }, 1000);   
+    }, 1000);
   }
 
- 
+
   updateSlidersAndFormInputsOneKeyValuePair(key, value) {
     let map = {};
     map[key] = value;
     this.updateSlidersAndFormInputs(map);
   }
-  
+
   /**
    * Updates all form inputs and sliders to all the given value, number pairs. 
    * 
@@ -360,11 +360,7 @@ class DynamicJavascript {
     }
     typeset.typesetter.typesetSoft(
       output,
-      {
-        fontSize: "20px",
-        fontFamily: "Times New Roman",
-        display: "inline-block"
-      },
+      null,
       (editor) => {
         if (typeSetCallback !== null && typeSetCallback !== undefined) {
           typeSetCallback(editor, output);

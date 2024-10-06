@@ -175,9 +175,10 @@ Adds algebraic number to rational.
 Adds rational to algebraic number. 
 
 *\+* [AddDoubleToRational] {CalculatorFunctionsBinaryOps::addDoubleOrRationalToDoubleOrRational}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283.14159265358979323846%29%20%2b%201%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283.14159265358979323846%29%20%2b%201%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-DoubleValue{}(3.14159265358979323846) + 1
+DoubleValue{}(3.14159265358979323846) + 1;
+
 ```
 Adds double or rational to a double or rational approximately using the built-in cpp addition, returning double. 
 
@@ -3082,18 +3083,33 @@ Round function.
 Operator or function DoubleValue is overloaded with 2 total handlers.
 
 *DoubleValue* [DoubleValue] {CalculatorFunctions::evaluateToDouble}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%29%3b%5cnDoubleValue%7b%7d%2813%21%2b0.1%2c0%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-DoubleValue{}(3/7)
+DoubleValue{}(3/7);
+DoubleValue{}(13!+0.1,0);
 ```
-Floating point value of a number.
+Floating point value of a number. Uses the built-in C++ floating point library.
 
 *DoubleValue* [DoubleValueWithRounding] {CalculatorFunctions::evaluateToDoubleWithRounding}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%2c3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValue%7b%7d%283%2f7%2c3%29%3b%5cnDoubleValue%7b%7d%283%2f7777777%2c2%29%3b%5cnDoubleValue%7b%7d%280.0030%2c2%29%3b%5cnDoubleValue%7b%7d%283.0030%2c2%29%3b%5cnDoubleValue%7b%7d%283%2f7777777%2c0%29%3b%5cnDoubleValue%7b%7d%2813%21%2b0.1%2c0%29%3b%5cnDoubleValue%7b%7d%283%2f7%2c100%29%3b%5cnDoubleValue%7b%7d%283%2f7%2c-5%29%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-DoubleValue{}(3/7,3)
+DoubleValue{}(3/7,3);
+DoubleValue{}(3/7777777,2);
+DoubleValue{}(0.0030,2);
+DoubleValue{}(3.0030,2);
+DoubleValue{}(3/7777777,0);
+DoubleValue{}(13!+0.1,0);
+DoubleValue{}(3/7,100);
+DoubleValue{}(3/7,-5);
 ```
-Round the floating point value of a number up to k digits.The first argument is the number to round. The second argument is the number of digits to round to.
+Round the floating point value of a number up to k <= 10 significant digits after the decimal dot. The first argument is the number to round. The second argument is the number of significant digits to round to. Using two significant digits, 0.00269 rounds to 0.0027. Not to be confused with fixed digits: rounding 0.00269 to two fixed digits rounds to 0.00. Corner cases such as rounding of 0.0030 vs 0.003 are left unspecified/specified-by-example. Integers are not rounded further unless they have very large absolute values. Negatives are multiplied by -1, rounded, and then multiplied back by -1. Handles up to 100 zeroes after the decimal dot, does nothing beyond that. 
+
+*DoubleValueFixed* [DoubleValueFixed] {CalculatorFunctions::evaluateToDoubleWithRounding}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22DoubleValueFixed%7b%7d%283%2f7%2c3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+DoubleValueFixed{}(3/7,3)
+```
+Round the floating point value of a number up to k fixed digits.The first argument is the number to round. The second argument is the number of digits to round to.
 
 *ModP* [ModP] {CalculatorFunctions::zModP}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22ModP%7b%7d%287%2c%203%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

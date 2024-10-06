@@ -526,7 +526,7 @@ class BaseLineComputer {
     }
     return this.ratiosCache[fontFamily];
   }
-  
+
   distanceBaselineToTopDividedByHeightWithoutCache(
     /** @type {string} */
     fontFamily
@@ -4362,12 +4362,20 @@ class EquationEditor {
   ) {
     targetContainer.style.height = `${this.containerDesiredHeight}px`;
     targetContainer.style.width = `${this.containerDesiredWidth}px`;
-    const distanceFromTopToBaseline = this.rootNode.boundingBox.distanceFromTopToBaseline;
-    if (distanceFromTopToBaseline !== null) {
-      let verticalAlign = distanceFromTopToBaseline;
-      targetContainer.style.verticalAlign = `${verticalAlign}px`;
+    const boundingBox = this.rootNode.boundingBox;
+    let verticalAlign = boundingBox.height / 2;
+    if (
+      boundingBox.needsMiddleAlignment
+    ) {
+      targetContainer.style.verticalAlign = `middle`;
     } else {
-      targetContainer.style.verticalAlign = 'middle';
+      const distanceFromTopToBaseline = boundingBox.distanceFromTopToBaseline;
+      if (distanceFromTopToBaseline !== null) {
+        verticalAlign = distanceFromTopToBaseline;
+      } else {
+        verticalAlign = boundingBox.height / 2;
+      }
+      targetContainer.style.verticalAlign = `${verticalAlign}px`;
     }
   }
 
@@ -5037,7 +5045,7 @@ class BoundingBox {
      * The distance between the top of the bounding box and the expected
      * location of a fraction line.
      */
-    this.fractionLineHeight = 0;
+    this.distanceFromTopToFractionLine = 0;
 
     /** @type {boolean} */
     this.needsMiddleAlignment = false;
@@ -5086,7 +5094,7 @@ class BoundingBox {
 
   /** @return {string} */
   toString() {
-    return `w: ${this.width.toFixed(2)}, h: ${this.height.toFixed(2)}, fl:${this.fractionLineHeight.toFixed(2)}`;
+    return `w: ${this.width.toFixed(2)}, h: ${this.height.toFixed(2)}, fl:${this.distanceFromTopToFractionLine.toFixed(2)}`;
   }
 }
 
@@ -5653,15 +5661,15 @@ class MathNode {
     if (this.boundingBox.height === 0) {
       this.boundingBox.height = this.equationEditor.standardAtomHeight;
     }
-    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+    this.boundingBox.distanceFromTopToFractionLine = this.boundingBox.height / 2;
   }
 
   /** Computes the dimensions of an overline math node. */
   computeDimensionsOverLine() {
     this.computeDimensionsStandard();
     // The border add 1 extra pixel of height.
-    this.boundingBox.fractionLineHeight =
-      this.children[0].boundingBox.fractionLineHeight + 1;
+    this.boundingBox.distanceFromTopToFractionLine =
+      this.children[0].boundingBox.distanceFromTopToFractionLine + 1;
   }
 
   /** @return {BoundingBox?} */
@@ -5741,7 +5749,7 @@ class MathNode {
     /** @type {number} */
     heightToEnclose,
     /** @type {number} */
-    fractionLineHeightEnclosed,
+    distanceFromTopToFractionLineEnclosed,
   ) {
     if (this.children.length === 0) {
       // Unbalanced parenthesis: the "missing delimiter" is there but has
@@ -5749,11 +5757,11 @@ class MathNode {
       return;
     }
     let child = this.children[0];
-    child.verticallyStretch(heightToEnclose, fractionLineHeightEnclosed);
+    child.verticallyStretch(heightToEnclose, distanceFromTopToFractionLineEnclosed);
 
     this.boundingBox.top = 0;
     this.boundingBox.height = child.boundingBox.height;
-    this.boundingBox.fractionLineHeight = child.boundingBox.fractionLineHeight;
+    this.boundingBox.distanceFromTopToFractionLine = child.boundingBox.distanceFromTopToFractionLine;
     this.boundingBox.width = child.boundingBox.width;
   }
 
@@ -5768,8 +5776,8 @@ class MathNode {
     this.computeDimensionsStandard();
     let child = this.children[0];
     this.boundingBox.height = child.boundingBox.height + 1;
-    this.boundingBox.fractionLineHeight =
-      child.boundingBox.fractionLineHeight + 1;
+    this.boundingBox.distanceFromTopToFractionLine =
+      child.boundingBox.distanceFromTopToFractionLine + 1;
   }
 
   /** Computes the dimensions of the bounding box. */
@@ -5827,14 +5835,14 @@ class MathNode {
     // Compute parentheses height
     /** @type {Array.<number>!} */
     let enclosedHeights = [];
-    let enclosedFractionLineHeights = [];
+    let enclosedDistanceFromTopToFractionLines = [];
     /** @type {Array.<number>!} */
     let indicesOpenedParentheses = [];
     for (let i = 0; i < this.children.length; i++) {
       this.computeDimensionsParenthesesAccountChild(
         i,
         enclosedHeights,
-        enclosedFractionLineHeights,
+        enclosedDistanceFromTopToFractionLines,
         indicesOpenedParentheses,
       );
     }
@@ -5846,14 +5854,14 @@ class MathNode {
     /** @type {Array.<number>!} */
     enclosedHeights,
     /** @type {Array.<number>!} */
-    enclosedFractionLineHeights,
+    enclosedDistanceFromTopToFractionLines,
     /** @type {Array.<number>!} */
     indicesOpenedParentheses,
   ) {
     let child = this.children[index];
     if (child.type.type === knownTypes.leftDelimiter.type) {
       enclosedHeights.push(0);
-      enclosedFractionLineHeights.push(0);
+      enclosedDistanceFromTopToFractionLines.push(0);
       indicesOpenedParentheses.push(index);
       return;
     }
@@ -5863,22 +5871,22 @@ class MathNode {
         return;
       }
       let currentHeight = enclosedHeights.pop();
-      let currentFractionLineHeight = enclosedFractionLineHeights.pop();
+      let currentDistanceFromTopToFractionLine = enclosedDistanceFromTopToFractionLines.pop();
       child.verticallyStretchParenthesis(
-        currentHeight, currentFractionLineHeight);
+        currentHeight, currentDistanceFromTopToFractionLine);
       let leftCounterpart = this.children[indicesOpenedParentheses.pop()];
       leftCounterpart.verticallyStretchParenthesis(
-        currentHeight, currentFractionLineHeight);
+        currentHeight, currentDistanceFromTopToFractionLine);
     }
     if (enclosedHeights.length > 0) {
       enclosedHeights[enclosedHeights.length - 1] = Math.max(
         child.boundingBox.height,
         enclosedHeights[enclosedHeights.length - 1]);
-      enclosedFractionLineHeights[enclosedFractionLineHeights.length - 1] =
+      enclosedDistanceFromTopToFractionLines[enclosedDistanceFromTopToFractionLines.length - 1] =
         Math.max(
-          child.boundingBox.fractionLineHeight,
-          enclosedFractionLineHeights
-          [enclosedFractionLineHeights.length - 1]);
+          child.boundingBox.distanceFromTopToFractionLine,
+          enclosedDistanceFromTopToFractionLines
+          [enclosedDistanceFromTopToFractionLines.length - 1]);
     }
   }
 
@@ -5890,23 +5898,23 @@ class MathNode {
     // Compute fraction line height.
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
-      this.boundingBox.fractionLineHeight = Math.max(
-        this.boundingBox.fractionLineHeight,
-        child.boundingBox.fractionLineHeight,
+      this.boundingBox.distanceFromTopToFractionLine = Math.max(
+        this.boundingBox.distanceFromTopToFractionLine,
+        child.boundingBox.distanceFromTopToFractionLine,
       );
     }
     // Compute top offsets of children.
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
-      child.boundingBox.top = this.boundingBox.fractionLineHeight -
-        child.boundingBox.fractionLineHeight;
+      child.boundingBox.top = this.boundingBox.distanceFromTopToFractionLine -
+        child.boundingBox.distanceFromTopToFractionLine;
     }
     // Compute present element height.
     for (let i = 0; i < this.children.length; i++) {
       let child = this.children[i];
       let heightFromChild = child.boundingBox.height -
-        child.boundingBox.fractionLineHeight +
-        this.boundingBox.fractionLineHeight;
+        child.boundingBox.distanceFromTopToFractionLine +
+        this.boundingBox.distanceFromTopToFractionLine;
       this.boundingBox.height =
         Math.max(this.boundingBox.height, heightFromChild);
     }
@@ -8579,8 +8587,8 @@ class MathNode {
     if (this.boundingBox.top !== 0) {
       content += `, t: ${this.boundingBox.top}`;
     }
-    if (this.boundingBox.fractionLineHeight !== 0) {
-      content += `, fl: ${this.boundingBox.fractionLineHeight}`;
+    if (this.boundingBox.distanceFromTopToFractionLine !== 0) {
+      content += `, fl: ${this.boundingBox.distanceFromTopToFractionLine}`;
     }
     if (this.type.type === knownTypes.atom.type) {
       content += `, cursor: ${this.positionCursorBeforeKeyEvents}, `;
@@ -8711,7 +8719,7 @@ class MathNode {
   ) {
     let left = boundingBoxFromParent.left + this.boundingBox.left;
     let top = boundingBoxFromParent.top + this.boundingBox.top +
-      this.boundingBox.fractionLineHeight;
+      this.boundingBox.distanceFromTopToFractionLine;
     canvas.textBaseline = 'baseline';
     let fontSize =
       this.type.fontSizeRatio * boundingBoxFromParent.fontSizeInPixels;
@@ -8792,7 +8800,7 @@ class ScalableVectorGraphicsTextElement extends ScalableVectorGraphicsBase {
     // An older version of this code was using 
     // "alignment-baseline" instead of "dominant-baseline".
     // "alignment-baseline" appears to not be supported in Firefox.
-    this.element.setAttribute('dominant-baseline', input);    
+    this.element.setAttribute('dominant-baseline', input);
   }
   setFontFamily(
     /** @type {string} */
@@ -8997,7 +9005,7 @@ class MathNodeFraction extends MathNode {
   computeDimensions() {
     let numerator = this.children[0];
     let denominator = this.children[1];
-    this.boundingBox.fractionLineHeight = numerator.boundingBox.height + 1;
+    this.boundingBox.distanceFromTopToFractionLine = numerator.boundingBox.height + 1;
     this.boundingBox.height = numerator.boundingBox.height +
       denominator.boundingBox.height +
       this.extraSpaceBetweenNumeratorAndDenominator;
@@ -9044,13 +9052,13 @@ class MathNodeFraction extends MathNode {
       [
         boundingBoxFromParent.left + this.boundingBox.left,
         boundingBoxFromParent.top + this.boundingBox.top +
-        this.boundingBox.fractionLineHeight
+        this.boundingBox.distanceFromTopToFractionLine
       ],
       [
         boundingBoxFromParent.left + this.boundingBox.left +
         this.boundingBox.width + this.extraWidth / 2,
         boundingBoxFromParent.top + this.boundingBox.top +
-        this.boundingBox.fractionLineHeight
+        this.boundingBox.distanceFromTopToFractionLine
       ]
     ];
   }
@@ -9223,8 +9231,8 @@ class MathNodeBaseWithExponent extends MathNode {
       exponent.boundingBox.left =
         base.boundingBox.width - baseWithSubscript.boundingBox.subScriptWidth;
     }
-    this.boundingBox.fractionLineHeight =
-      base.boundingBox.top + base.boundingBox.fractionLineHeight;
+    this.boundingBox.distanceFromTopToFractionLine =
+      base.boundingBox.top + base.boundingBox.distanceFromTopToFractionLine;
     this.computeMiddleAlignment();
   }
 
@@ -9401,13 +9409,16 @@ class MathNodeRoot extends MathNode {
       // We have a broken-line expression.
       lineHeight = this.boundingBox.lineHeight;
     }
-    let bottomDistance = lineHeight - this.boundingBox.fractionLineHeight;
-    if (bottomDistance > this.boundingBox.fractionLineHeight) {
+    const startingDistanceFromTopToFractionLine = this.boundingBox.distanceFromTopToFractionLine;
+    let bottomDistance = lineHeight - startingDistanceFromTopToFractionLine;
+    if (bottomDistance > startingDistanceFromTopToFractionLine) {
       this.boundingBox.height += bottomDistance * 2 - lineHeight;
-      this.boundingBox.fractionLineHeight = bottomDistance;
+      this.boundingBox.distanceFromTopToFractionLine = bottomDistance;
+      this.children[0].boundingBox.top +=
+        bottomDistance - startingDistanceFromTopToFractionLine;
     } else {
       this.boundingBox.height +=
-        this.boundingBox.fractionLineHeight * 2 - lineHeight;
+        startingDistanceFromTopToFractionLine * 2 - lineHeight;
     }
   }
 
@@ -9418,6 +9429,7 @@ class MathNodeRoot extends MathNode {
    */
   computeDimensionsBaselineAlignment() {
     let box = this.findBaselineBox(new BoundingBox());
+    this.boundingBox.distanceFromTopToBaseline = null;
     if (box === null) {
       return;
     }
@@ -9525,8 +9537,8 @@ class MathNodeCancel extends MathNode {
     content.boundingBox.left = 0;
     this.boundingBox.height = content.boundingBox.height;
     this.boundingBox.width = content.boundingBox.width;
-    this.boundingBox.fractionLineHeight =
-      content.boundingBox.fractionLineHeight;
+    this.boundingBox.distanceFromTopToFractionLine =
+      content.boundingBox.distanceFromTopToFractionLine;
     let cancelSign = this.children[0];
     cancelSign.boundingBox.width = 4;
     cancelSign.boundingBox.height = content.boundingBox.height;
@@ -9741,8 +9753,8 @@ class MathNodeSqrt extends MathNode {
       sqrtSign.boundingBox.width * this.widthSqrtSign;
     this.boundingBox = new BoundingBox();
     this.boundingBox.height = underTheRadical.boundingBox.height * 1.15;
-    this.boundingBox.fractionLineHeight =
-      underTheRadical.boundingBox.fractionLineHeight + 2.2;
+    this.boundingBox.distanceFromTopToFractionLine =
+      underTheRadical.boundingBox.distanceFromTopToFractionLine + 2.2;
     let extraSpaceAfterRadical = 4;
     this.boundingBox.width = underTheRadical.boundingBox.left +
       underTheRadical.boundingBox.width + extraSpaceAfterRadical;
@@ -9891,7 +9903,7 @@ class MathNodeFormInput extends MathNode {
       this.boundingBox.height = 20;
     }
     this.boundingBox.width = this.value.length * this.boundingBox.height / 2;
-    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+    this.boundingBox.distanceFromTopToFractionLine = this.boundingBox.height / 2;
   }
 }
 
@@ -10109,8 +10121,8 @@ class MathNodeOverBrace extends MathNode {
     superscript.computeBoundingBoxLeftSingleChild();
     this.boundingBox.height = base.boundingBox.height +
       brace.boundingBox.height + superscript.boundingBox.height;
-    this.boundingBox.fractionLineHeight = brace.boundingBox.height +
-      superscript.boundingBox.height + base.boundingBox.fractionLineHeight;
+    this.boundingBox.distanceFromTopToFractionLine = brace.boundingBox.height +
+      superscript.boundingBox.height + base.boundingBox.distanceFromTopToFractionLine;
     brace.boundingBox.top = superscript.boundingBox.height;
     base.boundingBox.top =
       superscript.boundingBox.height + brace.boundingBox.height;
@@ -10147,7 +10159,7 @@ class MathNodeUnderBrace extends MathNode {
     subscript.computeBoundingBoxLeftSingleChild();
     this.boundingBox.height = base.boundingBox.height +
       brace.boundingBox.height + subscript.boundingBox.height;
-    this.boundingBox.fractionLineHeight = base.boundingBox.fractionLineHeight;
+    this.boundingBox.distanceFromTopToFractionLine = base.boundingBox.distanceFromTopToFractionLine;
     brace.boundingBox.top = base.boundingBox.height;
     subscript.boundingBox.top =
       base.boundingBox.height + brace.boundingBox.height;
@@ -10252,7 +10264,7 @@ class MathNodeBaseWithSubscript extends MathNode {
         baseWithExponent.boundingBox.width,
       );
     }
-    this.boundingBox.fractionLineHeight = base.boundingBox.fractionLineHeight;
+    this.boundingBox.distanceFromTopToFractionLine = base.boundingBox.distanceFromTopToFractionLine;
     this.boundingBox.needsMiddleAlignment = true;
   }
 
@@ -10383,18 +10395,18 @@ class MathNodeDelimiterMark extends MathNode {
     /** @type {number} */
     heightToEnclose,
     /** @type {number} */
-    fractionLineHeightEnclosed,
+    distanceFromTopToFractionLineEnclosed,
   ) {
     let scaleHeight = 1.1;
     this.parenthesisThickness = heightToEnclose / 24;
     this.parenthesisThickness = Math.min(3, this.parenthesisThickness);
     this.parenthesisThickness = Math.max(1.5, this.parenthesisThickness);
     heightToEnclose = Math.max(
-      2 * fractionLineHeightEnclosed,
-      2 * (heightToEnclose - fractionLineHeightEnclosed));
+      2 * distanceFromTopToFractionLineEnclosed,
+      2 * (heightToEnclose - distanceFromTopToFractionLineEnclosed));
     this.boundingBox.top = 0;
     this.boundingBox.height = heightToEnclose * scaleHeight;
-    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+    this.boundingBox.distanceFromTopToFractionLine = this.boundingBox.height / 2;
   }
 }
 
@@ -10413,9 +10425,9 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
     /** @type {number} */
     heightToEnclose,
     /** @type {number} */
-    fractionLineHeightEnclosed,
+    distanceFromTopToFractionLineEnclosed,
   ) {
-    this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
+    this.verticallyStretchCommon(heightToEnclose, distanceFromTopToFractionLineEnclosed);
     this.boundingBox.width = Math.max(heightToEnclose / 6, 3);
     this.element.style.borderWidth = `${this.parenthesisThickness}px`;
   }
@@ -10491,9 +10503,9 @@ class MathNodeSquareBracketsLike extends MathNodeDelimiterMark {
     /** @type {number} */
     heightToEnclose,
     /** @type {number} */
-    fractionLineHeightEnclosed,
+    distanceFromTopToFractionLineEnclosed,
   ) {
-    this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
+    this.verticallyStretchCommon(heightToEnclose, distanceFromTopToFractionLineEnclosed);
     this.parenthesisThickness = heightToEnclose / 30;
     this.parenthesisThickness = Math.max(0.5, this.parenthesisThickness);
     this.parenthesisThickness = Math.min(3, this.parenthesisThickness);
@@ -10583,9 +10595,9 @@ class MathNodeSquareBrackets extends MathNodeSquareBracketsLike {
     /** @type {number} */
     heightToEnclose,
     /** @type {number} */
-    fractionLineHeightEnclosed,
+    distanceFromTopToFractionLineEnclosed,
   ) {
-    this.verticallyStretchBase(heightToEnclose, fractionLineHeightEnclosed);
+    this.verticallyStretchBase(heightToEnclose, distanceFromTopToFractionLineEnclosed);
     if (this.element !== null) {
       this.element.style.borderTop = `solid`;
       this.element.style.borderBottom = `solid`;
@@ -10645,9 +10657,9 @@ class MathNodeFloor extends MathNodeSquareBracketsLike {
     /** @type {number} */
     heightToEnclose,
     /** @type {number} */
-    fractionLineHeightEnclosed,
+    distanceFromTopToFractionLineEnclosed,
   ) {
-    this.verticallyStretchBase(heightToEnclose, fractionLineHeightEnclosed);
+    this.verticallyStretchBase(heightToEnclose, distanceFromTopToFractionLineEnclosed);
     if (this.element !== null) {
       this.element.style.borderBottom = `solid`;
       this.element.style.borderWidth = `${this.parenthesisThickness}px`;
@@ -10705,9 +10717,9 @@ class MathNodeCeiling extends MathNodeSquareBracketsLike {
     /** @type {number} */
     heightToEnclose,
     /** @type {number} */
-    fractionLineHeightEnclosed,
+    distanceFromTopToFractionLineEnclosed,
   ) {
-    this.verticallyStretchBase(heightToEnclose, fractionLineHeightEnclosed);
+    this.verticallyStretchBase(heightToEnclose, distanceFromTopToFractionLineEnclosed);
     if (this.element !== null) {
       this.element.style.borderTop = `solid`;
       this.element.style.borderWidth = `${this.parenthesisThickness}px`;
@@ -10766,9 +10778,9 @@ class MathNodeAngleBrackets extends MathNodeDelimiterMark {
     /** @type {number} */
     heightToEnclose,
     /** @type {number} */
-    fractionLineHeightEnclosed,
+    distanceFromTopToFractionLineEnclosed,
   ) {
-    this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
+    this.verticallyStretchCommon(heightToEnclose, distanceFromTopToFractionLineEnclosed);
     let topBar = this.children[0];
     let bottomBar = this.children[1];
     let halfHeight = this.boundingBox.height / 2;
@@ -10883,7 +10895,7 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     /** @type {number} */
     heightToEnclose,
     /** @type {number} */
-    fractionLineHeightEnclosed,
+    distanceFromTopToFractionLineEnclosed,
   ) {
     /** 
      * Measures how round are the parentheses. 
@@ -10891,7 +10903,7 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
      * When the number is higher, the parentheses appear more straight.
      */
     const flatness = 3;
-    this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
+    this.verticallyStretchCommon(heightToEnclose, distanceFromTopToFractionLineEnclosed);
     this.boundingBox.width = Math.min(this.boundingBox.height / flatness, 20);
     this.element.style.borderLeft = '';
     this.element.style.borderRight = '';
@@ -11063,9 +11075,9 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
     /** @type {number} */
     heightToEnclose,
     /** @type {number} */
-    fractionLineHeightEnclosed,
+    distanceFromTopToFractionLineEnclosed,
   ) {
-    this.verticallyStretchCommon(heightToEnclose, fractionLineHeightEnclosed);
+    this.verticallyStretchCommon(heightToEnclose, distanceFromTopToFractionLineEnclosed);
     let topBar = this.children[1];
     let bottomBar = this.children[4];
     let radius = this.radius();
@@ -11443,7 +11455,7 @@ class MathNodeMatrixTable extends MathNode {
       // empty matrix;
       this.boundingBox.height = betweenRows;
       this.boundingBox.width = betweenColumns;
-      this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+      this.boundingBox.distanceFromTopToFractionLine = this.boundingBox.height / 2;
       return;
     }
     let firstRow = this.children[0];
@@ -11481,7 +11493,7 @@ class MathNodeMatrixTable extends MathNode {
     }
     this.boundingBox.height = top - betweenRows;
     this.boundingBox.width = rowWidth;
-    this.boundingBox.fractionLineHeight = this.boundingBox.height / 2;
+    this.boundingBox.distanceFromTopToFractionLine = this.boundingBox.height / 2;
   }
 }
 
@@ -11507,8 +11519,8 @@ class MathNodeMatrix extends MathNode {
     this.boundingBox = new BoundingBox();
     this.boundingBox.height = this.children[0].boundingBox.height;
     this.boundingBox.width = this.children[0].boundingBox.width;
-    this.boundingBox.fractionLineHeight =
-      this.children[0].boundingBox.fractionLineHeight;
+    this.boundingBox.distanceFromTopToFractionLine =
+      this.children[0].boundingBox.distanceFromTopToFractionLine;
     this.boundingBox.needsMiddleAlignment = true;
     let table = this.children[0].children[1];
     let firstRow = table.children[0];
@@ -11882,8 +11894,8 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
     this.boundingBox.width = Math.max(
       superscript.boundingBox.width, operator.boundingBox.width,
       subscript.boundingBox.width);
-    this.boundingBox.fractionLineHeight = superscript.boundingBox.height +
-      operator.boundingBox.fractionLineHeight;
+    this.boundingBox.distanceFromTopToFractionLine = superscript.boundingBox.height +
+      operator.boundingBox.distanceFromTopToFractionLine;
     this.boundingBox.needsMiddleAlignment = true;
     superscript.boundingBox.width = this.boundingBox.width;
     subscript.boundingBox.width = this.boundingBox.width;
@@ -11953,7 +11965,7 @@ class MathNodeOperatorStandalone extends MathNode {
     child.boundingBox.top = -childHeight * distanceTopToCharacterTip;
     this.boundingBox.height = childHeight * (distanceTopToCharacterBottom);
     this.boundingBox.width = child.boundingBox.width;
-    this.boundingBox.fractionLineHeight = childHeight *
+    this.boundingBox.distanceFromTopToFractionLine = childHeight *
       (distanceTopToCharacterBottom + distanceTopToCharacterTip) / 2;
   }
 }
@@ -12007,8 +12019,8 @@ class MathNodeOperatorWithSubscript extends MathNode {
       extraSpaceBelowOperator + subscript.boundingBox.height;
     this.boundingBox.width =
       Math.max(operator.boundingBox.width, subscript.boundingBox.width);
-    this.boundingBox.fractionLineHeight =
-      operator.boundingBox.fractionLineHeight;
+    this.boundingBox.distanceFromTopToFractionLine =
+      operator.boundingBox.distanceFromTopToFractionLine;
     this.boundingBox.needsMiddleAlignment = true;
     subscript.boundingBox.width = this.boundingBox.width;
     operator.boundingBox.width = this.boundingBox.width;

@@ -213,14 +213,16 @@ Typeset all math in the 'toBeTypeSet' tag.
   &lt;/html&gt; 
 </pre>
 
-Two dom elements that illustrate the height of a text's baseline.
-Two such elements are constructed internally once for each font in order
-to measure the ratio of the baseline height to the total height 
-of the bounding box of the font.
-<div style="white-space-collapse:discard;"> 
-  <span style="font-family: 'Courier New'; font-size: 0px; vertical-align: baseline; display: inline-block; border-bottom: 2px solid blue; padding: 0; margin: 0; min-width: 10px;">AAAA</span>
-  <span style="font-family: 'Courier New'; font-size: 100px; vertical-align: baseline; display: inline-block; border-bottom: 2px solid red; padding: 0; margin: 0;">A</span>
-</div>
+  Two dom elements that illustrate the height of a text's baseline.
+  Two such elements are constructed internally once for each font in order
+  to measure the ratio of the baseline height to the total height
+  of the bounding box of the font.
+  <div style="white-space-collapse:discard;">
+    <span
+      style="font-family: 'Courier New'; font-size: 0px; vertical-align: baseline; display: inline-block; border-bottom: 2px solid blue; padding: 0; margin: 0; min-width: 10px;">AAAA</span>
+    <span
+      style="font-family: 'Courier New'; font-size: 100px; vertical-align: baseline; display: inline-block; border-bottom: 2px solid red; padding: 0; margin: 0;">A</span>
+  </div>
 
   <h2>Test page for static math content.</h2>
   <button id="typeSetButton"
@@ -232,14 +234,14 @@ of the bounding box of the font.
     Feel free to reorder examples as you see fit (if possible, arranged by categories and from simpler to more
     complicated).
     <ul>
+      <li> Comment nodes should not be typeset (you shouldn't see anything after): <!-- \(x^2+1\) --></li>
+      <li> Fraction 1: \(\frac{2}{x+\frac{1}{x}}\)</li>
+      <li> Fraction 2: \(\frac{2+\frac{1}{x}}{x}\)</li>
       <li><span style="font-family:'Times New Roman'; font-size:36px;"> 36px vert. align. no
           fraction lines inlined:
           \((x^2+3x)^2 \), where \(x=2y\cdot y \cdot y^2+zy+3\) and \(y=w\).
         </span>
       </li>
-      <li> Comment nodes should not be typeset (you shouldn't see anything after): <!-- \(x^2+1\) --></li>
-
-
       <li> A small table:
         \(
         (\begin{array}{c|c}1&2\\2&3\end{array}]
@@ -331,7 +333,6 @@ of the bounding box of the font.
       <li> \(\begin{array}{|c|c}1&2\\3&4\end{array}\)</li>
       <li> \(\displaystyle -x^{2}-\frac{4}{3} x^{\frac{3}{2}}+\ln \left|x\right|+C\)</li>
       <li> Unbalanced brace. \(\left\{2+2\right.\)</li>
-      <li> Fraction: \(\frac{2}{x+\frac{1}{x}}\), \(\frac{2+\frac{1}{x}}{x}\)</li>
       <li> Vertical boundary. This must not be overlapped by the math below.<br>
         For calibration of horizontal line. \(9^{x+\frac{5+\frac{1}{2}}{2}}-22\cdot 3^{x+2}-45=0\)<br>
         This must not be overlapped by the math below.

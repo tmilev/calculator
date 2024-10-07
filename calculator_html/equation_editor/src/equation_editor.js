@@ -256,8 +256,6 @@ const defaultFractionScale = 0.9;
 const knownTypes = {
   root: new MathNodeType({
     'type': 'root',
-    'padding': '2px',
-    'margin': '2px',
     'cursor': 'text',
     'minWidth': '30px',
     'overflow': 'visible',
@@ -3525,8 +3523,8 @@ class EquationEditor {
     inputContainer.style.position = 'relative';
     inputContainer.textContent = '';
     if (this.options.editable) {
-      inputContainer.style.margin = '2px';
-      inputContainer.style.padding = '2px';
+      inputContainer.style.marginRight = '2px';
+      inputContainer.style.paddingRight = '2px';
     }
     /**
      * The alignment element is needed to do correct vertical alignment.
@@ -4348,9 +4346,6 @@ class EquationEditor {
     this.containerDesiredHeight = Math.max(
       boundingRectangle.height, this.rootNode.boundingBox.height,
       this.standardAtomHeight);
-    if (this.options.editable) {
-      this.containerDesiredHeight += 2;
-    }
     this.containerDesiredWidth =
       Math.max(boundingRectangle.width, this.rootNode.boundingBox.width);
     this.setContainerStyle(this.container);
@@ -4363,18 +4358,21 @@ class EquationEditor {
     targetContainer.style.height = `${this.containerDesiredHeight}px`;
     targetContainer.style.width = `${this.containerDesiredWidth}px`;
     const boundingBox = this.rootNode.boundingBox;
-    let verticalAlign = boundingBox.height / 2;
     if (
       boundingBox.needsMiddleAlignment
     ) {
       targetContainer.style.verticalAlign = `middle`;
     } else {
       const distanceFromTopToBaseline = boundingBox.distanceFromTopToBaseline;
+      let verticalAlign = 0;
       if (distanceFromTopToBaseline !== null) {
         verticalAlign = distanceFromTopToBaseline;
       } else {
         verticalAlign = boundingBox.height / 2;
       }
+      // For empty boxes, the container may be larger than the rootNode 
+      const extraVerticalAlign = this.containerDesiredHeight - boundingBox.height;
+      // verticalAlign += extraVerticalAlign;
       targetContainer.style.verticalAlign = `${verticalAlign}px`;
     }
   }
@@ -5680,8 +5678,7 @@ class MathNode {
     let box = new BoundingBox();
     box.top = boundingBoxFromParent.top + this.boundingBox.top;
     box.height = this.boundingBox.height;
-    if (this.isAtomOrAtomImmutable() && this.boundingBox.width !== 0 &&
-      this.contentIfAtomic() !== '') {
+    if (this.isAtomOrAtomImmutable() && this.boundingBox.width !== 0) {
       box.width = this.boundingBox.width;
       return box;
     }
@@ -9396,9 +9393,6 @@ class MathNodeRoot extends MathNode {
   computeDimensions() {
     this.computeDimensionsStandard();
     this.boundingBox.lineHeight = this.children[0].boundingBox.lineHeight;
-    if (this.equationEditor.options.editable) {
-      return;
-    }
     if (!this.boundingBox.needsMiddleAlignment) {
       this.computeDimensionsBaselineAlignment();
       this.boundingBox.top = 0;

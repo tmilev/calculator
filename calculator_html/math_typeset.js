@@ -3,13 +3,6 @@ const equationEditor = require("./equation_editor/src/equation_editor");
 
 class TypeSetter {
   constructor() {
-    this.defaultStyle = {
-      verticalAlign: "text-bottom",
-      fontFamily: "Times New Roman",
-      fontSize: "120%",
-      display: "inline-block",
-      marginBottom: "-0.1em",
-    };
     this.logTiming = false;
   }
 
@@ -25,9 +18,6 @@ class TypeSetter {
   ) {
     if (typeof element === "string") {
       element = document.getElementById(element);
-    }
-    if (styleOverride === null) {
-      styleOverride = this.defaultStyle;
     }
     equationEditor.typeset(
       element,

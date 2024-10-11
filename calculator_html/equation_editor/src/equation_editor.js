@@ -3532,6 +3532,7 @@ class EquationEditor {
      */
     const alignmentElement = document.createElement('div');
     alignmentElement.style.display = 'inline-block';
+    alignmentElement.style.position = 'absolute';
     inputContainer.appendChild(alignmentElement);
   }
 
@@ -4366,13 +4367,11 @@ class EquationEditor {
       const distanceFromTopToBaseline = boundingBox.distanceFromTopToBaseline;
       let verticalAlign = 0;
       if (distanceFromTopToBaseline !== null) {
-        verticalAlign = distanceFromTopToBaseline;
+        verticalAlign = distanceFromTopToBaseline - boundingBox.height;
       } else {
         verticalAlign = boundingBox.height / 2;
       }
       // For empty boxes, the container may be larger than the rootNode 
-      const extraVerticalAlign = this.containerDesiredHeight - boundingBox.height;
-      // verticalAlign += extraVerticalAlign;
       targetContainer.style.verticalAlign = `${verticalAlign}px`;
     }
   }
@@ -5204,9 +5203,6 @@ class MathNode {
       this.equationEditor.options.editable) {
       // equationeditoreditable one word for maximum portability.
       this.element.classList.add('equationeditoreditable');
-      if (getComputedStyle(this.element).borderWidth === '') {
-        this.element.style.borderStyle = 'solid';
-      }
     }
 
     // Padding.
@@ -5665,7 +5661,7 @@ class MathNode {
   /** Computes the dimensions of an overline math node. */
   computeDimensionsOverLine() {
     this.computeDimensionsStandard();
-    // The border add 1 extra pixel of height.
+    // The border adds 1 extra pixel of height.
     this.boundingBox.distanceFromTopToFractionLine =
       this.children[0].boundingBox.distanceFromTopToFractionLine + 1;
   }
@@ -12356,14 +12352,6 @@ class MathTagConverter {
     for (let label in style) {
       styleComputer.style[label] = style[label];
     }
-    this.style = {
-      fontFamily: styleComputer.style.fontFamily,
-      display: styleComputer.style.display,
-      fontSize: styleComputer.style.fontSize,
-      verticalAlign: styleComputer.style.verticalAlign,
-      marginBottom: styleComputer.style.marginBottom,
-      maxWidth: styleComputer.style.maxWidth,
-    };
     /** @type {Array.<HTMLElement!>!} */
     this.mathElementsDOM = [];
     /** @type {Array.<HTMLElement?>!} */
@@ -12373,12 +12361,6 @@ class MathTagConverter {
   /** @return {HTMLElement!} */
   getMathTagEmpty() {
     let mathTag = document.createElement('DIV');
-    mathTag.style.fontFamily = this.style.fontFamily;
-    mathTag.style.display = this.style.display;
-    mathTag.style.fontSize = this.style.fontSize;
-    mathTag.style.verticalAlign = this.style.verticalAlign;
-    mathTag.style.marginBottom = this.style.marginBottom;
-    mathTag.style.maxWidth = this.style.maxWidth;
     return /** @type {HTMLElement!} */ (mathTag);
   }
 

@@ -393,21 +393,7 @@ answerCalculatorHighlight {
   /*max-width: 200px;*/
 }
 
-span.panelAnswer table,
-tr,
-td {
-  margin-left: 0px;
-  padding-left: 0px;
-  border-collapse: collapse;
-}
-
-span.panelAnswer tr {
-  margin-left: 0px;
-  padding-left: 0px;
-}
-
 span.panelAnswer {
-  display: inline-block;
   transition: 0.6s;
 }
 

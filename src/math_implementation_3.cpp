@@ -3171,7 +3171,7 @@ bool StringRoutines::stringEndsWith(
 ) {
   STACK_TRACE("StringRoutines::stringEndsWith");
   if (desiredEnd.size() == 0) {
-    if (outputStringBeginning == nullptr) {
+    if (outputStringBeginning != nullptr) {
       *outputStringBeginning = input;
     }
     return true;

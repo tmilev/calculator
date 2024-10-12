@@ -547,6 +547,9 @@ class BaseLineComputer {
     largeA.textContent = 'A';
     container.appendChild(zeroPixelA);
     container.appendChild(largeA);
+    if (document === undefined) {
+      return 1;
+    }
     // Append the dom to the document body.
     // Without attaching the container to the body, 
     // we won't be able to get accurate font metrics.
@@ -3675,15 +3678,30 @@ class EquationEditor {
   computeStandardAtomHeight() {
     // In firefox, empty space can be interpretted to have zero height;
     // not so for non-breaking space.
-    this.eventCatcher.initialContent = '\u200A';
-    this.eventCatcher.element =
-        /** @type {HTMLElement!} */ (document.createElement('div'));
-    this.eventCatcher.element.textContent = this.eventCatcher.initialContent;
-    this.container.appendChild(this.eventCatcher.element);
-    let boundingBox = this.eventCatcher.element.getBoundingClientRect();
+    // If we base the getBoundingClientRect() computations
+    // off this.container, the computations won't be correct if
+    // 1) this.container is not yet attached to the document.body or
+    // 2) this.container has computed display:none style.
+    // So, let us use the document.body
+    // instead to hold our computations.
+    let body = null;
+    if (this.containerWidthIsZero()) {
+      body = document.body;
+    } else {
+      body = this.container;
+    }
+    let heightComputer = /** @type {HTMLElement!} */ (document.createElement('div'));
+    const style = window.getComputedStyle(this.container);
+    // Copy the entire computed style of the original container.
+    heightComputer.style = style;
+    // Ensure our computer container is hidden.
+    // Note that setting display:none here will break the computations.
+    heightComputer.style.display = 'hidden';
+    heightComputer.textContent = '\u200A';
+    body.appendChild(heightComputer);
+    let boundingBox = heightComputer.getBoundingClientRect();
     this.standardAtomHeight = boundingBox.height;
-    this.container.removeChild(this.eventCatcher.element);
-    this.eventCatcher.element = null;
+    body.removeChild(heightComputer);
   }
 
   /** Prepares a stand-alone copy button that copies the formula. */
@@ -4392,7 +4410,8 @@ class EquationEditor {
       const style = window.getComputedStyle(this.container);
       // Copy the entire computed style of the original container.
       renderingContainer.style = style;
-      // Ensure our new container is visible.
+      // Ensure our temporary container is hidden.
+      // Note that setting display:none here will break the computations.
       renderingContainer.style.display = 'hidden';
       // Replace the root node with a dummy.
       this.container.replaceChild(dummyRoot, this.rootNode.element);
@@ -4401,8 +4420,11 @@ class EquationEditor {
       renderingContainer.appendChild(this.rootNode.element);
       // We need to access the getBoundingClientRect() function of 
       // the rendering container and its DOM subtree.
-      // The method does not run correctly unless the element is attached
-      // to a document body, so let us attach it, temporarily, here.
+      // The method does not run correctly unless the element is 
+      // 1) attached to a document body
+      // 2) is not under display:none style. 
+      // So let us attach, temporarily, 
+      // the root container to the document.body.
       document.body.appendChild(renderingContainer);
     }
     this.rootNode.computeBoundingBox();

@@ -1347,7 +1347,9 @@ void DatabaseInternalServer::ensureStandardCollectionIndices() {
     List<std::string>({
         DatabaseStrings::labelId,
         DatabaseStrings::labelUsername,
-        DatabaseStrings::labelEmail
+        DatabaseStrings::labelEmail,
+        DatabaseStrings::labelInstructor,
+        DatabaseStrings::labelUserRole
       }
     )
   );

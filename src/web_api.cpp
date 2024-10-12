@@ -442,7 +442,7 @@ bool WebAPIResponse::doSetEmail(
   std::stringstream* commentsGeneralNonSensitive,
   std::stringstream* commentsGeneralSensitive
 ) {
-  STACK_TRACE("WebWorker::doSetEmail");
+  STACK_TRACE("WebAPIResponse::doSetEmail");
   (void) inputOutputUser;
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
@@ -1029,7 +1029,7 @@ bool WebAPIResponse::addOneUser(
   STACK_TRACE("WebAPIResponse::addOneUser");
   std::string email = userNameOrEmail;
   // If it looks like email, assume it's email.
-  // The user addition comes from admin user,
+  // The user insertion comes from admin user,
   // so let's trust the input within reason.
   if (!EmailRoutines::isOKEmail(email, commentsOnFailure)) {
     // Not an email.
@@ -1112,7 +1112,10 @@ bool WebAPIResponse::addOneUser(
   UserCalculator currentUser;
   currentUser.username = userNameOrEmail;
   currentUser.email = email;
-  currentUser.courseInDB = global.getWebInput(WebAPI::Problem::courseHome);
+  currentUser.courseInDB =
+  HtmlRoutines::convertURLStringToNormal(
+    global.getWebInput(WebAPI::Problem::courseHome), false
+  );
   currentUser.sectionInDB = userGroup;
   currentUser.instructorInDB = global.userDefault.username;
   currentUser.userRole = userRole;
@@ -1174,7 +1177,7 @@ bool WebAPIResponse::addOneUser(
 }
 
 JSData WebAPIResponse::getSignUpRequestResult() {
-  STACK_TRACE("WebWorker::getSignUpRequestResult");
+  STACK_TRACE("WebAPIResponse::getSignUpRequestResult");
   JSData result;
   std::stringstream errorStream;
   std::stringstream generalCommentsStream;

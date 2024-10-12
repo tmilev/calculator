@@ -613,6 +613,27 @@ std::string WebWorker::getDatabaseDeleteOneItem() {
   return commentsStream.str();
 }
 
+bool WebWorker::isValidCookieWebArgument(
+  const std::string& argumentName, const std::string& argumentValue
+) {
+  if (argumentName != "request") {
+    return true;
+  }
+  // <- we are careful about
+  // reading arbitrary requests from the cookie. Those may effectively deny
+  // login to a person who does not know to change the request type from the
+  // web address.
+  // To prevent that we refuse to read requests from cookies except for the
+  // whitelist below.
+  return
+  argumentValue == "template" ||
+  argumentValue == "exercise" ||
+  argumentValue == "database" ||
+  argumentValue == "accounts" ||
+  argumentValue == "calculator" ||
+  argumentValue == "scoredQuiz";
+}
+
 bool WebWorker::extractArgumentsFromCookies(
   std::stringstream& argumentProcessingFailureComments
 ) {
@@ -647,31 +668,9 @@ bool WebWorker::extractArgumentsFromCookies(
     }
     // <-except the last cookie, cookies have extra semicolumn at the end,
     // trimming.
-    bool isGood = true;
-    if (newlyFoundArguments.keys[i] == "request") {
-      // <- we are careful about
-      // reading arbitrary requests from the cookie. Those may effectively deny
-      // login
-      // to a person who does not know to change the request type from the web
-      // address.
-      // To prevent that we refuse to read requests from cookies except for the
-      // whitelist below.
-      isGood = false;
-      if (
-        trimmed == "template" ||
-        trimmed == "exercise" ||
-        trimmed == "database" ||
-        trimmed == "accounts" ||
-        trimmed == "calculator" ||
-        trimmed == "scoredQuiz"
-      ) {
-        isGood = true;
-      }
-    }
-    if (isGood) {
-      global.webArguments.setKeyValue(
-        newlyFoundArguments.keys[i], trimmed
-      );
+    const std::string key = newlyFoundArguments.keys[i];
+    if (this->isValidCookieWebArgument(key, trimmed)) {
+      global.webArguments.setKeyValue(key, trimmed);
     }
   }
   return result;

@@ -2143,7 +2143,7 @@ std::string WebAPIResponse::addUsersOrEmails(
   );
   std::string userRole =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput("userRole"), false
+    global.getWebInput(DatabaseStrings::labelUserRole), false
   );
   if (inputEmails == "") {
     out << "addUserEmails failed: <b>No emails to add</b>";

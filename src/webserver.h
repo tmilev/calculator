@@ -122,6 +122,9 @@ public:
   bool extractArgumentsFromCookies(
     std::stringstream& argumentProcessingFailureComments
   );
+  bool isValidCookieWebArgument(
+    const std::string& argumentName, const std::string& argumentValue
+  );
   void writeAfterTimeoutShowIndicator(const std::string& message);
   void writeAfterTimeoutProgress(
     const std::string& input, bool forceFileWrite

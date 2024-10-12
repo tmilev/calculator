@@ -24,7 +24,7 @@ Detailed demo+debug page: https://calculator-algebra.org:8166/calculator_html/eq
 ```
 
 <html>
-<script type="text/javascript" src="equation_editor.js"></script>
+<script type="text/javascript" src="src/equation_editor.js"></script>
 <script>
   function createEditor() {
     const options = new EquationEditorOptions({

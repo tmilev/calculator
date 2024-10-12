@@ -9248,7 +9248,7 @@ class MathNodeBaseWithExponent extends MathNode {
     }
     this.boundingBox.distanceFromTopToFractionLine =
       base.boundingBox.top + base.boundingBox.distanceFromTopToFractionLine;
-    this.computeMiddleAlignment();
+    this.boundingBox.needsMiddleAlignment = base.boundingBox.needsMiddleAlignment;
   }
 
   /** @return {boolean} */

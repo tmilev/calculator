@@ -1644,7 +1644,6 @@ void DatabaseInternalIndex::computeKeyValueToObjectIds() {
     const std::string& valueForObject = this->objectIdToKeyValue.values[i];
     HashedList<std::string>& objectIds =
     this->keyValueToObjectIds.getValueCreateEmpty(valueForObject);
-    objectIds.clear();
     objectIds.addOnTopNoRepetition(objectId);
   }
 }

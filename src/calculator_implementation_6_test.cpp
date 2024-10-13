@@ -710,7 +710,7 @@ bool Course::Test::setDeadlines(DatabaseType databaseType) {
   finder.nestedLabels.addOnTop(DatabaseStrings::labelDeadlinesSchema);
   finder.exactValue = "deadlinesdefaultCOURSE";
   JSData resultData;
-  QueryUpdate::Test::findNoFail(finder, resultData);
+  QueryUpdate::Test::findExactlyOneNoFail(finder, resultData);
   std::string result =
   resultData[DatabaseStrings::labelDeadlines][
     "test/problems/interval_notation_1.html"

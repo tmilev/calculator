@@ -1,6 +1,7 @@
 #include "crypto_calculator.h"
 #include "database.h"
 #include "general_file_operations_encodings.h"
+#include "general_strings.h"
 #include "string_constants.h"
 
 std::string Database::Test::adminPassword = "111";
@@ -225,8 +226,8 @@ bool Database::Test::createAdminAccount(bool withEmail) {
 }
 
 bool QueryUpdate::Test::all() {
-  QueryUpdate::Test::basics(DatabaseType::fallback);
   QueryUpdate::Test::basics(DatabaseType::internal);
+  QueryUpdate::Test::basics(DatabaseType::fallback);
   return true;
 }
 
@@ -244,7 +245,9 @@ void QueryUpdate::Test::updateNoFail(QueryFind& find, QueryUpdate updater) {
   }
 }
 
-void QueryUpdate::Test::findNoFail(QueryFind& find, JSData& result) {
+void QueryUpdate::Test::findExactlyOneNoFail(
+  QueryFind& find, JSData& result
+) {
   std::stringstream comments;
   List<JSData> output;
   QueryFindOneOf wrapperQuery;
@@ -291,25 +294,29 @@ bool QueryUpdate::Test::basics(DatabaseType databaseType) {
   STACK_TRACE("QueryUpdate::Test::basics");
   Database::Test tester(databaseType);
   QueryFind find;
+  JSData found;
+  JSData expected;
+  QueryUpdate updater;
+  std::stringstream errorStream;
   find.collection = DatabaseStrings::tableUsers;
   find.nestedLabels.addOnTop(DatabaseStrings::labelUsername);
   find.exactValue = "ttt";
-  QueryUpdate updater;
   updater.fromJSONStringNoFail(
     "[{key:[\"username\"], value:\"ttt\"}, "
-    "{key:[\"a\", \"b\", \"c\"], value:\"123\"}]"
+    "{key:[\"a\", \"b\", \"c\"], value:\"123\"},"
+    "{key:[\"instructor\"], value:\"X\"}]"
   );
   QueryUpdate::Test::updateNoFail(find, updater);
-  JSData found;
-  QueryUpdate::Test::findNoFail(find, found);
-  JSData expected;
-  expected.parseNoFail("{username:\"ttt\",a:{b:{c:\"123\"}}}", true);
+  QueryUpdate::Test::findExactlyOneNoFail(find, found);
+  expected.parseNoFail(
+    "{username:\"ttt\",a:{b:{c:\"123\"}},instructor:\"X\"}", true
+  );
   QueryUpdate::Test::matchKeyValue(found, expected);
   updater.fromJSONStringNoFail(
     "[{key:[\"$set\", \"a.b\",\"$set.a.b\"], value:\"123\"}]"
   );
   QueryUpdate::Test::updateNoFail(find, updater);
-  QueryUpdate::Test::findNoFail(find, found);
+  QueryUpdate::Test::findExactlyOneNoFail(find, found);
   expected.parseNoFail(
     "{"
     "username:\"ttt\",a:{b:{c:\"123\"}}, "
@@ -318,5 +325,26 @@ bool QueryUpdate::Test::basics(DatabaseType databaseType) {
     true
   );
   QueryUpdate::Test::matchKeyValue(found, expected);
+  find.exactValue = "ttt2";
+  updater.fromJSONStringNoFail(
+    "[{key:[\"username\"], value:\"ttt2\"}, "
+    "{key:[\"instructor\"], value:\"X\"}]"
+  );
+  QueryUpdate::Test::updateNoFail(find, updater);
+  find.nestedLabels.clear();
+  find.nestedLabels.addOnTop("instructor");
+  find.exactValue = "X";
+  QueryFindOneOf finder;
+  finder.queries.addOnTop(find);
+  List<JSData> foundAll;
+  bool success =
+  Database::get().find(finder, nullptr, foundAll, &errorStream);
+  std::string foundString = found.toString();
+  if (!success || foundAll.size != 2) {
+    global.fatal
+    << "Wrong number of updated items:\n"
+    << foundString
+    << global.fatal;
+  }
   return true;
 }

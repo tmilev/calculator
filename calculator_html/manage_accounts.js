@@ -88,7 +88,9 @@ class ManageAccountsPage {
   }
 
   updateAccountsPage() {
-    let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.accountsJSON}`;
+    const api = pathnames.urls.calculatorAPI;
+    const fields = pathnames.urlFields;
+    let url = `${api}?${fields.request}=${fields.accountsJSON}`;
     let courseHome = storage.variables.currentCourse.courseHome.getValue();
     let elements = document.getElementsByClassName("currentCourseIndicator");
     for (const element of elements) {
@@ -124,8 +126,12 @@ class ManageAccountsPage {
       ) {
         miscellaneous.writeHTML(outputComponentAdmin, parsedUserInfo.error);
       } else {
-        miscellaneous.writeHTML(outputComponentAdmin, this.getAccountsTable(admins));
-        miscellaneous.writeHTML(outputComponentStudents, this.getAccountsTable(students));
+        const adminsTable = this.getAccountsTable(admins);
+        const studentsTable = this.getAccountsTable(students);
+        outputComponentAdmin.textContent = '';
+        outputComponentStudents.textContent = '';
+        outputComponentAdmin.appendChild(adminsTable);
+        outputComponentStudents.appendChild(studentsTable);
       }
     } catch (e) {
       miscellaneous.writeHTML(outputComponentStudents, e);
@@ -133,70 +139,103 @@ class ManageAccountsPage {
     }
   }
 
+  /** 
+   * Gets a table with input accounts. 
+   * @return {HTMLElement} 
+   */
   getAccountsTable(inputAccounts) {
-    let result = "";
-    result += "<table><tr>";
-    result += "<th>username</th>";
-    result += "<th>Email</th>";
-    result += "<th>Activated?</th>";
-    result += "<th>Course</th>";
-    result += "<th>Section</th>";
-    result += "<th>Semester</th>";
-    result += "</tr>";
-    for (let counterAccounts = 0; counterAccounts < inputAccounts.length; counterAccounts++) {
-      result += "<tr>";
-      let currentUser = inputAccounts[counterAccounts];
-      //console.log("Current user: " + JSON.stringify(currentUser));
-      result += `<td>${currentUser.username}</td>`;
+    let result = document.createElement("table");
+    let headerRow = result.insertRow();
+    const username = document.createElement("th");
+    const email = document.createElement("th");
+    const activated = document.createElement("th");
+    const course = document.createElement("th");
+    const section = document.createElement("th");
+    const semester = document.createElement("th");
+    const instructorHeader = document.createElement("th");
+    username.textContent = "username";
+    email.textContent = "email";
+    activated.textContent = "activated";
+    course.textContent = "course";
+    section.textContent = "section";
+    semester.textContent = "semester";
+    instructorHeader.textContent = "instructor";
+    headerRow.appendChild(username);
+    headerRow.appendChild(email);
+    headerRow.appendChild(activated);
+    headerRow.appendChild(course);
+    headerRow.appendChild(section);
+    headerRow.appendChild(semester);
+    headerRow.appendChild(instructorHeader);
+    for (let i = 0; i < inputAccounts.length; i++) {
+      const row = result.insertRow();
+      let currentUser = inputAccounts[i];
+      row.insertCell().textContent = currentUser.username;
+      const currentEmail = row.insertCell();
       if (currentUser.email !== undefined) {
-        result += `<td>${currentUser.email}</td>`;
+        currentEmail.textContent = currentUser.email;
       } else {
-        result += `<td>-</td>`;
+        currentEmail.textContent = "-";
       }
+      const currentActivated = row.insertCell();
       if (currentUser.activationToken === "activated") {
-        result += `<td><span style = 'color:green'>${currentUser.activationToken}</span></td>`;
+        currentActivated.style.color = "green";
+        currentActivated.textContent = currentUser.activationToken;
       } else {
-        result += "<td><span style = 'color:red'>Not activated</span></td>";
+        currentActivated.textContent = "Not activated";
+        currentActivated.style.color = "red";
       }
+      const currentCourses = row.insertCell();
       if (currentUser.currentCourses !== undefined) {
-        result += `<td>${currentUser.currentCourses}</td>`;
+        currentCourses.textContent = currentUser.currentCourses;
       } else {
-        result += "<td>-</td>";
+        currentCourses.textContent = "-";
       }
+      const currentSection = row.insertCell();
       if (currentUser.studentSection !== undefined) {
-        result += `<td>${currentUser.studentSection}</td>`;
+        currentSection.textContent = currentUser.studentSection;
       } else {
-        result += "<td>-</td>";
+        currentSection.textContent = "-";
       }
+      const semesterCell = row.insertCell();
       if (currentUser.semester !== undefined) {
-        result += `<td>${currentUser.semester}</td>`;
+        semesterCell.textContent = currentUser.semester;
       } else {
-        result += "<td>-</td>";
+        semesterCell.textContent = "-";
       }
-      result += "</tr>";
+      const currentInstructor = row.insertCell();
+      if (currentUser.instructor !== undefined) {
+        currentInstructor.textContent = currentUser.instructor;
+      } else {
+        currentInstructor.textContent = "-";
+      }
     }
-    result += "</table>";
     return result;
   }
 
   getTeachersStudents() {
-    let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.setTeacher}&`;
+    const api = pathnames.urls.calculatorAPI;
+    const fields = pathnames.urlFields;
+    let url = `${api}?${fields.request}=${fields.requests.setTeacher}&`;
     let inputSections = document.getElementById('inputSections').value;
     let inputTeachers = document.getElementById('inputSetTeacher').value;
     let teachersAndSections = {};
     teachersAndSections[
-      pathnames.urlFields.requests.teachers
+      fields.requests.teachers
     ] = encodeURIComponent(inputTeachers);
     teachersAndSections[
-      pathnames.urlFields.requests.sections
+      fields.requests.sections
     ] = encodeURIComponent(inputSections);
-    url += `${pathnames.urlFields.teachersAndSections}=${encodeURIComponent(JSON.stringify(teachersAndSections))}&`;
+    const json = JSON.stringify(teachersAndSections);
+    url += `${fields.teachersAndSections}=${encodeURIComponent(json)}&`;
     submitRequests.submitGET({
       url: url,
       progress: ids.domElements.spanProgressReportGeneral,
       result: "idOutputSections",
-      callback: () => {
-        this.getTeachersStudentsCallback();
+      callback: (input, output) => {
+        this.getTeachersStudentsCallback(
+          input, output
+        );
       }
     });
   }

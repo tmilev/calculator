@@ -2288,8 +2288,9 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     result[WebAPI::Result::error] = errorStream.str();
     return result;
   }
-  Answer& currentA = problem.problemData.answers.values[indexLastAnswerId];
-  if (currentA.commandAnswerOnGiveUp == "") {
+  Answer& currentAnswer =
+  problem.problemData.answers.values[indexLastAnswerId];
+  if (currentAnswer.commandAnswerOnGiveUp == "") {
     out
     << "<b>No answer given for "
     << "question (answerID: "
@@ -2298,7 +2299,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     if (
       global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights()
     ) {
-      out << "<br>Answer status: " << currentA.toString();
+      out << "<br>Answer status: " << currentAnswer.toString();
     }
     result[WebAPI::Result::error] = out.str();
     return result;
@@ -2307,16 +2308,17 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   interpreter.initialize(Calculator::Mode::educational);
   interpreter.flagPlotNoControls = true;
   interpreter.flagWriteLatexPlots = false;
-  std::stringstream answerCommands, answerCommandsNoEnclosure;
-  answerCommands << currentA.commandsBeforeAnswer;
+  std::stringstream answerCommands;
+  std::stringstream answerCommandsNoEnclosure;
+  answerCommands << currentAnswer.commandsBeforeAnswer;
   answerCommandsNoEnclosure
-  << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  << currentAnswer.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
   answerCommands
   << Calculator::Functions::Names::commandEnclosure
   << "{}("
-  << currentA.commandAnswerOnGiveUp
+  << currentAnswer.commandAnswerOnGiveUp
   << ");";
-  answerCommandsNoEnclosure << currentA.commandAnswerOnGiveUp;
+  answerCommandsNoEnclosure << currentAnswer.commandAnswerOnGiveUp;
   interpreter.evaluate(answerCommands.str());
   if (interpreter.parser.syntaxErrors != "") {
     out
@@ -2482,9 +2484,13 @@ JSData WebAPIResponse::getAccountsPageJSON(
   findStudents.collection = DatabaseStrings::tableUsers;
   findStudents.nestedLabels.addOnTop(DatabaseStrings::labelInstructor);
   findStudents.exactValue = global.userDefault.username;
+  findStudents.maximumNumberOfItems = 1000;
   QueryResultOptions columnsToRetain;
   columnsToRetain.fieldsToProjectTo.addOnTop(DatabaseStrings::labelUsername);
   columnsToRetain.fieldsToProjectTo.addOnTop(DatabaseStrings::labelEmail);
+  columnsToRetain.fieldsToProjectTo.addOnTop(
+    DatabaseStrings::labelInstructor
+  );
   columnsToRetain.fieldsToProjectTo.addOnTop(
     DatabaseStrings::labelActivationToken
   );
@@ -2549,7 +2555,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
   );
   if (flagFilterCourse) {
     out
-    << "<br>Displaying only students in course: <b style =\"color:blue\">"
+    << "<br>Displaying only students in course: <b style='color:blue'>"
     << currentCourse
     << "</b>. "
     << "<a href=\""

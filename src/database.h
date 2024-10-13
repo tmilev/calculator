@@ -94,7 +94,7 @@ public:
     static bool all();
     static bool basics(DatabaseType databaseType);
     static void updateNoFail(QueryFind& find, QueryUpdate updater);
-    static void findNoFail(QueryFind& find, JSData& result);
+    static void findExactlyOneNoFail(QueryFind& find, JSData& result);
     static void matchKeyValue(
       const JSData& mustContain, const JSData& mustBeContained
     );

@@ -134,6 +134,11 @@ public:
     this->references[this->size - 1] = 0;
     this->size --;
   }
+  void addListOnTop(const List<Object>& input) {
+    for (const Object& o : input) {
+      this->addOnTop(o);
+    }
+  }
   void swapTwoIndices(int index1, int index2) {
     this->references.swapTwoIndices(index1, index2);
   }

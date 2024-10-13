@@ -143,10 +143,13 @@ class StandardResponses {
   constructor() { }
 
   /**
-   * @return {boolean} Whether the response indicates that the user is not logged in.
-   * Please note that if this returns false, the user may still be not logged in, if for example,
+   * @return {boolean} Whether the response indicates that the user 
+   * is not logged in.
+   * Please note that if this returns false, the user may 
+   * still be not logged in, if for example,
    * the request was one that did not require login.
-   * @param responseObjectParsed the js object returned from the calculator, parsed.
+   * @param responseObjectParsed the js object returned from 
+   * the calculator, parsed.
    */
   isNotLoggedInResponse(responseObjectParsed) {
     return responseObjectParsed["status"] === "not logged in";

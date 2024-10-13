@@ -149,8 +149,9 @@ function deleteDatabaseItem(
   let finalSelector = {
     fields: labels
   };
+  const api = pathnames.urls.calculatorAPI;
   let item = encodeURIComponent(JSON.stringify(finalSelector));
-  let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=databaseDeleteOneEntry&item=${item}`;
+  let url = `${api}?${pathnames.urlFields.request}=databaseDeleteOneEntry&item=${item}`;
   submitRequests.submitGET({
     url: url,
     callback: () => {

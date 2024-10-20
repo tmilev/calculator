@@ -35,15 +35,17 @@ class DatabasePage {
       miscellaneous.writeHTML(element, "<b>Not logged-in.</b>");
       return;
     }
+    const urlFields = pathnames.urlFields;
     if (requestedOperation === undefined || requestedOperation === null) {
-      requestedOperation = pathnames.urlFields.database.fetch;
+      requestedOperation = urlFields.database.fetch;
     }
     let findQuery = storage.variables.database.findQuery.getValue();
+    console.log("DEBUG: and the findQuery is: ", findQuery);
     let url = "";
     url += `${pathnames.urls.calculatorAPI}?`;
-    url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
-    url += `${pathnames.urlFields.database.operation}=${requestedOperation}&`;
-    url += `${pathnames.urlFields.database.findQuery}=${findQuery}&`;
+    url += `${urlFields.request}=${urlFields.requests.database}&`;
+    url += `${urlFields.database.operation}=${requestedOperation}&`;
+    url += `${urlFields.database.findQuery}=${findQuery}&`;
     submitRequests.submitGET({
       url: url,
       progress: ids.domElements.spanProgressReportGeneral,
@@ -111,11 +113,18 @@ function fetchProblemData(
     return;
   }
   let url = "";
-  url += `${pathnames.urls.calculatorAPI}?`;
-  url += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.database}&`;
-  url += `${pathnames.urlFields.database.operation}=${pathnames.urlFields.database.fetch}&`;
-  let findQuery = JSON.stringify(ambientRowSelector.toObject());
-  url += `${pathnames.urlFields.database.findQuery}=${findQuery}&`;
+  const urlFields = pathnames.urlFields;
+  const fetchCommand = urlFields.database.fetch;
+  const operation = urlFields.database.operation;
+  const api = pathnames.urls.calculatorAPI;
+  const request = urlFields.request;
+  const database = urlFields.requests.database;
+  const find = urlFields.database.findQuery;
+  url += `${api}?`;
+  url += `${request}=${database}&`;
+  url += `${operation}=${fetchCommand}&`;
+  const query = JSON.stringify(ambientRowSelector.toObject());
+  url += `${find}=${query}&`;
   url += `${pathnames.urlFields.database.projector}="${key.toStringLabels()}"&`;
   submitRequests.submitGET({
     url: url,

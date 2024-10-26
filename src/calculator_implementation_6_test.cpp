@@ -5,6 +5,8 @@
 #include "string_constants.h"
 #include "web_api.h"
 
+std::string CalculatorHTML::Test::filenameFullOutput = "test/alltestedproblems.txt";
+
 CalculatorHTML::Test::Test() {
   this->filesToInterpret = 0;
   this->randomSeed = 0;
@@ -45,8 +47,8 @@ std::string CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow(
   STACK_TRACE("CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow");
   std::stringstream out;
   out << "<tr>";
-  out << "<td style = 'min-width:25px'>" << rowIndex << ". </td>";
-  out << "<td style = 'min-width:200px'>";
+  out << "<td style='min-width:25px'>" << rowIndex << ". </td>";
+  out << "<td style='min-width:200px'>";
   out << CalculatorHTML::toStringLinkFromProblem(this->fileName) << "</td>";
   if (this->errorLoad != "") {
     out
@@ -60,14 +62,14 @@ std::string CalculatorHTML::Test::OneProblemTest::toStringHTMLTableRow(
   << "<td style = 'min-width:60px'><b style = 'color:green'>Success</b></td>";
   if (!this->flagInterpretationSuccess) {
     out
-    << "<td style = 'min-width:400px'><b style ='color:red'>Failure.</b> "
+    << "<td style = 'min-width:400px'><b style='color:red'>Failure.</b> "
     << "Comments: "
     << this->errorInterpretation;
     out << "</td></tr>";
     return out.str();
   }
   out
-  << "<td style = 'min-width:60px'><b style = 'color:green'>Success</b></td>";
+  << "<td style='min-width:60px'><b style='color:green'>Success</b></td>";
   if (this->answers.size == 0) {
     out << "<td><b style = 'color:red'>No built-in answer.</b></td>";
   } else {
@@ -108,7 +110,9 @@ std::string CalculatorHTML::Test::toHTMLDebug() {
 }
 
 std::string CalculatorHTML::Test::toHTMLBuiltIn() {
-  std::stringstream tableBad, tableGood, out;
+  std::stringstream tableBad;
+  std::stringstream tableGood;
+  std::stringstream out;
   std::stringstream tableHeader;
   tableHeader
   << "<table>"
@@ -167,7 +171,15 @@ CalculatorHTML::Test::OneProblemTest::OneAnswer::OneAnswer() {
   this->flagBuiltInGenerated = false;
 }
 
-bool CalculatorHTML::Test::OneProblemTest::run() {
+JSData CalculatorHTML::Test::OneProblemTest::toJSON(CalculatorHTML& problem){
+  JSData result;
+  result["randomSeed"] = this->randomSeed;
+  result["body"] = problem.outputHtmlBodyNoTag;
+  result["head"] = problem.outputHtmlHeadNoTag;
+  return result;
+}
+
+bool CalculatorHTML::Test::OneProblemTest::run(JSData* outputComplete) {
   CalculatorHTML problem;
   std::stringstream commentsOnFailure;
   std::stringstream randomSeedStringStarting;
@@ -253,6 +265,9 @@ bool CalculatorHTML::Test::OneProblemTest::run() {
     }
   }
   this->errorAnswers = commentsOnFailure.str();
+  if (outputComplete != nullptr){
+    *outputComplete = this->toJSON(problem);
+  }
   return this->flagSuccess;
 }
 
@@ -277,16 +292,18 @@ std::string CalculatorHTML::Test::toStringSummary() {
 }
 
 bool CalculatorHTML::Test::builtInMultiple(
-  int inputFirstFileIndex,
-  int inputFilesToInterpret,
-  int inputRandomSeed,
-  int numberOfRepetitions,
-  std::stringstream* comments
-) {
+    int inputFirstFileIndex,
+    int inputFilesToInterpret,
+    int inputRandomSeed,
+    int numberOfRepetitions,
+    JSData *outputFullResult,
+    std::stringstream * comments)
+{
   List<int> randomSeeds;
   randomSeeds.setSize(numberOfRepetitions);
   ProgressReport report;
-  for (int i = 0; i < numberOfRepetitions; i ++) {
+  for (int i = 0; i < numberOfRepetitions; i++)
+  {
     randomSeeds[i] = inputRandomSeed + i;
     std::stringstream reportStream;
     reportStream
@@ -299,11 +316,13 @@ bool CalculatorHTML::Test::builtInMultiple(
     << ". ";
     report.report(reportStream.str());
     CalculatorHTML::Test tester;
+    JSData resultForRandomSeed;
+    JSData *outputResultForRandomSeed= (outputFullResult != nullptr)? & resultForRandomSeed :  nullptr;
+
     if (
-      !tester.builtIn(
-        inputFirstFileIndex, inputFilesToInterpret, randomSeeds[i]
-      )
-    ) {
+        !tester.builtIn(
+            inputFirstFileIndex, inputFilesToInterpret, randomSeeds[i], outputResultForRandomSeed))
+    {
       if (comments != nullptr) {
         *comments
         << "Failed run "
@@ -322,7 +341,13 @@ bool CalculatorHTML::Test::builtInMultiple(
       }
       return false;
     }
-    if (i == numberOfRepetitions - 1 && comments != nullptr) {
+    if (outputFullResult != nullptr) {
+      std::stringstream intToStringConverter;
+      intToStringConverter << randomSeeds[i];
+      (*outputFullResult)[intToStringConverter.str()] = resultForRandomSeed;
+    }
+    if (i == numberOfRepetitions - 1 && comments != nullptr)
+    {
       *comments
       << numberOfRepetitions
       << " consecutive successfull tests of all involved problems. "
@@ -336,7 +361,7 @@ bool CalculatorHTML::Test::builtInMultiple(
 }
 
 bool CalculatorHTML::Test::builtIn(
-  int inputFirstFileIndex, int inputFilesToInterpret, int inputRandomSeed
+  int inputFirstFileIndex, int inputFilesToInterpret, int inputRandomSeed, JSData* output
 ) {
   STACK_TRACE("CalculatorHTML::Test::builtIn");
   this->firstFileIndex = inputFirstFileIndex;
@@ -393,8 +418,14 @@ bool CalculatorHTML::Test::builtIn(
       global << reportStream.str() << Logger::endL;
     }
     report.report(reportStream.str());
-    if (!currentTest.run()) {
+    JSData oneProblemHolder;
+    JSData *oneProblem = output == nullptr ? nullptr : &oneProblemHolder;
+    if (!currentTest.run(oneProblem))
+    {
       result = false;
+    }
+    if (output != nullptr){
+      (*output)[currentTest.fileName] = oneProblemHolder;
     }
     if (!currentTest.flagSuccess) {
       badSoFar ++;
@@ -610,13 +641,31 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
     return true;
   }
   std::stringstream comments;
+  JSData actualOutput;
+  JSData desiredOutput;
+    std::string desiredOutputString;
+  bool desiredResultKnown =  FileOperations::loadFileToStringVirtual(CalculatorHTML::Test::filenameFullOutput, desiredOutputString, false,nullptr );
+  
   if (
-    !CalculatorHTML::Test::builtInMultiple(0, 0, 0, 3, &comments)
-  ) {
+      !CalculatorHTML::Test::builtInMultiple(0, 0, 0, 3, &actualOutput, &comments))
+  {
     global.fatal
     << "Built-in problem tests failed. "
     << comments.str()
     << global.fatal;
+  }
+    std::string actualOutputString = actualOutput.toString();
+  if ( actualOutputString != desiredOutputString) {
+if (desiredResultKnown) {
+  std::string newFileName = CalculatorHTML::Test::filenameFullOutput + ".new";
+  FileOperations::writeFileVirtual(newFileName, actualOutputString, nullptr);
+  global.fatal << "Detected change in the expected problem "
+  << "content and the actual one. Wrote the new output as " << newFileName
+  << ", please use a diff tool to see the difference. " << global.fatal;
+}
+global << Logger::purple << "No built-in problems on record. "
+       << "Writing the actual output to file: " << CalculatorHTML::Test::filenameFullOutput << Logger::endL;
+FileOperations::writeFileVirtual(CalculatorHTML::Test::filenameFullOutput, actualOutputString, nullptr);
   }
   return true;
 }

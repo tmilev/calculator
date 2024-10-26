@@ -26,9 +26,15 @@ class DatabasePage {
       return;
     }
     tableButtons.addEventListener('click', () => {
-      updateDatabasePageResetCurrentTable();
+      this.updateDatabasePageResetCurrentTable();
     });
   }
+
+  updateDatabasePageResetCurrentTable() {
+    storage.variables.database.findQuery.setAndStore("{}");
+    this.updateDatabasePage(pathnames.urlFields.database.allTables);
+  }  
+
   updateDatabasePage(/** @type{string?} */ requestedOperation) {
     if (!this.mainPage.isLoggedIn()) {
       let element = document.getElementById(ids.domElements.divDatabaseOutput);
@@ -39,27 +45,107 @@ class DatabasePage {
     if (requestedOperation === undefined || requestedOperation === null) {
       requestedOperation = urlFields.database.fetch;
     }
-    let findQuery = storage.variables.database.findQuery.getValue();
-    console.log("DEBUG: and the findQuery is: ", findQuery);
+    let findQuery = this.findQueryFromStorage();
+    const findQueryString = JSON.stringify(findQuery);
+    if (!(urlFields.database.collection in findQuery)) {
+      requestedOperation = urlFields.database.allTables;
+    }
     let url = "";
     url += `${pathnames.urls.calculatorAPI}?`;
     url += `${urlFields.request}=${urlFields.requests.database}&`;
     url += `${urlFields.database.operation}=${requestedOperation}&`;
-    url += `${urlFields.database.findQuery}=${findQuery}&`;
+    url += `${urlFields.database.findQuery}=${findQueryString}&`;
     submitRequests.submitGET({
       url: url,
       progress: ids.domElements.spanProgressReportGeneral,
-      callback: updateDatabasePageCallback,
+      callback: (incoming) => {
+        this.updateDatabasePageCallback(incoming); 
+      },
     });
+  }
+
+  findQueryFromStorage() {
+    let findQueryString = storage.variables.database.findQuery.getValue();
+    try {
+      return JSON.parse(findQueryString);
+    } catch (e) {
+      return {};
+    }
+  }
+
+  updateDatabasePageCallback(incoming) {
+    let findQuery = this.findQueryFromStorage();
+    let parsed = miscellaneous.jsonUnescapeParse(incoming);
+    let output = document.getElementById(ids.domElements.divDatabaseOutput);
+    output.textContent = "";
+    miscellaneous.writeHtmlElementsFromCommentsAndErrors(parsed, output);
+    if (
+      parsed.error !== undefined &&
+      parsed.error != null &&
+      parsed.error != ""
+    ) {
+      miscellaneous.writeHTML(output, miscellaneous.jsonParseGetHtmlStandard(incoming));
+    } else if ("rows" in parsed) {
+      let transformer = new jsonToHtml.JSONToHTML();
+      for (let i = 0; i < parsed.rows.length; i++) {
+        parsed.rows[i]["problemDataJSON"] = "";
+      }
+      let comments =
+        document.getElementById(
+          ids.domElements.spanDatabaseComments
+        );
+      miscellaneous.writeHTML(
+        comments,
+        `${parsed.rows.length} out of ${parsed.totalRows} rows displayed.<br> `,
+      );
+      output.appendChild(
+        transformer.getTableFromObject(
+          parsed.rows,
+          optionsDatabase, {
+          collection: findQuery[pathnames.urlFields.database.collection],
+        })
+      );
+    } else {
+      this.updateTables(parsed, output);
+    }
+  }
+
+  clickDatabaseTable(findQuery) {
+    storage.variables.database.findQuery.setAndStore(
+      JSON.stringify(findQuery)
+    );
+    updateDatabasePage();
+  }
+
+  updateTables(
+    parsed,
+    /** @type {HTMLElement} */
+    output,
+  ) {
+    if (parsed.collections === null || parsed.collections === undefined) {
+      let errorDiv = document.createElement("b");
+      errorDiv.style.color = "red";
+      errorDiv.textContent = "Missing collections.";
+      output.appendChild(errorDiv);
+      return;
+    }
+    let table = document.createElement("table");
+    table.className = "tableJSON";
+    for (let i = 0; i < parsed.collections.length; i++) {
+      let currentCollection = parsed.collections[i];
+      let anchor = document.createElement("a");
+      anchor.textContent = currentCollection;
+      let findQuery = queryFromCollection(currentCollection);
+      anchor.href = `#${JSON.stringify(findQuery)}`;
+      anchor.addEventListener("click", () => {
+        this.clickDatabaseTable(findQuery);
+      });
+      table.insertRow().insertCell().appendChild(anchor);
+    }
+    output.appendChild(table);
   }
 }
 
-function clickDatabaseTable(findQuery) {
-  storage.variables.database.findQuery.setAndStore(
-    JSON.stringify(findQuery)
-  );
-  updateDatabasePage();
-}
 
 function callbackFetchProblemData(
   /** @type {string} */
@@ -209,82 +295,6 @@ let optionsDatabase = new DataProcessorCollection([
   ),
 ]);
 
-function updateDatabasePageCallback(incoming, unused) {
-  let findQueryString = storage.variables.database.findQuery.getValue();
-  let findQuery = {};
-  try {
-    findQuery = JSON.parse(findQueryString);
-  } catch (e) {
-    findQuery = {};
-  }
-  let parsed = miscellaneous.jsonUnescapeParse(incoming);
-  let output = document.getElementById(ids.domElements.divDatabaseOutput);
-  output.textContent = "";
-  miscellaneous.writeHtmlElementsFromCommentsAndErrors(parsed, output);
-  if (
-    parsed.error !== undefined &&
-    parsed.error != null &&
-    parsed.error != ""
-  ) {
-    miscellaneous.writeHTML(output, miscellaneous.jsonParseGetHtmlStandard(incoming));
-  } else if ("rows" in parsed) {
-    let transformer = new jsonToHtml.JSONToHTML();
-    for (let i = 0; i < parsed.rows.length; i++) {
-      parsed.rows[i]["problemDataJSON"] = "";
-    }
-    let comments =
-      document.getElementById(
-        ids.domElements.spanDatabaseComments
-      );
-    miscellaneous.writeHTML(
-      comments,
-      `${parsed.rows.length} out of ${parsed.totalRows} rows displayed.<br> `,
-    );
-    output.appendChild(
-      transformer.getTableFromObject(
-        parsed.rows,
-        optionsDatabase, {
-        collection: findQuery[pathnames.urlFields.database.collection],
-      })
-    );
-  } else {
-    updateTables(parsed, output);
-  }
-}
-
-function updateTables(
-  parsed,
-  /** @type {HTMLElement} */
-  output,
-) {
-  if (parsed.collections === null || parsed.collections === undefined) {
-    let errorDiv = document.createElement("b");
-    errorDiv.style.color = "red";
-    errorDiv.textContent = "Missing collections.";
-    output.appendChild(errorDiv);
-    return;
-  }
-  let table = document.createElement("table");
-  table.className = "tableJSON";
-  for (let i = 0; i < parsed.collections.length; i++) {
-    let currentCollection = parsed.collections[i];
-    let anchor = document.createElement("a");
-    anchor.textContent = currentCollection;
-    let findQuery = queryFromCollection(currentCollection);
-    anchor.href = `#${JSON.stringify(findQuery)}`;
-    anchor.addEventListener("click", () => {
-      clickDatabaseTable(findQuery);
-    });
-    table.insertRow().insertCell().appendChild(anchor);
-  }
-  output.appendChild(table);
-}
-
-function updateDatabasePageResetCurrentTable() {
-  storage.variables.database.findQuery.setAndStore("{}");
-  updateDatabasePage(pathnames.urlFields.database.allTables);
-}
-
 function updateDatabasePage(/** @type{string?} */ requestedOperation) {
   databasePage.updateDatabasePage(requestedOperation);
 }
@@ -294,7 +304,5 @@ let databasePage = new DatabasePage();
 module.exports = {
   databasePage,
   optionsDatabase,
-  updateDatabasePage,
-  clickDatabaseTable,
-  updateDatabasePageResetCurrentTable,
+  updateDatabasePage,  
 };

@@ -11056,7 +11056,7 @@ bool CalculatorFunctions::turnRulesOnOff(
     if (!calculator.namedRules.contains(rulesToConsider[i])) {
       return
       calculator
-      << "Can't find named rule: "
+      << "<br>Can't find named rule: "
       << rulesToConsider[i]
       << ". Turn-off rules command failed. ";
     } else {

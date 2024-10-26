@@ -1695,7 +1695,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(
   if (
     global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights()
   ) {
-    this->logCommandsProblemGeneratioN
+    this->logCommandsProblemGeneration
     << "<b>Input commands:</b> "
     << this->problemData.commandsGenerateProblemLink
     << "<br>\n"
@@ -2394,7 +2394,7 @@ void CalculatorHTML::logProblemGenerationObsolete(Calculator& interpreter) {
     << "</td></tr>";
   }
   streamLog << "</table>";
-  this->logCommandsProblemGeneratioN << streamLog.str();
+  this->logCommandsProblemGeneration << streamLog.str();
 }
 
 void CalculatorHTML::figureOutCurrentProblemList(
@@ -3933,8 +3933,8 @@ void CalculatorHTML::computeBodyDebugString() {
   }
   std::stringstream out;
   out << "<hr><hr><b style='color:blue'>Problem body debug information.</b> ";
-  if (this->logCommandsProblemGeneratioN.str() != "") {
-    out << "<br>" << this->logCommandsProblemGeneratioN.str() << "<hr>";
+  if (this->logCommandsProblemGeneration.str() != "") {
+    out << "<br>" << this->logCommandsProblemGeneration.str() << "<hr>";
   }
   out
   << "<br>Random seed: "
@@ -3980,8 +3980,8 @@ bool CalculatorHTML::interpretHtmlOneAttempt(
   if (!this->prepareAndExecuteCommands(interpreter, &comments)) {
     return false;
   }
-  // ////////////////////////////interpretation takes place before javascript
-  // generation as the latter depends on the former.
+  // The javascript generation depends on interpretation, 
+  // so interpretation comes first.
   this->computeProblemLabel();
   std::string problemLabel = "";
   if (
@@ -4090,12 +4090,12 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time before database storage"
   );
-  bool shouldResetTheRandomSeed = false;
+  bool shouldResetRandomSeed = false;
   if (this->flagIsForReal && !this->problemData.flagRandomSeedGiven) {
-    shouldResetTheRandomSeed = true;
+    shouldResetRandomSeed = true;
   }
   if (this->flagIsForReal && this->numberOfInterpretationAttempts > 1) {
-    shouldResetTheRandomSeed = true;
+    shouldResetRandomSeed = true;
     outBody
     << "<hr><b style='color:red'>"
     << "Your problem's random seed was just reset. </b> "
@@ -4108,7 +4108,7 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
     << "this is a bug. "
     << "Please take a screenshot and send it to your instructor. </b>";
   }
-  if (shouldResetTheRandomSeed) {
+  if (shouldResetRandomSeed) {
     bool successStoringSeed = this->storeRandomSeedCurrent(&comments);
     if (!successStoringSeed) {
       global

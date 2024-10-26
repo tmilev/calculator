@@ -6,6 +6,7 @@
 #include "database.h"
 #include "general_lists.h"
 #include "math_subsets_selections.h"
+#include "json.h"
 #include "user.h"
 #include <ctime>
 
@@ -280,14 +281,13 @@ public:
     std::string,
     HashFunctions::hashFunction<std::string>
   > outputScripts;
-  std::stringstream logCommandsProblemGeneratioN;
+  std::stringstream logCommandsProblemGeneration;
   std::string courseHome;
   std::string topicListJavascriptWithTag;
   static const std::string bugsGenericMessage;
   HashedList<std::string> tagKeysNoValue;
   List<std::string> calculatorTopicElementNames;
   List<std::string> autoCompleteExtras;
-  //  List<std::string> answerFirstCorrectSubmission;
   Selection studentTagsAnswered;
   ProblemData problemData;
   List<std::string> answerHighlights;
@@ -338,7 +338,6 @@ public:
     bool isSplittingChar(const std::string& input);
     bool isCalculatorTag(const SyntacticElementHTML& input);
     bool consumeContentStandard();
-    bool consumeAfterAnswerHighlight();
     bool consumeAfterLeftAngleBracket();
     bool consumeTagOpened();
     bool closeOpenTag(int tagOffsetNegative);
@@ -640,11 +639,14 @@ public:
       bool flagSuccess;
       int randomSeed;
       List<OneAnswer> answers;
+      MapList<std::string, std::string> visibleCalculatorTags;
       OneProblemTest();
-      bool run();
+      bool run(JSData* outputComplete);
+      JSData toJSON(CalculatorHTML &problem);
       std::string toStringHTMLTableRow(int rowIndex);
     };
 
+    static std::string filenameFullOutput;
     int filesToInterpret;
     int firstFileIndex;
     int randomSeed;
@@ -661,10 +663,12 @@ public:
       int inputFilesToInterpret,
       int inputRandomSeed,
       int numberOfRepetitions,
+          JSData *outputFullResult,
+
       std::stringstream* comments
     );
     bool builtIn(
-      int inputFirstFileIndex, int inputFilesToInterpret, int inputRandomSeed
+      int inputFirstFileIndex, int inputFilesToInterpret, int inputRandomSeed, JSData* output
     );
     static bool builtInCrashOnFailure();
     static bool all();

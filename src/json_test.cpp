@@ -1,4 +1,3 @@
-#include "crypto_calculator.h"
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
 #include "json.h"

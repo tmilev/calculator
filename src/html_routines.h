@@ -95,11 +95,6 @@ public:
     const std::string& inputNoEncoding,
     const std::string& desiredAnchorTextEmptyForDefault
   );
-  static std::string getSliderSpanStartsHidden(
-    const std::string& content,
-    const std::string& label = "Expand/collapse",
-    const std::string& desiredID = ""
-  );
   static std::string getHtmlLinkToGithubRepository(
     const std::string& displayString
   );

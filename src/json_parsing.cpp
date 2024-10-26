@@ -418,6 +418,12 @@ void JSData::reset(JSData::Type inputType) {
   }
 }
 
+std::string JSData::toStringPretty() const {
+  JSData::PrintOptions options;
+  options.useNewLine = true;
+  return this->toString(&options);
+}
+
 std::string JSData::toString(const JSData::PrintOptions* options) const {
   std::stringstream out;
   this->intoStream(out, options);

@@ -128,6 +128,7 @@ public:
   };
 
   std::string toString(const JSData::PrintOptions* options = nullptr) const;
+  std::string toStringPretty() const;
   std::stringstream& intoStream(
     std::stringstream& out, const JSData::PrintOptions* optionsIncoming
   ) const;

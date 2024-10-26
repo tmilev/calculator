@@ -690,9 +690,9 @@ void LaTeXCrawler::crawl() {
     this->displayResult << "Errors encountered. " << this->errorStream.str();
   }
   this->displayResult
-  << "Output file: <a href=\""
+  << "Output file: <a href='"
   << global.displayPathOutputFolder
-  << "latexOutput.tex\">"
+  << "latexOutput.tex'>"
   << "latexOutput.tex"
   << "</a>";
 }

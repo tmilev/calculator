@@ -245,32 +245,6 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   return (totalWeightsFound <= upperBoundDominantWeights);
 }
 
-std::string HtmlRoutines::getSliderSpanStartsHidden(
-  const std::string& content,
-  const std::string& label,
-  const std::string& desiredID
-) {
-  (void) label;
-  std::stringstream out;
-  HtmlRoutines::globalGeneralPurposeID ++;
-  std::stringstream idStringStream;
-  idStringStream << desiredID;
-  if (desiredID == "") {
-    idStringStream << "UnnamedSpan" << HtmlRoutines::globalGeneralPurposeID;
-  }
-  out
-  << "<a href=\"javascript:;\" onmusedown =\"document.getElementById('"
-  << idStringStream.str()
-  << "').slideToggle('slow');\">Expand/collapse</a>";
-  out
-  << "<span id =\""
-  << idStringStream.str()
-  << "\" style =\"display:none\">"
-  << content
-  << "</span>";
-  return out.str();
-}
-
 std::string LittelmannPath::generateOrbitAndAnimate() {
   std::stringstream out;
   List<LittelmannPath> orbit;
@@ -724,6 +698,7 @@ bool Calculator::getMatrixExpressions(
 }
 
 bool Calculator::Test::processOneTest(JSData& input) {
+  STACK_TRACE("Calculator::Test::processOneTest");
   if (input["input"].elementType != JSData::Type::tokenString) {
     global << Logger::red << "Input command is missing. " << Logger::endL;
     return false;

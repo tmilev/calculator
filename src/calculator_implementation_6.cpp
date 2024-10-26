@@ -85,7 +85,12 @@ bool CalculatorFunctions::testProblemInterpretation(
   input[3].isSmallInteger(&randomSeed);
   std::stringstream comments;
   CalculatorHTML::Test::builtInMultiple(
-    firstFileIndex, desiredNumberOfTests, randomSeed, 3,nullptr, &comments
+    firstFileIndex,
+    desiredNumberOfTests,
+    randomSeed,
+    3,
+    nullptr,
+    &comments
   );
   return output.assignValue(calculator, comments.str());
 }

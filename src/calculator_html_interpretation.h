@@ -5,8 +5,8 @@
 #include "calculator_problem_storage.h"
 #include "database.h"
 #include "general_lists.h"
-#include "math_subsets_selections.h"
 #include "json.h"
+#include "math_subsets_selections.h"
 #include "user.h"
 #include <ctime>
 
@@ -642,7 +642,7 @@ public:
       MapList<std::string, std::string> visibleCalculatorTags;
       OneProblemTest();
       bool run(JSData* outputComplete);
-      JSData toJSON(CalculatorHTML &problem);
+      JSData toJSON(CalculatorHTML& problem);
       std::string toStringHTMLTableRow(int rowIndex);
     };
 
@@ -663,12 +663,14 @@ public:
       int inputFilesToInterpret,
       int inputRandomSeed,
       int numberOfRepetitions,
-          JSData *outputFullResult,
-
+      JSData* outputFullResult,
       std::stringstream* comments
     );
     bool builtIn(
-      int inputFirstFileIndex, int inputFilesToInterpret, int inputRandomSeed, JSData* output
+      int inputFirstFileIndex,
+      int inputFilesToInterpret,
+      int inputRandomSeed,
+      JSData* output
     );
     static bool builtInCrashOnFailure();
     static bool all();

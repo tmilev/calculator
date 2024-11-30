@@ -116,13 +116,6 @@ textarea.textAreaStudentPoints {
   display: none;
 }
 
-td.tableCellMQfield {
-  vertical-align: bottom;
-  font-size: 24px;
-  font-family: Times New Roman;
-  display: inline-block;
-}
-
 .calculatorMQfieldEnclosure {
   display: inline-block;
   background-color: white;

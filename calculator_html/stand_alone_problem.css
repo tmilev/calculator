@@ -110,13 +110,6 @@ textarea.textAreaStudentPoints {
   display: none;
 }
 
-td.tableCellMQfield {
-  vertical-align: center;
-  padding: 5px;
-  /*min-width: 100px;*/
-  text-align: center;
-}
-
 .calculatorMQfieldEnclosure {
   display: inline-block;
   background-color: white;

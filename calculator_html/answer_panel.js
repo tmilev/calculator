@@ -282,11 +282,9 @@ class AnswerPanel {
     let result = document.createElement("table");
     let row = result.insertRow();
     let cellAnswerHighlight = row.insertCell();
-    cellAnswerHighlight.className = "tableCellMQfield";
     cellAnswerHighlight.appendChild(this.spanAnswerHighlight);
     let cell = row.insertCell();
     cell.appendChild(this.editorEnclosure);
-    cell.className = "tableCellMQfield";
     return result;
   }
 

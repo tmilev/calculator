@@ -104,6 +104,7 @@ public:
   void setKeyValue(const std::string& key, const JSData& value);
   int getKeyIndex(const std::string& key) const;
   void makeEmptyArray();
+  void makeEmptyObject();
   static JSData emptyArray();
   static JSData emptyObject();
   JSData();

@@ -355,18 +355,22 @@ bool JSData::isTrueRepresentationInJSON() {
 
 JSData JSData::emptyArray() {
   JSData result;
-  result.elementType = JSData::tokenObject;
+  result.makeEmptyArray();
   return result;
 }
 
 JSData JSData::emptyObject() {
   JSData result;
-  result.makeEmptyArray();
+  result.makeEmptyObject();
   return result;
 }
 
 void JSData::makeEmptyArray() {
   this->reset(JSData::Type::tokenArray);
+}
+
+void JSData::makeEmptyObject() {
+  this->reset(JSData::Type::tokenObject);
 }
 
 bool JSData::isString(std::string* whichString) const {

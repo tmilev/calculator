@@ -221,7 +221,7 @@ class EditorInputExtractor {
       cursorPosition < 0 ||
       cursorPosition > inputLatex.length + 1
     ) {
-      console.log("Invalid caretPositionValue.");
+      console.log("Invalid cursorPosition.");
       return;
     }
     this.rawInput = inputLatex;

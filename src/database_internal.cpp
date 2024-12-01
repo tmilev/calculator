@@ -1019,6 +1019,13 @@ bool DatabaseInternalServer::findObjectIds(
     output.addListOnTop(
       index.keyValueToObjectIds.getValueNoFail(desiredValue)
     );
+    if (outputTotalItems != nullptr) {
+      *outputTotalItems = output.size;
+    }
+  } else {
+    if (outputTotalItems != nullptr) {
+      outputTotalItems->makeZero();
+    }
   }
   return true;
 }

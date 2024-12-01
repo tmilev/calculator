@@ -416,8 +416,11 @@ bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
   userQuery.exactValue = WebAPI::userDefaultAdmin;
   List<JSData> recordedProblems;
   std::stringstream comments;
+  LargeInteger totalItems = 0;
   bool success =
-  Database::get().find(userQuery, nullptr, recordedProblems, &comments);
+  Database::get().find(
+    userQuery, nullptr, recordedProblems, &totalItems, &comments
+  );
   if (!success) {
     global.fatal << "Failed to find admin user. " << global.fatal;
   }

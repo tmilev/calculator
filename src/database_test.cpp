@@ -83,7 +83,10 @@ bool Database::Test::loadFromJSON() {
   query.exactValue = "d739b82f2492ed095fa15a52";
   query.collection = "users";
   List<std::string> objectIds;
-  if (!server.findObjectIds(query, objectIds, &comments)) {
+  LargeInteger totalItems;
+  if (
+    !server.findObjectIds(query, objectIds, &totalItems, &comments)
+  ) {
     global.fatal << "Failed to find object ids. " << global.fatal;
   }
   if (
@@ -95,6 +98,12 @@ bool Database::Test::loadFromJSON() {
     << "\nexpected:\n["
     << query.exactValue
     << "]"
+    << global.fatal;
+  }
+  if (!totalItems.isEqualToOne()) {
+    global.fatal
+    << "Expected one item, got: "
+    << totalItems.toString()
     << global.fatal;
   }
   JSData user;
@@ -133,7 +142,7 @@ bool Database::Test::findWithOptions(DatabaseType databaseType) {
   QueryResultOptions options;
   options.fieldsProjectedAway.addOnTop("_id");
   List<JSData> result;
-  Database::get().find(query, &options, result, nullptr);
+  Database::get().find(query, &options, result, nullptr, nullptr);
   JSData admin = result[0];
   if (admin["username"].stringValue != "default") {
     global.fatal << "Failed to find expected admin username. " << global.fatal;
@@ -252,8 +261,11 @@ void QueryUpdate::Test::findExactlyOneNoFail(
   List<JSData> output;
   QueryFindOneOf wrapperQuery;
   wrapperQuery.queries.addOnTop(find);
+  LargeInteger totalItems = 0;
   bool success =
-  Database::get().find(wrapperQuery, nullptr, output, &comments);
+  Database::get().find(
+    wrapperQuery, nullptr, output, &totalItems, &comments
+  );
   if (!success || output.size != 1) {
     global.fatal
     << "Failed to find updated:\n"
@@ -337,8 +349,11 @@ bool QueryUpdate::Test::basics(DatabaseType databaseType) {
   QueryFindOneOf finder;
   finder.queries.addOnTop(find);
   List<JSData> foundAll;
+  LargeInteger totalItems = 0;
   bool success =
-  Database::get().find(finder, nullptr, foundAll, &errorStream);
+  Database::get().find(
+    finder, nullptr, foundAll, &totalItems, &errorStream
+  );
   std::string foundString = found.toString();
   if (!success || foundAll.size != 2) {
     global.fatal

@@ -134,7 +134,8 @@ public:
   std::string commandsCommentsBeforeSubmission;
   std::string commandsCommentsBeforeInterpretation;
   std::string commandsBeforeAnswer;
-  std::string commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  // Intended for debugging problem generation.
+  std::string commandsBeforeAnswerNoEnclosuresInternal;
   std::string commandVerificationOnly;
   std::string commandsSolutionOnly;
   std::string commandAnswerOnGiveUp;

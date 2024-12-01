@@ -227,6 +227,7 @@ class DatabaseInternalResult {
 public:
   List<JSData> content;
   bool success;
+  LargeInteger totalItems;
   std::string comments;
   // Used when an output message is too large.
   // When that happens, the message bytes will contain a json in which
@@ -271,7 +272,8 @@ public:
   // that was too large to receive in one go. Holds a process-unique id of the
   // message.
   LargeInteger messageId;
-  // Holds teh location of the stored message. May be expired.
+  // Holds the location of the stored message.
+  // The location may be out-of-date/invalid.
   int messageHandle;
   bool fromJSON(
     const std::string& input, std::stringstream* commentsOnFailure
@@ -287,6 +289,12 @@ public:
 class DatabaseInternal;
 
 class DatabaseInternalIndex {
+  friend std::ostream& operator<<(
+    std::ostream& output, const DatabaseInternalIndex& index
+  ) {
+    output << index.toString();
+    return output;
+  }
 public:
   std::string collectionName;
   List<std::string> nestedKeys;
@@ -349,19 +357,30 @@ public:
     const List<std::string>& indexableKeys
   );
   bool findAndUpdate(
-    QueryFindAndUpdate& input, std::stringstream* commentsOnFailure
+    QueryFindAndUpdate& input,
+    LargeInteger* outputTotalItemsFound,
+    std::stringstream* commentsOnFailure
   );
-  std::string collectionsSchemaFileName() const;
   bool shutdown();
+  // Finds the objects that match the query.
+  // The output may be limited by the query options.
+  // The (unlimited) total number of items is written in the outputTotalItems
+  // parameter.
   bool find(
     const QueryFindOneOf& query,
     const QueryResultOptions* options,
     List<JSData>& output,
+    LargeInteger* outputTotalItems,
     std::stringstream* commentsOnFailure
   );
+  // Finds object ids that match the query.
+  // The output may be limited by the query options.
+  // The (unlimited) total number of items is written in the outputTotalItems
+  // parameter.
   bool findObjectIds(
     const QueryFind& query,
     List<std::string>& output,
+    LargeInteger* outputTotalItems,
     std::stringstream* commentsOnFailure
   );
   bool fetchCollectionNames(
@@ -410,6 +429,7 @@ public:
     const QueryFindOneOf& query,
     const QueryResultOptions* options,
     List<JSData>& output,
+    LargeInteger* outputTotalItems,
     std::stringstream* commentsOnFailure
   );
   bool updateOne(
@@ -614,6 +634,7 @@ public:
     const QueryFindOneOf& query,
     const QueryResultOptions* options,
     List<JSData>& output,
+    LargeInteger* outputTotalItems,
     std::stringstream* commentsOnFailure
   );
   // Finds exactly one item that matches the query.
@@ -638,7 +659,7 @@ public:
     const std::string& tableName,
     List<std::string>& outputLabels,
     List<List<std::string> >& outputRows,
-    long long* totalItems = nullptr,
+    LargeInteger* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
   bool deleteOneEntry(

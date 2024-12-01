@@ -1601,8 +1601,7 @@ bool Answer::prepareAnswerStandard(
     commandsNoEnclosures << commandsBodyNoEnclosures.str();
   }
   this->commandsBeforeAnswer = commands.str();
-  this->commandsBeforeAnswerNoEnclosuresForDEBUGGING =
-  commandsNoEnclosures.str();
+  this->commandsBeforeAnswerNoEnclosuresInternal = commandsNoEnclosures.str();
   this->commandVerificationOnly = input.commandCleaned();
   this->flagAnswerHardcoded = false;
   return true;
@@ -1622,8 +1621,7 @@ bool Answer::prepareAnswerHardCoded(
     commandsNoEnclosures << commandsBodyNoEnclosures.str();
   }
   this->commandsBeforeAnswer = commands.str();
-  this->commandsBeforeAnswerNoEnclosuresForDEBUGGING =
-  commandsNoEnclosures.str();
+  this->commandsBeforeAnswerNoEnclosuresInternal = commandsNoEnclosures.str();
   this->commandAnswerOnGiveUp = input.content;
   this->flagAnswerHardcoded = true;
   return true;

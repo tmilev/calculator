@@ -367,7 +367,7 @@ bool Database::findExactlyOne(
   std::stringstream* commentsOnFailure
 ) {
   List<JSData> all;
-  if (!this->find(query, options, all, commentsOnFailure)) {
+  if (!this->find(query, options, all, nullptr, commentsOnFailure)) {
     return false;
   }
   if (all.size != 1) {
@@ -381,6 +381,7 @@ bool Database::find(
   const QueryFindOneOf& query,
   const QueryResultOptions* options,
   List<JSData>& output,
+  LargeInteger* outputTotalItems,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::find");
@@ -388,12 +389,12 @@ bool Database::find(
   case DatabaseType::internal:
     return
     this->localDatabase.client.find(
-      query, options, output, commentsOnFailure
+      query, options, output, outputTotalItems, commentsOnFailure
     );
   case DatabaseType::fallback:
     return
     this->fallbackDatabase.client.find(
-      query, options, output, commentsOnFailure
+      query, options, output, outputTotalItems, commentsOnFailure
     );
   case DatabaseType::noDatabaseEveryoneIsAdmin:
     if (commentsOnFailure != nullptr) {
@@ -581,7 +582,7 @@ bool Database::fetchTable(
   const std::string& tableName,
   List<std::string>& outputLabels,
   List<List<std::string> >& outputRows,
-  long long* totalItems,
+  LargeInteger* totalItems,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Database::fetchTable");
@@ -593,7 +594,9 @@ bool Database::fetchTable(
   List<JSData> rowsJSON;
   oneQuery.maximumNumberOfItems = 200;
   oneQuery.collection = tableName;
-  Database::get().find(query, nullptr, rowsJSON, commentsOnFailure);
+  Database::get().find(
+    query, nullptr, rowsJSON, totalItems, commentsOnFailure
+  );
   HashedList<std::string> labels;
   for (int i = 0; i < rowsJSON.size; i ++) {
     for (int j = 0; j < rowsJSON[i].objects.size(); j ++) {
@@ -641,12 +644,15 @@ JSData Database::toJSONFetchItem(
   JSData result;
   result[DatabaseStrings::labelCollection] = findQuery.collection;
   List<JSData> rowsJSON;
-  long long totalItems = 0;
+  LargeInteger totalItems = 0;
   std::stringstream comments;
   QueryFindOneOf query;
   query.queries.addOnTop(findQuery);
-  if (!Database::find(query, &projector, rowsJSON, &comments)) {
-    result["error"] = "Failure in toJSONFetchItem. " + comments.str();
+  if (
+    !Database::find(query, &projector, rowsJSON, &totalItems, &comments)
+  ) {
+    result[DatabaseStrings::error] =
+    "Failure in toJSONFetchItem. " + comments.str();
     return result;
   }
   Database::correctData(rowsJSON);
@@ -658,7 +664,7 @@ JSData Database::toJSONFetchItem(
     result["findQuery"] = findQuery.toJSON();
   }
   result["rows"] = rows;
-  result["totalRows"] = static_cast<int>(totalItems);
+  result[DatabaseStrings::labelTotalRows] = totalItems;
   return result;
 }
 
@@ -712,7 +718,7 @@ JSData Database::toJSONAllCollections() {
   }
   List<std::string> collectionNamesList;
   if (!Database::fetchCollectionNames(collectionNamesList, &out)) {
-    result["error"] = out.str();
+    result[DatabaseStrings::error] = out.str();
     return result;
   }
   JSData collectionNames;
@@ -722,6 +728,7 @@ JSData Database::toJSONAllCollections() {
     collectionNames[i] = collectionNamesList[i];
   }
   result["collections"] = collectionNames;
+  result[DatabaseStrings::labelTotalRows] = collectionNamesList.size;
   return result;
 }
 
@@ -740,9 +747,11 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   findQuery.maximumNumberOfItems = 200;
   QueryFindOneOf query(findQuery);
   List<JSData> rowsJSON;
-  long long totalItems = 0;
-  if (!Database::find(query, &projector, rowsJSON, &comments)) {
-    result["error"] = comments.str();
+  LargeInteger totalItems = 0;
+  if (
+    !Database::find(query, &projector, rowsJSON, &totalItems, &comments)
+  ) {
+    result[DatabaseStrings::error] = comments.str();
     return result;
   }
   Database::correctData(rowsJSON);
@@ -750,7 +759,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   rows.elementType = JSData::Type::tokenArray;
   rows.listObjects = rowsJSON;
   result["rows"] = rows;
-  result["totalRows"] = static_cast<int>(totalItems);
+  result[DatabaseStrings::labelTotalRows] = totalItems;
   return result;
 }
 
@@ -780,7 +789,7 @@ std::string Database::toHtmlDatabaseCollection(
   out << "Current table: " << currentTable << "<br>";
   List<std::string> labels;
   List<List<std::string> > rows;
-  long long totalItems = - 1;
+  LargeInteger totalItems = - 1;
   if (
     !Database::fetchTable(currentTable, labels, rows, &totalItems, &out)
   ) {

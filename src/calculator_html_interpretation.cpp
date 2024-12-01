@@ -116,7 +116,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   << "); "
   << answer.commandsSolutionOnly;
   answerCommandsNoEnclosures
-  << answer.commandsBeforeAnswerNoEnclosuresForDEBUGGING
+  << answer.commandsBeforeAnswerNoEnclosuresInternal
   << answer.commandsSolutionOnly;
   interpreter.evaluate(answerCommands.str());
   if (interpreter.parser.syntaxErrors != "") {
@@ -442,7 +442,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   << currentA.commandsBeforeAnswer
   << ");";
   calculatorInputStreamNoEnclosures
-  << currentA.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  << currentA.commandsBeforeAnswerNoEnclosuresInternal;
   calculatorInputStream
   << Calculator::Functions::Names::commandEnclosure
   << "{}("
@@ -1348,7 +1348,8 @@ public:
   // Include comments on the student answer such as
   // simple error checks.
   std::string commandsCommentsBeforeSubmission;
-  std::string commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  // Intended for problem debugging.
+  std::string commandsBeforeAnswerNoEnclosuresInternal;
   std::string errorSyntax;
   std::string verification;
   std::string completedProblem;
@@ -1672,8 +1673,8 @@ bool AnswerChecker::checkAnswerStandard(bool* outputIsCorrect) {
   ProblemData& currentProblemData = this->problem.problemData;
   Answer& answer = currentProblemData.answers.values[this->answerIndex];
   this->checker.commandsBeforeAnswer = answer.commandsBeforeAnswer;
-  this->checker.commandsBeforeAnswerNoEnclosuresForDEBUGGING =
-  answer.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  this->checker.commandsBeforeAnswerNoEnclosuresInternal =
+  answer.commandsBeforeAnswerNoEnclosuresInternal;
   this->checker.answerId = answer.answerId;
   this->checker.answerGiven = answer.currentAnswerClean;
   this->checker.commandsCommentsBeforeSubmission =
@@ -1701,7 +1702,7 @@ void AnswerCheckerNoProblem::prepareForEvaluation() {
   << this->commandsBeforeAnswer
   << ");";
   completedProblemStreamNoEnclosures
-  << this->commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  << this->commandsBeforeAnswerNoEnclosuresInternal;
   completedProblemStream
   << Calculator::Functions::Names::commandEnclosure
   << "{}("
@@ -2312,7 +2313,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
   std::stringstream answerCommandsNoEnclosure;
   answerCommands << currentAnswer.commandsBeforeAnswer;
   answerCommandsNoEnclosure
-  << currentAnswer.commandsBeforeAnswerNoEnclosuresForDEBUGGING;
+  << currentAnswer.commandsBeforeAnswerNoEnclosuresInternal;
   answerCommands
   << Calculator::Functions::Names::commandEnclosure
   << "{}("
@@ -2504,7 +2505,11 @@ JSData WebAPIResponse::getAccountsPageJSON(
   columnsToRetain.fieldsToProjectTo.addOnTop(DatabaseStrings::labelSemester);
   if (
     !Database::get().find(
-      findStudents, &columnsToRetain, students, &commentsOnFailure
+      findStudents,
+      &columnsToRetain,
+      students,
+      nullptr,
+      &commentsOnFailure
     )
   ) {
     output["error"] =
@@ -2517,7 +2522,7 @@ JSData WebAPIResponse::getAccountsPageJSON(
   findAdmins.exactValue = UserCalculator::Roles::administrator;
   if (
     !Database::get().find(
-      findAdmins, &columnsToRetain, admins, &commentsOnFailure
+      findAdmins, &columnsToRetain, admins, nullptr, &commentsOnFailure
     )
   ) {
     output["error"] =
@@ -2807,7 +2812,7 @@ void ProblemData::readExpectedNumberOfAnswersFromDatabase(
   findProblemInfo.collection = DatabaseStrings::tableProblemInformation;
   if (
     !Database::get().find(
-      findProblemInfo, &options, result, &commentsOnFailure
+      findProblemInfo, &options, result, nullptr, &commentsOnFailure
     )
   ) {
     return;

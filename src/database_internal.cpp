@@ -96,6 +96,7 @@ bool DatabaseInternalClient::find(
   const QueryFindOneOf& findOrQueries,
   const QueryResultOptions* options,
   List<JSData>& output,
+  LargeInteger* outputTotalItems,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalClient::find");
@@ -119,6 +120,9 @@ bool DatabaseInternalClient::find(
   }
   if (result.success) {
     result.writeContent(output);
+    if (outputTotalItems != nullptr) {
+      *outputTotalItems = result.totalItems;
+    }
   } else if (commentsOnFailure != nullptr) {
     *commentsOnFailure << result.comments;
   }
@@ -446,6 +450,7 @@ bool DatabaseInternal::runOneConnection() {
 }
 
 void DatabaseInternal::executeGetString(std::string& output) {
+  STACK_TRACE("DatabaseInternal::executeGetString");
   DatabaseInternalResult result;
   this->executeGetResult(result);
   if (result.nextChunk.size() > 0) {
@@ -494,7 +499,9 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
   case DatabaseInternalRequest::Type::findAndUpdate:
     output.success =
     this->server.findAndUpdate(
-      request.queryFindAndUpdate, &commentsOnFailure
+      request.queryFindAndUpdate,
+      &output.totalItems,
+      &commentsOnFailure
     );
     break;
   case DatabaseInternalRequest::Type::find:
@@ -503,6 +510,7 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
       request.queryOneOfExactly,
       &request.options,
       output.content,
+      &output.totalItems,
       &commentsOnFailure
     );
     break;
@@ -630,6 +638,7 @@ DatabaseInternalResult::DatabaseInternalResult() {
   this->success = false;
   this->messageId = - 1;
   this->messageHandle = - 1;
+  this->totalItems = 0;
 }
 
 bool DatabaseInternalResult::fromJSON(
@@ -655,6 +664,11 @@ bool DatabaseInternalResult::fromJSON(
   this->reader[DatabaseStrings::messageSize].integerValue.getElement().
   isIntegerFittingInInt(&this->messageSize);
   this->comments = this->reader[DatabaseStrings::resultComments].stringValue;
+  const JSData& totalItemsJSON =
+  this->reader[DatabaseStrings::labelTotalRows];
+  if (!totalItemsJSON.isLargeInteger(&this->totalItems)) {
+    this->totalItems = 0;
+  }
   return true;
 }
 
@@ -670,6 +684,8 @@ JSData DatabaseInternalResult::toJSON() {
   } else {
     this->reader[DatabaseStrings::resultContent] = this->content;
   }
+  LargeInteger totalItemsLarge(this->totalItems);
+  this->reader[DatabaseStrings::labelTotalRows] = totalItemsLarge;
   return this->reader;
 }
 
@@ -880,6 +896,7 @@ bool DatabaseInternalServer::find(
   const QueryFindOneOf& query,
   const QueryResultOptions* options,
   List<JSData>& output,
+  LargeInteger* outputTotalItems,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::find");
@@ -904,7 +921,7 @@ bool DatabaseInternalServer::find(
     }
     if (
       !DatabaseInternalServer::findObjectIds(
-        queryExact, currentObjectIds, commentsOnFailure
+        queryExact, currentObjectIds, outputTotalItems, commentsOnFailure
       )
     ) {
       return false;
@@ -936,6 +953,7 @@ bool DatabaseInternalServer::find(
 bool DatabaseInternalServer::findObjectIds(
   const QueryFind& query,
   List<std::string>& output,
+  LargeInteger* outputTotalItems,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::findObjectIds");
@@ -955,6 +973,9 @@ bool DatabaseInternalServer::findObjectIds(
     );
     for (int i = 0; i < numberOfItems; i ++) {
       output.addOnTop(index.objectIdToKeyValue.keys[i]);
+    }
+    if (outputTotalItems != nullptr) {
+      *outputTotalItems = index.objectIdToKeyValue.size();
     }
     return true;
   }
@@ -1003,11 +1024,17 @@ bool DatabaseInternalServer::findObjectIds(
 }
 
 bool DatabaseInternalServer::findAndUpdate(
-  QueryFindAndUpdate& input, std::stringstream* commentsOnFailure
+  QueryFindAndUpdate& input,
+  LargeInteger* outputTotalItemsFound,
+  std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("DatabaseInternalServer::findAndUpdate");
   List<std::string> objectIds;
-  if (!this->findObjectIds(input.find, objectIds, commentsOnFailure)) {
+  if (
+    !this->findObjectIds(
+      input.find, objectIds, outputTotalItemsFound, commentsOnFailure
+    )
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "DatabaseInternalServer::findAndUpdate: failed to find object id. ";
@@ -1336,7 +1363,11 @@ void DatabaseInternalServer::ensureStandardCollectionIndices() {
   );
   this->ensureCollection(
     DatabaseStrings::tableEmailInfo,
-    List<std::string>({DatabaseStrings::labelId})
+    List<std::string>({
+        DatabaseStrings::labelId,
+        DatabaseStrings::labelEmail,
+      }
+    )
   );
   this->ensureCollection(
     DatabaseStrings::tableProblemInformation,
@@ -1360,10 +1391,6 @@ void DatabaseInternalServer::ensureStandardCollectionIndices() {
         DatabaseStrings::labelProblemWeightsSchema
       }
     )
-  );
-  this->ensureCollection(
-    DatabaseStrings::tableEmailInfo,
-    List<std::string>({DatabaseStrings::labelEmail,})
   );
 }
 
@@ -1399,10 +1426,6 @@ bool DatabaseInternalServer::ensureCollection(
   return true;
 }
 
-std::string DatabaseInternalServer::collectionsSchemaFileName() const {
-  return this->owner->folder() + "collections.json";
-}
-
 JSData DatabaseInternalServer::toJSONDatabase() {
   JSData result;
   for (DatabaseCollection& collection : this->collections.values) {
@@ -1414,6 +1437,16 @@ JSData DatabaseInternalServer::toJSONDatabase() {
 }
 
 DatabaseInternalIndex& DatabaseCollection::indexOfObjectIds() {
+  STACK_TRACE("DatabaseCollection::indexOfObjectIds");
+  if (!this->indices.contains(DatabaseStrings::labelId)) {
+    global.fatal
+    << "Label id: "
+    << DatabaseStrings::labelId
+    << " not found. "
+    << "The indices are: "
+    << this->indices.toStringHtml()
+    << global.fatal;
+  }
   return this->indices.getValueNoFailNonConst(DatabaseStrings::labelId);
 }
 
@@ -1502,6 +1535,18 @@ bool DatabaseCollection::loadIndicesFromHardDrive(bool clearPreExistingIndices)
   if (!content.parse(contentString, true, &commentsOnFailure)) {
     this->owner->accountInitializationError(commentsOnFailure.str());
     return false;
+  }
+  if (!content.objects.contains(DatabaseStrings::labelId)) {
+    global
+    << Logger::red
+    << "WARNING: the database collection: "
+    << this->name
+    << " does not have an _id index on record!"
+    << Logger::endL
+    << Logger::blue
+    << "I am creating an empty index. "
+    << Logger::endL;
+    content[DatabaseStrings::labelId] = JSData::emptyObject();
   }
   for (int i = 0; i < content.objects.size(); i ++) {
     std::string indexCombinedKey = content.objects.keys[i];
@@ -1594,6 +1639,7 @@ bool DatabaseInternalIndex::fromJSON(
       << "Non-string key values not allowed, skipping. "
       << "Index may need to be rebuilt. "
       << Logger::endL;
+      continue;
     }
     this->objectIdToKeyValue.setKeyValue(key, value);
   }

@@ -105,12 +105,14 @@ public:
   int getKeyIndex(const std::string& key) const;
   void makeEmptyArray();
   static JSData emptyArray();
+  static JSData emptyObject();
   JSData();
   ~JSData();
   JSData(const JSData& other);
   bool isEqualTo(const std::string& other);
   bool isNullOrUndefined();
   bool isIntegerFittingInInt(int* whichInteger);
+  bool isLargeInteger(LargeInteger* whichInteger = nullptr) const;
   bool isTrueRepresentationInJSON();
   bool isListOfStrings(List<std::string>* whichStrings);
   bool isString(std::string* whichString = nullptr) const;

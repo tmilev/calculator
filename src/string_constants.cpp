@@ -216,6 +216,7 @@ std::string DatabaseStrings::anyField = "${any}";
 std::string DatabaseStrings::objectSelector = "${number}";
 std::string DatabaseStrings::labelFields = "fields";
 std::string DatabaseStrings::labelCollection = "collection";
+std::string DatabaseStrings::labelTotalRows = "totalRows";
 std::string DatabaseStrings::labelKey = "key";
 std::string DatabaseStrings::labelValue = "value";
 std::string DatabaseStrings::labelId = "_id";

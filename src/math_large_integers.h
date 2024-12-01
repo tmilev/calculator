@@ -465,6 +465,7 @@ public:
   LargeInteger(uint64_t x) {
     this->assignUInt64(x);
   }
+  LargeInteger(long long int x);
   LargeInteger(const LargeIntegerUnsigned& other): sign(1), value(other) {}
   LargeInteger(): sign(1) {}
 };

@@ -336,7 +336,7 @@ void WebAPIResponse::changePassword(
       DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, newEmail
     );
     bool success =
-    Database::get().find(queryEmailTaken, nullptr, list, nullptr);
+    Database::get().find(queryEmailTaken, nullptr, list, nullptr, nullptr);
     if (!success) {
       result[WebAPI::Result::error] = "Database operation failed. ";
       return;
@@ -1058,7 +1058,11 @@ bool WebAPIResponse::addOneUser(
   List<JSData> allUsers;
   if (
     !Database::get().find(
-      findUserByUsernameOrEmail, nullptr, allUsers, commentsOnFailure
+      findUserByUsernameOrEmail,
+      nullptr,
+      allUsers,
+      nullptr,
+      commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {

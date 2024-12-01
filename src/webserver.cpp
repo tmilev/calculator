@@ -1959,7 +1959,8 @@ std::string WebWorker::getChangePasswordPagePartOne(
     claimedEmail
   );
   List<JSData> allEmails;
-  bool success = Database::get().find(findEmail, nullptr, allEmails, &out);
+  bool success =
+  Database::get().find(findEmail, nullptr, allEmails, nullptr, &out);
   if (!success) {
     out
     << "\n<b style ='color:red'>"

@@ -50,7 +50,9 @@ bool DatabaseUserRoutines::loadUserInformation(
   List<JSData> allUsers;
   QueryFindOneOf queries;
   output.getFindMeQueryByUsernameOrEmail(queries);
-  if (!this->owner->find(queries, nullptr, allUsers, nullptr)) {
+  if (
+    !this->owner->find(queries, nullptr, allUsers, nullptr, nullptr)
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Could not read users from the database. "
@@ -687,7 +689,8 @@ void UserCalculator::exists(
   List<JSData> allUsers;
   QueryFindOneOf query;
   this->getFindMeQueryByUsernameOrEmail(query);
-  databaseIsOK = Database::get().find(query, nullptr, allUsers, comments);
+  databaseIsOK =
+  Database::get().find(query, nullptr, allUsers, nullptr, comments);
   outputExists = allUsers.size == 1;
 }
 
@@ -776,7 +779,9 @@ bool UserCalculator::computeAndStoreActivationStats(
   );
   List<JSData> allEmailStats;
   bool success =
-  Database::get().find(findEmail, nullptr, allEmailStats, commentsOnFailure);
+  Database::get().find(
+    findEmail, nullptr, allEmailStats, nullptr, commentsOnFailure
+  );
   if (!success) {
     return false;
   }
@@ -1159,7 +1164,7 @@ bool DatabaseUserRoutines::loginViaDatabase(
       if (
         userWrapper.actualActivationToken != "activated" &&
         userWrapper.actualActivationToken != "" &&
-        userWrapper.actualActivationToken != "error"
+        userWrapper.actualActivationToken != DatabaseStrings::error
       ) {
         if (
           userWrapper.enteredActivationToken ==
@@ -1169,7 +1174,7 @@ bool DatabaseUserRoutines::loginViaDatabase(
           return true;
         }
       } else if (commentsOnFailure != nullptr) {
-        if (userWrapper.actualActivationToken != "error") {
+        if (userWrapper.actualActivationToken != DatabaseStrings::error) {
           *commentsOnFailure << "Account already activated. ";
         } else {
           *commentsOnFailure << "An error during activation ocurred. ";

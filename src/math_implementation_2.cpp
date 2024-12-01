@@ -943,6 +943,10 @@ const {
 }
 
 void LargeIntegerUnsigned::assignUInt64(uint64_t x) {
+  if (x == 0) {
+    this->makeZero();
+    return;
+  }
   this->digits.setSize(0);
   while (x > 0) {
     uint64_t nextDigit = x % LargeIntegerUnsigned::carryOverBound;
@@ -1596,6 +1600,10 @@ void LargeInteger::toString(std::string& output) const {
 void LargeInteger::assignUInt64(uint64_t x) {
   this->sign = 1;
   this->value.assignUInt64(x);
+}
+
+LargeInteger::LargeInteger(long long x) {
+  this->assignInt64(static_cast<int64_t>(x));
 }
 
 void LargeInteger::assignInt64(int64_t x) {

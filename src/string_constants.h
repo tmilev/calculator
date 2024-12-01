@@ -330,6 +330,7 @@ public:
   static std::string labelCollection;
   static std::string labelKey;
   static std::string labelValue;
+  static std::string labelTotalRows;
   static std::string objectSelector;
   static std::string labelId;
   // Deleted information

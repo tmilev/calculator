@@ -301,6 +301,16 @@ JSData& JSData::operator[](const std::string& key) {
   return this->objects.getValueCreateEmpty(key);
 }
 
+bool JSData::isLargeInteger(LargeInteger* whichInteger) const {
+  if (this->elementType != JSData::Type::tokenLargeInteger) {
+    return false;
+  }
+  if (whichInteger != nullptr) {
+    *whichInteger = this->integerValue.getElementConst();
+  }
+  return true;
+}
+
 bool JSData::isIntegerFittingInInt(int* whichInteger) {
   if (this->elementType == JSData::Type::tokenLargeInteger) {
     return this->integerValue.getElement().isIntegerFittingInInt(whichInteger);
@@ -344,6 +354,12 @@ bool JSData::isTrueRepresentationInJSON() {
 }
 
 JSData JSData::emptyArray() {
+  JSData result;
+  result.elementType = JSData::tokenObject;
+  return result;
+}
+
+JSData JSData::emptyObject() {
   JSData result;
   result.makeEmptyArray();
   return result;

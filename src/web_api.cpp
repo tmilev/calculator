@@ -353,6 +353,7 @@ void WebAPIResponse::changePassword(
   }
   if (newPassword != reenteredPassword) {
     result[WebAPI::Result::error] = "Passwords don't match. ";
+    result[WebAPI::Result::success] = false;
     return;
   }
   std::stringstream commentsOnFailure;
@@ -366,6 +367,7 @@ void WebAPIResponse::changePassword(
     )
   ) {
     result[WebAPI::Result::error] = commentsOnFailure.str();
+    result[WebAPI::Result::success] = false;
     return;
   }
   QueryFind findQuery(
@@ -385,10 +387,11 @@ void WebAPIResponse::changePassword(
   ) {
     result[WebAPI::Result::error] =
     "Failed to set activationToken: " + commentsOnFailure.str();
+    result[WebAPI::Result::success] = false;
     return;
   }
   std::stringstream out;
-  out << "Password change successful.";
+  out << "<b style='color:green'>Password change successful.</b>";
   if (global.getWebInput("doReload") != "false") {
     out
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"
@@ -398,10 +401,11 @@ void WebAPIResponse::changePassword(
     << HtmlRoutines::convertStringToURLString(
       global.userDefault.username, false
     )
-    << "&activationToken = &authenticationToken = &"
+    << "&activationToken=&authenticationToken=&"
     << "'\" />";
   }
   result[WebAPI::Result::resultHtml] = out.str();
+  result[WebAPI::Result::success] = true;
 }
 
 JSData WebAPIResponse::setEmail(const std::string& input) {
@@ -447,10 +451,6 @@ bool WebAPIResponse::doSetEmail(
   (void) commentsOnFailure;
   (void) commentsGeneralNonSensitive;
   (void) commentsGeneralSensitive;
-  if (commentsGeneralNonSensitive != nullptr) {
-    *commentsGeneralNonSensitive
-    << "doSetEmail: project compiled without database support. ";
-  }
   EmailRoutines email;
   email.toEmail = inputOutputUser.email;
   if (!email.isOKEmail(email.toEmail, commentsOnFailure)) {

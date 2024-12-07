@@ -23,6 +23,7 @@ std::string WebAPI::Result::outputString = "outputString";
 std::string WebAPI::Result::syntaxErrors = "syntaxErrors";
 std::string WebAPI::Result::syntaxErrorsExtra = "syntaxErrorsExtra";
 std::string WebAPI::Result::resultLabel = "result";
+std::string WebAPI::Result::success = "success";
 std::string WebAPI::Result::badInput = "badInput";
 std::string WebAPI::Result::comments = "comments";
 std::string WebAPI::Result::performance = "performance";

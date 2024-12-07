@@ -20,47 +20,60 @@ class AccountPage {
       return;
     }
     buttonChangePasswordFromAccountPage.addEventListener('click', () => {
-      submitChangePassRequest();
+      this.submitChangePassRequest();
     });
     document.getElementById(
       ids.domElements.pages.account.buttonChangeEmail
     ).addEventListener('click', () => {
-      submitChangePassRequest();
+      this.submitChangePassRequest();
     });
     this.mainPage = mainPage;
   }
-}
 
-function submitChangePassRequestCallback(result) {
-  let spanVerification = document.getElementById("spanVerification");
-  miscellaneous.writeHTML(
-    spanVerification,
-    miscellaneous.jsonParseGetHtmlStandard(result),
-  );
-  document.getElementById("inputPassword").value = document.getElementById("inputNewPasswordInAccount").value;
-  document.getElementById("inputOldPasswordInAccount").value = "";
-  document.getElementById("inputNewPasswordInAccount").value = "";
-  document.getElementById("inputReenteredPasswordInAccount").value = "";
-  login.authenticator.loginCalculator();
-}
+  submitChangePassRequestCallback(result) {
+    let spanVerification = document.getElementById("spanVerification");
+    miscellaneous.writeHTML(
+      spanVerification,
+      miscellaneous.jsonParseGetHtmlStandard(result),
+    );
+    document.getElementById("inputPassword").value = document.getElementById(
+      "inputNewPasswordInAccount"
+    ).value;
+    document.getElementById("inputOldPasswordInAccount").value = "";
+    document.getElementById("inputNewPasswordInAccount").value = "";
+    document.getElementById("inputReenteredPasswordInAccount").value = "";
+    login.authenticator.loginCalculator();
+  }
 
-function submitChangePassRequest() {
-  let inputOldPassword = document.getElementById("inputOldPasswordInAccount");
-  let inputNewPassword = document.getElementById("inputNewPasswordInAccount");
-  let inputReenteredPassword = document.getElementById("inputReenteredPasswordInAccount");
-  let inputEmail = document.getElementById("inputEmail");
-  let url = "";
-  url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.changePassword}&`;
-  url += `${pathnames.urlFields.password}=${encodeURIComponent(inputOldPassword.value)}&`;
-  url += `${pathnames.urlFields.newPassword}=${encodeURIComponent(inputNewPassword.value)}&`;
-  url += `${pathnames.urlFields.reenteredPassword}=${encodeURIComponent(inputReenteredPassword.value)}&`;
-  url += `${pathnames.urlFields.email}=${encodeURIComponent(inputEmail.value)}&`;
-  url += "doReload=false&"
-  submitRequests.submitGET({
-    url: url,
-    callback: submitChangePassRequestCallback,
-    progress: ids.domElements.spanProgressReportGeneral
-  });
+  submitChangePassRequest() {
+    let inputOldPassword = document.getElementById("inputOldPasswordInAccount");
+    let inputNewPassword = document.getElementById("inputNewPasswordInAccount");
+    let inputReenteredPassword = document.getElementById("inputReenteredPasswordInAccount");
+    let inputEmail = document.getElementById("inputEmail");
+    const urlFields = pathnames.urlFields;
+    const calculatorAPI = pathnames.urls.calculatorAPI;
+    let url = "";
+    const encodedOldPassword = encodeURIComponent(inputOldPassword.value);
+    const encodedNewPassword = encodeURIComponent(inputNewPassword.value);
+    const encodedReenteredPassword = encodeURIComponent(
+      inputReenteredPassword.value
+    );
+    const encodedEmail = encodeURIComponent(inputEmail.value);
+    url += `${calculatorAPI}?`;
+    url += `${urlFields.request}=${urlFields.changePassword}&`;
+    url += `${urlFields.password}=${encodedOldPassword}&`;
+    url += `${urlFields.newPassword}=${encodedNewPassword}&`;
+    url += `${urlFields.reenteredPassword}=${encodedReenteredPassword}&`;
+    url += `${urlFields.email}=${encodedEmail}&`;
+    url += "doReload=false&"
+    submitRequests.submitGET({
+      url: url,
+      callback: (result) => {
+        this.submitChangePassRequestCallback(result);
+      },
+      progress: ids.domElements.spanProgressReportGeneral
+    });
+  }
 }
 
 function updateAccountPage() {
@@ -116,5 +129,4 @@ let accountPage = new AccountPage();
 module.exports = {
   accountPage,
   updateAccountPage,
-  submitChangePassRequest
 };

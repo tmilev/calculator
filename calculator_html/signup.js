@@ -113,26 +113,29 @@ class SignUp {
     } else {
       token = this.grecaptcha.getResponse(this.recaptchaIdForSignUp);
     }
+    let signUpResultElement = document.getElementById(
+      ids.domElements.pages.signUp.signUpResult
+    );
+    signUpResultElement.textContent = "";
     let desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
     let desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
     let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.signUp}&desiredUsername=${desiredUsernameEncoded}&`;
     url += `email=${desiredEmailEncoded}&`;
     if (token === '' || token === null) {
       if (!debugLogin) {
-        let element = document.getElementById(
-          ids.domElements.pages.signUp.signUpResult
-        );
-        miscellaneous.writeHTML(
-          element,
-          "<b style ='color:red'>Please don't forget to solve the captcha. </b>",
-        );
+        const errorElement = document.createElement("b");
+        errorElement.textContent = "Please don't forget to solve the captcha.";
+        errorElement.style.color = "red";
+        signUpResultElement.appendChild(errorElement);
+        errorElement.style.backgroundColor = "orange";
+        errorElement.style.transition = "all 1s";
+        setTimeout(() => {
+          errorElement.style.backgroundColor = "";
+        }, 0);
         return false;
       }
-      let element = document.getElementById(
-        ids.domElements.pages.signUp.signUpResult
-      );
       miscellaneous.writeHTML(
-        element,
+        signUpResultElement,
         "<b style='color:red'>Debug login: recaptcha ignored.</b>",
       );
     }

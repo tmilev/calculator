@@ -104,6 +104,7 @@ public:
     static std::string syntaxErrorsExtra;
     static std::string resultLabel;
     static std::string badInput;
+    static std::string success;
     static std::string comments;
     static std::string performance;
     static std::string performancePerHandler;

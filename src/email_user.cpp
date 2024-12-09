@@ -103,7 +103,7 @@ bool EmailRoutines::sendEmailWithMailGun(
       << commandToExecute.str()
       << "<br>";
     }
-    return true;
+     return true;
   }
   std::string commandResult =
   global.externalCommandReturnOutput(commandToExecute.str());
@@ -120,7 +120,7 @@ bool EmailRoutines::sendEmailWithMailGun(
     << EmailRoutines::sendEmailFrom
     << ". This is an error in our web site's email setup. "
     << "If you can, please take a screenshot and file us a bug report! "
-    << "Mailgun api key: "
+    << "Mailgun api key: ..."
     << apiKey
     << ". ";
   }

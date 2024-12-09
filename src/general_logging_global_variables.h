@@ -337,8 +337,10 @@ public:
   DatabaseType databaseType;
   // A flag that triggers debug messages during login.
   // This will reveal secrets to end users and cannot run in production.
-  // The flag can only be used with fallback database.
-  // It will automatically be turned off if using the regular database.
+  // It will automatically switch the database name to 'debug'
+  // and will run off the production database.
+  // However, this mode may leak internal certificates/api keys of
+  // the website.
   bool flagDebugLogin;
   bool hasDisabledDatabaseEveryoneIsAdmin() {
     return this->databaseType == DatabaseType::noDatabaseEveryoneIsAdmin;

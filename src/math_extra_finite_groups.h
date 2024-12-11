@@ -461,9 +461,7 @@ struct SimpleReflection {
   }
 };
 
-class
-ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-{
+class ElementSubgroupWeylGroupAutomorphisms {
 public:
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms*
   owner;
@@ -472,9 +470,7 @@ public:
   void multiplyOnTheRightBySimpleRootInner(int simpleRootIndex);
   void multiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism);
   static unsigned int hashFunction(
-    const
-    ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-    & input
+    const ElementSubgroupWeylGroupAutomorphisms& input
   );
   unsigned int hashFunction() const;
   std::string toString(FormatExpressions* format = nullptr) const;
@@ -548,7 +544,7 @@ public:
     return result;
   }
   void getCycleStructure(
-    VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult
+    VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMultiplicity
   ) const;
   Vector<Rational> operator*(const Vector<Rational>& v) const;
   ElementWeylGroup inverse() const;
@@ -2464,9 +2460,7 @@ public:
   bool truncated;
   bool flagDeallocated;
   WeylGroupData* ambientWeyl;
-  HashedList<
-    ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-  > allElements;
+  HashedList<ElementSubgroupWeylGroupAutomorphisms> allElements;
   // WeylGroupData ElementS;
   List<ElementWeylGroup> representativesQuotientAmbientOrder;
   Vectors<Rational> simpleRootsInner;
@@ -2560,9 +2554,7 @@ public:
   );
   void findQuotientRepresentatives(int upperLimit);
   void getMatrixOfElement(
-    const
-    ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-    & input,
+    const ElementSubgroupWeylGroupAutomorphisms& input,
     Matrix<Rational>& outputMatrix
   ) const;
   template <class Coefficient>
@@ -2590,17 +2582,13 @@ public:
   ) const;
   template <class Coefficient>
   void actByElement(
-    const
-    ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-    & element,
+    const ElementSubgroupWeylGroupAutomorphisms& element,
     const Vector<Coefficient>& input,
     Vector<Coefficient>& output
   ) const;
   template <class Coefficient>
   void actByElement(
-    const
-    ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-    & element,
+    const ElementSubgroupWeylGroupAutomorphisms& element,
     const Vectors<Coefficient>& input,
     Vectors<Coefficient>& output
   ) const;

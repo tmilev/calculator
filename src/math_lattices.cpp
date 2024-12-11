@@ -1366,7 +1366,7 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& substitution) {
   if (substitution.numberOfRows != this->getDimension()) {
     return false;
   }
-  int startingDim = this->getDimension();
+  int startingDimension = this->getDimension();
   Matrix<Rational> matrix;
   Matrix<Rational> oldBasisTransformed;
   Matrix<Rational> matRelationBetweenStartingVariables;
@@ -1381,10 +1381,10 @@ bool Lattice::substitutionHomogeneous(const Matrix<Rational>& substitution) {
   int numberOfNonZeroRows = nonPivotPoints.numberOfElements;
   int numberOfZeroRows = matrix.numberOfRows - numberOfNonZeroRows;
   matRelationBetweenStartingVariables.initialize(
-    numberOfZeroRows, startingDim
+    numberOfZeroRows, startingDimension
   );
   for (int i = 0; i < numberOfZeroRows; i ++) {
-    for (int j = 0; j < startingDim; j ++) {
+    for (int j = 0; j < startingDimension; j ++) {
       matRelationBetweenStartingVariables.elements[i][j] =
       oldBasisTransformed.elements[i + numberOfNonZeroRows][j];
     }

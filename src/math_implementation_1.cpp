@@ -1157,10 +1157,7 @@ getGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output) {
     this->simpleRootsInner[i].getIndexFirstNonZeroCoordinate();
   }
   for (int i = 0; i < this->allElements.size; i ++) {
-    const
-    ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-    & other =
-    this->allElements[i];
+    const ElementSubgroupWeylGroupAutomorphisms& other = this->allElements[i];
     currentOutput.generatorsLastAppliedFirst.setSize(
       other.generatorsLastAppliedFirst.size
     );

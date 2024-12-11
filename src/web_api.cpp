@@ -1189,11 +1189,11 @@ JSData WebAPIResponse::getSignUpRequestResult() {
   UserCalculator user;
   user.username =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput("desiredUsername"), false
+    global.getWebInput(WebAPI::Request::desiredUsername), false
   );
   user.email =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput("email"), false
+    global.getWebInput(DatabaseStrings::labelEmail), false
   );
   std::stringstream outputStream;
   if (
@@ -1225,7 +1225,7 @@ JSData WebAPIResponse::getSignUpRequestResult() {
     result[WebAPI::Result::error] = errorStream.str();
     result[WebAPI::Result::comments] = generalCommentsStream.str();
     return result;
-  } else if (!userExists) {
+  } else if (userExists) {
     errorStream
     << "Either the username ("
     << user.username
@@ -1257,7 +1257,6 @@ JSData WebAPIResponse::getSignUpRequestResult() {
   WebAPIResponse::doSetEmail(
     user, &errorStream, &generalCommentsStream, adminOutputStream
   );
-  result[WebAPI::Result::error] = errorStream.str();
   result[WebAPI::Result::comments] = generalCommentsStream.str();
   result[WebAPI::Result::resultHtml] = outputStream.str();
   return result;

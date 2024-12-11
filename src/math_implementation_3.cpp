@@ -7366,42 +7366,34 @@ const {
   return out.str();
 }
 
-void
-ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-::multiplyOnTheRightBySimpleRootInner(int simpleRootIndex) {
+void ElementSubgroupWeylGroupAutomorphisms::multiplyOnTheRightBySimpleRootInner
+(int simpleRootIndex) {
   SimpleReflectionOrOuterAutomorphism generator;
   generator.index = simpleRootIndex;
   this->generatorsLastAppliedFirst.addOnTop(generator);
 }
 
-void
-ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-::multiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism) {
+void ElementSubgroupWeylGroupAutomorphisms::
+multiplyOnTheRightByOuterAutomorphism(int indexOuterAutomorphism) {
   SimpleReflectionOrOuterAutomorphism generator;
   generator.index = indexOuterAutomorphism;
   generator.flagIsOuter = true;
   this->generatorsLastAppliedFirst.addOnTop(generator);
 }
 
-unsigned int
-ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-::hashFunction(
-  const
-  ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-  & input
+unsigned int ElementSubgroupWeylGroupAutomorphisms::hashFunction(
+  const ElementSubgroupWeylGroupAutomorphisms& input
 ) {
   return input.hashFunction();
 }
 
-unsigned int
-ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-::hashFunction() const {
+unsigned int ElementSubgroupWeylGroupAutomorphisms::hashFunction() const {
   return this->generatorsLastAppliedFirst.hashFunction();
 }
 
-std::string
-ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-::toString(FormatExpressions* format) const {
+std::string ElementSubgroupWeylGroupAutomorphisms::toString(
+  FormatExpressions* format
+) const {
   STACK_TRACE(
     "ElementSubgroupWeylGroupAutomorphisms"
     "GeneratedByRootReflectionsAndAutomorphisms::toString"
@@ -7609,11 +7601,11 @@ const {
 }
 
 void ElementWeylGroup::getCycleStructure(
-  VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult
+  VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMultiplicity
 ) const {
   STACK_TRACE("ElementWeylGroup::getCycleStructure");
   this->checkInitialization();
-  outputIndexIsCycleSizeCoordinateIsCycleMult.makeZero();
+  outputIndexIsCycleSizeCoordinateIsCycleMultiplicity.makeZero();
   List<bool> explored;
   HashedList<Vector<Rational> >& rootSystem = this->owner->rootSystem;
   explored.initializeFillInObject(rootSystem.size, false);
@@ -7629,7 +7621,7 @@ void ElementWeylGroup::getCycleStructure(
         currentCycleSize ++;
         explored[rootSystem.getIndex(currentRoot)] = true;
       }
-      outputIndexIsCycleSizeCoordinateIsCycleMult.addMonomial(
+      outputIndexIsCycleSizeCoordinateIsCycleMultiplicity.addMonomial(
         MonomialVector(currentCycleSize - 1), 1
       );
     }
@@ -7643,9 +7635,11 @@ void ElementWeylGroup::getCharacteristicPolynomialStandardRepresentation(
     "ElementWeylGroup::getCharacteristicPolynomialStandardRepresentation"
   );
   this->checkInitialization();
-  Matrix<Rational> standardRepMat;
-  this->owner->getMatrixStandardRepresentation(*this, standardRepMat);
-  output.assignCharacteristicPolynomial(standardRepMat);
+  Matrix<Rational> standardRepresentationMatrix;
+  this->owner->getMatrixStandardRepresentation(
+    *this, standardRepresentationMatrix
+  );
+  output.assignCharacteristicPolynomial(standardRepresentationMatrix);
 }
 
 ElementWeylGroup ElementWeylGroup::inverse() const {
@@ -8186,7 +8180,7 @@ void WeylGroupData::computeRootsOfBorel(Vectors<Rational>& output) {
 }
 
 std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
-  STACK_TRACE("WeylGroup::toStringCppCharTable");
+  STACK_TRACE("WeylGroupData::toStringCppCharTable");
   (void) format;
   // portable way to avoid non-used parameter warning.
   if (!this->flagCharTableIsComputed) {
@@ -8248,7 +8242,7 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
 std::string WeylGroupData::toStringCppConjugacyClasses(
   FormatExpressions* format
 ) {
-  STACK_TRACE("WeylGroup::toStringCppConjugacyClasses");
+  STACK_TRACE("WeylGroupData::toStringCppConjugacyClasses");
   (void) format;
   // portable way to avoid non-used parameter warning.
   if (!this->group.flagCCRepresentativesComputed) {
@@ -8330,7 +8324,7 @@ std::string WeylGroupData::toStringCppConjugacyClasses(
 std::string WeylGroupData::toStringRootsAndRootReflections(
   FormatExpressions* format
 ) {
-  STACK_TRACE("WeylGroup::toStringRootsAndRootReflections");
+  STACK_TRACE("WeylGroupData::toStringRootsAndRootReflections");
   (void) format;
   // portable way to avoid non-used parameter warning.
   std::stringstream out, outLatex;
@@ -8903,7 +8897,7 @@ void WeylGroupData::drawRootSystem(
   bool labelDynkinDiagramVertices,
   Vectors<Rational>* predefinedProjectionPlane
 ) {
-  STACK_TRACE("WeylGroup::drawRootSystem");
+  STACK_TRACE("WeylGroupData::drawRootSystem");
   DrawingVariables& output = outputDV;
   if (wipeCanvas) {
     output.initialize();
@@ -9337,9 +9331,7 @@ toStringBruhatGraph() {
   int GraphWidth = 1;
   int oldLayerElementLength = - 1;
   for (int i = 0; i < this->allElements.size; i ++) {
-    const
-    ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-    & currentElement =
+    const ElementSubgroupWeylGroupAutomorphisms& currentElement =
     this->allElements[i];
     if (
       currentElement.generatorsLastAppliedFirst.size != oldLayerElementLength
@@ -9370,9 +9362,7 @@ toStringBruhatGraph() {
         if (index == - 1) {
           global.fatal << "Negative index not allowed. " << global.fatal;
         }
-        const
-        ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-        & currentElement =
+        const ElementSubgroupWeylGroupAutomorphisms& currentElement =
         this->allElements[index];
         if (
           currentElement.generatorsLastAppliedFirst.size >
@@ -9466,9 +9456,7 @@ toString(std::string& output, bool displayElements) {
     << "written with minimal # of generators:<br>";
     body << "\\begin{array}{l}";
     for (int i = 0; i < this->allElements.size; i ++) {
-      const
-      ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-      & currentElement =
+      const ElementSubgroupWeylGroupAutomorphisms& currentElement =
       this->allElements[i];
       body << currentElement.toString(nullptr) << "\\\\";
     }
@@ -14078,6 +14066,7 @@ void ConeCollection::replaceConeAdjacentToWall(
       << ". New cones: "
       << newCones
       << global.fatal;
+      return;
     }
     this->replaceConeInNeighbor(
       *neighbor, - wall.normal, toBeReplaced.id, newCones

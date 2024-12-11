@@ -1602,10 +1602,6 @@ void LargeInteger::assignUInt64(uint64_t x) {
   this->value.assignUInt64(x);
 }
 
-LargeInteger::LargeInteger(long long x) {
-  this->assignInt64(static_cast<int64_t>(x));
-}
-
 void LargeInteger::assignInt64(int64_t x) {
   this->sign = 1;
   if (x < 0) {

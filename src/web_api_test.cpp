@@ -14,6 +14,7 @@ bool WebAPIResponse::Test::all() {
   WebAPIResponse::Test::solveJSON();
   WebAPIResponse::Test::compareExpressions();
   WebAPIResponse::Test::forgotLogin();
+  WebAPIResponse::Test::signUp();
   return true;
 }
 
@@ -231,13 +232,13 @@ bool WebAPIResponse::Test::forgotLogin() {
     }
   );
   for (const std::string& expected : expectedStrings) {
-    if (!StringRoutines::stringContains(globalComments, expected)) global.fatal
+    if (!StringRoutines::stringContains(globalComments, expected)) {global.fatal
     << "Change password: expected comment: ["
     << expected
     << "] not found in: "
     << globalComments
     << ". "
-    << global.fatal;
+          << global.fatal;}
   }
   UserCalculator userLoader;
   userLoader.email = "test.admin.user@calculator-algebra.org";
@@ -257,6 +258,74 @@ bool WebAPIResponse::Test::forgotLogin() {
     << ". "
     << global.fatal;
   }
+  return true;
+}
+
+bool WebAPIResponse::Test::signUp() {
+  STACK_TRACE("WebAPIResponse::Test::signUp");
+  Database::Test tester(DatabaseType::internal);
+  Database::Test::createAdminAccount(true);
+  DatabaseUserRoutines blankUser;
+  global.userDefault.reset();
+  StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
+  global.flagDebugLogin = true;
+  std::stringstream unused;
+  StateMaintainer<
+    MapList<
+      std::string,
+      std::string,
+      HashFunctions::hashFunction<std::string>
+    >
+  > maintainWebArgument(global.webArguments);
+  global.webArguments[WebAPI::Request::desiredUsername] = "someNewUser";
+  global.webArguments[DatabaseStrings::labelEmail] =
+  "some.email@calculator-algebra.org";
+  global.webArguments[WebAPI::Request::doSendActivationEmail] = "false";
+  global.comments.resetComments();
+  WebAPIResponse api;
+  JSData signUpResult = api.getSignUpRequestResult();
+  if (signUpResult.hasKey(WebAPI::Result::error)) {
+    global.fatal
+    << "Failed to sign up: "
+    << signUpResult.toStringPretty()
+    << global.fatal;
+  }
+  std::string globalComments = global.comments.getCurrentReset();
+  List<std::string> expectedStrings = List<std::string>({
+      std::string("noreply@mail2.noreply.calculator.algebra.org"),
+      std::string("dummy_mailgun_key")
+    }
+  );
+  for (const std::string& expected : expectedStrings) {
+    if (!StringRoutines::stringContains(globalComments, expected)) {
+      global.fatal
+      << "Change password: expected comment: ["
+      << expected
+      << "] not found in: "
+      << globalComments
+      << ". "
+      << global.fatal;
+    }
+  }
+  UserCalculator userLoader;
+  userLoader.email = "some.email@calculator-algebra.org";
+  std::stringstream comments;
+  if (!userLoader.loadFromDatabase(&comments, &comments)) {
+    global.fatal << "Failed to load user from database!" << global.fatal;
+  }
+  unsigned expectedSize = 24;
+  if (userLoader.actualActivationToken.size() != expectedSize) {
+    global.fatal
+    << "Activation token: "
+    << userLoader.actualActivationToken
+    << " has "
+    << userLoader.actualActivationToken.size()
+    << " bytes instead of the expected "
+    << expectedSize
+    << ". "
+    << global.fatal;
+  }
+  // TODO(tmilev): test that the signUp activation link works!
   return true;
 }
 

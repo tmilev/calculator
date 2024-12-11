@@ -202,6 +202,7 @@ public:
     static bool compareExpressions();
     static bool addUsersFromData();
     static bool forgotLogin();
+    static bool signUp();
   };
 };
 

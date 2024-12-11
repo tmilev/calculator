@@ -150,7 +150,7 @@ void Polynomial<Rational>::getValuesLagrangeInterpolands(
 bool PolynomialFactorizationKronecker::oneFactor(
   std::stringstream* comments, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("Polynomial::oneFactor");
+  STACK_TRACE("PolynomialFactorizationKronecker::oneFactor");
   (void) comments;
   this->current = this->output->current;
   if (this->current.minimalNumberOfVariables() > 1) {

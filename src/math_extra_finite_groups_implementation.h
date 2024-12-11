@@ -1983,9 +1983,7 @@ actByNonSimpleElement(
 template <class Coefficient>
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 actByElement(
-  const
-  ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-  & element,
+  const ElementSubgroupWeylGroupAutomorphisms& element,
   const Vectors<Coefficient>& input,
   Vectors<Coefficient>& output
 ) const {
@@ -1998,9 +1996,7 @@ actByElement(
 template <class Coefficient>
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 actByElement(
-  const
-  ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-  & element,
+  const ElementSubgroupWeylGroupAutomorphisms& element,
   const Vector<Coefficient>& input,
   Vector<Coefficient>& output
 ) const {

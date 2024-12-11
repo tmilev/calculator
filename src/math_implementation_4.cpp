@@ -2870,7 +2870,7 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
   );
   matrix.makeZero();
   for (int j = 0; j < dimSmallerAlgebra; j ++) {
-    matrix.elements[j][j] = 1;
+    matrix.elements[j][j] = Rational(1);
     for (int i = 0; i < dimLargerAlgebra; i ++) {
       matrix.elements[i][j] -= matrixOperator.elements[j][i];
     }

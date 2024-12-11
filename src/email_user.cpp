@@ -103,7 +103,7 @@ bool EmailRoutines::sendEmailWithMailGun(
       << commandToExecute.str()
       << "<br>";
     }
-     return true;
+    return true;
   }
   std::string commandResult =
   global.externalCommandReturnOutput(commandToExecute.str());

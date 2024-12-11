@@ -245,7 +245,7 @@ std::string SemisimpleLieAlgebra::toHTML(
   bool flagWriteLatexPlots,
   const std::string& extraDynkinDiagramPlot
 ) {
-  STACK_TRACE("SemisimpleLieAlgebra::toHTMLCalculator");
+  STACK_TRACE("SemisimpleLieAlgebra::toHTML");
   std::stringstream out;
   FormatExpressions format;
   FormatExpressions latexFormat;
@@ -1953,10 +1953,10 @@ void SemisimpleLieAlgebra::orderNilradicalFirstTotalWeightAscending(
 }
 
 void SemisimpleLieAlgebra::orderNilradicalNilWeightAscending(
-  const Selection& parSelZeroMeansLeviPart
+  const Selection& parabolicSelectionZeroMeansLeviPart
 ) {
   Vector<Rational> currentVector;
-  currentVector = parSelZeroMeansLeviPart;
+  currentVector = parabolicSelectionZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     Rational translationCoeff =
     this->getWeightOfGenerator(i).scalarEuclidean(currentVector) *
@@ -1969,10 +1969,10 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightAscending(
 }
 
 void SemisimpleLieAlgebra::orderNilradicalNilWeightDescending(
-  const Selection& parSelZeroMeansLeviPart
+  const Selection& parabolicSelectionZeroMeansLeviPart
 ) {
   Vector<Rational> currentVector;
-  currentVector = parSelZeroMeansLeviPart;
+  currentVector = parabolicSelectionZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     Rational translationCoefficient =
     this->getWeightOfGenerator(i).scalarEuclidean(currentVector) *

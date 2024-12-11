@@ -435,10 +435,10 @@ public:
     const Selection& parabolicSelectionZeroMeansLeviPart
   );
   void orderNilradicalNilWeightAscending(
-    const Selection& parSelZeroMeansLeviPart
+    const Selection& parabolicSelectionZeroMeansLeviPart
   );
   void orderNilradicalNilWeightDescending(
-    const Selection& parSelZeroMeansLeviPart
+    const Selection& parabolicSelectionZeroMeansLeviPart
   );
   void orderStandardAscending();
   void orderStandardDescending();

@@ -48,9 +48,7 @@ getRho() {
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 getMatrixOfElement(
-  const
-  ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-  & input,
+  const ElementSubgroupWeylGroupAutomorphisms& input,
   Matrix<Rational>& outputMatrix
 ) const {
   Vectors<Rational> startBasis;
@@ -94,8 +92,7 @@ computeSubGroupFromGeneratingReflections(
     this->simpleRootsInner, this->ambientWeyl->rootSystem
   );
   this->computeRootSubsystem();
-  ElementSubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
-  currentElement;
+  ElementSubgroupWeylGroupAutomorphisms currentElement;
   currentElement.owner = this;
   Vector<Rational> vectorGeneratingFaithfulOrbit;
   vectorGeneratingFaithfulOrbit = this->ambientWeyl->rho;
@@ -752,12 +749,12 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
   for (int i = 0; i < this->partition.size; i ++) {
     this->dimension += this->partition[i];
   }
-  hElement.initialize(this->dimension, this->dimension);
-  hElement.makeZero();
-  eElement.initialize(this->dimension, this->dimension);
-  eElement.makeZero();
-  fElement.initialize(this->dimension, this->dimension);
-  fElement.makeZero();
+  this->hElement.initialize(this->dimension, this->dimension);
+  this->hElement.makeZero();
+  this->eElement.initialize(this->dimension, this->dimension);
+  this->eElement.makeZero();
+  this->fElement.initialize(this->dimension, this->dimension);
+  this->fElement.makeZero();
   this->projectors.setSize(this->partition.size);
   int currentOffset = 0;
   std::string beginMath, endMath, newLine;
@@ -774,13 +771,14 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
     this->projectors[i].initialize(this->dimension, this->dimension);
     this->projectors[i].makeZero();
     for (int j = 0; j < this->partition[i]; j ++) {
-      hElement.elements[currentOffset + j][currentOffset + j] =
+      this->hElement.elements[currentOffset + j][currentOffset + j] =
       this->partition[i] - 1 - 2 * j;
       this->projectors[i].elements[currentOffset + j][currentOffset + j] = 1;
       if (j != this->partition[i] - 1) {
-        fElement.elements[currentOffset + j + 1][currentOffset + j] = 1;
-        eElement.elements[currentOffset + j][currentOffset + j + 1] = (j + 1) *
-        (this->partition[i] - j - 1);
+        this->fElement.elements[currentOffset + j + 1][currentOffset + j] = 1;
+        this->eElement.elements[currentOffset + j][currentOffset + j + 1] = (
+          j + 1
+        ) *(this->partition[i] - j - 1);
       }
     }
     currentOffset += this->partition[i];
@@ -900,7 +898,9 @@ std::string SlTwoInSlN::initPairingTable(bool useHtml) {
 std::string SlTwoInSlN::pairTwoIndices(
   List<int>& output, int leftIndex, int rightIndex, bool useHtml
 ) {
-  std::string beginMath, endMath, newLine;
+  std::string beginMath;
+  std::string endMath;
+  std::string newLine;
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;

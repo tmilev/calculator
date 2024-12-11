@@ -30,10 +30,19 @@ class SignUp {
     this.buttonsInitialized = false;
     /** @type {HTMLButtonElement|null} */
     this.submitSignUpButton = null;
+    /** @type {HTMLInputElement} */
+    this.doSendEmailCheckbox = document.getElementById(
+      ids.domElements.pages.signUp.inputSignUpDoSendEmail
+    );
   }
 
   signUp() {
     this.initialize();
+    if (globalUser.debugLoginIsOn()) {
+      document.getElementById(
+        ids.domElements.pages.signUp.inputSignUpDoSendEmailContainer
+      ).style.display = '';
+    }
     this.writeDebugLoginStatus("");
     if (this.grecaptcha !== null && this.grecaptcha !== undefined) {
       if (this.recaptchaIdForSignUp === null) {
@@ -110,17 +119,27 @@ class SignUp {
       if (!debugLogin) {
         return false;
       }
-    } else {
+    } else if (this.recaptchaIdForSignUp !== null) {
       token = this.grecaptcha.getResponse(this.recaptchaIdForSignUp);
     }
     let signUpResultElement = document.getElementById(
       ids.domElements.pages.signUp.signUpResult
     );
     signUpResultElement.textContent = "";
-    let desiredUsernameEncoded = encodeURIComponent(document.getElementById('desiredUsername').value);
-    let desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForSignUp').value);
-    let url = `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.signUp}&desiredUsername=${desiredUsernameEncoded}&`;
+    let desiredUsernameEncoded = encodeURIComponent(
+      document.getElementById('desiredUsername').value
+    );
+    let desiredEmailEncoded = encodeURIComponent(
+      document.getElementById('emailForSignUp').value
+    );
+    let fields = pathnames.urlFields;
+    let url = `${pathnames.urls.calculatorAPI}?`;
+    url += `${fields.request}=${fields.signUp}&`;
+    url += `desiredUsername=${desiredUsernameEncoded}&`;
     url += `email=${desiredEmailEncoded}&`;
+    if (debugLogin && this.doSendEmailCheckbox.checked) {
+      url += `${fields.doSendActivationEmail}=true&`;
+    }
     if (token === '' || token === null) {
       if (!debugLogin) {
         const errorElement = document.createElement("b");

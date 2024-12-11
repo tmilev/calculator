@@ -137,6 +137,7 @@ const urlFields = {
   email: "email",
   recaptchaToken: "recaptchaToken",
   userRole: "userRole",
+  doSendActivationEmail: "doSendActivationEmail",
 }
 
 class StandardResponses {

@@ -1,6 +1,8 @@
 #include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
+#include "general_strings.h"
 #include "html_routines.h"
+#include "string_constants.h"
 #include "user.h"
 
 std::string EmailRoutines::webAdress = "";
@@ -23,7 +25,12 @@ bool EmailRoutines::sendEmailWithMailGun(
     return false;
   }
   std::string mailGunKey;
-  if (!global.flagDebugLogin) {
+  bool useRealKey = !global.flagDebugLogin;
+  if (!useRealKey) {
+    useRealKey = global.getWebInput(WebAPI::Request::doSendActivationEmail) ==
+    "true";
+  }
+  if (useRealKey) {
     if (
       !FileOperations::
       loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
@@ -43,6 +50,7 @@ bool EmailRoutines::sendEmailWithMailGun(
       }
       return false;
     }
+    mailGunKey = StringRoutines::stringTrimWhiteSpace(mailGunKey);
   } else {
     mailGunKey = "dummy_mailgun_key";
   }
@@ -52,6 +60,7 @@ bool EmailRoutines::sendEmailWithMailGun(
   << EmailRoutines::sendEmailFrom
   << "/messages "
   << Logger::endL;
+  global << "DEBUG: mailGunKey: " << mailGunKey << "|" << Logger::endL;
   std::stringstream commandToExecute;
   commandToExecute << "curl -s --user 'api:" << mailGunKey << "' ";
   commandToExecute

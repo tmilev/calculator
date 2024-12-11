@@ -232,13 +232,15 @@ bool WebAPIResponse::Test::forgotLogin() {
     }
   );
   for (const std::string& expected : expectedStrings) {
-    if (!StringRoutines::stringContains(globalComments, expected)) {global.fatal
-    << "Change password: expected comment: ["
-    << expected
-    << "] not found in: "
-    << globalComments
-    << ". "
-          << global.fatal;}
+    if (!StringRoutines::stringContains(globalComments, expected)) {
+      global.fatal
+      << "Change password: expected comment: ["
+      << expected
+      << "] not found in: "
+      << globalComments
+      << ". "
+      << global.fatal;
+    }
   }
   UserCalculator userLoader;
   userLoader.email = "test.admin.user@calculator-algebra.org";

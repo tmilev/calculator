@@ -282,7 +282,6 @@ bool WebAPIResponse::Test::signUp() {
   global.webArguments[WebAPI::Request::desiredUsername] = "someNewUser";
   global.webArguments[DatabaseStrings::labelEmail] =
   "some.email@calculator-algebra.org";
-  global.webArguments[WebAPI::Request::doSendActivationEmail] = "false";
   global.comments.resetComments();
   WebAPIResponse api;
   JSData signUpResult = api.getSignUpRequestResult();

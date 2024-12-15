@@ -14,7 +14,6 @@ const serverInformation = require("./server_information");
 const login = require("./login");
 const calculatorPage = require("./calculator_page");
 const signUp = require("./signup").signUp;
-const mathTypeSet = require("./math_typeset");
 const themes = require("./themes");
 const solver = require("./solve");
 const solve = require("./solve");
@@ -205,12 +204,6 @@ class Page {
     forgotLogin.addEventListener("click", () => {
       this.selectPage(this.pages.forgotLogin.name);
     });
-    let sendRecoveryEmail = document.getElementById(
-      ids.domElements.pages.forgotLogin.buttonSendRecoveryEmail
-    );
-    sendRecoveryEmail.addEventListener("click", () => {
-      forgotPassword.forgotLogin.submitForgotPassword();
-    });
   }
 
   initializeAccountButtons() {
@@ -375,6 +368,7 @@ class Page {
     this.flagProblemPageOnly = false;
     this.mainMenuExpandedLength = null;
     this.initializeLoginPage();
+    activateAccount.accountActivator.selectPage = (input) => { this.selectPage(input); };
     accountPage.accountPage.initialize(this);
     editPage.problemEditor.initialize(this, problemPage.allTopics);
     database.databasePage.initialize(this);

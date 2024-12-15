@@ -134,11 +134,11 @@ let domElements = {
       signUpResultReport: "signUpResultReport",
       recaptchaSignUp: "recaptchaSignUp",
       buttonSignUpStart: "buttonSignUpStart",
-      inputSignUpDoSendEmail: "inputSignUpDoSendEmail",
-      inputSignUpDoSendEmailContainer: "inputSignUpDoSendEmailContainer",
     },
     activateAccount: {
       buttonChangePassword: "buttonChangePassword",
+      panelBackToLoginPage: "panelBackToLoginPage",
+      buttonBackToLoginPage: "buttonBackToLoginPage",
     },
     account: {
       buttonChangePasswordFromAccountPage: "buttonChangePasswordFromAccountPage",

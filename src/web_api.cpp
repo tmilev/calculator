@@ -391,7 +391,6 @@ void WebAPIResponse::changePassword(
     return;
   }
   std::stringstream out;
-  out << "<b style='color:green'>Password change successful.</b>";
   if (global.getWebInput("doReload") != "false") {
     out
     << "<meta http-equiv=\"refresh\" content =\"0; url ='"

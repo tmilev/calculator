@@ -137,9 +137,6 @@ class SignUp {
     url += `${fields.request}=${fields.signUp}&`;
     url += `desiredUsername=${desiredUsernameEncoded}&`;
     url += `email=${desiredEmailEncoded}&`;
-    if (debugLogin && this.doSendEmailCheckbox.checked) {
-      url += `${fields.doSendActivationEmail}=true&`;
-    }
     if (token === '' || token === null) {
       if (!debugLogin) {
         const errorElement = document.createElement("b");
@@ -158,7 +155,6 @@ class SignUp {
         "<b style='color:red'>Debug login: recaptcha ignored.</b>",
       );
     }
-    this.recaptchaIdForSignUp = null;
     url += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(token)}&`;
     submitRequests.submitGET({
       url: url,
@@ -178,6 +174,9 @@ class SignUp {
       let resultHtml = inputParsed[pathnames.urlFields.result.resultHtml];
       if (resultHtml !== undefined) {
         miscellaneous.writeHTML(output, resultHtml);
+      }
+      if (this.grecaptcha !== undefined && this.grecaptcha !== null) {
+        this.grecaptcha.reset();
       }
     } catch (e) {
       output.textContent = `Result: ${input}. Error: ${e}.`;

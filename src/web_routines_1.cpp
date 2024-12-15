@@ -930,6 +930,7 @@ bool WebAPIResponse::processForgotLogin() {
   STACK_TRACE("WebAPIResponse::processForgotLogin");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
+  this->forgotLogin(result);
   return global.response.writeResponse(result, false);
 }
 

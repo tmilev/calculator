@@ -6,30 +6,29 @@ const miscellaneous = require("./miscellaneous_frontend");
 const signUp = require('./signup');
 const globalUser = require('./user').globalUser;
 
-function callbackForgotLogin(input, output) {
-  if (typeof output === "string") {
-    output = document.getElementById(output);
-  }
-  try {
-    let parsed = miscellaneous.jsonUnescapeParse(input);
-    miscellaneous.writeHtmlFromCommentsAndErrors(parsed, output)
-  } catch (e) {
-    output.textContent = e + " Received input: " + input;
-
-  }
-}
-
 class ForgotLogin {
   constructor() {
     this.recaptchaIdForForgotLogin = null;
     this.grecaptcha = null;
+    /** @type {HTMLButtonElement} */
+    this.sendRecoveryEmail = document.getElementById(
+      ids.domElements.pages.forgotLogin.buttonSendRecoveryEmail
+    );
+    if (this.sendRecoveryEmail !== null) {
+      this.sendRecoveryEmail.addEventListener("click", () => {
+        this.submitForgotPassword();
+      });
+    }
   }
 
   initialize() {
     if (this.grecaptcha !== null && this.grecaptcha !== undefined) {
       return;
     }
-    if (window.calculator.grecaptcha !== null && window.calculator.grecaptcha !== undefined) {
+    if (
+      window.calculator.grecaptcha !== null &&
+      window.calculator.grecaptcha !== undefined
+    ) {
       this.grecaptcha = window.calculator.grecaptcha;
     }
   }
@@ -57,6 +56,18 @@ class ForgotLogin {
     }
   }
 
+  callbackForgotLogin(input) {
+    const output = document.getElementById(
+      ids.domElements.pages.forgotLogin.forgotLoginResult
+    );
+    try {
+      let parsed = miscellaneous.jsonUnescapeParse(input);
+      miscellaneous.writeHtmlFromCommentsAndErrors(parsed, output)
+    } catch (e) {
+      output.textContent = e + " Received input: " + input;
+    }
+  }
+
   forgotLoginPage() {
     this.initialize();
     this.writeDebugLoginStatus("");
@@ -77,10 +88,14 @@ class ForgotLogin {
 
   submitForgotPassword() {
     let debugLogin = this.debugLogin();
-    let desiredEmailEncoded = encodeURIComponent(document.getElementById('emailForForgotLogin').value);
+    let desiredEmailEncoded = encodeURIComponent(
+      document.getElementById('emailForForgotLogin').value
+    );
     let url = "";
-    url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.forgotLogin}&`
-    url += `${pathnames.urlFields.email}=${desiredEmailEncoded}&`;
+    const urlFields = pathnames.urlFields;
+    url += `${pathnames.urls.calculatorAPI}?`;
+    url += `${urlFields.request}=${urlFields.requests.forgotLogin}&`;
+    url += `${urlFields.email}=${desiredEmailEncoded}&`;
     let token = "";
     if (this.grecaptcha === undefined || this.grecaptcha === null) {
       this.writeDebugLoginStatus("Can't submit.");
@@ -111,11 +126,12 @@ class ForgotLogin {
         return false;
       }
     }
-    url += `${pathnames.urlFields.recaptchaToken}=${encodeURIComponent(token)}&`;
+    url += `${urlFields.recaptchaToken}=${encodeURIComponent(token)}&`;
     submitRequests.submitGET({
       url: url,
-      callback: callbackForgotLogin,
-      result: "forgotLoginResult",
+      callback: (result) => {
+        this.callbackForgotLogin(result);
+      },
       progress: ids.domElements.spanProgressReportGeneral
     });
   }

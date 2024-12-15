@@ -2,7 +2,6 @@
 #include "general_logging_global_variables.h"
 #include "general_strings.h"
 #include "html_routines.h"
-#include "string_constants.h"
 #include "user.h"
 
 std::string EmailRoutines::webAdress = "";
@@ -25,42 +24,32 @@ bool EmailRoutines::sendEmailWithMailGun(
     return false;
   }
   std::string mailGunKey;
-  bool useRealKey = !global.flagDebugLogin;
-  if (!useRealKey) {
-    useRealKey = global.getWebInput(WebAPI::Request::doSendActivationEmail) ==
-    "true";
-  }
-  if (useRealKey) {
-    if (
-      !FileOperations::
-      loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-        "certificates/mailgun-api.txt",
-        mailGunKey,
-        true,
-        true,
-        commentsOnFailure
-      )
-    ) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure
-        << "Could not find mailgun key. "
-        << "The key must be located in file: \n"
-        << "[certificates/mailgun-api.txt]. \n"
-        << "The file must be uploaded manually to the server. ";
-      }
-      return false;
+  if (
+    !FileOperations::
+    loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
+      "certificates/mailgun-api.txt",
+      mailGunKey,
+      true,
+      true,
+      commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Could not find mailgun key. "
+      << "The key must be located in file: \n"
+      << "[certificates/mailgun-api.txt]. \n"
+      << "The file must be uploaded manually to the server. ";
     }
-    mailGunKey = StringRoutines::stringTrimWhiteSpace(mailGunKey);
-  } else {
-    mailGunKey = "dummy_mailgun_key";
+    return false;
   }
+  mailGunKey = StringRoutines::stringTrimWhiteSpace(mailGunKey);
   global
   << "Sending email via "
-  << "https://api.mailgun.net/v3/mail2."
+  << "https://api.mailgun.net/v3/"
   << EmailRoutines::sendEmailFrom
   << "/messages "
   << Logger::endL;
-  global << "DEBUG: mailGunKey: " << mailGunKey << "|" << Logger::endL;
   std::stringstream commandToExecute;
   commandToExecute << "curl -s --user 'api:" << mailGunKey << "' ";
   commandToExecute
@@ -69,7 +58,7 @@ bool EmailRoutines::sendEmailWithMailGun(
   << "/messages ";
   commandToExecute
   << "-F from='Automated Email "
-  << "<noreply@mail2."
+  << "<noreply@"
   << EmailRoutines::sendEmailFrom
   << ">' ";
   if (this->toEmail == "") {
@@ -105,11 +94,15 @@ bool EmailRoutines::sendEmailWithMailGun(
   if (global.flagDebugLogin) {
     if (commentsGeneral != nullptr) {
       *commentsGeneral
-      << "Since this is a login debug, "
-      << "I am not sending your activation email. ";
+      << "<b style='color:red'>Since this is a login debug, "
+      << "I am not sending your activation email.</b> "
+      << "To actually (try to) send the email, simply copy+paste "
+      << "the command in your console. ";
       global.comments
       << "<br><b>Email command:</b><br>"
-      << commandToExecute.str()
+      << HtmlRoutines::convertStringToHtmlString(
+        commandToExecute.str(), false
+      )
       << "<br>";
     }
     return true;

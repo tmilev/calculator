@@ -68,7 +68,6 @@ public:
     static std::string teachers;
     static std::string sections;
     static std::string desiredUsername;
-    static std::string doSendActivationEmail;
     struct Slides {
     public:
       static std::string source;

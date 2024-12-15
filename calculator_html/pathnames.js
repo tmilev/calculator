@@ -55,6 +55,7 @@ const urlFields = {
     outputString: "outputString",
     outputSliders: "sliders",
     crashReport: "crashReport",
+    success: "success",
     error: "error",
     syntaxErrors: "syntaxErrors",
     syntaxErrorsExtra: "syntaxErrorsExtra",
@@ -137,7 +138,6 @@ const urlFields = {
   email: "email",
   recaptchaToken: "recaptchaToken",
   userRole: "userRole",
-  doSendActivationEmail: "doSendActivationEmail",
 }
 
 class StandardResponses {

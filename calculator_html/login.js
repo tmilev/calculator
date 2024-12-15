@@ -155,7 +155,9 @@ class Authenticator {
         "<b style='color:red; font-size:30px' " +
         "title='Set debugLogin to false in " +
         "configuration/configuration.json to get rid of this message.'>" +
-        "Unsafe website. Do not create accounts or enter passwords." +
+        "Unsafe website. " +
+        "LEAKS SERVER PRIVATE KEYS. " +
+        "Do not create accounts or enter passwords." +
         "</b>";
     }
     const httpsSupport = parsedAuthentication[
@@ -242,7 +244,7 @@ class Authenticator {
         accountPanels[i].classList.add("divInvisible");
       }
     }
-  } 
+  }
 
   showLoginCalculatorButtons() {
     const loginIds = ids.domElements.pages.login;
@@ -258,7 +260,7 @@ class Authenticator {
     document.getElementById(
       loginIds.userNameReport
     ).classList.add("divInvisible");
-  }  
+  }
 
   logout() {
     storage.variables.user.name.setAndStore("");
@@ -387,7 +389,7 @@ class Authenticator {
       logoutLinks[0].classList.add("linkLogoutActive");
       logoutLinks[0].classList.remove("linkLogoutInactive");
     }
-  }  
+  }
 
   hideLoginCalculatorButtons() {
     const loginIds = ids.domElements.pages.login;
@@ -417,7 +419,7 @@ class Authenticator {
       logoutLinks[0].classList.add("linkLogoutInactive");
       logoutLinks[0].classList.remove("linkLogoutActive");
     }
-  }  
+  }
 }
 
 function onGoogleSignIn(googleUser) {

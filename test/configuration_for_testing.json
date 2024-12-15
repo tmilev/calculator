@@ -11,7 +11,7 @@
   "monitorPingTime":10,
   "gitRepository":"https://github.com/tmilev/calculator",
   "webAddress":"localhost:8166",
-  "sendEmailFrom":"",
+  "sendEmailFrom":"fakemailgundomain.mailgun.org",
   "portHTTP":"8155",
   "portHTTPSOpenSSL":"8166",
   "portHTTPSBuiltIn":"",

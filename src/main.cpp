@@ -199,6 +199,8 @@ bool ArgumentAnalyzer::setTest() {
   global.runMode = GlobalVariables::RunMode::consoleTest;
   global.configurationFileName =
   "test/configuration_for_testing.json";
+  EmailRoutines::mailApiKeyFileName =   "test/test_mailgun-api.txt";
+
   return true;
 }
 

@@ -227,7 +227,7 @@ bool WebAPIResponse::Test::forgotLogin() {
   }
   std::string globalComments = global.comments.getCurrentReset();
   List<std::string> expectedStrings = List<std::string>({
-      std::string("noreply@mail2.noreply.calculator.algebra.org"),
+      std::string("noreply@fakemailgundomain.mailgun.org"),
       std::string("dummy_mailgun_key")
     }
   );
@@ -294,7 +294,7 @@ bool WebAPIResponse::Test::signUp() {
   }
   std::string globalComments = global.comments.getCurrentReset();
   List<std::string> expectedStrings = List<std::string>({
-      std::string("noreply@mail2.noreply.calculator.algebra.org"),
+      std::string("noreply@fakemailgundomain.mailgun.org"),
       std::string("dummy_mailgun_key")
     }
   );

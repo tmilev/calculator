@@ -29,8 +29,14 @@ public:
   // <- no access allowed through web server
   static List<List<std::string> >& folderVirtualLinksDefault();
   static bool checkFolderLinks();
+  // Folder names that are visible to every one.
   static void initializeFoldersNonSensitive();
+  // Folder names that are visible to logged in admins.
   static void initializeFoldersSensitive();
+  // Folder names that can be read by the calculator server but
+  // should not be displayed on the web in any form.
+  // Such files can only be viewed by having a secure access to the
+  // server, such as an ssh connection or physical access.
   static void initializeFoldersULTRASensitive();
   static List<List<std::string> >& initializeFolderVirtualLinksDefaults();
   static List<bool> safeFileCharacters;

@@ -198,7 +198,7 @@ bool ArgumentAnalyzer::setDeploy() {
 bool ArgumentAnalyzer::setTest() {
   global.runMode = GlobalVariables::RunMode::consoleTest;
   global.configurationFileName =
-  "/configuration/configuration_for_testing.json";
+  "test/configuration_for_testing.json";
   return true;
 }
 

@@ -33,6 +33,10 @@ public:
   // For example, this could be "https://calculator-algebra.org".
   static std::string webAdress;
   static std::string sendEmailFrom;
+  // The virtual file name of your mailgun api key.
+  // Expected to be constant, but we allow it to be
+  // overwritten for the purposes of writing tests.
+  static std::string mailApiKeyFileName;
   std::string subject;
   std::string ccEmail;
   std::string toEmail;

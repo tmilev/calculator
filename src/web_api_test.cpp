@@ -271,6 +271,7 @@ bool WebAPIResponse::Test::signUp() {
   global.userDefault.reset();
   StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
   global.flagDebugLogin = true;
+  EmailRoutines::mailApiKeyFileName = "test/test_mailgun-api.txt";
   std::stringstream unused;
   StateMaintainer<
     MapList<

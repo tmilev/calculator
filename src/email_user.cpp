@@ -6,6 +6,7 @@
 
 std::string EmailRoutines::webAdress = "";
 std::string EmailRoutines::sendEmailFrom = "";
+std::string EmailRoutines::mailApiKeyFileName = "certificates/mailgun-api.txt";
 List<bool> EmailRoutines::recognizedEmailCharacters;
 
 bool EmailRoutines::sendEmailWithMailGun(
@@ -27,7 +28,7 @@ bool EmailRoutines::sendEmailWithMailGun(
   if (
     !FileOperations::
     loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-      "certificates/mailgun-api.txt",
+              EmailRoutines::mailApiKeyFileName,
       mailGunKey,
       true,
       true,

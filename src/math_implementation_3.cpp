@@ -1592,6 +1592,7 @@ void FileOperations::initializeFoldersSensitive() {
   folderSubstitutionsSensitive.setKeyValue("LogFiles/", "LogFiles/");
   folderSubstitutionsSensitive.setKeyValue("/LogFiles/", "LogFiles/");
   folderSubstitutionsSensitive.setKeyValue("configuration/", "configuration/");
+  folderSubstitutionsSensitive.setKeyValue("test/", "test/");
   folderSubstitutionsSensitive.setKeyValue(
     "/configuration/", "configuration/"
   );

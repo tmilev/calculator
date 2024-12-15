@@ -204,11 +204,12 @@ class Authenticator {
     } else if (pathnames.standardResponses.isNotLoggedInResponse(
       parsedAuthentication
     )) {
-      if (parsedAuthentication[
+      const errorString = parsedAuthentication[
         pathnames.urlFields.result.error
-      ] !== undefined) {
+      ];
+      if (errorString !== undefined) {
         loginErrorMessage = decodeURIComponent(
-          parsedAuthentication[pathnames.urlFields.result.error]
+          errorString
         );
         parsedAuthentication[pathnames.urlFields.result.error] = "";
       }
@@ -226,6 +227,7 @@ class Authenticator {
       storage.variables.user.authenticationToken.setAndStore("");
       storage.variables.user.name.setAndStore("");
       storage.variables.user.role.setAndStore("");
+      storage.variables.user.email.setAndStore("");
       globalUser.flagLoggedIn = false;
       this.showLoginCalculatorButtons();
       this.toggleAccountPanels();
@@ -266,6 +268,7 @@ class Authenticator {
     storage.variables.user.name.setAndStore("");
     storage.variables.user.authenticationToken.setAndStore("");
     storage.variables.user.role.setAndStore("");
+    storage.variables.user.email.setAndStore("");
     this.hideLogoutButton();
     globalUser.hideProfilePicture();
     globalUser.flagLoggedIn = false;

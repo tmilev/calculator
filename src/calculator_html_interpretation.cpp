@@ -1097,6 +1097,7 @@ void WebAPIResponse::getJSDataUserInfo(
   HtmlRoutines::convertStringToHtmlString(
     global.userDefault.username, false
   );
+  outputAppend[DatabaseStrings::labelEmail] = global.userDefault.email;
   outputAppend[DatabaseStrings::labelAuthenticationToken] =
   HtmlRoutines::convertStringToHtmlString(
     global.userDefault.actualAuthenticationToken, false

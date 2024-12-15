@@ -2,6 +2,7 @@
 const ids = require("./ids_dom_elements");
 const storage = require("./storage").storage;
 const miscellaneous = require("./miscellaneous_frontend");
+const pathnames = require("./pathnames");
 
 /** 
  * A mutable object that stores the state of the current user, 
@@ -50,21 +51,32 @@ class User {
   }
 
   hideProfilePicture() {
-    document.getElementById(ids.domElements.divProfilePicture).classList.add("divInvisible");
-    document.getElementById(ids.domElements.divProfilePicture).classList.remove("divVisible");
+    document.getElementById(
+      ids.domElements.divProfilePicture
+    ).classList.add("divInvisible");
+    document.getElementById(
+      ids.domElements.divProfilePicture
+    ).classList.remove("divVisible");
   }
 
   makeFromUserInfo(inputData) {
     // Please note: the authentication token is
     // silently set through the cookie headers.
     // Please do not take explicit action as
-    // inputdata.authenticationToken may not 
+    // inputdata.authenticationToken may not
     // contain the authentication token.
-    // not ok: 
+    // not ok:
     // storage.variables.user.authenticationToken.
     // setAndStore(inputData.authenticationToken);
-    storage.variables.user.name.setAndStore(inputData.username);
-    storage.variables.user.role.setAndStore(inputData.userRole);
+    const username = inputData[pathnames.urlFields.username];
+    const userRole = inputData[pathnames.urlFields.userRole];
+    const email = inputData[pathnames.urlFields.email];
+    if (email === undefined) {
+      email = "";
+    }
+    storage.variables.user.name.setAndStore(username);
+    storage.variables.user.role.setAndStore(userRole);
+    storage.variables.user.email.setAndStore(email);
     this.flagLoggedIn = true;
     this.sectionsTaught = inputData.sectionsTaught;
     this.instructor = inputData.instructor;

@@ -28,7 +28,7 @@ bool EmailRoutines::sendEmailWithMailGun(
   if (
     !FileOperations::
     loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-              EmailRoutines::mailApiKeyFileName,
+      EmailRoutines::mailApiKeyFileName,
       mailGunKey,
       true,
       true,

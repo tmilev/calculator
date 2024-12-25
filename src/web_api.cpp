@@ -348,7 +348,7 @@ void WebAPIResponse::changePassword(
     }
   }
   if (newPassword == "" && reenteredPassword == "" && newEmail != "") {
-    result = WebAPIResponse::setEmail(newEmail);
+    result = WebAPIResponse::setEmail(true, newEmail);
     return;
   }
   if (newPassword != reenteredPassword) {
@@ -393,7 +393,7 @@ void WebAPIResponse::changePassword(
   std::stringstream out;
   if (global.getWebInput("doReload") != "false") {
     out
-    << "<meta http-equiv=\"refresh\" content =\"0; url ='"
+    << "<meta http-equiv='refresh' content =\"0; url ='"
     << global.displayNameExecutable
     << "?request=logout"
     << "&username="
@@ -407,7 +407,9 @@ void WebAPIResponse::changePassword(
   result[WebAPI::Result::success] = true;
 }
 
-JSData WebAPIResponse::setEmail(const std::string& input) {
+JSData WebAPIResponse::setEmail(
+  bool confirmEmailOnlyNoPasswordSet, const std::string& input
+) {
   STACK_TRACE("WebAPIResponse::setEmail");
   (void) input;
   JSData result;
@@ -426,7 +428,11 @@ JSData WebAPIResponse::setEmail(const std::string& input) {
   }
   if (
     !WebAPIResponse::doSetEmail(
-      global.userDefault, &errorStream, &out, adminOutputStream
+      confirmEmailOnlyNoPasswordSet,
+      global.userDefault,
+      &errorStream,
+      &out,
+      adminOutputStream
     )
   ) {
     result[WebAPI::Result::error] = errorStream.str();
@@ -440,6 +446,7 @@ JSData WebAPIResponse::setEmail(const std::string& input) {
 }
 
 bool WebAPIResponse::doSetEmail(
+  bool confirmEmailOnlyNoPasswordSet,
   UserCalculatorData& inputOutputUser,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneralNonSensitive,
@@ -460,7 +467,9 @@ bool WebAPIResponse::doSetEmail(
   userCopy.email = inputOutputUser.email;
   if (
     !userCopy.computeAndStoreActivationEmailAndTokens(
-      commentsOnFailure, commentsGeneralNonSensitive
+      confirmEmailOnlyNoPasswordSet,
+      commentsOnFailure,
+      commentsGeneralNonSensitive
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -1007,7 +1016,7 @@ bool WebAPIResponse::addUsersFromData(
     }
     if (
       !DatabaseUserRoutines::sendActivationEmail(
-        emails, comments, comments, commentsGeneralSensitive
+        false, emails, comments, comments, commentsGeneralSensitive
       )
     ) {
       result = false;
@@ -1174,8 +1183,8 @@ bool WebAPIResponse::addOneUser(
     return true;
   }
   return
-  currentUser.computeAndStoreActivationStats(
-    commentsOnFailure, commentsOnFailure
+  currentUser.computeAndStoreActivationEmail(
+    false, commentsOnFailure, commentsOnFailure
   );
 }
 
@@ -1254,7 +1263,7 @@ JSData WebAPIResponse::getSignUpRequestResult() {
     adminOutputStream = &generalCommentsStream;
   }
   WebAPIResponse::doSetEmail(
-    user, &errorStream, &generalCommentsStream, adminOutputStream
+    false, user, &errorStream, &generalCommentsStream, adminOutputStream
   );
   result[WebAPI::Result::comments] = generalCommentsStream.str();
   result[WebAPI::Result::resultHtml] = outputStream.str();

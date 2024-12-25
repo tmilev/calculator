@@ -148,20 +148,25 @@ public:
   bool computeAndStoreActivationToken(std::stringstream* commentsOnFailure);
   void computeHashedSaltedPassword();
   bool getActivationAddress(
-    std::string& output, std::stringstream& comments
+    bool confirmEmailOnlyNoPasswordSet,
+    std::string& output,
+    std::stringstream& comments
   );
   static bool getActivationAddressFromActivationToken(
     const std::string& activationToken,
     const std::string& inputUserNameUnsafe,
     const std::string& inputEmailUnsafe,
+    bool confirmEmailOnlyNoPasswordSet,
     std::string& output,
     std::stringstream* commentsOnFailure
   );
   bool computeAndStoreActivationEmailAndTokens(
+    bool confirmEmailOnlyNoPasswordSet,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  bool computeAndStoreActivationStats(
+  bool computeAndStoreActivationEmail(
+    bool confirmEmailOnlyNoPasswordSet,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );

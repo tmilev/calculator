@@ -116,6 +116,7 @@ function htmlElementsFromCommentsAndErrors(input) {
       continue;
     }
     let incoming = document.createElement("div");
+
     if (extraTags[i] === pathnames.urlFields.result.crashReport) {
       writeHTML(incoming, current);
     } else {

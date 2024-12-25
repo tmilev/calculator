@@ -5043,14 +5043,14 @@ void CalculatorHTML::interpretAccountInformationLinks(
     return;
   }
   out
-  << "<a href=\""
+  << "<a href='"
   << global.displayNameExecutable
-  << "?request=changePasswordPage\">Change password</a>";
+  << "?request=changePasswordPage'>Change password</a>";
   if (global.userDefaultHasAdminRights()) {
     out
-    << "<br>\n<a href=\""
+    << "<br>\n<a href='"
     << global.displayNameExecutable
-    << "?request=accounts\">Manage accounts</a>";
+    << "?request=accounts'>Manage accounts</a>";
   }
   inputOutput.interpretedCommand = out.str();
   return;

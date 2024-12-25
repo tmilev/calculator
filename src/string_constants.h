@@ -31,6 +31,7 @@ public:
     static std::string changePasswordPage;
     static std::string examplesJSON;
     static std::string activateAccountJSON;
+    static std::string confirmEmailOnlyNoPasswordChange;
     static std::string calculatorHTML;
     static std::string onePageJS;
     static std::string onePageJSWithHash;

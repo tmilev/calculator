@@ -73,6 +73,9 @@ public:
     const std::string& key, const std::string& value
   );
   void addKeyValuePair(const std::string& key, const JSData& value);
+  void addKeyStringValuePair(
+    const std::string& key, const std::string& value
+  );
   void addNestedKeyValuePair(
     const List<std::string>& nestedKeys, const JSData& value
   );
@@ -591,6 +594,7 @@ public:
   bool userDefaultHasInstructorRights();
   // TODO(tmilev): refactor down to database-only operations.
   static bool sendActivationEmail(
+    bool confirmEmailOnlyNoPasswordSet,
     const std::string& emailList,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral,
@@ -598,6 +602,7 @@ public:
   );
   // TODO(tmilev): refactor down to database-only operations.
   static bool sendActivationEmail(
+    bool confirmEmailOnlyNoPasswordSet,
     const List<std::string>& emails,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral,

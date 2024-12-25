@@ -944,6 +944,17 @@ void QueryUpdate::addKeyValuePair(
   this->data.addOnTop(querySetOnce);
 }
 
+void QueryUpdate::addKeyStringValuePair(
+  const std::string& key, const std::string& value
+) {
+  QueryUpdateOnce querySetOnce;
+  querySetOnce.nestedLabels.addOnTop(key);
+  JSData valueJSON;
+  valueJSON = value;
+  querySetOnce.value = valueJSON;
+  this->data.addOnTop(querySetOnce);
+}
+
 void QueryUpdate::addNestedKeyValuePair(
   const List<std::string>& nestedKeys, const JSData& value
 ) {

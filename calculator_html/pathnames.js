@@ -48,6 +48,7 @@ const urlFields = {
     expressionDesired: "compareExpressionsDesired",
     calculatorCompute: "compute",
     mainInput: "mainInput",
+    confirmEmailOnlyNoPasswordChange: "confirmEmailOnlyNoPasswordChange",
   },
   result: {
     result: "result",

@@ -206,18 +206,6 @@ class Page {
     });
   }
 
-  initializeAccountButtons() {
-    const button = document.getElementById(
-      ids.domElements.pages.activateAccount.buttonChangePassword
-    );
-    if (button === null) {
-      // No accordion buttons.
-      return;
-    }
-    button.addEventListener("click", () => {
-      activateAccount.accountActivator.submitActivateAccountRequest();
-    });
-  }
 
   initializeSliders() {
     this.setWebAssemblySlider();
@@ -376,7 +364,6 @@ class Page {
     problemPage.allTopics.initialize(this, coursePage.coursePage);
     coursePage.coursePage.initialize(this);
     selectCourse.courseSelector.initialize(this);
-    this.initializeAccountButtons();
     this.hashHistory = [];
     this.aceEditorAutoCompletionWordList = [];
     this.flagDoSubmitCalculatorComputation = true;

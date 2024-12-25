@@ -3,7 +3,6 @@ const ids = require("./ids_dom_elements");
 const pathnames = require("./pathnames");
 const cookies = require("./cookies");
 const configuration = require("./configuration");
-const miscellaneous = require("./miscellaneous_frontend");
 
 class StorageVariable {
   constructor(
@@ -423,6 +422,13 @@ class StorageCalculator {
           name: "email",
           nameURL: "email",
         }),
+        confirmEmailOnlyNoPasswordChange: new StorageVariable({
+          name: "confirmEmailOnlyNoPasswordChange",
+          nameURL: "confirmEmailOnlyNoPasswordChange",
+          showInURLOnPages: {
+            "activateAccount": true,
+          },
+        }),
       },
       theme: new StorageVariable({
         name: "theme",
@@ -542,7 +548,9 @@ class StorageCalculator {
   ) {
     const split = pair.split("=");
     if (split.length !== 2) {
-      console.log(`Failed to extract key-value pair from ${pair}`);
+      if (pair !== "") {
+        console.log(`Failed to extract key-value pair from ${pair}`);
+      }
       return;
     }
     writeInto[split[0]] = decodeURIComponent(split[1]);

@@ -2644,6 +2644,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
             currentUser.actualActivationToken,
             currentUser.username,
             currentUser.email,
+            false,
             activationLink,
             nullptr
           )
@@ -2665,6 +2666,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
           currentUser.actualActivationToken,
           currentUser.username,
           currentUser.email,
+          false,
           activationLink,
           nullptr
         )

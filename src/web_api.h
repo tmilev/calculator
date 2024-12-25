@@ -92,8 +92,11 @@ public:
   static void changePassword(
     JSData& result, const std::string& reasonForNoAuthentication
   );
-  static JSData setEmail(const std::string& input);
+  static JSData setEmail(
+    bool confirmEmailOnlyNoPasswordSet, const std::string& input
+  );
   static bool doSetEmail(
+    bool confirmEmailOnlyNoPasswordSet,
     UserCalculatorData& inputOutputUser,
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneralNonSensitive,

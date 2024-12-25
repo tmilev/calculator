@@ -10,28 +10,55 @@ class AccountActivator {
     this.panelBackToLoginPage = document.getElementById(
       ids.domElements.pages.activateAccount.panelBackToLoginPage
     );
-    const buttonBackToLoginPage = document.getElementById(
+    this.buttonBackToLoginPage = document.getElementById(
       ids.domElements.pages.activateAccount.buttonBackToLoginPage
     );
-    if (buttonBackToLoginPage !== null) {
-      buttonBackToLoginPage.addEventListener("click", () => {
+    if (this.buttonBackToLoginPage !== null) {
+      this.buttonBackToLoginPage.addEventListener("click", () => {
         this.selectPage("login")
       });
     }
     /** @type {function|null} */
     this.selectPage = null;
+    this.emailSpan = document.getElementById(
+      ids.domElements.spanCurrentActivationEmail
+    );
+    this.usernameInput = document.getElementById(
+      ids.domElements.spanUserIdInActivateAccountPage
+    );
+    this.inputNewPassword = document.getElementById(
+      ids.domElements.inputNewPasswordInActivationAccount
+    );
+    this.inputNewPasswordReentered = document.getElementById(
+      ids.domElements.inputReenteredPasswordInActivationAccount
+    );
+    this.buttonChangePassword = document.getElementById(
+      ids.domElements.pages.activateAccount.buttonChangePassword
+    );
+    if (this.buttonChangePassword !== null) {
+      this.buttonChangePassword.addEventListener("click", () => {
+        this.submitActivateAccountRequest();
+      });
+    }
+    this.spanActivation = document.getElementById(
+      ids.domElements.spanVerificationActivation
+    );
   }
 
   updateAccountActivationPage() {
     this.panelBackToLoginPage.style.display = "none";
-    let emailSpan = document.getElementById(
-      ids.domElements.spanCurrentActivationEmail
-    );
-    let usernameInput = document.getElementById(ids.domElements.spanUserIdInActivateAccountPage);
-    usernameInput.textContent = storage.variables.user.name.getValue();
-    emailSpan.textContent = storage.variables.user.email.getValue();
+    this.usernameInput.textContent = storage.variables.user.name.getValue();
+    this.emailSpan.textContent = storage.variables.user.email.getValue();
     let activationToken = storage.variables.user.activationToken.getValue();
     this.activationTokenSpan().textContent = activationToken;
+    if (
+      storage.variables.user.confirmEmailOnlyNoPasswordChange.isTrue()
+    ) {
+      this.buttonChangePassword.disabled = true;
+      this.submitDoActivateAccount();
+    } else {
+      this.buttonChangePassword.disabled = false;
+    }
   }
 
   activationTokenSpan() {
@@ -39,18 +66,19 @@ class AccountActivator {
   }
 
   submitDoActivateAccount() {
-    let inputNewPassword = document.getElementById(ids.domElements.inputNewPasswordInActivationAccount).value;
-    let inputNewPasswordReentered = document.getElementById(ids.domElements.inputReenteredPasswordInActivationAccount).value;
+    let inputNewPasswordValue = this.inputNewPassword.value;
+    let inputNewPasswordReenteredValue = this.inputNewPasswordReentered.value;
     let activationToken = storage.variables.user.activationToken.getValue();
     let userName = storage.variables.user.name.getValue();
     let url = "";
     let email = storage.variables.user.email.getValue();
-    url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=activateAccountJSON&`;
-    url += `${pathnames.urlFields.activationToken}=${encodeURIComponent(activationToken)}&`;
-    url += `${pathnames.urlFields.email}=${encodeURIComponent(email)}&`;
-    url += `${pathnames.urlFields.newPassword}=${encodeURIComponent(inputNewPassword)}&`;
-    url += `${pathnames.urlFields.reenteredPassword}=${encodeURIComponent(inputNewPasswordReentered)}&`;
-    url += `${pathnames.urlFields.username}=${encodeURIComponent(userName)}&`;
+    const urlFields = pathnames.urlFields;
+    url += `${pathnames.urls.calculatorAPI}?${urlFields.request}=activateAccountJSON&`;
+    url += `${urlFields.activationToken}=${encodeURIComponent(activationToken)}&`;
+    url += `${urlFields.email}=${encodeURIComponent(email)}&`;
+    url += `${urlFields.newPassword}=${encodeURIComponent(inputNewPasswordValue)}&`;
+    url += `${urlFields.reenteredPassword}=${encodeURIComponent(inputNewPasswordReenteredValue)}&`;
+    url += `${urlFields.username}=${encodeURIComponent(userName)}&`;
     url += `doReload=false&`;
     submitRequests.submitGET({
       url: url,
@@ -62,17 +90,22 @@ class AccountActivator {
   }
 
   submitActivateAccountRequest() {
-    let inputNewPassword = document.getElementById(ids.domElements.inputNewPasswordInActivationAccount).value;
-    let inputNewPasswordReentered = document.getElementById(ids.domElements.inputReenteredPasswordInActivationAccount).value;
+    let inputNewPasswordValue = this.inputNewPassword.value;
+    let inputNewPasswordReenteredValue = this.inputNewPasswordReentered.value;
     let userName = storage.variables.user.name.getValue();
     let url = "";
-    url += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.changePassword}&`;
-    url += `${pathnames.urlFields.newPassword}=${encodeURIComponent(inputNewPassword)}&`;
-    url += `${pathnames.urlFields.reenteredPassword}=${encodeURIComponent(inputNewPasswordReentered)}&`;
-    url += `${pathnames.urlFields.username}=${encodeURIComponent(userName)}&`;
+    const urlFields = pathnames.urlFields;
+    url += `${pathnames.urls.calculatorAPI}?${urlFields.request}=${urlFields.changePassword}&`;
+    url += `${urlFields.newPassword}=${encodeURIComponent(inputNewPasswordValue)}&`;
+    url += `${urlFields.reenteredPassword}=${encodeURIComponent(inputNewPasswordReenteredValue)}&`;
+    url += `${urlFields.username}=${encodeURIComponent(userName)}&`;
     let activationToken = this.activationTokenSpan().textContent;
-    if (activationToken !== "" && activationToken !== null && activationToken !== undefined) {
-      url += `${pathnames.urlFields.activationToken}=${encodeURIComponent(activationToken)}&`;
+    if (
+      activationToken !== "" &&
+      activationToken !== null &&
+      activationToken !== undefined
+    ) {
+      url += `${urlFields.activationToken}=${encodeURIComponent(activationToken)}&`;
     }
     url += `doReload=false&`;
     submitRequests.submitGET({
@@ -85,11 +118,10 @@ class AccountActivator {
   }
 
   submitAccountActivationRequestCallback(wipeOffActivationToken, result) {
-    let spanActivation = document.getElementById(ids.domElements.spanVerificationActivation);
     try {
       this.processAccountSubmissionResponse(result);
     } catch (e) {
-      spanActivation.textContent = "Result: " + result + ". Error: " + e;
+      this.spanActivation.textContent = "Result: " + result + ". Error: " + e;
     }
     document.getElementById(ids.domElements.inputNewPasswordInActivationAccount).value = "";
     document.getElementById(ids.domElements.inputReenteredPasswordInActivationAccount).value = "";
@@ -102,13 +134,11 @@ class AccountActivator {
     /** @type {string} */
     result
   ) {
-    let spanActivation = document.getElementById(
-      ids.domElements.spanVerificationActivation
-    );
+    ;
     let inputParsed = miscellaneous.jsonUnescapeParse(result);
     miscellaneous.writeHtmlElementsFromCommentsAndErrors(
       inputParsed,
-      spanActivation
+      this.spanActivation
     );
     const resultFields = pathnames.urlFields.result;
     let resultSpan = document.createElement("div");
@@ -131,7 +161,7 @@ class AccountActivator {
         this.panelBackToLoginPage.style.backgroundColor = "";
       }, 0);
     }
-    spanActivation.append(resultSpan);
+    this.spanActivation.append(resultSpan);
   }
 }
 

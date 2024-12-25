@@ -110,6 +110,8 @@ std::string WebAPI::Request::setProblemDeadline = "setProblemDeadline";
 std::string WebAPI::Request::changePassword = "changePassword";
 std::string WebAPI::Request::changePasswordPage = "changePasswordPage";
 std::string WebAPI::Request::activateAccountJSON = "activateAccountJSON";
+std::string WebAPI::Request::confirmEmailOnlyNoPasswordChange =
+"confirmEmailOnlyNoPasswordChange";
 std::string WebAPI::Request::debugFlag = "debugFlag";
 std::string WebAPI::Request::serverStatusJSON = "serverStatusJSON";
 std::string WebAPI::Request::selectCourseJSON = "selectCourseJSON";

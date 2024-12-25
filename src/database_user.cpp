@@ -597,6 +597,7 @@ std::string UserCalculator::getSelectedRowEntry(const std::string& key) {
 }
 
 bool DatabaseUserRoutines::sendActivationEmail(
+  bool confirmEmailOnlyNoPasswordSet,
   const std::string& emailList,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
@@ -607,11 +608,16 @@ bool DatabaseUserRoutines::sendActivationEmail(
   StringRoutines::stringSplitDefaultDelimiters(emailList, emails);
   return
   DatabaseUserRoutines::sendActivationEmail(
-    emails, commentsOnFailure, commentsGeneral, commentsGeneralSensitive
+    confirmEmailOnlyNoPasswordSet,
+    emails,
+    commentsOnFailure,
+    commentsGeneral,
+    commentsGeneralSensitive
   );
 }
 
 bool DatabaseUserRoutines::sendActivationEmail(
+  bool confirmEmailOnlyNoPasswordSet,
   const List<std::string>& emails,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral,
@@ -630,6 +636,7 @@ bool DatabaseUserRoutines::sendActivationEmail(
     currentUser.username = emails[i];
     currentUser.email = emails[i];
     WebAPIResponse::doSetEmail(
+      confirmEmailOnlyNoPasswordSet,
       currentUser,
       commentsOnFailure,
       commentsGeneral,
@@ -730,6 +737,7 @@ bool UserCalculator::computeAndStoreActivationToken(
 }
 
 bool UserCalculator::computeAndStoreActivationEmailAndTokens(
+  bool confirmEmailOnlyNoPasswordSet,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
@@ -738,10 +746,13 @@ bool UserCalculator::computeAndStoreActivationEmailAndTokens(
     return false;
   }
   return
-  this->computeAndStoreActivationStats(commentsOnFailure, commentsGeneral);
+  this->computeAndStoreActivationEmail(
+    confirmEmailOnlyNoPasswordSet, commentsOnFailure, commentsGeneral
+  );
 }
 
-bool UserCalculator::computeAndStoreActivationStats(
+bool UserCalculator::computeAndStoreActivationEmail(
+  bool confirmEmailOnlyNoPasswordSet,
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
@@ -763,6 +774,7 @@ bool UserCalculator::computeAndStoreActivationStats(
       this->actualActivationToken,
       this->username,
       this->email,
+      confirmEmailOnlyNoPasswordSet,
       activationAddress,
       nullptr
     )
@@ -975,7 +987,9 @@ bool UserCalculator::storeProblemData(
 }
 
 bool UserCalculator::getActivationAddress(
-  std::string& output, std::stringstream& comments
+  bool confirmEmailOnlyNoPasswordSet,
+  std::string& output,
+  std::stringstream& comments
 ) {
   STACK_TRACE("UserCalculator::getActivationAddress");
   if (!this->loadFromDatabase(&comments, &comments)) {
@@ -997,6 +1011,7 @@ bool UserCalculator::getActivationAddress(
     this->actualActivationToken,
     this->username,
     this->email,
+    confirmEmailOnlyNoPasswordSet,
     output,
     nullptr
   );
@@ -1289,6 +1304,7 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   const std::string& activationToken,
   const std::string& inputUserNameUnsafe,
   const std::string& inputEmailUnsafe,
+  bool confirmEmailOnlyNoPasswordSet,
   std::string& output,
   std::stringstream* commentsOnFailure
 ) {
@@ -1310,14 +1326,27 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   ) {
     address = "https://" + address;
   }
-  JSData jsonData;
-  jsonData[DatabaseStrings::labelActivationToken] = activationToken;
-  jsonData[DatabaseStrings::labelUsername] = inputUserNameUnsafe;
-  jsonData[DatabaseStrings::labelCalculatorRequest] =
-  WebAPI::Request::activateAccountJSON;
-  jsonData[DatabaseStrings::labelEmail] = inputEmailUnsafe;
-  jsonData[DatabaseStrings::labelCurrentPage] =
-  DatabaseStrings::labelPageActivateAccount;
+  MapList<std::string, std::string> urlParameters;
+  urlParameters.setKeyValue(
+    DatabaseStrings::labelCalculatorRequest,
+    WebAPI::Request::activateAccountJSON
+  );
+  urlParameters.setKeyValue(
+    DatabaseStrings::labelActivationToken, activationToken
+  );
+  urlParameters.setKeyValue(
+    DatabaseStrings::labelUsername, inputUserNameUnsafe
+  );
+  urlParameters.setKeyValue(DatabaseStrings::labelEmail, inputEmailUnsafe);
+  urlParameters.setKeyValue(
+    DatabaseStrings::labelCurrentPage,
+    DatabaseStrings::labelPageActivateAccount
+  );
+  std::string confirmEmailOnly =
+  confirmEmailOnlyNoPasswordSet ? "true" : "false";
+  urlParameters.setKeyValue(
+    WebAPI::Request::confirmEmailOnlyNoPasswordChange, confirmEmailOnly
+  );
   std::string application = global.displayApplication;
   if (global.flagDebugLogin) {
     // Use appNoCache for the link makes life easier when developing locally
@@ -1328,13 +1357,17 @@ bool UserCalculator::getActivationAddressFromActivationToken(
     // to notice you are using a stale cache version.
     application = global.displayApplicationNoCache;
   }
-  out
-  << address
-  << global.displayApplication
-  << "#"
-  << HtmlRoutines::convertStringToURLString(
-    jsonData.toString(nullptr), false
-  );
+  std::stringstream urlParametersStream;
+  for (int i = 0; i < urlParameters.size(); i ++) {
+    urlParametersStream
+    << urlParameters.keys[i]
+    << "="
+    << HtmlRoutines::convertStringToURLString(
+      urlParameters.values[i], false
+    )
+    << "&";
+  }
+  out << address << application << "?" << urlParametersStream.str();
   output = out.str();
   return true;
 }

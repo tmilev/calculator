@@ -10,7 +10,13 @@ const globalUser = require("./user").globalUser;
 class AccountPage {
   constructor() {
     this.mainPage = null;
+    this.spanVerification = document.getElementById("spanVerification");
+    this.usernameInput = document.getElementById(
+      ids.domElements.spanUserIdInAccountsPage
+    );
+    this.emailSpan = document.getElementById(ids.domElements.spanOldEmail);
   }
+
   initialize(mainPage) {
     const buttonChangePasswordFromAccountPage = document.getElementById(
       ids.domElements.pages.account.buttonChangePasswordFromAccountPage
@@ -31,10 +37,10 @@ class AccountPage {
   }
 
   submitChangePassRequestCallback(result) {
-    let spanVerification = document.getElementById("spanVerification");
-    miscellaneous.writeHTML(
-      spanVerification,
-      miscellaneous.jsonParseGetHtmlStandard(result),
+    const resultParsed = miscellaneous.jsonUnescapeParse(result);
+    miscellaneous.writeHtmlFromCommentsAndErrors(
+      resultParsed,
+      this.spanVerification,
     );
     document.getElementById("inputPassword").value = document.getElementById(
       "inputNewPasswordInAccount"
@@ -74,41 +80,44 @@ class AccountPage {
       progress: ids.domElements.spanProgressReportGeneral
     });
   }
-}
 
-function updateAccountPage() {
-  let usernameInput = document.getElementById(
-    ids.domElements.spanUserIdInAccountsPage
-  );
-  let emailSpan = document.getElementById(ids.domElements.spanOldEmail);
-  usernameInput.textContent = storage.variables.user.name.getValue();
-  emailSpan.textContent = storage.variables.user.email.getValue();
-  let spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
-  let table = document.createElement("table");
-  let resultCell = document.createElement("th");
-  resultCell.textContent = "Role:";
-  let row = table.insertRow();
-  row.appendChild(resultCell);
-  resultCell = document.createElement("th");
-  resultCell.textContent = globalUser.getRole();
-  if (
-    globalUser.sectionsTaught.length > 0 &&
-    !globalUser.studentView()
-  ) {
-    row = table.insertRow();
-    row.insertCell().appendChild(
-      document.createTextNode(
-        "Sections taught: "
-      )
-    );
-    row.insertCell().appendChild(
-      document.createTextNode(
-        globalUser.sectionsTaught.join(", ")
-      )
-    );
+  updatePage() {
+    this.usernameInput.textContent = storage.variables.user.name.getValue();
+    this.emailSpan.textContent = storage.variables.user.email.getValue();
+    let spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
+    let table = document.createElement("table");
+    let resultCell = document.createElement("th");
+    resultCell.textContent = "Role:";
+    const row = table.insertRow();
+    row.appendChild(resultCell);
+    resultCell = document.createElement("th");
+    resultCell.textContent = globalUser.getRole();
+    if (
+      globalUser.sectionsTaught.length > 0 &&
+      !globalUser.studentView()
+    ) {
+      row = table.insertRow();
+      row.insertCell().appendChild(
+        document.createTextNode(
+          "Sections taught: "
+        )
+      );
+      row.insertCell().appendChild(
+        document.createTextNode(
+          globalUser.sectionsTaught.join(", ")
+        )
+      );
+    }
+    this.insertRow(table, "Instructor: ", globalUser.instructor);
+    this.insertRow(table, "Section in database: ", globalUser.sectionInDB);
+    this.insertRow(table, "Section computed: ", globalUser.sectionComputed);
+    this.insertRow(table, "Deadline schema: ", globalUser.deadlineSchema);
+    spanExtraInfo.textContent = "";
+    spanExtraInfo.appendChild(table);
   }
-  function insertRow(first, second) {
-    row = table.insertRow();
+
+  insertRow(table, first, second) {
+    const row = table.insertRow();
     row.insertCell().appendChild(
       document.createTextNode(first)
     );
@@ -116,12 +125,10 @@ function updateAccountPage() {
       document.createTextNode(second)
     );
   }
-  insertRow("Instructor: ", globalUser.instructor);
-  insertRow("Section in database: ", globalUser.sectionInDB);
-  insertRow("Section computed: ", globalUser.sectionComputed);
-  insertRow("Deadline schema: ", globalUser.deadlineSchema);
-  spanExtraInfo.textContent = "";
-  spanExtraInfo.appendChild(table);
+}
+
+function updateAccountPage() {
+  accountPage.updatePage();
 }
 
 let accountPage = new AccountPage();

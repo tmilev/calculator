@@ -972,14 +972,16 @@ void WebAPIResponse::forgotLogin(JSData& result) {
   }
   out << "Your email is on record. ";
   std::stringstream commentsOnError;
+  std::stringstream* commentsOnErrorPointer = nullptr;
   bool success = false;
   if (global.flagDebugLogin) {
     out << "Setting email with debug information. ";
-    success =
-    this->doSetEmail(user, &commentsOnError, &out, &commentsOnError);
-  } else {
-    success = this->doSetEmail(user, &commentsOnError, &out, nullptr);
+    commentsOnErrorPointer = &commentsOnError;
   }
+  success =
+  this->doSetEmail(
+    false, user, &commentsOnError, &out, commentsOnErrorPointer
+  );
   if (!success) {
     result[WebAPI::Result::error] = commentsOnError.str();
   }

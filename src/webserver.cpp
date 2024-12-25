@@ -1932,10 +1932,6 @@ std::string WebWorker::getChangePasswordPagePartOne(
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("email"), false
   );
-  out
-  << "<input type ='hidden' id ='activationToken' value ='"
-  << claimedActivationToken
-  << "'>";
   if (claimedActivationToken == "") {
     out << "Activation token is empty. ";
     return out.str();
@@ -1948,7 +1944,7 @@ std::string WebWorker::getChangePasswordPagePartOne(
   std::string usernameAssociatedWithToken;
   if (global.userDefault.email == claimedEmail) {
     out
-    << "\n<b style ='color:green'>Email "
+    << "\n<b style='color:green'>Email "
     << claimedEmail
     << " updated. </b>";
     return out.str();
@@ -1963,7 +1959,7 @@ std::string WebWorker::getChangePasswordPagePartOne(
   Database::get().find(findEmail, nullptr, allEmails, nullptr, &out);
   if (!success) {
     out
-    << "\n<b style ='color:red'>"
+    << "\n<b style='color:red'>"
     << "Failed to fetch email activation token for email: "
     << claimedEmail
     << " </b>";
@@ -2013,18 +2009,18 @@ std::string WebWorker::getChangePasswordPagePartOne(
     DatabaseStrings::labelUsername,
     global.userDefault.username
   );
-  JSData userInfo;
-  userInfo[DatabaseStrings::labelEmail] = claimedEmail;
   QueryUpdate querySet;
-  querySet.fromJSONNoFail(userInfo);
+  querySet.addKeyValueStringPair(DatabaseStrings::labelEmail, claimedEmail);
   if (!Database::get().updateOne(findUser, querySet, true, &out)) {
     out
-    << "\n<b style ='color:red'>"
+    << "\n<b style='color:red'>"
     << "Could not store your email (database is down?). </b>";
     return out.str();
   }
   global.userDefault.email = claimedEmail;
-  out << "\n<b style =\"color:green\">Email successfully updated. </b>";
+  out << "\n<b style='color:green'>Email successfully updated. </b>";
+  JSData userInfo;
+  userInfo[DatabaseStrings::labelEmail] = claimedEmail;
   if (
     global.userDefault.actualActivationToken != "" &&
     global.userDefault.actualActivationToken != "activated" &&

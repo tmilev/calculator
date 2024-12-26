@@ -15,6 +15,8 @@ bool WebAPIResponse::Test::all() {
   WebAPIResponse::Test::compareExpressions();
   WebAPIResponse::Test::forgotLogin();
   WebAPIResponse::Test::signUp();
+  WebAPIResponse::Test::changePasswordEmailOnly();
+  WebAPIResponse::Test::changePassword();
   return true;
 }
 
@@ -191,6 +193,167 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
       << "Desired answer must be absent but was given. "
       << global.fatal;
     }
+  }
+  return true;
+}
+
+void WebAPIResponse::Test::extactActivationTokenFromEmail(
+  const std::string& email, std::string& outputToken
+) {
+  STACK_TRACE("WebAPIResponse::Test::extactActivationTokenFromEmail");
+  int location = email.find("activationToken=");
+  std::string unused;
+  std::string emailTrimmedFromTheStart;
+  StringRoutines::splitStringInTwo(
+    email,
+    location + DatabaseStrings::labelActivationToken.size() + 1,
+    unused,
+    emailTrimmedFromTheStart
+  );
+  location = emailTrimmedFromTheStart.find("&");
+  StringRoutines::splitStringInTwo(
+    emailTrimmedFromTheStart, location, outputToken, unused
+  );
+}
+
+bool WebAPIResponse::Test::changePasswordEmailOnly() {
+  STACK_TRACE("WebAPIResponse::Test::changePasswordEmailOnly");
+  Database::Test tester(DatabaseType::internal);
+  tester.deleteDatabase();
+  tester.startDatabase(DatabaseType::internal);
+  UserCalculatorData userData;
+  Database::Test::createAdminAccountReturnUser(true, userData);
+  StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
+  StateMaintainer<bool> maintainUsingSSL(
+    global.flagUsingSSLinCurrentConnection
+  );
+  StateMaintainer<bool> maintainLoggedIn(global.flagLoggedIn);
+  global.flagUsingSSLinCurrentConnection = true;
+  global.flagDebugLogin = true;
+  global.flagLoggedIn = true;
+  global.userDefault = userData;
+  global.comments.resetComments();
+  std::stringstream unused;
+  StateMaintainer<
+    MapList<
+      std::string,
+      std::string,
+      HashFunctions::hashFunction<std::string>
+    >
+  > maintainWebArgument(global.webArguments);
+  global.webArguments[DatabaseStrings::labelUsername] =
+  WebAPI::userDefaultAdmin;
+  global.webArguments[DatabaseStrings::labelEmail] =
+  "new.email.test.admin.user@calculator-algebra.org";
+  JSData result;
+  WebAPIResponse api;
+  if (global.userDefault.activationEmail != "") {
+    global.fatal << "The activation email is not empty." << global.fatal;
+  }
+  api.changePassword(result, "");
+  if (result.hasKey(WebAPI::Result::error)) {
+    global.fatal
+    << "Failed to change password: "
+    << result.toString()
+    << global.fatal;
+  }
+  if (global.userDefault.activationEmail == "") {
+    global.fatal << "The activation email is empty." << global.fatal;
+  }
+  std::string outputToken;
+  WebAPIResponse::Test::extactActivationTokenFromEmail(
+    global.userDefault.activationEmail, outputToken
+  );
+  if (outputToken == "") {
+    global.fatal << "Empty output token not allowed. " << global.fatal;
+  }
+  JSData activationAccountResult;
+  UserCalculatorData blank;
+  global.userDefault = blank;
+  global.userDefault.username = WebAPI::userDefaultAdmin;
+  global.webArguments[DatabaseStrings::labelActivationToken] = outputToken;
+  api.activateAccount(activationAccountResult);
+  JSData expected;
+  expected["resultHtml"] =
+  "\n<b style='color:green'>Email successfully updated. </b>"
+  "<br><b style ='color:orange'>To fully activate your account, "
+  "please choose a password.</b>";
+  if (activationAccountResult != expected) {
+    global.fatal
+    << "Failed to activate the new email. "
+    << activationAccountResult.toString()
+    << global.fatal;
+  }
+  return true;
+}
+
+bool WebAPIResponse::Test::changePassword() {
+  STACK_TRACE("WebAPIResponse::Test::changePassword");
+  Database::Test tester(DatabaseType::internal);
+  tester.deleteDatabase();
+  tester.startDatabase(DatabaseType::internal);
+  UserCalculatorData userData;
+  Database::Test::createAdminAccountReturnUser(true, userData);
+  StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
+  StateMaintainer<bool> maintainUsingSSL(
+    global.flagUsingSSLinCurrentConnection
+  );
+  StateMaintainer<bool> maintainLoggedIn(global.flagLoggedIn);
+  global.flagUsingSSLinCurrentConnection = true;
+  global.flagDebugLogin = true;
+  global.flagLoggedIn = true;
+  global.userDefault = userData;
+  global.comments.resetComments();
+  std::stringstream unused;
+  StateMaintainer<
+    MapList<
+      std::string,
+      std::string,
+      HashFunctions::hashFunction<std::string>
+    >
+  > maintainWebArgument(global.webArguments);
+  global.webArguments[DatabaseStrings::labelUsername] =
+  WebAPI::userDefaultAdmin;
+  global.webArguments[WebAPI::Request::newPassword] = "123";
+  global.webArguments[WebAPI::Request::reenteredPassword] = "123";
+  JSData result;
+  WebAPIResponse api;
+  api.changePassword(result, "");
+  if (result.hasKey(WebAPI::Result::error)) {
+    global.fatal
+    << "Failed to change password: "
+    << result.toString()
+    << global.fatal;
+  }
+  JSData expected;
+  if (result["success"].booleanValue != true) {
+    global.fatal
+    << "Failed to change password. "
+    << result.toString()
+    << global.fatal;
+  }
+  UserCalculatorData user;
+  user.username = WebAPI::userDefaultAdmin;
+  user.enteredPassword = Database::Test::adminPassword;
+  std::stringstream loginWithOldPassword;
+  std::stringstream loginWithNewPassword;
+  if (
+    Database::get().user.loginViaDatabase(user, &loginWithOldPassword)
+  ) {
+    global.fatal
+    << "I managed to login with the old password! "
+    << loginWithOldPassword.str()
+    << global.fatal;
+  }
+  user.username = WebAPI::userDefaultAdmin;
+  user.enteredPassword = "123";
+  if (
+    !Database::get().user.loginViaDatabase(user, &loginWithNewPassword)
+  ) {
+    global.fatal
+    << "I couldn't login with the new password! "
+    << loginWithNewPassword.str()
+    << global.fatal;
   }
   return true;
 }

@@ -23,6 +23,7 @@ public:
   static std::string compareExpressionsPage;
   static std::string compareExpressionsPageNoCache;
   struct Request {
+  public:
     static std::string requestAPI;
     static std::string database;
     static std::string setProblemWeight;
@@ -31,6 +32,8 @@ public:
     static std::string changePasswordPage;
     static std::string examplesJSON;
     static std::string activateAccountJSON;
+    static std::string newPassword;
+    static std::string reenteredPassword;
     static std::string confirmEmailOnlyNoPasswordChange;
     static std::string calculatorHTML;
     static std::string onePageJS;

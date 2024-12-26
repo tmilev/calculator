@@ -735,6 +735,9 @@ public:
     static bool loadFromJSON();
     bool deleteDatabase();
     static bool createAdminAccount(bool withEmail);
+    static bool createAdminAccountReturnUser(
+      bool withEmail, UserCalculatorData& outputUserData
+    );
     Test(DatabaseType inputDatabaseType);
     ~Test();
     static void startDatabase(DatabaseType databaseType);

@@ -214,17 +214,20 @@ bool Database::Test::deleteDatabase() {
   return true;
 }
 
-bool Database::Test::createAdminAccount(bool withEmail) {
-  STACK_TRACE("Database::Test::createAdminAccount");
-  UserCalculatorData userData;
-  userData.username = WebAPI::userDefaultAdmin;
-  userData.enteredPassword = Database::Test::adminPassword;
+bool Database::Test::createAdminAccountReturnUser(
+  bool withEmail, UserCalculatorData& outputUserData
+) {
+  STACK_TRACE("Database::Test::createAdminAccountReturnUser");
+  outputUserData.username = WebAPI::userDefaultAdmin;
+  outputUserData.enteredPassword = Database::Test::adminPassword;
   if (withEmail) {
-    userData.email = "test.admin.user@calculator-algebra.org";
+    outputUserData.email = "test.admin.user@calculator-algebra.org";
   }
   std::stringstream commentsOnFailure;
   if (
-    !Database::get().user.loginViaDatabase(userData, &commentsOnFailure)
+    !Database::get().user.loginViaDatabase(
+      outputUserData, &commentsOnFailure
+    )
   ) {
     global.fatal
     << "Failed to login as administrator on an empty database. "
@@ -232,6 +235,12 @@ bool Database::Test::createAdminAccount(bool withEmail) {
     << global.fatal;
   }
   return true;
+}
+
+bool Database::Test::createAdminAccount(bool withEmail) {
+  STACK_TRACE("Database::Test::createAdminAccount");
+  UserCalculatorData userData;
+  return Database::Test::createAdminAccountReturnUser(withEmail, userData);
 }
 
 bool QueryUpdate::Test::all() {

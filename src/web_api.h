@@ -60,6 +60,7 @@ public:
   bool processComputationIndicator();
   bool processChangePassword(const std::string& reasonForNoAuthentication);
   bool processActivateAccount();
+  void activateAccount(JSData& output);
   bool processScores();
   bool processApp(bool appendBuildHash);
   bool processCompareExpressionsPage(bool appendBuildHash);
@@ -205,7 +206,12 @@ public:
     static bool compareExpressions();
     static bool addUsersFromData();
     static bool forgotLogin();
+    static bool changePasswordEmailOnly();
+    static bool changePassword();
     static bool signUp();
+    static void extactActivationTokenFromEmail(
+      const std::string& email, std::string& outputToken
+    );
   };
 };
 

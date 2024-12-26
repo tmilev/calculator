@@ -1919,7 +1919,7 @@ std::string WebWorker::getAuthenticationToken(
   return reasonForNoAuthentication;
 }
 
-std::string WebWorker::getChangePasswordPagePartOne(
+std::string WebWorker::changePasswordPagePartOne(
   bool& outputDoShowPasswordChangeField
 ) {
   STACK_TRACE("WebWorker::getChangePasswordPagePartOne");

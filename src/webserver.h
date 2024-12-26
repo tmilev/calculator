@@ -172,9 +172,7 @@ public:
   void sendAllBytesNoHeaders();
   std::string mimeTypeFromFileExtension(const std::string& fileExtension);
   std::string headerFromFileExtension(const std::string& fileExtension);
-  std::string getChangePasswordPagePartOne(
-    bool& outputDoShowPasswordChangeField
-  );
+  std::string changePasswordPagePartOne(bool& outputDoShowPasswordChangeField);
   JSData getClonePageResult();
   std::string getAuthenticationToken(
     const std::string& reasonForNoAuthentication = ""

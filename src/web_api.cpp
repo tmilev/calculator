@@ -585,10 +585,15 @@ bool WebAPIResponse::processActivateAccount() {
   STACK_TRACE("WebAPIResponse::processActivateAccount");
   this->owner->setHeaderOKNoContentLength("");
   JSData result;
-  bool notUsed = false;
-  result[WebAPI::Result::resultHtml] =
-  this->owner->getChangePasswordPagePartOne(notUsed);
+  this->activateAccount(result);
   return global.response.writeResponse(result);
+}
+
+void WebAPIResponse::activateAccount(JSData& output) {
+  STACK_TRACE("WebAPIResponse::activateAccount");
+  bool notUsed = false;
+  output[WebAPI::Result::resultHtml] =
+  this->owner->changePasswordPagePartOne(notUsed);
 }
 
 bool WebAPIResponse::processLogout() {

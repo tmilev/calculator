@@ -30,28 +30,33 @@ class SignUp {
     this.buttonsInitialized = false;
     /** @type {HTMLButtonElement|null} */
     this.submitSignUpButton = null;
-    /** @type {HTMLInputElement} */
-    this.doSendEmailCheckbox = document.getElementById(
-      ids.domElements.pages.signUp.inputSignUpDoSendEmail
+    this.signUpResultElement = document.getElementById(
+      ids.domElements.pages.signUp.signUpResult
     );
+    this.outputStatus = document.getElementById(
+      ids.domElements.pages.login.signUpResultReport
+    );
+
   }
 
   signUp() {
     this.initialize();
-    if (globalUser.debugLoginIsOn()) {
-      document.getElementById(
-        ids.domElements.pages.signUp.inputSignUpDoSendEmailContainer
-      ).style.display = '';
-    }
     this.writeDebugLoginStatus("");
-    if (this.grecaptcha !== null && this.grecaptcha !== undefined) {
-      if (this.recaptchaIdForSignUp === null) {
-        this.recaptchaIdForSignUp = this.grecaptcha.render(
-          ids.domElements.pages.signUp.recaptchaSignUp, {
-          'sitekey': getRecaptchaId()
-        });
-      }
+    this.initializeRecaptcha();
+  }
+
+  initializeRecaptcha() {
+    if (this.grecaptcha === null || this.grecaptcha === undefined) {
+      return;
     }
+    if (this.recaptchaIdForSignUp !== null) {
+      // Already initialized.    
+      return;
+    }
+    this.recaptchaIdForSignUp = this.grecaptcha.render(
+      ids.domElements.pages.signUp.recaptchaSignUp, {
+      'sitekey': getRecaptchaId()
+    });
   }
 
   initialize() {
@@ -122,10 +127,8 @@ class SignUp {
     } else if (this.recaptchaIdForSignUp !== null) {
       token = this.grecaptcha.getResponse(this.recaptchaIdForSignUp);
     }
-    let signUpResultElement = document.getElementById(
-      ids.domElements.pages.signUp.signUpResult
-    );
-    signUpResultElement.textContent = "";
+
+    this.signUpResultElement.textContent = "";
     let desiredUsernameEncoded = encodeURIComponent(
       document.getElementById('desiredUsername').value
     );
@@ -142,7 +145,7 @@ class SignUp {
         const errorElement = document.createElement("b");
         errorElement.textContent = "Please don't forget to solve the captcha.";
         errorElement.style.color = "red";
-        signUpResultElement.appendChild(errorElement);
+        this.signUpResultElement.appendChild(errorElement);
         errorElement.style.backgroundColor = "orange";
         errorElement.style.transition = "all 1s";
         setTimeout(() => {
@@ -151,7 +154,7 @@ class SignUp {
         return false;
       }
       miscellaneous.writeHTML(
-        signUpResultElement,
+        this.signUpResultElement,
         "<b style='color:red'>Debug login: recaptcha ignored.</b>",
       );
     }
@@ -166,20 +169,24 @@ class SignUp {
   }
 
   callbackSignUp(input) {
-    let outputStatus = document.getElementById(ids.domElements.pages.login.signUpResultReport);
-    let output = document.getElementById(ids.domElements.pages.login.signUpResult);
+    this.signUpResultElement.textContent = "";
     try {
       let inputParsed = miscellaneous.jsonUnescapeParse(input);
-      miscellaneous.writeHtmlFromCommentsAndErrors(inputParsed, outputStatus);
+      miscellaneous.writeHtmlFromCommentsAndErrors(inputParsed, this.outputStatus);
+      const html = miscellaneous.htmlFromCommentsAndErrors(inputParsed);
+      const links = miscellaneous.extractLinksReturnAnchorCollection(html);
+      if (links !== null) {
+        this.outputStatus.append(links);
+      }
       let resultHtml = inputParsed[pathnames.urlFields.result.resultHtml];
       if (resultHtml !== undefined) {
-        miscellaneous.writeHTML(output, resultHtml);
+        miscellaneous.writeHTML(this.signUpResultElement, resultHtml);
       }
       if (this.grecaptcha !== undefined && this.grecaptcha !== null) {
         this.grecaptcha.reset();
       }
     } catch (e) {
-      output.textContent = `Result: ${input}. Error: ${e}.`;
+      this.signUpResultElement.textContent = `Result: ${input}. Error: ${e}.`;
     }
   }
 }

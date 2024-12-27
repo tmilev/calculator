@@ -1,6 +1,77 @@
 "use strict";
 let pathnames = require("./pathnames");
 
+/** 
+ * Extracts links from a given text and returns html container.
+ * 
+ * @return {HTMLElement|null} 
+ */
+function extractLinksReturnAnchorCollection(
+  /** @type {string} */
+  inputHTML
+) {
+  const links = extractLinks(inputHTML);
+  if (links.length === 0) {
+    return null;
+  }
+  const result = document.createElement("table");
+  const header = result.insertRow();
+  const headerCell = header.insertCell();
+  headerCell.textContent = "Links extracted from the input. ";
+  headerCell.style.fontWeight = "bolder";
+  result.style.border = "1px solid";
+  for (const link of links) {
+    const anchor = document.createElement("a");
+    anchor.href = link;
+    anchor.textContent = link;
+    const container = result.insertRow().insertCell();
+    container.appendChild(anchor);
+  }
+  return result;
+}
+
+/** @return {string[]} */
+function extractLinks(
+  /** @type {string} */
+  inputHTML
+) {
+  const result = [];
+  let sliced = unescapeInequalitiesAmpersands(inputHTML);
+  for (let i = 0; i < 10; i++) {
+    const linkAndSlice = extractLinksOnce(sliced);
+    sliced = linkAndSlice.remaining;
+    if (linkAndSlice.link != "") {
+      result.push(linkAndSlice.link);
+    }
+  }
+  return result;
+}
+
+/** @return {{remaining:string,link:string}} */
+function extractLinksOnce(
+  /** @type {string} */
+  input
+) {
+  let httpsIndex = input.search("https://");
+  if (httpsIndex === -1) {
+    return { remaining: "", link: "" };
+  }
+  const breakingCharacters = {
+    " ": true,
+    "\n": true,
+  }
+  const linkArray = [];
+  for (let i = httpsIndex; i < input.length; i++) {
+    if (input[i] in breakingCharacters) {
+      break;
+    }
+    linkArray.push(input[i]);
+  }
+  const link = linkArray.join("");
+  const remaining = input.slice(httpsIndex + linkArray.length);
+  return { remaining: remaining, link: link };
+}
+
 function writeHTML(
   /** @type {HTMLElement} */
   element,
@@ -265,5 +336,6 @@ module.exports = {
   jsonParseGetHtmlStandard,
   unescapeInequalitiesAmpersands,
   jsonUnescapeParse,
+  extractLinksReturnAnchorCollection,
   writeHTML,
 };

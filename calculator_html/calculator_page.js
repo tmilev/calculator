@@ -876,7 +876,7 @@ class Calculator {
       panel.originalWidth = 1000
     }
     if (panel.originalHeight > 1000) {
-      panel.originalHeight = 1000
+      panel.originalHeight = 1000;
     }
     panel.matchPanelStatus();
   }

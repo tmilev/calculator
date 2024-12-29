@@ -143,6 +143,9 @@ let domElements = {
     account: {
       buttonChangePasswordFromAccountPage: "buttonChangePasswordFromAccountPage",
       buttonChangeEmail: "buttonChangeEmail",
+      buttonRevealDeleteAccount: "buttonRevealDeleteAccount",
+      divDoDeleteAccountPanel: "divDoDeleteAccountPanel",
+      buttonDoDeleteAccount: "buttonDoDeleteAccount",
     },
     manageAccounts: {
       buttonSetTeacher: "buttonSetTeacher",

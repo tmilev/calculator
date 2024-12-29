@@ -337,7 +337,10 @@ class PanelExpandable {
   }
 }
 
-/** @return {PanelExpandable|null} Returns the panel, or null if the content is too small for a panel. */
+/**
+ * Returns the panel, or null if the content is too small for a panel. 
+ * @return {PanelExpandable|null}  
+ */
 function makePanelFromData(
   /** @type {PanelExpandableData} */
   data,
@@ -366,12 +369,53 @@ function makePanelFromData(
   }
 }
 
+class PanelFromToggleAndContent {
+  constructor(
+    /** @type {HTMLElement} */
+    expandButton,
+    /** @type {HTMLElement} */
+    panel,
+    /** @type {boolean} */
+    startsExpanded
+  ) {
+    this.panel = panel;
+    this.expandButton = expandButton;
+    this.toggleMark = document.createElement("span");
+    this.toggleMark.textContent = "◂";
+    this.toggleMark.style.transition = "0.2s all";
+    this.expandButton.appendChild(this.toggleMark);
+    this.expanded = startsExpanded;
+    this.originalElementHeight = this.panel.getBoundingClientRect().height;
+    if (this.originalElementHeight === 0) {
+      this.originalElementHeight = 50;
+    }
+    this.panel.style.transition = "0.2s all";
+    this.expandButton.addEventListener("click", () => {
+      this.expanded = !this.expanded;
+      this.matchPanelStatus();
+    });
+    this.matchPanelStatus();
+  }
+
+  matchPanelStatus() {
+    if (this.expanded) {
+      this.panel.style.maxHeight = `${this.originalElementHeight}px`;
+      this.panel.style.height = `${this.originalElementHeight}px`;
+      this.toggleMark.style.transform = "rotate(-0.25turn)";
+    } else {
+      this.panel.style.maxHeight = "0px";
+      this.panel.style.height = "0px";
+      this.toggleMark.style.transform = "";
+    }
+  }
+}
 
 module.exports = {
   writeHTML,
   modifyHeightForTimeout,
   PanelExpandable,
   PanelExpandableData,
+  PanelFromToggleAndContent,
   makePanelFromData,
   toggleHeight
 };

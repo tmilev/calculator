@@ -6,34 +6,51 @@ const login = require('./login');
 const miscellaneous = require("./miscellaneous_frontend");
 const storage = require("./storage").storage;
 const globalUser = require("./user").globalUser;
+const PanelFromToggleAndContent = require("./panels").PanelFromToggleAndContent;
 
 class AccountPage {
   constructor() {
-    this.mainPage = null;
     this.spanVerification = document.getElementById("spanVerification");
     this.usernameInput = document.getElementById(
       ids.domElements.spanUserIdInAccountsPage
     );
     this.emailSpan = document.getElementById(ids.domElements.spanOldEmail);
+    const accountIds = ids.domElements.pages.account;
+    this.buttonRevealDeleteAccount = document.getElementById(
+      accountIds.buttonRevealDeleteAccount
+    );
+    this.divDoDeleteAccountPanel = document.getElementById(
+      accountIds.divDoDeleteAccountPanel
+    );
+    this.buttonDoDeleteAccount = document.getElementById(
+      accountIds.buttonDoDeleteAccount
+    );
+    this.buttonChangeEmail = document.getElementById(
+      accountIds.buttonChangeEmail
+    );
+    this.buttonChangePasswordFromAccountPage = document.getElementById(
+      accountIds.buttonChangePasswordFromAccountPage
+    );
+    /** @type {PanelFromToggleAndContent|null} */
+    this.panel = null;
   }
 
   initialize(mainPage) {
-    const buttonChangePasswordFromAccountPage = document.getElementById(
-      ids.domElements.pages.account.buttonChangePasswordFromAccountPage
-    );
-    if (buttonChangePasswordFromAccountPage === null) {
+    if (this.buttonChangePasswordFromAccountPage === null) {
       // Account page not found.
       return;
     }
-    buttonChangePasswordFromAccountPage.addEventListener('click', () => {
+    this.buttonChangePasswordFromAccountPage.addEventListener('click', () => {
       this.submitChangePassRequest();
     });
-    document.getElementById(
-      ids.domElements.pages.account.buttonChangeEmail
-    ).addEventListener('click', () => {
+    this.buttonChangeEmail.addEventListener('click', () => {
       this.submitChangePassRequest();
     });
-    this.mainPage = mainPage;
+    this.panel = new PanelFromToggleAndContent(
+      this.buttonRevealDeleteAccount,
+      this.divDoDeleteAccountPanel,
+      false,
+    );
   }
 
   submitChangePassRequestCallback(result) {

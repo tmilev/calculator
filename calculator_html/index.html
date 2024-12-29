@@ -522,8 +522,9 @@
       </div>
       <div id="divAccount" class="divPage" style="display: none;">
         <form>
+          <!--Form needed to avoid password not in a form warning-->
           <table>
-            <!--Password change table, to avoid password not in a form warning-->
+            <!--Password change table.-->
             <tr>
               <td>User:</td>
               <td> <span id="spanUserIdInAccountsPage"></span></td>
@@ -549,8 +550,8 @@
                   placeholder="password" autocomplete="on">
               </td>
             </tr>
+            <!--Password change table.-->
           </table>
-          <!--Password change table-->
         </form>
         <button class="buttonStandard" id="buttonChangePasswordFromAccountPage">Change password</button>
         <table>
@@ -570,6 +571,14 @@
         <span id="spanVerification"></span>
         <hr>
         <span id="spanUserExtraInfo"></span>
+        <div>
+          <button id="buttonRevealDeleteAccount" class="buttonDangerous">Delete account</button>
+          <div id="divDoDeleteAccountPanel" style="background-color: whitesmoke; overflow: hidden;">
+            <b style="color: red;"> Warning: this operation cannot be undone.</b>
+            <br>
+            <button id="buttonDoDeleteAccount" class="buttonDangerous">Confirm delete request</button>
+          </div>
+        </div>
       </div>
 
       <div id="divActivateAccount" class="divPage" style="display: none;">

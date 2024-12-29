@@ -298,6 +298,20 @@ button.accordion:after {
   margin-left: 0px;
 }
 
+button.buttonDangerous {
+  margin: 3px;
+  padding: 3px;
+  border-radius: 3px;
+  display: inline;
+  background-color: lightcoral;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: medium;
+  transition: 0.6s;
+}
+
 button.buttonStandard {
   margin: 3px;
   padding: 3px;

@@ -263,6 +263,7 @@ public:
     unknown,
     findAndUpdate,
     find,
+    deleteByFindQuery,
     fetchCollectionNames,
     shutdown,
     getLargeMessage,
@@ -339,6 +340,9 @@ public:
   std::string toStringIndices() const;
   std::string fileNameIndex() const;
   DatabaseInternalIndex& indexOfObjectIds();
+  bool deleteOneObjectIdWithoutStoringIndices(
+    const std::string& objectId, std::stringstream* commentsOnFailure
+  );
   DatabaseCollection();
   void initialize(
     const std::string& inputName, DatabaseInternal* inputOwner
@@ -365,6 +369,12 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool shutdown();
+  bool findAllObjectIds(
+    const QueryFindOneOf& query,
+    HashedList<std::string>& allObjectIds,
+    LargeInteger* outputTotalItems,
+    std::stringstream* commentsOnFailure
+  );
   // Finds the objects that match the query.
   // The output may be limited by the query options.
   // The (unlimited) total number of items is written in the outputTotalItems
@@ -388,6 +398,16 @@ public:
   );
   bool fetchCollectionNames(
     List<JSData>& output, std::stringstream* commentsOnFailure
+  );
+  bool deleteAllByFindQuery(
+    const QueryFindOneOf& query,
+    LargeInteger& outputTotalDeleted,
+    std::stringstream* commentsOnFailure
+  );
+  bool deleteOneObjectId(
+    const std::string& objectId,
+    DatabaseCollection& collection,
+    std::stringstream* commentsOnFailure
   );
   bool createObject(
     const JSData& initialValue,
@@ -439,6 +459,11 @@ public:
     const QueryFind& findQuery,
     const QueryUpdate& updateQuery,
     bool createIfNotFound,
+    std::stringstream* commentsOnFailure = nullptr
+  );
+  bool deleteAllByFindQuery(
+    const QueryFindOneOf& findQuery,
+    LargeInteger& outputTotalDeleted,
     std::stringstream* commentsOnFailure = nullptr
   );
   bool fetchCollectionNames(
@@ -670,8 +695,13 @@ public:
   bool deleteOneEntry(
     const JSData& entry, std::stringstream* commentsOnFailure
   );
-  bool deleteOneEntryById(
+  bool deleteAtLeastOneEntryByFindQuery(
     const QueryFind& findQuery, std::stringstream* commentsOnFailure
+  );
+  bool deleteAllByFindQuery(
+    const QueryFindOneOf& findQuery,
+    LargeInteger& outputTotalDeleted,
+    std::stringstream* commentsOnFailure
   );
   static bool deleteOneEntryUnsetUnsecure(
     const QueryFind& findQuery,
@@ -733,6 +763,7 @@ public:
     static bool basics(DatabaseType databaseType);
     static bool findWithOptions(DatabaseType databaseType);
     static bool loadFromJSON();
+    static bool deleteAllByFindQuery();
     bool deleteDatabase();
     static bool createAdminAccount(bool withEmail);
     static bool createAdminAccountReturnUser(

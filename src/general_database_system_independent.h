@@ -48,6 +48,7 @@ public:
   std::string sectionComputed;
   std::string courseComputed;
   std::string problemWeightSchema;
+  std::string deleteAccountToken;
   JSData problemWeights;
   std::string deadlineSchema;
   JSData deadlines;

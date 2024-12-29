@@ -62,6 +62,7 @@ public:
   );
   static bool deleteFileVirtual(
     const std::string& fileNameVirtual,
+    bool accessUltraSensitiveFoldersIfNeeded,
     std::stringstream* commentsOnError
   );
   static bool writeFileVirualWithPermissions(

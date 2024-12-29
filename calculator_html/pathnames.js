@@ -49,6 +49,8 @@ const urlFields = {
     calculatorCompute: "compute",
     mainInput: "mainInput",
     confirmEmailOnlyNoPasswordChange: "confirmEmailOnlyNoPasswordChange",
+    deleteAccount: "deleteAccount",
+    deleteAccountToken: "deleteAccountToken",
   },
   result: {
     result: "result",

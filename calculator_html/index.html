@@ -573,10 +573,17 @@
         <span id="spanUserExtraInfo"></span>
         <div>
           <button id="buttonRevealDeleteAccount" class="buttonDangerous">Delete account</button>
-          <div id="divDoDeleteAccountPanel" style="background-color: whitesmoke; overflow: hidden;">
-            <b style="color: red;"> Warning: this operation cannot be undone.</b>
-            <br>
-            <button id="buttonDoDeleteAccount" class="buttonDangerous">Confirm delete request</button>
+          <div id="divDoDeleteAccountPanel" style="background-color: whitesmoke;">
+            <button id="buttonDoDeleteAccount" class="buttonDangerous">Request deletion</button>
+            <div id="divDoDeleteAccountFinalPanel" style="transition:0.4s all; opacity: 0;">
+              <b style="color: red;"> Warning: this operation cannot be undone.</b>
+              <br>
+              <button id="buttonDoDeleteAccountFinal" class="buttonDangerous">Delete</button>
+              <div id="divAccountDeletionStatus">
+
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

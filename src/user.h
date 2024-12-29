@@ -138,7 +138,9 @@ public:
   void exists(
     bool& outputExists, bool& databaseIsOK, std::stringstream* comments
   );
-  bool storeToDatabase(
+  // Stores the user data to the database.
+  // Overwrites previously stored data.
+  bool storeToDatabaseOverwrite(
     bool doSetPassword, std::stringstream* commentsOnFailure
   );
   static bool isAcceptableDatabaseInput(

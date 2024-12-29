@@ -163,7 +163,7 @@ void Test::run() {
       std::stringstream comments;
       bool success =
       FileOperations::deleteFileVirtual(
-        WebAPI::Calculator::testFileNameVirtual, &comments
+        WebAPI::Calculator::testFileNameVirtual, false, &comments
       );
       if (!success) {
         global.fatal

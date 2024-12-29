@@ -2134,12 +2134,18 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
 }
 
 bool FileOperations::deleteFileVirtual(
-  const std::string& fileNameVirtual, std::stringstream* commentsOnError
+  const std::string& fileNameVirtual,
+  bool accessUltraSensitiveFoldersIfNeeded,
+  std::stringstream* commentsOnError
 ) {
   std::string fileName;
   if (
     !FileOperations::getPhysicalFileNameFromVirtual(
-      fileNameVirtual, fileName, false, false, commentsOnError
+      fileNameVirtual,
+      fileName,
+      accessUltraSensitiveFoldersIfNeeded,
+      accessUltraSensitiveFoldersIfNeeded,
+      commentsOnError
     )
   ) {
     return false;

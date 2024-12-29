@@ -257,9 +257,8 @@ bool Database::isDeleteable(
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
-      <<
-      "The labels json is required to be an object of the form {fields: [tableName, objectId,...]}. "
-      ;
+      << "The labels json is required to be an object of "
+      << "the form {fields: [tableName, objectId,...]}. ";
     }
     return false;
   }
@@ -287,7 +286,7 @@ bool Database::deleteOneEntry(
     return false;
   }
   List<std::string>* labelTypes = nullptr;
-  if (!isDeleteable(entry, &labelTypes, commentsOnFailure)) {
+  if (!Database::isDeleteable(entry, &labelTypes, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Entry: "
@@ -326,22 +325,57 @@ bool Database::deleteOneEntry(
   );
   std::string tableName = labels[0];
   if (labels.size == 0) {
-    return this->deleteOneEntryById(findQuery, commentsOnFailure);
+    return
+    this->deleteAtLeastOneEntryByFindQuery(findQuery, commentsOnFailure);
   }
   return
   Database::deleteOneEntryUnsetUnsecure(findQuery, labels, commentsOnFailure);
 }
 
-bool Database::deleteOneEntryById(
-  const QueryFind& findQuery, std::stringstream* commentsOnFailure
+bool Database::deleteAllByFindQuery(
+  const QueryFindOneOf& findQuery,
+  LargeInteger& outputTotalDeleted,
+  std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("Database::deleteOneEntryById");
-  (void) findQuery;
-  if (commentsOnFailure != nullptr) {
-    *commentsOnFailure
-    << "deleteOneEntryById: project compiled without mongoDB support. ";
+  STACK_TRACE("Database::deleteAllByFindQuery");
+  switch (global.databaseType) {
+  case DatabaseType::internal:
+    return
+    this->localDatabase.client.deleteAllByFindQuery(
+      findQuery, outputTotalDeleted, commentsOnFailure
+    );
+  default:
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      <<
+      "deleteOneEntryByFindQuery has only been implemented for the internal database."
+      ;
+    }
+    return false;
   }
   return false;
+}
+
+bool Database::deleteAtLeastOneEntryByFindQuery(
+  const QueryFind& findQuery, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("Database::deleteOneEntryByFindQuery");
+  QueryFindOneOf findWrapper(findQuery);
+  LargeInteger totalDeleted;
+  if (
+    !Database::deleteAllByFindQuery(
+      findQuery, totalDeleted, commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  if (totalDeleted.isEqualToZero()) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Found no items to delete.";
+    }
+    return false;
+  }
+  return true;
 }
 
 bool Database::deleteOneEntryUnsetUnsecure(

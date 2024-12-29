@@ -75,6 +75,7 @@ public:
   bool processAssignTeacherToSection();
   bool processExamPageJSON();
   bool processTemplateJSON();
+  bool processDeleteAccount();
   bool processLoginUserInfo(const std::string& comments);
   bool processSelectCourseJSON();
   bool processLogout();
@@ -152,6 +153,9 @@ public:
   static std::string getCaptchaDiv();
   static JSData getExamPageJSON();
   static std::string getJSONFromTemplate();
+  static JSData deleteAccount();
+  static JSData deleteAccountGenerateToken();
+  static JSData deleteAccountFinal(const std::string& token);
   static JSData getJSONUserInfo(const std::string& comments);
   static void getJSDataUserInfo(
     JSData& outputAppend, const std::string& comments

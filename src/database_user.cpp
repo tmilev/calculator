@@ -1,10 +1,11 @@
 #include "calculator_problem_storage.h"
 #include "crypto_calculator.h"
 #include "database.h"
+#include "general_strings.h"
 #include "html_routines.h"
 #include "string_constants.h"
 #include "user.h"
-#include "webserver.h"
+#include "web_api.h"
 
 std::string UserCalculatorData::toStringFindQueries() const {
   QueryFindOneOf queries;
@@ -321,6 +322,8 @@ bool UserCalculatorData::loadFromJSON(JSData& input) {
   HtmlRoutines::convertURLStringToNormal(
     this->actualHashedSaltedPassword, false
   );
+  this->deleteAccountToken =
+  input[WebAPI::Result::deleteAccountToken].stringValue;
   JSData sectionsTaughtList = input[DatabaseStrings::labelSectionsTaught];
   if (sectionsTaughtList.elementType == JSData::Type::tokenArray) {
     for (int i = 0; i < sectionsTaughtList.listObjects.size; i ++) {
@@ -1086,7 +1089,7 @@ bool DatabaseUserRoutines::loginViaGoogleTokenCreateNewAccountIfNeeded(
       << " does not exist. ";
     }
     userWrapper.username = userWrapper.email;
-    if (!userWrapper.storeToDatabase(false, commentsOnFailure)) {
+    if (!userWrapper.storeToDatabaseOverwrite(false, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Failed to store the user data. ";
       }
@@ -1243,7 +1246,7 @@ bool DatabaseUserRoutines::firstLoginOfAdmin(
   << Logger::endL;
   userInDatabase.actualActivationToken = "activated";
   userInDatabase.userRole = UserCalculator::Roles::administrator;
-  if (!userInDatabase.storeToDatabase(true, commentsOnFailure)) {
+  if (!userInDatabase.storeToDatabaseOverwrite(true, commentsOnFailure)) {
     global << Logger::red << "Failed to store default's pass to database. ";
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to store default's pass to database. ";
@@ -1280,10 +1283,10 @@ void UserCalculator::computeHashedSaltedPassword() {
   );
 }
 
-bool UserCalculator::storeToDatabase(
+bool UserCalculator::storeToDatabaseOverwrite(
   bool doSetPassword, std::stringstream* commentsOnFailure
 ) {
-  STACK_TRACE("UserCalculator::storeToDatabase");
+  STACK_TRACE("UserCalculator::storeToDatabaseOverwrite");
   QueryFind findUser(
     DatabaseStrings::tableUsers,
     DatabaseStrings::labelUsername,

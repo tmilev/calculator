@@ -46,6 +46,30 @@ DatabaseInternalClient::DatabaseInternalClient() {
   this->owner = nullptr;
 }
 
+bool DatabaseInternalClient::deleteAllByFindQuery(
+  const QueryFindOneOf& findQuery,
+  LargeInteger& outputTotalDeleted,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("DatabaseInternalClient::deleteAllByFindQuery");
+  DatabaseInternalResult result;
+  DatabaseInternalRequest request;
+  request.requestType = DatabaseInternalRequest::Type::deleteByFindQuery;
+  request.queryOneOfExactly = findQuery;
+  if (
+    !this->owner->sendAndReceiveFromClientFull(
+      request, result, commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure << "Failed to send payload to database. ";
+    }
+    return false;
+  }
+  outputTotalDeleted = result.totalItems;
+  return true;
+}
+
 bool DatabaseInternalClient::updateOne(
   const QueryFind& findQuery,
   const QueryUpdate& updateQuery,
@@ -514,6 +538,12 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
       &commentsOnFailure
     );
     break;
+  case DatabaseInternalRequest::Type::deleteByFindQuery:
+    output.success =
+    this->server.deleteAllByFindQuery(
+      request.queryOneOfExactly, output.totalItems, &commentsOnFailure
+    );
+    break;
   case DatabaseInternalRequest::Type::fetchCollectionNames:
     output.success =
     this->server.fetchCollectionNames(output.content, &commentsOnFailure);
@@ -715,21 +745,26 @@ void DatabaseInternalRequest::toJSON(JSData& output) const {
   output = JSData();
   output[DatabaseStrings::requestType] =
   this->typeToString(this->requestType);
-  if (this->requestType == DatabaseInternalRequest::Type::findAndUpdate) {
+  switch (this->requestType) {
+  case DatabaseInternalRequest::Type::findAndUpdate:
     output[DatabaseStrings::requestContent] =
     this->queryFindAndUpdate.toJSON();
     return;
-  }
-  if (this->requestType == DatabaseInternalRequest::Type::find) {
+  case DatabaseInternalRequest::Type::find:
+  case DatabaseInternalRequest::deleteByFindQuery:
     output[DatabaseStrings::requestContent] = this->queryOneOfExactly.toJSON();
     if (this->options.isNonTrivial()) {
       output[DatabaseStrings::requestOptions] = this->options.toJSON();
     }
     return;
-  }
-  if (this->requestType == DatabaseInternalRequest::Type::getLargeMessage) {
+  case DatabaseInternalRequest::Type::getLargeMessage:
     output[DatabaseStrings::messageHandle] = this->messageHandle;
     output[DatabaseStrings::messageId] = this->messageId;
+    return;
+  case DatabaseInternalRequest::Type::unknown:
+  case DatabaseInternalRequest::Type::shutdown:
+  case DatabaseInternalRequest::Type::fetchCollectionNames:
+    return;
   }
 }
 
@@ -781,6 +816,14 @@ DatabaseInternalRequest::Type DatabaseInternalRequest::stringToType(
   if (
     input ==
     DatabaseInternalRequest::typeToString(
+      DatabaseInternalRequest::Type::deleteByFindQuery
+    )
+  ) {
+    return DatabaseInternalRequest::Type::deleteByFindQuery;
+  }
+  if (
+    input ==
+    DatabaseInternalRequest::typeToString(
       DatabaseInternalRequest::Type::shutdown
     )
   ) {
@@ -813,6 +856,8 @@ std::string DatabaseInternalRequest::typeToString(
     return "shutdown";
   case DatabaseInternalRequest::Type::getLargeMessage:
     return "getLargeMessage";
+  case DatabaseInternalRequest::Type::deleteByFindQuery:
+    return "deleteByFindQuery";
   }
   global.fatal
   << "Unhandled case in DatabaseInternalRequest::typeToString. "
@@ -832,6 +877,12 @@ bool DatabaseInternalRequest::fromJSData(
   case DatabaseInternalRequest::Type::findAndUpdate:
     return
     this->queryFindAndUpdate.fromJSON(
+      this->contentReader[DatabaseStrings::requestContent],
+      commentsOnFailure
+    );
+  case DatabaseInternalRequest::Type::deleteByFindQuery:
+    return
+    this->queryOneOfExactly.fromJSON(
       this->contentReader[DatabaseStrings::requestContent],
       commentsOnFailure
     );
@@ -892,6 +943,81 @@ bool DatabaseInternalServer::shutdown() {
   return true;
 }
 
+bool DatabaseInternalServer::deleteAllByFindQuery(
+  const QueryFindOneOf& query,
+  LargeInteger& outputTotalDeleted,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("DatabaseInternalServer::deleteAllByFindQuery");
+  std::string collectionName = query.collection();
+  if (collectionName == "") {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to extract the collection name from your query. ";
+    }
+    return false;
+  }
+  HashedList<std::string> allObjectIds;
+  if (
+    !this->findAllObjectIds(query, allObjectIds, nullptr, commentsOnFailure)
+  ) {
+    return false;
+  }
+  DatabaseCollection& collection =
+  this->collections.getValueNoFailNonConst(collectionName);
+  for (const std::string& objectId : allObjectIds) {
+    if (
+      !collection.deleteOneObjectIdWithoutStoringIndices(
+        objectId, commentsOnFailure
+      )
+    ) {
+      return false;
+    }
+  }
+  bool result = collection.storeIndicesToHardDrive(commentsOnFailure);
+  if (result) {
+    outputTotalDeleted.assignInteger(allObjectIds.size);
+  }
+  return result;
+}
+
+bool DatabaseInternalServer::findAllObjectIds(
+  const QueryFindOneOf& query,
+  HashedList<std::string>& allObjectIds,
+  LargeInteger* outputTotalItems,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("DatabaseInternalServer::findAllObjectIds");
+  std::string collection = query.collection();
+  if (collection == "") {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to extract the collection name from your query. ";
+    }
+    return false;
+  }
+  LargeInteger counter;
+  if (outputTotalItems == nullptr) {
+    outputTotalItems = &counter;
+  }
+  outputTotalItems->makeZero();
+  List<std::string> currentObjectIds;
+  LargeInteger foundItems;
+  for (int i = 0; i < query.queries.size; i ++) {
+    QueryFind& queryExact = query.queries[i];
+    if (
+      !DatabaseInternalServer::findObjectIds(
+        queryExact, currentObjectIds, &foundItems, commentsOnFailure
+      )
+    ) {
+      return false;
+    }
+    *outputTotalItems += foundItems;
+    allObjectIds.addOnTopNoRepetition(currentObjectIds);
+  }
+  return true;
+}
+
 bool DatabaseInternalServer::find(
   const QueryFindOneOf& query,
   const QueryResultOptions* options,
@@ -901,32 +1027,15 @@ bool DatabaseInternalServer::find(
 ) {
   STACK_TRACE("DatabaseInternalServer::find");
   (void) options;
-  List<std::string> currentObjectIds;
   HashedList<std::string> allObjectIds;
   JSData loader;
-  std::string collection;
-  for (int i = 0; i < query.queries.size; i ++) {
-    QueryFind& queryExact = query.queries[i];
-    if (i == 0) {
-      collection = queryExact.collection;
-    } else if (queryExact.collection != collection) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure
-        << "Combined query must refer to a single collection, "
-        << "you used 2: "
-        << queryExact.collection
-        << ", collection.";
-      }
-      return false;
-    }
-    if (
-      !DatabaseInternalServer::findObjectIds(
-        queryExact, currentObjectIds, outputTotalItems, commentsOnFailure
-      )
-    ) {
-      return false;
-    }
-    allObjectIds.addOnTopNoRepetition(currentObjectIds);
+  std::string collection = query.collection();
+  if (
+    !this->findAllObjectIds(
+      query, allObjectIds, outputTotalItems, commentsOnFailure
+    )
+  ) {
+    return false;
   }
   for (const std::string& objectId : allObjectIds) {
     if (
@@ -1441,6 +1550,24 @@ JSData DatabaseInternalServer::toJSONDatabase() {
     result[collection.name] = collectionJSON;
   }
   return result;
+}
+
+bool DatabaseCollection::deleteOneObjectIdWithoutStoringIndices(
+  const std::string& objectId, std::stringstream* commentsOnFailure
+) {
+  for (DatabaseInternalIndex& index : this->indices.values) {
+    if (!index.objectIdToKeyValue.contains(objectId)) {
+      continue;
+    }
+    const std::string value =
+    index.objectIdToKeyValue.getValueNoFail(objectId);
+    index.removeObjectId(objectId, value);
+    index.objectIdToKeyValue.removeKey(objectId);
+  }
+  std::string filename =
+  this->owner->server.objectFilename(objectId, this->name);
+  global << "Deleting object id: " << objectId << Logger::endL;
+  return FileOperations::deleteFileVirtual(filename, true, commentsOnFailure);
 }
 
 DatabaseInternalIndex& DatabaseCollection::indexOfObjectIds() {

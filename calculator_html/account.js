@@ -31,8 +31,18 @@ class AccountPage {
     this.buttonChangePasswordFromAccountPage = document.getElementById(
       accountIds.buttonChangePasswordFromAccountPage
     );
+    this.divDoDeleteAccountFinalPanel = document.getElementById(
+      accountIds.divDoDeleteAccountFinalPanel
+    );
+    this.buttonDoDeleteAccountFinal = document.getElementById(
+      accountIds.buttonDoDeleteAccountFinal
+    );
+    this.divAccountDeletionStatus = document.getElementById(
+      accountIds.divAccountDeletionStatus
+    );
     /** @type {PanelFromToggleAndContent|null} */
     this.panel = null;
+    this.deleteAccountToken = "";
   }
 
   initialize(mainPage) {
@@ -51,6 +61,13 @@ class AccountPage {
       this.divDoDeleteAccountPanel,
       false,
     );
+    this.panel.originalElementHeight = 150;
+    this.buttonDoDeleteAccount.addEventListener("click", () => {
+      this.deleteAccountRequest();
+    });
+    this.buttonDoDeleteAccountFinal.addEventListener("click", () => {
+      this.deleteAccountFinal();
+    });
   }
 
   submitChangePassRequestCallback(result) {
@@ -141,6 +158,74 @@ class AccountPage {
     row.insertCell().appendChild(
       document.createTextNode(second)
     );
+  }
+
+  deleteAccountRequest() {
+    this.divAccountDeletionStatus.textContent = "";
+    this.divDoDeleteAccountFinalPanel.style.opacity = 0;
+    const urlFields = pathnames.urlFields;
+    const requests = urlFields.requests;
+    const calculatorAPI = pathnames.urls.calculatorAPI;
+    let url = `${calculatorAPI}?`;
+    url += `${urlFields.request}=${requests.deleteAccount}&`;
+    submitRequests.submitGET({
+      url: url,
+      callback: (result) => {
+        this.deleteAccountCallback(result);
+      },
+      progress: ids.domElements.spanProgressReportGeneral
+    });
+  }
+
+  deleteAccountCallback(result) {
+    const parsed = miscellaneous.jsonUnescapeParse(result);
+    this.deleteAccountToken = parsed[pathnames.urlFields.requests.deleteAccountToken];
+    this.divDoDeleteAccountFinalPanel.style.opacity = 1;
+    const success = parsed[pathnames.urlFields.result.success];
+    if (success !== true && success !== "true") {
+      miscellaneous.writeHtmlElementsFromCommentsAndErrors(
+        parsed, this.divAccountDeletionStatus
+      );
+    }
+    if (pathnames.standardResponses.isNotLoggedInResponse(parsed)) {
+      const errorElement = document.createElement("b");
+      errorElement.style.color = "red";
+      errorElement.textContent = "I have trouble authenticating you, " +
+        "please login again";
+      this.divAccountDeletionStatus.appendChild(errorElement);
+    }
+  }
+
+  deleteAccountFinal() {
+    this.divAccountDeletionStatus.textContent = "";
+    const urlFields = pathnames.urlFields;
+    const requests = urlFields.requests;
+    const calculatorAPI = pathnames.urls.calculatorAPI;
+    let url = `${calculatorAPI}?`;
+    url += `${urlFields.request}=${requests.deleteAccount}&`;
+    url += `${requests.deleteAccountToken}=${this.deleteAccountToken}`;
+    submitRequests.submitGET({
+      url: url,
+      callback: (result) => {
+        this.deleteAccountFinalCallback(result);
+      },
+      progress: ids.domElements.spanProgressReportGeneral
+    });
+  }
+
+  deleteAccountFinalCallback(result) {
+    const parsed = miscellaneous.jsonUnescapeParse(result);
+    const success = parsed[pathnames.urlFields.result.success];
+    if (success !== true && success !== "true") {
+      miscellaneous.writeHtmlElementsFromCommentsAndErrors(
+        parsed, this.divAccountDeletionStatus
+      );
+    } else {
+      this.divAccountDeletionStatus.textContent = "";
+      const successElement = document.createElement("b");
+      successElement.style.color = "green";
+      this.divAccountDeletionStatus.appendChild(successElement);
+    }
   }
 }
 

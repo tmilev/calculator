@@ -379,9 +379,11 @@ class PanelFromToggleAndContent {
     startsExpanded
   ) {
     this.panel = panel;
+    this.panel.style.overflow = "hidden";
     this.expandButton = expandButton;
     this.toggleMark = document.createElement("span");
-    this.toggleMark.textContent = "◂";
+    this.toggleMark.textContent = "◀";
+    this.toggleMark.style.display = "inline-block";
     this.toggleMark.style.transition = "0.2s all";
     this.expandButton.appendChild(this.toggleMark);
     this.expanded = startsExpanded;

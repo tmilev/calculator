@@ -146,6 +146,9 @@ let domElements = {
       buttonRevealDeleteAccount: "buttonRevealDeleteAccount",
       divDoDeleteAccountPanel: "divDoDeleteAccountPanel",
       buttonDoDeleteAccount: "buttonDoDeleteAccount",
+      divDoDeleteAccountFinalPanel: "divDoDeleteAccountFinalPanel",
+      buttonDoDeleteAccountFinal: "buttonDoDeleteAccountFinal",
+      divAccountDeletionStatus: "divAccountDeletionStatus",
     },
     manageAccounts: {
       buttonSetTeacher: "buttonSetTeacher",

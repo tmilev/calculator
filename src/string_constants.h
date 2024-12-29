@@ -96,6 +96,7 @@ public:
     static std::string login;
     static std::string logout;
     static std::string signUp;
+    static std::string deleteAccount;
     static std::string addUsers;
     static std::string addEmails;
     static std::string setTeacher;
@@ -127,6 +128,7 @@ public:
     static std::string outputString;
     static std::string error;
     static std::string status;
+    static std::string deleteAccountToken;
     static std::string running;
     static std::string crashReport;
     static std::string millisecondsComputation;

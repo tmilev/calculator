@@ -56,6 +56,54 @@ bool Database::Test::all() {
   Database::Test::findWithOptions(DatabaseType::fallback);
   Database::Test::findWithOptions(DatabaseType::internal);
   Database::Test::loadFromJSON();
+  Database::Test::deleteAllByFindQuery();
+  return true;
+}
+
+bool Database::Test::deleteAllByFindQuery() {
+  STACK_TRACE("Database::Test::deleteAllByFindQuery");
+  Database::Test tester(DatabaseType::internal);
+  tester.createAdminAccount(false);
+  QueryFind query;
+  query.collection = "users";
+  query.setLabelValue("username", "default");
+  QueryFindOneOf queryWrapper(query);
+  LargeInteger totalFound;
+  std::stringstream commentsOnFailure;
+  bool success =
+  Database::get().deleteAllByFindQuery(
+    queryWrapper, totalFound, &commentsOnFailure
+  );
+  if (!success) {
+    global.fatal
+    << "Failed to delete all by find query. "
+    << commentsOnFailure.str()
+    << global.fatal;
+  }
+  if (!totalFound.isEqualToOne()) {
+    global.fatal
+    << "Deleted "
+    << totalFound.toString()
+    << " items instead of 1. "
+    << global.fatal;
+  }
+  success =
+  Database::get().deleteAllByFindQuery(
+    queryWrapper, totalFound, &commentsOnFailure
+  );
+  if (!success) {
+    global.fatal
+    << "Failed to delete all by find query. "
+    << commentsOnFailure.str()
+    << global.fatal;
+  }
+  if (!totalFound.isEqualToZero()) {
+    global.fatal
+    << "Deleted "
+    << totalFound.toString()
+    << " items instead of 0. "
+    << global.fatal;
+  }
   return true;
 }
 

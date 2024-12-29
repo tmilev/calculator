@@ -5,7 +5,6 @@
 #include "string_constants.h"
 #include "user.h"
 #include "web_api.h"
-#include "web_client.h"
 #include "webserver.h"
 
 std::string WebAPIResponse::youHaveReachedTheBackend =
@@ -196,6 +195,10 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     "/" + global.requestType == WebAPI::Request::calculatorWorkerJSWithHash
   ) {
     return this->processCalculatorWebWorkerJS(true);
+  } else if (
+    global.flagLoggedIn && global.requestType == WebAPI::Request::deleteAccount
+  ) {
+    return this->processDeleteAccount();
   }
   return false;
 }
@@ -684,6 +687,12 @@ bool WebAPIResponse::processCompareExpressionsPage(bool appendBuildHash) {
   );
   this->owner->sendPending();
   return true;
+}
+
+bool WebAPIResponse::processDeleteAccount() {
+  this->owner->setHeaderOKNoContentLength("");
+  return
+  global.response.writeResponse(WebAPIResponse::deleteAccount(), false);
 }
 
 bool WebAPIResponse::processLoginUserInfo(const std::string& comments) {
@@ -1256,7 +1265,7 @@ JSData WebAPIResponse::getSignUpRequestResult() {
     << user.email
     << ") is available.";
   }
-  if (!user.storeToDatabase(false, &errorStream)) {
+  if (!user.storeToDatabaseOverwrite(false, &errorStream)) {
     errorStream << "Failed to store error stream. ";
     result[WebAPI::Result::error] = errorStream.str();
     result[WebAPI::Result::comments] = generalCommentsStream.str();
@@ -1272,5 +1281,60 @@ JSData WebAPIResponse::getSignUpRequestResult() {
   );
   result[WebAPI::Result::comments] = generalCommentsStream.str();
   result[WebAPI::Result::resultHtml] = outputStream.str();
+  return result;
+}
+
+JSData WebAPIResponse::deleteAccount() {
+  std::string token =
+  global.webArguments.getValue(WebAPI::Result::deleteAccountToken, "");
+  if (token == "") {
+    return WebAPIResponse::deleteAccountGenerateToken();
+  }
+  return WebAPIResponse::deleteAccountFinal(token);
+}
+
+JSData WebAPIResponse::deleteAccountFinal(const std::string& token) {
+  JSData result;
+  if (token != global.userDefault.deleteAccountToken) {
+    result[WebAPI::Result::success] = false;
+    result[WebAPI::Result::error] =
+    "The provided token: " + token + " does not match the internal one.";
+    return result;
+  }
+  QueryFind find;
+  global.userDefault.getFindMeQueryByUsername(find);
+  std::stringstream commentsOnFailure;
+  if (
+    !Database::get().deleteAtLeastOneEntryByFindQuery(
+      find, &commentsOnFailure
+    )
+  ) {
+    result[WebAPI::Result::success] = false;
+    result[WebAPI::Result::error] = commentsOnFailure.str();
+    return result;
+  }
+  result[WebAPI::Result::success] = true;
+  return result;
+}
+
+JSData WebAPIResponse::deleteAccountGenerateToken() {
+  JSData result;
+  std::string deleteAccountToken =
+  Crypto::Random::getRandomHexStringLeaveMemoryTrace(10);
+  std::stringstream commentsOnFailure;
+  QueryFindAndUpdate findAndUpdate;
+  global.userDefault.getFindMeQueryByUsername(findAndUpdate.find);
+  findAndUpdate.update.addKeyStringValuePair(
+    WebAPI::Result::deleteAccountToken, deleteAccountToken
+  );
+  bool success =
+  Database::get().updateOne(
+    findAndUpdate.find, findAndUpdate.update, true, &commentsOnFailure
+  );
+  result[WebAPI::Result::success] = success;
+  if (!success) {
+    result[WebAPI::Result::comments] = commentsOnFailure.str();
+  }
+  result[WebAPI::Result::deleteAccountToken] = deleteAccountToken;
   return result;
 }

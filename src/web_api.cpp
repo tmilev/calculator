@@ -1296,12 +1296,18 @@ JSData WebAPIResponse::deleteAccount() {
 
 JSData WebAPIResponse::deleteAccountFinal(const std::string& token) {
   JSData result;
+  // The user is already authenticated, the account belongs to them.
+  // Therefore, there's no need to guard against timing attacks
+  // where an attacker guesses the token by the comparison speeeds of the
+  // following operation.
   if (token != global.userDefault.deleteAccountToken) {
     result[WebAPI::Result::success] = false;
+    // Once a user is logged in, the deletion account is not a secret.
     result[WebAPI::Result::error] =
     "The provided token: " +
     token +
-    " does not match the internal one. "
+    " does not match the internal one: " +
+    global.userDefault.deleteAccountToken +
     "Please request deletion again.";
     return result;
   }

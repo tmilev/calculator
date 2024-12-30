@@ -17,6 +17,7 @@ bool WebAPIResponse::Test::all() {
   WebAPIResponse::Test::signUp();
   WebAPIResponse::Test::changePasswordEmailOnly();
   WebAPIResponse::Test::changePassword();
+  WebAPIResponse::Test::deleteAccount();
   return true;
 }
 
@@ -283,6 +284,73 @@ bool WebAPIResponse::Test::changePasswordEmailOnly() {
     << "Failed to activate the new email. "
     << activationAccountResult.toString()
     << global.fatal;
+  }
+  return true;
+}
+
+bool WebAPIResponse::Test::deleteAccount() {
+  STACK_TRACE("WebAPIResponse::Test::deleteAccount");
+  Database::Test tester(DatabaseType::internal);
+  tester.deleteDatabase();
+  tester.startDatabase(DatabaseType::internal);
+  UserCalculatorData userData;
+  Database::Test::createAdminAccountReturnUser(true, userData);
+  StateMaintainer<bool> maintainDebugLogin(global.flagDebugLogin);
+  StateMaintainer<bool> maintainUsingSSL(
+    global.flagUsingSSLinCurrentConnection
+  );
+  StateMaintainer<bool> maintainLoggedIn(global.flagLoggedIn);
+  global.flagUsingSSLinCurrentConnection = true;
+  global.flagDebugLogin = true;
+  global.flagLoggedIn = true;
+  global.userDefault = userData;
+  global.comments.resetComments();
+  StateMaintainer<
+    MapList<
+      std::string,
+      std::string,
+      HashFunctions::hashFunction<std::string>
+    >
+  > maintainWebArgument(global.webArguments);
+  WebAPIResponse api;
+  JSData resultTokenGeneration = api.deleteAccount();
+  std::string token =
+  resultTokenGeneration[WebAPI::Result::deleteAccountToken].stringValue;
+  if (token.size() != 20) {
+    global.fatal
+    << "Expected a deletion token of length 20, got: "
+    << token
+    << global.fatal;
+  }
+  std::string wrongToken = "asdf";
+  global.webArguments[WebAPI::Result::deleteAccountToken] = wrongToken;
+  JSData resultWrongToken = api.deleteAccount();
+  if (!resultWrongToken.hasKey(WebAPI::Result::success)) {
+    global.fatal << "Expected success field to be set. " << global.fatal;
+  }
+  if (resultWrongToken[WebAPI::Result::success].booleanValue != false) {
+    global.fatal << "Got success with wrong activation token." << global.fatal;
+  }
+  global.webArguments[WebAPI::Result::deleteAccountToken] = token;
+  if (
+    !Database::get().user.loginViaDatabase(global.userDefault, nullptr)
+  ) {
+    global.fatal << "Unexpected failure to login. " << global.fatal;
+  }
+  JSData resultFinal = api.deleteAccount();
+  if (!resultFinal[WebAPI::Result::success].booleanValue) {
+    global.fatal
+    << "Failed to delete the user. "
+    << resultFinal.toString()
+    << global.fatal;
+  }
+  UserCalculator user;
+  user.username = WebAPI::userDefaultAdmin;
+  bool databaseOK = false;
+  bool exists = false;
+  user.exists(exists, databaseOK, nullptr);
+  if (!databaseOK || exists) {
+    global.fatal << "Admin user still exists!" << global.fatal;
   }
   return true;
 }

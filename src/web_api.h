@@ -153,8 +153,19 @@ public:
   static std::string getCaptchaDiv();
   static JSData getExamPageJSON();
   static std::string getJSONFromTemplate();
+  // Deletes an account in two phases.
+  // The first phase generates a confirmation token.
+  // The second phase actually deletes the account if
+  // the confirumation token is included.
+  // The confirmation token is a guard
+  // against an attacker who generates a link to
+  // the deletion API and get a victim to accidentally click
+  // and erase their account without wanting to do so.
   static JSData deleteAccount();
+  // Generates a confirmation token for the account deletion.
   static JSData deleteAccountGenerateToken();
+  // Deletes the account if the given confirmation token
+  // matches the record.
   static JSData deleteAccountFinal(const std::string& token);
   static JSData getJSONUserInfo(const std::string& comments);
   static void getJSDataUserInfo(
@@ -213,6 +224,7 @@ public:
     static bool changePasswordEmailOnly();
     static bool changePassword();
     static bool signUp();
+    static bool deleteAccount();
     static void extactActivationTokenFromEmail(
       const std::string& email, std::string& outputToken
     );

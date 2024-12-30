@@ -209,6 +209,7 @@ public:
   void extractAddressParts();
   void sanitizeVirtualFileName();
   int serveClient();
+  int serveWebServerTraffic();
   std::string toStringAddressAndRequest();
 };
 

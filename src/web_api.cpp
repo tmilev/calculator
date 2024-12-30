@@ -429,17 +429,18 @@ JSData WebAPIResponse::setEmail(
   if (global.flagDebugLogin) {
     adminOutputStream = &errorStream;
   }
-  if (
-    !WebAPIResponse::doSetEmail(
-      confirmEmailOnlyNoPasswordSet,
-      global.userDefault,
-      &errorStream,
-      &out,
-      adminOutputStream
-    )
-  ) {
+  bool success =
+  WebAPIResponse::doSetEmail(
+    confirmEmailOnlyNoPasswordSet,
+    global.userDefault,
+    &errorStream,
+    &out,
+    adminOutputStream
+  );
+  if (!success) {
     result[WebAPI::Result::error] = errorStream.str();
   }
+  result[WebAPI::Result::success] = success;
   if (global.flagDebugLogin) {
     out << "Debug login information. " << debugStream.str();
   }

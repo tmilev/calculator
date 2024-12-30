@@ -1,15 +1,32 @@
 "use strict";
 let pathnames = require("./pathnames");
 
+
+/** 
+ * Extracts links from a standard result json.
+ * 
+ * @return {HTMLElement|null} 
+ */
+function extractLinksFromStandardJsonReturnAnchorCollection(
+  input
+) {
+  return extractLinksReturnAnchorCollection(
+    htmlFromCommentsAndErrors(input)
+  );
+}
+
 /** 
  * Extracts links from a given text and returns html container.
  * 
  * @return {HTMLElement|null} 
  */
 function extractLinksReturnAnchorCollection(
-  /** @type {string} */
+  /** @type {string|null|undefined} */
   inputHTML
 ) {
+  if (inputHTML === null || inputHTML === undefined) {
+    return null;
+  }
   const links = extractLinks(inputHTML);
   if (links.length === 0) {
     return null;
@@ -337,5 +354,6 @@ module.exports = {
   unescapeInequalitiesAmpersands,
   jsonUnescapeParse,
   extractLinksReturnAnchorCollection,
+  extractLinksFromStandardJsonReturnAnchorCollection,
   writeHTML,
 };

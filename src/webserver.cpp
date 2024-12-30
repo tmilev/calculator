@@ -2329,6 +2329,33 @@ bool WebWorker::requireSSL() {
   return global.flagSSLAvailable;
 }
 
+int WebWorker::serveWebServerTraffic(){
+  global.web.flagIsStandaloneWebserver = true;
+  const ActAsWebServerOnly& configuration =
+      global.web.actAsWebServerOnlyForTheseHosts.getValueNoFail(
+          this->hostNoPort
+          );
+  if (
+      global.web.port != configuration.portHTTP &&
+      global.web.port != configuration.portHTTPS
+      ) {
+    std::stringstream redirectAddressStart;
+    redirectAddressStart
+        << "https://"
+        << this->hostNoPort
+        << ":"
+        << configuration.portHTTPS;
+    std::string redirectAddress =
+        FileOperations::addPaths(
+            redirectAddressStart.str(), this->addressComputed
+            );
+    this->redirect(redirectAddress);
+    return 0;
+  }
+  this->addressComputed = configuration.adjustURL(this->addressComputed);
+  return this->processFolderOrFile(false);
+}
+
 int WebWorker::serveClient() {
   STACK_TRACE("WebWorker::serveClient");
   global.millisecondsComputationStart = global.getElapsedMilliseconds();
@@ -2366,30 +2393,7 @@ int WebWorker::serveClient() {
   if (
     global.web.actAsWebServerOnlyForTheseHosts.contains(this->hostNoPort)
   ) {
-    global.web.flagIsStandaloneWebserver = true;
-    const ActAsWebServerOnly& configuration =
-    global.web.actAsWebServerOnlyForTheseHosts.getValueNoFail(
-      this->hostNoPort
-    );
-    if (
-      global.web.port != configuration.portHTTP &&
-      global.web.port != configuration.portHTTPS
-    ) {
-      std::stringstream redirectAddressStart;
-      redirectAddressStart
-      << "https://"
-      << this->hostNoPort
-      << ":"
-      << configuration.portHTTPS;
-      std::string redirectAddress =
-      FileOperations::addPaths(
-        redirectAddressStart.str(), this->addressComputed
-      );
-      this->redirect(redirectAddress);
-      return 0;
-    }
-    this->addressComputed = configuration.adjustURL(this->addressComputed);
-    return this->processFolderOrFile(false);
+   return this->serveWebServerTraffic();
   }
   std::stringstream argumentProcessingFailureComments;
   this->flagArgumentsAreOK = true;
@@ -2532,7 +2536,7 @@ int WebWorker::processFolderOrFile(bool generateLinkToCalculatorOnMissingFile)
     << HtmlRoutines::convertStringToHtmlStringRestrictSize(
       this->virtualFileName, false, 1000
     )
-    << " <b style = 'color:red'>deemed unsafe</b>. "
+    << " <b style='color:red'>deemed unsafe</b>. "
     << "Please note that folder names "
     << "are not allowed to contain dots and file names "
     << "are not allowed to start with dots. "

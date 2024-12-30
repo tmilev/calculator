@@ -75,13 +75,21 @@ bool DatabaseUserRoutines::loadUserInformation(
     return false;
   }
   if (allUsers.size > 1) {
-    if (commentsOnFailure != nullptr) {
-      *commentsOnFailure
-      << "Found more than one user with your username/email! "
-      << "This should not be possible. "
-      << "Please file a bug report at our bug tracker!";
+      // It appears both the username and the email
+    // exist but they belong to different accounts.
+    std::string username = allUsers[0][DatabaseStrings::labelUsername].stringValue;
+    if (username != output.username || username == ""){
+      if (commentsOnFailure!= nullptr){
+        *commentsOnFailure << "It seems that the username and email "
+                              <<"you provided belong to different accounts. "
+                           << "We'd default to the first find but only if it matches the username. "
+                           << "However, the first find does not "
+                           << "match the username you provided: " <<  output.username;
+      }
+      return false;
     }
-    return false;
+    // The username of the first found json matches the given username.
+    // We default to it.
   }
   return output.loadFromJSON(allUsers[0]);
 }
@@ -701,7 +709,13 @@ void UserCalculator::exists(
   this->getFindMeQueryByUsernameOrEmail(query);
   databaseIsOK =
   Database::get().find(query, nullptr, allUsers, nullptr, comments);
-  outputExists = allUsers.size == 1;
+  // If the email of the admin account is reused, it may be possible to have
+// more than 1 users found here. It should not have been possible to
+  // have a reused email. However, due to (hopefully now fixed) bugs
+  // in our code, a reused email has actually been observed in
+  // production. So let us handle the case of more than one user
+  // as well.
+  outputExists = (allUsers.size >= 1);
 }
 
 bool UserCalculator::computeAndStoreActivationToken(

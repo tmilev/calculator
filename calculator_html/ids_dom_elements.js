@@ -149,6 +149,8 @@ let domElements = {
       divDoDeleteAccountFinalPanel: "divDoDeleteAccountFinalPanel",
       buttonDoDeleteAccountFinal: "buttonDoDeleteAccountFinal",
       divAccountDeletionStatus: "divAccountDeletionStatus",
+      inputOldPasswordInAccount: "inputOldPasswordInAccount",
+      inputNewPasswordInAccount: "inputNewPasswordInAccount",
     },
     manageAccounts: {
       buttonSetTeacher: "buttonSetTeacher",

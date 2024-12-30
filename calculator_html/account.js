@@ -40,6 +40,12 @@ class AccountPage {
     this.divAccountDeletionStatus = document.getElementById(
       accountIds.divAccountDeletionStatus
     );
+    this.inputOldPasswordInAccount = document.getElementById(
+      accountIds.inputOldPasswordInAccount
+    );
+    this.inputNewPasswordInAccount = document.getElementById(
+      accountIds.inputNewPasswordInAccount
+    );
     /** @type {PanelFromToggleAndContent|null} */
     this.panel = null;
     this.deleteAccountToken = "";
@@ -72,28 +78,46 @@ class AccountPage {
 
   submitChangePassRequestCallback(result) {
     const resultParsed = miscellaneous.jsonUnescapeParse(result);
+    const success = resultParsed[pathnames.urlFields.result.success];
+    if (success === true) {
+      this.spanVerification.style.color = "green";
+    } else {
+      this.spanVerification.style.color = "red";
+    }
     miscellaneous.writeHtmlFromCommentsAndErrors(
       resultParsed,
       this.spanVerification,
     );
-    document.getElementById("inputPassword").value = document.getElementById(
-      "inputNewPasswordInAccount"
-    ).value;
-    document.getElementById("inputOldPasswordInAccount").value = "";
-    document.getElementById("inputNewPasswordInAccount").value = "";
+    if (globalUser.debugLogin) {
+      const links = miscellaneous.extractLinksFromStandardJsonReturnAnchorCollection(
+        resultParsed
+      );
+      if (links !== null) {
+        this.spanVerification.appendChild(links);
+      }
+    }
+    const wasJustEmailChange = (this.inputNewPasswordInAccount.value === "");
+    this.inputOldPasswordInAccount.value = "";
+    this.inputNewPasswordInAccount.value = "";
     document.getElementById("inputReenteredPasswordInAccount").value = "";
-    login.authenticator.loginCalculator();
+    if (success === true && !wasJustEmailChange) {
+      document.getElementById("inputPassword").value = this.inputNewPasswordInAccount.value;
+      const pleaseLoginAgain = document.createElement("span");
+      pleaseLoginAgain.textContent = "Please login again";
+      this.spanVerification.appendChild(pleaseLoginAgain);
+    }
   }
 
   submitChangePassRequest() {
-    let inputOldPassword = document.getElementById("inputOldPasswordInAccount");
+    this.spanVerification.textContent = "";
+    this.spanVerification.style.fontWeight = "bolder";
     let inputNewPassword = document.getElementById("inputNewPasswordInAccount");
     let inputReenteredPassword = document.getElementById("inputReenteredPasswordInAccount");
     let inputEmail = document.getElementById("inputEmail");
     const urlFields = pathnames.urlFields;
     const calculatorAPI = pathnames.urls.calculatorAPI;
     let url = "";
-    const encodedOldPassword = encodeURIComponent(inputOldPassword.value);
+    const encodedOldPassword = encodeURIComponent(this.inputOldPasswordInAccount.value);
     const encodedNewPassword = encodeURIComponent(inputNewPassword.value);
     const encodedReenteredPassword = encodeURIComponent(
       inputReenteredPassword.value
@@ -118,7 +142,9 @@ class AccountPage {
   updatePage() {
     this.usernameInput.textContent = storage.variables.user.name.getValue();
     this.emailSpan.textContent = storage.variables.user.email.getValue();
-    let spanExtraInfo = document.getElementById(ids.domElements.spanUserExtraInfo);
+    let spanExtraInfo = document.getElementById(
+      ids.domElements.spanUserExtraInfo
+    );
     let table = document.createElement("table");
     let resultCell = document.createElement("th");
     resultCell.textContent = "Role:";

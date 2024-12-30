@@ -2329,26 +2329,24 @@ bool WebWorker::requireSSL() {
   return global.flagSSLAvailable;
 }
 
-int WebWorker::serveWebServerTraffic(){
+int WebWorker::serveWebServerTraffic() {
   global.web.flagIsStandaloneWebserver = true;
   const ActAsWebServerOnly& configuration =
-      global.web.actAsWebServerOnlyForTheseHosts.getValueNoFail(
-          this->hostNoPort
-          );
+  global.web.actAsWebServerOnlyForTheseHosts.getValueNoFail(this->hostNoPort);
   if (
-      global.web.port != configuration.portHTTP &&
-      global.web.port != configuration.portHTTPS
-      ) {
+    global.web.port != configuration.portHTTP &&
+    global.web.port != configuration.portHTTPS
+  ) {
     std::stringstream redirectAddressStart;
     redirectAddressStart
-        << "https://"
-        << this->hostNoPort
-        << ":"
-        << configuration.portHTTPS;
+    << "https://"
+    << this->hostNoPort
+    << ":"
+    << configuration.portHTTPS;
     std::string redirectAddress =
-        FileOperations::addPaths(
-            redirectAddressStart.str(), this->addressComputed
-            );
+    FileOperations::addPaths(
+      redirectAddressStart.str(), this->addressComputed
+    );
     this->redirect(redirectAddress);
     return 0;
   }
@@ -2393,7 +2391,7 @@ int WebWorker::serveClient() {
   if (
     global.web.actAsWebServerOnlyForTheseHosts.contains(this->hostNoPort)
   ) {
-   return this->serveWebServerTraffic();
+    return this->serveWebServerTraffic();
   }
   std::stringstream argumentProcessingFailureComments;
   this->flagArgumentsAreOK = true;

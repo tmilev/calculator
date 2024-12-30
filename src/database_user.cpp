@@ -77,23 +77,16 @@ bool DatabaseUserRoutines::loadUserInformation(
   if (allUsers.size > 1) {
     // It appears both the username and the email
     // exist but they belong to different accounts.
-    std::string username =
-    allUsers[0][DatabaseStrings::labelUsername].stringValue;
-    if (username != output.username || username == "") {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure
-        << "It seems that the username and email "
-        << "you provided belong to different accounts. "
-        <<
-        "We'd default to the first find but only if it matches the username. "
-        << "However, the first find does not "
-        << "match the username you provided: "
-        << output.username;
+    std::string desiredUsername = output.username;
+    for (JSData& user : allUsers) {
+      std::string username =
+      allUsers[0][DatabaseStrings::labelUsername].stringValue;
+      if (username == desiredUsername) {
+        // Found an exact username match.
+        // Login using that account.
+        return output.loadFromJSON(user);
       }
-      return false;
     }
-    // The username of the first found json matches the given username.
-    // We default to it.
   }
   return output.loadFromJSON(allUsers[0]);
 }

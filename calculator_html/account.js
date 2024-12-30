@@ -249,6 +249,8 @@ class AccountPage {
     } else {
       this.divAccountDeletionStatus.textContent = "";
       const successElement = document.createElement("b");
+      successElement.textContent =
+        "Your account was deleted. Please refresh the page. ";
       successElement.style.color = "green";
       this.divAccountDeletionStatus.appendChild(successElement);
     }

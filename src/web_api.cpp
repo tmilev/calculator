@@ -1299,7 +1299,10 @@ JSData WebAPIResponse::deleteAccountFinal(const std::string& token) {
   if (token != global.userDefault.deleteAccountToken) {
     result[WebAPI::Result::success] = false;
     result[WebAPI::Result::error] =
-    "The provided token: " + token + " does not match the internal one.";
+    "The provided token: " +
+    token +
+    " does not match the internal one. "
+    "Please request deletion again.";
     return result;
   }
   QueryFind find;

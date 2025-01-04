@@ -21,14 +21,15 @@
 <script>
   function clickSlider(slider) {
     document.getElementById("editor").style.fontSize = `${slider.value}px`;
+    svgContainer.style.fontSize = `${slider.value}px`;
     document.getElementById("font-size").textContent = `${slider.value}px`;
     editor.resizingEditorFont = true;
     editor.updateDOM();
-    editor.writeSVG();
     editor.drawOnCanvas();
     editor.rootNode.focusRestore(1);
     editor.writeDebugInfo(null);
     editor.resizingEditorFont = false;
+    typesetSVG();
   }
   var editor = null;
   function handleEnter(editor, shiftKeyPressed) {
@@ -41,7 +42,16 @@
     debug.appendChild(document.createTextNode(editor.rootNode.toLatex()));
   }
 
+  function typesetSVG() {
+    const latex = editor.rootNode.toLatex();
+    svgContainer.textContent = `\\(${latex}\\)`;
+    typeset(svgContainer);
+  }
+
+  var svgContainer = null;
+
   function createEditor() {
+    svgContainer = document.getElementById("svgContainer");
     const options = new EquationEditorOptions({
       // Can you edit the math or is it static math?
       editable: true,
@@ -57,6 +67,9 @@
       copyButton: true,
       // Extra key handler to be executed after the regular
       // equation editor handers.
+      editHandler: () => {
+        typesetSVG();
+      },
       /** @type {Object<string, Function>} */
       extraKeyHandlers: {
         "Enter": handleEnter,
@@ -68,8 +81,7 @@
         outline: "1px dashed black",
       },
     });
-    let svgContainer = document.getElementById("svgContainer");
-    editor = new EquationEditor(document.getElementById('editor'), options, svgContainer);
+    editor = new EquationEditor(document.getElementById('editor'), options);
     editor.containerCanvas = document.getElementById("canvasContainer");
     let panel = new EquationEditorButtonPanel(
       // The editor to go with the button panel.
@@ -158,7 +170,7 @@
   <hr>
   Svg output:
   <br>
-  <div id="svgContainer"></div>
+  <div id="svgContainer" style="font-size: 72px; font-family:'Times New Roman'"></div>
   <br>
   Canvas output:
   <br>
@@ -166,7 +178,8 @@
   <div id="debug" style="display:normal"></div>
   <h2>How to use on your web site.</h2>
   Include the script <a
-    href='https://github.com/tmilev/calculator/blob/master/calculator_html/equation_editor.js'>equation_editor.js</a> in
+    href='https://github.com/tmilev/calculator/blob/master/calculator_html/equation_editor.js'>equation_editor.js</a>
+  in
   your html page. Use the typeset function to convert content enclosed in \( \) text to LaTeX. Use
   new EquationEditor(...) to create an editable math equation editor. Here's a simple example; you can see it rendered
   <a href='example_equation_editor.html'>here</a>. Here's an <a href='example_equation_editor_with_panel.html'>example
@@ -354,7 +367,8 @@ Typeset all math in the 'toBeTypeSet' tag.
           \frac{xy^2z^3}{\arctan
           y}dx} </div>
       </li>
-      <li> Copy button on static math: <div class="mathcalculator" copyButton="true">\left(x^2\right) +(x^2)+\left(\frac
+      <li> Copy button on static math: <div class="mathcalculator" copyButton="true">\left(x^2\right)
+          +(x^2)+\left(\frac
           1 2\right)</div>
       </li>
       <li> Nth root: \(2\sqrt[5]{3x^2}\)</li>
@@ -365,7 +379,8 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> Limits \(\lim\limits_{x\to-\infty}x\),\(\lim\limits_{x\to-\infty}\frac{2}{x}\) \(\lim_{x\to 5^+} x\),
         \(\lim\limits_{x\to\pm\infty}\).</li>
       <li> How are expressions such as \(((123+12)^{123})\) rendered and vertically aligned inline?</li>
-      <li> Horizontal alignment trigonometry: \(sin(2\alpha)\), \(\sin (2x)\), \(\cos x\); for example \(\cos^2x\)</li>
+      <li> Horizontal alignment trigonometry: \(sin(2\alpha)\), \(\sin (2x)\), \(\cos x\); for example \(\cos^2x\)
+      </li>
       <li> Absolute values in parentheses.
         \( (a+\frac{1}{2}|x|+c) \)
         \( (a+\frac{1}{2}\left|1+x\right|+c) \)
@@ -390,7 +405,8 @@ Typeset all math in the 'toBeTypeSet' tag.
       </li>
       <li> \(\displaystyle \lim _{x\to 0}\frac{\sin x}{x} \stackrel{\text{L'Hospital}}{=} 1\)</li>
       <li> \(0.3 \overline{ 640 }= 0.3 640 640 640 \dots =\)</li>
-      <li> Miscellaneous symbols \(\S,\to,\bullet,\approx, \searrow, \swarrow, \nwarrow,\nearrow\), \(b\cdot a\neq b \),
+      <li> Miscellaneous symbols \(\S,\to,\bullet,\approx, \searrow, \swarrow, \nwarrow,\nearrow\), \(b\cdot a\neq b
+        \),
         \(f\circ g\), \(x\mapsto y\)
       </li>
       </li>
@@ -411,7 +427,8 @@ Typeset all math in the 'toBeTypeSet' tag.
         \sqrt{b^{2}-{4} a
         c}}{{2} a}\\ &=&\frac{ 10\pm \sqrt{\left(-10\right)^{2}-4\cdot 24 }}{{2}( 1)}\\ &=&\frac{ 10\pm \sqrt{
         100-96}}{2}\\
-        &=&\frac{ 10\pm \sqrt{ 4}}{2}\\ &=&\left\{\begin{array}{l} 4\\ 6\end{array} \right. \\ \end{array} \end{array}}
+        &=&\frac{ 10\pm \sqrt{ 4}}{2}\\ &=&\left\{\begin{array}{l} 4\\ 6\end{array} \right. \\ \end{array}
+        \end{array}}
         \end{array}\)</li>
       <li> \(60+k 360\)</li>
       <li> \(\theta=60^\circ+k 360^\circ ~or~ \theta=120^\circ+k 360^\circ\)</li>
@@ -433,20 +450,24 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> \(\begin{array}{rcll|l} \displaystyle \displaystyle \lim\limits_{x \to 4}\frac{-5 x^{2}+39
         x-76}{4 x^{2}-35 x+76}&=&\displaystyle \lim\limits_{x \to 4}
         \frac{-5(x-4)(x-\frac{19}{5})}{4(x-4)(x-\frac{19}{4})} && {\begin{array}{l}\text{If~we~can't~guess~
-        factorization: }\\ ax^{2}+bx+c=a(x-x_{1})(x-x_{2})\\ \text{ then~use:}\\ \text{Numerator: }\\ \begin{array}{rcl}
+        factorization: }\\ ax^{2}+bx+c=a(x-x_{1})(x-x_{2})\\ \text{ then~use:}\\ \text{Numerator: }\\
+        \begin{array}{rcl}
         x_{1},x_{2}&=&\frac{-b\pm \sqrt{b^{2}-{4} a
         c}}{{2} a}\\ &=&\frac{ -39\pm \sqrt{39^{2}-4 \left(-5 \left(-76\right)\right) }}{{2}( -5)}\\ &=&\frac{ -39\pm
         \sqrt{ 1521-1520}}{-10}\\
-        &=&\frac{ -39\pm \sqrt{ 1}}{-10}\\ &=&4, \frac{19}{5}\\ \end{array} \\ \text{Denominator:~}\\ \begin{array}{rcl}
+        &=&\frac{ -39\pm \sqrt{ 1}}{-10}\\ &=&4, \frac{19}{5}\\ \end{array} \\ \text{Denominator:~}\\
+        \begin{array}{rcl}
         x_{1},x_{2}&=&\frac{-b\pm \sqrt{b^{2}-{4} a
         c}}{{2} a}\\ &=&\frac{ 35\pm \sqrt{\left(-35\right)^{2}-4^{2}\cdot 76 }}{{2} 4}\\ &=&\frac{ 35\pm \sqrt{
         1225-1216}}{8}\\
-        &=&\frac{ 35\pm \sqrt{ 9}}{8}\\ &=&4, \frac{19}{4}\\ \end{array} \end{array}}\\ &=&\displaystyle \lim\limits_{x
+        &=&\frac{ 35\pm \sqrt{ 9}}{8}\\ &=&4, \frac{19}{4}\\ \end{array} \end{array}}\\ &=&\displaystyle
+        \lim\limits_{x
         \to 4} \frac{-5(\cancel{x-4})(x-\frac{19}{5})}{4(\cancel{x-4})(x-\frac{19}{4})} &&\text{Allowed~to~substitute~
         }x=-5\\ &=&\displaystyle \frac{-5(4-\frac{19}{5})}{4(4-\frac{19}{4})}\\ &=&\displaystyle \frac{1}{3}
         \end{array}\)
       </li>
-      <li> \(\begin{array}{rcll|l} \displaystyle \lim\limits_{x \to -1}\frac{x^{2}+4 x+3}{x^{2}+6 x+5}&=& \displaystyle
+      <li> \(\begin{array}{rcll|l} \displaystyle \lim\limits_{x \to -1}\frac{x^{2}+4 x+3}{x^{2}+6 x+5}&=&
+        \displaystyle
         \lim\limits_{x \to -1} \frac{(x+1)(x+3)}{(x+1)(x+5)} && {\begin{array}{l}\text{Factor:~Vieta's~formulas~help:~
         if:}\\ ax^{2}+bx+c=a(x-x_{1})(x-x_{2})\\ \text{then:}\\ {\begin{array}{rcl} \displaystyle x_{1}+x_{2}&=&
         \displaystyle - \frac{b}{a}= \\ \displaystyle x_{1} x_{2} &=& \displaystyle \frac{c}{a} \end{array}}
@@ -459,9 +480,12 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> A problem solution:
         \( \begin{array}{rcll|l} \displaystyle \int \frac{3 x}{x^{2}+3} {\text d} x&=&\displaystyle 3 \phantom{}
         \int\frac{
-        {\text d} \left(\frac{x^{2}}{{2}}\right)}{x^{2}+3} \\ &=&\displaystyle \frac{3}{2} \phantom{} \int\frac{ {\text
-        d} \left(x^{2}+3\right)}{x^{2}+3} &&\text{Set~} u=x^{2}+3 \\ &=&\displaystyle \frac{3}{2} \phantom{} \int\frac{
-        {\text d} u}{u} \\ &=&\displaystyle \frac{3}{2} \phantom{} \ln |u| +C \\ &=&\displaystyle \frac{3}{2} \phantom{}
+        {\text d} \left(\frac{x^{2}}{{2}}\right)}{x^{2}+3} \\ &=&\displaystyle \frac{3}{2} \phantom{} \int\frac{
+        {\text
+        d} \left(x^{2}+3\right)}{x^{2}+3} &&\text{Set~} u=x^{2}+3 \\ &=&\displaystyle \frac{3}{2} \phantom{}
+        \int\frac{
+        {\text d} u}{u} \\ &=&\displaystyle \frac{3}{2} \phantom{} \ln |u| +C \\ &=&\displaystyle \frac{3}{2}
+        \phantom{}
         \ln |x^{2}+3| +C \end{array}
         \)
       </li>
@@ -554,11 +578,14 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> A small matrix: \(\begin{pmatrix}1 &2\\3&4\end{pmatrix}\).
       <li> A small matrix with fractions: \(\begin{pmatrix}\frac{1}{2}
         &\frac{1}{3}\\\frac{1}{3}&\frac{1}{4}\end{pmatrix}\).
-      <li> A matrix: \(\begin{pmatrix}\frac{1}{2} & \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6} & \frac{1}{7}
+      <li> A matrix: \(\begin{pmatrix}\frac{1}{2} & \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6} &
+        \frac{1}{7}
         &
-        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6}
+        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} &
+        \frac{1}{6}
         & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}\\ \frac{1}{4} &
-        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}
+        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} &
+        \frac{1}{12}
         & \frac{1}{13}\\ \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} &
         \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14}\\ \frac{1}{6} & \frac{1}{7} & \frac{1}{8} &
         \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14} & \frac{1}{15}\\
@@ -572,9 +599,11 @@ Typeset all math in the 'toBeTypeSet' tag.
         \frac{1}{20} \end{pmatrix} \) </li>
       <li> Square root of a matrix:
         \(A=\sqrt{\begin{pmatrix}\frac{1}{2} & \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6} & \frac{1}{7} &
-        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6}
+        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} &
+        \frac{1}{6}
         & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}\\ \frac{1}{4} &
-        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}
+        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} &
+        \frac{1}{12}
         & \frac{1}{13}\\ \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} &
         \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14}\\ \frac{1}{6} & \frac{1}{7} & \frac{1}{8} &
         \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14} & \frac{1}{15}\\
@@ -649,7 +678,8 @@ Typeset all math in the 'toBeTypeSet' tag.
           \frac{xy^2z^3}{\arctan
           y}dx} </div>
       </li>
-      <li> Copy button on static math: <div class="mathcalculator" copyButton="true">\left(x^2\right) +(x^2)+\left(\frac
+      <li> Copy button on static math: <div class="mathcalculator" copyButton="true">\left(x^2\right)
+          +(x^2)+\left(\frac
           1 2\right)</div>
       </li>
       <li> Nth root: \(2\sqrt[5]{3x^2}\)</li>
@@ -660,7 +690,8 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> Limits \(\lim\limits_{x\to-\infty}x\),\(\lim\limits_{x\to-\infty}\frac{2}{x}\) \(\lim_{x\to 5^+} x\),
         \(\lim\limits_{x\to\pm\infty}\).</li>
       <li> How are expressions such as \(((123+12)^{123})\) rendered and vertically aligned inline?</li>
-      <li> Horizontal alignment trigonometry: \(sin(2\alpha)\), \(\sin (2x)\), \(\cos x\); for example \(\cos^2x\)</li>
+      <li> Horizontal alignment trigonometry: \(sin(2\alpha)\), \(\sin (2x)\), \(\cos x\); for example \(\cos^2x\)
+      </li>
       <li> Absolute values in parentheses.
         \( (a+\frac{1}{2}|x|+c) \)
         \( (a+\frac{1}{2}\left|1+x\right|+c) \)
@@ -685,7 +716,8 @@ Typeset all math in the 'toBeTypeSet' tag.
       </li>
       <li> \(\displaystyle \lim _{x\to 0}\frac{\sin x}{x} \stackrel{\text{L'Hospital}}{=} 1\)</li>
       <li> \(0.3 \overline{ 640 }= 0.3 640 640 640 \dots =\)</li>
-      <li> Miscellaneous symbols \(\S,\to,\bullet,\approx, \searrow, \swarrow, \nwarrow,\nearrow\), \(b\cdot a\neq b \),
+      <li> Miscellaneous symbols \(\S,\to,\bullet,\approx, \searrow, \swarrow, \nwarrow,\nearrow\), \(b\cdot a\neq b
+        \),
         \(f\circ g\), \(x\mapsto y\)
       </li>
       </li>
@@ -706,7 +738,8 @@ Typeset all math in the 'toBeTypeSet' tag.
         \sqrt{b^{2}-{4} a
         c}}{{2} a}\\ &=&\frac{ 10\pm \sqrt{\left(-10\right)^{2}-4\cdot 24 }}{{2}( 1)}\\ &=&\frac{ 10\pm \sqrt{
         100-96}}{2}\\
-        &=&\frac{ 10\pm \sqrt{ 4}}{2}\\ &=&\left\{\begin{array}{l} 4\\ 6\end{array} \right. \\ \end{array} \end{array}}
+        &=&\frac{ 10\pm \sqrt{ 4}}{2}\\ &=&\left\{\begin{array}{l} 4\\ 6\end{array} \right. \\ \end{array}
+        \end{array}}
         \end{array}\)</li>
       <li> \(60+k 360\)</li>
       <li> \(\theta=60^\circ+k 360^\circ ~or~ \theta=120^\circ+k 360^\circ\)</li>
@@ -728,20 +761,24 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> \(\begin{array}{rcll|l} \displaystyle \displaystyle \lim\limits_{x \to 4}\frac{-5 x^{2}+39
         x-76}{4 x^{2}-35 x+76}&=&\displaystyle \lim\limits_{x \to 4}
         \frac{-5(x-4)(x-\frac{19}{5})}{4(x-4)(x-\frac{19}{4})} && {\begin{array}{l}\text{If~we~can't~guess~
-        factorization: }\\ ax^{2}+bx+c=a(x-x_{1})(x-x_{2})\\ \text{ then~use:}\\ \text{Numerator: }\\ \begin{array}{rcl}
+        factorization: }\\ ax^{2}+bx+c=a(x-x_{1})(x-x_{2})\\ \text{ then~use:}\\ \text{Numerator: }\\
+        \begin{array}{rcl}
         x_{1},x_{2}&=&\frac{-b\pm \sqrt{b^{2}-{4} a
         c}}{{2} a}\\ &=&\frac{ -39\pm \sqrt{39^{2}-4 \left(-5 \left(-76\right)\right) }}{{2}( -5)}\\ &=&\frac{ -39\pm
         \sqrt{ 1521-1520}}{-10}\\
-        &=&\frac{ -39\pm \sqrt{ 1}}{-10}\\ &=&4, \frac{19}{5}\\ \end{array} \\ \text{Denominator:~}\\ \begin{array}{rcl}
+        &=&\frac{ -39\pm \sqrt{ 1}}{-10}\\ &=&4, \frac{19}{5}\\ \end{array} \\ \text{Denominator:~}\\
+        \begin{array}{rcl}
         x_{1},x_{2}&=&\frac{-b\pm \sqrt{b^{2}-{4} a
         c}}{{2} a}\\ &=&\frac{ 35\pm \sqrt{\left(-35\right)^{2}-4^{2}\cdot 76 }}{{2} 4}\\ &=&\frac{ 35\pm \sqrt{
         1225-1216}}{8}\\
-        &=&\frac{ 35\pm \sqrt{ 9}}{8}\\ &=&4, \frac{19}{4}\\ \end{array} \end{array}}\\ &=&\displaystyle \lim\limits_{x
+        &=&\frac{ 35\pm \sqrt{ 9}}{8}\\ &=&4, \frac{19}{4}\\ \end{array} \end{array}}\\ &=&\displaystyle
+        \lim\limits_{x
         \to 4} \frac{-5(\cancel{x-4})(x-\frac{19}{5})}{4(\cancel{x-4})(x-\frac{19}{4})} &&\text{Allowed~to~substitute~
         }x=-5\\ &=&\displaystyle \frac{-5(4-\frac{19}{5})}{4(4-\frac{19}{4})}\\ &=&\displaystyle \frac{1}{3}
         \end{array}\)
       </li>
-      <li> \(\begin{array}{rcll|l} \displaystyle \lim\limits_{x \to -1}\frac{x^{2}+4 x+3}{x^{2}+6 x+5}&=& \displaystyle
+      <li> \(\begin{array}{rcll|l} \displaystyle \lim\limits_{x \to -1}\frac{x^{2}+4 x+3}{x^{2}+6 x+5}&=&
+        \displaystyle
         \lim\limits_{x \to -1} \frac{(x+1)(x+3)}{(x+1)(x+5)} && {\begin{array}{l}\text{Factor:~Vieta's~formulas~help:~
         if:}\\ ax^{2}+bx+c=a(x-x_{1})(x-x_{2})\\ \text{then:}\\ {\begin{array}{rcl} \displaystyle x_{1}+x_{2}&=&
         \displaystyle - \frac{b}{a}= \\ \displaystyle x_{1} x_{2} &=& \displaystyle \frac{c}{a} \end{array}}
@@ -754,9 +791,12 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> A problem solution:
         \( \begin{array}{rcll|l} \displaystyle \int \frac{3 x}{x^{2}+3} {\text d} x&=&\displaystyle 3 \phantom{}
         \int\frac{
-        {\text d} \left(\frac{x^{2}}{{2}}\right)}{x^{2}+3} \\ &=&\displaystyle \frac{3}{2} \phantom{} \int\frac{ {\text
-        d} \left(x^{2}+3\right)}{x^{2}+3} &&\text{Set~} u=x^{2}+3 \\ &=&\displaystyle \frac{3}{2} \phantom{} \int\frac{
-        {\text d} u}{u} \\ &=&\displaystyle \frac{3}{2} \phantom{} \ln |u| +C \\ &=&\displaystyle \frac{3}{2} \phantom{}
+        {\text d} \left(\frac{x^{2}}{{2}}\right)}{x^{2}+3} \\ &=&\displaystyle \frac{3}{2} \phantom{} \int\frac{
+        {\text
+        d} \left(x^{2}+3\right)}{x^{2}+3} &&\text{Set~} u=x^{2}+3 \\ &=&\displaystyle \frac{3}{2} \phantom{}
+        \int\frac{
+        {\text d} u}{u} \\ &=&\displaystyle \frac{3}{2} \phantom{} \ln |u| +C \\ &=&\displaystyle \frac{3}{2}
+        \phantom{}
         \ln |x^{2}+3| +C \end{array}
         \)
       </li>
@@ -849,11 +889,14 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> A small matrix: \(\begin{pmatrix}1 &2\\3&4\end{pmatrix}\).
       <li> A small matrix with fractions: \(\begin{pmatrix}\frac{1}{2}
         &\frac{1}{3}\\\frac{1}{3}&\frac{1}{4}\end{pmatrix}\).
-      <li> A matrix: \(\begin{pmatrix}\frac{1}{2} & \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6} & \frac{1}{7}
+      <li> A matrix: \(\begin{pmatrix}\frac{1}{2} & \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6} &
+        \frac{1}{7}
         &
-        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6}
+        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} &
+        \frac{1}{6}
         & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}\\ \frac{1}{4} &
-        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}
+        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} &
+        \frac{1}{12}
         & \frac{1}{13}\\ \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} &
         \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14}\\ \frac{1}{6} & \frac{1}{7} & \frac{1}{8} &
         \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14} & \frac{1}{15}\\
@@ -867,9 +910,11 @@ Typeset all math in the 'toBeTypeSet' tag.
         \frac{1}{20} \end{pmatrix} \) </li>
       <li> Square root of a matrix:
         \(A=\sqrt{\begin{pmatrix}\frac{1}{2} & \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6} & \frac{1}{7} &
-        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6}
+        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} &
+        \frac{1}{6}
         & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}\\ \frac{1}{4} &
-        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}
+        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} &
+        \frac{1}{12}
         & \frac{1}{13}\\ \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} &
         \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14}\\ \frac{1}{6} & \frac{1}{7} & \frac{1}{8} &
         \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14} & \frac{1}{15}\\
@@ -944,7 +989,8 @@ Typeset all math in the 'toBeTypeSet' tag.
           \frac{xy^2z^3}{\arctan
           y}dx} </div>
       </li>
-      <li> Copy button on static math: <div class="mathcalculator" copyButton="true">\left(x^2\right) +(x^2)+\left(\frac
+      <li> Copy button on static math: <div class="mathcalculator" copyButton="true">\left(x^2\right)
+          +(x^2)+\left(\frac
           1 2\right)</div>
       </li>
       <li> Nth root: \(2\sqrt[5]{3x^2}\)</li>
@@ -955,7 +1001,8 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> Limits \(\lim\limits_{x\to-\infty}x\),\(\lim\limits_{x\to-\infty}\frac{2}{x}\) \(\lim_{x\to 5^+} x\),
         \(\lim\limits_{x\to\pm\infty}\).</li>
       <li> How are expressions such as \(((123+12)^{123})\) rendered and vertically aligned inline?</li>
-      <li> Horizontal alignment trigonometry: \(sin(2\alpha)\), \(\sin (2x)\), \(\cos x\); for example \(\cos^2x\)</li>
+      <li> Horizontal alignment trigonometry: \(sin(2\alpha)\), \(\sin (2x)\), \(\cos x\); for example \(\cos^2x\)
+      </li>
       <li> Absolute values in parentheses.
         \( (a+\frac{1}{2}|x|+c) \)
         \( (a+\frac{1}{2}\left|1+x\right|+c) \)
@@ -980,7 +1027,8 @@ Typeset all math in the 'toBeTypeSet' tag.
       </li>
       <li> \(\displaystyle \lim _{x\to 0}\frac{\sin x}{x} \stackrel{\text{L'Hospital}}{=} 1\)</li>
       <li> \(0.3 \overline{ 640 }= 0.3 640 640 640 \dots =\)</li>
-      <li> Miscellaneous symbols \(\S,\to,\bullet,\approx, \searrow, \swarrow, \nwarrow,\nearrow\), \(b\cdot a\neq b \),
+      <li> Miscellaneous symbols \(\S,\to,\bullet,\approx, \searrow, \swarrow, \nwarrow,\nearrow\), \(b\cdot a\neq b
+        \),
         \(f\circ g\), \(x\mapsto y\)
       </li>
       </li>
@@ -1001,7 +1049,8 @@ Typeset all math in the 'toBeTypeSet' tag.
         \sqrt{b^{2}-{4} a
         c}}{{2} a}\\ &=&\frac{ 10\pm \sqrt{\left(-10\right)^{2}-4\cdot 24 }}{{2}( 1)}\\ &=&\frac{ 10\pm \sqrt{
         100-96}}{2}\\
-        &=&\frac{ 10\pm \sqrt{ 4}}{2}\\ &=&\left\{\begin{array}{l} 4\\ 6\end{array} \right. \\ \end{array} \end{array}}
+        &=&\frac{ 10\pm \sqrt{ 4}}{2}\\ &=&\left\{\begin{array}{l} 4\\ 6\end{array} \right. \\ \end{array}
+        \end{array}}
         \end{array}\)</li>
       <li> \(60+k 360\)</li>
       <li> \(\theta=60^\circ+k 360^\circ ~or~ \theta=120^\circ+k 360^\circ\)</li>
@@ -1023,20 +1072,24 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> \(\begin{array}{rcll|l} \displaystyle \displaystyle \lim\limits_{x \to 4}\frac{-5 x^{2}+39
         x-76}{4 x^{2}-35 x+76}&=&\displaystyle \lim\limits_{x \to 4}
         \frac{-5(x-4)(x-\frac{19}{5})}{4(x-4)(x-\frac{19}{4})} && {\begin{array}{l}\text{If~we~can't~guess~
-        factorization: }\\ ax^{2}+bx+c=a(x-x_{1})(x-x_{2})\\ \text{ then~use:}\\ \text{Numerator: }\\ \begin{array}{rcl}
+        factorization: }\\ ax^{2}+bx+c=a(x-x_{1})(x-x_{2})\\ \text{ then~use:}\\ \text{Numerator: }\\
+        \begin{array}{rcl}
         x_{1},x_{2}&=&\frac{-b\pm \sqrt{b^{2}-{4} a
         c}}{{2} a}\\ &=&\frac{ -39\pm \sqrt{39^{2}-4 \left(-5 \left(-76\right)\right) }}{{2}( -5)}\\ &=&\frac{ -39\pm
         \sqrt{ 1521-1520}}{-10}\\
-        &=&\frac{ -39\pm \sqrt{ 1}}{-10}\\ &=&4, \frac{19}{5}\\ \end{array} \\ \text{Denominator:~}\\ \begin{array}{rcl}
+        &=&\frac{ -39\pm \sqrt{ 1}}{-10}\\ &=&4, \frac{19}{5}\\ \end{array} \\ \text{Denominator:~}\\
+        \begin{array}{rcl}
         x_{1},x_{2}&=&\frac{-b\pm \sqrt{b^{2}-{4} a
         c}}{{2} a}\\ &=&\frac{ 35\pm \sqrt{\left(-35\right)^{2}-4^{2}\cdot 76 }}{{2} 4}\\ &=&\frac{ 35\pm \sqrt{
         1225-1216}}{8}\\
-        &=&\frac{ 35\pm \sqrt{ 9}}{8}\\ &=&4, \frac{19}{4}\\ \end{array} \end{array}}\\ &=&\displaystyle \lim\limits_{x
+        &=&\frac{ 35\pm \sqrt{ 9}}{8}\\ &=&4, \frac{19}{4}\\ \end{array} \end{array}}\\ &=&\displaystyle
+        \lim\limits_{x
         \to 4} \frac{-5(\cancel{x-4})(x-\frac{19}{5})}{4(\cancel{x-4})(x-\frac{19}{4})} &&\text{Allowed~to~substitute~
         }x=-5\\ &=&\displaystyle \frac{-5(4-\frac{19}{5})}{4(4-\frac{19}{4})}\\ &=&\displaystyle \frac{1}{3}
         \end{array}\)
       </li>
-      <li> \(\begin{array}{rcll|l} \displaystyle \lim\limits_{x \to -1}\frac{x^{2}+4 x+3}{x^{2}+6 x+5}&=& \displaystyle
+      <li> \(\begin{array}{rcll|l} \displaystyle \lim\limits_{x \to -1}\frac{x^{2}+4 x+3}{x^{2}+6 x+5}&=&
+        \displaystyle
         \lim\limits_{x \to -1} \frac{(x+1)(x+3)}{(x+1)(x+5)} && {\begin{array}{l}\text{Factor:~Vieta's~formulas~help:~
         if:}\\ ax^{2}+bx+c=a(x-x_{1})(x-x_{2})\\ \text{then:}\\ {\begin{array}{rcl} \displaystyle x_{1}+x_{2}&=&
         \displaystyle - \frac{b}{a}= \\ \displaystyle x_{1} x_{2} &=& \displaystyle \frac{c}{a} \end{array}}
@@ -1049,9 +1102,12 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> A problem solution:
         \( \begin{array}{rcll|l} \displaystyle \int \frac{3 x}{x^{2}+3} {\text d} x&=&\displaystyle 3 \phantom{}
         \int\frac{
-        {\text d} \left(\frac{x^{2}}{{2}}\right)}{x^{2}+3} \\ &=&\displaystyle \frac{3}{2} \phantom{} \int\frac{ {\text
-        d} \left(x^{2}+3\right)}{x^{2}+3} &&\text{Set~} u=x^{2}+3 \\ &=&\displaystyle \frac{3}{2} \phantom{} \int\frac{
-        {\text d} u}{u} \\ &=&\displaystyle \frac{3}{2} \phantom{} \ln |u| +C \\ &=&\displaystyle \frac{3}{2} \phantom{}
+        {\text d} \left(\frac{x^{2}}{{2}}\right)}{x^{2}+3} \\ &=&\displaystyle \frac{3}{2} \phantom{} \int\frac{
+        {\text
+        d} \left(x^{2}+3\right)}{x^{2}+3} &&\text{Set~} u=x^{2}+3 \\ &=&\displaystyle \frac{3}{2} \phantom{}
+        \int\frac{
+        {\text d} u}{u} \\ &=&\displaystyle \frac{3}{2} \phantom{} \ln |u| +C \\ &=&\displaystyle \frac{3}{2}
+        \phantom{}
         \ln |x^{2}+3| +C \end{array}
         \)
       </li>
@@ -1144,11 +1200,14 @@ Typeset all math in the 'toBeTypeSet' tag.
       <li> A small matrix: \(\begin{pmatrix}1 &2\\3&4\end{pmatrix}\).
       <li> A small matrix with fractions: \(\begin{pmatrix}\frac{1}{2}
         &\frac{1}{3}\\\frac{1}{3}&\frac{1}{4}\end{pmatrix}\).
-      <li> A matrix: \(\begin{pmatrix}\frac{1}{2} & \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6} & \frac{1}{7}
+      <li> A matrix: \(\begin{pmatrix}\frac{1}{2} & \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6} &
+        \frac{1}{7}
         &
-        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6}
+        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} &
+        \frac{1}{6}
         & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}\\ \frac{1}{4} &
-        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}
+        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} &
+        \frac{1}{12}
         & \frac{1}{13}\\ \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} &
         \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14}\\ \frac{1}{6} & \frac{1}{7} & \frac{1}{8} &
         \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14} & \frac{1}{15}\\
@@ -1162,9 +1221,11 @@ Typeset all math in the 'toBeTypeSet' tag.
         \frac{1}{20} \end{pmatrix} \) </li>
       <li> Square root of a matrix:
         \(A=\sqrt{\begin{pmatrix}\frac{1}{2} & \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6} & \frac{1}{7} &
-        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} & \frac{1}{6}
+        \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11}\\ \frac{1}{3} & \frac{1}{4} & \frac{1}{5} &
+        \frac{1}{6}
         & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}\\ \frac{1}{4} &
-        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12}
+        \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} & \frac{1}{11} &
+        \frac{1}{12}
         & \frac{1}{13}\\ \frac{1}{5} & \frac{1}{6} & \frac{1}{7} & \frac{1}{8} & \frac{1}{9} & \frac{1}{10} &
         \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14}\\ \frac{1}{6} & \frac{1}{7} & \frac{1}{8} &
         \frac{1}{9} & \frac{1}{10} & \frac{1}{11} & \frac{1}{12} & \frac{1}{13} & \frac{1}{14} & \frac{1}{15}\\

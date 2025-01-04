@@ -6,48 +6,10 @@
 #include "main.h"
 #include "signals_infrastructure.h"
 #include "string_constants.h"
+#include "test.h"
 #include "transport_layer_security.h"
 #include "web_api.h"
 #include <iostream>
-
-class Test {
-public:
-  class Suites {
-  public:
-    static const std::string all;
-    static const std::string API;
-    static const std::string database;
-    static const std::string problems;
-    static const std::string build;
-    static const std::string wasm;
-    static const std::string crypto;
-    static const std::string topicLists;
-    static const std::string topiclists;
-    static const std::string freecalc;
-    static const std::string calculator;
-    static const std::string json;
-    static const std::string polynomial;
-    static const std::string basic;
-    static const std::string courses;
-  };
-
-  static std::string update;
-  HashedList<std::string> inputs;
-  bool flagTestAll;
-  // If this is set, AB tests will not be compared to the known results,
-  // but instead the known results file will be updated.
-  // Recall that an AB tests ("golden test") is running a bunch of input
-  // and comparing the output to previously recorded outputs.
-  // Use this flag to ignore previously recorded behavior and instead reset
-  // the expected outputs.
-  // Use with appropriate caution to avoid
-  // accidentally record undesired bad behavior.
-  static bool flagUpdateABTests;
-  void initialize(List<std::string>& inputArguments);
-  void run();
-  bool shouldTest(const std::string& testSuite);
-  Test();
-};
 
 std::string Test::update = "update";
 bool Test::flagUpdateABTests = false;
@@ -104,6 +66,7 @@ void Test::run() {
     ElementZmodP::Test::all();
     RationalFraction<Rational>::Test::all();
     Vectors<Rational>::Test::all();
+    VectorTest::all();
     Selection::Test::all();
     // Also tested in calculator test suite.
     Calculator::Examples::Test::all();

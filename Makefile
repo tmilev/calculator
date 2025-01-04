@@ -223,6 +223,7 @@ SOURCES_RELATIVE_PATH=\
     symmetric_groups_and_generalizations.cpp \
     system_functions.cpp \
     test.cpp \
+    math_vectors_test.cpp \
     main.cpp \
     transport_layer_security.cpp \
     transport_layer_security_implementation.cpp \

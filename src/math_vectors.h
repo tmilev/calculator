@@ -1178,7 +1178,7 @@ public:
 
 template <class Coefficient>
 bool Vector<Coefficient>::fromString(const std::string& input) {
-  STACK_TRACE("Vector::assignString");
+  STACK_TRACE("Vector::fromString");
   this->setSize(0);
   int currentDigit = - 1;
   int sign = 1;

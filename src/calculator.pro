@@ -635,6 +635,7 @@ HEADERS += \
    #openssl/test/threadstest.h \
     progress_report.h \
     signals_infrastructure.h \
+  test.h \
   user.h \
     web_api.h \
     json.h \
@@ -755,6 +756,7 @@ SOURCES += \
     math_semisimple_lie_root_subalgebras.cpp \
     math_semisimple_lie_subalgebras.cpp \
     math_vector_partition_functions.cpp \
+  math_vectors_test.cpp \
     multiprocessing.cpp \
     multitasking.cpp \
     network.cpp \

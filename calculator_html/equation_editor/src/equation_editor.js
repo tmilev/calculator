@@ -1461,8 +1461,10 @@ function mathFromElement(
   removeDisplayStyle,
   /** @type {Function?} callback after the element has been typeset.*/
   callback,
-  /** @type {HTMLElement?} */
-  containerSVG,
+  /** @type {boolean} */
+  useSVG,
+  /** @type{boolean} */
+  useMathML,
   /** @type {boolean} */
   copyButton,
 ) {
@@ -1472,7 +1474,7 @@ function mathFromElement(
   }
   return mathFromLatex(
     container, content, editable, sanitizeLatexSource, removeDisplayStyle,
-    callback, containerSVG, copyButton);
+    callback, useSVG, useMathML, copyButton);
 }
 
 /**
@@ -1493,8 +1495,10 @@ function mathFromLatex(
   removeDisplayStyle,
   /** @type {Function?} callback after the element has been typeset*/
   callback,
-  /** @type {HTMLElement?} */
-  containerSVG,
+  /** @type {boolean} */
+  useSVG,
+  /** @type {boolean} */
+  useMathML,
   /** @type {boolean} */
   copyButton,
 ) {
@@ -1515,8 +1519,10 @@ function mathFromLatex(
       logTiming: true,
       lineBreakWidth: lineBreakWidth,
       copyButton: copyButton,
+      useSVG: useSVG,
+      useMathML: useMathML,
     }),
-    containerSVG);
+  );
   result.writeLatex(latex);
   if (callback !== undefined && callback !== null) {
     callback(result);
@@ -3072,6 +3078,8 @@ class EquationEditorOptions {
      * boolean)>|null|undefined), highlightStyle: ({ backgroundColor:
      * (string|undefined|null), outline:
      * (string|undefined|null)}|null|undefined),
+     * useSVG: {boolean|null|undefined},
+     * useMathML: {boolean|null|undefined},
      * }}
      */
     options,
@@ -3092,6 +3100,16 @@ class EquationEditorOptions {
     this.lineBreakWidth = 0;
     /** @type {boolean} */
     this.copyButton = false;
+    /** @type {boolean} */
+    this.useSVG = false;
+    if (options.useSVG === true) {
+      this.useSVG = true;
+    }
+    /** @type {boolean} */
+    this.useMathML = false;
+    if (options.useMathML === true) {
+      this.useMathML = true;
+    }
     if (options.lineBreakWidth !== null ||
       options.lineBreakWidth !== undefined) {
       this.lineBreakWidth = /** @type {number} */ (options.lineBreakWidth);
@@ -3410,16 +3428,9 @@ class EquationEditor {
     containerGiven,
     /** @type {EquationEditorOptions?} */
     options,
-    /** @type {HTMLElement?} */
-    containerSVGGiven,
   ) {
     /** @type {HTMLElement!} */
     this.container = containerGiven;
-    /** @type {HTMLElement?} */
-    this.containerSVG = containerSVGGiven;
-    if (this.containerSVG === undefined) {
-      this.containerSVG = null;
-    }
     /** @type {HTMLCanvasElement?} */
     this.containerCanvas = null;
     /** @type {CanvasRenderingContext2D?} */
@@ -3436,7 +3447,6 @@ class EquationEditor {
     /** @type {HTMLElement?} */
     this.latexContainer = null;
     this.initializeContainer(this.container);
-    this.initializeContainer(this.containerSVG);
     /** @type {number} */
     this.containerDesiredHeight = 0;
     /** @type {number} */
@@ -3779,16 +3789,16 @@ class EquationEditor {
 
   /** Writes an SVG component to the svg container specified at creation. */
   writeSVG() {
-    if (this.containerSVG === null) {
+    if (!this.options.useSVG) {
       return;
     }
-    this.containerSVG.textContent = '';
-    this.initializeContainer(this.containerSVG);
+    this.container.textContent = '';
+    this.initializeContainer(this.container);
     let graphicsWriter = new ScalableVectorGraphicsWriter();
     let svgElement = graphicsWriter.typeset(this.rootNode);
     svgElement.style.position = 'absolute';
-    this.containerSVG.appendChild(svgElement);
-    this.setContainerStyle(this.containerSVG);
+    this.container.appendChild(svgElement);
+    this.setContainerStyle(this.container);
   }
 
   /** Draws the math node on a canvas. */
@@ -3935,9 +3945,6 @@ class EquationEditor {
     }
     this.writeDebugInfo(parser);
     this.container.setAttribute('latexsource', latex);
-    if (this.containerSVG !== null) {
-      this.containerSVG.setAttribute('latexsource', latex);
-    }
     this.setLastFocused(this.rootNode.rightmostAtomChild());
     return true;
   }
@@ -12281,8 +12288,7 @@ class MathTagConverter {
    *  one.
    * removeDisplayStyle: whether to remove \\displaystyle from latex
    *  source. logTiming: whether to log in the console timing statistics.
-   * svgAndDOM: generate both a DOM and an SVG equation side-by side. Use
-   *  for debugging only. svgOnly: use svg instead of DOM output.
+   * mathML: generate a mathML rendering.
    * extraAttributes: an string-key string-value object.
    */
   constructor(
@@ -12292,7 +12298,7 @@ class MathTagConverter {
      * sanitizeLatexSource: (boolean|undefined),
      * removeDisplayStyle: (boolean|undefined),
      * svgOnly: (boolean|undefined),
-     * svgAndDOM: (boolean|undefined),
+     * mathML: (boolean|undefined),
      * logTiming: (boolean|undefined),
      * copyButton: (boolean|undefined),
      * extraAttributes: (Object.<string, string>!|undefined)}|undefined}
@@ -12305,7 +12311,7 @@ class MathTagConverter {
         removeDisplayStyle: false,
         logTiming: false,
         extraAttributes: {},
-        svgAndDOM: false,
+        mathML: false,
         svgOnly: false,
         style: null,
         copyButton: false,
@@ -12338,9 +12344,9 @@ class MathTagConverter {
       this.extraAttributes = {};
     }
     /** @type {boolean} */
-    this.svgAndDOM = /** @type {boolean} */ (options.svgAndDOM);
-    if (this.svgAndDOM === undefined || this.svgAndDOM === null) {
-      this.svgAndDOM = false;
+    this.mathML = /** @type {boolean} */ (options.mathML);
+    if (this.mathML === undefined || this.mathML === null) {
+      this.mathML = false;
     }
     /** @type {boolean} */
     this.svgOnly = /** @type {boolean} */ (options.svgOnly);
@@ -12374,10 +12380,14 @@ class MathTagConverter {
     for (let label in style) {
       styleComputer.style[label] = style[label];
     }
-    /** @type {Array.<HTMLElement!>!} */
+    /** @type {HTMLElement[]} */
     this.mathElementsDOM = [];
-    /** @type {Array.<HTMLElement?>!} */
+    /** @type {HTMLElement[]} */
     this.mathElementsSVG = [];
+    /** @type {HTMLElement[]} */
+    this.mathElementsMathML = [];
+    /** @type {HTMLElement[]} */
+    this.allMathElements = [];
   }
 
   /** @return {HTMLElement!} */
@@ -12408,17 +12418,17 @@ class MathTagConverter {
         newChildren.push(document.createTextNode(intermediateContent));
       }
       let mathTag = this.getMathTagEmpty();
-      mathTag.textContent = toBeConverted[i].content;
-      mathTag.className = 'mathcalculator';
-      this.mathElementsDOM.push(mathTag);
       newChildren.push(mathTag);
+      mathTag.textContent = toBeConverted[i].content;
       if (this.svgOnly) {
+        mathTag.className = 'mathcalculatorSVG';
         this.mathElementsSVG.push(mathTag);
-      } else if (this.svgAndDOM) {
-        let mathTagSVG = this.getMathTagEmpty();
-        mathTagSVG.className = 'mathcalculatorSVG';
-        this.mathElementsSVG.push(mathTagSVG);
-        newChildren.push(mathTagSVG);
+      } else if (this.mathML) {
+        mathTag.className = 'mathcalculatorMathML';
+        this.mathElementsSVG.push(mathTag);
+      } else {
+        mathTag.className = 'mathcalculator';
+        this.mathElementsDOM.push(mathTag);
       }
     }
     let previousIndex = toBeConverted[toBeConverted.length - 1].closeIndex + 1;
@@ -12509,8 +12519,8 @@ class MathTagConverter {
     }
     for (let i = 0; i < mathElements.length; i++) {
       this.mathElementsDOM.push(/** @type {HTMLElement!} */(mathElements[i]));
-      this.mathElementsSVG.push(null);
     }
+    this.allMathElements = this.mathElementsDOM.concat(this.mathElementsMathML).concat(this.mathElementsSVG);
     this.typesetMathTags(callback);
   }
 
@@ -12540,34 +12550,39 @@ class MathTagConverter {
     callback,
   ) {
     if (this.elementsToTypeset < 0) {
-      this.elementsToTypeset = this.mathElementsDOM.length;
+      this.elementsToTypeset = this.allMathElements.length;
       this.typesetTotal = 0;
     }
-    for (; this.typesetTotal < this.mathElementsDOM.length;
+    for (; this.typesetTotal < this.allMathElements.length;
       this.typesetTotal++) {
       if (this.postponeTypeset(callback)) {
         return;
       }
       /** @type {HTMLElement!} */
-      let element = this.mathElementsDOM[this.typesetTotal];
-      let elementSVG = this.mathElementsSVG[this.typesetTotal];
+      let element = this.allMathElements[this.typesetTotal];
       if (element.getAttribute('typeset') === 'true') {
         continue;
       }
       element.setAttribute('typeset', 'true');
       let startTime = (new Date()).getTime();
+      let useSVG = false;
+      let useMathML = false;
+      if (element.className === "mathcalculatorSVG") {
+        useSVG = true;
+      }
+      if (element.className === "mathcalculatorMathML") {
+        useMathML = true;
+      }
       mathFromElement(
         element,
         false,
         this.sanitizeLatexSource,
         this.removeDisplayStyle,
         callback,
-        elementSVG,
+        useSVG,
+        useMathML,
         this.copyButton,
       );
-      if (this.svgOnly) {
-        console.log('svgOnly not implemented yet.');
-      }
       let typeSetTime = (new Date()).getTime() - startTime;
       if (this.logTiming) {
         console.log(`Typeset of element ${this.typesetTotal + 1} out of ${this.elementsToTypeset} took ${typeSetTime} ms.`);
@@ -12600,7 +12615,7 @@ function typeset(
    * sanitizeLatexSource: boolean,
    * removeDisplayStyle: boolean,
    * svgOnly: boolean,
-   * svgAndDOM: boolean,
+   * mathML: boolean,
    * extraAttributes: Object.<string, string>!}}
    */
   options,

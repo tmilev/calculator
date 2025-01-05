@@ -10580,6 +10580,12 @@ class MathNodeLeftDelimiter extends MathNode {
   }
 
   toMathML() {
+    if (this.children.length === 0) {
+      // Invisible delimiter without [visible] delimiter mark.
+      // Example latex:
+      // \left. 1,2\right)
+      return this.createMathMLElement("mo");
+    }
     return this.children[0].toMathML();
   }
 }
@@ -10623,6 +10629,12 @@ class MathNodeRightDelimiter extends MathNode {
   }
 
   toMathML() {
+    if (this.children.length === 0) {
+      // Invisible delimiter without [visible] delimiter mark.
+      // Example latex:
+      // \left. 1,2\right)
+      return this.createMathMLElement("mo");
+    }
     return this.children[0].toMathML();
   }
 }
@@ -10756,7 +10768,7 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
   }
 
   toMathML() {
-    return toMathMLDelimiter("|", "|");
+    return this.toMathMLDelimiter("|", "|");
   }
 }
 
@@ -12038,6 +12050,14 @@ class MathNodeMatrixRow extends MathNode {
     this.bottomLineCount++;
     this.type.borderBottom = '1px solid black';
   }
+
+  toMathML() {
+    const result = this.createMathMLElement("mtr");
+    for (const child of this.children) {
+      result.appendChild(child.toMathML());
+    }
+    return result;
+  }
 }
 
 class MathNodeRowEntry extends MathNode {
@@ -12086,6 +12106,12 @@ class MathNodeRowEntry extends MathNode {
       }
     }
     return this.getAtomToFocusFromActionDefault(key, arrowType);
+  }
+
+  toMathML() {
+    const result = this.createMathMLElement("mtd");
+    result.appendChild(this.children[0].toMathML());
+    return result;
   }
 }
 

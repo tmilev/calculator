@@ -19,6 +19,10 @@
 </style>
 
 <script>
+  var svgContainer = null;
+  var editor = null;
+  var mathMLContainer = null;
+
   function clickSlider(slider) {
     document.getElementById("editor").style.fontSize = `${slider.value}px`;
     svgContainer.style.fontSize = `${slider.value}px`;
@@ -30,8 +34,9 @@
     editor.writeDebugInfo(null);
     editor.resizingEditorFont = false;
     typesetSVG();
+    typesetMathML();
   }
-  var editor = null;
+
   function handleEnter(editor, shiftKeyPressed) {
     let debug = document.getElementById("debug");
     debug.textContent = "";
@@ -44,14 +49,25 @@
 
   function typesetSVG() {
     const latex = editor.rootNode.toLatex();
-    svgContainer.textContent = `\\(${latex}\\)`;
-    typeset(svgContainer);
+    svgContainer.textContent = latex;
+    svgContainer.setAttribute('typeset', 'false');
+    typeset(svgContainer, null, {
+      svgOnly: true,
+    });
   }
 
-  var svgContainer = null;
+  function typesetMathML() {
+    const latex = editor.rootNode.toLatex();
+    mathMLContainer.textContent = latex;
+    mathMLContainer.setAttribute('typeset', 'false');
+    typeset(mathMLContainer, null, {
+      useMathML: true,
+    });
+  }
 
   function createEditor() {
     svgContainer = document.getElementById("svgContainer");
+    mathMLContainer = document.getElementById("mathMLContainer");
     const options = new EquationEditorOptions({
       // Can you edit the math or is it static math?
       editable: true,
@@ -69,6 +85,7 @@
       // equation editor handers.
       editHandler: () => {
         typesetSVG();
+        typesetMathML();
       },
       /** @type {Object<string, Function>} */
       extraKeyHandlers: {
@@ -145,7 +162,24 @@
     });
   }
 
+  function testMathTagRendering() {
+    const tag = document.getElementById('mathcalculatorTags');
+    typeset(
+      tag,
+      null, {
+      sanitizeLatexSource: false,
+      removeDisplayStyle: false,
+      logTiming: true,
+      mathML: true,
+      // Should have no effect.
+      svgOnly: true,
+      // Should haave no effect.
+      mathML: true,
+    });
+  }
+
   function testRendering() {
+    testMathTagRendering();
     testDOMRendering();
     testSVGRendering();
     testMathMLRendering();
@@ -168,9 +202,13 @@
       oninput="clickSlider(this);">
   </div>
   <hr>
+  MathML output:
+  <br>
+  <div id="mathMLContainer" class="mathcalculatorMathML" style="font-size: 72px; font-family:'Times New Roman'"></div>
+  <br>
   Svg output:
   <br>
-  <div id="svgContainer" style="font-size: 72px; font-family:'Times New Roman'"></div>
+  <div id="svgContainer" class="mathcalculatorSVG" style="font-size: 72px; font-family:'Times New Roman'"></div>
   <br>
   Canvas output:
   <br>
@@ -305,9 +343,51 @@ Typeset all math in the 'toBeTypeSet' tag.
   </div>
 
   <h3>Test page for static math content.</h3>
-  <button id="typeSetButton" onclick="testRendering()">typeset</button>
+  <button id="typeSetButton"
+    style="background-color: lightgreen; font-size: 36px; border-radius: 5px; cursor: pointer; border: 0px;"
+    onclick="testRendering()">typeset</button>
   <br>
+  <h1>
+    Tag specified rendering
+  </h1>
+  <div id="mathcalculatorTags">
+    The tag specifies the format of the rendering.
+
+    <ul>
+      <li> Math ML tag.
+        <span class="mathcalculatorMathML">e^x=\sum_{i=0}^\infty \frac{x^n}{n!} </span>
+      </li>
+      <li>
+        <span class="mathcalculator">\begin{align}x&y\\ x &z\end{align} </span>
+      </li>
+      <li> <span style="font-family:'Times New Roman', Times, serif">In Times New Roman </span>
+        <div class="mathcalculator" style="font-family:'Times New Roman', Times, serif"> \sqrt{\int
+          \frac{xy^2z^3}{\arctan
+          y}dx} </div>
+      </li>
+      <li> Copy button on static math: <div class="mathcalculator" copyButton="true">\left(x^2\right)
+          +(x^2)+\left(\frac
+          1 2\right)</div>
+      </li>
+      <li> Copy button on svg static math: <div class="mathcalculatorSVG" copyButton="true">\left(x^2\right)
+          +(x^2)+\left(\frac
+          1 2\right)</div>
+      </li>
+      <li> Line breaks with fractions.<br>
+        Alignment text. <div class="mathcalculator" lineBreakWidth="200">
+          \frac{1}{2}+\frac{2}{3}+\left(x+12\right)^3+\frac{2}{3}+
+          1+\frac{1}{1+\frac{1}{1+\frac{1}{1}}}+C+ x^2+1+abcd=123
+        </div>
+      </li>
+      <li> Line breaks simple.<br>
+        Alignment text. <div class="mathcalculator" lineBreakWidth="200">1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1
+        </div>
+      </li>
+    </ul>
+  </div>
+
   <h1>MathML Core rendering</h1>
+  Here, we test rendering with mathML. <b style="color: red;">This is Work In Progress.</b>
   <div id="mathMLTester">
     Example content to be typeset follow.
     During development, we may shuffle examples we currently work on to the top.
@@ -352,9 +432,6 @@ Typeset all math in the 'toBeTypeSet' tag.
         \)
 
       </li>
-      <li>
-        <span class="mathcalculator">\begin{align}x&y\\ x &z\end{align} </span>
-      </li>
       <li> Align environment: \(\left\{ \begin{align}x&=5\\ y&=7\end{align}\right. \)</li>
       <li> Exponent basic: \(x^2\)</li>
       <li> <span style="font-family:'Courier New', Courier, monospace">In Courier New: \(\sqrt{\int
@@ -362,15 +439,8 @@ Typeset all math in the 'toBeTypeSet' tag.
           y}dx} \) </span></li>
       <li> <span style="font-family:Arial, Helvetica, sans-serif">In Arial: \(\sqrt{\int \frac{xy^2z^3}{\arctan
           y}dx} \) </span></li>
-      <li> <span style="font-family:'Times New Roman', Times, serif">In Times New Roman </span>
-        <div class="mathcalculator" style="font-family:'Times New Roman', Times, serif"> \sqrt{\int
-          \frac{xy^2z^3}{\arctan
-          y}dx} </div>
-      </li>
-      <li> Copy button on static math: <div class="mathcalculator" copyButton="true">\left(x^2\right)
-          +(x^2)+\left(\frac
-          1 2\right)</div>
-      </li>
+
+
       <li> Nth root: \(2\sqrt[5]{3x^2}\)</li>
       <li> Horizontal alignment: \(sin(2\alpha)\)</li>
       <li> Tall operator in brackets with super and subscript. \([\int dx]_{2}^{3}\)
@@ -386,16 +456,7 @@ Typeset all math in the 'toBeTypeSet' tag.
         \( (a+\frac{1}{2}\left|1+x\right|+c) \)
 
       </li>
-      <li> Line breaks with fractions.<br>
-        Alignment text. <div class="mathcalculator" lineBreakWidth="200">
-          \frac{1}{2}+\frac{2}{3}+\left(x+12\right)^3+\frac{2}{3}+
-          1+\frac{1}{1+\frac{1}{1+\frac{1}{1}}}+C+ x^2+1+abcd=123
-        </div>
-      </li>
-      <li> Line breaks simple.<br>
-        Alignment text. <div class="mathcalculator" lineBreakWidth="200">1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1
-        </div>
-      </li>
+
       <li> Parentheses must be tall enough \(()\), \(( )\), \(f()\), \(\displaystyle \left(\right)\).</li>
       <li> Color \(\color{blue}{x}\)</li>
       <li> Form input \(\formInput{10,formInputName}\)
@@ -663,9 +724,6 @@ Typeset all math in the 'toBeTypeSet' tag.
         \)
 
       </li>
-      <li>
-        <span class="mathcalculator">\begin{align}x&y\\ x &z\end{align} </span>
-      </li>
       <li> Align environment: \(\left\{ \begin{align}x&=5\\ y&=7\end{align}\right. \)</li>
       <li> Exponent basic: \(x^2\)</li>
       <li> <span style="font-family:'Courier New', Courier, monospace">In Courier New: \(\sqrt{\int
@@ -673,15 +731,6 @@ Typeset all math in the 'toBeTypeSet' tag.
           y}dx} \) </span></li>
       <li> <span style="font-family:Arial, Helvetica, sans-serif">In Arial: \(\sqrt{\int \frac{xy^2z^3}{\arctan
           y}dx} \) </span></li>
-      <li> <span style="font-family:'Times New Roman', Times, serif">In Times New Roman </span>
-        <div class="mathcalculator" style="font-family:'Times New Roman', Times, serif"> \sqrt{\int
-          \frac{xy^2z^3}{\arctan
-          y}dx} </div>
-      </li>
-      <li> Copy button on static math: <div class="mathcalculator" copyButton="true">\left(x^2\right)
-          +(x^2)+\left(\frac
-          1 2\right)</div>
-      </li>
       <li> Nth root: \(2\sqrt[5]{3x^2}\)</li>
       <li> Horizontal alignment: \(sin(2\alpha)\)</li>
       <li> Tall operator in brackets with super and subscript. \([\int dx]_{2}^{3}\)
@@ -697,16 +746,7 @@ Typeset all math in the 'toBeTypeSet' tag.
         \( (a+\frac{1}{2}\left|1+x\right|+c) \)
 
       </li>
-      <li> Line breaks with fractions.<br>
-        Alignment text. <div class="mathcalculator" lineBreakWidth="200">
-          \frac{1}{2}+\frac{2}{3}+\left(x+12\right)^3+\frac{2}{3}+
-          1+\frac{1}{1+\frac{1}{1+\frac{1}{1}}}+C+ x^2+1+abcd=123
-        </div>
-      </li>
-      <li> Line breaks simple.<br>
-        Alignment text. <div class="mathcalculator" lineBreakWidth="200">1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1
-        </div>
-      </li>
+
       <li> Parentheses must be tall enough \(()\), \(( )\), \(f()\), \(\displaystyle \left(\right)\).</li>
       <li> Color \(\color{blue}{x}\)</li>
       <li> Form input \(\formInput{10,formInputName}\)
@@ -974,9 +1014,6 @@ Typeset all math in the 'toBeTypeSet' tag.
         \)
 
       </li>
-      <li>
-        <span class="mathcalculator">\begin{align}x&y\\ x &z\end{align} </span>
-      </li>
       <li> Align environment: \(\left\{ \begin{align}x&=5\\ y&=7\end{align}\right. \)</li>
       <li> Exponent basic: \(x^2\)</li>
       <li> <span style="font-family:'Courier New', Courier, monospace">In Courier New: \(\sqrt{\int
@@ -984,15 +1021,6 @@ Typeset all math in the 'toBeTypeSet' tag.
           y}dx} \) </span></li>
       <li> <span style="font-family:Arial, Helvetica, sans-serif">In Arial: \(\sqrt{\int \frac{xy^2z^3}{\arctan
           y}dx} \) </span></li>
-      <li> <span style="font-family:'Times New Roman', Times, serif">In Times New Roman </span>
-        <div class="mathcalculator" style="font-family:'Times New Roman', Times, serif"> \sqrt{\int
-          \frac{xy^2z^3}{\arctan
-          y}dx} </div>
-      </li>
-      <li> Copy button on static math: <div class="mathcalculator" copyButton="true">\left(x^2\right)
-          +(x^2)+\left(\frac
-          1 2\right)</div>
-      </li>
       <li> Nth root: \(2\sqrt[5]{3x^2}\)</li>
       <li> Horizontal alignment: \(sin(2\alpha)\)</li>
       <li> Tall operator in brackets with super and subscript. \([\int dx]_{2}^{3}\)
@@ -1007,16 +1035,6 @@ Typeset all math in the 'toBeTypeSet' tag.
         \( (a+\frac{1}{2}|x|+c) \)
         \( (a+\frac{1}{2}\left|1+x\right|+c) \)
 
-      </li>
-      <li> Line breaks with fractions.<br>
-        Alignment text. <div class="mathcalculator" lineBreakWidth="200">
-          \frac{1}{2}+\frac{2}{3}+\left(x+12\right)^3+\frac{2}{3}+
-          1+\frac{1}{1+\frac{1}{1+\frac{1}{1}}}+C+ x^2+1+abcd=123
-        </div>
-      </li>
-      <li> Line breaks simple.<br>
-        Alignment text. <div class="mathcalculator" lineBreakWidth="200">1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1
-        </div>
       </li>
       <li> Parentheses must be tall enough \(()\), \(( )\), \(f()\), \(\displaystyle \left(\right)\).</li>
       <li> Color \(\color{blue}{x}\)</li>

@@ -500,7 +500,7 @@ const knownTypes = {
 
 class BaseLineComputer {
   constructor() {
-    /** @type{Object.<string,number>} */
+    /** @type {Object.<string,number>} */
     this.ratiosCache = {}
   }
 
@@ -1463,7 +1463,7 @@ function mathFromElement(
   callback,
   /** @type {boolean} */
   useSVG,
-  /** @type{boolean} */
+  /** @type {boolean} */
   useMathML,
   /** @type {boolean} */
   copyButton,
@@ -2160,6 +2160,25 @@ class LaTeXConstants {
     input,
   ) {
     return input in this.latinCharacters;
+  }
+
+  /** 
+   * Returns whether the input contains only digits and is nonempty. 
+   * @return {boolean} 
+   */
+  isDigitsNonEmpty(
+    /** @type {string} */
+    input,
+  ) {
+    if (input.length === 0) {
+      return false;
+    }
+    for (let i = 0; i < input.length; i++) {
+      if (!this.isDigit(input[i])) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /** @return {boolean} */
@@ -3787,18 +3806,39 @@ class EquationEditor {
     this.rootNode.updateDOM();
   }
 
-  /** Writes an SVG component to the svg container specified at creation. */
+  /** 
+   * Writes an SVG component into the container element. 
+   * The container element is expected to have held a DOM version
+   * of the math, used to compute the font sizes and coordinates
+   * of our math elements. The DOM version of the math is no longer needed
+   * and will be overwritten.
+   */
   writeSVG() {
     if (!this.options.useSVG) {
       return;
     }
-    this.container.textContent = '';
-    this.initializeContainer(this.container);
     let graphicsWriter = new ScalableVectorGraphicsWriter();
     let svgElement = graphicsWriter.typeset(this.rootNode);
     svgElement.style.position = 'absolute';
-    this.container.appendChild(svgElement);
-    this.setContainerStyle(this.container);
+    // So far, the container holds a DOM rendering of our math.
+    this.rootNode.element.textContent = '';
+    this.rootNode.element.appendChild(svgElement);
+  }
+
+  /** Writes a MathML component into the container element. */
+  writeMathML() {
+    if (!this.options.useMathML) {
+      return;
+    }
+    if (this.rootNode.element === null) {
+      this.rootNode.createDOMElementIfMissing();
+      this.rootNode.element.textContent = "";
+      this.rootNode.element.style.position = "";
+      this.container.appendChild(this.rootNode.element);
+    }
+    let mathMLElement = this.rootNode.toMathML();
+
+    this.rootNode.element.appendChild(mathMLElement);
   }
 
   /** Draws the math node on a canvas. */
@@ -3937,16 +3977,32 @@ class EquationEditor {
       return false;
     }
     this.rootNode.appendChild(newContent);
+    this.writeLatexFromContent(newContent);
+    this.container.setAttribute('latexsource', latex);
+    this.writeDebugInfo(parser);
+    return true;
+  }
+
+  writeLatexFromContent(
+    /** @type {MathNode} */
+    newContent
+  ) {
+    if (this.options.useMathML) {
+      this.writeMathML(newContent);
+      return;
+    }
+    // Create the DOM if needed and compute all coordinates.
+    // If we're doing svg rendering, the coordinates of the DOM
+    // will be used to figure out the SVG coordinates. After that,
+    // the so created DOM tree will be discarded, 
+    // overwritten by the SVG.
     this.updateDOM();
     this.updateAlignment();
     this.writeSVG();
     if (this.containerCanvas !== null) {
       this.drawOnCanvas();
     }
-    this.writeDebugInfo(parser);
-    this.container.setAttribute('latexsource', latex);
     this.setLastFocused(this.rootNode.rightmostAtomChild());
-    return true;
   }
 
   writeLatexLastFocused(
@@ -8532,6 +8588,38 @@ class MathNode {
     container.appendChild(text.element);
   }
 
+  /** @return {MathMLElement} */
+  createMathMLElement(/** @type {string} */ tagName) {
+    return document.createElementNS("http://www.w3.org/1998/Math/MathML", tagName);
+  }
+
+  toMathMLAtom(/** @type {string}*/ content) {
+    let result = null;
+    if (latexConstants.isDigitsNonEmpty(content)) {
+      result = this.createMathMLElement("mn");
+    } else {
+      result = this.createMathMLElement("mi");
+    }
+    result.textContent = content;
+    return result;
+  }
+
+  /** @return {MathMLElement} */
+  toMathMLBase() {
+    if (this.isAtomic()) {
+      return this.toMathMLAtom(this.contentIfAtom());
+    }
+    const result = this.createMathMLElement("mrow");
+    for (const child of this.children) {
+      result.appendChild(child.toMathML());
+    }
+    return result;
+  }
+
+  toMathML() {
+    return this.toMathMLBase();
+  }
+
   toScalableVectorGraphicsBase(
     /** @type {SVGSVGElement!} */
     container,
@@ -9133,6 +9221,14 @@ class MathNodeFraction extends MathNode {
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
   }
+
+  /** Converts the math node to MathML.  */
+  toMathML() {
+    const result = this.createMathMLElement("mfrac");
+    result.appendChild(this.children[0].toMathML());
+    result.appendChild(this.children[1].toMathML());
+    return result;
+  }
 }
 
 class MathNodeNumerator extends MathNode {
@@ -9490,6 +9586,12 @@ class MathNodeRoot extends MathNode {
   ) {
     let boundingBox = this.prepareBoundingBox(boundingBoxFromParent);
     this.children[0].drawOnCanvas(canvas, boundingBox);
+  }
+
+  toMathML() {
+    const result = this.createMathMLElement("math");
+    result.appendChild(this.children[0].toMathML());
+    return result;
   }
 }
 
@@ -12511,18 +12613,47 @@ class MathTagConverter {
     callback,
   ) {
     this.elementProcessed = toBeModified;
+    if (toBeModified === null || toBeModified === undefined) {
+      // No element was given, so assume the user wants to 
+      // process the entire document.
+      elementProcessed = document;
+    }
     this.startTime = (new Date()).getTime();
     this.lastTimeSample = this.startTime;
-    let mathElements = document.getElementsByClassName('mathcalculator');
+    // Hard-coded tags are processed first.
+    this.appendHardCodedTags();
     if (this.elementProcessed !== null) {
       this.convertTagsRecursive(this.elementProcessed, 0);
     }
-    for (let i = 0; i < mathElements.length; i++) {
-      this.mathElementsDOM.push(/** @type {HTMLElement!} */(mathElements[i]));
-    }
-    this.allMathElements = this.mathElementsDOM.concat(this.mathElementsMathML).concat(this.mathElementsSVG);
+    this.allMathElements = this.mathElementsDOM.concat(
+      this.mathElementsMathML
+    ).concat(
+      this.mathElementsSVG
+    );
     this.typesetMathTags(callback);
   }
+
+  /** 
+   * Appends tags whose svg/mathML/DOM rendering is hard-coded in the tag. 
+   */
+  appendHardCodedTags() {
+    this.appendTagToCollection('mathcalculator', this.mathElementsDOM);
+    this.appendTagToCollection('mathcalculatorSVG', this.mathElementsSVG);
+    this.appendTagToCollection('mathcalculatorMathML', this.mathElementsMathML);
+  }
+
+  appendTagToCollection(/** @type {string} */ className, /** @type {HTMLElement[]} */ collection) {
+    let incoming = this.elementProcessed.getElementsByClassName(
+      className
+    );
+    for (const element of incoming) {
+      collection.push(element);
+    }
+    if (this.elementProcessed.className === className) {
+      collection.push(this.elementProcessed);
+    }
+  }
+
 
   /** @return {boolean} */
   postponeTypeset(
@@ -13082,7 +13213,7 @@ class EquationEditorButtonPanel {
 
 /** A read-only class whose constructor computes information about the current cursor position. */
 class CursorInformation {
-  constructor(/** @type {HTMLElement?} */ element, /** @type{number} */ previousPosition) {
+  constructor(/** @type {HTMLElement?} */ element, /** @type {number} */ previousPosition) {
     let selection = window.getSelection();
     let range = null;
     let rangeClone = null;

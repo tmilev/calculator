@@ -21,12 +21,20 @@
 <script>
   var svgContainer = null;
   var editor = null;
+  /** @type {HTMLElement|null} */
+  var editorContainer = null;
+  /** @type {HTMLElement|null} */
   var mathMLContainer = null;
 
   function clickSlider(slider) {
-    document.getElementById("editor").style.fontSize = `${slider.value}px`;
+    editorContainer.style.fontSize = `${slider.value}px`;
     svgContainer.style.fontSize = `${slider.value}px`;
+    mathMLContainer.style.fontSize = `${slider.value}px`;
     document.getElementById("font-size").textContent = `${slider.value}px`;
+    rerender();
+  }
+
+  function rerender() {
     editor.resizingEditorFont = true;
     editor.updateDOM();
     editor.drawOnCanvas();
@@ -66,6 +74,7 @@
   }
 
   function createEditor() {
+    editorContainer = document.getElementById('editor');
     svgContainer = document.getElementById("svgContainer");
     mathMLContainer = document.getElementById("mathMLContainer");
     const options = new EquationEditorOptions({
@@ -98,7 +107,7 @@
         outline: "1px dashed black",
       },
     });
-    editor = new EquationEditor(document.getElementById('editor'), options);
+    editor = new EquationEditor(editorContainer, options);
     editor.containerCanvas = document.getElementById("canvasContainer");
     let panel = new EquationEditorButtonPanel(
       // The editor to go with the button panel.
@@ -183,6 +192,13 @@
     testDOMRendering();
     testSVGRendering();
     testMathMLRendering();
+  }
+
+  function setEquationEditorFont(font) {
+    editorContainer.style.font = font;
+    mathMLContainer.style.font = font;
+    svgContainer.style.font = font;
+    rerender();
   }
 </script>
 

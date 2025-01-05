@@ -1,5 +1,4 @@
 const equationEditor = require("./equation_editor/src/equation_editor");
-// const mathjaxSetup = require("./mathjax-calculator-setup");
 
 class TypeSetter {
   constructor() {
@@ -27,7 +26,7 @@ class TypeSetter {
       removeDisplayStyle: true,
       logTiming: this.logTiming,
       extraAttributes: extraAttributes,
-      svgOnly: false,
+      mathML: true,
       svgAndDOM: false,
       copyButton: true,
     },

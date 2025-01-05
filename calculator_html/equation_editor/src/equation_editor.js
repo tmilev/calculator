@@ -9574,6 +9574,12 @@ class MathNodeRoot extends MathNode {
   /** Computes the dimensions of the bounding box. */
   computeDimensions() {
     this.computeDimensionsStandard();
+    if (this.equationEditor.options.useSVG) {
+      // Parentheses at the end of the expression are cut off 
+      // unless we increase the width slightly.
+      // Feel free to improve this behavior.
+      this.boundingBox.width += this.boundingBox.height / 10;
+    }
     this.boundingBox.lineHeight = this.children[0].boundingBox.lineHeight;
     if (!this.boundingBox.needsMiddleAlignment) {
       this.computeDimensionsBaselineAlignment();
@@ -10617,7 +10623,6 @@ class MathNodeDelimiterMark extends MathNode {
     rightDelimiterString,
   ) {
     const result = this.createMathMLElement("mo");
-    result.textContent = "|";
     if (this.left) {
       result.textContent = leftDelimiterString;
       result.setAttribute("prefix", true);
@@ -10625,7 +10630,6 @@ class MathNodeDelimiterMark extends MathNode {
       result.textContent = rightDelimiterString;
       result.setAttribute("postfix", true);
     }
-    result.setAttribute("stretchy", true);
     return result;
   }
 }

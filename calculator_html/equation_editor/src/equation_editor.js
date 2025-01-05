@@ -1801,6 +1801,7 @@ class LaTeXConstants {
     this.operatorWithSuperAndSubscript = {
       'sum': '\u2211',
       'int': '\u222B',
+      'prod': '\u220F',
     };
 
     /** @type {Object.<string, string>!} */
@@ -8180,6 +8181,10 @@ class MathNode {
       previous.makeBaseDefaultWithExponentNoDelimiter();
       return;
     }
+    if (previous.type.type === knownTypes.baseWithSubscript.type) {
+      previous.makeBaseDefaultWithExponent();
+      return;
+    }
     this.makeBaseDefaultWithExponentNoDelimiter();
   }
 
@@ -8593,14 +8598,35 @@ class MathNode {
     return document.createElementNS("http://www.w3.org/1998/Math/MathML", tagName);
   }
 
+  toMathMLWithSubscriptAndSuperscript(
+    /** @type {MathNode} */ base,
+    /** @type {MathNode} */ subscript,
+    /** @type {MathNode} */ superscript,
+  ) {
+    const result = this.createMathMLElement("msubsup");
+    result.appendChild(base.toMathML());
+    result.appendChild(subscript.toMathML());
+    result.appendChild(superscript.toMathML());
+    return result;
+  }
+
   toMathMLAtom(/** @type {string}*/ content) {
     let result = null;
     if (latexConstants.isDigitsNonEmpty(content)) {
       result = this.createMathMLElement("mn");
-    } else {
+      result.textContent = content;
+    } else if (content.length === 1) {
       result = this.createMathMLElement("mi");
+      result.textContent = content;
+    } else {
+      result = this.createMathMLElement("mrow");
+      for (let i = 0; i < content.length; i++) {
+        const character = content.charAt(i);
+        const childML = this.createMathMLElement("mi");
+        childML.textContent = character;
+        result.appendChild(childML);
+      }
     }
-    result.textContent = content;
     return result;
   }
 
@@ -9367,11 +9393,30 @@ class MathNodeBaseWithExponent extends MathNode {
 
   /** @return {MathMLElement} */
   toMathML() {
+    let base = this.children[0];
+    const exponent = this.children[1];
+    if (base.type.type === knownTypes.baseWithSubscript.type) {
+      return this.toMathMLWithSubscriptAndSuperscript(
+        base.children[0], base.children[1], exponent
+      );
+    }
+    if (
+      base.type.type === knownTypes.horizontalMath.type &&
+      base.children.length === 1 &&
+      base.children[0].type.type === knownTypes.baseWithSubscript.type
+    ) {
+      base = base.children[0];
+      return this.toMathMLWithSubscriptAndSuperscript(
+        base.children[0],
+        base.children[1],
+        exponent
+      );
+    }
     const result = this.createMathMLElement("msup");
-    const base = this.children[0].toMathML();
-    const exponent = this.children[1].toMathML();
-    result.appendChild(base);
-    result.appendChild(exponent);
+    const baseML = base.toMathML();
+    const exponentML = exponent.toMathML();
+    result.appendChild(baseML);
+    result.appendChild(exponentML);
     return result;
   }
 }
@@ -10436,6 +10481,15 @@ class MathNodeBaseWithSubscript extends MathNode {
   requiresTallExponent() {
     return this.children[0].requiresTallExponent();
   }
+
+  toMathML() {
+    const result = this.createMathMLElement("msub");
+    const base = this.children[0].toMathML();
+    const subscript = this.children[1].toMathML();
+    result.appendChild(base);
+    result.appendChild(subscript);
+    return result;
+  }
 }
 
 class MathNodeLeftDelimiter extends MathNode {
@@ -10535,16 +10589,35 @@ class MathNodeDelimiterMark extends MathNode {
     /** @type {number} */
     distanceFromTopToFractionLineEnclosed,
   ) {
-    let scaleHeight = 1.1;
-    this.parenthesisThickness = heightToEnclose / 24;
-    this.parenthesisThickness = Math.min(3, this.parenthesisThickness);
-    this.parenthesisThickness = Math.max(1.5, this.parenthesisThickness);
+    let scaleHeight = 1.05;
+    this.parenthesisThickness = heightToEnclose / 18;
+    this.parenthesisThickness = Math.min(1.5, this.parenthesisThickness);
+    this.parenthesisThickness = Math.max(4, this.parenthesisThickness);
     heightToEnclose = Math.max(
       2 * distanceFromTopToFractionLineEnclosed,
       2 * (heightToEnclose - distanceFromTopToFractionLineEnclosed));
     this.boundingBox.top = 0;
     this.boundingBox.height = heightToEnclose * scaleHeight;
     this.boundingBox.distanceFromTopToFractionLine = this.boundingBox.height / 2;
+  }
+
+  toMathMLDelimiter(
+    /** @type {string} */
+    leftDelimiterString,
+    /** @type {string} */
+    rightDelimiterString,
+  ) {
+    const result = this.createMathMLElement("mo");
+    result.textContent = "|";
+    if (this.left) {
+      result.textContent = leftDelimiterString;
+      result.setAttribute("prefix", true);
+    } else {
+      result.textContent = rightDelimiterString;
+      result.setAttribute("postfix", true);
+    }
+    result.setAttribute("stretchy", true);
+    return result;
   }
 }
 
@@ -10623,6 +10696,10 @@ class MathNodeAbsoluteValue extends MathNodeDelimiterMark {
     canvas.moveTo(c.x, c.yLow);
     canvas.lineTo(c.x, c.yHigh);
     canvas.stroke();
+  }
+
+  toMathML() {
+    return toMathMLDelimiter("|", "|");
   }
 }
 
@@ -10779,6 +10856,10 @@ class MathNodeSquareBrackets extends MathNodeSquareBracketsLike {
     canvas.lineTo(c.xStart, c.yHigh);
     canvas.stroke();
   }
+
+  toMathML() {
+    return this.toMathMLDelimiter("[", "]");
+  }
 }
 
 class MathNodeFloor extends MathNodeSquareBracketsLike {
@@ -10839,6 +10920,10 @@ class MathNodeFloor extends MathNodeSquareBracketsLike {
     canvas.lineTo(c.xMiddle, c.yHigh);
     canvas.stroke();
   }
+
+  toMathML() {
+    return this.toMathMLDelimiter("⌊", "⌋");
+  }
 }
 
 class MathNodeCeiling extends MathNodeSquareBracketsLike {
@@ -10898,6 +10983,10 @@ class MathNodeCeiling extends MathNodeSquareBracketsLike {
     canvas.lineTo(c.xMiddle, c.yHigh);
     canvas.lineTo(c.xStart, c.yHigh);
     canvas.stroke();
+  }
+
+  toMathML() {
+    return this.toMathMLDelimiter("⌈", "⌉");
   }
 }
 
@@ -11016,6 +11105,10 @@ class MathNodeAngleBrackets extends MathNodeDelimiterMark {
     canvas.lineTo(c.xEnd, c.yHigh);
     canvas.stroke();
   }
+
+  toMathML() {
+    return this.toMathMLDelimiter("〈", "〉");
+  }
 }
 
 class MathNodeParenthesis extends MathNodeDelimiterMark {
@@ -11040,9 +11133,9 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
      * The lower the number, the more round the parentheses appear.
      * When the number is higher, the parentheses appear more straight.
      */
-    const flatness = 3;
+    const flatness = 2;
     this.verticallyStretchCommon(heightToEnclose, distanceFromTopToFractionLineEnclosed);
-    this.boundingBox.width = Math.min(this.boundingBox.height / flatness, 20);
+    this.boundingBox.width = Math.min(this.boundingBox.height / flatness, 50);
     this.element.style.borderLeft = '';
     this.element.style.borderRight = '';
     let scale = this.scale();
@@ -11186,6 +11279,10 @@ class MathNodeParenthesis extends MathNodeDelimiterMark {
     canvas.ellipse(
       x, middle, rxInner, ry, 0, Math.PI / 2, 3 * Math.PI / 2, !this.left);
     canvas.fill();
+  }
+
+  toMathML() {
+    return this.toMathMLDelimiter("(", ")");
   }
 }
 
@@ -11573,6 +11670,10 @@ class MathNodeCurlyBrace extends MathNodeDelimiterMark {
       xStickyPart: xStickyPart,
       thicknessShift: thicknessShift,
     };
+  }
+
+  toMathML() {
+    return this.toMathMLDelimiter("{", "}");
   }
 }
 
@@ -12091,12 +12192,17 @@ class MathNodeOperatorStandalone extends MathNode {
     let distanceTopToCharacterTipMap = {
       // sum
       '\u2211': 0.066,
+      // product
+      '\u220F': 0.066,
       // integral
       '\u222B': 0.066,
+
     };
     let distanceTopToCharacterBottomMap = {
       // sum
       '\u2211': 1.033,
+      // prod
+      '\u220F': 1.033,
       // integral
       '\u222B': 1,
     };

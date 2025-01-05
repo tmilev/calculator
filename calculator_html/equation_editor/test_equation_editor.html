@@ -194,10 +194,22 @@
     testMathMLRendering();
   }
 
+  function setTimesNewRoman() {
+    setEquationEditorFont("Times New Roman");
+  }
+
+  function setCourierNew() {
+    setEquationEditorFont("Courier New");
+  }
+
+  function setArial() {
+    setEquationEditorFont("Arial");
+  }
+
   function setEquationEditorFont(font) {
-    editorContainer.style.font = font;
-    mathMLContainer.style.font = font;
-    svgContainer.style.font = font;
+    editorContainer.style.fontFamily = font;
+    mathMLContainer.style.fontFamily = font;
+    svgContainer.style.fontFamily = font;
     rerender();
   }
 </script>
@@ -216,6 +228,18 @@
     Font size: <span id="font-size">72px</span>
     <input type="range" min="5" max="100" value="72" class="slider" onchange="clickSlider(this);"
       oninput="clickSlider(this);">
+    <br>
+    <div>
+      <button onclick="setTimesNewRoman()" style="font-family:'Times New Roman', Times, serif;">
+        Times New Roman
+      </button>
+      <button onclick="setCourierNew()" style="font-family:'Courier New', Courier, monospace;">
+        Courier New
+      </button>
+      <button onclick="setArial()" style="font-family:Arial, Helvetica, sans-serif">
+        Arial
+      </button>
+    </div>
   </div>
   <hr>
   MathML output:

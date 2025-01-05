@@ -10043,6 +10043,15 @@ class MathNodeSqrt extends MathNode {
   applyBackspaceToTheRight() {
     return this.applyBackspaceToTheRightAsLeftArrow();
   }
+
+  toMathML() {
+    const result = this.createMathMLElement("mroot");
+    const exponent = this.children[0];
+    const underTheRadical = this.children[2];
+    result.appendChild(underTheRadical.toMathML());
+    result.appendChild(exponent.toMathML());
+    return result;
+  }
 }
 
 class MathNodeOverLine extends MathNode {

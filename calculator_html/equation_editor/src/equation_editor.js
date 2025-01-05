@@ -9099,6 +9099,12 @@ class MathNodeAtomImmutable extends MathNode {
   ) {
     this.drawOnCanvasAtomic(canvas, boundingBoxFromParent);
   }
+
+  toMathML() {
+    const result = this.createMathMLElement("mo");
+    result.textContent = this.contentIfAtomic();
+    return result;
+  }
 }
 
 class MathNodeFraction extends MathNode {
@@ -9358,6 +9364,16 @@ class MathNodeBaseWithExponent extends MathNode {
   requiresTallExponent() {
     return this.children[0].requiresTallExponent();
   }
+
+  /** @return {MathMLElement} */
+  toMathML() {
+    const result = this.createMathMLElement("msup");
+    const base = this.children[0].toMathML();
+    const exponent = this.children[1].toMathML();
+    result.appendChild(base);
+    result.appendChild(exponent);
+    return result;
+  }
 }
 
 class MathNodeHorizontalMath extends MathNode {
@@ -9590,6 +9606,7 @@ class MathNodeRoot extends MathNode {
 
   toMathML() {
     const result = this.createMathMLElement("math");
+    result.setAttribute("displaystyle", "true");
     result.appendChild(this.children[0].toMathML());
     return result;
   }
@@ -12024,6 +12041,17 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
     superscript.computeBoundingBoxLeftSingleChild();
     operator.computeBoundingBoxLeftSingleChild();
     subscript.computeBoundingBoxLeftSingleChild();
+  }
+
+  toMathML() {
+    const result = this.createMathMLElement("munderover");
+    const operator = this.children[1].toMathML();
+    const subscript = this.children[2].toMathML();
+    const superscript = this.children[0].toMathML();
+    result.appendChild(operator);
+    result.appendChild(subscript);
+    result.appendChild(superscript);
+    return result;
   }
 }
 

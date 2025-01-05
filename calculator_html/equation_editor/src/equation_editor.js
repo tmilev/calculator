@@ -11734,6 +11734,14 @@ class MathNodeMatrixTable extends MathNode {
     this.boundingBox.width = rowWidth;
     this.boundingBox.distanceFromTopToFractionLine = this.boundingBox.height / 2;
   }
+
+  toMathML() {
+    const result = this.createMathMLElement("mtable");
+    for (const row of this.children) {
+      result.appendChild(row.toMathML());
+    }
+    return result;
+  }
 }
 
 class MathNodeMatrix extends MathNode {
@@ -11882,7 +11890,6 @@ class MathNodeMatrix extends MathNode {
 
   /** Ensures that a matrix has rows with equal number of columns. */
   normalizeMatrix() {
-    /** */
     let matrixTable = this.children[0].children[1];
     let columnCount = this.matrixColumnCount();
     let numberOfRows = matrixTable.children.length;

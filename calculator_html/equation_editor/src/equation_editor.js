@@ -2056,6 +2056,24 @@ class LaTeXConstants {
       '\\cancel': true,
       '\\sqrt': true,
     };
+
+    /** @type {Object.<string, boolean>} */
+    this.mathLetters = {};
+    const mathLetterReverseCollections = [
+      this.mathbbEquivalents,
+      this.mathfrakEquivalents,
+      this.mathcalEquivalents,
+      this.latexBackslashAtomsEditable
+    ];
+    for (const collection of mathLetterReverseCollections) {
+      for (const label in collection) {
+        const mathLike = collection[label];
+        this.mathLetters[mathLike] = true;
+      }
+    }
+    for (const latinCharacter in this.latinCharacters) {
+      this.mathLetters[latinCharacter] = true;
+    }
     for (let operator in this.operatorWithSuperAndSubscriptBackslashed) {
       this.recognizedCommandsKeyInput[operator] = true;
     }
@@ -2161,6 +2179,31 @@ class LaTeXConstants {
     input,
   ) {
     return input in this.latinCharacters;
+  }
+
+  /** @return {boolean} */
+  isMathLetter(/** @type {string} */ input) {
+    return input in this.mathLetters;
+  }
+
+  /**
+   * Returns whether the input is to be regarded as text. 
+   * @return {boolean} 
+   */
+  isTextLike(
+    /** @type {string} */
+    input,
+  ) {
+    for (let i = 0; i < input.length; i++) {
+      const character = input.charAt(i);
+      if (this.isWhiteSpace(character)) {
+        return true;
+      }
+      if (!this.isMathLetter(character) && !this.isDigit(character)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /** 
@@ -8615,7 +8658,7 @@ class MathNode {
     if (latexConstants.isDigitsNonEmpty(content)) {
       result = this.createMathMLElement("mn");
       result.textContent = content;
-    } else if (content.length === 1) {
+    } else if (content.length === 1 || latexConstants.isTextLike(content)) {
       result = this.createMathMLElement("mi");
       result.textContent = content;
     } else {

@@ -9128,6 +9128,7 @@ class MathNodeAtomImmutable extends MathNode {
 
   toMathML() {
     const result = this.createMathMLElement("mo");
+    result.setAttribute("stretchy", false);
     result.textContent = this.contentIfAtomic();
     return result;
   }
@@ -9538,6 +9539,39 @@ class MathNodeHorizontalMath extends MathNode {
       return false;
     }
     return false;
+  }
+
+  isOpenDelimiter(/** @type {MathNode} */ element) {
+    return (element instanceof MathNodeLeftDelimiter);
+  }
+
+  isCloseDelimiter(/** @type {MathNode} */ element) {
+    return (element instanceof MathNodeRightDelimiter);
+  }
+
+  toMathML() {
+    // Whenever an open delimiter is encountered,
+    // enclose the open delimiter, the inbetween, and the
+    // closing delimiter in an mrow.
+    // As of writing, this seems necessary so that the parentheses
+    // are stretched correctly.
+    /** @type {MathMLElement[]} */
+    const subrows = [];
+    let last = this.createMathMLElement("mrow");
+    subrows.push(last);
+    for (const child of this.children) {
+      if (this.isOpenDelimiter(child)) {
+        last = this.createMathMLElement("mrow");
+        subrows.push(last);
+      }
+      last.appendChild(child.toMathML());
+      if (this.isCloseDelimiter(child)) {
+        subrows.length--;
+        subrows[subrows.length - 1].appendChild(last);
+        last = subrows[subrows.length - 1];
+      }
+    }
+    return subrows[0];
   }
 }
 
@@ -10544,6 +10578,10 @@ class MathNodeLeftDelimiter extends MathNode {
   computeDimensions() {
     this.computeDimensionsDelimiter();
   }
+
+  toMathML() {
+    return this.children[0].toMathML();
+  }
 }
 
 class MathNodeRightDelimiter extends MathNode {
@@ -10582,6 +10620,10 @@ class MathNodeRightDelimiter extends MathNode {
   /** Computes the dimensions of the bounding box. */
   computeDimensions() {
     this.computeDimensionsDelimiter();
+  }
+
+  toMathML() {
+    return this.children[0].toMathML();
   }
 }
 
@@ -10625,12 +10667,14 @@ class MathNodeDelimiterMark extends MathNode {
     const result = this.createMathMLElement("mo");
     if (this.left) {
       result.textContent = leftDelimiterString;
-      result.setAttribute("prefix", true);
     } else {
       result.textContent = rightDelimiterString;
-      result.setAttribute("postfix", true);
     }
     return result;
+  }
+
+  isLeft() {
+    return this.type.type === knownTypes.leftDelimiterMark.type;
   }
 }
 

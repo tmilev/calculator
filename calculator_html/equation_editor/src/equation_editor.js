@@ -10648,8 +10648,8 @@ class MathNodeDelimiterMark extends MathNode {
   ) {
     let scaleHeight = 1.05;
     this.parenthesisThickness = heightToEnclose / 18;
-    this.parenthesisThickness = Math.min(1.5, this.parenthesisThickness);
-    this.parenthesisThickness = Math.max(4, this.parenthesisThickness);
+    this.parenthesisThickness = Math.max(1.5, this.parenthesisThickness);
+    this.parenthesisThickness = Math.min(4, this.parenthesisThickness);
     heightToEnclose = Math.max(
       2 * distanceFromTopToFractionLineEnclosed,
       2 * (heightToEnclose - distanceFromTopToFractionLineEnclosed));

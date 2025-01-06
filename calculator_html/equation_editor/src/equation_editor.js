@@ -5670,7 +5670,12 @@ class MathNode {
     return this.textContentOrInitialContent();
   }
 
-  /** @return {MathNode} */
+  /** 
+   * If the horizontal math contains a single nonempty atomic element, 
+   * or a single nonempty atomic element combined with empty atomics, then
+   * returns the atomic element, otherwise returns the this node. 
+   * @return {MathNode} 
+   */
   stripRedundantHorizontalMath() {
     if (this.type.type !== knownTypes.horizontalMath.type) {
       return this;
@@ -5688,6 +5693,9 @@ class MathNode {
         }
         result = child;
       }
+    }
+    if (result === null) {
+      return this;
     }
     return result;
   }
@@ -7671,6 +7679,103 @@ class MathNode {
   }
 
   /** @return {Array.<MathNode?>!} */
+  splitByCursorIntoPrefixBaseArgumentAndSuffix() {
+    return this.splitIntoPrefixBaseArgumentAndSuffix(this.positionCursorBeforeKeyEvents);
+  }
+
+  /** @return {Array.<MathNode?>!} */
+  splitIntoPrefixBaseArgumentAndSuffix(/** @type {number} */ position) {
+    if (!this.isAtomEditable()) {
+      // We are trying to split an element that is not an editable atom.
+      return [null, this, null, null];
+    }
+    const content = this.contentIfAtomic();
+    const beforeCursor = content.slice(0, position);
+    const afterCursor = content.slice(position);
+    const beforeCursorSplits = this.splitBeforeCursor(beforeCursor);
+    const afterCursorSplits = this.splitAfterCursor(afterCursor);
+    const allSplits = [
+      beforeCursorSplits[0],
+      beforeCursorSplits[1],
+      afterCursorSplits[0],
+      afterCursorSplits[1]
+    ];
+    const result = [];
+    for (const split of allSplits) {
+      if (split === "") {
+        result.push(null);
+        continue;
+      }
+      result.push(mathNodeFactory.atom(this.equationEditor, split));
+    }
+    return result;
+  }
+
+  /** @return {string[]} */
+  splitString(
+    /** @type {string}*/ input,
+    /** @type{number} */ length,
+  ) {
+    return [
+      input.slice(0, length),
+      input.slice(length),
+    ];
+  }
+
+  /** @return {string[]} */
+  splitBeforeCursor(/** @type {string}*/ beforeCursor) {
+    if (beforeCursor.length === 0) {
+      return ["", ""];
+    }
+    let last = String.fromCodePoint(beforeCursor.codePointAt(
+      beforeCursor.length - 1
+    ));
+    if (latexConstants.isMathLetter(last)) {
+      // Ends on a letter.
+      return this.splitString(beforeCursor, beforeCursor.length - 1);
+    }
+    if (!latexConstants.isDigit(last)) {
+      // Does not end on a letter or a digit.
+      return ["", beforeCursor];
+    }
+    // Ends on a digit. Combine all preceding digits.
+    let sliceIndex = beforeCursor.length - 1;
+    for (let i = beforeCursor.length - 2; i >= 0; i--) {
+      const current = beforeCursor.charAt(i);
+      if (!latexConstants.isDigit(current)) {
+        break;
+      }
+      sliceIndex = i;
+    }
+    return this.splitString(beforeCursor, sliceIndex);
+  }
+
+  /** @return {string[]} */
+  splitAfterCursor(/** @type {string}*/ afterCursor) {
+    if (afterCursor.length === 0) {
+      return ["", ""];
+    }
+    let first = String.fromCodePoint(afterCursor.codePointAt(0));
+    if (latexConstants.isMathLetter(first)) {
+      // Starts with a letter.
+      return this.splitString(afterCursor, 1);
+    }
+    if (!latexConstants.isDigit(first)) {
+      // Does not start with a letter or a digit.
+      return [afterCursor, ""];
+    }
+    // Starts with a digit.
+    let sliceIndex = 0;
+    for (; sliceIndex < afterCursor.length; sliceIndex++) {
+      const character = afterCursor.charAt(sliceIndex);
+      if (!latexConstants.isDigit(character)) {
+        break;
+      }
+    }
+    return this.splitString(afterCursor, sliceIndex);
+  }
+
+  /** @return {Array.<MathNode?>!} */
   splitByCursor() {
     return this.splitByPosition(this.positionCursorBeforeKeyEvents);
   }
@@ -8287,12 +8392,16 @@ class MathNode {
       this.makeBaseDefaultWithExponent();
       return;
     }
-    let split = this.splitByCursor();
+    let split = this.splitByCursorIntoPrefixBaseArgumentAndSuffix();
     let originalParent = this.parent;
     let originalIndexInParent = this.indexInParent;
+    const prefix = split[0];
+    const base = split[1];
+    const exponent = split[2];
+    const suffix = split[3];
     let baseWithExponent = mathNodeFactory.baseWithExponent(
-      this.equationEditor, split[0], split[1]);
-    if (split[0] === null) {
+      this.equationEditor, base, exponent);
+    if (base === null) {
       baseWithExponent.children[0].appendChild(
         mathNodeFactory.atom(this.equationEditor, ''));
       baseWithExponent.children[0].children[0].desiredCursorPosition = 0;
@@ -8302,8 +8411,13 @@ class MathNode {
         .children[0]
         .desiredCursorPosition = 0;
     }
+    const horizontalMathWrapper = mathNodeFactory.horizontalMathFromArray(
+      this.equationEditor,
+      [prefix, baseWithExponent, suffix]
+    );
     originalParent.replaceChildAtPosition(
-      originalIndexInParent, baseWithExponent);
+      originalIndexInParent, horizontalMathWrapper);
+    originalParent.normalizeHorizontalMath();
     originalParent.ensureEditableAtoms();
     originalParent.updateDOM();
     originalParent.focusRestore();
@@ -10582,14 +10696,23 @@ class MathNodeBaseWithSubscript extends MathNode {
     options,
   ) {
     let result = null;
-    let numerator = this.children[0].toLatexWithAnnotation(options);
-    let denominator = this.children[1].toLatexWithAnnotation(options);
-    if (this.children[0].isAtomicNonEmptyOrHorizontalMathWithNonEmptyAtomic()) {
-      result =
-        new LatexWithAnnotation(`${numerator.latex}_{${denominator.latex}}`);
-    } else {
+    const baseNode = this.children[0].stripRedundantHorizontalMath();
+
+    let base = baseNode.toLatexWithAnnotation(options);
+    let subscript = this.children[1].toLatexWithAnnotation(options);
+    let shouldUseBracesInBase = true;
+    if (
+      baseNode.isAtomic() &&
+      (latexConstants.isDigitsNonEmpty(base.latex) || base.latex.length === 1)
+    ) {
+      shouldUseBracesInBase = false;
+    }
+    if (shouldUseBracesInBase) {
       result = new LatexWithAnnotation(
-        `{${numerator.latex}}_{${denominator.latex}}`);
+        `{${base.latex}}_{${subscript.latex}}`);
+    } else {
+      result =
+        new LatexWithAnnotation(`${base.latex}_{${subscript.latex}}`);
     }
     return result;
   }

@@ -5310,6 +5310,8 @@ class MathNode {
     this.extraData = null;
   }
 
+
+
   /** Creates a the DOM element if missing. */
   createDOMElementIfMissing() {
     if (this.element !== null) {
@@ -5668,6 +5670,28 @@ class MathNode {
     return this.textContentOrInitialContent();
   }
 
+  /** @return {MathNode} */
+  stripRedundantHorizontalMath() {
+    if (this.type.type !== knownTypes.horizontalMath.type) {
+      return this;
+    }
+    let result = null;
+    for (const child of this.children) {
+      if (!child.isAtomic()) {
+        // Found non-atomic child.
+        return this;
+      }
+      if (child.contentIfAtomic() !== '') {
+        if (result != null) {
+          // More than one atomic children
+          return this;
+        }
+        result = child;
+      }
+    }
+    return result;
+  }
+
   /** @return {boolean} */
   isAtomicNonEmptyOrHorizontalMathWithNonEmptyAtomic() {
     if (this.isAtomic()) {
@@ -5699,6 +5723,7 @@ class MathNode {
       this.type.type === knownTypes.atomImmutable.type ||
       this.type.type === knownTypes.sqrtSign.type);
   }
+
   /** @return {boolean} */
   isAtomOrAtomImmutable() {
     return (
@@ -9346,19 +9371,27 @@ class MathNodeBaseWithExponent extends MathNode {
     /** @type {ToLatexOptions?} */
     options,
   ) {
-    let base = this.children[0];
+    let base = this.children[0].stripRedundantHorizontalMath();
     let baseLatex = base.toLatexWithAnnotation(options);
     let exponentLatex = this.children[1].toLatexWithAnnotation(options);
     let useBracesInBase = false;
     if (base.type.type === knownTypes.fraction.type) {
       useBracesInBase = true;
     }
+    const baseLatexContent = baseLatex.latex;
+    if (
+      base.type.type === knownTypes.atom.type &&
+      baseLatexContent.length > 1 &&
+      !latexConstants.isDigitsNonEmpty(baseLatexContent)
+    ) {
+      useBracesInBase = true;
+    }
     if (useBracesInBase) {
       return new LatexWithAnnotation(
-        `{${baseLatex.latex}}^{${exponentLatex.latex}}`);
+        `{${baseLatexContent}}^{${exponentLatex.latex}}`);
     } else {
       return new LatexWithAnnotation(
-        `${baseLatex.latex}^{${exponentLatex.latex}}`);
+        `${baseLatexContent}^{${exponentLatex.latex}}`);
     }
   }
 
@@ -11219,7 +11252,7 @@ class MathNodeAngleBrackets extends MathNodeDelimiterMark {
   }
 
   toMathML() {
-    return this.toMathMLDelimiter("〈", "〉");
+    return this.toMathMLDelimiter("\u27e8", "\u27e9");
   }
 }
 
@@ -12279,7 +12312,7 @@ class MathNodeOperatorWithSuperAndSubscript extends MathNode {
 
   toMathML() {
     const result = this.createMathMLElement("munderover");
-    const operator = this.children[1].toMathML();
+    const operator = this.children[1].children[0].toMathML();
     const subscript = this.children[2].toMathML();
     const superscript = this.children[0].toMathML();
     result.appendChild(operator);
@@ -12430,6 +12463,15 @@ class MathNodeOperatorWithSubscript extends MathNode {
       result += `_{${bottom}}`;
     }
     return new LatexWithAnnotation(result);
+  }
+
+  toMathML() {
+    const result = this.createMathMLElement("munderover");
+    const operator = this.children[0].children[0].toMathML();
+    const subscript = this.children[1].toMathML();
+    result.appendChild(operator);
+    result.appendChild(subscript);
+    return result;
   }
 }
 

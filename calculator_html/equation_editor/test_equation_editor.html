@@ -124,7 +124,14 @@
   }
 
   function createInlinedEditor() {
-    const containerIds = ["inlinedEditor1", "inlinedEditor2", "inlinedEditor3", "inlinedEditor4"];
+    const containerIds = [
+      "inlinedEditor1",
+      "inlinedEditor2",
+      "inlinedEditor3",
+      "inlinedEditor4",
+      "inlinedEditor5",
+      "inlinedEditor6",
+    ];
     for (const containerId of containerIds) {
       const container = document.getElementById(containerId);
       if (container === null) {
@@ -730,7 +737,7 @@ Typeset all math in the 'toBeTypeSet' tag.
     Feel free to reorder examples as you see fit (if possible, arranged by categories and from simpler to more
     complicated).
     <ul>
-      <li> Inlined editor against static math: \(f(x)=\)<span id="inlinedEditor4"> </span></li>
+      <li> Inlined editor against static math: \(f(x)=\)<span id="inlinedEditor5"> </span></li>
       <li> Comment nodes should not be typeset (you shouldn't see anything after): <!-- \(x^2+1\) --></li>
       <li> Fraction 1: \(\frac{2}{x+\frac{1}{x}}\)</li>
       <li> Fraction 2: \(\frac{2+\frac{1}{x}}{x}\)</li>
@@ -1020,7 +1027,7 @@ Typeset all math in the 'toBeTypeSet' tag.
     Feel free to reorder examples as you see fit (if possible, arranged by categories and from simpler to more
     complicated).
     <ul>
-      <li> Inlined editor against static math: \(f(x)=\)<span id="inlinedEditor4"> </span></li>
+      <li> Inlined editor against static math: \(f(x)=\)<span id="inlinedEditor6"> </span></li>
       <li> Comment nodes should not be typeset (you shouldn't see anything after): <!-- \(x^2+1\) --></li>
       <li> Fraction 1: \(\frac{2}{x+\frac{1}{x}}\)</li>
       <li> Fraction 2: \(\frac{2+\frac{1}{x}}{x}\)</li>

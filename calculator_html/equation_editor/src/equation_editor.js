@@ -920,7 +920,11 @@ class MathNodeFactory {
     exponentWrapped.appendChild(exponentContainer);
     // Horizontal math wrapper for the base.
     const baseHorizontal = new MathNodeHorizontalMath(equationEditor);
-    baseHorizontal.appendChild(base);
+    let baseCorrected = base;
+    if (baseCorrected === null) {
+      baseCorrected = this.atom(equationEditor, '');
+    }
+    baseHorizontal.appendChild(baseCorrected);
     baseHorizontal.normalizeHorizontalMath();
     // The base with the exponent.
     baseWithExponent.appendChild(baseHorizontal);
@@ -932,7 +936,7 @@ class MathNodeFactory {
   baseWithSubscript(
     /** @type {EquationEditor!} */
     equationEditor,
-    /** @type {MathNode!} */
+    /** @type {MathNode?} */
     base,
     /** @type {MathNode?} */
     subscript,
@@ -945,7 +949,11 @@ class MathNodeFactory {
     subscriptWrapped.appendChild(subscriptContainer);
     // Horizontal math wrapper for the base.
     const baseHorizontal = new MathNodeHorizontalMath(equationEditor);
-    baseHorizontal.appendChild(base);
+    let baseCorrected = base;
+    if (baseCorrected === null) {
+      baseCorrected = this.atom(equationEditor, '');
+    }
+    baseHorizontal.appendChild(baseCorrected);
     baseHorizontal.normalizeHorizontalMath();
     // The base with the subscript.
     const baseWithSubscript = new MathNodeBaseWithSubscript(equationEditor);
@@ -8402,8 +8410,6 @@ class MathNode {
     let baseWithExponent = mathNodeFactory.baseWithExponent(
       this.equationEditor, base, exponent);
     if (base === null) {
-      baseWithExponent.children[0].appendChild(
-        mathNodeFactory.atom(this.equationEditor, ''));
       baseWithExponent.children[0].children[0].desiredCursorPosition = 0;
     } else {
       baseWithExponent.children[1]
@@ -8445,6 +8451,10 @@ class MathNode {
     if (this.parent === null) {
       return;
     }
+    if (this.positionCursorBeforeKeyEvents > 0) {
+      this.makeBaseDefaultWithSubscriptSplitByCursor();
+      return;
+    }
     if (this.isEmptyAtom()) {
       let previous = this.previousHorizontalSibling();
       if (previous !== null) {
@@ -8457,6 +8467,40 @@ class MathNode {
       return;
     }
     this.makeBaseDefaultWithSubscript();
+  }
+
+  makeBaseDefaultWithSubscriptSplitByCursor() {
+    if (!this.isAtomEditable()) {
+      this.makeBaseDefaultWithSubscript();
+      return;
+    }
+    let split = this.splitByCursorIntoPrefixBaseArgumentAndSuffix();
+    let originalParent = this.parent;
+    let originalIndexInParent = this.indexInParent;
+    const prefix = split[0];
+    const base = split[1];
+    const subscript = split[2];
+    const suffix = split[3];
+    let baseWithSubscript = mathNodeFactory.baseWithSubscript(
+      this.equationEditor, base, subscript);
+    if (base === null) {
+      baseWithSubscript.children[0].children[0].desiredCursorPosition = 0;
+    } else {
+      baseWithSubscript.children[1]
+        .children[0]
+        .children[0]
+        .desiredCursorPosition = 0;
+    }
+    const horizontalMathWrapper = mathNodeFactory.horizontalMathFromArray(
+      this.equationEditor,
+      [prefix, baseWithSubscript, suffix]
+    );
+    originalParent.replaceChildAtPosition(
+      originalIndexInParent, horizontalMathWrapper);
+    originalParent.normalizeHorizontalMath();
+    originalParent.ensureEditableAtoms();
+    originalParent.updateDOM();
+    originalParent.focusRestore();
   }
 
   /** Makes a base with subscript where the base ends on a right delimiter. */

@@ -8358,6 +8358,10 @@ class MathNode {
       previous.makeBaseDefaultWithExponent();
       return;
     }
+    if (previous.type.type === knownTypes.atomImmutable.type) {
+      previous.makeBaseDefaultWithExponent();
+      return;
+    }
     if (previous.isAtomEditable()) {
       previous.makeBaseDefaultWithExponentNoDelimiter();
       return;

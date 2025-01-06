@@ -12633,7 +12633,7 @@ class MathNodeOperatorWithSubscript extends MathNode {
   }
 
   toMathML() {
-    const result = this.createMathMLElement("munderover");
+    const result = this.createMathMLElement("munder");
     const operator = this.children[0].children[0].toMathML();
     const subscript = this.children[1].toMathML();
     result.appendChild(operator);

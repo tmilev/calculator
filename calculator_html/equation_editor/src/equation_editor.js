@@ -5679,9 +5679,9 @@ class MathNode {
   }
 
   /** 
-   * If the horizontal math contains a single nonempty atomic element, 
-   * or a single nonempty atomic element combined with empty atomics, then
-   * returns the atomic element, otherwise returns the this node. 
+   * If the horizontal math contains a single nonempty element, 
+   * or a single nonempty element combined with empty atomics, then
+   * returns the nonempty element, otherwise returns the this node. 
    * @return {MathNode} 
    */
   stripRedundantHorizontalMath() {
@@ -5690,17 +5690,15 @@ class MathNode {
     }
     let result = null;
     for (const child of this.children) {
-      if (!child.isAtomic()) {
-        // Found non-atomic child.
+      if (child.isAtomEditable() && child.contentIfAtomic() === '') {
+        // Empty atom, ignore.
+        continue;
+      }
+      if (result != null) {
+        // More than one non-empty child.
         return this;
       }
-      if (child.contentIfAtomic() !== '') {
-        if (result != null) {
-          // More than one atomic children
-          return this;
-        }
-        result = child;
-      }
+      result = child;
     }
     if (result === null) {
       return this;
@@ -9632,23 +9630,11 @@ class MathNodeBaseWithExponent extends MathNode {
 
   /** @return {MathMLElement} */
   toMathML() {
-    let base = this.children[0];
+    let base = this.children[0].stripRedundantHorizontalMath();
     const exponent = this.children[1];
     if (base.type.type === knownTypes.baseWithSubscript.type) {
       return this.toMathMLWithSubscriptAndSuperscript(
         base.children[0], base.children[1], exponent
-      );
-    }
-    if (
-      base.type.type === knownTypes.horizontalMath.type &&
-      base.children.length === 1 &&
-      base.children[0].type.type === knownTypes.baseWithSubscript.type
-    ) {
-      base = base.children[0];
-      return this.toMathMLWithSubscriptAndSuperscript(
-        base.children[0],
-        base.children[1],
-        exponent
       );
     }
     const result = this.createMathMLElement("msup");
@@ -10779,11 +10765,16 @@ class MathNodeBaseWithSubscript extends MathNode {
   }
 
   toMathML() {
+    let base = this.children[0].stripRedundantHorizontalMath();
+    const subscript = this.children[1];
+    if (base.type.type === knownTypes.baseWithExponent.type) {
+      return this.toMathMLWithSubscriptAndSuperscript(
+        base, subscript, exponent
+      );
+    }
     const result = this.createMathMLElement("msub");
-    const base = this.children[0].toMathML();
-    const subscript = this.children[1].toMathML();
-    result.appendChild(base);
-    result.appendChild(subscript);
+    result.appendChild(base.toMathML());
+    result.appendChild(subscript.toMathML());
     return result;
   }
 }

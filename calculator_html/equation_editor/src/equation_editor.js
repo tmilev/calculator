@@ -10062,6 +10062,25 @@ class MathNodeCancel extends MathNode {
     canvas.lineTo(c.rightX, c.rightY);
     canvas.stroke();
   }
+
+  toMathML() {
+    const result = this.createMathMLElement("mrow");
+    const cancelSign = this.createMathMLElement("mspace");
+    cancelSign.textContent = " ";
+    result.style.position = "relative";
+    cancelSign.style.display = "inline-block";
+    cancelSign.style.borderBottom = "1px solid black";
+    cancelSign.style.position = "absolute";
+    //    cancelSign.style.width = `100%`;
+    //  cancelSign.style.height = `100%`;
+    cancelSign.style.height = "1px";
+    cancelSign.style.width = "100%";
+    cancelSign.style.top = "50%";
+    cancelSign.style.transform = `skewY(-20deg)`;
+    result.appendChild(cancelSign);
+    result.appendChild(this.children[1].toMathML());
+    return result;
+  }
 }
 
 class MathNodeCancelUnderBox extends MathNode {

@@ -10768,6 +10768,8 @@ class MathNodeBaseWithSubscript extends MathNode {
     let base = this.children[0].stripRedundantHorizontalMath();
     const subscript = this.children[1];
     if (base.type.type === knownTypes.baseWithExponent.type) {
+      const exponent = base.children[1];
+      base = base.children[0].stripRedundantHorizontalMath();
       return this.toMathMLWithSubscriptAndSuperscript(
         base, subscript, exponent
       );

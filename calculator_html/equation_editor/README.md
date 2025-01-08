@@ -17,9 +17,9 @@ Detailed demo+debug page: https://calculator-algebra.org:8166/calculator_html/eq
 	- Can be copy and pasted: one [single javascript file](https://github.com/tmilev/calculator/blob/HEAD/calculator_html/equation_editor/src/equation_editor.js) and you're done.
 - Matrix support from the start.
 - Will construct math tags from content enclosed in \\(...\\) just like MathJax; can be used as a drop-in replacement. 
-- Will also construct math from ```<div class="mathcalculator">your formula here</div>```.
+- Will also construct math from divs with the classNames `mathcalculator`, `mathcalculatorSVG` and `mathcalculatorMathML`, for example ```<div class="mathcalculator">x^x</div>```,  ```<div class="mathcalculatorSVG">\sqrt{b^2-4ac}</div>``` and ```<div class="mathcalculatorMathML">\begin{matrix}\cos x& \sin x\\ \cos x & sin x  \end{matrix}</div>```.
 - Copy+paste your LaTeX at the cursor.
-- Prints to SVG and canvas.
+- Render static math to MathML, SVG and canvas.
 
 ```
 

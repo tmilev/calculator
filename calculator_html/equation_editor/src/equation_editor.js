@@ -9819,6 +9819,15 @@ class MathNodeGenericBox extends MathNode {
     }
     return new LatexWithAnnotation(`{\\color{${color}}{${childLatex.latex}}}`);
   }
+
+  toMathML() {
+    const result = this.children[0].toMathML();
+    let color = this.type.colorText;
+    if (color !== '') {
+      result.style.color = color;
+    }
+    return result;
+  }
 }
 
 class MathNodeRoot extends MathNode {

@@ -710,6 +710,7 @@ public:
   void swapTwoIndices(int index1, int index2);
   void cycleIndices(const List<int>& cycle);
   void permuteIndices(const List<List<int> >& cycles);
+  std::string toStringLimit(int limit = 20) const;
   std::string toStringConcatenate() const;
   std::string toString(FormatExpressions* format) const;
   std::string toString() const;
@@ -1996,6 +1997,19 @@ void List<Object>::setSize(int incomingSize) {
   this->setExpectedSize(incomingSize);
   this->reserve(incomingSize);
   this->size = incomingSize;
+}
+
+template <class Object>
+std::string List<Object>::toStringLimit(int limit) const {
+  std::stringstream out;
+  int itemsToDisplay = this->size;
+  if (itemsToDisplay > limit) {
+    itemsToDisplay = limit;
+  }
+  for (int i = 0; i < itemsToDisplay; i ++) {
+    out << this->objects[i].toString() << "\n";
+  }
+  return out.str();
 }
 
 template <class Object>

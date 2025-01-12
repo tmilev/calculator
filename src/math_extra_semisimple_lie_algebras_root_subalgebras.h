@@ -815,7 +815,7 @@ public:
   }
 };
 
-class SlTwoSubalgebras: public HashedList<SlTwoSubalgebra> {
+class SlTwoSubalgebras {
   friend class SemisimpleSubalgebras;
   SemisimpleLieAlgebra* owner;
 public:
@@ -823,6 +823,7 @@ public:
   static std::string descriptionModuleDecompositionOverSl2;
   static std::string descriptionHRealization;
   static std::string descriptionMinimalContainingRegularSubalgebras;
+  HashedList<SlTwoSubalgebra> allSubalgebras;
   List<List<int> > indicesSl2sContainedInRootSubalgebras;
   List<int> indicesSl2DecompositionFormulas;
   Vectors<Rational> badHCharacteristics;

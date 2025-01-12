@@ -1165,7 +1165,7 @@ std::string SemisimpleSubalgebras::toStringPart2(
 }
 
 std::string SemisimpleSubalgebras::toStringSl2s(FormatExpressions* format) {
-  if (this->slTwoSubalgebras.size == 0) {
+  if (this->slTwoSubalgebras.allSubalgebras.size == 0) {
     return "";
   }
   std::stringstream out;
@@ -1186,7 +1186,8 @@ std::string SemisimpleSubalgebras::toStringSl2s(FormatExpressions* format) {
   for (int i = 0; i < this->orbits.size; i ++) {
     out
     << "<tr><td>"
-    << this->slTwoSubalgebras[i].hElement.getCartanPart().toString()
+    << this->slTwoSubalgebras.allSubalgebras[i].hElement.getCartanPart().
+    toString()
     << "</td>";
     if (this->orbits[i].orbitSize != - 1) {
       out << "<td>" << this->orbits[i].orbitSize;
@@ -1295,9 +1296,13 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
   );
   this->orbitHElementLengths.clear();
   this->orbitDynkinIndices.clear();
-  this->orbitHElementLengths.setExpectedSize(this->slTwoSubalgebras.size);
-  this->orbitDynkinIndices.setExpectedSize(this->slTwoSubalgebras.size);
-  this->orbits.setSize(this->slTwoSubalgebras.size);
+  this->orbitHElementLengths.setExpectedSize(
+    this->slTwoSubalgebras.allSubalgebras.size
+  );
+  this->orbitDynkinIndices.setExpectedSize(
+    this->slTwoSubalgebras.allSubalgebras.size
+  );
+  this->orbits.setSize(this->slTwoSubalgebras.allSubalgebras.size);
   List<ElementWeylGroupAutomorphisms> generators;
   WeylGroupAutomorphisms& weylAutomorphisms =
   this->slTwoSubalgebras.rootSubalgebras.weylGroupAutomorphisms;
@@ -1315,18 +1320,20 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
       generators.addOnTop(element);
     }
   }
-  for (int i = 0; i < this->slTwoSubalgebras.size; i ++) {
+  for (int i = 0; i < this->slTwoSubalgebras.allSubalgebras.size; i ++) {
     this->orbitHElementLengths.addOnTop(
-      this->slTwoSubalgebras[i].lengthHSquared
+      this->slTwoSubalgebras.allSubalgebras[i].lengthHSquared
     );
     this->orbitDynkinIndices.addOnTop(
       DynkinSimpleType(
-        'A', 1, this->slTwoSubalgebras[i].lengthHSquared
+        'A',
+        1,
+        this->slTwoSubalgebras.allSubalgebras[i].lengthHSquared
       )
     );
     this->orbits[i].initialize(
       generators,
-      this->slTwoSubalgebras[i].hElement.getCartanPart()
+      this->slTwoSubalgebras.allSubalgebras[i].hElement.getCartanPart()
     );
   }
 }
@@ -1722,9 +1729,9 @@ bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos() {
   this->flagComputeModuleDecomposition = true;
   this->flagRealForms = true;
   this->wConjecture.computeBeforeSubalgebras(*this);
-  for (int i = 0; i < this->slTwoSubalgebras.size; i ++) {
+  for (int i = 0; i < this->slTwoSubalgebras.allSubalgebras.size; i ++) {
     this->computeStructureRealFormOneSlTwo(
-      this->slTwoSubalgebras.getElement(i), i
+      this->slTwoSubalgebras.allSubalgebras.getElement(i), i
     );
   }
   // this->hookUpCentralizers(true);
@@ -2387,7 +2394,7 @@ std::string OrbitIteratorRootActionWeylGroupAutomorphisms::toString() const {
   if (this->flagOrbitIsBuffered) {
     out
     << "<br>The orbit is buffered, the orbit elements are: "
-    << this->orbitBuffer.toString();
+    << this->orbitBuffer.toStringLimit();
   } else {
     out
     << "<br>The orbit is either too large or not yet fully enumerated. "
@@ -2419,117 +2426,116 @@ std::string OrbitIteratorRootActionWeylGroupAutomorphisms::toStringSize() const 
   return out.str();
 }
 
-void SemisimpleSubalgebras::getHCandidates(
+void SemisimpleSubalgebras::writeHCandidates(
   Vectors<Rational>& outputHCandidatesScaledToActByTwo,
   CandidateSemisimpleSubalgebra& newCandidate,
   DynkinType& currentType,
   List<int>& currentRootInjection
 ) {
-  STACK_TRACE("SemisimpleSubalgebras::getHCandidates");
-  ProgressReport report1;
-  ProgressReport report2;
-  ProgressReport report3;
+  STACK_TRACE("SemisimpleSubalgebras::writeHCandidates");
+  ProgressReport targetHeader;
   int baseRank = currentType.getRank() - 1;
   DynkinSimpleType smallType = currentType.getSmallestSimpleType();
-  if (report1.tickAndWantReport()) {
-    std::stringstream reportStream;
-    reportStream
-    << "the latest root of the candidate simple component "
-    << smallType.toString();
-    report1.report(reportStream.str());
-  }
-  int indexNewRooT = *currentRootInjection.lastObject();
+  int indexNewRoot = *currentRootInjection.lastObject();
   int indexNewRootInSmallType =
-  indexNewRooT - currentType.getRank() + smallType.rank;
+  indexNewRoot - currentType.getRank() + smallType.rank;
   Rational desiredHScaledToActByTwoLengthSquared =
   smallType.cartanSymmetricInverseScale * 4 /
   smallType.getDefaultRootLengthSquared(indexNewRootInSmallType);
   outputHCandidatesScaledToActByTwo.setSize(0);
-  for (int j = 0; j < this->slTwoSubalgebras.size; j ++) {
-    if (report2.tickAndWantReport()) {
-      std::stringstream reportStreamX;
-      reportStreamX << "Trying to realize via orbit number " << j + 1 << ".";
-      if (
-        this->slTwoSubalgebras[j].lengthHSquared !=
-        desiredHScaledToActByTwoLengthSquared
-      ) {
-        reportStreamX
-        << " The h element "
-        << this->slTwoSubalgebras[j].hElement.getCartanPart().toString()
-        << " of length "
-        << this->orbitHElementLengths[j].toString()
-        << " generating orbit number "
-        << j + 1
-        << " out of "
-        << this->slTwoSubalgebras.size
-        << " does not have the required length of "
-        << desiredHScaledToActByTwoLengthSquared.toString();
-      }
-      report2.report(reportStreamX.str());
+  for (int j = 0; j < this->slTwoSubalgebras.allSubalgebras.size; j ++) {
+    if (targetHeader.tickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream
+      << "the latest root of the candidate simple component "
+      << smallType.toString();
+      reportStream << "Trying to realize via orbit number " << j + 1 << ".";
+      targetHeader.report(reportStream.str());
     }
-    if (
-      this->slTwoSubalgebras[j].lengthHSquared !=
-      desiredHScaledToActByTwoLengthSquared
-    ) {
-      continue;
-    }
-    if (baseRank == 0) {
-      outputHCandidatesScaledToActByTwo.addOnTop(
-        this->slTwoSubalgebras[j].hElement.getCartanPart()
-      );
-      // Orbit of not generated because that is the very first H element
-      // selected.
-      continue;
-    }
-    Vector<Rational> currentCandidate;
-    OrbitIteratorRootActionWeylGroupAutomorphisms& currentOrbit =
-    this->orbits[j];
-    currentOrbit.initialize();
-    do {
-      currentCandidate = currentOrbit.getCurrentElement();
-      if (
-        newCandidate.isGoodHNewActingByTwo(
-          currentCandidate, currentRootInjection
-        )
-      ) {
-        if (report3.tickAndWantReport()) {
-          std::stringstream out2, out3;
-          out3
-          << "So far, found "
-          << outputHCandidatesScaledToActByTwo.size + 1
-          << " good candidates. ";
-          report2.report(out3.str());
-          out2 << "sl(2) orbit " << j + 1 << ". " << currentOrbit.toString();
-          out2 << "Current element has desired scalar products. ";
-          report3.report(out2.str());
-        }
-        outputHCandidatesScaledToActByTwo.addOnTop(
-          currentOrbit.getCurrentElement()
-        );
-      } else {
-        if (report3.tickAndWantReport()) {
-          std::stringstream out2;
-          out2
-          << "sl(2) orbit "
-          << j + 1
-          << ". "
-          << currentOrbit.toString()
-          << "\n<br>Current element is not a valid candidate. ";
-          report3.report(out2.str());
-        }
-      }
-    } while (currentOrbit.incrementReturnFalseIfPastLast());
-    if (outputHCandidatesScaledToActByTwo.size == 0) {
-      std::stringstream out2;
-      out2
-      << "Sl(2) orbit "
-      << j + 1
-      << ": extension to "
-      << currentType.toString()
-      << " not possible because there were no h candidates.";
-      report1.report(out2.str());
-    }
+    const SlTwoSubalgebra& currentSubalgebra =
+    this->slTwoSubalgebras.allSubalgebras[j];
+    this->writeHCandidatesForOneOrbit(
+      currentSubalgebra,
+      desiredHScaledToActByTwoLengthSquared,
+      baseRank,
+      outputHCandidatesScaledToActByTwo,
+      newCandidate,
+      currentRootInjection
+    );
   }
+}
+
+void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
+  const SlTwoSubalgebra& currentSubalgebra,
+  const Rational& desiredHScaledToActByTwoLengthSquared,
+  int baseRank,
+  Vectors<Rational>& outputHCandidatesScaledToActByTwo,
+  CandidateSemisimpleSubalgebra& newCandidate,
+  List<int>& currentRootInjection
+) {
+  STACK_TRACE("SemisimpleSubalgebras::writeHCandidatesForOneOrbit");
+  if (
+    currentSubalgebra.lengthHSquared != desiredHScaledToActByTwoLengthSquared
+  ) {
+    return;
+  }
+  if (baseRank == 0) {
+    outputHCandidatesScaledToActByTwo.addOnTop(
+      currentSubalgebra.hElement.getCartanPart()
+    );
+    // Orbit of not generated because that is the very first H element
+    // selected.
+    return;
+  }
+  ProgressReport orbitHeader(1, "orbitGeneration");
+  ProgressReport body;
+  Vector<Rational> currentCandidate;
+  OrbitIteratorRootActionWeylGroupAutomorphisms& currentOrbit =
+  this->orbits[currentSubalgebra.indexInContainer];
+  currentOrbit.initialize();
+  std::stringstream orbitBodyStream;
+  orbitBodyStream
+  << "sl(2) orbit "
+  << currentSubalgebra.indexInContainer + 1
+  << " out of "
+  << this->slTwoSubalgebras.allSubalgebras.size
+  << ". "
+  << currentOrbit.toString();
+  body.report(orbitBodyStream.str());
+  do {
+    this->writeOneHCandidate(
+      currentOrbit.getCurrentElement(),
+      outputHCandidatesScaledToActByTwo,
+      newCandidate,
+      currentRootInjection,
+      orbitHeader
+    );
+  } while (currentOrbit.incrementReturnFalseIfPastLast());
+}
+
+void SemisimpleSubalgebras::writeOneHCandidate(
+  const Vector<Rational>& currentCandidate,
+  Vectors<Rational>& outputHCandidatesScaledToActByTwo,
+  CandidateSemisimpleSubalgebra& newCandidate,
+  const List<int>& currentRootInjection,
+  ProgressReport& report
+) {
+  if (
+    !newCandidate.isGoodHNewActingByTwo(
+      currentCandidate, currentRootInjection
+    )
+  ) {
+    return;
+  }
+  if (report.tickAndWantReport()) {
+    std::stringstream reportStream;
+    reportStream
+    << "So far, found "
+    << outputHCandidatesScaledToActByTwo.size + 1
+    << " good candidates. ";
+    report.report(reportStream.str());
+  }
+  outputHCandidatesScaledToActByTwo.addOnTop(currentCandidate);
 }
 
 const CandidateSemisimpleSubalgebra& SemisimpleSubalgebras::baseSubalgebra() {
@@ -2629,10 +2635,10 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
       simpleAlgebra, sl2s, false, algebraicClosure
     );
     dynkinSimpleTypesWithComputedSl2Subalgebras.addOnTop(typeDefaultScale);
-    outputIndicesDefaultScale.setExpectedSize(sl2s.size);
-    for (int i = 0; i < sl2s.size; i ++) {
+    outputIndicesDefaultScale.setExpectedSize(sl2s.allSubalgebras.size);
+    for (int i = 0; i < sl2s.allSubalgebras.size; i ++) {
       outputIndicesDefaultScale.addOnTopNoRepetition(
-        sl2s[i].lengthHSquared / 2
+        sl2s.allSubalgebras[i].lengthHSquared / 2
       );
     }
     precomputedDynkinIndicesSl2subalgebrasSimpleTypes.addOnTop(
@@ -2827,7 +2833,8 @@ bool CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed() {
     << "I can't find its H element in the list of sl(2) subalgebras. "
     << global.fatal;
   }
-  const SlTwoSubalgebra& sl2 = this->owner->slTwoSubalgebras[indexSl2];
+  const SlTwoSubalgebra& sl2 =
+  this->owner->slTwoSubalgebras.allSubalgebras[indexSl2];
   if (!sl2.flagCentralizerTypeComputed) {
     return false;
   }
@@ -3042,7 +3049,7 @@ bool SemisimpleSubalgebras::computeCurrentHCandidates() {
     this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
     this->currentRootInjections[stackIndex][typeIndex]
   );
-  this->getHCandidates(
+  this->writeHCandidates(
     this->currentHCandidatesScaledToActByTwo[stackIndex],
     newCandidate,
     this->currentPossibleLargerDynkinTypes[stackIndex][typeIndex],
@@ -7442,7 +7449,7 @@ void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
   this->indexZeroWeight = - 1;
   this->owner = &inputOwner;
   this->rootSubalgebras.owner = &inputOwner;
-  this->clear();
+  this->allSubalgebras.clear();
 }
 
 void SemisimpleLieAlgebra::findSl2Subalgebras(
@@ -7499,12 +7506,12 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
   // sort subalgebras by dynkin index
   List<int> permutation;
   List<int> indexMap;
-  permutation.setSize(output.size);
+  permutation.setSize(output.allSubalgebras.size);
   indexMap.setSize(permutation.size);
   for (int i = 0; i < permutation.size; i ++) {
     permutation[i] = i;
   }
-  output.quickSortDescending(nullptr, &permutation);
+  output.allSubalgebras.quickSortDescending(nullptr, &permutation);
   for (int i = 0; i < indexMap.size; i ++) {
     indexMap[permutation[i]] = i;
   }
@@ -7520,8 +7527,9 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
   }
   inputOwner.checkConsistency();
   output.checkMinimalContainingRootSubalgebras();
-  for (int i = 0; i < output.size; i ++) {
-    SlTwoSubalgebra& currentSubalgebra = output.getElement(i);
+  for (int i = 0; i < output.allSubalgebras.size; i ++) {
+    SlTwoSubalgebra& currentSubalgebra = output.allSubalgebras.getElement(i);
+    currentSubalgebra.indexInContainer = i;
     currentSubalgebra.indicesMinimalContainingRootSubalgebras.reserve(
       currentSubalgebra.indicesContainingRootSubalgebras.size
     );
@@ -7665,12 +7673,11 @@ bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
 bool SlTwoSubalgebras::checkMinimalContainingRootSubalgebras() const {
   this->checkInitialization();
   this->checkConsistency();
-  for (int i = 0; i < this->size; i ++) {
-    const SlTwoSubalgebra& current = (*this)[i];
+  for (const SlTwoSubalgebra& current : this->allSubalgebras) {
     if (current.container != this) {
       global.fatal << "Corrupt sl(2) subalgebra." << global.fatal;
     }
-    (*this)[i].checkIndicesMinimalContainingRootSubalgebras();
+    current.checkIndicesMinimalContainingRootSubalgebras();
   }
   return true;
 }
@@ -7685,25 +7692,24 @@ void SlTwoSubalgebras::checkInitialization() const {
 }
 
 bool SlTwoSubalgebras::checkConsistency() const {
-  if (this->flagDeallocated) {
+  if (this->allSubalgebras.flagDeallocated) {
     global.fatal << "Use after free of SemisimpleLieAlgebra. " << global.fatal;
   }
   if (this->owner != nullptr) {
     this->owner->checkConsistency();
   }
-  for (int i = 0; i < this->size; i ++) {
-    (*this)[i].checkConsistency();
+  for (const SlTwoSubalgebra& current : this->allSubalgebras) {
+    current.checkConsistency();
   }
   return true;
 }
 
 void SlTwoSubalgebras::computeModuleDecompositionsitionsOfAmbientLieAlgebra() {
-  this->grandMasterConsistencyCheck();
   this->checkConsistency();
-  for (int i = 0; i < this->size; i ++) {
-    (*this).getElement(i).computeModuleDecompositionsitionAmbientLieAlgebra();
+  for (SlTwoSubalgebra& current : this->allSubalgebras) {
+    current.computeModuleDecompositionsitionAmbientLieAlgebra();
   }
-  this->grandMasterConsistencyCheck();
+  this->allSubalgebras.grandMasterConsistencyCheck();
 }
 
 bool SlTwoSubalgebras::containsSl2WithGivenH(
@@ -7712,11 +7718,11 @@ bool SlTwoSubalgebras::containsSl2WithGivenH(
   if (outputIndex != nullptr) {
     *outputIndex = - 1;
   }
-  ElementSemisimpleLieAlgebra<Rational> tempH;
+  ElementSemisimpleLieAlgebra<Rational> cartanElement;
   this->checkInitialization();
-  tempH.makeCartanGenerator(elementH, *this->owner);
-  for (int i = 0; i < this->size; i ++) {
-    if (this->objects[i].hElement == tempH) {
+  cartanElement.makeCartanGenerator(elementH, *this->owner);
+  for (int i = 0; i < this->allSubalgebras.size; i ++) {
+    if (this->allSubalgebras[i].hElement == cartanElement) {
       if (outputIndex != nullptr) {
         *outputIndex = i;
       }
@@ -7732,8 +7738,8 @@ bool SlTwoSubalgebras::containsSl2WithGivenHCharacteristic(
   if (outputIndex != nullptr) {
     *outputIndex = - 1;
   }
-  for (int i = 0; i < this->size; i ++) {
-    if ((*this)[i].hCharacteristic == hCharacteristic) {
+  for (int i = 0; i < this->allSubalgebras.size; i ++) {
+    if (this->allSubalgebras[i].hCharacteristic == hCharacteristic) {
       if (outputIndex != nullptr) {
         *outputIndex = i;
       }
@@ -8026,8 +8032,8 @@ void SlTwoSubalgebras::toStringModuleDecompositionMinimalContainingRegularSAs(
 ) {
   std::string currentString;
   std::stringstream out;
-  for (int i = 0; i < this->size; i ++) {
-    (*this)[i].toStringModuleDecompositionMinimalContainingRegularSubalgebras(
+  for (SlTwoSubalgebra& current : this->allSubalgebras) {
+    current.toStringModuleDecompositionMinimalContainingRegularSubalgebras(
       useLatex, useHtml, *this, currentString
     );
     out << currentString;
@@ -8079,7 +8085,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
   bool useHtml = format == nullptr ? true : format->flagUseHTML;
   std::string displayPathAlgebra;
   displayPathAlgebra = "../";
-  out << "Number of sl(2) subalgebras: " << this->size << ".\n";
+  out << "Number of sl(2) subalgebras: " << this->allSubalgebras.size << ".\n";
   std::stringstream out2;
   out2
   << "<br>Length longest root ambient algebra squared/4= "
@@ -8099,9 +8105,9 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
     bool allbadAreGoodInTheirBadness = true;
     for (int i = 0; i < this->badHCharacteristics.size; i ++) {
       bool isGoodInItsbadness = false;
-      for (int j = 0; j < this->size; j ++) {
+      for (const SlTwoSubalgebra& current : this->allSubalgebras) {
         if (
-          this->badHCharacteristics[i] == (*this)[j].hElement.getCartanPart()
+          this->badHCharacteristics[i] == current.hElement.getCartanPart()
         ) {
           isGoodInItsbadness = true;
           break;
@@ -8186,8 +8192,8 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
     << "which the sl(2) has no centralizer</a>"
     << "</td></tr>";
   }
-  for (int i = 0; i < this->size; i ++) {
-    const SlTwoSubalgebra& currentSubalgebra = (*this)[i];
+  for (int i = 0; i < this->allSubalgebras.size; i ++) {
+    const SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras[i];
     if (useHtml) {
       out
       << "<tr>"
@@ -8312,9 +8318,8 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
   std::stringstream out;
   std::stringstream body;
   bool useHtml = format == nullptr ? true : format->flagUseHTML;
-  for (int i = 0; i < this->size; i ++) {
-    currentString = (*this)[i].toString(format);
-    //  body<< "Index " << i << ": ";
+  for (const SlTwoSubalgebra& current : this->allSubalgebras) {
+    currentString = current.toString(format);
     if (useHtml) {
       body << "<br>";
     }
@@ -10329,7 +10334,9 @@ std::string CandidateSemisimpleSubalgebra::toString(
     << "<hr style='max-width:300px;margin:0px;'>"
     << "This is an <b>sl(2) subalgebra</b>; "
     << "details follow [info from sl(2) tables].<br>";
-    out << this->owner->slTwoSubalgebras[this->indexInSlTwos].toString();
+    out
+    << this->owner->slTwoSubalgebras.allSubalgebras[this->indexInSlTwos].
+    toString();
     out << "<hr style='max-width:100px;margin:0px;'>";
   }
   if (this->indexInducedFrom != - 1) {

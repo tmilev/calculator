@@ -747,11 +747,26 @@ public:
   bool writeFilesRealForms(std::stringstream* outputStream);
   void findSemisimpleSubalgebrasInitialize();
   bool findSemisimpleSubalgebrasContinue();
-  void getHCandidates(
+  void writeHCandidates(
     Vectors<Rational>& outputHCandidatesScaledToActByTwo,
     CandidateSemisimpleSubalgebra& newCandidate,
     DynkinType& currentType,
     List<int>& currentRootInjection
+  );
+  void writeHCandidatesForOneOrbit(
+    const SlTwoSubalgebra& currentSubalgebra,
+    const Rational& desiredHScaledToActByTwoLengthSquared,
+    int baseRank,
+    Vectors<Rational>& outputHCandidatesScaledToActByTwo,
+    CandidateSemisimpleSubalgebra& newCandidate,
+    List<int>& currentRootInjection
+  );
+  void writeOneHCandidate(
+    const Vector<Rational>& currentCandidate,
+    Vectors<Rational>& outputHCandidatesScaledToActByTwo,
+    CandidateSemisimpleSubalgebra& newCandidate,
+    const List<int>& currentRootInjection,
+    ProgressReport& report
   );
 };
 

@@ -53,7 +53,6 @@ void JSData::operator=(const List<unsigned char>& other) {
   this->elementType = JSData::Type::tokenString;
   this->stringValue = other.toStringConcatenate();
   this->listObjects.setSize(0);
-;
   this->objects.clear();
 }
 

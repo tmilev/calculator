@@ -3846,18 +3846,21 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
           sl2.hCharacteristic, &indexIsoSl2
         )
       ) {
-        output.getElement(indexIsoSl2).indicesContainingRootSubalgebras.
-        addOnTop(indexRootSubalgebraInContainer);
+        output.allSubalgebras.getElement(indexIsoSl2).
+        indicesContainingRootSubalgebras.addOnTop(
+          indexRootSubalgebraInContainer
+        );
         output.indicesSl2sContainedInRootSubalgebras[
           indexRootSubalgebraInContainer
         ].addOnTop(indexIsoSl2);
       } else {
         output.indicesSl2sContainedInRootSubalgebras[
           indexRootSubalgebraInContainer
-        ].addOnTop(output.size);
-        sl2.indexInContainer = output.size;
-        output.addOnTop(sl2);
-        output.lastObject()->checkIndicesMinimalContainingRootSubalgebras();
+        ].addOnTop(output.allSubalgebras.size);
+        sl2.indexInContainer = output.allSubalgebras.size;
+        output.allSubalgebras.addOnTop(sl2);
+        output.allSubalgebras.lastObject()->
+        checkIndicesMinimalContainingRootSubalgebras();
       }
     } else {
       output.badHCharacteristics.addOnTop(characteristicH);

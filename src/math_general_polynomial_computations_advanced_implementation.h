@@ -113,7 +113,7 @@ generateSymmetricDifferenceCandidates() {
   STACK_TRACE(
     "GroebnerBasisComputation::generateSymmetricDifferenceCandidates"
   );
-  ProgressReport reportProgress("Groebner basis report");
+  ProgressReport reportProgress(1, "Groebner basis report");
   this->numberOfSymmetricDifferenceRounds ++;
   for (int i = 0; i < this->basis.size; i ++) {
     for (
@@ -160,7 +160,7 @@ bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasis(
       );
     }
   }
-  ProgressReport reportStart("Groebner basis start");
+  ProgressReport reportStart(1, "Groebner basis start");
   if (this->flagDoProgressReport) {
     reportStart.report(this->toStringStatusGroebnerBasisTransformation());
   }
@@ -259,7 +259,7 @@ bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
 template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::addAndReducePolynomials() {
   STACK_TRACE("GroebnerBasisComputation::addAndReducePolynomials");
-  ProgressReport report("Add polynomial");
+  ProgressReport report(1, "Add polynomial");
   this->flagFoundNewBasisElements = false;
   while (this->basisCandidates.size > 0) {
     if (this->flagDoProgressReport) {

@@ -14253,7 +14253,7 @@ void ConeCollection::mergeChambers() {
   LargeInteger total =
   selection.getNumberOfCombinationsFixedCardinality(dimension);
   LargeInteger count;
-  ProgressReport report("simplexCones");
+  ProgressReport report(100, "simplexCones");
   while (
     selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
       dimension

@@ -3892,7 +3892,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool loadSemisimpleSubalgebras(
-    Calculator& calculator, const Expression& inpuT, Expression& output
+    Calculator& calculator, const Expression& input, Expression& output
   );
   static bool expressionFromChevalleyGenerator(
     Calculator& calculator,

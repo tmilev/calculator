@@ -141,7 +141,7 @@ bool SemisimpleLieAlgebra::attemptFindingHEF(
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF,
   std::stringstream* logStream
 ) {
-  STACK_TRACE("SemisimpleLieAlgebra::AttemptFindingHEF");
+  STACK_TRACE("SemisimpleLieAlgebra::attemptFindingHEF");
   List<Polynomial<AlgebraicNumber> > input;
   PolynomialSystem<AlgebraicNumber> system;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > mustBeZero;
@@ -2299,7 +2299,7 @@ incrementReturnFalseIfPastLast() {
 }
 
 void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
-  STACK_TRACE("OrbitFDRepIteratorWeylGroupAutomorphisms::initialize");
+  STACK_TRACE("OrbitIteratorRootActionWeylGroupAutomorphisms::initialize");
   this->iterator.checkInitialization();
   this->currentIndexInBuffer = 0;
   if (this->flagOrbitIsBuffered) {
@@ -2326,7 +2326,7 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
   const List<ElementWeylGroupAutomorphisms>& inputGenerators,
   const Vector<Rational>& inputElement
 ) {
-  STACK_TRACE("OrbitFDRepIteratorWeylGroupAutomorphisms::initialize");
+  STACK_TRACE("OrbitIteratorRootActionWeylGroupAutomorphisms::initialize");
   if (this->orbitDefiningElement == inputElement) {
     if (this->flagOrbitIsBuffered) {
       this->currentIndexInBuffer = 0;
@@ -3154,7 +3154,7 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
 std::string SemisimpleSubalgebras::toStringCurrentChain(
   FormatExpressions* format
 ) {
-  STACK_TRACE("SemisimpleSubalgebras::ToStringCurrentChain");
+  STACK_TRACE("SemisimpleSubalgebras::toStringCurrentChain");
   (void) format;
   // avoid unused parameter warning in a portable way
   std::stringstream out;
@@ -6270,7 +6270,7 @@ computePrimalModuleDecompositionHighestWeights(
 ) {
   STACK_TRACE(
     "CandidateSemisimpleSubalgebra::"
-    "computePrimalModuleDecompositionHighestWeightsOnly"
+    "computePrimalModuleDecompositionHighestWeights"
   );
   outputHighestWeightsCoordinates.clear();
   Vector<Rational> currentWeight;
@@ -6364,7 +6364,8 @@ getPrimalWeightProjectionFundamentalCoordinates(
   const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output
 ) const {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::getPrimalWeightProjectionFundamentalCoordinates"
+    "CandidateSemisimpleSubalgebra::"
+    "getPrimalWeightProjectionFundamentalCoordinates"
   );
   this->checkFullInitialization();
   output.setSize(
@@ -7144,7 +7145,9 @@ const WeylGroupData& SlTwoSubalgebra::getOwnerWeyl() const {
 }
 
 std::string SlTwoSubalgebra::toStringTripleStandardRealization() const {
-  Matrix<Rational> matrixH, matrixE, matrixF;
+  Matrix<Rational> matrixH;
+  Matrix<Rational> matrixE;
+  Matrix<Rational> matrixF;
   if (
     !this->owner->getElementStandardRepresentation(this->hElement, matrixH) ||
     !this->owner->getElementStandardRepresentation(this->eElement, matrixE) ||
@@ -10863,7 +10866,8 @@ void SemisimpleSubalgebras::hookUpCentralizers(
   this->subalgebras.keys = hsCopy;
   HashedList<int, HashFunctions::hashFunction> candidatePermutationHashed;
   candidatePermutationHashed = candidatePermutation;
-  ProgressReport report1, report2;
+  ProgressReport report1;
+  ProgressReport report2;
   report1.report("<hr>\nHooking up centralizers ");
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     if (!this->subalgebras.values[i].flagSystemSolved) {

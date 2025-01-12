@@ -1239,12 +1239,15 @@ bool CalculatorConversions::loadKey(
   Expression keyExpression;
   keyExpression.makeAtom(calculator, inputKey);
   for (int i = 0; i < inputStatementList.size(); i ++) {
-    if (inputStatementList[i].startsWith(calculator.opDefine(), 3)) {
-      if (inputStatementList[i][1] == keyExpression) {
-        output = inputStatementList[i][2];
-        return true;
-      }
+    const Expression& statement = inputStatementList[i];
+    if (!statement.startsWith(calculator.opDefine(), 3)) {
+      continue;
     }
+    if (statement[1] != keyExpression) {
+      continue;
+    }
+    output = statement[2];
+    return true;
   }
   return
   calculator
@@ -1470,74 +1473,75 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
 }
 
 bool CalculatorConversions::loadSemisimpleSubalgebras(
-  Calculator& calculator, const Expression& inpuT, Expression& output
+  Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorConversions::loadSemisimpleSubalgebras");
-  Expression input = inpuT;
-  Expression
-  ambientTypeE,
-  numExploredHsE,
-  numExploredTypesE,
-  subalgebrasE,
-  currentChainE;
+  Expression inputArguments = input[1];
+  Expression ambientTypeE;
+  Expression numExploredHsE;
+  Expression numExploredTypesE;
+  Expression subalgebrasE;
+  Expression currentChainE;
   if (
     !CalculatorConversions::loadKey(
-      calculator, input, "AmbientDynkinType", ambientTypeE
+      calculator, inputArguments, "AmbientDynkinType", ambientTypeE
     )
   ) {
     return
     calculator
     << "<hr>Failed to load Dynkin type from: "
-    << input.toString();
+    << inputArguments.toString();
   }
   if (
     !CalculatorConversions::loadKey(
-      calculator, input, "NumExploredHs", numExploredHsE
+      calculator, inputArguments, "NumExploredHs", numExploredHsE
     )
   ) {
     return
     calculator
     << "<hr>Failed to load numExploredHs list from: "
-    << input.toString();
+    << inputArguments.toString();
   }
   if (
     !CalculatorConversions::loadKey(
-      calculator, input, "NumExploredTypes", numExploredTypesE
+      calculator, inputArguments, "NumExploredTypes", numExploredTypesE
     )
   ) {
     return
     calculator
     << "<hr>Failed to load NumExploredTypes list from: "
-    << input.toString();
+    << inputArguments.toString();
   }
   if (
     !CalculatorConversions::loadKey(
-      calculator, input, "Subalgebras", subalgebrasE
+      calculator, inputArguments, "Subalgebras", subalgebrasE
     )
   ) {
     return
     calculator
     << "<hr>Failed to load Subalgebras list from: "
-    << input.toString();
+    << inputArguments.toString();
   }
   if (
     !CalculatorConversions::loadKey(
-      calculator, input, "CurrentChain", currentChainE
+      calculator, inputArguments, "CurrentChain", currentChainE
     )
   ) {
     return
     calculator
     << "<hr>Failed to load CurrentChain from: "
-    << input.toString();
+    << inputArguments.toString();
   }
-  List<int> currentChainInt, numExploredTypes, numExploredHs;
+  List<int> currentChainInt;
+  List<int> numberOfExploredTypes;
+  List<int> numberOfExploredHs;
   if (!calculator.getVectorInt(currentChainE, currentChainInt)) {
     return false;
   }
-  if (!calculator.getVectorInt(numExploredHsE, numExploredHs)) {
+  if (!calculator.getVectorInt(numExploredHsE, numberOfExploredHs)) {
     return false;
   }
-  if (!calculator.getVectorInt(numExploredTypesE, numExploredTypes)) {
+  if (!calculator.getVectorInt(numExploredTypesE, numberOfExploredTypes)) {
     return false;
   }
   WithContext<SemisimpleLieAlgebra*> ownerSemisimple;
@@ -1584,6 +1588,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   subalgebras.flagComputePairingTable = false;
   subalgebras.flagComputeNilradicals = false;
   subalgebras.millisecondsComputationStart = global.getElapsedMilliseconds();
+  subalgebras.ownerField = &calculator.objectContainer.algebraicClosure;
   reportStream
   << " done. <br>Total subalgebras: "
   << subalgebrasE.size() - 1
@@ -1647,8 +1652,8 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   if (
     !subalgebras.loadState(
       currentChainInt,
-      numExploredTypes,
-      numExploredHs,
+      numberOfExploredTypes,
+      numberOfExploredHs,
       calculator.comments
     )
   ) {

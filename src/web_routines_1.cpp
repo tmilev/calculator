@@ -345,7 +345,7 @@ void WebClient::fetchWebPagePart2(
   std::stringstream* commentsOnFailure,
   std::stringstream* commentsGeneral
 ) {
-  STACK_TRACE("WebCrawler::FetchWebPagePart2");
+  STACK_TRACE("WebCrawler::fetchWebPagePart2");
   (void) commentsOnFailure;
   (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl

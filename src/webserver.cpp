@@ -1158,7 +1158,7 @@ void WebWorker::extractHostInfo() {
 }
 
 void WebWorker::extractAddressParts() {
-  STACK_TRACE("WebWorker::ExtractAdressParts");
+  STACK_TRACE("WebWorker::extractAddressParts");
   bool found = false;
   for (unsigned i = 0; i < this->addressGetOrPost.size(); i ++) {
     if (this->addressGetOrPost[i] == '?') {
@@ -1286,7 +1286,7 @@ void WebWorker::sanitizeVirtualFileName() {
 }
 
 int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
-  STACK_TRACE("WebWorker::GetJSONResultFromFile");
+  STACK_TRACE("WebWorker::getIndexIfRunningWorkerId");
   std::string workerId = global.getWebInput(WebAPI::Request::workerId);
   std::stringstream commentsOnError;
   std::string computationResult;
@@ -1430,7 +1430,7 @@ void WebWorker::writeAfterTimeoutString(
   const std::string& status,
   const std::string& fileNameCarbonCopy
 ) {
-  STACK_TRACE("WebWorker::WriteAfterTimeout");
+  STACK_TRACE("WebWorker::writeAfterTimeoutString");
   JSData result;
   result[WebAPI::Result::resultHtml] = input;
   WebWorker::writeAfterTimeoutPartTwo(result, status, fileNameCarbonCopy);
@@ -1873,7 +1873,7 @@ void WebServer::initializeMainMIMETypes() {
 std::string WebWorker::mimeTypeFromFileExtension(
   const std::string& fileExtension
 ) {
-  STACK_TRACE("WebWorker::GetMIMEtypeFromFileExtension");
+  STACK_TRACE("WebWorker::mimeTypeFromFileExtension");
   return
   this->parent->MIMETypes.getValue(fileExtension, "application/octet-stream");
 }
@@ -1922,7 +1922,7 @@ std::string WebWorker::getAuthenticationToken(
 std::string WebWorker::changePasswordPagePartOne(
   bool& outputDoShowPasswordChangeField
 ) {
-  STACK_TRACE("WebWorker::getChangePasswordPagePartOne");
+  STACK_TRACE("WebWorker::changePasswordPagePartOne");
   std::stringstream out;
   std::string claimedActivationToken =
   HtmlRoutines::convertURLStringToNormal(
@@ -2121,7 +2121,7 @@ std::string WebAPIResponse::modifyProblemReport() {
 }
 
 std::string WebAPIResponse::getJavascriptCaptcha() {
-  STACK_TRACE("WebAPIResponse::GetCaptchaJavascript");
+  STACK_TRACE("WebAPIResponse::getJavascriptCaptcha");
   std::stringstream out;
   out << "<script src = 'https://www.google.com/recaptcha/api.js'></script>";
   return out.str();
@@ -3187,7 +3187,7 @@ std::string WebServer::toStringStatusAll() {
 }
 
 bool WebServer::restartNeeded() {
-  STACK_TRACE("WebServer::restartIsNeeded");
+  STACK_TRACE("WebServer::restartNeeded");
   struct stat fileStatistic;
   if (
     stat(global.physicalNameExecutableWithPath.c_str(), &fileStatistic) != 0

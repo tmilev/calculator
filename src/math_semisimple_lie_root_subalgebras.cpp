@@ -508,7 +508,9 @@ void RootSubalgebra::possibleNilradicalComputation(
       /* owner.numberOfconeConditionHoldsBySSpart.objects[indexInOwner] ++;
       if (owner.ReportStringNonNilradicalParabolic == "") {
         this->computeRootsOfK();
-        Vectors<Rational> tempNilradical; Vectors<Rational> tempOthers; Vectors<Rational> tempK;
+        Vectors<Rational> tempNilradical;
+        Vectors<Rational> tempOthers;
+        Vectors<Rational> tempK;
         for (int i = 0; i < this->kModules.size; i ++)
           if (this->NilradicalKmods.selected[i])
             tempNilradical.addListOnTop(this->kModules.objects[i]);
@@ -1338,7 +1340,9 @@ void RootSubalgebra::computeEpsilonCoordinatesWithRespectToSubalgebra() {
     simpleBasisG[i].makeZero(dimension);
     simpleBasisG[i][i] = 1;
   }
-  Vector<Rational> root, root2, root3;
+  Vector<Rational> root;
+  Vector<Rational> root2;
+  Vector<Rational> root3;
   for (int i = 0; i < this->modules.size; i ++) {
     if (this->simpleRootsReductiveSubalgebra.size > 0) {
       epsilonCoordinatesWithRespectToK.size = 0;
@@ -1506,7 +1510,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   Vectors<Rational>& firstKmodLeft =
   leftSubalgebra.weightsModulesPrimalSimple[counter];
   bool result = false;
-  bool tempBool;
+  bool tempBool = false;
   for (int i = 0; i < rightSubalgebra.modules.size; i ++) {
     if (firstKmodLeft.size == rightSubalgebra.modules[i].size) {
       for (int j = 0; j < firstKmodLeft.size; j ++) {
@@ -2338,9 +2342,11 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
     }
     return false;
   }
-  Vectors<Rational> isoDomain, isoRange;
+  Vectors<Rational> isoDomain;
+  Vectors<Rational> isoRange;
   Permutation permComponentsCentralizer;
-  List<int> tempList, tempPermutation2;
+  List<int> tempList;
+  List<int> tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
   List<List<List<int> > > centralizerDiagramAutomorphisms;
   domainRootSubalgebra.centralizerDiagram.getAutomorphisms(
@@ -2793,7 +2799,8 @@ computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators()
 {
   STACK_TRACE(
     "RootSubalgebra::"
-    "computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators"
+    "computeOuterSubalgebraAutomorphisms"
+    "ExtendingToAmbientAutomorphismsGenerators"
   );
   if (this->simpleRootsReductiveSubalgebra.size == 0) {
     return;
@@ -3729,7 +3736,8 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     if (dynkinEpsilon != 0) {
       continue;
     }
-    Vector<Rational> relativeCharacteristic, relativeSimpleCoordinates;
+    Vector<Rational> relativeCharacteristic;
+    Vector<Rational> relativeSimpleCoordinates;
     relativeCharacteristic.makeZero(relativeDimension);
     for (int k = 0; k < relativeDimension; k ++) {
       if (!selectionRootsWithZeroCharacteristic.selected[k]) {

@@ -4,6 +4,27 @@ const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
 const miscellaneous = require("./miscellaneous_frontend");
 
+class ProgressReport {
+  constructor() {
+    this.content = "";
+    this.element = document.createElement("div");
+    this.element.style.transition = "1s all";
+  }
+
+  setProgressContent(input) {
+    const changed = (this.content !== input);
+    this.content = input;
+    if (!changed) {
+      return;
+    }
+    miscellaneous.writeHTML(this.element, this.content);
+    this.element.style.backgroundColor = "palegreen";
+    setTimeout(() => {
+      this.element.style.backgroundColor = "";
+    }, 0);
+  }
+}
+
 class Monitor {
   constructor() {
     this.isPaused = false;
@@ -15,6 +36,11 @@ class Monitor {
     this.currentWorkerId = "";
     this.currentTimeOutHandler = null;
     this.ownerCalculator = null;
+    /** @type{ProgressReport[]} */
+    this.allProgressReports = [];
+    this.progressReportElement = document.getElementById(
+      ids.domElements.pages.calculator.monitoring.progressOutput
+    );
   }
 
   pauseButton() {
@@ -127,25 +153,37 @@ class Monitor {
 
   writeProgressReportUnfinishedComputation(input) {
     this.ownerCalculator.getOutputElement().textContent = "";
-    const outputElement = document.getElementById(
-      ids.domElements.pages.calculator.monitoring.progressOutput
-    );
-    outputElement.textContent = "";
-    let resultList = [];
-    for (const report of input[pathnames.urlFields.result.progressReports]) {
-      resultList.push(report);
+    const progressStrings = input[pathnames.urlFields.result.progressReports];
+    if (progressStrings === undefined) {
+      progressStrings = [];
     }
-    let resultHTML = resultList.join("");
+    for (
+      let i = this.allProgressReports.length;
+      i < progressStrings.length;
+      i++
+    ) {
+      this.allProgressReports.push(new ProgressReport());
+    }
+    this.progressReportElement.textContent = "";
     const computationLimits = input["computationLimits"];
     if (computationLimits !== undefined && computationLimits !== null) {
-      resultHTML += computationLimits;
+      const computationLimitElement = document.createElement("div");
+      miscellaneous.writeHTML(computationLimitElement, computationLimits);
+      this.progressReportElement.appendChild(computationLimitElement);
     }
+    for (let i = 0; i < progressStrings.length; i++) {
+      const progress = this.allProgressReports[i];
+      progress.setProgressContent(progressStrings[i]);
+      this.progressReportElement.appendChild(
+        progress.element
+      );
+    }
+    this.allProgressReports.length = progressStrings.length;
     const stackTrace = input["stackTrace"];
     if (stackTrace !== null && stackTrace !== undefined) {
-      resultHTML += stackTrace;
-    }
-    if (resultHTML !== "" && resultHTML !== undefined && resultHTML !== null) {
-      miscellaneous.writeHTML(outputElement, resultHTML);
+      const stackTraceElement = document.createElement("div");
+      miscellaneous.writeHTML(stackTraceElement, stackTrace);
+      this.progressReportElement.appendChild(stackTraceElement);
     }
   }
 

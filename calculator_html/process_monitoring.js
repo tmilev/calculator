@@ -18,7 +18,9 @@ class Monitor {
   }
 
   pauseButton() {
-    return document.getElementById(ids.domElements.pages.calculator.monitoring.buttonPauseToggle);
+    return document.getElementById(
+      ids.domElements.pages.calculator.monitoring.buttonPauseToggle
+    );
   }
 
   start(
@@ -47,8 +49,10 @@ class Monitor {
     this.timeOutOldCounter = this.timeOutCounter;
     this.timeOutCounter += this.timeIncrement;
     let sURL = "";
-    sURL += `${pathnames.urls.calculatorAPI}?${pathnames.urlFields.request}=${pathnames.urlFields.requests.indicator}`;
-    sURL += `&${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}`;
+    const api = pathnames.urls.calculatorAPI;
+    const urlFields = pathnames.urlFields;
+    sURL += `${api}?${urlFields.request}=${urlFields.requests.indicator}`;
+    sURL += `&${urlFields.requests.workerId}=${this.currentWorkerId}`;
     submitRequests.submitGET({
       url: sURL,
       progress: ids.domElements.pages.calculator.progress,
@@ -122,11 +126,18 @@ class Monitor {
   }
 
   writeProgressReportUnfinishedComputation(input) {
-    const outputElement = this.ownerCalculator.getOutputElement();
+    this.ownerCalculator.getOutputElement().textContent = "";
+    const outputElement = document.getElementById(
+      ids.domElements.pages.calculator.monitoring.progressOutput
+    );
     outputElement.textContent = "";
-    let resultHTML = input[pathnames.urlFields.result.resultHtml];
+    let resultList = [];
+    for (const report of input[pathnames.urlFields.result.progressReports]) {
+      resultList.push(report);
+    }
+    let resultHTML = resultList.join("");
     const computationLimits = input["computationLimits"];
-    if (computationLimits !== undefined && computationLimits != null) {
+    if (computationLimits !== undefined && computationLimits !== null) {
       resultHTML += computationLimits;
     }
     const stackTrace = input["stackTrace"];
@@ -152,7 +163,7 @@ class Monitor {
     let progressReportTimer = document.getElementById(
       ids.domElements.pages.calculator.monitoring.progressTimer,
     );
-    miscellaneous.writeHTML(progressReportTimer, finalContent);
+    miscellaneous.writeHTML(progressReportTimer, finalContent); pathnames
   }
 
   togglePause() {
@@ -161,12 +172,13 @@ class Monitor {
     }
     let pauseURL = "";
     pauseURL += `${pathnames.urls.calculatorAPI}?`;
+    const urlFields = pathnames.urlFields;
     if (!this.isPaused) {
-      pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.pause}&`;
+      pauseURL += `${urlFields.request}=${urlFields.requests.pause}&`;
     } else {
-      pauseURL += `${pathnames.urlFields.request}=${pathnames.urlFields.requests.unpause}&`;
+      pauseURL += `${urlFields.request}=${urlFields.requests.unpause}&`;
     }
-    pauseURL += `${pathnames.urlFields.requests.workerId}=${this.currentWorkerId}&`;
+    pauseURL += `${urlFields.requests.workerId}=${this.currentWorkerId}&`;
     submitRequests.submitGET({
       url: pauseURL,
       callback: this.callbackPauseRequest.bind(this),

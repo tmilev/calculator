@@ -335,19 +335,41 @@ std::string GlobalVariables::toStringProgressReportWithThreadData(bool useHTML)
   return out.str();
 }
 
-void GlobalVariables::toJSONProgressReport(JSData& output){
+void GlobalVariables::toJSONProgressReport(JSData& output) {
   STACK_TRACE("GlobalVariables::toJSONProgressReport");
-  output[WebAPI::Result::resultHtml] =this->toStringProgressReportMainData(true);
-  output["computationLimits"] = this->toStringProgressReportComputationLimits(true);
-  output["stackTrace"] =this->toStringProgressReportStackTrace(true);
-
+  JSData progress;
+  this->toJSONProgressReportData(progress);
+  output[WebAPI::Result::progressReports] = progress;
+  output["computationLimits"] =
+  this->toStringProgressReportComputationLimits(true);
+  output["stackTrace"] = this->toStringProgressReportStackTrace(true);
 }
 
-const ListReferences<std::string>* GlobalVariables::selectProgressReportStrings(int& outputThreadId){
+void GlobalVariables::toJSONProgressReportData(JSData& output) {
+  STACK_TRACE("GlobalVariables::toJSONProgressReportData");
+  int currentThreadId = 0;
+  const ListReferences<std::string>* progressStringsPointer =
+  this->selectProgressReportStrings(currentThreadId);
+  if (progressStringsPointer == nullptr) {
+    return;
+  }
+  const ListReferences<std::string>& progressStrings = *progressStringsPointer;
+  output.makeEmptyArray();
+  for (const std::string& progress : progressStrings) {
+    std::stringstream progressStream;
+    progressStream << "\n<div>" << progress << "\n</div>\n<hr>";
+    JSData next;
+    next = progressStream.str();
+    output.listObjects.addOnTop(next);
+  }
+}
+
+const ListReferences<std::string>* GlobalVariables::selectProgressReportStrings
+(int& outputThreadId) {
   for (
-      int threadIndex = 0; threadIndex < this->progressReportStrings.size;
-      threadIndex ++
-      ) {
+    int threadIndex = 0; threadIndex < this->progressReportStrings.size;
+    threadIndex ++
+  ) {
     int currentThreadID = ThreadData::getCurrentThreadId();
     if (currentThreadID == threadIndex) {
       outputThreadId = currentThreadID;
@@ -355,38 +377,31 @@ const ListReferences<std::string>* GlobalVariables::selectProgressReportStrings(
     }
   }
   return nullptr;
-
 }
 
-std::string GlobalVariables::toStringProgressReportMainData(bool useHTML){
-  int currentThreadID=-1;
-  const  ListReferences<std::string> * progressPointer =this->selectProgressReportStrings(currentThreadID);
-  if (progressPointer==nullptr){
-    return "";}
+std::string GlobalVariables::toStringProgressReportMainData(bool useHTML) {
+  int currentThreadID = - 1;
+  const ListReferences<std::string>* progressPointer =
+  this->selectProgressReportStrings(currentThreadID);
+  if (progressPointer == nullptr) {
+    return "";
+  }
   const ListReferences<std::string>& progressStrings = *progressPointer;
   std::stringstream reportStream;
-
   if (useHTML) {
     reportStream << "<b>Current thread id: " << currentThreadID << ". </b>";
   } else {
     reportStream
-        << "Thread id: "
-        << Logger::consoleBlue()
-        << currentThreadID
-        << Logger::consoleNormal()
-        << "\n";
+    << "Thread id: "
+    << Logger::consoleBlue()
+    << currentThreadID
+    << Logger::consoleNormal()
+    << "\n";
   }
-  for (
-      int i = 0; i < progressStrings.size; i ++
-      ) {
+  for (int i = 0; i < progressStrings.size; i ++) {
     if (progressStrings[i] != "") {
       if (useHTML) {
-        reportStream
-            << "\n<div id ='divProgressReport"
-            << i
-            << "'>"
-            << progressStrings[i]
-            << "\n</div>\n<hr>";
+        reportStream << "\n<div>" << progressStrings[i] << "\n</div>\n<hr>";
       } else {
         reportStream << progressStrings[i] << "\n";
       }
@@ -395,7 +410,7 @@ std::string GlobalVariables::toStringProgressReportMainData(bool useHTML){
   return reportStream.str();
 }
 
-std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML){
+std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
   std::stringstream reportStream;
   reportStream << this->toStringProgressReportMainData(useHTML);
   reportStream << this->toStringProgressReportStackTrace(useHTML);
@@ -403,39 +418,40 @@ std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML){
   return reportStream.str();
 }
 
-std::string GlobalVariables::toStringProgressReportStackTrace(bool useHTML){
+std::string GlobalVariables::toStringProgressReportStackTrace(bool useHTML) {
   if (useHTML) {
-return global.fatal.getStackTraceEtcErrorMessageHTML();
+    return global.fatal.getStackTraceEtcErrorMessageHTML();
   } else {
     return global.fatal.getStackTraceEtcErrorMessageConsole();
   }
 }
 
-std::string GlobalVariables::toStringProgressReportComputationLimits(bool useHTML) {
+std::string GlobalVariables::toStringProgressReportComputationLimits(
+  bool useHTML
+) {
   STACK_TRACE("GlobalVariables::toStringProgressReportNoThreadData");
   if (global.fatal.flagCrashInitiated) {
     return "";
   }
   std::stringstream reportStream;
-
-    reportStream << global.getElapsedMilliseconds() << " ms elapsed. ";
-    if (global.millisecondsMaxComputation > 0) {
-      if (useHTML) {
-        reportStream << "<br>";
-      }
-      reportStream
-      << "\nHard limit: "
-      << global.millisecondsMaxComputation
-      << " ms [system crash if limit exceeded].";
-      if (useHTML) {
-        reportStream << "<br>";
-      }
-      reportStream
-      << "\nSoft limit: "
-      << global.millisecondsMaxComputation / 2
-      << " ms [computation error if limit exceeded, "
-      << "triggered between calculator/atomic functions].";
+  reportStream << global.getElapsedMilliseconds() << " ms elapsed. ";
+  if (global.millisecondsMaxComputation > 0) {
+    if (useHTML) {
+      reportStream << "<br>";
     }
+    reportStream
+    << "\nHard limit: "
+    << global.millisecondsMaxComputation
+    << " ms [system crash if limit exceeded].";
+    if (useHTML) {
+      reportStream << "<br>";
+    }
+    reportStream
+    << "\nSoft limit: "
+    << global.millisecondsMaxComputation / 2
+    << " ms [computation error if limit exceeded, "
+    << "triggered between calculator/atomic functions].";
+  }
   return reportStream.str();
 }
 
@@ -667,11 +683,10 @@ void GlobalVariables::makeReport() {
   ) {
     std::string reportString;
     reportString = this->toStringProgressReportConsole();
-    report[WebAPI::Result::resultHtml]=reportString;
+    report[WebAPI::Result::resultHtml] = reportString;
   } else {
-     this->toJSONProgressReport(report);
+    this->toJSONProgressReport(report);
   }
-
   this->response.report(report);
 }
 

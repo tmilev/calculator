@@ -1737,7 +1737,7 @@ button.buttonSolve:hover {
   flex-basis: 200px;
 }
 
-#divCalculatorMainOutput {
+#divCalculatorOutputAndProgress {
   overflow: auto;
   vertical-align: top;
   flex-grow: 0;

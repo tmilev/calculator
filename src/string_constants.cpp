@@ -18,6 +18,7 @@ std::string WebAPI::Result::error = "error";
 std::string WebAPI::Result::status = "status";
 std::string WebAPI::Result::running = "running";
 std::string WebAPI::Result::resultHtml = "resultHtml";
+std::string WebAPI::Result::progressReports = "progressReports";
 std::string WebAPI::Result::scripts = "scripts";
 std::string WebAPI::Result::outputString = "outputString";
 std::string WebAPI::Result::syntaxErrors = "syntaxErrors";

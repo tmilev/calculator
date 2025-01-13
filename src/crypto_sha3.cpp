@@ -51,10 +51,10 @@ public:
 
 Sha3::Sha3() {
   this->flagUseKeccak = false;
-  this->saved =0;
+  this->saved = 0;
   this->byteIndex = 0;
-  this->wordIndex=0;
-  this->capacityWords=0;
+  this->wordIndex = 0;
+  this->capacityWords = 0;
 }
 
 // Define SHA3_USE_KECCAK to run "pure" Keccak, as opposed to SHA3.

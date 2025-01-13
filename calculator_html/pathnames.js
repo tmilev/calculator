@@ -62,6 +62,7 @@ const urlFields = {
     error: "error",
     syntaxErrors: "syntaxErrors",
     syntaxErrorsExtra: "syntaxErrorsExtra",
+    progressReports: "progressReports",
     // Comments on performance.
     performance: "performance",
     // Comments on performance per individual internal math handler.

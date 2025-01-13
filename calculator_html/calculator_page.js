@@ -216,7 +216,7 @@ class Calculator {
       ids.domElements.pages.calculator.divCalculatorSplitter,
       ids.domElements.pages.calculator.divCalculatorMainInputOutput,
       ids.domElements.pages.calculator.divCalculatorMainInput,
-      ids.domElements.pages.calculator.divCalculatorMainOutput,
+      ids.domElements.pages.calculator.divCalculatorOutputAndProgress,
       storage.variables.calculator.splitterInputOutput,
       true,
     );
@@ -264,7 +264,7 @@ class Calculator {
     this.examples = examplesMessage["calculatorExamples"];
     let atomsSorted = Object.keys(this.handlerDocumentation).slice().sort();
     let examplesSorted = Object.keys(this.examples).slice().sort();
-    let numHandlers = 0;
+    let numberOfHandlers = 0;
     let allElements = [];
     for (let i = 0; i < examplesSorted.length; i++) {
       let name = examplesSorted[i];
@@ -277,10 +277,11 @@ class Calculator {
       let currentExamples = this.handlerDocumentation[atom];
       allElements.push(this.processOneFunctionAtom(currentExamples.regular));
       allElements.push(this.processOneFunctionAtom(currentExamples.composite));
-      numHandlers += this.handlerDocumentation[atom].regular.length + this.handlerDocumentation[atom].composite.length;
+      numberOfHandlers += currentExamples.regular.length;
+      numberOfHandlers += currentExamples.composite.length;
     }
     let handlerReport = document.createElement("span");
-    handlerReport.textContent = `${atomsSorted.length} built-in atoms, ${numHandlers} handlers. `;
+    handlerReport.textContent = `${atomsSorted.length} built-in atoms, ${numberOfHandlers} handlers. `;
     let output = document.getElementById(ids.domElements.pages.calculator.examples);
     output.textContent = "";
     miscellaneousFrontend.writeHtmlFromCommentsAndErrors(examplesMessage, output);
@@ -312,9 +313,6 @@ class Calculator {
   formatExamplesPanel() {
     let examples = document.getElementById(
       ids.domElements.pages.calculator.examples
-    );
-    let examplesContainer = document.getElementById(
-      ids.domElements.pages.calculator.examplesContainer
     );
     let calculatorElement = document.getElementById(
       ids.domElements.divCalculatorMainInputOutput
@@ -365,7 +363,9 @@ class Calculator {
   downloadExamples() {
     let url = "";
     url += pathnames.urls.calculatorAPI;
-    url += `?${pathnames.urlFields.request}=${pathnames.urlFields.requests.calculatorExamplesJSON}`;
+    const urlFields = pathnames.urlFields;
+    const requests = urlFields.requests;
+    url += `?${urlFields.request}=${requests.calculatorExamplesJSON}`;
     submitRequests.submitGET({
       url: url,
       callback: (input) => {
@@ -1010,15 +1010,18 @@ class Calculator {
 
   getQueryStringSubmitStringAsMainInput(inputString, requestType) {
     let inputParams = '';
-    inputParams += `${pathnames.urlFields.request}=${requestType}&`;
-    inputParams += `${pathnames.urlFields.requests.calculatorInput}=${encodeURIComponent(inputString)}&`;
+    const urlFields = pathnames.urlFields;
+    const requests = urlFields.requests;
+    inputParams += `${urlFields.request}=${requestType}&`;
+    const inputEncoded = encodeURIComponent(inputString);
+    inputParams += `${requests.calculatorInput}=${inputEncoded}&`;
     if (storage.variables.flagDebug.isTrue()) {
-      inputParams += `${pathnames.urlFields.debugFlag}=true&`;
+      inputParams += `${urlFields.debugFlag}=true&`;
     }
     if (storage.variables.calculator.monitoring.value === "false") {
-      inputParams += `${pathnames.urlFields.requests.monitoring}=false&`;
+      inputParams += `${requests.monitoring}=false&`;
     } else {
-      inputParams += `${pathnames.urlFields.requests.monitoring}=true&`;
+      inputParams += `${requests.monitoring}=true&`;
     }
     return inputParams;
   }

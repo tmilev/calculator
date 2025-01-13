@@ -69,6 +69,7 @@ let domElements = {
       divAutocompleteHints: "idAutocompleteHints",
       divAutocompletePanel: "idAutocompletePanel",
       divCalculatorMainOutput: "divCalculatorMainOutput",
+      divCalculatorOutputAndProgress: "divCalculatorOutputAndProgress",
       divCalculatorMainInput: "divCalculatorMainInput",
       divCalculatorMainInputOutput: "divCalculatorMainInputOutput",
       divCalculatorSplitter: "divCalculatorSplitter",

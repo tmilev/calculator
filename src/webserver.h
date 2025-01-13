@@ -89,7 +89,7 @@ public:
   std::string openIndentTag(const std::string& tag);
   std::string closeIndentTag(const std::string& tag);
   JSData processComputationIndicatorJSData();
-static  bool isValidWorkerId(const std::string& workerId);
+  static bool isValidWorkerId(const std::string& workerId);
   int getIndexIfRunningWorkerId(JSData& outputComputationStatus);
   int processFolderOrFile(bool generateLinkToCalculatorOnMissingFile);
   int processFolder();
@@ -127,9 +127,7 @@ static  bool isValidWorkerId(const std::string& workerId);
     const std::string& argumentName, const std::string& argumentValue
   );
   void writeAfterTimeoutShowIndicator(const std::string& message);
-  void writeAfterTimeoutProgress(
-    const JSData& input, bool forceFileWrite
-  );
+  void writeAfterTimeoutProgress(const JSData& input, bool forceFileWrite);
   // /////
   void pauseIfRequested();
   // writes json to body, sanitizes.

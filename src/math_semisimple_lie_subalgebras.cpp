@@ -3139,16 +3139,6 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
   this->currentNumberOfLargerTypesExplored.addOnTop(
     inputNumberOfLargerTypesExplored
   );
-  // global.Comments << "<hr>" <<
-  // this->currentPossibleLargerDynkinTypes.lastObject()->size
-  // << " possible extensions of " <<
-  // input.weylNonEmbedded->dynkinType.toString() << ": ";
-  // for (int i = 0; i <
-  // this->currentPossibleLargerDynkinTypes.lastObject()->size; i ++)
-  // global.Comments <<
-  // (*this->currentPossibleLargerDynkinTypes.lastObject())[i].toString() << ",
-  // ";
-  // /////////
   this->currentHCandidatesScaledToActByTwo.setSize(
     this->currentSubalgebraChain.size
   );
@@ -3156,6 +3146,20 @@ void SemisimpleSubalgebras::addSubalgebraToStack(
     inputNumberOfHCandidatesExplored
   );
   this->computeCurrentHCandidates();
+  this->writeProgressFile();
+}
+
+void SemisimpleSubalgebras::writeProgressFile() {
+  std::stringstream fileName;
+  std::string dynkinTypeFilename =
+  FileOperations::cleanUpForFileNameUse(
+    this->owner->weylGroup.dynkinType.toStringPretty()
+  );
+  std::string progressFileName =
+  "output/" +
+  this->owner->fileNames.virtualFilenameProgressSemisimpleSubalgebras();
+  std::string content = this->toStringProgressReport();
+  FileOperations::writeFileVirtual(progressFileName, content, nullptr);
 }
 
 std::string SemisimpleSubalgebras::toStringCurrentChain(

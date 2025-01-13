@@ -502,6 +502,16 @@ fileNameSlTwoRealFormSubalgebraStructure() const {
 }
 
 std::string SemisimpleLieAlgebra::FileNames::
+virtualFilenameProgressSemisimpleSubalgebras() const {
+  return
+  "progress_subalgebras_" +
+  FileOperations::cleanUpForFileNameUse(
+    this->owner->weylGroup.dynkinType.toString()
+  ) +
+  ".html";
+}
+
+std::string SemisimpleLieAlgebra::FileNames::
 fileNameNoPathSemisimpleSubalgebras() const {
   std::stringstream out;
   out

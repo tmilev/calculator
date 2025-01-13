@@ -624,6 +624,7 @@ public:
   bool centralizersComputedToHaveUnsuitableNilpotentOrbits();
   bool centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits();
   bool computeCurrentHCandidates();
+  void writeProgressFile();
   void initHookUpPointers(
     SemisimpleLieAlgebra& inputOwner,
     AlgebraicClosureRationals* field,

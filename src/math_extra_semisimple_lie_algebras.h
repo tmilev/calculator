@@ -306,6 +306,7 @@ public:
     std::string fileNameNoPathRootSubalgebras() const;
     std::string fileNameRelativePathSlTwoSubalgebras() const;
     std::string fileNameSlTwoRealFormSubalgebraStructure() const;
+    std::string virtualFilenameProgressSemisimpleSubalgebras() const;
   };
 
   SemisimpleLieAlgebra::FileNames fileNames;

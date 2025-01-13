@@ -3,6 +3,7 @@ const pathnames = require("./pathnames");
 const submitRequests = require("./submit_requests");
 const ids = require("./ids_dom_elements");
 const miscellaneous = require("./miscellaneous_frontend");
+const storage = require("./storage").storage;
 
 class ProgressReport {
   constructor() {
@@ -53,6 +54,9 @@ class Monitor {
     /** @type {String} */
     workerId,
   ) {
+    storage.variables.calculator.workerId.setAndStore(
+      workerId, true, false
+    );
     this.isFinished = false;
     this.isPaused = false;
     this.timeOutCounter = 0;

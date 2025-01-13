@@ -342,6 +342,13 @@ class StorageCalculator {
         secure: true,
       }),
       calculator: {
+        workerId: new StorageVariable({
+          name: "workerId",
+          nameURL: "workerId",
+          showInURLOnPages: {
+            calculator: true,
+          },
+        }),
         input: new StorageVariable({
           name: "calculatorInput",
           nameURL: "calculatorInput",
@@ -523,7 +530,7 @@ class StorageCalculator {
       // The url is a json. 
       return JSON.parse(currentHashDecoded);
     }
-    // The url uses regular query parameters
+    // The url uses regular query parameters.
     return this.computeUrlObjectFromQueryParameters();
   }
 

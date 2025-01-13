@@ -491,7 +491,7 @@ class Calculator {
 
   selectCalculatorPage() {
     this.initialize();
-    this.submitComputationAndStore(false);
+    this.submitComputationOnFirstRun();
   }
 
   updateSameAsPreviousInput(
@@ -515,6 +515,15 @@ class Calculator {
       note.style.backgroundColor = "";
     }, 0);
     sameAsPreviousInputIndicator.appendChild(note);
+  }
+
+  submitComputationOnFirstRun() {
+    const workerId = storage.variables.calculator.workerId.getValue();
+    if (workerId === "") {
+      this.submitComputationAndStore(false);
+    } else {
+      processMonitoring.monitor.start(workerId);
+    }
   }
 
   submitComputationAndStore(
@@ -930,7 +939,7 @@ class Calculator {
     this.getOutputElement().appendChild(result);
   }
 
-  defaultOnLoadInjectScriptsAndProcessLaTeX(input, output) {
+  defaultOnLoadInjectScriptsAndProcessLaTeX(input) {
     this.panels.length = 0;
     try {
       this.parsedComputation = miscellaneousFrontend.jsonUnescapeParse(input);
@@ -1024,17 +1033,6 @@ class Calculator {
       inputParams += `${requests.monitoring}=true&`;
     }
     return inputParams;
-  }
-
-  submitStringAsMainInput(
-    inputString, idOutput, requestType, onLoadFunction, idStatus,
-  ) {
-    let inputParams = this.getQueryStringSubmitStringAsMainInput(
-      inputString, requestType,
-    );
-    this.submitStringCalculatorArgument(
-      inputParams, idOutput, onLoadFunction, idStatus,
-    );
   }
 }
 

@@ -106,6 +106,7 @@ public:
 
   struct Result {
     static std::string resultHtml;
+    static std::string progressReports;
     static std::string syntaxErrors;
     static std::string syntaxErrorsExtra;
     static std::string resultLabel;

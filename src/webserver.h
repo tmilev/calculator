@@ -89,6 +89,7 @@ public:
   std::string openIndentTag(const std::string& tag);
   std::string closeIndentTag(const std::string& tag);
   JSData processComputationIndicatorJSData();
+static  bool isValidWorkerId(const std::string& workerId);
   int getIndexIfRunningWorkerId(JSData& outputComputationStatus);
   int processFolderOrFile(bool generateLinkToCalculatorOnMissingFile);
   int processFolder();
@@ -127,18 +128,13 @@ public:
   );
   void writeAfterTimeoutShowIndicator(const std::string& message);
   void writeAfterTimeoutProgress(
-    const std::string& input, bool forceFileWrite
+    const JSData& input, bool forceFileWrite
   );
   // /////
   void pauseIfRequested();
   // writes json to body, sanitizes.
   bool writeToBodyJSON(const JSData& result);
   bool writeToBody(const std::string& bytesToAppend);
-  void writeAfterTimeoutString(
-    const std::string& input,
-    const std::string& status,
-    const std::string& fileNameCarbonCopy
-  );
   void writeAfterTimeoutJSON(
     const JSData& input,
     const std::string& status,

@@ -52,10 +52,14 @@ class Monitor {
     submitRequests.submitGET({
       url: sURL,
       progress: ids.domElements.pages.calculator.progress,
-      callback: this.callbackPauseRequest.bind(this),
+      callback: (input) => {
+        this.callbackPauseRequest(input);
+      }
     });
     this.clearTimeout();
-    this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
+    this.currentTimeOutHandler = setTimeout(() => {
+      this.progressReport();
+    }, this.timeIncrement * 1000);
   }
 
   clearTimeout() {
@@ -68,21 +72,23 @@ class Monitor {
     pauseButton.style.display = "none";
   }
 
-  callbackPauseRequest(input, output) {
+  callbackPauseRequest(input) {
     let progressReportContent = "";
     if (input === "") {
       this.clearTimeout();
-      this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
+      this.currentTimeOutHandler = setTimeout(() => {
+        this.callbackPauseRequest();
+      }, this.timeIncrement * 1000);
       return;
     }
     let indicatorButton = this.pauseButton();
-    this.ownerCalculator.parsedComputation = miscellaneous.jsonUnescapeParse(input);
-    let status = this.ownerCalculator.parsedComputation.status;
-    let doUpdateCalculatorPage = false;
+    const parsed = miscellaneous.jsonUnescapeParse(input);
+    let status = parsed.status;
     if (status === undefined || status === null) {
-      if (this.ownerCalculator.parsedComputation.error !== null && this.ownerCalculator.parsedComputation.error !== undefined) {
+      const error = parsed.error;
+      if (error !== null && error !== undefined) {
         status = "error";
-        progressReportContent += `<b>Error.</b> ${this.ownerCalculator.parsedComputation.error}`;
+        progressReportContent += `<b>Error.</b> ${parsed.error}`;
         progressReportContent += `<br>`;
       }
     }
@@ -94,7 +100,7 @@ class Monitor {
       this.isFinished = true;
       this.isPaused = false;
       this.pauseButtonMarkFinished();
-      doUpdateCalculatorPage = true;
+      this.writeFinalResult(parsed);
     } else if (status === "paused") {
       this.isPaused = true;
       indicatorButton.textContent = "Continue";
@@ -103,26 +109,50 @@ class Monitor {
         progressReportContent += "No report on last ping. ";
       } else if (status === "unpaused") {
         progressReportContent += "Recently unpaused. ";
-      } else {
-        doUpdateCalculatorPage = true;
       }
       this.isPaused = false;
       indicatorButton.textContent = "Pause";
       this.clearTimeout();
-      this.currentTimeOutHandler = setTimeout(this.progressReport.bind(this), this.timeIncrement * 1000);
+      this.writeProgressReportUnfinishedComputation(parsed);
+      this.currentTimeOutHandler = setTimeout(() => {
+        this.progressReport();
+      }, this.timeIncrement * 1000);
     }
-    progressReportContent += `Refreshing every ${this.timeIncrement} second(s). `;
-    progressReportContent += `Client time: ~${Math.floor(this.timeOutOldCounter)} second(s)<br>`;
-    let progReportTimer = document.getElementById(
+    this.writeProgressReportOverView(progressReportContent);
+  }
+
+  writeProgressReportUnfinishedComputation(input) {
+    const outputElement = this.ownerCalculator.getOutputElement();
+    outputElement.textContent = "";
+    let resultHTML = input[pathnames.urlFields.result.resultHtml];
+    const computationLimits = input["computationLimits"];
+    if (computationLimits !== undefined && computationLimits != null) {
+      resultHTML += computationLimits;
+    }
+    const stackTrace = input["stackTrace"];
+    if (stackTrace !== null && stackTrace !== undefined) {
+      resultHTML += stackTrace;
+    }
+    if (resultHTML !== "" && resultHTML !== undefined && resultHTML !== null) {
+      miscellaneous.writeHTML(outputElement, resultHTML);
+    }
+  }
+
+  writeFinalResult(parsed) {
+    this.ownerCalculator.parsedComputation = parsed;
+    this.ownerCalculator.panels.length = 0;
+    this.ownerCalculator.writeResultAndUpdateElement();
+    this.ownerCalculator.afterWriteOutput();
+  }
+
+  writeProgressReportOverView(progressReportContent) {
+    let finalContent = progressReportContent;
+    finalContent += `Refreshing every ${this.timeIncrement} second(s). `;
+    finalContent += `Client time: ~${Math.floor(this.timeOutOldCounter)} second(s)<br>`;
+    let progressReportTimer = document.getElementById(
       ids.domElements.pages.calculator.monitoring.progressTimer,
     );
-    miscellaneous.writeHTML(progReportTimer, progressReportContent);
-
-    if (doUpdateCalculatorPage) {
-      this.ownerCalculator.panels.length = 0;
-      this.ownerCalculator.writeResultAndUpdateElement();
-      this.ownerCalculator.afterWriteOutput();
-    }
+    miscellaneous.writeHTML(progressReportTimer, finalContent);
   }
 
   togglePause() {

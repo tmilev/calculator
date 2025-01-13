@@ -411,7 +411,7 @@ public:
 
     // Respond functions start here.
     // The functions below lock one another out.
-    void report(const std::string& input);
+    void report(const JSData& input);
     void initiate(const std::string& message);
     // Respond functions end here.
     // returns true
@@ -584,7 +584,14 @@ public:
   std::string toHTMLTopCommandLinuxSystem();
   std::string toStringFolderInfo() const;
   std::string toStringThreadData(bool useHTML);
+
+  void toJSONProgressReport(JSData& output);
   std::string toStringProgressReportNoThreadData(bool useHTML);
+  std::string toStringProgressReportMainData(bool useHTML);
+  std::string toStringProgressReportComputationLimits(bool useHTML);
+  std::string toStringProgressReportStackTrace(bool useHTML);
+
+  const ListReferences<std::string>* selectProgressReportStrings(int& outputThreadId);
   std::string toStringProgressReportWithThreadData(bool useHTML);
   std::string toStringProgressReportConsole();
   WebServer& server();

@@ -899,8 +899,7 @@ bool WebWorker::loginProcedure(
   return true;
 }
 
-void WebWorker::writeAfterTimeoutProgress(
-  const std::string& input, bool forceFileWrite
+void WebWorker::writeAfterTimeoutProgress(const JSData& input, bool forceFileWrite
 ) {
   this->pauseIfRequested();
   STACK_TRACE("WebWorker::writeAfterTimeoutProgress");
@@ -916,11 +915,9 @@ void WebWorker::writeAfterTimeoutProgress(
   ) {
     return;
   }
-  this->writeAfterTimeoutString(
-    input,
-    WebAPI::Result::running,
-    global.relativePhysicalNameOptionalProgressReport
-  );
+  this->writeAfterTimeoutJSON(input,    WebAPI::Result::running,
+                              global.relativePhysicalNameOptionalProgressReport
+                              );
 }
 
 void WebWorker::parseMessageHead() {
@@ -1285,11 +1282,20 @@ void WebWorker::sanitizeVirtualFileName() {
   }
 }
 
+bool WebWorker::isValidWorkerId(const std::string& workerId){
+return StringRoutines::isLatinLetterOrDigitSequence(workerId);
+}
+
 int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
   STACK_TRACE("WebWorker::getIndexIfRunningWorkerId");
   std::string workerId = global.getWebInput(WebAPI::Request::workerId);
   std::stringstream commentsOnError;
   std::string computationResult;
+  if (! this->isValidWorkerId(workerId)) {
+    outputComputationStatus[WebAPI::Result::error] = "Your workerId seems to be invalid.";
+    return - 1;
+
+  }
   // 1. Warning: timing attacks on the speed of looking up file names
   // may be used to guess an old worker id.
   // No need to worry as user computations should not contain any
@@ -1425,16 +1431,6 @@ void WebWorker::writeAfterTimeoutCarbonCopy(
   }
 }
 
-void WebWorker::writeAfterTimeoutString(
-  const std::string& input,
-  const std::string& status,
-  const std::string& fileNameCarbonCopy
-) {
-  STACK_TRACE("WebWorker::writeAfterTimeoutString");
-  JSData result;
-  result[WebAPI::Result::resultHtml] = input;
-  WebWorker::writeAfterTimeoutPartTwo(result, status, fileNameCarbonCopy);
-}
 
 void WebWorker::writeAfterTimeoutJSON(
   const JSData& input,
@@ -2616,8 +2612,10 @@ void WebWorker::writeAfterTimeoutShowIndicator(const std::string& message) {
     << global.fatal;
   }
   this->writeToBodyJSON(result);
+  JSData progressReport;
+  global.toJSONProgressReport(progressReport);
   this->writeAfterTimeoutProgress(
-    global.toStringProgressReportNoThreadData(true), true
+progressReport, true
   );
   this->sendPending();
   for (int i = 0; i < this->parent->allWorkers.size; i ++) {

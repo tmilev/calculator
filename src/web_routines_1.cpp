@@ -1059,7 +1059,7 @@ bool GlobalVariables::Response::writeResponse(
   return true;
 }
 
-void GlobalVariables::Response::report(const std::string& input) {
+void GlobalVariables::Response::report(const JSData& input) {
   MutexlockGuard guard(global.mutexReturnBytes);
   STACK_TRACE("GlobalVariables::Progress::report");
   return

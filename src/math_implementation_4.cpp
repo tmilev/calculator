@@ -335,51 +335,89 @@ std::string GlobalVariables::toStringProgressReportWithThreadData(bool useHTML)
   return out.str();
 }
 
-std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
-  STACK_TRACE("GlobalVariables::toStringProgressReportNoThreadData");
-  std::stringstream reportStream;
+void GlobalVariables::toJSONProgressReport(JSData& output){
+  STACK_TRACE("GlobalVariables::toJSONProgressReport");
+  output[WebAPI::Result::resultHtml] =this->toStringProgressReportMainData(true);
+  output["computationLimits"] = this->toStringProgressReportComputationLimits(true);
+  output["stackTrace"] =this->toStringProgressReportStackTrace(true);
+
+}
+
+const ListReferences<std::string>* GlobalVariables::selectProgressReportStrings(int& outputThreadId){
   for (
-    int threadIndex = 0; threadIndex < this->progressReportStrings.size;
-    threadIndex ++
-  ) {
+      int threadIndex = 0; threadIndex < this->progressReportStrings.size;
+      threadIndex ++
+      ) {
     int currentThreadID = ThreadData::getCurrentThreadId();
-    if (currentThreadID != threadIndex) {
-      // <-to avoid coordinating threads
-      continue;
+    if (currentThreadID == threadIndex) {
+      outputThreadId = currentThreadID;
+      return &this->progressReportStrings[threadIndex];
     }
-    if (useHTML) {
-      reportStream << "<b>Current thread id: " << currentThreadID << ". </b>";
-    } else {
-      reportStream
-      << "Thread id: "
-      << Logger::consoleBlue()
-      << currentThreadID
-      << Logger::consoleNormal()
-      << "\n";
-    }
-    for (
-      int i = 0; i < this->progressReportStrings[threadIndex].size; i ++
-    ) {
-      if (this->progressReportStrings[threadIndex][i] != "") {
-        if (useHTML) {
-          reportStream
-          << "\n<div id ='divProgressReport"
-          << i
-          << "'>"
-          << this->progressReportStrings[threadIndex][i]
-          << "\n</div>\n<hr>";
-        } else {
-          reportStream << this->progressReportStrings[threadIndex][i] << "\n";
-        }
+  }
+  return nullptr;
+
+}
+
+std::string GlobalVariables::toStringProgressReportMainData(bool useHTML){
+  int currentThreadID=-1;
+  const  ListReferences<std::string> * progressPointer =this->selectProgressReportStrings(currentThreadID);
+  if (progressPointer==nullptr){
+    return "";}
+  const ListReferences<std::string>& progressStrings = *progressPointer;
+  std::stringstream reportStream;
+
+  if (useHTML) {
+    reportStream << "<b>Current thread id: " << currentThreadID << ". </b>";
+  } else {
+    reportStream
+        << "Thread id: "
+        << Logger::consoleBlue()
+        << currentThreadID
+        << Logger::consoleNormal()
+        << "\n";
+  }
+  for (
+      int i = 0; i < progressStrings.size; i ++
+      ) {
+    if (progressStrings[i] != "") {
+      if (useHTML) {
+        reportStream
+            << "\n<div id ='divProgressReport"
+            << i
+            << "'>"
+            << progressStrings[i]
+            << "\n</div>\n<hr>";
+      } else {
+        reportStream << progressStrings[i] << "\n";
       }
     }
   }
-  if (!global.fatal.flagCrashInitiated) {
-    if (useHTML) {
-      reportStream << global.fatal.getStackTraceEtcErrorMessageHTML();
-    } else {
-      reportStream << global.fatal.getStackTraceEtcErrorMessageConsole();
-    }
+  return reportStream.str();
+}
+
+std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML){
+  std::stringstream reportStream;
+  reportStream << this->toStringProgressReportMainData(useHTML);
+  reportStream << this->toStringProgressReportStackTrace(useHTML);
+  reportStream << this->toStringProgressReportComputationLimits(useHTML);
+  return reportStream.str();
+}
+
+std::string GlobalVariables::toStringProgressReportStackTrace(bool useHTML){
+  if (useHTML) {
+return global.fatal.getStackTraceEtcErrorMessageHTML();
+  } else {
+    return global.fatal.getStackTraceEtcErrorMessageConsole();
+  }
+}
+
+std::string GlobalVariables::toStringProgressReportComputationLimits(bool useHTML) {
+  STACK_TRACE("GlobalVariables::toStringProgressReportNoThreadData");
+  if (global.fatal.flagCrashInitiated) {
+    return "";
+  }
+  std::stringstream reportStream;
+
     reportStream << global.getElapsedMilliseconds() << " ms elapsed. ";
     if (global.millisecondsMaxComputation > 0) {
       if (useHTML) {
@@ -398,7 +436,6 @@ std::string GlobalVariables::toStringProgressReportNoThreadData(bool useHTML) {
       << " ms [computation error if limit exceeded, "
       << "triggered between calculator/atomic functions].";
     }
-  }
   return reportStream.str();
 }
 
@@ -623,16 +660,19 @@ void GlobalVariables::makeReport() {
   if (!global.response.monitoringAllowed()) {
     return;
   }
-  std::string reportString;
+  JSData report;
   if (
     global.runMode == GlobalVariables::RunMode::consoleRegular ||
     global.runMode == GlobalVariables::RunMode::consoleTest
   ) {
+    std::string reportString;
     reportString = this->toStringProgressReportConsole();
+    report[WebAPI::Result::resultHtml]=reportString;
   } else {
-    reportString = this->toStringProgressReportNoThreadData(true);
+     this->toJSONProgressReport(report);
   }
-  this->response.report(reportString);
+
+  this->response.report(report);
 }
 
 void GlobalVariables::initOutputReportAndCrashFileNames(

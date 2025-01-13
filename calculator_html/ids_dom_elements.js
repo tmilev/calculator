@@ -54,6 +54,7 @@ let domElements = {
       buttonCopyLatexLink: "buttonCopyLatexLink",
       monitoring: {
         progressTimer: "idProgressReportTimer",
+        progressOutput: "progressOutput",
         spanStatus: "spanMonitoringStatus",
         buttonPauseToggle: "buttonPauseToggle",
       },

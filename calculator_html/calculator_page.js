@@ -228,6 +228,9 @@ class Calculator {
       storage.variables.calculator.splitterExamples,
       false,
     );
+    this.progressOutput = document.getElementById(
+      ids.domElements.pages.calculator.monitoring.progressOutput
+    );
   }
 
   /** @return {HTMLElement} */
@@ -921,6 +924,7 @@ class Calculator {
 
   writeResultAndUpdateElement() {
     this.panels = [];
+    this.progressOutput.textContent = "";
     let result = this.writeResult(this.parsedComputation, this.panels);
     this.getOutputElement().textContent = '';
     this.getOutputElement().appendChild(result);

@@ -1155,7 +1155,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
     MonomialPolynomial monomial(variableIndex);
     out
     << this->toStringImpliedSubstitutions()
-    << "Attempting an (a priori random) substitution:<br>"
+    << "<br>Attempting an arbitrary substitution:<br>"
     << monomial.toString(&this->format())
     << "="
     << aValueToTryOnPreferredVariable

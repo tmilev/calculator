@@ -596,23 +596,24 @@ bool CalculatorConversions::expressionFromChevalleyGenerator(
   STACK_TRACE("CalculatorConversions::expressionFromChevalleyGenerator");
   input.checkInitialization();
   output.reset(calculator, 2);
-  Expression generatorLetterE, generatorIndexE;
+  Expression generatorLetterExpression;
+  Expression generatorIndexExpression;
   if (
     input.generatorIndex >= input.owner->getNumberOfPositiveRoots() &&
     input.generatorIndex < input.owner->getNumberOfPositiveRoots() +
     input.owner->getRank()
   ) {
-    generatorLetterE.makeAtom(
+    generatorLetterExpression.makeAtom(
       calculator,
       calculator.addOperationNoRepetitionOrReturnIndexFirst("h")
     );
   } else {
-    generatorLetterE.makeAtom(
+    generatorLetterExpression.makeAtom(
       calculator,
       calculator.addOperationNoRepetitionOrReturnIndexFirst("g")
     );
   }
-  generatorIndexE.assignValue(
+  generatorIndexExpression.assignValue(
     calculator,
     input.owner->getDisplayIndexFromGenerator(input.generatorIndex)
   );
@@ -620,8 +621,8 @@ bool CalculatorConversions::expressionFromChevalleyGenerator(
   output.makeXOX(
     calculator,
     calculator.opUnderscore(),
-    generatorLetterE,
-    generatorIndexE
+    generatorLetterExpression,
+    generatorIndexExpression
   );
 }
 
@@ -668,7 +669,7 @@ bool CalculatorConversions::loadWeylGroup(
 bool CalculatorConversions::dynkinSimpleType(
   Calculator& calculator,
   const Expression& input,
-  DynkinSimpleType& outputMon
+  DynkinSimpleType& output
 ) {
   STACK_TRACE("CalculatorConversions::dynkinSimpleType");
   if (input.size() != 2) {
@@ -678,7 +679,7 @@ bool CalculatorConversions::dynkinSimpleType(
   }
   return
   CalculatorConversions::functionDynkinSimpleType(
-    calculator, input[1], outputMon
+    calculator, input[1], output
   );
 }
 
@@ -688,18 +689,20 @@ bool CalculatorConversions::functionDynkinSimpleType(
   DynkinSimpleType& outputMon
 ) {
   STACK_TRACE("CalculatorConversions::functionDynkinSimpleType");
-  Expression rankE, typeLetterE, scaleE;
+  Expression rankExpression;
+  Expression typeLetterExpression;
+  Expression scaleExpression;
   if (input.startsWith(calculator.opUnderscore(), 3)) {
-    rankE = input[2];
-    typeLetterE = input[1];
-    if (typeLetterE.startsWith(calculator.opPower(), 3)) {
-      scaleE = typeLetterE[2];
-      typeLetterE = typeLetterE[1];
+    rankExpression = input[2];
+    typeLetterExpression = input[1];
+    if (typeLetterExpression.startsWith(calculator.opPower(), 3)) {
+      scaleExpression = typeLetterExpression[2];
+      typeLetterExpression = typeLetterExpression[1];
     } else {
-      scaleE.assignValue(calculator, 1);
+      scaleExpression.assignValue(calculator, 1);
     }
   } else if (input.startsWith(calculator.opPower(), 3)) {
-    scaleE = input[2];
+    scaleExpression = input[2];
     if (!input[1].startsWith(calculator.opUnderscore(), 3)) {
       return
       calculator
@@ -707,8 +710,8 @@ bool CalculatorConversions::functionDynkinSimpleType(
       << input[1].toString()
       << ". The expression does not have two children.";
     }
-    rankE = input[1][2];
-    typeLetterE = input[1][1];
+    rankExpression = input[1][2];
+    typeLetterExpression = input[1][1];
   } else {
     return
     calculator
@@ -718,12 +721,12 @@ bool CalculatorConversions::functionDynkinSimpleType(
     << ". ";
   }
   Rational scale;
-  if (!scaleE.isOfType<Rational>(&scale)) {
+  if (!scaleExpression.isOfType<Rational>(&scale)) {
     return
     calculator
     << "<hr>Failed to extract first co-root length: "
     << "expression "
-    << scaleE.toString()
+    << scaleExpression.toString()
     << " is not a rational number.";
   }
   if (scale <= 0) {
@@ -734,11 +737,11 @@ bool CalculatorConversions::functionDynkinSimpleType(
     << " is non-positive.";
   }
   std::string typeName;
-  if (!typeLetterE.isOperation(&typeName)) {
+  if (!typeLetterExpression.isOperation(&typeName)) {
     return
     calculator
     << "I couldn't extract a type letter from "
-    << typeLetterE.toString();
+    << typeLetterExpression.toString();
   }
   if (typeName.size() != 1) {
     return
@@ -790,7 +793,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
     << input.toString();
   }
   int rank;
-  if (!rankE.isSmallInteger(&rank)) {
+  if (!rankExpression.isSmallInteger(&rank)) {
     return
     calculator
     << "I wasn't able to extract rank from "
@@ -934,21 +937,27 @@ bool CalculatorConversions::expressionFromDynkinSimpleType(
   Expression& output
 ) {
   STACK_TRACE("CalculatorConversions::expressionFromDynkinSimpleType");
-  Expression letterE, rankE, letterAndIndexE, indexE;
+  Expression letterExpression;
+  Expression rankExpression;
+  Expression letterAndIndexExpression;
+  Expression indexExpression;
   std::string letterS;
   letterS = input.letter;
-  letterE.makeAtom(
+  letterExpression.makeAtom(
     calculator,
     calculator.addOperationNoRepetitionOrReturnIndexFirst(letterS)
   );
-  indexE.assignValue(calculator, input.cartanSymmetricInverseScale);
-  rankE.assignValue(calculator, input.rank);
-  letterAndIndexE.makeXOX(
-    calculator, calculator.opPower(), letterE, indexE
+  indexExpression.assignValue(calculator, input.cartanSymmetricInverseScale);
+  rankExpression.assignValue(calculator, input.rank);
+  letterAndIndexExpression.makeXOX(
+    calculator, calculator.opPower(), letterExpression, indexExpression
   );
   return
   output.makeXOX(
-    calculator, calculator.opUnderscore(), letterAndIndexE, rankE
+    calculator,
+    calculator.opUnderscore(),
+    letterAndIndexExpression,
+    rankExpression
   );
 }
 
@@ -1058,7 +1067,8 @@ bool CalculatorConversions::slTwoSubalgebraPrecomputed(
   output.owner = algebraWithContext.content;
   const Expression& expressionF = input[2];
   const Expression& expressionE = input[3];
-  ElementSemisimpleLieAlgebra<Rational> elementF, elementE;
+  ElementSemisimpleLieAlgebra<Rational> elementF;
+  ElementSemisimpleLieAlgebra<Rational> elementE;
   if (
     !CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients
     (calculator, expressionF, elementF, *output.owner)
@@ -1111,15 +1121,15 @@ bool CalculatorConversions::slTwoSubalgebraPrecomputed(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorConversions::slTwoSubalgebraPrecomputed");
-  SlTwoSubalgebra tempSL2;
+  SlTwoSubalgebra sl2Reader;
   if (
     !CalculatorConversions::slTwoSubalgebraPrecomputed(
-      calculator, input, tempSL2
+      calculator, input, sl2Reader
     )
   ) {
     return calculator << "<hr>Failed to load sl(2) subalgebra. ";
   }
-  return output.assignValue(calculator, tempSL2.toString());
+  return output.assignValue(calculator, sl2Reader.toString());
 }
 
 bool CalculatorConversions::algebraicNumber(
@@ -1264,20 +1274,20 @@ bool CalculatorConversions::storeCandidateSubalgebra(
   Expression& output
 ) {
   STACK_TRACE("CalculatorConversions::storeCandidateSubalgebra");
-  Expression currentE;
+  Expression currentExpression;
   List<std::string> keys;
   List<Expression> values;
   input.checkBasicInitialization();
   CalculatorConversions::expressionFromDynkinType(
-    calculator, input.weylNonEmbedded->dynkinType, currentE
+    calculator, input.weylNonEmbedded->dynkinType, currentExpression
   );
   keys.addOnTop("DynkinType");
-  values.addOnTop(currentE);
+  values.addOnTop(currentExpression);
   Matrix<Rational> conversionMatrix;
   conversionMatrix.assignVectorsToRows(input.cartanElementsScaledToActByTwo);
-  currentE.makeMatrix(calculator, conversionMatrix, nullptr, false);
+  currentExpression.makeMatrix(calculator, conversionMatrix, nullptr, false);
   keys.addOnTop("ElementsCartan");
-  values.addOnTop(currentE);
+  values.addOnTop(currentExpression);
   input.checkAll();
   if (input.flagSystemSolved) {
     Expression listGenerators;
@@ -1285,14 +1295,14 @@ bool CalculatorConversions::storeCandidateSubalgebra(
     for (int i = 0; i < input.negativeGenerators.size; i ++) {
       CalculatorConversions::
       expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
-        calculator, input.negativeGenerators[i], currentE
+        calculator, input.negativeGenerators[i], currentExpression
       );
-      listGenerators.addChildOnTop(currentE);
+      listGenerators.addChildOnTop(currentExpression);
       CalculatorConversions::
       expressionFromElementSemisimpleLieAlgebraAlgebraicNumbers(
-        calculator, input.positiveGenerators[i], currentE
+        calculator, input.positiveGenerators[i], currentExpression
       );
-      listGenerators.addChildOnTop(currentE);
+      listGenerators.addChildOnTop(currentExpression);
     }
     keys.addOnTop("generators");
     values.addOnTop(listGenerators);
@@ -1313,35 +1323,40 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   std::stringstream reportStream;
   reportStream << "Loading precomputed semisimple subalgebra. ";
   report.report(reportStream.str());
-  Expression dynkinTypeE, ElementsCartanE, generatorsE;
+  Expression dynkinTypeExpression;
+  Expression ElementsCartanExpression;
+  Expression generatorsExpression;
   if (
     !CalculatorConversions::loadKey(
-      calculator, input, "DynkinType", dynkinTypeE
+      calculator, input, "DynkinType", dynkinTypeExpression
     ) ||
     !CalculatorConversions::loadKey(
-      calculator, input, "ElementsCartan", ElementsCartanE
+      calculator, input, "ElementsCartan", ElementsCartanExpression
     )
   ) {
     return false;
   }
-  reportStream << "Extracted types: " << dynkinTypeE.toString() << ". ";
+  reportStream
+  << "Extracted types: "
+  << dynkinTypeExpression.toString()
+  << ". ";
   report.report(reportStream.str());
   outputSubalgebra.owner = &owner;
   DynkinType nonEmbeddedDynkinType;
   if (
     !CalculatorConversions::functionDynkinType(
-      calculator, dynkinTypeE, nonEmbeddedDynkinType
+      calculator, dynkinTypeExpression, nonEmbeddedDynkinType
     )
   ) {
     return
     calculator
     << "<hr>Failed to load dynkin type of candidate subalgebra from "
-    << dynkinTypeE.toString()
+    << dynkinTypeExpression.toString()
     << "<hr>";
   }
   reportStream
   << "Non embedded Dynkin type: "
-  << dynkinTypeE.toString()
+  << dynkinTypeExpression.toString()
   << ". ";
   report.report(reportStream.str());
   outputSubalgebra.weylNonEmbedded =
@@ -1356,7 +1371,7 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   if (
     !CalculatorConversions::functionGetMatrix(
       calculator,
-      ElementsCartanE,
+      ElementsCartanExpression,
       hElements,
       false,
       nullptr,
@@ -1379,7 +1394,8 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
     << outputSubalgebra.weylNonEmbedded->getDimension()
     << " elements, but failed to get them.";
   }
-  List<int> ranks, multiplicities;
+  List<int> ranks;
+  List<int> multiplicities;
   outputSubalgebra.weylNonEmbedded->dynkinType.getLettersTypesMultiplicities(
     nullptr, &ranks, &multiplicities, nullptr
   );
@@ -1408,17 +1424,17 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   outputSubalgebra.negativeGenerators.setSize(0);
   if (
     CalculatorConversions::loadKey(
-      calculator, input, "generators", generatorsE
+      calculator, input, "generators", generatorsExpression
     )
   ) {
-    generatorsE.sequencefy();
+    generatorsExpression.sequencefy();
     ElementSemisimpleLieAlgebra<AlgebraicNumber> currentGeneratorAlgebraic;
-    for (int i = 1; i < generatorsE.size(); i ++) {
+    for (int i = 1; i < generatorsExpression.size(); i ++) {
       if (
         !CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers
         (
           calculator,
-          generatorsE[i],
+          generatorsExpression[i],
           currentGeneratorAlgebraic,
           *owner.owner
         )
@@ -1426,7 +1442,7 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
         return
         calculator
         << "<hr>Failed to load semisimple Lie algebra element from expression "
-        << generatorsE[i].toString()
+        << generatorsExpression[i].toString()
         << ". ";
       }
       if (i % 2 == 1) {
@@ -1477,14 +1493,14 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
 ) {
   STACK_TRACE("CalculatorConversions::loadSemisimpleSubalgebras");
   Expression inputArguments = input[1];
-  Expression ambientTypeE;
-  Expression numExploredHsE;
-  Expression numExploredTypesE;
-  Expression subalgebrasE;
-  Expression currentChainE;
+  Expression ambientTypeExpression;
+  Expression numberOfExploredHsExpression(calculator);
+  Expression numberOfExploredTypesExpression(calculator);
+  Expression subalgebrasElement;
+  Expression currentChainExpression(calculator);
   if (
     !CalculatorConversions::loadKey(
-      calculator, inputArguments, "AmbientDynkinType", ambientTypeE
+      calculator, inputArguments, "AmbientDynkinType", ambientTypeExpression
     )
   ) {
     return
@@ -1494,27 +1510,29 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   }
   if (
     !CalculatorConversions::loadKey(
-      calculator, inputArguments, "NumExploredHs", numExploredHsE
+      calculator,
+      inputArguments,
+      "NumberOfExploredHs",
+      numberOfExploredHsExpression
     )
   ) {
-    return
     calculator
-    << "<hr>Failed to load numExploredHs list from: "
-    << inputArguments.toString();
+    << "<hr>Failed to load NumberOfExploredHs list from the input. ";
   }
   if (
     !CalculatorConversions::loadKey(
-      calculator, inputArguments, "NumExploredTypes", numExploredTypesE
+      calculator,
+      inputArguments,
+      "NumberOfExploredTypes",
+      numberOfExploredTypesExpression
     )
   ) {
-    return
     calculator
-    << "<hr>Failed to load NumExploredTypes list from: "
-    << inputArguments.toString();
+    << "<hr>Failed to load NumberOfExploredTypes list from the input. ";
   }
   if (
     !CalculatorConversions::loadKey(
-      calculator, inputArguments, "Subalgebras", subalgebrasE
+      calculator, inputArguments, "Subalgebras", subalgebrasElement
     )
   ) {
     return
@@ -1524,10 +1542,9 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   }
   if (
     !CalculatorConversions::loadKey(
-      calculator, inputArguments, "CurrentChain", currentChainE
+      calculator, inputArguments, "CurrentChain", currentChainExpression
     )
   ) {
-    return
     calculator
     << "<hr>Failed to load CurrentChain from: "
     << inputArguments.toString();
@@ -1535,14 +1552,26 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   List<int> currentChainInt;
   List<int> numberOfExploredTypes;
   List<int> numberOfExploredHs;
-  if (!calculator.getVectorInt(currentChainE, currentChainInt)) {
-    return false;
+  if (!calculator.getVectorInt(currentChainExpression, currentChainInt)) {
+    calculator
+    << "Failed to load currentChain of Expressions; using empty list. ";
+    currentChainInt.clear();
   }
-  if (!calculator.getVectorInt(numExploredHsE, numberOfExploredHs)) {
-    return false;
+  if (
+    !calculator.getVectorInt(numberOfExploredHsExpression, numberOfExploredHs)
+  ) {
+    calculator
+    << "Failed to load the indices of the explored H's; using empty list. ";
+    numberOfExploredHs.clear();
   }
-  if (!calculator.getVectorInt(numExploredTypesE, numberOfExploredTypes)) {
-    return false;
+  if (
+    !calculator.getVectorInt(
+      numberOfExploredTypesExpression, numberOfExploredTypes
+    )
+  ) {
+    calculator
+    << "Failed to load the number of explored types; using empty list ";
+    numberOfExploredTypes.clear();
   }
   WithContext<SemisimpleLieAlgebra*> ownerSemisimple;
   ownerSemisimple.content = nullptr;
@@ -1553,7 +1582,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   report.report(reportStream.str());
   if (
     !CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
-      calculator, ambientTypeE, expression, ownerSemisimple
+      calculator, ambientTypeExpression, expression, ownerSemisimple
     )
   ) {
     return
@@ -1577,11 +1606,11 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   report.report(reportStream.str());
   reportStream << " done. Fetching subalgebra list ... ";
   report.report(reportStream.str());
-  subalgebrasE.sequencefy();
-  subalgebras.subalgebras.setExpectedSize(subalgebrasE.size() - 1);
+  subalgebrasElement.sequencefy();
+  subalgebras.subalgebras.setExpectedSize(subalgebrasElement.size() - 1);
   subalgebras.subalgebras.clear();
   subalgebras.subalgebrasNonEmbedded->setExpectedSize(
-    subalgebrasE.size() - 1
+    subalgebrasElement.size() - 1
   );
   subalgebras.flagAttemptToSolveSystems = true;
   subalgebras.flagComputeModuleDecomposition = true;
@@ -1591,24 +1620,24 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   subalgebras.ownerField = &calculator.objectContainer.algebraicClosure;
   reportStream
   << " done. <br>Total subalgebras: "
-  << subalgebrasE.size() - 1
+  << subalgebrasElement.size() - 1
   << ". ";
   report.report(reportStream.str());
-  for (int i = 1; i < subalgebrasE.size(); i ++) {
+  for (int i = 1; i < subalgebrasElement.size(); i ++) {
     std::stringstream reportStream2;
     reportStream2
     << reportStream.str()
     << "Subalgebra "
     << i
     << " is being loaded from expression "
-    << subalgebrasE[i].toString()
+    << subalgebrasElement[i].toString()
     << ".";
     report.report(reportStream2.str());
     CandidateSemisimpleSubalgebra currentCandidate;
     if (
       !CalculatorConversions::candidateSubalgebraPrecomputed(
         calculator,
-        subalgebrasE[i],
+        subalgebrasElement[i],
         expression,
         currentCandidate,
         subalgebras
@@ -1620,7 +1649,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
       << "failed to load candidate number "
       << i
       << " extracted from expression: "
-      << subalgebrasE[i].toString()
+      << subalgebrasElement[i].toString()
       << ". <hr>";
     }
     currentCandidate.checkFullInitialization();
@@ -1694,62 +1723,69 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   Expression& output
 ) {
   STACK_TRACE("CalculatorConversions::storeSemisimpleSubalgebras");
-  Expression dynkinTypeE;
+  Expression dynkinTypeExpression;
   List<std::string> keys;
   List<Expression> values;
   if (
     !CalculatorConversions::expressionFromDynkinType(
-      calculator, input.owner->weylGroup.dynkinType, dynkinTypeE
+      calculator,
+      input.owner->weylGroup.dynkinType,
+      dynkinTypeExpression
     )
   ) {
     return false;
   }
   keys.addOnTop("AmbientDynkinType");
-  values.addOnTop(dynkinTypeE);
-  Expression currentChainE, numericalConvertorE(calculator);
-  currentChainE.makeSequence(calculator);
+  values.addOnTop(dynkinTypeExpression);
+  Expression currentChainExpression;
+  Expression numericalConverterExpression(calculator);
+  currentChainExpression.makeSequence(calculator);
   for (int i = 0; i < input.currentSubalgebraChain.size; i ++) {
-    numericalConvertorE = input.currentSubalgebraChain[i].indexInOwner;
-    currentChainE.addChildOnTop(numericalConvertorE);
+    numericalConverterExpression =
+    input.currentSubalgebraChain[i].indexInOwner;
+    currentChainExpression.addChildOnTop(numericalConverterExpression);
   }
   keys.addOnTop("CurrentChain");
-  values.addOnTop(currentChainE);
+  values.addOnTop(currentChainExpression);
   Expression totalTypesExploredE;
   totalTypesExploredE.makeSequence(calculator);
   for (
     int i = 0; i < input.currentNumberOfLargerTypesExplored.size; i ++
   ) {
-    numericalConvertorE = input.currentNumberOfLargerTypesExplored[i];
-    totalTypesExploredE.addChildOnTop(numericalConvertorE);
+    numericalConverterExpression = input.currentNumberOfLargerTypesExplored[i];
+    totalTypesExploredE.addChildOnTop(numericalConverterExpression);
   }
-  keys.addOnTop("NumExploredTypes");
+  keys.addOnTop("NumberOfExploredTypes");
   values.addOnTop(totalTypesExploredE);
-  Expression totalHsExploredE;
-  totalHsExploredE.makeSequence(calculator);
+  Expression totalHsExploredExpression;
+  totalHsExploredExpression.makeSequence(calculator);
   for (
     int i = 0; i < input.currentNumberOfHCandidatesExplored.size; i ++
   ) {
-    numericalConvertorE = input.currentNumberOfHCandidatesExplored[i];
-    totalHsExploredE.addChildOnTop(numericalConvertorE);
+    numericalConverterExpression = input.currentNumberOfHCandidatesExplored[i];
+    totalHsExploredExpression.addChildOnTop(numericalConverterExpression);
   }
-  keys.addOnTop("NumExploredHs");
-  values.addOnTop(totalHsExploredE);
-  Expression subalgebrasListE, candidateE;
-  subalgebrasListE.makeSequence(calculator);
-  subalgebrasListE.setExpectedSize(input.subalgebras.values.size + 1);
+  keys.addOnTop("NumberOfExploredHs");
+  values.addOnTop(totalHsExploredExpression);
+  Expression subalgebrasListExpression;
+  Expression candidateExpression;
+  subalgebrasListExpression.makeSequence(calculator);
+  subalgebrasListExpression.setExpectedSize(
+    input.subalgebras.values.size + 1
+  );
   input.checkAll();
   for (int i = 0; i < input.subalgebras.values.size; i ++) {
     if (
       !CalculatorConversions::storeCandidateSubalgebra(
-        calculator, input.subalgebras.values[i], candidateE
+        calculator, input.subalgebras.values[i], candidateExpression
       )
     ) {
       return false;
     }
-    subalgebrasListE.addChildOnTop(candidateE);
+    subalgebrasListExpression.addChildOnTop(candidateExpression);
   }
   keys.addOnTop("Subalgebras");
-  values.addOnTop(subalgebrasListE);
+  values.addOnTop(subalgebrasListExpression);
   return output.makeSequenceCommands(calculator, keys, values);
 }
 
@@ -1767,7 +1803,9 @@ bool CalculatorConversions::expressionFromMonomialUniversalEnveloping(
   }
   ChevalleyGenerator chevalleyGenerator;
   chevalleyGenerator.owner = input.owner;
-  Expression chevalleyExpression, powerE, termE;
+  Expression chevalleyExpression;
+  Expression powerExpression;
+  Expression termExpression;
   List<Expression> terms;
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     chevalleyGenerator.generatorIndex = input.generatorsIndices[i];
@@ -1775,12 +1813,15 @@ bool CalculatorConversions::expressionFromMonomialUniversalEnveloping(
       calculator, chevalleyGenerator, chevalleyExpression
     );
     CalculatorConversions::expressionFromRationalFraction<Rational>(
-      calculator, input.powers[i], powerE, inputContext
+      calculator, input.powers[i], powerExpression, inputContext
     );
-    termE.makeXOX(
-      calculator, calculator.opPower(), chevalleyExpression, powerE
+    termExpression.makeXOX(
+      calculator,
+      calculator.opPower(),
+      chevalleyExpression,
+      powerExpression
     );
-    terms.addOnTop(termE);
+    terms.addOnTop(termExpression);
   }
   return output.makeProduct(calculator, terms);
 }

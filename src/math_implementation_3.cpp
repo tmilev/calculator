@@ -5912,7 +5912,8 @@ void DynkinType::getOuterAutosGeneratorsActOnVectorColumn(
   STACK_TRACE("DynkinType::getOuterAutosGeneratorsActOnVectorColumn");
   this->sortDynkinTypes();
   List<MatrixTensor<Rational> > intermediateGenerators;
-  MatrixTensor<Rational> matrixFinal, matrixToGo;
+  MatrixTensor<Rational> matrixFinal;
+  MatrixTensor<Rational> matrixToGo;
   int currentMultiplicity = 0;
   output.setSize(0);
   int numberOfRowsSoFar = 0;
@@ -5999,7 +6000,8 @@ bool DynkinType::canBeExtendedParabolicallyOrIsEqualTo(
     return false;
   }
   const DynkinSimpleType& currentSimpleType = (*this)[0];
-  DynkinType remainderThis, remainderOther;
+  DynkinType remainderThis;
+  DynkinType remainderOther;
   for (int i = 0; i < other.size(); i ++) {
     if (
       !currentSimpleType.canBeExtendedParabolicallyOrIsEqualTo(other[i])
@@ -6181,8 +6183,8 @@ bool DynkinType::containsType(char typeLetter) const {
 }
 
 bool DynkinType::isSimpleOfType(char desiredType, int desiredRank) const {
-  char currentType;
-  int currentRank;
+  char currentType = 0;
+  int currentRank = 0;
   if (!this->isSimple(&currentType, &currentRank)) {
     return false;
   }
@@ -6318,17 +6320,18 @@ int DynkinType::getRank() const {
 
 void DynkinType::getEpsilonMatrix(Matrix<Rational>& output) const {
   output.initialize(0, 0);
-  Matrix<Rational> curCartan;
-  List<DynkinSimpleType> sortedMons;
-  this->getSortedDynkinTypes(sortedMons);
-  for (int j = 0; j < sortedMons.size; j ++) {
-    int index = this->monomials.getIndex(sortedMons[j]);
+  Matrix<Rational> currentCartan;
+  List<DynkinSimpleType> sortedMonomials;
+  this->getSortedDynkinTypes(sortedMonomials);
+  for (int j = 0; j < sortedMonomials.size; j ++) {
+    int index = this->monomials.getIndex(sortedMonomials[j]);
     int multiplicity = this->getMultiplicity(index);
     for (int k = 0; k < multiplicity; k ++) {
       DynkinSimpleType::getEpsilonMatrix((*this)[index].letter, (*this)[index].
-        rank, curCartan
+        rank,
+        currentCartan
       );
-      output.directSumWith(curCartan);
+      output.directSumWith(currentCartan);
     }
   }
 }
@@ -6355,10 +6358,10 @@ void DynkinType::getCartanSymmetric(Matrix<Rational>& output) const {
   STACK_TRACE("DynkinType::getCartanSymmetric");
   output.initialize(0, 0);
   Matrix<Rational> currentCartan;
-  List<DynkinSimpleType> sortedMons;
-  this->getSortedDynkinTypes(sortedMons);
-  for (int j = 0; j < sortedMons.size; j ++) {
-    int index = this->monomials.getIndex(sortedMons[j]);
+  List<DynkinSimpleType> sortedMonomials;
+  this->getSortedDynkinTypes(sortedMonomials);
+  for (int j = 0; j < sortedMonomials.size; j ++) {
+    int index = this->monomials.getIndex(sortedMonomials[j]);
     int multiplicity = this->getMultiplicity(index);
     for (int k = 0; k < multiplicity; k ++) {
       (*this)[index].getCartanSymmetric(currentCartan);
@@ -6369,9 +6372,9 @@ void DynkinType::getCartanSymmetric(Matrix<Rational>& output) const {
 
 void DynkinType::getCoCartanSymmetric(Matrix<Rational>& output) const {
   STACK_TRACE("DynkinType::getCartanSymmetric");
-  Matrix<Rational> curCartan;
-  this->getCartanSymmetric(curCartan);
-  WeylGroupData::getCoCartanSymmetric(curCartan, output);
+  Matrix<Rational> currentCartan;
+  this->getCartanSymmetric(currentCartan);
+  WeylGroupData::getCoCartanSymmetric(currentCartan, output);
 }
 
 void DynkinType::getCartanSymmetricDefaultLengthKeepComponentOrder(
@@ -6382,21 +6385,21 @@ void DynkinType::getCartanSymmetricDefaultLengthKeepComponentOrder(
     "getCartanSymmetricDefaultLengthKeepComponentOrder"
   );
   output.initialize(0, 0);
-  Matrix<Rational> curCartan;
-  List<DynkinSimpleType> sortedMons;
-  this->getSortedDynkinTypes(sortedMons);
+  Matrix<Rational> currentCartan;
+  List<DynkinSimpleType> sortedMonomials;
+  this->getSortedDynkinTypes(sortedMonomials);
   DynkinSimpleType currentType;
-  for (int j = 0; j < sortedMons.size; j ++) {
-    int index = this->monomials.getIndex(sortedMons[j]);
+  for (int j = 0; j < sortedMonomials.size; j ++) {
+    int index = this->monomials.getIndex(sortedMonomials[j]);
     int mult = this->getMultiplicity(index);
     currentType.makeArbitrary(
-      sortedMons[j].letter, sortedMons[j].rank, 1
+      sortedMonomials[j].letter, sortedMonomials[j].rank, 1
     );
     currentType.cartanSymmetricInverseScale = 1;
     // = currentType.getDefaultCoRootLengthSquared(0);
     for (int k = 0; k < mult; k ++) {
-      currentType.getCartanSymmetric(curCartan);
-      output.directSumWith(curCartan);
+      currentType.getCartanSymmetric(currentCartan);
+      output.directSumWith(currentCartan);
     }
   }
 }
@@ -7576,13 +7579,15 @@ bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
     return false;
   }
   this->checkInitialization();
-  Polynomial<Rational> leftCharPoly, rightCharPoly;
+  Polynomial<Rational> leftCharPoly;
+  Polynomial<Rational> rightCharPoly;
   this->getCharacteristicPolynomialStandardRepresentation(leftCharPoly);
   right.getCharacteristicPolynomialStandardRepresentation(rightCharPoly);
   if (leftCharPoly != rightCharPoly) {
     return true;
   }
-  VectorSparse<Rational> leftCycleStructure, rightCycleStructure;
+  VectorSparse<Rational> leftCycleStructure;
+  VectorSparse<Rational> rightCycleStructure;
   this->getCycleStructure(leftCycleStructure);
   right.getCycleStructure(rightCycleStructure);
   if (leftCycleStructure != rightCycleStructure) {
@@ -7754,13 +7759,14 @@ void WeylGroupData::simpleReflectionRootPolynomial(
   int index, PolynomialSubstitution<Rational>& root, bool rhoAction
 ) {
   int lengthA = this->cartanSymmetric.elements[index][index].numeratorShort;
-  Polynomial<Rational> aScalarB, tempP;
+  Polynomial<Rational> aScalarB;
+  Polynomial<Rational> polynomialCoefficient;
   aScalarB.makeZero();
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    tempP.makeZero();
-    tempP = root[i];
-    tempP *= cartanSymmetric.elements[index][i];
-    aScalarB += (tempP);
+    polynomialCoefficient.makeZero();
+    polynomialCoefficient = root[i];
+    polynomialCoefficient *= cartanSymmetric.elements[index][i];
+    aScalarB += (polynomialCoefficient);
   }
   aScalarB *= - 2;
   aScalarB /= lengthA;
@@ -8334,7 +8340,8 @@ std::string WeylGroupData::toStringRootsAndRootReflections(
   STACK_TRACE("WeylGroupData::toStringRootsAndRootReflections");
   (void) format;
   // portable way to avoid non-used parameter warning.
-  std::stringstream out, outLatex;
+  std::stringstream out;
+  std::stringstream outLatex;
   out << "<br>The root system has " << this->rootSystem.size << " elements.\n";
   out
   << "<table><tr><td>Simple basis coordinates</td><td>Epsilon coordinates</td>"
@@ -8590,11 +8597,11 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
   Vectors<Rational> coordinatesInNewBasis;
   simpleBasis = generators;
   tempDyn.computeDiagramTypeModifyInput(simpleBasis, *this);
-  bool tempBool = true;
+  bool hasGenerators = true;
   if (generators.size == 0) {
-    tempBool = false;
+    hasGenerators = false;
   }
-  if (!tempBool) {
+  if (!hasGenerators) {
     output.setSize(input.size);
     for (int i = 0; i < input.size; i ++) {
       output[i].makeZero(0);
@@ -8633,11 +8640,11 @@ void WeylGroupData::getEpsilonCoordinates(
 }
 
 LargeInteger WeylGroupData::getSizeByFormulaImplementation(
-  FiniteGroup<ElementWeylGroup>& G
+  FiniteGroup<ElementWeylGroup>& g
 ) {
-  WeylGroupData* W = static_cast<WeylGroupData*>(G.specificDataPointer);
-  W->checkConsistency();
-  return W->dynkinType.getWeylGroupSizeByFormula();
+  WeylGroupData* weylGroupData = static_cast<WeylGroupData*>(g.specificDataPointer);
+  weylGroupData->checkConsistency();
+  return weylGroupData->dynkinType.getWeylGroupSizeByFormula();
 }
 
 void WeylGroupData::getWeylChamber(Cone& output) {
@@ -8727,7 +8734,7 @@ void WeylGroupData::getExtremeElementInOrbit(
     *stabilizerFound = false;
   }
   Rational scalarProduct;
-  ElementWeylGroup elementSimplReflection;
+  ElementWeylGroup elementSimpleReflection;
   for (bool found = true; found;) {
     found = false;
     for (int i = 0; i < this->getDimension(); i ++) {
@@ -8754,8 +8761,8 @@ void WeylGroupData::getExtremeElementInOrbit(
           this->reflectMinusRhoSimple(i, inputOutput);
         }
         if (outputWeylElement != nullptr) {
-          elementSimplReflection.makeSimpleReflection(i, *this);
-          *outputWeylElement = elementSimplReflection *(*outputWeylElement);
+          elementSimpleReflection.makeSimpleReflection(i, *this);
+          *outputWeylElement = elementSimpleReflection *(*outputWeylElement);
         }
         if (sign != nullptr) {
           *sign *= - 1;
@@ -8793,9 +8800,8 @@ bool WeylGroupAutomorphisms::isElementWeylGroupOrOuterAutomorphisms(
     rhoImage, nullptr, nullptr, &elementCandidate
   );
   Matrix<Rational> candidateMatrix;
-  MatrixTensor<Rational>
-  candidateMatrixTensorForm,
-  candidateMatrixWithOuterAutomorphisms;
+  MatrixTensor<Rational> candidateMatrixTensorForm;
+  MatrixTensor<Rational> candidateMatrixWithOuterAutomorphisms;
   this->weylGroup->getMatrixStandardRepresentation(
     elementCandidate, candidateMatrix
   );
@@ -8837,7 +8843,8 @@ void WeylGroupData::getCoxeterPlane(
   }
   ElementWeylGroup element;
   this->getCoxeterElement(element);
-  Matrix<Rational> matrixCoxeterElement, matrix;
+  Matrix<Rational> matrixCoxeterElement;
+  Matrix<Rational> matrix;
   this->getMatrixStandardRepresentation(element, matrixCoxeterElement);
   matrix = matrixCoxeterElement;
   int coxeterNumber =
@@ -9172,7 +9179,8 @@ bool WeylGroupData::isElementWeylGroup(
   this->raiseToDominantWeight(
     rhoImage, nullptr, nullptr, &elementCandidate
   );
-  Matrix<Rational> candidateMatrix, inputMatrix;
+  Matrix<Rational> candidateMatrix;
+  Matrix<Rational> inputMatrix;
   matrix.getMatrix(inputMatrix, this->getDimension());
   this->getMatrixStandardRepresentation(elementCandidate, candidateMatrix);
   return candidateMatrix == inputMatrix;
@@ -9391,7 +9399,9 @@ toString(std::string& output, bool displayElements) {
     "::toString"
   );
   this->checkInitialization();
-  std::stringstream out, head, head2;
+  std::stringstream out;
+  std::stringstream head;
+  std::stringstream head2;
   List<int> displayIndicesSimpleGenerators;
   displayIndicesSimpleGenerators.setSize(this->simpleRootsInner.size);
   FormatExpressions latexFormat;
@@ -9411,14 +9421,18 @@ toString(std::string& output, bool displayElements) {
       displayIndicesSimpleGenerators[i] = i + 1;
     }
   }
-  DynkinDiagramRootSubalgebra tempDyn;
-  tempDyn.ambientRootSystem = this->ambientWeyl->rootSystem;
-  tempDyn.ambientBilinearForm = this->ambientWeyl->cartanSymmetric;
-  tempDyn.computeDiagramInputIsSimple(this->simpleRootsInner);
+  DynkinDiagramRootSubalgebra dynkinDiagramRootSubalgebra;
+  dynkinDiagramRootSubalgebra.ambientRootSystem =
+  this->ambientWeyl->rootSystem;
+  dynkinDiagramRootSubalgebra.ambientBilinearForm =
+  this->ambientWeyl->cartanSymmetric;
+  dynkinDiagramRootSubalgebra.computeDiagramInputIsSimple(
+    this->simpleRootsInner
+  );
   out
   << "Dynkin diagram & subalgebra of "
   << "root subsystem generated by the given root: "
-  << tempDyn.toString();
+  << dynkinDiagramRootSubalgebra.toString();
   out << "<br>Simple roots:\n<br>\n ";
   head << "\\begin{array}{rcl}";
   for (int i = 0; i < this->simpleRootsInner.size; i ++) {
@@ -9536,7 +9550,7 @@ toStringCosetGraph() {
   List<List<int> > layers;
   Vector<Rational> root;
   layers.reserve(this->representativesQuotientAmbientOrder.size);
-  int GraphWidth = 1;
+  int graphWidth = 1;
   int oldLayerElementLength = - 1;
   for (
     int i = 0; i < this->representativesQuotientAmbientOrder.size; i ++
@@ -9552,8 +9566,8 @@ toStringCosetGraph() {
       size;
     }
     layers.lastObject()->addOnTop(i);
-    GraphWidth =
-    MathRoutines::maximum(GraphWidth, layers.lastObject()->size);
+    graphWidth =
+    MathRoutines::maximum(graphWidth, layers.lastObject()->size);
   }
   for (
     int i = 0; i < this->representativesQuotientAmbientOrder.size; i ++
@@ -9594,7 +9608,7 @@ toStringCosetGraph() {
       }
     }
   }
-  return this->toStringFromLayersAndArrows(arrows, layers, GraphWidth, true);
+  return this->toStringFromLayersAndArrows(arrows, layers, graphWidth, true);
 }
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
@@ -9925,10 +9939,11 @@ void KazhdanLusztigPolynomials::generatePartialBruhatOrder() {
   this->bruhatOrder.setSize(this->size);
   this->inverseBruhatOrder.setSize(this->size);
   this->simpleReflectionsActionList.setSize(this->size);
+  Vector<Rational> root;
+  Vector<Rational> root2;
   for (int i = 0; i < this->size; i ++) {
     this->simpleReflectionsActionList[i].reserve(dimension);
     for (int j = 0; j < dimension; j ++) {
-      Vector<Rational> root, root2;
       root = (*this)[i];
       root2 = (*this)[i];
       this->weylGroup->reflectSimple(j, root, false, false);
@@ -10092,8 +10107,8 @@ bool KazhdanLusztigPolynomials::computeKLPolys(WeylGroupData* weylGroup) {
   weylGroup->group.computeAllElements(- 1);
   this->initFromWeyl(weylGroup);
   this->generatePartialBruhatOrder();
-  FormatExpressions PolyFormatLocal;
-  PolyFormatLocal.polynomialDefaultLetter = "q";
+  FormatExpressions polynomialFormatLocal;
+  polynomialFormatLocal.polynomialDefaultLetter = "q";
   this->computeRPolys();
   this->kazhdanLuzstigPolynomials.setSize(this->size);
   this->kazhdanLuzstigCoefficients.setSize(this->size);
@@ -10126,13 +10141,13 @@ void KazhdanLusztigPolynomials::computeRPolys() {
   }
   this->lowestNonExplored =
   this->findMinimalBruhatNonExplored(this->explored);
-  List<bool> ExploredFromTop;
-  ExploredFromTop.setSize(this->size);
+  List<bool> exploredFromTop;
+  exploredFromTop.setSize(this->size);
   while (this->lowestNonExplored != - 1) {
     for (int i = 0; i < this->size; i ++) {
-      ExploredFromTop[i] = false;
+      exploredFromTop[i] = false;
     }
-    int a = this->findMaximalBruhatNonExplored(ExploredFromTop);
+    int a = this->findMaximalBruhatNonExplored(exploredFromTop);
     while (a != - 1) {
       bool tempBool = false;
       for (int j = 0; j < dimension; j ++) {
@@ -10146,8 +10161,8 @@ void KazhdanLusztigPolynomials::computeRPolys() {
         << "An algorithmic check failed while computing R-polynomials. "
         << global.fatal;
       }
-      ExploredFromTop[a] = true;
-      a = this->findMaximalBruhatNonExplored(ExploredFromTop);
+      exploredFromTop[a] = true;
+      a = this->findMaximalBruhatNonExplored(exploredFromTop);
     }
     this->explored[this->lowestNonExplored] = true;
     this->lowestNonExplored =
@@ -10156,10 +10171,10 @@ void KazhdanLusztigPolynomials::computeRPolys() {
 }
 
 bool KazhdanLusztigPolynomials::indexGEQIndex(int a, int b) {
-  Vector<Rational> tempV;
-  tempV = (*this)[a];
-  tempV -= (*this)[b];
-  return tempV.isNegativeOrZero();
+  Vector<Rational> difference;
+  difference = (*this)[a];
+  difference -= (*this)[b];
+  return difference.isNegativeOrZero();
 }
 
 bool KazhdanLusztigPolynomials::indexGreaterThanIndex(int a, int b) {
@@ -10186,7 +10201,9 @@ int KazhdanLusztigPolynomials::computeProductfromSimpleReflectionsActionList(
 }
 
 void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
-  Polynomial<Rational> accumulator, tempP1, tempP2;
+  Polynomial<Rational> accumulator;
+  Polynomial<Rational> buffer1;
+  Polynomial<Rational> buffer2;
   if (x == y) {
     this->kazhdanLuzstigPolynomials[x][y].makeOne();
     return;
@@ -10201,11 +10218,11 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
     if (
       this->indexGreaterThanIndex(i, x) && this->indexGEQIndex(y, i)
     ) {
-      tempP1.makeZero();
+      buffer1.makeZero();
       for (int j = 0; j < this->rPolynomials[x][i].size(); j ++) {
         monomial = this->rPolynomials[x][i][j];
         monomial.invert();
-        tempP1.addMonomial(
+        buffer1.addMonomial(
           monomial, this->rPolynomials[x][i].coefficients[j]
         );
       }
@@ -10227,9 +10244,9 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
       this->weylGroup->group.elements[i].generatorsLastAppliedFirst.size -
       this->weylGroup->group.elements[y].generatorsLastAppliedFirst.size;
       powerQ /= 2;
-      tempP2.makeMonomial(0, powerQ, sign);
-      tempP1 *= tempP2;
-      tempP1 *= this->kazhdanLuzstigPolynomials[i][y];
+      buffer2.makeMonomial(0, powerQ, sign);
+      buffer1 *= buffer2;
+      buffer1 *= this->kazhdanLuzstigPolynomials[i][y];
       if (!this->explored[i]) {
         global.fatal
         << "An internal check during the "
@@ -10246,19 +10263,19 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
         << " which hasn't been computed yet. "
         << global.fatal;
       }
-      accumulator += tempP1;
+      accumulator += buffer1;
     }
   }
   this->kazhdanLuzstigPolynomials[x][y].makeZero();
-  Rational lengthDiff =
+  Rational lengthDifference =
   this->weylGroup->group.elements[y].generatorsLastAppliedFirst.size -
   this->weylGroup->group.elements[x].generatorsLastAppliedFirst.size;
-  lengthDiff /= 2;
+  lengthDifference /= 2;
   for (int i = 0; i < accumulator.size(); i ++) {
     if (accumulator[i].hasPositiveOrZeroExponents()) {
       monomial = accumulator[i];
       monomial.setVariable(0, monomial[0] * - 1);
-      monomial.multiplyByVariable(0, lengthDiff);
+      monomial.multiplyByVariable(0, lengthDifference);
       this->kazhdanLuzstigPolynomials[x][y].addMonomial(
         monomial, accumulator.coefficients[i]
       );
@@ -10280,9 +10297,8 @@ bool KazhdanLusztigPolynomials::computeRxy(
   }
   int sx = this->simpleReflectionsActionList[x][simpleReflectionIndex];
   int sy = this->simpleReflectionsActionList[y][simpleReflectionIndex];
-  bool boolX, boolY;
-  boolX = this->indexGreaterThanIndex(x, sx);
-  boolY = this->indexGreaterThanIndex(y, sy);
+  bool boolX = this->indexGreaterThanIndex(x, sx);
+  bool boolY = this->indexGreaterThanIndex(y, sy);
   if (boolX && boolY) {
     if (!this->explored[sy]) {
       global.fatal
@@ -11357,7 +11373,9 @@ void Cone::intersectHyperplane(
     global.fatal << "zero normal not allowed. " << global.fatal;
   }
   int dimension = normal.size;
-  Matrix<Rational> kernelComputer, embedding, projection;
+  Matrix<Rational> kernelComputer;
+  Matrix<Rational> embedding;
+  Matrix<Rational> projection;
   kernelComputer.assignVectorRow(normal);
   Vectors<Rational> basis;
   kernelComputer.getZeroEigenSpace(basis);
@@ -11384,8 +11402,8 @@ void Cone::intersectHyperplane(
     incoming.normal = newNormals[i];
     incoming.neighbors = this->walls[i].neighbors;
   }
-  bool tempBool = outputConeLowerDimension.createFromWalls(inputWalls, false);
-  if (!tempBool) {
+  bool success = outputConeLowerDimension.createFromWalls(inputWalls, false);
+  if (!success) {
     global.fatal << "Create from normals failed. " << global.fatal;
   }
 }
@@ -11742,7 +11760,8 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
     outputError = " Computation too large. ";
     return false;
   }
-  Polynomial<Rational> basisMonomialsZeroWeight, basisMonomialsAll;
+  Polynomial<Rational> basisMonomialsZeroWeight;
+  Polynomial<Rational> basisMonomialsAll;
   basisMonomialsZeroWeight.makeZero();
   basisMonomialsAll.makeZero();
   MonomialPolynomial monomial;
@@ -11774,25 +11793,25 @@ bool SlTwoInSlN::computeInvariantsOfDegree(
   matrix.initialize(
     basisMonomialsAll.size() * 2, basisMonomialsZeroWeight.size()
   );
-  Polynomial<Rational> tempP;
+  Polynomial<Rational> buffer;
   for (int l = 0; l < 2; l ++) {
     for (int k = 0; k < basisMonomialsZeroWeight.size(); k ++) {
       if (l == 0) {
         this->eElement.actOnMonomialAsDifferentialOperator(
-          basisMonomialsZeroWeight[k], tempP
+          basisMonomialsZeroWeight[k], buffer
         );
       } else {
         this->fElement.actOnMonomialAsDifferentialOperator(
-          basisMonomialsZeroWeight[k], tempP
+          basisMonomialsZeroWeight[k], buffer
         );
       }
       for (int j = 0; j < basisMonomialsAll.size(); j ++) {
-        int indexInResult = tempP.monomials.getIndex(basisMonomialsAll[j]);
+        int indexInResult = buffer.monomials.getIndex(basisMonomialsAll[j]);
         int currentRow = l * basisMonomialsAll.size() + j;
         if (indexInResult == - 1) {
           matrix.elements[currentRow][k] = 0;
         } else {
-          matrix.elements[currentRow][k] = tempP.coefficients[indexInResult];
+          matrix.elements[currentRow][k] = buffer.coefficients[indexInResult];
         }
       }
     }
@@ -12055,7 +12074,7 @@ bool Cone::isRegularToBasis(
   Selection wallSelection;
   wallSelection.initialize(basis.size);
   LargeInteger x = MathRoutines::nChooseK(basis.size, dimension - 1);
-  Matrix<Rational> bufferMat;
+  Matrix<Rational> bufferMatrix;
   Vector<Rational> candidate;
   Rational scalarProduct;
   for (int i = 0; i < x; i ++) {
@@ -12064,7 +12083,7 @@ bool Cone::isRegularToBasis(
     );
     if (
       basis.computeNormalFromSelection(
-        candidate, wallSelection, bufferMat, dimension
+        candidate, wallSelection, bufferMatrix, dimension
       )
     ) {
       candidate.scalarEuclidean(input, scalarProduct);
@@ -12741,7 +12760,8 @@ void ConeCollection::translateMeMyLastCoordinateAffinization(
     this->refinedCones.setKeyValue(currentCone.id, currentCone);
     this->convexHull.makeConvexHullOfMeAnd(currentCone);
   }
-  Vector<Rational> normalNoAffinePart, newNormal;
+  Vector<Rational> normalNoAffinePart;
+  Vector<Rational> newNormal;
   for (int j = 0; j < myCopy.splittingNormals.size; j ++) {
     normalNoAffinePart = myCopy.splittingNormals[j];
     newNormal = normalNoAffinePart;
@@ -12793,7 +12813,7 @@ void PiecewiseQuasipolynomial::drawMe(
   Vectors<Rational> latticePoints;
   HashedList<Vector<Rational> > latticePointsFinal;
   List<std::string> latticePointColors;
-  List<std::string> tempList;
+  List<std::string> colors;
   if (numberOfLatticePointsPerDimension < 0) {
     numberOfLatticePointsPerDimension = 0;
   }
@@ -12825,18 +12845,18 @@ void PiecewiseQuasipolynomial::drawMe(
         latticePoints,
         distinguishedPoint
       );
-      tempList.initializeFillInObject(latticePoints.size, chamberWallColor);
+      colors.initializeFillInObject(latticePoints.size, chamberWallColor);
       if (restrictingChamber != nullptr) {
         for (int k = 0; k < latticePoints.size; k ++) {
           root = latticePoints[k];
           root.makeAffineUsingLastCoordinate();
           if (!restrictingChamber->isInCone(root)) {
-            tempList[k] = zeroColor;
+            colors[k] = zeroColor;
           }
         }
       }
       latticePointsFinal.addListOnTop(latticePoints);
-      latticePointColors.addListOnTop(tempList);
+      latticePointColors.addListOnTop(colors);
     }
   }
   for (int i = 0; i < latticePointsFinal.size; i ++) {
@@ -13316,7 +13336,9 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1() {
       }
       this->conesLargerDimension.size --;
       this->lPtoMaximizeLargerDim.size --;
-      std::stringstream currentStream1, currentStream2, currentStream3;
+      std::stringstream currentStream1;
+      std::stringstream currentStream2;
+      std::stringstream currentStream3;
       currentStream1
       << "Processing "
       << this->numberOfProcessedNonParameters + 1
@@ -13358,7 +13380,7 @@ findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
   Rational firstCoord = preferredNormal[0];
   preferredNormal.shiftToTheLeftOnePosition();
   preferredNormal /= - firstCoord;
-  ConeLatticeAndShift tempCLS;
+  ConeLatticeAndShift currentConeLatticeShift;
   Vectors<Rational> newNormals = this->projectivizedCone.getAllNormals();
   Rational firstCoordNewNormal;
   for (int i = 0; i < newNormals.size; i ++) {
@@ -13366,17 +13388,19 @@ findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
     newNormals[i].shiftToTheLeftOnePosition();
     newNormals[i] += preferredNormal * firstCoordNewNormal;
   }
-  tempCLS.projectivizedCone.createFromNormals(
+  currentConeLatticeShift.projectivizedCone.createFromNormals(
     newNormals, this->projectivizedCone.getAllNeighbors()
   );
-  tempCLS.shift = this->shift;
-  tempCLS.shift.shiftToTheLeftOnePosition();
-  this->lattice.applyLinearMap(projectionLatticeLevel, tempCLS.lattice);
+  currentConeLatticeShift.shift = this->shift;
+  currentConeLatticeShift.shift.shiftToTheLeftOnePosition();
+  this->lattice.applyLinearMap(
+    projectionLatticeLevel, currentConeLatticeShift.lattice
+  );
   Vector<Rational> root;
   root = lpToMaximizeAffine.getshiftToTheLeftOnePositionition();
   root += preferredNormal * lpToMaximizeAffine[0];
-  if (!tempCLS.projectivizedCone.flagIsTheZeroCone) {
-    outputAppend.addOnTop(tempCLS);
+  if (!currentConeLatticeShift.projectivizedCone.flagIsTheZeroCone) {
+    outputAppend.addOnTop(currentConeLatticeShift);
     outputAppendLPToMaximizeAffine.addOnTop(root);
   }
 }
@@ -13449,14 +13473,17 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   Vector<Rational> extraEquation;
   Vector<Rational> exitNormalAffine;
   Vector<Rational> enteringNormalAffine;
-  Vector<Rational> exitNormalLatticeLevel, exitNormalShiftedAffineProjected;
-  Vector<Rational> directionSmallerDim, directionSmallerDimOnLattice;
+  Vector<Rational> exitNormalLatticeLevel;
+  Vector<Rational> exitNormalShiftedAffineProjected;
+  Vector<Rational> directionSmallerDimension;
+  Vector<Rational> directionSmallerDimensionOnLattice;
   Vector<Rational> shiftReduced = this->shift;
   this->lattice.reduceVector(shiftReduced);
-  Vectors<Rational> exitRepresentatives, exitWallsShifted;
+  Vectors<Rational> exitRepresentatives;
+  Vectors<Rational> exitWallsShifted;
   Lattice exitRougherLattice;
-  ConeLatticeAndShift tempCLS;
-  directionSmallerDim.makeEi(dimensionProjectivized - 1, 0);
+  ConeLatticeAndShift coneLatticeShift;
+  directionSmallerDimension.makeEi(dimensionProjectivized - 1, 0);
   List<Wall> newWalls;
   for (
     int i = 0; i < complexBeforeProjection.refinedCones.size(); i ++
@@ -13483,8 +13510,8 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
           !foundExitNormal
         ) {
           lattice.getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
-            directionSmallerDim,
-            directionSmallerDimOnLattice,
+            directionSmallerDimension,
+            directionSmallerDimensionOnLattice,
             shift,
             currentNormal,
             exitRepresentatives,
@@ -13502,7 +13529,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
       }
     }
     exitRougherLattice.applyLinearMap(
-      projectionLatticeLevel, tempCLS.lattice
+      projectionLatticeLevel, coneLatticeShift.lattice
     );
     for (int j = 0; j < exitRepresentatives.size; j ++) {
       exitRepresentatives[j] += shiftReduced;
@@ -13511,7 +13538,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
       (
         exitRepresentatives[j],
         exitNormalAffine,
-        directionSmallerDimOnLattice,
+        directionSmallerDimensionOnLattice,
         exitRepresentatives[j]
       );
     }
@@ -13531,7 +13558,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
       global.fatal << "New normals missing. " << global.fatal;
     }
     for (int j = 0; j < exitRepresentatives.size; j ++) {
-      tempCLS.projectivizedCone.walls = newWalls;
+      coneLatticeShift.projectivizedCone.walls = newWalls;
       exitNormalShiftedAffineProjected =
       exitNormalAffine.getshiftToTheLeftOnePositionition();
       *exitNormalShiftedAffineProjected.lastObject() =
@@ -13550,30 +13577,32 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
         << ", ";
         Wall extraWall;
         extraWall.normal = extraEquation;
-        tempCLS.projectivizedCone.walls.addOnTop(extraWall);
+        coneLatticeShift.projectivizedCone.walls.addOnTop(extraWall);
       }
       wall.normal = lpToMaximizeAffine.getshiftToTheLeftOnePositionition();
       wall.normal -= exitNormalShiftedAffineProjected * lpToMaximizeAffine[0] /
       exitNormalAffine[0];
       outputAppendLPToMaximizeAffine.addOnTop(wall.normal);
-      if (tempCLS.projectivizedCone.walls.size <= 0) {
+      if (coneLatticeShift.projectivizedCone.walls.size <= 0) {
         global.fatal << "Projectivized cone has no normals. " << global.fatal;
       }
-      Vectors<Rational> roots = tempCLS.projectivizedCone.getAllNormals();
-      tempCLS.projectivizedCone.createFromNormals(
-        roots, tempCLS.projectivizedCone.getAllNeighbors()
+      Vectors<Rational> roots =
+      coneLatticeShift.projectivizedCone.getAllNormals();
+      coneLatticeShift.projectivizedCone.createFromNormals(
+        roots, coneLatticeShift.projectivizedCone.getAllNeighbors()
       );
-      if (!tempCLS.projectivizedCone.flagIsTheZeroCone) {
+      if (!coneLatticeShift.projectivizedCone.flagIsTheZeroCone) {
         projectionLatticeLevel.actOnVectorColumn(
-          exitRepresentatives[j], tempCLS.shift
+          exitRepresentatives[j], coneLatticeShift.shift
         );
-        outputAppend.addOnTop(tempCLS);
-        if (tempCLS.getDimensionProjectivized() == 0) {
+        outputAppend.addOnTop(coneLatticeShift);
+        if (coneLatticeShift.getDimensionProjectivized() == 0) {
           report.report(roots.toString());
           while (true) {}
         }
         if (
-          tempCLS.getDimensionProjectivized() != dimensionProjectivized - 1
+          coneLatticeShift.getDimensionProjectivized() !=
+          dimensionProjectivized - 1
         ) {
           global.fatal
           << "Projectivized dimension not correct. "
@@ -14650,12 +14679,12 @@ void Cone::computeVerticesFromNormals() {
     matrix.gaussianEliminationByRows(nullptr, &nonPivotPoints);
     if (nonPivotPoints.cardinalitySelection == 1) {
       matrix.nonPivotPointsToEigenVectorHomogeneous(nonPivotPoints, root);
-      bool tempBool = this->isInCone(root);
-      if (!tempBool) {
+      bool belongsToCone = this->isInCone(root);
+      if (!belongsToCone) {
         root.negate();
-        tempBool = this->isInCone(root);
+        belongsToCone = this->isInCone(root);
       }
-      if (tempBool) {
+      if (belongsToCone) {
         Cone::scaleNormalizeByPositive(root);
         this->vertices.addOnTopNoRepetition(root);
       }
@@ -14714,8 +14743,9 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numberOfAddedFakeWalls) {
     }
   }
   Matrix<Rational> matrixX;
-  Selection tempSelX;
-  int desiredRank = this->vertices.getRankElementSpan(&matrixX, &tempSelX);
+  Selection currentSelectionX;
+  int desiredRank =
+  this->vertices.getRankElementSpan(&matrixX, &currentSelectionX);
   if (desiredRank > 1) {
     for (int i = 0; i < this->walls.size; i ++) {
       Vector<Rational>& currentNormal = this->walls[i].normal;
@@ -14726,7 +14756,8 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numberOfAddedFakeWalls) {
           currentNormal.scalarEuclidean(this->vertices[j]).isEqualToZero()
         ) {
           verticesOnWall.addOnTop(this->vertices[j]);
-          int rank = verticesOnWall.getRankElementSpan(&matrixX, &tempSelX);
+          int rank =
+          verticesOnWall.getRankElementSpan(&matrixX, &currentSelectionX);
           if (rank < verticesOnWall.size) {
             verticesOnWall.removeLastObject();
           } else {
@@ -15275,7 +15306,9 @@ std::string Cone::toHTML(
 std::string Cone::toStringPrecomputedVectorPartitionFunctionValues() const {
   std::stringstream out;
   out << "<br>Precomputed values, checked by enumeration: ";
-  for (Vector<Rational> input : this->payload.precomputedChecked.keys) {
+  for (
+    const Vector<Rational>& input : this->payload.precomputedChecked.keys
+  ) {
     out
     << "<br>"
     << input
@@ -15284,7 +15317,7 @@ std::string Cone::toStringPrecomputedVectorPartitionFunctionValues() const {
   }
   out << "<br>Precomputed values, too large to check: ";
   for (
-    Vector<Rational> input : this->payload.precomputedNonChecked.keys
+    const Vector<Rational>& input : this->payload.precomputedNonChecked.keys
   ) {
     out
     << "<br>"

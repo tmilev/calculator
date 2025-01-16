@@ -1471,7 +1471,7 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   while (this->incrementReturnFalseIfPastLast()) {
     this->checkAll();
     report.report(this->toStringProgressReport());
-    if (!this->flagRealizedAllCandidates) {
+    if (!this->flagHasPossibleSubalgebrasWeCouldntSolveFor) {
       this->comments =
       this->comments +
       "Failed to realize all candidates, aborting computation.";
@@ -2128,7 +2128,7 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
     );
   }
   this->rootInjectionsFromInducer = rootInjection;
-  // induction history is complete.
+  // Induction history is complete.
   if (
     this->owner->setUpParabolicInductionDataPrecomputedSubalgebra(*this)
   ) {
@@ -2166,6 +2166,7 @@ bool CandidateSemisimpleSubalgebra::createAndAddExtendBaseSubalgebra(
         " -> no system solution."
       );
     }
+    return false;
   }
   for (int i = 0; i < this->owner->subalgebras.values.size; i ++) {
     if (
@@ -2787,31 +2788,34 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
         << "the original summand I computed to be:<br> "
         << dynkinIndicesCurrentSummand.toStringCommaDelimited()
         << ". ";
-        this->comments += reportStream.str();
-        std::fstream logFile;
-        if (
-          !FileOperations::openFileCreateIfNotPresentVirtual(
-            logFile,
-            this->owner->fileNames.virtualFolderName() +
-            this->fileNameToLogComments,
-            true,
-            false,
-            false
-          )
-        ) {
-          global.fatal
-          << "Failed to open log file: "
-          << this->fileNameToLogComments
-          << ". This is not fatal but "
-          << "I am crashing to let you know. "
-          << global.fatal;
-        }
-        logFile << reportStream.str();
+        this->logComments(reportStream.str());
         return true;
       }
     }
   }
   return false;
+}
+
+void SemisimpleSubalgebras::logComments(const std::string& extraComments) {
+  this->comments += extraComments;
+  std::fstream logFile;
+  if (
+    !FileOperations::openFileCreateIfNotPresentVirtual(
+      logFile,
+      this->owner->fileNames.virtualFolderName() + this->fileNameToLogComments,
+      true,
+      false,
+      false
+    )
+  ) {
+    global.fatal
+    << "Failed to open log file: "
+    << this->fileNameToLogComments
+    << ". This is not fatal but "
+    << "I am crashing to let you know. "
+    << global.fatal;
+  }
+  logFile << extraComments;
 }
 
 bool CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed() {
@@ -2864,7 +2868,8 @@ centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
   if (newSummandType.size() != 1) {
     return false;
   }
-  HashedList<Rational> dynkinIndicesNewSummand, dynkinIndicesTheyGotToFitIn;
+  HashedList<Rational> dynkinIndicesNewSummand;
+  HashedList<Rational> dynkinIndicesTheyGotToFitIn;
   centralizerComplementNewSummandType.getDynkinIndicesSl2Subalgebras(
     this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
     this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
@@ -2879,23 +2884,6 @@ centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
   );
   if (dynkinIndicesTheyGotToFitIn.contains(dynkinIndicesNewSummand)) {
     return false;
-  }
-  std::fstream logFile;
-  if (
-    !FileOperations::openFileCreateIfNotPresentVirtual(
-      logFile,
-      this->owner->fileNames.virtualFolderName() + this->fileNameToLogComments,
-      true,
-      false,
-      false
-    )
-  ) {
-    global.fatal
-    << "Failed to open log file: "
-    << this->fileNameToLogComments
-    << ". This is not fatal but "
-    << " I am crashing to let you know. "
-    << global.fatal;
   }
   std::stringstream reportStream;
   reportStream
@@ -2924,7 +2912,7 @@ centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
   << "of the original summand I computed to be:<br> "
   << dynkinIndicesNewSummand.toStringCommaDelimited()
   << ". ";
-  logFile << reportStream.str();
+  this->logComments(reportStream.str());
   global.comments << reportStream.str();
   return true;
 }
@@ -3189,6 +3177,14 @@ std::string SemisimpleSubalgebras::toStringState(FormatExpressions* format) {
   out
   << "Subalgebras found so far: "
   << this->subalgebras.values.size
+  << "<br>Searching for nice centralizers: "
+  << this->flagAttemptToAdjustCentralizers
+  << "<br>Realizing Kostant-Sekiguchi triples: "
+  << this->flagRealForms
+  << "<br>Has possible subalgebras that we couldn't solve for: "
+  << this->flagHasPossibleSubalgebrasWeCouldntSolveFor
+  << "<br>Attempting to solve Serre relations: "
+  << this->flagAttemptToSolveSystems
   << "<br>Orbit sizes: ";
   for (int i = 0; i < this->orbits.size; i ++) {
     out
@@ -3274,7 +3270,7 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
     this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.size
   ) {
     global.fatal
-    << " The order of creation of the elements "
+    << "The order of creation of the elements "
     << "of the Cartan is missing in base subalgebra of type "
     << this->baseSubalgebra().weylNonEmbedded->dynkinType.toString()
     << ", and this order is needed to construct extensions. "
@@ -3315,16 +3311,16 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
       !newCandidate.flagSystemSolved &&
       !newCandidate.flagSystemProvedToHaveNoSolution
     ) {
-      this->flagRealizedAllCandidates = false;
+      this->flagHasPossibleSubalgebrasWeCouldntSolveFor = true;
       std::stringstream out;
       out
       << "<hr>Failed to realize type "
       << newCandidate.weylNonEmbedded->dynkinType.toString()
       << " because I couldn't handle the polynomial system. "
-      << "one poly system that governs the embedding follows.<br>"
+      << "One poly system that governs the embedding follows.<br>"
       << newCandidate.toStringSystemPart2()
       << "<hr>";
-      this->comments = out.str();
+      this->logComments(out.str());
       return true;
     }
   }
@@ -3782,14 +3778,16 @@ bool CandidateSemisimpleSubalgebra::computeSystem(
     for (int j = 0; j < this->getAmbientWeyl().rootSystem.size; j ++) {
       int indexCurrentGenerator =
       this->getAmbientSemisimpleLieAlgebra().getGeneratorFromRootIndex(j);
-      int opIndex =
+      int indexOfOppositeGenerator =
       this->getAmbientSemisimpleLieAlgebra().getGeneratorIndexFromRoot(
         - this->getAmbientWeyl().rootSystem[j]
       );
       currentGen.makeGenerator(
         *this->owner->owner, indexCurrentGenerator
       );
-      currentOpGen.makeGenerator(*this->owner->owner, opIndex);
+      currentOpGen.makeGenerator(
+        *this->owner->owner, indexOfOppositeGenerator
+      );
       if (
         this->isWeightSystemSpaceIndex(
           i, this->getAmbientWeyl().rootSystem[j]
@@ -3847,7 +3845,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
   bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
 ) {
   STACK_TRACE("CandidateSemisimpleSubalgebra::computeSystemPart2");
-  systemToSolve.setSize(0);
+  this->systemToSolve.setSize(0);
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
   lieBracketMinusGoalValue;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > goalValue;
@@ -3896,9 +3894,10 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
     this->unknownCartanCentralizerBasis.setSize(0);
   } else {
     int rankCentralizer = - 1;
-    bool tempB = this->centralizerRank.isSmallInteger(&rankCentralizer);
+    bool centralizerIsSmall =
+    this->centralizerRank.isSmallInteger(&rankCentralizer);
     if (
-      !tempB ||
+      !centralizerIsSmall ||
       rankCentralizer < 0 ||
       rankCentralizer > this->getAmbientWeyl().getDimension()
     ) {
@@ -3906,7 +3905,7 @@ bool CandidateSemisimpleSubalgebra::computeSystemPart2(
         return false;
       }
     }
-    if (!tempB) {
+    if (!centralizerIsSmall) {
       global.fatal
       << "Error: rankCentralizer is not a small integer. "
       << "Detailed subalgebra printout: "
@@ -6741,7 +6740,7 @@ void SemisimpleSubalgebras::resetPointers() {
   this->owner = nullptr;
   this->ownerField = nullptr;
   this->slTwoSubalgebras.owner = nullptr;
-  this->flagRealizedAllCandidates = true;
+  this->flagHasPossibleSubalgebrasWeCouldntSolveFor = false;
   this->flagAttemptToSolveSystems = true;
   this->flagComputeModuleDecomposition = true;
   this->flagComputePairingTable = false;
@@ -6757,6 +6756,7 @@ void SemisimpleSubalgebras::resetPointers() {
 }
 
 void SemisimpleSubalgebras::resetComputations() {
+  this->flagHasPossibleSubalgebrasWeCouldntSolveFor = false;
   this->subalgebrasNonDefaultCartanAndScale.clear();
   this->cachedDynkinIndicesSl2subalgebrasSimpleTypes.clear();
   this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras.clear();
@@ -6774,6 +6774,41 @@ void SemisimpleSubalgebras::resetComputations() {
   this->subalgebras.clear();
 }
 
+void CandidateSemisimpleSubalgebra::configurePolynomialSystem(
+  PolynomialSystem<AlgebraicNumber>& toBeConfigured
+) {
+  int maximumPolynomialDivisions = 300;
+  int maximumMonomialOperations = 20000;
+  std::string ambientLieAlgebraName =
+  this->owner->owner->toStringLieAlgebraName();
+  if (ambientLieAlgebraName == "C^{1}_5") {
+    // Known to run slow in this type.
+    maximumPolynomialDivisions = 100;
+    maximumMonomialOperations = 2000;
+  }
+  DynkinType& embeddedType = this->weylNonEmbedded->dynkinType;
+  if (embeddedType.getRank() == 1) {
+    maximumPolynomialDivisions = 300;
+    maximumMonomialOperations = 10000;
+    toBeConfigured.arbitrarySubstitutionsInOrder = List<Rational>({
+        Rational::oneStatic(),
+        Rational::zeroStatic()
+      }
+    );
+  }
+  std::string embeddingLieAlgebraName = embeddedType.toString();
+  if (embeddingLieAlgebraName == "A^{20}_1+A^{4}_1") {
+    // System known to be contradictory but takes extra computational time.
+    maximumPolynomialDivisions = 2000;
+    maximumMonomialOperations = 10000;
+  }
+  toBeConfigured.groebner.maximumMonomialOperations =
+  maximumMonomialOperations;
+  toBeConfigured.groebner.maximumPolynomialDivisions =
+  maximumPolynomialDivisions;
+  toBeConfigured.algebraicClosure = this->owner->ownerField;
+}
+
 bool CandidateSemisimpleSubalgebra::attemptToSolveSystem() {
   STACK_TRACE("CandidateSemisimpleSubalgebra::attemptToSolveSystem");
   this->checkFullInitialization();
@@ -6787,26 +6822,12 @@ bool CandidateSemisimpleSubalgebra::attemptToSolveSystem() {
   << this->owner->owner->toStringLieAlgebraName()
   << " I need to solve the following system."
   << this->toStringSystemPart2();
-  int maximumPolynomialDivisions = 300;
-  int maximumMonomialOperations = 200000;
-  if (
-    this->owner->owner->toStringLieAlgebraName() == "C^{1}_5" ||
-    this->owner->owner->toStringLieAlgebraName() == "C_5"
-  ) {
-    reportstream
-    << "<hr>This algorithm is known to run very slow for C_5. "
-    << "Reducing the computation limits. ";
-    maximumPolynomialDivisions = 100;
-    maximumMonomialOperations = 2000;
-  }
   report.report(reportstream.str());
   PolynomialSystem<AlgebraicNumber> system;
+  this->configurePolynomialSystem(system);
   system.groebner.polynomialOrder.monomialOrder.setComparison(
     MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
   );
-  system.groebner.maximumMonomialOperations = maximumMonomialOperations;
-  system.groebner.maximumPolynomialDivisions = maximumPolynomialDivisions;
-  system.algebraicClosure = this->owner->ownerField;
   system.solveSerreLikeSystem(this->transformedSystem);
   this->flagSystemSolved = system.flagSystemSolvedOverBaseField;
   this->flagSystemProvedToHaveNoSolution =

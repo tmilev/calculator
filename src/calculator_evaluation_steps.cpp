@@ -12,7 +12,10 @@ HashedList<std::string> Calculator::ExpressionHistoryEnumerator::
 ruleIgnoreListHashList;
 
 void Calculator::ExpressionHistoryEnumerator::initializeComputation() {
-  STACK_TRACE("ExpressionHistoryEnumerator::initializeComputation");
+  STACK_TRACE(
+    "Calculator::"
+    "ExpressionHistoryEnumerator::initializeComputation"
+  );
   this->output.setSize(0);
   this->rulesNames.setSize(0);
 }

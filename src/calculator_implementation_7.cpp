@@ -1312,19 +1312,19 @@ bool CalculatorFunctions::solveSerreLikeSystem(
   if (useUpperLimit) {
     FormatExpressions format = context.getFormat();
     for (int i = 0; i < 2; i ++) {
-      Rational upperLimitRat;
-      if (!polynomialsRational[0].isConstant(&upperLimitRat)) {
+      Rational upperLimitRational;
+      if (!polynomialsRational[0].isConstant(&upperLimitRational)) {
         return
         calculator
         << "Failed to extract a constant from the first argument "
         << polynomialsRational[0].toString(&format)
         << ". ";
       }
-      if (!upperLimitRat.isIntegerFittingInInt(&upperLimits[i])) {
+      if (!upperLimitRational.isIntegerFittingInInt(&upperLimits[i])) {
         return
         calculator
         << "Failed to extract a small integer from the first argument "
-        << upperLimitRat.toString(&format)
+        << upperLimitRational.toString(&format)
         << ". ";
       }
       polynomialsRational.popIndexShiftDown(0);

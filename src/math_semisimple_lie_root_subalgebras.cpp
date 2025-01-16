@@ -3393,7 +3393,9 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
     }
   }
   this->initializeHEFSystemFromFCoefficients(h, cartanInvolutionToRespect);
-  Matrix<Rational> matrix, adjoinedColumn, result;
+  Matrix<Rational> matrix;
+  Matrix<Rational> adjoinedColumn;
+  Matrix<Rational> result;
   matrix = this->systemArbitraryMatrix;
   adjoinedColumn = this->systemArbitraryColumnVector;
   this->fElement.makeZero();
@@ -3437,7 +3439,8 @@ bool SlTwoSubalgebra::attemptRealizingKostantSekiguchi() {
   for (int i = 0; i < solution.size; i ++) {
     solution[i].makeConstant(computation.systemSolution[i]);
   }
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eSolved, fSolved;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eSolved;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > fSolved;
   eSolved = this->eKostantSekiguchiUnknown;
   fSolved = this->fKostantSekiguchiUnknown;
   eSolved.substituteInCoefficients(solution);

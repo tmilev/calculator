@@ -419,6 +419,9 @@ public:
   );
   bool computeCharacter(bool allowBadCharacter);
   bool attemptToSolveSystem();
+  void configurePolynomialSystem(
+    PolynomialSystem<AlgebraicNumber>& toBeConfigured
+  );
   bool verifySolution(PolynomialSystem<AlgebraicNumber>& system);
   bool isGoodHNewActingByTwo(
     const Vector<Rational>& hNewActingByTwo,
@@ -505,7 +508,7 @@ public:
   // All found subalgebras are here.
   // The keys are their embedded symmetric Cartan matrices.
   MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> subalgebras;
-  bool flagRealizedAllCandidates;
+  bool flagHasPossibleSubalgebrasWeCouldntSolveFor;
   bool flagAttemptToSolveSystems;
   // This flag determines whether our computation is over
   // the real forms of the Lie algebra.
@@ -620,6 +623,7 @@ public:
   bool getCentralizerTypeIfComputableAndKnown(
     const DynkinType& input, DynkinType& output
   );
+  void logComments(const std::string& extraComments);
   bool combinatorialCriteriaAllowRealization();
   bool centralizersComputedToHaveUnsuitableNilpotentOrbits();
   bool centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits();

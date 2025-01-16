@@ -3936,8 +3936,6 @@ public:
   );
   GroebnerBasisComputation();
   int minimalNumberOfVariables() const;
-  std::string toStringLetterOrder() const;
-  std::string toStringPolynomialBasisStatus();
   static int getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
     int variableIndex, List<Polynomial<Coefficient> >& input
   );
@@ -3959,10 +3957,14 @@ public:
     int index,
     ProgressReport* report
   );
-  std::string toStringDivision(Polynomial<Coefficient>& toBeDivided);
-  std::string toStringStatusGroebnerBasisTransformation();
   void checkConsistency();
   void initializeForGroebnerComputation();
+  std::string toStringLetterOrder() const;
+  std::string toStringPolynomialBasisStatusLong();
+  std::string toStringPolynomialBasisStatusShort();
+  std::string toStringLimits() const;
+  std::string toStringDivision(Polynomial<Coefficient>& toBeDivided);
+  std::string toStringStatusGroebnerBasisTransformation();
 };
 
 template <class Coefficient>
@@ -3985,6 +3987,7 @@ public:
   List<Coefficient> systemSolution;
   Selection solutionsFound;
   List<PolynomialSubstitution<Coefficient> > impliedSubstitutions;
+  List<Rational> arbitrarySubstitutionsInOrder;
   PolynomialSystem();
   void solveSerreLikeSystem(List<Polynomial<Coefficient> >& inputSystem);
   std::string toStringCalculatorInputFromSystem(

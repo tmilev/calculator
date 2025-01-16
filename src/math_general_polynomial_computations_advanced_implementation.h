@@ -182,9 +182,7 @@ bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasis(
 }
 
 template <class Coefficient>
-std::string GroebnerBasisComputation<Coefficient>::
-toStringPolynomialBasisStatus() {
-  STACK_TRACE("GroebnerBasisComputation::toStringPolynomialBasisStatus");
+std::string GroebnerBasisComputation<Coefficient>::toStringLimits() const {
   std::stringstream out;
   out
   << "There are "
@@ -203,7 +201,23 @@ toStringPolynomialBasisStatus() {
   << this->numberMonomialOperations
   << ", limit: "
   << this->maximumMonomialOperations
-  << ". ";
+  << ". "
+  << "<br>Basis size: "
+  << this->basisCandidates.size;
+  return out.str();
+}
+
+template <class Coefficient>
+std::string GroebnerBasisComputation<Coefficient>::
+toStringPolynomialBasisStatusLong() {
+  return this->toStringLimits() + this->toStringPolynomialBasisStatusShort();
+}
+
+template <class Coefficient>
+std::string GroebnerBasisComputation<Coefficient>::
+toStringPolynomialBasisStatusShort() {
+  STACK_TRACE("GroebnerBasisComputation::toStringPolynomialBasisStatusShort");
+  std::stringstream out;
   out << "The basis follows.";
   for (int i = 0; i < this->basis.size; i ++) {
     out << "<br>" << this->basis[i].toString(&this->format);
@@ -259,11 +273,15 @@ bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
 template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::addAndReducePolynomials() {
   STACK_TRACE("GroebnerBasisComputation::addAndReducePolynomials");
+  ProgressReport reportLimits(5, "Report limits");
   ProgressReport report(1, "Add polynomial");
   this->flagFoundNewBasisElements = false;
   while (this->basisCandidates.size > 0) {
+    if (reportLimits.tickAndWantReport()) {
+      reportLimits.report(this->toStringLimits());
+    }
     if (this->flagDoProgressReport) {
-      report.report(this->toStringPolynomialBasisStatus());
+      report.report(this->toStringPolynomialBasisStatusShort());
     }
     if (!this->addAndReduceOnePolynomial()) {
       return false;
@@ -587,6 +605,11 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->flagSystemProvenToHaveSolution = false;
   this->flagSystemSolvedOverBaseField = false;
   this->flagUsingAlgebraicClosure = false;
+  this->arbitrarySubstitutionsInOrder = List<Rational>({
+      Rational::zeroStatic(),
+      Rational::oneStatic()
+    }
+  );
 }
 
 template <class Coefficient>
@@ -1099,6 +1122,8 @@ void PolynomialSystem<Coefficient>::setUpRecursiveComputation(
   this->groebner.maximumPolynomialDivisions;
   toBeModified.groebner.format = this->groebner.format;
   toBeModified.groebner.polynomialOrder = this->groebner.polynomialOrder;
+  toBeModified.arbitrarySubstitutionsInOrder =
+  this->arbitrarySubstitutionsInOrder;
 }
 
 template <class Coefficient>
@@ -1132,7 +1157,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   List<Polynomial<Coefficient> >& inputSystem,
   const Rational& aValueToTryOnPreferredVariable
 ) {
-  STACK_TRACE("GroebnerBasisComputation::trySettingValueToVariable");
+  STACK_TRACE("PolynomialSystem::trySettingValueToVariable");
   ProgressReport report1;
   PolynomialSystem<Coefficient>& heuristicAttempt =
   this->computationUsedInRecursiveCalls.getElement();
@@ -1149,7 +1174,9 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   }
   PolynomialSubstitution<Coefficient> substitution;
   substitution.makeIdentitySubstitution(this->systemSolution.size);
-  substitution[variableIndex] = aValueToTryOnPreferredVariable;
+  Coefficient converter;
+  converter = aValueToTryOnPreferredVariable;
+  substitution[variableIndex] = converter;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream out;
     MonomialPolynomial monomial(variableIndex);
@@ -1260,7 +1287,9 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
 ) {
   STACK_TRACE("PolynomialSystem::solveSerreLikeSystemRecursively");
   RecursionDepthCounter counter(&this->recursionCounterSerreLikeSystem);
-  ProgressReport report1, report2, report3;
+  ProgressReport report1;
+  ProgressReport report2;
+  ProgressReport report3;
   List<Polynomial<Coefficient> > startingSystemNoModifications = inputSystem;
   this->numberOfVariablesToSolveForStart =
   this->getNumberOfVariablesToSolveFor(inputSystem);
@@ -1313,8 +1342,10 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     }
   }
   std::stringstream reportStreamHeuristics;
-  for (int randomValueItry = 0; randomValueItry < 2; randomValueItry ++) {
-    this->trySettingValueToVariable(inputSystem, randomValueItry);
+  for (
+    const Rational& arbitrarySubstitution : this->arbitrarySubstitutionsInOrder
+  ) {
+    this->trySettingValueToVariable(inputSystem, arbitrarySubstitution);
     if (this->flagSystemSolvedOverBaseField) {
       return;
     }
@@ -1327,7 +1358,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
       << "<br>The substitution  "
       << monomial.toString(&this->groebner.format)
       << "="
-      << randomValueItry
+      << arbitrarySubstitution
       << ";"
       << " did not produce a solution over the base field ";
       if (
@@ -1464,7 +1495,8 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
         << "Function solveSerreLikeSystem reports to "
         << "have found a solution over the base field, "
         << "but substituting the solution back to the original "
-        << "system does not yield a zero system of equations. More precisely, "
+        << "system does not yield a zero system of equations. "
+        << "More precisely, "
         << "the reported solution was "
         << this->toStringSerreLikeSolution()
         << " but substitution in equation "
@@ -1482,7 +1514,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
 
 template <class Coefficient>
 std::string PolynomialSystem<Coefficient>::toStringSerreLikeSolution() {
-  STACK_TRACE("GroebnerBasisComputation::toStringSerreLikeSolution");
+  STACK_TRACE("PolynomialSystem::toStringSerreLikeSolution");
   std::stringstream out;
   Polynomial<Rational> monomial;
   for (int i = 0; i < this->systemSolution.size; i ++) {
@@ -1572,25 +1604,26 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
       left, right, output, commentsOnFailure
     );
   }
-  Polynomial<Coefficient> leftTemp, rightTemp;
-  leftTemp = left;
-  rightTemp = right;
+  Polynomial<Coefficient> leftBuffer;
+  Polynomial<Coefficient> rightBuffer;
+  leftBuffer = left;
+  rightBuffer = right;
   Polynomial<Coefficient> oneMinusT;
   List<Polynomial<Coefficient> > basis;
-  leftTemp.scaleNormalizeLeadingMonomial(
+  leftBuffer.scaleNormalizeLeadingMonomial(
     &MonomialPolynomial::orderDefault()
   );
-  rightTemp.scaleNormalizeLeadingMonomial(
+  rightBuffer.scaleNormalizeLeadingMonomial(
     &MonomialPolynomial::orderDefault()
   );
   oneMinusT.makeMonomial(numberOfVariables, 1, one);
-  leftTemp *= oneMinusT;
+  leftBuffer *= oneMinusT;
   oneMinusT *= - 1;
   oneMinusT += one;
-  rightTemp *= oneMinusT;
+  rightBuffer *= oneMinusT;
   basis.setSize(0);
-  basis.addOnTop(leftTemp);
-  basis.addOnTop(rightTemp);
+  basis.addOnTop(leftBuffer);
+  basis.addOnTop(rightBuffer);
   GroebnerBasisComputation<Coefficient> computation;
   computation.format.flagSuppressModP = true;
   computation.format.polynomialAlphabet.addOnTop("x");
@@ -2800,7 +2833,7 @@ getSpacedMonomialsWithHighlightLaTeX(
   (void) slidesToUncoverAllMons;
   std::stringstream out;
   bool found = false;
-  int countMons = 0;
+  int countMonomials = 0;
   if (polynomial.isEqualToZero()) {
     if (useColumnSeparator) {
       for (int i = 0; i < this->allMonomials.size * 2 - 1; i ++) {
@@ -2811,21 +2844,21 @@ getSpacedMonomialsWithHighlightLaTeX(
     std::stringstream highlightTailStream;
     MonomialPolynomial monomial;
     monomial.makeOne();
-    int monIndex = this->allMonomials.getIndex(monomial);
-    if (slidesAdditionalHighlight != nullptr && monIndex != - 1) {
-      if ((*slidesAdditionalHighlight)[monIndex] > 0) {
+    int monomialIndex = this->allMonomials.getIndex(monomial);
+    if (slidesAdditionalHighlight != nullptr && monomialIndex != - 1) {
+      if ((*slidesAdditionalHighlight)[monomialIndex] > 0) {
         highlightHeadStream
         << "{ \\only<"
-        << (*slidesAdditionalHighlight)[monIndex]
+        << (*slidesAdditionalHighlight)[monomialIndex]
         << "->{\\color{orange}}";
         highlightTailStream << "}";
       }
     }
-    if (slidesToFcAnswer != nullptr && monIndex != - 1) {
-      if ((*slidesToFcAnswer)[monIndex] > 1) {
+    if (slidesToFcAnswer != nullptr && monomialIndex != - 1) {
+      if ((*slidesToFcAnswer)[monomialIndex] > 1) {
         highlightHeadStream
         << "\\fcAnswer{"
-        << (*slidesToFcAnswer)[monIndex]
+        << (*slidesToFcAnswer)[monomialIndex]
         << "}{";
         highlightTailStream << "}";
       }
@@ -2888,16 +2921,16 @@ getSpacedMonomialsWithHighlightLaTeX(
         highlightTail = "}" + highlightTail;
       }
     }
-    countMons ++;
-    std::string monWithSign =
+    countMonomials ++;
+    std::string monomialWithSign =
     Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
       polynomial[index],
       polynomial.coefficients[index],
       true,
       &this->owner->format
     );
-    std::string sign = monWithSign.substr(0, 1);
-    std::string monNoSign = monWithSign.substr(1);
+    std::string sign = monomialWithSign.substr(0, 1);
+    std::string monomialNoSign = monomialWithSign.substr(1);
     if (sign == "-" || found) {
       if (fcAnswerSlide != - 1) {
         out << "\\uncover<" << fcAnswerSlide << "->{";
@@ -2918,7 +2951,7 @@ getSpacedMonomialsWithHighlightLaTeX(
     if (fcAnswerSlide != - 1) {
       out << "\\fcAnswer{" << fcAnswerSlide << "}{";
     }
-    out << highlightHead << "$" << monNoSign << "$" << highlightTail;
+    out << highlightHead << "$" << monomialNoSign << "$" << highlightTail;
     if (fcAnswerSlide != - 1) {
       out << "}";
     }
@@ -2931,7 +2964,7 @@ getSpacedMonomialsWithHighlightLaTeX(
       }
     }
   }
-  if (countMons != polynomial.size()) {
+  if (countMonomials != polynomial.size()) {
     out << " Programming ERROR!";
   }
   return out.str();
@@ -2972,13 +3005,14 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     this->uncoverMonsFinalRemainder[monomialIndex] = currentSlideNumber;
     currentSlideNumber ++;
   }
-  MonomialPolynomial constMon;
-  constMon.makeOne();
-  int zeroMonIndex = this->allMonomials.getIndex(constMon);
+  MonomialPolynomial constMonomial;
+  constMonomial.makeOne();
+  int zeroMonomialIndex = this->allMonomials.getIndex(constMonomial);
   if (this->intermediateRemainders[remainderIndex].isEqualToZero()) {
-    this->additionalHighlightRemainders[remainderIndex][zeroMonIndex] =
+    this->additionalHighlightRemainders[remainderIndex][zeroMonomialIndex] =
     currentSlideNumber;
-    this->additionalHighlightFinalRemainder[zeroMonIndex] = currentSlideNumber;
+    this->additionalHighlightFinalRemainder[zeroMonomialIndex] =
+    currentSlideNumber;
     currentSlideNumber ++;
   }
   if (remainderIndex == this->intermediateRemainders.size - 1) {
@@ -2999,7 +3033,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   int indexCurrentDivisor = this->intermediateSelectedDivisors[remainderIndex];
   Polynomial<Coefficient>& currentDivisor = basis[indexCurrentDivisor].element;
   MonomialPolynomial divisorLeadingMonomial;
-  int indexCurrentDivisorLeadingMoN =
+  int indexCurrentDivisorLeadingMonomial =
   currentDivisor.getIndexLeadingMonomial(
     &divisorLeadingMonomial,
     nullptr,
@@ -3051,8 +3085,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << "}{"
   << "$"
   << currentRemainder.getBlendCoefficientAndMonomial(
-    currentDivisor.monomials[indexCurrentDivisorLeadingMoN],
-    currentDivisor.coefficients[indexCurrentDivisorLeadingMoN],
+    currentDivisor.monomials[indexCurrentDivisorLeadingMonomial],
+    currentDivisor.coefficients[indexCurrentDivisorLeadingMonomial],
     false,
     &format
   )
@@ -3066,23 +3100,23 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   this->highlightMonsRemainders[remainderIndex][
     indexCurrentRemainderLeadingMonInAllMons
   ].addOnTop(currentSlideNumber);
-  int indexCurrentQuotientMonInAllMons =
+  int indexCurrentQuotientMonomialInAllMonomials =
   this->allMonomials.getIndex(
     this->intermediateHighestMonDivHighestMon[remainderIndex]
   );
   Polynomial<Coefficient>& currentQuotient =
   this->owner->quotients[indexCurrentDivisor];
-  int indexCurrentQuotientMoN =
+  int indexCurrentQuotientMonomial =
   currentQuotient.monomials.getIndex(
     this->intermediateHighestMonDivHighestMon[remainderIndex]
   );
   this->fcAnswerMonsQuotients[indexCurrentDivisor][
-    indexCurrentQuotientMonInAllMons
+    indexCurrentQuotientMonomialInAllMonomials
   ] =
   currentSlideNumber;
   currentSlideNumber ++;
   this->highlightMonsQuotients[indexCurrentDivisor][
-    indexCurrentQuotientMonInAllMons
+    indexCurrentQuotientMonomialInAllMonomials
   ].addOnTop(currentSlideNumber);
   for (int i = 0; i < currentDivisor.size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
@@ -3102,8 +3136,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << currentSlideNumber + 1
   << "}{$"
   << currentQuotient.getBlendCoefficientAndMonomial(
-    currentQuotient.monomials[indexCurrentQuotientMoN],
-    currentQuotient.coefficients[indexCurrentQuotientMoN],
+    currentQuotient.monomials[indexCurrentQuotientMonomial],
+    currentQuotient.coefficients[indexCurrentQuotientMonomial],
     false,
     &format
   )
@@ -3112,7 +3146,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << "}";
   currentSlideNumber ++;
   this->highlightMonsQuotients[indexCurrentDivisor][
-    indexCurrentQuotientMonInAllMons
+    indexCurrentQuotientMonomialInAllMonomials
   ].addOnTop(currentSlideNumber);
   for (int i = 0; i < currentDivisor.size(); i ++) {
     this->highlightMonsDivisors[indexCurrentDivisor][
@@ -3199,7 +3233,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     currentSlideNumber;
   }
   if (this->intermediateRemainders[remainderIndex + 1].isEqualToZero()) {
-    this->fcAnswerMonsRemainders[remainderIndex + 1][zeroMonIndex] =
+    this->fcAnswerMonsRemainders[remainderIndex + 1][zeroMonomialIndex] =
     currentSlideNumber;
   }
   currentSlideNumber ++;

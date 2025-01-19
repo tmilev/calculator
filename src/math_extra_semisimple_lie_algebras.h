@@ -1715,7 +1715,8 @@ Coefficient SemisimpleLieAlgebra::getKillingForm(
 ) {
   STACK_TRACE("SemisimpleLieAlgebra::getKillingForm");
   Coefficient result = 0;
-  ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMonomial, element;
+  ElementSemisimpleLieAlgebra<Coefficient> adadAppliedToMonomial;
+  ElementSemisimpleLieAlgebra<Coefficient> element;
   ChevalleyGenerator baseGenerator;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     baseGenerator.makeGenerator(*this, i);

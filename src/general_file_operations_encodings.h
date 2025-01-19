@@ -232,7 +232,7 @@ public:
   static bool openFileVirtual(
     std::fstream& file,
     const std::string& fileName,
-    bool OpenInAppendMode,
+    bool openInAppendMode,
     bool truncate,
     bool openAsBinary,
     bool accessSensitiveFolders = false
@@ -240,7 +240,7 @@ public:
   static bool openFileVirtualCustomizedReadOnly(
     std::fstream& file,
     const std::string& fileName,
-    bool OpenInAppendMode,
+    bool openInAppendMode,
     bool truncate,
     bool openAsBinary,
     std::stringstream* commentsOnFailure

@@ -488,7 +488,7 @@ public:
   public:
     std::stringstream crashReport;
     std::stringstream crashReportHtml;
-    std::stringstream crashReportConsolE;
+    std::stringstream crashReportConsole;
     std::stringstream crashReportFile;
     bool flagCrashInitiated;
     // <-we crash only once, and we do not resume execution after a crash

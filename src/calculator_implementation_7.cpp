@@ -8746,7 +8746,7 @@ bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(
   << smallSubalgebraPointer.content->weylGroup.dynkinType.toString()
   << " in "
   << semisimpleLieAlgebra.toStringLieAlgebraName();
-  semisimpleSubalgebras.findTheSemisimpleSubalgebrasFromScratch(
+  semisimpleSubalgebras.findSemisimpleSubalgebrasFromScratch(
     semisimpleLieAlgebra,
     calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,

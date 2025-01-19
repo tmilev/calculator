@@ -20,21 +20,25 @@ addElementZModPOrRationalToElementZModPOrRational(
   if (input.size() != 3) {
     return false;
   }
-  const Expression* leftE;
-  const Expression* rightE;
-  leftE = &input[1];
-  rightE = &input[2];
+  const Expression* leftExpression;
+  const Expression* rightExpression;
+  leftExpression = &input[1];
+  rightExpression = &input[2];
   ElementZmodP element1;
   ElementZmodP element2;
-  for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
-    if (leftE->isOfType<ElementZmodP>(&element1)) {
-      if (rightE->isOfType<ElementZmodP>(&element2)) {
+  for (
+    int i = 0; i < 2;
+    i ++,
+    MathRoutines::swap(leftExpression, rightExpression)
+  ) {
+    if (leftExpression->isOfType<ElementZmodP>(&element1)) {
+      if (rightExpression->isOfType<ElementZmodP>(&element2)) {
         if (element1.modulus != element2.modulus) {
           return false;
         }
       } else {
         Rational rationalValue;
-        if (!rightE->isOfType<Rational>(&rationalValue)) {
+        if (!rightExpression->isOfType<Rational>(&rationalValue)) {
           return false;
         }
         element2.modulus = element1.modulus;
@@ -62,21 +66,25 @@ multiplyElementZmodPorRationalByElementZmodPorRational(
   if (!input.isListNElements(3)) {
     return false;
   }
-  const Expression* leftE;
-  const Expression* rightE;
-  leftE = &input[1];
-  rightE = &input[2];
+  const Expression* leftExpression;
+  const Expression* rightExpression;
+  leftExpression = &input[1];
+  rightExpression = &input[2];
   ElementZmodP element1;
   ElementZmodP element2;
-  for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
-    if (leftE->isOfType<ElementZmodP>(&element1)) {
-      if (rightE->isOfType<ElementZmodP>(&element2)) {
+  for (
+    int i = 0; i < 2;
+    i ++,
+    MathRoutines::swap(leftExpression, rightExpression)
+  ) {
+    if (leftExpression->isOfType<ElementZmodP>(&element1)) {
+      if (rightExpression->isOfType<ElementZmodP>(&element2)) {
         if (element1.modulus != element2.modulus) {
           return false;
         }
       } else {
         Rational rationalValue;
-        if (!rightE->isOfType<Rational>(&rationalValue)) {
+        if (!rightExpression->isOfType<Rational>(&rationalValue)) {
           return false;
         }
         element2.modulus = element1.modulus;
@@ -103,21 +111,25 @@ divideElementZmodPorRationalByElementZmodPorRational(
   if (!input.isListNElements(3)) {
     return false;
   }
-  const Expression* leftE;
-  const Expression* rightE;
-  leftE = &input[1];
-  rightE = &input[2];
+  const Expression* leftExpression;
+  const Expression* rightExpression;
+  leftExpression = &input[1];
+  rightExpression = &input[2];
   ElementZmodP element1;
   ElementZmodP element2;
-  for (int i = 0; i < 2; i ++, MathRoutines::swap(leftE, rightE)) {
-    if (leftE->isOfType<ElementZmodP>(&element1)) {
-      if (rightE->isOfType<ElementZmodP>(&element2)) {
+  for (
+    int i = 0; i < 2;
+    i ++,
+    MathRoutines::swap(leftExpression, rightExpression)
+  ) {
+    if (leftExpression->isOfType<ElementZmodP>(&element1)) {
+      if (rightExpression->isOfType<ElementZmodP>(&element2)) {
         if (element1.modulus != element2.modulus) {
           return false;
         }
       } else {
         Rational rationalValue;
-        if (!rightE->isOfType<Rational>(&rationalValue)) {
+        if (!rightExpression->isOfType<Rational>(&rationalValue)) {
           return false;
         }
         element2.modulus = element1.modulus;
@@ -152,13 +164,14 @@ bool CalculatorFunctionsBinaryOps::addRationalToRational(
   if (input.size() != 3) {
     return false;
   }
-  Rational leftR, rightR;
+  Rational leftRational;
+  Rational rightRational;
   if (
-    !input[1].isOfType(&leftR) || !input[2].isOfType(&rightR)
+    !input[1].isOfType(&leftRational) || !input[2].isOfType(&rightRational)
   ) {
     return false;
   }
-  return output.assignValue(calculator, leftR + rightR);
+  return output.assignValue(calculator, leftRational + rightRational);
 }
 
 bool CalculatorFunctionsBinaryOps::addStringToString(
@@ -189,32 +202,32 @@ divideAlgebraicNumberOrRationalByAlgebraicNumberOrRational(
   if (!input.isListNElements(3)) {
     return false;
   }
-  AlgebraicNumber leftAN;
-  AlgebraicNumber rightAN;
+  AlgebraicNumber leftAlgebraicNumber;
+  AlgebraicNumber rightAlgebraicNumber;
   Rational rationalValue;
-  if (!input[1].isOfType(&leftAN)) {
-    if (!input[2].isOfType(&rightAN)) {
+  if (!input[1].isOfType(&leftAlgebraicNumber)) {
+    if (!input[2].isOfType(&rightAlgebraicNumber)) {
       return false;
     }
     if (!input[1].isOfType<Rational>(&rationalValue)) {
       return false;
     }
-    leftAN.assignRational(
+    leftAlgebraicNumber.assignRational(
       rationalValue, &calculator.objectContainer.algebraicClosure
     );
-  } else if (!input[2].isOfType(&rightAN)) {
+  } else if (!input[2].isOfType(&rightAlgebraicNumber)) {
     if (!input[2].isOfType(&rationalValue)) {
       return false;
     }
-    rightAN.assignRational(
+    rightAlgebraicNumber.assignRational(
       rationalValue, &calculator.objectContainer.algebraicClosure
     );
   }
-  if (rightAN.isEqualToZero()) {
+  if (rightAlgebraicNumber.isEqualToZero()) {
     return output.assignError(calculator, "Division by zero. ");
   }
-  leftAN /= rightAN;
-  output.assignValue(calculator, leftAN);
+  leftAlgebraicNumber /= rightAlgebraicNumber;
+  output.assignValue(calculator, leftAlgebraicNumber);
   output.checkInitializationRecursively();
   return true;
 }
@@ -321,7 +334,8 @@ bool CalculatorFunctionsBinaryOps::multiplyRationalByRational(
   if (!input.isListNElements(3)) {
     return false;
   }
-  Rational leftR, rightR;
+  Rational leftR;
+  Rational rightR;
   if (
     !input[1].isOfType(&leftR) || !input[2].isOfType(&rightR)
   ) {
@@ -385,7 +399,8 @@ bool CalculatorFunctionsBinaryOps::divideRationalByRational(
   if (!input.isListNElements(3)) {
     return false;
   }
-  Rational leftR, rightR;
+  Rational leftR;
+  Rational rightR;
   if (
     !input[1].isOfType(&leftR) || !input[2].isOfType(&rightR)
   ) {
@@ -404,8 +419,10 @@ bool CalculatorFunctionsBinaryOps::divideDoubleByDouble(
   if (!input.isListNElements(3)) {
     return false;
   }
-  double leftD, rightD;
-  Rational leftR, rightR;
+  double leftD;
+  double rightD;
+  Rational leftR;
+  Rational rightR;
   if (!input[1].isOfType(&leftD)) {
     if (!input[1].isOfType(&leftR)) {
       return false;
@@ -850,13 +867,13 @@ multiplyNumberOrPolynomialByNumberOrPolynomial(
   if (input.size() < 3) {
     return false;
   }
-  const Expression leftE = input[1];
-  const Expression rightE = input[2];
+  const Expression leftExpression = input[1];
+  const Expression rightExpression = input[2];
   if (
-    leftE.isOfType<AlgebraicNumber>() ||
-    leftE.isOfType<Polynomial<AlgebraicNumber> >() ||
-    rightE.isOfType<AlgebraicNumber>() ||
-    rightE.isOfType<Polynomial<AlgebraicNumber> >()
+    leftExpression.isOfType<AlgebraicNumber>() ||
+    leftExpression.isOfType<Polynomial<AlgebraicNumber> >() ||
+    rightExpression.isOfType<AlgebraicNumber>() ||
+    rightExpression.isOfType<Polynomial<AlgebraicNumber> >()
   ) {
     return
     CalculatorFunctionsBinaryOps::multiplyTypeByType<
@@ -1023,13 +1040,13 @@ bool CalculatorFunctionsBinaryOps::addNumberOrPolynomialToNumberOrPolynomial(
   if (input.size() < 3) {
     return false;
   }
-  const Expression leftE = input[1];
-  const Expression rightE = input[2];
+  const Expression leftExpression = input[1];
+  const Expression rightExpression = input[2];
   if (
-    leftE.isOfType<AlgebraicNumber>() ||
-    leftE.isOfType<Polynomial<AlgebraicNumber> >() ||
-    rightE.isOfType<AlgebraicNumber>() ||
-    rightE.isOfType<Polynomial<AlgebraicNumber> >()
+    leftExpression.isOfType<AlgebraicNumber>() ||
+    leftExpression.isOfType<Polynomial<AlgebraicNumber> >() ||
+    rightExpression.isOfType<AlgebraicNumber>() ||
+    rightExpression.isOfType<Polynomial<AlgebraicNumber> >()
   ) {
     return
     CalculatorFunctionsBinaryOps::addTypeToType<Polynomial<AlgebraicNumber> >(
@@ -2686,7 +2703,8 @@ bool CalculatorFunctionsBinaryOps::makeMatrixProduct(
     return output.assignError(calculator, out.str());
   }
   outputMatrix.initialize(left.numberOfRows, right.numberOfColumns);
-  Expression leftSummand, rightSummand;
+  Expression leftSummand;
+  Expression rightSummand;
   for (int i = 0; i < left.numberOfRows; i ++) {
     for (int j = 0; j < right.numberOfColumns; j ++) {
       for (int k = 0; k < left.numberOfColumns; k ++) {
@@ -2778,7 +2796,8 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixByMatrix(
       calculator, input, output
     );
   }
-  Matrix<Expression> leftMatrix, rightMatrix;
+  Matrix<Expression> leftMatrix;
+  Matrix<Expression> rightMatrix;
   if (!calculator.getMatrixExpressions(left, leftMatrix)) {
     return false;
   }
@@ -2837,36 +2856,53 @@ bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrix(
     return false;
   }
   STACK_TRACE("CalculatorFunctionsBinaryOps::tensorMatrixByMatrix");
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
-  if ((!rightE.isMatrix() && !rightE.isSequenceNElements()) || (
-      !leftE.isMatrix() && !leftE.isSequenceNElements()
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
+  if ((
+      !rightExpression.isMatrix() && !rightExpression.isSequenceNElements()
+    ) || (
+      !leftExpression.isMatrix() && !leftExpression.isSequenceNElements()
     )
   ) {
     return false;
   }
-  Matrix<Rational> leftMatRat, rightMatRat;
+  Matrix<Rational> leftMatrixRational;
+  Matrix<Rational> rightMatrixRational;
   if (
     CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, leftE, leftMatRat
+      calculator, leftExpression, leftMatrixRational
     ) &&
     CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, rightE, rightMatRat
+      calculator, rightExpression, rightMatrixRational
     )
   ) {
-    Matrix<Rational> resultMatRat;
-    resultMatRat.assignTensorProduct(leftMatRat, rightMatRat);
-    return output.makeMatrix(calculator, resultMatRat, nullptr, true);
+    Matrix<Rational> resultMatrixRational;
+    resultMatrixRational.assignTensorProduct(
+      leftMatrixRational, rightMatrixRational
+    );
+    return
+    output.makeMatrix(calculator, resultMatrixRational, nullptr, true);
   }
-  Matrix<Expression> leftMatE, rightMatE, resultMatE;
-  if (!calculator.getMatrixExpressions(input[1], leftMatE)) {
+  Matrix<Expression> leftMatrixExpression;
+  Matrix<Expression> rightMatrixExpression;
+  Matrix<Expression> resultMatrixExpression;
+  if (
+    !calculator.getMatrixExpressions(input[1], leftMatrixExpression)
+  ) {
     return false;
   }
-  if (!calculator.getMatrixExpressions(input[2], rightMatE)) {
+  if (
+    !calculator.getMatrixExpressions(input[2], rightMatrixExpression)
+  ) {
     return false;
   }
-  resultMatE.assignTensorProduct(leftMatE, rightMatE);
-  return output.assignMatrixExpressions(resultMatE, calculator, true, true);
+  resultMatrixExpression.assignTensorProduct(
+    leftMatrixExpression, rightMatrixExpression
+  );
+  return
+  output.assignMatrixExpressions(
+    resultMatrixExpression, calculator, true, true
+  );
 }
 
 bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor(
@@ -2876,18 +2912,18 @@ bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor(
     return false;
   }
   STACK_TRACE("CalculatorFunctionsBinaryOps::tensorMatrixByMatrixTensor");
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
   if (
-    !rightE.isOfType<MatrixTensor<Rational> >() ||
-    !leftE.isOfType<MatrixTensor<Rational> >()
+    !rightExpression.isOfType<MatrixTensor<Rational> >() ||
+    !leftExpression.isOfType<MatrixTensor<Rational> >()
   ) {
     return false;
   }
   MatrixTensor<Rational> result;
   result.assignTensorProduct(
-    leftE.getValue<MatrixTensor<Rational> >(),
-    rightE.getValue<MatrixTensor<Rational> >()
+    leftExpression.getValue<MatrixTensor<Rational> >(),
+    rightExpression.getValue<MatrixTensor<Rational> >()
   );
   return output.assignValue(calculator, result);
 }
@@ -2901,19 +2937,19 @@ bool CalculatorFunctionsBinaryOps::multiplyRatOrAlgebraicByMatRatOrMatAlg(
   if (!input.isListNElements(3)) {
     return false;
   }
-  const Expression* matE;
-  const Expression* scalarE;
-  matE = &input[1];
-  scalarE = &input[2];
+  const Expression* matrixExpression;
+  const Expression* scalarExpression;
+  matrixExpression = &input[1];
+  scalarExpression = &input[2];
   if (
-    !matE->isMatrixOfType<Rational>() &&
-    !matE->isMatrixOfType<AlgebraicNumber>()
+    !matrixExpression->isMatrixOfType<Rational>() &&
+    !matrixExpression->isMatrixOfType<AlgebraicNumber>()
   ) {
-    MathRoutines::swap(matE, scalarE);
+    MathRoutines::swap(matrixExpression, scalarExpression);
   }
   if (
-    !matE->isMatrixOfType<Rational>() &&
-    !matE->isMatrixOfType<AlgebraicNumber>()
+    !matrixExpression->isMatrixOfType<Rational>() &&
+    !matrixExpression->isMatrixOfType<AlgebraicNumber>()
   ) {
     return false;
   }
@@ -2923,23 +2959,23 @@ bool CalculatorFunctionsBinaryOps::multiplyRatOrAlgebraicByMatRatOrMatAlg(
   Rational scalarRational;
   if (
     CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, *matE, matrixRational
+      calculator, *matrixExpression, matrixRational
     )
   ) {
     matrixAlgebraic = matrixRational;
   } else {
     if (
       !CalculatorConversions::functionGetMatrixNoComputation(
-        calculator, *matE, matrixAlgebraic
+        calculator, *matrixExpression, matrixAlgebraic
       )
     ) {
       return false;
     }
   }
-  if (scalarE->isOfType(&scalarRational)) {
+  if (scalarExpression->isOfType(&scalarRational)) {
     scalar = scalarRational;
   } else {
-    if (!scalarE->isOfType(&scalar)) {
+    if (!scalarExpression->isOfType(&scalar)) {
       return false;
     }
   }
@@ -2956,25 +2992,28 @@ bool CalculatorFunctionsBinaryOps::multiplyMatRatOrMatAlgByMatRatOrMatAlg(
   if (!input.isListNElements(3)) {
     return false;
   }
-  Matrix<AlgebraicNumber> matAlgLeft, matAlgRight;
-  Matrix<Rational> matRatLeft, matRatRight;
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
+  Matrix<AlgebraicNumber> matrixAlgebraicLeft;
+  Matrix<AlgebraicNumber> matrixAlgebraicRight;
+  Matrix<Rational> matrixRationalLeft;
+  Matrix<Rational> matrixRationalRight;
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
   if (
-    leftE.isMatrixOfType<Rational>() && rightE.isMatrixOfType<Rational>()
+    leftExpression.isMatrixOfType<Rational>() &&
+    rightExpression.isMatrixOfType<Rational>()
   ) {
     return false;
   }
   if (
     CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, leftE, matRatLeft
+      calculator, leftExpression, matrixRationalLeft
     )
   ) {
-    matAlgLeft = matRatLeft;
+    matrixAlgebraicLeft = matrixRationalLeft;
   } else {
     if (
       !CalculatorConversions::functionGetMatrixNoComputation(
-        calculator, leftE, matAlgLeft
+        calculator, leftExpression, matrixAlgebraicLeft
       )
     ) {
       return false;
@@ -2982,32 +3021,34 @@ bool CalculatorFunctionsBinaryOps::multiplyMatRatOrMatAlgByMatRatOrMatAlg(
   }
   if (
     CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, rightE, matRatRight
+      calculator, rightExpression, matrixRationalRight
     )
   ) {
-    matAlgRight = matRatRight;
+    matrixAlgebraicRight = matrixRationalRight;
   } else {
     if (
       !CalculatorConversions::functionGetMatrixNoComputation(
-        calculator, rightE, matAlgRight
+        calculator, rightExpression, matrixAlgebraicRight
       )
     ) {
       return false;
     }
   }
-  if (matAlgLeft.numberOfColumns != matAlgRight.numberOfRows) {
+  if (
+    matrixAlgebraicLeft.numberOfColumns != matrixAlgebraicRight.numberOfRows
+  ) {
     std::stringstream errorStream;
     errorStream
     << "Error: attempting to multiply matrix with "
-    << matAlgLeft.numberOfColumns
+    << matrixAlgebraicLeft.numberOfColumns
     << " columns by a "
     << "matrix with "
-    << matAlgRight.numberOfRows
+    << matrixAlgebraicRight.numberOfRows
     << " rows. ";
     return output.assignError(calculator, errorStream.str());
   }
-  matAlgLeft *= matAlgRight;
-  return output.makeMatrix(calculator, matAlgLeft);
+  matrixAlgebraicLeft *= matrixAlgebraicRight;
+  return output.makeMatrix(calculator, matrixAlgebraicLeft);
 }
 
 bool CalculatorFunctionsBinaryOps::
@@ -3021,30 +3062,31 @@ multiplyMatrixRationalOrRationalByMatrixRational(
   if (!input.isListNElements(3)) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
-  if (!rightE.isMatrixOfType<Rational>()) {
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
+  if (!rightExpression.isMatrixOfType<Rational>()) {
     return false;
   }
-  Matrix<Rational> leftMatrix, rightMatrix;
+  Matrix<Rational> leftMatrix;
+  Matrix<Rational> rightMatrix;
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, rightE, rightMatrix
+      calculator, rightExpression, rightMatrix
     )
   ) {
     return false;
   }
   Rational scalar;
-  if (leftE.isOfType<Rational>(&scalar)) {
+  if (leftExpression.isOfType<Rational>(&scalar)) {
     leftMatrix *= scalar;
     return output.makeMatrix(calculator, leftMatrix);
   }
-  if (!leftE.isMatrixOfType<Rational>()) {
+  if (!leftExpression.isMatrixOfType<Rational>()) {
     return false;
   }
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, leftE, rightMatrix
+      calculator, leftExpression, rightMatrix
     )
   ) {
     return false;
@@ -3067,56 +3109,58 @@ multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction(
   if (!input.isListNElements(3)) {
     return false;
   }
-  Expression leftE = input[1];
-  Expression rightE = input[2];
+  Expression leftExpression = input[1];
+  Expression rightExpression = input[2];
   if (
-    !rightE.isMatrixOfType<RationalFraction<Rational> >() ||
+    !rightExpression.isMatrixOfType<RationalFraction<Rational> >() ||
     !(
-      leftE.isOfType<Rational>() ||
-      leftE.isOfType<Polynomial<Rational> >() ||
-      leftE.isOfType<RationalFraction<Rational> >() ||
-      leftE.isMatrixOfType<RationalFraction<Rational> >()
+      leftExpression.isOfType<Rational>() ||
+      leftExpression.isOfType<Polynomial<Rational> >() ||
+      leftExpression.isOfType<RationalFraction<Rational> >() ||
+      leftExpression.isMatrixOfType<RationalFraction<Rational> >()
     )
   ) {
     return false;
   }
-  if (!leftE.mergeContexts(leftE, rightE)) {
+  if (!leftExpression.mergeContexts(leftExpression, rightExpression)) {
     return
     calculator
     << "Failed to convert "
-    << leftE.toString()
+    << leftExpression.toString()
     << " and "
-    << rightE.toString()
+    << rightExpression.toString()
     << " to common context. ";
   }
-  Matrix<RationalFraction<Rational> > leftMatrix, rightMatrix;
+  Matrix<RationalFraction<Rational> > leftMatrix;
+  Matrix<RationalFraction<Rational> > rightMatrix;
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, rightE, rightMatrix
+      calculator, rightExpression, rightMatrix
     )
   ) {
     return false;
   }
-  if (!leftE.isMatrixOfType<RationalFraction<Rational> >()) {
-    WithContext<RationalFraction<Rational> > leftErfForm;
+  if (!leftExpression.isMatrixOfType<RationalFraction<Rational> >()) {
+    WithContext<RationalFraction<Rational> >
+    leftExpressionRationalFractionForm;
     if (
       !CalculatorConversions::convertWithoutComputation(
-        calculator, leftE, leftErfForm
+        calculator, leftExpression, leftExpressionRationalFractionForm
       )
     ) {
       return
       calculator
       << "Failed to convert "
-      << leftE.toString()
+      << leftExpression.toString()
       << " to rational function. ";
     }
-    rightMatrix *= leftErfForm.content;
-    ExpressionContext contextE = leftE.getContext();
-    return output.makeMatrix(calculator, rightMatrix, &contextE);
+    rightMatrix *= leftExpressionRationalFractionForm.content;
+    ExpressionContext contextExpression = leftExpression.getContext();
+    return output.makeMatrix(calculator, rightMatrix, &contextExpression);
   }
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, leftE, leftMatrix
+      calculator, leftExpression, leftMatrix
     )
   ) {
     return false;
@@ -3125,8 +3169,8 @@ multiplyMatrixRationalFractionOrRationalFractionByMatrixRationalFraction(
     return false;
   }
   leftMatrix.multiplyOnTheRight(rightMatrix);
-  ExpressionContext contextE = leftE.getContext();
-  return output.makeMatrix(calculator, leftMatrix, &contextE);
+  ExpressionContext contextExpression = leftExpression.getContext();
+  return output.makeMatrix(calculator, leftMatrix, &contextExpression);
 }
 
 bool CalculatorFunctionsBinaryOps::multiplyMatrixTensorOrRationalByMatrixTensor
@@ -3138,23 +3182,25 @@ bool CalculatorFunctionsBinaryOps::multiplyMatrixTensorOrRationalByMatrixTensor
   if (!input.isListNElements(3)) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
-  if (!rightE.isOfType<MatrixTensor<Rational> >()) {
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
+  if (!rightExpression.isOfType<MatrixTensor<Rational> >()) {
     return false;
   }
   Rational scalar;
-  if (leftE.isOfType<Rational>(&scalar)) {
-    MatrixTensor<Rational> result = rightE.getValue<MatrixTensor<Rational> >();
+  if (leftExpression.isOfType<Rational>(&scalar)) {
+    MatrixTensor<Rational> result =
+    rightExpression.getValue<MatrixTensor<Rational> >();
     result *= scalar;
     return output.assignValue(calculator, result);
   }
-  if (!leftE.isOfType<MatrixTensor<Rational> >()) {
+  if (!leftExpression.isOfType<MatrixTensor<Rational> >()) {
     return false;
   }
   const MatrixTensor<Rational>& rightMatrix =
-  rightE.getValue<MatrixTensor<Rational> >();
-  MatrixTensor<Rational> result = leftE.getValue<MatrixTensor<Rational> >();
+  rightExpression.getValue<MatrixTensor<Rational> >();
+  MatrixTensor<Rational> result =
+  leftExpression.getValue<MatrixTensor<Rational> >();
   result *= rightMatrix;
   return output.assignValue(calculator, result);
 }
@@ -3168,28 +3214,33 @@ bool CalculatorFunctionsBinaryOps::lieBracketExtractConstant(
   }
   Rational coefficient = 1;
   Rational rationalValue;
-  Expression leftE = input[1];
-  Expression rightE = input[2];
+  Expression leftExpression = input[1];
+  Expression rightExpression = input[2];
   bool found = false;
   if (input[1].startsWith(calculator.opTimes(), 3)) {
     if (input[1][1].isOfType(&rationalValue)) {
       found = true;
       coefficient *= rationalValue;
-      leftE = input[1][2];
+      leftExpression = input[1][2];
     }
   }
   if (input[2].startsWith(calculator.opTimes(), 3)) {
     if (input[2][1].isOfType(&rationalValue)) {
       found = true;
       coefficient *= rationalValue;
-      rightE = input[2][2];
+      rightExpression = input[2][2];
     }
   }
   if (!found) {
     return false;
   }
   Expression bracket;
-  bracket.makeXOX(calculator, calculator.opLieBracket(), leftE, rightE);
+  bracket.makeXOX(
+    calculator,
+    calculator.opLieBracket(),
+    leftExpression,
+    rightExpression
+  );
   output.assignValue(calculator, coefficient);
   output *= bracket;
   return true;
@@ -3220,32 +3271,38 @@ bool CalculatorFunctionsBinaryOps::lieBracketRatOrUEWithRatOrUE(
   if (!input.mergeContextsMyAruments(inputConverted, nullptr)) {
     return false;
   }
-  const Expression& leftE = inputConverted[1];
-  const Expression& rightE = inputConverted[2];
-  if (leftE.isOfType<Rational>() || rightE.isOfType<Rational>()) {
+  const Expression& leftExpression = inputConverted[1];
+  const Expression& rightExpression = inputConverted[2];
+  if (
+    leftExpression.isOfType<Rational>() || rightExpression.isOfType<Rational>()
+  ) {
     return
-    output.assignValueWithContext(calculator, 0, leftE.getContext());
+    output.assignValueWithContext(
+      calculator, 0, leftExpression.getContext()
+    );
   }
   if (
-    leftE.isOfType<
+    leftExpression.isOfType<
       ElementUniversalEnveloping<RationalFraction<Rational> >
     >() &&
-    rightE.isOfType<
+    rightExpression.isOfType<
       ElementUniversalEnveloping<RationalFraction<Rational> >
     >()
   ) {
     ElementUniversalEnveloping<RationalFraction<Rational> > result;
-    leftE.getValue<
+    leftExpression.getValue<
       ElementUniversalEnveloping<RationalFraction<Rational> >
     >().lieBracketOnTheRight(
-      rightE.getValue<
+      rightExpression.getValue<
         ElementUniversalEnveloping<RationalFraction<Rational> >
       >(),
       result
     );
     result.simplify(RationalFraction<Rational>::one());
     return
-    output.assignValueWithContext(calculator, result, leftE.getContext());
+    output.assignValueWithContext(
+      calculator, result, leftExpression.getContext()
+    );
   }
   return false;
 }
@@ -3269,7 +3326,8 @@ bool CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded(
   if (!doContinue) {
     return false;
   }
-  Expression leftE, rightE;
+  Expression leftExpression;
+  Expression rightExpression;
   Expression lieBracket;
   lieBracket.makeXOX(
     calculator,
@@ -3277,7 +3335,7 @@ bool CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded(
     input[2][2],
     input[1]
   );
-  leftE.makeXOX(
+  leftExpression.makeXOX(
     calculator, calculator.opLieBracket(), input[2][1], lieBracket
   );
   lieBracket.makeXOX(
@@ -3286,12 +3344,12 @@ bool CalculatorFunctionsBinaryOps::lieBracketJacobiIdentityIfNeeded(
     input[1],
     input[2][1]
   );
-  rightE.makeXOX(
+  rightExpression.makeXOX(
     calculator, calculator.opLieBracket(), input[2][2], lieBracket
   );
-  leftE = calculator.expressionMinusOne() * leftE;
-  rightE = calculator.expressionMinusOne() * rightE;
-  output = leftE + rightE;
+  leftExpression = calculator.expressionMinusOne() * leftExpression;
+  rightExpression = calculator.expressionMinusOne() * rightExpression;
+  output = leftExpression + rightExpression;
   return true;
 }
 
@@ -3365,29 +3423,30 @@ bool CalculatorFunctionsBinaryOps::lieBracketRatPolyOrEWAWithRatPolyOrEWA(
     return false;
   }
   const Expression& leftE = inputConverted[1];
-  const Expression& rightE = inputConverted[2];
+  const Expression& rightExpression = inputConverted[2];
   bool leftEisGood = leftE.isOfType<Rational>() ||
   leftE.isOfType<Polynomial<Rational> >() ||
   leftE.isOfType<ElementWeylAlgebra<Rational> >();
-  bool rightEisGood = rightE.isOfType<Rational>() ||
-  rightE.isOfType<Polynomial<Rational> >() ||
-  rightE.isOfType<ElementWeylAlgebra<Rational> >();
+  bool rightEisGood = rightExpression.isOfType<Rational>() ||
+  rightExpression.isOfType<Polynomial<Rational> >() ||
+  rightExpression.isOfType<ElementWeylAlgebra<Rational> >();
   if (!leftEisGood || !rightEisGood) {
     return false;
   }
   if (
     !leftE.isOfType<ElementWeylAlgebra<Rational> >() &&
-    !rightE.isOfType<ElementWeylAlgebra<Rational> >()
+    !rightExpression.isOfType<ElementWeylAlgebra<Rational> >()
   ) {
     return output.assignValue(calculator, 0);
   }
-  WithContext<ElementWeylAlgebra<Rational> > leftConverted, rightConverted;
+  WithContext<ElementWeylAlgebra<Rational> > leftConverted;
+  WithContext<ElementWeylAlgebra<Rational> > rightConverted;
   if (
     !CalculatorConversions::convertWithoutComputation(
       calculator, leftE, leftConverted
     ) ||
     !CalculatorConversions::convertWithoutComputation(
-      calculator, rightE, rightConverted
+      calculator, rightExpression, rightConverted
     )
   ) {
     calculator
@@ -3409,14 +3468,14 @@ bool CalculatorFunctionsBinaryOps::addMatrixToMatrix(
     return false;
   }
   const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
+  const Expression& rightExpression = input[2];
   int leftNumberOfRows = - 1;
   int leftNumberOfColumns = - 1;
   int rightNumberOfRows = - 1;
   int rightNumberOfColumns = - 1;
   if (
     !leftE.isMatrix(&leftNumberOfRows, &leftNumberOfColumns) ||
-    !rightE.isMatrix(&rightNumberOfRows, &rightNumberOfColumns)
+    !rightExpression.isMatrix(&rightNumberOfRows, &rightNumberOfColumns)
   ) {
     return false;
   }
@@ -3426,10 +3485,11 @@ bool CalculatorFunctionsBinaryOps::addMatrixToMatrix(
   ) {
     return false;
   }
-  Matrix<Expression> leftMatrix, rightMatrix;
+  Matrix<Expression> leftMatrix;
+  Matrix<Expression> rightMatrix;
   if (
     !calculator.getMatrixExpressions(leftE, leftMatrix) ||
-    !calculator.getMatrixExpressions(rightE, rightMatrix)
+    !calculator.getMatrixExpressions(rightExpression, rightMatrix)
   ) {
     return false;
   }
@@ -3454,7 +3514,8 @@ bool CalculatorFunctionsBinaryOps::augmentMatrixToTheRight(
   if (input.size() != 3) {
     return false;
   }
-  Matrix<Expression> leftMatrix, rightMatrix;
+  Matrix<Expression> leftMatrix;
+  Matrix<Expression> rightMatrix;
   if (
     !calculator.getMatrixExpressions(input[1], leftMatrix) ||
     !calculator.getMatrixExpressions(input[2], rightMatrix)
@@ -3482,7 +3543,8 @@ bool CalculatorFunctionsBinaryOps::augmentMatrixBelow(
   if (input.size() != 3) {
     return false;
   }
-  Matrix<Expression> leftMatrix, rightMatrix;
+  Matrix<Expression> leftMatrix;
+  Matrix<Expression> rightMatrix;
   if (
     !calculator.getMatrixExpressions(input[1], leftMatrix) ||
     !calculator.getMatrixExpressions(input[2], rightMatrix)
@@ -3511,14 +3573,15 @@ bool CalculatorFunctionsBinaryOps::directSumMatrixWithMatrix(
     return false;
   }
   const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
-  if (!leftE.isMatrix() || !rightE.isMatrix()) {
+  const Expression& rightExpression = input[2];
+  if (!leftE.isMatrix() || !rightExpression.isMatrix()) {
     return false;
   }
-  Matrix<Expression> leftMatrix, rightMatrix;
+  Matrix<Expression> leftMatrix;
+  Matrix<Expression> rightMatrix;
   if (
     !calculator.getMatrixExpressions(leftE, leftMatrix) ||
-    !calculator.getMatrixExpressions(rightE, rightMatrix)
+    !calculator.getMatrixExpressions(rightExpression, rightMatrix)
   ) {
     return false;
   }
@@ -3538,19 +3601,22 @@ addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
     return false;
   }
   Expression leftE = input[1];
-  Expression rightE = input[2];
-  Matrix<Rational> leftMatRat, rightMatRat;
-  Matrix<AlgebraicNumber> leftMatrixAlgebraic, rightMatrixAlgebraic;
+  Expression rightExpression = input[2];
+  Matrix<Rational> leftMatrixRational;
+  Matrix<Rational> rightMatrixRational;
+  Matrix<AlgebraicNumber> leftMatrixAlgebraic;
+  Matrix<AlgebraicNumber> rightMatrixAlgebraic;
   if (
-    !rightE.isMatrixOfType<Rational>() || !leftE.isMatrixOfType<Rational>()
+    !rightExpression.isMatrixOfType<Rational>() ||
+    !leftE.isMatrixOfType<Rational>()
   ) {
-    if (rightE.isMatrixOfType<AlgebraicNumber>()) {
-      MathRoutines::swap(leftE, rightE);
+    if (rightExpression.isMatrixOfType<AlgebraicNumber>()) {
+      MathRoutines::swap(leftE, rightExpression);
     }
     if (!leftE.isMatrixOfType<AlgebraicNumber>()) {
       return false;
     }
-    if (rightE.isMatrixOfType<Rational>()) {
+    if (rightExpression.isMatrixOfType<Rational>()) {
       if (
         !CalculatorConversions::functionGetMatrixNoComputation(
           calculator, leftE, leftMatrixAlgebraic
@@ -3560,7 +3626,7 @@ addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
       }
       if (
         !CalculatorConversions::functionGetMatrixNoComputation(
-          calculator, rightE, rightMatrixAlgebraic
+          calculator, rightExpression, rightMatrixAlgebraic
         )
       ) {
         return false;
@@ -3578,7 +3644,7 @@ addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
     }
     if (
       !CalculatorConversions::functionGetMatrixNoComputation(
-        calculator, rightE, rightMatrixAlgebraic
+        calculator, rightExpression, rightMatrixAlgebraic
       )
     ) {
       return false;
@@ -3602,37 +3668,37 @@ addMatrixRationalOrAlgebraicToMatrixRationalOrAlgebraic(
   }
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, leftE, leftMatRat
+      calculator, leftE, leftMatrixRational
     )
   ) {
     return false;
   }
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, rightE, rightMatRat
+      calculator, rightExpression, rightMatrixRational
     )
   ) {
     return false;
   }
   if (
-    leftMatRat.numberOfRows != rightMatRat.numberOfRows ||
-    leftMatRat.numberOfColumns != rightMatRat.numberOfColumns
+    leftMatrixRational.numberOfRows != rightMatrixRational.numberOfRows ||
+    leftMatrixRational.numberOfColumns != rightMatrixRational.numberOfColumns
   ) {
     std::stringstream errorStream;
     errorStream
     << "Error: attempting to add a "
-    << rightMatRat.numberOfRows
+    << rightMatrixRational.numberOfRows
     << " by "
-    << rightMatRat.numberOfColumns
+    << rightMatrixRational.numberOfColumns
     << " matrix to a "
-    << leftMatRat.numberOfRows
+    << leftMatrixRational.numberOfRows
     << " by "
-    << leftMatRat.numberOfColumns
+    << leftMatrixRational.numberOfColumns
     << " matrix. ";
     return output.assignError(calculator, errorStream.str());
   }
-  leftMatRat += rightMatRat;
-  return output.makeMatrix(calculator, leftMatRat);
+  leftMatrixRational += rightMatrixRational;
+  return output.makeMatrix(calculator, leftMatrixRational);
 }
 
 bool CalculatorFunctionsBinaryOps::setMinus(
@@ -3678,17 +3744,18 @@ addMatrixRationalFractionsToMatrixRationalFractions(
     return false;
   }
   Expression leftE = input[1];
-  Expression rightE = input[2];
+  Expression rightExpression = input[2];
   if (
-    !rightE.isMatrixOfType<RationalFraction<Rational> >() ||
+    !rightExpression.isMatrixOfType<RationalFraction<Rational> >() ||
     !leftE.isMatrixOfType<RationalFraction<Rational> >()
   ) {
     return false;
   }
-  if (!leftE.mergeContexts(leftE, rightE)) {
+  if (!leftE.mergeContexts(leftE, rightExpression)) {
     return false;
   }
-  Matrix<RationalFraction<Rational> > leftMatrix, rightMatrix;
+  Matrix<RationalFraction<Rational> > leftMatrix;
+  Matrix<RationalFraction<Rational> > rightMatrix;
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
       calculator, leftE, leftMatrix
@@ -3698,7 +3765,7 @@ addMatrixRationalFractionsToMatrixRationalFractions(
   }
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, rightE, rightMatrix
+      calculator, rightExpression, rightMatrix
     )
   ) {
     return false;
@@ -3721,15 +3788,15 @@ bool CalculatorFunctionsBinaryOps::addMatrixTensorToMatrixTensor(
     return false;
   }
   const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
+  const Expression& rightExpression = input[2];
   if (
-    !rightE.isOfType<MatrixTensor<Rational> >() ||
+    !rightExpression.isOfType<MatrixTensor<Rational> >() ||
     !leftE.isOfType<MatrixTensor<Rational> >()
   ) {
     return false;
   }
   const MatrixTensor<Rational>& rightMatrix =
-  rightE.getValue<MatrixTensor<Rational> >();
+  rightExpression.getValue<MatrixTensor<Rational> >();
   const MatrixTensor<Rational>& leftMatrix =
   leftE.getValue<MatrixTensor<Rational> >();
   MatrixTensor<Rational> result = leftMatrix;
@@ -3777,15 +3844,15 @@ bool CalculatorFunctionsBinaryOps::addSequenceToSequence(
   output.reset(calculator);
   output.setExpectedSize(input[1].size());
   output.addChildAtomOnTop(calculator.opSequence());
-  Expression tempSum;
+  Expression summand;
   for (int i = 1; i < input[2].size(); i ++) {
-    tempSum.makeXOX(
+    summand.makeXOX(
       calculator,
       calculator.opPlus(),
       input[1][i],
       input[2][i]
     );
-    output.addChildOnTop(tempSum);
+    output.addChildOnTop(summand);
   }
   return true;
 }
@@ -3814,7 +3881,8 @@ bool CalculatorFunctionsBinaryOps::binomialCoefficient(
     for (int i = 0; i < K; i ++) {
       output *= input[1] - i;
     }
-    Expression factorial, kExpression;
+    Expression factorial;
+    Expression kExpression;
     kExpression.assignValue(calculator, K);
     factorial.makeOX(calculator, calculator.opFactorial(), kExpression);
     output /= factorial;
@@ -3831,13 +3899,13 @@ bool CalculatorFunctionsBinaryOps::powerElementZmodPByInteger(
     return false;
   }
   const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
+  const Expression& rightExpression = input[2];
   ElementZmodP element;
   if (!leftE.isOfType(&element)) {
     return false;
   }
   LargeInteger power = 0;
-  if (!rightE.isInteger(&power)) {
+  if (!rightExpression.isInteger(&power)) {
     return false;
   }
   if (power < 0) {
@@ -3863,14 +3931,14 @@ bool CalculatorFunctionsBinaryOps::powerEllipticCurveRationalElementByInteger(
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
   ElementEllipticCurve<Rational> element;
-  if (!leftE.isOfType(&element)) {
+  if (!leftExpression.isOfType(&element)) {
     return false;
   }
   int power = 0;
-  if (!rightE.isSmallInteger(&power)) {
+  if (!rightExpression.isSmallInteger(&power)) {
     return false;
   }
   if (power < 0) {
@@ -3895,14 +3963,14 @@ bool CalculatorFunctionsBinaryOps::powerEllipticCurveZmodPElementByInteger(
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
   ElementEllipticCurve<ElementZmodP> element;
-  if (!leftE.isOfType(&element)) {
+  if (!leftExpression.isOfType(&element)) {
     return false;
   }
   LargeInteger power = 0;
-  if (!rightE.isInteger(&power)) {
+  if (!rightExpression.isInteger(&power)) {
     return false;
   }
   if (power < 0) {
@@ -3941,7 +4009,8 @@ bool CalculatorFunctionsBinaryOps::polynomialModPModuloPolynomialModP(
   ) {
     return false;
   }
-  WithContext<Polynomial<ElementZmodP> > left, right;
+  WithContext<Polynomial<ElementZmodP> > left;
+  WithContext<Polynomial<ElementZmodP> > right;
   if (
     !inputConverted[1].isOfTypeWithContext(&left) ||
     !inputConverted[2].isOfTypeWithContext(&right)

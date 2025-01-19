@@ -857,24 +857,38 @@ std::string SemisimpleSubalgebras::toStringShort() const {
   return out.str();
 }
 
+std::string SemisimpleSubalgebras::toStringCandidateStatistics(
+  bool showInternals
+) const {
+  std::stringstream out;
+  out
+  << "Up to linear equivalence, there are total "
+  << this->subalgebras.size()
+  << " semisimple subalgebras (including the full subalgebra)";
+  if (this->subalgebraCandidatesUnrealizedNotProvenImpossible.size() != 0) {
+    out
+    << " and "
+    << this->subalgebraCandidatesUnrealizedNotProvenImpossible.size()
+    << " semisimple subalgebra candidate(s) "
+    << "which were not realized (but not proven impossible)";
+  }
+  out << ". ";
+  if (
+    this->subalgebraCandidatesProvenImpossible.size() != 0 && showInternals
+  ) {
+    out
+    << "There were an additional "
+    << this->subalgebraCandidatesProvenImpossible.size()
+    << " subalgebra cases that were proved impossible. ";
+  }
+  return out.str();
+}
+
 std::string SemisimpleSubalgebras::toString(
   FormatExpressions* format, bool writeToHardDisk
 ) {
   STACK_TRACE("SemisimpleSubalgebras::toString");
   std::stringstream out;
-  int candidatesRealized = 0;
-  int candidatesNotRealizedNotProvenImpossible = 0;
-  int candidatesProvenImpossible = 0;
-  for (int i = 0; i < this->subalgebras.values.size; i ++) {
-    CandidateSemisimpleSubalgebra& currentSubalgebra =
-    this->subalgebras.values[i];
-    if (currentSubalgebra.flagSystemProvedToHaveNoSolution) {
-      candidatesProvenImpossible ++;
-    }
-    if (currentSubalgebra.flagSystemSolved) {
-      candidatesRealized ++;
-    }
-  }
   out << "<h1>Lie algebra " << this->owner->toStringLieAlgebraNameFullHTML();
   if (!this->flagRealForms) {
     out << "<br>Semisimple complex Lie subalgebras";
@@ -899,34 +913,7 @@ std::string SemisimpleSubalgebras::toString(
     << this->subalgebras.size()
     << "<br>";
   }
-  candidatesNotRealizedNotProvenImpossible =
-  this->subalgebras.size() - candidatesRealized - candidatesProvenImpossible;
-  if (!writeToHardDisk) {
-    out << candidatesRealized << " subalgebras realized.";
-    out
-    << "<br>Up to linear equivalence, there are "
-    << this->subalgebras.size()
-    << " = "
-    << candidatesRealized
-    << " realized + "
-    << candidatesProvenImpossible
-    << " proven impossible + "
-    << candidatesNotRealizedNotProvenImpossible
-    << " neither realized nor proven impossible. \n<hr>\n ";
-  } else {
-    out
-    << "Up to linear equivalence, there are total "
-    << candidatesRealized
-    << " semisimple subalgebras (including the full subalgebra)";
-    if (candidatesNotRealizedNotProvenImpossible != 0) {
-      out
-      << " and "
-      << candidatesNotRealizedNotProvenImpossible
-      << " semisimple subalgebra candidate(s) "
-      << "which were not realized (but not proven impossible)";
-    }
-    out << ". ";
-  }
+  out << this->toStringCandidateStatistics(true);
   out
   << "The subalgebras are ordered by rank, "
   << "Dynkin indices of simple constituents "
@@ -1461,6 +1448,7 @@ bool SemisimpleSubalgebras::loadState(
 
 bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   STACK_TRACE("SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue");
+  global.comments << "DEBUG: got to here!!!!!";
   ProgressReport report;
   std::stringstream reportstream;
   this->checkAll();
@@ -1469,9 +1457,11 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   << this->toStringProgressReport();
   report.report(reportstream.str());
   while (this->incrementReturnFalseIfPastLast()) {
+    global.comments << "<br>DEBUG: rounx X!!!!!";
     this->checkAll();
     report.report(this->toStringProgressReport());
     if (!this->flagHasPossibleSubalgebrasWeCouldntSolveFor) {
+      global.comments << "<br>DEBUG: CANT solve!";
       this->comments =
       this->comments +
       "Failed to realize all candidates, aborting computation.";
@@ -1507,6 +1497,7 @@ void SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize() {
   }
   if (global.response.monitoringAllowed()) {
     this->fileNameToLogComments =
+    this->owner->fileNames.virtualFolderName() +
     "LogFileComments_" +
     FileOperations::cleanUpForFileNameUse(
       this->owner->weylGroup.dynkinType.toString()
@@ -1515,12 +1506,7 @@ void SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize() {
     std::fstream logFile;
     if (
       !FileOperations::openFileCreateIfNotPresentVirtual(
-        logFile,
-        this->owner->fileNames.virtualFolderName() +
-        this->fileNameToLogComments,
-        true,
-        false,
-        false
+        logFile, this->fileNameToLogComments, true, false, false
       )
     ) {
       global.fatal
@@ -1534,7 +1520,7 @@ void SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize() {
   this->currentSubalgebraChain.setExpectedSize(
     this->owner->getRank() + 2
   );
-  this->currentSubalgebraChain.setSize(0);
+  this->currentSubalgebraChain.clear();
 }
 
 void SemisimpleSubalgebras::makeEmptyCandidateSubalgebra(
@@ -1635,7 +1621,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
     this->flagAttemptToAdjustCentralizers = adjustCentralizers;
     this->checkFileWritePermissions();
     if (doFullInitialization) {
-      this->findTheSemisimpleSubalgebrasFromScratch(
+      this->findSemisimpleSubalgebrasFromScratch(
         newOwner,
         ownerField,
         containerSubalgebras,
@@ -1837,16 +1823,14 @@ bool SemisimpleSubalgebras::checkIsEmpty() const {
   return true;
 }
 
-bool SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch(
+bool SemisimpleSubalgebras::findSemisimpleSubalgebrasFromScratch(
   SemisimpleLieAlgebra& newOwner,
   AlgebraicClosureRationals& ownerField,
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   const DynkinType* targetType
 ) {
-  STACK_TRACE(
-    "SemisimpleSubalgebras::findTheSemisimpleSubalgebrasFromScratch"
-  );
+  STACK_TRACE("SemisimpleSubalgebras::findSemisimpleSubalgebrasFromScratch");
   this->resetComputations();
   this->initHookUpPointers(
     newOwner,
@@ -2801,11 +2785,7 @@ void SemisimpleSubalgebras::logComments(const std::string& extraComments) {
   std::fstream logFile;
   if (
     !FileOperations::openFileCreateIfNotPresentVirtual(
-      logFile,
-      this->owner->fileNames.virtualFolderName() + this->fileNameToLogComments,
-      true,
-      false,
-      false
+      logFile, this->fileNameToLogComments, true, false, false
     )
   ) {
     global.fatal
@@ -6777,7 +6757,7 @@ void SemisimpleSubalgebras::resetComputations() {
 void CandidateSemisimpleSubalgebra::configurePolynomialSystem(
   PolynomialSystem<AlgebraicNumber>& toBeConfigured
 ) {
-  int maximumPolynomialDivisions = 300;
+  int maximumPolynomialDivisions = 2000;
   int maximumMonomialOperations = 20000;
   std::string ambientLieAlgebraName =
   this->owner->owner->toStringLieAlgebraName();
@@ -6788,11 +6768,11 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem(
   }
   DynkinType& embeddedType = this->weylNonEmbedded->dynkinType;
   if (embeddedType.getRank() == 1) {
-    maximumPolynomialDivisions = 300;
+    maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
     toBeConfigured.arbitrarySubstitutionsInOrder = List<Rational>({
-        Rational::oneStatic(),
-        Rational::zeroStatic()
+        Rational::zeroStatic(),
+        Rational::oneStatic()
       }
     );
   }
@@ -6829,6 +6809,7 @@ bool CandidateSemisimpleSubalgebra::attemptToSolveSystem() {
     MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
   );
   system.solveSerreLikeSystem(this->transformedSystem);
+  global.comments << "DEBUG: system solved: " << this->flagSystemSolved;
   this->flagSystemSolved = system.flagSystemSolvedOverBaseField;
   this->flagSystemProvedToHaveNoSolution =
   system.flagSystemProvenToHaveNoSolution;
@@ -10054,7 +10035,7 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
         << "for computing the centralizer type yield different results: "
         << "by sub-diagram I computed the type as "
         << this->centralizerType.toString()
-        << " but looking at subalgerba containing "
+        << " but looking at subalgebra containing "
         << "the current one I got centralizer type "
         << centralizerTypeAlternative.toString()
         << global.fatal;
@@ -10063,7 +10044,12 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
     if (this->centralizerRank > this->owner->owner->getRank()) {
       global.fatal
       << "Something is wrong: the rank of the centralizer "
-      << "is larger than the rank of the owner."
+      << this->centralizerRank
+      << " of computed type: "
+      << centralizerTypeAlternative.toStringPretty()
+      << " is larger than the rank of the ambient lie algebra: "
+      << this->owner->owner->getRank()
+      << ". "
       << this->toStringCentralizerDebugData()
       << global.fatal;
     }

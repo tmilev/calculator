@@ -508,6 +508,10 @@ public:
   // All found subalgebras are here.
   // The keys are their embedded symmetric Cartan matrices.
   MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> subalgebras;
+  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>
+  subalgebraCandidatesProvenImpossible;
+  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>
+  subalgebraCandidatesUnrealizedNotProvenImpossible;
   bool flagHasPossibleSubalgebrasWeCouldntSolveFor;
   bool flagAttemptToSolveSystems;
   // This flag determines whether our computation is over
@@ -660,11 +664,13 @@ public:
   bool checkInitialization() const;
   bool checkIsEmpty() const;
   bool checkAll() const;
+  std::string toStringCandidateStatistics(bool showInternals) const;
   std::string toStringShort() const;
   std::string toStringState(FormatExpressions* format = nullptr);
   std::string toStringCurrentChain(FormatExpressions* format = nullptr);
   std::string toStringProgressReport(FormatExpressions* format = nullptr);
   std::string toStringHTML();
+  std::string toStringHeader(FormatExpressions* format);
   std::string toString(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringPart2(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringTableSubalgebraLinksTable(FormatExpressions* format);
@@ -674,6 +680,7 @@ public:
   std::string toStringSubalgebrasWithHDWrite(
     FormatExpressions* format = nullptr
   );
+  std::string writeToHardDisk(FormatExpressions* format);
   void writeSubalgebraToFile(FormatExpressions* format, int subalgebraIndex);
   std::string toStringPart3(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringSl2s(FormatExpressions* format = nullptr);
@@ -700,7 +707,9 @@ public:
   );
   void hookUpCentralizers(bool allowNonPolynomialSystemFailure);
   void computeSl2sInitOrbitsForComputationOnDemand(bool computeRealSlTwos);
-  bool findTheSemisimpleSubalgebrasFromScratch(
+  void findSemisimpleSubalgebrasInitialize();
+  bool findSemisimpleSubalgebrasContinue();
+  bool findSemisimpleSubalgebrasFromScratch(
     SemisimpleLieAlgebra& newOwner,
     AlgebraicClosureRationals& ownerField,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
@@ -750,8 +759,6 @@ public:
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
   );
   bool writeFilesRealForms(std::stringstream* outputStream);
-  void findSemisimpleSubalgebrasInitialize();
-  bool findSemisimpleSubalgebrasContinue();
   void writeHCandidates(
     Vectors<Rational>& outputHCandidatesScaledToActByTwo,
     CandidateSemisimpleSubalgebra& newCandidate,

@@ -2695,7 +2695,8 @@ bool CalculatorFunctions::generateMultiplicativelyClosedSet(
     set.addOnTop(input[i]);
   }
   int numberOfGenerators = set.size;
-  Expression product, evaluatedProduct;
+  Expression product;
+  Expression evaluatedProduct;
   ProgressReport report;
   for (int i = 0; i < set.size; i ++) {
     for (int j = 0; j < numberOfGenerators; j ++) {
@@ -2897,21 +2898,22 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
     << " entries<br>";
     return false;
   }
-  Matrix<Expression> resultMat;
-  resultMat.initialize(numberOfRows, numberOfColumns);
+  Matrix<Expression> resultMatrix;
+  resultMatrix.initialize(numberOfRows, numberOfColumns);
   Expression leftIE;
   Expression rightIE;
   for (int i = 0; i < numberOfRows; i ++) {
     for (int j = 0; j < numberOfColumns; j ++) {
       leftIE.assignValue(calculator, i + 1);
       rightIE.assignValue(calculator, j + 1);
-      resultMat.elements[i][j].reset(calculator, 3);
-      resultMat.elements[i][j].addChildOnTop(leftE);
-      resultMat.elements[i][j].addChildOnTop(leftIE);
-      resultMat.elements[i][j].addChildOnTop(rightIE);
+      resultMatrix.elements[i][j].reset(calculator, 3);
+      resultMatrix.elements[i][j].addChildOnTop(leftE);
+      resultMatrix.elements[i][j].addChildOnTop(leftIE);
+      resultMatrix.elements[i][j].addChildOnTop(rightIE);
     }
   }
-  return output.assignMatrixExpressions(resultMat, calculator, true, true);
+  return
+  output.assignMatrixExpressions(resultMatrix, calculator, true, true);
 }
 
 bool CalculatorFunctions::suffixNotationForPostScript(

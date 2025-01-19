@@ -1286,6 +1286,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
   STACK_TRACE("PolynomialSystem::solveSerreLikeSystemRecursively");
+  global.comments << "DEBUG: solving here!";
   RecursionDepthCounter counter(&this->recursionCounterSerreLikeSystem);
   ProgressReport report1;
   ProgressReport report2;
@@ -1347,9 +1348,11 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   ) {
     this->trySettingValueToVariable(inputSystem, arbitrarySubstitution);
     if (this->flagSystemSolvedOverBaseField) {
+      global.comments << "DEBUG : soli soli soli!";
       return;
     }
     inputSystem = systemBeforeHeuristics;
+    global.comments << "DEBUG : no soli here!";
     if (this->groebner.flagDoProgressReport) {
       MonomialPolynomial monomial(
         this->getPreferredSerreSystemSubstitutionIndex(inputSystem)

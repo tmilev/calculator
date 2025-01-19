@@ -1240,7 +1240,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int opIndexParentIfAvailable,
+    int operatorIndexParentIfAvailable,
     Function** outputHandler
   );
   bool checkConsistency() const;
@@ -2993,7 +2993,7 @@ public:
     );
   }
   void specializeBoundVariables(
-    Expression& toBeSubbedIn,
+    Expression& toBeSubstitutedIn,
     MapList<Expression, Expression>& matchedPairs
   );
   Expression* patternMatch(
@@ -3108,21 +3108,21 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int opIndexParentIfAvailable,
+    int operatorIndexParentIfAvailable,
     Function** outputHandler
   );
   static bool outerStandardCompositeHandler(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int opIndexParentIfAvailable,
+    int operatorIndexParentIfAvailable,
     Function** outputHandler
   );
   static bool outerStandardHandler(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int opIndexParentIfAvailable,
+    int operatorIndexParentIfAvailable,
     Function** outputHandler
   );
   static bool outerPowerRaiseToFirst(
@@ -3364,7 +3364,7 @@ public:
     const Expression& input,
     Expression& output,
     bool& outputIsCacheable,
-    int opIndexParentIfAvailable,
+    int operatorIndexParentIfAvailable,
     Expression* outputHistory
   );
   class EvaluateLoop {
@@ -3385,7 +3385,7 @@ public:
   public:
     Calculator* owner;
     bool flagIsNonCacheable;
-    int opIndexParent;
+    int operatorIndexParent;
     int numberOfTransformations;
     int indexInCache;
     bool reductionOccurred;

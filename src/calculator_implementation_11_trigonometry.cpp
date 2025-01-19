@@ -123,7 +123,8 @@ bool CalculatorFunctionsTrigonometry::tan(
     return false;
   }
   const Expression& argument = input[1];
-  Expression num, den;
+  Expression num;
+  Expression den;
   num.makeOX(calculator, calculator.opSin(), argument);
   den.makeOX(calculator, calculator.opCos(), argument);
   return output.makeXOX(calculator, calculator.opDivide(), num, den);
@@ -137,7 +138,8 @@ bool CalculatorFunctionsTrigonometry::cotangent(
     return false;
   }
   const Expression& argument = input[1];
-  Expression num, den;
+  Expression num;
+  Expression den;
   num.makeOX(calculator, calculator.opCos(), argument);
   den.makeOX(calculator, calculator.opSin(), argument);
   return output.makeXOX(calculator, calculator.opDivide(), num, den);
@@ -151,7 +153,8 @@ bool CalculatorFunctionsTrigonometry::sec(
     return false;
   }
   const Expression& argument = input[1];
-  Expression num, den;
+  Expression num;
+  Expression den;
   num.assignValue(calculator, 1);
   den.makeOX(calculator, calculator.opCos(), argument);
   return output.makeXOX(calculator, calculator.opDivide(), num, den);
@@ -165,7 +168,8 @@ bool CalculatorFunctionsTrigonometry::csc(
     return false;
   }
   const Expression& argument = input[1];
-  Expression numerator, denominator;
+  Expression numerator;
+  Expression denominator;
   numerator.assignValue(calculator, 1);
   denominator.makeOX(calculator, calculator.opSin(), argument);
   return
@@ -184,7 +188,8 @@ bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   if (!input[1].isOperationGiven(calculator.opE())) {
     return false;
   }
-  Expression coefficientOfI, currentE;
+  Expression coefficientOfI;
+  Expression currentE;
   Expression iE;
   iE.makeAtom(calculator, calculator.opImaginaryUnit());
   currentE.reset(calculator, 3);
@@ -199,7 +204,8 @@ bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   if (coefficientOfI.isEqualToZero()) {
     return false;
   }
-  Expression cosE, sinE;
+  Expression cosE;
+  Expression sinE;
   cosE.makeOX(calculator, calculator.opCos(), coefficientOfI);
   sinE.makeOX(calculator, calculator.opSin(), coefficientOfI);
   output = cosE + iE * sinE;
@@ -243,7 +249,8 @@ bool CalculatorFunctionsTrigonometry::exploitSineOddness(
     return false;
   }
   const Expression& argument = input[1];
-  Expression coefficientExpression, nonCFpart;
+  Expression coefficientExpression;
+  Expression nonCFpart;
   argument.getCoefficientMultiplicandForm(coefficientExpression, nonCFpart);
   Rational rational;
   if (!coefficientExpression.isRational(&rational)) {
@@ -252,7 +259,8 @@ bool CalculatorFunctionsTrigonometry::exploitSineOddness(
   if (rational >= 0) {
     return false;
   }
-  Expression moneE, sinE;
+  Expression moneE;
+  Expression sinE;
   moneE.assignValue(calculator, - 1);
   sinE.makeOX(
     calculator,
@@ -271,7 +279,12 @@ bool CalculatorFunctionsTrigonometry::convertSineToExponent(
     return false;
   }
   const Expression& argument = input[1];
-  Expression eE, iE, exponentArgument, minusExponentArgument, leftE, rightE;
+  Expression eE;
+  Expression iE;
+  Expression exponentArgument;
+  Expression minusExponentArgument;
+  Expression leftE;
+  Expression rightE;
   eE.makeAtom(calculator, calculator.opE());
   iE.makeAtom(calculator, calculator.opImaginaryUnit());
   exponentArgument = iE * argument;
@@ -292,7 +305,12 @@ bool CalculatorFunctionsTrigonometry::convertCosineToExponent(
     return false;
   }
   const Expression& argument = input[1];
-  Expression eE, iE, exponentArgument, minusExponentArgument, leftE, rightE;
+  Expression eE;
+  Expression iE;
+  Expression exponentArgument;
+  Expression minusExponentArgument;
+  Expression leftE;
+  Expression rightE;
   eE.makeAtom(calculator, calculator.opE());
   iE.makeAtom(calculator, calculator.opImaginaryUnit());
   exponentArgument = iE * argument;
@@ -338,7 +356,8 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(
       return true;
     }
   }
-  AlgebraicNumber argument, candidate;
+  AlgebraicNumber argument;
+  AlgebraicNumber candidate;
   if (argumentE.isOfType<AlgebraicNumber>(&argument)) {
     candidate.assignRationalQuadraticRadical(
       Rational(1, 2),
@@ -412,7 +431,8 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
       return true;
     }
   }
-  AlgebraicNumber argument, candidate;
+  AlgebraicNumber argument;
+  AlgebraicNumber candidate;
   if (argumentE.isOfType<AlgebraicNumber>(&argument)) {
     candidate.assignRationalQuadraticRadical(
       Rational(1, 2),
@@ -553,7 +573,10 @@ bool CalculatorFunctionsTrigonometry::sineOfAngleSumToTrigonometry(
   if (!argument.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
-  Expression sinA, sinB, cosA, cosB;
+  Expression sinA;
+  Expression sinB;
+  Expression cosA;
+  Expression cosB;
   sinA.makeOX(calculator, calculator.opSin(), argument[1]);
   sinB.makeOX(calculator, calculator.opSin(), argument[2]);
   cosA.makeOX(calculator, calculator.opCos(), argument[1]);
@@ -571,7 +594,8 @@ bool CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct(
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
-  Expression leftE = input[1], rightE = input[2];
+  Expression leftE = input[1];
+  Expression rightE = input[2];
   bool isGood = false;
   int leftSign = 1;
   int rightSign = 1;
@@ -601,7 +625,10 @@ bool CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct(
   if (!isGood) {
     return false;
   }
-  Expression argSum, argDiff, leftMultiplicand, rightMultiplicand;
+  Expression argSum;
+  Expression argDiff;
+  Expression leftMultiplicand;
+  Expression rightMultiplicand;
   if (leftE.startsWith(calculator.opSin(), 2)) {
     argSum = (leftE[1] * leftSign + rightE[1] * rightSign) / 2;
     argDiff = (leftE[1] * leftSign - rightE[1] * rightSign) / 2;
@@ -645,7 +672,10 @@ bool CalculatorFunctionsTrigonometry::cosineOfAngleSumToTrigonometry(
   if (!argument.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
-  Expression sinA, sinB, cosA, cosB;
+  Expression sinA;
+  Expression sinB;
+  Expression cosA;
+  Expression cosB;
   sinA.makeOX(calculator, calculator.opSin(), argument[1]);
   sinB.makeOX(calculator, calculator.opSin(), argument[2]);
   cosA.makeOX(calculator, calculator.opCos(), argument[1]);
@@ -1284,7 +1314,8 @@ bool TrigonometricReduction::getSineCosineFormVariableOfPower(
     return false;
   }
   output.makeZero();
-  MonomialPolynomial cosineMonomial, sineMonomial;
+  MonomialPolynomial cosineMonomial;
+  MonomialPolynomial sineMonomial;
   cosineMonomial.makeEi(letterIndex);
   sineMonomial.makeEi(numberOfVariables + letterIndex);
   output.addMonomial(cosineMonomial, this->algebraicClosure()->one());
@@ -1544,7 +1575,8 @@ void TrigonometricReduction::TrigonometricFunction::computeEulerFormAnonymous()
     "TrigonometricFunction::computeEulerFormAnonymous"
   );
   this->eulerForm.makeZero();
-  Polynomial<AlgebraicNumber> plusSummand, minusSummand;
+  Polynomial<AlgebraicNumber> plusSummand;
+  Polynomial<AlgebraicNumber> minusSummand;
   plusSummand.makeConstant(
     this->owner->owner->objectContainer.algebraicClosure.one()
   );

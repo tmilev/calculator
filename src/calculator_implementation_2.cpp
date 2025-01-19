@@ -426,7 +426,7 @@ bool Calculator::outerStandardCompositeHandler(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int opIndexParentIfAvailable,
+  int operatorIndexParentIfAvailable,
   Function** outputHandler
 ) {
   int64_t start = 0;
@@ -447,13 +447,17 @@ bool Calculator::outerStandardCompositeHandler(
   }
   for (int i = 0; i < handlers->size; i ++) {
     Function& currentHandler = (*handlers)[i];
-    if (!currentHandler.shouldBeApplied(opIndexParentIfAvailable)) {
+    if (!currentHandler.shouldBeApplied(operatorIndexParentIfAvailable)) {
       continue;
     }
     int64_t startCurrentFunction = global.getElapsedMilliseconds();
     if (
       !currentHandler.apply(
-        calculator, input, output, opIndexParentIfAvailable, outputHandler
+        calculator,
+        input,
+        output,
+        operatorIndexParentIfAvailable,
+        outputHandler
       )
     ) {
       calculator.accountFunctionTrivialPerformance(
@@ -484,14 +488,14 @@ bool Function::apply(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int opIndexParentIfAvailable,
+  int operatorIndexParentIfAvailable,
   Function** outputHandler
 ) {
   int64_t start = 0;
   if (this->owner->flagLogEvaluation) {
     start = global.getElapsedMilliseconds();
   }
-  if (!this->shouldBeApplied(opIndexParentIfAvailable)) {
+  if (!this->shouldBeApplied(operatorIndexParentIfAvailable)) {
     return false;
   }
   if (this->functionAddress == nullptr) {
@@ -529,7 +533,7 @@ bool Calculator::outerStandardHandler(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int opIndexParentIfAvailable,
+  int operatorIndexParentIfAvailable,
   Function** outputHandler
 ) {
   STACK_TRACE("Calculator::outerStandardHandler");
@@ -548,7 +552,11 @@ bool Calculator::outerStandardHandler(
     int64_t startTime = global.getElapsedMilliseconds();
     if (
       currentFunction.apply(
-        calculator, input, output, opIndexParentIfAvailable, outputHandler
+        calculator,
+        input,
+        output,
+        operatorIndexParentIfAvailable,
+        outputHandler
       )
     ) {
       calculator.accountFunctionNonTrivialPerformance(
@@ -565,7 +573,7 @@ bool Calculator::outerStandardFunction(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int opIndexParentIfAvailable,
+  int operatorIndexParentIfAvailable,
   Function** outputHandler
 ) {
   STACK_TRACE("Calculator::outerStandardFunction");
@@ -623,7 +631,7 @@ bool Calculator::outerStandardFunction(
       calculator,
       input,
       output,
-      opIndexParentIfAvailable,
+      operatorIndexParentIfAvailable,
       &transformation.firstApplicableHandler
     )
   ) {
@@ -638,7 +646,7 @@ bool Calculator::outerStandardFunction(
       calculator,
       input,
       output,
-      opIndexParentIfAvailable,
+      operatorIndexParentIfAvailable,
       &transformation.firstApplicableHandler
     )
   ) {
@@ -955,7 +963,7 @@ bool Calculator::isTimedOut() {
 
 Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
   this->owner = &inputOwner;
-  this->opIndexParent = - 1;
+  this->operatorIndexParent = - 1;
   this->flagIsNonCacheable = false;
   this->numberOfTransformations = 0;
   this->indexInCache = - 1;
@@ -977,12 +985,13 @@ void Calculator::EvaluateLoop::accountHistoryChildTransformation(
     // Child hasn't changed.
     return;
   }
-  Expression incomingHistory, indexE;
-  indexE.assignValue(*this->owner, childIndex);
+  Expression incomingHistory;
+  Expression indexExpression;
+  indexExpression.assignValue(*this->owner, childIndex);
   incomingHistory.makeXOX(
     *this->owner,
     this->owner->opExpressionHistorySetChild(),
-    indexE,
+    indexExpression,
     childHistory
   );
   this->history->addChildOnTop(incomingHistory);
@@ -1278,7 +1287,7 @@ bool Calculator::EvaluateLoop::builtInEvaluation() {
       *(this->owner),
       *(this->output),
       result,
-      this->opIndexParent,
+      this->operatorIndexParent,
       &handlerContainer
     )
   ) {
@@ -1401,7 +1410,7 @@ bool Calculator::evaluateExpression(
   const Expression& input,
   Expression& output,
   bool& outputIsNonCacheable,
-  int opIndexParentIfAvailable,
+  int operatorIndexParentIfAvailable,
   Expression* outputHistory
 ) {
   STACK_TRACE("Calculator::evaluateExpression");
@@ -1414,10 +1423,10 @@ bool Calculator::evaluateExpression(
   if (state.history != nullptr) {
     state.history->reset(calculator);
   }
-  state.opIndexParent = opIndexParentIfAvailable;
+  state.operatorIndexParent = operatorIndexParentIfAvailable;
   if (calculator.statistics.report.getElement().tickAndWantReport()) {
     std::stringstream reportStream;
-    reportStream << "Evaluating: " << input.toString();
+    reportStream << "Evaluating expression: " << input.toString();
     calculator.statistics.report.getElement().report(reportStream.str());
   }
   if (calculator.flagLogFullTreeCrunching && calculator.recursionDepth < 3) {
@@ -1450,9 +1459,9 @@ bool Calculator::evaluateExpression(
     << input.toString()
     << " but I have already seen that expression in the expression stack. ";
     calculator.flagAbortComputationASAP = true;
-    Expression errorE;
-    errorE.assignError(calculator, errorStream.str());
-    return state.setOutput(errorE, nullptr, "Error");
+    Expression errorExpression;
+    errorExpression.assignError(calculator, errorStream.str());
+    return state.setOutput(errorExpression, nullptr, "Error");
   }
   // reduction phase:
   // ////////////////////////////////
@@ -1549,22 +1558,22 @@ Expression* Calculator::patternMatch(
 }
 
 void Calculator::specializeBoundVariables(
-  Expression& toBeSubbedIn,
+  Expression& toBeSubstitutedIn,
   MapList<Expression, Expression>& matchedPairs
 ) {
   STACK_TRACE("Calculator::specializeBoundVariables");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
-  if (toBeSubbedIn.isListOfTwoAtomsStartingWith(this->opBind())) {
-    if (matchedPairs.contains(toBeSubbedIn)) {
-      toBeSubbedIn = matchedPairs.getValueCreateEmpty(toBeSubbedIn);
+  if (toBeSubstitutedIn.isListOfTwoAtomsStartingWith(this->opBind())) {
+    if (matchedPairs.contains(toBeSubstitutedIn)) {
+      toBeSubstitutedIn = matchedPairs.getValueCreateEmpty(toBeSubstitutedIn);
       return;
     }
   }
-  Expression subbedE;
-  for (int i = 0; i < toBeSubbedIn.size(); i ++) {
-    subbedE = toBeSubbedIn[i];
-    this->specializeBoundVariables(subbedE, matchedPairs);
-    toBeSubbedIn.setChild(i, subbedE);
+  Expression substitutedExpression;
+  for (int i = 0; i < toBeSubstitutedIn.size(); i ++) {
+    substitutedExpression = toBeSubstitutedIn[i];
+    this->specializeBoundVariables(substitutedExpression, matchedPairs);
+    toBeSubstitutedIn.setChild(i, substitutedExpression);
   }
 }
 

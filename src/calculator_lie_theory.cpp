@@ -5303,7 +5303,7 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   }
   SemisimpleLieAlgebra& lieAlgebra = *lieAlgebraPointer.content;
   std::stringstream out;
-  if (lieAlgebra.getRank() > 6) {
+  if (lieAlgebra.getRank() > 8) {
     out
     << "<b>This code is completely experimental "
     << "and has been set to run up to rank 6. "
@@ -5317,7 +5317,7 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   );
   semisimpleSubalgebras.flagComputePairingTable = false;
   semisimpleSubalgebras.flagComputeNilradicals = false;
-  semisimpleSubalgebras.findTheSemisimpleSubalgebrasFromScratch(
+  semisimpleSubalgebras.findSemisimpleSubalgebrasFromScratch(
     lieAlgebra,
     calculator.objectContainer.algebraicClosure,
     calculator.objectContainer.semisimpleLieAlgebras,

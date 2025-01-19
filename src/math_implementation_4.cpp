@@ -32,7 +32,7 @@ void GlobalVariables::Crasher::firstRun() {
     << "\n<b style = 'color:red'>Crash</b> "
     << elapsedSeconds
     << " second(s) from the start.<hr>";
-    this->crashReportConsolE
+    this->crashReportConsole
     << Logger::consoleRed()
     << "Crash "
     << elapsedSeconds
@@ -56,16 +56,16 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::doCrash(
     std::cout
     << "Recursion within the crashing mechanism detected. "
     << "Something is very wrong. "
-    << this->crashReportConsolE.str()
+    << this->crashReportConsole.str()
     << std::endl;
     std::exit(- 1);
   }
-  this->crashReportConsolE << this->crashReport.str();
+  this->crashReportConsole << this->crashReport.str();
   this->crashReportHtml << this->crashReport.str();
   this->crashReportFile << this->crashReport.str();
   this->flagFinishingCrash = true;
   if (!global.flagNotAllocated) {
-    this->crashReportConsolE << "\n";
+    this->crashReportConsole << "\n";
   }
   if (!global.flagNotAllocated) {
     if (global.userInputStringIfAvailable != "") {
@@ -73,7 +73,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::doCrash(
       << "<hr>User input: <br> "
       << global.userInputStringIfAvailable
       << "<hr>";
-      this->crashReportConsolE
+      this->crashReportConsole
       << "User input: "
       << Logger::consoleBlue()
       << global.userInputStringIfAvailable
@@ -85,7 +85,7 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::doCrash(
       << "\n";
     }
   }
-  this->crashReportConsolE << Crasher::getStackTraceEtcErrorMessageConsole();
+  this->crashReportConsole << Crasher::getStackTraceEtcErrorMessageConsole();
   this->crashReportHtml << Crasher::getStackTraceEtcErrorMessageHTML();
   this->crashReportFile << Crasher::getStackTraceEtcErrorMessageHTML();
   if (!global.flagNotAllocated) {
@@ -96,13 +96,13 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::doCrash(
       this->crashReportFile
       << "<hr><b>Computation progress report strings:</b><br>"
       << global.toStringProgressReportNoThreadData(true);
-      this->crashReportConsolE << "Computation progress strings:\n";
-      this->crashReportConsolE
+      this->crashReportConsole << "Computation progress strings:\n";
+      this->crashReportConsole
       << global.toStringProgressReportNoThreadData(false);
     }
   }
   this->writeCrashFile();
-  std::cout << this->crashReportConsolE.str() << std::endl;
+  std::cout << this->crashReportConsole.str() << std::endl;
   JSData output;
   output[WebAPI::Result::crashReport] = this->crashReportHtml.str();
   output[WebAPI::Result::comments] = global.comments.getCurrentReset();
@@ -114,12 +114,12 @@ GlobalVariables::Crasher& GlobalVariables::Crasher::doCrash(
 void GlobalVariables::Crasher::writeCrashFile() {
   if (global.flagNotAllocated) {
     this->crashReportHtml << "GlobalVariables.flagNotAllocated is true. ";
-    this->crashReportConsolE << "GlobalVariables.flagNotAllocated is true. ";
+    this->crashReportConsole << "GlobalVariables.flagNotAllocated is true. ";
     return;
   }
   if (global.runMode == GlobalVariables::RunMode::webAssembly) {
     this->crashReportHtml << "Crash while running web assembly.";
-    this->crashReportConsolE << "Crash while running web assembly.";
+    this->crashReportConsole << "Crash while running web assembly.";
     return;
   }
   if (!global.calculator().isZeroPointer()) {
@@ -147,7 +147,7 @@ void GlobalVariables::Crasher::writeCrashFile() {
     << "If running locally, simply open the results/crashes "
     << "folder within your calculator folder. "
     << "If running remotely, you will need an ssh connection. ";
-    this->crashReportConsolE
+    this->crashReportConsole
     << "Crash dumped in file: "
     << Logger::consoleGreen()
     << global.relativePhysicalNameCrashReport
@@ -158,7 +158,7 @@ void GlobalVariables::Crasher::writeCrashFile() {
     << "<hr>Failed to open crash report file: "
     << global.relativePhysicalNameCrashReport
     << ". check file permissions. ";
-    this->crashReportConsolE
+    this->crashReportConsole
     << "Failed to open crash report file: "
     << Logger::consoleRed()
     << global.relativePhysicalNameCrashReport
@@ -877,12 +877,12 @@ void DynkinDiagramRootSubalgebra::sort() {
   this->sameTypeComponents.reserve(
     this->simpleBasesConnectedComponents.size
   );
-  DynkinSimpleType tempType;
+  DynkinSimpleType dynkinType;
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
-    if (!(this->simpleComponentTypes[i] == tempType)) {
+    if (!(this->simpleComponentTypes[i] == dynkinType)) {
       this->sameTypeComponents.setSize(this->sameTypeComponents.size + 1);
       this->sameTypeComponents.lastObject()->size = 0;
-      tempType = this->simpleComponentTypes[i];
+      dynkinType = this->simpleComponentTypes[i];
     }
     this->sameTypeComponents.lastObject()->addOnTop(i);
     this->indexUniComponent[i] = this->sameTypeComponents.size - 1;
@@ -1100,7 +1100,8 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     }
     return;
   }
-  Rational length1, length2;
+  Rational length1;
+  Rational length2;
   length1 =
   currentComponent[0].scalarProduct(
     currentComponent[0], this->ambientBilinearForm
@@ -1268,9 +1269,9 @@ void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(
   this->computeDynkinStrings();
   this->sort();
   this->computeDynkinStrings();
-  DynkinType tempType;
-  this->getDynkinType(tempType);
-  if (tempType.isEqualToZero() && simpleBasisInput.size != 0) {
+  DynkinType dynkinType;
+  this->getDynkinType(dynkinType);
+  if (dynkinType.isEqualToZero() && simpleBasisInput.size != 0) {
     global.fatal
     << "Dynkin type of zero but the roots generating the type are: "
     << simpleBasisInput.toString()
@@ -1432,14 +1433,14 @@ bool DynkinDiagramRootSubalgebra::operator==(
     return false;
   }
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
-    bool tempBool = ((
+    bool typesAreEqual = ((
         this->simpleBasesConnectedComponents[i].size ==
         right.simpleBasesConnectedComponents[i].size
       ) && (
         this->simpleComponentTypes[i] == right.simpleComponentTypes[i]
       )
     );
-    if (!tempBool) {
+    if (!typesAreEqual) {
       return false;
     }
   }
@@ -1459,7 +1460,7 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(
 ) {
   Vectors<Rational>& currentComponent =
   this->simpleBasesConnectedComponents[index];
-  DynkinSimpleType& currentStrinG = this->simpleComponentTypes[index];
+  DynkinSimpleType& currentString = this->simpleComponentTypes[index];
   List<int> permutation;
   permutation.setSize(currentComponent.size);
   output.size = 0;
@@ -1467,11 +1468,11 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(
     permutation[i] = i;
   }
   output.addOnTop(permutation);
-  if (currentStrinG.letter == 'A' && currentComponent.size != 1) {
+  if (currentString.letter == 'A' && currentComponent.size != 1) {
     permutation.reverseElements();
     output.addOnTop(permutation);
   }
-  if (currentStrinG.letter == 'D') {
+  if (currentString.letter == 'D') {
     if (currentComponent.size == 4) {
       // the automorphism group of the Dynkin Diagram is S3
       permutation[1] = 2;
@@ -1500,7 +1501,7 @@ void DynkinDiagramRootSubalgebra::getAutomorphism(
       output.addOnTop(permutation);
     }
   }
-  if (currentStrinG.letter == 'E' && currentStrinG.rank == 6) {
+  if (currentString.letter == 'E' && currentString.rank == 6) {
     permutation[1] = 3;
     permutation[2] = 4;
     permutation[3] = 1;
@@ -1577,7 +1578,7 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent)
   STACK_TRACE("DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes");
   Vectors<Rational>& currentComponent =
   this->simpleBasesConnectedComponents[indexComponent];
-  int numEnds = 0;
+  int numberOfEnds = 0;
   int result = 0;
   this->indicesThreeNodes[indexComponent] = - 1;
   this->indicesEnds[indexComponent].size = 0;
@@ -1614,14 +1615,14 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent)
       this->indicesThreeNodes[indexComponent] = i;
     }
     if (counter <= 1) {
-      numEnds ++;
+      numberOfEnds ++;
       this->indicesEnds[indexComponent].addOnTop(i);
     }
   }
   if (result > 1) {
     global.fatal
     << "numEnds variable equals: "
-    << numEnds
+    << numberOfEnds
     << ", number of three-nodes equals: "
     << result
     << "; this should not happen. The bilinear form is: "
@@ -1629,10 +1630,10 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent)
     << global.fatal;
   }
   if (result == 1) {
-    if (numEnds != 3) {
+    if (numberOfEnds != 3) {
       global.fatal
       << "numEnds variable equals: "
-      << numEnds
+      << numberOfEnds
       << ", number of three-nodes equals: "
       << result
       << "; this should not happen. The bilinear form is: "
@@ -1640,10 +1641,10 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent)
       << global.fatal;
     }
   } else {
-    if (numEnds > 2) {
+    if (numberOfEnds > 2) {
       global.fatal
       << "numEnds variable equals: "
-      << numEnds
+      << numberOfEnds
       << ", number of three-nodes equals: "
       << result
       << "; this should not happen. The bilinear form is: "
@@ -1923,7 +1924,7 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
   // false);
   // this->multiplicitiesMaxOutputReport2.flush();
   this->projectivizedChamber.checkIsRefinedOrCrash();
-  QuasiPolynomial tempQP;
+  QuasiPolynomial quasiPolynomial;
   this->multiplicities.setSize(
     this->projectivizedChamber.refinedCones.size()
   );
@@ -1946,9 +1947,9 @@ void GeneralizedVermaModuleCharacters::computeQPsFromChamberComplex() {
       int index = - 1;
       // = this->pfs.chambersOld.GetFirstChamberIndexContainingPoint(root);
       if (index != - 1) {
-        tempQP = this->quasiPolynomialsSubstituted[index][k];
-        tempQP *= this->coefficients[k];
-        currentSum += tempQP;
+        quasiPolynomial = this->quasiPolynomialsSubstituted[index][k];
+        quasiPolynomial *= this->coefficients[k];
+        currentSum += quasiPolynomial;
       }
       std::stringstream currentStream;
       currentStream << " Chamber " << i + 1 << " translation " << k + 1;
@@ -2005,10 +2006,10 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   int smallDimension = smallWeylGroup.cartanSymmetric.numberOfRows;
   Vectors<double> draggableBasis;
   draggableBasis.makeEiBasis(smallDimension);
-  WeylGroupData tmpWeyl;
-  tmpWeyl.makeArbitrarySimple('A', 2);
+  WeylGroupData weylGroupA2;
+  weylGroupA2.makeArbitrarySimple('A', 2);
   drawOps.initializeDimensions(
-    tmpWeyl.cartanSymmetric, draggableBasis, draggableBasis
+    weylGroupA2.cartanSymmetric, draggableBasis, draggableBasis
   );
   FormatExpressions format;
   drawOps.basisProjectionPlane[0][0] = 1;
@@ -2135,18 +2136,18 @@ std::string GeneralizedVermaModuleCharacters::checkMultiplicitiesVsOrbits() {
   Vector<Rational> normal;
   normal.makeZero(totalDimensionAffine + 1);
   Vectors<Rational> newWalls;
-  ConeCollection tempComplex;
-  tempComplex = this->projectivizedChamber;
+  ConeCollection complex;
+  complex = this->projectivizedChamber;
   for (int i = 0; i < this->weylChamberSmallerAlgebra.walls.size; i ++) {
     for (int j = 0; j < smallDimension; j ++) {
       normal[j] = this->weylChamberSmallerAlgebra.walls[i].normal[j];
     }
     newWalls.addOnTop(normal);
-    tempComplex.splittingNormals.addOnTop(normal);
+    complex.splittingNormals.addOnTop(normal);
   }
-  tempComplex.refineByNormals();
-  out << "Number chambers with new walls: " << tempComplex.refinedCones.size();
-  out << "\n" << tempComplex.toString();
+  complex.refineByNormals();
+  out << "Number chambers with new walls: " << complex.refinedCones.size();
+  out << "\n" << complex.toString();
   return out.str();
 }
 
@@ -2252,7 +2253,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   weylGroupCoDomain.group.computeAllElements(false);
   this->nonIntegralOriginModificationBasisChanged = "(1/2,1/2)";
   Matrix<Rational> projectionBasisChanged;
-  Vector<Rational> startingWeight, projectedWeight;
+  Vector<Rational> startingWeight;
+  Vector<Rational> projectedWeight;
   FormatExpressions format;
   global.fatal << "Not implemented. " << global.fatal;
   input.computeHomomorphismFromImagesSimpleChevalleyGenerators(nullptr);
@@ -2309,16 +2311,17 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms
   subgroup;
   this->parabolicLeviPartRootSpacesZeroStandsForSelected = parabolicSelection;
-  Matrix<Rational> DualCartanEmbedding;
-  input.getMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
-  Vector<Rational> parabolicEvaluationRootImage, root;
+  Matrix<Rational> dualCartanEmbedding;
+  input.getMapSmallCartanDualToLargeCartanDual(dualCartanEmbedding);
+  Vector<Rational> parabolicEvaluationRootImage;
+  Vector<Rational> root;
   parabolicEvaluationRootImage =
   this->parabolicLeviPartRootSpacesZeroStandsForSelected;
   this->parabolicSelectionSmallerAlgebra.initialize(
     input.domainAlgebra().getRank()
   );
   for (int i = 0; i < input.domainAlgebra().getRank(); i ++) {
-    DualCartanEmbedding.getVectorFromColumn(i, root);
+    dualCartanEmbedding.getVectorFromColumn(i, root);
     if (
       parabolicEvaluationRootImage.scalarEuclidean(root).isPositive()
     ) {
@@ -2327,7 +2330,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   }
   this->log
   << "\nDual cartan embedding smaller into larger:\n"
-  << DualCartanEmbedding.toString(&global.defaultFormat.getElement());
+  << dualCartanEmbedding.toString(&global.defaultFormat.getElement());
   this->log
   << "\nParabolic subalgebra large algebra: "
   << this->parabolicLeviPartRootSpacesZeroStandsForSelected.toString();
@@ -2430,7 +2433,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     }
   }
   Matrix<Polynomial<Rational> > matrixPoly;
-  Vector<Polynomial<Rational> > tempVect, tempVect2;
+  Vector<Polynomial<Rational> > tempVect;
+  Vector<Polynomial<Rational> > tempVect2;
   tempVect.setSize(
     input.domainAlgebra().weylGroup.getDimension() +
     input.coDomainAlgebra().weylGroup.getDimension()
@@ -2762,9 +2766,9 @@ void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
   );
   this->maximumComputation.conesLargerDimension.setSize(0);
   this->maximumComputation.lPtoMaximizeLargerDim.setSize(0);
-  Lattice ZnLattice;
+  Lattice znLattice;
   int affineDimension = 5;
-  ZnLattice.makeZn(affineDimension);
+  znLattice.makeZn(affineDimension);
   this->numberNonZeroMultiplicities = 0;
   ProgressReport report;
   ConeLatticeAndShift currentCLS;
@@ -2775,7 +2779,7 @@ void GeneralizedVermaModuleCharacters::inititializeMaximumComputation() {
     }
     currentCLS.projectivizedCone = this->projectivizedChamber.refinedCones[i];
     currentCLS.shift.makeZero(affineDimension);
-    currentCLS.lattice = ZnLattice;
+    currentCLS.lattice = znLattice;
     bool tempBool =
     this->multiplicities[i].valueOnEachLatticeShift[0].
     rootFromLinearPolynomialConstantTermLastVariable(latticePtoMax);

@@ -1863,7 +1863,7 @@ bool FileOperations::openFileVirtualCustomizedWriteOnlyCreateIfNeeded(
 bool FileOperations::openFileVirtualCustomizedReadOnly(
   std::fstream& file,
   const std::string& fileName,
-  bool OpenInAppendMode,
+  bool openInAppendMode,
   bool truncate,
   bool openAsBinary,
   std::stringstream* commentsOnFailure
@@ -1879,14 +1879,14 @@ bool FileOperations::openFileVirtualCustomizedReadOnly(
   }
   return
   FileOperations::openFileUnsecure(
-    file, computedFileName, OpenInAppendMode, truncate, openAsBinary
+    file, computedFileName, openInAppendMode, truncate, openAsBinary
   );
 }
 
 bool FileOperations::openFileVirtual(
   std::fstream& file,
   const std::string& fileName,
-  bool OpenInAppendMode,
+  bool openInAppendMode,
   bool truncate,
   bool openAsBinary,
   bool accessSensitiveFolders
@@ -1901,7 +1901,7 @@ bool FileOperations::openFileVirtual(
   }
   return
   FileOperations::openFileUnsecure(
-    file, computedFileName, OpenInAppendMode, truncate, openAsBinary
+    file, computedFileName, openInAppendMode, truncate, openAsBinary
   );
 }
 
@@ -2572,7 +2572,9 @@ std::string StringRoutines::Differ::differenceHTML(
   const std::string& labelLeft, const std::string& labelRight
 ) {
   STACK_TRACE("StringRoutines::Differ::differenceHTML");
-  std::stringstream leftOut, rightOut, commentsOnFailure;
+  std::stringstream leftOut;
+  std::stringstream rightOut;
+  std::stringstream commentsOnFailure;
   if (!this->computeDifference(&commentsOnFailure)) {
     commentsOnFailure
     << "<b style='color:red'>Failed to compute string difference.</b><br>";
@@ -2893,9 +2895,9 @@ void StringRoutines::splitExcludeDelimiter(
   char delimiter,
   List<std::string>& output
 ) {
-  List<char> tempList;
-  tempList.addOnTop(delimiter);
-  StringRoutines::splitExcludeDelimiters(inputString, tempList, output);
+  List<char> buffer;
+  buffer.addOnTop(delimiter);
+  StringRoutines::splitExcludeDelimiters(inputString, buffer, output);
 }
 
 std::string StringRoutines::stringTrimWhiteSpace(
@@ -5217,11 +5219,11 @@ bool PartialFractions::isHigherThanWithRespectToWeight(
     << "Left and right vectors need equal dimensions. "
     << global.fatal;
   }
-  Rational accum = 0;
+  Rational accumulator = 0;
   for (int i = 0; i < left.size; i ++) {
-    accum += (left[i] - r[i]) * weights[i];
+    accumulator += (left[i] - r[i]) * weights[i];
   }
-  return accum > 0;
+  return accumulator > 0;
 }
 
 unsigned int OnePartialFractionDenominatorComponent::hashFunction(
@@ -5533,12 +5535,12 @@ bool OnePartialFractionDenominatorComponent::operator==(
 }
 
 void PartialFractions::computeTable(int dimension) {
-  Vector<Rational> tempR;
-  Vector<Rational> tempR2;
-  Vector<Rational> tempR3;
-  tempR.setSize(dimension);
-  tempR2.setSize(dimension);
-  tempR3.setSize(dimension);
+  Vector<Rational> buffer1;
+  Vector<Rational> buffer2;
+  Vector<Rational> buffer3;
+  buffer1.setSize(dimension);
+  buffer2.setSize(dimension);
+  buffer3.setSize(dimension);
   this->indicesRedundantShortRoots.initialize(this->reduced.size());
   this->indicesDoublesOfRedundantShortRoots.setSize(this->reduced.size());
   this->tableAllowedAminus2B.initialize(
@@ -5550,16 +5552,16 @@ void PartialFractions::computeTable(int dimension) {
   for (int i = 0; i < this->reduced.size(); i ++) {
     for (int j = 0; j < this->reduced.size(); j ++) {
       for (int k = 0; k < dimension; k ++) {
-        tempR[k] = this->originalVectors[i][k] - this->originalVectors[j][k];
-        tempR2[k] =
+        buffer1[k] = this->originalVectors[i][k] - this->originalVectors[j][k];
+        buffer2[k] =
         this->originalVectors[i][k] - this->originalVectors[j][k] * 2;
       }
-      this->tableAllowedAminusB.elements[i][j] = this->getIndex(tempR);
-      this->tableAllowedAminus2B.elements[i][j] = this->getIndex(tempR2);
+      this->tableAllowedAminusB.elements[i][j] = this->getIndex(buffer1);
+      this->tableAllowedAminus2B.elements[i][j] = this->getIndex(buffer2);
     }
-    tempR3 = this->originalVectors[i];
-    tempR3 *= 2;
-    this->indicesDoublesOfRedundantShortRoots[i] = this->getIndex(tempR3);
+    buffer3 = this->originalVectors[i];
+    buffer3 *= 2;
+    this->indicesDoublesOfRedundantShortRoots[i] = this->getIndex(buffer3);
     if (indicesDoublesOfRedundantShortRoots[i] != - 1) {
       this->indicesRedundantShortRoots.addSelectionAppendNewIndex(i);
     }
@@ -6441,13 +6443,13 @@ LargeInteger DynkinType::getWeylGroupSizeByFormula() const {
   STACK_TRACE("DynkinType::getWeylGroupSizeByFormula");
   this->checkFlagDeallocated();
   LargeInteger result = 1;
-  LargeInteger tempLI;
+  LargeInteger largeInteger;
   for (int i = 0; i < this->size(); i ++) {
-    tempLI =
+    largeInteger =
     WeylGroupData::sizeByFormulaOrNegative1((*this)[i].letter, (*this)[i].rank
     );
-    tempLI.raiseToPower(this->getMultiplicity(i));
-    result *= tempLI;
+    largeInteger.raiseToPower(this->getMultiplicity(i));
+    result *= largeInteger;
   }
   if (result <= 0) {
     global.fatal
@@ -7464,11 +7466,11 @@ const {
 }
 
 void ElementWeylGroup::conjugationAction(
-  const ElementWeylGroup& ConjugateWith,
-  const ElementWeylGroup& ConjugateOn,
+  const ElementWeylGroup& conjugateWith,
+  const ElementWeylGroup& conjugateOn,
   ElementWeylGroup& out
 ) {
-  out = ConjugateOn ^ ConjugateWith;
+  out = conjugateOn ^ conjugateWith;
 }
 
 void ElementWeylGroup::operator*=(const ElementWeylGroup& other) {
@@ -8857,22 +8859,22 @@ void WeylGroupData::getCoxeterPlane(
   FloatingPoint::cosFloating(2 * MathRoutines::pi() / coxeterNumber);
   eigenValue.imaginaryPart =
   FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
-  Matrix<Complex<double> > eigenMat;
-  eigenMat.initialize(
+  Matrix<Complex<double> > eigenMatrix;
+  eigenMatrix.initialize(
     matrixCoxeterElement.numberOfRows,
     matrixCoxeterElement.numberOfColumns
   );
-  for (int i = 0; i < eigenMat.numberOfRows; i ++) {
-    for (int j = 0; j < eigenMat.numberOfColumns; j ++) {
-      eigenMat.elements[i][j] =
+  for (int i = 0; i < eigenMatrix.numberOfRows; i ++) {
+    for (int j = 0; j < eigenMatrix.numberOfColumns; j ++) {
+      eigenMatrix.elements[i][j] =
       matrixCoxeterElement.elements[i][j].getDoubleValue();
       if (i == j) {
-        eigenMat.elements[i][i] -= eigenValue;
+        eigenMatrix.elements[i][i] -= eigenValue;
       }
     }
   }
   List<Vector<Complex<double> > > eigenSpaceList;
-  eigenMat.getZeroEigenSpace(eigenSpaceList);
+  eigenMatrix.getZeroEigenSpace(eigenSpaceList);
   Vectors<Complex<double> > eigenSpace;
   outputBasis1.setSize(dimension);
   outputBasis2.setSize(dimension);
@@ -9267,8 +9269,8 @@ toStringFromLayersAndArrows(
     }
   }
   out << "\\xymatrix{";
-  bool GraphWidthIsOdd = ((graphWidth % 2) != 0);
-  if (!GraphWidthIsOdd) {
+  bool graphWidthIsOdd = ((graphWidth % 2) != 0);
+  if (!graphWidthIsOdd) {
     graphWidth ++;
   }
   for (int i = 0; i < layers.size; i ++) {
@@ -9343,7 +9345,7 @@ toStringBruhatGraph() {
   List<List<int> > layers;
   Vector<Rational> root;
   layers.reserve(this->allElements.size);
-  int GraphWidth = 1;
+  int graphWidth = 1;
   int oldLayerElementLength = - 1;
   for (int i = 0; i < this->allElements.size; i ++) {
     const ElementSubgroupWeylGroupAutomorphisms& currentElement =
@@ -9355,8 +9357,8 @@ toStringBruhatGraph() {
       oldLayerElementLength = currentElement.generatorsLastAppliedFirst.size;
     }
     layers.lastObject()->addOnTop(i);
-    GraphWidth =
-    MathRoutines::maximum(GraphWidth, layers.lastObject()->size);
+    graphWidth =
+    MathRoutines::maximum(graphWidth, layers.lastObject()->size);
   }
   HashedList<Vector<Rational> > orbit;
   orbit.reserve(this->allElements.size);
@@ -9389,7 +9391,7 @@ toStringBruhatGraph() {
     }
   }
   return
-  this->toStringFromLayersAndArrows(arrows, layers, GraphWidth, false);
+  this->toStringFromLayersAndArrows(arrows, layers, graphWidth, false);
 }
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::

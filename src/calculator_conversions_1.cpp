@@ -1556,6 +1556,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     calculator
     << "Failed to load currentChain of Expressions; using empty list. ";
     currentChainInt.clear();
+    currentChainInt.addOnTop(- 1);
   }
   if (
     !calculator.getVectorInt(numberOfExploredHsExpression, numberOfExploredHs)
@@ -1563,6 +1564,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     calculator
     << "Failed to load the indices of the explored H's; using empty list. ";
     numberOfExploredHs.clear();
+    //    numberOfExploredHs.addOnTop(0);
   }
   if (
     !calculator.getVectorInt(
@@ -1572,6 +1574,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     calculator
     << "Failed to load the number of explored types; using empty list ";
     numberOfExploredTypes.clear();
+    //    numberOfExploredTypes.addOnTop(0);
   }
   WithContext<SemisimpleLieAlgebra*> ownerSemisimple;
   ownerSemisimple.content = nullptr;

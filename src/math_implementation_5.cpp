@@ -426,7 +426,7 @@ getWeightsRelativeToKInSimpleKCoordinates(
 ) {
   outputWeights.setSize(inputElements.size);
   Rational scalar;
-  ElementSemisimpleLieAlgebra<Rational> tempLieElement;
+  ElementSemisimpleLieAlgebra<Rational> bufferElement;
   for (int i = 0; i < inputElements.size; i ++) {
     Vector<Rational>& currentWeight = outputWeights[i];
     currentWeight.makeZero(this->domainAlgebra().getRank());
@@ -437,9 +437,9 @@ getWeightsRelativeToKInSimpleKCoordinates(
           j + this->domainAlgebra().getNumberOfPositiveRoots()
         ],
         currentElement,
-        tempLieElement
+        bufferElement
       );
-      if (!currentElement.isProportionalTo(tempLieElement, scalar)) {
+      if (!currentElement.isProportionalTo(bufferElement, scalar)) {
         global.fatal
         << "Lie algebra elements not "
         << "proportional as expected. "
@@ -512,7 +512,9 @@ void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
 }
 
 std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
-  std::string beginMath, endMath, newLine;
+  std::string beginMath;
+  std::string endMath;
+  std::string newLine;
   if (useHtml) {
     beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
@@ -540,7 +542,10 @@ std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
       }
     }
   }
-  int sRow, kRow, sColumn, kColumn;
+  int sRow = 0;
+  int kRow = 0;
+  int sColumn = 0;
+  int kColumn = 0;
   this->getIsPlusKIndexingFrom(firstNonZeroRow, sRow, kRow);
   this->getIsPlusKIndexingFrom(firstNonZeroColumn, sColumn, kColumn);
   std::stringstream out;
@@ -575,7 +580,9 @@ void SlTwoInSlN::getIsPlusKIndexingFrom(int input, int& s, int& k) {
 std::string SlTwoInSlN::elementMatrixToTensorString(
   const Matrix<Rational>& input, bool useHtml
 ) {
-  std::string beginMath, endMath, newLine;
+  std::string beginMath;
+  std::string endMath;
+  std::string newLine;
   if (useHtml) {
     beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
@@ -609,7 +616,10 @@ std::string SlTwoInSlN::elementMatrixToTensorString(
         }
         found = true;
         out << coefficient;
-        int sI, kI, sJ, kJ;
+        int sI = 0;
+        int kI = 0;
+        int sJ = 0;
+        int kJ = 0;
         this->getIsPlusKIndexingFrom(i, sI, kI);
         this->getIsPlusKIndexingFrom(j, sJ, kJ);
         out << "v_{i_{" << sI << "}";
@@ -697,7 +707,9 @@ void SlTwoInSlN::climbUpFromVector(
 
 std::string SlTwoInSlN::GetNotationString(bool useHtml) {
   std::stringstream out;
-  std::string beginMath, endMath, newLine;
+  std::string beginMath;
+  std::string endMath;
+  std::string newLine;
   if (useHtml) {
     beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
@@ -757,7 +769,9 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
   this->fElement.makeZero();
   this->projectors.setSize(this->partition.size);
   int currentOffset = 0;
-  std::string beginMath, endMath, newLine;
+  std::string beginMath;
+  std::string endMath;
+  std::string newLine;
   if (useHtml) {
     beginMath = "<span class ='mathcalculator'>";
     endMath = "</span>";
@@ -809,10 +823,9 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
   << endMath;
   Matrix<Rational> matrix;
   matrix.initialize(this->dimension, this->dimension);
-  List<Matrix<Rational> >
-  Decomposition,
-  highestWeightCandidatesBeforeProjection,
-  highestWeightCandidatesProjected;
+  List<Matrix<Rational> > decomposition;
+  List<Matrix<Rational> > highestWeightCandidatesBeforeProjection;
+  List<Matrix<Rational> > highestWeightCandidatesProjected;
   this->highestWeightVectors.size = 0;
   this->gModKModules.size = 0;
   for (int i = 0; i < this->dimension; i ++) {
@@ -820,7 +833,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
       matrix.makeZero();
       matrix.elements[i][j] = 1;
       this->extractHighestWeightVectorsFromVector(
-        matrix, Decomposition, highestWeightCandidatesBeforeProjection
+        matrix, decomposition, highestWeightCandidatesBeforeProjection
       );
       highestWeightCandidatesProjected.size = 0;
       for (

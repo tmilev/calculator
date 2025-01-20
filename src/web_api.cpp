@@ -230,7 +230,8 @@ bool WebAPIResponse::processServerStatusJSON() {
 bool WebAPIResponse::processUnpauseWorker() {
   STACK_TRACE("WebAPIResponse::processUnpauseWorker");
   this->owner->setHeaderOKNoContentLength("");
-  JSData progressReader, result;
+  JSData progressReader;
+  JSData result;
   int indexWorker = this->owner->getIndexIfRunningWorkerId(progressReader);
   if (indexWorker < 0) {
     this->owner->flagKeepAlive = false;
@@ -248,7 +249,8 @@ bool WebAPIResponse::processUnpauseWorker() {
 bool WebAPIResponse::processPauseWorker() {
   STACK_TRACE("WebAPIResponse::processPauseWorker");
   this->owner->setHeaderOKNoContentLength("");
-  JSData progressReader, result;
+  JSData progressReader;
+  JSData result;
   int indexWorker = this->owner->getIndexIfRunningWorkerId(progressReader);
   if (indexWorker < 0) {
     this->owner->flagKeepAlive = false;

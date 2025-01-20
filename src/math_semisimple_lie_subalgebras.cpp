@@ -1463,6 +1463,7 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   << this->toStringProgressReport();
   report.report(reportstream.str());
   while (this->incrementReturnFalseIfPastLast(&report)) {
+    global.comments << "DEBUG: incremented stuff.";
     CandidateSemisimpleSubalgebra& candidate =
     this->currentSubalgebraChain.lastObject()->attemptExtension();
     if (
@@ -3117,7 +3118,6 @@ std::string SemisimpleSubalgebras::toStringCurrentChain(
 ) {
   STACK_TRACE("SemisimpleSubalgebras::toStringCurrentChain");
   (void) format;
-  // avoid unused parameter warning in a portable way
   std::stringstream out;
   out
   << "<br>Current subalgebra chain length: "
@@ -3130,6 +3130,11 @@ std::string SemisimpleSubalgebras::toStringCurrentChain(
     if (i != this->currentSubalgebraChain.size - 1) {
       out << "&lt;";
     }
+  }
+  if (this->currentSubalgebraChain.size > 0) {
+    PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
+    *this->currentSubalgebraChain.lastObject();
+    out << lastExtension.toString();
   }
   return out.str();
 }
@@ -3337,6 +3342,7 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast(
   ProgressReport* report
 ) {
   STACK_TRACE("SemisimpleSubalgebras::incrementReturnFalseIfPastLast");
+  global.comments << "DEBUG: incremeting.. " << this->toStringCurrentChain();
   while (this->currentSubalgebraChain.size > 0) {
     PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
     *this->currentSubalgebraChain.lastObject();

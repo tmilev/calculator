@@ -807,11 +807,11 @@ bool Crypto::verifyJWTagainstKnownKeys(
     << keyIDstring
     << ".</b>";
   }
-  PublicKeyRSA& currentCert = Crypto::knownCertificates[index];
+  PublicKeyRSA& currentCertificate = Crypto::knownCertificates[index];
   return
   webToken.verifyRSA256(
-    currentCert.modulus,
-    currentCert.exponent,
+    currentCertificate.modulus,
+    currentCertificate.exponent,
     commentsOnFailure,
     commentsGeneral
   );

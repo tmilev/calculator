@@ -3043,15 +3043,15 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   );
   int indexCurrentDivisorLeadingMonInAllMons =
   this->allMonomials.getIndex(divisorLeadingMonomial);
-  MonomialPolynomial maxMonCurrentRemainder;
+  MonomialPolynomial maximalMonomialCurrentRemainder;
   Coefficient leadingCFCurrentRemainder;
   currentRemainder.getIndexLeadingMonomial(
-    &maxMonCurrentRemainder,
+    &maximalMonomialCurrentRemainder,
     &leadingCFCurrentRemainder,
     &this->owner->polynomialOrder.monomialOrder
   );
   int indexCurrentRemainderLeadingMonInAllMons =
-  this->allMonomials.getIndex(maxMonCurrentRemainder);
+  this->allMonomials.getIndex(maximalMonomialCurrentRemainder);
   this->highlightMonsDivisors[indexCurrentDivisor][
     indexCurrentDivisorLeadingMonInAllMons
   ].addOnTop(currentSlideNumber);
@@ -3075,7 +3075,10 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << "}{"
   << "$"
   << currentRemainder.getBlendCoefficientAndMonomial(
-    maxMonCurrentRemainder, leadingCFCurrentRemainder, false, &format
+    maximalMonomialCurrentRemainder,
+    leadingCFCurrentRemainder,
+    false,
+    &format
   )
   << "$ "
   << "}"

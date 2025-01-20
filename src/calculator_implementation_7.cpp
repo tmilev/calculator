@@ -6308,20 +6308,20 @@ bool CalculatorFunctions::powerImaginaryUnit(
   if (!input[2].isInteger(&power)) {
     return false;
   }
-  Expression iE;
-  iE.makeAtom(calculator, calculator.opImaginaryUnit());
+  Expression iExpression;
+  iExpression.makeAtom(calculator, calculator.opImaginaryUnit());
   if (power % 4 == 0) {
     return output.assignValue(calculator, 1);
   }
   if (power % 4 == 1) {
-    output = iE;
+    output = iExpression;
     return true;
   }
   if (power % 4 == 2) {
     return output.assignValue(calculator, - 1);
   }
   if (power % 4 == 3) {
-    output = iE *(- 1);
+    output = iExpression *(- 1);
     return true;
   }
   return false;

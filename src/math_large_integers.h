@@ -440,7 +440,8 @@ public:
     if (this->isEqualToZero()) {
       return;
     }
-    LargeIntegerUnsigned quotient, remainder;
+    LargeIntegerUnsigned quotient;
+    LargeIntegerUnsigned remainder;
     this->value.dividePositive(other.value, quotient, remainder);
     this->value = remainder;
     if (this->isNegative()) {
@@ -652,22 +653,22 @@ public:
   void divideBy(const Rational& r);
   void divideByInteger(int x) {
     int denominator = 0;
-    signed char tempSign;
+    signed char sign;
     if (x < 0) {
       denominator = - x;
-      tempSign = - 1;
+      sign = - 1;
     } else {
       denominator = x;
-      tempSign = 1;
+      sign = 1;
     }
-    if (this->tryToMultiplyQuickly(tempSign, denominator)) {
+    if (this->tryToMultiplyQuickly(sign, denominator)) {
       return;
     }
     this->initializeExtendedFromShortIfNeeded();
     this->extended->denominator.multiplyByUInt(
       static_cast<unsigned int>(denominator)
     );
-    this->extended->numerator.sign *= tempSign;
+    this->extended->numerator.sign *= sign;
     this->simplify();
   }
   void divideByLargeInteger(LargeInteger& x) {

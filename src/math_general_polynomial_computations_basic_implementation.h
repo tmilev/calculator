@@ -389,11 +389,11 @@ bool Polynomial<Coefficient>::isConstant(Coefficient* whichConstant) const {
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::isNegative() const {
-  Coefficient tempC;
-  if (!this->isConstant(&tempC)) {
+  Coefficient coefficient;
+  if (!this->isConstant(&coefficient)) {
     return false;
   }
-  return tempC.isNegative();
+  return coefficient.isNegative();
 }
 
 template <class Coefficient>
@@ -896,18 +896,18 @@ bool Polynomial<Coefficient>::isProportionalTo(
     outputTimesMeEqualsOther = ringUnit;
     return true;
   }
-  const MonomialPolynomial& firstMon = (*this)[0];
-  int indexInOther = other.monomials.getIndex(firstMon);
+  const MonomialPolynomial& firstMonomial = (*this)[0];
+  int indexInOther = other.monomials.getIndex(firstMonomial);
   if (indexInOther == - 1) {
     return false;
   }
   outputTimesMeEqualsOther = other.coefficients[indexInOther];
   outputTimesMeEqualsOther /= this->coefficients[0];
-  Polynomial<Coefficient> tempP;
-  tempP = *this;
-  tempP *= outputTimesMeEqualsOther;
-  tempP -= other;
-  return tempP.isEqualToZero();
+  Polynomial<Coefficient> difference;
+  difference = *this;
+  difference *= outputTimesMeEqualsOther;
+  difference -= other;
+  return difference.isEqualToZero();
 }
 
 template <class Coefficient>
@@ -935,14 +935,16 @@ void Polynomial<Coefficient>::divideBy(
     &outputRemainder == &inputDivisor ||
     &outputQuotient == &inputDivisor
   ) {
-    Polynomial<Coefficient> newQuotient, newRemainder;
+    Polynomial<Coefficient> newQuotient;
+    Polynomial<Coefficient> newRemainder;
     this->divideBy(inputDivisor, newQuotient, newRemainder, monomialOrder);
     outputQuotient = newQuotient;
     outputRemainder = newRemainder;
     return;
   }
   outputRemainder = *this;
-  MonomialPolynomial scaleRemainder, scaleInput;
+  MonomialPolynomial scaleRemainder;
+  MonomialPolynomial scaleInput;
   Polynomial<Coefficient> divisorShiftedExponents = inputDivisor;
   outputRemainder.scaleToPositiveMonomialExponents(scaleRemainder);
   divisorShiftedExponents.scaleToPositiveMonomialExponents(scaleInput);
@@ -1104,7 +1106,8 @@ void Polynomial<Coefficient>::interpolate(
   const Vector<Coefficient>& points,
   const Vector<Coefficient>& valuesAtPoints
 ) {
-  Polynomial<Coefficient> lagrangeInterpolator, accumulator;
+  Polynomial<Coefficient> lagrangeInterpolator;
+  Polynomial<Coefficient> accumulator;
   this->makeZero();
   for (int i = 0; i < points.size; i ++) {
     lagrangeInterpolator.makeConstant(1);
@@ -1354,7 +1357,7 @@ getPolynomialStringSpacedMonomialsLaTeX(
   );
   std::stringstream out;
   bool found = false;
-  int countMons = 0;
+  int monomialCount = 0;
   if (firstNonZeroIndex != nullptr) {
     *firstNonZeroIndex = - 1;
   }
@@ -1371,7 +1374,7 @@ getPolynomialStringSpacedMonomialsLaTeX(
         *firstNonZeroIndex = i;
       }
     }
-    countMons ++;
+    monomialCount ++;
     bool useHighlightStyle = false;
     if (highlightColor != nullptr) {
       if (highlightedMonomials != nullptr) {
@@ -1399,7 +1402,7 @@ getPolynomialStringSpacedMonomialsLaTeX(
       out << "& ";
     }
   }
-  if (countMons != polynomial.size()) {
+  if (monomialCount != polynomial.size()) {
     out << " Programming ERROR!";
   }
   return out.str();
@@ -1702,7 +1705,8 @@ void Polynomial<Coefficient>::polynomialWithPolynomialCoefficient(
     << global.fatal;
   }
   output.makeZero();
-  MonomialPolynomial coefficientPart, polynomialPart;
+  MonomialPolynomial coefficientPart;
+  MonomialPolynomial polynomialPart;
   Polynomial<Coefficient> currentCoefficient;
   for (int i = 0; i < this->size(); i ++) {
     coefficientPart.makeOne();

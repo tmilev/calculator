@@ -828,21 +828,21 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
     for (int i = 0; i < this->startingRuleStackSize; i ++) {
       if (ruleStack[i].startsWith(this->owner->opRulesOn())) {
         for (int j = 1; j < ruleStack[i].size(); j ++) {
-          Function& currentFun =
+          Function& currentFunction =
           this->owner->getFunctionHandlerFromNamedRule(
             ruleStack[i][j].getValue<std::string>()
           );
-          currentFun.options.disabledByUser = false;
+          currentFunction.options.disabledByUser = false;
         }
       } else if (
         ruleStack[i].startsWith(this->owner->opRulesOff())
       ) {
         for (int j = 1; j < ruleStack[i].size(); j ++) {
-          Function& currentFun =
+          Function& currentFunction =
           this->owner->getFunctionHandlerFromNamedRule(
             ruleStack[i][j].getValue<std::string>()
           );
-          currentFun.options.disabledByUser = true;
+          currentFunction.options.disabledByUser = true;
         }
       }
     }

@@ -162,7 +162,8 @@ void MathRoutines::lieBracket(
   Element& output
 ) {
   if (&standsOnTheLeft == &output || &standsOnTheRight == &output) {
-    Element standsOnTheLeftNew, standsOnTheRightNew;
+    Element standsOnTheLeftNew;
+    Element standsOnTheRightNew;
     standsOnTheLeftNew = standsOnTheLeft;
     standsOnTheRightNew = standsOnTheRight;
     MathRoutines::lieBracket(standsOnTheLeftNew, standsOnTheRightNew, output);
@@ -490,29 +491,39 @@ bool CalculatorBasics::combineFractions(
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
-  const Expression* quotientE = nullptr;
-  const Expression* summandE = nullptr;
+  const Expression* quotientExpression = nullptr;
+  const Expression* summandExpression = nullptr;
   if (input[1].startsWith(calculator.opDivide(), 3)) {
-    quotientE = &input[1];
-    summandE = &input[2];
+    quotientExpression = &input[1];
+    summandExpression = &input[2];
   } else if (input[2].startsWith(calculator.opDivide(), 3)) {
-    quotientE = &input[2];
-    summandE = &input[1];
+    quotientExpression = &input[2];
+    summandExpression = &input[1];
   } else {
     return false;
   }
-  const Expression& quotientNumeratorE = (*quotientE)[1];
-  const Expression& quotientDenominatorE = (*quotientE)[2];
-  Expression outputSummandE, outputNumE;
-  outputSummandE.makeXOX(
-    calculator, calculator.opTimes(), *summandE, quotientDenominatorE
+  const Expression& quotientNumeratorExpression = (*quotientExpression)[1];
+  const Expression& quotientDenominatorExpression = (*quotientExpression)[2];
+  Expression outputSummandExpression;
+  Expression outputNumeratorExpression;
+  outputSummandExpression.makeXOX(
+    calculator,
+    calculator.opTimes(),
+    *summandExpression,
+    quotientDenominatorExpression
   );
-  outputNumE.makeXOX(
-    calculator, calculator.opPlus(), quotientNumeratorE, outputSummandE
+  outputNumeratorExpression.makeXOX(
+    calculator,
+    calculator.opPlus(),
+    quotientNumeratorExpression,
+    outputSummandExpression
   );
   return
   output.makeXOX(
-    calculator, calculator.opDivide(), outputNumE, quotientDenominatorE
+    calculator,
+    calculator.opDivide(),
+    outputNumeratorExpression,
+    quotientDenominatorExpression
   );
 }
 
@@ -575,12 +586,15 @@ bool CalculatorBasics::associateTimesDivision(
   if (!input[2].startsWith(calculator.opDivide(), 3)) {
     return false;
   }
-  Expression newLeftE;
-  newLeftE.makeXOX(
+  Expression newLeftExpression;
+  newLeftExpression.makeXOX(
     calculator, calculator.opTimes(), input[1], input[2][1]
   );
   output.makeXOX(
-    calculator, calculator.opDivide(), newLeftE, input[2][2]
+    calculator,
+    calculator.opDivide(),
+    newLeftExpression,
+    input[2][2]
   );
   return true;
 }
@@ -834,14 +848,18 @@ bool CalculatorBasics::leftDistributeBracketIsOnTheLeft(
       return false;
     }
   }
-  Expression leftE, rightE;
-  leftE.makeXOX(
+  Expression leftExpression;
+  Expression rightExpression;
+  leftExpression.makeXOX(
     calculator, multiplicativeOperation, input[1][1], input[2]
   );
-  rightE.makeXOX(
+  rightExpression.makeXOX(
     calculator, multiplicativeOperation, input[1][2], input[2]
   );
-  return output.makeXOX(calculator, additiveOperation, leftE, rightE);
+  return
+  output.makeXOX(
+    calculator, additiveOperation, leftExpression, rightExpression
+  );
 }
 
 bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
@@ -871,14 +889,18 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
     }
   }
   //  int format = input.format;
-  Expression leftE, rightE;
-  leftE.makeXOX(
+  Expression leftExpression;
+  Expression rightExpression;
+  leftExpression.makeXOX(
     calculator, multiplicativeOperation, input[1], input[2][1]
   );
-  rightE.makeXOX(
+  rightExpression.makeXOX(
     calculator, multiplicativeOperation, input[1], input[2][2]
   );
-  return output.makeXOX(calculator, additiveOperation, leftE, rightE);
+  return
+  output.makeXOX(
+    calculator, additiveOperation, leftExpression, rightExpression
+  );
 }
 
 bool Calculator::collectCoefficientsPowersVariables(
@@ -887,7 +909,9 @@ bool Calculator::collectCoefficientsPowersVariables(
   VectorSparse<Expression>& outputPositionIiscoeffXtoIth
 ) {
   STACK_TRACE("Calculator::collectCoefficientsPowersVariables");
-  List<Expression> summands, currentMultiplicands, remainingMultiplicands;
+  List<Expression> summands;
+  List<Expression> currentMultiplicands;
+  List<Expression> remainingMultiplicands;
   Calculator& calculator = *input.owner;
   calculator.collectOpands(input, calculator.opPlus(), summands);
   Expression currentCoefficient;
@@ -898,7 +922,7 @@ bool Calculator::collectCoefficientsPowersVariables(
     );
     bool found = false;
     for (int j = 0; j < currentMultiplicands.size; j ++) {
-      const Expression& currentE = currentMultiplicands[j];
+      const Expression& currentExpression = currentMultiplicands[j];
       remainingMultiplicands = currentMultiplicands;
       remainingMultiplicands.removeIndexShiftDown(j);
       if (remainingMultiplicands.size == 0) {
@@ -906,17 +930,17 @@ bool Calculator::collectCoefficientsPowersVariables(
       } else {
         currentCoefficient.makeProduct(calculator, remainingMultiplicands);
       }
-      if (currentE == variable) {
+      if (currentExpression == variable) {
         outputPositionIiscoeffXtoIth.addMonomial(
           MonomialVector(1), currentCoefficient
         );
         found = true;
         break;
       }
-      if (currentE.startsWith(calculator.opPower(), 3)) {
+      if (currentExpression.startsWith(calculator.opPower(), 3)) {
         int power;
-        if (currentE[1] == variable) {
-          if (currentE[2].isSmallInteger(&power)) {
+        if (currentExpression[1] == variable) {
+          if (currentExpression[2].isSmallInteger(&power)) {
             outputPositionIiscoeffXtoIth.addMonomial(
               MonomialVector(power), currentCoefficient
             );
@@ -1197,15 +1221,15 @@ bool CalculatorBasics::evaluateIf(
       calculator, "Error: operation :if = takes three arguments."
     );
   }
-  Rational conditionRat;
-  if (!input[1].isOfType<Rational>(&conditionRat)) {
+  Rational conditionRational;
+  if (!input[1].isOfType<Rational>(&conditionRational)) {
     return false;
   }
-  if (conditionRat.isEqualToOne()) {
+  if (conditionRational.isEqualToOne()) {
     output = input[2];
     return true;
   }
-  if (conditionRat.isEqualToZero()) {
+  if (conditionRational.isEqualToZero()) {
     output = input[3];
     return true;
   }

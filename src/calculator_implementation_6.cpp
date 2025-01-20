@@ -212,19 +212,19 @@ bool CalculatorFunctions::getSummand(
     output.reset(calculator);
     output.addChildAtomOnTop("GetSummand");
     output.addChildOnTop(sums[0]);
-    Expression shiftE;
-    shiftE.assignValue(calculator, summands.size);
-    return output.addChildOnTop(input[2] - shiftE);
+    Expression shiftExpression;
+    shiftExpression.assignValue(calculator, summands.size);
+    return output.addChildOnTop(input[2] - shiftExpression);
   }
   List<Expression> multiplicands;
   expression.getMultiplicandsRecursive(multiplicands);
   Expression sumExpression = *multiplicands.lastObject();
   multiplicands.removeLastObject();
-  Expression coeffExpression;
+  Expression coefficientExpression;
   if (multiplicands.size > 0) {
-    coeffExpression.makeProduct(calculator, multiplicands);
+    coefficientExpression.makeProduct(calculator, multiplicands);
   } else {
-    coeffExpression.assignValue(calculator, 1);
+    coefficientExpression.assignValue(calculator, 1);
   }
   if (!sumExpression.startsWith(calculator.opSum(), 3)) {
     return false;
@@ -238,13 +238,13 @@ bool CalculatorFunctions::getSummand(
     return false;
   }
   Expression substitution = bottomBoundary;
-  Expression valueToSubWith;
-  valueToSubWith = bottomBoundary[2] + input[2];
-  substitution.setChild(2, valueToSubWith);
+  Expression valueToSubstituteWith;
+  valueToSubstituteWith = bottomBoundary[2] + input[2];
+  substitution.setChild(2, valueToSubstituteWith);
   Expression commandSequence(calculator);
   commandSequence.addChildAtomOnTop(calculator.opCommandSequence());
   commandSequence.addChildOnTop(substitution);
-  commandSequence.addChildOnTop(coeffExpression * sumExpression[2]);
+  commandSequence.addChildOnTop(coefficientExpression * sumExpression[2]);
   return
   output.makeXOX(
     calculator,
@@ -316,7 +316,8 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   if (input.size() >= 8) {
     input[7].evaluatesToDouble(&plotObject.lineWidth);
   }
-  Vector<double> lowLeft, upRight;
+  Vector<double> lowLeft;
+  Vector<double> upRight;
   if (!calculator.getVectorDoubles(input[2], lowLeft, 2)) {
     return
     calculator
@@ -345,7 +346,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   plotObject.variableRangesJS[1][0] = lowLeftStrings[1];
   plotObject.variableRangesJS[1][1] = upRightStrings[1];
   plotObject.manifoldImmersion = input[1];
-  Expression jsConverterE;
+  Expression jsConverterExpression;
   JavascriptExtractor extractor(calculator);
   if (input.size() >= 6) {
     if (
@@ -376,18 +377,18 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   plotObject.manifoldImmersion.getFreeVariables(
     plotObject.variablesInPlay, true
   );
-  Expression xE;
-  Expression yE;
-  xE.makeAtom(calculator, "x");
-  yE.makeAtom(calculator, "y");
+  Expression xExpression;
+  Expression yExpression;
+  xExpression.makeAtom(calculator, "x");
+  yExpression.makeAtom(calculator, "y");
   if (plotObject.variablesInPlay.size == 0) {
-    plotObject.variablesInPlay.addOnTop(xE);
+    plotObject.variablesInPlay.addOnTop(xExpression);
   }
   if (plotObject.variablesInPlay.size == 1) {
-    if (plotObject.variablesInPlay.contains(xE)) {
-      plotObject.variablesInPlay.addOnTop(yE);
+    if (plotObject.variablesInPlay.contains(xExpression)) {
+      plotObject.variablesInPlay.addOnTop(yExpression);
     } else {
-      plotObject.variablesInPlay.addOnTop(xE);
+      plotObject.variablesInPlay.addOnTop(xExpression);
     }
   }
   plotObject.variablesInPlay.quickSortAscending();
@@ -1179,9 +1180,9 @@ bool CalculatorFunctions::degreesToRadians(
   if (!input[2].isOperationGiven("\\circ")) {
     return false;
   }
-  Expression piE;
-  piE.makeAtom(calculator, calculator.opPi());
-  output = input[1] * piE;
+  Expression piExpression;
+  piExpression.makeAtom(calculator, calculator.opPi());
+  output = input[1] * piExpression;
   output /= 180;
   return true;
 }
@@ -1210,20 +1211,23 @@ bool CalculatorFunctions::greaterThanOrEqualTo(
   }
   const Expression& left = input[1];
   const Expression& right = input[2];
-  Rational leftRat;
-  Rational rightRat;
-  if (left.isRational(&leftRat) && right.isRational(&rightRat)) {
-    if (leftRat >= rightRat) {
+  Rational leftRational;
+  Rational rightRational;
+  if (
+    left.isRational(&leftRational) && right.isRational(&rightRational)
+  ) {
+    if (leftRational >= rightRational) {
       return output.assignValue(calculator, 1);
     }
     return output.assignValue(calculator, 0);
   }
-  double leftD;
-  double rightD;
+  double leftDouble = 0;
+  double rightDouble = 0;
   if (
-    left.evaluatesToDouble(&leftD) && right.evaluatesToDouble(&rightD)
+    left.evaluatesToDouble(&leftDouble) &&
+    right.evaluatesToDouble(&rightDouble)
   ) {
-    if (leftD >= rightD) {
+    if (leftDouble >= rightDouble) {
       return output.assignValue(calculator, 1);
     }
     return output.assignValue(calculator, 0);
@@ -1240,20 +1244,23 @@ bool CalculatorFunctions::greaterThan(
   }
   const Expression& left = input[1];
   const Expression& right = input[2];
-  Rational leftRat;
-  Rational rightRat;
-  if (left.isRational(&leftRat) && right.isRational(&rightRat)) {
-    if (leftRat > rightRat) {
+  Rational leftRational;
+  Rational rightRational;
+  if (
+    left.isRational(&leftRational) && right.isRational(&rightRational)
+  ) {
+    if (leftRational > rightRational) {
       return output.assignValue(calculator, 1);
     }
     return output.assignValue(calculator, 0);
   }
-  double leftD;
-  double rightD;
+  double leftDouble = 0;
+  double rightDouble = 0;
   if (
-    left.evaluatesToDouble(&leftD) && right.evaluatesToDouble(&rightD)
+    left.evaluatesToDouble(&leftDouble) &&
+    right.evaluatesToDouble(&rightDouble)
   ) {
-    if (leftD > rightD) {
+    if (leftDouble > rightDouble) {
       return output.assignValue(calculator, 1);
     }
     return output.assignValue(calculator, 0);
@@ -1268,11 +1275,12 @@ bool CalculatorFunctions::lessThan(
   if (!input.isListNElements(3)) {
     return false;
   }
-  Expression swappedE(calculator);
-  swappedE.addChildOnTop(input[0]);
-  swappedE.addChildOnTop(input[2]);
-  swappedE.addChildOnTop(input[1]);
-  return CalculatorFunctions::greaterThan(calculator, swappedE, output);
+  Expression swappedExpression(calculator);
+  swappedExpression.addChildOnTop(input[0]);
+  swappedExpression.addChildOnTop(input[2]);
+  swappedExpression.addChildOnTop(input[1]);
+  return
+  CalculatorFunctions::greaterThan(calculator, swappedExpression, output);
 }
 
 bool CalculatorFunctions::collectOpands(
@@ -1341,8 +1349,9 @@ bool CalculatorFunctions::leftIntervalGreaterThanRight(
   bool right1IsDouble = right[1].evaluatesToDouble(&right1);
   bool left2IsDouble = left[2].evaluatesToDouble(&left2);
   bool righ2IsDouble = right[2].evaluatesToDouble(&right2);
-  const Expression& inftyE = right.owner->expressionInfinity();
-  const Expression& mInftyE = right.owner->expressionMinusInfinity();
+  const Expression& infinityExpression = right.owner->expressionInfinity();
+  const Expression& minusInfinityExpression =
+  right.owner->expressionMinusInfinity();
   if (left1IsDouble && right1IsDouble) {
     if (left1 > right1) {
       return true;
@@ -1358,20 +1367,22 @@ bool CalculatorFunctions::leftIntervalGreaterThanRight(
         return false;
       }
     }
-    if (left[2] == inftyE && righ2IsDouble) {
+    if (left[2] == infinityExpression && righ2IsDouble) {
       return true;
     }
-    if (left2IsDouble && right[2] == inftyE) {
+    if (left2IsDouble && right[2] == infinityExpression) {
       return false;
     }
   }
-  if (left[1] == mInftyE && right1IsDouble) {
+  if (left[1] == minusInfinityExpression && right1IsDouble) {
     return false;
   }
-  if (left1IsDouble && right[1] == mInftyE) {
+  if (left1IsDouble && right[1] == minusInfinityExpression) {
     return true;
   }
-  if (left[1] == mInftyE || right[1] == mInftyE) {
+  if (
+    left[1] == minusInfinityExpression || right[1] == minusInfinityExpression
+  ) {
     if (left2IsDouble && righ2IsDouble) {
       if (left2 > right2) {
         return true;
@@ -1380,10 +1391,10 @@ bool CalculatorFunctions::leftIntervalGreaterThanRight(
         return false;
       }
     }
-    if (left[2] == inftyE && righ2IsDouble) {
+    if (left[2] == infinityExpression && righ2IsDouble) {
       return true;
     }
-    if (left2IsDouble && right[2] == inftyE) {
+    if (left2IsDouble && right[2] == infinityExpression) {
       return false;
     }
   }
@@ -1397,12 +1408,12 @@ bool CalculatorFunctionsIntervals::intersectIntervals(
   if (!input.startsWith(calculator.opIntersection(), 3)) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
-  if (!leftE.isIntervalRealLine()) {
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
+  if (!leftExpression.isIntervalRealLine()) {
     return false;
   }
-  if (!rightE.isIntervalRealLine()) {
+  if (!rightExpression.isIntervalRealLine()) {
     return false;
   }
   double left1 = 0;
@@ -1410,13 +1421,14 @@ bool CalculatorFunctionsIntervals::intersectIntervals(
   double right1 = 0;
   double right2 = 0;
   if (
-    !leftE[1].evaluatesToDouble(&left1) || !leftE[2].evaluatesToDouble(&left2)
+    !leftExpression[1].evaluatesToDouble(&left1) ||
+    !leftExpression[2].evaluatesToDouble(&left2)
   ) {
     return false;
   }
   if (
-    !rightE[1].evaluatesToDouble(&right1) ||
-    !rightE[2].evaluatesToDouble(&right2)
+    !rightExpression[1].evaluatesToDouble(&right1) ||
+    !rightExpression[2].evaluatesToDouble(&right2)
   ) {
     return false;
   }
@@ -1430,66 +1442,66 @@ bool CalculatorFunctionsIntervals::intersectIntervals(
   double leftResult = 0;
   double rightResult = 0;
   if (left1 < right1) {
-    leftFinal = rightE[1];
+    leftFinal = rightExpression[1];
     leftResult = right1;
     if (
-      rightE.startsWith(calculator.opSequence()) ||
-      rightE.startsWith(calculator.opIntervalRightClosed())
+      rightExpression.startsWith(calculator.opSequence()) ||
+      rightExpression.startsWith(calculator.opIntervalRightClosed())
     ) {
       leftIsClosed = false;
     }
   }
   if (left1 - right1 == 0.0) {
-    leftFinal = leftE[1];
+    leftFinal = leftExpression[1];
     leftResult = left1;
     if (
-      leftE.startsWith(calculator.opSequence()) ||
-      leftE.startsWith(calculator.opIntervalRightClosed()) ||
-      rightE.startsWith(calculator.opSequence()) ||
-      rightE.startsWith(calculator.opIntervalRightClosed())
+      leftExpression.startsWith(calculator.opSequence()) ||
+      leftExpression.startsWith(calculator.opIntervalRightClosed()) ||
+      rightExpression.startsWith(calculator.opSequence()) ||
+      rightExpression.startsWith(calculator.opIntervalRightClosed())
     ) {
       leftIsClosed = false;
     }
   }
   if (left1 > right1) {
-    leftFinal = leftE[1];
+    leftFinal = leftExpression[1];
     leftResult = left1;
     if (
-      leftE.startsWith(calculator.opSequence()) ||
-      leftE.startsWith(calculator.opIntervalRightClosed())
+      leftExpression.startsWith(calculator.opSequence()) ||
+      leftExpression.startsWith(calculator.opIntervalRightClosed())
     ) {
       leftIsClosed = false;
     }
   }
   // /////////////////////////
   if (left2 > right2) {
-    rightFinal = rightE[2];
+    rightFinal = rightExpression[2];
     rightResult = right2;
     if (
-      rightE.startsWith(calculator.opSequence()) ||
-      rightE.startsWith(calculator.opIntervalLeftClosed())
+      rightExpression.startsWith(calculator.opSequence()) ||
+      rightExpression.startsWith(calculator.opIntervalLeftClosed())
     ) {
       rightIsClosed = false;
     }
   }
   if (left2 - right2 == 0.0) {
-    rightFinal = rightE[2];
+    rightFinal = rightExpression[2];
     rightResult = right2;
     if (
-      leftE.startsWith(calculator.opSequence()) ||
-      leftE.startsWith(calculator.opIntervalLeftClosed()) ||
-      rightE.startsWith(calculator.opSequence()) ||
-      rightE.startsWith(calculator.opIntervalLeftClosed())
+      leftExpression.startsWith(calculator.opSequence()) ||
+      leftExpression.startsWith(calculator.opIntervalLeftClosed()) ||
+      rightExpression.startsWith(calculator.opSequence()) ||
+      rightExpression.startsWith(calculator.opIntervalLeftClosed())
     ) {
       rightIsClosed = false;
     }
   }
   if (left2 < right2) {
-    rightFinal = leftE[2];
+    rightFinal = leftExpression[2];
     rightResult = left2;
     if (
-      leftE.startsWith(calculator.opSequence()) ||
-      leftE.startsWith(calculator.opIntervalLeftClosed())
+      leftExpression.startsWith(calculator.opSequence()) ||
+      leftExpression.startsWith(calculator.opIntervalLeftClosed())
     ) {
       rightIsClosed = false;
     }
@@ -1537,15 +1549,17 @@ bool CalculatorFunctionsIntervals::unionUnionIntervals(
   if (input.size() != 3) {
     return false;
   }
-  const Expression& leftE = input[1];
+  const Expression& leftExpression = input[1];
   const Expression& rightComposite = input[2];
   if (!rightComposite.startsWith(calculator.opUnion(), 3)) {
     return false;
   }
-  const Expression& rightE = input[2][1];
+  const Expression& rightExpression = input[2][1];
   Expression middleUnion;
   Expression middleUnionReduced;
-  middleUnion.makeXOX(calculator, calculator.opUnion(), leftE, rightE);
+  middleUnion.makeXOX(
+    calculator, calculator.opUnion(), leftExpression, rightExpression
+  );
   if (
     !CalculatorFunctionsIntervals::unionIntervals(
       calculator, middleUnion, middleUnionReduced
@@ -1569,23 +1583,27 @@ bool CalculatorFunctionsIntervals::unionIntervals(
   if (input.size() != 3) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
-  if (!leftE.isIntervalRealLine()) {
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
+  if (!leftExpression.isIntervalRealLine()) {
     return false;
   }
-  if (!rightE.isIntervalRealLine()) {
+  if (!rightExpression.isIntervalRealLine()) {
     return false;
   }
-  double left1 = 0, left2 = 0, right1 = 0, right2 = 0;
+  double left1 = 0;
+  double left2 = 0;
+  double right1 = 0;
+  double right2 = 0;
   if (
-    !leftE[1].evaluatesToDouble(&left1) || !leftE[2].evaluatesToDouble(&left2)
+    !leftExpression[1].evaluatesToDouble(&left1) ||
+    !leftExpression[2].evaluatesToDouble(&left2)
   ) {
     return false;
   }
   if (
-    !rightE[1].evaluatesToDouble(&right1) ||
-    !rightE[2].evaluatesToDouble(&right2)
+    !rightExpression[1].evaluatesToDouble(&right1) ||
+    !rightExpression[2].evaluatesToDouble(&right2)
   ) {
     return false;
   }
@@ -1597,8 +1615,8 @@ bool CalculatorFunctionsIntervals::unionIntervals(
     makeUnion = true;
   }
   if ((right1 - left2 == 0.0) &&
-    leftE.startsWith(calculator.opIntervalOpen(), 3) &&
-    rightE.startsWith(calculator.opIntervalOpen(), 3)
+    leftExpression.startsWith(calculator.opIntervalOpen(), 3) &&
+    rightExpression.startsWith(calculator.opIntervalOpen(), 3)
   ) {
     makeUnion = false;
   }
@@ -1610,60 +1628,60 @@ bool CalculatorFunctionsIntervals::unionIntervals(
   Expression leftFinal;
   Expression rightFinal;
   if (left1 < right1) {
-    leftFinal = leftE[1];
+    leftFinal = leftExpression[1];
     if (
-      leftE.startsWith(calculator.opIntervalClosed()) ||
-      leftE.startsWith(calculator.opIntervalLeftClosed())
+      leftExpression.startsWith(calculator.opIntervalClosed()) ||
+      leftExpression.startsWith(calculator.opIntervalLeftClosed())
     ) {
       leftIsClosed = true;
     }
   }
   if (left1 - right1 == 0.0) {
-    leftFinal = leftE[1];
+    leftFinal = leftExpression[1];
     if (
-      leftE.startsWith(calculator.opIntervalClosed()) ||
-      leftE.startsWith(calculator.opIntervalLeftClosed()) ||
-      rightE.startsWith(calculator.opIntervalClosed()) ||
-      rightE.startsWith(calculator.opIntervalLeftClosed())
+      leftExpression.startsWith(calculator.opIntervalClosed()) ||
+      leftExpression.startsWith(calculator.opIntervalLeftClosed()) ||
+      rightExpression.startsWith(calculator.opIntervalClosed()) ||
+      rightExpression.startsWith(calculator.opIntervalLeftClosed())
     ) {
       leftIsClosed = true;
     }
   }
   if (left1 > right1) {
-    leftFinal = rightE[1];
+    leftFinal = rightExpression[1];
     if (
-      rightE.startsWith(calculator.opIntervalClosed()) ||
-      rightE.startsWith(calculator.opIntervalLeftClosed())
+      rightExpression.startsWith(calculator.opIntervalClosed()) ||
+      rightExpression.startsWith(calculator.opIntervalLeftClosed())
     ) {
       leftIsClosed = true;
     }
   }
   // /////////////////////
   if (left2 > right2) {
-    rightFinal = leftE[2];
+    rightFinal = leftExpression[2];
     if (
-      leftE.startsWith(calculator.opIntervalClosed()) ||
-      leftE.startsWith(calculator.opIntervalRightClosed())
+      leftExpression.startsWith(calculator.opIntervalClosed()) ||
+      leftExpression.startsWith(calculator.opIntervalRightClosed())
     ) {
       rightIsClosed = true;
     }
   }
   if (left2 - right2 == 0.0) {
-    rightFinal = rightE[2];
+    rightFinal = rightExpression[2];
     if (
-      leftE.startsWith(calculator.opIntervalClosed()) ||
-      leftE.startsWith(calculator.opIntervalRightClosed()) ||
-      rightE.startsWith(calculator.opIntervalClosed()) ||
-      rightE.startsWith(calculator.opIntervalRightClosed())
+      leftExpression.startsWith(calculator.opIntervalClosed()) ||
+      leftExpression.startsWith(calculator.opIntervalRightClosed()) ||
+      rightExpression.startsWith(calculator.opIntervalClosed()) ||
+      rightExpression.startsWith(calculator.opIntervalRightClosed())
     ) {
       rightIsClosed = true;
     }
   }
   if (left2 < right2) {
-    rightFinal = rightE[2];
+    rightFinal = rightExpression[2];
     if (
-      rightE.startsWith(calculator.opIntervalClosed()) ||
-      rightE.startsWith(calculator.opIntervalRightClosed())
+      rightExpression.startsWith(calculator.opIntervalClosed()) ||
+      rightExpression.startsWith(calculator.opIntervalRightClosed())
     ) {
       rightIsClosed = true;
     }
@@ -1951,7 +1969,7 @@ bool CalculatorFunctions::distributeSqrt(
     return false;
   }
   const Expression& base = input[2];
-  const Expression& oneOverExponentE = input[1];
+  const Expression& oneOverExponentExpression = input[1];
   if (!base.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
@@ -1960,12 +1978,12 @@ bool CalculatorFunctions::distributeSqrt(
   }
   bool isGood = base[1].isPositiveNumber() || base[2].isPositiveNumber();
   if (!isGood) {
-    if (oneOverExponentE.isInteger()) {
+    if (oneOverExponentExpression.isInteger()) {
       isGood = true;
     } else {
-      Rational exponentRat;
-      if (oneOverExponentE.isRational(&exponentRat)) {
-        if (!exponentRat.getDenominator().isEven()) {
+      Rational exponentRational;
+      if (oneOverExponentExpression.isRational(&exponentRational)) {
+        if (!exponentRational.getDenominator().isEven()) {
           isGood = true;
         }
       }
@@ -1974,15 +1992,24 @@ bool CalculatorFunctions::distributeSqrt(
   if (!isGood) {
     return false;
   }
-  Expression leftE;
-  Expression rightE;
-  leftE.makeXOX(
-    calculator, calculator.opSqrt(), oneOverExponentE, base[1]
+  Expression leftExpression;
+  Expression rightExpression;
+  leftExpression.makeXOX(
+    calculator,
+    calculator.opSqrt(),
+    oneOverExponentExpression,
+    base[1]
   );
-  rightE.makeXOX(
-    calculator, calculator.opSqrt(), oneOverExponentE, base[2]
+  rightExpression.makeXOX(
+    calculator,
+    calculator.opSqrt(),
+    oneOverExponentExpression,
+    base[2]
   );
-  return output.makeXOX(calculator, calculator.opTimes(), leftE, rightE);
+  return
+  output.makeXOX(
+    calculator, calculator.opTimes(), leftExpression, rightExpression
+  );
 }
 
 bool CalculatorFunctionsAlgebraic::isAlgebraicRadical(
@@ -2030,16 +2057,16 @@ bool CalculatorFunctions::isProductTermsUpToPower(
   }
   Expression baseExpression;
   baseExpression = input[1];
-  LargeInteger desiredMaxPower = 1;
+  LargeInteger desiredMaximumPower = 1;
   if (baseExpression.startsWith(calculator.opPower(), 3)) {
-    if (baseExpression[2].isInteger(&desiredMaxPower)) {
-      if (desiredMaxPower > 0) {
+    if (baseExpression[2].isInteger(&desiredMaximumPower)) {
+      if (desiredMaximumPower > 0) {
         baseExpression = input[1][1];
       } else {
-        desiredMaxPower = 1;
+        desiredMaximumPower = 1;
       }
     } else {
-      desiredMaxPower = 1;
+      desiredMaximumPower = 1;
     }
   }
   List<Expression> multiplicands;
@@ -2083,7 +2110,7 @@ bool CalculatorFunctions::isProductTermsUpToPower(
           return output.assignValue(calculator, 0);
         }
       }
-      if (foundPower > desiredMaxPower) {
+      if (foundPower > desiredMaximumPower) {
         return output.assignValue(calculator, 0);
       }
     }
@@ -2122,7 +2149,8 @@ bool CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic(
   if (exponent.getDenominator() != 2) {
     return false;
   }
-  Expression radical, reduced;
+  Expression radical;
+  Expression reduced;
   radical.makeXOX(
     calculator,
     calculator.opSqrt(),
@@ -2276,8 +2304,8 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
     << "Elliptic curve expects 3 arguments "
     << "(curve, generator letter, baseX and baseY) ";
   }
-  const Expression& xDefE = input[2];
-  const Expression& yDefE = input[3];
+  const Expression& xDefinitionExpression = input[2];
+  const Expression& yDefinitionExpression = input[3];
   //  HashedList<Expression> xEcandidates, yEcandidates;
   //  if (!xDefE.getFreeVariables(xEcandidates, false))
   // return calculator << "Failed to get free variables from " <<
@@ -2290,17 +2318,17 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   // xEcandidates.toStringCommaDelimited()
   //    << " and/or " << yEcandidates.toStringCommaDelimited();
   //  if (CalculatorFunctions::equalityToArithmeticExpression())
-  if (!xDefE.startsWith(calculator.opDefine(), 3)) {
+  if (!xDefinitionExpression.startsWith(calculator.opDefine(), 3)) {
     return
     calculator
     << "Failed to extract variable form "
-    << xDefE.toString();
+    << xDefinitionExpression.toString();
   }
-  if (!yDefE.startsWith(calculator.opDefine(), 3)) {
+  if (!yDefinitionExpression.startsWith(calculator.opDefine(), 3)) {
     return
     calculator
     << "Failed to extract variable form "
-    << yDefE.toString();
+    << yDefinitionExpression.toString();
   }
   ElementEllipticCurve<ElementZmodP> elementZmodP;
   ElementEllipticCurve<Rational> elementRational;
@@ -2308,25 +2336,29 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   elementRational.flagInfinity = false;
   bool isRational = true;
   bool isElementZmodP = true;
-  if (!xDefE[2].isOfType(&elementRational.xCoordinate)) {
+  if (
+    !xDefinitionExpression[2].isOfType(&elementRational.xCoordinate)
+  ) {
     isRational = false;
   }
-  if (!yDefE[2].isOfType(&elementRational.yCoordinate)) {
+  if (
+    !yDefinitionExpression[2].isOfType(&elementRational.yCoordinate)
+  ) {
     isRational = false;
   }
-  if (!xDefE[2].isOfType(&elementZmodP.xCoordinate)) {
+  if (!xDefinitionExpression[2].isOfType(&elementZmodP.xCoordinate)) {
     isElementZmodP = false;
   }
-  if (!yDefE[2].isOfType(&elementZmodP.yCoordinate)) {
+  if (!yDefinitionExpression[2].isOfType(&elementZmodP.yCoordinate)) {
     isElementZmodP = false;
   }
   if (!isRational && !isElementZmodP) {
     return
     calculator
     << "Could not extract rational or element of z mod p from "
-    << xDefE[2].toString()
+    << xDefinitionExpression[2].toString()
     << ", "
-    << yDefE[2].toString();
+    << yDefinitionExpression[2].toString();
   }
   if (isElementZmodP) {
     if (
@@ -2335,10 +2367,10 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
       return calculator << "The two base coordinates have different moduli. ";
     }
   }
-  Expression curveE;
+  Expression curveExpression;
   if (
     !CalculatorFunctions::functionEqualityToArithmeticExpression(
-      calculator, input[1], curveE
+      calculator, input[1], curveExpression
     )
   ) {
     return
@@ -2350,10 +2382,13 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   WithContext<Polynomial<Rational> > polynomialWithContext;
   if (
     !CalculatorConversions::functionPolynomial<Rational>(
-      calculator, curveE, polynomialWithContext, - 1, - 1, false
+      calculator, curveExpression, polynomialWithContext, - 1, - 1, false
     )
   ) {
-    return calculator << "Could not get polynomial from " << curveE.toString();
+    return
+    calculator
+    << "Could not get polynomial from "
+    << curveExpression.toString();
   }
   ExpressionContext curveContext = polynomialWithContext.context;
   Polynomial<Rational> polynomial = polynomialWithContext.content;
@@ -2361,7 +2396,7 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
     return
     calculator
     << "Expected 2 context variables in "
-    << curveE.toString()
+    << curveExpression.toString()
     << ", got context: "
     << curveContext.toString();
   }
@@ -2377,26 +2412,26 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   if (leadingMonomial[indexX] != 3) {
     MathRoutines::swap(indexX, indexY);
   }
-  Expression xE = xDefE[1];
-  Expression yE = yDefE[1];
-  if (curveContext.getVariable(indexX) != xE) {
-    MathRoutines::swap(xE, yE);
+  Expression xExpression = xDefinitionExpression[1];
+  Expression yExpression = yDefinitionExpression[1];
+  if (curveContext.getVariable(indexX) != xExpression) {
+    MathRoutines::swap(xExpression, yExpression);
   }
-  if (curveContext.getVariable(indexY) != yE) {
+  if (curveContext.getVariable(indexY) != yExpression) {
     return
     calculator
     << "Curve variable "
     << curveContext.getVariable(1).toString()
     << " not equal to "
-    << yE.toString();
+    << yExpression.toString();
   }
   calculator
   << "Created elliptic curve "
   << polynomial.toString()
   << " = 0. The variables are assumed to be: x = "
-  << xE.toString()
+  << xExpression.toString()
   << ", y = "
-  << yE.toString();
+  << yExpression.toString();
   if (polynomial.size() > 4) {
     return
     calculator
@@ -2445,12 +2480,12 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
     return
     calculator
     << "It appears your curve: "
-    << curveE.toString()
+    << curveExpression.toString()
     << " is not of the form y^2 = x^3 + ax + b. ";
   }
   ExpressionContext context(calculator);
-  context.addVariable(xE);
-  context.addVariable(yE);
+  context.addVariable(xExpression);
+  context.addVariable(yExpression);
   if (isRational) {
     return
     output.assignValueWithContext(calculator, elementRational, context);
@@ -2655,9 +2690,9 @@ bool CalculatorFunctions::determinantPolynomial(
     << "This function is meant to be used with honest "
     << "polynomial entries. ";
   }
-  Polynomial<Rational> outputPoly;
-  outputPoly.makeDeterminantFromSquareMatrix(matrixPolynomial);
-  return output.assignValueWithContext(calculator, outputPoly, context);
+  Polynomial<Rational> outputPolynomial;
+  outputPolynomial.makeDeterminantFromSquareMatrix(matrixPolynomial);
+  return output.assignValueWithContext(calculator, outputPolynomial, context);
 }
 
 bool CalculatorFunctions::generateMultiplicativelyClosedSet(
@@ -2672,7 +2707,7 @@ bool CalculatorFunctions::generateMultiplicativelyClosedSet(
       "upper bound and at least one element to multiply. "
     );
   }
-  int upperLimit;
+  int upperLimit = 0;
   if (!input[1].isSmallInteger(&upperLimit)) {
     return
     output.assignError(
@@ -2871,14 +2906,14 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
   if (!input.isListNElements(4)) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& middleE = input[2];
-  const Expression& rightE = input[3];
+  const Expression& leftExpression = input[1];
+  const Expression& middleExpression = input[2];
+  const Expression& rightExpression = input[3];
   int numberOfRows = 0;
   int numberOfColumns = 0;
   if (
-    !middleE.isIntegerFittingInInt(&numberOfRows) ||
-    !rightE.isIntegerFittingInInt(&numberOfColumns)
+    !middleExpression.isIntegerFittingInInt(&numberOfRows) ||
+    !rightExpression.isIntegerFittingInInt(&numberOfColumns)
   ) {
     return false;
   }
@@ -2900,16 +2935,16 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
   }
   Matrix<Expression> resultMatrix;
   resultMatrix.initialize(numberOfRows, numberOfColumns);
-  Expression leftIE;
-  Expression rightIE;
+  Expression leftIExpression;
+  Expression rightIExpression;
   for (int i = 0; i < numberOfRows; i ++) {
     for (int j = 0; j < numberOfColumns; j ++) {
-      leftIE.assignValue(calculator, i + 1);
-      rightIE.assignValue(calculator, j + 1);
+      leftIExpression.assignValue(calculator, i + 1);
+      rightIExpression.assignValue(calculator, j + 1);
       resultMatrix.elements[i][j].reset(calculator, 3);
-      resultMatrix.elements[i][j].addChildOnTop(leftE);
-      resultMatrix.elements[i][j].addChildOnTop(leftIE);
-      resultMatrix.elements[i][j].addChildOnTop(rightIE);
+      resultMatrix.elements[i][j].addChildOnTop(leftExpression);
+      resultMatrix.elements[i][j].addChildOnTop(leftIExpression);
+      resultMatrix.elements[i][j].addChildOnTop(rightIExpression);
     }
   }
   return
@@ -3018,14 +3053,14 @@ bool CalculatorFunctions::suffixNotationForPostScript(
     out << " " << FloatingPoint::doubleToString(doubleValue);
     return output.assignValue(calculator, out.str());
   }
-  Expression currentE;
+  Expression currentExpression;
   bool useUsualOrder = !input[0].isOperationGiven(calculator.opDivide()) &&
   !input[0].isOperationGiven(calculator.opPower());
   if (useUsualOrder) {
     for (int i = input.size() - 1; i >= 1; i --) {
       if (
         !CalculatorFunctions::suffixNotationForPostScript(
-          calculator, input[i], currentE
+          calculator, input[i], currentExpression
         )
       ) {
         return
@@ -3033,7 +3068,7 @@ bool CalculatorFunctions::suffixNotationForPostScript(
           calculator, "Failed to convert " + input[i].toString()
         );
       }
-      if (!currentE.isOfType(&currentString)) {
+      if (!currentExpression.isOfType(&currentString)) {
         return
         output.assignError(
           calculator, "Failed to convert " + input[i].toString()
@@ -3045,7 +3080,7 @@ bool CalculatorFunctions::suffixNotationForPostScript(
     for (int i = 1; i < input.size(); i ++) {
       if (
         !CalculatorFunctions::suffixNotationForPostScript(
-          calculator, input[i], currentE
+          calculator, input[i], currentExpression
         )
       ) {
         return
@@ -3053,7 +3088,7 @@ bool CalculatorFunctions::suffixNotationForPostScript(
           calculator, "Failed to convert " + input[i].toString()
         );
       }
-      if (!currentE.isOfType(&currentString)) {
+      if (!currentExpression.isOfType(&currentString)) {
         return
         output.assignError(
           calculator, "Failed to convert " + input[i].toString()
@@ -3064,7 +3099,7 @@ bool CalculatorFunctions::suffixNotationForPostScript(
   }
   if (
     !CalculatorFunctions::suffixNotationForPostScript(
-      calculator, input[0], currentE
+      calculator, input[0], currentExpression
     )
   ) {
     return
@@ -3072,7 +3107,7 @@ bool CalculatorFunctions::suffixNotationForPostScript(
       calculator, "Failed to convert " + input[0].toString()
     );
   }
-  if (!currentE.isOfType(&currentString)) {
+  if (!currentExpression.isOfType(&currentString)) {
     return
     output.assignError(
       calculator, "Failed to convert " + input[0].toString()
@@ -3105,7 +3140,7 @@ bool CalculatorFunctions::freudenthalFull(
 ) {
   Vector<Rational> hwFundamental;
   Vector<Rational> hwSimple;
-  Selection tempSel;
+  Selection selection;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
     !calculator.getTypeHighestWeightParabolic<Rational>(
@@ -3113,7 +3148,7 @@ bool CalculatorFunctions::freudenthalFull(
       input,
       output,
       hwFundamental,
-      tempSel,
+      selection,
       semisimpleLieAlgebra
     )
   ) {
@@ -3125,27 +3160,27 @@ bool CalculatorFunctions::freudenthalFull(
   if (output.isError()) {
     return true;
   }
-  if (tempSel.cardinalitySelection > 0) {
+  if (selection.cardinalitySelection > 0) {
     return
     output.assignError(calculator, "Failed to extract highest weight. ");
   }
-  CharacterSemisimpleLieAlgebraModule<Rational> startingChar;
-  CharacterSemisimpleLieAlgebraModule<Rational> resultChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> startingCharacter;
+  CharacterSemisimpleLieAlgebraModule<Rational> resultCharacter;
   hwSimple =
   semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(
     hwFundamental, Rational::zero()
   );
-  startingChar.makeFromWeight(hwSimple, semisimpleLieAlgebra.content);
+  startingCharacter.makeFromWeight(hwSimple, semisimpleLieAlgebra.content);
   std::string reportString;
   if (
-    !startingChar.freudenthalEvaluateMeFullCharacter(
-      resultChar, 10000, &reportString
+    !startingCharacter.freudenthalEvaluateMeFullCharacter(
+      resultCharacter, 10000, &reportString
     )
   ) {
     return output.assignError(calculator, reportString);
   }
   std::stringstream out;
-  out << resultChar.toString();
+  out << resultCharacter.toString();
   return output.assignValue(calculator, out.str());
 }
 
@@ -3178,22 +3213,22 @@ bool CalculatorFunctions::freudenthalFormula(
     return
     output.assignError(calculator, "Failed to extract highest weight. ");
   }
-  CharacterSemisimpleLieAlgebraModule<Rational> startingChar;
-  CharacterSemisimpleLieAlgebraModule<Rational> resultChar;
+  CharacterSemisimpleLieAlgebraModule<Rational> startingCharacter;
+  CharacterSemisimpleLieAlgebraModule<Rational> resultCharacter;
   hwSimple =
   semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental(
     hwFundamental, Rational::zero()
   );
-  startingChar.makeFromWeight(hwSimple, semisimpleLieAlgebra.content);
+  startingCharacter.makeFromWeight(hwSimple, semisimpleLieAlgebra.content);
   std::string reportString;
   if (
-    !startingChar.freudenthalEvalMeDominantWeightsOnly(
-      resultChar, 10000, &reportString
+    !startingCharacter.freudenthalEvalMeDominantWeightsOnly(
+      resultCharacter, 10000, &reportString
     )
   ) {
     return output.assignError(calculator, reportString);
   }
-  return output.assignValue(calculator, resultChar);
+  return output.assignValue(calculator, resultCharacter);
 }
 
 std::string StringRoutines::Conversions::stringToCalculatorDisplay(
@@ -3268,12 +3303,13 @@ bool CalculatorFunctions::jacobiSymbol(
   if (input.size() != 3) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
   int leftInt = 0;
   int rightInt = 0;
   if (
-    !leftE.isSmallInteger(&leftInt) || !rightE.isSmallInteger(&rightInt)
+    !leftExpression.isSmallInteger(&leftInt) ||
+    !rightExpression.isSmallInteger(&rightInt)
   ) {
     return false;
   }

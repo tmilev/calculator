@@ -44,8 +44,8 @@ public:
     Vectors<double>& outputAppend,
     const Vector<double>& left,
     const Vector<double>& right,
-    double leftVal,
-    double rightVal
+    double leftValue,
+    double rightValue
   );
   bool computePoints(
     Calculator& calculator, const Expression& input, bool showGrid
@@ -119,13 +119,13 @@ double MeshTriangles::getTriangleMaxSideLength(int triangleIndex) {
     << this->triangles[triangleIndex]
     << global.fatal;
   }
-  Vector<double>& firstV = this->triangles[triangleIndex][0];
-  Vector<double>& secondV = this->triangles[triangleIndex][1];
-  Vector<double>& thirdV = this->triangles[triangleIndex][2];
+  Vector<double>& firstVector = this->triangles[triangleIndex][0];
+  Vector<double>& secondVector = this->triangles[triangleIndex][1];
+  Vector<double>& thirdVector = this->triangles[triangleIndex][2];
   List<Vector<double> > sides;
-  sides.addOnTop(firstV - secondV);
-  sides.addOnTop(secondV - thirdV);
-  sides.addOnTop(thirdV - firstV);
+  sides.addOnTop(firstVector - secondVector);
+  sides.addOnTop(secondVector - thirdVector);
+  sides.addOnTop(thirdVector - firstVector);
   double result = 0;
   for (int i = 0; i < sides.size; i ++) {
     double normSquared = sides[i][0] * sides[i][0] + sides[i][1] * sides[i][1];
@@ -141,19 +141,19 @@ void MeshTriangles::addPointFromVerticesValues(
   Vectors<double>& outputAppend,
   const Vector<double>& left,
   const Vector<double>& right,
-  double leftVal,
-  double rightVal
+  double leftValue,
+  double rightValue
 ) {
-  double Delta = leftVal - rightVal;
+  double Delta = leftValue - rightValue;
   if (Delta == 0.0) {
     outputAppend.addOnTop(left);
     return;
   }
-  double contributionLeft = rightVal / Delta;
+  double contributionLeft = rightValue / Delta;
   if (contributionLeft < 0) {
     contributionLeft *= - 1;
   }
-  double contributionRight = leftVal / Delta;
+  double contributionRight = leftValue / Delta;
   if (contributionRight < 0) {
     contributionRight *= - 1;
   }
@@ -682,51 +682,57 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
   if (!functionExpression.startsWith(calculator.opTimes(), 3)) {
     return false;
   }
-  Expression exponentPartE = functionExpression[1];
+  Expression exponentPartExpression = functionExpression[1];
   // <- note: the seemingly odd order is intentional!
-  Expression polyPartE = functionExpression[2];
+  Expression polynomialPartExpression = functionExpression[2];
   // <- note: the seemingly odd order is intentional!
-  Expression powerOfXE;
-  Expression powerOfEE;
-  Expression aE;
-  Expression bE;
+  Expression powerOfXExpression;
+  Expression powerOfEExpression;
+  Expression aExpression;
+  Expression bExpression;
   // exponent is of form aX+b
-  powerOfXE.assignValue(calculator, 1);
+  powerOfXExpression.assignValue(calculator, 1);
   bool isGood = false;
   for (int i = 0; i < 2; i ++) {
-    MathRoutines::swap(exponentPartE, polyPartE);
-    if (!exponentPartE.startsWith(calculator.opPower(), 3)) {
+    MathRoutines::swap(exponentPartExpression, polynomialPartExpression);
+    if (!exponentPartExpression.startsWith(calculator.opPower(), 3)) {
       continue;
     }
-    if (!exponentPartE[1].isOperationGiven(calculator.opE())) {
+    if (
+      !exponentPartExpression[1].isOperationGiven(calculator.opE())
+    ) {
       continue;
     }
-    powerOfEE = exponentPartE[2];
+    powerOfEExpression = exponentPartExpression[2];
     if (
       !CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(
-        powerOfEE, variableExpression, aE, bE
+        powerOfEExpression, variableExpression, aExpression, bExpression
       )
     ) {
       continue;
     }
-    if (!aE.isConstantNumber() || !bE.isConstantNumber()) {
+    if (
+      !aExpression.isConstantNumber() || !bExpression.isConstantNumber()
+    ) {
       continue;
     }
-    if (polyPartE != variableExpression) {
-      if (!polyPartE.startsWith(calculator.opPower(), 3)) {
+    if (polynomialPartExpression != variableExpression) {
+      if (
+        !polynomialPartExpression.startsWith(calculator.opPower(), 3)
+      ) {
         continue;
       }
-      if (polyPartE[1] != variableExpression) {
+      if (polynomialPartExpression[1] != variableExpression) {
         continue;
       }
       int integerValue = - 1;
-      if (!polyPartE[2].isSmallInteger(&integerValue)) {
+      if (!polynomialPartExpression[2].isSmallInteger(&integerValue)) {
         continue;
       }
       if (integerValue <= 0) {
         continue;
       }
-      powerOfXE = polyPartE[2];
+      powerOfXExpression = polynomialPartExpression[2];
     }
     isGood = true;
     break;
@@ -740,13 +746,17 @@ bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
     calculator,
     calculator.opPower(),
     variableExpression,
-    powerOfXE - calculator.expressionOne()
+    powerOfXExpression - calculator.expressionOne()
   );
-  remainingIntegrand *= exponentPartE;
+  remainingIntegrand *= exponentPartExpression;
   integralPart.makeIntegral(
     calculator, setExpression, remainingIntegrand, variableExpression
   );
-  output = (polyPartE * exponentPartE - powerOfXE * integralPart) / aE;
+  output = (
+    polynomialPartExpression *
+    exponentPartExpression - powerOfXExpression * integralPart
+  ) /
+  aExpression;
   return true;
 }
 
@@ -893,20 +903,23 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
       }
     }
   }
-  Expression substitutionTop(calculator), substitutionBottom(calculator);
+  Expression substitutionTop(calculator);
+  Expression substitutionBottom(calculator);
   substitutionTop.addChildAtomOnTop(calculator.opDefine());
   substitutionTop.addChildOnTop(variableExpression);
   substitutionBottom = substitutionTop;
   substitutionBottom.addChildOnTop(setExpression[1]);
   substitutionTop.addChildOnTop(setExpression[2]);
-  Expression topCommands(calculator), bottomCommands(calculator);
+  Expression topCommands(calculator);
+  Expression bottomCommands(calculator);
   topCommands.addChildAtomOnTop(calculator.opCommandSequence());
   bottomCommands.addChildAtomOnTop(calculator.opCommandSequence());
   topCommands.addChildOnTop(substitutionTop);
   bottomCommands.addChildOnTop(substitutionBottom);
   topCommands.addChildOnTop(solvedIntegral);
   bottomCommands.addChildOnTop(solvedIntegral);
-  Expression topExpression, bottomExpression;
+  Expression topExpression;
+  Expression bottomExpression;
   topExpression.makeXOX(
     calculator,
     calculator.opUnderscore(),
@@ -1003,7 +1016,8 @@ bool CalculatorFunctions::denominator(
     return false;
   }
   const Expression& argument = input[1];
-  Rational rational, denominator;
+  Rational rational;
+  Rational denominator;
   if (argument.isRational(&rational)) {
     denominator = rational.getDenominator();
     return output.assignValue(calculator, denominator);
@@ -1059,9 +1073,9 @@ bool CalculatorFunctions::sumAsOperatorToSumInternalNotation(
   for (int i = 1; i < input.size(); i ++) {
     remaining.addOnTop(input[i]);
   }
-  Expression argumentE;
-  argumentE.makeSequence(calculator, &remaining);
-  return output.addChildOnTop(argumentE);
+  Expression argumentExpression;
+  argumentExpression.makeSequence(calculator, &remaining);
+  return output.addChildOnTop(argumentExpression);
 }
 
 bool CalculatorFunctions::sumTimesExpressionToSumOf(
@@ -1289,31 +1303,31 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
     return false;
   }
   const Expression& expression = input[1];
-  HashedList<Expression> mandatoryFreeVars;
-  HashedList<Expression> allowedFreeVars;
-  HashedList<Expression> presentFreeVars;
+  HashedList<Expression> mandatoryFreeVariables;
+  HashedList<Expression> allowedFreeVariables;
+  HashedList<Expression> presentFreeVariables;
   if (input[2].isSequenceNElements()) {
-    mandatoryFreeVars.setExpectedSize(input[2].size() - 1);
+    mandatoryFreeVariables.setExpectedSize(input[2].size() - 1);
     for (int i = 1; i < input[2].size(); i ++) {
-      mandatoryFreeVars.addOnTop(input[2][i]);
+      mandatoryFreeVariables.addOnTop(input[2][i]);
     }
   } else {
-    mandatoryFreeVars.addOnTop(input[2]);
+    mandatoryFreeVariables.addOnTop(input[2]);
   }
-  allowedFreeVars.addListOnTop(mandatoryFreeVars);
+  allowedFreeVariables.addListOnTop(mandatoryFreeVariables);
   if (input.size() > 3) {
     if (input[3].isSequenceNElements()) {
       for (int i = 1; i < input[3].size(); i ++) {
-        allowedFreeVars.addOnTop(input[3][i]);
+        allowedFreeVariables.addOnTop(input[3][i]);
       }
     } else {
-      allowedFreeVars.addOnTop(input[3]);
+      allowedFreeVariables.addOnTop(input[3]);
     }
   }
-  presentFreeVars.setExpectedSize(input.size() - 2);
-  expression.getFreeVariables(presentFreeVars, excludeNamedConstants);
+  presentFreeVariables.setExpectedSize(input.size() - 2);
+  expression.getFreeVariables(presentFreeVariables, excludeNamedConstants);
   std::stringstream out;
-  if (!presentFreeVars.contains(mandatoryFreeVars)) {
+  if (!presentFreeVariables.contains(mandatoryFreeVariables)) {
     out << "<hr>";
     out
     << "Your expression:<br>\\("
@@ -1322,22 +1336,22 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
     << "<br><b style ='color:red'>"
     << "is required to contain the variables:</b><br><b>";
     bool found = false;
-    for (int i = 0; i < mandatoryFreeVars.size; i ++) {
-      if (!presentFreeVars.contains(mandatoryFreeVars[i])) {
+    for (int i = 0; i < mandatoryFreeVariables.size; i ++) {
+      if (!presentFreeVariables.contains(mandatoryFreeVariables[i])) {
         if (found) {
           out << ", ";
         }
         found = true;
-        out << "\\(" << mandatoryFreeVars[i].toString() << "\\)";
+        out << "\\(" << mandatoryFreeVariables[i].toString() << "\\)";
       }
     }
     out << "</b>.";
     out
     << "<br>The mandatory variable(s) are: "
-    << mandatoryFreeVars.toStringCommaDelimited()
+    << mandatoryFreeVariables.toStringCommaDelimited()
     << ". ";
   }
-  if (!allowedFreeVars.contains(presentFreeVars)) {
+  if (!allowedFreeVariables.contains(presentFreeVariables)) {
     out << "<hr>";
     out
     << "Your expression:<br>\\("
@@ -1346,19 +1360,19 @@ bool CalculatorFunctions::ensureExpressionDependsOnlyOnMandatoryVariables(
     << "<br><b style ='color:red'>"
     << "contains the unexpected variable(s):</b><br><b>";
     bool found = false;
-    for (int i = 0; i < presentFreeVars.size; i ++) {
-      if (!allowedFreeVars.contains(presentFreeVars[i])) {
+    for (int i = 0; i < presentFreeVariables.size; i ++) {
+      if (!allowedFreeVariables.contains(presentFreeVariables[i])) {
         if (found) {
           out << ", ";
         }
         found = true;
-        out << presentFreeVars[i].toString();
+        out << presentFreeVariables[i].toString();
       }
     }
     out << "</b>.";
     out
     << "<br>The expected variables are: "
-    << allowedFreeVars.toStringCommaDelimited()
+    << allowedFreeVariables.toStringCommaDelimited()
     << ". ";
   }
   if (out.str() != "") {
@@ -1507,9 +1521,9 @@ bool CalculatorFunctions::operatorBounds(
   ) {
     return false;
   }
-  const Expression& baseE = input[1];
+  const Expression& baseExpression = input[1];
   Expression limitsExpression;
-  int integralOperator = baseE.data;
+  int integralOperator = baseExpression.data;
   if (
     integralOperator == calculator.opIntegral() ||
     integralOperator == calculator.opSum()
@@ -1524,16 +1538,16 @@ bool CalculatorFunctions::operatorBounds(
     return true;
   }
   if (
-    !baseE.startsWith(calculator.opIntegral(), 2) &&
-    !baseE.startsWith(calculator.opSum(), 2)
+    !baseExpression.startsWith(calculator.opIntegral(), 2) &&
+    !baseExpression.startsWith(calculator.opSum(), 2)
   ) {
     return false;
   }
   limitsExpression.reset(calculator);
   limitsExpression.addChildAtomOnTop(calculator.opLimitBoundary());
   for (int i = 1; i < 3; i ++) {
-    if (i < baseE[1].size()) {
-      limitsExpression.addChildOnTop(baseE[1][i]);
+    if (i < baseExpression[1].size()) {
+      limitsExpression.addChildOnTop(baseExpression[1][i]);
     } else {
       limitsExpression.addChildAtomOnTop(
         calculator.opIndefiniteIndicator()
@@ -1556,11 +1570,11 @@ bool CalculatorFunctions::powerExponentToLog(
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
-  const Expression& baseE = input[1];
-  const Expression& powerE = input[2];
-  if (baseE.isOperationGiven(calculator.opE())) {
-    if (powerE.startsWith(calculator.opLog(), 2)) {
-      output = powerE[1];
+  const Expression& baseExpression = input[1];
+  const Expression& powerExpression = input[2];
+  if (baseExpression.isOperationGiven(calculator.opE())) {
+    if (powerExpression.startsWith(calculator.opLog(), 2)) {
+      output = powerExpression[1];
       return true;
     }
   }
@@ -1575,8 +1589,8 @@ bool CalculatorFunctions::distributeExponent(
     return false;
   }
   const Expression& base = input[1];
-  const Expression& exponentE = input[2];
-  if (exponentE.isOperationGiven(calculator.opCirc())) {
+  const Expression& exponentExpression = input[2];
+  if (exponentExpression.isOperationGiven(calculator.opCirc())) {
     return false;
   }
   if (!input[1].startsWith(calculator.opTimes(), 3)) {
@@ -1587,12 +1601,12 @@ bool CalculatorFunctions::distributeExponent(
   }
   bool isGood = base[1].isPositiveNumber() || base[2].isPositiveNumber();
   if (!isGood) {
-    if (exponentE.isInteger()) {
+    if (exponentExpression.isInteger()) {
       isGood = true;
     } else {
-      Rational exponentRat;
-      if (exponentE.isRational(&exponentRat)) {
-        if (!exponentRat.getDenominator().isEven()) {
+      Rational exponentRational;
+      if (exponentExpression.isRational(&exponentRational)) {
+        if (!exponentRational.getDenominator().isEven()) {
           isGood = true;
         }
       }
@@ -1601,15 +1615,18 @@ bool CalculatorFunctions::distributeExponent(
   if (!isGood) {
     return false;
   }
-  Expression leftE;
-  Expression rightE;
-  leftE.makeXOX(
+  Expression leftExpression;
+  Expression rightExpression;
+  leftExpression.makeXOX(
     calculator, calculator.opPower(), input[1][1], input[2]
   );
-  rightE.makeXOX(
+  rightExpression.makeXOX(
     calculator, calculator.opPower(), input[1][2], input[2]
   );
-  return output.makeXOX(calculator, calculator.opTimes(), leftE, rightE);
+  return
+  output.makeXOX(
+    calculator, calculator.opTimes(), leftExpression, rightExpression
+  );
 }
 
 bool CalculatorFunctions::sqrtApproximate(
@@ -1830,9 +1847,11 @@ bool PlotObject::readColorAndLineWidthFromChild3And4(
   this->colorRedGreenBlue = static_cast<int>(
     HtmlRoutines::redGreenBlue(0, 0, 0)
   );
-  const Expression& colorE = input[2];
-  if (!colorE.isOfType<std::string>(&this->colorJavascript)) {
-    this->colorJavascript = colorE.toString();
+  const Expression& colorExpression = input[2];
+  if (
+    !colorExpression.isOfType<std::string>(&this->colorJavascript)
+  ) {
+    this->colorJavascript = colorExpression.toString();
   }
   if (
     !DrawingVariables::getColorIntFromColorString(
@@ -1842,11 +1861,11 @@ bool PlotObject::readColorAndLineWidthFromChild3And4(
     calculator << "Unrecognized color: " << this->colorJavascript;
   }
   if (input.size() >= 4) {
-    const Expression& lineWidthE = input[3];
-    if (!lineWidthE.evaluatesToDouble(&this->lineWidth)) {
+    const Expression& lineWidthExpression = input[3];
+    if (!lineWidthExpression.evaluatesToDouble(&this->lineWidth)) {
       calculator
       << "Failed to extract line width from: "
-      << lineWidthE.toString();
+      << lineWidthExpression.toString();
     }
     std::stringstream lineWidthStream;
     lineWidthStream.precision(4);
@@ -1952,7 +1971,8 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   }
   Expression vectorExpression = (rightExpression - leftExpression);
   Expression midPoint = (rightExpression + leftExpression) / 2;
-  Expression vectorX, vectorY;
+  Expression vectorX;
+  Expression vectorY;
   vectorX.makeXOX(
     calculator,
     calculator.opUnderscore(),
@@ -2218,7 +2238,8 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   if (!input.startsWith(calculator.opLogBase(), 3)) {
     return false;
   }
-  Rational base, argument;
+  Rational base;
+  Rational argument;
   if (
     !input[1].isOfType<Rational>(&base) ||
     !input[2].isOfType<Rational>(&argument)
@@ -2413,7 +2434,7 @@ bool JavascriptExtractor::convertMatrixOfExpressionToPoints(
   STACK_TRACE("JavascriptExtractor::convertMatrixOfExpressionToPoints");
   output.points = input;
   output.dimension = output.points.numberOfColumns;
-  Expression jsConverterE;
+  Expression jsConverterExpression;
   output.pointsJS.initialize(
     output.points.numberOfRows, output.points.numberOfColumns
   );
@@ -2863,8 +2884,8 @@ bool JavascriptExtractor::extractJavascriptRecursive(
     return true;
   }
   Expression operation;
-  Expression leftE;
-  Expression rightE;
+  Expression leftExpression;
+  Expression rightExpression;
   if (
     input.startsWith(this->owner->opSequence()) ||
     input.startsWith(this->owner->opIntervalOpen())
@@ -2984,20 +3005,20 @@ bool CalculatorFunctionsPlot::plotSurface(
     << ". I've been taught to plot 2d surfaces only. "
     << "Please reduce the number of variables to 2. ";
   }
-  Expression uE;
-  Expression vE;
-  uE.makeAtom(calculator, "u");
-  vE.makeAtom(calculator, "v");
+  Expression uExpression;
+  Expression vExpression;
+  uExpression.makeAtom(calculator, "u");
+  vExpression.makeAtom(calculator, "v");
   if (plot.variablesInPlay.size == 1) {
-    if (plot.variablesInPlay.contains(vE)) {
-      plot.variablesInPlay.addOnTop(uE);
+    if (plot.variablesInPlay.contains(vExpression)) {
+      plot.variablesInPlay.addOnTop(uExpression);
     } else {
-      plot.variablesInPlay.addOnTop(vE);
+      plot.variablesInPlay.addOnTop(vExpression);
     }
   }
   if (plot.variablesInPlay.size == 0) {
-    plot.variablesInPlay.addOnTop(uE);
-    plot.variablesInPlay.addOnTop(vE);
+    plot.variablesInPlay.addOnTop(uExpression);
+    plot.variablesInPlay.addOnTop(vExpression);
   }
   plot.variablesInPlay.quickSortAscending();
   plot.coordinateFunctionsE.setSize(plot.manifoldImmersion.size() - 1);

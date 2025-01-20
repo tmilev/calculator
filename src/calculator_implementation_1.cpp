@@ -1413,8 +1413,10 @@ bool Expression::assignStringParsed(
   Calculator& owner
 ) {
   STACK_TRACE("Expression::assignStringParsed");
-  Expression commands, result;
-  List<SyntacticElement> outputSyntacticSoup, outputSyntacticStack;
+  Expression commands;
+  Expression result;
+  List<SyntacticElement> outputSyntacticSoup;
+  List<SyntacticElement> outputSyntacticStack;
   std::string outputSyntacticErrors;
   if (
     !owner.parser.parseAndExtractExpressions(

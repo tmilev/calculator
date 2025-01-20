@@ -1462,7 +1462,7 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   << "State at beginning of computation: "
   << this->toStringProgressReport();
   report.report(reportstream.str());
-  while (this->incrementReturnFalseIfPastLast()) {
+  while (this->incrementReturnFalseIfPastLast(&report)) {
     CandidateSemisimpleSubalgebra& candidate =
     this->currentSubalgebraChain.lastObject()->attemptExtension();
     if (
@@ -1561,6 +1561,7 @@ void SemisimpleSubalgebras::makeEmptyCandidateSubalgebra(
   );
   output.indexNonEmbeddedMeNonStandardCartan =
   this->subalgebrasNonDefaultCartanAndScale.getIndex(zeroCartan);
+  output.status = CandidateSubalgebraStatus::realized;
 }
 
 void SemisimpleSubalgebras::makeCandidateSubalgebra(
@@ -3179,6 +3180,10 @@ std::string SemisimpleSubalgebras::toStringProgressReport(
   return out.str();
 }
 
+SemisimpleSubalgebras::Statistics::Statistics() {
+  this->totalExtensionsTried = 0;
+}
+
 PossibleExtensionsOfSemisimpleLieSubalgebra::
 PossibleExtensionsOfSemisimpleLieSubalgebra(
   SemisimpleSubalgebras* inputOwner,
@@ -3191,11 +3196,16 @@ PossibleExtensionsOfSemisimpleLieSubalgebra(
 }
 
 bool PossibleExtensionsOfSemisimpleLieSubalgebra::
-incrementReturnFalseIfPastLast() {
+incrementReturnFalseIfPastLast(ProgressReport* report) {
   STACK_TRACE(
-    "PossibleExtensionsOfSemisimpleLieSubalgebra::incrementReturnFalseIfPastLast"
+    "PossibleExtensionsOfSemisimpleLieSubalgebra::"
+    "incrementReturnFalseIfPastLast"
   );
   while (true) {
+    this->owner->statistics.totalExtensionsTried ++;
+    if (report != nullptr && report->tickAndWantReport()) {
+      report->report(this->owner->toStringCurrentChain());
+    }
     this->indexOfCurrentHCandidate ++;
     if (
       this->indexOfCurrentHCandidate < this->candidateHsScaledToActByTwo.size
@@ -3323,7 +3333,9 @@ attemptExtension() {
   return this->owner->addSubalgebraIfNew(newCandidate);
 }
 
-bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
+bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast(
+  ProgressReport* report
+) {
   STACK_TRACE("SemisimpleSubalgebras::incrementReturnFalseIfPastLast");
   while (this->currentSubalgebraChain.size > 0) {
     PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
@@ -3334,7 +3346,8 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
       this->currentSubalgebraChain.removeLastObject();
       continue;
     }
-    if (!lastExtension.incrementReturnFalseIfPastLast()) {
+    if (!lastExtension.incrementReturnFalseIfPastLast(report)) {
+      this->currentSubalgebraChain.removeLastObject();
       continue;
     }
     return true;
@@ -3972,7 +3985,7 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
     );
   }
   if (this->unknownCartanCentralizerBasis.size > 0) {
-    Matrix<Polynomial<AlgebraicNumber> > centralizerCartanVars;
+    Matrix<Polynomial<AlgebraicNumber> > centralizerCartanVariables;
     Vectors<Polynomial<AlgebraicNumber> > centralizerCartanElements;
     centralizerCartanElements.setSize(
       this->unknownCartanCentralizerBasis.size
@@ -3985,11 +3998,12 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
       this->unknownCartanCentralizerBasis[i].getCartanPart();
     }
     centralizerCartanElements.getGramMatrix(
-      centralizerCartanVars, &this->getAmbientWeyl().cartanSymmetric
+      centralizerCartanVariables,
+      &this->getAmbientWeyl().cartanSymmetric
     );
     Polynomial<AlgebraicNumber> determinant;
     Polynomial<AlgebraicNumber> determinantMultiplier;
-    determinant.makeDeterminantFromSquareMatrix(centralizerCartanVars);
+    determinant.makeDeterminantFromSquareMatrix(centralizerCartanVariables);
     determinantMultiplier.makeMonomial(
       this->totalUnknownsWithCentralizer - 1, 1, 1
     );
@@ -4012,7 +4026,7 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
 
 void CandidateSemisimpleSubalgebra::prepareSystemSerreRelations() {
   STACK_TRACE("CandidateSemisimpleSubalgebra::prepareSystemSerreRelations");
-  Vector<Polynomial<Rational> > desiredHpart;
+  Vector<Polynomial<Rational> > desiredHPart;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > goalValue;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
   lieBracketMinusGoalValue;
@@ -4023,9 +4037,9 @@ void CandidateSemisimpleSubalgebra::prepareSystemSerreRelations() {
   Vector<Rational> positiveRoot1;
   Vector<Rational> positiveRoot2;
   for (int i = 0; i < this->unknownNegativeGenerators.size; i ++) {
-    desiredHpart = this->cartanElementsScaledToActByTwo[i];
+    desiredHPart = this->cartanElementsScaledToActByTwo[i];
     // <-implicit type conversion here!
-    goalValue.makeCartanGenerator(desiredHpart, *this->owner->owner);
+    goalValue.makeCartanGenerator(desiredHPart, *this->owner->owner);
     this->getAmbientSemisimpleLieAlgebra().lieBracket(
       this->unknownPositiveGenerators[i],
       this->unknownNegativeGenerators[i],

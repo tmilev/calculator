@@ -21,12 +21,13 @@ isDominantWithRespectToGenerator<RationalFraction<Rational> >(
     "::isDominantWithRespectToGenerator"
   );
   this->checkInitialization();
-  Vector<RationalFraction<Rational> > tempVect;
-  RationalFraction<Rational> tempRF;
-  tempVect = this->simpleRootsInner[generatorIndex].getVectorRational();
-  tempRF = this->ambientWeyl->rootScalarCartanRoot(weight, tempVect);
+  Vector<RationalFraction<Rational> > currentVector;
+  RationalFraction<Rational> rationalFraction;
+  currentVector = this->simpleRootsInner[generatorIndex].getVectorRational();
+  rationalFraction =
+  this->ambientWeyl->rootScalarCartanRoot(weight, currentVector);
   if (
-    tempRF.expressionType !=
+    rationalFraction.expressionType !=
     RationalFraction<Rational>::TypeExpression::typeConstant
   ) {
     global.fatal
@@ -39,10 +40,10 @@ isDominantWithRespectToGenerator<RationalFraction<Rational> >(
     << "More precisely, the scalar product of "
     << weight.toString()
     << " and "
-    << tempVect.toString()
+    << currentVector.toString()
     << " "
     << "equals "
-    << tempRF.toString()
+    << rationalFraction.toString()
     << ". "
     << "I cannot decide (more precisely, "
     << "do not want to *silently* decide for you) "
@@ -56,7 +57,7 @@ isDominantWithRespectToGenerator<RationalFraction<Rational> >(
     << global.fatal;
     return false;
   }
-  return !tempRF.constantValue.isNegative();
+  return !rationalFraction.constantValue.isNegative();
 }
 
 template < >
@@ -75,12 +76,12 @@ template < >
 bool WeylGroupData::isDominantWithRespectToGenerator<
   RationalFraction<Rational>
 >(const Vector<RationalFraction<Rational> >& weight, int generatorIndex) {
-  Vector<Rational> tempVect;
-  RationalFraction<Rational> tempRF;
-  tempVect.makeEi(this->getDimension(), generatorIndex);
-  tempRF = this->rootScalarCartanRoot(weight, tempVect);
+  Vector<Rational> unitVector;
+  RationalFraction<Rational> coefficient;
+  unitVector.makeEi(this->getDimension(), generatorIndex);
+  coefficient = this->rootScalarCartanRoot(weight, unitVector);
   if (
-    tempRF.expressionType !=
+    coefficient.expressionType !=
     RationalFraction<Rational>::TypeExpression::typeConstant
   ) {
     global.fatal
@@ -93,10 +94,10 @@ bool WeylGroupData::isDominantWithRespectToGenerator<
     << "More precisely, the scalar product of "
     << weight.toString()
     << " and "
-    << tempVect.toString()
+    << unitVector.toString()
     << " "
     << "equals "
-    << tempRF.toString()
+    << coefficient.toString()
     << ". "
     << "I cannot decide (more precisely, "
     << "do not want to *silently* decide for you) "
@@ -110,7 +111,7 @@ bool WeylGroupData::isDominantWithRespectToGenerator<
     << global.fatal;
     return false;
   }
-  return !tempRF.constantValue.isNegative();
+  return !coefficient.constantValue.isNegative();
 }
 
 template < >
@@ -313,16 +314,16 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   monomial.powers.reverseElements();
   out << "<table>";
   for (int i = monomial.generatorsIndices.size - 1; i >= 1; i --) {
-    int curInd = - monomial.generatorsIndices[i] - 1;
-    int nextInd = - monomial.generatorsIndices[i - 1] - 1;
+    int currentIndex = - monomial.generatorsIndices[i] - 1;
+    int nextIndex = - monomial.generatorsIndices[i - 1] - 1;
     for (int k = 0; k < monomial.powers[i]; k ++) {
-      lastPath.actByFAlpha(curInd);
+      lastPath.actByFAlpha(currentIndex);
     }
     path = lastPath;
-    path.actByEAlpha(nextInd);
+    path.actByEAlpha(nextIndex);
     out
     << "<tr><td> e_"
-    << nextInd + 1
+    << nextIndex + 1
     << "("
     << lastPath.toString()
     << ") =</td>"
@@ -384,7 +385,8 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
 
 void Calculator::makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output) {
   STACK_TRACE("Calculator::makeHmmG2InB3");
-  DynkinType b3Type, g2Type;
+  DynkinType b3Type;
+  DynkinType g2Type;
   b3Type.makeSimpleType('B', 3);
   g2Type.makeSimpleType('G', 2);
   output.domain =

@@ -506,7 +506,7 @@ public:
   bool isExhausted() const;
   // Increments to the next possible extension, or
   // returns last if all extensions have been explored.
-  bool incrementReturnFalseIfPastLast();
+  bool incrementReturnFalseIfPastLast(ProgressReport* report);
   // Attempts to realize the extension currently being explored.
   CandidateSemisimpleSubalgebra& attemptExtension();
   DynkinType& nextUnexploredDynkinType();
@@ -578,6 +578,12 @@ public:
   std::string displayNameMainFile1NoPath;
   std::string displayNameMainFile1WithPath;
   std::string virtualNameMainFile1;
+  struct Statistics {
+    Statistics();
+    int totalExtensionsTried;
+  };
+
+  SemisimpleSubalgebras::Statistics statistics;
   class WConjecture {
   public:
     // The W-conjecture is an ongoing research project b-w D. King, T. Milev,
@@ -670,7 +676,7 @@ public:
   void makeCandidateFromSlTwo(
     SlTwoSubalgebra& candidate, CandidateSemisimpleSubalgebra& output
   );
-  bool incrementReturnFalseIfPastLast();
+  bool incrementReturnFalseIfPastLast(ProgressReport* report);
   bool getCentralizerTypeIfComputableAndKnown(
     const DynkinType& input, DynkinType& output
   );

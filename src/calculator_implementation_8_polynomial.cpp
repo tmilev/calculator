@@ -334,14 +334,14 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments(
   Expression constantFactor;
   constantFactor.assignValue(calculator, factorization.constantFactor);
   resultSequence.addOnTop(constantFactor);
-  Expression polynomialE;
+  Expression polynomialExpression;
   for (int i = 0; i < factorization.reduced.size; i ++) {
     Expression expressionE(calculator);
-    polynomialE.assignValueWithContext(
+    polynomialExpression.assignValueWithContext(
       calculator, factorization.reduced[i], polynomial.context
     );
     expressionE.addChildAtomOnTop("MakeExpression");
-    expressionE.addChildOnTop(polynomialE);
+    expressionE.addChildOnTop(polynomialExpression);
     resultSequence.addOnTop(expressionE);
   }
   return output.makeSequence(calculator, &resultSequence);
@@ -380,13 +380,13 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   Expression constantFactor;
   constantFactor.assignValue(calculator, factorization.constantFactor);
   resultSequence.addOnTop(constantFactor);
-  Expression polynomialE;
+  Expression polynomialExpression;
   for (int i = 0; i < factorization.reduced.size; i ++) {
     if (
       !CalculatorConversions::expressionFromPolynomial(
         calculator,
         factorization.reduced[i],
-        polynomialE,
+        polynomialExpression,
         &polynomial.context
       )
     ) {
@@ -394,7 +394,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
       calculator
       << "Unexpected failure to convert factor to expression. ";
     }
-    resultSequence.addOnTop(polynomialE);
+    resultSequence.addOnTop(polynomialExpression);
   }
   return output.makeSequence(calculator, &resultSequence);
 }
@@ -475,13 +475,13 @@ bool CalculatorFunctionsPolynomial::factorPolynomialProcess(
   Expression constantFactorExpression;
   constantFactorExpression.assignValue(calculator, constantFactor);
   resultSequence.addOnTop(constantFactorExpression);
-  Expression polynomialE;
+  Expression polynomialExpression;
   for (int i = 0; i < factors.size; i ++) {
     if (
       !CalculatorConversions::expressionFromPolynomial(
         calculator,
         factors[i],
-        polynomialE,
+        polynomialExpression,
         &originalPolynomial.context
       )
     ) {
@@ -491,7 +491,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialProcess(
       << factors[i].toString()
       << " to expression. ";
     }
-    resultSequence.addOnTop(polynomialE);
+    resultSequence.addOnTop(polynomialExpression);
   }
   return output.makeSequence(calculator, &resultSequence);
 }
@@ -598,9 +598,9 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
     return
     output.assignError(calculator, "Function takes at least two arguments. ");
   }
-  const Expression& numeratorComputationsE = input[1];
+  const Expression& numeratorComputationsExpression = input[1];
   Rational upperBound = 0;
-  if (!numeratorComputationsE.isOfType(&upperBound)) {
+  if (!numeratorComputationsExpression.isOfType(&upperBound)) {
     return
     output.assignError(
       calculator,
@@ -752,7 +752,8 @@ greatestCommonDivisorOrLeastCommonMultipleModular(
   if (!input.mergeContexts(left, right)) {
     return false;
   }
-  Polynomial<ElementZmodP> leftPolynomial, rightPolynomial;
+  Polynomial<ElementZmodP> leftPolynomial;
+  Polynomial<ElementZmodP> rightPolynomial;
   if (
     !left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)
   ) {
@@ -1235,11 +1236,11 @@ combineFractionsCommutativeWithInternalLibrary(
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
-  const Expression& leftE = input[1];
-  const Expression& rightE = input[2];
+  const Expression& leftExpression = input[1];
+  const Expression& rightExpression = input[2];
   if (
-    !leftE.startsWith(calculator.opDivide(), 3) ||
-    !rightE.startsWith(calculator.opDivide(), 3)
+    !leftExpression.startsWith(calculator.opDivide(), 3) ||
+    !rightExpression.startsWith(calculator.opDivide(), 3)
   ) {
     return false;
   }

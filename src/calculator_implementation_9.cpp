@@ -230,7 +230,8 @@ bool CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan(
   ElementSemisimpleLieAlgebra<AlgebraicNumber> hElement;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> eElement;
   eElement = rationalExpression;
-  std::stringstream out, logStream;
+  std::stringstream out;
+  std::stringstream logStream;
   bool success =
   ownerSemisimple->attemptExtendingEtoHEFwithHinCartan(
     eElement, hElement, fElement, &logStream
@@ -437,16 +438,16 @@ bool Calculator::functionReverseOrderRecursively(
   output.reset(calculator, input.size());
   output.addChildOnTop(input[0]);
   for (int i = input.size() - 1; i >= 1; i --) {
-    Expression currentE = input[i];
-    Expression reversedCurrentE;
+    Expression currentExpression = input[i];
+    Expression reversedCurrentExpression;
     if (
       !calculator.functionReverseOrderRecursively(
-        calculator, currentE, reversedCurrentE
+        calculator, currentExpression, reversedCurrentExpression
       )
     ) {
       return false;
     }
-    output.addChildOnTop(reversedCurrentE);
+    output.addChildOnTop(reversedCurrentExpression);
   }
   return true;
 }
@@ -501,8 +502,8 @@ bool CalculatorFunctions::printZnEnumeration(
   if (!input.isListNElements(3)) {
     return false;
   }
-  int grade;
-  int dimension;
+  int grade = 0;
+  int dimension = 0;
   if (
     !input[2].isSmallInteger(&grade) || !input[1].isSmallInteger(&dimension)
   ) {
@@ -713,30 +714,40 @@ bool CalculatorFunctions::interpolatePolynomial(
   if (input.size() < 2) {
     return false;
   }
-  Expression convertedE;
-  if (!CalculatorConversions::makeMatrix(calculator, input, convertedE)) {
+  Expression convertedExpression;
+  if (
+    !CalculatorConversions::makeMatrix(
+      calculator, input, convertedExpression
+    )
+  ) {
     return false;
   }
   Matrix<Rational> pointsOfInterpoly;
   if (
     !CalculatorConversions::functionGetMatrix(
-      calculator, convertedE, pointsOfInterpoly, false, nullptr, 2
+      calculator,
+      convertedExpression,
+      pointsOfInterpoly,
+      false,
+      nullptr,
+      2
     )
   ) {
     return
     calculator
     << "<hr>Failed to extract points of interpolation from "
-    << convertedE.toString();
+    << convertedExpression.toString();
   }
-  Polynomial<Rational> interPoly;
+  Polynomial<Rational> interpolatingPolynomial;
   Vector<Rational> arguments;
   Vector<Rational> values;
   pointsOfInterpoly.getVectorFromColumn(0, arguments);
   pointsOfInterpoly.getVectorFromColumn(1, values);
-  interPoly.interpolate(arguments, values);
+  interpolatingPolynomial.interpolate(arguments, values);
   ExpressionContext context(calculator);
   context.makeOneVariableFromString("x");
-  return output.assignValueWithContext(calculator, interPoly, context);
+  return
+  output.assignValueWithContext(calculator, interpolatingPolynomial, context);
 }
 
 bool CalculatorFunctions::operationBinary(

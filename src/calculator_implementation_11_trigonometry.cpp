@@ -123,11 +123,14 @@ bool CalculatorFunctionsTrigonometry::tan(
     return false;
   }
   const Expression& argument = input[1];
-  Expression num;
-  Expression den;
-  num.makeOX(calculator, calculator.opSin(), argument);
-  den.makeOX(calculator, calculator.opCos(), argument);
-  return output.makeXOX(calculator, calculator.opDivide(), num, den);
+  Expression numerator;
+  Expression denominator;
+  numerator.makeOX(calculator, calculator.opSin(), argument);
+  denominator.makeOX(calculator, calculator.opCos(), argument);
+  return
+  output.makeXOX(
+    calculator, calculator.opDivide(), numerator, denominator
+  );
 }
 
 bool CalculatorFunctionsTrigonometry::cotangent(
@@ -138,11 +141,14 @@ bool CalculatorFunctionsTrigonometry::cotangent(
     return false;
   }
   const Expression& argument = input[1];
-  Expression num;
-  Expression den;
-  num.makeOX(calculator, calculator.opCos(), argument);
-  den.makeOX(calculator, calculator.opSin(), argument);
-  return output.makeXOX(calculator, calculator.opDivide(), num, den);
+  Expression numerator;
+  Expression denominator;
+  numerator.makeOX(calculator, calculator.opCos(), argument);
+  denominator.makeOX(calculator, calculator.opSin(), argument);
+  return
+  output.makeXOX(
+    calculator, calculator.opDivide(), numerator, denominator
+  );
 }
 
 bool CalculatorFunctionsTrigonometry::sec(
@@ -153,11 +159,14 @@ bool CalculatorFunctionsTrigonometry::sec(
     return false;
   }
   const Expression& argument = input[1];
-  Expression num;
-  Expression den;
-  num.assignValue(calculator, 1);
-  den.makeOX(calculator, calculator.opCos(), argument);
-  return output.makeXOX(calculator, calculator.opDivide(), num, den);
+  Expression numerator;
+  Expression denominator;
+  numerator.assignValue(calculator, 1);
+  denominator.makeOX(calculator, calculator.opCos(), argument);
+  return
+  output.makeXOX(
+    calculator, calculator.opDivide(), numerator, denominator
+  );
 }
 
 bool CalculatorFunctionsTrigonometry::csc(
@@ -220,7 +229,8 @@ bool CalculatorFunctionsTrigonometry::exploitCosineEvenness(
     return false;
   }
   const Expression& argument = input[1];
-  Expression coefficientExpression, nonCoefficientPart;
+  Expression coefficientExpression;
+  Expression nonCoefficientPart;
   argument.getCoefficientMultiplicandForm(
     coefficientExpression, nonCoefficientPart
   );
@@ -330,9 +340,9 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(
   if (input.size() != 2) {
     return false;
   }
-  const Expression& argumentE = input[1];
+  const Expression& argumentExpression = input[1];
   Rational rational;
-  if (argumentE.isRational(&rational)) {
+  if (argumentExpression.isRational(&rational)) {
     if (rational == 1) {
       return output.assignValue(calculator, 0);
     }
@@ -358,7 +368,7 @@ bool CalculatorFunctionsTrigonometry::arccosAlgebraic(
   }
   AlgebraicNumber argument;
   AlgebraicNumber candidate;
-  if (argumentE.isOfType<AlgebraicNumber>(&argument)) {
+  if (argumentExpression.isOfType<AlgebraicNumber>(&argument)) {
     candidate.assignRationalQuadraticRadical(
       Rational(1, 2),
       calculator.objectContainer.algebraicClosure,
@@ -404,9 +414,9 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   if (input.size() != 2) {
     return false;
   }
-  const Expression& argumentE = input[1];
+  const Expression& argumentExpression = input[1];
   Rational rational;
-  if (argumentE.isRational(&rational)) {
+  if (argumentExpression.isRational(&rational)) {
     if (rational == 1) {
       output.makeAtom(calculator, calculator.opPi());
       output /= 2;
@@ -433,7 +443,7 @@ bool CalculatorFunctionsTrigonometry::arcsinAlgebraic(
   }
   AlgebraicNumber argument;
   AlgebraicNumber candidate;
-  if (argumentE.isOfType<AlgebraicNumber>(&argument)) {
+  if (argumentExpression.isOfType<AlgebraicNumber>(&argument)) {
     candidate.assignRationalQuadraticRadical(
       Rational(1, 2),
       calculator.objectContainer.algebraicClosure,
@@ -594,31 +604,31 @@ bool CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct(
   if (!input.startsWith(calculator.opPlus(), 3)) {
     return false;
   }
-  Expression leftE = input[1];
-  Expression rightE = input[2];
+  Expression leftExpression = input[1];
+  Expression rightExpression = input[2];
   bool isGood = false;
   int leftSign = 1;
   int rightSign = 1;
-  if (leftE.startsWith(calculator.opTimes(), 3)) {
-    if (leftE[1].isEqualToMOne()) {
-      leftE = leftE[2];
+  if (leftExpression.startsWith(calculator.opTimes(), 3)) {
+    if (leftExpression[1].isEqualToMOne()) {
+      leftExpression = leftExpression[2];
       leftSign = - 1;
     }
   }
-  if (rightE.startsWith(calculator.opTimes(), 3)) {
-    if (rightE[1].isEqualToMOne()) {
-      rightE = rightE[2];
+  if (rightExpression.startsWith(calculator.opTimes(), 3)) {
+    if (rightExpression[1].isEqualToMOne()) {
+      rightExpression = rightExpression[2];
       rightSign = - 1;
     }
   }
   if (
-    leftE.startsWith(calculator.opSin(), 2) &&
-    rightE.startsWith(calculator.opSin(), 2)
+    leftExpression.startsWith(calculator.opSin(), 2) &&
+    rightExpression.startsWith(calculator.opSin(), 2)
   ) {
     isGood = true;
   } else if (
-    leftE.startsWith(calculator.opCos(), 2) &&
-    rightE.startsWith(calculator.opCos(), 2)
+    leftExpression.startsWith(calculator.opCos(), 2) &&
+    rightExpression.startsWith(calculator.opCos(), 2)
   ) {
     isGood = true;
   }
@@ -629,17 +639,23 @@ bool CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct(
   Expression argDiff;
   Expression leftMultiplicand;
   Expression rightMultiplicand;
-  if (leftE.startsWith(calculator.opSin(), 2)) {
-    argSum = (leftE[1] * leftSign + rightE[1] * rightSign) / 2;
-    argDiff = (leftE[1] * leftSign - rightE[1] * rightSign) / 2;
+  if (leftExpression.startsWith(calculator.opSin(), 2)) {
+    argSum = (
+      leftExpression[1] * leftSign + rightExpression[1] * rightSign
+    ) /
+    2;
+    argDiff = (
+      leftExpression[1] * leftSign - rightExpression[1] * rightSign
+    ) /
+    2;
     leftMultiplicand.makeOX(calculator, calculator.opCos(), argDiff);
     rightMultiplicand.makeOX(calculator, calculator.opSin(), argSum);
     output = leftMultiplicand * rightMultiplicand * 2;
     return true;
   } else {
     if (leftSign == rightSign) {
-      argSum = (leftE[1] + rightE[1]) / 2;
-      argDiff = (leftE[1] - rightE[1]) / 2;
+      argSum = (leftExpression[1] + rightExpression[1]) / 2;
+      argDiff = (leftExpression[1] - rightExpression[1]) / 2;
       leftMultiplicand.makeOX(calculator, calculator.opCos(), argDiff);
       rightMultiplicand.makeOX(calculator, calculator.opCos(), argSum);
       output = leftMultiplicand * rightMultiplicand * 2;
@@ -648,8 +664,11 @@ bool CalculatorFunctionsTrigonometry::trigonometricSumToTrigonometricProduct(
       }
       return true;
     } else {
-      argSum = (leftE[1] + rightE[1]) / 2;
-      argDiff = (leftE[1] * leftSign + rightE[1] * rightSign) / 2;
+      argSum = (leftExpression[1] + rightExpression[1]) / 2;
+      argDiff = (
+        leftExpression[1] * leftSign + rightExpression[1] * rightSign
+      ) /
+      2;
       leftMultiplicand.makeOX(calculator, calculator.opSin(), argDiff);
       rightMultiplicand.makeOX(calculator, calculator.opSin(), argSum);
       output = leftMultiplicand * rightMultiplicand * 2;

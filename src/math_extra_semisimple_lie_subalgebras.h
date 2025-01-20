@@ -95,6 +95,23 @@ public:
   bool checkInitialization();
 };
 
+enum CandidateSubalgebraStatus {
+  unknown,
+  realized,
+  unrealizableNoSerreSystemSolutions,
+  unrealizableNonFittingCharacter,
+  neitherRealizedNorProvedImpossible,
+  previouslyRealizedAsADirectSummand,
+  // The generators for the subalgebra were
+  // either:
+  // 1) given by an end user,
+  // 2) hardcoded,
+  // 3) loaded from harddisk.
+  preloadedButNotVerified,
+  // Bad user input (user error)
+  // or bad precomputed data (programming error).
+  corrupt
+};
 class CandidateSemisimpleSubalgebra {
   friend std::ostream& operator<<(
     std::ostream& output, const CandidateSemisimpleSubalgebra& candidate
@@ -158,10 +175,7 @@ public:
   int indexSemisimplePartCentralizer;
   List<int> indicesDirectSummandSuperAlgebra;
   MemorySaving<FormatExpressions> characterFormat;
-  bool flagSubalgebraPreloadedButNotVerified;
-  bool flagSystemSolved;
-  bool flagSystemProvedToHaveNoSolution;
-  bool flagSystemGroebnerBasisFound;
+  CandidateSubalgebraStatus status;
   bool flagCentralizerIsWellChosen;
   bool flagCentralizerTypeIsComputed;
   bool flagUsedInducingSubalgebraRealization;
@@ -274,6 +288,8 @@ public:
     List<List<Vectors<Rational> > >& outputHsByType,
     List<DynkinSimpleType>& outputTypeList
   ) const;
+  bool isUnrealizable() const;
+  bool isRealized() const;
   bool hasHsScaledByTwoConjugateTo(List<Vector<Rational> >& other) const;
   bool computeCentralizerTypeFailureAllowed();
   bool isDirectSummandOf(const CandidateSemisimpleSubalgebra& other);
@@ -312,12 +328,11 @@ public:
     const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
     elementThatMustVanish
   );
-  bool createAndAddExtendBaseSubalgebra(
+  void setupInductionHistory(
     const CandidateSemisimpleSubalgebra& baseSubalgebra,
-    Vector<Rational>& newHRescaledToActByTwo,
-    const DynkinType& newType,
-    const List<int>& rootInjection
+    Vector<Rational>& newHRescaledToActByTwo
   );
+  CandidateSubalgebraStatus attemptToRealize();
   bool getCentralizerTypeIfComputableAndKnown(
     const DynkinType& input, DynkinType& output
   );
@@ -367,7 +382,9 @@ public:
   );
   void computeCharactersPrimalModules();
   void computePairingTable();
-  bool computeFromGenerators(bool allowNonPolynomialSystemFailure);
+  CandidateSubalgebraStatus computeFromGenerators(
+    bool allowNonPolynomialSystemFailure
+  );
   void computeSinglePair(
     int leftIndex, int rightIndex, List<int>& output
   );
@@ -411,14 +428,18 @@ public:
     const Vector<Rational>& inputAmbientWeight,
     Vector<Rational>& output
   ) const;
-  bool computeSystem(
+  void computeSystem(
     bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
   );
-  bool computeSystemPart2(
+  void computeSystemPart2(
     bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
   );
+  bool prepareSystem(
+    bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
+  );
+  void prepareSystemSerreRelations();
   bool computeCharacter(bool allowBadCharacter);
-  bool attemptToSolveSystem();
+  CandidateSubalgebraStatus attemptToSolveSystem();
   void configurePolynomialSystem(
     PolynomialSystem<AlgebraicNumber>& toBeConfigured
   );
@@ -464,6 +485,37 @@ public:
   bool operator>(const CandidateSemisimpleSubalgebra& other) const;
 };
 
+// Encodes a possible extension of a base subalgebra
+// to a larger Semisimple Lie algebra.
+// The base is an already realized semisimple subalagebra or zero.
+struct PossibleExtensionsOfSemisimpleLieSubalgebra {
+public:
+  CandidateSemisimpleSubalgebra* realizedBase;
+  SemisimpleSubalgebras* owner;
+  int numberOfLargerTypesExplored;
+  int indexOfCurrentHCandidate;
+  // state that is recomputed each load:
+  List<DynkinType> possibleLargerDynkinTypes;
+  List<List<int> > possibleRootInjections;
+  List<Vector<Rational> > candidateHsScaledToActByTwo;
+  PossibleExtensionsOfSemisimpleLieSubalgebra(
+    SemisimpleSubalgebras* inputOwner = nullptr,
+    CandidateSemisimpleSubalgebra* inputBase = nullptr
+  );
+  // Returns true if all possible extensions have been explored.
+  bool isExhausted() const;
+  // Increments to the next possible extension, or
+  // returns last if all extensions have been explored.
+  bool incrementReturnFalseIfPastLast();
+  // Attempts to realize the extension currently being explored.
+  CandidateSemisimpleSubalgebra& attemptExtension();
+  DynkinType& nextUnexploredDynkinType();
+  List<int>& nextPossibleRootInjection();
+  void computeCurrentHCandidates();
+  Vector<Rational>& nextCandidateHScaledToActByTwo();
+  std::string toString();
+};
+
 class SemisimpleSubalgebras {
 public:
   friend std::ostream& operator<<(
@@ -494,13 +546,7 @@ public:
   std::string fileNamePrefix;
   // current computation state:
   // state that gets stored to hd:
-  List<CandidateSemisimpleSubalgebra> currentSubalgebraChain;
-  List<int> currentNumberOfLargerTypesExplored;
-  List<int> currentNumberOfHCandidatesExplored;
-  // state that is recomputed each load:
-  List<List<DynkinType> > currentPossibleLargerDynkinTypes;
-  List<List<List<int> > > currentRootInjections;
-  List<Vectors<Rational> > currentHCandidatesScaledToActByTwo;
+  List<PossibleExtensionsOfSemisimpleLieSubalgebra> currentSubalgebraChain;
   // end current computation state variables.
   // The map keys are used to search for subalgebras quickly.
   MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>
@@ -512,6 +558,8 @@ public:
   subalgebraCandidatesProvenImpossible;
   MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>
   subalgebraCandidatesUnrealizedNotProvenImpossible;
+  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>
+  previouslyRealizedAsDirectSummand;
   bool flagHasPossibleSubalgebrasWeCouldntSolveFor;
   bool flagAttemptToSolveSystems;
   // This flag determines whether our computation is over
@@ -623,7 +671,6 @@ public:
     SlTwoSubalgebra& candidate, CandidateSemisimpleSubalgebra& output
   );
   bool incrementReturnFalseIfPastLast();
-  bool removeLastSubalgebraFromStack();
   bool getCentralizerTypeIfComputableAndKnown(
     const DynkinType& input, DynkinType& output
   );
@@ -631,7 +678,6 @@ public:
   bool combinatorialCriteriaAllowRealization();
   bool centralizersComputedToHaveUnsuitableNilpotentOrbits();
   bool centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits();
-  bool computeCurrentHCandidates();
   void writeProgressFile();
   void initHookUpPointers(
     SemisimpleLieAlgebra& inputOwner,
@@ -648,17 +694,17 @@ public:
   SemisimpleSubalgebras(): flagDeallocated(false) {
     this->resetPointers();
   }
-  CandidateSemisimpleSubalgebra* addSubalgebraIfNewSetToStackTop(
-    const CandidateSemisimpleSubalgebra& input
+  CandidateSemisimpleSubalgebra& addSubalgebraIfNew(
+    CandidateSemisimpleSubalgebra& input
   );
-  void addSubalgebraToStack(
-    CandidateSemisimpleSubalgebra& input,
-    int inputNumberOfLargerTypesExplored,
-    int inputNumberOfHCandidatesExplored
+  CandidateSemisimpleSubalgebra& addSubalgebraIfNewToCollection(
+    const CandidateSemisimpleSubalgebra& input,
+    MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>& collection
   );
-  bool setUpParabolicInductionDataPrecomputedSubalgebra(
-    CandidateSemisimpleSubalgebra& candidate
+  CandidateSemisimpleSubalgebra& addSubalgebraIfNewSetToStackTop(
+    CandidateSemisimpleSubalgebra& input
   );
+  void addSubalgebraToStack(CandidateSemisimpleSubalgebra& input);
   bool checkConsistencyHs() const;
   bool checkConsistency() const;
   bool checkInitialization() const;
@@ -676,6 +722,12 @@ public:
   std::string toStringTableSubalgebraLinksTable(FormatExpressions* format);
   std::string toStringSubalgebrasNoHDWrite(
     FormatExpressions* format, bool generateLinks
+  );
+  std::string toStringSubalgebraCollection(
+    FormatExpressions* format,
+    MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>& collection
+    ,
+    const std::string& collectionDescription
   );
   std::string toStringSubalgebrasWithHDWrite(
     FormatExpressions* format = nullptr
@@ -760,7 +812,7 @@ public:
   );
   bool writeFilesRealForms(std::stringstream* outputStream);
   void writeHCandidates(
-    Vectors<Rational>& outputHCandidatesScaledToActByTwo,
+    List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
     CandidateSemisimpleSubalgebra& newCandidate,
     DynkinType& currentType,
     List<int>& currentRootInjection
@@ -769,17 +821,22 @@ public:
     const SlTwoSubalgebra& currentSubalgebra,
     const Rational& desiredHScaledToActByTwoLengthSquared,
     int baseRank,
-    Vectors<Rational>& outputHCandidatesScaledToActByTwo,
+    List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
     CandidateSemisimpleSubalgebra& newCandidate,
     List<int>& currentRootInjection
   );
   void writeOneHCandidate(
     const Vector<Rational>& currentCandidate,
-    Vectors<Rational>& outputHCandidatesScaledToActByTwo,
+    List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
     CandidateSemisimpleSubalgebra& newCandidate,
     const List<int>& currentRootInjection,
     ProgressReport& report
   );
+  class Test {
+  public:
+    static bool all();
+    static bool constructAllB3Subalgebras();
+  };
 };
 
 #endif // header_math_extra_semisimple_lie_subalgebras_ALREADY_INCLUDED

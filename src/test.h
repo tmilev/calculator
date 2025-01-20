@@ -21,6 +21,7 @@ public:
     static const std::string json;
     static const std::string polynomial;
     static const std::string basic;
+    static const std::string scientific;
     static const std::string courses;
   };
 

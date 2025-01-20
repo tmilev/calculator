@@ -670,7 +670,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
             firstIndexFirstPositiveChoice = firstPositiveIndex;
             secondIndexFirstPositiveChoice = secondPositiveIndex;
             int power;
-            this->getMaxQForWhichBetaMinusQAlphaisARoot(
+            this->getMaxQForWhichBetaMinusQAlphaIsARoot(
               smallRoot1, smallRoot2, power
             );
             this->chevalleyConstants.elements[firstNegativeIndex][
@@ -837,7 +837,7 @@ void SemisimpleLieAlgebra::exploitSymmetryChevalleyConstants(
     global.fatal << "Bad root sum. " << global.fatal;
   }
   int power;
-  this->getMaxQForWhichBetaMinusQAlphaisARoot(
+  this->getMaxQForWhichBetaMinusQAlphaIsARoot(
     this->weylGroup.rootSystem[indexMinusI],
     this->weylGroup.rootSystem[indexMinusJ],
     power
@@ -884,7 +884,7 @@ void SemisimpleLieAlgebra::exploitTheCyclicTrick(int i, int j, int k) {
   this->exploitSymmetryChevalleyConstants(k, i);
 }
 
-bool SemisimpleLieAlgebra::getMaxQForWhichBetaMinusQAlphaisARoot(
+bool SemisimpleLieAlgebra::getMaxQForWhichBetaMinusQAlphaIsARoot(
   const Vector<Rational>& alpha,
   const Vector<Rational>& beta,
   int& output
@@ -1004,7 +1004,7 @@ bool SemisimpleLieAlgebra::testForConsistency() {
   ElementSemisimpleLieAlgebra<Rational> g123;
   ElementSemisimpleLieAlgebra<Rational> g231;
   ElementSemisimpleLieAlgebra<Rational> g312;
-  ElementSemisimpleLieAlgebra<Rational> temp;
+  ElementSemisimpleLieAlgebra<Rational> buffer;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
     g1.makeGenerator(i, *this);
     for (int j = 0; j < this->getNumberOfGenerators(); j ++) {
@@ -1017,10 +1017,10 @@ bool SemisimpleLieAlgebra::testForConsistency() {
         this->lieBracket(g2, g31, g231);
         this->lieBracket(g1, g2, g12);
         this->lieBracket(g3, g12, g312);
-        temp = g123;
-        temp += g231;
-        temp += g312;
-        if (!temp.isEqualToZero()) {
+        buffer = g123;
+        buffer += g231;
+        buffer += g312;
+        if (!buffer.isEqualToZero()) {
           global.fatal
           << "The computed structure constants "
           << "are wrong: the Jacobi identity fails. "

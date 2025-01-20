@@ -28,6 +28,7 @@ const std::string Test::Suites::json = "json";
 const std::string Test::Suites::wasm = "wasm";
 const std::string Test::Suites::basic = "basic";
 const std::string Test::Suites::API = "api";
+const std::string Test::Suites::scientific = "scientific";
 
 int MainFunctions::mainTest(List<std::string>& inputArguments) {
   SignalsInfrastructure::signals().initializeSignals();
@@ -102,6 +103,9 @@ void Test::run() {
     PolynomialUnivariateModular::Test::all();
     PolynomialFactorizationFiniteFields::Test::all();
     global << Logger::green << "Polynomial tests completed." << Logger::endL;
+  }
+  if (this->shouldTest(Test::Suites::scientific)) {
+    SemisimpleSubalgebras::Test::all();
   }
   if (
     this->shouldTest(Test::Suites::topicLists) ||

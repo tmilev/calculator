@@ -1289,7 +1289,7 @@ bool CalculatorConversions::storeCandidateSubalgebra(
   keys.addOnTop("ElementsCartan");
   values.addOnTop(currentExpression);
   input.checkAll();
-  if (input.flagSystemSolved) {
+  if (input.status == CandidateSubalgebraStatus::realized) {
     Expression listGenerators;
     listGenerators.makeSequence(calculator);
     for (int i = 0; i < input.negativeGenerators.size; i ++) {
@@ -1455,8 +1455,8 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
         );
       }
     }
-    outputSubalgebra.flagSystemProvedToHaveNoSolution = false;
-    outputSubalgebra.flagSystemSolved = true;
+    outputSubalgebra.status =
+    CandidateSubalgebraStatus::preloadedButNotVerified;
   } else {
     return
     calculator
@@ -1479,7 +1479,7 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   // am about to take
   // some time soon.
   outputSubalgebra.computeHsAndHsScaledToActByTwoFromComponents();
-  outputSubalgebra.flagSubalgebraPreloadedButNotVerified = true;
+  outputSubalgebra.status = CandidateSubalgebraStatus::preloadedButNotVerified;
   return
   output.assignError(
     calculator,
@@ -1743,31 +1743,25 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   Expression currentChainExpression;
   Expression numericalConverterExpression(calculator);
   currentChainExpression.makeSequence(calculator);
-  for (int i = 0; i < input.currentSubalgebraChain.size; i ++) {
-    numericalConverterExpression =
-    input.currentSubalgebraChain[i].indexInOwner;
-    currentChainExpression.addChildOnTop(numericalConverterExpression);
-  }
   keys.addOnTop("CurrentChain");
   values.addOnTop(currentChainExpression);
-  Expression totalTypesExploredE;
-  totalTypesExploredE.makeSequence(calculator);
-  for (
-    int i = 0; i < input.currentNumberOfLargerTypesExplored.size; i ++
-  ) {
-    numericalConverterExpression = input.currentNumberOfLargerTypesExplored[i];
-    totalTypesExploredE.addChildOnTop(numericalConverterExpression);
-  }
-  keys.addOnTop("NumberOfExploredTypes");
-  values.addOnTop(totalTypesExploredE);
+  Expression totalTypesExploredExpression;
+  totalTypesExploredExpression.makeSequence(calculator);
   Expression totalHsExploredExpression;
   totalHsExploredExpression.makeSequence(calculator);
   for (
-    int i = 0; i < input.currentNumberOfHCandidatesExplored.size; i ++
+    PossibleExtensionsOfSemisimpleLieSubalgebra& current :
+    input.currentSubalgebraChain
   ) {
-    numericalConverterExpression = input.currentNumberOfHCandidatesExplored[i];
+    numericalConverterExpression = current.realizedBase->indexInOwner;
+    currentChainExpression.addChildOnTop(numericalConverterExpression);
+    numericalConverterExpression = current.numberOfLargerTypesExplored;
+    totalTypesExploredExpression.addChildOnTop(numericalConverterExpression);
+    numericalConverterExpression = current.indexOfCurrentHCandidate + 1;
     totalHsExploredExpression.addChildOnTop(numericalConverterExpression);
   }
+  keys.addOnTop("NumberOfExploredTypes");
+  values.addOnTop(totalTypesExploredExpression);
   keys.addOnTop("NumberOfExploredHs");
   values.addOnTop(totalHsExploredExpression);
   Expression subalgebrasListExpression;

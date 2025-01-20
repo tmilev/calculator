@@ -1286,7 +1286,6 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   List<Polynomial<Coefficient> >& inputSystem
 ) {
   STACK_TRACE("PolynomialSystem::solveSerreLikeSystemRecursively");
-  global.comments << "DEBUG: solving here!";
   RecursionDepthCounter counter(&this->recursionCounterSerreLikeSystem);
   ProgressReport report1;
   ProgressReport report2;

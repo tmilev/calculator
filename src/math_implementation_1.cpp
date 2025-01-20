@@ -31,7 +31,8 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
   }
   Vector<Rational> weight = this->getWeightOfGenerator(generatorIndex);
   outputMultiplyLieBracketsToGetGenerator = 1;
-  Vector<Rational> genWeight, newWeight;
+  Vector<Rational> genWeight;
+  Vector<Rational> newWeight;
   while (!weight.isEqualToZero()) {
     for (int i = 0; i < this->getRank(); i ++) {
       genWeight.makeEi(this->getRank(), i);
@@ -196,17 +197,17 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   }
   Vectors<Rational> differences;
   differences.setSize(indexMinimalScalarProduct - precedingIndex);
-  Rational currentDist = 0;
-  Rational minDist = 0;
+  Rational currentDistance = 0;
+  Rational minimalDistance = 0;
   for (int i = 0; i < differences.size; i ++) {
     differences[i] =
     this->waypoints[i + precedingIndex + 1] -
     this->waypoints[i + precedingIndex];
-    currentDist +=
+    currentDistance +=
     weylGroup.rootScalarCartanRoot(differences[i], alphaScaled);
-    if (currentDist < minDist) {
+    if (currentDistance < minimalDistance) {
       weylGroup.reflectSimple(indexAlpha, differences[i]);
-      minDist = currentDist;
+      minimalDistance = currentDistance;
     }
   }
   for (int i = 0; i < differences.size; i ++) {
@@ -290,20 +291,21 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
     Rational x = (minimalScalarProduct + 1 - s2) / (s1 - s2);
     this->waypoints[succeedingIndex] = (r1 - r2) * x + r2;
   }
-  Vector<Rational> diff;
+  Vector<Rational> difference;
   Vector<Rational> oldWayPoint;
   oldWayPoint = this->waypoints[indexMinimalScalarProduct];
   Rational currentDist = 0;
   for (int i = 0; i < succeedingIndex - indexMinimalScalarProduct; i ++) {
-    diff = this->waypoints[i + indexMinimalScalarProduct + 1] - oldWayPoint;
-    currentDist += weylGroup.rootScalarCartanRoot(diff, alphaScaled);
+    difference =
+    this->waypoints[i + indexMinimalScalarProduct + 1] - oldWayPoint;
+    currentDist += weylGroup.rootScalarCartanRoot(difference, alphaScaled);
     if (currentDist > 0) {
-      weylGroup.reflectSimple(indexAlpha, diff);
+      weylGroup.reflectSimple(indexAlpha, difference);
       currentDist = 0;
     }
     oldWayPoint = this->waypoints[i + indexMinimalScalarProduct + 1];
     this->waypoints[i + indexMinimalScalarProduct + 1] =
-    this->waypoints[i + indexMinimalScalarProduct] + diff;
+    this->waypoints[i + indexMinimalScalarProduct] + difference;
   }
   for (int i = succeedingIndex + 1; i < this->waypoints.size; i ++) {
     this->waypoints[i] -= alpha;
@@ -789,7 +791,8 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
     );
     MonomialUniversalEnveloping<Coefficient>& rightMonomial =
     minusTransposeRight[j];
-    Coefficient& rightMonCoeff = minusTransposeRight.coefficients[j];
+    Coefficient& rightMonomialCoefficient =
+    minusTransposeRight.coefficients[j];
     int power;
     for (int i = rightMonomial.powers.size - 1; i >= 0; i --) {
       if (rightMonomial.powers[i].isSmallInteger(&power)) {
@@ -847,7 +850,7 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
         return false;
       }
     }
-    intermediateAccum *= rightMonCoeff;
+    intermediateAccum *= rightMonomialCoefficient;
     accumulator += intermediateAccum;
     int index = intermediateAccum.getIndex(constMon);
     if (index != - 1) {
@@ -1009,7 +1012,7 @@ void BranchingData::initializePart1NoSubgroups() {
   }
   this->nilradicalModuloPreimageNilradical = this->nilradicalLarge;
   this->weightsNilModPreNil = this->weightsNilradicalLarge;
-  Vector<Rational> proj;
+  Vector<Rational> projection;
   for (int i = 0; i < this->nilradicalSmall.size; i ++) {
     ElementSemisimpleLieAlgebra<Rational>& elementImage =
     this->homomorphism.imagesAllChevalleyGenerators[
@@ -1024,8 +1027,8 @@ void BranchingData::initializePart1NoSubgroups() {
     }
     bool isGood = false;
     for (int j = 0; j < this->weightsNilModPreNil.size; j ++) {
-      proj = this->projectWeight(this->weightsNilModPreNil[j]);
-      if (proj == this->weightsNilradicalSmall[i]) {
+      projection = this->projectWeight(this->weightsNilModPreNil[j]);
+      if (projection == this->weightsNilradicalSmall[i]) {
         isGood = true;
         this->nilradicalModuloPreimageNilradical.removeIndexSwapWithLast(j);
         this->weightsNilModPreNil.removeIndexSwapWithLast(j);
@@ -1079,16 +1082,16 @@ std::string BranchingData::getStringCasimirProjector(
 ) {
   Vector<RationalFraction<Rational> > weightDifference;
   std::stringstream formulaStream1;
-  HashedList<Vector<RationalFraction<Rational> > > accountedDiffs;
-  accountedDiffs.setExpectedSize(this->g2Weights.size);
+  HashedList<Vector<RationalFraction<Rational> > > accountedDifferences;
+  accountedDifferences.setExpectedSize(this->g2Weights.size);
   bool found = false;
   for (int i = 0; i < this->g2Weights.size; i ++) {
     weightDifference = this->g2Weights[i] - this->g2Weights[index];
     if (
       weightDifference.isPositive() &&
-      !accountedDiffs.contains(weightDifference)
+      !accountedDifferences.contains(weightDifference)
     ) {
-      accountedDiffs.addOnTop(weightDifference);
+      accountedDifferences.addOnTop(weightDifference);
       if (additionalMultiple != 1) {
         formulaStream1 << additionalMultiple.toString(&this->format);
       }
@@ -1137,7 +1140,8 @@ bool LittelmannPath::isAdaptedString(
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 getGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output) {
   STACK_TRACE(
-    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::getGroupElementsIndexedAsAmbientGroup"
+    "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+    "::getGroupElementsIndexedAsAmbientGroup"
   );
   if (this->externalAutomorphisms.size > 0) {
     global.fatal

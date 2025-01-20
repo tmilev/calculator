@@ -514,7 +514,7 @@ public:
   void exploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void exploitSymmetryChevalleyConstants(int indexI, int indexJ);
   void exploitTheCyclicTrick(int i, int j, int k);
-  bool getMaxQForWhichBetaMinusQAlphaisARoot(
+  bool getMaxQForWhichBetaMinusQAlphaIsARoot(
     const Vector<Rational>& alpha,
     const Vector<Rational>& beta,
     int& output

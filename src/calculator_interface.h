@@ -1742,6 +1742,7 @@ public:
   void resetSliders();
   void resetPlots();
   bool checkConsistencyAfterReset();
+  bool checkAll();
   std::string toString();
 };
 

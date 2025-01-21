@@ -2441,6 +2441,25 @@ void ObjectContainer::resetSliders() {
   );
 }
 
+bool ObjectContainer::checkAll() {
+  STACK_TRACE("ObjectContainer::checkAll");
+  for (
+    const SemisimpleSubalgebras& subalgebras :
+    this->semisimpleSubalgebras.values
+  ) {
+    subalgebras.checkAll();
+  }
+  for (
+    const SemisimpleLieAlgebra& algebra : this->semisimpleLieAlgebras.values
+  ) {
+    algebra.checkConsistency();
+  }
+  for (const SlTwoSubalgebras& slTwos : this->slTwoSubalgebras) {
+    slTwos.checkConsistency();
+  }
+  return true;
+}
+
 bool ObjectContainer::checkConsistencyAfterReset() {
   STACK_TRACE("ObjectContainer::checkConsistencyAfterReset");
   if (this->weylGroupElements.size != 0) {

@@ -4619,7 +4619,7 @@ void TopicElementParser::TopicLine::makeError(const std::string& message) {
   this->topicType = TopicElement::types::error;
 }
 
-void TopicElementParser::TopicLine::MakeEmpty() {
+void TopicElementParser::TopicLine::makeEmpty() {
   this->contentTrimmedWhiteSpace = "";
   this->tag = "";
   this->topicType = TopicElement::types::empty;
@@ -4708,11 +4708,11 @@ TopicElementParser::TopicLine TopicElementParser::extractLine(
   TopicElementParser::TopicLine result;
   std::string input = StringRoutines::stringTrimWhiteSpace(inputNonTrimmed);
   if (input.size() == 0) {
-    result.MakeEmpty();
+    result.makeEmpty();
     return result;
   }
   if (input[0] == '%') {
-    result.MakeEmpty();
+    result.makeEmpty();
     return result;
   }
   result.topicType = TopicElement::types::unknown;

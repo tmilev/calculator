@@ -102,12 +102,6 @@ enum CandidateSubalgebraStatus {
   unrealizableNonFittingCharacter,
   neitherRealizedNorProvedImpossible,
   previouslyRealizedAsADirectSummand,
-  // The generators for the subalgebra were
-  // either:
-  // 1) given by an end user,
-  // 2) hardcoded,
-  // 3) loaded from harddisk.
-  preloadedButNotVerified,
   // Bad user input (user error)
   // or bad precomputed data (programming error).
   corrupt
@@ -290,6 +284,7 @@ public:
   ) const;
   bool isUnrealizable() const;
   bool isRealized() const;
+  bool isZero() const;
   bool hasHsScaledByTwoConjugateTo(List<Vector<Rational> >& other) const;
   bool computeCentralizerTypeFailureAllowed();
   bool isDirectSummandOf(const CandidateSemisimpleSubalgebra& other);
@@ -485,12 +480,40 @@ public:
   bool operator>(const CandidateSemisimpleSubalgebra& other) const;
 };
 
+class RealizedSemisimpleSubalgebra {
+public:
+  friend std::ostream& operator<<(
+    std::ostream& output, const RealizedSemisimpleSubalgebra& input
+  ) {
+    output << input.toString(nullptr, false);
+    return output;
+  }
+  bool operator>(const RealizedSemisimpleSubalgebra& other) const;
+  CandidateSemisimpleSubalgebra content;
+  bool flagDeallocated;
+  int indexInOwner;
+  RealizedSemisimpleSubalgebra();
+  ~RealizedSemisimpleSubalgebra();
+  bool checkAll() const;
+  std::string toString(FormatExpressions* format, bool generateLinks) const;
+};
+
+class NonRealizedSemisimpleSubalgebra {
+public:
+  CandidateSemisimpleSubalgebra candidate;
+  bool flagDeallocated;
+  int indexInOwner;
+  NonRealizedSemisimpleSubalgebra();
+  ~NonRealizedSemisimpleSubalgebra();
+  bool checkAll() const;
+};
+
 // Encodes a possible extension of a base subalgebra
 // to a larger Semisimple Lie algebra.
 // The base is an already realized semisimple subalagebra or zero.
 struct PossibleExtensionsOfSemisimpleLieSubalgebra {
 public:
-  CandidateSemisimpleSubalgebra* realizedBase;
+  RealizedSemisimpleSubalgebra* realizedBase;
   SemisimpleSubalgebras* owner;
   int numberOfLargerTypesExplored;
   int indexOfCurrentHCandidate;
@@ -498,17 +521,14 @@ public:
   List<DynkinType> possibleLargerDynkinTypes;
   List<List<int> > possibleRootInjections;
   List<Vector<Rational> > candidateHsScaledToActByTwo;
-  PossibleExtensionsOfSemisimpleLieSubalgebra(
-    SemisimpleSubalgebras* inputOwner = nullptr,
-    CandidateSemisimpleSubalgebra* inputBase = nullptr
-  );
+  PossibleExtensionsOfSemisimpleLieSubalgebra();
   // Returns true if all possible extensions have been explored.
   bool isExhausted() const;
   // Increments to the next possible extension, or
   // returns last if all extensions have been explored.
   bool incrementReturnFalseIfPastLast(ProgressReport* report);
   // Attempts to realize the extension currently being explored.
-  CandidateSemisimpleSubalgebra& attemptExtension();
+  void attemptExtension(CandidateSemisimpleSubalgebra& newCandidate);
   DynkinType& nextUnexploredDynkinType();
   List<int>& nextPossibleRootInjection();
   void computeCurrentHCandidates();
@@ -553,13 +573,14 @@ public:
   slTwoSubalgebrasRealForm;
   // All found subalgebras are here.
   // The keys are their embedded symmetric Cartan matrices.
-  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra> subalgebras;
-  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>
-  subalgebraCandidatesProvenImpossible;
-  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>
-  subalgebraCandidatesUnrealizedNotProvenImpossible;
-  MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>
-  previouslyRealizedAsDirectSummand;
+  MapReferences<Vectors<Rational>, RealizedSemisimpleSubalgebra> subalgebras;
+  // Subalgebras not realized.
+  // Non-realized subalgebras include:
+  // 1) Subalgebras that may or may not exist
+  // but we could neither find a solution nor prove impossibility.
+  // 2) Subalgebras that are impossible.
+  MapReferences<Vectors<Rational>, NonRealizedSemisimpleSubalgebra>
+  nonRealizedSubalgebras;
   bool flagHasPossibleSubalgebrasWeCouldntSolveFor;
   bool flagAttemptToSolveSystems;
   // This flag determines whether our computation is over
@@ -581,6 +602,8 @@ public:
   struct Statistics {
     Statistics();
     int totalExtensionsTried;
+    int subalgebrasNeitherRealizedNorProvedImpossible;
+    int subalgebrasProvedImpossible;
   };
 
   SemisimpleSubalgebras::Statistics statistics;
@@ -669,6 +692,7 @@ public:
     }
     return *this->owner;
   }
+  RealizedSemisimpleSubalgebra& emptyCandidateSubalgebra();
   void makeEmptyCandidateSubalgebra(CandidateSemisimpleSubalgebra& output);
   void makeCandidateSubalgebra(
     const DynkinType& input, CandidateSemisimpleSubalgebra& output
@@ -700,23 +724,23 @@ public:
   SemisimpleSubalgebras(): flagDeallocated(false) {
     this->resetPointers();
   }
-  CandidateSemisimpleSubalgebra& addSubalgebraIfNew(
+  RealizedSemisimpleSubalgebra& addRealizedSubalgebraIfNew(
     CandidateSemisimpleSubalgebra& input
   );
-  CandidateSemisimpleSubalgebra& addSubalgebraIfNewToCollection(
-    const CandidateSemisimpleSubalgebra& input,
-    MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>& collection
-  );
-  CandidateSemisimpleSubalgebra& addSubalgebraIfNewSetToStackTop(
+  NonRealizedSemisimpleSubalgebra& addNonRealizedSubalgebraIfNew(
     CandidateSemisimpleSubalgebra& input
   );
-  void addSubalgebraToStack(CandidateSemisimpleSubalgebra& input);
+  RealizedSemisimpleSubalgebra& addSubalgebraIfNewSetToStackTop(
+    CandidateSemisimpleSubalgebra& input
+  );
+  void addSubalgebraToStack(RealizedSemisimpleSubalgebra& realized);
   bool checkConsistencyHs() const;
   bool checkConsistency() const;
   bool checkInitialization() const;
   bool checkIsEmpty() const;
   bool checkAll() const;
-  std::string toStringCandidateStatistics(bool showInternals) const;
+  void computeStatistics();
+  std::string toStringCandidateStatistics(bool showInternals);
   std::string toStringShort() const;
   std::string toStringState(FormatExpressions* format = nullptr);
   std::string toStringCurrentChain(FormatExpressions* format = nullptr);
@@ -729,11 +753,13 @@ public:
   std::string toStringSubalgebrasNoHDWrite(
     FormatExpressions* format, bool generateLinks
   );
-  std::string toStringSubalgebraCollection(
+  std::string toStringRealizedSubalgebraCollection(
     FormatExpressions* format,
-    MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>& collection
-    ,
+    MapReferences<Vectors<Rational>, RealizedSemisimpleSubalgebra>& collection,
     const std::string& collectionDescription
+  );
+  std::string toStringNonRealizedSubalgebraCollection(
+    FormatExpressions* format
   );
   std::string toStringSubalgebrasWithHDWrite(
     FormatExpressions* format = nullptr

@@ -1324,14 +1324,14 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   reportStream << "Loading precomputed semisimple subalgebra. ";
   report.report(reportStream.str());
   Expression dynkinTypeExpression;
-  Expression ElementsCartanExpression;
+  Expression elementsCartanExpression;
   Expression generatorsExpression;
   if (
     !CalculatorConversions::loadKey(
       calculator, input, "DynkinType", dynkinTypeExpression
     ) ||
     !CalculatorConversions::loadKey(
-      calculator, input, "ElementsCartan", ElementsCartanExpression
+      calculator, input, "ElementsCartan", elementsCartanExpression
     )
   ) {
     return false;
@@ -1371,7 +1371,7 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   if (
     !CalculatorConversions::functionGetMatrix(
       calculator,
-      ElementsCartanExpression,
+      elementsCartanExpression,
       hElements,
       false,
       nullptr,
@@ -1455,8 +1455,6 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
         );
       }
     }
-    outputSubalgebra.status =
-    CandidateSubalgebraStatus::preloadedButNotVerified;
   } else {
     return
     calculator
@@ -1479,7 +1477,6 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   // am about to take
   // some time soon.
   outputSubalgebra.computeHsAndHsScaledToActByTwoFromComponents();
-  outputSubalgebra.status = CandidateSubalgebraStatus::preloadedButNotVerified;
   return
   output.assignError(
     calculator,
@@ -1668,11 +1665,11 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
       << "the same Cartan subalgebra. ";
       continue;
     }
-    subalgebras.subalgebras.setKeyValue(
-      currentCandidate.cartanElementsSubalgebra, currentCandidate
-    );
-    subalgebras.subalgebras.values.lastObject().indexInOwner =
-    subalgebras.subalgebras.values.size - 1;
+    if (currentCandidate.computeAndVerifyFromGeneratorsAndHs()) {
+      subalgebras.addRealizedSubalgebraIfNew(currentCandidate);
+    } else {
+      subalgebras.addNonRealizedSubalgebraIfNew(currentCandidate);
+    }
   }
   reportStream
   << "Subalgebra loading done, total "
@@ -1774,7 +1771,9 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   for (int i = 0; i < input.subalgebras.values.size; i ++) {
     if (
       !CalculatorConversions::storeCandidateSubalgebra(
-        calculator, input.subalgebras.values[i], candidateExpression
+        calculator,
+        input.subalgebras.values[i].content,
+        candidateExpression
       )
     ) {
       return false;

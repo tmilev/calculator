@@ -8859,6 +8859,7 @@ bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(
   << smallSubalgebraPointer.content->weylGroup.dynkinType.toString()
   << " in "
   << semisimpleLieAlgebra.toStringLieAlgebraName();
+  semisimpleSubalgebras.checkAll();
   semisimpleSubalgebras.findSemisimpleSubalgebrasFromScratch(
     semisimpleLieAlgebra,
     calculator.objectContainer.algebraicClosure,
@@ -8866,7 +8867,12 @@ bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(
     calculator.objectContainer.slTwoSubalgebras,
     &smallSubalgebraPointer.content->weylGroup.dynkinType
   );
-  return output.assignValue(calculator, semisimpleSubalgebras);
+  semisimpleSubalgebras.checkAll();
+  output.assignValue(calculator, semisimpleSubalgebras);
+  calculator.objectContainer.checkAll();
+  output.toString();
+  semisimpleSubalgebras.checkAll();
+  return true;
 }
 
 bool CalculatorFunctions::allPartitions(

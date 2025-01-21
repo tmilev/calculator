@@ -27,7 +27,7 @@ public:
     std::string tag;
     std::string contentTrimmedWhiteSpace;
     void makeError(const std::string& message);
-    void MakeEmpty();
+    void makeEmpty();
     TopicElement toTopicElement() const;
     std::string toString() const;
     bool accountIfStateChanger(CalculatorHTML& owner) const;

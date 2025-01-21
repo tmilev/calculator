@@ -5189,11 +5189,11 @@ bool CalculatorLieTheory::growDynkinType(
   if (input.size() != 3) {
     return false;
   }
-  const Expression& smallerTypeE = input[1];
+  const Expression& smallerTypeExpression = input[1];
   DynkinType smallDynkinType;
   if (
     !CalculatorConversions::functionDynkinType(
-      calculator, smallerTypeE, smallDynkinType
+      calculator, smallerTypeExpression, smallDynkinType
     )
   ) {
     return false;
@@ -5252,7 +5252,7 @@ bool CalculatorLieTheory::growDynkinType(
   if (largerTypes.size == 0) {
     out << " cannot grow any further. ";
   } else {
-    CandidateSemisimpleSubalgebra tempCandidate;
+    CandidateSemisimpleSubalgebra currentCandidate;
     out << " can grow to the following types. <br>";
     out
     << "<table border='1'>"
@@ -5272,7 +5272,7 @@ bool CalculatorLieTheory::growDynkinType(
       Vector<Rational> currentHighestWeight =
       subalgebras.
       getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot
-      (largerTypes[i], imagesSimpleRoots[i], tempCandidate);
+      (largerTypes[i], imagesSimpleRoots[i], currentCandidate);
       out
       << HtmlRoutines::getMathNoDisplay(
         currentHighestWeight.toStringLetterFormat("\\omega")
@@ -5388,7 +5388,7 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
   List<List<int> > chains;
   std::stringstream out;
   subalgebras.getCentralizerChains(chains);
-  Expression currentChainE;
+  Expression currentChainExpression;
   out << chains.size << " chains total. <br>";
   for (int i = 0; i < chains.size; i ++) {
     out
@@ -5400,10 +5400,10 @@ bool CalculatorLieTheory::getCentralizerChainsSemisimpleSubalgebras(
     for (int j = 0; j < chains[i].size; j ++) {
       CalculatorConversions::storeCandidateSubalgebra(
         calculator,
-        subalgebras.subalgebras.values[chains[i][j]],
-        currentChainE
+        subalgebras.subalgebras.values[chains[i][j]].content,
+        currentChainExpression
       );
-      out << currentChainE.toString();
+      out << currentChainExpression.toString();
       if (j != chains[i].size - 1) {
         out << ", ";
       }

@@ -6057,6 +6057,7 @@ bool DynkinType::grow(
         (*outputPermutationRoots)[i][0] = 0;
       }
     }
+    global.comments << "<br>DEBUG: grown: " << output.toString() << "<br>";
     return true;
   }
   // Rational minCoRootLengthSquared = - 1;
@@ -6066,16 +6067,16 @@ bool DynkinType::grow(
   List<int> currentRootInjection;
   this->getMinimalMonomial(minimalComponent, coefficientMinimalComponent);
   if (coefficientMinimalComponent == 1) {
-    DynkinType typeMinusMin = (*this);
-    typeMinusMin.subtractMonomial(minimalComponent, 1);
+    DynkinType typeMinusMinimal = (*this);
+    typeMinusMinimal.subtractMonomial(minimalComponent, 1);
     List<DynkinSimpleType> simpleTypes;
     List<List<int> > lastComponentRootInjections;
     minimalComponent.grow(simpleTypes, &lastComponentRootInjections);
     currentRootInjection.setSize(this->getRank() + 1);
     for (int i = 0; i < simpleTypes.size; i ++) {
       bool isGood = true;
-      for (int j = 0; j < typeMinusMin.size(); j ++) {
-        if (simpleTypes[i] > typeMinusMin[j]) {
+      for (int j = 0; j < typeMinusMinimal.size(); j ++) {
+        if (simpleTypes[i] > typeMinusMinimal[j]) {
           isGood = false;
           break;
         }
@@ -6083,10 +6084,10 @@ bool DynkinType::grow(
       if (!isGood) {
         continue;
       }
-      output.addOnTop(typeMinusMin);
+      output.addOnTop(typeMinusMinimal);
       output.lastObject()->addMonomial(simpleTypes[i], 1);
       if (outputPermutationRoots != nullptr) {
-        int baseTypeRank = typeMinusMin.getRank();
+        int baseTypeRank = typeMinusMinimal.getRank();
         for (int j = 0; j < baseTypeRank; j ++) {
           currentRootInjection[j] = j;
         }
@@ -6393,13 +6394,13 @@ void DynkinType::getCartanSymmetricDefaultLengthKeepComponentOrder(
   DynkinSimpleType currentType;
   for (int j = 0; j < sortedMonomials.size; j ++) {
     int index = this->monomials.getIndex(sortedMonomials[j]);
-    int mult = this->getMultiplicity(index);
+    int multiplicity = this->getMultiplicity(index);
     currentType.makeArbitrary(
       sortedMonomials[j].letter, sortedMonomials[j].rank, 1
     );
     currentType.cartanSymmetricInverseScale = 1;
     // = currentType.getDefaultCoRootLengthSquared(0);
-    for (int k = 0; k < mult; k ++) {
+    for (int k = 0; k < multiplicity; k ++) {
       currentType.getCartanSymmetric(currentCartan);
       output.directSumWith(currentCartan);
     }
@@ -12883,10 +12884,10 @@ Rational PiecewiseQuasipolynomial::evaluate(
     << "projectivized complex dimension minus one. "
     << global.fatal;
   }
-  Vector<Rational> ProjectivizedInput = input;
-  ProjectivizedInput.setSize(input.size + 1);
-  *ProjectivizedInput.lastObject() = 1;
-  return this->evaluateInputProjectivized(ProjectivizedInput, comments);
+  Vector<Rational> projectivizedInput = input;
+  projectivizedInput.setSize(input.size + 1);
+  *projectivizedInput.lastObject() = 1;
+  return this->evaluateInputProjectivized(projectivizedInput, comments);
 }
 
 Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
@@ -14705,22 +14706,22 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numberOfAddedFakeWalls) {
     // We modify the normals so that they lie in the subspace spanned by the
     // vertices.
     Matrix<Rational> matrix;
-    Matrix<Rational> matNormals;
+    Matrix<Rational> matrixOfNormals;
     Matrix<Rational> gramMatrixInverted;
     matrix.assignVectorsToRows(this->vertices);
     Vectors<Rational> normalsToSubspace;
     matrix.getZeroEigenSpaceModifyMe(normalsToSubspace);
     if (normalsToSubspace.size > 0) {
-      matNormals.assignVectorsToRows(normalsToSubspace);
+      matrixOfNormals.assignVectorsToRows(normalsToSubspace);
       // global.Comments << "<br>normals to the subspace spanned by the
       // vertices: " << NormalsToSubspace.toString();
-      gramMatrixInverted = matNormals;
+      gramMatrixInverted = matrixOfNormals;
       gramMatrixInverted.transpose();
-      gramMatrixInverted.multiplyOnTheLeft(matNormals);
+      gramMatrixInverted.multiplyOnTheLeft(matrixOfNormals);
       gramMatrixInverted.invert();
       Vector<Rational> root;
       for (int i = 0; i < this->walls.size; i ++) {
-        matNormals.actOnVectorColumn(this->walls[i].normal, root);
+        matrixOfNormals.actOnVectorColumn(this->walls[i].normal, root);
         gramMatrixInverted.actOnVectorColumn(root);
         for (int j = 0; j < root.size; j ++) {
           this->walls[i].normal -= normalsToSubspace[j] * root[j];

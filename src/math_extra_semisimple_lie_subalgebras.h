@@ -423,18 +423,20 @@ public:
     const Vector<Rational>& inputAmbientWeight,
     Vector<Rational>& output
   ) const;
-  void computeSystem(
+  void attemptToSolveSystem(
     bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
   );
-  void computeSystemPart2(
+  void attemptToSolveSystemPart2(
     bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
   );
+  CandidateSubalgebraStatus attemptToSolveSystemFinal();
   bool prepareSystem(
     bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
   );
+  void prepareSystemCentralizerCommutingRelations();
+  void prepareSystemSerreRelationsForIndexPair(int leftIndex, int rightIndex);
   void prepareSystemSerreRelations();
   bool computeCharacter(bool allowBadCharacter);
-  CandidateSubalgebraStatus attemptToSolveSystem();
   void configurePolynomialSystem(
     PolynomialSystem<AlgebraicNumber>& toBeConfigured
   );
@@ -447,6 +449,10 @@ public:
     const Vector<Rational>& primalWeightLeft,
     const Vector<Rational>& primalWeightRight
   ) const;
+  static std::string toStringStatusStatic(CandidateSubalgebraStatus status);
+  std::string toStringStatus() const {
+    return CandidateSemisimpleSubalgebra::toStringStatusStatic(this->status);
+  }
   std::string toStringType(FormatExpressions* format = nullptr) const;
   std::string toStringTypeAndHs(FormatExpressions* format = nullptr) const;
   std::string toStringGenerators(FormatExpressions* format) const;
@@ -517,6 +523,7 @@ public:
   SemisimpleSubalgebras* owner;
   int numberOfLargerTypesExplored;
   int indexOfCurrentHCandidate;
+  bool flagInitialized;
   // state that is recomputed each load:
   List<DynkinType> possibleLargerDynkinTypes;
   List<List<int> > possibleRootInjections;
@@ -527,6 +534,7 @@ public:
   // Increments to the next possible extension, or
   // returns last if all extensions have been explored.
   bool incrementReturnFalseIfPastLast(ProgressReport* report);
+  void initializeIfNeeded();
   // Attempts to realize the extension currently being explored.
   void attemptExtension(CandidateSemisimpleSubalgebra& newCandidate);
   DynkinType& nextUnexploredDynkinType();
@@ -558,7 +566,7 @@ public:
   List<OrbitIteratorRootActionWeylGroupAutomorphisms> orbits;
   HashedList<Rational> orbitHElementLengths;
   HashedList<DynkinSimpleType> orbitDynkinIndices;
-  // if an entry in orbit sizes is - 1 this means the corresponding orbit size
+  // If an entry in orbit sizes is - 1 it means the corresponding orbit size
   // has not been computed yet.
   int maxStoredOrbitSize;
   std::string comments;
@@ -567,10 +575,11 @@ public:
   // current computation state:
   // state that gets stored to hd:
   List<PossibleExtensionsOfSemisimpleLieSubalgebra> currentSubalgebraChain;
-  // end current computation state variables.
+  // End current computation state variables.
   // The map keys are used to search for subalgebras quickly.
   MapReferences<Vectors<Rational>, CandidateSemisimpleSubalgebra>
   slTwoSubalgebrasRealForm;
+  RealizedSemisimpleSubalgebra zeroSubalgebra;
   // All found subalgebras are here.
   // The keys are their embedded symmetric Cartan matrices.
   MapReferences<Vectors<Rational>, RealizedSemisimpleSubalgebra> subalgebras;
@@ -693,14 +702,13 @@ public:
     return *this->owner;
   }
   RealizedSemisimpleSubalgebra& emptyCandidateSubalgebra();
-  void makeEmptyCandidateSubalgebra(CandidateSemisimpleSubalgebra& output);
   void makeCandidateSubalgebra(
     const DynkinType& input, CandidateSemisimpleSubalgebra& output
   );
   void makeCandidateFromSlTwo(
     SlTwoSubalgebra& candidate, CandidateSemisimpleSubalgebra& output
   );
-  bool incrementReturnFalseIfPastLast(ProgressReport* report);
+  bool incrementReturnFalseIfPastLast();
   bool getCentralizerTypeIfComputableAndKnown(
     const DynkinType& input, DynkinType& output
   );

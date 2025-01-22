@@ -97,32 +97,32 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
     "AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection"
   );
   output.makeZero();
-  Selection vectorActedOnSel, resultVectorSel;
-  vectorActedOnSel.initialize(this->quadraticRadicals.size);
-  resultVectorSel.initialize(this->quadraticRadicals.size);
+  Selection vectorActedOnSelection;Selection resultVectorSelection;
+  vectorActedOnSelection.initialize(this->quadraticRadicals.size);
+  resultVectorSelection.initialize(this->quadraticRadicals.size);
   Rational coefficient;
   MonomialMatrix monomial;
   do {
     coefficient = 1;
     for (int i = 0; i < this->quadraticRadicals.size; i ++) {
-      if (vectorActedOnSel.selected[i] && selection.selected[i]) {
-        resultVectorSel.selected[i] = false;
+      if (vectorActedOnSelection.selected[i] && selection.selected[i]) {
+        resultVectorSelection.selected[i] = false;
         coefficient *= this->quadraticRadicals[i];
       } else if (
-        !vectorActedOnSel.selected[i] && !selection.selected[i]
+        !vectorActedOnSelection.selected[i] && !selection.selected[i]
       ) {
-        resultVectorSel.selected[i] = false;
+        resultVectorSelection.selected[i] = false;
       } else {
-        resultVectorSel.selected[i] = true;
+        resultVectorSelection.selected[i] = true;
       }
     }
-    resultVectorSel.computeIndicesFromSelection();
+    resultVectorSelection.computeIndicesFromSelection();
     monomial.makeEij(
-      this->getIndexFromRadicalSelection(resultVectorSel),
-      this->getIndexFromRadicalSelection(vectorActedOnSel)
+      this->getIndexFromRadicalSelection(resultVectorSelection),
+      this->getIndexFromRadicalSelection(vectorActedOnSelection)
     );
     output.addMonomial(monomial, coefficient);
-  } while (vectorActedOnSel.incrementReturnFalseIfPastLast());
+  } while (vectorActedOnSelection.incrementReturnFalseIfPastLast());
 }
 
 void AlgebraicClosureRationals::computeDisplayStringsFromRadicals() {
@@ -201,7 +201,7 @@ bool AlgebraicClosureRationals::mergeRadicals(
   HashedList<LargeInteger> radicalsNew = this->quadraticRadicals;
   radicalsNew.addOnTopNoRepetition(radicals);
   bool found = true;
-  LargeIntegerUnsigned candidateGCD, leftQuotient, rightQuotient;
+  LargeIntegerUnsigned candidateGCD;LargeIntegerUnsigned leftQuotient;LargeIntegerUnsigned rightQuotient;
   while (found) {
     found = false;
     for (int i = 0; i < radicalsNew.size; i ++) {
@@ -848,7 +848,8 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE(
-    "AlgebraicClosureRationals::adjoinRootQuadraticPolynomialToQuadraticRadicalExtension"
+    "AlgebraicClosureRationals::"
+      "adjoinRootQuadraticPolynomialToQuadraticRadicalExtension"
   );
   if (
     polynomial.totalDegree() != 2 ||
@@ -862,7 +863,7 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   );
   Polynomial<Rational> minimialPolynomial;
   minimialPolynomial.makeZero();
-  Rational currentCF, linearTermCoefficientFDividedByTwo, constantTermShifted;
+  Rational currentCF;Rational linearTermCoefficientFDividedByTwo;Rational constantTermShifted;
   for (int i = 0; i < algebraicNumberPolynomial.size(); i ++) {
     if (
       !algebraicNumberPolynomial.coefficients[i].isRational(&currentCF)
@@ -923,7 +924,7 @@ convertPolynomialOneVariableToPolynomialFirstVariable(
 ) {
   STACK_TRACE(
     "AlgebraicClosureRationals::"
-    "convertPolynomialDependingOneVariableToPolynomialDependingOnFirstVariableNoFail"
+    "convertPolynomialOneVariableToPolynomialFirstVariable"
   );
   int indexVariable = - 1;
   if (!input.isOneVariableNonConstantPolynomial(&indexVariable)) {

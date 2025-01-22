@@ -6057,7 +6057,6 @@ bool DynkinType::grow(
         (*outputPermutationRoots)[i][0] = 0;
       }
     }
-    global.comments << "<br>DEBUG: grown: " << output.toString() << "<br>";
     return true;
   }
   // Rational minCoRootLengthSquared = - 1;

@@ -1347,11 +1347,9 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   ) {
     this->trySettingValueToVariable(inputSystem, arbitrarySubstitution);
     if (this->flagSystemSolvedOverBaseField) {
-      global.comments << "DEBUG : soli soli soli!";
       return;
     }
     inputSystem = systemBeforeHeuristics;
-    global.comments << "DEBUG : no soli here!";
     if (this->groebner.flagDoProgressReport) {
       MonomialPolynomial monomial(
         this->getPreferredSerreSystemSubstitutionIndex(inputSystem)

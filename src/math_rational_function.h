@@ -313,9 +313,9 @@ bool RationalFraction<Coefficient>::checkConsistency() const {
 
 template <class Coefficient>
 void RationalFraction<Coefficient>::operator/=(int other) {
-  RationalFraction tempRF;
-  tempRF.makeConstant(other);
-  *this /= tempRF;
+  RationalFraction coefficient;
+  coefficient.makeConstant(other);
+  *this /= coefficient;
 }
 
 template <class Coefficient>
@@ -342,10 +342,10 @@ void RationalFraction<Coefficient>::operator-=(
     << "Corrupt other rational function in operator -=. "
     << global.fatal;
   }
-  RationalFraction<Coefficient> tempRF;
-  tempRF = other;
-  tempRF.negate();
-  this->operator+=(tempRF);
+  RationalFraction<Coefficient> negativeCoefficient;
+  negativeCoefficient = other;
+  negativeCoefficient.negate();
+  this->operator+=(negativeCoefficient);
   if (!this->checkConsistency()) {
     global.fatal
     << "Corrupt output in rational function operator -=."
@@ -391,9 +391,9 @@ void RationalFraction<Coefficient>::makeZero() {
 
 template <class Coefficient>
 void RationalFraction<Coefficient>::operator+=(int coefficient) {
-  RationalFraction tempRF;
-  tempRF.makeConstant(Rational(coefficient));
-  (*this) += tempRF;
+  RationalFraction constantTerm;
+  constantTerm.makeConstant(Rational(coefficient));
+  (*this) += constantTerm;
 }
 
 template <class Coefficient>
@@ -460,9 +460,9 @@ bool RationalFraction<Coefficient>::findOneVariableRationalRoots(
     output.setSize(0);
     return true;
   }
-  Polynomial<Rational> tempP;
-  this->getNumerator(tempP);
-  return tempP.findOneVariableRationalRoots(output);
+  Polynomial<Rational> polynomial;
+  this->getNumerator(polynomial);
+  return polynomial.findOneVariableRationalRoots(output);
 }
 
 template <class Coefficient>
@@ -690,10 +690,10 @@ template <class Coefficient>
 void RationalFraction<Coefficient>::operator*=(
   const MonomialPolynomial& other
 ) {
-  Polynomial<Rational> otherP;
-  otherP.makeZero();
-  otherP.addMonomial(other, 1);
-  *this *= otherP;
+  Polynomial<Rational> converted;
+  converted.makeZero();
+  converted.addMonomial(other, 1);
+  *this *= converted;
 }
 
 template <class Coefficient>
@@ -712,7 +712,9 @@ void RationalFraction<Coefficient>::operator*=(
     this->reduceMemory();
     return;
   }
-  Polynomial<Coefficient> commonDivisor, result, tempP;
+  Polynomial<Coefficient> commonDivisor;
+  Polynomial<Coefficient> result;
+  Polynomial<Coefficient> divisor;
   ProgressReport report;
   if (report.tickAndWantReport()) {
     std::stringstream out;
@@ -730,18 +732,18 @@ void RationalFraction<Coefficient>::operator*=(
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderForGreatestCommonDivisor();
   this->numerator.getElement().divideBy(
-    commonDivisor, result, tempP, monomialOrder
+    commonDivisor, result, divisor, monomialOrder
   );
-  if (!tempP.isEqualToZero()) {
+  if (!divisor.isEqualToZero()) {
     global.fatal
     << "Polynomial equal to zero not allowed here. "
     << global.fatal;
   }
   this->numerator.getElement() = result;
   this->denominator.getElement().divideBy(
-    commonDivisor, result, tempP, monomialOrder
+    commonDivisor, result, divisor, monomialOrder
   );
-  if (!tempP.isEqualToZero()) {
+  if (!divisor.isEqualToZero()) {
     global.fatal << "Polynomial not equal to zero. " << global.fatal;
   }
   this->denominator.getElement() = result;
@@ -764,12 +766,12 @@ void RationalFraction<Coefficient>::operator/=(
   const RationalFraction<Coefficient>& other
 ) {
   this->checkConsistency();
-  RationalFraction tempRF;
-  tempRF = other;
-  tempRF.checkConsistency();
-  tempRF.invert();
-  tempRF.checkConsistency();
-  *this *= tempRF;
+  RationalFraction inverted;
+  inverted = other;
+  inverted.checkConsistency();
+  inverted.invert();
+  inverted.checkConsistency();
+  *this *= inverted;
   if (!this->checkConsistency()) {
     global.fatal << "Incosistent rational function. " << global.fatal;
   }
@@ -825,16 +827,16 @@ void RationalFraction<Coefficient>::operator*=(
     return;
   }
   if (this->expressionType == TypeExpression::typePolynomial) {
-    Polynomial<Coefficient> tempP;
-    tempP = this->numerator.getElement();
+    Polynomial<Coefficient> polynomial;
+    polynomial = this->numerator.getElement();
     this->operator=(other);
-    this->operator*=(tempP);
+    this->operator*=(polynomial);
     return;
   }
   Polynomial<Coefficient> greatestCommonDivisor1;
   Polynomial<Coefficient> greatestCommonDivisor2;
-  Polynomial<Coefficient> tempP1;
-  Polynomial<Coefficient> tempP2;
+  Polynomial<Coefficient> polynomial1;
+  Polynomial<Coefficient> polynomial2;
   ProgressReport report;
   if (report.tickAndWantReport()) {
     std::stringstream out;
@@ -854,35 +856,35 @@ void RationalFraction<Coefficient>::operator*=(
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderForGreatestCommonDivisor();
   this->numerator.getElement().divideBy(
-    greatestCommonDivisor1, tempP1, tempP2, monomialOrder
+    greatestCommonDivisor1, polynomial1, polynomial2, monomialOrder
   );
-  this->numerator.getElement() = tempP1;
-  if (!tempP2.isEqualToZero()) {
+  this->numerator.getElement() = polynomial1;
+  if (!polynomial2.isEqualToZero()) {
     global.fatal
     << "Polynomial equal to zero not allowed here. "
     << global.fatal;
   }
   other.denominator.getElementConst().divideBy(
-    greatestCommonDivisor1, tempP1, tempP2, monomialOrder
+    greatestCommonDivisor1, polynomial1, polynomial2, monomialOrder
   );
-  if (!tempP2.isEqualToZero()) {
+  if (!polynomial2.isEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
-  this->denominator.getElement() *= tempP1;
+  this->denominator.getElement() *= polynomial1;
   this->denominator.getElement().divideBy(
-    greatestCommonDivisor2, tempP1, tempP2, monomialOrder
+    greatestCommonDivisor2, polynomial1, polynomial2, monomialOrder
   );
-  if (!tempP2.isEqualToZero()) {
+  if (!polynomial2.isEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
-  this->denominator.getElement() = tempP1;
+  this->denominator.getElement() = polynomial1;
   other.numerator.getElementConst().divideBy(
-    greatestCommonDivisor2, tempP1, tempP2, monomialOrder
+    greatestCommonDivisor2, polynomial1, polynomial2, monomialOrder
   );
-  if (!tempP2.isEqualToZero()) {
+  if (!polynomial2.isEqualToZero()) {
     global.fatal << "Polynomial must not be zero here. " << global.fatal;
   }
-  this->numerator.getElement() *= tempP1;
+  this->numerator.getElement() *= polynomial1;
   this->reduceMemory();
   this->simplifyLeadingCoefficientOnly();
   if (report.tickAndWantReport()) {
@@ -908,10 +910,10 @@ void RationalFraction<Coefficient>::operator+=(
     global.fatal << "Corrupt other rational function. " << global.fatal;
   }
   if (other.expressionType < this->expressionType) {
-    RationalFraction<Coefficient> tempRF;
-    tempRF = other;
-    tempRF.convertToType(this->expressionType);
-    this->addSameTypes(tempRF);
+    RationalFraction<Coefficient> converter;
+    converter = other;
+    converter.convertToType(this->expressionType);
+    this->addSameTypes(converter);
     if (!this->checkConsistency()) {
       global.fatal
       << "Output of rational function addition is corrupt. "
@@ -964,10 +966,9 @@ void RationalFraction<Coefficient>::reduceRationalFraction() {
   simplifiedNumerator *= scale;
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderForGreatestCommonDivisor();
-  Polynomial<Coefficient>
-  greatestCommonDivisor,
-  quotientByGreatestCommonDivisor,
-  remainderByGCD;
+  Polynomial<Coefficient> greatestCommonDivisor;
+  Polynomial<Coefficient> quotientByGreatestCommonDivisor;
+  Polynomial<Coefficient> remainderByGCD;
   this->greatestCommonDivisor(
     simplifiedNumerator, simplifiedDenominator, greatestCommonDivisor
   );
@@ -1090,7 +1091,8 @@ scaleNormalizeIndex(
   }
   List<Rational> scales;
   Rational scale;
-  Polynomial<Rational> currentNumerator, currentDenominator;
+  Polynomial<Rational> currentNumerator;
+  Polynomial<Rational> currentDenominator;
   for (int i = 0; i < input.size; i ++) {
     RationalFraction<Rational>& current = input[i];
     current.getNumerator(currentNumerator);
@@ -1145,7 +1147,8 @@ bool RationalFraction<Coefficient>::greatestCommonDivisorQuick(
     << "Greatest common divisor involving zero not allowed. "
     << global.fatal;
   }
-  Polynomial<Coefficient> quotient, remainder;
+  Polynomial<Coefficient> quotient;
+  Polynomial<Coefficient> remainder;
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderDefault();
   if (left.totalDegree() > right.totalDegree()) {
@@ -1217,11 +1220,11 @@ void RationalFraction<Coefficient>::clearDenominators(
     outputWasMultipliedBy.makeConstant(scalar);
     break;
   case RationalFraction::typeRationalFraction:
-    RationalFraction tempRF;
+    RationalFraction converter;
     outputWasMultipliedBy.operator=(this->denominator.getElement());
     *this *= outputWasMultipliedBy;
-    this->clearDenominators(tempRF);
-    outputWasMultipliedBy *= tempRF;
+    this->clearDenominators(converter);
+    outputWasMultipliedBy *= converter;
     break;
   }
 }
@@ -1450,9 +1453,9 @@ template <class Coefficient>
 void RationalFraction<Coefficient>::operator+=(
   const Polynomial<Coefficient>& other
 ) {
-  RationalFraction tempOther;
-  tempOther = other;
-  *this += tempOther;
+  RationalFraction<Coefficient> converter;
+  converter = other;
+  *this += converter;
 }
 
 template <class Coefficient>
@@ -1691,16 +1694,16 @@ bool RationalFraction<Coefficient>::getRelations(
   outputRelations.reserve(groebnerBasis.size);
   outputRelations.setSize(0);
   for (int i = 0; i < groebnerBasis.size; i ++) {
-    Polynomial<Rational>& currentPoly = groebnerBasis[i];
+    Polynomial<Rational>& currentPolynomial = groebnerBasis[i];
     bool bad = false;
     for (int j = 0; j < totalStartingVariables; j ++) {
-      if (currentPoly.maximumPowerOfVariableIndex(j) > 0) {
+      if (currentPolynomial.maximumPowerOfVariableIndex(j) > 0) {
         bad = true;
         break;
       }
     }
     if (!bad) {
-      outputRelations.addOnTop(currentPoly);
+      outputRelations.addOnTop(currentPolynomial);
     }
   }
   return true;

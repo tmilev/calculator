@@ -64,9 +64,9 @@ template <class Coefficient>
 bool Polynomial<Coefficient>::isOneVariableNonConstantPolynomial(
   int* whichVariable
 ) const {
-  int tempInt;
+  int integerHolder = 0;
   if (whichVariable == nullptr) {
-    whichVariable = &tempInt;
+    whichVariable = &integerHolder;
   }
   if (!this->isOneVariablePolynomial(whichVariable)) {
     return false;
@@ -97,9 +97,9 @@ Rational Polynomial<Coefficient>::rationalValue() {
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::isOneVariablePolynomial(int* whichVariable) const {
-  int tempInt;
+  int containerInteger = 0;
   if (whichVariable == nullptr) {
-    whichVariable = &tempInt;
+    whichVariable = &containerInteger;
   }
   *whichVariable = - 1;
   for (int i = 0; i < this->size(); i ++) {
@@ -136,7 +136,8 @@ void Polynomial<Coefficient>::makeDeterminantFromSquareMatrix(
   int numberOfCycles = permutation.getNumberOfPermutations();
   List<int> permutationIndices;
   permutation.getPermutationLthElementIsTheImageofLthIndex(permutationIndices);
-  Polynomial<Coefficient> result, monomial;
+  Polynomial<Coefficient> result;
+  Polynomial<Coefficient> monomial;
   result.makeZero();
   result.setExpectedSize(numberOfCycles);
   for (
@@ -192,7 +193,8 @@ bool Polynomial<Coefficient>::substitute(
   const Coefficient& one
 ) {
   STACK_TRACE("Polynomial::substitute");
-  Polynomial<Coefficient> sum, monomialContribution;
+  Polynomial<Coefficient> sum;
+  Polynomial<Coefficient> monomialContribution;
   for (int i = 0; i < this->size(); i ++) {
     if (
       !(*this)[i].substitute(substitution, monomialContribution, one)
@@ -559,7 +561,7 @@ bool Polynomial<Coefficient>::isLinearGetRootConstantTermLastCoordinate(
   Vector<Coefficient>& outputRoot
 ) {
   outputRoot.makeZero(this->minimalNumberOfVariables() + 1);
-  int index;
+  int index = 0;
   for (int i = 0; i < this->size(); i ++) {
     if ((*this)[i].isConstant()) {
       *outputRoot.lastObject() = this->coefficients[i];
@@ -823,10 +825,10 @@ template <class Coefficient>
 Polynomial<Coefficient> Polynomial<Coefficient>::operator%(
   const Polynomial<Coefficient>& other
 ) {
-  Polynomial<Coefficient> temp;
+  Polynomial<Coefficient> divisor;
   Polynomial<Coefficient> result;
   this->divideBy(
-    other, temp, result, &MonomialPolynomial::orderDefault()
+    other, divisor, result, &MonomialPolynomial::orderDefault()
   );
   return result;
 }
@@ -1023,17 +1025,19 @@ void Polynomial<Coefficient>::assignCharacteristicPolynomial(
     << global.fatal;
   }
   this->makeConstant(1);
-  Matrix<Coefficient> acc = input;
-  Coefficient currenCF;
+  Matrix<Coefficient> accumulator = input;
+  Coefficient currenCoefficient;
   for (int i = 1; i < n; i ++) {
-    currenCF = - acc.getTrace() / i;
-    this->addMonomial(MonomialPolynomial(0, i), currenCF);
+    currenCoefficient = - accumulator.getTrace() / i;
+    this->addMonomial(MonomialPolynomial(0, i), currenCoefficient);
     for (int j = 0; j < n; j ++) {
-      acc(j, j) += currenCF;
+      accumulator(j, j) += currenCoefficient;
     }
-    acc.multiplyOnTheLeft(input);
+    accumulator.multiplyOnTheLeft(input);
   }
-  this->addMonomial(MonomialPolynomial(0, n), - acc.getTrace() / n);
+  this->addMonomial(
+    MonomialPolynomial(0, n), - accumulator.getTrace() / n
+  );
 }
 
 template <class Coefficient>

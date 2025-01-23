@@ -97,7 +97,8 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
     "AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection"
   );
   output.makeZero();
-  Selection vectorActedOnSelection;Selection resultVectorSelection;
+  Selection vectorActedOnSelection;
+  Selection resultVectorSelection;
   vectorActedOnSelection.initialize(this->quadraticRadicals.size);
   resultVectorSelection.initialize(this->quadraticRadicals.size);
   Rational coefficient;
@@ -201,7 +202,9 @@ bool AlgebraicClosureRationals::mergeRadicals(
   HashedList<LargeInteger> radicalsNew = this->quadraticRadicals;
   radicalsNew.addOnTopNoRepetition(radicals);
   bool found = true;
-  LargeIntegerUnsigned candidateGCD;LargeIntegerUnsigned leftQuotient;LargeIntegerUnsigned rightQuotient;
+  LargeIntegerUnsigned candidateGCD;
+  LargeIntegerUnsigned leftQuotient;
+  LargeIntegerUnsigned rightQuotient;
   while (found) {
     found = false;
     for (int i = 0; i < radicalsNew.size; i ++) {
@@ -242,15 +245,16 @@ bool AlgebraicClosureRationals::mergeRadicals(
   this->latestBasis.setSize(MathRoutines::twoToTheNth(radicalsNew.size));
   MatrixTensor<Rational> currentInjection;
   currentInjection.makeZero();
-  Selection largerFieldSel, smallerFieldSel;
-  largerFieldSel.initialize(radicalsNew.size);
-  smallerFieldSel.initialize(this->quadraticRadicals.size);
+  Selection largerFieldSelection;
+  Selection smallerFieldSelection;
+  largerFieldSelection.initialize(radicalsNew.size);
+  smallerFieldSelection.initialize(this->quadraticRadicals.size);
   do {
-    largerFieldSel.initialize(radicalsNew.size);
+    largerFieldSelection.initialize(radicalsNew.size);
     for (int j = 0; j < this->quadraticRadicals.size; j ++) {
-      if (smallerFieldSel.selected[j]) {
+      if (smallerFieldSelection.selected[j]) {
         if (this->quadraticRadicals[j] == - 1) {
-          largerFieldSel.addSelectionAppendNewIndex(
+          largerFieldSelection.addSelectionAppendNewIndex(
             radicalsNew.getIndex(- 1)
           );
           continue;
@@ -260,29 +264,29 @@ bool AlgebraicClosureRationals::mergeRadicals(
             this->quadraticRadicals[j] % radicalsNew[k] == 0 &&
             radicalsNew[k] != - 1
           ) {
-            largerFieldSel.addSelectionAppendNewIndex(k);
+            largerFieldSelection.addSelectionAppendNewIndex(k);
           }
         }
       }
     }
     currentInjection.addMonomial(
       MonomialMatrix(
-        this->getIndexFromRadicalSelection(largerFieldSel),
-        this->getIndexFromRadicalSelection(smallerFieldSel)
+        this->getIndexFromRadicalSelection(largerFieldSelection),
+        this->getIndexFromRadicalSelection(smallerFieldSelection)
       ),
       1
     );
-  } while (smallerFieldSel.incrementReturnFalseIfPastLast());
+  } while (smallerFieldSelection.incrementReturnFalseIfPastLast());
   this->quadraticRadicals = radicalsNew;
-  largerFieldSel.initialize(radicalsNew.size);
+  largerFieldSelection.initialize(radicalsNew.size);
   do {
     this->getMultiplicativeOperatorFromRadicalSelection(
-      largerFieldSel,
+      largerFieldSelection,
       this->latestBasis[
-        this->getIndexFromRadicalSelection(largerFieldSel)
+        this->getIndexFromRadicalSelection(largerFieldSelection)
       ]
     );
-  } while (largerFieldSel.incrementReturnFalseIfPastLast());
+  } while (largerFieldSelection.incrementReturnFalseIfPastLast());
   this->injectOldBases(&currentInjection);
   this->appendAdditiveEiBasis();
   this->computeDisplayStringsFromRadicals();
@@ -368,10 +372,10 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
     }
     this->generatingElement.element.makeZero();
     for (int i = 0; i < selection.integers.size; i ++) {
-      MonomialVector tempV;
-      tempV.makeEi(i);
+      MonomialVector basisGenerator;
+      basisGenerator.makeEi(i);
       this->generatingElement.element.addMonomial(
-        tempV, selection.integers[i]
+        basisGenerator, selection.integers[i]
       );
     }
     this->getMultiplicationBy(
@@ -441,7 +445,8 @@ bool AlgebraicClosureRationals::reduceMe(
   if (this->flagIsQuadraticRadicalExtensionRationals) {
     return true;
   }
-  Polynomial<Rational> minimalPolynomial, smallestFactor;
+  Polynomial<Rational> minimalPolynomial;
+  Polynomial<Rational> smallestFactor;
   minimalPolynomial.assignMinimalPolynomial(
     this->generatingElementMatrixForm
   );
@@ -461,11 +466,14 @@ bool AlgebraicClosureRationals::reduceMe(
   if (smallestFactor.totalDegreeInt() == dimension) {
     return true;
   }
-  MatrixTensor<Rational> generatorPowers, generatorPowersInverse;
+  MatrixTensor<Rational> generatorPowers;
+  MatrixTensor<Rational> generatorPowersInverse;
   generatorPowers.assignVectorsToColumns(this->generatingElementPowersBasis);
   generatorPowersInverse = generatorPowers;
   generatorPowersInverse.invert();
-  Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
+  Polynomial<Rational> zToTheNth;
+  Polynomial<Rational> remainderAfterReduction;
+  Polynomial<Rational> buffer;
   MatrixTensor<Rational> projectionGeneratorCoordinates;
   int smallestFactorDegree = - 1;
   if (
@@ -493,7 +501,7 @@ bool AlgebraicClosureRationals::reduceMe(
     zToTheNth.makeMonomial(0, i, 1);
     zToTheNth.divideBy(
       smallestFactor,
-      tempP,
+      buffer,
       remainderAfterReduction,
       &MonomialPolynomial::orderDefault()
     );
@@ -510,7 +518,8 @@ bool AlgebraicClosureRationals::reduceMe(
   MatrixTensor<Rational> generatorProjected;
   Rational leadingCoefficient = smallestFactor.getLeadingCoefficient(nullptr);
   for (int i = 0; i < smallestFactorDegree; i ++) {
-    MonomialMatrix termBelowMainDiagonal, termInLastColumn;
+    MonomialMatrix termBelowMainDiagonal;
+    MonomialMatrix termInLastColumn;
     if (i + 1 < smallestFactorDegree) {
       termBelowMainDiagonal.makeEij(i + 1, i);
       generatorProjected.addMonomial(termBelowMainDiagonal, 1);
@@ -676,7 +685,8 @@ bool AlgebraicNumber::assignCosRationalTimesPi(
     halfFractionalPart = half - halfFractionalPart;
   }
   if (halfFractionalPart == Rational(1, 12)) {
-    AlgebraicNumber sqrt6, sqrt2;
+    AlgebraicNumber sqrt6;
+    AlgebraicNumber sqrt2;
     sqrt6.assignRationalQuadraticRadical(6, inputOwner, nullptr);
     sqrt2.assignRationalQuadraticRadical(2, inputOwner, nullptr);
     *this = sqrt6 + sqrt2;
@@ -684,7 +694,8 @@ bool AlgebraicNumber::assignCosRationalTimesPi(
     return true;
   }
   if (halfFractionalPart == Rational(5, 12)) {
-    AlgebraicNumber sqrt6, sqrt2;
+    AlgebraicNumber sqrt6;
+    AlgebraicNumber sqrt2;
     sqrt6.assignRationalQuadraticRadical(6, inputOwner, nullptr);
     sqrt2.assignRationalQuadraticRadical(2, inputOwner, nullptr);
     *this = sqrt6 - sqrt2;
@@ -849,7 +860,7 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
 ) {
   STACK_TRACE(
     "AlgebraicClosureRationals::"
-      "adjoinRootQuadraticPolynomialToQuadraticRadicalExtension"
+    "adjoinRootQuadraticPolynomialToQuadraticRadicalExtension"
   );
   if (
     polynomial.totalDegree() != 2 ||
@@ -863,7 +874,9 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   );
   Polynomial<Rational> minimialPolynomial;
   minimialPolynomial.makeZero();
-  Rational currentCF;Rational linearTermCoefficientFDividedByTwo;Rational constantTermShifted;
+  Rational currentCF;
+  Rational linearTermCoefficientFDividedByTwo;
+  Rational constantTermShifted;
   for (int i = 0; i < algebraicNumberPolynomial.size(); i ++) {
     if (
       !algebraicNumberPolynomial.coefficients[i].isRational(&currentCF)
@@ -896,10 +909,10 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   }
   outputRoot -= linearTermCoefficientFDividedByTwo;
   // check our work:
-  PolynomialSubstitution<AlgebraicNumber> checkSub;
-  checkSub.setSize(1);
-  checkSub[0].makeConstant(outputRoot);
-  algebraicNumberPolynomial.substitute(checkSub, this->one());
+  PolynomialSubstitution<AlgebraicNumber> checkSubstitution;
+  checkSubstitution.setSize(1);
+  checkSubstitution[0].makeConstant(outputRoot);
+  algebraicNumberPolynomial.substitute(checkSubstitution, this->one());
   if (!algebraicNumberPolynomial.isEqualToZero()) {
     global.fatal
     << "The number z = "
@@ -1325,7 +1338,8 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     report.report(reportStream.str());
   }
   this->checkCommonOwner(other);
-  MatrixTensor<Rational> leftMatrix, rightMatrix;
+  MatrixTensor<Rational> leftMatrix;
+  MatrixTensor<Rational> rightMatrix;
   this->owner->getMultiplicationBy(*this, leftMatrix);
   this->owner->getMultiplicationBy(other, rightMatrix);
   leftMatrix.checkConsistencyGrandMaster();
@@ -1344,7 +1358,8 @@ void AlgebraicNumber::squareRootDefault(std::stringstream* commentsOnError) {
 }
 
 bool AlgebraicNumber::operator>(const AlgebraicNumber& other) const {
-  Rational left, right;
+  Rational left;
+  Rational right;
   if (this->isRational(&left) && other.isRational(&right)) {
     return left > right;
   }
@@ -1357,11 +1372,11 @@ bool AlgebraicNumber::constructFromMinimalPolynomial(
   AlgebraicClosureRationals& inputOwner,
   std::stringstream* commentsOnFailure
 ) {
-  Polynomial<AlgebraicNumber> polyConverted;
-  polyConverted = polynomial;
+  Polynomial<AlgebraicNumber> convertedPolynomial;
+  convertedPolynomial = polynomial;
   return
   this->constructFromMinimalPolynomial(
-    polyConverted, inputOwner, commentsOnFailure
+    convertedPolynomial, inputOwner, commentsOnFailure
   );
 }
 
@@ -1490,12 +1505,12 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
     return false;
   }
   if (!inputOwner.flagIsQuadraticRadicalExtensionRationals) {
-    Polynomial<AlgebraicNumber> minPoly;
-    minPoly.makeMonomial(0, 2);
-    minPoly -= input;
+    Polynomial<AlgebraicNumber> minimalPolynomial;
+    minimalPolynomial.makeMonomial(0, 2);
+    minimalPolynomial -= input;
     bool result =
     this->constructFromMinimalPolynomial(
-      minPoly, inputOwner, commentsOnFailure
+      minimalPolynomial, inputOwner, commentsOnFailure
     );
     if (result) {
       this->checkConsistency();
@@ -1578,7 +1593,9 @@ bool AlgebraicNumber::radicalMeDefault(
     }
     return false;
   }
-  AlgebraicNumber result, one, minusOne;
+  AlgebraicNumber result;
+  AlgebraicNumber one;
+  AlgebraicNumber minusOne;
   one.assignRational(1, this->owner);
   minusOne.assignRational(- 1, this->owner);
   Polynomial<AlgebraicNumber> polynomial;
@@ -1861,7 +1878,8 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other) const {
   if (this->basisIndex == other.basisIndex) {
     return this->element == other.element;
   }
-  VectorSparse<Rational> leftAdditive, rightAdditive;
+  VectorSparse<Rational> leftAdditive;
+  VectorSparse<Rational> rightAdditive;
   this->owner->getAdditionTo(*this, leftAdditive);
   this->owner->getAdditionTo(other, rightAdditive);
   return leftAdditive == rightAdditive;
@@ -2274,8 +2292,8 @@ void ElementZmodP::operator-=(const ElementZmodP& other) {
 }
 
 void ElementZmodP::operator=(const Rational& other) {
-  bool tempB = this->assignRational(other);
-  if (!tempB) {
+  bool mustBeTrue = this->assignRational(other);
+  if (!mustBeTrue) {
     global.fatal
     << "Using ElementZmodP::operator= to assign a Rational number failed. "
     << "Operator = does not allow failure. "
@@ -2323,7 +2341,9 @@ bool ElementZmodP::operator/=(const ElementZmodP& other) {
   if (other.isEqualToZero()) {
     global.fatal << "Division by zero in ElementZmodP." << global.fatal;
   }
-  LargeInteger inverted, otherValue, incomingModulus;
+  LargeInteger inverted;
+  LargeInteger otherValue;
+  LargeInteger incomingModulus;
   incomingModulus = this->modulus;
   otherValue = other.value;
   if (!MathRoutines::invertXModN(otherValue, incomingModulus, inverted)) {

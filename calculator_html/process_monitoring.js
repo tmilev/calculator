@@ -42,12 +42,15 @@ class Monitor {
     this.progressReportElement = document.getElementById(
       ids.domElements.pages.calculator.monitoring.progressOutput
     );
-  }
-
-  pauseButton() {
-    return document.getElementById(
+    this.pauseButton = document.getElementById(
       ids.domElements.pages.calculator.monitoring.buttonPauseToggle
     );
+    this.pauseButton.addEventListener(
+      "click", () => {
+        processMonitoring.monitor.togglePause();
+      }
+    )
+    this.pauseButton.style.display = "none";
   }
 
   start(
@@ -62,9 +65,8 @@ class Monitor {
     this.timeOutCounter = 0;
     this.timeOutOldCounter = 0;
     this.currentWorkerId = workerId;
-    let pauseButton = this.pauseButton();
-    pauseButton.textContent = "Pause";
-    pauseButton.style.display = "";
+    this.pauseButton.textContent = "Pause";
+    this.pauseButton.style.display = "";
     this.progressReport();
   }
 
@@ -101,9 +103,8 @@ class Monitor {
   }
 
   pauseButtonMarkFinished() {
-    let pauseButton = this.pauseButton();
-    pauseButton.textContent = "finished";
-    pauseButton.style.display = "none";
+    this.pauseButton.textContent = "finished";
+    this.pauseButton.style.display = "none";
   }
 
   callbackPauseRequest(input) {
@@ -115,7 +116,6 @@ class Monitor {
       }, this.timeIncrement * 1000);
       return;
     }
-    let indicatorButton = this.pauseButton();
     const parsed = miscellaneous.jsonUnescapeParse(input);
     let status = parsed.status;
     if (status === undefined || status === null) {
@@ -137,7 +137,7 @@ class Monitor {
       this.writeFinalResult(parsed);
     } else if (status === "paused") {
       this.isPaused = true;
-      indicatorButton.textContent = "Continue";
+      this.pauseButton.textContent = "Continue";
     } else {
       if (status === "noReport") {
         progressReportContent += "No report on last ping. ";
@@ -145,7 +145,7 @@ class Monitor {
         progressReportContent += "Recently unpaused. ";
       }
       this.isPaused = false;
-      indicatorButton.textContent = "Pause";
+      this.pauseButton.textContent = "Pause";
       this.clearTimeout();
       this.writeProgressReportUnfinishedComputation(parsed);
       this.currentTimeOutHandler = setTimeout(() => {

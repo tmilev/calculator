@@ -124,22 +124,22 @@ std::string ProblemData::store() {
     out << "randomSeed=" << this->randomSeed;
   }
   for (int i = 0; i < this->answers.size(); i ++) {
-    Answer& currentA = this->answers.values[i];
+    Answer& currentAnswer = this->answers.values[i];
     if (this->flagRandomSeedGiven || i != 0) {
       out << "&";
     }
     out
-    << HtmlRoutines::convertStringToURLString(currentA.answerId, false)
+    << HtmlRoutines::convertStringToURLString(currentAnswer.answerId, false)
     << "=";
     std::stringstream questionsStream;
     questionsStream
     << "numCorrectSubmissions="
-    << currentA.numberOfCorrectSubmissions
+    << currentAnswer.numberOfCorrectSubmissions
     << "&numSubmissions="
-    << currentA.numberOfSubmissions
+    << currentAnswer.numberOfSubmissions
     << "&firstCorrectAnswer="
     << HtmlRoutines::convertStringToURLString(
-      currentA.firstCorrectAnswerClean, false
+      currentAnswer.firstCorrectAnswerClean, false
     );
     out
     << HtmlRoutines::convertStringToURLString(

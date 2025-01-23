@@ -622,6 +622,7 @@ GroebnerBasisComputation<Coefficient>::GroebnerBasisComputation() {
   this->flagStoreQuotients = false;
   this->flagFoundNewBasisElements = false;
   this->numberOfSymmetricDifferenceRounds = 0;
+  this->flagDoProgressReport = true;
 }
 
 template <class Coefficient>
@@ -1264,8 +1265,8 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
     this->setUpRecursiveComputation(oneCase);
     oneCase.setSerreLikeSolutionIndex(i, 0);
     inputSystem = inputSystemCopy;
-    for (int i = 0; i < inputSystem.size; i ++) {
-      inputSystem[i].substitute(substitution, 1);
+    for (int j = 0; j < inputSystem.size; j ++) {
+      inputSystem[j].substitute(substitution, 1);
     }
     oneCase.solveSerreLikeSystemRecursively(inputSystem);
     this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(oneCase);
@@ -1354,6 +1355,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
       MonomialPolynomial monomial(
         this->getPreferredSerreSystemSubstitutionIndex(inputSystem)
       );
+      std::stringstream reportStreamHeuristics;
       reportStreamHeuristics
       << "<br>The substitution  "
       << monomial.toString(&this->groebner.format)

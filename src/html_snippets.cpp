@@ -102,7 +102,7 @@ const std::string& HtmlRoutines::getFile(
       return HtmlRoutines::preLoadedFiles().getValueCreateEmpty(fileId);
     }
   }
-  std::stringstream out, commentsOnFailure;
+  std::stringstream out; std::stringstream  commentsOnFailure;
   std::string fileReader;
   if (
     FileOperations::loadFileToStringVirtual(

@@ -41,15 +41,6 @@ class CalculatorEquationEditor {
       },
     });
     this.calculatorPanel.initialize();
-    let pauseButton = document.getElementById(
-      ids.domElements.pages.calculator.monitoring.buttonPauseToggle
-    );
-    pauseButton.addEventListener(
-      "click", () => {
-        processMonitoring.monitor.togglePause();
-      }
-    )
-    pauseButton.style.display = "none";
 
     this.textBox = document.getElementById(ids.domElements.pages.calculator.inputMain);
     const isChrome = navigator.userAgent.includes("Chrome");

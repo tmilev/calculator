@@ -615,13 +615,6 @@ class Page {
     return problemPage.allTopics.getTopicElementByIdOrNull(label);
   }
 
-  /** @return {HTMLButtonElement} */
-  pauseButton() {
-    return document.getElementById(
-      ids.domElements.pages.calculator.monitoring.buttonPauseToggle
-    );
-  }
-
   toggleWebAssembly() {
     let webAssembly = this.storage.variables.calculator.useWebAssembly;
     if (webAssembly.value !== "true") {

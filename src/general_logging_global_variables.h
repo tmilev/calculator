@@ -463,7 +463,6 @@ public:
   JSData configurationCommandLine;
   JSData timeStats;
   List<List<std::string> > databaseModifiableFields;
-  std::string userInputStringRAWIfAvailable;
   std::string userInputStringIfAvailable;
   std::string relativePhysicalNameCrashReport;
   std::string relativePhysicalNameOptionalProgressReport;
@@ -564,7 +563,6 @@ public:
   void initDefaultFolderAndFileNames();
   void initFoldersProjectBase(const std::string& inputPhysicalExecutable);
   void initOutputReportAndCrashFileNames(
-    const std::string& inputUserStringRAW,
     const std::string& inputUserStringCivilized
   );
   bool userSecureNonAdminOperationsAllowed();

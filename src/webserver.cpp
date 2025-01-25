@@ -534,7 +534,6 @@ void WebWorker::resetConnection() {
   global.webArguments.clear();
   global.requestType = "";
   global.userInputStringIfAvailable = "";
-  global.userInputStringRAWIfAvailable = "";
 }
 
 void WebWorker::resetMessageComponentsExceptRawMessage() {

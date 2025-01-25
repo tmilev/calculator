@@ -464,10 +464,7 @@ void CompareExpressions::compare(
   ", " +
   this->desiredString +
   ")";
-  global.initOutputReportAndCrashFileNames(
-    HtmlRoutines::convertStringToURLString(calculator.inputString, false),
-    calculator.inputString
-  );
+  global.initOutputReportAndCrashFileNames(calculator.inputString);
   global.response.disallowReport();
   this->comparePartTwo(calculator);
   global.flagComputationComplete = true;

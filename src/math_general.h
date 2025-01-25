@@ -3995,7 +3995,7 @@ public:
   );
   bool hasImpliedSubstitutions(
     List<Polynomial<Coefficient> >& inputSystem,
-    PolynomialSubstitution<Coefficient>& outputSub
+    PolynomialSubstitution<Coefficient>& outputSubstitution
   );
   bool hasSingleMonomialEquation(
     const List<Polynomial<Coefficient> >& inputSystem,

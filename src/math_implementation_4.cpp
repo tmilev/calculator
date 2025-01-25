@@ -521,7 +521,7 @@ void GlobalVariables::initDefaultFolderAndFileNames() {
   "/cgi-bin/" + this->physicalNameExecutableNoPath;
   this->displayApplication = "/" + WebAPI::app;
   this->displayApplicationNoCache = "/" + WebAPI::appNoCache;
-  this->initOutputReportAndCrashFileNames("", "");
+  this->initOutputReportAndCrashFileNames("");
 }
 
 void GlobalVariables::setWebInput(
@@ -691,23 +691,13 @@ void GlobalVariables::makeReport() {
 }
 
 void GlobalVariables::initOutputReportAndCrashFileNames(
-  const std::string& inputUserStringRAW,
   const std::string& inputUserStringCivilized
 ) {
-  std::string inputAbbreviated;
-  this->userInputStringIfAvailable =
-  FileOperations::cleanUpForFileNameUse(inputUserStringCivilized);
-  if (!global.flagUsingSSLinCurrentConnection) {
-    this->userInputStringRAWIfAvailable = inputUserStringRAW;
-    inputAbbreviated = this->userInputStringRAWIfAvailable;
-  } else {
-    this->userInputStringRAWIfAvailable =
-    "Raw user input string not available in SSL mode. ";
-    inputAbbreviated = this->userInputStringIfAvailable;
-  }
-  StringRoutines::stringTrimToLengthWithHash(inputAbbreviated, 150);
-  this->relativePhysicalNameCrashReport =
-  "crash_" + inputAbbreviated + ".html";
+  this->userInputStringIfAvailable = inputUserStringCivilized;
+  std::string fileName =
+  FileOperations::cleanUpForFileNameUse(this->userInputStringIfAvailable);
+  StringRoutines::stringTrimToLengthWithHash(fileName, 150);
+  this->relativePhysicalNameCrashReport = "crash_" + fileName + ".html";
 }
 
 UserCalculatorData::UserCalculatorData() {

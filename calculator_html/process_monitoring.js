@@ -47,7 +47,7 @@ class Monitor {
     );
     this.pauseButton.addEventListener(
       "click", () => {
-        processMonitoring.monitor.togglePause();
+        this.togglePause();
       }
     )
     this.pauseButton.style.display = "none";
@@ -157,7 +157,7 @@ class Monitor {
 
   writeProgressReportUnfinishedComputation(input) {
     this.ownerCalculator.getOutputElement().textContent = "";
-    const progressStrings = input[pathnames.urlFields.result.progressReports];
+    let progressStrings = input[pathnames.urlFields.result.progressReports];
     if (progressStrings === undefined) {
       progressStrings = [];
     }

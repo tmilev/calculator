@@ -24,6 +24,7 @@ const compareExpressionsSocratic = require("./compare_expressions_socratic").com
 const storage = require("./storage").storage;
 const miscellaneous = require("./miscellaneous_frontend");
 const user = require("./user");
+const processMonitoring = require("./process_monitoring");
 
 class Page {
   constructor() {
@@ -690,7 +691,6 @@ class Page {
     if (monitorResult === null) {
       return;
     }
-    let pauseButton = this.pauseButton();
     if (monitoring) {
       miscellaneous.writeHTML(
         monitorResult,
@@ -701,7 +701,7 @@ class Page {
         monitorResult,
         "Monitor <b style='color:green'>off</b>"
       );
-      pauseButton.style.display = "none";
+      processMonitoring.monitor.pauseButton.style.display = "none";
     }
   }
 

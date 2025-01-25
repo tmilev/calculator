@@ -710,7 +710,7 @@ bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
   List<Polynomial<Coefficient> >& inputSystem,
-  PolynomialSubstitution<Coefficient>& outputSub
+  PolynomialSubstitution<Coefficient>& outputSubstitution
 ) {
   int numberOfVariables = this->systemSolution.size;
   MonomialPolynomial monomial;
@@ -737,28 +737,28 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
       if (!isGood) {
         continue;
       }
-      outputSub.makeIdentitySubstitution(numberOfVariables);
-      outputSub[j] = polynomial;
+      outputSubstitution.makeIdentitySubstitution(numberOfVariables);
+      outputSubstitution[j] = polynomial;
       coefficient *= - 1;
-      outputSub[j] /= coefficient;
+      outputSubstitution[j] /= coefficient;
       return true;
     }
-    int oneVarIndex;
-    if (polynomial.isOneVariableNonConstantPolynomial(&oneVarIndex)) {
+    int oneVariableIndex = 0;
+    if (polynomial.isOneVariableNonConstantPolynomial(&oneVariableIndex)) {
       if (this->flagUsingAlgebraicClosure && this->algebraicClosure != 0) {
         if (
           this->getOneVariablePolynomialSolution(polynomial, coefficient)
         ) {
-          outputSub.makeIdentitySubstitution(numberOfVariables);
-          outputSub[oneVarIndex].makeConstant(coefficient);
+          outputSubstitution.makeIdentitySubstitution(numberOfVariables);
+          outputSubstitution[oneVariableIndex].makeConstant(coefficient);
           // check our work:
-          polynomial.substitute(outputSub, 1);
+          polynomial.substitute(outputSubstitution, 1);
           if (!polynomial.isEqualToZero()) {
             global.fatal
             << "I was solving the polynomial equation "
             << inputSystem[i].toString()
             << ", which resulted in the substitution "
-            << outputSub.toString()
+            << outputSubstitution.toString()
             << ". However, after carrying out the "
             << "substitution in the polynomial, I got "
             << polynomial.toString()
@@ -812,20 +812,17 @@ int PolynomialSystem<Coefficient>::getPreferredSerreSystemSubstitutionIndex(
     championIndex, inputSystem
   );
   for (int i = 1; i < variableSelection.cardinalitySelection; i ++) {
-    if (
-      GroebnerBasisComputation<Coefficient>::
-      getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
-        variableSelection.elements[i], inputSystem
-      ) >
-      championImprovement
-    ) {
-      championIndex = variableSelection.elements[i];
-      championImprovement =
-      GroebnerBasisComputation<Coefficient>::
-      getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
-        variableSelection.elements[i], inputSystem
-      );
+    int candidateIndex = variableSelection.elements[i];
+    int candidateImprovement =
+    GroebnerBasisComputation<Coefficient>::
+    getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
+      candidateIndex, inputSystem
+    );
+    if (candidateImprovement <= championImprovement) {
+      continue;
     }
+    championIndex = candidateIndex;
+    championImprovement = candidateImprovement;
   }
   return championIndex;
 }
@@ -848,23 +845,24 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
     for (
       int j = 0; j < substitution[i].minimalNumberOfVariables(); j ++
     ) {
-      if (substitution[i](j) != 0) {
-        if (!this->solutionsFound.selected[j]) {
-          this->setSerreLikeSolutionIndex(j, 0);
-        } else {
-          if (this->systemSolution[j] != 0) {
-            global.fatal
-            << "Variable index "
-            << j + 1
-            << " is supposed to be a free parameter, "
-            << "i.e., be set to zero, but "
-            << "instead it has a non-zero value. "
-            << global.fatal;
-          }
-        }
-        finalSubstitution[j] = 0;
-        changed = true;
+      if (substitution[i](j) == 0) {
+        continue;
       }
+      if (!this->solutionsFound.selected[j]) {
+        this->setSerreLikeSolutionIndex(j, 0);
+      } else {
+        if (this->systemSolution[j] != 0) {
+          global.fatal
+          << "Variable index "
+          << j + 1
+          << " is supposed to be a free parameter, "
+          << "i.e., be set to zero, but "
+          << "instead it has a non-zero value. "
+          << global.fatal;
+        }
+      }
+      finalSubstitution[j] = 0;
+      changed = true;
     }
   }
   if (changed) {
@@ -1212,22 +1210,23 @@ bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
   int minimalNumberOfNonZeroMonomialEntries =
   this->numberOfVariablesToSolveForStart * 2 + 1;
   for (int i = 0; i < inputSystem.size; i ++) {
-    if (inputSystem[i].size() == 1) {
-      result = true;
-      int currentNumberNonZeroMonomialEntries = 0;
-      for (
-        int j = 0; j < inputSystem[i][0].minimalNumberOfVariables(); j ++
-      ) {
-        if (!(inputSystem[i][0](j) == 0)) {
-          currentNumberNonZeroMonomialEntries ++;
-        }
+    if (inputSystem[i].size() != 1) {
+      continue;
+    }
+    result = true;
+    int currentNumberNonZeroMonomialEntries = 0;
+    for (
+      int j = 0; j < inputSystem[i][0].minimalNumberOfVariables(); j ++
+    ) {
+      if (!(inputSystem[i][0](j) == 0)) {
+        currentNumberNonZeroMonomialEntries ++;
       }
-      if (
-        currentNumberNonZeroMonomialEntries <
-        minimalNumberOfNonZeroMonomialEntries
-      ) {
-        outputMonomial = inputSystem[i][0];
-      }
+    }
+    if (
+      currentNumberNonZeroMonomialEntries <
+      minimalNumberOfNonZeroMonomialEntries
+    ) {
+      outputMonomial = inputSystem[i][0];
     }
   }
   return result;
@@ -1342,7 +1341,6 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
       return;
     }
   }
-  std::stringstream reportStreamHeuristics;
   for (
     const Rational& arbitrarySubstitution : this->arbitrarySubstitutionsInOrder
   ) {

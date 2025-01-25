@@ -529,10 +529,7 @@ bool WebAPIResponse::processCompute() {
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput(WebAPI::Request::calculatorInput), false
   );
-  global.initOutputReportAndCrashFileNames(
-    HtmlRoutines::convertStringToURLString(calculator.inputString, false),
-    calculator.inputString
-  );
+  global.initOutputReportAndCrashFileNames(calculator.inputString);
   // The parser used to be initialized here.
   // It has since been moved to the start of the web server.
   global.response.allowReport();
@@ -554,10 +551,7 @@ JSData WebAPIResponse::solveJSON() {
     global.getWebInput(WebAPI::Request::calculatorInput), false
   );
   global.initOutputReportAndCrashFileNames(
-    HtmlRoutines::convertStringToURLString(
-      "SolveJSON{}(" + calculator.inputString + ")", false
-    ),
-    calculator.inputString
+    "SolveJSON{}(" + calculator.inputString + ")"
   );
   global.response.disallowReport();
   JSData solution = calculator.solve(calculator.inputString);

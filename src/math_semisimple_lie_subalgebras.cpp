@@ -11200,5 +11200,15 @@ bool SemisimpleSubalgebras::Test::constructAllB3Subalgebras() {
   subalgebras.findSemisimpleSubalgebrasFromScratch(
     b3, allgebraicClosure, subalgebrasNonEmbedded, sl2sOfSubalgebras, nullptr
   );
+  int expected = 16;
+  if (subalgebras.subalgebras.size() != expected) {
+    global.fatal
+    << "B3 subalgebra count is wrong: got: "
+    << subalgebras.subalgebras.size()
+    << ", expected: "
+    << expected
+    << "."
+    << global.fatal;
+  }
   return true;
 }

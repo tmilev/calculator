@@ -588,7 +588,9 @@ std::string ASNElement::toString() const {
 }
 
 void ASNElement::writeAnnotations(List<Serialization::Marker>& output) {
-  std::stringstream bodyStream, tagStream, lengthStream;
+  std::stringstream bodyStream;
+  std::stringstream tagStream;
+  std::stringstream lengthStream;
   tagStream
   << "Type: "
   << AbstractSyntaxNotationOneSubsetDecoder::getType(this->tag);
@@ -2073,7 +2075,9 @@ bool PrivateKeyRSA::loadFromASNEncoded(
   ) {
     return false;
   }
-  LargeInteger exponent1, exponent2, coefficient;
+  LargeInteger exponent1;
+  LargeInteger exponent2;
+  LargeInteger coefficient;
   if (
     !this->sourceASNInner.hasSubElementOfType({6}, {}, exponent1,
       commentsOnFailure

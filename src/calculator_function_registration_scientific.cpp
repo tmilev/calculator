@@ -302,7 +302,9 @@ void Calculator::initializeFunctionsScientificBasic() {
   );
   this->addOperationHandler(
     "PolyDivSlidesGrLex",
-    CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex<ElementZmodP>,
+    CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex<
+      ElementZmodP
+    >,
     "",
     "Creates a slide with the polynomial disivion algorithm. "
     "First element = starting slide number. "

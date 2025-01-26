@@ -5993,9 +5993,7 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
   // as syntactic elements.
   this->addOperationNoRepetitionAllowed("RulesOff");
   this->addOperationNoRepetitionAllowed("RulesOn");
-  this->addOperationNoRepetitionAllowed(
-    Calculator::Functions::Names::freeze
-  );
+  this->addOperationNoRepetitionAllowed(Calculator::Functions::Names::freeze);
   this->addOperationNoRepetitionAllowed("\\infty");
   this->addOperationNoRepetitionAllowed("\\phantom");
   this->addOperationNoRepetitionAllowed(
@@ -6003,9 +6001,7 @@ void Calculator::initializePredefinedStandardOperationsWithoutHandler() {
   );
   this->addOperationNoRepetitionAllowed("MonomialPoly");
   this->addOperationNoRepetitionAllowed("Melt");
-  this->addOperationNoRepetitionAllowed(
-    Calculator::Functions::Names::bind
-  );
+  this->addOperationNoRepetitionAllowed(Calculator::Functions::Names::bind);
   this->addOperationNoRepetitionAllowed("\\limits");
   this->addOperationNoRepetitionAllowed("[)");
   this->addOperationNoRepetitionAllowed("(]");
@@ -6208,7 +6204,9 @@ void Calculator::initializeOperationsThatAreKnownFunctions() {
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("/");
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("^");
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("|");
-  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\sqrt");
+  this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew(
+    "\\sqrt"
+  );
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\sin");
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\cos");
   this->knownFunctionsWithComplexRange.addOnTopNoRepetitionMustBeNew("\\tan");
@@ -6252,8 +6250,7 @@ void Calculator::initializeBuiltInAtomsNotInterpretedAsFunctions() {
 }
 
 void CalculatorParser::addTrigonometricSplit(
-  const std::string& trigonometricFunction,
-  const List<std::string>& variables
+  const std::string& trigonometricFunction, const List<std::string>& variables
 ) {
   STACK_TRACE("CalculatorParser::addTrigonometricSplit");
   List<std::string> split;
@@ -6324,9 +6321,7 @@ void Calculator::addOneStringHandler(
 
 void Calculator::initializeToStringHandlers() {
   STACK_TRACE("Calculator::initializeToStringHandlers");
-  this->addOneStringAtomHandler(
-    this->opDefine(), Expression::toStringDefine
-  );
+  this->addOneStringAtomHandler(this->opDefine(), Expression::toStringDefine);
   this->addOneStringAtomHandler(
     this->opIsDenotedBy(), Expression::toStringIsDenotedBy
   );
@@ -6340,8 +6335,7 @@ void Calculator::initializeToStringHandlers() {
     this->opIntervalOpen(), Expression::toStringIntervalOpen
   );
   this->addOneStringAtomHandler(
-    this->opIntervalRightClosed(),
-    Expression::toStringIntervalRightClosed
+    this->opIntervalRightClosed(), Expression::toStringIntervalRightClosed
   );
   this->addOneStringAtomHandler(
     this->opIntervalLeftClosed(), Expression::toStringIntervalLeftClosed
@@ -6349,24 +6343,16 @@ void Calculator::initializeToStringHandlers() {
   this->addOneStringAtomHandler(
     this->opIntervalClosed(), Expression::toStringIntervalClosed
   );
-  this->addOneStringAtomHandler(
-    this->opQuote(), Expression::toStringQuote
-  );
+  this->addOneStringAtomHandler(this->opQuote(), Expression::toStringQuote);
   this->addOneStringAtomHandler(
     this->opDefineConditional(), Expression::toStringDefineConditional
   );
-  this->addOneStringAtomHandler(
-    this->opDivide(), Expression::toStringDivide
-  );
-  this->addOneStringAtomHandler(
-    this->opTensor(), Expression::toStringTensor
-  );
+  this->addOneStringAtomHandler(this->opDivide(), Expression::toStringDivide);
+  this->addOneStringAtomHandler(this->opTensor(), Expression::toStringTensor);
   this->addOneStringAtomHandler(this->opIn(), Expression::toStringIn);
   this->addOneStringAtomHandler(this->opOr(), Expression::toStringOr);
   this->addOneStringAtomHandler(this->opAnd(), Expression::toStringAnd);
-  this->addOneStringAtomHandler(
-    this->opBinom(), Expression::toStringBinom
-  );
+  this->addOneStringAtomHandler(this->opBinom(), Expression::toStringBinom);
   this->addOneStringAtomHandler(
     this->opUnderscore(), Expression::toStringUnderscore
   );
@@ -6376,36 +6362,24 @@ void Calculator::initializeToStringHandlers() {
   this->addOneStringAtomHandler(
     this->opLimitBoundary(), Expression::toStringLimitBoundary
   );
-  this->addOneStringAtomHandler(
-    this->opTimes(), Expression::toStringTimes
-  );
+  this->addOneStringAtomHandler(this->opTimes(), Expression::toStringTimes);
   this->addOneStringAtomHandler(
     this->opCrossProduct(), Expression::toStringCrossProduct
   );
-  this->addOneStringAtomHandler(
-    this->opSqrt(), Expression::toStringSqrt
-  );
+  this->addOneStringAtomHandler(this->opSqrt(), Expression::toStringSqrt);
   this->addOneStringAtomHandler(
     this->opFactorial(), Expression::toStringFactorial
   );
   this->addOneStringAtomHandler(
     this->opAbsoluteValue(), Expression::toStringAbsoluteValue
   );
-  this->addOneStringAtomHandler(
-    this->opPower(), Expression::toStringPower
-  );
-  this->addOneStringAtomHandler(
-    this->opPlus(), Expression::toStringPlus
-  );
+  this->addOneStringAtomHandler(this->opPower(), Expression::toStringPower);
+  this->addOneStringAtomHandler(this->opPlus(), Expression::toStringPlus);
   this->addOneStringAtomHandler(
     this->opDirectSum(), Expression::toStringDirectSum
   );
-  this->addOneStringAtomHandler(
-    this->opMinus(), Expression::toStringMinus
-  );
-  this->addOneStringAtomHandler(
-    this->opBind(), Expression::toStringBind
-  );
+  this->addOneStringAtomHandler(this->opMinus(), Expression::toStringMinus);
+  this->addOneStringAtomHandler(this->opBind(), Expression::toStringBind);
   this->addOneStringAtomHandler(
     this->opEqualEqual(), Expression::toStringEqualEqual
   );
@@ -6428,15 +6402,12 @@ void Calculator::initializeToStringHandlers() {
     this->opGreaterThan(), Expression::toStringGreaterThan
   );
   this->addOneStringAtomHandler(
-    this->opGreaterThanOrEqualTo(),
-    Expression::toStringGreaterThanOrEqualTo
+    this->opGreaterThanOrEqualTo(), Expression::toStringGreaterThanOrEqualTo
   );
   this->addOneStringAtomHandler(
     this->opLessThanOrEqualTo(), Expression::toStringLessThanOrEqualTo
   );
-  this->addOneStringAtomHandler(
-    this->opLimit(), Expression::toStringLimit
-  );
+  this->addOneStringAtomHandler(this->opLimit(), Expression::toStringLimit);
   this->addOneStringAtomHandler(
     this->opLimitProcess(), Expression::toStringLimitProcess
   );
@@ -6450,18 +6421,14 @@ void Calculator::initializeToStringHandlers() {
     this->opLieBracket(), Expression::toStringLieBracket
   );
   this->addOneStringAtomHandler(this->opMod(), Expression::toStringMod);
-  this->addOneStringAtomHandler(
-    this->opUnion(), Expression::toStringUnion
-  );
+  this->addOneStringAtomHandler(this->opUnion(), Expression::toStringUnion);
   this->addOneStringAtomHandler(
     this->opIntersection(), Expression::toStringIntersection
   );
   this->addOneStringAtomHandler(
     this->opUnionNoRepetition(), Expression::toStringUnionNoRepetition
   );
-  this->addOneStringAtomHandler(
-    this->opError(), Expression::toStringError
-  );
+  this->addOneStringAtomHandler(this->opError(), Expression::toStringError);
   this->addOneStringCompositeHandler(
     this->opMatrix(), Expression::toStringMatrix
   );

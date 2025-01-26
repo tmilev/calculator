@@ -130,8 +130,7 @@ bool Polynomial<Rational>::Test::factorizationKronecker() {
     "1/2(x^3-2x^2-2x +14)(3x^4-7x^3-2x^2+3x +5)"
   );
   Polynomial<Rational>::Test::oneFactorizationKronecker(
-    "10x^7+3x^6+5x^5-2x^4-x^3+x^2-4x+1",
-    "(10x^7+3x^6+5x^5-2x^4-x^3+x^2-4x +1)"
+    "10x^7+3x^6+5x^5-2x^4-x^3+x^2-4x+1", "(10x^7+3x^6+5x^5-2x^4-x^3+x^2-4x +1)"
   );
   return true;
 }
@@ -164,9 +163,7 @@ Polynomial<Rational> Polynomial<Rational>::Test::fromString(
   std::string inputModified = "Polynomial(" + input + ")";
   parser.initialize(Calculator::Mode::full);
   parser.evaluate(inputModified);
-  if (
-    !parser.programExpression.startsWith(parser.opCommandSequence())
-  ) {
+  if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
     global.fatal
     << "Polynomial::fromString parsed: "
     << parser.programExpression.toString()
@@ -209,9 +206,7 @@ bool Polynomial<Rational>::Test::fromStringTest() {
 
 template < >
 Vector<Polynomial<Rational> > Polynomial<Rational>::Test::
-fromStringCommonContext(
-  const std::string& first, const std::string& second
-) {
+fromStringCommonContext(const std::string& first, const std::string& second) {
   List<std::string> input;
   input.addOnTop(first);
   input.addOnTop(second);
@@ -237,9 +232,7 @@ fromStringCommonContext(const List<std::string>& input) {
   inputStream << ")";
   parser.initialize(Calculator::Mode::full);
   parser.evaluate(inputStream.str());
-  if (
-    !parser.programExpression.startsWith(parser.opCommandSequence())
-  ) {
+  if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
     global.fatal
     << "Polynomial::fromString parsed: "
     << parser.programExpression.toString()
@@ -285,9 +278,8 @@ bool Polynomial<Rational>::Test::fromStringCommonContextTest() {
 
 template < >
 bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
-  const std::string& left,
-  const std::string& right,
-  const std::string& expected
+  const std::string& left, const std::string& right, const std::string&
+  expected
 ) {
   List<Polynomial<Rational> > converted =
   Polynomial<Rational>::Test::fromStringCommonContext(left, right);

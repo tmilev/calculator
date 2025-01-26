@@ -325,9 +325,8 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
 }
 
 bool DatabaseInternal::sendAndReceiveFromClientInternal(
-  const std::string& input,
-  std::string& output,
-  std::stringstream* commentsOnFailure
+  const std::string& input, std::string& output, std::stringstream*
+  commentsOnFailure
 ) {
   if (!this->flagIsRunning) {
     // Do not send messages to a non-running database.
@@ -364,11 +363,12 @@ bool DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex
 }
 
 bool DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe(
-  const std::string& input,
-  std::string& output,
-  std::stringstream* commentsOnFailure
+  const std::string& input, std::string& output, std::stringstream*
+  commentsOnFailure
 ) {
-  STACK_TRACE("DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe");
+  STACK_TRACE(
+    "DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe"
+  );
   if (!this->sendFromClientToServer(input, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       global
@@ -406,9 +406,7 @@ bool DatabaseInternal::receiveInClientFromServer(
     }
     return false;
   }
-  Crypto::convertListCharsToString(
-    connection.serverToClient.buffer, output
-  );
+  Crypto::convertListCharsToString(connection.serverToClient.buffer, output);
   return true;
 }
 
@@ -459,11 +457,7 @@ bool DatabaseInternal::runOneConnection() {
   int fileDescriptor = 0;
   if (
     !Pipe::readWithTimeOutViaSelect(
-      this->readEnds,
-      this->buffer,
-      fileDescriptor,
-      this->maximumMessageSize,
-      0
+      this->readEnds, this->buffer, fileDescriptor, this->maximumMessageSize, 0
     )
   ) {
     return false;
@@ -523,9 +517,7 @@ void DatabaseInternal::executeGetResult(DatabaseInternalResult& output) {
   case DatabaseInternalRequest::Type::findAndUpdate:
     output.success =
     this->server.findAndUpdate(
-      request.queryFindAndUpdate,
-      &output.totalItems,
-      &commentsOnFailure
+      request.queryFindAndUpdate, &output.totalItems, &commentsOnFailure
     );
     break;
   case DatabaseInternalRequest::Type::find:
@@ -583,9 +575,7 @@ void DatabaseInternal::fetchLargeMessage(
     return;
   }
   // Sending in chunks of 65000.
-  if (
-    static_cast<unsigned long>(message.bytesSent) >= message.content.size()
-  ) {
+  if (static_cast<unsigned long>(message.bytesSent) >= message.content.size()) {
     output.success = false;
     output.comments = "Message already sent fully.";
     return;
@@ -617,11 +607,9 @@ void DatabaseInternalConnection::create(int inputIndexInOwner) {
   clientToServerName << "database_client_to_server_" << this->indexInOwner;
   serverToClientName << "database_server_to_client_" << this->indexInOwner;
   if (
-    !this->clientToServer.createMe(
-      clientToServerName.str(), true, false, false
+    !this->clientToServer.createMe(clientToServerName.str(), true, false, false
     ) ||
-    !this->serverToClient.createMe(
-      clientToServerName.str(), true, false, false
+    !this->serverToClient.createMe(clientToServerName.str(), true, false, false
     )
   ) {
     global.fatal
@@ -636,9 +624,7 @@ DatabaseInternalConnection::DatabaseInternalConnection() {
 
 bool DatabaseInternalResult::isSuccess(std::stringstream* commentsOnFalse)
 const {
-  if (
-    !this->reader.objects.contains(DatabaseStrings::resultSuccess)
-  ) {
+  if (!this->reader.objects.contains(DatabaseStrings::resultSuccess)) {
     if (commentsOnFalse != nullptr) {
       *commentsOnFalse
       << "Missing result success entry: "
@@ -865,9 +851,8 @@ std::string DatabaseInternalRequest::typeToString(
   return "";
 }
 
-bool DatabaseInternalRequest::fromJSData(
-  std::stringstream* commentsOnFailure
-) {
+bool DatabaseInternalRequest::fromJSData(std::stringstream* commentsOnFailure)
+{
   STACK_TRACE("DatabaseInternalRequest::fromJSData");
   this->requestType =
   DatabaseInternalRequest::stringToType(
@@ -877,14 +862,12 @@ bool DatabaseInternalRequest::fromJSData(
   case DatabaseInternalRequest::Type::findAndUpdate:
     return
     this->queryFindAndUpdate.fromJSON(
-      this->contentReader[DatabaseStrings::requestContent],
-      commentsOnFailure
+      this->contentReader[DatabaseStrings::requestContent], commentsOnFailure
     );
   case DatabaseInternalRequest::Type::deleteByFindQuery:
     return
     this->queryOneOfExactly.fromJSON(
-      this->contentReader[DatabaseStrings::requestContent],
-      commentsOnFailure
+      this->contentReader[DatabaseStrings::requestContent], commentsOnFailure
     );
   case DatabaseInternalRequest::Type::find:
     if (this->contentReader.hasKey(DatabaseStrings::requestOptions)) {
@@ -899,8 +882,7 @@ bool DatabaseInternalRequest::fromJSData(
     }
     return
     this->queryOneOfExactly.fromJSON(
-      this->contentReader[DatabaseStrings::requestContent],
-      commentsOnFailure
+      this->contentReader[DatabaseStrings::requestContent], commentsOnFailure
     );
   case DatabaseInternalRequest::Type::getLargeMessage:
     this->messageHandle =
@@ -958,9 +940,8 @@ bool DatabaseInternalServer::deleteAllByFindQuery(
     return false;
   }
   HashedList<std::string> allObjectIds;
-  if (
-    !this->findAllObjectIds(query, allObjectIds, nullptr, commentsOnFailure)
-  ) {
+  if (!this->findAllObjectIds(query, allObjectIds, nullptr, commentsOnFailure))
+  {
     return false;
   }
   DatabaseCollection& collection =
@@ -1196,9 +1177,7 @@ bool DatabaseInternalServer::findAndUpdate(
     }
   }
   JSData object;
-  if (
-    !this->loadObject(objectId, collectionName, object, commentsOnFailure)
-  ) {
+  if (!this->loadObject(objectId, collectionName, object, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "DatabaseInternalServer::findAndUpdate: failed to load object. ";
@@ -1207,9 +1186,7 @@ bool DatabaseInternalServer::findAndUpdate(
   }
   input.update.mergeData(object);
   bool result =
-  this->storeObject(
-    objectId, collectionName, object, true, commentsOnFailure
-  );
+  this->storeObject(objectId, collectionName, object, true, commentsOnFailure);
   return result;
 }
 
@@ -1372,9 +1349,7 @@ bool DatabaseInternalServer::createObject(
   bool foundPrimaryKey = false;
   for (DatabaseInternalIndex& index : collection.indices.values) {
     JSData primaryKeyValueJSON;
-    if (
-      !initialValue.hasNestedKey(index.nestedKeys, &primaryKeyValueJSON)
-    ) {
+    if (!initialValue.hasNestedKey(index.nestedKeys, &primaryKeyValueJSON)) {
       continue;
     }
     std::string primaryKeyValue = primaryKeyValueJSON.stringValue;
@@ -1474,15 +1449,12 @@ void DatabaseInternalServer::ensureStandardCollectionIndices() {
     )
   );
   this->ensureCollection(
-    DatabaseStrings::tableDeleted,
-    List<std::string>({DatabaseStrings::labelId})
+    DatabaseStrings::tableDeleted, List<std::string>({DatabaseStrings::labelId}
+    )
   );
   this->ensureCollection(
     DatabaseStrings::tableEmailInfo,
-    List<std::string>({
-        DatabaseStrings::labelId,
-        DatabaseStrings::labelEmail,
-      }
+    List<std::string>({DatabaseStrings::labelId, DatabaseStrings::labelEmail,}
     )
   );
   this->ensureCollection(
@@ -1528,14 +1500,14 @@ bool DatabaseInternalServer::initializeLoadFromHardDrive() {
 }
 
 bool DatabaseInternalServer::ensureCollection(
-  const std::string& collectionName,
-  const List<std::string>& indexableKeys
+  const std::string& collectionName, const List<std::string>& indexableKeys
 ) {
   DatabaseCollection& collection =
   this->collections.getValueCreateEmpty(collectionName);
   collection.initialize(collectionName, this->owner);
   for (const std::string& key : indexableKeys) {
-    DatabaseInternalIndex& index = collection.indices.getValueCreateEmpty(key);
+    DatabaseInternalIndex& index =
+    collection.indices.getValueCreateEmpty(key);
     index.collectionName = collectionName;
     index.nestedKeys.addOnTop(key);
   }
@@ -1617,8 +1589,9 @@ std::string DatabaseCollection::toStringIndices() const {
   return out.str();
 }
 
-bool DatabaseCollection::loadIndicesFromHardDrive(bool clearPreExistingIndices)
-{
+bool DatabaseCollection::loadIndicesFromHardDrive(
+  bool clearPreExistingIndices
+) {
   STACK_TRACE("DatabaseCollection::loadIndicesFromHardDrive");
   if (this->indicesLoaded) {
     return true;
@@ -1626,9 +1599,7 @@ bool DatabaseCollection::loadIndicesFromHardDrive(bool clearPreExistingIndices)
   std::string filename = this->fileNameIndex();
   std::string contentString;
   std::stringstream commentsOnFailure;
-  if (
-    !FileOperations::fileExistsVirtual(filename, true, true, nullptr)
-  ) {
+  if (!FileOperations::fileExistsVirtual(filename, true, true, nullptr)) {
     global
     << Logger::red
     << "Missing index file: "
@@ -1796,9 +1767,8 @@ void DatabaseInternalIndex::removeObjectId(
 }
 
 void DatabaseInternalIndex::setObjectIdValue(
-  const std::string& objectId,
-  const std::string& newValue,
-  bool& outputValueChanged
+  const std::string& objectId, const std::string& newValue, bool&
+  outputValueChanged
 ) {
   outputValueChanged = false;
   if (this->objectIdToKeyValue.contains(objectId)) {

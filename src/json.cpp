@@ -100,10 +100,7 @@ bool JSData::hasCompositeKeyOfType(
   JSData container;
   if (
     !this->hasCompositeKeyOfToken(
-      key,
-      &container,
-      JSData::Type::tokenLargeInteger,
-      commentsOnFailure
+      key, &container, JSData::Type::tokenLargeInteger, commentsOnFailure
     )
   ) {
     return false;
@@ -119,9 +116,8 @@ bool JSData::hasCompositeKeyOfType(
 }
 
 bool JSData::hasCompositeKeyOfType(
-  const std::string& key,
-  std::string& output,
-  std::stringstream* commentsOnFailure
+  const std::string& key, std::string& output, std::stringstream*
+  commentsOnFailure
 ) const {
   JSData container;
   if (
@@ -312,7 +308,8 @@ bool JSData::isLargeInteger(LargeInteger* whichInteger) const {
 
 bool JSData::isIntegerFittingInInt(int* whichInteger) {
   if (this->elementType == JSData::Type::tokenLargeInteger) {
-    return this->integerValue.getElement().isIntegerFittingInInt(whichInteger);
+    return
+    this->integerValue.getElement().isIntegerFittingInInt(whichInteger);
   }
   if (this->elementType == JSData::Type::tokenFloat) {
     double floatRounded = static_cast<double>(
@@ -387,9 +384,7 @@ bool JSData::isListOfStrings(List<std::string>* whichStrings) {
     return false;
   }
   for (int i = 0; i < this->listObjects.size; i ++) {
-    if (
-      this->listObjects[i].elementType != JSData::Type::tokenString
-    ) {
+    if (this->listObjects[i].elementType != JSData::Type::tokenString) {
       return false;
     }
   }

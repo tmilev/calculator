@@ -30,9 +30,8 @@ public:
   std::string messageHead;
   std::string messageBody;
   JSData resultWork;
-  MonomialWrapper<
-    std::string, HashFunctions::hashFunction<std::string>
-  > userAddress;
+  MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> >
+  userAddress;
   std::string hostWithPort;
   std::string hostNoPort;
   std::string cookiesApache;
@@ -61,11 +60,8 @@ public:
   bool flagUsingSSLInWorkerProcess;
   bool flagDidSendAll;
   List<std::string> messageHeaderStrings;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > requestHeaders;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  requestHeaders;
   int contentLength;
   int requestType;
   int connectedSocketID;
@@ -139,9 +135,8 @@ public:
     const std::string& fileNameCarbonCopy
   );
   void writeAfterTimeoutPartTwo(
-    JSData& result,
-    const std::string& status,
-    const std::string& fileNameCarbonCopy
+    JSData& result, const std::string& status, const std::string&
+    fileNameCarbonCopy
   );
   void writeAfterTimeoutCarbonCopy(
     const JSData& input, const std::string& fileNameCarbonCopy
@@ -174,8 +169,8 @@ public:
   JSData getDatabaseJSON();
   std::string getDatabaseDeleteOneItem();
   void setHeaderOKNoContentLength(
-    const std::string& extraHeader,
-    const std::string& contentType = "application/json"
+    const std::string& extraHeader, const std::string& contentType =
+    "application/json"
   );
   void setHeader(
     const std::string& httpResponseNoTermination,
@@ -249,9 +244,7 @@ public:
   std::string pingAuthentication;
   TransportLayerSecurity transportLayerSecurity;
   LinearCombination<
-    MonomialWrapper<
-      std::string, HashFunctions::hashFunction<std::string>
-    >,
+    MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> >,
     LargeInteger
   > currentlyConnectedAddresses;
   std::string portHTTP;
@@ -308,9 +301,8 @@ public:
   // 1) in the worker process and
   // 2) if the server encounters a fatal error.
   bool runOnce(
-    Listener& listener,
-    long long& previousReportedNumberOfSelects,
-    int& returnCode
+    Listener& listener, long long& previousReportedNumberOfSelects, int&
+    returnCode
   );
   // Wraps the system level fork() call.
   // Addionally computes a

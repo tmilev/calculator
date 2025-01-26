@@ -121,9 +121,7 @@ Expression ExpressionContext::toExpressionDifferntialOperators() const {
 Expression ExpressionContext::toExpressionPolynomialVariables() const {
   Expression polynomialVariables;
   polynomialVariables.reset(*this->owner);
-  polynomialVariables.addChildAtomOnTop(
-    this->owner->opPolynomialVariables()
-  );
+  polynomialVariables.addChildAtomOnTop(this->owner->opPolynomialVariables());
   for (int i = 0; i < this->variables.size; i ++) {
     polynomialVariables.addChildOnTop(this->variables[i]);
   }
@@ -134,9 +132,7 @@ void ExpressionContext::addVariable(const Expression& inputVariable) {
   this->variables.addOnTop(inputVariable);
 }
 
-bool ExpressionContext::setVariables(
-  const List<Expression>& inputVariables
-) {
+bool ExpressionContext::setVariables(const List<Expression>& inputVariables) {
   this->variables = inputVariables;
   return true;
 }
@@ -265,9 +261,7 @@ bool Expression::contextSetDifferentialOperatorVariable(
   Expression differentialPart;
   Expression polynomialPart;
   differentialPart.reset(*this->owner, 2);
-  differentialPart.addChildAtomOnTop(
-    this->owner->opWeylAlgebraVariables()
-  );
+  differentialPart.addChildAtomOnTop(this->owner->opWeylAlgebraVariables());
   differentialPart.addChildOnTop(differentialOperatorVariable);
   polynomialPart.reset(*this->owner, 2);
   polynomialPart.addChildAtomOnTop(this->owner->opPolynomialVariables());
@@ -275,12 +269,10 @@ bool Expression::contextSetDifferentialOperatorVariable(
   bool foundDiffVarsE = false;
   bool foundPolyVarsE = false;
   for (int i = 0; i < this->children.size; i ++) {
-    if ((*this)[i].startsWith(this->owner->opWeylAlgebraVariables())
-    ) {
+    if ((*this)[i].startsWith(this->owner->opWeylAlgebraVariables())) {
       this->setChild(i, differentialPart);
       foundDiffVarsE = true;
-    } else if ((*this)[i].startsWith(this->owner->opPolynomialVariables())
-    ) {
+    } else if ((*this)[i].startsWith(this->owner->opPolynomialVariables())) {
       this->setChild(i, polynomialPart);
       foundPolyVarsE = true;
     }
@@ -424,8 +416,8 @@ bool ExpressionContext::mergeVariables(
 }
 
 bool ExpressionContext::mergeDifferentialOperatorsOnce(
-  Selection& differentialOperatorVariablesFound,
-  ExpressionContext& outputContext
+  Selection& differentialOperatorVariablesFound, ExpressionContext&
+  outputContext
 ) const {
   if (this->owner == nullptr) {
     return false;
@@ -575,9 +567,7 @@ void ExpressionContext::getFormat(FormatExpressions& output) const {
   for (int i = 0; i < this->variables.size; i ++) {
     output.polynomialAlphabet[i] = this->variables[i].toString();
   }
-  output.weylAlgebraLetters.setSize(
-    this->differentialOperatorVariables.size
-  );
+  output.weylAlgebraLetters.setSize(this->differentialOperatorVariables.size);
   for (int i = 0; i < this->differentialOperatorVariables.size; i ++) {
     output.weylAlgebraLetters[i] =
     this->differentialOperatorVariables[i].toString();
@@ -780,8 +770,7 @@ bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
   PolynomialSubstitution<Rational> substitutionDifferentialOperatorPart;
   PolynomialSubstitution<Rational> substitutionPolynomialPart;
   this->context.polynomialAndWeylAlgebraSubstitutionNoFailure(
-    newContext,
-    substitutionPolynomialPart,
+    newContext, substitutionPolynomialPart,
     substitutionDifferentialOperatorPart
   );
   if (
@@ -814,9 +803,7 @@ bool WithContext<RationalFraction<Rational> >::extendContext(
     newContext, substitution, Rational::one()
   );
   if (
-    !this->content.substitute(
-      substitution, Rational::one(), commentsOnFailure
-    )
+    !this->content.substitute(substitution, Rational::one(), commentsOnFailure)
   ) {
     // This is not supposed to happen.
     if (commentsOnFailure != nullptr) {
@@ -843,11 +830,8 @@ bool WithContext<RationalFraction<AlgebraicNumber> >::extendContext(
   this->context.polynomialSubstitutionNoFailure(
     newContext, substitution, closure.one()
   );
-  if (
-    !this->content.substitute(
-      substitution, closure.one(), commentsOnFailure
-    )
-  ) {
+  if (!this->content.substitute(substitution, closure.one(), commentsOnFailure))
+  {
     // This is not supposed to happen.
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -863,9 +847,8 @@ bool WithContext<RationalFraction<AlgebraicNumber> >::extendContext(
 }
 
 template < >
-bool WithContext<
-  ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
->::extendContext(
+bool WithContext<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >
+::extendContext(
   ExpressionContext& newContext, std::stringstream* commentsOnFailure
 ) {
   (void) commentsOnFailure;
@@ -874,8 +857,7 @@ bool WithContext<
     newContext, substitution, Rational::one()
   );
   this->content.substitute(
-    substitution,
-    this->context.owner->objectContainer.categoryOModules
+    substitution, this->context.owner->objectContainer.categoryOModules
   );
   this->context = newContext;
   return true;
@@ -890,9 +872,7 @@ bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
   this->context.polynomialSubstitution(
     newContext, substitution, Rational::one()
   );
-  for (
-    int i = 0; i < this->content.weightFundamentalCoordinates.size; i ++
-  ) {
+  for (int i = 0; i < this->content.weightFundamentalCoordinates.size; i ++) {
     this->content.weightFundamentalCoordinates[i].substitute(
       substitution, Rational::one()
     );
@@ -902,8 +882,8 @@ bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
 }
 
 bool Expression::setContextAtLeastEqualTo(
-  ExpressionContext& inputOutputMinContext,
-  std::stringstream* commentsOnFailure
+  ExpressionContext& inputOutputMinContext, std::stringstream*
+  commentsOnFailure
 ) {
   STACK_TRACE("Expression::setContextAtLeastEqualTo");
   this->checkInitialization();
@@ -1007,12 +987,9 @@ bool Expression::setContextAtLeastEqualTo(
       inputOutputMinContext, *this, commentsOnFailure
     );
   }
-  WithContext<
-    ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
-  > elementTensorProductGeneralizedVermaModules;
-  if (
-    this->isOfTypeWithContext(&elementTensorProductGeneralizedVermaModules)
-  ) {
+  WithContext<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >
+  elementTensorProductGeneralizedVermaModules;
+  if (this->isOfTypeWithContext(&elementTensorProductGeneralizedVermaModules)) {
     return
     elementTensorProductGeneralizedVermaModules.setContextAndSerialize(
       inputOutputMinContext, *this, commentsOnFailure
@@ -1060,8 +1037,7 @@ bool Expression::setContextAtLeastEqualTo(
         }
       }
     }
-    return
-    this->makeMatrix(*this->owner, newMatrix, &inputOutputMinContext);
+    return this->makeMatrix(*this->owner, newMatrix, &inputOutputMinContext);
   }
   this->owner->comments
   << "Expression "

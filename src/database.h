@@ -69,20 +69,15 @@ private:
 public:
   List<QueryUpdateOnce> data;
   // Adds a single string key with a single string value.
-  void addKeyValueStringPair(
-    const std::string& key, const std::string& value
-  );
+  void addKeyValueStringPair(const std::string& key, const std::string& value);
   void addKeyValuePair(const std::string& key, const JSData& value);
-  void addKeyStringValuePair(
-    const std::string& key, const std::string& value
-  );
+  void addKeyStringValuePair(const std::string& key, const std::string& value);
   void addNestedKeyValuePair(
     const List<std::string>& nestedKeys, const JSData& value
   );
   void addValue(const JSData& value);
   QueryUpdate();
-  bool fromJSON(
-    const JSData& inputValue, std::stringstream* commentsOnFailure
+  bool fromJSON(const JSData& inputValue, std::stringstream* commentsOnFailure
   );
   bool fromJSONString(
     const std::string& inputValue, std::stringstream* commentsOnFailure
@@ -172,8 +167,7 @@ public:
   );
   // Concatenates the nested labels with a comma separator.
   std::string concatenateNestedLabels() const;
-  void setLabelValue(
-    const std::string& label, const std::string& desiredValue
+  void setLabelValue(const std::string& label, const std::string& desiredValue
   );
   void setLabelsValue(
     const List<std::string>& labels, const std::string& desiredValue
@@ -187,11 +181,9 @@ public:
   // this will return {"key1": {subkey2: {subkey3: "XX"}}}
   JSData toJSONCombineKeysAndValue() const;
   bool fromString(
-    const std::string& input, std::stringstream* commentsOnFailure
-  );
-  bool fromJSON(
-    const JSData& source, std::stringstream* commentsOnFailure
-  );
+    const std::string& input, std::stringstream*
+    commentsOnFailure);
+  bool fromJSON(const JSData& source, std::stringstream* commentsOnFailure);
   std::string toString() const;
   bool isEmpty() const;
 };
@@ -246,8 +238,7 @@ public:
   // A chunk of a raw large message, to be sent next.
   std::string nextChunk;
   int bytesSentSoFar;
-  bool fromJSON(
-    const std::string& input, std::stringstream* commentsOnFailure
+  bool fromJSON(const std::string& input, std::stringstream* commentsOnFailure
   );
   JSData toJSON();
   void writeContent(List<JSData>& output);
@@ -279,8 +270,7 @@ public:
   // Holds the location of the stored message.
   // The location may be out-of-date/invalid.
   int messageHandle;
-  bool fromJSON(
-    const std::string& input, std::stringstream* commentsOnFailure
+  bool fromJSON(const std::string& input, std::stringstream* commentsOnFailure
   );
   void toJSON(JSData& output) const;
   JSData toJSON() const;
@@ -309,9 +299,8 @@ public:
   std::string toString() const;
   // Sets an object id to a given value.
   void setObjectIdValue(
-    const std::string& objectId,
-    const std::string& newValue,
-    bool& outputValueChanged
+    const std::string& objectId, const std::string& newValue, bool&
+    outputValueChanged
   );
   void removeObjectId(
     const std::string& objectId, const std::string& previousValue
@@ -344,9 +333,7 @@ public:
     const std::string& objectId, std::stringstream* commentsOnFailure
   );
   DatabaseCollection();
-  void initialize(
-    const std::string& inputName, DatabaseInternal* inputOwner
-  );
+  void initialize(const std::string& inputName, DatabaseInternal* inputOwner);
   bool updateObjectInIndexReturnTrueIfChanged(
     const std::string& objectId, const JSData& data
   );
@@ -360,8 +347,7 @@ public:
   bool initializeLoadFromHardDrive();
   void ensureStandardCollectionIndices();
   bool ensureCollection(
-    const std::string& collectionName,
-    const List<std::string>& indexableKeys
+    const std::string& collectionName, const List<std::string>& indexableKeys
   );
   bool findAndUpdate(
     QueryFindAndUpdate& input,
@@ -692,8 +678,7 @@ public:
     LargeInteger* totalItems = nullptr,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool deleteOneEntry(
-    const JSData& entry, std::stringstream* commentsOnFailure
+  bool deleteOneEntry(const JSData& entry, std::stringstream* commentsOnFailure
   );
   bool deleteAtLeastOneEntryByFindQuery(
     const QueryFind& findQuery, std::stringstream* commentsOnFailure
@@ -709,18 +694,14 @@ public:
     std::stringstream* commentsOnFailure
   );
   std::string toHtmlDatabaseCollection(const std::string& currentTable);
-  JSData toJSONFetchItem(
-    QueryFind& findQuery, QueryResultOptions& projector
-  );
+  JSData toJSONFetchItem(QueryFind& findQuery, QueryResultOptions& projector);
   // Redacts object ids and hashes.
   static void correctData(JSData& row);
   static void correctData(List<JSData>& toBeCorrected);
   static void correctDataFromLabels(
-    JSData& row, const List<std::string>& labels
-  );
-  static void correctDataFromLabels(
-    JSData& row, const std::string& oneLabel
-  );
+    JSData& row, const List<std::string>&
+    labels);
+  static void correctDataFromLabels(JSData& row, const std::string& oneLabel);
   JSData toJSONDatabaseCollection(const std::string& currentTable);
   JSData toJSONAllCollections();
   JSData toJSONDatabaseFetch(const std::string& findQuery);
@@ -740,8 +721,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   static bool matchesPattern(
-    const List<std::string>& fieldLabel,
-    const List<std::string>& pattern
+    const List<std::string>& fieldLabel, const List<std::string>& pattern
   );
   static QueryResultOptions getStandardProjectors(
     const std::string& collectionName
@@ -813,19 +793,14 @@ public:
   // Once the errors are all fixed, we shall change the function to a noop,
   // but will keep the mechanism for future use.
   bool correctDatabaseJSON(std::stringstream& commentsOnFailure);
-  bool correctUser(
-    JSData& inputOutput, std::stringstream& commentsOnFailure
-  );
+  bool correctUser(JSData& inputOutput, std::stringstream& commentsOnFailure);
   bool loadFromJSON(JSData& input, std::stringstream& comments);
   bool loadOneCollectionFromJSON(
-    const std::string& collectionName,
-    JSData& input,
-    std::stringstream& comments
+    const std::string& collectionName, JSData& input, std::stringstream&
+    comments
   );
   bool loadOneObject(
-    DatabaseCollection& collection,
-    JSData& input,
-    std::stringstream& comments
+    DatabaseCollection& collection, JSData& input, std::stringstream& comments
   );
 };
 

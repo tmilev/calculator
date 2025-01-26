@@ -113,16 +113,12 @@ bool DatabaseLoader::loadJSONFromHardDrive(
   return result;
 }
 
-bool DatabaseLoader::loadFromJSON(
-  JSData& input, std::stringstream& comments
-) {
+bool DatabaseLoader::loadFromJSON(JSData& input, std::stringstream& comments) {
   DatabaseInternalServer& database = Database::get().localDatabase.server;
   database.ensureStandardCollectionIndices();
   for (const std::string& collectionName : input.objects.keys) {
     JSData& content = input[collectionName];
-    if (
-      !this->loadOneCollectionFromJSON(collectionName, content, comments)
-    ) {
+    if (!this->loadOneCollectionFromJSON(collectionName, content, comments)) {
       return false;
     }
   }
@@ -130,9 +126,7 @@ bool DatabaseLoader::loadFromJSON(
 }
 
 bool DatabaseLoader::loadOneCollectionFromJSON(
-  const std::string& collectionName,
-  JSData& input,
-  std::stringstream& comments
+  const std::string& collectionName, JSData& input, std::stringstream& comments
 ) {
   STACK_TRACE("DatabaseLoader::loadOneCollectionFromJSON");
   DatabaseInternalServer& database = Database::get().localDatabase.server;
@@ -158,9 +152,7 @@ bool DatabaseLoader::loadOneCollectionFromJSON(
 }
 
 bool DatabaseLoader::loadOneObject(
-  DatabaseCollection& collection,
-  JSData& input,
-  std::stringstream& comments
+  DatabaseCollection& collection, JSData& input, std::stringstream& comments
 ) {
   STACK_TRACE("DatabaseLoader::loadOneObject");
   std::string objectId;
@@ -182,19 +174,15 @@ bool DatabaseLoader::loadOneObject(
   // unused);
   collection.updateObjectInIndexReturnTrueIfChanged(objectId, input);
   DatabaseInternalServer& database = Database::get().localDatabase.server;
-  if (
-    !database.storeObject(
-      objectId, collection.name, input, false, &comments
-    )
-  ) {
+  if (!database.storeObject(objectId, collection.name, input, false, &comments))
+  {
     return false;
   }
   return true;
 }
 
-bool DatabaseLoader::correctDatabaseJSON(
-  std::stringstream& commentsOnFailure
-) {
+bool DatabaseLoader::correctDatabaseJSON(std::stringstream& commentsOnFailure)
+{
   JSData& users = this->databaseJSON["users"];
   for (JSData& user : users.listObjects) {
     if (!this->correctUser(user, commentsOnFailure)) {
@@ -216,11 +204,8 @@ bool DatabaseLoader::correctUser(
   << inputOutput["username"]
   << Logger::endL;
   std::string data = inputOutput["problemData"].stringValue;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > mapStrings;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  mapStrings;
   if (
     !HtmlRoutines::chopPercentEncodedString(
       data, mapStrings, commentsOnFailure
@@ -233,9 +218,7 @@ bool DatabaseLoader::correctUser(
   for (int i = 0; i < mapStrings.size(); i ++) {
     if (
       !reader.loadFromOldFormatDeprecated(
-        HtmlRoutines::convertURLStringToNormal(
-          mapStrings.values[i], false
-        ),
+        HtmlRoutines::convertURLStringToNormal(mapStrings.values[i], false),
         commentsOnFailure
       )
     ) {

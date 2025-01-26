@@ -41,9 +41,7 @@ bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
     }
     return false;
   }
-  if (
-    !this->history.startsWith(this->owner->opExpressionHistory())
-  ) {
+  if (!this->history.startsWith(this->owner->opExpressionHistory())) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Corrupt expression history does not start with the expected atom: "
@@ -55,9 +53,7 @@ bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
   int firstNonAccountedChildIndex = - 1;
   for (int i = 1; i < this->history.size(); i ++) {
     const Expression& current = this->history[i];
-    if (
-      current.startsWith(this->owner->opExpressionHistorySetChild())
-    ) {
+    if (current.startsWith(this->owner->opExpressionHistorySetChild())) {
       if (childrenToAccount == 0) {
         firstNonAccountedChildIndex = i;
       }
@@ -87,9 +83,7 @@ bool Calculator::ExpressionHistoryEnumerator::computeRecursively(
 }
 
 bool Calculator::ExpressionHistoryEnumerator::processChildrenTransformations(
-  int startIndex,
-  int numberOfChildren,
-  std::stringstream* commentsOnFailure
+  int startIndex, int numberOfChildren, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE(
     "Calculator::ExpressionHistoryEnumerator::processChildrenTransformations"
@@ -310,8 +304,7 @@ void Calculator::ExpressionHistoryEnumerator::Step::assignContentAndAnnotation(
 }
 
 void Calculator::ExpressionHistoryEnumerator::toOneStep(
-  int stepIndex,
-  Calculator::ExpressionHistoryEnumerator::Step& outputStep
+  int stepIndex, Calculator::ExpressionHistoryEnumerator::Step& outputStep
 ) {
   outputStep.annotations.addListOnTop(this->rulesNames[stepIndex]);
   outputStep.content = this->output[stepIndex];
@@ -373,10 +366,8 @@ bool CalculatorSteps::logEvaluationSteps(
 }
 
 bool CalculatorSteps::logEvaluationStepsHumanReadableMerged(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  bool doDebug
+  Calculator& calculator, const Expression& input, Expression& output, bool
+  doDebug
 ) {
   STACK_TRACE("CalculatorSteps::logEvaluationStepsHumanReadableMerged");
   Expression argument;
@@ -390,12 +381,7 @@ bool CalculatorSteps::logEvaluationStepsHumanReadableMerged(
   bool notUsed = false;
   Calculator::ExpressionHistoryEnumerator history;
   calculator.evaluateExpression(
-    calculator,
-    argument,
-    outputTransformation,
-    notUsed,
-    - 1,
-    &history.history
+    calculator, argument, outputTransformation, notUsed, - 1, &history.history
   );
   std::stringstream out;
   history.owner = &calculator;

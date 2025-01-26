@@ -48,8 +48,8 @@ getRho() {
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 getMatrixOfElement(
-  const ElementSubgroupWeylGroupAutomorphisms& input,
-  Matrix<Rational>& outputMatrix
+  const ElementSubgroupWeylGroupAutomorphisms& input, Matrix<Rational>&
+  outputMatrix
 ) const {
   Vectors<Rational> startBasis;
   Vectors<Rational> imageBasis;
@@ -329,8 +329,7 @@ bool SemisimpleLieAlgebraOrdered::checkInitialization() const {
 }
 
 void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
-  ElementSemisimpleLieAlgebra<Rational>& input,
-  Vector<Rational>& coefficients
+  ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& coefficients
 ) {
   this->checkInitialization();
   coefficients.makeZero(
@@ -569,9 +568,7 @@ void SlTwoInSlN::getIsPlusKIndexingFrom(int input, int& s, int& k) {
   if (input >= this->dimension || input < 0) {
     return;
   }
-  for (
-    int offset = 0; offset <= input; offset += this->partition[s - 1]
-  ) {
+  for (int offset = 0; offset <= input; offset += this->partition[s - 1]) {
     k = input - offset;
     s ++;
   }
@@ -657,10 +654,7 @@ void SlTwoInSlN::extractHighestWeightVectorsFromVector(
       remainder, highestWeightVector, largestPowerNotKillingInput
     );
     this->climbDownFromHighestWeightAlongSl2String(
-      highestWeightVector,
-      component,
-      coefficient,
-      largestPowerNotKillingInput
+      highestWeightVector, component, coefficient, largestPowerNotKillingInput
     );
     for (int i = 0; i < this->projectors.size; i ++) {
       Matrix<Rational>& currentProjector = this->projectors[i];
@@ -750,9 +744,7 @@ std::string SlTwoInSlN::GetNotationString(bool useHtml) {
 }
 
 std::string SlTwoInSlN::initFromModuleDecomposition(
-  List<int>& decompositionDimensions,
-  bool useHtml,
-  bool computePairingTable
+  List<int>& decompositionDimensions, bool useHtml, bool computePairingTable
 ) {
   std::stringstream out;
   this->partition = decompositionDimensions;
@@ -836,9 +828,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
         matrix, decomposition, highestWeightCandidatesBeforeProjection
       );
       highestWeightCandidatesProjected.size = 0;
-      for (
-        int k = 0; k < highestWeightCandidatesBeforeProjection.size; k ++
-      ) {
+      for (int k = 0; k < highestWeightCandidatesBeforeProjection.size; k ++) {
         for (int l = 0; l < this->projectors.size; l ++) {
           matrix = highestWeightCandidatesBeforeProjection[k];
           matrix.multiplyOnTheLeft(this->projectors[l]);
@@ -862,8 +852,9 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
           *this->gModKModules.lastObject();
           currentMod.size = 0;
           for (
-            matrix = currentHighest; !matrix.isEqualToZero(); Matrix<Rational>
-            ::lieBracket(this->fElement, matrix, matrix)
+            matrix = currentHighest; !matrix.isEqualToZero(); Matrix<
+              Rational
+            >::lieBracket(this->fElement, matrix, matrix)
           ) {
             currentMod.addOnTop(matrix);
           }
@@ -1014,9 +1005,8 @@ void MonomialPolynomial::makeEi(
   this->setVariable(letterIndex, power);
 }
 
-void MonomialPolynomial::setVariable(
-  int variableIndex, const Rational& power
-) {
+void MonomialPolynomial::setVariable(int variableIndex, const Rational& power)
+{
   if (variableIndex >= this->monomialBody.size) {
     this->setSize(variableIndex + 1);
   }
@@ -1093,17 +1083,14 @@ bool MonomialPolynomial::operator>(const MonomialPolynomial& other) const {
 }
 
 bool MonomialPolynomial::isDivisibleBy(const MonomialPolynomial& other) const {
-  for (
-    int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --
-  ) {
+  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --)
+  {
     if (other.monomialBody[i] > 0) {
       return false;
     }
   }
   int upperLimit =
-  MathRoutines::minimum(
-    this->monomialBody.size, other.monomialBody.size
-  );
+  MathRoutines::minimum(this->monomialBody.size, other.monomialBody.size);
   for (int i = 0; i < upperLimit; i ++) {
     if (this->monomialBody[i] < other.monomialBody[i]) {
       return false;
@@ -1113,16 +1100,14 @@ bool MonomialPolynomial::isDivisibleBy(const MonomialPolynomial& other) const {
 }
 
 bool MonomialPolynomial::operator==(const MonomialPolynomial& other) const {
-  for (
-    int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --
-  ) {
+  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --)
+  {
     if (other.monomialBody[i] != 0) {
       return false;
     }
   }
-  for (
-    int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --
-  ) {
+  for (int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --)
+  {
     if (this->monomialBody[i] != 0) {
       return false;
     }
@@ -1171,9 +1156,8 @@ bool MonomialPolynomial::greaterThan_totalDegree_leftLargerWins(
 bool MonomialPolynomial::greaterThan_rightLargerWins(
   const MonomialPolynomial& other
 ) const {
-  for (
-    int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --
-  ) {
+  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --)
+  {
     if (other.monomialBody[i] > 0) {
       return false;
     }
@@ -1181,9 +1165,8 @@ bool MonomialPolynomial::greaterThan_rightLargerWins(
       return true;
     }
   }
-  for (
-    int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --
-  ) {
+  for (int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --)
+  {
     if (this->monomialBody[i] > 0) {
       return true;
     }
@@ -1245,9 +1228,7 @@ bool MonomialPolynomial::greaterThan_leftLargerWins(
       return false;
     }
   }
-  for (
-    int i = this->monomialBody.size; i < other.monomialBody.size; i ++
-  ) {
+  for (int i = this->monomialBody.size; i < other.monomialBody.size; i ++) {
     if (other.monomialBody[i] > 0) {
       return false;
     }
@@ -1255,9 +1236,7 @@ bool MonomialPolynomial::greaterThan_leftLargerWins(
       return true;
     }
   }
-  for (
-    int i = other.monomialBody.size; i < this->monomialBody.size; i ++
-  ) {
+  for (int i = other.monomialBody.size; i < this->monomialBody.size; i ++) {
     if (this->monomialBody[i] > 0) {
       return true;
     }
@@ -1308,9 +1287,7 @@ void MonomialPolynomial::raiseToPower(const Rational& power) {
 
 void MonomialPolynomial::operator*=(const MonomialPolynomial& other) {
   this->setSize(
-    MathRoutines::maximum(
-      this->monomialBody.size, other.monomialBody.size
-    )
+    MathRoutines::maximum(this->monomialBody.size, other.monomialBody.size)
   );
   for (int i = 0; i < other.monomialBody.size; i ++) {
     this->monomialBody[i] += other.monomialBody[i];
@@ -1320,9 +1297,7 @@ void MonomialPolynomial::operator*=(const MonomialPolynomial& other) {
 
 void MonomialPolynomial::operator/=(const MonomialPolynomial& other) {
   this->setSize(
-    MathRoutines::maximum(
-      this->monomialBody.size, other.monomialBody.size
-    )
+    MathRoutines::maximum(this->monomialBody.size, other.monomialBody.size)
   );
   for (int i = 0; i < other.monomialBody.size; i ++) {
     this->monomialBody[i] -= other.monomialBody[i];

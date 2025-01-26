@@ -24,9 +24,7 @@ bool WebAPIResponse::Test::all() {
 bool WebAPIResponse::Test::solveJSON() {
   WebAPIResponse response;
   global.calculator().freeMemory();
-  global.calculator().getElement().initialize(
-    Calculator::Mode::educational
-  );
+  global.calculator().getElement().initialize(Calculator::Mode::educational);
   global.comments.resetComments();
   global.setWebInput(WebAPI::Request::calculatorInput, "1+1");
   JSData result = response.solveJSON();
@@ -140,9 +138,7 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
   STACK_TRACE("OneComparison::compare");
   WebAPIResponse response;
   global.calculator().freeMemory();
-  global.calculator().getElement().initialize(
-    Calculator::Mode::educational
-  );
+  global.calculator().getElement().initialize(Calculator::Mode::educational);
   global.setWebInput(
     WebAPI::Request::compareExpressionsGiven,
     HtmlRoutines::convertStringToURLString(this->given, false)
@@ -187,9 +183,7 @@ bool OneComparison::compare(bool hideDesiredAnswer) {
     << global.fatal;
   }
   if (hideDesiredAnswer) {
-    if (
-      result[WebAPI::Result::ComparisonData::desired].isString(nullptr)
-    ) {
+    if (result[WebAPI::Result::ComparisonData::desired].isString(nullptr)) {
       global.fatal
       << "Desired answer must be absent but was given. "
       << global.fatal;
@@ -237,10 +231,9 @@ bool WebAPIResponse::Test::changePasswordEmailOnly() {
   std::stringstream unused;
   StateMaintainer<
     MapList<
-      std::string,
-      std::string,
-      HashFunctions::hashFunction<std::string>
-    >
+      std::string, std::string, HashFunctions::hashFunction<
+        std::string
+      > >
   > maintainWebArgument(global.webArguments);
   global.webArguments[DatabaseStrings::labelUsername] =
   WebAPI::userDefaultAdmin;
@@ -307,10 +300,9 @@ bool WebAPIResponse::Test::deleteAccount() {
   global.comments.resetComments();
   StateMaintainer<
     MapList<
-      std::string,
-      std::string,
-      HashFunctions::hashFunction<std::string>
-    >
+      std::string, std::string, HashFunctions::hashFunction<
+        std::string
+      > >
   > maintainWebArgument(global.webArguments);
   WebAPIResponse api;
   JSData resultTokenGeneration = api.deleteAccount();
@@ -332,9 +324,7 @@ bool WebAPIResponse::Test::deleteAccount() {
     global.fatal << "Got success with wrong activation token." << global.fatal;
   }
   global.webArguments[WebAPI::Result::deleteAccountToken] = token;
-  if (
-    !Database::get().user.loginViaDatabase(global.userDefault, nullptr)
-  ) {
+  if (!Database::get().user.loginViaDatabase(global.userDefault, nullptr)) {
     global.fatal << "Unexpected failure to login. " << global.fatal;
   }
   JSData resultFinal = api.deleteAccount();
@@ -375,10 +365,9 @@ bool WebAPIResponse::Test::changePassword() {
   std::stringstream unused;
   StateMaintainer<
     MapList<
-      std::string,
-      std::string,
-      HashFunctions::hashFunction<std::string>
-    >
+      std::string, std::string, HashFunctions::hashFunction<
+        std::string
+      > >
   > maintainWebArgument(global.webArguments);
   global.webArguments[DatabaseStrings::labelUsername] =
   WebAPI::userDefaultAdmin;
@@ -405,9 +394,7 @@ bool WebAPIResponse::Test::changePassword() {
   user.enteredPassword = Database::Test::adminPassword;
   std::stringstream loginWithOldPassword;
   std::stringstream loginWithNewPassword;
-  if (
-    Database::get().user.loginViaDatabase(user, &loginWithOldPassword)
-  ) {
+  if (Database::get().user.loginViaDatabase(user, &loginWithOldPassword)) {
     global.fatal
     << "I managed to login with the old password! "
     << loginWithOldPassword.str()
@@ -415,9 +402,7 @@ bool WebAPIResponse::Test::changePassword() {
   }
   user.username = WebAPI::userDefaultAdmin;
   user.enteredPassword = "123";
-  if (
-    !Database::get().user.loginViaDatabase(user, &loginWithNewPassword)
-  ) {
+  if (!Database::get().user.loginViaDatabase(user, &loginWithNewPassword)) {
     global.fatal
     << "I couldn't login with the new password! "
     << loginWithNewPassword.str()
@@ -437,10 +422,9 @@ bool WebAPIResponse::Test::forgotLogin() {
   std::stringstream unused;
   StateMaintainer<
     MapList<
-      std::string,
-      std::string,
-      HashFunctions::hashFunction<std::string>
-    >
+      std::string, std::string, HashFunctions::hashFunction<
+        std::string
+      > >
   > maintainWebArgument(global.webArguments);
   global.webArguments[DatabaseStrings::labelUsername] =
   WebAPI::userDefaultAdmin;
@@ -506,10 +490,9 @@ bool WebAPIResponse::Test::signUp() {
   std::stringstream unused;
   StateMaintainer<
     MapList<
-      std::string,
-      std::string,
-      HashFunctions::hashFunction<std::string>
-    >
+      std::string, std::string, HashFunctions::hashFunction<
+        std::string
+      > >
   > maintainWebArgument(global.webArguments);
   global.webArguments[WebAPI::Request::desiredUsername] = "someNewUser";
   global.webArguments[DatabaseStrings::labelEmail] =
@@ -640,10 +623,8 @@ bool WebAPIResponse::Test::compareExpressions() {
   std::stringstream commentsOnFailure;
   if (
     !FileOperations::loadFileToStringVirtual(
-      "test/compare_expressions.json",
-      comparisonJSON,
-      false,
-      &commentsOnFailure
+      "test/compare_expressions.json", comparisonJSON, false, &
+      commentsOnFailure
     )
   ) {
     global.fatal
@@ -700,11 +681,7 @@ bool WebAPIResponse::Test::scoredQuiz(DatabaseType databaseType) {
     << afterSecondRun
     << global.fatal;
   }
-  if (
-    !StringRoutines::stringContains(
-      resultFirst.toString(), "mathematical"
-    )
-  ) {
+  if (!StringRoutines::stringContains(resultFirst.toString(), "mathematical")) {
     global.fatal
     << "Test problem expected to contain the string "
     << "'mathematical'. Instead it was:\n"

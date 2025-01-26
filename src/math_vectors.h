@@ -338,8 +338,7 @@ public:
     return result;
   }
   bool isProportionalTo(
-    const Vector<Coefficient>& other,
-    Coefficient& outputTimesMeEqualsOther
+    const Vector<Coefficient>& other, Coefficient& outputTimesMeEqualsOther
   ) const;
   bool isProportionalTo(const Vector<Coefficient>& other) const {
     Coefficient outputTimesMeEqualsOther;
@@ -357,8 +356,7 @@ public:
     int newDimension = normal.size + 1;
     this->setSize(newDimension);
     this->RootScalarEuclideanRoot(
-      normal, point, this->objects[newDimension - 1]
-    );
+      normal, point, this->objects[newDimension - 1]);
     this->objects[newDimension - 1].negate();
     for (int j = 0; j < newDimension - 1; j ++) {
       this->objects[j] = normal[j];
@@ -479,12 +477,9 @@ public:
     return false;
   }
   bool getCoordinatesInBasis(
-    const Vectors<Coefficient>& inputBasis,
-    Vector<Coefficient>& output
+    const Vectors<Coefficient>& inputBasis, Vector<Coefficient>& output
   ) const;
-  Vector<Coefficient> getProjectivizedNormal(
-    Vector<Coefficient>& affinePoint
-  );
+  Vector<Coefficient> getProjectivizedNormal(Vector<Coefficient>& affinePoint);
   Vector<Coefficient> operator*(const Coefficient& other) const {
     Vector<Coefficient> result;
     result.setSize(this->size);
@@ -729,9 +724,8 @@ int Vector<Coefficient>::findLeastCommonMultipleDenominatorsTruncateToInt() {
 template <class Coefficient>
 class Vectors: public List<Vector<Coefficient> > {
 public:
-  std::string toStringEpsilonForm(
-    bool useLatex, bool useHtml, bool makeTable
-  ) {
+  std::string toStringEpsilonForm(bool useLatex, bool useHtml, bool makeTable)
+  {
     std::string currentString;
     std::stringstream out;
     if (useLatex) {
@@ -793,9 +787,7 @@ public:
       output[i] = this->objects[i].getVectorDouble();
     }
   }
-  void assignListListCoefficientType(
-    const List<List<Coefficient> >& input
-  ) {
+  void assignListListCoefficientType(const List<List<Coefficient> >& input) {
     this->setSize(input.size);
     for (int i = 0; i < input.size; i ++) {
       this->objects[i] = input[i];
@@ -835,9 +827,8 @@ public:
   unsigned int hashFunction() const {
     return this->::List<Vector<Coefficient> >::hashFunction();
   }
-  bool hasAnElementWithPositiveScalarProduct(
-    const Vector<Coefficient>& input
-  ) const {
+  bool hasAnElementWithPositiveScalarProduct(const Vector<Coefficient>& input)
+  const {
     for (int i = 0; i < this->size; i ++) {
       if (input.scalarEuclidean(this->objects[i]).isPositive()) {
         return true;
@@ -845,9 +836,8 @@ public:
     }
     return false;
   }
-  bool hasAnElementWithNegativeScalarProduct(
-    const Vector<Coefficient>& input
-  ) const {
+  bool hasAnElementWithNegativeScalarProduct(const Vector<Coefficient>& input)
+  const {
     for (int i = 0; i < this->size; i ++) {
       if (input.scalarEuclidean(this->objects[i]).isNegative()) {
         return true;
@@ -864,9 +854,7 @@ public:
     return false;
   }
   void selectionToMatrix(
-    Selection& selection,
-    int outputDimension,
-    Matrix<Coefficient>& output
+    Selection& selection, int outputDimension, Matrix<Coefficient>& output
   );
   void selectionToMatrixAppend(
     Selection& selection,
@@ -881,13 +869,11 @@ public:
     int startRowIndex
   );
   void getGramMatrix(
-    Matrix<Coefficient>& output,
-    const Matrix<Rational>* bilinearForm = nullptr
+    Matrix<Coefficient>& output, const Matrix<Rational>* bilinearForm = nullptr
   ) const;
   void getMatrixRootsToRows(Matrix<Rational>& output) const;
   void getOrthogonalComplement(
-    Vectors<Coefficient>& output,
-    Matrix<Coefficient>* bilinearForm = nullptr
+    Vectors<Coefficient>& output, Matrix<Coefficient>* bilinearForm = nullptr
   );
   bool linearSpanContainsVector(
     const Vector<Coefficient>& input,
@@ -934,8 +920,8 @@ public:
     }
   }
   bool getCoordinatesInBasis(
-    const Vectors<Coefficient>& inputBasis,
-    Vectors<Coefficient>& outputCoordinates
+    const Vectors<Coefficient>& inputBasis, Vectors<Coefficient>&
+    outputCoordinates
   ) const;
   bool getIntegralCoordinatesInBasisIfTheyExist(
     const Vectors<Coefficient>& inputBasis,
@@ -995,8 +981,8 @@ public:
     return result;
   }
   std::string toStringLetterFormat(
-    const std::string& inputLetter, bool useLatex
-  ) {
+    const std::string& inputLetter, bool
+    useLatex) {
     std::stringstream out;
     for (int i = 0; i < this->size; i ++) {
       out << this->objects[i].toStringLetterFormat(inputLetter, useLatex);
@@ -1007,9 +993,7 @@ public:
     return out.str();
   }
   bool computeNormalExcludingIndex(
-    Vector<Coefficient>& output,
-    int index,
-    Matrix<Coefficient>& bufferMatrix
+    Vector<Coefficient>& output, int index, Matrix<Coefficient>& bufferMatrix
   );
   bool computeNormalFromSelection(
     Vector<Coefficient>& output,
@@ -1034,9 +1018,8 @@ public:
   );
   bool computeNormal(Vector<Coefficient>& output, int inputDimension);
   void gaussianEliminationForNormalComputation(
-    Matrix<Coefficient>& inputMatrix,
-    Selection& outputNonPivotPoints,
-    int dimension
+    Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int
+    dimension
   ) const;
   // Computes a linear combination with coefficients in the natural order.
   bool getLinearDependence(
@@ -1051,8 +1034,7 @@ public:
     const Coefficient& one = 1,
     const Coefficient& zero = 0
   ) {
-    return
-    this->getLinearDependence(outputLinearCombination, true, one, zero);
+    return this->getLinearDependence(outputLinearCombination, true, one, zero);
   }
   // Computes a linear combination with coefficients in the natural order.
   bool getLinearDependenceLexicographic(
@@ -1067,8 +1049,7 @@ public:
     Matrix<Coefficient>& outputSystem, Selection& outputNonPivotPoints
   );
   bool containsVectorNonPerpendicularTo(
-    const Vector<Coefficient>& input,
-    const Matrix<Coefficient>& bilinearForm
+    const Vector<Coefficient>& input, const Matrix<Coefficient>& bilinearForm
   );
   bool containsOppositeRoots() {
     if (this->size < 10) {
@@ -1270,8 +1251,8 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
 
 template <class Coefficient>
 bool Vectors<Coefficient>::getCoordinatesInBasis(
-  const Vectors<Coefficient>& inputBasis,
-  Vectors<Coefficient>& outputCoordinates
+  const Vectors<Coefficient>& inputBasis, Vectors<Coefficient>&
+  outputCoordinates
 ) const {
   STACK_TRACE("Vectors::getCoordinatesInBasis");
   outputCoordinates.setSize(this->size);
@@ -1323,9 +1304,7 @@ bool Vector<Coefficient>::getIntegralCoordinatesInBasisIfTheyExist(
   int column = 0;
   for (int i = 0; i < inputBasis.size; i ++) {
     for (; column < dimension; column ++) {
-      if (
-        !bufferMatGaussianElimination.elements[i][column].isEqualToZero()
-      ) {
+      if (!bufferMatGaussianElimination.elements[i][column].isEqualToZero()) {
         break;
       }
     }
@@ -1354,10 +1333,9 @@ void Vectors<Coefficient>::getGramMatrix(
     for (int j = i; j < this->size; j ++) {
       if (bilinearForm != nullptr) {
         Vector<Coefficient>::scalarProduct(
-          this->objects[i],
-          this->objects[j],
-          *bilinearForm,
-          output.elements[i][j]
+          this->objects[i], this->objects[j], *bilinearForm, output.elements[
+            i
+          ][j]
         );
       } else {
         output(i, j) = (*this)[i].scalarEuclidean((*this)[j]);
@@ -1371,8 +1349,7 @@ void Vectors<Coefficient>::getGramMatrix(
 
 template <class Coefficient>
 bool Vectors<Coefficient>::containsVectorNonPerpendicularTo(
-  const Vector<Coefficient>& input,
-  const Matrix<Coefficient>& bilinearForm
+  const Vector<Coefficient>& input, const Matrix<Coefficient>& bilinearForm
 ) {
   for (int i = 0; i < this->size; i ++) {
     if (
@@ -1491,9 +1468,7 @@ bool AffineHyperplane<Coefficient>::projectFromFacetNormal(
 }
 
 template <class Coefficient>
-bool AffineHyperplane<Coefficient>::containsPoint(
-  Vector<Coefficient>& point
-) {
+bool AffineHyperplane<Coefficient>::containsPoint(Vector<Coefficient>& point) {
   Rational scalarProductPoint, scalarProductInternalPoint;
   scalarProductPoint = this->normal.scalarEuclidean(point);
   scalarProductInternalPoint =
@@ -1511,14 +1486,10 @@ hasCommonPointWithPositiveTwoToTheNthQuadrant() {
   }
   for (int i = 0; i < this->normal.size; i ++) {
     Rational& scalarProduct = this->normal[i];
-    if (
-      scalarProductWithInternal.isNegative() && scalarProduct.isNegative()
-    ) {
+    if (scalarProductWithInternal.isNegative() && scalarProduct.isNegative()) {
       return true;
     }
-    if (
-      scalarProductWithInternal.isPositive() && scalarProduct.isPositive()
-    ) {
+    if (scalarProductWithInternal.isPositive() && scalarProduct.isPositive()) {
       return true;
     }
   }

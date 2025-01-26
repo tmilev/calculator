@@ -148,9 +148,7 @@ public:
   LargeInteger getTotalCombinationCount() const;
   int numberOfSelectionsTotal() {
     return
-    MathRoutines::kToTheNth(
-      maximumMultiplicity, this->multiplicities.size
-    );
+    MathRoutines::kToTheNth(maximumMultiplicity, this->multiplicities.size);
   }
   bool incrementReturnFalseIfPastLast();
   void incrementSubset();
@@ -443,9 +441,7 @@ void Vectors<Coefficient>::selectionToMatrix(
 
 template <class Coefficient>
 bool Vectors<Coefficient>::computeNormalExcludingIndex(
-  Vector<Coefficient>& output,
-  int index,
-  Matrix<Coefficient>& bufferMatrix
+  Vector<Coefficient>& output, int index, Matrix<Coefficient>& bufferMatrix
 ) {
   Selection nonPivotPoints;
   if (this->size == 0) {
@@ -533,9 +529,8 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
 
 template <class Coefficient>
 void Vectors<Coefficient>::gaussianEliminationForNormalComputation(
-  Matrix<Coefficient>& inputMatrix,
-  Selection& outputNonPivotPoints,
-  int dimension
+  Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int
+  dimension
 ) const {
   inputMatrix.initialize(this->size, dimension);
   outputNonPivotPoints.initialize(dimension);

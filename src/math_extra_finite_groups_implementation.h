@@ -73,9 +73,7 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(
   for (int j = 0; j < this->elements.size; j ++) {
     for (int i = 0; i < this->generators.size; i ++) {
       currentElement = this->generators[i] * this->elements[j];
-      if (
-        this->elements.addOnTopNoRepetition(currentElement) && andWords
-      ) {
+      if (this->elements.addOnTopNoRepetition(currentElement) && andWords) {
         if (this->getWordByFormula == 0) {
           this->words.addOnTop(this->words[j]);
           this->words.lastObject()->addOnTop(i);
@@ -180,9 +178,7 @@ incrementReturnFalseIfPastLast() {
       ],
       this->bufferRepresentationElement
     );
-    if (
-      !this->currentLayer->contains(this->bufferRepresentationElement)
-    ) {
+    if (!this->currentLayer->contains(this->bufferRepresentationElement)) {
       this->currentLayer->addOnTopNoRepetition(
         this->bufferRepresentationElement
       );
@@ -279,9 +275,7 @@ void SubgroupData<someGroup, elementSomeGroup>::makeTranslatableWordsSubgroup(
   this->groupContent = &inputGroup;
   this->subgroupContent = &this->subgroupMayBeHere;
   this->subgroupContent->generators = subGenerators;
-  this->superGeneratorSubWords.setSize(
-    this->groupContent->generators.size
-  );
+  this->superGeneratorSubWords.setSize(this->groupContent->generators.size);
   this->superGeneratorSubWordExists.setSize(
     this->groupContent->generators.size
   );
@@ -429,16 +423,13 @@ computeCCRepresentativesPreimages() {
     << "Parent group must have initialized generators. "
     << global.fatal;
   }
-  for (
-    int i = 0; i < this->subgroupContent->conjugacyClasses.size; i ++
-  ) {
+  for (int i = 0; i < this->subgroupContent->conjugacyClasses.size; i ++) {
     elementSomeGroup& scr =
     this->subgroupContent->conjugacyClasses[i].representative;
     bool notFound = true;
     for (
-      int j = 0; notFound && j < this->groupContent->conjugacyClasses.size; j
-      ++
-    ) {
+      int j = 0; notFound && j < this->groupContent->conjugacyClasses.size;
+      j ++) {
       elementSomeGroup& gcr =
       this->groupContent->conjugacyClasses[j].representative;
       if (this->groupContent->areConjugate(scr, gcr)) {
@@ -594,7 +585,8 @@ bool FiniteGroup<elementSomeGroup>::checkOrthogonalityCharacterTable() {
   STACK_TRACE("FiniteGroup::checkOrthogonalityCharacterTable");
   for (int i = 0; i < this->characterTable.size; i ++) {
     for (int j = i; j < this->characterTable.size; j ++) {
-      ClassFunction<FiniteGroup, Rational>& leftChar = this->characterTable[i];
+      ClassFunction<FiniteGroup, Rational>& leftChar =
+      this->characterTable[i];
       ClassFunction<FiniteGroup, Rational>& rightChar =
       this->characterTable[j];
       Rational scalarProduct =
@@ -645,9 +637,7 @@ void FiniteGroup<elementSomeGroup>::computeGeneratorsConjugacyClasses() {
   for (int i = 0; i < this->unionGeneratorsCC.size; i ++) {
     for (int j = 0; j < this->generators.size; j ++) {
       elementSomeGroup::conjugationAction(
-        this->generators[j],
-        this->unionGeneratorsCC[i],
-        currentElement
+        this->generators[j], this->unionGeneratorsCC[i], currentElement
       );
       this->unionGeneratorsCC.addOnTopNoRepetition(currentElement);
     }
@@ -664,9 +654,8 @@ void FiniteGroup<elementSomeGroup>::computeCCSizeOrCCFromRepresentative(
   orbitIterator.groupAction.actOn = elementSomeGroup::conjugationAction;
   orbitIterator.groupAction.name = "conjugation action";
   orbitIterator.initialize(
-    this->generators,
-    inputOutputClass.representative,
-    orbitIterator.groupAction
+    this->generators, inputOutputClass.representative, orbitIterator.
+    groupAction
   );
   inputOutputClass.size = 1;
   if (storeCC) {
@@ -677,9 +666,7 @@ void FiniteGroup<elementSomeGroup>::computeCCSizeOrCCFromRepresentative(
     inputOutputClass.size ++;
     if (storeCC) {
       if (
-        inputOutputClass.elements.contains(
-          orbitIterator.getCurrentElement()
-        )
+        inputOutputClass.elements.contains(orbitIterator.getCurrentElement())
       ) {
         global.fatal
         << " !element "
@@ -699,9 +686,7 @@ checkConjugacyClassRepresentationsMatchCCSizes() {
   LargeInteger computedSize = 0;
   for (int i = 0; i < this->conjugacyClasses.size; i ++) {
     LargeInteger oldCCsize = this->conjugacyClasses[i].size;
-    this->computeCCSizeOrCCFromRepresentative(
-      this->conjugacyClasses[i], true
-    );
+    this->computeCCSizeOrCCFromRepresentative(this->conjugacyClasses[i], true);
     if (oldCCsize != this->conjugacyClasses[i].size) {
       global.fatal
       << "The precomputed size "
@@ -875,8 +860,7 @@ computeConjugacyClassesFromConjugacyClassIndicesInAllElements(
     this->conjugacyClasses[i].indicesElementsInOwner = ccIndices[i];
     this->conjugacyClasses[i].elements.setSize(ccIndices[i].size);
     for (int j = 0; j < ccIndices[i].size; j ++) {
-      this->conjugacyClasses[i].elements[j] =
-      this->elements[ccIndices[i][j]];
+      this->conjugacyClasses[i].elements[j] = this->elements[ccIndices[i][j]];
     }
     this->conjugacyClasses[i].representative =
     this->elements[ccIndices[i][0]];
@@ -972,9 +956,7 @@ LargeInteger WeylGroupData::getOrbitSize(Vector<Coefficient>& weight) {
   if (doDebug) {
     if (result < 100000) {
       HashedList<Vector<Coefficient> > comparisonOrbit;
-      this->generateOrbit(
-        weight, false, comparisonOrbit, false, - 1, 0, - 1
-      );
+      this->generateOrbit(weight, false, comparisonOrbit, false, - 1, 0, - 1);
       if (result != comparisonOrbit.size) {
         global.fatal
         << "Actual orbit of "
@@ -1119,9 +1101,8 @@ void WeylGroupData::raiseToDominantWeight(
 }
 
 template <class Coefficient>
-void WeylGroupData::reflectRhoSimple(
-  int index, Vector<Coefficient>& vector
-) const {
+void WeylGroupData::reflectRhoSimple(int index, Vector<Coefficient>& vector)
+const {
   Coefficient alphaShift;
   Coefficient scalar;
   alphaShift = 0;
@@ -1153,9 +1134,7 @@ bool WeylGroupData::generateOrbit(
   Vector<Coefficient> currentRoot;
   ElementWeylGroup currentElement;
   if (expectedOrbitSize <= 0) {
-    if (
-      !this->group.getSize().isIntegerFittingInInt(&expectedOrbitSize)
-    ) {
+    if (!this->group.getSize().isIntegerFittingInInt(&expectedOrbitSize)) {
       expectedOrbitSize = - 1;
     }
   }
@@ -1280,8 +1259,7 @@ bool WeylGroupData::isDominantWeight(const Vector<Coefficient>& weight) {
 
 template <class Coefficient>
 Coefficient WeylGroupData::weylDimensionFormulaSimpleCoordinates(
-  Vector<Coefficient>& weightInSimpleCoordinates,
-  const Coefficient& ringUnit
+  Vector<Coefficient>& weightInSimpleCoordinates, const Coefficient& ringUnit
 ) {
   Coefficient result, buffer;
   Vector<Coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;
@@ -1345,8 +1323,8 @@ Vector<Coefficient> WeylGroupData::getFundamentalCoordinatesFromEpsilon(
 
 template <class Coefficient>
 Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
-  const Vector<Coefficient>& inputInFundamentalCoordinates,
-  const Coefficient& zero
+  const Vector<Coefficient>& inputInFundamentalCoordinates, const Coefficient&
+  zero
 ) {
   Matrix<Rational>& transitionMatrix =
   *this->getMatrixfundamentalToSimpleCoordinates();
@@ -1358,8 +1336,8 @@ Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
 
 template <class Coefficient>
 Vectors<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
-  const Vectors<Coefficient>& inputInFundamentalCoordinates,
-  const Coefficient& zero
+  const Vectors<Coefficient>& inputInFundamentalCoordinates, const Coefficient&
+  zero
 ) {
   Matrix<Rational>& transitionMatrix =
   *this->getMatrixfundamentalToSimpleCoordinates();
@@ -1439,7 +1417,8 @@ bool WeylGroupData::freudenthalFormula(
   ProgressReport report;
   for (int k = 1; k < outputDominantWeightsSimpleCoordinates.size; k ++) {
     explored[k] = true;
-    Coefficient& currentAccumulator = outputMultiplicitiesSimpleCoordinates[k];
+    Coefficient& currentAccumulator =
+    outputMultiplicitiesSimpleCoordinates[k];
     currentAccumulator = 0;
     for (int j = 0; j < this->rootsOfBorel.size; j ++) {
       for (int i = 1;; i ++) {
@@ -1516,9 +1495,7 @@ bool WeylGroupData::getAllDominantWeightsHWFDIM(
   this->raiseToDominantWeight(highestWeightTrue);
   Vector<Coefficient> highestWeightFundamentalCoordinates =
   this->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  if (
-    !highestWeightFundamentalCoordinates.sumCoordinates().isSmallInteger()
-  ) {
+  if (!highestWeightFundamentalCoordinates.sumCoordinates().isSmallInteger()) {
     if (outputDetails != nullptr) {
       out
       << "<hr> The highest weight you gave in simple coordinates: "
@@ -1754,9 +1731,7 @@ int GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getDimension
 template <typename somegroup, typename Coefficient>
 template <typename elementSomeGroup>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
-getMatrixElement(
-  const elementSomeGroup& input, Matrix<Coefficient>& output
-) {
+getMatrixElement(const elementSomeGroup& input, Matrix<Coefficient>& output) {
   this->checkInitialization();
   if (this->ownerGroup->generators.size == 0) {
     // here be trivial weyl group
@@ -1827,13 +1802,9 @@ getClassFunctionMatrix(
         );
       } else {
         auto& currentCC = this->ownerGroup->conjugacyClasses[cci];
-        this->classFunctionMatrices[cci].makeZeroMatrix(
-          this->getDimension()
-        );
+        this->classFunctionMatrices[cci].makeZeroMatrix(this->getDimension());
         for (int i = 0; i < currentCC.elements.size; i ++) {
-          if (
-            !this->elementIsComputed[currentCC.indicesElementsInOwner[i]]
-          ) {
+          if (!this->elementIsComputed[currentCC.indicesElementsInOwner[i]]) {
             this->computeAllElementImages();
           }
           this->classFunctionMatrices[cci] +=
@@ -1881,13 +1852,9 @@ classFunctionMatrix(
   int dimension = this->generators[0].numberOfRows;
   outputMatrix.makeZeroMatrix(dimension);
   if (classFunctionMatrices.size == 0) {
-    classFunctionMatrices.setSize(
-      this->ownerGroup->conjugacyClassCount()
-    );
+    classFunctionMatrices.setSize(this->ownerGroup->conjugacyClassCount());
   }
-  for (
-    int cci = 0; cci < this->ownerGroup->conjugacyClassCount(); cci ++
-  ) {
+  for (int cci = 0; cci < this->ownerGroup->conjugacyClassCount(); cci ++) {
     if (inputClassFunction[cci] == 0) {
       continue;
     }
@@ -2455,8 +2422,7 @@ std::string ClassFunction<someFiniteGroup, Coefficient>::toString(
 
 template <class someFiniteGroup, typename Coefficient>
 std::ostream& operator<<(
-  std::ostream& out,
-  const ClassFunction<someFiniteGroup, Coefficient> X
+  std::ostream& out, const ClassFunction<someFiniteGroup, Coefficient> X
 ) {
   out << X.toString();
   return out;
@@ -2530,8 +2496,7 @@ void SubgroupData<someGroup, elementSomeGroup>::computeCosets() {
   this->groupContent->computeAllElements(true);
   GraphOLD orbitg =
   GraphOLD(
-    this->groupContent->elements.size,
-    this->subgroupContent->generators.size
+    this->groupContent->elements.size, this->subgroupContent->generators.size
   );
   for (int i = 0; i < this->groupContent->elements.size; i ++) {
     for (int j = 0; j < this->subgroupContent->generators.size; j ++) {
@@ -2551,8 +2516,7 @@ void SubgroupData<someGroup, elementSomeGroup>::computeCosets() {
     cosets[i].supergroupIndices = orbits[i];
     cosets[i].representative = this->groupContent->elements[orbits[i][0]];
     this->groupContent->getWord(
-      this->groupContent->elements[orbits[i][0]],
-      cosets[i].representativeWord
+      this->groupContent->elements[orbits[i][0]], cosets[i].representativeWord
     );
   }
   this->flagCosetSetsComputed = true;
@@ -2587,13 +2551,9 @@ bool SubgroupData<someGroup, elementSomeGroup>::verifyCosets() {
     for (int cs = 0; cs < this->cosets.size; cs ++) {
       auto g = this->cosets[cs].representative;
       g.invert();
-      for (
-        int i = 0; i < this->cosets[cs].supergroupIndices.size; i ++
-      ) {
+      for (int i = 0; i < this->cosets[cs].supergroupIndices.size; i ++) {
         auto g2 =
-        this->groupContent->elements[
-          this->cosets[cs].supergroupIndices[i]
-        ];
+        this->groupContent->elements[this->cosets[cs].supergroupIndices[i]];
         auto g3 = g * g2;
         if (!this->subgroupContent->hasElement(g3)) {
           global.fatal
@@ -2677,9 +2637,7 @@ computeIrreducibleRepresentationsTodorsVersion() {
       << global.fatal;
     }
     for (int i = 0; i < this->irreducibleRepresentations.size; i ++) {
-      this->irreps_grcam.addOnTop(
-        irreducibleRepresentations[i].makeGRCAM()
-      );
+      this->irreps_grcam.addOnTop(irreducibleRepresentations[i].makeGRCAM());
     }
   }
   List<
@@ -2690,9 +2648,7 @@ computeIrreducibleRepresentationsTodorsVersion() {
   appendOnlyIrrepsList = this->irreps_grcam;
   {
     bool nontrivial = false;
-    for (
-      int i = 0; i < appendOnlyIrrepsList[0].character.data.size; i ++
-    ) {
+    for (int i = 0; i < appendOnlyIrrepsList[0].character.data.size; i ++) {
       if (appendOnlyIrrepsList[0].character.data[i] != 1) {
         nontrivial = true;
         break;
@@ -2777,9 +2733,7 @@ computeIrreducibleRepresentationsTodorsVersion() {
     << "Character table size does not equal the number of conjugacy classes. "
     << global.fatal;
   }
-  if (
-    this->irreducibleRepresentations.size < this->conjugacyClasses.size
-  ) {
+  if (this->irreducibleRepresentations.size < this->conjugacyClasses.size) {
     global.fatal
     << "Bad number of irreducible representations. "
     << global.fatal;
@@ -2789,8 +2743,8 @@ computeIrreducibleRepresentationsTodorsVersion() {
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 spreadVector(
-  const Vector<Coefficient>& input,
-  Vectors<Coefficient>& outputBasisGeneratedSpace
+  const Vector<Coefficient>& input, Vectors<Coefficient>&
+  outputBasisGeneratedSpace
 ) {
   this->checkInitialization();
   outputBasisGeneratedSpace.setSize(1);
@@ -2822,18 +2776,14 @@ getLargestDenominatorSimpleGenerators(
   outputDenominator = 1;
   for (int gi = 0; gi < this->generators.size; gi ++) {
     for (int mi = 0; mi < this->generators[gi].numberOfRows; mi ++) {
-      for (
-        int mj = 0; mj < this->generators[gi].numberOfColumns; mj ++
-      ) {
-        if (
-          this->generators[gi](mi, mj).getDenominator() > outputDenominator
-        ) {
+      for (int mj = 0; mj < this->generators[gi].numberOfColumns; mj ++) {
+        if (this->generators[gi](mi, mj).getDenominator() > outputDenominator) {
           outputDenominator = this->generators[gi](mi, mj).getDenominator();
         }
         outputLeastCommonMultiple =
         LargeIntegerUnsigned::leastCommonMultiple(
-          outputLeastCommonMultiple,
-          this->generators[gi](mi, mj).getDenominator()
+          outputLeastCommonMultiple, this->generators[gi](mi, mj).
+          getDenominator()
         );
       }
     }
@@ -2877,9 +2827,7 @@ decomposeTodorsVersionRecursive(
       }
       i = this->ownerGroup->characterTable.sortedGetIndex(this->character);
     }
-    outputIrrepMults.addMonomial(
-      this->ownerGroup->characterTable[i], 1
-    );
+    outputIrrepMults.addMonomial(this->ownerGroup->characterTable[i], 1);
     return true;
   }
   Matrix<Coefficient> splittingOperatorMatrix;
@@ -2933,7 +2881,9 @@ decomposeTodorsVersionRecursive(
         << " computing its zero eigenspace... ";
         Report3.report(reportStream.str());
       }
-      splittingOperatorMatrix.getZeroEigenSpaceModifyMe(splittingMatrixKernel);
+      splittingOperatorMatrix.getZeroEigenSpaceModifyMe(
+        splittingMatrixKernel
+      );
       remainingVectorSpace.intersectTwoLinearSpaces(
         splittingMatrixKernel, remainingVectorSpace, tempSpace
       );
@@ -3090,8 +3040,7 @@ computeIrreducibleRepresentationsThomasVersion(
       startingIrrep = &(this->irreps_grcam[0]);
     } else {
       if (this->irreducibleRepresentations.size != 0) {
-        startingIrrep =
-        &(this->irreducibleRepresentations[0].makeGRCAM());
+        startingIrrep = &(this->irreducibleRepresentations[0].makeGRCAM());
       }
     }
     if (
@@ -3149,14 +3098,8 @@ computeIrreducibleRepresentationsThomasVersion(
     tspace.decomposeThomasVersion();
     for (int spi = 0; spi < spaces.size; spi ++) {
       if (spaces[spi].getNumberOfComponents() == 1) {
-        if (
-          !this->group.characterTable.contains(
-            spaces[spi].getCharacter()
-          )
-        ) {
-          this->group.characterTable.addOnTop(
-            spaces[spi].getCharacter()
-          );
+        if (!this->group.characterTable.contains(spaces[spi].getCharacter())) {
+          this->group.characterTable.addOnTop(spaces[spi].getCharacter());
           this->irreps_grcam.addOnTop(spaces[spi]);
           newspaces.addOnTop(spaces[spi]);
         }
@@ -3244,9 +3187,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getCharacter() {
   }
   this->character.G = this->ownerGroup;
   this->character.data.setSize(this->ownerGroup->conjugacyClassCount());
-  for (
-    int cci = 0; cci < this->ownerGroup->conjugacyClassCount(); cci ++
-  ) {
+  for (int cci = 0; cci < this->ownerGroup->conjugacyClassCount(); cci ++) {
     this->character.data[cci] =
     this->getMatrixElement(
       this->ownerGroup->conjugacyClasses[cci].representative
@@ -3300,10 +3241,7 @@ void WeylGroupAutomorphisms::raiseToMaximallyDominant(
           }
           for (int k = 0; k < weights.size; k ++) {
             this->weylGroup->reflectBetaWithRespectToAlpha(
-              this->weylGroup->rootsOfBorel[j],
-              weights[k],
-              false,
-              weights[k]
+              this->weylGroup->rootsOfBorel[j], weights[k], false, weights[k]
             );
           }
           found = true;
@@ -3327,7 +3265,9 @@ void WeylGroupAutomorphisms::raiseToMaximallyDominant(
           continue;
         }
         if (
-          !(weightsCopy[i] - weights[i]).isGreaterThanLexicographic(zeroWeight)
+          !(weightsCopy[i] - weights[i]).isGreaterThanLexicographic(
+            zeroWeight
+          )
         ) {
           continue;
         }

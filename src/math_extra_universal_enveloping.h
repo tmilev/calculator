@@ -15,8 +15,8 @@ public:
   // powers gives the powers of the Chevalley generators in the order they
   // appear in generatorsIndices
   friend std::ostream& operator<<(
-    std::ostream& output,
-    const MonomialUniversalEnveloping<Coefficient>& monomial
+    std::ostream& output, const MonomialUniversalEnveloping<Coefficient>&
+    monomial
   ) {
     output << monomial.toString();
     return output;
@@ -39,8 +39,8 @@ public:
   }
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
     if (
-      generatorIndex < 0 || generatorIndex > inputOwner.getNumberOfGenerators()
-    ) {
+      generatorIndex < 0 ||
+      generatorIndex > inputOwner.getNumberOfGenerators()) {
       global.fatal
       << "Attempt to assign impossible index to monomial UE. "
       << global.fatal;
@@ -117,8 +117,9 @@ public:
   // between
   // the negative and positive rootss.
   void simplify(
-    ElementUniversalEnveloping<Coefficient>& output,
-    const Coefficient& ringUnit = 1
+    ElementUniversalEnveloping<Coefficient>& output, const Coefficient&
+    ringUnit =
+    1
   );
   void commuteABntoBnAPlusLowerOrder(
     int index,
@@ -202,11 +203,7 @@ public:
     element.addMonomial(right, ringUnit);
     return
     this->highestWeightTransposeAntiAutomorphismBilinearForm(
-      element,
-      output,
-      substitutionHiGoesToIthElement,
-      ringUnit,
-      ringZero,
+      element, output, substitutionHiGoesToIthElement, ringUnit, ringZero,
       logStream
     );
   }
@@ -224,14 +221,11 @@ public:
     const Coefficient& ringUnit = 1
   );
   void makeOneGenerator(
-    int index,
-    SemisimpleLieAlgebra& inputOwner,
-    const Coefficient& ringUnit
+    int index, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit
   );
   void makeOneGeneratorCoefficientOne(
-    int index,
-    SemisimpleLieAlgebra& inputOwners,
-    const Coefficient& ringUnit = 1
+    int index, SemisimpleLieAlgebra& inputOwners, const Coefficient& ringUnit =
+    1
   );
   void makeOneGeneratorCoefficientOne(
     int index, int numberOfVariables, SemisimpleLieAlgebra& inputOwner
@@ -242,9 +236,7 @@ public:
     const Coefficient& ringUnit = 1
   ) {
     this->makeOneGeneratorCoefficientOne(
-      inputOwner.getGeneratorIndexFromRoot(rootSpace),
-      inputOwner,
-      ringUnit
+      inputOwner.getGeneratorIndexFromRoot(rootSpace), inputOwner, ringUnit
     );
   }
   Coefficient getKillingFormProduct(
@@ -274,9 +266,7 @@ public:
         result, this->coefficients[i].minimalNumberOfVariables()
       );
       result =
-      MathRoutines::maximum(
-        result, (*this)[i].minimalNumberOfVariables()
-      );
+      MathRoutines::maximum(result, (*this)[i].minimalNumberOfVariables());
     }
     return result;
   }
@@ -363,9 +353,7 @@ public:
     const ElementUniversalEnveloping<Coefficient>& right,
     ElementUniversalEnveloping<Coefficient>& output
   ) const;
-  void lieBracketOnTheLeft(
-    const ElementSemisimpleLieAlgebra<Rational>& left
-  );
+  void lieBracketOnTheLeft(const ElementSemisimpleLieAlgebra<Rational>& left);
   void assignInteger(
     int coefficient, int numberOfVariables, SemisimpleLieAlgebra& owner
   ) {
@@ -534,10 +522,7 @@ void ElementUniversalEnveloping<Coefficient>::modOutVermaRelations(
   for (int i = 0; i < this->size(); i ++) {
     monomial = (*this)[i];
     monomial.modOutVermaRelations(
-      acquiredCoefficient,
-      substitutionHiGoesToIthElement,
-      ringUnit,
-      ringZero
+      acquiredCoefficient, substitutionHiGoesToIthElement, ringUnit, ringZero
     );
     acquiredCoefficient *= this->coefficients[i];
     output.addMonomial(monomial, acquiredCoefficient);
@@ -620,8 +605,7 @@ void ElementUniversalEnveloping<Coefficient>::simplify(
     for (int i = 0; i < monomial.generatorsIndices.size - 1; i ++) {
       if (
         !this->getOwner().areOrderedProperly(
-          monomial.generatorsIndices[i],
-          monomial.generatorsIndices[i + 1]
+          monomial.generatorsIndices[i], monomial.generatorsIndices[i + 1]
         )
       ) {
         if (monomial.switchConsecutiveIndicesIfTheyCommute(i)) {
@@ -872,9 +856,9 @@ bool ElementUniversalEnveloping<Coefficient>::applyTransposeAntiAutoOnMe() {
   Coefficient coefficient;
   this->checkNumberOfCoefficientsConsistency();
   for (int i = 0; i < this->size(); i ++) {
-    const MonomialUniversalEnveloping<Coefficient>& startingMonomial = (*this)[
-      i
-    ];
+    const MonomialUniversalEnveloping<Coefficient>& startingMonomial = (
+      *this
+    )[i];
     coefficient = this->coefficients[i];
     monomial.owner = startingMonomial.owner;
     monomial.powers.size = 0;
@@ -1041,9 +1025,7 @@ highestWeightTransposeAntiAutomorphismBilinearForm(
       if (leftMonomial.powers[i].isSmallInteger(&power)) {
         for (int k = 0; k < power; k ++) {
           element.makeOneGenerator(
-            leftMonomial.generatorsIndices[i],
-            this->getOwner(),
-            ringUnit
+            leftMonomial.generatorsIndices[i], this->getOwner(), ringUnit
           );
           MathRoutines::swap(element, intermediate);
           if (logStream != nullptr) {

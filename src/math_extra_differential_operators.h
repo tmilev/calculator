@@ -100,9 +100,7 @@ fourierTransformDifferentialPartOnly(
     for (int j = 0; j < finalDifferentialOperator.size(); j ++) {
       monomial.matrixMonomial = (*this)[i].matrixMonomial;
       monomial.weylMonomial = finalDifferentialOperator[j];
-      output.addMonomial(
-        monomial, finalDifferentialOperator.coefficients[j]
-      );
+      output.addMonomial(monomial, finalDifferentialOperator.coefficients[j]);
     }
   }
 }
@@ -114,8 +112,7 @@ getElementWeylAlgebraSetMatrixPartsToId(
 ) const {
   output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
-    output.addMonomial((*this)[i].weylMonomial, this->coefficients[i]
-    );
+    output.addMonomial((*this)[i].weylMonomial, this->coefficients[i]);
   }
 }
 
@@ -190,13 +187,11 @@ void QuasiDifferentialOperator<Coefficient>::operator*=(
   for (int j = 0; j < standsOnTheRight.size(); j ++) {
     rightElement.makeZero();
     rightElement.addMonomial(
-      standsOnTheRight[j].weylMonomial,
-      standsOnTheRight.coefficients[j]
+      standsOnTheRight[j].weylMonomial, standsOnTheRight.coefficients[j]
     );
     for (int i = 0; i < this->size(); i ++) {
       leftElement.makeZero();
-      leftElement.addMonomial((*this)[i].weylMonomial, this->coefficients[i]
-      );
+      leftElement.addMonomial((*this)[i].weylMonomial, this->coefficients[i]);
       outputMon.matrixMonomial = (*this)[i].matrixMon;
       outputMon.matrixMonomial *= standsOnTheRight[j].matrixMon;
       leftElement *= rightElement;
@@ -228,9 +223,7 @@ std::string QuasiDifferentialOperator<Coefficient>::toString(
   for (int i = 0; i < this->size(); i ++) {
     const QuasiDifferentialMononomial& monomial = (*this)[i];
     polynomial.makeZero();
-    polynomial.addMonomial(
-      monomial.weylMonomial, this->coefficients[i]
-    );
+    polynomial.addMonomial(monomial.weylMonomial, this->coefficients[i]);
     reordered.addMonomial(monomial.matrixMonomial, polynomial);
   }
   std::string result = reordered.toString(format);

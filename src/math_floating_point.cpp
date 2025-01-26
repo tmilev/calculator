@@ -19,9 +19,7 @@ std::string FloatingPoint::doubleToString(double input, int precision) {
   out << std::fixed << input;
   std::string result = out.str();
   bool hasDot = false;
-  for (
-    int i = static_cast<signed>(result.size()) - 1; i >= 0; i --
-  ) {
+  for (int i = static_cast<signed>(result.size()) - 1; i >= 0; i --) {
     if (result[static_cast<unsigned>(i)] == '.') {
       hasDot = true;
       break;

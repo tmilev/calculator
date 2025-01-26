@@ -11,20 +11,14 @@ public:
   static HashedList<std::string>&
   folderVirtualLinksToWhichWeAppendTimeAndBuildHash();
   static MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
+    std::string, std::string, HashFunctions::hashFunction<std::string>
   >& folderVirtualLinksNonSensitive();
   static MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
+    std::string, std::string, HashFunctions::hashFunction<std::string>
   >& folderVirtualLinksSensitive();
   // <- admin access only
   static MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
+    std::string, std::string, HashFunctions::hashFunction<std::string>
   >& folderVirtualLinksULTRASensitive();
   // <- no access allowed through web server
   static List<List<std::string> >& folderVirtualLinksDefault();
@@ -129,12 +123,10 @@ public:
   static std::string getFileNameFromFileNameWithPath(
     const std::string& fileName
   );
-  static std::string getPathFromFileNameWithPath(
-    const std::string& fileName
-  );
+  static std::string getPathFromFileNameWithPath(const std::string& fileName);
   static std::string getFileExtensionWithDot(
-    const std::string& fileName,
-    std::string* outputFileNameNoExtension = nullptr
+    const std::string& fileName, std::string* outputFileNameNoExtension =
+    nullptr
   );
   static bool fileExistsUnsecure(const std::string& fileName);
   static bool fileExistsVirtual(
@@ -175,9 +167,7 @@ public:
     std::string& output,
     std::stringstream* commentsOnFailure
   );
-  static std::string getVirtualNameWithHash(
-    const std::string& inputFileName
-  );
+  static std::string getVirtualNameWithHash(const std::string& inputFileName);
   static bool getPhysicalFileNameFromVirtual(
     const std::string& inputFileName,
     std::string& output,
@@ -268,8 +258,7 @@ public:
     bool accessSensitiveFolders = false
   );
   // Combines paths making sure that we don't get a "//" in the middle.
-  static std::string addPaths(
-    const std::string& left, const std::string right
+  static std::string addPaths(const std::string& left, const std::string right
   );
 };
 

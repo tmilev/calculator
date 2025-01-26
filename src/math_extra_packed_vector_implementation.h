@@ -119,9 +119,8 @@ void PackedVector<scalar>::makeEi(int d, int ei) {
 }
 
 template <typename scalar>
-unsigned int PackedVector<scalar>::hashFunction(
-  const PackedVector<scalar>& in
-) {
+unsigned int PackedVector<scalar>::hashFunction(const PackedVector<scalar>& in)
+{
   return in.hashFunction();
 }
 
@@ -138,9 +137,7 @@ unsigned int PackedVector<scalar>::hashFunction() const {
 }
 
 template <typename scalar>
-std::ostream& operator<<(
-  std::ostream& out, const PackedVector<scalar>& v
-) {
+std::ostream& operator<<(std::ostream& out, const PackedVector<scalar>& v) {
   out << '(';
   for (int i = 0; i < v.size; i ++) {
     out << v[i];

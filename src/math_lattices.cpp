@@ -7,8 +7,7 @@
 const int Lattice::maximumPointsToDraw = 1024;
 
 void QuasiPolynomial::addLatticeShift(
-  const Polynomial<Rational>& input,
-  const Vector<Rational>& inputShift
+  const Polynomial<Rational>& input, const Vector<Rational>& inputShift
 ) {
   STACK_TRACE("QuasiPolynomial::addLatticeShift");
   Vector<Rational> shift = inputShift;
@@ -28,8 +27,7 @@ void QuasiPolynomial::addLatticeShift(
 }
 
 void QuasiPolynomial::setLatticeShift(
-  const Polynomial<Rational>& input,
-  const Vector<Rational>& inputShift
+  const Polynomial<Rational>& input, const Vector<Rational>& inputShift
 ) {
   STACK_TRACE("QuasiPolynomial::setLatticeShift");
   Vector<Rational> shift = inputShift;
@@ -144,8 +142,8 @@ void QuasiPolynomial::substitute(
       << global.fatal;
     }
     output.addLatticeShift(
-      polynomial,
-      this->latticeShifts[i] + inputTranslationSubtractedFromArgument
+      polynomial, this->latticeShifts[i] +
+      inputTranslationSubtractedFromArgument
     );
   }
 }
@@ -212,9 +210,7 @@ void QuasiPolynomial::substituteShiftByFloorOfLinearFunction(
   List<std::string>* comments
 ) const {
   STACK_TRACE("QuasiPolynomial::substituteShiftByFloorOfLinearFunction");
-  if (
-    this->ambientLatticeReduced.getDimension() != scalarProductBy.size
-  ) {
+  if (this->ambientLatticeReduced.getDimension() != scalarProductBy.size) {
     global.fatal
     << "The lattice of the quasipolynomial must be of full rank. "
     << global.fatal;
@@ -395,9 +391,7 @@ void QuasiPolynomial::combineLatticeShifts(
     if (!output.contains(current)) {
       output.setKeyValue(current, empty);
     }
-    output.getValueNoFailNonConst(current).addOnTop(
-      this->latticeShifts[i]
-    );
+    output.getValueNoFailNonConst(current).addOnTop(this->latticeShifts[i]);
   }
 }
 
@@ -417,9 +411,8 @@ bool QuasiPolynomial::compressOnce() {
   STACK_TRACE("QuasiPolynomial::compressOnce");
   for (int i = 0; i < this->latticeShifts.size; i ++) {
     for (int j = i + 1; j < this->latticeShifts.size; j ++) {
-      if (
-        this->valueOnEachLatticeShift[i] != this->valueOnEachLatticeShift[j]
-      ) {
+      if (this->valueOnEachLatticeShift[i] != this->valueOnEachLatticeShift[j])
+      {
         continue;
       }
       if (
@@ -469,8 +462,7 @@ bool QuasiPolynomial::compressWithRespectToPeriod(
 }
 
 bool QuasiPolynomial::substitutionFewerVariables(
-  const PolynomialSubstitution<Rational>& substitution,
-  QuasiPolynomial& output
+  const PolynomialSubstitution<Rational>& substitution, QuasiPolynomial& output
 ) const {
   Matrix<Rational> latticeSubstitution;
   if (
@@ -484,15 +476,15 @@ bool QuasiPolynomial::substitutionFewerVariables(
   Matrix<Rational> subLatticeShift;
   output.ambientLatticeReduced = this->ambientLatticeReduced;
   if (
-    !output.ambientLatticeReduced.substitutionHomogeneous(latticeSubstitution)
+    !output.ambientLatticeReduced.substitutionHomogeneous(
+      latticeSubstitution
+    )
   ) {
     return false;
   }
   subLatticeShift.initialize(latticeSubstitution.numberOfRows, 1);
   for (int i = 0; i < subLatticeShift.numberOfRows; i ++) {
-    substitution[i].constantTerm(
-      subLatticeShift.elements[i][0], Rational(0)
-    );
+    substitution[i].constantTerm(subLatticeShift.elements[i][0], Rational(0));
   }
   Matrix<Rational> shiftImage;
   Matrix<Rational> shiftMatrixForm;
@@ -666,8 +658,8 @@ void QuasiPolynomial::operator-=(const QuasiPolynomial& other) {
   summand.makeRougherLattice(this->ambientLatticeReduced);
   for (int i = 0; i < summand.latticeShifts.size; i ++) {
     this->addLatticeShift(
-      summand.valueOnEachLatticeShift[i] *(Rational)(- 1),
-      summand.latticeShifts[i]
+      summand.valueOnEachLatticeShift[i] *(Rational)(- 1), summand.
+      latticeShifts[i]
     );
   }
 }
@@ -866,9 +858,7 @@ bool Lattice::getDualLattice(Lattice& output) const {
   dualMatrix = this->basisRationalForm;
   dualMatrix.invert();
   dualMatrix.transpose();
-  dualMatrix.getMatrixIntegerWithDenominator(
-    output.basis, output.denominator
-  );
+  dualMatrix.getMatrixIntegerWithDenominator(output.basis, output.denominator);
   output.reduce();
   return true;
 }
@@ -882,9 +872,7 @@ bool Lattice::findOnePreimageInLatticeOf(
   thisBasis.assignMatrixRows(this->basisRationalForm);
   linearMap.actOnVectorsColumn(thisBasis, Rational(0));
   bool result =
-  input.getIntegralCoordinatesInBasisIfTheyExist(
-    thisBasis, output, 1, - 1, 0
-  );
+  input.getIntegralCoordinatesInBasisIfTheyExist(thisBasis, output, 1, - 1, 0);
   Matrix<Rational> matrix;
   matrix = this->basisRationalForm;
   matrix.transpose();
@@ -1061,9 +1049,7 @@ bool Lattice::getAllRepresentatives(
   Rational currentPeriod;
   LargeInteger currentPeriodInteger;
   for (int i = 0; i < this->basis.numberOfRows; i ++) {
-    while (
-      this->basisRationalForm.elements[i][column].isEqualToZero()
-    ) {
+    while (this->basisRationalForm.elements[i][column].isEqualToZero()) {
       column ++;
     }
     currentPeriod = rougherLattice.basisRationalForm.elements[i][column] /
@@ -1211,9 +1197,7 @@ void Lattice::makeZn(int dimension) {
   this->basisRationalForm.makeIdentityMatrix(
     dimension, Rational::one(), Rational::zero()
   );
-  this->basis.makeIdentityMatrix(
-    dimension, LargeInteger(1), LargeInteger(0)
-  );
+  this->basis.makeIdentityMatrix(dimension, LargeInteger(1), LargeInteger(0));
   this->denominator.makeOne();
 }
 
@@ -1233,8 +1217,8 @@ bool Lattice::substitutionHomogeneous(
 
 bool Lattice::
 getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
-  const PolynomialSubstitution<Rational>& substitution,
-  Matrix<Rational>& output
+  const PolynomialSubstitution<Rational>& substitution, Matrix<Rational>&
+  output
 ) {
   if (substitution.size < 1) {
     return false;
@@ -1483,8 +1467,7 @@ void Lattice::subLatticeScalarProductTimesDirectionInLattice(
 }
 
 void Lattice::subLatticeWithIntegralScalarProducts(
-  const Vector<Rational>& mustHaveIntegerScalarProductWith,
-  Lattice& output
+  const Vector<Rational>& mustHaveIntegerScalarProductWith, Lattice& output
 ) const {
   this->getDualLattice(output);
   Matrix<Rational> lastRow;
@@ -1512,9 +1495,7 @@ void Lattice::reduce() {
     rowsToTrim ++;
   }
   this->basis.resize(
-    this->basis.numberOfRows - rowsToTrim,
-    this->basis.numberOfColumns,
-    true
+    this->basis.numberOfRows - rowsToTrim, this->basis.numberOfColumns, true
   );
   this->basisRationalForm.assignMatrixIntegerWithDenominator(
     this->basis, this->denominator
@@ -1524,9 +1505,7 @@ void Lattice::reduce() {
 void Lattice::testGaussianEliminationEuclideanDomainRationals(
   Matrix<Rational>& output
 ) {
-  output.assignMatrixIntegerWithDenominator(
-    this->basis, this->denominator
-  );
+  output.assignMatrixIntegerWithDenominator(this->basis, this->denominator);
   std::stringstream out;
   global.comments << "Test output: " << output.toString();
   out << "Test output: " << output.toString();
@@ -1546,9 +1525,7 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
   if (other.basis.numberOfColumns == 0) {
     return;
   }
-  if (
-    other.basis == this->basis && this->denominator == other.denominator
-  ) {
+  if (other.basis == this->basis && this->denominator == other.denominator) {
     return;
   }
   if (other.getDimension() != this->getDimension()) {
@@ -1568,9 +1545,7 @@ void Lattice::refineByOtherLattice(const Lattice& other) {
   scale = scaleThis;
   this->basis *= scale;
   this->basis.resize(
-    this->basis.numberOfRows + other.basis.numberOfRows,
-    dimension,
-    true
+    this->basis.numberOfRows + other.basis.numberOfRows, dimension, true
   );
   for (int i = oldNumberOfRows; i < this->basis.numberOfRows; i ++) {
     for (int j = 0; j < this->basis.numberOfColumns; j ++) {
@@ -1632,12 +1607,7 @@ void Lattice::drawOnePointWithSigns(
   );
   while (signs.incrementReturnFalseIfPastLast()) {
     this->drawOnePoint(
-      toDraw,
-      basis,
-      signs,
-      output,
-      outputTotalPointsDrawn,
-      restrictingCone
+      toDraw, basis, signs, output, outputTotalPointsDrawn, restrictingCone
     );
   }
 }
@@ -1693,9 +1663,7 @@ void Lattice::draw(
   output.makeMeAStandardBasis(dimension);
   output.drawCoordinateSystemBuffer(dimension);
   int totalPointsDrawn = 0;
-  this->drawOnePointBase(
-    Vector<Rational>({0, 0}), output, totalPointsDrawn
-  );
+  this->drawOnePointBase(Vector<Rational>({0, 0}), output, totalPointsDrawn);
   Vectors<Rational> generators;
   this->basisRationalForm.getVectorsFromRows(generators);
   SelectionWithMaximumMultiplicity selection;

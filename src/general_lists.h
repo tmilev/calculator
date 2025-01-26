@@ -332,9 +332,7 @@ public:
       this->leftGreaterThanRight = nullptr;
     }
     Comparator(
-      bool(*inputLeftGreaterThanRight)(
-        const Object& left, const Object& right
-      )
+      bool(*inputLeftGreaterThanRight)(const Object& left, const Object& right)
     ) {
       this->setComparison(inputLeftGreaterThanRight);
     }
@@ -349,9 +347,7 @@ public:
       return true;
     }
     void setComparison(
-      bool(*inputLeftGreaterThanRight)(
-        const Object& left, const Object& right
-      )
+      bool(*inputLeftGreaterThanRight)(const Object& left, const Object& right)
     ) {
       this->leftGreaterThanRight = inputLeftGreaterThanRight;
     }
@@ -633,9 +629,7 @@ public:
     }
     int highIndex = topIndex;
     for (int lowIndex = bottomIndex + 1; lowIndex <= highIndex; lowIndex ++) {
-      if (
-        order.greaterThan(other[lowIndex], (other[bottomIndex]))
-      ) {
+      if (order.greaterThan(other[lowIndex], (other[bottomIndex]))) {
         other.swapTwoIndices(lowIndex, highIndex);
         if (carbonCopy != 0) {
           carbonCopy->swapTwoIndices(lowIndex, highIndex);
@@ -673,10 +667,8 @@ public:
   }
   template <class TemplateList, class OtherTemplateList>
   static void quickSortAscendingNoOrder(
-    TemplateList& input,
-    int bottomIndex,
-    int topIndex,
-    OtherTemplateList* carbonCopy
+    TemplateList& input, int bottomIndex, int topIndex, OtherTemplateList*
+    carbonCopy
   ) {
     if (topIndex <= bottomIndex) {
       return;
@@ -863,10 +855,7 @@ public:
   }
   void rotate(int r) {
     std::rotate(
-      this->objects,
-      this->objects + r,
-      this->objects + (this->size - 1)
-    );
+      this->objects, this->objects + r, this->objects + (this->size - 1));
   }
   Object* lastObject() const;
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
@@ -1029,11 +1018,11 @@ public:
   ObjectType1 object1;
   ObjectType2 object2;
   Pair() {}
-  Pair(const ObjectType1& o1, const ObjectType2& o2): object1(o1), object2(o2)
-  {}
-  static unsigned int hashFunction(
-    const Pair<ObjectType1, ObjectType2>& input
-  ) {
+  Pair(const ObjectType1& o1, const ObjectType2& o2):
+  object1(o1),
+  object2(o2) {}
+  static unsigned int hashFunction(const Pair<ObjectType1, ObjectType2>& input)
+  {
     return
     HashConstants::constant0 * HashFunctions::hashFunction<ObjectType1>(
       input.object1
@@ -1179,9 +1168,7 @@ public:
           << " entries. ";
           fatalCrash(commentsOnCrash.str());
         }
-        if (
-          this->getHash((*this)[index]) != static_cast<unsigned>(i)
-        ) {
+        if (this->getHash((*this)[index]) != static_cast<unsigned>(i)) {
           std::stringstream commentsOnCrash;
           commentsOnCrash
           << "<hr>The hashed element in position "
@@ -1413,9 +1400,7 @@ public:
     return this->setHashSize(static_cast<unsigned>(inputHashSize));
   }
   void setHashSize(unsigned int desiredHashSize) {
-    if (
-      desiredHashSize == static_cast<unsigned>(this->hashBuckets.size)
-    ) {
+    if (desiredHashSize == static_cast<unsigned>(this->hashBuckets.size)) {
       return;
     }
     MacroIncrementCounter(GlobalStatistics::numberOfHashResizes);
@@ -1517,10 +1502,14 @@ public:
   }
   HashedList() {}
   void operator=(const HashedList& other) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(
+      other
+    );
   }
   void operator=(const List<Object>& other) {
-    this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
+    this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(
+      other
+    );
   }
   // Note The following function specializations are declared entirely in order
   // to facilitate autocomplete in my current IDE. If I find a better
@@ -1641,14 +1630,11 @@ public:
 };
 
 template <class Base>
-std::iostream& operator<<(
-  std::iostream& output, const Complex<Base>& input
-);
+std::iostream& operator<<(std::iostream& output, const Complex<Base>& input);
 
 template <typename Element>
-std::iostream& operator<<(
-  std::iostream& output, const Matrix<Element>& matrix
-) {
+std::iostream& operator<<(std::iostream& output, const Matrix<Element>& matrix)
+{
   output << "<table>";
   for (int i = 0; i < matrix.numberOfRows; i ++) {
     output << "<tr>";
@@ -1664,9 +1650,7 @@ std::iostream& operator<<(
 }
 
 template <class Coefficient>
-std::ostream& operator<<(
-  std::ostream& out, const Vector<Coefficient>& input
-) {
+std::ostream& operator<<(std::ostream& out, const Vector<Coefficient>& input) {
   out << "(";
   for (int i = 0; i < input.size; i ++) {
     out << input[i];
@@ -1744,9 +1728,8 @@ void List<Object>::addListOnTop(const List<Object>& incoming) {
 
 template <class Object>
 void List<Object>::swapTwoIndices(int index1, int index2) {
-  if (
-    index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size
-  ) {
+  if (index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size)
+  {
     std::stringstream commentsOnCrash;
     commentsOnCrash
     << "Requested elements with indices "
@@ -1904,8 +1887,8 @@ List<Object> List<Object>::sliceCopy(int startingIndex, int sizeOfSlice) const {
 
 template <class Object>
 void List<Object>::slice(
-  int startingIndex, int sizeOfSlice, List<Object>& output
-) const {
+  int startingIndex, int sizeOfSlice, List<Object>&
+  output) const {
   // output allowed to equal this
   if (startingIndex < 0) {
     startingIndex = 0;
@@ -2027,9 +2010,8 @@ std::string List<Object>::toStringCommaDelimited() const {
 }
 
 template <class Object>
-std::string List<Object>::toStringWithSeparator(
-  const std::string& separator
-) const {
+std::string List<Object>::toStringWithSeparator(const std::string& separator)
+const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
     out << this->objects[i];

@@ -6,9 +6,8 @@
 template <class Element>
 bool Matrix<Element>::
 systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
-  Matrix<Element>& matrixA,
-  Matrix<Element>& matrixb,
-  Vector<Element>* outputSolution
+  Matrix<Element>& matrixA, Matrix<Element>& matrixb, Vector<Element>*
+  outputSolution
 ) {
   // This function return true if Ax = b >= 0 has a solution with x >= 0 and
   // records a solution x at outputPoint
@@ -210,9 +209,7 @@ bool CalculatorFunctions::attemptExtendingEtoHEFwithHinCartan(
     );
   }
   WithContext<SemisimpleLieAlgebra*> ownerAlgebra;
-  if (
-    !CalculatorConversions::convert(calculator, input[1], ownerAlgebra)
-  ) {
+  if (!CalculatorConversions::convert(calculator, input[1], ownerAlgebra)) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   SemisimpleLieAlgebra* ownerSemisimple = ownerAlgebra.content;
@@ -262,9 +259,7 @@ bool CalculatorFunctions::zModP(
   }
   Rational left;
   Rational right;
-  if (
-    !input[1].isRational(&left) || !input[2].isRational(&right)
-  ) {
+  if (!input[1].isRational(&left) || !input[2].isRational(&right)) {
     return false;
   }
   LargeInteger base;
@@ -326,9 +321,8 @@ bool CalculatorFunctions::conesIntersect(
     << input[2].toString();
   }
   std::stringstream out;
-  if (
-    coneNonStrictMatForm.numberOfColumns != coneStrictMatForm.numberOfColumns
-  ) {
+  if (coneNonStrictMatForm.numberOfColumns != coneStrictMatForm.numberOfColumns)
+  {
     out
     << "I got as input vectors of different dimensions, "
     << "first groups had vectors of dimension "
@@ -357,10 +351,8 @@ bool CalculatorFunctions::conesIntersect(
   Vector<Rational> outputSeparatingNormal;
   bool conesDoIntersect =
   coneNonStrictGens.conesIntersect(
-    coneStrictGens,
-    coneNonStrictGens,
-    &outputIntersection,
-    &outputSeparatingNormal
+    coneStrictGens, coneNonStrictGens, &outputIntersection, &
+    outputSeparatingNormal
   );
   if (conesDoIntersect) {
     Vector<Rational> checkVector;
@@ -504,9 +496,8 @@ bool CalculatorFunctions::printZnEnumeration(
   }
   int grade = 0;
   int dimension = 0;
-  if (
-    !input[2].isSmallInteger(&grade) || !input[1].isSmallInteger(&dimension)
-  ) {
+  if (!input[2].isSmallInteger(&grade) || !input[1].isSmallInteger(&dimension))
+  {
     return false;
   }
   if (grade > 10 || dimension > 5 || grade < 0 || dimension < 0) {
@@ -561,12 +552,7 @@ bool CalculatorFunctions::perturbSplittingNormal(
   Vectors<Rational> vectorsToPerturbRelativeTo;
   if (
     !CalculatorConversions::functionGetMatrix(
-      calculator,
-      input[2],
-      matrix,
-      false,
-      nullptr,
-      splittingNormal.size,
+      calculator, input[2], matrix, false, nullptr, splittingNormal.size,
       nullptr
     )
   ) {
@@ -578,12 +564,7 @@ bool CalculatorFunctions::perturbSplittingNormal(
   nonStrictCone.assignMatrixRows(matrix);
   if (
     !CalculatorConversions::functionGetMatrix(
-      calculator,
-      input[3],
-      matrix,
-      false,
-      nullptr,
-      splittingNormal.size,
+      calculator, input[3], matrix, false, nullptr, splittingNormal.size,
       nullptr
     )
   ) {
@@ -639,10 +620,7 @@ bool CalculatorFunctions::printAllVectorPartitions(
   Vector<Rational> highestWeight;
   if (
     !calculator.getVector<Rational>(
-      input[2],
-      highestWeight,
-      &context,
-      semisimpleLieAlgebra.getRank()
+      input[2], highestWeight, &context, semisimpleLieAlgebra.getRank()
     )
   ) {
     return
@@ -716,21 +694,14 @@ bool CalculatorFunctions::interpolatePolynomial(
   }
   Expression convertedExpression;
   if (
-    !CalculatorConversions::makeMatrix(
-      calculator, input, convertedExpression
-    )
+    !CalculatorConversions::makeMatrix(calculator, input, convertedExpression)
   ) {
     return false;
   }
   Matrix<Rational> pointsOfInterpoly;
   if (
     !CalculatorConversions::functionGetMatrix(
-      calculator,
-      convertedExpression,
-      pointsOfInterpoly,
-      false,
-      nullptr,
-      2
+      calculator, convertedExpression, pointsOfInterpoly, false, nullptr, 2
     )
   ) {
     return
@@ -751,10 +722,8 @@ bool CalculatorFunctions::interpolatePolynomial(
 }
 
 bool CalculatorFunctions::operationBinary(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  int operation
+  Calculator& calculator, const Expression& input, Expression& output, int
+  operation
 ) {
   MemorySaving<Calculator::OperationHandlers>& operationMap =
   calculator.operations.values[operation];
@@ -773,10 +742,8 @@ bool CalculatorFunctions::operationBinary(
 }
 
 bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  bool assignPoly
+  Calculator& calculator, const Expression& input, Expression& output, bool
+  assignPoly
 ) {
   STACK_TRACE("CalculatorFunctions::elementWeylAlgebraOrPolynomial");
   if (!input.isListNElements(3)) {
@@ -838,9 +805,7 @@ bool CalculatorBasics::extractBaseMultiplication(
     output.swapChildren(1, 2);
     result = true;
   }
-  if (
-    output[2].isOfType<double>() && !output[1].isOfType<Rational>()
-  ) {
+  if (output[2].isOfType<double>() && !output[1].isOfType<Rational>()) {
     output.swapChildren(1, 2);
     result = true;
   }
@@ -852,15 +817,8 @@ bool CalculatorBasics::extractBaseMultiplication(
     // Anything2)
     if (output[2][1].isOfType<Rational>()) {
       Expression right;
-      right.makeXOX(
-        calculator,
-        calculator.opTimes(),
-        output[1],
-        output[2][2]
-      );
-      output.makeXOX(
-        calculator, calculator.opTimes(), output[2][1], right
-      );
+      right.makeXOX(calculator, calculator.opTimes(), output[1], output[2][2]);
+      output.makeXOX(calculator, calculator.opTimes(), output[2][1], right);
       result = true;
     }
     // <- handle a * (b * anything)
@@ -870,9 +828,7 @@ bool CalculatorBasics::extractBaseMultiplication(
     rearranged.makeXOX(
       calculator, calculator.opTimes(), output[1], output[2][1]
     );
-    if (
-      CalculatorFunctions::times(calculator, rearranged, newExpression)
-    ) {
+    if (CalculatorFunctions::times(calculator, rearranged, newExpression)) {
       output.makeProduct(calculator, newExpression, output[2][2]);
       result = true;
     }

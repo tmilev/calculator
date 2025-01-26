@@ -139,9 +139,7 @@ bool JSData::parse(
       << "<a href=\""
       << global.displayNameExecutable
       << "?request=calculator&mainInput="
-      << HtmlRoutines::convertStringToURLString(
-        calculatorInput.str(), false
-      )
+      << HtmlRoutines::convertStringToURLString(calculatorInput.str(), false)
       << "\">"
       << HtmlRoutines::convertStringToHtmlString(json, true)
       << "</a>"
@@ -199,7 +197,8 @@ bool JSData::convertTwoByteHexToUnsignedChar(
     }
     return false;
   }
-  char rightHex = MathRoutines::convertHumanReadableHexToCharValue(inputRight);
+  char rightHex =
+  MathRoutines::convertHumanReadableHexToCharValue(inputRight);
   if (rightHex < 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -214,8 +213,8 @@ bool JSData::convertTwoByteHexToUnsignedChar(
 }
 
 bool JSData::mergeInMe(
-  const JSData& input, std::stringstream* commentsOnFailure
-) {
+  const JSData& input, std::stringstream*
+  commentsOnFailure) {
   if (this->elementType != JSData::Type::tokenObject) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Can only merge in objects. ";
@@ -759,9 +758,7 @@ bool JSONWithTokens::tryToComputeType(std::stringstream* commentsOnFailure) {
     return true;
   }
   if (this->source.size() > 0) {
-    if (
-      this->source[0] == '-' || MathRoutines::isDigit(this->source[0])
-    ) {
+    if (this->source[0] == '-' || MathRoutines::isDigit(this->source[0])) {
       this->content().integerValue.freeMemory();
       this->content().elementType = JSData::Type::tokenUndefined;
       Rational parser;
@@ -847,9 +844,7 @@ bool JSONWithTokens::readstringConsumeUnicodeFourHexAppendUtf8(
   return true;
 }
 
-std::string JSONWithTokens::toStringTokens(
-  const List<JSONWithTokens>& stack
-) {
+std::string JSONWithTokens::toStringTokens(const List<JSONWithTokens>& stack) {
   std::stringstream out;
   for (JSONWithTokens& element : stack) {
     out << element.toString();
@@ -862,9 +857,7 @@ std::string JSONWithTokens::toStringReadingStack(
 ) {
   return
   toStringTokens(
-    stack.sliceCopy(
-      JSONWithTokens::numberOfEmptyTokensAtStart, stack.size
-    )
+    stack.sliceCopy(JSONWithTokens::numberOfEmptyTokensAtStart, stack.size)
   );
 }
 

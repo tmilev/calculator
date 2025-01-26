@@ -86,9 +86,7 @@ bool QueryFind::fromJSON(
     );
   }
   JSData nestedKeySource = findQuery[DatabaseStrings::labelKey];
-  if (
-    !this->extractNestedKeysFromJSON(nestedKeySource, commentsOnFailure)
-  ) {
+  if (!this->extractNestedKeysFromJSON(nestedKeySource, commentsOnFailure)) {
     return false;
   }
   this->exactValue = findQuery[DatabaseStrings::labelValue];
@@ -173,8 +171,7 @@ bool QueryFind::fromString(
 }
 
 bool Database::matchesPattern(
-  const List<std::string>& fieldLabel,
-  const List<std::string>& pattern
+  const List<std::string>& fieldLabel, const List<std::string>& pattern
 ) {
   STACK_TRACE("Database::matchesPattern");
   if (fieldLabel.size != pattern.size) {
@@ -201,11 +198,7 @@ bool Database::isDeleteable(
 ) {
   STACK_TRACE("Database::isDeleteable");
   for (int i = 0; i < global.databaseModifiableFields.size; i ++) {
-    if (
-      Database::matchesPattern(
-        labels, global.databaseModifiableFields[i]
-      )
-    ) {
+    if (Database::matchesPattern(labels, global.databaseModifiableFields[i])) {
       if (outputPattern != nullptr) {
         *outputPattern = &global.databaseModifiableFields[i];
       }
@@ -229,9 +222,7 @@ bool Database::getLabels(
   STACK_TRACE("Database::getLabels");
   labels.setSize(0);
   for (int i = 0; i < fieldEntries.listObjects.size; i ++) {
-    if (
-      fieldEntries.listObjects[i].elementType != JSData::Type::tokenString
-    ) {
+    if (fieldEntries.listObjects[i].elementType != JSData::Type::tokenString) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
         << "Label index "
@@ -265,9 +256,7 @@ bool Database::isDeleteable(
   List<std::string> labels;
   if (
     !Database::getLabels(
-      entry.objects.getValueNoFail("fields"),
-      labels,
-      commentsOnFailure
+      entry.objects.getValueNoFail("fields"), labels, commentsOnFailure
     )
   ) {
     return false;
@@ -319,9 +308,7 @@ bool Database::deleteOneEntry(
     return false;
   }
   QueryFind findQuery(
-    labels[0],
-    List<std::string>({DatabaseStrings::labelId}),
-    labels[1]
+    labels[0], List<std::string>({DatabaseStrings::labelId}), labels[1]
   );
   std::string tableName = labels[0];
   if (labels.size == 0) {
@@ -363,9 +350,7 @@ bool Database::deleteAtLeastOneEntryByFindQuery(
   QueryFindOneOf findWrapper(findQuery);
   LargeInteger totalDeleted;
   if (
-    !Database::deleteAllByFindQuery(
-      findQuery, totalDeleted, commentsOnFailure
-    )
+    !Database::deleteAllByFindQuery(findQuery, totalDeleted, commentsOnFailure)
   ) {
     return false;
   }
@@ -628,8 +613,7 @@ bool Database::fetchTable(
   List<JSData> rowsJSON;
   oneQuery.maximumNumberOfItems = 200;
   oneQuery.collection = tableName;
-  Database::get().find(
-    query, nullptr, rowsJSON, totalItems, commentsOnFailure
+  Database::get().find(query, nullptr, rowsJSON, totalItems, commentsOnFailure
   );
   HashedList<std::string> labels;
   for (int i = 0; i < rowsJSON.size; i ++) {
@@ -682,9 +666,7 @@ JSData Database::toJSONFetchItem(
   std::stringstream comments;
   QueryFindOneOf query;
   query.queries.addOnTop(findQuery);
-  if (
-    !Database::find(query, &projector, rowsJSON, &totalItems, &comments)
-  ) {
+  if (!Database::find(query, &projector, rowsJSON, &totalItems, &comments)) {
     result[DatabaseStrings::error] =
     "Failure in toJSONFetchItem. " + comments.str();
     return result;
@@ -716,12 +698,9 @@ void Database::correctData(JSData& row) {
   Database::correctDataFromLabels(row, DatabaseStrings::labelPassword);
 }
 
-void Database::correctDataFromLabels(
-  JSData& row, const std::string& oneLabel
-) {
-  Database::correctDataFromLabels(
-    row, List<std::string>({oneLabel})
-  );
+void Database::correctDataFromLabels(JSData& row, const std::string& oneLabel)
+{
+  Database::correctDataFromLabels(row, List<std::string>({oneLabel}));
 }
 
 void Database::correctDataFromLabels(
@@ -782,9 +761,7 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   QueryFindOneOf query(findQuery);
   List<JSData> rowsJSON;
   LargeInteger totalItems = 0;
-  if (
-    !Database::find(query, &projector, rowsJSON, &totalItems, &comments)
-  ) {
+  if (!Database::find(query, &projector, rowsJSON, &totalItems, &comments)) {
     result[DatabaseStrings::error] = comments.str();
     return result;
   }
@@ -797,9 +774,8 @@ JSData Database::toJSONDatabaseCollection(const std::string& currentTable) {
   return result;
 }
 
-std::string Database::toHtmlDatabaseCollection(
-  const std::string& currentTable
-) {
+std::string Database::toHtmlDatabaseCollection(const std::string& currentTable)
+{
   STACK_TRACE("Database::toHtmlDatabaseCollection");
   std::stringstream out;
   if (currentTable == "") {
@@ -824,9 +800,7 @@ std::string Database::toHtmlDatabaseCollection(
   List<std::string> labels;
   List<List<std::string> > rows;
   LargeInteger totalItems = - 1;
-  if (
-    !Database::fetchTable(currentTable, labels, rows, &totalItems, &out)
-  ) {
+  if (!Database::fetchTable(currentTable, labels, rows, &totalItems, &out)) {
     return out.str();
   }
   out << "Total: " << totalItems << ". ";
@@ -868,10 +842,7 @@ void GlobalVariables::initModifiableDatabaseFields() {
   modifiableData.addOnTop(currentEntry);
   std::fstream outputFile;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    outputFile,
-    "/calculator_html/modifiable_database_fields.js",
-    false,
-    true,
+    outputFile, "/calculator_html/modifiable_database_fields.js", false, true,
     false
   );
   JSData modifiableDataJSON;
@@ -969,9 +940,8 @@ void QueryUpdate::addKeyValueStringPair(
   this->data.addOnTop(querySetOnce);
 }
 
-void QueryUpdate::addKeyValuePair(
-  const std::string& key, const JSData& value
-) {
+void QueryUpdate::addKeyValuePair(const std::string& key, const JSData& value)
+{
   QueryUpdateOnce querySetOnce;
   querySetOnce.nestedLabels.addOnTop(key);
   querySetOnce.value = value;
@@ -1052,9 +1022,8 @@ void QueryResultOptions::makeProjection(const List<std::string>& fields) {
   this->fieldsToProjectTo = fields;
 }
 
-void QueryResultOptions::applyProjection(
-  const JSData& input, JSData& output
-) const {
+void QueryResultOptions::applyProjection(const JSData& input, JSData& output)
+const {
   if (&input == &output) {
     JSData inputCopy;
     inputCopy = input;

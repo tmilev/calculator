@@ -32,11 +32,8 @@ public:
   std::string content;
   std::string tag;
   std::string errorComment;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > properties;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  properties;
   List<std::string> propertiesWithoutValue;
   List<std::string> defaultKeysIfMissing;
   List<std::string> defaultValuesIfMissing;
@@ -75,9 +72,7 @@ public:
   std::string toStringCloseTag(const std::string& overrideTagIfNonEmpty) const;
   std::string getTagClass() const;
   std::string toStringDebug() const;
-  static std::string toHTMLElements(
-    const List<SyntacticElementHTML>& input
-  );
+  static std::string toHTMLElements(const List<SyntacticElementHTML>& input);
   SyntacticElementHTML() {
     this->flagUseDisplaystyleInMathMode = false;
     this->indexInOwner = - 1;
@@ -140,11 +135,8 @@ public:
   std::string commandsSolutionOnly;
   std::string commandAnswerOnGiveUp;
   List<SyntacticElementHTML> solutionElements;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > properties;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  properties;
   std::string answerId;
   std::string idVerificationSpan;
   std::string idAnswerPanel;
@@ -183,16 +175,10 @@ public:
 
 class ProblemDataAdministrative {
 public:
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > problemWeightsPerCourse;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > deadlinesPerSection;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  problemWeightsPerCourse;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  deadlinesPerSection;
   bool getWeightFromCourse(
     const std::string& courseNonURLed,
     Rational& output,
@@ -206,8 +192,7 @@ private:
   int expectedNumberOfAnswersFromDB;
   int knownNumberOfAnswersFromHD;
 public:
-  friend std::ostream& operator<<(
-    std::ostream& output, const ProblemData& data
+  friend std::ostream& operator<<(std::ostream& output, const ProblemData& data
   ) {
     output << data.toString();
     return output;
@@ -222,9 +207,8 @@ public:
   std::string commandsGenerateProblem;
   std::string commandsGenerateProblemNoEnclosures;
   std::string commandsGenerateProblemLink;
-  MapList<
-    std::string, Answer, HashFunctions::hashFunction<std::string>
-  > answers;
+  MapList<std::string, Answer, HashFunctions::hashFunction<std::string> >
+  answers;
   List<std::string> inputNonAnswerIds;
   int getExpectedNumberOfAnswers(
     const std::string& problemName, std::stringstream& commentsOnFailure

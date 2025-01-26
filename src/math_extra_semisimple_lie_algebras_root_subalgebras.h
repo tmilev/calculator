@@ -20,8 +20,7 @@ public:
   std::string stringConnectedComponents;
   void computeDiagramAndDiagramRelationsAndK(RootSubalgebra& owner);
   void computeDiagramRelationsAndK(RootSubalgebra& owner);
-  void fixRepeatingRoots(
-    Vectors<Rational>& roots, List<Rational>& coefficients
+  void fixRepeatingRoots(Vectors<Rational>& roots, List<Rational>& coefficients
   );
   void relationOneSideToString(
     std::string& output,
@@ -48,9 +47,7 @@ public:
     RootSubalgebra& owner
   );
   void computeConnectedComponents(
-    Vectors<Rational>& input,
-    RootSubalgebra& owner,
-    List<List<int> >& output
+    Vectors<Rational>& input, RootSubalgebra& owner, List<List<int> >& output
   );
   void computeRelationString(
     RootSubalgebras& owner,
@@ -75,13 +72,9 @@ public:
   void fixRightHandSide(
     RootSubalgebra& owner, Vectors<Rational>& nilradicalRoots
   );
-  bool leftSortedBiggerThanOrEqualToRight(
-    List<int>& left, List<int>& right
-  );
+  bool leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>& right);
   void computeKComponents(
-    Vectors<Rational>& input,
-    List<List<int> >& output,
-    RootSubalgebra& owner
+    Vectors<Rational>& input, List<List<int> >& output, RootSubalgebra& owner
   );
   void relationOneSideToStringCoordinateForm(
     std::string& output,
@@ -90,9 +83,7 @@ public:
     bool epsilonForm
   );
   void getSumAlphas(Vector<Rational>& output, int dimension);
-  bool checkForBugs(
-    RootSubalgebra& owner, Vectors<Rational>& nilradicalRoots
-  );
+  bool checkForBugs(RootSubalgebra& owner, Vectors<Rational>& nilradicalRoots);
   void sortRelation(RootSubalgebra& owner);
   bool operator==(const ConeRelation& right) {
     return this->relationString == right.relationString;
@@ -119,9 +110,7 @@ public:
   void getLatexHeaderAndFooter(
     std::string& outputHeader, std::string& outputFooter
   );
-  void toString(
-    std::string& output, RootSubalgebras& owners, bool useLatex
-  );
+  void toString(std::string& output, RootSubalgebras& owners, bool useLatex);
   void writeToFile(std::fstream& output);
   void readFromFile(std::fstream& input, RootSubalgebras& owner);
   void addRelationNoRepetition(ConeRelation& input, RootSubalgebras& owners);
@@ -250,8 +239,7 @@ public:
   bool isSubalgebraBorelHighest(const Vector<Rational>& input);
   bool isSubalgebraBorelLowest(const Vector<Rational>& input);
   bool compareLeftGreaterThanRight(
-    const Vector<Rational>& weightLeft,
-    const Vector<Rational>& weightRight
+    const Vector<Rational>& weightLeft, const Vector<Rational>& weightRight
   );
   bool rootIsInNilradicalParabolicCentralizer(
     Selection& positiveSimpleRootsSel, Vector<Rational>& input
@@ -388,10 +376,7 @@ public:
     List<List<List<int> > >& output, List<int>& oppositeKModules
   );
   void kModuleLieBracketKModule(
-    int index1,
-    int index2,
-    List<int>& oppositeKModules,
-    List<int>& output
+    int index1, int index2, List<int>& oppositeKModules, List<int>& output
   );
   void computeDynkinDiagramKAndCentralizer();
   bool checkRankInequality() const;
@@ -408,9 +393,8 @@ public:
     const Vector<Rational>& input, Vector<Rational>& outputHW
   );
   void computeExtremeWeightInTheSameKModule(
-    const Vector<Rational>& input,
-    Vector<Rational>& outputW,
-    bool lookingForHighest
+    const Vector<Rational>& input, Vector<Rational>& outputW, bool
+    lookingForHighest
   );
   void computeLowestWeightInTheSameKModule(
     const Vector<Rational>& input, Vector<Rational>& outputLW
@@ -434,14 +418,12 @@ public:
     std::string& output
   );
   void writeLieBracketTableAndOppositeKModulesToFile(
-    std::fstream& output,
-    List<List<List<int> > >& inMultTable,
-    List<int>& inOpposites
+    std::fstream& output, List<List<List<int> > >& inMultTable, List<int>&
+    inOpposites
   );
   void readLieBracketTableAndOppositeKModulesFromFile(
-    std::fstream& input,
-    List<List<List<int> > >& outMultTable,
-    List<int>& outOpposites
+    std::fstream& input, List<List<List<int> > >& outMultTable, List<int>&
+    outOpposites
   );
   bool operator>(const RootSubalgebra& other) const;
 };
@@ -509,9 +491,7 @@ public:
     List<int>& generator, Selection& targetSelection
   );
   void raiseSelectionUntilApproval(Selection& targetSelection);
-  void applyOneGenerator(
-    List<int>& generator, Selection& targetSelection
-  );
+  void applyOneGenerator(List<int>& generator, Selection& targetSelection);
   void generateActionKintersectBIsos(RootSubalgebra& rootSubalgebra);
   void generateKintersectBOuterIsos(RootSubalgebra& rootSubalgebra);
   void computeActionNormalizerOfCentralizerIntersectNilradical(
@@ -537,19 +517,14 @@ public:
   );
   void sortDescendingOrderBySSRank();
   void toStringRootSpaces(
-    std::string& output,
-    bool includeMatrixForm,
-    Vectors<Rational>& input
+    std::string& output, bool includeMatrixForm, Vectors<Rational>& input
   );
   void toStringConeConditionNotSatisfying(
     std::string& output, bool includeMatrixForm
   );
   void toStringCentralizerIsomorphisms(
-    std::string& output,
-    bool useLatex,
-    bool useHtml,
-    int fromIndex,
-    int amountToProcess
+    std::string& output, bool useLatex, bool useHtml, int fromIndex, int
+    amountToProcess
   );
   void toHTML(FormatExpressions* format);
   std::string toString(FormatExpressions* format);
@@ -751,10 +726,7 @@ public:
   void getInvolvedPositiveGenerators(List<ChevalleyGenerator>& output);
   void getInvolvedNegativeGenerators(List<ChevalleyGenerator>& output);
   void toStringModuleDecompositionMinimalContainingRegularSubalgebras(
-    bool useLatex,
-    bool useHtml,
-    SlTwoSubalgebras& owner,
-    std::string& output
+    bool useLatex, bool useHtml, SlTwoSubalgebras& owner, std::string& output
   ) const;
   void computeModuleDecompositionsition(
     const Vectors<Rational>& positiveRootsContainingRegularSubalgebra,
@@ -853,9 +825,7 @@ public:
   }
   void computeModuleDecompositionsitionsOfAmbientLieAlgebra();
   void reset(SemisimpleLieAlgebra& inputOwners);
-  bool containsSl2WithGivenH(
-    Vector<Rational>& elementH, int* outputIndex
-  );
+  bool containsSl2WithGivenH(Vector<Rational>& elementH, int* outputIndex);
   bool containsSl2WithGivenHCharacteristic(
     Vector<Rational>& hCharacteristic, int* outputIndex
   );

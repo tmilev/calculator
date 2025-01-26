@@ -113,8 +113,7 @@ public:
     int inputSocketID, std::stringstream* commentsOnFailure
   );
   bool inspectCertificates(
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   bool initializeSSLKeyFilesSelfSignedCreateOnDemand();
   bool hasOKCertificates();
@@ -162,9 +161,7 @@ public:
   bool computeName();
   bool checkInitialization() const;
   CipherSuiteSpecification();
-  CipherSuiteSpecification(
-    TransportLayerSecurityServer* owner, int inputType
-  );
+  CipherSuiteSpecification(TransportLayerSecurityServer* owner, int inputType);
   std::string toString() const;
   static unsigned int hashFunction(const CipherSuiteSpecification& input);
   unsigned int hashFunction() const;
@@ -308,8 +305,7 @@ public:
   );
   bool processSignatureAlgorithms(std::stringstream* commentsOnError);
   void writeBytes(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   );
   void makeEllipticCurvePointFormat(SSLContent* inputOwner);
   void makeExtendedMasterSecret(SSLContent* inputOwner);
@@ -435,53 +431,41 @@ public:
   // As the name suggests, this will append the output bytes, without
   // wiping the already existing contents of output.
   void writeBytes(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeType(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeVersion(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesHandshakeClientHello(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesHandshakeServerHello(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesHandshakeServerHelloDone(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesHandshakeCertificate(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesHandshakeSecretExchange(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   List<unsigned char>& getMyRandomBytes() const;
   void writeBytesIncomingRandomAndSessionId(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesMyRandomAndSessionId(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesSupportedCiphers(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
   void writeBytesExtensionsOnly(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
 };
 
@@ -547,8 +531,7 @@ public:
   );
   void prepareServerHandshake4ServerHelloDone();
   void writeBytes(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   ) const;
 };
 
@@ -631,8 +614,7 @@ public:
       List<unsigned char>& input, std::stringstream* commentsOnFailure
     );
     void writeNamedCurveAndPublicKey(
-      List<unsigned char>& output,
-      List<Serialization::Marker>* annotations
+      List<unsigned char>& output, List<Serialization::Marker>* annotations
     ) const;
   };
 
@@ -682,17 +664,13 @@ public:
     List<SSLRecord>& input, std::stringstream* commentsOnFailure
   );
   JSData toJSON();
-  bool initializeCertificatesSelfSigned(
-    std::stringstream* commentsOnFailure
-  );
+  bool initializeCertificatesSelfSigned(std::stringstream* commentsOnFailure);
   bool loadSelfSignedPEMCertificate(std::stringstream* commentsOnFailure);
   bool loadSelfSignedPEMCertificateContent(
-    std::stringstream* commentsOnFailure,
-    std::string& certificateContent
+    std::stringstream* commentsOnFailure, std::string& certificateContent
   );
   bool loadSelfSignedPEMPrivateKeyContent(
-    std::stringstream* commentsOnFailure,
-    std::string& outputPrivateKeyContent
+    std::stringstream* commentsOnFailure, std::string& outputPrivateKeyContent
   );
   bool loadSelfSignedPEMPrivateKey(std::stringstream* commentsOnFailure);
 };

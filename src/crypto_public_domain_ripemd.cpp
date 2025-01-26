@@ -201,9 +201,7 @@ const uint32_t RIPEMD160Internal::KR[5] =
 
 void RIPEMD160Internal::ripemd160Initialize(Ripemd160State* self) {
   memcpy(
-    self->h,
-    RIPEMD160Internal::initial_h,
-    Crypto::RIPEMD160LengthInBytes
+    self->h, RIPEMD160Internal::initial_h, Crypto::RIPEMD160LengthInBytes
   );
   memset(&self->buf, 0, sizeof(self->buf));
   self->length = 0;
@@ -478,9 +476,8 @@ void RIPEMD160Internal::ripemd160Process(
   }
 }
 
-void RIPEMD160Internal::ripemd160Done(
-  Ripemd160State* self, unsigned char* out
-) {
+void RIPEMD160Internal::ripemd160Done(Ripemd160State* self, unsigned char* out)
+{
   /* Append the padding */ self->buf.b[self->bufpos ++] = 0x80;
   if (self->bufpos > 56) {
     self->bufpos = 64;
@@ -488,8 +485,7 @@ void RIPEMD160Internal::ripemd160Done(
   }
   /* Append the length */
   self->buf.w[14] = static_cast<uint32_t>(self->length & 0xFFFFffffu);
-  self->buf.w[15] = static_cast<uint32_t>((self->length >> 32) & 0xFFFFffffu
-  );
+  self->buf.w[15] = static_cast<uint32_t>((self->length >> 32) & 0xFFFFffffu);
   if (Crypto::flagRIPEMDBigEndian) {
     byteswap32(&self->buf.w[14]);
     byteswap32(&self->buf.w[15]);
@@ -511,9 +507,7 @@ void CryptoPublicDomain::computeRIPEMD160(
   RIPEMD160Internal::ripemd160Initialize(&md);
   output.setSize(20);
   RIPEMD160Internal::ripemd160Process(
-    &md,
-    reinterpret_cast<const unsigned char*>(input.c_str()),
-    input.size()
+    &md, reinterpret_cast<const unsigned char*>(input.c_str()), input.size()
   );
   RIPEMD160Internal::ripemd160Done(&md, output.objects);
 }

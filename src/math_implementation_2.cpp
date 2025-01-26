@@ -195,8 +195,9 @@ void LargeIntegerUnsigned::writeBigEndianBytes(
     }
   }
   outputAppend.reserve(
-    outputAppend.size + digitsReveredOrder.size + padWithZero
-  );
+    outputAppend.size +
+    digitsReveredOrder.size +
+    padWithZero);
   if (padWithZero == 1) {
     outputAppend.addOnTop(0);
   }
@@ -461,9 +462,8 @@ bool LargeIntegerUnsigned::isCompositePrimeDivision(
 }
 
 bool LargeIntegerUnsigned::isPossiblyPrime(
-  int millerRabinTries,
-  bool tryDivisionSetTrueFaster,
-  std::stringstream* comments
+  int millerRabinTries, bool tryDivisionSetTrueFaster, std::stringstream*
+  comments
 ) {
   STACK_TRACE("LargeIntUnsigned::isPossiblyPrime");
   if (this->isEqualToOne()) {
@@ -481,9 +481,7 @@ bool LargeIntegerUnsigned::isPossiblyPrime(
   List<unsigned int> aFewPrimes;
   if (tryDivisionSetTrueFaster) {
     bool guaranteedPrime = false;
-    if (
-      this->isCompositePrimeDivision(aFewPrimes, guaranteedPrime, comments)
-    ) {
+    if (this->isCompositePrimeDivision(aFewPrimes, guaranteedPrime, comments)) {
       return false;
     }
     if (guaranteedPrime) {
@@ -534,8 +532,7 @@ void LargeIntegerUnsigned::getPrimesEratosthenesSieve(
   unsigned int primesUpToInclusive, List<unsigned int>& output
 ) {
   List<int> sieve;
-  sieve.initializeFillInObject(
-    static_cast<signed>(primesUpToInclusive) + 1, 1
+  sieve.initializeFillInObject(static_cast<signed>(primesUpToInclusive) + 1, 1
   );
   output.reserve(primesUpToInclusive / 2);
   output.size = 0;
@@ -726,8 +723,7 @@ void LargeIntegerUnsigned::dividePositive(
       );
       if (*remainderOutput.digits.lastObject() >= 0) {
         quotientOutput.addShiftedUIntSmallerThanCarryOverBound(
-          static_cast<unsigned>(currentQuotientDigit),
-          quotientDigitIndex
+          static_cast<unsigned>(currentQuotientDigit), quotientDigitIndex
         );
         break;
       }
@@ -742,8 +738,7 @@ void LargeIntegerUnsigned::dividePositive(
     }
     if (
       lastRemainderSize == remainderOutput.digits.size &&
-      lastRemainderSize != 1
-    ) {
+      lastRemainderSize != 1) {
       numberOfRunsWithoutDigitImprovement ++;
     } else {
       numberOfRunsWithoutDigitImprovement = 0;
@@ -794,9 +789,7 @@ const {
         out << "[";
       }
       int numberOfZeroesToPad =
-      numberOfZeroesInCarryOver - static_cast<signed>(
-        currentString.length()
-      );
+      numberOfZeroesInCarryOver - static_cast<signed>(currentString.length());
       for (int j = 0; j < numberOfZeroesToPad; j ++) {
         out << "0";
       }
@@ -1074,8 +1067,8 @@ void LargeIntegerUnsigned::addLargeIntegerUnsignedShiftedTimesDigit(
   }
   int numberOfDigits =
   MathRoutines::maximum(
-    other.digits.size + 1 + digitShift, this->digits.size + 1
-  );
+    other.digits.size + 1 + digitShift, this->digits.size +
+    1);
   this->padWithZeroesToAtLeastNDigits(numberOfDigits);
   long long nextDigit = 0;
   for (int j = 0; j < other.digits.size; j ++) {
@@ -1099,8 +1092,7 @@ void LargeIntegerUnsigned::addLargeIntegerUnsignedShiftedTimesDigit(
   if (
     lastDigit >= this->carryOverBound || (- lastDigit) <= (
       - this->carryOverBound
-    )
-  ) {
+    )) {
     global.fatal
     << "Leading digit: "
     << lastDigit
@@ -1819,9 +1811,7 @@ void Rational::multiplyByInteger(int x) {
 
 void Rational::multiplyBy(const Rational& r) {
   if (r.extended == nullptr && this->extended == nullptr) {
-    if (
-      this->tryToMultiplyQuickly(r.numeratorShort, r.denominatorShort)
-    ) {
+    if (this->tryToMultiplyQuickly(r.numeratorShort, r.denominatorShort)) {
       return;
     }
   }

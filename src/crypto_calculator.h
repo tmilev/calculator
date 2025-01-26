@@ -21,9 +21,7 @@ public:
     std::stringstream* commentsOnFailure,
     std::stringstream* commentsGeneral
   );
-  bool loadFromModulusAndExponentStrings(
-    std::stringstream* commentsOnFailure
-  );
+  bool loadFromModulusAndExponentStrings(std::stringstream* commentsOnFailure);
   std::string toString();
 };
 
@@ -62,9 +60,7 @@ public:
   bool loadFromASNEncoded(
     List<unsigned char>& input, std::stringstream* commentsOnFailure
   );
-  bool generateRandom(
-    std::stringstream* commentsOnFailure, int numberOfBytes
-  );
+  bool generateRandom(std::stringstream* commentsOnFailure, int numberOfBytes);
   bool computeFromTwoPrimes(
     LargeIntegerUnsigned& inputPrimeOne,
     LargeIntegerUnsigned& inputPrimeTwo,
@@ -95,9 +91,7 @@ public:
     std::string toString();
     bool loadFields(
       const MapList<
-        std::string,
-        ASNObject,
-        HashFunctions::hashFunction<std::string>
+        std::string, ASNObject, HashFunctions::hashFunction<std::string>
       >& fields,
       std::stringstream* commentsOnFailure
     );
@@ -134,9 +128,8 @@ public:
     const ASNElement& input, std::stringstream* commentsOnFailure
   );
   static bool loadASNAlgorithmIdentifier(
-    const ASNElement& input,
-    ASNElement& output,
-    std::stringstream* commentsOnFailure
+    const ASNElement& input, ASNElement& output, std::stringstream*
+    commentsOnFailure
   );
   std::string toString();
   void computeASN(ASNElement& output);
@@ -168,15 +161,14 @@ public:
   };
 
   bool loadFromPEMFile(
-    const std::string& inputFilenameVirtual,
-    std::stringstream* commentsOnFailure
+    const std::string& inputFilenameVirtual, std::stringstream*
+    commentsOnFailure
   );
   bool loadFromPEM(
     const std::string& input, std::stringstream* commentsOnFailure
   );
   bool loadFromASNEncoded(
-    const List<unsigned char>& input,
-    std::stringstream* commentsOnFailure
+    const List<unsigned char>& input, std::stringstream* commentsOnFailure
   );
   bool loadFromJSON(
     JSData& input,
@@ -189,8 +181,7 @@ public:
   void computeASN(ASNElement& output);
   void computeASNSignatureAlgorithm(ASNElement& output);
   void writeBytesASN1(
-    List<unsigned char>& output,
-    List<Serialization::Marker>* annotations
+    List<unsigned char>& output, List<Serialization::Marker>* annotations
   );
 };
 
@@ -210,8 +201,7 @@ public:
   };
 
   static bool loadKnownCertificates(
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   static bool loadOneKnownCertificate(
     const std::string& input,
@@ -257,9 +247,8 @@ public:
     const LargeIntegerUnsigned& input, std::string& output
   );
   static void convertLargeIntUnsignedToBase58SignificantDigitsFIRST(
-    const LargeIntegerUnsigned& input,
-    std::string& output,
-    int numberOfOnesToPrepend
+    const LargeIntegerUnsigned& input, std::string& output, int
+    numberOfOnesToPrepend
   );
   static bool convertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
     const std::string& inputSignificantDigitsFirst,
@@ -273,8 +262,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   static std::string convertIntToHex(int input, int significantBytes);
-  static std::string convertUintToHex(
-    unsigned int input, int significantBytes
+  static std::string convertUintToHex(unsigned int input, int significantBytes
   );
   static std::string convertUint64ToHex(uint64_t input);
   static bool convertHexToString(
@@ -299,9 +287,8 @@ public:
     const List<unsigned char>& input
   );
   static std::string convertListUnsignedCharsToHexFormat(
-    const List<unsigned char>& input,
-    int byteWidthLineBreakZeroForNone,
-    bool useHtml
+    const List<unsigned char>& input, int byteWidthLineBreakZeroForNone, bool
+    useHtml
   );
   static bool convertListUnsignedCharsToHexFormat(
     const List<unsigned char>& input,
@@ -316,9 +303,7 @@ public:
     bool useHtml
   );
   static std::string convertListCharsToHex(
-    const List<char>& input,
-    int byteWidthLineBreakZeroForNone,
-    bool useHtml
+    const List<char>& input, int byteWidthLineBreakZeroForNone, bool useHtml
   );
   static bool convertStringToHex(
     const std::string& input,
@@ -330,9 +315,7 @@ public:
     const std::string& input, std::string& output
   );
   static std::string convertStringToHex(
-    const std::string& input,
-    int byteWidthLineBreakZeroForNone,
-    bool useHtml
+    const std::string& input, int byteWidthLineBreakZeroForNone, bool useHtml
   );
   static bool getBase58FromChar(char input, uint32_t& output);
   static bool getCharFromBase58(uint32_t input, char& output);
@@ -386,15 +369,13 @@ public:
   static void initSha256();
   static void initSha512();
   static void computeSha1(
-    const std::string& inputString, List<uint32_t>& output
-  );
+    const std::string& inputString, List<uint32_t>&
+    output);
   static void computeSha224(
     const List<unsigned char>& input, List<uint32_t>& output
   );
   static void computeSha2xx(
-    const List<unsigned char>& input,
-    List<uint32_t>& output,
-    bool is224
+    const List<unsigned char>& input, List<uint32_t>& output, bool is224
   );
   static void computeSha256(
     const List<unsigned char>& input, List<uint32_t>& output
@@ -402,9 +383,7 @@ public:
   static void computeSha256(
     const List<unsigned char>& input, List<unsigned char>& output
   );
-  static void computeSha256(
-    const std::string& input, std::string& output
-  );
+  static void computeSha256(const std::string& input, std::string& output);
   static std::string computeSha256(const std::string& input);
   static void computeSha512(
     const List<unsigned char>& input, List<uint64_t>& output
@@ -412,9 +391,7 @@ public:
   static void computeSha512(
     const List<unsigned char>& input, List<unsigned char>& output
   );
-  static std::string computeSha3_256OutputBase64URL(
-    const std::string& input
-  );
+  static std::string computeSha3_256OutputBase64URL(const std::string& input);
   static void computeKeccak3_256(
     const std::string& input, List<unsigned char>& output
   );
@@ -491,14 +468,13 @@ public:
 
   // Shorter strings should hash faster, so
   // timing attacks on this should reveal differences in string lengths.
-  static bool haveEqualHashes(
-    const std::string& left, const std::string& right
+  static bool haveEqualHashes(const std::string& left, const std::string& right
   );
   class External {
   public:
     void(*computeRIPEMD160)(
-      const std::string& input, List<unsigned char>& output
-    );
+      const std::string& input, List<unsigned char>&
+      output);
     bool(*encryptAES_CBC_256)(
       const std::string& inputKey,
       const std::string& inputPlainText,
@@ -536,11 +512,8 @@ public:
   std::string signatureBase64;
   std::string headerJSON;
   std::string claimsJSON;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > payloadKeys;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  payloadKeys;
   bool assignString(
     const std::string& other, std::stringstream* commentsOnFailure
   );

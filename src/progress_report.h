@@ -45,8 +45,7 @@ public:
   // they are reporting.
   void report(const std::string& stringToReport);
   bool tickAndWantReport();
-  ProgressReport(
-    int inputTicksPerReport = 1, const std::string& inputName = ""
+  ProgressReport(int inputTicksPerReport = 1, const std::string& inputName = ""
   ) {
     this->name = inputName;
     this->ticksPerReport = inputTicksPerReport;

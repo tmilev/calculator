@@ -113,20 +113,20 @@ public:
     HashedList<Vector<Rational> >& outputRootSystem
   );
   static bool loadSignSignatureF1_4(
-    WeylGroupData& inputGroup,
-    List<SubgroupDataRootReflections>& outputSubgroups
+    WeylGroupData& inputGroup, List<SubgroupDataRootReflections>&
+    outputSubgroups
   );
   static bool loadSignSignatureE1_6(
-    WeylGroupData& inputGroup,
-    List<SubgroupDataRootReflections>& outputSubgroups
+    WeylGroupData& inputGroup, List<SubgroupDataRootReflections>&
+    outputSubgroups
   );
   static bool loadSignSignatureE1_7(
-    WeylGroupData& inputGroup,
-    List<SubgroupDataRootReflections>& outputSubgroups
+    WeylGroupData& inputGroup, List<SubgroupDataRootReflections>&
+    outputSubgroups
   );
   static bool loadSignSignatureE1_8(
-    WeylGroupData& inputGroup,
-    List<SubgroupDataRootReflections>& outputSubgroups
+    WeylGroupData& inputGroup, List<SubgroupDataRootReflections>&
+    outputSubgroups
   );
   static bool loadOutputSubgroupsFromJSData(
     JSData& input,
@@ -963,8 +963,7 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
-    output,
-    false,
+    output, false,
     "[8, 7, 6, 7, 5, 2, 4, 3, 4, 5, 2, 4, 1, 3, 4, 5, 6, 2, 4, 5]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
@@ -2915,9 +2914,8 @@ bool HardCodedWeylGroupData::loadOutputSubgroupsFromJSData(
   SubgroupDataRootReflections readerSubgroup;
   for (int i = 0; i < input.listObjects.size; i ++) {
     JSData& currentSGdata = input.listObjects[i];
-    if (
-      currentSGdata.listObjects[0].listObjects[0].stringValue == "parabolic"
-    ) {
+    if (currentSGdata.listObjects[0].listObjects[0].stringValue == "parabolic")
+    {
       readerSubgroup.flagIsParabolic = true;
       readerSubgroup.flagIsExtendedParabolic = true;
     } else if (
@@ -2992,9 +2990,7 @@ bool HardCodedWeylGroupData::loadOutputSubgroupsFromJSData(
         global.fatal << "Bad f4. " << global.fatal;
       }
     }
-    readerSubgroup.tauSignature.setSize(
-      inputGroup.group.characterTable.size
-    );
+    readerSubgroup.tauSignature.setSize(inputGroup.group.characterTable.size);
     for (int j = 0; j < readerSubgroup.tauSignature.size; j ++) {
       readerSubgroup.tauSignature[j] =
       currentSGdata.listObjects[1].listObjects[j].integerValue.getElement();
@@ -3005,8 +3001,7 @@ bool HardCodedWeylGroupData::loadOutputSubgroupsFromJSData(
 }
 
 bool HardCodedWeylGroupData::loadSignSignatureF1_4(
-  WeylGroupData& inputGroup,
-  List<SubgroupDataRootReflections>& outputSubgroups
+  WeylGroupData& inputGroup, List<SubgroupDataRootReflections>& outputSubgroups
 ) {
   JSData jsonReader;
   // double startTime = global->getElapsedSeconds();
@@ -3020,8 +3015,7 @@ bool HardCodedWeylGroupData::loadSignSignatureF1_4(
 }
 
 bool HardCodedWeylGroupData::loadSignSignatureE1_6(
-  WeylGroupData& inputGroup,
-  List<SubgroupDataRootReflections>& outputSubgroups
+  WeylGroupData& inputGroup, List<SubgroupDataRootReflections>& outputSubgroups
 ) {
   JSData jsonReader;
   // double startTime = global->getElapsedSeconds();
@@ -3035,8 +3029,7 @@ bool HardCodedWeylGroupData::loadSignSignatureE1_6(
 }
 
 bool HardCodedWeylGroupData::loadSignSignatureE1_7(
-  WeylGroupData& inputGroup,
-  List<SubgroupDataRootReflections>& outputSubgroups
+  WeylGroupData& inputGroup, List<SubgroupDataRootReflections>& outputSubgroups
 ) {
   JSData jsonReader;
   // double startTime = global->getElapsedSeconds();
@@ -3050,8 +3043,7 @@ bool HardCodedWeylGroupData::loadSignSignatureE1_7(
 }
 
 bool HardCodedWeylGroupData::loadSignSignatureE1_8(
-  WeylGroupData& inputGroup,
-  List<SubgroupDataRootReflections>& outputSubgroups
+  WeylGroupData& inputGroup, List<SubgroupDataRootReflections>& outputSubgroups
 ) {
   JSData jsonReader;
   // double startTime = global->getElapsedSeconds();
@@ -3411,9 +3403,7 @@ bool WeylGroupData::loadConjugacyClassesHelper() {
   for (int i = 0; i < this->group.conjugacyClasses.size; i ++) {
     this->group.sizePrivate += this->group.conjugacyClasses[i].size;
   }
-  if (
-    this->group.sizePrivate != this->group.getSizeByFormula(this->group)
-  ) {
+  if (this->group.sizePrivate != this->group.getSizeByFormula(this->group)) {
     global.fatal
     << "Corrupt hard-coded data: the size of the "
     << "group does not work out according to formula. "

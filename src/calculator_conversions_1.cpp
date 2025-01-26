@@ -166,9 +166,7 @@ bool CalculatorConversions::convertWithoutComputation<
   WithContext<AlgebraicNumber> algebraicNumber;
   if (input.isOfTypeWithContext(&algebraicNumber)) {
     Rational rationalValue;
-    if (
-      !input.getValue<AlgebraicNumber>().isRational(&rationalValue)
-    ) {
+    if (!input.getValue<AlgebraicNumber>().isRational(&rationalValue)) {
       return false;
     }
     output.content = rationalValue;
@@ -348,9 +346,8 @@ bool CalculatorConversions::convertWithoutComputation<
 >(
   Calculator& calculator,
   const Expression& input,
-  WithContext<
-    ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
-  >& output,
+  WithContext<ElementTensorsGeneralizedVermas<RationalFraction<Rational> > >&
+  output,
   bool* outputConversionByOtherMeansNotDesired
 ) {
   (void) calculator;
@@ -467,9 +464,8 @@ bool CalculatorConversions::convert<Polynomial<ElementZmodP> >(
 
 template < >
 bool CalculatorConversions::convert<Rational>(
-  Calculator& calculator,
-  const Expression& input,
-  WithContext<Rational>& output
+  Calculator& calculator, const Expression& input, WithContext<Rational>&
+  output
 ) {
   (void) calculator;
   return input.isOfTypeWithContext(&output);
@@ -487,14 +483,10 @@ bool CalculatorConversions::convert<AlgebraicNumber>(
 
 template < >
 bool CalculatorConversions::convert<double>(
-  Calculator& calculator,
-  const Expression& input,
-  WithContext<double>& output
+  Calculator& calculator, const Expression& input, WithContext<double>& output
 ) {
   if (
-    CalculatorConversions::convertWithoutComputation(
-      calculator, input, output
-    )
+    CalculatorConversions::convertWithoutComputation(calculator, input, output)
   ) {
     return true;
   }
@@ -569,9 +561,8 @@ bool CalculatorConversions::convert(
 
 template < >
 bool CalculatorConversions::convert(
-  Calculator& calculator,
-  const Expression& input,
-  WithContext<std::string>& output
+  Calculator& calculator, const Expression& input, WithContext<std::string>&
+  output
 ) {
   return
   CalculatorConversions::convertWithoutComputation(calculator, input, output);
@@ -579,9 +570,8 @@ bool CalculatorConversions::convert(
 
 template < >
 bool CalculatorConversions::convert(
-  Calculator& calculator,
-  const Expression& input,
-  WithContext<ElementZmodP>& output
+  Calculator& calculator, const Expression& input, WithContext<ElementZmodP>&
+  output
 ) {
   return
   CalculatorConversions::convertWithoutComputation(calculator, input, output);
@@ -589,9 +579,7 @@ bool CalculatorConversions::convert(
 
 // end Expression::convert specializations.
 bool CalculatorConversions::expressionFromChevalleyGenerator(
-  Calculator& calculator,
-  const ChevalleyGenerator& input,
-  Expression& output
+  Calculator& calculator, const ChevalleyGenerator& input, Expression& output
 ) {
   STACK_TRACE("CalculatorConversions::expressionFromChevalleyGenerator");
   input.checkInitialization();
@@ -604,18 +592,17 @@ bool CalculatorConversions::expressionFromChevalleyGenerator(
     input.owner->getRank()
   ) {
     generatorLetterExpression.makeAtom(
-      calculator,
-      calculator.addOperationNoRepetitionOrReturnIndexFirst("h")
+      calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst("h")
     );
   } else {
     generatorLetterExpression.makeAtom(
-      calculator,
-      calculator.addOperationNoRepetitionOrReturnIndexFirst("g")
+      calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst("g")
     );
   }
   generatorIndexExpression.assignValue(
-    calculator,
-    input.owner->getDisplayIndexFromGenerator(input.generatorIndex)
+    calculator, input.owner->getDisplayIndexFromGenerator(
+      input.generatorIndex
+    )
   );
   return
   output.makeXOX(
@@ -667,9 +654,7 @@ bool CalculatorConversions::loadWeylGroup(
 }
 
 bool CalculatorConversions::dynkinSimpleType(
-  Calculator& calculator,
-  const Expression& input,
-  DynkinSimpleType& output
+  Calculator& calculator, const Expression& input, DynkinSimpleType& output
 ) {
   STACK_TRACE("CalculatorConversions::dynkinSimpleType");
   if (input.size() != 2) {
@@ -684,9 +669,7 @@ bool CalculatorConversions::dynkinSimpleType(
 }
 
 bool CalculatorConversions::functionDynkinSimpleType(
-  Calculator& calculator,
-  const Expression& input,
-  DynkinSimpleType& outputMon
+  Calculator& calculator, const Expression& input, DynkinSimpleType& outputMon
 ) {
   STACK_TRACE("CalculatorConversions::functionDynkinSimpleType");
   Expression rankExpression;
@@ -839,9 +822,7 @@ bool CalculatorConversions::functionDynkinType(
   STACK_TRACE("CalculatorConversions::functionDynkinType");
   LinearCombination<Expression, Rational> typeComputer;
   if (
-    !calculator.functionCollectSummandsCombine(
-      calculator, input, typeComputer
-    )
+    !calculator.functionCollectSummandsCombine(calculator, input, typeComputer)
   ) {
     return false;
   }
@@ -886,9 +867,8 @@ bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
   DynkinType dynkinType;
   outputPointer.content = nullptr;
   outputPointer.context.initialize(calculator);
-  if (
-    !CalculatorConversions::functionDynkinType(calculator, input, dynkinType)
-  ) {
+  if (!CalculatorConversions::functionDynkinType(calculator, input, dynkinType))
+  {
     return
     calculator
     << "Failed to extract Dynkin type from: "
@@ -932,9 +912,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
 }
 
 bool CalculatorConversions::expressionFromDynkinSimpleType(
-  Calculator& calculator,
-  const DynkinSimpleType& input,
-  Expression& output
+  Calculator& calculator, const DynkinSimpleType& input, Expression& output
 ) {
   STACK_TRACE("CalculatorConversions::expressionFromDynkinSimpleType");
   Expression letterExpression;
@@ -944,8 +922,9 @@ bool CalculatorConversions::expressionFromDynkinSimpleType(
   std::string letterS;
   letterS = input.letter;
   letterExpression.makeAtom(
-    calculator,
-    calculator.addOperationNoRepetitionOrReturnIndexFirst(letterS)
+    calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst(
+      letterS
+    )
   );
   indexExpression.assignValue(calculator, input.cartanSymmetricInverseScale);
   rankExpression.assignValue(calculator, input.rank);
@@ -954,9 +933,7 @@ bool CalculatorConversions::expressionFromDynkinSimpleType(
   );
   return
   output.makeXOX(
-    calculator,
-    calculator.opUnderscore(),
-    letterAndIndexExpression,
+    calculator, calculator.opUnderscore(), letterAndIndexExpression,
     rankExpression
   );
 }
@@ -1151,11 +1128,8 @@ bool CalculatorConversions::algebraicNumber(
 bool CalculatorConversions::loadKeysFromStatementList(
   Calculator& calculator,
   const Expression& input,
-  MapList<
-    std::string,
-    Expression,
-    HashFunctions::hashFunction<std::string>
-  >& outputKeys,
+  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >&
+  outputKeys,
   bool allowFailure,
   List<Expression>* outputNotAKeyValuePair,
   std::stringstream* commentsOnFailure
@@ -1370,12 +1344,7 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   Matrix<Rational> hElements;
   if (
     !CalculatorConversions::functionGetMatrix(
-      calculator,
-      elementsCartanExpression,
-      hElements,
-      false,
-      nullptr,
-      rank,
+      calculator, elementsCartanExpression, hElements, false, nullptr, rank,
       nullptr
     )
   ) {
@@ -1636,10 +1605,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     CandidateSemisimpleSubalgebra currentCandidate;
     if (
       !CalculatorConversions::candidateSubalgebraPrecomputed(
-        calculator,
-        subalgebrasElement[i],
-        expression,
-        currentCandidate,
+        calculator, subalgebrasElement[i], expression, currentCandidate,
         subalgebras
       )
     ) {
@@ -1718,9 +1684,8 @@ std::string CalculatorConversions::stringFromSemisimpleSubalgebras(
 }
 
 bool CalculatorConversions::storeSemisimpleSubalgebras(
-  Calculator& calculator,
-  const SemisimpleSubalgebras& input,
-  Expression& output
+  Calculator& calculator, const SemisimpleSubalgebras& input, Expression&
+  output
 ) {
   STACK_TRACE("CalculatorConversions::storeSemisimpleSubalgebras");
   Expression dynkinTypeExpression;
@@ -1728,9 +1693,7 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   List<Expression> values;
   if (
     !CalculatorConversions::expressionFromDynkinType(
-      calculator,
-      input.owner->weylGroup.dynkinType,
-      dynkinTypeExpression
+      calculator, input.owner->weylGroup.dynkinType, dynkinTypeExpression
     )
   ) {
     return false;
@@ -1764,16 +1727,12 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   Expression subalgebrasListExpression;
   Expression candidateExpression;
   subalgebrasListExpression.makeSequence(calculator);
-  subalgebrasListExpression.setExpectedSize(
-    input.subalgebras.values.size + 1
-  );
+  subalgebrasListExpression.setExpectedSize(input.subalgebras.values.size + 1);
   input.checkAll();
   for (int i = 0; i < input.subalgebras.values.size; i ++) {
     if (
       !CalculatorConversions::storeCandidateSubalgebra(
-        calculator,
-        input.subalgebras.values[i].content,
-        candidateExpression
+        calculator, input.subalgebras.values[i].content, candidateExpression
       )
     ) {
       return false;
@@ -1812,10 +1771,7 @@ bool CalculatorConversions::expressionFromMonomialUniversalEnveloping(
       calculator, input.powers[i], powerExpression, inputContext
     );
     termExpression.makeXOX(
-      calculator,
-      calculator.opPower(),
-      chevalleyExpression,
-      powerExpression
+      calculator, calculator.opPower(), chevalleyExpression, powerExpression
     );
     terms.addOnTop(termExpression);
   }
@@ -1843,9 +1799,7 @@ bool CalculatorConversions::expressionFromElementUniversalEnveloping(
     ) {
       return calculator << "<hr>Failed to store " << input.toString();
     }
-    elementUniversalEnveloping.addMonomial(
-      monomial, input.coefficients[i]
-    );
+    elementUniversalEnveloping.addMonomial(monomial, input.coefficients[i]);
   }
   return
   output.makeSumFromLinearCombination(calculator, elementUniversalEnveloping);
@@ -1930,11 +1884,8 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
     }
     Expression chevalleyGeneratorExpression =
     context.getVariable(chevalleyGeneratorIndex);
-    if (
-      !chevalleyGeneratorExpression.startsWith(
-        calculator.opUnderscore(), 3
-      )
-    ) {
+    if (!chevalleyGeneratorExpression.startsWith(calculator.opUnderscore(), 3))
+    {
       return
       calculator
       << "<hr>Failed to convert: "
@@ -1967,9 +1918,7 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
       ) {
         isGood = false;
       }
-      output.addMonomial(
-        chevalleyGenerator, polynomialForm.coefficients[j]
-      );
+      output.addMonomial(chevalleyGenerator, polynomialForm.coefficients[j]);
     } else if (letter == "h") {
       int rootIndex =
       owner.getRootIndexFromDisplayIndex(chevalleyGenerator.generatorIndex);
@@ -2034,9 +1983,7 @@ bool CalculatorConversions::elementUniversalEnveloping(
   HashedList<Expression> polynomialVariables;
   for (int j = 0; j < polynomial.content.size(); j ++) {
     const MonomialPolynomial& monomial = polynomial.content[j];
-    currentSummand.makeConstant(
-      polynomial.content.coefficients[j], owner
-    );
+    currentSummand.makeConstant(polynomial.content.coefficients[j], owner);
     currentMultiplicandRFpartMon.makeOne();
     for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
       int power = - 1;
@@ -2191,9 +2138,9 @@ bool CalculatorConversions::expressionFromElementUniversalEnveloping(
   ElementUniversalEnveloping<RationalFraction<Rational> >
   elementUniversalEnveloping;
   if (
-    !input.isOfType<
-      ElementUniversalEnveloping<RationalFraction<Rational> >
-    >(&elementUniversalEnveloping)
+    !input.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(
+      &elementUniversalEnveloping
+    )
   ) {
     return
     calculator
@@ -2360,13 +2307,8 @@ bool CalculatorConversions::functionMatrixRationalFunction(
   ExpressionContext context(calculator);
   if (
     !CalculatorConversions::functionGetMatrix(
-      calculator,
-      input,
-      outputMatrix,
-      true,
-      &context,
-      - 1,
-      &calculator.comments
+      calculator, input, outputMatrix, true, &context, - 1, &calculator.
+      comments
     )
   ) {
     return calculator << "<hr>Failed to get matrix of rational functions. ";
@@ -2466,9 +2408,7 @@ bool CalculatorConversions::polynomialModuloInteger(
     << "Expected two arguments, polynomial and positive integer.";
   }
   WithContext<Polynomial<Rational> > polynomial;
-  if (
-    !CalculatorConversions::convert(calculator, input[1], polynomial)
-  ) {
+  if (!CalculatorConversions::convert(calculator, input[1], polynomial)) {
     return false;
   }
   LargeInteger modulus;

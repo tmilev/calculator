@@ -152,12 +152,11 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
       Rational::nChooseK(polynomialPower, multiplicityDrop) *
       Rational::factorial(multiplicityDrop);
       buffer.polynomialPart.setVariable(
-        k,
-        left.polynomialPart(k) + right.polynomialPart(k) - multiplicityDrop
+        k, left.polynomialPart(k) + right.polynomialPart(k) - multiplicityDrop
       );
       buffer.differentialPart.setVariable(
-        k,
-        left.differentialPart(k) + right.differentialPart(k) - multiplicityDrop
+        k, left.differentialPart(k) +
+        right.differentialPart(k) - multiplicityDrop
       );
     }
     output.addMonomial(buffer, coefficientBuffer);
@@ -249,9 +248,7 @@ void ElementWeylAlgebra<Coefficient>::multiplyOnTheLeft(
   Coefficient currentCoefficient;
   for (int j = 0; j < standsOnTheLeft.size(); j ++) {
     for (int i = 0; i < this->size(); i ++) {
-      this->multiplyTwoMonomials(
-        standsOnTheLeft[j], (*this)[i], summand
-      );
+      this->multiplyTwoMonomials(standsOnTheLeft[j], (*this)[i], summand);
       currentCoefficient = standsOnTheLeft.coefficients[j];
       currentCoefficient *= this->coefficients[i];
       summand *= currentCoefficient;
@@ -271,8 +268,7 @@ void ElementWeylAlgebra<Coefficient>::operator*=(
   Coefficient currentCoefficient;
   for (int j = 0; j < standsOnTheRight.size(); j ++) {
     for (int i = 0; i < this->size(); i ++) {
-      this->multiplyTwoMonomials((*this)[i], standsOnTheRight[j], summand
-      );
+      this->multiplyTwoMonomials((*this)[i], standsOnTheRight[j], summand);
       currentCoefficient = this->coefficients[i];
       currentCoefficient *= standsOnTheRight.coefficients[j];
       summand *= currentCoefficient;
@@ -440,9 +436,7 @@ bool ElementWeylAlgebra<Coefficient>::substitute(
     }
     if (
       !workingMonomial.differentialPart.substitute(
-        substitutionDifferentialPart,
-        differentialOperatorPart,
-        Rational::one()
+        substitutionDifferentialPart, differentialOperatorPart, Rational::one()
       )
     ) {
       return false;

@@ -19,9 +19,7 @@ public:
   List<TemplateMonomial> involvedMonomials;
   Matrix<Coefficient> projectionOperator;
   void setBasis(const List<templateVector>& basis);
-  void denseVectorInBasis(
-    Vector<Coefficient>& out, const templateVector& in
-  );
+  void denseVectorInBasis(Vector<Coefficient>& out, const templateVector& in);
   bool checkConsistency() const {
     if (this->flagDeallocated) {
       global.fatal
@@ -54,9 +52,7 @@ setBasis(const List<templateVector>& basis) {
   }
   for (int i = 0; i < basis.size; i ++) {
     for (int j = 0; j < basis[i].monomials.size; j ++) {
-      this->involvedMonomials.sortedInsertDontDup(
-        basis[i].monomials[j]
-      );
+      this->involvedMonomials.sortedInsertDontDup(basis[i].monomials[j]);
     }
   }
   Matrix<Coefficient> basisMatrix;
@@ -103,9 +99,8 @@ intoStream(somestream& out) const {
 }
 
 template <class templateVector, class TemplateMonomial, class Coefficient>
-std::string SparseSubspaceBasis<
-  templateVector, TemplateMonomial, Coefficient
->::toString() const {
+std::string SparseSubspaceBasis<templateVector, TemplateMonomial, Coefficient>
+::toString() const {
   std::stringstream out;
   this->intoStream(out);
   return out.str();
@@ -138,9 +133,8 @@ public:
   void fillTableauOrdered(Tableau& out) const;
   void getAllStandardTableaux(List<Tableau>& out) const;
   template <typename scalar>
-  void spechtModuleMatricesOfTranspositions1j(
-    List<Matrix<scalar> >& out
-  ) const;
+  void spechtModuleMatricesOfTranspositions1j(List<Matrix<scalar> >& out)
+  const;
   template <typename scalar>
   void spechtModuleMatricesOfTranspositionsjjplusone(
     List<Matrix<scalar> >& out
@@ -164,12 +158,11 @@ public:
   somestream& intoStream(somestream& out) const;
   std::string toString() const;
   std::string toStringForArticles(
-    const std::string& leftParenthesis = "[",
-    const std::string& rightParenthesis = "]"
+    const std::string& leftParenthesis = "[", const std::string&
+    rightParenthesis =
+    "]"
   ) const;
-  friend std::ostream& operator<<(
-    std::ostream& out, const Partition& data
-  ) {
+  friend std::ostream& operator<<(std::ostream& out, const Partition& data) {
     return data.intoStream(out);
   }
   unsigned int hashFunction() const {
@@ -313,9 +306,8 @@ public:
   template <typename somestream>
   somestream& intoStream(somestream& out) const;
   std::string toString(FormatExpressions* format = nullptr) const;
-  friend std::ostream& operator<<(
-    std::ostream& out, const PermutationR2& data
-  ) {
+  friend std::ostream& operator<<(std::ostream& out, const PermutationR2& data)
+  {
     return data.intoStream(out);
   }
 };
@@ -338,8 +330,7 @@ class TrivialOuterAutomorphism {
     return ss.str();
   }
   friend std::ostream& operator<<(
-    std::ostream& out,
-    const TrivialOuterAutomorphism<HElement, KElement>& data
+    std::ostream& out, const TrivialOuterAutomorphism<HElement, KElement>& data
   ) {
     out << data.toString();
     return out;
@@ -384,14 +375,12 @@ public:
   ) {
     out = conjugateOn ^ conjugateWith;
   }
-  bool operator==(
-    const SemidirectProductElement<HElement, KElement, oa> right
-  ) const {
+  bool operator==(const SemidirectProductElement<HElement, KElement, oa> right)
+  const {
     return (this->h == right.h) && (this->k == right.k);
   }
-  bool operator>(
-    const SemidirectProductElement<HElement, KElement, oa> right
-  ) const {
+  bool operator>(const SemidirectProductElement<HElement, KElement, oa> right)
+  const {
     if (this->h > right.h) {
       return true;
     }
@@ -435,8 +424,7 @@ public:
     global.fatal << "not implemented yet" << global.fatal;
   }
   friend std::ostream& operator<<(
-    std::ostream& s,
-    const SemidirectProductElement<HElement, KElement, oa>& in
+    std::ostream& s, const SemidirectProductElement<HElement, KElement, oa>& in
   ) {
     return s << in.toString();
   }
@@ -473,12 +461,8 @@ class DirectProductElement: SemidirectProductElement<
 > {};
 
 template <
-  typename hg,
-  typename kg,
-  typename HElement,
-  typename KElement,
-  typename oa
->
+  typename hg, typename kg, typename HElement, typename KElement,
+  typename oa>
 class SemidirectProductGroup: public FiniteGroup<
   SemidirectProductElement<HElement, KElement, oa>
 > {
@@ -487,18 +471,13 @@ public:
   kg* K;
   void initialize(hg* inH, kg* inK);
   void getWord(
-    SemidirectProductElement<HElement, KElement, oa>& g,
-    List<int>& out
+    SemidirectProductElement<HElement, KElement, oa>& g, List<int>& out
   );
 };
 
 template <
-  typename hg,
-  typename kg,
-  typename HElement,
-  typename KElement,
-  typename oa
->
+  typename hg, typename kg, typename HElement, typename KElement,
+  typename oa>
 void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::initialize(
   hg* inH, kg* inK
 ) {
@@ -510,25 +489,17 @@ void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::initialize(
     this->generators[i].h = this->H.generators[i];
     this->generators[i].k = this->K.makeIdentity();
   }
-  for (
-    ; i < this->H.generators.size + this->K.generators.size; i ++
-  ) {
+  for (; i < this->H.generators.size + this->K.generators.size; i ++) {
     this->generators[i].h = this->H.makeIdentity();
-    this->generators[i].k =
-    this->K.generators[i - this->H.generators.size];
+    this->generators[i].k = this->K.generators[i - this->H.generators.size];
   }
 }
 
 template <
-  typename hg,
-  typename kg,
-  typename HElement,
-  typename KElement,
-  typename oa
->
+  typename hg, typename kg, typename HElement, typename KElement,
+  typename oa>
 void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::getWord(
-  SemidirectProductElement<HElement, KElement, oa>& g,
-  List<int>& out
+  SemidirectProductElement<HElement, KElement, oa>& g, List<int>& out
 ) {
   this->H.getWord(g.h, out);
   List<int> kword;
@@ -538,11 +509,7 @@ void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::getWord(
 
 template <typename hg, typename kg, typename HElement, typename KElement>
 class DirectProductGroup: public SemidirectProductGroup<
-  hg,
-  kg,
-  HElement,
-  KElement,
-  TrivialOuterAutomorphism<HElement, KElement>
+  hg, kg, HElement, KElement, TrivialOuterAutomorphism<HElement, KElement>
 > {};
 
 class ElementZ2N {
@@ -557,13 +524,9 @@ public:
   }
   ElementZ2N operator*(const ElementZ2N right) const {
     ElementZ2N out;
-    out.bits.setSize(
-      MathRoutines::maximum(this->bits.size, right.bits.size)
-    );
+    out.bits.setSize(MathRoutines::maximum(this->bits.size, right.bits.size));
     int i = 0;
-    for (
-      ; i < MathRoutines::minimum(this->bits.size, right.bits.size); i ++
-    ) {
+    for (; i < MathRoutines::minimum(this->bits.size, right.bits.size); i ++) {
       out.bits[i] = this->bits[i] != right.bits[i];
     }
     for (; i < this->bits.size; i ++) {
@@ -596,9 +559,7 @@ public:
   void invert() {}
   bool operator==(const ElementZ2N& right) const {
     int i = 0;
-    for (
-      ; i < MathRoutines::minimum(this->bits.size, right.bits.size); i ++
-    ) {
+    for (; i < MathRoutines::minimum(this->bits.size, right.bits.size); i ++) {
       if (this->bits[i] != right.bits[i]) {
         return false;
       }
@@ -760,9 +721,8 @@ public:
   void spechtModuleOfPartititons(
     const Partition& positive,
     const Partition& negative,
-    GroupRepresentation<
-      FiniteGroup<ElementHyperoctahedralGroupR2>, Rational
-    >& out
+    GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>&
+    out
   );
   bool operator==(const HyperoctahedralGroupData& other) const {
     if (
@@ -884,13 +844,12 @@ public:
       case firstout:
         if (stack[frame_pointer].c % 2 != 0) {
           l.swapTwoIndices(
-            l.size - 1 - stack[frame_pointer].loop_i,
-            l.size - 1 - stack[frame_pointer].c
+            l.size - 1 - stack[frame_pointer].loop_i, l.size -
+            1 -
+            stack[frame_pointer].c
           );
         } else {
-          l.swapTwoIndices(
-            l.size - 1, l.size - 1 - stack[frame_pointer].c
-          );
+          l.swapTwoIndices(l.size - 1, l.size - 1 - stack[frame_pointer].c);
         }
         stack[frame_pointer].loop_i ++;
         stack[frame_pointer].program_counter = pcpositions::loop;
@@ -1146,9 +1105,7 @@ public:
     FiniteGroup<PermutationR2>& G
   );
   static bool getWordjjPlus1Implementation(
-    FiniteGroup<PermutationR2>& G,
-    const PermutationR2& g,
-    List<int>& word
+    FiniteGroup<PermutationR2>& G, const PermutationR2& g, List<int>& word
   );
   PermutationGroupData() {
     this->flagIsSymmetricGroup = false;
@@ -1164,8 +1121,7 @@ public:
   template <typename somestream>
   somestream& intoStream(somestream& out);
   std::string toString();
-  friend std::ostream& operator<<(
-    std::ostream& out, PermutationGroupData& data
+  friend std::ostream& operator<<(std::ostream& out, PermutationGroupData& data
   ) {
     return data.intoStream(out);
   }
@@ -1391,12 +1347,8 @@ bool FiniteGroup<elementSomeGroup>::areConjugate(
   int xi = this->elements.getIndex(x);
   int yi = this->elements.getIndex(y);
   for (int i = 0; i < this->conjugacyClasses.size; i ++) {
-    if (
-      this->conjugacyClasses[i].indicesElementsInOwner.sortedContains(xi)
-    ) {
-      if (
-        this->conjugacyClasses[i].indicesElementsInOwner.sortedContains(yi)
-      ) {
+    if (this->conjugacyClasses[i].indicesElementsInOwner.sortedContains(xi)) {
+      if (this->conjugacyClasses[i].indicesElementsInOwner.sortedContains(yi)) {
         return true;
       }
     }
@@ -1434,7 +1386,9 @@ void FiniteGroup<elementSomeGroup>::makeIdentity(elementSomeGroup& e) {
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::
 computeConjugacyClassesSizesRepresentativesWords() {
-  STACK_TRACE("FiniteGroup::computeConjugacyClassesSizesRepresentativesWords");
+  STACK_TRACE(
+    "FiniteGroup::computeConjugacyClassesSizesRepresentativesWords"
+  );
   this->checkConsistency();
   if (this->getWordByFormula != 0) {
     this->flagWordsComputed = true;
@@ -1484,9 +1438,8 @@ computeConjugacyClassesSizesRepresentativesWords() {
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeGeneratorCommutationRelations() {
-  if (
-    this->generatorCommutationRelations.numberOfRows == this->generators.size
-  ) {
+  if (this->generatorCommutationRelations.numberOfRows == this->generators.size)
+  {
     return;
   }
   this->generatorCommutationRelations.initialize(
@@ -1653,8 +1606,7 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(
     out << ' ';
     out << '[';
     for (int j = 0; j < values[i].size; j ++) {
-      int padl =
-      columnsPerElement - static_cast<int>(values[i][j].length());
+      int padl = columnsPerElement - static_cast<int>(values[i][j].length());
       for (int pp = 0; pp < padl; pp ++) {
         out << ' ';
       }
@@ -2052,10 +2004,7 @@ std::string GroupRepresentation<somegroup, Coefficient>::describeAsDirectSum()
   for (int i = 0; i < this->ownerGroup->irreps.size; i ++) {
     this->ownerGroup->irreps[i].computeCharacter();
     Coefficient x;
-    x =
-    this->character.innerProduct(
-      this->ownerGroup->irreps[i].character
-    );
+    x = this->character.innerProduct(this->ownerGroup->irreps[i].character);
     if (x != 0) {
       if (firstone) {
         firstone = false;

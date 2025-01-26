@@ -17,8 +17,7 @@ class TopicElementParser {
 public:
   class TopicLine {
   public:
-    friend std::ostream& operator<<(
-      std::ostream& output, const TopicLine& line
+    friend std::ostream& operator<<(std::ostream& output, const TopicLine& line
     ) {
       output << line.toString();
       return output;
@@ -34,20 +33,16 @@ public:
   };
 
   CalculatorHTML* owner;
-  MapList<
-    std::string,
-    TopicElement,
-    HashFunctions::hashFunction<std::string>
-  > topics;
+  MapList<std::string, TopicElement, HashFunctions::hashFunction<std::string> >
+  topics;
   MapList<
     std::string,
     List<TopicElementParser::TopicLine>,
     HashFunctions::hashFunction<std::string>
   > knownTopicBundles;
   HashedList<std::string> loadedTopicBundleFiles;
-  MapList<
-    std::string, int, HashFunctions::hashFunction<std::string>
-  > elementTypes;
+  MapList<std::string, int, HashFunctions::hashFunction<std::string> >
+  elementTypes;
   MapList<int, std::string, HashFunctions::hashFunction> elementNames;
   List<TopicElementParser::TopicLine> crawled;
   List<TopicElementParser::TopicLine> bundleStack;
@@ -276,11 +271,8 @@ public:
   std::string outputProblemLabel;
   std::string outputProblemTitle;
   std::string outputDebugInformationBody;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > outputScripts;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  outputScripts;
   std::stringstream logCommandsProblemGeneration;
   std::string courseHome;
   std::string topicListJavascriptWithTag;
@@ -296,11 +288,8 @@ public:
   std::string topicListFileName;
   HashedList<std::string> problemNamesNoTopics;
   TopicElementParser topics;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > scripts;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  scripts;
   List<std::string> databaseStudentSections;
   bool flagLoadedSuccessfully;
   bool flagLoadedClassDataSuccessfully;
@@ -447,9 +436,7 @@ public:
   bool prepareCommentsBeforeInterpretation(
     Answer& answer, std::stringstream* comments
   );
-  bool exrtactSolutionCommands(
-    Answer& answer, std::stringstream* comments
-  );
+  bool exrtactSolutionCommands(Answer& answer, std::stringstream* comments);
   bool prepareCommandsAnswer(Answer& answer, std::stringstream* comments);
   bool prepareCommandsGenerateProblem(std::stringstream* comments);
   std::string getProblemHeaderEnclosure();
@@ -471,68 +458,59 @@ public:
     std::stringstream& commentsOnFailure
   );
   bool mergeProblemWeightAndStore(
-    std::string& incomingProblemInfo,
-    std::stringstream* commentsOnFailure
+    std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
   );
   bool mergeProblemDeadlineAndStore(
-    std::string& incomingProblemInfo,
-    std::stringstream* commentsOnFailure
+    std::string& incomingProblemInfo, std::stringstream* commentsOnFailure
   );
   bool mergeProblemWeight(
     const JSData& inputJSON,
     MapList<
-      std::string,
-      ProblemData,
-      HashFunctions::hashFunction<std::string>
-    >& outputAppendProblemInfo,
+      std::string, ProblemData, HashFunctions::hashFunction<
+        std::string
+      > >& outputAppendProblemInfo,
     bool checkFileExistence,
     std::stringstream* commentsOnFailure
   );
   bool mergeProblemDeadline(
     const JSData& inputJSON,
     MapList<
-      std::string,
-      ProblemData,
-      HashFunctions::hashFunction<std::string>
-    >& outputAppendProblemInfo,
+      std::string, ProblemData, HashFunctions::hashFunction<
+        std::string
+      > >& outputAppendProblemInfo,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemWeights(
     MapList<
-      std::string,
-      ProblemData,
-      HashFunctions::hashFunction<std::string>
-    >& toStore,
+      std::string, ProblemData, HashFunctions::hashFunction<
+        std::string
+      > >& toStore,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemDeadlines(
     MapList<
-      std::string,
-      ProblemData,
-      HashFunctions::hashFunction<std::string>
-    >& toStore,
+      std::string, ProblemData, HashFunctions::hashFunction<
+        std::string
+      > >& toStore,
     std::stringstream* commentsOnFailure
   );
   QueryUpdate toQuerySetProblemWeights(
     MapList<
-      std::string,
-      ProblemData,
-      HashFunctions::hashFunction<std::string>
-    >& inputProblemInfo
+      std::string, ProblemData, HashFunctions::hashFunction<
+        std::string
+      > >& inputProblemInfo
   );
   QueryUpdate toQuerySetDeadlines(
     MapList<
-      std::string,
-      ProblemData,
-      HashFunctions::hashFunction<std::string>
-    >& inputProblemInfo
+      std::string, ProblemData, HashFunctions::hashFunction<
+        std::string
+      > >& inputProblemInfo
   );
   JSData toJSONDeadlines(
     MapList<
-      std::string,
-      ProblemData,
-      HashFunctions::hashFunction<std::string>
-    >& inputProblemInfo
+      std::string, ProblemData, HashFunctions::hashFunction<
+        std::string
+      > >& inputProblemInfo
   );
   std::string toStringDeadline(
     const std::string& topicID,
@@ -547,15 +525,11 @@ public:
     const std::string& fileName, const std::string& stringToDisplay = ""
   );
   static std::string toStringLinkFromProblem(
-    const std::string& fileName,
-    bool practiceMode = true,
-    int randomSeed = - 1
+    const std::string& fileName, bool practiceMode = true, int randomSeed = - 1
   );
   std::string toStringLinkFromFileName(const std::string& fileName);
   std::string toStringLinkCurrentAdmin(
-    const std::string& displayString,
-    bool setDebugFlag,
-    bool includeRandomSeed
+    const std::string& displayString, bool setDebugFlag, bool includeRandomSeed
   );
   std::string toStringCalculatorProblemSourceFromFileName(
     const std::string& fileName
@@ -703,9 +677,7 @@ public:
       StateMaintainer<UserCalculatorData> maintainUserRole;
       StateMaintainer<
         MapList<
-          std::string,
-          std::string,
-          HashFunctions::hashFunction<std::string>
+          std::string, std::string, HashFunctions::hashFunction<std::string>
         >
       > maintainWebArguments;
       StateMaintainer<std::string> maintainRequestType;

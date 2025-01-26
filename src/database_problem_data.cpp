@@ -55,9 +55,7 @@ bool ProblemData::checkConsistency() const {
   STACK_TRACE("ProblemData::checkConsistency");
   for (int i = 0; i < this->answers.size(); i ++) {
     if (
-      StringRoutines::stringTrimWhiteSpace(
-        this->answers.values[i].answerId
-      ) ==
+      StringRoutines::stringTrimWhiteSpace(this->answers.values[i].answerId) ==
       ""
     ) {
       global.fatal
@@ -142,9 +140,7 @@ std::string ProblemData::store() {
       currentAnswer.firstCorrectAnswerClean, false
     );
     out
-    << HtmlRoutines::convertStringToURLString(
-      questionsStream.str(), false
-    );
+    << HtmlRoutines::convertStringToURLString(questionsStream.str(), false);
   }
   return out.str();
 }
@@ -170,9 +166,7 @@ JSData ProblemData::storeJSON() const {
     HtmlRoutines::convertStringToURLString(
       currentA.firstCorrectAnswerClean, false
     );
-    result[
-      HtmlRoutines::convertStringToURLString(currentA.answerId, false)
-    ] =
+    result[HtmlRoutines::convertStringToURLString(currentA.answerId, false)] =
     currentAnswerJSON;
   }
   return result;
@@ -182,11 +176,8 @@ bool ProblemData::loadFromOldFormatDeprecated(
   const std::string& inputData, std::stringstream& commentsOnFailure
 ) {
   STACK_TRACE("ProblemData::loadFromOldFormatDeprecated");
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > mapStrings;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  mapStrings;
   if (
     !HtmlRoutines::chopPercentEncodedString(
       inputData, mapStrings, commentsOnFailure
@@ -211,11 +202,8 @@ bool ProblemData::loadFromOldFormatDeprecated(
   }
   this->answers.clear();
   bool result = true;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > currentQuestionMap;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  currentQuestionMap;
   for (int i = 0; i < mapStrings.size(); i ++) {
     if (mapStrings.keys[i] == WebAPI::Problem::randomSeed) {
       continue;
@@ -245,9 +233,7 @@ bool ProblemData::loadFromOldFormatDeprecated(
     }
     if (currentQuestionMap.contains("numSubmissions")) {
       currentA.numberOfSubmissions =
-      atoi(
-        currentQuestionMap.getValueCreateEmpty("numSubmissions").c_str()
-      );
+      atoi(currentQuestionMap.getValueCreateEmpty("numSubmissions").c_str());
     }
     if (currentQuestionMap.contains("firstCorrectAnswer")) {
       currentA.firstCorrectAnswerURLed =

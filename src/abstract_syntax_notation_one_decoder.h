@@ -73,8 +73,7 @@ public:
   bool isIntegerUnsigned(
     LargeIntegerUnsigned* whichInteger, std::stringstream* commentsOnFalse
   ) const;
-  bool isInteger(
-    LargeInteger* whichInteger, std::stringstream* commentsOnFalse
+  bool isInteger(LargeInteger* whichInteger, std::stringstream* commentsOnFalse
   ) const;
   std::string interpretAsObjectIdentifier() const;
   std::string interpretAsObjectIdentifierGetNameAndId() const;
@@ -186,8 +185,8 @@ public:
   };
 
   friend std::ostream& operator<<(
-    std::ostream& output, const ASNObject& element
-  ) {
+    std::ostream& output, const ASNObject&
+    element) {
     output << element.toString();
     return output;
   }
@@ -195,11 +194,8 @@ public:
   ASNElement objectId;
   ASNElement content;
   static void initializeAddSample(
-    MapList<
-      std::string,
-      ASNObject,
-      HashFunctions::hashFunction<std::string>
-    >& container,
+    MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >&
+    container,
     const std::string& inputName,
     const std::string& inputObjectIdHex,
     unsigned char inputContentTag
@@ -212,23 +208,18 @@ public:
   static MapList<List<unsigned char>, ASNObject>& objectIdsToNames();
   static void initializeNonThreadSafe();
   bool loadFromASN(
-    const ASNElement& input, std::stringstream* commentsOnFailure
-  );
+    const ASNElement& input, std::stringstream*
+    commentsOnFailure);
   static bool loadFieldsFromASNSequence(
     const ASNElement& input,
-    MapList<
-      std::string,
-      ASNObject,
-      HashFunctions::hashFunction<std::string>
-    >& output,
+    MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >&
+    output,
     std::stringstream* commentsOnFailure
   );
   // Returns 1 if field was found, 0 otherwise.
   int loadField(
     const MapList<
-      std::string,
-      ASNObject,
-      HashFunctions::hashFunction<std::string>
+      std::string, ASNObject, HashFunctions::hashFunction<std::string>
     >& inputFields,
     const std::string& fieldName
   );

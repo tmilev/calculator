@@ -91,17 +91,14 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool extractFileNames(
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   void crawl();
   bool extractFileNamesPdfExists(
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   bool buildOrFetchFromCachePDF(
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   bool buildTopicList(
     int topicNumber,
@@ -110,8 +107,7 @@ public:
   );
   void buildFreecalc();
   void crawlRecursive(
-    std::stringstream& crawlingResult,
-    const std::string& currentFileName
+    std::stringstream& crawlingResult, const std::string& currentFileName
   );
   bool initializeFromGlobalVariables(std::stringstream* commentsOnFailure);
   std::stringstream displayResult;

@@ -85,12 +85,7 @@ bool CalculatorFunctions::testProblemInterpretation(
   input[3].isSmallInteger(&randomSeed);
   std::stringstream comments;
   CalculatorHTML::Test::builtInMultiple(
-    firstFileIndex,
-    desiredNumberOfTests,
-    randomSeed,
-    3,
-    nullptr,
-    &comments
+    firstFileIndex, desiredNumberOfTests, randomSeed, 3, nullptr, &comments
   );
   return output.assignValue(calculator, comments.str());
 }
@@ -190,9 +185,7 @@ bool CalculatorFunctions::getSummand(
     calculator.collectOpands(expression, calculator.opPlus(), summands);
     for (int i = 0; i < summands.size; i ++) {
       if (
-        summands[i].containsAsSubExpressionNoBuiltInTypes(
-          calculator.opSum()
-        )
+        summands[i].containsAsSubExpressionNoBuiltInTypes(calculator.opSum())
       ) {
         sums.addOnTop(summands[i]);
         summands.removeIndexShiftDown(i);
@@ -298,9 +291,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   plotObject.leftPoint = input[2];
   plotObject.rightPoint = input[3];
   if (input.size() >= 7) {
-    if (
-      !input[6].isOfType<std::string>(&plotObject.colorJavascript)
-    ) {
+    if (!input[6].isOfType<std::string>(&plotObject.colorJavascript)) {
       plotObject.colorJavascript = input[6].toString();
     }
   } else {
@@ -411,9 +402,7 @@ bool CalculatorFunctionsPlot::plotDirectionOrVectorField(
   for (int i = 0; i < 2; i ++) {
     if (
       !extractor.extract(
-        input[4][i + 1],
-        plotObject.numberOfSegmentsJS[i],
-        &calculator.comments
+        input[4][i + 1], plotObject.numberOfSegmentsJS[i], &calculator.comments
       )
     ) {
       return
@@ -451,8 +440,8 @@ bool CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256(
   std::string modulusBase64;
   std::string exponentBase64;
   if (
-    !input[2].isOfType(&modulusBase64) || !input[3].isOfType(&exponentBase64)
-  ) {
+    !input[2].isOfType(&modulusBase64) ||
+    !input[3].isOfType(&exponentBase64)) {
     return
     calculator
     << "Failed to convert the arguments "
@@ -516,9 +505,7 @@ bool CalculatorFunctionsEncoding::convertHexToString(
   }
   std::string result;
   std::stringstream commentsOnFailure;
-  if (
-    !Crypto::convertHexToString(inputString, result, &commentsOnFailure)
-  ) {
+  if (!Crypto::convertHexToString(inputString, result, &commentsOnFailure)) {
     return
     calculator
     << "Failed to interpret your input as string. "
@@ -627,10 +614,7 @@ bool CalculatorFunctionsEncoding::convertBase64ToHex(
   std::string bitStream;
   if (
     !Crypto::convertBase64ToString(
-      inputString,
-      bitStream,
-      &calculator.comments,
-      &calculator.comments
+      inputString, bitStream, &calculator.comments, &calculator.comments
     )
   ) {
     return false;
@@ -692,11 +676,8 @@ bool CalculatorFunctionsCrypto::testRSASign(
     << "Failed to extract positive integers "
     << "from the second and third argument. ";
   }
-  if (
-    !key.computeFromTwoPrimes(
-      key.primeOne, key.primeTwo, true, &errorStream
-    )
-  ) {
+  if (!key.computeFromTwoPrimes(key.primeOne, key.primeTwo, true, &errorStream))
+  {
     return
     calculator
     << "Inputs do not appear to be prime. "
@@ -707,15 +688,12 @@ bool CalculatorFunctionsCrypto::testRSASign(
   List<unsigned char> signature;
   message = messageString;
   key.hashAndPadPKCS1(
-    message,
-    SignatureAlgorithmSpecification::HashAlgorithm::sha256,
+    message, SignatureAlgorithmSpecification::HashAlgorithm::sha256,
     paddedMessage
   );
   out << "Temporary private key:<br>" << key.toString() << "<br>";
   key.signBytesPadPKCS1(
-    message,
-    SignatureAlgorithmSpecification::HashAlgorithm::sha256,
-    signature
+    message, SignatureAlgorithmSpecification::HashAlgorithm::sha256, signature
   );
   out << "Message:<br>" << Crypto::convertListUnsignedCharsToHex(message);
   out
@@ -869,8 +847,7 @@ bool CalculatorFunctions::isSquareFreePolynomial(
     return false;
   }
   std::stringstream out;
-  bool squareFree =
-  polynomial.content.isSquareFree(Rational::one(), &out);
+  bool squareFree = polynomial.content.isSquareFree(Rational::one(), &out);
   return output.assignValue(calculator, Rational(int(squareFree)));
 }
 
@@ -930,9 +907,7 @@ bool CalculatorFunctions::numberOfIntegerDivisors(
   }
   List<LargeInteger> allPrimeFactors;
   List<int> allMultiplicities;
-  argument.value.factor(
-    allPrimeFactors, allMultiplicities, 10000, 2, nullptr
-  );
+  argument.value.factor(allPrimeFactors, allMultiplicities, 10000, 2, nullptr);
   LargeInteger result = 1;
   for (int i = 0; i < allMultiplicities.size; i ++) {
     result *= allMultiplicities[i] + 1;
@@ -1014,9 +989,7 @@ bool CalculatorFunctions::functionFactorInteger(
     );
     factorNext.addChildOnTop(numberLast);
     return
-    output.makeXOX(
-      calculator, calculator.opUnion(), factorsSoFar, factorNext
-    );
+    output.makeXOX(calculator, calculator.opUnion(), factorsSoFar, factorNext);
   }
 }
 
@@ -1093,9 +1066,7 @@ bool CalculatorFunctions::subList(
     substituted = input[2];
     substituted.substituteRecursively(toBeSubbed, input[1][i]);
     if (
-      !calculator.evaluateExpression(
-        calculator, substituted, subbedSimplified
-      )
+      !calculator.evaluateExpression(calculator, substituted, subbedSimplified)
     ) {
       return calculator << "Failed to evaluate " << substituted.toString();
     }
@@ -1147,9 +1118,7 @@ bool CalculatorFunctions::matchesPattern(
   commandList.addChildAtomOnTop(calculator.opCommandSequence());
   for (int i = 0; i < matchedExpressions.size(); i ++) {
     Expression currentCommand;
-    if (
-      !matchedExpressions.keys[i].startsWith(calculator.opBind(), 2)
-    ) {
+    if (!matchedExpressions.keys[i].startsWith(calculator.opBind(), 2)) {
       std::stringstream errorStream;
       errorStream
       << "Bound variable "
@@ -1213,9 +1182,7 @@ bool CalculatorFunctions::greaterThanOrEqualTo(
   const Expression& right = input[2];
   Rational leftRational;
   Rational rightRational;
-  if (
-    left.isRational(&leftRational) && right.isRational(&rightRational)
-  ) {
+  if (left.isRational(&leftRational) && right.isRational(&rightRational)) {
     if (leftRational >= rightRational) {
       return output.assignValue(calculator, 1);
     }
@@ -1246,9 +1213,7 @@ bool CalculatorFunctions::greaterThan(
   const Expression& right = input[2];
   Rational leftRational;
   Rational rightRational;
-  if (
-    left.isRational(&leftRational) && right.isRational(&rightRational)
-  ) {
+  if (left.isRational(&leftRational) && right.isRational(&rightRational)) {
     if (leftRational > rightRational) {
       return output.assignValue(calculator, 1);
     }
@@ -1380,9 +1345,8 @@ bool CalculatorFunctions::leftIntervalGreaterThanRight(
   if (left1IsDouble && right[1] == minusInfinityExpression) {
     return true;
   }
-  if (
-    left[1] == minusInfinityExpression || right[1] == minusInfinityExpression
-  ) {
+  if (left[1] == minusInfinityExpression || right[1] == minusInfinityExpression)
+  {
     if (left2IsDouble && righ2IsDouble) {
       if (left2 > right2) {
         return true;
@@ -1518,26 +1482,18 @@ bool CalculatorFunctionsIntervals::intersectIntervals(
   if (!leftIsClosed && rightIsClosed) {
     return
     output.makeXOX(
-      calculator,
-      calculator.opIntervalRightClosed(),
-      leftFinal,
-      rightFinal
+      calculator, calculator.opIntervalRightClosed(), leftFinal, rightFinal
     );
   }
   if (leftIsClosed && !rightIsClosed) {
     return
     output.makeXOX(
-      calculator,
-      calculator.opIntervalLeftClosed(),
-      leftFinal,
-      rightFinal
+      calculator, calculator.opIntervalLeftClosed(), leftFinal, rightFinal
     );
   }
   if (!leftIsClosed && !rightIsClosed) {
     return
-    output.makeXOX(
-      calculator, calculator.opSequence(), leftFinal, rightFinal
-    );
+    output.makeXOX(calculator, calculator.opSequence(), leftFinal, rightFinal);
   }
   return false;
 }
@@ -1569,10 +1525,7 @@ bool CalculatorFunctionsIntervals::unionUnionIntervals(
   }
   return
   output.makeXOX(
-    calculator,
-    calculator.opUnion(),
-    middleUnionReduced,
-    rightComposite[2]
+    calculator, calculator.opUnion(), middleUnionReduced, rightComposite[2]
   );
 }
 
@@ -1695,19 +1648,13 @@ bool CalculatorFunctionsIntervals::unionIntervals(
   if (!leftIsClosed && rightIsClosed) {
     return
     output.makeXOX(
-      calculator,
-      calculator.opIntervalRightClosed(),
-      leftFinal,
-      rightFinal
+      calculator, calculator.opIntervalRightClosed(), leftFinal, rightFinal
     );
   }
   if (leftIsClosed && !rightIsClosed) {
     return
     output.makeXOX(
-      calculator,
-      calculator.opIntervalLeftClosed(),
-      leftFinal,
-      rightFinal
+      calculator, calculator.opIntervalLeftClosed(), leftFinal, rightFinal
     );
   }
   if (!leftIsClosed && !rightIsClosed) {
@@ -1727,19 +1674,14 @@ bool CalculatorFunctionsIntervals::normalizeIntervals(
     return false;
   }
   List<Expression> outputList;
-  if (
-    !calculator.collectOpands(
-      input[1], calculator.opUnion(), outputList
-    )
-  ) {
+  if (!calculator.collectOpands(input[1], calculator.opUnion(), outputList)) {
     return false;
   }
   List<Expression>::Comparator order(
     CalculatorFunctions::leftIntervalGreaterThanRight
   );
   outputList.quickSortAscending(&order);
-  return
-  output.makeXOXOdotsOX(calculator, calculator.opUnion(), outputList);
+  return output.makeXOXOdotsOX(calculator, calculator.opUnion(), outputList);
 }
 
 bool CalculatorFunctionsListsAndSets::unionEmptySet(
@@ -1791,18 +1733,10 @@ bool CalculatorFunctions::compareIntervalsNumerically(
   }
   List<Expression> leftList;
   List<Expression> rightList;
-  if (
-    !calculator.collectOpands(
-      input[1], calculator.opUnion(), leftList
-    )
-  ) {
+  if (!calculator.collectOpands(input[1], calculator.opUnion(), leftList)) {
     return false;
   }
-  if (
-    !calculator.collectOpands(
-      input[2], calculator.opUnion(), rightList
-    )
-  ) {
+  if (!calculator.collectOpands(input[2], calculator.opUnion(), rightList)) {
     return false;
   }
   if (leftList.size != rightList.size) {
@@ -1909,11 +1843,8 @@ bool CalculatorFunctions::isProductLinearOrConstantTermsIn(
     return false;
   }
   List<Expression> multiplicands;
-  if (
-    !calculator.collectOpands(
-      input[2], calculator.opTimes(), multiplicands
-    )
-  ) {
+  if (!calculator.collectOpands(input[2], calculator.opTimes(), multiplicands))
+  {
     return
     calculator
     << "Could not extract multiplicands from: "
@@ -1921,9 +1852,7 @@ bool CalculatorFunctions::isProductLinearOrConstantTermsIn(
   }
   for (int k = 0; k < multiplicands.size; k ++) {
     List<List<Expression> > summands;
-    if (
-      !calculator.getSumProductsExpressions(multiplicands[k], summands)
-    ) {
+    if (!calculator.getSumProductsExpressions(multiplicands[k], summands)) {
       return
       calculator
       << "Failed to extract sum from "
@@ -1995,16 +1924,10 @@ bool CalculatorFunctions::distributeSqrt(
   Expression leftExpression;
   Expression rightExpression;
   leftExpression.makeXOX(
-    calculator,
-    calculator.opSqrt(),
-    oneOverExponentExpression,
-    base[1]
+    calculator, calculator.opSqrt(), oneOverExponentExpression, base[1]
   );
   rightExpression.makeXOX(
-    calculator,
-    calculator.opSqrt(),
-    oneOverExponentExpression,
-    base[2]
+    calculator, calculator.opSqrt(), oneOverExponentExpression, base[2]
   );
   return
   output.makeXOX(
@@ -2070,11 +1993,8 @@ bool CalculatorFunctions::isProductTermsUpToPower(
     }
   }
   List<Expression> multiplicands;
-  if (
-    !calculator.collectOpands(
-      input[2], calculator.opTimes(), multiplicands
-    )
-  ) {
+  if (!calculator.collectOpands(input[2], calculator.opTimes(), multiplicands))
+  {
     return
     calculator
     << "Could not extract multiplicands from: "
@@ -2082,9 +2002,7 @@ bool CalculatorFunctions::isProductTermsUpToPower(
   }
   for (int k = 0; k < multiplicands.size; k ++) {
     List<List<Expression> > summands;
-    if (
-      !calculator.getSumProductsExpressions(multiplicands[k], summands)
-    ) {
+    if (!calculator.getSumProductsExpressions(multiplicands[k], summands)) {
       return
       calculator
       << "Failed to extract sum from "
@@ -2135,7 +2053,9 @@ bool CalculatorFunctions::scaleToLeadingUnit(
 bool CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsBinaryOps::powerRatByRatReducePrimeFactors");
+  STACK_TRACE(
+    "CalculatorFunctionsBinaryOps::powerRatByRatReducePrimeFactors"
+  );
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
   }
@@ -2152,10 +2072,7 @@ bool CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic(
   Expression radical;
   Expression reduced;
   radical.makeXOX(
-    calculator,
-    calculator.opSqrt(),
-    calculator.expressionTwo(),
-    input[1]
+    calculator, calculator.opSqrt(), calculator.expressionTwo(), input[1]
   );
   if (!CalculatorFunctions::sqrt(calculator, radical, reduced)) {
     return false;
@@ -2164,13 +2081,9 @@ bool CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic(
     return false;
   }
   Expression integerPower;
-  integerPower.assignValue(
-    calculator, Rational(exponent.getNumerator())
-  );
+  integerPower.assignValue(calculator, Rational(exponent.getNumerator()));
   return
-  output.makeXOX(
-    calculator, calculator.opPower(), reduced, integerPower
-  );
+  output.makeXOX(calculator, calculator.opPower(), reduced, integerPower);
 }
 
 bool CalculatorFunctions::newtonsMethod(
@@ -2230,11 +2143,8 @@ bool CalculatorFunctions::newtonsMethod(
     << "to be a number between 1 and 50. ";
     return output.assignError(calculator, errorStream.str());
   }
-  MapList<
-    std::string,
-    Expression,
-    HashFunctions::hashFunction<std::string>
-  > substitution;
+  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >
+  substitution;
   substitution.setKeyValue("x", variables[0]);
   substitution.setKeyValue("f", functionExpression);
   substitution.setKeyValue("a", calculator.getNewAtom());
@@ -2336,14 +2246,10 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   elementRational.flagInfinity = false;
   bool isRational = true;
   bool isElementZmodP = true;
-  if (
-    !xDefinitionExpression[2].isOfType(&elementRational.xCoordinate)
-  ) {
+  if (!xDefinitionExpression[2].isOfType(&elementRational.xCoordinate)) {
     isRational = false;
   }
-  if (
-    !yDefinitionExpression[2].isOfType(&elementRational.yCoordinate)
-  ) {
+  if (!yDefinitionExpression[2].isOfType(&elementRational.yCoordinate)) {
     isRational = false;
   }
   if (!xDefinitionExpression[2].isOfType(&elementZmodP.xCoordinate)) {
@@ -2361,9 +2267,7 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
     << yDefinitionExpression[2].toString();
   }
   if (isElementZmodP) {
-    if (
-      elementZmodP.xCoordinate.modulus != elementZmodP.yCoordinate.modulus
-    ) {
+    if (elementZmodP.xCoordinate.modulus != elementZmodP.yCoordinate.modulus) {
       return calculator << "The two base coordinates have different moduli. ";
     }
   }
@@ -2487,8 +2391,7 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   context.addVariable(xExpression);
   context.addVariable(yExpression);
   if (isRational) {
-    return
-    output.assignValueWithContext(calculator, elementRational, context);
+    return output.assignValueWithContext(calculator, elementRational, context);
   }
   if (isElementZmodP) {
     return output.assignValueWithContext(calculator, elementZmodP, context);
@@ -2547,10 +2450,8 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo =
     true;
     algebra.findSl2Subalgebras(
-      algebra,
-      slTwoSubalgebras,
-      true,
-      &calculator.objectContainer.algebraicClosure
+      algebra, slTwoSubalgebras, true, &calculator.objectContainer.
+      algebraicClosure
     );
     slTwoSubalgebras.writeHTML();
     Plot plot;
@@ -2596,9 +2497,7 @@ bool CalculatorFunctionsCrypto::showKnownObjectIds(
   STACK_TRACE("CalculatorFunctionsCrypto::showKnownObjectIds");
   (void) input;
   return
-  output.assignValue(
-    calculator, ASNObject::toStringAllRecognizedObjectIds()
-  );
+  output.assignValue(calculator, ASNObject::toStringAllRecognizedObjectIds());
 }
 
 bool CalculatorFunctionsCrypto::testASN1Decode(
@@ -2800,9 +2699,7 @@ bool Matrix<Rational>::jordanNormalForm(
     << global.fatal;
   }
   PolynomialSolverWithQuadraticRadicalsUnivariate solver(ownerField);
-  if (
-    !solver.solvePolynomialWithRadicals(characteristicPolynomial, comments)
-  ) {
+  if (!solver.solvePolynomialWithRadicals(characteristicPolynomial, comments)) {
     return false;
   }
   Matrix<AlgebraicNumber> diagonalizer;
@@ -2947,8 +2844,7 @@ bool CalculatorFunctionsLinearAlgebra::functionToMatrix(
       resultMatrix.elements[i][j].addChildOnTop(rightIExpression);
     }
   }
-  return
-  output.assignMatrixExpressions(resultMatrix, calculator, true, true);
+  return output.assignMatrixExpressions(resultMatrix, calculator, true, true);
 }
 
 bool CalculatorFunctions::suffixNotationForPostScript(
@@ -2992,16 +2888,13 @@ bool CalculatorFunctions::suffixNotationForPostScript(
       return output.assignValue(calculator, std::string("ln "));
     }
     if (currentString == "\\sin") {
-      return
-      output.assignValue(calculator, std::string(" 57.29578 mul sin "));
+      return output.assignValue(calculator, std::string(" 57.29578 mul sin "));
     }
     if (currentString == "\\cos") {
-      return
-      output.assignValue(calculator, std::string(" 57.29578 mul cos "));
+      return output.assignValue(calculator, std::string(" 57.29578 mul cos "));
     }
     if (currentString == "\\tan") {
-      return
-      output.assignValue(calculator, std::string(" 57.29578 mul tan "));
+      return output.assignValue(calculator, std::string(" 57.29578 mul tan "));
     }
     if (currentString == "\\arctan") {
       return output.assignValue(calculator, std::string("ATAN "));
@@ -3103,15 +2996,11 @@ bool CalculatorFunctions::suffixNotationForPostScript(
     )
   ) {
     return
-    output.assignError(
-      calculator, "Failed to convert " + input[0].toString()
-    );
+    output.assignError(calculator, "Failed to convert " + input[0].toString());
   }
   if (!currentExpression.isOfType(&currentString)) {
     return
-    output.assignError(
-      calculator, "Failed to convert " + input[0].toString()
-    );
+    output.assignError(calculator, "Failed to convert " + input[0].toString());
   }
   out << currentString << " ";
   return output.assignValue(calculator, out.str());
@@ -3144,12 +3033,7 @@ bool CalculatorFunctions::freudenthalFull(
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
     !calculator.getTypeHighestWeightParabolic<Rational>(
-      calculator,
-      input,
-      output,
-      hwFundamental,
-      selection,
-      semisimpleLieAlgebra
+      calculator, input, output, hwFundamental, selection, semisimpleLieAlgebra
     )
   ) {
     return
@@ -3193,12 +3077,7 @@ bool CalculatorFunctions::freudenthalFormula(
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
     !calculator.getTypeHighestWeightParabolic<Rational>(
-      calculator,
-      input,
-      output,
-      hwFundamental,
-      selection,
-      semisimpleLieAlgebra
+      calculator, input, output, hwFundamental, selection, semisimpleLieAlgebra
     )
   ) {
     return
@@ -3245,8 +3124,11 @@ std::string StringRoutines::Conversions::stringToCalculatorDisplay(
 
 std::string StringRoutines::convertByteToHex(unsigned char byte) {
   std::stringstream out;
-  out << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned>
-  (byte);
+  out
+  << std::setfill('0')
+  << std::setw(2)
+  << std::hex
+  << static_cast<unsigned>(byte);
   return out.str();
 }
 

@@ -273,9 +273,7 @@ public:
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElements
   );
   static bool cartanInvolutionInternal(
-    Calculator& calculator,
-    const Expression& input,
-    CartanInvolution& output
+    Calculator& calculator, const Expression& input, CartanInvolution& output
   );
   static bool cartanInvolution(
     Calculator& calculator, const Expression& input, Expression& output
@@ -350,10 +348,8 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool printSemisimpleLieAlgebra(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool verbose
+    Calculator& calculator, const Expression& input, Expression& output, bool
+    verbose
   );
   static bool writeToHardDiskOrPrintSemisimpleLieAlgebra(
     Calculator& calculator,

@@ -32,14 +32,11 @@ PolynomialSolverWithQuadraticRadicalsUnivariate(
 
 bool PolynomialSolverWithQuadraticRadicalsUnivariate::
 solvePolynomialWithRadicals(
-  const Polynomial<Rational>& input,
-  std::stringstream* commentsOnFailure
+  const Polynomial<Rational>& input, std::stringstream* commentsOnFailure
 ) {
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationFiniteFields algorithm;
-  if (
-    !factorization.factor(input, algorithm, nullptr, commentsOnFailure)
-  ) {
+  if (!factorization.factor(input, algorithm, nullptr, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to factor the characteristic polynomial.";
     }
@@ -109,9 +106,8 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
       if (vectorActedOnSelection.selected[i] && selection.selected[i]) {
         resultVectorSelection.selected[i] = false;
         coefficient *= this->quadraticRadicals[i];
-      } else if (
-        !vectorActedOnSelection.selected[i] && !selection.selected[i]
-      ) {
+      } else if (!vectorActedOnSelection.selected[i] && !selection.selected[i])
+      {
         resultVectorSelection.selected[i] = false;
       } else {
         resultVectorSelection.selected[i] = true;
@@ -351,8 +347,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
     selection.incrementReturnFalseIfPastLast();; selection.incrementReturnFalseIfPastLast()
   ) {
     attemptsSoFar ++;
-    if (
-      attemptsLimitZeroForNone > 0 && attemptsSoFar > attemptsLimitZeroForNone
+    if (attemptsLimitZeroForNone > 0 && attemptsSoFar > attemptsLimitZeroForNone
     ) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
@@ -410,8 +405,8 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
 }
 
 void AlgebraicClosureRationals::contractBasesIfRedundant(
-  AlgebraicClosureRationals& previousCopy,
-  AlgebraicNumber* outputImageGenerator
+  AlgebraicClosureRationals& previousCopy, AlgebraicNumber*
+  outputImageGenerator
 ) {
   STACK_TRACE("AlgebraicClosureRationals::contractBasesIfRedundant");
   if (
@@ -435,9 +430,8 @@ void AlgebraicClosureRationals::contractBasesIfRedundant(
   *this = previousCopy;
 }
 
-bool AlgebraicClosureRationals::reduceMe(
-  std::stringstream* commentsOnFailure
-) {
+bool AlgebraicClosureRationals::reduceMe(std::stringstream* commentsOnFailure)
+{
   STACK_TRACE("AlgebraicClosureRationals::reduceMe");
   if (!this->chooseGeneratingElement(1000, commentsOnFailure)) {
     return false;
@@ -476,9 +470,7 @@ bool AlgebraicClosureRationals::reduceMe(
   Polynomial<Rational> buffer;
   MatrixTensor<Rational> projectionGeneratorCoordinates;
   int smallestFactorDegree = - 1;
-  if (
-    !smallestFactor.totalDegree().isSmallInteger(&smallestFactorDegree)
-  ) {
+  if (!smallestFactor.totalDegree().isSmallInteger(&smallestFactorDegree)) {
     global.fatal
     << smallestFactor.toString()
     << " has non-integral exponent, which should be "
@@ -509,8 +501,7 @@ bool AlgebraicClosureRationals::reduceMe(
       int index = - 1;
       remainderAfterReduction[j](0).isSmallInteger(&index);
       projectionGeneratorCoordinates.addMonomial(
-        MonomialMatrix(index, i),
-        remainderAfterReduction.coefficients[j]
+        MonomialMatrix(index, i), remainderAfterReduction.coefficients[j]
       );
     }
   }
@@ -586,9 +577,7 @@ void AlgebraicClosureRationals::getAdditionTo(
     }
     return;
   }
-  if (
-    input.basisIndex < 0 || input.basisIndex >= this->basisInjections.size
-  ) {
+  if (input.basisIndex < 0 || input.basisIndex >= this->basisInjections.size) {
     global.fatal
     << "Element has out-of-range basis index "
     << input.basisIndex
@@ -827,9 +816,7 @@ bool AlgebraicNumber::constructFromMinimalPolynomial(
 ) {
   STACK_TRACE("AlgebraicNumber::constructFromMinimalPolynomial");
   return
-  inputOwner.adjoinRootMinimalPolynomial(
-    polynomial, *this, commentsOnFailure
-  );
+  inputOwner.adjoinRootMinimalPolynomial(polynomial, *this, commentsOnFailure);
 }
 
 void AlgebraicClosureRationals::reset() {
@@ -878,14 +865,10 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   Rational linearTermCoefficientFDividedByTwo;
   Rational constantTermShifted;
   for (int i = 0; i < algebraicNumberPolynomial.size(); i ++) {
-    if (
-      !algebraicNumberPolynomial.coefficients[i].isRational(&currentCF)
-    ) {
+    if (!algebraicNumberPolynomial.coefficients[i].isRational(&currentCF)) {
       return false;
     } else {
-      minimialPolynomial.addMonomial(
-        algebraicNumberPolynomial[i], currentCF
-      );
+      minimialPolynomial.addMonomial(algebraicNumberPolynomial[i], currentCF);
     }
   }
   List<MonomialPolynomial>::Comparator* monomialOrder =
@@ -932,8 +915,7 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
 
 void AlgebraicClosureRationals::
 convertPolynomialOneVariableToPolynomialFirstVariable(
-  const Polynomial<AlgebraicNumber>& input,
-  Polynomial<AlgebraicNumber>& output
+  const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output
 ) {
   STACK_TRACE(
     "AlgebraicClosureRationals::"
@@ -1027,9 +1009,7 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
     for (int j = 0; j < startingDimension; j ++) {
       generatorMatrix.addMonomial(
         MonomialMatrix((i + 1) * startingDimension + j, i * startingDimension +
-          j
-        ),
-        1
+          j), 1
       );
     }
   }
@@ -1046,9 +1026,8 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   minusMinimalPolynomialMinusMaximalMonomial /= leadingCoefficientModified;
   minusMinimalPolynomialMinusMaximalMonomial *= - 1;
   MatrixTensor<Rational> currentCoefficientMatrixForm;
-  for (
-    int i = 0; i < minusMinimalPolynomialMinusMaximalMonomial.size(); i ++
-  ) {
+  for (int i = 0; i < minusMinimalPolynomialMinusMaximalMonomial.size(); i ++)
+  {
     AlgebraicNumber& currentCoefficient =
     minusMinimalPolynomialMinusMaximalMonomial.coefficients[i];
     const MonomialPolynomial& monomial =
@@ -1323,9 +1302,7 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other) {
     *this *= copy;
     return;
   }
-  bool doReport = (
-    this->element.size() * other.element.size() > 100
-  );
+  bool doReport = (this->element.size() * other.element.size() > 100);
   ProgressReport report;
   if (doReport) {
     std::stringstream reportStream;
@@ -1470,10 +1447,7 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
     }
     for (int j = 0; j < currentRadicalSelection.cardinalitySelection; j ++) {
       if (
-        this->owner->quadraticRadicals[
-          currentRadicalSelection.elements[j]
-        ] <
-        0
+        this->owner->quadraticRadicals[currentRadicalSelection.elements[j]] < 0
       ) {
         return false;
       } else {
@@ -1527,10 +1501,7 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   squareFreeInput *= absoluteInput.getDenominator();
   List<LargeInteger> primeFactors;
   List<int> multiplicities;
-  if (
-    !squareFreeInput.value.factor(
-      primeFactors, multiplicities, 0, 4, nullptr
-    )
+  if (!squareFreeInput.value.factor(primeFactors, multiplicities, 0, 4, nullptr)
   ) {
     return false;
   }
@@ -2111,9 +2082,7 @@ void ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
   STACK_TRACE("ElementZmodP::convertModuloIntegerAfterScalingToIntegral");
   Polynomial<Rational> rescaled;
   rescaled = input;
-  rescaled.scaleNormalizeLeadingMonomial(
-    &MonomialPolynomial::orderDefault()
-  );
+  rescaled.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   output.setExpectedSize(input.size());
   ElementZmodP coefficient;
   coefficient.modulus = newModulo;

@@ -7,9 +7,7 @@
 
 template <class Coefficient>
 void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
-  Coefficient& output,
-  const Coefficient& ringOne,
-  const Coefficient& ringZero
+  Coefficient& output, const Coefficient& ringOne, const Coefficient& ringZero
 ) {
   STACK_TRACE("Matrix::computeDeterminantOverwriteMatrix");
   bool doReport = this->numberOfColumns > 10 &&
@@ -89,8 +87,8 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
 
 template <class Coefficient>
 std::ostream& operator<<(
-  std::ostream& output, const Matrix<Coefficient>& matrix
-) {
+  std::ostream& output, const Matrix<Coefficient>&
+  matrix) {
   output << "\\left(\\begin{array}{";
   for (int j = 0; j < matrix.numberOfColumns; j ++) {
     output << "c";
@@ -144,9 +142,7 @@ std::ostream& operator<<(
 
 template <class Coefficient, typename IntegerType>
 void MathRoutines::raiseToPower(
-  Coefficient& element,
-  const IntegerType& power,
-  const Coefficient& ringUnit
+  Coefficient& element, const IntegerType& power, const Coefficient& ringUnit
 ) {
   STACK_TRACE("MathRoutines::raiseToPower");
   IntegerType powerCopy;
@@ -386,8 +382,8 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
   const Coefficient& negativeOne,
   const Coefficient& ringUnit,
   bool(*comparisonGEQFunction)(
-    const Coefficient& left, const Coefficient& right
-  )
+    const Coefficient& left, const Coefficient&
+    right)
 ) {
   STACK_TRACE("Matrix::gaussianEliminationEuclideanDomain");
   ProgressReport report(1);
@@ -475,9 +471,7 @@ void Vectors<Coefficient>::chooseABasis() {
   Selection selection;
   for (int i = 0; i < this->size; i ++) {
     output.addOnTop(this->objects[i]);
-    if (
-      output.getRankElementSpan(&toBeEliminated, &selection) < output.size
-    ) {
+    if (output.getRankElementSpan(&toBeEliminated, &selection) < output.size) {
       output.removeLastObject();
     }
   }
@@ -588,10 +582,8 @@ void Vectors<Coefficient>::selectBasisInSubspace(
 
 template <typename Coefficient>
 void Matrix<Coefficient>::addTwoRows(
-  int fromRowIndex,
-  int toRowIndex,
-  int startColumnIndex,
-  const Coefficient& scalar
+  int fromRowIndex, int toRowIndex, int startColumnIndex, const Coefficient&
+  scalar
 ) {
   ProgressReport report(10);
   Coefficient coefficient;

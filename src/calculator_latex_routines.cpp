@@ -77,9 +77,7 @@ bool LaTeXCrawler::extractFileNamesFromRelativeFileName(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("LaTeXcrawler::extractFileNamesFromRelativeFileName");
-  if (
-    !FileOperations::isOKFileNameVirtual(this->fileNameToCrawlRelative)
-  ) {
+  if (!FileOperations::isOKFileNameVirtual(this->fileNameToCrawlRelative)) {
     this->displayResult
     << "The folders below the file name contain dots. This is not allowed. ";
     if (commentsOnFailure != nullptr) {
@@ -100,8 +98,9 @@ bool LaTeXCrawler::extractFileNamesFromRelativeFileName(
     this->fileNameToCrawlPhysicalWithPath
   );
   this->baseFolderStartFilePhysical =
-  FileOperations::getWouldBeFolderAfterHypotheticalChdirNonThreadSafe(basePath)
-  +
+  FileOperations::getWouldBeFolderAfterHypotheticalChdirNonThreadSafe(
+    basePath
+  ) +
   "/";
   this->fileNameToCrawlPhysicalNoPathName =
   FileOperations::getFileNameFromFileNameWithPath(
@@ -143,11 +142,7 @@ void LaTeXCrawler::buildFreecalc() {
   std::fstream inputFile;
   if (
     !FileOperations::openFileUnsecure(
-      inputFile,
-      this->fileNameToCrawlPhysicalWithPath,
-      false,
-      false,
-      false
+      inputFile, this->fileNameToCrawlPhysicalWithPath, false, false, false
     )
   ) {
     this->displayResult
@@ -183,9 +178,7 @@ void LaTeXCrawler::buildFreecalc() {
     if (this->flagBuildSingleSlides && isLecture) {
       if (
         StringRoutines::stringBeginsWith(
-          StringRoutines::stringTrimWhiteSpace(buffer),
-          "\\input",
-          nullptr
+          StringRoutines::stringTrimWhiteSpace(buffer), "\\input", nullptr
         )
       ) {
         this->slideTexInputCommands.addOnTop(
@@ -250,8 +243,7 @@ void LaTeXCrawler::buildFreecalc() {
       if (
         desiredName[i] == '.' ||
         desiredName[i] == '/' ||
-        desiredName[i] == '\\'
-      ) {
+        desiredName[i] == '\\') {
         desiredName = "";
       }
     }
@@ -322,8 +314,7 @@ void LaTeXCrawler::buildFreecalc() {
         if (!foundFirstLecture) {
           if (
             !StringRoutines::stringBeginsWith(
-              StringRoutines::stringTrimWhiteSpace(buffer),
-              "\\documentclass"
+              StringRoutines::stringTrimWhiteSpace(buffer), "\\documentclass"
             ) &&
             !StringRoutines::stringBeginsWith(
               StringRoutines::stringTrimWhiteSpace(buffer), "[handout]"
@@ -363,16 +354,13 @@ void LaTeXCrawler::buildFreecalc() {
   std::string lectureFileNameEnd;
   if (
     !StringRoutines::stringBeginsWith(
-      this->fileNameToCrawlPhysicalNoPathName,
-      "Lecture_",
-      &lectureFileNameEnd
+      this->fileNameToCrawlPhysicalNoPathName, "Lecture_", &lectureFileNameEnd
     )
   ) {
     if (
       !StringRoutines::stringBeginsWith(
-        this->fileNameToCrawlPhysicalNoPathName,
-        "Homework_",
-        &lectureFileNameEnd
+        this->fileNameToCrawlPhysicalNoPathName, "Homework_", &
+        lectureFileNameEnd
       )
     ) {
       lectureFileNameEnd = "";
@@ -655,9 +643,7 @@ void LaTeXCrawler::buildFreecalc() {
 
 void LaTeXCrawler::crawl() {
   STACK_TRACE("LaTeXcrawler::crawl");
-  if (
-    !this->extractFileNamesFromRelativeFileName(&this->displayResult)
-  ) {
+  if (!this->extractFileNamesFromRelativeFileName(&this->displayResult)) {
     return;
   }
   this->recursionDepth = 0;
@@ -830,8 +816,7 @@ void LaTeXCrawler::crawlRecursive(
 }
 
 bool LaTeXCrawler::extractFileNames(
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("LaTeXcrawler::ExtractPresentationFileNames");
   (void) commentsGeneral;
@@ -875,8 +860,7 @@ bool LaTeXCrawler::extractFileNames(
     }
     if (
       !FileOperations::isFileNameSafeForSystemCommands(
-        this->slideFileNamesVirtualWithPath[i].fileName,
-        commentsOnFailure
+        this->slideFileNamesVirtualWithPath[i].fileName, commentsOnFailure
       )
     ) {
       if (commentsOnFailure != nullptr) {
@@ -889,8 +873,7 @@ bool LaTeXCrawler::extractFileNames(
     }
     if (
       !FileOperations::isOKFileNameVirtual(
-        this->slideFileNamesVirtualWithPath[i].fileName,
-        false,
+        this->slideFileNamesVirtualWithPath[i].fileName, false,
         commentsOnFailure
       )
     ) {
@@ -908,9 +891,7 @@ bool LaTeXCrawler::extractFileNames(
     ) {
       if (
         !FileOperations::fileExistsVirtual(
-          this->slideFileNamesVirtualWithPath[i].fileName,
-          false,
-          false
+          this->slideFileNamesVirtualWithPath[i].fileName, false, false
         )
       ) {
         if (commentsOnFailure != nullptr) {
@@ -928,9 +909,7 @@ bool LaTeXCrawler::extractFileNames(
     );
     if (
       StringRoutines::stringBeginsWith(
-        this->slideFileNamesWithLatexPathNoExtension[i],
-        "freecalc",
-        nullptr
+        this->slideFileNamesWithLatexPathNoExtension[i], "freecalc", nullptr
       )
     ) {
       this->slideFileNamesWithLatexPathNoExtension[i] =
@@ -1115,8 +1094,7 @@ std::string LaTeXCrawler::adjustDisplayTitle(
 }
 
 bool LaTeXCrawler::extractFileNamesPdfExists(
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   this->desiredPresentationTitle =
   this->adjustDisplayTitle(
@@ -1131,22 +1109,16 @@ bool LaTeXCrawler::extractFileNamesPdfExists(
   }
   this->flagPDFExists =
   FileOperations::fileExistsVirtual(
-    this->targetPDFFileNameWithPathVirtual,
-    false,
-    false,
-    commentsOnFailure
+    this->targetPDFFileNameWithPathVirtual, false, false, commentsOnFailure
   );
   return true;
 }
 
 bool LaTeXCrawler::buildOrFetchFromCachePDF(
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("LaTeXcrawler::buildOrFetchFromCachePDF");
-  if (
-    !this->extractFileNamesPdfExists(commentsOnFailure, commentsGeneral)
-  ) {
+  if (!this->extractFileNamesPdfExists(commentsOnFailure, commentsGeneral)) {
     return false;
   }
   if (
@@ -1189,11 +1161,7 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
   if (!this->flagCrawlTexSourcesRecursively) {
     if (
       !FileOperations::openFileVirtual(
-        fileStream,
-        this->headerFileNameWithPathVirtual,
-        false,
-        false,
-        false
+        fileStream, this->headerFileNameWithPathVirtual, false, false, false
       )
     ) {
       return false;
@@ -1211,8 +1179,7 @@ bool LaTeXCrawler::buildOrFetchFromCachePDF(
       if (!this->flagProjectorMode && !this->flagHomeworkRatherThanSlides) {
         if (
           StringRoutines::stringBeginsWith(
-            StringRoutines::stringTrimWhiteSpace(buffer),
-            "\\documentclass"
+            StringRoutines::stringTrimWhiteSpace(buffer), "\\documentclass"
           )
         ) {
           crawlingResult << "[handout]" << "\n";
@@ -1406,9 +1373,7 @@ bool LaTeXCrawler::buildTopicList(
     commentsGeneral = &temp;
   }
   topicParser.loadFileNames();
-  if (
-    !topicParser.loadAndParseTopicIndex(topicNumber, *commentsOnFailure)
-  ) {
+  if (!topicParser.loadAndParseTopicIndex(topicNumber, *commentsOnFailure)) {
     return false;
   }
   int numberOfSlidePairsToBuild = 0;
@@ -1475,22 +1440,16 @@ bool LaTeXCrawler::buildTopicList(
       << this->slideFileNamesVirtualWithPath.toStringCommaDelimited()
       << ". ";
     }
-    if (
-      !this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)
-    ) {
+    if (!this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;
     }
     this->flagDoChangeDirs = false;
     this->flagAddSlideToSVN = true;
-    if (
-      !this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)
-    ) {
+    if (!this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;
     }
     this->flagAnswerKey = true;
-    if (
-      !this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)
-    ) {
+    if (!this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;
     }
   }
@@ -1528,23 +1487,17 @@ bool LaTeXCrawler::buildTopicList(
       << "<br>Build slide pair from: "
       << this->slideFileNamesVirtualWithPath.toStringCommaDelimited();
     }
-    if (
-      !this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)
-    ) {
+    if (!this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;
     }
     this->flagDoChangeDirs = false;
     this->flagAddSlideToSVN = true;
     this->flagProjectorMode = false;
-    if (
-      !this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)
-    ) {
+    if (!this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;
     }
     this->flagProjectorMode = true;
-    if (
-      !this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)
-    ) {
+    if (!this->buildOrFetchFromCachePDF(commentsOnFailure, commentsGeneral)) {
       result = false;
       break;
     }

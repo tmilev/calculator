@@ -123,9 +123,7 @@ bool Calculator::Test::parseAllExamples(Calculator& ownerInitialized) {
       }
       Expression notUsed;
       if (
-        !ownerInitialized.parser.parse(
-          currentHandler.example, false, notUsed
-        )
+        !ownerInitialized.parser.parse(currentHandler.example, false, notUsed)
       ) {
         global.fatal
         << "Failed to parse built-in example for rule: "
@@ -172,9 +170,7 @@ bool Calculator::Test::parseQuotes(Calculator& ownerInitialized) {
   std::string input = "\"\\\"\\\\\\\"\"";
   std::string expected = "\"\\\"\\\\\\\"\"";
   Expression output;
-  if (
-    !ownerInitialized.parser.parseNoEmbeddingInCommand(input, output)
-  ) {
+  if (!ownerInitialized.parser.parseNoEmbeddingInCommand(input, output)) {
     global.fatal << "Failed to parse: " << input << global.fatal;
   }
   std::string result = output.toString();

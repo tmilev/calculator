@@ -186,9 +186,7 @@ bool PolynomialUnivariateModular::Test::testOneGreatestCommonDivisor(
   PolynomialUnivariateModular leftPolynomial =
   PolynomialUnivariateModular::Test::fromStringAndModulus(left, &modulusData);
   PolynomialUnivariateModular rightPolynomial =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(
-    right, &modulusData
-  );
+  PolynomialUnivariateModular::Test::fromStringAndModulus(right, &modulusData);
   PolynomialUnivariateModular result;
   leftPolynomial.greatestCommonDivisor(
     leftPolynomial, rightPolynomial, result, nullptr
@@ -248,9 +246,8 @@ bool PolynomialUnivariateModular::Test::testOneDivision(
 }
 
 bool PolynomialUnivariateModular::Test::testOneDerivative(
-  int modulusData,
-  const std::string& toBeDifferentiated,
-  const std::string& expected
+  int modulusData, const std::string& toBeDifferentiated, const std::string&
+  expected
 ) {
   STACK_TRACE("PolynomialUnivariateModular::Test::testOneDerivative");
   IntegerModulusSmall modulus;
@@ -275,9 +272,7 @@ bool PolynomialUnivariateModular::Test::testOneDerivative(
 }
 
 PolynomialUnivariateModular PolynomialUnivariateModular::Test::
-fromStringAndModulus(
-  const std::string& input, IntegerModulusSmall* modulus
-) {
+fromStringAndModulus(const std::string& input, IntegerModulusSmall* modulus) {
   Polynomial<Rational> polynomialRational =
   Polynomial<Rational>::Test::fromString(input);
   PolynomialUnivariateModular result;
@@ -304,9 +299,7 @@ fromStringAndModulus(const std::string& input, int modulus) {
   IntegerModulusSmall modulusData;
   modulusData.initializeModulusData(modulus);
   PolynomialUnivariateModular modulusPolynomialInternal =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(
-    input, &modulusData
-  );
+  PolynomialUnivariateModular::Test::fromStringAndModulus(input, &modulusData);
   Polynomial<ElementZmodP> result;
   modulusPolynomialInternal.toPolynomialNonDense(result);
   return result;
@@ -362,11 +355,7 @@ bool PolynomialModuloPolynomialModuloInteger::Test::product() {
     5, "x^2", "x^3", "x^2+2x+3", "4x +3 \\mod 5"
   );
   PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
-    5,
-    "x +4",
-    "x +4",
-    "x^{6}+3x^{4}+2x^{3}+2x^{2}+3x +1",
-    "x^2+3x +1 \\mod 5"
+    5, "x +4", "x +4", "x^{6}+3x^{4}+2x^{3}+2x^{2}+3x +1", "x^2+3x +1 \\mod 5"
   );
   PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
     5,
@@ -385,7 +374,9 @@ bool PolynomialModuloPolynomialModuloInteger::Test::testOneProduct(
   const std::string& modulusPolynomial,
   const std::string& expected
 ) {
-  STACK_TRACE("PolynomialModuloPolynomialModuloInteger::Test::testOneProduct");
+  STACK_TRACE(
+    "PolynomialModuloPolynomialModuloInteger::Test::testOneProduct"
+  );
   IntegerModulusSmall modulusData;
   modulusData.initializeModulusData(modulus);
   Polynomial<ElementZmodP> leftPolynomial =
@@ -439,9 +430,7 @@ bool PolynomialConversions::Test::oneUnivariateModularToDense(
   IntegerModulusSmall modulusData;
   modulusData.initializeModulusData(modulus);
   PolynomialUnivariateModular inputPolynomial =
-  PolynomialUnivariateModular::Test::fromStringAndModulus(
-    input, &modulusData
-  );
+  PolynomialUnivariateModular::Test::fromStringAndModulus(input, &modulusData);
   Polynomial<ElementZmodP> resultPolynomial;
   PolynomialConversions::convertToPolynomial(
     inputPolynomial, resultPolynomial
@@ -485,9 +474,7 @@ bool PolynomialFactorizationCantorZassenhaus<
   algorithm.initialize(zero);
   PolynomialFactorizationUnivariate<ElementZmodP> factorization;
   std::stringstream comments;
-  if (
-    !factorization.factor(polynomial, algorithm, &comments, &comments)
-  ) {
+  if (!factorization.factor(polynomial, algorithm, &comments, &comments)) {
     global.fatal
     << "Unexpected failure to factor: "
     << PolynomialUnivariateModular::Test::toStringPolynomialElementZModP(
@@ -519,10 +506,7 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialUnivariateModular,
   PolynomialUnivariateModularAsModulus
 >::Test::testOneStartingPolynomial(
-  int modulus,
-  int constant,
-  int currentDegree,
-  const std::string& expected
+  int modulus, int constant, int currentDegree, const std::string& expected
 ) {
   STACK_TRACE(
     "PolynomialFactorizationFiniteFields::"
@@ -632,9 +616,8 @@ void Matrix<Rational>::Test::matrixFromString(
 
 template < >
 bool Matrix<Rational>::Test::oneMatrixIntegerWithDenominator(
-  const std::string& input,
-  const std::string& expectedMatrix,
-  int expectedScale
+  const std::string& input, const std::string& expectedMatrix, int
+  expectedScale
 ) {
   Matrix<Rational> matrix;
   Matrix<Rational>::Test::matrixFromString(input, matrix);

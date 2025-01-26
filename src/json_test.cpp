@@ -29,15 +29,9 @@ bool JSData::Test::recode() {
       }
     )
   );
-  toRecode.addOnTop(
-    List<std::string>({"{\"a\":\"\\n\"}", "{\"a\":\"\\n\"}"})
-  );
-  toRecode.addOnTop(
-    List<std::string>({"{\"a\":\"\n\"}", "{\"a\":\"\\n\"}"})
-  );
-  toRecode.addOnTop(
-    List<std::string>({"\"\u03C0\"", "\"\\u03c0\""})
-  );
+  toRecode.addOnTop(List<std::string>({"{\"a\":\"\\n\"}", "{\"a\":\"\\n\"}"}));
+  toRecode.addOnTop(List<std::string>({"{\"a\":\"\n\"}", "{\"a\":\"\\n\"}"}));
+  toRecode.addOnTop(List<std::string>({"\"\u03C0\"", "\"\\u03c0\""}));
   toRecode.addOnTop(
     List<std::string>({"{\"\n\r\":\"\n\r\"}", "{\"\\n\\r\":\"\\n\\r\"}"})
   );
@@ -54,9 +48,8 @@ bool JSData::Test::recode() {
   return true;
 }
 
-bool JSData::Test::recodeOnce(
-  const List<std::string>& pair, bool relaxedInput
-) {
+bool JSData::Test::recodeOnce(const List<std::string>& pair, bool relaxedInput)
+{
   STACK_TRACE("JSData::Test::recodeOnce");
   JSData parser;
   std::string input = pair[0];

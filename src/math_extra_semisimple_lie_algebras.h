@@ -36,8 +36,7 @@ public:
   );
   bool isElementCartan() const;
   void makeCartanGenerator(
-    const Vector<Coefficient>& elementH,
-    SemisimpleLieAlgebra& inputOwners
+    const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& inputOwners
   );
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
   void toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
@@ -75,9 +74,8 @@ public:
     const RationalFraction<Rational>& ringZero
   );
   bool isCoefficientOneChevalleyGenerator();
-  bool isProportionalTo(
-    const ElementSemisimpleLieAlgebra<Coefficient>& other
-  ) const {
+  bool isProportionalTo(const ElementSemisimpleLieAlgebra<Coefficient>& other)
+  const {
     Vector<Rational> left, right;
     this->toVectorNegativeRootSpacesFirst(left);
     other.toVectorNegativeRootSpacesFirst(right);
@@ -170,25 +168,8 @@ private:
 public:
   // This is the column 1 entry of Table 5.11 in the paper mentioned above.
   enum DiagramType {
-    AI,
-    AII,
-    AIII,
-    BI,
-    CI,
-    DI,
-    DII,
-    EI,
-    EII,
-    EIII,
-    EIV,
-    EV,
-    EVI,
-    EVII,
-    EVIII,
-    EIX,
-    FI,
-    FII,
-    G
+    AI, AII, AIII, BI, CI, DI, DII, EI, EII, EIII, EIV, EV, EVI, EVII, EVIII,
+    EIX, FI, FII, G
   };
   DiagramType diagram;
   static const int radiusOfRootCircle = 1;
@@ -320,8 +301,7 @@ public:
     Polynomial<Coefficient> coefficient;
     for (int i = 0; i < this->getRank(); i ++) {
       generator.makeGenerator(
-        *this,
-        this->getGeneratorIndexFromNonZeroCoefficientIndexInCartan(i)
+        *this, this->getGeneratorIndexFromNonZeroCoefficientIndexInCartan(i)
       );
       coefficient.makeMonomial(indexFirstVariable + i, 1, 1);
       output.addMonomial(generator, coefficient);
@@ -393,14 +373,12 @@ public:
     bool includeSemisimpleSubalgebras
   ) const;
   void writeHTML(
-    bool verbose,
-    bool flagWriteLatexPlots,
-    const std::string& extraDynkinDiagramPlot
+    bool verbose, bool flagWriteLatexPlots, const std::string&
+    extraDynkinDiagramPlot
   );
   std::string toHTML(
-    bool verbose,
-    bool flagWriteLatexPlots,
-    const std::string& extraDynkinDiagramPlot
+    bool verbose, bool flagWriteLatexPlots, const std::string&
+    extraDynkinDiagramPlot
   );
   static std::string toHTMLCalculatorHeadElements(
     const std::string& relativeTo = "../../.."
@@ -462,8 +440,9 @@ public:
   // The function below returns an negative number if the chevalley generator
   // is an element of the Cartan subalgebra.
   int getRootIndexFromGenerator(int index) const;
-  int getGeneratorIndexFromNonZeroCoefficientIndexInCartan(int simpleRootIndex)
-  const;
+  int getGeneratorIndexFromNonZeroCoefficientIndexInCartan(
+    int simpleRootIndex
+  ) const;
   int getCartanCoordinateIndexFromCartanGeneratorIndex(int generatorIndex)
   const;
   int getDisplayIndexFromGenerator(int index) const;
@@ -515,9 +494,7 @@ public:
   void exploitSymmetryChevalleyConstants(int indexI, int indexJ);
   void exploitTheCyclicTrick(int i, int j, int k);
   bool getMaxQForWhichBetaMinusQAlphaIsARoot(
-    const Vector<Rational>& alpha,
-    const Vector<Rational>& beta,
-    int& output
+    const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output
   ) const;
   Rational getConstant(
     const Vector<Rational>& root1, const Vector<Rational>& root2
@@ -551,13 +528,13 @@ public:
   );
   template <class Coefficient>
   void getAdjoint(
-    Matrix<Coefficient>& output,
-    ElementSemisimpleLieAlgebra<Coefficient>& e
+    Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e
   );
   template <class Coefficient>
   void getAdjoint(
-    MatrixTensor<Coefficient>& output,
-    ElementSemisimpleLieAlgebra<Coefficient>& e
+    MatrixTensor<Coefficient>& output, ElementSemisimpleLieAlgebra<
+      Coefficient
+    >& e
   );
   void makeChevalleyTestReport(int i, int j, int k, int total);
   bool isInTheWeightSupport(
@@ -852,9 +829,7 @@ public:
     return *this->coDomain;
   }
   HomomorphismSemisimpleLieAlgebra(): domain(nullptr), coDomain(nullptr) {}
-  void getWeightsGmodKInSimpleCoordinatesK(
-    Vectors<Rational>& outputWeights
-  ) {
+  void getWeightsGmodKInSimpleCoordinatesK(Vectors<Rational>& outputWeights) {
     this->getWeightsRelativeToKInSimpleKCoordinates(
       outputWeights, this->gModK
     );
@@ -868,8 +843,7 @@ public:
   }
   void toString(std::string& output, bool useHtml);
   void makeGInGWithIdentity(SemisimpleLieAlgebra& owner);
-  void projectOntoSmallCartan(
-    Vector<Rational>& input, Vector<Rational>& output
+  void projectOntoSmallCartan(Vector<Rational>& input, Vector<Rational>& output
   );
   void projectOntoSmallCartan(
     Vectors<Rational>& input, Vectors<Rational>& output
@@ -945,8 +919,7 @@ public:
 
 template <class Coefficient>
 bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
-  const List<ElementSemisimpleLieAlgebra>& basis,
-  Vector<Coefficient>& output
+  const List<ElementSemisimpleLieAlgebra>& basis, Vector<Coefficient>& output
 ) const {
   STACK_TRACE("ElementSemisimpleLieAlgebra::getCoordinatesInBasis");
   if (basis.size == 0) {
@@ -1186,13 +1159,7 @@ freudenthalEvaluateMeFullCharacter(
     if (
       !(
         this->getOwner()->weylGroup.generateOrbit(
-          vector,
-          false,
-          orbit,
-          false,
-          - 1,
-          0,
-          upperBoundTotalDominantWeights
+          vector, false, orbit, false, - 1, 0, upperBoundTotalDominantWeights
         )
       )
     ) {
@@ -1207,9 +1174,7 @@ freudenthalEvaluateMeFullCharacter(
       this->getOwner()->weylGroup.getFundamentalCoordinatesFromSimple(
         orbit[j]
       );
-      outputCharOwnerSetToZero.addMonomial(
-        monomial, domChar.coefficients[i]
-      );
+      outputCharOwnerSetToZero.addMonomial(monomial, domChar.coefficients[i]);
     }
   }
   return true;
@@ -1334,8 +1299,8 @@ freudenthalEvalMeDominantWeightsOnly(
 
 template <class Coefficient>
 void SemisimpleLieAlgebra::getAdjoint(
-  MatrixTensor<Coefficient>& output,
-  ElementSemisimpleLieAlgebra<Coefficient>& e
+  MatrixTensor<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>&
+  e
 ) {
   Matrix<Coefficient> matForm;
   this->getAdjoint(matForm, e);
@@ -1344,8 +1309,7 @@ void SemisimpleLieAlgebra::getAdjoint(
 
 template <class Coefficient>
 void SemisimpleLieAlgebra::getAdjoint(
-  Matrix<Coefficient>& output,
-  ElementSemisimpleLieAlgebra<Coefficient>& e
+  Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e
 ) {
   int numberOfGenerators = this->getNumberOfGenerators();
   output.initialize(numberOfGenerators, numberOfGenerators);
@@ -1407,9 +1371,7 @@ void SemisimpleLieAlgebra::lieBracket(
   for (int i = 0; i < g1.size(); i ++) {
     for (int j = 0; j < g2.size(); j ++) {
       buffer =
-      this->lieBrackets.elements[g1[i].generatorIndex][
-        g2[j].generatorIndex
-      ];
+      this->lieBrackets.elements[g1[i].generatorIndex][g2[j].generatorIndex];
       coefficient = g1.coefficients[i];
       coefficient *= g2.coefficients[j];
       buffer *= coefficient;
@@ -1572,12 +1534,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
     );
     bool isTrimmed =
     !weylGroup.generateOrbit(
-      dominantWeightsNonHashed,
-      false,
-      finalWeights,
-      false,
-      0,
-      0,
+      dominantWeightsNonHashed, false, finalWeights, false, 0, 0,
       upperBoundWeights
     );
     totalWeights += finalWeights.size;
@@ -1588,9 +1545,7 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
     }
     for (int j = 0; j < finalWeights.size; j ++) {
       convertor = finalWeights[j].getVectorRational();
-      drawingVariables.drawCircleAtVectorBufferRational(
-        convertor, "black", 3
-      );
+      drawingVariables.drawCircleAtVectorBufferRational(convertor, "black", 3);
       if (useMultiplicities) {
         drawingVariables.drawTextAtVector(
           convertor,
@@ -1622,8 +1577,8 @@ drawMeAssumeCharIsOverCartan(
   Vector<Coefficient> actualWeight;
   Vector<Rational> actualWeightRationalPart;
   actualAmbientWeyl.drawRootSystem(
-    drawingVariables, true, false, nullptr, false
-  );
+    drawingVariables, true, false, nullptr,
+    false);
   for (int j = 0; j < this->size(); j ++) {
     actualWeight =
     actualAmbientWeyl.getSimpleCoordinatesFromFundamental((*this)[j].
@@ -1635,9 +1590,7 @@ drawMeAssumeCharIsOverCartan(
       actualWeightRationalPart, "black", 5
     );
     drawingVariables.drawTextAtVector(
-      actualWeightRationalPart,
-      this->coefficients[j].toString(),
-      "black"
+      actualWeightRationalPart, this->coefficients[j].toString(), "black"
     );
   }
 }
@@ -1694,9 +1647,7 @@ std::string CharacterSemisimpleLieAlgebraModule<Coefficient>::multiplyBy(
 }
 
 template <class Coefficient>
-void SemisimpleLieAlgebra::getKillingFormMatrix(
-  Matrix<Coefficient>& output
-) {
+void SemisimpleLieAlgebra::getKillingFormMatrix(Matrix<Coefficient>& output) {
   output.makeZeroMatrix(this->getNumberOfGenerators(), 0);
   ElementSemisimpleLieAlgebra<Coefficient> left, right;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {

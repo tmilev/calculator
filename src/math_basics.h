@@ -91,9 +91,7 @@ public:
   static bool generateVectorSpaceClosedWithRespectToOperation(
     List<Type>& inputOutputElements,
     int upperDimensionBound,
-    void(*binaryOperation)(
-      const Type& left, const Type& right, Type& output
-    )
+    void(*binaryOperation)(const Type& left, const Type& right, Type& output)
   );
   static char convertHumanReadableHexToCharValue(char input);
   static void nChooseK(int n, int k, LargeInteger& result);
@@ -114,14 +112,11 @@ public:
   static bool isPrimeSimple(int input);
   template <class Coefficient, typename IntegerType>
   static void raiseToPower(
-    Coefficient& element,
-    const IntegerType& power,
-    const Coefficient& ringUnit
+    Coefficient& element, const IntegerType& power, const Coefficient& ringUnit
   );
   template <typename Coefficient>
-  inline static Coefficient maximum(
-    const Coefficient& a, const Coefficient& b
-  ) {
+  inline static Coefficient maximum(const Coefficient& a, const Coefficient& b)
+  {
     if (a > b) {
       return a;
     } else {
@@ -178,9 +173,8 @@ public:
   static unsigned int hashListStrings(const List<std::string>& input);
   template <class Element>
   static void lieBracket(
-    const Element& standsOnTheLeft,
-    const Element& standsOnTheRight,
-    Element& output
+    const Element& standsOnTheLeft, const Element& standsOnTheRight, Element&
+    output
   );
   template <typename number>
   static number complexConjugate(number x) {
@@ -194,9 +188,8 @@ public:
   }
   static bool isInteger(Rational x);
   static bool parseListIntegers(
-    const std::string& input,
-    List<int>& result,
-    std::stringstream* commentsOnFailure
+    const std::string& input, List<int>& result, std::stringstream*
+    commentsOnFailure
   );
   static void parseListIntegersNoFailure(
     const std::string& input, List<int>& result

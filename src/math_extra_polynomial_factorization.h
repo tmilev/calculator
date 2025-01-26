@@ -73,9 +73,8 @@ public:
   bool isConstant() const;
   bool checkInitialization() const;
   int totalDegreeInt() const;
-  ElementZmodP evaluate(
-    const ElementZmodP& input, const ElementZmodP& unused
-  ) const;
+  ElementZmodP evaluate(const ElementZmodP& input, const ElementZmodP& unused)
+  const;
   inline int getModulus() const {
     return this->modulusData->modulus;
   }
@@ -146,8 +145,7 @@ private:
     Polynomial<LargeInteger>& output
   );
   bool computeGreatestCommonDivisor(
-    Polynomial<LargeInteger>& output,
-    std::stringstream* commentsOnFailure
+    Polynomial<LargeInteger>& output, std::stringstream* commentsOnFailure
   );
 public:
   // The left input, rescaled.
@@ -196,9 +194,7 @@ public:
   List<List<int> > imagesPowersOfX;
   void operator=(const PolynomialUnivariateModular& inputModulus);
   void computeFromModulus();
-  void computeOneReductionRow(
-    const List<int>& previous, List<int>& output
-  );
+  void computeOneReductionRow(const List<int>& previous, List<int>& output);
   bool checkInitialization() const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringFull(FormatExpressions* format = nullptr) const;
@@ -216,8 +212,7 @@ public:
 
 class PolynomialModuloPolynomialModuloInteger {
   friend std::ostream& operator<<(
-    std::ostream& output,
-    const PolynomialModuloPolynomialModuloInteger& input
+    std::ostream& output, const PolynomialModuloPolynomialModuloInteger& input
   ) {
     output << input.toStringFull();
     return output;
@@ -435,12 +430,11 @@ std::string PolynomialModuloPolynomial<Coefficient>::toString(
 }
 
 template <class Coefficient>
-PolynomialModuloPolynomial<Coefficient> PolynomialModuloPolynomial<Coefficient>
-::one() {
+PolynomialModuloPolynomial<Coefficient> PolynomialModuloPolynomial<
+  Coefficient
+>::one() {
   PolynomialModuloPolynomial<Coefficient> result;
-  result.value.makeConstant(
-    this->modulusContainer.coefficients[0].one()
-  );
+  result.value.makeConstant(this->modulusContainer.coefficients[0].one());
   result.modulusContainer = this->modulusContainer;
   return result;
 }

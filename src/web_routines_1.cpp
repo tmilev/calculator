@@ -278,9 +278,7 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
   Pipe::writeWithTimeoutViaSelect(
     connector.socketInteger, getMessage, 1, 10, &errorStream1
   );
-  if (
-    static_cast<unsigned>(numberOfBytesWritten) != getMessage.size()
-  ) {
+  if (static_cast<unsigned>(numberOfBytesWritten) != getMessage.size()) {
     this->lastTransactionErrors +=
     "\nERROR writing to socket. " + errorStream1.str();
     connector.closeSocket();
@@ -288,12 +286,7 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
   std::stringstream errorStream2;
   this->lastNumberOfBytesRead =
   Pipe::readWithTimeOutViaSelectOneFileDescriptor(
-    connector.socketInteger,
-    this->buffer,
-    10000,
-    1,
-    10,
-    &errorStream2
+    connector.socketInteger, this->buffer, 10000, 1, 10, &errorStream2
   );
   if (this->lastNumberOfBytesRead < 0) {
     this->lastTransactionErrors +=
@@ -302,8 +295,7 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
   }
   std::string readString;
   readString.assign(
-    buffer.objects,
-    static_cast<unsigned>(this->lastNumberOfBytesRead)
+    buffer.objects, static_cast<unsigned>(this->lastNumberOfBytesRead)
   );
   reportStream
   << "Wrote "
@@ -318,8 +310,7 @@ void WebClient::pingCalculatorStatus(const std::string& pingAuthentication) {
 }
 
 void WebClient::fetchWebPage(
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("WebCrawler::fetchWebPage");
   (void) commentsOnFailure;
@@ -342,8 +333,7 @@ void WebClient::fetchWebPage(
 }
 
 void WebClient::fetchWebPagePart2(
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("WebCrawler::fetchWebPagePart2");
   (void) commentsOnFailure;
@@ -640,8 +630,7 @@ bool CalculatorFunctions::fetchKnownPublicKeys(
 }
 
 void WebClient::updatePublicKeys(
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("WebCrawler::updatePublicKeys");
   this->peerAddress = "www.googleapis.com";
@@ -840,10 +829,7 @@ bool WebAPIResponse::verifyRecaptcha(
   if (
     !FileOperations::
     loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-      "certificates/recaptcha-secret.txt",
-      secret,
-      true,
-      true,
+      "certificates/recaptcha-secret.txt", secret, true, true,
       commentsOnFailure
     )
   ) {
@@ -942,9 +928,7 @@ void WebAPIResponse::forgotLogin(JSData& result) {
   }
   UserCalculator user;
   user.email =
-  HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput("email"), false
-  );
+  HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
   if (!WebAPIResponse::verifyRecaptcha(&out, &out, nullptr)) {
     result[WebAPI::Result::comments] = out.str();
     return;
@@ -979,8 +963,7 @@ void WebAPIResponse::forgotLogin(JSData& result) {
     commentsOnErrorPointer = &commentsOnError;
   }
   success =
-  this->doSetEmail(
-    false, user, &commentsOnError, &out, commentsOnErrorPointer
+  this->doSetEmail(false, user, &commentsOnError, &out, commentsOnErrorPointer
   );
   if (!success) {
     result[WebAPI::Result::error] = commentsOnError.str();
@@ -991,9 +974,7 @@ void WebAPIResponse::forgotLogin(JSData& result) {
 
 bool WebWorker::writeToBodyJSON(const JSData& result) {
   std::string toWrite =
-  HtmlRoutines::convertStringToHtmlString(
-    result.toString(nullptr), false
-  );
+  HtmlRoutines::convertStringToHtmlString(result.toString(nullptr), false);
   if (toWrite.size() < 2000) {
     if (
       toWrite.find(WebAPIResponse::youHaveReachedTheBackend) !=
@@ -1011,9 +992,7 @@ bool WebWorker::writeToBodyJSON(const JSData& result) {
       << "'>app</a>";
       toWrite =
       StringRoutines::replaceAll(
-        toWrite,
-        WebAPIResponse::youHaveReachedTheBackend,
-        outLinkApp.str()
+        toWrite, WebAPIResponse::youHaveReachedTheBackend, outLinkApp.str()
       );
     }
   }

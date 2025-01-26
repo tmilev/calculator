@@ -8,8 +8,8 @@ bool CalculatorFunctionsCrypto::x509CertificateServer(
   (void) input;
   return
   output.assignValue(
-    calculator,
-    global.server().transportLayerSecurity.server.certificate.source
+    calculator, global.server().transportLayerSecurity.server.certificate.
+    source
   );
 }
 

@@ -208,9 +208,7 @@ int externalCommandNoOutput(const std::string& command) {
 
 #ifndef MACRO_use_wasm
 
-std::string externalCommandReturnStandardOut(
-  const std::string& inputCommand
-) {
+std::string externalCommandReturnStandardOut(const std::string& inputCommand) {
   std::string inputCommandWithRedirection = inputCommand + " 2>&1";
   std::shared_ptr<FILE> pipe(
     popen(inputCommandWithRedirection.c_str(), "r"), pclose

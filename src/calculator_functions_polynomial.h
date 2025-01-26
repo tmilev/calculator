@@ -108,16 +108,12 @@ public:
     bool doGCD
   );
   static bool greatestCommonDivisorOrLeastCommonMultiplePolynomial(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool doGCD
+    Calculator& calculator, const Expression& input, Expression& output, bool
+    doGCD
   );
   static bool greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool doGCD
+    Calculator& calculator, const Expression& input, Expression& output, bool
+    doGCD
   );
   static bool leastCommonMultiplePolynomial(
     Calculator& calculator, const Expression& input, Expression& output
@@ -138,26 +134,19 @@ public:
     );
   }
   static bool greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool doGCD
+    Calculator& calculator, const Expression& input, Expression& output, bool
+    doGCD
   );
   static bool greatestCommonDivisorOrLeastCommonMultipleModular(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool doGCD
+    Calculator& calculator, const Expression& input, Expression& output, bool
+    doGCD
   );
   static bool groebnerGradedLexicographic(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
     return
     CalculatorFunctionsPolynomial::groebner(
-      calculator,
-      input,
-      output,
-      MonomialPolynomial::Order::gradedLexicographic
+      calculator, input, output, MonomialPolynomial::Order::gradedLexicographic
     );
   }
   static bool groebnerGradedReverseLexicographic(
@@ -176,17 +165,12 @@ public:
   ) {
     return
     CalculatorFunctionsPolynomial::groebner(
-      calculator,
-      input,
-      output,
-      MonomialPolynomial::Order::lexicographic
+      calculator, input, output, MonomialPolynomial::Order::lexicographic
     );
   }
   static bool groebner(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    int order
+    Calculator& calculator, const Expression& input, Expression& output, int
+    order
   );
   static bool divideExpressionsAsIfPolynomial(
     Calculator& calculator, const Expression& input, Expression& output
@@ -223,9 +207,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionRemainderBuiltIn(
     computation.addBasisElementNoReduction(polynomials[i]);
   }
   Polynomial<Type> outputRemainder;
-  computation.remainderDivisionByBasis(
-    polynomials[0], outputRemainder, - 1
-  );
+  computation.remainderDivisionByBasis(polynomials[0], outputRemainder, - 1);
   return output.assignValueWithContext(calculator, outputRemainder, context);
 }
 
@@ -292,8 +274,9 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   << "\\end{document}\r\n";
   return
   output.assignValue(
-    calculator,
-    HtmlRoutines::convertStringToHtmlString(latexOutput.str(), true)
+    calculator, HtmlRoutines::convertStringToHtmlString(
+      latexOutput.str(), true
+    )
   );
 }
 

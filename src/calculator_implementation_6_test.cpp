@@ -188,15 +188,12 @@ bool CalculatorHTML::Test::OneProblemTest::run(JSData* outputComplete) {
   this->flagSuccess = false;
   StateMaintainer<
     MapList<
-      std::string,
-      std::string,
-      HashFunctions::hashFunction<std::string>
-    >
+      std::string, std::string, HashFunctions::hashFunction<
+        std::string
+      > >
   > maintainArguments(global.webArguments);
   if (
-    !problem.loadMe(
-      false, randomSeedStringStarting.str(), &commentsOnFailure
-    )
+    !problem.loadMe(false, randomSeedStringStarting.str(), &commentsOnFailure)
   ) {
     this->errorLoad = commentsOnFailure.str();
     return this->flagSuccess;
@@ -211,9 +208,7 @@ bool CalculatorHTML::Test::OneProblemTest::run(JSData* outputComplete) {
   this->answers.setSize(problem.problemData.answers.size());
   this->flagAllBuiltInAnswersOK = true;
   global.setWebInput(WebAPI::Problem::fileName, problem.fileName);
-  global.setWebInput(
-    WebAPI::Problem::randomSeed, randomSeedStream.str()
-  );
+  global.setWebInput(WebAPI::Problem::randomSeed, randomSeedStream.str());
   this->flagSuccess = true;
   for (int j = 0; j < this->answers.size; j ++) {
     CalculatorHTML::Test::OneProblemTest::OneAnswer& current =
@@ -243,9 +238,7 @@ bool CalculatorHTML::Test::OneProblemTest::run(JSData* outputComplete) {
     }
     current.builtInAnswerEncoded =
     HtmlRoutines::convertStringToURLString(current.builtInAnswer, false);
-    global.setWebInput(
-      current.answerIdWebAPI, current.builtInAnswerEncoded
-    );
+    global.setWebInput(current.answerIdWebAPI, current.builtInAnswerEncoded);
     current.builtInAnswerReply =
     WebAPIResponse::submitAnswersJSON(
       randomSeedStream.str(), &current.flagBuiltInWorks, false
@@ -382,8 +375,7 @@ bool CalculatorHTML::Test::builtIn(
   }
   if (
     this->filesToInterpret <= 0 ||
-    this->filesToInterpret > this->fileNames.size
-  ) {
+    this->filesToInterpret > this->fileNames.size) {
     this->filesToInterpret = this->fileNames.size;
   }
   int lastIndex = this->firstFileIndex + this->filesToInterpret;
@@ -533,9 +525,7 @@ bool TopicElementParser::Test::defaultPdfsOK(int& whichTopic) {
     << courses.errorMessage;
     return false;
   }
-  for (
-    whichTopic = 0; whichTopic < courses.allCourses.size; whichTopic ++
-  ) {
+  for (whichTopic = 0; whichTopic < courses.allCourses.size; whichTopic ++) {
     CalculatorHTML owner;
     owner.topicListFileName =
     courses.allCourses[whichTopic].courseTopicsWithFolder();
@@ -651,16 +641,12 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
   std::string desiredOutputString;
   bool desiredResultKnown =
   FileOperations::loadFileToStringVirtual(
-    CalculatorHTML::Test::filenameFullOutput,
-    desiredOutputString,
-    false,
+    CalculatorHTML::Test::filenameFullOutput, desiredOutputString, false,
     nullptr
   );
   if (
-    !CalculatorHTML::Test::builtInMultiple(
-      0, 0, 0, 3, &actualOutput, &comments
-    )
-  ) {
+    !CalculatorHTML::Test::builtInMultiple(0, 0, 0, 3, &actualOutput, &comments
+    )) {
     global.fatal
     << "Built-in problem tests failed. "
     << comments.str()
@@ -688,9 +674,7 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
     << CalculatorHTML::Test::filenameFullOutput
     << Logger::endL;
     FileOperations::writeFileVirtual(
-      CalculatorHTML::Test::filenameFullOutput,
-      actualOutputString,
-      nullptr
+      CalculatorHTML::Test::filenameFullOutput, actualOutputString, nullptr
     );
   } else {
     global
@@ -752,13 +736,10 @@ bool Course::Test::setDeadlines(DatabaseType databaseType) {
   STACK_TRACE("Course::Test::setDeadlines");
   Course::Test::Setup setup(databaseType);
   global.setWebInput(
-    WebAPI::Frontend::problemFileName,
-    "test/problems/interval_notation_1.html"
+    WebAPI::Frontend::problemFileName, "test/problems/interval_notation_1.html"
   );
   global.setWebInput(WebAPI::Problem::courseHome, "test/test.html");
-  global.setWebInput(
-    WebAPI::Problem::topicList, "test/topiclists/test.txt"
-  );
+  global.setWebInput(WebAPI::Problem::topicList, "test/topiclists/test.txt");
   global.setWebInput(WebAPI::Problem::courseHome, "COURSE");
   global.setWebInput(
     "mainInput",
@@ -768,9 +749,7 @@ bool Course::Test::setDeadlines(DatabaseType databaseType) {
       false
     )
   );
-  global.setWebInput(
-    DatabaseStrings::labelUsername, WebAPI::userDefaultAdmin
-  );
+  global.setWebInput(DatabaseStrings::labelUsername, WebAPI::userDefaultAdmin);
   setup.setupAll();
   std::string deadlineResult = WebAPIResponse::setProblemDeadline();
   if (!StringRoutines::stringContains(deadlineResult, "Modified")) {

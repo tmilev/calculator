@@ -222,9 +222,8 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
     std::string certificateContent;
     if (
       !FileOperations::loadFileToStringUnsecure(
-        input.certificateFileNamePhysical,
-        certificateContent,
-        &commentsOnFailure
+        input.certificateFileNamePhysical, certificateContent, &
+        commentsOnFailure
       )
     ) {
       global.fatal
@@ -268,8 +267,7 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
     << Logger::endL;
   } else if (
     SSL_use_certificate_file(
-      this->sslData,
-      input.certificateFileNamePhysical.c_str(),
+      this->sslData, input.certificateFileNamePhysical.c_str(),
       SSL_FILETYPE_PEM
     ) <=
     0
@@ -289,9 +287,7 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
   << Logger::endL;
   if (
     SSL_use_PrivateKey_file(
-      this->sslData,
-      input.privateKeyFileNamePhysical.c_str(),
-      SSL_FILETYPE_PEM
+      this->sslData, input.privateKeyFileNamePhysical.c_str(), SSL_FILETYPE_PEM
     ) <=
     0
   ) {
@@ -517,8 +513,7 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
 }
 
 bool TransportLayerSecurityOpenSSL::inspectCertificates(
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("TransportLayerSecurity::inspectCertificates");
   (void) commentsOnFailure;
@@ -606,8 +601,7 @@ int TransportLayerSecurityOpenSSL::sslRead(
   (void) includeNoErrorInComments;
 #ifdef MACRO_use_open_ssl
   ERR_clear_error();
-  int result =
-  SSL_read(this->sslData, readBuffer.objects, readBuffer.size);
+  int result = SSL_read(this->sslData, readBuffer.objects, readBuffer.size);
   if (result <= 0) {
     this->clearErrorQueue(result);
   }
@@ -642,8 +636,7 @@ int TransportLayerSecurityOpenSSL::sslWrite(
     global.fatal << "Uninitialized ssl not allowed here. " << global.fatal;
   }
   int result = 0;
-  result =
-  SSL_write(this->sslData, writeBuffer.objects, writeBuffer.size);
+  result = SSL_write(this->sslData, writeBuffer.objects, writeBuffer.size);
   this->clearErrorQueue(result);
   return result;
 #else
@@ -887,10 +880,7 @@ bool TransportLayerSecurityConfiguration::makeFromAdditionalKeyAndCertificate(
     keyWithFolder, this->privateKeyFileNamePhysical, true, true, nullptr
   );
   FileOperations::getPhysicalFileNameFromVirtual(
-    certificateWithFolder,
-    this->certificateFileNamePhysical,
-    true,
-    true,
+    certificateWithFolder, this->certificateFileNamePhysical, true, true,
     nullptr
   );
   return this->keysExist();

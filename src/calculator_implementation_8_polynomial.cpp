@@ -17,10 +17,8 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseGrLex(
 ) {
   return
   CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
-    calculator,
-    input,
-    output,
-    &MonomialPolynomial::orderDegreeThenLeftLargerWins()
+    calculator, input, output, &MonomialPolynomial::
+    orderDegreeThenLeftLargerWins()
   );
 }
 
@@ -141,11 +139,7 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
   ) {
     return
     CalculatorFunctionsPolynomial::polynomialDivisionVerbosePart2(
-      calculator,
-      polynomialsRational,
-      contextAlgebraic,
-      output,
-      monomialOrder
+      calculator, polynomialsRational, contextAlgebraic, output, monomialOrder
     );
   }
   Vector<Polynomial<ElementZmodP> > polynomialsModP;
@@ -222,9 +216,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialModPrime(
   << "Converted polynomial: \\("
   << polynomial.content.toString(&result.format)
   << "\\)<br>";
-  if (
-    !result.factor(polynomial.content, algorithm, &comments, &comments)
-  ) {
+  if (!result.factor(polynomial.content, algorithm, &comments, &comments)) {
     out
     << "Failed to factor. "
     << comments.str()
@@ -305,9 +297,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments(
 ) {
   STACK_TRACE("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
   WithContext<Polynomial<Rational> > polynomial;
-  if (
-    !CalculatorConversions::convert(calculator, input[1], polynomial)
-  ) {
+  if (!CalculatorConversions::convert(calculator, input[1], polynomial)) {
     return false;
   }
   if (polynomial.content.minimalNumberOfVariables() > 1) {
@@ -320,10 +310,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments(
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationFiniteFields algorithm;
   std::stringstream comments;
-  if (
-    !factorization.factor(
-      polynomial.content, algorithm, &comments, &comments
-    )
+  if (!factorization.factor(polynomial.content, algorithm, &comments, &comments)
   ) {
     return output.assignValue(calculator, comments.str());
   }
@@ -352,9 +339,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
 ) {
   STACK_TRACE("CalculatorFunctionsPolynomial::factorPolynomialKronecker");
   WithContext<Polynomial<Rational> > polynomial;
-  if (
-    !CalculatorConversions::convert(calculator, input[1], polynomial)
-  ) {
+  if (!CalculatorConversions::convert(calculator, input[1], polynomial)) {
     return false;
   }
   if (polynomial.content.minimalNumberOfVariables() > 1) {
@@ -368,10 +353,7 @@ bool CalculatorFunctionsPolynomial::factorPolynomialKronecker(
   PolynomialFactorizationKronecker algorithm;
   if (
     !factorization.factor(
-      polynomial.content,
-      algorithm,
-      &calculator.comments,
-      &calculator.comments
+      polynomial.content, algorithm, &calculator.comments, &calculator.comments
     )
   ) {
     return false;
@@ -479,10 +461,8 @@ bool CalculatorFunctionsPolynomial::factorPolynomialProcess(
   for (int i = 0; i < factors.size; i ++) {
     if (
       !CalculatorConversions::expressionFromPolynomial(
-        calculator,
-        factors[i],
-        polynomialExpression,
-        &originalPolynomial.context
+        calculator, factors[i], polynomialExpression, &originalPolynomial.
+        context
       )
     ) {
       return
@@ -503,7 +483,9 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
   ExpressionContext* context,
   Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials");
+  STACK_TRACE(
+    "CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials"
+  );
   if (polynomials.size < 2) {
     return output.assignError(calculator, "Too few polynomials");
   }
@@ -535,9 +517,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(
   }
   if (isModular) {
     Expression inputMerged;
-    if (
-      !input.mergeContextsMyAruments(inputMerged, &calculator.comments)
-    ) {
+    if (!input.mergeContextsMyAruments(inputMerged, &calculator.comments)) {
       return
       output.assignError(
         calculator, "Sylvester matrix: failed to merge polynomial contexts."
@@ -706,10 +686,8 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
 
 bool CalculatorFunctionsPolynomial::
 greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  bool doGCD
+  Calculator& calculator, const Expression& input, Expression& output, bool
+  doGCD
 ) {
   if (input.size() != 3) {
     return false;
@@ -720,29 +698,21 @@ greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
     return false;
   }
   Polynomial<AlgebraicNumber> leftPolynomial, rightPolynomial;
-  if (
-    !left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)
-  ) {
+  if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
     return false;
   }
   return
   CalculatorFunctionsPolynomial::
   greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    calculator,
-    leftPolynomial,
-    rightPolynomial,
-    left.getContext(),
-    output,
+    calculator, leftPolynomial, rightPolynomial, left.getContext(), output,
     doGCD
   );
 }
 
 bool CalculatorFunctionsPolynomial::
 greatestCommonDivisorOrLeastCommonMultipleModular(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  bool doGCD
+  Calculator& calculator, const Expression& input, Expression& output, bool
+  doGCD
 ) {
   if (input.size() != 3) {
     return false;
@@ -754,9 +724,7 @@ greatestCommonDivisorOrLeastCommonMultipleModular(
   }
   Polynomial<ElementZmodP> leftPolynomial;
   Polynomial<ElementZmodP> rightPolynomial;
-  if (
-    !left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)
-  ) {
+  if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
     return false;
   }
   if (leftPolynomial.isEqualToZero() || rightPolynomial.isEqualToZero()) {
@@ -791,21 +759,15 @@ greatestCommonDivisorOrLeastCommonMultipleModular(
   return
   CalculatorFunctionsPolynomial::
   greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    calculator,
-    leftPolynomial,
-    rightPolynomial,
-    left.getContext(),
-    output,
+    calculator, leftPolynomial, rightPolynomial, left.getContext(), output,
     doGCD
   );
 }
 
 bool CalculatorFunctionsPolynomial::
 greatestCommonDivisorOrLeastCommonMultiplePolynomial(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  bool doGCD
+  Calculator& calculator, const Expression& input, Expression& output, bool
+  doGCD
 ) {
   STACK_TRACE(
     "CalculatorFunctionsPolynomial::"
@@ -838,10 +800,8 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
 
 bool CalculatorFunctionsPolynomial::
 greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  bool doGCD
+  Calculator& calculator, const Expression& input, Expression& output, bool
+  doGCD
 ) {
   STACK_TRACE(
     "CalculatorFunctionsPolynomial::"
@@ -850,9 +810,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
   Vector<Polynomial<Rational> > polynomials;
   ExpressionContext context(calculator);
   if (
-    !calculator.getVectorFromFunctionArguments(
-      input, polynomials, &context, 2
-    )
+    !calculator.getVectorFromFunctionArguments(input, polynomials, &context, 2)
   ) {
     return
     output.assignError(
@@ -890,9 +848,7 @@ private:
 public:
   Expression output;
   GroebnerComputationCalculator(
-    Calculator& inputOwner,
-    const Expression& inputExpression,
-    int inputOrder
+    Calculator& inputOwner, const Expression& inputExpression, int inputOrder
   );
   PolynomialOrder getOrder() const;
   template <class Coefficient>
@@ -910,8 +866,7 @@ public:
     bool success
   );
   template <class Coefficient>
-  bool prepareFinalResult(
-    const List<Polynomial<Coefficient> >& outputGroebner
+  bool prepareFinalResult(const List<Polynomial<Coefficient> >& outputGroebner
   );
 };
 
@@ -937,12 +892,7 @@ bool GroebnerComputationCalculator::initializeComputation() {
   List<Expression> polynomials;
   if (
     !CalculatorConversions::loadKeysFromStatementList(
-      *this->owner,
-      *this->input,
-      configuration,
-      true,
-      &polynomials,
-      nullptr
+      *this->owner, *this->input, configuration, true, &polynomials, nullptr
     )
   ) {
     return *this->owner << "Could not extract statement list. ";
@@ -962,9 +912,7 @@ bool GroebnerComputationCalculator::initializeComputation() {
     }
   }
   if (
-    configuration.contains(
-      Calculator::Functions::Names::Polynomials::order
-    )
+    configuration.contains(Calculator::Functions::Names::Polynomials::order)
   ) {
     Expression order = configuration.getValueNoFail("order");
     if (!order.isSequenceNElements()) {
@@ -983,9 +931,7 @@ bool GroebnerComputationCalculator::initializeComputation() {
       Calculator::Functions::Names::Polynomials::modulus
     )
   ) {
-    if (
-      !configuration.getValueNoFail("modulus").isInteger(&this->modulus)
-    ) {
+    if (!configuration.getValueNoFail("modulus").isInteger(&this->modulus)) {
       return
       *this->owner
       << "Error: could not extract modulus integer from "
@@ -1005,10 +951,7 @@ bool GroebnerComputationCalculator::initializeComputation() {
   this->extractedContext.initialize(*this->owner);
   if (
     !this->owner->getVectorFromFunctionArguments<Polynomial<Rational> >(
-      argumentExtractor,
-      this->inputVector,
-      &this->extractedContext,
-      - 1
+      argumentExtractor, this->inputVector, &this->extractedContext, - 1
     )
   ) {
     return *this->owner << "Failed to extract polynomial expressions. ";
@@ -1211,10 +1154,8 @@ bool GroebnerComputationCalculator::prepareFinalResult(
 }
 
 bool CalculatorFunctionsPolynomial::groebner(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  int order
+  Calculator& calculator, const Expression& input, Expression& output, int
+  order
 ) {
   STACK_TRACE("CalculatorFunctionsPolynomial::groebner");
   GroebnerComputationCalculator computation(calculator, input, order);
@@ -1254,10 +1195,7 @@ combineFractionsCommutativeWithInternalLibrary(
   }
   return
   CalculatorConversions::expressionFromRationalFraction(
-    calculator,
-    rationalFunction.content,
-    output,
-    &rationalFunction.context
+    calculator, rationalFunction.content, output, &rationalFunction.context
   );
 }
 

@@ -67,8 +67,8 @@ public:
   bool isEven() const;
   bool isPositive() const;
   bool tryIsPower(
-    bool& outputIsPower, LargeInteger& outputBase, int& outputPower
-  ) const;
+    bool& outputIsPower, LargeInteger& outputBase, int&
+    outputPower) const;
   bool isCompositePrimeDivision(
     List<unsigned int>& primesGenerated,
     bool& outputGuaranteedPrime,
@@ -117,9 +117,8 @@ public:
   void operator++(int);
   bool isIntegerFittingInInt(int* whichInt) const;
   void assignFactorial(unsigned int x);
-  void multiplyBy(
-    const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output
-  ) const;
+  void multiplyBy(const LargeIntegerUnsigned& x, LargeIntegerUnsigned& output)
+  const;
   void multiplyByUInt(unsigned int x);
   void addShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void assignShiftedUInt(unsigned int x, int shift);
@@ -146,8 +145,8 @@ public:
   ) const;
   void assignString(const std::string& input);
   bool assignStringFailureAllowed(
-    const std::string& input, bool ignoreNonDigits
-  );
+    const std::string& input, bool
+    ignoreNonDigits);
   int getUnsignedIntValueTruncated();
   int operator%(unsigned int x);
   void operator=(const LargeIntegerUnsigned& x);
@@ -187,9 +186,8 @@ public:
     int desiredNumberOfBytes,
     std::stringstream* commentsOnFailure
   ) const;
-  void getHexBigEndian(
-    int numberOfLeadingZeroesToPadWith, std::string& output
-  ) const;
+  void getHexBigEndian(int numberOfLeadingZeroesToPadWith, std::string& output)
+  const;
   // must be rewritten:
   double getDoubleValue() const;
   class Test {
@@ -207,9 +205,8 @@ public:
       int64_t maximumRunningTimeMilliseconds
     );
     static bool isPossiblyPrimeMillerRabinOnly(
-      const List<LargeIntegerUnsigned>& input,
-      bool mustBeTrue,
-      int millerRabinTries
+      const List<LargeIntegerUnsigned>& input, bool mustBeTrue, int
+      millerRabinTries
     );
     static bool factor();
     static bool factorSmall(
@@ -284,8 +281,8 @@ public:
   static LargeInteger zero();
   static LargeInteger zeroStatic();
   bool tryIsPower(
-    bool& outputIsPower, LargeInteger& outputBase, int& outputPower
-  ) const;
+    bool& outputIsPower, LargeInteger& outputBase, int&
+    outputPower) const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused) const {
     (void) unused;
     return false;
@@ -483,8 +480,8 @@ private:
   friend Rational operator-(const Rational& argument);
   friend Rational operator/(int left, const Rational& right);
   friend std::ostream& operator<<(
-    std::ostream& output, const Rational& rational
-  ) {
+    std::ostream& output, const Rational&
+    rational) {
     output << rational.toString();
     return output;
   }

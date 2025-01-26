@@ -196,8 +196,8 @@ bool Plot::operator==(const Plot& other) const {
       this->highY - other.highY
     ) ==
     0.0
-  ) && ((this->lowY - other.lowY) == 0.0) && ((this->lowX - other.lowX) == 0.0
-  ) && ((this->highX - other.highX) == 0.0) &&
+  ) && ((this->lowY - other.lowY) == 0.0) && ((this->lowX - other.lowX) == 0.0)
+  && ((this->highX - other.highX) == 0.0) &&
   this->plotObjects == other.plotObjects &&
   this->parameterNames == other.parameterNames &&
   this->parameterNamesJS == other.parameterNamesJS &&
@@ -233,8 +233,7 @@ bool PlotObject::operator==(const PlotObject& other) const {
   return ((this->xLow - other.xLow) == 0.0) && ((this->xHigh - other.xHigh) ==
     0.0
   ) && ((this->yLow - other.yLow) == 0.0) && ((this->yHigh - other.yHigh) ==
-    0.0
-  ) && ((this->paramLow - other.paramLow) == 0.0) && ((
+    0.0) && ((this->paramLow - other.paramLow) == 0.0) && ((
       this->paramHigh - other.paramHigh
     ) ==
     0.0
@@ -296,10 +295,8 @@ PlotObject::PlotObject() {
 void PlotObject::computeYBounds() {
   STACK_TRACE("PlotObject::computeYBounds");
   for (int i = 0; i < this->pointsDouble.size; i ++) {
-    this->yHigh =
-    MathRoutines::maximum(this->yHigh, this->pointsDouble[i][1]);
-    this->yLow =
-    MathRoutines::minimum(this->yLow, this->pointsDouble[i][1]);
+    this->yHigh = MathRoutines::maximum(this->yHigh, this->pointsDouble[i][1]);
+    this->yLow = MathRoutines::minimum(this->yLow, this->pointsDouble[i][1]);
   }
 }
 
@@ -355,15 +352,11 @@ void Plot::computeAxesAndBoundingBox() {
   for (int k = 0; k < this->plotObjects.size; k ++) {
     this->plotObjects[k].computeYBounds();
     this->lowX = MathRoutines::minimum(this->plotObjects[k].xLow, lowX);
-    this->highX =
-    MathRoutines::maximum(this->plotObjects[k].xHigh, highX);
-    this->lowY =
-    MathRoutines::minimum(this->plotObjects[k].yLow, this->lowY);
+    this->highX = MathRoutines::maximum(this->plotObjects[k].xHigh, highX);
+    this->lowY = MathRoutines::minimum(this->plotObjects[k].yLow, this->lowY);
     this->highY =
     MathRoutines::maximum(this->plotObjects[k].yHigh, this->highY);
-    for (
-      int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++
-    ) {
+    for (int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++) {
       Vector<double>& currentPoint = this->plotObjects[k].pointsDouble[j];
       if (!this->isOKVector(currentPoint)) {
         continue;
@@ -385,15 +378,11 @@ void Plot::computeAxesAndBoundingBox3d() {
   for (int k = 0; k < this->plotObjects.size; k ++) {
     this->plotObjects[k].computeYBounds();
     this->lowX = MathRoutines::minimum(this->plotObjects[k].xLow, lowX);
-    this->highX =
-    MathRoutines::maximum(this->plotObjects[k].xHigh, highX);
-    this->lowY =
-    MathRoutines::minimum(this->plotObjects[k].yLow, this->lowY);
+    this->highX = MathRoutines::maximum(this->plotObjects[k].xHigh, highX);
+    this->lowY = MathRoutines::minimum(this->plotObjects[k].yLow, this->lowY);
     this->highY =
     MathRoutines::maximum(this->plotObjects[k].yHigh, this->highY);
-    for (
-      int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++
-    ) {
+    for (int j = 0; j < this->plotObjects[k].pointsDouble.size; j ++) {
       Vector<double>& currentPoint = this->plotObjects[k].pointsDouble[j];
       if (!this->isOKVector(currentPoint)) {
         continue;
@@ -429,11 +418,8 @@ void PlotObject::makeLabel(
 }
 
 void PlotObject::makeRectangle(
-  double xLowLeft,
-  double yLowLeft,
-  double width,
-  double height,
-  const std::string& color
+  double xLowLeft, double yLowLeft, double width, double height, const std::
+  string& color
 ) {
   this->plotType = PlotObject::PlotTypes::pathFilled;
   Vector<double> current;
@@ -496,9 +482,8 @@ void PlotObject::makePlotFillFinish() {
 }
 
 void PlotObject::makeCircle(
-  const Vector<Rational>& center,
-  const Rational& radius,
-  const std::string& color
+  const Vector<Rational>& center, const Rational& radius, const std::string&
+  color
 ) {
   if (center.size < 2) {
     global.fatal
@@ -581,11 +566,8 @@ void Plot::drawPlotFillFinish() {
 }
 
 void Plot::drawRectangle(
-  double xLowLeft,
-  double yLowLeft,
-  double width,
-  double height,
-  const std::string& color
+  double xLowLeft, double yLowLeft, double width, double height, const std::
+  string& color
 ) {
   PlotObject plot;
   plot.makeRectangle(xLowLeft, yLowLeft, width, height, color);
@@ -663,8 +645,7 @@ void Plot::drawSegment(
   this->addPlotOnTop(segment);
 }
 
-void Plot::drawLabel(
-  const Vector<Rational>& position, const std::string& label
+void Plot::drawLabel(const Vector<Rational>& position, const std::string& label
 ) {
   PlotObject labelPlot;
   labelPlot.makeLabel(position, label);
@@ -705,9 +686,7 @@ bool Plot::isOKVector(const Vector<double>& input) {
 std::string Plot::getPlotHtml3d(Calculator& owner) {
   STACK_TRACE("Plot::getPlotHtml3d");
   owner.flagHasGraphics = true;
-  this->computeCanvasNameIfNecessary(
-    owner.objectContainer.canvasPlotCounter
-  );
+  this->computeCanvasNameIfNecessary(owner.objectContainer.canvasPlotCounter);
   JSData result = this->plotJSON3d(owner);
   std::stringstream out;
   if (!owner.flagPlotShowJavascriptOnly) {
@@ -798,7 +777,8 @@ JSData PlotObject::toJSONParametricCurve() {
   result[PlotObject::Labels::variableRange][0] = this->paramLowJS;
   result[PlotObject::Labels::variableRange][1] = this->paramHighJS;
   if (this->numberOfSegmentsJS.size > 0) {
-    result[PlotObject::Labels::numberOfSegments] = this->numberOfSegmentsJS[0];
+    result[PlotObject::Labels::numberOfSegments] =
+    this->numberOfSegmentsJS[0];
   } else {
     result[PlotObject::Labels::numberOfSegments] = 100;
   }
@@ -937,7 +917,8 @@ JSData PlotObject::coordinateFunction(int index) {
 
 void PlotObject::writeColorWidthSegments(JSData& output) {
   if (this->numberOfSegmentsJS.size > 0) {
-    output[PlotObject::Labels::numberOfSegments] = this->numberOfSegmentsJS[0];
+    output[PlotObject::Labels::numberOfSegments] =
+    this->numberOfSegmentsJS[0];
   } else {
     output[PlotObject::Labels::numberOfSegments] = 200;
   }
@@ -972,8 +953,7 @@ JSData PlotObject::toJSON2dDrawFunction() {
 }
 
 JSData PlotObject::manifoldImmersionFunctionsJS() {
-  return
-  this->functionFromString("return " + this->manifoldImmersionJS + ";");
+  return this->functionFromString("return " + this->manifoldImmersionJS + ";");
 }
 
 JSData PlotObject::toJSONDirectionFieldInTwoDimensions() {
@@ -1192,9 +1172,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
     return "[plot already displayed]";
   }
   this->flagDivAlreadyDisplayed = true;
-  this->computeCanvasNameIfNecessary(
-    owner.objectContainer.canvasPlotCounter
-  );
+  this->computeCanvasNameIfNecessary(owner.objectContainer.canvasPlotCounter);
   std::stringstream out;
   if (this->priorityViewRectangle <= 0) {
     this->computeAxesAndBoundingBox();
@@ -1233,9 +1211,7 @@ std::string Plot::getPlotHtml2d(Calculator& owner) {
 
 JSData Plot::plotJSON3d(Calculator& owner) {
   JSData result;
-  this->computeCanvasNameIfNecessary(
-    owner.objectContainer.canvasPlotCounter
-  );
+  this->computeCanvasNameIfNecessary(owner.objectContainer.canvasPlotCounter);
   result[WebAPI::Result::scriptType] = "graphics3d";
   if (!owner.flagPlotShowJavascriptOnly) {
     std::string canvasId = this->getCanvasName();
@@ -1405,11 +1381,8 @@ std::string Plot::getPlotStringAddLatexCommands(bool useHtml) {
 
 bool Expression::assignStringParsed(
   const std::string& input,
-  MapList<
-    std::string,
-    Expression,
-    HashFunctions::hashFunction<std::string>
-  >* substitutions,
+  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >*
+  substitutions,
   Calculator& owner
 ) {
   STACK_TRACE("Expression::assignStringParsed");
@@ -1452,9 +1425,7 @@ bool Expression::isSuitableForSubstitution() const {
   if (this->owner == nullptr) {
     return false;
   }
-  if (
-    this->isBuiltInType() || this->startsWith(this->owner->opBind())
-  ) {
+  if (this->isBuiltInType() || this->startsWith(this->owner->opBind())) {
     return false;
   }
   return true;
@@ -1493,9 +1464,7 @@ void Expression::substituteRecursivelyInChildren(
   Expression expression;
   for (int i = 0; i < this->size(); i ++) {
     if (substitutions.contains((*this)[i])) {
-      this->setChild(
-        i, substitutions.getValueCreateEmpty((*this)[i])
-      );
+      this->setChild(i, substitutions.getValueCreateEmpty((*this)[i]));
     } else {
       expression = (*this)[i];
       expression.substituteRecursivelyInChildren(substitutions);

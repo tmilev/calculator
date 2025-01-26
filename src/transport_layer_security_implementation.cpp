@@ -36,8 +36,7 @@ bool TransportLayerSecurityServer::loadSelfSignedPEMCertificateContent(
 }
 
 bool TransportLayerSecurityServer::loadSelfSignedPEMPrivateKeyContent(
-  std::stringstream* commentsOnFailure,
-  std::string& outputPrivateKeyContent
+  std::stringstream* commentsOnFailure, std::string& outputPrivateKeyContent
 ) {
   STACK_TRACE(
     "TransportLayerSecurityServer::loadSelfSignedPEMPrivateKeyContent"

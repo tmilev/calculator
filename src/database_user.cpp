@@ -51,9 +51,7 @@ bool DatabaseUserRoutines::loadUserInformation(
   List<JSData> allUsers;
   QueryFindOneOf queries;
   output.getFindMeQueryByUsernameOrEmail(queries);
-  if (
-    !this->owner->find(queries, nullptr, allUsers, nullptr, nullptr)
-  ) {
+  if (!this->owner->find(queries, nullptr, allUsers, nullptr, nullptr)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Could not read users from the database. "
@@ -131,19 +129,14 @@ UserCalculator::~UserCalculator() {
   for (unsigned i = 0; i < this->enteredPassword.size(); i ++) {
     this->enteredPassword[i] = ' ';
   }
-  for (
-    unsigned i = 0; i < this->usernameHashedPlusPassWordHashed.size(); i ++
-  ) {
+  for (unsigned i = 0; i < this->usernameHashedPlusPassWordHashed.size(); i ++)
+  {
     this->usernameHashedPlusPassWordHashed[i] = ' ';
   }
-  for (
-    unsigned i = 0; i < this->enteredHashedSaltedPassword.size(); i ++
-  ) {
+  for (unsigned i = 0; i < this->enteredHashedSaltedPassword.size(); i ++) {
     this->enteredHashedSaltedPassword[i] = ' ';
   }
-  for (
-    unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++
-  ) {
+  for (unsigned i = 0; i < this->actualHashedSaltedPassword.size(); i ++) {
     this->actualHashedSaltedPassword[i] = ' ';
   }
 }
@@ -243,16 +236,13 @@ bool UserCalculator::authenticateWithToken(
 }
 
 bool UserCalculator::loadFromDatabase(
-  std::stringstream* commentsOnFailure,
-  std::stringstream* commentsGeneral
+  std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
 ) {
   STACK_TRACE("UserCalculator::loadFromDatabase");
   (void) commentsGeneral;
   (void) commentsOnFailure;
   double startTime = global.getElapsedSeconds();
-  if (
-    !Database::get().user.loadUserInformation(*this, commentsOnFailure)
-  ) {
+  if (!Database::get().user.loadUserInformation(*this, commentsOnFailure)) {
     return false;
   }
   this->computeCourseInformation();
@@ -514,14 +504,11 @@ bool UserCalculator::resetAuthenticationToken(
   this->actualAuthenticationToken =
   Crypto::convertListUnsignedCharsToBase64(authenticationToken, true);
   QueryFind findUser(
-    DatabaseStrings::tableUsers,
-    DatabaseStrings::labelUsername,
-    this->username
+    DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username
   );
   QueryUpdate setUser;
   setUser.addKeyValueStringPair(
-    DatabaseStrings::labelAuthenticationToken,
-    this->actualAuthenticationToken
+    DatabaseStrings::labelAuthenticationToken, this->actualAuthenticationToken
   );
   setUser.addKeyValueStringPair(
     DatabaseStrings::labelTimeOfAuthenticationTokenCreation,
@@ -542,9 +529,7 @@ bool UserCalculator::setPassword(std::stringstream* commentsOnFailure) {
   }
   this->computeHashedSaltedPassword();
   QueryFind findUser(
-    DatabaseStrings::tableUsers,
-    DatabaseStrings::labelUsername,
-    this->username
+    DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username
   );
   QueryUpdate setUser;
   setUser.addKeyValueStringPair(
@@ -676,9 +661,7 @@ bool UserCalculator::interpretDatabaseProblemDataJSON(
   ProblemData reader;
   std::string problemNameNoWhiteSpace;
   for (int i = 0; i < data.objects.size(); i ++) {
-    if (
-      !reader.loadFromJSON(data.objects.values[i], commentsOnFailure)
-    ) {
+    if (!reader.loadFromJSON(data.objects.values[i], commentsOnFailure)) {
       result = false;
       continue;
     }
@@ -728,9 +711,7 @@ bool UserCalculator::computeAndStoreActivationToken(
   this->actualActivationToken =
   Crypto::convertListUnsignedCharsToBase64(activationToken, true);
   QueryFind findUserQuery(
-    DatabaseStrings::tableUsers,
-    DatabaseStrings::labelUsername,
-    this->username
+    DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username
   );
   QueryUpdate updateUser;
   updateUser.addKeyValueStringPair(
@@ -799,9 +780,7 @@ bool UserCalculator::computeAndStoreActivationEmail(
     return false;
   }
   QueryFind findEmail(
-    DatabaseStrings::tableEmailInfo,
-    DatabaseStrings::labelEmail,
-    this->email
+    DatabaseStrings::tableEmailInfo, DatabaseStrings::labelEmail, this->email
   );
   List<JSData> allEmailStats;
   bool success =
@@ -862,9 +841,7 @@ bool UserCalculator::computeAndStoreActivationEmail(
     DatabaseStrings::labelTimeOfActivationTokenCreation, now.toString()
   );
   if (this->userId != "") {
-    findQueryInUsers.setLabelValue(
-      DatabaseStrings::labelUserId, this->userId
-    );
+    findQueryInUsers.setLabelValue(DatabaseStrings::labelUserId, this->userId);
   } else if (this->username != "") {
     findQueryInUsers.setLabelValue(
       DatabaseStrings::labelUsername, this->username
@@ -915,9 +892,7 @@ bool UserCalculator::computeAndStoreActivationEmail(
     return false;
   }
   this->activationEmailSubject = "NO REPLY: Activation of your math account. ";
-  if (
-    global.flagDebugLogin && global.databaseType == DatabaseType::fallback
-  ) {
+  if (global.flagDebugLogin && global.databaseType == DatabaseType::fallback) {
     global.comments
     << "Activation link displayed for debugging purposes. Database is off. "
     << "<a href='"
@@ -944,9 +919,7 @@ void UserCalculatorData::getFindMeQueryByUsername(QueryFind& output) const {
   STACK_TRACE("UserCalculatorData::getFindMeQueryByUsername");
   output =
   QueryFind(
-    DatabaseStrings::tableUsers,
-    DatabaseStrings::labelUsername,
-    this->username
+    DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username
   );
 }
 
@@ -957,17 +930,14 @@ void UserCalculatorData::getFindMeQueryByUsernameOrEmail(
   output.queries.clear();
   if (this->username != "") {
     QueryFind findByUsername(
-      DatabaseStrings::tableUsers,
-      DatabaseStrings::labelUsername,
-      this->username
+      DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->
+      username
     );
     output.queries.addOnTop(findByUsername);
   }
   if (this->email != "") {
     QueryFind findByEmail(
-      DatabaseStrings::tableUsers,
-      DatabaseStrings::labelEmail,
-      this->email
+      DatabaseStrings::tableUsers, DatabaseStrings::labelEmail, this->email
     );
     output.queries.addOnTop(findByEmail);
   }
@@ -1061,9 +1031,7 @@ bool DatabaseUserRoutines::loginViaGoogleTokenCreateNewAccountIfNeeded(
   tokenIsGood = true;
   JSONWebToken webToken;
   if (
-    !webToken.assignString(
-      userWrapper.enteredGoogleToken, commentsOnFailure
-    )
+    !webToken.assignString(userWrapper.enteredGoogleToken, commentsOnFailure)
   ) {
     return false;
   }
@@ -1071,9 +1039,7 @@ bool DatabaseUserRoutines::loginViaGoogleTokenCreateNewAccountIfNeeded(
   if (!data.parse(webToken.claimsJSON, commentsOnFailure)) {
     return false;
   }
-  if (
-    data.getValue("email").elementType != JSData::Type::tokenString
-  ) {
+  if (data.getValue("email").elementType != JSData::Type::tokenString) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Could not find email entry in the json data "
@@ -1299,9 +1265,7 @@ bool UserCalculator::storeToDatabaseOverwrite(
 ) {
   STACK_TRACE("UserCalculator::storeToDatabaseOverwrite");
   QueryFind findUser(
-    DatabaseStrings::tableUsers,
-    DatabaseStrings::labelUsername,
-    this->username
+    DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->username
   );
   if (this->enteredPassword != "" && doSetPassword) {
     this->computeHashedSaltedPassword();
@@ -1342,8 +1306,8 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   }
   MapList<std::string, std::string> urlParameters;
   urlParameters.setKeyValue(
-    DatabaseStrings::labelCalculatorRequest,
-    WebAPI::Request::activateAccountJSON
+    DatabaseStrings::labelCalculatorRequest, WebAPI::Request::
+    activateAccountJSON
   );
   urlParameters.setKeyValue(
     DatabaseStrings::labelActivationToken, activationToken
@@ -1353,8 +1317,8 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   );
   urlParameters.setKeyValue(DatabaseStrings::labelEmail, inputEmailUnsafe);
   urlParameters.setKeyValue(
-    DatabaseStrings::labelCurrentPage,
-    DatabaseStrings::labelPageActivateAccount
+    DatabaseStrings::labelCurrentPage, DatabaseStrings::
+    labelPageActivateAccount
   );
   std::string confirmEmailOnly =
   confirmEmailOnlyNoPasswordSet ? "true" : "false";
@@ -1376,9 +1340,7 @@ bool UserCalculator::getActivationAddressFromActivationToken(
     urlParametersStream
     << urlParameters.keys[i]
     << "="
-    << HtmlRoutines::convertStringToURLString(
-      urlParameters.values[i], false
-    )
+    << HtmlRoutines::convertStringToURLString(urlParameters.values[i], false)
     << "&";
   }
   out << address << application << "?" << urlParametersStream.str();

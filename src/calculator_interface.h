@@ -132,9 +132,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   typedef bool(*ToStringHandler)(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   // ////
   friend std::ostream& operator<<(
@@ -161,9 +159,8 @@ public:
     Expression& outputLeftMultiplicand,
     Expression& outputRightMultiplicand
   ) const;
-  void getBaseExponentForm(
-    Expression& outputBase, Expression& outputExponent
-  ) const;
+  void getBaseExponentForm(Expression& outputBase, Expression& outputExponent)
+  const;
   void getMultiplicandsRecursive(
     List<Expression>& outputAppendList, int depth = 0
   ) const;
@@ -215,9 +212,8 @@ public:
     std::string* outputWhichAtom = nullptr
   ) const;
   bool isPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const;
-  bool isAtomNotInterpretedAsFunction(
-    std::string* outputWhichAtom = nullptr
-  ) const;
+  bool isAtomNotInterpretedAsFunction(std::string* outputWhichAtom = nullptr)
+  const;
   bool isMatrix(
     int* outputNumberOfRows = nullptr, int* outputNumberOfColumns = nullptr
   ) const;
@@ -232,9 +228,8 @@ public:
   bool isOperation(int& outputWhichOperationIndex) const;
   bool isOperation(std::string* outputWhichOperation = nullptr) const;
   bool isBuiltInAtom(std::string* outputWhichOperation = nullptr) const;
-  bool isGoodForChainRuleFunction(
-    std::string* outputWhichOperation = nullptr
-  ) const;
+  bool isGoodForChainRuleFunction(std::string* outputWhichOperation = nullptr)
+  const;
   bool isIntegralFdx(
     Expression* differentialVariable = nullptr,
     Expression* functionToIntegrate = nullptr,
@@ -346,21 +341,17 @@ public:
   // note: the following always returns true:
   template <class Type>
   bool assignValueWithContext(
-    Calculator& owner,
-    const Type& inputValue,
-    const ExpressionContext& context
+    Calculator& owner, const Type& inputValue, const ExpressionContext& context
   );
   // Same as assignValueWithContext but with shuffled arguments. Deprecated.
   template <class BuiltIn>
-  bool assignWithContext(
-    Calculator& owner, const WithContext<BuiltIn>& input
-  ) {
-    return
-    this->assignValueWithContext(owner, input.content, input.context);
+  bool assignWithContext(Calculator& owner, const WithContext<BuiltIn>& input)
+  {
+    return this->assignValueWithContext(owner, input.content, input.context);
   }
   bool setContextAtLeastEqualTo(
-    ExpressionContext& inputOutputMinContext,
-    std::stringstream* commentsOnFailure
+    ExpressionContext& inputOutputMinContext, std::stringstream*
+    commentsOnFailure
   );
   bool hasContext() const;
   bool hasNonEmptyContext() const;
@@ -406,9 +397,7 @@ public:
     const LinearCombination<Expression, Coefficient>& summands
   );
   bool makeSum(Calculator& calculator, const List<Expression>& summands);
-  bool makeProduct(
-    Calculator& owner, const List<Expression>& multiplicands
-  );
+  bool makeProduct(Calculator& owner, const List<Expression>& multiplicands);
   bool makeProduct(
     Calculator& owner, const Expression& left, const Expression& right
   );
@@ -416,15 +405,13 @@ public:
     Calculator& owner, const List<Expression>& multiplicands
   );
   bool makeQuotientReduce(
-    Calculator& owner,
-    const Expression& numerator,
-    const Expression& denominator
+    Calculator& owner, const Expression& numerator, const Expression&
+    denominator
   );
   int getNumberOfColumns() const;
   bool makeSequenceCommands(
-    Calculator& owner,
-    List<std::string>& inputKeys,
-    List<Expression>& inputValues
+    Calculator& owner, List<std::string>& inputKeys, List<Expression>&
+    inputValues
   );
   bool makeSequenceStatements(
     Calculator& owner, List<Expression>* inputStatements = nullptr
@@ -438,26 +425,23 @@ public:
   );
   bool makeMatrix(Matrix<Expression>* inputMatrix, Calculator& owner);
   bool makeSequence(
-    Calculator& owner, List<Expression>* inputSequence = nullptr
-  );
-  bool makeExponentReduce(
-    Calculator& owner, const Expression& base, int power
+    Calculator& owner, List<Expression>* inputSequence =
+    nullptr);
+  bool makeExponentReduce(Calculator& owner, const Expression& base, int power
   );
   bool makeXOX(
-    Calculator& owner,
-    int operation,
-    const Expression& left,
-    const Expression& right
+    Calculator& owner, int operation, const Expression& left, const Expression&
+    right
   );
   bool makeSqrt(
-    Calculator& owner,
-    const Rational& argument,
-    const Rational& radicalSuperIndex = 2
+    Calculator& owner, const Rational& argument, const Rational&
+    radicalSuperIndex =
+    2
   );
   bool makeSqrt(
-    Calculator& owner,
-    const Expression& argument,
-    const Rational& radicalSuperIndex = 2
+    Calculator& owner, const Expression& argument, const Rational&
+    radicalSuperIndex =
+    2
   );
   bool makeXOXOdotsOX(
     Calculator& owner, int operation, const List<Expression>& opands
@@ -465,9 +449,7 @@ public:
   bool makeOXdotsX(
     Calculator& owner, int operation, const List<Expression>& opands
   );
-  bool makeOX(
-    Calculator& owner, int operation, const Expression& opArgument
-  );
+  bool makeOX(Calculator& owner, int operation, const Expression& opArgument);
   bool sequencefy();
   bool isSuitableForSubstitution() const;
   bool isSuitableForRecursion() const;
@@ -489,8 +471,7 @@ public:
     this->setChild(childIndex, expression);
   }
   std::string lispify() const;
-  bool toStringData(
-    std::stringstream& out, FormatExpressions* format = nullptr
+  bool toStringData(std::stringstream& out, FormatExpressions* format = nullptr
   ) const;
   std::string toStringSemiFull() const;
   std::string toStringFull() const;
@@ -499,9 +480,7 @@ public:
   std::string toUTF8String(FormatExpressions* format = nullptr) const;
   template <class Type>
   static bool toStringBuiltIn(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   bool toStringWithAtomHandler(
     std::stringstream& out, FormatExpressions* format
@@ -510,279 +489,170 @@ public:
     std::stringstream& out, FormatExpressions* format
   ) const;
   static bool toStringLnAbsoluteInsteadOfLogarithm(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringDifferential(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringDifferential2(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringDifferential3(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringDifferentiate(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringDefine(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringIsDenotedBy(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringLogBase(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringQuote(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringDefineConditional(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringTensor(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringIn(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringAnd(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringBinom(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringUnderscore(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringSetMinus(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringLimitBoundary(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringCrossProduct(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringAbsoluteValue(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringBind(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringMod(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringPlus(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringMatrix(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringSequence(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringLieBracket(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringSumOrIntegral(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringGreaterThan(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringGreaterThanOrEqualTo(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringLessThanOrEqualTo(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringDirectSum(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringLimitProcess(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringLessThan(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringLimit(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringTimes(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringSqrt(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringSqrt2(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringSqrt3(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringOr(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringIntervalOpen(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringIntervalLeftClosed(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringIntervalRightClosed(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringIntervalClosed(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringDivide(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringPower(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringFactorial(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringUnion(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringMinus(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringMinus2(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringMinus3(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringIntersection(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringUnionNoRepetition(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringEqualEqual(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringEqualEqualEqual(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringError(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format
+    const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   void toStringOpMultiplicative(
-    std::stringstream& out,
-    const std::string& operation,
-    FormatExpressions* format
+    std::stringstream& out, const std::string& operation, FormatExpressions*
+    format
   ) const;
   std::string toStringTreeHtml(int depth) const;
   std::string toString(
@@ -902,11 +772,8 @@ public:
   // The inputExpressions give us the ability to specify substitutions
   bool assignStringParsed(
     const std::string& input,
-    MapList<
-      std::string,
-      Expression,
-      HashFunctions::hashFunction<std::string>
-    >* substitutions,
+    MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >
+    * substitutions,
     Calculator& owner
   );
   const Expression& operator[](int n) const;
@@ -952,9 +819,7 @@ public:
   // void operator=(const Expression& other);
   bool operator>(const Expression& other) const;
   bool greaterThanNoCoefficient(const Expression& other) const;
-  void substituteRecursively(
-    MapList<Expression, Expression>& substitutions
-  );
+  void substituteRecursively(MapList<Expression, Expression>& substitutions);
   void substituteRecursivelyInChildren(
     MapList<Expression, Expression>& substitutions
   );
@@ -990,8 +855,8 @@ private:
     const ExpressionContext& other, ExpressionContext& outputContext
   );
   bool mergeDifferentialOperatorsOnce(
-    Selection& differentialOperatorVariablesFound,
-    ExpressionContext& outputContext
+    Selection& differentialOperatorVariablesFound, ExpressionContext&
+    outputContext
   ) const;
 public:
   Calculator* owner;
@@ -1091,8 +956,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   bool setContextAtLeast(
-    ExpressionContext& inputOutputContext,
-    std::stringstream* commentsOnFailure
+    ExpressionContext& inputOutputContext, std::stringstream* commentsOnFailure
   );
   bool setContextAndSerialize(
     ExpressionContext& inputOutputContext,
@@ -1275,8 +1139,8 @@ public:
 
 class PlotObject {
   friend std::ostream& operator<<(
-    std::ostream& output, const PlotObject& unused
-  ) {
+    std::ostream& output, const PlotObject&
+    unused) {
     (void) unused;
     output << "A Plot object.";
     return output;
@@ -1446,24 +1310,16 @@ public:
   JSData toJSONPlotFillStart();
   JSData toJSONPlotFillFinish();
   void makeCircle(
-    const Vector<Rational>& center,
-    const Rational& radius,
-    const std::string& color
+    const Vector<Rational>& center, const Rational& radius, const std::string&
+    color
   );
   void makePlotFillStart();
   void makePlotFillFinish();
-  void makeSegment(
-    const Vector<Rational>& left, const Vector<Rational>& right
+  void makeSegment(const Vector<Rational>& left, const Vector<Rational>& right
   );
-  void makeLabel(
-    const Vector<Rational>& position, const std::string& label
-  );
-  void makeLabel(
-    const Vector<double>& position, const std::string& label
-  );
-  void makeLatex(
-    const Vector<double>& position, const std::string& latex
-  );
+  void makeLabel(const Vector<Rational>& position, const std::string& label);
+  void makeLabel(const Vector<double>& position, const std::string& label);
+  void makeLatex(const Vector<double>& position, const std::string& latex);
   void makeSelectablePoint(
     const Expression& inputX,
     const Expression& inputY,
@@ -1566,12 +1422,9 @@ public:
   void addPlotOnTop(PlotObject& input);
   void addPlotsOnTop(Plot& input);
   void setLabel(const std::string& layerLabel);
-  void drawSegment(
-    const Vector<Rational>& left, const Vector<Rational>& right
+  void drawSegment(const Vector<Rational>& left, const Vector<Rational>& right
   );
-  void drawLabel(
-    const Vector<Rational>& position, const std::string& label
-  );
+  void drawLabel(const Vector<Rational>& position, const std::string& label);
   void drawCircle(
     const Vector<Rational>& center,
     const Rational& radius,
@@ -1616,9 +1469,8 @@ public:
 
 class InputBox {
 public:
-  friend std::ostream& operator<<(
-    std::ostream& output, const InputBox& input
-  ) {
+  friend std::ostream& operator<<(std::ostream& output, const InputBox& input)
+  {
     output << "name: " << input.name << ", ...";
     return output;
   }
@@ -1683,13 +1535,11 @@ public:
   HashedListReferences<CharacterSemisimpleLieAlgebraModule<Rational> >
   charactersSemisimpleLieAlgebraFiniteDimensional;
   HashedListReferences<double, MathRoutines::hashDouble> doubleNumbers;
-  HashedListReferences<
-    std::string, HashFunctions::hashFunction<std::string>
-  > allStrings;
+  HashedListReferences<std::string, HashFunctions::hashFunction<std::string> >
+  allStrings;
   HashedListReferences<JSData> jsonObjects;
-  HashedListReferences<
-    std::string, HashFunctions::hashFunction<std::string>
-  > expressionNotation;
+  HashedListReferences<std::string, HashFunctions::hashFunction<std::string> >
+  expressionNotation;
   HashedListReferences<Expression> expressionWithNotation;
   HashedListReferences<Expression> constraints;
   HashedListReferences<LittelmannPath> lakshmibaiSeshadriPaths;
@@ -1713,9 +1563,7 @@ public:
     std::string, InputBox, HashFunctions::hashFunction<std::string>
   > userInputTextBoxesWithValues;
   MapReferences<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
+    std::string, std::string, HashFunctions::hashFunction<std::string>
   > graphicsScripts;
   AlgebraicClosureRationals algebraicClosure;
   HashedList<AlgebraicNumber> allAlgebraicNumbers;
@@ -1773,9 +1621,7 @@ private:
   HashedList<int, HashFunctions::hashFunction> boundVariablesInContext;
   HashedList<std::string> stringsThatSplitIfFollowedByDigit;
   MapList<
-    std::string,
-    List<std::string>,
-    HashFunctions::hashFunction<std::string>
+    std::string, List<std::string>, HashFunctions::hashFunction<std::string>
   > predefinedWordSplits;
 public:
   // Control sequences parametrize the syntactical elements
@@ -1787,9 +1633,8 @@ private:
   // Sets an expression value and syntactic role to a given position in the
   // stack.
   bool setStackValue(
-    const Expression& newExpression,
-    const std::string& newRole,
-    int stackOffset
+    const Expression& newExpression, const std::string& newRole, int
+    stackOffset
   );
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
@@ -1820,8 +1665,8 @@ private:
   bool allowsTensorInPreceding(const std::string& lookAhead);
   bool allowsDivideInPreceding(const std::string& lookAhead);
   void addTrigonometricSplit(
-    const std::string& trigonometricFunction,
-    const List<std::string>& variables
+    const std::string& trigonometricFunction, const List<std::string>&
+    variables
   );
   bool decreaseStackSetCharacterRanges(int decrease);
   SyntacticElement getSyntacticElementEnd();
@@ -1915,20 +1760,20 @@ private:
   bool replaceXEXEXBy_CofEE(int operation);
   bool replaceEXEByCofEE(int operation);
   bool replaceXYByConY(int controlIndex) {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2
-    ].controlIndex =
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2].
+    controlIndex =
     controlIndex;
     return true;
   }
   bool replaceXYYByConYY(int controlIndex) {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3
-    ].controlIndex =
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3].
+    controlIndex =
     controlIndex;
     return true;
   }
   bool replaceXYYYByConYYY(int controlIndex) {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4
-    ].controlIndex =
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4].
+    controlIndex =
     controlIndex;
     return true;
   }
@@ -1957,12 +1802,12 @@ private:
     return true;
   }
   bool replaceXXYXByYX() {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4
-    ] = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2
-    ];
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3
-    ] = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1
-    ];
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4] = (
+      *this->currentSyntacticStack
+    )[(*this->currentSyntacticStack).size - 2];
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] = (
+      *this->currentSyntacticStack
+    )[(*this->currentSyntacticStack).size - 1];
     (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size
       -
       2
@@ -1970,12 +1815,12 @@ private:
     return true;
   }
   bool replaceXYYXByYY() {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4
-    ] = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3
-    ];
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3
-    ] = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2
-    ];
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 4] = (
+      *this->currentSyntacticStack
+    )[(*this->currentSyntacticStack).size - 3];
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] = (
+      *this->currentSyntacticStack
+    )[(*this->currentSyntacticStack).size - 2];
     (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size
       -
       2
@@ -1983,16 +1828,16 @@ private:
     return true;
   }
   bool replaceXYXByY() {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3
-    ] = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2
-    ];
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3] = (
+      *this->currentSyntacticStack
+    )[(*this->currentSyntacticStack).size - 2];
     this->decreaseStackSetCharacterRanges(2);
     return true;
   }
   bool replaceXYByY() {
-    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2
-    ] = (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 1
-    ];
+    (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 2] = (
+      *this->currentSyntacticStack
+    )[(*this->currentSyntacticStack).size - 1];
     (*this->currentSyntacticStack).setSize((*this->currentSyntacticStack).size
       -
       1
@@ -2101,8 +1946,7 @@ private:
   bool isLeftSeparator(unsigned char c);
   bool isRightSeparator(unsigned char c);
   bool shouldSplitOutsideQuotes(const std::string& left, char right);
-  bool parseEmbedInCommandSequence(
-    const std::string& input, Expression& output
+  bool parseEmbedInCommandSequence(const std::string& input, Expression& output
   );
   int getExpressionIndex();
 public:
@@ -2133,19 +1977,13 @@ public:
   int conSequenceStatements() {
     return this->controlSequences.getIndexNoFail("SequenceStatements");
   }
-  std::string toStringIsCorrectAsciiCalculatorString(
-    const std::string& input
-  );
+  std::string toStringIsCorrectAsciiCalculatorString(const std::string& input);
   std::string toStringSyntacticStackHTMLTable(
     bool includeLispifiedExpressions, bool ignoreCommandEnclosures
   );
-  bool parseNoEmbeddingInCommand(
-    const std::string& input, Expression& output
-  );
+  bool parseNoEmbeddingInCommand(const std::string& input, Expression& output);
   bool parse(
-    const std::string& input,
-    bool stripCommandSequence,
-    Expression& output
+    const std::string& input, bool stripCommandSequence, Expression& output
   );
   bool parseAndExtractExpressionsDefault(
     const std::string& input, Expression& output
@@ -2169,9 +2007,9 @@ public:
   std::string toStringSyntacticStackHTMLSimple();
   void reset();
   void parseConsumeQuote(
-    const std::string& input,
-    unsigned int& indexOfLast,
-    List<SyntacticElement>& output
+    const std::string& input, unsigned int& indexOfLast, List<
+      SyntacticElement
+    >& output
   );
 };
 
@@ -2191,9 +2029,7 @@ class Calculator {
     Expression& startingExpression, std::stringstream& out
   );
   void evaluateCommandsWriteJavascriptOutput();
-  void collectJavascript(
-    const Expression& input, HashedList<JSData>& output
-  );
+  void collectJavascript(const Expression& input, HashedList<JSData>& output);
 public:
   class OperationHandlers {
   public:
@@ -2265,9 +2101,7 @@ public:
   // Operations parametrize the expression elements.
   // Operations are the labels of the atom nodes of the expression tree.
   MapReferences<
-    std::string,
-    MemorySaving<OperationHandlers>,
-    HashFunctions::hashFunction
+    std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction
   > operations;
   HashedList<std::string> atomsThatAllowCommutingOfCompositesStartingWithThem;
   HashedList<std::string> atomsNotAllowingChainRule;
@@ -2299,9 +2133,7 @@ public:
   };
 
   MapList<
-    std::string,
-    NamedRuleLocation,
-    HashFunctions::hashFunction<std::string>
+    std::string, NamedRuleLocation, HashFunctions::hashFunction<std::string>
   > namedRules;
   // Calculator functions have as arguments two expressions passed by
   // reference,
@@ -2513,9 +2345,8 @@ public:
   std::string toStringOutputAndSpecials();
   class Examples {
     std::string toStringOneOperationHandler(
-      const std::string& escapedAtom,
-      bool isComposite,
-      const Function& function
+      const std::string& escapedAtom, bool isComposite, const Function&
+      function
     );
     std::string escape(const std::string& atom);
   public:
@@ -2548,17 +2379,13 @@ public:
   // Adds an expression to the global list of expressions that are children of
   // another expression.
   int addChildExpression(const Expression& child);
-  void registerCalculatorFunction(
-    Function& inputFunction, int indexOperation
-  );
+  void registerCalculatorFunction(Function& inputFunction, int indexOperation);
   std::string toStringSemismipleLieAlgebraLinksFromHardDrive(
     const std::string& prefixFolder,
     const DynkinType& dynkinType,
     FormatExpressions* format = nullptr
   );
-  Function& getFunctionHandlerFromNamedRule(
-    const std::string& inputRuleName
-  );
+  Function& getFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool checkPredefinedFunctionNameRepetitions();
   bool checkOperationHandlers();
   bool checkConsistencyAfterInitialization();
@@ -2583,8 +2410,7 @@ public:
   Expression expressionSquareRootNegativeOne();
   void logFunctionWithTime(Function& input, int64_t startTime);
   void accountFunctionTrivialPerformance(Function& input, int64_t startTime);
-  void accountFunctionNonTrivialPerformance(
-    Function& input, int64_t startTime
+  void accountFunctionNonTrivialPerformance(Function& input, int64_t startTime
   );
   void logTime(int64_t startTime);
   void logPublicError(const std::string& error);
@@ -2610,8 +2436,8 @@ public:
   );
   void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool accountRule(
-    const Expression& ruleExpression,
-    StateMaintainerCalculator& ruleStackMaintainer
+    const Expression& ruleExpression, StateMaintainerCalculator&
+    ruleStackMaintainer
   );
   int opIsDenotedBy() {
     return this->operations.getIndexNoFail("=:");
@@ -2790,9 +2616,8 @@ public:
   }
   int opElementUEOverRF() {
     return
-    this->builtInCode<
-      ElementUniversalEnveloping<RationalFraction<Rational> >
-    >();
+    this->builtInCode<ElementUniversalEnveloping<RationalFraction<Rational> > >
+    ();
   }
   int opWeylGroupVirtualRep() {
     return
@@ -2986,16 +2811,16 @@ public:
     );
   }
   bool accumulateSummands(
-    const Expression& expression, List<Expression>& output
-  ) {
+    const Expression& expression, List<Expression>&
+    output) {
     return
     this->accumulateOpandsReturnTrueIfOrderIsNonCanonical(
       expression, output, this->opPlus()
     );
   }
   void specializeBoundVariables(
-    Expression& toBeSubstitutedIn,
-    MapList<Expression, Expression>& matchedPairs
+    Expression& toBeSubstitutedIn, MapList<Expression, Expression>&
+    matchedPairs
   );
   Expression* patternMatch(
     const Expression& pattern,
@@ -3135,14 +2960,10 @@ public:
     VectorSparse<Expression>& outputPositionIiscoeffXtoIth
   );
   bool collectOpands(
-    const Expression& input,
-    int operation,
-    List<Expression>& outputOpands
+    const Expression& input, int operation, List<Expression>& outputOpands
   );
   bool collectOpandsAccumulate(
-    const Expression& input,
-    int operation,
-    List<Expression>& outputOpands
+    const Expression& input, int operation, List<Expression>& outputOpands
   );
   static bool functionCollectOneSummand(
     Calculator& calculator,
@@ -3171,25 +2992,17 @@ public:
   ) {
     if (
       this->getVectorFromFunctionArgumentsInternal(
-        input,
-        output,
-        inputOutputStartingContext,
-        targetDimensionNonMandatory
+        input, output, inputOutputStartingContext, targetDimensionNonMandatory
       )
     ) {
       return true;
     }
-    if (
-      input.size() != 2 || input.isSequenceNElements() || input.isMatrix()
-    ) {
+    if (input.size() != 2 || input.isSequenceNElements() || input.isMatrix()) {
       return false;
     }
     return
     getVectorFromFunctionArgumentsInternal(
-      input[1],
-      output,
-      inputOutputStartingContext,
-      targetDimensionNonMandatory
+      input[1], output, inputOutputStartingContext, targetDimensionNonMandatory
     );
   }
   template <class Type>
@@ -3202,9 +3015,7 @@ public:
     STACK_TRACE("Calculator::getVectorFromFunctionArguments");
     input.checkInitialization();
     Expression sequence = input;
-    if (
-      input.size() == 2 && input[1].startsWith(this->opCommandSequence())
-    ) {
+    if (input.size() == 2 && input[1].startsWith(this->opCommandSequence())) {
       sequence = input[1];
     }
     if (sequence.isList()) {
@@ -3213,20 +3024,16 @@ public:
     sequence.checkInitialization();
     return
     this->getVector(
-      sequence,
-      output,
-      inputOutputStartingContext,
-      targetDimensionNonMandatory
+      sequence, output, inputOutputStartingContext, targetDimensionNonMandatory
     );
   }
   bool getSumProductsExpressions(
-    const Expression& inputSum,
-    List<List<Expression> >& outputSumMultiplicands
+    const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands
   );
   bool getVectorExpressions(
-    const Expression& input,
-    List<Expression>& output,
-    int targetDimNonMandatory = - 1
+    const Expression& input, List<Expression>& output, int
+    targetDimNonMandatory =
+    - 1
   );
   template <typename Type>
   bool combineContexts(
@@ -3238,9 +3045,9 @@ public:
     const Expression& input, List<LargeInteger>& output
   );
   bool getMatrixDoubles(
-    const Expression& input,
-    Matrix<double>& output,
-    int desiredNumberOfColumns = - 1
+    const Expression& input, Matrix<double>& output, int desiredNumberOfColumns
+    =
+    - 1
   );
   bool getVectorDoubles(
     const Expression& input,
@@ -3290,9 +3097,7 @@ public:
     this->allBuiltInTypes.addOnTop(name);
     this->addOneBuiltInHandler<Type>();
   }
-  void addKnownDoubleConstant(
-    const std::string& constantName, double value
-  );
+  void addKnownDoubleConstant(const std::string& constantName, double value);
   void addOperationBinaryInnerHandlerWithTypes(
     const std::string& operation,
     Expression::FunctionAddress innerHandler,
@@ -3315,18 +3120,15 @@ public:
     const Function::Options& options,
     const List<std::string>* parentsThatBanHandler = nullptr
   );
-  void addOneStringAtomHandler(
-    int atom, Expression::ToStringHandler handler
-  );
+  void addOneStringAtomHandler(int atom, Expression::ToStringHandler handler);
   void addOneStringCompositeHandler(
     int atom, Expression::ToStringHandler handler
   );
   void addOneStringHandler(
     int atom,
     Expression::ToStringHandler handler,
-    MapList<
-      int, Expression::ToStringHandler, HashFunctions::hashFunction
-    >& handlerCollection
+    MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>&
+    handlerCollection
   );
   void reset();
   void initialize(Calculator::Mode desiredMode);
@@ -3400,9 +3202,7 @@ public:
     bool outputHasErrors();
     EvaluateLoop(Calculator& inputOwner);
     bool setOutput(
-      const Expression& input,
-      Function* handler,
-      const std::string& info
+      const Expression& input, Function* handler, const std::string& info
     );
     void accountHistory(Function* handler, const std::string& info);
     bool checkInitialization();
@@ -3438,10 +3238,9 @@ public:
     static HashedList<std::string> ruleIgnoreListHashList;
     HashedList<std::string> rulesToBeIgnored;
     MapList<
-      std::string,
-      std::string,
-      HashFunctions::hashFunction<std::string>
-    > rulesDisplayNamesMap;
+      std::string, std::string, HashFunctions::hashFunction<
+        std::string
+      > > rulesDisplayNamesMap;
     bool computeRecursively(
       int incomingRecursionDepth, std::stringstream* commentsOnFailure
     );
@@ -3449,9 +3248,8 @@ public:
       const Expression& current, std::stringstream* commentsOnFailure
     );
     bool processChildrenTransformations(
-      int startIndex,
-      int numberOfChildren,
-      std::stringstream* commentsOnFailure
+      int startIndex, int numberOfChildren, std::stringstream*
+      commentsOnFailure
     );
     void initializeComputation();
     ExpressionHistoryEnumerator();
@@ -3481,8 +3279,7 @@ public:
       const Calculator::ExpressionHistoryEnumerator::Step& step
     );
     void toOneStep(
-      int stepIndex,
-      Calculator::ExpressionHistoryEnumerator::Step& outputStep
+      int stepIndex, Calculator::ExpressionHistoryEnumerator::Step& outputStep
     );
     std::string toStringExpressionHistoryMerged();
     std::string toStringDebug();
@@ -3496,9 +3293,7 @@ public:
   // For internal use only; will crash
   // the calculator if the input has syntax
   // errors.
-  Expression parseOrCrash(
-    const std::string& input, bool stripCommandSequence
-  );
+  Expression parseOrCrash(const std::string& input, bool stripCommandSequence);
 };
 
 class CalculatorBasics {
@@ -3598,10 +3393,8 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool logEvaluationStepsHumanReadableMerged(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool doDebug
+    Calculator& calculator, const Expression& input, Expression& output, bool
+    doDebug
   );
 };
 
@@ -3682,19 +3475,13 @@ public:
     Calculator& calculator, const Expression& input, DynkinType& output
   );
   static bool dynkinSimpleType(
-    Calculator& calculator,
-    const Expression& input,
-    DynkinSimpleType& output
+    Calculator& calculator, const Expression& input, DynkinSimpleType& output
   );
   static bool functionDynkinSimpleType(
-    Calculator& calculator,
-    const Expression& input,
-    DynkinSimpleType& output
+    Calculator& calculator, const Expression& input, DynkinSimpleType& output
   );
   static bool slTwoSubalgebraPrecomputed(
-    Calculator& calculator,
-    const Expression& input,
-    SlTwoSubalgebra& output
+    Calculator& calculator, const Expression& input, SlTwoSubalgebra& output
   );
   static bool algebraicNumber(
     Calculator& calculator, const Expression& input, Expression& output
@@ -3777,9 +3564,8 @@ public:
   // Converstion from type to expression tree.
   template <class Coefficient>
   static bool expressionFromVectorRational(
-    Calculator& calculator,
-    const Vector<Coefficient>& input,
-    Expression& output
+    Calculator& calculator, const Vector<Coefficient>& input, Expression&
+    output
   );
   template <class Coefficient>
   static bool expressionFromRationalFraction(
@@ -3824,9 +3610,8 @@ public:
     std::stringstream* commentsOnFailure
   );
   static bool storeSemisimpleSubalgebras(
-    Calculator& calculator,
-    const SemisimpleSubalgebras& input,
-    Expression& output
+    Calculator& calculator, const SemisimpleSubalgebras& input, Expression&
+    output
   );
   static std::string stringFromSemisimpleSubalgebras(
     SemisimpleSubalgebras& input
@@ -3851,9 +3636,7 @@ public:
     Calculator& calculator, const DynkinType& input, Expression& output
   );
   static bool expressionFromDynkinSimpleType(
-    Calculator& calculator,
-    const DynkinSimpleType& input,
-    Expression& output
+    Calculator& calculator, const DynkinSimpleType& input, Expression& output
   );
   static bool expressionFromElementSemisimpleLieAlgebraRationals(
     Calculator& calculator,
@@ -3896,9 +3679,7 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool expressionFromChevalleyGenerator(
-    Calculator& calculator,
-    const ChevalleyGenerator& input,
-    Expression& output
+    Calculator& calculator, const ChevalleyGenerator& input, Expression& output
   );
   static bool expressionFromMonomialUniversalEnveloping(
     Calculator& calculator,
@@ -3921,9 +3702,7 @@ public:
   );
   template <class Type>
   static bool convert(
-    Calculator& calculator,
-    const Expression& input,
-    WithContext<Type>& output
+    Calculator& calculator, const Expression& input, WithContext<Type>& output
   );
   // Determines whether the input can be converted to the
   // output type using internal C++ conversions (rather than
@@ -3944,9 +3723,7 @@ public:
   );
   template <class Type>
   static bool functionGetMatrixNoComputation(
-    Calculator& calculator,
-    const Expression& input,
-    Matrix<Type>& outputMatrix
+    Calculator& calculator, const Expression& input, Matrix<Type>& outputMatrix
   ) {
     return
     CalculatorConversions::functionGetMatrix(
@@ -4077,9 +3854,7 @@ bool Expression::isMatrixOfType(
   if (!(*this)[0].startsWith(this->owner->opMatrix(), 2)) {
     return false;
   }
-  if (
-    !(*this)[0][1].isOperationGiven(this->getBuiltInType<Type>())
-  ) {
+  if (!(*this)[0][1].isOperationGiven(this->getBuiltInType<Type>())) {
     return false;
   }
   const Expression& rows = (*this)[1];
@@ -4262,8 +4037,8 @@ bool CalculatorConversions::functionGetMatrixInternal(
 
 template <class Coefficient>
 bool Expression::makeSumFromLinearCombination(
-  Calculator& calculator,
-  const LinearCombination<Expression, Coefficient>& summands
+  Calculator& calculator, const LinearCombination<Expression, Coefficient>&
+  summands
 ) {
   STACK_TRACE("Expression::makeSumFromLinearCombination");
   Expression oneE;
@@ -4315,16 +4090,12 @@ bool Expression::makeSumFromLinearCombination(
     }
   }
   return
-  this->makeOXdotsX(
-    calculator, calculator.opPlus(), summandsWithCoefficient
-  );
+  this->makeOXdotsX(calculator, calculator.opPlus(), summandsWithCoefficient);
 }
 
 template <class Type>
 bool Expression::assignValueWithContext(
-  Calculator& owner,
-  const Type& inputValue,
-  const ExpressionContext& context
+  Calculator& owner, const Type& inputValue, const ExpressionContext& context
 ) {
   this->reset(owner, 3);
   this->addChildAtomOnTop(this->getBuiltInType<Type>());
@@ -4543,12 +4314,8 @@ bool Calculator::getTypeHighestWeightParabolic(
     outputInducingSelection.initialize(
       ambientSemisimpleLieAlgebra->getRank()
     );
-    for (
-      int i = 0; i < outputHighestWeightFundamentalCoordinates.size; i ++
-    ) {
-      if (
-        !outputHighestWeightFundamentalCoordinates[i].isSmallInteger()
-      ) {
+    for (int i = 0; i < outputHighestWeightFundamentalCoordinates.size; i ++) {
+      if (!outputHighestWeightFundamentalCoordinates[i].isSmallInteger()) {
         outputInducingSelection.addSelectionAppendNewIndex(i);
       }
     }
@@ -4588,8 +4355,7 @@ bool Expression::makeMatrix(
       if (inputContext == nullptr) {
         currentElement.assignValue(owner, input(i, j));
       } else {
-        currentElement.assignValueWithContext(
-          owner, input(i, j), *inputContext
+        currentElement.assignValueWithContext(owner, input(i, j), *inputContext
         );
       }
       matrixExpressions(i, j) = currentElement;
@@ -4597,9 +4363,7 @@ bool Expression::makeMatrix(
   }
   return
   this->assignMatrixExpressions(
-    matrixExpressions,
-    owner,
-    reduceOneRowToSequenceAndOneByOneToNonMatrix,
+    matrixExpressions, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix,
     false
   );
 }
@@ -4666,9 +4430,7 @@ bool CalculatorConversions::expressionFromPolynomial(
 
 template <class Coefficient>
 bool CalculatorConversions::expressionFromVectorRational(
-  Calculator& calculator,
-  const Vector<Coefficient>& input,
-  Expression& output
+  Calculator& calculator, const Vector<Coefficient>& input, Expression& output
 ) {
   STACK_TRACE("CalculatorConversions::expressionFromVectorRational");
   List<Expression> result;
@@ -4744,9 +4506,7 @@ bool CalculatorConversions::expressionFromRationalFraction(
     calculator, denominatorRescaled, denominatorExpression, inputContext
   );
   output.makeXOX(
-    calculator,
-    calculator.opDivide(),
-    numeratorExpression,
+    calculator, calculator.opDivide(), numeratorExpression,
     denominatorExpression
   );
   output.checkConsistency();
@@ -4767,8 +4527,7 @@ std::string WithContext<BuiltIn>::toString() const {
 
 template <class BuiltIn>
 bool WithContext<BuiltIn>::setContextAtLeast(
-  ExpressionContext& inputOutputContext,
-  std::stringstream* commentsOnFailure
+  ExpressionContext& inputOutputContext, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("WithContext::setContextAtLeast");
   ExpressionContext newContext;
@@ -4806,9 +4565,7 @@ bool WithContext<BuiltIn>::mergeContexts(
   std::stringstream* commentsOnFailure
 ) {
   ExpressionContext resultContext;
-  if (
-    !leftOutput.context.mergeContexts(rightOutput.context, resultContext)
-  ) {
+  if (!leftOutput.context.mergeContexts(rightOutput.context, resultContext)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to merge contexts.";
     }
@@ -4831,9 +4588,7 @@ bool CalculatorConversions::getListPolynomialVariableLabelsLexicographic(
   );
   ExpressionContext contextStart(calculator);
   if (
-    !calculator.getVectorFromFunctionArguments(
-      input, output, &contextStart, 0
-    )
+    !calculator.getVectorFromFunctionArguments(input, output, &contextStart, 0)
   ) {
     return false;
   }
@@ -4858,9 +4613,7 @@ int Expression::getBuiltInType() const {
 
 template <class Type>
 bool Expression::toStringBuiltIn(
-  const Expression& input,
-  std::stringstream& out,
-  FormatExpressions* format
+  const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   STACK_TRACE("Expression::toStringBuiltIn");
   (void) out;

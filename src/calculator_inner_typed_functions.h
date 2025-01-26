@@ -433,9 +433,8 @@ bool CalculatorConversions::extractPolynomialFromDifference(
   STACK_TRACE(
     "CalculatorConversions::extractPolynomialFromDifferenceOrProduct"
   );
-  if (
-    !input.isListStartingWithAtom(calculator.opMinus()) || input.size() != 3
-  ) {
+  if (!input.isListStartingWithAtom(calculator.opMinus()) || input.size() != 3)
+  {
     global.fatal
     << "Unexpected input for extractPolynomialFromDifference. "
     << global.fatal;
@@ -594,8 +593,7 @@ bool CalculatorConversions::extractPolynomialArgumentsOfOperation(
   }
   if (
     maximumVariables >= 0 &&
-    outputContext.numberOfVariables() > maximumVariables
-  ) {
+    outputContext.numberOfVariables() > maximumVariables) {
     return false;
   }
   output.clear();
@@ -787,9 +785,7 @@ bool CalculatorConversions::functionRationalFraction(
 ) {
   STACK_TRACE("CalculatorConversions::functionRationalFraction");
   if (
-    CalculatorConversions::convertWithoutComputation(
-      calculator, input, output
-    )
+    CalculatorConversions::convertWithoutComputation(calculator, input, output)
   ) {
     return true;
   }

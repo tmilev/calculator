@@ -459,10 +459,7 @@ int MainFunctions::mainCommandLine() {
   std::string outputFileName;
   if (
     !FileOperations::getPhysicalFileNameFromVirtual(
-      "output/outputFileCommandLine.html",
-      outputFileName,
-      false,
-      false,
+      "output/outputFileCommandLine.html", outputFileName, false, false,
       nullptr
     )
   ) {
@@ -725,10 +722,7 @@ bool GlobalVariables::configurationLoad() {
   }
   if (
     !FileOperations::loadFileToStringVirtual(
-      this->configurationFileName,
-      global.configurationFileContent,
-      true,
-      &out
+      this->configurationFileName, global.configurationFileContent, true, &out
     )
   ) {
     global
@@ -739,10 +733,7 @@ bool GlobalVariables::configurationLoad() {
     std::string computedPhysicalFileName;
     if (
       FileOperations::getPhysicalFileNameFromVirtual(
-        this->configurationFileName,
-        computedPhysicalFileName,
-        true,
-        false,
+        this->configurationFileName, computedPhysicalFileName, true, false,
         nullptr
       )
     ) {
@@ -755,11 +746,8 @@ bool GlobalVariables::configurationLoad() {
     }
     return false;
   }
-  if (
-    !global.configuration.parse(
-      this->configurationFileContent, false, &out
-    )
-  ) {
+  if (!global.configuration.parse(this->configurationFileContent, false, &out))
+  {
     global
     << Logger::red
     << "Failed to read configuration. "
@@ -787,12 +775,7 @@ bool GlobalVariables::configurationStore() {
   std::fstream configurationFile;
   if (
     !FileOperations::openFileCreateIfNotPresentVirtual(
-      configurationFile,
-      this->configurationFileName,
-      false,
-      true,
-      false,
-      true
+      configurationFile, this->configurationFileName, false, true, false, true
     )
   ) {
     global
@@ -803,10 +786,7 @@ bool GlobalVariables::configurationStore() {
     std::string configFileNamePhysical;
     if (
       FileOperations::getPhysicalFileNameFromVirtual(
-        this->configurationFileName,
-        configFileNamePhysical,
-        true,
-        false,
+        this->configurationFileName, configFileNamePhysical, true, false,
         nullptr
       )
     ) {
@@ -836,9 +816,7 @@ bool GlobalVariables::configurationStore() {
 
 void GlobalVariables::configurationProcess() {
   STACK_TRACE("GlobalVariables::configurationProcess");
-  for (
-    int i = 0; i < global.configurationCommandLine.objects.size(); i ++
-  ) {
+  for (int i = 0; i < global.configurationCommandLine.objects.size(); i ++) {
     global.configuration.setKeyValue(
       global.configurationCommandLine.objects.keys[i],
       global.configurationCommandLine.objects.values[i]
@@ -1066,9 +1044,7 @@ void GlobalVariables::configurationProcess() {
   if (global.configuration[Configuration::portHTTP].stringValue == "") {
     global.configuration[Configuration::portHTTP] = "8155";
   }
-  if (
-    global.configuration[Configuration::portHTTPSOpenSSL].stringValue == ""
-  ) {
+  if (global.configuration[Configuration::portHTTPSOpenSSL].stringValue == "") {
     global.configuration[Configuration::portHTTPSOpenSSL] = "8166";
   }
   if (!global.configuration.hasKey(Configuration::portHTTPSBuiltIn)) {

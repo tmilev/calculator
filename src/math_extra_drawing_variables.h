@@ -10,9 +10,8 @@ class DrawGeneric {
 public:
   JSData content;
   void toJSON(JSData& output, const DrawingVariables& owner) const;
-  void toLatexPsTricks(
-    std::stringstream& out, const DrawingVariables& owner
-  ) const;
+  void toLatexPsTricks(std::stringstream& out, const DrawingVariables& owner)
+  const;
   std::string toString() const;
   void accountBoundingBox(DrawingVariables& owner) const;
 };
@@ -51,9 +50,8 @@ public:
   Vector<double> vector2;
   DrawOptions drawOptions;
   void toJSON(JSData& output, const DrawingVariables& owner) const;
-  void toLatexPsTricks(
-    std::stringstream& out, const DrawingVariables& owner
-  ) const;
+  void toLatexPsTricks(std::stringstream& out, const DrawingVariables& owner)
+  const;
   void accountBoundingBox(DrawingVariables& owner) const;
 };
 
@@ -63,9 +61,8 @@ public:
   std::string text;
   DrawOptions drawOptions;
   void toJSON(JSData& output, const DrawingVariables& owner) const;
-  void toLatexPsTricks(
-    std::stringstream& out, const DrawingVariables& owner
-  ) const;
+  void toLatexPsTricks(std::stringstream& out, const DrawingVariables& owner)
+  const;
   void accountBoundingBox(DrawingVariables& owner) const;
 };
 
@@ -77,9 +74,8 @@ public:
   std::string frameId;
   int frameIndex;
   void toJSON(JSData& output, const DrawingVariables& owner) const;
-  void toLatexPsTricks(
-    std::stringstream& out, const DrawingVariables& owner
-  ) const;
+  void toLatexPsTricks(std::stringstream& out, const DrawingVariables& owner)
+  const;
   void accountBoundingBox(DrawingVariables& owner) const;
 };
 
@@ -128,9 +124,8 @@ public:
   MemorySaving<DrawCircle> drawCircle;
   bool toJSON(JSData& output, const DrawingVariables& owner) const;
   JSData toJSON(const DrawingVariables& owner) const;
-  bool toLatexPsTricks(
-    std::stringstream& out, const DrawingVariables& owner
-  ) const;
+  bool toLatexPsTricks(std::stringstream& out, const DrawingVariables& owner)
+  const;
   bool accountBoundingBox(DrawingVariables& owner);
   DrawOperation();
   template <class Implementation>
@@ -160,11 +155,8 @@ public:
   // nonnegative integers = selectedindex
   Vectors<double> basisToDrawCirclesAt;
   Matrix<double> bilinearForm;
-  MapList<
-    std::string,
-    List<int>,
-    HashFunctions::hashFunction<std::string>
-  > frames;
+  MapList<std::string, List<int>, HashFunctions::hashFunction<std::string> >
+  frames;
   double clickToleranceX;
   double clickToleranceY;
   double centerX;
@@ -191,8 +183,7 @@ public:
   );
   static std::string getColorHtmlFromColorIndex(int colorIndex);
   std::string getColorPsTricksFromColorIndex(int colorIndex);
-  static bool getColorIntFromColorString(
-    const std::string& input, int& output
+  static bool getColorIntFromColorString(const std::string& input, int& output
   );
   void scaleToUnitLength(Vector<double>& root);
   std::string getHTMLDiv(int dimension, bool generateInfoPanels);

@@ -19,8 +19,7 @@ Connector::~Connector() {
   this->freeAddressInformation();
 }
 
-void Connector::initialize(
-  const std::string& inputAddressToConnectTo, int port
+void Connector::initialize(const std::string& inputAddressToConnectTo, int port
 ) {
   std::stringstream portStream;
   portStream << port;
@@ -28,8 +27,8 @@ void Connector::initialize(
 }
 
 void Connector::initialize(
-  const std::string& inputAddressToConnectTo,
-  const std::string& inputPortOrService
+  const std::string& inputAddressToConnectTo, const std::string&
+  inputPortOrService
 ) {
   memset(&this->hints, 0, sizeof this->hints);
   this->hints.ai_family = AF_UNSPEC;
@@ -154,9 +153,7 @@ bool Connector::oneConnectionAttempt(
   << "<br>";
   this->socketInteger =
   socket(
-    this->peer->ai_family,
-    this->peer->ai_socktype,
-    this->peer->ai_protocol
+    this->peer->ai_family, this->peer->ai_socktype, this->peer->ai_protocol
   );
   int connectionResult = - 1;
   if (this->socketInteger < 0) {
@@ -201,12 +198,7 @@ bool Connector::oneConnectionAttempt(
     }
     totalSelected =
     select(
-      this->socketInteger + 1,
-      &fdConnectSockets,
-      nullptr,
-      nullptr,
-      &timeOut
-    );
+      this->socketInteger + 1, &fdConnectSockets, nullptr, nullptr, &timeOut);
     failStream
     << "While pinging, select failed. Error message: "
     << strerror(errno)
@@ -222,11 +214,7 @@ bool Connector::oneConnectionAttempt(
     connectionResult = - 1;
   } else {
     connectionResult =
-    connect(
-      this->socketInteger,
-      this->peer->ai_addr,
-      this->peer->ai_addrlen
-    );
+    connect(this->socketInteger, this->peer->ai_addr, this->peer->ai_addrlen);
   }
   if (connectionResult == - 1) {
     reportStream
@@ -292,11 +280,7 @@ bool Listener::initializeBindToOnePort(
     }
     if (
       setsockopt(
-        outputListeningSocket,
-        SOL_SOCKET,
-        SO_REUSEADDR,
-        &yes,
-        sizeof(int)
+        outputListeningSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)
       ) ==
       - 1
     ) {
@@ -320,8 +304,8 @@ bool Listener::initializeBindToOnePort(
     unsigned int serverAddressLength = 0;
     if (
       getsockname(
-        outputListeningSocket, (sockaddr*) & serverAddress,
-        &serverAddressLength
+        outputListeningSocket, (sockaddr*) & serverAddress, &
+        serverAddressLength
       ) ==
       - 1
     ) {
@@ -376,9 +360,7 @@ bool Listener::initializeBindToOnePort(
 void Listener::zeroSocketSet() {
   FD_ZERO(&this->fdSetListenSockets);
   for (int i = 0; i < this->allListeningSockets->size(); i ++) {
-    FD_SET(
-      this->allListeningSockets->keys[i], &this->fdSetListenSockets
-    );
+    FD_SET(this->allListeningSockets->keys[i], &this->fdSetListenSockets);
   }
   if (global.flagServerDetailedLog) {
     global

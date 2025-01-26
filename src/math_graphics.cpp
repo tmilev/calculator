@@ -49,16 +49,9 @@ void DrawingVariables::drawCoordinateSystemBuffer(int dimension) {
     std::string label;
     label = unitVector.toString();
     this->drawLineBetweenTwoVectorsBufferRational(
-      zeroRoot,
-      unitVector,
-      "black",
-      1,
-      DrawOptions::PenStyle::dashed,
-      "axes"
+      zeroRoot, unitVector, "black", 1, DrawOptions::PenStyle::dashed, "axes"
     );
-    this->drawTextAtVector(
-      unitVector, label, "black", this->fontSizeNormal
-    );
+    this->drawTextAtVector(unitVector, label, "black", this->fontSizeNormal);
     this->drawCircleAtVectorBufferRational(unitVector, "black", 4);
   }
   this->basisToDrawCirclesAt.makeEiBasis(dimension);
@@ -110,8 +103,7 @@ int DrawingVariables::getColorFromChamberIndex(int index) {
     numberColorsBase* numberColorsBase
   );
   int b = (
-    255 *(
-      colorIndex % (numberColorsBase * numberColorsBase * numberColorsBase)
+    255 *(colorIndex % (numberColorsBase * numberColorsBase * numberColorsBase)
     )
   ) / (numberColorsBase * numberColorsBase * numberColorsBase);
   return
@@ -393,10 +385,8 @@ int DrawingVariables::getDimensionFromBilinearForm() {
 void DrawingVariables::getCoordinatesDrawingComputeAll(
   Vector<double>& input, double& x1, double& y1
 ) const {
-  x1 =
-  this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[0]);
-  y1 =
-  this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[1]);
+  x1 = this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[0]);
+  y1 = this->bilinearForm.scalarProduct(input, this->basisProjectionPlane[1]);
   x1 = x1 * this->graphicsUnit + this->centerX;
   y1 = y1 * this->graphicsUnit + this->centerY;
 }
@@ -485,21 +475,13 @@ void DrawingVariables::accountBoundingBox(const Vector<double>& input) {
     this->boundingBoxLatex.addOnTop(v);
   }
   this->boundingBoxLatex[0][0] =
-  MathRoutines::minimum(
-    this->boundingBoxLatex[0][0], coordinatesLatex[0]
-  );
+  MathRoutines::minimum(this->boundingBoxLatex[0][0], coordinatesLatex[0]);
   this->boundingBoxLatex[0][1] =
-  MathRoutines::minimum(
-    this->boundingBoxLatex[0][1], coordinatesLatex[1]
-  );
+  MathRoutines::minimum(this->boundingBoxLatex[0][1], coordinatesLatex[1]);
   this->boundingBoxLatex[1][0] =
-  MathRoutines::maximum(
-    this->boundingBoxLatex[1][0], coordinatesLatex[0]
-  );
+  MathRoutines::maximum(this->boundingBoxLatex[1][0], coordinatesLatex[0]);
   this->boundingBoxLatex[1][1] =
-  MathRoutines::maximum(
-    this->boundingBoxLatex[1][1], coordinatesLatex[1]
-  );
+  MathRoutines::maximum(this->boundingBoxLatex[1][1], coordinatesLatex[1]);
 }
 
 void DrawingVariables::initializeDimensions(
@@ -508,9 +490,7 @@ void DrawingVariables::initializeDimensions(
   Vectors<double>& startingPlane
 ) {
   Matrix<double> matrix;
-  matrix.initialize(
-    bilinearForm.numberOfRows, bilinearForm.numberOfColumns
-  );
+  matrix.initialize(bilinearForm.numberOfRows, bilinearForm.numberOfColumns);
   for (int i = 0; i < bilinearForm.numberOfRows; i ++) {
     for (int j = 0; j < bilinearForm.numberOfColumns; j ++) {
       matrix.elements[i][j] = bilinearForm.elements[i][j].getDoubleValue();
@@ -607,9 +587,7 @@ double DrawingVariables::getAngleFromXandY(double x, double y) {
 
 void DrawingVariables::click(double x, double y) {
   this->selectedCircleMinus2noneMinus1Center = - 2;
-  if (
-    this->areWithinClickTolerance(x, y, this->centerX, this->centerY)
-  ) {
+  if (this->areWithinClickTolerance(x, y, this->centerX, this->centerY)) {
     this->selectedCircleMinus2noneMinus1Center = - 1;
   }
   int dimension = this->bilinearForm.numberOfRows;
@@ -723,10 +701,12 @@ void DrawingVariables::changeBasisPReserveAngles(double newX, double newY) {
   Vector<double> newVectorE1;
   Vector<double> newVectorE2;
   Vectors<double>& currentBasisPlane = this->basisProjectionPlane;
-  newVectorE1 = currentBasisPlane[0] * FloatingPoint::cosFloating(angleChange);
+  newVectorE1 =
+  currentBasisPlane[0] * FloatingPoint::cosFloating(angleChange);
   newVectorE1 +=
   currentBasisPlane[1] * FloatingPoint::sinFloating(angleChange);
-  newVectorE2 = currentBasisPlane[1] * FloatingPoint::cosFloating(angleChange);
+  newVectorE2 =
+  currentBasisPlane[1] * FloatingPoint::cosFloating(angleChange);
   newVectorE2 +=
   currentBasisPlane[0] *(- FloatingPoint::sinFloating(angleChange));
   currentBasisPlane[0] = newVectorE1;
@@ -821,9 +801,7 @@ void DrawingVariables::projectionMultiplicityMergeOnBasisChange(
 }
 
 void DrawingVariables::operator+=(const DrawingVariables& other) {
-  if (
-    this->bilinearForm.numberOfRows != other.bilinearForm.numberOfRows
-  ) {
+  if (this->bilinearForm.numberOfRows != other.bilinearForm.numberOfRows) {
     return;
   }
   this->operations.addListOnTop(other.operations);

@@ -20,9 +20,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   std::stringstream out, errorStream;
   JSData result;
   problem.loadCurrentProblemItem(
-    false,
-    global.getWebInput(WebAPI::Problem::randomSeed),
-    &errorStream
+    false, global.getWebInput(WebAPI::Problem::randomSeed), &errorStream
   );
   if (!problem.flagLoadedSuccessfully) {
     out
@@ -58,11 +56,8 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     return result;
   }
   std::string lastStudentAnswerID;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  arguments =
   global.webArguments;
   for (int i = 0; i < arguments.size(); i ++) {
     StringRoutines::stringBeginsWith(
@@ -149,9 +144,7 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
     return result;
   }
   if (
-    !problem.processExecutedCommands(
-      interpreter, answer.solutionElements, out
-    )
+    !problem.processExecutedCommands(interpreter, answer.solutionElements, out)
   ) {
     result[WebAPI::Result::resultHtml] = out.str();
     result[WebAPI::Result::millisecondsComputation] =
@@ -193,9 +186,8 @@ std::string WebAPIResponse::setProblemWeight() {
     global.getWebInput("mainInput"), false
   );
   std::stringstream commentsOnFailure, out;
-  if (
-    problem.mergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)
-  ) {
+  if (problem.mergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure))
+  {
     out << "<b style='color:green'>Modified.</b>";
   } else {
     out << "<b style='color:red'>" << commentsOnFailure.str() << "</b>";
@@ -218,9 +210,7 @@ std::string WebAPIResponse::setProblemDeadline() {
   );
   std::stringstream commentsOnFailure, out;
   if (
-    problem.mergeProblemDeadlineAndStore(
-      inputProblemInfo, &commentsOnFailure
-    )
+    problem.mergeProblemDeadlineAndStore(inputProblemInfo, &commentsOnFailure)
   ) {
     out
     << "<b style='color:green'>Modified. </b>"
@@ -269,9 +259,7 @@ std::string WebAPIResponse::getSanitizedComment(
 }
 
 std::string WebAPIResponse::getCommentsInterpretation(
-  Calculator& interpreterWithAdvice,
-  int indexShift,
-  FormatExpressions& format
+  Calculator& interpreterWithAdvice, int indexShift, FormatExpressions& format
 ) {
   STACK_TRACE("WebAPIReponse::getCommentsInterpretation");
   std::stringstream out;
@@ -285,9 +273,7 @@ std::string WebAPIResponse::getCommentsInterpretation(
   interpreterWithAdvice.programExpression[indexShift][1];
   bool resultIsPlot = false;
   if (
-    !currentExpression.startsWith(
-      interpreterWithAdvice.opCommandSequence()
-    )
+    !currentExpression.startsWith(interpreterWithAdvice.opCommandSequence())
   ) {
     out
     << WebAPIResponse::getSanitizedComment(
@@ -321,11 +307,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   std::string lastStudentAnswerID;
   std::string lastAnswer;
   std::stringstream out, studentAnswerSream;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  arguments =
   global.webArguments;
   JSData result;
   for (int i = 0; i < arguments.size(); i ++) {
@@ -674,9 +657,7 @@ void BuilderApplication::buildHtmlJavascriptPage(bool appendBuildHash) {
   }
 }
 
-bool BuilderApplication::fileNameAllowedToBeMissing(
-  const std::string& input
-) {
+bool BuilderApplication::fileNameAllowedToBeMissing(const std::string& input) {
   // External dependency.
   // The calculator must be capable of running without it.
   if (input == "/calculator_html/external/build/output-min.js") {
@@ -701,15 +682,14 @@ std::string WebAPIResponse::getCalculatorWorkerJS() {
 }
 
 std::string WebAPIResponse::getBrowserification(
-  const std::string& buildJSONVirtualFileName,
-  const std::string& scriptEntryPoint
+  const std::string& buildJSONVirtualFileName, const std::string&
+  scriptEntryPoint
 ) {
   STACK_TRACE("WebAPIReponse::getBrowserification");
   BuilderApplication builder;
   std::stringstream errorStream;
-  if (
-    !builder.loadJavascriptFileNames(buildJSONVirtualFileName, &errorStream)
-  ) {
+  if (!builder.loadJavascriptFileNames(buildJSONVirtualFileName, &errorStream))
+  {
     errorStream
     << "<b>Failed to load the javascript build json file: "
     << buildJSONVirtualFileName
@@ -720,15 +700,10 @@ std::string WebAPIResponse::getBrowserification(
   for (int i = 0; i < builder.jsFileNames.size; i ++) {
     if (
       !FileOperations::loadFileToStringVirtual(
-        builder.jsFileNames[i],
-        builder.jsFileContents[i],
-        false,
-        &errorStream
+        builder.jsFileNames[i], builder.jsFileContents[i], false, &errorStream
       )
     ) {
-      if (
-        !builder.fileNameAllowedToBeMissing(builder.jsFileNames[i])
-      ) {
+      if (!builder.fileNameAllowedToBeMissing(builder.jsFileNames[i])) {
         errorStream
         << "Failed to load javascript file: "
         << builder.jsFileNames[i];
@@ -743,9 +718,8 @@ std::string WebAPIResponse::getBrowserification(
       << "specifically white-listed as ok. \");";
       builder.jsFileContents[i] = moduleNotFound.str();
     }
-    if (
-      builder.jsFileNames[i] == "/calculator_html/web_assembly/calculator.js"
-    ) {
+    if (builder.jsFileNames[i] == "/calculator_html/web_assembly/calculator.js")
+    {
       // Special exception for web assembly.
       // Save ourselves lots of headache and
       // configuration by manually inserting the snippets we
@@ -764,8 +738,7 @@ std::string WebAPIResponse::getBrowserification(
 }
 
 bool BuilderApplication::loadJavascriptFileNames(
-  const std::string& buildFileNameVirtual,
-  std::stringstream* commentsOnFailure
+  const std::string& buildFileNameVirtual, std::stringstream* commentsOnFailure
 ) {
   if (
     !FileOperations::loadFileToStringVirtual(
@@ -924,9 +897,7 @@ bool CourseList::loadFromString(const std::string& input) {
   Course current;
   while (std::getline(tableReader, currentLine, '\n')) {
     if (
-      StringRoutines::stringBeginsWith(
-        currentLine, "Html:", &currentArgument
-      )
+      StringRoutines::stringBeginsWith(currentLine, "Html:", &currentArgument)
     ) {
       if (current.courseTemplate != "") {
         this->allCourses.addOnTop(current);
@@ -948,9 +919,7 @@ bool CourseList::loadFromString(const std::string& input) {
       StringRoutines::stringTrimWhiteSpace(currentArgument);
     }
     if (
-      StringRoutines::stringBeginsWith(
-        currentLine, "Title:", &currentArgument
-      )
+      StringRoutines::stringBeginsWith(currentLine, "Title:", &currentArgument)
     ) {
       if (current.title != "") {
         this->allCourses.addOnTop(current);
@@ -1045,9 +1014,7 @@ JSData WebAPIResponse::getTopicTableJSON() {
   }
   if (
     !page.loadMe(
-      true,
-      global.getWebInput(WebAPI::Problem::randomSeed),
-      &comments
+      true, global.getWebInput(WebAPI::Problem::randomSeed), &comments
     )
   ) {
     comments
@@ -1094,18 +1061,14 @@ void WebAPIResponse::getJSDataUserInfo(
   }
   outputAppend[WebAPI::Result::status] = "logged in";
   outputAppend[DatabaseStrings::labelUsername] =
-  HtmlRoutines::convertStringToHtmlString(
-    global.userDefault.username, false
-  );
+  HtmlRoutines::convertStringToHtmlString(global.userDefault.username, false);
   outputAppend[DatabaseStrings::labelEmail] = global.userDefault.email;
   outputAppend[DatabaseStrings::labelAuthenticationToken] =
   HtmlRoutines::convertStringToHtmlString(
     global.userDefault.actualAuthenticationToken, false
   );
   outputAppend[DatabaseStrings::labelUserRole] =
-  HtmlRoutines::convertStringToHtmlString(
-    global.userDefault.userRole, false
-  );
+  HtmlRoutines::convertStringToHtmlString(global.userDefault.userRole, false);
   outputAppend[DatabaseStrings::labelInstructor] =
   HtmlRoutines::convertStringToHtmlString(
     global.userDefault.instructorInDB, false
@@ -1153,9 +1116,7 @@ std::string WebAPIResponse::getJSONFromTemplate() {
   );
   if (
     !page.loadMe(
-      true,
-      global.getWebInput(WebAPI::Problem::randomSeed),
-      &comments
+      true, global.getWebInput(WebAPI::Problem::randomSeed), &comments
     )
   ) {
     out
@@ -1191,8 +1152,7 @@ JSData WebAPIResponse::getExamPageJSON() {
   STACK_TRACE("WebAPIReponse::getExamPageJSON");
   std::stringstream out;
   JSData output;
-  if (
-    !global.flagLoggedIn && global.requestType == WebAPI::Frontend::scoredQuiz
+  if (!global.flagLoggedIn && global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
     output[WebAPI::Result::error] = "Scored quiz requires login";
     return output;
@@ -1226,9 +1186,7 @@ JSData WebAPIResponse::getExamPageJSON() {
     scripts.listObjects.setSize(problem.scripts.size());
     for (int i = 0; i < problem.scripts.size(); i ++) {
       scripts[problem.scripts.keys[i]] =
-      HtmlRoutines::convertStringToURLString(
-        problem.scripts.values[i], false
-      );
+      HtmlRoutines::convertStringToURLString(problem.scripts.values[i], false);
     }
     output["scripts"] = scripts;
     output[WebAPI::Problem::forReal] = problem.flagIsForReal;
@@ -1258,9 +1216,7 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
   std::stringstream failureStream;
   if (
     !editedFile.loadMe(
-      false,
-      global.getWebInput(WebAPI::Problem::randomSeed),
-      &failureStream
+      false, global.getWebInput(WebAPI::Problem::randomSeed), &failureStream
     )
   ) {
     std::stringstream errorStream;
@@ -1322,9 +1278,7 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
   }
   output["autoComplete"] = autoCompleteWordsJS;
   output["content"] =
-  HtmlRoutines::convertStringToURLString(
-    editedFile.parser.inputHtml, false
-  );
+  HtmlRoutines::convertStringToURLString(editedFile.parser.inputHtml, false);
   return output;
 }
 
@@ -1375,9 +1329,8 @@ public:
   int answerIndex;
   std::string storageReport;
   JSData submitAnswersJSON(
-    const std::string& inputRandomSeed,
-    bool* outputIsCorrect,
-    bool timeSafetyBrake
+    const std::string& inputRandomSeed, bool* outputIsCorrect, bool
+    timeSafetyBrake
   );
   bool prepareProblem(const std::string& inputRandomSeed);
   bool extractStudentAnswerPartOne();
@@ -1399,9 +1352,8 @@ bool AnswerChecker::prepareProblem(const std::string& inputRandomSeed) {
   std::stringstream errorStream, comments;
   this->startTime = global.getElapsedMilliseconds();
   this->problem.loadCurrentProblemItem(
-    global.userRequestRequiresLoadingRealExamData(),
-    inputRandomSeed,
-    &errorStream
+    global.userRequestRequiresLoadingRealExamData(), inputRandomSeed, &
+    errorStream
   );
   if (!this->problem.flagLoadedSuccessfully) {
     errorStream << "Failed to load current problem. ";
@@ -1434,11 +1386,8 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
   this->problem.studentTagsAnswered.initialize(
     this->problem.problemData.answers.size()
   );
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& webArguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  webArguments =
   global.webArguments;
   this->answerIndex = - 1;
   for (int i = 0; i < webArguments.size(); i ++) {
@@ -1451,7 +1400,8 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
     ) {
       continue;
     }
-    int newAnswerIndex = this->problem.getAnswerIndex(studentAnswerNameReader);
+    int newAnswerIndex =
+    this->problem.getAnswerIndex(studentAnswerNameReader);
     if (this->answerIndex == - 1) {
       this->answerIndex = newAnswerIndex;
     } else if (
@@ -1848,9 +1798,7 @@ void AnswerCheckerNoProblem::computeVerificationString() {
     FormatExpressions format;
     out
     << "<tr><td>"
-    << WebAPIResponse::getCommentsInterpretation(
-      this->interpreter, 3, format
-    )
+    << WebAPIResponse::getCommentsInterpretation(this->interpreter, 3, format)
     << "</td></tr>\n";
   }
   out << "<tr><td>Your answer was: ";
@@ -1900,9 +1848,8 @@ JSData WebAPIResponse::checkAnswer(bool hideDesiredAnswer) {
 }
 
 JSData AnswerChecker::submitAnswersJSON(
-  const std::string& inputRandomSeed,
-  bool* outputIsCorrect,
-  bool timeSafetyBrake
+  const std::string& inputRandomSeed, bool* outputIsCorrect, bool
+  timeSafetyBrake
 ) {
   STACK_TRACE("AnswerChecker::submitAnswersJSON");
   if (!global.userDefaultHasAdminRights()) {
@@ -1986,15 +1933,12 @@ JSData WebAPIResponse::submitAnswersHardcoded(bool hideDesiredAnswer) {
 }
 
 JSData WebAPIResponse::submitAnswersJSON(
-  const std::string& inputRandomSeed,
-  bool* outputIsCorrect,
-  bool timeSafetyBrake
+  const std::string& inputRandomSeed, bool* outputIsCorrect, bool
+  timeSafetyBrake
 ) {
   AnswerChecker checker;
   return
-  checker.submitAnswersJSON(
-    inputRandomSeed, outputIsCorrect, timeSafetyBrake
-  );
+  checker.submitAnswersJSON(inputRandomSeed, outputIsCorrect, timeSafetyBrake);
 }
 
 std::string WebAPIResponse::addTeachersSections() {
@@ -2097,9 +2041,7 @@ std::string WebAPIResponse::addTeachersSections() {
     setQuery.addKeyValuePair(
       DatabaseStrings::labelSectionsTaught, desiredSectionListJSON
     );
-    if (
-      !Database::get().updateOne(findQuery, setQuery, true, &out)
-    ) {
+    if (!Database::get().updateOne(findQuery, setQuery, true, &out)) {
       out
       << "<span style='color:red'>Failed to store course info of instructor: "
       << teachers[i]
@@ -2257,11 +2199,8 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     return result;
   }
   std::string lastStudentAnswerId;
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  arguments =
   global.webArguments;
   for (int i = 0; i < arguments.size(); i ++) {
     StringRoutines::stringBeginsWith(
@@ -2397,9 +2336,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
         continue;
       }
       std::string stringAnswer;
-      if (
-        currentExpression[j].isOfType<std::string>(&stringAnswer)
-      ) {
+      if (currentExpression[j].isOfType<std::string>(&stringAnswer)) {
         if (
           StringRoutines::stringBeginsWith(
             stringAnswer, "Approximations have been"
@@ -2506,11 +2443,7 @@ JSData WebAPIResponse::getAccountsPageJSON(
   columnsToRetain.fieldsToProjectTo.addOnTop(DatabaseStrings::labelSemester);
   if (
     !Database::get().find(
-      findStudents,
-      &columnsToRetain,
-      students,
-      nullptr,
-      &commentsOnFailure
+      findStudents, &columnsToRetain, students, nullptr, &commentsOnFailure
     )
   ) {
     output["error"] =
@@ -2546,9 +2479,8 @@ std::string WebAPIResponse::getScoresPage() {
 }
 
 std::string WebAPIResponse::toStringUserDetailsTable(
-  bool adminsOnly,
-  List<JSData>& users,
-  const std::string& hostWebAddressWithPort
+  bool adminsOnly, List<JSData>& users, const std::string&
+  hostWebAddressWithPort
 ) {
   STACK_TRACE("WebAPIReponse::toStringUserDetailsTable");
   std::stringstream out;
@@ -2755,9 +2687,7 @@ std::string WebAPIResponse::toStringUserDetailsTable(
         << "</td></tr>";
       }
     }
-    for (
-      int j = 0; j < nonActivatedAccountBucketsBySection[i].size; j ++
-    ) {
+    for (int j = 0; j < nonActivatedAccountBucketsBySection[i].size; j ++) {
       tableStream << nonActivatedAccountBucketsBySection[i][j];
     }
   }
@@ -2907,19 +2837,14 @@ int ProblemData::getExpectedNumberOfAnswers(
   updateQuery.addKeyValueStringPair(
     DatabaseStrings::labelProblemFileName, problemName
   );
-  Database::get().updateOne(
-    findEntry, updateQuery, true, &commentsOnFailure
-  );
+  Database::get().updateOne(findEntry, updateQuery, true, &commentsOnFailure);
   return this->knownNumberOfAnswersFromHD;
 }
 
 void UserCalculator::computePointsEarned(
   const HashedList<std::string>& gradableProblems,
-  MapList<
-    std::string,
-    TopicElement,
-    HashFunctions::hashFunction<std::string>
-  >* topics,
+  MapList<std::string, TopicElement, HashFunctions::hashFunction<std::string> >
+  * topics,
   std::stringstream& commentsOnFailure
 ) {
   STACK_TRACE("UserCalculator::computePointsEarned");
@@ -2951,9 +2876,7 @@ void UserCalculator::computePointsEarned(
       currentWeight = 0;
     }
     for (int j = 0; j < currentProblem.answers.size(); j ++) {
-      if (
-        currentProblem.answers.values[j].numberOfCorrectSubmissions > 0
-      ) {
+      if (currentProblem.answers.values[j].numberOfCorrectSubmissions > 0) {
         currentProblem.totalCorrectlyAnswered ++;
       }
       currentProblem.totalSubmissions +=
@@ -2991,9 +2914,7 @@ void UserCalculator::computePointsEarned(
         }
         if (currentElement.parentTopics.size > 1) {
           (*topics).values[
-            currentElement.parentTopics[
-              currentElement.parentTopics.size - 2
-            ]
+            currentElement.parentTopics[currentElement.parentTopics.size - 2]
           ].pointsEarnedInProblemsThatAreImmediateChildren +=
           currentProblem.points;
         }
@@ -3008,11 +2929,7 @@ public:
   std::string currentSection;
   std::string currentCourse;
   List<
-    MapList<
-      std::string,
-      Rational,
-      HashFunctions::hashFunction<std::string>
-    >
+    MapList<std::string, Rational, HashFunctions::hashFunction<std::string> >
   > scoresBreakdown;
   List<JSData> userProblemData;
   List<Rational> userScores;
@@ -3040,9 +2957,7 @@ bool UserScores::computeScoresAndStats(std::stringstream& comments) {
     << "Could not load your problem history.</span> <br>";
   }
   problem.currentUser.computePointsEarned(
-    problem.currentUser.problemData.keys,
-    &problem.topics.topics,
-    comments
+    problem.currentUser.problemData.keys, &problem.topics.topics, comments
   );
   List<std::string> userLabels;
   int usernameIndex = userLabels.getIndex(DatabaseStrings::labelUsername);
@@ -3090,21 +3005,15 @@ bool UserScores::computeScoresAndStats(std::stringstream& comments) {
     // this->userTablE[i][courseInfoIndex];
     // currentUserRecord.currentUser.AssignCourseInfoString(&comments);
     if (ignoreSectionsIdontTeach) {
-      if (
-        currentUserRecord.currentUser.courseComputed != this->currentCourse
-      ) {
+      if (currentUserRecord.currentUser.courseComputed != this->currentCourse) {
         continue;
       }
       if (global.userStudentVieWOn()) {
-        if (
-          currentUserRecord.currentUser.sectionInDB != this->currentSection
-        ) {
+        if (currentUserRecord.currentUser.sectionInDB != this->currentSection) {
           continue;
         }
       } else {
-        if (
-          currentUserRecord.currentUser.sectionInDB != this->currentSection
-        ) {
+        if (currentUserRecord.currentUser.sectionInDB != this->currentSection) {
           continue;
         }
       }

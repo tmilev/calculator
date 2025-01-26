@@ -14,18 +14,14 @@ vectorPartitionFunctionFormulaElementary(
   Vectors<Rational> vectors;
   Matrix<Rational> matrix;
   if (
-    !CalculatorConversions::functionGetMatrix(
-      calculator, input, matrix, false
-    )
+    !CalculatorConversions::functionGetMatrix(calculator, input, matrix, false)
   ) {
     return
     calculator
     << "Failed to extract matrix of rationals from: "
     << input.toString();
   }
-  if (
-    calculator.objectContainer.vectorPartitionFunctions.contains(vectors)
-  ) {
+  if (calculator.objectContainer.vectorPartitionFunctions.contains(vectors)) {
     return
     output.assignValue(
       calculator,
@@ -81,9 +77,7 @@ vectorPartitionFunctionFormulaInternal(
   ) {
     return false;
   }
-  if (
-    calculator.objectContainer.vectorPartitionFunctions.contains(vectors)
-  ) {
+  if (calculator.objectContainer.vectorPartitionFunctions.contains(vectors)) {
     return
     output.assignValue(
       calculator,
@@ -114,10 +108,7 @@ bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition
 ) {
   Matrix<Rational> matrix;
   outputLabel = "";
-  if (
-    CalculatorConversions::functionGetMatrix(
-      calculator, input, matrix, false
-    )
+  if (CalculatorConversions::functionGetMatrix(calculator, input, matrix, false)
   ) {
     matrix.getVectorsFromRows(output);
     return true;
@@ -147,9 +138,8 @@ getVectorsForConeDecompositionFromDynkinType(
     "getVectorsForConeDecompositionFromDynkinType"
   );
   DynkinSimpleType type;
-  if (
-    !CalculatorConversions::functionDynkinSimpleType(calculator, input, type)
-  ) {
+  if (!CalculatorConversions::functionDynkinSimpleType(calculator, input, type))
+  {
     return false;
   }
   WeylGroupData weylGroup;
@@ -169,7 +159,9 @@ bool CalculatorFunctionsVectorPartitionFunction::coneDecomposition(
   bool flagIncludeHistory,
   bool flagAmalgamateChambers
 ) {
-  STACK_TRACE("CalculatorFunctionsVectorPartitionFunction::coneDecomposition");
+  STACK_TRACE(
+    "CalculatorFunctionsVectorPartitionFunction::coneDecomposition"
+  );
   Vectors<Rational> vectors;
   std::string label;
   if (
@@ -199,9 +191,7 @@ applyVectorPartitionFunctionFormula(
     "applyVectorPartitionFunctionFormula"
   );
   Vector<Rational> vector;
-  if (
-    !calculator.getVectorFromFunctionArguments(input, vector, nullptr, - 1)
-  ) {
+  if (!calculator.getVectorFromFunctionArguments(input, vector, nullptr, - 1)) {
     return calculator << "Failed to extract vector from: " << input.toString();
   }
   WithContext<VectorPartitionFunction> element;
@@ -263,9 +253,7 @@ bool CalculatorFunctionsVectorPartitionFunction::lattice(
   STACK_TRACE("CalculatorFunctionsVectorPartitionFunction::lattice");
   Matrix<Rational> matrix;
   if (
-    !CalculatorConversions::functionGetMatrix(
-      calculator, input, matrix, false
-    )
+    !CalculatorConversions::functionGetMatrix(calculator, input, matrix, false)
   ) {
     return
     calculator
@@ -433,9 +421,7 @@ bool CalculatorFunctionsVectorPartitionFunction::quotientLatticeRepresentatives
   }
   Lattice dividend;
   Lattice divisor;
-  if (
-    !input[1].isOfType(&dividend) || !input[2].isOfType(&divisor)
-  ) {
+  if (!input[1].isOfType(&dividend) || !input[2].isOfType(&divisor)) {
     return
     calculator
     << "Could not extract lattice arguments from "

@@ -8,9 +8,7 @@ template <class Coefficient>
 class RationalFraction {
 private:
   void addSameTypes(const RationalFraction<Coefficient>& other);
-  void addHonestRationalFunction(
-    const RationalFraction<Coefficient>& other
-  );
+  void addHonestRationalFunction(const RationalFraction<Coefficient>& other);
   void reduceRationalFunctionToPolynomial();
   void reducePolynomialToRational();
   bool convertToType(int inputExpressionType);
@@ -21,8 +19,7 @@ private:
   );
 public:
   friend std::ostream& operator<<(
-    std::ostream& output,
-    const RationalFraction<Coefficient>& rationalFraction
+    std::ostream& output, const RationalFraction<Coefficient>& rationalFraction
   ) {
     output << rationalFraction.toString();
     return output;
@@ -32,10 +29,8 @@ public:
   Coefficient constantValue;
   int expressionType;
   enum TypeExpression {
-    typeConstant = 0,
-    typePolynomial = 1,
-    typeRationalFraction = 2,
-    typeError = 3
+    typeConstant = 0, typePolynomial = 1, typeRationalFraction = 2, typeError =
+    3
   };
   std::string toString(FormatExpressions* format = nullptr) const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused = nullptr)
@@ -46,8 +41,8 @@ public:
   static RationalFraction zeroStatic();
   int minimalNumberOfVariables() const;
   bool substitute(
-    const PolynomialSubstitution<Rational>& substitution,
-    const Coefficient& one
+    const PolynomialSubstitution<Rational>& substitution, const Coefficient&
+    one
   );
   bool substitute(
     const PolynomialSubstitution<Coefficient>& substitution,
@@ -62,9 +57,7 @@ public:
   void raiseToPower(int power);
   void reduceMemory();
   unsigned int hashFunction() const;
-  static unsigned int hashFunction(
-    const RationalFraction<Coefficient>& input
-  );
+  static unsigned int hashFunction(const RationalFraction<Coefficient>& input);
   void operator=(int other);
   void operator=(const Coefficient& other);
   void operator=(const RationalFraction<Rational>& other);
@@ -73,16 +66,13 @@ public:
   void setNumberOfVariables(int goalNumberOfVariables);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables);
   void makeOneLetterMonomial(
-    int index,
-    const Coefficient& coefficient,
-    int expectedNumberOfVariables = 0
+    int index, const Coefficient& coefficient, int expectedNumberOfVariables =
+    0
   );
   void getNumerator(Polynomial<Coefficient>& output) const;
   void getDenominator(Polynomial<Coefficient>& output) const;
   bool isNegative();
-  void clearDenominators(
-    RationalFraction<Coefficient>& outputWasMultipliedBy
-  );
+  void clearDenominators(RationalFraction<Coefficient>& outputWasMultipliedBy);
   void operator+=(int coefficient);
   void operator+=(const Polynomial<Coefficient>& other);
   void operator+=(const RationalFraction<Coefficient>& other);
@@ -216,9 +206,7 @@ bool RationalFraction<Coefficient>::convertToType(int inputExpressionType) {
     this->expressionType < inputExpressionType
   ) {
     this->expressionType = TypeExpression::typeRationalFraction;
-    this->denominator.getElement().makeConstant(
-      this->constantValue.one()
-    );
+    this->denominator.getElement().makeConstant(this->constantValue.one());
   }
   return true;
 }
@@ -278,9 +266,7 @@ bool RationalFraction<Coefficient>::checkConsistency() const {
     }
   }
   if (this->expressionType == TypeExpression::typeRationalFraction) {
-    if (
-      this->numerator.isZeroPointer() || this->denominator.isZeroPointer()
-    ) {
+    if (this->numerator.isZeroPointer() || this->denominator.isZeroPointer()) {
       global.fatal
       << "A rational function is flagged as "
       << "having non-constant denominator, but "
@@ -572,9 +558,7 @@ void RationalFraction<Coefficient>::greatestCommonDivisor(
     << ", which is imposible."
     << global.fatal;
   }
-  output.scaleNormalizeLeadingMonomial(
-    &MonomialPolynomial::orderDefault()
-  );
+  output.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
 }
 
 template <class Coefficient>
@@ -644,9 +628,7 @@ void RationalFraction<Coefficient>::operator=(
     this->numerator.getElement() = other.numerator.getElementConst();
     break;
   case RationalFraction::typeRationalFraction:
-    if (
-      other.numerator.isZeroPointer() || other.denominator.isZeroPointer()
-    ) {
+    if (other.numerator.isZeroPointer() || other.denominator.isZeroPointer()) {
       global.fatal
       << "zero pointer in numerator or denominator of other. "
       << global.fatal;
@@ -672,11 +654,7 @@ void RationalFraction<Coefficient>::leastCommonMultiple(
   }
   std::stringstream commentsOnFailure;
   bool success = Polynomial<Coefficient>::leastCommonMultiple(
-    left,
-    right,
-    output,
-    left.coefficients[0].one(),
-    &commentsOnFailure
+    left, right, output, left.coefficients[0].one(), &commentsOnFailure
   );
   if (!success) {
     global.fatal
@@ -687,9 +665,8 @@ void RationalFraction<Coefficient>::leastCommonMultiple(
 }
 
 template <class Coefficient>
-void RationalFraction<Coefficient>::operator*=(
-  const MonomialPolynomial& other
-) {
+void RationalFraction<Coefficient>::operator*=(const MonomialPolynomial& other)
+{
   Polynomial<Rational> converted;
   converted.makeZero();
   converted.addMonomial(other, 1);
@@ -1114,8 +1091,7 @@ scaleNormalizeIndex(
   for (int i = 1; i < scales.size; i ++) {
     numeratorContentGreatestCommonDivisor =
     LargeIntegerUnsigned::leastCommonMultiple(
-      scales[i].getNumerator().value,
-      numeratorContentGreatestCommonDivisor
+      scales[i].getNumerator().value, numeratorContentGreatestCommonDivisor
     );
     denominatorContentLeastCommonMultiple =
     LargeIntegerUnsigned::greatestCommonDivisor(
@@ -1571,8 +1547,7 @@ void RationalFraction<Coefficient>::reduceRationalFunctionToPolynomial() {
 
 template <class Coefficient>
 bool RationalFraction<Coefficient>::substitute(
-  const PolynomialSubstitution<Rational>& substitution,
-  const Coefficient& one
+  const PolynomialSubstitution<Rational>& substitution, const Coefficient& one
 ) {
   return this->substitute(substitution, one, nullptr);
 }
@@ -1588,22 +1563,16 @@ bool RationalFraction<Coefficient>::substitute(
   case RationalFraction::typeConstant:
     return true;
   case RationalFraction::typePolynomial:
-    if (
-      !this->numerator.getElement().substitute(substitution, one)
-    ) {
+    if (!this->numerator.getElement().substitute(substitution, one)) {
       return false;
     }
     this->simplify();
     return true;
   case RationalFraction::typeRationalFraction:
-    if (
-      !this->numerator.getElement().substitute(substitution, one)
-    ) {
+    if (!this->numerator.getElement().substitute(substitution, one)) {
       return false;
     }
-    if (
-      !this->denominator.getElement().substitute(substitution, one)
-    ) {
+    if (!this->denominator.getElement().substitute(substitution, one)) {
       return false;
     }
     if (this->denominator.getElement().isEqualToZero()) {
@@ -1665,8 +1634,7 @@ bool RationalFraction<Coefficient>::getRelations(
   for (int i = 0; i < inputElements.size; i ++) {
     totalStartingVariables =
     MathRoutines::maximum(
-      totalStartingVariables,
-      inputElements[0].minimalNumberOfVariables()
+      totalStartingVariables, inputElements[0].minimalNumberOfVariables()
     );
   }
   Polynomial<Rational> currentGenerator;
@@ -1676,8 +1644,7 @@ bool RationalFraction<Coefficient>::getRelations(
       totalStartingVariables + startingGenerators
     );
     currentGenerator.makeDegreeOne(
-      totalStartingVariables + startingGenerators,
-      i + totalStartingVariables,
+      totalStartingVariables + startingGenerators, i + totalStartingVariables,
       1
     );
     outputGeneratorLabels[i] = currentGenerator;

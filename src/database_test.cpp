@@ -132,14 +132,10 @@ bool Database::Test::loadFromJSON() {
   query.collection = "users";
   List<std::string> objectIds;
   LargeInteger totalItems;
-  if (
-    !server.findObjectIds(query, objectIds, &totalItems, &comments)
-  ) {
+  if (!server.findObjectIds(query, objectIds, &totalItems, &comments)) {
     global.fatal << "Failed to find object ids. " << global.fatal;
   }
-  if (
-    objectIds[0] != query.exactValue.stringValue || objectIds.size != 1
-  ) {
+  if (objectIds[0] != query.exactValue.stringValue || objectIds.size != 1) {
     global.fatal
     << "Got: "
     << objectIds.toStringCommaDelimited()
@@ -252,11 +248,7 @@ bool Database::Test::deleteDatabase() {
   }
   std::string folderToRemove;
   FileOperations::getPhysicalFileNameFromVirtual(
-    DatabaseInternal::folder(),
-    folderToRemove,
-    true,
-    true,
-    &commentsOnFailure
+    DatabaseInternal::folder(), folderToRemove, true, true, &commentsOnFailure
   );
   global.externalCommandStream("rm -rf " + folderToRemove);
   return true;
@@ -273,9 +265,7 @@ bool Database::Test::createAdminAccountReturnUser(
   }
   std::stringstream commentsOnFailure;
   if (
-    !Database::get().user.loginViaDatabase(
-      outputUserData, &commentsOnFailure
-    )
+    !Database::get().user.loginViaDatabase(outputUserData, &commentsOnFailure)
   ) {
     global.fatal
     << "Failed to login as administrator on an empty database. "
@@ -311,18 +301,14 @@ void QueryUpdate::Test::updateNoFail(QueryFind& find, QueryUpdate updater) {
   }
 }
 
-void QueryUpdate::Test::findExactlyOneNoFail(
-  QueryFind& find, JSData& result
-) {
+void QueryUpdate::Test::findExactlyOneNoFail(QueryFind& find, JSData& result) {
   std::stringstream comments;
   List<JSData> output;
   QueryFindOneOf wrapperQuery;
   wrapperQuery.queries.addOnTop(find);
   LargeInteger totalItems = 0;
   bool success =
-  Database::get().find(
-    wrapperQuery, nullptr, output, &totalItems, &comments
-  );
+  Database::get().find(wrapperQuery, nullptr, output, &totalItems, &comments);
   if (!success || output.size != 1) {
     global.fatal
     << "Failed to find updated:\n"
@@ -408,9 +394,7 @@ bool QueryUpdate::Test::basics(DatabaseType databaseType) {
   List<JSData> foundAll;
   LargeInteger totalItems = 0;
   bool success =
-  Database::get().find(
-    finder, nullptr, foundAll, &totalItems, &errorStream
-  );
+  Database::get().find(finder, nullptr, foundAll, &totalItems, &errorStream);
   std::string foundString = found.toString();
   if (!success || foundAll.size != 2) {
     global.fatal

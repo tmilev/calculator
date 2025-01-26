@@ -149,7 +149,8 @@ const signed Sha3::powersOfA[24] =
   2,
   20,
   14,
-  22,
+  22
+  ,
   9,
   6,
   1
@@ -178,8 +179,7 @@ void Sha3::piOfRho() {
   for (int i = 0; i < 24; i ++) {
     int j = Sha3::powersOfA[i];
     y = this->stateStorage[j];
-    this->stateStorage[j] =
-    Sha3::rotateLeft(x, Sha3::triangularNumbers[i]);
+    this->stateStorage[j] = Sha3::rotateLeft(x, Sha3::triangularNumbers[i]);
     x = y;
   }
 }
@@ -300,8 +300,7 @@ void Sha3::finalize() {
     // Original Keccak.
     this->stateStorage[this->wordIndex] ^= (
       this->saved ^ (
-        static_cast<uint64_t>(
-          static_cast<uint64_t>(1) << (this->byteIndex * 8)
+        static_cast<uint64_t>(static_cast<uint64_t>(1) << (this->byteIndex * 8)
         )
       )
     );
@@ -315,9 +314,8 @@ void Sha3::finalize() {
     unsigned i;
     for (i = 0; i < Sha3::numberOfSpongeWords; i ++) {
       const unsigned t1 = static_cast<uint32_t>(this->stateStorage[i]);
-      const unsigned t2 = static_cast<uint32_t>((
-          this->stateStorage[i] >> 16
-        ) >>
+      const unsigned t2 = static_cast<uint32_t>((this->stateStorage[i] >> 16)
+        >>
         16
       );
       this->stateBytes[i * 8 + 0] = static_cast<uint8_t>(t1);

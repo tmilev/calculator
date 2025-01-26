@@ -30,7 +30,9 @@ unsigned int HashFunctions::hashFunction(
 MapList<
   std::string,
   VoganDiagram::DiagramType,
-  HashFunctions::hashFunction<std::string>
+  HashFunctions::hashFunction<
+    std::string
+  >
 > VoganDiagram::mapStringToType;
 
 bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
@@ -92,9 +94,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       generatorsItry.addOnTop(generator);
     }
   } else {
-    for (
-      int j = 0; j < semisimpleLieAlgebra.getNumberOfGenerators(); j ++
-    ) {
+    for (int j = 0; j < semisimpleLieAlgebra.getNumberOfGenerators(); j ++) {
       generator.makeGenerator(j, semisimpleLieAlgebra);
       generatorsItry.addOnTop(generator);
     }
@@ -348,9 +348,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       ElementWeylAlgebra<Rational> transformedDO;
       reportfourierTransformedCalculatorCommands
       << "<hr>"
-      << HtmlRoutines::getMathNoDisplay(
-        currentModule.character.toString()
-      )
+      << HtmlRoutines::getMathNoDisplay(currentModule.character.toString())
       << ", differential operators Fourier transformed - "
       << "formatted for calculator input. <br><br>";
       reportfourierTransformedCalculatorCommands
@@ -358,9 +356,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
       << "\\partial_{{i}}= ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
       reportCalculatorCommands
       << "<hr>"
-      << HtmlRoutines::getMathNoDisplay(
-        currentModule.character.toString()
-      )
+      << HtmlRoutines::getMathNoDisplay(currentModule.character.toString())
       << ", differential operators - formatted for calculator input. <br><br>";
       reportCalculatorCommands
       << "x_{{i}}= ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
@@ -521,10 +517,7 @@ bool CalculatorLieTheory::animateLittelmannPaths(
   ExpressionContext tempContext(calculator);
   if (
     !calculator.getVector<Rational>(
-      input[2],
-      weight,
-      &tempContext,
-      semisimpleLieAlgebraOwner->getRank()
+      input[2], weight, &tempContext, semisimpleLieAlgebraOwner->getRank()
     )
   ) {
     return
@@ -717,8 +710,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2inner(
         if (weightDifference.isPositive()) {
           g2CasimirCopy = imageCasimirInB3;
           element.makeConstant(
-            g2B3Data.allCharacters[j],
-            g2B3Data.homomorphism.coDomainAlgebra()
+            g2B3Data.allCharacters[j], g2B3Data.homomorphism.coDomainAlgebra()
           );
           g2CasimirCopy -= element;
           g2CasimirCopy *= Rational(12);
@@ -768,9 +760,7 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
   const Expression& dimE = input[2];
   int rankBound = 0;
   int dimBound = 0;
-  if (
-    !rankE.isSmallInteger(&rankBound) || !dimE.isSmallInteger(&dimBound)
-  ) {
+  if (!rankE.isSmallInteger(&rankBound) || !dimE.isSmallInteger(&dimBound)) {
     return
     output.assignError(
       calculator, "The rank and  dim bounds must be small integers"
@@ -896,8 +886,9 @@ bool CalculatorLieTheory::testMonomialBaseConjecture(
         integerStrings,
         MathRoutines::minimum(
           1000,
-          currentAlg.weylGroup.weylDimFormulaFundamentalCoordinates(currentHW).
-          numeratorShort
+          currentAlg.weylGroup.weylDimFormulaFundamentalCoordinates(
+            currentHW
+          ).numeratorShort
         ),
         nullptr
       );
@@ -1003,10 +994,7 @@ bool CalculatorLieTheory::LSPath(
   for (int i = 2; i < input.size(); i ++) {
     if (
       !calculator.getVector<Rational>(
-        input[i],
-        waypoints[i - 2],
-        nullptr,
-        semisimpleLieAlgebra.getRank()
+        input[i], waypoints[i - 2], nullptr, semisimpleLieAlgebra.getRank()
       )
     ) {
       return output.assignError(calculator, "Failed to extract waypoints");
@@ -1034,9 +1022,7 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
   RecursionDepthCounter recursionIncrementer(&calculator.recursionDepth);
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
-    !CalculatorConversions::convert(
-      calculator, input[1], semisimpleLieAlgebra
-    )
+    !CalculatorConversions::convert(calculator, input[1], semisimpleLieAlgebra)
   ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -1101,8 +1087,7 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperators(
   ) {
     return
     output.assignError(
-      calculator,
-      "Failed to extract type, highest weight, parabolic selection"
+      calculator, "Failed to extract type, highest weight, parabolic selection"
     );
   }
   if (output.isError()) {
@@ -1225,9 +1210,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
     RationalFraction<Rational> numEigenVectors;
     numEigenVectors = rfZero;
     for (
-      int j = 0; j < g2inB3Data.smallCharacterFiniteDimensionalPart.size(); j
-      ++
-    ) {
+      int j = 0; j < g2inB3Data.smallCharacterFiniteDimensionalPart.size();
+      j ++) {
       numEigenVectors +=
       g2inB3Data.smallCharacterFiniteDimensionalPart.coefficients[j];
     }
@@ -1243,9 +1227,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
       << "in $Sh_{\\lambda,i}$ &$x_1\\notin$ \\\\\\hline";
     }
     for (
-      int k = 0; k < g2inB3Data.smallCharacterFiniteDimensionalPart.size(); k
-      ++
-    ) {
+      int k = 0; k < g2inB3Data.smallCharacterFiniteDimensionalPart.size();
+      k ++) {
       CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> >
       character;
       character.addMonomial(
@@ -1258,8 +1241,7 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
       for (
         int counter = 0; counter < multiplicity;
         counter ++,
-        eigenIndexcounter ++
-      ) {
+        eigenIndexcounter ++) {
         out << "<tr>";
         if (k == 0 && counter == 0) {
           g2inB3Data.format.customPlusSign = "\\oplus ";
@@ -1577,8 +1559,7 @@ bool CalculatorLieTheory::printB3G2branchingTableCharsOnly(
     character.makeFromWeight(
       g3InB3Data.homomorphism.coDomainAlgebra().weylGroup.
       getSimpleCoordinatesFromFundamental(
-        highestWeights[k],
-        RationalFraction<Rational>::zeroRational()
+        highestWeights[k], RationalFraction<Rational>::zeroRational()
       ),
       &g3InB3Data.homomorphism.coDomainAlgebra()
     );
@@ -1776,9 +1757,8 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
   Expression resultSSalgebraE;
   resultSSalgebraE = leftE;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
-  if (
-    !CalculatorConversions::convert(calculator, leftE, semisimpleLieAlgebra)
-  ) {
+  if (!CalculatorConversions::convert(calculator, leftE, semisimpleLieAlgebra))
+  {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   int rank = semisimpleLieAlgebra.content->getRank();
@@ -1786,10 +1766,7 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
   ExpressionContext hwContext(calculator);
   if (
     !calculator.getVector(
-      genVemaWeightNode,
-      highestWeightFundamentalCoordinates,
-      &hwContext,
-      rank
+      genVemaWeightNode, highestWeightFundamentalCoordinates, &hwContext, rank
     )
   ) {
     return
@@ -1817,9 +1794,7 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
   selInducing.makeFullSelection(rank);
   int coefficient;
   for (int i = 0; i < rank; i ++) {
-    if (
-      highestWeightFundamentalCoordinates[i].isSmallInteger(&coefficient)
-    ) {
+    if (highestWeightFundamentalCoordinates[i].isSmallInteger(&coefficient)) {
       if (coefficient == 0) {
         selInducing.removeSelection(i);
       }
@@ -1890,12 +1865,12 @@ bool CalculatorLieTheory::killingForm(
   ElementUniversalEnveloping<RationalFraction<Rational> > left;
   ElementUniversalEnveloping<RationalFraction<Rational> > right;
   if (
-    !leftE.isOfType<
-      ElementUniversalEnveloping<RationalFraction<Rational> >
-    >(&left) ||
-    !rightE.isOfType<
-      ElementUniversalEnveloping<RationalFraction<Rational> >
-    >(&right)
+    !leftE.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(
+      &left
+    ) ||
+    !rightE.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(
+      &right
+    )
   ) {
     return false;
   }
@@ -1978,9 +1953,8 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   const Expression& genVemaWeightNode = input[3];
   const Expression& fdWeightNode = input[2];
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
-  if (
-    !CalculatorConversions::convert(calculator, leftE, semisimpleLieAlgebra)
-  ) {
+  if (!CalculatorConversions::convert(calculator, leftE, semisimpleLieAlgebra))
+  {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   int rank = semisimpleLieAlgebra.content->getRank();
@@ -2032,9 +2006,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   finiteDimensionalSelection.initialize(rank);
   int coefficient;
   for (int i = 0; i < rank; i ++) {
-    if (
-      highestWeightFundamentalCoordinates[i].isSmallInteger(&coefficient)
-    ) {
+    if (highestWeightFundamentalCoordinates[i].isSmallInteger(&coefficient)) {
       if (coefficient >= 0) {
         parabolicSelection1.removeSelection(i);
       }
@@ -2292,10 +2264,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   for (int i = 0; i < centralCharacters.size; i ++) {
     Vector<RationalFraction<Rational> > currentWeightSimpleCoordinates =
     semisimpleLieAlgebra.content->weylGroup.getSimpleCoordinatesFromFundamental
-    (
-      eigenVectorWeightsFund[i],
-      RationalFraction<Rational>::zeroRational()
-    );
+    (eigenVectorWeightsFund[i], RationalFraction<Rational>::zeroRational());
     element.makeHighestWeightVector(
       finiteDimensionalModule, rationalFractionOne
     );
@@ -2317,8 +2286,7 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
       Vector<RationalFraction<Rational> > otherWeightSimpleCoordinates =
       semisimpleLieAlgebra.content->weylGroup.
       getSimpleCoordinatesFromFundamental(
-        eigenVectorWeightsFund[j],
-        RationalFraction<Rational>::zeroRational()
+        eigenVectorWeightsFund[j], RationalFraction<Rational>::zeroRational()
       );
       if ((otherWeightSimpleCoordinates - currentWeightSimpleCoordinates).
         isPositive()
@@ -2360,8 +2328,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     out
     << "<tr><td>"
     << semisimpleLieAlgebra.content->weylGroup.
-    getFundamentalCoordinatesFromSimple(currentHighestWeightSimpleCoordinates).
-    toStringLetterFormat("\\psi")
+    getFundamentalCoordinatesFromSimple(
+      currentHighestWeightSimpleCoordinates
+    ).toStringLetterFormat("\\psi")
     << "</td><td>"
     << HtmlRoutines::getMathNoDisplay(currentStream.str())
     << "</td><td>"
@@ -2370,8 +2339,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
     latexReport2
     << "$"
     << semisimpleLieAlgebra.content->weylGroup.
-    getFundamentalCoordinatesFromSimple(currentHighestWeightSimpleCoordinates).
-    toStringLetterFormat("\\psi")
+    getFundamentalCoordinatesFromSimple(
+      currentHighestWeightSimpleCoordinates
+    ).toStringLetterFormat("\\psi")
     << "$ &  "
     << currentStream2.str()
     << " &"
@@ -2558,9 +2528,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2old(
     << "</td>";
     out
     << "<td>"
-    << HtmlRoutines::getMathNoDisplay(
-      g2B3Data.allCharacters[i].toString()
-    )
+    << HtmlRoutines::getMathNoDisplay(g2B3Data.allCharacters[i].toString())
     << "</td>";
     out << "</tr>";
   }
@@ -2588,9 +2556,7 @@ bool CalculatorLieTheory::splitFDpartB3overG2old(
     out
     << HtmlRoutines::getMathNoDisplay(formulaStream1.str())
     << "</td><td>"
-    << HtmlRoutines::getMathNoDisplay(
-      g2B3Data.eigenVectors[k].toString()
-    )
+    << HtmlRoutines::getMathNoDisplay(g2B3Data.eigenVectors[k].toString())
     << "</td></tr>";
   }
   out << "</table>";
@@ -2731,17 +2697,14 @@ bool CalculatorLieTheory::slTwoRealFormStructureForceRecompute(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   return
-  CalculatorLieTheory::slTwoRealFormStructure(
-    calculator, input, output, true
-  );
+  CalculatorLieTheory::slTwoRealFormStructure(calculator, input, output, true);
 }
 
 bool CalculatorLieTheory::slTwoRealFormStructureComputeOnDemand(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   return
-  CalculatorLieTheory::slTwoRealFormStructure(
-    calculator, input, output, false
+  CalculatorLieTheory::slTwoRealFormStructure(calculator, input, output, false
   );
 }
 
@@ -2843,9 +2806,7 @@ bool CalculatorLieTheory::standardRepresentationMatrix(
     element, result, &calculator.comments
   );
   Matrix<Expression> resultExpressions;
-  resultExpressions.initialize(
-    result.numberOfRows, result.numberOfColumns
-  );
+  resultExpressions.initialize(result.numberOfRows, result.numberOfColumns);
   for (int i = 0; i < resultExpressions.numberOfRows; i ++) {
     for (int j = 0; j < resultExpressions.numberOfColumns; j ++) {
       Rational whichConstant;
@@ -2859,9 +2820,7 @@ bool CalculatorLieTheory::standardRepresentationMatrix(
     }
   }
   return
-  output.assignMatrixExpressions(
-    resultExpressions, calculator, false, false
-  );
+  output.assignMatrixExpressions(resultExpressions, calculator, false, false);
 }
 
 bool CalculatorLieTheory::adjointMatrix(
@@ -2881,13 +2840,9 @@ bool CalculatorLieTheory::adjointMatrix(
   ExpressionContext context = input[1].getContext();
   SemisimpleLieAlgebra& owner = element.getOwner();
   Matrix<RationalFraction<Rational> > result;
-  owner.getElementAdjointRepresentation(
-    element, result, &calculator.comments
-  );
+  owner.getElementAdjointRepresentation(element, result, &calculator.comments);
   Matrix<Expression> resultExpressions;
-  resultExpressions.initialize(
-    result.numberOfRows, result.numberOfColumns
-  );
+  resultExpressions.initialize(result.numberOfRows, result.numberOfColumns);
   for (int i = 0; i < resultExpressions.numberOfRows; i ++) {
     for (int j = 0; j < resultExpressions.numberOfColumns; j ++) {
       Rational whichConstant;
@@ -2901,9 +2856,7 @@ bool CalculatorLieTheory::adjointMatrix(
     }
   }
   return
-  output.assignMatrixExpressions(
-    resultExpressions, calculator, false, false
-  );
+  output.assignMatrixExpressions(resultExpressions, calculator, false, false);
 }
 
 std::string VoganDiagram::toString() {
@@ -3255,9 +3208,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeAIII(
     return false;
   }
   int rank = this->owner->getRank();
-  if (
-    this->voganDiagram.parameter < 0 || this->voganDiagram.parameter > rank
-  ) {
+  if (this->voganDiagram.parameter < 0 || this->voganDiagram.parameter > rank) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Parameter must be between 0 and the rank "
@@ -3306,9 +3257,8 @@ bool CartanInvolution::computeSimpleRootImagesTypeBI(
     return false;
   }
   int rank = this->owner->getRank();
-  if (
-    this->voganDiagram.parameter < 0 || this->voganDiagram.parameter >= rank
-  ) {
+  if (this->voganDiagram.parameter < 0 || this->voganDiagram.parameter >= rank)
+  {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Parameter must be between 0 and "
@@ -3361,9 +3311,8 @@ bool CartanInvolution::computeSimpleRootImagesTypeCI(
     return false;
   }
   int rank = this->owner->getRank();
-  if (
-    this->voganDiagram.parameter < 0 || this->voganDiagram.parameter >= rank
-  ) {
+  if (this->voganDiagram.parameter < 0 || this->voganDiagram.parameter >= rank)
+  {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Parameter must be between 0 and the rank less one. The rank is: "
@@ -3430,8 +3379,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeD(
   int rank = this->owner->getRank();
   if (
     this->voganDiagram.parameter < 0 ||
-    this->voganDiagram.parameter >= rank - 1
-  ) {
+    this->voganDiagram.parameter >= rank - 1) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Parameter must be between 0 and the rank less one. The rank is: "
@@ -3914,10 +3862,7 @@ void DynkinSimpleType::plotDn(
     topFilled = filledRoots->selected[rank - 1];
   }
   output.drawCircle(
-    bottomCenter,
-    DynkinSimpleType::radiusOfRootCircle,
-    "black",
-    bottomFilled
+    bottomCenter, DynkinSimpleType::radiusOfRootCircle, "black", bottomFilled
   );
   output.drawCircle(
     topCenter, DynkinSimpleType::radiusOfRootCircle, "black", topFilled
@@ -3965,8 +3910,7 @@ void DynkinSimpleType::plotE6(Plot& output, int verticalOffset) {
   verticalOffset;
   output.drawSegment(left, right);
   right[1] = DynkinSimpleType::distanceBetweenRootCenters + verticalOffset;
-  output.drawCircle(
-    right, DynkinSimpleType::radiusOfRootCircle, "black", false
+  output.drawCircle(right, DynkinSimpleType::radiusOfRootCircle, "black", false
   );
   right[1] += DynkinSimpleType::labelDistance;
   output.drawLabel(right, "2");
@@ -4050,9 +3994,7 @@ void SatakeDiagram::plotAIII(Plot& output, int verticalOffset) {
   Selection filledRoots;
   filledRoots.initialize(this->rank);
   int remainingRank = this->rank - this->parameter * 2;
-  for (
-    int i = this->parameter; i < this->parameter + remainingRank; i ++
-  ) {
+  for (int i = this->parameter; i < this->parameter + remainingRank; i ++) {
     filledRoots.addSelectionAppendNewIndex(i);
   }
   for (int i = 0; i < this->parameter; i ++) {
@@ -4071,9 +4013,7 @@ void SatakeDiagram::plotBI(Plot& output, int verticalOffset) {
   for (int i = this->parameter; i < this->rank; i ++) {
     filledRoots.addSelectionAppendNewIndex(i);
   }
-  DynkinSimpleType::plotBn(
-    output, this->rank, &filledRoots, verticalOffset
-  );
+  DynkinSimpleType::plotBn(output, this->rank, &filledRoots, verticalOffset);
 }
 
 void SatakeDiagram::plotCI(Plot& output, int verticalOffset) {
@@ -4167,8 +4107,7 @@ void VoganDiagram::plotAI(Plot& output) {
   );
   for (int i = 0; i < this->rank / 2; i ++) {
     VoganDiagram::plotTwoElementOrbit(
-      output, i, this->rank - i - 1, 0, this->rank
-    );
+      output, i, this->rank - i - 1, 0, this->rank);
   }
 }
 
@@ -4176,8 +4115,7 @@ void VoganDiagram::plotAII(Plot& output) {
   DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, nullptr);
   for (int i = 0; i < this->rank / 2; i ++) {
     VoganDiagram::plotTwoElementOrbit(
-      output, i, this->rank - i - 1, 0, this->rank
-    );
+      output, i, this->rank - i - 1, 0, this->rank);
   }
 }
 
@@ -4244,11 +4182,8 @@ void VoganDiagram::plotDII(Plot& output) {
 }
 
 void VoganDiagram::plotTwoElementOrbit(
-  Plot& output,
-  int leftIndex,
-  int rightIndex,
-  int verticalOffset,
-  int rootsOnThisPlotRow
+  Plot& output, int leftIndex, int rightIndex, int verticalOffset, int
+  rootsOnThisPlotRow
 ) {
   Vector<Rational> left, right;
   left.makeZero(2);
@@ -4324,9 +4259,7 @@ void CartanInvolution::plotSatakeDiagram(Plot& output, int verticalOffset) {
 }
 
 bool CalculatorLieTheory::cartanInvolutionInternal(
-  Calculator& calculator,
-  const Expression& input,
-  CartanInvolution& output
+  Calculator& calculator, const Expression& input, CartanInvolution& output
 ) {
   STACK_TRACE("CalculatorLieTheory::cartanInvolutionInternal");
   if (input.size() != 4 && input.size() != 3 && input.size() != 2) {
@@ -4434,9 +4367,7 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
     << "Root subalgebra / sl(2)-subalgebras function expects 1 argument. ";
   }
   WithContext<SemisimpleLieAlgebra*> ownerLieAlgebra;
-  if (
-    !CalculatorConversions::convert(calculator, input[1], ownerLieAlgebra)
-  ) {
+  if (!CalculatorConversions::convert(calculator, input[1], ownerLieAlgebra)) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   FormatExpressions format;
@@ -4512,9 +4443,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
-    !CalculatorConversions::convert(
-      calculator, input[1], semisimpleLieAlgebra
-    )
+    !CalculatorConversions::convert(calculator, input[1], semisimpleLieAlgebra)
   ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -4565,9 +4494,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   }
   out
   << "<a href='"
-  << (
-    showSLTwos ? outSltwoMainFile.str() : outRootHtmlDisplayName.str()
-  )
+  << (showSLTwos ? outSltwoMainFile.str() : outRootHtmlDisplayName.str())
   << "' target='_blank'>"
   << semisimpleLieAlgebra.content->toStringLieAlgebraName()
   << " </a>";
@@ -4591,9 +4518,7 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   const Expression& inducingParNode = input[3];
   const Expression& splittingParNode = input[4];
   WithContext<SemisimpleLieAlgebra*> ownerSSPointer;
-  if (
-    !CalculatorConversions::convert(calculator, typeNode, ownerSSPointer)
-  ) {
+  if (!CalculatorConversions::convert(calculator, typeNode, ownerSSPointer)) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   Vector<RationalFraction<Rational> > weightFundamentalCoordinates;
@@ -4626,10 +4551,7 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   }
   if (
     !calculator.getVector<Rational>(
-      splittingParNode,
-      splittingParabolicSelection,
-      &finalContext,
-      dimension
+      splittingParNode, splittingParabolicSelection, &finalContext, dimension
     )
   ) {
     return
@@ -4644,8 +4566,7 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   calculator
   << "<br>Your input weight in simple coordinates: "
   << weylGroup.getSimpleCoordinatesFromFundamental(
-    weightFundamentalCoordinates,
-    RationalFraction<Rational>::zeroRational()
+    weightFundamentalCoordinates, RationalFraction<Rational>::zeroRational()
   ).toString()
   << "<br>Your inducing parabolic subalgebra: "
   << inducingParabolicSelection.toString()
@@ -4657,12 +4578,7 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   Selection selInducing = inducingParabolicSelection;
   Selection selSplittingParSel = splittingParabolicSelection;
   module.makeFromHW(
-    ownerSemisimple,
-    weightFundamentalCoordinates,
-    selInducing,
-    1,
-    0,
-    nullptr,
+    ownerSemisimple, weightFundamentalCoordinates, selInducing, 1, 0, nullptr,
     false
   );
   std::string report;
@@ -4696,8 +4612,7 @@ bool CalculatorLieTheory::parabolicWeylGroups(
   for (
     int i = 0; i < numberOfCycles;
     i ++,
-    selectionParabolic.incrementSelection()
-  ) {
+    selectionParabolic.incrementSelection()) {
     subgroup.makeParabolicFromSelectionSimpleRoots(
       semisimpleLieAlgebra.weylGroup, selectionParabolic, 2000
     );
@@ -4716,9 +4631,7 @@ bool CalculatorLieTheory::weylDimensionFormula(
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
-    !CalculatorConversions::convert(
-      calculator, input[1], semisimpleLieAlgebra
-    )
+    !CalculatorConversions::convert(calculator, input[1], semisimpleLieAlgebra)
   ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -4892,8 +4805,7 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
     << "<table><tr><td>Element</td><td>weight simple coords</td>"
     << "<td>weight fund. coords</td></tr>";
     format.fundamentalWeightLetter = "\\omega";
-    for (
-      int i = 0; i < subgroup.representativesQuotientAmbientOrder.size; i ++
+    for (int i = 0; i < subgroup.representativesQuotientAmbientOrder.size; i ++
     ) {
       ElementWeylGroup& current =
       subgroup.representativesQuotientAmbientOrder[i];
@@ -5105,8 +5017,9 @@ bool CalculatorLieTheory::decomposeCharGenVerma(
         0 ? 1 : - 1;
         currentChar.addMonomial(
           monomial,
-          kazhdanLusztigPolynomials.kazhdanLuzstigCoefficients[indexInWeyl][j]
-          *
+          kazhdanLusztigPolynomials.kazhdanLuzstigCoefficients[indexInWeyl][
+            j
+          ] *
           sign
         );
       }
@@ -5200,9 +5113,7 @@ bool CalculatorLieTheory::growDynkinType(
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
-    !CalculatorConversions::convert(
-      calculator, input[2], semisimpleLieAlgebra
-    )
+    !CalculatorConversions::convert(calculator, input[2], semisimpleLieAlgebra)
   ) {
     return
     output.assignError(calculator, "Error extracting ambient Lie algebra.");
@@ -5294,11 +5205,8 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
     << "Semisimple subalgebras function expects 1 argument. ";
   }
   WithContext<SemisimpleLieAlgebra*> lieAlgebraPointer;
-  if (
-    !CalculatorConversions::convert(
-      calculator, input[1], lieAlgebraPointer
-    )
-  ) {
+  if (!CalculatorConversions::convert(calculator, input[1], lieAlgebraPointer))
+  {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   SemisimpleLieAlgebra& lieAlgebra = *lieAlgebraPointer.content;
@@ -5581,9 +5489,7 @@ bool CalculatorLieTheory::generateVectorSpaceClosedWithRespectToLieBracket(
         out << operations[i].toString(&format);
       } else {
         out
-        << HtmlRoutines::getMathNoDisplay(
-          operations[i].toString(&format)
-        );
+        << HtmlRoutines::getMathNoDisplay(operations[i].toString(&format));
       }
     }
   }
@@ -5606,10 +5512,7 @@ bool CalculatorLieTheory::casimirWithRespectToLevi(
   Vector<Rational> leviSelection;
   if (
     !calculator.getVector(
-      input[2],
-      leviSelection,
-      nullptr,
-      semisimpleLieAlgebra->getRank()
+      input[2], leviSelection, nullptr, semisimpleLieAlgebra->getRank()
     )
   ) {
     return calculator << "<hr>Failed to extract parabolic selection. ";
@@ -5630,11 +5533,11 @@ template <class Type>
 bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
   List<Type>& inputOutputElements,
   int upperDimensionBound,
-  void(*binaryOperation)(
-    const Type& left, const Type& right, Type& output
-  )
+  void(*binaryOperation)(const Type& left, const Type& right, Type& output)
 ) {
-  STACK_TRACE("MathRoutines::generateVectorSpaceClosedWithRespectToOperation");
+  STACK_TRACE(
+    "MathRoutines::generateVectorSpaceClosedWithRespectToOperation"
+  );
   inputOutputElements[0].gaussianEliminationByRowsDeleteZeroRows(
     inputOutputElements
   );
@@ -5661,8 +5564,7 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
       }
       if (
         upperDimensionBound > 0 &&
-        inputOutputElements.size > upperDimensionBound
-      ) {
+        inputOutputElements.size > upperDimensionBound) {
         return false;
       }
       if (report2.tickAndWantReport()) {
@@ -5694,9 +5596,8 @@ bool CalculatorLieTheory::canBeExtendedParabolicallyTo(
   DynkinType smallType;
   DynkinType targetType;
   if (
-    !CalculatorConversions::functionDynkinType(
-      calculator, input[1], smallType
-    ) ||
+    !CalculatorConversions::functionDynkinType(calculator, input[1], smallType)
+    ||
     !CalculatorConversions::functionDynkinType(
       calculator, input[2], targetType
     )
@@ -5787,9 +5688,7 @@ bool CalculatorLieTheory::drawWeightSupportWithMults(
   DrawingVariables drawingVariables;
   std::string report;
   character.drawMeWithMultiplicities(report, drawingVariables, 10000);
-  out
-  << report
-  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
+  out << report << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
   return output.assignValue(calculator, out.str());
 }
 
@@ -5802,9 +5701,7 @@ bool CalculatorLieTheory::drawRootSystem(
   }
   bool hasPreferredProjectionPlane = input.isListNElements(4);
   WithContext<SemisimpleLieAlgebra*> algebraPointer;
-  if (
-    !CalculatorConversions::convert(calculator, input[1], algebraPointer)
-  ) {
+  if (!CalculatorConversions::convert(calculator, input[1], algebraPointer)) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   SemisimpleLieAlgebra& algebra = *algebraPointer.content;
@@ -5814,16 +5711,10 @@ bool CalculatorLieTheory::drawRootSystem(
     preferredProjectionPlane.setSize(2);
     bool isGood =
     calculator.getVector(
-      input[2],
-      preferredProjectionPlane[0],
-      nullptr,
-      weylGroup.getDimension()
+      input[2], preferredProjectionPlane[0], nullptr, weylGroup.getDimension()
     ) &&
     calculator.getVector(
-      input[3],
-      preferredProjectionPlane[1],
-      nullptr,
-      weylGroup.getDimension()
+      input[3], preferredProjectionPlane[1], nullptr, weylGroup.getDimension()
     );
     if (!isGood) {
       return
@@ -5837,8 +5728,8 @@ bool CalculatorLieTheory::drawRootSystem(
   std::stringstream out;
   DrawingVariables drawingVariables;
   weylGroup.drawRootSystem(
-    drawingVariables, true, false, nullptr, true, nullptr
-  );
+    drawingVariables, true, false, nullptr, true,
+    nullptr);
   out << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
   return output.assignValue(calculator, out.str());
 }
@@ -5872,9 +5763,7 @@ toStringFullCharacterWeightsTable() {
   );
   std::stringstream out;
   CharacterSemisimpleLieAlgebraModule<Coefficient> outputChar;
-  if (
-    !this->freudenthalEvaluateMeFullCharacter(outputChar, 10000, nullptr)
-  ) {
+  if (!this->freudenthalEvaluateMeFullCharacter(outputChar, 10000, nullptr)) {
     out
     << "Failed to compute the character with highest weight "
     << this->toString()
@@ -5900,9 +5789,7 @@ toStringFullCharacterWeightsTable() {
     );
     out << "<td>" << weightSimple.toString() << "</td>";
     outputSimpleStringCoordinates.makeZero(this->getOwner()->getRank());
-    outputSimpleHalfStringCoordinates.makeZero(
-      this->getOwner()->getRank()
-    );
+    outputSimpleHalfStringCoordinates.makeZero(this->getOwner()->getRank());
     for (int j = 0; j < this->getOwner()->getRank(); j ++) {
       simpleRoot.makeEi(this->getOwner()->getRank(), j);
       simpleRootFundamentalCoordinates =
@@ -5960,19 +5847,14 @@ bool CalculatorLieTheory::drawWeightSupport(
   const Expression& typeNode = input[1];
   const Expression& hwNode = input[2];
   WithContext<SemisimpleLieAlgebra*> algebraPointer;
-  if (
-    !CalculatorConversions::convert(calculator, typeNode, algebraPointer)
-  ) {
+  if (!CalculatorConversions::convert(calculator, typeNode, algebraPointer)) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   SemisimpleLieAlgebra& algebra = *algebraPointer.content;
   Vector<Rational> highestWeightFundamentalCoordinates;
   if (
     !calculator.getVector<Rational>(
-      hwNode,
-      highestWeightFundamentalCoordinates,
-      nullptr,
-      algebra.getRank()
+      hwNode, highestWeightFundamentalCoordinates, nullptr, algebra.getRank()
     )
   ) {
     return false;
@@ -5992,9 +5874,7 @@ bool CalculatorLieTheory::drawWeightSupport(
   DrawingVariables drawingVariables;
   std::string report;
   character.drawMeNoMultiplicities(report, drawingVariables, 10000);
-  out
-  << report
-  << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
+  out << report << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
   out << "<br>A table with the weights of the character follows. <br>";
   out << character.toStringFullCharacterWeightsTable();
   return output.assignValue(calculator, out.str());
@@ -6124,9 +6004,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
     maximumRank = 12;
   }
   if (!isAlreadySubalgebrasObject) {
-    if (
-      !CalculatorConversions::convert(calculator, input[1], ownerAlgebra)
-    ) {
+    if (!CalculatorConversions::convert(calculator, input[1], ownerAlgebra)) {
       return output.assignError(calculator, "Error extracting Lie algebra.");
     }
     ownerAlgebraPointer = ownerAlgebra.content;
@@ -6220,9 +6098,8 @@ bool CalculatorLieTheory::embedG2InB3(
   }
   output = input[1];
   if (
-    !output.isOfType<
-      ElementUniversalEnveloping<RationalFraction<Rational> >
-    >()
+    !output.isOfType<ElementUniversalEnveloping<RationalFraction<Rational> > >(
+    )
   ) {
     return
     output.assignError(
@@ -6304,9 +6181,7 @@ bool CalculatorLieTheory::chevalleyGenerator(
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
-    !CalculatorConversions::convert(
-      calculator, input[1], semisimpleLieAlgebra
-    )
+    !CalculatorConversions::convert(calculator, input[1], semisimpleLieAlgebra)
   ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -6355,9 +6230,7 @@ bool CalculatorLieTheory::cartanGenerator(
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   if (
-    !CalculatorConversions::convert(
-      calculator, input[1], semisimpleLieAlgebra
-    )
+    !CalculatorConversions::convert(calculator, input[1], semisimpleLieAlgebra)
   ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
@@ -6430,8 +6303,9 @@ bool CalculatorLieTheory::rootSubsystem(
     if (!weylGroup.rootSystem.contains(currentRoot)) {
       return
       output.assignError(
-        calculator,
-        "Input vector " + currentRoot.toString() + " is not a root. "
+        calculator, "Input vector " +
+        currentRoot.toString() +
+        " is not a root. "
       );
     }
     outputRoots.addOnTop(currentRoot);
@@ -6453,10 +6327,8 @@ bool CalculatorLieTheory::rootSubsystem(
 }
 
 bool CalculatorLieTheory::printSemisimpleLieAlgebra(
-  Calculator& calculator,
-  const Expression& input,
-  Expression& output,
-  bool verbose
+  Calculator& calculator, const Expression& input, Expression& output, bool
+  verbose
 ) {
   return
   CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(
@@ -6516,9 +6388,7 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   );
   WithContext<SemisimpleLieAlgebra*> algebraPointer;
   input.checkInitialization();
-  if (
-    !CalculatorConversions::convert(calculator, input, algebraPointer)
-  ) {
+  if (!CalculatorConversions::convert(calculator, input, algebraPointer)) {
     calculator
     << "Failed to extract Lie algebra from: "
     << input.toString()

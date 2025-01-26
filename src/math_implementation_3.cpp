@@ -67,14 +67,9 @@ List<Vector<Rational> >::Comparator* FormatExpressions::getMonomialOrder<
 
 // Format expression monomial orders for the toString() function follow.
 template < >
-List<
-  MonomialWrapper<
-    std::string, HashFunctions::hashFunction<std::string>
-  >
->::Comparator* FormatExpressions::getMonomialOrder<
-  MonomialWrapper<
-    std::string, HashFunctions::hashFunction<std::string>
-  >
+List<MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> > >
+::Comparator* FormatExpressions::getMonomialOrder<
+  MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> >
 >() {
   return nullptr;
 }
@@ -322,9 +317,8 @@ void ProgressReport::report(const std::string& stringToReport) {
   if (this->threadIndex == - 1) {
     return;
   }
-  if (
-    global.progressReportStrings[this->threadIndex].size > this->currentLevel
-  ) {
+  if (global.progressReportStrings[this->threadIndex].size > this->currentLevel)
+  {
     global.progressReportStrings[this->threadIndex][this->currentLevel] =
     stringToReport;
     global.makeReport();
@@ -439,9 +433,7 @@ std::string HtmlRoutines::cleanUpForLaTeXLabelUse(
   return out.str();
 }
 
-void HtmlRoutines::clearDollarSigns(
-  std::string& input, std::string& output
-) {
+void HtmlRoutines::clearDollarSigns(std::string& input, std::string& output) {
   std::stringstream out;
   for (unsigned int i = 0; i < input.size(); i ++) {
     if (input[i] != '$') {
@@ -864,14 +856,10 @@ std::string StringRoutines::Conversions::unescapeJavascriptLike(
       continue;
     }
     // Sequence "\u????".
-    char hex0 =
-    MathRoutines::convertHumanReadableHexToCharValue(input[i + 2]);
-    char hex1 =
-    MathRoutines::convertHumanReadableHexToCharValue(input[i + 3]);
-    char hex2 =
-    MathRoutines::convertHumanReadableHexToCharValue(input[i + 4]);
-    char hex3 =
-    MathRoutines::convertHumanReadableHexToCharValue(input[i + 5]);
+    char hex0 = MathRoutines::convertHumanReadableHexToCharValue(input[i + 2]);
+    char hex1 = MathRoutines::convertHumanReadableHexToCharValue(input[i + 3]);
+    char hex2 = MathRoutines::convertHumanReadableHexToCharValue(input[i + 4]);
+    char hex3 = MathRoutines::convertHumanReadableHexToCharValue(input[i + 5]);
     if (
       hex0 == StringRoutines::notAllowedInStrings ||
       hex1 == StringRoutines::notAllowedInStrings ||
@@ -951,9 +939,7 @@ std::string HtmlRoutines::convertStringEscapeNewLinesQuotesBackslashes(
 }
 
 std::string HtmlRoutines::convertStringToHtmlStringRestrictSize(
-  const std::string& inputString,
-  bool doReplaceNewLineByBr,
-  int maxStringSize
+  const std::string& inputString, bool doReplaceNewLineByBr, int maxStringSize
 ) {
   std::string result =
   HtmlRoutines::convertStringToHtmlString(inputString, doReplaceNewLineByBr);
@@ -982,8 +968,8 @@ std::string HtmlRoutines::convertStringToHtmlString(
 }
 
 uint32_t HtmlRoutines::redGreenBlue(
-  unsigned int r, unsigned int g, unsigned int b
-) {
+  unsigned int r, unsigned int g, unsigned
+  int b) {
   r = r % 256;
   g = g % 256;
   b = b % 256;
@@ -1013,16 +999,13 @@ std::string FileOperations::getFileExtensionWithDot(
     return
     FileOperations::getFileExtensionWithDot(copy, outputFileNameNoExtension);
   }
-  for (
-    int i = static_cast<signed>(fileName.size() - 1); i >= 0; i --
-  ) {
+  for (int i = static_cast<signed>(fileName.size() - 1); i >= 0; i --) {
     if (fileName[static_cast<unsigned>(i)] == '.') {
       if (outputFileNameNoExtension != nullptr) {
         *outputFileNameNoExtension =
         fileName.substr(0, static_cast<unsigned>(i));
       }
-      return
-      fileName.substr(static_cast<unsigned>(i), std::string::npos);
+      return fileName.substr(static_cast<unsigned>(i), std::string::npos);
     }
   }
   return "";
@@ -1078,7 +1061,8 @@ bool FileOperations::isOKFileNameVirtual(
   (void) accessSensitiveFolders;
   std::string fileNameNoPath =
   FileOperations::getFileNameFromFileNameWithPath(fileName);
-  std::string filePath = FileOperations::getPathFromFileNameWithPath(fileName);
+  std::string filePath =
+  FileOperations::getPathFromFileNameWithPath(fileName);
   if (filePath.size() > 10000000) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Invalid file name: too long. ";
@@ -1130,9 +1114,7 @@ bool FileOperations::isFileNameWithoutDotsAndSlashes(
 ) {
   STACK_TRACE("FileOperations::isFileNameWithoutDotsAndSlashes");
   for (unsigned i = 0; i < fileName.size(); i ++) {
-    if (
-      fileName[i] == '/' || fileName[i] == '\\' || fileName[i] == '.'
-    ) {
+    if (fileName[i] == '/' || fileName[i] == '\\' || fileName[i] == '.') {
       return false;
     }
   }
@@ -1152,9 +1134,7 @@ List<bool>& FileOperations::getSafeFileChars() {
     for (unsigned i = 0; i < characters.size(); i ++) {
       FileOperations::safeFileCharacters[
         static_cast<int>(
-          static_cast<unsigned int>(
-            static_cast<unsigned char>(characters[i])
-          )
+          static_cast<unsigned int>(static_cast<unsigned char>(characters[i]))
         )
       ] =
       true;
@@ -1218,9 +1198,7 @@ std::string FileOperations::getFileNameFromFileNameWithPath(
     }
   }
   std::stringstream nameWithoutFolderInfo;
-  for (
-    unsigned i = startNameWithoutFolderInfo; i < fileName.size(); i ++
-  ) {
+  for (unsigned i = startNameWithoutFolderInfo; i < fileName.size(); i ++) {
     nameWithoutFolderInfo << fileName[i];
   }
   return nameWithoutFolderInfo.str();
@@ -1357,10 +1335,7 @@ bool FileOperations::writeFileVirualWithPermissions(
   return
   FileOperations::
   writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
-    fileNameVirtual,
-    fileContent,
-    accessSensitiveFolders,
-    false,
+    fileNameVirtual, fileContent, accessSensitiveFolders, false,
     commentsOnError
   );
 }
@@ -1496,15 +1471,10 @@ bool FileOperations::loadFileToStringUnsecure(
   return true;
 }
 
-MapList<
-  std::string,
-  std::string,
-  HashFunctions::hashFunction<std::string>
->& FileOperations::folderVirtualLinksNonSensitive() {
+MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+FileOperations::folderVirtualLinksNonSensitive() {
   static MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
+    std::string, std::string, HashFunctions::hashFunction<std::string>
   > result;
   return result;
 }
@@ -1521,28 +1491,18 @@ folderVirtualLinksToWhichWeAppendTimeAndBuildHash() {
   return result;
 }
 
-MapList<
-  std::string,
-  std::string,
-  HashFunctions::hashFunction<std::string>
->& FileOperations::folderVirtualLinksSensitive() {
+MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+FileOperations::folderVirtualLinksSensitive() {
   static MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
+    std::string, std::string, HashFunctions::hashFunction<std::string>
   > result;
   return result;
 }
 
-MapList<
-  std::string,
-  std::string,
-  HashFunctions::hashFunction<std::string>
->& FileOperations::folderVirtualLinksULTRASensitive() {
+MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+FileOperations::folderVirtualLinksULTRASensitive() {
   static MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
+    std::string, std::string, HashFunctions::hashFunction<std::string>
   > result;
   return result;
 }
@@ -1554,11 +1514,8 @@ List<List<std::string> >& FileOperations::folderVirtualLinksDefault() {
 
 void FileOperations::initializeFoldersULTRASensitive() {
   STACK_TRACE("FileOperations::initializeFoldersULTRASensitive");
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& folderSubstitutionsULTRASensitive =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  folderSubstitutionsULTRASensitive =
   FileOperations::folderVirtualLinksULTRASensitive();
   // <- allocates data structure
   folderSubstitutionsULTRASensitive.setKeyValue(
@@ -1582,11 +1539,8 @@ void FileOperations::initializeFoldersULTRASensitive() {
 
 void FileOperations::initializeFoldersSensitive() {
   STACK_TRACE("FileOperations::initializeFoldersSensitive");
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& folderSubstitutionsSensitive =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  folderSubstitutionsSensitive =
   FileOperations::folderVirtualLinksSensitive();
   folderSubstitutionsSensitive.clear();
   folderSubstitutionsSensitive.setKeyValue("LogFiles/", "LogFiles/");
@@ -1625,11 +1579,9 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults(
       ),
       List<std::string>({Configuration::HTMLCommonFonts, "html-common/fonts"}
       ),
-      List<std::string>({Configuration::HTMLCommonFont, "html-common/fonts"}
-      ),
+      List<std::string>({Configuration::HTMLCommonFont, "html-common/fonts"}),
       List<std::string>({Configuration::HTMLCommon, "html-common/"}),
-      List<std::string>({Configuration::calculatorHTML, "calculator_html/"}
-      ),
+      List<std::string>({Configuration::calculatorHTML, "calculator_html/"}),
       List<std::string>({Configuration::publicHTML, "public_html/"}),
       List<std::string>({
           Configuration::certificatesPublic,
@@ -1641,10 +1593,7 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults(
       List<std::string>({Configuration::outputFolder, "output/"}),
       List<std::string>({Configuration::HTMLGeneral, "public_html/"}),
       List<std::string>({Configuration::problemsFolder, "../problems/"}),
-      List<std::string>({
-          Configuration::courseTemplates,
-          "../coursetemplates/"
-        }
+      List<std::string>({Configuration::courseTemplates, "../coursetemplates/"}
       ),
       List<std::string>({
           Configuration::coursesAvailable,
@@ -1652,10 +1601,7 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults(
         }
       ),
       List<std::string>({Configuration::topicLists, "../topiclists/"}),
-      List<std::string>({
-          Configuration::laTeXMaterials,
-          "../LaTeX-materials/"
-        }
+      List<std::string>({Configuration::laTeXMaterials, "../LaTeX-materials/"}
       ),
       List<std::string>({Configuration::slidesVideo, "../slides-video/"}),
       List<std::string>({Configuration::freecalc, "../freecalc/"}),
@@ -1673,11 +1619,8 @@ void FileOperations::initializeFoldersNonSensitive() {
   // No further rules are applied after that.
   // Location keys that start with "/" are coming from webserver references.
   // Location keys that do not start with "/" are for internal use.
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& folderSubstitutionsNonSensitive =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  folderSubstitutionsNonSensitive =
   FileOperations::folderVirtualLinksNonSensitive();
   // initializeFolderVirtualLinksDefaults() is called in
   // GlobalVariables::configurationProcess and its contents
@@ -1942,15 +1885,15 @@ bool FileOperations::openFileUnsecure(
       );
     } else {
       file.open(
-        fileName.c_str(),
-        std::fstream::in | std::fstream::out | std::fstream::app
+        fileName.c_str(), std::fstream::in | std::fstream::out |
+        std::fstream::app
       );
     }
   } else {
     if (openAsBinary) {
       file.open(
-        fileName.c_str(),
-        std::fstream::in | std::fstream::out | std::fstream::binary
+        fileName.c_str(), std::fstream::in | std::fstream::out |
+        std::fstream::binary
       );
     } else {
       if (truncate) {
@@ -1959,9 +1902,7 @@ bool FileOperations::openFileUnsecure(
           std::fstream::in | std::fstream::out | std::fstream::trunc
         );
       } else {
-        file.open(
-          fileName.c_str(), std::fstream::in | std::fstream::out
-        );
+        file.open(fileName.c_str(), std::fstream::in | std::fstream::out);
       }
     }
   }
@@ -1972,9 +1913,7 @@ bool FileOperations::openFileUnsecureReadOnly(
   std::ifstream& file, const std::string& fileName, bool openAsBinary
 ) {
   if (openAsBinary) {
-    file.open(
-      fileName.c_str(), std::fstream::in | std::fstream::binary
-    );
+    file.open(fileName.c_str(), std::fstream::in | std::fstream::binary);
   } else {
     file.open(fileName.c_str(), std::fstream::in);
   }
@@ -1994,9 +1933,7 @@ std::string FileOperations::getVirtualNameWithHash(
   ) {
     const std::string& currentStart =
     FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i];
-    if (
-      StringRoutines::stringBeginsWith(result, currentStart, &fileNameEnd)
-    ) {
+    if (StringRoutines::stringBeginsWith(result, currentStart, &fileNameEnd)) {
       result = currentStart + global.buildHeadHashWithServerTime + fileNameEnd;
       break;
     }
@@ -2098,8 +2035,9 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
     if (
       StringRoutines::stringBeginsWith(
         inputFileName,
-        FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash()[i]
-        ,
+        FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash()[
+          i
+        ],
         &fileEnd
       )
     ) {
@@ -2189,7 +2127,9 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
     if (
       StringRoutines::stringBeginsWith(
         inputCopy,
-        FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i],
+        FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[
+          i
+        ],
         &folderEnd
       )
     ) {
@@ -2199,16 +2139,16 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
         )
       ) {
         inputCopy =
-        FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i]
-        +
+        FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[
+          i
+        ] +
         folderEnd2;
       }
     }
   }
   for (
-    int i = 0; i < FileOperations::folderVirtualLinksNonSensitive().size(); i
-    ++
-  ) {
+    int i = 0; i < FileOperations::folderVirtualLinksNonSensitive().size();
+    i ++) {
     if (
       StringRoutines::stringBeginsWith(
         inputCopy,
@@ -2283,11 +2223,7 @@ bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
   return
   FileOperations::
   openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
-    file,
-    fileName,
-    openInAppendMode,
-    truncate,
-    openAsBinary,
+    file, fileName, openInAppendMode, truncate, openAsBinary,
     accessSensitiveFolders
   );
 }
@@ -2374,15 +2310,15 @@ bool FileOperations::openFileCreateIfNotPresentUnsecure(
       );
     } else {
       file.open(
-        fileName.c_str(),
-        std::fstream::in | std::fstream::out | std::fstream::app
+        fileName.c_str(), std::fstream::in | std::fstream::out |
+        std::fstream::app
       );
     }
   } else {
     if (openAsBinary) {
       file.open(
-        fileName.c_str(),
-        std::fstream::in | std::fstream::out | std::fstream::binary
+        fileName.c_str(), std::fstream::in | std::fstream::out |
+        std::fstream::binary
       );
     } else {
       if (truncate) {
@@ -2391,9 +2327,7 @@ bool FileOperations::openFileCreateIfNotPresentUnsecure(
           std::fstream::in | std::fstream::out | std::fstream::trunc
         );
       } else {
-        file.open(
-          fileName.c_str(), std::fstream::in | std::fstream::out
-        );
+        file.open(fileName.c_str(), std::fstream::in | std::fstream::out);
       }
     }
   }
@@ -2411,8 +2345,8 @@ bool FileOperations::openFileCreateIfNotPresentUnsecure(
   }
   file.close();
   file.open(
-    fileName.c_str(),
-    std::fstream::out | std::fstream::in | std::fstream::trunc
+    fileName.c_str(), std::fstream::out | std::fstream::in |
+    std::fstream::trunc
   );
   file.clear();
   return file.is_open();
@@ -2517,9 +2451,7 @@ char MathRoutines::convertHumanReadableHexToCharValue(char input) {
   return StringRoutines::notAllowedInStrings;
 }
 
-unsigned int MathRoutines::hashListStrings(
-  const List<std::string>& input
-) {
+unsigned int MathRoutines::hashListStrings(const List<std::string>& input) {
   unsigned int result = 0;
   int j = 0;
   for (int i = 0; i < input.size; i ++) {
@@ -2698,8 +2630,7 @@ void StringRoutines::Differ::computeLongestSubsequenceMatrix() {
   unsigned numberOfColumns = static_cast<unsigned>(right.size()) + 1;
   Matrix<int>& matrix = this->matrixLongestCommonSubsequence.getElement();
   matrix.initialize(
-    static_cast<int>(numberOfRows),
-    static_cast<int>(numberOfColumns)
+    static_cast<int>(numberOfRows), static_cast<int>(numberOfColumns)
   );
   for (int j = 0; j < matrix.numberOfColumns; j ++) {
     matrix(0, j) = 0;
@@ -2731,16 +2662,14 @@ void StringRoutines::Differ::pushCommonString(int indexLeft, int indexRight) {
   this->currentCommonStringLength = 0;
 }
 
-void StringRoutines::Differ::extractCommonStrings(
-  int indexLeft, int indexRight
+void StringRoutines::Differ::extractCommonStrings(int indexLeft, int indexRight
 ) {
   STACK_TRACE("StringRoutines::Differ::extractCommonStrings");
   if (
     this->left.size() == 0 ||
     this->right.size() == 0 ||
     indexLeft < 0 ||
-    indexRight < 0
-  ) {
+    indexRight < 0) {
     return;
   }
   int previousLeft = - 1;
@@ -2762,9 +2691,7 @@ void StringRoutines::Differ::extractCommonStrings(
     }
     this->pushCommonString(previousLeft, previousRight);
     Matrix<int>& matrix = this->matrixLongestCommonSubsequence.getElement();
-    if (
-      matrix(indexLeft - 1, indexRight) > matrix(indexLeft, indexRight - 1)
-    ) {
+    if (matrix(indexLeft - 1, indexRight) > matrix(indexLeft, indexRight - 1)) {
       indexLeft --;
     } else {
       indexRight --;
@@ -2776,14 +2703,10 @@ void StringRoutines::Differ::extractCommonStrings(
 
 void StringRoutines::Differ::extractDifferences() {
   this->extractResult(
-    this->commonStringsLeftStartsReverseOrder,
-    this->left,
-    this->leftResult
+    this->commonStringsLeftStartsReverseOrder, this->left, this->leftResult
   );
   this->extractResult(
-    this->commonStringsRightStartsReverseOrder,
-    this->right,
-    this->rightResult
+    this->commonStringsRightStartsReverseOrder, this->right, this->rightResult
   );
   while (this->leftResult.size < this->rightResult.size) {
     this->leftResult.addOnTop("");
@@ -2794,16 +2717,12 @@ void StringRoutines::Differ::extractDifferences() {
 }
 
 void StringRoutines::Differ::extractResult(
-  const List<int>& starts,
-  const std::string& input,
-  List<std::string>& output
+  const List<int>& starts, const std::string& input, List<std::string>& output
 ) {
   STACK_TRACE("StringRoutines::Differ::extractResult");
   output.setSize(0);
   unsigned int previousEnd = 0;
-  for (
-    int i = this->commonStringSizesReverseOrder.size - 1; i >= 0; i --
-  ) {
+  for (int i = this->commonStringSizesReverseOrder.size - 1; i >= 0; i --) {
     int stringSize = this->commonStringSizesReverseOrder[i];
     int stringStart = starts[i];
     std::string nonCommon =
@@ -2814,8 +2733,7 @@ void StringRoutines::Differ::extractResult(
     output.addOnTop(nonCommon);
     std::string common =
     input.substr(
-      static_cast<unsigned>(stringStart),
-      static_cast<unsigned>(stringSize)
+      static_cast<unsigned>(stringStart), static_cast<unsigned>(stringSize)
     );
     previousEnd = static_cast<unsigned>(stringStart + stringSize);
     output.addOnTop(common);
@@ -2876,9 +2794,7 @@ std::string StringRoutines::shortenInsertDots(
   int numberOfCharactersOmitted = static_cast<signed>(inputString.size()) -
   numberOfCharactersBeginEnd * 2;
   out
-  << inputString.substr(
-    0, static_cast<unsigned>(numberOfCharactersBeginEnd)
-  )
+  << inputString.substr(0, static_cast<unsigned>(numberOfCharactersBeginEnd))
   << "..omit_"
   << numberOfCharactersOmitted
   << ".."
@@ -2891,9 +2807,7 @@ std::string StringRoutines::shortenInsertDots(
 }
 
 void StringRoutines::splitExcludeDelimiter(
-  const std::string& inputString,
-  char delimiter,
-  List<std::string>& output
+  const std::string& inputString, char delimiter, List<std::string>& output
 ) {
   List<char> buffer;
   buffer.addOnTop(delimiter);
@@ -2911,9 +2825,7 @@ std::string StringRoutines::stringTrimWhiteSpace(
 void StringRoutines::stringTrimToLengthWithHash(
   std::string& inputOutput, int desiredLength50AtLeast
 ) {
-  if (
-    static_cast<signed>(inputOutput.size()) <= desiredLength50AtLeast
-  ) {
+  if (static_cast<signed>(inputOutput.size()) <= desiredLength50AtLeast) {
     return;
   }
   if (desiredLength50AtLeast < 40) {
@@ -2921,9 +2833,7 @@ void StringRoutines::stringTrimToLengthWithHash(
   }
   std::stringstream inputAbbreviatedStream;
   inputAbbreviatedStream
-  << inputOutput.substr(
-    0, static_cast<unsigned>(desiredLength50AtLeast - 30)
-  )
+  << inputOutput.substr(0, static_cast<unsigned>(desiredLength50AtLeast - 30))
   << "_abbrev_hash_"
   << HashFunctions::hashFunction<std::string>(inputOutput);
   inputOutput = inputAbbreviatedStream.str();
@@ -3087,9 +2997,7 @@ bool StringRoutines::replaceOnce(
   if (tagLocation == std::string::npos) {
     return false;
   }
-  inputOutput.replace(
-    tagLocation, subStringToReplace.size(), replaceWith
-  );
+  inputOutput.replace(tagLocation, subStringToReplace.size(), replaceWith);
   return true;
 }
 
@@ -3114,8 +3022,7 @@ void StringRoutines::splitStringInTwo(
     firstStringSize = inputSize;
   }
   outputFirst = "";
-  outputFirst =
-  inputString.substr(0, static_cast<unsigned>(firstStringSize));
+  outputFirst = inputString.substr(0, static_cast<unsigned>(firstStringSize));
   outputSecond = "";
   int secondStringSize = inputSize - firstStringSize;
   if (secondStringSize > 0) {
@@ -3186,9 +3093,7 @@ bool StringRoutines::stringEndsWith(
     return true;
   }
   int indexInString = static_cast<signed>(input.size()) - 1;
-  for (
-    int i = static_cast<signed>(desiredEnd.size()) - 1; i >= 0; i --
-  ) {
+  for (int i = static_cast<signed>(desiredEnd.size()) - 1; i >= 0; i --) {
     if (indexInString < 0) {
       return false;
     }
@@ -3201,8 +3106,7 @@ bool StringRoutines::stringEndsWith(
     indexInString --;
   }
   if (outputStringBeginning != nullptr) {
-    *outputStringBeginning =
-    input.substr(0, input.size() - desiredEnd.size());
+    *outputStringBeginning = input.substr(0, input.size() - desiredEnd.size());
   }
   return true;
 }
@@ -3215,9 +3119,7 @@ bool StringRoutines::stringBeginsWith(
   std::string actualBeginning;
   std::string stringEnd;
   StringRoutines::splitStringInTwo(
-    input,
-    static_cast<int>(desiredBeginning.size()),
-    actualBeginning,
+    input, static_cast<int>(desiredBeginning.size()), actualBeginning,
     stringEnd
   );
   bool result = (actualBeginning == desiredBeginning);
@@ -3330,9 +3232,7 @@ Vector<double> MathRoutines::getVectorDouble(Vector<Rational>& input) {
   return result;
 }
 
-int MathRoutines::binomialCoefficientMultivariate(
-  int n, List<int>& choices
-) {
+int MathRoutines::binomialCoefficientMultivariate(int n, List<int>& choices) {
   int choiceIndex = 0;
   int denominator = 1;
   int result = 0;
@@ -3532,9 +3432,8 @@ void Selection::computeIndicesFromSelection() {
   }
 }
 
-void Selection::makeSubSelection(
-  Selection& selection, Selection& subSelection
-) {
+void Selection::makeSubSelection(Selection& selection, Selection& subSelection)
+{
   this->initialize(selection.numberOfElements);
   for (int i = 0; i < subSelection.cardinalitySelection; i ++) {
     this->addSelectionAppendNewIndex(
@@ -3658,9 +3557,8 @@ std::string FormatExpressions::getPolynomialLetter(int index) const {
 }
 
 bool OnePartialFractionDenominator::reduceOnceTotalOrderMethod(
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  >& output
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >&
+  output
 ) {
   for (int i = 0; i < this->denominatorsNoScale.size(); i ++) {
     for (int j = 0; j < this->denominatorsNoScale.size(); j ++) {
@@ -3697,16 +3595,13 @@ bool OnePartialFractionDenominator::checkInitialization() const {
 }
 
 bool OnePartialFractionDenominator::reduceOnce(
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  >& output,
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >&
+  output,
   const Polynomial<LargeInteger>& numerator
 ) {
   STACK_TRACE("OnePartialFractionDenominator::reduceOnce");
   this->checkInitialization();
-  if (
-    this->denominatorsNoScale.size() <= this->owner->ambientDimension
-  ) {
+  if (this->denominatorsNoScale.size() <= this->owner->ambientDimension) {
     return false;
   }
   Vectors<Rational> allRootsSorted;
@@ -3824,9 +3719,7 @@ bool OnePartialFractionDenominator::rootIsInFractionCone(
   Cone cone;
   Vectors<Rational> roots;
   for (int i = 0; i < this->denominatorsNoScale.size(); i ++) {
-    roots.addOnTop(
-      this->denominatorsNoScale.values[i].getNormalizedVector()
-    );
+    roots.addOnTop(this->denominatorsNoScale.values[i].getNormalizedVector());
   }
   cone.createFromVertices(roots);
   return cone.isInCone(*root);
@@ -3862,15 +3755,13 @@ int OnePartialFractionDenominator::
 getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner) {
   int result = 0;
   for (
-    int i = 0; i < owner.indicesRedundantShortRoots.cardinalitySelection; i ++
-  ) {
+    int i = 0; i < owner.indicesRedundantShortRoots.cardinalitySelection; i ++)
+  {
     int index = owner.indicesRedundantShortRoots.elements[i];
     int rootIndex =
     owner.getIndexDoubleOfARoot(owner.normalizedVectors[index]);
     if (rootIndex != - 1) {
-      if (
-        this->denominatorsNoScale.values[rootIndex].multiplicities.size > 0
-      ) {
+      if (this->denominatorsNoScale.values[rootIndex].multiplicities.size > 0) {
         result ++;
       }
     }
@@ -3921,9 +3812,8 @@ void OnePartialFractionDenominator::getLinearRelationFromNormalized(
 bool OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation(
   Vector<Rational>& linearRelationBetweenNormalizedVectors,
   Vectors<Rational>& normalizedVectors,
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  >& output
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >&
+  output
 ) {
   STACK_TRACE(
     "OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation"
@@ -3960,10 +3850,7 @@ bool OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation(
     global.fatal << "Elongation is too large. " << global.fatal;
   }
   this->applyGeneralizedSzenesVergneFormula(
-    reduced,
-    linearRelation,
-    gainingExponent,
-    elongationGainingMultiplicity,
+    reduced, linearRelation, gainingExponent, elongationGainingMultiplicity,
     output
   );
   return true;
@@ -3975,9 +3862,8 @@ void OnePartialFractionDenominator::applyGeneralizedSzenesVergneFormula(
   const Vector<Rational>& linearRelation,
   const Vector<Rational>& gainingNormalizedExponent,
   int elongationGainingMultiplicityIndex,
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  >& output
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >&
+  output
 ) const {
   STACK_TRACE(
     "OnePartialFractionDenominator::applyGeneralizedSzenesVergneFormula"
@@ -4001,8 +3887,7 @@ void OnePartialFractionDenominator::applyGeneralizedSzenesVergneFormula(
     const OnePartialFractionDenominatorComponent& currentDenominator =
     toBeReduced.values[i];
     int removedElongation = currentDenominator.getLargestElongation();
-    currentFraction.addMultiplicity(
-      toBeReduced.keys[i], - 1, removedElongation
+    currentFraction.addMultiplicity(toBeReduced.keys[i], - 1, removedElongation
     );
     Vector<Rational> nextExponent;
     currentDenominator.getLongestVector(nextExponent);
@@ -4031,15 +3916,13 @@ void OnePartialFractionDenominator::decomposeAMinusNB(
   int indexB,
   int n,
   int indexAMinusNB,
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  >& output,
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >&
+  output,
   PartialFractions& owner
 ) {
   OnePartialFractionDenominator currentFraction;
   Polynomial<LargeInteger> aMinusNBetaPolynomial, commonPolynomial;
-  this->getAlphaMinusNBetaPoly(
-    owner, indexA, indexB, n, aMinusNBetaPolynomial
+  this->getAlphaMinusNBetaPoly(owner, indexA, indexB, n, aMinusNBetaPolynomial
   );
   int powerA = this->denominatorsNoScale.values[indexA].multiplicities[0];
   int powerB = this->denominatorsNoScale.values[indexB].multiplicities[0];
@@ -4097,9 +3980,7 @@ void OnePartialFractionDenominator::decomposeAMinusNB(
 bool OnePartialFractionDenominator::decreasePowerOneFraction(
   int index, int increment
 ) {
-  this->addMultiplicity(
-    this->denominatorsNoScale.keys[index], - increment, 1
-  );
+  this->addMultiplicity(this->denominatorsNoScale.keys[index], - increment, 1);
   return true;
 }
 
@@ -4266,17 +4147,14 @@ std::string PartialFractions::toLatexOneSum(
     out << "\\displaystyle ";
     bool showDetails = false;
     if (this->flagShowDetails && highlightInformation != nullptr) {
-      if (
-        fractions.monomials[i] == highlightInformation->toBeReducedNext
-      ) {
+      if (fractions.monomials[i] == highlightInformation->toBeReducedNext) {
         showDetails = true;
       }
     }
     if (showDetails) {
       out << "\\underbrace{";
     }
-    out
-    << fractions.monomials[i].toLatex(fractions.coefficients[i], format);
+    out << fractions.monomials[i].toLatex(fractions.coefficients[i], format);
     if (showDetails) {
       out << "}_{" << highlightInformation->toStringLinearCombination() << "}";
     }
@@ -4289,9 +4167,8 @@ std::string PartialFractions::toLatexFullSum(
 ) const {
   STACK_TRACE("PartialFractions::toLatexFullSum");
   std::stringstream out;
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  > total;
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+  total;
   this->getSum(total);
   out << this->toLatexOneSum(total, lineSeparator, nullptr, format);
   return out.str();
@@ -4303,7 +4180,8 @@ std::string PartialFractions::toLatexDifferentialOperatorForm(
   STACK_TRACE("PartialFractions::toLatexDifferentialOperatorForm");
   std::stringstream out;
   for (int i = 0; i < this->reduced.size(); i ++) {
-    const OnePartialFractionDenominator& fraction = this->reduced.monomials[i];
+    const OnePartialFractionDenominator& fraction =
+    this->reduced.monomials[i];
     std::string summand =
     fraction.toLatexDifferentialOperator(
       this->reduced.coefficients[i], format
@@ -4395,8 +4273,7 @@ void PartialFractions::Details::addStateBeforeFormula(
 }
 
 std::string PartialFractions::toLatexPartialFractionDecomposition(
-  FormatExpressions* formatDecomposition,
-  FormatExpressions* formatDenominator
+  FormatExpressions* formatDecomposition, FormatExpressions* formatDenominator
 ) const {
   STACK_TRACE("PartialFractions::toLatexPartialFractionDecomposition");
   const std::string lineSeparator = "\\\\&\n";
@@ -4509,9 +4386,8 @@ std::string PartialFractions::toStringLatticeShiftsOneQuasipolynomial(
 }
 
 std::string PartialFractions::toLatexOneQuasipolynomialInTable(
-  const std::string& displayId,
-  const QuasiPolynomial& input,
-  FormatExpressions* format
+  const std::string& displayId, const QuasiPolynomial& input, FormatExpressions
+  * format
 ) const {
   STACK_TRACE("PartialFractions::toLatexOneQuasipolynomialInTable");
   std::stringstream out;
@@ -4730,9 +4606,7 @@ std::string PartialFractions::toString(FormatExpressions* format) const {
   return out.str();
 }
 
-bool PartialFractions::assureIndicatorRegularity(
-  Vector<Rational>& indicator
-) {
+bool PartialFractions::assureIndicatorRegularity(Vector<Rational>& indicator) {
   STACK_TRACE("PartialFractions::assureIndicatorRegularity");
   if (this->ambientDimension <= 1) {
     return true;
@@ -4789,9 +4663,8 @@ void PartialFractions::prepareIndicatorVariables() {
 bool PartialFractions::splitPartial() {
   STACK_TRACE("PartialFractions::splitPartial");
   OnePartialFractionDenominator currentFraction;
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  > currentReduction;
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+  currentReduction;
   Polynomial<LargeInteger> currentCoefficient;
   while (this->nonReduced.size() > 0) {
     this->nonReduced.popMonomial(0, currentFraction, currentCoefficient);
@@ -4830,9 +4703,7 @@ bool PartialFractions::checkForMinimalityDecompositionWithRespectToRoot(
 }
 
 void OnePartialFractionDenominator::addMultiplicity(
-  const Vector<Rational>& normalizedVector,
-  int multiplicity,
-  int elongation
+  const Vector<Rational>& normalizedVector, int multiplicity, int elongation
 ) {
   STACK_TRACE("OnePartialFractionDenominator::addMultiplicity");
   this->checkInitialization();
@@ -4843,8 +4714,7 @@ void OnePartialFractionDenominator::addMultiplicity(
   if (!this->denominatorsNoScale.contains(normalizedVector)) {
     OnePartialFractionDenominatorComponent incoming;
     incoming.initialize(
-      *this->owner,
-      this->owner->normalizedVectors.getIndex(normalizedVector)
+      *this->owner, this->owner->normalizedVectors.getIndex(normalizedVector)
     );
     this->denominatorsNoScale.setKeyValue(normalizedVector, incoming);
   }
@@ -4980,8 +4850,7 @@ int OnePartialFractionDenominator::controlLineSizeStringPolys(
       1; j ++
     ) {
       unsigned k = static_cast<unsigned>(j);
-      if ((output[k] == '+' || output[k] == '-') && output[k - 1] != '{'
-      ) {
+      if ((output[k] == '+' || output[k] == '-') && output[k - 1] != '{') {
         output.insert(k, "\\\\\n&&");
         numberOfLinesAdded ++;
         lastCutOffIndex = j + 5;
@@ -5064,9 +4933,7 @@ void PartialFractions::initializeDimension() {
   this->ambientDimension = this->originalVectors[0].size;
 }
 
-void PartialFractions::initializeInput(
-  const List<Vector<Rational> >& input
-) {
+void PartialFractions::initializeInput(const List<Vector<Rational> >& input) {
   STACK_TRACE("PartialFractions::initializeInput");
   this->originalVectors = input;
   List<int> coefficients;
@@ -5093,12 +4960,8 @@ void PartialFractions::initializeInput(
   for (int i = 0; i < normalizedWithMultiplicity.size; i ++) {
     OnePartialFractionDenominatorComponent component;
     const Vector<Rational>& exponent = normalizedWithMultiplicity[i];
-    component.initialize(
-      *this, this->normalizedVectors.getIndex(exponent)
-    );
-    this->initialPartialFraction.addMultiplicity(
-      exponent, 1, coefficients[i]
-    );
+    component.initialize(*this, this->normalizedVectors.getIndex(exponent));
+    this->initialPartialFraction.addMultiplicity(exponent, 1, coefficients[i]);
   }
 }
 
@@ -5175,9 +5038,7 @@ void PartialFractions::run(Vectors<Rational>& input) {
   this->split(nullptr);
 }
 
-void PartialFractions::removeRedundantShortRoots(
-  Vector<Rational>* indicator
-) {
+void PartialFractions::removeRedundantShortRoots(Vector<Rational>* indicator) {
   STACK_TRACE("PartialFractions::removeRedundantShortRoots");
   Rational startCheckSum;
   Polynomial<LargeInteger> coefficient;
@@ -5237,9 +5098,8 @@ unsigned int OnePartialFractionDenominatorComponent::hashFunction() const {
 }
 
 void OnePartialFractionDenominatorComponent::getPolynomialDenominator(
-  Polynomial<LargeInteger>& output,
-  int multiplicityIndex,
-  Vector<Rational>& exponent
+  Polynomial<LargeInteger>& output, int multiplicityIndex, Vector<Rational>&
+  exponent
 ) {
   if (multiplicityIndex >= this->multiplicities.size) {
     global.fatal << "Bad multiplicity. " << global.fatal;
@@ -5249,8 +5109,8 @@ void OnePartialFractionDenominatorComponent::getPolynomialDenominator(
   monomial.makeOne();
   for (int i = 0; i < exponent.size; i ++) {
     monomial.setVariable(
-      i, exponent[i] * this->elongations[multiplicityIndex]
-    );
+      i, exponent[i] *
+      this->elongations[multiplicityIndex]);
   }
   output.addMonomial(monomial, - 1);
 }
@@ -5281,8 +5141,7 @@ const {
     if (this->elongations[i] == 0) {
       global.fatal << "Elongation not allowed to be zero. " << global.fatal;
     }
-    result =
-    MathRoutines::leastCommonMultiple(this->elongations[i], result);
+    result = MathRoutines::leastCommonMultiple(this->elongations[i], result);
   }
   return result;
 }
@@ -5300,9 +5159,8 @@ void OnePartialFractionDenominatorComponent::getDenominatorExponents(
 }
 
 void OnePartialFractionDenominatorComponent::
-getDenominatorExponentsWithoutMultiplicities(
-  List<Vector<Rational> >& output
-) const {
+getDenominatorExponentsWithoutMultiplicities(List<Vector<Rational> >& output)
+const {
   output.clear();
   Vector<Rational> normalizedVector = this->getNormalizedVector();
   for (int i = 0; i < this->multiplicities.size; i ++) {
@@ -5552,7 +5410,8 @@ void PartialFractions::computeTable(int dimension) {
   for (int i = 0; i < this->reduced.size(); i ++) {
     for (int j = 0; j < this->reduced.size(); j ++) {
       for (int k = 0; k < dimension; k ++) {
-        buffer1[k] = this->originalVectors[i][k] - this->originalVectors[j][k];
+        buffer1[k] =
+        this->originalVectors[i][k] - this->originalVectors[j][k];
         buffer2[k] =
         this->originalVectors[i][k] - this->originalVectors[j][k] * 2;
       }
@@ -5644,9 +5503,7 @@ bool SelectionWithMaximumMultiplicity::incrementSubsetFixedCardinality(
     return false;
   }
   if (this->cardinalitySelectionWithMultiplicities() != cardinality) {
-    this->multiplicities.initializeFillInObject(
-      this->multiplicities.size, 0
-    );
+    this->multiplicities.initializeFillInObject(this->multiplicities.size, 0);
   }
   if (this->cardinalitySelectionWithMultiplicities() == 0) {
     for (int i = this->multiplicities.size - 1; cardinality > 0; i --) {
@@ -5686,9 +5543,8 @@ bool SelectionWithMaximumMultiplicity::incrementSubsetFixedCardinality(
     }
   }
   for (
-    int i = this->multiplicities.size - 1; currentCardinality < cardinality; i
-    --
-  ) {
+    int i = this->multiplicities.size - 1; currentCardinality < cardinality;
+    i --) {
     if (this->multiplicities[i] != 0) {
       global.fatal
       << "Non-zero multiplicities not implemented here. "
@@ -5709,8 +5565,8 @@ LargeInteger SelectionWithMaximumMultiplicity::
 numberOfCombinationsOfCardinality(int cardinality) {
   return
   MathRoutines::nChooseK(
-    this->multiplicities.size + cardinality - 1, cardinality
-  );
+    this->multiplicities.size + cardinality - 1,
+    cardinality);
 }
 
 LargeInteger SelectionWithMaximumMultiplicity::getTotalCombinationCount() const {
@@ -5873,8 +5729,9 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
   MatrixTensor<Rational> finalMatrix;
   if (
     dynkinType.letter == 'D' || (
-      dynkinType.letter == 'A' && dynkinType.rank > 1
-    ) || (dynkinType.letter == 'E' && dynkinType.rank == 6)
+      dynkinType.letter == 'A' &&
+      dynkinType.rank > 1) || (dynkinType.letter == 'E' && dynkinType.rank == 6
+    )
   ) {
     directSummand.makeIdentity(dynkinType.rank *(multiplicity - 1));
     int numberOfGenerators = 1;
@@ -5893,12 +5750,8 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
   for (int i = 0; i < multiplicity - 1; i ++) {
     directSummand.makeZero();
     for (int j = 0; j < dynkinType.rank; j ++) {
-      directSummand.addMonomial(
-        MonomialMatrix(j, dynkinType.rank + j), 1
-      );
-      directSummand.addMonomial(
-        MonomialMatrix(dynkinType.rank + j, j), 1
-      );
+      directSummand.addMonomial(MonomialMatrix(j, dynkinType.rank + j), 1);
+      directSummand.addMonomial(MonomialMatrix(dynkinType.rank + j, j), 1);
     }
     finalMatrix.makeIdentity(i * dynkinType.rank);
     finalMatrix.directSumWith(directSummand);
@@ -5991,9 +5844,8 @@ std::string DynkinType::getWeylGroupName(FormatExpressions* format) const {
   return this->toString(format);
 }
 
-bool DynkinType::canBeExtendedParabolicallyOrIsEqualTo(
-  const DynkinType& other
-) const {
+bool DynkinType::canBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other)
+const {
   STACK_TRACE("DynkinType::canBeExtendedParabolicallyOrIsEqualTo");
   if (this->isEqualToZero()) {
     return true;
@@ -6005,18 +5857,14 @@ bool DynkinType::canBeExtendedParabolicallyOrIsEqualTo(
   DynkinType remainderThis;
   DynkinType remainderOther;
   for (int i = 0; i < other.size(); i ++) {
-    if (
-      !currentSimpleType.canBeExtendedParabolicallyOrIsEqualTo(other[i])
-    ) {
+    if (!currentSimpleType.canBeExtendedParabolicallyOrIsEqualTo(other[i])) {
       continue;
     }
     remainderThis = *this;
     remainderThis.subtractMonomial(currentSimpleType, 1);
     remainderOther = other;
     remainderOther.subtractMonomial(other[i], 1);
-    if (
-      remainderThis.canBeExtendedParabolicallyOrIsEqualTo(remainderOther)
-    ) {
+    if (remainderThis.canBeExtendedParabolicallyOrIsEqualTo(remainderOther)) {
       return true;
     }
   }
@@ -6227,9 +6075,7 @@ bool DynkinType::isSimple(
 
 int DynkinType::getMultiplicity(int SimpleTypeIdentifier) const {
   int result = 0;
-  if (
-    !this->coefficients[SimpleTypeIdentifier].isSmallInteger(&result)
-  ) {
+  if (!this->coefficients[SimpleTypeIdentifier].isSmallInteger(&result)) {
     global.fatal
     << "Dynkin type has multiplicity that is not a small integer. "
     << global.fatal;
@@ -6329,9 +6175,9 @@ void DynkinType::getEpsilonMatrix(Matrix<Rational>& output) const {
     int index = this->monomials.getIndex(sortedMonomials[j]);
     int multiplicity = this->getMultiplicity(index);
     for (int k = 0; k < multiplicity; k ++) {
-      DynkinSimpleType::getEpsilonMatrix((*this)[index].letter, (*this)[index].
-        rank,
-        currentCartan
+      DynkinSimpleType::getEpsilonMatrix((*this)[index].letter, (*this)[
+          index
+        ].rank, currentCartan
       );
       output.directSumWith(currentCartan);
     }
@@ -6581,9 +6427,8 @@ std::string DynkinSimpleType::toString(FormatExpressions* format) const {
 }
 
 void DynkinSimpleType::makeArbitrary(
-  char inputLetter,
-  int inputRank,
-  const Rational& inputLengthFirstCorRootSquared
+  char inputLetter, int inputRank, const Rational&
+  inputLengthFirstCorRootSquared
 ) {
   if ((
       inputLetter != 'A' &&
@@ -6949,8 +6794,7 @@ bool DynkinSimpleType::canBeExtendedParabolicallyTo(
 }
 
 void DynkinSimpleType::grow(
-  List<DynkinSimpleType>& output,
-  List<List<int> >* outputPermutationRoots
+  List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots
 ) const {
   STACK_TRACE("DynkinSimpleType::grow");
   // Almost all simple types are grown from type A. Exceptions only for types
@@ -6989,8 +6833,7 @@ void DynkinSimpleType::grow(
   }
   if (this->letter == 'E' && this->rank < 8) {
     newType.makeArbitrary(
-      'E', this->rank + 1, this->cartanSymmetricInverseScale
-    );
+      'E', this->rank + 1, this->cartanSymmetricInverseScale);
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
@@ -7012,8 +6855,7 @@ void DynkinSimpleType::grow(
     }
     outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
   }
-  newType.makeArbitrary(
-    'B', this->rank + 1, this->cartanSymmetricInverseScale
+  newType.makeArbitrary('B', this->rank + 1, this->cartanSymmetricInverseScale
   );
   output.addOnTop(newType);
   if (outputPermutationRoots != nullptr) {
@@ -7030,8 +6872,7 @@ void DynkinSimpleType::grow(
   }
   if (this->rank > 2) {
     newType.makeArbitrary(
-      'D', this->rank + 1, this->cartanSymmetricInverseScale
-    );
+      'D', this->rank + 1, this->cartanSymmetricInverseScale);
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
@@ -7059,13 +6900,10 @@ bool DynkinSimpleType::operator>(const DynkinSimpleType& other) const {
   if (this->cartanSymmetricInverseScale < other.cartanSymmetricInverseScale) {
     return false;
   }
-  if ((this->letter == 'B' || this->letter == 'C') && other.letter == 'D'
-  ) {
+  if ((this->letter == 'B' || this->letter == 'C') && other.letter == 'D') {
     return true;
   }
-  if (
-    this->letter == 'D' && (other.letter == 'B' || other.letter == 'C')
-  ) {
+  if (this->letter == 'D' && (other.letter == 'B' || other.letter == 'C')) {
     return false;
   }
   return this->letter > other.letter;
@@ -7713,9 +7551,7 @@ void WeylGroupData::simpleReflectionDualSpace(
   coefficient.divideBy(this->cartanSymmetric.elements[index][index]);
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
     scalarProduct.assign(coefficient);
-    scalarProduct.multiplyBy(
-      this->cartanSymmetric.elements[index][i] *(- 2)
-    );
+    scalarProduct.multiplyBy(this->cartanSymmetric.elements[index][i] *(- 2));
     dualSpaceElement[i] += scalarProduct;
   }
 }
@@ -7741,9 +7577,7 @@ void WeylGroupData::reflectSimple(
   alphaShift.makeZero();
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
     scalar = root[i];
-    scalar.multiplyBy(
-      this->cartanSymmetric.elements[index][i] *(- 2)
-    );
+    scalar.multiplyBy(this->cartanSymmetric.elements[index][i] *(- 2));
     alphaShift += scalar;
   }
   alphaShift.divideBy(this->cartanSymmetric.elements[index][index]);
@@ -7814,10 +7648,8 @@ void WeylGroupData::reset() {
 }
 
 void WeylGroupData::actOnAffineHyperplaneByGroupElement(
-  int index,
-  AffineHyperplane<Rational>& output,
-  bool rhoAction,
-  bool useMinusRho
+  int index, AffineHyperplane<Rational>& output, bool rhoAction, bool
+  useMinusRho
 ) {
   int numberOfGenerators =
   this->group.elements[index].generatorsLastAppliedFirst.size;
@@ -7838,9 +7670,8 @@ void WeylGroupData::actOnAffineHyperplaneByGroupElement(
 }
 
 bool WeylGroupData::getWordByFormulaImplementation(
-  FiniteGroup<ElementWeylGroup>& group,
-  const ElementWeylGroup& g,
-  List<int>& out
+  FiniteGroup<ElementWeylGroup>& group, const ElementWeylGroup& g, List<int>&
+  out
 ) {
   (void) group;
   // avoid unused parameter warning, portable.
@@ -7928,8 +7759,7 @@ void WeylGroupData::getStandardRepresentationMatrix(
 ) const {
   // the rank is the number of rows of the Cartan form
   output.initialize(
-    this->cartanSymmetric.numberOfRows,
-    this->cartanSymmetric.numberOfRows
+    this->cartanSymmetric.numberOfRows, this->cartanSymmetric.numberOfRows
   );
   for (int i = 0; i < this->cartanSymmetric.numberOfRows; i ++) {
     Vector<Rational> v;
@@ -7981,8 +7811,7 @@ void WeylGroupData::perturbWeightToRegularWithRespectToRootSystem(
         currentMaximumMovement = scalarProduct2 / scalarProduct1;
         currentMaximumMovement.AssignAbsoluteValue();
         if ((currentMaximumMovement < maxMovement) ||
-          maxMovement.isEqualToZero()
-        ) {
+          maxMovement.isEqualToZero()) {
           maxMovement = currentMaximumMovement;
         }
       }
@@ -8002,9 +7831,8 @@ bool WeylGroupData::isRegular(
     *indexFirstPerpendicularRoot = - 1;
   }
   for (int i = 0; i < this->rootSystem.size; i ++) {
-    if (
-      this->rootScalarCartanRoot(input, this->rootSystem[i]).isEqualToZero()
-    ) {
+    if (this->rootScalarCartanRoot(input, this->rootSystem[i]).isEqualToZero())
+    {
       if (indexFirstPerpendicularRoot != nullptr) {
         *indexFirstPerpendicularRoot = i;
       }
@@ -8039,7 +7867,8 @@ LargeInteger WeylGroupData::sizeByFormulaOrNegative1(
     output = Rational::factorial(dimension + 1);
   }
   if (weylLetter == 'B' || weylLetter == 'C') {
-    output = Rational::factorial(dimension) * Rational::twoToTheNth(dimension);
+    output =
+    Rational::factorial(dimension) * Rational::twoToTheNth(dimension);
   }
   if (weylLetter == 'D') {
     output =
@@ -8069,13 +7898,10 @@ LargeInteger WeylGroupData::sizeByFormulaOrNegative1(
 }
 
 void WeylGroupData::getWord(int g, List<int>& out) const {
-  out.setSize(
-    this->group.elements[g].generatorsLastAppliedFirst.size
-  );
+  out.setSize(this->group.elements[g].generatorsLastAppliedFirst.size);
   for (
-    int i = 0; i < this->group.elements[g].generatorsLastAppliedFirst.size; i
-    ++
-  ) {
+    int i = 0; i < this->group.elements[g].generatorsLastAppliedFirst.size;
+    i ++) {
     out[i] = this->group.elements[g].generatorsLastAppliedFirst[i].index;
   }
 }
@@ -8090,8 +7916,7 @@ void WeylGroupData::actOnRootByGroupElement(
   int index, Vector<Rational>& root, bool rhoAction, bool useMinusRho
 ) {
   const ElementWeylGroup& currentElement = this->group.elements[index];
-  for (
-    int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
+  for (int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
   ) {
     this->reflectSimple(
       currentElement.generatorsLastAppliedFirst[i].index,
@@ -8161,9 +7986,8 @@ void WeylGroupData::actOnRootAlgByGroupElement(
   }
 }
 
-void WeylGroupData::computeWeylGroupAndrootsOfBorel(
-  Vectors<Rational>& output
-) {
+void WeylGroupData::computeWeylGroupAndrootsOfBorel(Vectors<Rational>& output)
+{
   this->group.computeAllElements(false);
   output.size = 0;
   output.reserve(this->rootSystem.size / 2);
@@ -8226,9 +8050,7 @@ std::string WeylGroupData::toStringCppCharTable(FormatExpressions* format) {
     out << "(";
     // Print vector ensuring every number is at least 3 characters wide. (3
     // should suffice for E8... or does it?)
-    for (
-      int j = 0; j < this->group.characterTable[i].data.size; j ++
-    ) {
+    for (int j = 0; j < this->group.characterTable[i].data.size; j ++) {
       std::string numberString =
       this->group.characterTable[i].data[j].toString();
       out << numberString;
@@ -8282,9 +8104,7 @@ std::string WeylGroupData::toStringCppConjugacyClasses(
   << ", emptyClass);";
   for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
     out << "\n<br>&nbsp;&nbsp;output.conjugacyClasses[" << i;
-    for (
-      size_t j = (Rational(i)).toString().size(); j < 3; j ++
-    ) {
+    for (size_t j = (Rational(i)).toString().size(); j < 3; j ++) {
       // <-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;";
       // making sure index has width exactly 3 spaces
@@ -8311,9 +8131,7 @@ std::string WeylGroupData::toStringCppConjugacyClasses(
   }
   for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
     out << "\n<br>&nbsp;&nbsp;output.conjugacyClasses[" << i;
-    for (
-      size_t j = (Rational(i)).toString().size(); j < 3; j ++
-    ) {
+    for (size_t j = (Rational(i)).toString().size(); j < 3; j ++) {
       // <-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;";
       // making sure index has width exactly 3 spaces
@@ -8349,9 +8167,7 @@ std::string WeylGroupData::toStringRootsAndRootReflections(
   << "<table><tr><td>Simple basis coordinates</td><td>Epsilon coordinates</td>"
   << "<td>Reflection w.r.t. root</td></tr>";
   Vectors<Rational> rootSystemEpsilonCoordinates;
-  this->getEpsilonCoordinates(
-    this->rootSystem, rootSystemEpsilonCoordinates
-  );
+  this->getEpsilonCoordinates(this->rootSystem, rootSystemEpsilonCoordinates);
   ElementWeylGroup currentRootReflection;
   for (int i = 0; i < this->rootSystem.size; i ++) {
     const Vector<Rational>& current = this->rootSystem[i];
@@ -8461,9 +8277,7 @@ void WeylGroupData::transformToAdmissibleDynkinType(
 }
 
 void WeylGroupData::computeCoCartanSymmetricFromCartanSymmetric() {
-  this->getCoCartanSymmetric(
-    this->cartanSymmetric, this->coCartanSymmetric
-  );
+  this->getCoCartanSymmetric(this->cartanSymmetric, this->coCartanSymmetric);
 }
 
 void WeylGroupData::makeMeFromMyCartanSymmetric() {
@@ -8693,15 +8507,11 @@ Rational WeylGroupData::getKillingDividedByTraceRatio() {
   Rational scalar;
   for (int i = 0; i < this->rootSystem.size; i ++) {
     scalar =
-    this->rootScalarCartanRoot(
-      this->rootSystem[i], this->rootSystem[0]
-    );
+    this->rootScalarCartanRoot(this->rootSystem[i], this->rootSystem[0]);
     result += scalar * scalar;
   }
   result /=
-  this->rootScalarCartanRoot(
-    this->rootSystem[0], this->rootSystem[0]
-  );
+  this->rootScalarCartanRoot(this->rootSystem[0], this->rootSystem[0]);
   return result;
 }
 
@@ -8711,8 +8521,7 @@ void WeylGroupData::getLongestWeylElement(ElementWeylGroup& outputWeylElement)
   Vector<Rational> lowest = this->rho;
   Vectors<Rational> roots;
   roots.makeEiBasis(this->getDimension());
-  this->getLowestElementInOrbit(
-    lowest, &outputWeylElement, roots, false, false
+  this->getLowestElementInOrbit(lowest, &outputWeylElement, roots, false, false
   );
 }
 
@@ -8861,8 +8670,7 @@ void WeylGroupData::getCoxeterPlane(
   FloatingPoint::sinFloating(2 * MathRoutines::pi() / coxeterNumber);
   Matrix<Complex<double> > eigenMatrix;
   eigenMatrix.initialize(
-    matrixCoxeterElement.numberOfRows,
-    matrixCoxeterElement.numberOfColumns
+    matrixCoxeterElement.numberOfRows, matrixCoxeterElement.numberOfColumns
   );
   for (int i = 0; i < eigenMatrix.numberOfRows; i ++) {
     for (int j = 0; j < eigenMatrix.numberOfColumns; j ++) {
@@ -8990,9 +8798,8 @@ void WeylGroupData::drawRootSystem(
   this->rootScalarCartanRoot(differenceRoot, differenceRoot);
   for (int i = 2; i < rootSystemSorted.size; i ++) {
     differenceRoot = rootSystemSorted[0] - rootSystemSorted[i];
-    if (
-      minLength > this->rootScalarCartanRoot(differenceRoot, differenceRoot)
-    ) {
+    if (minLength > this->rootScalarCartanRoot(differenceRoot, differenceRoot))
+    {
       minLength = this->rootScalarCartanRoot(differenceRoot, differenceRoot);
     }
   }
@@ -9013,9 +8820,7 @@ void WeylGroupData::drawRootSystem(
     output.drawLineBetweenTwoVectorsBufferRational(
       zeroRoot, rootSystemSorted[i], "green", 1
     );
-    output.drawCircleAtVectorBufferRational(
-      rootSystemSorted[i], "#ff00ff", 2
-    );
+    output.drawCircleAtVectorBufferRational(rootSystemSorted[i], "#ff00ff", 2);
     for (int j = i + 1; j < rootSystemSorted.size; j ++) {
       differenceRoot = rootSystemSorted[i] - rootSystemSorted[j];
       scalarProduct =
@@ -9096,10 +8901,8 @@ std::string WeylGroupData::generateWeightSupportMethod1(
   std::string currentString;
   bool isTrimmed =
   !this->getAllDominantWeightsHWFDIM(
-    highestWeightSimpleCoordinates,
-    dominantWeights,
-    upperBoundInt,
-    &currentString
+    highestWeightSimpleCoordinates, dominantWeights, upperBoundInt, &
+    currentString
   );
   out << currentString << "<br>";
   if (isTrimmed) {
@@ -9126,13 +8929,7 @@ std::string WeylGroupData::generateWeightSupportMethod1(
   Vectors<Rational> dominantWeightsNonHashed;
   dominantWeightsNonHashed = (dominantWeights);
   this->generateOrbit(
-    dominantWeightsNonHashed,
-    false,
-    finalWeights,
-    false,
-    0,
-    nullptr,
-    10000
+    dominantWeightsNonHashed, false, finalWeights, false, 0, nullptr, 10000
   );
   if (finalWeights.size >= 10000) {
     out << "Did not generate all weights of the module due to RAM limits. ";
@@ -9171,16 +8968,12 @@ Rational WeylGroupData::getLongestRootLengthSquared() const {
   return result;
 }
 
-bool WeylGroupData::isElementWeylGroup(
-  const MatrixTensor<Rational>& matrix
-) {
+bool WeylGroupData::isElementWeylGroup(const MatrixTensor<Rational>& matrix) {
   STACK_TRACE("WeylGroupData::isElementWeylGroup");
   Vector<Rational> rhoImage;
   matrix.actOnVectorColumn(this->rho, rhoImage);
   ElementWeylGroup elementCandidate;
-  this->raiseToDominantWeight(
-    rhoImage, nullptr, nullptr, &elementCandidate
-  );
+  this->raiseToDominantWeight(rhoImage, nullptr, nullptr, &elementCandidate);
   Matrix<Rational> candidateMatrix;
   Matrix<Rational> inputMatrix;
   matrix.getMatrix(inputMatrix, this->getDimension());
@@ -9350,15 +9143,13 @@ toStringBruhatGraph() {
   for (int i = 0; i < this->allElements.size; i ++) {
     const ElementSubgroupWeylGroupAutomorphisms& currentElement =
     this->allElements[i];
-    if (
-      currentElement.generatorsLastAppliedFirst.size != oldLayerElementLength
-    ) {
+    if (currentElement.generatorsLastAppliedFirst.size != oldLayerElementLength)
+    {
       layers.setSize(layers.size + 1);
       oldLayerElementLength = currentElement.generatorsLastAppliedFirst.size;
     }
     layers.lastObject()->addOnTop(i);
-    graphWidth =
-    MathRoutines::maximum(graphWidth, layers.lastObject()->size);
+    graphWidth = MathRoutines::maximum(graphWidth, layers.lastObject()->size);
   }
   HashedList<Vector<Rational> > orbit;
   orbit.reserve(this->allElements.size);
@@ -9390,8 +9181,7 @@ toStringBruhatGraph() {
       }
     }
   }
-  return
-  this->toStringFromLayersAndArrows(arrows, layers, graphWidth, false);
+  return this->toStringFromLayersAndArrows(arrows, layers, graphWidth, false);
 }
 
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
@@ -9452,9 +9242,7 @@ toString(std::string& output, bool displayElements) {
     Matrix<Rational> automorphismMatrix;
     head2 << "\\begin{array}{rcl}";
     for (int i = 0; i < this->externalAutomorphisms.size; i ++) {
-      automorphismMatrix.assignVectorsToRows(
-        this->externalAutomorphisms[i]
-      );
+      automorphismMatrix.assignVectorsToRows(this->externalAutomorphisms[i]);
       automorphismMatrix.transpose();
       head2
       << "a_{"
@@ -9519,9 +9307,8 @@ makeParabolicFromSelectionSimpleRoots(
     << global.fatal;
   }
   for (
-    int i = 0; i < zeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements; i
-    ++
-  ) {
+    int i = 0; i < zeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements;
+    i ++) {
     if (!zeroesMeanSimpleRootSpaceIsInParabolic.selected[i]) {
       selectedRoots.setSize(selectedRoots.size + 1);
       selectedRoots.lastObject()->makeEi(inputWeyl.getDimension(), i);
@@ -9554,9 +9341,7 @@ toStringCosetGraph() {
   layers.reserve(this->representativesQuotientAmbientOrder.size);
   int graphWidth = 1;
   int oldLayerElementLength = - 1;
-  for (
-    int i = 0; i < this->representativesQuotientAmbientOrder.size; i ++
-  ) {
+  for (int i = 0; i < this->representativesQuotientAmbientOrder.size; i ++) {
     if (
       this->representativesQuotientAmbientOrder[i].generatorsLastAppliedFirst.
       size !=
@@ -9568,12 +9353,9 @@ toStringCosetGraph() {
       size;
     }
     layers.lastObject()->addOnTop(i);
-    graphWidth =
-    MathRoutines::maximum(graphWidth, layers.lastObject()->size);
+    graphWidth = MathRoutines::maximum(graphWidth, layers.lastObject()->size);
   }
-  for (
-    int i = 0; i < this->representativesQuotientAmbientOrder.size; i ++
-  ) {
+  for (int i = 0; i < this->representativesQuotientAmbientOrder.size; i ++) {
     root = this->ambientWeyl->rho;
     this->ambientWeyl->actOnRootByGroupElement(
       this->ambientWeyl->group.elements.getIndex(
@@ -9588,9 +9370,8 @@ toStringCosetGraph() {
   for (int i = 0; i < layers.size; i ++) {
     arrows[i].setSize(layers[i].size);
     for (int j = 0; j < layers[i].size; j ++) {
-      for (
-        int k = 0; k < this->representativesQuotientAmbientOrder.size; k ++
-      ) {
+      for (int k = 0; k < this->representativesQuotientAmbientOrder.size; k ++)
+      {
         if (
           this->ambientWeyl->leftIsHigherInBruhatOrderThanRight(
             this->representativesQuotientAmbientOrder[k],
@@ -9808,9 +9589,7 @@ void KazhdanLusztigPolynomials::compute(int x) {
   this->initTheMults();
   this->multiplicities[x] = 1;
   while (this->nextToExplore != - 1) {
-    for (
-      int i = 0; i < this->bruhatOrder[this->nextToExplore].size; i ++
-    ) {
+    for (int i = 0; i < this->bruhatOrder[this->nextToExplore].size; i ++) {
       int a = this->bruhatOrder[this->nextToExplore][i];
       this->multiplicities[a] -= this->multiplicities[this->nextToExplore];
     }
@@ -9887,7 +9666,9 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
     this->kazhdanLuzstigCoefficients.size ==
     this->weylGroup->group.elements.size
   ) {
-    out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(format);
+    out
+    << "Kazhdan-Lusztig Polynomials:<br>"
+    << this->KLPolysToString(format);
     out
     << "Kazhdan-Lusztig coefficients; the (w_1,w_2) "
     << "coefficient is defined as the multiplicity of "
@@ -9915,9 +9696,7 @@ std::string KazhdanLusztigPolynomials::toString(FormatExpressions* format) {
         << "<td>"
         << this->weylGroup->group.elements[i].toString()
         << "</td>";
-        for (
-          int j = 0; j < this->kazhdanLuzstigCoefficients[i].size; j ++
-        ) {
+        for (int j = 0; j < this->kazhdanLuzstigCoefficients[i].size; j ++) {
           out
           << "<td>"
           << kazhdanLuzstigCoefficients[i][j].toString()
@@ -10008,17 +9787,13 @@ void KazhdanLusztigPolynomials::mergeBruhatLists(int fromList, int toList) {
   for (int i = 0; i < this->bruhatOrder[fromList].size; i ++) {
     bool found = false;
     for (int j = 0; j < this->bruhatOrder[toList].size; j ++) {
-      if (
-        this->bruhatOrder[toList][j] == this->bruhatOrder[fromList][i]
-      ) {
+      if (this->bruhatOrder[toList][j] == this->bruhatOrder[fromList][i]) {
         found = true;
         break;
       }
     }
     if (!found) {
-      this->bruhatOrder[toList].addOnTop(
-        this->bruhatOrder[fromList][i]
-      );
+      this->bruhatOrder[toList].addOnTop(this->bruhatOrder[fromList][i]);
     }
   }
 }
@@ -10040,9 +9815,7 @@ int KazhdanLusztigPolynomials::chamberIndicatorToIndex(
     bool haveSameSigns = true;
     for (int j = 0; j < this->weylGroup->rootSystem.size; j ++) {
       this->weylGroup->rootScalarCartanRoot(
-        chamberIndicatorPlusRho,
-        this->weylGroup->rootSystem[j],
-        scalarProduct1
+        chamberIndicatorPlusRho, this->weylGroup->rootSystem[j], scalarProduct1
       );
       root = (*this)[i];
       root += (this->weylGroup->rho);
@@ -10051,9 +9824,7 @@ int KazhdanLusztigPolynomials::chamberIndicatorToIndex(
       );
       firstIsPositive = scalarProduct1.isPositive();
       secondIsPositive = scalarProduct2.isPositive();
-      if (
-        scalarProduct1.isEqualToZero() || scalarProduct2.isEqualToZero()
-      ) {
+      if (scalarProduct1.isEqualToZero() || scalarProduct2.isEqualToZero()) {
         global.fatal
         << "Coefficients are zero at a bad place. "
         << global.fatal;
@@ -10079,9 +9850,7 @@ void KazhdanLusztigPolynomials::computeKLCoefficients() {
     this->kazhdanLuzstigCoefficients[i].setSize(
       this->kazhdanLuzstigPolynomials[i].size
     );
-    for (
-      int j = 0; j < this->kazhdanLuzstigCoefficients[i].size; j ++
-    ) {
+    for (int j = 0; j < this->kazhdanLuzstigCoefficients[i].size; j ++) {
       Polynomial<Rational>& currentPoly =
       this->kazhdanLuzstigPolynomials[i][j];
       this->kazhdanLuzstigCoefficients[i][j] = 0;
@@ -10191,8 +9960,7 @@ int KazhdanLusztigPolynomials::computeProductfromSimpleReflectionsActionList(
 ) {
   int start = y;
   const ElementWeylGroup& currentElement = this->weylGroup->group.elements[x];
-  for (
-    int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
+  for (int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
   ) {
     start =
     this->simpleReflectionsActionList[start][
@@ -10217,9 +9985,7 @@ void KazhdanLusztigPolynomials::computeKLxy(int x, int y) {
   accumulator.makeZero();
   MonomialPolynomial monomial;
   for (int i = 0; i < this->size; i ++) {
-    if (
-      this->indexGreaterThanIndex(i, x) && this->indexGEQIndex(y, i)
-    ) {
+    if (this->indexGreaterThanIndex(i, x) && this->indexGEQIndex(y, i)) {
       buffer1.makeZero();
       for (int j = 0; j < this->rPolynomials[x][i].size(); j ++) {
         monomial = this->rPolynomials[x][i][j];
@@ -10340,9 +10106,7 @@ std::string KazhdanLusztigPolynomials::KLPolysToString(
       << "<tr><td>"
       << this->weylGroup->group.elements[i].toString()
       << "</td>";
-      for (
-        int j = 0; j < this->kazhdanLuzstigPolynomials[i].size; j ++
-      ) {
+      for (int j = 0; j < this->kazhdanLuzstigPolynomials[i].size; j ++) {
         out
         << "<td>"
         << this->kazhdanLuzstigPolynomials[i][j].toString(format)
@@ -10454,11 +10218,8 @@ void LaTeXProcedures::getStringFromColorIndex(
 }
 
 void LaTeXProcedures::drawTextDirectly(
-  double x1,
-  double y1,
-  const std::string& text,
-  int colorIndex,
-  std::fstream& output
+  double x1, double y1, const std::string& text, int colorIndex, std::fstream&
+  output
 ) {
   (void) colorIndex;
   output.precision(4);
@@ -10495,9 +10256,7 @@ void LaTeXProcedures::drawline(
   y1 /= LaTeXProcedures::scaleFactor;
   y2 /= LaTeXProcedures::scaleFactor;
   std::string currentString;
-  if (
-    penStyle == static_cast<unsigned>(DrawOptions::PenStyle::dashed)
-  ) {
+  if (penStyle == static_cast<unsigned>(DrawOptions::PenStyle::dashed)) {
     currentString = "lightgray";
   } else {
     LaTeXProcedures::getStringFromColorIndex(
@@ -10520,8 +10279,8 @@ void LaTeXProcedures::drawline(
 }
 
 void WeylGroupData::transformToSimpleBasisGenerators(
-  Vectors<Rational>& generators,
-  const HashedList<Vector<Rational> >& inputRootSystem
+  Vectors<Rational>& generators, const HashedList<Vector<Rational> >&
+  inputRootSystem
 ) {
   STACK_TRACE("WeylGroupData::transformToSimpleBasisGenerators");
   for (int i = 0; i < generators.size; i ++) {
@@ -10599,8 +10358,8 @@ void Vector<Coefficient>::perturbNoZeroScalarProductWithMe(
 }
 
 void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(
-  Vectors<Rational>& generators,
-  const HashedList<Vector<Rational> >& inputRootSystem
+  Vectors<Rational>& generators, const HashedList<Vector<Rational> >&
+  inputRootSystem
 ) {
   if (generators.size == 0) {
     return;
@@ -10745,9 +10504,7 @@ std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
   Polynomial<LargeInteger>& coefficient, FormatExpressions* format
 ) const {
   STACK_TRACE("OnePartialFractionDenominator::toLatexDifferentialOperator");
-  if (
-    this->denominatorsNoScale.size() != this->owner->ambientDimension
-  ) {
+  if (this->denominatorsNoScale.size() != this->owner->ambientDimension) {
     return "(non-decomposed)";
   }
   List<ElementWeylAlgebra<Rational> > differentialOperators;
@@ -10820,9 +10577,7 @@ std::string OnePartialFractionDenominator::toLatexDifferentialOperator(
     OnePartialFractionDenominatorComponent& current =
     this->denominatorsNoScale.values[i];
     withMultiplicityOne.addMultiplicity(
-      this->denominatorsNoScale.keys[i],
-      1,
-      current.getLargestElongation()
+      this->denominatorsNoScale.keys[i], 1, current.getLargestElongation()
     );
   }
   outFraction << "\\cdot" << withMultiplicityOne.toLatex(1);
@@ -10933,9 +10688,7 @@ void OnePartialFractionDenominator::computePolynomialCorrespondingToOneMonomial
   Polynomial<Rational> multiplicand;
   Polynomial<Rational> outputPolynomialPart;
   outputPolynomialPart.makeOne();
-  if (
-    this->denominatorsNoScale.size() != this->owner->ambientDimension
-  ) {
+  if (this->denominatorsNoScale.size() != this->owner->ambientDimension) {
     global.fatal
     << "Attempt to extract quasipolynomial "
     << "from non-reduced fraction (too many vectors). "
@@ -11014,10 +10767,7 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
   output.makeZeroLatticeZn(owner.ambientDimension);
   for (int i = 0; i < coefficient.size(); i ++) {
     this->computePolynomialCorrespondingToOneMonomial(
-      shiftedQuasiPolynomial,
-      coefficient[i],
-      latticeGenerators,
-      normals,
+      shiftedQuasiPolynomial, coefficient[i], latticeGenerators, normals,
       lattice
     );
     shiftedQuasiPolynomial *= coefficient.coefficients[i];
@@ -11055,9 +10805,7 @@ void PartialFractions::computeOneQuasipolynomial(Cone& cone) {
       cone.vertices[i], this->originalVectors
     );
   }
-  cone.precomputeVectorPartitionFunction(
-    internalPoint, this->originalVectors
-  );
+  cone.precomputeVectorPartitionFunction(internalPoint, this->originalVectors);
   Rational n = 10;
   cone.precomputeVectorPartitionFunction(
     internalPoint* n, this->originalVectors
@@ -11069,9 +10817,7 @@ void PartialFractions::computeOneQuasipolynomial(Cone& cone) {
 }
 
 void PartialFractions::evaluateVectorPartitionFunctionNonChecked(
-  const Vector<Rational>& input,
-  Rational& output,
-  std::stringstream* comments
+  const Vector<Rational>& input, Rational& output, std::stringstream* comments
 ) {
   STACK_TRACE("PartialFractions::evaluateVectorPartitionFunctionNonChecked");
   if (this->chambers.refinedCones.size() == 0) {
@@ -11107,9 +10853,7 @@ void PartialFractions::evaluateVectorPartitionFunctionNonChecked(
 }
 
 void PartialFractions::evaluateVectorPartitionFunctionChecked(
-  const Vector<Rational>& input,
-  Rational& output,
-  std::stringstream* comments
+  const Vector<Rational>& input, Rational& output, std::stringstream* comments
 ) {
   STACK_TRACE("PartialFractions::evaluateVectorPartitionFunctionChecked");
   if (this->chambers.refinedCones.size() == 0) {
@@ -11172,9 +10916,7 @@ bool PartialFractions::computeOneVectorPartitionFunction(
   if (this->assureIndicatorRegularity(newIndicator)) {
     report.report("Indicator modified to regular");
   }
-  if (
-    !this->checkForMinimalityDecompositionWithRespectToRoot(&newIndicator)
-  ) {
+  if (!this->checkForMinimalityDecompositionWithRespectToRoot(&newIndicator)) {
     return false;
   }
   this->statistics.totalFractionsWithAccountedVectorPartitionFunction = 0;
@@ -11419,9 +11161,7 @@ bool Cone::getRootFromLPolynomialConstantTermGoesToLastVariable(
   output.makeZero(inputLPoly.minimalNumberOfVariables() + 1);
   for (int i = 0; i < inputLPoly.size(); i ++) {
     int index;
-    if (
-      inputLPoly[i].::MonomialPolynomial::isOneLetterFirstDegree(&index)
-    ) {
+    if (inputLPoly[i].::MonomialPolynomial::isOneLetterFirstDegree(&index)) {
       output[index] = inputLPoly.coefficients[i];
     } else {
       *output.lastObject() = inputLPoly.coefficients[i];
@@ -11467,8 +11207,7 @@ bool Cone::solveLQuasiPolyEqualsZeroIAmProjective(
   for (int i = 0; i < inputLQP.latticeShifts.size; i ++) {
     result = result &&
     this->solveLPolynomialEqualsZeroIAmProjective(
-      inputLQP.valueOnEachLatticeShift[i],
-      outputConesOverEachLatticeShift[i]
+      inputLQP.valueOnEachLatticeShift[i], outputConesOverEachLatticeShift[i]
     );
   }
   return result;
@@ -11534,9 +11273,7 @@ std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
 }
 
 std::string HtmlRoutines::toHtmlTable(
-  List<std::string>& labels,
-  List<List<std::string> >& content,
-  bool nestTables
+  List<std::string>& labels, List<List<std::string> >& content, bool nestTables
 ) {
   STACK_TRACE("HtmlRoutines::toHtmlTable");
   std::stringstream out;
@@ -11566,9 +11303,7 @@ std::string HtmlRoutines::toHtmlTable(
       if (!nestTables) {
         out
         << "<td>"
-        << StringRoutines::stringTrimToLengthForDisplay(
-          content[i][j], 1000
-        )
+        << StringRoutines::stringTrimToLengthForDisplay(content[i][j], 1000)
         << "</td>";
       } else {
         out
@@ -11586,9 +11321,7 @@ std::string HtmlRoutines::toHtmlTable(
 }
 
 bool HtmlRoutines::convertStringToHtmlStringReturnTrueIfModified(
-  const std::string& input,
-  std::string& output,
-  bool doReplaceNewLineByBr
+  const std::string& input, std::string& output, bool doReplaceNewLineByBr
 ) {
   std::stringstream out;
   bool modified = false;
@@ -11917,8 +11650,7 @@ std::string ConeCollection::drawMeToHtmlProjective(
     << this->maximumCones
     << " allowed for drawing. I am omitting most of the graphics. ";
   }
-  out
-  << drawingVariables.getHTMLDiv(this->getDimension(), generateControls);
+  out << drawingVariables.getHTMLDiv(this->getDimension(), generateControls);
   if (!isGood) {
     out << "<hr>" << "Found cones which I cannot draw.<hr>";
     out << this->toString();
@@ -11950,9 +11682,7 @@ bool ConeCollection::drawMeLastCoordinateAffine(
     currentStream << i + 1;
     Vector<Rational> point = this->nonRefinedCones[i].internalPoint();
     point.makeAffineUsingLastCoordinate();
-    drawingVariables.drawTextAtVector(
-      point, currentStream.str(), "black"
-    );
+    drawingVariables.drawTextAtVector(point, currentStream.str(), "black");
   }
   return result;
 }
@@ -11993,9 +11723,7 @@ bool ConeCollection::drawMeProjectiveInitialize(
 }
 
 bool ConeCollection::drawProjectiveChambers(
-  DrawingVariables& drawingVariables,
-  bool includeVertices,
-  bool includeLattice
+  DrawingVariables& drawingVariables, bool includeVertices, bool includeLattice
 ) const {
   bool result = true;
   List<const List<Cone>*> coneCollectionsToPlot = List<const List<Cone>*>({
@@ -12034,9 +11762,7 @@ bool ConeCollection::drawProjectiveChambers(
 }
 
 bool ConeCollection::drawMeProjective(
-  DrawingVariables& drawingVariables,
-  bool includeVertices,
-  bool includeLattice
+  DrawingVariables& drawingVariables, bool includeVertices, bool includeLattice
 ) const {
   STACK_TRACE("ConeCollection::drawMeProjective");
   bool result = true;
@@ -12103,9 +11829,7 @@ bool Cone::regularizeToBasis(
 ) {
   Vector<Rational> normal;
   bool result = false;
-  while (
-    !Cone::isRegularToBasis(basis, output, normal, output.size)
-  ) {
+  while (!Cone::isRegularToBasis(basis, output, normal, output.size)) {
     result = true;
     normal /= 10;
     output += normal;
@@ -12264,11 +11988,7 @@ bool Cone::drawMeProjectiveVertices(
       }
     }
     drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-      zeroRoot,
-      vertex,
-      "lightblue",
-      1,
-      DrawOptions::PenStyle::dashed,
+      zeroRoot, vertex, "lightblue", 1, DrawOptions::PenStyle::dashed,
       "vertices"
     );
   }
@@ -12293,15 +12013,11 @@ bool Cone::drawMeProjectiveSlice(
       }
     }
     for (int i = 0; i < this->vertices.size; i ++) {
-      if (
-        !wall.normal.scalarEuclidean(this->vertices[i]).isEqualToZero()
-      ) {
+      if (!wall.normal.scalarEuclidean(this->vertices[i]).isEqualToZero()) {
         continue;
       }
       for (int j = i + 1; j < this->vertices.size; j ++) {
-        if (
-          !wall.normal.scalarEuclidean(this->vertices[j]).isEqualToZero()
-        ) {
+        if (!wall.normal.scalarEuclidean(this->vertices[j]).isEqualToZero()) {
           continue;
         }
         if (!this->isHonest1DEdgeAffine(i, j)) {
@@ -12346,9 +12062,7 @@ std::string Cone::drawMeToHtmlProjective(
 }
 
 template <class Base>
-std::iostream& operator<<(
-  std::iostream& output, const Complex<Base>& input
-) {
+std::iostream& operator<<(std::iostream& output, const Complex<Base>& input) {
   if (input.isEqualToZero()) {
     output << "0";
     return output;
@@ -12385,12 +12099,11 @@ void Selection::operator=(const Vector<Rational>& other) {
 }
 
 void ConeCollection::initializeFromAffineDirectionsAndRefine(
-  Vectors<Rational>& inputDirections,
-  Vectors<Rational>& inputAffinePoints
+  Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints
 ) {
   if (
-    inputDirections.size != inputAffinePoints.size || inputDirections.size <= 0
-  ) {
+    inputDirections.size != inputAffinePoints.size ||
+    inputDirections.size <= 0) {
     global.fatal
     << "Input directions size does not match affine point size. "
     << global.fatal;
@@ -12404,7 +12117,8 @@ void ConeCollection::initializeFromAffineDirectionsAndRefine(
     *projectivizedDirections[i].lastObject() = 0;
   }
   for (int i = 0; i < inputAffinePoints.size; i ++) {
-    projectivizedDirections[i + inputAffinePoints.size] = inputAffinePoints[i];
+    projectivizedDirections[i + inputAffinePoints.size] =
+    inputAffinePoints[i];
     projectivizedDirections[i + inputAffinePoints.size].setSize(
       affineDimension + 1
     );
@@ -12534,9 +12248,7 @@ bool Cone::getLatticePointsInCone(
   Vector<Rational> candidatePoint;
   Vectors<Rational> latticeBasis;
   latticeBasis.assignMatrixRows(lattice.basisRationalForm);
-  for (
-    int i = 0; i < numberOfCycles; i ++, boundingBox.incrementSubset()
-  ) {
+  for (int i = 0; i < numberOfCycles; i ++, boundingBox.incrementSubset()) {
     candidatePoint = actualShift;
     if (shiftAllPointsBy != nullptr) {
       candidatePoint += *shiftAllPointsBy;
@@ -12572,9 +12284,7 @@ void PiecewiseQuasipolynomial::operator+=(
   const PiecewiseQuasipolynomial& other
 ) {
   this->makeCommonRefinement(other);
-  for (
-    int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
-  ) {
+  for (int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++) {
     int index =
     other.projectivizedComplex.getLowestIndexRefinedChamberContaining(
       this->projectivizedComplex.refinedCones.values[i].internalPoint()
@@ -12598,11 +12308,9 @@ bool PiecewiseQuasipolynomial::makeVPF(
   std::stringstream out;
   std::string whatWentWrong;
   partialFractions.initializeFromVectors(roots, nullptr);
-  out
-  << HtmlRoutines::getMathNoDisplay(partialFractions.toString(&format));
+  out << HtmlRoutines::getMathNoDisplay(partialFractions.toString(&format));
   partialFractions.split(nullptr);
-  out
-  << HtmlRoutines::getMathNoDisplay(partialFractions.toString(&format));
+  out << HtmlRoutines::getMathNoDisplay(partialFractions.toString(&format));
   // partialFractions.chambers.initializeFromDirectionsAndRefine(roots);
   global.fatal << "Not implemented. " << global.fatal;
   // partialFractions.chambersOld.AmbientDimension = roots[0].size;
@@ -12614,9 +12322,7 @@ bool PiecewiseQuasipolynomial::makeVPF(
     partialFractions.chambers.refinedCones.size()
   );
   Vector<Rational> indicator;
-  for (
-    int i = 0; i < partialFractions.chambers.refinedCones.size(); i ++
-  ) {
+  for (int i = 0; i < partialFractions.chambers.refinedCones.size(); i ++) {
     indicator = partialFractions.chambers.refinedCones[i].internalPoint();
     partialFractions.computeOneVectorPartitionFunction(
       this->quasiPolynomials[i], indicator
@@ -12718,9 +12424,7 @@ getAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(
   HashedList<Vector<Rational> > outputHashed;
   Vector<Rational> root;
   for (int i = 0; i < this->nonRefinedCones.size(); i ++) {
-    for (
-      int j = 0; j < this->nonRefinedCones.values[i].walls.size; j ++
-    ) {
+    for (int j = 0; j < this->nonRefinedCones.values[i].walls.size; j ++) {
       root = this->nonRefinedCones.values[i].walls[j].normal;
       root.scaleNormalizeFirstNonZero();
       outputHashed.addOnTopNoRepetition(root);
@@ -12792,9 +12496,7 @@ void PiecewiseQuasipolynomial::translateArgument(
 
 std::string PiecewiseQuasipolynomial::toString(FormatExpressions* format) {
   std::stringstream out;
-  for (
-    int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
-  ) {
+  for (int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++) {
     const Cone& currentCone = this->projectivizedComplex.refinedCones[i];
     QuasiPolynomial& currentQuasiPolynomial = this->quasiPolynomials[i];
     out << "Chamber number " << i + 1;
@@ -12820,9 +12522,7 @@ void PiecewiseQuasipolynomial::drawMe(
     numberOfLatticePointsPerDimension = 0;
   }
   const std::string zeroColor = "gray";
-  for (
-    int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
-  ) {
+  for (int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++) {
     std::string chamberWallColor = "black";
     bool isZeroChamber = this->quasiPolynomials[i].isEqualToZero();
     if (isZeroChamber) {
@@ -12836,9 +12536,7 @@ void PiecewiseQuasipolynomial::drawMe(
     Vector<Rational> root =
     this->projectivizedComplex.refinedCones[i].internalPoint();
     root.makeAffineUsingLastCoordinate();
-    for (
-      int j = 0; j < this->quasiPolynomials[i].latticeShifts.size; j ++
-    ) {
+    for (int j = 0; j < this->quasiPolynomials[i].latticeShifts.size; j ++) {
       this->projectivizedComplex.refinedCones[i].getLatticePointsInCone(
         this->quasiPolynomials[i].ambientLatticeReduced,
         this->quasiPolynomials[i].latticeShifts[j],
@@ -12909,12 +12607,8 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
   // The following for loop is for self-check purposes only.
   // Comment it out as soon as
   // the code has been tested sufficiently.
-  for (
-    int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
-  ) {
-    if (
-      !this->projectivizedComplex.refinedCones[i].isInCone(input)
-    ) {
+  for (int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++) {
+    if (!this->projectivizedComplex.refinedCones[i].isInCone(input)) {
       continue;
     }
     Rational altResult =
@@ -12935,9 +12629,7 @@ void PiecewiseQuasipolynomial::makeCommonRefinement(
   this->quasiPolynomials.setSize(
     this->projectivizedComplex.refinedCones.size()
   );
-  for (
-    int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++
-  ) {
+  for (int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++) {
     int oldIndex =
     oldComplex.getLowestIndexRefinedChamberContaining(
       this->projectivizedComplex.refinedCones[i].internalPoint()
@@ -12966,18 +12658,16 @@ void Lattice::getDefaultFundamentalDomainInternalPoint(
 }
 
 void PartialFractions::getSum(
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  >& output
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >&
+  output
 ) const {
   output.makeZero();
   this->accumulateSum(output);
 }
 
 void PartialFractions::accumulateSum(
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  >& output
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >&
+  output
 ) const {
   if (
     &output == &this->nonReduced ||
@@ -13116,9 +12806,7 @@ void ConeLatticeAndShiftMaxComputation::initialize(
   this->isInfinity.initializeFillInObject(1, false);
 }
 
-void Lattice::applyLinearMap(
-  Matrix<Rational>& linearMap, Lattice& output
-) {
+void Lattice::applyLinearMap(Matrix<Rational>& linearMap, Lattice& output) {
   Vectors<Rational> roots;
   roots.assignMatrixRows(this->basisRationalForm);
   linearMap.actOnVectorsColumn(roots);
@@ -13161,9 +12849,7 @@ std::string ConeLatticeAndShiftMaxComputation::toString(
     << this->conesLargerDimension[i].shift.toString()
     << " + "
     << this->conesLargerDimension[i].lattice.toString();
-    polynomialPart.makeLinearWithConstantTerm(
-      this->lPtoMaximizeLargerDim[i]
-    );
+    polynomialPart.makeLinearWithConstantTerm(this->lPtoMaximizeLargerDim[i]);
     out
     << "<br>the function we have maxed, as "
     << "a function of the remaining variables, is: "
@@ -13253,8 +12939,7 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
   for (int i = 0; i < this->finalRepresentatives.size; i ++) {
     ConeCollection& currentComplex = this->complexRefinedPerRepresentative[i];
     currentComplex.initFromConeWalls(
-      this->complexStartingPerRepresentative[i].refinedCones.values,
-      true
+      this->complexStartingPerRepresentative[i].refinedCones.values, true
     );
     std::stringstream currentStream;
     currentStream
@@ -13438,9 +13123,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     projectionLatticeLevel.elements[i][i + 1] = 1;
   }
   direction.makeEi(dimensionProjectivized, 0);
-  if (
-    !this->projectivizedCone.vertices.linearSpanContainsVector(direction)
-  ) {
+  if (!this->projectivizedCone.vertices.linearSpanContainsVector(direction)) {
     this->findExtremaInDirectionOverLatticeOneNonParamDegenerateCase(
       lpToMaximizeAffine,
       outputAppendLPToMaximizeAffine,
@@ -13487,9 +13170,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   ConeLatticeAndShift coneLatticeShift;
   directionSmallerDimension.makeEi(dimensionProjectivized - 1, 0);
   List<Wall> newWalls;
-  for (
-    int i = 0; i < complexBeforeProjection.refinedCones.size(); i ++
-  ) {
+  for (int i = 0; i < complexBeforeProjection.refinedCones.size(); i ++) {
     const Cone& currentCone = complexBeforeProjection.refinedCones[i];
     int numberOfNonPerpendicularWalls = 0;
     newWalls.size = 0;
@@ -13547,8 +13228,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
     global.comments << "<hr><hr><hr>" << currentCone.toString(&format);
     global.comments
     << "<br>Entering normal: "
-    << ((foundEnteringNormal) ? enteringNormalAffine.toString() : "not found"
-    );
+    << ((foundEnteringNormal) ? enteringNormalAffine.toString() : "not found");
     global.comments
     << "<br>Exit normal: "
     << ((foundExitNormal) ? exitNormalAffine.toString() : "not found");
@@ -13704,10 +13384,7 @@ bool ConeCollection::splitChamber(
   HashedList<Vector<Rational> > zeroVertices;
   if (
     !this->splitVerticesByNormal(
-      toBeSliced,
-      normal,
-      newPlusCone.vertices,
-      newMinusCone.vertices,
+      toBeSliced, normal, newPlusCone.vertices, newMinusCone.vertices,
       zeroVertices
     )
   ) {
@@ -13847,16 +13524,13 @@ bool Cone::makeConvexHullOfMeAnd(const Cone& other) {
   return true;
 }
 
-bool ConeCollection::refineOneByNormals(
-  Cone& toBeRefined, List<Cone>& output
-) {
+bool ConeCollection::refineOneByNormals(Cone& toBeRefined, List<Cone>& output)
+{
   STACK_TRACE("ConeCollection::refineByNormals");
   output.clear();
   int& counter = toBeRefined.payload.lowestSlicingIndex;
   for (; counter < this->splittingNormals.size; counter ++) {
-    if (
-      this->splitChamber(toBeRefined, this->splittingNormals[counter])
-    ) {
+    if (this->splitChamber(toBeRefined, this->splittingNormals[counter])) {
       return true;
     }
   }
@@ -13924,9 +13598,8 @@ void ConeCollection::splitConeByMultipleNeighbors(Cone& input, Wall& wall) {
   this->addNonRefinedCone(input);
 }
 
-bool ConeCollection::isSpannedByDirections(
-  const Vector<Rational>& planeNormal
-) {
+bool ConeCollection::isSpannedByDirections(const Vector<Rational>& planeNormal)
+{
   STACK_TRACE("ConeCollection::isSpannedByDirections");
   Vectors<Rational> directionsPerpendicularToNormal;
   for (Vector<Rational>& direction : this->slicingDirections) {
@@ -13939,9 +13612,8 @@ bool ConeCollection::isSpannedByDirections(
 }
 
 bool ConeCollection::allExitWallsAreVisited(
-  Cone& toBeRefined,
-  const Vector<Rational>& direction,
-  List<Wall>& outputExitWalls
+  Cone& toBeRefined, const Vector<Rational>& direction, List<Wall>&
+  outputExitWalls
 ) {
   STACK_TRACE("ConeCollection::allExitWallsAreVisited");
   outputExitWalls.clear();
@@ -13992,9 +13664,7 @@ bool ConeCollection::refineOneByOneDirection(
 }
 
 bool ConeCollection::refineOneByOneDirectionArbitrarySlices(
-  Cone& toBeRefined,
-  List<Wall>& exitWalls,
-  const Vector<Rational>& direction
+  Cone& toBeRefined, List<Wall>& exitWalls, const Vector<Rational>& direction
 ) {
   STACK_TRACE("ConeCollection::refineOneByOneDirectionArbitrarySlices");
   MapList<int, Cone> candidates;
@@ -14012,10 +13682,7 @@ bool ConeCollection::refineOneByOneDirectionArbitrarySlices(
       }
       Wall newWall;
       toBeRefined.produceNormalSeparatingWallsInDirection(
-        direction,
-        exitWalls[i].normal,
-        exitWalls[j].normal,
-        newWall.normal
+        direction, exitWalls[i].normal, exitWalls[j].normal, newWall.normal
       );
       newWall.neighbors.addOnTop(firstIndex + j);
       current.walls.addOnTop(newWall);
@@ -14090,9 +13757,7 @@ void ConeCollection::attachNeighbbors(
 }
 
 void ConeCollection::replaceConeAdjacentToWall(
-  const Cone& toBeReplaced,
-  const Wall& wall,
-  const List<Cone*>& newCones
+  const Cone& toBeReplaced, const Wall& wall, const List<Cone*>& newCones
 ) {
   STACK_TRACE("ConeCollection::replaceConeAdjacentToWall");
   for (int idNeighbor : wall.neighbors) {
@@ -14147,9 +13812,7 @@ void ConeCollection::addMutualNeighborsIfAdjacent(
     return;
   }
   if (
-    !original.hasCommonPossiblyIrregularWall(
-      incoming, wallInOriginal.normal
-    )
+    !original.hasCommonPossiblyIrregularWall(incoming, wallInOriginal.normal)
   ) {
     // The chambers are on the opposite sides of a plane that acts as a wall
     // for both chambers. However, the set of common points is less than n-1
@@ -14192,9 +13855,7 @@ void ConeCollection::sort() {
   this->refinedCones.clear();
   for (int i = 0; i < sortedValues.size; i ++) {
     sortedValues[i].payload.displayNumber = i + 1;
-    this->refinedCones.setKeyValue(
-      sortedValues[i].id, sortedValues[i]
-    );
+    this->refinedCones.setKeyValue(sortedValues[i].id, sortedValues[i]);
   }
 }
 
@@ -14205,9 +13866,7 @@ void ConeCollection::refineByNormals() {
   while (this->nonRefinedCones.size() > 0) {
     int indexLast = this->nonRefinedCones.size() - 1;
     Cone toBeReduced = this->nonRefinedCones.values[indexLast];
-    this->nonRefinedCones.removeKey(
-      this->nonRefinedCones.keys[indexLast]
-    );
+    this->nonRefinedCones.removeKey(this->nonRefinedCones.keys[indexLast]);
     bool isAlreadyRefined = !this->refineOneByNormals(toBeReduced, incoming);
     if (isAlreadyRefined) {
       this->refinedCones.setKeyValue(toBeReduced.id, toBeReduced);
@@ -14272,9 +13931,7 @@ void ConeCollection::mergeChambers() {
   &container1;
   MapList<List<unsigned char>, HashedList<int> >* nextConeFamilies =
   &container2;
-  currentConeFamilies->setKeyValue(
-    List<unsigned char>(), HashedList<int>()
-  );
+  currentConeFamilies->setKeyValue(List<unsigned char>(), HashedList<int>());
   for (Cone& cone : this->refinedCones.values) {
     cone.payload.hashOfContainingSimplices.clear();
     currentConeFamilies->getValueCreateNoInitialization(
@@ -14323,7 +13980,8 @@ void ConeCollection::mergeChambersAlongWall(
   Vector<Rational> normal = oldWall.normal;
   Vector<Rational> minusNormal = - normal;
   if (
-    outputNewWalls.contains(minusNormal) || outputMergedWalls.contains(normal)
+    outputNewWalls.contains(minusNormal) ||
+    outputMergedWalls.contains(normal)
   ) {
     outputMergedWalls.addOnTopNoRepetition(normal);
     outputMergedWalls.addOnTop(minusNormal);
@@ -14452,10 +14110,9 @@ bool ConeCollection::isAddmissibleConeSplit(
 }
 
 bool ConeCollection::computeSplittingNormal(
-  Cone& toBeSliced,
-  List<Wall>& exitWalls,
-  int directionIndex,
-  Vector<Rational>& normal
+  Cone& toBeSliced, List<Wall>& exitWalls, int directionIndex, Vector<
+    Rational
+  >& normal
 ) {
   Vector<Rational>& direction = this->slicingDirections[directionIndex];
   for (int i = 0; i < exitWalls.size; i ++) {
@@ -14493,8 +14150,7 @@ bool ConeCollection::refineOneByOneDirectionSpannedSlices(
   }
   Vector<Rational> normal;
   if (
-    !this->computeSplittingNormal(
-      toBeSliced, exitWalls, directionIndex, normal
+    !this->computeSplittingNormal(toBeSliced, exitWalls, directionIndex, normal
     )
   ) {
     this->addRefinedCone(toBeSliced);
@@ -14754,9 +14410,7 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numberOfAddedFakeWalls) {
       verticesOnWall.size = 0;
       bool wallIsGood = false;
       for (int j = 0; j < this->vertices.size; j ++) {
-        if (
-          currentNormal.scalarEuclidean(this->vertices[j]).isEqualToZero()
-        ) {
+        if (currentNormal.scalarEuclidean(this->vertices[j]).isEqualToZero()) {
           verticesOnWall.addOnTop(this->vertices[j]);
           int rank =
           verticesOnWall.getRankElementSpan(&matrixX, &currentSelectionX);
@@ -14967,8 +14621,7 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
 }
 
 bool Cone::createFromNormals(
-  const Vectors<Rational>& inputNormals,
-  const List<List<int> >& inputNeighbors
+  const Vectors<Rational>& inputNormals, const List<List<int> >& inputNeighbors
 ) {
   return this->createFromNormals(inputNormals, inputNeighbors, false);
 }
@@ -15150,9 +14803,7 @@ void ConeCollection::initFromConeWalls(
   Vector<Rational> root;
   this->splittingNormals.clear();
   for (int i = 0; i < this->nonRefinedCones.size(); i ++) {
-    for (
-      int j = 0; j < this->nonRefinedCones.values[i].walls.size; j ++
-    ) {
+    for (int j = 0; j < this->nonRefinedCones.values[i].walls.size; j ++) {
       root = this->nonRefinedCones[i].walls[j].normal;
       root.scaleNormalizeFirstNonZero();
       this->splittingNormals.addOnTopNoRepetition(root);
@@ -15199,15 +14850,13 @@ std::string Cone::toLatexVectorWithErrorCheck(
   std::stringstream out;
   out << input.toString();
   if (
-    includeErrorChecks && this->payload.precomputedNonChecked.contains(input)
-  ) {
+    includeErrorChecks &&
+    this->payload.precomputedNonChecked.contains(input)) {
     out
     << ": "
     << this->payload.precomputedNonChecked.getValueNoFail(input).toString();
   }
-  if (
-    includeErrorChecks && this->payload.precomputedChecked.contains(input)
-  ) {
+  if (includeErrorChecks && this->payload.precomputedChecked.contains(input)) {
     out
     << ": "
     << this->payload.precomputedChecked.getValueNoFail(input).toString()
@@ -15223,9 +14872,7 @@ std::string Cone::toLatexVertices(bool includeErrorChecks) const {
   }
   if (this->vertices.size == 1) {
     return
-    this->toLatexVectorWithErrorCheck(
-      this->vertices[0], includeErrorChecks
-    );
+    this->toLatexVectorWithErrorCheck(this->vertices[0], includeErrorChecks);
   }
   out << "\\begin{array}{l}";
   for (int i = 0; i < this->vertices.size; i ++) {
@@ -15241,9 +14888,8 @@ std::string Cone::toLatexVertices(bool includeErrorChecks) const {
   return out.str();
 }
 
-std::string Cone::toLatex(
-  const ConeCollection& owner, bool includeErrorChecks
-) const {
+std::string Cone::toLatex(const ConeCollection& owner, bool includeErrorChecks)
+const {
   STACK_TRACE("Cone::toLatex");
   std::stringstream out;
   bool lastVarIsConstant = false;
@@ -15276,9 +14922,8 @@ std::string Cone::toLatex(
   return out.str();
 }
 
-std::string Cone::toHTML(
-  const ConeCollection& owner, bool includeErrorChecks
-) const {
+std::string Cone::toHTML(const ConeCollection& owner, bool includeErrorChecks)
+const {
   STACK_TRACE("Cone::toHTML");
   std::stringstream out;
   bool lastVarIsConstant = false;
@@ -15308,9 +14953,7 @@ std::string Cone::toHTML(
 std::string Cone::toStringPrecomputedVectorPartitionFunctionValues() const {
   std::stringstream out;
   out << "<br>Precomputed values, checked by enumeration: ";
-  for (
-    const Vector<Rational>& input : this->payload.precomputedChecked.keys
-  ) {
+  for (const Vector<Rational>& input : this->payload.precomputedChecked.keys) {
     out
     << "<br>"
     << input
@@ -15318,8 +14961,7 @@ std::string Cone::toStringPrecomputedVectorPartitionFunctionValues() const {
     << this->payload.precomputedChecked.getValueNoFail(input);
   }
   out << "<br>Precomputed values, too large to check: ";
-  for (
-    const Vector<Rational>& input : this->payload.precomputedNonChecked.keys
+  for (const Vector<Rational>& input : this->payload.precomputedNonChecked.keys
   ) {
     out
     << "<br>"
@@ -15421,8 +15063,7 @@ std::string Cone::toString(FormatExpressions* format) const {
   if (format == nullptr) {
     format = &formatContainer;
   }
-  out
-  << this->getAllNormals().toLatexInequalities(lastVarIsConstant, *format);
+  out << this->getAllNormals().toLatexInequalities(lastVarIsConstant, *format);
   if (useLatex) {
     out << "\\]";
   }
@@ -15486,8 +15127,7 @@ void Cone::precomputeVectorPartitionFunction(
   }
 }
 
-std::string ConeCollection::toStringNeighborGraph(
-  const MapList<int, Cone>& map
+std::string ConeCollection::toStringNeighborGraph(const MapList<int, Cone>& map
 ) const {
   std::stringstream out;
   for (const Cone& cone : map.values) {
@@ -15617,9 +15257,7 @@ std::string ConeCollection::toLatexGraphicsOnlyPsTricks(
   std::stringstream out;
   DrawingVariables drawingVariables;
   if (
-    !this->drawMeProjective(
-      drawingVariables, includeVertices, includeLattice
-    )
+    !this->drawMeProjective(drawingVariables, includeVertices, includeLattice)
   ) {
     return "";
   }

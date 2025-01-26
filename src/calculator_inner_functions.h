@@ -144,10 +144,8 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool plotImplicitFunctionFull(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool showGrid
+    Calculator& calculator, const Expression& input, Expression& output, bool
+    showGrid
   );
   static bool plotImplicitFunction(
     Calculator& calculator, const Expression& input, Expression& output
@@ -269,30 +267,25 @@ public:
 class JavascriptExtractor {
 private:
   bool extractJavascriptRecursive(
-    const Expression& input,
-    std::string& output,
-    std::stringstream* commentsOnFailure
+    const Expression& input, std::string& output, std::stringstream*
+    commentsOnFailure
   );
   bool extractFromAtom(const Expression& input, std::string& output);
   bool extractFromSequence(
-    const Expression& input,
-    std::string& output,
-    std::stringstream* commentsOnFailure
+    const Expression& input, std::string& output, std::stringstream*
+    commentsOnFailure
   );
   bool extractFromOperation(
-    const Expression& input,
-    std::string& output,
-    std::stringstream* commentsOnFailure
+    const Expression& input, std::string& output, std::stringstream*
+    commentsOnFailure
   );
   bool extractFromUnaryOrBinary(
-    const Expression& input,
-    std::string& output,
-    std::stringstream* commentsOnFailure
+    const Expression& input, std::string& output, std::stringstream*
+    commentsOnFailure
   );
   bool extractFromTernary(
-    const Expression& input,
-    std::string& output,
-    std::stringstream* commentsOnFailure
+    const Expression& input, std::string& output, std::stringstream*
+    commentsOnFailure
   );
 public:
   Calculator* owner;
@@ -312,14 +305,11 @@ public:
     const Expression& input, std::stringstream* commentsOnFailure
   );
   bool extract(
-    const Expression& input,
-    std::string& output,
-    std::stringstream* commentsOnFailure
+    const Expression& input, std::string& output, std::stringstream*
+    commentsOnFailure
   );
   void writeParameterNames(PlotObject& output);
-  bool expressionToMatrixToPoints(
-    const Expression& input, PlotObject& output
-  );
+  bool expressionToMatrixToPoints(const Expression& input, PlotObject& output);
   bool convertMatrixOfExpressionToPoints(
     const Matrix<Expression>& input, PlotObject& output
   );
@@ -327,9 +317,7 @@ public:
     const Expression& input, int desiredDimension, PlotObject& output
   );
   bool convertListOfListOfExpressionsToPoints(
-    const List<Expression>& input,
-    int desiredDimension,
-    PlotObject& output
+    const List<Expression>& input, int desiredDimension, PlotObject& output
   );
 };
 
@@ -702,10 +690,8 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool turnRulesOnOff(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool turnOff
+    Calculator& calculator, const Expression& input, Expression& output, bool
+    turnOff
   );
   static bool turnOffRules(
     Calculator& calculator, const Expression& input, Expression& output
@@ -1370,16 +1356,12 @@ public:
     );
   }
   static bool elementWeylAlgebraOrPolynomial(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    bool assignPoly
+    Calculator& calculator, const Expression& input, Expression& output, bool
+    assignPoly
   );
   static bool operationBinary(
-    Calculator& calculator,
-    const Expression& input,
-    Expression& output,
-    int operation
+    Calculator& calculator, const Expression& input, Expression& output, int
+    operation
   );
   static bool interpolatePolynomial(
     Calculator& calculator, const Expression& input, Expression& output

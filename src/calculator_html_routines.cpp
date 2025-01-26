@@ -4,19 +4,11 @@ bool CalculatorHtmlFunctions::userInputBox(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorHtmlFunctions::userInputBox");
-  MapList<
-    std::string,
-    Expression,
-    HashFunctions::hashFunction<std::string>
-  > arguments;
+  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >
+  arguments;
   if (
     !CalculatorConversions::loadKeysFromStatementList(
-      calculator,
-      input,
-      arguments,
-      false,
-      nullptr,
-      &calculator.comments
+      calculator, input, arguments, false, nullptr, &calculator.comments
     )
   ) {
     return false;
@@ -103,19 +95,15 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
   return output.assignValue(calculator, out.str());
 }
 
-std::string CalculatorHtmlFunctions::getUserInputBoxName(
-  const Expression& box
-) {
+std::string CalculatorHtmlFunctions::getUserInputBoxName(const Expression& box)
+{
   STACK_TRACE("CalculatorHtmlFunctions::getUserInputBoxName");
   if (box.owner == nullptr) {
     return "non-initialized-expression";
   }
   Calculator& calculator = *box.owner;
-  MapList<
-    std::string,
-    Expression,
-    HashFunctions::hashFunction<std::string>
-  > arguments;
+  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >
+  arguments;
   if (
     !CalculatorConversions::loadKeysFromStatementList(
       calculator, box, arguments, false, nullptr, nullptr
@@ -127,9 +115,7 @@ std::string CalculatorHtmlFunctions::getUserInputBoxName(
     return "box-without-name";
   }
   std::string boxName = "faultyBoxName";
-  if (
-    !arguments.getValueCreateEmpty("name").isOfType<std::string>(&boxName)
-  ) {
+  if (!arguments.getValueCreateEmpty("name").isOfType<std::string>(&boxName)) {
     boxName = arguments.getValueCreateEmpty("name").toString();
   }
   return boxName;

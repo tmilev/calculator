@@ -28,10 +28,7 @@ bool EmailRoutines::sendEmailWithMailGun(
   if (
     !FileOperations::
     loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-      EmailRoutines::mailApiKeyFileName,
-      mailGunKey,
-      true,
-      true,
+      EmailRoutines::mailApiKeyFileName, mailGunKey, true, true,
       commentsOnFailure
     )
   ) {
@@ -114,9 +111,7 @@ bool EmailRoutines::sendEmailWithMailGun(
   bool success = commandResult.find("Forbidden") == std::string::npos;
   if (!success && commentsOnFailure != nullptr) {
     int start =
-    MathRoutines::maximum(
-      0, static_cast<int>(mailGunKey.size() - 17)
-    );
+    MathRoutines::maximum(0, static_cast<int>(mailGunKey.size() - 17));
     std::string apiKey = mailGunKey.substr(start);
     *commentsOnFailure
     << "Failed to send your email from our automated account: "
@@ -144,9 +139,7 @@ List<bool>& EmailRoutines::getRecognizedEmailChars() {
     characters += "@";
     characters += "!#$%&'*+-/=?.";
     for (unsigned i = 0; i < characters.size(); i ++) {
-      recognizedEmailCharacters[
-        static_cast<unsigned char>(characters[i])
-      ] =
+      recognizedEmailCharacters[static_cast<unsigned char>(characters[i])] =
       true;
     }
   }

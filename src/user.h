@@ -90,11 +90,8 @@ class TopicElement;
 
 class UserCalculator: public UserCalculatorData {
 public:
-  MapList<
-    std::string,
-    ProblemData,
-    HashFunctions::hashFunction<std::string>
-  > problemData;
+  MapList<std::string, ProblemData, HashFunctions::hashFunction<std::string> >
+  problemData;
   TimeWrapper authenticationCreationTime;
   Rational pointsEarned;
   Rational pointsMaximum;
@@ -103,9 +100,7 @@ public:
   void computePointsEarned(
     const HashedList<std::string>& gradableProblems,
     MapList<
-      std::string,
-      TopicElement,
-      HashFunctions::hashFunction<std::string>
+      std::string, TopicElement, HashFunctions::hashFunction<std::string>
     >* topics,
     std::stringstream& commentsOnFailure
   );
@@ -136,8 +131,8 @@ public:
   bool resetAuthenticationToken(std::stringstream* commentsOnFailure);
   bool setPassword(std::stringstream* commentsOnFailure);
   void exists(
-    bool& outputExists, bool& databaseIsOK, std::stringstream* comments
-  );
+    bool& outputExists, bool& databaseIsOK, std::stringstream*
+    comments);
   // Stores the user data to the database.
   // Overwrites previously stored data.
   bool storeToDatabaseOverwrite(

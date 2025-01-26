@@ -7,16 +7,13 @@
 
 template < >
 void PolynomialConversions::convertToPolynomial(
-  const PolynomialUnivariateModular& input,
-  Polynomial<ElementZmodP>& output
+  const PolynomialUnivariateModular& input, Polynomial<ElementZmodP>& output
 ) {
   output.makeZero();
   ElementZmodP coefficient;
   MonomialPolynomial monomial;
   for (int i = 0; i < input.coefficients.size; i ++) {
-    coefficient.makeFrom(
-      input.modulusData->modulus, input.coefficients[i]
-    );
+    coefficient.makeFrom(input.modulusData->modulus, input.coefficients[i]);
     monomial.makeEi(0, i);
     output.addMonomial(monomial, coefficient);
   }
@@ -55,9 +52,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
   }
   Polynomial<Rational> myCopy;
   myCopy = *this;
-  myCopy.scaleNormalizeLeadingMonomial(
-    &MonomialPolynomial::orderDefault()
-  );
+  myCopy.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Rational lowestTerm;
   Rational highestCoefficient;
   this->constantTerm(lowestTerm);
@@ -76,9 +71,7 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
     return true;
   }
   highestCoefficient = this->getLeadingCoefficient(monomialOrder);
-  if (
-    !highestCoefficient.isSmallInteger() || !lowestTerm.isSmallInteger()
-  ) {
+  if (!highestCoefficient.isSmallInteger() || !lowestTerm.isSmallInteger()) {
     return false;
   }
   Vector<Rational> vector;
@@ -90,16 +83,12 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
   LargeInteger lT;
   hT = highestCoefficient.getNumerator();
   lT = lowestTerm.getNumerator();
-  if (
-    !hT.getDivisors(divisorsH, false) || !lT.getDivisors(divisorsS, true)
-  ) {
+  if (!hT.getDivisors(divisorsH, false) || !lT.getDivisors(divisorsS, true)) {
     return false;
   }
   for (int i = 0; i < divisorsH.size; i ++) {
     for (int j = 0; j < divisorsS.size; j ++) {
-      vector[0].assignNumeratorAndDenominator(
-        divisorsS[j], divisorsH[i]
-      );
+      vector[0].assignNumeratorAndDenominator(divisorsS[j], divisorsH[i]);
       value = myCopy.evaluate(vector);
       if (value == 0) {
         Polynomial<Rational> divisor;
@@ -130,9 +119,8 @@ void Polynomial<Rational>::getValuesLagrangeInterpolands(
     for (int j = 0; j < pointsOfInterpolation.size; j ++) {
       currentInterpoland[j] = (i == j) ? 1 : 0;
     }
-    for (
-      int j = pointsOfInterpolation.size; j < pointsOfEvaluation.size; j ++
-    ) {
+    for (int j = pointsOfInterpolation.size; j < pointsOfEvaluation.size; j ++)
+    {
       currentInterpoland[j] = 1;
       for (int k = 0; k < pointsOfInterpolation.size; k ++) {
         if (i == k) {
@@ -438,14 +426,10 @@ bool PolynomialFactorizationFiniteFields::hasSquareFactor(
     // The current polynomial is supposed to have integer coefficients,
     // hence the modular conversion cannot fail due to division by
     // zero.
-    converted.makeFromPolynomialAndModulusNoFailure(
-      &modulus, this->current
-    );
+    converted.makeFromPolynomialAndModulusNoFailure(&modulus, this->current);
     converted.derivative(derivative);
     converted.greatestCommonDivisor(
-      converted,
-      derivative,
-      greatestCommonDivisorConvertedAndDerivative,
+      converted, derivative, greatestCommonDivisorConvertedAndDerivative,
       nullptr
     );
     if (greatestCommonDivisorConvertedAndDerivative.isConstant()) {
@@ -592,9 +576,7 @@ void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary()
   for (int i = 0; i < this->current.size(); i ++) {
     this->largestCoefficient =
     MathRoutines::maximum(
-      LargeInteger(
-        this->current.coefficients[i].getNumerator().value
-      ),
+      LargeInteger(this->current.coefficients[i].getNumerator().value),
       this->largestCoefficient
     );
   }
@@ -630,9 +612,7 @@ void PolynomialFactorizationFiniteFields::computeCoefficientBoundsGelfond() {
   for (int i = 0; i < this->current.size(); i ++) {
     this->largestCoefficient =
     MathRoutines::maximum(
-      LargeInteger(
-        this->current.coefficients[i].getNumerator().value
-      ),
+      LargeInteger(this->current.coefficients[i].getNumerator().value),
       this->largestCoefficient
     );
   }
@@ -734,16 +714,13 @@ std::string PolynomialFactorizationFiniteFields::toLatexLiftedFactors() {
 }
 
 void PolynomialFactorizationFiniteFields::henselLiftOnce(
-  const LargeIntegerUnsigned& oldModulus,
-  int stepCount,
-  std::stringstream* comments
+  const LargeIntegerUnsigned& oldModulus, int stepCount, std::stringstream*
+  comments
 ) {
   STACK_TRACE("PolynomialFactorizationFiniteFields::henselLiftOnce");
   std::stringstream explainer;
   ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
-    this->current,
-    this->desiredLiftWithoutRescaling,
-    this->modulusHenselLift
+    this->current, this->desiredLiftWithoutRescaling, this->modulusHenselLift
   );
   this->desiredLift = this->desiredLiftWithoutRescaling;
   this->scaleProductLift =
@@ -785,9 +762,7 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
   }
   for (int i = 0; i < this->factorsLifted.size; i ++) {
     ElementZmodP::convertLiftPolynomialModular(
-      this->factorsLifted[i],
-      this->factorsLifted[i],
-      this->modulusHenselLift
+      this->factorsLifted[i], this->factorsLifted[i], this->modulusHenselLift
     );
   }
   Polynomial<ElementZmodP> newProduct;
@@ -879,8 +854,7 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
   }
   Vector<ElementZmodP> coefficientsCorrection;
   coefficientsCorrection.makeZero(
-    this->sylvesterMatrixInverted.numberOfColumns,
-    this->oneModular.zero()
+    this->sylvesterMatrixInverted.numberOfColumns, this->oneModular.zero()
   );
   for (int i = 0; i < correctionOverPrime.size(); i ++) {
     int index =
@@ -1045,9 +1019,7 @@ bool PolynomialFactorizationFiniteFields::factorizationFromHenselLift(
   );
   this->maximumFactorsLiftedTries = 1000;
   while (this->factorsLifted.size > 0) {
-    if (
-      !this->factorizationFromHenselLiftOnce(comments, commentsOnFailure)
-    ) {
+    if (!this->factorizationFromHenselLiftOnce(comments, commentsOnFailure)) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure << "Failed to carry out hensel lift. ";
       }
@@ -1251,9 +1223,7 @@ void PolynomialUnivariateModular::divideBy(
   if (divisor.isEqualToZero()) {
     global.fatal << "Dividing by zero is not allowed. " << global.fatal;
   }
-  while (
-    outputRemainder.coefficients.size >= divisor.coefficients.size
-  ) {
+  while (outputRemainder.coefficients.size >= divisor.coefficients.size) {
     int coefficient = (
       outputRemainder.getLeadingCoefficient() *
       divisorInvertedLeadingCoefficient
@@ -1663,9 +1633,7 @@ void PolynomialModuloPolynomialModuloInteger::reduce() {
     << global.fatal;
   }
   List<List<int> >& reductions = this->modulus()->imagesPowersOfX;
-  for (
-    int i = totalModulusDegree; i < this->value.coefficients.size; i ++
-  ) {
+  for (int i = totalModulusDegree; i < this->value.coefficients.size; i ++) {
     int coefficient = this->value.coefficients[i];
     this->value.coefficients[i] = 0;
     List<int>& currentReduction = reductions[i - totalModulusDegree];
@@ -1713,9 +1681,7 @@ void IntegerModulusSmall::initializeModulusData(int inputModulus) {
   this->modulus = inputModulus;
   this->inverses.initializeFillInObject(inputModulus, 0);
   for (int i = 1; i < inputModulus; i ++) {
-    if (
-      !MathRoutines::invertXModN(i, inputModulus, this->inverses[i])
-    ) {
+    if (!MathRoutines::invertXModN(i, inputModulus, this->inverses[i])) {
       global.fatal
       << "Modulus "
       << inputModulus
@@ -1756,9 +1722,8 @@ greatestCommonDivisorRational(
   computer.rightInput = rightRescaled;
   Polynomial<LargeInteger> outputInteger;
   int64_t millisecondsStart = global.getElapsedMilliseconds();
-  if (
-    !computer.computeGreatestCommonDivisor(outputInteger, commentsOnFailure)
-  ) {
+  if (!computer.computeGreatestCommonDivisor(outputInteger, commentsOnFailure))
+  {
     return false;
   }
   computer.millisecondsTotal =
@@ -1806,8 +1771,7 @@ void PolynomialRationalGreatestCommonDivisorComputer::initializeComputation() {
 
 bool PolynomialRationalGreatestCommonDivisorComputer::
 computeGreatestCommonDivisor(
-  Polynomial<LargeInteger>& output,
-  std::stringstream* commentsOnFailure
+  Polynomial<LargeInteger>& output, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE(
     "PolynomialRationalGreatestCommonDivisorComputer::"
@@ -1835,8 +1799,7 @@ computeGreatestCommonDivisor(
 }
 
 bool PolynomialRationalGreatestCommonDivisorComputer::
-computeOneGreatestCommonDivisor(
-  int prime, std::stringstream* commentsOnFailure
+computeOneGreatestCommonDivisor(int prime, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE(
     "PolynomialRationalGreatestCommonDivisorComputer::"
@@ -1860,10 +1823,7 @@ computeOneGreatestCommonDivisor(
   PolynomialUnivariateModular unused;
   int64_t startGreatestCommonDivisor = global.getElapsedMilliseconds();
   leftModular.greatestCommonDivisor(
-    leftModular,
-    rightModular,
-    greatestCommonDivisorModular,
-    commentsOnFailure
+    leftModular, rightModular, greatestCommonDivisorModular, commentsOnFailure
   );
   this->millisecondsGreatestCommonDivisorDense +=
   global.getElapsedMilliseconds() - startGreatestCommonDivisor;
@@ -1906,14 +1866,10 @@ computeOneGreatestCommonDivisor(
     << global.fatal;
   }
   this->convertModularPolynomialToIntegerPolynomial(
-    leftFactorModular,
-    this->leftFactorCandidate,
-    this->leftFactorCandidate
+    leftFactorModular, this->leftFactorCandidate, this->leftFactorCandidate
   );
   this->convertModularPolynomialToIntegerPolynomial(
-    rightFactorModular,
-    this->rightFactorCandidate,
-    this->rightFactorCandidate
+    rightFactorModular, this->rightFactorCandidate, this->rightFactorCandidate
   );
   this->convertModularPolynomialToIntegerPolynomial(
     greatestCommonDivisorModular,

@@ -260,9 +260,8 @@ public:
     std::string toStringWConjectureHolds() const;
     std::string toString(const CandidateSemisimpleSubalgebra& owner) const;
     std::string toStringAdjointActionNegativeOne() const;
-    std::string toStringLieBracketTriples(
-      const List<std::string>& triple
-    ) const;
+    std::string toStringLieBracketTriples(const List<std::string>& triple)
+    const;
     void computeSmallOrbits(const CandidateSemisimpleSubalgebra& owner);
     void computeAdEAsPolynomialMap(const CandidateSemisimpleSubalgebra& owner);
   };
@@ -312,8 +311,8 @@ public:
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void getGenericLinearCombinationInvolvedPosGens(
-    int index,
-    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
+    int index, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
+    output
   );
   void computeCentralizerIsWellChosen();
   void computeCentralizerManually();
@@ -380,9 +379,7 @@ public:
   CandidateSubalgebraStatus computeFromGenerators(
     bool allowNonPolynomialSystemFailure
   );
-  void computeSinglePair(
-    int leftIndex, int rightIndex, List<int>& output
-  );
+  void computeSinglePair(int leftIndex, int rightIndex, List<int>& output);
   int getNumberOfModules() const;
   void computePairKWeightElementAndModule(
     const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKWeightElement,
@@ -415,13 +412,11 @@ public:
   );
   void computePrimalModuleDecompositionHighestWeightsLastPart();
   void getPrimalWeightProjectionFundamentalCoordinates(
-    const Vector<Rational>& inputAmbientWeight,
-    Vector<Rational>& output
+    const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output
   ) const;
   bool checkGeneratorsBracketToHs();
   void getWeightProjectionFundamentalCoordinates(
-    const Vector<Rational>& inputAmbientWeight,
-    Vector<Rational>& output
+    const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output
   ) const;
   void attemptToSolveSystem(
     bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
@@ -442,8 +437,7 @@ public:
   );
   bool verifySolution(PolynomialSystem<AlgebraicNumber>& system);
   bool isGoodHNewActingByTwo(
-    const Vector<Rational>& hNewActingByTwo,
-    const List<int>& rootInjections
+    const Vector<Rational>& hNewActingByTwo, const List<int>& rootInjections
   ) const;
   Rational getScalarSubalgebra(
     const Vector<Rational>& primalWeightLeft,
@@ -463,9 +457,8 @@ public:
   std::string toStringCentralizer(
     FormatExpressions* format, bool writeToHardDisk
   ) const;
-  std::string toStringCentralizerDebugData(
-    FormatExpressions* format = nullptr
-  ) const;
+  std::string toStringCentralizerDebugData(FormatExpressions* format = nullptr)
+  const;
   std::string toStringCartanSubalgebra(FormatExpressions* format = nullptr)
   const;
   std::string toStringPairingTable(FormatExpressions* format = nullptr) const;
@@ -661,9 +654,7 @@ public:
   void checkFileWritePermissions();
   void writeReportToFiles();
   std::string toStringAlgebraLink(
-    int actualindexSubalgebra,
-    FormatExpressions* format,
-    bool writeToHardDisk
+    int actualindexSubalgebra, FormatExpressions* format, bool writeToHardDisk
   ) const;
   std::string getRelativePhysicalFileNameSubalgebra(int actualIndexSubalgebra)
   const;

@@ -10,15 +10,10 @@ std::string HtmlRoutines::latexWithCopyButton = "latexWithCopyButton";
 std::string HtmlRoutines::gitRepository =
 "https://github.com/tmilev/calculator";
 
-MapList<
-  std::string,
-  std::string,
-  HashFunctions::hashFunction<std::string>
->& HtmlRoutines::preLoadedFiles() {
+MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+HtmlRoutines::preLoadedFiles() {
   static MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
+    std::string, std::string, HashFunctions::hashFunction<std::string>
   > result;
   return result;
 }
@@ -72,12 +67,16 @@ void HtmlRoutines::loadStrings() {
 const std::string& HtmlRoutines::getJavascriptAceEditorScriptWithTags() {
   if (HtmlRoutines::preLoadedFiles().contains("AceEditor")) {
     return
-    HtmlRoutines::preLoadedFiles().getValueCreateNoInitialization("AceEditor");
+    HtmlRoutines::preLoadedFiles().getValueCreateNoInitialization(
+      "AceEditor"
+    );
   }
   std::stringstream out;
   out
   << "<script type =\"text/javascript\" src =\""
-  << FileOperations::getVirtualNameWithHash("/html-common/ace/src-min/ace.js")
+  << FileOperations::getVirtualNameWithHash(
+    "/html-common/ace/src-min/ace.js"
+  )
   << "\" charset =\"utf-8\"></script>";
   out
   << HtmlRoutines::getJavascriptAddScriptTags(
@@ -96,9 +95,7 @@ const std::string& HtmlRoutines::getFile(
   STACK_TRACE("HtmlRoutines::getFile");
   std::string fileId = fileNameVirtual + additionalBeginTag + additionalEndTag;
   if (global.flagCachingInternalFilesOn) {
-    if (
-      HtmlRoutines::preLoadedFiles().getValueCreateEmpty(fileId) != ""
-    ) {
+    if (HtmlRoutines::preLoadedFiles().getValueCreateEmpty(fileId) != "") {
       return HtmlRoutines::preLoadedFiles().getValueCreateEmpty(fileId);
     }
   }
@@ -127,7 +124,8 @@ const std::string& HtmlRoutines::getFile(
     << "</b>";
   }
   HtmlRoutines::preLoadedFiles().setKeyValue(fileId, out.str());
-  return HtmlRoutines::preLoadedFiles().getValueCreateNoInitialization(fileId);
+  return
+  HtmlRoutines::preLoadedFiles().getValueCreateNoInitialization(fileId);
 }
 
 const std::string& HtmlRoutines::getJavascriptAddScriptTags(
@@ -137,9 +135,8 @@ const std::string& HtmlRoutines::getJavascriptAddScriptTags(
   return HtmlRoutines::getFile(fileNameVirtual, "<script>", "</script>");
 }
 
-std::string HtmlRoutines::getJavascriptLink(
-  const std::string& fileNameVirtual
-) {
+std::string HtmlRoutines::getJavascriptLink(const std::string& fileNameVirtual)
+{
   STACK_TRACE("HtmlRoutines::getJavascriptLink");
   std::stringstream out;
   std::string fileName =
@@ -174,15 +171,12 @@ std::string HtmlRoutines::getCalculatorComputationURL(
   WebAPI::Frontend::calculatorPage;
   out
   << "#"
-  << HtmlRoutines::convertStringToURLString(
-    request.toString(nullptr), false
-  );
+  << HtmlRoutines::convertStringToURLString(request.toString(nullptr), false);
   return out.str();
 }
 
-std::string HtmlRoutines::getProblemURLRelative(
-  const std::string& problemName
-) {
+std::string HtmlRoutines::getProblemURLRelative(const std::string& problemName)
+{
   std::stringstream out;
   JSData anchor;
   anchor[WebAPI::Frontend::currentPage] = WebAPI::Frontend::problemPage;
@@ -294,15 +288,10 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
   if (recursionDepth > 50) {
     return input;
   }
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > currentMap;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  currentMap;
   std::stringstream notUsed;
-  if (
-    !HtmlRoutines::chopPercentEncodedString(input, currentMap, notUsed)
-  ) {
+  if (!HtmlRoutines::chopPercentEncodedString(input, currentMap, notUsed)) {
     return input;
   }
   if (currentMap.size() == 0) {
@@ -310,8 +299,7 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
   }
   if (currentMap.size() == 1) {
     if (currentMap.values[0] == "") {
-      return
-      HtmlRoutines::convertURLStringToNormal(currentMap.keys[0], false);
+      return HtmlRoutines::convertURLStringToNormal(currentMap.keys[0], false);
     }
   }
   std::stringstream out;
@@ -327,9 +315,7 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
       if (currentMap.values[i] != "") {
         out
         << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
-          HtmlRoutines::convertURLStringToNormal(
-            currentMap.values[i], true
-          ),
+          HtmlRoutines::convertURLStringToNormal(currentMap.values[i], true),
           recursionDepth + 1
         );
       }
@@ -367,9 +353,7 @@ std::string HtmlRoutines::convertURLStringToNormal(
 }
 
 void HtmlRoutines::convertURLStringToNormal(
-  const std::string& input,
-  std::string& output,
-  bool replacePlusBySpace
+  const std::string& input, std::string& output, bool replacePlusBySpace
 ) {
   std::string readAhead;
   std::stringstream out;
@@ -396,11 +380,8 @@ void HtmlRoutines::convertURLStringToNormal(
 bool HtmlRoutines::accountOneInputPercentEncodedString(
   const std::string& fieldName,
   const std::string& fieldValue,
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& outputMap,
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  outputMap,
   std::stringstream& commentsOnFailure
 ) {
   STACK_TRACE("HtmlRoutines::accountOneInputPercentEncodedString");
@@ -424,11 +405,8 @@ bool HtmlRoutines::accountOneInputPercentEncodedString(
 
 bool HtmlRoutines::chopPercentEncodedString(
   const std::string& input,
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& outputMap,
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  outputMap,
   std::stringstream& commentsOnFailure
 ) {
   STACK_TRACE("HtmlRoutines::chopPercentEncodedString");
@@ -442,11 +420,8 @@ bool HtmlRoutines::chopPercentEncodedString(
 
 bool HtmlRoutines::chopPercentEncodedStringAppend(
   const std::string& input,
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& outputMap,
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  outputMap,
   std::stringstream& commentsOnFailure
 ) {
   STACK_TRACE("HtmlRoutines::chopPercentEncodedStringAppend");
@@ -487,9 +462,7 @@ bool HtmlRoutines::chopPercentEncodedStringAppend(
 }
 
 bool HtmlRoutines::URLStringToNormalOneStep(
-  std::string& readAhead,
-  std::stringstream& out,
-  bool replacePlusBySpace
+  std::string& readAhead, std::stringstream& out, bool replacePlusBySpace
 ) {
   if (replacePlusBySpace) {
     if (readAhead[0] == '+') {

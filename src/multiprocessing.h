@@ -40,8 +40,7 @@ public:
   );
   std::string getLastRead();
   bool checkConsistency();
-  bool setPipeFlagsNoFailure(
-    int inputFlags, int whichEnd, bool dontCrashOnFail
+  bool setPipeFlagsNoFailure(int inputFlags, int whichEnd, bool dontCrashOnFail
   );
   bool setReadNonBlocking(bool dontCrashOnFail);
   bool setReadBlocking(bool dontCrashOnFail);
@@ -54,14 +53,10 @@ public:
     const std::string& input, int offset, bool dontCrashOnFail
   );
   bool readOnceNoFailure(bool dontCrashOnFail);
-  bool writeOnceAfterEmptying(
-    const std::string& input, bool dontCrashOnFail
-  );
+  bool writeOnceAfterEmptying(const std::string& input, bool dontCrashOnFail);
   bool readOnceWithoutEmptying(bool dontCrashOnFail);
   bool handleFailedWriteReturnFalse(
-    const std::string& toBeSent,
-    bool dontCrashOnFail,
-    int numberOfBadAttempts
+    const std::string& toBeSent, bool dontCrashOnFail, int numberOfBadAttempts
   );
   std::string toString() const;
   PipePrimitive();
@@ -165,9 +160,7 @@ public:
   // The counterpart sender is expected to cooperate,
   // and in particular to run on the same machine.
   bool readFullMessage(List<char>& output);
-  static int writeNoInterrupts(
-    int fileDescriptor, const std::string& input
-  );
+  static int writeNoInterrupts(int fileDescriptor, const std::string& input);
   static int writeWithTimeoutViaSelect(
     int fileDescriptor,
     const std::string& input,
@@ -192,8 +185,7 @@ public:
     int maximumTries = 10,
     std::stringstream* commentsOnFailure = nullptr
   );
-  bool writeOnceAfterEmptying(
-    const std::string& toBeSent, bool dontCrashOnFail
+  bool writeOnceAfterEmptying(const std::string& toBeSent, bool dontCrashOnFail
   );
   std::string toString() const;
   void release();

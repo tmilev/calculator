@@ -19,8 +19,8 @@ void WebAPIResponse::reset(WebWorker& inputOwner) {
 }
 
 bool WebAPIResponse::serveResponseFalseIfUnrecognized(
-  std::stringstream& argumentProcessingFailureComments,
-  std::stringstream& comments
+  std::stringstream& argumentProcessingFailureComments, std::stringstream&
+  comments
 ) {
   STACK_TRACE("WebAPIResponse::serveResponseFalseIfUnrecognized");
   if (
@@ -89,9 +89,8 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processSubmitAnswers();
   } else if (global.requestType == "scores" && global.flagLoggedIn) {
     return this->processScores();
-  } else if (
-    global.requestType == "scoresInCoursePage" && global.flagLoggedIn
-  ) {
+  } else if (global.requestType == "scoresInCoursePage" && global.flagLoggedIn)
+  {
     return this->processScoresInCoursePage();
   } else if (
     global.userGuestMode() && global.requestType == "submitExerciseNoLogin"
@@ -104,9 +103,7 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     global.requestType == WebAPI::Request::problemGiveUpNoLogin
   ) {
     return this->processProblemGiveUp();
-  } else if ((
-      global.requestType == "problemSolution" && global.flagLoggedIn
-    ) ||
+  } else if ((global.requestType == "problemSolution" && global.flagLoggedIn) ||
     global.requestType == "problemSolutionNoLogin"
   ) {
     return this->processProblemSolution();
@@ -177,19 +174,14 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processCompareExpressions(true);
   } else if (global.requestType == WebAPI::Request::submitAnswerHardcoded) {
     return this->processSubmitAnswerHardcoded();
-  } else if (
-    global.requestType == WebAPI::Request::compareExpressionsInternal
-  ) {
+  } else if (global.requestType == WebAPI::Request::compareExpressionsInternal)
+  {
     return this->processCompareExpressions(false);
   } else if ("/" + global.requestType == WebAPI::Request::onePageJS) {
     return this->processCalculatorOnePageJS(false);
-  } else if (
-    "/" + global.requestType == WebAPI::Request::onePageJSWithHash
-  ) {
+  } else if ("/" + global.requestType == WebAPI::Request::onePageJSWithHash) {
     return this->processCalculatorOnePageJS(true);
-  } else if (
-    "/" + global.requestType == WebAPI::Request::calculatorWorkerJS
-  ) {
+  } else if ("/" + global.requestType == WebAPI::Request::calculatorWorkerJS) {
     return this->processCalculatorWebWorkerJS(false);
   } else if (
     "/" + global.requestType == WebAPI::Request::calculatorWorkerJSWithHash
@@ -331,9 +323,7 @@ void WebAPIResponse::changePassword(
   // form.submit() works!
   // <-Incoming pluses must be re-coded as spaces (%20).
   std::string newEmail =
-  HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput("email"), false
-  );
+  HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
   List<JSData> list;
   if (newEmail != "") {
     JSData notUsed;
@@ -365,10 +355,7 @@ void WebAPIResponse::changePassword(
   std::string newAuthenticationToken;
   if (
     !Database::get().user.setPassword(
-      user.username,
-      newPassword,
-      newAuthenticationToken,
-      commentsOnFailure
+      user.username, newPassword, newAuthenticationToken, commentsOnFailure
     )
   ) {
     result[WebAPI::Result::error] = commentsOnFailure.str();
@@ -376,9 +363,7 @@ void WebAPIResponse::changePassword(
     return;
   }
   QueryFind findQuery(
-    DatabaseStrings::tableUsers,
-    DatabaseStrings::labelUsername,
-    user.username
+    DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, user.username
   );
   JSData setQuery;
   QueryUpdate doSetQuery;
@@ -386,8 +371,7 @@ void WebAPIResponse::changePassword(
     DatabaseStrings::labelActivationToken, "activated"
   );
   if (
-    !Database::get().updateOne(
-      findQuery, doSetQuery, false, &commentsOnFailure
+    !Database::get().updateOne(findQuery, doSetQuery, false, &commentsOnFailure
     )
   ) {
     result[WebAPI::Result::error] =
@@ -566,13 +550,11 @@ JSData WebAPIResponse::compareExpressions(bool hideDesiredAnswer) {
   STACK_TRACE("WebAPIResponse::compareExpressions");
   std::string given =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::Request::compareExpressionsGiven),
-    false
+    global.getWebInput(WebAPI::Request::compareExpressionsGiven), false
   );
   std::string desired =
   HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput(WebAPI::Request::compareExpressionsDesired),
-    false
+    global.getWebInput(WebAPI::Request::compareExpressionsDesired), false
   );
   this->initializeCalculatorComputation();
   Calculator& calculator = global.calculator().getElement();
@@ -606,8 +588,7 @@ bool WebAPIResponse::processLogout() {
 bool WebAPIResponse::processSelectCourseJSON() {
   STACK_TRACE("WebAPIResponse::processSelectCourseJSON");
   this->owner->setHeaderOKNoContentLength("");
-  return
-  global.response.writeResponse(WebAPIResponse::getSelectCourseJSON());
+  return global.response.writeResponse(WebAPIResponse::getSelectCourseJSON());
 }
 
 bool WebAPIResponse::processTopicListJSON() {
@@ -688,8 +669,7 @@ bool WebAPIResponse::processCompareExpressionsPage(bool appendBuildHash) {
 
 bool WebAPIResponse::processDeleteAccount() {
   this->owner->setHeaderOKNoContentLength("");
-  return
-  global.response.writeResponse(WebAPIResponse::deleteAccount(), false);
+  return global.response.writeResponse(WebAPIResponse::deleteAccount(), false);
 }
 
 bool WebAPIResponse::processLoginUserInfo(const std::string& comments) {
@@ -961,9 +941,7 @@ bool WebAPIResponse::processSubmitAnswerHardcoded() {
   STACK_TRACE("WebWorker::processSubmitAnswerHardcoded");
   this->owner->setHeaderOKNoContentLength("");
   return
-  global.response.writeResponse(
-    WebAPIResponse::submitAnswersHardcoded(true)
-  );
+  global.response.writeResponse(WebAPIResponse::submitAnswersHardcoded(true));
 }
 
 bool WebAPIResponse::addUsersFromData(
@@ -1062,8 +1040,7 @@ bool WebAPIResponse::addOneUser(
   QueryFindOneOf findUserByUsernameOrEmail;
   QueryFind findUserByUsername =
   QueryFind(
-    DatabaseStrings::tableUsers,
-    DatabaseStrings::labelUsername,
+    DatabaseStrings::tableUsers, DatabaseStrings::labelUsername,
     userNameOrEmail
   );
   findUserByUsernameOrEmail.queries.addOnTop(findUserByUsername);
@@ -1077,11 +1054,7 @@ bool WebAPIResponse::addOneUser(
   List<JSData> allUsers;
   if (
     !Database::get().find(
-      findUserByUsernameOrEmail,
-      nullptr,
-      allUsers,
-      nullptr,
-      commentsOnFailure
+      findUserByUsernameOrEmail, nullptr, allUsers, nullptr, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {

@@ -122,8 +122,8 @@ public:
   // ambient space
   // 2) the resulting cone is the entire space.
   bool createFromNormals(
-    const Vectors<Rational>& inputNormals,
-    const List<List<int> >& inputNeighbors
+    const Vectors<Rational>& inputNormals, const List<List<int> >&
+    inputNeighbors
   );
   bool createFromWalls(
     const List<Wall>& inputWalls, bool hasEnoughProjectiveVertices
@@ -182,8 +182,7 @@ public:
     Polynomial<Rational>& inputLPoly, Cone& outputCone
   );
   bool solveLQuasiPolyEqualsZeroIAmProjective(
-    QuasiPolynomial& inputLQP,
-    List<Cone>& outputConesOverEachLatticeShift
+    QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift
   );
   template <class ListTemplate>
   void getAllVerticesPerpendicularTo(
@@ -338,26 +337,19 @@ public:
   // exit wall neighbors not being visited.
   bool refineOneByOneDirection(Cone& toBeRefined, int directionIndex);
   bool refineOneByOneDirectionArbitrarySlices(
-    Cone& toBeRefined,
-    List<Wall>& exitWalls,
-    const Vector<Rational>& direction
+    Cone& toBeRefined, List<Wall>& exitWalls, const Vector<Rational>& direction
   );
   void refineAllConesWithWallsWithMultipleNeighbors(ProgressReport* report);
   bool allExitWallsAreVisited(
-    Cone& toBeRefined,
-    const Vector<Rational>& direction,
-    List<Wall>& outputExitWalls
+    Cone& toBeRefined, const Vector<Rational>& direction, List<Wall>&
+    outputExitWalls
   );
   void attachNeighbbors(
     const Cone& toBeReplaced, MapList<int, Cone>& allCandidates
   );
-  void attachNeighbbors(
-    const Cone& toBeReplaced, const List<Cone*>& newCones
-  );
+  void attachNeighbbors(const Cone& toBeReplaced, const List<Cone*>& newCones);
   void replaceConeAdjacentToWall(
-    const Cone& toBeReplaced,
-    const Wall& wall,
-    const List<Cone*>& newCones
+    const Cone& toBeReplaced, const Wall& wall, const List<Cone*>& newCones
   );
   void replaceConeInNeighbor(
     Cone& neighbor,
@@ -371,9 +363,7 @@ public:
   void addMutualNeighborsIfAdjacent(
     Cone& original, Wall& wallInOriginal, Cone& incoming
   );
-  void constructSubstituteChambers(
-    List<Cone>& candidates, List<Cone>& output
-  );
+  void constructSubstituteChambers(List<Cone>& candidates, List<Cone>& output);
   void refineByNormals();
   void refineMakeCommonRefinement(const ConeCollection& other);
   void sort();
@@ -394,12 +384,9 @@ public:
     Vector<Rational>& translationVector
   );
   void initializeFromDirectionsAndRefine(Vectors<Rational>& inputVectors);
-  void initializeFromDirections(
-    const List<Vector<Rational> >& inputVectors
-  );
+  void initializeFromDirections(const List<Vector<Rational> >& inputVectors);
   void initializeFromAffineDirectionsAndRefine(
-    Vectors<Rational>& inputDirections,
-    Vectors<Rational>& inputAffinePoints
+    Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints
   );
   std::string drawMeToHtmlLastCoordAffine(
     DrawingVariables& drawingVariables, FormatExpressions& format
@@ -410,14 +397,12 @@ public:
   Cone& getConeByIdNonConstNoFail(int id);
   bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(
-    DrawingVariables& drawingVariables,
-    bool includeVertices,
-    bool includeLattice
+    DrawingVariables& drawingVariables, bool includeVertices, bool
+    includeLattice
   ) const;
   bool drawProjectiveChambers(
-    DrawingVariables& drawingVariables,
-    bool includeVertices,
-    bool includeLattice
+    DrawingVariables& drawingVariables, bool includeVertices, bool
+    includeLattice
   ) const;
   std::string drawMeToHtmlProjective(
     DrawingVariables& drawingVariables,
@@ -466,8 +451,7 @@ public:
   // hasEnoughProjectiveVertices is a mathematical promise that
   // the input is of finite size when made affine.
   void initFromConeWalls(
-    List<Vectors<Rational> >& normalsOfCones,
-    bool hasEnoughProjectiveVertices
+    List<Vectors<Rational> >& normalsOfCones, bool hasEnoughProjectiveVertices
   );
   void initFromConeWalls(
     List<Cone>& normalsOfCones, bool hasEnoughProjectiveVertices
@@ -476,9 +460,7 @@ public:
   // in two by a given slicing plane.
   // If that is the case, slices the chamber
   // and writes the result in the output variable.
-  bool splitChamber(
-    const Cone& toBeSliced, const Vector<Rational>& normal
-  );
+  bool splitChamber(const Cone& toBeSliced, const Vector<Rational>& normal);
   bool splitVerticesByNormal(
     const Cone& toBeSliced,
     const Vector<Rational>& normal,
@@ -520,8 +502,7 @@ public:
 // of the vector v in the normalized list of starting vectors.
 class OnePartialFractionDenominatorComponent {
   friend std::ostream& operator<<(
-    std::ostream& output,
-    const OnePartialFractionDenominatorComponent& input
+    std::ostream& output, const OnePartialFractionDenominatorComponent& input
   ) {
     output << input.toString(nullptr);
     return output;
@@ -551,8 +532,7 @@ public:
     List<Vector<Rational> >& output
   ) const;
   void invert();
-  void initialize(
-    PartialFractions& inputOwner, int inputNormalizedVectorIndex
+  void initialize(PartialFractions& inputOwner, int inputNormalizedVectorIndex
   );
   static Vector<Rational> getCheckSumRoot(int numberOfVariables);
   unsigned int hashFunction() const;
@@ -638,9 +618,8 @@ public:
   // Returns the denominator exponents in the order implied by
   // the order of the normalized vectors.
   void getDenominatorExponents(Vectors<Rational>& output) const;
-  void getDenominatorExponentsWithoutMultiplicities(
-    Vectors<Rational>& output
-  ) const;
+  void getDenominatorExponentsWithoutMultiplicities(Vectors<Rational>& output)
+  const;
   void getNormalsToConeWallsIfDecomposed(Vectors<Rational>& output) const;
   void getVectorPartitionFunction(
     PartialFractions& owner,
@@ -652,17 +631,15 @@ public:
     int indexB,
     int n,
     int indexAMinusNB,
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >& output,
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    & output,
     PartialFractions& owner
   );
   bool decomposeFromNormalizedLinearRelation(
     Vector<Rational>& linearRelationBetweenNormalizedVectors,
     Vectors<Rational>& normalizedVectors,
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >& output
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    & output
   );
   void getLinearRelationFromNormalized(
     int gainingMultiplicityIndex,
@@ -670,28 +647,24 @@ public:
     Vector<Rational>& linearRelationBetweenNormalizedVectors,
     Vector<Rational>& output
   );
-  void computeOneCheckSum(
-    Vector<Rational>& variableValues, Rational& output
-  ) const;
+  void computeOneCheckSum(Vector<Rational>& variableValues, Rational& output)
+  const;
   void applyGeneralizedSzenesVergneFormula(
     MapList<Vector<Rational>, OnePartialFractionDenominatorComponent>&
     toBeReduced,
     const Vector<Rational>& linearRelation,
     const Vector<Rational>& gainingNormalizedExponent,
     int elongationGainingMultiplicityIndex,
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >& output
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    & output
   ) const;
   bool reduceOnceTotalOrderMethod(
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >& output
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    & output
   );
   bool reduceOnce(
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >& output,
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    & output,
     const Polynomial<LargeInteger>& numerator
   );
   unsigned int hashFunction() const;
@@ -742,23 +715,20 @@ public:
   void operator=(const OnePartialFractionDenominator& right);
   bool initializeFromPartialFractions(const PartialFractions& owner);
   void addMultiplicity(
-    const Vector<Rational>& normalizedVector,
-    int multiplicity,
-    int elongation
+    const Vector<Rational>& normalizedVector, int multiplicity, int elongation
   );
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringDenominatorOnly(FormatExpressions* format = nullptr)
   const;
-  bool getDifferentialOperatorForm(
-    List<ElementWeylAlgebra<Rational> >& output
-  ) const;
+  bool getDifferentialOperatorForm(List<ElementWeylAlgebra<Rational> >& output)
+  const;
   void computeDifferentialOperatorConstant(Rational& output) const;
   std::string toLatexDifferentialOperator(
     Polynomial<LargeInteger>& coefficient, FormatExpressions* format
   ) const;
   std::string toLatex(
-    const Polynomial<LargeInteger>& numerator,
-    FormatExpressions* format = nullptr
+    const Polynomial<LargeInteger>& numerator, FormatExpressions* format =
+    nullptr
   ) const;
   bool checkInitialization() const;
   bool operator>(const OnePartialFractionDenominator& other) const;
@@ -770,15 +740,12 @@ class PartialFractions {
   void initializeInput(const List<Vector<Rational> >& input);
   void initializeDimension();
 public:
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  > nonReduced;
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  > reducedWithElongationRedundancies;
-  LinearCombination<
-    OnePartialFractionDenominator, Polynomial<LargeInteger>
-  > reduced;
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+  nonReduced;
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+  reducedWithElongationRedundancies;
+  LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+  reduced;
   class Statistics {
   public:
     int totalFractionsWithAccountedVectorPartitionFunction;
@@ -796,16 +763,14 @@ public:
 
   class Snapshot {
   public:
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    > content;
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    content;
     bool flagTooManySummands;
     PartialFractions::HighlightInformation highlightInformation;
     PartialFractions* owner;
     Snapshot();
     std::string toLatex(
-      const std::string& lineSeparator,
-      FormatExpressions* format = nullptr
+      const std::string& lineSeparator, FormatExpressions* format = nullptr
     ) const;
   };
 
@@ -815,9 +780,8 @@ public:
     PartialFractions* owner;
     bool flagNeedsElongation;
     List<Snapshot> snapshots;
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    > snapShotBeforeElongation;
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    snapShotBeforeElongation;
     Details();
     void takeSnapShotBeforeElongation();
     void addStateBeforeFormula(
@@ -896,16 +860,14 @@ public:
   // nonReduced, reducedWithElongationRedundancies and reduced
   // collections.
   void getSum(
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >& output
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    & output
   ) const;
   // Adds the full sum of the partial fractions to a possibly non-zero
   // starting collection of fractions.
   void accumulateSum(
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >& output
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    & output
   ) const;
   bool isHigherThanWithRespectToWeight(
     const Vector<Rational>& left,
@@ -925,14 +887,12 @@ public:
     Rational& output
   );
   void evaluateVectorPartitionFunctionNonChecked(
-    const Vector<Rational>& input,
-    Rational& output,
-    std::stringstream* comments
+    const Vector<Rational>& input, Rational& output, std::stringstream*
+    comments
   );
   void evaluateVectorPartitionFunctionChecked(
-    const Vector<Rational>& input,
-    Rational& output,
-    std::stringstream* comments
+    const Vector<Rational>& input, Rational& output, std::stringstream*
+    comments
   );
   void prepareIndicatorVariables();
   bool computeOneVectorPartitionFunction(
@@ -970,8 +930,8 @@ public:
   ) const;
   // Converts to latex suitable for display in a web page.
   std::string toLatexPartialFractionDecomposition(
-    FormatExpressions* formatDecomposition,
-    FormatExpressions* formatDenominator
+    FormatExpressions* formatDecomposition, FormatExpressions*
+    formatDenominator
   ) const;
   // Converts to latex suitable for a .tex file.
   std::string toLatexRawPartialFractionDecomposition() const;
@@ -1005,9 +965,7 @@ public:
   void getNthBernoulliPlusNumber(int index, Rational& output);
   // We define the n^th bernoulli sum to be
   // B_n(X) = \sum_{t=1}^X t^n.
-  void getBernoulliSumStartingAtOne(
-    int power, Polynomial<Rational>& output
-  );
+  void getBernoulliSumStartingAtOne(int power, Polynomial<Rational>& output);
   // Same as the previous sum but starts at t=0.
   // C_n(X) = \sum_{t=0}^X t^n.
   // The two functions produce the same output, i.e., C_n(X)= B_n(X)
@@ -1015,9 +973,7 @@ public:
   // C_0(X) = X+1
   // but
   // B_0(X) = X.
-  void getBernoulliSumStartingAtZero(
-    int power, Polynomial<Rational>& output
-  );
+  void getBernoulliSumStartingAtZero(int power, Polynomial<Rational>& output);
 };
 
 class VectorPartitionFunctionElementary {
@@ -1173,8 +1129,7 @@ public:
   void makeCommonRefinement(const ConeCollection& other);
   void translateArgument(Vector<Rational>& translateToBeAddedToArgument);
   bool makeVPF(Vectors<Rational>& roots, std::string& outputstring);
-  Rational evaluate(
-    const Vector<Rational>& point, std::stringstream* comments
+  Rational evaluate(const Vector<Rational>& point, std::stringstream* comments
   );
   Rational evaluateInputProjectivized(
     const Vector<Rational>& point, std::stringstream* comments

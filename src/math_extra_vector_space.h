@@ -35,13 +35,11 @@ public:
   bool getCoordinatesDestructively(
     Vector<Coefficient>& v, Vector<Coefficient>& out
   ) const;
-  VectorSpace<Coefficient> intersection(
-    const VectorSpace<Coefficient>& other
-  ) const;
+  VectorSpace<Coefficient> intersection(const VectorSpace<Coefficient>& other)
+  const;
   VectorSpace<Coefficient> Union(const VectorSpace<Coefficient>& other) const;
   VectorSpace<Coefficient> orthogonalComplement(
-    VectorSpace<Coefficient>* ambient = 0,
-    Matrix<Coefficient>* form = 0
+    VectorSpace<Coefficient>* ambient = 0, Matrix<Coefficient>* form = 0
   ) const;
   Vector<Coefficient> getBasisVector(int i) const;
   Vector<Coefficient> getCanonicalBasisVector(int i) const;
@@ -125,9 +123,7 @@ bool VectorSpace<Coefficient>::addVector(const Vector<Coefficient>& v) {
 }
 
 template <typename Coefficient>
-bool VectorSpace<Coefficient>::addVectorDestructively(
-  Vector<Coefficient>& v
-) {
+bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
   if (fastbasis.numberOfRows == 0) {
     this->fastbasis.makeZeroMatrix(v.size);
     this->degree = v.size;
@@ -159,9 +155,7 @@ bool VectorSpace<Coefficient>::addVectorDestructively(
     }
     int j = i;
     for (
-      ;(j < fastbasis.numberOfColumns) && (
-        fastbasis.elements[i][j] == 0
-      ); j ++
+      ;(j < fastbasis.numberOfColumns) && (fastbasis.elements[i][j] == 0); j ++
     ) {
       if (jj < j) {
         if (fastbasis.actualNumberOfRows >= fastbasis.numberOfRows + 1) {
@@ -200,8 +194,8 @@ bool VectorSpace<Coefficient>::addVectorDestructively(
     fastbasis.numberOfRows ++;
   } else {
     fastbasis.resize(
-      fastbasis.numberOfRows + 1, fastbasis.numberOfColumns, true
-    );
+      fastbasis.numberOfRows + 1, fastbasis.numberOfColumns,
+      true);
   }
   for (int j = 0; j < fastbasis.numberOfColumns; j ++) {
     fastbasis.elements[fastbasis.numberOfRows - 1][j] = v[j];
@@ -211,9 +205,7 @@ bool VectorSpace<Coefficient>::addVectorDestructively(
 }
 
 template <typename Coefficient>
-bool VectorSpace<Coefficient>::addVectorToBasis(
-  const Vector<Coefficient>& v
-) {
+bool VectorSpace<Coefficient>::addVectorToBasis(const Vector<Coefficient>& v) {
   if (addVector(v)) {
     basis.addVector(v);
     return true;
@@ -271,9 +263,7 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::intersection(
   if (
     this->degree != other.degree && ((this->degree != - 1) && (
         other.degree != - 1
-      )
-    )
-  ) {
+      ))) {
     global.fatal
     << "Attempting to intersect vector spaces of different degrees, "
     << this->degree

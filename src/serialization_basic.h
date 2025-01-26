@@ -27,9 +27,7 @@ public:
     int offset;
     int length;
     std::string label;
-    Marker(
-      int inputOffset, int inputLength, const std::string& inputLabel
-    ):
+    Marker(int inputOffset, int inputLength, const std::string& inputLabel):
     offset(inputOffset),
     length(inputLength),
     label(inputLabel) {}
@@ -68,8 +66,7 @@ public:
       List<Serialization::Marker>* outputMarkers,
       const std::string& label
     ) {
-      this->initialize(
-        inputNumberOfBytes, input, output, outputMarkers, label
+      this->initialize(inputNumberOfBytes, input, output, outputMarkers, label
       );
     }
     inline void initialize(

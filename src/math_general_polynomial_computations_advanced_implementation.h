@@ -114,9 +114,7 @@ generateSymmetricDifferenceCandidates() {
   ProgressReport reportProgress(1, "Groebner basis report");
   this->numberOfSymmetricDifferenceRounds ++;
   for (int i = 0; i < this->basis.size; i ++) {
-    for (
-      int j = i + 1; j < this->basis.size && i < this->basis.size; j ++
-    ) {
+    for (int j = i + 1; j < this->basis.size && i < this->basis.size; j ++) {
       if (reportProgress.tickAndWantReport()) {
         std::stringstream reportStream;
         reportStream
@@ -145,8 +143,7 @@ generateSymmetricDifferenceCandidates() {
 
 template <class Coefficient>
 bool GroebnerBasisComputation<Coefficient>::transformToReducedGroebnerBasis(
-  List<Polynomial<Coefficient> >& inputOutput,
-  bool rescaleLeadingMonomials
+  List<Polynomial<Coefficient> >& inputOutput, bool rescaleLeadingMonomials
 ) {
   STACK_TRACE("GroebnerBasisComputation::transformToReducedGroebnerBasis");
   this->initializeForGroebnerComputation();
@@ -289,13 +286,11 @@ int GroebnerBasisComputation<Coefficient>::minimalNumberOfVariables() const {
   int result = 0;
   for (int i = 0; i < this->basis.size; i ++) {
     Polynomial<Coefficient>& current = this->basis[i].element;
-    result =
-    MathRoutines::maximum(current.minimalNumberOfVariables(), result);
+    result = MathRoutines::maximum(current.minimalNumberOfVariables(), result);
   }
   for (int i = 0; i < this->basisCandidates.size; i ++) {
     Polynomial<Coefficient>& current = this->basisCandidates[i];
-    result =
-    MathRoutines::maximum(current.minimalNumberOfVariables(), result);
+    result = MathRoutines::maximum(current.minimalNumberOfVariables(), result);
   }
   return result;
 }
@@ -427,9 +422,7 @@ bool GroebnerBasisComputation<Coefficient>::oneDivisonStepWithBasis(
   Coefficient leadingCoefficient;
   int indexLeadingMonomial =
   currentRemainder.getIndexLeadingMonomial(
-    &highestMonomial,
-    &leadingCoefficient,
-    &this->polynomialOrder.monomialOrder
+    &highestMonomial, &leadingCoefficient, &this->polynomialOrder.monomialOrder
   );
   if (indexLeadingMonomial == - 1) {
     // Remainder is zero.
@@ -439,9 +432,7 @@ bool GroebnerBasisComputation<Coefficient>::oneDivisonStepWithBasis(
     if (i == basisIndexToIgnore) {
       continue;
     }
-    if (
-      !highestMonomial.isDivisibleBy(this->basis[i].leadingMonomial)
-    ) {
+    if (!highestMonomial.isDivisibleBy(this->basis[i].leadingMonomial)) {
       continue;
     }
     this->numberOfIntermediateRemainders ++;
@@ -736,9 +727,7 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
     int oneVariableIndex = 0;
     if (polynomial.isOneVariableNonConstantPolynomial(&oneVariableIndex)) {
       if (this->flagUsingAlgebraicClosure && this->algebraicClosure != 0) {
-        if (
-          this->getOneVariablePolynomialSolution(polynomial, coefficient)
-        ) {
+        if (this->getOneVariablePolynomialSolution(polynomial, coefficient)) {
           outputSubstitution.makeIdentitySubstitution(numberOfVariables);
           outputSubstitution[oneVariableIndex].makeConstant(coefficient);
           // check our work:
@@ -832,9 +821,8 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
   toBeSubstitutedIn.substitute(finalSubstitution, 1);
   bool changed = false;
   for (int i = 0; i < toBeSubstitutedIn.size(); i ++) {
-    for (
-      int j = 0; j < toBeSubstitutedIn[i].minimalNumberOfVariables(); j ++
-    ) {
+    for (int j = 0; j < toBeSubstitutedIn[i].minimalNumberOfVariables(); j ++)
+    {
       if (toBeSubstitutedIn[i](j) == 0) {
         continue;
       }
@@ -944,7 +932,9 @@ bool PolynomialSystem<Coefficient>::isContradictoryReducedSystem(
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
 (List<Polynomial<Coefficient> >& inputSystem) {
-  STACK_TRACE("PolynomialSystem::polynomialSystemSolutionSimplificationPhase");
+  STACK_TRACE(
+    "PolynomialSystem::polynomialSystemSolutionSimplificationPhase"
+  );
   ProgressReport report1;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
@@ -1346,9 +1336,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   List<Polynomial<Coefficient> > systemBeforeHeuristics = inputSystem;
   MonomialPolynomial singleMonomialEquation;
   if (this->flagUseMonomialBranchingOptimization) {
-    if (
-      this->hasSingleMonomialEquation(inputSystem, singleMonomialEquation)
-    ) {
+    if (this->hasSingleMonomialEquation(inputSystem, singleMonomialEquation)) {
       this->solveWhenSystemHasSingleMonomial(
         inputSystem, singleMonomialEquation
       );
@@ -1660,9 +1648,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   MonomialPolynomial currentLeading;
   for (int i = basis.size - 1; i >= 0; i --) {
     basis[i].getIndexLeadingMonomial(
-      &currentLeading,
-      nullptr,
-      &computation.polynomialOrder.monomialOrder
+      &currentLeading, nullptr, &computation.polynomialOrder.monomialOrder
     );
     if (currentLeading(numberOfVariables) == 0) {
       if (maximalMonomialNoTIndex == - 1) {
@@ -1690,9 +1676,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   }
   output = basis[maximalMonomialNoTIndex];
   output.setNumberOfVariablesSubstituteDeletedByOne(numberOfVariables);
-  output.scaleNormalizeLeadingMonomial(
-    &MonomialPolynomial::orderDefault()
-  );
+  output.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   return true;
 }
 
@@ -1721,8 +1705,8 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariableDefault(
     << global.fatal;
   }
   if (
-    left.minimalNumberOfVariables() > 1 || right.minimalNumberOfVariables() > 1
-  ) {
+    left.minimalNumberOfVariables() > 1 ||
+    right.minimalNumberOfVariables() > 1) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "This greatest common divisor computation "
@@ -1779,8 +1763,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   }
   if (
     left.minimalNumberOfVariables() <= 1 &&
-    right.minimalNumberOfVariables() <= 1
-  ) {
+    right.minimalNumberOfVariables() <= 1) {
     return
     Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
       left, right, output, commentsOnFailure
@@ -1825,9 +1808,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
     << ", which is imposible."
     << global.fatal;
   }
-  output.scaleNormalizeLeadingMonomial(
-    &MonomialPolynomial::orderDefault()
-  );
+  output.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   return true;
 }
 
@@ -1934,9 +1915,7 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountNonReducedFactor(
   Polynomial<Coefficient>& incoming
 ) {
   STACK_TRACE("PolynomialFactorizationUnivariate::accountNonReducedFactor");
-  incoming.scaleNormalizeLeadingMonomial(
-    &MonomialPolynomial::orderDefault()
-  );
+  incoming.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Polynomial<Coefficient> quotient;
   Polynomial<Coefficient> remainder;
   this->current.divideBy(
@@ -1976,9 +1955,7 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountReducedFactor(
     << "Constant factors are not to be accounted. "
     << global.fatal;
   }
-  incoming.scaleNormalizeLeadingMonomial(
-    &MonomialPolynomial::orderDefault()
-  );
+  incoming.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
   Polynomial<Coefficient> quotient;
   Polynomial<Coefficient> remainder;
   this->current.divideBy(
@@ -2118,9 +2095,8 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialModuloPolynomialImplementation,
   PolynomialImplementation,
   PolynomialModulusImplementation
->::oneFactor(
-  std::stringstream* comments, std::stringstream* commentsOnFailure
-) {
+>::oneFactor(std::stringstream* comments, std::stringstream* commentsOnFailure)
+{
   STACK_TRACE("PolynomialFactorizationCantorZassenhaus::oneFactor");
   this->checkInitialization();
   this->output->format.flagSuppressModP = true;
@@ -2146,11 +2122,7 @@ bool PolynomialFactorizationCantorZassenhaus<
   PolynomialImplementation candidate;
   if (
     !derivative.greatestCommonDivisor(
-      derivative,
-      this->current,
-      candidate,
-      this->one,
-      commentsOnFailure
+      derivative, this->current, candidate, this->one, commentsOnFailure
     )
   ) {
     return false;
@@ -2291,9 +2263,7 @@ bool PolynomialFactorizationCantorZassenhaus<
     PolynomialConversions::convertToPolynomial(divisor, divisorConverted);
     *comments
     << "Found divisor \\("
-    << this->one.toStringPolynomial(
-      divisorConverted, &this->output->format
-    )
+    << this->one.toStringPolynomial(divisorConverted, &this->output->format)
     << "\\) by taking gcd with \\("
     << candidateDisplayName
     << "\\). ";
@@ -2441,9 +2411,7 @@ bool PolynomialFactorizationCantorZassenhaus<
     this->one.modulus.isIntegerFittingInInt(&maximumDivisors);
   }
   ProgressReport report;
-  for (
-    unsigned i = 0; i < static_cast<unsigned>(maximumDivisors); i ++
-  ) {
+  for (unsigned i = 0; i < static_cast<unsigned>(maximumDivisors); i ++) {
     std::stringstream reportStream;
     reportStream
     << "Looking for factors round "
@@ -2545,11 +2513,8 @@ bool PolynomialFactorizationCantorZassenhaus<
       << currentPolynomial.modulus()->toString(&this->output->format)
       << "\\)";
     }
-    if (
-      this->divisorFromCandidate(
-        currentPolynomial.getValue(), "A", comments
-      )
-    ) {
+    if (this->divisorFromCandidate(currentPolynomial.getValue(), "A", comments))
+    {
       return true;
     }
     currentPolynomialPlusOne = currentPolynomial;
@@ -2585,9 +2550,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   this->owner->polynomialOrder.monomialOrder;
   bool oneDivisor = (this->owner->basis.size == 1);
   this->allMonomials.clear();
-  this->allMonomials.addOnTopNoRepetition(
-    this->startingPolynomial.monomials
-  );
+  this->allMonomials.addOnTopNoRepetition(this->startingPolynomial.monomials);
   for (int i = 0; i < remainders.size; i ++) {
     this->allMonomials.addOnTopNoRepetition(remainders[i].monomials);
   }
@@ -2640,9 +2603,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   this->fcAnswerMonsQuotients.initializeFillInObject(basis.size, dummyList);
   this->fcAnswerMonsDivisors.initializeFillInObject(basis.size, dummyList);
   this->uncoverAllMonsRemainders.initializeFillInObject(remainders.size, 1);
-  this->uncoverAllMonsSubtrahends.initializeFillInObject(
-    subtrahends.size, 1
-  );
+  this->uncoverAllMonsSubtrahends.initializeFillInObject(subtrahends.size, 1);
   this->uncoverAllMonsQuotients.initializeFillInObject(basis.size, 1);
   this->uncoverAllMonsDivisors.initializeFillInObject(basis.size, 1);
   this->uncoverMonsFinalRemainder.initializeFillInObject(
@@ -2938,10 +2899,8 @@ getSpacedMonomialsWithHighlightLaTeX(
     countMonomials ++;
     std::string monomialWithSign =
     Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
-      polynomial[index],
-      polynomial.coefficients[index],
-      true,
-      &this->owner->format
+      polynomial[index], polynomial.coefficients[index], true, &this->owner->
+      format
     );
     std::string sign = monomialWithSign.substr(0, 1);
     std::string monomialNoSign = monomialWithSign.substr(1);
@@ -3044,14 +3003,14 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   }
   Polynomial<Coefficient>& currentRemainder =
   this->intermediateRemainders[remainderIndex];
-  int indexCurrentDivisor = this->intermediateSelectedDivisors[remainderIndex];
+  int indexCurrentDivisor =
+  this->intermediateSelectedDivisors[remainderIndex];
   Polynomial<Coefficient>& currentDivisor = basis[indexCurrentDivisor].element;
   MonomialPolynomial divisorLeadingMonomial;
   int indexCurrentDivisorLeadingMonomial =
   currentDivisor.getIndexLeadingMonomial(
-    &divisorLeadingMonomial,
-    nullptr,
-    &this->owner->polynomialOrder.monomialOrder
+    &divisorLeadingMonomial, nullptr, &this->owner->polynomialOrder.
+    monomialOrder
   );
   int indexCurrentDivisorLeadingMonInAllMons =
   this->allMonomials.getIndex(divisorLeadingMonomial);
@@ -3087,10 +3046,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << "}{"
   << "$"
   << currentRemainder.getBlendCoefficientAndMonomial(
-    maximalMonomialCurrentRemainder,
-    leadingCFCurrentRemainder,
-    false,
-    &format
+    maximalMonomialCurrentRemainder, leadingCFCurrentRemainder, false, &format
   )
   << "$ "
   << "}"
@@ -3179,8 +3135,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     );
   }
   for (
-    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
-  ) {
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++)
+  {
     this->fcAnswerMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(
         this->intermediateSubtractands[remainderIndex][i]
@@ -3189,8 +3145,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     currentSlideNumber;
   }
   currentSlideNumber ++;
-  for (
-    int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++
+  for (int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++
   ) {
     this->highlightMonsRemainders[remainderIndex][
       this->allMonomials.getIndex(
@@ -3199,8 +3154,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     ].addOnTop(currentSlideNumber);
   }
   for (
-    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
-  ) {
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++)
+  {
     this->highlightMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(
         this->intermediateSubtractands[remainderIndex][i]
@@ -3215,8 +3170,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << currentSlideNumber + 1
   << "| handout:0>{subtract last two polynomials.}";
   currentSlideNumber ++;
-  for (
-    int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++
+  for (int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++
   ) {
     this->highlightMonsRemainders[remainderIndex][
       this->allMonomials.getIndex(
@@ -3225,8 +3179,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     ].addOnTop(currentSlideNumber);
   }
   for (
-    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
-  ) {
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++)
+  {
     this->highlightMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(
         this->intermediateSubtractands[remainderIndex][i]
@@ -3239,9 +3193,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     << global.fatal;
   }
   for (
-    int i = 0; i < this->intermediateRemainders[remainderIndex + 1].size(); i
-    ++
-  ) {
+    int i = 0; i < this->intermediateRemainders[remainderIndex + 1].size();
+    i ++) {
     this->fcAnswerMonsRemainders[remainderIndex + 1][
       this->allMonomials.getIndex(
         this->intermediateRemainders[remainderIndex + 1][i]

@@ -68,9 +68,7 @@ JSData Calculator::Examples::toJSONFunctionHandlers() {
   JSData examples;
   examples.elementType = JSData::Type::tokenObject;
   MapReferences<
-    std::string,
-    MemorySaving<OperationHandlers>,
-    HashFunctions::hashFunction
+    std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction
   >& operations =
   this->owner->operations;
   for (int i = 0; i < operations.size(); i ++) {
@@ -119,9 +117,7 @@ std::string Calculator::Examples::getExamplesReadmeFragment() {
   STACK_TRACE("Calculator::Examples::getExamplesReadmeFragment");
   std::stringstream out;
   MapReferences<
-    std::string,
-    MemorySaving<OperationHandlers>,
-    HashFunctions::hashFunction
+    std::string, MemorySaving<OperationHandlers>, HashFunctions::hashFunction
   >& operations =
   this->owner->operations;
   for (int i = 0; i < operations.size(); i ++) {
@@ -160,9 +156,7 @@ std::string Calculator::Examples::getExamplesReadmeFragment() {
 }
 
 std::string Calculator::Examples::toStringOneOperationHandler(
-  const std::string& escapedAtom,
-  bool isComposite,
-  const Function& function
+  const std::string& escapedAtom, bool isComposite, const Function& function
 ) {
   std::stringstream out;
   out << "*" << escapedAtom << "*";
@@ -407,8 +401,9 @@ const ListReferences<Function>* Calculator::getOperationCompositeHandlers(
   &this->operations.values[operation].getElementConst().compositeHandlers;
 }
 
-const ListReferences<Function>* Calculator::getOperationHandlers(int operation)
-{
+const ListReferences<Function>* Calculator::getOperationHandlers(
+  int operation
+) {
   if (operation < 0 || operation >= this->operations.size()) {
     // Instead of crashing, we may instead return nullptr.
     // TODO(tmilev): document why we are so harsh
@@ -453,10 +448,7 @@ bool Calculator::outerStandardCompositeHandler(
     int64_t startCurrentFunction = global.getElapsedMilliseconds();
     if (
       !currentHandler.apply(
-        calculator,
-        input,
-        output,
-        operatorIndexParentIfAvailable,
+        calculator, input, output, operatorIndexParentIfAvailable,
         outputHandler
       )
     ) {
@@ -552,10 +544,7 @@ bool Calculator::outerStandardHandler(
     int64_t startTime = global.getElapsedMilliseconds();
     if (
       currentFunction.apply(
-        calculator,
-        input,
-        output,
-        operatorIndexParentIfAvailable,
+        calculator, input, output, operatorIndexParentIfAvailable,
         outputHandler
       )
     ) {
@@ -743,9 +732,7 @@ bool Calculator::expressionMatchesPattern(
     for (int i = 1; i < pattern.size(); i ++) {
       if (
         !this->expressionMatchesPattern(
-          pattern[i],
-          input[pattern.size() - i],
-          matchedExpressions,
+          pattern[i], input[pattern.size() - i], matchedExpressions,
           commentsGeneral
         )
       ) {
@@ -808,9 +795,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
       ruleStack[i].startsWith(this->owner->opRulesOff())
     ) {
       for (int j = 1; j < ruleStack[i].size(); j ++) {
-        if (
-          !ruleStack[i][j].isOfType<std::string>(&currentRuleName)
-        ) {
+        if (!ruleStack[i][j].isOfType<std::string>(&currentRuleName)) {
           continue;
         }
         if (!this->owner->namedRules.contains(currentRuleName)) {
@@ -834,9 +819,7 @@ StateMaintainerCalculator::~StateMaintainerCalculator() {
           );
           currentFunction.options.disabledByUser = false;
         }
-      } else if (
-        ruleStack[i].startsWith(this->owner->opRulesOff())
-      ) {
+      } else if (ruleStack[i].startsWith(this->owner->opRulesOff())) {
         for (int j = 1; j < ruleStack[i].size(); j ++) {
           Function& currentFunction =
           this->owner->getFunctionHandlerFromNamedRule(
@@ -892,8 +875,8 @@ Expression Calculator::getNewAtom(const std::string& preferredName) {
 }
 
 bool Calculator::accountRule(
-  const Expression& ruleExpression,
-  StateMaintainerCalculator& ruleStackMaintainer
+  const Expression& ruleExpression, StateMaintainerCalculator&
+  ruleStackMaintainer
 ) {
   STACK_TRACE("Calculator::accountRule");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
@@ -906,9 +889,7 @@ bool Calculator::accountRule(
   if (ruleExpression.isCalculatorBuiltInStatusChanger()) {
     this->ruleCollectionId ++;
   }
-  if (
-    !ruleExpression.isListStartingWithAtom(this->opCommandEnclosure())
-  ) {
+  if (!ruleExpression.isListStartingWithAtom(this->opCommandEnclosure())) {
     return true;
   }
   if (ruleExpression.size() <= 1) {
@@ -918,9 +899,7 @@ bool Calculator::accountRule(
     return this->accountRule(ruleExpression[1], ruleStackMaintainer);
   }
   for (int i = 1; i < ruleExpression[1].size(); i ++) {
-    if (
-      !this->accountRule(ruleExpression[1][i], ruleStackMaintainer)
-    ) {
+    if (!this->accountRule(ruleExpression[1][i], ruleStackMaintainer)) {
       return false;
     }
   }
@@ -934,8 +913,8 @@ bool Calculator::evaluateExpression(
   bool notUsed = false;
   return
   calculator.evaluateExpression(
-    calculator, input, output, notUsed, - 1, nullptr
-  );
+    calculator, input, output, notUsed, - 1,
+    nullptr);
 }
 
 bool Calculator::isTimedOut() {
@@ -973,9 +952,8 @@ Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
 }
 
 void Calculator::EvaluateLoop::accountHistoryChildTransformation(
-  const Expression& transformedChild,
-  const Expression& childHistory,
-  int childIndex
+  const Expression& transformedChild, const Expression& childHistory, int
+  childIndex
 ) {
   if (this->history == nullptr) {
     // History is not recorded.
@@ -1137,9 +1115,7 @@ void Calculator::EvaluateLoop::reportChildEvaluation(
   << "Evaluating at recursion depth "
   << this->owner->recursionDepth
   << ":<br><b>"
-  << StringRoutines::shortenInsertDots(
-    output[childIndex].toString(), 100
-  )
+  << StringRoutines::shortenInsertDots(output[childIndex].toString(), 100)
   << "</b>";
   report.report(reportStream.str());
 }
@@ -1193,10 +1169,7 @@ bool Calculator::EvaluateLoop::evaluateChildren(
       return false;
     }
     if (this->output->startsWith(this->owner->opCommandSequence())) {
-      if (
-        !this->owner->accountRule((*this->output)[i], maintainRuleStack
-        )
-      ) {
+      if (!this->owner->accountRule((*this->output)[i], maintainRuleStack)) {
         std::stringstream out;
         out
         << "Failed to account rule: "
@@ -1251,9 +1224,7 @@ bool Calculator::EvaluateLoop::userDefinedEvaluation() {
         << "User-defined substition: "
         << currentPattern.toString();
       }
-      this->setOutput(
-        afterPatternMatch, nullptr, substitutionComment.str()
-      );
+      this->setOutput(afterPatternMatch, nullptr, substitutionComment.str());
       this->reductionOccurred = true;
       if (this->owner->flagLogEvaluation) {
         *this->owner
@@ -1510,8 +1481,7 @@ Expression* Calculator::patternMatch(
   pattern.checkInitialization();
   expression.checkInitialization();
   if (
-    !this->expressionMatchesPattern(
-      pattern, expression, bufferPairs, logStream
+    !this->expressionMatchesPattern(pattern, expression, bufferPairs, logStream
     )
   ) {
     return nullptr;
@@ -1558,8 +1528,7 @@ Expression* Calculator::patternMatch(
 }
 
 void Calculator::specializeBoundVariables(
-  Expression& toBeSubstitutedIn,
-  MapList<Expression, Expression>& matchedPairs
+  Expression& toBeSubstitutedIn, MapList<Expression, Expression>& matchedPairs
 ) {
   STACK_TRACE("Calculator::specializeBoundVariables");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
@@ -1686,9 +1655,7 @@ JSData Calculator::solve(const std::string& input) {
   this->statistics.initialize();
   // this->inputString = input;
   Expression toBeSolved;
-  if (
-    !this->parser.parseAndExtractExpressionsDefault(input, toBeSolved)
-  ) {
+  if (!this->parser.parseAndExtractExpressionsDefault(input, toBeSolved)) {
     return this->extractSolution();
   }
   if (toBeSolved.startsWith(this->opCommandSequence(), 2)) {
@@ -1723,9 +1690,7 @@ void Calculator::evaluateCommands() {
   if (global.runMode != GlobalVariables::RunMode::consoleRegular) {
     report.report("Evaluating expressions, current expression stack:\n");
   }
-  this->evaluateExpression(
-    *this, startingExpression, this->programExpression
-  );
+  this->evaluateExpression(*this, startingExpression, this->programExpression);
   if (this->recursionDepth != 0) {
     global.fatal
     << "The starting recursion "
@@ -1796,9 +1761,7 @@ void Calculator::evaluateCommandsConsoleOutput(
   out
   << Logger::consoleNormal()
   << "Output:\n"
-  << this->programExpression.toString(
-    &global.defaultFormat.getElement()
-  )
+  << this->programExpression.toString(&global.defaultFormat.getElement())
   << Logger::consoleNormal()
   << std::endl;
 }
@@ -1818,10 +1781,7 @@ void Calculator::evaluateCommandsStandardOutput(
   result.elementType = JSData::Type::tokenObject;
   std::string resultString =
   this->programExpression.toString(
-    &global.defaultFormat.getElement(),
-    &startingExpression,
-    true,
-    &result
+    &global.defaultFormat.getElement(), &startingExpression, true, &result
   );
   this->output[WebAPI::Result::resultLabel] = result;
   out << resultString;

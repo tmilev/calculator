@@ -33,20 +33,17 @@ public:
   ~WebClient();
   void closeEverything();
   void updatePublicKeys(
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   void fetchWebPagePart2(
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   void initialize();
   // Ping authentication used for pings only, over localhost connections only.
   void pingCalculatorStatus(const std::string& pingAuthentication);
   void freeAddressInfo();
   void fetchWebPage(
-    std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral
+    std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   std::string toString() const;
 };

@@ -24,9 +24,7 @@ public:
     const std::string& inputString, List<std::string>& output
   );
   static void splitExcludeDelimiter(
-    const std::string& inputString,
-    char delimiter,
-    List<std::string>& output
+    const std::string& inputString, char delimiter, List<std::string>& output
   );
   // Splits a string using a set of character delimiters.
   static void splitExcludeDelimiters(
@@ -88,9 +86,7 @@ public:
     // notation:
     // escapes quote, backslash, newline, and uses \u-notation to encode
     // utf-16-like two-byte sequences.
-    static std::string stringToJSONStringEscaped(
-      const std::string& inputUtf8
-    );
+    static std::string stringToJSONStringEscaped(const std::string& inputUtf8);
     static std::string codePointToBackslashEscapedString(uint32_t input);
     static std::string codePointToUtf8(uint32_t input);
     // Similar to utf8StringToJSONStringEscaped but uses
@@ -185,15 +181,13 @@ public:
     );
     bool computeDifference(std::stringstream* commentsOnFailure);
     void computeLongestSubsequenceMatrix();
-    void computeBestStartingIndices(
-      int& outputIndexLeft, int& outputIndexRight
+    void computeBestStartingIndices(int& outputIndexLeft, int& outputIndexRight
     );
     void extractCommonStrings(int indexLeft, int indexRight);
     void extractDifferences();
     void extractResult(
-      const List<int>& starts,
-      const std::string& input,
-      List<std::string>& output
+      const List<int>& starts, const std::string& input, List<std::string>&
+      output
     );
     void pushCommonString(int indexLeft, int indexRight);
     std::string toString();

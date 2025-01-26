@@ -75,8 +75,7 @@ MutexProcess::~MutexProcess() {
 std::string PipePrimitive::getLastRead() {
   STACK_TRACE("PipePrimitive::getLastRead");
   std::string result(
-    this->lastRead.objects,
-    static_cast<unsigned>(this->lastRead.size)
+    this->lastRead.objects, static_cast<unsigned>(this->lastRead.size)
   );
   return result;
 }
@@ -124,15 +123,14 @@ bool PipePrimitive::createMe(
   return true;
 }
 
-bool MutexProcess::createMe(
-  const std::string& inputName, bool dontCrashOnFail
-) {
+bool MutexProcess::createMe(const std::string& inputName, bool dontCrashOnFail)
+{
   this->release();
   this->name = inputName;
   if (
     !this->lockPipe.createMe(
-      inputName + "lockPipe", true, false, dontCrashOnFail
-    )
+      inputName + "lockPipe", true, false,
+      dontCrashOnFail)
   ) {
     return false;
   }
@@ -141,9 +139,7 @@ bool MutexProcess::createMe(
 }
 
 bool MutexProcess::resetNoAllocation() {
-  if (
-    this->lockPipe.writeOnceNoFailure(MutexProcess::lockContent, 0, true)
-  ) {
+  if (this->lockPipe.writeOnceNoFailure(MutexProcess::lockContent, 0, true)) {
     return true;
   }
   global
@@ -228,11 +224,7 @@ int Pipe::writeWithTimeoutViaSelect(
     }
     totalSelected =
     select(
-      fileDescriptor + 1,
-      nullptr,
-      &fileDescriptorContainer,
-      nullptr,
-      &timeOut
+      fileDescriptor + 1, nullptr, &fileDescriptorContainer, nullptr, &timeOut
     );
     failStream
     << "While select-writing on file descriptor: "
@@ -314,10 +306,7 @@ bool Pipe::readWithTimeOutViaSelect(
     }
     totalSelected =
     select(
-      maximumFileDescriptor + 1,
-      &fileDescriptorContainer,
-      nullptr,
-      nullptr,
+      maximumFileDescriptor + 1, &fileDescriptorContainer, nullptr, nullptr,
       timeOut
     );
     failStream
@@ -346,9 +335,9 @@ bool Pipe::readWithTimeOutViaSelect(
   do {
     bytesRead = static_cast<int>(
       read(
-        outputFileDescriptor,
-        output.objects,
-        static_cast<unsigned>(output.size - 1)
+        outputFileDescriptor, output.objects, static_cast<unsigned>(
+          output.size - 1
+        )
       )
     );
     if (bytesRead > 0) {
@@ -487,8 +476,7 @@ bool Pipe::readFullMessage(List<char>& output) {
   int offset = 0;
   List<unsigned char> metaDataBuffer;
   metaDataBuffer = this->metaData.lastRead;
-  Serialization::readFourByteInt(
-    metaDataBuffer, offset, expectedBytes, nullptr
+  Serialization::readFourByteInt(metaDataBuffer, offset, expectedBytes, nullptr
   );
   output.setSize(0);
   while (output.size < expectedBytes) {
@@ -525,8 +513,7 @@ bool PipePrimitive::readOnceWithoutEmptying(bool dontCrashOnFail) {
   if (this->getLastRead().size() <= 0) {
     return true;
   }
-  return
-  this->writeOnceNoFailure(this->getLastRead(), 0, dontCrashOnFail);
+  return this->writeOnceNoFailure(this->getLastRead(), 0, dontCrashOnFail);
 }
 
 bool PipePrimitive::writeOnceAfterEmptying(
@@ -545,9 +532,7 @@ bool PipePrimitive::writeOnceAfterEmptying(
 }
 
 bool PipePrimitive::handleFailedWriteReturnFalse(
-  const std::string& toBeSent,
-  bool dontCrashOnFail,
-  int numberOfBadAttempts
+  const std::string& toBeSent, bool dontCrashOnFail, int numberOfBadAttempts
 ) {
   std::stringstream errorStream;
   errorStream
@@ -608,9 +593,7 @@ bool PipePrimitive::writeOnceNoFailure(
   for (;;) {
     this->numberOfBytesLastWrite = static_cast<int>(
       write(
-        this->pipeEnds[1],
-        &toBeSent[static_cast<unsigned>(offset)],
-        remaining
+        this->pipeEnds[1], &toBeSent[static_cast<unsigned>(offset)], remaining
       )
     );
     if (this->numberOfBytesLastWrite < 0) {
@@ -618,8 +601,7 @@ bool PipePrimitive::writeOnceNoFailure(
         errno == EAI_AGAIN ||
         errno == EWOULDBLOCK ||
         errno == EINTR ||
-        errno == EIO
-      ) {
+        errno == EIO) {
         numberOfBadAttempts ++;
         if (numberOfBadAttempts > maximumBadAttempts) {
           return
@@ -690,9 +672,7 @@ bool Pipe::createMe(const std::string& inputPipeName) {
   this->checkConsistency();
   this->release();
   this->name = inputPipeName;
-  if (
-    !this->pipe.createMe("pipe[" + inputPipeName + "]", false, false, true)
-  ) {
+  if (!this->pipe.createMe("pipe[" + inputPipeName + "]", false, false, true)) {
     this->release();
     return false;
   }
@@ -702,8 +682,8 @@ bool Pipe::createMe(const std::string& inputPipeName) {
   }
   if (
     !this->metaData.createMe(
-      "metaData[" + inputPipeName + "]", false, false, true
-    )
+      "metaData[" + inputPipeName + "]", false, false,
+      true)
   ) {
     this->release();
     return false;
@@ -751,9 +731,7 @@ bool PipePrimitive::readOnceNoFailure(bool dontCrashOnFail) {
   int totalReadBytes = 0;
   for (;;) {
     totalReadBytes = static_cast<int>(
-      read(
-        this->pipeEnds[0], this->buffer.objects, this->bufferSize
-      )
+      read(this->pipeEnds[0], this->buffer.objects, this->bufferSize)
     );
     if (totalReadBytes >= 0) {
       break;
@@ -1105,9 +1083,8 @@ void MathRoutines::parseListIntegersNoFailure(
 }
 
 bool MathRoutines::parseListIntegers(
-  const std::string& input,
-  List<int>& result,
-  std::stringstream* commentsOnFailure
+  const std::string& input, List<int>& result, std::stringstream*
+  commentsOnFailure
 ) {
   List<char> delimiters;
   delimiters.addOnTopNoRepetition('\n');

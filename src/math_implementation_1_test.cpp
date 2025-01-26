@@ -102,14 +102,10 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrime() {
   mustReturnFalse.addOnTop(4);
   mustReturnFalse.addOnTop(6);
   mustReturnFalse.addOnTop(9989);
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
-    mustReturnTrue, true, 0, 3
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 0, 3);
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 100, 3
   );
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
-    mustReturnTrue, true, 100, 3
-  );
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
-    mustReturnFalse, false, 0, 3
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnFalse, false, 0, 3
   );
   LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
     mustReturnFalse, false, 100, 3
@@ -162,9 +158,8 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
 }
 
 bool LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
-  const List<LargeIntegerUnsigned>& input,
-  bool mustBeTrue,
-  int millerRabinTries
+  const List<LargeIntegerUnsigned>& input, bool mustBeTrue, int
+  millerRabinTries
 ) {
   for (int i = 0; i < input.size; i ++) {
     bool result =
@@ -240,10 +235,9 @@ bool LargeIntegerUnsigned::Test::guaranteedPrime() {
 
 bool LargeIntegerUnsigned::Test::factor() {
   LargeIntegerUnsigned::Test::factorSmall(
-    120, "2, 3, 5", "3, 1, 1", 100, 100, 3
-  );
-  LargeIntegerUnsigned::Test::factorSmall(
-    120, "2, 3, 5", "3, 1, 1", 0, 100, 3
+    120, "2, 3, 5", "3, 1, 1", 100, 100,
+    3);
+  LargeIntegerUnsigned::Test::factorSmall(120, "2, 3, 5", "3, 1, 1", 0, 100, 3
   );
   return true;
 }
@@ -260,10 +254,7 @@ bool LargeIntegerUnsigned::Test::factorSmall(
   List<int> multiplicitiesInt;
   int64_t millisecondsStart = global.getElapsedMilliseconds();
   input.factor(
-    factors,
-    multiplicitiesInt,
-    maximumDivisorToTry,
-    numberMillerRabinRuns,
+    factors, multiplicitiesInt, maximumDivisorToTry, numberMillerRabinRuns,
     nullptr
   );
   int64_t elapsed = global.getElapsedMilliseconds() - millisecondsStart;
@@ -425,9 +416,7 @@ RationalFraction<Rational> RationalFraction<Rational>::Test::fromString(
   std::string inputModified = "MakeRationalFunction(" + input + ")";
   parser.initialize(Calculator::Mode::full);
   parser.evaluate(inputModified);
-  if (
-    !parser.programExpression.startsWith(parser.opCommandSequence())
-  ) {
+  if (!parser.programExpression.startsWith(parser.opCommandSequence())) {
     global.fatal
     << "RationalFunction::fromString parsed: "
     << parser.programExpression.toString()
@@ -484,8 +473,7 @@ bool RationalFraction<Rational>::Test::scaleNormalizeIndex() {
   RationalFraction<Rational> c = RationalFraction<Rational>::Test::fromString(
     "3a/(7x)"
   );
-  List<List<RationalFraction<Rational> > > toScale =
-  {{a}, {a, b}, {a, b, c}};
+  List<List<RationalFraction<Rational> > > toScale = {{a}, {a, b}, {a, b, c}};
   List<std::string> expected =
   {
     "(2x_{1} +1)/(3x_{2} +1)",

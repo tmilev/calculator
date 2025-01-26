@@ -36,9 +36,7 @@ List<List<int> > GraphOLD::destructivelyGetConnectedComponents() {
     if (this->data[i] != - 1) {
       List<int> l;
       l.addOnTop(i / this->max_edges);
-      this->treeRecurseCopyDelete(
-        l, i / this->max_edges, this->max_edges
-      );
+      this->treeRecurseCopyDelete(l, i / this->max_edges, this->max_edges);
       outerl.addOnTop(l);
     }
   }
@@ -177,9 +175,8 @@ void GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances(
   List<int> orbit;
   orbit.setExpectedSize(this->edges.size());
   for (
-    int indexBaseNode = 0; indexBaseNode < this->numberOfNodes; indexBaseNode
-    ++
-  ) {
+    int indexBaseNode = 0; indexBaseNode < this->numberOfNodes;
+    indexBaseNode ++) {
     if (this->baseNode[indexBaseNode] == - 1) {
       this->distanceToBaseNode[indexBaseNode] = 0;
       this->baseNode[indexBaseNode] = indexBaseNode;
@@ -215,9 +212,7 @@ void GraphWeightedLabeledEdges::computeDisplayGroups() {
   this->nodeGroupsForDisplay.setSize(0);
   for (int i = 0; i < this->connectedComponents.size; i ++) {
     for (int j = 0; j < this->connectedComponents[i].size; j ++) {
-      this->nodeGroupsForDisplay.addOnTop(
-        this->connectedComponents[i][j]
-      );
+      this->nodeGroupsForDisplay.addOnTop(this->connectedComponents[i][j]);
     }
   }
   this->groupMaxSize = 0;
@@ -374,9 +369,7 @@ std::string GraphWeightedLabeledEdges::toStringPsTricks(
   << ")"
   << "\n<br>\\tiny\n<br>\n";
   for (int i = 0; i < this->edgesPerNodeNoMultiplicities.size; i ++) {
-    for (
-      int j = 0; j < this->edgesPerNodeNoMultiplicities[i].size; j ++
-    ) {
+    for (int j = 0; j < this->edgesPerNodeNoMultiplicities[i].size; j ++) {
       out
       << this->toStringPsTricksEdge(
         i, this->edgesPerNodeNoMultiplicities[i][j], format

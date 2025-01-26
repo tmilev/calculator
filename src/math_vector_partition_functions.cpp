@@ -156,9 +156,7 @@ bool VectorPartitionFunctionElementary::computeOneQuasiPolynomial(
   STACK_TRACE("VectorPartitionFunctionElementary::computeOneQuasiPolynomial");
   Vector<Rational> direction = this->originalVectors[directionIndex];
   List<Wall> exitWalls;
-  if (
-    !this->collection.allExitWallsAreVisited(cone, direction, exitWalls)
-  ) {
+  if (!this->collection.allExitWallsAreVisited(cone, direction, exitWalls)) {
     return false;
   }
   if (exitWalls.size > 1) {
@@ -216,9 +214,7 @@ void VectorPartitionFunctionElementary::getExitConesAfterStart(
   Cone* next = &start;
   List<Wall> exitWalls;
   while (next != nullptr) {
-    if (
-      !this->collection.allExitWallsAreVisited(*next, direction, exitWalls)
-    ) {
+    if (!this->collection.allExitWallsAreVisited(*next, direction, exitWalls)) {
       global.fatal
       << "Expected all exit walls to be visited. "
       << global.fatal;
@@ -259,18 +255,12 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
   QuasiPolynomial summand;
   QuasiPolynomial subtracand;
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
-    entranceWallRescaled,
-    1,
-    direction,
-    summand,
-    this->comments.commentsPointer()
+    entranceWallRescaled, 1, direction, summand, this->comments.commentsPointer
+    ()
   );
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
-    exitWallRescaled,
-    1,
-    direction,
-    subtracand,
-    this->comments.commentsPointer()
+    exitWallRescaled, 1, direction, subtracand, this->comments.commentsPointer(
+    )
   );
   if (this->comments.shouldComment()) {
     std::stringstream reportStream;
@@ -344,11 +334,7 @@ void VectorPartitionFunctionElementary::induceQuasiPolynomialFromWall(
   Vector<Rational> normalRescaled = exitWall.normal;
   normalRescaled /= direction.scalarEuclidean(normalRescaled);
   pivotValue.substituteShiftByFloorOfLinearFunction(
-    normalRescaled,
-    0,
-    direction,
-    output,
-    this->comments.commentsPointer()
+    normalRescaled, 0, direction, output, this->comments.commentsPointer()
   );
   int dimension = this->collection.getDimension();
   QuasiPolynomial indicatorIntegral;
@@ -384,9 +370,7 @@ void VectorPartitionFunctionElementary::sumQuasiPolynomialOverCone(
     }
     Cone & neighbor =
     this->collection.getConeByIdNonConstNoFail(exitWall.neighbors[0]);
-    this->induceQuasiPolynomialFromWall(
-      direction, exitWall, neighbor, output
-    );
+    this->induceQuasiPolynomialFromWall(direction, exitWall, neighbor, output);
     return;
   }
   output.makeZeroOverLattice(toBeIntegrated.ambientLatticeReduced);
@@ -492,9 +476,7 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
     format.flagUseLatex = true;
     format.flagSuppressOneIn1overXtimesY = true;
     format.flagUseFrac = true;
-    format.makePolynomialAlphabetLetters(
-      "x", this->collection.getDimension()
-    );
+    format.makePolynomialAlphabetLetters("x", this->collection.getDimension());
     format.polynomialAlphabet.addOnTop("t");
     reportStream
     << "<br>Lattice shift: \\("

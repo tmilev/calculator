@@ -155,9 +155,7 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
   this->raiseToDominantWeightInner(highestWeightTrue);
   Vector<Rational> highestWeightFundamentalCoordinates =
   this->ambientWeyl->getFundamentalCoordinatesFromSimple(highestWeightTrue);
-  if (
-    !highestWeightFundamentalCoordinates.sumCoordinates().isSmallInteger()
-  ) {
+  if (!highestWeightFundamentalCoordinates.sumCoordinates().isSmallInteger()) {
     return false;
   }
   int topHeightSimpleCoordinates = static_cast<int>(
@@ -265,20 +263,13 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
   for (int i = 0; i < orbit.size; i ++) {
     LittelmannPath& currentPath = orbit[i];
     animated.drawPath(
-      currentPath.waypoints,
-      "black",
-      1,
-      this->owner->dynkinType.toString(),
-      i
+      currentPath.waypoints, "black", 1, this->owner->dynkinType.toString(), i
     );
     collapsed.drawPath(currentPath.waypoints, "black", 1);
     for (int j = 0; j < currentPath.waypoints.size; j ++) {
       animated.drawCircleAtVectorBufferRational(
-        currentPath.waypoints[j],
-        "purple",
-        3,
-        this->owner->dynkinType.toString(),
-        i
+        currentPath.waypoints[j], "purple", 3, this->owner->dynkinType.toString
+        (), i
       );
       collapsed.drawCircleAtVectorBufferRational(
         currentPath.waypoints[j], "purple", 3
@@ -507,13 +498,9 @@ bool Expression::assignMatrixExpressions(
         inType = typeDouble;
       } else if (input(i, j).isOfType<Polynomial<Rational> >()) {
         inType = typePolynomialRational;
-      } else if (
-        input(i, j).isOfType<Polynomial<AlgebraicNumber> >()
-      ) {
+      } else if (input(i, j).isOfType<Polynomial<AlgebraicNumber> >()) {
         inType = typeAlgebraic;
-      } else if (
-        input(i, j).isOfType<RationalFraction<Rational> >()
-      ) {
+      } else if (input(i, j).isOfType<RationalFraction<Rational> >()) {
         inType = typeRationalFraction;
       } else {
         inType = typeExpression;
@@ -685,9 +672,7 @@ bool Calculator::getMatrixExpressions(
   for (int i = 1; i < input.size(); i ++) {
     if (
       input[i].isSequenceNElements(output.numberOfColumns) ||
-      input[i].startsWith(
-        this->opIntervalOpen(), output.numberOfColumns + 1
-      )
+      input[i].startsWith(this->opIntervalOpen(), output.numberOfColumns + 1)
     ) {
       for (int j = 1; j < input[i].size(); j ++) {
         output(i - 1, j - 1) = input[i][j];
@@ -790,9 +775,7 @@ std::string Calculator::writeFileToOutputFolderReturnLink(
   );
 }
 
-bool Calculator::Test::writeTestStrings(
-  std::stringstream* commentsOnFailure
-) {
+bool Calculator::Test::writeTestStrings(std::stringstream* commentsOnFailure) {
   STACK_TRACE("Calculator::Test::writeTestStrings");
   JSData result;
   result.elementType = JSData::Type::tokenArray;
@@ -889,9 +872,8 @@ bool Calculator::Test::processResults() {
   std::stringstream badCommands;
   std::stringstream badCommandsConsole;
   this->inconsistencies = 0;
-  if (
-    this->startIndex > 0 || this->lastIndexNotTested < this->commands.size()
-  ) {
+  if (this->startIndex > 0 || this->lastIndexNotTested < this->commands.size())
+  {
     out
     << "<b style='color:red'>Only "
     << this->numberOfTests
@@ -940,9 +922,7 @@ bool Calculator::Test::processResults() {
     } else {
       StringRoutines::Differ differ;
       differ.left =
-      HtmlRoutines::convertStringToHtmlString(
-        currentTest.actualResult, false
-      );
+      HtmlRoutines::convertStringToHtmlString(currentTest.actualResult, false);
       differ.right =
       HtmlRoutines::convertStringToHtmlString(
         currentTest.expectedResult, false

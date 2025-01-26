@@ -217,9 +217,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decodeBitString(
     }
   }
   if (
-    subDecoder.decode(
-      *this->rawData, offsetAtStart, subDecoderResult, nullptr
-    )
+    subDecoder.decode(*this->rawData, offsetAtStart, subDecoderResult, nullptr)
   ) {
     if (subDecoder.dataPointer == this->dataPointer) {
       output.elements.setSize(0);
@@ -325,17 +323,12 @@ void ASNElement::writeBytesConst(List<unsigned char>& output) const {
   }
 }
 
-void ASNElement::writeBytesUpdatePromisedLength(
-  List<unsigned char>& output
-) {
+void ASNElement::writeBytesUpdatePromisedLength(List<unsigned char>& output) {
   this->offsetLastWrite = output.size;
   // WARNING: writer needs to be a named object to avoid
   // gcc immediately calling the object's destructor.
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength notAnonymous(
-    this->startByte,
-    this->lengthPromised,
-    output,
-    &this->lengthPromised
+    this->startByte, this->lengthPromised, output, &this->lengthPromised
   );
   if (this->flagHeaderPadded) {
     output.addOnTop(0);
@@ -617,9 +610,7 @@ void ASNElement::writeAnnotations(List<Serialization::Marker>& output) {
   );
   output.addOnTop(
     Serialization::Marker(
-      this->offsetLastWrite + 1,
-      lengthOfLengthEncoding,
-      lengthStream.str()
+      this->offsetLastWrite + 1, lengthOfLengthEncoding, lengthStream.str()
     )
   );
   output.addOnTop(
@@ -717,9 +708,8 @@ void ASNElement::toJSON(JSData& output) const {
       output[ASNElement::JSLabels::interpretation] =
       Crypto::convertListUnsignedCharsToHex(this->ASNAtom);
     }
-    if (
-      this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
-    ) {
+    if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01)
+    {
       if (this->ASNAtom.size > 0) {
         if (this->ASNAtom[0]) {
           output[ASNElement::JSLabels::interpretation] = "true";
@@ -728,9 +718,8 @@ void ASNElement::toJSON(JSData& output) const {
         }
       }
     }
-    if (
-      this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02
-    ) {
+    if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02)
+    {
       LargeInteger integer;
       this->isInteger(&integer, nullptr);
       output[ASNElement::JSLabels::interpretation] = integer.toString();
@@ -742,9 +731,7 @@ bool ASNElement::isIntegerUnsigned(
   LargeIntegerUnsigned* whichInteger, std::stringstream* commentsOnFalse
 ) const {
   STACK_TRACE("ASNElement::isIntegerUnsigned");
-  if (
-    this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02
-  ) {
+  if (this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
     if (commentsOnFalse != nullptr) {
       *commentsOnFalse
       << "Element is not an unsigned integer but is of type: "
@@ -778,9 +765,7 @@ bool ASNElement::isInteger(
   LargeInteger* whichInteger, std::stringstream* commentsOnFalse
 ) const {
   STACK_TRACE("ASNElement::isInteger");
-  if (
-    this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02
-  ) {
+  if (this->tag != AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02) {
     if (commentsOnFalse != nullptr) {
       *commentsOnFalse
       << "Element is not an integer but is of type: "
@@ -1010,9 +995,7 @@ bool AbstractSyntaxNotationOneSubsetDecoder::decode(
     }
     return false;
   }
-  if (
-    this->dataPointer < this->rawData->size && this->flagMustDecodeAll
-  ) {
+  if (this->dataPointer < this->rawData->size && this->flagMustDecodeAll) {
     if (commentsOnError != nullptr) {
       *commentsOnError
       << "Decoded "
@@ -1137,16 +1120,16 @@ WriterObjectFixedLength() {
     // Wrong number of reserved bytes for sequence writer.
     // This is non-fatal but affects negatively performance.
     this->outputPointer->shiftUpExpandOnTopRepeated(
-      this->offset + 1,
-      actualBytesNeededForLength - this->reservedBytesForLength
+      this->offset + 1, actualBytesNeededForLength -
+      this->reservedBytesForLength
     );
   }
   if (actualBytesNeededForLength < this->reservedBytesForLength) {
     // Wrong number of reserved bytes for sequence writer.
     // This is non-fatal but affects negatively performance.
     this->outputPointer->removeIndicesShiftDown(
-      this->offset + 1,
-      this->reservedBytesForLength - actualBytesNeededForLength
+      this->offset + 1, this->reservedBytesForLength -
+      actualBytesNeededForLength
     );
   }
   this->reservedBytesForLength = actualBytesNeededForLength;
@@ -1163,8 +1146,7 @@ void AbstractSyntaxNotationOneSubsetDecoder::writeUnsignedIntegerObject(
   List<unsigned char> serialized;
   input.writeBigEndianBytes(serialized, true);
   ASNElement::writeBytesASNAtom(
-    AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02,
-    serialized,
+    AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02, serialized,
     output
   );
 }
@@ -1180,9 +1162,8 @@ void AbstractSyntaxNotationOneSubsetDecoder::writeObjectId(
 }
 
 void ASNObject::initializeAddSample(
-  MapList<
-    std::string, ASNObject, HashFunctions::hashFunction<std::string>
-  >& container,
+  MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >&
+  container,
   const std::string& inputName,
   const std::string& inputObjectIdHex,
   unsigned char inputContentTag
@@ -1212,9 +1193,8 @@ MapList<List<unsigned char>, ASNObject>& ASNObject::objectIdsToNames() {
   return result;
 }
 
-MapList<
-  std::string, ASNObject, HashFunctions::hashFunction<std::string>
->& ASNObject::namesToObjectIdsNonThreadSafe() {
+MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >&
+ASNObject::namesToObjectIdsNonThreadSafe() {
   static MapList<
     std::string, ASNObject, HashFunctions::hashFunction<std::string>
   > container;
@@ -1320,9 +1300,9 @@ MapList<
     AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
   );
   MapList<
-    List<unsigned char>,
-    ASNObject,
-    HashFunctions::hashFunction<List<unsigned char> >
+    List<unsigned char>, ASNObject, HashFunctions::hashFunction<
+      List<unsigned char>
+    >
   >& reverseMap =
   ASNObject::objectIdsToNames();
   for (int i = 0; i < container.values.size; i ++) {
@@ -1406,16 +1386,13 @@ const List<unsigned char>& ASNObject::objectIdFromNameNoFail(
 
 bool ASNObject::loadFieldsFromASNSequence(
   const ASNElement& input,
-  MapList<
-    std::string, ASNObject, HashFunctions::hashFunction<std::string>
-  >& output,
+  MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >&
+  output,
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("ASNObject::loadFieldsFromASNSequence");
   output.clear();
-  if (
-    input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10
-  ) {
+  if (input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Input is not array. ";
     }
@@ -1482,9 +1459,7 @@ bool ASNObject::loadFromASN(
     }
     return false;
   }
-  if (
-    !ASNObject::objectIdsToNames().contains(this->objectId.ASNAtom)
-  ) {
+  if (!ASNObject::objectIdsToNames().contains(this->objectId.ASNAtom)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Unrecognized object id. "
@@ -1734,8 +1709,7 @@ void X509Certificate::computeASNSignatureAlgorithm(ASNElement& output) {
 }
 
 void X509Certificate::writeBytesASN1(
-  List<unsigned char>& output,
-  List<Serialization::Marker>* annotations
+  List<unsigned char>& output, List<Serialization::Marker>* annotations
 ) {
   STACK_TRACE("X509Certificate::writeBytesASN1");
   this->computeASN(this->recodedASN);
@@ -1886,9 +1860,7 @@ bool PrivateKeyRSA::loadFromPEM(
   StringRoutines::stringTrimWhiteSpace(certificateContentStripped);
   if (
     !Crypto::convertBase64ToBitStream(
-      certificateContentStripped,
-      this->sourceBinary,
-      commentsOnFailure,
+      certificateContentStripped, this->sourceBinary, commentsOnFailure,
       nullptr
     )
   ) {
@@ -1965,14 +1937,10 @@ bool PrivateKeyRSA::computeFromTwoPrimes(
       return false;
     }
   }
-  this->publicKey.exponent.assignUnsignedInt(
-    this->publicKey.defaultExponent
-  );
+  this->publicKey.exponent.assignUnsignedInt(this->publicKey.defaultExponent);
   this->publicKey.modulus = this->primeOne * this->primeTwo;
   this->carmichaelTotientOfModulus =
-  MathRoutines::leastCommonMultiple(
-    this->primeOne - 1, this->primeTwo - 1
-  );
+  MathRoutines::leastCommonMultiple(this->primeOne - 1, this->primeTwo - 1);
   ElementZmodP inverter;
   inverter.modulus = this->carmichaelTotientOfModulus;
   inverter.value = 1;
@@ -2046,11 +2014,7 @@ bool PrivateKeyRSA::loadFromASNEncoded(
 ) {
   STACK_TRACE("PrivateKeyRSA::loadFromASNEncoded");
   AbstractSyntaxNotationOneSubsetDecoder outerDecoder, innerDecoder;
-  if (
-    !outerDecoder.decode(
-      input, 0, this->sourceASNOuter, commentsOnFailure
-    )
-  ) {
+  if (!outerDecoder.decode(input, 0, this->sourceASNOuter, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to asn-decode private key outer data. ";
     }
@@ -2147,9 +2111,7 @@ bool X509Certificate::loadFromPEM(
   std::string certificateContentNoHeader;
   if (
     !StringRoutines::stringBeginsWith(
-      certificateContentStripped,
-      beginCertificate,
-      &certificateContentNoHeader
+      certificateContentStripped, beginCertificate, &certificateContentNoHeader
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -2160,9 +2122,7 @@ bool X509Certificate::loadFromPEM(
   std::string certificateContentNoFooter;
   if (
     !StringRoutines::stringEndsWith(
-      certificateContentNoHeader,
-      endCertificate,
-      &certificateContentNoFooter
+      certificateContentNoHeader, endCertificate, &certificateContentNoFooter
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -2174,9 +2134,7 @@ bool X509Certificate::loadFromPEM(
   StringRoutines::stringTrimWhiteSpace(certificateContentNoFooter);
   if (
     !Crypto::convertBase64ToBitStream(
-      certificateContentStripped,
-      this->sourceBinary,
-      commentsOnFailure,
+      certificateContentStripped, this->sourceBinary, commentsOnFailure,
       nullptr
     )
   ) {
@@ -2186,8 +2144,7 @@ bool X509Certificate::loadFromPEM(
 }
 
 bool X509Certificate::loadFromPEMFile(
-  const std::string& inputFilenameVirtual,
-  std::stringstream* commentsOnFailure
+  const std::string& inputFilenameVirtual, std::stringstream* commentsOnFailure
 ) {
   // No access to sensitive folders here, so this cannot be used for the
   // server's certificate.
@@ -2248,9 +2205,8 @@ bool TBSCertificateInfo::loadExtensions(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
   this->extensions.setSize(0);
-  if (
-    input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03
-  ) {
+  if (input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03)
+  {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "TBS certificate extensions are expected to be of type bit string. ";
@@ -2275,9 +2231,7 @@ bool TBSCertificateInfo::loadValidity(
     }
     return false;
   }
-  if (
-    !input.elements[0].isTime() || !input.elements[1].isTime()
-  ) {
+  if (!input.elements[0].isTime() || !input.elements[1].isTime()) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Validity elements must be of type time. ";
     }
@@ -2292,12 +2246,9 @@ bool TBSCertificateInfo::Organization::loadFromASN(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("TBSCertificateInfo::Organization::loadFromASN");
-  MapList<
-    std::string, ASNObject, HashFunctions::hashFunction<std::string>
-  > fields;
-  if (
-    !ASNObject::loadFieldsFromASNSequence(input, fields, commentsOnFailure)
-  ) {
+  MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >
+  fields;
+  if (!ASNObject::loadFieldsFromASNSequence(input, fields, commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Failed to read certificate fields. Certificate fields decoded: "
@@ -2330,9 +2281,7 @@ bool TBSCertificateInfo::Organization::loadFields(
     fields, ASNObject::names::organizationalUnitName
   );
   numberOfLoadedFields +=
-  this->organizationName.loadField(
-    fields, ASNObject::names::organizationName
-  );
+  this->organizationName.loadField(fields, ASNObject::names::organizationName);
   numberOfLoadedFields +=
   this->stateOrProvinceName.loadField(
     fields, ASNObject::names::stateOrProvinceName
@@ -2350,9 +2299,8 @@ bool TBSCertificateInfo::Organization::loadFields(
 }
 
 bool TBSCertificateInfo::loadASNAlgorithmIdentifier(
-  const ASNElement& input,
-  ASNElement& output,
-  std::stringstream* commentsOnFailure
+  const ASNElement& input, ASNElement& output, std::stringstream*
+  commentsOnFailure
 ) {
   if (
     input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
@@ -2403,18 +2351,14 @@ bool TBSCertificateInfo::load(
     }
     return false;
   }
-  if (
-    !input.hasSubElementOfType({0, 0}, {}, this->version, commentsOnFailure
-    )
-  ) {
+  if (!input.hasSubElementOfType({0, 0}, {}, this->version, commentsOnFailure))
+  {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load version. ";
     }
     return false;
   }
-  if (
-    !input.hasSubElementOfType({1}, {}, this->serialNumber, commentsOnFailure
-    )
+  if (!input.hasSubElementOfType({1}, {}, this->serialNumber, commentsOnFailure)
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read serial number. ";
@@ -2423,9 +2367,7 @@ bool TBSCertificateInfo::load(
   }
   if (
     !this->loadASNAlgorithmIdentifier(
-      input.elements[2],
-      this->signatureAlgorithmIdentifier,
-      commentsOnFailure
+      input.elements[2], this->signatureAlgorithmIdentifier, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -2434,9 +2376,7 @@ bool TBSCertificateInfo::load(
     }
     return false;
   }
-  if (
-    !this->issuer.loadFromASN(input.elements[3], commentsOnFailure)
-  ) {
+  if (!this->issuer.loadFromASN(input.elements[3], commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Failed to load issuer (authority that signed the certificate). ";
@@ -2449,9 +2389,7 @@ bool TBSCertificateInfo::load(
     }
     return false;
   }
-  if (
-    !this->subject.loadFromASN(input.elements[5], commentsOnFailure)
-  ) {
+  if (!this->subject.loadFromASN(input.elements[5], commentsOnFailure)) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Failed to load subject (owner of advertised public key). ";
@@ -2459,10 +2397,8 @@ bool TBSCertificateInfo::load(
     return false;
   }
   if (
-    !input.hasSubElementOfType({6, 1, 0, 1},
-      {},
-      this->subjectPublicKey.modulus,
-      commentsOnFailure
+    !input.hasSubElementOfType({6, 1, 0, 1}, {}, this->subjectPublicKey.modulus
+      , commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -2471,10 +2407,8 @@ bool TBSCertificateInfo::load(
     return false;
   }
   if (
-    !input.hasSubElementOfType({6, 1, 0, 0},
-      {},
-      this->subjectPublicKey.exponent,
-      commentsOnFailure
+    !input.hasSubElementOfType({6, 1, 0, 0}, {}, this->subjectPublicKey.
+      exponent, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -2483,8 +2417,8 @@ bool TBSCertificateInfo::load(
     return false;
   }
   if (
-    this->subjectPublicKey.modulus == 0 || this->subjectPublicKey.exponent == 0
-  ) {
+    this->subjectPublicKey.modulus == 0 ||
+    this->subjectPublicKey.exponent == 0) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Invalid RSA modulus or exponent. ";
     }
@@ -2497,8 +2431,7 @@ bool TBSCertificateInfo::load(
 }
 
 bool X509Certificate::loadFromASNEncoded(
-  const List<unsigned char>& input,
-  std::stringstream* commentsOnFailure
+  const List<unsigned char>& input, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("X509Certificate::loadFromASNEncoded");
   AbstractSyntaxNotationOneSubsetDecoder decoder;
@@ -2514,9 +2447,7 @@ bool X509Certificate::loadFromASNEncoded(
     }
     return false;
   }
-  if (
-    !this->information.load(this->sourceASN[0], commentsOnFailure)
-  ) {
+  if (!this->information.load(this->sourceASN[0], commentsOnFailure)) {
     return false;
   }
   if (
@@ -2531,9 +2462,7 @@ bool X509Certificate::loadFromASNEncoded(
   }
   if (
     !this->information.loadASNAlgorithmIdentifier(
-      this->sourceASN[1],
-      this->signatureAlgorithmId,
-      commentsOnFailure
+      this->sourceASN[1], this->signatureAlgorithmId, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {

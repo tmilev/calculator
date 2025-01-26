@@ -177,9 +177,7 @@ bool CalculatorFunctions::solveUnivariatePolynomialWithRadicalsWithRespectTo(
     equation.equationAllTermsOnLeftHandSide = modifiedInput[2];
   } else if (
     !CalculatorFunctions::functionEqualityToArithmeticExpression(
-      calculator,
-      modifiedInput[2],
-      equation.equationAllTermsOnLeftHandSide
+      calculator, modifiedInput[2], equation.equationAllTermsOnLeftHandSide
     )
   ) {
     return
@@ -251,8 +249,7 @@ bool ProblemWithSolution::solveEquation(Calculator& calculator) {
     )
   ) {
     this->addAnnotationStep(
-      calculator,
-      "Sorry, I've only been taught to solve polynomial equations."
+      calculator, "Sorry, I've only been taught to solve polynomial equations."
     );
     return true;
   }
@@ -349,9 +346,8 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     "Unexpected failure to extract free variables from desired answer.";
     return output.assignValue(calculator, comparison.toJSON());
   }
-  if (
-    !comparison.given.getFreeVariables(comparison.freeVariablesFound, false)
-  ) {
+  if (!comparison.given.getFreeVariables(comparison.freeVariablesFound, false))
+  {
     comparison.errorEvaluation =
     "Unexpected failure to extract free variables from given answer.";
     return output.assignValue(calculator, comparison.toJSON());
@@ -392,11 +388,8 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     comparison.comparisonStandardRaw,
     comparison.comparisonStandardEvaluated
   );
-  MapList<
-    std::string,
-    Expression,
-    HashFunctions::hashFunction<std::string>
-  > substitution;
+  MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >
+  substitution;
   substitution.setKeyValue("a", comparison.given);
   substitution.setKeyValue("b", comparison.desired);
   comparison.comparisonNoDistributionRaw.assignStringParsed(
@@ -609,8 +602,7 @@ bool CalculatorEducationalFunctions::divideByNumberTrivial(
   Rational result = numerator / denominator;
   if (
     numerator == result.getNumerator() &&
-    denominator == result.getDenominator()
-  ) {
+    denominator == result.getDenominator()) {
     return output.assignValue(calculator, result);
   }
   return false;
@@ -655,9 +647,7 @@ bool CalculatorFunctions::cardanoFormula(
     << "Could not find a third power variable in your input. ";
   }
   Selection nonCoefficientVariables;
-  nonCoefficientVariables.initialize(
-    withContext.context.numberOfVariables()
-  );
+  nonCoefficientVariables.initialize(withContext.context.numberOfVariables());
   nonCoefficientVariables.addSelectionAppendNewIndex(
     indexVariableMaximumDegree
   );

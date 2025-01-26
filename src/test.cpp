@@ -183,9 +183,7 @@ void Test::initialize(List<std::string>& inputArguments) {
   << "Input arguments: "
   << inputArguments.toStringCommaDelimited()
   << Logger::endL;
-  if (
-    this->inputs.size == 0 || this->inputs.contains(Test::Suites::all)
-  ) {
+  if (this->inputs.size == 0 || this->inputs.contains(Test::Suites::all)) {
     this->flagTestAll = true;
   } else {
     this->flagTestAll = false;

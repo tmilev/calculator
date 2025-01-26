@@ -109,8 +109,7 @@ public:
     const PolynomialSubstitution<Rational>& substitution
   );
   void subLatticeWithIntegralScalarProducts(
-    const Vector<Rational>& mustHaveIntegerScalarProductWith,
-    Lattice& output
+    const Vector<Rational>& mustHaveIntegerScalarProductWith, Lattice& output
   ) const;
   // Returns the sub-lattice of vectors:
   // { v \in L | <b,v>d \in M}
@@ -138,8 +137,8 @@ public:
   );
   static bool
   getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
-    const PolynomialSubstitution<Rational>& substitution,
-    Matrix<Rational>& output
+    const PolynomialSubstitution<Rational>& substitution, Matrix<Rational>&
+    output
   );
   // Returning false means that the lattice given as rougher
   // is not actually rougher than the current one
@@ -167,9 +166,8 @@ public:
   // Draws the lattice. If a restricting cone is given,
   // all points outside of if will be omitted.
   // The restricting cone is specified by giving the normals of its walls.
-  void draw(
-    DrawingVariables& output, List<Vector<Rational> >* restrictingCone
-  ) const;
+  void draw(DrawingVariables& output, List<Vector<Rational> >* restrictingCone)
+  const;
   static void scaleNormalizeByPositive(Vector<Rational>& toScale);
 };
 
@@ -188,16 +186,13 @@ public:
   void combineLatticeShifts(
     MapList<Polynomial<Rational>, List<Vector<Rational> > >& output
   ) const;
-  Rational evaluate(
-    const Vector<Rational>& input, std::stringstream* comments
-  ) const;
+  Rational evaluate(const Vector<Rational>& input, std::stringstream* comments)
+  const;
   void addLatticeShift(
-    const Polynomial<Rational>& input,
-    const Vector<Rational>& inputShift
+    const Polynomial<Rational>& input, const Vector<Rational>& inputShift
   );
   void setLatticeShift(
-    const Polynomial<Rational>& input,
-    const Vector<Rational>& inputShift
+    const Polynomial<Rational>& input, const Vector<Rational>& inputShift
   );
   void makeRougherLattice(const Lattice& latticeToRoughenBy);
   void makeFromPolynomialShiftAndLattice(
@@ -269,8 +264,8 @@ public:
     List<std::string>* comments
   ) const;
   bool substitutionFewerVariables(
-    const PolynomialSubstitution<Rational>& substitution,
-    QuasiPolynomial& output
+    const PolynomialSubstitution<Rational>& substitution, QuasiPolynomial&
+    output
   ) const;
   bool compress();
   bool compressOnce();

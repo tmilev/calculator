@@ -221,9 +221,7 @@ public:
   bool flagIsQuadraticRadicalExtensionRationals;
   HashedList<LargeInteger> quadraticRadicals;
   List<std::string> displayNamesBasisElements;
-  void injectOldBases(
-    const MatrixTensor<Rational>* injectionNullForIdentity
-  );
+  void injectOldBases(const MatrixTensor<Rational>* injectionNullForIdentity);
   void appendAdditiveEiBasis();
   void assignDefaultBasisDisplayNames();
   void reset();
@@ -238,8 +236,8 @@ public:
   );
   bool reduceMe(std::stringstream* commentsOnFailure);
   void contractBasesIfRedundant(
-    AlgebraicClosureRationals& previousCopy,
-    AlgebraicNumber* outputImageGenerator
+    AlgebraicClosureRationals& previousCopy, AlgebraicNumber*
+    outputImageGenerator
   );
   void computeDisplayStringsFromRadicals();
   bool getRadicalSelectionFromIndex(int inputIndex, Selection& selection);
@@ -255,8 +253,8 @@ public:
     const AlgebraicNumber& input, VectorSparse<Rational>& output
   );
   void convertPolynomialOneVariableToPolynomialFirstVariable(
-    const Polynomial<AlgebraicNumber>& input,
-    Polynomial<AlgebraicNumber>& output
+    const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>&
+    output
   );
   bool adjoinRootMinimalPolynomial(
     const Polynomial<AlgebraicNumber>& polynomial,
@@ -342,15 +340,10 @@ public:
     static bool all();
     static bool constructStartingPolynomial();
     static bool testOneStartingPolynomial(
-      int modulus,
-      int constant,
-      int currentDegree,
-      const std::string& expected
+      int modulus, int constant, int currentDegree, const std::string& expected
     );
     static bool testOnce(
-      int modulus,
-      const std::string& input,
-      const std::string& expected
+      int modulus, const std::string& input, const std::string& expected
     );
   };
 };
@@ -397,9 +390,8 @@ public:
   bool tryFactor(SelectionFixedRank& selection);
   void henselLift(std::stringstream* comments);
   void henselLiftOnce(
-    const LargeIntegerUnsigned& oldModulus,
-    int stepCount,
-    std::stringstream* comments
+    const LargeIntegerUnsigned& oldModulus, int stepCount, std::stringstream*
+    comments
   );
   // Same as factor.
   // The name oneFactor is
@@ -434,8 +426,7 @@ public:
     std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   // Factors the polynomial fully.
-  bool factor(
-    std::stringstream* comments, std::stringstream* commentsOnFailure
+  bool factor(std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   bool hasSquareFactor(
     std::stringstream* comments, std::stringstream* commentsOnFailure
@@ -491,8 +482,7 @@ public:
       const std::string& toFactor, const std::string& desiredResult
     );
     static bool gelfondBound(
-      const std::string& inputPolynomial,
-      const std::string& desiredBound
+      const std::string& inputPolynomial, const std::string& desiredBound
     );
   };
 };

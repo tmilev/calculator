@@ -313,8 +313,7 @@ Object&ListReferencesIterator<Object>::operator*() const {
 }
 
 template <
-  class Object,
-  unsigned int hashFunction(const Object&) = Object::hashFunction
+  class Object, unsigned int hashFunction(const Object&) = Object::hashFunction
 >
 class HashedListReferences: public HashTemplate<
   Object, ListReferences<Object>, hashFunction

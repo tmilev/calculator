@@ -22,9 +22,8 @@ public:
   PackedVector<scalar> operator*(scalar x) const;
   PackedVector<scalar> operator+(const PackedVector<scalar>& w) const;
   void operator+=(const PackedVector<scalar>& w);
-  scalar scalarProduct(
-    const PackedVector<scalar>& v, const Matrix<scalar>& B
-  ) const;
+  scalar scalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B)
+  const;
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const PackedVector<scalar>& in);
 };
@@ -45,15 +44,14 @@ public:
   AnotherWeylGroup(): sizePrivate(- 1) {}
   int getRank() const;
   // idk lol
-  void simpleReflection(
-    int i, const templateVector& v, templateVector& out
-  ) const;
+  void simpleReflection(int i, const templateVector& v, templateVector& out)
+  const;
   void simpleReflection(int i, templateVector& v) const;
   void getSimpleReflections(const templateVector& v, List<int>& out) const;
   void getWord(int i, List<int>& out) const;
   void applyReflectionList(
-    const List<int>& simpleReflections, templateVector& v
-  ) const;
+    const List<int>& simpleReflections, templateVector&
+    v) const;
   void actOn(int g, templateVector& v) const;
   void actOn(int g, const templateVector& v, templateVector& out) const;
   int multiplyElements(int g, int h) const;
@@ -145,9 +143,8 @@ void AnotherWeylGroup<scalar, templateVector>::getSimpleReflections(
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::getWord(
-  int i, List<int>& out
-) const {
+void AnotherWeylGroup<scalar, templateVector>::getWord(int i, List<int>& out)
+const {
   this->getSimpleReflections(this->rhoOrbit[i], out);
 }
 
@@ -174,9 +171,8 @@ void AnotherWeylGroup<scalar, templateVector>::applyReflectionList(
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::actOn(
-  int i, templateVector& v
-) const {
+void AnotherWeylGroup<scalar, templateVector>::actOn(int i, templateVector& v)
+const {
   List<int> simpleReflections;
   getSimpleReflections(this->rhoOrbit[i], simpleReflections);
   this->applyReflectionList(simpleReflections, v);
@@ -243,9 +239,8 @@ void AnotherWeylGroup<scalar, templateVector>::computeRho() {
   }
   global.comments << "symmetric Cartan matrix is" << "\n";
   for (int i = 0; i < this->unrationalCartanSymmetric.numberOfRows; i ++) {
-    for (
-      int j = 0; j < this->unrationalCartanSymmetric.numberOfColumns; j ++
-    ) {
+    for (int j = 0; j < this->unrationalCartanSymmetric.numberOfColumns; j ++)
+    {
       global.comments
       << this->unrationalCartanSymmetric.elements[i][j]
       << '\t';
@@ -384,8 +379,7 @@ Matrix<Rational>& AnotherWeylGroup<scalar, templateVector>::getClassMatrix(
   if (this->classMap.size == 0) {
     this->computeClassMap();
   }
-  this->classMatrices[cc] =
-  getClassMatrix(*this, cc, &(this->classmap));
+  this->classMatrices[cc] = getClassMatrix(*this, cc, &(this->classmap));
   return this->classMatrices[cc];
 }
 

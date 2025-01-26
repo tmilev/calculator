@@ -13,8 +13,7 @@ void DrawingVariables::toJSON(JSData& output) {
   }
 }
 
-std::string DrawingVariables::getHTMLDiv(
-  int dimension, bool generateInfoPanels
+std::string DrawingVariables::getHTMLDiv(int dimension, bool generateInfoPanels
 ) {
   STACK_TRACE("DrawingVariables::getHTMLDiv");
   JSData data;
@@ -30,9 +29,7 @@ std::string DrawingVariables::getHTMLDiv(
   this->toJSON(data[drawObjects]);
   data["dimension"] = dimension;
   std::string graphicsId =
-  Crypto::convertStringToHex(
-    Crypto::computeSha256(data.toString()), 0, false
-  );
+  Crypto::convertStringToHex(Crypto::computeSha256(data.toString()), 0, false);
   std::string idHighlightInformation =
   "idHighlightInfoNDimensionalGraphics" + graphicsId;
   std::string idSpanInformation =

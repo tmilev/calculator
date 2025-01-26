@@ -65,14 +65,11 @@ public:
   JSData& operator[](int i);
   JSData& operator[](const std::string& s);
   JSData getValue(const std::string& key) const;
-  bool mergeInMe(
-    const JSData& input, std::stringstream* commentsOnFailure
-  );
+  bool mergeInMe(const JSData& input, std::stringstream* commentsOnFailure);
   bool hasKey(const std::string& key) const;
   bool hasCompositeKey(
-    const std::string& key,
-    JSData* whichValue,
-    std::stringstream* commentsOnFailure
+    const std::string& key, JSData* whichValue, std::stringstream*
+    commentsOnFailure
   ) const;
   bool hasCompositeKeyOfToken(
     const std::string& key,
@@ -81,9 +78,8 @@ public:
     std::stringstream* commentsOnFailure
   ) const;
   bool hasCompositeKeyOfType(
-    const std::string& key,
-    std::string& output,
-    std::stringstream* commentsOnFailure
+    const std::string& key, std::string& output, std::stringstream*
+    commentsOnFailure
   ) const;
   bool hasCompositeKeyOfType(
     const std::string& key,
@@ -149,16 +145,13 @@ public:
     bool useHTMLInComments = false
   );
   static void filterColumnsJSDataObjectList(
-    List<JSData>& inputOutput,
-    const List<std::string>& columnsToPreserve
+    List<JSData>& inputOutput, const List<std::string>& columnsToPreserve
   );
   class Test {
   public:
     static bool all();
     static bool recode();
-    static bool recodeOnce(
-      const List<std::string>& pair, bool relaxedInput
-    );
+    static bool recodeOnce(const List<std::string>& pair, bool relaxedInput);
     static bool recodeRelaxed();
     static bool decodeEscapedUnicode();
     static bool badInput();
@@ -216,9 +209,7 @@ public:
     std::stringstream* commentsOnFailure
   );
   static std::string toStringTokens(const List<JSONWithTokens>& stack);
-  static std::string toStringReadingStack(
-    const List<JSONWithTokens>& stack
-  );
+  static std::string toStringReadingStack(const List<JSONWithTokens>& stack);
 };
 
 std::ostream& operator<<(std::ostream& out, const JSData& data);

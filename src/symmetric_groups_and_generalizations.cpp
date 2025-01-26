@@ -181,9 +181,7 @@ void Partition::fillTableauOrdered(Tableau& in) const {
 
 void Partition::getAllStandardTableaux(List<Tableau>& out) const {
   GeneratorPermutationsOfList<int> perms;
-  for (
-    perms.initialize(this->n); !perms.doneIterating(); ++ perms
-  ) {
+  for (perms.initialize(this->n); !perms.doneIterating(); ++ perms) {
     Tableau tableau;
     this->fillTableau(tableau, *perms);
     if (tableau.isStandard()) {
@@ -274,8 +272,7 @@ std::string Partition::toString() const {
 }
 
 std::string Partition::toStringForArticles(
-  const std::string& leftParenthesis,
-  const std::string& rightParenthesis
+  const std::string& leftParenthesis, const std::string& rightParenthesis
 ) const {
   if (this->n == 0) {
     return "\\emptyset";
@@ -538,8 +535,7 @@ void PermutationR2::conjugationAction(
   out = conjugateOn ^ conjugateWith;
 }
 
-bool PermutationR2::areConjugate(
-  const PermutationR2& x, const PermutationR2& y
+bool PermutationR2::areConjugate(const PermutationR2& x, const PermutationR2& y
 ) {
   List<int> xcsh, ycsh;
   x.getCycleStructure(xcsh);
@@ -586,9 +582,7 @@ void PermutationR2::addTransposition(int i, int j) {
   this->makeCanonical();
 }
 
-void PermutationR2::makeFromListOfCycles(
-  const List<List<int> >& inCycles
-) {
+void PermutationR2::makeFromListOfCycles(const List<List<int> >& inCycles) {
   this->cycles = inCycles;
   this->makeCanonical();
 }
@@ -760,10 +754,7 @@ void PermutationR2::actOnMonomialTensor(
     out.generatorsIndices.addOnTop(expanded[xi]);
     xi ++;
     for (int j = 1;; j ++, xi ++) {
-      if ((xi == expanded.size) || (
-          expanded[xi] != out.generatorsIndices[i]
-        )
-      ) {
+      if ((xi == expanded.size) || (expanded[xi] != out.generatorsIndices[i])) {
         out.powers.addOnTop(j);
         break;
       }
@@ -885,9 +876,7 @@ computeCCSizesAndRepresentativesByFormulaImplementation(
 }
 
 bool PermutationGroupData::getWordjjPlus1Implementation(
-  FiniteGroup<PermutationR2>& G,
-  const PermutationR2& g,
-  List<int>& word
+  FiniteGroup<PermutationR2>& G, const PermutationR2& g, List<int>& word
 ) {
   (void) G;
   g.getWordjjPlus1(word);
@@ -1583,7 +1572,7 @@ std::string HyperoctahedralGroupData::toString() const {
 }
 
 std::ostream& operator<<(
-  std::ostream& out, const HyperoctahedralGroupData& data
-) {
+  std::ostream& out, const HyperoctahedralGroupData&
+  data) {
   return data.intoStream(out);
 }

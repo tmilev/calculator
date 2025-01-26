@@ -195,9 +195,7 @@ bool WebWorker::receiveAll() {
     }
     failedReceives ++;
     if (failedReceives > maximumFailedReceives) {
-      if (
-        errorString == TransportLayerSecurityOpenSSL::errors::errorWantRead
-      ) {
+      if (errorString == TransportLayerSecurityOpenSSL::errors::errorWantRead) {
         this->error = errorString;
       } else {
         std::stringstream out;
@@ -228,9 +226,7 @@ bool WebWorker::receiveAll() {
   if (this->contentLength <= 0) {
     return true;
   }
-  if (
-    this->messageBody.size() == static_cast<unsigned>(this->contentLength)
-  ) {
+  if (this->messageBody.size() == static_cast<unsigned>(this->contentLength)) {
     return true;
   }
   this->messageBody.clear();
@@ -248,9 +244,7 @@ bool WebWorker::receiveAll() {
   this->sendAllBytesNoHeaders();
   this->remainingBytesToSend.setSize(0);
   std::string bufferString;
-  while (
-    static_cast<signed>(this->messageBody.size()) < this->contentLength
-  ) {
+  while (static_cast<signed>(this->messageBody.size()) < this->contentLength) {
     if (global.getElapsedSeconds() - numberOfSecondsAtStart > 5) {
       this->error = "Receiving bytes timed out (5 seconds).";
       global << this->error << Logger::endL;
@@ -291,15 +285,11 @@ bool WebWorker::receiveAll() {
     );
     this->messageBody += bufferString;
   }
-  if (
-    static_cast<signed>(this->messageBody.size()) != this->contentLength
-  ) {
+  if (static_cast<signed>(this->messageBody.size()) != this->contentLength) {
     this->messageHead += this->messageBody;
     this->parseMessageHead();
   }
-  if (
-    static_cast<signed>(this->messageBody.size()) != this->contentLength
-  ) {
+  if (static_cast<signed>(this->messageBody.size()) != this->contentLength) {
     std::stringstream out;
     out
     << "The message-body received by me had length "
@@ -500,9 +490,7 @@ std::string WebWorker::toStringMessageShort() const {
   }
   out
   << "\n<hr>\nHost with port:<br>\n"
-  << HtmlRoutines::convertStringToHtmlString(
-    global.web.hostWithPort, false
-  )
+  << HtmlRoutines::convertStringToHtmlString(global.web.hostWithPort, false)
   << "<br>Host without port:<br>\n"
   << HtmlRoutines::convertStringToHtmlString(global.web.hostNoPort, false);
   out
@@ -637,17 +625,13 @@ bool WebWorker::extractArgumentsFromCookies(
   std::stringstream& argumentProcessingFailureComments
 ) {
   STACK_TRACE("WebWorker::extractArgumentsFromCookies");
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  > newlyFoundArguments;
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >
+  newlyFoundArguments;
   bool result = true;
   for (int i = 0; i < this->cookies.size; i ++) {
     if (
       !HtmlRoutines::chopPercentEncodedStringAppend(
-        this->cookies[i],
-        newlyFoundArguments,
+        this->cookies[i], newlyFoundArguments,
         argumentProcessingFailureComments
       )
     ) {
@@ -686,11 +670,8 @@ bool WebWorker::extractArgumentsFromMessage(
     << "Error: input string encoded too many times";
     return false;
   }
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  arguments =
   global.webArguments;
   if (
     !HtmlRoutines::chopPercentEncodedStringAppend(
@@ -706,8 +687,8 @@ bool WebWorker::extractArgumentsFromMessage(
 // Returning true does not necessarily mean the login information was accepted.
 // Returning false guarantees the login information was not accepted.
 bool WebWorker::loginProcedure(
-  std::stringstream& argumentProcessingFailureComments,
-  std::stringstream* comments
+  std::stringstream& argumentProcessingFailureComments, std::stringstream*
+  comments
 ) {
   STACK_TRACE("WebWorker::loginProcedure");
   global.flagLoggedIn = false;
@@ -715,11 +696,8 @@ bool WebWorker::loginProcedure(
     global.flagLoggedIn = true;
     return true;
   }
-  MapList<
-    std::string,
-    std::string,
-    HashFunctions::hashFunction<std::string>
-  >& arguments =
+  MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
+  arguments =
   global.webArguments;
   UserCalculatorData& user = global.userDefault;
   user.username =
@@ -880,8 +858,8 @@ bool WebWorker::loginProcedure(
     }
     if (user.flagEnteredAuthenticationToken) {
       if (
-        user.enteredActivationToken != "0" && user.enteredActivationToken != ""
-      ) {
+        user.enteredActivationToken != "0" &&
+        user.enteredActivationToken != "") {
         shouldDisplayMessage = true;
       }
     }
@@ -910,8 +888,7 @@ void WebWorker::writeAfterTimeoutProgress(
     << Logger::endL;
     return;
   }
-  if (
-    this->workerToWorkerRequestIndicator.lastRead.size == 0 && !forceFileWrite
+  if (this->workerToWorkerRequestIndicator.lastRead.size == 0 && !forceFileWrite
   ) {
     return;
   }
@@ -953,9 +930,7 @@ void WebWorker::parseMessageHead() {
         buffer = "";
       }
       if (i > 0) {
-        if (
-          this->messageHead[i - 1] == '\r' && this->messageHead[i] == '\n'
-        ) {
+        if (this->messageHead[i - 1] == '\r' && this->messageHead[i] == '\n') {
           this->messageHeaderStrings.addOnTop("\n");
         }
       }
@@ -1017,9 +992,7 @@ void WebWorker::parseMessageHead() {
             this->messageHeaderStrings[i + 1], true
           )
         ) {
-          if (
-            !largeInteger.isIntegerFittingInInt(&this->contentLength)
-          ) {
+          if (!largeInteger.isIntegerFittingInInt(&this->contentLength)) {
             this->contentLength = - 1;
           }
         }
@@ -1148,8 +1121,7 @@ void WebWorker::extractHostInfo() {
   );
   if (
     global.web.hostNoPort == "localhost" ||
-    global.web.hostNoPort == "127.0.0.1"
-  ) {
+    global.web.hostNoPort == "127.0.0.1") {
     global.flagRequestComingLocally = true;
   } else {
     global.flagRequestComingLocally = false;
@@ -1256,9 +1228,8 @@ void WebWorker::sanitizeVirtualFileName() {
   resultName.reserve(this->virtualFileName.size());
   bool foundslash = false;
   for (
-    signed i = static_cast<signed>(this->virtualFileName.size()) - 1; i >= 0; i
-    --
-  ) {
+    signed i = static_cast<signed>(this->virtualFileName.size()) - 1; i >=
+    0; i --) {
     unsigned k = static_cast<unsigned>(i);
     bool isOK = true;
     if (foundslash && this->virtualFileName[k] == '.') {
@@ -1275,12 +1246,8 @@ void WebWorker::sanitizeVirtualFileName() {
     }
   }
   this->virtualFileName = "";
-  for (
-    signed i = static_cast<signed>(resultName.size()) - 1; i >= 0; i --
-  ) {
-    this->virtualFileName.push_back(
-      resultName[static_cast<unsigned>(i)]
-    );
+  for (signed i = static_cast<signed>(resultName.size()) - 1; i >= 0; i --) {
+    this->virtualFileName.push_back(resultName[static_cast<unsigned>(i)]);
   }
 }
 
@@ -1434,9 +1401,8 @@ void WebWorker::writeAfterTimeoutCarbonCopy(
 }
 
 void WebWorker::writeAfterTimeoutJSON(
-  const JSData& input,
-  const std::string& status,
-  const std::string& fileNameCarbonCopy
+  const JSData& input, const std::string& status, const std::string&
+  fileNameCarbonCopy
 ) {
   STACK_TRACE("WebWorker::writeAfterTimeoutJSON");
   JSData result;
@@ -1445,9 +1411,8 @@ void WebWorker::writeAfterTimeoutJSON(
 }
 
 void WebWorker::writeAfterTimeoutPartTwo(
-  JSData& result,
-  const std::string& status,
-  const std::string& fileNameCarbonCopy
+  JSData& result, const std::string& status, const std::string&
+  fileNameCarbonCopy
 ) {
   STACK_TRACE("WebWorker::writeAfterTimeoutPartTwo");
   std::stringstream commentsOnError;
@@ -1459,11 +1424,7 @@ void WebWorker::writeAfterTimeoutPartTwo(
   bool success =
   FileOperations::
   writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
-    "results/" + currentWorker.workerId,
-    toWrite,
-    true,
-    true,
-    &commentsOnError
+    "results/" + currentWorker.workerId, toWrite, true, true, &commentsOnError
   );
   currentWorker.writeAfterTimeoutCarbonCopy(result, fileNameCarbonCopy);
   currentWorker.writingReportFile.unlock();
@@ -1485,18 +1446,15 @@ int WebWorker::processFolder() {
   outPage << "<html><body>";
   if (this->relativePhysicalFileName.size() > 0) {
     if (
-      this->relativePhysicalFileName[
-        this->relativePhysicalFileName.size() - 1
-      ] !=
+      this->relativePhysicalFileName[this->relativePhysicalFileName.size() - 1]
+      !=
       '/'
     ) {
       this->relativePhysicalFileName.push_back('/');
     }
   }
   if (this->addressGetOrPost.size() > 0) {
-    if (
-      this->addressGetOrPost[this->addressGetOrPost.size() - 1] != '/'
-    ) {
+    if (this->addressGetOrPost[this->addressGetOrPost.size() - 1] != '/') {
       this->addressGetOrPost.push_back('/');
     }
   }
@@ -1672,10 +1630,9 @@ int WebWorker::processFileTooLarge(long fileSize) {
 
 int WebWorker::processFile(bool generateLinkToCalculatorOnMissingFile) {
   STACK_TRACE("WebWorker::processFile");
-  if (
-    !FileOperations::fileExistsUnsecure(this->relativePhysicalFileName)
-  ) {
-    return this->processFileDoesntExist(generateLinkToCalculatorOnMissingFile);
+  if (!FileOperations::fileExistsUnsecure(this->relativePhysicalFileName)) {
+    return
+    this->processFileDoesntExist(generateLinkToCalculatorOnMissingFile);
   }
   std::string fileExtension =
   FileOperations::getFileExtensionWithDot(this->relativePhysicalFileName);
@@ -1683,11 +1640,7 @@ int WebWorker::processFile(bool generateLinkToCalculatorOnMissingFile) {
   std::fstream fileStream;
   if (
     !FileOperations::openFileUnsecure(
-      fileStream,
-      this->relativePhysicalFileName,
-      false,
-      false,
-      !isBinary
+      fileStream, this->relativePhysicalFileName, false, false, !isBinary
     )
   ) {
     return this->processFileCantOpen();
@@ -1702,13 +1655,13 @@ int WebWorker::processFile(bool generateLinkToCalculatorOnMissingFile) {
   << "HTTP/1.0 200 OK\r\n"
   << this->headerFromFileExtension(fileExtension)
   << "Access-Control-Allow-Origin: *\r\n";
-  for (
-    int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++
+  for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++
   ) {
     if (
       StringRoutines::stringBeginsWith(
-        this->virtualFileName,
-        this->parent->addressStartsSentWithCacheMaxAge[i]
+        this->virtualFileName, this->parent->addressStartsSentWithCacheMaxAge[
+          i
+        ]
       )
     ) {
       header << WebAPI::headerCacheControl << "\r\n";
@@ -1734,9 +1687,7 @@ int WebWorker::processFile(bool generateLinkToCalculatorOnMissingFile) {
     this->bufferFileIO.setSize(static_cast<int>(numberOfBytesRead));
     this->queueBytesForSendingNoHeader(this->bufferFileIO);
     this->bufferFileIO.setSize(bufferSize);
-    fileStream.read(
-      this->bufferFileIO.objects, this->bufferFileIO.size
-    );
+    fileStream.read(this->bufferFileIO.objects, this->bufferFileIO.size);
     numberOfBytesRead = fileStream.gcount();
   }
   this->sendAllBytesNoHeaders();
@@ -1785,9 +1736,7 @@ bool WebWorker::isActive() {
   return this->parent->activeWorker == this->indexInParent;
 }
 
-bool WebWorker::isFileExtensionOfBinaryFile(
-  const std::string& fileExtension
-) {
+bool WebWorker::isFileExtensionOfBinaryFile(const std::string& fileExtension) {
   if (fileExtension == ".png") {
     return true;
   }
@@ -1812,9 +1761,7 @@ void WebWorker::wrapUpConnection() {
   this->statistics.allReceives;
   this->resultWork[WebServer::Statististics::pingRequestsString] =
   this->statistics.pingReceives;
-  this->resultWork[
-    WebServer::Statististics::standaloneServerRequestsString
-  ] =
+  this->resultWork[WebServer::Statististics::standaloneServerRequestsString] =
   this->statistics.standaloneServerReceives;
   this->resultWork["result"] = "close";
   this->pipeWorkerToServerControls.writeOnceAfterEmptying(
@@ -1926,9 +1873,7 @@ std::string WebWorker::changePasswordPagePartOne(
     global.getWebInput("activationToken"), false
   );
   std::string claimedEmail =
-  HtmlRoutines::convertURLStringToNormal(
-    global.getWebInput("email"), false
-  );
+  HtmlRoutines::convertURLStringToNormal(global.getWebInput("email"), false);
   if (claimedActivationToken == "") {
     out << "Activation token is empty. ";
     return out.str();
@@ -1947,9 +1892,7 @@ std::string WebWorker::changePasswordPagePartOne(
     return out.str();
   }
   QueryFind findEmail(
-    DatabaseStrings::tableEmailInfo,
-    DatabaseStrings::labelEmail,
-    claimedEmail
+    DatabaseStrings::tableEmailInfo, DatabaseStrings::labelEmail, claimedEmail
   );
   List<JSData> allEmails;
   bool success =
@@ -2046,9 +1989,7 @@ int WebWorker::processgetAuthenticationToken(
   STACK_TRACE("WebWorker::processgetAuthenticationToken");
   this->setHeaderOKNoContentLength("");
   return
-  this->writeToBody(
-    this->getAuthenticationToken(reasonForNoAuthentication)
-  );
+  this->writeToBody(this->getAuthenticationToken(reasonForNoAuthentication));
 }
 
 JSData WebWorker::getClonePageResult() {
@@ -2131,11 +2072,7 @@ std::string WebAPIResponse::getCaptchaDiv() {
   if (
     !FileOperations::
     loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-      "certificates/recaptcha-public.txt",
-      recaptchaPublic,
-      true,
-      true,
-      &out
+      "certificates/recaptcha-public.txt", recaptchaPublic, true, true, &out
     )
   ) {
     out
@@ -2293,9 +2230,7 @@ int WebWorker::processLoginNeededOverUnsecureConnection() {
   std::stringstream outBody;
   if (this->hostNoPort != "") {
     redirectStream << "Location: " << newAddressStream.str();
-    this->setHeader(
-      "HTTP/1.0 301 Moved Permanently", redirectStream.str()
-    );
+    this->setHeader("HTTP/1.0 301 Moved Permanently", redirectStream.str());
     outBody
     << "<html><body>Address available through "
     << "secure (SSL) connection only. " // The
@@ -2385,9 +2320,7 @@ int WebWorker::serveClient() {
   this->extractHostInfo();
   this->extractAddressParts();
   global.web.flagIsStandaloneWebserver = false;
-  if (
-    global.web.actAsWebServerOnlyForTheseHosts.contains(this->hostNoPort)
-  ) {
+  if (global.web.actAsWebServerOnlyForTheseHosts.contains(this->hostNoPort)) {
     return this->serveWebServerTraffic();
   }
   std::stringstream argumentProcessingFailureComments;
@@ -2406,9 +2339,7 @@ int WebWorker::serveClient() {
   ) {
     this->flagArgumentsAreOK = false;
   }
-  if (
-    !this->extractArgumentsFromCookies(argumentProcessingFailureComments)
-  ) {
+  if (!this->extractArgumentsFromCookies(argumentProcessingFailureComments)) {
     this->flagArgumentsAreOK = false;
   }
   global.requestType = "";
@@ -2576,8 +2507,8 @@ void WebWorker::release() {
 }
 
 void WebWorker::getIndicatorOnTimeout(
-  JSData& output, const std::string& message
-) {
+  JSData& output, const std::string&
+  message) {
   STACK_TRACE("WebWorker::getIndicatorOnTimeout");
   global
   << Logger::blue
@@ -2828,9 +2759,7 @@ void WebServer::reapChildren() {
 
 WebWorker& WebServer::getActiveWorker() {
   STACK_TRACE("WebServer::getActiveWorker");
-  if (
-    this->activeWorker < 0 || this->activeWorker >= this->allWorkers.size
-  ) {
+  if (this->activeWorker < 0 || this->activeWorker >= this->allWorkers.size) {
     global.fatal
     << "Active worker index is "
     << this->activeWorker
@@ -3027,9 +2956,7 @@ std::string WebServer::toStringConnectionSummary() {
   << now.toStringGM()
   << ".<br>";
   int64_t timeRunning = - 1;
-  if (
-    this->activeWorker < 0 || this->activeWorker >= this->allWorkers.size
-  ) {
+  if (this->activeWorker < 0 || this->activeWorker >= this->allWorkers.size) {
     timeRunning = global.getElapsedMilliseconds();
   } else {
     timeRunning = this->getActiveWorker().millisecondsLastPingServerSideOnly;
@@ -3087,9 +3014,7 @@ std::string WebServer::toStringConnectionSummary() {
   << FloatingPoint::doubleToString(connectionsPerDay, 0)
   << " calculator connections per day. "
   << "~"
-  << (
-    this->statistics.allConnections - this->statistics.pingConnections
-  )
+  << (this->statistics.allConnections - this->statistics.pingConnections)
   << " http connections, "
   << this->statistics.pingConnections
   << " ping connections. "
@@ -3186,9 +3111,8 @@ std::string WebServer::toStringStatusAll() {
 bool WebServer::restartNeeded() {
   STACK_TRACE("WebServer::restartNeeded");
   struct stat fileStatistic;
-  if (
-    stat(global.physicalNameExecutableWithPath.c_str(), &fileStatistic) != 0
-  ) {
+  if (stat(global.physicalNameExecutableWithPath.c_str(), &fileStatistic) != 0)
+  {
     global
     << Logger::red
     << "Failed to extract executable statistics from: "
@@ -3233,9 +3157,7 @@ void WebServer::stopKillAll() {
   while (true) {
     workersStillInUse = 0;
     for (int i = 0; i < this->allWorkers.size; i ++) {
-      if (
-        !this->allWorkers[i].flagExited && this->allWorkers[i].flagInUse
-      ) {
+      if (!this->allWorkers[i].flagExited && this->allWorkers[i].flagInUse) {
         workersStillInUse ++;
         break;
       }
@@ -3322,8 +3244,7 @@ void WebServer::initializeListeningSockets() {
   }
   for (int i = 0; i < this->additionalPorts.size(); i ++) {
     this->allListeningSockets.setKeyValue(
-      this->additionalPorts.values[i],
-      this->additionalPorts.keys[i]
+      this->additionalPorts.values[i], this->additionalPorts.keys[i]
     );
   }
   this->highestSocketNumber = - 1;
@@ -3334,8 +3255,7 @@ void WebServer::initializeListeningSockets() {
     );
     if (
       listen(
-        this->allListeningSockets.keys[i],
-        Listener::maximumPendingConnections
+        this->allListeningSockets.keys[i], Listener::maximumPendingConnections
       ) ==
       - 1
     ) {
@@ -3400,9 +3320,7 @@ void WebServer::terminateProcessId(int processId) {
 
 void WebServer::terminateChildSystemCall(int i) {
   // Signal lock not needed: signals are unlocked outside of the select loop.
-  if (
-    !this->allWorkers[i].flagInUse || this->allWorkers[i].flagExited
-  ) {
+  if (!this->allWorkers[i].flagInUse || this->allWorkers[i].flagExited) {
     return;
   }
   this->markChildNotInUse(i);
@@ -3434,9 +3352,8 @@ void WebServer::handleTooManyConnections(
     << "too many connections handler start. "
     << Logger::endL;
   }
-  MonomialWrapper<
-    std::string, HashFunctions::hashFunction<std::string>
-  > incomingAddress(incomingUserAddress);
+  MonomialWrapper<std::string, HashFunctions::hashFunction<std::string> >
+  incomingAddress(incomingUserAddress);
   bool purgeIncomingAddress = (
     this->currentlyConnectedAddresses.getCoefficientOf(incomingAddress) >
     this->maximumWorkersPerIPAdress
@@ -3449,9 +3366,7 @@ void WebServer::handleTooManyConnections(
   for (int i = 0; i < this->allWorkers.size; i ++) {
     if (this->allWorkers[i].flagInUse) {
       if (this->allWorkers[i].userAddress == incomingAddress) {
-        times.addOnTop(
-          this->allWorkers[i].millisecondsServerAtWorkerStart
-        );
+        times.addOnTop(this->allWorkers[i].millisecondsServerAtWorkerStart);
         indices.addOnTop(i);
       }
     }
@@ -3621,9 +3536,8 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
   int64_t millisecondsElapsed =
   global.getElapsedMilliseconds() -
   currentWorker.millisecondsLastPingServerSideOnly;
-  if (
-    millisecondsElapsed <= global.millisecondsNoPingBeforeChildIsPresumedDead
-  ) {
+  if (millisecondsElapsed <= global.millisecondsNoPingBeforeChildIsPresumedDead)
+  {
     return;
   }
   this->terminateChildSystemCall(childIndex);
@@ -3774,9 +3688,7 @@ bool WebServer::initializeBindToPorts() {
   for (int i = 0; i < this->additionalPorts.size(); i ++) {
     const std::string& port = this->additionalPorts.keys[i];
     int& socket = this->additionalPorts.values[i];
-    if (
-      !Listener::initializeBindToOnePort(port, socket, unusedPort, false)
-    ) {
+    if (!Listener::initializeBindToOnePort(port, socket, unusedPort, false)) {
       return false;
     }
     int indexInTransportArray =
@@ -3896,11 +3808,7 @@ void WebServer::writeVersionJSFile() {
   out << "module.exports = {\nserverInformation,\n};\n";
   std::fstream fileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    fileStream,
-    "/calculator_html/server_information.js",
-    false,
-    true,
-    false,
+    fileStream, "/calculator_html/server_information.js", false, true, false,
     false
   );
   fileStream << out.str();
@@ -4083,9 +3991,7 @@ int WebServer::run() {
   this->statistics.successfulSelectsSoFar = 0;
   this->statistics.failedSelectsSoFar = 0;
   long long previousReportedNumberOfSelects = 0;
-  Listener listener(
-    this->highestSocketNumber, &this->allListeningSockets
-  );
+  Listener listener(this->highestSocketNumber, &this->allListeningSockets);
   int returnCode = 0;
   // Allocate all workers to make sure all pipes are allocated.
   // The number of open pipes can be limited, so it's best to allocate those
@@ -4097,16 +4003,14 @@ int WebServer::run() {
   for (int i = 0; i < this->maximumTotalUsedWorkers; i ++) {
     this->allWorkers[i].flagInUse = false;
   }
-  while (
-    this->runOnce(listener, previousReportedNumberOfSelects, returnCode)
-  ) {}
+  while (this->runOnce(listener, previousReportedNumberOfSelects, returnCode))
+  {}
   return 0;
 }
 
 bool WebServer::runOnce(
-  Listener& listener,
-  long long& previousReportedNumberOfSelects,
-  int& returnCode
+  Listener& listener, long long& previousReportedNumberOfSelects, int&
+  returnCode
 ) {
   // Main accept() loop.
   listener.zeroSocketSet();
@@ -4615,12 +4519,8 @@ void WebServer::initializeMainHashes() {
   StringRoutines::stringTrimWhiteSpace(
     global.externalCommandReturnOutput("git rev-parse HEAD")
   );
-  for (
-    unsigned i = 0; i < global.buildHeadHashWithServerTime.size(); i ++
-  ) {
-    if (
-      !MathRoutines::isHexDigit(global.buildHeadHashWithServerTime[i])
-    ) {
+  for (unsigned i = 0; i < global.buildHeadHashWithServerTime.size(); i ++) {
+    if (!MathRoutines::isHexDigit(global.buildHeadHashWithServerTime[i])) {
       global.buildHeadHashWithServerTime = "x";
       break;
     }
@@ -4636,9 +4536,7 @@ void WebServer::initializeMainHashes() {
   WebAPI::Request::onePageJSWithHash =
   FileOperations::getVirtualNameWithHash(WebAPI::Request::onePageJS);
   WebAPI::Request::calculatorWorkerJSWithHash =
-  FileOperations::getVirtualNameWithHash(
-    WebAPI::Request::calculatorWorkerJS
-  );
+  FileOperations::getVirtualNameWithHash(WebAPI::Request::calculatorWorkerJS);
 }
 
 void WebServer::initializeMainRequests() {
@@ -4649,9 +4547,7 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::solveRequest);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::forgotLogin);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::compute);
-  this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::Request::compareExpressions
-  );
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::compareExpressions);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::examplesJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::indicator);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::pause);
@@ -4670,9 +4566,7 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(
     WebAPI::Request::problemSolutionNoLogin
   );
-  this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::Request::homeworkFromSource
-  );
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::homeworkFromSource);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::Slides::source);
   this->requestsNotNeedingLogin.addOnTop(
     WebAPI::Request::Slides::pdfFromSource
@@ -4691,9 +4585,7 @@ void WebServer::initializeMainRequests() {
   this->requestsNotNeedingLogin.addOnTop(
     WebAPI::compareExpressionsPageNoCache
   );
-  this->requestsNotNeedingLogin.addOnTop(
-    WebAPI::Request::compareExpressions
-  );
+  this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::compareExpressions);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::userInfoJSON);
   this->requestsNotNeedingLogin.addOnTop(WebAPI::Request::serverStatusJSON);
   this->requestsNotNeedingLogin.addOnTop(
@@ -4719,13 +4611,9 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addOnTop("/" + WebAPI::appNoCache);
   this->addressStartsNotNeedingLogin.addOnTop(WebAPI::Request::onePageJS);
   this->addressStartsNotNeedingLogin.addOnTop(Configuration::HTMLCommon);
-  this->addressStartsNotNeedingLogin.addOnTop(
-    "/" + Configuration::HTMLCommon
-  );
+  this->addressStartsNotNeedingLogin.addOnTop("/" + Configuration::HTMLCommon);
   this->addressStartsNotNeedingLogin.addOnTop(Configuration::publicHTML);
-  this->addressStartsNotNeedingLogin.addOnTop(
-    "/" + Configuration::publicHTML
-  );
+  this->addressStartsNotNeedingLogin.addOnTop("/" + Configuration::publicHTML);
   this->addressStartsNotNeedingLogin.addOnTop(
     "/" + WebAPI::compareExpressionsPage
   );
@@ -4954,9 +4842,7 @@ bool WebWorker::writeToBody(const std::string& stringToSend) {
   STACK_TRACE("WebWorker::writeToBody");
   int oldSize = this->remainingBodyToSend.size;
   this->remainingBodyToSend.setSize(
-    this->remainingBodyToSend.size + static_cast<signed>(
-      stringToSend.size()
-    )
+    this->remainingBodyToSend.size + static_cast<signed>(stringToSend.size())
   );
   for (unsigned i = 0; i < stringToSend.size(); i ++) {
     this->remainingBodyToSend[static_cast<signed>(i) + oldSize] =

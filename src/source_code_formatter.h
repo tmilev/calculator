@@ -198,8 +198,8 @@ public:
     bool operator>(const CodeFormatter::Element& other) const;
     void clear();
     void appendType(
-      const CodeFormatter::Element& other,
-      CodeFormatter::Element::Type inputType
+      const CodeFormatter::Element& other, CodeFormatter::Element::Type
+      inputType
     );
     void appendExpression(const CodeFormatter::Element& other);
     void addChild(const CodeFormatter::Element& other);
@@ -242,13 +242,11 @@ public:
     Element* previousSibling();
     Element* rightMostAtomUnderMe();
     Element* leftMostAtomUnderMe();
-    void makeFrom1(
-      CodeFormatter::Element::Type inputType, const Element& child
+    void makeFrom1(CodeFormatter::Element::Type inputType, const Element& child
     );
     void makeFrom2(
-      CodeFormatter::Element::Type inputType,
-      const Element& left,
-      const Element& right
+      CodeFormatter::Element::Type inputType, const Element& left, const
+      Element& right
     );
     void makeFrom3(
       CodeFormatter::Element::Type inputType,
@@ -389,9 +387,7 @@ public:
   // in-curly-brace block.
   HashedList<std::string, HashFunctions::hashFunction> controlKeyWords;
   MapList<
-    std::string,
-    CodeFormatter::Element::Type,
-    HashFunctions::hashFunction
+    std::string, CodeFormatter::Element::Type, HashFunctions::hashFunction
   > elementTypes;
   // A list of elements interpreted as operators.
   HashedList<std::string, HashFunctions::hashFunction> operatorList;
@@ -412,9 +408,8 @@ public:
   // A class to represent
   CodeFormatter();
   static bool formatCPPDirectory(
-    const std::string& inputDirectory,
-    bool inPlace,
-    std::stringstream* comments
+    const std::string& inputDirectory, bool inPlace, std::stringstream*
+    comments
   );
   static bool formatCalculatorInPlace();
   bool formatCPPSourceCode(
@@ -426,12 +421,11 @@ public:
   );
 private:
   void addOperatorOverride(
-    const std::string& overridingOperator,
-    const List<std::string>& overridden
+    const std::string& overridingOperator, const List<std::string>& overridden
   );
   bool shouldSeparateWithSpace(
-    const std::string& left, const std::string& right
-  );
+    const std::string& left, const std::string&
+    right);
   bool needsSpaceToTheRight(const std::string& word);
   bool isSeparatorCharacter(char input);
   bool isSeparator(const std::string& input);
@@ -464,8 +458,7 @@ private:
   void sortHeaders(CodeFormatter::Element& current);
   void sortHeadersInTopLevel(CodeFormatter::Element& topLevel);
   void addTopLevelElementsSorted(
-    CodeFormatter::Element& topLevel,
-    List<CodeFormatter::Element>& elements
+    CodeFormatter::Element& topLevel, List<CodeFormatter::Element>& elements
   );
   void normalizeBinaryOperationsRecursively(CodeFormatter::Element& current);
   void correctMultiArguments(CodeFormatter::Element& inputOutput);
@@ -479,8 +472,8 @@ private:
     const CodeFormatter::Element& rightOperator
   );
   bool mustSplitWithWhitespace(
-    const CodeFormatter::Element& leftAtom,
-    const CodeFormatter::Element& rightAtom
+    const CodeFormatter::Element& leftAtom, const CodeFormatter::Element&
+    rightAtom
   );
   void applyNewLineExceptions(
     CodeFormatter::Element& leftAtom, CodeFormatter::Element& rightAtom

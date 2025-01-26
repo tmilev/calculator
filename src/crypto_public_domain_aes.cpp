@@ -790,9 +790,8 @@ void AESContext::setInitializationVector(const uint8_t* iv) {
 
 // This function adds the round key to state.
 // The round key is added to the state by an XOR function.
-void AESContext::addRoundKey(
-  uint8_t round, state_t* state, uint8_t* RoundKey
-) {
+void AESContext::addRoundKey(uint8_t round, state_t* state, uint8_t* RoundKey)
+{
   uint8_t i, j;
   for (i = 0; i < 4; ++ i) {
     for (j = 0; j < 4; ++ j) {
@@ -1076,8 +1075,7 @@ bool CryptoPublicDomain::decryptAES_CBC_256(
   );
   output = inputCipherText;
   context.AES_CBC_decrypt_buffer(
-    static_cast<uint8_t*>(output.objects),
-    static_cast<unsigned>(output.size)
+    static_cast<uint8_t*>(output.objects), static_cast<unsigned>(output.size)
   );
   return true;
 }

@@ -367,7 +367,8 @@ void WebWorker::sendAllBytesNoHeaders() {
     }
     global << bytesSent;
     this->remainingBytesToSend.sliceInPlace(
-      bytesSent, this->remainingBytesToSend.size - bytesSent
+      bytesSent, this->remainingBytesToSend.size -
+      bytesSent
     );
     if (this->remainingBytesToSend.size > 0) {
       global << ", ";
@@ -631,7 +632,8 @@ bool WebWorker::extractArgumentsFromCookies(
   for (int i = 0; i < this->cookies.size; i ++) {
     if (
       !HtmlRoutines::chopPercentEncodedStringAppend(
-        this->cookies[i], newlyFoundArguments,
+        this->cookies[i],
+        newlyFoundArguments,
         argumentProcessingFailureComments
       )
     ) {
@@ -687,7 +689,8 @@ bool WebWorker::extractArgumentsFromMessage(
 // Returning true does not necessarily mean the login information was accepted.
 // Returning false guarantees the login information was not accepted.
 bool WebWorker::loginProcedure(
-  std::stringstream& argumentProcessingFailureComments, std::stringstream*
+  std::stringstream& argumentProcessingFailureComments,
+  std::stringstream*
   comments
 ) {
   STACK_TRACE("WebWorker::loginProcedure");
@@ -888,7 +891,8 @@ void WebWorker::writeAfterTimeoutProgress(
     << Logger::endL;
     return;
   }
-  if (this->workerToWorkerRequestIndicator.lastRead.size == 0 && !forceFileWrite
+  if (
+    this->workerToWorkerRequestIndicator.lastRead.size == 0 && !forceFileWrite
   ) {
     return;
   }
@@ -1401,7 +1405,9 @@ void WebWorker::writeAfterTimeoutCarbonCopy(
 }
 
 void WebWorker::writeAfterTimeoutJSON(
-  const JSData& input, const std::string& status, const std::string&
+  const JSData& input,
+  const std::string& status,
+  const std::string&
   fileNameCarbonCopy
 ) {
   STACK_TRACE("WebWorker::writeAfterTimeoutJSON");
@@ -1411,7 +1417,9 @@ void WebWorker::writeAfterTimeoutJSON(
 }
 
 void WebWorker::writeAfterTimeoutPartTwo(
-  JSData& result, const std::string& status, const std::string&
+  JSData& result,
+  const std::string& status,
+  const std::string&
   fileNameCarbonCopy
 ) {
   STACK_TRACE("WebWorker::writeAfterTimeoutPartTwo");
@@ -1655,13 +1663,13 @@ int WebWorker::processFile(bool generateLinkToCalculatorOnMissingFile) {
   << "HTTP/1.0 200 OK\r\n"
   << this->headerFromFileExtension(fileExtension)
   << "Access-Control-Allow-Origin: *\r\n";
-  for (int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++
+  for (
+    int i = 0; i < this->parent->addressStartsSentWithCacheMaxAge.size; i ++
   ) {
     if (
       StringRoutines::stringBeginsWith(
-        this->virtualFileName, this->parent->addressStartsSentWithCacheMaxAge[
-          i
-        ]
+        this->virtualFileName,
+        this->parent->addressStartsSentWithCacheMaxAge[i]
       )
     ) {
       header << WebAPI::headerCacheControl << "\r\n";
@@ -2421,7 +2429,8 @@ int WebWorker::serveClient() {
   }
   if (
     argumentProcessingFailureComments.str() != "" && (
-      user.flagMustLogin || global.requestType == WebAPI::Request::userInfoJSON
+      user.flagMustLogin ||
+      global.requestType == WebAPI::Request::userInfoJSON
     )
   ) {
     global.setWebInput("error", argumentProcessingFailureComments.str());
@@ -3808,7 +3817,11 @@ void WebServer::writeVersionJSFile() {
   out << "module.exports = {\nserverInformation,\n};\n";
   std::fstream fileStream;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    fileStream, "/calculator_html/server_information.js", false, true, false,
+    fileStream,
+    "/calculator_html/server_information.js",
+    false,
+    true,
+    false,
     false
   );
   fileStream << out.str();
@@ -4009,7 +4022,9 @@ int WebServer::run() {
 }
 
 bool WebServer::runOnce(
-  Listener& listener, long long& previousReportedNumberOfSelects, int&
+  Listener& listener,
+  long long& previousReportedNumberOfSelects,
+  int&
   returnCode
 ) {
   // Main accept() loop.
@@ -4274,7 +4289,8 @@ bool WebWorker::failReceiveReturnFalse() {
   bool sslWasOK = true;
   if (global.flagSSLAvailable) {
     sslWasOK = (
-      this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead
+      this->error ==
+      TransportLayerSecurityOpenSSL::errors::errorWantRead
     );
   }
   if (this->statistics.allReceives > 0 && sslWasOK) {
@@ -4405,7 +4421,8 @@ void WebServer::figureOutOperatingSystem() {
 void WebServer::checkSystemInstallationOpenSSL() {
   STACK_TRACE("WebServer::checkSystemInstallationOpenSSL");
   if (
-    global.configuration["openSSL"].elementType != JSData::Type::tokenUndefined
+    global.configuration["openSSL"].elementType !=
+    JSData::Type::tokenUndefined
   ) {
     return;
   }
@@ -4615,33 +4632,39 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addOnTop(Configuration::publicHTML);
   this->addressStartsNotNeedingLogin.addOnTop("/" + Configuration::publicHTML);
   this->addressStartsNotNeedingLogin.addOnTop(
-    "/" + WebAPI::compareExpressionsPage
+    "/" +
+    WebAPI::compareExpressionsPage
   );
   this->addressStartsNotNeedingLogin.addOnTop(WebAPI::compareExpressionsPage);
   this->addressStartsNotNeedingLogin.addOnTop(
-    "/" + WebAPI::compareExpressionsPageNoCache
+    "/" +
+    WebAPI::compareExpressionsPageNoCache
   );
   this->addressStartsNotNeedingLogin.addOnTop(
     WebAPI::compareExpressionsPageNoCache
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    "/" + WebAPI::app
+    "/" +
+    WebAPI::app
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::app);
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    "/" + WebAPI::appNoCache
+    "/" +
+    WebAPI::appNoCache
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
     WebAPI::appNoCache
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    "/" + WebAPI::compareExpressionsPage
+    "/" +
+    WebAPI::compareExpressionsPage
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
     WebAPI::compareExpressionsPage
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    "/" + WebAPI::compareExpressionsPageNoCache
+    "/" +
+    WebAPI::compareExpressionsPageNoCache
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
     WebAPI::compareExpressionsPageNoCache
@@ -4753,7 +4776,9 @@ void WebWorker::prepareFullMessageHeaderAndFooter() {
   STACK_TRACE("WebWorker::prepareFullMessageHeaderAndFooter");
   this->remainingBytesToSend.setSize(0);
   this->remainingBytesToSend.setExpectedSize(
-    this->remainingBodyToSend.size + this->remainingHeaderToSend.size + 30
+    this->remainingBodyToSend.size +
+    this->remainingHeaderToSend.size +
+    30
   );
   if (this->remainingHeaderToSend.size == 0) {
     if (this->requestType != this->requestHead) {

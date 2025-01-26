@@ -459,7 +459,10 @@ int MainFunctions::mainCommandLine() {
   std::string outputFileName;
   if (
     !FileOperations::getPhysicalFileNameFromVirtual(
-      "output/outputFileCommandLine.html", outputFileName, false, false,
+      "output/outputFileCommandLine.html",
+      outputFileName,
+      false,
+      false,
       nullptr
     )
   ) {
@@ -733,7 +736,10 @@ bool GlobalVariables::configurationLoad() {
     std::string computedPhysicalFileName;
     if (
       FileOperations::getPhysicalFileNameFromVirtual(
-        this->configurationFileName, computedPhysicalFileName, true, false,
+        this->configurationFileName,
+        computedPhysicalFileName,
+        true,
+        false,
         nullptr
       )
     ) {
@@ -786,7 +792,10 @@ bool GlobalVariables::configurationStore() {
     std::string configFileNamePhysical;
     if (
       FileOperations::getPhysicalFileNameFromVirtual(
-        this->configurationFileName, configFileNamePhysical, true, false,
+        this->configurationFileName,
+        configFileNamePhysical,
+        true,
+        false,
         nullptr
       )
     ) {

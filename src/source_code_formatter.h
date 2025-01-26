@@ -198,7 +198,8 @@ public:
     bool operator>(const CodeFormatter::Element& other) const;
     void clear();
     void appendType(
-      const CodeFormatter::Element& other, CodeFormatter::Element::Type
+      const CodeFormatter::Element& other,
+      CodeFormatter::Element::Type
       inputType
     );
     void appendExpression(const CodeFormatter::Element& other);
@@ -242,10 +243,13 @@ public:
     Element* previousSibling();
     Element* rightMostAtomUnderMe();
     Element* leftMostAtomUnderMe();
-    void makeFrom1(CodeFormatter::Element::Type inputType, const Element& child
+    void makeFrom1(
+      CodeFormatter::Element::Type inputType, const Element& child
     );
     void makeFrom2(
-      CodeFormatter::Element::Type inputType, const Element& left, const
+      CodeFormatter::Element::Type inputType,
+      const Element& left,
+      const
       Element& right
     );
     void makeFrom3(
@@ -408,7 +412,9 @@ public:
   // A class to represent
   CodeFormatter();
   static bool formatCPPDirectory(
-    const std::string& inputDirectory, bool inPlace, std::stringstream*
+    const std::string& inputDirectory,
+    bool inPlace,
+    std::stringstream*
     comments
   );
   static bool formatCalculatorInPlace();
@@ -472,7 +478,8 @@ private:
     const CodeFormatter::Element& rightOperator
   );
   bool mustSplitWithWhitespace(
-    const CodeFormatter::Element& leftAtom, const CodeFormatter::Element&
+    const CodeFormatter::Element& leftAtom,
+    const CodeFormatter::Element&
     rightAtom
   );
   void applyNewLineExceptions(

@@ -143,7 +143,8 @@ bool TransportLayerSecurity::sslReadLoop(
   int numberOfBytes = - 1;
   for (i = 0; i < totalTries; i ++) {
     numberOfBytes =
-    this->readOnce(- 1, outputError, commentsGeneral, includeNoErrorInComments
+    this->readOnce(
+      - 1, outputError, commentsGeneral, includeNoErrorInComments
     );
     if (numberOfBytes < 0) {
       continue;
@@ -346,7 +347,9 @@ bool TransportLayerSecurityServer::initializeAll(
     return false;
   }
   this->privateKey.computeFromTwoPrimes(
-    this->privateKey.primeOne, this->privateKey.primeTwo, false,
+    this->privateKey.primeOne,
+    this->privateKey.primeTwo,
+    false,
     commentsOnError
   );
   if (
@@ -1826,7 +1829,10 @@ void Serialization::writeNByteLengthFollowedByBytes(
   const std::string& label
 ) {
   Serialization::WriterIntegerWithMarker writer(
-    byteCountOfLength, static_cast<unsigned>(input.size), output, annotations,
+    byteCountOfLength,
+    static_cast<unsigned>(input.size),
+    output,
+    annotations,
     label
   );
   output.addListOnTop(input);
@@ -2150,7 +2156,9 @@ bool SSLRecord::decode(std::stringstream* commentsOnFailure) {
   }
   if (
     !Serialization::readTwoByteInt(
-      this->incomingBytes, this->offsetDecoded, this->version,
+      this->incomingBytes,
+      this->offsetDecoded,
+      this->version,
       commentsOnFailure
     )
   ) {
@@ -2598,9 +2606,12 @@ int TransportLayerSecurity::readOnce(
   } else {
     result = static_cast<int>(
       recv(
-        socket, this->readBuffer.objects, static_cast<size_t>(
-          readBuffer.size - 1
-        ), 0
+        socket,
+        this->readBuffer.objects,
+        static_cast<size_t>(
+          readBuffer.size -
+          1 ),
+        0
       )
     );
   }

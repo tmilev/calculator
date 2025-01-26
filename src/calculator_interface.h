@@ -162,10 +162,12 @@ public:
   void getBaseExponentForm(Expression& outputBase, Expression& outputExponent)
   const;
   void getMultiplicandsRecursive(
-    List<Expression>& outputAppendList, int depth = 0
+    List<Expression>& outputAppendList, int depth =
+    0
   ) const;
   void getMultiplicandsDivisorsRecursive(
-    List<Expression>& outputAppendList, int depth = 0
+    List<Expression>& outputAppendList, int depth =
+    0
   ) const;
   void getCoefficientMultiplicandForm(
     Expression& outputCoefficient, Expression& outputNoCoefficient
@@ -209,17 +211,20 @@ public:
   bool isAtomThatFreezesArguments(std::string* outputWhichAtom = nullptr)
   const;
   bool isAtomWhoseExponentsAreInterpretedAsFunction(
-    std::string* outputWhichAtom = nullptr
+    std::string* outputWhichAtom =
+    nullptr
   ) const;
   bool isPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const;
   bool isAtomNotInterpretedAsFunction(std::string* outputWhichAtom = nullptr)
   const;
   bool isMatrix(
-    int* outputNumberOfRows = nullptr, int* outputNumberOfColumns = nullptr
+    int* outputNumberOfRows = nullptr, int* outputNumberOfColumns =
+    nullptr
   ) const;
   template <class Type>
   bool isMatrixOfType(
-    int* outputNumberOfRows = nullptr, int* outputNumberOfColumns = nullptr
+    int* outputNumberOfRows = nullptr, int* outputNumberOfColumns =
+    nullptr
   ) const;
   bool isAtom() const;
   bool isAtomUserDefined(std::string* whichAtom = nullptr) const;
@@ -233,24 +238,29 @@ public:
   bool isIntegralFdx(
     Expression* differentialVariable = nullptr,
     Expression* functionToIntegrate = nullptr,
-    Expression* integrationSet = nullptr
+    Expression* integrationSet =
+    nullptr
   ) const;
   bool isIndefiniteIntegralFdx(
     Expression* differentialVariable = nullptr,
     Expression* functionToIntegrate = nullptr,
-    Expression* integrationSet = nullptr
+    Expression* integrationSet =
+    nullptr
   ) const;
   bool isDefiniteIntegralOverIntervalFdx(
     Expression* differentialVariable = nullptr,
     Expression* functionToIntegrate = nullptr,
-    Expression* integrationSet = nullptr
+    Expression* integrationSet =
+    nullptr
   ) const;
   bool isDifferentialOneFormOneVariable(
     Expression* outputDifferentialOfWhat = nullptr,
-    Expression* outputCoefficientInFrontOfDifferential = nullptr
+    Expression* outputCoefficientInFrontOfDifferential =
+    nullptr
   ) const;
   bool isKnownFunctionWithComplexRange(
-    std::string* outputWhichOperation = nullptr
+    std::string* outputWhichOperation =
+    nullptr
   ) const;
   bool isArithmeticOperation(std::string* outputWhichOperation = nullptr)
   const;
@@ -270,7 +280,8 @@ public:
   const;
   bool needsParenthesisForAddition() const;
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
-    const Expression* leftNeighbor = nullptr
+    const Expression* leftNeighbor =
+    nullptr
   ) const;
   int getExpressionTreeSize() const;
   template <class Type>
@@ -350,7 +361,8 @@ public:
     return this->assignValueWithContext(owner, input.content, input.context);
   }
   bool setContextAtLeastEqualTo(
-    ExpressionContext& inputOutputMinContext, std::stringstream*
+    ExpressionContext& inputOutputMinContext,
+    std::stringstream*
     commentsOnFailure
   );
   bool hasContext() const;
@@ -405,42 +417,54 @@ public:
     Calculator& owner, const List<Expression>& multiplicands
   );
   bool makeQuotientReduce(
-    Calculator& owner, const Expression& numerator, const Expression&
+    Calculator& owner,
+    const Expression& numerator,
+    const Expression&
     denominator
   );
   int getNumberOfColumns() const;
   bool makeSequenceCommands(
-    Calculator& owner, List<std::string>& inputKeys, List<Expression>&
+    Calculator& owner,
+    List<std::string>& inputKeys,
+    List<Expression>&
     inputValues
   );
   bool makeSequenceStatements(
-    Calculator& owner, List<Expression>* inputStatements = nullptr
+    Calculator& owner, List<Expression>* inputStatements =
+    nullptr
   );
   template <class Coefficient>
   bool makeMatrix(
     Calculator& owner,
     const Matrix<Coefficient>& input,
     ExpressionContext const*inputContext = nullptr,
-    bool reduceOneRowToSequenceAndOneByOneToNonMatrix = true
+    bool reduceOneRowToSequenceAndOneByOneToNonMatrix =
+    true
   );
   bool makeMatrix(Matrix<Expression>* inputMatrix, Calculator& owner);
   bool makeSequence(
     Calculator& owner, List<Expression>* inputSequence =
     nullptr);
-  bool makeExponentReduce(Calculator& owner, const Expression& base, int power
+  bool makeExponentReduce(
+    Calculator& owner, const Expression& base, int power
   );
   bool makeXOX(
-    Calculator& owner, int operation, const Expression& left, const Expression&
+    Calculator& owner,
+    int operation,
+    const Expression& left,
+    const Expression&
     right
   );
   bool makeSqrt(
-    Calculator& owner, const Rational& argument, const Rational&
-    radicalSuperIndex =
+    Calculator& owner,
+    const Rational& argument,
+    const Rational& radicalSuperIndex =
     2
   );
   bool makeSqrt(
-    Calculator& owner, const Expression& argument, const Rational&
-    radicalSuperIndex =
+    Calculator& owner,
+    const Expression& argument,
+    const Rational& radicalSuperIndex =
     2
   );
   bool makeXOXOdotsOX(
@@ -471,7 +495,9 @@ public:
     this->setChild(childIndex, expression);
   }
   std::string lispify() const;
-  bool toStringData(std::stringstream& out, FormatExpressions* format = nullptr
+  bool toStringData(
+    std::stringstream& out, FormatExpressions* format =
+    nullptr
   ) const;
   std::string toStringSemiFull() const;
   std::string toStringFull() const;
@@ -651,7 +677,9 @@ public:
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   void toStringOpMultiplicative(
-    std::stringstream& out, const std::string& operation, FormatExpressions*
+    std::stringstream& out,
+    const std::string& operation,
+    FormatExpressions*
     format
   ) const;
   std::string toStringTreeHtml(int depth) const;
@@ -659,7 +687,8 @@ public:
     FormatExpressions* format = nullptr,
     Expression* startingExpression = nullptr,
     bool unfoldCommandEnclosures = true,
-    JSData* outputJS = nullptr
+    JSData* outputJS =
+    nullptr
   ) const;
   bool toStringGeneral(std::stringstream& out, FormatExpressions* format)
   const;
@@ -726,10 +755,12 @@ public:
     int numberOfSegments,
     double* outputYmin = nullptr,
     double* outputYmax = nullptr,
-    Vectors<double>* outputPoints = nullptr
+    Vectors<double>* outputPoints =
+    nullptr
   ) const;
   bool evaluatesToDouble(
-    double* whichDouble = nullptr, bool evaluateInputBoxes = false
+    double* whichDouble = nullptr, bool evaluateInputBoxes =
+    false
   ) const;
   bool getExpressionLeafs(HashedList<Expression>& outputAccumulateLeafs) const;
   bool getFreeVariables(
@@ -744,7 +775,8 @@ public:
     const HashedList<Expression>& knownEs,
     const List<double>& valuesKnownEs,
     double* whichDouble,
-    bool evaluateInputBoxes = false
+    bool evaluateInputBoxes =
+    false
   ) const;
   bool hasBoundVariables() const;
   bool hasInputBoxVariables(
@@ -772,7 +804,9 @@ public:
   // The inputExpressions give us the ability to specify substitutions
   bool assignStringParsed(
     const std::string& input,
-    MapList<std::string, Expression, HashFunctions::hashFunction<std::string> >
+    MapList<
+      std::string, Expression, HashFunctions::hashFunction<std::string>
+    >
     * substitutions,
     Calculator& owner
   );
@@ -855,7 +889,8 @@ private:
     const ExpressionContext& other, ExpressionContext& outputContext
   );
   bool mergeDifferentialOperatorsOnce(
-    Selection& differentialOperatorVariablesFound, ExpressionContext&
+    Selection& differentialOperatorVariablesFound,
+    ExpressionContext&
     outputContext
   ) const;
 public:
@@ -1310,12 +1345,15 @@ public:
   JSData toJSONPlotFillStart();
   JSData toJSONPlotFillFinish();
   void makeCircle(
-    const Vector<Rational>& center, const Rational& radius, const std::string&
+    const Vector<Rational>& center,
+    const Rational& radius,
+    const std::string&
     color
   );
   void makePlotFillStart();
   void makePlotFillFinish();
-  void makeSegment(const Vector<Rational>& left, const Vector<Rational>& right
+  void makeSegment(
+    const Vector<Rational>& left, const Vector<Rational>& right
   );
   void makeLabel(const Vector<Rational>& position, const std::string& label);
   void makeLabel(const Vector<double>& position, const std::string& label);
@@ -1422,7 +1460,8 @@ public:
   void addPlotOnTop(PlotObject& input);
   void addPlotsOnTop(Plot& input);
   void setLabel(const std::string& layerLabel);
-  void drawSegment(const Vector<Rational>& left, const Vector<Rational>& right
+  void drawSegment(
+    const Vector<Rational>& left, const Vector<Rational>& right
   );
   void drawLabel(const Vector<Rational>& position, const std::string& label);
   void drawCircle(
@@ -1633,7 +1672,9 @@ private:
   // Sets an expression value and syntactic role to a given position in the
   // stack.
   bool setStackValue(
-    const Expression& newExpression, const std::string& newRole, int
+    const Expression& newExpression,
+    const std::string& newRole,
+    int
     stackOffset
   );
   bool isInterpretedAsEmptySpace(const std::string& input);
@@ -1665,7 +1706,8 @@ private:
   bool allowsTensorInPreceding(const std::string& lookAhead);
   bool allowsDivideInPreceding(const std::string& lookAhead);
   void addTrigonometricSplit(
-    const std::string& trigonometricFunction, const List<std::string>&
+    const std::string& trigonometricFunction,
+    const List<std::string>&
     variables
   );
   bool decreaseStackSetCharacterRanges(int decrease);
@@ -1946,7 +1988,8 @@ private:
   bool isLeftSeparator(unsigned char c);
   bool isRightSeparator(unsigned char c);
   bool shouldSplitOutsideQuotes(const std::string& left, char right);
-  bool parseEmbedInCommandSequence(const std::string& input, Expression& output
+  bool parseEmbedInCommandSequence(
+    const std::string& input, Expression& output
   );
   int getExpressionIndex();
 public:
@@ -2007,7 +2050,9 @@ public:
   std::string toStringSyntacticStackHTMLSimple();
   void reset();
   void parseConsumeQuote(
-    const std::string& input, unsigned int& indexOfLast, List<
+    const std::string& input,
+    unsigned int& indexOfLast,
+    List<
       SyntacticElement
     >& output
   );
@@ -2345,7 +2390,9 @@ public:
   std::string toStringOutputAndSpecials();
   class Examples {
     std::string toStringOneOperationHandler(
-      const std::string& escapedAtom, bool isComposite, const Function&
+      const std::string& escapedAtom,
+      bool isComposite,
+      const Function&
       function
     );
     std::string escape(const std::string& atom);
@@ -2383,7 +2430,8 @@ public:
   std::string toStringSemismipleLieAlgebraLinksFromHardDrive(
     const std::string& prefixFolder,
     const DynkinType& dynkinType,
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   );
   Function& getFunctionHandlerFromNamedRule(const std::string& inputRuleName);
   bool checkPredefinedFunctionNameRepetitions();
@@ -2410,14 +2458,16 @@ public:
   Expression expressionSquareRootNegativeOne();
   void logFunctionWithTime(Function& input, int64_t startTime);
   void accountFunctionTrivialPerformance(Function& input, int64_t startTime);
-  void accountFunctionNonTrivialPerformance(Function& input, int64_t startTime
+  void accountFunctionNonTrivialPerformance(
+    Function& input, int64_t startTime
   );
   void logTime(int64_t startTime);
   void logPublicError(const std::string& error);
   std::string writeDefaultLatexFileReturnHtmlLink(
     const std::string& fileContent,
     std::string* outputFileNameNoExtension,
-    bool useLatexDviPSpsToPNG = false
+    bool useLatexDviPSpsToPNG =
+    false
   );
   bool recursionDepthExceededHandleRoughly(
     const std::string& additionalErrorInfo = ""
@@ -2436,7 +2486,8 @@ public:
   );
   void makeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool accountRule(
-    const Expression& ruleExpression, StateMaintainerCalculator&
+    const Expression& ruleExpression,
+    StateMaintainerCalculator&
     ruleStackMaintainer
   );
   int opIsDenotedBy() {
@@ -2819,7 +2870,8 @@ public:
     );
   }
   void specializeBoundVariables(
-    Expression& toBeSubstitutedIn, MapList<Expression, Expression>&
+    Expression& toBeSubstitutedIn,
+    MapList<Expression, Expression>&
     matchedPairs
   );
   Expression* patternMatch(
@@ -2827,13 +2879,15 @@ public:
     Expression& expression,
     MapList<Expression, Expression>& bufferPairs,
     const Expression* condition = nullptr,
-    std::stringstream* logStream = nullptr
+    std::stringstream* logStream =
+    nullptr
   );
   bool processOneExpressionOnePatternOneSubstitution(
     const Expression& pattern,
     Expression& expression,
     MapList<Expression, Expression>& bufferPairs,
-    std::stringstream* logStream = nullptr
+    std::stringstream* logStream =
+    nullptr
   );
   static void checkInputNotSameAsOutput(
     const Expression& input, const Expression& output
@@ -2864,7 +2918,8 @@ public:
     const Expression& pattern,
     const Expression& input,
     MapList<Expression, Expression>& matchedExpressions,
-    std::stringstream* commentsGeneral = nullptr
+    std::stringstream* commentsGeneral =
+    nullptr
   );
   static bool functionReverseOrderRecursively(
     Calculator& calculator, const Expression& input, Expression& output
@@ -3031,22 +3086,25 @@ public:
     const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands
   );
   bool getVectorExpressions(
-    const Expression& input, List<Expression>& output, int
-    targetDimNonMandatory =
+    const Expression& input,
+    List<Expression>& output,
+    int targetDimNonMandatory =
     - 1
   );
   template <typename Type>
   bool combineContexts(
     List<WithContext<Type> >& inputOutputConverted,
-    ExpressionContext* inputOutputStartingContext = nullptr
+    ExpressionContext* inputOutputStartingContext =
+    nullptr
   );
   bool getVectorInt(const Expression& input, List<int>& output);
   bool getVectorLargeIntegerFromFunctionArguments(
     const Expression& input, List<LargeInteger>& output
   );
   bool getMatrixDoubles(
-    const Expression& input, Matrix<double>& output, int desiredNumberOfColumns
-    =
+    const Expression& input,
+    Matrix<double>& output,
+    int desiredNumberOfColumns =
     - 1
   );
   bool getVectorDoubles(
@@ -3118,7 +3176,8 @@ public:
     const std::string& inputAdditionalIdentifier,
     const std::string& inputCalculatorIdentifier,
     const Function::Options& options,
-    const List<std::string>* parentsThatBanHandler = nullptr
+    const List<std::string>* parentsThatBanHandler =
+    nullptr
   );
   void addOneStringAtomHandler(int atom, Expression::ToStringHandler handler);
   void addOneStringCompositeHandler(
@@ -3248,7 +3307,9 @@ public:
       const Expression& current, std::stringstream* commentsOnFailure
     );
     bool processChildrenTransformations(
-      int startIndex, int numberOfChildren, std::stringstream*
+      int startIndex,
+      int numberOfChildren,
+      std::stringstream*
       commentsOnFailure
     );
     void initializeComputation();
@@ -3361,7 +3422,8 @@ public:
     Expression& output,
     int additiveOperation = - 1,
     int multiplicativeOperation = - 1,
-    bool constantsOnly = false
+    bool constantsOnly =
+    false
   );
   static bool leftDistributeBracketIsOnTheLeft(
     Calculator& calculator,
@@ -3369,7 +3431,8 @@ public:
     Expression& output,
     int additiveOperation = - 1,
     int multiplicativeOperation = - 1,
-    bool constantsOnly = false
+    bool constantsOnly =
+    false
   );
   static bool rightDistributeBracketIsOnTheRight(
     Calculator& calculator,
@@ -3377,7 +3440,8 @@ public:
     Expression& output,
     int additiveOperation = - 1,
     int multiplicativeOperation = - 1,
-    bool constantsOnly = false
+    bool constantsOnly =
+    false
   );
   static bool evaluateIf(
     Calculator& calculator, const Expression& input, Expression& output
@@ -3393,7 +3457,10 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool logEvaluationStepsHumanReadableMerged(
-    Calculator& calculator, const Expression& input, Expression& output, bool
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool
     doDebug
   );
 };
@@ -3559,12 +3626,15 @@ public:
     Calculator& calculator,
     const Polynomial<Coefficient>& input,
     Expression& output,
-    ExpressionContext* inputContext = nullptr
+    ExpressionContext* inputContext =
+    nullptr
   );
   // Converstion from type to expression tree.
   template <class Coefficient>
   static bool expressionFromVectorRational(
-    Calculator& calculator, const Vector<Coefficient>& input, Expression&
+    Calculator& calculator,
+    const Vector<Coefficient>& input,
+    Expression&
     output
   );
   template <class Coefficient>
@@ -3572,7 +3642,8 @@ public:
     Calculator& calculator,
     const RationalFraction<Coefficient>& input,
     Expression& output,
-    ExpressionContext* inputContext = nullptr
+    ExpressionContext* inputContext =
+    nullptr
   );
   template <class Coefficient>
   static bool expressionFromRationalFraction(
@@ -3610,7 +3681,9 @@ public:
     std::stringstream* commentsOnFailure
   );
   static bool storeSemisimpleSubalgebras(
-    Calculator& calculator, const SemisimpleSubalgebras& input, Expression&
+    Calculator& calculator,
+    const SemisimpleSubalgebras& input,
+    Expression&
     output
   );
   static std::string stringFromSemisimpleSubalgebras(
@@ -3625,7 +3698,8 @@ public:
     Calculator& calculator,
     const ElementUniversalEnveloping<RationalFraction<Rational> >& input,
     Expression& output,
-    ExpressionContext* inputContext = nullptr
+    ExpressionContext* inputContext =
+    nullptr
   );
   static bool storeCandidateSubalgebra(
     Calculator& calculator,
@@ -3685,7 +3759,8 @@ public:
     Calculator& calculator,
     const MonomialUniversalEnveloping<RationalFraction<Rational> >& input,
     Expression& output,
-    ExpressionContext* inputContext = nullptr
+    ExpressionContext* inputContext =
+    nullptr
   );
   static bool functionExpressionFromBuiltInType(
     Calculator& calculator, const Expression& input, Expression& output
@@ -3719,7 +3794,8 @@ public:
     Calculator& calculator,
     const Expression& input,
     WithContext<Type>& output,
-    bool* outputConversionByOtherMeansNotDesired = nullptr
+    bool* outputConversionByOtherMeansNotDesired =
+    nullptr
   );
   template <class Type>
   static bool functionGetMatrixNoComputation(
@@ -3738,7 +3814,8 @@ public:
     bool convertWithComputation,
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetNumberOfColumnsNonMandatory = - 1,
-    std::stringstream* commentsOnError = nullptr
+    std::stringstream* commentsOnError =
+    nullptr
   );
   template <class Type>
   static bool functionGetMatrix(
@@ -3748,7 +3825,8 @@ public:
     bool convertWithComputation,
     ExpressionContext* inputOutputStartingContext = nullptr,
     int targetNumberOfColumnsNonMandatory = - 1,
-    std::stringstream* commentsOnError = nullptr
+    std::stringstream* commentsOnError =
+    nullptr
   );
   template <class Type>
   static bool getListPolynomialVariableLabelsLexicographic(
@@ -4037,7 +4115,8 @@ bool CalculatorConversions::functionGetMatrixInternal(
 
 template <class Coefficient>
 bool Expression::makeSumFromLinearCombination(
-  Calculator& calculator, const LinearCombination<Expression, Coefficient>&
+  Calculator& calculator,
+  const LinearCombination<Expression, Coefficient>&
   summands
 ) {
   STACK_TRACE("Expression::makeSumFromLinearCombination");
@@ -4355,7 +4434,8 @@ bool Expression::makeMatrix(
       if (inputContext == nullptr) {
         currentElement.assignValue(owner, input(i, j));
       } else {
-        currentElement.assignValueWithContext(owner, input(i, j), *inputContext
+        currentElement.assignValueWithContext(
+          owner, input(i, j), *inputContext
         );
       }
       matrixExpressions(i, j) = currentElement;
@@ -4363,7 +4443,9 @@ bool Expression::makeMatrix(
   }
   return
   this->assignMatrixExpressions(
-    matrixExpressions, owner, reduceOneRowToSequenceAndOneByOneToNonMatrix,
+    matrixExpressions,
+    owner,
+    reduceOneRowToSequenceAndOneByOneToNonMatrix,
     false
   );
 }
@@ -4506,7 +4588,9 @@ bool CalculatorConversions::expressionFromRationalFraction(
     calculator, denominatorRescaled, denominatorExpression, inputContext
   );
   output.makeXOX(
-    calculator, calculator.opDivide(), numeratorExpression,
+    calculator,
+    calculator.opDivide(),
+    numeratorExpression,
     denominatorExpression
   );
   output.checkConsistency();

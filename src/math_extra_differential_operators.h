@@ -49,7 +49,8 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   void generateBasisLieAlgebra(
     List<QuasiDifferentialOperator<Coefficient> >& inputElements,
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   );
   void operator*=(
     const QuasiDifferentialOperator<Coefficient>& standsOnTheRight

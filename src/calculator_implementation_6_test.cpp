@@ -190,7 +190,8 @@ bool CalculatorHTML::Test::OneProblemTest::run(JSData* outputComplete) {
     MapList<
       std::string, std::string, HashFunctions::hashFunction<
         std::string
-      > >
+      >
+    >
   > maintainArguments(global.webArguments);
   if (
     !problem.loadMe(false, randomSeedStringStarting.str(), &commentsOnFailure)
@@ -641,11 +642,14 @@ bool CalculatorHTML::Test::builtInCrashOnFailure() {
   std::string desiredOutputString;
   bool desiredResultKnown =
   FileOperations::loadFileToStringVirtual(
-    CalculatorHTML::Test::filenameFullOutput, desiredOutputString, false,
+    CalculatorHTML::Test::filenameFullOutput,
+    desiredOutputString,
+    false,
     nullptr
   );
   if (
-    !CalculatorHTML::Test::builtInMultiple(0, 0, 0, 3, &actualOutput, &comments
+    !CalculatorHTML::Test::builtInMultiple(
+      0, 0, 0, 3, &actualOutput, &comments
     )) {
     global.fatal
     << "Built-in problem tests failed. "

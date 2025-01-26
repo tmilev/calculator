@@ -28,7 +28,8 @@ public:
   std::string userAddress;
   void zeroSocketSet();
   Listener(
-    int inputHighestSocketNumber, MapList<int, std::string>*
+    int inputHighestSocketNumber,
+    MapList<int, std::string>*
     inputListeningSockets
   ) {
     this->highestSocketNumber = inputHighestSocketNumber;
@@ -60,7 +61,8 @@ public:
   Connector();
   ~Connector();
   void initialize(
-    const std::string& inputAddressToConnectTo, const std::string&
+    const std::string& inputAddressToConnectTo,
+    const std::string&
     inputPortOrService
   );
   void initialize(const std::string& inputAddressToConnectTo, int port);

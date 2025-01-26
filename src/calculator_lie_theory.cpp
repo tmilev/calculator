@@ -2704,7 +2704,8 @@ bool CalculatorLieTheory::slTwoRealFormStructureComputeOnDemand(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   return
-  CalculatorLieTheory::slTwoRealFormStructure(calculator, input, output, false
+  CalculatorLieTheory::slTwoRealFormStructure(
+    calculator, input, output, false
   );
 }
 
@@ -3414,7 +3415,8 @@ bool CartanInvolution::computeSimpleRootImagesTypeD(
   }
   if (useAutomorphism) {
     this->setSimpleRootSwap(
-      this->voganDiagram.rank - 2, this->voganDiagram.rank - 1
+      this->voganDiagram.rank - 2, this->voganDiagram.rank -
+      1
     );
   } else {
     this->setHollowSimpleRoot(this->voganDiagram.rank - 2);
@@ -3910,7 +3912,8 @@ void DynkinSimpleType::plotE6(Plot& output, int verticalOffset) {
   verticalOffset;
   output.drawSegment(left, right);
   right[1] = DynkinSimpleType::distanceBetweenRootCenters + verticalOffset;
-  output.drawCircle(right, DynkinSimpleType::radiusOfRootCircle, "black", false
+  output.drawCircle(
+    right, DynkinSimpleType::radiusOfRootCircle, "black", false
   );
   right[1] += DynkinSimpleType::labelDistance;
   output.drawLabel(right, "2");
@@ -4182,7 +4185,11 @@ void VoganDiagram::plotDII(Plot& output) {
 }
 
 void VoganDiagram::plotTwoElementOrbit(
-  Plot& output, int leftIndex, int rightIndex, int verticalOffset, int
+  Plot& output,
+  int leftIndex,
+  int rightIndex,
+  int verticalOffset,
+  int
   rootsOnThisPlotRow
 ) {
   Vector<Rational> left, right;
@@ -4210,7 +4217,8 @@ void VoganDiagram::plotTwoElementOrbit(
   2;
   std::string height =
   StringRoutines::toStringElement(
-    DynkinSimpleType::distanceBetweenRootCenters * width / totalWidth
+    DynkinSimpleType::distanceBetweenRootCenters * width /
+    totalWidth
   );
   std::string widthString = StringRoutines::toStringElement(width);
   plotObject.coordinateFunctionsJS[0] =
@@ -4578,7 +4586,12 @@ bool CalculatorLieTheory::decomposeFDPartGeneralizedVermaModuleOverLeviPart(
   Selection selInducing = inducingParabolicSelection;
   Selection selSplittingParSel = splittingParabolicSelection;
   module.makeFromHW(
-    ownerSemisimple, weightFundamentalCoordinates, selInducing, 1, 0, nullptr,
+    ownerSemisimple,
+    weightFundamentalCoordinates,
+    selInducing,
+    1,
+    0,
+    nullptr,
     false
   );
   std::string report;
@@ -4805,7 +4818,8 @@ bool CalculatorLieTheory::parabolicWeylGroupsBruhatGraph(
     << "<table><tr><td>Element</td><td>weight simple coords</td>"
     << "<td>weight fund. coords</td></tr>";
     format.fundamentalWeightLetter = "\\omega";
-    for (int i = 0; i < subgroup.representativesQuotientAmbientOrder.size; i ++
+    for (
+      int i = 0; i < subgroup.representativesQuotientAmbientOrder.size; i ++
     ) {
       ElementWeylGroup& current =
       subgroup.representativesQuotientAmbientOrder[i];
@@ -5750,7 +5764,8 @@ getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
   for (
     ; this->monomials.contains(currentWeight);
     result ++,
-    currentWeight.weightFundamentalCoordinates -= alphaInFundamentalCoordinates
+    currentWeight.weightFundamentalCoordinates -=
+    alphaInFundamentalCoordinates
   ) {}
   return result;
 }
@@ -6303,7 +6318,8 @@ bool CalculatorLieTheory::rootSubsystem(
     if (!weylGroup.rootSystem.contains(currentRoot)) {
       return
       output.assignError(
-        calculator, "Input vector " +
+        calculator,
+        "Input vector " +
         currentRoot.toString() +
         " is not a root. "
       );
@@ -6327,7 +6343,10 @@ bool CalculatorLieTheory::rootSubsystem(
 }
 
 bool CalculatorLieTheory::printSemisimpleLieAlgebra(
-  Calculator& calculator, const Expression& input, Expression& output, bool
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool
   verbose
 ) {
   return

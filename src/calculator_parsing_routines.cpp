@@ -271,8 +271,11 @@ bool CalculatorParser::parseAndExtractExpressionsDefault(
 ) {
   return
   this->parseAndExtractExpressions(
-    input, output, this->syntacticSoup, this->syntacticStack, &this->
-    syntaxErrors
+    input,
+    output,
+    this->syntacticSoup,
+    this->syntacticStack,
+    &this->syntaxErrors
   );
 }
 
@@ -1128,7 +1131,8 @@ bool CalculatorParser::replaceXXXXXByConCon(
   return true;
 }
 
-bool CalculatorParser::replaceXXXXByConCon(int controlIndex1, int controlIndex2
+bool CalculatorParser::replaceXXXXByConCon(
+  int controlIndex1, int controlIndex2
 ) {
   (*this->currentSyntacticStack)[(*this->currentSyntacticStack).size - 3].
   controlIndex =
@@ -1426,7 +1430,9 @@ bool CalculatorParser::shouldSplitOutsideQuotes(
 }
 
 void CalculatorParser::parseConsumeQuote(
-  const std::string& input, unsigned int& indexOfLast, List<SyntacticElement>&
+  const std::string& input,
+  unsigned int& indexOfLast,
+  List<SyntacticElement>&
   output
 ) {
   SyntacticElement quoteStart;
@@ -1545,9 +1551,8 @@ bool CalculatorParser::replaceOXdotsXbyEXdotsX(int numberOfXs) {
     numberOfXs
   ];
   element.data.makeAtom(
-    *this->owner, this->getOperationIndexFromControlIndex(
-      element.controlIndex
-    )
+    *this->owner,
+    this->getOperationIndexFromControlIndex(element.controlIndex)
   );
   if (this->flagLogSyntaxRules) {
     std::stringstream out;
@@ -1565,9 +1570,8 @@ bool CalculatorParser::replaceOXbyEX() {
     2
   ];
   element.data.makeAtom(
-    *this->owner, this->getOperationIndexFromControlIndex(
-      element.controlIndex
-    )
+    *this->owner,
+    this->getOperationIndexFromControlIndex(element.controlIndex)
   );
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Rule: Calculator::replaceOXbyEX]";
@@ -1582,9 +1586,8 @@ bool CalculatorParser::replaceObyE() {
     1
   ];
   element.data.makeAtom(
-    *this->owner, this->getOperationIndexFromControlIndex(
-      element.controlIndex
-    )
+    *this->owner,
+    this->getOperationIndexFromControlIndex(element.controlIndex)
   );
   if (this->flagLogSyntaxRules) {
     this->lastRuleName = "[Calculator::replaceObyE]";
@@ -1852,7 +1855,8 @@ bool CalculatorParser::replaceMatrixXByE() {
   int numberOfColumns = 0;
   for (int i = 0; i < matrixElement.dataList.size; i ++) {
     numberOfColumns =
-    MathRoutines::maximum(matrixElement.dataList[i].size() - 1, numberOfColumns
+    MathRoutines::maximum(
+      matrixElement.dataList[i].size() - 1, numberOfColumns
     );
   }
   if (matrixElement.dataList.size > 1) {
@@ -1878,7 +1882,8 @@ bool CalculatorParser::replaceMatrixXByE() {
         matrix.elements[i][j] = matrixElement.dataList[i][j + 1];
       }
     }
-    matrixElement.data.assignMatrixExpressions(matrix, *this->owner, true, true
+    matrixElement.data.assignMatrixExpressions(
+      matrix, *this->owner, true, true
     );
   } else {
     matrixElement.data.makeMatrix(nullptr, *this->owner);
@@ -3164,7 +3169,8 @@ bool CalculatorParser::extractExpressions(
     SyntacticElement& result = (*this->currentSyntacticStack)[
       this->numberOfEmptyTokensStart
     ];
-    if (result.errorString == "" && result.controlIndex == this->conExpression()
+    if (
+      result.errorString == "" && result.controlIndex == this->conExpression()
     ) {
       outputExpression = result.data;
       success = true;
@@ -3458,8 +3464,10 @@ bool CalculatorParser::applyOneRule() {
     integralAtom.makeAtom(*this->owner, "\\int");
     Expression underscore;
     underscore.makeXOX(
-      *this->owner, this->owner->opUnderscore(), integralAtom, secondToLastE.
-      data
+      *this->owner,
+      this->owner->opUnderscore(),
+      integralAtom,
+      secondToLastE.data
     );
     this->setStackValue(underscore, "\\int_{*}", - 4);
     return this->decreaseStackExceptLast(2);
@@ -3497,8 +3505,10 @@ bool CalculatorParser::applyOneRule() {
   ) {
     Expression exponent;
     exponent.makeXOX(
-      *this->owner, this->owner->opPower(), fourthToLastE.data, secondToLastE.
-      data
+      *this->owner,
+      this->owner->opPower(),
+      fourthToLastE.data,
+      secondToLastE.data
     );
     this->setStackValue(exponent, "\\int_{*}^{**}", - 4);
     this->lastRuleName = "int_{*} ^ {**} --> int_{*}^{**}";
@@ -3609,7 +3619,8 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceXYByY();
   }
   if (
-    secondToLastS == "\\right" && (lastS == ")" || lastS == "]" || lastS == "}"
+    secondToLastS == "\\right" && (
+      lastS == ")" || lastS == "]" || lastS == "}"
     )) {
     return this->replaceXYByY();
   }
@@ -4212,7 +4223,8 @@ bool CalculatorParser::applyOneRule() {
     secondToLastS == "Expression" && (
       lastS == "," ||
       lastS == ")" ||
-      lastS == "}" || (this->owner->flagUseBracketsForIntervals && lastS == "]"
+      lastS == "}" || (
+        this->owner->flagUseBracketsForIntervals && lastS == "]"
       )
     )
   ) {

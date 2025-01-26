@@ -283,28 +283,40 @@ bool RealAndImaginaryPartExtractor::extractRecursive(
   if (input.startsWith(this->owner->opDivide(), 3)) {
     return
     this->extractFromDivision(
-      input[1], input[2], outputRealPart, outputImaginaryPart,
+      input[1],
+      input[2],
+      outputRealPart,
+      outputImaginaryPart,
       commentsOnFailure
     );
   }
   if (input.startsWith(this->owner->opPower(), 3)) {
     return
     this->extractFromPower(
-      input[1], input[2], outputRealPart, outputImaginaryPart,
+      input[1],
+      input[2],
+      outputRealPart,
+      outputImaginaryPart,
       commentsOnFailure
     );
   }
   if (input.startsWith(this->owner->opPlus(), 3)) {
     return
     this->extractFromSum(
-      input[1], input[2], outputRealPart, outputImaginaryPart,
+      input[1],
+      input[2],
+      outputRealPart,
+      outputImaginaryPart,
       commentsOnFailure
     );
   }
   if (input.startsWith(this->owner->opTimes(), 3)) {
     return
     this->extractFromProduct(
-      input[1], input[2], outputRealPart, outputImaginaryPart,
+      input[1],
+      input[2],
+      outputRealPart,
+      outputImaginaryPart,
       commentsOnFailure
     );
   }
@@ -382,7 +394,9 @@ bool RealAndImaginaryPartExtractor::extractFromDivision(
       numerator, numeratorRealPart, numeratorImaginaryPart, commentsOnFailure
     ) ||
     !this->extractRecursive(
-      denominator, denominatorRealPart, denominatorImaginaryPart,
+      denominator,
+      denominatorRealPart,
+      denominatorImaginaryPart,
       commentsOnFailure
     )
   ) {

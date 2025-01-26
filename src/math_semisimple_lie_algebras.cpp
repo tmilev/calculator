@@ -241,7 +241,9 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorMainDiv() {
 }
 
 std::string SemisimpleLieAlgebra::toHTML(
-  bool verbose, bool flagWriteLatexPlots, const std::string&
+  bool verbose,
+  bool flagWriteLatexPlots,
+  const std::string&
   extraDynkinDiagramPlot
 ) {
   STACK_TRACE("SemisimpleLieAlgebra::toHTML");
@@ -443,7 +445,9 @@ std::string SemisimpleLieAlgebra::toHTML(
 }
 
 void SemisimpleLieAlgebra::writeHTML(
-  bool verbose, bool flagWriteLatexPlots, const std::string&
+  bool verbose,
+  bool flagWriteLatexPlots,
+  const std::string&
   extraDynkinDiagramPlot
 ) {
   std::stringstream outWithLinks;
@@ -905,7 +909,10 @@ bool SemisimpleLieAlgebra::getMaxQForWhichBetaMinusQAlphaIsARoot(
 }
 
 void SemisimpleLieAlgebra::computeOneChevalleyConstant(
-  int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta,
+  int indexGamma,
+  int indexDelta,
+  int indexMinusEpsilon,
+  int indexMinusZeta,
   int indexEta
 ) {
   // using formula (**), 2.9, page 49, Samelson, Notes on Lie algebras, 1989
@@ -1500,7 +1507,8 @@ void HomomorphismSemisimpleLieAlgebra::projectOntoSmallCartan(
     output[i] =
     this->coDomainAlgebra().weylGroup.rootScalarCartanRoot(
       this->imagesAllChevalleyGenerators[
-        this->domainAlgebra().weylGroup.rootsOfBorel.size + i
+        this->domainAlgebra().weylGroup.rootsOfBorel.size +
+        i
       ].getCartanPart(),
       input
     );

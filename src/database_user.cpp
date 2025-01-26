@@ -930,8 +930,9 @@ void UserCalculatorData::getFindMeQueryByUsernameOrEmail(
   output.queries.clear();
   if (this->username != "") {
     QueryFind findByUsername(
-      DatabaseStrings::tableUsers, DatabaseStrings::labelUsername, this->
-      username
+      DatabaseStrings::tableUsers,
+      DatabaseStrings::labelUsername,
+      this->username
     );
     output.queries.addOnTop(findByUsername);
   }
@@ -1246,7 +1247,8 @@ void UserCalculator::computeHashedSaltedPassword() {
   // freed (to the extent possible and practical).
   for (unsigned i = 0; i < Crypto::lengthSha3DefaultInBytes; i ++) {
     this->usernameHashedPlusPassWordHashed[
-      i + Crypto::lengthSha3DefaultInBytes
+      i +
+      Crypto::lengthSha3DefaultInBytes
     ] =
     static_cast<char>(hasher[i]);
   }
@@ -1306,7 +1308,8 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   }
   MapList<std::string, std::string> urlParameters;
   urlParameters.setKeyValue(
-    DatabaseStrings::labelCalculatorRequest, WebAPI::Request::
+    DatabaseStrings::labelCalculatorRequest,
+    WebAPI::Request::
     activateAccountJSON
   );
   urlParameters.setKeyValue(
@@ -1317,7 +1320,8 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   );
   urlParameters.setKeyValue(DatabaseStrings::labelEmail, inputEmailUnsafe);
   urlParameters.setKeyValue(
-    DatabaseStrings::labelCurrentPage, DatabaseStrings::
+    DatabaseStrings::labelCurrentPage,
+    DatabaseStrings::
     labelPageActivateAccount
   );
   std::string confirmEmailOnly =

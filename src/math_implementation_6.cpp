@@ -429,7 +429,9 @@ bool PolynomialFactorizationFiniteFields::hasSquareFactor(
     converted.makeFromPolynomialAndModulusNoFailure(&modulus, this->current);
     converted.derivative(derivative);
     converted.greatestCommonDivisor(
-      converted, derivative, greatestCommonDivisorConvertedAndDerivative,
+      converted,
+      derivative,
+      greatestCommonDivisorConvertedAndDerivative,
       nullptr
     );
     if (greatestCommonDivisorConvertedAndDerivative.isConstant()) {
@@ -714,7 +716,9 @@ std::string PolynomialFactorizationFiniteFields::toLatexLiftedFactors() {
 }
 
 void PolynomialFactorizationFiniteFields::henselLiftOnce(
-  const LargeIntegerUnsigned& oldModulus, int stepCount, std::stringstream*
+  const LargeIntegerUnsigned& oldModulus,
+  int stepCount,
+  std::stringstream*
   comments
 ) {
   STACK_TRACE("PolynomialFactorizationFiniteFields::henselLiftOnce");
@@ -1185,7 +1189,8 @@ void PolynomialUnivariateModular::addAnotherTimesTerm(
   int modulus = this->getModulus();
   for (int i = 0; i < other.coefficients.size; i ++) {
     this->coefficients[i + termPower] = (
-      this->coefficients[i + termPower] + other.coefficients[i] * coefficient
+      this->coefficients[i + termPower] +
+      other.coefficients[i] * coefficient
     ) %
     modulus;
   }
@@ -1563,7 +1568,8 @@ void PolynomialUnivariateModular::operator*=(
   PolynomialUnivariateModular output;
   output.makeZero(this->modulusData);
   output.ensureCoefficientLength(
-    other.coefficients.size + this->coefficients.size - 1
+    other.coefficients.size +
+    this->coefficients.size - 1
   );
   int modulus = this->getModulus();
   for (int i = 0; i < this->coefficients.size; i ++) {
@@ -1799,7 +1805,8 @@ computeGreatestCommonDivisor(
 }
 
 bool PolynomialRationalGreatestCommonDivisorComputer::
-computeOneGreatestCommonDivisor(int prime, std::stringstream* commentsOnFailure
+computeOneGreatestCommonDivisor(
+  int prime, std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE(
     "PolynomialRationalGreatestCommonDivisorComputer::"

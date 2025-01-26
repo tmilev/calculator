@@ -222,8 +222,9 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
     std::string certificateContent;
     if (
       !FileOperations::loadFileToStringUnsecure(
-        input.certificateFileNamePhysical, certificateContent, &
-        commentsOnFailure
+        input.certificateFileNamePhysical,
+        certificateContent,
+        &commentsOnFailure
       )
     ) {
       global.fatal
@@ -267,7 +268,8 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
     << Logger::endL;
   } else if (
     SSL_use_certificate_file(
-      this->sslData, input.certificateFileNamePhysical.c_str(),
+      this->sslData,
+      input.certificateFileNamePhysical.c_str(),
       SSL_FILETYPE_PEM
     ) <=
     0
@@ -880,7 +882,10 @@ bool TransportLayerSecurityConfiguration::makeFromAdditionalKeyAndCertificate(
     keyWithFolder, this->privateKeyFileNamePhysical, true, true, nullptr
   );
   FileOperations::getPhysicalFileNameFromVirtual(
-    certificateWithFolder, this->certificateFileNamePhysical, true, true,
+    certificateWithFolder,
+    this->certificateFileNamePhysical,
+    true,
+    true,
     nullptr
   );
   return this->keysExist();

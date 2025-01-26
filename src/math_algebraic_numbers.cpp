@@ -347,7 +347,9 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
     selection.incrementReturnFalseIfPastLast();; selection.incrementReturnFalseIfPastLast()
   ) {
     attemptsSoFar ++;
-    if (attemptsLimitZeroForNone > 0 && attemptsSoFar > attemptsLimitZeroForNone
+    if (
+      attemptsLimitZeroForNone > 0 &&
+      attemptsSoFar > attemptsLimitZeroForNone
     ) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
@@ -392,7 +394,8 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
         this->generatingElementPowersBasis.getRankElementSpan()
       ) {
         this->generatingElementPowersBasis.setSize(
-          this->generatingElementPowersBasis.size - 1
+          this->generatingElementPowersBasis.size -
+          1
         );
         break;
       }
@@ -405,7 +408,8 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
 }
 
 void AlgebraicClosureRationals::contractBasesIfRedundant(
-  AlgebraicClosureRationals& previousCopy, AlgebraicNumber*
+  AlgebraicClosureRationals& previousCopy,
+  AlgebraicNumber*
   outputImageGenerator
 ) {
   STACK_TRACE("AlgebraicClosureRationals::contractBasesIfRedundant");
@@ -1009,7 +1013,9 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
     for (int j = 0; j < startingDimension; j ++) {
       generatorMatrix.addMonomial(
         MonomialMatrix((i + 1) * startingDimension + j, i * startingDimension +
-          j), 1
+          j
+        ),
+        1
       );
     }
   }
@@ -1447,7 +1453,8 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
     }
     for (int j = 0; j < currentRadicalSelection.cardinalitySelection; j ++) {
       if (
-        this->owner->quadraticRadicals[currentRadicalSelection.elements[j]] < 0
+        this->owner->quadraticRadicals[currentRadicalSelection.elements[j]] <
+        0
       ) {
         return false;
       } else {
@@ -1501,7 +1508,8 @@ bool AlgebraicNumber::assignRationalQuadraticRadical(
   squareFreeInput *= absoluteInput.getDenominator();
   List<LargeInteger> primeFactors;
   List<int> multiplicities;
-  if (!squareFreeInput.value.factor(primeFactors, multiplicities, 0, 4, nullptr)
+  if (
+    !squareFreeInput.value.factor(primeFactors, multiplicities, 0, 4, nullptr)
   ) {
     return false;
   }

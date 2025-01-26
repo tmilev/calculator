@@ -173,7 +173,9 @@ public:
   static unsigned int hashListStrings(const List<std::string>& input);
   template <class Element>
   static void lieBracket(
-    const Element& standsOnTheLeft, const Element& standsOnTheRight, Element&
+    const Element& standsOnTheLeft,
+    const Element& standsOnTheRight,
+    Element&
     output
   );
   template <typename number>
@@ -188,7 +190,9 @@ public:
   }
   static bool isInteger(Rational x);
   static bool parseListIntegers(
-    const std::string& input, List<int>& result, std::stringstream*
+    const std::string& input,
+    List<int>& result,
+    std::stringstream*
     commentsOnFailure
   );
   static void parseListIntegersNoFailure(

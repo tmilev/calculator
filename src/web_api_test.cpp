@@ -233,7 +233,8 @@ bool WebAPIResponse::Test::changePasswordEmailOnly() {
     MapList<
       std::string, std::string, HashFunctions::hashFunction<
         std::string
-      > >
+      >
+    >
   > maintainWebArgument(global.webArguments);
   global.webArguments[DatabaseStrings::labelUsername] =
   WebAPI::userDefaultAdmin;
@@ -302,7 +303,8 @@ bool WebAPIResponse::Test::deleteAccount() {
     MapList<
       std::string, std::string, HashFunctions::hashFunction<
         std::string
-      > >
+      >
+    >
   > maintainWebArgument(global.webArguments);
   WebAPIResponse api;
   JSData resultTokenGeneration = api.deleteAccount();
@@ -367,7 +369,8 @@ bool WebAPIResponse::Test::changePassword() {
     MapList<
       std::string, std::string, HashFunctions::hashFunction<
         std::string
-      > >
+      >
+    >
   > maintainWebArgument(global.webArguments);
   global.webArguments[DatabaseStrings::labelUsername] =
   WebAPI::userDefaultAdmin;
@@ -424,7 +427,8 @@ bool WebAPIResponse::Test::forgotLogin() {
     MapList<
       std::string, std::string, HashFunctions::hashFunction<
         std::string
-      > >
+      >
+    >
   > maintainWebArgument(global.webArguments);
   global.webArguments[DatabaseStrings::labelUsername] =
   WebAPI::userDefaultAdmin;
@@ -492,7 +496,8 @@ bool WebAPIResponse::Test::signUp() {
     MapList<
       std::string, std::string, HashFunctions::hashFunction<
         std::string
-      > >
+      >
+    >
   > maintainWebArgument(global.webArguments);
   global.webArguments[WebAPI::Request::desiredUsername] = "someNewUser";
   global.webArguments[DatabaseStrings::labelEmail] =
@@ -623,8 +628,10 @@ bool WebAPIResponse::Test::compareExpressions() {
   std::stringstream commentsOnFailure;
   if (
     !FileOperations::loadFileToStringVirtual(
-      "test/compare_expressions.json", comparisonJSON, false, &
-      commentsOnFailure
+      "test/compare_expressions.json",
+      comparisonJSON,
+      false,
+      &commentsOnFailure
     )
   ) {
     global.fatal

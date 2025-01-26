@@ -22,7 +22,8 @@ public:
   void buildHtmlJavascriptPage(bool appendBuildHash);
   std::string getBrowserificationAssembled(const std::string& entryPoint);
   bool loadJavascriptFileNames(
-    const std::string& buildFileNameVirtual, std::stringstream*
+    const std::string& buildFileNameVirtual,
+    std::stringstream*
     commentsOnFailure
   );
 };
@@ -133,7 +134,9 @@ public:
     std::stringstream* commentsOnFailure
   );
   static JSData submitAnswersJSON(
-    const std::string& inputRandomSeed, bool* outputIsCorrect, bool
+    const std::string& inputRandomSeed,
+    bool* outputIsCorrect,
+    bool
     timeSafetyBrake
   );
   static JSData submitAnswersPreviewJSON();
@@ -177,10 +180,13 @@ public:
     const std::string& inputRandomSeed,
     std::string* outputNakedAnswer = nullptr,
     bool* answerGenerationSuccess = nullptr,
-    bool doIncludeTimeStats = true
+    bool doIncludeTimeStats =
+    true
   );
   static std::string getCommentsInterpretation(
-    Calculator& interpreterWithAdvice, int indexShift, FormatExpressions&
+    Calculator& interpreterWithAdvice,
+    int indexShift,
+    FormatExpressions&
     format
   );
   static JSData getSelectCourseJSON();
@@ -193,7 +199,8 @@ public:
   static std::string getOnePageJS();
   static std::string getCalculatorWorkerJS();
   static std::string getBrowserification(
-    const std::string& buildJSONVirtualFileName, const std::string&
+    const std::string& buildJSONVirtualFileName,
+    const std::string&
     scriptEntryPoint
   );
   static std::string getScoresInCoursePage();
@@ -202,7 +209,9 @@ public:
   static JSData getAccountsPageJSON(const std::string& hostWebAddressWithPort);
   static std::string toStringUserScores();
   static std::string toStringUserDetailsTable(
-    bool adminsOnly, List<JSData>& users, const std::string&
+    bool adminsOnly,
+    List<JSData>& users,
+    const std::string&
     hostWebAddressWithPort
   );
   static std::string getSanitizedComment(

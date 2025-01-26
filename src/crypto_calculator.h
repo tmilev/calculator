@@ -128,7 +128,9 @@ public:
     const ASNElement& input, std::stringstream* commentsOnFailure
   );
   static bool loadASNAlgorithmIdentifier(
-    const ASNElement& input, ASNElement& output, std::stringstream*
+    const ASNElement& input,
+    ASNElement& output,
+    std::stringstream*
     commentsOnFailure
   );
   std::string toString();
@@ -161,7 +163,8 @@ public:
   };
 
   bool loadFromPEMFile(
-    const std::string& inputFilenameVirtual, std::stringstream*
+    const std::string& inputFilenameVirtual,
+    std::stringstream*
     commentsOnFailure
   );
   bool loadFromPEM(
@@ -232,13 +235,15 @@ public:
     const std::string& input,
     List<unsigned char>& output,
     std::stringstream* commentsOnFailure = nullptr,
-    std::stringstream* commentsGeneral = nullptr
+    std::stringstream* commentsGeneral =
+    nullptr
   );
   static bool convertBase64ToString(
     const std::string& input,
     std::string& output,
     std::stringstream* commentsOnFailure = nullptr,
-    std::stringstream* commentsGeneral = nullptr
+    std::stringstream* commentsGeneral =
+    nullptr
   );
   static void convertStringToLargeIntUnsigned(
     const std::string& input, LargeIntegerUnsigned& output
@@ -247,7 +252,9 @@ public:
     const LargeIntegerUnsigned& input, std::string& output
   );
   static void convertLargeIntUnsignedToBase58SignificantDigitsFIRST(
-    const LargeIntegerUnsigned& input, std::string& output, int
+    const LargeIntegerUnsigned& input,
+    std::string& output,
+    int
     numberOfOnesToPrepend
   );
   static bool convertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
@@ -262,7 +269,8 @@ public:
     std::stringstream* commentsOnFailure
   );
   static std::string convertIntToHex(int input, int significantBytes);
-  static std::string convertUintToHex(unsigned int input, int significantBytes
+  static std::string convertUintToHex(
+    unsigned int input, int significantBytes
   );
   static std::string convertUint64ToHex(uint64_t input);
   static bool convertHexToString(
@@ -287,7 +295,9 @@ public:
     const List<unsigned char>& input
   );
   static std::string convertListUnsignedCharsToHexFormat(
-    const List<unsigned char>& input, int byteWidthLineBreakZeroForNone, bool
+    const List<unsigned char>& input,
+    int byteWidthLineBreakZeroForNone,
+    bool
     useHtml
   );
   static bool convertListUnsignedCharsToHexFormat(
@@ -468,7 +478,8 @@ public:
 
   // Shorter strings should hash faster, so
   // timing attacks on this should reveal differences in string lengths.
-  static bool haveEqualHashes(const std::string& left, const std::string& right
+  static bool haveEqualHashes(
+    const std::string& left, const std::string& right
   );
   class External {
   public:

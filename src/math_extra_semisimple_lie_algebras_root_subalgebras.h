@@ -20,7 +20,8 @@ public:
   std::string stringConnectedComponents;
   void computeDiagramAndDiagramRelationsAndK(RootSubalgebra& owner);
   void computeDiagramRelationsAndK(RootSubalgebra& owner);
-  void fixRepeatingRoots(Vectors<Rational>& roots, List<Rational>& coefficients
+  void fixRepeatingRoots(
+    Vectors<Rational>& roots, List<Rational>& coefficients
   );
   void relationOneSideToString(
     std::string& output,
@@ -393,7 +394,9 @@ public:
     const Vector<Rational>& input, Vector<Rational>& outputHW
   );
   void computeExtremeWeightInTheSameKModule(
-    const Vector<Rational>& input, Vector<Rational>& outputW, bool
+    const Vector<Rational>& input,
+    Vector<Rational>& outputW,
+    bool
     lookingForHighest
   );
   void computeLowestWeightInTheSameKModule(
@@ -418,11 +421,15 @@ public:
     std::string& output
   );
   void writeLieBracketTableAndOppositeKModulesToFile(
-    std::fstream& output, List<List<List<int> > >& inMultTable, List<int>&
+    std::fstream& output,
+    List<List<List<int> > >& inMultTable,
+    List<int>&
     inOpposites
   );
   void readLieBracketTableAndOppositeKModulesFromFile(
-    std::fstream& input, List<List<List<int> > >& outMultTable, List<int>&
+    std::fstream& input,
+    List<List<List<int> > >& outMultTable,
+    List<int>&
     outOpposites
   );
   bool operator>(const RootSubalgebra& other) const;
@@ -523,7 +530,11 @@ public:
     std::string& output, bool includeMatrixForm
   );
   void toStringCentralizerIsomorphisms(
-    std::string& output, bool useLatex, bool useHtml, int fromIndex, int
+    std::string& output,
+    bool useLatex,
+    bool useHtml,
+    int fromIndex,
+    int
     amountToProcess
   );
   void toHTML(FormatExpressions* format);
@@ -708,12 +719,14 @@ public:
   std::string toStringTripleVerification(FormatExpressions* format) const;
   std::string toStringTripleUnknowns(FormatExpressions* format) const;
   std::string toStringTripleUnknownsPolynomialSystem(
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   ) const;
   template <typename Coefficient>
   std::string toStringPolynomialSystem(
     const PolynomialSubstitution<Coefficient>& system,
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   ) const;
   std::string toStringTripleArbitrary(FormatExpressions* format) const;
   std::string toStringTripleArbitraryMatrix() const;

@@ -367,14 +367,18 @@ bool Calculator::getMatrixDoubles(
 }
 
 bool Calculator::getVectorDoubles(
-  const Expression& input, Vector<double>& output, int
+  const Expression& input,
+  Vector<double>& output,
+  int
   desiredDimensionNonMandatory
 ) {
   return this->getVector(input, output, nullptr, desiredDimensionNonMandatory);
 }
 
 bool Calculator::getVectorDoublesFromFunctionArguments(
-  const Expression& input, Vector<double>& output, int
+  const Expression& input,
+  Vector<double>& output,
+  int
   desiredDimensionNonMandatory
 ) {
   return
@@ -524,7 +528,10 @@ bool MeshTriangles::computePoints(
 }
 
 bool CalculatorFunctionsPlot::plotImplicitFunctionFull(
-  Calculator& calculator, const Expression& input, Expression& output, bool
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool
   showGrid
 ) {
   STACK_TRACE("CalculatorFunctionsPlot::plotImplicitFunctionFull");
@@ -788,7 +795,9 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   algSQRTPart =
   newVariableExpression * newVariableExpression - calculator.expressionOne();
   algPart.makeSqrt(calculator, algSQRTPart);
-  lnPart.makeOX(calculator, calculator.opLog(), newVariableExpression - algPart
+  lnPart.makeOX(
+    calculator, calculator.opLog(), newVariableExpression -
+    algPart
   );
   output = functionCoefficient *(algPart * newVariableExpression + lnPart) / 2;
   return true;
@@ -890,8 +899,10 @@ bool CalculatorFunctionsIntegration::integrateDefiniteIntegral(
   Expression topExpression;
   Expression bottomExpression;
   topExpression.makeXOX(
-    calculator, calculator.opUnderscore(), topCommands, calculator.
-    expressionTwo()
+    calculator,
+    calculator.opUnderscore(),
+    topCommands,
+    calculator.expressionTwo()
   );
   bottomExpression.makeXOX(
     calculator,
@@ -1382,7 +1393,8 @@ bool CalculatorFunctionsPlot::plotLabel(
   }
   JavascriptExtractor extractor(calculator);
   PlotObject plotObject;
-  extractor.convertExpressionToPoint(input[1], input[1].size() - 1, plotObject
+  extractor.convertExpressionToPoint(
+    input[1], input[1].size() - 1, plotObject
   );
   if (!input[2].isOfType<std::string>(&plotObject.plotString)) {
     plotObject.plotString = input[2].toString();
@@ -2214,7 +2226,9 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
     base.invert();
     newBaseExpression.assignValue(calculator, base);
     output.makeXOX(
-      calculator, calculator.opLogBase(), newBaseExpression,
+      calculator,
+      calculator.opLogBase(),
+      newBaseExpression,
       newArgumentExpression
     );
     output *= - 1;
@@ -2224,7 +2238,9 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
     argument.invert();
     newArgumentExpression.assignValue(calculator, argument);
     output.makeXOX(
-      calculator, calculator.opLogBase(), newBaseExpression,
+      calculator,
+      calculator.opLogBase(),
+      newBaseExpression,
       newArgumentExpression
     );
     output *= - 1;
@@ -2282,7 +2298,9 @@ bool CalculatorFunctionsBasic::logarithmBaseSimpleCases(
   newBaseExpression.assignValue(calculator, base);
   newArgumentExpression.assignValue(calculator, argument);
   output.makeXOX(
-    calculator, calculator.opLogBase(), newBaseExpression,
+    calculator,
+    calculator.opLogBase(),
+    newBaseExpression,
     newArgumentExpression
   );
   if (integerPart == 0) {
@@ -2433,7 +2451,9 @@ void JavascriptExtractor::writeParameterNames(PlotObject& output) {
 }
 
 bool JavascriptExtractor::extract(
-  const Expression& input, std::string& output, std::stringstream*
+  const Expression& input,
+  std::string& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   if (!this->extractJavascript(input, commentsOnFailure)) {
@@ -2522,7 +2542,9 @@ bool JavascriptExtractor::extractFromAtom(
 }
 
 bool JavascriptExtractor::extractFromSequence(
-  const Expression& input, std::string& output, std::stringstream*
+  const Expression& input,
+  std::string& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   std::string expression;
@@ -2553,7 +2575,9 @@ bool JavascriptExtractor::extractFromSequence(
 }
 
 bool JavascriptExtractor::extractFromOperation(
-  const Expression& input, std::string& output, std::stringstream*
+  const Expression& input,
+  std::string& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   if (input.size() == 4) {
@@ -2563,7 +2587,9 @@ bool JavascriptExtractor::extractFromOperation(
 }
 
 bool JavascriptExtractor::extractFromTernary(
-  const Expression& input, std::string& output, std::stringstream*
+  const Expression& input,
+  std::string& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   STACK_TRACE("JavascriptExtractor::extractFromTernary");
@@ -2604,7 +2630,9 @@ bool JavascriptExtractor::extractFromTernary(
 }
 
 bool JavascriptExtractor::extractFromUnaryOrBinary(
-  const Expression& input, std::string& output, std::stringstream*
+  const Expression& input,
+  std::string& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   if (input.size() != 3 && input.size() != 2) {
@@ -2663,7 +2691,8 @@ bool JavascriptExtractor::extractFromUnaryOrBinary(
       output = out.str();
       return true;
     }
-    if (opString == "+" || opString == "-" || opString == "/" || opString == "*"
+    if (
+      opString == "+" || opString == "-" || opString == "/" || opString == "*"
     ) {
       out << "(" << leftString << " " << opString << " " << rightString << ")";
       output = out.str();
@@ -2739,7 +2768,9 @@ bool JavascriptExtractor::extractFromUnaryOrBinary(
 }
 
 bool JavascriptExtractor::extractJavascriptRecursive(
-  const Expression& input, std::string& output, std::stringstream*
+  const Expression& input,
+  std::string& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   RecursionDepthCounter counter(&this->recursionDepth);
@@ -2968,7 +2999,8 @@ bool CalculatorFunctionsPlot::plotSurface(
       }
       for (int j = 0; j < 2; j ++) {
         if (
-          !extractor.extractJavascript(input[i][2][j + 1], &calculator.comments
+          !extractor.extractJavascript(
+            input[i][2][j + 1], &calculator.comments
           )
         ) {
           return

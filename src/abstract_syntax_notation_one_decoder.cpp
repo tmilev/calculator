@@ -1122,7 +1122,8 @@ WriterObjectFixedLength() {
     // Wrong number of reserved bytes for sequence writer.
     // This is non-fatal but affects negatively performance.
     this->outputPointer->shiftUpExpandOnTopRepeated(
-      this->offset + 1, actualBytesNeededForLength -
+      this->offset + 1,
+      actualBytesNeededForLength -
       this->reservedBytesForLength
     );
   }
@@ -1130,7 +1131,8 @@ WriterObjectFixedLength() {
     // Wrong number of reserved bytes for sequence writer.
     // This is non-fatal but affects negatively performance.
     this->outputPointer->removeIndicesShiftDown(
-      this->offset + 1, this->reservedBytesForLength -
+      this->offset + 1,
+      this->reservedBytesForLength -
       actualBytesNeededForLength
     );
   }
@@ -1138,7 +1140,8 @@ WriterObjectFixedLength() {
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLength(
     static_cast<unsigned>(this->totalByteLength),
     *this->outputPointer,
-    this->offset + 1
+    this->offset +
+    1
   );
 }
 
@@ -1148,7 +1151,8 @@ void AbstractSyntaxNotationOneSubsetDecoder::writeUnsignedIntegerObject(
   List<unsigned char> serialized;
   input.writeBigEndianBytes(serialized, true);
   ASNElement::writeBytesASNAtom(
-    AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02, serialized,
+    AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02,
+    serialized,
     output
   );
 }
@@ -1302,7 +1306,9 @@ ASNObject::namesToObjectIdsNonThreadSafe() {
     AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
   );
   MapList<
-    List<unsigned char>, ASNObject, HashFunctions::hashFunction<
+    List<unsigned char>,
+    ASNObject,
+    HashFunctions::hashFunction<
       List<unsigned char>
     >
   >& reverseMap =
@@ -1862,7 +1868,9 @@ bool PrivateKeyRSA::loadFromPEM(
   StringRoutines::stringTrimWhiteSpace(certificateContentStripped);
   if (
     !Crypto::convertBase64ToBitStream(
-      certificateContentStripped, this->sourceBinary, commentsOnFailure,
+      certificateContentStripped,
+      this->sourceBinary,
+      commentsOnFailure,
       nullptr
     )
   ) {
@@ -2138,7 +2146,9 @@ bool X509Certificate::loadFromPEM(
   StringRoutines::stringTrimWhiteSpace(certificateContentNoFooter);
   if (
     !Crypto::convertBase64ToBitStream(
-      certificateContentStripped, this->sourceBinary, commentsOnFailure,
+      certificateContentStripped,
+      this->sourceBinary,
+      commentsOnFailure,
       nullptr
     )
   ) {
@@ -2303,7 +2313,9 @@ bool TBSCertificateInfo::Organization::loadFields(
 }
 
 bool TBSCertificateInfo::loadASNAlgorithmIdentifier(
-  const ASNElement& input, ASNElement& output, std::stringstream*
+  const ASNElement& input,
+  ASNElement& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   if (
@@ -2362,7 +2374,8 @@ bool TBSCertificateInfo::load(
     }
     return false;
   }
-  if (!input.hasSubElementOfType({1}, {}, this->serialNumber, commentsOnFailure)
+  if (
+    !input.hasSubElementOfType({1}, {}, this->serialNumber, commentsOnFailure)
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to read serial number. ";

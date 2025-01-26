@@ -688,7 +688,8 @@ bool CalculatorFunctionsCrypto::testRSASign(
   List<unsigned char> signature;
   message = messageString;
   key.hashAndPadPKCS1(
-    message, SignatureAlgorithmSpecification::HashAlgorithm::sha256,
+    message,
+    SignatureAlgorithmSpecification::HashAlgorithm::sha256,
     paddedMessage
   );
   out << "Temporary private key:<br>" << key.toString() << "<br>";
@@ -2450,8 +2451,10 @@ bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
     slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo =
     true;
     algebra.findSl2Subalgebras(
-      algebra, slTwoSubalgebras, true, &calculator.objectContainer.
-      algebraicClosure
+      algebra,
+      slTwoSubalgebras,
+      true,
+      &calculator.objectContainer.algebraicClosure
     );
     slTwoSubalgebras.writeHTML();
     Plot plot;

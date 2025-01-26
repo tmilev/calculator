@@ -2449,10 +2449,12 @@ void PolynomialFactorizationCantorZassenhaus<
     power = 1;
   } else {
     constantTerm = 1 + (constant - 1) % (
-      this->one.modulus.getUnsignedIntValueTruncated() - 1
+      this->one.modulus.getUnsignedIntValueTruncated() -
+      1
     );
     power = 1 + (constant - 1) / (
-      this->one.modulus.getUnsignedIntValueTruncated() - 1
+      this->one.modulus.getUnsignedIntValueTruncated() -
+      1
     );
     if (power >= this->current.totalDegreeInt()) {
       power = 1;
@@ -2899,8 +2901,10 @@ getSpacedMonomialsWithHighlightLaTeX(
     countMonomials ++;
     std::string monomialWithSign =
     Polynomial<Coefficient>::getBlendCoefficientAndMonomial(
-      polynomial[index], polynomial.coefficients[index], true, &this->owner->
-      format
+      polynomial[index],
+      polynomial.coefficients[index],
+      true,
+      &this->owner->format
     );
     std::string sign = monomialWithSign.substr(0, 1);
     std::string monomialNoSign = monomialWithSign.substr(1);
@@ -3009,8 +3013,9 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   MonomialPolynomial divisorLeadingMonomial;
   int indexCurrentDivisorLeadingMonomial =
   currentDivisor.getIndexLeadingMonomial(
-    &divisorLeadingMonomial, nullptr, &this->owner->polynomialOrder.
-    monomialOrder
+    &divisorLeadingMonomial,
+    nullptr,
+    &this->owner->polynomialOrder.monomialOrder
   );
   int indexCurrentDivisorLeadingMonInAllMons =
   this->allMonomials.getIndex(divisorLeadingMonomial);
@@ -3145,7 +3150,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     currentSlideNumber;
   }
   currentSlideNumber ++;
-  for (int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++
+  for (
+    int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++
   ) {
     this->highlightMonsRemainders[remainderIndex][
       this->allMonomials.getIndex(
@@ -3170,7 +3176,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   << currentSlideNumber + 1
   << "| handout:0>{subtract last two polynomials.}";
   currentSlideNumber ++;
-  for (int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++
+  for (
+    int i = 0; i < this->intermediateRemainders[remainderIndex].size(); i ++
   ) {
     this->highlightMonsRemainders[remainderIndex][
       this->allMonomials.getIndex(

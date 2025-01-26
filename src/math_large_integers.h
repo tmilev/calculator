@@ -77,10 +77,12 @@ public:
   bool isPossiblyPrime(
     int millerRabinTries,
     bool tryDivisionSetTrueFaster = true,
-    std::stringstream* comments = nullptr
+    std::stringstream* comments =
+    nullptr
   );
   bool isPossiblyPrimeMillerRabin(
-    int numberOfTimesToRun = 1, std::stringstream* comments = nullptr
+    int numberOfTimesToRun = 1, std::stringstream* comments =
+    nullptr
   );
   bool isPossiblyPrimeMillerRabinOnce(
     unsigned int base,
@@ -205,7 +207,9 @@ public:
       int64_t maximumRunningTimeMilliseconds
     );
     static bool isPossiblyPrimeMillerRabinOnly(
-      const List<LargeIntegerUnsigned>& input, bool mustBeTrue, int
+      const List<LargeIntegerUnsigned>& input,
+      bool mustBeTrue,
+      int
       millerRabinTries
     );
     static bool factor();
@@ -772,13 +776,15 @@ public:
   static long long int totalAdditions() {
     return
     static_cast<long long int>(
-      Rational::totalLargeAdditions + Rational::totalSmallAdditions
+      Rational::totalLargeAdditions +
+      Rational::totalSmallAdditions
     );
   }
   static long long int totalMultiplications() {
     return
     static_cast<long long int>(
-      Rational::totalLargeMultiplications + Rational::totalSmallMultiplications
+      Rational::totalLargeMultiplications +
+      Rational::totalSmallMultiplications
     );
   }
   static long long int totalArithmeticOperations() {

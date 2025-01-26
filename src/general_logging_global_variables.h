@@ -546,7 +546,8 @@ public:
   static std::string getDateForLogFiles();
   static std::string getTimeGM();
   static std::string getTimeLocal();
-  void setWebInput(const std::string& inputName, const std::string& inputValue
+  void setWebInput(
+    const std::string& inputName, const std::string& inputValue
   );
   std::string getWebInput(const std::string& inputName);
   void initialize();
@@ -563,7 +564,8 @@ public:
   bool userStudentVieWOn();
   bool checkConsistency();
   int externalCommandStream(const std::string& systemCommand);
-  int externalCommandNoOutput(const std::string& systemCommand, bool logErrors
+  int externalCommandNoOutput(
+    const std::string& systemCommand, bool logErrors
   );
   std::string externalCommandReturnOutput(const std::string& systemCommand);
   void changeDirectory(const std::string& systemCommand);

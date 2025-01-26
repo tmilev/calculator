@@ -119,7 +119,9 @@ bool SemisimpleLieAlgebra::isSimpleGenerator(int generatorIndex) {
   ) && (generatorIndex >= this->getNumberOfPositiveRoots() - this->getRank());
   bool isPositiveGenerator = (
     generatorIndex >= this->getNumberOfPositiveRoots() + this->getRank()
-  ) && (generatorIndex < this->getNumberOfPositiveRoots() + this->getRank() * 2
+  ) && (
+    generatorIndex < this->getNumberOfPositiveRoots() +
+    this->getRank() * 2
   );
   return isNegativeGenerator || isPositiveGenerator;
 }
@@ -898,7 +900,8 @@ std::string SemisimpleSubalgebras::toString(
   }
   out << "</h1>";
   out
-  << this->owner->toStringHTMLMenuStructureSummary("", true, true, true, false
+  << this->owner->toStringHTMLMenuStructureSummary(
+    "", true, true, true, false
   );
   if (this->flagRealForms) {
     if (this->wConjecture.wConjectureHolds(*this)) {
@@ -1423,7 +1426,8 @@ bool SemisimpleSubalgebras::loadState(
     } else {
       currentSubalgebra.hsScaledToActByTwoInOrderOfCreation =
       this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation;
-      for (int i = 0; i < currentSubalgebra.cartanElementsSubalgebra.size; i ++
+      for (
+        int i = 0; i < currentSubalgebra.cartanElementsSubalgebra.size; i ++
       ) {
         if (
           !this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.contains(
@@ -1676,7 +1680,10 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
     this->checkFileWritePermissions();
     if (doFullInitialization) {
       this->findSemisimpleSubalgebrasFromScratch(
-        newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras,
+        newOwner,
+        ownerField,
+        containerSubalgebras,
+        containerSl2Subalgebras,
         nullptr
       );
     }
@@ -1900,7 +1907,8 @@ bool SemisimpleSubalgebras::ranksAndIndicesFit(const DynkinType& input) const {
   for (int i = 0; i < input.size(); i ++) {
     if (
       !this->orbitHElementLengths.contains(
-        input[i].cartanSymmetricInverseScale * 2
+        input[i].cartanSymmetricInverseScale *
+        2
       )
     ) {
       return false;
@@ -2006,7 +2014,8 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
   this->owner->makeCandidateSubalgebra(newType, *this);
   this->checkCandidateInitialization();
   this->hsScaledToActByTwoInOrderOfCreation.reserve(
-    baseSubalgebra.hsScaledToActByTwoInOrderOfCreation.size + 1
+    baseSubalgebra.hsScaledToActByTwoInOrderOfCreation.size +
+    1
   );
   this->hsScaledToActByTwoInOrderOfCreation =
   baseSubalgebra.hsScaledToActByTwoInOrderOfCreation;
@@ -2023,7 +2032,8 @@ void CandidateSemisimpleSubalgebra::setUpInjectionHs(
   newIndexInNewComponent = *rootInjection.lastObject() - indexOffset;
   if (newComponent.rank == 1) {
     this->cartanSubalgebrasByComponentScaledToActByTwo.setSize(
-      this->cartanSubalgebrasByComponentScaledToActByTwo.size + 1
+      this->cartanSubalgebrasByComponentScaledToActByTwo.size +
+      1
     );
     this->cartanSubalgebrasByComponentScaledToActByTwo.lastObject()->setSize(
       1
@@ -2153,7 +2163,8 @@ CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::attemptToRealize() {
     }
     return this->status;
   }
-  for (RealizedSemisimpleSubalgebra& realized : this->owner->subalgebras.values
+  for (
+    RealizedSemisimpleSubalgebra& realized : this->owner->subalgebras.values
   ) {
     if (
       this->weylNonEmbedded->dynkinType ==
@@ -2566,7 +2577,8 @@ bool SemisimpleSubalgebras::getCentralizerTypeIfComputableAndKnown(
     int i = 0; i < this->slTwoSubalgebras.rootSubalgebras.subalgebras.size;
     i ++) {
     if (
-      this->slTwoSubalgebras.rootSubalgebras.subalgebras[i].dynkinType == input
+      this->slTwoSubalgebras.rootSubalgebras.subalgebras[i].dynkinType ==
+      input
     ) {
       if (index != - 1) {
         index = - 1;
@@ -2608,7 +2620,8 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
     outputIndicesDefaultScale.setExpectedSize(sl2s.allSubalgebras.size);
     for (int i = 0; i < sl2s.allSubalgebras.size; i ++) {
       outputIndicesDefaultScale.addOnTopNoRepetition(
-        sl2s.allSubalgebras[i].lengthHSquared / 2
+        sl2s.allSubalgebras[i].lengthHSquared /
+        2
       );
     }
     precomputedDynkinIndicesSl2subalgebrasSimpleTypes.addOnTop(
@@ -3411,7 +3424,6 @@ void DynkinType::getDynkinTypeWithDefaultScales(DynkinType& output) const {
   output.makeZero();
   DynkinSimpleType currentType;
   for (int i = 0; i < this->size(); i ++) {
-    int fixThisBadCodeFormatting;
     currentType.makeArbitrary((*this)[i].letter, (*this)[i].rank, 1);
     output.addMonomial(currentType, this->coefficients[i]);
   }
@@ -3810,10 +3822,12 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystem(
     List<ChevalleyGenerator>& currentInvolvedNegativeGenerators =
     this->involvedNegativeGenerators[i];
     currentInvolvedNegativeGenerators.setExpectedSize(
-      this->getAmbientWeyl().getDimension() * 2
+      this->getAmbientWeyl().getDimension() *
+      2
     );
     currentInvolvedPositiveGenerators.setExpectedSize(
-      this->getAmbientWeyl().getDimension() * 2
+      this->getAmbientWeyl().getDimension() *
+      2
     );
     currentInvolvedNegativeGenerators.setSize(0);
     currentInvolvedPositiveGenerators.setSize(0);
@@ -5514,7 +5528,8 @@ bool NilradicalCandidate::isCommutingSelectionNilradicalElements(
     }
   }
   for (int i = 0; i < inputNilradicalSelection.cardinalitySelection; i ++) {
-    for (int j = i + 1; j < inputNilradicalSelection.cardinalitySelection; j ++
+    for (
+      int j = i + 1; j < inputNilradicalSelection.cardinalitySelection; j ++
     ) {
       if (
         this->owner->getScalarSubalgebra(
@@ -6244,7 +6259,8 @@ isPossibleNilradicalCarryOutSelectionImplications(
       j ++
     ) {
       if (
-        selection[this->oppositeModulesByStructure[selectedIndices[i]][j]] == 1
+        selection[this->oppositeModulesByStructure[selectedIndices[i]][j]] ==
+        1
       ) {
         if (logStream != nullptr) {
           *logStream
@@ -7550,7 +7566,8 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
     output.rootSubalgebras.subalgebras.size
   );
   output.indicesSl2sContainedInRootSubalgebras.reserve(
-    output.rootSubalgebras.subalgebras.size * 2
+    output.rootSubalgebras.subalgebras.size *
+    2
   );
   output.checkMinimalContainingRootSubalgebras();
   for (int i = 0; i < output.indicesSl2sContainedInRootSubalgebras.size; i ++)
@@ -7653,8 +7670,8 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromGeneratorsAndHs() {
   );
   Matrix<Rational> actualCoCartan;
   this->cartanElementsScaledToActByTwo.getGramMatrix(
-    actualCoCartan, &this->owner->getSemisimpleOwner().weylGroup.
-    cartanSymmetric
+    actualCoCartan,
+    &this->owner->getSemisimpleOwner().weylGroup.cartanSymmetric
   );
   std::stringstream out;
   this->status = CandidateSubalgebraStatus::realized;
@@ -8029,7 +8046,8 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
   }
   bufferHighestWeights = (outputModuleDimensions);
   outputHighestWeights.setExpectedSize(
-    positiveRootsContainingRegularSubalgebra.size * 2
+    positiveRootsContainingRegularSubalgebra.size *
+    2
   );
   outputHighestWeights.makeZero();
   Weight<Rational> currentHighestWeight;
@@ -8481,7 +8499,8 @@ bool CandidateSemisimpleSubalgebra::isExtremeWeight(
 }
 
 Rational CandidateSemisimpleSubalgebra::getScalarSubalgebra(
-  const Vector<Rational>& primalWeightLeft, const Vector<Rational>&
+  const Vector<Rational>& primalWeightLeft,
+  const Vector<Rational>&
   primalWeightRight
 ) const {
   return
@@ -9105,8 +9124,8 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
   out
   << "<br> Highest weight cone:<br> "
   << this->toStringTableElementWithWeights(
-    this->nonFernandoKacHighestWeightVectors, this->
-    nonFernandoKacHighestWeights
+    this->nonFernandoKacHighestWeightVectors,
+    this->nonFernandoKacHighestWeights
   );
   if (this->flagNilradicalConesIntersect) {
     out
@@ -9429,7 +9448,8 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
         ) {
           Rational coefficient =
           currentNilradical.coneRelativelyStrongIntersection[
-            currentNilradical.nilradicalSubsetWeights.size + j
+            currentNilradical.nilradicalSubsetWeights.size +
+            j
           ];
           coefficient.negate();
           out
@@ -10459,7 +10479,8 @@ std::string CandidateSemisimpleSubalgebra::toString(
   );
   if (displayNilradSummary) {
     displayNilradSummary = !shortReportOnly || (
-      this->numberOfBadParabolics > 0
+      this->numberOfBadParabolics >
+      0
     );
   }
   if (displayNilradSummary) {

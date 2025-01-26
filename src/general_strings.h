@@ -13,12 +13,14 @@ public:
   static bool stringBeginsWith(
     const std::string& input,
     const std::string& desiredBeginning,
-    std::string* outputStringEnd = nullptr
+    std::string* outputStringEnd =
+    nullptr
   );
   static bool stringEndsWith(
     const std::string& input,
     const std::string& desiredEnd,
-    std::string* outputStringBeginning = nullptr
+    std::string* outputStringBeginning =
+    nullptr
   );
   static void stringSplitDefaultDelimiters(
     const std::string& inputString, List<std::string>& output
@@ -39,10 +41,12 @@ public:
     const std::string& inputString, std::string& output
   );
   static void stringTrimToLengthWithHash(
-    std::string& inputOutput, int desiredLength50AtLeast = 150
+    std::string& inputOutput, int desiredLength50AtLeast =
+    150
   );
   static std::string stringTrimToLengthForDisplay(
-    const std::string& input, int desiredLength20AtLeast = 50
+    const std::string& input, int desiredLength20AtLeast =
+    50
   );
   static std::string convertStringToHexIfNonReadable(
     const std::string& input, int lineWidthZeroForNone, bool useHTML
@@ -120,7 +124,8 @@ public:
         const std::string& givenInput,
         uint32_t codePoint1,
         uint32_t codePoint2 = 0xffffffff,
-        uint32_t codePoint3 = 0xffffffff
+        uint32_t codePoint3 =
+        0xffffffff
       );
     };
   };
@@ -181,12 +186,15 @@ public:
     );
     bool computeDifference(std::stringstream* commentsOnFailure);
     void computeLongestSubsequenceMatrix();
-    void computeBestStartingIndices(int& outputIndexLeft, int& outputIndexRight
+    void computeBestStartingIndices(
+      int& outputIndexLeft, int& outputIndexRight
     );
     void extractCommonStrings(int indexLeft, int indexRight);
     void extractDifferences();
     void extractResult(
-      const List<int>& starts, const std::string& input, List<std::string>&
+      const List<int>& starts,
+      const std::string& input,
+      List<std::string>&
       output
     );
     void pushCommonString(int indexLeft, int indexRight);

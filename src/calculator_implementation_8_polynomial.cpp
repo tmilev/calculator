@@ -17,8 +17,10 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionVerboseGrLex(
 ) {
   return
   CalculatorFunctionsPolynomial::polynomialDivisionVerbose(
-    calculator, input, output, &MonomialPolynomial::
-    orderDegreeThenLeftLargerWins()
+    calculator,
+    input,
+    output,
+    &MonomialPolynomial::orderDegreeThenLeftLargerWins()
   );
 }
 
@@ -310,7 +312,8 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments(
   PolynomialFactorizationUnivariate<Rational> factorization;
   PolynomialFactorizationFiniteFields algorithm;
   std::stringstream comments;
-  if (!factorization.factor(polynomial.content, algorithm, &comments, &comments)
+  if (
+    !factorization.factor(polynomial.content, algorithm, &comments, &comments)
   ) {
     return output.assignValue(calculator, comments.str());
   }
@@ -461,8 +464,10 @@ bool CalculatorFunctionsPolynomial::factorPolynomialProcess(
   for (int i = 0; i < factors.size; i ++) {
     if (
       !CalculatorConversions::expressionFromPolynomial(
-        calculator, factors[i], polynomialExpression, &originalPolynomial.
-        context
+        calculator,
+        factors[i],
+        polynomialExpression,
+        &originalPolynomial.context
       )
     ) {
       return
@@ -686,7 +691,10 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
 
 bool CalculatorFunctionsPolynomial::
 greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
-  Calculator& calculator, const Expression& input, Expression& output, bool
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool
   doGCD
 ) {
   if (input.size() != 3) {
@@ -704,14 +712,21 @@ greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
   return
   CalculatorFunctionsPolynomial::
   greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    calculator, leftPolynomial, rightPolynomial, left.getContext(), output,
+    calculator,
+    leftPolynomial,
+    rightPolynomial,
+    left.getContext(),
+    output,
     doGCD
   );
 }
 
 bool CalculatorFunctionsPolynomial::
 greatestCommonDivisorOrLeastCommonMultipleModular(
-  Calculator& calculator, const Expression& input, Expression& output, bool
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool
   doGCD
 ) {
   if (input.size() != 3) {
@@ -759,14 +774,21 @@ greatestCommonDivisorOrLeastCommonMultipleModular(
   return
   CalculatorFunctionsPolynomial::
   greatestCommonDivisorOrLeastCommonMultiplePolynomialTypePartTwo(
-    calculator, leftPolynomial, rightPolynomial, left.getContext(), output,
+    calculator,
+    leftPolynomial,
+    rightPolynomial,
+    left.getContext(),
+    output,
     doGCD
   );
 }
 
 bool CalculatorFunctionsPolynomial::
 greatestCommonDivisorOrLeastCommonMultiplePolynomial(
-  Calculator& calculator, const Expression& input, Expression& output, bool
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool
   doGCD
 ) {
   STACK_TRACE(
@@ -800,7 +822,10 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
 
 bool CalculatorFunctionsPolynomial::
 greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
-  Calculator& calculator, const Expression& input, Expression& output, bool
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool
   doGCD
 ) {
   STACK_TRACE(
@@ -866,7 +891,8 @@ public:
     bool success
   );
   template <class Coefficient>
-  bool prepareFinalResult(const List<Polynomial<Coefficient> >& outputGroebner
+  bool prepareFinalResult(
+    const List<Polynomial<Coefficient> >& outputGroebner
   );
 };
 
@@ -1154,7 +1180,10 @@ bool GroebnerComputationCalculator::prepareFinalResult(
 }
 
 bool CalculatorFunctionsPolynomial::groebner(
-  Calculator& calculator, const Expression& input, Expression& output, int
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  int
   order
 ) {
   STACK_TRACE("CalculatorFunctionsPolynomial::groebner");

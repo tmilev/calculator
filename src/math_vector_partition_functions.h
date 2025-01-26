@@ -80,7 +80,8 @@ public:
     bool initializeDrawingVariables,
     DrawingVariables& drawingVariables,
     FormatExpressions& format,
-    const std::string& chamberWallColor = nullptr
+    const std::string& chamberWallColor =
+    nullptr
   ) const;
   void drawLattice(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(DrawingVariables& drawingVariables) const;
@@ -122,7 +123,8 @@ public:
   // ambient space
   // 2) the resulting cone is the entire space.
   bool createFromNormals(
-    const Vectors<Rational>& inputNormals, const List<List<int> >&
+    const Vectors<Rational>& inputNormals,
+    const List<List<int> >&
     inputNeighbors
   );
   bool createFromWalls(
@@ -341,7 +343,9 @@ public:
   );
   void refineAllConesWithWallsWithMultipleNeighbors(ProgressReport* report);
   bool allExitWallsAreVisited(
-    Cone& toBeRefined, const Vector<Rational>& direction, List<Wall>&
+    Cone& toBeRefined,
+    const Vector<Rational>& direction,
+    List<Wall>&
     outputExitWalls
   );
   void attachNeighbbors(
@@ -397,11 +401,15 @@ public:
   Cone& getConeByIdNonConstNoFail(int id);
   bool drawMeProjectiveInitialize(DrawingVariables& drawingVariables) const;
   bool drawMeProjective(
-    DrawingVariables& drawingVariables, bool includeVertices, bool
+    DrawingVariables& drawingVariables,
+    bool includeVertices,
+    bool
     includeLattice
   ) const;
   bool drawProjectiveChambers(
-    DrawingVariables& drawingVariables, bool includeVertices, bool
+    DrawingVariables& drawingVariables,
+    bool includeVertices,
+    bool
     includeLattice
   ) const;
   std::string drawMeToHtmlProjective(
@@ -532,7 +540,8 @@ public:
     List<Vector<Rational> >& output
   ) const;
   void invert();
-  void initialize(PartialFractions& inputOwner, int inputNormalizedVectorIndex
+  void initialize(
+    PartialFractions& inputOwner, int inputNormalizedVectorIndex
   );
   static Vector<Rational> getCheckSumRoot(int numberOfVariables);
   unsigned int hashFunction() const;
@@ -631,14 +640,18 @@ public:
     int indexB,
     int n,
     int indexAMinusNB,
-    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >
     & output,
     PartialFractions& owner
   );
   bool decomposeFromNormalizedLinearRelation(
     Vector<Rational>& linearRelationBetweenNormalizedVectors,
     Vectors<Rational>& normalizedVectors,
-    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >
     & output
   );
   void getLinearRelationFromNormalized(
@@ -655,15 +668,21 @@ public:
     const Vector<Rational>& linearRelation,
     const Vector<Rational>& gainingNormalizedExponent,
     int elongationGainingMultiplicityIndex,
-    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >
     & output
   ) const;
   bool reduceOnceTotalOrderMethod(
-    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >
     & output
   );
   bool reduceOnce(
-    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >
     & output,
     const Polynomial<LargeInteger>& numerator
   );
@@ -727,7 +746,8 @@ public:
     Polynomial<LargeInteger>& coefficient, FormatExpressions* format
   ) const;
   std::string toLatex(
-    const Polynomial<LargeInteger>& numerator, FormatExpressions* format =
+    const Polynomial<LargeInteger>& numerator,
+    FormatExpressions* format =
     nullptr
   ) const;
   bool checkInitialization() const;
@@ -770,7 +790,8 @@ public:
     PartialFractions* owner;
     Snapshot();
     std::string toLatex(
-      const std::string& lineSeparator, FormatExpressions* format = nullptr
+      const std::string& lineSeparator, FormatExpressions* format =
+      nullptr
     ) const;
   };
 
@@ -860,13 +881,17 @@ public:
   // nonReduced, reducedWithElongationRedundancies and reduced
   // collections.
   void getSum(
-    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >
     & output
   ) const;
   // Adds the full sum of the partial fractions to a possibly non-zero
   // starting collection of fractions.
   void accumulateSum(
-    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
+    LinearCombination<
+      OnePartialFractionDenominator, Polynomial<LargeInteger>
+    >
     & output
   ) const;
   bool isHigherThanWithRespectToWeight(
@@ -887,11 +912,15 @@ public:
     Rational& output
   );
   void evaluateVectorPartitionFunctionNonChecked(
-    const Vector<Rational>& input, Rational& output, std::stringstream*
+    const Vector<Rational>& input,
+    Rational& output,
+    std::stringstream*
     comments
   );
   void evaluateVectorPartitionFunctionChecked(
-    const Vector<Rational>& input, Rational& output, std::stringstream*
+    const Vector<Rational>& input,
+    Rational& output,
+    std::stringstream*
     comments
   );
   void prepareIndicatorVariables();
@@ -923,14 +952,16 @@ public:
   std::string toLatexSelfContainedDocumentBody() const;
   std::string toLatexCopyButton() const;
   std::string toLatexFullSum(
-    const std::string& lineSeparator, FormatExpressions* format = nullptr
+    const std::string& lineSeparator, FormatExpressions* format =
+    nullptr
   ) const;
   std::string toLatexDifferentialOperatorForm(
     const std::string& lineSeparator, FormatExpressions* format
   ) const;
   // Converts to latex suitable for display in a web page.
   std::string toLatexPartialFractionDecomposition(
-    FormatExpressions* formatDecomposition, FormatExpressions*
+    FormatExpressions* formatDecomposition,
+    FormatExpressions*
     formatDenominator
   ) const;
   // Converts to latex suitable for a .tex file.
@@ -1115,7 +1146,8 @@ public:
     DrawingVariables& drawingVariables,
     int numberOfLatticePointsPerDimension,
     Cone* restrictingChamber = nullptr,
-    Vector<Rational>* distinguishedPoint = nullptr
+    Vector<Rational>* distinguishedPoint =
+    nullptr
   );
   int minimalNumberOfVariables() {
     return this->numberOfVariables;
@@ -1129,7 +1161,8 @@ public:
   void makeCommonRefinement(const ConeCollection& other);
   void translateArgument(Vector<Rational>& translateToBeAddedToArgument);
   bool makeVPF(Vectors<Rational>& roots, std::string& outputstring);
-  Rational evaluate(const Vector<Rational>& point, std::stringstream* comments
+  Rational evaluate(
+    const Vector<Rational>& point, std::stringstream* comments
   );
   Rational evaluateInputProjectivized(
     const Vector<Rational>& point, std::stringstream* comments

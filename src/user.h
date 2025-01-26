@@ -116,12 +116,14 @@ public:
   std::string getSelectedRowEntry(const std::string& key);
   bool loadFromDatabase(
     std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral = nullptr
+    std::stringstream* commentsGeneral =
+    nullptr
   );
   bool fetchOneColumn(
     const std::string& columnNameUnsafe,
     std::string& outputUnsafe,
-    std::stringstream* failureComments = nullptr
+    std::stringstream* failureComments =
+    nullptr
   );
   bool authenticateWithPassword(std::stringstream* commentsOnFailure);
   bool authenticateWithToken(std::stringstream* commentsOnFailure);

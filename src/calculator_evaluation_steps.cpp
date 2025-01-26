@@ -366,7 +366,10 @@ bool CalculatorSteps::logEvaluationSteps(
 }
 
 bool CalculatorSteps::logEvaluationStepsHumanReadableMerged(
-  Calculator& calculator, const Expression& input, Expression& output, bool
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool
   doDebug
 ) {
   STACK_TRACE("CalculatorSteps::logEvaluationStepsHumanReadableMerged");

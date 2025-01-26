@@ -582,7 +582,10 @@ void Vectors<Coefficient>::selectBasisInSubspace(
 
 template <typename Coefficient>
 void Matrix<Coefficient>::addTwoRows(
-  int fromRowIndex, int toRowIndex, int startColumnIndex, const Coefficient&
+  int fromRowIndex,
+  int toRowIndex,
+  int startColumnIndex,
+  const Coefficient&
   scalar
 ) {
   ProgressReport report(10);

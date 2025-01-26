@@ -73,7 +73,8 @@ public:
   bool isIntegerUnsigned(
     LargeIntegerUnsigned* whichInteger, std::stringstream* commentsOnFalse
   ) const;
-  bool isInteger(LargeInteger* whichInteger, std::stringstream* commentsOnFalse
+  bool isInteger(
+    LargeInteger* whichInteger, std::stringstream* commentsOnFalse
   ) const;
   std::string interpretAsObjectIdentifier() const;
   std::string interpretAsObjectIdentifierGetNameAndId() const;

@@ -1014,7 +1014,8 @@ uint32_t Crypto::rightShiftAsIfBigEndian(
   return result;
 }
 
-uint32_t Crypto::leftShiftAsIfBigEndian(uint32_t input, int numberOfBitsToShift
+uint32_t Crypto::leftShiftAsIfBigEndian(
+  uint32_t input, int numberOfBitsToShift
 ) {
   uint32_t result = input;
   // Can be improved for speed but since not using bit operators,
@@ -1099,7 +1100,8 @@ void Crypto::convertListUint32ToString(
   output.resize(static_cast<unsigned>(input.size * 4));
   for (unsigned i = 0; i < static_cast<unsigned>(input.size); i ++) {
     output[i * 4 + 0] = static_cast<char>(
-      input[static_cast<int>(i)] / 16777216
+      input[static_cast<int>(i)] /
+      16777216
     );
     output[i * 4 + 1] = static_cast<char>((input[static_cast<int>(i)] / 65536)
       %
@@ -1148,7 +1150,9 @@ bool Crypto::convertHexToListUnsignedChar(
 }
 
 bool Crypto::convertHexToString(
-  const std::string& input, std::string& output, std::stringstream*
+  const std::string& input,
+  std::string& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   output.reserve(input.size() / 2);
@@ -1292,7 +1296,9 @@ std::string Crypto::convertListUnsignedCharsToHex(
 }
 
 std::string Crypto::convertListUnsignedCharsToHexFormat(
-  const List<unsigned char>& input, int byteWidthLineBreakZeroForNone, bool
+  const List<unsigned char>& input,
+  int byteWidthLineBreakZeroForNone,
+  bool
   useHtml
 ) {
   std::string inputString(
@@ -1380,7 +1386,8 @@ void Crypto::convertUint64toBigendianListUnsignedCharAppendResult(
   );
   outputAppend.addOnTop(
     static_cast<unsigned char>((input / 1099511627776) % 256));
-  outputAppend.addOnTop(static_cast<unsigned char>((input / 4294967296) % 256)
+  outputAppend.addOnTop(
+    static_cast<unsigned char>((input / 4294967296) % 256)
   );
   outputAppend.addOnTop(static_cast<unsigned char>((input / 16777216) % 256));
   outputAppend.addOnTop(static_cast<unsigned char>((input / 65536) % 256));
@@ -1402,7 +1409,8 @@ void Crypto::convertUint128toBigendianListUnsignedCharAppendResult(
   );
   outputAppend.addOnTop(
     static_cast<unsigned char>((input / 1099511627776) % 256));
-  outputAppend.addOnTop(static_cast<unsigned char>((input / 4294967296) % 256)
+  outputAppend.addOnTop(
+    static_cast<unsigned char>((input / 4294967296) % 256)
   );
   outputAppend.addOnTop(static_cast<unsigned char>((input / 16777216) % 256));
   outputAppend.addOnTop(static_cast<unsigned char>((input / 65536) % 256));
@@ -1448,7 +1456,8 @@ uint32_t Crypto::convertListByteToUnsignedInt32(
   return result;
 }
 
-void Crypto::computeSha1(const std::string& inputString, List<uint32_t>& output
+void Crypto::computeSha1(
+  const std::string& inputString, List<uint32_t>& output
 ) {
   STACK_TRACE("Crypto::computeSha1");
   // Reference: wikipedia page on sha1.
@@ -1820,7 +1829,9 @@ void Crypto::convertLargeIntUnsignedToBase58SignificantDigitsLAST(
 }
 
 void Crypto::convertLargeIntUnsignedToBase58SignificantDigitsFIRST(
-  const LargeIntegerUnsigned& input, std::string& output, int
+  const LargeIntegerUnsigned& input,
+  std::string& output,
+  int
   numberOfOnesToPrepend
 ) {
   std::string outputReversed;
@@ -1874,7 +1885,9 @@ bool Crypto::convertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
 }
 
 bool Crypto::convertBase58ToHexSignificantDigitsFirst(
-  const std::string& input, std::string& output, std::stringstream*
+  const std::string& input,
+  std::string& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   STACK_TRACE("Crypto::convertBase58ToHexSignificantDigitsFirst");
@@ -2369,7 +2382,9 @@ bool Crypto::loadKnownCertificates(
     std::string currentCert;
     if (
       !FileOperations::loadFileToStringVirtual(
-        "certificates-public/" + fileNames[i], currentCert, false,
+        "certificates-public/" + fileNames[i],
+        currentCert,
+        false,
         commentsOnFailure
       )
     ) {
@@ -2622,7 +2637,8 @@ void UnsecurePseudoRandomGenerator::setRandomSeedSmall(
   this->state[0] = static_cast<unsigned char>(randomSeedUnsigned / 16777216);
   this->state[1] = static_cast<unsigned char>((randomSeedUnsigned / 65536) %
     256);
-  this->state[2] = static_cast<unsigned char>((randomSeedUnsigned / 256) % 256
+  this->state[2] = static_cast<unsigned char>((randomSeedUnsigned / 256) %
+    256
   );
   this->state[3] = static_cast<unsigned char>(randomSeedUnsigned % 256);
   Crypto::computeSha256(this->state, this->state);

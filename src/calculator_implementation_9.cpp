@@ -6,7 +6,9 @@
 template <class Element>
 bool Matrix<Element>::
 systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
-  Matrix<Element>& matrixA, Matrix<Element>& matrixb, Vector<Element>*
+  Matrix<Element>& matrixA,
+  Matrix<Element>& matrixb,
+  Vector<Element>*
   outputSolution
 ) {
   // This function return true if Ax = b >= 0 has a solution with x >= 0 and
@@ -351,8 +353,10 @@ bool CalculatorFunctions::conesIntersect(
   Vector<Rational> outputSeparatingNormal;
   bool conesDoIntersect =
   coneNonStrictGens.conesIntersect(
-    coneStrictGens, coneNonStrictGens, &outputIntersection, &
-    outputSeparatingNormal
+    coneStrictGens,
+    coneNonStrictGens,
+    &outputIntersection,
+    &outputSeparatingNormal
   );
   if (conesDoIntersect) {
     Vector<Rational> checkVector;
@@ -552,7 +556,12 @@ bool CalculatorFunctions::perturbSplittingNormal(
   Vectors<Rational> vectorsToPerturbRelativeTo;
   if (
     !CalculatorConversions::functionGetMatrix(
-      calculator, input[2], matrix, false, nullptr, splittingNormal.size,
+      calculator,
+      input[2],
+      matrix,
+      false,
+      nullptr,
+      splittingNormal.size,
       nullptr
     )
   ) {
@@ -564,7 +573,12 @@ bool CalculatorFunctions::perturbSplittingNormal(
   nonStrictCone.assignMatrixRows(matrix);
   if (
     !CalculatorConversions::functionGetMatrix(
-      calculator, input[3], matrix, false, nullptr, splittingNormal.size,
+      calculator,
+      input[3],
+      matrix,
+      false,
+      nullptr,
+      splittingNormal.size,
       nullptr
     )
   ) {
@@ -722,7 +736,10 @@ bool CalculatorFunctions::interpolatePolynomial(
 }
 
 bool CalculatorFunctions::operationBinary(
-  Calculator& calculator, const Expression& input, Expression& output, int
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  int
   operation
 ) {
   MemorySaving<Calculator::OperationHandlers>& operationMap =
@@ -742,7 +759,10 @@ bool CalculatorFunctions::operationBinary(
 }
 
 bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
-  Calculator& calculator, const Expression& input, Expression& output, bool
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool
   assignPoly
 ) {
   STACK_TRACE("CalculatorFunctions::elementWeylAlgebraOrPolynomial");

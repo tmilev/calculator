@@ -108,11 +108,17 @@ public:
     bool doGCD
   );
   static bool greatestCommonDivisorOrLeastCommonMultiplePolynomial(
-    Calculator& calculator, const Expression& input, Expression& output, bool
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool
     doGCD
   );
   static bool greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
-    Calculator& calculator, const Expression& input, Expression& output, bool
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool
     doGCD
   );
   static bool leastCommonMultiplePolynomial(
@@ -134,11 +140,17 @@ public:
     );
   }
   static bool greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
-    Calculator& calculator, const Expression& input, Expression& output, bool
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool
     doGCD
   );
   static bool greatestCommonDivisorOrLeastCommonMultipleModular(
-    Calculator& calculator, const Expression& input, Expression& output, bool
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool
     doGCD
   );
   static bool groebnerGradedLexicographic(
@@ -169,7 +181,10 @@ public:
     );
   }
   static bool groebner(
-    Calculator& calculator, const Expression& input, Expression& output, int
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    int
     order
   );
   static bool divideExpressionsAsIfPolynomial(
@@ -274,9 +289,8 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionSlidesGrLex(
   << "\\end{document}\r\n";
   return
   output.assignValue(
-    calculator, HtmlRoutines::convertStringToHtmlString(
-      latexOutput.str(), true
-    )
+    calculator,
+    HtmlRoutines::convertStringToHtmlString(latexOutput.str(), true)
   );
 }
 

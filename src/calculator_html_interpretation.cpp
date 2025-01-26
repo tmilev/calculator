@@ -682,7 +682,8 @@ std::string WebAPIResponse::getCalculatorWorkerJS() {
 }
 
 std::string WebAPIResponse::getBrowserification(
-  const std::string& buildJSONVirtualFileName, const std::string&
+  const std::string& buildJSONVirtualFileName,
+  const std::string&
   scriptEntryPoint
 ) {
   STACK_TRACE("WebAPIReponse::getBrowserification");
@@ -1152,7 +1153,9 @@ JSData WebAPIResponse::getExamPageJSON() {
   STACK_TRACE("WebAPIReponse::getExamPageJSON");
   std::stringstream out;
   JSData output;
-  if (!global.flagLoggedIn && global.requestType == WebAPI::Frontend::scoredQuiz
+  if (
+    !global.flagLoggedIn &&
+    global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
     output[WebAPI::Result::error] = "Scored quiz requires login";
     return output;
@@ -1329,7 +1332,9 @@ public:
   int answerIndex;
   std::string storageReport;
   JSData submitAnswersJSON(
-    const std::string& inputRandomSeed, bool* outputIsCorrect, bool
+    const std::string& inputRandomSeed,
+    bool* outputIsCorrect,
+    bool
     timeSafetyBrake
   );
   bool prepareProblem(const std::string& inputRandomSeed);
@@ -1352,8 +1357,9 @@ bool AnswerChecker::prepareProblem(const std::string& inputRandomSeed) {
   std::stringstream errorStream, comments;
   this->startTime = global.getElapsedMilliseconds();
   this->problem.loadCurrentProblemItem(
-    global.userRequestRequiresLoadingRealExamData(), inputRandomSeed, &
-    errorStream
+    global.userRequestRequiresLoadingRealExamData(),
+    inputRandomSeed,
+    &errorStream
   );
   if (!this->problem.flagLoadedSuccessfully) {
     errorStream << "Failed to load current problem. ";
@@ -1754,7 +1760,8 @@ bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
   int mustBeOne = - 1;
   Expression last =
   this->interpreter.programExpression[
-    this->interpreter.programExpression.size() - 1
+    this->interpreter.programExpression.size() -
+    1
   ];
   if (!last.isSmallInteger(&mustBeOne)) {
     this->answerIsCorrect = false;
@@ -1848,7 +1855,9 @@ JSData WebAPIResponse::checkAnswer(bool hideDesiredAnswer) {
 }
 
 JSData AnswerChecker::submitAnswersJSON(
-  const std::string& inputRandomSeed, bool* outputIsCorrect, bool
+  const std::string& inputRandomSeed,
+  bool* outputIsCorrect,
+  bool
   timeSafetyBrake
 ) {
   STACK_TRACE("AnswerChecker::submitAnswersJSON");
@@ -1933,7 +1942,9 @@ JSData WebAPIResponse::submitAnswersHardcoded(bool hideDesiredAnswer) {
 }
 
 JSData WebAPIResponse::submitAnswersJSON(
-  const std::string& inputRandomSeed, bool* outputIsCorrect, bool
+  const std::string& inputRandomSeed,
+  bool* outputIsCorrect,
+  bool
   timeSafetyBrake
 ) {
   AnswerChecker checker;
@@ -2479,7 +2490,9 @@ std::string WebAPIResponse::getScoresPage() {
 }
 
 std::string WebAPIResponse::toStringUserDetailsTable(
-  bool adminsOnly, List<JSData>& users, const std::string&
+  bool adminsOnly,
+  List<JSData>& users,
+  const std::string&
   hostWebAddressWithPort
 ) {
   STACK_TRACE("WebAPIReponse::toStringUserDetailsTable");
@@ -2843,7 +2856,9 @@ int ProblemData::getExpectedNumberOfAnswers(
 
 void UserCalculator::computePointsEarned(
   const HashedList<std::string>& gradableProblems,
-  MapList<std::string, TopicElement, HashFunctions::hashFunction<std::string> >
+  MapList<
+    std::string, TopicElement, HashFunctions::hashFunction<std::string>
+  >
   * topics,
   std::stringstream& commentsOnFailure
 ) {

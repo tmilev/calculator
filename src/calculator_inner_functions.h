@@ -144,7 +144,10 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool plotImplicitFunctionFull(
-    Calculator& calculator, const Expression& input, Expression& output, bool
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool
     showGrid
   );
   static bool plotImplicitFunction(
@@ -267,24 +270,34 @@ public:
 class JavascriptExtractor {
 private:
   bool extractJavascriptRecursive(
-    const Expression& input, std::string& output, std::stringstream*
+    const Expression& input,
+    std::string& output,
+    std::stringstream*
     commentsOnFailure
   );
   bool extractFromAtom(const Expression& input, std::string& output);
   bool extractFromSequence(
-    const Expression& input, std::string& output, std::stringstream*
+    const Expression& input,
+    std::string& output,
+    std::stringstream*
     commentsOnFailure
   );
   bool extractFromOperation(
-    const Expression& input, std::string& output, std::stringstream*
+    const Expression& input,
+    std::string& output,
+    std::stringstream*
     commentsOnFailure
   );
   bool extractFromUnaryOrBinary(
-    const Expression& input, std::string& output, std::stringstream*
+    const Expression& input,
+    std::string& output,
+    std::stringstream*
     commentsOnFailure
   );
   bool extractFromTernary(
-    const Expression& input, std::string& output, std::stringstream*
+    const Expression& input,
+    std::string& output,
+    std::stringstream*
     commentsOnFailure
   );
 public:
@@ -305,7 +318,9 @@ public:
     const Expression& input, std::stringstream* commentsOnFailure
   );
   bool extract(
-    const Expression& input, std::string& output, std::stringstream*
+    const Expression& input,
+    std::string& output,
+    std::stringstream*
     commentsOnFailure
   );
   void writeParameterNames(PlotObject& output);
@@ -690,7 +705,10 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool turnRulesOnOff(
-    Calculator& calculator, const Expression& input, Expression& output, bool
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool
     turnOff
   );
   static bool turnOffRules(
@@ -1254,7 +1272,8 @@ public:
     ExpressionContext& context,
     Expression& output,
     bool startWithAlgebraicClosure,
-    List<int>* upperLimits = nullptr
+    List<int>* upperLimits =
+    nullptr
   );
   static bool solveSerreLikeSystemNoUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
@@ -1356,11 +1375,17 @@ public:
     );
   }
   static bool elementWeylAlgebraOrPolynomial(
-    Calculator& calculator, const Expression& input, Expression& output, bool
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool
     assignPoly
   );
   static bool operationBinary(
-    Calculator& calculator, const Expression& input, Expression& output, int
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    int
     operation
   );
   static bool interpolatePolynomial(

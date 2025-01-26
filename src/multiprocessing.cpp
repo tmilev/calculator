@@ -306,7 +306,10 @@ bool Pipe::readWithTimeOutViaSelect(
     }
     totalSelected =
     select(
-      maximumFileDescriptor + 1, &fileDescriptorContainer, nullptr, nullptr,
+      maximumFileDescriptor + 1,
+      &fileDescriptorContainer,
+      nullptr,
+      nullptr,
       timeOut
     );
     failStream
@@ -335,9 +338,9 @@ bool Pipe::readWithTimeOutViaSelect(
   do {
     bytesRead = static_cast<int>(
       read(
-        outputFileDescriptor, output.objects, static_cast<unsigned>(
-          output.size - 1
-        )
+        outputFileDescriptor,
+        output.objects,
+        static_cast<unsigned>(output.size - 1)
       )
     );
     if (bytesRead > 0) {
@@ -476,7 +479,8 @@ bool Pipe::readFullMessage(List<char>& output) {
   int offset = 0;
   List<unsigned char> metaDataBuffer;
   metaDataBuffer = this->metaData.lastRead;
-  Serialization::readFourByteInt(metaDataBuffer, offset, expectedBytes, nullptr
+  Serialization::readFourByteInt(
+    metaDataBuffer, offset, expectedBytes, nullptr
   );
   output.setSize(0);
   while (output.size < expectedBytes) {
@@ -1083,7 +1087,9 @@ void MathRoutines::parseListIntegersNoFailure(
 }
 
 bool MathRoutines::parseListIntegers(
-  const std::string& input, List<int>& result, std::stringstream*
+  const std::string& input,
+  List<int>& result,
+  std::stringstream*
   commentsOnFailure
 ) {
   List<char> delimiters;

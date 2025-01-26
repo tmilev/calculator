@@ -325,7 +325,9 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
 }
 
 bool DatabaseInternal::sendAndReceiveFromClientInternal(
-  const std::string& input, std::string& output, std::stringstream*
+  const std::string& input,
+  std::string& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   if (!this->flagIsRunning) {
@@ -363,7 +365,9 @@ bool DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex
 }
 
 bool DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe(
-  const std::string& input, std::string& output, std::stringstream*
+  const std::string& input,
+  std::string& output,
+  std::stringstream*
   commentsOnFailure
 ) {
   STACK_TRACE(
@@ -607,9 +611,11 @@ void DatabaseInternalConnection::create(int inputIndexInOwner) {
   clientToServerName << "database_client_to_server_" << this->indexInOwner;
   serverToClientName << "database_server_to_client_" << this->indexInOwner;
   if (
-    !this->clientToServer.createMe(clientToServerName.str(), true, false, false
+    !this->clientToServer.createMe(
+      clientToServerName.str(), true, false, false
     ) ||
-    !this->serverToClient.createMe(clientToServerName.str(), true, false, false
+    !this->serverToClient.createMe(
+      clientToServerName.str(), true, false, false
     )
   ) {
     global.fatal
@@ -1449,8 +1455,8 @@ void DatabaseInternalServer::ensureStandardCollectionIndices() {
     )
   );
   this->ensureCollection(
-    DatabaseStrings::tableDeleted, List<std::string>({DatabaseStrings::labelId}
-    )
+    DatabaseStrings::tableDeleted,
+    List<std::string>({DatabaseStrings::labelId})
   );
   this->ensureCollection(
     DatabaseStrings::tableEmailInfo,
@@ -1767,7 +1773,9 @@ void DatabaseInternalIndex::removeObjectId(
 }
 
 void DatabaseInternalIndex::setObjectIdValue(
-  const std::string& objectId, const std::string& newValue, bool&
+  const std::string& objectId,
+  const std::string& newValue,
+  bool&
   outputValueChanged
 ) {
   outputValueChanged = false;

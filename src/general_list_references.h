@@ -221,7 +221,8 @@ public:
   template <class otherList = List<Object> >
   void quickSortAscending(
     const typename List<Object>::Comparator* order = nullptr,
-    otherList* carbonCopy = nullptr
+    otherList* carbonCopy =
+    nullptr
   ) {
     List<Object>::quickSortAscending(*this, order, carbonCopy);
   }

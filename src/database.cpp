@@ -613,7 +613,8 @@ bool Database::fetchTable(
   List<JSData> rowsJSON;
   oneQuery.maximumNumberOfItems = 200;
   oneQuery.collection = tableName;
-  Database::get().find(query, nullptr, rowsJSON, totalItems, commentsOnFailure
+  Database::get().find(
+    query, nullptr, rowsJSON, totalItems, commentsOnFailure
   );
   HashedList<std::string> labels;
   for (int i = 0; i < rowsJSON.size; i ++) {
@@ -842,7 +843,10 @@ void GlobalVariables::initModifiableDatabaseFields() {
   modifiableData.addOnTop(currentEntry);
   std::fstream outputFile;
   FileOperations::openFileCreateIfNotPresentVirtual(
-    outputFile, "/calculator_html/modifiable_database_fields.js", false, true,
+    outputFile,
+    "/calculator_html/modifiable_database_fields.js",
+    false,
+    true,
     false
   );
   JSData modifiableDataJSON;

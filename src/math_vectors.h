@@ -72,7 +72,8 @@ public:
     return out.str();
   }
   std::string toStringSquareBracketsBasicType(
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   ) const {
     (void) format;
     std::stringstream out;
@@ -90,7 +91,8 @@ public:
   std::string toStringLetterFormat(
     const std::string& inputLetter,
     FormatExpressions* format = nullptr,
-    bool dontIncludeLastVar = false
+    bool dontIncludeLastVar =
+    false
   ) const;
   std::string toStringEpsilonFormat(FormatExpressions* format = nullptr) const {
     return this->toStringLetterFormat("\\varepsilon", format);
@@ -869,11 +871,13 @@ public:
     int startRowIndex
   );
   void getGramMatrix(
-    Matrix<Coefficient>& output, const Matrix<Rational>* bilinearForm = nullptr
+    Matrix<Coefficient>& output, const Matrix<Rational>* bilinearForm =
+    nullptr
   ) const;
   void getMatrixRootsToRows(Matrix<Rational>& output) const;
   void getOrthogonalComplement(
-    Vectors<Coefficient>& output, Matrix<Coefficient>* bilinearForm = nullptr
+    Vectors<Coefficient>& output, Matrix<Coefficient>* bilinearForm =
+    nullptr
   );
   bool linearSpanContainsVector(
     const Vector<Coefficient>& input,
@@ -893,13 +897,15 @@ public:
     Selection& outputSelectedPivots
   );
   int getRankElementSpan(
-    Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr
+    Matrix<Coefficient>* buffer = 0, Selection* bufferSelection =
+    nullptr
   ) const;
   static bool conesIntersect(
     List<Vector<Rational> >& strictCone,
     List<Vector<Rational> >& nonStrictCone,
     Vector<Rational>* outputLinearCombo = nullptr,
-    Vector<Rational>* outputSplittingNormal = nullptr
+    Vector<Rational>* outputSplittingNormal =
+    nullptr
   );
   static bool getNormalSeparatingCones(
     List<Vector<Coefficient> >& coneStrictlyPositiveCoefficients,
@@ -920,7 +926,8 @@ public:
     }
   }
   bool getCoordinatesInBasis(
-    const Vectors<Coefficient>& inputBasis, Vectors<Coefficient>&
+    const Vectors<Coefficient>& inputBasis,
+    Vectors<Coefficient>&
     outputCoordinates
   ) const;
   bool getIntegralCoordinatesInBasisIfTheyExist(
@@ -1018,7 +1025,9 @@ public:
   );
   bool computeNormal(Vector<Coefficient>& output, int inputDimension);
   void gaussianEliminationForNormalComputation(
-    Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int
+    Matrix<Coefficient>& inputMatrix,
+    Selection& outputNonPivotPoints,
+    int
     dimension
   ) const;
   // Computes a linear combination with coefficients in the natural order.
@@ -1026,13 +1035,15 @@ public:
     Vector<Coefficient>& outputLinearCombination,
     bool homogenous,
     const Coefficient& one = 1,
-    const Coefficient& zero = 0
+    const Coefficient& zero =
+    0
   );
   // Computes a linear combination with coefficients in the natural order.
   bool getLinearDependenceHomogenous(
     Vector<Coefficient>& outputLinearCombination,
     const Coefficient& one = 1,
-    const Coefficient& zero = 0
+    const Coefficient& zero =
+    0
   ) {
     return this->getLinearDependence(outputLinearCombination, true, one, zero);
   }
@@ -1040,7 +1051,8 @@ public:
   bool getLinearDependenceLexicographic(
     Vector<Coefficient>& outputLinearCombination,
     const Coefficient& one = 1,
-    const Coefficient& zero = 0
+    const Coefficient& zero =
+    0
   ) {
     return
     this->getLinearDependence(outputLinearCombination, false, one, zero);
@@ -1251,7 +1263,8 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
 
 template <class Coefficient>
 bool Vectors<Coefficient>::getCoordinatesInBasis(
-  const Vectors<Coefficient>& inputBasis, Vectors<Coefficient>&
+  const Vectors<Coefficient>& inputBasis,
+  Vectors<Coefficient>&
   outputCoordinates
 ) const {
   STACK_TRACE("Vectors::getCoordinatesInBasis");
@@ -1333,9 +1346,10 @@ void Vectors<Coefficient>::getGramMatrix(
     for (int j = i; j < this->size; j ++) {
       if (bilinearForm != nullptr) {
         Vector<Coefficient>::scalarProduct(
-          this->objects[i], this->objects[j], *bilinearForm, output.elements[
-            i
-          ][j]
+          this->objects[i],
+          this->objects[j],
+          *bilinearForm,
+          output.elements[i][j]
         );
       } else {
         output(i, j) = (*this)[i].scalarEuclidean((*this)[j]);

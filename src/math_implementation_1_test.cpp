@@ -103,9 +103,11 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrime() {
   mustReturnFalse.addOnTop(6);
   mustReturnFalse.addOnTop(9989);
   LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 0, 3);
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnTrue, true, 100, 3
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
+    mustReturnTrue, true, 100, 3
   );
-  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(mustReturnFalse, false, 0, 3
+  LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
+    mustReturnFalse, false, 0, 3
   );
   LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
     mustReturnFalse, false, 100, 3
@@ -158,7 +160,9 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
 }
 
 bool LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
-  const List<LargeIntegerUnsigned>& input, bool mustBeTrue, int
+  const List<LargeIntegerUnsigned>& input,
+  bool mustBeTrue,
+  int
   millerRabinTries
 ) {
   for (int i = 0; i < input.size; i ++) {
@@ -237,7 +241,8 @@ bool LargeIntegerUnsigned::Test::factor() {
   LargeIntegerUnsigned::Test::factorSmall(
     120, "2, 3, 5", "3, 1, 1", 100, 100,
     3);
-  LargeIntegerUnsigned::Test::factorSmall(120, "2, 3, 5", "3, 1, 1", 0, 100, 3
+  LargeIntegerUnsigned::Test::factorSmall(
+    120, "2, 3, 5", "3, 1, 1", 0, 100, 3
   );
   return true;
 }
@@ -254,7 +259,10 @@ bool LargeIntegerUnsigned::Test::factorSmall(
   List<int> multiplicitiesInt;
   int64_t millisecondsStart = global.getElapsedMilliseconds();
   input.factor(
-    factors, multiplicitiesInt, maximumDivisorToTry, numberMillerRabinRuns,
+    factors,
+    multiplicitiesInt,
+    maximumDivisorToTry,
+    numberMillerRabinRuns,
     nullptr
   );
   int64_t elapsed = global.getElapsedMilliseconds() - millisecondsStart;

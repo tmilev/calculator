@@ -13,7 +13,8 @@ private:
     const std::string& desiredAnchorTextEmptyForDefault
   );
   static std::string getMathSpan(
-    const std::string& input, bool useDisplayStyle = false
+    const std::string& input, bool useDisplayStyle =
+    false
   );
 public:
   static MapList<
@@ -25,7 +26,8 @@ public:
   static std::string gitRepository;
   static std::string latexWithCopyButton;
   static std::string URLKeyValuePairsToNormalRecursiveHtml(
-    const std::string& input, int recursionDepth = 0
+    const std::string& input, int recursionDepth =
+    0
   );
   // Returns a no-display span with name="script" with the given content.
   static std::string jsonContainer(
@@ -50,7 +52,9 @@ public:
     const std::string& inputString, bool doReplaceNewLineByBr
   );
   static std::string convertStringToHtmlStringRestrictSize(
-    const std::string& inputString, bool doReplaceNewLineByBr, int
+    const std::string& inputString,
+    bool doReplaceNewLineByBr,
+    int
     maxStringSize
   );
   static std::string convertStringEscapeQuotesAndBackslashes(
@@ -78,7 +82,8 @@ public:
   static std::string getCalculatorComputationAnchorThisServer(
     const std::string& inputNoEncoding,
     const std::string& desiredAnchorTextEmptyForDefault,
-    bool useAppWithoutCache = false
+    bool useAppWithoutCache =
+    false
   );
   static std::string getCalculatorComputationAnchorRelativeAppAddress(
     const std::string& inputNoEncoding,
@@ -88,7 +93,9 @@ public:
     const std::string& displayString
   );
   static std::string getHtmlLinkFromProjectFileName(
-    const std::string& fileName, const std::string& fileDesc = "", int line =
+    const std::string& fileName,
+    const std::string& fileDesc = "",
+    int line =
     - 1
   );
   static std::string doubleBackslashes(const std::string& input);
@@ -122,7 +129,8 @@ public:
     MapList<
       std::string, std::string, HashFunctions::hashFunction<
         std::string
-      > >& outputMap,
+      >
+    >& outputMap,
     std::stringstream& commentsOnFailure
   );
   static bool chopPercentEncodedString(
@@ -130,7 +138,8 @@ public:
     MapList<
       std::string, std::string, HashFunctions::hashFunction<
         std::string
-      > >& outputMap,
+      >
+    >& outputMap,
     std::stringstream& commentsOnFailure
   );
   static bool chopPercentEncodedStringAppend(
@@ -138,7 +147,8 @@ public:
     MapList<
       std::string, std::string, HashFunctions::hashFunction<
         std::string
-      > >& outputMap,
+      >
+    >& outputMap,
     std::stringstream& commentsOnFailure
   );
   static void elementToStringTooltip(
@@ -163,7 +173,9 @@ public:
   static void makeStdCoutReport(const std::string& input);
   static void makeReportIndicatorFile(const std::string& input);
   static std::string toHtmlTable(
-    List<std::string>& labels, List<List<std::string> >& content, bool
+    List<std::string>& labels,
+    List<List<std::string> >& content,
+    bool
     nestTables
   );
   static std::string toHtmlTableRowsFromStringContainingJSON(

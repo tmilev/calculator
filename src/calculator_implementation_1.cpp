@@ -418,7 +418,11 @@ void PlotObject::makeLabel(
 }
 
 void PlotObject::makeRectangle(
-  double xLowLeft, double yLowLeft, double width, double height, const std::
+  double xLowLeft,
+  double yLowLeft,
+  double width,
+  double height,
+  const std::
   string& color
 ) {
   this->plotType = PlotObject::PlotTypes::pathFilled;
@@ -482,7 +486,9 @@ void PlotObject::makePlotFillFinish() {
 }
 
 void PlotObject::makeCircle(
-  const Vector<Rational>& center, const Rational& radius, const std::string&
+  const Vector<Rational>& center,
+  const Rational& radius,
+  const std::string&
   color
 ) {
   if (center.size < 2) {
@@ -566,7 +572,11 @@ void Plot::drawPlotFillFinish() {
 }
 
 void Plot::drawRectangle(
-  double xLowLeft, double yLowLeft, double width, double height, const std::
+  double xLowLeft,
+  double yLowLeft,
+  double width,
+  double height,
+  const std::
   string& color
 ) {
   PlotObject plot;
@@ -645,7 +655,8 @@ void Plot::drawSegment(
   this->addPlotOnTop(segment);
 }
 
-void Plot::drawLabel(const Vector<Rational>& position, const std::string& label
+void Plot::drawLabel(
+  const Vector<Rational>& position, const std::string& label
 ) {
   PlotObject labelPlot;
   labelPlot.makeLabel(position, label);

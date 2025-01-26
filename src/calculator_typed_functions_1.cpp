@@ -2066,8 +2066,9 @@ bool CalculatorFunctionsBinaryOps::powerMatrixExpressionsBySmallInteger(
   }
   Matrix<Expression> idMatE;
   idMatE.makeIdentityMatrix(
-    matrix.numberOfRows, calculator.expressionOne(), calculator.expressionZero(
-    )
+    matrix.numberOfRows,
+    calculator.expressionOne(),
+    calculator.expressionZero()
   );
   MathRoutines::raiseToPower(matrix, power, idMatE);
   return output.assignMatrixExpressions(matrix, calculator, true, true);
@@ -2307,7 +2308,8 @@ bool CalculatorFunctionsBinaryOps::powerDoubleOrRationalToDoubleOrRational(
         return false;
       }
       return
-      output.assignValue(calculator, FloatingPoint::power(- baseDouble, power)
+      output.assignValue(
+        calculator, FloatingPoint::power(- baseDouble, power)
       );
     }
     baseDouble *= - 1;
@@ -2781,7 +2783,8 @@ bool CalculatorFunctionsBinaryOps::tensorMatrixByMatrix(
     leftMatrixExpression, rightMatrixExpression
   );
   return
-  output.assignMatrixExpressions(resultMatrixExpression, calculator, true, true
+  output.assignMatrixExpressions(
+    resultMatrixExpression, calculator, true, true
   );
 }
 
@@ -3340,7 +3343,8 @@ bool CalculatorFunctionsBinaryOps::addMatrixToMatrix(
     return false;
   }
   if ((leftNumberOfRows != rightNumberOfRows) || (
-      leftNumberOfColumns != rightNumberOfColumns
+      leftNumberOfColumns !=
+      rightNumberOfColumns
     )
   ) {
     return false;

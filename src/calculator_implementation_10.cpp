@@ -108,7 +108,8 @@ bool CalculatorFunctionsVectorPartitionFunction::getVectorsForConeDecomposition
 ) {
   Matrix<Rational> matrix;
   outputLabel = "";
-  if (CalculatorConversions::functionGetMatrix(calculator, input, matrix, false)
+  if (
+    CalculatorConversions::functionGetMatrix(calculator, input, matrix, false)
   ) {
     matrix.getVectorsFromRows(output);
     return true;

@@ -1679,7 +1679,8 @@ bool Expression::allowedAsFreeVariableAtom(const std::string& input) const {
 }
 
 bool Expression::getFreeVariables(
-  HashedList<Expression>& outputAccumulateFreeVariables, bool
+  HashedList<Expression>& outputAccumulateFreeVariables,
+  bool
   excludeNamedConstants
 ) const {
   STACK_TRACE("Expression::getFreeVariables");
@@ -3199,7 +3200,8 @@ bool Expression::toStringBuiltIn<Weight<Rational> >(
   return true;
 }
 
-bool Expression::toStringData(std::stringstream& out, FormatExpressions* format
+bool Expression::toStringData(
+  std::stringstream& out, FormatExpressions* format
 ) const {
   STACK_TRACE("Expression::toStringData");
   if (this->owner == nullptr) {
@@ -3216,7 +3218,9 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* format
       this->isOperationGiven(this->owner->opLog())
     ) {
       out << "\\ln";
-    } else if (this->data < this->owner->getOperations().size && this->data >= 0
+    } else if (
+      this->data < this->owner->getOperations().size &&
+      this->data >= 0
     ) {
       out << this->owner->getOperations()[this->data];
     } else {
@@ -3230,7 +3234,8 @@ bool Expression::toStringData(std::stringstream& out, FormatExpressions* format
     format.flagUseHTML = false;
     format.flagUseLatex = true;
     Matrix<RationalFraction<Rational> > matrix;
-    CalculatorConversions::functionGetMatrix(*this->owner, *this, matrix, false
+    CalculatorConversions::functionGetMatrix(
+      *this->owner, *this, matrix, false
     );
     out << matrix.toString(&format);
     return true;
@@ -3711,7 +3716,9 @@ bool Expression::toStringTimes(
 }
 
 void Expression::toStringOpMultiplicative(
-  std::stringstream& out, const std::string& operation, FormatExpressions*
+  std::stringstream& out,
+  const std::string& operation,
+  FormatExpressions*
   format
 ) const {
   std::string secondE = (*this)[2].toString(format);
@@ -4603,7 +4610,9 @@ bool Expression::toStringLimit(
 bool Expression::toStringUnion(
   const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
-  if (!input.isListStartingWithAtom(input.owner->opUnion()) || input.size() != 3
+  if (
+    !input.isListStartingWithAtom(input.owner->opUnion()) ||
+    input.size() != 3
   ) {
     return false;
   }
@@ -5768,7 +5777,9 @@ void ExpressionContext::makeOneVariableFromString(
 }
 
 bool Expression::makeSqrt(
-  Calculator& owner, const Rational& argument, const Rational&
+  Calculator& owner,
+  const Rational& argument,
+  const Rational&
   radicalSuperIndex
 ) {
   STACK_TRACE("Expression::makeSqrt");
@@ -5778,7 +5789,9 @@ bool Expression::makeSqrt(
 }
 
 bool Expression::makeSqrt(
-  Calculator& owner, const Expression& argument, const Rational&
+  Calculator& owner,
+  const Expression& argument,
+  const Rational&
   radicalSuperIndex
 ) {
   STACK_TRACE("Expression::makeSqrt");
@@ -5791,7 +5804,10 @@ bool Expression::makeSqrt(
 }
 
 bool Expression::makeXOX(
-  Calculator& owner, int operation, const Expression& left, const Expression&
+  Calculator& owner,
+  int operation,
+  const Expression& left,
+  const Expression&
   right
 ) {
   STACK_TRACE("Expression::makeXOX");

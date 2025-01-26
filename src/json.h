@@ -68,7 +68,9 @@ public:
   bool mergeInMe(const JSData& input, std::stringstream* commentsOnFailure);
   bool hasKey(const std::string& key) const;
   bool hasCompositeKey(
-    const std::string& key, JSData* whichValue, std::stringstream*
+    const std::string& key,
+    JSData* whichValue,
+    std::stringstream*
     commentsOnFailure
   ) const;
   bool hasCompositeKeyOfToken(
@@ -78,7 +80,9 @@ public:
     std::stringstream* commentsOnFailure
   ) const;
   bool hasCompositeKeyOfType(
-    const std::string& key, std::string& output, std::stringstream*
+    const std::string& key,
+    std::string& output,
+    std::stringstream*
     commentsOnFailure
   ) const;
   bool hasCompositeKeyOfType(
@@ -95,7 +99,8 @@ public:
     const std::string& key, std::stringstream* commentsOnFailure
   ) const;
   bool hasNestedKey(
-    const List<std::string>& nestedKeys, JSData* whichValue = nullptr
+    const List<std::string>& nestedKeys, JSData* whichValue =
+    nullptr
   ) const;
   void setKeyValue(const std::string& key, const JSData& value);
   int getKeyIndex(const std::string& key) const;
@@ -142,7 +147,8 @@ public:
     const std::string& json,
     bool relaxedInput = false,
     std::stringstream* commentsOnFailure = nullptr,
-    bool useHTMLInComments = false
+    bool useHTMLInComments =
+    false
   );
   static void filterColumnsJSDataObjectList(
     List<JSData>& inputOutput, const List<std::string>& columnsToPreserve

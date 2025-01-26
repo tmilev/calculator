@@ -316,7 +316,8 @@ std::string HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
         out
         << HtmlRoutines::URLKeyValuePairsToNormalRecursiveHtml(
           HtmlRoutines::convertURLStringToNormal(currentMap.values[i], true),
-          recursionDepth + 1
+          recursionDepth +
+          1
         );
       }
       out << "</td>";

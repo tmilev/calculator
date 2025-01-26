@@ -448,7 +448,10 @@ bool Calculator::outerStandardCompositeHandler(
     int64_t startCurrentFunction = global.getElapsedMilliseconds();
     if (
       !currentHandler.apply(
-        calculator, input, output, operatorIndexParentIfAvailable,
+        calculator,
+        input,
+        output,
+        operatorIndexParentIfAvailable,
         outputHandler
       )
     ) {
@@ -544,7 +547,10 @@ bool Calculator::outerStandardHandler(
     int64_t startTime = global.getElapsedMilliseconds();
     if (
       currentFunction.apply(
-        calculator, input, output, operatorIndexParentIfAvailable,
+        calculator,
+        input,
+        output,
+        operatorIndexParentIfAvailable,
         outputHandler
       )
     ) {
@@ -732,7 +738,9 @@ bool Calculator::expressionMatchesPattern(
     for (int i = 1; i < pattern.size(); i ++) {
       if (
         !this->expressionMatchesPattern(
-          pattern[i], input[pattern.size() - i], matchedExpressions,
+          pattern[i],
+          input[pattern.size() - i],
+          matchedExpressions,
           commentsGeneral
         )
       ) {
@@ -875,7 +883,8 @@ Expression Calculator::getNewAtom(const std::string& preferredName) {
 }
 
 bool Calculator::accountRule(
-  const Expression& ruleExpression, StateMaintainerCalculator&
+  const Expression& ruleExpression,
+  StateMaintainerCalculator&
   ruleStackMaintainer
 ) {
   STACK_TRACE("Calculator::accountRule");
@@ -952,7 +961,9 @@ Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
 }
 
 void Calculator::EvaluateLoop::accountHistoryChildTransformation(
-  const Expression& transformedChild, const Expression& childHistory, int
+  const Expression& transformedChild,
+  const Expression& childHistory,
+  int
   childIndex
 ) {
   if (this->history == nullptr) {
@@ -986,7 +997,8 @@ void Calculator::EvaluateLoop::accountHistory(
   Expression incomingHistory;
   if (this->history->size() > 0) {
     const Expression& lastHistory = (*this->history)[
-      this->history->size() - 1
+      this->history->size() -
+      1
     ];
     if (lastHistory.size() < 2) {
       global.fatal
@@ -1481,7 +1493,8 @@ Expression* Calculator::patternMatch(
   pattern.checkInitialization();
   expression.checkInitialization();
   if (
-    !this->expressionMatchesPattern(pattern, expression, bufferPairs, logStream
+    !this->expressionMatchesPattern(
+      pattern, expression, bufferPairs, logStream
     )
   ) {
     return nullptr;

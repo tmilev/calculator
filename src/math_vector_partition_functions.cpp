@@ -255,12 +255,18 @@ void VectorPartitionFunctionElementary::addSingleNeighborContribution(
   QuasiPolynomial summand;
   QuasiPolynomial subtracand;
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
-    entranceWallRescaled, 1, direction, summand, this->comments.commentsPointer
-    ()
+    entranceWallRescaled,
+    1,
+    direction,
+    summand,
+    this->comments.commentsPointer()
   );
   toBeSubstituted.substituteShiftByFloorOfLinearFunction(
-    exitWallRescaled, 1, direction, subtracand, this->comments.commentsPointer(
-    )
+    exitWallRescaled,
+    1,
+    direction,
+    subtracand,
+    this->comments.commentsPointer()
   );
   if (this->comments.shouldComment()) {
     std::stringstream reportStream;
@@ -417,7 +423,8 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
   for (int i = 0; i < dimension; i ++) {
     substitution[i].makeMonomial(i, 1, 1);
     substitution[i].subtractMonomial(
-      MonomialPolynomial(dimension), direction[i] * scale
+      MonomialPolynomial(dimension), direction[i] *
+      scale
     );
     substitution[i] -= direction[i] * shift;
   }

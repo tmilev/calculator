@@ -158,8 +158,8 @@ public:
   somestream& intoStream(somestream& out) const;
   std::string toString() const;
   std::string toStringForArticles(
-    const std::string& leftParenthesis = "[", const std::string&
-    rightParenthesis =
+    const std::string& leftParenthesis = "[",
+    const std::string& rightParenthesis =
     "]"
   ) const;
   friend std::ostream& operator<<(std::ostream& out, const Partition& data) {
@@ -844,7 +844,8 @@ public:
       case firstout:
         if (stack[frame_pointer].c % 2 != 0) {
           l.swapTwoIndices(
-            l.size - 1 - stack[frame_pointer].loop_i, l.size -
+            l.size - 1 - stack[frame_pointer].loop_i,
+            l.size -
             1 -
             stack[frame_pointer].c
           );
@@ -1121,7 +1122,8 @@ public:
   template <typename somestream>
   somestream& intoStream(somestream& out);
   std::string toString();
-  friend std::ostream& operator<<(std::ostream& out, PermutationGroupData& data
+  friend std::ostream& operator<<(
+    std::ostream& out, PermutationGroupData& data
   ) {
     return data.intoStream(out);
   }

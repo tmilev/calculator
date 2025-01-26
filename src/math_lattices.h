@@ -137,7 +137,8 @@ public:
   );
   static bool
   getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
-    const PolynomialSubstitution<Rational>& substitution, Matrix<Rational>&
+    const PolynomialSubstitution<Rational>& substitution,
+    Matrix<Rational>&
     output
   );
   // Returning false means that the lattice given as rougher
@@ -264,7 +265,8 @@ public:
     List<std::string>* comments
   ) const;
   bool substitutionFewerVariables(
-    const PolynomialSubstitution<Rational>& substitution, QuasiPolynomial&
+    const PolynomialSubstitution<Rational>& substitution,
+    QuasiPolynomial&
     output
   ) const;
   bool compress();

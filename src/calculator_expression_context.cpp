@@ -416,7 +416,8 @@ bool ExpressionContext::mergeVariables(
 }
 
 bool ExpressionContext::mergeDifferentialOperatorsOnce(
-  Selection& differentialOperatorVariablesFound, ExpressionContext&
+  Selection& differentialOperatorVariablesFound,
+  ExpressionContext&
   outputContext
 ) const {
   if (this->owner == nullptr) {
@@ -770,7 +771,8 @@ bool WithContext<ElementWeylAlgebra<Rational> >::extendContext(
   PolynomialSubstitution<Rational> substitutionDifferentialOperatorPart;
   PolynomialSubstitution<Rational> substitutionPolynomialPart;
   this->context.polynomialAndWeylAlgebraSubstitutionNoFailure(
-    newContext, substitutionPolynomialPart,
+    newContext,
+    substitutionPolynomialPart,
     substitutionDifferentialOperatorPart
   );
   if (
@@ -882,7 +884,8 @@ bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
 }
 
 bool Expression::setContextAtLeastEqualTo(
-  ExpressionContext& inputOutputMinContext, std::stringstream*
+  ExpressionContext& inputOutputMinContext,
+  std::stringstream*
   commentsOnFailure
 ) {
   STACK_TRACE("Expression::setContextAtLeastEqualTo");

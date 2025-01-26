@@ -17,7 +17,8 @@ class TopicElementParser {
 public:
   class TopicLine {
   public:
-    friend std::ostream& operator<<(std::ostream& output, const TopicLine& line
+    friend std::ostream& operator<<(
+      std::ostream& output, const TopicLine& line
     ) {
       output << line.toString();
       return output;
@@ -468,7 +469,8 @@ public:
     MapList<
       std::string, ProblemData, HashFunctions::hashFunction<
         std::string
-      > >& outputAppendProblemInfo,
+      >
+    >& outputAppendProblemInfo,
     bool checkFileExistence,
     std::stringstream* commentsOnFailure
   );
@@ -477,40 +479,46 @@ public:
     MapList<
       std::string, ProblemData, HashFunctions::hashFunction<
         std::string
-      > >& outputAppendProblemInfo,
+      >
+    >& outputAppendProblemInfo,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemWeights(
     MapList<
       std::string, ProblemData, HashFunctions::hashFunction<
         std::string
-      > >& toStore,
+      >
+    >& toStore,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemDeadlines(
     MapList<
       std::string, ProblemData, HashFunctions::hashFunction<
         std::string
-      > >& toStore,
+      >
+    >& toStore,
     std::stringstream* commentsOnFailure
   );
   QueryUpdate toQuerySetProblemWeights(
     MapList<
       std::string, ProblemData, HashFunctions::hashFunction<
         std::string
-      > >& inputProblemInfo
+      >
+    >& inputProblemInfo
   );
   QueryUpdate toQuerySetDeadlines(
     MapList<
       std::string, ProblemData, HashFunctions::hashFunction<
         std::string
-      > >& inputProblemInfo
+      >
+    >& inputProblemInfo
   );
   JSData toJSONDeadlines(
     MapList<
       std::string, ProblemData, HashFunctions::hashFunction<
         std::string
-      > >& inputProblemInfo
+      >
+    >& inputProblemInfo
   );
   std::string toStringDeadline(
     const std::string& topicID,
@@ -581,7 +589,8 @@ public:
     const std::string& requestType,
     const std::string& studentView,
     const std::string& studentSection = "",
-    bool includeRandomSeedIfAppropriate = false
+    bool includeRandomSeedIfAppropriate =
+    false
   ) const;
   std::string toStringExtractedCommands();
   std::string toStringContent();

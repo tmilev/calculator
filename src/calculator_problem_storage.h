@@ -67,7 +67,8 @@ public:
   std::string toStringInterpretedBody();
   std::string toStringTagAndContent() const;
   std::string toStringOpenTag(
-    const std::string& overrideTagIfNonEmpty, bool immediatelyClose = false
+    const std::string& overrideTagIfNonEmpty, bool immediatelyClose =
+    false
   ) const;
   std::string toStringCloseTag(const std::string& overrideTagIfNonEmpty) const;
   std::string getTagClass() const;
@@ -182,7 +183,8 @@ public:
   bool getWeightFromCourse(
     const std::string& courseNonURLed,
     Rational& output,
-    std::string* outputAsGivenByInstructor = nullptr
+    std::string* outputAsGivenByInstructor =
+    nullptr
   );
   std::string toString() const;
 };
@@ -192,7 +194,8 @@ private:
   int expectedNumberOfAnswersFromDB;
   int knownNumberOfAnswersFromHD;
 public:
-  friend std::ostream& operator<<(std::ostream& output, const ProblemData& data
+  friend std::ostream& operator<<(
+    std::ostream& output, const ProblemData& data
   ) {
     output << data.toString();
     return output;

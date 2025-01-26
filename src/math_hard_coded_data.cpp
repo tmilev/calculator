@@ -113,19 +113,23 @@ public:
     HashedList<Vector<Rational> >& outputRootSystem
   );
   static bool loadSignSignatureF1_4(
-    WeylGroupData& inputGroup, List<SubgroupDataRootReflections>&
+    WeylGroupData& inputGroup,
+    List<SubgroupDataRootReflections>&
     outputSubgroups
   );
   static bool loadSignSignatureE1_6(
-    WeylGroupData& inputGroup, List<SubgroupDataRootReflections>&
+    WeylGroupData& inputGroup,
+    List<SubgroupDataRootReflections>&
     outputSubgroups
   );
   static bool loadSignSignatureE1_7(
-    WeylGroupData& inputGroup, List<SubgroupDataRootReflections>&
+    WeylGroupData& inputGroup,
+    List<SubgroupDataRootReflections>&
     outputSubgroups
   );
   static bool loadSignSignatureE1_8(
-    WeylGroupData& inputGroup, List<SubgroupDataRootReflections>&
+    WeylGroupData& inputGroup,
+    List<SubgroupDataRootReflections>&
     outputSubgroups
   );
   static bool loadOutputSubgroupsFromJSData(
@@ -963,7 +967,8 @@ bool HardCodedWeylGroupData::loadConjugacyClassesE1_8(WeylGroupData& output) {
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);
   conjugacyClass.representative.makeFromReadableReflections(
-    output, false,
+    output,
+    false,
     "[8, 7, 6, 7, 5, 2, 4, 3, 4, 5, 2, 4, 1, 3, 4, 5, 6, 2, 4, 5]"
   );
   output.group.conjugacyClasses.addOnTop(conjugacyClass);

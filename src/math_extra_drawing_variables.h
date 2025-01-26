@@ -183,7 +183,8 @@ public:
   );
   static std::string getColorHtmlFromColorIndex(int colorIndex);
   std::string getColorPsTricksFromColorIndex(int colorIndex);
-  static bool getColorIntFromColorString(const std::string& input, int& output
+  static bool getColorIntFromColorString(
+    const std::string& input, int& output
   );
   void scaleToUnitLength(Vector<double>& root);
   std::string getHTMLDiv(int dimension, bool generateInfoPanels);
@@ -222,13 +223,15 @@ public:
     const Vector<double>& input,
     const std::string& inputText,
     const std::string& color,
-    int fontSize = DrawingVariables::fontSizeNormal
+    int fontSize =
+    DrawingVariables::fontSizeNormal
   );
   void drawTextAtVector(
     const Vector<Rational>& point,
     const std::string& inputText,
     const std::string& color,
-    int fontSize = DrawingVariables::fontSizeNormal
+    int fontSize =
+    DrawingVariables::fontSizeNormal
   );
   void drawCircleAtVectorBufferRational(
     const Vector<Rational>& point,

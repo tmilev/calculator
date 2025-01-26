@@ -13,7 +13,8 @@ void DrawingVariables::toJSON(JSData& output) {
   }
 }
 
-std::string DrawingVariables::getHTMLDiv(int dimension, bool generateInfoPanels
+std::string DrawingVariables::getHTMLDiv(
+  int dimension, bool generateInfoPanels
 ) {
   STACK_TRACE("DrawingVariables::getHTMLDiv");
   JSData data;

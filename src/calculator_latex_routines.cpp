@@ -359,8 +359,9 @@ void LaTeXCrawler::buildFreecalc() {
   ) {
     if (
       !StringRoutines::stringBeginsWith(
-        this->fileNameToCrawlPhysicalNoPathName, "Homework_", &
-        lectureFileNameEnd
+        this->fileNameToCrawlPhysicalNoPathName,
+        "Homework_",
+        &lectureFileNameEnd
       )
     ) {
       lectureFileNameEnd = "";
@@ -368,7 +369,8 @@ void LaTeXCrawler::buildFreecalc() {
   }
   std::string folderEnd =
   this->fileNameToCrawlPhysicalNoPathName.substr(
-    0, this->fileNameToCrawlPhysicalNoPathName.size() - 4
+    0, this->fileNameToCrawlPhysicalNoPathName.size() -
+    4
   );
   if (lectureFileNameEnd.size() > 4) {
     lectureFileNameEnd =
@@ -413,7 +415,8 @@ void LaTeXCrawler::buildFreecalc() {
   std::string fileNameWorkingCopyPDF =
   "working_file_" +
   this->fileNameToCrawlPhysicalNoPathName.substr(
-    0, this->fileNameToCrawlPhysicalNoPathName.size() - 3
+    0, this->fileNameToCrawlPhysicalNoPathName.size() -
+    3
   ) +
   "pdf";
   int totalLecturesToProcess = this->lectureNumbers.size;
@@ -569,7 +572,8 @@ void LaTeXCrawler::buildFreecalc() {
     }
     std::string currentName =
     this->slideTexInputCommands[i].substr(
-      0, this->slideTexInputCommands[i].size() - 1
+      0, this->slideTexInputCommands[i].size() -
+      1
     );
     this->slideFileNamesVirtualNoPathNoExtension[i] =
     FileOperations::getFileNameFromFileNameWithPath(currentName);
@@ -873,7 +877,8 @@ bool LaTeXCrawler::extractFileNames(
     }
     if (
       !FileOperations::isOKFileNameVirtual(
-        this->slideFileNamesVirtualWithPath[i].fileName, false,
+        this->slideFileNamesVirtualWithPath[i].fileName,
+        false,
         commentsOnFailure
       )
     ) {
@@ -940,7 +945,8 @@ bool LaTeXCrawler::extractFileNames(
   if (this->headerPathBelowFileNameVirtual.size() > 0) {
     this->headerPathBelowFileNameVirtual =
     this->headerPathBelowFileNameVirtual.substr(
-      0, this->headerPathBelowFileNameVirtual.size() - 1
+      0, this->headerPathBelowFileNameVirtual.size() -
+      1
     );
     this->headerPathBelowFileNameVirtual =
     FileOperations::getFileNameFromFileNameWithPath(

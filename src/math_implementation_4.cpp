@@ -580,7 +580,8 @@ bool GlobalVariables::userDefaultHasAdminRights() {
   }
   return
   this->flagLoggedIn && (
-    this->userDefault.userRole == UserCalculatorData::Roles::administrator
+    this->userDefault.userRole ==
+    UserCalculatorData::Roles::administrator
   );
 }
 
@@ -1103,7 +1104,8 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     outputType.makeArbitrary(
       'A',
       numberOfLength1,
-      DynkinSimpleType::getDefaultLongRootLengthSquared('A') / length1
+      DynkinSimpleType::getDefaultLongRootLengthSquared('A') /
+      length1
     );
   } else {
     if (length1 < length2) {
@@ -1120,17 +1122,23 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       // B2, C2, F4 or G2
       if (numberOfLength1 == 2) {
         outputType.makeArbitrary(
-          'F', 4, DynkinSimpleType::getDefaultLongRootLengthSquared('F') /
+          'F',
+          4,
+          DynkinSimpleType::getDefaultLongRootLengthSquared('F') /
           length1
         );
       } else if (length1 / length2 == 3) {
         outputType.makeArbitrary(
-          'G', 2, DynkinSimpleType::getDefaultLongRootLengthSquared('G') /
+          'G',
+          2,
+          DynkinSimpleType::getDefaultLongRootLengthSquared('G') /
           length1
         );
       } else {
         outputType.makeArbitrary(
-          'B', 2, DynkinSimpleType::getDefaultLongRootLengthSquared('B') /
+          'B',
+          2,
+          DynkinSimpleType::getDefaultLongRootLengthSquared('B') /
           length1
         );
       }
@@ -1139,13 +1147,15 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
         outputType.makeArbitrary(
           'B',
           currentComponent.size,
-          DynkinSimpleType::getDefaultLongRootLengthSquared('B') / length1
+          DynkinSimpleType::getDefaultLongRootLengthSquared('B') /
+          length1
         );
       } else {
         outputType.makeArbitrary(
           'C',
           currentComponent.size,
-          DynkinSimpleType::getDefaultLongRootLengthSquared('C') / length1
+          DynkinSimpleType::getDefaultLongRootLengthSquared('C') /
+          length1
         );
       }
     }
@@ -1229,7 +1239,8 @@ void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(
     }
     if (indexFirstComponentConnectedToRoot == - 1) {
       this->simpleBasesConnectedComponents.setSize(
-        this->simpleBasesConnectedComponents.size + 1
+        this->simpleBasesConnectedComponents.size +
+        1
       );
       this->simpleBasesConnectedComponents.lastObject()->size = 0;
       this->simpleBasesConnectedComponents.lastObject()->addOnTop(
@@ -2279,7 +2290,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   root = this->parabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << root.toString();
   subgroup.makeParabolicFromSelectionSimpleRoots(
-    weylGroupCoDomain, this->parabolicLeviPartRootSpacesZeroStandsForSelected,
+    weylGroupCoDomain,
+    this->parabolicLeviPartRootSpacesZeroStandsForSelected,
     - 1
   );
   this->linearOperators.setSize(subgroup.allElements.size);
@@ -2472,7 +2484,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < this->preimageWeylChamberLargerAlgebra.walls.size; i ++)
   {
     root.makeZero(
-      input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1
+      input.coDomainAlgebra().getRank() +
+      input.domainAlgebra().getRank() +
+      1
     );
     for (int j = 0; j < input.coDomainAlgebra().getRank(); j ++) {
       root[j + input.domainAlgebra().getRank()] =
@@ -2525,7 +2539,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < this->preimageWeylChamberSmallerAlgebra.walls.size; i ++)
   {
     root.makeZero(
-      input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1
+      input.coDomainAlgebra().getRank() +
+      input.domainAlgebra().getRank() +
+      1
     );
     for (int j = 0; j < input.domainAlgebra().getRank(); j ++) {
       root[j] = this->preimageWeylChamberSmallerAlgebra.walls[i].normal[j];
@@ -2799,7 +2815,8 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromNonParametricArray(
   // contributes to the translation only!
   int numberOfNonParameters = nonParameters.size;
   output.initialize(
-    numberOfParameters + numberOfNonParameters - 1, numberOfParameters - 1
+    numberOfParameters + numberOfNonParameters - 1, numberOfParameters -
+    1
   );
   outputTranslation.makeZero(numberOfParameters + numberOfNonParameters - 1);
   output.makeZero();
@@ -2844,7 +2861,8 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
   int dimSmallerAlgebra = matrixOperator.numberOfRows;
   Vector<Rational>& translation = this->translations[index];
   Matrix<Rational> matrix;
-  matrix.initialize(dimLargerAlgebra + dimSmallerAlgebra + 1, dimSmallerAlgebra
+  matrix.initialize(
+    dimLargerAlgebra + dimSmallerAlgebra + 1, dimSmallerAlgebra
   );
   matrix.makeZero();
   for (int j = 0; j < dimSmallerAlgebra; j ++) {
@@ -2862,7 +2880,9 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
 }
 
 void GeneralizedVermaModuleCharacters::transformToWeylProjective(
-  int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>&
+  int indexOperator,
+  Vector<Rational>& startingNormal,
+  Vector<Rational>&
   outputNormal
 ) {
   Matrix<Rational> operatorExtended =

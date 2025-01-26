@@ -629,7 +629,8 @@ uint32_t StringRoutines::Conversions::codePointFromUtf8(
     }
     // Strip the first two bits.
     nextContribution = static_cast<unsigned char>(
-      input[indexIncrementedToLastConsumedByte + j] << 2
+      input[indexIncrementedToLastConsumedByte + j]
+      << 2
     ) >>
     2;
     codePoint <<= 6;
@@ -748,7 +749,8 @@ std::string StringRoutines::convertStringToJavascriptVariable(
 
 std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
   std::stringstream out;
-  if (input >= 2097152 // = 2^21-1
+  if (
+    input >= 2097152 // = 2^21-1
   ) {
     // Invalid code point.
     // A unicode code point must be smaller than 2^21.
@@ -766,7 +768,8 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
     out << output;
     return out.str();
   }
-  if (input < 2048 // = 2^11, encoding fits in b_110?????, b_10??????
+  if (
+    input < 2048 // = 2^11, encoding fits in b_110?????, b_10??????
   ) {
     unsigned char high = input >> 6;
     high += 128 + 64;
@@ -1335,7 +1338,10 @@ bool FileOperations::writeFileVirualWithPermissions(
   return
   FileOperations::
   writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
-    fileNameVirtual, fileContent, accessSensitiveFolders, false,
+    fileNameVirtual,
+    fileContent,
+    accessSensitiveFolders,
+    false,
     commentsOnError
   );
 }
@@ -1885,21 +1891,24 @@ bool FileOperations::openFileUnsecure(
       );
     } else {
       file.open(
-        fileName.c_str(), std::fstream::in | std::fstream::out |
+        fileName.c_str(),
+        std::fstream::in | std::fstream::out |
         std::fstream::app
       );
     }
   } else {
     if (openAsBinary) {
       file.open(
-        fileName.c_str(), std::fstream::in | std::fstream::out |
+        fileName.c_str(),
+        std::fstream::in | std::fstream::out |
         std::fstream::binary
       );
     } else {
       if (truncate) {
         file.open(
           fileName.c_str(),
-          std::fstream::in | std::fstream::out | std::fstream::trunc
+          std::fstream::in | std::fstream::out |
+          std::fstream::trunc
         );
       } else {
         file.open(fileName.c_str(), std::fstream::in | std::fstream::out);
@@ -2223,7 +2232,11 @@ bool FileOperations::openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
   return
   FileOperations::
   openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
-    file, fileName, openInAppendMode, truncate, openAsBinary,
+    file,
+    fileName,
+    openInAppendMode,
+    truncate,
+    openAsBinary,
     accessSensitiveFolders
   );
 }
@@ -2310,21 +2323,24 @@ bool FileOperations::openFileCreateIfNotPresentUnsecure(
       );
     } else {
       file.open(
-        fileName.c_str(), std::fstream::in | std::fstream::out |
+        fileName.c_str(),
+        std::fstream::in | std::fstream::out |
         std::fstream::app
       );
     }
   } else {
     if (openAsBinary) {
       file.open(
-        fileName.c_str(), std::fstream::in | std::fstream::out |
+        fileName.c_str(),
+        std::fstream::in | std::fstream::out |
         std::fstream::binary
       );
     } else {
       if (truncate) {
         file.open(
           fileName.c_str(),
-          std::fstream::in | std::fstream::out | std::fstream::trunc
+          std::fstream::in | std::fstream::out |
+          std::fstream::trunc
         );
       } else {
         file.open(fileName.c_str(), std::fstream::in | std::fstream::out);
@@ -2345,7 +2361,8 @@ bool FileOperations::openFileCreateIfNotPresentUnsecure(
   }
   file.close();
   file.open(
-    fileName.c_str(), std::fstream::out | std::fstream::in |
+    fileName.c_str(),
+    std::fstream::out | std::fstream::in |
     std::fstream::trunc
   );
   file.clear();
@@ -2662,7 +2679,8 @@ void StringRoutines::Differ::pushCommonString(int indexLeft, int indexRight) {
   this->currentCommonStringLength = 0;
 }
 
-void StringRoutines::Differ::extractCommonStrings(int indexLeft, int indexRight
+void StringRoutines::Differ::extractCommonStrings(
+  int indexLeft, int indexRight
 ) {
   STACK_TRACE("StringRoutines::Differ::extractCommonStrings");
   if (
@@ -2728,7 +2746,8 @@ void StringRoutines::Differ::extractResult(
     std::string nonCommon =
     input.substr(
       static_cast<unsigned>(previousEnd),
-      static_cast<unsigned>(stringStart) - previousEnd
+      static_cast<unsigned>(stringStart) -
+      previousEnd
     );
     output.addOnTop(nonCommon);
     std::string common =
@@ -2800,7 +2819,8 @@ std::string StringRoutines::shortenInsertDots(
   << ".."
   << inputString.substr(
     static_cast<unsigned>(
-      static_cast<signed>(inputString.size()) - numberOfCharactersBeginEnd
+      static_cast<signed>(inputString.size()) -
+      numberOfCharactersBeginEnd
     )
   );
   return out.str();
@@ -2851,7 +2871,8 @@ std::string StringRoutines::stringTrimToLengthForDisplay(
   std::stringstream abbreviationStream;
   abbreviationStream << "...(" << input.size() << " characters) ...";
   int numberOfCharactersAtEnds = (
-    static_cast<signed>(input.size()) - desiredLength20AtLeast
+    static_cast<signed>(input.size()) -
+    desiredLength20AtLeast
   ) /
   2;
   std::stringstream out;
@@ -2863,7 +2884,8 @@ std::string StringRoutines::stringTrimToLengthForDisplay(
     out
     << input[
       static_cast<unsigned>(
-        static_cast<signed>(input.size()) - numberOfCharactersAtEnds + i
+        static_cast<signed>(input.size()) - numberOfCharactersAtEnds +
+        i
       )
     ];
   }
@@ -3119,7 +3141,9 @@ bool StringRoutines::stringBeginsWith(
   std::string actualBeginning;
   std::string stringEnd;
   StringRoutines::splitStringInTwo(
-    input, static_cast<int>(desiredBeginning.size()), actualBeginning,
+    input,
+    static_cast<int>(desiredBeginning.size()),
+    actualBeginning,
     stringEnd
   );
   bool result = (actualBeginning == desiredBeginning);
@@ -3850,7 +3874,10 @@ bool OnePartialFractionDenominator::decomposeFromNormalizedLinearRelation(
     global.fatal << "Elongation is too large. " << global.fatal;
   }
   this->applyGeneralizedSzenesVergneFormula(
-    reduced, linearRelation, gainingExponent, elongationGainingMultiplicity,
+    reduced,
+    linearRelation,
+    gainingExponent,
+    elongationGainingMultiplicity,
     output
   );
   return true;
@@ -3887,7 +3914,8 @@ void OnePartialFractionDenominator::applyGeneralizedSzenesVergneFormula(
     const OnePartialFractionDenominatorComponent& currentDenominator =
     toBeReduced.values[i];
     int removedElongation = currentDenominator.getLargestElongation();
-    currentFraction.addMultiplicity(toBeReduced.keys[i], - 1, removedElongation
+    currentFraction.addMultiplicity(
+      toBeReduced.keys[i], - 1, removedElongation
     );
     Vector<Rational> nextExponent;
     currentDenominator.getLongestVector(nextExponent);
@@ -3922,7 +3950,8 @@ void OnePartialFractionDenominator::decomposeAMinusNB(
 ) {
   OnePartialFractionDenominator currentFraction;
   Polynomial<LargeInteger> aMinusNBetaPolynomial, commonPolynomial;
-  this->getAlphaMinusNBetaPoly(owner, indexA, indexB, n, aMinusNBetaPolynomial
+  this->getAlphaMinusNBetaPoly(
+    owner, indexA, indexB, n, aMinusNBetaPolynomial
   );
   int powerA = this->denominatorsNoScale.values[indexA].multiplicities[0];
   int powerB = this->denominatorsNoScale.values[indexB].multiplicities[0];
@@ -4386,7 +4415,9 @@ std::string PartialFractions::toStringLatticeShiftsOneQuasipolynomial(
 }
 
 std::string PartialFractions::toLatexOneQuasipolynomialInTable(
-  const std::string& displayId, const QuasiPolynomial& input, FormatExpressions
+  const std::string& displayId,
+  const QuasiPolynomial& input,
+  FormatExpressions
   * format
 ) const {
   STACK_TRACE("PartialFractions::toLatexOneQuasipolynomialInTable");
@@ -4781,7 +4812,8 @@ void OnePartialFractionDenominator::getPolyReduceMonomialByMonomial(
         coefficient =
         MathRoutines::parity(startDenominatorPower) *
         MathRoutines::nChooseK(
-          startMonomialPower - 1 - k, startDenominatorPower - 1
+          startMonomialPower - 1 - k, startDenominatorPower -
+          1
         );
         output.addMonomial(monomial, coefficient);
       }
@@ -4802,7 +4834,8 @@ void OnePartialFractionDenominator::getPolyReduceMonomialByMonomial(
         coefficient =
         MathRoutines::nChooseK(
           startDenominatorPower - startMonomialPower - 1 - k,
-          startDenominatorPower - 1
+          startDenominatorPower -
+          1
         );
         output.addMonomial(monomial, coefficient);
       }
@@ -5098,7 +5131,9 @@ unsigned int OnePartialFractionDenominatorComponent::hashFunction() const {
 }
 
 void OnePartialFractionDenominatorComponent::getPolynomialDenominator(
-  Polynomial<LargeInteger>& output, int multiplicityIndex, Vector<Rational>&
+  Polynomial<LargeInteger>& output,
+  int multiplicityIndex,
+  Vector<Rational>&
   exponent
 ) {
   if (multiplicityIndex >= this->multiplicities.size) {
@@ -5730,7 +5765,9 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
   if (
     dynkinType.letter == 'D' || (
       dynkinType.letter == 'A' &&
-      dynkinType.rank > 1) || (dynkinType.letter == 'E' && dynkinType.rank == 6
+      dynkinType.rank > 1) || (
+      dynkinType.letter == 'E' &&
+      dynkinType.rank == 6
     )
   ) {
     directSummand.makeIdentity(dynkinType.rank *(multiplicity - 1));
@@ -6427,7 +6464,9 @@ std::string DynkinSimpleType::toString(FormatExpressions* format) const {
 }
 
 void DynkinSimpleType::makeArbitrary(
-  char inputLetter, int inputRank, const Rational&
+  char inputLetter,
+  int inputRank,
+  const Rational&
   inputLengthFirstCorRootSquared
 ) {
   if ((
@@ -6855,7 +6894,8 @@ void DynkinSimpleType::grow(
     }
     outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
   }
-  newType.makeArbitrary('B', this->rank + 1, this->cartanSymmetricInverseScale
+  newType.makeArbitrary(
+    'B', this->rank + 1, this->cartanSymmetricInverseScale
   );
   output.addOnTop(newType);
   if (outputPermutationRoots != nullptr) {
@@ -6863,7 +6903,8 @@ void DynkinSimpleType::grow(
   }
   if (this->rank > 1) {
     newType.makeArbitrary(
-      'C', this->rank + 1, this->cartanSymmetricInverseScale / 2
+      'C', this->rank + 1, this->cartanSymmetricInverseScale /
+      2
     );
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
@@ -7409,7 +7450,8 @@ bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
 ) const {
   STACK_TRACE("ElementWeylGroup::hasDifferentConjugacyInvariantsFrom");
   if ((this->generatorsLastAppliedFirst.size % 2) != (
-      right.generatorsLastAppliedFirst.size % 2
+      right.generatorsLastAppliedFirst.size %
+      2
     )
   ) {
     return true;
@@ -7648,7 +7690,10 @@ void WeylGroupData::reset() {
 }
 
 void WeylGroupData::actOnAffineHyperplaneByGroupElement(
-  int index, AffineHyperplane<Rational>& output, bool rhoAction, bool
+  int index,
+  AffineHyperplane<Rational>& output,
+  bool rhoAction,
+  bool
   useMinusRho
 ) {
   int numberOfGenerators =
@@ -7662,7 +7707,9 @@ void WeylGroupData::actOnAffineHyperplaneByGroupElement(
     );
     this->simpleReflectionDualSpace(
       this->group.elements[index].generatorsLastAppliedFirst[
-        numberOfGenerators - i - 1
+        numberOfGenerators -
+        i -
+        1
       ].index,
       output.normal
     );
@@ -7670,7 +7717,9 @@ void WeylGroupData::actOnAffineHyperplaneByGroupElement(
 }
 
 bool WeylGroupData::getWordByFormulaImplementation(
-  FiniteGroup<ElementWeylGroup>& group, const ElementWeylGroup& g, List<int>&
+  FiniteGroup<ElementWeylGroup>& group,
+  const ElementWeylGroup& g,
+  List<int>&
   out
 ) {
   (void) group;
@@ -7916,7 +7965,8 @@ void WeylGroupData::actOnRootByGroupElement(
   int index, Vector<Rational>& root, bool rhoAction, bool useMinusRho
 ) {
   const ElementWeylGroup& currentElement = this->group.elements[index];
-  for (int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
+  for (
+    int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
   ) {
     this->reflectSimple(
       currentElement.generatorsLastAppliedFirst[i].index,
@@ -8521,7 +8571,8 @@ void WeylGroupData::getLongestWeylElement(ElementWeylGroup& outputWeylElement)
   Vector<Rational> lowest = this->rho;
   Vectors<Rational> roots;
   roots.makeEiBasis(this->getDimension());
-  this->getLowestElementInOrbit(lowest, &outputWeylElement, roots, false, false
+  this->getLowestElementInOrbit(
+    lowest, &outputWeylElement, roots, false, false
   );
 }
 
@@ -8901,8 +8952,10 @@ std::string WeylGroupData::generateWeightSupportMethod1(
   std::string currentString;
   bool isTrimmed =
   !this->getAllDominantWeightsHWFDIM(
-    highestWeightSimpleCoordinates, dominantWeights, upperBoundInt, &
-    currentString
+    highestWeightSimpleCoordinates,
+    dominantWeights,
+    upperBoundInt,
+    &currentString
   );
   out << currentString << "<br>";
   if (isTrimmed) {
@@ -9960,7 +10013,8 @@ int KazhdanLusztigPolynomials::computeProductfromSimpleReflectionsActionList(
 ) {
   int start = y;
   const ElementWeylGroup& currentElement = this->weylGroup->group.elements[x];
-  for (int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
+  for (
+    int i = currentElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
   ) {
     start =
     this->simpleReflectionsActionList[start][
@@ -10218,7 +10272,11 @@ void LaTeXProcedures::getStringFromColorIndex(
 }
 
 void LaTeXProcedures::drawTextDirectly(
-  double x1, double y1, const std::string& text, int colorIndex, std::fstream&
+  double x1,
+  double y1,
+  const std::string& text,
+  int colorIndex,
+  std::fstream&
   output
 ) {
   (void) colorIndex;
@@ -10279,7 +10337,8 @@ void LaTeXProcedures::drawline(
 }
 
 void WeylGroupData::transformToSimpleBasisGenerators(
-  Vectors<Rational>& generators, const HashedList<Vector<Rational> >&
+  Vectors<Rational>& generators,
+  const HashedList<Vector<Rational> >&
   inputRootSystem
 ) {
   STACK_TRACE("WeylGroupData::transformToSimpleBasisGenerators");
@@ -10358,7 +10417,8 @@ void Vector<Coefficient>::perturbNoZeroScalarProductWithMe(
 }
 
 void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(
-  Vectors<Rational>& generators, const HashedList<Vector<Rational> >&
+  Vectors<Rational>& generators,
+  const HashedList<Vector<Rational> >&
   inputRootSystem
 ) {
   if (generators.size == 0) {
@@ -10767,7 +10827,10 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
   output.makeZeroLatticeZn(owner.ambientDimension);
   for (int i = 0; i < coefficient.size(); i ++) {
     this->computePolynomialCorrespondingToOneMonomial(
-      shiftedQuasiPolynomial, coefficient[i], latticeGenerators, normals,
+      shiftedQuasiPolynomial,
+      coefficient[i],
+      latticeGenerators,
+      normals,
       lattice
     );
     shiftedQuasiPolynomial *= coefficient.coefficients[i];
@@ -11807,7 +11870,8 @@ bool Cone::isRegularToBasis(
   Rational scalarProduct;
   for (int i = 0; i < x; i ++) {
     wallSelection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
-      dimension - 1
+      dimension -
+      1
     );
     if (
       basis.computeNormalFromSelection(
@@ -11988,7 +12052,11 @@ bool Cone::drawMeProjectiveVertices(
       }
     }
     drawingVariables.drawLineBetweenTwoVectorsBufferRational(
-      zeroRoot, vertex, "lightblue", 1, DrawOptions::PenStyle::dashed,
+      zeroRoot,
+      vertex,
+      "lightblue",
+      1,
+      DrawOptions::PenStyle::dashed,
       "vertices"
     );
   }
@@ -12120,7 +12188,8 @@ void ConeCollection::initializeFromAffineDirectionsAndRefine(
     projectivizedDirections[i + inputAffinePoints.size] =
     inputAffinePoints[i];
     projectivizedDirections[i + inputAffinePoints.size].setSize(
-      affineDimension + 1
+      affineDimension +
+      1
     );
     *projectivizedDirections[i + inputAffinePoints.size].lastObject() = 1;
   }
@@ -12256,7 +12325,8 @@ bool Cone::getLatticePointsInCone(
     for (int j = 0; j < boundingBox.multiplicities.size; j ++) {
       candidatePoint +=
       latticeBasis[j] *(
-        boundingBox.multiplicities[j] - upperBoundPointsInEachDim
+        boundingBox.multiplicities[j] -
+        upperBoundPointsInEachDim
       );
     }
     if (lastCoordinateIsOne) {
@@ -13116,7 +13186,8 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   int dimensionProjectivized = this->getDimensionProjectivized();
   Matrix<Rational> projectionLatticeLevel;
   projectionLatticeLevel.initialize(
-    dimensionProjectivized - 2, dimensionProjectivized - 1
+    dimensionProjectivized - 2, dimensionProjectivized -
+    1
   );
   projectionLatticeLevel.makeZero();
   for (int i = 0; i < projectionLatticeLevel.numberOfRows; i ++) {
@@ -13384,7 +13455,10 @@ bool ConeCollection::splitChamber(
   HashedList<Vector<Rational> > zeroVertices;
   if (
     !this->splitVerticesByNormal(
-      toBeSliced, normal, newPlusCone.vertices, newMinusCone.vertices,
+      toBeSliced,
+      normal,
+      newPlusCone.vertices,
+      newMinusCone.vertices,
       zeroVertices
     )
   ) {
@@ -13612,7 +13686,9 @@ bool ConeCollection::isSpannedByDirections(const Vector<Rational>& planeNormal)
 }
 
 bool ConeCollection::allExitWallsAreVisited(
-  Cone& toBeRefined, const Vector<Rational>& direction, List<Wall>&
+  Cone& toBeRefined,
+  const Vector<Rational>& direction,
+  List<Wall>&
   outputExitWalls
 ) {
   STACK_TRACE("ConeCollection::allExitWallsAreVisited");
@@ -14110,7 +14186,10 @@ bool ConeCollection::isAddmissibleConeSplit(
 }
 
 bool ConeCollection::computeSplittingNormal(
-  Cone& toBeSliced, List<Wall>& exitWalls, int directionIndex, Vector<
+  Cone& toBeSliced,
+  List<Wall>& exitWalls,
+  int directionIndex,
+  Vector<
     Rational
   >& normal
 ) {
@@ -14150,7 +14229,8 @@ bool ConeCollection::refineOneByOneDirectionSpannedSlices(
   }
   Vector<Rational> normal;
   if (
-    !this->computeSplittingNormal(toBeSliced, exitWalls, directionIndex, normal
+    !this->computeSplittingNormal(
+      toBeSliced, exitWalls, directionIndex, normal
     )
   ) {
     this->addRefinedCone(toBeSliced);
@@ -14327,7 +14407,8 @@ void Cone::computeVerticesFromNormals() {
   matrix.initialize(dimension - 1, dimension);
   for (int i = 0; i < numberOfCycles; i ++) {
     selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
-      dimension - 1
+      dimension -
+      1
     );
     for (int j = 0; j < selection.cardinalitySelection; j ++) {
       for (int k = 0; k < dimension; k ++) {
@@ -14584,7 +14665,8 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
   Vector<Rational> normalCandidate;
   for (int i = 0; i < numberOfCandidates; i ++) {
     selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
-      rankVerticesSpan - 1
+      rankVerticesSpan -
+      1
     );
     for (int j = 0; j < selection.cardinalitySelection; j ++) {
       extraVertices.addOnTop(inputVertices[selection.elements[j]]);
@@ -14961,7 +15043,8 @@ std::string Cone::toStringPrecomputedVectorPartitionFunctionValues() const {
     << this->payload.precomputedChecked.getValueNoFail(input);
   }
   out << "<br>Precomputed values, too large to check: ";
-  for (const Vector<Rational>& input : this->payload.precomputedNonChecked.keys
+  for (
+    const Vector<Rational>& input : this->payload.precomputedNonChecked.keys
   ) {
     out
     << "<br>"
@@ -15127,7 +15210,8 @@ void Cone::precomputeVectorPartitionFunction(
   }
 }
 
-std::string ConeCollection::toStringNeighborGraph(const MapList<int, Cone>& map
+std::string ConeCollection::toStringNeighborGraph(
+  const MapList<int, Cone>& map
 ) const {
   std::stringstream out;
   for (const Cone& cone : map.values) {

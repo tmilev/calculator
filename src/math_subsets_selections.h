@@ -256,7 +256,8 @@ public:
   }
   template <class Element>
   void initializeFromMultiplicities(
-    const List<Element>& input, int useOnlyNElementsOnly = 0
+    const List<Element>& input, int useOnlyNElementsOnly =
+    0
   ) {
     if (useOnlyNElementsOnly > 0 && useOnlyNElementsOnly <= input.size) {
       this->elements.setSize(useOnlyNElementsOnly);
@@ -529,7 +530,9 @@ bool Vectors<Coefficient>::computeNormalFromSelectionAndExtraRoot(
 
 template <class Coefficient>
 void Vectors<Coefficient>::gaussianEliminationForNormalComputation(
-  Matrix<Coefficient>& inputMatrix, Selection& outputNonPivotPoints, int
+  Matrix<Coefficient>& inputMatrix,
+  Selection& outputNonPivotPoints,
+  int
   dimension
 ) const {
   inputMatrix.initialize(this->size, dimension);

@@ -462,7 +462,9 @@ bool LargeIntegerUnsigned::isCompositePrimeDivision(
 }
 
 bool LargeIntegerUnsigned::isPossiblyPrime(
-  int millerRabinTries, bool tryDivisionSetTrueFaster, std::stringstream*
+  int millerRabinTries,
+  bool tryDivisionSetTrueFaster,
+  std::stringstream*
   comments
 ) {
   STACK_TRACE("LargeIntUnsigned::isPossiblyPrime");
@@ -532,7 +534,8 @@ void LargeIntegerUnsigned::getPrimesEratosthenesSieve(
   unsigned int primesUpToInclusive, List<unsigned int>& output
 ) {
   List<int> sieve;
-  sieve.initializeFillInObject(static_cast<signed>(primesUpToInclusive) + 1, 1
+  sieve.initializeFillInObject(
+    static_cast<signed>(primesUpToInclusive) + 1, 1
   );
   output.reserve(primesUpToInclusive / 2);
   output.size = 0;
@@ -715,7 +718,8 @@ void LargeIntegerUnsigned::dividePositive(
         }
       }
       currentQuotientDigit = static_cast<int>(
-        remainderLeadingDigit / divisorLeadingDigitPlusSlack
+        remainderLeadingDigit /
+        divisorLeadingDigitPlusSlack
       );
       remainderBackup = remainderOutput;
       remainderOutput.addLargeIntegerUnsignedShiftedTimesDigit(
@@ -969,7 +973,8 @@ void LargeIntegerUnsigned::addNoFitSize(const LargeIntegerUnsigned& x) {
   MacroIncrementCounter(Rational::totalLargeAdditions);
   int oldsize = this->digits.size;
   this->digits.setSize(
-    MathRoutines::maximum(this->digits.size, x.digits.size) + 1
+    MathRoutines::maximum(this->digits.size, x.digits.size) +
+    1
   );
   for (int i = oldsize; i < this->digits.size; i ++) {
     this->digits[i] = 0;
@@ -1179,10 +1184,13 @@ void LargeIntegerUnsigned::multiplyBy(
       unsigned long long highPart = tempLong /
       LargeIntegerUnsigned::carryOverBound;
       output.addShiftedUIntSmallerThanCarryOverBound(
-        static_cast<unsigned int>(lowPart), i + j
+        static_cast<unsigned int>(lowPart), i +
+        j
       );
       output.addShiftedUIntSmallerThanCarryOverBound(
-        static_cast<unsigned int>(highPart), i + j + 1
+        static_cast<unsigned int>(highPart), i +
+        j +
+        1
       );
       if (doReport) {
         if (report2.getElement().tickAndWantReport()) {

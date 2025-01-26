@@ -294,7 +294,8 @@ public:
   template <class Coefficient>
   void getGenericElementCartan(
     ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output,
-    int indexFirstVariable = 0
+    int indexFirstVariable =
+    0
   ) {
     output.makeZero();
     ChevalleyGenerator generator;
@@ -310,7 +311,8 @@ public:
   template <class Coefficient>
   void getGenericElementNegativeBorelNilradical(
     ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output,
-    int indexFirstVariable = 0
+    int indexFirstVariable =
+    0
   ) {
     output.makeZero();
     ChevalleyGenerator generator;
@@ -373,11 +375,15 @@ public:
     bool includeSemisimpleSubalgebras
   ) const;
   void writeHTML(
-    bool verbose, bool flagWriteLatexPlots, const std::string&
+    bool verbose,
+    bool flagWriteLatexPlots,
+    const std::string&
     extraDynkinDiagramPlot
   );
   std::string toHTML(
-    bool verbose, bool flagWriteLatexPlots, const std::string&
+    bool verbose,
+    bool flagWriteLatexPlots,
+    const std::string&
     extraDynkinDiagramPlot
   );
   static std::string toHTMLCalculatorHeadElements(
@@ -512,13 +518,15 @@ public:
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputH,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputE,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF,
-    std::stringstream* logStream = nullptr
+    std::stringstream* logStream =
+    nullptr
   );
   bool attemptExtendingEtoHEFwithHinCartan(
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementE,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputH,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
-    std::stringstream* logStream = nullptr
+    std::stringstream* logStream =
+    nullptr
   );
   static void findSl2Subalgebras(
     SemisimpleLieAlgebra& inputOwner,
@@ -532,7 +540,8 @@ public:
   );
   template <class Coefficient>
   void getAdjoint(
-    MatrixTensor<Coefficient>& output, ElementSemisimpleLieAlgebra<
+    MatrixTensor<Coefficient>& output,
+    ElementSemisimpleLieAlgebra<
       Coefficient
     >& e
   );
@@ -843,7 +852,8 @@ public:
   }
   void toString(std::string& output, bool useHtml);
   void makeGInGWithIdentity(SemisimpleLieAlgebra& owner);
-  void projectOntoSmallCartan(Vector<Rational>& input, Vector<Rational>& output
+  void projectOntoSmallCartan(
+    Vector<Rational>& input, Vector<Rational>& output
   );
   void projectOntoSmallCartan(
     Vectors<Rational>& input, Vectors<Rational>& output
@@ -1299,7 +1309,8 @@ freudenthalEvalMeDominantWeightsOnly(
 
 template <class Coefficient>
 void SemisimpleLieAlgebra::getAdjoint(
-  MatrixTensor<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>&
+  MatrixTensor<Coefficient>& output,
+  ElementSemisimpleLieAlgebra<Coefficient>&
   e
 ) {
   Matrix<Coefficient> matForm;
@@ -1534,7 +1545,12 @@ bool CharacterSemisimpleLieAlgebraModule<Coefficient>::drawMe(
     );
     bool isTrimmed =
     !weylGroup.generateOrbit(
-      dominantWeightsNonHashed, false, finalWeights, false, 0, 0,
+      dominantWeightsNonHashed,
+      false,
+      finalWeights,
+      false,
+      0,
+      0,
       upperBoundWeights
     );
     totalWeights += finalWeights.size;

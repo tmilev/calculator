@@ -204,7 +204,9 @@ void RootSubalgebra::computeCentralizerFromKModulesAndSortKModules() {
 }
 
 void RootSubalgebra::computeExtremeWeightInTheSameKModule(
-  const Vector<Rational>& input, Vector<Rational>& outputW, bool
+  const Vector<Rational>& input,
+  Vector<Rational>& outputW,
+  bool
   lookingForHighest
 ) {
   this->getAmbientWeyl().computeExtremeRootInTheSameKMod(
@@ -277,7 +279,9 @@ bool RootSubalgebra::rootIsInCentralizer(const Vector<Rational>& input) {
 }
 
 void RootSubalgebra::writeLieBracketTableAndOppositeKModulesToFile(
-  std::fstream& output, List<List<List<int> > >& inMultTable, List<int>&
+  std::fstream& output,
+  List<List<List<int> > >& inMultTable,
+  List<int>&
   inOpposites
 ) {
   output << "pairing_table_size: " << inMultTable.size << "\n";
@@ -296,7 +300,9 @@ void RootSubalgebra::writeLieBracketTableAndOppositeKModulesToFile(
 }
 
 void RootSubalgebra::readLieBracketTableAndOppositeKModulesFromFile(
-  std::fstream& input, List<List<List<int> > >& outMultTable, List<int>&
+  std::fstream& input,
+  List<List<List<int> > >& outMultTable,
+  List<int>&
   outOpposites
 ) {
   std::string currentString;
@@ -1647,9 +1653,8 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
     }
     out << "</td><td>";
     this->getAmbientWeyl().getEpsilonCoordinates(
-      this->weightsModulesPrimalSimple[i], this->kModulesGEpsilonCoordinates[
-        i
-      ]
+      this->weightsModulesPrimalSimple[i],
+      this->kModulesGEpsilonCoordinates[i]
     );
     for (int j = 0; j < this->modules[i].size; j ++) {
       out << this->kModulesGEpsilonCoordinates[i][j].toStringEpsilonFormat();
@@ -1856,7 +1861,10 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2()
           std::string linearCombinationString;
           if (
             this->linearCombinationToStringDistinguishedIndex(
-              l, allRoots.objects[i], x, linearCombination,
+              l,
+              allRoots.objects[i],
+              x,
+              linearCombination,
               linearCombinationString
             )
           ) {
@@ -1989,7 +1997,8 @@ std::string RootSubalgebra::toStringLieBracketTable(
     }
     for (int j = 0; j < this->pairingTable[i].size; j ++) {
       if ((j == owner.centralizerRoots.size - 1) && (
-          i <= owner.centralizerRoots.size - 1
+          i <=
+          owner.centralizerRoots.size - 1
         )
       ) {
         if (useLaTeX) {
@@ -2008,7 +2017,8 @@ std::string RootSubalgebra::toStringLieBracketTable(
       }
       if (useLaTeX) {
         if ((j == owner.centralizerRoots.size - 1) && (
-            i <= owner.centralizerRoots.size - 1
+            i <=
+            owner.centralizerRoots.size - 1
           )
         ) {
           out << "}";
@@ -2179,8 +2189,9 @@ void RootSubalgebra::generatePossibleNilradicals(
     this->flagFirstRoundCounting = false;
     parabolicsGenerator.initialize(this->simpleBasisCentralizerRoots.size);
     for (
-      int i = 0; i < numberOfCycles; i ++, parabolicsGenerator.
-      incrementSelection()
+      int i = 0; i < numberOfCycles;
+      i ++,
+      parabolicsGenerator.incrementSelection()
     ) {
       selection.initialize(this->modules.size);
       for (int j = 0; j < this->centralizerRoots.size; j ++) {
@@ -2200,7 +2211,8 @@ void RootSubalgebra::generatePossibleNilradicals(
     for (
       ; parabolicsCounter < StartingNilradicalsNoRepetition.size;
       parabolicsCounter ++,
-      owner.flagNilradicalComputationInitialized = false
+      owner.flagNilradicalComputationInitialized =
+      false
     ) {
       if (!owner.flagNilradicalComputationInitialized) {
         impliedSelections[0] = (
@@ -2329,7 +2341,13 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
       );
       if (
         domainRootSubalgebra.attemptExtensionToIsomorphismNoCentralizer(
-          isoDomain, isoRange, 0, outputAutomorphisms, false, nullptr, &domain,
+          isoDomain,
+          isoRange,
+          0,
+          outputAutomorphisms,
+          false,
+          nullptr,
+          &domain,
           &range
         )
       ) {
@@ -2993,7 +3011,8 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(
   // WeylRank);
   RootSubalgebras rootSAsGenerateAll;
   rootSAsGenerateAll.subalgebras.setSize(
-    this->getOwnerSemisimpleLieAlgebra().getRank() * 2 + 1
+    this->getOwnerSemisimpleLieAlgebra().getRank() * 2 +
+    1
   );
   rootSAsGenerateAll.subalgebras[0].generatorsK.size = 0;
   rootSAsGenerateAll.subalgebras[0].owner = this;
@@ -3399,9 +3418,8 @@ void SlTwoSubalgebra::initializeUnknownTriples(const Vector<Rational>& targetH)
     // Initialize arbitrary triple
     ChevalleyGenerator negative;
     negative.makeGeneratorRootSpace(
-      this->getOwnerSemisimpleAlgebra(), - this->participatingPositiveRoots[
-        i
-      ]
+      this->getOwnerSemisimpleAlgebra(),
+      - this->participatingPositiveRoots[i]
     );
     this->fArbitrary.addMonomial(negative, i * i + 1);
     // (i % 2== 0)? 1: 2;
@@ -3427,8 +3445,9 @@ void SlTwoSubalgebra::initializeUnknownTriples(const Vector<Rational>& targetH)
       positive, unknownCoefficientAlgebraic
     );
     unknownCoefficientAlgebraic.makeMonomial(
-      i + this->participatingPositiveRoots.size, 1, this->algebraicClosure->one
-      ()
+      i + this->participatingPositiveRoots.size,
+      1,
+      this->algebraicClosure->one()
     );
     this->fKostantSekiguchiUnknown.addMonomial(
       negative, unknownCoefficientAlgebraic
@@ -3469,7 +3488,8 @@ void SlTwoSubalgebra::computePolynomialSystems() {
     );
   }
   this->systemToSolveKostantSekiguchi.clear();
-  for (int i = 0; i < this->eBracketFMinusHUnknownKostantSekiguchi.size(); i ++
+  for (
+    int i = 0; i < this->eBracketFMinusHUnknownKostantSekiguchi.size(); i ++
   ) {
     this->systemToSolveKostantSekiguchi.addOnTop(
       this->eBracketFMinusHUnknownKostantSekiguchi.coefficients[i]
@@ -4171,7 +4191,11 @@ std::string RootSubalgebras::toString(FormatExpressions* format) {
 }
 
 void RootSubalgebras::toStringCentralizerIsomorphisms(
-  std::string& output, bool useLatex, bool useHtml, int fromIndex, int
+  std::string& output,
+  bool useLatex,
+  bool useHtml,
+  int fromIndex,
+  int
   amountToProcess
 ) {
   std::stringstream out;
@@ -4347,7 +4371,9 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
       row = 0;
     }
     out << "</td>";
-    if (col == this->columnsPerTableLatex - 1 || i == this->subalgebras.size - 1
+    if (
+      col == this->columnsPerTableLatex - 1 ||
+      i == this->subalgebras.size - 1
     ) {
       out << "</tr>";
     }
@@ -4638,14 +4664,16 @@ computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
         addOnTopNoRepetition(this->subalgebras.size);
         this->
         computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
-          bufferSubalgebras, recursionDepth + 1
+          bufferSubalgebras, recursionDepth +
+          1
         );
       } else {
         this->subalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.
         addOnTopNoRepetition(indexSA);
       }
       bufferSubalgebras[recursionDepth].generatorsK.removeIndexSwapWithLast(
-        bufferSubalgebras[recursionDepth].generatorsK.size - 1
+        bufferSubalgebras[recursionDepth].generatorsK.size -
+        1
       );
     }
   }
@@ -4705,7 +4733,8 @@ void RootSubalgebras::computeActionNormalizerOfCentralizerIntersectNilradical(
   subgroup =
   this->centralizerIsomorphisms.lastObject();
   this->actionsNormalizerCentralizerNilradical.setSize(
-    subgroup.allElements.size - 1
+    subgroup.allElements.size -
+    1
   );
   Vector<Rational> root;
   ProgressReport report;
@@ -4746,7 +4775,8 @@ void RootSubalgebras::computeNormalizerOfCentralizerIntersectNilradical(
   this->centralizerIsomorphisms.reserve(this->subalgebras.size);
   this->centralizerOuterIsomorphisms.reserve(this->subalgebras.size);
   this->centralizerIsomorphisms.setSize(
-    this->centralizerIsomorphisms.size + 1
+    this->centralizerIsomorphisms.size +
+    1
   );
   this->centralizerOuterIsomorphisms.setSize(
     this->centralizerIsomorphisms.size
@@ -4837,7 +4867,8 @@ void RootSubalgebras::raiseSelectionUntilApproval(Selection& targetSelection) {
   bool raised = true;
   while (raised) {
     raised = false;
-    for (int i = 0; i < this->actionsNormalizerCentralizerNilradical.size; i ++
+    for (
+      int i = 0; i < this->actionsNormalizerCentralizerNilradical.size; i ++
     ) {
       if (
         !this->approveSelAgainstOneGenerator(
@@ -5047,7 +5078,9 @@ void RootSubalgebras::toStringRootSpaces(
           }
           matrix.elements[positiveIndex][negativeIndex] = 1;
           matrix.elements[dimension + 1 + negativeIndex][
-            dimension + 1 + positiveIndex
+            dimension +
+            1 +
+            positiveIndex
           ] =
           - 1;
         } else {

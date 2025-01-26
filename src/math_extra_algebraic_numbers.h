@@ -236,7 +236,8 @@ public:
   );
   bool reduceMe(std::stringstream* commentsOnFailure);
   void contractBasesIfRedundant(
-    AlgebraicClosureRationals& previousCopy, AlgebraicNumber*
+    AlgebraicClosureRationals& previousCopy,
+    AlgebraicNumber*
     outputImageGenerator
   );
   void computeDisplayStringsFromRadicals();
@@ -253,7 +254,8 @@ public:
     const AlgebraicNumber& input, VectorSparse<Rational>& output
   );
   void convertPolynomialOneVariableToPolynomialFirstVariable(
-    const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>&
+    const Polynomial<AlgebraicNumber>& input,
+    Polynomial<AlgebraicNumber>&
     output
   );
   bool adjoinRootMinimalPolynomial(
@@ -390,7 +392,9 @@ public:
   bool tryFactor(SelectionFixedRank& selection);
   void henselLift(std::stringstream* comments);
   void henselLiftOnce(
-    const LargeIntegerUnsigned& oldModulus, int stepCount, std::stringstream*
+    const LargeIntegerUnsigned& oldModulus,
+    int stepCount,
+    std::stringstream*
     comments
   );
   // Same as factor.
@@ -426,7 +430,8 @@ public:
     std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   // Factors the polynomial fully.
-  bool factor(std::stringstream* comments, std::stringstream* commentsOnFailure
+  bool factor(
+    std::stringstream* comments, std::stringstream* commentsOnFailure
   );
   bool hasSquareFactor(
     std::stringstream* comments, std::stringstream* commentsOnFailure

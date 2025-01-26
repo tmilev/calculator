@@ -19,7 +19,8 @@ public:
   int indexFDVector;
   MonomialGeneralizedVerma(): owner(nullptr), indexFDVector(- 1) {}
   friend std::ostream& operator<<(
-    std::ostream& output, const MonomialGeneralizedVerma<Coefficient>&
+    std::ostream& output,
+    const MonomialGeneralizedVerma<Coefficient>&
     generator
   ) {
     output << generator.toString();
@@ -38,7 +39,8 @@ public:
     FormatExpressions* format = nullptr, bool includeV =
     true) const;
   bool operator==(const MonomialGeneralizedVerma<Coefficient>& other) const {
-    if (this->indexFDVector == other.indexFDVector && this->owner == other.owner
+    if (
+      this->indexFDVector == other.indexFDVector && this->owner == other.owner
     ) {
       return this->monomialCoefficientOne == other.monomialCoefficientOne;
     }
@@ -137,7 +139,8 @@ public:
     return answer;
   }
   bool extractElementUniversalEnveloping(
-    ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra&
+    ElementUniversalEnveloping<Coefficient>& output,
+    SemisimpleLieAlgebra&
     owner
   );
   void operator=(const ElementSumGeneralizedVermas<Coefficient>& other) {
@@ -152,7 +155,8 @@ class MonomialTensorGeneralizedVermas {
 public:
   List<MonomialGeneralizedVerma<Coefficient> > monomials;
   friend std::ostream& operator<<(
-    std::ostream& output, const MonomialTensorGeneralizedVermas<Coefficient>&
+    std::ostream& output,
+    const MonomialTensorGeneralizedVermas<Coefficient>&
     input
   ) {
     output << input.toString();
@@ -251,14 +255,16 @@ class ModuleSSalgebra {
   highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
     const MonomialTensor<int, HashFunctions::hashFunction>& leftMonomial,
     const MonomialTensor<int, HashFunctions::hashFunction>& rightMonomial,
-    ProgressReport* progressReport = nullptr
+    ProgressReport* progressReport =
+    nullptr
   );
   Rational highestWeightTrace(
     const Pair<
       MonomialTensor<int, HashFunctions::hashFunction>,
       MonomialTensor<int, HashFunctions::hashFunction>
     >& pair,
-    ProgressReport* progressReport = nullptr
+    ProgressReport* progressReport =
+    nullptr
   );
   void checkConsistency();
 public:
@@ -415,7 +421,8 @@ public:
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
     std::string* outputReport,
-    bool computeSimpleGens = true
+    bool computeSimpleGens =
+    true
   );
   SemisimpleLieAlgebra& getOwner() const {
     if (this->owner == nullptr) {
@@ -453,7 +460,8 @@ public:
   );
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string elementToStringHighestWeightVector(
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   ) const {
     if (this->highestWeightVectorNotation != "") {
       return this->highestWeightVectorNotation;
@@ -474,7 +482,8 @@ public:
     nullptr,
     Vectors<Coefficient>* outputWeightsFundamentalCoordinates = nullptr,
     Vectors<Coefficient>* outputEigenSpace = nullptr,
-    CharacterSemisimpleLieAlgebraModule<Coefficient>* outputChar = nullptr
+    CharacterSemisimpleLieAlgebraModule<Coefficient>* outputChar =
+    nullptr
   );
   void splitFDpartOverFKLeviRedSubalg(
     HomomorphismSemisimpleLieAlgebra& homomorphism,
@@ -483,7 +492,8 @@ public:
     nullptr,
     Vectors<Coefficient>* outputWeightsFundamentalCoordinates = nullptr,
     Vectors<Coefficient>* outputEigenSpace = nullptr,
-    std::stringstream* comments = nullptr
+    std::stringstream* comments =
+    nullptr
   );
   template <class ResultType>
   void getElementsNilradical(
@@ -691,7 +701,8 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
       summand = 0;
       newRight = accumulator;
       newRight.multiplyByGeneratorPowerOnTheRight(
-        oldRight.generatorsIndices[i], oldRight.powers[i] - 1
+        oldRight.generatorsIndices[i], oldRight.powers[i] -
+        1
       );
       remainingWeight.makeZero(weylGroup.getDimension());
       for (int j = i + 1; j < oldRight.generatorsIndices.size; j ++) {
@@ -937,9 +948,8 @@ void ModuleSSalgebra<Coefficient>::getMatrixHomogenousElement(
           global.fatal << "Negative row index not allowed. " << global.fatal;
         }
         output.addMonomial(
-          MonomialMatrix(indexRow, indexColumn), imageMonomial.coefficients[
-            l
-          ]
+          MonomialMatrix(indexRow, indexColumn),
+          imageMonomial.coefficients[l]
         );
       }
     }
@@ -1197,7 +1207,8 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   subWeyl.ambientWeyl = &this->owner->weylGroup;
   MemorySaving<CharacterSemisimpleLieAlgebraModule<Coefficient> > buffer;
   CharacterSemisimpleLieAlgebraModule<Coefficient>& charWRTsubalgebra = (
-    outputChar == 0
+    outputChar ==
+    0
   ) ?
   buffer.getElement() :
   *outputChar;
@@ -1389,9 +1400,8 @@ getActionSimpleGeneratorIndex(int generatorIndex) {
         );
         for (int k = 0; k < scalarProducts.size; k ++) {
           outputMat.addMonomial(
-            MonomialMatrix(rowOffset + k, columnOffset + j), scalarProducts[
-              k
-            ]
+            MonomialMatrix(rowOffset + k, columnOffset + j),
+            scalarProducts[k]
           );
         }
       }
@@ -1669,7 +1679,8 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
           }
           if (k == 1) {
             this->getActionGeneratorIndex(
-              this->getOwner().getNumberOfPositiveRoots() + j
+              this->getOwner().getNumberOfPositiveRoots() +
+              j
             );
           }
         }
@@ -1877,7 +1888,9 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
     left = this->getActionGeneratorIndex(i);
     right =
     this->getActionGeneratorIndex(
-      this->getOwner().getNumberOfGenerators() - 1 - i
+      this->getOwner().getNumberOfGenerators() -
+      1 -
+      i
     );
     left.transpose();
     left -= right;
@@ -2470,7 +2483,8 @@ void ModuleSSalgebra<Coefficient>::getGenericUnMinusElement(
 ) {
   STACK_TRACE("ModuleSSalgebra::getGenericUnMinusElement");
   List<ElementUniversalEnveloping<Coefficient> > elementsNilradical;
-  this->getElementsNilradical(elementsNilradical, true, useNilWeight, ascending
+  this->getElementsNilradical(
+    elementsNilradical, true, useNilWeight, ascending
   );
   RationalFraction<Rational> rationalFunction;
   output.makeZero(*this->owner);
@@ -2539,7 +2553,8 @@ getActionGeneralizedVermaModuleAsDifferentialOperator(
   );
   ElementUniversalEnveloping<Polynomial<Rational> > genericElement;
   ElementUniversalEnveloping<Polynomial<Rational> > result;
-  this->getGenericUnMinusElement(true, genericElement, useNilWeight, ascending
+  this->getGenericUnMinusElement(
+    true, genericElement, useNilWeight, ascending
   );
   result.assignElementLieAlgebra(inputElement, *this->owner, 1);
   Polynomial<Rational> onePolynomial;

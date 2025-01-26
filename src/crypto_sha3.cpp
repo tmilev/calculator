@@ -300,7 +300,8 @@ void Sha3::finalize() {
     // Original Keccak.
     this->stateStorage[this->wordIndex] ^= (
       this->saved ^ (
-        static_cast<uint64_t>(static_cast<uint64_t>(1) << (this->byteIndex * 8)
+        static_cast<uint64_t>(
+          static_cast<uint64_t>(1) << (this->byteIndex * 8)
         )
       )
     );

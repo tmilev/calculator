@@ -464,7 +464,9 @@ bool CalculatorConversions::convert<Polynomial<ElementZmodP> >(
 
 template < >
 bool CalculatorConversions::convert<Rational>(
-  Calculator& calculator, const Expression& input, WithContext<Rational>&
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<Rational>&
   output
 ) {
   (void) calculator;
@@ -561,7 +563,9 @@ bool CalculatorConversions::convert(
 
 template < >
 bool CalculatorConversions::convert(
-  Calculator& calculator, const Expression& input, WithContext<std::string>&
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<std::string>&
   output
 ) {
   return
@@ -570,7 +574,9 @@ bool CalculatorConversions::convert(
 
 template < >
 bool CalculatorConversions::convert(
-  Calculator& calculator, const Expression& input, WithContext<ElementZmodP>&
+  Calculator& calculator,
+  const Expression& input,
+  WithContext<ElementZmodP>&
   output
 ) {
   return
@@ -600,9 +606,8 @@ bool CalculatorConversions::expressionFromChevalleyGenerator(
     );
   }
   generatorIndexExpression.assignValue(
-    calculator, input.owner->getDisplayIndexFromGenerator(
-      input.generatorIndex
-    )
+    calculator,
+    input.owner->getDisplayIndexFromGenerator(input.generatorIndex)
   );
   return
   output.makeXOX(
@@ -922,9 +927,8 @@ bool CalculatorConversions::expressionFromDynkinSimpleType(
   std::string letterS;
   letterS = input.letter;
   letterExpression.makeAtom(
-    calculator, calculator.addOperationNoRepetitionOrReturnIndexFirst(
-      letterS
-    )
+    calculator,
+    calculator.addOperationNoRepetitionOrReturnIndexFirst(letterS)
   );
   indexExpression.assignValue(calculator, input.cartanSymmetricInverseScale);
   rankExpression.assignValue(calculator, input.rank);
@@ -933,7 +937,9 @@ bool CalculatorConversions::expressionFromDynkinSimpleType(
   );
   return
   output.makeXOX(
-    calculator, calculator.opUnderscore(), letterAndIndexExpression,
+    calculator,
+    calculator.opUnderscore(),
+    letterAndIndexExpression,
     rankExpression
   );
 }
@@ -1344,7 +1350,12 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   Matrix<Rational> hElements;
   if (
     !CalculatorConversions::functionGetMatrix(
-      calculator, elementsCartanExpression, hElements, false, nullptr, rank,
+      calculator,
+      elementsCartanExpression,
+      hElements,
+      false,
+      nullptr,
+      rank,
       nullptr
     )
   ) {
@@ -1579,7 +1590,8 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   subalgebras.subalgebras.setExpectedSize(subalgebrasElement.size() - 1);
   subalgebras.subalgebras.clear();
   subalgebras.subalgebrasNonEmbedded->setExpectedSize(
-    subalgebrasElement.size() - 1
+    subalgebrasElement.size() -
+    1
   );
   subalgebras.flagAttemptToSolveSystems = true;
   subalgebras.flagComputeModuleDecomposition = true;
@@ -1605,7 +1617,10 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     CandidateSemisimpleSubalgebra currentCandidate;
     if (
       !CalculatorConversions::candidateSubalgebraPrecomputed(
-        calculator, subalgebrasElement[i], expression, currentCandidate,
+        calculator,
+        subalgebrasElement[i],
+        expression,
+        currentCandidate,
         subalgebras
       )
     ) {
@@ -1684,7 +1699,9 @@ std::string CalculatorConversions::stringFromSemisimpleSubalgebras(
 }
 
 bool CalculatorConversions::storeSemisimpleSubalgebras(
-  Calculator& calculator, const SemisimpleSubalgebras& input, Expression&
+  Calculator& calculator,
+  const SemisimpleSubalgebras& input,
+  Expression&
   output
 ) {
   STACK_TRACE("CalculatorConversions::storeSemisimpleSubalgebras");
@@ -2307,8 +2324,13 @@ bool CalculatorConversions::functionMatrixRationalFunction(
   ExpressionContext context(calculator);
   if (
     !CalculatorConversions::functionGetMatrix(
-      calculator, input, outputMatrix, true, &context, - 1, &calculator.
-      comments
+      calculator,
+      input,
+      outputMatrix,
+      true,
+      &context,
+      - 1,
+      &calculator.comments
     )
   ) {
     return calculator << "<hr>Failed to get matrix of rational functions. ";

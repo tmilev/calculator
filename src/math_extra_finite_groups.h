@@ -278,7 +278,8 @@ public:
     FiniteGroup<elementSomeGroup>& G
   );
   LargeInteger(*getSizeByFormula)(FiniteGroup<elementSomeGroup>& G);
-  bool areConjugate(const elementSomeGroup& left, const elementSomeGroup& right
+  bool areConjugate(
+    const elementSomeGroup& left, const elementSomeGroup& right
   );
   bool areConjugate_OLD_Deprecated_Version(
     const elementSomeGroup& left, const elementSomeGroup& right
@@ -309,7 +310,8 @@ public:
   bool computeConjugacyClassesRepresentatives();
   void computeGeneratorsConjugacyClasses();
   void computeConjugacyClassSizesAndRepresentatives(
-    bool useComputeCCSizesRepresentativesWords = true
+    bool useComputeCCSizesRepresentativesWords =
+    true
   );
   void computeConjugacyClassSizesAndRepresentativesWithOrbitIterator();
   void computeConjugacyClassesSizesRepresentativesWords();
@@ -701,7 +703,9 @@ public:
   bool loadConjugacyClassesHelper();
   bool loadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups);
   void computeOrLoadCharacterTable(std::stringstream* reportStream = nullptr);
-  void computeOrLoadConjugacyClasses(std::stringstream* reportStream = nullptr
+  void computeOrLoadConjugacyClasses(
+    std::stringstream* reportStream =
+    nullptr
   );
   static void computeIrreducibleRepresentationsWithFormulasImplementation(
     FiniteGroup<ElementWeylGroup>& g
@@ -714,7 +718,8 @@ public:
   );
   void computeRho(bool recompute);
   std::string toStringRootsAndRootReflections(
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   );
   std::string toString(FormatExpressions* format = nullptr);
   std::string toStringCppConjugacyClasses(FormatExpressions* format = nullptr);
@@ -724,7 +729,9 @@ public:
     const List<SubgroupDataRootReflections>& inputSubgroups
   );
   void makeArbitrarySimple(
-    char weylGroupLetter, int n, const Rational* firstCoRootLengthSquared =
+    char weylGroupLetter,
+    int n,
+    const Rational* firstCoRootLengthSquared =
     nullptr
   );
   void makeFromDynkinType(const DynkinType& inputType);
@@ -739,7 +746,9 @@ public:
   void computeCoCartanSymmetricFromCartanSymmetric();
   bool checkConsistency() const;
   static bool getWordByFormulaImplementation(
-    FiniteGroup<ElementWeylGroup>& group, const ElementWeylGroup& g, List<
+    FiniteGroup<ElementWeylGroup>& group,
+    const ElementWeylGroup& g,
+    List<
       int
     >& out
   );
@@ -877,8 +886,8 @@ public:
   }
   template <class Coefficient>
   Coefficient weylDimensionFormulaSimpleCoordinates(
-    Vector<Coefficient>& weightInSimpleCoordinates, const Coefficient& ringUnit
-    =
+    Vector<Coefficient>& weightInSimpleCoordinates,
+    const Coefficient& ringUnit =
     1
   );
   template <class Coefficient>
@@ -890,7 +899,8 @@ public:
     Vector<Coefficient>& weight,
     int* sign = nullptr,
     bool* stabilizerFound = nullptr,
-    ElementWeylGroup* raisingElement = nullptr
+    ElementWeylGroup* raisingElement =
+    nullptr
   );
   bool areMaximallyDominantGroupInner(List<Vector<Rational> >& weights);
   template <class Coefficient>
@@ -909,7 +919,8 @@ public:
     bool drawWeylChamber,
     Vector<Rational>* bluePoint = nullptr,
     bool labelDynkinDiagramVertices = false,
-    Vectors<Rational>* predefinedProjectionPlane = nullptr
+    Vectors<Rational>* predefinedProjectionPlane =
+    nullptr
   );
   bool hasStronglyPerpendicularDecompositionWRT(
     Vector<Rational>& input,
@@ -922,7 +933,8 @@ public:
   static bool isAddmisibleDynkinType(char candidateLetter, int n);
   // The below will not do anything if the inputLetter is not a valid Dynkin
   // letter.
-  static void transformToAdmissibleDynkinType(char inputLetter, int& outputRank
+  static void transformToAdmissibleDynkinType(
+    char inputLetter, int& outputRank
   );
   void computeEpsilonMatrix();
   template <class Coefficient>
@@ -1032,7 +1044,10 @@ public:
   }
   void generateRootSystem();
   void actOnAffineHyperplaneByGroupElement(
-    int index, AffineHyperplane<Rational>& output, bool rhoAction, bool
+    int index,
+    AffineHyperplane<Rational>& output,
+    bool rhoAction,
+    bool
     useMinusRho
   );
   void getLowestElementInOrbit(
@@ -1042,7 +1057,8 @@ public:
     bool rhoAction,
     bool useMinusRho,
     int* sign = nullptr,
-    bool* stabilizerFound = nullptr
+    bool* stabilizerFound =
+    nullptr
   ) {
     this->getExtremeElementInOrbit(
       inputOutput,
@@ -1091,7 +1107,8 @@ public:
     outputWeylElement.generatorsLastAppliedFirst.setSize(
       this->getDimension()
     );
-    for (int i = 0; i < outputWeylElement.generatorsLastAppliedFirst.size; i ++
+    for (
+      int i = 0; i < outputWeylElement.generatorsLastAppliedFirst.size; i ++
     ) {
       outputWeylElement.generatorsLastAppliedFirst[i].makeSimpleReflection(i);
     }
@@ -1116,7 +1133,8 @@ public:
     Vector<Coefficient>& outputVector
   ) const {
     outputVector = inputVector;
-    for (int i = groupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
+    for (
+      int i = groupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
     ) {
       this->reflectSimple(
         groupElement.generatorsLastAppliedFirst[i].index, outputVector
@@ -1140,7 +1158,10 @@ public:
   }
   template <class Coefficient>
   void actOnDual(
-    int index, Vector<Coefficient>& vector, bool RhoAction, const Coefficient&
+    int index,
+    Vector<Coefficient>& vector,
+    bool RhoAction,
+    const Coefficient&
     ringZero
   );
   // root is a list of the simple coordinates of the Vector<Rational>
@@ -1193,7 +1214,8 @@ public:
     this->getMatrixStandardRepresentation(input, result);
     return result;
   }
-  void simpleReflectionDualSpace(int index, Vector<Rational>& dualSpaceElement
+  void simpleReflectionDualSpace(
+    int index, Vector<Rational>& dualSpaceElement
   );
   void simpleReflectionRootPolynomial(
     int index, PolynomialSubstitution<Rational>& root, bool rhoAction
@@ -2431,7 +2453,9 @@ public:
   Vector<Rational> getRho();
   template <class Coefficient>
   void raiseToDominantWeightInner(
-    Vector<Coefficient>& weight, int* sign = nullptr, bool* stabilizerFound =
+    Vector<Coefficient>& weight,
+    int* sign = nullptr,
+    bool* stabilizerFound =
     nullptr
   );
   template <class Coefficient>
@@ -2537,7 +2561,8 @@ class ElementWeylGroupRing: public ElementMonomialAlgebra<
 public:
   void makeEi(WeylGroupData* G, int i);
   void makeFromClassFunction(WeylGroupData* G, const List<Coefficient>& l);
-  void makeFromClassFunction(const ClassFunction<WeylGroupData, Coefficient>& l
+  void makeFromClassFunction(
+    const ClassFunction<WeylGroupData, Coefficient>& l
   );
 };
 

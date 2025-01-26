@@ -39,7 +39,8 @@ public:
   const;
   VectorSpace<Coefficient> Union(const VectorSpace<Coefficient>& other) const;
   VectorSpace<Coefficient> orthogonalComplement(
-    VectorSpace<Coefficient>* ambient = 0, Matrix<Coefficient>* form = 0
+    VectorSpace<Coefficient>* ambient = 0, Matrix<Coefficient>* form =
+    0
   ) const;
   Vector<Coefficient> getBasisVector(int i) const;
   Vector<Coefficient> getCanonicalBasisVector(int i) const;

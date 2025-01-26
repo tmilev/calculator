@@ -535,7 +535,8 @@ void PermutationR2::conjugationAction(
   out = conjugateOn ^ conjugateWith;
 }
 
-bool PermutationR2::areConjugate(const PermutationR2& x, const PermutationR2& y
+bool PermutationR2::areConjugate(
+  const PermutationR2& x, const PermutationR2& y
 ) {
   List<int> xcsh, ycsh;
   x.getCycleStructure(xcsh);

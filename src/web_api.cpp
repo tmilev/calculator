@@ -19,7 +19,8 @@ void WebAPIResponse::reset(WebWorker& inputOwner) {
 }
 
 bool WebAPIResponse::serveResponseFalseIfUnrecognized(
-  std::stringstream& argumentProcessingFailureComments, std::stringstream&
+  std::stringstream& argumentProcessingFailureComments,
+  std::stringstream&
   comments
 ) {
   STACK_TRACE("WebAPIResponse::serveResponseFalseIfUnrecognized");
@@ -184,11 +185,13 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
   } else if ("/" + global.requestType == WebAPI::Request::calculatorWorkerJS) {
     return this->processCalculatorWebWorkerJS(false);
   } else if (
-    "/" + global.requestType == WebAPI::Request::calculatorWorkerJSWithHash
+    "/" + global.requestType ==
+    WebAPI::Request::calculatorWorkerJSWithHash
   ) {
     return this->processCalculatorWebWorkerJS(true);
   } else if (
-    global.flagLoggedIn && global.requestType == WebAPI::Request::deleteAccount
+    global.flagLoggedIn &&
+    global.requestType == WebAPI::Request::deleteAccount
   ) {
     return this->processDeleteAccount();
   }
@@ -371,7 +374,8 @@ void WebAPIResponse::changePassword(
     DatabaseStrings::labelActivationToken, "activated"
   );
   if (
-    !Database::get().updateOne(findQuery, doSetQuery, false, &commentsOnFailure
+    !Database::get().updateOne(
+      findQuery, doSetQuery, false, &commentsOnFailure
     )
   ) {
     result[WebAPI::Result::error] =
@@ -1040,7 +1044,8 @@ bool WebAPIResponse::addOneUser(
   QueryFindOneOf findUserByUsernameOrEmail;
   QueryFind findUserByUsername =
   QueryFind(
-    DatabaseStrings::tableUsers, DatabaseStrings::labelUsername,
+    DatabaseStrings::tableUsers,
+    DatabaseStrings::labelUsername,
     userNameOrEmail
   );
   findUserByUsernameOrEmail.queries.addOnTop(findUserByUsername);

@@ -100,7 +100,8 @@ public:
   bool checkInitialization() const;
   int getDisplayIndexFromGeneratorIndex(int generatorIndex);
   void getLinearCombinationFrom(
-    ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>&
+    ElementSemisimpleLieAlgebra<Rational>& input,
+    Vector<Rational>&
     coefficients
   );
   void initialize(
@@ -188,7 +189,8 @@ public:
   std::string prepareReport();
   GeneralizedVermaModuleCharacters();
   bool checkInitialization() const;
-  std::string prepareReportOneCone(FormatExpressions& format, const Cone& cone
+  std::string prepareReportOneCone(
+    FormatExpressions& format, const Cone& cone
   );
   void getProjection(
     int indexOperator, const Vector<Rational>& input, Vector<Rational>& output
@@ -210,7 +212,8 @@ public:
     int numberOfParameters
   );
   void initFromHomomorphism(
-    Vector<Rational>& parabolicSelection, HomomorphismSemisimpleLieAlgebra&
+    Vector<Rational>& parabolicSelection,
+    HomomorphismSemisimpleLieAlgebra&
     input
   );
   void transformToWeylProjectiveStep1();
@@ -230,7 +233,8 @@ class MonomialUniversalEnvelopingOrdered {
   void simplifyAccumulateInOutputNoOutputInit(
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero = 0
+    const Coefficient& ringZero =
+    0
   );
   MonomialUniversalEnvelopingOrdered(
     const MonomialUniversalEnvelopingOrdered& other
@@ -255,7 +259,8 @@ public:
   );
   void multiplyByGeneratorPowerOnTheRight(int generatorIndex, int power);
   void multiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other);
-  void makeZero(int numberOfVariables, SemisimpleLieAlgebraOrdered& inputOwner
+  void makeZero(
+    int numberOfVariables, SemisimpleLieAlgebraOrdered& inputOwner
   );
   void makeZero(
     const Coefficient& ringZero, SemisimpleLieAlgebraOrdered& inputOwner
@@ -263,12 +268,14 @@ public:
   bool modOutFDRelationsExperimental(
     const Vector<Rational>& highestWeightSimpleCoordinates,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero = 0
+    const Coefficient& ringZero =
+    0
   );
   void modOutVermaRelations(
     const List<Coefficient>* substitutionHiGoesToIthElement = 0,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero = 0
+    const Coefficient& ringZero =
+    0
   );
   void setNumberOfVariables(int newNumberOfVariables);
   unsigned int hashFunction() const;
@@ -299,7 +306,8 @@ public:
   bool switchConsecutiveIndicesIfTheyCommute(
     int leftIndex,
     MonomialUniversalEnvelopingOrdered<Coefficient>& output,
-    const Coefficient& ringZero = 0
+    const Coefficient& ringZero =
+    0
   );
   void makeConstant(
     const Coefficient& inputConstant, SemisimpleLieAlgebraOrdered& inputOwner
@@ -312,19 +320,22 @@ public:
   void simplify(
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero = 0
+    const Coefficient& ringZero =
+    0
   );
   void commuteConsecutiveIndicesLeftIndexAroundRight(
     int index,
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero = 0
+    const Coefficient& ringZero =
+    0
   );
   void commuteConsecutiveIndicesRightIndexAroundLeft(
     int index,
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero = 0
+    const Coefficient& ringZero =
+    0
   );
   MonomialUniversalEnvelopingOrdered() {
     this->owner = nullptr;
@@ -410,7 +421,8 @@ public:
   bool modOutFDRelationsExperimental(
     const Vector<Rational>& highestWeightSimpleCoordinates,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero = 0
+    const Coefficient& ringZero =
+    0
   );
   bool isEqualToZero() const {
     return this->size == 0;
@@ -442,7 +454,8 @@ public:
   void modOutVermaRelations(
     const List<Coefficient>* substitutionHiGoesToIthElement = 0,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero = 0
+    const Coefficient& ringZero =
+    0
   );
   void modOutVermaRelationsOld(
     bool substitutionHighestWeightWithZeroes,
@@ -892,7 +905,11 @@ highestWeightTransposeAntiAutomorphismBilinearForm(
   element2.addMonomial(right, ringUnit);
   return
   element1.highestWeightTransposeAntiAutomorphismBilinearForm(
-    element2, output, substitutionHiGoesToIthElement, ringUnit, ringZero,
+    element2,
+    output,
+    substitutionHiGoesToIthElement,
+    ringUnit,
+    ringZero,
     logStream
   );
 }
@@ -1046,7 +1063,8 @@ void MonomialUniversalEnveloping<Coefficient>::simplify(
 template <class Coefficient>
 bool ElementUniversalEnvelopingOrdered<Coefficient>::
 getElementUniversalEnveloping(
-  ElementUniversalEnveloping<Coefficient>& output, SemisimpleLieAlgebra&
+  ElementUniversalEnveloping<Coefficient>& output,
+  SemisimpleLieAlgebra&
   inputOwner
 ) {
   ElementUniversalEnveloping<Coefficient> Accum, element;
@@ -1273,7 +1291,8 @@ assignElementUniversalEnvelopingOrderedTimesHighestWeightVector(
   this->substitutionNthElementIsImageNthCoordinateSimpleBasis =
   ringZero.substitutionNthElementIsImageNthCoordinateSimpleBasis;
   this->elementInternal.modOutVermaRelationsOld(
-    false, this->substitutionNthElementIsImageNthCoordinateSimpleBasis,
+    false,
+    this->substitutionNthElementIsImageNthCoordinateSimpleBasis,
     ringUnit
   );
 }
@@ -1293,7 +1312,8 @@ void ElementVermaModuleOrdered<Coefficient>::multiplyOnTheLeft(
   output.elementInternal = element;
   output.elementInternal.simplify(ringUnit, ringZero);
   output.elementInternal.modOutVermaRelationsOld(
-    false, this->substitutionNthElementIsImageNthCoordinateSimpleBasis,
+    false,
+    this->substitutionNthElementIsImageNthCoordinateSimpleBasis,
     ringUnit
   );
 }
@@ -1336,7 +1356,8 @@ void ElementVermaModuleOrdered<Coefficient>::actOnMe(
   output.substitutionNthElementIsImageNthCoordinateSimpleBasis =
   this->substitutionNthElementIsImageNthCoordinateSimpleBasis;
   output.elementInternal.modOutVermaRelationsOld(
-    false, this->substitutionNthElementIsImageNthCoordinateSimpleBasis,
+    false,
+    this->substitutionNthElementIsImageNthCoordinateSimpleBasis,
     ringUnit
   );
 }
@@ -1981,7 +2002,8 @@ multiplyByGeneratorPowerOnTheRight(int generatorIndex, int power) {
 
 template <class Coefficient>
 void MonomialUniversalEnvelopingOrdered<Coefficient>::
-multiplyByGeneratorPowerOnTheRight(int generatorIndex, const Coefficient& power
+multiplyByGeneratorPowerOnTheRight(
+  int generatorIndex, const Coefficient& power
 ) {
   if (power.isEqualToZero()) {
     return;

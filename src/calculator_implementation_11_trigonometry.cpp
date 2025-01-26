@@ -234,7 +234,8 @@ bool CalculatorFunctionsTrigonometry::exploitCosineEvenness(
   output.makeOX(
     calculator,
     calculator.opCos(),
-    negativeOne * coefficientExpression * nonCoefficientPart
+    negativeOne * coefficientExpression *
+    nonCoefficientPart
   );
 }
 
@@ -260,7 +261,8 @@ bool CalculatorFunctionsTrigonometry::exploitSineOddness(
   Expression sinE;
   moneE.assignValue(calculator, - 1);
   sinE.makeOX(
-    calculator, calculator.opSin(), moneE * coefficientExpression * nonCFpart
+    calculator, calculator.opSin(), moneE * coefficientExpression *
+    nonCFpart
   );
   output = moneE * sinE;
   return true;
@@ -764,7 +766,8 @@ public:
     std::stringstream* commentsOnFailure
   );
   void sineAlgebraicForm(int letterIndex, Polynomial<AlgebraicNumber>& output);
-  void cosineAlgebraicForm(int letterIndex, Polynomial<AlgebraicNumber>& output
+  void cosineAlgebraicForm(
+    int letterIndex, Polynomial<AlgebraicNumber>& output
   );
   bool cosinePowerNAlgebraicForm(
     int power,
@@ -1585,7 +1588,8 @@ void TrigonometricReduction::TrigonometricFunction::computeEulerFormExpression(
     Expression twoI =
     calculator.expressionTwo() * calculator.expressionSquareRootNegativeOne();
     this->eulerFormExpression = (
-      plusSummand + calculator.expressionMinusOne() * minusSummand
+      plusSummand +
+      calculator.expressionMinusOne() * minusSummand
     ) /
     twoI;
   } else {

@@ -311,7 +311,8 @@ public:
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void getGenericLinearCombinationInvolvedPosGens(
-    int index, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
+    int index,
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
     output
   );
   void computeCentralizerIsWellChosen();
@@ -335,18 +336,21 @@ public:
     const CandidateSemisimpleSubalgebra& baseSubalgebra,
     const DynkinType& newType,
     const List<int>& rootInjection,
-    Vector<Rational>* newHScaledToActByTwo = nullptr
+    Vector<Rational>* newHScaledToActByTwo =
+    nullptr
   );
   void enumerateAllNilradicals();
   std::string toStringNilradicalSelection(const List<int>& selection);
   void enumerateNilradicalsRecursively(
-    List<int>& selection, std::stringstream* logStream = nullptr
+    List<int>& selection, std::stringstream* logStream =
+    nullptr
   );
   void extendNilradicalSelectionToMultFreeOverSemisimplePartSubalgebra(
     HashedList<int, HashFunctions::hashFunction>& inputOutput
   );
   bool isPossibleNilradicalCarryOutSelectionImplications(
-    List<int>& selection, std::stringstream* logStream = nullptr
+    List<int>& selection, std::stringstream* logStream =
+    nullptr
   );
   void extendToModule(
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput
@@ -470,7 +474,8 @@ public:
   std::string toStringModuleDecomposition(FormatExpressions* format = nullptr)
   const;
   std::string toStringModuleDecompositionLaTeX(
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   ) const;
   std::string toStringDrawWeights(FormatExpressions* format = nullptr) const;
   std::string toStringDrawWeightsHelper(
@@ -761,17 +766,20 @@ public:
     FormatExpressions* format
   );
   std::string toStringSubalgebrasWithHDWrite(
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   );
   std::string writeToHardDisk(FormatExpressions* format);
   void writeSubalgebraToFile(FormatExpressions* format, int subalgebraIndex);
   std::string toStringPart3(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringSl2s(FormatExpressions* format = nullptr);
   std::string toStringSemisimpleSubalgebrasSummaryLaTeX(
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   ) const;
   std::string toStringSemisimpleSubalgebraSummaryHTML(
-    FormatExpressions* format = nullptr
+    FormatExpressions* format =
+    nullptr
   ) const;
   void computePairingTablesAndFKFTtypes();
   void getCentralizerChains(List<List<int> >& outputChains);

@@ -189,7 +189,8 @@ Rational Polynomial<Coefficient>::totalDegree() const {
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::substitute(
-  const PolynomialSubstitution<Coefficient>& substitution, const Coefficient&
+  const PolynomialSubstitution<Coefficient>& substitution,
+  const Coefficient&
   one
 ) {
   return this->substituteWriteOutput(substitution, one, *this);
@@ -1679,7 +1680,8 @@ void Polynomial<Coefficient>::coefficientPolynomialOfXPowerK(
 
 template <class Coefficient>
 void Polynomial<Coefficient>::polynomialWithPolynomialCoefficient(
-  Selection& nonCoefficientVariables, Polynomial<Polynomial<Coefficient> >&
+  Selection& nonCoefficientVariables,
+  Polynomial<Polynomial<Coefficient> >&
   output
 ) const {
   STACK_TRACE("Polynomial::getPolynomialWithPolynomialCoefficient");

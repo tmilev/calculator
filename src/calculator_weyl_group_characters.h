@@ -13,7 +13,10 @@ public:
     bool useRho
   );
   static bool weylRaiseToMaximallyDominant(
-    Calculator& calculator, const Expression& input, Expression& output, bool
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool
     useOuter
   );
   static bool weylOuterRaiseToMaximallyDominant(

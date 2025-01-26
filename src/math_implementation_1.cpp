@@ -20,7 +20,8 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
     int simpleIndex = generatorIndex - this->getNumberOfPositiveRoots();
     outputIndicesFormatAd0Ad1Ad2etc.addOnTop(generatorIndex + this->getRank());
     outputIndicesFormatAd0Ad1Ad2etc.addOnTop(
-      2 * this->getNumberOfPositiveRoots() - 1 - generatorIndex
+      2 *
+      this->getNumberOfPositiveRoots() - 1 - generatorIndex
     );
     outputMultiplyLieBracketsToGetGenerator =
     this->weylGroup.cartanSymmetric.elements[simpleIndex][simpleIndex] /
@@ -673,11 +674,13 @@ void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
     found = false;
     for (int j = numberOfPositiveRoots - 1; j >= 0; j --) {
       this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(
-        j, numberOfPositiveRoots - 1
+        j, numberOfPositiveRoots -
+        1
       );
       this->simplify(ringUnit);
       this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(
-        j, numberOfPositiveRoots - 1
+        j, numberOfPositiveRoots -
+        1
       );
       if (
         this->modOutFDRelationsExperimental(

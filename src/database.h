@@ -77,7 +77,8 @@ public:
   );
   void addValue(const JSData& value);
   QueryUpdate();
-  bool fromJSON(const JSData& inputValue, std::stringstream* commentsOnFailure
+  bool fromJSON(
+    const JSData& inputValue, std::stringstream* commentsOnFailure
   );
   bool fromJSONString(
     const std::string& inputValue, std::stringstream* commentsOnFailure
@@ -167,7 +168,8 @@ public:
   );
   // Concatenates the nested labels with a comma separator.
   std::string concatenateNestedLabels() const;
-  void setLabelValue(const std::string& label, const std::string& desiredValue
+  void setLabelValue(
+    const std::string& label, const std::string& desiredValue
   );
   void setLabelsValue(
     const List<std::string>& labels, const std::string& desiredValue
@@ -238,7 +240,8 @@ public:
   // A chunk of a raw large message, to be sent next.
   std::string nextChunk;
   int bytesSentSoFar;
-  bool fromJSON(const std::string& input, std::stringstream* commentsOnFailure
+  bool fromJSON(
+    const std::string& input, std::stringstream* commentsOnFailure
   );
   JSData toJSON();
   void writeContent(List<JSData>& output);
@@ -270,7 +273,8 @@ public:
   // Holds the location of the stored message.
   // The location may be out-of-date/invalid.
   int messageHandle;
-  bool fromJSON(const std::string& input, std::stringstream* commentsOnFailure
+  bool fromJSON(
+    const std::string& input, std::stringstream* commentsOnFailure
   );
   void toJSON(JSData& output) const;
   JSData toJSON() const;
@@ -299,7 +303,9 @@ public:
   std::string toString() const;
   // Sets an object id to a given value.
   void setObjectIdValue(
-    const std::string& objectId, const std::string& newValue, bool&
+    const std::string& objectId,
+    const std::string& newValue,
+    bool&
     outputValueChanged
   );
   void removeObjectId(
@@ -445,12 +451,14 @@ public:
     const QueryFind& findQuery,
     const QueryUpdate& updateQuery,
     bool createIfNotFound,
-    std::stringstream* commentsOnFailure = nullptr
+    std::stringstream* commentsOnFailure =
+    nullptr
   );
   bool deleteAllByFindQuery(
     const QueryFindOneOf& findQuery,
     LargeInteger& outputTotalDeleted,
-    std::stringstream* commentsOnFailure = nullptr
+    std::stringstream* commentsOnFailure =
+    nullptr
   );
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
@@ -676,9 +684,11 @@ public:
     List<std::string>& outputLabels,
     List<List<std::string> >& outputRows,
     LargeInteger* totalItems = nullptr,
-    std::stringstream* commentsOnFailure = nullptr
+    std::stringstream* commentsOnFailure =
+    nullptr
   );
-  bool deleteOneEntry(const JSData& entry, std::stringstream* commentsOnFailure
+  bool deleteOneEntry(
+    const JSData& entry, std::stringstream* commentsOnFailure
   );
   bool deleteAtLeastOneEntryByFindQuery(
     const QueryFind& findQuery, std::stringstream* commentsOnFailure
@@ -796,7 +806,9 @@ public:
   bool correctUser(JSData& inputOutput, std::stringstream& commentsOnFailure);
   bool loadFromJSON(JSData& input, std::stringstream& comments);
   bool loadOneCollectionFromJSON(
-    const std::string& collectionName, JSData& input, std::stringstream&
+    const std::string& collectionName,
+    JSData& input,
+    std::stringstream&
     comments
   );
   bool loadOneObject(

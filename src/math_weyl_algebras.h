@@ -152,10 +152,12 @@ void ElementWeylAlgebra<Coefficient>::multiplyTwoMonomials(
       Rational::nChooseK(polynomialPower, multiplicityDrop) *
       Rational::factorial(multiplicityDrop);
       buffer.polynomialPart.setVariable(
-        k, left.polynomialPart(k) + right.polynomialPart(k) - multiplicityDrop
+        k, left.polynomialPart(k) +
+        right.polynomialPart(k) - multiplicityDrop
       );
       buffer.differentialPart.setVariable(
-        k, left.differentialPart(k) +
+        k,
+        left.differentialPart(k) +
         right.differentialPart(k) - multiplicityDrop
       );
     }

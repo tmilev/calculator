@@ -66,7 +66,8 @@ public:
       List<Serialization::Marker>* outputMarkers,
       const std::string& label
     ) {
-      this->initialize(inputNumberOfBytes, input, output, outputMarkers, label
+      this->initialize(
+        inputNumberOfBytes, input, output, outputMarkers, label
       );
     }
     inline void initialize(

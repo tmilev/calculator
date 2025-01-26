@@ -829,7 +829,10 @@ bool WebAPIResponse::verifyRecaptcha(
   if (
     !FileOperations::
     loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-      "certificates/recaptcha-secret.txt", secret, true, true,
+      "certificates/recaptcha-secret.txt",
+      secret,
+      true,
+      true,
       commentsOnFailure
     )
   ) {
@@ -963,7 +966,8 @@ void WebAPIResponse::forgotLogin(JSData& result) {
     commentsOnErrorPointer = &commentsOnError;
   }
   success =
-  this->doSetEmail(false, user, &commentsOnError, &out, commentsOnErrorPointer
+  this->doSetEmail(
+    false, user, &commentsOnError, &out, commentsOnErrorPointer
   );
   if (!success) {
     result[WebAPI::Result::error] = commentsOnError.str();

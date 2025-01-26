@@ -88,7 +88,8 @@ public:
   std::string toStringPsTricks(FormatExpressions* format);
   std::string toStringNodesAndEdges(FormatExpressions* format);
   std::string toStringPsTricksEdge(
-    int fromIndex, int toIndex, FormatExpressions* format = nullptr
+    int fromIndex, int toIndex, FormatExpressions* format =
+    nullptr
   );
 };
 

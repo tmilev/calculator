@@ -654,8 +654,9 @@ void FiniteGroup<elementSomeGroup>::computeCCSizeOrCCFromRepresentative(
   orbitIterator.groupAction.actOn = elementSomeGroup::conjugationAction;
   orbitIterator.groupAction.name = "conjugation action";
   orbitIterator.initialize(
-    this->generators, inputOutputClass.representative, orbitIterator.
-    groupAction
+    this->generators,
+    inputOutputClass.representative,
+    orbitIterator.groupAction
   );
   inputOutputClass.size = 1;
   if (storeCC) {
@@ -1323,7 +1324,8 @@ Vector<Coefficient> WeylGroupData::getFundamentalCoordinatesFromEpsilon(
 
 template <class Coefficient>
 Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
-  const Vector<Coefficient>& inputInFundamentalCoordinates, const Coefficient&
+  const Vector<Coefficient>& inputInFundamentalCoordinates,
+  const Coefficient&
   zero
 ) {
   Matrix<Rational>& transitionMatrix =
@@ -1336,7 +1338,8 @@ Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
 
 template <class Coefficient>
 Vectors<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
-  const Vectors<Coefficient>& inputInFundamentalCoordinates, const Coefficient&
+  const Vectors<Coefficient>& inputInFundamentalCoordinates,
+  const Coefficient&
   zero
 ) {
   Matrix<Rational>& transitionMatrix =
@@ -2296,7 +2299,8 @@ freudenthalFormulaIrrepIsWRTLeviPart(
   hwPlusRhoSquared =
   this->ambientWeyl->rootScalarCartanRoot(
     highestWeightSimpleCoordinatesLeviPart + rho,
-    highestWeightSimpleCoordinatesLeviPart + rho
+    highestWeightSimpleCoordinatesLeviPart +
+    rho
   );
   Explored[0] = true;
   outputMultiplicitiesSimpleCoordinates[0] = 1;
@@ -2348,7 +2352,8 @@ freudenthalFormulaIrrepIsWRTLeviPart(
     bufferCoefficienticient -=
     this->ambientWeyl->rootScalarCartanRoot(
       outputDomWeightsSimpleCoordinatesLeviPart[k] + rho,
-      outputDomWeightsSimpleCoordinatesLeviPart[k] + rho
+      outputDomWeightsSimpleCoordinatesLeviPart[k] +
+      rho
     );
     // bufferCoefficient now holds the denominator participating in the
     // Freudenthal
@@ -2743,7 +2748,8 @@ computeIrreducibleRepresentationsTodorsVersion() {
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 spreadVector(
-  const Vector<Coefficient>& input, Vectors<Coefficient>&
+  const Vector<Coefficient>& input,
+  Vectors<Coefficient>&
   outputBasisGeneratedSpace
 ) {
   this->checkInitialization();
@@ -2782,8 +2788,8 @@ getLargestDenominatorSimpleGenerators(
         }
         outputLeastCommonMultiple =
         LargeIntegerUnsigned::leastCommonMultiple(
-          outputLeastCommonMultiple, this->generators[gi](mi, mj).
-          getDenominator()
+          outputLeastCommonMultiple,
+          this->generators[gi](mi, mj).getDenominator()
         );
       }
     }
@@ -2941,7 +2947,8 @@ decomposeTodorsVersionRecursive(
     }
   }
   if ((remainingVectorSpace.size < this->getDimension()) && (
-      remainingVectorSpace.size > 0
+      remainingVectorSpace.size >
+      0
     )
   ) {
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> reducedRep;
@@ -3167,7 +3174,8 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentations() {
   if (this->ComputeIrreducibleRepresentationsWithFormulas) {
     this->ComputeIrreducibleRepresentationsWithFormulas(*this);
   } else if (
-    this->irreps_grcam.size != 0 || this->irreducibleRepresentations.size != 0
+    this->irreps_grcam.size != 0 ||
+    this->irreducibleRepresentations.size != 0
   ) {
     this->computeIrreducibleRepresentationsTodorsVersion();
   } else {

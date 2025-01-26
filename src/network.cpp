@@ -19,7 +19,8 @@ Connector::~Connector() {
   this->freeAddressInformation();
 }
 
-void Connector::initialize(const std::string& inputAddressToConnectTo, int port
+void Connector::initialize(
+  const std::string& inputAddressToConnectTo, int port
 ) {
   std::stringstream portStream;
   portStream << port;
@@ -27,7 +28,8 @@ void Connector::initialize(const std::string& inputAddressToConnectTo, int port
 }
 
 void Connector::initialize(
-  const std::string& inputAddressToConnectTo, const std::string&
+  const std::string& inputAddressToConnectTo,
+  const std::string&
   inputPortOrService
 ) {
   memset(&this->hints, 0, sizeof this->hints);
@@ -304,8 +306,8 @@ bool Listener::initializeBindToOnePort(
     unsigned int serverAddressLength = 0;
     if (
       getsockname(
-        outputListeningSocket, (sockaddr*) & serverAddress, &
-        serverAddressLength
+        outputListeningSocket, (sockaddr*) & serverAddress,
+        &serverAddressLength
       ) ==
       - 1
     ) {

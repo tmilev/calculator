@@ -471,7 +471,8 @@ void WeylGroupData::raiseToMaximallyDominant(
           bool isGood = true;
           for (int k = 0; k < i; k ++) {
             if (
-              this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[k]) > 0
+              this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[k]) >
+              0
             ) {
               isGood = false;
               break;
@@ -493,7 +494,10 @@ void WeylGroupData::raiseToMaximallyDominant(
 }
 
 bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
-  Calculator& calculator, const Expression& input, Expression& output, bool
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool
   useOuter
 ) {
   STACK_TRACE("CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant");
@@ -521,8 +525,10 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   for (int i = 2; i < input.size(); i ++) {
     if (
       !calculator.getVector<Rational>(
-        input[i], highestWeights[i - 2], nullptr, semisimpleLieAlgebra->getRank
-        ()
+        input[i],
+        highestWeights[i - 2],
+        nullptr,
+        semisimpleLieAlgebra->getRank()
       )
     ) {
       isGood = false;
@@ -746,7 +752,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   }
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
   Vector<Polynomial<Rational> > weight;
-  if (!calculator.getTypeWeight(calculator, input, weight, semisimpleLieAlgebra)
+  if (
+    !calculator.getTypeWeight(calculator, input, weight, semisimpleLieAlgebra)
   ) {
     return false;
   }
@@ -775,7 +782,12 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
   Polynomial<Rational> exponent;
   if (
     !semisimpleLieAlgebra.content->weylGroup.generateOrbit(
-      highestWeights, useRho, outputOrbit, false, 1921, &orbitGeneratingSet,
+      highestWeights,
+      useRho,
+      outputOrbit,
+      false,
+      1921,
+      &orbitGeneratingSet,
       1921
     )
   ) {
@@ -837,7 +849,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
           isGood = false;
           break;
         } else if (
-          !currentCoordDifference.isInteger() || currentCoordDifference < 0
+          !currentCoordDifference.isInteger() ||
+          currentCoordDifference < 0
         ) {
           isGood = false;
           break;
@@ -1289,7 +1302,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitFundRho(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   return
-  CalculatorFunctionsWeylGroup::weylOrbit(calculator, input, output, true, true
+  CalculatorFunctionsWeylGroup::weylOrbit(
+    calculator, input, output, true, true
   );
 }
 
@@ -1430,7 +1444,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
     fullSignSig[i].setSize(inputSubgroups.size);
     pseudoSignSig[i].setSize(
-      numberOfParabolicClasses + numberOfNonParabolicPseudoParabolic
+      numberOfParabolicClasses +
+      numberOfNonParabolicPseudoParabolic
     );
     parabolicSignSig[i].setSize(numberOfParabolicClasses);
     for (int j = 0; j < inputSubgroups.size; j ++) {
@@ -1465,7 +1480,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
     }
   }
   for (int i = 0; i < parabolicSignSig.size && !hasRepeatingParSigs; i ++) {
-    for (int j = i + 1; j < parabolicSignSig.size && !hasRepeatingParSigs; j ++
+    for (
+      int j = i + 1; j < parabolicSignSig.size && !hasRepeatingParSigs; j ++
     ) {
       if (parabolicSignSig[i] == parabolicSignSig[j]) {
         hasRepeatingParSigs = true;
@@ -1794,7 +1810,8 @@ public:
   KostkaNumber();
   bool compute(
     HashedList<KostkaNumber>* kostkaNumberCache,
-    std::stringstream* comments = nullptr
+    std::stringstream* comments =
+    nullptr
   );
 };
 
@@ -2955,7 +2972,8 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
   }
   if (index == calculator.objectContainer.hyperOctahedralGroups.size) {
     calculator.objectContainer.hyperOctahedralGroups.setSize(
-      calculator.objectContainer.hyperOctahedralGroups.size + 1
+      calculator.objectContainer.hyperOctahedralGroups.size +
+      1
     );
     calculator.objectContainer.hyperOctahedralGroups[index].
     makeHyperoctahedralGroup(partitionLeft.n + partitionRight.n);

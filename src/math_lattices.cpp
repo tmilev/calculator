@@ -142,7 +142,8 @@ void QuasiPolynomial::substitute(
       << global.fatal;
     }
     output.addLatticeShift(
-      polynomial, this->latticeShifts[i] +
+      polynomial,
+      this->latticeShifts[i] +
       inputTranslationSubtractedFromArgument
     );
   }
@@ -658,8 +659,8 @@ void QuasiPolynomial::operator-=(const QuasiPolynomial& other) {
   summand.makeRougherLattice(this->ambientLatticeReduced);
   for (int i = 0; i < summand.latticeShifts.size; i ++) {
     this->addLatticeShift(
-      summand.valueOnEachLatticeShift[i] *(Rational)(- 1), summand.
-      latticeShifts[i]
+      summand.valueOnEachLatticeShift[i] *(Rational)(- 1),
+      summand.latticeShifts[i]
     );
   }
 }
@@ -1217,7 +1218,8 @@ bool Lattice::substitutionHomogeneous(
 
 bool Lattice::
 getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
-  const PolynomialSubstitution<Rational>& substitution, Matrix<Rational>&
+  const PolynomialSubstitution<Rational>& substitution,
+  Matrix<Rational>&
   output
 ) {
   if (substitution.size < 1) {
@@ -1437,7 +1439,8 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   movementInDirectionPerRepresentative.setSize(outputRepresentatives.size);
   for (int i = 0; i < outputRepresentatives.size; i ++) {
     scalarProduct = (
-      normal.scalarEuclidean(outputRepresentatives[i]) - constOnRightHandSide
+      normal.scalarEuclidean(outputRepresentatives[i]) -
+      constOnRightHandSide
     ) /
     unitMovement;
     scalarProduct.assignFractionalValue();

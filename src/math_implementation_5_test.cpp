@@ -278,7 +278,9 @@ bool Polynomial<Rational>::Test::fromStringCommonContextTest() {
 
 template < >
 bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
-  const std::string& left, const std::string& right, const std::string&
+  const std::string& left,
+  const std::string& right,
+  const std::string&
   expected
 ) {
   List<Polynomial<Rational> > converted =

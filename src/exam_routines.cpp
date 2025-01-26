@@ -527,7 +527,8 @@ bool CalculatorHTML::loadMe(
   STACK_TRACE("CalculatorHTML::loadMe");
   if (
     !FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
-      this->fileName, this->relativePhysicalFileNameWithFolder,
+      this->fileName,
+      this->relativePhysicalFileNameWithFolder,
       commentsOnFailure
     )
   ) {
@@ -889,7 +890,8 @@ bool CalculatorHtmlFunctions::interpretProblemGiveUp(
   JSData result =
   WebAPIResponse::getAnswerOnGiveUp(randomSeed, nullptr, nullptr, false);
   global.webArguments.removeKey(
-    WebAPI::Problem::calculatorAnswerPrefix + answerId
+    WebAPI::Problem::calculatorAnswerPrefix +
+    answerId
   );
   global.setWebInput(WebAPI::Problem::fileName, oldProblem);
   std::stringstream out;
@@ -1501,13 +1503,19 @@ bool Answer::prepareAnswer(
   if (input.isAnswerStandard()) {
     return
     this->prepareAnswerStandard(
-      input, commands, commandsBody, commandsNoEnclosures,
+      input,
+      commands,
+      commandsBody,
+      commandsNoEnclosures,
       commandsBodyNoEnclosures
     );
   }
   return
   this->prepareAnswerHardCoded(
-    input, commands, commandsBody, commandsNoEnclosures,
+    input,
+    commands,
+    commandsBody,
+    commandsNoEnclosures,
     commandsBodyNoEnclosures
   );
 }
@@ -1613,7 +1621,8 @@ bool CalculatorHTML::prepareAndExecuteCommands(
   interpreter.flagWriteLatexPlots = false;
   interpreter.flagPlotNoControls = true;
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() - startTime
+    global.getElapsedSeconds() -
+    startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "calculator initialize time"
@@ -1629,7 +1638,8 @@ bool CalculatorHTML::prepareAndExecuteCommands(
   }
   interpreter.evaluate(this->problemData.commandsGenerateProblem);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() - startTime
+    global.getElapsedSeconds() -
+    startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "calculator evaluation time"
@@ -1891,7 +1901,8 @@ std::string CalculatorHTML::cleanUpFileName(const std::string& inputLink) {
   }
   return
   inputLink.substr(
-    firstMeaningfulChar, lastMeaningfulChar - firstMeaningfulChar + 1
+    firstMeaningfulChar, lastMeaningfulChar - firstMeaningfulChar +
+    1
   );
 }
 
@@ -2190,7 +2201,9 @@ std::string CalculatorHTML::toStringInterprettedCommands(
 }
 
 bool CalculatorHTML::processOneExecutedCommand(
-  Calculator& interpreter, SyntacticElementHTML& element, std::stringstream&
+  Calculator& interpreter,
+  SyntacticElementHTML& element,
+  std::stringstream&
   comments
 ) {
   (void) comments;
@@ -2249,7 +2262,8 @@ bool CalculatorHTML::processOneExecutedCommand(
   element.interpretedCommand = "";
   element.interpretedCommand += interpretedExpression.toString(&format);
   element.flagUseDisplaystyleInMathMode = (
-    element.content.find("\\displaystyle") != std::string::npos
+    element.content.find("\\displaystyle") !=
+    std::string::npos
   );
   element.flagUseMathMode = true;
   element.flagUseMathSpan = false;
@@ -2349,11 +2363,13 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
     this->numberOfInterpretationAttempts = i + 1;
     startTime = global.getElapsedSeconds();
     this->timeIntermediatePerAttempt.setSize(
-      this->timeIntermediatePerAttempt.size + 1
+      this->timeIntermediatePerAttempt.size +
+      1
     );
     this->timeIntermediatePerAttempt.lastObject()->setSize(0);
     this->timeIntermediateComments.setSize(
-      this->timeIntermediateComments.size + 1
+      this->timeIntermediateComments.size +
+      1
     );
     this->timeIntermediateComments.lastObject()->setSize(0);
     Calculator interpreter;
@@ -2419,7 +2435,8 @@ std::string CalculatorHTML::Parser::toStringParsingStack(
   << "#Non-dummy elements: "
   << stack.size - SyntacticElementHTML::parsingDummyElements
   << ". ";
-  for (int i = SyntacticElementHTML::parsingDummyElements; i < stack.size; i ++
+  for (
+    int i = SyntacticElementHTML::parsingDummyElements; i < stack.size; i ++
   ) {
     out << "<span style='color:" << ((i % 2 == 0) ? "orange" : "blue") << "'>";
     std::string content = stack[i].toStringDebug();
@@ -2489,9 +2506,8 @@ void TopicElementParser::initializeElementTypes() {
       "Video", static_cast<int>(TopicElement::types::video)
     );
     this->elementTypes.setKeyValue(
-      "VideoHandwritten", static_cast<int>(
-        TopicElement::types::videoHandwritten
-      )
+      "VideoHandwritten",
+      static_cast<int>(TopicElement::types::videoHandwritten)
     );
     this->elementTypes.setKeyValue(
       "SlidesLatex", static_cast<int>(TopicElement::types::slidesLatex)
@@ -2518,9 +2534,8 @@ void TopicElementParser::initializeElementTypes() {
       static_cast<int>(TopicElement::types::homeworkSourceHeader)
     );
     this->elementTypes.setKeyValue(
-      "LoadTopicBundles", static_cast<int>(
-        TopicElement::types::loadTopicBundles
-      )
+      "LoadTopicBundles",
+      static_cast<int>(TopicElement::types::loadTopicBundles)
     );
     this->elementTypes.setKeyValue(
       "TopicBundle", static_cast<int>(TopicElement::types::topicBundle)
@@ -2662,7 +2677,8 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
   element.tag = "";
   element.content = "";
   this->elementStack.setExpectedSize(
-    elements.size + SyntacticElementHTML::parsingDummyElements
+    elements.size +
+    SyntacticElementHTML::parsingDummyElements
   );
   for (int i = 0; i < SyntacticElementHTML::parsingDummyElements; i ++) {
     this->elementStack.addOnTop(dummy);
@@ -2818,7 +2834,8 @@ bool CalculatorHTML::Parser::reduceStackMergeContents(
     calculatorTag.content.append(this->elementStack[i].content);
   }
   this->elementStack.setSize(
-    this->elementStack.size - numberOfElementsToRemove
+    this->elementStack.size -
+    numberOfElementsToRemove
   );
   return false;
 }
@@ -2838,7 +2855,8 @@ bool CalculatorHTML::Parser::reduceStackMergeContentsRetainLast(
   this->elementStack[this->elementStack.size - numberOfElementsToRemove - 1] =
   *this->elementStack.lastObject();
   this->elementStack.setSize(
-    this->elementStack.size - numberOfElementsToRemove
+    this->elementStack.size -
+    numberOfElementsToRemove
   );
   return false;
 }
@@ -2896,7 +2914,10 @@ bool CalculatorHTML::Parser::closeOpenTag(int tagOffsetNegative) {
     } else {
       toBeConverted.syntacticRole = "<calculatorTag>";
     }
-    this->elementStack.setSize(this->elementStack.size + tagOffsetNegative + 1
+    this->elementStack.setSize(
+      this->elementStack.size +
+      tagOffsetNegative +
+      1
     );
     return false;
   }
@@ -2933,7 +2954,8 @@ bool CalculatorHTML::Parser::consumeTagOpened() {
   }
   if (last.syntacticRole == "<") {
     this->consumeErrorOrMergeInCalculatorTagRetainLast(
-      - 3, "While constructing your tag, failed to interpret " +
+      - 3,
+      "While constructing your tag, failed to interpret " +
       last.syntacticRole
     );
     // Don't push new elements to be parsed on the stack.
@@ -2941,7 +2963,8 @@ bool CalculatorHTML::Parser::consumeTagOpened() {
   }
   return
   this->consumeErrorOrMergeInCalculatorTag(
-    - 3, "While constructing your tag, failed to interpret " +
+    - 3,
+    "While constructing your tag, failed to interpret " +
     last.syntacticRole
   );
 }
@@ -3029,7 +3052,8 @@ bool CalculatorHTML::Parser::consumeAfterProperty() {
   }
   return
   this->consumeErrorOrMergeInCalculatorTag(
-    - 4, "Couldn't continue tag construction after property " +
+    - 4,
+    "Couldn't continue tag construction after property " +
     secondToLast.content
   );
 }
@@ -3147,7 +3171,8 @@ bool CalculatorHTML::Parser::consumeCloseTagWaitingForRightAngleBracket() {
       return this->reduceStackMergeContents(1);
     }
     if (
-      secondToLast.tag == SyntacticElementHTML::Tags::answerCalculatorHighlight
+      secondToLast.tag ==
+      SyntacticElementHTML::Tags::answerCalculatorHighlight
     ) {
       secondToLast.tag =
       SyntacticElementHTML::Tags::answerCalculatorHighlightEnd;
@@ -3613,9 +3638,8 @@ std::string SyntacticElementHTML::cleanUpCommandString(
   }
   std::string result =
   inputCommand.substr(
-    static_cast<unsigned>(realStart), static_cast<unsigned>(
-      realEnd - realStart + 1
-    )
+    static_cast<unsigned>(realStart),
+    static_cast<unsigned>(realEnd - realStart + 1)
   );
   for (int i = static_cast<signed>(result.size()) - 1; i >= 0; i --) {
     if (
@@ -3832,13 +3856,15 @@ bool CalculatorHTML::interpretHtmlOneAttempt(
   std::stringstream outHeadPt2;
   this->figureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() - startTime
+    global.getElapsedSeconds() -
+    startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time before after loading problem list"
   );
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() - startTime
+    global.getElapsedSeconds() -
+    startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time before execution"
@@ -3889,7 +3915,8 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
   STACK_TRACE("CalculatorHTML::interpretHtmlOneAttemptPartTwo");
   // ////////////////////////////
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() - startTime
+    global.getElapsedSeconds() -
+    startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time after execution"
@@ -3903,7 +3930,8 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
     return false;
   }
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() - startTime
+    global.getElapsedSeconds() -
+    startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time before class management routines"
@@ -3942,7 +3970,8 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
     }
   }
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() - startTime
+    global.getElapsedSeconds() -
+    startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time before database storage"
@@ -5317,7 +5346,8 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
       this->id,
       problemSolved,
       returnEmptyStringIfNoDeadline, (
-        this->type != TopicElement::types::problem
+        this->type !=
+        TopicElement::types::problem
       )
     );
   }

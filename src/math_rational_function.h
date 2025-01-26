@@ -41,7 +41,8 @@ public:
   static RationalFraction zeroStatic();
   int minimalNumberOfVariables() const;
   bool substitute(
-    const PolynomialSubstitution<Rational>& substitution, const Coefficient&
+    const PolynomialSubstitution<Rational>& substitution,
+    const Coefficient&
     one
   );
   bool substitute(
@@ -66,7 +67,9 @@ public:
   void setNumberOfVariables(int goalNumberOfVariables);
   void setNumberOfVariablesSubstituteDeletedByOne(int newNumberOfVariables);
   void makeOneLetterMonomial(
-    int index, const Coefficient& coefficient, int expectedNumberOfVariables =
+    int index,
+    const Coefficient& coefficient,
+    int expectedNumberOfVariables =
     0
   );
   void getNumerator(Polynomial<Coefficient>& output) const;
@@ -105,7 +108,8 @@ public:
   void makeOne();
   void makeZero();
   void makeMonomial(
-    int letterIndex, const Rational& power, const Rational& coefficient = 1
+    int letterIndex, const Rational& power, const Rational& coefficient =
+    1
   );
   void makeConstant(const Coefficient& coefficient) {
     this->makeZero();
@@ -1441,7 +1445,8 @@ bool RationalFraction<Coefficient>::operator==(int other) const {
   } else {
     return
     this->expressionType == TypeExpression::typeConstant && (
-      this->constantValue == other
+      this->constantValue ==
+      other
     );
   }
 }
@@ -1641,10 +1646,12 @@ bool RationalFraction<Coefficient>::getRelations(
   for (int i = 0; i < startingGenerators; i ++) {
     Polynomial<Rational>& currentPoly = groebnerBasis[i];
     currentPoly.setNumberOfVariablesSubstituteDeletedByOne(
-      totalStartingVariables + startingGenerators
+      totalStartingVariables +
+      startingGenerators
     );
     currentGenerator.makeDegreeOne(
-      totalStartingVariables + startingGenerators, i + totalStartingVariables,
+      totalStartingVariables + startingGenerators,
+      i + totalStartingVariables,
       1
     );
     outputGeneratorLabels[i] = currentGenerator;

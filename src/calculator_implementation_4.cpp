@@ -150,7 +150,9 @@ bool Calculator::getVectorExpressions(
 
 template <class Element>
 void MathRoutines::lieBracket(
-  const Element& standsOnTheLeft, const Element& standsOnTheRight, Element&
+  const Element& standsOnTheLeft,
+  const Element& standsOnTheRight,
+  Element&
   output
 ) {
   if (&standsOnTheLeft == &output || &standsOnTheRight == &output) {
@@ -816,7 +818,8 @@ bool CalculatorBasics::leftDistributeBracketIsOnTheLeft(
     calculator, multiplicativeOperation, input[1][2], input[2]
   );
   return
-  output.makeXOX(calculator, additiveOperation, leftExpression, rightExpression
+  output.makeXOX(
+    calculator, additiveOperation, leftExpression, rightExpression
   );
 }
 
@@ -856,7 +859,8 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
     calculator, multiplicativeOperation, input[1], input[2][2]
   );
   return
-  output.makeXOX(calculator, additiveOperation, leftExpression, rightExpression
+  output.makeXOX(
+    calculator, additiveOperation, leftExpression, rightExpression
   );
 }
 
@@ -1133,7 +1137,8 @@ bool Expression::makeXOXOdotsOX(
     *this = opands[0];
     return true;
   }
-  this->makeXOX(owner, operation, opands[opands.size - 2], *opands.lastObject()
+  this->makeXOX(
+    owner, operation, opands[opands.size - 2], *opands.lastObject()
   );
   for (int i = opands.size - 3; i >= 0; i --) {
     this->makeXOX(owner, operation, opands[i], *this);
@@ -2370,7 +2375,8 @@ bool ObjectContainer::checkAll() {
   ) {
     subalgebras.checkAll();
   }
-  for (const SemisimpleLieAlgebra& algebra : this->semisimpleLieAlgebras.values
+  for (
+    const SemisimpleLieAlgebra& algebra : this->semisimpleLieAlgebras.values
   ) {
     algebra.checkConsistency();
   }

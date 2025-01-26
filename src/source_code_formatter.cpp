@@ -762,6 +762,7 @@ bool CodeFormatter::Element::computeIndentationInParentheses() {
   }
   this->children[2].indentationLevel = this->indentationLevel;
   this->children[2].computeIndentation();
+  global.comments << "<hr>DEBUG: in parens: <br>" << HtmlRoutines::convertStringToHtmlString( this->toStringContentOnly() , true)<< "<hr>";
   return true;
 }
 
@@ -935,6 +936,8 @@ bool CodeFormatter::Element::computeIndentation() {
     return this->computeIndentationCommaList();
   case CodeFormatter::Element::FunctionWithArgumentsAndInitializerList:
     return this->computeIndentationInitializerList();
+  case CodeFormatter::Element::FunctionWithArguments:
+    return this->computeIndentationFunctionWithArguments();
   case CodeFormatter::Element::Command:
     return this->computeIndentationCommand();
   case CodeFormatter::Element::CommandList:
@@ -1454,6 +1457,13 @@ bool CodeFormatter::Element::computeIndentationCommand() {
   return true;
 }
 
+bool CodeFormatter::Element::computeIndentationFunctionWithArguments(){
+  global.comments << "DEBUG: really here whi world!!!<hr>";
+  bool result = this->computeIndentationBasic(0);
+  global.comments << "DEBUG: conti htmli:<br>" << HtmlRoutines::convertStringToHtmlString( this->toStringContentOnly(), true) << "<br>";
+  return result;
+}
+
 bool CodeFormatter::Element::computeIndentationInitializerList() {
   return this->computeIndentationBasic(0);
 }
@@ -1466,6 +1476,7 @@ bool CodeFormatter::Element::computeIndentationCommaList() {
   ) {
     mustSplitLines = true;
   }
+  global.comments << "DEBUG: must split lines: " << mustSplitLines << "<br>";
   if (mustSplitLines) {
     this->previousAtom()->newLinesAfter = 1;
   }
@@ -1482,6 +1493,7 @@ bool CodeFormatter::Element::computeIndentationCommaList() {
     }
     current.computeIndentation();
   }
+  global.comments << "<hr>DEBUG: tostirng<br>" << this->toStringContentOnly() << "<hr>";
   return true;
 }
 
@@ -1495,6 +1507,9 @@ bool CodeFormatter::Element::computeIndentationExpression() {
 }
 
 bool CodeFormatter::Element::computeIndentationBasic(int startingIndex) {
+  if (this->type == CodeFormatter::Element::FunctionWithArguments){
+    global.comments << "DEBUG: HI WORLD!!!!!";
+  }
   for (int i = startingIndex; i < this->children.size; i ++) {
     this->children[i].indentationLevel = this->indentationLevel;
     this->children[i].computeIndentation();

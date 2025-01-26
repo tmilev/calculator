@@ -1610,6 +1610,7 @@ let latexOptionsWithCursor = new ToLatexOptions(true);
 
 class LaTeXConstants {
   constructor() {
+    this.mathMLMaximumConsecutiveDigits = 20;
     this.latinCharactersString =
       'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     this.latinCharacters = {};
@@ -8837,12 +8838,27 @@ class MathNode {
     result.appendChild(superscript.toMathML());
     return result;
   }
+  toMathMLDigits(/** @type {string} */ content) {
+    const interval = latexConstants.mathMLMaximumConsecutiveDigits;
+    if (content.length < interval) {
+      const result = this.createMathMLElement("mn");
+      result.textContent = content;
+      return result;
+    }
+    const result = this.createMathMLElement("mrow");
+    for (let i = 0; i < content.length; i += interval) {
+      const next = this.createMathMLElement("mn");
+      const end = Math.min(i + interval, content.length);
+      next.textContent = content.slice(i, end);
+      result.appendChild(next);
+    }
+    return result;
+  }
 
   toMathMLAtom(/** @type {string}*/ content) {
     let result = null;
     if (latexConstants.isDigitsNonEmpty(content)) {
-      result = this.createMathMLElement("mn");
-      result.textContent = content;
+      return this.toMathMLDigits(content);
     } else if (content.length === 1 || latexConstants.isTextLike(content)) {
       result = this.createMathMLElement("mi");
       result.textContent = content;

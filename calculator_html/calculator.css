@@ -624,7 +624,6 @@ table.tableCalculatorOutput {
   height: 100%;
   max-width: 90%;
   border-collapse: collapse;
-  word-break: break-all;
   box-shadow: var(--box-shadow-tableCalculatorOutputs)
 }
 

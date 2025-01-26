@@ -119,6 +119,7 @@ public:
     };
   private:
     bool computeIndentation();
+    bool computeIndentationBasic(int startingIndex);
     bool computeIndentationFunctionDeclaration();
     bool computeIndentationFunctionDefinition();
     bool computeIndentationCodeBlock();
@@ -138,7 +139,7 @@ public:
     bool computeIndentationInParentheses();
     bool computeIndentationInBrackets();
     bool computeIndentationAngleBrackets();
-    bool computeIndentationBasic(int startingIndex);
+    bool computeIndentationFunctionWithArguments();
     bool computeIndentationExpression();
     bool computeIndentationTopLevel();
     bool computeIndentationTemplateClause();

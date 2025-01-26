@@ -1277,9 +1277,6 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
     for (int j = 0; j < inputOutputSystem.size; j ++) {
       inputOutputSystem[j].substitute(substitution, 1);
     }
-    global.comments
-    << "DEBUG: Input-output system after subi: "
-    << inputOutputSystem.toString(&this->format());
     oneCase.solveSerreLikeSystemRecursively(inputOutputSystem);
     this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(oneCase);
     if (!oneCase.flagSystemProvenToHaveNoSolution) {

@@ -1017,7 +1017,8 @@ public:
       << "Scalar product using matrix: dimensions of vectors don't match. "
       << global.fatal;
     }
-    Coefficient result, contribution;
+    Coefficient result;
+    Coefficient contribution;
     result = ringZero;
     for (int i = 0; i < this->numberOfRows; i ++) {
       for (int j = 0; j < this->numberOfColumns; j ++) {
@@ -1477,7 +1478,8 @@ public:
       << "In lieBracket: bad dimensions of matrices. "
       << global.fatal;
     }
-    Matrix<Coefficient> firstSummand, subtracand;
+    Matrix<Coefficient> firstSummand;
+    Matrix<Coefficient> subtracand;
     firstSummand = (right);
     firstSummand.multiplyOnTheLeft(left);
     subtracand = (left);
@@ -1598,7 +1600,8 @@ public:
     out.assignCharacteristicPolynomial(*this);
   }
   bool hasDifferentConjugacyInvariantsFrom(Matrix<Coefficient>& other) {
-    Polynomial<Coefficient> p, q;
+    Polynomial<Coefficient> p;
+    Polynomial<Coefficient> q;
     this->getCharacteristicPolynomialStandardRepresentation(p);
     other.getCharacteristicPolynomialStandardRepresentation(q);
     return !(p == q);
@@ -1672,12 +1675,12 @@ bool Vectors<Coefficient>::conesIntersect(
     matA.elements[dimension][i].makeOne();
   }
   for (int i = 0; i < nonStrictCone.size; i ++) {
-    int currentCol = i + strictCone.size;
+    int currentColumn = i + strictCone.size;
     for (int k = 0; k < dimension; k ++) {
-      matA.elements[k][currentCol].assign(nonStrictCone[i][k]);
-      matA.elements[k][currentCol].negate();
+      matA.elements[k][currentColumn].assign(nonStrictCone[i][k]);
+      matA.elements[k][currentColumn].negate();
     }
-    matA.elements[dimension][currentCol].makeZero();
+    matA.elements[dimension][currentColumn].makeZero();
   }
   if (
     !Matrix<Rational>::
@@ -1752,10 +1755,10 @@ void Matrix<Coefficient>::resize(
     }
   }
   int firstInvalidRow = MathRoutines::minimum(this->numberOfRows, r);
-  int firstInvalidCol = MathRoutines::minimum(this->numberOfColumns, c);
+  int firstInvalidColumn = MathRoutines::minimum(this->numberOfColumns, c);
   if (preserveValues && newElements != nullptr) {
     for (int j = 0; j < firstInvalidRow; j ++) {
-      for (int i = 0; i < firstInvalidCol; i ++) {
+      for (int i = 0; i < firstInvalidColumn; i ++) {
         newElements[j][i] = this->elements[j][i];
       }
     }
@@ -1763,11 +1766,11 @@ void Matrix<Coefficient>::resize(
   if (ringZero != nullptr) {
     if (!preserveValues) {
       firstInvalidRow = 0;
-      firstInvalidCol = 0;
+      firstInvalidColumn = 0;
     }
     for (int i = 0; i < r; i ++) {
-      int colStart = (i < firstInvalidRow) ? firstInvalidCol : 0;
-      for (int j = colStart; j < c; j ++) {
+      int columnStart = (i < firstInvalidRow) ? firstInvalidColumn : 0;
+      for (int j = columnStart; j < c; j ++) {
         newElements[i][j] = *ringZero;
       }
     }
@@ -1913,10 +1916,10 @@ Matrix<Coefficient> Matrix<Coefficient>::operator^(
 ) const {
   Matrix<Coefficient> conjugateInverse = right;
   conjugateInverse.invert();
-  Matrix<Coefficient> tmp;
-  this->multiplyOnTheLeft(conjugateInverse, tmp);
+  Matrix<Coefficient> buffer;
+  this->multiplyOnTheLeft(conjugateInverse, buffer);
   Matrix<Coefficient> out;
-  right.multiplyOnTheLeft(tmp, out);
+  right.multiplyOnTheLeft(buffer, out);
   return out;
 }
 
@@ -2750,11 +2753,11 @@ public:
   template <class LinearCombinationTemplate>
   static void gaussianEliminationByRowsDeleteZeroRows(
     List<LinearCombinationTemplate>& inputList,
-    bool* IvemadeARowSwitch = nullptr,
+    bool* madeARowSwitch = nullptr,
     HashedList<TemplateMonomial>* seedMonomials = nullptr
   ) {
     LinearCombinationTemplate::gaussianEliminationByRows(
-      inputList, IvemadeARowSwitch, seedMonomials
+      inputList, madeARowSwitch, seedMonomials
     );
     for (int j = inputList.size - 1; j >= 0; j --) {
       if (inputList[j].isEqualToZero()) {
@@ -2773,9 +2776,13 @@ public:
       }
     }
   }
-  template <class baseType>
+  // Carries out an in-place substitution
+  // in the coefficients of the linear combination.
+  // The coefficient type is required to have a
+  // substitute function that carries out a substitution in-place.
+  template <class SubstitutionClass>
   void substituteInCoefficients(
-    const List<Polynomial<baseType> >& substitution
+    const SubstitutionClass& substitution
   ) {
     STACK_TRACE("Polynomial::substituteInCoefficients");
     Coefficient newCoefficient;
@@ -2791,11 +2798,12 @@ public:
     }
   }
   void subtractMonomial(
-    const TemplateMonomial& inputMon, const Coefficient& inputCoeff
+    const TemplateMonomial& inputMonomial,
+    const Coefficient& inputCoefficient
   ) {
     this->cleanupMonomialIndex(
       this->subtractMonomialNoCoefficientCleanUpReturnIndex(
-        inputMon, inputCoeff
+        inputMonomial, inputCoefficient
       )
     );
   }
@@ -3361,10 +3369,23 @@ public:
   void scaleToPositiveMonomialExponents(
     MonomialPolynomial& outputIWasMultipliedBy
   );
+  // Substitutes in the given polynomial and writes the end result
+  // in-place.
   bool substitute(
-    const List<Polynomial<Coefficient> >& substitution,
-    const Coefficient& one
-  );
+      const PolynomialSubstitution<Coefficient> & substitution,
+      const Coefficient& one
+      );
+  // Substitutes in a polynomial.
+  // The n^th polynomial in the substitution list gives the
+  // image under the substitution of the n^th variable.
+  // If the substitution has fewer variable images than
+  // number of participating variables in some monomial,
+  // the computation should crash fatally.
+  bool substituteWriteOutput(
+      const PolynomialSubstitution<Coefficient> & substitution,
+      const Coefficient& one,
+          Polynomial<Coefficient>& output
+      )const;
   Rational totalDegree() const;
   int totalDegreeInt() const;
   bool isEqualToOne() const;
@@ -3976,7 +3997,7 @@ public:
   int numberOfVariablesToSolveForStart;
   int numberOfVariablesToSolveForAfterReduction;
   bool flagTryDirectlySolutionOverAlgebraicClosure;
-  bool flagUseTheMonomialBranchingOptimization;
+  bool flagUseMonomialBranchingOptimization;
   bool flagSystemProvenToHaveNoSolution;
   bool flagSystemProvenToHaveSolution;
   bool flagSystemSolvedOverBaseField;
@@ -4008,7 +4029,7 @@ public:
     PolynomialSystem<Coefficient>& potentiallySolvedCase
   );
   void solveWhenSystemHasSingleMonomial(
-    List<Polynomial<Coefficient> >& inputSystem,
+    List<Polynomial<Coefficient> >& inputOutputSystem,
     const MonomialPolynomial& monomial
   );
   int getPreferredSerreSystemSubstitutionIndex(
@@ -4020,11 +4041,14 @@ public:
   void polynomialSystemSolutionSimplificationPhase(
     List<Polynomial<Coefficient> >& inputSystem
   );
+  // Carries out one polynomial system simplification step.
+  bool oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(List<Polynomial<Coefficient> >& inputOutputSystem
+                             , ProgressReport& report2, ProgressReport& report3);
   void backSubstituteIntoPolynomialSystem(
     List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions
   );
   void backSubstituteIntoSinglePolynomial(
-    Polynomial<Coefficient>& substitution,
+    Polynomial<Coefficient>& toBeSubstitutedIn,
     int index,
     PolynomialSubstitution<Coefficient>& finalSubstitution
   );

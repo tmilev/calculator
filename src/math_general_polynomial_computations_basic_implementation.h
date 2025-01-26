@@ -188,23 +188,36 @@ Rational Polynomial<Coefficient>::totalDegree() const {
 }
 
 template <class Coefficient>
-bool Polynomial<Coefficient>::substitute(
-  const List<Polynomial<Coefficient> >& substitution,
+bool Polynomial<Coefficient>::substitute(const PolynomialSubstitution<Coefficient>& substitution,
   const Coefficient& one
 ) {
-  STACK_TRACE("Polynomial::substitute");
-  Polynomial<Coefficient> sum;
+  return this->substituteWriteOutput(substitution, one, *this);
+}
+
+
+template <class Coefficient>
+bool Polynomial<Coefficient>::substituteWriteOutput(
+    const PolynomialSubstitution<Coefficient> & substitution,
+    const Coefficient& one,
+    Polynomial<Coefficient>& output
+    ) const{
+  STACK_TRACE("Polynomial::substituteWriteOutput");
+  if (&output == this) {
+    Polynomial<Coefficient> thisCopy = *this;
+    thisCopy.substituteWriteOutput(substitution, one, output);
+    return true;
+  }
   Polynomial<Coefficient> monomialContribution;
+  output.makeZero();
   for (int i = 0; i < this->size(); i ++) {
     if (
-      !(*this)[i].substitute(substitution, monomialContribution, one)
-    ) {
+        !(*this)[i].substitute(substitution, monomialContribution, one)
+        ) {
       return false;
     }
     monomialContribution *= this->coefficients[i];
-    sum += monomialContribution;
+    output += monomialContribution;
   }
-  *this = sum;
   return true;
 }
 

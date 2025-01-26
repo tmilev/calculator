@@ -1244,7 +1244,7 @@ bool CalculatorFunctions::solvePolynomialSystem(
   system.flagTryDirectlySolutionOverAlgebraicClosure =
   startWithAlgebraicClosure;
   global.defaultFormat.getElement() = system.groebner.format;
-  system.flagUseTheMonomialBranchingOptimization = true;
+  system.flagUseMonomialBranchingOptimization = true;
   system.solveSerreLikeSystem(polynomials);
   std::stringstream out;
   out << "<br>The context vars:<br>" << context.toString();

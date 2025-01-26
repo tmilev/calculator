@@ -282,7 +282,7 @@ public:
   bool areConjugate(
     const elementSomeGroup& left, const elementSomeGroup& right
   );
-  bool areConjugate_OLD_Deprecated_Version_By_Todor(
+  bool areConjugate_OLD_Deprecated_Version(
     const elementSomeGroup& left, const elementSomeGroup& right
   );
   bool computeAllElements(bool andWords, int maximumElements = 1000000);

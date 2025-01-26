@@ -1,9 +1,9 @@
 #ifndef header_calculator_problem_storage_ALREADY_INCLUDED
 #define header_calculator_problem_storage_ALREADY_INCLUDED
 
-#include "general_database_system_independent.h"
-#include "general_time_date.h"
 #include "math_large_integers.h"
+#include "general_maps.h"
+#include "json.h"
 
 class SyntacticElementHTML {
 public:

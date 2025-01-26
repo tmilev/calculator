@@ -8,7 +8,7 @@ let ids = {
 
 function bootstrap() {
   console.log("Bootstrapping Lie algebra page.");
-  equationEditor.typeset(document.body, null);
+  equationEditor.typeset(document.body, null, { mathML: true, copyButton: true });
 
   let elementsWithPanels = document.getElementsByClassName(ids.panelClassName);
   for (let i = 0; i < elementsWithPanels.length; i++) {

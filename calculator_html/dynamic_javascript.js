@@ -252,6 +252,11 @@ class ElementWithScripts {
     crypto.abstractSyntaxNotationAnnotate(parsedContent[0], parsedContent[1], parsedContent[2]);
   }
 
+  /** 
+   * Shows latex snippets with a copy button 
+   * that is not rendered as math, 
+   * possibly for being too large. 
+   */
   bootstrapLatexWithCopyButtons() {
     let domElements = this.element.getElementsByClassName("latexWithCopyButton");
     for (let i = 0; i < domElements.length; i++) {

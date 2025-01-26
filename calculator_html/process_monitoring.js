@@ -45,12 +45,14 @@ class Monitor {
     this.pauseButton = document.getElementById(
       ids.domElements.pages.calculator.monitoring.buttonPauseToggle
     );
-    this.pauseButton.addEventListener(
-      "click", () => {
-        this.togglePause();
-      }
-    )
-    this.pauseButton.style.display = "none";
+    if (this.pauseButton !== null) {
+      this.pauseButton.addEventListener(
+        "click", () => {
+          this.togglePause();
+        }
+      )
+      this.pauseButton.style.display = "none";
+    }
   }
 
   start(

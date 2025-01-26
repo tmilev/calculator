@@ -76,7 +76,7 @@ class Layer {
     /** @type {number} */
     index,
   ) {
-    this.indices.push(index);    
+    this.indices.push(index);
   }
 }
 
@@ -237,7 +237,10 @@ class GraphicsNDimensions {
   }
 
   initializeControls() {
-    if (this.containerControls === null) {
+    if (
+      this.containerControls === null ||
+      this.containerControls === undefined
+    ) {
       return;
     }
 
@@ -318,7 +321,7 @@ class GraphicsNDimensions {
     }
     result.push("\\end{pspicture}");
     result.push("\\end{document}");
-    
+
     navigator.clipboard.writeText(result.join("\n"));
   }
 
@@ -335,7 +338,7 @@ class GraphicsNDimensions {
       }
       const drawOperation = this.drawOperations[i];
       drawOperation.accountBoundingBox();
-    }    
+    }
   }
 
   accountVectorInBoundingBox(
@@ -365,7 +368,7 @@ class GraphicsNDimensions {
     output[0][0] = Math.min(vector[0], output[0][0]);
     output[0][1] = Math.min(vector[1], output[0][1]);
     output[1][0] = Math.max(vector[0], output[1][0]);
-    output[1][1] = Math.max(vector[1], output[1][1]); 
+    output[1][1] = Math.max(vector[1], output[1][1]);
   }
 
   isVisible(index) {
@@ -479,7 +482,7 @@ class GraphicsNDimensions {
     for (let i = 0; i < 2; i++) {
       this.animationBasisChange.screenGoal[i] = [];
       for (let j = 0; j < this.dimension; j++) {
-        let coordinate =  this.screenBasisInputs[i][j].value;
+        let coordinate = this.screenBasisInputs[i][j].value;
         this.animationBasisChange.screenGoal[i][j] = Number(coordinate);
       }
     }
@@ -592,7 +595,7 @@ class GraphicsNDimensions {
       console.log("Negative dimension received, not plotting.");
       return;
     }
-    if (this.bilinearForm.length !== this.dimension ) {
+    if (this.bilinearForm.length !== this.dimension) {
       this.makeStandardBilinearForm(this.dimension);
     }
     if (this.basisCircles.length === 0) {
@@ -1053,7 +1056,7 @@ class GraphicsNDimensions {
     index,
   ) {
     let layerLabel = input["layer"];
-    if (layerLabel === undefined ) {
+    if (layerLabel === undefined) {
       layerLabel = "";
     }
     if (!(layerLabel in this.layers)) {
@@ -1205,7 +1208,7 @@ class DrawHighlights {
     return '%javascript highlighting not suitable for latex';
   }
 
-  accountBoundingBox() {  
+  accountBoundingBox() {
     // Nothing to do.
   }
 }
@@ -1213,7 +1216,7 @@ class DrawHighlights {
 class DrawPath {
   constructor(
     /** @type {GraphicsNDimensions} */
-    inputOwner, 
+    inputOwner,
     inputData,
   ) {
     /** @type {GraphicsNDimensions} */
@@ -1252,7 +1255,7 @@ class DrawPath {
   }
 
   accountBoundingBox() {
-    for (let i = 0; i < this.points.length; i++){
+    for (let i = 0; i < this.points.length; i++) {
       this.owner.accountVectorInBoundingBox(this.points[i]);
     }
   }
@@ -1261,7 +1264,7 @@ class DrawPath {
 class DrawSegmentBetweenTwoVectors {
   constructor(
     /** @type {GraphicsNDimensions} */
-    inputOwner, 
+    inputOwner,
     inputData,
   ) {
     /** @type {GraphicsNDimensions} */
@@ -1309,7 +1312,7 @@ class DrawSegmentBetweenTwoVectors {
     }
     if (options !== "") {
       options = `[${options}]`;
-    } 
+    }
     return options;
   }
 
@@ -1366,7 +1369,7 @@ class DrawFilledShape {
 class DrawCircleAtVector {
   constructor(
     /** @type {GraphicsNDimensions} */
-    inputOwner, 
+    inputOwner,
     inputData,
   ) {
     /** @type {GraphicsNDimensions} */
@@ -1415,7 +1418,7 @@ class DrawCircleAtVector {
 class DrawTextAtVector {
   constructor(
     /** @type {GraphicsNDimensions} */
-    inputOwner, 
+    inputOwner,
     inputData,
   ) {
     this.owner = inputOwner;
@@ -1431,8 +1434,8 @@ class DrawTextAtVector {
     canvas.strokeStyle = this.colorFill;
     this.owner.computeScreenCoordinates(this.location, this.locationScreen);
     canvas.strokeText(
-      this.text, 
-      this.locationScreen[0] + this.owner.textShift[0], 
+      this.text,
+      this.locationScreen[0] + this.owner.textShift[0],
       this.locationScreen[1] + this.owner.textShift[1],
     );
   }

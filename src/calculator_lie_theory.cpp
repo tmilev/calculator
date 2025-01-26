@@ -5237,6 +5237,8 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   calculator.objectContainer.getSemisimpleSubalgebrasCreateIfNotPresent(
     lieAlgebra.weylGroup.dynkinType
   );
+  semisimpleSubalgebras.toStringExpressionString =
+  CalculatorConversions::stringFromSemisimpleSubalgebras;
   semisimpleSubalgebras.flagComputePairingTable = false;
   semisimpleSubalgebras.flagComputeNilradicals = false;
   semisimpleSubalgebras.findSemisimpleSubalgebrasFromScratch(

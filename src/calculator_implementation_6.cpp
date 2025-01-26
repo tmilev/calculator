@@ -2,6 +2,7 @@
 #include "calculator_html_interpretation.h"
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
+#include "calculator_lie_theory.h"
 #include "crypto_calculator.h"
 #include "html_routines.h"
 #include "math_extra_drawing_variables.h"
@@ -2400,10 +2401,10 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   return false;
 }
 
-bool CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure(
+bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure");
+  STACK_TRACE("CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure");
   if (!global.response.monitoringAllowed()) {
     global.response.initiate(
       "Triggered by precomputeSemisimpleLieAlgebraStructure."

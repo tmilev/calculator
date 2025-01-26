@@ -701,9 +701,6 @@ public:
   static bool testTopicListProblems(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool precomputeSemisimpleLieAlgebraStructure(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
   static bool turnRulesOnOff(
     Calculator& calculator,
     const Expression& input,
@@ -1162,9 +1159,6 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool functionEvaluateToDouble(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
-  static bool embedSemisimpleAlgebraInSemisimpleAlgebra(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool allPartitions(

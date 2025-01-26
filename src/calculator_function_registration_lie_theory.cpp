@@ -94,7 +94,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "PrecomputeSemisimpleLieAlgebraStructure",
-    CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure,
+    CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure,
     "",
     "Function available to logged-in admins only. "
     "Precomputes all built-in semisimple Lie algebra information. "
@@ -102,7 +102,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "(0 or negative to start at the beginning). "
     "Turn process monitoring on when using this function. ",
     "PrecomputeSemisimpleLieAlgebraStructure 0",
-    "CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure",
+    "CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure",
     "PrecomputeSemisimpleLieAlgebraStructure",
     adminNoTest
   );
@@ -1102,14 +1102,14 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "EmbedSemisimpleInSemisimple",
-    CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra,
+    CalculatorLieTheory::embedSemisimpleAlgebraInSemisimpleAlgebra,
     "",
     "Tries to find all embeddings of the "
     "first semisimple type into the second. "
     "Records all intermediate subalgebras. ",
     "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);"
     "EmbedSemisimpleInSemisimple{}(G_2, B_3)",
-    "CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra",
+    "CalculatorLieTheory::embedSemisimpleAlgebraInSemisimpleAlgebra",
     "EmbedSemisimpleInSemisimple",
     noTest
   );

@@ -222,6 +222,12 @@ public:
   static bool computeSemisimpleSubalgebras(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  static bool precomputeSemisimpleLieAlgebraStructure(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool embedSemisimpleAlgebraInSemisimpleAlgebra(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool computePairingTablesAndFKFTsubalgebras(
     Calculator& calculator, const Expression& input, Expression& output
   );

@@ -1,5 +1,6 @@
 #include "calculator_inner_functions.h"
 #include "calculator_inner_typed_functions.h"
+#include "calculator_lie_theory.h"
 #include "crypto_calculator.h"
 #include "general_file_operations_encodings.h"
 #include "html_routines.h"
@@ -8580,11 +8581,11 @@ bool CalculatorFunctions::functionEvaluateToDouble(
   return output.assignValue(calculator, value);
 }
 
-bool CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra(
+bool CalculatorLieTheory::embedSemisimpleAlgebraInSemisimpleAlgebra(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra"
+    "CalculatorLieTheory::embedSemisimpleAlgebraInSemisimpleAlgebra"
   );
   if (input.size() != 3) {
     return

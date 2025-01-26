@@ -914,7 +914,7 @@ public:
   Matrix<Rational> simpleReflectionMatrix(int indexSimpleRoot) const;
   void getStandardRepresentationMatrix(int g, Matrix<Rational>& output) const;
   void drawRootSystem(
-    DrawingVariables& outputDV,
+    DrawingVariables& outputDrawingVariables,
     bool wipeCanvas,
     bool drawWeylChamber,
     Vector<Rational>* bluePoint = nullptr,

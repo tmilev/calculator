@@ -4632,7 +4632,6 @@ std::string PartialFractions::toString(FormatExpressions* format) const {
       out << "+";
     }
     out << "[[((" << this->nonReduced.toString(format) << "))]]";
-    found = true;
   }
   return out.str();
 }
@@ -4760,7 +4759,9 @@ void OnePartialFractionDenominator::addMultiplicity(
 bool OnePartialFractionDenominator::initializeFromPartialFractions(
   const PartialFractions& owner
 ) {
-  STACK_TRACE("OnePartialFractionDenominator::initializeFromVectors");
+  STACK_TRACE(
+    "OnePartialFractionDenominator::initializeFromPartialFractions"
+  );
   *this = owner.initialPartialFraction;
   return true;
 }
@@ -6110,9 +6111,9 @@ bool DynkinType::isSimple(
   return true;
 }
 
-int DynkinType::getMultiplicity(int SimpleTypeIdentifier) const {
+int DynkinType::getMultiplicity(int simpleTypeIdentifier) const {
   int result = 0;
-  if (!this->coefficients[SimpleTypeIdentifier].isSmallInteger(&result)) {
+  if (!this->coefficients[simpleTypeIdentifier].isSmallInteger(&result)) {
     global.fatal
     << "Dynkin type has multiplicity that is not a small integer. "
     << global.fatal;
@@ -8458,11 +8459,11 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
 ) {
   Matrix<Rational> basisChange;
   Matrix<Rational> epsilonMatrix;
-  DynkinDiagramRootSubalgebra tempDyn;
+  DynkinDiagramRootSubalgebra dynkinType;
   Vectors<Rational> simpleBasis;
   Vectors<Rational> coordinatesInNewBasis;
   simpleBasis = generators;
-  tempDyn.computeDiagramTypeModifyInput(simpleBasis, *this);
+  dynkinType.computeDiagramTypeModifyInput(simpleBasis, *this);
   bool hasGenerators = true;
   if (generators.size == 0) {
     hasGenerators = false;
@@ -8475,15 +8476,15 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
     return;
   }
   basisChange.resize(0, 0, true);
-  for (int i = 0; i < tempDyn.simpleComponentTypes.size; i ++) {
+  for (int i = 0; i < dynkinType.simpleComponentTypes.size; i ++) {
     DynkinSimpleType::getEpsilonMatrix(
-      tempDyn.simpleComponentTypes[i].letter,
-      tempDyn.simpleComponentTypes[i].rank,
+      dynkinType.simpleComponentTypes[i].letter,
+      dynkinType.simpleComponentTypes[i].rank,
       epsilonMatrix
     );
     basisChange.directSumWith(epsilonMatrix, Rational(0));
   }
-  simpleBasis.assignListList(tempDyn.simpleBasesConnectedComponents);
+  simpleBasis.assignListList(dynkinType.simpleBasesConnectedComponents);
   coordinatesInNewBasis.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
     input[i].getCoordinatesInBasis(simpleBasis, coordinatesInNewBasis[i]);
@@ -8738,13 +8739,13 @@ void WeylGroupData::getCoxeterPlane(
   outputBasis1.setSize(dimension);
   outputBasis2.setSize(dimension);
   eigenSpace.operator=(eigenSpaceList);
-  DrawingVariables tempDO;
-  tempDO.initializeDimensions(dimension);
-  tempDO.graphicsUnit = DrawingVariables::graphicsUnitDefault;
+  DrawingVariables drawingOperations;
+  drawingOperations.initializeDimensions(dimension);
+  drawingOperations.graphicsUnit = DrawingVariables::graphicsUnitDefault;
   eigenSpace.operator=(eigenSpaceList);
   for (int i = 0; i < dimension; i ++) {
     for (int j = 0; j < dimension; j ++) {
-      tempDO.bilinearForm.elements[i][j] =
+      drawingOperations.bilinearForm.elements[i][j] =
       this->cartanSymmetric.elements[i][j].getDoubleValue();
     }
   }
@@ -8760,12 +8761,14 @@ void WeylGroupData::getCoxeterPlane(
         outputBasis2[j] = eigenSpace[1][j].realPart;
       }
     }
-    tempDO.modifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
+    drawingOperations.modifyToOrthonormalNoShiftSecond(
+      outputBasis2, outputBasis1
+    );
   }
 }
 
 void WeylGroupData::drawRootSystem(
-  DrawingVariables& outputDV,
+  DrawingVariables& outputDrawingVariables,
   bool wipeCanvas,
   bool drawWeylChamber,
   Vector<Rational>* bluePoint,
@@ -8773,7 +8776,7 @@ void WeylGroupData::drawRootSystem(
   Vectors<Rational>* predefinedProjectionPlane
 ) {
   STACK_TRACE("WeylGroupData::drawRootSystem");
-  DrawingVariables& output = outputDV;
+  DrawingVariables& output = outputDrawingVariables;
   if (wipeCanvas) {
     output.initialize();
   }
@@ -8845,13 +8848,16 @@ void WeylGroupData::drawRootSystem(
   }
   Vector<Rational> differenceRoot;
   differenceRoot = rootSystemSorted[0] - rootSystemSorted[1];
-  Rational minLength =
+  Rational minimalLength =
   this->rootScalarCartanRoot(differenceRoot, differenceRoot);
   for (int i = 2; i < rootSystemSorted.size; i ++) {
     differenceRoot = rootSystemSorted[0] - rootSystemSorted[i];
-    if (minLength > this->rootScalarCartanRoot(differenceRoot, differenceRoot))
-    {
-      minLength = this->rootScalarCartanRoot(differenceRoot, differenceRoot);
+    if (
+      minimalLength >
+      this->rootScalarCartanRoot(differenceRoot, differenceRoot)
+    ) {
+      minimalLength =
+      this->rootScalarCartanRoot(differenceRoot, differenceRoot);
     }
   }
   if (bluePoint != nullptr) {
@@ -8862,7 +8868,7 @@ void WeylGroupData::drawRootSystem(
   if (drawWeylChamber) {
     Cone weylChamber;
     this->getWeylChamber(weylChamber);
-    weylChamber.drawMeProjective(outputDV);
+    weylChamber.drawMeProjective(outputDrawingVariables);
   }
   output.centerX = 300;
   output.centerY = 300;
@@ -8876,7 +8882,7 @@ void WeylGroupData::drawRootSystem(
       differenceRoot = rootSystemSorted[i] - rootSystemSorted[j];
       scalarProduct =
       this->rootScalarCartanRoot(differenceRoot, differenceRoot);
-      if (minLength == scalarProduct) {
+      if (minimalLength == scalarProduct) {
         output.drawLineBetweenTwoVectorsBufferRational(
           rootSystemSorted[i], rootSystemSorted[j], "blue", 1
         );
@@ -8917,7 +8923,9 @@ void WeylGroupData::drawRootSystem(
     twoPlane[1][1] = 0;
     twoPlane[0][0] = 0;
     twoPlane[0][1] = 1;
-    outputDV.modifyToOrthonormalNoShiftSecond(twoPlane[0], twoPlane[1]);
+    outputDrawingVariables.modifyToOrthonormalNoShiftSecond(
+      twoPlane[0], twoPlane[1]
+    );
   }
 }
 
@@ -9367,10 +9375,10 @@ makeParabolicFromSelectionSimpleRoots(
       selectedRoots.lastObject()->makeEi(inputWeyl.getDimension(), i);
     }
   }
-  List<Vectors<Rational> > rootsCol;
+  List<Vectors<Rational> > rootsCollections;
   return
   this->computeSubGroupFromGeneratingReflections(
-    &selectedRoots, &rootsCol, upperLimitNumberOfElements, true
+    &selectedRoots, &rootsCollections, upperLimitNumberOfElements, true
   );
 }
 

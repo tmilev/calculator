@@ -1959,24 +1959,25 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
     highestWeightLargerAlgebraFundamentalCoordinates
   );
   Vector<Rational> root;
-  DrawingVariables drawOps;
+  DrawingVariables drawOperations;
   int smallDimension = smallWeylGroup.cartanSymmetric.numberOfRows;
   Vectors<double> draggableBasis;
   draggableBasis.makeEiBasis(smallDimension);
   WeylGroupData weylGroupA2;
   weylGroupA2.makeArbitrarySimple('A', 2);
-  drawOps.initializeDimensions(
+  drawOperations.initializeDimensions(
     weylGroupA2.cartanSymmetric, draggableBasis, draggableBasis
   );
   FormatExpressions format;
-  drawOps.basisProjectionPlane[0][0] = 1;
-  drawOps.basisProjectionPlane[0][1] = 0;
-  drawOps.basisProjectionPlane[1][0] = 1;
-  drawOps.basisProjectionPlane[1][1] = 1;
-  drawOps.modifyToOrthonormalNoShiftSecond(
-    drawOps.basisProjectionPlane[1], drawOps.basisProjectionPlane[0]
+  drawOperations.basisProjectionPlane[0][0] = 1;
+  drawOperations.basisProjectionPlane[0][1] = 0;
+  drawOperations.basisProjectionPlane[1][0] = 1;
+  drawOperations.basisProjectionPlane[1][1] = 1;
+  drawOperations.modifyToOrthonormalNoShiftSecond(
+    drawOperations.basisProjectionPlane[1],
+    drawOperations.basisProjectionPlane[0]
   );
-  drawOps.graphicsUnit = 50;
+  drawOperations.graphicsUnit = 50;
   PiecewiseQuasipolynomial startingPolynomial;
   PiecewiseQuasipolynomial substitutedPolynomial;
   PiecewiseQuasipolynomial accumulator;
@@ -2004,7 +2005,7 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   startingPolynomial.makeVPF(
     this->gModKNegativeWeightsBasisChanged, currentString
   );
-  drawOps.drawCoordinateSystemBuffer(2);
+  drawOperations.drawCoordinateSystemBuffer(2);
   Cone smallWeylChamber;
   Matrix<Rational> invertedCartan;
   invertedCartan = smallWeylGroup.cartanSymmetric;
@@ -2041,7 +2042,7 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
     );
     translationsProjectedFinal[i] +=
     this->translationsProjectedBasisChanged[i];
-    drawOps.drawCircleAtVectorBufferRational(
+    drawOperations.drawCircleAtVectorBufferRational(
       - translationsProjectedFinal[i], "red", 3
     );
   }
@@ -2056,9 +2057,9 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
     accumulator += substitutedPolynomial;
   }
   accumulator.drawMe(
-    drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged
+    drawOperations, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged
   );
-  out << drawOps.getHTMLDiv(2, true);
+  out << drawOperations.getHTMLDiv(2, true);
   out << accumulator.toString();
   return out.str();
 }
@@ -2227,11 +2228,11 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   // this->preferredBasiS[0] ="(1,0)";
   // this->preferredBasiS[1] ="(0,1)";
   // //////////////////////////////////////
-  this->preferredBasisChangE.assignVectorsToRows(this->preferredBasis);
-  this->preferredBasisChangE.transpose();
-  this->preferredBasisChangeInversE = this->preferredBasisChangE;
-  this->preferredBasisChangeInversE.invert();
-  this->preferredBasisChangeInversE.actOnVectorsColumn(
+  this->preferredBasisChange.assignVectorsToRows(this->preferredBasis);
+  this->preferredBasisChange.transpose();
+  this->preferredBasisChangeInverse = this->preferredBasisChange;
+  this->preferredBasisChangeInverse.invert();
+  this->preferredBasisChangeInverse.actOnVectorsColumn(
     this->gModKNegativeWeights, this->gModKNegativeWeightsBasisChanged
   );
   this->log
@@ -2258,7 +2259,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < input.coDomainAlgebra().getRank(); i ++) {
     startingWeight.makeEi(input.coDomainAlgebra().getRank(), i);
     input.projectOntoSmallCartan(startingWeight, projectedWeight);
-    this->preferredBasisChangeInversE.actOnVectorColumn(projectedWeight);
+    this->preferredBasisChangeInverse.actOnVectorColumn(projectedWeight);
     for (int j = 0; j < projectedWeight.size; j ++) {
       projectionBasisChanged.elements[j][i] = projectedWeight[j];
     }
@@ -2399,7 +2400,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   format.polynomialAlphabet[4] = "y_3";
   root = subgroup.getRho();
   this->linearOperators[0].actOnVectorColumn(root);
-  this->preferredBasisChangE.actOnVectorColumn(root);
+  this->preferredBasisChange.actOnVectorColumn(root);
   root.negate();
   this->log
   << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}="
@@ -2510,7 +2511,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
       invertedCartan.getVectorFromRow(i, *roots.lastObject());
     }
   }
-  this->preferredBasisChangeInversE.actOnVectorsColumn(roots);
+  this->preferredBasisChangeInverse.actOnVectorsColumn(roots);
   this->log << "**********************\n\n\n";
   this->log
   << "\nthe smaller parabolic selection: "

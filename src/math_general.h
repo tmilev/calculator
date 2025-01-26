@@ -6049,7 +6049,7 @@ public:
   void scaleFirstCoRootSquaredLength(
     const Rational& multiplyCoRootSquaredLengthBy
   );
-  int getMultiplicity(int SimpleTypeIdentifier) const;
+  int getMultiplicity(int simpleTypeIdentifier) const;
   int getNumberOfSimpleComponentsOfGivenRank(int desiredRank) const;
   int getNumberOfSimpleComponents() const;
   Rational getRankRational() const;
@@ -6892,7 +6892,7 @@ public:
   void climbDownFromHighestWeightAlongSl2String(
     Matrix<Rational>& input,
     Matrix<Rational>& output,
-    Rational& outputCoeff,
+    Rational& outputCoefficients,
     int generatorPower
   );
   void climbUpFromVector(

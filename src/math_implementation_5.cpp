@@ -68,8 +68,8 @@ computeSubGroupFromGeneratingReflections(
   bool recomputeAmbientRho
 ) {
   STACK_TRACE(
-    "SubgroupWeylGroupAutomorphisms::"
     "SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms"
+    "::computeSubGroupFromGeneratingReflections"
   );
   this->checkInitialization();
   HashedList<Vector<Rational> > orbitRho;
@@ -345,9 +345,9 @@ void SemisimpleLieAlgebraOrdered::getLinearCombinationFrom(
   }
   int numberOfPositiveRoots =
   this->ownerSemisimpleLieAlgebra->getNumberOfPositiveRoots();
-  Vector<Rational> tempH = input.getCartanPart();
+  Vector<Rational> cartanElement = input.getCartanPart();
   for (int i = 0; i < this->ownerSemisimpleLieAlgebra->getRank(); i ++) {
-    coefficients[numberOfPositiveRoots + i] = tempH[i];
+    coefficients[numberOfPositiveRoots + i] = cartanElement[i];
   }
   this->chevalleyGeneratorsInCurrentCoordinates.actOnVectorColumn(
     coefficients
@@ -486,7 +486,7 @@ needsParenthesisForMultiplication() const {
 void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
   Matrix<Rational>& input,
   Matrix<Rational>& output,
-  Rational& outputCoeff,
+  Rational& outputCoefficients,
   int generatorPower
 ) {
   STACK_TRACE("SlTwoInSlN::climbDownFromHighestWeightAlongSl2String");
@@ -495,18 +495,18 @@ void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
   }
   Rational currentWeight;
   Matrix<Rational>::lieBracket(this->hElement, input, output);
-  bool tempBool = input.isProportionalTo(output, currentWeight);
-  if (!tempBool) {
+  bool isProportional = input.isProportionalTo(output, currentWeight);
+  if (!isProportional) {
     global.comments << "<br>Climbing down does not work as expected!";
   }
-  Rational raiseCoeff;
-  raiseCoeff.makeZero();
-  outputCoeff.makeOne();
+  Rational raiseCoefficient;
+  raiseCoefficient.makeZero();
+  outputCoefficients.makeOne();
   output = input;
   for (int i = 0; i < generatorPower; i ++) {
-    raiseCoeff += currentWeight;
+    raiseCoefficient += currentWeight;
     currentWeight -= 2;
-    outputCoeff *= raiseCoeff;
+    outputCoefficients *= raiseCoefficient;
     Matrix<Rational>::lieBracket(this->fElement, output, output);
   }
 }
@@ -850,15 +850,15 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
           highestWeightCandidatesProjected[k];
           this->highestWeightVectors.addOnTop(currentHighest);
           this->gModKModules.expandOnTop(1);
-          List<Matrix<Rational> >& currentMod =
+          List<Matrix<Rational> >& currentModule =
           *this->gModKModules.lastObject();
-          currentMod.size = 0;
+          currentModule.size = 0;
           for (
             matrix = currentHighest; !matrix.isEqualToZero(); Matrix<
               Rational
             >::lieBracket(this->fElement, matrix, matrix)
           ) {
-            currentMod.addOnTop(matrix);
+            currentModule.addOnTop(matrix);
           }
         }
       }

@@ -3434,7 +3434,7 @@ bool SlTwoSubalgebra::attemptRealizingKostantSekiguchi() {
   if (!computation.flagSystemSolvedOverBaseField) {
     return false;
   }
-  PolynomialSubstitution<AlgebraicNumber>  solution;
+  PolynomialSubstitution<AlgebraicNumber> solution;
   solution.setSize(computation.systemSolution.size);
   for (int i = 0; i < solution.size; i ++) {
     solution[i].makeConstant(computation.systemSolution[i]);

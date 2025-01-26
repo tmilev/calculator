@@ -1116,8 +1116,7 @@ void SubgroupDataRootReflections::makeFromRoots(
 }
 
 template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::
-    areConjugate_OLD_Deprecated_Version(
+bool FiniteGroup<elementSomeGroup>::areConjugate_OLD_Deprecated_Version(
   const elementSomeGroup& left, const elementSomeGroup& right
 ) {
   STACK_TRACE("WeylGroup::areConjugate_OLD_Deprecated_Version_By_Todor");

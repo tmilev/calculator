@@ -2781,9 +2781,7 @@ public:
   // The coefficient type is required to have a
   // substitute function that carries out a substitution in-place.
   template <class SubstitutionClass>
-  void substituteInCoefficients(
-    const SubstitutionClass& substitution
-  ) {
+  void substituteInCoefficients(const SubstitutionClass& substitution) {
     STACK_TRACE("Polynomial::substituteInCoefficients");
     Coefficient newCoefficient;
     for (int i = 0; i < this->size(); i ++) {
@@ -3372,9 +3370,9 @@ public:
   // Substitutes in the given polynomial and writes the end result
   // in-place.
   bool substitute(
-      const PolynomialSubstitution<Coefficient> & substitution,
-      const Coefficient& one
-      );
+    const PolynomialSubstitution<Coefficient>& substitution,
+    const Coefficient& one
+  );
   // Substitutes in a polynomial.
   // The n^th polynomial in the substitution list gives the
   // image under the substitution of the n^th variable.
@@ -3382,10 +3380,10 @@ public:
   // number of participating variables in some monomial,
   // the computation should crash fatally.
   bool substituteWriteOutput(
-      const PolynomialSubstitution<Coefficient> & substitution,
-      const Coefficient& one,
-          Polynomial<Coefficient>& output
-      )const;
+    const PolynomialSubstitution<Coefficient>& substitution,
+    const Coefficient& one,
+    Polynomial<Coefficient>& output
+  ) const;
   Rational totalDegree() const;
   int totalDegreeInt() const;
   bool isEqualToOne() const;
@@ -4042,8 +4040,11 @@ public:
     List<Polynomial<Coefficient> >& inputSystem
   );
   // Carries out one polynomial system simplification step.
-  bool oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(List<Polynomial<Coefficient> >& inputOutputSystem
-                             , ProgressReport& report2, ProgressReport& report3);
+  bool oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
+    List<Polynomial<Coefficient> >& inputOutputSystem,
+    ProgressReport& report2,
+    ProgressReport& report3
+  );
   void backSubstituteIntoPolynomialSystem(
     List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions
   );

@@ -51,10 +51,9 @@ bool GroebnerBasisComputation<Coefficient>::transformToReducedBasis(
     << " elements (at the start). ";
     report.report(reportStream.str());
   }
-  bool success =   this->addAndReducePolynomials();
+  bool success = this->addAndReducePolynomials();
   if (!success) {
-      global.comments << "<br>DEBUG: no success here!";
-      return this->wrapUpGroebnerOnExceedingComputationLimit(inputOutput);
+    return this->wrapUpGroebnerOnExceedingComputationLimit(inputOutput);
   }
   return this->wrapUpOnGroebnerBasisSuccess(inputOutput);
 }
@@ -960,29 +959,28 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
   }
   this->impliedSubstitutions.setSize(0);
   this->impliedSubstitutions.reserve(inputSystem.size);
-  global.comments << "<hr>DEBUG: before grobni: " << inputSystem.toStringCommaDelimited(&this->format());
   ProgressReport report2;
   ProgressReport report3;
-  while (this->oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(inputSystem, report2, report3)) {
-
-  }
-  global.comments << "<hr>DEBUG: system right after grobni: " << inputSystem.toStringCommaDelimited(&this->format()) << "<br>";
-
+  while (
+    this->oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
+      inputSystem, report2, report3
+    )
+  ) {}
 }
 
 template <class Coefficient>
-bool PolynomialSystem<Coefficient>::oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
-    List<Polynomial<Coefficient>>& inputOutputSystem, ProgressReport& report2, ProgressReport& report3){
+bool PolynomialSystem<Coefficient>::
+oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
+  List<Polynomial<Coefficient> >& inputOutputSystem,
+  ProgressReport& report2,
+  ProgressReport& report3
+) {
   this->groebner.numberPolynomialDivisions = 0;
   List<Polynomial<Coefficient> > oldSystem = inputOutputSystem;
   bool success = this->groebner.transformToReducedBasis(inputOutputSystem);
   if (success) {
-    global.comments << "DEBUG: redu basis successi!";
     oldSystem = inputOutputSystem;
-    global.comments << "<hr>DEBUG: system right after redu: " << inputOutputSystem.toStringCommaDelimited(&this->format()) << "<br>";
-
   } else {
-    global.comments << "DEBUG: redu basis NOT successi!";
     inputOutputSystem = oldSystem;
   }
   if (this->groebner.flagDoProgressReport) {
@@ -993,7 +991,7 @@ bool PolynomialSystem<Coefficient>::oneSimplificationStepReturnTrueIfMoreSimplif
   if (success && inputOutputSystem.size > 0) {
     this->groebner.numberPolynomialDivisions = 0;
     success =
-        this->groebner.transformToReducedGroebnerBasis(inputOutputSystem, false);
+    this->groebner.transformToReducedGroebnerBasis(inputOutputSystem, false);
   }
   if (!success) {
     inputOutputSystem = oldSystem;
@@ -1005,21 +1003,21 @@ bool PolynomialSystem<Coefficient>::oneSimplificationStepReturnTrueIfMoreSimplif
     reportStream << "Transforming system to a groebner basis... ";
     if (success) {
       reportStream
-          << "done, basis has "
-          << inputOutputSystem.size
-          << " elements. ";
+      << "done, basis has "
+      << inputOutputSystem.size
+      << " elements. ";
     } else {
       reportStream
-          << "not successful: computation is too large. "
-          << "In the process I transformed the "
-          << "starting system to one with "
-          << inputOutputSystem.size
-          << " elements.";
+      << "not successful: computation is too large. "
+      << "In the process I transformed the "
+      << "starting system to one with "
+      << inputOutputSystem.size
+      << " elements.";
     }
     report2.report(reportStream.str());
   }
   this->numberOfSerreSystemComputations +=
-      this->groebner.numberPolynomialDivisions;
+  this->groebner.numberPolynomialDivisions;
   if (success) {
     if (this->isContradictoryReducedSystem(inputOutputSystem)) {
       this->flagSystemProvenToHaveNoSolution = true;
@@ -1027,20 +1025,17 @@ bool PolynomialSystem<Coefficient>::oneSimplificationStepReturnTrueIfMoreSimplif
       this->flagSystemProvenToHaveSolution = false;
       return false;
     }
-      this->flagSystemProvenToHaveSolution = true;
-      if (inputOutputSystem.size == 0) {
-        this->flagSystemProvenToHaveNoSolution = false;
-        this->flagSystemSolvedOverBaseField = true;
-        this->backSubstituteIntoPolynomialSystem(
-            this->impliedSubstitutions
-            );
-        return false;
-
+    this->flagSystemProvenToHaveSolution = true;
+    if (inputOutputSystem.size == 0) {
+      this->flagSystemProvenToHaveNoSolution = false;
+      this->flagSystemSolvedOverBaseField = true;
+      this->backSubstituteIntoPolynomialSystem(this->impliedSubstitutions);
+      return false;
     }
   }
   PolynomialSubstitution<Coefficient> substitution;
-
- bool changed = this->hasImpliedSubstitutions(inputOutputSystem, substitution);
+  bool changed =
+  this->hasImpliedSubstitutions(inputOutputSystem, substitution);
   if (!changed) {
     // We did not find implied substitutions.
     // Do not continue.
@@ -1048,18 +1043,18 @@ bool PolynomialSystem<Coefficient>::oneSimplificationStepReturnTrueIfMoreSimplif
   }
   // We found implied substitutions, so we can reduce the number of variables.
   // Let's do some more computation.
-    if (this->groebner.flagDoProgressReport) {
-      std::stringstream reportStream;
-      reportStream
-          << "Found implied substitutions.<br>"
-          << this->toStringImpliedSubstitutions();
-      report3.report(reportStream.str());
-    }
-    this->impliedSubstitutions.addOnTop(substitution);
-    for (int i = 0; i < inputOutputSystem.size; i ++) {
-      inputOutputSystem[i].substitute(substitution, 1);
-    }
-    return true;
+  if (this->groebner.flagDoProgressReport) {
+    std::stringstream reportStream;
+    reportStream
+    << "Found implied substitutions.<br>"
+    << this->toStringImpliedSubstitutions();
+    report3.report(reportStream.str());
+  }
+  this->impliedSubstitutions.addOnTop(substitution);
+  for (int i = 0; i < inputOutputSystem.size; i ++) {
+    inputOutputSystem[i].substitute(substitution, 1);
+  }
+  return true;
 }
 
 template <class Coefficient>
@@ -1227,7 +1222,6 @@ bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
     result = true;
     int currentNumberNonZeroMonomialEntries = 0;
     const MonomialPolynomial& onlyMonomial = polynomial[0];
-    global.comments << "DEBUG: single monomial here: "<< polynomial.toString(&this->format()) << "<br>";
     for (int j = 0; j < onlyMonomial.minimalNumberOfVariables(); j ++) {
       if (!(onlyMonomial(j) == 0)) {
         currentNumberNonZeroMonomialEntries ++;
@@ -1244,7 +1238,8 @@ bool PolynomialSystem<Coefficient>::hasSingleMonomialEquation(
 }
 
 template <class Coefficient>
-void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(List<Polynomial<Coefficient> >& inputOutputSystem,
+void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
+  List<Polynomial<Coefficient> >& inputOutputSystem,
   const MonomialPolynomial& monomial
 ) {
   STACK_TRACE("PolynomialSystem::solveWhenSystemHasSingleMonomial");
@@ -1253,11 +1248,9 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(List<Polyno
   bool allProvenToHaveNoSolution = true;
   if (monomial.isConstant()) {
     // We have an equation of the form 1=0.
-    global.comments << "DEBUG: Single constant mon equation! NO SOLI HERE!<br>";
     this->flagSystemProvenToHaveNoSolution = true;
     return;
   }
-  global.comments << "DEBUG: using mon subi: "<< monomial.toString(&this->format()) << "<br>";
   for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
     if (monomial(i) == 0) {
       continue;
@@ -1284,7 +1277,9 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(List<Polyno
     for (int j = 0; j < inputOutputSystem.size; j ++) {
       inputOutputSystem[j].substitute(substitution, 1);
     }
-    global.comments << "DEBUG: Input-output system after subi: " << inputOutputSystem.toString(&this->format());
+    global.comments
+    << "DEBUG: Input-output system after subi: "
+    << inputOutputSystem.toString(&this->format());
     oneCase.solveSerreLikeSystemRecursively(inputOutputSystem);
     this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(oneCase);
     if (!oneCase.flagSystemProvenToHaveNoSolution) {
@@ -1478,22 +1473,22 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     this->flagUsingAlgebraicClosure = false;
     this->solveSerreLikeSystemRecursively(workingSystem);
   }
-  if (this->algebraicClosure != nullptr &&
-      !this->flagSystemSolvedOverBaseField &&
-      !this->flagSystemProvenToHaveNoSolution
-    ) {
-      if (this->groebner.flagDoProgressReport) {
-        if (!this->flagTryDirectlySolutionOverAlgebraicClosure) {
-          reportStream
-          << "<br><b>Failed to solve system over the rationals... </b>";
-        }
+  if (
+    this->algebraicClosure != nullptr &&
+    !this->flagSystemSolvedOverBaseField &&
+    !this->flagSystemProvenToHaveNoSolution
+  ) {
+    if (this->groebner.flagDoProgressReport) {
+      if (!this->flagTryDirectlySolutionOverAlgebraicClosure) {
         reportStream
-        << "<br><b>Attempting to solve allowing algebraic extensions.</b> ";
-        report.report(reportStream.str());
+        << "<br><b>Failed to solve system over the rationals... </b>";
       }
-      this->flagUsingAlgebraicClosure = true;
-      this->solveSerreLikeSystemRecursively(workingSystem);
-
+      reportStream
+      << "<br><b>Attempting to solve allowing algebraic extensions.</b> ";
+      report.report(reportStream.str());
+    }
+    this->flagUsingAlgebraicClosure = true;
+    this->solveSerreLikeSystemRecursively(workingSystem);
   }
   if (this->flagSystemSolvedOverBaseField) {
     if (

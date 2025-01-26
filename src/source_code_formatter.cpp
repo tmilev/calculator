@@ -580,6 +580,12 @@ std::string CodeFormatter::Element::format() {
   return out.str();
 }
 
+std::string CodeFormatter::Element::formatDefaultToString(){
+  std::stringstream out;
+  this->formatDefault(out);
+  return out.str();
+}
+
 void CodeFormatter::Element::formatDefault(std::stringstream& out) {
   if (this->type == CodeFormatter::Element::Type::Dummy) {
     return;
@@ -752,7 +758,8 @@ bool CodeFormatter::Element::computeIndentationInParentheses() {
   ) {
     this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
     this->children[1].computeIndentation();
-    this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
+    int whatThislinedoes;
+//    this->children[1].rightMostAtomUnderMe()->newLinesAfter = 0;
   } else {
     this->children[1].computeIndentation();
     if (this->children[1].containsNewLineAfterExcludingComments()) {
@@ -762,7 +769,6 @@ bool CodeFormatter::Element::computeIndentationInParentheses() {
   }
   this->children[2].indentationLevel = this->indentationLevel;
   this->children[2].computeIndentation();
-  global.comments << "<hr>DEBUG: in parens: <br>" << HtmlRoutines::convertStringToHtmlString( this->toStringContentOnly() , true)<< "<hr>";
   return true;
 }
 
@@ -1316,6 +1322,7 @@ bool CodeFormatter::Element::computeIndentationCommandList() {
     }
     current.computeIndentation();
   }
+
   return true;
 }
 
@@ -1429,6 +1436,8 @@ bool CodeFormatter::Element::computeIndentationCommand() {
   if (last.content != ";") {
     return true;
   }
+
+
   if (last.whiteSpaceBefore != this->indentationLevel) {
     return true;
   }
@@ -1458,9 +1467,7 @@ bool CodeFormatter::Element::computeIndentationCommand() {
 }
 
 bool CodeFormatter::Element::computeIndentationFunctionWithArguments(){
-  global.comments << "DEBUG: really here whi world!!!<hr>";
   bool result = this->computeIndentationBasic(0);
-  global.comments << "DEBUG: conti htmli:<br>" << HtmlRoutines::convertStringToHtmlString( this->toStringContentOnly(), true) << "<br>";
   return result;
 }
 
@@ -1476,7 +1483,6 @@ bool CodeFormatter::Element::computeIndentationCommaList() {
   ) {
     mustSplitLines = true;
   }
-  global.comments << "DEBUG: must split lines: " << mustSplitLines << "<br>";
   if (mustSplitLines) {
     this->previousAtom()->newLinesAfter = 1;
   }
@@ -1493,7 +1499,6 @@ bool CodeFormatter::Element::computeIndentationCommaList() {
     }
     current.computeIndentation();
   }
-  global.comments << "<hr>DEBUG: tostirng<br>" << this->toStringContentOnly() << "<hr>";
   return true;
 }
 
@@ -1507,9 +1512,6 @@ bool CodeFormatter::Element::computeIndentationExpression() {
 }
 
 bool CodeFormatter::Element::computeIndentationBasic(int startingIndex) {
-  if (this->type == CodeFormatter::Element::FunctionWithArguments){
-    global.comments << "DEBUG: HI WORLD!!!!!";
-  }
   for (int i = startingIndex; i < this->children.size; i ++) {
     this->children[i].indentationLevel = this->indentationLevel;
     this->children[i].computeIndentation();

@@ -155,6 +155,7 @@ public:
     bool computeIndentationIfWantsCodeBlock();
     bool computeIndentationQuote();
     void formatDefault(std::stringstream& out);
+    std::string formatDefaultToString();
     void formatContent(std::stringstream& out);
     bool containsNewLineAfterExcludingComments();
     void resetWhitespaceRecursively();

@@ -248,8 +248,7 @@ bool PolynomialUnivariateModular::Test::testOneDivision(
 bool PolynomialUnivariateModular::Test::testOneDerivative(
   int modulusData,
   const std::string& toBeDifferentiated,
-  const std::string&
-  expected
+  const std::string& expected
 ) {
   STACK_TRACE("PolynomialUnivariateModular::Test::testOneDerivative");
   IntegerModulusSmall modulus;
@@ -620,8 +619,7 @@ template < >
 bool Matrix<Rational>::Test::oneMatrixIntegerWithDenominator(
   const std::string& input,
   const std::string& expectedMatrix,
-  int
-  expectedScale
+  int expectedScale
 ) {
   Matrix<Rational> matrix;
   Matrix<Rational>::Test::matrixFromString(input, matrix);

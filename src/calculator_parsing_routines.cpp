@@ -33,7 +33,8 @@ bool SyntacticElement::isCommandEnclosure() const {
   }
   if (
     this->data.startsWith(owner->opCommandSequence()) &&
-    this->data.size() >= 2) {
+    this->data.size() >= 2
+  ) {
     if (this->data[1].startsWith(owner->opCommandEnclosure())) {
       return true;
     }
@@ -1432,8 +1433,7 @@ bool CalculatorParser::shouldSplitOutsideQuotes(
 void CalculatorParser::parseConsumeQuote(
   const std::string& input,
   unsigned int& indexOfLast,
-  List<SyntacticElement>&
-  output
+  List<SyntacticElement>& output
 ) {
   SyntacticElement quoteStart;
   SyntacticElement quoteEnd;
@@ -2460,7 +2460,8 @@ bool CalculatorParser::replaceEXdotsXbySsXdotsX(int numberOfDots) {
   bool found = false;
   for (
     int i = (*this->currentSyntacticStack).size - numberOfDots - 2; i >= 0;
-    i --) {
+    i --
+  ) {
     SyntacticElement& current = (*this->currentSyntacticStack)[i];
     if (
       current.totalBoundVariablesInherited >= 0 &&
@@ -2883,7 +2884,8 @@ bool CalculatorParser::allowsTimesInNext(const std::string& preceding) {
     preceding == "{}" ||
     preceding == "^" ||
     preceding == "\\sqrt" ||
-    preceding == "_") {
+    preceding == "_"
+  ) {
     return false;
   }
   return true;
@@ -3450,7 +3452,8 @@ bool CalculatorParser::applyOneRule() {
   if ((fifthToLastS == "\\int" || this->isDefiniteIntegral(fifthToLastS)) &&
     fourthToLastS == "Expression" && (
       thirdToLastS == "+" ||
-      thirdToLastS == "-") &&
+      thirdToLastS == "-"
+    ) &&
     secondToLastS == "Expression" &&
     this->canBeRegardedAsDifferentialForm(lastE)
   ) {
@@ -3459,7 +3462,8 @@ bool CalculatorParser::applyOneRule() {
   if (
     fourthToLastS == "\\int" &&
     thirdToLastS == "_" &&
-    secondToLastS == "Expression") {
+    secondToLastS == "Expression"
+  ) {
     Expression integralAtom;
     integralAtom.makeAtom(*this->owner, "\\int");
     Expression underscore;
@@ -3475,7 +3479,8 @@ bool CalculatorParser::applyOneRule() {
   if (
     fourthToLastS == "\\int" &&
     thirdToLastS == "^" &&
-    secondToLastS == "Expression") {
+    secondToLastS == "Expression"
+  ) {
     Expression integralAtom;
     integralAtom.makeAtom(*this->owner, "\\int");
     Expression underscore;
@@ -3489,7 +3494,8 @@ bool CalculatorParser::applyOneRule() {
   if (
     thirdToLastS == "\\int_{*}" &&
     secondToLastS == "^" &&
-    lastS == "Expression") {
+    lastS == "Expression"
+  ) {
     Expression exponent;
     exponent.makeXOX(
       *this->owner, this->owner->opPower(), thirdToLastE.data, lastE.data
@@ -3517,7 +3523,8 @@ bool CalculatorParser::applyOneRule() {
   if (
     thirdToLastS == "\\int^{*}" &&
     secondToLastS == "_" &&
-    lastS == "Expression") {
+    lastS == "Expression"
+  ) {
     Expression underscore;
     underscore.makeXOX(
       *this->owner, this->owner->opUnderscore(), thirdToLastE.data, lastE.data
@@ -3593,7 +3600,8 @@ bool CalculatorParser::applyOneRule() {
   if (
     thirdToLastS == "Variable" && ((
         secondToLastS != "}" &&
-        secondToLastS != " ") ||
+        secondToLastS != " "
+      ) ||
       fourthToLastS != "{" ||
       fifthToLastS != "{"
     )
@@ -3621,7 +3629,8 @@ bool CalculatorParser::applyOneRule() {
   if (
     secondToLastS == "\\right" && (
       lastS == ")" || lastS == "]" || lastS == "}"
-    )) {
+    )
+  ) {
     return this->replaceXYByY();
   }
   if (lastS == "=" && secondToLastS == "=") {
@@ -3760,7 +3769,8 @@ bool CalculatorParser::applyOneRule() {
     thirdToLastS == "-" &&
     secondToLastS == "Expression" && (
       lastS == "Expression" ||
-      lastS == "Variable")
+      lastS == "Variable"
+    )
   ) {
     return this->replaceEPowerMinusEXByEX();
   }
@@ -3926,7 +3936,8 @@ bool CalculatorParser::applyOneRule() {
   }
   if ((lastS == ">" && secondToLastS == "=") || (
       lastS == "=" && secondToLastS == ">"
-    )) {
+    )
+  ) {
     return this->replaceXXByCon(this->conGEQ());
   }
   if (thirdToLastS == "|" && secondToLastS == "Expression" && lastS == "|") {
@@ -3941,7 +3952,8 @@ bool CalculatorParser::applyOneRule() {
   if (
     fourthToLastS == "{" &&
     thirdToLastS == "Expression" &&
-    secondToLastS == "}") {
+    secondToLastS == "}"
+  ) {
     return this->replaceXEXYByEY();
   }
   if (thirdToLastS == "(" && secondToLastS == "\\circ" && lastS == ")") {
@@ -4128,7 +4140,8 @@ bool CalculatorParser::applyOneRule() {
   if (
     fourthToLastS == "\\log" &&
     thirdToLastS == "_" &&
-    secondToLastS == "Expression") {
+    secondToLastS == "Expression"
+  ) {
     return
     this->replaceXYYYByConYYY(
       this->controlSequences.getIndexNoFail("LogBase")
@@ -4241,7 +4254,8 @@ bool CalculatorParser::applyOneRule() {
   if (
     thirdToLastS == "MakeSequence" &&
     secondToLastS == "{}" &&
-    lastS == "Expression") {
+    lastS == "Expression"
+  ) {
     return this->replaceXXYBySequenceY(this->conExpression());
   }
   if (
@@ -4312,7 +4326,8 @@ bool CalculatorParser::applyOneRule() {
     fourthToLastS == "\\end" &&
     thirdToLastS == "{" && (
       secondToLastS == "array" ||
-      secondToLastS == "pmatrix") &&
+      secondToLastS == "pmatrix"
+    ) &&
     lastS == "}"
   ) {
     return this->replaceXXXXByCon(this->conMatrixEnd());
@@ -4331,13 +4346,15 @@ bool CalculatorParser::applyOneRule() {
   if (
     thirdToLastS == "Matrix" &&
     secondToLastS == "Expression" &&
-    lastS == "MatrixEnd") {
+    lastS == "MatrixEnd"
+  ) {
     return this->replaceMatrixEXByMatrixX();
   }
   if (
     thirdToLastS == "Matrix" &&
     secondToLastS == "Expression" &&
-    lastS == "\\\\") {
+    lastS == "\\\\"
+  ) {
     return this->replaceMatrixEXByMatrixNewRow();
   }
   if (secondToLastS == "Matrix" && lastS == "MatrixEnd") {

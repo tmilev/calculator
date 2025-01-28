@@ -442,7 +442,8 @@ bool CalculatorFunctionsCrypto::jwtVerifyAgainstRSA256(
   std::string exponentBase64;
   if (
     !input[2].isOfType(&modulusBase64) ||
-    !input[3].isOfType(&exponentBase64)) {
+    !input[3].isOfType(&exponentBase64)
+  ) {
     return
     calculator
     << "Failed to convert the arguments "

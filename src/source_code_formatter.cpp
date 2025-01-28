@@ -250,8 +250,7 @@ void CodeFormatter::Element::clear() {
 void CodeFormatter::Element::makeFrom2(
   CodeFormatter::Element::Type inputType,
   const Element& left,
-  const Element&
-  right
+  const Element& right
 ) {
   if (this == &left || this == &right) {
     CodeFormatter::Element leftCopy = left;
@@ -763,6 +762,7 @@ bool CodeFormatter::Element::computeIndentationInParentheses() {
     if (this->children[1].containsNewLineAfterExcludingComments()) {
       this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
       this->children[1].computeIndentation();
+      this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
     }
   }
   this->children[2].indentationLevel = this->indentationLevel;
@@ -845,7 +845,8 @@ void CodeFormatter::Element::breakExpression() {
     if (
       current.isOperator() &&
       previousIsExpression &&
-      i != this->children.size - 1) {
+      i != this->children.size - 1
+    ) {
       breakLine = true;
     }
     if (breakLine) {
@@ -1484,14 +1485,19 @@ bool CodeFormatter::Element::computeIndentationCommaList() {
     mustSplitLines = true;
   }
   if (mustSplitLines) {
-    this->previousAtom()->newLinesAfter = 1;
+    CodeFormatter::Element* previous = this->previousAtom();
+    if (previous != nullptr) {
+      previous->newLinesAfter = 1;
+    }
   }
   for (int i = 0; i < this->children.size; i ++) {
     CodeFormatter::Element& current = this->children[i];
-    if (current.content == "," || current.isComment()) {
-      if (mustSplitLines) {
-        current.rightMostAtomUnderMe()->newLinesAfter = 1;
-      }
+    bool isCommaOrComment = current.content == "," || current.isComment();
+    if (isCommaOrComment && mustSplitLines) {
+      current.rightMostAtomUnderMe()->newLinesAfter = 1;
+    }
+    if (!isCommaOrComment || i == this->children.size - 1) {
+      current.resetWhitespaceRecursively();
     }
     current.indentationLevel = this->indentationLevel;
     if (current.isComment()) {
@@ -2600,7 +2606,8 @@ bool CodeFormatter::Processor::applyOneRule() {
   }
   if (
     secondToLast.type == CodeFormatter::Element::Expression &&
-    last.isComment()) {
+    last.isComment()
+  ) {
     secondToLast.addChild(last);
     return this->removeLast();
   }
@@ -3328,7 +3335,8 @@ bool CodeFormatter::Processor::applyOneRule() {
   if (
     thirdToLast.content == "." &&
     secondToLast.content == "." &&
-    last.content == ".") {
+    last.content == "."
+  ) {
     this->lastRuleName = "three dots";
     thirdToLast.content = "...";
     thirdToLast.makeFrom1(CodeFormatter::Element::Expression, thirdToLast);
@@ -5029,8 +5037,7 @@ void CodeFormatter::applyNewLineExceptions(
 
 bool CodeFormatter::mustSplitWithWhitespace(
   const CodeFormatter::Element& leftAtom,
-  const CodeFormatter::Element&
-  rightAtom
+  const CodeFormatter::Element& rightAtom
 ) {
   if (leftAtom.newLinesAfter > 0) {
     return false;
@@ -5122,7 +5129,8 @@ bool CodeFormatter::mustSplitWithWhitespace(
   if (
     leftAtom.content == "(" ||
     leftAtom.content == "[" ||
-    leftAtom.content == "{") {
+    leftAtom.content == "{"
+  ) {
     return false;
   }
   if (leftAtom.content == "!") {
@@ -5131,7 +5139,8 @@ bool CodeFormatter::mustSplitWithWhitespace(
   if (
     rightAtom.content == ")" ||
     rightAtom.content == "]" ||
-    rightAtom.content == "}") {
+    rightAtom.content == "}"
+  ) {
     return false;
   }
   if (rightAtom.content == "[") {

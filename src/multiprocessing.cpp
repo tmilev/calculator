@@ -130,7 +130,8 @@ bool MutexProcess::createMe(const std::string& inputName, bool dontCrashOnFail)
   if (
     !this->lockPipe.createMe(
       inputName + "lockPipe", true, false,
-      dontCrashOnFail)
+      dontCrashOnFail
+    )
   ) {
     return false;
   }
@@ -605,7 +606,8 @@ bool PipePrimitive::writeOnceNoFailure(
         errno == EAI_AGAIN ||
         errno == EWOULDBLOCK ||
         errno == EINTR ||
-        errno == EIO) {
+        errno == EIO
+      ) {
         numberOfBadAttempts ++;
         if (numberOfBadAttempts > maximumBadAttempts) {
           return
@@ -687,7 +689,8 @@ bool Pipe::createMe(const std::string& inputPipeName) {
   if (
     !this->metaData.createMe(
       "metaData[" + inputPipeName + "]", false, false,
-      true)
+      true
+    )
   ) {
     this->release();
     return false;
@@ -1089,8 +1092,7 @@ void MathRoutines::parseListIntegersNoFailure(
 bool MathRoutines::parseListIntegers(
   const std::string& input,
   List<int>& result,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   List<char> delimiters;
   delimiters.addOnTopNoRepetition('\n');

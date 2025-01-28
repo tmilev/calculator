@@ -49,8 +49,7 @@ getRho() {
 void SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms::
 getMatrixOfElement(
   const ElementSubgroupWeylGroupAutomorphisms& input,
-  Matrix<Rational>&
-  outputMatrix
+  Matrix<Rational>& outputMatrix
 ) const {
   Vectors<Rational> startBasis;
   Vectors<Rational> imageBasis;

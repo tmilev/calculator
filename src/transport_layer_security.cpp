@@ -1174,7 +1174,8 @@ bool SSLContent::decodeHandshakeRecord(std::stringstream* commentsOnFailure) {
   }
   if (
     this->length + this->owner->offsetDecoded >
-    this->owner->incomingBytes.size) {
+    this->owner->incomingBytes.size
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Client hello length is too big. ";
     }
@@ -1755,7 +1756,8 @@ void Serialization::writeNByteUnsigned(
   }
   for (
     int i = byteCountOfLength - 1 + inputOutputOffset; i >=
-    inputOutputOffset; i --) {
+    inputOutputOffset; i --
+  ) {
     output[i] = static_cast<unsigned char>(input % 256);
     input /= 256;
   }
@@ -2608,9 +2610,7 @@ int TransportLayerSecurity::readOnce(
       recv(
         socket,
         this->readBuffer.objects,
-        static_cast<size_t>(
-          readBuffer.size -
-          1 ),
+        static_cast<size_t>(readBuffer.size - 1),
         0
       )
     );

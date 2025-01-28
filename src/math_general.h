@@ -377,8 +377,7 @@ public:
     this->monomialBody.setSize(0);
   }
   void makeEi(
-    int letterIndex, int power = 1, int expectedNumberOfVariables =
-    0
+    int letterIndex, int power = 1, int expectedNumberOfVariables = 0
   );
   void setVariable(int variableIndex, const Rational& power);
   void trimTrailingZeroes();
@@ -421,8 +420,7 @@ public:
     return whichDegree == 1;
   }
   bool isOneLetterNonConstant(
-    int* whichLetter = nullptr, Rational* whichDegree =
-    nullptr
+    int* whichLetter = nullptr, Rational* whichDegree = nullptr
   ) const {
     int indexBuffer;
     if (whichLetter == nullptr) {
@@ -621,8 +619,7 @@ public:
     int desiredRows,
     int desiredColumns,
     bool preserveValues,
-    const Coefficient* ringZero =
-    nullptr
+    const Coefficient* ringZero = nullptr
   );
   Matrix():
   numberOfRows(0),
@@ -769,8 +766,7 @@ public:
   void computeDeterminantOverwriteMatrix(
     Coefficient& output,
     const Coefficient& ringOne = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   void actOnVectorROWSOnTheLeft(
     List<Vector<Coefficient> >& standOnTheRightAsVectorRow
@@ -888,8 +884,7 @@ public:
   void actOnVectorsColumn(
     const Vectors<otherType>& input,
     Vectors<otherType>& output,
-    const otherType& ringZero =
-    0
+    const otherType& ringZero = 0
   ) const {
     if (&input == &output) {
       global.fatal
@@ -922,8 +917,7 @@ public:
   template <class otherType>
   void actOnVectorColumn(
     Vector<otherType>& inputOutput,
-    const otherType& ringZero =
-    otherType::zero()
+    const otherType& ringZero = otherType::zero()
   ) const {
     Vector<otherType> buffer;
     this->actOnVectorColumn(inputOutput, buffer, ringZero);
@@ -932,8 +926,7 @@ public:
   template <class otherType>
   void actOnVectorsColumn(
     Vectors<otherType>& inputOutput,
-    const otherType& ringZero =
-    otherType::zero()
+    const otherType& ringZero = otherType::zero()
   ) const {
     for (int i = 0; i < inputOutput.size; i ++) {
       this->actOnVectorColumn(inputOutput[i], ringZero);
@@ -942,8 +935,7 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringLatex(FormatExpressions* format = nullptr) const;
   std::string toStringSystemLatex(
-    Matrix<Coefficient>* constantTerms = 0, FormatExpressions* format =
-    nullptr
+    Matrix<Coefficient>* constantTerms = 0, FormatExpressions* format = nullptr
   ) const;
   std::string toStringPlainText(bool jsonFormat = false) const;
   std::string toStringOneLine(bool jsonFormat = false) const;
@@ -1129,8 +1121,7 @@ public:
     int fromRowIndex,
     int toRowIndex,
     int startColumnIndex,
-    const Coefficient&
-    scalar
+    const Coefficient& scalar
   );
   void addTwoRowsWithCarbonCopy(
     int fromRowIndex,
@@ -1171,12 +1162,10 @@ public:
   void multiplyOnTheLeft(
     const Matrix<Coefficient>& standsOnTheLeft,
     Matrix<Coefficient>& output,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   ) const;
   void multiplyOnTheLeft(
-    const Matrix<Coefficient>& standsOnTheLeft, const Coefficient& ringZero =
-    0
+    const Matrix<Coefficient>& standsOnTheLeft, const Coefficient& ringZero = 0
   );
   void multiplyOnTheRight(const Matrix<Coefficient>& standsOnTheRight) {
     Matrix<Coefficient> thisCopy = *this;
@@ -1196,15 +1185,13 @@ public:
     Selection& nonPivotPoints,
     Vector<Coefficient>& output,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   void nonPivotPointsToEigenVectorLexicographic(
     Selection& nonPivotPoints,
     Vector<Coefficient>& output,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   bool invert();
   Matrix<Coefficient> inverse() {
@@ -1228,8 +1215,7 @@ public:
   void makeIdentity(
     const Matrix<Coefficient>& prototype,
     const Coefficient& ringZero = 0,
-    const Coefficient& ringOne =
-    1
+    const Coefficient& ringOne = 1
   );
   // If m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below
@@ -1337,8 +1323,8 @@ public:
     }
   }
   void directSumWith(
-    const Matrix<Coefficient>& m2, const Coefficient& ringZero =
-    0);
+    const Matrix<Coefficient>& m2, const Coefficient& ringZero = 0
+  );
   bool operator!=(const Matrix<Coefficient>& other) const {
     return !((*this) == other);
   }
@@ -1492,8 +1478,7 @@ public:
     Selection* outputNonPivotColumns = nullptr,
     Selection* outputPivotColumns = nullptr,
     std::stringstream* humanReadableReport = nullptr,
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   );
   void gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
     int firstNonProcessedRow,
@@ -1532,8 +1517,7 @@ public:
   void getZeroEigenSpaceModifyMe(List<Vector<Coefficient> >& output);
   void getEigenspaceModifyMe(
     const Coefficient& inputEigenValue,
-    List<Vector<Coefficient> >&
-    outputEigenspace
+    List<Vector<Coefficient> >& outputEigenspace
   ) {
     for (int i = 0; i < this->numberOfColumns; i ++) {
       this->elements[i][i] -= inputEigenValue;
@@ -1544,8 +1528,7 @@ public:
   systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
     Matrix<Coefficient>& matrixA,
     Matrix<Coefficient>& matrixb,
-    Vector<Coefficient>* outputSolution =
-    0
+    Vector<Coefficient>* outputSolution = 0
   );
   static void computePotentialChangeGradient(
     Matrix<Coefficient>& matrixA,
@@ -1622,8 +1605,7 @@ public:
     static bool oneMatrixIntegerWithDenominator(
       const std::string& input,
       const std::string& expectedMatrix,
-      int
-      expectedScale
+      int expectedScale
     );
     // Makes a matrix from a string such as
     // ((2,3), (3,4), (4,5))
@@ -2128,8 +2110,8 @@ void Matrix<Coefficient>::subtractRows(
 
 template <typename Coefficient>
 void Matrix<Coefficient>::rowTimesScalar(
-  int rowIndex, const Coefficient&
-  scalar) {
+  int rowIndex, const Coefficient& scalar
+) {
   for (int i = 0; i < this->numberOfColumns; i ++) {
     this->elements[rowIndex][i] *= scalar;
   }
@@ -2414,8 +2396,8 @@ template <class SourceCoefficient, class TargetCoefficient>
 class CoefficientConverter {
 public:
   virtual bool convert(
-    const SourceCoefficient& input, TargetCoefficient&
-    output) = 0;
+    const SourceCoefficient& input, TargetCoefficient& output
+  ) = 0;
 };
 
 template <class TemplateMonomial, class Coefficient>
@@ -2467,12 +2449,10 @@ public:
   // needed,
   // it will be enclosed in a \begin{array} ... \end{array} pair.
   std::string toStringWithPossibleLineBreak(
-    FormatExpressions* format = nullptr, int* outputNumberOfLines =
-    nullptr
+    FormatExpressions* format = nullptr, int* outputNumberOfLines = nullptr
   ) const;
   std::string toString(
-    FormatExpressions* format = nullptr, int* outputNumberOfLines =
-    nullptr
+    FormatExpressions* format = nullptr, int* outputNumberOfLines = nullptr
   ) const;
   // Same as toString but uses a default alphabet "x", "y", ...
   // for the first few variables.
@@ -2581,8 +2561,7 @@ public:
   int getIndexLeadingMonomial(
     TemplateMonomial* outputMonomial,
     Coefficient* outputCoefficient,
-    const typename List<TemplateMonomial>::Comparator* monomialOrder =
-    nullptr
+    const typename List<TemplateMonomial>::Comparator* monomialOrder = nullptr
   ) const {
     if (this->size() == 0) {
       return - 1;
@@ -2643,23 +2622,20 @@ public:
     bool* madeARowSwitch = nullptr,
     HashedList<TemplateMonomial>* seedMonomials = nullptr,
     Matrix<Coefficient>* carbonCopyMatrix = nullptr,
-    List<LinearCombinationTemplate>* carbonCopyList =
-    nullptr
+    List<LinearCombinationTemplate>* carbonCopyList = nullptr
   );
   template <class LinearCombinationTemplate>
   static void intersectVectorSpaces(
     const List<LinearCombinationTemplate>& vectorSpace1,
     const List<LinearCombinationTemplate>& vectorSpace2,
     List<LinearCombinationTemplate>& outputIntersection,
-    HashedList<TemplateMonomial>* seedMonomials =
-    nullptr
+    HashedList<TemplateMonomial>* seedMonomials = nullptr
   );
   template <class LinearCombinationTemplate>
   static int getRankIntersectionVectorSpaces(
     const List<LinearCombinationTemplate>& left,
     const List<LinearCombinationTemplate>& right,
-    HashedList<TemplateMonomial>* seedMonomials =
-    nullptr
+    HashedList<TemplateMonomial>* seedMonomials = nullptr
   ) {
     List<LinearCombinationTemplate> listCopy = left;
     listCopy.addListOnTop(right);
@@ -2677,8 +2653,7 @@ public:
   static bool vectorSpacesIntersectionIsNonTrivial(
     const List<LinearCombinationTemplate>& left,
     const List<LinearCombinationTemplate>& right,
-    HashedList<TemplateMonomial>* seedMonomials =
-    nullptr
+    HashedList<TemplateMonomial>* seedMonomials = nullptr
   ) {
     int intersectionRank =
     LinearCombination<TemplateMonomial, Coefficient>::
@@ -2689,8 +2664,7 @@ public:
   static bool linearSpanContains(
     const List<LinearCombinationTemplate>& inputList,
     const LinearCombinationTemplate& input,
-    HashedList<TemplateMonomial>* seedMonomials =
-    nullptr
+    HashedList<TemplateMonomial>* seedMonomials = nullptr
   ) {
     List<LinearCombinationTemplate> listCopy = inputList;
     LinearCombination<TemplateMonomial, Coefficient>::
@@ -2706,8 +2680,7 @@ public:
     const List<LinearCombinationTemplate>& inputList,
     const LinearCombinationTemplate& input,
     Vector<Coefficient>& outputFirstLinearCombination,
-    HashedList<TemplateMonomial>* seedMonomials =
-    nullptr
+    HashedList<TemplateMonomial>* seedMonomials = nullptr
   );
   bool hasRationalCoefficients(
     LinearCombination<TemplateMonomial, Rational>* outputConversionToRationals
@@ -2734,8 +2707,7 @@ public:
   template <class LinearCombinationTemplate>
   static int getRankElementSpan(
     const List<LinearCombinationTemplate>& inputList,
-    HashedList<TemplateMonomial>* seedMonomials =
-    nullptr
+    HashedList<TemplateMonomial>* seedMonomials = nullptr
   ) {
     List<LinearCombinationTemplate> listCopy = inputList;
     LinearCombination<TemplateMonomial, Coefficient>::
@@ -2746,8 +2718,7 @@ public:
   static void gaussianEliminationByRowsDeleteZeroRows(
     List<LinearCombinationTemplate>& inputList,
     bool* madeARowSwitch = nullptr,
-    HashedList<TemplateMonomial>* seedMonomials =
-    nullptr
+    HashedList<TemplateMonomial>* seedMonomials = nullptr
   ) {
     LinearCombinationTemplate::gaussianEliminationByRows(
       inputList, madeARowSwitch, seedMonomials
@@ -2875,8 +2846,7 @@ public:
     const TemplateMonomial& inputMonomial,
     Coefficient& inputCoefficient,
     bool addPlusToFront,
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   );
   void checkNumberOfCoefficientsConsistency() const {
     if (this->coefficients.size != this->monomials.size) {
@@ -2999,8 +2969,7 @@ public:
   }
   void subtractOtherTimesCoefficient(
     const LinearCombination<TemplateMonomial, Coefficient>& other,
-    Coefficient* inputCoefficient =
-    nullptr
+    Coefficient* inputCoefficient = nullptr
   );
   template <class otherType>
   void operator/=(const otherType& other) {
@@ -3128,8 +3097,8 @@ public:
     this->multiplyBy(other, *this);
   }
   void multiplyBy(
-    const MonomialPolynomial& other, const Coefficient&
-    coefficient) {
+    const MonomialPolynomial& other, const Coefficient& coefficient
+  ) {
     return this->multiplyBy(other, coefficient, *this);
   }
   void multiplyBy(
@@ -3215,8 +3184,7 @@ public:
   void assignMinimalPolynomial(const Matrix<Coefficient>& input);
   void assignCharacteristicPolynomial(const Matrix<Coefficient>& input);
   void assignMonomialWithExponent(
-    Vector<Rational>& r, const Coefficient& coefficient =
-    1
+    Vector<Rational>& r, const Coefficient& coefficient = 1
   ) {
     this->makeZero();
     this->addMonomial(r, coefficient);
@@ -3252,8 +3220,7 @@ public:
   ) const;
   void interpolate(
     const Vector<Coefficient>& points,
-    const Vector<Coefficient>&
-    valuesAtPoints
+    const Vector<Coefficient>& valuesAtPoints
   );
   bool findOneVariableRationalRoots(List<Rational>& output);
   Coefficient discriminant();
@@ -3268,8 +3235,7 @@ public:
   void makeMonomial(
     int letterIndex,
     const Rational& power,
-    const Coefficient& inputCoefficient =
-    1
+    const Coefficient& inputCoefficient = 1
   );
   void makeDegreeOne(
     int numberOfVariables, int nonZeroIndex, const Coefficient& coefficient
@@ -3321,8 +3287,7 @@ public:
   void makeOne();
   void polynomialWithPolynomialCoefficient(
     Selection& nonCoefficientVariables,
-    Polynomial<Polynomial<Coefficient> >&
-    output
+    Polynomial<Polynomial<Coefficient> >& output
   ) const;
   void polynomialUnivariateWithPolynomialCoefficients(
     int variableIndex, Polynomial<Polynomial<Coefficient> >& output
@@ -3358,8 +3323,7 @@ public:
   // in-place.
   bool substitute(
     const PolynomialSubstitution<Coefficient>& substitution,
-    const Coefficient&
-    one
+    const Coefficient& one
   );
   // Substitutes in a polynomial.
   // The n^th polynomial in the substitution list gives the
@@ -3398,8 +3362,7 @@ public:
   );
   // <-for univariate polynomials only
   Coefficient evaluate(
-    const Vector<Coefficient>& input, const Coefficient& zero =
-    0
+    const Vector<Coefficient>& input, const Coefficient& zero = 0
   );
   Coefficient evaluate(const Coefficient& input, const Coefficient& zero = 0) {
     Vector<Coefficient> vectorInput;
@@ -3536,8 +3499,7 @@ public:
     bool oneLeastCommonMultiple(
       const std::string& left,
       const std::string& right,
-      const std::string&
-      expected
+      const std::string& expected
     );
     bool leastCommonMultiple();
     bool oneFactorizationKronecker(
@@ -3627,8 +3589,7 @@ template < >
 bool Polynomial<Rational>::Test::oneLeastCommonMultiple(
   const std::string& left,
   const std::string& right,
-  const std::string&
-  expected
+  const std::string& expected
 );
 template < >
 Vector<Polynomial<Rational> > Polynomial<Rational>::Test::
@@ -3742,8 +3703,7 @@ public:
   // x_2-> (x_1x_3+2)
   // to produce a polynomial in three variables.
   void makeIdentitySubstitution(
-    int numberOfVariables, const Coefficient& ringUnit =
-    1
+    int numberOfVariables, const Coefficient& ringUnit = 1
   );
   void makeIdentityLikeInjectionSubstitution(
     int numberOfStartingVariables,
@@ -3860,8 +3820,7 @@ public:
     const Polynomial<Coefficient>& polynomial,
     std::string* highlightColor = nullptr,
     List<MonomialPolynomial>* highlightedMonomials = nullptr,
-    int* firstNonZeroIndex =
-    nullptr
+    int* firstNonZeroIndex = nullptr
   );
   std::string getSpacedMonomialsWithHighlightLaTeX(
     const Polynomial<Coefficient>& polynomial,
@@ -3875,8 +3834,7 @@ public:
   std::string getPolynomialStringSpacedMonomialsHtml(
     const Polynomial<Coefficient>& polynomial,
     const std::string& extraStyle,
-    List<MonomialPolynomial>* highlightedMonomials =
-    nullptr
+    List<MonomialPolynomial>* highlightedMonomials = nullptr
   );
   void computeHighLightsFromRemainder(
     int remainderIndex, int& currentSlideNumber
@@ -4381,7 +4339,8 @@ gaussianEliminationByRows(
   Coefficient accumulator, negated;
   for (
     int i = 0; i < allMonomials.size &&
-    currentRowIndex < toBeEliminated.size; i ++) {
+    currentRowIndex < toBeEliminated.size; i ++
+  ) {
     const TemplateMonomial& monomial = allMonomials[i];
     int goodRow = currentRowIndex;
     for (; goodRow < toBeEliminated.size; goodRow ++) {
@@ -4607,8 +4566,7 @@ public:
     double y1,
     const std::string& text,
     int colorIndex,
-    std::fstream
-    & output
+    std::fstream& output
   );
   static void beginDocument(std::fstream& output);
   static void endLatexDocument(std::fstream& output);
@@ -5191,8 +5149,8 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
 
 template <class Object>
 void List<Object>::subSelection(
-  const Selection& selection, List<Object>&
-  output) {
+  const Selection& selection, List<Object>& output
+) {
   if (&output == this) {
     List<Object> thisCopy = *this;
     thisCopy.subSelection(selection, output);
@@ -5206,8 +5164,8 @@ void List<Object>::subSelection(
 
 template <class Object>
 void List<Object>::intersectWith(
-  const List<Object>& other, List<Object>&
-  output) const {
+  const List<Object>& other, List<Object>& output
+) const {
   if (&output == &other || this == &output) {
     List<Object> l1 = *this;
     List<Object> l2 = other;
@@ -5228,8 +5186,7 @@ template <class Coefficient>
 std::string Vector<Coefficient>::toStringLetterFormat(
   const std::string& inputLetter,
   FormatExpressions* format,
-  bool
-  dontIncludeLastVar
+  bool dontIncludeLastVar
 ) const {
   if (this->isEqualToZero()) {
     return "0";
@@ -5274,7 +5231,8 @@ std::string Vector<Coefficient>::toStringLetterFormat(
 }
 
 template <
-  class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
+  class Coefficient, unsigned int inputHashFunction(const Coefficient&)
+>
 void MonomialTensor<Coefficient, inputHashFunction>::
 multiplyByGeneratorPowerOnTheLeft(
   int generatorIndexStandsToTheLeft, const Coefficient& power
@@ -5296,7 +5254,8 @@ multiplyByGeneratorPowerOnTheLeft(
 }
 
 template <
-  class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
+  class Coefficient, unsigned int inputHashFunction(const Coefficient&)
+>
 void MonomialTensor<Coefficient, inputHashFunction>::
 multiplyByGeneratorPowerOnTheRight(
   int generatorIndex, const Coefficient& power
@@ -5315,7 +5274,8 @@ multiplyByGeneratorPowerOnTheRight(
 }
 
 template <
-  class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
+  class Coefficient, unsigned int inputHashFunction(const Coefficient&)
+>
 std::string MonomialTensor<Coefficient, inputHashFunction>::toString(
   FormatExpressions* format
 ) const {
@@ -5338,7 +5298,8 @@ std::string MonomialTensor<Coefficient, inputHashFunction>::toString(
 }
 
 template <
-  class Coefficient, unsigned int inputHashFunction(const Coefficient&)>
+  class Coefficient, unsigned int inputHashFunction(const Coefficient&)
+>
 bool MonomialTensor<Coefficient, inputHashFunction>::
 simplifyEqualConsecutiveGenerators(int lowestNonReducedIndex) {
   if (this->generatorsIndices.size < 1) {
@@ -5854,8 +5815,8 @@ public:
     *this = other;
   }
   DynkinSimpleType(
-    char inputLetter, int inputRank, const Rational& inputScale =
-    1):
+    char inputLetter, int inputRank, const Rational& inputScale = 1
+  ):
   letter(inputLetter),
   rank(inputRank),
   cartanSymmetricInverseScale(inputScale) {}
@@ -5866,8 +5827,7 @@ public:
   void makeArbitrary(
     char inputLetter,
     int inputRank,
-    const Rational&
-    inputLengthFirstCorRootSquared
+    const Rational& inputLengthFirstCorRootSquared
   );
   Rational getPrincipalSlTwoCartanSymmetricInverseScale() const;
   void getCoCartanSymmetric(Matrix<Rational>& output) const;
@@ -5947,8 +5907,8 @@ public:
   bool operator<(int otherRank) const;
   void plot(Plot& output, int verticalOffset) const;
   static void plotOneRoot(
-    Plot& output, int index, bool filled, int
-    verticalOffset);
+    Plot& output, int index, bool filled, int verticalOffset
+  );
   static void plotHorizontalChainOfRoots(
     Plot& output, int count, Selection* filledNodes
   );
@@ -6001,8 +5961,7 @@ public:
     List<char>* outputLetters = nullptr,
     List<int>* outputRanks = nullptr,
     List<int>* outputMults = nullptr,
-    List<Rational>* outputFirstCoRootLengthsSquared =
-    nullptr
+    List<Rational>* outputFirstCoRootLengthsSquared = nullptr
   ) const;
   void getTypesWithMults(List<DynkinSimpleType>& output) const;
   static void getOuterAutosGeneratorsOneTypeActOnVectorColumn(
@@ -6023,14 +5982,12 @@ public:
   bool isSimpleOfType(
     char desiredType,
     int* outputRank = nullptr,
-    Rational* outputLength =
-    nullptr
+    Rational* outputLength = nullptr
   ) const;
   bool isSimple(
     char* outputtype = nullptr,
     int* outputRank = nullptr,
-    Rational* outputLength =
-    nullptr
+    Rational* outputLength = nullptr
   ) const;
   void getSortedDynkinTypes(List<DynkinSimpleType>& output) const;
   Rational getPrincipalSlTwoCartanSymmetricInverseScale() const;
@@ -6067,8 +6024,7 @@ public:
   bool canBeExtendedParabolicallyTo(const DynkinType& other) const;
   bool canBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other) const;
   void makeSimpleType(
-    char type, int rank, const Rational* inputFirstCoRootSquareLength =
-    nullptr
+    char type, int rank, const Rational* inputFirstCoRootSquareLength = nullptr
   );
   void getEpsilonMatrix(Matrix<Rational>& output) const;
   void getCoCartanSymmetric(Matrix<Rational>& output) const;
@@ -6223,8 +6179,7 @@ public:
   Vectors<Rational> waypoints;
   void makeFromweightInSimpleCoordinates(
     const Vector<Rational>& weightInSimpleCoordinates,
-    WeylGroupData&
-    inputOwner
+    WeylGroupData& inputOwner
   );
   void makeFromWaypoints(
     Vectors<Rational>& weightsinSimpleCoordinates, WeylGroupData& inputOwner
@@ -6254,16 +6209,14 @@ public:
     List<LittelmannPath>& output,
     List<List<int> >& outputOperators,
     int upperBoundNumberOfElements,
-    Selection* parabolicNonSelectedAreInLeviPart =
-    nullptr
+    Selection* parabolicNonSelectedAreInLeviPart = nullptr
   );
   std::string generateOrbitAndAnimate();
   bool minimaAreIntegral();
   std::string toString(
     bool useSimpleCoordinates = true,
     bool useArrows = true,
-    bool includeDominance =
-    false
+    bool includeDominance = false
   ) const;
   void simplify();
   unsigned int hashFunction() const {
@@ -6495,8 +6448,7 @@ public:
   }
   void assignTensorProduct(
     const MatrixTensor<Coefficient>& left,
-    const MatrixTensor<Coefficient>&
-    right
+    const MatrixTensor<Coefficient>& right
   ) {
     // handle lazy programmers:
     if (this == &left || this == &right) {
@@ -6964,8 +6916,8 @@ public:
   void computeRPolys();
   int computeProductfromSimpleReflectionsActionList(int x, int y);
   void writeKLCoeffsToFile(
-    std::fstream& output, List<int>& KLcoeff, int
-    topIndex);
+    std::fstream& output, List<int>& KLcoeff, int topIndex
+  );
   // returns the topIndex of the KL coefficients
   int readKLCoeffsFromFile(std::fstream& input, List<int>& output);
   KazhdanLusztigPolynomials() {

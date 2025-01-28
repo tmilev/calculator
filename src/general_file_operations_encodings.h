@@ -114,8 +114,7 @@ public:
   static bool isOKFileNameVirtual(
     const std::string& fileName,
     bool accessSensitiveFolders = false,
-    std::stringstream* commentsOnFailure =
-    nullptr
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool isFileNameWithoutDotsAndSlashes(const std::string& fileName);
   static bool isFileNameSafeForSystemCommands(
@@ -127,16 +126,14 @@ public:
   static std::string getPathFromFileNameWithPath(const std::string& fileName);
   static std::string getFileExtensionWithDot(
     const std::string& fileName,
-    std::string* outputFileNameNoExtension =
-    nullptr
+    std::string* outputFileNameNoExtension = nullptr
   );
   static bool fileExistsUnsecure(const std::string& fileName);
   static bool fileExistsVirtual(
     const std::string& fileName,
     bool accessSensitiveFolders = false,
     bool accessULTRASensitiveFolders = false,
-    std::stringstream* commentsOnFailure =
-    nullptr
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool fileExistsVirtualCustomizedReadOnly(
     const std::string& fileName, std::stringstream* commentsOnFailure
@@ -145,8 +142,7 @@ public:
   static bool getFolderFileNamesUnsecure(
     const std::string& folderName,
     List<std::string>& outputFileNamesNoPath,
-    List<std::string>* outputFileTypesWithDot =
-    nullptr
+    List<std::string>* outputFileTypesWithDot = nullptr
   );
   static std::string cleanUpForFileNameUse(const std::string& inputString);
   static std::string getCurrentFolder();
@@ -159,8 +155,7 @@ public:
     List<std::string>* outputFileTypesWithDot = nullptr,
     bool accessSensitiveFolders = false,
     bool accessULTRASensitiveFolders = false,
-    std::stringstream* commentsOnFailure =
-    nullptr
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool getPhysicalFileNameFromVirtualCustomizedReadOnly(
     const std::string& inputFileName,
@@ -194,8 +189,7 @@ public:
     bool truncate,
     bool openAsBinary,
     bool accessSensitiveFolders = false,
-    bool accessUltraSensitiveFolders =
-    false
+    bool accessUltraSensitiveFolders = false
   );
   static bool
   openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded_UltraSensitiveOptions(
@@ -205,8 +199,7 @@ public:
     bool truncate,
     bool openAsBinary,
     bool accessSensitiveFolders = false,
-    bool accessUltraSensitiveFolders =
-    false
+    bool accessUltraSensitiveFolders = false
   );
   static bool openFileCreateIfNotPresentVirtualCreateFoldersIfNeeded(
     std::fstream& file,
@@ -214,8 +207,7 @@ public:
     bool openInAppendMode,
     bool truncate,
     bool openAsBinary,
-    bool accessSensitiveFolders =
-    false
+    bool accessSensitiveFolders = false
   );
   static bool openFileUnsecure(
     std::fstream& file,
@@ -233,8 +225,7 @@ public:
     bool openInAppendMode,
     bool truncate,
     bool openAsBinary,
-    bool accessSensitiveFolders =
-    false
+    bool accessSensitiveFolders = false
   );
   static bool openFileVirtualCustomizedReadOnly(
     std::fstream& file,
@@ -264,8 +255,7 @@ public:
     std::ifstream& file,
     const std::string& fileName,
     bool openAsBinary,
-    bool accessSensitiveFolders =
-    false
+    bool accessSensitiveFolders = false
   );
   // Combines paths making sure that we don't get a "//" in the middle.
   static std::string addPaths(

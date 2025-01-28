@@ -8,8 +8,7 @@ bool Matrix<Element>::
 systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
   Matrix<Element>& matrixA,
   Matrix<Element>& matrixb,
-  Vector<Element>*
-  outputSolution
+  Vector<Element>* outputSolution
 ) {
   // This function return true if Ax = b >= 0 has a solution with x >= 0 and
   // records a solution x at outputPoint
@@ -741,8 +740,7 @@ bool CalculatorFunctions::operationBinary(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int
-  operation
+  int operation
 ) {
   MemorySaving<Calculator::OperationHandlers>& operationMap =
   calculator.operations.values[operation];
@@ -764,8 +762,7 @@ bool CalculatorFunctions::elementWeylAlgebraOrPolynomial(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  assignPoly
+  bool assignPoly
 ) {
   STACK_TRACE("CalculatorFunctions::elementWeylAlgebraOrPolynomial");
   if (!input.isListNElements(3)) {

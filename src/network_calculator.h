@@ -29,8 +29,7 @@ public:
   void zeroSocketSet();
   Listener(
     int inputHighestSocketNumber,
-    MapList<int, std::string>*
-    inputListeningSockets
+    MapList<int, std::string>* inputListeningSockets
   ) {
     this->highestSocketNumber = inputHighestSocketNumber;
     this->allListeningSockets = inputListeningSockets;
@@ -62,8 +61,7 @@ public:
   ~Connector();
   void initialize(
     const std::string& inputAddressToConnectTo,
-    const std::string&
-    inputPortOrService
+    const std::string& inputPortOrService
   );
   void initialize(const std::string& inputAddressToConnectTo, int port);
   bool connectWrapper(std::stringstream* commentsOnError);
@@ -81,8 +79,8 @@ class SystemFunctions {
 public:
   static void* getIncomingAddress(sockaddr* sa);
   static void segfaultSigaction[[noreturn]](
-    int signal, siginfo_t* si, void*
-    arg);
+    int signal, siginfo_t* si, void* arg
+  );
 };
 
 #endif // header_network_calculator_ALREADY_INCLUDED

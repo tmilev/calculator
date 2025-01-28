@@ -148,7 +148,8 @@ public:
   }
   bool operator==(
     const MapTemplate<ListType, Key, Value, keyHashFunction>&
-    other) const {
+    other
+  ) const {
     if (this->size() != other.size()) {
       return false;
     }

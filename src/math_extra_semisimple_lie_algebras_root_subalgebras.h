@@ -396,8 +396,7 @@ public:
   void computeExtremeWeightInTheSameKModule(
     const Vector<Rational>& input,
     Vector<Rational>& outputW,
-    bool
-    lookingForHighest
+    bool lookingForHighest
   );
   void computeLowestWeightInTheSameKModule(
     const Vector<Rational>& input, Vector<Rational>& outputLW
@@ -423,14 +422,12 @@ public:
   void writeLieBracketTableAndOppositeKModulesToFile(
     std::fstream& output,
     List<List<List<int> > >& inMultTable,
-    List<int>&
-    inOpposites
+    List<int>& inOpposites
   );
   void readLieBracketTableAndOppositeKModulesFromFile(
     std::fstream& input,
     List<List<List<int> > >& outMultTable,
-    List<int>&
-    outOpposites
+    List<int>& outOpposites
   );
   bool operator>(const RootSubalgebra& other) const;
 };
@@ -534,8 +531,7 @@ public:
     bool useLatex,
     bool useHtml,
     int fromIndex,
-    int
-    amountToProcess
+    int amountToProcess
   );
   void toHTML(FormatExpressions* format);
   std::string toString(FormatExpressions* format);
@@ -725,8 +721,7 @@ public:
   template <typename Coefficient>
   std::string toStringPolynomialSystem(
     const PolynomialSubstitution<Coefficient>& system,
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   ) const;
   std::string toStringTripleArbitrary(FormatExpressions* format) const;
   std::string toStringTripleArbitraryMatrix() const;

@@ -118,8 +118,7 @@ bool JSData::hasCompositeKeyOfType(
 bool JSData::hasCompositeKeyOfType(
   const std::string& key,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) const {
   JSData container;
   if (

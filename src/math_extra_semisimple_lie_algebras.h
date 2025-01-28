@@ -294,8 +294,7 @@ public:
   template <class Coefficient>
   void getGenericElementCartan(
     ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output,
-    int indexFirstVariable =
-    0
+    int indexFirstVariable = 0
   ) {
     output.makeZero();
     ChevalleyGenerator generator;
@@ -311,8 +310,7 @@ public:
   template <class Coefficient>
   void getGenericElementNegativeBorelNilradical(
     ElementSemisimpleLieAlgebra<Polynomial<Coefficient> >& output,
-    int indexFirstVariable =
-    0
+    int indexFirstVariable = 0
   ) {
     output.makeZero();
     ChevalleyGenerator generator;
@@ -377,14 +375,12 @@ public:
   void writeHTML(
     bool verbose,
     bool flagWriteLatexPlots,
-    const std::string&
-    extraDynkinDiagramPlot
+    const std::string& extraDynkinDiagramPlot
   );
   std::string toHTML(
     bool verbose,
     bool flagWriteLatexPlots,
-    const std::string&
-    extraDynkinDiagramPlot
+    const std::string& extraDynkinDiagramPlot
   );
   static std::string toHTMLCalculatorHeadElements(
     const std::string& relativeTo = "../../.."
@@ -518,15 +514,13 @@ public:
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputH,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputE,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF,
-    std::stringstream* logStream =
-    nullptr
+    std::stringstream* logStream = nullptr
   );
   bool attemptExtendingEtoHEFwithHinCartan(
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& elementE,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputH,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
-    std::stringstream* logStream =
-    nullptr
+    std::stringstream* logStream = nullptr
   );
   static void findSl2Subalgebras(
     SemisimpleLieAlgebra& inputOwner,
@@ -541,9 +535,7 @@ public:
   template <class Coefficient>
   void getAdjoint(
     MatrixTensor<Coefficient>& output,
-    ElementSemisimpleLieAlgebra<
-      Coefficient
-    >& e
+    ElementSemisimpleLieAlgebra<Coefficient>& e
   );
   void makeChevalleyTestReport(int i, int j, int k, int total);
   bool isInTheWeightSupport(
@@ -1310,8 +1302,7 @@ freudenthalEvalMeDominantWeightsOnly(
 template <class Coefficient>
 void SemisimpleLieAlgebra::getAdjoint(
   MatrixTensor<Coefficient>& output,
-  ElementSemisimpleLieAlgebra<Coefficient>&
-  e
+  ElementSemisimpleLieAlgebra<Coefficient>& e
 ) {
   Matrix<Coefficient> matForm;
   this->getAdjoint(matForm, e);
@@ -1594,7 +1585,8 @@ drawMeAssumeCharIsOverCartan(
   Vector<Rational> actualWeightRationalPart;
   actualAmbientWeyl.drawRootSystem(
     drawingVariables, true, false, nullptr,
-    false);
+    false
+  );
   for (int j = 0; j < this->size(); j ++) {
     actualWeight =
     actualAmbientWeyl.getSimpleCoordinatesFromFundamental((*this)[j].

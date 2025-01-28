@@ -234,8 +234,7 @@ bool CalculatorFunctionsTrigonometry::exploitCosineEvenness(
   output.makeOX(
     calculator,
     calculator.opCos(),
-    negativeOne * coefficientExpression *
-    nonCoefficientPart
+    negativeOne * coefficientExpression * nonCoefficientPart
   );
 }
 
@@ -261,8 +260,7 @@ bool CalculatorFunctionsTrigonometry::exploitSineOddness(
   Expression sinE;
   moneE.assignValue(calculator, - 1);
   sinE.makeOX(
-    calculator, calculator.opSin(), moneE * coefficientExpression *
-    nonCFpart
+    calculator, calculator.opSin(), moneE * coefficientExpression * nonCFpart
   );
   output = moneE * sinE;
   return true;

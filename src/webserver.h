@@ -114,8 +114,7 @@ public:
   bool extractArgumentsFromMessage(
     const std::string& input,
     std::stringstream& argumentProcessingFailureComments,
-    int recursionDepth =
-    0
+    int recursionDepth = 0
   );
   bool extractArgumentsFromCookies(
     std::stringstream& argumentProcessingFailureComments
@@ -138,20 +137,17 @@ public:
   void writeAfterTimeoutPartTwo(
     JSData& result,
     const std::string& status,
-    const std::string&
-    fileNameCarbonCopy
+    const std::string& fileNameCarbonCopy
   );
   void writeAfterTimeoutCarbonCopy(
     const JSData& input, const std::string& fileNameCarbonCopy
   );
   void getIndicatorOnTimeout(JSData& output, const std::string& message);
   void queueStringForSendingNoHeader(
-    const std::string& stringToSend, bool mustSendAll =
-    false
+    const std::string& stringToSend, bool mustSendAll = false
   );
   void queueBytesForSendingNoHeader(
-    const List<char>& bytesToSend, bool mustSendAll =
-    false
+    const List<char>& bytesToSend, bool mustSendAll = false
   );
   bool shouldDisplayLoginPage();
   void wrapUpConnection();
@@ -175,8 +171,7 @@ public:
   std::string getDatabaseDeleteOneItem();
   void setHeaderOKNoContentLength(
     const std::string& extraHeader,
-    const std::string& contentType =
-    "application/json"
+    const std::string& contentType = "application/json"
   );
   void setHeader(
     const std::string& httpResponseNoTermination,
@@ -309,8 +304,7 @@ public:
   bool runOnce(
     Listener& listener,
     long long& previousReportedNumberOfSelects,
-    int&
-    returnCode
+    int& returnCode
   );
   // Wraps the system level fork() call.
   // Addionally computes a

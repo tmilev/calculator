@@ -91,8 +91,7 @@ public:
   std::string toStringLetterFormat(
     const std::string& inputLetter,
     FormatExpressions* format = nullptr,
-    bool dontIncludeLastVar =
-    false
+    bool dontIncludeLastVar = false
   ) const;
   std::string toStringEpsilonFormat(FormatExpressions* format = nullptr) const {
     return this->toStringLetterFormat("\\varepsilon", format);
@@ -358,7 +357,8 @@ public:
     int newDimension = normal.size + 1;
     this->setSize(newDimension);
     this->RootScalarEuclideanRoot(
-      normal, point, this->objects[newDimension - 1]);
+      normal, point, this->objects[newDimension - 1]
+    );
     this->objects[newDimension - 1].negate();
     for (int j = 0; j < newDimension - 1; j ++) {
       this->objects[j] = normal[j];
@@ -871,13 +871,11 @@ public:
     int startRowIndex
   );
   void getGramMatrix(
-    Matrix<Coefficient>& output, const Matrix<Rational>* bilinearForm =
-    nullptr
+    Matrix<Coefficient>& output, const Matrix<Rational>* bilinearForm = nullptr
   ) const;
   void getMatrixRootsToRows(Matrix<Rational>& output) const;
   void getOrthogonalComplement(
-    Vectors<Coefficient>& output, Matrix<Coefficient>* bilinearForm =
-    nullptr
+    Vectors<Coefficient>& output, Matrix<Coefficient>* bilinearForm = nullptr
   );
   bool linearSpanContainsVector(
     const Vector<Coefficient>& input,
@@ -897,15 +895,13 @@ public:
     Selection& outputSelectedPivots
   );
   int getRankElementSpan(
-    Matrix<Coefficient>* buffer = 0, Selection* bufferSelection =
-    nullptr
+    Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr
   ) const;
   static bool conesIntersect(
     List<Vector<Rational> >& strictCone,
     List<Vector<Rational> >& nonStrictCone,
     Vector<Rational>* outputLinearCombo = nullptr,
-    Vector<Rational>* outputSplittingNormal =
-    nullptr
+    Vector<Rational>* outputSplittingNormal = nullptr
   );
   static bool getNormalSeparatingCones(
     List<Vector<Coefficient> >& coneStrictlyPositiveCoefficients,
@@ -927,8 +923,7 @@ public:
   }
   bool getCoordinatesInBasis(
     const Vectors<Coefficient>& inputBasis,
-    Vectors<Coefficient>&
-    outputCoordinates
+    Vectors<Coefficient>& outputCoordinates
   ) const;
   bool getIntegralCoordinatesInBasisIfTheyExist(
     const Vectors<Coefficient>& inputBasis,
@@ -988,8 +983,8 @@ public:
     return result;
   }
   std::string toStringLetterFormat(
-    const std::string& inputLetter, bool
-    useLatex) {
+    const std::string& inputLetter, bool useLatex
+  ) {
     std::stringstream out;
     for (int i = 0; i < this->size; i ++) {
       out << this->objects[i].toStringLetterFormat(inputLetter, useLatex);
@@ -1027,23 +1022,20 @@ public:
   void gaussianEliminationForNormalComputation(
     Matrix<Coefficient>& inputMatrix,
     Selection& outputNonPivotPoints,
-    int
-    dimension
+    int dimension
   ) const;
   // Computes a linear combination with coefficients in the natural order.
   bool getLinearDependence(
     Vector<Coefficient>& outputLinearCombination,
     bool homogenous,
     const Coefficient& one = 1,
-    const Coefficient& zero =
-    0
+    const Coefficient& zero = 0
   );
   // Computes a linear combination with coefficients in the natural order.
   bool getLinearDependenceHomogenous(
     Vector<Coefficient>& outputLinearCombination,
     const Coefficient& one = 1,
-    const Coefficient& zero =
-    0
+    const Coefficient& zero = 0
   ) {
     return this->getLinearDependence(outputLinearCombination, true, one, zero);
   }
@@ -1051,8 +1043,7 @@ public:
   bool getLinearDependenceLexicographic(
     Vector<Coefficient>& outputLinearCombination,
     const Coefficient& one = 1,
-    const Coefficient& zero =
-    0
+    const Coefficient& zero = 0
   ) {
     return
     this->getLinearDependence(outputLinearCombination, false, one, zero);
@@ -1264,8 +1255,7 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
 template <class Coefficient>
 bool Vectors<Coefficient>::getCoordinatesInBasis(
   const Vectors<Coefficient>& inputBasis,
-  Vectors<Coefficient>&
-  outputCoordinates
+  Vectors<Coefficient>& outputCoordinates
 ) const {
   STACK_TRACE("Vectors::getCoordinatesInBasis");
   outputCoordinates.setSize(this->size);

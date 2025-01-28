@@ -176,7 +176,8 @@ void GraphWeightedLabeledEdges::computeConnectedComponentsAndBaseNodeDistances(
   orbit.setExpectedSize(this->edges.size());
   for (
     int indexBaseNode = 0; indexBaseNode < this->numberOfNodes;
-    indexBaseNode ++) {
+    indexBaseNode ++
+  ) {
     if (this->baseNode[indexBaseNode] == - 1) {
       this->distanceToBaseNode[indexBaseNode] = 0;
       this->baseNode[indexBaseNode] = indexBaseNode;

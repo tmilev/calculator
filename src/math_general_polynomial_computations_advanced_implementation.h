@@ -1706,7 +1706,8 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariableDefault(
   }
   if (
     left.minimalNumberOfVariables() > 1 ||
-    right.minimalNumberOfVariables() > 1) {
+    right.minimalNumberOfVariables() > 1
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "This greatest common divisor computation "
@@ -1763,7 +1764,8 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   }
   if (
     left.minimalNumberOfVariables() <= 1 &&
-    right.minimalNumberOfVariables() <= 1) {
+    right.minimalNumberOfVariables() <= 1
+  ) {
     return
     Polynomial<Coefficient>::greatestCommonDivisorOneVariable(
       left, right, output, commentsOnFailure
@@ -3140,8 +3142,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     );
   }
   for (
-    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++)
-  {
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
+  ) {
     this->fcAnswerMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(
         this->intermediateSubtractands[remainderIndex][i]
@@ -3160,8 +3162,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     ].addOnTop(currentSlideNumber);
   }
   for (
-    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++)
-  {
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
+  ) {
     this->highlightMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(
         this->intermediateSubtractands[remainderIndex][i]
@@ -3186,8 +3188,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     ].addOnTop(currentSlideNumber);
   }
   for (
-    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++)
-  {
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
+  ) {
     this->highlightMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(
         this->intermediateSubtractands[remainderIndex][i]
@@ -3201,7 +3203,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   }
   for (
     int i = 0; i < this->intermediateRemainders[remainderIndex + 1].size();
-    i ++) {
+    i ++
+  ) {
     this->fcAnswerMonsRemainders[remainderIndex + 1][
       this->allMonomials.getIndex(
         this->intermediateRemainders[remainderIndex + 1][i]

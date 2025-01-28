@@ -116,14 +116,12 @@ public:
   std::string getSelectedRowEntry(const std::string& key);
   bool loadFromDatabase(
     std::stringstream* commentsOnFailure,
-    std::stringstream* commentsGeneral =
-    nullptr
+    std::stringstream* commentsGeneral = nullptr
   );
   bool fetchOneColumn(
     const std::string& columnNameUnsafe,
     std::string& outputUnsafe,
-    std::stringstream* failureComments =
-    nullptr
+    std::stringstream* failureComments = nullptr
   );
   bool authenticateWithPassword(std::stringstream* commentsOnFailure);
   bool authenticateWithToken(std::stringstream* commentsOnFailure);
@@ -133,8 +131,8 @@ public:
   bool resetAuthenticationToken(std::stringstream* commentsOnFailure);
   bool setPassword(std::stringstream* commentsOnFailure);
   void exists(
-    bool& outputExists, bool& databaseIsOK, std::stringstream*
-    comments);
+    bool& outputExists, bool& databaseIsOK, std::stringstream* comments
+  );
   // Stores the user data to the database.
   // Overwrites previously stored data.
   bool storeToDatabaseOverwrite(

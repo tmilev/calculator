@@ -149,8 +149,7 @@ const signed Sha3::powersOfA[24] =
   2,
   20,
   14,
-  22
-  ,
+  22 ,
   9,
   6,
   1

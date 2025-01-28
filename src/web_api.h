@@ -23,8 +23,7 @@ public:
   std::string getBrowserificationAssembled(const std::string& entryPoint);
   bool loadJavascriptFileNames(
     const std::string& buildFileNameVirtual,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
 };
 
@@ -136,8 +135,7 @@ public:
   static JSData submitAnswersJSON(
     const std::string& inputRandomSeed,
     bool* outputIsCorrect,
-    bool
-    timeSafetyBrake
+    bool timeSafetyBrake
   );
   static JSData submitAnswersPreviewJSON();
   static JSData submitAnswersJSON();
@@ -180,14 +178,12 @@ public:
     const std::string& inputRandomSeed,
     std::string* outputNakedAnswer = nullptr,
     bool* answerGenerationSuccess = nullptr,
-    bool doIncludeTimeStats =
-    true
+    bool doIncludeTimeStats = true
   );
   static std::string getCommentsInterpretation(
     Calculator& interpreterWithAdvice,
     int indexShift,
-    FormatExpressions&
-    format
+    FormatExpressions& format
   );
   static JSData getSelectCourseJSON();
   static std::string getScoresPage();
@@ -200,8 +196,7 @@ public:
   static std::string getCalculatorWorkerJS();
   static std::string getBrowserification(
     const std::string& buildJSONVirtualFileName,
-    const std::string&
-    scriptEntryPoint
+    const std::string& scriptEntryPoint
   );
   static std::string getScoresInCoursePage();
   static std::string setProblemDeadline();
@@ -211,8 +206,7 @@ public:
   static std::string toStringUserDetailsTable(
     bool adminsOnly,
     List<JSData>& users,
-    const std::string&
-    hostWebAddressWithPort
+    const std::string& hostWebAddressWithPort
   );
   static std::string getSanitizedComment(
     const Expression& input, FormatExpressions& format, bool& resultIsPlot

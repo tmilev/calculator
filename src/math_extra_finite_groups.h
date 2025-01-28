@@ -289,8 +289,8 @@ public:
   // function will try to find.
   // Set maximumElements = - 1 for "unlimited" upper bound.
   bool computeAllElementsLargeGroup(
-    bool andWords, int maximumElements =
-    1000000);
+    bool andWords, int maximumElements = 1000000
+  );
   // maximumElements gives an upper bound to the number of elements this
   // function will try to find.
   // Set maximumElements = - 1 for "unlimited" upper bound.
@@ -731,8 +731,7 @@ public:
   void makeArbitrarySimple(
     char weylGroupLetter,
     int n,
-    const Rational* firstCoRootLengthSquared =
-    nullptr
+    const Rational* firstCoRootLengthSquared = nullptr
   );
   void makeFromDynkinType(const DynkinType& inputType);
   void makeFinalSteps();
@@ -748,9 +747,7 @@ public:
   static bool getWordByFormulaImplementation(
     FiniteGroup<ElementWeylGroup>& group,
     const ElementWeylGroup& g,
-    List<
-      int
-    >& out
+    List<int>& out
   );
   void getSignCharacter(Vector<Rational>& out);
   void getStandardRepresentation(
@@ -887,8 +884,7 @@ public:
   template <class Coefficient>
   Coefficient weylDimensionFormulaSimpleCoordinates(
     Vector<Coefficient>& weightInSimpleCoordinates,
-    const Coefficient& ringUnit =
-    1
+    const Coefficient& ringUnit = 1
   );
   template <class Coefficient>
   Coefficient weylDimFormulaFundamentalCoordinates(
@@ -899,8 +895,7 @@ public:
     Vector<Coefficient>& weight,
     int* sign = nullptr,
     bool* stabilizerFound = nullptr,
-    ElementWeylGroup* raisingElement =
-    nullptr
+    ElementWeylGroup* raisingElement = nullptr
   );
   bool areMaximallyDominantGroupInner(List<Vector<Rational> >& weights);
   template <class Coefficient>
@@ -919,8 +914,7 @@ public:
     bool drawWeylChamber,
     Vector<Rational>* bluePoint = nullptr,
     bool labelDynkinDiagramVertices = false,
-    Vectors<Rational>* predefinedProjectionPlane =
-    nullptr
+    Vectors<Rational>* predefinedProjectionPlane = nullptr
   );
   bool hasStronglyPerpendicularDecompositionWRT(
     Vector<Rational>& input,
@@ -1047,8 +1041,7 @@ public:
     int index,
     AffineHyperplane<Rational>& output,
     bool rhoAction,
-    bool
-    useMinusRho
+    bool useMinusRho
   );
   void getLowestElementInOrbit(
     Vector<Rational>& inputOutput,
@@ -1057,8 +1050,7 @@ public:
     bool rhoAction,
     bool useMinusRho,
     int* sign = nullptr,
-    bool* stabilizerFound =
-    nullptr
+    bool* stabilizerFound = nullptr
   ) {
     this->getExtremeElementInOrbit(
       inputOutput,
@@ -1161,8 +1153,7 @@ public:
     int index,
     Vector<Coefficient>& vector,
     bool RhoAction,
-    const Coefficient&
-    ringZero
+    const Coefficient& ringZero
   );
   // root is a list of the simple coordinates of the Vector<Rational>
   // root serves as both input and output
@@ -1238,8 +1229,8 @@ public:
     const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output
   ) const;
   double rootScalarCartanRoot(
-    const Vector<double>& r1, const Vector<double>&
-    r2) const {
+    const Vector<double>& r1, const Vector<double>& r2
+  ) const {
     if (r1.size != r2.size || r1.size != this->getDimension()) {
       global.fatal
       << "Attempt to take the root system scalar product of "
@@ -2050,8 +2041,8 @@ public:
   );
   void(*cosetRepresentativeEnumerator)(void* H) = nullptr;
   bool(*sameCosetAsByFormula)(
-    void* H, elementSomeGroup& g1, elementSomeGroup&
-    g2) =
+    void* H, elementSomeGroup& g1, elementSomeGroup& g2
+  ) =
   nullptr;
   static bool translatableWordsSubgroupElementGetWord(
     FiniteGroup<elementSomeGroup>& H, const elementSomeGroup& g, List<int>& out
@@ -2455,8 +2446,7 @@ public:
   void raiseToDominantWeightInner(
     Vector<Coefficient>& weight,
     int* sign = nullptr,
-    bool* stabilizerFound =
-    nullptr
+    bool* stabilizerFound = nullptr
   );
   template <class Coefficient>
   bool freudenthalFormulaIrrepIsWRTLeviPart(

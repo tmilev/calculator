@@ -312,8 +312,7 @@ public:
   );
   void getGenericLinearCombinationInvolvedPosGens(
     int index,
-    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
-    output
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void computeCentralizerIsWellChosen();
   void computeCentralizerManually();
@@ -336,21 +335,18 @@ public:
     const CandidateSemisimpleSubalgebra& baseSubalgebra,
     const DynkinType& newType,
     const List<int>& rootInjection,
-    Vector<Rational>* newHScaledToActByTwo =
-    nullptr
+    Vector<Rational>* newHScaledToActByTwo = nullptr
   );
   void enumerateAllNilradicals();
   std::string toStringNilradicalSelection(const List<int>& selection);
   void enumerateNilradicalsRecursively(
-    List<int>& selection, std::stringstream* logStream =
-    nullptr
+    List<int>& selection, std::stringstream* logStream = nullptr
   );
   void extendNilradicalSelectionToMultFreeOverSemisimplePartSubalgebra(
     HashedList<int, HashFunctions::hashFunction>& inputOutput
   );
   bool isPossibleNilradicalCarryOutSelectionImplications(
-    List<int>& selection, std::stringstream* logStream =
-    nullptr
+    List<int>& selection, std::stringstream* logStream = nullptr
   );
   void extendToModule(
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput

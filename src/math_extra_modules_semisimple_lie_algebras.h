@@ -20,8 +20,7 @@ public:
   MonomialGeneralizedVerma(): owner(nullptr), indexFDVector(- 1) {}
   friend std::ostream& operator<<(
     std::ostream& output,
-    const MonomialGeneralizedVerma<Coefficient>&
-    generator
+    const MonomialGeneralizedVerma<Coefficient>& generator
   ) {
     output << generator.toString();
     return output;
@@ -36,8 +35,8 @@ public:
     this->monomialCoefficientOne = other.monomialCoefficientOne;
   }
   std::string toString(
-    FormatExpressions* format = nullptr, bool includeV =
-    true) const;
+    FormatExpressions* format = nullptr, bool includeV = true
+  ) const;
   bool operator==(const MonomialGeneralizedVerma<Coefficient>& other) const {
     if (
       this->indexFDVector == other.indexFDVector && this->owner == other.owner
@@ -140,8 +139,7 @@ public:
   }
   bool extractElementUniversalEnveloping(
     ElementUniversalEnveloping<Coefficient>& output,
-    SemisimpleLieAlgebra&
-    owner
+    SemisimpleLieAlgebra& owner
   );
   void operator=(const ElementSumGeneralizedVermas<Coefficient>& other) {
     this->::LinearCombination<
@@ -156,8 +154,7 @@ public:
   List<MonomialGeneralizedVerma<Coefficient> > monomials;
   friend std::ostream& operator<<(
     std::ostream& output,
-    const MonomialTensorGeneralizedVermas<Coefficient>&
-    input
+    const MonomialTensorGeneralizedVermas<Coefficient>& input
   ) {
     output << input.toString();
     return output;
@@ -203,8 +200,8 @@ public:
     }
   }
   std::string toString(
-    FormatExpressions* format = nullptr, bool includeV =
-    true) const;
+    FormatExpressions* format = nullptr, bool includeV = true
+  ) const;
   MonomialTensorGeneralizedVermas() {}
   void operator=(const MonomialTensorGeneralizedVermas<Coefficient>& other) {
     this->monomials = other.monomials;
@@ -255,16 +252,14 @@ class ModuleSSalgebra {
   highestWeightTransposeAntiAutomorphismBilinearFormSimpleGeneratorsOnly(
     const MonomialTensor<int, HashFunctions::hashFunction>& leftMonomial,
     const MonomialTensor<int, HashFunctions::hashFunction>& rightMonomial,
-    ProgressReport* progressReport =
-    nullptr
+    ProgressReport* progressReport = nullptr
   );
   Rational highestWeightTrace(
     const Pair<
       MonomialTensor<int, HashFunctions::hashFunction>,
       MonomialTensor<int, HashFunctions::hashFunction>
     >& pair,
-    ProgressReport* progressReport =
-    nullptr
+    ProgressReport* progressReport = nullptr
   );
   void checkConsistency();
 public:
@@ -421,8 +416,7 @@ public:
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
     std::string* outputReport,
-    bool computeSimpleGens =
-    true
+    bool computeSimpleGens = true
   );
   SemisimpleLieAlgebra& getOwner() const {
     if (this->owner == nullptr) {
@@ -482,8 +476,7 @@ public:
     nullptr,
     Vectors<Coefficient>* outputWeightsFundamentalCoordinates = nullptr,
     Vectors<Coefficient>* outputEigenSpace = nullptr,
-    CharacterSemisimpleLieAlgebraModule<Coefficient>* outputChar =
-    nullptr
+    CharacterSemisimpleLieAlgebraModule<Coefficient>* outputChar = nullptr
   );
   void splitFDpartOverFKLeviRedSubalg(
     HomomorphismSemisimpleLieAlgebra& homomorphism,
@@ -492,8 +485,7 @@ public:
     nullptr,
     Vectors<Coefficient>* outputWeightsFundamentalCoordinates = nullptr,
     Vectors<Coefficient>* outputEigenSpace = nullptr,
-    std::stringstream* comments =
-    nullptr
+    std::stringstream* comments = nullptr
   );
   template <class ResultType>
   void getElementsNilradical(
@@ -701,8 +693,7 @@ Rational ModuleSSalgebra<Coefficient>::highestWeightTrace(
       summand = 0;
       newRight = accumulator;
       newRight.multiplyByGeneratorPowerOnTheRight(
-        oldRight.generatorsIndices[i], oldRight.powers[i] -
-        1
+        oldRight.generatorsIndices[i], oldRight.powers[i] - 1
       );
       remainingWeight.makeZero(weylGroup.getDimension());
       for (int j = i + 1; j < oldRight.generatorsIndices.size; j ++) {
@@ -2951,7 +2942,8 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(
   }
   needsCdot = needsCdot || (
     coefficientString != "1" &&
-    coefficientString != "-");
+    coefficientString != "-"
+  );
   if (needsCdot) {
     out << "\\cdot ";
   }

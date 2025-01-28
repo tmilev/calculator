@@ -162,8 +162,7 @@ bool LargeIntegerUnsigned::Test::isPossiblyPrimeFast(
 bool LargeIntegerUnsigned::Test::isPossiblyPrimeMillerRabinOnly(
   const List<LargeIntegerUnsigned>& input,
   bool mustBeTrue,
-  int
-  millerRabinTries
+  int millerRabinTries
 ) {
   for (int i = 0; i < input.size; i ++) {
     bool result =
@@ -240,7 +239,8 @@ bool LargeIntegerUnsigned::Test::guaranteedPrime() {
 bool LargeIntegerUnsigned::Test::factor() {
   LargeIntegerUnsigned::Test::factorSmall(
     120, "2, 3, 5", "3, 1, 1", 100, 100,
-    3);
+    3
+  );
   LargeIntegerUnsigned::Test::factorSmall(
     120, "2, 3, 5", "3, 1, 1", 0, 100, 3
   );

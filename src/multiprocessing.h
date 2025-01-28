@@ -167,8 +167,7 @@ public:
     const std::string& input,
     int timeOutInSeconds,
     int maximumTries = 10,
-    std::stringstream* commentsOnFailure =
-    nullptr
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool readWithTimeOutViaSelectOneFileDescriptor(
     int fileDescriptor,
@@ -176,8 +175,7 @@ public:
     int bufferSize,
     int timeOutInSecondsNonPositiveForNoTimeLimit,
     int maximumTries = 10,
-    std::stringstream* commentsOnFailure =
-    nullptr
+    std::stringstream* commentsOnFailure = nullptr
   );
   static bool readWithTimeOutViaSelect(
     const List<int>& fileDescriptors,
@@ -186,8 +184,7 @@ public:
     int bufferSize,
     int timeOutInSecondsNonPositiveForNoTimeLimit,
     int maximumTries = 10,
-    std::stringstream* commentsOnFailure =
-    nullptr
+    std::stringstream* commentsOnFailure = nullptr
   );
   bool writeOnceAfterEmptying(
     const std::string& toBeSent, bool dontCrashOnFail

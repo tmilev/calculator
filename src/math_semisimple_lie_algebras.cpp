@@ -242,8 +242,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorMainDiv() {
 std::string SemisimpleLieAlgebra::toHTML(
   bool verbose,
   bool flagWriteLatexPlots,
-  const std::string&
-  extraDynkinDiagramPlot
+  const std::string& extraDynkinDiagramPlot
 ) {
   STACK_TRACE("SemisimpleLieAlgebra::toHTML");
   std::stringstream out;
@@ -446,8 +445,7 @@ std::string SemisimpleLieAlgebra::toHTML(
 void SemisimpleLieAlgebra::writeHTML(
   bool verbose,
   bool flagWriteLatexPlots,
-  const std::string&
-  extraDynkinDiagramPlot
+  const std::string& extraDynkinDiagramPlot
 ) {
   std::stringstream outWithLinks;
   std::stringstream outFile;
@@ -1112,8 +1110,8 @@ bool SemisimpleLieAlgebra::getConstantOrHElement(
 }
 
 void SemisimpleLieAlgebra::makeChevalleyTestReport(
-  int i, int j, int k, int
-  total) {
+  int i, int j, int k, int total
+) {
   if (!global.response.reportDesired()) {
     return;
   }
@@ -1393,7 +1391,8 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
       // Looking for elements left, right such that [left, right] = current.
       for (
         int leftIndex = 0; leftIndex < nonComputed.numberOfElements;
-        leftIndex ++) {
+        leftIndex ++
+      ) {
         if (nonComputed.selected[leftIndex]) {
           // The candidate for left is not computed yet.
           continue;

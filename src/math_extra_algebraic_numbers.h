@@ -237,8 +237,7 @@ public:
   bool reduceMe(std::stringstream* commentsOnFailure);
   void contractBasesIfRedundant(
     AlgebraicClosureRationals& previousCopy,
-    AlgebraicNumber*
-    outputImageGenerator
+    AlgebraicNumber* outputImageGenerator
   );
   void computeDisplayStringsFromRadicals();
   bool getRadicalSelectionFromIndex(int inputIndex, Selection& selection);
@@ -255,8 +254,7 @@ public:
   );
   void convertPolynomialOneVariableToPolynomialFirstVariable(
     const Polynomial<AlgebraicNumber>& input,
-    Polynomial<AlgebraicNumber>&
-    output
+    Polynomial<AlgebraicNumber>& output
   );
   bool adjoinRootMinimalPolynomial(
     const Polynomial<AlgebraicNumber>& polynomial,
@@ -394,8 +392,7 @@ public:
   void henselLiftOnce(
     const LargeIntegerUnsigned& oldModulus,
     int stepCount,
-    std::stringstream*
-    comments
+    std::stringstream* comments
   );
   // Same as factor.
   // The name oneFactor is

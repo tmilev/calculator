@@ -971,8 +971,8 @@ std::string HtmlRoutines::convertStringToHtmlString(
 }
 
 uint32_t HtmlRoutines::redGreenBlue(
-  unsigned int r, unsigned int g, unsigned
-  int b) {
+  unsigned int r, unsigned int g, unsigned int b
+) {
   r = r % 256;
   g = g % 256;
   b = b % 256;
@@ -1583,8 +1583,7 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults(
           "html-common/ace/src-min/"
         }
       ),
-      List<std::string>({Configuration::HTMLCommonFonts, "html-common/fonts"}
-      ),
+      List<std::string>({Configuration::HTMLCommonFonts, "html-common/fonts"}),
       List<std::string>({Configuration::HTMLCommonFont, "html-common/fonts"}),
       List<std::string>({Configuration::HTMLCommon, "html-common/"}),
       List<std::string>({Configuration::calculatorHTML, "calculator_html/"}),
@@ -1892,23 +1891,20 @@ bool FileOperations::openFileUnsecure(
     } else {
       file.open(
         fileName.c_str(),
-        std::fstream::in | std::fstream::out |
-        std::fstream::app
+        std::fstream::in | std::fstream::out | std::fstream::app
       );
     }
   } else {
     if (openAsBinary) {
       file.open(
         fileName.c_str(),
-        std::fstream::in | std::fstream::out |
-        std::fstream::binary
+        std::fstream::in | std::fstream::out | std::fstream::binary
       );
     } else {
       if (truncate) {
         file.open(
           fileName.c_str(),
-          std::fstream::in | std::fstream::out |
-          std::fstream::trunc
+          std::fstream::in | std::fstream::out | std::fstream::trunc
         );
       } else {
         file.open(fileName.c_str(), std::fstream::in | std::fstream::out);
@@ -2157,7 +2153,8 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
   }
   for (
     int i = 0; i < FileOperations::folderVirtualLinksNonSensitive().size();
-    i ++) {
+    i ++
+  ) {
     if (
       StringRoutines::stringBeginsWith(
         inputCopy,
@@ -2324,23 +2321,20 @@ bool FileOperations::openFileCreateIfNotPresentUnsecure(
     } else {
       file.open(
         fileName.c_str(),
-        std::fstream::in | std::fstream::out |
-        std::fstream::app
+        std::fstream::in | std::fstream::out | std::fstream::app
       );
     }
   } else {
     if (openAsBinary) {
       file.open(
         fileName.c_str(),
-        std::fstream::in | std::fstream::out |
-        std::fstream::binary
+        std::fstream::in | std::fstream::out | std::fstream::binary
       );
     } else {
       if (truncate) {
         file.open(
           fileName.c_str(),
-          std::fstream::in | std::fstream::out |
-          std::fstream::trunc
+          std::fstream::in | std::fstream::out | std::fstream::trunc
         );
       } else {
         file.open(fileName.c_str(), std::fstream::in | std::fstream::out);
@@ -2362,8 +2356,7 @@ bool FileOperations::openFileCreateIfNotPresentUnsecure(
   file.close();
   file.open(
     fileName.c_str(),
-    std::fstream::out | std::fstream::in |
-    std::fstream::trunc
+    std::fstream::out | std::fstream::in | std::fstream::trunc
   );
   file.clear();
   return file.is_open();
@@ -2687,7 +2680,8 @@ void StringRoutines::Differ::extractCommonStrings(
     this->left.size() == 0 ||
     this->right.size() == 0 ||
     indexLeft < 0 ||
-    indexRight < 0) {
+    indexRight < 0
+  ) {
     return;
   }
   int previousLeft = - 1;
@@ -2746,8 +2740,7 @@ void StringRoutines::Differ::extractResult(
     std::string nonCommon =
     input.substr(
       static_cast<unsigned>(previousEnd),
-      static_cast<unsigned>(stringStart) -
-      previousEnd
+      static_cast<unsigned>(stringStart) - previousEnd
     );
     output.addOnTop(nonCommon);
     std::string common =
@@ -3779,8 +3772,8 @@ int OnePartialFractionDenominator::
 getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner) {
   int result = 0;
   for (
-    int i = 0; i < owner.indicesRedundantShortRoots.cardinalitySelection; i ++)
-  {
+    int i = 0; i < owner.indicesRedundantShortRoots.cardinalitySelection; i ++
+  ) {
     int index = owner.indicesRedundantShortRoots.elements[i];
     int rootIndex =
     owner.getIndexDoubleOfARoot(owner.normalizedVectors[index]);
@@ -4417,8 +4410,7 @@ std::string PartialFractions::toStringLatticeShiftsOneQuasipolynomial(
 std::string PartialFractions::toLatexOneQuasipolynomialInTable(
   const std::string& displayId,
   const QuasiPolynomial& input,
-  FormatExpressions
-  * format
+  FormatExpressions* format
 ) const {
   STACK_TRACE("PartialFractions::toLatexOneQuasipolynomialInTable");
   std::stringstream out;
@@ -4813,8 +4805,7 @@ void OnePartialFractionDenominator::getPolyReduceMonomialByMonomial(
         coefficient =
         MathRoutines::parity(startDenominatorPower) *
         MathRoutines::nChooseK(
-          startMonomialPower - 1 - k, startDenominatorPower -
-          1
+          startMonomialPower - 1 - k, startDenominatorPower - 1
         );
         output.addMonomial(monomial, coefficient);
       }
@@ -4835,8 +4826,7 @@ void OnePartialFractionDenominator::getPolyReduceMonomialByMonomial(
         coefficient =
         MathRoutines::nChooseK(
           startDenominatorPower - startMonomialPower - 1 - k,
-          startDenominatorPower -
-          1
+          startDenominatorPower - 1
         );
         output.addMonomial(monomial, coefficient);
       }
@@ -5134,8 +5124,7 @@ unsigned int OnePartialFractionDenominatorComponent::hashFunction() const {
 void OnePartialFractionDenominatorComponent::getPolynomialDenominator(
   Polynomial<LargeInteger>& output,
   int multiplicityIndex,
-  Vector<Rational>&
-  exponent
+  Vector<Rational>& exponent
 ) {
   if (multiplicityIndex >= this->multiplicities.size) {
     global.fatal << "Bad multiplicity. " << global.fatal;
@@ -5145,8 +5134,8 @@ void OnePartialFractionDenominatorComponent::getPolynomialDenominator(
   monomial.makeOne();
   for (int i = 0; i < exponent.size; i ++) {
     monomial.setVariable(
-      i, exponent[i] *
-      this->elongations[multiplicityIndex]);
+      i, exponent[i] * this->elongations[multiplicityIndex]
+    );
   }
   output.addMonomial(monomial, - 1);
 }
@@ -5580,7 +5569,8 @@ bool SelectionWithMaximumMultiplicity::incrementSubsetFixedCardinality(
   }
   for (
     int i = this->multiplicities.size - 1; currentCardinality < cardinality;
-    i --) {
+    i --
+  ) {
     if (this->multiplicities[i] != 0) {
       global.fatal
       << "Non-zero multiplicities not implemented here. "
@@ -5602,7 +5592,8 @@ numberOfCombinationsOfCardinality(int cardinality) {
   return
   MathRoutines::nChooseK(
     this->multiplicities.size + cardinality - 1,
-    cardinality);
+    cardinality
+  );
 }
 
 LargeInteger SelectionWithMaximumMultiplicity::getTotalCombinationCount() const {
@@ -5766,10 +5757,8 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
   if (
     dynkinType.letter == 'D' || (
       dynkinType.letter == 'A' &&
-      dynkinType.rank > 1) || (
-      dynkinType.letter == 'E' &&
-      dynkinType.rank == 6
-    )
+      dynkinType.rank > 1
+    ) || (dynkinType.letter == 'E' && dynkinType.rank == 6)
   ) {
     directSummand.makeIdentity(dynkinType.rank *(multiplicity - 1));
     int numberOfGenerators = 1;
@@ -6467,8 +6456,7 @@ std::string DynkinSimpleType::toString(FormatExpressions* format) const {
 void DynkinSimpleType::makeArbitrary(
   char inputLetter,
   int inputRank,
-  const Rational&
-  inputLengthFirstCorRootSquared
+  const Rational& inputLengthFirstCorRootSquared
 ) {
   if ((
       inputLetter != 'A' &&
@@ -6873,7 +6861,8 @@ void DynkinSimpleType::grow(
   }
   if (this->letter == 'E' && this->rank < 8) {
     newType.makeArbitrary(
-      'E', this->rank + 1, this->cartanSymmetricInverseScale);
+      'E', this->rank + 1, this->cartanSymmetricInverseScale
+    );
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       for (int i = 0; i < currentImagesSimpleRootsCurrent.size; i ++) {
@@ -6904,8 +6893,7 @@ void DynkinSimpleType::grow(
   }
   if (this->rank > 1) {
     newType.makeArbitrary(
-      'C', this->rank + 1, this->cartanSymmetricInverseScale /
-      2
+      'C', this->rank + 1, this->cartanSymmetricInverseScale / 2
     );
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
@@ -6914,7 +6902,8 @@ void DynkinSimpleType::grow(
   }
   if (this->rank > 2) {
     newType.makeArbitrary(
-      'D', this->rank + 1, this->cartanSymmetricInverseScale);
+      'D', this->rank + 1, this->cartanSymmetricInverseScale
+    );
     output.addOnTop(newType);
     if (outputPermutationRoots != nullptr) {
       outputPermutationRoots->addOnTop(currentImagesSimpleRootsCurrent);
@@ -7694,8 +7683,7 @@ void WeylGroupData::actOnAffineHyperplaneByGroupElement(
   int index,
   AffineHyperplane<Rational>& output,
   bool rhoAction,
-  bool
-  useMinusRho
+  bool useMinusRho
 ) {
   int numberOfGenerators =
   this->group.elements[index].generatorsLastAppliedFirst.size;
@@ -7720,8 +7708,7 @@ void WeylGroupData::actOnAffineHyperplaneByGroupElement(
 bool WeylGroupData::getWordByFormulaImplementation(
   FiniteGroup<ElementWeylGroup>& group,
   const ElementWeylGroup& g,
-  List<int>&
-  out
+  List<int>& out
 ) {
   (void) group;
   // avoid unused parameter warning, portable.
@@ -7861,7 +7848,8 @@ void WeylGroupData::perturbWeightToRegularWithRespectToRootSystem(
         currentMaximumMovement = scalarProduct2 / scalarProduct1;
         currentMaximumMovement.AssignAbsoluteValue();
         if ((currentMaximumMovement < maxMovement) ||
-          maxMovement.isEqualToZero()) {
+          maxMovement.isEqualToZero()
+        ) {
           maxMovement = currentMaximumMovement;
         }
       }
@@ -7951,7 +7939,8 @@ void WeylGroupData::getWord(int g, List<int>& out) const {
   out.setSize(this->group.elements[g].generatorsLastAppliedFirst.size);
   for (
     int i = 0; i < this->group.elements[g].generatorsLastAppliedFirst.size;
-    i ++) {
+    i ++
+  ) {
     out[i] = this->group.elements[g].generatorsLastAppliedFirst[i].index;
   }
 }
@@ -9369,7 +9358,8 @@ makeParabolicFromSelectionSimpleRoots(
   }
   for (
     int i = 0; i < zeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements;
-    i ++) {
+    i ++
+  ) {
     if (!zeroesMeanSimpleRootSpaceIsInParabolic.selected[i]) {
       selectedRoots.setSize(selectedRoots.size + 1);
       selectedRoots.lastObject()->makeEi(inputWeyl.getDimension(), i);
@@ -10284,8 +10274,7 @@ void LaTeXProcedures::drawTextDirectly(
   double y1,
   const std::string& text,
   int colorIndex,
-  std::fstream&
-  output
+  std::fstream& output
 ) {
   (void) colorIndex;
   output.precision(4);
@@ -10346,8 +10335,7 @@ void LaTeXProcedures::drawline(
 
 void WeylGroupData::transformToSimpleBasisGenerators(
   Vectors<Rational>& generators,
-  const HashedList<Vector<Rational> >&
-  inputRootSystem
+  const HashedList<Vector<Rational> >& inputRootSystem
 ) {
   STACK_TRACE("WeylGroupData::transformToSimpleBasisGenerators");
   for (int i = 0; i < generators.size; i ++) {
@@ -10426,8 +10414,7 @@ void Vector<Coefficient>::perturbNoZeroScalarProductWithMe(
 
 void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(
   Vectors<Rational>& generators,
-  const HashedList<Vector<Rational> >&
-  inputRootSystem
+  const HashedList<Vector<Rational> >& inputRootSystem
 ) {
   if (generators.size == 0) {
     return;
@@ -12179,7 +12166,8 @@ void ConeCollection::initializeFromAffineDirectionsAndRefine(
 ) {
   if (
     inputDirections.size != inputAffinePoints.size ||
-    inputDirections.size <= 0) {
+    inputDirections.size <= 0
+  ) {
     global.fatal
     << "Input directions size does not match affine point size. "
     << global.fatal;
@@ -13194,8 +13182,7 @@ void ConeLatticeAndShift::findExtremaInDirectionOverLatticeOneNonParametric(
   int dimensionProjectivized = this->getDimensionProjectivized();
   Matrix<Rational> projectionLatticeLevel;
   projectionLatticeLevel.initialize(
-    dimensionProjectivized - 2, dimensionProjectivized -
-    1
+    dimensionProjectivized - 2, dimensionProjectivized - 1
   );
   projectionLatticeLevel.makeZero();
   for (int i = 0; i < projectionLatticeLevel.numberOfRows; i ++) {
@@ -13696,8 +13683,7 @@ bool ConeCollection::isSpannedByDirections(const Vector<Rational>& planeNormal)
 bool ConeCollection::allExitWallsAreVisited(
   Cone& toBeRefined,
   const Vector<Rational>& direction,
-  List<Wall>&
-  outputExitWalls
+  List<Wall>& outputExitWalls
 ) {
   STACK_TRACE("ConeCollection::allExitWallsAreVisited");
   outputExitWalls.clear();
@@ -14197,9 +14183,7 @@ bool ConeCollection::computeSplittingNormal(
   Cone& toBeSliced,
   List<Wall>& exitWalls,
   int directionIndex,
-  Vector<
-    Rational
-  >& normal
+  Vector<Rational>& normal
 ) {
   Vector<Rational>& direction = this->slicingDirections[directionIndex];
   for (int i = 0; i < exitWalls.size; i ++) {
@@ -14941,7 +14925,8 @@ std::string Cone::toLatexVectorWithErrorCheck(
   out << input.toString();
   if (
     includeErrorChecks &&
-    this->payload.precomputedNonChecked.contains(input)) {
+    this->payload.precomputedNonChecked.contains(input)
+  ) {
     out
     << ": "
     << this->payload.precomputedNonChecked.getValueNoFail(input).toString();

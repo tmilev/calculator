@@ -1123,8 +1123,7 @@ WriterObjectFixedLength() {
     // This is non-fatal but affects negatively performance.
     this->outputPointer->shiftUpExpandOnTopRepeated(
       this->offset + 1,
-      actualBytesNeededForLength -
-      this->reservedBytesForLength
+      actualBytesNeededForLength - this->reservedBytesForLength
     );
   }
   if (actualBytesNeededForLength < this->reservedBytesForLength) {
@@ -1132,16 +1131,14 @@ WriterObjectFixedLength() {
     // This is non-fatal but affects negatively performance.
     this->outputPointer->removeIndicesShiftDown(
       this->offset + 1,
-      this->reservedBytesForLength -
-      actualBytesNeededForLength
+      this->reservedBytesForLength - actualBytesNeededForLength
     );
   }
   this->reservedBytesForLength = actualBytesNeededForLength;
   AbstractSyntaxNotationOneSubsetDecoder::WriterObjectFixedLength::writeLength(
     static_cast<unsigned>(this->totalByteLength),
     *this->outputPointer,
-    this->offset +
-    1
+    this->offset + 1
   );
 }
 
@@ -1308,9 +1305,7 @@ ASNObject::namesToObjectIdsNonThreadSafe() {
   MapList<
     List<unsigned char>,
     ASNObject,
-    HashFunctions::hashFunction<
-      List<unsigned char>
-    >
+    HashFunctions::hashFunction<List<unsigned char> >
   >& reverseMap =
   ASNObject::objectIdsToNames();
   for (int i = 0; i < container.values.size; i ++) {
@@ -2315,8 +2310,7 @@ bool TBSCertificateInfo::Organization::loadFields(
 bool TBSCertificateInfo::loadASNAlgorithmIdentifier(
   const ASNElement& input,
   ASNElement& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   if (
     input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::sequence0x10 ||
@@ -2435,7 +2429,8 @@ bool TBSCertificateInfo::load(
   }
   if (
     this->subjectPublicKey.modulus == 0 ||
-    this->subjectPublicKey.exponent == 0) {
+    this->subjectPublicKey.exponent == 0
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Invalid RSA modulus or exponent. ";
     }

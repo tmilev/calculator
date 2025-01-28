@@ -231,9 +231,7 @@ bool WebAPIResponse::Test::changePasswordEmailOnly() {
   std::stringstream unused;
   StateMaintainer<
     MapList<
-      std::string, std::string, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, std::string, HashFunctions::hashFunction<std::string>
     >
   > maintainWebArgument(global.webArguments);
   global.webArguments[DatabaseStrings::labelUsername] =
@@ -301,9 +299,7 @@ bool WebAPIResponse::Test::deleteAccount() {
   global.comments.resetComments();
   StateMaintainer<
     MapList<
-      std::string, std::string, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, std::string, HashFunctions::hashFunction<std::string>
     >
   > maintainWebArgument(global.webArguments);
   WebAPIResponse api;
@@ -367,9 +363,7 @@ bool WebAPIResponse::Test::changePassword() {
   std::stringstream unused;
   StateMaintainer<
     MapList<
-      std::string, std::string, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, std::string, HashFunctions::hashFunction<std::string>
     >
   > maintainWebArgument(global.webArguments);
   global.webArguments[DatabaseStrings::labelUsername] =
@@ -425,9 +419,7 @@ bool WebAPIResponse::Test::forgotLogin() {
   std::stringstream unused;
   StateMaintainer<
     MapList<
-      std::string, std::string, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, std::string, HashFunctions::hashFunction<std::string>
     >
   > maintainWebArgument(global.webArguments);
   global.webArguments[DatabaseStrings::labelUsername] =
@@ -494,9 +486,7 @@ bool WebAPIResponse::Test::signUp() {
   std::stringstream unused;
   StateMaintainer<
     MapList<
-      std::string, std::string, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, std::string, HashFunctions::hashFunction<std::string>
     >
   > maintainWebArgument(global.webArguments);
   global.webArguments[WebAPI::Request::desiredUsername] = "someNewUser";

@@ -175,8 +175,7 @@ public:
   static void lieBracket(
     const Element& standsOnTheLeft,
     const Element& standsOnTheRight,
-    Element&
-    output
+    Element& output
   );
   template <typename number>
   static number complexConjugate(number x) {
@@ -192,8 +191,7 @@ public:
   static bool parseListIntegers(
     const std::string& input,
     List<int>& result,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
   static void parseListIntegersNoFailure(
     const std::string& input, List<int>& result

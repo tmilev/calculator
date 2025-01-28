@@ -46,7 +46,8 @@ void RootSubalgebra::getCoxeterPlane(
   int coxeterNumber = 1;
   for (
     int i = 0; i < this->dynkinDiagram.simpleBasesConnectedComponents.size;
-    i ++) {
+    i ++
+  ) {
     tempGroup.ambientWeyl = &this->getAmbientWeyl();
     tempGroup.simpleRootsInner =
     this->dynkinDiagram.simpleBasesConnectedComponents[i];
@@ -206,8 +207,7 @@ void RootSubalgebra::computeCentralizerFromKModulesAndSortKModules() {
 void RootSubalgebra::computeExtremeWeightInTheSameKModule(
   const Vector<Rational>& input,
   Vector<Rational>& outputW,
-  bool
-  lookingForHighest
+  bool lookingForHighest
 ) {
   this->getAmbientWeyl().computeExtremeRootInTheSameKMod(
     this->simpleRootsReductiveSubalgebra, input, outputW, lookingForHighest
@@ -281,8 +281,7 @@ bool RootSubalgebra::rootIsInCentralizer(const Vector<Rational>& input) {
 void RootSubalgebra::writeLieBracketTableAndOppositeKModulesToFile(
   std::fstream& output,
   List<List<List<int> > >& inMultTable,
-  List<int>&
-  inOpposites
+  List<int>& inOpposites
 ) {
   output << "pairing_table_size: " << inMultTable.size << "\n";
   for (int i = 0; i < inMultTable.size; i ++) {
@@ -302,8 +301,7 @@ void RootSubalgebra::writeLieBracketTableAndOppositeKModulesToFile(
 void RootSubalgebra::readLieBracketTableAndOppositeKModulesFromFile(
   std::fstream& input,
   List<List<List<int> > >& outMultTable,
-  List<int>&
-  outOpposites
+  List<int>& outOpposites
 ) {
   std::string currentString;
   int reader = 0;
@@ -1142,7 +1140,8 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
   DynkinDiagramRootSubalgebra diagram;
   for (
     int i = 2; i <= MathRoutines::maximum(highestWeightsAllowed.size, rank);
-    i ++) {
+    i ++
+  ) {
     selection.initializeMaximumMultiplicity(highestWeightsAllowed.size, i);
     LargeInteger numberOfElements =
     selection.numberOfCombinationsOfCardinality(i);
@@ -2211,8 +2210,7 @@ void RootSubalgebra::generatePossibleNilradicals(
     for (
       ; parabolicsCounter < StartingNilradicalsNoRepetition.size;
       parabolicsCounter ++,
-      owner.flagNilradicalComputationInitialized =
-      false
+      owner.flagNilradicalComputationInitialized = false
     ) {
       if (!owner.flagNilradicalComputationInitialized) {
         impliedSelections[0] = (
@@ -2867,7 +2865,8 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     potentialExtensionCartanSymmetrics;
     for (
       int i = 0; i < extensionRootPermutations.size &&
-      goodPermutation == - 1; i ++) {
+      goodPermutation == - 1; i ++
+    ) {
       this->scalarProdMatrixOrdered.makeZeroMatrix(
         this->simpleRootsReductiveSubalgebra.size
       );
@@ -4195,8 +4194,7 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
   bool useLatex,
   bool useHtml,
   int fromIndex,
-  int
-  amountToProcess
+  int amountToProcess
 ) {
   std::stringstream out;
   std::string currentString;
@@ -4664,8 +4662,7 @@ computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
         addOnTopNoRepetition(this->subalgebras.size);
         this->
         computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
-          bufferSubalgebras, recursionDepth +
-          1
+          bufferSubalgebras, recursionDepth + 1
         );
       } else {
         this->subalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.

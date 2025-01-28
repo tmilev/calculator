@@ -1680,8 +1680,7 @@ bool Expression::allowedAsFreeVariableAtom(const std::string& input) const {
 
 bool Expression::getFreeVariables(
   HashedList<Expression>& outputAccumulateFreeVariables,
-  bool
-  excludeNamedConstants
+  bool excludeNamedConstants
 ) const {
   STACK_TRACE("Expression::getFreeVariables");
   if (this->owner == nullptr) {
@@ -3689,7 +3688,8 @@ bool Expression::toStringTimes(
     !firstNeedsBrackets &&
     !secondNeedsBrackets &&
     firstE != "" &&
-    firstE != "-") {
+    firstE != "-"
+  ) {
     if (MathRoutines::isDigit(secondE[0])) {
       mustHaveTimes = true;
     }
@@ -3718,8 +3718,7 @@ bool Expression::toStringTimes(
 void Expression::toStringOpMultiplicative(
   std::stringstream& out,
   const std::string& operation,
-  FormatExpressions*
-  format
+  FormatExpressions* format
 ) const {
   std::string secondE = (*this)[2].toString(format);
   std::string firstE = (*this)[1].toString(format);
@@ -5780,8 +5779,7 @@ void ExpressionContext::makeOneVariableFromString(
 bool Expression::makeSqrt(
   Calculator& owner,
   const Rational& argument,
-  const Rational&
-  radicalSuperIndex
+  const Rational& radicalSuperIndex
 ) {
   STACK_TRACE("Expression::makeSqrt");
   Expression argumentExpression;
@@ -5792,8 +5790,7 @@ bool Expression::makeSqrt(
 bool Expression::makeSqrt(
   Calculator& owner,
   const Expression& argument,
-  const Rational&
-  radicalSuperIndex
+  const Rational& radicalSuperIndex
 ) {
   STACK_TRACE("Expression::makeSqrt");
   this->reset(owner, 3);
@@ -5808,8 +5805,7 @@ bool Expression::makeXOX(
   Calculator& owner,
   int operation,
   const Expression& left,
-  const Expression&
-  right
+  const Expression& right
 ) {
   STACK_TRACE("Expression::makeXOX");
   if (&left == this || &right == this) {

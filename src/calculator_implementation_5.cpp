@@ -369,8 +369,7 @@ bool Calculator::getMatrixDoubles(
 bool Calculator::getVectorDoubles(
   const Expression& input,
   Vector<double>& output,
-  int
-  desiredDimensionNonMandatory
+  int desiredDimensionNonMandatory
 ) {
   return this->getVector(input, output, nullptr, desiredDimensionNonMandatory);
 }
@@ -378,8 +377,7 @@ bool Calculator::getVectorDoubles(
 bool Calculator::getVectorDoublesFromFunctionArguments(
   const Expression& input,
   Vector<double>& output,
-  int
-  desiredDimensionNonMandatory
+  int desiredDimensionNonMandatory
 ) {
   return
   this->getVectorFromFunctionArguments(
@@ -531,8 +529,7 @@ bool CalculatorFunctionsPlot::plotImplicitFunctionFull(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  showGrid
+  bool showGrid
 ) {
   STACK_TRACE("CalculatorFunctionsPlot::plotImplicitFunctionFull");
   MeshTriangles mesh;
@@ -798,8 +795,7 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   newVariableExpression * newVariableExpression - calculator.expressionOne();
   algPart.makeSqrt(calculator, algSQRTPart);
   lnPart.makeOX(
-    calculator, calculator.opLog(), newVariableExpression -
-    algPart
+    calculator, calculator.opLog(), newVariableExpression - algPart
   );
   output = functionCoefficient *(algPart * newVariableExpression + lnPart) / 2;
   return true;
@@ -2455,8 +2451,7 @@ void JavascriptExtractor::writeParameterNames(PlotObject& output) {
 bool JavascriptExtractor::extract(
   const Expression& input,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   if (!this->extractJavascript(input, commentsOnFailure)) {
     return false;
@@ -2546,8 +2541,7 @@ bool JavascriptExtractor::extractFromAtom(
 bool JavascriptExtractor::extractFromSequence(
   const Expression& input,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   std::string expression;
   std::stringstream out;
@@ -2579,8 +2573,7 @@ bool JavascriptExtractor::extractFromSequence(
 bool JavascriptExtractor::extractFromOperation(
   const Expression& input,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   if (input.size() == 4) {
     return this->extractFromTernary(input, output, commentsOnFailure);
@@ -2591,8 +2584,7 @@ bool JavascriptExtractor::extractFromOperation(
 bool JavascriptExtractor::extractFromTernary(
   const Expression& input,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("JavascriptExtractor::extractFromTernary");
   if (input.size() != 4) {
@@ -2634,8 +2626,7 @@ bool JavascriptExtractor::extractFromTernary(
 bool JavascriptExtractor::extractFromUnaryOrBinary(
   const Expression& input,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   if (input.size() != 3 && input.size() != 2) {
     return false;
@@ -2772,8 +2763,7 @@ bool JavascriptExtractor::extractFromUnaryOrBinary(
 bool JavascriptExtractor::extractJavascriptRecursive(
   const Expression& input,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   RecursionDepthCounter counter(&this->recursionDepth);
   if (this->recursionDepth > this->owner->maximumRecursionDepth) {
@@ -3029,9 +3019,8 @@ bool CalculatorFunctionsPlot::plotSurface(
       plot.colorVU = keys.getValueCreateEmpty("color2").toString();
     }
     MapList<
-      std::string, std::string, HashFunctions::hashFunction<
-        std::string
-      > > keysToConvert;
+      std::string, std::string, HashFunctions::hashFunction<std::string>
+    > keysToConvert;
     keysToConvert.getValueCreateEmpty("numSegments1");
     keysToConvert.getValueCreateEmpty("numSegments2");
     keysToConvert.getValueCreateEmpty("lineWidth");

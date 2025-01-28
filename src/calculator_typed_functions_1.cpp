@@ -29,7 +29,8 @@ addElementZModPOrRationalToElementZModPOrRational(
   for (
     int i = 0; i < 2;
     i ++,
-    MathRoutines::swap(leftExpression, rightExpression)) {
+    MathRoutines::swap(leftExpression, rightExpression)
+  ) {
     if (leftExpression->isOfType<ElementZmodP>(&element1)) {
       if (rightExpression->isOfType<ElementZmodP>(&element2)) {
         if (element1.modulus != element2.modulus) {
@@ -74,7 +75,8 @@ multiplyElementZmodPorRationalByElementZmodPorRational(
   for (
     int i = 0; i < 2;
     i ++,
-    MathRoutines::swap(leftExpression, rightExpression)) {
+    MathRoutines::swap(leftExpression, rightExpression)
+  ) {
     if (leftExpression->isOfType<ElementZmodP>(&element1)) {
       if (rightExpression->isOfType<ElementZmodP>(&element2)) {
         if (element1.modulus != element2.modulus) {
@@ -118,7 +120,8 @@ divideElementZmodPorRationalByElementZmodPorRational(
   for (
     int i = 0; i < 2;
     i ++,
-    MathRoutines::swap(leftExpression, rightExpression)) {
+    MathRoutines::swap(leftExpression, rightExpression)
+  ) {
     if (leftExpression->isOfType<ElementZmodP>(&element1)) {
       if (rightExpression->isOfType<ElementZmodP>(&element2)) {
         if (element1.modulus != element2.modulus) {
@@ -1895,8 +1898,8 @@ bool CalculatorFunctionsBinaryOps::powerElementWeylAlgebraBySmallInteger(
     monomial.polynomialPart.raiseToPower(powerRational);
     monomial.differentialPart.raiseToPower(powerRational);
     for (
-      int i = 0; i < monomial.polynomialPart.minimalNumberOfVariables(); i ++)
-    {
+      int i = 0; i < monomial.polynomialPart.minimalNumberOfVariables(); i ++
+    ) {
       if (monomial.polynomialPart(i) != 0 && monomial.differentialPart(i) != 0)
       {
         return

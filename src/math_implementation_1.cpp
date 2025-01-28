@@ -674,13 +674,11 @@ void ElementUniversalEnveloping<Coefficient>::modToMinDegreeFormFDRels(
     found = false;
     for (int j = numberOfPositiveRoots - 1; j >= 0; j --) {
       this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(
-        j, numberOfPositiveRoots -
-        1
+        j, numberOfPositiveRoots - 1
       );
       this->simplify(ringUnit);
       this->owner->universalEnvelopingGeneratorOrder.swapTwoIndices(
-        j, numberOfPositiveRoots -
-        1
+        j, numberOfPositiveRoots - 1
       );
       if (
         this->modOutFDRelationsExperimental(
@@ -966,8 +964,8 @@ void BranchingData::initializePart1NoSubgroups() {
     const Vector<Rational>& currentWeight = smallWeylGroup.rootSystem[i];
     bool isInNilradical = false;
     for (
-      int k = 0; k < this->smallParabolicSelection.cardinalitySelection; k ++)
-    {
+      int k = 0; k < this->smallParabolicSelection.cardinalitySelection; k ++
+    ) {
       if (
         !currentWeight[this->smallParabolicSelection.elements[k]].isEqualToZero
         ()

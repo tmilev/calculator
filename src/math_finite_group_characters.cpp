@@ -187,17 +187,14 @@ public:
     Somegroup& group
   );
   static void computeTauSignatures(
-    WeylGroupData* group, List<List<bool> >& tauSignatures, bool pseudo =
-    false
+    WeylGroupData* group, List<List<bool> >& tauSignatures, bool pseudo = false
   );
   static List<List<Vector<Rational> > > eigenspaces(
-    const Matrix<Rational>& M, int checkDivisorsOf =
-    0
+    const Matrix<Rational>& M, int checkDivisorsOf = 0
   );
   template <typename Somegroup>
   static Matrix<Rational> getClassMatrix(
-    const Somegroup& group, int cci, List<int>* classmap =
-    nullptr
+    const Somegroup& group, int cci, List<int>* classmap = nullptr
   );
   template <typename Coefficient>
   static List<VectorSpace<Coefficient> > getEigenspaces(
@@ -996,8 +993,8 @@ void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
       this->subgroupData.groupContent->conjugacyClasses.size
     );
     for (
-      int i = 0; i < this->subgroupData.ccRepresentativesPreimages.size; i ++)
-    {
+      int i = 0; i < this->subgroupData.ccRepresentativesPreimages.size; i ++
+    ) {
       this->subgroupData.ccRepresentativesPreimages[i] = i;
     }
     this->subgroupData.subgroupContent->flagCCRepresentativesComputed = true;
@@ -1381,8 +1378,8 @@ void CharacterFunctions::getTauSignaturesFromSubgroup(
     bool notFound = true;
     for (int ci = 0; notFound && ci < G.group.conjugacyClassCount(); ci ++) {
       for (
-        int cj = 0; notFound && cj < G.group.conjugacyClasses[ci].size; cj ++)
-      {
+        int cj = 0; notFound && cj < G.group.conjugacyClasses[ci].size; cj ++
+      ) {
         if (
           G.group.conjugacyClasses[ci].elements[cj] ==
           H.conjugacyClasses[i].representative

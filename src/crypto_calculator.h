@@ -130,8 +130,7 @@ public:
   static bool loadASNAlgorithmIdentifier(
     const ASNElement& input,
     ASNElement& output,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
   std::string toString();
   void computeASN(ASNElement& output);
@@ -164,8 +163,7 @@ public:
 
   bool loadFromPEMFile(
     const std::string& inputFilenameVirtual,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
   bool loadFromPEM(
     const std::string& input, std::stringstream* commentsOnFailure
@@ -235,15 +233,13 @@ public:
     const std::string& input,
     List<unsigned char>& output,
     std::stringstream* commentsOnFailure = nullptr,
-    std::stringstream* commentsGeneral =
-    nullptr
+    std::stringstream* commentsGeneral = nullptr
   );
   static bool convertBase64ToString(
     const std::string& input,
     std::string& output,
     std::stringstream* commentsOnFailure = nullptr,
-    std::stringstream* commentsGeneral =
-    nullptr
+    std::stringstream* commentsGeneral = nullptr
   );
   static void convertStringToLargeIntUnsigned(
     const std::string& input, LargeIntegerUnsigned& output
@@ -254,8 +250,7 @@ public:
   static void convertLargeIntUnsignedToBase58SignificantDigitsFIRST(
     const LargeIntegerUnsigned& input,
     std::string& output,
-    int
-    numberOfOnesToPrepend
+    int numberOfOnesToPrepend
   );
   static bool convertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
     const std::string& inputSignificantDigitsFirst,
@@ -297,8 +292,7 @@ public:
   static std::string convertListUnsignedCharsToHexFormat(
     const List<unsigned char>& input,
     int byteWidthLineBreakZeroForNone,
-    bool
-    useHtml
+    bool useHtml
   );
   static bool convertListUnsignedCharsToHexFormat(
     const List<unsigned char>& input,
@@ -379,8 +373,8 @@ public:
   static void initSha256();
   static void initSha512();
   static void computeSha1(
-    const std::string& inputString, List<uint32_t>&
-    output);
+    const std::string& inputString, List<uint32_t>& output
+  );
   static void computeSha224(
     const List<unsigned char>& input, List<uint32_t>& output
   );
@@ -484,8 +478,8 @@ public:
   class External {
   public:
     void(*computeRIPEMD160)(
-      const std::string& input, List<unsigned char>&
-      output);
+      const std::string& input, List<unsigned char>& output
+    );
     bool(*encryptAES_CBC_256)(
       const std::string& inputKey,
       const std::string& inputPlainText,

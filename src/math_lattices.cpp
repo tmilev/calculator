@@ -143,8 +143,7 @@ void QuasiPolynomial::substitute(
     }
     output.addLatticeShift(
       polynomial,
-      this->latticeShifts[i] +
-      inputTranslationSubtractedFromArgument
+      this->latticeShifts[i] + inputTranslationSubtractedFromArgument
     );
   }
 }
@@ -1219,8 +1218,7 @@ bool Lattice::substitutionHomogeneous(
 bool Lattice::
 getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
   const PolynomialSubstitution<Rational>& substitution,
-  Matrix<Rational>&
-  output
+  Matrix<Rational>& output
 ) {
   if (substitution.size < 1) {
     return false;

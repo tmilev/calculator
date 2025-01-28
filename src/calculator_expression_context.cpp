@@ -417,8 +417,7 @@ bool ExpressionContext::mergeVariables(
 
 bool ExpressionContext::mergeDifferentialOperatorsOnce(
   Selection& differentialOperatorVariablesFound,
-  ExpressionContext&
-  outputContext
+  ExpressionContext& outputContext
 ) const {
   if (this->owner == nullptr) {
     return false;
@@ -885,8 +884,7 @@ bool WithContext<Weight<Polynomial<Rational> > >::extendContext(
 
 bool Expression::setContextAtLeastEqualTo(
   ExpressionContext& inputOutputMinContext,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Expression::setContextAtLeastEqualTo");
   this->checkInitialization();

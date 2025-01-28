@@ -467,9 +467,7 @@ public:
   bool mergeProblemWeight(
     const JSData& inputJSON,
     MapList<
-      std::string, ProblemData, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, ProblemData, HashFunctions::hashFunction<std::string>
     >& outputAppendProblemInfo,
     bool checkFileExistence,
     std::stringstream* commentsOnFailure
@@ -477,47 +475,35 @@ public:
   bool mergeProblemDeadline(
     const JSData& inputJSON,
     MapList<
-      std::string, ProblemData, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, ProblemData, HashFunctions::hashFunction<std::string>
     >& outputAppendProblemInfo,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemWeights(
     MapList<
-      std::string, ProblemData, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, ProblemData, HashFunctions::hashFunction<std::string>
     >& toStore,
     std::stringstream* commentsOnFailure
   );
   bool storeProblemDeadlines(
     MapList<
-      std::string, ProblemData, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, ProblemData, HashFunctions::hashFunction<std::string>
     >& toStore,
     std::stringstream* commentsOnFailure
   );
   QueryUpdate toQuerySetProblemWeights(
     MapList<
-      std::string, ProblemData, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, ProblemData, HashFunctions::hashFunction<std::string>
     >& inputProblemInfo
   );
   QueryUpdate toQuerySetDeadlines(
     MapList<
-      std::string, ProblemData, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, ProblemData, HashFunctions::hashFunction<std::string>
     >& inputProblemInfo
   );
   JSData toJSONDeadlines(
     MapList<
-      std::string, ProblemData, HashFunctions::hashFunction<
-        std::string
-      >
+      std::string, ProblemData, HashFunctions::hashFunction<std::string>
     >& inputProblemInfo
   );
   std::string toStringDeadline(
@@ -589,8 +575,7 @@ public:
     const std::string& requestType,
     const std::string& studentView,
     const std::string& studentSection = "",
-    bool includeRandomSeedIfAppropriate =
-    false
+    bool includeRandomSeedIfAppropriate = false
   ) const;
   std::string toStringExtractedCommands();
   std::string toStringContent();

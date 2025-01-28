@@ -493,8 +493,7 @@ bool CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  useOuter
+  bool useOuter
 ) {
   STACK_TRACE("CalculatorFunctionsWeylGroup::weylRaiseToMaximallyDominant");
   if (input.size() < 2) {
@@ -1052,8 +1051,8 @@ weylGroupOuterConjugacyClassesFromAllElements(
   Matrix<Rational> currentAutomorphism;
   List<Matrix<Rational> > outerAutomorphisms;
   for (
-    int i = 0; i < automorphismGroup.outerAutomorphisms.generators.size; i ++)
-  {
+    int i = 0; i < automorphismGroup.outerAutomorphisms.generators.size; i ++
+  ) {
     automorphismGroup.outerAutomorphisms.generators[i].getMatrix(
       currentAutomorphism, groupData.getDimension()
     );
@@ -1312,7 +1311,8 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitFund(
   return
   CalculatorFunctionsWeylGroup::weylOrbit(
     calculator, input, output, true,
-    false);
+    false
+  );
 }
 
 bool CalculatorFunctionsWeylGroup::weylGroupOrbitSimple(
@@ -1477,7 +1477,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   ) {
     for (
       int j = i + 1; j < pseudoSignSig.size &&
-      !hasRepeatingPseudoParabolicSigs; j ++) {
+      !hasRepeatingPseudoParabolicSigs; j ++
+    ) {
       if (pseudoSignSig[i] == pseudoSignSig[j]) {
         hasRepeatingPseudoParabolicSigs = true;
       }
@@ -1818,8 +1819,7 @@ public:
   KostkaNumber();
   bool compute(
     HashedList<KostkaNumber>* kostkaNumberCache,
-    std::stringstream* comments =
-    nullptr
+    std::stringstream* comments = nullptr
   );
 };
 
@@ -1890,7 +1890,8 @@ bool KostkaNumber::initTableaux(std::stringstream* comments) {
     if (
       this->sumTuple > 10000000 ||
       this->tuple[i] > 10000000 ||
-      this->tuple[i] < 0) {
+      this->tuple[i] < 0
+    ) {
       if (comments != nullptr) {
         *comments
         << "Failed to compute Kostka number: the tuple "
@@ -2978,8 +2979,8 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
   partitionRight.fromListInt(inputRight);
   int index = 0;
   for (
-    ; index < calculator.objectContainer.hyperOctahedralGroups.size; index ++)
-  {
+    ; index < calculator.objectContainer.hyperOctahedralGroups.size; index ++
+  ) {
     if (
       calculator.objectContainer.hyperOctahedralGroups[index].
       flagIsEntireHyperoctahedralGroup &&

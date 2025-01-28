@@ -466,8 +466,7 @@ template < >
 bool CalculatorConversions::convert<Rational>(
   Calculator& calculator,
   const Expression& input,
-  WithContext<Rational>&
-  output
+  WithContext<Rational>& output
 ) {
   (void) calculator;
   return input.isOfTypeWithContext(&output);
@@ -565,8 +564,7 @@ template < >
 bool CalculatorConversions::convert(
   Calculator& calculator,
   const Expression& input,
-  WithContext<std::string>&
-  output
+  WithContext<std::string>& output
 ) {
   return
   CalculatorConversions::convertWithoutComputation(calculator, input, output);
@@ -576,8 +574,7 @@ template < >
 bool CalculatorConversions::convert(
   Calculator& calculator,
   const Expression& input,
-  WithContext<ElementZmodP>&
-  output
+  WithContext<ElementZmodP>& output
 ) {
   return
   CalculatorConversions::convertWithoutComputation(calculator, input, output);
@@ -1701,8 +1698,7 @@ std::string CalculatorConversions::stringFromSemisimpleSubalgebras(
 bool CalculatorConversions::storeSemisimpleSubalgebras(
   Calculator& calculator,
   const SemisimpleSubalgebras& input,
-  Expression&
-  output
+  Expression& output
 ) {
   STACK_TRACE("CalculatorConversions::storeSemisimpleSubalgebras");
   Expression dynkinTypeExpression;

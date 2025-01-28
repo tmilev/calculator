@@ -1922,8 +1922,7 @@ std::string CalculatorHTML::cleanUpFileName(const std::string& inputLink) {
   }
   return
   inputLink.substr(
-    firstMeaningfulChar, lastMeaningfulChar - firstMeaningfulChar +
-    1
+    firstMeaningfulChar, lastMeaningfulChar - firstMeaningfulChar + 1
   );
 }
 
@@ -2185,7 +2184,8 @@ std::string CalculatorHTML::toStringInterprettedCommands(
   int commandCounter = calculator.programExpression.size() - 1;
   for (
     int elementCounter = elements.size - 1; elementCounter > 0;
-    elementCounter --) {
+    elementCounter --
+  ) {
     SyntacticElementHTML& currentElement = elements[elementCounter];
     std::string currentElementString =
     currentElement.getTagClass() +
@@ -2224,8 +2224,7 @@ std::string CalculatorHTML::toStringInterprettedCommands(
 bool CalculatorHTML::processOneExecutedCommand(
   Calculator& interpreter,
   SyntacticElementHTML& element,
-  std::stringstream&
-  comments
+  std::stringstream& comments
 ) {
   (void) comments;
   STACK_TRACE("CalculatorHTML::processOneExecutedCommand");
@@ -2976,8 +2975,7 @@ bool CalculatorHTML::Parser::consumeTagOpened() {
   if (last.syntacticRole == "<") {
     this->consumeErrorOrMergeInCalculatorTagRetainLast(
       - 3,
-      "While constructing your tag, failed to interpret " +
-      last.syntacticRole
+      "While constructing your tag, failed to interpret " + last.syntacticRole
     );
     // Don't push new elements to be parsed on the stack.
     return true;
@@ -2985,8 +2983,7 @@ bool CalculatorHTML::Parser::consumeTagOpened() {
   return
   this->consumeErrorOrMergeInCalculatorTag(
     - 3,
-    "While constructing your tag, failed to interpret " +
-    last.syntacticRole
+    "While constructing your tag, failed to interpret " + last.syntacticRole
   );
 }
 
@@ -3074,8 +3071,7 @@ bool CalculatorHTML::Parser::consumeAfterProperty() {
   return
   this->consumeErrorOrMergeInCalculatorTag(
     - 4,
-    "Couldn't continue tag construction after property " +
-    secondToLast.content
+    "Couldn't continue tag construction after property " + secondToLast.content
   );
 }
 
@@ -3777,7 +3773,8 @@ void CalculatorHTML::computeProblemLabel() {
   }
   if (
     global.requestType == "template" ||
-    global.requestType == "templateNoLogin") {
+    global.requestType == "templateNoLogin"
+  ) {
     return;
   }
   if (!this->topics.topics.contains(this->fileName)) {
@@ -3879,7 +3876,8 @@ bool CalculatorHTML::interpretHtmlOneAttempt(
   std::string problemLabel = "";
   if (
     global.requestType != "template" &&
-    global.requestType != "templateNoLogin") {
+    global.requestType != "templateNoLogin"
+  ) {
     if (this->topics.topics.contains(this->fileName)) {
       TopicElement& current =
       this->topics.topics.getValueCreateEmpty(this->fileName);

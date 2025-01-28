@@ -718,8 +718,7 @@ std::string PolynomialFactorizationFiniteFields::toLatexLiftedFactors() {
 void PolynomialFactorizationFiniteFields::henselLiftOnce(
   const LargeIntegerUnsigned& oldModulus,
   int stepCount,
-  std::stringstream*
-  comments
+  std::stringstream* comments
 ) {
   STACK_TRACE("PolynomialFactorizationFiniteFields::henselLiftOnce");
   std::stringstream explainer;

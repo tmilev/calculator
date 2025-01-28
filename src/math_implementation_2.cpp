@@ -197,7 +197,8 @@ void LargeIntegerUnsigned::writeBigEndianBytes(
   outputAppend.reserve(
     outputAppend.size +
     digitsReveredOrder.size +
-    padWithZero);
+    padWithZero
+  );
   if (padWithZero == 1) {
     outputAppend.addOnTop(0);
   }
@@ -464,8 +465,7 @@ bool LargeIntegerUnsigned::isCompositePrimeDivision(
 bool LargeIntegerUnsigned::isPossiblyPrime(
   int millerRabinTries,
   bool tryDivisionSetTrueFaster,
-  std::stringstream*
-  comments
+  std::stringstream* comments
 ) {
   STACK_TRACE("LargeIntUnsigned::isPossiblyPrime");
   if (this->isEqualToOne()) {
@@ -742,7 +742,8 @@ void LargeIntegerUnsigned::dividePositive(
     }
     if (
       lastRemainderSize == remainderOutput.digits.size &&
-      lastRemainderSize != 1) {
+      lastRemainderSize != 1
+    ) {
       numberOfRunsWithoutDigitImprovement ++;
     } else {
       numberOfRunsWithoutDigitImprovement = 0;
@@ -1072,8 +1073,8 @@ void LargeIntegerUnsigned::addLargeIntegerUnsignedShiftedTimesDigit(
   }
   int numberOfDigits =
   MathRoutines::maximum(
-    other.digits.size + 1 + digitShift, this->digits.size +
-    1);
+    other.digits.size + 1 + digitShift, this->digits.size + 1
+  );
   this->padWithZeroesToAtLeastNDigits(numberOfDigits);
   long long nextDigit = 0;
   for (int j = 0; j < other.digits.size; j ++) {
@@ -1097,7 +1098,8 @@ void LargeIntegerUnsigned::addLargeIntegerUnsignedShiftedTimesDigit(
   if (
     lastDigit >= this->carryOverBound || (- lastDigit) <= (
       - this->carryOverBound
-    )) {
+    )
+  ) {
     global.fatal
     << "Leading digit: "
     << lastDigit
@@ -1184,13 +1186,10 @@ void LargeIntegerUnsigned::multiplyBy(
       unsigned long long highPart = tempLong /
       LargeIntegerUnsigned::carryOverBound;
       output.addShiftedUIntSmallerThanCarryOverBound(
-        static_cast<unsigned int>(lowPart), i +
-        j
+        static_cast<unsigned int>(lowPart), i + j
       );
       output.addShiftedUIntSmallerThanCarryOverBound(
-        static_cast<unsigned int>(highPart), i +
-        j +
-        1
+        static_cast<unsigned int>(highPart), i + j + 1
       );
       if (doReport) {
         if (report2.getElement().tickAndWantReport()) {

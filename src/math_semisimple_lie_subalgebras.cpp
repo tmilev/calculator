@@ -2098,7 +2098,8 @@ computeHsAndHsScaledToActByTwoFromComponents() {
   this->weylNonEmbedded->dynkinType.getTypesWithMults(dynkinTypes);
   for (
     int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size;
-    i ++) {
+    i ++
+  ) {
     for (
       int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].
       size; j ++
@@ -2575,7 +2576,8 @@ bool SemisimpleSubalgebras::getCentralizerTypeIfComputableAndKnown(
   int index = - 1;
   for (
     int i = 0; i < this->slTwoSubalgebras.rootSubalgebras.subalgebras.size;
-    i ++) {
+    i ++
+  ) {
     if (
       this->slTwoSubalgebras.rootSubalgebras.subalgebras[i].dynkinType ==
       input
@@ -3662,7 +3664,8 @@ void CandidateSemisimpleSubalgebra::addHIncomplete(
   }
   for (
     int i = 0; i < this->posistiveRootsPerpendicularToPrecedingWeights.size;
-    i ++) {
+    i ++
+  ) {
     if (
       this->getAmbientWeyl().rootScalarCartanRoot(
         this->posistiveRootsPerpendicularToPrecedingWeights[i], hElement
@@ -4517,7 +4520,8 @@ void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
   Matrix<AlgebraicNumber> adMatrix;
   for (
     int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size;
-    i ++) {
+    i ++
+  ) {
     currentElement.makeCartanGenerator(
       this->cartanSubalgebrasByComponentScaledToActByTwo[i][0],
       this->getAmbientSemisimpleLieAlgebra()
@@ -4823,8 +4827,8 @@ void CandidateSemisimpleSubalgebra::WConjecture::computeSmallOrbits(
 ) {
   this->flagSlTwoIsSmall = false;
   for (
-    int i = 0; i < owner.characterNonPrimalFundamentalCoordinates.size(); i ++)
-  {
+    int i = 0; i < owner.characterNonPrimalFundamentalCoordinates.size(); i ++
+  ) {
     const Weight<Rational>& weight =
     owner.characterNonPrimalFundamentalCoordinates.monomials[i];
     if (weight.weightFundamentalCoordinates.size != 1) {
@@ -6786,7 +6790,8 @@ bool SemisimpleSubalgebras::checkAll() const {
   STACK_TRACE("SemisimpleSubalgebras::checkAll");
   for (
     const RealizedSemisimpleSubalgebra& subalgebra :
-    this->subalgebras.values) {
+    this->subalgebras.values
+  ) {
     subalgebra.checkAll();
   }
   for (
@@ -7190,8 +7195,8 @@ toStringModuleDecompositionMinimalContainingRegularSubalgebras(
   if (useHtml) {
     out << "<table><tr><td align='center'>Char.</td>";
     for (
-      int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++)
-    {
+      int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++
+    ) {
       RootSubalgebra& rootSubalgebra =
       owner.rootSubalgebras.subalgebras[
         this->indicesMinimalContainingRootSubalgebras[i]
@@ -8500,8 +8505,7 @@ bool CandidateSemisimpleSubalgebra::isExtremeWeight(
 
 Rational CandidateSemisimpleSubalgebra::getScalarSubalgebra(
   const Vector<Rational>& primalWeightLeft,
-  const Vector<Rational>&
-  primalWeightRight
+  const Vector<Rational>& primalWeightRight
 ) const {
   return
   primalWeightLeft.scalarProduct(
@@ -9476,8 +9480,8 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
           }
         }
         for (
-          int j = 0; j < currentNilradical.nilradicalSubsetWeights.size; j ++)
-        {
+          int j = 0; j < currentNilradical.nilradicalSubsetWeights.size; j ++
+        ) {
           Rational coefficient =
           currentNilradical.coneRelativelyStrongIntersection[j];
           out
@@ -9842,7 +9846,8 @@ std::string CandidateSemisimpleSubalgebra::toStringCartanSubalgebra(
   }
   for (
     int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size;
-    i ++) {
+    i ++
+  ) {
     if (useLaTeX && useHtml) {
       out
       << HtmlRoutines::getMathNoDisplay(

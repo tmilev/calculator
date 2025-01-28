@@ -50,8 +50,8 @@ public:
   void getSimpleReflections(const templateVector& v, List<int>& out) const;
   void getWord(int i, List<int>& out) const;
   void applyReflectionList(
-    const List<int>& simpleReflections, templateVector&
-    v) const;
+    const List<int>& simpleReflections, templateVector& v
+  ) const;
   void actOn(int g, templateVector& v) const;
   void actOn(int g, const templateVector& v, templateVector& out) const;
   int multiplyElements(int g, int h) const;

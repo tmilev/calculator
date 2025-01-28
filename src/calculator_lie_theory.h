@@ -36,8 +36,7 @@ public:
     Selection& selectionParSel,
     ExpressionContext& hwContext,
     SemisimpleLieAlgebra* owner,
-    bool Verbose =
-    true
+    bool Verbose = true
   );
   static bool writeGenVermaModAsDiffOperatorInner(
     Calculator& calculator,
@@ -61,8 +60,7 @@ public:
     Expression& output,
     Vector<Coefficient>& outputWeight,
     Selection& outputInducingSelection,
-    Expression* outputContext =
-    nullptr
+    Expression* outputContext = nullptr
   );
   static bool printB3G2branchingTableCharsOnly(
     Calculator& calculator, const Expression& input, Expression& output
@@ -359,8 +357,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool
-    verbose
+    bool verbose
   );
   static bool writeToHardDiskOrPrintSemisimpleLieAlgebra(
     Calculator& calculator,

@@ -1153,8 +1153,7 @@ bool Crypto::convertHexToListUnsignedChar(
 bool Crypto::convertHexToString(
   const std::string& input,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   output.reserve(input.size() / 2);
   output.clear();
@@ -1299,8 +1298,7 @@ std::string Crypto::convertListUnsignedCharsToHex(
 std::string Crypto::convertListUnsignedCharsToHexFormat(
   const List<unsigned char>& input,
   int byteWidthLineBreakZeroForNone,
-  bool
-  useHtml
+  bool useHtml
 ) {
   std::string inputString(
     reinterpret_cast<char*>(input.objects), static_cast<unsigned>(input.size)
@@ -1386,7 +1384,8 @@ void Crypto::convertUint64toBigendianListUnsignedCharAppendResult(
     static_cast<unsigned char>((input / 281474976710656) % 256)
   );
   outputAppend.addOnTop(
-    static_cast<unsigned char>((input / 1099511627776) % 256));
+    static_cast<unsigned char>((input / 1099511627776) % 256)
+  );
   outputAppend.addOnTop(
     static_cast<unsigned char>((input / 4294967296) % 256)
   );
@@ -1409,7 +1408,8 @@ void Crypto::convertUint128toBigendianListUnsignedCharAppendResult(
     static_cast<unsigned char>((input / 281474976710656) % 256)
   );
   outputAppend.addOnTop(
-    static_cast<unsigned char>((input / 1099511627776) % 256));
+    static_cast<unsigned char>((input / 1099511627776) % 256)
+  );
   outputAppend.addOnTop(
     static_cast<unsigned char>((input / 4294967296) % 256)
   );
@@ -1832,8 +1832,7 @@ void Crypto::convertLargeIntUnsignedToBase58SignificantDigitsLAST(
 void Crypto::convertLargeIntUnsignedToBase58SignificantDigitsFIRST(
   const LargeIntegerUnsigned& input,
   std::string& output,
-  int
-  numberOfOnesToPrepend
+  int numberOfOnesToPrepend
 ) {
   std::string outputReversed;
   Crypto::convertLargeIntUnsignedToBase58SignificantDigitsLAST(
@@ -1888,8 +1887,7 @@ bool Crypto::convertBase58SignificantDigitsFIRSTToLargeIntUnsigned(
 bool Crypto::convertBase58ToHexSignificantDigitsFirst(
   const std::string& input,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Crypto::convertBase58ToHexSignificantDigitsFirst");
   LargeIntegerUnsigned outputLIU;
@@ -2667,7 +2665,8 @@ void UnsecurePseudoRandomGenerator::setRandomSeedSmall(
   );
   this->state[0] = static_cast<unsigned char>(randomSeedUnsigned / 16777216);
   this->state[1] = static_cast<unsigned char>((randomSeedUnsigned / 65536) %
-    256);
+    256
+  );
   this->state[2] = static_cast<unsigned char>((randomSeedUnsigned / 256) %
     256
   );

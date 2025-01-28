@@ -1104,8 +1104,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     outputType.makeArbitrary(
       'A',
       numberOfLength1,
-      DynkinSimpleType::getDefaultLongRootLengthSquared('A') /
-      length1
+      DynkinSimpleType::getDefaultLongRootLengthSquared('A') / length1
     );
   } else {
     if (length1 < length2) {
@@ -1124,22 +1123,19 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
         outputType.makeArbitrary(
           'F',
           4,
-          DynkinSimpleType::getDefaultLongRootLengthSquared('F') /
-          length1
+          DynkinSimpleType::getDefaultLongRootLengthSquared('F') / length1
         );
       } else if (length1 / length2 == 3) {
         outputType.makeArbitrary(
           'G',
           2,
-          DynkinSimpleType::getDefaultLongRootLengthSquared('G') /
-          length1
+          DynkinSimpleType::getDefaultLongRootLengthSquared('G') / length1
         );
       } else {
         outputType.makeArbitrary(
           'B',
           2,
-          DynkinSimpleType::getDefaultLongRootLengthSquared('B') /
-          length1
+          DynkinSimpleType::getDefaultLongRootLengthSquared('B') / length1
         );
       }
     } else {
@@ -1147,15 +1143,13 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
         outputType.makeArbitrary(
           'B',
           currentComponent.size,
-          DynkinSimpleType::getDefaultLongRootLengthSquared('B') /
-          length1
+          DynkinSimpleType::getDefaultLongRootLengthSquared('B') / length1
         );
       } else {
         outputType.makeArbitrary(
           'C',
           currentComponent.size,
-          DynkinSimpleType::getDefaultLongRootLengthSquared('C') /
-          length1
+          DynkinSimpleType::getDefaultLongRootLengthSquared('C') / length1
         );
       }
     }
@@ -2015,7 +2009,8 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   tMpRt = this->parabolicSelectionSmallerAlgebra;
   for (
     int i = 0; i < this->parabolicSelectionSmallerAlgebra.numberOfElements;
-    i ++) {
+    i ++
+  ) {
     invertedCartan.getVectorFromRow(i, root);
     tempVertices.addOnTop(root);
     if (this->parabolicSelectionSmallerAlgebra.selected[i]) {
@@ -2816,8 +2811,7 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromNonParametricArray(
   // contributes to the translation only!
   int numberOfNonParameters = nonParameters.size;
   output.initialize(
-    numberOfParameters + numberOfNonParameters - 1, numberOfParameters -
-    1
+    numberOfParameters + numberOfNonParameters - 1, numberOfParameters - 1
   );
   outputTranslation.makeZero(numberOfParameters + numberOfNonParameters - 1);
   output.makeZero();
@@ -2883,8 +2877,7 @@ void GeneralizedVermaModuleCharacters::getSubstitutionFromIndex(
 void GeneralizedVermaModuleCharacters::transformToWeylProjective(
   int indexOperator,
   Vector<Rational>& startingNormal,
-  Vector<Rational>&
-  outputNormal
+  Vector<Rational>& outputNormal
 ) {
   Matrix<Rational> operatorExtended =
   this->linearOperatorsExtended[indexOperator];
@@ -2962,8 +2955,8 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
     const Cone& currentCone = projectivizedChamberFinal.refinedCones[i];
     bool isNonDominant = false;
     for (
-      int j = 0; j < this->preimageWeylChamberSmallerAlgebra.walls.size; j ++)
-    {
+      int j = 0; j < this->preimageWeylChamberSmallerAlgebra.walls.size; j ++
+    ) {
       if (
         currentCone.internalPoint().scalarEuclidean(
           this->preimageWeylChamberSmallerAlgebra.walls[j].normal

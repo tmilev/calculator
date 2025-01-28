@@ -695,8 +695,7 @@ greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  doGCD
+  bool doGCD
 ) {
   if (input.size() != 3) {
     return false;
@@ -728,8 +727,7 @@ greatestCommonDivisorOrLeastCommonMultipleModular(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  doGCD
+  bool doGCD
 ) {
   if (input.size() != 3) {
     return false;
@@ -790,8 +788,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomial(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  doGCD
+  bool doGCD
 ) {
   STACK_TRACE(
     "CalculatorFunctionsPolynomial::"
@@ -827,8 +824,7 @@ greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  doGCD
+  bool doGCD
 ) {
   STACK_TRACE(
     "CalculatorFunctionsPolynomial::"
@@ -1185,8 +1181,7 @@ bool CalculatorFunctionsPolynomial::groebner(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int
-  order
+  int order
 ) {
   STACK_TRACE("CalculatorFunctionsPolynomial::groebner");
   GroebnerComputationCalculator computation(calculator, input, order);

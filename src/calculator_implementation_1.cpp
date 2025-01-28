@@ -233,7 +233,8 @@ bool PlotObject::operator==(const PlotObject& other) const {
   return ((this->xLow - other.xLow) == 0.0) && ((this->xHigh - other.xHigh) ==
     0.0
   ) && ((this->yLow - other.yLow) == 0.0) && ((this->yHigh - other.yHigh) ==
-    0.0) && ((this->paramLow - other.paramLow) == 0.0) && ((
+    0.0
+  ) && ((this->paramLow - other.paramLow) == 0.0) && ((
       this->paramHigh - other.paramHigh
     ) ==
     0.0
@@ -422,8 +423,7 @@ void PlotObject::makeRectangle(
   double yLowLeft,
   double width,
   double height,
-  const std::
-  string& color
+  const std::string& color
 ) {
   this->plotType = PlotObject::PlotTypes::pathFilled;
   Vector<double> current;
@@ -488,8 +488,7 @@ void PlotObject::makePlotFillFinish() {
 void PlotObject::makeCircle(
   const Vector<Rational>& center,
   const Rational& radius,
-  const std::string&
-  color
+  const std::string& color
 ) {
   if (center.size < 2) {
     global.fatal
@@ -576,8 +575,7 @@ void Plot::drawRectangle(
   double yLowLeft,
   double width,
   double height,
-  const std::
-  string& color
+  const std::string& color
 ) {
   PlotObject plot;
   plot.makeRectangle(xLowLeft, yLowLeft, width, height, color);

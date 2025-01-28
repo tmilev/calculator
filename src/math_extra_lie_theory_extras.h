@@ -101,8 +101,7 @@ public:
   int getDisplayIndexFromGeneratorIndex(int generatorIndex);
   void getLinearCombinationFrom(
     ElementSemisimpleLieAlgebra<Rational>& input,
-    Vector<Rational>&
-    coefficients
+    Vector<Rational>& coefficients
   );
   void initialize(
     List<ElementSemisimpleLieAlgebra<Rational> >& inputOrder,
@@ -213,8 +212,7 @@ public:
   );
   void initFromHomomorphism(
     Vector<Rational>& parabolicSelection,
-    HomomorphismSemisimpleLieAlgebra&
-    input
+    HomomorphismSemisimpleLieAlgebra& input
   );
   void transformToWeylProjectiveStep1();
   void transformToWeylProjectiveStep2();
@@ -233,8 +231,7 @@ class MonomialUniversalEnvelopingOrdered {
   void simplifyAccumulateInOutputNoOutputInit(
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   MonomialUniversalEnvelopingOrdered(
     const MonomialUniversalEnvelopingOrdered& other
@@ -268,14 +265,12 @@ public:
   bool modOutFDRelationsExperimental(
     const Vector<Rational>& highestWeightSimpleCoordinates,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   void modOutVermaRelations(
     const List<Coefficient>* substitutionHiGoesToIthElement = 0,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   void setNumberOfVariables(int newNumberOfVariables);
   unsigned int hashFunction() const;
@@ -306,8 +301,7 @@ public:
   bool switchConsecutiveIndicesIfTheyCommute(
     int leftIndex,
     MonomialUniversalEnvelopingOrdered<Coefficient>& output,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   void makeConstant(
     const Coefficient& inputConstant, SemisimpleLieAlgebraOrdered& inputOwner
@@ -320,22 +314,19 @@ public:
   void simplify(
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   void commuteConsecutiveIndicesLeftIndexAroundRight(
     int index,
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   void commuteConsecutiveIndicesRightIndexAroundLeft(
     int index,
     ElementUniversalEnvelopingOrdered<Coefficient>& output,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   MonomialUniversalEnvelopingOrdered() {
     this->owner = nullptr;
@@ -422,8 +413,7 @@ public:
   bool modOutFDRelationsExperimental(
     const Vector<Rational>& highestWeightSimpleCoordinates,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   bool isEqualToZero() const {
     return this->size == 0;
@@ -447,16 +437,15 @@ public:
     this->addMonomial(monomial);
   }
   void simplify(
-    const Coefficient& ringUnit = 1, const Coefficient& ringZero =
-    0);
+    const Coefficient& ringUnit = 1, const Coefficient& ringZero = 0
+  );
   inline void multiplyBy(const ElementUniversalEnvelopingOrdered& other) {
     this->operator*=(other);
   }
   void modOutVermaRelations(
     const List<Coefficient>* substitutionHiGoesToIthElement = 0,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   void modOutVermaRelationsOld(
     bool substitutionHighestWeightWithZeroes,
@@ -1074,8 +1063,7 @@ template <class Coefficient>
 bool ElementUniversalEnvelopingOrdered<Coefficient>::
 getElementUniversalEnveloping(
   ElementUniversalEnveloping<Coefficient>& output,
-  SemisimpleLieAlgebra&
-  inputOwner
+  SemisimpleLieAlgebra& inputOwner
 ) {
   ElementUniversalEnveloping<Coefficient> accumulator;
   ElementUniversalEnveloping<Coefficient> element;
@@ -2489,8 +2477,8 @@ splitCharacterOverReductiveSubalgebra(
     for (bool Found = true; Found;) {
       Found = false;
       for (
-        int i = 0; i < weylGroupFiniteDimensionalSmall.rootsOfBorel.size; i ++)
-      {
+        int i = 0; i < weylGroupFiniteDimensionalSmall.rootsOfBorel.size; i ++
+      ) {
         workingMonomial = localHighest;
         simpleGeneratorBaseField =
         weylGroupFiniteDimensionalSmall.rootsOfBorel[i];

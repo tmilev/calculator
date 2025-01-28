@@ -1574,7 +1574,8 @@ preparePartialFractionExpressionSummands() {
       currentCoefficient.invert();
       denominatorRescaled *= currentCoefficient;
       MathRoutines::raiseToPower(
-        currentCoefficient, j + 1, AlgebraicNumber(1));
+        currentCoefficient, j + 1, AlgebraicNumber(1)
+      );
       numeratorRescaled.getIndexLeadingMonomial(
         nullptr, &numberScale, monomialOrder
       );
@@ -1684,7 +1685,8 @@ bool IntegralRationalFunctionComputation::integrateRationalFunction() {
       currentCoefficient.invert();
       denominatorRescaled *= currentCoefficient;
       MathRoutines::raiseToPower(
-        currentCoefficient, j + 1, AlgebraicNumber(1));
+        currentCoefficient, j + 1, AlgebraicNumber(1)
+      );
       numberScale = numeratorRescaled.getLeadingCoefficient(monomialOrder);
       numeratorRescaled /= numberScale;
       currentCoefficient *= numberScale;
@@ -2604,8 +2606,7 @@ bool CalculatorFunctions::formatCPPSourceCodeInternal(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  logDebugData
+  bool logDebugData
 ) {
   STACK_TRACE("CalculatorFunctions::formatCPPSourceCodeInternal");
   if (!global.userDefaultHasAdminRights()) {
@@ -3247,12 +3248,14 @@ bool CalculatorFunctions::divisionCancellations(
   if (input[1][2] == input[2][2]) {
     return
     output.makeXOX(
-      calculator, calculator.opDivide(), input[1][1], input[2][1]);
+      calculator, calculator.opDivide(), input[1][1], input[2][1]
+    );
   }
   if (input[1][1] == input[2][1]) {
     return
     output.makeXOX(
-      calculator, calculator.opDivide(), input[2][2], input[1][2]);
+      calculator, calculator.opDivide(), input[2][2], input[1][2]
+    );
   }
   return false;
 }
@@ -3709,7 +3712,8 @@ bool CalculatorFunctions::Test::checkSorting(
     for (int j = i; j < mustBeSorted.size; j ++) {
       if (
         mustBeSorted[i] > mustBeSorted[j] &&
-        mustBeSorted[j] > mustBeSorted[i]) {
+        mustBeSorted[j] > mustBeSorted[i]
+      ) {
         global.fatal
         << "Faulty comparison: "
         << mustBeSorted[i].toString()
@@ -4496,7 +4500,8 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
   ExpressionContext context = converted.getContext();
   if (
     matrix.numberOfRows != matrix.numberOfColumns ||
-    matrix.numberOfColumns < 1) {
+    matrix.numberOfColumns < 1
+  ) {
     std::stringstream out;
     out
     << "The matrix "
@@ -4682,7 +4687,8 @@ bool CalculatorFunctions::invertMatrixVerbose(
   }
   if (
     matrix.numberOfRows != matrix.numberOfColumns ||
-    matrix.numberOfColumns < 1) {
+    matrix.numberOfColumns < 1
+  ) {
     return output.assignError(calculator, "The matrix is not square");
   }
   outputMatrix.makeIdentityMatrix(matrix.numberOfRows);
@@ -5335,15 +5341,13 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
     calculator,
     calculator.opPower(),
     monicQuadratic,
-    oneE -
-    numeratorPowerExpression
+    oneE - numeratorPowerExpression
   );
   quadraticPowerNMinusOne.makeXOX(
     calculator,
     calculator.opPower(),
     monicQuadratic,
-    numeratorPowerExpression -
-    oneE
+    numeratorPowerExpression - oneE
   );
   functionRemainingToIntegrate = oneE / quadraticPowerNMinusOne;
   remainingIntegral.makeIntegral(
@@ -5479,8 +5483,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
     calculator, calculator.opPower(), quadraticDividedByA, nE
   );
   quadraticPowerOneMinusN.makeXOX(
-    calculator, calculator.opPower(), quadraticDividedByA, oneE -
-    nE
+    calculator, calculator.opPower(), quadraticDividedByA, oneE - nE
   );
   remainingFunctionToIntegrate = oneE / quadraticPowerN;
   remainingIntegral.makeIntegral(
@@ -6643,8 +6646,7 @@ bool Expression::makeSequence(
 bool Expression::makeSequenceCommands(
   Calculator& owner,
   List<std::string>& inputKeys,
-  List<Expression>&
-  inputValues
+  List<Expression>& inputValues
 ) {
   STACK_TRACE("Expression::makeSequenceCommands");
   List<Expression> statements;
@@ -6672,8 +6674,7 @@ bool Expression::makeSequenceStatements(
 ) {
   STACK_TRACE("Expression::makeSequenceStatements");
   this->reset(
-    owner, inputStatements ==
-    nullptr ? 1 : inputStatements->size + 1
+    owner, inputStatements == nullptr ? 1 : inputStatements->size + 1
   );
   this->addChildAtomOnTop(owner.opCommandSequence());
   if (inputStatements != nullptr) {
@@ -7080,7 +7081,8 @@ bool CalculatorFunctions::invertMatrix(
   ) {
     if (
       matrix.numberOfRows != matrix.numberOfColumns ||
-      matrix.numberOfColumns < 1) {
+      matrix.numberOfColumns < 1
+    ) {
       return output.assignError(calculator, "The matrix is not square");
     }
     if (matrix.getDeterminant() == 0) {
@@ -7208,7 +7210,8 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
   int pointsCounter = 0;
   for (
     double currentX = xInitial; currentX > leftEndpoint - delta; currentX -=
-    delta) {
+    delta
+  ) {
     XValues.addOnTop(currentX);
     pointsCounter ++;
     if (pointsCounter > numberOfPoints) {
@@ -7242,7 +7245,8 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
   for (int direction = - 1; direction < 2; direction += 2) {
     for (
       int i = indexXinitial + direction; i >= 0 && i < XValues.size; i +=
-      direction) {
+      direction
+    ) {
       knownValues[knownValues.size - 2] = XValues[i];
       bool isGood = true;
       for (int counter = 0;; counter ++) {
@@ -7929,7 +7933,8 @@ bool CalculatorFunctionsPlot::plot2DWithBars(
     }
     for (
       Rational i = lowerBoundRational; i <= upperBoundRational; i +=
-      deltaRational) {
+      deltaRational
+    ) {
       rValues.addOnTop(i);
     }
   }
@@ -10753,8 +10758,7 @@ bool CalculatorFunctionsPlot::drawExpressionGraphWithOptions(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  useFullTree
+  bool useFullTree
 ) {
   STACK_TRACE("CalculatorFunctionsPlot::drawExpressionGraphWithOptions");
   ExpressionTreeDrawer expressionDrawer;
@@ -10876,8 +10880,7 @@ bool CalculatorFunctions::turnRulesOnOff(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  turnOff
+  bool turnOff
 ) {
   STACK_TRACE("CalculatorFunctions::turnRulesOnOff");
   List<std::string> rulesToConsider;
@@ -11086,7 +11089,8 @@ bool CalculatorFunctions::randomInteger(
     int nextAccumulator = accumulator + currentContribution;
     if (
       accumulator <= generatedRandomInt &&
-      generatedRandomInt < nextAccumulator) {
+      generatedRandomInt < nextAccumulator
+    ) {
       resultRandomValue =
       intervals[i][0] + sign *(generatedRandomInt - accumulator);
       found = true;

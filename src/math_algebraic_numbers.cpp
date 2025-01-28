@@ -409,8 +409,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
 
 void AlgebraicClosureRationals::contractBasesIfRedundant(
   AlgebraicClosureRationals& previousCopy,
-  AlgebraicNumber*
-  outputImageGenerator
+  AlgebraicNumber* outputImageGenerator
 ) {
   STACK_TRACE("AlgebraicClosureRationals::contractBasesIfRedundant");
   if (

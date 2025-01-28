@@ -113,7 +113,8 @@ bool Calculator::getVectorExpressions(
   output.setSize(0);
   if (
     !input.isSequenceNElements() &&
-    !input.startsWith(this->opIntervalOpen())) {
+    !input.startsWith(this->opIntervalOpen())
+  ) {
     if (targetDimNonMandatory > 0) {
       if (targetDimNonMandatory != 1) {
         return
@@ -152,8 +153,7 @@ template <class Element>
 void MathRoutines::lieBracket(
   const Element& standsOnTheLeft,
   const Element& standsOnTheRight,
-  Element&
-  output
+  Element& output
 ) {
   if (&standsOnTheLeft == &output || &standsOnTheRight == &output) {
     Element standsOnTheLeftNew;
@@ -1089,7 +1089,8 @@ bool CalculatorBasics::associateExponentExponent(
     Rational powerOuter;
     if (
       input[2].isRational(&powerOuter) &&
-      input[1][2].isRational(&powerInner)) {
+      input[1][2].isRational(&powerInner)
+    ) {
       if ((powerInner* powerOuter).isEven()) {
         isGood = true;
       }
@@ -2136,14 +2137,15 @@ JSData Calculator::toJSONPerformance() {
   LargeInteger trivialPerformance;
   LargeInteger nonTrivialPerformance;
   for (
-    int i = 0; i < this->statistics.trivialPerformancePerHandler.size(); i ++)
-  {
+    int i = 0; i < this->statistics.trivialPerformancePerHandler.size(); i ++
+  ) {
     trivialPerformance +=
     this->statistics.trivialPerformancePerHandler.coefficients[i];
   }
   for (
     int i = 0; i < this->statistics.nonTrivialPerformancePerHandler.size();
-    i ++) {
+    i ++
+  ) {
     nonTrivialPerformance +=
     this->statistics.nonTrivialPerformancePerHandler.coefficients[i];
   }

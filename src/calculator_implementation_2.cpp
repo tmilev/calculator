@@ -884,8 +884,7 @@ Expression Calculator::getNewAtom(const std::string& preferredName) {
 
 bool Calculator::accountRule(
   const Expression& ruleExpression,
-  StateMaintainerCalculator&
-  ruleStackMaintainer
+  StateMaintainerCalculator& ruleStackMaintainer
 ) {
   STACK_TRACE("Calculator::accountRule");
   RecursionDepthCounter recursionCounter(&this->recursionDepth);
@@ -923,7 +922,8 @@ bool Calculator::evaluateExpression(
   return
   calculator.evaluateExpression(
     calculator, input, output, notUsed, - 1,
-    nullptr);
+    nullptr
+  );
 }
 
 bool Calculator::isTimedOut() {
@@ -963,8 +963,7 @@ Calculator::EvaluateLoop::EvaluateLoop(Calculator& inputOwner) {
 void Calculator::EvaluateLoop::accountHistoryChildTransformation(
   const Expression& transformedChild,
   const Expression& childHistory,
-  int
-  childIndex
+  int childIndex
 ) {
   if (this->history == nullptr) {
     // History is not recorded.

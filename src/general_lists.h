@@ -521,8 +521,7 @@ public:
   // The following function returns false if the comparison operator failed!!!!
   template <class compareClass, class carbonCopyType = Object>
   bool quickSortAscendingCustom(
-    compareClass& comparator, List<carbonCopyType>* carbonCopy =
-    nullptr
+    compareClass& comparator, List<carbonCopyType>* carbonCopy = nullptr
   ) {
     return
     this->quickSortAscendingCustomRecursive(
@@ -531,8 +530,7 @@ public:
   }
   template <class compareClass, class carbonCopyType = Object>
   bool quickSortDescendingCustom(
-    compareClass& comparator, List<carbonCopyType>* carbonCopy =
-    nullptr
+    compareClass& comparator, List<carbonCopyType>* carbonCopy = nullptr
   ) {
     bool result =
     this->quickSortAscendingCustomRecursive(
@@ -553,8 +551,7 @@ public:
   template <class otherType = Object>
   void quickSortAscending(
     const List<Object>::Comparator* order = nullptr,
-    List<otherType>* carbonCopy =
-    nullptr
+    List<otherType>* carbonCopy = nullptr
   ) {
     List<Object>::quickSortAscending<List<Object>, List<otherType> >(
       *this, order, carbonCopy
@@ -563,8 +560,7 @@ public:
   template <class otherType = Object>
   void quickSortDescending(
     const List<Object>::Comparator* order = nullptr,
-    List<otherType>* carbonCopy =
-    nullptr
+    List<otherType>* carbonCopy = nullptr
   ) {
     List<Object>::quickSortDescending<List<Object>, List<otherType> >(
       *this, order, carbonCopy
@@ -574,8 +570,7 @@ public:
   static void quickSortAscending(
     templateList& other,
     const typename List<Object>::Comparator* order = nullptr,
-    otherList* carbonCopy =
-    nullptr
+    otherList* carbonCopy = nullptr
   ) {
     if (carbonCopy != 0) {
       if (carbonCopy->size != other.size) {
@@ -611,8 +606,7 @@ public:
   static void quickSortDescending(
     templateList& other,
     const List<Object>::Comparator* order = nullptr,
-    otherList* carbonCopy =
-    0
+    otherList* carbonCopy = 0
   ) {
     List<Object>::quickSortAscending<templateList, otherList>(
       other, order, carbonCopy
@@ -676,8 +670,7 @@ public:
     TemplateList& input,
     int bottomIndex,
     int topIndex,
-    OtherTemplateList*
-    carbonCopy
+    OtherTemplateList* carbonCopy
   ) {
     if (topIndex <= bottomIndex) {
       return;
@@ -864,7 +857,8 @@ public:
   }
   void rotate(int r) {
     std::rotate(
-      this->objects, this->objects + r, this->objects + (this->size - 1));
+      this->objects, this->objects + r, this->objects + (this->size - 1)
+    );
   }
   Object* lastObject() const;
   // <-Registering stack trace forbidden! Multithreading deadlock alert.
@@ -1426,8 +1420,7 @@ public:
   template <typename otherType = int>
   void quickSortAscending(
     typename List<Object>::Comparator* order = nullptr,
-    List<otherType>* carbonCopy =
-    nullptr
+    List<otherType>* carbonCopy = nullptr
   ) {
     List<Object> myCopy;
     myCopy = *this;
@@ -1437,8 +1430,7 @@ public:
   template <typename otherType>
   void quickSortDescending(
     typename List<Object>::Comparator* order = nullptr,
-    List<otherType>* carbonCopy =
-    nullptr
+    List<otherType>* carbonCopy = nullptr
   ) {
     List<Object> myCopy;
     myCopy = *this;
@@ -1587,8 +1579,7 @@ public:
   template <typename otherType = int>
   void quickSortAscending(
     typename List<Object>::Comparator* order = nullptr,
-    List<otherType>* carbonCopy =
-    nullptr
+    List<otherType>* carbonCopy = nullptr
   ) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::
     quickSortAscending(order, carbonCopy);
@@ -1596,8 +1587,7 @@ public:
   template <typename otherType = int>
   void quickSortDescending(
     typename List<Object>::Comparator* order = nullptr,
-    List<otherType>* carbonCopy =
-    nullptr
+    List<otherType>* carbonCopy = nullptr
   ) {
     this->::HashTemplate<Object, List<Object>, hashFunction>::
     quickSortDescending(order, carbonCopy);
@@ -1900,8 +1890,8 @@ List<Object> List<Object>::sliceCopy(int startingIndex, int sizeOfSlice) const {
 
 template <class Object>
 void List<Object>::slice(
-  int startingIndex, int sizeOfSlice, List<Object>&
-  output) const {
+  int startingIndex, int sizeOfSlice, List<Object>& output
+) const {
   // output allowed to equal this
   if (startingIndex < 0) {
     startingIndex = 0;

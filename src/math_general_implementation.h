@@ -87,8 +87,8 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
 
 template <class Coefficient>
 std::ostream& operator<<(
-  std::ostream& output, const Matrix<Coefficient>&
-  matrix) {
+  std::ostream& output, const Matrix<Coefficient>& matrix
+) {
   output << "\\left(\\begin{array}{";
   for (int j = 0; j < matrix.numberOfColumns; j ++) {
     output << "c";
@@ -382,8 +382,8 @@ void Matrix<Coefficient>::gaussianEliminationEuclideanDomain(
   const Coefficient& negativeOne,
   const Coefficient& ringUnit,
   bool(*comparisonGEQFunction)(
-    const Coefficient& left, const Coefficient&
-    right)
+    const Coefficient& left, const Coefficient& right
+  )
 ) {
   STACK_TRACE("Matrix::gaussianEliminationEuclideanDomain");
   ProgressReport report(1);
@@ -585,8 +585,7 @@ void Matrix<Coefficient>::addTwoRows(
   int fromRowIndex,
   int toRowIndex,
   int startColumnIndex,
-  const Coefficient&
-  scalar
+  const Coefficient& scalar
 ) {
   ProgressReport report(10);
   Coefficient coefficient;

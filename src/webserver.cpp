@@ -367,8 +367,7 @@ void WebWorker::sendAllBytesNoHeaders() {
     }
     global << bytesSent;
     this->remainingBytesToSend.sliceInPlace(
-      bytesSent, this->remainingBytesToSend.size -
-      bytesSent
+      bytesSent, this->remainingBytesToSend.size - bytesSent
     );
     if (this->remainingBytesToSend.size > 0) {
       global << ", ";
@@ -690,8 +689,7 @@ bool WebWorker::extractArgumentsFromMessage(
 // Returning false guarantees the login information was not accepted.
 bool WebWorker::loginProcedure(
   std::stringstream& argumentProcessingFailureComments,
-  std::stringstream*
-  comments
+  std::stringstream* comments
 ) {
   STACK_TRACE("WebWorker::loginProcedure");
   global.flagLoggedIn = false;
@@ -862,7 +860,8 @@ bool WebWorker::loginProcedure(
     if (user.flagEnteredAuthenticationToken) {
       if (
         user.enteredActivationToken != "0" &&
-        user.enteredActivationToken != "") {
+        user.enteredActivationToken != ""
+      ) {
         shouldDisplayMessage = true;
       }
     }
@@ -1125,7 +1124,8 @@ void WebWorker::extractHostInfo() {
   );
   if (
     global.web.hostNoPort == "localhost" ||
-    global.web.hostNoPort == "127.0.0.1") {
+    global.web.hostNoPort == "127.0.0.1"
+  ) {
     global.flagRequestComingLocally = true;
   } else {
     global.flagRequestComingLocally = false;
@@ -1233,7 +1233,8 @@ void WebWorker::sanitizeVirtualFileName() {
   bool foundslash = false;
   for (
     signed i = static_cast<signed>(this->virtualFileName.size()) - 1; i >=
-    0; i --) {
+    0; i --
+  ) {
     unsigned k = static_cast<unsigned>(i);
     bool isOK = true;
     if (foundslash && this->virtualFileName[k] == '.') {
@@ -1407,8 +1408,7 @@ void WebWorker::writeAfterTimeoutCarbonCopy(
 void WebWorker::writeAfterTimeoutJSON(
   const JSData& input,
   const std::string& status,
-  const std::string&
-  fileNameCarbonCopy
+  const std::string& fileNameCarbonCopy
 ) {
   STACK_TRACE("WebWorker::writeAfterTimeoutJSON");
   JSData result;
@@ -1419,8 +1419,7 @@ void WebWorker::writeAfterTimeoutJSON(
 void WebWorker::writeAfterTimeoutPartTwo(
   JSData& result,
   const std::string& status,
-  const std::string&
-  fileNameCarbonCopy
+  const std::string& fileNameCarbonCopy
 ) {
   STACK_TRACE("WebWorker::writeAfterTimeoutPartTwo");
   std::stringstream commentsOnError;
@@ -2516,8 +2515,8 @@ void WebWorker::release() {
 }
 
 void WebWorker::getIndicatorOnTimeout(
-  JSData& output, const std::string&
-  message) {
+  JSData& output, const std::string& message
+) {
   STACK_TRACE("WebWorker::getIndicatorOnTimeout");
   global
   << Logger::blue
@@ -4024,8 +4023,7 @@ int WebServer::run() {
 bool WebServer::runOnce(
   Listener& listener,
   long long& previousReportedNumberOfSelects,
-  int&
-  returnCode
+  int& returnCode
 ) {
   // Main accept() loop.
   listener.zeroSocketSet();

@@ -327,8 +327,7 @@ bool DatabaseInternal::sendAndReceiveFromClientFull(
 bool DatabaseInternal::sendAndReceiveFromClientInternal(
   const std::string& input,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   if (!this->flagIsRunning) {
     // Do not send messages to a non-running database.
@@ -367,8 +366,7 @@ bool DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex
 bool DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe(
   const std::string& input,
   std::string& output,
-  std::stringstream*
-  commentsOnFailure
+  std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE(
     "DatabaseInternal::sendAndReceiveFromClientToServerThroughPipe"
@@ -1775,8 +1773,7 @@ void DatabaseInternalIndex::removeObjectId(
 void DatabaseInternalIndex::setObjectIdValue(
   const std::string& objectId,
   const std::string& newValue,
-  bool&
-  outputValueChanged
+  bool& outputValueChanged
 ) {
   outputValueChanged = false;
   if (this->objectIdToKeyValue.contains(objectId)) {

@@ -138,8 +138,7 @@ public:
   static bool
   getHomogeneousSubstitutionMatrixFromSubstitutionIgnoreConstantTerms(
     const PolynomialSubstitution<Rational>& substitution,
-    Matrix<Rational>&
-    output
+    Matrix<Rational>& output
   );
   // Returning false means that the lattice given as rougher
   // is not actually rougher than the current one
@@ -266,8 +265,7 @@ public:
   ) const;
   bool substitutionFewerVariables(
     const PolynomialSubstitution<Rational>& substitution,
-    QuasiPolynomial&
-    output
+    QuasiPolynomial& output
   ) const;
   bool compress();
   bool compressOnce();

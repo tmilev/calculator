@@ -1309,8 +1309,7 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   MapList<std::string, std::string> urlParameters;
   urlParameters.setKeyValue(
     DatabaseStrings::labelCalculatorRequest,
-    WebAPI::Request::
-    activateAccountJSON
+    WebAPI::Request::activateAccountJSON
   );
   urlParameters.setKeyValue(
     DatabaseStrings::labelActivationToken, activationToken
@@ -1321,8 +1320,7 @@ bool UserCalculator::getActivationAddressFromActivationToken(
   urlParameters.setKeyValue(DatabaseStrings::labelEmail, inputEmailUnsafe);
   urlParameters.setKeyValue(
     DatabaseStrings::labelCurrentPage,
-    DatabaseStrings::
-    labelPageActivateAccount
+    DatabaseStrings::labelPageActivateAccount
   );
   std::string confirmEmailOnly =
   confirmEmailOnlyNoPasswordSet ? "true" : "false";

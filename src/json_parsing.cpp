@@ -213,8 +213,8 @@ bool JSData::convertTwoByteHexToUnsignedChar(
 }
 
 bool JSData::mergeInMe(
-  const JSData& input, std::stringstream*
-  commentsOnFailure) {
+  const JSData& input, std::stringstream* commentsOnFailure
+) {
   if (this->elementType != JSData::Type::tokenObject) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Can only merge in objects. ";

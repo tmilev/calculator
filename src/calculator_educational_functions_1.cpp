@@ -602,7 +602,8 @@ bool CalculatorEducationalFunctions::divideByNumberTrivial(
   Rational result = numerator / denominator;
   if (
     numerator == result.getNumerator() &&
-    denominator == result.getDenominator()) {
+    denominator == result.getDenominator()
+  ) {
     return output.assignValue(calculator, result);
   }
   return false;

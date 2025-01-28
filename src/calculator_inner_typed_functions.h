@@ -593,7 +593,8 @@ bool CalculatorConversions::extractPolynomialArgumentsOfOperation(
   }
   if (
     maximumVariables >= 0 &&
-    outputContext.numberOfVariables() > maximumVariables) {
+    outputContext.numberOfVariables() > maximumVariables
+  ) {
     return false;
   }
   output.clear();

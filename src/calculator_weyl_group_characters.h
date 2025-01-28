@@ -16,8 +16,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool
-    useOuter
+    bool useOuter
   );
   static bool weylOuterRaiseToMaximallyDominant(
     Calculator& calculator, const Expression& input, Expression& output

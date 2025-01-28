@@ -42,8 +42,7 @@ public:
   int minimalNumberOfVariables() const;
   bool substitute(
     const PolynomialSubstitution<Rational>& substitution,
-    const Coefficient&
-    one
+    const Coefficient& one
   );
   bool substitute(
     const PolynomialSubstitution<Coefficient>& substitution,
@@ -69,8 +68,7 @@ public:
   void makeOneLetterMonomial(
     int index,
     const Coefficient& coefficient,
-    int expectedNumberOfVariables =
-    0
+    int expectedNumberOfVariables = 0
   );
   void getNumerator(Polynomial<Coefficient>& output) const;
   void getDenominator(Polynomial<Coefficient>& output) const;
@@ -108,8 +106,7 @@ public:
   void makeOne();
   void makeZero();
   void makeMonomial(
-    int letterIndex, const Rational& power, const Rational& coefficient =
-    1
+    int letterIndex, const Rational& power, const Rational& coefficient = 1
   );
   void makeConstant(const Coefficient& coefficient) {
     this->makeZero();

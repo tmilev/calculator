@@ -30,9 +30,7 @@ unsigned int HashFunctions::hashFunction(
 MapList<
   std::string,
   VoganDiagram::DiagramType,
-  HashFunctions::hashFunction<
-    std::string
-  >
+  HashFunctions::hashFunction<std::string>
 > VoganDiagram::mapStringToType;
 
 bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
@@ -1211,7 +1209,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
     numEigenVectors = rfZero;
     for (
       int j = 0; j < g2inB3Data.smallCharacterFiniteDimensionalPart.size();
-      j ++) {
+      j ++
+    ) {
       numEigenVectors +=
       g2inB3Data.smallCharacterFiniteDimensionalPart.coefficients[j];
     }
@@ -1228,7 +1227,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
     }
     for (
       int k = 0; k < g2inB3Data.smallCharacterFiniteDimensionalPart.size();
-      k ++) {
+      k ++
+    ) {
       CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> >
       character;
       character.addMonomial(
@@ -1241,7 +1241,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
       for (
         int counter = 0; counter < multiplicity;
         counter ++,
-        eigenIndexcounter ++) {
+        eigenIndexcounter ++
+      ) {
         out << "<tr>";
         if (k == 0 && counter == 0) {
           g2inB3Data.format.customPlusSign = "\\oplus ";
@@ -3380,7 +3381,8 @@ bool CartanInvolution::computeSimpleRootImagesTypeD(
   int rank = this->owner->getRank();
   if (
     this->voganDiagram.parameter < 0 ||
-    this->voganDiagram.parameter >= rank - 1) {
+    this->voganDiagram.parameter >= rank - 1
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Parameter must be between 0 and the rank less one. The rank is: "
@@ -3415,8 +3417,7 @@ bool CartanInvolution::computeSimpleRootImagesTypeD(
   }
   if (useAutomorphism) {
     this->setSimpleRootSwap(
-      this->voganDiagram.rank - 2, this->voganDiagram.rank -
-      1
+      this->voganDiagram.rank - 2, this->voganDiagram.rank - 1
     );
   } else {
     this->setHollowSimpleRoot(this->voganDiagram.rank - 2);
@@ -4110,7 +4111,8 @@ void VoganDiagram::plotAI(Plot& output) {
   );
   for (int i = 0; i < this->rank / 2; i ++) {
     VoganDiagram::plotTwoElementOrbit(
-      output, i, this->rank - i - 1, 0, this->rank);
+      output, i, this->rank - i - 1, 0, this->rank
+    );
   }
 }
 
@@ -4118,7 +4120,8 @@ void VoganDiagram::plotAII(Plot& output) {
   DynkinSimpleType::plotHorizontalChainOfRoots(output, this->rank, nullptr);
   for (int i = 0; i < this->rank / 2; i ++) {
     VoganDiagram::plotTwoElementOrbit(
-      output, i, this->rank - i - 1, 0, this->rank);
+      output, i, this->rank - i - 1, 0, this->rank
+    );
   }
 }
 
@@ -4189,8 +4192,7 @@ void VoganDiagram::plotTwoElementOrbit(
   int leftIndex,
   int rightIndex,
   int verticalOffset,
-  int
-  rootsOnThisPlotRow
+  int rootsOnThisPlotRow
 ) {
   Vector<Rational> left, right;
   left.makeZero(2);
@@ -4625,7 +4627,8 @@ bool CalculatorLieTheory::parabolicWeylGroups(
   for (
     int i = 0; i < numberOfCycles;
     i ++,
-    selectionParabolic.incrementSelection()) {
+    selectionParabolic.incrementSelection()
+  ) {
     subgroup.makeParabolicFromSelectionSimpleRoots(
       semisimpleLieAlgebra.weylGroup, selectionParabolic, 2000
     );
@@ -5580,7 +5583,8 @@ bool MathRoutines::generateVectorSpaceClosedWithRespectToOperation(
       }
       if (
         upperDimensionBound > 0 &&
-        inputOutputElements.size > upperDimensionBound) {
+        inputOutputElements.size > upperDimensionBound
+      ) {
         return false;
       }
       if (report2.tickAndWantReport()) {
@@ -5745,7 +5749,8 @@ bool CalculatorLieTheory::drawRootSystem(
   DrawingVariables drawingVariables;
   weylGroup.drawRootSystem(
     drawingVariables, true, false, nullptr, true,
-    nullptr);
+    nullptr
+  );
   out << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
   return output.assignValue(calculator, out.str());
 }
@@ -5766,8 +5771,7 @@ getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
   for (
     ; this->monomials.contains(currentWeight);
     result ++,
-    currentWeight.weightFundamentalCoordinates -=
-    alphaInFundamentalCoordinates
+    currentWeight.weightFundamentalCoordinates -= alphaInFundamentalCoordinates
   ) {}
   return result;
 }
@@ -6322,9 +6326,7 @@ bool CalculatorLieTheory::rootSubsystem(
       return
       output.assignError(
         calculator,
-        "Input vector " +
-        currentRoot.toString() +
-        " is not a root. "
+        "Input vector " + currentRoot.toString() + " is not a root. "
       );
     }
     outputRoots.addOnTop(currentRoot);
@@ -6349,8 +6351,7 @@ bool CalculatorLieTheory::printSemisimpleLieAlgebra(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  bool
-  verbose
+  bool verbose
 ) {
   return
   CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(

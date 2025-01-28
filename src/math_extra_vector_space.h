@@ -39,8 +39,7 @@ public:
   const;
   VectorSpace<Coefficient> Union(const VectorSpace<Coefficient>& other) const;
   VectorSpace<Coefficient> orthogonalComplement(
-    VectorSpace<Coefficient>* ambient = 0, Matrix<Coefficient>* form =
-    0
+    VectorSpace<Coefficient>* ambient = 0, Matrix<Coefficient>* form = 0
   ) const;
   Vector<Coefficient> getBasisVector(int i) const;
   Vector<Coefficient> getCanonicalBasisVector(int i) const;
@@ -196,7 +195,8 @@ bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
   } else {
     fastbasis.resize(
       fastbasis.numberOfRows + 1, fastbasis.numberOfColumns,
-      true);
+      true
+    );
   }
   for (int j = 0; j < fastbasis.numberOfColumns; j ++) {
     fastbasis.elements[fastbasis.numberOfRows - 1][j] = v[j];
@@ -264,7 +264,9 @@ VectorSpace<Coefficient> VectorSpace<Coefficient>::intersection(
   if (
     this->degree != other.degree && ((this->degree != - 1) && (
         other.degree != - 1
-      ))) {
+      )
+    )
+  ) {
     global.fatal
     << "Attempting to intersect vector spaces of different degrees, "
     << this->degree

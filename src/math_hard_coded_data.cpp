@@ -114,23 +114,19 @@ public:
   );
   static bool loadSignSignatureF1_4(
     WeylGroupData& inputGroup,
-    List<SubgroupDataRootReflections>&
-    outputSubgroups
+    List<SubgroupDataRootReflections>& outputSubgroups
   );
   static bool loadSignSignatureE1_6(
     WeylGroupData& inputGroup,
-    List<SubgroupDataRootReflections>&
-    outputSubgroups
+    List<SubgroupDataRootReflections>& outputSubgroups
   );
   static bool loadSignSignatureE1_7(
     WeylGroupData& inputGroup,
-    List<SubgroupDataRootReflections>&
-    outputSubgroups
+    List<SubgroupDataRootReflections>& outputSubgroups
   );
   static bool loadSignSignatureE1_8(
     WeylGroupData& inputGroup,
-    List<SubgroupDataRootReflections>&
-    outputSubgroups
+    List<SubgroupDataRootReflections>& outputSubgroups
   );
   static bool loadOutputSubgroupsFromJSData(
     JSData& input,

@@ -20,8 +20,7 @@ void WebAPIResponse::reset(WebWorker& inputOwner) {
 
 bool WebAPIResponse::serveResponseFalseIfUnrecognized(
   std::stringstream& argumentProcessingFailureComments,
-  std::stringstream&
-  comments
+  std::stringstream& comments
 ) {
   STACK_TRACE("WebAPIResponse::serveResponseFalseIfUnrecognized");
   if (

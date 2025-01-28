@@ -1573,7 +1573,7 @@ std::string HyperoctahedralGroupData::toString() const {
 }
 
 std::ostream& operator<<(
-  std::ostream& out, const HyperoctahedralGroupData&
-  data) {
+  std::ostream& out, const HyperoctahedralGroupData& data
+) {
   return data.intoStream(out);
 }

@@ -688,8 +688,7 @@ std::string WebAPIResponse::getCalculatorWorkerJS() {
 
 std::string WebAPIResponse::getBrowserification(
   const std::string& buildJSONVirtualFileName,
-  const std::string&
-  scriptEntryPoint
+  const std::string& scriptEntryPoint
 ) {
   STACK_TRACE("WebAPIReponse::getBrowserification");
   BuilderApplication builder;
@@ -1340,8 +1339,7 @@ public:
   JSData submitAnswersJSON(
     const std::string& inputRandomSeed,
     bool* outputIsCorrect,
-    bool
-    timeSafetyBrake
+    bool timeSafetyBrake
   );
   bool prepareProblem(const std::string& inputRandomSeed);
   bool extractStudentAnswerPartOne();
@@ -1869,8 +1867,7 @@ JSData WebAPIResponse::checkAnswer(bool hideDesiredAnswer) {
 JSData AnswerChecker::submitAnswersJSON(
   const std::string& inputRandomSeed,
   bool* outputIsCorrect,
-  bool
-  timeSafetyBrake
+  bool timeSafetyBrake
 ) {
   STACK_TRACE("AnswerChecker::submitAnswersJSON");
   if (!global.userDefaultHasAdminRights()) {
@@ -1957,8 +1954,7 @@ JSData WebAPIResponse::submitAnswersHardcoded(bool hideDesiredAnswer) {
 JSData WebAPIResponse::submitAnswersJSON(
   const std::string& inputRandomSeed,
   bool* outputIsCorrect,
-  bool
-  timeSafetyBrake
+  bool timeSafetyBrake
 ) {
   AnswerChecker checker;
   return
@@ -2505,8 +2501,7 @@ std::string WebAPIResponse::getScoresPage() {
 std::string WebAPIResponse::toStringUserDetailsTable(
   bool adminsOnly,
   List<JSData>& users,
-  const std::string&
-  hostWebAddressWithPort
+  const std::string& hostWebAddressWithPort
 ) {
   STACK_TRACE("WebAPIReponse::toStringUserDetailsTable");
   std::stringstream out;
@@ -2869,9 +2864,7 @@ int ProblemData::getExpectedNumberOfAnswers(
 
 void UserCalculator::computePointsEarned(
   const HashedList<std::string>& gradableProblems,
-  MapList<
-    std::string, TopicElement, HashFunctions::hashFunction<std::string>
-  >
+  MapList<std::string, TopicElement, HashFunctions::hashFunction<std::string> >
   * topics,
   std::stringstream& commentsOnFailure
 ) {

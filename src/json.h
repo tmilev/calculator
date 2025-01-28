@@ -70,8 +70,7 @@ public:
   bool hasCompositeKey(
     const std::string& key,
     JSData* whichValue,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   ) const;
   bool hasCompositeKeyOfToken(
     const std::string& key,
@@ -82,8 +81,7 @@ public:
   bool hasCompositeKeyOfType(
     const std::string& key,
     std::string& output,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   ) const;
   bool hasCompositeKeyOfType(
     const std::string& key,
@@ -99,8 +97,7 @@ public:
     const std::string& key, std::stringstream* commentsOnFailure
   ) const;
   bool hasNestedKey(
-    const List<std::string>& nestedKeys, JSData* whichValue =
-    nullptr
+    const List<std::string>& nestedKeys, JSData* whichValue = nullptr
   ) const;
   void setKeyValue(const std::string& key, const JSData& value);
   int getKeyIndex(const std::string& key) const;
@@ -147,8 +144,7 @@ public:
     const std::string& json,
     bool relaxedInput = false,
     std::stringstream* commentsOnFailure = nullptr,
-    bool useHTMLInComments =
-    false
+    bool useHTMLInComments = false
   );
   static void filterColumnsJSDataObjectList(
     List<JSData>& inputOutput, const List<std::string>& columnsToPreserve

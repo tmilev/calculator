@@ -186,8 +186,8 @@ public:
   };
 
   friend std::ostream& operator<<(
-    std::ostream& output, const ASNObject&
-    element) {
+    std::ostream& output, const ASNObject& element
+  ) {
     output << element.toString();
     return output;
   }
@@ -209,8 +209,8 @@ public:
   static MapList<List<unsigned char>, ASNObject>& objectIdsToNames();
   static void initializeNonThreadSafe();
   bool loadFromASN(
-    const ASNElement& input, std::stringstream*
-    commentsOnFailure);
+    const ASNElement& input, std::stringstream* commentsOnFailure
+  );
   static bool loadFieldsFromASNSequence(
     const ASNElement& input,
     MapList<std::string, ASNObject, HashFunctions::hashFunction<std::string> >&

@@ -271,7 +271,7 @@ std::string LittelmannPath::generateOrbitAndAnimate() {
         currentPath.waypoints[j],
         "purple",
         3,
-        this->owner->dynkinType.toString (),
+        this->owner->dynkinType.toString(),
         i
       );
       collapsed.drawCircleAtVectorBufferRational(

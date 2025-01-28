@@ -223,15 +223,13 @@ public:
     const Vector<double>& input,
     const std::string& inputText,
     const std::string& color,
-    int fontSize =
-    DrawingVariables::fontSizeNormal
+    int fontSize = DrawingVariables::fontSizeNormal
   );
   void drawTextAtVector(
     const Vector<Rational>& point,
     const std::string& inputText,
     const std::string& color,
-    int fontSize =
-    DrawingVariables::fontSizeNormal
+    int fontSize = DrawingVariables::fontSizeNormal
   );
   void drawCircleAtVectorBufferRational(
     const Vector<Rational>& point,

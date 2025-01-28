@@ -183,8 +183,8 @@ public:
   // this will return {"key1": {subkey2: {subkey3: "XX"}}}
   JSData toJSONCombineKeysAndValue() const;
   bool fromString(
-    const std::string& input, std::stringstream*
-    commentsOnFailure);
+    const std::string& input, std::stringstream* commentsOnFailure
+  );
   bool fromJSON(const JSData& source, std::stringstream* commentsOnFailure);
   std::string toString() const;
   bool isEmpty() const;
@@ -305,8 +305,7 @@ public:
   void setObjectIdValue(
     const std::string& objectId,
     const std::string& newValue,
-    bool&
-    outputValueChanged
+    bool& outputValueChanged
   );
   void removeObjectId(
     const std::string& objectId, const std::string& previousValue
@@ -451,14 +450,12 @@ public:
     const QueryFind& findQuery,
     const QueryUpdate& updateQuery,
     bool createIfNotFound,
-    std::stringstream* commentsOnFailure =
-    nullptr
+    std::stringstream* commentsOnFailure = nullptr
   );
   bool deleteAllByFindQuery(
     const QueryFindOneOf& findQuery,
     LargeInteger& outputTotalDeleted,
-    std::stringstream* commentsOnFailure =
-    nullptr
+    std::stringstream* commentsOnFailure = nullptr
   );
   bool fetchCollectionNames(
     List<std::string>& output, std::stringstream* commentsOnFailure
@@ -684,8 +681,7 @@ public:
     List<std::string>& outputLabels,
     List<List<std::string> >& outputRows,
     LargeInteger* totalItems = nullptr,
-    std::stringstream* commentsOnFailure =
-    nullptr
+    std::stringstream* commentsOnFailure = nullptr
   );
   bool deleteOneEntry(
     const JSData& entry, std::stringstream* commentsOnFailure
@@ -709,8 +705,8 @@ public:
   static void correctData(JSData& row);
   static void correctData(List<JSData>& toBeCorrected);
   static void correctDataFromLabels(
-    JSData& row, const List<std::string>&
-    labels);
+    JSData& row, const List<std::string>& labels
+  );
   static void correctDataFromLabels(JSData& row, const std::string& oneLabel);
   JSData toJSONDatabaseCollection(const std::string& currentTable);
   JSData toJSONAllCollections();
@@ -808,8 +804,7 @@ public:
   bool loadOneCollectionFromJSON(
     const std::string& collectionName,
     JSData& input,
-    std::stringstream&
-    comments
+    std::stringstream& comments
   );
   bool loadOneObject(
     DatabaseCollection& collection, JSData& input, std::stringstream& comments

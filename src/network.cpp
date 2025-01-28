@@ -29,8 +29,7 @@ void Connector::initialize(
 
 void Connector::initialize(
   const std::string& inputAddressToConnectTo,
-  const std::string&
-  inputPortOrService
+  const std::string& inputPortOrService
 ) {
   memset(&this->hints, 0, sizeof this->hints);
   this->hints.ai_family = AF_UNSPEC;
@@ -200,7 +199,8 @@ bool Connector::oneConnectionAttempt(
     }
     totalSelected =
     select(
-      this->socketInteger + 1, &fdConnectSockets, nullptr, nullptr, &timeOut);
+      this->socketInteger + 1, &fdConnectSockets, nullptr, nullptr, &timeOut
+    );
     failStream
     << "While pinging, select failed. Error message: "
     << strerror(errno)

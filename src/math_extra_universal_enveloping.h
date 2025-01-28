@@ -16,8 +16,7 @@ public:
   // appear in generatorsIndices
   friend std::ostream& operator<<(
     std::ostream& output,
-    const MonomialUniversalEnveloping<Coefficient>&
-    monomial
+    const MonomialUniversalEnveloping<Coefficient>& monomial
   ) {
     output << monomial.toString();
     return output;
@@ -41,7 +40,8 @@ public:
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
     if (
       generatorIndex < 0 ||
-      generatorIndex > inputOwner.getNumberOfGenerators()) {
+      generatorIndex > inputOwner.getNumberOfGenerators()
+    ) {
       global.fatal
       << "Attempt to assign impossible index to monomial UE. "
       << global.fatal;
@@ -58,15 +58,13 @@ public:
     const Vector<Coefficient>* substitutionHiGoesToIthElement,
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
-    std::stringstream* logStream =
-    nullptr
+    std::stringstream* logStream = nullptr
   );
   void modOutVermaRelations(
     Coefficient& outputCoeff,
     const Vector<Coefficient>* substitutionHiGoesToIthElement = 0,
     const Coefficient& ringUnit = 1,
-    const Coefficient& ringZero =
-    0
+    const Coefficient& ringZero = 0
   );
   void setNumberOfVariables(int newNumberOfVariables);
   void substitute(const PolynomialSubstitution<Rational>& substitution);
@@ -121,20 +119,17 @@ public:
   // the negative and positive rootss.
   void simplify(
     ElementUniversalEnveloping<Coefficient>& output,
-    const Coefficient& ringUnit =
-    1
+    const Coefficient& ringUnit = 1
   );
   void commuteABntoBnAPlusLowerOrder(
     int index,
     ElementUniversalEnveloping<Coefficient>& output,
-    const Coefficient& ringUnit =
-    1
+    const Coefficient& ringUnit = 1
   );
   void commuteAnBtoBAnPlusLowerOrder(
     int indexA,
     ElementUniversalEnveloping<Coefficient>& output,
-    const Coefficient& ringUnit =
-    1
+    const Coefficient& ringUnit = 1
   );
   MonomialUniversalEnveloping(): owner(nullptr) {}
   bool operator>(const MonomialUniversalEnveloping& other) const {
@@ -180,8 +175,7 @@ public:
     const Vector<Coefficient>* substitutionHiGoesToIthElement,
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
-    std::stringstream* logStream =
-    nullptr
+    std::stringstream* logStream = nullptr
   );
   std::string isInProperSubmodule(
     const Vector<Coefficient>* substitutionHiGoesToIthElement,
@@ -194,8 +188,7 @@ public:
     const Vector<Coefficient>* substitutionHiGoesToIthElement,
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
-    std::stringstream* logStream =
-    nullptr
+    std::stringstream* logStream = nullptr
   ) const;
   bool highestWeightTransposeAntiAutomorphismBilinearForm(
     const MonomialUniversalEnveloping<Coefficient>& right,
@@ -203,8 +196,7 @@ public:
     const Vector<Coefficient>* substitutionHiGoesToIthElement,
     const Coefficient& ringUnit,
     const Coefficient& ringZero,
-    std::stringstream* logStream =
-    nullptr
+    std::stringstream* logStream = nullptr
   ) const {
     ElementUniversalEnveloping<Coefficient> element;
     element.makeZero(*this->owner);
@@ -230,8 +222,7 @@ public:
   void assignElementLieAlgebra(
     const ElementSemisimpleLieAlgebra<Rational>& input,
     SemisimpleLieAlgebra& inputOwner,
-    const Coefficient& ringUnit =
-    1
+    const Coefficient& ringUnit = 1
   );
   void makeOneGenerator(
     int index, SemisimpleLieAlgebra& inputOwner, const Coefficient& ringUnit
@@ -239,8 +230,7 @@ public:
   void makeOneGeneratorCoefficientOne(
     int index,
     SemisimpleLieAlgebra& inputOwners,
-    const Coefficient& ringUnit =
-    1
+    const Coefficient& ringUnit = 1
   );
   void makeOneGeneratorCoefficientOne(
     int index, int numberOfVariables, SemisimpleLieAlgebra& inputOwner
@@ -248,8 +238,7 @@ public:
   void makeOneGeneratorCoefficientOne(
     const Vector<Rational>& rootSpace,
     SemisimpleLieAlgebra& inputOwner,
-    const Coefficient& ringUnit =
-    1
+    const Coefficient& ringUnit = 1
   ) {
     this->makeOneGeneratorCoefficientOne(
       inputOwner.getGeneratorIndexFromRoot(rootSpace), inputOwner, ringUnit

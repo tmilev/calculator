@@ -147,8 +147,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool
-    showGrid
+    bool showGrid
   );
   static bool plotImplicitFunction(
     Calculator& calculator, const Expression& input, Expression& output
@@ -272,33 +271,28 @@ private:
   bool extractJavascriptRecursive(
     const Expression& input,
     std::string& output,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
   bool extractFromAtom(const Expression& input, std::string& output);
   bool extractFromSequence(
     const Expression& input,
     std::string& output,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
   bool extractFromOperation(
     const Expression& input,
     std::string& output,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
   bool extractFromUnaryOrBinary(
     const Expression& input,
     std::string& output,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
   bool extractFromTernary(
     const Expression& input,
     std::string& output,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
 public:
   Calculator* owner;
@@ -320,8 +314,7 @@ public:
   bool extract(
     const Expression& input,
     std::string& output,
-    std::stringstream*
-    commentsOnFailure
+    std::stringstream* commentsOnFailure
   );
   void writeParameterNames(PlotObject& output);
   bool expressionToMatrixToPoints(const Expression& input, PlotObject& output);
@@ -705,8 +698,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool
-    turnOff
+    bool turnOff
   );
   static bool turnOffRules(
     Calculator& calculator, const Expression& input, Expression& output
@@ -1266,8 +1258,7 @@ public:
     ExpressionContext& context,
     Expression& output,
     bool startWithAlgebraicClosure,
-    List<int>* upperLimits =
-    nullptr
+    List<int>* upperLimits = nullptr
   );
   static bool solveSerreLikeSystemNoUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
@@ -1372,15 +1363,13 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool
-    assignPoly
+    bool assignPoly
   );
   static bool operationBinary(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int
-    operation
+    int operation
   );
   static bool interpolatePolynomial(
     Calculator& calculator, const Expression& input, Expression& output

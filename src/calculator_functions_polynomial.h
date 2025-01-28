@@ -111,15 +111,13 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool
-    doGCD
+    bool doGCD
   );
   static bool greatestCommonDivisorOrLeastCommonMultiplePolynomialRational(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool
-    doGCD
+    bool doGCD
   );
   static bool leastCommonMultiplePolynomial(
     Calculator& calculator, const Expression& input, Expression& output
@@ -143,15 +141,13 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool
-    doGCD
+    bool doGCD
   );
   static bool greatestCommonDivisorOrLeastCommonMultipleModular(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool
-    doGCD
+    bool doGCD
   );
   static bool groebnerGradedLexicographic(
     Calculator& calculator, const Expression& input, Expression& output
@@ -184,8 +180,7 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    int
-    order
+    int order
   );
   static bool divideExpressionsAsIfPolynomial(
     Calculator& calculator, const Expression& input, Expression& output

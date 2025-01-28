@@ -159,8 +159,7 @@ public:
   std::string toString() const;
   std::string toStringForArticles(
     const std::string& leftParenthesis = "[",
-    const std::string& rightParenthesis =
-    "]"
+    const std::string& rightParenthesis = "]"
   ) const;
   friend std::ostream& operator<<(std::ostream& out, const Partition& data) {
     return data.intoStream(out);
@@ -462,7 +461,8 @@ class DirectProductElement: SemidirectProductElement<
 
 template <
   typename hg, typename kg, typename HElement, typename KElement,
-  typename oa>
+  typename oa
+>
 class SemidirectProductGroup: public FiniteGroup<
   SemidirectProductElement<HElement, KElement, oa>
 > {
@@ -477,7 +477,8 @@ public:
 
 template <
   typename hg, typename kg, typename HElement, typename KElement,
-  typename oa>
+  typename oa
+>
 void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::initialize(
   hg* inH, kg* inK
 ) {
@@ -497,7 +498,8 @@ void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::initialize(
 
 template <
   typename hg, typename kg, typename HElement, typename KElement,
-  typename oa>
+  typename oa
+>
 void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::getWord(
   SemidirectProductElement<HElement, KElement, oa>& g, List<int>& out
 ) {
@@ -845,9 +847,7 @@ public:
         if (stack[frame_pointer].c % 2 != 0) {
           l.swapTwoIndices(
             l.size - 1 - stack[frame_pointer].loop_i,
-            l.size -
-            1 -
-            stack[frame_pointer].c
+            l.size - 1 - stack[frame_pointer].c
           );
         } else {
           l.swapTwoIndices(l.size - 1, l.size - 1 - stack[frame_pointer].c);

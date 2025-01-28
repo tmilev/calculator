@@ -199,8 +199,7 @@ public:
     void clear();
     void appendType(
       const CodeFormatter::Element& other,
-      CodeFormatter::Element::Type
-      inputType
+      CodeFormatter::Element::Type inputType
     );
     void appendExpression(const CodeFormatter::Element& other);
     void addChild(const CodeFormatter::Element& other);
@@ -249,8 +248,7 @@ public:
     void makeFrom2(
       CodeFormatter::Element::Type inputType,
       const Element& left,
-      const
-      Element& right
+      const Element& right
     );
     void makeFrom3(
       CodeFormatter::Element::Type inputType,
@@ -414,8 +412,7 @@ public:
   static bool formatCPPDirectory(
     const std::string& inputDirectory,
     bool inPlace,
-    std::stringstream*
-    comments
+    std::stringstream* comments
   );
   static bool formatCalculatorInPlace();
   bool formatCPPSourceCode(
@@ -430,8 +427,8 @@ private:
     const std::string& overridingOperator, const List<std::string>& overridden
   );
   bool shouldSeparateWithSpace(
-    const std::string& left, const std::string&
-    right);
+    const std::string& left, const std::string& right
+  );
   bool needsSpaceToTheRight(const std::string& word);
   bool isSeparatorCharacter(char input);
   bool isSeparator(const std::string& input);
@@ -479,8 +476,7 @@ private:
   );
   bool mustSplitWithWhitespace(
     const CodeFormatter::Element& leftAtom,
-    const CodeFormatter::Element&
-    rightAtom
+    const CodeFormatter::Element& rightAtom
   );
   void applyNewLineExceptions(
     CodeFormatter::Element& leftAtom, CodeFormatter::Element& rightAtom

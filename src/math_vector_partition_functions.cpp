@@ -423,8 +423,7 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScale(
   for (int i = 0; i < dimension; i ++) {
     substitution[i].makeMonomial(i, 1, 1);
     substitution[i].subtractMonomial(
-      MonomialPolynomial(dimension), direction[i] *
-      scale
+      MonomialPolynomial(dimension), direction[i] * scale
     );
     substitution[i] -= direction[i] * shift;
   }

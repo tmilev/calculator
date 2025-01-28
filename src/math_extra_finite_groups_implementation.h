@@ -429,7 +429,8 @@ computeCCRepresentativesPreimages() {
     bool notFound = true;
     for (
       int j = 0; notFound && j < this->groupContent->conjugacyClasses.size;
-      j ++) {
+      j ++
+    ) {
       elementSomeGroup& gcr =
       this->groupContent->conjugacyClasses[j].representative;
       if (this->groupContent->areConjugate(scr, gcr)) {
@@ -1325,8 +1326,7 @@ Vector<Coefficient> WeylGroupData::getFundamentalCoordinatesFromEpsilon(
 template <class Coefficient>
 Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
   const Vector<Coefficient>& inputInFundamentalCoordinates,
-  const Coefficient&
-  zero
+  const Coefficient& zero
 ) {
   Matrix<Rational>& transitionMatrix =
   *this->getMatrixfundamentalToSimpleCoordinates();
@@ -1339,8 +1339,7 @@ Vector<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
 template <class Coefficient>
 Vectors<Coefficient> WeylGroupData::getSimpleCoordinatesFromFundamental(
   const Vectors<Coefficient>& inputInFundamentalCoordinates,
-  const Coefficient&
-  zero
+  const Coefficient& zero
 ) {
   Matrix<Rational>& transitionMatrix =
   *this->getMatrixfundamentalToSimpleCoordinates();
@@ -2299,8 +2298,7 @@ freudenthalFormulaIrrepIsWRTLeviPart(
   hwPlusRhoSquared =
   this->ambientWeyl->rootScalarCartanRoot(
     highestWeightSimpleCoordinatesLeviPart + rho,
-    highestWeightSimpleCoordinatesLeviPart +
-    rho
+    highestWeightSimpleCoordinatesLeviPart + rho
   );
   Explored[0] = true;
   outputMultiplicitiesSimpleCoordinates[0] = 1;
@@ -2352,8 +2350,7 @@ freudenthalFormulaIrrepIsWRTLeviPart(
     bufferCoefficienticient -=
     this->ambientWeyl->rootScalarCartanRoot(
       outputDomWeightsSimpleCoordinatesLeviPart[k] + rho,
-      outputDomWeightsSimpleCoordinatesLeviPart[k] +
-      rho
+      outputDomWeightsSimpleCoordinatesLeviPart[k] + rho
     );
     // bufferCoefficient now holds the denominator participating in the
     // Freudenthal
@@ -2749,8 +2746,7 @@ template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 spreadVector(
   const Vector<Coefficient>& input,
-  Vectors<Coefficient>&
-  outputBasisGeneratedSpace
+  Vectors<Coefficient>& outputBasisGeneratedSpace
 ) {
   this->checkInitialization();
   outputBasisGeneratedSpace.setSize(1);

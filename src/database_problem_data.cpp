@@ -99,15 +99,17 @@ std::string ProblemData::toString() const {
   }
   out << ". <br>";
   for (int i = 0; i < this->answers.size(); i ++) {
-    Answer& currentA = this->answers.values[i];
-    out << "AnswerId: " << currentA.answerId;
-    out << ", numCorrectSubmissions: " << currentA.numberOfCorrectSubmissions;
-    out << ", numSubmissions: " << currentA.numberOfSubmissions;
+    Answer& currentAnswer = this->answers.values[i];
+    out << "AnswerId: " << currentAnswer.answerId;
+    out
+    << ", numCorrectSubmissions: "
+    << currentAnswer.numberOfCorrectSubmissions;
+    out << ", numSubmissions: " << currentAnswer.numberOfSubmissions;
     out << ", firstCorrectAnswer: ";
-    if (currentA.firstCorrectAnswerClean == "") {
+    if (currentAnswer.firstCorrectAnswerClean == "") {
       out << "[none yet], ";
     } else {
-      out << "[" << currentA.firstCorrectAnswerClean << "], ";
+      out << "[" << currentAnswer.firstCorrectAnswerClean << "], ";
     }
     out << "<br>";
   }
@@ -156,17 +158,19 @@ JSData ProblemData::storeJSON() const {
     result[WebAPI::Problem::randomSeed] = stringConverter.str();
   }
   for (int i = 0; i < this->answers.size(); i ++) {
-    Answer& currentA = this->answers.values[i];
+    Answer& currentAnswer = this->answers.values[i];
     JSData currentAnswerJSON;
     currentAnswerJSON["numCorrectSubmissions"] =
-    std::to_string(currentA.numberOfCorrectSubmissions);
+    std::to_string(currentAnswer.numberOfCorrectSubmissions);
     currentAnswerJSON["numSubmissions"] =
-    std::to_string(currentA.numberOfSubmissions);
+    std::to_string(currentAnswer.numberOfSubmissions);
     currentAnswerJSON["firstCorrectAnswer"] =
     HtmlRoutines::convertStringToURLString(
-      currentA.firstCorrectAnswerClean, false
+      currentAnswer.firstCorrectAnswerClean, false
     );
-    result[HtmlRoutines::convertStringToURLString(currentA.answerId, false)] =
+    result[
+      HtmlRoutines::convertStringToURLString(currentAnswer.answerId, false)
+    ] =
     currentAnswerJSON;
   }
   return result;
@@ -211,7 +215,7 @@ bool ProblemData::loadFromOldFormatDeprecated(
     Answer answer;
     answer.answerId = mapStrings.keys[i];
     this->answers.setKeyValue(answer.answerId, answer);
-    Answer& currentA = *this->answers.values.lastObject();
+    Answer& currentAnswer = *this->answers.values.lastObject();
     std::string currentQuestion =
     HtmlRoutines::convertURLStringToNormal(mapStrings.values[i], false);
     result =
@@ -226,25 +230,25 @@ bool ProblemData::loadFromOldFormatDeprecated(
       continue;
     }
     if (currentQuestionMap.contains("numCorrectSubmissions")) {
-      currentA.numberOfCorrectSubmissions =
+      currentAnswer.numberOfCorrectSubmissions =
       atoi(
         currentQuestionMap.getValueCreateEmpty("numCorrectSubmissions").c_str()
       );
     }
     if (currentQuestionMap.contains("numSubmissions")) {
-      currentA.numberOfSubmissions =
+      currentAnswer.numberOfSubmissions =
       atoi(currentQuestionMap.getValueCreateEmpty("numSubmissions").c_str());
     }
     if (currentQuestionMap.contains("firstCorrectAnswer")) {
-      currentA.firstCorrectAnswerURLed =
+      currentAnswer.firstCorrectAnswerURLed =
       currentQuestionMap.getValueCreateEmpty("firstCorrectAnswer");
-      currentA.firstCorrectAnswerClean =
+      currentAnswer.firstCorrectAnswerClean =
       HtmlRoutines::convertURLStringToNormal(
-        currentA.firstCorrectAnswerURLed, false
+        currentAnswer.firstCorrectAnswerURLed, false
       );
-      currentA.firstCorrectAnswerURLed =
+      currentAnswer.firstCorrectAnswerURLed =
       HtmlRoutines::convertStringToURLString(
-        currentA.firstCorrectAnswerClean, false
+        currentAnswer.firstCorrectAnswerClean, false
       );
       // url-encoding back the cleaned up answer:
       // this protects from the possibility that

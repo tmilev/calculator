@@ -5132,7 +5132,7 @@ PrintSemisimpleLieAlgebra{}(2 G^5_2 + B_3);
 ```
 Creates a printout with information about the semisimple Lie algebra, including the Lie bracket pairing table. In addition, this function creates a graphics of the root system. 
 
-*PrecomputeSemisimpleLieAlgebraStructure* [PrecomputeSemisimpleLieAlgebraStructure] {CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure}. (admin only) 
+*PrecomputeSemisimpleLieAlgebraStructure* [PrecomputeSemisimpleLieAlgebraStructure] {CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrecomputeSemisimpleLieAlgebraStructure%200%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PrecomputeSemisimpleLieAlgebraStructure 0
@@ -5599,7 +5599,7 @@ CanBeExtendedParabolicallyTo(A^3_1, A_5);CanBeExtendedParabolicallyTo(a_2, b_3);
 ```
 Finds whether a Dynkin type extends via the standard parabolic extension to another. 
 
-*EmbedSemisimpleInSemisimple* [EmbedSemisimpleInSemisimple] {CalculatorFunctions::embedSemisimpleAlgebraInSemisimpleAlgebra}. 
+*EmbedSemisimpleInSemisimple* [EmbedSemisimpleInSemisimple] {CalculatorLieTheory::embedSemisimpleAlgebraInSemisimpleAlgebra}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22EmbedSemisimpleInSemisimple%7b%7d%28G%5e3_2%2c%20B_3%29%3bEmbedSemisimpleInSemisimple%7b%7d%28G_2%2c%20B_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 EmbedSemisimpleInSemisimple{}(G^3_2, B_3);EmbedSemisimpleInSemisimple{}(G_2, B_3)

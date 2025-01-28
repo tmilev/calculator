@@ -43,6 +43,25 @@ HashedList<std::string, HashFunctions::hashFunction> CalculatorHTML::Parser::
 calculatorClassesAnswerFields;
 int SyntacticElementHTML::parsingDummyElements = 8;
 int TopicElement::scoreButtonCounter = 0;
+std::string CalculatorHTML::answerLabels::properties = "properties";
+std::string CalculatorHTML::answerLabels::idPanel = "answerPanelId";
+std::string CalculatorHTML::answerLabels::answerHighlight = "answerHighlight";
+std::string CalculatorHTML::answerLabels::idEquationEditorElement =
+"idEquationEditorElement";
+std::string CalculatorHTML::answerLabels::idButtonContainer =
+"idButtonContainer";
+std::string CalculatorHTML::answerLabels::mathQuillPanelOptions =
+"mathQuillPanelOptions";
+std::string CalculatorHTML::answerLabels::idPureLatex = "idPureLatex";
+std::string CalculatorHTML::answerLabels::idButtonSubmit = "idButtonSubmit";
+std::string CalculatorHTML::answerLabels::idButtonInterpret =
+"idButtonInterpret";
+std::string CalculatorHTML::answerLabels::idButtonAnswer = "idButtonAnswer";
+std::string CalculatorHTML::answerLabels::idButtonSolution =
+"idButtonSolution";
+std::string CalculatorHTML::answerLabels::idVerificationSpan =
+"idVerificationSpan";
+std::string CalculatorHTML::answerLabels::previousAnswers = "previousAnswers";
 
 CalculatorHTML::CalculatorHTML() {
   this->numberOfInterpretationAttempts = 0;
@@ -339,10 +358,10 @@ bool CalculatorHTML::mergeOneProblemAdminData(
   incomingDeadlines =
   inputProblemInfo.adminData.deadlinesPerSection;
   MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
-  currentWeightS =
+  currentWeights =
   currentProblem.problemWeightsPerCourse;
   MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
-  incomingWeightS =
+  incomingWeights =
   inputProblemInfo.adminData.problemWeightsPerCourse;
   for (int i = 0; i < incomingDeadlines.size(); i ++) {
     if (this->databaseStudentSections.size >= 1000) {
@@ -360,9 +379,9 @@ bool CalculatorHTML::mergeOneProblemAdminData(
       incomingDeadlines.keys[i], incomingDeadlines.values[i]
     );
   }
-  for (int i = 0; i < incomingWeightS.size(); i ++) {
-    currentWeightS.setKeyValue(
-      incomingWeightS.keys[i], incomingWeightS.values[i]
+  for (int i = 0; i < incomingWeights.size(); i ++) {
+    currentWeights.setKeyValue(
+      incomingWeights.keys[i], incomingWeights.values[i]
     );
   }
   return true;
@@ -774,8 +793,9 @@ std::string CalculatorHTML::toStringLinkFromFileName(
   const std::string& fileName
 ) {
   STACK_TRACE("CalculatorHTML::toStringLinkFromFileName");
-  std::stringstream out, refStreamNoRequest, refStreamExercise,
-  refStreamForReal;
+  std::stringstream out;
+  std::stringstream refStreamNoRequest;
+  std::stringstream refStreamExercise, refStreamForReal;
   std::string urledProblem =
   HtmlRoutines::convertStringToURLString(fileName, false);
   refStreamNoRequest
@@ -1327,7 +1347,8 @@ bool CalculatorHTML::prepareCommandsGenerateProblem(
 ) {
   STACK_TRACE("CalculatorHTML::prepareCommandsGenerateProblem");
   (void) comments;
-  std::stringstream streamCommands, streamCommandsNoEnclosures;
+  std::stringstream streamCommands;
+  std::stringstream streamCommandsNoEnclosures;
   streamCommandsNoEnclosures << this->getProblemHeaderWithoutEnclosure();
   streamCommands << this->getProblemHeaderEnclosure();
   // <-The first calculator enclosure contains the header.
@@ -2090,14 +2111,14 @@ std::string CalculatorHTML::toStringDeadline(
   if (global.userGuestMode()) {
     return "deadlines require login";
   } else if (global.userDefaultHasAdminRights() && global.userStudentVieWOn()) {
-    std::string sectionNum =
+    std::string sectionNumber =
     HtmlRoutines::convertURLStringToNormal(
       global.getWebInput("studentSection"), false
     );
     return
     this->toStringOneDeadlineFormatted(
       topicID,
-      sectionNum,
+      sectionNumber,
       problemAlreadySolved,
       returnEmptyStringIfNoDeadline,
       isSection
@@ -3679,26 +3700,6 @@ bool CalculatorHtmlFunctions::extractCalculatorExpressionFromHtml(
   return
   output.assignValue(calculator, interpreter.toStringExtractedCommands());
 }
-
-std::string CalculatorHTML::answerLabels::properties = "properties";
-std::string CalculatorHTML::answerLabels::idPanel = "answerPanelId";
-std::string CalculatorHTML::answerLabels::answerHighlight = "answerHighlight";
-std::string CalculatorHTML::answerLabels::idEquationEditorElement =
-"idEquationEditorElement";
-std::string CalculatorHTML::answerLabels::idButtonContainer =
-"idButtonContainer";
-std::string CalculatorHTML::answerLabels::mathQuillPanelOptions =
-"mathQuillPanelOptions";
-std::string CalculatorHTML::answerLabels::idPureLatex = "idPureLatex";
-std::string CalculatorHTML::answerLabels::idButtonSubmit = "idButtonSubmit";
-std::string CalculatorHTML::answerLabels::idButtonInterpret =
-"idButtonInterpret";
-std::string CalculatorHTML::answerLabels::idButtonAnswer = "idButtonAnswer";
-std::string CalculatorHTML::answerLabels::idButtonSolution =
-"idButtonSolution";
-std::string CalculatorHTML::answerLabels::idVerificationSpan =
-"idVerificationSpan";
-std::string CalculatorHTML::answerLabels::previousAnswers = "previousAnswers";
 
 JSData CalculatorHTML::getEditorBoxesHTML() {
   STACK_TRACE("CalculatorHTML::getEditorBoxesHTML");

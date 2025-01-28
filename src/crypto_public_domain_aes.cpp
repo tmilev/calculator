@@ -723,7 +723,9 @@ uint8_t AESContext::getSBoxInvert(uint8_t num) {
 // This function produces Nb(Nr+1) round keys. The round keys are used in each
 // round to decrypt the states.
 void AESContext::keyExpansion(uint8_t* RoundKey, const uint8_t* Key) {
-  unsigned i, j, k;
+  unsigned i;
+  unsigned j;
+  unsigned k;
   uint8_t tempa[4];
   // Used for the column/row operations
   // The first round key is the key itself.
@@ -792,7 +794,8 @@ void AESContext::setInitializationVector(const uint8_t* iv) {
 // The round key is added to the state by an XOR function.
 void AESContext::addRoundKey(uint8_t round, state_t* state, uint8_t* RoundKey)
 {
-  uint8_t i, j;
+  uint8_t i;
+  uint8_t j;
   for (i = 0; i < 4; ++ i) {
     for (j = 0; j < 4; ++ j) {
       (*state)[i][j] ^= RoundKey[(round * Nb * 4) + (i* Nb) + j];
@@ -803,7 +806,8 @@ void AESContext::addRoundKey(uint8_t round, state_t* state, uint8_t* RoundKey)
 // The substituteBytes Function Substitutes the values in the
 // state matrix with values in an S-box.
 void AESContext::substituteBytes(state_t* state) {
-  uint8_t i, j;
+  uint8_t i;
+  uint8_t j;
   for (i = 0; i < 4; ++ i) {
     for (j = 0; j < 4; ++ j) {
       (*state)[j][i] = getSBoxValue((*state)[j][i]);
@@ -840,7 +844,9 @@ void AESContext::shiftRows(state_t* state) {
 // mixColumns function mixes the columns of the state matrix
 void AESContext::mixColumns(state_t* state) {
   uint8_t i;
-  uint8_t Tmp, Tm, t;
+  uint8_t Tmp;
+  uint8_t Tm;
+  uint8_t t;
   for (i = 0; i < 4; ++ i) {
     t = (*state)[i][0];
     Tmp = (*state)[i][0] ^ (*state)[i][1] ^ (*state)[i][2] ^ (*state)[i][3];
@@ -865,7 +871,10 @@ void AESContext::mixColumns(state_t* state) {
 // Please use the references to gain more information.
 void AESContext::invMixColumns(state_t* state) {
   int i;
-  uint8_t a, b, c, d;
+  uint8_t a;
+  uint8_t b;
+  uint8_t c;
+  uint8_t d;
   for (i = 0; i < 4; ++ i) {
     a = (*state)[i][0];
     b = (*state)[i][1];
@@ -889,7 +898,8 @@ void AESContext::invMixColumns(state_t* state) {
 // The substituteBytes Function Substitutes the values in the
 // state matrix with values in an S-box.
 void AESContext::invSubstitutionBytes(state_t* state) {
-  uint8_t i, j;
+  uint8_t i;
+  uint8_t j;
   for (i = 0; i < 4; ++ i) {
     for (j = 0; j < 4; ++ j) {
       (*state)[j][i] = getSBoxInvert((*state)[j][i]);

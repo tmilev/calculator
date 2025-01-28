@@ -236,11 +236,20 @@ void RIPEMD160Internal::byteswapDigest(uint32_t* p) {
 
 /* The RIPEMD160 compression function.  Operates on self->buf */
 void RIPEMD160Internal::ripemd160Compress(Ripemd160State* self) {
-  uint8_t w, round;
+  uint8_t w;
+  uint8_t round;
   uint32_t T;
-  uint32_t AL, BL, CL, DL, EL;
+  uint32_t AL;
+  uint32_t BL;
+  uint32_t CL;
+  uint32_t DL;
+  uint32_t EL;
   /* left line */
-  uint32_t AR, BR, CR, DR, ER;
+  uint32_t AR;
+  uint32_t BR;
+  uint32_t CR;
+  uint32_t DR;
+  uint32_t ER;
   /* right line */
   /* Sanity check */
   if (self->bufpos != 64) {

@@ -65,7 +65,8 @@ void Crypto::Random::getRandomBytesSecureInternalMayLeaveTracesInMemory(
 
 bool Crypto::haveEqualHashes(const std::string& left, const std::string& right)
 {
-  List<uint32_t> leftSHA, rightSHA;
+  List<uint32_t> leftSHA;
+  List<uint32_t> rightSHA;
   Crypto::computeSha256(left, leftSHA);
   Crypto::computeSha256(right, rightSHA);
   return leftSHA == rightSHA;
@@ -1935,7 +1936,8 @@ std::string Crypto::computeSha256(const std::string& input) {
 }
 
 void Crypto::computeSha256(const std::string& input, std::string& output) {
-  List<unsigned char> inputList, outputList;
+  List<unsigned char> inputList;
+  List<unsigned char> outputList;
   inputList = input;
   computeSha256(inputList, outputList);
   output.assign(
@@ -2019,9 +2021,20 @@ void Crypto::computeSha2xx(
   }
   List<uint32_t> currentChunk;
   currentChunk.setSize(64);
-  uint32_t a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0, maj = 0,
-  temp1 = 0, temp2 = 0;
-  uint32_t s0 = 0, s1 = 0, ch = 0;
+  uint32_t a = 0;
+  uint32_t b = 0;
+  uint32_t c = 0;
+  uint32_t d = 0;
+  uint32_t e = 0;
+  uint32_t f = 0;
+  uint32_t g = 0;
+  uint32_t h = 0;
+  uint32_t maj = 0;
+  uint32_t temp1 = 0;
+  uint32_t temp2 = 0;
+  uint32_t s0 = 0;
+  uint32_t s1 = 0;
+  uint32_t ch = 0;
   List<uint32_t>& kArray = Crypto::kArraySha2xx;
   for (
     int chunkCounter = 0; chunkCounter < inputStringUint32.size; chunkCounter
@@ -2153,9 +2166,22 @@ void Crypto::computeSha512(
   int numberOfRounds = 80;
   List<uint64_t> currentChunk;
   currentChunk.setSize(numberOfRounds);
-  uint64_t a = 0, b = 0, c = 0, d = 0, e = 0, f = 0, g = 0, h = 0, maj = 0,
-  temp1 = 0, temp2 = 0;
-  uint64_t s0 = 0, s1 = 0, S0 = 0, S1 = 0, ch = 0;
+  uint64_t a = 0;
+  uint64_t b = 0;
+  uint64_t c = 0;
+  uint64_t d = 0;
+  uint64_t e = 0;
+  uint64_t f = 0;
+  uint64_t g = 0;
+  uint64_t h = 0;
+  uint64_t maj = 0;
+  uint64_t temp1 = 0;
+  uint64_t temp2 = 0;
+  uint64_t s0 = 0;
+  uint64_t s1 = 0;
+  uint64_t S0 = 0;
+  uint64_t S1 = 0;
+  uint64_t ch = 0;
   List<uint64_t>& kArray = Crypto::kArraySha512;
   for (
     int chunkCounter = 0; chunkCounter < inputStringUint64.size; chunkCounter
@@ -2424,7 +2450,8 @@ LargeIntegerUnsigned Crypto::rsaEncrypt(
     << exponent.toString()
     << global.fatal;
   }
-  ElementZmodP element, one;
+  ElementZmodP element;
+  ElementZmodP one;
   element.modulus = modulus;
   one.value = 1;
   one.modulus = modulus;
@@ -2494,7 +2521,8 @@ bool JSONWebToken::verifyRSA256(
   //   *commentsGeneral << "<br>RSA encryption took: "
   //   << global.getElapsedSeconds() - timeStart << " second(s).<br>";
   // }
-  std::string rsaResultBitstream, rsaResultLast32bytes;
+  std::string rsaResultBitstream;
+  std::string rsaResultLast32bytes;
   Crypto::convertLargeUnsignedToStringSignificantDigitsFirst(
     rsaResult, 0, rsaResultBitstream
   );
@@ -2511,7 +2539,10 @@ bool JSONWebToken::verifyRSA256(
     result = (rsaResultIntegers == outputSha);
   }
   if ((!result && commentsOnFailure != nullptr) || commentsGeneral != nullptr) {
-    std::string RSAresultTrimmedHex, shaHex, RSAresultHex, RSAresultBase64;
+    std::string RSAresultTrimmedHex;
+    std::string shaHex;
+    std::string RSAresultHex;
+    std::string RSAresultBase64;
     LargeIntegerUnsigned shaUnsignedInteger;
     Crypto::convertListUint32ToLargeIntegerUnsignedLittleEndian(
       outputSha, shaUnsignedInteger

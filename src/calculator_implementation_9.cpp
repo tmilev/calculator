@@ -78,22 +78,22 @@ systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(
     changeGradient.makeZero();
     for (int i = 0; i < workingMatrix.numberOfColumns; i ++) {
       if (!baseVariables.selected[i]) {
-        Rational PotentialChangeGradient;
+        Rational potentialChangeGradient;
         bool hasAPotentialLeavingVariable;
         Matrix<Rational>::computePotentialChangeGradient(
           workingMatrix,
           baseVariables,
           numberOfTrueVariables,
           i,
-          PotentialChangeGradient,
+          potentialChangeGradient,
           hasAPotentialLeavingVariable
         );
         if (
-          PotentialChangeGradient.isGreaterThanOrEqualTo(changeGradient) &&
+          potentialChangeGradient.isGreaterThanOrEqualTo(changeGradient) &&
           hasAPotentialLeavingVariable
         ) {
           enteringVariable = i;
-          changeGradient.assign(PotentialChangeGradient);
+          changeGradient.assign(potentialChangeGradient);
         }
       }
     }
@@ -299,12 +299,12 @@ bool CalculatorFunctions::conesIntersect(
     << " instead. ";
   }
   Matrix<Rational> coneNonStrictMatForm;
-  Matrix<Rational> coneStrictMatForm;
-  Vectors<Rational> coneNonStrictGens;
+  Matrix<Rational> coneStrictMatrixForm;
+  Vectors<Rational> coneNonStrictGenerators;
   Vectors<Rational> coneStrictGens;
   if (
     !CalculatorConversions::functionGetMatrixNoComputation(
-      calculator, input[1], coneStrictMatForm
+      calculator, input[1], coneStrictMatrixForm
     )
   ) {
     return
@@ -323,50 +323,52 @@ bool CalculatorFunctions::conesIntersect(
     << input[2].toString();
   }
   std::stringstream out;
-  if (coneNonStrictMatForm.numberOfColumns != coneStrictMatForm.numberOfColumns)
-  {
+  if (
+    coneNonStrictMatForm.numberOfColumns !=
+    coneStrictMatrixForm.numberOfColumns
+  ) {
     out
     << "I got as input vectors of different dimensions, "
     << "first groups had vectors of dimension "
     << coneNonStrictMatForm.numberOfColumns
     << " and second of dimension "
-    << coneStrictMatForm.numberOfColumns
+    << coneStrictMatrixForm.numberOfColumns
     << " which is not allowed. ";
     return output.assignError(calculator, out.str());
   }
-  coneNonStrictMatForm.getVectorsFromRows(coneNonStrictGens);
-  coneStrictMatForm.getVectorsFromRows(coneStrictGens);
+  coneNonStrictMatForm.getVectorsFromRows(coneNonStrictGenerators);
+  coneStrictMatrixForm.getVectorsFromRows(coneStrictGens);
   out << "<br>Input non-strict (i.e., over Z_{&gt;= 0}) cone: ";
   for (int i = 0; i < coneStrictGens.size; i ++) {
     out << "<br>v_{" << i + 1 << "}=" << coneStrictGens[i].toString() << ";";
   }
   out << "<br>Input strict (i.e., over Z_{&gt;0}) cone: ";
-  for (int i = 0; i < coneNonStrictGens.size; i ++) {
+  for (int i = 0; i < coneNonStrictGenerators.size; i ++) {
     out
     << "<br>v_{"
     << coneStrictGens.size + i + 1
     << "}="
-    << coneNonStrictGens[i].toString()
+    << coneNonStrictGenerators[i].toString()
     << ";";
   }
   Vector<Rational> outputIntersection;
   Vector<Rational> outputSeparatingNormal;
   bool conesDoIntersect =
-  coneNonStrictGens.conesIntersect(
+  coneNonStrictGenerators.conesIntersect(
     coneStrictGens,
-    coneNonStrictGens,
+    coneNonStrictGenerators,
     &outputIntersection,
     &outputSeparatingNormal
   );
   if (conesDoIntersect) {
     Vector<Rational> checkVector;
-    checkVector.makeZero(coneStrictMatForm.numberOfColumns);
+    checkVector.makeZero(coneStrictMatrixForm.numberOfColumns);
     for (int i = 0; i < coneStrictGens.size; i ++) {
       checkVector += coneStrictGens[i] * outputIntersection[i];
     }
-    for (int i = 0; i < coneNonStrictGens.size; i ++) {
+    for (int i = 0; i < coneNonStrictGenerators.size; i ++) {
       checkVector +=
-      coneNonStrictGens[i] * outputIntersection[coneStrictGens.size + i];
+      coneNonStrictGenerators[i] * outputIntersection[coneStrictGens.size + i];
     }
     if (!checkVector.isEqualToZero()) {
       global.fatal
@@ -394,13 +396,13 @@ bool CalculatorFunctions::conesIntersect(
       << "}, n\\rangle = "
       << outputSeparatingNormal.scalarEuclidean(coneStrictGens[i]).toString();
     }
-    for (int i = 0; i < coneNonStrictGens.size; i ++) {
+    for (int i = 0; i < coneNonStrictGenerators.size; i ++) {
       out
       << "<br>\\langle v_{"
       << i + 1 + coneStrictGens.size
       << "}, n\\rangle = "
-      << outputSeparatingNormal.scalarEuclidean(coneNonStrictGens[i]).toString(
-      );
+      << outputSeparatingNormal.scalarEuclidean(coneNonStrictGenerators[i]).
+      toString();
     }
   }
   return output.assignValue(calculator, out.str());

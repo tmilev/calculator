@@ -764,7 +764,9 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   if (!functionNoCoefficient[2].isEqualToHalf()) {
     return false;
   }
-  Expression a, b, c;
+  Expression a;
+  Expression b;
+  Expression c;
   if (
     !CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(
       functionNoCoefficient[1], variableExpression, a, b, c
@@ -1952,12 +1954,12 @@ bool CalculatorFunctionsPlot::plotMarkSegment(
   orthogonalVector.makeXOX(
     calculator, calculator.opSequence(), vectorY *(- 1), vectorX
   );
-  Expression leftPt = midPoint - orthogonalVector / 25;
-  Expression rightPt = midPoint + orthogonalVector / 25;
+  Expression leftPoint = midPoint - orthogonalVector / 25;
+  Expression rightPoint = midPoint + orthogonalVector / 25;
   output.reset(calculator);
   output.addChildAtomOnTop("PlotSegment");
-  output.addChildOnTop(leftPt);
-  output.addChildOnTop(rightPt);
+  output.addChildOnTop(leftPoint);
+  output.addChildOnTop(rightPoint);
   for (int i = 4; i < input.size(); i ++) {
     output.addChildOnTop(input[i]);
   }
@@ -1973,18 +1975,18 @@ bool CalculatorFunctionsPlot::plotSegment(
   }
   const Expression& leftExpression = input[1];
   const Expression& rightExpression = input[2];
-  Vector<double> leftV;
-  Vector<double> rightV;
+  Vector<double> leftVector;
+  Vector<double> rightVector;
   if (
-    !calculator.getVectorDoubles(leftExpression, leftV) ||
-    !calculator.getVectorDoubles(rightExpression, rightV)
+    !calculator.getVectorDoubles(leftExpression, leftVector) ||
+    !calculator.getVectorDoubles(rightExpression, rightVector)
   ) {
     return false;
   }
-  if (leftV.size != rightV.size) {
+  if (leftVector.size != rightVector.size) {
     return false;
   }
-  if (leftV.size != 2 && leftV.size != 3) {
+  if (leftVector.size != 2 && leftVector.size != 3) {
     return false;
   }
   PlotObject segment;
@@ -1993,9 +1995,9 @@ bool CalculatorFunctionsPlot::plotSegment(
     segment.colorRedGreenBlue = static_cast<int>(
       HtmlRoutines::redGreenBlue(0, 0, 0)
     );
-    const Expression& colorE = input[3];
-    if (!colorE.isOfType<std::string>(&segment.colorJavascript)) {
-      segment.colorJavascript = colorE.toString();
+    const Expression& colorExpression = input[3];
+    if (!colorExpression.isOfType<std::string>(&segment.colorJavascript)) {
+      segment.colorJavascript = colorExpression.toString();
     }
     if (
       !DrawingVariables::getColorIntFromColorString(
@@ -2006,11 +2008,11 @@ bool CalculatorFunctionsPlot::plotSegment(
     }
   }
   if (input.size() >= 5) {
-    const Expression& lineWidthE = input[4];
-    if (!lineWidthE.evaluatesToDouble(&segment.lineWidth)) {
+    const Expression& lineWidthExpression = input[4];
+    if (!lineWidthExpression.evaluatesToDouble(&segment.lineWidth)) {
       calculator
       << "Failed to extract line width from: "
-      << lineWidthE.toString();
+      << lineWidthExpression.toString();
     }
     std::stringstream lineWidthStream;
     lineWidthStream.precision(4);
@@ -2018,13 +2020,13 @@ bool CalculatorFunctionsPlot::plotSegment(
     segment.lineWidthJS = lineWidthStream.str();
   }
   segment.plotType = "segment";
-  if (leftV.size == 3) {
+  if (leftVector.size == 3) {
     segment.dimension = 3;
   } else {
     segment.dimension = 2;
   }
-  segment.pointsDouble.addOnTop(leftV);
-  segment.pointsDouble.addOnTop(rightV);
+  segment.pointsDouble.addOnTop(leftVector);
+  segment.pointsDouble.addOnTop(rightVector);
   if (input.size() >= 5) {
     if (!input[4].evaluatesToDouble(&segment.lineWidth)) {
       segment.lineWidth = 1;

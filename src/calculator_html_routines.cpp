@@ -63,16 +63,16 @@ bool CalculatorHtmlFunctions::evaluateSymbols(
   }
   List<SyntacticElement> elements;
   calculator.parser.parseFillDictionary(argumentString, elements);
-  Expression evaluatedE;
+  Expression evaluatedExpression;
   std::stringstream out;
   bool previousWasInteger = false;
   for (int i = 0; i < elements.size; i ++) {
     SyntacticElement& currentElement = elements[i];
     if (currentElement.controlIndex == calculator.parser.conVariable()) {
       calculator.evaluateExpression(
-        calculator, currentElement.data, evaluatedE
+        calculator, currentElement.data, evaluatedExpression
       );
-      out << evaluatedE.toString();
+      out << evaluatedExpression.toString();
       continue;
     }
     if (currentElement.controlIndex == calculator.parser.conInteger()) {

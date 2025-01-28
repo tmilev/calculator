@@ -5644,15 +5644,15 @@ bool CalculatorLieTheory::getSymmetricCartan(
     << " to DynkinType.";
   }
   std::stringstream out;
-  Matrix<Rational> outputMat;
-  Matrix<Rational> outputCoMat;
-  dynkinType.getCartanSymmetric(outputMat);
-  dynkinType.getCoCartanSymmetric(outputCoMat);
+  Matrix<Rational> outputMatrix;
+  Matrix<Rational> outputCoMatrix;
+  dynkinType.getCartanSymmetric(outputMatrix);
+  dynkinType.getCoCartanSymmetric(outputCoMatrix);
   out
   << "Symmetric Cartan matrix: "
-  << HtmlRoutines::getMathNoDisplay(outputMat.toStringLatex())
+  << HtmlRoutines::getMathNoDisplay(outputMatrix.toStringLatex())
   << "<br>Co-symmetric Cartan matrix: "
-  << HtmlRoutines::getMathNoDisplay(outputCoMat.toStringLatex());
+  << HtmlRoutines::getMathNoDisplay(outputCoMatrix.toStringLatex());
   return output.assignValue(calculator, out.str());
 }
 
@@ -5901,7 +5901,8 @@ bool CalculatorLieTheory::getLinksToSimpleLieAlgebras(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   (void) input;
-  std::stringstream outFromHD, outRecomputeLinks;
+  std::stringstream outFromHD;
+  std::stringstream outRecomputeLinks;
   outFromHD
   << "\n\n<p>\n\n<table>"
   << "<tr><td>Structure constants</td>"

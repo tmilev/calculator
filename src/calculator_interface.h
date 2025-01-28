@@ -197,7 +197,7 @@ public:
   bool isCalculatorStatusChanger() const;
   bool isCalculatorBuiltInStatusChanger() const;
   bool isList() const;
-  bool isListNElements(int N = - 1) const;
+  bool isListNElements(int n = - 1) const;
   bool startsWithBuiltInAtom() const;
   bool startsWithFunctionWithComplexRange() const;
   bool startsWithArithmeticOperation() const;

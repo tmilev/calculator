@@ -667,7 +667,7 @@ bool CalculatorParser::replaceOXEXEXEXByE() {
     ).size -
     8
   ];
-  SyntacticElement& leftE = (*this->currentSyntacticStack)[(
+  SyntacticElement& leftExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     6
@@ -677,7 +677,7 @@ bool CalculatorParser::replaceOXEXEXEXByE() {
     ).size -
     4
   ];
-  SyntacticElement& rightE = (*this->currentSyntacticStack)[(
+  SyntacticElement& rightExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     2
@@ -687,9 +687,9 @@ bool CalculatorParser::replaceOXEXEXEXByE() {
   newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpression.addChildOnTop(leftE.data);
+  newExpression.addChildOnTop(leftExpression.data);
   newExpression.addChildOnTop(middleE.data);
-  newExpression.addChildOnTop(rightE.data);
+  newExpression.addChildOnTop(rightExpression.data);
   opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   return this->decreaseStackSetCharacterRanges(7);
@@ -764,12 +764,12 @@ bool CalculatorParser::replaceOXEXEByE() {
     ).size -
     5
   ];
-  SyntacticElement& leftE = (*this->currentSyntacticStack)[(
+  SyntacticElement& leftExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     3
   ];
-  SyntacticElement& rightE = (*this->currentSyntacticStack)[(
+  SyntacticElement& rightExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     1
@@ -779,8 +779,8 @@ bool CalculatorParser::replaceOXEXEByE() {
   newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpression.addChildOnTop(leftE.data);
-  newExpression.addChildOnTop(rightE.data);
+  newExpression.addChildOnTop(leftExpression.data);
+  newExpression.addChildOnTop(rightExpression.data);
   opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   return this->decreaseStackSetCharacterRanges(4);
@@ -792,12 +792,12 @@ bool CalculatorParser::replaceOXEXEXByEX() {
     ).size -
     6
   ];
-  SyntacticElement& leftE = (*this->currentSyntacticStack)[(
+  SyntacticElement& leftExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     4
   ];
-  SyntacticElement& rightE = (*this->currentSyntacticStack)[(
+  SyntacticElement& rightExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     2
@@ -807,8 +807,8 @@ bool CalculatorParser::replaceOXEXEXByEX() {
   newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpression.addChildOnTop(leftE.data);
-  newExpression.addChildOnTop(rightE.data);
+  newExpression.addChildOnTop(leftExpression.data);
+  newExpression.addChildOnTop(rightExpression.data);
   opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   return this->decreaseStackExceptLast(4);
@@ -820,12 +820,12 @@ bool CalculatorParser::replaceOXEXEXXByEXX() {
     ).size -
     7
   ];
-  SyntacticElement& leftE = (*this->currentSyntacticStack)[(
+  SyntacticElement& leftExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     5
   ];
-  SyntacticElement& rightE = (*this->currentSyntacticStack)[(
+  SyntacticElement& rightExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     3
@@ -835,8 +835,8 @@ bool CalculatorParser::replaceOXEXEXXByEXX() {
   newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpression.addChildOnTop(leftE.data);
-  newExpression.addChildOnTop(rightE.data);
+  newExpression.addChildOnTop(leftExpression.data);
+  newExpression.addChildOnTop(rightExpression.data);
   opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   return this->decreaseStackExceptLastTwo(4);
@@ -899,12 +899,12 @@ bool CalculatorParser::replaceOXEEXByEX() {
     ).size -
     5
   ];
-  SyntacticElement& leftE = (*this->currentSyntacticStack)[(
+  SyntacticElement& leftExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     3
   ];
-  SyntacticElement& rightE = (*this->currentSyntacticStack)[(
+  SyntacticElement& rightExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     2
@@ -913,8 +913,8 @@ bool CalculatorParser::replaceOXEEXByEX() {
   newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpression.addChildOnTop(leftE.data);
-  newExpression.addChildOnTop(rightE.data);
+  newExpression.addChildOnTop(leftExpression.data);
+  newExpression.addChildOnTop(rightExpression.data);
   opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   return this->decreaseStackExceptLast(3);
@@ -926,7 +926,7 @@ bool CalculatorParser::replaceOXXEXEXEXByE() {
     ).size -
     9
   ];
-  SyntacticElement& leftE = (*this->currentSyntacticStack)[(
+  SyntacticElement& leftExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     6
@@ -936,7 +936,7 @@ bool CalculatorParser::replaceOXXEXEXEXByE() {
     ).size -
     4
   ];
-  SyntacticElement& rightE = (*this->currentSyntacticStack)[(
+  SyntacticElement& rightExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     2
@@ -946,9 +946,9 @@ bool CalculatorParser::replaceOXXEXEXEXByE() {
   newExpression.addChildAtomOnTop(
     this->getOperationIndexFromControlIndex(opElement.controlIndex)
   );
-  newExpression.addChildOnTop(leftE.data);
+  newExpression.addChildOnTop(leftExpression.data);
   newExpression.addChildOnTop(middleE.data);
-  newExpression.addChildOnTop(rightE.data);
+  newExpression.addChildOnTop(rightExpression.data);
   opElement.data = newExpression;
   opElement.controlIndex = this->conExpression();
   this->decreaseStackSetCharacterRanges(8);
@@ -1770,22 +1770,22 @@ bool CalculatorParser::replaceVXdotsXbyE_NONBOUND_XdotsX(int numberOfXs) {
 }
 
 bool CalculatorParser::replaceOOEEXbyEXpowerLike() {
-  SyntacticElement& outerO = (*this->currentSyntacticStack)[(
+  SyntacticElement& outerOperation = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     4
   ];
-  SyntacticElement& innerO = (*this->currentSyntacticStack)[(
+  SyntacticElement& innerOperation = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     5
   ];
-  SyntacticElement& innerArg = (*this->currentSyntacticStack)[(
+  SyntacticElement& innerArgument = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     2
   ];
-  SyntacticElement& outerArg = (*this->currentSyntacticStack)[(
+  SyntacticElement& outerArgument = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     3
@@ -1793,19 +1793,19 @@ bool CalculatorParser::replaceOOEEXbyEXpowerLike() {
   if (this->flagLogSyntaxRules) {
     this->parsingLog = "[Calculator::replaceOOEEXbyEXpowerLike]";
   }
-  Expression newInnerE(*this->owner);
-  Expression newFinalE(*this->owner);
-  newInnerE.addChildAtomOnTop(
-    this->getOperationIndexFromControlIndex(innerO.controlIndex)
+  Expression newInnerExpression(*this->owner);
+  Expression newFinalExpression(*this->owner);
+  newInnerExpression.addChildAtomOnTop(
+    this->getOperationIndexFromControlIndex(innerOperation.controlIndex)
   );
-  newInnerE.addChildOnTop(innerArg.data);
-  newFinalE.addChildAtomOnTop(
-    this->getOperationIndexFromControlIndex(outerO.controlIndex)
+  newInnerExpression.addChildOnTop(innerArgument.data);
+  newFinalExpression.addChildAtomOnTop(
+    this->getOperationIndexFromControlIndex(outerOperation.controlIndex)
   );
-  newFinalE.addChildOnTop(newInnerE);
-  newFinalE.addChildOnTop(outerArg.data);
-  innerO.data = newFinalE;
-  innerO.controlIndex = this->conExpression();
+  newFinalExpression.addChildOnTop(newInnerExpression);
+  newFinalExpression.addChildOnTop(outerArgument.data);
+  innerOperation.data = newFinalExpression;
+  innerOperation.controlIndex = this->conExpression();
   return this->decreaseStackExceptLast(3);
 }
 

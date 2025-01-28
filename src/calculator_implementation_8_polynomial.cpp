@@ -273,16 +273,17 @@ bool CalculatorFunctionsPolynomial::polynomialDivisionQuotient(
   computation.remainderDivisionByBasis(
     polynomialsRational[0], outputRemainder, - 1
   );
-  Expression currentE, polynomialExpression;
+  Expression currentExpression;
+  Expression polynomialExpression;
   List<Expression> quotients;
   for (int i = 0; i < computation.quotients.size; i ++) {
-    currentE.reset(calculator);
-    currentE.addChildAtomOnTop("MakeExpression");
+    currentExpression.reset(calculator);
+    currentExpression.addChildAtomOnTop("MakeExpression");
     polynomialExpression.assignValueWithContext(
       calculator, computation.quotients[i], context
     );
-    currentE.addChildOnTop(polynomialExpression);
-    quotients.addOnTop(currentE);
+    currentExpression.addChildOnTop(polynomialExpression);
+    quotients.addOnTop(currentExpression);
   }
   if (quotients.size == 1) {
     output = quotients[0];
@@ -705,7 +706,8 @@ greatestCommonDivisorOrLeastCommonMultipleAlgebraic(
   if (!input.mergeContexts(left, right)) {
     return false;
   }
-  Polynomial<AlgebraicNumber> leftPolynomial, rightPolynomial;
+  Polynomial<AlgebraicNumber> leftPolynomial;
+  Polynomial<AlgebraicNumber> rightPolynomial;
   if (!left.isOfType(&leftPolynomial) || !right.isOfType(&rightPolynomial)) {
     return false;
   }

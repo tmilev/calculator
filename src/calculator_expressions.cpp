@@ -5172,7 +5172,8 @@ std::string Expression::toString(
   recursionCounter.initialize(&this->owner->recursionDepth);
   this->checkConsistency();
   if (startingExpression != nullptr && unfoldCommandEnclosures) {
-    Expression newStart, newMe;
+    Expression newStart;
+    Expression newMe;
     if (
       CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
         *this->owner, *this, newMe
@@ -5264,14 +5265,14 @@ bool Expression::isListStartingWithAtom(int operation) const {
   return (*this)[0].data == operation;
 }
 
-bool Expression::isListNElements(int N) const {
+bool Expression::isListNElements(int n) const {
   if (!this->isList()) {
     return false;
   }
-  if (N == - 1) {
+  if (n == - 1) {
     return true;
   }
-  return this->children.size == N;
+  return this->children.size == n;
 }
 
 bool Expression::isList() const {
@@ -5783,9 +5784,9 @@ bool Expression::makeSqrt(
   radicalSuperIndex
 ) {
   STACK_TRACE("Expression::makeSqrt");
-  Expression argumentE;
-  argumentE.assignValue(owner, argument);
-  return this->makeSqrt(owner, argumentE, radicalSuperIndex);
+  Expression argumentExpression;
+  argumentExpression.assignValue(owner, argument);
+  return this->makeSqrt(owner, argumentExpression, radicalSuperIndex);
 }
 
 bool Expression::makeSqrt(
@@ -5796,10 +5797,10 @@ bool Expression::makeSqrt(
 ) {
   STACK_TRACE("Expression::makeSqrt");
   this->reset(owner, 3);
-  Expression radicalIndexE;
-  radicalIndexE.assignValue(owner, radicalSuperIndex);
+  Expression radicalIndexExpression;
+  radicalIndexExpression.assignValue(owner, radicalSuperIndex);
   this->addChildAtomOnTop(owner.opSqrt());
-  this->addChildOnTop(radicalIndexE);
+  this->addChildOnTop(radicalIndexExpression);
   return this->addChildOnTop(argument);
 }
 
@@ -5844,8 +5845,8 @@ bool Expression::makeOX(
   Calculator& owner, int operation, const Expression& opArgument
 ) {
   if (&opArgument == this) {
-    Expression copyE = opArgument;
-    return this->makeOX(owner, operation, copyE);
+    Expression copyExpression = opArgument;
+    return this->makeOX(owner, operation, copyExpression);
   }
   this->reset(owner);
   this->data = owner.opList();
@@ -5905,31 +5906,33 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
     if ((*this)[1].isOperationGiven(this->owner->opSqrt())) {
       out << "sqrt(" << secondUTF8String << ")";
     } else {
-      std::string firstE = (*this)[1].toUTF8String(format);
+      std::string firstExpression = (*this)[1].toUTF8String(format);
       bool firstNeedsBrackets = (*this)[1].needsParenthesisForMultiplication();
       bool secondNeedsBrackets = (*this)[2].
       needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
         &((*this)[1])
       );
       bool mustHaveTimes = false;
-      if (firstE == "- 1" || firstE == "-1") {
-        firstE = "-";
+      if (firstExpression == "- 1" || firstExpression == "-1") {
+        firstExpression = "-";
         firstNeedsBrackets = false;
       }
-      if (firstE == "1") {
-        firstE = "";
+      if (firstExpression == "1") {
+        firstExpression = "";
       }
       if (firstNeedsBrackets) {
-        out << "(" << firstE << ")";
+        out << "(" << firstExpression << ")";
       } else {
-        out << firstE;
+        out << firstExpression;
       }
       if (
         !firstNeedsBrackets &&
         !secondNeedsBrackets &&
-        firstE != "" &&
-        firstE != "-") {
-        if (MathRoutines::isDigit(firstE[firstE.size() - 1])) {
+        firstExpression != "" &&
+        firstExpression != "-"
+      ) {
+        if (MathRoutines::isDigit(firstExpression[firstExpression.size() - 1]))
+        {
           if (MathRoutines::isDigit(secondUTF8String[0])) {
             mustHaveTimes = true;
           }
@@ -6027,10 +6030,10 @@ Expression Expression::operator-(int other) const {
     << " is not allowed. "
     << global.fatal;
   }
-  Expression otherE;
-  otherE.assignValue(*this->owner, other);
+  Expression otherExpression;
+  otherExpression.assignValue(*this->owner, other);
   result = *this;
-  result -= otherE;
+  result -= otherExpression;
   return result;
 }
 
@@ -6161,7 +6164,8 @@ bool Expression::isEqualToMathematically(const Expression& other) const {
   if (*this == other) {
     return true;
   }
-  Rational rational, rationalTwo;
+  Rational rational;
+  Rational rationalTwo;
   AlgebraicNumber algebraicNumber;
   if (this->isOfType(&rational) && other.isOfType(&rationalTwo)) {
     return rational == rationalTwo;
@@ -6172,7 +6176,8 @@ bool Expression::isEqualToMathematically(const Expression& other) const {
   if (other.isOfType(&rational) && this->isOfType(&algebraicNumber)) {
     return algebraicNumber == rational;
   }
-  double leftD = - 1, rightD = - 1;
+  double leftD = - 1;
+  double rightD = - 1;
   if (this->evaluatesToDouble(&leftD) && other.evaluatesToDouble(&rightD)) {
     return (leftD - rightD == 0.0);
   }

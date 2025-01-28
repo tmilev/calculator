@@ -17,7 +17,8 @@ JSData WebAPIResponse::getProblemSolutionJSON() {
   }
   int64_t startMilliseconds = global.getElapsedMilliseconds();
   CalculatorHTML problem;
-  std::stringstream out, errorStream;
+  std::stringstream out;
+  std::stringstream errorStream;
   JSData result;
   problem.loadCurrentProblemItem(
     false, global.getWebInput(WebAPI::Problem::randomSeed), &errorStream
@@ -185,7 +186,8 @@ std::string WebAPIResponse::setProblemWeight() {
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("mainInput"), false
   );
-  std::stringstream commentsOnFailure, out;
+  std::stringstream commentsOnFailure;
+  std::stringstream out;
   if (problem.mergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure))
   {
     out << "<b style='color:green'>Modified.</b>";
@@ -208,7 +210,8 @@ std::string WebAPIResponse::setProblemDeadline() {
   HtmlRoutines::convertURLStringToNormal(
     global.getWebInput("mainInput"), false
   );
-  std::stringstream commentsOnFailure, out;
+  std::stringstream commentsOnFailure;
+  std::stringstream out;
   if (
     problem.mergeProblemDeadlineAndStore(inputProblemInfo, &commentsOnFailure)
   ) {
@@ -306,7 +309,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   double startTime = global.getElapsedSeconds();
   std::string lastStudentAnswerID;
   std::string lastAnswer;
-  std::stringstream out, studentAnswerSream;
+  std::stringstream out;
+  std::stringstream studentAnswerSream;
   MapList<std::string, std::string, HashFunctions::hashFunction<std::string> >&
   arguments =
   global.webArguments;
@@ -358,7 +362,8 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     result[WebAPI::Result::resultHtml] = out.str();
     return result;
   }
-  Answer& currentA = problem.problemData.answers.values[indexLastAnswerId];
+  Answer& currentAnswer =
+  problem.problemData.answers.values[indexLastAnswerId];
   if (!problem.prepareCommands(&comments)) {
     errorStream
     << "Something went wrong while interpreting the problem file. ";
@@ -380,7 +385,7 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   studentAnswerWithComments
   << Calculator::Functions::Names::commandEnclosure
   << "{}("
-  << currentA.commandsCommentsBeforeInterpretation
+  << currentAnswer.commandsCommentsBeforeInterpretation
   << ");"
   << studentAnswerSream.str();
   interpreter.evaluate(studentAnswerWithComments.str());
@@ -422,25 +427,25 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
   calculatorInputStream
   << Calculator::Functions::Names::commandEnclosure
   << "{}("
-  << currentA.commandsBeforeAnswer
+  << currentAnswer.commandsBeforeAnswer
   << ");";
   calculatorInputStreamNoEnclosures
-  << currentA.commandsBeforeAnswerNoEnclosuresInternal;
+  << currentAnswer.commandsBeforeAnswerNoEnclosuresInternal;
   calculatorInputStream
   << Calculator::Functions::Names::commandEnclosure
   << "{}("
-  << currentA.answerId
+  << currentAnswer.answerId
   << " = "
   << lastAnswer
   << ");";
   calculatorInputStreamNoEnclosures
-  << currentA.answerId
+  << currentAnswer.answerId
   << " = "
   << lastAnswer
   << "";
   bool hasCommentsBeforeSubmission = (
     StringRoutines::stringTrimWhiteSpace(
-      currentA.commandsCommentsBeforeSubmission
+      currentAnswer.commandsCommentsBeforeSubmission
     ) !=
     ""
   );
@@ -448,10 +453,10 @@ JSData WebAPIResponse::submitAnswersPreviewJSON() {
     calculatorInputStream
     << Calculator::Functions::Names::commandEnclosure
     << "{}("
-    << currentA.commandsCommentsBeforeSubmission
+    << currentAnswer.commandsCommentsBeforeSubmission
     << ");";
     calculatorInputStreamNoEnclosures
-    << currentA.commandsCommentsBeforeSubmission;
+    << currentAnswer.commandsCommentsBeforeSubmission;
   }
   std::stringstream problemLinkStream;
   problemLinkStream
@@ -894,7 +899,8 @@ std::string CourseList::toHtml() {
 bool CourseList::loadFromString(const std::string& input) {
   STACK_TRACE("CourseList::loadFromString");
   std::stringstream tableReader(input);
-  std::string currentLine, currentArgument;
+  std::string currentLine;
+  std::string currentArgument;
   Course current;
   while (std::getline(tableReader, currentLine, '\n')) {
     if (
@@ -1262,14 +1268,14 @@ JSData WebAPIResponse::getEditPageJSON(bool showSourceRelaxed) {
       editedFile.topics.knownTopicBundles.keys
     );
   } else {
-    Calculator tempCalculator;
-    tempCalculator.initialize(Calculator::Mode::educational);
-    tempCalculator.computeAutoCompleteKeyWords();
+    Calculator currentCalculator;
+    currentCalculator.initialize(Calculator::Mode::educational);
+    currentCalculator.computeAutoCompleteKeyWords();
     autocompleteKeyWords.addOnTopNoRepetition(
       editedFile.parser.calculatorClasses
     );
     autocompleteKeyWords.addOnTopNoRepetition(
-      tempCalculator.autoCompleteKeyWords
+      currentCalculator.autoCompleteKeyWords
     );
     editedFile.initAutocompleteExtras();
     autocompleteKeyWords.addOnTopNoRepetition(editedFile.autoCompleteExtras);
@@ -1354,7 +1360,8 @@ AnswerChecker::AnswerChecker() {
 
 bool AnswerChecker::prepareProblem(const std::string& inputRandomSeed) {
   STACK_TRACE("AnswerChecker::prepareProblem");
-  std::stringstream errorStream, comments;
+  std::stringstream errorStream;
+  std::stringstream comments;
   this->startTime = global.getElapsedMilliseconds();
   this->problem.loadCurrentProblemItem(
     global.userRequestRequiresLoadingRealExamData(),
@@ -1459,11 +1466,16 @@ bool AnswerChecker::extractStudentAnswerPartOne() {
 bool AnswerChecker::extractStudentAnswerPartTwo() {
   STACK_TRACE("AnswerChecker::extractStudentAnswerPartTwo");
   ProblemData& currentProblemData = this->problem.problemData;
-  Answer& currentA = currentProblemData.answers.values[this->answerIndex];
-  currentA.currentAnswerClean =
-  HtmlRoutines::convertURLStringToNormal(currentA.currentAnswerURLed, false);
-  currentA.currentAnswerURLed =
-  HtmlRoutines::convertStringToURLString(currentA.currentAnswerClean, false);
+  Answer& currentAnswer =
+  currentProblemData.answers.values[this->answerIndex];
+  currentAnswer.currentAnswerClean =
+  HtmlRoutines::convertURLStringToNormal(
+    currentAnswer.currentAnswerURLed, false
+  );
+  currentAnswer.currentAnswerURLed =
+  HtmlRoutines::convertStringToURLString(
+    currentAnswer.currentAnswerClean, false
+  );
   // <-encoding back to overwrite malformed input
   this->problem.studentTagsAnswered.addSelectionAppendNewIndex(
     this->answerIndex
@@ -1877,7 +1889,8 @@ JSData AnswerChecker::submitAnswersJSON(
     this->result[WebAPI::Problem::randomSeed] = inputRandomSeed;
   }
   ProblemData& currentProblemData = this->problem.problemData;
-  Answer& currentA = currentProblemData.answers.values[this->answerIndex];
+  Answer& currentAnswer =
+  currentProblemData.answers.values[this->answerIndex];
   bool errorsCheckingAnswer = false;
   if (timeSafetyBrake) {
     global.millisecondsMaxComputation =
@@ -1888,7 +1901,7 @@ JSData AnswerChecker::submitAnswersJSON(
   if (outputIsCorrect == nullptr) {
     outputIsCorrect = &temporary;
   }
-  if (currentA.flagAnswerHardcoded) {
+  if (currentAnswer.flagAnswerHardcoded) {
     errorsCheckingAnswer = this->checkAnswerHardcoded(outputIsCorrect);
   } else {
     errorsCheckingAnswer = this->checkAnswerStandard(outputIsCorrect);

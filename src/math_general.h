@@ -3144,9 +3144,12 @@ public:
     const ElementMonomialAlgebra<TemplateMonomial, Coefficient>&
     standsOnTheLeft
   ) {
-    ElementMonomialAlgebra<TemplateMonomial, Coefficient> matrix, bufferPoly;
-    TemplateMonomial bufferMon;
-    standsOnTheLeft.multiplyBy(*this, matrix, bufferPoly, bufferMon);
+    ElementMonomialAlgebra<TemplateMonomial, Coefficient> matrix;
+    ElementMonomialAlgebra<TemplateMonomial, Coefficient> bufferPolynomial;
+    TemplateMonomial bufferMonomial;
+    standsOnTheLeft.multiplyBy(
+      *this, matrix, bufferPolynomial, bufferMonomial
+    );
     *this = matrix;
   }
   void operator*=(
@@ -4301,7 +4304,8 @@ linearSpanContainsGetFirstLinearCombination(
   );
   LinearCombinationTemplate remainderFromInput = input;
   TemplateMonomial monomial;
-  Coefficient coefficientMinimialMonomial, coefficientInRemainder;
+  Coefficient coefficientMinimialMonomial;
+  Coefficient coefficientInRemainder;
   outputFirstLinearCombination.makeZero(listCopy.size);
   for (int i = 0; i < listCopy.size; i ++) {
     if (listCopy[i].isEqualToZero()) {
@@ -4552,8 +4556,8 @@ void PolynomialSubstitution<Coefficient>::makeIdentityLikeInjectionSubstitution
   }
   this->setSize(numberOfStartingVariables);
   for (int i = 0; i < this->size; i ++) {
-    Polynomial<Coefficient>& currentPoly = this->objects[i];
-    currentPoly.makeDegreeOne(
+    Polynomial<Coefficient>& currentPolynomial = this->objects[i];
+    currentPolynomial.makeDegreeOne(
       numberOfTargetVariablesMustBeLargerOrEqual, i, ringUnit
     );
   }

@@ -238,8 +238,7 @@ bool LargeIntegerUnsigned::Test::guaranteedPrime() {
 
 bool LargeIntegerUnsigned::Test::factor() {
   LargeIntegerUnsigned::Test::factorSmall(
-    120, "2, 3, 5", "3, 1, 1", 100, 100,
-    3
+    120, "2, 3, 5", "3, 1, 1", 100, 100, 3
   );
   LargeIntegerUnsigned::Test::factorSmall(
     120, "2, 3, 5", "3, 1, 1", 0, 100, 3

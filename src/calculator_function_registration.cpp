@@ -6437,8 +6437,7 @@ void Calculator::initializeToStringHandlers() {
 void Calculator::initializeBuiltInsFreezeArguments() {
   STACK_TRACE("Calculator::initializeBuiltInsFreezeArguments");
   this->atomsThatFreezeArguments.setExpectedSize(
-    this->allBuiltInTypes.size +
-    100
+    this->allBuiltInTypes.size + 100
   );
   this->atomsThatFreezeArguments.addListOnTop(this->allBuiltInTypes);
 }

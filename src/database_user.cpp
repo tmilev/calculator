@@ -1247,8 +1247,7 @@ void UserCalculator::computeHashedSaltedPassword() {
   // freed (to the extent possible and practical).
   for (unsigned i = 0; i < Crypto::lengthSha3DefaultInBytes; i ++) {
     this->usernameHashedPlusPassWordHashed[
-      i +
-      Crypto::lengthSha3DefaultInBytes
+      i + Crypto::lengthSha3DefaultInBytes
     ] =
     static_cast<char>(hasher[i]);
   }

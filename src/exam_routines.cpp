@@ -910,8 +910,7 @@ bool CalculatorHtmlFunctions::interpretProblemGiveUp(
   JSData result =
   WebAPIResponse::getAnswerOnGiveUp(randomSeed, nullptr, nullptr, false);
   global.webArguments.removeKey(
-    WebAPI::Problem::calculatorAnswerPrefix +
-    answerId
+    WebAPI::Problem::calculatorAnswerPrefix + answerId
   );
   global.setWebInput(WebAPI::Problem::fileName, oldProblem);
   std::stringstream out;
@@ -1642,8 +1641,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(
   interpreter.flagWriteLatexPlots = false;
   interpreter.flagPlotNoControls = true;
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() -
-    startTime
+    global.getElapsedSeconds() - startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "calculator initialize time"
@@ -1659,8 +1657,7 @@ bool CalculatorHTML::prepareAndExecuteCommands(
   }
   interpreter.evaluate(this->problemData.commandsGenerateProblem);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() -
-    startTime
+    global.getElapsedSeconds() - startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "calculator evaluation time"
@@ -2183,8 +2180,8 @@ std::string CalculatorHTML::toStringInterprettedCommands(
   out << "<table>";
   int commandCounter = calculator.programExpression.size() - 1;
   for (
-    int elementCounter = elements.size - 1; elementCounter > 0;
-    elementCounter --
+    int elementCounter = elements.size - 1; elementCounter > 0; elementCounter
+    --
   ) {
     SyntacticElementHTML& currentElement = elements[elementCounter];
     std::string currentElementString =
@@ -2282,8 +2279,7 @@ bool CalculatorHTML::processOneExecutedCommand(
   element.interpretedCommand = "";
   element.interpretedCommand += interpretedExpression.toString(&format);
   element.flagUseDisplaystyleInMathMode = (
-    element.content.find("\\displaystyle") !=
-    std::string::npos
+    element.content.find("\\displaystyle") != std::string::npos
   );
   element.flagUseMathMode = true;
   element.flagUseMathSpan = false;
@@ -2383,13 +2379,11 @@ bool CalculatorHTML::interpretHtml(std::stringstream* comments) {
     this->numberOfInterpretationAttempts = i + 1;
     startTime = global.getElapsedSeconds();
     this->timeIntermediatePerAttempt.setSize(
-      this->timeIntermediatePerAttempt.size +
-      1
+      this->timeIntermediatePerAttempt.size + 1
     );
     this->timeIntermediatePerAttempt.lastObject()->setSize(0);
     this->timeIntermediateComments.setSize(
-      this->timeIntermediateComments.size +
-      1
+      this->timeIntermediateComments.size + 1
     );
     this->timeIntermediateComments.lastObject()->setSize(0);
     Calculator interpreter;
@@ -2697,8 +2691,7 @@ bool CalculatorHTML::Parser::parseHTML(std::stringstream* comments) {
   element.tag = "";
   element.content = "";
   this->elementStack.setExpectedSize(
-    elements.size +
-    SyntacticElementHTML::parsingDummyElements
+    elements.size + SyntacticElementHTML::parsingDummyElements
   );
   for (int i = 0; i < SyntacticElementHTML::parsingDummyElements; i ++) {
     this->elementStack.addOnTop(dummy);
@@ -2854,8 +2847,7 @@ bool CalculatorHTML::Parser::reduceStackMergeContents(
     calculatorTag.content.append(this->elementStack[i].content);
   }
   this->elementStack.setSize(
-    this->elementStack.size -
-    numberOfElementsToRemove
+    this->elementStack.size - numberOfElementsToRemove
   );
   return false;
 }
@@ -2875,8 +2867,7 @@ bool CalculatorHTML::Parser::reduceStackMergeContentsRetainLast(
   this->elementStack[this->elementStack.size - numberOfElementsToRemove - 1] =
   *this->elementStack.lastObject();
   this->elementStack.setSize(
-    this->elementStack.size -
-    numberOfElementsToRemove
+    this->elementStack.size - numberOfElementsToRemove
   );
   return false;
 }
@@ -2935,9 +2926,7 @@ bool CalculatorHTML::Parser::closeOpenTag(int tagOffsetNegative) {
       toBeConverted.syntacticRole = "<calculatorTag>";
     }
     this->elementStack.setSize(
-      this->elementStack.size +
-      tagOffsetNegative +
-      1
+      this->elementStack.size + tagOffsetNegative + 1
     );
     return false;
   }
@@ -3188,8 +3177,7 @@ bool CalculatorHTML::Parser::consumeCloseTagWaitingForRightAngleBracket() {
       return this->reduceStackMergeContents(1);
     }
     if (
-      secondToLast.tag ==
-      SyntacticElementHTML::Tags::answerCalculatorHighlight
+      secondToLast.tag == SyntacticElementHTML::Tags::answerCalculatorHighlight
     ) {
       secondToLast.tag =
       SyntacticElementHTML::Tags::answerCalculatorHighlightEnd;
@@ -3772,8 +3760,7 @@ void CalculatorHTML::computeProblemLabel() {
     return;
   }
   if (
-    global.requestType == "template" ||
-    global.requestType == "templateNoLogin"
+    global.requestType == "template" || global.requestType == "templateNoLogin"
   ) {
     return;
   }
@@ -3854,15 +3841,13 @@ bool CalculatorHTML::interpretHtmlOneAttempt(
   std::stringstream outHeadPt2;
   this->figureOutCurrentProblemList(comments);
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() -
-    startTime
+    global.getElapsedSeconds() - startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time before after loading problem list"
   );
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() -
-    startTime
+    global.getElapsedSeconds() - startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time before execution"
@@ -3875,8 +3860,7 @@ bool CalculatorHTML::interpretHtmlOneAttempt(
   this->computeProblemLabel();
   std::string problemLabel = "";
   if (
-    global.requestType != "template" &&
-    global.requestType != "templateNoLogin"
+    global.requestType != "template" && global.requestType != "templateNoLogin"
   ) {
     if (this->topics.topics.contains(this->fileName)) {
       TopicElement& current =
@@ -3914,8 +3898,7 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
   STACK_TRACE("CalculatorHTML::interpretHtmlOneAttemptPartTwo");
   // ////////////////////////////
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() -
-    startTime
+    global.getElapsedSeconds() - startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time after execution"
@@ -3929,8 +3912,7 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
     return false;
   }
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() -
-    startTime
+    global.getElapsedSeconds() - startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time before class management routines"
@@ -3969,8 +3951,7 @@ bool CalculatorHTML::interpretHtmlOneAttemptPartTwo(
     }
   }
   this->timeIntermediatePerAttempt.lastObject()->addOnTop(
-    global.getElapsedSeconds() -
-    startTime
+    global.getElapsedSeconds() - startTime
   );
   this->timeIntermediateComments.lastObject()->addOnTop(
     "Time before database storage"
@@ -5345,8 +5326,7 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
       this->id,
       problemSolved,
       returnEmptyStringIfNoDeadline, (
-        this->type !=
-        TopicElement::types::problem
+        this->type != TopicElement::types::problem
       )
     );
   }

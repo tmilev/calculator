@@ -467,8 +467,7 @@ void WeylGroupData::raiseToMaximallyDominant(
           bool isGood = true;
           for (int k = 0; k < i; k ++) {
             if (
-              this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[k]) >
-              0
+              this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[k]) > 0
             ) {
               isGood = false;
               break;
@@ -845,8 +844,7 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
           isGood = false;
           break;
         } else if (
-          !currentCoordDifference.isInteger() ||
-          currentCoordDifference < 0
+          !currentCoordDifference.isInteger() || currentCoordDifference < 0
         ) {
           isGood = false;
           break;
@@ -1310,8 +1308,7 @@ bool CalculatorFunctionsWeylGroup::weylGroupOrbitFund(
 ) {
   return
   CalculatorFunctionsWeylGroup::weylOrbit(
-    calculator, input, output, true,
-    false
+    calculator, input, output, true, false
   );
 }
 
@@ -1448,8 +1445,7 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
   for (int i = 0; i < this->group.conjugacyClassCount(); i ++) {
     fullSignSig[i].setSize(inputSubgroups.size);
     pseudoSignSig[i].setSize(
-      numberOfParabolicClasses +
-      numberOfNonParabolicPseudoParabolic
+      numberOfParabolicClasses + numberOfNonParabolicPseudoParabolic
     );
     parabolicSignSig[i].setSize(numberOfParabolicClasses);
     for (int j = 0; j < inputSubgroups.size; j ++) {
@@ -2992,8 +2988,7 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
   }
   if (index == calculator.objectContainer.hyperOctahedralGroups.size) {
     calculator.objectContainer.hyperOctahedralGroups.setSize(
-      calculator.objectContainer.hyperOctahedralGroups.size +
-      1
+      calculator.objectContainer.hyperOctahedralGroups.size + 1
     );
     calculator.objectContainer.hyperOctahedralGroups[index].
     makeHyperoctahedralGroup(partitionLeft.n + partitionRight.n);

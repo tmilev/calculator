@@ -715,8 +715,7 @@ public:
   std::string toStringTripleVerification(FormatExpressions* format) const;
   std::string toStringTripleUnknowns(FormatExpressions* format) const;
   std::string toStringTripleUnknownsPolynomialSystem(
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   ) const;
   template <typename Coefficient>
   std::string toStringPolynomialSystem(

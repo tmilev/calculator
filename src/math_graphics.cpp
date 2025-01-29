@@ -93,8 +93,7 @@ void DrawingVariables::projectOnToHyperPlaneGraphics(
 int DrawingVariables::getColorFromChamberIndex(int index) {
   static const int numberColorsBase = 3;
   int colorIndex = index % (
-    numberColorsBase * numberColorsBase *
-    numberColorsBase
+    numberColorsBase * numberColorsBase * numberColorsBase
   );
   if (colorIndex < 0) {
     colorIndex += (numberColorsBase * numberColorsBase * numberColorsBase);
@@ -722,12 +721,10 @@ void DrawingVariables::changeBasisPReserveAngles(double newX, double newY) {
   vProjection += currentBasisPlane[1] * RootTimesE2;
   vOrthogonal -= vProjection;
   double oldRatioProjectionOverHeightSquared = (oldX * oldX + oldY * oldY) / (
-    selectedRootLength -
-    oldX * oldX - oldY * oldY
+    selectedRootLength - oldX * oldX - oldY * oldY
   );
   double newRatioProjectionOverHeightSquared = (newX * newX + newY * newY) / (
-    selectedRootLength -
-    newX * newX - newY * newY
+    selectedRootLength - newX * newX - newY * newY
   );
   out << "\noldRatio: " << oldRatioProjectionOverHeightSquared;
   out << "\nnewRatio: " << newRatioProjectionOverHeightSquared;

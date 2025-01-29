@@ -348,8 +348,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
   ) {
     attemptsSoFar ++;
     if (
-      attemptsLimitZeroForNone > 0 &&
-      attemptsSoFar > attemptsLimitZeroForNone
+      attemptsLimitZeroForNone > 0 && attemptsSoFar > attemptsLimitZeroForNone
     ) {
       if (commentsOnFailure != nullptr) {
         *commentsOnFailure
@@ -394,8 +393,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
         this->generatingElementPowersBasis.getRankElementSpan()
       ) {
         this->generatingElementPowersBasis.setSize(
-          this->generatingElementPowersBasis.size -
-          1
+          this->generatingElementPowersBasis.size - 1
         );
         break;
       }
@@ -1011,8 +1009,8 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   for (int i = 0; i < degreeMinimialPolynomial - 1; i ++) {
     for (int j = 0; j < startingDimension; j ++) {
       generatorMatrix.addMonomial(
-        MonomialMatrix((i + 1) * startingDimension + j, i * startingDimension +
-          j
+        MonomialMatrix((i + 1) * startingDimension + j,
+          i * startingDimension + j
         ),
         1
       );
@@ -1452,8 +1450,7 @@ bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
     }
     for (int j = 0; j < currentRadicalSelection.cardinalitySelection; j ++) {
       if (
-        this->owner->quadraticRadicals[currentRadicalSelection.elements[j]] <
-        0
+        this->owner->quadraticRadicals[currentRadicalSelection.elements[j]] < 0
       ) {
         return false;
       } else {

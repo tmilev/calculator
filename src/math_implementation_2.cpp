@@ -195,9 +195,7 @@ void LargeIntegerUnsigned::writeBigEndianBytes(
     }
   }
   outputAppend.reserve(
-    outputAppend.size +
-    digitsReveredOrder.size +
-    padWithZero
+    outputAppend.size + digitsReveredOrder.size + padWithZero
   );
   if (padWithZero == 1) {
     outputAppend.addOnTop(0);
@@ -718,8 +716,7 @@ void LargeIntegerUnsigned::dividePositive(
         }
       }
       currentQuotientDigit = static_cast<int>(
-        remainderLeadingDigit /
-        divisorLeadingDigitPlusSlack
+        remainderLeadingDigit / divisorLeadingDigitPlusSlack
       );
       remainderBackup = remainderOutput;
       remainderOutput.addLargeIntegerUnsignedShiftedTimesDigit(
@@ -974,8 +971,7 @@ void LargeIntegerUnsigned::addNoFitSize(const LargeIntegerUnsigned& x) {
   MacroIncrementCounter(Rational::totalLargeAdditions);
   int oldsize = this->digits.size;
   this->digits.setSize(
-    MathRoutines::maximum(this->digits.size, x.digits.size) +
-    1
+    MathRoutines::maximum(this->digits.size, x.digits.size) + 1
   );
   for (int i = oldsize; i < this->digits.size; i ++) {
     this->digits[i] = 0;

@@ -1159,8 +1159,7 @@ JSData WebAPIResponse::getExamPageJSON() {
   std::stringstream out;
   JSData output;
   if (
-    !global.flagLoggedIn &&
-    global.requestType == WebAPI::Frontend::scoredQuiz
+    !global.flagLoggedIn && global.requestType == WebAPI::Frontend::scoredQuiz
   ) {
     output[WebAPI::Result::error] = "Scored quiz requires login";
     return output;
@@ -1770,8 +1769,7 @@ bool AnswerCheckerNoProblem::checkAnswer(bool* outputIsCorrect) {
   int mustBeOne = - 1;
   Expression last =
   this->interpreter.programExpression[
-    this->interpreter.programExpression.size() -
-    1
+    this->interpreter.programExpression.size() - 1
   ];
   if (!last.isSmallInteger(&mustBeOne)) {
     this->answerIsCorrect = false;

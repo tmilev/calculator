@@ -1437,8 +1437,7 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   movementInDirectionPerRepresentative.setSize(outputRepresentatives.size);
   for (int i = 0; i < outputRepresentatives.size; i ++) {
     scalarProduct = (
-      normal.scalarEuclidean(outputRepresentatives[i]) -
-      constOnRightHandSide
+      normal.scalarEuclidean(outputRepresentatives[i]) - constOnRightHandSide
     ) /
     unitMovement;
     scalarProduct.assignFractionalValue();

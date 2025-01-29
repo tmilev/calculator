@@ -783,8 +783,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
       if (j != this->partition[i] - 1) {
         this->fElement.elements[currentOffset + j + 1][currentOffset + j] = 1;
         this->eElement.elements[currentOffset + j][currentOffset + j + 1] = (
-          j +
-          1
+          j + 1
         ) *(this->partition[i] - j - 1);
       }
     }

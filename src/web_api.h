@@ -143,7 +143,8 @@ public:
   static JSData getProblemSolutionJSON();
   static JSData getAnswerOnGiveUp();
   static JSData getEditPageJSON(
-    // When this is set, will returns the source of the problem
+    // When this is set, will returns the source of
+    // the problem
     // even though the user has no admin rights.
     // Intended for non-teaching uses when anonymous
     // users of the system are allowed to peek inside the source.

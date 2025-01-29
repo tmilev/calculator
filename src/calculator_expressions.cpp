@@ -3218,8 +3218,7 @@ bool Expression::toStringData(
     ) {
       out << "\\ln";
     } else if (
-      this->data < this->owner->getOperations().size &&
-      this->data >= 0
+      this->data < this->owner->getOperations().size && this->data >= 0
     ) {
       out << this->owner->getOperations()[this->data];
     } else {
@@ -4610,8 +4609,7 @@ bool Expression::toStringUnion(
   const Expression& input, std::stringstream& out, FormatExpressions* format
 ) {
   if (
-    !input.isListStartingWithAtom(input.owner->opUnion()) ||
-    input.size() != 3
+    !input.isListStartingWithAtom(input.owner->opUnion()) || input.size() != 3
   ) {
     return false;
   }

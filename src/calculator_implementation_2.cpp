@@ -921,8 +921,7 @@ bool Calculator::evaluateExpression(
   bool notUsed = false;
   return
   calculator.evaluateExpression(
-    calculator, input, output, notUsed, - 1,
-    nullptr
+    calculator, input, output, notUsed, - 1, nullptr
   );
 }
 
@@ -996,8 +995,7 @@ void Calculator::EvaluateLoop::accountHistory(
   Expression incomingHistory;
   if (this->history->size() > 0) {
     const Expression& lastHistory = (*this->history)[
-      this->history->size() -
-      1
+      this->history->size() - 1
     ];
     if (lastHistory.size() < 2) {
       global.fatal

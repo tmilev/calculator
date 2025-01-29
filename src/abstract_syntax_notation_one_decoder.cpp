@@ -2027,7 +2027,9 @@ bool PrivateKeyRSA::loadFromASNEncoded(
   }
   const ASNElement* innerData;
   if (
-    !this->sourceASNOuter.hasSubElementConst({2}, {}, &innerData,
+    !this->sourceASNOuter.hasSubElementConst({2},
+      {},
+      &innerData,
       commentsOnFailure
     )
   ) {
@@ -2044,35 +2046,45 @@ bool PrivateKeyRSA::loadFromASNEncoded(
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({1}, {}, this->publicKey.modulus,
+    !this->sourceASNInner.hasSubElementOfType({1},
+      {},
+      this->publicKey.modulus,
       commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({2}, {}, this->publicKey.exponent
-      , commentsOnFailure
-    )
-  ) {
-    return false;
-  }
-  if (
-    !this->sourceASNInner.hasSubElementOfType({3}, {}, this->privateExponent,
+    !this->sourceASNInner.hasSubElementOfType({2},
+      {},
+      this->publicKey.exponent,
       commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({4}, {}, this->primeOne,
+    !this->sourceASNInner.hasSubElementOfType({3},
+      {},
+      this->privateExponent,
       commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({5}, {}, this->primeTwo,
+    !this->sourceASNInner.hasSubElementOfType({4},
+      {},
+      this->primeOne,
+      commentsOnFailure
+    )
+  ) {
+    return false;
+  }
+  if (
+    !this->sourceASNInner.hasSubElementOfType({5},
+      {},
+      this->primeTwo,
       commentsOnFailure
     )
   ) {
@@ -2082,21 +2094,27 @@ bool PrivateKeyRSA::loadFromASNEncoded(
   LargeInteger exponent2;
   LargeInteger coefficient;
   if (
-    !this->sourceASNInner.hasSubElementOfType({6}, {}, exponent1,
+    !this->sourceASNInner.hasSubElementOfType({6},
+      {},
+      exponent1,
       commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({7}, {}, exponent2,
+    !this->sourceASNInner.hasSubElementOfType({7},
+      {},
+      exponent2,
       commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({8}, {}, coefficient,
+    !this->sourceASNInner.hasSubElementOfType({8},
+      {},
+      coefficient,
       commentsOnFailure
     )
   ) {
@@ -2408,8 +2426,10 @@ bool TBSCertificateInfo::load(
     return false;
   }
   if (
-    !input.hasSubElementOfType({6, 1, 0, 1}, {}, this->subjectPublicKey.modulus
-      , commentsOnFailure
+    !input.hasSubElementOfType({6, 1, 0, 1},
+      {},
+      this->subjectPublicKey.modulus,
+      commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -2418,8 +2438,10 @@ bool TBSCertificateInfo::load(
     return false;
   }
   if (
-    !input.hasSubElementOfType({6, 1, 0, 0}, {}, this->subjectPublicKey.
-      exponent, commentsOnFailure
+    !input.hasSubElementOfType({6, 1, 0, 0},
+      {},
+      this->subjectPublicKey.exponent,
+      commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -2428,8 +2450,7 @@ bool TBSCertificateInfo::load(
     return false;
   }
   if (
-    this->subjectPublicKey.modulus == 0 ||
-    this->subjectPublicKey.exponent == 0
+    this->subjectPublicKey.modulus == 0 || this->subjectPublicKey.exponent == 0
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Invalid RSA modulus or exponent. ";

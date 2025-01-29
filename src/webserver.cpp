@@ -859,8 +859,7 @@ bool WebWorker::loginProcedure(
     }
     if (user.flagEnteredAuthenticationToken) {
       if (
-        user.enteredActivationToken != "0" &&
-        user.enteredActivationToken != ""
+        user.enteredActivationToken != "0" && user.enteredActivationToken != ""
       ) {
         shouldDisplayMessage = true;
       }
@@ -1232,8 +1231,8 @@ void WebWorker::sanitizeVirtualFileName() {
   resultName.reserve(this->virtualFileName.size());
   bool foundslash = false;
   for (
-    signed i = static_cast<signed>(this->virtualFileName.size()) - 1; i >=
-    0; i --
+    signed i = static_cast<signed>(this->virtualFileName.size()) - 1; i >= 0; i
+    --
   ) {
     unsigned k = static_cast<unsigned>(i);
     bool isOK = true;
@@ -2428,8 +2427,7 @@ int WebWorker::serveClient() {
   }
   if (
     argumentProcessingFailureComments.str() != "" && (
-      user.flagMustLogin ||
-      global.requestType == WebAPI::Request::userInfoJSON
+      user.flagMustLogin || global.requestType == WebAPI::Request::userInfoJSON
     )
   ) {
     global.setWebInput("error", argumentProcessingFailureComments.str());
@@ -4287,8 +4285,7 @@ bool WebWorker::failReceiveReturnFalse() {
   bool sslWasOK = true;
   if (global.flagSSLAvailable) {
     sslWasOK = (
-      this->error ==
-      TransportLayerSecurityOpenSSL::errors::errorWantRead
+      this->error == TransportLayerSecurityOpenSSL::errors::errorWantRead
     );
   }
   if (this->statistics.allReceives > 0 && sslWasOK) {
@@ -4419,8 +4416,7 @@ void WebServer::figureOutOperatingSystem() {
 void WebServer::checkSystemInstallationOpenSSL() {
   STACK_TRACE("WebServer::checkSystemInstallationOpenSSL");
   if (
-    global.configuration["openSSL"].elementType !=
-    JSData::Type::tokenUndefined
+    global.configuration["openSSL"].elementType != JSData::Type::tokenUndefined
   ) {
     return;
   }
@@ -4630,39 +4626,33 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsNotNeedingLogin.addOnTop(Configuration::publicHTML);
   this->addressStartsNotNeedingLogin.addOnTop("/" + Configuration::publicHTML);
   this->addressStartsNotNeedingLogin.addOnTop(
-    "/" +
-    WebAPI::compareExpressionsPage
+    "/" + WebAPI::compareExpressionsPage
   );
   this->addressStartsNotNeedingLogin.addOnTop(WebAPI::compareExpressionsPage);
   this->addressStartsNotNeedingLogin.addOnTop(
-    "/" +
-    WebAPI::compareExpressionsPageNoCache
+    "/" + WebAPI::compareExpressionsPageNoCache
   );
   this->addressStartsNotNeedingLogin.addOnTop(
     WebAPI::compareExpressionsPageNoCache
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    "/" +
-    WebAPI::app
+    "/" + WebAPI::app
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(WebAPI::app);
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    "/" +
-    WebAPI::appNoCache
+    "/" + WebAPI::appNoCache
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
     WebAPI::appNoCache
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    "/" +
-    WebAPI::compareExpressionsPage
+    "/" + WebAPI::compareExpressionsPage
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
     WebAPI::compareExpressionsPage
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
-    "/" +
-    WebAPI::compareExpressionsPageNoCache
+    "/" + WebAPI::compareExpressionsPageNoCache
   );
   this->addressStartsInterpretedAsCalculatorRequest.addOnTop(
     WebAPI::compareExpressionsPageNoCache
@@ -4774,9 +4764,7 @@ void WebWorker::prepareFullMessageHeaderAndFooter() {
   STACK_TRACE("WebWorker::prepareFullMessageHeaderAndFooter");
   this->remainingBytesToSend.setSize(0);
   this->remainingBytesToSend.setExpectedSize(
-    this->remainingBodyToSend.size +
-    this->remainingHeaderToSend.size +
-    30
+    this->remainingBodyToSend.size + this->remainingHeaderToSend.size + 30
   );
   if (this->remainingHeaderToSend.size == 0) {
     if (this->requestType != this->requestHead) {

@@ -7,9 +7,13 @@
 
 // struct JSHashData;
 class Rational;
-template <typename Coefficient>
+template <
+  typename Coefficient
+>
 class Matrix;
-template <typename Coefficient>
+template <
+  typename Coefficient
+>
 class Vector;
 class LargeInteger;
 

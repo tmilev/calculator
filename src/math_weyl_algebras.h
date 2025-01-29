@@ -87,8 +87,8 @@ bool ElementWeylAlgebra<Coefficient>::isPolynomial(
       return false;
     }
     if (whichPolynomial != 0) {
-      whichPolynomial->addMonomial((*this)[i].polynomialPart, this->
-        coefficients[i]
+      whichPolynomial->addMonomial((*this)[i].polynomialPart,
+        this->coefficients[i]
       );
     }
   }

@@ -74,41 +74,63 @@ class LargeInteger;
 class Rational;
 
 // More involved mathematical types
-template <class Base>
+template <
+  class Base
+>
 class Complex;
 class AlgebraicNumber;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class RationalFraction;
 class SemisimpleLieAlgebra;
 class RootSubalgebra;
 class RootSubalgebras;
 class ChevalleyGenerator;
 class DynkinDiagramRootSubalgebra;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class ElementSemisimpleLieAlgebra;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class ElementUniversalEnveloping;
 template <
   class Coefficient, unsigned int inputHashFunction(const Coefficient&)
 >
 class MonomialTensor;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class MonomialUniversalEnveloping;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class ElementSumGeneralizedVermas;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class CharacterSemisimpleLieAlgebraModule;
 class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class ModuleSSalgebra;
 class SlTwoSubalgebras;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class MonomialTensorGeneralizedVermas;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class ElementTensorsGeneralizedVermas;
 struct BranchingData;
 class QuasiDifferentialMononomial;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class QuasiDifferentialOperator;
 
 // classes related to linear integral programming (polyhedra, lattices,
@@ -116,40 +138,68 @@ class QuasiDifferentialOperator;
 class Cone;
 class ConeCollection;
 class Lattice;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class AffineHyperplane;
 class AffineCones;
 
 // Hybrid classes that serve both memory-management and mathematical purposes
 // (Matrices, Vectors, PolynomialSubstitution, etc.)
-template <class ObjectType1, class ObjectType2>
+template <
+  class ObjectType1, class ObjectType2
+>
 class Pair;
-template <class Object>
+template <
+  class Object
+>
 class ListIterator;
-template <class Object>
+template <
+  class Object
+>
 class List;
-template <class Object>
+template <
+  class Object
+>
 class ListReferences;
-template <class Object>
+template <
+  class Object
+>
 class ListZeroAfterUse;
-template <class Object>
+template <
+  class Object
+>
 class Matrix;
-template <class Object, unsigned int hashFunction(const Object&)>
+template <
+  class Object, unsigned int hashFunction(const Object&)
+>
 class HashedList;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class Vector;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class Vectors;
 class MonomialPolynomial;
-template <class TemplateMonomial, class Coefficient>
+template <
+  class TemplateMonomial, class Coefficient
+>
 class LinearCombination;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class Polynomial;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class PolynomialSubstitution;
 
 // algebraic geometry computation class:
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class GroebnerBasisComputation;
 
 // Combinatorial classes.

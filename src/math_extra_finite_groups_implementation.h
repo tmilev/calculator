@@ -428,8 +428,8 @@ computeCCRepresentativesPreimages() {
     this->subgroupContent->conjugacyClasses[i].representative;
     bool notFound = true;
     for (
-      int j = 0; notFound && j < this->groupContent->conjugacyClasses.size;
-      j ++
+      int j = 0; notFound && j < this->groupContent->conjugacyClasses.size; j
+      ++
     ) {
       elementSomeGroup& gcr =
       this->groupContent->conjugacyClasses[j].representative;
@@ -2242,7 +2242,9 @@ freudenthalFormulaIrrepIsWRTLeviPart(
   Coefficient ringZero;
   ringZero = inputHighestWeightFundamentalCoordinates[0].zero();
   // ///////////////////////
-  Vector<Coefficient>
+  Vector<
+    Coefficient
+  >
   highestWeightSimpleCoordinatesLeviPart,
   highestWeightSimpleCoordinatesNilPart;
   highestWeightSimpleCoordinatesLeviPart =
@@ -2943,8 +2945,7 @@ decomposeTodorsVersionRecursive(
     }
   }
   if ((remainingVectorSpace.size < this->getDimension()) && (
-      remainingVectorSpace.size >
-      0
+      remainingVectorSpace.size > 0
     )
   ) {
     GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> reducedRep;
@@ -3170,8 +3171,7 @@ void FiniteGroup<elementSomeGroup>::computeIrreducibleRepresentations() {
   if (this->ComputeIrreducibleRepresentationsWithFormulas) {
     this->ComputeIrreducibleRepresentationsWithFormulas(*this);
   } else if (
-    this->irreps_grcam.size != 0 ||
-    this->irreducibleRepresentations.size != 0
+    this->irreps_grcam.size != 0 || this->irreducibleRepresentations.size != 0
   ) {
     this->computeIrreducibleRepresentationsTodorsVersion();
   } else {

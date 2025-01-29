@@ -125,7 +125,7 @@ public:
     bool computeIndentationCodeBlock();
     bool computeIndentationControlWantsCodeBlock();
     bool computeIndentationCommandList();
-    bool computeIndentationCommaList();
+    bool computeIndentationCommaList(bool forceNewLines = false);
     bool computeIndentationInitializerList();
     bool computeIndentationEnumDefinition();
     bool computeIndentationEnumDeclaration();
@@ -136,7 +136,7 @@ public:
     bool computeIndentationTypeExpression();
     bool computeIndentationReturnedExpression();
     bool computeIndentationOperator();
-    bool computeIndentationInParentheses();
+    bool computeIndentationInParentheses(bool forceBreakLines = false);
     bool computeIndentationInBrackets();
     bool computeIndentationAngleBrackets();
     bool computeIndentationFunctionWithArguments();

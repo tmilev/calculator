@@ -29,8 +29,10 @@ public:
   Coefficient constantValue;
   int expressionType;
   enum TypeExpression {
-    typeConstant = 0, typePolynomial = 1, typeRationalFraction = 2, typeError =
-    3
+    typeConstant = 0,
+    typePolynomial = 1,
+    typeRationalFraction = 2,
+    typeError = 3
   };
   std::string toString(FormatExpressions* format = nullptr) const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused = nullptr)
@@ -1442,8 +1444,7 @@ bool RationalFraction<Coefficient>::operator==(int other) const {
   } else {
     return
     this->expressionType == TypeExpression::typeConstant && (
-      this->constantValue ==
-      other
+      this->constantValue == other
     );
   }
 }
@@ -1643,8 +1644,7 @@ bool RationalFraction<Coefficient>::getRelations(
   for (int i = 0; i < startingGenerators; i ++) {
     Polynomial<Rational>& currentPoly = groebnerBasis[i];
     currentPoly.setNumberOfVariablesSubstituteDeletedByOne(
-      totalStartingVariables +
-      startingGenerators
+      totalStartingVariables + startingGenerators
     );
     currentGenerator.makeDegreeOne(
       totalStartingVariables + startingGenerators,

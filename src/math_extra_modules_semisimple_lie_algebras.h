@@ -454,8 +454,7 @@ public:
   );
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string elementToStringHighestWeightVector(
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   ) const {
     if (this->highestWeightVectorNotation != "") {
       return this->highestWeightVectorNotation;
@@ -1200,8 +1199,7 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
   subWeyl.ambientWeyl = &this->owner->weylGroup;
   MemorySaving<CharacterSemisimpleLieAlgebraModule<Coefficient> > buffer;
   CharacterSemisimpleLieAlgebraModule<Coefficient>& charWRTsubalgebra = (
-    outputChar ==
-    0
+    outputChar == 0
   ) ?
   buffer.getElement() :
   *outputChar;
@@ -1673,8 +1671,7 @@ bool ModuleSSalgebra<Coefficient>::makeFromHW(
           }
           if (k == 1) {
             this->getActionGeneratorIndex(
-              this->getOwner().getNumberOfPositiveRoots() +
-              j
+              this->getOwner().getNumberOfPositiveRoots() + j
             );
           }
         }
@@ -1894,9 +1891,7 @@ void ModuleSSalgebra<Coefficient>::checkConsistency() {
     left = this->getActionGeneratorIndex(i);
     right =
     this->getActionGeneratorIndex(
-      this->getOwner().getNumberOfGenerators() -
-      1 -
-      i
+      this->getOwner().getNumberOfGenerators() - 1 - i
     );
     left.transpose();
     left -= right;
@@ -2941,8 +2936,7 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(
     out << coefficientString;
   }
   needsCdot = needsCdot || (
-    coefficientString != "1" &&
-    coefficientString != "-"
+    coefficientString != "1" && coefficientString != "-"
   );
   if (needsCdot) {
     out << "\\cdot ";

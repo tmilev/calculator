@@ -1208,8 +1208,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
     RationalFraction<Rational> numEigenVectors;
     numEigenVectors = rfZero;
     for (
-      int j = 0; j < g2inB3Data.smallCharacterFiniteDimensionalPart.size();
-      j ++
+      int j = 0; j < g2inB3Data.smallCharacterFiniteDimensionalPart.size(); j
+      ++
     ) {
       numEigenVectors +=
       g2inB3Data.smallCharacterFiniteDimensionalPart.coefficients[j];
@@ -1226,8 +1226,8 @@ bool CalculatorLieTheory::printB3G2branchingIntermediate(
       << "in $Sh_{\\lambda,i}$ &$x_1\\notin$ \\\\\\hline";
     }
     for (
-      int k = 0; k < g2inB3Data.smallCharacterFiniteDimensionalPart.size();
-      k ++
+      int k = 0; k < g2inB3Data.smallCharacterFiniteDimensionalPart.size(); k
+      ++
     ) {
       CharacterSemisimpleLieAlgebraModule<RationalFraction<Rational> >
       character;
@@ -4219,8 +4219,7 @@ void VoganDiagram::plotTwoElementOrbit(
   2;
   std::string height =
   StringRoutines::toStringElement(
-    DynkinSimpleType::distanceBetweenRootCenters * width /
-    totalWidth
+    DynkinSimpleType::distanceBetweenRootCenters * width / totalWidth
   );
   std::string widthString = StringRoutines::toStringElement(width);
   plotObject.coordinateFunctionsJS[0] =
@@ -5748,8 +5747,7 @@ bool CalculatorLieTheory::drawRootSystem(
   std::stringstream out;
   DrawingVariables drawingVariables;
   weylGroup.drawRootSystem(
-    drawingVariables, true, false, nullptr, true,
-    nullptr
+    drawingVariables, true, false, nullptr, true, nullptr
   );
   out << drawingVariables.getHTMLDiv(weylGroup.getDimension(), true);
   return output.assignValue(calculator, out.str());

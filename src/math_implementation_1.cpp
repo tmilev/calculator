@@ -20,8 +20,7 @@ void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
     int simpleIndex = generatorIndex - this->getNumberOfPositiveRoots();
     outputIndicesFormatAd0Ad1Ad2etc.addOnTop(generatorIndex + this->getRank());
     outputIndicesFormatAd0Ad1Ad2etc.addOnTop(
-      2 *
-      this->getNumberOfPositiveRoots() - 1 - generatorIndex
+      2 * this->getNumberOfPositiveRoots() - 1 - generatorIndex
     );
     outputMultiplyLieBracketsToGetGenerator =
     this->weylGroup.cartanSymmetric.elements[simpleIndex][simpleIndex] /

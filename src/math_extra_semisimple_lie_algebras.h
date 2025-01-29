@@ -168,8 +168,25 @@ private:
 public:
   // This is the column 1 entry of Table 5.11 in the paper mentioned above.
   enum DiagramType {
-    AI, AII, AIII, BI, CI, DI, DII, EI, EII, EIII, EIV, EV, EVI, EVII, EVIII,
-    EIX, FI, FII, G
+    AI,
+    AII,
+    AIII,
+    BI,
+    CI,
+    DI,
+    DII,
+    EI,
+    EII,
+    EIII,
+    EIV,
+    EV,
+    EVI,
+    EVII,
+    EVIII,
+    EIX,
+    FI,
+    FII,
+    G
   };
   DiagramType diagram;
   static const int radiusOfRootCircle = 1;
@@ -1584,8 +1601,7 @@ drawMeAssumeCharIsOverCartan(
   Vector<Coefficient> actualWeight;
   Vector<Rational> actualWeightRationalPart;
   actualAmbientWeyl.drawRootSystem(
-    drawingVariables, true, false, nullptr,
-    false
+    drawingVariables, true, false, nullptr, false
   );
   for (int j = 0; j < this->size(); j ++) {
     actualWeight =

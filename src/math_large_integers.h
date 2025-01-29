@@ -773,15 +773,13 @@ public:
   static long long int totalAdditions() {
     return
     static_cast<long long int>(
-      Rational::totalLargeAdditions +
-      Rational::totalSmallAdditions
+      Rational::totalLargeAdditions + Rational::totalSmallAdditions
     );
   }
   static long long int totalMultiplications() {
     return
     static_cast<long long int>(
-      Rational::totalLargeMultiplications +
-      Rational::totalSmallMultiplications
+      Rational::totalLargeMultiplications + Rational::totalSmallMultiplications
     );
   }
   static long long int totalArithmeticOperations() {

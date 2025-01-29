@@ -1705,8 +1705,7 @@ bool Polynomial<Coefficient>::greatestCommonDivisorOneVariableDefault(
     << global.fatal;
   }
   if (
-    left.minimalNumberOfVariables() > 1 ||
-    right.minimalNumberOfVariables() > 1
+    left.minimalNumberOfVariables() > 1 || right.minimalNumberOfVariables() > 1
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
@@ -2451,12 +2450,10 @@ void PolynomialFactorizationCantorZassenhaus<
     power = 1;
   } else {
     constantTerm = 1 + (constant - 1) % (
-      this->one.modulus.getUnsignedIntValueTruncated() -
-      1
+      this->one.modulus.getUnsignedIntValueTruncated() - 1
     );
     power = 1 + (constant - 1) / (
-      this->one.modulus.getUnsignedIntValueTruncated() -
-      1
+      this->one.modulus.getUnsignedIntValueTruncated() - 1
     );
     if (power >= this->current.totalDegreeInt()) {
       power = 1;
@@ -3202,8 +3199,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     << global.fatal;
   }
   for (
-    int i = 0; i < this->intermediateRemainders[remainderIndex + 1].size();
-    i ++
+    int i = 0; i < this->intermediateRemainders[remainderIndex + 1].size(); i
+    ++
   ) {
     this->fcAnswerMonsRemainders[remainderIndex + 1][
       this->allMonomials.getIndex(

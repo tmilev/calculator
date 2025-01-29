@@ -239,7 +239,9 @@ public:
     basisOrthogonalComplementOfCentralizerOfSl2InP;
     // The vector space whose basis is below is called W, from where the
     // WConjecture derives its name.
-    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >
+    List<
+      ElementSemisimpleLieAlgebra<AlgebraicNumber>
+    >
     basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP
     ;
     // A human-readable math formula that describes w_1, w_2 \in W
@@ -470,8 +472,7 @@ public:
   std::string toStringModuleDecomposition(FormatExpressions* format = nullptr)
   const;
   std::string toStringModuleDecompositionLaTeX(
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   ) const;
   std::string toStringDrawWeights(FormatExpressions* format = nullptr) const;
   std::string toStringDrawWeightsHelper(
@@ -762,20 +763,17 @@ public:
     FormatExpressions* format
   );
   std::string toStringSubalgebrasWithHDWrite(
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   );
   std::string writeToHardDisk(FormatExpressions* format);
   void writeSubalgebraToFile(FormatExpressions* format, int subalgebraIndex);
   std::string toStringPart3(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringSl2s(FormatExpressions* format = nullptr);
   std::string toStringSemisimpleSubalgebrasSummaryLaTeX(
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   ) const;
   std::string toStringSemisimpleSubalgebraSummaryHTML(
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   ) const;
   void computePairingTablesAndFKFTtypes();
   void getCentralizerChains(List<List<int> >& outputChains);

@@ -1390,8 +1390,8 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
       this->domainAlgebra().getWeightOfGenerator(index);
       // Looking for elements left, right such that [left, right] = current.
       for (
-        int leftIndex = 0; leftIndex < nonComputed.numberOfElements;
-        leftIndex ++
+        int leftIndex = 0; leftIndex < nonComputed.numberOfElements; leftIndex
+        ++
       ) {
         if (nonComputed.selected[leftIndex]) {
           // The candidate for left is not computed yet.
@@ -1505,8 +1505,7 @@ void HomomorphismSemisimpleLieAlgebra::projectOntoSmallCartan(
     output[i] =
     this->coDomainAlgebra().weylGroup.rootScalarCartanRoot(
       this->imagesAllChevalleyGenerators[
-        this->domainAlgebra().weylGroup.rootsOfBorel.size +
-        i
+        this->domainAlgebra().weylGroup.rootsOfBorel.size + i
       ].getCartanPart(),
       input
     );

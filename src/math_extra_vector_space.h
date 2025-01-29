@@ -194,8 +194,7 @@ bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
     fastbasis.numberOfRows ++;
   } else {
     fastbasis.resize(
-      fastbasis.numberOfRows + 1, fastbasis.numberOfColumns,
-      true
+      fastbasis.numberOfRows + 1, fastbasis.numberOfColumns, true
     );
   }
   for (int j = 0; j < fastbasis.numberOfColumns; j ++) {

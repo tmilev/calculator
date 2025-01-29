@@ -236,7 +236,9 @@ void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::multiplyBy(
   GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
 ) const {
   if (&output == this || &output == &other) {
-    GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>
+    GroupRepresentationCarriesAllMatrices<
+      somegroup, Coefficient
+    >
     thisCopy,
     otherCopy;
     thisCopy = *this;

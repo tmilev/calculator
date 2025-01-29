@@ -1587,8 +1587,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
   subalgebras.subalgebras.setExpectedSize(subalgebrasElement.size() - 1);
   subalgebras.subalgebras.clear();
   subalgebras.subalgebrasNonEmbedded->setExpectedSize(
-    subalgebrasElement.size() -
-    1
+    subalgebrasElement.size() - 1
   );
   subalgebras.flagAttemptToSolveSystems = true;
   subalgebras.flagComputeModuleDecomposition = true;

@@ -1188,8 +1188,7 @@ void PolynomialUnivariateModular::addAnotherTimesTerm(
   int modulus = this->getModulus();
   for (int i = 0; i < other.coefficients.size; i ++) {
     this->coefficients[i + termPower] = (
-      this->coefficients[i + termPower] +
-      other.coefficients[i] * coefficient
+      this->coefficients[i + termPower] + other.coefficients[i] * coefficient
     ) %
     modulus;
   }
@@ -1567,8 +1566,7 @@ void PolynomialUnivariateModular::operator*=(
   PolynomialUnivariateModular output;
   output.makeZero(this->modulusData);
   output.ensureCoefficientLength(
-    other.coefficients.size +
-    this->coefficients.size - 1
+    other.coefficients.size + this->coefficients.size - 1
   );
   int modulus = this->getModulus();
   for (int i = 0; i < this->coefficients.size; i ++) {

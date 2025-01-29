@@ -38,7 +38,10 @@ public:
     const std::string& input, bool replacePlusBySpace
   );
   static bool convertStringToHtmlStringReturnTrueIfModified(
-    const std::string& input, std::string& output, bool doReplaceNewLineByBr
+    const std::string& input,
+    std::string& output,
+    bool doReplaceNewLineByBr,
+    bool newLineNeedsCarriageReturn = true
   );
   static std::string convertStringToURLStringExceptDashesAndSlashes(
     const std::string& input
@@ -47,7 +50,10 @@ public:
     const std::string& input, bool usePlusesForSpacebars
   );
   static std::string convertStringToHtmlString(
-    const std::string& inputString, bool doReplaceNewLineByBr
+    const std::string& inputString, bool doReplaceNewLineCarriageReturnByBr
+  );
+  static std::string convertStringToHtmlStringWithBr(
+    const std::string& inputString
   );
   static std::string convertStringToHtmlStringRestrictSize(
     const std::string& inputString,

@@ -1173,8 +1173,7 @@ bool SSLContent::decodeHandshakeRecord(std::stringstream* commentsOnFailure) {
     return false;
   }
   if (
-    this->length + this->owner->offsetDecoded >
-    this->owner->incomingBytes.size
+    this->length + this->owner->offsetDecoded > this->owner->incomingBytes.size
   ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Client hello length is too big. ";
@@ -1755,8 +1754,8 @@ void Serialization::writeNByteUnsigned(
     output.setSize(inputOutputOffset + byteCountOfLength);
   }
   for (
-    int i = byteCountOfLength - 1 + inputOutputOffset; i >=
-    inputOutputOffset; i --
+    int i = byteCountOfLength - 1 + inputOutputOffset; i >= inputOutputOffset;
+    i --
   ) {
     output[i] = static_cast<unsigned char>(input % 256);
     input /= 256;

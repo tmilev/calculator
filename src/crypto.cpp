@@ -1101,8 +1101,7 @@ void Crypto::convertListUint32ToString(
   output.resize(static_cast<unsigned>(input.size * 4));
   for (unsigned i = 0; i < static_cast<unsigned>(input.size); i ++) {
     output[i * 4 + 0] = static_cast<char>(
-      input[static_cast<int>(i)] /
-      16777216
+      input[static_cast<int>(i)] / 16777216
     );
     output[i * 4 + 1] = static_cast<char>((input[static_cast<int>(i)] / 65536)
       %
@@ -2667,8 +2666,7 @@ void UnsecurePseudoRandomGenerator::setRandomSeedSmall(
   this->state[1] = static_cast<unsigned char>((randomSeedUnsigned / 65536) %
     256
   );
-  this->state[2] = static_cast<unsigned char>((randomSeedUnsigned / 256) %
-    256
+  this->state[2] = static_cast<unsigned char>((randomSeedUnsigned / 256) % 256
   );
   this->state[3] = static_cast<unsigned char>(randomSeedUnsigned % 256);
   Crypto::computeSha256(this->state, this->state);

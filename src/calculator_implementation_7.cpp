@@ -1876,8 +1876,7 @@ void IntegralRationalFunctionComputation::prepareFormatExpressions() {
           ) !=
           k
         ) || (
-          i !=
-          this->denominatorFactorsAlgebraicWithMultiplicities.size() - 1
+          i != this->denominatorFactorsAlgebraicWithMultiplicities.size() - 1
         )
       ) {
         rationalFractionStream << "+";
@@ -1984,8 +1983,7 @@ void IntegralRationalFunctionComputation::prepareFinalAnswer() {
           ) !=
           k
         ) || (
-          i !=
-          this->denominatorFactorsAlgebraicWithMultiplicities.size() - 1
+          i != this->denominatorFactorsAlgebraicWithMultiplicities.size() - 1
         )
       ) {
         rationalFractionStream << "+";
@@ -3304,8 +3302,8 @@ bool CalculatorFunctionsDifferentiation::differentiateChainRule(
     << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& differentialOperatorVariable = input[1], argument =
-  input[2];
+  const Expression& differentialOperatorVariable = input[1],
+  argument = input[2];
   if (!argument.startsWith(- 1, 2)) {
     return false;
   }
@@ -3355,8 +3353,8 @@ bool CalculatorFunctionsDifferentiation::differentiateAplusB(
     << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& differentialOperatorVariable = input[1], argument =
-  input[2];
+  const Expression& differentialOperatorVariable = input[1],
+  argument = input[2];
   // ////////////////////
   if (!argument.startsWith(calculator.opPlus(), 3)) {
     return false;
@@ -3395,8 +3393,8 @@ bool CalculatorFunctionsDifferentiation::differentiateAtimesB(
     << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& differentialOperatorVariable = input[1], argument =
-  input[2];
+  const Expression& differentialOperatorVariable = input[1],
+  argument = input[2];
   // ////////////////////
   if (!argument.startsWith(calculator.opTimes(), 3)) {
     return false;
@@ -3470,8 +3468,8 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBCommutative(
     << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& differentialOperatorVariable = input[1], argument =
-  input[2];
+  const Expression& differentialOperatorVariable = input[1],
+  argument = input[2];
   // Quotient rule (commutative): (a/b^n)'= (a'b-n a b')/b^{n + 1}
   if (!argument.startsWith(calculator.opDivide(), 3)) {
     return false;
@@ -3569,8 +3567,8 @@ bool CalculatorFunctionsDifferentiation::differentiateAdivideBNONCommutative(
     << input[1].toString()
     << " - possible user typo?";
   }
-  const Expression& differentialOperatorVariable = input[1], argument =
-  input[2];
+  const Expression& differentialOperatorVariable = input[1],
+  argument = input[2];
   // Quotient rule (non-commutative): (a/b)'= (ab^{- 1})'=a' b - a b^{- 1} b'
   // b^{- 1}
   if (!argument.startsWith(calculator.opDivide(), 3)) {
@@ -4499,8 +4497,7 @@ bool CalculatorFunctions::invertMatrixRationalFractionsVerbose(
   }
   ExpressionContext context = converted.getContext();
   if (
-    matrix.numberOfRows != matrix.numberOfColumns ||
-    matrix.numberOfColumns < 1
+    matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfColumns < 1
   ) {
     std::stringstream out;
     out
@@ -4686,8 +4683,7 @@ bool CalculatorFunctions::invertMatrixVerbose(
     );
   }
   if (
-    matrix.numberOfRows != matrix.numberOfColumns ||
-    matrix.numberOfColumns < 1
+    matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfColumns < 1
   ) {
     return output.assignError(calculator, "The matrix is not square");
   }
@@ -5356,8 +5352,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIIb(
   output = oneE / D *((x + b / twoE) / (twoE * numeratorPowerExpression - twoE)
     *
     quadraticPowerOneMinusN + (twoE * numeratorPowerExpression - threeE) / (
-      twoE *
-      numeratorPowerExpression - twoE
+      twoE * numeratorPowerExpression - twoE
     ) *
     remainingIntegral
   );
@@ -5499,8 +5494,7 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIIb(
   C.checkInitializationRecursively();
   remainingIntegral.checkInitializationRecursively();
   output = (oneE / apowerN) *(
-    A / (twoE *(oneE - nE)) * quadraticPowerOneMinusN +
-    C * remainingIntegral
+    A / (twoE *(oneE - nE)) * quadraticPowerOneMinusN + C * remainingIntegral
   );
   output.checkConsistencyRecursively();
   output.checkInitializationRecursively();
@@ -6473,8 +6467,7 @@ bool Expression::splitProduct(
     return false;
   }
   multiplicandsRight.setExpectedSize(
-    multiplicandsLeft.size -
-    totalDesiredMultiplicandsLeft
+    multiplicandsLeft.size - totalDesiredMultiplicandsLeft
   );
   for (int i = totalDesiredMultiplicandsLeft; i < multiplicandsLeft.size; i ++)
   {
@@ -7224,8 +7217,7 @@ bool CalculatorFunctions::differentialEquationsEulersMethod(
   pointsCounter = 0;
   for (
     double currentX = xInitial + delta; currentX < rightEndpoint + delta;
-    currentX +=
-    delta
+    currentX += delta
   ) {
     XValues.addOnTop(currentX);
     pointsCounter ++;
@@ -10632,8 +10624,7 @@ public:
     }
     std::string truncatedInput = input;
     truncatedInput.resize(
-      static_cast<unsigned>(this->maximumCharactersInString) -
-      3
+      static_cast<unsigned>(this->maximumCharactersInString) - 3
     );
     truncatedInput += "...";
     this->displayedExpressionStrings.addOnTop(truncatedInput);
@@ -11088,8 +11079,7 @@ bool CalculatorFunctions::randomInteger(
     currentContribution ++;
     int nextAccumulator = accumulator + currentContribution;
     if (
-      accumulator <= generatedRandomInt &&
-      generatedRandomInt < nextAccumulator
+      accumulator <= generatedRandomInt && generatedRandomInt < nextAccumulator
     ) {
       resultRandomValue =
       intervals[i][0] + sign *(generatedRandomInt - accumulator);

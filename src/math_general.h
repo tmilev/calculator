@@ -12,7 +12,9 @@ class Plot;
 class ElementZmodP;
 class WeylGroupData;
 class AlgebraicClosureRationals;
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class MatrixTensor;
 class ProgressReport;
 
@@ -2476,16 +2478,14 @@ public:
     return result;
   }
   void quickSortAscending(
-    typename List<TemplateMonomial>::Comparator* order =
-    nullptr
+    typename List<TemplateMonomial>::Comparator* order = nullptr
   ) {
     List<TemplateMonomial> sortedMonomials = this->monomials;
     sortedMonomials.quickSortAscending(order, &this->coefficients);
     this->monomials = sortedMonomials;
   }
   void quickSortDescending(
-    typename List<TemplateMonomial>::Comparator* order =
-    nullptr
+    typename List<TemplateMonomial>::Comparator* order = nullptr
   ) {
     List<TemplateMonomial> sortedMonomials = this->monomials;
     sortedMonomials.quickSortDescending(order, &this->coefficients);
@@ -4338,8 +4338,8 @@ gaussianEliminationByRows(
   int currentRowIndex = 0;
   Coefficient accumulator, negated;
   for (
-    int i = 0; i < allMonomials.size &&
-    currentRowIndex < toBeEliminated.size; i ++
+    int i = 0; i < allMonomials.size && currentRowIndex < toBeEliminated.size;
+    i ++
   ) {
     const TemplateMonomial& monomial = allMonomials[i];
     int goodRow = currentRowIndex;
@@ -4398,7 +4398,8 @@ gaussianEliminationByRows(
         if (carbonCopyList != 0) {
           (*carbonCopyList)[j].subtractOtherTimesCoefficient((
               *carbonCopyList
-            )[currentRowIndex], &accumulator
+            )[currentRowIndex],
+            &accumulator
           );
         }
         if (carbonCopyMatrix != 0) {
@@ -5683,8 +5684,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   // and make it return 0 (or a pointer to a monomial order, should you
   // wish to use a custom one.
   typename List<TemplateMonomial>::Comparator* monomialOrder = (
-    format ==
-    nullptr
+    format == nullptr
   ) ?
   0 :
   format->getMonomialOrder<TemplateMonomial>();
@@ -5702,8 +5702,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   if (format != nullptr) {
     useCustomPlus = (format->customPlusSign != "");
     if (
-      format->flagPassCustomCoefficientMonomialSeparatorToCoefficients ==
-      false
+      format->flagPassCustomCoefficientMonomialSeparatorToCoefficients == false
     ) {
       customTimes = format->customCoefficientMonomialSeparator;
       format->customCoefficientMonomialSeparator = "";
@@ -6606,8 +6605,7 @@ public:
     return false;
   }
   void gaussianEliminationByRowsMatrix(
-    MatrixTensor<Coefficient>* carbonCopyMatrix =
-    0
+    MatrixTensor<Coefficient>* carbonCopyMatrix = 0
   );
   template <class otherType>
   void actOnVectorColumn(

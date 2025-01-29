@@ -87,14 +87,16 @@ fourierTransformDifferentialPartOnly(
     return;
   }
   output.makeZero();
-  ElementWeylAlgebra<Coefficient>
+  ElementWeylAlgebra<
+    Coefficient
+  >
   startDifferentialOperator,
   finalDifferentialOperator;
   QuasiDifferentialMononomial monomial;
   for (int i = 0; i < this->size(); i ++) {
     startDifferentialOperator.makeZero();
-    startDifferentialOperator.addMonomial((*this)[i].weylMonomial, this->
-      coefficients[i]
+    startDifferentialOperator.addMonomial((*this)[i].weylMonomial,
+      this->coefficients[i]
     );
     startDifferentialOperator.fourierTransform(finalDifferentialOperator);
     for (int j = 0; j < finalDifferentialOperator.size(); j ++) {

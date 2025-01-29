@@ -580,8 +580,7 @@ bool GlobalVariables::userDefaultHasAdminRights() {
   }
   return
   this->flagLoggedIn && (
-    this->userDefault.userRole ==
-    UserCalculatorData::Roles::administrator
+    this->userDefault.userRole == UserCalculatorData::Roles::administrator
   );
 }
 
@@ -1233,8 +1232,7 @@ void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(
     }
     if (indexFirstComponentConnectedToRoot == - 1) {
       this->simpleBasesConnectedComponents.setSize(
-        this->simpleBasesConnectedComponents.size +
-        1
+        this->simpleBasesConnectedComponents.size + 1
       );
       this->simpleBasesConnectedComponents.lastObject()->size = 0;
       this->simpleBasesConnectedComponents.lastObject()->addOnTop(
@@ -2008,8 +2006,8 @@ computeMultiplicitiesLargerAlgebraHighestWeight(
   Vector<Rational> tMpRt;
   tMpRt = this->parabolicSelectionSmallerAlgebra;
   for (
-    int i = 0; i < this->parabolicSelectionSmallerAlgebra.numberOfElements;
-    i ++
+    int i = 0; i < this->parabolicSelectionSmallerAlgebra.numberOfElements; i
+    ++
   ) {
     invertedCartan.getVectorFromRow(i, root);
     tempVertices.addOnTop(root);
@@ -2480,9 +2478,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < this->preimageWeylChamberLargerAlgebra.walls.size; i ++)
   {
     root.makeZero(
-      input.coDomainAlgebra().getRank() +
-      input.domainAlgebra().getRank() +
-      1
+      input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1
     );
     for (int j = 0; j < input.coDomainAlgebra().getRank(); j ++) {
       root[j + input.domainAlgebra().getRank()] =
@@ -2535,9 +2531,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < this->preimageWeylChamberSmallerAlgebra.walls.size; i ++)
   {
     root.makeZero(
-      input.coDomainAlgebra().getRank() +
-      input.domainAlgebra().getRank() +
-      1
+      input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1
     );
     for (int j = 0; j < input.domainAlgebra().getRank(); j ++) {
       root[j] = this->preimageWeylChamberSmallerAlgebra.walls[i].normal[j];

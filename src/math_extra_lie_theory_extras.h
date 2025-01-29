@@ -223,7 +223,9 @@ public:
   );
 };
 
-template <class Coefficient>
+template <
+  class Coefficient
+>
 class ElementUniversalEnvelopingOrdered;
 
 template <class Coefficient>

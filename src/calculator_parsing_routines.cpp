@@ -32,8 +32,7 @@ bool SyntacticElement::isCommandEnclosure() const {
     return true;
   }
   if (
-    this->data.startsWith(owner->opCommandSequence()) &&
-    this->data.size() >= 2
+    this->data.startsWith(owner->opCommandSequence()) && this->data.size() >= 2
   ) {
     if (this->data[1].startsWith(owner->opCommandEnclosure())) {
       return true;
@@ -2459,8 +2458,8 @@ bool CalculatorParser::replaceEXdotsXbySsXdotsX(int numberOfDots) {
   ];
   bool found = false;
   for (
-    int i = (*this->currentSyntacticStack).size - numberOfDots - 2; i >= 0;
-    i --
+    int i = (*this->currentSyntacticStack).size - numberOfDots - 2; i >= 0; i
+    --
   ) {
     SyntacticElement& current = (*this->currentSyntacticStack)[i];
     if (
@@ -3451,8 +3450,7 @@ bool CalculatorParser::applyOneRule() {
   }
   if ((fifthToLastS == "\\int" || this->isDefiniteIntegral(fifthToLastS)) &&
     fourthToLastS == "Expression" && (
-      thirdToLastS == "+" ||
-      thirdToLastS == "-"
+      thirdToLastS == "+" || thirdToLastS == "-"
     ) &&
     secondToLastS == "Expression" &&
     this->canBeRegardedAsDifferentialForm(lastE)
@@ -3599,8 +3597,7 @@ bool CalculatorParser::applyOneRule() {
   }
   if (
     thirdToLastS == "Variable" && ((
-        secondToLastS != "}" &&
-        secondToLastS != " "
+        secondToLastS != "}" && secondToLastS != " "
       ) ||
       fourthToLastS != "{" ||
       fifthToLastS != "{"
@@ -3768,8 +3765,7 @@ bool CalculatorParser::applyOneRule() {
     fourthToLastS == "^" &&
     thirdToLastS == "-" &&
     secondToLastS == "Expression" && (
-      lastS == "Expression" ||
-      lastS == "Variable"
+      lastS == "Expression" || lastS == "Variable"
     )
   ) {
     return this->replaceEPowerMinusEXByEX();
@@ -4325,8 +4321,7 @@ bool CalculatorParser::applyOneRule() {
   if (
     fourthToLastS == "\\end" &&
     thirdToLastS == "{" && (
-      secondToLastS == "array" ||
-      secondToLastS == "pmatrix"
+      secondToLastS == "array" || secondToLastS == "pmatrix"
     ) &&
     lastS == "}"
   ) {

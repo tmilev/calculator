@@ -3382,8 +3382,7 @@ bool CalculatorFunctionsBinaryOps::addMatrixToMatrix(
     return false;
   }
   if ((leftNumberOfRows != rightNumberOfRows) || (
-      leftNumberOfColumns !=
-      rightNumberOfColumns
+      leftNumberOfColumns != rightNumberOfColumns
     )
   ) {
     return false;

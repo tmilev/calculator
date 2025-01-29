@@ -13,7 +13,9 @@
 #include "math_rational_function.h"
 #include "math_vector_partition_functions.h"
 
-template <class builtIn>
+template <
+  class builtIn
+>
 class WithContext;
 class ExpressionContext;
 
@@ -209,8 +211,7 @@ public:
   bool isAtomThatFreezesArguments(std::string* outputWhichAtom = nullptr)
   const;
   bool isAtomWhoseExponentsAreInterpretedAsFunction(
-    std::string* outputWhichAtom =
-    nullptr
+    std::string* outputWhichAtom = nullptr
   ) const;
   bool isPowerOfAtomWhoseExponentsAreInterpretedAsFunction() const;
   bool isAtomNotInterpretedAsFunction(std::string* outputWhichAtom = nullptr)
@@ -251,8 +252,7 @@ public:
     Expression* outputCoefficientInFrontOfDifferential = nullptr
   ) const;
   bool isKnownFunctionWithComplexRange(
-    std::string* outputWhichOperation =
-    nullptr
+    std::string* outputWhichOperation = nullptr
   ) const;
   bool isArithmeticOperation(std::string* outputWhichOperation = nullptr)
   const;
@@ -272,8 +272,7 @@ public:
   const;
   bool needsParenthesisForAddition() const;
   bool needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
-    const Expression* leftNeighbor =
-    nullptr
+    const Expression* leftNeighbor = nullptr
   ) const;
   int getExpressionTreeSize() const;
   template <class Type>

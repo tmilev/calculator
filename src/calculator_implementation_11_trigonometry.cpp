@@ -1586,8 +1586,7 @@ void TrigonometricReduction::TrigonometricFunction::computeEulerFormExpression(
     Expression twoI =
     calculator.expressionTwo() * calculator.expressionSquareRootNegativeOne();
     this->eulerFormExpression = (
-      plusSummand +
-      calculator.expressionMinusOne() * minusSummand
+      plusSummand + calculator.expressionMinusOne() * minusSummand
     ) /
     twoI;
   } else {

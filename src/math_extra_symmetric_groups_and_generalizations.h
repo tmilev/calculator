@@ -460,8 +460,7 @@ class DirectProductElement: SemidirectProductElement<
 > {};
 
 template <
-  typename hg, typename kg, typename HElement, typename KElement,
-  typename oa
+  typename hg, typename kg, typename HElement, typename KElement, typename oa
 >
 class SemidirectProductGroup: public FiniteGroup<
   SemidirectProductElement<HElement, KElement, oa>
@@ -476,8 +475,7 @@ public:
 };
 
 template <
-  typename hg, typename kg, typename HElement, typename KElement,
-  typename oa
+  typename hg, typename kg, typename HElement, typename KElement, typename oa
 >
 void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::initialize(
   hg* inH, kg* inK
@@ -497,8 +495,7 @@ void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::initialize(
 }
 
 template <
-  typename hg, typename kg, typename HElement, typename KElement,
-  typename oa
+  typename hg, typename kg, typename HElement, typename KElement, typename oa
 >
 void SemidirectProductGroup<hg, kg, HElement, KElement, oa>::getWord(
   SemidirectProductElement<HElement, KElement, oa>& g, List<int>& out

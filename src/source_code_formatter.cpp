@@ -739,38 +739,38 @@ bool CodeFormatter::Element::computeIndentationAngleBrackets() {
   return true;
 }
 
-bool CodeFormatter::Element::computeIndentationInParentheses() {
+bool CodeFormatter::Element::computeIndentationInParentheses(
+  bool forceBreakLines
+) {
   if (this->children.size != 3) {
     this->computeIndentationBasic(0);
     return true;
   }
   this->children[0].indentationLevel = this->indentationLevel;
+  this->children[2].indentationLevel = this->indentationLevel;
   this->children[0].computeIndentation();
   int middleSize = this->children[1].minimalSizeWithSpacebars();
   this->children[1].indentationLevel =
   this->indentationLevel + this->owner->tabLength;
   // +4 allows for open parentheses, space, open curly brace.
-  if (
-    this->children[0].rightMostAtomUnderMe()->columnFinal + middleSize + 4 >
-    this->owner->maximumDesiredLineLength
-  ) {
+  bool tooWide =
+  this->children[0].rightMostAtomUnderMe()->columnFinal + middleSize + 4 >
+  this->owner->maximumDesiredLineLength;
+  this->children[1].computeIndentation();
+  bool middleHasNewLines =
+  this->children[1].containsNewLineAfterExcludingComments();
+  bool mustBreakLines = tooWide || middleHasNewLines || forceBreakLines;
+  if (mustBreakLines) {
     this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
+    this->children[1].resetWhitespaceRecursively();
+    this->children[1].indentationLevel =
+    this->indentationLevel + this->owner->tabLength;
     this->children[1].computeIndentation();
     this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
-  } else {
-    this->children[1].computeIndentation();
-    if (this->children[1].containsNewLineAfterExcludingComments()) {
-      this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
-      this->children[1].computeIndentation();
-      this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
-    }
   }
-  this->children[2].indentationLevel = this->indentationLevel;
   this->children[2].computeIndentation();
-  if (this->children[1].rightMostAtomUnderMe()->newLinesAfter == 1) {
-    this->children[0].rightMostAtomUnderMe()->newLinesAfter = 1;
-    this->children[1].computeIndentation();
-    this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
+  if (!mustBreakLines && this->containsNewLineAfterExcludingComments()) {
+    return this->computeIndentationInParentheses(true);
   }
   return true;
 }
@@ -1018,8 +1018,7 @@ bool CodeFormatter::Element::computeIndentationFunctionDefinition() {
   CodeFormatter::Element& lastElementFunctionDeclaration =
   *this->children[0].rightMostAtomUnderMe();
   if (
-    lastElementFunctionDeclaration.type ==
-    CodeFormatter::Element::ConstKeyWord
+    lastElementFunctionDeclaration.type == CodeFormatter::Element::ConstKeyWord
   ) {
     lastElementFunctionDeclaration.newLinesAfter = 0;
     this->children[1].leftMostAtomUnderMe()->whiteSpaceBefore = 1;
@@ -1476,13 +1475,18 @@ bool CodeFormatter::Element::computeIndentationInitializerList() {
   return this->computeIndentationBasic(0);
 }
 
-bool CodeFormatter::Element::computeIndentationCommaList() {
-  bool mustSplitLines = false;
-  if (
-    this->minimalSizeWithSpacebars() + this->offsetFromPrevious() >
-    this->owner->maximumDesiredLineLength
-  ) {
-    mustSplitLines = true;
+bool CodeFormatter::Element::computeIndentationCommaList(bool forceNewLines) {
+  bool mustSplitLines = forceNewLines;
+  if (!mustSplitLines) {
+    if (
+      this->minimalSizeWithSpacebars() + this->offsetFromPrevious() >
+      this->owner->maximumDesiredLineLength
+    ) {
+      mustSplitLines = true;
+    }
+    if (this->containsNewLineAfterExcludingComments()) {
+      mustSplitLines = true;
+    }
   }
   if (mustSplitLines) {
     CodeFormatter::Element* previous = this->previousAtom();
@@ -1493,10 +1497,7 @@ bool CodeFormatter::Element::computeIndentationCommaList() {
   for (int i = 0; i < this->children.size; i ++) {
     CodeFormatter::Element& current = this->children[i];
     bool isCommaOrComment = current.content == "," || current.isComment();
-    if (isCommaOrComment && mustSplitLines) {
-      current.rightMostAtomUnderMe()->newLinesAfter = 1;
-    }
-    if (!isCommaOrComment || i == this->children.size - 1) {
+    if (mustSplitLines) {
       current.resetWhitespaceRecursively();
     }
     current.indentationLevel = this->indentationLevel;
@@ -1504,6 +1505,16 @@ bool CodeFormatter::Element::computeIndentationCommaList() {
       current.whiteSpaceBefore = this->indentationLevel;
     }
     current.computeIndentation();
+    if (mustSplitLines && (isCommaOrComment || i == this->children.size - 1)) {
+      current.rightMostAtomUnderMe()->newLinesAfter = 1;
+    }
+  }
+  if (
+    !mustSplitLines &&
+    !forceNewLines &&
+    this->containsNewLineAfterExcludingComments()
+  ) {
+    return this->computeIndentationCommaList(true);
   }
   return true;
 }
@@ -2605,8 +2616,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast();
   }
   if (
-    secondToLast.type == CodeFormatter::Element::Expression &&
-    last.isComment()
+    secondToLast.type == CodeFormatter::Element::Expression && last.isComment()
   ) {
     secondToLast.addChild(last);
     return this->removeLast();
@@ -3842,8 +3852,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     thirdToLast.type == CodeFormatter::Element::Colon &&
     secondToLast.isExpressionIdentifierAtomFunctionWithArgumentsOrInParentheses
     () && (
-      last.isRightDelimiter() ||
-      last.type == CodeFormatter::Element::SemiColon
+      last.isRightDelimiter() || last.type == CodeFormatter::Element::SemiColon
     )
   ) {
     this->lastRuleName = "ternary question mark";
@@ -4034,8 +4043,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     fourthToLast.type == CodeFormatter::Element::TypeAndIdentifier &&
     thirdToLast.type == CodeFormatter::Element::Comma &&
     secondToLast.type == CodeFormatter::Element::TypeAndIdentifier && (
-      last.isRightDelimiter() ||
-      last.type == CodeFormatter::Element::SemiColon
+      last.isRightDelimiter() || last.type == CodeFormatter::Element::SemiColon
     )
   ) {
     this->lastRuleName = "type identifier comma type identifier delimiter";
@@ -4200,8 +4208,7 @@ bool CodeFormatter::Processor::applyOneRule() {
     return true;
   }
   if (
-    secondToLast.isComment() &&
-    last.type == CodeFormatter::Element::CommaList
+    secondToLast.isComment() && last.type == CodeFormatter::Element::CommaList
   ) {
     this->lastRuleName = "comment comma list";
     secondToLast.makeFrom1(CodeFormatter::Element::CommaList, secondToLast);
@@ -5151,8 +5158,7 @@ bool CodeFormatter::mustSplitWithWhitespace(
   }
   if (rightAtom.content == "(") {
     if (
-      !leftAtom.isOperator() &&
-      leftAtom.type != CodeFormatter::Element::Comma
+      !leftAtom.isOperator() && leftAtom.type != CodeFormatter::Element::Comma
     ) {
       return false;
     }

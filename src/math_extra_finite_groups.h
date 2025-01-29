@@ -9,11 +9,17 @@
 // To do: move Weyl groups to this file. Eliminate all redundant code and
 // organize nicely.
 class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms;
-template <typename someGroup, typename Coefficient>
+template <
+  typename someGroup, typename Coefficient
+>
 class GroupRepresentation;
-template <typename someGroup, typename Coefficient>
+template <
+  typename someGroup, typename Coefficient
+>
 class GroupRepresentationCarriesAllMatrices;
-template <typename someGroup, typename elementSomeGroup>
+template <
+  typename someGroup, typename elementSomeGroup
+>
 class SubgroupData;
 
 template <typename ElementEuclideanDomain>
@@ -310,8 +316,7 @@ public:
   bool computeConjugacyClassesRepresentatives();
   void computeGeneratorsConjugacyClasses();
   void computeConjugacyClassSizesAndRepresentatives(
-    bool useComputeCCSizesRepresentativesWords =
-    true
+    bool useComputeCCSizesRepresentativesWords = true
   );
   void computeConjugacyClassSizesAndRepresentativesWithOrbitIterator();
   void computeConjugacyClassesSizesRepresentativesWords();
@@ -626,9 +631,13 @@ bool FinitelyGeneratedMatrixMonoid<Coefficient>::generateElements(
   return true;
 }
 
-template <typename somegroup, typename Coefficient>
+template <
+  typename somegroup, typename Coefficient
+>
 class VirtualRepresentation;
-template <typename somegroup, typename Coefficient>
+template <
+  typename somegroup, typename Coefficient
+>
 class GroupRepresentationCarriesAllMatrices;
 class SubgroupDataRootReflections;
 
@@ -704,8 +713,7 @@ public:
   bool loadSignSignatures(List<SubgroupDataRootReflections>& outputSubgroups);
   void computeOrLoadCharacterTable(std::stringstream* reportStream = nullptr);
   void computeOrLoadConjugacyClasses(
-    std::stringstream* reportStream =
-    nullptr
+    std::stringstream* reportStream = nullptr
   );
   static void computeIrreducibleRepresentationsWithFormulasImplementation(
     FiniteGroup<ElementWeylGroup>& g
@@ -718,8 +726,7 @@ public:
   );
   void computeRho(bool recompute);
   std::string toStringRootsAndRootReflections(
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   );
   std::string toString(FormatExpressions* format = nullptr);
   std::string toStringCppConjugacyClasses(FormatExpressions* format = nullptr);
@@ -1892,7 +1899,9 @@ public:
   };
 
 private:
-  HashedList<elementRepresentation> privateLayer1, privateLayer2,
+  HashedList<elementRepresentation>
+  privateLayer1,
+  privateLayer2,
   privateLayer3;
   elementRepresentation bufferRepresentationElement;
 public:

@@ -72,8 +72,7 @@ public:
     return out.str();
   }
   std::string toStringSquareBracketsBasicType(
-    FormatExpressions* format =
-    nullptr
+    FormatExpressions* format = nullptr
   ) const {
     (void) format;
     std::stringstream out;
@@ -932,7 +931,9 @@ public:
     const Coefficient& negativeOne,
     const Coefficient& ringZero
   ) const {
-    Matrix<Coefficient>
+    Matrix<
+      Coefficient
+    >
     bufferMatGaussianEliminationCC,
     bufferMatGaussianElimination;
     bool result = true;

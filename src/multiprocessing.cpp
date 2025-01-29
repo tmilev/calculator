@@ -129,8 +129,7 @@ bool MutexProcess::createMe(const std::string& inputName, bool dontCrashOnFail)
   this->name = inputName;
   if (
     !this->lockPipe.createMe(
-      inputName + "lockPipe", true, false,
-      dontCrashOnFail
+      inputName + "lockPipe", true, false, dontCrashOnFail
     )
   ) {
     return false;
@@ -688,8 +687,7 @@ bool Pipe::createMe(const std::string& inputPipeName) {
   }
   if (
     !this->metaData.createMe(
-      "metaData[" + inputPipeName + "]", false, false,
-      true
+      "metaData[" + inputPipeName + "]", false, false, true
     )
   ) {
     this->release();

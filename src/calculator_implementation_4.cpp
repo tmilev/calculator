@@ -112,8 +112,7 @@ bool Calculator::getVectorExpressions(
   output.reserve(input.size());
   output.setSize(0);
   if (
-    !input.isSequenceNElements() &&
-    !input.startsWith(this->opIntervalOpen())
+    !input.isSequenceNElements() && !input.startsWith(this->opIntervalOpen())
   ) {
     if (targetDimNonMandatory > 0) {
       if (targetDimNonMandatory != 1) {
@@ -1088,8 +1087,7 @@ bool CalculatorBasics::associateExponentExponent(
     Rational powerInner;
     Rational powerOuter;
     if (
-      input[2].isRational(&powerOuter) &&
-      input[1][2].isRational(&powerInner)
+      input[2].isRational(&powerOuter) && input[1][2].isRational(&powerInner)
     ) {
       if ((powerInner* powerOuter).isEven()) {
         isGood = true;
@@ -2143,8 +2141,8 @@ JSData Calculator::toJSONPerformance() {
     this->statistics.trivialPerformancePerHandler.coefficients[i];
   }
   for (
-    int i = 0; i < this->statistics.nonTrivialPerformancePerHandler.size();
-    i ++
+    int i = 0; i < this->statistics.nonTrivialPerformancePerHandler.size(); i
+    ++
   ) {
     nonTrivialPerformance +=
     this->statistics.nonTrivialPerformancePerHandler.coefficients[i];

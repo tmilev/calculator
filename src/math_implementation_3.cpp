@@ -37,7 +37,9 @@ true;
 template < >
 double Complex<double>::equalityPrecision =
 0.00000001;
-template <class ElementLeft, class ElementRight, class Coefficient>
+template <
+  class ElementLeft, class ElementRight, class Coefficient
+>
 class TensorProductMonomial;
 
 // template < > int ListPointers<PartFraction>::MemoryAllocationIncrement =100;
@@ -629,8 +631,7 @@ uint32_t StringRoutines::Conversions::codePointFromUtf8(
     }
     // Strip the first two bits.
     nextContribution = static_cast<unsigned char>(
-      input[indexIncrementedToLastConsumedByte + j]
-      << 2
+      input[indexIncrementedToLastConsumedByte + j] << 2
     ) >>
     2;
     codePoint <<= 6;
@@ -749,8 +750,7 @@ std::string StringRoutines::convertStringToJavascriptVariable(
 
 std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
   std::stringstream out;
-  if (
-    input >= 2097152 // = 2^21-1
+  if (input >= 2097152 // = 2^21-1
   ) {
     // Invalid code point.
     // A unicode code point must be smaller than 2^21.
@@ -768,8 +768,7 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
     out << output;
     return out.str();
   }
-  if (
-    input < 2048 // = 2^11, encoding fits in b_110?????, b_10??????
+  if (input < 2048 // = 2^11, encoding fits in b_110?????, b_10??????
   ) {
     unsigned char high = input >> 6;
     high += 128 + 64;
@@ -780,7 +779,8 @@ std::string StringRoutines::Conversions::codePointToUtf8(uint32_t input) {
     return out.str();
   }
   if (
-    input < 65536 // = 2^16, encoding fits in b_1110????, b_10??????, b_10??????
+    input < 65536 // = 2^16, encoding fits in b_1110????, b_10??????,
+    // b_10??????
   ) {
     unsigned char high = input >> 12;
     high += 128 + 64 + 32;
@@ -961,11 +961,21 @@ std::string HtmlRoutines::convertStringToHtmlStringRestrictSize(
 }
 
 std::string HtmlRoutines::convertStringToHtmlString(
-  const std::string& inputString, bool doReplaceNewLineByBr
+  const std::string& inputString, bool doReplaceNewLineCarriageReturnByBr
 ) {
   std::string result;
   HtmlRoutines::convertStringToHtmlStringReturnTrueIfModified(
-    inputString, result, doReplaceNewLineByBr
+    inputString, result, doReplaceNewLineCarriageReturnByBr
+  );
+  return result;
+}
+
+std::string HtmlRoutines::convertStringToHtmlStringWithBr(
+  const std::string& inputString
+) {
+  std::string result;
+  HtmlRoutines::convertStringToHtmlStringReturnTrueIfModified(
+    inputString, result, true, false
   );
   return result;
 }
@@ -2152,8 +2162,8 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
     }
   }
   for (
-    int i = 0; i < FileOperations::folderVirtualLinksNonSensitive().size();
-    i ++
+    int i = 0; i < FileOperations::folderVirtualLinksNonSensitive().size(); i
+    ++
   ) {
     if (
       StringRoutines::stringBeginsWith(
@@ -2812,8 +2822,7 @@ std::string StringRoutines::shortenInsertDots(
   << ".."
   << inputString.substr(
     static_cast<unsigned>(
-      static_cast<signed>(inputString.size()) -
-      numberOfCharactersBeginEnd
+      static_cast<signed>(inputString.size()) - numberOfCharactersBeginEnd
     )
   );
   return out.str();
@@ -2864,8 +2873,7 @@ std::string StringRoutines::stringTrimToLengthForDisplay(
   std::stringstream abbreviationStream;
   abbreviationStream << "...(" << input.size() << " characters) ...";
   int numberOfCharactersAtEnds = (
-    static_cast<signed>(input.size()) -
-    desiredLength20AtLeast
+    static_cast<signed>(input.size()) - desiredLength20AtLeast
   ) /
   2;
   std::stringstream out;
@@ -2877,8 +2885,7 @@ std::string StringRoutines::stringTrimToLengthForDisplay(
     out
     << input[
       static_cast<unsigned>(
-        static_cast<signed>(input.size()) - numberOfCharactersAtEnds +
-        i
+        static_cast<signed>(input.size()) - numberOfCharactersAtEnds + i
       )
     ];
   }
@@ -5568,8 +5575,8 @@ bool SelectionWithMaximumMultiplicity::incrementSubsetFixedCardinality(
     }
   }
   for (
-    int i = this->multiplicities.size - 1; currentCardinality < cardinality;
-    i --
+    int i = this->multiplicities.size - 1; currentCardinality < cardinality; i
+    --
   ) {
     if (this->multiplicities[i] != 0) {
       global.fatal
@@ -5591,8 +5598,7 @@ LargeInteger SelectionWithMaximumMultiplicity::
 numberOfCombinationsOfCardinality(int cardinality) {
   return
   MathRoutines::nChooseK(
-    this->multiplicities.size + cardinality - 1,
-    cardinality
+    this->multiplicities.size + cardinality - 1, cardinality
   );
 }
 
@@ -5756,8 +5762,7 @@ void DynkinType::getOuterAutosGeneratorsOneTypeActOnVectorColumn(
   MatrixTensor<Rational> finalMatrix;
   if (
     dynkinType.letter == 'D' || (
-      dynkinType.letter == 'A' &&
-      dynkinType.rank > 1
+      dynkinType.letter == 'A' && dynkinType.rank > 1
     ) || (dynkinType.letter == 'E' && dynkinType.rank == 6)
   ) {
     directSummand.makeIdentity(dynkinType.rank *(multiplicity - 1));
@@ -6204,7 +6209,8 @@ void DynkinType::getEpsilonMatrix(Matrix<Rational>& output) const {
     for (int k = 0; k < multiplicity; k ++) {
       DynkinSimpleType::getEpsilonMatrix((*this)[index].letter, (*this)[
           index
-        ].rank, currentCartan
+        ].rank,
+        currentCartan
       );
       output.directSumWith(currentCartan);
     }
@@ -7440,8 +7446,7 @@ bool ElementWeylGroup::hasDifferentConjugacyInvariantsFrom(
 ) const {
   STACK_TRACE("ElementWeylGroup::hasDifferentConjugacyInvariantsFrom");
   if ((this->generatorsLastAppliedFirst.size % 2) != (
-      right.generatorsLastAppliedFirst.size %
-      2
+      right.generatorsLastAppliedFirst.size % 2
     )
   ) {
     return true;
@@ -7696,9 +7701,7 @@ void WeylGroupData::actOnAffineHyperplaneByGroupElement(
     );
     this->simpleReflectionDualSpace(
       this->group.elements[index].generatorsLastAppliedFirst[
-        numberOfGenerators -
-        i -
-        1
+        numberOfGenerators - i - 1
       ].index,
       output.normal
     );
@@ -7938,8 +7941,8 @@ LargeInteger WeylGroupData::sizeByFormulaOrNegative1(
 void WeylGroupData::getWord(int g, List<int>& out) const {
   out.setSize(this->group.elements[g].generatorsLastAppliedFirst.size);
   for (
-    int i = 0; i < this->group.elements[g].generatorsLastAppliedFirst.size;
-    i ++
+    int i = 0; i < this->group.elements[g].generatorsLastAppliedFirst.size; i
+    ++
   ) {
     out[i] = this->group.elements[g].generatorsLastAppliedFirst[i].index;
   }
@@ -9357,8 +9360,8 @@ makeParabolicFromSelectionSimpleRoots(
     << global.fatal;
   }
   for (
-    int i = 0; i < zeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements;
-    i ++
+    int i = 0; i < zeroesMeanSimpleRootSpaceIsInParabolic.numberOfElements; i
+    ++
   ) {
     if (!zeroesMeanSimpleRootSpaceIsInParabolic.selected[i]) {
       selectedRoots.setSize(selectedRoots.size + 1);
@@ -11379,7 +11382,10 @@ std::string HtmlRoutines::toHtmlTable(
 }
 
 bool HtmlRoutines::convertStringToHtmlStringReturnTrueIfModified(
-  const std::string& input, std::string& output, bool doReplaceNewLineByBr
+  const std::string& input,
+  std::string& output,
+  bool doReplaceNewLineByBr,
+  bool newLineNeedsCarriageReturn
 ) {
   std::stringstream out;
   bool modified = false;
@@ -11389,7 +11395,10 @@ bool HtmlRoutines::convertStringToHtmlStringReturnTrueIfModified(
     if (i + 1 < input.size()) {
       isReturnNewLine = input[i] == '\r' && input[i + 1] == '\n';
     }
-    if (doReplaceNewLineByBr && isReturnNewLine) {
+    bool isNewLine = input[i] == '\n';
+    if (doReplaceNewLineByBr && isNewLine && !newLineNeedsCarriageReturn) {
+      out << "<br>\n";
+    } else if (doReplaceNewLineByBr && isReturnNewLine) {
       out << "<br>\n";
       i ++;
     } else if (input[i] == '<') {
@@ -11865,8 +11874,7 @@ bool Cone::isRegularToBasis(
   Rational scalarProduct;
   for (int i = 0; i < x; i ++) {
     wallSelection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
-      dimension -
-      1
+      dimension - 1
     );
     if (
       basis.computeNormalFromSelection(
@@ -12165,8 +12173,7 @@ void ConeCollection::initializeFromAffineDirectionsAndRefine(
   Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints
 ) {
   if (
-    inputDirections.size != inputAffinePoints.size ||
-    inputDirections.size <= 0
+    inputDirections.size != inputAffinePoints.size || inputDirections.size <= 0
   ) {
     global.fatal
     << "Input directions size does not match affine point size. "
@@ -12184,8 +12191,7 @@ void ConeCollection::initializeFromAffineDirectionsAndRefine(
     projectivizedDirections[i + inputAffinePoints.size] =
     inputAffinePoints[i];
     projectivizedDirections[i + inputAffinePoints.size].setSize(
-      affineDimension +
-      1
+      affineDimension + 1
     );
     *projectivizedDirections[i + inputAffinePoints.size].lastObject() = 1;
   }
@@ -12321,8 +12327,7 @@ bool Cone::getLatticePointsInCone(
     for (int j = 0; j < boundingBox.multiplicities.size; j ++) {
       candidatePoint +=
       latticeBasis[j] *(
-        boundingBox.multiplicities[j] -
-        upperBoundPointsInEachDim
+        boundingBox.multiplicities[j] - upperBoundPointsInEachDim
       );
     }
     if (lastCoordinateIsOne) {
@@ -14399,8 +14404,7 @@ void Cone::computeVerticesFromNormals() {
   matrix.initialize(dimension - 1, dimension);
   for (int i = 0; i < numberOfCycles; i ++) {
     selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
-      dimension -
-      1
+      dimension - 1
     );
     for (int j = 0; j < selection.cardinalitySelection; j ++) {
       for (int k = 0; k < dimension; k ++) {
@@ -14657,8 +14661,7 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
   Vector<Rational> normalCandidate;
   for (int i = 0; i < numberOfCandidates; i ++) {
     selection.incrementSelectionFixedCardinalityReturnFalseIfPastLast(
-      rankVerticesSpan -
-      1
+      rankVerticesSpan - 1
     );
     for (int j = 0; j < selection.cardinalitySelection; j ++) {
       extraVertices.addOnTop(inputVertices[selection.elements[j]]);
@@ -14924,8 +14927,7 @@ std::string Cone::toLatexVectorWithErrorCheck(
   std::stringstream out;
   out << input.toString();
   if (
-    includeErrorChecks &&
-    this->payload.precomputedNonChecked.contains(input)
+    includeErrorChecks && this->payload.precomputedNonChecked.contains(input)
   ) {
     out
     << ": "

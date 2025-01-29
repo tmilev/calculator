@@ -663,9 +663,7 @@ public:
     & output
   ) const;
   bool reduceOnceTotalOrderMethod(
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
     & output
   );
   bool reduceOnce(
@@ -866,17 +864,13 @@ public:
   // nonReduced, reducedWithElongationRedundancies and reduced
   // collections.
   void getSum(
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
     & output
   ) const;
   // Adds the full sum of the partial fractions to a possibly non-zero
   // starting collection of fractions.
   void accumulateSum(
-    LinearCombination<
-      OnePartialFractionDenominator, Polynomial<LargeInteger>
-    >
+    LinearCombination<OnePartialFractionDenominator, Polynomial<LargeInteger> >
     & output
   ) const;
   bool isHigherThanWithRespectToWeight(

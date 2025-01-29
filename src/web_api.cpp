@@ -184,13 +184,11 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
   } else if ("/" + global.requestType == WebAPI::Request::calculatorWorkerJS) {
     return this->processCalculatorWebWorkerJS(false);
   } else if (
-    "/" + global.requestType ==
-    WebAPI::Request::calculatorWorkerJSWithHash
+    "/" + global.requestType == WebAPI::Request::calculatorWorkerJSWithHash
   ) {
     return this->processCalculatorWebWorkerJS(true);
   } else if (
-    global.flagLoggedIn &&
-    global.requestType == WebAPI::Request::deleteAccount
+    global.flagLoggedIn && global.requestType == WebAPI::Request::deleteAccount
   ) {
     return this->processDeleteAccount();
   }

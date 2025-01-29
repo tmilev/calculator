@@ -39,8 +39,7 @@ public:
   }
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner) {
     if (
-      generatorIndex < 0 ||
-      generatorIndex > inputOwner.getNumberOfGenerators()
+      generatorIndex < 0 || generatorIndex > inputOwner.getNumberOfGenerators()
     ) {
       global.fatal
       << "Attempt to assign impossible index to monomial UE. "

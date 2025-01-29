@@ -147,8 +147,7 @@ public:
     return this->getValueCreateNoInitialization(key);
   }
   bool operator==(
-    const MapTemplate<ListType, Key, Value, keyHashFunction>&
-    other
+    const MapTemplate<ListType, Key, Value, keyHashFunction>& other
   ) const {
     if (this->size() != other.size()) {
       return false;

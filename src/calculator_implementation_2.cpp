@@ -104,8 +104,7 @@ std::string Calculator::Examples::escape(const std::string& atom) {
         ".",
         "!",
         "|"
-      }
-    );
+      });
   }
   if (!this->toBeEscaped.contains(atom)) {
     return atom;

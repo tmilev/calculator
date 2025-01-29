@@ -1585,44 +1585,38 @@ List<List<std::string> >& FileOperations::initializeFolderVirtualLinksDefaults(
       List<std::string>({
           Configuration::calculatorWasm,
           "calculator_html/web_assembly/calculator.wasm"
-        }
-      ),
+        }),
       List<std::string>({Configuration::examples, "examples/"}),
-      List<std::string>({
-          Configuration::HTMLAceSrcMin,
-          "html-common/ace/src-min/"
-        }
+      List<std::string>(
+        {Configuration::HTMLAceSrcMin, "html-common/ace/src-min/"}
       ),
       List<std::string>({Configuration::HTMLCommonFonts, "html-common/fonts"}),
       List<std::string>({Configuration::HTMLCommonFont, "html-common/fonts"}),
       List<std::string>({Configuration::HTMLCommon, "html-common/"}),
       List<std::string>({Configuration::calculatorHTML, "calculator_html/"}),
       List<std::string>({Configuration::publicHTML, "public_html/"}),
-      List<std::string>({
-          Configuration::certificatesPublic,
-          "certificates-public/"
-        }
+      List<std::string>(
+        {Configuration::certificatesPublic, "certificates-public/"}
       ),
       List<std::string>({Configuration::sourceCode, "src/"}),
       List<std::string>({Configuration::testFolder, "test/"}),
       List<std::string>({Configuration::outputFolder, "output/"}),
       List<std::string>({Configuration::HTMLGeneral, "public_html/"}),
       List<std::string>({Configuration::problemsFolder, "../problems/"}),
-      List<std::string>({Configuration::courseTemplates, "../coursetemplates/"}
+      List<std::string>(
+        {Configuration::courseTemplates, "../coursetemplates/"}
       ),
-      List<std::string>({
-          Configuration::coursesAvailable,
-          "../coursesavailable/"
-        }
+      List<std::string>(
+        {Configuration::coursesAvailable, "../coursesavailable/"}
       ),
       List<std::string>({Configuration::topicLists, "../topiclists/"}),
-      List<std::string>({Configuration::laTeXMaterials, "../LaTeX-materials/"}
+      List<std::string>(
+        {Configuration::laTeXMaterials, "../LaTeX-materials/"}
       ),
       List<std::string>({Configuration::slidesVideo, "../slides-video/"}),
       List<std::string>({Configuration::freecalc, "../freecalc/"}),
       List<std::string>({"favicon.ico", "calculator_html/favicon.ico"}),
-    }
-  );
+    });
   FileOperations::checkFolderLinks();
   return result;
 }
@@ -11797,8 +11791,7 @@ bool ConeCollection::drawProjectiveChambers(
       &this->refinedCones.values,
       &this->nonRefinedCones.values,
       &this->conesWithIrregularWalls.values
-    }
-  );
+    });
   if (this->refinedCones.size() > this->maximumCones) {
     // Too many cones to draw;
     return true;

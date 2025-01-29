@@ -23,10 +23,8 @@ bool JSData::Test::recode() {
   toRecode.addOnTop(List<std::string>({"- 5", "-5"}));
   toRecode.addOnTop(List<std::string>({"[1, \"\"]", "[1,\"\"]"}));
   toRecode.addOnTop(
-    List<std::string>({
-        "{\"a\":\"b\", \"c\": [\"d\",5]}",
-        "{\"a\":\"b\",\"c\":[\"d\",5]}"
-      }
+    List<std::string>(
+      {"{\"a\":\"b\", \"c\": [\"d\",5]}", "{\"a\":\"b\",\"c\":[\"d\",5]}"}
     )
   );
   toRecode.addOnTop(List<std::string>({"{\"a\":\"\\n\"}", "{\"a\":\"\\n\"}"}));
@@ -39,8 +37,7 @@ bool JSData::Test::recode() {
     List<std::string>({
         "{\"resultHtml\":\"&lt;!-- --&gt;\\na\"}",
         "{\"resultHtml\":\"&lt;!-- --&gt;\\na\"}"
-      }
-    )
+      })
   );
   for (int i = 0; i < toRecode.size; i ++) {
     JSData::Test::recodeOnce(toRecode[i], false);
@@ -110,8 +107,7 @@ bool JSData::Test::recodeRelaxed() {
         "[true, false, null, \"\", {\"a\":\"b\"}, "
         "4.0, 4.1,-4.0,-4.01, 1234, -123, - 123]",
         "[true,false,null,\"\",{\"a\":\"b\"},4,4.1,-4,-4.01,1234,-123,-123]"
-      }
-    )
+      })
   );
   toRecode.addOnTop(
     List<std::string>({"{a: 1, b:\"c\"}", "{\"a\":1,\"b\":\"c\"}"})

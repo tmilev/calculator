@@ -1446,10 +1446,8 @@ void DatabaseInternalServer::ensureStandardCollectionIndices() {
   STACK_TRACE("DatabaseInternalServer::ensureStandardCollectionIndices");
   this->ensureCollection(
     DatabaseStrings::tableDeadlines,
-    List<std::string>({
-        DatabaseStrings::labelId,
-        DatabaseStrings::labelDeadlinesSchema
-      }
+    List<std::string>(
+      {DatabaseStrings::labelId, DatabaseStrings::labelDeadlinesSchema}
     )
   );
   this->ensureCollection(
@@ -1458,7 +1456,8 @@ void DatabaseInternalServer::ensureStandardCollectionIndices() {
   );
   this->ensureCollection(
     DatabaseStrings::tableEmailInfo,
-    List<std::string>({DatabaseStrings::labelId, DatabaseStrings::labelEmail,}
+    List<std::string>(
+      {DatabaseStrings::labelId, DatabaseStrings::labelEmail,}
     )
   );
   this->ensureCollection(
@@ -1473,15 +1472,12 @@ void DatabaseInternalServer::ensureStandardCollectionIndices() {
         DatabaseStrings::labelEmail,
         DatabaseStrings::labelInstructor,
         DatabaseStrings::labelUserRole
-      }
-    )
+      })
   );
   this->ensureCollection(
     DatabaseStrings::tableProblemWeights,
-    List<std::string>({
-        DatabaseStrings::labelId,
-        DatabaseStrings::labelProblemWeightsSchema
-      }
+    List<std::string>(
+      {DatabaseStrings::labelId, DatabaseStrings::labelProblemWeightsSchema}
     )
   );
 }

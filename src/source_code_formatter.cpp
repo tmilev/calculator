@@ -1122,8 +1122,8 @@ bool CodeFormatter::Element::computeIndentationCurlyBraceCommaDelimitedList() {
   }
   this->resetWhitespaceRecursively();
   this->children[0].indentationLevel = this->indentationLevel;
-  this->children[0].computeIndentation();
   this->children[0].newLinesAfter = 1;
+  this->children[0].computeIndentation();
   int indentationChildren = this->indentationLevel + this->owner->tabLength;
   CodeFormatter::Element& list = this->children[1];
   list.indentationLevel = indentationChildren;
@@ -2052,27 +2052,12 @@ CodeFormatter::CodeFormatter() {
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"&", "&"}));
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"&", "*"}));
   this->pairsNotSeparatedBySpace.addOnTop(List<std::string>({"*", "&"}));
-  List<std::string> relations = List<std::string>({
-      "=",
-      "==",
-      ">=",
-      ">",
-      "<=",
-      "!=",
-      "*=",
-      "+=",
-      "-=",
-      "/=",
-      "^="
-    }
+  List<std::string> relations = List<std::string>(
+    {"=", "==", ">=", ">", "<=", "!=", "*=", "+=", "-=", "/=", "^="}
   );
   List<std::string> andAndOr = List<std::string>({"&&", "||"});
-  List<std::string> arithmeticOperations = List<std::string>({
-      "+",
-      "-",
-      "/",
-      "*"
-    }
+  List<std::string> arithmeticOperations = List<std::string>(
+    {"+", "-", "/", "*"}
   );
   List<std::string> bitShift = List<std::string>({"<<", ">>"});
   List<std::string> andOrRelations = relations;
@@ -2205,15 +2190,8 @@ CodeFormatter::CodeFormatter() {
     "catch", CodeFormatter::Element::CatchKeyWord
   );
   this->typeKeyWords.addListOnTop(
-    List<std::string>({
-        "bool",
-        "void",
-        "char",
-        "signed",
-        "unsigned",
-        "int",
-        "long"
-      }
+    List<std::string>(
+      {"bool", "void", "char", "signed", "unsigned", "int", "long"}
     )
   );
   this->controlKeyWords.addListOnTop(
@@ -2258,8 +2236,7 @@ CodeFormatter::CodeFormatter() {
         "and",
         "or",
         "xor"
-      }
-    )
+      })
   );
   this->maximumDesiredLineLength = 80;
   this->indexCurrentlyConsumed = 0;
@@ -5008,13 +4985,25 @@ bool CodeFormatter::isOperatorSuitableForNormalization(
 void CodeFormatter::applyNewLineExceptions(
   CodeFormatter::Element& left, CodeFormatter::Element& right
 ) {
-  if (right.content == "{") {
+  if (right.content == "{" && right.newLinesAfter > 0) {
     if (
       left.content == "(" &&
       left.newLinesAfter > 0 &&
       left.columnFinal + 1 < this->maximumDesiredLineLength
     ) {
       // Exception: formatting of ({ sequence.
+      left.newLinesAfter = 0;
+      right.whiteSpaceBefore = 0;
+      return;
+    }
+  }
+  if (left.content == "}" && right.content == ")") {
+    if (
+      left.previousAtom()->newLinesAfter > 0 &&
+      left.newLinesAfter > 0 &&
+      left.columnFinal + 1 < this->maximumDesiredLineLength
+    ) {
+      // We have a lonely } followed by a ) on the next line.
       left.newLinesAfter = 0;
       right.whiteSpaceBefore = 0;
       return;

@@ -4699,8 +4699,7 @@ void WebServer::initializeMainFoldersInstructorSpecific() {
       Configuration::courseTemplates,
       Configuration::coursesAvailable,
       Configuration::problemsFolder,
-    }
-  );
+    });
   for (int i = 0; i < incoming.size; i ++) {
     FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash().
     addOnTop(incoming[i]);

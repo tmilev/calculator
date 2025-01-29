@@ -57,8 +57,7 @@ bool MonomialPolynomial::Test::testMonomialOrdersSatisfyTheDefinition() {
       {one, xTwo, xTwoSquared},
       {one, xOne, xOneXtwo},
       {one, xTwo, xOneXtwo}
-    }
-  );
+    });
   for (int i = 0; i < allOrders.size; i ++) {
     for (int j = 0; j < elementsIncreasingOrder.size; j ++) {
       for (int k = 0; k < elementsIncreasingOrder[i].size; k ++) {

@@ -275,7 +275,8 @@ QueryUpdate CalculatorHTML::toQuerySetDeadlines(
       currentDeadline;
     }
     output.addNestedKeyValuePair(
-      List<std::string>({DatabaseStrings::labelDeadlines, currentProblemName,}
+      List<std::string>(
+        {DatabaseStrings::labelDeadlines, currentProblemName,}
       ),
       currentProblemJSON
     );
@@ -314,10 +315,8 @@ QueryUpdate CalculatorHTML::toQuerySetProblemWeights(
     JSData currentWeight;
     currentWeight[DatabaseStrings::labelProblemWeight] = currentProblemJSON;
     output.addNestedKeyValuePair(
-      List<std::string>({
-          DatabaseStrings::labelProblemWeight,
-          currentProblemName
-        }
+      List<std::string>(
+        {DatabaseStrings::labelProblemWeight, currentProblemName}
       ),
       currentWeight
     );

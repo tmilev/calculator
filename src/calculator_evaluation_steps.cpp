@@ -6,8 +6,7 @@ List<std::string> Calculator::ExpressionHistoryEnumerator::ruleIgnoreList({
     "InterpretAsDifferential",
     "CommuteConstants",
     "MultiplyByOne"
-  }
-);
+  });
 HashedList<std::string> Calculator::ExpressionHistoryEnumerator::
 ruleIgnoreListHashList;
 

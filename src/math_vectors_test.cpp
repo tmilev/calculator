@@ -26,8 +26,7 @@ bool VectorTest::order() {
       fromString("(1,2,1)"),
       fromString("(2,2,0)"),
       fromString("(2,0,2)")
-    }
-  );
+    });
   currentVectors.quickSortAscending();
   std::string ascending = currentVectors.toString();
   currentVectors.quickSortDescending();

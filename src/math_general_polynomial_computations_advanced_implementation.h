@@ -586,10 +586,8 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->flagSystemProvenToHaveSolution = false;
   this->flagSystemSolvedOverBaseField = false;
   this->flagUsingAlgebraicClosure = false;
-  this->arbitrarySubstitutionsInOrder = List<Rational>({
-      Rational::zeroStatic(),
-      Rational::oneStatic()
-    }
+  this->arbitrarySubstitutionsInOrder = List<Rational>(
+    {Rational::zeroStatic(), Rational::oneStatic()}
   );
 }
 

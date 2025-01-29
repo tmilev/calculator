@@ -6856,10 +6856,8 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem(
   if (embeddedType.getRank() == 1) {
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
-    toBeConfigured.arbitrarySubstitutionsInOrder = List<Rational>({
-        Rational::zeroStatic(),
-        Rational::oneStatic()
-      }
+    toBeConfigured.arbitrarySubstitutionsInOrder = List<Rational>(
+      {Rational::zeroStatic(), Rational::oneStatic()}
     );
   }
   std::string embeddingLieAlgebraName = embeddedType.toString();

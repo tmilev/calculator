@@ -314,8 +314,7 @@ void MainFunctions::analyzeMainArguments(int argC, char** argv) {
         Configuration::portHTTP,
         Configuration::portHTTPSOpenSSL,
         Configuration::serverAutoMonitor,
-      }
-    )
+      })
   );
   for (; arguments.processOneArgument(); arguments.currentIndex ++) {}
 }

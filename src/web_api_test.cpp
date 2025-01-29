@@ -440,8 +440,7 @@ bool WebAPIResponse::Test::forgotLogin() {
   List<std::string> expectedStrings = List<std::string>({
       std::string("noreply@fakemailgundomain.mailgun.org"),
       std::string("dummy_mailgun_key")
-    }
-  );
+    });
   for (const std::string& expected : expectedStrings) {
     if (!StringRoutines::stringContains(globalComments, expected)) {
       global.fatal
@@ -505,8 +504,7 @@ bool WebAPIResponse::Test::signUp() {
   List<std::string> expectedStrings = List<std::string>({
       std::string("noreply@fakemailgundomain.mailgun.org"),
       std::string("dummy_mailgun_key")
-    }
-  );
+    });
   for (const std::string& expected : expectedStrings) {
     if (!StringRoutines::stringContains(globalComments, expected)) {
       global.fatal

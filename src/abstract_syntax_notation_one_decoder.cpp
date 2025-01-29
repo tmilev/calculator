@@ -1683,8 +1683,7 @@ void TBSCertificateInfo::Organization::computeASN(ASNElement& output) {
       &this->organizationalUnitName,
       &this->commonName,
       &this->emailAddress
-    }
-  );
+    });
   ASNElement next;
   for (int i = 0; i < serializationOrder.size; i ++) {
     ASNObject* current = serializationOrder[i];
@@ -2027,10 +2026,8 @@ bool PrivateKeyRSA::loadFromASNEncoded(
   }
   const ASNElement* innerData;
   if (
-    !this->sourceASNOuter.hasSubElementConst({2},
-      {},
-      &innerData,
-      commentsOnFailure
+    !this->sourceASNOuter.hasSubElementConst(
+      {2}, {}, &innerData, commentsOnFailure
     )
   ) {
     return false;
@@ -2046,46 +2043,36 @@ bool PrivateKeyRSA::loadFromASNEncoded(
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({1},
-      {},
-      this->publicKey.modulus,
-      commentsOnFailure
+    !this->sourceASNInner.hasSubElementOfType(
+      {1}, {}, this->publicKey.modulus, commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({2},
-      {},
-      this->publicKey.exponent,
-      commentsOnFailure
+    !this->sourceASNInner.hasSubElementOfType(
+      {2}, {}, this->publicKey.exponent, commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({3},
-      {},
-      this->privateExponent,
-      commentsOnFailure
+    !this->sourceASNInner.hasSubElementOfType(
+      {3}, {}, this->privateExponent, commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({4},
-      {},
-      this->primeOne,
-      commentsOnFailure
+    !this->sourceASNInner.hasSubElementOfType(
+      {4}, {}, this->primeOne, commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({5},
-      {},
-      this->primeTwo,
-      commentsOnFailure
+    !this->sourceASNInner.hasSubElementOfType(
+      {5}, {}, this->primeTwo, commentsOnFailure
     )
   ) {
     return false;
@@ -2094,28 +2081,22 @@ bool PrivateKeyRSA::loadFromASNEncoded(
   LargeInteger exponent2;
   LargeInteger coefficient;
   if (
-    !this->sourceASNInner.hasSubElementOfType({6},
-      {},
-      exponent1,
-      commentsOnFailure
+    !this->sourceASNInner.hasSubElementOfType(
+      {6}, {}, exponent1, commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({7},
-      {},
-      exponent2,
-      commentsOnFailure
+    !this->sourceASNInner.hasSubElementOfType(
+      {7}, {}, exponent2, commentsOnFailure
     )
   ) {
     return false;
   }
   if (
-    !this->sourceASNInner.hasSubElementOfType({8},
-      {},
-      coefficient,
-      commentsOnFailure
+    !this->sourceASNInner.hasSubElementOfType(
+      {8}, {}, coefficient, commentsOnFailure
     )
   ) {
     return false;
@@ -2342,7 +2323,8 @@ bool TBSCertificateInfo::loadASNAlgorithmIdentifier(
     return false;
   }
   if (
-    !input.hasSubElementGetCopy({0},
+    !input.hasSubElementGetCopy(
+      {0},
       {AbstractSyntaxNotationOneSubsetDecoder::tags::objectIdentifier0x06},
       output,
       commentsOnFailure
@@ -2354,7 +2336,8 @@ bool TBSCertificateInfo::loadASNAlgorithmIdentifier(
     return false;
   }
   if (
-    !input.hasSubElementConst({1},
+    !input.hasSubElementConst(
+      {1},
       {AbstractSyntaxNotationOneSubsetDecoder::tags::null0x05},
       nullptr,
       commentsOnFailure
@@ -2426,10 +2409,8 @@ bool TBSCertificateInfo::load(
     return false;
   }
   if (
-    !input.hasSubElementOfType({6, 1, 0, 1},
-      {},
-      this->subjectPublicKey.modulus,
-      commentsOnFailure
+    !input.hasSubElementOfType(
+      {6, 1, 0, 1}, {}, this->subjectPublicKey.modulus, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {
@@ -2438,10 +2419,8 @@ bool TBSCertificateInfo::load(
     return false;
   }
   if (
-    !input.hasSubElementOfType({6, 1, 0, 0},
-      {},
-      this->subjectPublicKey.exponent,
-      commentsOnFailure
+    !input.hasSubElementOfType(
+      {6, 1, 0, 0}, {}, this->subjectPublicKey.exponent, commentsOnFailure
     )
   ) {
     if (commentsOnFailure != nullptr) {

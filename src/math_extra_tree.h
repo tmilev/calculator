@@ -3,9 +3,7 @@
 
 #include "math_general.h"
 
-template <
-  typename data
->
+template <typename data>
 class Tree;
 
 template <typename Data>

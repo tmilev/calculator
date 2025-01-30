@@ -769,7 +769,12 @@ bool CodeFormatter::Element::computeIndentationInParentheses(
     this->children[1].rightMostAtomUnderMe()->newLinesAfter = 1;
   }
   this->children[2].computeIndentation();
-  if (!mustBreakLines && this->containsNewLineAfterExcludingComments()) {
+  if (
+    !mustBreakLines && (
+      this->children[0].containsNewLineAfterExcludingComments() ||
+      this->children[1].containsNewLineAfterExcludingComments()
+    )
+  ) {
     return this->computeIndentationInParentheses(true);
   }
   return true;

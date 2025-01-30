@@ -931,11 +931,8 @@ public:
     const Coefficient& negativeOne,
     const Coefficient& ringZero
   ) const {
-    Matrix<
-      Coefficient
-    >
-    bufferMatGaussianEliminationCC,
-    bufferMatGaussianElimination;
+    Matrix<Coefficient> bufferMatGaussianEliminationCC;
+    Matrix<Coefficient> bufferMatGaussianElimination;
     bool result = true;
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {
@@ -1245,12 +1242,12 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
   Selection& bufferSelection
 ) const {
   STACK_TRACE("Vectors::linearSpanContainsVector");
-  Vectors<Coefficient> tempVectors;
-  tempVectors = *this;
-  tempVectors.addOnTop(input);
+  Vectors<Coefficient> bufferVectors;
+  bufferVectors = *this;
+  bufferVectors.addOnTop(input);
   return
   this->getRankElementSpan(&bufferMatrix, &bufferSelection) ==
-  tempVectors.getRankElementSpan(&bufferMatrix, &bufferSelection);
+  bufferVectors.getRankElementSpan(&bufferMatrix, &bufferSelection);
 }
 
 template <class Coefficient>
@@ -1297,7 +1294,8 @@ bool Vector<Coefficient>::getIntegralCoordinatesInBasisIfTheyExist(
   bufferMatGaussianElimination.gaussianEliminationEuclideanDomain(
     &bufferMatGaussianEliminationCC, negativeOne, ringUnit
   );
-  Vector<Coefficient> root, combination;
+  Vector<Coefficient> root;
+  Vector<Coefficient> combination;
   if (this == &output) {
     global.fatal
     << "Output not allowed to coincide with this object."

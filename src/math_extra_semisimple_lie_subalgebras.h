@@ -239,9 +239,7 @@ public:
     basisOrthogonalComplementOfCentralizerOfSl2InP;
     // The vector space whose basis is below is called W, from where the
     // WConjecture derives its name.
-    List<
-      ElementSemisimpleLieAlgebra<AlgebraicNumber>
-    >
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >
     basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP
     ;
     // A human-readable math formula that describes w_1, w_2 \in W

@@ -13,9 +13,7 @@
 #include "math_rational_function.h"
 #include "math_vector_partition_functions.h"
 
-template <
-  class builtIn
->
+template <class builtIn>
 class WithContext;
 class ExpressionContext;
 

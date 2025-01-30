@@ -339,7 +339,8 @@ void WebClient::fetchWebPagePart2(
   (void) commentsOnFailure;
   (void) commentsGeneral;
 #ifdef MACRO_use_open_ssl
-  std::stringstream messageHeader, continueHeader;
+  std::stringstream messageHeader;
+  std::stringstream continueHeader;
   Connector& connector = this->connectorContainer.getElement();
   if (this->flagDoUseGET) {
     messageHeader

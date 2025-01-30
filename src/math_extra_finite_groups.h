@@ -9,17 +9,11 @@
 // To do: move Weyl groups to this file. Eliminate all redundant code and
 // organize nicely.
 class SubgroupWeylGroupAutomorphismsGeneratedByRootReflectionsAndAutomorphisms;
-template <
-  typename someGroup, typename Coefficient
->
+template <typename someGroup, typename Coefficient>
 class GroupRepresentation;
-template <
-  typename someGroup, typename Coefficient
->
+template <typename someGroup, typename Coefficient>
 class GroupRepresentationCarriesAllMatrices;
-template <
-  typename someGroup, typename elementSomeGroup
->
+template <typename someGroup, typename elementSomeGroup>
 class SubgroupData;
 
 template <typename ElementEuclideanDomain>
@@ -631,13 +625,9 @@ bool FinitelyGeneratedMatrixMonoid<Coefficient>::generateElements(
   return true;
 }
 
-template <
-  typename somegroup, typename Coefficient
->
+template <typename somegroup, typename Coefficient>
 class VirtualRepresentation;
-template <
-  typename somegroup, typename Coefficient
->
+template <typename somegroup, typename Coefficient>
 class GroupRepresentationCarriesAllMatrices;
 class SubgroupDataRootReflections;
 

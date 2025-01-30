@@ -2242,9 +2242,7 @@ freudenthalFormulaIrrepIsWRTLeviPart(
   Coefficient ringZero;
   ringZero = inputHighestWeightFundamentalCoordinates[0].zero();
   // ///////////////////////
-  Vector<
-    Coefficient
-  >
+  Vector<Coefficient>
   highestWeightSimpleCoordinatesLeviPart,
   highestWeightSimpleCoordinatesNilPart;
   highestWeightSimpleCoordinatesLeviPart =

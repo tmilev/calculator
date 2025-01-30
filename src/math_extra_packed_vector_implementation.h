@@ -4,9 +4,7 @@
 #include "math_extra_packed_vector.h"
 #include <assert.h>
 
-template <
-  typename scalar
->
+template <typename scalar>
 const int PackedVector<scalar>::size;
 
 template <typename scalar>

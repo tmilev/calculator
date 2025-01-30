@@ -2734,9 +2734,7 @@ computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators()
   simpleBasisMatrixTimesCartanSymm.getZeroEigenSpaceModifyMe(
     basisOrthogonalRoots
   );
-  Vectors<
-    Rational
-  >
+  Vectors<Rational>
   imagesWeightBasis,
   weightBasis = this->simpleRootsReductiveSubalgebra;
   weightBasis.addListOnTop(basisOrthogonalRoots);

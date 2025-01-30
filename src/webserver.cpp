@@ -1448,7 +1448,8 @@ void WebWorker::writeAfterTimeoutPartTwo(
 int WebWorker::processFolder() {
   STACK_TRACE("WebWorker::processFolder");
   this->setHeaderOKNoContentLength("");
-  std::stringstream outPage, outError;
+  std::stringstream outPage;
+  std::stringstream outError;
   outPage << "<html><body>";
   if (this->relativePhysicalFileName.size() > 0) {
     if (
@@ -1477,7 +1478,8 @@ int WebWorker::processFolder() {
     outPage << sanitization.str();
     outError << sanitization.str();
   }
-  List<std::string> fileNames, fileTypes;
+  List<std::string> fileNames;
+  List<std::string> fileTypes;
   if (
     !FileOperations::getFolderFileNamesUnsecure(
       this->relativePhysicalFileName, fileNames, &fileTypes
@@ -1500,7 +1502,8 @@ int WebWorker::processFolder() {
   << "<br>Virtual name: "
   << HtmlRoutines::convertStringToHtmlString(this->virtualFileName, false)
   << "<hr>";
-  List<std::string> folderLinksSanitized, fileLinksSanitized;
+  List<std::string> folderLinksSanitized;
+  List<std::string> fileLinksSanitized;
   for (int i = 0; i < fileNames.size; i ++) {
     std::stringstream currentStream;
     bool isDir = (fileTypes[i] == ".d");
@@ -2182,7 +2185,8 @@ bool WebWorker::processRedirectAwayFromWWW() {
   ) {
     return false;
   }
-  std::stringstream newAddressStream, redirectHeaderStream;
+  std::stringstream newAddressStream;
+  std::stringstream redirectHeaderStream;
   // The address will be quoted in a link below.
   // Escape quotes, newlines, etc. to prevent injection via malformed url.
   newAddressStream
@@ -2214,7 +2218,8 @@ bool WebWorker::processRedirectAwayFromWWW() {
 
 int WebWorker::processLoginNeededOverUnsecureConnection() {
   STACK_TRACE("WebWorker::processLoginNeededOverUnsecureConnection");
-  std::stringstream redirectStream, newAddressStream;
+  std::stringstream redirectStream;
+  std::stringstream newAddressStream;
   // The address will be included in an href entry enclosed by quotes;
   // escape quotes to prevent content injection using addresses that contain
   // quotes.

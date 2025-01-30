@@ -87,9 +87,7 @@ fourierTransformDifferentialPartOnly(
     return;
   }
   output.makeZero();
-  ElementWeylAlgebra<
-    Coefficient
-  >
+  ElementWeylAlgebra<Coefficient>
   startDifferentialOperator,
   finalDifferentialOperator;
   QuasiDifferentialMononomial monomial;

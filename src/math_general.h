@@ -12,9 +12,7 @@ class Plot;
 class ElementZmodP;
 class WeylGroupData;
 class AlgebraicClosureRationals;
-template <
-  class Coefficient
->
+template <class Coefficient>
 class MatrixTensor;
 class ProgressReport;
 

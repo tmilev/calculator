@@ -3,9 +3,7 @@
 
 #include "general_lists.h"
 
-template <
-  class Object
->
+template <class Object>
 class ListReferences;
 
 template <typename Object>

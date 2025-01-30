@@ -37,9 +37,7 @@ true;
 template < >
 double Complex<double>::equalityPrecision =
 0.00000001;
-template <
-  class ElementLeft, class ElementRight, class Coefficient
->
+template <class ElementLeft, class ElementRight, class Coefficient>
 class TensorProductMonomial;
 
 // template < > int ListPointers<PartFraction>::MemoryAllocationIncrement =100;

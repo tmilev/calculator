@@ -1724,8 +1724,6 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   Expression currentChainExpression;
   Expression numericalConverterExpression(calculator);
   currentChainExpression.makeSequence(calculator);
-  keys.addOnTop("CurrentChain");
-  values.addOnTop(currentChainExpression);
   Expression totalTypesExploredExpression;
   totalTypesExploredExpression.makeSequence(calculator);
   Expression totalHsExploredExpression;
@@ -1745,6 +1743,8 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
   values.addOnTop(totalTypesExploredExpression);
   keys.addOnTop("NumberOfExploredHs");
   values.addOnTop(totalHsExploredExpression);
+  keys.addOnTop("CurrentChain");
+  values.addOnTop(currentChainExpression);
   Expression subalgebrasListExpression;
   Expression candidateExpression;
   subalgebrasListExpression.makeSequence(calculator);

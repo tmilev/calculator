@@ -538,7 +538,8 @@ void PermutationR2::conjugationAction(
 bool PermutationR2::areConjugate(
   const PermutationR2& x, const PermutationR2& y
 ) {
-  List<int> xcsh, ycsh;
+  List<int> xcsh;
+  List<int> ycsh;
   x.getCycleStructure(xcsh);
   y.getCycleStructure(ycsh);
   if (xcsh != ycsh) {
@@ -1267,7 +1268,8 @@ void HyperoctahedralGroupData::spechtModuleOfPartititons(
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>&
   out
 ) {
-  List<Matrix<Rational> > pozm, negm;
+  List<Matrix<Rational> > pozm;
+  List<Matrix<Rational> > negm;
   // global.Comments << "HyperoctahedralGroupR2::SpectModuleOfPartitions(" <<
   // positive << ", " << negative << ")\n";
   positive.spechtModuleMatricesOfTranspositionsjjplusone(pozm);

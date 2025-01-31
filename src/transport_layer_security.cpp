@@ -40,6 +40,66 @@ std::string SSLContent::JSLabels::renegotiate = "renegotiate";
 std::string SSLContent::JSLabels::OCSPrequest = "OCSPrequest";
 std::string SSLContent::JSLabels::signedCertificateTimestampRequest =
 "signedCertificateTimestampRequest";
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
+inputMessages =
+"inputMessages";
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
+outputMessages =
+"outputMessages";
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
+errorsOnInput =
+"errorsOnInput";
+std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
+errorsOnOutput =
+"errorsOnOutput";
+std::string TransportLayerSecurityServer::JSLabels::spoofer = "spoofer";
+std::string TransportLayerSecurityServer::JSLabels::session = "session";
+std::string Serialization::JSLabels::markers = "markers";
+std::string Serialization::JSLabels::body = "body";
+std::string Serialization::JSLabels::length = "length";
+std::string Serialization::JSLabels::offset = "offset";
+std::string Serialization::JSLabels::label = "label";
+std::string Serialization::JSLabels::serialization = "serialization";
+std::string SSLRecord::JSLabels::type = "type";
+std::string SSLRecord::JSLabels::content = "content";
+std::string SSLRecord::JSLabels::session = "session";
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher =
+"chosenCipher";
+std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName
+=
+"chosenCipherName";
+std::string TransportLayerSecurityServer::Session::JSLabels::
+incomingRandomBytes =
+"incomingRandomBytes";
+std::string TransportLayerSecurityServer::Session::JSLabels::myRandomBytes =
+"myRandomBytes";
+std::string TransportLayerSecurityServer::Session::JSLabels::OCSPrequest =
+"OnlineCertificateStatusProtocol";
+std::string TransportLayerSecurityServer::Session::JSLabels::
+signedCertificateTimestampRequest =
+"RequestSignedCertificateTimestamp";
+std::string TransportLayerSecurityServer::Session::JSLabels::cipherSuites =
+"cipherSuites";
+std::string TransportLayerSecurityServer::Session::JSLabels::serverName =
+"serverName";
+std::string TransportLayerSecurityServer::Session::JSLabels::
+algorithmSpecifications =
+"algorithmSpecifications";
+std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId =
+"ellipticCurveId";
+std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName
+=
+"ellipticCurveName";
+std::string TransportLayerSecurityServer::Session::JSLabels::bytesToSign =
+"bytesToSign";
+std::string SignatureAlgorithmSpecification::JSLabels::hash = "hash";
+std::string SignatureAlgorithmSpecification::JSLabels::hashName = "hashName";
+std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithm =
+"signatureAlgorithm";
+std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName
+=
+"signatureAlgorithmName";
+std::string SignatureAlgorithmSpecification::JSLabels::valueHex = "valueHex";
 
 TransportLayerSecurity::TransportLayerSecurity() {
   this->flagIsServer = true;
@@ -497,21 +557,6 @@ bool TransportLayerSecurityServer::writeBytesOnce(
   return numberOfBytesSent >= 0;
 }
 
-std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
-inputMessages =
-"inputMessages";
-std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
-outputMessages =
-"outputMessages";
-std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
-errorsOnInput =
-"errorsOnInput";
-std::string TransportLayerSecurityServer::NetworkSpoofer::JSLabels::
-errorsOnOutput =
-"errorsOnOutput";
-std::string TransportLayerSecurityServer::JSLabels::spoofer = "spoofer";
-std::string TransportLayerSecurityServer::JSLabels::session = "session";
-
 JSData TransportLayerSecurityServer::toJSON() {
   JSData result;
   if (this->spoofer.flagDoSpoof) {
@@ -524,7 +569,11 @@ JSData TransportLayerSecurityServer::toJSON() {
 }
 
 JSData TransportLayerSecurityServer::NetworkSpoofer::toJSON() {
-  JSData result, inputMessage, outputMessages, inErrors, outErrors;
+  JSData result;
+  JSData inputMessage;
+  JSData outputMessages;
+  JSData inErrors;
+  JSData outErrors;
   result.elementType = JSData::Type::tokenArray;
   inputMessage.elementType = JSData::Type::tokenArray;
   outputMessages.elementType = JSData::Type::tokenArray;
@@ -1855,13 +1904,6 @@ SSLRecord::SSLRecord() {
   this->owner = nullptr;
 }
 
-std::string Serialization::JSLabels::markers = "markers";
-std::string Serialization::JSLabels::body = "body";
-std::string Serialization::JSLabels::length = "length";
-std::string Serialization::JSLabels::offset = "offset";
-std::string Serialization::JSLabels::label = "label";
-std::string Serialization::JSLabels::serialization = "serialization";
-
 std::string Serialization::Marker::toString() const {
   std::stringstream out;
   out
@@ -1895,10 +1937,6 @@ std::string SSLRecord::toHtml(int id) {
   return out.str();
 }
 
-std::string SSLRecord::JSLabels::type = "type";
-std::string SSLRecord::JSLabels::content = "content";
-std::string SSLRecord::JSLabels::session = "session";
-
 JSData SSLRecord::toJSON() {
   STACK_TRACE("SSLRecord::toJSON");
   JSData result;
@@ -1915,15 +1953,6 @@ std::string TransportLayerSecurityServer::Session::toStringChosenCipher() {
   }
   return this->owner->cipherSuiteNames.getValueNoFail(this->chosenCipher);
 }
-
-std::string SignatureAlgorithmSpecification::JSLabels::hash = "hash";
-std::string SignatureAlgorithmSpecification::JSLabels::hashName = "hashName";
-std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithm =
-"signatureAlgorithm";
-std::string SignatureAlgorithmSpecification::JSLabels::signatureAlgorithmName
-=
-"signatureAlgorithmName";
-std::string SignatureAlgorithmSpecification::JSLabels::valueHex = "valueHex";
 
 std::string SignatureAlgorithmSpecification::getSignatureAlgorithmName() {
   switch (this->signatureAlgorithm) {
@@ -1977,36 +2006,6 @@ JSData SignatureAlgorithmSpecification::toJSON() {
   this->getSignatureAlgorithmName();
   return result;
 }
-
-std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipher =
-"chosenCipher";
-std::string TransportLayerSecurityServer::Session::JSLabels::chosenCipherName
-=
-"chosenCipherName";
-std::string TransportLayerSecurityServer::Session::JSLabels::
-incomingRandomBytes =
-"incomingRandomBytes";
-std::string TransportLayerSecurityServer::Session::JSLabels::myRandomBytes =
-"myRandomBytes";
-std::string TransportLayerSecurityServer::Session::JSLabels::OCSPrequest =
-"OnlineCertificateStatusProtocol";
-std::string TransportLayerSecurityServer::Session::JSLabels::
-signedCertificateTimestampRequest =
-"RequestSignedCertificateTimestamp";
-std::string TransportLayerSecurityServer::Session::JSLabels::cipherSuites =
-"cipherSuites";
-std::string TransportLayerSecurityServer::Session::JSLabels::serverName =
-"serverName";
-std::string TransportLayerSecurityServer::Session::JSLabels::
-algorithmSpecifications =
-"algorithmSpecifications";
-std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveId =
-"ellipticCurveId";
-std::string TransportLayerSecurityServer::Session::JSLabels::ellipticCurveName
-=
-"ellipticCurveName";
-std::string TransportLayerSecurityServer::Session::JSLabels::bytesToSign =
-"bytesToSign";
 
 JSData TransportLayerSecurityServer::Session::toJSON() {
   JSData result;

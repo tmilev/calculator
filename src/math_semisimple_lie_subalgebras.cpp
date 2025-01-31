@@ -8,6 +8,34 @@
 #include "math_subsets_selections.h"
 #include "math_vector_partition_functions.h"
 
+std::string SlTwoSubalgebras::descriptionHCharacteristic =
+"Let h be in the Cartan subalgebra. Let \\(\\alpha_1, ..., \\alpha_n\\) "
+"be simple roots with respect to h. "
+"Then the h-characteristic, as defined by E. Dynkin, "
+"is the n-tuple \\((\\alpha_1(h), ..., \\alpha_n(h))\\).";
+std::string SlTwoSubalgebras::descriptionHRealization =
+"The actual realization of h. "
+"The coordinates of h are given with "
+"respect to the fixed original simple basis. "
+"Note that the h-characteristic is computed using "
+"<b>a possibly different simple basis</b>, "
+"more precisely, with respect to any h-positive simple basis. ";
+std::string SlTwoSubalgebras::descriptionMinimalContainingRegularSubalgebras =
+"A regular semisimple subalgebra might contain an sl(2) such that the sl(2) "
+"has no centralizer in the regular semisimple subalgebra, "
+"but the regular semisimple subalgebra might fail to be minimal containing. "
+"This happens when another minimal containing regular semisimple subalgebra "
+"of equal rank nests as a root subalgebra in the containing SA. "
+"See Dynkin, Semisimple Lie subalgebras of semisimple "
+"Lie algebras, remark before Theorem 10.4.";
+std::string SlTwoSubalgebras::descriptionModuleDecompositionOverSl2 =
+"The \\(sl(2)\\) submodules of the "
+"ambient Lie algebra are parametrized by their "
+"highest weight with respect to the Cartan element h of \\(sl(2)\\). "
+"In turn, the highest weight is a positive integer "
+"multiple of the fundamental highest weight \\(\\psi\\). "
+"\\(V_{k\\psi}\\) is \\(k + 1\\)-dimensional. ";
+
 template < >
 List<DynkinSimpleType>::Comparator* FormatExpressions::getMonomialOrder<
   DynkinSimpleType
@@ -4526,11 +4554,11 @@ void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
       this->getAmbientSemisimpleLieAlgebra().lieBracket(
         currentElement, adActionElement, adAdActionElement
       );
-      bool tempB =
+      bool mustBeTrue =
       currentElement.linearSpanContainsGetFirstLinearCombination(
         this->basis, adAdActionElement, linearCombination
       );
-      if (!tempB) {
+      if (!mustBeTrue) {
         global.fatal
         << "Candidate subalgebra not closed under Lie bracket. "
         << global.fatal;
@@ -8123,34 +8151,6 @@ Rational SlTwoSubalgebra::getDynkinIndex() const {
   this->lengthHSquared * this->getOwnerWeyl().getLongestRootLengthSquared() /
   4;
 }
-
-std::string SlTwoSubalgebras::descriptionHCharacteristic =
-"Let h be in the Cartan subalgebra. Let \\(\\alpha_1, ..., \\alpha_n\\) "
-"be simple roots with respect to h. "
-"Then the h-characteristic, as defined by E. Dynkin, "
-"is the n-tuple \\((\\alpha_1(h), ..., \\alpha_n(h))\\).";
-std::string SlTwoSubalgebras::descriptionHRealization =
-"The actual realization of h. "
-"The coordinates of h are given with "
-"respect to the fixed original simple basis. "
-"Note that the h-characteristic is computed using "
-"<b>a possibly different simple basis</b>, "
-"more precisely, with respect to any h-positive simple basis. ";
-std::string SlTwoSubalgebras::descriptionMinimalContainingRegularSubalgebras =
-"A regular semisimple subalgebra might contain an sl(2) such that the sl(2) "
-"has no centralizer in the regular semisimple subalgebra, "
-"but the regular semisimple subalgebra might fail to be minimal containing. "
-"This happens when another minimal containing regular semisimple subalgebra "
-"of equal rank nests as a root subalgebra in the containing SA. "
-"See Dynkin, Semisimple Lie subalgebras of semisimple "
-"Lie algebras, remark before Theorem 10.4.";
-std::string SlTwoSubalgebras::descriptionModuleDecompositionOverSl2 =
-"The \\(sl(2)\\) submodules of the "
-"ambient Lie algebra are parametrized by their "
-"highest weight with respect to the Cartan element h of \\(sl(2)\\). "
-"In turn, the highest weight is a positive integer "
-"multiple of the fundamental highest weight \\(\\psi\\). "
-"\\(V_{k\\psi}\\) is \\(k + 1\\)-dimensional. ";
 
 std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
   STACK_TRACE("SlTwoSubalgebras::toStringSummary");

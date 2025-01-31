@@ -443,9 +443,8 @@ bool TransportLayerSecurityOpenSSL::handShakeIAmClientNoSocketCleanup(
       case SSL_ERROR_WANT_ACCEPT:
         if (commentsOnFailure != nullptr) {
           *commentsOnFailure
-          <<
-          " During handshake negotiations: repeat needed (not implemented). <br> "
-          ;
+          << " During handshake negotiations: "
+          << "repeat needed (not implemented). <br> ";
         }
         break;
       case SSL_ERROR_WANT_X509_LOOKUP:

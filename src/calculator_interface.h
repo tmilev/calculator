@@ -3469,6 +3469,13 @@ private:
     const Expression& input,
     WithContext<Polynomial<Coefficient> >& output
   );
+  static bool chevalleyOrCartanGeneratorFromSemisimplePolynomialForm(
+    Calculator& calculator,
+    const MonomialPolynomial& monomial,
+    ExpressionContext& context,
+    SemisimpleLieAlgebra& owner,
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputElement
+  );
 public:
   // Conversion from expression tree.
   // Conversions from expression tree to type.

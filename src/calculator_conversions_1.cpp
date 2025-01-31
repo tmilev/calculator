@@ -1340,7 +1340,22 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   &calculator.objectContainer.getWeylGroupDataCreateIfNotPresent(
     nonEmbeddedDynkinType
   );
-  outputSubalgebra.weylNonEmbedded->makeFromDynkinType(nonEmbeddedDynkinType);
+  if (owner.owner->getNumberOfPositiveRoots() == 0) {
+    // Newly created weyl group; compute the basics.
+    outputSubalgebra.weylNonEmbedded->makeFromDynkinType(
+      nonEmbeddedDynkinType
+    );
+  }
+  // If the Weyl group wasn't newly created,
+  // there's no need to wipe off previously computed data.
+  if (owner.owner->getNumberOfPositiveRoots() == 0) {
+    // The previous recomputation wiped off the number of positive roots
+    // in an old broken version of this code.
+    global.fatal
+    << "Subalgebra needs initialization: "
+    << owner.owner->toStringLieAlgebraName()
+    << global.fatal;
+  }
   int rank = owner.owner->getRank();
   reportStream << "Extracting matrix of Cartan elements. ";
   report.report(reportStream.str());
@@ -1400,44 +1415,38 @@ bool CalculatorConversions::candidateSubalgebraPrecomputed(
   outputSubalgebra.positiveGenerators.setSize(0);
   outputSubalgebra.negativeGenerators.setSize(0);
   if (
-    CalculatorConversions::loadKey(
+    !CalculatorConversions::loadKey(
       calculator, input, "generators", generatorsExpression
     )
   ) {
-    generatorsExpression.sequencefy();
-    ElementSemisimpleLieAlgebra<AlgebraicNumber> currentGeneratorAlgebraic;
-    for (int i = 1; i < generatorsExpression.size(); i ++) {
-      if (
-        !CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers
-        (
-          calculator,
-          generatorsExpression[i],
-          currentGeneratorAlgebraic,
-          *owner.owner
-        )
-      ) {
-        return
-        calculator
-        << "<hr>Failed to load semisimple Lie algebra element from expression "
-        << generatorsExpression[i].toString()
-        << ". ";
-      }
-      if (i % 2 == 1) {
-        outputSubalgebra.negativeGenerators.addOnTop(
-          currentGeneratorAlgebraic
-        );
-      } else {
-        outputSubalgebra.positiveGenerators.addOnTop(
-          currentGeneratorAlgebraic
-        );
-      }
-    }
-  } else {
     return
     calculator
     << "<hr>Failed to extract subalgebra generators from expression "
     << input.toString()
     << ". ";
+  }
+  generatorsExpression.sequencefy();
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> currentGeneratorAlgebraic;
+  for (int i = 1; i < generatorsExpression.size(); i ++) {
+    if (
+      !CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
+        calculator,
+        generatorsExpression[i],
+        currentGeneratorAlgebraic,
+        *owner.owner
+      )
+    ) {
+      return
+      calculator
+      << "<hr>Failed to load semisimple Lie algebra element from expression "
+      << generatorsExpression[i].toString()
+      << ". ";
+    }
+    if (i % 2 == 1) {
+      outputSubalgebra.negativeGenerators.addOnTop(currentGeneratorAlgebraic);
+    } else {
+      outputSubalgebra.positiveGenerators.addOnTop(currentGeneratorAlgebraic);
+    }
   }
   SemisimpleLieAlgebra& currentNonEmbededSubalgebra =
   owner.subalgebrasNonEmbedded->getValueCreateNoInitialization(
@@ -1625,7 +1634,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
       << "<hr>Error loading candidate subalgebra: "
       << "failed to load candidate number "
       << i
-      << " extracted from expression: "
+      << " from expression: "
       << subalgebrasElement[i].toString()
       << ". <hr>";
     }
@@ -1856,6 +1865,98 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraRationalCoefficients
   return true;
 }
 
+bool CalculatorConversions::
+chevalleyOrCartanGeneratorFromSemisimplePolynomialForm(
+  Calculator& calculator,
+  const MonomialPolynomial& monomial,
+  ExpressionContext& context,
+  SemisimpleLieAlgebra& owner,
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputElement
+) {
+  STACK_TRACE(
+    "CalculatorConversions::chevalleyGeneratorFromSemisimplePolynomialForm"
+  );
+  outputElement.makeZero();
+  int chevalleyGeneratorIndex = 0;
+  if (!monomial.isOneLetterFirstDegree(&chevalleyGeneratorIndex)) {
+    return
+    calculator
+    << "Failed to convert monomial to "
+    << "Chevalley generator: monomial not of degree 1.";
+  }
+  Expression chevalleyGeneratorExpression =
+  context.getVariable(chevalleyGeneratorIndex);
+  if (!chevalleyGeneratorExpression.startsWith(calculator.opUnderscore(), 3)) {
+    return
+    calculator
+    << "<hr>Element: "
+    << chevalleyGeneratorExpression.toString()
+    << "doesn't have the underscore operator.<hr>";
+  }
+  std::string letter;
+  if (!chevalleyGeneratorExpression[1].isOperation(&letter)) {
+    return
+    calculator
+    << "<hr>Failed to convert summand "
+    << chevalleyGeneratorExpression[1].toString()
+    << " to Chevalley generator letter of: "
+    << owner.toStringLieAlgebraName();
+  }
+  ChevalleyGenerator chevalleyGenerator;
+  chevalleyGenerator.owner = &owner;
+  if (
+    !chevalleyGeneratorExpression[2].isSmallInteger(
+      &chevalleyGenerator.generatorIndex
+    )
+  ) {
+    return
+    calculator
+    << "<hr>Failed to convert  "
+    << chevalleyGeneratorExpression[2].toString()
+    << " to Chevalley generator index of: "
+    << owner.toStringLieAlgebraName();
+  }
+  if (letter == "g") {
+    chevalleyGenerator.generatorIndex =
+    owner.getGeneratorFromDisplayIndex(chevalleyGenerator.generatorIndex);
+    if (
+      chevalleyGenerator.generatorIndex < 0 ||
+      chevalleyGenerator.generatorIndex >= owner.getNumberOfGenerators()
+    ) {
+      return
+      calculator
+      << "Bad Chevalley generator index: "
+      << chevalleyGenerator.generatorIndex
+      << ". ";
+    }
+    outputElement.addMonomial(
+      chevalleyGenerator, AlgebraicNumber::oneStatic()
+    );
+    return true;
+  }
+  if (letter != "h") {
+    return
+    calculator
+    << "<hr>Failed to convert  "
+    << letter
+    << " to Chevalley generator of "
+    << owner.toStringLieAlgebraName();
+  }
+  int rootIndex =
+  owner.getRootIndexFromDisplayIndex(chevalleyGenerator.generatorIndex);
+  if (rootIndex < 0) {
+    return
+    calculator
+    << "Cartan letter has negative root index: "
+    << rootIndex
+    << ". ";
+  }
+  outputElement.makeCartanGenerator(
+    owner.weylGroup.rootSystem[rootIndex], owner
+  );
+  return true;
+}
+
 bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   Calculator& calculator,
   const Expression& input,
@@ -1879,81 +1980,30 @@ bool CalculatorConversions::loadElementSemisimpleLieAlgebraAlgebraicNumbers(
   }
   Polynomial<AlgebraicNumber> polynomialForm =
   polynomialFormWithContext.content;
-  ChevalleyGenerator chevalleyGenerator;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElement;
-  chevalleyGenerator.owner = &owner;
   output.makeZero();
+  if (owner.getNumberOfPositiveRoots() == 0) {
+    global.fatal
+    << "Bad number of positive roots for algebra: "
+    << owner.toStringLieAlgebraName()
+    << global.fatal;
+  }
   ExpressionContext context = polynomialFormWithContext.context;
   for (int j = 0; j < polynomialForm.size(); j ++) {
     const MonomialPolynomial& monomial = polynomialForm[j];
-    int chevalleyGeneratorIndex = 0;
-    if (!monomial.isOneLetterFirstDegree(&chevalleyGeneratorIndex)) {
+    bool successfulMonomialConversion =
+    CalculatorConversions::
+    chevalleyOrCartanGeneratorFromSemisimplePolynomialForm(
+      calculator, monomial, context, owner, currentElement
+    );
+    if (!successfulMonomialConversion) {
       return
       calculator
-      << "<hr>Failed to convert semisimple Lie algebra input to linear poly: "
+      << "<hr>Failed to convert to Chevalley generator: "
       << input.toString()
       << ".<hr>";
     }
-    Expression chevalleyGeneratorExpression =
-    context.getVariable(chevalleyGeneratorIndex);
-    if (!chevalleyGeneratorExpression.startsWith(calculator.opUnderscore(), 3))
-    {
-      return
-      calculator
-      << "<hr>Failed to convert: "
-      << chevalleyGeneratorExpression.toString()
-      << "(summand of: "
-      << input.toString()
-      << ") to Chevalley generator.<hr>";
-    }
-    std::string letter;
-    if (
-      !chevalleyGeneratorExpression[1].isOperation(&letter) ||
-      !chevalleyGeneratorExpression[2].isSmallInteger(
-        &chevalleyGenerator.generatorIndex
-      )
-    ) {
-      return
-      calculator
-      << "<hr>Failed to convert summand "
-      << chevalleyGeneratorExpression.toString()
-      << " to Chevalley generator of "
-      << owner.toStringLieAlgebraName();
-    }
-    bool isGood = true;
-    if (letter == "g") {
-      chevalleyGenerator.generatorIndex =
-      owner.getGeneratorFromDisplayIndex(chevalleyGenerator.generatorIndex);
-      if (
-        chevalleyGenerator.generatorIndex < 0 ||
-        chevalleyGenerator.generatorIndex >= owner.getNumberOfGenerators()
-      ) {
-        isGood = false;
-      }
-      output.addMonomial(chevalleyGenerator, polynomialForm.coefficients[j]);
-    } else if (letter == "h") {
-      int rootIndex =
-      owner.getRootIndexFromDisplayIndex(chevalleyGenerator.generatorIndex);
-      if (rootIndex < 0) {
-        isGood = false;
-      } else {
-        currentElement.makeCartanGenerator(
-          owner.weylGroup.rootSystem[rootIndex], owner
-        );
-        currentElement *= polynomialForm.coefficients[j];
-        output += currentElement;
-      }
-    } else {
-      isGood = false;
-    }
-    if (!isGood) {
-      return
-      calculator
-      << "<hr>Failed to convert summand "
-      << chevalleyGeneratorExpression.toString()
-      << " to Chevalley generator of "
-      << owner.toStringLieAlgebraName();
-    }
+    output.addOtherTimesConst(currentElement, polynomialForm.coefficients[j]);
   }
   return true;
 }
@@ -1972,13 +2022,14 @@ bool CalculatorConversions::elementUniversalEnveloping(
   }
   ChevalleyGenerator chevalleyGenerator;
   chevalleyGenerator.owner = &owner;
-  ElementUniversalEnveloping<RationalFraction<Rational> > outputUE;
+  ElementUniversalEnveloping<RationalFraction<Rational> >
+  outputUniversalEnvelopingAlgebraElement;
   ElementUniversalEnveloping<RationalFraction<Rational> > currentSummand;
   ElementUniversalEnveloping<RationalFraction<Rational> > currentMultiplicand;
-  MonomialPolynomial currentMultiplicandRFpartMon;
+  MonomialPolynomial currentMultiplicandRationalFrationalPartialMonomial;
   Polynomial<Rational> currentPMultiplicand;
   RationalFraction<Rational> currentMultiplicandRFpart;
-  outputUE.makeZero(owner);
+  outputUniversalEnvelopingAlgebraElement.makeZero(owner);
   WithContext<Polynomial<Rational> > polynomial;
   if (
     !CalculatorConversions::functionPolynomial<Rational>(
@@ -1996,7 +2047,7 @@ bool CalculatorConversions::elementUniversalEnveloping(
   for (int j = 0; j < polynomial.content.size(); j ++) {
     const MonomialPolynomial& monomial = polynomial.content[j];
     currentSummand.makeConstant(polynomial.content.coefficients[j], owner);
-    currentMultiplicandRFpartMon.makeOne();
+    currentMultiplicandRationalFrationalPartialMonomial.makeOne();
     for (int i = 0; i < monomial.minimalNumberOfVariables(); i ++) {
       int power = - 1;
       if (!monomial(i).isSmallInteger(&power)) {
@@ -2018,18 +2069,26 @@ bool CalculatorConversions::elementUniversalEnveloping(
         << " to polynomial.<hr>";
       }
       std::string letter;
+      if (!singleChevalleyGeneratorExpression[0].isOperation(&letter)) {
+        return
+        calculator
+        << "<hr>Failed to convert element "
+        << singleChevalleyGeneratorExpression[0].toString()
+        << " to Chevalley generator of "
+        << owner.toStringLieAlgebraName();
+      }
       if (
-        !singleChevalleyGeneratorExpression[0].isOperation(&letter) ||
-        !singleChevalleyGeneratorExpression[1].isSmallInteger(
+        !!singleChevalleyGeneratorExpression[1].isSmallInteger(
           &chevalleyGenerator.generatorIndex
         )
       ) {
         return
         calculator
-        << "<hr>Failed to convert summand "
-        << singleChevalleyGeneratorExpression.toString()
-        << " to Chevalley generator of "
+        << "<hr>Failed to convert element "
+        << singleChevalleyGeneratorExpression[1].toString()
+        << " to Chevalley generator letter of "
         << owner.toStringLieAlgebraName();
+;
       }
       bool isGood = true;
       bool isHonestElementUniversalEnveloping = true;
@@ -2075,19 +2134,26 @@ bool CalculatorConversions::elementUniversalEnveloping(
         polynomialVariables.addNoRepetitionOrReturnIndexFirst(
           singleChevalleyGeneratorExpression
         );
-        currentMultiplicandRFpartMon.setVariable(variableIndex, power);
+        currentMultiplicandRationalFrationalPartialMonomial.setVariable(
+          variableIndex, power
+        );
       }
     }
     currentPMultiplicand.makeZero();
-    currentPMultiplicand.addMonomial(currentMultiplicandRFpartMon, 1);
+    currentPMultiplicand.addMonomial(
+      currentMultiplicandRationalFrationalPartialMonomial, 1
+    );
     currentMultiplicandRFpart = currentPMultiplicand;
     currentSummand *= currentMultiplicandRFpart;
-    outputUE += currentSummand;
+    outputUniversalEnvelopingAlgebraElement += currentSummand;
   }
   ExpressionContext outputContext(calculator);
   outputContext.setVariables(polynomialVariables);
   outputContext.setAmbientSemisimpleLieAlgebra(owner);
-  return output.assignValueWithContext(calculator, outputUE, outputContext);
+  return
+  output.assignValueWithContext(
+    calculator, outputUniversalEnvelopingAlgebraElement, outputContext
+  );
 }
 
 bool CalculatorConversions::expressionFromBuiltInType(

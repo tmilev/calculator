@@ -917,10 +917,11 @@ void BranchingData::initializePart1NoSubgroups() {
     weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension()
   );
   for (int i = 0; i < this->homomorphism.imagesCartanDomain.size; i ++) {
-    Vector<Rational>& currentV = this->homomorphism.imagesCartanDomain[i];
-    this->generatorsSmallSub.addOnTop(currentV);
-    for (int j = 0; j < currentV.size; j ++) {
-      if (!currentV[j].isEqualToZero() && this->inducing.selected[j]) {
+    Vector<Rational>& currentVector =
+    this->homomorphism.imagesCartanDomain[i];
+    this->generatorsSmallSub.addOnTop(currentVector);
+    for (int j = 0; j < currentVector.size; j ++) {
+      if (!currentVector[j].isEqualToZero() && this->inducing.selected[j]) {
         this->generatorsSmallSub.removeLastObject();
         this->smallParabolicSelection.addSelectionAppendNewIndex(i);
         break;

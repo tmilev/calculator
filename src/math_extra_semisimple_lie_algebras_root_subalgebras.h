@@ -243,7 +243,7 @@ public:
     const Vector<Rational>& weightLeft, const Vector<Rational>& weightRight
   );
   bool rootIsInNilradicalParabolicCentralizer(
-    Selection& positiveSimpleRootsSel, Vector<Rational>& input
+    Selection& positiveSimpleRootsSelection, Vector<Rational>& input
   );
   void computeEpsilonCoordinatesWithRespectToSubalgebra();
   bool attemptTheTripleTrick(
@@ -365,7 +365,7 @@ public:
     bool doextractRelations
   );
   void possibleNilradicalComputation(
-    Selection& selKmods, RootSubalgebras& owner, int indexInOwner
+    Selection& selectionKModules, RootSubalgebras& owner, int indexInOwner
   );
   std::string toString(FormatExpressions* format = nullptr);
   void toHTML(int index, FormatExpressions* format);
@@ -426,7 +426,7 @@ public:
   );
   void readLieBracketTableAndOppositeKModulesFromFile(
     std::fstream& input,
-    List<List<List<int> > >& outMultTable,
+    List<List<List<int> > >& outLieBracketTable,
     List<int>& outOpposites
   );
   bool operator>(const RootSubalgebra& other) const;

@@ -510,7 +510,7 @@ void SlTwoInSlN::climbDownFromHighestWeightAlongSl2String(
   }
 }
 
-std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
+std::string SlTwoInSlN::elementModuleIndexToString(int input, bool useHtml) {
   std::string beginMath;
   std::string endMath;
   std::string newLine;
@@ -526,7 +526,8 @@ std::string SlTwoInSlN::ElementModuleIndexToString(int input, bool useHtml) {
   Matrix<Rational>& currentHW = this->highestWeightVectors.objects[input];
   int currentEtaHw = this->gModKModules.objects[input].size - 1;
   // currentEtaHw-= currentEtaHw/2;
-  int firstNonZeroRow = - 1, firstNonZeroColumn = - 1;
+  int firstNonZeroRow = - 1;
+  int firstNonZeroColumn = - 1;
   bool found = false;
   for (int i = 0; i < currentHW.numberOfRows; i ++) {
     if (found) {
@@ -699,7 +700,7 @@ void SlTwoInSlN::climbUpFromVector(
   }
 }
 
-std::string SlTwoInSlN::GetNotationString(bool useHtml) {
+std::string SlTwoInSlN::getNotationString(bool useHtml) {
   std::stringstream out;
   std::string beginMath;
   std::string endMath;
@@ -862,7 +863,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
       }
     }
   }
-  out << this->GetNotationString(useHtml);
+  out << this->getNotationString(useHtml);
   out
   << newLine
   << "...and the highest weights of the module decomposition are ("
@@ -877,7 +878,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
     << ", highest weight of ";
     out
     << beginMath
-    << this->ElementModuleIndexToString(i, useHtml)
+    << this->elementModuleIndexToString(i, useHtml)
     << endMath;
   }
   if (computePairingTable) {
@@ -922,7 +923,7 @@ std::string SlTwoInSlN::pairTwoIndices(
   List<Matrix<Rational> >& leftElements = this->gModKModules[leftIndex];
   List<Matrix<Rational> >& rightElements = this->gModKModules[rightIndex];
   Matrix<Rational> matrix;
-  List<Matrix<Rational> > HighestWeightsContainingModules;
+  List<Matrix<Rational> > highestWeightsContainingModules;
   List<Matrix<Rational> > tempDecomposition;
   for (int i = 0; i < leftElements.size; i ++) {
     for (int j = 0; j < rightElements.size; j ++) {
@@ -931,17 +932,17 @@ std::string SlTwoInSlN::pairTwoIndices(
       Matrix<Rational>::lieBracket(leftElement, rightElement, matrix);
       if (!matrix.isEqualToZero()) {
         this->extractHighestWeightVectorsFromVector(
-          matrix, tempDecomposition, HighestWeightsContainingModules
+          matrix, tempDecomposition, highestWeightsContainingModules
         );
-        for (int k = 0; k < HighestWeightsContainingModules.size; k ++) {
+        for (int k = 0; k < highestWeightsContainingModules.size; k ++) {
           output.addOnTopNoRepetition(
             this->getModuleIndexFromHighestWeightVector(
-              HighestWeightsContainingModules[k]
+              highestWeightsContainingModules[k]
             )
           );
           if (
             this->getModuleIndexFromHighestWeightVector(
-              HighestWeightsContainingModules[k]
+              highestWeightsContainingModules[k]
             ) ==
             - 1
           ) {
@@ -963,17 +964,17 @@ std::string SlTwoInSlN::pairTwoIndices(
   out
   << newLine
   << beginMath
-  << this->ElementModuleIndexToString(leftIndex, useHtml)
+  << this->elementModuleIndexToString(leftIndex, useHtml)
   << endMath
   << " and "
   << beginMath
-  << this->ElementModuleIndexToString(rightIndex, useHtml)
+  << this->elementModuleIndexToString(rightIndex, useHtml)
   << endMath
   << " pair to: ";
   for (int i = 0; i < output.size; i ++) {
     out
     << beginMath
-    << this->ElementModuleIndexToString(output[i], useHtml)
+    << this->elementModuleIndexToString(output[i], useHtml)
     << endMath;
     if (i != output.size - 1) {
       out << beginMath << "\\oplus" << endMath;

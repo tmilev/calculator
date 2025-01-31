@@ -712,13 +712,13 @@ void DrawingVariables::changeBasisPReserveAngles(double newX, double newY) {
   currentBasisPlane[0] *(- FloatingPoint::sinFloating(angleChange));
   currentBasisPlane[0] = newVectorE1;
   currentBasisPlane[1] = newVectorE2;
-  double RootTimesE1 =
+  double rootTimesE1 =
   this->bilinearForm.scalarProduct(selectedRoot, currentBasisPlane[0]);
-  double RootTimesE2 =
+  double rootTimesE2 =
   this->bilinearForm.scalarProduct(selectedRoot, currentBasisPlane[1]);
   Vector<double> vOrthogonal = selectedRoot;
-  Vector<double> vProjection = currentBasisPlane[0] * RootTimesE1;
-  vProjection += currentBasisPlane[1] * RootTimesE2;
+  Vector<double> vProjection = currentBasisPlane[0] * rootTimesE1;
+  vProjection += currentBasisPlane[1] * rootTimesE2;
   vOrthogonal -= vProjection;
   double oldRatioProjectionOverHeightSquared = (oldX * oldX + oldY * oldY) / (
     selectedRootLength - oldX * oldX - oldY * oldY

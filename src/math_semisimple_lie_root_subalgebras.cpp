@@ -300,27 +300,27 @@ void RootSubalgebra::writeLieBracketTableAndOppositeKModulesToFile(
 
 void RootSubalgebra::readLieBracketTableAndOppositeKModulesFromFile(
   std::fstream& input,
-  List<List<List<int> > >& outMultTable,
+  List<List<List<int> > >& outLieBracketTable,
   List<int>& outOpposites
 ) {
   std::string currentString;
   int reader = 0;
   int size = 0;
   input >> currentString >> size;
-  outMultTable.setSize(size);
+  outLieBracketTable.setSize(size);
   outOpposites.setSize(size);
   for (int i = 0; i < size; i ++) {
-    outMultTable[i].setSize(size);
+    outLieBracketTable[i].setSize(size);
     for (int j = 0; j < size; j ++) {
       input >> reader;
-      outMultTable[i][j].setSize(reader);
-      for (int k = 0; k < outMultTable[i][j].size; k ++) {
-        input >> outMultTable[i][j][k];
+      outLieBracketTable[i][j].setSize(reader);
+      for (int k = 0; k < outLieBracketTable[i][j].size; k ++) {
+        input >> outLieBracketTable[i][j][k];
       }
     }
   }
   input >> currentString;
-  for (int i = 0; i < outMultTable.size; i ++) {
+  for (int i = 0; i < outLieBracketTable.size; i ++) {
     input >> outOpposites[i];
   }
   if (currentString != "opposites:") {
@@ -329,7 +329,7 @@ void RootSubalgebra::readLieBracketTableAndOppositeKModulesFromFile(
 }
 
 bool RootSubalgebra::rootIsInNilradicalParabolicCentralizer(
-  Selection& positiveSimpleRootsSel, Vector<Rational>& input
+  Selection& positiveSimpleRootsSelection, Vector<Rational>& input
 ) {
   Vector<Rational> root;
   bool found = true;
@@ -342,7 +342,7 @@ bool RootSubalgebra::rootIsInNilradicalParabolicCentralizer(
       if (this->isARoot(root) || root.isEqualToZero()) {
         currentRoot = root;
         found = true;
-        if (positiveSimpleRootsSel.selected[k]) {
+        if (positiveSimpleRootsSelection.selected[k]) {
           foundPositive = true;
         }
         if (currentRoot.isEqualToZero()) {
@@ -457,7 +457,7 @@ bool RootSubalgebra::indexIsCompatibleWithPrevious(
 }
 
 void RootSubalgebra::possibleNilradicalComputation(
-  Selection& selKmods, RootSubalgebras& owner, int indexInOwner
+  Selection& selectionKModules, RootSubalgebras& owner, int indexInOwner
 ) {
   this->numberOfNilradicalsAllowed ++;
   if (owner.flagCountingNilradicalsOnlyNoComputation) {
@@ -469,7 +469,7 @@ void RootSubalgebra::possibleNilradicalComputation(
     this->totalSubalgebras = this->numberOfNilradicalsAllowed;
   }
   if (!this->flagFirstRoundCounting) {
-    this->nilradicalKModules = selKmods;
+    this->nilradicalKModules = selectionKModules;
     if (
       !this->coneConditionHolds(
         owner, indexInOwner, owner.flagComputingLprohibitingWeights
@@ -481,9 +481,9 @@ void RootSubalgebra::possibleNilradicalComputation(
         List<List<int> >& currentSubalgebrasList =
         owner.storedNilradicals[indexInOwner];
         List<int> newNilradical;
-        newNilradical.setSize(selKmods.cardinalitySelection);
-        for (int i = 0; i < selKmods.cardinalitySelection; i ++) {
-          newNilradical[i] = selKmods.elements[i];
+        newNilradical.setSize(selectionKModules.cardinalitySelection);
+        for (int i = 0; i < selectionKModules.cardinalitySelection; i ++) {
+          newNilradical[i] = selectionKModules.elements[i];
         }
         currentSubalgebrasList.addOnTop(newNilradical);
       }
@@ -527,7 +527,8 @@ void RootSubalgebra::makeProgressReportGeneratorAutomorphisms(
   int progress, int outOf, int found
 ) {
   ProgressReport report;
-  std::stringstream out4, out5;
+  std::stringstream out4;
+  std::stringstream out5;
   out5 << progress + 1 << " out of " << outOf << " checked; ";
   out5 << found << " found pos. generators";
   report.report(out5.str());
@@ -542,9 +543,17 @@ void RootSubalgebra::makeProgressReportpossibleNilradicalComputation(
   if (!global.response.monitoringAllowed()) {
     return;
   }
-  ProgressReport report1, report2, report3, report4, report5;
+  ProgressReport report1;
+  ProgressReport report2;
+  ProgressReport report3;
+  ProgressReport report4;
+  ProgressReport report5;
   if (this->flagMakingProgressReport) {
-    std::stringstream out1, out2, out3, out4, out5;
+    std::stringstream out1;
+    std::stringstream out2;
+    std::stringstream out3;
+    std::stringstream out4;
+    std::stringstream out5;
     if (this->flagFirstRoundCounting) {
       out1 << "Counting ss part " << this->dynkinDiagram.toString();
       out2 << "# nilradicals for fixed ss part: " << this->totalSubalgebras;
@@ -950,10 +959,10 @@ bool RootSubalgebra::coneConditionHolds(
   }
   nilradicalRoots.size = 0;
   for (int i = 0; i < this->nilradicalKModules.cardinalitySelection; i ++) {
-    Vectors<Rational>& tempKmod =
+    Vectors<Rational>& kModule =
     this->weightsModulesPrimalSimple[this->nilradicalKModules.elements[i]];
-    for (int j = 0; j < tempKmod.size; j ++) {
-      nilradicalRoots.addOnTop(tempKmod[j]);
+    for (int j = 0; j < kModule.size; j ++) {
+      nilradicalRoots.addOnTop(kModule[j]);
     }
   }
   kSingular.size = 0;
@@ -1095,8 +1104,9 @@ void RootSubalgebra::extractRelations(
     relation.makeLookCivilized(*this);
     owner.minimalRelations.addRelationNoRepetition(relation, owner);
   }
-  bool tempBool = this->attemptTheTripleTrick(relation, nilradicalRoots);
-  if (tempBool) {
+  bool tripleTrickSuccess =
+  this->attemptTheTripleTrick(relation, nilradicalRoots);
+  if (tripleTrickSuccess) {
     this->numberOfRelationsWithStronglyPerpendicularDecomposition ++;
     relation.makeLookCivilized(*this);
     owner.goodRelations.addRelationNoRepetition(relation, owner);
@@ -1322,9 +1332,9 @@ void RootSubalgebra::computeEpsilonCoordinatesWithRespectToSubalgebra() {
         this->kModulesGEpsilonCoordinates[i]
       );
     } else {
-      Vector<Rational> emptyV;
+      Vector<Rational> emptyVector;
       this->kModulesGEpsilonCoordinates[i].initializeFillInObject(
-        this->modules[i].size, emptyV
+        this->modules[i].size, emptyVector
       );
     }
     Vector<Rational> root;
@@ -2496,14 +2506,14 @@ void RootSubalgebra::doKRootsEnumeration() {
   this->kEnumerations.setSize(this->positiveRootsKConnectedComponents.size);
   this->kComponentRanks.setSize(this->positiveRootsKConnectedComponents.size);
   Matrix<Rational> rankComputer;
-  Selection tempSel;
+  Selection selection;
   for (int i = 0; i < this->positiveRootsKConnectedComponents.size; i ++) {
     this->kEnumerations[i].initialize(
       this->positiveRootsKConnectedComponents[i].size
     );
     this->kComponentRanks[i] =
     this->positiveRootsKConnectedComponents[i].getRankElementSpan(
-      &rankComputer, &tempSel
+      &rankComputer, &selection
     );
   }
   this->doKRootsEnumerationRecursively(0);
@@ -2541,23 +2551,26 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
   }
   if (matrix.invert()) {
     for (int l = 0; l < this->testedRootsAlpha.size; l ++) {
-      Vector<Rational> linComb;
+      Vector<Rational> linearCombination;
       Vector<Rational>& testedRootAlpha = this->testedRootsAlpha[l];
       for (int j = 0; j < dimension; j ++) {
-        linComb[j].makeZero();
+        linearCombination[j].makeZero();
         for (int k = 0; k < dimension; k ++) {
           Rational scalarProduct;
           scalarProduct.assign(matrix.elements[k][j]);
           scalarProduct.multiplyBy(testedRootAlpha[k]);
-          linComb[j] += scalarProduct;
+          linearCombination[j] += scalarProduct;
         }
       }
-      int x = linComb.findLeastCommonMultipleDenominatorsTruncateToInt();
-      linComb *= - x;
+      int x =
+      linearCombination.findLeastCommonMultipleDenominatorsTruncateToInt();
+      linearCombination *= - x;
       bool foundBadCombination = true;
       for (int i = 0; i < dimension; i ++) {
-        if (linComb[i].numeratorShort == - 1 || linComb[i].numeratorShort == 1)
-        {
+        if (
+          linearCombination[i].numeratorShort == - 1 ||
+          linearCombination[i].numeratorShort == 1
+        ) {
           foundBadCombination = false;
           break;
         }
@@ -2565,7 +2578,7 @@ void RootSubalgebra::subalgebraEnumerationsToLinearCombinations() {
       if (foundBadCombination) {
         std::string currentString;
         this->linearCombinationToString(
-          testedRootAlpha, x, linComb, currentString
+          testedRootAlpha, x, linearCombination, currentString
         );
       }
     }
@@ -2734,9 +2747,8 @@ computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators()
   simpleBasisMatrixTimesCartanSymm.getZeroEigenSpaceModifyMe(
     basisOrthogonalRoots
   );
-  Vectors<Rational>
-  imagesWeightBasis,
-  weightBasis = this->simpleRootsReductiveSubalgebra;
+  Vectors<Rational> imagesWeightBasis;
+  Vectors<Rational> weightBasis = this->simpleRootsReductiveSubalgebra;
   weightBasis.addListOnTop(basisOrthogonalRoots);
   Matrix<Rational> basisMatrixInverted, resultingOperator;
   basisMatrixInverted.assignVectorsToColumns(weightBasis);
@@ -5058,7 +5070,8 @@ void RootSubalgebras::toStringRootSpaces(
       if (!isShort) {
         bool signsAreDifferent = (firstSignIsPositive != secondSignIsPositive);
         if (signsAreDifferent) {
-          int positiveIndex, negativeIndex;
+          int positiveIndex;
+          int negativeIndex;
           if (firstSignIsPositive) {
             positiveIndex = firstIndex;
             negativeIndex = secondIndex;
@@ -5124,7 +5137,8 @@ void RootSubalgebras::toStringRootSpaces(
       if (!isLong) {
         bool signsAreDifferent = (firstSignIsPositive != secondSignIsPositive);
         if (signsAreDifferent) {
-          int positiveIndex = - 1, negativeIndex = - 1;
+          int positiveIndex = - 1;
+          int negativeIndex = - 1;
           if (firstSignIsPositive) {
             positiveIndex = firstIndex;
             negativeIndex = secondIndex;

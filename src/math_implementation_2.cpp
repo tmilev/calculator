@@ -129,7 +129,8 @@ void LargeIntegerUnsigned::getHexBigEndian(
   int numberOfLeadingZeroesToPadWith, std::string& output
 ) const {
   List<char> result;
-  LargeIntegerUnsigned digit, inputCopy = *this;
+  LargeIntegerUnsigned digit;
+  LargeIntegerUnsigned inputCopy = *this;
   while (inputCopy > 0) {
     digit = static_cast<unsigned char>(inputCopy % 256);
     inputCopy /= 256;
@@ -307,7 +308,8 @@ bool LargeIntegerUnsigned::isPossiblyPrimeMillerRabinOnce(
   if (this->isEqualToOne()) {
     return false;
   }
-  ElementZmodP power, one;
+  ElementZmodP power;
+  ElementZmodP one;
   power.modulus = *this;
   power = LargeIntegerUnsigned(base);
   one.makeOne(*this);
@@ -659,7 +661,8 @@ bool LargeIntegerUnsigned::isDivisibleBy(const LargeIntegerUnsigned& divisor) {
   if (divisor > *this || this->isEqualToZero()) {
     return false;
   }
-  LargeIntegerUnsigned quotient, remainder;
+  LargeIntegerUnsigned quotient;
+  LargeIntegerUnsigned remainder;
   this->dividePositive(divisor, quotient, remainder);
   return remainder.isEqualToZero();
 }
@@ -1160,7 +1163,8 @@ void LargeIntegerUnsigned::multiplyBy(
     this->digits.size
   ) *
   static_cast<unsigned long long>(x.digits.size);
-  MemorySaving<ProgressReport> report1, report2;
+  MemorySaving<ProgressReport> report1;
+  MemorySaving<ProgressReport> report2;
   if (totalCycles >= static_cast<unsigned>(ticksPerReport)) {
     doReport = true;
     std::stringstream reportStream;
@@ -1213,7 +1217,8 @@ void LargeIntegerUnsigned::multiplyBy(
 LargeIntegerUnsigned LargeIntegerUnsigned::operator%(
   const LargeIntegerUnsigned& other
 ) const {
-  LargeIntegerUnsigned result, temp;
+  LargeIntegerUnsigned result;
+  LargeIntegerUnsigned temp;
   this->dividePositive(other, temp, result);
   return result;
 }
@@ -1384,7 +1389,8 @@ void LargeIntegerUnsigned::leastCommonMultiple(
   const LargeIntegerUnsigned& b,
   LargeIntegerUnsigned& output
 ) {
-  LargeIntegerUnsigned tempUI, tempUI2;
+  LargeIntegerUnsigned tempUI;
+  LargeIntegerUnsigned tempUI2;
   if (a.isEqualToZero() || b.isEqualToZero()) {
     global.fatal
     << "Call lcm on zero elements is not allowed. "
@@ -1435,7 +1441,8 @@ void LargeIntegerUnsigned::assignFactorial(unsigned int x) {
   this->makeOne();
   List<unsigned int> primesBelowX;
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(x, primesBelowX);
-  LargeIntegerUnsigned tempInt, tempOne;
+  LargeIntegerUnsigned tempInt;
+  LargeIntegerUnsigned tempOne;
   tempOne.makeOne();
   for (int i = 0; i < primesBelowX.size; i ++) {
     unsigned int prime = primesBelowX.objects[i];
@@ -1764,17 +1771,17 @@ void Rational::raiseToPower(int x) {
     x = - x;
     this->invert();
   }
-  LargeInteger tempNum = this->getNumerator();
+  LargeInteger numeratorBuffer = this->getNumerator();
   LargeIntegerUnsigned one;
   one.makeOne();
-  MathRoutines::raiseToPower(tempNum.value, x, one);
-  LargeIntegerUnsigned tempDen = this->getDenominator();
-  MathRoutines::raiseToPower(tempDen, x, one);
+  MathRoutines::raiseToPower(numeratorBuffer.value, x, one);
+  LargeIntegerUnsigned denominatorBuffer = this->getDenominator();
+  MathRoutines::raiseToPower(denominatorBuffer, x, one);
   char sign = (this->isPositive() || x % 2 == 0) ? 1 : - 1;
   this->allocateExtended();
   this->extended->numerator.sign = sign;
-  this->extended->denominator = tempDen;
-  this->extended->numerator.value = tempNum.value;
+  this->extended->denominator = denominatorBuffer;
+  this->extended->numerator.value = numeratorBuffer.value;
   this->shrinkExtendedPartIfPossible();
 }
 
@@ -1944,7 +1951,8 @@ void Rational::assignFractionalValue() {
     this->makeZero();
     return;
   }
-  LargeIntegerUnsigned newNumerator, quotient;
+  LargeIntegerUnsigned newNumerator;
+  LargeIntegerUnsigned quotient;
   this->extended->numerator.value.dividePositive(
     this->extended->denominator, quotient, newNumerator
   );
@@ -1961,9 +1969,9 @@ void Rational::assignFractionalValue() {
 }
 
 void Rational::assignLargeIntUnsigned(const LargeIntegerUnsigned& other) {
-  LargeInteger tempInt;
-  tempInt.assignLargeIntUnsigned(other);
-  this->assignLargeInteger(tempInt);
+  LargeInteger converter;
+  converter.assignLargeIntUnsigned(other);
+  this->assignLargeInteger(converter);
 }
 
 void Rational::assignLargeInteger(const LargeInteger& other) {
@@ -1993,10 +2001,10 @@ bool Rational::isGreaterThan(const Rational& r) const {
 }
 
 void Rational::subtract(const Rational& r) {
-  Rational temp;
-  temp.assign(r);
-  temp.negate();
-  this->operator+=(temp);
+  Rational negated;
+  negated.assign(r);
+  negated.negate();
+  this->operator+=(negated);
 }
 
 bool Rational::getSquareRootIfRational(Rational& output) const {
@@ -2090,14 +2098,14 @@ bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
     MacroIncrementCounter(Rational::totalSmallAdditions);
     return true;
   }
-  int tempGCD = 0;
+  int commonDivisor = 0;
   if (N > 0) {
-    tempGCD = Rational::greatestCommonDivisor(N, D);
+    commonDivisor = Rational::greatestCommonDivisor(N, D);
   } else {
-    tempGCD = Rational::greatestCommonDivisor(- N, D);
+    commonDivisor = Rational::greatestCommonDivisor(- N, D);
   }
-  this->numeratorShort = N / tempGCD;
-  this->denominatorShort = D / tempGCD;
+  this->numeratorShort = N / commonDivisor;
+  this->denominatorShort = D / commonDivisor;
   MacroIncrementCounter(Rational::totalSmallAdditions);
   return true;
 }
@@ -2375,20 +2383,20 @@ void Rational::simplify() {
       if (this->denominatorShort == 1) {
         return;
       }
-      int tempGCD;
+      int currentGreatestCommonDivisor;
       if (this->numeratorShort > 0) {
-        tempGCD =
+        currentGreatestCommonDivisor =
         this->greatestCommonDivisor(
           this->numeratorShort, this->denominatorShort
         );
       } else {
-        tempGCD =
+        currentGreatestCommonDivisor =
         this->greatestCommonDivisor(
           - this->numeratorShort, this->denominatorShort
         );
       }
-      this->numeratorShort /= tempGCD;
-      this->denominatorShort /= tempGCD;
+      this->numeratorShort /= currentGreatestCommonDivisor;
+      this->denominatorShort /= currentGreatestCommonDivisor;
     }
     return;
   }

@@ -31,7 +31,8 @@ bool Crypto::Test::sha256() {
   );
   std::stringstream commentsOnFailure;
   for (int i = 0; i < inputs.size; i ++) {
-    std::string result, desiredResult;
+    std::string result;
+    std::string desiredResult;
     Crypto::computeSha256(inputs[i], result);
     if (
       !Crypto::convertHexToString(

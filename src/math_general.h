@@ -6825,8 +6825,8 @@ public:
     List<int>& decompositionDimensions, bool useHtml, bool computePairingTable
   );
   std::string initPairingTable(bool useHtml);
-  std::string ElementModuleIndexToString(int input, bool useHtml);
-  std::string GetNotationString(bool useHtml);
+  std::string elementModuleIndexToString(int input, bool useHtml);
+  std::string getNotationString(bool useHtml);
   bool computeInvariantsOfDegree(
     List<int>& decompositionDimensions,
     int degree,

@@ -1,7 +1,6 @@
 #include "crypto_calculator.h"
 #include "database.h"
 #include "general_file_operations_encodings.h"
-#include "general_strings.h"
 #include "string_constants.h"
 
 std::string Database::Test::adminPassword = "111";

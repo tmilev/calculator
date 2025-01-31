@@ -1115,7 +1115,8 @@ void SemisimpleLieAlgebra::makeChevalleyTestReport(
   if (!global.response.reportDesired()) {
     return;
   }
-  std::stringstream out2, out3;
+  std::stringstream out2;
+  std::stringstream out3;
   int x = i * total * total + j * total + k + 1;
   out2
   << "i: "
@@ -1156,9 +1157,11 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
   int numberOfRoots = this->weylGroup.rootSystem.size;
   nonExplored.initialize(numberOfRoots);
   nonExplored.makeFullSelection();
-  Vector<Rational> domainRoot, rangeRoot;
+  Vector<Rational> domainRoot;
+  Vector<Rational> rangeRoot;
   this->computeChevalleyConstants();
-  List<ElementSemisimpleLieAlgebra<Rational> > domain, range;
+  List<ElementSemisimpleLieAlgebra<Rational> > domain;
+  List<ElementSemisimpleLieAlgebra<Rational> > range;
   range.setSize(numberOfRoots + dimension);
   domain.setSize(numberOfRoots + dimension);
   ElementSemisimpleLieAlgebra<Rational> element;
@@ -1213,7 +1216,8 @@ void SemisimpleLieAlgebra::computeOneAutomorphism(
       }
     }
   }
-  Vectors<Rational> vectorsLeft, vectorsRight;
+  Vectors<Rational> vectorsLeft;
+  Vectors<Rational> vectorsRight;
   vectorsLeft.setSize(range.size);
   vectorsRight.setSize(range.size);
   if (!useNegativeRootsFirst) {
@@ -1952,12 +1956,14 @@ void SemisimpleLieAlgebra::orderNilradicalNilWeightAscending(
   Vector<Rational> currentVector;
   currentVector = parabolicSelectionZeroMeansLeviPart;
   for (int i = 0; i < this->getNumberOfGenerators(); i ++) {
-    Rational translationCoeff =
+    Rational translationCoefficient =
     this->getWeightOfGenerator(i).scalarEuclidean(currentVector) *
     this->getNumberOfPositiveRoots();
-    if (translationCoeff < 0) {
+    if (translationCoefficient < 0) {
       this->universalEnvelopingGeneratorOrder[i] =
-      i + translationCoeff.numeratorShort * this->getNumberOfGenerators() * 5;
+      i +
+      translationCoefficient.numeratorShort * this->getNumberOfGenerators() *
+      5;
     }
   }
 }

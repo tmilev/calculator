@@ -14,6 +14,16 @@
 #include "webserver.h"
 #include <iostream>
 
+std::string MainFlags::server = "server";
+std::string MainFlags::format = "format";
+std::string MainFlags::daemon = "daemon";
+std::string MainFlags::help = "help";
+std::string MainFlags::basePath = "base_path";
+std::string MainFlags::configurationFile = "configuration_file";
+std::string MainFlags::test = "test";
+std::string MainFlags::loadDatabase = "load_database";
+std::string MainFlags::deploy = "deploy";
+
 int main(int argc, char** argv) {
   bool useWasm = false;
 #ifdef MACRO_use_wasm
@@ -144,15 +154,6 @@ int MainFunctions::mainWithoutExceptions(int argc, char** argv) {
   }
 }
 
-std::string MainFlags::server = "server";
-std::string MainFlags::format = "format";
-std::string MainFlags::daemon = "daemon";
-std::string MainFlags::help = "help";
-std::string MainFlags::basePath = "base_path";
-std::string MainFlags::configurationFile = "configuration_file";
-std::string MainFlags::test = "test";
-std::string MainFlags::loadDatabase = "load_database";
-std::string MainFlags::deploy = "deploy";
 class ArgumentAnalyzer {
 public:
   int currentIndex;

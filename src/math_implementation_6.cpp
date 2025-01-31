@@ -58,9 +58,9 @@ bool Polynomial<Rational>::findOneVariableRationalRoots(
   this->constantTerm(lowestTerm);
   if (lowestTerm == 0) {
     Polynomial<Rational> x1;
-    Polynomial<Rational> tempP;
+    Polynomial<Rational> bufferPolynomial;
     x1.makeMonomial(0, 1, 1);
-    myCopy.divideBy(x1, myCopy, tempP, monomialOrder);
+    myCopy.divideBy(x1, myCopy, bufferPolynomial, monomialOrder);
     List<Rational> list;
     bool result = myCopy.findOneVariableRationalRoots(list);
     output.addOnTop(0);
@@ -327,7 +327,9 @@ bool PolynomialFactorizationKronecker::solvePolynomial(
   }
   MonomialPolynomial x(0, 1);
   MonomialPolynomial xSquared(0, 2);
-  Rational a, b, c;
+  Rational a;
+  Rational b;
+  Rational c;
   for (int i = 0; i < factorization.reduced.size; i ++) {
     Polynomial<Rational>& factor = factorization.reduced[i];
     c = factor.constantTerm(0);

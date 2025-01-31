@@ -862,14 +862,20 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
   );
   Polynomial<Rational> minimialPolynomial;
   minimialPolynomial.makeZero();
-  Rational currentCF;
+  Rational currentCoefficient;
   Rational linearTermCoefficientFDividedByTwo;
   Rational constantTermShifted;
   for (int i = 0; i < algebraicNumberPolynomial.size(); i ++) {
-    if (!algebraicNumberPolynomial.coefficients[i].isRational(&currentCF)) {
+    if (
+      !algebraicNumberPolynomial.coefficients[i].isRational(
+        &currentCoefficient
+      )
+    ) {
       return false;
     } else {
-      minimialPolynomial.addMonomial(algebraicNumberPolynomial[i], currentCF);
+      minimialPolynomial.addMonomial(
+        algebraicNumberPolynomial[i], currentCoefficient
+      );
     }
   }
   List<MonomialPolynomial>::Comparator* monomialOrder =

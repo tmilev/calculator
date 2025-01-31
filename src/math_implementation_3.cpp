@@ -40,6 +40,7 @@ double Complex<double>::equalityPrecision =
 template <class ElementLeft, class ElementRight, class Coefficient>
 class TensorProductMonomial;
 
+List<bool> FileOperations::safeFileCharacters;
 // template < > int ListPointers<PartFraction>::MemoryAllocationIncrement =100;
 // ListPointers<PartFraction> PartFraction::GlobalCollectorPartFraction;
 // FacetPointers TheBigFacetOutput;
@@ -1131,8 +1132,6 @@ bool FileOperations::isFileNameWithoutDotsAndSlashes(
   }
   return true;
 }
-
-List<bool> FileOperations::safeFileCharacters;
 
 List<bool>& FileOperations::getSafeFileChars() {
   if (FileOperations::safeFileCharacters.size == 0) {

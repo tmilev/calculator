@@ -2370,7 +2370,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
       displayIndicesReflections.addOnTop(i + 1);
     }
   }
-  Matrix<Polynomial<Rational> > matrixPoly;
+  Matrix<Polynomial<Rational> > matrixPolynomial;
   Vector<Polynomial<Rational> > tempVect;
   Vector<Polynomial<Rational> > tempVect2;
   tempVect.setSize(
@@ -2380,7 +2380,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   for (int i = 0; i < tempVect.size; i ++) {
     tempVect[i].makeMonomial(i, 1, Rational(1));
   }
-  matrixPoly.initialize(
+  matrixPolynomial.initialize(
     input.domainAlgebra().weylGroup.getDimension(), tempVect.size
   );
   Polynomial<Rational> polyZero;
@@ -2411,10 +2411,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     Matrix<Rational>& currentLoExt = this->linearOperatorsExtended[i];
     for (int j = 0; j < currentLoExt.numberOfRows; j ++) {
       for (int k = 0; k < currentLoExt.numberOfColumns; k ++) {
-        matrixPoly.elements[j][k].makeConstant(currentLoExt.elements[j][k]);
+        matrixPolynomial.elements[j][k].makeConstant(
+          currentLoExt.elements[j][k]
+        );
       }
     }
-    matrixPoly.actOnVectorColumn(tempVect, tempVect2, polyZero);
+    matrixPolynomial.actOnVectorColumn(tempVect, tempVect2, polyZero);
     for (int j = 0; j < tempVect2.size; j ++) {
       tempVect2[j] += this->translationsProjectedBasisChanged[i][j];
     }

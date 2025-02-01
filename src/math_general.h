@@ -3808,7 +3808,7 @@ public:
   List<int> uncoverAllMonsDivisors;
   List<int> uncoverMonsFinalRemainder;
   List<int> additionalHighlightFinalRemainder;
-  std::stringstream divisionLog;
+  std::string divisionLog;
   GroebnerBasisComputation<Coefficient>* owner;
   bool checkInitialization();
   std::string getDivisionStringHtml();

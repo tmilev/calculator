@@ -155,6 +155,7 @@ public:
   Vectors<Rational> cartanOfCentralizer;
   List<Polynomial<AlgebraicNumber> > systemToSolve;
   List<Polynomial<AlgebraicNumber> > transformedSystem;
+  PolynomialSystem<AlgebraicNumber> configuredSystemToSolve;
   SemisimpleSubalgebras* owner;
   int indexInOwner;
   int indexInducedFrom;
@@ -240,8 +241,7 @@ public:
     // The vector space whose basis is below is called W, from where the
     // WConjecture derives its name.
     List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >
-    basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP
-    ;
+    basisOrthogonalComplementCentralizerSl2InPIntersectedWithCentralizerOfHInP;
     // A human-readable math formula that describes w_1, w_2 \in W
     // such that [w_1, w_2] \in the centralizer of sl(2) in k.
     List<std::string> triplesNotViolatingWConjecture;
@@ -432,9 +432,7 @@ public:
   void prepareSystemSerreRelationsForIndexPair(int leftIndex, int rightIndex);
   void prepareSystemSerreRelations();
   bool computeCharacter(bool allowBadCharacter);
-  void configurePolynomialSystem(
-    PolynomialSystem<AlgebraicNumber>& toBeConfigured
-  );
+  void configurePolynomialSystem();
   bool verifySolution(PolynomialSystem<AlgebraicNumber>& system);
   bool isGoodHNewActingByTwo(
     const Vector<Rational>& hNewActingByTwo, const List<int>& rootInjections

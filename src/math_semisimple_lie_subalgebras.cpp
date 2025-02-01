@@ -4680,8 +4680,7 @@ std::string CandidateSemisimpleSubalgebra::WConjecture::toString(
   << owner.owner->wConjecture.toStringElementSemisimpleLieAlgebraOrMatrix(
     *owner.owner,
     this->
-    basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP
-    ,
+    basisOrthogonalComplementCentralizerSl2InPIntersectedWithCentralizerOfHInP,
     "w"
   );
   out << "</div></div>";
@@ -4773,8 +4772,7 @@ void CandidateSemisimpleSubalgebra::WConjecture::compute(
   }
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& wSpace =
   this->
-  basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP
-  ;
+  basisOrthogonalComplementCentralizerSl2InPIntersectedWithCentralizerOfHInP;
   ElementSemisimpleLieAlgebra<AlgebraicNumber>::intersectVectorSpaces(
     this->basisOrthogonalComplementOfCentralizerOfSl2InP,
     this->basisCentralizerOfHInP,
@@ -4871,8 +4869,7 @@ void CandidateSemisimpleSubalgebra::WConjecture::processOnePair(
   std::stringstream out;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& wSpace =
   this->
-  basisOrthogonalComplementOfCentralizerOfSl2InPIntersectedWithCentralizerOfHInP
-  ;
+  basisOrthogonalComplementCentralizerSl2InPIntersectedWithCentralizerOfHInP;
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& left = wSpace[indexLeft];
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& right = wSpace[indexRight];
   ElementSemisimpleLieAlgebra<AlgebraicNumber> lieBracket;
@@ -5132,6 +5129,7 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->centralizerRank = - 1;
   this->weylNonEmbedded = nullptr;
   this->subalgebraNonEmbeddedDefaultScale = nullptr;
+  this->systemToSolve.clear();
 }
 
 CandidateSemisimpleSubalgebra::CandidateSemisimpleSubalgebra() {
@@ -6868,9 +6866,7 @@ void SemisimpleSubalgebras::resetComputations() {
   this->subalgebras.clear();
 }
 
-void CandidateSemisimpleSubalgebra::configurePolynomialSystem(
-  PolynomialSystem<AlgebraicNumber>& toBeConfigured
-) {
+void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   int maximumPolynomialDivisions = 2000;
   int maximumMonomialOperations = 20000;
   std::string ambientLieAlgebraName =
@@ -6884,9 +6880,8 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem(
   if (embeddedType.getRank() == 1) {
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
-    toBeConfigured.arbitrarySubstitutionsInOrder = List<Rational>(
-      {Rational::zeroStatic(), Rational::oneStatic()}
-    );
+    this->configuredSystemToSolve.arbitrarySubstitutionsInOrder =
+    List<Rational>({Rational::zeroStatic(), Rational::oneStatic()});
   }
   std::string embeddingLieAlgebraName = embeddedType.toString();
   if (embeddingLieAlgebraName == "A^{20}_1+A^{4}_1") {
@@ -6894,11 +6889,15 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem(
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
   }
-  toBeConfigured.groebner.maximumMonomialOperations =
+  if (embeddingLieAlgebraName == "A^{15}_1") {
+    maximumPolynomialDivisions = 2000;
+    maximumMonomialOperations = 10000;
+  }
+  this->configuredSystemToSolve.groebner.maximumMonomialOperations =
   maximumMonomialOperations;
-  toBeConfigured.groebner.maximumPolynomialDivisions =
+  this->configuredSystemToSolve.groebner.maximumPolynomialDivisions =
   maximumPolynomialDivisions;
-  toBeConfigured.algebraicClosure = this->owner->ownerField;
+  this->configuredSystemToSolve.algebraicClosure = this->owner->ownerField;
 }
 
 CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::
@@ -6916,22 +6915,20 @@ attemptToSolveSystemFinal() {
   << " I need to solve the following system."
   << this->toStringSystemPart2();
   report.report(reportstream.str());
-  PolynomialSystem<AlgebraicNumber> system;
-  this->configurePolynomialSystem(system);
-  system.groebner.polynomialOrder.monomialOrder.setComparison(
-    MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins
-  );
-  system.solveSerreLikeSystem(this->transformedSystem);
-  if (system.flagSystemSolvedOverBaseField) {
+  this->configurePolynomialSystem();
+  this->configuredSystemToSolve.groebner.polynomialOrder.monomialOrder.
+  setComparison(MonomialPolynomial::greaterThan_totalDegree_rightSmallerWins);
+  this->configuredSystemToSolve.solveSerreLikeSystem(this->transformedSystem);
+  if (this->configuredSystemToSolve.flagSystemSolvedOverBaseField) {
     this->status = CandidateSubalgebraStatus::realized;
-  } else if (system.flagSystemProvenToHaveNoSolution) {
+  } else if (this->configuredSystemToSolve.flagSystemProvenToHaveNoSolution) {
     this->status =
     CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions;
   } else {
     this->status =
     CandidateSubalgebraStatus::neitherRealizedNorProvedImpossible;
   }
-  this->verifySolution(system);
+  this->verifySolution(this->configuredSystemToSolve);
   return this->status;
 }
 

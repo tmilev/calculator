@@ -2785,7 +2785,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
   }
   out << "\\end{longtable}";
   out << "\r\n";
-  out << this->divisionLog.str();
+  out << this->divisionLog;
   return out.str();
 }
 
@@ -3032,10 +3032,11 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     indexCurrentRemainderLeadingMonInAllMons
   ].addOnTop(currentSlideNumber);
   if (remainderIndex == 0) {
-    this->divisionLog << "$\\vphantom" << "{\\frac{x^1}{x^1}}$";
+    this->divisionLog += "$\\vphantom{\\frac{x^1}{x^1}}$";
   }
   FormatExpressions& format = this->owner->format;
-  this->divisionLog
+  std::stringstream divisionLogBuilder;
+  divisionLogBuilder
   << "\\only<"
   << currentSlideNumber
   << ","
@@ -3099,7 +3100,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsSubtrahends[remainderIndex] = currentSlideNumber;
-  this->divisionLog
+  divisionLogBuilder
   << "\\only<"
   << currentSlideNumber
   << ", "
@@ -3166,7 +3167,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     ].addOnTop(currentSlideNumber);
   }
   this->uncoverAllMonsRemainders[remainderIndex + 1] = currentSlideNumber;
-  this->divisionLog
+  divisionLogBuilder
   << "\\only<"
   << currentSlideNumber
   << ", "
@@ -3212,6 +3213,7 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     currentSlideNumber;
   }
   currentSlideNumber ++;
+  this->divisionLog += divisionLogBuilder.str();
 }
 
 #endif // header_math_general_polynomial_computations_advanced_implementation_ALREADY_INCLUDED

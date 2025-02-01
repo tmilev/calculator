@@ -3945,7 +3945,7 @@ public:
   void solveSerreLikeSystem(List<Polynomial<Coefficient> >& inputSystem);
   std::string toStringCalculatorInputFromSystem(
     const List<Polynomial<Coefficient> >& inputSystem
-  );
+  ) const;
   bool hasImpliedSubstitutions(
     List<Polynomial<Coefficient> >& inputSystem,
     PolynomialSubstitution<Coefficient>& outputSubstitution

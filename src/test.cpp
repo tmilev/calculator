@@ -105,7 +105,15 @@ void Test::run() {
     global << Logger::green << "Polynomial tests completed." << Logger::endL;
   }
   if (this->shouldTest(Test::Suites::scientific)) {
+    global
+    << Logger::blue
+    << "Scientific function test start ..."
+    << Logger::endL;
     SemisimpleSubalgebras::Test::all();
+    global
+    << Logger::green
+    << "Scientific function tests passed."
+    << Logger::endL;
   }
   if (
     this->shouldTest(Test::Suites::topicLists) ||

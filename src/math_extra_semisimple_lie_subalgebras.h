@@ -273,7 +273,10 @@ public:
   void reset(SemisimpleSubalgebras* inputOwner = nullptr);
   bool checkConsistency() const;
   bool checkMaximalDominance() const;
-  bool computeAndVerifyFromGeneratorsAndHs();
+  bool computeAndVerifyFromKnownGeneratorsAndHsPrepare(
+    std::stringstream* commentsOnError
+  );
+  bool computeAndVerifyFromKnownGeneratorsAndHs();
   int getPrimalRank() const;
   int getRank() const;
   int getSemisimplePartCentralizerOfSemisimplePartCentralizer() const;

@@ -1394,13 +1394,15 @@ std::string GroebnerBasisComputation<Coefficient>::toStringDivision(
 template <class Coefficient>
 std::string PolynomialSystem<Coefficient>::toStringCalculatorInputFromSystem(
   const List<Polynomial<Coefficient> >& inputSystem
-) {
+) const {
   std::stringstream out;
   if (this->flagTryDirectlySolutionOverAlgebraicClosure) {
     out << "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit";
   } else {
     out << "FindOneSolutionSerreLikePolynomialSystemUpperLimit";
   }
+  FormatExpressions format;
+  format = this->groebner.format;
   out
   << "{}("
   << this->groebner.maximumPolynomialDivisions
@@ -1408,7 +1410,7 @@ std::string PolynomialSystem<Coefficient>::toStringCalculatorInputFromSystem(
   << this->groebner.maximumMonomialOperations
   << ", ";
   for (int j = 0; j < inputSystem.size; j ++) {
-    out << inputSystem[j].toString(&this->groebner.format);
+    out << inputSystem[j].toString(&format);
     if (j != inputSystem.size - 1) {
       out << ", ";
     }

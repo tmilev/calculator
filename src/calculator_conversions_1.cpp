@@ -1651,7 +1651,9 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
       << "the same Cartan subalgebra. ";
       continue;
     }
-    if (currentCandidate.computeAndVerifyFromGeneratorsAndHs()) {
+    reportStream2 << " Loading data done. Recomputing internals ...";
+    report.report(reportStream2.str());
+    if (currentCandidate.computeAndVerifyFromKnownGeneratorsAndHs()) {
       subalgebras.addRealizedSubalgebraIfNew(currentCandidate);
     } else {
       subalgebras.addNonRealizedSubalgebraIfNew(currentCandidate);

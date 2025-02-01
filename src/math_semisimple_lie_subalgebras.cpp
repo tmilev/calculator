@@ -1435,7 +1435,7 @@ bool SemisimpleSubalgebras::loadState(
     RealizedSemisimpleSubalgebra& realized =
     this->subalgebras.values[currentChainIntegers[i]];
     CandidateSemisimpleSubalgebra& currentSubalgebra = realized.content;
-    if (!currentSubalgebra.computeAndVerifyFromGeneratorsAndHs()) {
+    if (!currentSubalgebra.computeAndVerifyFromKnownGeneratorsAndHs()) {
       reportStream
       << "<hr>Subalgebra "
       << currentSubalgebra.weylNonEmbedded->dynkinType.toString()
@@ -3395,7 +3395,7 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension(
     precomputedCandidate.indexInducedFrom = newCandidate.indexInducedFrom;
     precomputedCandidate.rootInjectionsFromInducer =
     newCandidate.rootInjectionsFromInducer;
-    if (!precomputedCandidate.computeAndVerifyFromGeneratorsAndHs()) {
+    if (!precomputedCandidate.computeAndVerifyFromKnownGeneratorsAndHs()) {
       global.fatal
       << "Precomputed candidate should be verified at this point."
       << global.fatal;
@@ -3833,6 +3833,7 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystem(
   bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
 ) {
   STACK_TRACE("CandidateSemisimpleSubalgebra::attemptToSolveSystem");
+  this->computeAndVerifyFromKnownGeneratorsAndHsPrepare(nullptr);
   ChevalleyGenerator currentGenerator;
   ChevalleyGenerator currentOppositeGenerator;
   this->involvedNegativeGenerators.setSize(
@@ -3892,6 +3893,7 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystem(
   this->attemptToSolveSystemPart2(
     attemptToChooseCentalizer, allowNonPolynomialSystemFailure
   );
+  this->computeAndVerifyFromKnownGeneratorsAndHs();
 }
 
 bool CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs() {
@@ -7681,9 +7683,13 @@ bool CandidateSemisimpleSubalgebra::checkConsistency() const {
   return true;
 }
 
-bool CandidateSemisimpleSubalgebra::computeAndVerifyFromGeneratorsAndHs() {
+bool CandidateSemisimpleSubalgebra::
+computeAndVerifyFromKnownGeneratorsAndHsPrepare(
+  std::stringstream* commentsOnError
+) {
   STACK_TRACE(
-    "CandidateSemisimpleSubalgebra::computeAndVerifyFromGeneratorsAndHs"
+    "CandidateSemisimpleSubalgebra::"
+    "computeAndVerifyFromKnownGeneratorsAndHsPrepare"
   );
   Matrix<Rational> actualCoCartan;
   this->cartanElementsScaledToActByTwo.getGramMatrix(
@@ -7693,19 +7699,30 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromGeneratorsAndHs() {
   std::stringstream out;
   this->status = CandidateSubalgebraStatus::realized;
   if (!(this->weylNonEmbedded->coCartanSymmetric == actualCoCartan)) {
-    out
-    << "<b>Corrupt semisimple subalgebra: "
-    << "the gram matrix of the elements of its Cartan, "
-    << this->cartanElementsScaledToActByTwo.toString()
-    << " is "
-    << actualCoCartan.toString()
-    << "; it should be "
-    << this->weylNonEmbedded->coCartanSymmetric.toString()
-    << ".</b>";
+    if (commentsOnError != nullptr) {
+      out
+      << "<b>Corrupt semisimple subalgebra: "
+      << "the gram matrix of the elements of its Cartan, "
+      << this->cartanElementsScaledToActByTwo.toString()
+      << " is "
+      << actualCoCartan.toString()
+      << "; it should be "
+      << this->weylNonEmbedded->coCartanSymmetric.toString()
+      << ".</b>";
+    }
     this->status = CandidateSubalgebraStatus::corrupt;
   }
+  return this->status != CandidateSubalgebraStatus::corrupt;
+}
+
+bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs()
+{
+  STACK_TRACE(
+    "CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs"
+  );
   ProgressReport report;
-  this->attemptToSolveSystem(false, true);
+  std::stringstream out;
+  this->computeAndVerifyFromKnownGeneratorsAndHsPrepare(&out);
   if (!this->computeCharacter(true)) {
     out
     << "<b>Corrupt semisimple subalgebra: "
@@ -10255,14 +10272,10 @@ std::string CandidateSemisimpleSubalgebra::toStringSystemPart2(
   << "<br><b>For the calculator:</b><br>\n"
   << this->toStringLoadUnknown()
   << ";"
-  << "<br>FindOneSolutionSerreLikePolynomialSystem{}( ";
-  for (int i = 0; i < this->systemToSolve.size; i ++) {
-    out << this->systemToSolve[i].toString();
-    if (i != this->systemToSolve.size - 1) {
-      out << ", ";
-    }
-  }
-  out << " )";
+  << "<br> "
+  << this->configuredSystemToSolve.toStringCalculatorInputFromSystem(
+    this->systemToSolve
+  );
   return out.str();
 }
 
@@ -10951,7 +10964,7 @@ void SemisimpleSubalgebras::hookUpCentralizers(
     if (!currentSubalgebra.isRealized()) {
       continue;
     }
-    if (!currentSubalgebra.computeAndVerifyFromGeneratorsAndHs()) {
+    if (!currentSubalgebra.computeAndVerifyFromKnownGeneratorsAndHs()) {
       continue;
     }
     std::stringstream reportStream2;

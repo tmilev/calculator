@@ -316,7 +316,8 @@ public:
   // Additionally, if useArbitraryValues is set, then
   // instead of arbitrary values x_1, ..., x_k, we will use
   // arbitrarily chosen constants.
-  void getGenericLinearCombination(int numberOfVariables,
+  void getGenericLinearCombination(
+    int numberOfVariables,
     int variableOffset,
     List<ChevalleyGenerator>& involvedGenerators,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
@@ -542,6 +543,11 @@ public:
   DynkinType& nextUnexploredDynkinType();
   List<int>& nextPossibleRootInjection();
   void computeCurrentHCandidates();
+  bool moduleDecompostionOverBaseAllowsExtension(
+    DynkinType& candidateExtensionType,
+    List<int>& candidateRootInjection,
+    CandidateSemisimpleSubalgebra& newCandidate
+  );
   Vector<Rational>& nextCandidateHScaledToActByTwo();
   std::string toString();
 };

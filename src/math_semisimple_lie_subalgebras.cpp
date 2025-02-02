@@ -1517,9 +1517,6 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   << this->toStringProgressReport();
   reportHeader.report(reportHeaderStream.str());
   while (this->incrementReturnFalseIfPastLast()) {
-    global.comments << "DEBUG : HI WORLD " << this->toStringCurrentChain() << "<br> total subalg: "
-
-                    << this->subalgebras.size() << "<hr>";
     reportHeader.report(this->toStringProgressReport());
     CandidateSemisimpleSubalgebra candidate;
     this->currentSubalgebraChain.lastObject()->attemptExtension(candidate);
@@ -2937,6 +2934,58 @@ bool SemisimpleSubalgebras::combinatorialCriteriaAllowRealization() {
   return true;
 }
 
+bool PossibleExtensionsOfSemisimpleLieSubalgebra::
+moduleDecompostionOverBaseAllowsExtension(
+  DynkinType& candidateExtensionType,
+  List<int>& candidateRootInjection,
+  CandidateSemisimpleSubalgebra& newCandidate
+) {
+  STACK_TRACE(
+    "PossibleExtensionsOfSemisimpleLieSubalgebra::"
+    "moduleDecompostionOverBaseAllowsExtension"
+  );
+  CandidateSemisimpleSubalgebra& base = this->realizedBase->content;
+  if (base.getRank() == 0) {
+    return true;
+  }
+  ProgressReport report1;
+  Vector<Rational> weightHElementWeAreLookingFor =
+  this->owner->
+  getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
+    candidateExtensionType, candidateRootInjection, newCandidate
+  );
+  List<int> indicesModulesNewComponentOfExtensionModule;
+  indicesModulesNewComponentOfExtensionModule.reserve(
+    this->owner->owner->weylGroup.rootSystem.size
+  );
+  indicesModulesNewComponentOfExtensionModule.setSize(0);
+  for (int j = 0; j < base.highestWeightsNonPrimal.size; j ++) {
+    if (base.highestWeightsNonPrimal[j] == weightHElementWeAreLookingFor) {
+      indicesModulesNewComponentOfExtensionModule.addOnTop(j);
+    }
+  }
+  if (indicesModulesNewComponentOfExtensionModule.size == 0) {
+    if (report1.tickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream
+      << " Extension "
+      << this->numberOfLargerTypesExplored + 1
+      << " out of "
+      << this->possibleLargerDynkinTypes.size
+      << ", type  "
+      << candidateExtensionType.toString()
+      << " cannot be realized: no appropriate module: "
+      << "desired weight of h element is: "
+      << weightHElementWeAreLookingFor.toString()
+      << " but the highest weights of the base candidate are: "
+      << base.highestWeightsNonPrimal.toString();
+      report1.report(reportStream.str());
+    }
+    return false;
+  }
+  return true;
+}
+
 void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
   STACK_TRACE(
     "PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates"
@@ -2948,15 +2997,12 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
     candidateExtensionType.getRootSystemSize() >
     this->owner->owner->getNumberOfPositiveRoots() * 2
   ) {
-    global .comments << "<br>DEBUG: comments candidateExtensionType: " <<candidateExtensionType.toStringPretty()   << " rejected due to root system size. ";
     return;
   }
   if (!this->owner->combinatorialCriteriaAllowRealization()) {
-    global .comments << "<br>DEBUG: comments candidateExtensionType: " <<candidateExtensionType.toStringPretty()   << " rejected due to combis. ";
     return;
   }
   ProgressReport report0;
-  ProgressReport report1;
   CandidateSemisimpleSubalgebra& base = this->realizedBase->content;
   if (report0.tickAndWantReport()) {
     std::stringstream reportStream;
@@ -2974,46 +3020,12 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
   }
   CandidateSemisimpleSubalgebra newCandidate;
   newCandidate.owner = this->owner;
-  if (base.getRank() != 0) {
-    Vector<Rational> weightHElementWeAreLookingFor =
-    this->owner->
-    getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
+  if (
+    !this->moduleDecompostionOverBaseAllowsExtension(
       candidateExtensionType, candidateRootInjection, newCandidate
-    );
-    global.comments << "<br>DEBUG: weightHElementWeAreLookingFor: " << weightHElementWeAreLookingFor.toString() << "<br>";
-    List<int> indicesModulesNewComponentOfExtensionModule;
-    indicesModulesNewComponentOfExtensionModule.reserve(
-      this->owner->owner->weylGroup.rootSystem.size
-    );
-    global.comments << "<br>DEBUG: highestWeightsNonPrimal: " << base.highestWeightsNonPrimal.toString() << "<br>";
-    indicesModulesNewComponentOfExtensionModule.setSize(0);
-    for (int j = 0; j < base.highestWeightsNonPrimal.size; j ++) {
-      if (base.highestWeightsNonPrimal[j] == weightHElementWeAreLookingFor) {
-        indicesModulesNewComponentOfExtensionModule.addOnTop(j);
-      }
-    }
-    if (indicesModulesNewComponentOfExtensionModule.size == 0) {
-      if (report1.tickAndWantReport()) {
-        std::stringstream reportStream;
-        reportStream
-        << " Extension "
-        << this->numberOfLargerTypesExplored + 1
-        << " out of "
-        << this->possibleLargerDynkinTypes.size
-        << ", type  "
-        << candidateExtensionType.toString()
-        << " cannot be realized: no appropriate module: "
-        << "desired weight of h element is: "
-        << weightHElementWeAreLookingFor.toString()
-        << " but the highest weights of the base candidate are: "
-        << base.highestWeightsNonPrimal.toString();
-        report1.report(reportStream.str());
-      }
-      global .comments << "<br>DEBUG: comments candidateExtensionType: " <<candidateExtensionType.toStringPretty()
-                      << " rejected due to no apro modi. <hr>";
-
-      return;
-    }
+    )
+  ) {
+    return;
   }
   newCandidate.setUpInjectionHs(
     base, candidateExtensionType, candidateRootInjection
@@ -7048,17 +7060,16 @@ void CandidateSemisimpleSubalgebra::addToSystem(
   }
 }
 
-
-
-void CandidateSemisimpleSubalgebra::getGenericLinearCombination(int numberOfVariables,
+void CandidateSemisimpleSubalgebra::getGenericLinearCombination(
+  int numberOfVariables,
   int variableOffset,
   List<ChevalleyGenerator>& involvedGenerators,
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output) {
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
+) {
   Polynomial<AlgebraicNumber> coefficient;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > monomial;
   output.makeZero();
   for (int i = 0; i < involvedGenerators.size; i ++) {
-
     coefficient.makeDegreeOne(numberOfVariables, variableOffset + i, 1);
     monomial.makeGenerator(
       involvedGenerators[i].generatorIndex, *this->owner->owner
@@ -7744,7 +7755,6 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs()
   }
   this->comments = out.str();
   this->computeFromGenerators(false);
-
   return this->status == CandidateSubalgebraStatus::realized;
 }
 
@@ -10112,7 +10122,9 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
       << " is larger than the rank of the ambient lie algebra: "
       << this->owner->owner->getRank()
       << ". "
-              << "The centralizer dimension is: " << this->centralizerDimension << ". "
+      << "The centralizer dimension is: "
+      << this->centralizerDimension
+      << ". "
       << this->toStringCentralizerDebugData()
       << global.fatal;
     }
@@ -10966,7 +10978,6 @@ void SemisimpleSubalgebras::hookUpCentralizers(
   ProgressReport report1;
   ProgressReport report2;
   report1.report("<hr>\nHooking up centralizers ");
-  global.comments << "DEBUG: hook em up!";
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     CandidateSemisimpleSubalgebra& currentSubalgebra =
     this->subalgebras.values[i].content;

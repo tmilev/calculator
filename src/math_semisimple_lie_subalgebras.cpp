@@ -4251,6 +4251,42 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystemPart2(
   }
 }
 
+bool CandidateSemisimpleSubalgebra::checkDimensionOfSubalgebra(
+  bool allowNonPolynomialSystemFailure
+) {
+  STACK_TRACE(
+    "CandidateSemisimpleSubalgebra::"
+    "checkDimensionOfSubalgebra"
+  );
+  if (this->basis.size == 0) {
+    return true;
+  }
+  this->owner->owner->generateLieSubalgebra(this->basis);
+  if (
+    this->basis.size ==
+    this->weylNonEmbedded->dynkinType.getLieAlgebraDimension()
+  ) {
+    return true;
+  }
+  if (!allowNonPolynomialSystemFailure) {
+    global.fatal
+    << "Lie subalgebra dimension doesn't fit: "
+    << "dimension of generated subalgebra is "
+    << this->basis.size
+    << ", must be "
+    << this->weylNonEmbedded->dynkinType.getLieAlgebraDimension()
+    << ". The subalgebra is "
+    << this->toString(nullptr, false)
+    << "<br>Involved generators: "
+    << this->involvedNegativeGenerators.toString()
+    << "<br>and<br>"
+    << this->involvedPositiveGenerators.toString()
+    << global.fatal;
+  }
+  this->status = CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions;
+  return false;
+}
+
 CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::computeFromGenerators(
   bool allowNonPolynomialSystemFailure
 ) {
@@ -4258,33 +4294,14 @@ CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::computeFromGenerators(
   if (this->status != CandidateSubalgebraStatus::realized) {
     return this->status;
   }
+  if (this->flagComputedFromGenerators) {
+    // Speed optimization: the computation is already done.
+    return this->status;
+  }
   this->basis = this->negativeGenerators;
   this->basis.addListOnTop(this->positiveGenerators);
-  if (this->basis.size > 0) {
-    this->owner->owner->generateLieSubalgebra(this->basis);
-    if (
-      this->basis.size !=
-      this->weylNonEmbedded->dynkinType.getLieAlgebraDimension()
-    ) {
-      if (!allowNonPolynomialSystemFailure) {
-        global.fatal
-        << "Lie subalgebra dimension doesn't fit: "
-        << "dimension of generated subalgebra is "
-        << this->basis.size
-        << ", must be "
-        << this->weylNonEmbedded->dynkinType.getLieAlgebraDimension()
-        << ". The subalgebra is "
-        << this->toString(nullptr, false)
-        << "<br>Involved generators: "
-        << this->involvedNegativeGenerators.toString()
-        << "<br>and<br>"
-        << this->involvedPositiveGenerators.toString()
-        << global.fatal;
-      }
-      this->status =
-      CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions;
-      return this->status;
-    }
+  if (!this->checkDimensionOfSubalgebra(allowNonPolynomialSystemFailure)) {
+    return this->status;
   }
   this->owner->owner->getCommonCentralizer(
     this->positiveGenerators, this->highestVectorsNonSorted
@@ -5135,6 +5152,7 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->flagCentralizerIsWellChosen = false;
   this->flagCentralizerTypeIsComputed = false;
   this->flagUsedInducingSubalgebraRealization = true;
+  this->flagComputedFromGenerators = false;
   this->totalUnknownsNoCentralizer = 0;
   this->totalUnknownsWithCentralizer = 0;
   this->totalArithmeticOpsToSolveSystem = 0;

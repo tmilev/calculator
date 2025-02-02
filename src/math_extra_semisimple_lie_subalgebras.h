@@ -174,6 +174,7 @@ public:
   bool flagCentralizerIsWellChosen;
   bool flagCentralizerTypeIsComputed;
   bool flagUsedInducingSubalgebraRealization;
+  bool flagComputedFromGenerators;
   int recursionDepthCounterForNilradicalGeneration;
   int totalUnknownsNoCentralizer;
   int totalUnknownsWithCentralizer;
@@ -391,6 +392,7 @@ public:
   CandidateSubalgebraStatus computeFromGenerators(
     bool allowNonPolynomialSystemFailure
   );
+  bool checkDimensionOfSubalgebra(bool allowNonPolynomialSystemFailure);
   void computeSinglePair(int leftIndex, int rightIndex, List<int>& output);
   int getNumberOfModules() const;
   void computePairKWeightElementAndModule(

@@ -307,8 +307,16 @@ public:
   bool compareLeftGreaterThanRight(
     const Vector<Rational>& left, const Vector<Rational>& right
   );
-  void getGenericLinearCombination(
-    int numberOfVariables,
+  // Given chevalley generators a_1, ..., a_k, returns the
+  // generic linear combination along the lines of:
+  // x_1 a_1+...+x_k a_k.
+  // Here, the variables x_1, ..., x_k may run in a different variable range;
+  // the exact variable range is determined by the variableOffset and the
+  // numberOfVariables.
+  // Additionally, if useArbitraryValues is set, then
+  // instead of arbitrary values x_1, ..., x_k, we will use
+  // arbitrarily chosen constants.
+  void getGenericLinearCombination(int numberOfVariables,
     int variableOffset,
     List<ChevalleyGenerator>& involvedGenerators,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output

@@ -1517,6 +1517,9 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   << this->toStringProgressReport();
   reportHeader.report(reportHeaderStream.str());
   while (this->incrementReturnFalseIfPastLast()) {
+    global.comments << "DEBUG : HI WORLD " << this->toStringCurrentChain() << "<br> total subalg: "
+
+                    << this->subalgebras.size() << "<hr>";
     reportHeader.report(this->toStringProgressReport());
     CandidateSemisimpleSubalgebra candidate;
     this->currentSubalgebraChain.lastObject()->attemptExtension(candidate);
@@ -2945,9 +2948,11 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
     candidateExtensionType.getRootSystemSize() >
     this->owner->owner->getNumberOfPositiveRoots() * 2
   ) {
+    global .comments << "<br>DEBUG: comments candidateExtensionType: " <<candidateExtensionType.toStringPretty()   << " rejected due to root system size. ";
     return;
   }
   if (!this->owner->combinatorialCriteriaAllowRealization()) {
+    global .comments << "<br>DEBUG: comments candidateExtensionType: " <<candidateExtensionType.toStringPretty()   << " rejected due to combis. ";
     return;
   }
   ProgressReport report0;
@@ -2975,10 +2980,12 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
     getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
       candidateExtensionType, candidateRootInjection, newCandidate
     );
+    global.comments << "<br>DEBUG: weightHElementWeAreLookingFor: " << weightHElementWeAreLookingFor.toString() << "<br>";
     List<int> indicesModulesNewComponentOfExtensionModule;
     indicesModulesNewComponentOfExtensionModule.reserve(
       this->owner->owner->weylGroup.rootSystem.size
     );
+    global.comments << "<br>DEBUG: highestWeightsNonPrimal: " << base.highestWeightsNonPrimal.toString() << "<br>";
     indicesModulesNewComponentOfExtensionModule.setSize(0);
     for (int j = 0; j < base.highestWeightsNonPrimal.size; j ++) {
       if (base.highestWeightsNonPrimal[j] == weightHElementWeAreLookingFor) {
@@ -3002,6 +3009,9 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
         << base.highestWeightsNonPrimal.toString();
         report1.report(reportStream.str());
       }
+      global .comments << "<br>DEBUG: comments candidateExtensionType: " <<candidateExtensionType.toStringPretty()
+                      << " rejected due to no apro modi. <hr>";
+
       return;
     }
   }
@@ -4018,7 +4028,6 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
     indexNewRoot = *this->rootInjectionsFromInducer.lastObject();
   }
   for (int i = 0; i < this->involvedNegativeGenerators.size; i ++) {
-    bool seedsHaveBeenSown = false;
     if (this->flagUsedInducingSubalgebraRealization) {
       CandidateSemisimpleSubalgebra& inducer =
       this->owner->subalgebras.values[this->indexInducedFrom].content;
@@ -4036,11 +4045,8 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
         this->unknownPositiveGenerators[i] =
         inducer.positiveGenerators[preimageIndex];
         // <-implicit type conversion from base field to polynomial here
-        seedsHaveBeenSown = true;
+        continue;
       }
-    }
-    if (seedsHaveBeenSown) {
-      continue;
     }
     this->getGenericNegativeGeneratorLinearCombination(
       i, this->unknownNegativeGenerators[i]
@@ -4231,10 +4237,6 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystemPart2(
     );
     return;
   }
-  if (this->status != CandidateSubalgebraStatus::realized) {
-    return;
-  }
-  this->computeFromGenerators(allowNonPolynomialSystemFailure);
 }
 
 CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::computeFromGenerators(
@@ -5132,6 +5134,8 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->weylNonEmbedded = nullptr;
   this->subalgebraNonEmbeddedDefaultScale = nullptr;
   this->systemToSolve.clear();
+  this->rootSystemCentralizerPrimalCoordinates.clear();
+  this->rootSystemSubalgebraPrimalCoordinates.clear();
 }
 
 CandidateSemisimpleSubalgebra::CandidateSemisimpleSubalgebra() {
@@ -6892,8 +6896,8 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
     maximumMonomialOperations = 10000;
   }
   if (embeddingLieAlgebraName == "A^{15}_1") {
-    maximumPolynomialDivisions = 2000;
-    maximumMonomialOperations = 10000;
+    maximumPolynomialDivisions = 200;
+    maximumMonomialOperations = 1000;
   }
   this->configuredSystemToSolve.groebner.maximumMonomialOperations =
   maximumMonomialOperations;
@@ -7044,16 +7048,17 @@ void CandidateSemisimpleSubalgebra::addToSystem(
   }
 }
 
-void CandidateSemisimpleSubalgebra::getGenericLinearCombination(
-  int numberOfVariables,
+
+
+void CandidateSemisimpleSubalgebra::getGenericLinearCombination(int numberOfVariables,
   int variableOffset,
   List<ChevalleyGenerator>& involvedGenerators,
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
-) {
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output) {
   Polynomial<AlgebraicNumber> coefficient;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > monomial;
   output.makeZero();
   for (int i = 0; i < involvedGenerators.size; i ++) {
+
     coefficient.makeDegreeOne(numberOfVariables, variableOffset + i, 1);
     monomial.makeGenerator(
       involvedGenerators[i].generatorIndex, *this->owner->owner
@@ -7738,6 +7743,8 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs()
     this->status = CandidateSubalgebraStatus::corrupt;
   }
   this->comments = out.str();
+  this->computeFromGenerators(false);
+
   return this->status == CandidateSubalgebraStatus::realized;
 }
 
@@ -10098,13 +10105,14 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
     }
     if (this->centralizerRank > this->owner->owner->getRank()) {
       global.fatal
-      << "Something is wrong: the rank of the centralizer "
+      << "Something is wrong: the rank of the centralizer: "
       << this->centralizerRank
       << " of computed type: "
       << centralizerTypeAlternative.toStringPretty()
       << " is larger than the rank of the ambient lie algebra: "
       << this->owner->owner->getRank()
       << ". "
+              << "The centralizer dimension is: " << this->centralizerDimension << ". "
       << this->toStringCentralizerDebugData()
       << global.fatal;
     }
@@ -10958,6 +10966,7 @@ void SemisimpleSubalgebras::hookUpCentralizers(
   ProgressReport report1;
   ProgressReport report2;
   report1.report("<hr>\nHooking up centralizers ");
+  global.comments << "DEBUG: hook em up!";
   for (int i = 0; i < this->subalgebras.values.size; i ++) {
     CandidateSemisimpleSubalgebra& currentSubalgebra =
     this->subalgebras.values[i].content;

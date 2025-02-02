@@ -2948,6 +2948,7 @@ moduleDecompostionOverBaseAllowsExtension(
   if (base.getRank() == 0) {
     return true;
   }
+  base.computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors();
   ProgressReport report1;
   Vector<Rational> weightHElementWeAreLookingFor =
   this->owner->
@@ -4294,10 +4295,18 @@ CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::computeFromGenerators(
   if (this->status != CandidateSubalgebraStatus::realized) {
     return this->status;
   }
-  if (this->flagComputedFromGenerators) {
+  if (this->flagComputedBasics) {
     // Speed optimization: the computation is already done.
     return this->status;
   }
+  ProgressReport report;
+  if (report.tickAndWantReport()) {
+    report.report(
+      "Computing basics from a realized subalgebra of type: " +
+      this->toStringType()
+    );
+  }
+  this->flagComputedBasics = true;
   this->basis = this->negativeGenerators;
   this->basis.addListOnTop(this->positiveGenerators);
   if (!this->checkDimensionOfSubalgebra(allowNonPolynomialSystemFailure)) {
@@ -4307,8 +4316,6 @@ CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::computeFromGenerators(
     this->positiveGenerators, this->highestVectorsNonSorted
   );
   this->computeCartanOfCentralizer();
-  this->computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors(
-  );
   return this->status;
 }
 
@@ -5152,7 +5159,8 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->flagCentralizerIsWellChosen = false;
   this->flagCentralizerTypeIsComputed = false;
   this->flagUsedInducingSubalgebraRealization = true;
-  this->flagComputedFromGenerators = false;
+  this->flagComputedPrimalDecomposition = false;
+  this->flagComputedBasics = false;
   this->totalUnknownsNoCentralizer = 0;
   this->totalUnknownsWithCentralizer = 0;
   this->totalArithmeticOpsToSolveSystem = 0;
@@ -6458,6 +6466,10 @@ computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors() {
     "CandidateSemisimpleSubalgebra::"
     "computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors"
   );
+  if (this->flagComputedPrimalDecomposition) {
+    return;
+  }
+  this->flagComputedPrimalDecomposition = true;
   HashedList<Vector<Rational> > weightsCartanRestrictedDualCoordinates;
   this->computePrimalModuleDecompositionHighestWeights(
     weightsCartanRestrictedDualCoordinates
@@ -7755,6 +7767,11 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs()
     "CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs"
   );
   ProgressReport report;
+  if (report.tickAndWantReport()) {
+    report.report(
+      "Verifying and computing from generators, type: " + this->toStringType()
+    );
+  }
   std::stringstream out;
   this->computeAndVerifyFromKnownGeneratorsAndHsPrepare(&out);
   if (!this->computeCharacter(true)) {
@@ -8027,10 +8044,10 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   transformToSimpleBasisGeneratorsWithRespectToH(
     roots, this->hElement.getCartanPart()
   );
-  DynkinDiagramRootSubalgebra tempDiagram;
-  tempDiagram.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
-  tempDiagram.ambientRootSystem = this->getOwnerWeyl().rootSystem;
-  tempDiagram.computeDiagramInputIsSimple(roots);
+  DynkinDiagramRootSubalgebra diagramComputer;
+  diagramComputer.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
+  diagramComputer.ambientRootSystem = this->getOwnerWeyl().rootSystem;
+  diagramComputer.computeDiagramInputIsSimple(roots);
   this->preferredAmbientSimpleBasis = roots;
   this->hCharacteristic.setSize(dimension);
   for (int i = 0; i < dimension; i ++) {
@@ -8121,28 +8138,28 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
   Weight<Rational> currentHighestWeight;
   currentHighestWeight.weightFundamentalCoordinates.makeEi(1, 0);
   for (int j = bufferHighestWeights.size - 1; j >= indexZeroWeight; j --) {
-    int topMult = bufferHighestWeights[j];
-    if (topMult < 0) {
+    int topMultiplicity = bufferHighestWeights[j];
+    if (topMultiplicity < 0) {
       global.fatal
       << "The sl(2)-module decomposition "
       << "shows an sl(2)-module with highest weight "
-      << topMult
+      << topMultiplicity
       << " which is impossible. Here is the sl(2) subalgebra. "
       << this->toString()
       << "."
       << global.fatal;
     }
-    if (topMult > 0) {
+    if (topMultiplicity > 0) {
       currentHighestWeight.weightFundamentalCoordinates[0] =
       j - indexZeroWeight;
-      outputHighestWeights.addMonomial(currentHighestWeight, topMult);
+      outputHighestWeights.addMonomial(currentHighestWeight, topMultiplicity);
       if (j != indexZeroWeight) {
-        bufferHighestWeights[indexZeroWeight * 2 - j] -= topMult;
+        bufferHighestWeights[indexZeroWeight * 2 - j] -= topMultiplicity;
       }
       for (int k = j - 2; k >= indexZeroWeight; k -= 2) {
-        bufferHighestWeights[k] -= topMult;
+        bufferHighestWeights[k] -= topMultiplicity;
         if (k != indexZeroWeight) {
-          bufferHighestWeights[indexZeroWeight * 2 - k] -= topMult;
+          bufferHighestWeights[indexZeroWeight * 2 - k] -= topMultiplicity;
         }
         if (
           bufferHighestWeights[k] < 0 ||
@@ -8555,17 +8572,17 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(
   std::stringstream out;
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > >& currentModule =
   this->modules[indexModule];
-  FormatExpressions charFormat;
-  charFormat.vectorSpaceEiBasisNames.setSize(this->getPrimalRank());
+  FormatExpressions characterFormat;
+  characterFormat.vectorSpaceEiBasisNames.setSize(this->getPrimalRank());
   for (int i = 0; i < this->getRank(); i ++) {
     std::stringstream currentStream;
     currentStream << "\\\\omega_{" << i + 1 << "}";
-    charFormat.vectorSpaceEiBasisNames[i] = currentStream.str();
+    characterFormat.vectorSpaceEiBasisNames[i] = currentStream.str();
   }
   for (int i = this->getRank(); i < this->getPrimalRank(); i ++) {
     std::stringstream currentStream;
     currentStream << "\\\\psi_{" << i + 1 << "}";
-    charFormat.vectorSpaceEiBasisNames[i] = currentStream.str();
+    characterFormat.vectorSpaceEiBasisNames[i] = currentStream.str();
   }
   for (int i = 0; i < currentModule.size; i ++) {
     out << "<table style =\\\"border:1px solid #000;\\\">";
@@ -8574,7 +8591,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(
     << "<span class =\\\"math\\\">"
     << "V_{"
     << this->highestWeightsPrimal[indexModule].toStringLetterFormat(
-      "\\\\omega", &charFormat
+      "\\\\omega", &characterFormat
     )
     << "}"
     << " </span></td></tr>"
@@ -8591,7 +8608,8 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(
     << "weights primal</td>"
     << "</tr>";
     for (int j = 0; j < currentModule[i].size; j ++) {
-      std::string openTag = "", closeTag = "";
+      std::string openTag = "";
+      std::string closeTag = "";
       if (this->weightsModulesPrimal[indexModule][j] == weight) {
         openTag = "<span style =\\\"color:#FF0000\\\">";
         closeTag = "</span>";
@@ -8618,7 +8636,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(
       out
       << "<span class =\\\"math\\\">"
       << this->weightsModulesNONprimal[indexModule][j].toStringLetterFormat(
-        "\\\\omega", &charFormat
+        "\\\\omega", &characterFormat
       )
       << "</span>";
       out << closeTag << "</td>";
@@ -8628,7 +8646,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(
       out
       << "<span class =\\\"math\\\">"
       << this->weightsModulesPrimal[indexModule][j].toStringLetterFormat(
-        "\\\\omega", &charFormat
+        "\\\\omega", &characterFormat
       )
       << "</span>";
       out << closeTag << "</td>";

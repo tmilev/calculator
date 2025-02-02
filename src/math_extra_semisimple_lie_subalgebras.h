@@ -174,7 +174,8 @@ public:
   bool flagCentralizerIsWellChosen;
   bool flagCentralizerTypeIsComputed;
   bool flagUsedInducingSubalgebraRealization;
-  bool flagComputedFromGenerators;
+  bool flagComputedPrimalDecomposition;
+  bool flagComputedBasics;
   int recursionDepthCounterForNilradicalGeneration;
   int totalUnknownsNoCentralizer;
   int totalUnknownsWithCentralizer;

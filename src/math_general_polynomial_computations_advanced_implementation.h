@@ -589,6 +589,7 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->arbitrarySubstitutionsInOrder = List<Rational>(
     {Rational::zeroStatic(), Rational::oneStatic()}
   );
+  this->arbitrarySubstitutionsProvider = nullptr;
 }
 
 template <class Coefficient>
@@ -687,65 +688,95 @@ bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
 }
 
 template <class Coefficient>
-bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
-  List<Polynomial<Coefficient> >& inputSystem,
+bool PolynomialSystem<Coefficient>::isImpliedLinearSubstitution(
+  Polynomial<Coefficient>& polynomial,
   PolynomialSubstitution<Coefficient>& outputSubstitution
 ) {
   int numberOfVariables = this->systemSolution.size;
   MonomialPolynomial monomial;
-  Polynomial<Coefficient> polynomial;
   Coefficient coefficient;
-  for (int i = 0; i < inputSystem.size; i ++) {
-    polynomial = inputSystem[i];
-    for (int j = 0; j < numberOfVariables; j ++) {
-      monomial.makeEi(j, 1, numberOfVariables);
-      int indexOfMonomial = polynomial.monomials.getIndex(monomial);
-      if (indexOfMonomial == - 1) {
-        continue;
+  for (int j = 0; j < numberOfVariables; j ++) {
+    monomial.makeEi(j, 1, numberOfVariables);
+    int indexOfMonomial = polynomial.monomials.getIndex(monomial);
+    if (indexOfMonomial == - 1) {
+      continue;
+    }
+    coefficient = polynomial.coefficients[indexOfMonomial];
+    polynomial.subtractMonomial(monomial, coefficient);
+    bool isGood = true;
+    for (int k = 0; k < polynomial.size(); k ++) {
+      if (!(polynomial[k](j) == 0)) {
+        isGood = false;
+        polynomial.addMonomial(monomial, coefficient);
+        break;
       }
-      coefficient = polynomial.coefficients[indexOfMonomial];
-      polynomial.subtractMonomial(monomial, coefficient);
-      bool isGood = true;
-      for (int k = 0; k < polynomial.size(); k ++) {
-        if (!(polynomial[k](j) == 0)) {
-          isGood = false;
-          polynomial.addMonomial(monomial, coefficient);
-          break;
-        }
-      }
-      if (!isGood) {
-        continue;
-      }
-      outputSubstitution.makeIdentitySubstitution(numberOfVariables);
-      outputSubstitution[j] = polynomial;
-      coefficient *= - 1;
-      outputSubstitution[j] /= coefficient;
+    }
+    if (!isGood) {
+      continue;
+    }
+    outputSubstitution.makeIdentitySubstitution(numberOfVariables);
+    outputSubstitution[j] = polynomial;
+    coefficient *= - 1;
+    outputSubstitution[j] /= coefficient;
+    return true;
+  }
+  return false;
+}
+
+template <class Coefficient>
+bool PolynomialSystem<Coefficient>::isSolutionToPolynomialInOneVariable(
+  Polynomial<Coefficient>& polynomial,
+  PolynomialSubstitution<Coefficient>& outputSubstitution
+) {
+  int oneVariableIndex = 0;
+  if (!polynomial.isOneVariableNonConstantPolynomial(&oneVariableIndex)) {
+    return false;
+  }
+  if (!this->flagUsingAlgebraicClosure || this->algebraicClosure == nullptr) {
+    return false;
+  }
+  Coefficient coefficient;
+  int numberOfVariables = this->systemSolution.size;
+  Polynomial<Coefficient> polynomialCopy = polynomial;
+  if (!this->getOneVariablePolynomialSolution(polynomial, coefficient)) {
+    return false;
+  }
+  outputSubstitution.makeIdentitySubstitution(numberOfVariables);
+  outputSubstitution[oneVariableIndex].makeConstant(coefficient);
+  // check our work:
+  polynomial.substitute(outputSubstitution, 1);
+  if (!polynomial.isEqualToZero()) {
+    global.fatal
+    << "I was solving the polynomial equation "
+    << polynomialCopy.toString()
+    << ", which resulted in the substitution "
+    << outputSubstitution.toString()
+    << ". However, after carrying out the "
+    << "substitution in the polynomial, I got "
+    << polynomial.toString()
+    << ". "
+    << global.fatal;
+  }
+  return true;
+}
+
+template <class Coefficient>
+bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
+  List<Polynomial<Coefficient> >& inputSystem,
+  PolynomialSubstitution<Coefficient>& outputSubstitution
+) {
+  Polynomial<Coefficient> polynomial;
+  for (const Polynomial<Coefficient>& current : inputSystem) {
+    polynomial = current;
+    if (this->isImpliedLinearSubstitution(polynomial, outputSubstitution)) {
       return true;
     }
-    int oneVariableIndex = 0;
-    if (polynomial.isOneVariableNonConstantPolynomial(&oneVariableIndex)) {
-      if (this->flagUsingAlgebraicClosure && this->algebraicClosure != 0) {
-        if (this->getOneVariablePolynomialSolution(polynomial, coefficient)) {
-          outputSubstitution.makeIdentitySubstitution(numberOfVariables);
-          outputSubstitution[oneVariableIndex].makeConstant(coefficient);
-          // check our work:
-          polynomial.substitute(outputSubstitution, 1);
-          if (!polynomial.isEqualToZero()) {
-            global.fatal
-            << "I was solving the polynomial equation "
-            << inputSystem[i].toString()
-            << ", which resulted in the substitution "
-            << outputSubstitution.toString()
-            << ". However, after carrying out the "
-            << "substitution in the polynomial, I got "
-            << polynomial.toString()
-            << ". "
-            << global.fatal;
-          }
-          //
-          return true;
-        }
-      }
+    if (
+      this->isSolutionToPolynomialInOneVariable(
+        polynomial, outputSubstitution
+      )
+    ) {
+      return true;
     }
   }
   return false;
@@ -1116,6 +1147,8 @@ void PolynomialSystem<Coefficient>::setUpRecursiveComputation(
   toBeModified.groebner.polynomialOrder = this->groebner.polynomialOrder;
   toBeModified.arbitrarySubstitutionsInOrder =
   this->arbitrarySubstitutionsInOrder;
+  toBeModified.arbitrarySubstitutionsProvider =
+  this->arbitrarySubstitutionsProvider;
 }
 
 template <class Coefficient>
@@ -1340,6 +1373,12 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
       );
       return;
     }
+  }
+  if (this->arbitrarySubstitutionsProvider != nullptr) {
+    this->arbitrarySubstitutionsProvider(
+      this->arbitrarySubstitutionsInOrder,
+      this->recursionCounterSerreLikeSystem
+    );
   }
   for (
     const Rational& arbitrarySubstitution : this->arbitrarySubstitutionsInOrder

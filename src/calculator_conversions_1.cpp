@@ -1738,7 +1738,7 @@ bool CalculatorConversions::storeSemisimpleSubalgebras(
     currentChainExpression.addChildOnTop(numericalConverterExpression);
     numericalConverterExpression = current.numberOfLargerTypesExplored;
     totalTypesExploredExpression.addChildOnTop(numericalConverterExpression);
-    numericalConverterExpression = current.indexOfCurrentHCandidate + 1;
+    numericalConverterExpression = current.indexOfCurrentHCandidate;
     totalHsExploredExpression.addChildOnTop(numericalConverterExpression);
   }
   keys.addOnTop("NumberOfExploredTypes");

@@ -490,6 +490,7 @@ public:
     int indexModule, const Vector<Rational>& weight
   ) const;
   bool operator>(const CandidateSemisimpleSubalgebra& other) const;
+  static void arbitrarySusbsitutionProvider(List<Rational>& output, int depth);
 };
 
 class RealizedSemisimpleSubalgebra {
@@ -781,7 +782,6 @@ public:
   std::string toStringSubalgebrasWithHDWrite(
     FormatExpressions* format = nullptr
   );
-  std::string writeToHardDisk(FormatExpressions* format);
   void writeSubalgebraToFile(FormatExpressions* format, int subalgebraIndex);
   std::string toStringPart3(FormatExpressions* format, bool writeToHardDisk);
   std::string toStringSl2s(FormatExpressions* format = nullptr);

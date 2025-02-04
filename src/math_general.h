@@ -3942,10 +3942,21 @@ public:
   List<PolynomialSubstitution<Coefficient> > impliedSubstitutions;
   List<Rational> arbitrarySubstitutionsInOrder;
   PolynomialSystem();
+  void(*arbitrarySubstitutionsProvider)(
+    List<Rational>& outputSubstitutions, int recursionDepth
+  );
   void solveSerreLikeSystem(List<Polynomial<Coefficient> >& inputSystem);
   std::string toStringCalculatorInputFromSystem(
     const List<Polynomial<Coefficient> >& inputSystem
   ) const;
+  bool isImpliedLinearSubstitution(
+    Polynomial<Coefficient>& polynomial,
+    PolynomialSubstitution<Coefficient>& outputSubstitution
+  );
+  bool isSolutionToPolynomialInOneVariable(
+    Polynomial<Coefficient>& polynomial,
+    PolynomialSubstitution<Coefficient>& outputSubstitution
+  );
   bool hasImpliedSubstitutions(
     List<Polynomial<Coefficient> >& inputSystem,
     PolynomialSubstitution<Coefficient>& outputSubstitution

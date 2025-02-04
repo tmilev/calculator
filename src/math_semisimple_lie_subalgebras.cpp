@@ -1849,6 +1849,8 @@ bool SemisimpleSubalgebras::computeStructureRealFormOneSlTwo(
   }
   candidate.adjustCentralizerAndRecompute(false);
   candidate.computeCharacter(false);
+  candidate.
+  computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors();
   candidate.computePrimalModuleDecomposition();
   RealizedSemisimpleSubalgebra& realized =
   this->addSubalgebraIfNewSetToStackTop(candidate);
@@ -3252,7 +3254,7 @@ SemisimpleSubalgebras::Statistics::Statistics() {
 PossibleExtensionsOfSemisimpleLieSubalgebra::
 PossibleExtensionsOfSemisimpleLieSubalgebra() {
   this->indexOfCurrentHCandidate = - 1;
-  this->numberOfLargerTypesExplored = - 1;
+  this->numberOfLargerTypesExplored = 0;
   this->flagInitialized = false;
   this->owner = nullptr;
   this->realizedBase = nullptr;
@@ -3272,8 +3274,6 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::initializeIfNeeded() {
     this->possibleLargerDynkinTypes,
     &this->possibleRootInjections
   );
-  this->indexOfCurrentHCandidate = - 1;
-  this->numberOfLargerTypesExplored = 0;
   this->computeCurrentHCandidates();
 }
 
@@ -4950,6 +4950,8 @@ void CandidateSemisimpleSubalgebra::WConjecture::processOnePair(
 void CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition() {
   STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computePrimalModuleDecomposition"
+  );
+  this->computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors(
   );
   for (int i = 0; i < this->modules.size; i ++) {
     for (int j = 0; j < this->modules[i].size; j ++) {
@@ -6914,6 +6916,16 @@ void SemisimpleSubalgebras::resetComputations() {
   this->subalgebras.clear();
 }
 
+void CandidateSemisimpleSubalgebra::arbitrarySusbsitutionProvider(
+  List<Rational>& output, int depth
+) {
+  if (depth % 2 == 0) {
+    output = List<Rational>({Rational::oneStatic(), Rational::zeroStatic()});
+  } else {
+    output = List<Rational>({Rational::zeroStatic(), Rational::oneStatic()});
+  }
+}
+
 void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   int maximumPolynomialDivisions = 2000;
   int maximumMonomialOperations = 20000;
@@ -6928,8 +6940,8 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   if (embeddedType.getRank() == 1) {
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
-    this->configuredSystemToSolve.arbitrarySubstitutionsInOrder =
-    List<Rational>({Rational::zeroStatic(), Rational::oneStatic()});
+    this->configuredSystemToSolve.arbitrarySubstitutionsProvider =
+    CandidateSemisimpleSubalgebra::arbitrarySusbsitutionProvider;
   }
   std::string embeddingLieAlgebraName = embeddedType.toString();
   if (embeddingLieAlgebraName == "A^{20}_1+A^{4}_1") {

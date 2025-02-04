@@ -554,6 +554,7 @@ public:
   );
   Vector<Rational>& nextCandidateHScaledToActByTwo();
   std::string toString();
+  bool checkConsistency();
 };
 
 class SemisimpleSubalgebras {

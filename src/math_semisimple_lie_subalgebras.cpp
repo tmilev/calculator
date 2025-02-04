@@ -1419,7 +1419,10 @@ bool SemisimpleSubalgebras::loadState(
       this->addSubalgebraToStack(this->emptyCandidateSubalgebra());
       PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
       *this->currentSubalgebraChain.lastObject();
-      lastExtension.indexOfCurrentHCandidate = numberOfExploredHs[i] - 1;
+      lastExtension.indexOfCurrentHCandidate = numberOfExploredHs[i];
+      if (lastExtension.indexOfCurrentHCandidate < - 1) {
+        lastExtension.indexOfCurrentHCandidate = - 1;
+      }
       lastExtension.numberOfLargerTypesExplored = numberOfExploredTypes[i];
       continue;
     }
@@ -1454,15 +1457,15 @@ bool SemisimpleSubalgebras::loadState(
       currentSubalgebra.hsScaledToActByTwoInOrderOfCreation =
       this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation;
       for (
-        int i = 0; i < currentSubalgebra.cartanElementsSubalgebra.size; i ++
+        int j = 0; j < currentSubalgebra.cartanElementsSubalgebra.size; j ++
       ) {
         if (
           !this->baseSubalgebra().hsScaledToActByTwoInOrderOfCreation.contains(
-            currentSubalgebra.cartanElementsSubalgebra[i]
+            currentSubalgebra.cartanElementsSubalgebra[j]
           )
         ) {
           currentSubalgebra.hsScaledToActByTwoInOrderOfCreation.addOnTop(
-            currentSubalgebra.cartanElementsSubalgebra[i]
+            currentSubalgebra.cartanElementsSubalgebra[j]
           );
           if (
             currentSubalgebra.hsScaledToActByTwoInOrderOfCreation.size >
@@ -3261,6 +3264,10 @@ PossibleExtensionsOfSemisimpleLieSubalgebra() {
 }
 
 void PossibleExtensionsOfSemisimpleLieSubalgebra::initializeIfNeeded() {
+  STACK_TRACE(
+    "PossibleExtensionsOfSemisimpleLieSubalgebra::"
+    "initializeIfNeeded"
+  );
   if (this->flagInitialized) {
     // Already initialized.
     return;
@@ -3310,17 +3317,40 @@ incrementReturnFalseIfPastLast(ProgressReport* report) {
 
 DynkinType& PossibleExtensionsOfSemisimpleLieSubalgebra::
 nextUnexploredDynkinType() {
+  STACK_TRACE(
+    "PossibleExtensionsOfSemisimpleLieSubalgebra::"
+    "nextUnexploredDynkinType"
+  );
   return this->possibleLargerDynkinTypes[this->numberOfLargerTypesExplored];
 }
 
 List<int>& PossibleExtensionsOfSemisimpleLieSubalgebra::
 nextPossibleRootInjection() {
+  STACK_TRACE(
+    "PossibleExtensionsOfSemisimpleLieSubalgebra::"
+    "nextPossibleRootInjection"
+  );
   return this->possibleRootInjections[this->numberOfLargerTypesExplored];
 }
 
 Vector<Rational>& PossibleExtensionsOfSemisimpleLieSubalgebra::
 nextCandidateHScaledToActByTwo() {
+  STACK_TRACE(
+    "PossibleExtensionsOfSemisimpleLieSubalgebra::"
+    "nextCandidateHScaledToActByTwo"
+  );
   return this->candidateHsScaledToActByTwo[this->indexOfCurrentHCandidate];
+}
+
+bool PossibleExtensionsOfSemisimpleLieSubalgebra::checkConsistency() {
+  STACK_TRACE(
+    "PossibleExtensionsOfSemisimpleLieSubalgebra::"
+    "checkConsistency"
+  );
+  this->nextPossibleRootInjection();
+  this->nextUnexploredDynkinType();
+  this->nextCandidateHScaledToActByTwo();
+  return true;
 }
 
 std::string PossibleExtensionsOfSemisimpleLieSubalgebra::toString() {
@@ -3373,6 +3403,7 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension(
     "PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension"
   );
   this->owner->checkConsistency();
+  this->checkConsistency();
   CandidateSemisimpleSubalgebra& base = this->realizedBase->content;
   if (
     base.cartanElementsSubalgebra.size !=
@@ -6845,6 +6876,7 @@ bool SemisimpleSubalgebras::checkInitialization() const {
 }
 
 bool SemisimpleSubalgebras::checkConsistency() const {
+  STACK_TRACE("SemisimpleSubalgebras::checkConsistency");
   if (this->flagDeallocated) {
     global.fatal
     << "Use after free of semisimple subalgebras. "

@@ -590,6 +590,7 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
     {Rational::zeroStatic(), Rational::oneStatic()}
   );
   this->arbitrarySubstitutionsProvider = nullptr;
+  this->preferredVariableForArbitrarySubstitutionProvider = nullptr;
 }
 
 template <class Coefficient>
@@ -832,7 +833,13 @@ int PolynomialSystem<Coefficient>::getPreferredSerreSystemSubstitutionIndex(
     championIndex = candidateIndex;
     championImprovement = candidateImprovement;
   }
-  return championIndex;
+  if (this->preferredVariableForArbitrarySubstitutionProvider == nullptr) {
+    return championIndex;
+  }
+  return
+  this->preferredVariableForArbitrarySubstitutionProvider(
+    variableSelection, championIndex
+  );
 }
 
 template <class Coefficient>
@@ -944,6 +951,7 @@ void PolynomialSystem<Coefficient>::getVariablesToSolveFor(
       }
     }
   }
+  output.computeIndicesFromSelection();
 }
 
 template <class Coefficient>
@@ -1149,6 +1157,8 @@ void PolynomialSystem<Coefficient>::setUpRecursiveComputation(
   this->arbitrarySubstitutionsInOrder;
   toBeModified.arbitrarySubstitutionsProvider =
   this->arbitrarySubstitutionsProvider;
+  toBeModified.preferredVariableForArbitrarySubstitutionProvider =
+  this->preferredVariableForArbitrarySubstitutionProvider;
 }
 
 template <class Coefficient>

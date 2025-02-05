@@ -3945,6 +3945,9 @@ public:
   void(*arbitrarySubstitutionsProvider)(
     List<Rational>& outputSubstitutions, int recursionDepth
   );
+  int(*preferredVariableForArbitrarySubstitutionProvider)(
+    Selection& variablesToSolveFor, int bestHeursticCandidate
+  );
   void solveSerreLikeSystem(List<Polynomial<Coefficient> >& inputSystem);
   std::string toStringCalculatorInputFromSystem(
     const List<Polynomial<Coefficient> >& inputSystem

@@ -1505,6 +1505,9 @@ bool SemisimpleSubalgebras::loadState(
     PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
     *this->currentSubalgebraChain.lastObject();
     lastExtension.indexOfCurrentHCandidate = numberOfExploredHs[i] - 1;
+    if (lastExtension.indexOfCurrentHCandidate < - 1) {
+      lastExtension.indexOfCurrentHCandidate = - 1;
+    }
     lastExtension.numberOfLargerTypesExplored = numberOfExploredTypes[i];
   }
   return true;
@@ -6958,6 +6961,15 @@ void CandidateSemisimpleSubalgebra::arbitrarySusbsitutionProvider(
   }
 }
 
+int CandidateSemisimpleSubalgebra::preferredVariableForSl2SystemProvider(
+  Selection& variablesToSolveFor, int bestIndexHeuristically
+) {
+  if (variablesToSolveFor.cardinalitySelection == 0) {
+    return bestIndexHeuristically;
+  }
+  return variablesToSolveFor.elements[0];
+}
+
 void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   int maximumPolynomialDivisions = 2000;
   int maximumMonomialOperations = 20000;
@@ -6974,6 +6986,9 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
     maximumMonomialOperations = 10000;
     this->configuredSystemToSolve.arbitrarySubstitutionsProvider =
     CandidateSemisimpleSubalgebra::arbitrarySusbsitutionProvider;
+    this->configuredSystemToSolve.
+    preferredVariableForArbitrarySubstitutionProvider =
+    CandidateSemisimpleSubalgebra::preferredVariableForSl2SystemProvider;
   }
   std::string embeddingLieAlgebraName = embeddedType.toString();
   if (embeddingLieAlgebraName == "A^{20}_1+A^{4}_1") {

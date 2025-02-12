@@ -1245,7 +1245,7 @@ std::string SemisimpleSubalgebras::toStringSl2s(FormatExpressions* format) {
     << "</td>";
     if (this->orbits[i].orbitSize != - 1) {
       out << "<td>" << this->orbits[i].orbitSize;
-      if (this->orbits[i].flagOrbitIsBuffered == 0) {
+      if (!this->orbits[i].flagOrbitIsBuffered) {
         out << "<b>(orbit enumerated but not stored)</b>";
       }
       out << "</td>";
@@ -1414,7 +1414,19 @@ bool SemisimpleSubalgebras::loadState(
     return false;
   }
   this->currentSubalgebraChain.clear();
+  ProgressReport report;
   for (int i = 0; i < currentChainIntegers.size; i ++) {
+    if (report.tickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream
+      << "Loading current subalgebra chain index: "
+      << currentChainIntegers[i]
+      << i + 1
+      << " out of "
+      << currentChainIntegers.size
+      << ". ";
+      report.report(reportStream.str());
+    }
     if (currentChainIntegers[i] == - 1 && i == 0) {
       this->addSubalgebraToStack(this->emptyCandidateSubalgebra());
       PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
@@ -2519,7 +2531,7 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
     return;
   }
   ProgressReport orbitHeader(1, "orbitGeneration");
-  ProgressReport body;
+  ProgressReport body(1000, "orbit body");
   Vector<Rational> currentCandidate;
   OrbitIteratorRootActionWeylGroupAutomorphisms& currentOrbit =
   this->orbits[currentSubalgebra.indexInContainer];
@@ -2532,15 +2544,26 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
   << this->slTwoSubalgebras.allSubalgebras.size
   << ". "
   << currentOrbit.toString();
-  body.report(orbitBodyStream.str());
+  orbitHeader.report(orbitBodyStream.str());
+  int totalHCandidates = 0;
   do {
     this->writeOneHCandidate(
       currentOrbit.getCurrentElement(),
       outputHCandidatesScaledToActByTwo,
       newCandidate,
-      currentRootInjection,
-      orbitHeader
+      currentRootInjection
     );
+    totalHCandidates ++;
+    if (body.tickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream
+      << "So far, found "
+      << outputHCandidatesScaledToActByTwo.size + 1
+      << " good candidates; explored "
+      << totalHCandidates
+      << " candidates. ";
+      body.report(reportStream.str());
+    }
   } while (currentOrbit.incrementReturnFalseIfPastLast());
 }
 
@@ -2548,23 +2571,15 @@ void SemisimpleSubalgebras::writeOneHCandidate(
   const Vector<Rational>& currentCandidate,
   List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
   CandidateSemisimpleSubalgebra& newCandidate,
-  const List<int>& currentRootInjection,
-  ProgressReport& report
+  const List<int>& currentRootInjection
 ) {
+  STACK_TRACE("SemisimpleSubalgebras::writeOneHCandidate");
   if (
     !newCandidate.isGoodHNewActingByTwo(
       currentCandidate, currentRootInjection
     )
   ) {
     return;
-  }
-  if (report.tickAndWantReport()) {
-    std::stringstream reportStream;
-    reportStream
-    << "So far, found "
-    << outputHCandidatesScaledToActByTwo.size + 1
-    << " good candidates. ";
-    report.report(reportStream.str());
   }
   outputHCandidatesScaledToActByTwo.addOnTop(currentCandidate);
 }
@@ -2957,7 +2972,6 @@ moduleDecompostionOverBaseAllowsExtension(
     return true;
   }
   base.computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors();
-  ProgressReport report1;
   Vector<Rational> weightHElementWeAreLookingFor =
   this->owner->
   getHighestWeightFundamentalNewComponentFromImagesOldSimpleRootsAndNewRoot(
@@ -2974,22 +2988,6 @@ moduleDecompostionOverBaseAllowsExtension(
     }
   }
   if (indicesModulesNewComponentOfExtensionModule.size == 0) {
-    if (report1.tickAndWantReport()) {
-      std::stringstream reportStream;
-      reportStream
-      << " Extension "
-      << this->numberOfLargerTypesExplored + 1
-      << " out of "
-      << this->possibleLargerDynkinTypes.size
-      << ", type  "
-      << candidateExtensionType.toString()
-      << " cannot be realized: no appropriate module: "
-      << "desired weight of h element is: "
-      << weightHElementWeAreLookingFor.toString()
-      << " but the highest weights of the base candidate are: "
-      << base.highestWeightsNonPrimal.toString();
-      report1.report(reportStream.str());
-    }
     return false;
   }
   return true;
@@ -3012,6 +3010,7 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
     return;
   }
   ProgressReport report0;
+  ProgressReport report1;
   CandidateSemisimpleSubalgebra& base = this->realizedBase->content;
   if (report0.tickAndWantReport()) {
     std::stringstream reportStream;
@@ -3035,6 +3034,14 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::computeCurrentHCandidates() {
     )
   ) {
     return;
+  }
+  if (report1.tickAndWantReport()) {
+    std::stringstream reportStream;
+    reportStream
+    << "The module decomposition over "
+    << base.weylNonEmbedded->dynkinType.toString()
+    << " allows the possible extension. ";
+    report1.report(reportStream.str());
   }
   newCandidate.setUpInjectionHs(
     base, candidateExtensionType, candidateRootInjection
@@ -3768,7 +3775,7 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
   STACK_TRACE("CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo");
   // check if input weight is maximally dominant:
   Rational scalarProduct;
-  int indexHneW = *rootInjections.lastObject();
+  int indexHNew = *rootInjections.lastObject();
   for (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
     Vector<Rational>& currentPositiveRoot =
     this->getAmbientWeyl().rootsOfBorel[i];
@@ -3815,7 +3822,7 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
     }
   }
   for (int i = 0; i < this->cartanElementsScaledToActByTwo.size; i ++) {
-    if (i != indexHneW) {
+    if (i != indexHNew) {
       scalarProduct =
       this->getAmbientWeyl().rootScalarCartanRoot(
         hNewActingByTwo, this->cartanElementsScaledToActByTwo[i]
@@ -3826,7 +3833,7 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
         hNewActingByTwo, hNewActingByTwo
       );
     }
-    if (scalarProduct != this->weylNonEmbedded->coCartanSymmetric(indexHneW, i))
+    if (scalarProduct != this->weylNonEmbedded->coCartanSymmetric(indexHNew, i))
     {
       return false;
     }
@@ -3890,6 +3897,7 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystem(
   bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
 ) {
   STACK_TRACE("CandidateSemisimpleSubalgebra::attemptToSolveSystem");
+  this->flagInternalInitializationAndVerificationComplete = false;
   this->computeAndVerifyFromKnownGeneratorsAndHsPrepare(nullptr);
   ChevalleyGenerator currentGenerator;
   ChevalleyGenerator currentOppositeGenerator;
@@ -5197,6 +5205,7 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->flagUsedInducingSubalgebraRealization = true;
   this->flagComputedPrimalDecomposition = false;
   this->flagComputedBasics = false;
+  this->flagInternalInitializationAndVerificationComplete = false;
   this->totalUnknownsNoCentralizer = 0;
   this->totalUnknownsWithCentralizer = 0;
   this->totalArithmeticOpsToSolveSystem = 0;
@@ -6506,14 +6515,21 @@ computePrimalModuleDecompositionHighestWeightsAndHighestWeightVectors() {
     return;
   }
   this->flagComputedPrimalDecomposition = true;
+  ProgressReport report;
   HashedList<Vector<Rational> > weightsCartanRestrictedDualCoordinates;
+  report.report("Computing primal decomposition highest weights ... ");
   this->computePrimalModuleDecompositionHighestWeights(
     weightsCartanRestrictedDualCoordinates
   );
+  report.report("Computing primal decomposition highest weight vectors ... ");
   this->computePrimalModuleDecompositionHighestWeightVectors(
     weightsCartanRestrictedDualCoordinates
   );
+  report.report(
+    "Computing primal decomposition: finalizaing and error checks ... "
+  );
   this->computePrimalModuleDecompositionHighestWeightsLastPart();
+  report.report("Computing primal decomposition: done.");
 }
 
 bool CandidateSemisimpleSubalgebra::compareLeftGreaterThanRight(
@@ -6800,22 +6816,34 @@ computePrimalModuleDecompositionHighestWeightVectors(
   );
   this->checkConsistency();
   List<Matrix<AlgebraicNumber> > adjointActionsOfHs;
-  Matrix<AlgebraicNumber> tempAd;
-  Matrix<AlgebraicNumber> temp;
+  Matrix<AlgebraicNumber> currentAdjoint;
   Matrix<AlgebraicNumber> commonAd;
   Matrix<AlgebraicNumber> adIncludingCartanActions;
   for (int i = 0; i < this->positiveGenerators.size; i ++) {
     this->getAmbientSemisimpleLieAlgebra().getAdjoint(
-      tempAd, this->positiveGenerators[i]
+      currentAdjoint, this->positiveGenerators[i]
     );
-    commonAd.appendMatrixToTheBottom(tempAd);
+    commonAd.appendMatrixToTheBottom(currentAdjoint);
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
   Vectors<Rational> allHs;
   allHs.addListOnTop(this->cartanElementsSubalgebra);
   allHs.addListOnTop(this->cartanOfCentralizer);
   adjointActionsOfHs.setSize(allHs.size);
+  ProgressReport report;
   for (int j = 0; j < allHs.size; j ++) {
+    if (report.tickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream
+      << "Finding the adjoint with respect to "
+      << allHs[j].toString()
+      << " [h element "
+      << j + 1
+      << " out of "
+      << allHs.size
+      << "].";
+      report.report(reportStream.str());
+    }
     element.makeCartanGenerator(
       allHs[j], this->getAmbientSemisimpleLieAlgebra()
     );
@@ -6825,19 +6853,44 @@ computePrimalModuleDecompositionHighestWeightVectors(
   }
   Vectors<AlgebraicNumber> currentHighestVectors;
   this->highestVectorsNonSorted.setSize(0);
+  Matrix<AlgebraicNumber> scalarTimesIdentity;
   for (int i = 0; i < inputHighestWeights.size; i ++) {
     adIncludingCartanActions = commonAd;
     for (int j = 0; j < allHs.size; j ++) {
-      tempAd = adjointActionsOfHs[j];
-      temp.makeIdentityMatrix(
+      currentAdjoint = adjointActionsOfHs[j];
+      scalarTimesIdentity.makeIdentityMatrix(
         this->getAmbientSemisimpleLieAlgebra().getNumberOfGenerators()
       );
-      temp *= inputHighestWeights[i][j];
-      tempAd -= temp;
-      adIncludingCartanActions.appendMatrixToTheBottom(tempAd);
+      scalarTimesIdentity *= inputHighestWeights[i][j];
+      currentAdjoint -= scalarTimesIdentity;
+      adIncludingCartanActions.appendMatrixToTheBottom(currentAdjoint);
     }
     currentHighestVectors.setSize(0);
+    if (report.tickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream
+      << "Computing the highest weight vector with respect to weight: "
+      << inputHighestWeights[i].toString()
+      << " ["
+      << i + 1
+      << " out of "
+      << inputHighestWeights.size
+      << "]. About to compute the eigenspace ...";
+      report.report(reportStream.str());
+    }
     adIncludingCartanActions.getZeroEigenSpace(currentHighestVectors);
+    if (report.tickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream
+      << "Computed the zero eigenspace with respect to weight: "
+      << inputHighestWeights[i].toString()
+      << " ["
+      << i + 1
+      << " out of "
+      << inputHighestWeights.size
+      << "]. About to scale and normalize...";
+      report.report(reportStream.str());
+    }
     for (int j = 0; j < currentHighestVectors.size; j ++) {
       currentHighestVectors[j].scaleNormalizeFirstNonZero();
       element.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
@@ -7825,6 +7878,11 @@ bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs()
   STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs"
   );
+  if (this->flagInternalInitializationAndVerificationComplete) {
+    // The function already ran; everything was already computed.
+    return this->status == CandidateSubalgebraStatus::realized;
+  }
+  this->flagInternalInitializationAndVerificationComplete = true;
   ProgressReport report;
   if (report.tickAndWantReport()) {
     report.report(

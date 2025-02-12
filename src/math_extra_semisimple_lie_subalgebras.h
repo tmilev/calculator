@@ -176,6 +176,9 @@ public:
   bool flagUsedInducingSubalgebraRealization;
   bool flagComputedPrimalDecomposition;
   bool flagComputedBasics;
+  // Whether we have computed all internals from the given
+  // subalgebra generators.
+  bool flagInternalInitializationAndVerificationComplete;
   int recursionDepthCounterForNilradicalGeneration;
   int totalUnknownsNoCentralizer;
   int totalUnknownsWithCentralizer;
@@ -882,8 +885,7 @@ public:
     const Vector<Rational>& currentCandidate,
     List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
     CandidateSemisimpleSubalgebra& newCandidate,
-    const List<int>& currentRootInjection,
-    ProgressReport& report
+    const List<int>& currentRootInjection
   );
   class Test {
   public:

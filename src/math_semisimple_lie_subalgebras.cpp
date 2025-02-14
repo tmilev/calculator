@@ -1385,9 +1385,11 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
         'A', 1, this->slTwoSubalgebras.allSubalgebras[i].lengthHSquared
       )
     );
+    WeylGroupAutomorphismAction action;
     this->orbits[i].initialize(
       generators,
-      this->slTwoSubalgebras.allSubalgebras[i].hElement.getCartanPart()
+      this->slTwoSubalgebras.allSubalgebras[i].hElement.getCartanPart(),
+      action
     );
   }
 }
@@ -2239,6 +2241,29 @@ CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::attemptToRealize() {
   return this->status;
 }
 
+WeylGroupAutomorphismAction::WeylGroupAutomorphismAction() {
+  this->name = "Weyl group automorphism action";
+  this->owner = nullptr;
+}
+
+bool WeylGroupAutomorphismAction::checkInitialization() const {
+  if (this->owner == nullptr) {
+    global.fatal
+    << "WeylGroupAutomorphismAction owner not initialized"
+    << global.fatal;
+  }
+  return true;
+}
+
+void WeylGroupAutomorphismAction::actOn(
+  const ElementWeylGroupAutomorphisms& actingElement,
+  const Vector<Rational>& inputElementActedUpon,
+  Vector<Rational>& output
+) {
+  this->checkInitialization();
+  this->owner->actOnStandard(actingElement, inputElementActedUpon, output);
+}
+
 const Vector<Rational>& OrbitIteratorRootActionWeylGroupAutomorphisms::
 getCurrentElement() {
   STACK_TRACE(
@@ -2304,7 +2329,6 @@ incrementReturnFalseIfPastLast() {
     "::incrementReturnFalseIfPastLast"
   );
   this->checkConsistency();
-  this->iterator.checkInitialization();
   if (this->flagOrbitIsBuffered) {
     this->currentIndexInBuffer ++;
     if (this->currentIndexInBuffer >= this->orbitSize) {
@@ -2315,9 +2339,14 @@ incrementReturnFalseIfPastLast() {
   }
   this->currentIndexInBuffer ++;
   if (this->flagOrbitEnumeratedOnce) {
-    return this->iterator.incrementReturnFalseIfPastLastFALSE();
+    return
+    this->iterator.
+    incrementReturnFalseIfPastLastForGroupsWithGeneratorsOfOrderTwo();
   }
-  if (!this->iterator.incrementReturnFalseIfPastLastFALSE()) {
+  if (
+    !this->iterator.
+    incrementReturnFalseIfPastLastForGroupsWithGeneratorsOfOrderTwo()
+  ) {
     this->orbitSize = this->currentIndexInBuffer;
     if (this->computedSize != - 1) {
       if (this->computedSize != this->orbitSize) {
@@ -2352,31 +2381,31 @@ incrementReturnFalseIfPastLast() {
 
 void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
   STACK_TRACE("OrbitIteratorRootActionWeylGroupAutomorphisms::initialize");
-  this->iterator.checkInitialization();
   this->currentIndexInBuffer = 0;
   if (this->flagOrbitIsBuffered) {
     return;
   }
   this->iterator.initialize(
-    this->iterator.groupGeneratingElements,
-    this->orbitDefiningElement,
-    this->iterator.groupAction
+    this->iterator.groupGeneratingElements, this->orbitDefiningElement
   );
   if (this->iterator.groupGeneratingElements.size > 0) {
     WeylGroupAutomorphisms& ownerGroup =
     *this->iterator.groupGeneratingElements[0].owner;
+    WeylGroupAutomorphismAction weylGroupAutomorphismAction;
+    weylGroupAutomorphismAction.owner = &ownerGroup;
+    this->iterator.setGroupAction(weylGroupAutomorphismAction);
     this->computedSize = ownerGroup.getOrbitSize(this->orbitDefiningElement);
     if (this->computedSize > this->maxOrbitBufferSize) {
       this->maxOrbitBufferSize = 0;
       this->orbitBuffer.setSize(0);
     }
   }
-  this->iterator.checkInitialization();
 }
 
 void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
   const List<ElementWeylGroupAutomorphisms>& inputGenerators,
-  const Vector<Rational>& inputElement
+  const Vector<Rational>& inputElement,
+  WeylGroupAutomorphismAction& action
 ) {
   STACK_TRACE("OrbitIteratorRootActionWeylGroupAutomorphisms::initialize");
   if (this->orbitDefiningElement == inputElement) {
@@ -2392,15 +2421,12 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
     this->orbitBuffer.setSize(0);
     this->orbitBuffer.addOnTop(this->orbitDefiningElement);
   }
-  this->iterator.initialize(
-    inputGenerators, this->orbitDefiningElement, this->iterator.groupAction
-  );
+  this->iterator.setGroupAction(action);
+  this->iterator.initialize(inputGenerators, this->orbitDefiningElement);
 }
 
 OrbitIteratorRootActionWeylGroupAutomorphisms::
 OrbitIteratorRootActionWeylGroupAutomorphisms() {
-  this->iterator.groupAction.name = "WeylGroupAutomorphismRootAction";
-  this->iterator.groupAction.actOn = ElementWeylGroupAutomorphisms::actOn;
   this->reset();
 }
 

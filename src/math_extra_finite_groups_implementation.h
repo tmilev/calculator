@@ -121,16 +121,14 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(
   return true;
 }
 
-template <class elementGroup, class elementRepresentation>
-void OrbitIterator<elementGroup, elementRepresentation>::initialize(
-  const List<elementGroup>& inputGenerators,
-  const elementRepresentation& inputElement,
-  const GroupActionWithName& inputGroupAction
+template <class ElementGroup, class ElementRepresentation, class GroupAction>
+void OrbitIterator<ElementGroup, ElementRepresentation, GroupAction>::
+initialize(
+  const List<ElementGroup>& inputGenerators,
+  const ElementRepresentation& inputElement
 ) {
   this->resetNoActionChange();
   this->groupGeneratingElements = inputGenerators;
-  this->groupAction.name = inputGroupAction.name;
-  this->groupAction.actOn = inputGroupAction.actOn;
   this->currentLayer->clear();
   this->currentLayer->addOnTop(inputElement);
   this->indexCurrentElement = 0;
@@ -138,15 +136,15 @@ void OrbitIterator<elementGroup, elementRepresentation>::initialize(
   this->nextLayer->clear();
 }
 
-template <class elementGroup, class elementRepresentation>
-const elementRepresentation& OrbitIterator<
-  elementGroup, elementRepresentation
+template <class ElementGroup, class ElementRepresentation, class GroupAction>
+const ElementRepresentation& OrbitIterator<
+  ElementGroup, ElementRepresentation, GroupAction
 >::getCurrentElement() {
   return (*this->currentLayer)[this->indexCurrentElement];
 }
 
-template <class elementGroup, class elementRepresentation>
-std::string OrbitIterator<elementGroup, elementRepresentation>::
+template <class ElementGroup, class ElementRepresentation, class GroupAction>
+std::string OrbitIterator<ElementGroup, ElementRepresentation, GroupAction>::
 toStringLayerSize() const {
   std::stringstream out;
   out
@@ -164,8 +162,8 @@ toStringLayerSize() const {
   return out.str();
 }
 
-template <class elementGroup, class elementRepresentation>
-bool OrbitIterator<elementGroup, elementRepresentation>::
+template <class ElementGroup, class ElementRepresentation, class GroupAction>
+bool OrbitIterator<ElementGroup, ElementRepresentation, GroupAction>::
 incrementReturnFalseIfPastLast() {
   STACK_TRACE("OrbitIterator::incrementReturnFalseIfPastLast");
   if (this->groupGeneratingElements.size == 0) {
@@ -192,17 +190,19 @@ incrementReturnFalseIfPastLast() {
   return false;
 }
 
-template <class elementGroup, class elementRepresentation>
-bool OrbitIterator<elementGroup, elementRepresentation>::checkInitialization()
-const {
-  this->groupAction.checkInitialization();
+template <class ElementGroup, class ElementRepresentation, class GroupAction>
+bool OrbitIterator<ElementGroup, ElementRepresentation, GroupAction>::
+checkInitialization() const {
   return true;
 }
 
-template <class elementGroup, class elementRepresentation>
-bool OrbitIterator<elementGroup, elementRepresentation>::
-incrementReturnFalseIfPastLastFALSE() {
-  STACK_TRACE("OrbitIterator::incrementReturnFalseIfPastLastFALSE");
+template <class ElementGroup, class ElementRepresentation, class GroupAction>
+bool OrbitIterator<ElementGroup, ElementRepresentation, GroupAction>::
+incrementReturnFalseIfPastLastForGroupsWithGeneratorsOfOrderTwo() {
+  STACK_TRACE(
+    "OrbitIterator::"
+    "incrementReturnFalseIfPastLastForGroupsWithGeneratorsOfOrderTwo"
+  );
   if (this->groupGeneratingElements.size == 0) {
     return false;
   }
@@ -230,7 +230,7 @@ incrementReturnFalseIfPastLastFALSE() {
   if (this->nextLayer->size == 0) {
     return false;
   }
-  HashedList<elementRepresentation>* layerPointer = this->previousLayer;
+  HashedList<ElementRepresentation>* layerPointer = this->previousLayer;
   this->previousLayer = this->currentLayer;
   this->currentLayer = this->nextLayer;
   this->nextLayer = layerPointer;
@@ -646,19 +646,17 @@ void FiniteGroup<elementSomeGroup>::computeGeneratorsConjugacyClasses() {
   this->flagGeneratorsConjugacyClassesComputed = true;
 }
 
-template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::computeCCSizeOrCCFromRepresentative(
+template <class ElementSomeGroup>
+void FiniteGroup<ElementSomeGroup>::computeCCSizeOrCCFromRepresentative(
   ConjugacyClass& inputOutputClass, bool storeCC
 ) {
   STACK_TRACE("FiniteGroup::ComputeCCSizesFromCCRepresentatives");
-  OrbitIterator<elementSomeGroup, elementSomeGroup> orbitIterator;
-  orbitIterator.groupAction.actOn = elementSomeGroup::conjugationAction;
-  orbitIterator.groupAction.name = "conjugation action";
-  orbitIterator.initialize(
-    this->generators,
-    inputOutputClass.representative,
-    orbitIterator.groupAction
-  );
+  OrbitIterator<
+    ElementSomeGroup, ElementSomeGroup, ConjugationAction<ElementSomeGroup>
+  > orbitIterator;
+  ConjugationAction<ElementSomeGroup> conjugation;
+  orbitIterator.setGroupAction(conjugation);
+  orbitIterator.initialize(this->generators, inputOutputClass.representative);
   inputOutputClass.size = 1;
   if (storeCC) {
     inputOutputClass.elements.setSize(0);
@@ -681,8 +679,8 @@ void FiniteGroup<elementSomeGroup>::computeCCSizeOrCCFromRepresentative(
   }
 }
 
-template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::
+template <class ElementSomeGroup>
+bool FiniteGroup<ElementSomeGroup>::
 checkConjugacyClassRepresentationsMatchCCSizes() {
   STACK_TRACE("FiniteGroup::checkConjugacyClassRepresentationsMatchCCSizes");
   LargeInteger computedSize = 0;
@@ -720,8 +718,8 @@ checkConjugacyClassRepresentationsMatchCCSizes() {
   return true;
 }
 
-template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::computeConjugacyClassesRepresentatives() {
+template <class ElementSomeGroup>
+bool FiniteGroup<ElementSomeGroup>::computeConjugacyClassesRepresentatives() {
   STACK_TRACE("FiniteGroup::computeConjugacyClassesRepresentatives");
   // This algorithm is effective if the sum of the sizes of the conjugacy
   // classes
@@ -752,8 +750,8 @@ bool FiniteGroup<elementSomeGroup>::computeConjugacyClassesRepresentatives() {
   // First we compute the generator's conjugacy classes:
   this->computeGeneratorsConjugacyClasses();
   ProgressReport report;
-  elementSomeGroup currentElement;
-  LargeInteger groupSizeByFla = this->sizeByFormulaOrNegative1();
+  ElementSomeGroup currentElement;
+  LargeInteger groupSizeByFormula = this->sizeByFormulaOrNegative1();
   this->flagCharPolysAreComputed = true;
   for (int phase = 0; phase < 2; phase ++) {
     // In phase 0 we try to add a new conjugacy class only if
@@ -778,14 +776,14 @@ bool FiniteGroup<elementSomeGroup>::computeConjugacyClassesRepresentatives() {
         currentElement =
         this->conjugacyClasses[i].representative * this->unionGeneratorsCC[j];
         this->registerConjugacyClass(currentElement, phase == 0);
-        if (this->sizePrivate == groupSizeByFla) {
+        if (this->sizePrivate == groupSizeByFormula) {
           return true;
         }
       }
     }
   }
-  if (groupSizeByFla > 0) {
-    if (this->sizePrivate != groupSizeByFla) {
+  if (groupSizeByFormula > 0) {
+    if (this->sizePrivate != groupSizeByFormula) {
       global.fatal
       << "Something went very wrong: number of elements "
       << "generated is not equal to group size by formula. "
@@ -795,8 +793,8 @@ bool FiniteGroup<elementSomeGroup>::computeConjugacyClassesRepresentatives() {
   return true;
 }
 
-template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::
+template <class ElementSomeGroup>
+void FiniteGroup<ElementSomeGroup>::
 computeConjugacyClassSizesAndRepresentatives(
   bool useComputeCCSizesRepresentativesWords
 ) {
@@ -817,8 +815,8 @@ computeConjugacyClassSizesAndRepresentatives(
   }
 }
 
-template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::
+template <class ElementSomeGroup>
+void FiniteGroup<ElementSomeGroup>::
 computeConjugacyClassSizesAndRepresentativesWithOrbitIterator() {
   STACK_TRACE(
     "FiniteGroup::"
@@ -832,7 +830,7 @@ computeConjugacyClassSizesAndRepresentativesWithOrbitIterator() {
   this->characterPolynomialsConjugacyClassesStandardRepresentation.clear();
   this->conjugacyClasses.setSize(0);
   this->sizePrivate = 0;
-  elementSomeGroup currentElement;
+  ElementSomeGroup currentElement;
   currentElement.makeIdentity(this->generators[0]);
   static int recursionCount = 0;
   recursionCount ++;
@@ -847,8 +845,8 @@ computeConjugacyClassSizesAndRepresentativesWithOrbitIterator() {
   this->flagCCRepresentativesComputed = true;
 }
 
-template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::
+template <class ElementSomeGroup>
+void FiniteGroup<ElementSomeGroup>::
 computeConjugacyClassesFromConjugacyClassIndicesInAllElements(
   const List<List<int> >& ccIndices
 ) {
@@ -874,20 +872,20 @@ computeConjugacyClassesFromConjugacyClassIndicesInAllElements(
   this->conjugacyClasses.quickSortAscending();
 }
 
-template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::computeConjugacyClassesFromAllElements() {
+template <class ElementSomeGroup>
+void FiniteGroup<ElementSomeGroup>::computeConjugacyClassesFromAllElements() {
   STACK_TRACE("FiniteGroup::computeConjugacyClassesFromAllElements");
   this->computeAllElements(false, - 1);
   List<bool> accounted;
   accounted.initializeFillInObject(this->elements.size, false);
   HashedList<int, HashFunctions::hashFunction> stack;
   stack.setExpectedSize(this->elements.size);
-  List<elementSomeGroup> inversesOfGenerators;
+  List<ElementSomeGroup> inversesOfGenerators;
   inversesOfGenerators.setSize(this->generators.size);
   for (int i = 0; i < this->generators.size; i ++) {
     inversesOfGenerators[i] = this->generators[i].inverse();
   }
-  elementSomeGroup currentElement;
+  ElementSomeGroup currentElement;
   List<List<int> > ccIndices;
   ccIndices.reserve(120);
   for (int i = 0; i < this->elements.size; i ++) {

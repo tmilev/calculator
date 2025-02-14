@@ -1093,32 +1093,6 @@ void SubgroupDataRootReflections::makeFromRoots(
   this->initializeGenerators();
 }
 
-template <class elementSomeGroup>
-bool FiniteGroup<elementSomeGroup>::areConjugate_OLD_Deprecated_Version(
-  const elementSomeGroup& left, const elementSomeGroup& right
-) {
-  STACK_TRACE("WeylGroup::areConjugate_OLD_Deprecated_Version_By_Todor");
-  if (left.hasDifferentConjugacyInvariantsFrom(right)) {
-    return false;
-  }
-  OrbitIteratorWeylGroup iterator;
-  iterator.initialize(
-    this->generators, left, ElementWeylGroup::conjugationAction
-  );
-  if (this->generators.size == 0) {
-    global.fatal << "Generators not allowed to be 0. " << global.fatal;
-  }
-  do {
-    // if (left.toString() == "s_{4}")
-    // global.Comments << "<br>" << iterator.getCurrentElement().toString() <<
-    // "=?=" << right.toString();
-    if (iterator.getCurrentElement() == right) {
-      return true;
-    }
-  } while (iterator.incrementReturnFalseIfPastLast());
-  return false;
-}
-
 void WeylGroupData::getSignSignatureAllRootSubsystems(
   List<SubgroupDataRootReflections>& outputSubgroups
 ) {

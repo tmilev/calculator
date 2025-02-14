@@ -286,18 +286,18 @@ unsigned int HashFunctions::hashFunction(const List<unsigned char>& input);
 template <typename Object>
 class ListIterator {
 public:
-  const List<Object>* iterated;
-  int index;
+  Object* pointer;
   ListIterator(const List<Object>* input) {
-    this->iterated = input;
-    this->index = 0;
+    this->pointer = input->objects;
   }
   bool operator!=(const ListIterator<Object>& other) {
-    return this->index != other.index;
+    return this->pointer != other.pointer;
   }
-  Object& operator*() const;
+  Object& operator*() const {
+    return *(this->pointer);
+  }
   const ListIterator<Object>& operator++() {
-    this->index ++;
+    this->pointer ++;
     return *this;
   }
 };
@@ -985,15 +985,13 @@ public:
   }
   ListIterator<Object> end() const {
     ListIterator<Object> result(this);
-    result.index = this->size;
+    if (this->size == 0) {
+      return result;
+    }
+    result.pointer = &this->objects[this->size];
     return result;
   }
 };
-
-template <typename Object>
-Object&ListIterator<Object>::operator*() const {
-  return (*this->iterated)[this->index];
-}
 
 template <typename Object>
 class ListZeroAfterUse {
@@ -1330,8 +1328,7 @@ public:
   int getIndex(const Object& o) const {
     unsigned int hashIndex = this->getHash(o);
     const List<int>& hashBucket = this->hashBuckets[hashIndex];
-    for (int i = 0; i < hashBucket.size; i ++) {
-      int j = hashBucket.objects[i];
+    for (int j : hashBucket) {
       if (j >= this->size) {
         std::stringstream commentsOnCrash;
         commentsOnCrash

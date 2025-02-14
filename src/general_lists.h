@@ -1329,8 +1329,9 @@ public:
   }
   int getIndex(const Object& o) const {
     unsigned int hashIndex = this->getHash(o);
-    for (int i = 0; i < this->hashBuckets[hashIndex].size; i ++) {
-      int j = this->hashBuckets[hashIndex].objects[i];
+    const List<int>& hashBucket = this->hashBuckets[hashIndex];
+    for (int i = 0; i < hashBucket.size; i ++) {
+      int j = hashBucket.objects[i];
       if (j >= this->size) {
         std::stringstream commentsOnCrash;
         commentsOnCrash

@@ -452,8 +452,12 @@ public:
   bool computeCharacter(bool allowBadCharacter);
   void configurePolynomialSystem();
   bool verifySolution(PolynomialSystem<AlgebraicNumber>& system);
+  void computeCentralizerOfOldHs(List<Vector<Rational> >& output);
+  bool centralizesOldHs(const Vector<Rational>& candidate);
   bool isGoodHNewActingByTwo(
-    const Vector<Rational>& hNewActingByTwo, const List<int>& rootInjections
+    const Vector<Rational>& hNewActingByTwo,
+    const List<int>& rootInjections,
+    const List<Vector<Rational> >& centralizerOfOldHs
   ) const;
   Rational getScalarSubalgebra(
     const Vector<Rational>& primalWeightLeft,
@@ -885,7 +889,8 @@ public:
     const Vector<Rational>& currentCandidate,
     List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
     CandidateSemisimpleSubalgebra& newCandidate,
-    const List<int>& currentRootInjection
+    const List<int>& currentRootInjection,
+    const List<Vector<Rational> >& centralizerOfOldHs
   );
   class Test {
   public:

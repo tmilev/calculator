@@ -230,10 +230,10 @@ incrementReturnFalseIfPastLastFALSE() {
   if (this->nextLayer->size == 0) {
     return false;
   }
-  HashedList<elementRepresentation>* layerPtr = this->previousLayer;
+  HashedList<elementRepresentation>* layerPointer = this->previousLayer;
   this->previousLayer = this->currentLayer;
   this->currentLayer = this->nextLayer;
-  this->nextLayer = layerPtr;
+  this->nextLayer = layerPointer;
   this->nextLayer->clear();
   this->indexCurrentElement = 0;
   return true;

@@ -2325,8 +2325,7 @@ incrementReturnFalseIfPastLast() {
         << "This is a mathematical error: "
         << "the computed size of the orbit is "
         << this->computedSize.toString()
-        << " "
-        << "but I enumerated an orbit of size "
+        << " but I enumerated an orbit of size "
         << this->orbitSize
         << ". More details on the orbit follow. "
         << this->toString()
@@ -2491,9 +2490,9 @@ void SemisimpleSubalgebras::writeHCandidates(
     if (targetHeader.tickAndWantReport()) {
       std::stringstream reportStream;
       reportStream
-      << "the latest root of the candidate simple component "
+      << "The latest root of the candidate simple component: "
       << smallType.toString();
-      reportStream << "Trying to realize via orbit number " << j + 1 << ".";
+      reportStream << ". Trying to realize via orbit number " << j + 1 << ".";
       targetHeader.report(reportStream.str());
     }
     const SlTwoSubalgebra& currentSubalgebra =
@@ -2531,37 +2530,56 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
     return;
   }
   ProgressReport orbitHeader(1, "orbitGeneration");
-  ProgressReport body(1000, "orbit body");
+  ProgressReport body(10000, "orbit body");
   Vector<Rational> currentCandidate;
   OrbitIteratorRootActionWeylGroupAutomorphisms& currentOrbit =
   this->orbits[currentSubalgebra.indexInContainer];
   currentOrbit.initialize();
   std::stringstream orbitBodyStream;
+  orbitHeader.report(orbitBodyStream.str());
+  int totalHCandidates = 0;
+  List<Vector<Rational> > centralizerOfOldHs;
+  newCandidate.computeCentralizerOfOldHs(centralizerOfOldHs);
   orbitBodyStream
   << "sl(2) orbit "
   << currentSubalgebra.indexInContainer + 1
   << " out of "
   << this->slTwoSubalgebras.allSubalgebras.size
   << ". "
-  << currentOrbit.toString();
+  << "Centralizer of old h's size: "
+  << centralizerOfOldHs.size
+  << " out of "
+  << newCandidate.getAmbientWeyl().rootsOfBorel.size
+  << ". ";
   orbitHeader.report(orbitBodyStream.str());
-  int totalHCandidates = 0;
+  int64_t startingTime = global.getElapsedMilliseconds();
   do {
     this->writeOneHCandidate(
       currentOrbit.getCurrentElement(),
       outputHCandidatesScaledToActByTwo,
       newCandidate,
-      currentRootInjection
+      currentRootInjection,
+      centralizerOfOldHs
     );
     totalHCandidates ++;
     if (body.tickAndWantReport()) {
       std::stringstream reportStream;
+      int64_t elapsedMilliseconds =
+      global.getElapsedMilliseconds() - startingTime;
       reportStream
       << "So far, found "
       << outputHCandidatesScaledToActByTwo.size + 1
       << " good candidates; explored "
       << totalHCandidates
-      << " candidates. ";
+      << " candidates. "
+      << currentOrbit.toString();
+      if (elapsedMilliseconds > 0) {
+        double speed = ((double) totalHCandidates) / ((double)
+          elapsedMilliseconds
+        );
+        reportStream.precision(2);
+        reportStream << "<br> Speed: " << speed << " elements/ms";
+      }
       body.report(reportStream.str());
     }
   } while (currentOrbit.incrementReturnFalseIfPastLast());
@@ -2571,12 +2589,13 @@ void SemisimpleSubalgebras::writeOneHCandidate(
   const Vector<Rational>& currentCandidate,
   List<Vector<Rational> >& outputHCandidatesScaledToActByTwo,
   CandidateSemisimpleSubalgebra& newCandidate,
-  const List<int>& currentRootInjection
+  const List<int>& currentRootInjection,
+  const List<Vector<Rational> >& centralizerOfOldHs
 ) {
   STACK_TRACE("SemisimpleSubalgebras::writeOneHCandidate");
   if (
     !newCandidate.isGoodHNewActingByTwo(
-      currentCandidate, currentRootInjection
+      currentCandidate, currentRootInjection, centralizerOfOldHs
     )
   ) {
     return;
@@ -3769,56 +3788,55 @@ void CandidateSemisimpleSubalgebra::addHIncomplete(
   );
 }
 
+void CandidateSemisimpleSubalgebra::computeCentralizerOfOldHs(
+  List<Vector<Rational> >& output
+) {
+  output.clear();
+  Rational scalarProduct;
+  for (
+    const Vector<Rational>& currentPositiveRoot :
+    this->getAmbientWeyl().rootsOfBorel
+  ) {
+    if (this->centralizesOldHs(currentPositiveRoot)) {
+      output.addOnTop(currentPositiveRoot);
+    }
+  }
+}
+
+bool CandidateSemisimpleSubalgebra::centralizesOldHs(
+  const Vector<Rational>& candidate
+) {
+  Rational scalarProduct;
+  for (
+    const Vector<Rational>& hElement :
+    this->hsScaledToActByTwoInOrderOfCreation
+  ) {
+    scalarProduct =
+    this->getAmbientWeyl().rootScalarCartanRoot(candidate, hElement);
+    if (!scalarProduct.isEqualToZero()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
-  const Vector<Rational>& hNewActingByTwo, const List<int>& rootInjections
+  const Vector<Rational>& hNewActingByTwo,
+  const List<int>& rootInjections,
+  const List<Vector<Rational> >& centralizerOfOldHs
 ) const {
   STACK_TRACE("CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo");
   // check if input weight is maximally dominant:
   Rational scalarProduct;
   int indexHNew = *rootInjections.lastObject();
-  for (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
-    Vector<Rational>& currentPositiveRoot =
-    this->getAmbientWeyl().rootsOfBorel[i];
-    bool canBeRaisingReflection = true;
-    for (
-      int l = 0; l < this->hsScaledToActByTwoInOrderOfCreation.size &&
-      canBeRaisingReflection; l ++
-    ) {
-      scalarProduct =
+  for (const Vector<Rational>& centralizingPositiveRoot : centralizerOfOldHs) {
+    if (
       this->getAmbientWeyl().rootScalarCartanRoot(
-        currentPositiveRoot, this->hsScaledToActByTwoInOrderOfCreation[l]
-      );
-      if (scalarProduct > 0) {
-        canBeRaisingReflection = false;
-      }
-      if (scalarProduct < 0) {
-        global.fatal
-        << "While trying to realize type "
-        << this->weylNonEmbedded->dynkinType.toString()
-        << ", the candidate h elements of the semisimple "
-        << "subalgebra are supposed to be maximally dominant, "
-        << "however the scalar product of the positive root "
-        << currentPositiveRoot.toString()
-        << " with the subalgebra root "
-        << this->hsScaledToActByTwoInOrderOfCreation[l].toString()
-        << " is negative, while the very same positive "
-        << "root has had zero scalar products with all "
-        << "preceding roots. Hnew equals: "
-        << hNewActingByTwo.toString()
-        << " Here are all preceding roots: "
-        << this->hsScaledToActByTwoInOrderOfCreation.toString()
-        << global.fatal;
-      }
-    }
-    if (canBeRaisingReflection) {
-      if (
-        this->getAmbientWeyl().rootScalarCartanRoot(
-          currentPositiveRoot, hNewActingByTwo
-        ) <
-        0
-      ) {
-        return false;
-      }
+        centralizingPositiveRoot, hNewActingByTwo
+      ) <
+      0
+    ) {
+      return false;
     }
   }
   for (int i = 0; i < this->cartanElementsScaledToActByTwo.size; i ++) {
@@ -8738,14 +8756,14 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeightsHelper(
       << HtmlRoutines::doubleBackslashes(currentModule[i][j].toString())
       << "</span>";
       out << closeTag << "</td>";
-      Vector<Rational> tempV;
+      Vector<Rational> currentVector;
       this->matrixMultiplyFundamentalCoordinatesToGetSimple.actOnVectorColumn(
-        this->weightsModulesPrimal[indexModule][j], tempV
+        this->weightsModulesPrimal[indexModule][j], currentVector
       );
       out
       << "<td style =\\\"text-align: center; border-left:1px solid #000;\\\">"
       << openTag;
-      out << tempV.toString();
+      out << currentVector.toString();
       out << closeTag << "</td>";
       out
       << "<td style =\\\"text-align: center; border-left:1px solid #000;\\\">"
@@ -9236,22 +9254,22 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecomposition(
   }
   out << "</tr>";
   out << "</table>";
-  Vector<Rational> semisimpleSAv;
-  Vector<Rational> centralizerV;
-  semisimpleSAv.makeZero(this->modules.size);
-  centralizerV.makeZero(this->modules.size);
+  Vector<Rational> semisimpleSubalgebraVector;
+  Vector<Rational> centralizerVector;
+  semisimpleSubalgebraVector.makeZero(this->modules.size);
+  centralizerVector.makeZero(this->modules.size);
   for (int i = 0; i < this->subalgebraModules.size; i ++) {
-    semisimpleSAv[this->subalgebraModules[i]] += 1;
+    semisimpleSubalgebraVector[this->subalgebraModules[i]] += 1;
   }
   for (int i = 0; i < this->centralizerSubalgebraModules.size; i ++) {
-    centralizerV[this->centralizerSubalgebraModules[i]] += 1;
+    centralizerVector[this->centralizerSubalgebraModules[i]] += 1;
   }
   out
   << "<br>Semisimple subalgebra: "
-  << semisimpleSAv.toStringLetterFormat("W");
+  << semisimpleSubalgebraVector.toStringLetterFormat("W");
   out
   << "<br>Centralizer extension: "
-  << centralizerV.toStringLetterFormat("W");
+  << centralizerVector.toStringLetterFormat("W");
   return out.str();
 }
 

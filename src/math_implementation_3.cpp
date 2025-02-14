@@ -363,7 +363,6 @@ void ProgressReport::initialize() {
   }
   currentThreadReports.addOnTop(std::string(""));
   this->ticks = 0;
-  this->ticksPerReport = 1;
 }
 
 ProgressReport::~ProgressReport() {
@@ -1646,6 +1645,7 @@ void FileOperations::initializeFoldersNonSensitive() {
       << key
       << ", value: "
       << value
+              << "; global.configuration: " << global.configuration.toString()
       << global.fatal;
     }
     folderSubstitutionsNonSensitive.setKeyValue(key, value);

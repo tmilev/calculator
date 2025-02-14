@@ -1645,7 +1645,8 @@ void FileOperations::initializeFoldersNonSensitive() {
       << key
       << ", value: "
       << value
-              << "; global.configuration: " << global.configuration.toString()
+      << "; global.configuration: "
+      << global.configuration.toString()
       << global.fatal;
     }
     folderSubstitutionsNonSensitive.setKeyValue(key, value);

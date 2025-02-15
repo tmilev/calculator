@@ -1261,8 +1261,11 @@ template <class Coefficient>
 Coefficient WeylGroupData::weylDimensionFormulaSimpleCoordinates(
   Vector<Coefficient>& weightInSimpleCoordinates, const Coefficient& ringUnit
 ) {
-  Coefficient result, buffer;
-  Vector<Coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;
+  Coefficient result;
+  Coefficient buffer;
+  Vector<Coefficient> rhoOverNewRing;
+  Vector<Coefficient> rootOfBorelNewRing;
+  Vector<Coefficient> sumWithRho;
   // <-to facilitate type conversion!
   rhoOverNewRing = this->rho;
   // <-type conversion here!
@@ -1593,46 +1596,46 @@ void WeylGroupData::reflectBetaWithRespectToAlpha(
   bool rhoAction,
   Vector<Coefficient>& output
 ) const {
-  Coefficient bufferCoefficienticient;
+  Coefficient bufferCoefficient;
   Coefficient alphaShift;
-  Coefficient lengthA;
+  Coefficient lengthAlpha;
   Vector<Coefficient> result;
   result = beta;
   alphaShift = beta[0].zero();
   // <-the zero of coefficient is not known at compile time (think multivariate
   // polynomials)
-  lengthA = alphaShift;
+  lengthAlpha = alphaShift;
   if (rhoAction) {
     result += this->rho;
     // <-implicit type conversion here if coefficient is not Rational
   }
   for (int i = 0; i < this->cartanSymmetric.numberOfRows; i ++) {
     for (int j = 0; j < this->cartanSymmetric.numberOfColumns; j ++) {
-      bufferCoefficienticient = result[j];
-      bufferCoefficienticient *= alpha[i];
-      bufferCoefficienticient *= this->cartanSymmetric.elements[i][j] *(- 2);
-      alphaShift += bufferCoefficienticient;
-      bufferCoefficienticient = alpha[i];
-      bufferCoefficienticient *= alpha[j];
-      bufferCoefficienticient *= this->cartanSymmetric.elements[i][j];
-      lengthA += bufferCoefficienticient;
+      bufferCoefficient = result[j];
+      bufferCoefficient *= alpha[i];
+      bufferCoefficient *= this->cartanSymmetric.elements[i][j] *(- 2);
+      alphaShift += bufferCoefficient;
+      bufferCoefficient = alpha[i];
+      bufferCoefficient *= alpha[j];
+      bufferCoefficient *= this->cartanSymmetric.elements[i][j];
+      lengthAlpha += bufferCoefficient;
     }
   }
-  alphaShift /= lengthA;
+  alphaShift /= lengthAlpha;
   output.setSize(this->cartanSymmetric.numberOfRows);
   for (int i = 0; i < this->cartanSymmetric.numberOfColumns; i ++) {
-    bufferCoefficienticient = alphaShift;
-    bufferCoefficienticient *= alpha[i];
-    bufferCoefficienticient += result[i];
-    output[i] = bufferCoefficienticient;
+    bufferCoefficient = alphaShift;
+    bufferCoefficient *= alpha[i];
+    bufferCoefficient += result[i];
+    output[i] = bufferCoefficient;
   }
   if (rhoAction) {
     output -= this->rho;
   }
 }
 
-template <typename somegroup, typename Coefficient>
-bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
+template <typename Somegroup, typename Coefficient>
+bool GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>::
 checkInitialization() const {
   if (this->ownerGroup == 0) {
     global.fatal
@@ -1644,16 +1647,16 @@ checkInitialization() const {
   return true;
 }
 
-template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::reset() {
+template <typename Somegroup, typename Coefficient>
+void GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>::reset() {
   this->parent = 0;
   this->flagCharacterIsComputed = false;
   this->ownerGroup = 0;
 }
 
-template <typename somegroup, typename Coefficient>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::initialize(
-  somegroup& inputOwner
+template <typename Somegroup, typename Coefficient>
+void GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>::initialize(
+  Somegroup& inputOwner
 ) {
   this->reset();
   this->ownerGroup = &inputOwner;
@@ -1709,11 +1712,11 @@ Matrix<Coefficient>& GroupRepresentationCarriesAllMatrices<
   return matrix;
 }
 
-template <typename somegroup, typename Coefficient>
-template <typename elementSomeGroup>
+template <typename Somegroup, typename Coefficient>
+template <typename ElementSomeGroup>
 Matrix<Coefficient> GroupRepresentationCarriesAllMatrices<
-  somegroup, Coefficient
->::getMatrixElement(const elementSomeGroup& input) {
+  Somegroup, Coefficient
+>::getMatrixElement(const ElementSomeGroup& input) {
   Matrix<Coefficient> result;
   this->getMatrixElement(input, result);
   return result;
@@ -1728,10 +1731,10 @@ int GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getDimension
   return this->generators[0].numberOfRows;
 }
 
-template <typename somegroup, typename Coefficient>
-template <typename elementSomeGroup>
-void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
-getMatrixElement(const elementSomeGroup& input, Matrix<Coefficient>& output) {
+template <typename Somegroup, typename Coefficient>
+template <typename ElementSomeGroup>
+void GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>::
+getMatrixElement(const ElementSomeGroup& input, Matrix<Coefficient>& output) {
   this->checkInitialization();
   if (this->ownerGroup->generators.size == 0) {
     // here be trivial weyl group
@@ -1747,8 +1750,8 @@ getMatrixElement(const elementSomeGroup& input, Matrix<Coefficient>& output) {
   }
 }
 
-template <typename somegroup, typename Coefficient>
-std::string GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
+template <typename Somegroup, typename Coefficient>
+std::string GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>::
 getName() const {
   std::string name;
   for (int i = 0; i < this->names.size; i ++) {

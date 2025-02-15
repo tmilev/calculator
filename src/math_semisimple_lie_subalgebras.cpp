@@ -1386,6 +1386,7 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
       )
     );
     WeylGroupAutomorphismAction action;
+    action.owner = &weylAutomorphisms;
     this->orbits[i].initialize(
       generators,
       this->slTwoSubalgebras.allSubalgebras[i].hElement.getCartanPart(),
@@ -2249,7 +2250,7 @@ WeylGroupAutomorphismAction::WeylGroupAutomorphismAction() {
 bool WeylGroupAutomorphismAction::checkInitialization() const {
   if (this->owner == nullptr) {
     global.fatal
-    << "WeylGroupAutomorphismAction owner not initialized"
+    << "WeylGroupAutomorphismQuotientOrbitAction owner not initialized"
     << global.fatal;
   }
   return true;
@@ -2264,10 +2265,10 @@ void WeylGroupAutomorphismAction::actOn(
   this->owner->actOnStandard(actingElement, inputElementActedUpon, output);
 }
 
-const Vector<Rational>& OrbitIteratorRootActionWeylGroupAutomorphisms::
+const Vector<Rational>& IteratorRootActionWeylGroupAutomorphisms::
 getCurrentElement() {
   STACK_TRACE(
-    "OrbitIteratorRootActionWeylGroupAutomorphisms"
+    "IteratorRootActionWeylGroupAutomorphisms"
     "::getCurrentElement"
   );
   if (this->flagOrbitIsBuffered) {
@@ -2276,7 +2277,7 @@ getCurrentElement() {
   return this->iterator.getCurrentElement();
 }
 
-bool OrbitIteratorRootActionWeylGroupAutomorphisms::checkConsistency() {
+bool IteratorRootActionWeylGroupAutomorphisms::checkConsistency() {
   if (this->flagOrbitIsBuffered) {
     if (this->currentIndexInBuffer >= this->orbitBuffer.size) {
       global.fatal
@@ -2322,10 +2323,10 @@ bool OrbitIteratorRootActionWeylGroupAutomorphisms::checkConsistency() {
   return true;
 }
 
-bool OrbitIteratorRootActionWeylGroupAutomorphisms::
-incrementReturnFalseIfPastLast() {
+bool IteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLast()
+{
   STACK_TRACE(
-    "OrbitIteratorRootActionWeylGroupAutomorphisms"
+    "IteratorRootActionWeylGroupAutomorphisms"
     "::incrementReturnFalseIfPastLast"
   );
   this->checkConsistency();
@@ -2348,7 +2349,7 @@ incrementReturnFalseIfPastLast() {
     incrementReturnFalseIfPastLastForGroupsWithGeneratorsOfOrderTwo()
   ) {
     this->orbitSize = this->currentIndexInBuffer;
-    if (this->computedSize != - 1) {
+    if (this->computedSize > 0) {
       if (this->computedSize != this->orbitSize) {
         global.fatal
         << "This is a mathematical error: "
@@ -2376,61 +2377,71 @@ incrementReturnFalseIfPastLast() {
   if (this->orbitBuffer.size < this->maxOrbitBufferSize) {
     this->orbitBuffer.addOnTop(this->iterator.getCurrentElement());
   }
+  if (this->getCurrentElement().size == 0) {
+    global.fatal
+    << "Empty orbit element not expected here! "
+    << this->toString()
+    << global.fatal;
+  }
   return true;
 }
 
-void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize() {
-  STACK_TRACE("OrbitIteratorRootActionWeylGroupAutomorphisms::initialize");
-  this->currentIndexInBuffer = 0;
-  if (this->flagOrbitIsBuffered) {
-    return;
-  }
-  this->iterator.initialize(
-    this->iterator.groupGeneratingElements, this->orbitDefiningElement
+void IteratorRootActionWeylGroupAutomorphisms::
+initializeFromOrbitWithCentralizerQuotient(
+  IteratorRootActionWeylGroupAutomorphisms& originalOrbit,
+  const List<Vector<Rational> >& generatorsSubgroupToQuotientOut
+) {
+  STACK_TRACE(
+    "IteratorRootActionWeylGroupAutomorphisms::"
+    "initialize"
   );
-  if (this->iterator.groupGeneratingElements.size > 0) {
-    WeylGroupAutomorphisms& ownerGroup =
-    *this->iterator.groupGeneratingElements[0].owner;
-    WeylGroupAutomorphismAction weylGroupAutomorphismAction;
-    weylGroupAutomorphismAction.owner = &ownerGroup;
-    this->iterator.setGroupAction(weylGroupAutomorphismAction);
+  if (originalOrbit.iterator.groupGeneratingElements.size == 0) {
+    global.fatal
+    << "Missing generating elements not allowed here."
+    << global.fatal;
+  }
+  this->currentIndexInBuffer = - 1;
+  this->orbitDefiningElement = originalOrbit.orbitDefiningElement;
+  this->iterator.initialize(
+    originalOrbit.iterator.groupGeneratingElements, this->orbitDefiningElement
+  );
+  WeylGroupAutomorphisms& ownerGroup =
+  *this->iterator.groupGeneratingElements[0].owner;
+  WeylGroupAutomorphismAction weylGroupAutomorphismAction;
+  weylGroupAutomorphismAction.owner = &ownerGroup;
+  weylGroupAutomorphismAction.generatorsSubgroupToQuotientOut =
+  generatorsSubgroupToQuotientOut;
+  this->iterator.setGroupAction(weylGroupAutomorphismAction);
+  if (generatorsSubgroupToQuotientOut.size == 0) {
     this->computedSize = ownerGroup.getOrbitSize(this->orbitDefiningElement);
-    if (this->computedSize > this->maxOrbitBufferSize) {
-      this->maxOrbitBufferSize = 0;
-      this->orbitBuffer.setSize(0);
-    }
+  }
+  if (this->computedSize > this->maxOrbitBufferSize) {
+    this->maxOrbitBufferSize = 0;
+    this->orbitBuffer.setSize(0);
   }
 }
 
-void OrbitIteratorRootActionWeylGroupAutomorphisms::initialize(
+void IteratorRootActionWeylGroupAutomorphisms::initialize(
   const List<ElementWeylGroupAutomorphisms>& inputGenerators,
   const Vector<Rational>& inputElement,
   WeylGroupAutomorphismAction& action
 ) {
-  STACK_TRACE("OrbitIteratorRootActionWeylGroupAutomorphisms::initialize");
-  if (this->orbitDefiningElement == inputElement) {
-    if (this->flagOrbitIsBuffered) {
-      this->currentIndexInBuffer = 0;
-      return;
-    }
-  } else {
-    this->reset();
-  }
+  STACK_TRACE(
+    "IteratorRootActionWeylGroupAutomorphisms::"
+    "initialize"
+  );
+  this->reset();
   this->orbitDefiningElement = inputElement;
-  if (this->maxOrbitBufferSize >= 1) {
-    this->orbitBuffer.setSize(0);
-    this->orbitBuffer.addOnTop(this->orbitDefiningElement);
-  }
   this->iterator.setGroupAction(action);
   this->iterator.initialize(inputGenerators, this->orbitDefiningElement);
 }
 
-OrbitIteratorRootActionWeylGroupAutomorphisms::
-OrbitIteratorRootActionWeylGroupAutomorphisms() {
+IteratorRootActionWeylGroupAutomorphisms::
+IteratorRootActionWeylGroupAutomorphisms() {
   this->reset();
 }
 
-void OrbitIteratorRootActionWeylGroupAutomorphisms::reset() {
+void IteratorRootActionWeylGroupAutomorphisms::reset() {
   this->flagOrbitIsBuffered = false;
   this->flagOrbitEnumeratedOnce = false;
   this->orbitSize = - 1;
@@ -2441,7 +2452,7 @@ void OrbitIteratorRootActionWeylGroupAutomorphisms::reset() {
   this->iterator.resetNoActionChange();
 }
 
-std::string OrbitIteratorRootActionWeylGroupAutomorphisms::toString() const {
+std::string IteratorRootActionWeylGroupAutomorphisms::toString() const {
   std::stringstream out;
   out
   << " The orbit defining element is: "
@@ -2481,7 +2492,7 @@ std::string OrbitIteratorRootActionWeylGroupAutomorphisms::toString() const {
   return out.str();
 }
 
-std::string OrbitIteratorRootActionWeylGroupAutomorphisms::toStringSize() const {
+std::string IteratorRootActionWeylGroupAutomorphisms::toStringSize() const {
   std::stringstream out;
   if (this->orbitSize != - 1) {
     out << this->orbitSize;
@@ -2558,9 +2569,8 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
   ProgressReport orbitHeader(1, "orbitGeneration");
   ProgressReport body(10000, "orbit body");
   Vector<Rational> currentCandidate;
-  OrbitIteratorRootActionWeylGroupAutomorphisms& currentOrbit =
+  IteratorRootActionWeylGroupAutomorphisms& currentOrbit =
   this->orbits[currentSubalgebra.indexInContainer];
-  currentOrbit.initialize();
   std::stringstream orbitBodyStream;
   orbitHeader.report(orbitBodyStream.str());
   int totalHCandidates = 0;
@@ -2579,7 +2589,7 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
   << ". ";
   orbitHeader.report(orbitBodyStream.str());
   int64_t startingTime = global.getElapsedMilliseconds();
-  do {
+  while (currentOrbit.incrementReturnFalseIfPastLast()) {
     this->writeOneHCandidate(
       currentOrbit.getCurrentElement(),
       outputHCandidatesScaledToActByTwo,
@@ -2608,7 +2618,7 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
       }
       body.report(reportStream.str());
     }
-  } while (currentOrbit.incrementReturnFalseIfPastLast());
+  }
 }
 
 void SemisimpleSubalgebras::writeOneHCandidate(
@@ -2619,6 +2629,9 @@ void SemisimpleSubalgebras::writeOneHCandidate(
   const List<Vector<Rational> >& centralizerOfOldHs
 ) {
   STACK_TRACE("SemisimpleSubalgebras::writeOneHCandidate");
+  if (currentCandidate.size == 0) {
+    global.fatal << "Empty vector not expected here" << global.fatal;
+  }
   if (
     !newCandidate.isGoodHNewActingByTwo(
       currentCandidate, currentRootInjection, centralizerOfOldHs

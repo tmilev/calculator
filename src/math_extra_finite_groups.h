@@ -1737,7 +1737,7 @@ JSData GroupRepresentation<someGroup, Coefficient>::toJSON() {
   return out;
 }
 
-template <typename somegroup, typename Coefficient>
+template <typename Somegroup, typename Coefficient>
 class GroupRepresentationCarriesAllMatrices {
   friend std::ostream& operator<<(
     std::ostream& output,
@@ -1749,7 +1749,7 @@ class GroupRepresentationCarriesAllMatrices {
 public:
   List<Matrix<Coefficient> > elementImages;
   List<bool> elementIsComputed;
-  ClassFunction<somegroup, Coefficient> character;
+  ClassFunction<Somegroup, Coefficient> character;
   List<Matrix<Coefficient> > classFunctionMatrices;
   List<bool> classFunctionMatricesComputed;
   List<Matrix<Coefficient> > generators;
@@ -1757,12 +1757,12 @@ public:
   Vectors<Coefficient> basis;
   Matrix<Coefficient> gramMatrixInverted;
   bool flagCharacterIsComputed;
-  somegroup* ownerGroup;
+  Somegroup* ownerGroup;
   List<std::string> names;
   GroupRepresentationCarriesAllMatrices() {
     this->reset();
   }
-  GroupRepresentation<somegroup, Coefficient> makeOtherGroupRepresentationClass
+  GroupRepresentation<Somegroup, Coefficient> makeOtherGroupRepresentationClass
   () const;
   // Note: The group representation types compute the hash value from the
   // character,
@@ -1776,69 +1776,69 @@ public:
   bool checkInitialization() const;
   bool checkAllSimpleGeneratorsAreOK() const;
   static unsigned int hashFunction(
-    const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& input
+    const GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>& input
   ) {
     return input.hashFunction();
   }
   void computeAllElementImages();
-  const ClassFunction<somegroup, Coefficient>& getCharacter();
+  const ClassFunction<Somegroup, Coefficient>& getCharacter();
   VectorSpace<Coefficient> findBasis() const;
   void multiplyBy(
-    const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other,
-    GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
+    const GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>& other,
+    GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>& output
   ) const;
   void getLargestDenominatorSimpleGenerators(
     LargeIntegerUnsigned& outputLeastCommonMultiple,
     LargeIntegerUnsigned& outputDenominator
   ) const;
   void reset();
-  void initialize(somegroup& inputOwner);
+  void initialize(Somegroup& inputOwner);
   void checkRepresentationIsMultiplicativelyClosed();
   void getClassFunctionMatrix(
-    ClassFunction<somegroup, Coefficient>& inputCharacter,
+    ClassFunction<Somegroup, Coefficient>& inputCharacter,
     Matrix<Coefficient>& outputMatrix
   );
   void classFunctionMatrix(
-    ClassFunction<somegroup, Coefficient>& inputClassFunction,
+    ClassFunction<Somegroup, Coefficient>& inputClassFunction,
     Matrix<Coefficient>& outputMatrix
   );
   int getDimension() const;
   void restrictRepresentation(
     const Vectors<Coefficient>& vectorSpaceBasisSubrep,
-    const ClassFunction<somegroup, Rational>& remainingCharacter,
-    GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& output
+    const ClassFunction<Somegroup, Rational>& remainingCharacter,
+    GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>& output
   );
   bool decomposeTodorsVersionRecursive(
-    VirtualRepresentation<somegroup, Coefficient>& outputIrrepMults,
-    List<GroupRepresentation<somegroup, Coefficient> >& appendOnlyIrrepList,
-    List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >*
+    VirtualRepresentation<Somegroup, Coefficient>& outputIrrepMults,
+    List<GroupRepresentation<Somegroup, Coefficient> >& appendOnlyIrrepList,
+    List<GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient> >*
     appendOnlyGRCAMSList =
     0
   );
   bool decomposeTodorsVersion(
-    VirtualRepresentation<somegroup, Coefficient>& outputIrrepMults,
-    List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >*
+    VirtualRepresentation<Somegroup, Coefficient>& outputIrrepMults,
+    List<GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient> >*
     appendOnlyIrrepsList =
     0
   );
-  List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >
+  List<GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient> >
   decomposeThomasVersion();
-  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> reduced()
+  GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient> reduced()
   const;
   Coefficient getNumberOfComponents();
   void operator*=(
-    const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other
+    const GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>& other
   );
-  GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> operator*(
-    const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other
+  GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient> operator*(
+    const GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>& other
   ) const {
-    GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> result =
+    GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient> result =
     *this;
     result *= other;
     return result;
   }
   bool operator==(
-    const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other
+    const GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>& other
   ) const {
     return
     this->ownerGroup == other.ownerGroup &&
@@ -1851,12 +1851,12 @@ public:
   std::string getName() const;
   std::string toString(FormatExpressions* format = nullptr) const;
   Matrix<Coefficient>& getMatrixElement(int groupElementIndex);
-  template <typename elementSomeGroup>
+  template <typename ElementSomeGroup>
   void getMatrixElement(
-    const elementSomeGroup& input, Matrix<Coefficient>& output
+    const ElementSomeGroup& input, Matrix<Coefficient>& output
   );
-  template <typename elementSomeGroup>
-  Matrix<Coefficient> getMatrixElement(const elementSomeGroup& input);
+  template <typename ElementSomeGroup>
+  Matrix<Coefficient> getMatrixElement(const ElementSomeGroup& input);
   void setElementImage(int elementIndex, const Matrix<Coefficient>& input) {
     this->elementImages[elementIndex] = input;
     this->elementIsComputed[elementIndex] = true;
@@ -1865,7 +1865,7 @@ public:
     this->generators[generatorIndex] = input;
   }
   bool operator>(
-    const GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>& other
+    const GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>& other
   ) const;
   void computeAllGeneratorImagesFromSimple();
   // bool operator<(const GroupRepresentationCarriesAllMatrices<somegroup,
@@ -1948,6 +1948,7 @@ class WeylGroupAutomorphismAction: public GroupActionInterface<
 > {
 public:
   WeylGroupAutomorphisms* owner;
+  List<Vector<Rational> > generatorsSubgroupToQuotientOut;
   WeylGroupAutomorphismAction();
   bool checkInitialization() const;
   void actOn(
@@ -1957,12 +1958,7 @@ public:
   );
 };
 
-class OrbitIteratorRootActionWeylGroupAutomorphisms {
-  OrbitIterator<
-    ElementWeylGroupAutomorphisms,
-    Vector<Rational>,
-    WeylGroupAutomorphismAction
-  > iterator;
+class IteratorRootActionWeylGroupAutomorphisms {
   List<Vector<Rational> > orbitBuffer;
   Vector<Rational> orbitDefiningElement;
   int maxOrbitBufferSize;
@@ -1972,14 +1968,22 @@ public:
   int currentIndexInBuffer;
   bool flagOrbitIsBuffered;
   bool flagOrbitEnumeratedOnce;
-  OrbitIteratorRootActionWeylGroupAutomorphisms();
+  OrbitIterator<
+    ElementWeylGroupAutomorphisms,
+    Vector<Rational>,
+    WeylGroupAutomorphismAction
+  > iterator;
+  IteratorRootActionWeylGroupAutomorphisms();
   void reset();
   bool incrementReturnFalseIfPastLast();
   const Vector<Rational>& getCurrentElement();
   std::string toString() const;
   std::string toStringSize() const;
   bool checkConsistency();
-  void initialize();
+  void initializeFromOrbitWithCentralizerQuotient(
+    IteratorRootActionWeylGroupAutomorphisms& originalOrbit,
+    const List<Vector<Rational> >& generatorsSubgroupToQuotientOut
+  );
   void initialize(
     const List<ElementWeylGroupAutomorphisms>& inputGenerators,
     const Vector<Rational>& inputElement,

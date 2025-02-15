@@ -586,7 +586,7 @@ public:
   List<List<Rational> > cachedDynkinIndicesSl2subalgebrasSimpleTypes;
   HashedList<DynkinSimpleType>
   cachedDynkinSimpleTypesWithComputedSl2Subalgebras;
-  List<OrbitIteratorRootActionWeylGroupAutomorphisms> orbits;
+  List<IteratorRootActionWeylGroupAutomorphisms> orbits;
   HashedList<Rational> orbitHElementLengths;
   HashedList<DynkinSimpleType> orbitDynkinIndices;
   // If an entry in orbit sizes is - 1 it means the corresponding orbit size

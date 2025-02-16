@@ -123,17 +123,28 @@ bool FiniteGroup<elementSomeGroup>::computeAllElementsLargeGroup(
 
 template <class ElementGroup, class ElementRepresentation, class GroupAction>
 void OrbitIterator<ElementGroup, ElementRepresentation, GroupAction>::
+resetNoActionChange(const ElementRepresentation& inputElement) {
+  this->previousLayer = &this->privateLayer1;
+  this->currentLayer = &this->privateLayer2;
+  this->nextLayer = &this->privateLayer3;
+  // Starts at -1: means the orbit is ready for iteration,
+  // will be incremented to 0 as soon as the first
+  // element is found.
+  this->indexCurrentElement = - 1;
+  this->currentLayer->clear();
+  this->currentLayer->addOnTop(inputElement);
+  this->previousLayer->clear();
+  this->nextLayer->clear();
+}
+
+template <class ElementGroup, class ElementRepresentation, class GroupAction>
+void OrbitIterator<ElementGroup, ElementRepresentation, GroupAction>::
 initialize(
   const List<ElementGroup>& inputGenerators,
   const ElementRepresentation& inputElement
 ) {
-  this->resetNoActionChange();
   this->groupGeneratingElements = inputGenerators;
-  this->currentLayer->clear();
-  this->currentLayer->addOnTop(inputElement);
-  this->indexCurrentElement = 0;
-  this->previousLayer->clear();
-  this->nextLayer->clear();
+  this->resetNoActionChange(inputElement);
 }
 
 template <class ElementGroup, class ElementRepresentation, class GroupAction>
@@ -203,10 +214,13 @@ incrementReturnFalseIfPastLastForGroupsWithGeneratorsOfOrderTwo() {
     "OrbitIterator::"
     "incrementReturnFalseIfPastLastForGroupsWithGeneratorsOfOrderTwo"
   );
-  if (this->groupGeneratingElements.size == 0) {
-    return false;
-  }
   this->checkInitialization();
+  if (this->indexCurrentElement == - 1) {
+    // The enumeration just started.
+    // The generating element must be placed in the first layer.
+    this->indexCurrentElement ++;
+    return true;
+  }
   for (int i = 0; i < this->groupGeneratingElements.size; i ++) {
     this->groupAction.actOn(
       this->groupGeneratingElements[i], (*this->currentLayer)[

@@ -1917,7 +1917,10 @@ public:
   List<ElementGroup> groupGeneratingElements;
   int indexCurrentElement;
   OrbitIterator() {
-    this->resetNoActionChange();
+    this->previousLayer = &this->privateLayer1;
+    this->currentLayer = &this->privateLayer2;
+    this->nextLayer = &this->privateLayer3;
+    this->indexCurrentElement = - 1;
   }
   // Sets the group action. The action will crash
   // if you fail to set the group action.
@@ -1926,12 +1929,7 @@ public:
   }
   bool checkInitialization() const;
   std::string toStringLayerSize() const;
-  void resetNoActionChange() {
-    this->previousLayer = &this->privateLayer1;
-    this->currentLayer = &this->privateLayer2;
-    this->nextLayer = &this->privateLayer3;
-    this->indexCurrentElement = - 1;
-  }
+  void resetNoActionChange(const ElementRepresentation& inputElement);
   const ElementRepresentation& getCurrentElement();
   bool incrementReturnFalseIfPastLastForGroupsWithGeneratorsOfOrderTwo();
   bool incrementReturnFalseIfPastLast();
@@ -1974,7 +1972,7 @@ public:
     WeylGroupAutomorphismAction
   > iterator;
   IteratorRootActionWeylGroupAutomorphisms();
-  void reset();
+  void resetNoActionChange();
   bool incrementReturnFalseIfPastLast();
   const Vector<Rational>& getCurrentElement();
   std::string toString() const;
@@ -1984,6 +1982,7 @@ public:
     IteratorRootActionWeylGroupAutomorphisms& originalOrbit,
     const List<Vector<Rational> >& generatorsSubgroupToQuotientOut
   );
+  void computeSize();
   void initialize(
     const List<ElementWeylGroupAutomorphisms>& inputGenerators,
     const Vector<Rational>& inputElement,

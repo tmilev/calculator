@@ -1392,6 +1392,7 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
       this->slTwoSubalgebras.allSubalgebras[i].hElement.getCartanPart(),
       action
     );
+    this->orbits[i].computeSize();
   }
 }
 
@@ -2339,11 +2340,6 @@ bool IteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLast()
     return true;
   }
   this->currentIndexInBuffer ++;
-  if (this->flagOrbitEnumeratedOnce) {
-    return
-    this->iterator.
-    incrementReturnFalseIfPastLastForGroupsWithGeneratorsOfOrderTwo();
-  }
   if (
     !this->iterator.
     incrementReturnFalseIfPastLastForGroupsWithGeneratorsOfOrderTwo()
@@ -2374,7 +2370,10 @@ bool IteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLast()
     this->checkConsistency();
     return false;
   }
-  if (this->orbitBuffer.size < this->maxOrbitBufferSize) {
+  if (
+    this->orbitBuffer.size < this->maxOrbitBufferSize &&
+    !this->flagOrbitEnumeratedOnce
+  ) {
     this->orbitBuffer.addOnTop(this->iterator.getCurrentElement());
   }
   if (this->getCurrentElement().size == 0) {
@@ -2384,6 +2383,16 @@ bool IteratorRootActionWeylGroupAutomorphisms::incrementReturnFalseIfPastLast()
     << global.fatal;
   }
   return true;
+}
+
+void IteratorRootActionWeylGroupAutomorphisms::computeSize() {
+  if (this->computedSize > 0) {
+    // Size already computed.
+    return;
+  }
+  WeylGroupAutomorphisms & ownerGroup =
+  *this->iterator.groupGeneratingElements[0].owner;
+  this->computedSize = ownerGroup.getOrbitSize(this->orbitDefiningElement);
 }
 
 void IteratorRootActionWeylGroupAutomorphisms::
@@ -2412,9 +2421,7 @@ initializeFromOrbitWithCentralizerQuotient(
   weylGroupAutomorphismAction.generatorsSubgroupToQuotientOut =
   generatorsSubgroupToQuotientOut;
   this->iterator.setGroupAction(weylGroupAutomorphismAction);
-  if (generatorsSubgroupToQuotientOut.size == 0) {
-    this->computedSize = ownerGroup.getOrbitSize(this->orbitDefiningElement);
-  }
+  this->computeSize();
   if (this->computedSize > this->maxOrbitBufferSize) {
     this->maxOrbitBufferSize = 0;
     this->orbitBuffer.setSize(0);
@@ -2430,7 +2437,6 @@ void IteratorRootActionWeylGroupAutomorphisms::initialize(
     "IteratorRootActionWeylGroupAutomorphisms::"
     "initialize"
   );
-  this->reset();
   this->orbitDefiningElement = inputElement;
   this->iterator.setGroupAction(action);
   this->iterator.initialize(inputGenerators, this->orbitDefiningElement);
@@ -2438,18 +2444,19 @@ void IteratorRootActionWeylGroupAutomorphisms::initialize(
 
 IteratorRootActionWeylGroupAutomorphisms::
 IteratorRootActionWeylGroupAutomorphisms() {
-  this->reset();
-}
-
-void IteratorRootActionWeylGroupAutomorphisms::reset() {
   this->flagOrbitIsBuffered = false;
   this->flagOrbitEnumeratedOnce = false;
   this->orbitSize = - 1;
   this->computedSize = - 1;
   this->currentIndexInBuffer = - 1;
-  this->maxOrbitBufferSize = 5000000;
+  // Ten million.
+  this->maxOrbitBufferSize = 10000000;
   this->orbitBuffer.setSize(0);
-  this->iterator.resetNoActionChange();
+}
+
+void IteratorRootActionWeylGroupAutomorphisms::resetNoActionChange() {
+  this->currentIndexInBuffer = - 1;
+  this->iterator.resetNoActionChange(this->orbitDefiningElement);
 }
 
 std::string IteratorRootActionWeylGroupAutomorphisms::toString() const {
@@ -2571,6 +2578,8 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
   Vector<Rational> currentCandidate;
   IteratorRootActionWeylGroupAutomorphisms& currentOrbit =
   this->orbits[currentSubalgebra.indexInContainer];
+  currentOrbit.resetNoActionChange();
+  currentOrbit.computeSize();
   std::stringstream orbitBodyStream;
   orbitHeader.report(orbitBodyStream.str());
   int totalHCandidates = 0;

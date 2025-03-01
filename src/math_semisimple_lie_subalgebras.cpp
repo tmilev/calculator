@@ -7119,6 +7119,11 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
     maximumPolynomialDivisions = 200;
     maximumMonomialOperations = 1000;
   }
+  if (embeddingLieAlgebraName == "A^{40}_1") {
+    // System known to require more computations than most.
+    maximumPolynomialDivisions = 4000;
+    maximumMonomialOperations = 20000;
+  }
   this->configuredSystemToSolve.groebner.maximumMonomialOperations =
   maximumMonomialOperations;
   this->configuredSystemToSolve.groebner.maximumPolynomialDivisions =

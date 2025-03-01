@@ -10,11 +10,11 @@
 #include "web_api.h"
 #include "web_client.h"
 #include "webserver.h"
-#include <arpa/inet.h> // <- inet_ntop declared here (ntop = network to presentation)
+#include <arpa/inet.h> // <- inet_ntop (ntop = network to presentation)
 #include <fcntl.h>//<-setting flags of file descriptors
 #include <iostream>
 #include <netdb.h> //<-addrinfo and related data structures defined here
-#include <sys/resource.h> //<- for setrlimit(...) function. Restricts the time the executable can run.
+#include <sys/resource.h> //<- setrlimit(...): restrict executable runtime
 #include <sys/stat.h>//<-for file statistics
 #include <sys/wait.h>//<-waitpid f-n here
 #include <unistd.h>
@@ -1259,12 +1259,14 @@ bool WebWorker::isValidWorkerId(const std::string& workerId) {
   return StringRoutines::isLatinLetterOrDigitSequence(workerId);
 }
 
-int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
+int WebWorker::getIndexIfRunningWorkerId(
+  JSData& outputComputationStatus, std::string& outputWorkerId
+) {
   STACK_TRACE("WebWorker::getIndexIfRunningWorkerId");
-  std::string workerId = global.getWebInput(WebAPI::Request::workerId);
+  outputWorkerId = global.getWebInput(WebAPI::Request::workerId);
   std::stringstream commentsOnError;
   std::string computationResult;
-  if (!this->isValidWorkerId(workerId)) {
+  if (!this->isValidWorkerId(outputWorkerId)) {
     outputComputationStatus[WebAPI::Result::error] =
     "Your workerId seems to be invalid.";
     return - 1;
@@ -1277,13 +1279,17 @@ int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
   // ultra-sensitive only because they are private, so there is no reason
   // to overdo the cryptographic protections beyond the common-sense one
   // of requesting a unique id.
-  int indexOther = this->parent->workerIds.getValue(workerId, - 1);
+  int indexOther = this->parent->workerIds.getValue(outputWorkerId, - 1);
   if (indexOther >= 0) {
     this->parent->allWorkers[indexOther].writingReportFile.lock();
   }
   bool success =
   FileOperations::loadFiletoStringVirtual_accessUltraSensitiveFoldersIfNeeded(
-    "results/" + workerId, computationResult, true, true, &commentsOnError
+    "results/" + outputWorkerId,
+    computationResult,
+    true,
+    true,
+    &commentsOnError
   );
   if (indexOther >= 0) {
     this->parent->allWorkers[indexOther].writingReportFile.unlock();
@@ -1291,7 +1297,7 @@ int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
   if (!success) {
     commentsOnError
     << "Failed to load your output with id: "
-    << workerId
+    << outputWorkerId
     << ". ";
     outputComputationStatus[WebAPI::Result::error] = commentsOnError.str();
     return - 1;
@@ -1299,7 +1305,7 @@ int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
   if (!outputComputationStatus.parse(computationResult)) {
     commentsOnError
     << "I found your worker id: "
-    << workerId
+    << outputWorkerId
     << " but I could not parse its JSON status. "
     << "This is likely an internal server error. ";
     outputComputationStatus[WebAPI::Result::error] = commentsOnError.str();
@@ -1340,7 +1346,7 @@ int WebWorker::getIndexIfRunningWorkerId(JSData& outputComputationStatus) {
     << "WorkerId has too large of an index: "
     << indexOther
     << ". "
-    << workerId
+    << outputWorkerId
     << " not found. ";
     outputComputationStatus[WebAPI::Result::comments] = out.str();
     this->flagKeepAlive = false;
@@ -1370,7 +1376,8 @@ JSData WebWorker::processComputationIndicatorJSData() {
     result[WebAPI::Result::error] = commentsOnFailure.str();
     return result;
   }
-  int otherIndex = this->getIndexIfRunningWorkerId(result);
+  std::string unusedWorkerId;
+  int otherIndex = this->getIndexIfRunningWorkerId(result, unusedWorkerId);
   if (otherIndex < 0) {
     this->flagKeepAlive = false;
     return result;

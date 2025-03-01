@@ -111,10 +111,10 @@ class Monitor {
 
   callbackPauseRequest(input) {
     let progressReportContent = "";
-    if (input === "") {
+    if (input === "" || input === undefined) {
       this.clearTimeout();
       this.currentTimeOutHandler = setTimeout(() => {
-        this.callbackPauseRequest();
+        this.callbackPauseRequest("");
       }, this.timeIncrement * 1000);
       return;
     }
@@ -137,7 +137,7 @@ class Monitor {
       this.isPaused = false;
       this.pauseButtonMarkFinished();
       this.writeFinalResult(parsed);
-    } else if (status === "paused") {
+    } else if (status === "paused" || status === "recentlyPaused") {
       this.isPaused = true;
       this.pauseButton.textContent = "Continue";
     } else {
@@ -225,7 +225,9 @@ class Monitor {
     pauseURL += `${urlFields.requests.workerId}=${this.currentWorkerId}&`;
     submitRequests.submitGET({
       url: pauseURL,
-      callback: this.callbackPauseRequest.bind(this),
+      callback: (input) => {
+        this.callbackPauseRequest(input);
+      },
       progress: ids.domElements.pages.calculator.progress
     });
   }

@@ -1,5 +1,6 @@
 #include "calculator_educational_functions_1.h"
 #include "database.h"
+#include "general_file_operations_encodings.h"
 #include "general_logging_global_variables.h"
 #include "math_extra_latex_routines.h"
 #include "string_constants.h"
@@ -224,7 +225,9 @@ bool WebAPIResponse::processUnpauseWorker() {
   this->owner->setHeaderOKNoContentLength("");
   JSData progressReader;
   JSData result;
-  int indexWorker = this->owner->getIndexIfRunningWorkerId(progressReader);
+  std::string unused;
+  int indexWorker =
+  this->owner->getIndexIfRunningWorkerId(progressReader, unused);
   if (indexWorker < 0) {
     this->owner->flagKeepAlive = false;
     return global.response.writeResponse(progressReader, false);
@@ -243,16 +246,27 @@ bool WebAPIResponse::processPauseWorker() {
   this->owner->setHeaderOKNoContentLength("");
   JSData progressReader;
   JSData result;
-  int indexWorker = this->owner->getIndexIfRunningWorkerId(progressReader);
+  std::string workerId;
+  int indexWorker =
+  this->owner->getIndexIfRunningWorkerId(progressReader, workerId);
   if (indexWorker < 0) {
     this->owner->flagKeepAlive = false;
     return global.response.writeResponse(progressReader, false);
   }
   WebWorker& otherWorker = this->owner->parent->allWorkers[indexWorker];
   if (otherWorker.pauseWorker.lock()) {
-    result[WebAPI::Result::status] = "paused";
+    result[WebAPI::Result::status] = WebAPI::Result::paused;
   } else {
     result[WebAPI::Result::error] = "Failed to pause process. ";
+  }
+  progressReader[WebAPI::Result::status] = WebAPI::Result::paused;
+  bool success =
+  FileOperations::
+  writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
+    "results/" + workerId, progressReader.toString(), true, true, nullptr
+  );
+  if (!success) {
+    result[WebAPI::Result::comments] = "Fail to store updated progress json";
   }
   return global.response.writeResponse(result, false);
 }

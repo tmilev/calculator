@@ -1390,9 +1390,28 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
       this->recursionCounterSerreLikeSystem
     );
   }
-  for (
-    const Rational& arbitrarySubstitution : this->arbitrarySubstitutionsInOrder
-  ) {
+  std::stringstream reportStreamHeuristics;
+  if (this->groebner.flagDoProgressReport) {
+    reportStreamHeuristics
+    << "Attempting the arbitrary substitutions: "
+    << this->arbitrarySubstitutionsInOrder.toStringCommaDelimited()
+    << ".<br>";
+  }
+  for (int i = 0; i < this->arbitrarySubstitutionsInOrder.size; i ++) {
+    if (this->groebner.flagDoProgressReport) {
+      MonomialPolynomial monomial(
+        this->getPreferredSerreSystemSubstitutionIndex(inputSystem)
+      );
+      reportStreamHeuristics
+      << "Attempting arbitrary subtitution "
+      << i + 1
+      << " out of "
+      << this->arbitrarySubstitutionsInOrder.size
+      << ". ";
+      report3.report(reportStreamHeuristics.str());
+    }
+    const Rational& arbitrarySubstitution =
+    this->arbitrarySubstitutionsInOrder[i];
     this->trySettingValueToVariable(inputSystem, arbitrarySubstitution);
     if (this->flagSystemSolvedOverBaseField) {
       return;
@@ -1402,7 +1421,6 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
       MonomialPolynomial monomial(
         this->getPreferredSerreSystemSubstitutionIndex(inputSystem)
       );
-      std::stringstream reportStreamHeuristics;
       reportStreamHeuristics
       << "<br>The substitution  "
       << monomial.toString(&this->groebner.format)

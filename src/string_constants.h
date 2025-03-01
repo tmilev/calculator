@@ -131,6 +131,7 @@ public:
     static std::string status;
     static std::string deleteAccountToken;
     static std::string running;
+    static std::string paused;
     static std::string crashReport;
     static std::string millisecondsComputation;
     static std::string loginDisabledEveryoneIsAdmin;

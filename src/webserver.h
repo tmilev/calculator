@@ -86,7 +86,9 @@ public:
   std::string closeIndentTag(const std::string& tag);
   JSData processComputationIndicatorJSData();
   static bool isValidWorkerId(const std::string& workerId);
-  int getIndexIfRunningWorkerId(JSData& outputComputationStatus);
+  int getIndexIfRunningWorkerId(
+    JSData& outputComputationStatus, std::string& outputWorkerId
+  );
   int processFolderOrFile(bool generateLinkToCalculatorOnMissingFile);
   int processFolder();
   int processFile(bool generateLinkToCalculatorOnMissingFile);

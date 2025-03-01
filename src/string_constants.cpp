@@ -17,6 +17,7 @@ std::string WebAPI::DatabaseParameters::allTables = "allTables";
 std::string WebAPI::Result::error = "error";
 std::string WebAPI::Result::status = "status";
 std::string WebAPI::Result::running = "running";
+std::string WebAPI::Result::paused = "paused";
 std::string WebAPI::Result::resultHtml = "resultHtml";
 std::string WebAPI::Result::progressReports = "progressReports";
 std::string WebAPI::Result::scripts = "scripts";

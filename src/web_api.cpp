@@ -225,18 +225,41 @@ bool WebAPIResponse::processUnpauseWorker() {
   this->owner->setHeaderOKNoContentLength("");
   JSData progressReader;
   JSData result;
-  std::string unused;
+  std::string workerIdToUnpause;
   int indexWorker =
-  this->owner->getIndexIfRunningWorkerId(progressReader, unused);
+  this->owner->getIndexOfWorkerId(progressReader, workerIdToUnpause);
   if (indexWorker < 0) {
     this->owner->flagKeepAlive = false;
     return global.response.writeResponse(progressReader, false);
   }
+  std::string currentWorkerStatus =
+  progressReader[WebAPI::Result::status].stringValue;
+  std::stringstream errorStream;
+  if (currentWorkerStatus != WebAPI::Result::paused) {
+    errorStream << "Seems the process wasn't really paused. ";
+  }
+  progressReader[WebAPI::Result::status] = "unpaused";
+  bool fileUpdateSuccess =
+  FileOperations::
+  writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
+    "results/" + workerIdToUnpause,
+    progressReader.toString(),
+    true,
+    true,
+    nullptr
+  );
+  if (!fileUpdateSuccess) {
+    errorStream << "Failed to store the worker status. ";
+  }
   WebWorker& otherWorker = this->owner->parent->allWorkers[indexWorker];
   if (!otherWorker.pauseWorker.unlock()) {
-    result[WebAPI::Result::error] = "Failed to unpause process";
+    errorStream << "Failed to unpause process. ";
   } else {
     result[WebAPI::Result::status] = "unpaused";
+  }
+  std::string errorMessage = errorStream.str();
+  if (errorMessage != "") {
+    result[WebAPI::Result::error] = errorMessage;
   }
   return global.response.writeResponse(result, false);
 }
@@ -246,12 +269,19 @@ bool WebAPIResponse::processPauseWorker() {
   this->owner->setHeaderOKNoContentLength("");
   JSData progressReader;
   JSData result;
-  std::string workerId;
+  std::string workerIdToBePaused;
   int indexWorker =
-  this->owner->getIndexIfRunningWorkerId(progressReader, workerId);
+  this->owner->getIndexOfWorkerId(progressReader, workerIdToBePaused);
   if (indexWorker < 0) {
     this->owner->flagKeepAlive = false;
     return global.response.writeResponse(progressReader, false);
+  }
+  std::string workerStatus =
+  progressReader[WebAPI::Result::status].stringValue;
+  if (workerStatus != WebAPI::Result::running) {
+    result[WebAPI::Result::status] = workerStatus;
+    result[WebAPI::Result::error] = "The process appears to not be running ";
+    return global.response.writeResponse(result, false);
   }
   WebWorker& otherWorker = this->owner->parent->allWorkers[indexWorker];
   if (otherWorker.pauseWorker.lock()) {
@@ -263,7 +293,11 @@ bool WebAPIResponse::processPauseWorker() {
   bool success =
   FileOperations::
   writeFileVirualWithPermissions_accessUltraSensitiveFoldersIfNeeded(
-    "results/" + workerId, progressReader.toString(), true, true, nullptr
+    "results/" + workerIdToBePaused,
+    progressReader.toString(),
+    true,
+    true,
+    nullptr
   );
   if (!success) {
     result[WebAPI::Result::comments] = "Fail to store updated progress json";

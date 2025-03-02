@@ -217,10 +217,10 @@ class Monitor {
     let pauseURL = "";
     pauseURL += `${pathnames.urls.calculatorAPI}?`;
     const urlFields = pathnames.urlFields;
-    if (!this.isPaused) {
-      pauseURL += `${urlFields.request}=${urlFields.requests.pause}&`;
-    } else {
+    if (this.isPaused) {
       pauseURL += `${urlFields.request}=${urlFields.requests.unpause}&`;
+    } else {
+      pauseURL += `${urlFields.request}=${urlFields.requests.pause}&`;
     }
     pauseURL += `${urlFields.requests.workerId}=${this.currentWorkerId}&`;
     submitRequests.submitGET({

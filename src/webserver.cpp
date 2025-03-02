@@ -1259,10 +1259,10 @@ bool WebWorker::isValidWorkerId(const std::string& workerId) {
   return StringRoutines::isLatinLetterOrDigitSequence(workerId);
 }
 
-int WebWorker::getIndexIfRunningWorkerId(
+int WebWorker::getIndexOfWorkerId(
   JSData& outputComputationStatus, std::string& outputWorkerId
 ) {
-  STACK_TRACE("WebWorker::getIndexIfRunningWorkerId");
+  STACK_TRACE("WebWorker::getIndexOfWorkerId");
   outputWorkerId = global.getWebInput(WebAPI::Request::workerId);
   std::stringstream commentsOnError;
   std::string computationResult;
@@ -1309,13 +1309,6 @@ int WebWorker::getIndexIfRunningWorkerId(
     << " but I could not parse its JSON status. "
     << "This is likely an internal server error. ";
     outputComputationStatus[WebAPI::Result::error] = commentsOnError.str();
-    return - 1;
-  }
-  if (
-    !outputComputationStatus[WebAPI::Result::status].isEqualTo(
-      WebAPI::Result::running
-    )
-  ) {
     return - 1;
   }
   int indexFromFile = - 1;
@@ -1377,7 +1370,7 @@ JSData WebWorker::processComputationIndicatorJSData() {
     return result;
   }
   std::string unusedWorkerId;
-  int otherIndex = this->getIndexIfRunningWorkerId(result, unusedWorkerId);
+  int otherIndex = this->getIndexOfWorkerId(result, unusedWorkerId);
   if (otherIndex < 0) {
     this->flagKeepAlive = false;
     return result;

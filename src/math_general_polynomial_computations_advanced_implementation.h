@@ -586,11 +586,6 @@ PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->flagSystemProvenToHaveSolution = false;
   this->flagSystemSolvedOverBaseField = false;
   this->flagUsingAlgebraicClosure = false;
-  this->arbitrarySubstitutionsInOrder = List<Rational>(
-    {Rational::zeroStatic(), Rational::oneStatic()}
-  );
-  this->arbitrarySubstitutionsProvider = nullptr;
-  this->preferredVariableForArbitrarySubstitutionProvider = nullptr;
 }
 
 template <class Coefficient>
@@ -833,13 +828,9 @@ int PolynomialSystem<Coefficient>::getPreferredSerreSystemSubstitutionIndex(
     championIndex = candidateIndex;
     championImprovement = candidateImprovement;
   }
-  if (this->preferredVariableForArbitrarySubstitutionProvider == nullptr) {
-    return championIndex;
-  }
   return
-  this->preferredVariableForArbitrarySubstitutionProvider(
-    variableSelection, championIndex
-  );
+  this->substitutionsProvider.preferredVariableForArbitrarySubstitutionProvider
+  (variableSelection, championIndex);
 }
 
 template <class Coefficient>
@@ -1153,12 +1144,7 @@ void PolynomialSystem<Coefficient>::setUpRecursiveComputation(
   this->groebner.maximumPolynomialDivisions;
   toBeModified.groebner.format = this->groebner.format;
   toBeModified.groebner.polynomialOrder = this->groebner.polynomialOrder;
-  toBeModified.arbitrarySubstitutionsInOrder =
-  this->arbitrarySubstitutionsInOrder;
-  toBeModified.arbitrarySubstitutionsProvider =
-  this->arbitrarySubstitutionsProvider;
-  toBeModified.preferredVariableForArbitrarySubstitutionProvider =
-  this->preferredVariableForArbitrarySubstitutionProvider;
+  toBeModified.substitutionsProvider = this->substitutionsProvider;
 }
 
 template <class Coefficient>
@@ -1384,34 +1370,35 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
       return;
     }
   }
-  if (this->arbitrarySubstitutionsProvider != nullptr) {
-    this->arbitrarySubstitutionsProvider(
-      this->arbitrarySubstitutionsInOrder,
-      this->recursionCounterSerreLikeSystem
-    );
-  }
+  this->substitutionsProvider.computeArbitrarySubstitutions(
+    this->recursionCounterSerreLikeSystem
+  );
   std::stringstream reportStreamHeuristics;
   if (this->groebner.flagDoProgressReport) {
     reportStreamHeuristics
     << "Attempting the arbitrary substitutions: "
-    << this->arbitrarySubstitutionsInOrder.toStringCommaDelimited()
+    << this->substitutionsProvider.arbitrarySubstitutions.
+    toStringCommaDelimited()
     << ".<br>";
   }
-  for (int i = 0; i < this->arbitrarySubstitutionsInOrder.size; i ++) {
+  for (
+    int i = 0; i < this->substitutionsProvider.arbitrarySubstitutions.size; i
+    ++
+  ) {
     if (this->groebner.flagDoProgressReport) {
       MonomialPolynomial monomial(
         this->getPreferredSerreSystemSubstitutionIndex(inputSystem)
       );
       reportStreamHeuristics
-      << "Attempting arbitrary subtitution "
+      << "Attempting arbitrary substitution "
       << i + 1
       << " out of "
-      << this->arbitrarySubstitutionsInOrder.size
+      << this->substitutionsProvider.arbitrarySubstitutions.size
       << ". ";
       report3.report(reportStreamHeuristics.str());
     }
     const Rational& arbitrarySubstitution =
-    this->arbitrarySubstitutionsInOrder[i];
+    this->substitutionsProvider.arbitrarySubstitutions[i];
     this->trySettingValueToVariable(inputSystem, arbitrarySubstitution);
     if (this->flagSystemSolvedOverBaseField) {
       return;

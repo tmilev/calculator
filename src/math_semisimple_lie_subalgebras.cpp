@@ -7070,28 +7070,52 @@ void SemisimpleSubalgebras::resetComputations() {
   this->subalgebras.clear();
 }
 
-void CandidateSemisimpleSubalgebra::arbitrarySusbsitutionProvider(
-  List<Rational>& output, int depth
-) {
-  if (depth % 2 == 0) {
-    output = List<Rational>({Rational::oneStatic(), Rational::zeroStatic()});
-  } else {
-    output = List<Rational>({Rational::zeroStatic(), Rational::oneStatic()});
-  }
-}
-
-int CandidateSemisimpleSubalgebra::preferredVariableForSl2SystemProvider(
+int ArbitrarySubstitutionsProvider::
+preferredVariableForArbitrarySubstitutionProvider(
   Selection& variablesToSolveFor, int bestIndexHeuristically
 ) {
+  if (!this->flagChooseSmallestIndexVariableFirst) {
+    return bestIndexHeuristically;
+  }
   if (variablesToSolveFor.cardinalitySelection == 0) {
     return bestIndexHeuristically;
   }
+  variablesToSolveFor.computeIndicesFromSelection();
   return variablesToSolveFor.elements[0];
 }
 
+ArbitrarySubstitutionsProvider::ArbitrarySubstitutionsProvider() {
+  this->flagChooseSmallestIndexVariableFirst = false;
+  this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf =
+  - 1;
+}
+
+void ArbitrarySubstitutionsProvider::computeArbitrarySubstitutions(
+  int recursionDepth
+) {
+  if (
+    this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf
+    >
+    0 && (recursionDepth + 1) %
+    this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf
+    ==
+    0
+  ) {
+    // One comes first.
+    this->arbitrarySubstitutions = List<Rational>(
+      {Rational::oneStatic(), Rational::zeroStatic()}
+    );
+  } else {
+    // Zero comes first.
+    this->arbitrarySubstitutions = List<Rational>(
+      {Rational::zeroStatic(), Rational::oneStatic()}
+    );
+  }
+}
+
 void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
-  int maximumPolynomialDivisions = 2000;
-  int maximumMonomialOperations = 20000;
+  int maximumPolynomialDivisions = 1000;
+  int maximumMonomialOperations = 10000;
   std::string ambientLieAlgebraName =
   this->owner->owner->toStringLieAlgebraName();
   if (ambientLieAlgebraName == "C^{1}_5") {
@@ -7103,11 +7127,12 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   if (embeddedType.getRank() == 1) {
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
-    this->configuredSystemToSolve.arbitrarySubstitutionsProvider =
-    CandidateSemisimpleSubalgebra::arbitrarySusbsitutionProvider;
-    this->configuredSystemToSolve.
-    preferredVariableForArbitrarySubstitutionProvider =
-    CandidateSemisimpleSubalgebra::preferredVariableForSl2SystemProvider;
+    this->configuredSystemToSolve.substitutionsProvider.
+    oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf =
+    2;
+    this->configuredSystemToSolve.substitutionsProvider.
+    flagChooseSmallestIndexVariableFirst =
+    true;
   }
   std::string embeddingLieAlgebraName = embeddedType.toString();
   if (embeddingLieAlgebraName == "A^{20}_1+A^{4}_1") {
@@ -7123,6 +7148,11 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
     // System known to require more computations than most.
     maximumPolynomialDivisions = 4000;
     maximumMonomialOperations = 20000;
+  }
+  if (embeddingLieAlgebraName == "A^{36}_1+A^{4}_1") {
+    this->configuredSystemToSolve.substitutionsProvider.
+    oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf =
+    2;
   }
   this->configuredSystemToSolve.groebner.maximumMonomialOperations =
   maximumMonomialOperations;

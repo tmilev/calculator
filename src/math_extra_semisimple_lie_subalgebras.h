@@ -497,10 +497,6 @@ public:
     int indexModule, const Vector<Rational>& weight
   ) const;
   bool operator>(const CandidateSemisimpleSubalgebra& other) const;
-  static void arbitrarySusbsitutionProvider(List<Rational>& output, int depth);
-  static int preferredVariableForSl2SystemProvider(
-    Selection& variablesToSolveFor, int bestIndexHeuristically
-  );
 };
 
 class RealizedSemisimpleSubalgebra {

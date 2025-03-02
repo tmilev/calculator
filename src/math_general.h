@@ -3920,6 +3920,18 @@ public:
   std::string toStringStatusGroebnerBasisTransformation();
 };
 
+class ArbitrarySubstitutionsProvider {
+public:
+  List<Rational> arbitrarySubstitutions;
+  bool flagChooseSmallestIndexVariableFirst;
+  int oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf;
+  ArbitrarySubstitutionsProvider();
+  void computeArbitrarySubstitutions(int recursionDepth);
+  int preferredVariableForArbitrarySubstitutionProvider(
+    Selection& variablesToSolveFor, int bestHeursticCandidate
+  );
+};
+
 template <class Coefficient>
 class PolynomialSystem {
 public:
@@ -3940,14 +3952,8 @@ public:
   List<Coefficient> systemSolution;
   Selection solutionsFound;
   List<PolynomialSubstitution<Coefficient> > impliedSubstitutions;
-  List<Rational> arbitrarySubstitutionsInOrder;
+  ArbitrarySubstitutionsProvider substitutionsProvider;
   PolynomialSystem();
-  void(*arbitrarySubstitutionsProvider)(
-    List<Rational>& outputSubstitutions, int recursionDepth
-  );
-  int(*preferredVariableForArbitrarySubstitutionProvider)(
-    Selection& variablesToSolveFor, int bestHeursticCandidate
-  );
   void solveSerreLikeSystem(List<Polynomial<Coefficient> >& inputSystem);
   std::string toStringCalculatorInputFromSystem(
     const List<Polynomial<Coefficient> >& inputSystem

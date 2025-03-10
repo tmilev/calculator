@@ -7086,19 +7086,16 @@ preferredVariableForArbitrarySubstitutionProvider(
 
 ArbitrarySubstitutionsProvider::ArbitrarySubstitutionsProvider() {
   this->flagChooseSmallestIndexVariableFirst = false;
-  this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf =
-  - 1;
+  this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf = - 1;
 }
 
 void ArbitrarySubstitutionsProvider::computeArbitrarySubstitutions(
   int recursionDepth
 ) {
   if (
-    this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf
-    >
-    0 && (recursionDepth + 1) %
-    this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf
-    ==
+    this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf > 0 &&
+    recursionDepth %
+    this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf ==
     0
   ) {
     // One comes first.
@@ -7128,7 +7125,7 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
     this->configuredSystemToSolve.substitutionsProvider.
-    oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf =
+    oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf =
     2;
     this->configuredSystemToSolve.substitutionsProvider.
     flagChooseSmallestIndexVariableFirst =
@@ -7140,6 +7137,9 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
   }
+  // Polynomial systems that were solved manually (with the help of computer):
+  // 1. A^{32}_1+A^{8}_1 in E_8.
+  // 2. A^24_1 in E_8.
   if (embeddingLieAlgebraName == "A^{15}_1") {
     maximumPolynomialDivisions = 200;
     maximumMonomialOperations = 1000;
@@ -7151,7 +7151,7 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   }
   if (embeddingLieAlgebraName == "A^{36}_1+A^{4}_1") {
     this->configuredSystemToSolve.substitutionsProvider.
-    oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf =
+    oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf =
     2;
   }
   this->configuredSystemToSolve.groebner.maximumMonomialOperations =
@@ -10544,12 +10544,12 @@ std::string CandidateSemisimpleSubalgebra::toStringSystemPart2(
   std::stringstream out;
   out
   << "<br><b>For the calculator:</b><br>\n"
-  << this->toStringLoadUnknown()
-  << ";"
-  << "<br> "
   << this->configuredSystemToSolve.toStringCalculatorInputFromSystem(
     this->systemToSolve
-  );
+  )
+  << ";"
+  << "<br> "
+  << this->toStringLoadUnknown();
   return out.str();
 }
 

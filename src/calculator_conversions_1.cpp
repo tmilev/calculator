@@ -1555,7 +1555,7 @@ bool CalculatorConversions::loadSemisimpleSubalgebras(
     )
   ) {
     calculator
-    << "Failed to load the number of explored types; using empty list ";
+    << "Failed to load the number of explored types; using empty list. ";
     numberOfExploredTypes.clear();
     numberOfExploredTypes.addOnTop(0);
   }

@@ -3924,7 +3924,7 @@ class ArbitrarySubstitutionsProvider {
 public:
   List<Rational> arbitrarySubstitutions;
   bool flagChooseSmallestIndexVariableFirst;
-  int oneIsFirstArbitrarySubstitutionWhenRecursionDepthPlusOneIsMultipleOf;
+  int oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf;
   ArbitrarySubstitutionsProvider();
   void computeArbitrarySubstitutions(int recursionDepth);
   int preferredVariableForArbitrarySubstitutionProvider(

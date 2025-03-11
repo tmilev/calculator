@@ -289,6 +289,7 @@ bool TransportLayerSecurityOpenSSL::initializeOneCertificate(
     << " for certificate: "
     << input.certificateFileNamePhysical
     << Logger::endL;
+    return false;
   }
   global
   << Logger::green

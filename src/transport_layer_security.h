@@ -79,7 +79,7 @@ public:
   void initializeSSL(bool isServer);
   // Loads one certificate. The certificate is primary
   // if it is used by the calculator server.
-  void initializeOneCertificate(
+  bool initializeOneCertificate(
     TransportLayerSecurityConfiguration& input, bool isPrimary
   );
   void initializeSSLClient();
@@ -116,7 +116,7 @@ public:
     std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   bool initializeSSLKeyFilesSelfSignedCreateOnDemand();
-  bool hasOKCertificates();
+  bool hasCertificateFiles();
 };
 
 class TransportLayerSecurityServer;
@@ -762,6 +762,7 @@ public:
     std::stringstream* commentsGeneral
   );
   bool initializeAdditionalCertificates();
+  void initializeAdditionalCertificatesWithErrorChecks(bool crashOnFail);
   void free();
   void freeEverythingShutdown();
 };

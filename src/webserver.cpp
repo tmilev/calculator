@@ -3992,7 +3992,9 @@ int WebServer::run() {
   global.initModifiableDatabaseFields();
   HtmlRoutines::loadStrings();
   // Must run before port binding: create openSSL configurations.
-  this->transportLayerSecurity.initializeAdditionalCertificates();
+  this->transportLayerSecurity.initializeAdditionalCertificatesWithErrorChecks(
+    false
+  );
   // Bind to all ports and create a map from ports to different openSSL
   // configurations.
   if (!this->initializePrepareWebServerAll()) {

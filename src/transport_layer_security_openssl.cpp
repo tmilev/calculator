@@ -189,33 +189,29 @@ void TransportLayerSecurityOpenSSL::initializeSSL(bool isServer) {
 #endif // MACRO_use_open_ssl
 }
 
-bool TransportLayerSecurityOpenSSL::hasOKCertificates() {
+bool TransportLayerSecurityOpenSSL::hasCertificateFiles() {
   return
   this->configuration.certificateFileNamePhysical != "" &&
   this->configuration.privateKeyFileNamePhysical != "";
 }
 
-void TransportLayerSecurityOpenSSL::initializeOneCertificate(
+bool TransportLayerSecurityOpenSSL::initializeOneCertificate(
   TransportLayerSecurityConfiguration& input, bool isPrimary
 ) {
   STACK_TRACE("TransportLayerSecurityOpenSSL::initializeOneCertificate");
-  if (this->hasOKCertificates()) {
-    return;
-  }
-  if (
-    input.certificateFileNamePhysical == "" ||
-    input.privateKeyFileNamePhysical == ""
-  ) {
-    return;
+  if (!this->hasCertificateFiles()) {
+    global << Logger::red << "Certificate files are missing. " << Logger::endL;
+    return false;
   }
   if (!input.keysExist()) {
-    global.fatal
+    global
+    << Logger::red
     << "The certificate files are missing: "
     << input.certificateFileNamePhysical
     << " and "
     << input.privateKeyFileNamePhysical
-    << global.fatal;
-    return;
+    << Logger::endL;
+    return false;
   }
   if (isPrimary) {
     std::stringstream commentsOnFailure;
@@ -227,11 +223,12 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
         &commentsOnFailure
       )
     ) {
-      global.fatal
+      global
+      << Logger::red
       << "Failed to load primary certificate: ["
       << input.certificateFileNamePhysical
       << "]."
-      << global.fatal;
+      << Logger::endL;
     }
     if (
       !this->owner->server.certificate.loadFromPEM(
@@ -275,10 +272,11 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
     0
   ) {
     ERR_print_errors_fp(stderr);
-    global.fatal
+    global
+    << Logger::red
     << "Your certificate file exists by I failed to load it. "
     << input.certificateFileNamePhysical
-    << global.fatal;
+    << Logger::endL;
   }
   global
   << Logger::green
@@ -294,12 +292,13 @@ void TransportLayerSecurityOpenSSL::initializeOneCertificate(
     0
   ) {
     ERR_print_errors_fp(stderr);
-    global.fatal
+    global
+    << Logger::red
     << "Failed to use private key: "
     << input.privateKeyFileNamePhysical
     << " for certificate: "
     << input.certificateFileNamePhysical
-    << global.fatal;
+    << Logger::endL;
   }
   global
   << Logger::green

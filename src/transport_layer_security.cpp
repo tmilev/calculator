@@ -129,19 +129,25 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
     this->official.makeOfficialKeyAndCertificate();
     this->selfSigned.makeSelfSignedKeyAndCertificate();
     this->openSSLData.initializeSSLServer();
-    this->openSSLData.initializeOneCertificate(this->official, true);
-    if (this->openSSLData.hasOKCertificates()) {
-      global
-      << Logger::green
-      << "Successfully loaded official certificates."
-      << Logger::endL;
-    } else {
+    if (!this->openSSLData.hasCertificateFiles()) {
       global
       << Logger::red
       << "Official certificates not found. Trying self-signed ones. "
       << Logger::endL;
       this->openSSLData.initializeSSLKeyFilesSelfSignedCreateOnDemand();
-      this->openSSLData.initializeOneCertificate(this->selfSigned, true);
+    }
+    bool success =
+    this->openSSLData.initializeOneCertificate(this->official, true);
+    if (success) {
+      global
+      << Logger::green
+      << "Successfully loaded official certificates."
+      << Logger::endL;
+    } else {
+      global.fatal
+      << Logger::red
+      << "Failed to load server certificates. Crashing. "
+      << global.fatal;
     }
     if (this->flagBuiltInTLSAvailable) {
       this->server.initializeAllUseSelfSignedPrivateKeys();
@@ -155,6 +161,35 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
 void TransportLayerSecurity::freeEverythingShutdown() {
   STACK_TRACE("TransportLayerSecurity::freeEverythingShutdown");
   this->getOpenSSLData().freeSession();
+}
+
+void TransportLayerSecurity::initializeAdditionalCertificatesWithErrorChecks(
+  bool crashOnFail
+) {
+  STACK_TRACE(
+    "TransportLayerSecurity::"
+    "initializeAdditionalCertificatesWithErrorChecks"
+  );
+  bool success = this->initializeAdditionalCertificates();
+  if (success) {
+    return;
+  }
+  // We failed to load the key-certificate pairs.
+  if (crashOnFail) {
+    global.fatal
+    << "Failed to load all additional key-certificate pairs. "
+    << global.fatal;
+  } else {
+    global
+    << Logger::red
+    << "Failed to load all additional key-certificate pairs."
+    << Logger::endL;
+    global
+    << Logger::purple
+    << "Continuing as requested; additional web sites will not be served."
+    << Logger::endL;
+    global.web.actAsWebServerOnlyForTheseHosts.clear();
+  }
 }
 
 bool TransportLayerSecurity::initializeAdditionalCertificates() {
@@ -175,7 +210,9 @@ bool TransportLayerSecurity::initializeAdditionalCertificates() {
     configurationTransport.makeFromAdditionalKeyAndCertificate(
       configuration.privateKeyFile, configuration.certificateFile
     );
-    newSSLServer.initializeOneCertificate(configurationTransport, false);
+    if (!newSSLServer.initializeOneCertificate(configurationTransport, false)) {
+      return false;
+    }
   }
   return true;
 }

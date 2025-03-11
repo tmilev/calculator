@@ -54,7 +54,6 @@ public:
   // One context per program as per ssl documetnation.
   static SSL_CTX* contextGlobal;
   static const SSL_METHOD* methodGlobal;
-  TransportLayerSecurityConfiguration configuration;
   TransportLayerSecurity* owner;
   std::string name;
   int errorCode;
@@ -116,7 +115,6 @@ public:
     std::stringstream* commentsOnFailure, std::stringstream* commentsGeneral
   );
   bool initializeSSLKeyFilesSelfSignedCreateOnDemand();
-  bool hasCertificateFiles();
 };
 
 class TransportLayerSecurityServer;
@@ -691,6 +689,9 @@ public:
   bool flagBuiltInTLSAvailable;
   TransportLayerSecurityOpenSSL openSSLData;
   TransportLayerSecurityServer server;
+  // The configuration of the primary server connection.
+  // Either equal to the selfSigned or the official configuration.
+  TransportLayerSecurityConfiguration primaryServerConfiguration;
   List<char> readBuffer;
   List<char> writeBuffer;
   int readBufferStandardSize;

@@ -90,7 +90,8 @@ void TransportLayerSecurityOpenSSL::initializeSSLLibrary() {
 bool TransportLayerSecurityOpenSSL::
 initializeSSLKeyFilesSelfSignedCreateOnDemand() {
   STACK_TRACE(
-    "TransportLayerSecurityOpenSSL::initializeSSLKeyFilesSelfSignedCreateOnDemand"
+    "TransportLayerSecurityOpenSSL::"
+    "initializeSSLKeyFilesSelfSignedCreateOnDemand"
   );
   if (!global.flagSSLAvailable) {
     return false;
@@ -189,20 +190,10 @@ void TransportLayerSecurityOpenSSL::initializeSSL(bool isServer) {
 #endif // MACRO_use_open_ssl
 }
 
-bool TransportLayerSecurityOpenSSL::hasCertificateFiles() {
-  return
-  this->configuration.certificateFileNamePhysical != "" &&
-  this->configuration.privateKeyFileNamePhysical != "";
-}
-
 bool TransportLayerSecurityOpenSSL::initializeOneCertificate(
   TransportLayerSecurityConfiguration& input, bool isPrimary
 ) {
   STACK_TRACE("TransportLayerSecurityOpenSSL::initializeOneCertificate");
-  if (!this->hasCertificateFiles()) {
-    global << Logger::red << "Certificate files are missing. " << Logger::endL;
-    return false;
-  }
   if (!input.keysExist()) {
     global
     << Logger::red
@@ -247,7 +238,6 @@ bool TransportLayerSecurityOpenSSL::initializeOneCertificate(
       << Logger::endL;
     }
   }
-  this->configuration = input;
 #ifdef MACRO_use_open_ssl
   global << Logger::green << "SSL is available." << Logger::endL;
   if (
@@ -309,7 +299,9 @@ bool TransportLayerSecurityOpenSSL::initializeOneCertificate(
   global.flagCertificatesAreOfficiallySigned = true;
 #else
   global << Logger::red << "Openssl not available." << Logger::endL;
+  return false;
 #endif // MACRO_use_open_ssl
+  return true;
 }
 
 void TransportLayerSecurityOpenSSL::initializeSSLServer() {

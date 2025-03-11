@@ -129,19 +129,38 @@ void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
     this->official.makeOfficialKeyAndCertificate();
     this->selfSigned.makeSelfSignedKeyAndCertificate();
     this->openSSLData.initializeSSLServer();
-    if (!this->openSSLData.hasCertificateFiles()) {
+    if (this->official.keysExist()) {
+      global
+      << Logger::green
+      << "Found official certificates."
+      << Logger::endL;
+      this->primaryServerConfiguration = this->official;
+    } else {
       global
       << Logger::red
       << "Official certificates not found. Trying self-signed ones. "
       << Logger::endL;
-      this->openSSLData.initializeSSLKeyFilesSelfSignedCreateOnDemand();
+      this->primaryServerConfiguration = this->selfSigned;
+      if (!this->primaryServerConfiguration.keysExist()) {
+        global
+        << Logger::purple
+        << "Couldn't find the self-singed certificates: ["
+        << this->primaryServerConfiguration.privateKeyFileNamePhysical
+        << "] and ["
+        << this->primaryServerConfiguration.privateKeyFileNamePhysical
+        << "]. Let me try to generate them for you. "
+        << Logger::endL;
+        this->openSSLData.initializeSSLKeyFilesSelfSignedCreateOnDemand();
+      }
     }
     bool success =
-    this->openSSLData.initializeOneCertificate(this->official, true);
+    this->openSSLData.initializeOneCertificate(
+      this->primaryServerConfiguration, true
+    );
     if (success) {
       global
       << Logger::green
-      << "Successfully loaded official certificates."
+      << "Successfully loaded the certificates."
       << Logger::endL;
     } else {
       global.fatal

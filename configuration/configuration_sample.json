@@ -36,5 +36,6 @@
   "LaTeX-materials/":"../LaTeX-materials/",
   "slides-video/":"../slides-video/",
   "freecalc/":"../freecalc/",
-  "favicon.ico":"calculator-html/favicon.ico"
+  "favicon.ico":"calculator-html/favicon.ico",
+  "openSSLSubject":"/C=CA/ST=ON/L=MyTown/O=MyOrganization/OU=none/CN=localhost/emailAddress=myemail@gmail.com"
 }

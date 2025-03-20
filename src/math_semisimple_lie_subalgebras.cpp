@@ -7094,7 +7094,7 @@ void ArbitrarySubstitutionsProvider::computeArbitrarySubstitutions(
 ) {
   if (
     this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf > 0 &&
-    recursionDepth %
+    (recursionDepth - 1) %
     this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf ==
     0
   ) {
@@ -7121,12 +7121,12 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
     maximumMonomialOperations = 2000;
   }
   DynkinType& embeddedType = this->weylNonEmbedded->dynkinType;
+  this->configuredSystemToSolve.substitutionsProvider.
+  oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf =
+  3;
   if (embeddedType.getRank() == 1) {
     maximumPolynomialDivisions = 2000;
     maximumMonomialOperations = 10000;
-    this->configuredSystemToSolve.substitutionsProvider.
-    oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf =
-    2;
     this->configuredSystemToSolve.substitutionsProvider.
     flagChooseSmallestIndexVariableFirst =
     true;
@@ -7140,6 +7140,7 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   // Polynomial systems that were solved manually (with the help of computer):
   // 1. A^{32}_1+A^{8}_1 in E_8.
   // 2. A^24_1 in E_8.
+  // 3. A^{20}_1+A^{4}_1 in E_8
   if (embeddingLieAlgebraName == "A^{15}_1") {
     maximumPolynomialDivisions = 200;
     maximumMonomialOperations = 1000;

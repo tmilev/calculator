@@ -1591,6 +1591,9 @@ bool CodeFormatter::Element::shouldAddExtraLineInTopLevel(
   ) {
     return true;
   }
+  if (this->type == CodeFormatter::Element::EnumDefinition) {
+    return true;
+  }
   return false;
 }
 

@@ -157,6 +157,7 @@ enum DatabaseType {
   // No data can be stored in the system.
   noDatabaseEveryoneIsAdmin
 };
+
 // All global objects are either
 // 1) fields of variable:  GlobalVariables& global
 // or

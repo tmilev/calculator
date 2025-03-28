@@ -104,8 +104,9 @@ enum CandidateSubalgebraStatus {
   previouslyRealizedAsADirectSummand,
   // Bad user input (user error)
   // or bad precomputed data (programming error).
-  corrupt
+  corrupt,
 };
+
 class CandidateSemisimpleSubalgebra {
   friend std::ostream& operator<<(
     std::ostream& output, const CandidateSemisimpleSubalgebra& candidate

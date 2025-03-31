@@ -158,12 +158,12 @@ void LittelmannPath::actByEAlpha(int indexAlpha) {
   }
   int precedingIndex = 0;
   for (int i = 0; i <= indexMinimalScalarProduct; i ++) {
-    Rational tempScalar =
+    Rational scalar =
     weylGroup.rootScalarCartanRoot(this->waypoints[i], alphaScaled);
-    if (tempScalar >= minimalScalarProduct + 1) {
+    if (scalar >= minimalScalarProduct + 1) {
       precedingIndex = i;
     }
-    if (tempScalar < minimalScalarProduct + 1) {
+    if (scalar < minimalScalarProduct + 1) {
       break;
     }
   }
@@ -1088,18 +1088,18 @@ LittelmannPath::LittelmannPath(const LittelmannPath& other) {
 bool LittelmannPath::isAdaptedString(
   MonomialTensor<int, HashFunctions::hashFunction>& inputString
 ) {
-  LittelmannPath tempPath = *this;
-  LittelmannPath tempPath2;
+  LittelmannPath path1 = *this;
+  LittelmannPath path2;
   for (int i = 0; i < inputString.generatorsIndices.size; i ++) {
     for (int k = 0; k < inputString.powers[i]; k ++) {
-      tempPath.actByEAlpha(- inputString.generatorsIndices[i] - 1);
+      path1.actByEAlpha(- inputString.generatorsIndices[i] - 1);
     }
-    if (tempPath.isEqualToZero()) {
+    if (path1.isEqualToZero()) {
       return false;
     }
-    tempPath2 = tempPath;
-    tempPath2.actByEAlpha(- inputString.generatorsIndices[i] - 1);
-    if (!tempPath2.isEqualToZero()) {
+    path2 = path1;
+    path2.actByEAlpha(- inputString.generatorsIndices[i] - 1);
+    if (!path2.isEqualToZero()) {
       return false;
     }
   }
@@ -1168,14 +1168,14 @@ std::string LittelmannPath::toString(
   if (includeDominance) {
     out << " ";
     for (int i = 0; i < this->owner->getDimension(); i ++) {
-      LittelmannPath tempP = *this;
-      tempP.actByEFDisplayIndex(i + 1);
-      if (!tempP.isEqualToZero()) {
+      LittelmannPath path = *this;
+      path.actByEFDisplayIndex(i + 1);
+      if (!path.isEqualToZero()) {
         out << "e_{" << i + 1 << "}";
       }
-      tempP = *this;
-      tempP.actByEFDisplayIndex(- i - 1);
-      if (!tempP.isEqualToZero()) {
+      path = *this;
+      path.actByEFDisplayIndex(- i - 1);
+      if (!path.isEqualToZero()) {
         out << "e_{" << - i - 1 << "},";
       }
     }

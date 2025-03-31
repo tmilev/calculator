@@ -1389,17 +1389,17 @@ void LargeIntegerUnsigned::leastCommonMultiple(
   const LargeIntegerUnsigned& b,
   LargeIntegerUnsigned& output
 ) {
-  LargeIntegerUnsigned tempUI;
-  LargeIntegerUnsigned tempUI2;
+  LargeIntegerUnsigned divisor;
+  LargeIntegerUnsigned product;
   if (a.isEqualToZero() || b.isEqualToZero()) {
     global.fatal
     << "Call lcm on zero elements is not allowed. "
     << global.fatal;
   }
-  LargeIntegerUnsigned::greatestCommonDivisor(a, b, tempUI);
-  a.multiplyBy(b, tempUI2);
-  output = tempUI2;
-  output.dividePositive(tempUI, output, tempUI2);
+  LargeIntegerUnsigned::greatestCommonDivisor(a, b, divisor);
+  a.multiplyBy(b, product);
+  output = product;
+  output.dividePositive(divisor, output, product);
   if (output.isEqualToZero()) {
     global.fatal
     << "Least common multiple not allowed to be zero. "
@@ -1441,9 +1441,9 @@ void LargeIntegerUnsigned::assignFactorial(unsigned int x) {
   this->makeOne();
   List<unsigned int> primesBelowX;
   LargeIntegerUnsigned::getPrimesEratosthenesSieve(x, primesBelowX);
-  LargeIntegerUnsigned tempInt;
-  LargeIntegerUnsigned tempOne;
-  tempOne.makeOne();
+  LargeIntegerUnsigned integerConverter;
+  LargeIntegerUnsigned one;
+  one.makeOne();
   for (int i = 0; i < primesBelowX.size; i ++) {
     unsigned int prime = primesBelowX.objects[i];
     unsigned int powerOfThePrime = 0;
@@ -1452,9 +1452,9 @@ void LargeIntegerUnsigned::assignFactorial(unsigned int x) {
       powerOfThePrime += x / currentPower;
       currentPower *= prime;
     } while (currentPower <= x);
-    tempInt.assignShiftedUInt(prime, 0);
-    MathRoutines::raiseToPower(tempInt, powerOfThePrime, tempOne);
-    *this *= tempInt;
+    integerConverter.assignShiftedUInt(prime, 0);
+    MathRoutines::raiseToPower(integerConverter, powerOfThePrime, one);
+    *this *= integerConverter;
   }
 }
 
@@ -2088,24 +2088,24 @@ bool Rational::tryToAddQuickly(int otherNumerator, int otherDenominator) {
   ) {
     return false;
   }
-  int N =
+  int n =
   this->numeratorShort * otherDenominator +
   this->denominatorShort * otherNumerator;
-  int D = this->denominatorShort * otherDenominator;
-  if (N == 0) {
+  int d = this->denominatorShort * otherDenominator;
+  if (n == 0) {
     this->numeratorShort = 0;
     this->denominatorShort = 1;
     MacroIncrementCounter(Rational::totalSmallAdditions);
     return true;
   }
   int commonDivisor = 0;
-  if (N > 0) {
-    commonDivisor = Rational::greatestCommonDivisor(N, D);
+  if (n > 0) {
+    commonDivisor = Rational::greatestCommonDivisor(n, d);
   } else {
-    commonDivisor = Rational::greatestCommonDivisor(- N, D);
+    commonDivisor = Rational::greatestCommonDivisor(- n, d);
   }
-  this->numeratorShort = N / commonDivisor;
-  this->denominatorShort = D / commonDivisor;
+  this->numeratorShort = n / commonDivisor;
+  this->denominatorShort = d / commonDivisor;
   MacroIncrementCounter(Rational::totalSmallAdditions);
   return true;
 }
@@ -2334,7 +2334,7 @@ Rational Rational::nChooseK(const Rational& n, int k) {
   return result;
 }
 
-Rational Rational::NtoTheKth(int n, int k) {
+Rational Rational::nToTheKth(int n, int k) {
   Rational result = n;
   result.raiseToPower(k);
   return result;

@@ -788,7 +788,7 @@ public:
   static Rational nChooseK(const Rational& n, int k);
   static Rational factorial(int n);
   static Rational twoToTheNth(int n);
-  static Rational NtoTheKth(int n, int k);
+  static Rational nToTheKth(int n, int k);
   void raiseToPower(int x);
   // Calling the following constructor on an already initialized object will
   // leak the

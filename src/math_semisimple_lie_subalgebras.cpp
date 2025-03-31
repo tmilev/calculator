@@ -296,7 +296,6 @@ std::string SubalgebraSemisimpleLieAlgebra::toString(
 ) {
   STACK_TRACE("SubalgebraSemisimpleLieAlgebra::toString");
   (void) format;
-  // avoid unused parameter warning in a portable way
   if (this->owner == nullptr) {
     return "A non-initialized subalgebra of a semisimple Lie algebra; ";
   }
@@ -508,7 +507,6 @@ std::string SemisimpleSubalgebras::getDisplayFileNameSubalgebraAbsolute(
 ) const {
   std::stringstream out;
   (void) format;
-  // avoid unused parameter warning in a portable way
   out << this->owner->fileNames.virtualFolderName();
   out
   << FileOperations::cleanUpForFileNameUse(
@@ -525,8 +523,6 @@ std::string SemisimpleSubalgebras::getDisplayFileNameSubalgebraRelative(
 ) const {
   std::stringstream out;
   (void) format;
-  // avoid unused parameter warning in a portable way
-  // out << "./";
   out
   << this->fileNamePrefix
   << FileOperations::cleanUpForFileNameUse(
@@ -543,8 +539,6 @@ std::string SemisimpleSubalgebras::getDisplayFileNameFKFTNilradicals(
 ) const {
   std::stringstream out;
   (void) format;
-  // avoid unused parameter warning in a portable way
-  // out << this->owner->toStringVirtualFolderName();
   out
   << this->fileNamePrefix
   << FileOperations::cleanUpForFileNameUse(
@@ -639,7 +633,6 @@ void SemisimpleSubalgebras::computeFolderNames(FormatExpressions& inputFormat)
 {
   STACK_TRACE("SemisimpleSubalgebras::computeFolderNames");
   (void) inputFormat;
-  // avoid unused parameter warning in a portable way
   this->checkConsistency();
   if (this->owner == nullptr) {
     global.fatal
@@ -665,7 +658,6 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
     "SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML"
   );
   (void) format;
-  // avoid unused parameter warning in a portable way
   if (!this->flagComputeNilradicals) {
     return "";
   }
@@ -1541,7 +1533,14 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasContinue() {
   while (this->incrementReturnFalseIfPastLast()) {
     reportHeader.report(this->toStringProgressReport());
     CandidateSemisimpleSubalgebra candidate;
-    this->currentSubalgebraChain.lastObject()->attemptExtension(candidate);
+    PossibleExtensionsOfSemisimpleLieSubalgebra* subalgebraBeingExtended =
+    nullptr;
+    if (this->currentSubalgebraChain.size > 0) {
+      subalgebraBeingExtended = this->currentSubalgebraChain.lastObject();
+    }
+    this->currentSubalgebraChain.lastObject()->attemptExtension(
+      candidate, subalgebraBeingExtended
+    );
     if (candidate.status != CandidateSubalgebraStatus::realized) {
       this->addNonRealizedSubalgebraIfNew(candidate);
     }
@@ -1822,7 +1821,6 @@ bool SemisimpleSubalgebras::computeStructureRealFormsSlTwos() {
       this->slTwoSubalgebras.allSubalgebras.getElement(i), i
     );
   }
-  // this->hookUpCentralizers(true);
   this->wConjecture.computeAfterSubalgebras(*this);
   return true;
 }
@@ -2162,20 +2160,9 @@ computeHsAndHsScaledToActByTwoFromComponents() {
   }
 }
 
-void CandidateSemisimpleSubalgebra::setupInductionHistory(
-  const CandidateSemisimpleSubalgebra& baseSubalgebra,
-  Vector<Rational>& newHRescaledToActByTwo
+CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::attemptToRealize(
+  PossibleExtensionsOfSemisimpleLieSubalgebra* currentExtension
 ) {
-  if (this->getRank() == 1) {
-    this->indexInSlTwos = - 1;
-    this->owner->slTwoSubalgebras.containsSl2WithGivenH(
-      newHRescaledToActByTwo, &this->indexInSlTwos
-    );
-  }
-  this->indexInducedFrom = baseSubalgebra.indexInOwner;
-}
-
-CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::attemptToRealize() {
   STACK_TRACE(
     "CandidateSemisimpleSubalgebra::"
     "attemptToRealize"
@@ -2198,7 +2185,7 @@ CandidateSubalgebraStatus CandidateSemisimpleSubalgebra::attemptToRealize() {
     this->status = CandidateSubalgebraStatus::unrealizableNonFittingCharacter;
     return this->status;
   }
-  this->attemptToSolveSystem(false, false);
+  this->attemptToSolveSystem(false, false, currentExtension);
   if (
     this->status ==
     CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions
@@ -2872,7 +2859,9 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
         toStringCommaDelimited()
         << ". If the type was realizable, those would have to contain "
         << "the absolute Dynkin indices of sl(2) "
-        << "subalgebras of the original summand. "
+        << "subalgebras of the original summand, which are: "
+        << dynkinIndicesCurrentSummand.toStringCommaDelimited()
+        << ". "
         << "However, that is not the case. "
         << "I can therefore conclude that the Dynkin type "
         << currentType.toString()
@@ -3474,7 +3463,8 @@ std::string PossibleExtensionsOfSemisimpleLieSubalgebra::toString() {
 }
 
 void PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension(
-  CandidateSemisimpleSubalgebra& newCandidate
+  CandidateSemisimpleSubalgebra& newCandidate,
+  PossibleExtensionsOfSemisimpleLieSubalgebra* currentExtension
 ) {
   STACK_TRACE(
     "PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension"
@@ -3534,7 +3524,7 @@ void PossibleExtensionsOfSemisimpleLieSubalgebra::attemptExtension(
     newCandidate = precomputedCandidate;
     return;
   }
-  newCandidate.attemptToRealize();
+  newCandidate.attemptToRealize(currentExtension);
 }
 
 bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
@@ -3617,22 +3607,22 @@ void DynkinSimpleType::getAutomorphismActingOnVectorColumn(
         output.addMonomial(MonomialMatrix(2, 0), 1);
         output.addMonomial(MonomialMatrix(3, 3), 1);
       } else if (autoIndex == 2) {
-        // Permutation (23), AutoIndex =2
+        // Permutation (23), AutoIndex = 2
         output.addMonomial(MonomialMatrix(0, 0), 1);
         output.addMonomial(MonomialMatrix(2, 3), 1);
         output.addMonomial(MonomialMatrix(3, 2), 1);
       } else if (autoIndex == 3) {
-        // Permutation (12)(23)=(123), AutoIndex =3
+        // Permutation (12)(23)=(123), AutoIndex = 3
         output.addMonomial(MonomialMatrix(0, 2), 1);
         output.addMonomial(MonomialMatrix(2, 3), 1);
         output.addMonomial(MonomialMatrix(3, 0), 1);
       } else if (autoIndex == 4) {
-        // Permutation (23)(12)=(132), AutoIndex =4
+        // Permutation (23)(12)=(132), AutoIndex = 4
         output.addMonomial(MonomialMatrix(0, 3), 1);
         output.addMonomial(MonomialMatrix(2, 0), 1);
         output.addMonomial(MonomialMatrix(3, 2), 1);
       } else if (autoIndex == 5) {
-        // Permutation (12)(23)(12)=(13), AutoIndex =5
+        // Permutation (12)(23)(12)=(13), AutoIndex = 5
         output.addMonomial(MonomialMatrix(0, 3), 1);
         output.addMonomial(MonomialMatrix(2, 2), 1);
         output.addMonomial(MonomialMatrix(3, 0), 1);
@@ -3874,7 +3864,7 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
   const List<Vector<Rational> >& centralizerOfOldHs
 ) const {
   STACK_TRACE("CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo");
-  // check if input weight is maximally dominant:
+  // Check if input weight is maximally dominant.
   Rational scalarProduct;
   int indexHNew = *rootInjections.lastObject();
   for (const Vector<Rational>& centralizingPositiveRoot : centralizerOfOldHs) {
@@ -3960,13 +3950,13 @@ bool CandidateSemisimpleSubalgebra::isWeightSystemSpaceIndex(
 }
 
 void CandidateSemisimpleSubalgebra::attemptToSolveSystem(
-  bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
+  bool attemptToChooseCentalizer,
+  bool allowNonPolynomialSystemFailure,
+  PossibleExtensionsOfSemisimpleLieSubalgebra* currentExtension
 ) {
   STACK_TRACE("CandidateSemisimpleSubalgebra::attemptToSolveSystem");
   this->flagInternalInitializationAndVerificationComplete = false;
   this->computeAndVerifyFromKnownGeneratorsAndHsPrepare(nullptr);
-  ChevalleyGenerator currentGenerator;
-  ChevalleyGenerator currentOppositeGenerator;
   this->involvedNegativeGenerators.setSize(
     this->cartanElementsScaledToActByTwo.size
   );
@@ -3974,57 +3964,75 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystem(
     this->cartanElementsScaledToActByTwo.size
   );
   for (int i = 0; i < this->cartanElementsScaledToActByTwo.size; i ++) {
-    List<ChevalleyGenerator>& currentInvolvedPositiveGenerators =
-    this->involvedPositiveGenerators[i];
-    List<ChevalleyGenerator>& currentInvolvedNegativeGenerators =
-    this->involvedNegativeGenerators[i];
-    currentInvolvedNegativeGenerators.setExpectedSize(
-      this->getAmbientWeyl().getDimension() * 2
-    );
-    currentInvolvedPositiveGenerators.setExpectedSize(
-      this->getAmbientWeyl().getDimension() * 2
-    );
-    currentInvolvedNegativeGenerators.setSize(0);
-    currentInvolvedPositiveGenerators.setSize(0);
-    for (int j = 0; j < this->getAmbientWeyl().rootSystem.size; j ++) {
-      int indexCurrentGenerator =
-      this->getAmbientSemisimpleLieAlgebra().getGeneratorFromRootIndex(j);
-      int indexOfOppositeGenerator =
-      this->getAmbientSemisimpleLieAlgebra().getGeneratorIndexFromRoot(
-        - this->getAmbientWeyl().rootSystem[j]
-      );
-      currentGenerator.makeGenerator(
-        *this->owner->owner, indexCurrentGenerator
-      );
-      currentOppositeGenerator.makeGenerator(
-        *this->owner->owner, indexOfOppositeGenerator
-      );
-      if (
-        this->isWeightSystemSpaceIndex(
-          i, this->getAmbientWeyl().rootSystem[j]
-        )
-      ) {
-        currentInvolvedPositiveGenerators.addOnTop(currentGenerator);
-        currentInvolvedNegativeGenerators.addOnTop(currentOppositeGenerator);
-      }
-    }
-    if (currentInvolvedNegativeGenerators.size == 0) {
-      if (currentInvolvedPositiveGenerators.size != 0) {
-        global.fatal
-        << "The number of involved negative generators is different "
-        << "from the number of involved positive generators. "
-        << global.fatal;
-      }
-      this->status =
-      CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions;
+    this->computeInvolvedGeneratorsOfIndex(i);
+    if (
+      this->status ==
+      CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions
+    ) {
       return;
     }
   }
-  this->flagUsedInducingSubalgebraRealization = true;
+  this->flagUsedInducingSubalgebraRealization = false;
+  if (currentExtension != nullptr) {
+    this->flagUsedInducingSubalgebraRealization = true;
+    this->indexInducedFrom = currentExtension->realizedBase->indexInOwner;
+  }
   this->attemptToSolveSystemPart2(
     attemptToChooseCentalizer, allowNonPolynomialSystemFailure
   );
   this->computeAndVerifyFromKnownGeneratorsAndHs();
+}
+
+void CandidateSemisimpleSubalgebra::computeInvolvedGeneratorsOfIndex(
+  int index
+) {
+  STACK_TRACE(
+    "CandidateSemisimpleSubalgebra::computeInvolvedGeneratorsOfIndex"
+  );
+  List<ChevalleyGenerator>& involvedPositiveGenerators =
+  this->involvedPositiveGenerators[index];
+  List<ChevalleyGenerator>& involvedNegativeGenerators =
+  this->involvedNegativeGenerators[index];
+  involvedNegativeGenerators.setExpectedSize(
+    this->getAmbientWeyl().getDimension() * 2
+  );
+  involvedPositiveGenerators.setExpectedSize(
+    this->getAmbientWeyl().getDimension() * 2
+  );
+  involvedNegativeGenerators.setSize(0);
+  involvedPositiveGenerators.setSize(0);
+  ChevalleyGenerator currentGenerator;
+  ChevalleyGenerator currentOppositeGenerator;
+  for (int j = 0; j < this->getAmbientWeyl().rootSystem.size; j ++) {
+    int generatorIndex =
+    this->getAmbientSemisimpleLieAlgebra().getGeneratorFromRootIndex(j);
+    int oppositeGeneratorIndex =
+    this->getAmbientSemisimpleLieAlgebra().getGeneratorIndexFromRoot(
+      - this->getAmbientWeyl().rootSystem[j]
+    );
+    currentGenerator.makeGenerator(*this->owner->owner, generatorIndex);
+    currentOppositeGenerator.makeGenerator(
+      *this->owner->owner, oppositeGeneratorIndex
+    );
+    if (
+      this->isWeightSystemSpaceIndex(
+        index, this->getAmbientWeyl().rootSystem[j]
+      )
+    ) {
+      involvedPositiveGenerators.addOnTop(currentGenerator);
+      involvedNegativeGenerators.addOnTop(currentOppositeGenerator);
+    }
+  }
+  if (involvedNegativeGenerators.size == 0) {
+    if (involvedPositiveGenerators.size != 0) {
+      global.fatal
+      << "The number of involved negative generators is different "
+      << "from the number of involved positive generators. "
+      << global.fatal;
+    }
+    this->status =
+    CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions;
+  }
 }
 
 bool CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs() {
@@ -4049,6 +4057,88 @@ bool CandidateSemisimpleSubalgebra::checkGeneratorsBracketToHs() {
       return false;
     }
   }
+  return true;
+}
+
+bool CandidateSemisimpleSubalgebra::candidateInvolvesAllowedGeneratorsOnly(
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>& candidate,
+  List<ChevalleyGenerator>& allowedSummands
+) {
+  STACK_TRACE(
+    "CandidateSemisimpleSubalgebra::candidateInvolvesAllowedGeneratorsOnly"
+  );
+  for (ChevalleyGenerator& summand : candidate.monomials) {
+    if (!allowedSummands.contains(summand)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CandidateSemisimpleSubalgebra::induceUnknownsFromBaseSubalgebra(
+  int indexCurrentRoot, int indexNewRoot
+) {
+  STACK_TRACE(
+    "CandidateSemisimpleSubalgebra::induceUnknownsFromBaseSubalgebra"
+  );
+  if (
+    !this->flagUsedInducingSubalgebraRealization ||
+    this->indexInducedFrom == - 1
+  ) {
+    // Not using the subalgebra being extended to higher rank.
+    return false;
+  }
+  if (indexCurrentRoot == indexNewRoot) {
+    // This is the only root not present subalgebra being extended
+    return false;
+  }
+  CandidateSemisimpleSubalgebra& inducer =
+  this->owner->subalgebras.values[this->indexInducedFrom].content;
+  if (inducer.status != CandidateSubalgebraStatus::realized) {
+    // The subalgebra from which we are inducing has not been realized yet.
+    return false;
+  }
+  int preimageIndex =
+  DynkinType::getIndexPreimageFromRootInjection(
+    indexCurrentRoot, this->rootInjectionsFromInducer
+  );
+  Vector<Rational> inducerCartanElement =
+  inducer.cartanElementsScaledToActByTwo[preimageIndex];
+  Vector<Rational> targetCartanElement =
+  this->cartanElementsScaledToActByTwo[indexCurrentRoot];
+  if (inducerCartanElement != targetCartanElement) {
+    // The cartan element of the inducing subalgebra does
+    // not equal the desired Cartan element.
+    // This is possible if the two are different conjugates
+    // in the same Weyl orbit.
+    // Recall that to guarantee uniqueness of our subalgebras,
+    // we act with the Weyl group on all elements of the cartan simultaneously
+    // which can shuffle the order of the vectors.
+    return false;
+  }
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>& negativeCandidate =
+  inducer.negativeGenerators[preimageIndex];
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>& positiveCandidate =
+  inducer.positiveGenerators[preimageIndex];
+  if (
+    !this->candidateInvolvesAllowedGeneratorsOnly(
+      negativeCandidate, this->involvedNegativeGenerators[indexCurrentRoot]
+    ) ||
+    !this->candidateInvolvesAllowedGeneratorsOnly(
+      positiveCandidate, this->involvedPositiveGenerators[indexCurrentRoot]
+    )
+  ) {
+    // The candidate involves chevalley generators that don't have
+    // the right weights with respect to the Cartan.
+    return false;
+  }
+  // The Cartan element of the inducing subalgebra equals
+  // the Cartan element of the current subalgebra.
+  // We can reuse the realizations of the inducing subalgebra.
+  this->unknownNegativeGenerators[indexCurrentRoot] = negativeCandidate;
+  // <-implicit type conversion from base field to polynomial here
+  this->unknownPositiveGenerators[indexCurrentRoot] = positiveCandidate;
+  // <-implicit type conversion from base field to polynomial here
   return true;
 }
 
@@ -4148,26 +4238,17 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
   if (this->flagUsedInducingSubalgebraRealization) {
     indexNewRoot = *this->rootInjectionsFromInducer.lastObject();
   }
+  bool foundInduction = false;
   for (int i = 0; i < this->involvedNegativeGenerators.size; i ++) {
-    if (this->flagUsedInducingSubalgebraRealization) {
-      CandidateSemisimpleSubalgebra& inducer =
-      this->owner->subalgebras.values[this->indexInducedFrom].content;
-      if (
-        inducer.status == CandidateSubalgebraStatus::realized &&
-        i != indexNewRoot
-      ) {
-        int preimageIndex =
-        DynkinType::getIndexPreimageFromRootInjection(
-          i, this->rootInjectionsFromInducer
-        );
-        this->unknownNegativeGenerators[i] =
-        inducer.negativeGenerators[preimageIndex];
-        // <-implicit type conversion from base field to polynomial here
-        this->unknownPositiveGenerators[i] =
-        inducer.positiveGenerators[preimageIndex];
-        // <-implicit type conversion from base field to polynomial here
-        continue;
-      }
+    if (
+      !attemptToChooseCentalizer &&
+      this->flagUsedInducingSubalgebraRealization &&
+      this->induceUnknownsFromBaseSubalgebra(i, indexNewRoot)
+    ) {
+      // Using the negative generator computed in the base subalgebra that we
+      // are extending.
+      foundInduction = true;
+      continue;
     }
     this->getGenericNegativeGeneratorLinearCombination(
       i, this->unknownNegativeGenerators[i]
@@ -4175,6 +4256,9 @@ bool CandidateSemisimpleSubalgebra::prepareSystem(
     this->getGenericPositiveGeneratorLinearCombination(
       i, this->unknownPositiveGenerators[i]
     );
+  }
+  if (!foundInduction) {
+    this->flagUsedInducingSubalgebraRealization = false;
   }
   if (this->unknownCartanCentralizerBasis.size > 0) {
     Matrix<Polynomial<AlgebraicNumber> > centralizerCartanVariables;
@@ -4290,7 +4374,7 @@ void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
     << " does not contain any root, which is impossible. "
     << global.fatal;
   }
-  // positive-positive generator Serre relations
+  // Positive-positive generator Serre relations
   mustBeZero = this->unknownPositiveGenerators[rightIndex];
   for (int k = 0; k < alphaStringLength + 1; k ++) {
     this->getAmbientSemisimpleLieAlgebra().lieBracket(
@@ -4298,7 +4382,7 @@ void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
     );
   }
   this->addToSystem(mustBeZero);
-  // negative-negative generator Serre relations
+  // Negative-negative generator Serre relations
   mustBeZero = this->unknownNegativeGenerators[rightIndex];
   for (int k = 0; k < alphaStringLength + 1; k ++) {
     this->getAmbientSemisimpleLieAlgebra().lieBracket(
@@ -4351,7 +4435,11 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystemPart2(
     CandidateSubalgebraStatus::unrealizableNoSerreSystemSolutions &&
     this->flagUsedInducingSubalgebraRealization
   ) {
-    // Second try.
+    // We have used generators from the inducing subalgebra.
+    // This has the chance of accidentally making the serre relations
+    // unsolvable - please figure out the mathematical details of why
+    // and document here.
+    // Therefore, let's solve the system again without that optimization.
     this->flagUsedInducingSubalgebraRealization = false;
     this->attemptToSolveSystemPart2(
       attemptToChooseCentalizer, allowNonPolynomialSystemFailure
@@ -4384,7 +4472,11 @@ bool CandidateSemisimpleSubalgebra::checkDimensionOfSubalgebra(
     << this->basis.size
     << ", must be "
     << this->weylNonEmbedded->dynkinType.getLieAlgebraDimension()
-    << ". The subalgebra is "
+    << ". "
+    << "The subalgebras generated is: <br>"
+    << this->basis.toStringCommaDelimited()
+    << "<br>"
+    << "The subalgebra is "
     << this->toString(nullptr, false)
     << "<br>Involved generators: "
     << this->involvedNegativeGenerators.toString()
@@ -6291,7 +6383,6 @@ void Vector<Coefficient>::perturbNormalRelativeToVectorsInGeneralPosition(
       }
     }
   }
-  //  return true;
 }
 
 void NilradicalCandidate::processMe() {
@@ -6519,7 +6610,6 @@ void CandidateSemisimpleSubalgebra::enumerateNilradicalsRecursively(
       newSelection[i] = 1;
       this->enumerateNilradicalsRecursively(newSelection, logStream);
       break;
-      // newSelection
     }
   }
   if (found) {
@@ -7635,14 +7725,12 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   currentString = this->preferredAmbientSimpleBasis.toString();
   std::string virtualPath = "";
   std::string htmlPathServer = "";
-  // bool usePNG = false;
   bool useHtml = true;
   bool useLatex = false;
   virtualPath = this->owner->fileNames.virtualFolderName() + "sl2s/";
   htmlPathServer =
   this->owner->fileNames.displayFolderName("../../") + "sl2s/";
   if (virtualPath == "" || htmlPathServer == "") {
-    // usePNG = false;
     useHtml = false;
   }
   if (useHtml) {
@@ -9055,13 +9143,10 @@ std::string CandidateSemisimpleSubalgebra::toStringModuleDecompositionLaTeX(
     return "";
   }
   std::stringstream out;
-  // out << "Isotypic module decomposition over primal subalgebra (total " <<
-  // this->modules.size << " isotypic components). ";
   FormatExpressions characterFormat;
   if (!this->characterFormat.isZeroPointer()) {
     characterFormat = this->characterFormat.getElementConst();
   }
-  // bool useModuleIndex = false;
   out
   << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}"
   << "\\usepackage{multirow}\\begin{document}";
@@ -10541,7 +10626,6 @@ std::string CandidateSemisimpleSubalgebra::toStringSystemPart2(
   FormatExpressions* format
 ) const {
   (void) format;
-  // avoid unused parameter warning in a portable way
   STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSystemPart2");
   std::stringstream out;
   out
@@ -11148,7 +11232,7 @@ void CandidateSemisimpleSubalgebra::adjustCentralizerAndRecompute(
   if (!this->flagCentralizerTypeIsComputed) {
     return;
   }
-  this->attemptToSolveSystem(true, allowNonPolynomialSystemFailure);
+  this->attemptToSolveSystem(true, allowNonPolynomialSystemFailure, nullptr);
   this->computeCentralizerIsWellChosen();
 }
 
@@ -11414,7 +11498,6 @@ void CandidateSemisimpleSubalgebra::computeCartanOfCentralizer() {
     this->cartanOfCentralizer[i] = centralizerH;
     this->cartanOfCentralizer[i].scaleNormalizeFirstNonZero();
   }
-  // //////////////
   this->bilinearFormSimplePrimal = this->weylNonEmbedded->cartanSymmetric;
   Matrix<Rational> centralizerPart;
   Matrix<Rational> matrixFundamentalCoordinatesSimple;

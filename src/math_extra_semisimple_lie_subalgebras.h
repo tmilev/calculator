@@ -8,6 +8,7 @@
 class SemisimpleSubalgebras;
 class CandidateSemisimpleSubalgebra;
 class SubalgebraSemisimpleLieAlgebra;
+class PossibleExtensionsOfSemisimpleLieSubalgebra;
 
 class NilradicalCandidate {
 public:
@@ -340,11 +341,9 @@ public:
     const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
     elementThatMustVanish
   );
-  void setupInductionHistory(
-    const CandidateSemisimpleSubalgebra& baseSubalgebra,
-    Vector<Rational>& newHRescaledToActByTwo
+  CandidateSubalgebraStatus attemptToRealize(
+    PossibleExtensionsOfSemisimpleLieSubalgebra* currentExtension
   );
-  CandidateSubalgebraStatus attemptToRealize();
   bool getCentralizerTypeIfComputableAndKnown(
     const DynkinType& input, DynkinType& output
   );
@@ -438,7 +437,13 @@ public:
     const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output
   ) const;
   void attemptToSolveSystem(
-    bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
+    bool attemptToChooseCentalizer,
+    bool allowNonPolynomialSystemFailure,
+    PossibleExtensionsOfSemisimpleLieSubalgebra* currentExtension
+  );
+  void computeInvolvedGeneratorsOfIndex(int index);
+  bool canReusePreviouslyFoundRealization(
+    int index, PossibleExtensionsOfSemisimpleLieSubalgebra* currentExtension
   );
   void attemptToSolveSystemPart2(
     bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
@@ -446,6 +451,13 @@ public:
   CandidateSubalgebraStatus attemptToSolveSystemFinal();
   bool prepareSystem(
     bool attemptToChooseCentalizer, bool allowNonPolynomialSystemFailure
+  );
+  bool induceUnknownsFromBaseSubalgebra(
+    int indexCurrentRoot, int indexNewRoot
+  );
+  bool candidateInvolvesAllowedGeneratorsOnly(
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& candidate,
+    List<ChevalleyGenerator>& allowedSummands
   );
   void prepareSystemCentralizerCommutingRelations();
   void prepareSystemSerreRelationsForIndexPair(int leftIndex, int rightIndex);
@@ -531,7 +543,7 @@ public:
 // Encodes a possible extension of a base subalgebra
 // to a larger Semisimple Lie algebra.
 // The base is an already realized semisimple subalagebra or zero.
-struct PossibleExtensionsOfSemisimpleLieSubalgebra {
+class PossibleExtensionsOfSemisimpleLieSubalgebra {
 public:
   RealizedSemisimpleSubalgebra* realizedBase;
   SemisimpleSubalgebras* owner;
@@ -550,7 +562,10 @@ public:
   bool incrementReturnFalseIfPastLast(ProgressReport* report);
   void initializeIfNeeded();
   // Attempts to realize the extension currently being explored.
-  void attemptExtension(CandidateSemisimpleSubalgebra& newCandidate);
+  void attemptExtension(
+    CandidateSemisimpleSubalgebra& newCandidate,
+    PossibleExtensionsOfSemisimpleLieSubalgebra* currentExtension
+  );
   DynkinType& nextUnexploredDynkinType();
   List<int>& nextPossibleRootInjection();
   void computeCurrentHCandidates();

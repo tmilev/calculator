@@ -4066,9 +4066,9 @@ bool Expression::makeSumFromLinearCombination(
   const LinearCombination<Expression, Coefficient>& summands
 ) {
   STACK_TRACE("Expression::makeSumFromLinearCombination");
-  Expression oneE;
+  Expression oneExpression;
   // used to record the constant term
-  oneE.assignValue<Rational>(calculator, 1);
+  oneExpression.assignValue<Rational>(calculator, 1);
   if (summands.isEqualToZero()) {
     return this->assignValue<Rational>(calculator, 0);
   }
@@ -4077,7 +4077,7 @@ bool Expression::makeSumFromLinearCombination(
   summandsWithCoefficient.setSize(summands.size());
   for (int i = 0; i < summands.size(); i ++) {
     Expression& current = summandsWithCoefficient[i];
-    if (summands[i] == oneE) {
+    if (summands[i] == oneExpression) {
       current.assignValueWithContext(
         calculator, summands.coefficients[i], emptyContext
       );

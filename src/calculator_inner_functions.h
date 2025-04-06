@@ -720,6 +720,13 @@ public:
   static bool turnOffApproximations(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  // Converts a=b to a-b recursively in all sub-expressions.
+  // Returns true if the input was changed, false otherwise.
+  // Writes in the output value in all cases, including when it returns false.
+  static bool equalityToArithmeticExpressionRecursively(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  // Converts a=b to a-b.
   static bool equalityToArithmeticExpression(
     Calculator& calculator, const Expression& input, Expression& output
   );

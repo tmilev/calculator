@@ -250,9 +250,13 @@ bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
   if (this->basisCandidates.size == 0) {
     return true;
   }
-  this->remainderDivisionByBasis(
-    *this->basisCandidates.lastObject(), this->remainderDivision
-  );
+  if (
+    !this->remainderDivisionByBasisFailureAllowed(
+      *this->basisCandidates.lastObject(), this->remainderDivision
+    )
+  ) {
+    return false;
+  }
   if (this->limitsExceeded()) {
     return false;
   }
@@ -353,7 +357,7 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
   Coefficient quotientCoefficient = leadingCoefficient;
   quotientCoefficient /= leadingCoefficientBasis;
   if (this->flagDoLogDivision) {
-    this->divisionReport.getElement().intermediateCoeffs.addOnTop(
+    this->divisionReport.getElement().intermediateCoefficients.addOnTop(
       quotientCoefficient
     );
   }
@@ -459,6 +463,19 @@ void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
   Polynomial<Coefficient>& outputRemainder,
   int basisIndexToIgnore
 ) {
+  this->remainderDivisionByBasisFailureAllowed(
+    input, outputRemainder, basisIndexToIgnore, false
+  );
+}
+
+template <class Coefficient>
+bool GroebnerBasisComputation<Coefficient>::
+remainderDivisionByBasisFailureAllowed(
+  const Polynomial<Coefficient>& input,
+  Polynomial<Coefficient>& outputRemainder,
+  int basisIndexToIgnore,
+  bool failureAllowed
+) {
   // Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62.
   STACK_TRACE("GroebnerBasisComputation::remainderDivisionByBasis");
   if (this->flagDoLogDivision) {
@@ -490,7 +507,7 @@ void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
     this->divisionReport.getElement().startingPolynomial = currentRemainder;
   }
   if (this->flagDoLogDivision) {
-    this->divisionReport.getElement().intermediateCoeffs.size = 0;
+    this->divisionReport.getElement().intermediateCoefficients.size = 0;
     this->divisionReport.getElement().intermediateRemainders.size = 0;
     this->divisionReport.getElement().intermediateSubtractands.size = 0;
     this->divisionReport.getElement().intermediateRemainders.addOnTop(
@@ -506,7 +523,11 @@ void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
       this->oneDivisonStepWithBasis(
         currentRemainder, outputRemainder, basisIndexToIgnore, &reportMain
       )
-    ) {}
+    ) {
+      if (failureAllowed && this->limitsExceeded()) {
+        return false;
+      }
+    }
     if (this->flagDoProgressReport) {
       std::stringstream out;
       out
@@ -529,6 +550,7 @@ void GroebnerBasisComputation<Coefficient>::remainderDivisionByBasis(
       reportRemainderSoFar.report(out.str());
     }
   }
+  return true;
 }
 
 template <class Coefficient>
@@ -994,6 +1016,13 @@ oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
   ProgressReport& report3
 ) {
   this->groebner.numberPolynomialDivisions = 0;
+  Polynomial<Coefficient>::gaussianEliminationByRows(
+    inputOutputSystem,
+    nullptr,
+    nullptr,
+    nullptr,
+    &this->groebner.numberMonomialOperations
+  );
   List<Polynomial<Coefficient> > oldSystem = inputOutputSystem;
   bool success = this->groebner.transformToReducedBasis(inputOutputSystem);
   if (success) {
@@ -1092,7 +1121,7 @@ std::string PolynomialSystem<Coefficient>::toStringImpliedSubstitutions() {
     return "";
   }
   std::stringstream out;
-  out << "Implied subs: ";
+  out << "Implied substitutions: ";
   for (int i = 0; i < this->impliedSubstitutions.size; i ++) {
     for (int j = 0; j < this->impliedSubstitutions[i].size; j ++) {
       int letterIndex = - 1;
@@ -1352,7 +1381,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
       0
     ) {
       out
-      << "I did this via the substitutions "
+      << "I did this via the substitutions: "
       << this->toStringImpliedSubstitutions();
     }
     out

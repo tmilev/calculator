@@ -7231,7 +7231,10 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   // 1. A^{32}_1+A^{8}_1 in E_8.
   // 2. A^24_1 in E_8.
   // 3. A^{20}_1+A^{4}_1 in E_8
-  // 4. A^{16}_1+A^{8}_1 in E_8
+  if (embeddingLieAlgebraName == "A^{16}_1+A^{8}_1") {
+    maximumPolynomialDivisions = 200;
+    maximumMonomialOperations = 400;
+  }
   if (embeddingLieAlgebraName == "A^{15}_1") {
     maximumPolynomialDivisions = 200;
     maximumMonomialOperations = 1000;

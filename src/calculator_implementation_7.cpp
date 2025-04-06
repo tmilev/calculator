@@ -1230,7 +1230,8 @@ bool CalculatorFunctions::solvePolynomialSystem(
   << polynomials.toString(&system.groebner.format);
   out
   << "<br>Total number of polynomial computations: "
-  << system.numberOfSerreSystemComputations;
+  << system.numberOfSerreSystemComputations
+  << ". ";
   if (system.flagSystemProvenToHaveNoSolution) {
     out << "<br>The system does not have a solution. ";
   } else if (system.flagSystemProvenToHaveSolution) {
@@ -1260,23 +1261,27 @@ bool CalculatorFunctions::solveSerreLikeSystem(
   STACK_TRACE("CalculatorFunctions::solveSerreLikeSystem");
   Vector<Polynomial<Rational> > polynomialsRational;
   ExpressionContext context(calculator);
+  Expression inputTransformed = input;
+  CalculatorFunctions::equalityToArithmeticExpressionRecursively(
+    calculator, inputTransformed, inputTransformed
+  );
   bool useArguments =
-  input.startsWith(
+  inputTransformed.startsWith(
     calculator.getOperations().getIndexNoFail(
       "FindOneSolutionSerreLikePolynomialSystem"
     )
   ) ||
-  input.startsWith(
+  inputTransformed.startsWith(
     calculator.getOperations().getIndexNoFail(
       "FindOneSolutionSerreLikePolynomialSystemAlgebraic"
     )
   ) ||
-  input.startsWith(
+  inputTransformed.startsWith(
     calculator.getOperations().getIndexNoFail(
       "FindOneSolutionSerreLikePolynomialSystemUpperLimit"
     )
   ) ||
-  input.startsWith(
+  inputTransformed.startsWith(
     calculator.getOperations().getIndexNoFail(
       "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
     )
@@ -1284,7 +1289,7 @@ bool CalculatorFunctions::solveSerreLikeSystem(
   if (useArguments) {
     if (
       !calculator.getVectorFromFunctionArguments(
-        input, polynomialsRational, &context, 0
+        inputTransformed, polynomialsRational, &context, 0
       )
     ) {
       return
@@ -1293,7 +1298,9 @@ bool CalculatorFunctions::solveSerreLikeSystem(
       );
     }
   } else {
-    if (!calculator.getVector(input, polynomialsRational, &context, 0)) {
+    if (
+      !calculator.getVector(inputTransformed, polynomialsRational, &context, 0)
+    ) {
       return
       output.assignError(
         calculator, "Failed to extract list of polynomials. "
@@ -2703,7 +2710,7 @@ bool CalculatorFunctionsListsAndSets::listUnion(
 bool CalculatorFunctionsListsAndSets::belongsTo(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsListsAndSets::listUnion");
+  STACK_TRACE("CalculatorFunctionsListsAndSets::belongsTo");
   if (input.size() != 3) {
     return false;
   }
@@ -10991,6 +10998,39 @@ bool CalculatorFunctions::resetBuiltInHandlerCache(
   calculator.cachedExpressionsPerStack.clear();
   return
   output.assignValue<std::string>(calculator, "Built in evaluation reset.");
+}
+
+bool CalculatorFunctions::equalityToArithmeticExpressionRecursively(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE(
+    "CalculatorFunctionsPolynomial::equalityToArithmeticExpressionRecursively"
+  );
+  if (input.isElementaryObject()) {
+    return false;
+  }
+  input.checkInitialization();
+  Expression transformedChild;
+  Expression result(calculator);
+  for (int i = 0; i < input.size(); i ++) {
+    if (
+      !CalculatorFunctions::equalityToArithmeticExpressionRecursively(
+        calculator, input[i], transformedChild
+      )
+    ) {
+      result.addChildOnTop(input[i]);
+    } else {
+      result.addChildOnTop(transformedChild);
+    }
+  }
+  if (result.startsWith(calculator.opDefine(), 3)) {
+    result.makeXOX(calculator, calculator.opMinus(), result[1], result[2]);
+  }
+  if (result == input) {
+    return false;
+  }
+  output = result;
+  return true;
 }
 
 bool CalculatorFunctions::equalityToArithmeticExpression(

@@ -2614,12 +2614,18 @@ public:
   int addMonomialNoCoefficientCleanUpReturnIndex(
     const TemplateMonomial& inputMonomial, const Coefficient& inputCoefficient
   );
+  // Carries out sparse gaussian elimination.
+  // When outputAccumulateNumberOfMonomialOperations, the number of monomial
+  // operations
+  // carried out by the algorithm will be accumulated into that variable;
+  // the variable will not be initialized.
   template <class LinearCombinationTemplate>
   static void gaussianEliminationByRows(
     List<LinearCombinationTemplate>& toBeEliminated,
     bool* madeARowSwitch = nullptr,
     HashedList<TemplateMonomial>* seedMonomials = nullptr,
     Matrix<Coefficient>* carbonCopyMatrix = nullptr,
+    int* outputAccumulateNumberOfMonomialOperations = nullptr,
     List<LinearCombinationTemplate>* carbonCopyList = nullptr
   );
   template <class LinearCombinationTemplate>
@@ -3786,7 +3792,7 @@ public:
   List<Polynomial<Coefficient> > intermediateRemainders;
   List<List<MonomialPolynomial> > intermediateHighlightedMons;
   List<MonomialPolynomial> intermediateHighestMonDivHighestMon;
-  List<Coefficient> intermediateCoeffs;
+  List<Coefficient> intermediateCoefficients;
   List<Polynomial<Coefficient> > intermediateSubtractands;
   Polynomial<Coefficient> startingPolynomial;
   int highlightAllMonsFinalRemainder;
@@ -3892,10 +3898,20 @@ public:
   static int getNumberOfEquationsThatWouldBeLinearIfISubstitutedVariable(
     int variableIndex, List<Polynomial<Coefficient> >& input
   );
+  // Divides a multivariable polynomial simultaneously by a
+  // list of polynomial divisors; the order of the divisors matters.
   void remainderDivisionByBasis(
     const Polynomial<Coefficient>& input,
     Polynomial<Coefficient>& outputRemainder,
     int basisIndexToIgnore = - 1
+  );
+  // Same as remainderDivisionByBasis but failure due to exceeding
+  // computational limits is allowed.
+  bool remainderDivisionByBasisFailureAllowed(
+    const Polynomial<Coefficient>& input,
+    Polynomial<Coefficient>& outputRemainder,
+    int basisIndexToIgnore = - 1,
+    bool failureAllowed = false
   );
   bool oneDivisonStepWithBasis(
     Polynomial<Coefficient>& currentRemainder,
@@ -4308,6 +4324,7 @@ gaussianEliminationByRows(
   bool* madeARowSwitch,
   HashedList<TemplateMonomial>* seedMonomials,
   Matrix<Coefficient>* carbonCopyMatrix,
+  int* outputAccumulateNumberOfMonomialOperations,
   List<LinearCombinationTemplate>* carbonCopyList
 ) {
   STACK_TRACE("LinearCombination::gaussianEliminationByRows");
@@ -4354,7 +4371,8 @@ gaussianEliminationByRows(
     *madeARowSwitch = false;
   }
   int currentRowIndex = 0;
-  Coefficient accumulator, negated;
+  Coefficient accumulator;
+  Coefficient negated;
   for (
     int i = 0; i < allMonomials.size && currentRowIndex < toBeEliminated.size;
     i ++
@@ -4410,21 +4428,25 @@ gaussianEliminationByRows(
       LinearCombination<TemplateMonomial, Coefficient>& currentOther =
       toBeEliminated[j];
       int otherColumnIndex = currentOther.monomials.getIndex(monomial);
-      if (otherColumnIndex != - 1) {
-        accumulator = currentOther.coefficients[otherColumnIndex];
-        currentOther.subtractOtherTimesCoefficient(currentPivot, &accumulator);
-        if (carbonCopyList != 0) {
-          (*carbonCopyList)[j].subtractOtherTimesCoefficient((
-              *carbonCopyList
-            )[currentRowIndex],
-            &accumulator
-          );
-        }
-        if (carbonCopyMatrix != 0) {
-          negated = accumulator;
-          negated *= - 1;
-          carbonCopyMatrix->addTwoRows(currentRowIndex, j, 0, negated);
-        }
+      if (otherColumnIndex == - 1) {
+        continue;
+      }
+      accumulator = currentOther.coefficients[otherColumnIndex];
+      currentOther.subtractOtherTimesCoefficient(currentPivot, &accumulator);
+      if (outputAccumulateNumberOfMonomialOperations != nullptr) {
+        *outputAccumulateNumberOfMonomialOperations += currentPivot.size();
+      }
+      if (carbonCopyList != 0) {
+        (*carbonCopyList)[j].subtractOtherTimesCoefficient((*carbonCopyList)[
+            currentRowIndex
+          ],
+          &accumulator
+        );
+      }
+      if (carbonCopyMatrix != 0) {
+        negated = accumulator;
+        negated *= - 1;
+        carbonCopyMatrix->addTwoRows(currentRowIndex, j, 0, negated);
       }
     }
     currentRowIndex ++;
@@ -6635,7 +6657,7 @@ public:
       return;
     }
     output.makeZero(this->getMinimalNumberOfRows());
-    otherType currentCF;
+    otherType currentCoefficient;
     for (int i = 0; i < this->size(); i ++) {
       // note that, at the cost of one extra implicit conversion below, we
       // pReserve the order of multiplication:
@@ -6643,9 +6665,9 @@ public:
       // as-is for non-commutative fields.
       // (think in the generality of quaternion matrix acting on
       // quaternion-coefficient polynomials!)
-      currentCF = this->coefficients[i];
-      currentCF *= input[(*this)[i].dualIndex];
-      output[(*this)[i].vIndex] += currentCF;
+      currentCoefficient = this->coefficients[i];
+      currentCoefficient *= input[(*this)[i].dualIndex];
+      output[(*this)[i].vIndex] += currentCoefficient;
     }
   }
   void actOnVectorROWSOnTheLeft(
@@ -6753,7 +6775,8 @@ template <class Coefficient>
 void MatrixTensor<Coefficient>::gaussianEliminationByRowsMatrix(
   MatrixTensor<Coefficient>* carbonCopyMatrix
 ) {
-  List<VectorSparse<Coefficient> > rows, carbonCopyRows;
+  List<VectorSparse<Coefficient> > rows;
+  List<VectorSparse<Coefficient> > carbonCopyRows;
   int numberOfRows = this->getMinimalNumberOfRows();
   if (carbonCopyMatrix != 0) {
     numberOfRows =
@@ -6768,7 +6791,7 @@ void MatrixTensor<Coefficient>::gaussianEliminationByRowsMatrix(
   List<VectorSparse<Coefficient> >* carbonCopyPointer = carbonCopyMatrix ==
   0 ? 0 : &carbonCopyRows;
   VectorSparse<Coefficient>::gaussianEliminationByRows(
-    rows, 0, 0, 0, carbonCopyPointer
+    rows, nullptr, nullptr, nullptr, nullptr, carbonCopyPointer
   );
   this->assignVectorsToRows(rows);
   if (carbonCopyMatrix != 0) {

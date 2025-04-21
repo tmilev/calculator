@@ -1250,6 +1250,14 @@ public:
     bool useUpperLimit,
     bool startWithAlgebraicClosure
   );
+  static bool extractPolynomialSystemInputs(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& outputOnError,
+    Vector<Polynomial<Rational> >& outputSystem,
+    ExpressionContext& outputContext,
+    List<int>* outputUpperLimits
+  );
   static void transformEqualityToExpressionInChildren(
     Calculator& calculator, const Expression& input, Expression& output
   );
@@ -1275,6 +1283,9 @@ public:
       calculator, input, output, false, false
     );
   }
+  static bool findOneSolutionModPUpperLimit(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool solveSerreLikeSystemUpperLimit(
     Calculator& calculator, const Expression& input, Expression& output
   ) {

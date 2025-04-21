@@ -3962,6 +3962,7 @@ public:
   bool flagSystemProvenToHaveSolution;
   bool flagSystemSolvedOverBaseField;
   bool flagUsingAlgebraicClosure;
+  List<Polynomial<Coefficient> > gaussianEliminatedSystem;
   AlgebraicClosureRationals* algebraicClosure;
   GroebnerBasisComputation<Coefficient> groebner;
   MemorySaving<PolynomialSystem<Coefficient> > computationUsedInRecursiveCalls;
@@ -3975,12 +3976,19 @@ public:
     const List<Polynomial<Coefficient> >& inputSystem
   ) const;
   bool isImpliedLinearSubstitution(
-    Polynomial<Coefficient>& polynomial,
-    PolynomialSubstitution<Coefficient>& outputSubstitution
+    const Polynomial<Coefficient>& inputPolynomial,
+    PolynomialSubstitution<Coefficient>& outputSubstitution,
+    Polynomial<Coefficient>& outputPolynomial
+  );
+  static bool leftIsBetterSubstitutionThanRight(
+    const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
   );
   bool isSolutionToPolynomialInOneVariable(
     Polynomial<Coefficient>& polynomial,
     PolynomialSubstitution<Coefficient>& outputSubstitution
+  );
+  bool findAndApplyImpliedSubstitutions(
+    List<Polynomial<Coefficient> >& inputSystem, ProgressReport& progressReport
   );
   bool hasImpliedSubstitutions(
     List<Polynomial<Coefficient> >& inputSystem,
@@ -4005,13 +4013,13 @@ public:
     List<Polynomial<Coefficient> >& inputSystem
   );
   void polynomialSystemSolutionSimplificationPhase(
-    List<Polynomial<Coefficient> >& inputSystem
+    List<Polynomial<Coefficient> >& inputOutputSystem
   );
   // Carries out one polynomial system simplification step.
   bool oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
     List<Polynomial<Coefficient> >& inputOutputSystem,
-    ProgressReport& report2,
-    ProgressReport& report3
+    ProgressReport& simplificationProgressReport,
+    ProgressReport& substitutionsProgressReport
   );
   void backSubstituteIntoPolynomialSystem(
     List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions

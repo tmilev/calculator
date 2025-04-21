@@ -250,6 +250,19 @@ bool GroebnerBasisComputation<Coefficient>::addAndReduceOnePolynomial() {
   if (this->basisCandidates.size == 0) {
     return true;
   }
+  // Put the best polynomial in the last position.
+  for (int i = this->basisCandidates.size - 2; i >= 0; i --) {
+    const Polynomial<Coefficient>& currentCandidate =
+    this->basisCandidates[i];
+    const Polynomial<Coefficient>& last = *this->basisCandidates.lastObject();
+    if (
+      PolynomialSystem<Coefficient>::leftIsBetterSubstitutionThanRight(
+        currentCandidate, last
+      )
+    ) {
+      this->basisCandidates.swapTwoIndices(i, this->basisCandidates.size - 1);
+    }
+  }
   if (
     !this->remainderDivisionByBasisFailureAllowed(
       *this->basisCandidates.lastObject(), this->remainderDivision
@@ -706,26 +719,43 @@ bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
 }
 
 template <class Coefficient>
+bool PolynomialSystem<Coefficient>::leftIsBetterSubstitutionThanRight(
+  const Polynomial<Coefficient>& left, const Polynomial<Coefficient>& right
+) {
+  Rational leftDegree = left.totalDegree();
+  Rational rightDegree = right.totalDegree();
+  if (leftDegree > rightDegree) {
+    return false;
+  }
+  if (rightDegree > leftDegree) {
+    return true;
+  }
+  return left.size() < right.size();
+}
+
+template <class Coefficient>
 bool PolynomialSystem<Coefficient>::isImpliedLinearSubstitution(
-  Polynomial<Coefficient>& polynomial,
-  PolynomialSubstitution<Coefficient>& outputSubstitution
+  const Polynomial<Coefficient>& inputPolynomial,
+  PolynomialSubstitution<Coefficient>& outputSubstitution,
+  Polynomial<Coefficient>& outputPolynomial
 ) {
   int numberOfVariables = this->systemSolution.size;
   MonomialPolynomial monomial;
   Coefficient coefficient;
+  Polynomial<Coefficient> workingPolynomial = inputPolynomial;
   for (int j = 0; j < numberOfVariables; j ++) {
     monomial.makeEi(j, 1, numberOfVariables);
-    int indexOfMonomial = polynomial.monomials.getIndex(monomial);
+    int indexOfMonomial = workingPolynomial.monomials.getIndex(monomial);
     if (indexOfMonomial == - 1) {
       continue;
     }
-    coefficient = polynomial.coefficients[indexOfMonomial];
-    polynomial.subtractMonomial(monomial, coefficient);
+    coefficient = workingPolynomial.coefficients[indexOfMonomial];
+    workingPolynomial.subtractMonomial(monomial, coefficient);
     bool isGood = true;
-    for (int k = 0; k < polynomial.size(); k ++) {
-      if (!(polynomial[k](j) == 0)) {
+    for (int k = 0; k < workingPolynomial.size(); k ++) {
+      if (!(workingPolynomial[k](j) == 0)) {
         isGood = false;
-        polynomial.addMonomial(monomial, coefficient);
+        workingPolynomial.addMonomial(monomial, coefficient);
         break;
       }
     }
@@ -733,7 +763,8 @@ bool PolynomialSystem<Coefficient>::isImpliedLinearSubstitution(
       continue;
     }
     outputSubstitution.makeIdentitySubstitution(numberOfVariables);
-    outputSubstitution[j] = polynomial;
+    outputSubstitution[j] = workingPolynomial;
+    outputPolynomial = workingPolynomial;
     coefficient *= - 1;
     outputSubstitution[j] /= coefficient;
     return true;
@@ -783,12 +814,16 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
   List<Polynomial<Coefficient> >& inputSystem,
   PolynomialSubstitution<Coefficient>& outputSubstitution
 ) {
+  STACK_TRACE("PolynomialSystem::hasImpliedSubstitutions");
+  for (const Polynomial<Coefficient>& current : inputSystem) {
+    if (current.isConstant() && !current.isEqualToZero()) {
+      // Contradictory system.
+      return false;
+    }
+  }
   Polynomial<Coefficient> polynomial;
   for (const Polynomial<Coefficient>& current : inputSystem) {
     polynomial = current;
-    if (this->isImpliedLinearSubstitution(polynomial, outputSubstitution)) {
-      return true;
-    }
     if (
       this->isSolutionToPolynomialInOneVariable(
         polynomial, outputSubstitution
@@ -797,7 +832,38 @@ bool PolynomialSystem<Coefficient>::hasImpliedSubstitutions(
       return true;
     }
   }
-  return false;
+  PolynomialSubstitution<Coefficient> bestSubstitution;
+  PolynomialSubstitution<Coefficient> candidateSubstitution;
+  Polynomial<Coefficient> bestPolynomial;
+  Polynomial<Coefficient> candidatePolynomial;
+  bool found = false;
+  for (const Polynomial<Coefficient>& current : inputSystem) {
+    if (
+      !this->isImpliedLinearSubstitution(
+        current, candidateSubstitution, candidatePolynomial
+      )
+    ) {
+      continue;
+    }
+    if (!found) {
+      found = true;
+      bestSubstitution = candidateSubstitution;
+      bestPolynomial = candidatePolynomial;
+    }
+    if (
+      this->leftIsBetterSubstitutionThanRight(
+        candidatePolynomial, bestPolynomial
+      )
+    ) {
+      bestSubstitution = candidateSubstitution;
+      bestPolynomial = candidatePolynomial;
+    }
+  }
+  if (!found) {
+    return false;
+  }
+  outputSubstitution = bestSubstitution;
+  return true;
 }
 
 template <class Coefficient>
@@ -981,11 +1047,13 @@ bool PolynomialSystem<Coefficient>::isContradictoryReducedSystem(
 
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
-(List<Polynomial<Coefficient> >& inputSystem) {
+(List<Polynomial<Coefficient> >& inputOutputSystem) {
   STACK_TRACE(
     "PolynomialSystem::polynomialSystemSolutionSimplificationPhase"
   );
   ProgressReport report1;
+  ProgressReport report2;
+  ProgressReport report3;
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
     reportStream
@@ -998,12 +1066,10 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
     report1.report(reportStream.str());
   }
   this->impliedSubstitutions.setSize(0);
-  this->impliedSubstitutions.reserve(inputSystem.size);
-  ProgressReport report2;
-  ProgressReport report3;
+  this->impliedSubstitutions.reserve(inputOutputSystem.size);
   while (
     this->oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
-      inputSystem, report2, report3
+      inputOutputSystem, report2, report3
     )
   ) {}
 }
@@ -1012,8 +1078,8 @@ template <class Coefficient>
 bool PolynomialSystem<Coefficient>::
 oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
   List<Polynomial<Coefficient> >& inputOutputSystem,
-  ProgressReport& report2,
-  ProgressReport& report3
+  ProgressReport& simplificationProgressReport,
+  ProgressReport& substitutionsProgressReport
 ) {
   this->groebner.numberPolynomialDivisions = 0;
   Polynomial<Coefficient>::gaussianEliminationByRows(
@@ -1023,8 +1089,22 @@ oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
     nullptr,
     &this->groebner.numberMonomialOperations
   );
+  if (
+    this->findAndApplyImpliedSubstitutions(
+      inputOutputSystem, substitutionsProgressReport
+    )
+  ) {
+    return true;
+  }
   List<Polynomial<Coefficient> > oldSystem = inputOutputSystem;
   bool success = this->groebner.transformToReducedBasis(inputOutputSystem);
+  if (
+    this->findAndApplyImpliedSubstitutions(
+      inputOutputSystem, substitutionsProgressReport
+    )
+  ) {
+    return true;
+  }
   if (success) {
     oldSystem = inputOutputSystem;
   } else {
@@ -1033,12 +1113,19 @@ oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
   if (this->groebner.flagDoProgressReport) {
     std::stringstream reportStream;
     reportStream << "Attempting to transform system to a groebner basis... ";
-    report2.report(reportStream.str());
+    simplificationProgressReport.report(reportStream.str());
   }
   if (success && inputOutputSystem.size > 0) {
     this->groebner.numberPolynomialDivisions = 0;
     success =
     this->groebner.transformToReducedGroebnerBasis(inputOutputSystem, false);
+  }
+  if (
+    this->findAndApplyImpliedSubstitutions(
+      inputOutputSystem, substitutionsProgressReport
+    )
+  ) {
+    return true;
   }
   if (!success) {
     inputOutputSystem = oldSystem;
@@ -1061,7 +1148,7 @@ oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
       << inputOutputSystem.size
       << " elements.";
     }
-    report2.report(reportStream.str());
+    simplificationProgressReport.report(reportStream.str());
   }
   this->numberOfSerreSystemComputations +=
   this->groebner.numberPolynomialDivisions;
@@ -1080,9 +1167,16 @@ oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
       return false;
     }
   }
+  return false;
+}
+
+template <class Coefficient>
+bool PolynomialSystem<Coefficient>::findAndApplyImpliedSubstitutions(
+  List<Polynomial<Coefficient> >& inputSystem, ProgressReport& progressReport
+) {
+  STACK_TRACE("PolynomialSystem::findAndApplyImpliedSubstitutions");
   PolynomialSubstitution<Coefficient> substitution;
-  bool changed =
-  this->hasImpliedSubstitutions(inputOutputSystem, substitution);
+  bool changed = this->hasImpliedSubstitutions(inputSystem, substitution);
   if (!changed) {
     // We did not find implied substitutions.
     // Do not continue.
@@ -1095,11 +1189,11 @@ oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
     reportStream
     << "Found implied substitutions.<br>"
     << this->toStringImpliedSubstitutions();
-    report3.report(reportStream.str());
+    progressReport.report(reportStream.str());
   }
   this->impliedSubstitutions.addOnTop(substitution);
-  for (int i = 0; i < inputOutputSystem.size; i ++) {
-    inputOutputSystem[i].substitute(substitution, 1);
+  for (int i = 0; i < inputSystem.size; i ++) {
+    inputSystem[i].substitute(substitution, 1);
   }
   return true;
 }
@@ -1359,6 +1453,10 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     << ". ";
     report1.report(out.str());
   }
+  this->gaussianEliminatedSystem = inputSystem;
+  Polynomial<Coefficient>::gaussianEliminationByRows(
+    this->gaussianEliminatedSystem, nullptr, nullptr, nullptr, nullptr
+  );
   this->polynomialSystemSolutionSimplificationPhase(inputSystem);
   if (
     this->flagSystemProvenToHaveNoSolution ||
@@ -1387,6 +1485,11 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     out
     << "<br>Number of remaining variables to solve for: "
     << this->numberOfVariablesToSolveForAfterReduction;
+    out
+    << "<br>The gaussian elimination is: "
+    << this->toStringCalculatorInputFromSystem(
+      this->gaussianEliminatedSystem
+    );
     report2.report(out.str());
   }
   List<Polynomial<Coefficient> > systemBeforeHeuristics = inputSystem;

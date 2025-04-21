@@ -1251,6 +1251,92 @@ bool CalculatorFunctions::solvePolynomialSystem(
   return output.assignValue(calculator, out.str());
 }
 
+bool CalculatorFunctions::extractPolynomialSystemInputs(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& outputOnError,
+  Vector<Polynomial<Rational> >& outputSystem,
+  ExpressionContext& outputContext,
+  List<int>* outputUpperLimits
+) {
+  STACK_TRACE("CalculatorFunctions::extractPolynomialSystemInputs");
+  Expression inputTransformed = input;
+  CalculatorFunctions::equalityToArithmeticExpressionRecursively(
+    calculator, inputTransformed, inputTransformed
+  );
+  List<std::string> keyWords = List<std::string>({
+      "FindOneSolutionSerreLikePolynomialSystem",
+      "FindOneSolutionSerreLikePolynomialSystemAlgebraic",
+      "FindOneSolutionSerreLikePolynomialSystemUpperLimit",
+      "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
+    });
+  bool useArguments = false;
+  for (const std::string& keyWord : keyWords) {
+    if (
+      inputTransformed.startsWith(
+        calculator.getOperations().getIndexNoFail(keyWord)
+      )
+    ) {
+      useArguments = true;
+      break;
+    }
+  }
+  if (useArguments) {
+    if (
+      !calculator.getVectorFromFunctionArguments(
+        inputTransformed, outputSystem, &outputContext, 0
+      )
+    ) {
+      return
+      outputOnError.assignError(
+        calculator, "Failed to extract list of polynomials. "
+      );
+    }
+  } else {
+    if (
+      !calculator.getVector(inputTransformed, outputSystem, &outputContext, 0)
+    ) {
+      return
+      outputOnError.assignError(
+        calculator, "Failed to extract list of polynomials. "
+      );
+    }
+  }
+  if (outputUpperLimits == nullptr) {
+    // No upper limits desired.
+    return true;
+  }
+  // Upper limits are desired.
+  // Convert the first two polynomials to integers.
+  FormatExpressions format = outputContext.getFormat();
+  for (int i = 0; i < 2; i ++) {
+    Rational upperLimitRational;
+    if (!outputSystem[0].isConstant(&upperLimitRational)) {
+      return
+      calculator
+      << "Failed to extract a constant from the first argument "
+      << outputSystem[0].toString(&format)
+      << ". ";
+    }
+    if (!upperLimitRational.isIntegerFittingInInt(&(*outputUpperLimits)[i])) {
+      return
+      calculator
+      << "Failed to extract a small integer from the first argument "
+      << upperLimitRational.toString(&format)
+      << ". ";
+    }
+    outputSystem.popIndexShiftDown(0);
+  }
+  return true;
+}
+
+bool CalculatorFunctions::findOneSolutionModPUpperLimit(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctions::findOneSolutionModPUpperLimit");
+  return false;
+}
+
 bool CalculatorFunctions::solveSerreLikeSystem(
   Calculator& calculator,
   const Expression& input,
@@ -1260,74 +1346,20 @@ bool CalculatorFunctions::solveSerreLikeSystem(
 ) {
   STACK_TRACE("CalculatorFunctions::solveSerreLikeSystem");
   Vector<Polynomial<Rational> > polynomialsRational;
-  ExpressionContext context(calculator);
-  Expression inputTransformed = input;
-  CalculatorFunctions::equalityToArithmeticExpressionRecursively(
-    calculator, inputTransformed, inputTransformed
-  );
-  bool useArguments =
-  inputTransformed.startsWith(
-    calculator.getOperations().getIndexNoFail(
-      "FindOneSolutionSerreLikePolynomialSystem"
-    )
-  ) ||
-  inputTransformed.startsWith(
-    calculator.getOperations().getIndexNoFail(
-      "FindOneSolutionSerreLikePolynomialSystemAlgebraic"
-    )
-  ) ||
-  inputTransformed.startsWith(
-    calculator.getOperations().getIndexNoFail(
-      "FindOneSolutionSerreLikePolynomialSystemUpperLimit"
-    )
-  ) ||
-  inputTransformed.startsWith(
-    calculator.getOperations().getIndexNoFail(
-      "FindOneSolutionSerreLikePolynomialSystemAlgebraicUpperLimit"
-    )
-  );
-  if (useArguments) {
-    if (
-      !calculator.getVectorFromFunctionArguments(
-        inputTransformed, polynomialsRational, &context, 0
-      )
-    ) {
-      return
-      output.assignError(
-        calculator, "Failed to extract list of polynomials. "
-      );
-    }
-  } else {
-    if (
-      !calculator.getVector(inputTransformed, polynomialsRational, &context, 0)
-    ) {
-      return
-      output.assignError(
-        calculator, "Failed to extract list of polynomials. "
-      );
-    }
-  }
   List<int> upperLimits = List<int>({201, 1000});
-  if (useUpperLimit) {
-    FormatExpressions format = context.getFormat();
-    for (int i = 0; i < 2; i ++) {
-      Rational upperLimitRational;
-      if (!polynomialsRational[0].isConstant(&upperLimitRational)) {
-        return
-        calculator
-        << "Failed to extract a constant from the first argument "
-        << polynomialsRational[0].toString(&format)
-        << ". ";
-      }
-      if (!upperLimitRational.isIntegerFittingInInt(&upperLimits[i])) {
-        return
-        calculator
-        << "Failed to extract a small integer from the first argument "
-        << upperLimitRational.toString(&format)
-        << ". ";
-      }
-      polynomialsRational.popIndexShiftDown(0);
-    }
+  List<int>* upperLimitsPointer = useUpperLimit ? &upperLimits : nullptr;
+  ExpressionContext context(calculator);
+  if (
+    !CalculatorFunctions::extractPolynomialSystemInputs(
+      calculator,
+      input,
+      output,
+      polynomialsRational,
+      context,
+      upperLimitsPointer
+    )
+  ) {
+    return true;
   }
   return
   CalculatorFunctions::solvePolynomialSystem(

@@ -2359,7 +2359,7 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
     return calculator << "Did not find cube term in your curve.";
   }
   Rational coefficientXLinear = - polynomial.getCoefficientOf(xLinear);
-  Rational constCoefficient = - polynomial.constantTerm();
+  Rational constCoefficient = - polynomial.constantTerm(0);
   EllipticCurveWeierstrassNormalForm& curveConstants =
   isRational ? elementRational.owner : elementZmodP.owner;
   if (

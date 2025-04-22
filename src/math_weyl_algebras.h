@@ -2,6 +2,7 @@
 #define header_math_extra_weyl_algebras_implementation_ALREADY_INCLUDED
 
 #include "math_general.h"
+#include "math_polynomials.h"
 
 template <class Coefficient>
 class ElementWeylAlgebra: public LinearCombination<

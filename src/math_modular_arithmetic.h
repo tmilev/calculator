@@ -59,6 +59,7 @@ public:
   void makeFrom(const LargeIntegerUnsigned& inputModulus, int inputValue);
   void checkEqualModuli(const ElementZmodP& other);
   void negate();
+  bool operator!=(const ElementZmodP& other)const;
   bool operator==(int other) const;
   bool operator==(const ElementZmodP& other) const;
   void operator*=(const ElementZmodP& other);
@@ -85,11 +86,16 @@ public:
   bool operator/=(const LargeInteger& den);
   bool needsParenthesisForMultiplication(FormatExpressions* format = nullptr)
   const;
-  static void convertModuloIntegerAfterScalingToIntegral(
-    const Polynomial<Rational>& input,
-    Polynomial<ElementZmodP>& output,
-    const LargeIntegerUnsigned& newModulo
-  );
+  static void convertPolynomialRationalToModular(
+      const Polynomial<Rational>& input,
+      Polynomial<ElementZmodP>& output,
+      const LargeIntegerUnsigned& newModulus
+      );
+  static void convertPolynomialsRationalToModular(
+      const List<Polynomial<Rational>>& input,
+      List<Polynomial<ElementZmodP>>& output,
+      const LargeIntegerUnsigned& newModulus
+      );
   static void convertPolynomialModularToPolynomialIntegral(
     const Polynomial<ElementZmodP>& input,
     Polynomial<Rational>& output,

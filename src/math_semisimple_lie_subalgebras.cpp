@@ -7160,45 +7160,6 @@ void SemisimpleSubalgebras::resetComputations() {
   this->subalgebras.clear();
 }
 
-int ArbitrarySubstitutionsProvider::
-preferredVariableForArbitrarySubstitutionProvider(
-  Selection& variablesToSolveFor, int bestIndexHeuristically
-) {
-  if (!this->flagChooseSmallestIndexVariableFirst) {
-    return bestIndexHeuristically;
-  }
-  if (variablesToSolveFor.cardinalitySelection == 0) {
-    return bestIndexHeuristically;
-  }
-  variablesToSolveFor.computeIndicesFromSelection();
-  return variablesToSolveFor.elements[0];
-}
-
-ArbitrarySubstitutionsProvider::ArbitrarySubstitutionsProvider() {
-  this->flagChooseSmallestIndexVariableFirst = false;
-  this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf = - 1;
-}
-
-void ArbitrarySubstitutionsProvider::computeArbitrarySubstitutions(
-  int recursionDepth
-) {
-  if (
-    this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf > 0 &&
-    (recursionDepth - 1) %
-    this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf ==
-    0
-  ) {
-    // One comes first.
-    this->arbitrarySubstitutions = List<Rational>(
-      {Rational::oneStatic(), Rational::zeroStatic()}
-    );
-  } else {
-    // Zero comes first.
-    this->arbitrarySubstitutions = List<Rational>(
-      {Rational::zeroStatic(), Rational::oneStatic()}
-    );
-  }
-}
 
 void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   int maximumPolynomialDivisions = 1000;

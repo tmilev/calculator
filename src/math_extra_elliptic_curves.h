@@ -2,7 +2,7 @@
 #define header_math_extra_elliptic_curves_ALREADY_INCLUDED
 
 #include "math_general.h"
-
+#include "math_polynomials.h"
 class EllipticCurveWeierstrassNormalForm {
 public:
   LargeInteger linearCoefficient;

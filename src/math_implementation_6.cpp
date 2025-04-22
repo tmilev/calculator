@@ -506,7 +506,7 @@ bool PolynomialFactorizationFiniteFields::factor(
     }
     this->oneModular.makeOne(primeFactors[i]);
     this->smallModulus.initializeModulusData(primeFactors[i]);
-    ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
+    ElementZmodP::convertPolynomialRationalToModular(
       this->current, this->modularization, primeFactors[i]
     );
     if (
@@ -724,7 +724,7 @@ void PolynomialFactorizationFiniteFields::henselLiftOnce(
 ) {
   STACK_TRACE("PolynomialFactorizationFiniteFields::henselLiftOnce");
   std::stringstream explainer;
-  ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
+  ElementZmodP::convertPolynomialRationalToModular(
     this->current, this->desiredLiftWithoutRescaling, this->modulusHenselLift
   );
   this->desiredLift = this->desiredLiftWithoutRescaling;

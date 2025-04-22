@@ -1197,6 +1197,68 @@ bool CalculatorFunctions::solvePolynomialSystem(
   );
 }
 
+bool CalculatorFunctions::solvePolynomialSystemModP(Calculator& calculator, const Vector<Polynomial<Rational>>& input,   ExpressionContext& context,
+                                                    Expression& output,
+                                                    int maximumPolynomialDivisions,
+                                                    int maximumMonomialOperations,
+                                                    int primeModulus
+)
+{
+  STACK_TRACE("CalculatorFunctions::solvePolynomialSystemModP");
+  PolynomialSystem<ElementZmodP> system;
+  context.getFormat(system.groebner.format);
+  Vector<Polynomial<ElementZmodP> > polynomials;
+  ElementZmodP oneModP;
+  oneModP.modulus = primeModulus;
+  if (primeModulus < 0){
+    primeModulus*=-1;
+  }
+  std::stringstream commentsOnFailure;
+  LargeIntegerUnsigned modulus = primeModulus;
+  if (!modulus.isPossiblyPrime(0, true, &commentsOnFailure)){
+    calculator << "The input modulus " << primeModulus << " is not prime";
+return false;
+
+  }
+  ElementZmodP::convertPolynomialsRationalToModular(input,polynomials,modulus);
+  system.groebner.maximumPolynomialDivisions = maximumPolynomialDivisions;
+  system.groebner.maximumMonomialOperations = maximumMonomialOperations;
+  system.groebner.polynomialOrder.monomialOrder =
+      MonomialPolynomial::orderDefault();
+  system.algebraicClosure = &calculator.objectContainer.algebraicClosure;
+  system.flagTryDirectlySolutionOverAlgebraicClosure =
+      false;
+  global.defaultFormat.getElement() = system.groebner.format;
+  system.flagUseMonomialBranchingOptimization = true;
+  system.solveSerreLikeSystem(polynomials);
+  std::stringstream out;
+  out << "<br>The context vars:<br>" << context.toString();
+  out
+      << "<br>The polynomials: "
+      << polynomials.toString(&system.groebner.format);
+  out
+      << "<br>Total number of polynomial computations: "
+      << system.numberOfSerreSystemComputations
+      << ". ";
+  if (system.flagSystemProvenToHaveNoSolution) {
+    out << "<br>The system does not have a solution. ";
+  } else if (system.flagSystemProvenToHaveSolution) {
+    out << "<br>System proven to have solution. ";
+  }
+  if (!system.flagSystemProvenToHaveNoSolution) {
+    if (system.flagSystemSolvedOverBaseField) {
+      out
+          << "<br>One solution follows. "
+          << system.toStringSerreLikeSolution();
+    } else {
+      out
+          << "However, I was unable to find such a solution: "
+          << "my heuristics are not good enough.";
+    }
+  }
+  return output.assignValue(calculator, out.str());
+  return false;
+}
 bool CalculatorFunctions::solvePolynomialSystem(
   Calculator& calculator,
   const Vector<Polynomial<Rational> >& input,
@@ -1205,6 +1267,7 @@ bool CalculatorFunctions::solvePolynomialSystem(
   bool startWithAlgebraicClosure,
   List<int>* upperLimits
 ) {
+  STACK_TRACE("CalculatorFunctions::solvePolynomialSystem");
   PolynomialSystem<AlgebraicNumber> system;
   context.getFormat(system.groebner.format);
   List<int> defaultUpperLimits = List<int>({201, 1000});
@@ -1309,21 +1372,21 @@ bool CalculatorFunctions::extractPolynomialSystemInputs(
   // Upper limits are desired.
   // Convert the first two polynomials to integers.
   FormatExpressions format = outputContext.getFormat();
-  for (int i = 0; i < 2; i ++) {
+  for (int i = 0; i < outputUpperLimits->size; i ++) {
     Rational upperLimitRational;
     if (!outputSystem[0].isConstant(&upperLimitRational)) {
-      return
       calculator
-      << "Failed to extract a constant from the first argument "
+      << "Failed to extract a constant from "
       << outputSystem[0].toString(&format)
       << ". ";
+      return outputOnError.assignError(calculator, "Error extracting argument");
     }
     if (!upperLimitRational.isIntegerFittingInInt(&(*outputUpperLimits)[i])) {
-      return
       calculator
-      << "Failed to extract a small integer from the first argument "
+      << "Failed to extract a small integer from "
       << upperLimitRational.toString(&format)
       << ". ";
+      return outputOnError.assignError(calculator, "Error extracting argument");
     }
     outputSystem.popIndexShiftDown(0);
   }
@@ -1334,7 +1397,22 @@ bool CalculatorFunctions::findOneSolutionModPUpperLimit(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorFunctions::findOneSolutionModPUpperLimit");
-  return false;
+  Vector<Polynomial<Rational> > polynomialsRational;
+  List<int> smallIntegers = List<int>({201, 1000, 3});
+  ExpressionContext context(calculator);
+  if (
+      !CalculatorFunctions::extractPolynomialSystemInputs(
+          calculator,
+          input,
+          output,
+          polynomialsRational,
+          context,
+          &smallIntegers
+          )
+      ) {
+    return true;
+  }
+  return CalculatorFunctions::solvePolynomialSystemModP(calculator, polynomialsRational,context, output, smallIntegers[0], smallIntegers[1], smallIntegers[2]);
 }
 
 bool CalculatorFunctions::solveSerreLikeSystem(
@@ -2372,7 +2450,7 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
     &this->currentFormat
   );
   PolynomialSubstitution<AlgebraicNumber> substitution;
-  substitution.makeIdentitySubstitution(this->numberOfSystemVariables + 1);
+  substitution.makeIdentitySubstitution(this->numberOfSystemVariables + 1, 1);
   for (int i = 1; i < substitution.size; i ++) {
     substitution[i].makeConstant(constantTerms(i - 1, 0));
   }
@@ -6997,6 +7075,11 @@ bool CalculatorFunctionsListsAndSets::removeLastElement(
   output = input;
   output.removeLastChild();
   return output.setChildAtomValue(0, calculator.opSequence());
+}
+
+bool ElementZmodP::operator!=(const ElementZmodP& other)const{
+  return !(*this ==other);
+
 }
 
 bool ElementZmodP::operator==(int other) const {

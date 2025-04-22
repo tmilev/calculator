@@ -3,6 +3,7 @@
 
 #include "html_routines.h"
 #include "math_general.h"
+#include "math_polynomials.h"
 
 template <class Coefficient>
 bool MonomialPolynomial::substitute(

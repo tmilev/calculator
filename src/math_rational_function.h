@@ -393,7 +393,7 @@ Rational RationalFraction<Coefficient>::rationalValue() const {
   case RationalFraction::typeError:
     return 0;
   default:
-    return this->numerator.getElementConst().constantTerm();
+    return this->numerator.getElementConst().constantTerm(0);
   }
 }
 

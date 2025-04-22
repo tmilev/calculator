@@ -692,31 +692,36 @@ getSubstitutionFromPartialSolutionSerreLikeSystem(
   STACK_TRACE(
     "PolynomialSystem::getSubstitutionFromPartialSolutionSerreLikeSystem"
   );
-  outputSubstitution.makeIdentitySubstitution(this->systemSolution.size);
+  outputSubstitution.makeIdentitySubstitution(this->systemSolution.size, this->sampleCoefficient.one());
   for (int i = 0; i < this->solutionsFound.cardinalitySelection; i ++) {
     outputSubstitution[this->solutionsFound.elements[i]] =
     this->systemSolution[this->solutionsFound.elements[i]];
   }
 }
 
+
+template <>
+bool PolynomialSystem<AlgebraicNumber>::getOneVariablePolynomialSolution(
+  const Polynomial<AlgebraicNumber>& polynomial, AlgebraicNumber& outputSolution
+    ) ;
+
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::getOneVariablePolynomialSolution(
-  const Polynomial<Coefficient>& polynomial, Coefficient& outputSolution
-) {
-  AlgebraicNumber number;
-  if (this->algebraicClosure == 0) {
+    const Polynomial<Coefficient>& polynomial, Coefficient& outputSolution
+    ) {
+  int variableIndex =0;
+  if (!polynomial.isOneVariablePolynomial(&variableIndex)) {
     return false;
   }
-  if (
-    !number.constructFromMinimalPolynomial(
-      polynomial, *this->algebraicClosure, nullptr
-    )
-  ) {
+  if (!polynomial.totalDegree().isEqualToOne()) {
     return false;
   }
-  outputSolution = number;
+  const Coefficient leadingCoefficient = polynomial.getCoefficientOf(MonomialPolynomial(variableIndex));
+  outputSolution = (polynomial.constantTerm()/leadingCoefficient);
+  outputSolution.negate();
   return true;
 }
+
 
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::leftIsBetterSubstitutionThanRight(
@@ -762,7 +767,7 @@ bool PolynomialSystem<Coefficient>::isImpliedLinearSubstitution(
     if (!isGood) {
       continue;
     }
-    outputSubstitution.makeIdentitySubstitution(numberOfVariables);
+    outputSubstitution.makeIdentitySubstitution(numberOfVariables, this->sampleCoefficient.one());
     outputSubstitution[j] = workingPolynomial;
     outputPolynomial = workingPolynomial;
     coefficient *= - 1;
@@ -790,10 +795,10 @@ bool PolynomialSystem<Coefficient>::isSolutionToPolynomialInOneVariable(
   if (!this->getOneVariablePolynomialSolution(polynomial, coefficient)) {
     return false;
   }
-  outputSubstitution.makeIdentitySubstitution(numberOfVariables);
+  outputSubstitution.makeIdentitySubstitution(numberOfVariables, this->sampleCoefficient.one());
   outputSubstitution[oneVariableIndex].makeConstant(coefficient);
   // check our work:
-  polynomial.substitute(outputSubstitution, 1);
+  polynomial.substitute(outputSubstitution, this->sampleCoefficient.one());
   if (!polynomial.isEqualToZero()) {
     global.fatal
     << "I was solving the polynomial equation "
@@ -929,22 +934,22 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
 ) {
   STACK_TRACE("PolynomialSystem::backSubstituteIntoSinglePolynomial");
   Polynomial<Coefficient> polynomial;
-  polynomial.makeMonomial(index, 1, 1);
+  polynomial.makeMonomial(index, 1, this->sampleCoefficient.one());
   if (toBeSubstitutedIn == polynomial) {
     return;
   }
-  toBeSubstitutedIn.substitute(finalSubstitution, 1);
+  toBeSubstitutedIn.substitute(finalSubstitution, this->sampleCoefficient.one());
   bool changed = false;
-  for (int i = 0; i < toBeSubstitutedIn.size(); i ++) {
-    for (int j = 0; j < toBeSubstitutedIn[i].minimalNumberOfVariables(); j ++)
+  for (const MonomialPolynomial& monomial: toBeSubstitutedIn.monomials) {
+    for (int j = 0; j < monomial.minimalNumberOfVariables(); j ++)
     {
-      if (toBeSubstitutedIn[i](j) == 0) {
+      if (monomial(j) == 0) {
         continue;
       }
       if (!this->solutionsFound.selected[j]) {
-        this->setSerreLikeSolutionIndex(j, 0);
+        this->setSerreLikeSolutionIndex(j, this->sampleCoefficient.zero());
       } else {
-        if (this->systemSolution[j] != 0) {
+        if (this->systemSolution[j] != this->sampleCoefficient.zero()) {
           global.fatal
           << "Variable index "
           << j + 1
@@ -959,7 +964,7 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
     }
   }
   if (changed) {
-    toBeSubstitutedIn.substitute(finalSubstitution, 1);
+    toBeSubstitutedIn.substitute(finalSubstitution, this->sampleCoefficient.one());
   }
   Coefficient mustBeConstant;
   if (!toBeSubstitutedIn.isConstant(&mustBeConstant)) {
@@ -1193,7 +1198,7 @@ bool PolynomialSystem<Coefficient>::findAndApplyImpliedSubstitutions(
   }
   this->impliedSubstitutions.addOnTop(substitution);
   for (int i = 0; i < inputSystem.size; i ++) {
-    inputSystem[i].substitute(substitution, 1);
+    inputSystem[i].substitute(substitution, this->sampleCoefficient.one());
   }
   return true;
 }
@@ -1299,7 +1304,7 @@ processSolvedSubcaseIfSolvedOrProvenToHaveSolution(
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   List<Polynomial<Coefficient> >& inputSystem,
-  const Rational& aValueToTryOnPreferredVariable
+  const Coefficient& aValueToTryOnPreferredVariable
 ) {
   STACK_TRACE("PolynomialSystem::trySettingValueToVariable");
   ProgressReport report1;
@@ -1317,7 +1322,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
     << global.fatal;
   }
   PolynomialSubstitution<Coefficient> substitution;
-  substitution.makeIdentitySubstitution(this->systemSolution.size);
+  substitution.makeIdentitySubstitution(this->systemSolution.size, this->sampleCoefficient.one());
   Coefficient converter;
   converter = aValueToTryOnPreferredVariable;
   substitution[variableIndex] = converter;
@@ -1337,7 +1342,7 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
     variableIndex, aValueToTryOnPreferredVariable
   );
   for (int i = 0; i < inputSystem.size; i ++) {
-    inputSystem[i].substitute(substitution, 1);
+    inputSystem[i].substitute(substitution, this->sampleCoefficient.one());
   }
   heuristicAttempt.solveSerreLikeSystemRecursively(inputSystem);
   this->numberOfSerreSystemComputations +=
@@ -1407,15 +1412,15 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
       report1.report(out.str());
     }
     PolynomialSubstitution<Coefficient> substitution;
-    substitution.makeIdentitySubstitution(this->systemSolution.size);
-    substitution[i] = 0;
+    substitution.makeIdentitySubstitution(this->systemSolution.size, this->sampleCoefficient.one());
+    substitution[i] =  this->sampleCoefficient.zero();
     PolynomialSystem<Coefficient>& oneCase =
     this->computationUsedInRecursiveCalls.getElement();
     this->setUpRecursiveComputation(oneCase);
-    oneCase.setSerreLikeSolutionIndex(i, 0);
+    oneCase.setSerreLikeSolutionIndex(i, this->sampleCoefficient.zero());
     inputOutputSystem = inputSystemCopy;
     for (int j = 0; j < inputOutputSystem.size; j ++) {
-      inputOutputSystem[j].substitute(substitution, 1);
+      inputOutputSystem[j].substitute(substitution, this->sampleCoefficient.one());
     }
     oneCase.solveSerreLikeSystemRecursively(inputOutputSystem);
     this->processSolvedSubcaseIfSolvedOrProvenToHaveSolution(oneCase);
@@ -1529,7 +1534,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
       << ". ";
       report3.report(reportStreamHeuristics.str());
     }
-    const Rational& arbitrarySubstitution =
+    const Coefficient& arbitrarySubstitution =
     this->substitutionsProvider.arbitrarySubstitutions[i];
     this->trySettingValueToVariable(inputSystem, arbitrarySubstitution);
     if (this->flagSystemSolvedOverBaseField) {
@@ -1605,6 +1610,8 @@ std::string PolynomialSystem<Coefficient>::toStringCalculatorInputFromSystem(
   return out.str();
 }
 
+
+
 template <class Coefficient>
 void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
   List<Polynomial<Coefficient> >& inputSystem
@@ -1624,7 +1631,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
       numberOfVariables, workingSystem[i].minimalNumberOfVariables()
     );
   }
-  this->systemSolution.initializeFillInObject(numberOfVariables, 0);
+  this->systemSolution.initializeFillInObject(numberOfVariables, this->sampleCoefficient.zero());
   this->solutionsFound.initialize(numberOfVariables);
   ProgressReport report;
   std::stringstream reportStream;
@@ -1661,14 +1668,16 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     this->flagUsingAlgebraicClosure = true;
     this->solveSerreLikeSystemRecursively(workingSystem);
   }
-  if (this->flagSystemSolvedOverBaseField) {
+  if (!this->flagSystemSolvedOverBaseField) {
+    return;
+  }
     if (
       this->solutionsFound.cardinalitySelection !=
       this->solutionsFound.numberOfElements
     ) {
       for (int i = 0; i < this->solutionsFound.numberOfElements; i ++) {
         if (!this->solutionsFound.selected[i]) {
-          this->setSerreLikeSolutionIndex(i, 0);
+        this->setSerreLikeSolutionIndex(i, this->sampleCoefficient.zero());
         }
       }
     }
@@ -1676,7 +1685,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     this->getSubstitutionFromPartialSolutionSerreLikeSystem(substitution);
     workingSystem = inputSystem;
     for (int i = 0; i < workingSystem.size; i ++) {
-      workingSystem[i].substitute(substitution, 1);
+      workingSystem[i].substitute(substitution, this->sampleCoefficient.one());
       if (!workingSystem[i].isEqualToZero()) {
         global.fatal
         << "<br>"
@@ -1697,7 +1706,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
         << global.fatal;
       }
     }
-  }
+
 }
 
 template <class Coefficient>
@@ -3404,4 +3413,47 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   this->divisionLog += divisionLogBuilder.str();
 }
 
+
+template <class Coefficient>
+int ArbitrarySubstitutionsProvider<Coefficient>::
+    preferredVariableForArbitrarySubstitutionProvider(
+        Selection& variablesToSolveFor, int bestIndexHeuristically
+        ) {
+  if (!this->flagChooseSmallestIndexVariableFirst) {
+    return bestIndexHeuristically;
+  }
+  if (variablesToSolveFor.cardinalitySelection == 0) {
+    return bestIndexHeuristically;
+  }
+  variablesToSolveFor.computeIndicesFromSelection();
+  return variablesToSolveFor.elements[0];
+}
+
+template <class Coefficient>
+ArbitrarySubstitutionsProvider<Coefficient>::ArbitrarySubstitutionsProvider() {
+  this->flagChooseSmallestIndexVariableFirst = false;
+  this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf = - 1;
+}
+
+template <class Coefficient>
+void ArbitrarySubstitutionsProvider<Coefficient>::computeArbitrarySubstitutions(
+    int recursionDepth
+    ) {
+  if (
+      this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf > 0 &&
+      (recursionDepth - 1) %
+              this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf ==
+          0
+      ) {
+    // One comes first.
+    this->arbitrarySubstitutions = List<Rational>(
+        {Rational::oneStatic(), Rational::zeroStatic()}
+        );
+  } else {
+    // Zero comes first.
+    this->arbitrarySubstitutions = List<Rational>(
+        {Rational::zeroStatic(), Rational::oneStatic()}
+        );
+  }
+}
 #endif // header_math_general_polynomial_computations_advanced_implementation_ALREADY_INCLUDED

@@ -2508,7 +2508,7 @@ bool CalculatorConversions::polynomialModuloInteger(
     << " must be non-negative. ";
   }
   Polynomial<ElementZmodP> converted;
-  ElementZmodP::convertModuloIntegerAfterScalingToIntegral(
+  ElementZmodP::convertPolynomialRationalToModular(
     polynomial.content, converted, modulus.value
   );
   polynomial.context.setDefaultModulus(modulus.value);

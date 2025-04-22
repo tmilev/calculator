@@ -5,6 +5,7 @@
 #include "math_extra_drawing_variables.h"
 #include "math_extra_finite_groups.h"
 #include "math_vectors.h"
+#include "math_lie_theory.h"
 
 class Plot;
 class CartanInvolution;

@@ -489,4 +489,6 @@ public:
   };
 };
 
+
+
 #endif // header_math_extra_algebraic_numbers_ALREADY_INCLUDED

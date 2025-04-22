@@ -7,7 +7,6 @@
 #include "math_subsets_selections.h"
 #include "progress_report.h"
 
-
 std::string MonomialVector::toString(FormatExpressions* format) const {
   if (format != nullptr) {
     if (
@@ -937,7 +936,7 @@ convertPolynomialOneVariableToPolynomialFirstVariable(
     << global.fatal;
   }
   PolynomialSubstitution<AlgebraicNumber> substitution;
-  substitution.makeIdentitySubstitution(indexVariable + 1,1);
+  substitution.makeIdentitySubstitution(indexVariable + 1, 1);
   substitution[indexVariable].makeMonomial(0, 1, 1);
   output = input;
   output.substitute(substitution, this->one());
@@ -1890,20 +1889,21 @@ void AlgebraicNumber::operator=(int other) {
   *this = Rational(other);
 }
 
-template <>
+template < >
 bool PolynomialSystem<AlgebraicNumber>::getOneVariablePolynomialSolution(
-    const Polynomial<AlgebraicNumber>& polynomial, AlgebraicNumber& outputSolution
-    ) {
+  const Polynomial<AlgebraicNumber>& polynomial,
+  AlgebraicNumber& outputSolution
+) {
   STACK_TRACE("PolynomialSystem::getOneVariablePolynomialSolution");
   AlgebraicNumber number;
   if (this->algebraicClosure == 0) {
     return false;
   }
   if (
-      !number.constructFromMinimalPolynomial(
-          polynomial, *this->algebraicClosure, nullptr
-          )
-      ) {
+    !number.constructFromMinimalPolynomial(
+      polynomial, *this->algebraicClosure, nullptr
+    )
+  ) {
     return false;
   }
   outputSolution = number;

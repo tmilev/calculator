@@ -2,10 +2,10 @@
 #define header_math_lie_theory_ALREADY_INCLUDED
 
 #include "general_strings.h"
+#include "math_general.h"
 #include "math_large_integers.h"
 #include "math_subsets_selections.h"
 #include "math_vectors.h"
-#include "math_general.h"
 
 // An externally defined class used to plot Dynkin diagrams.
 class Plot;
@@ -69,7 +69,6 @@ public:
     static bool basic();
   };
 };
-
 
 class DynkinSimpleType {
   friend std::ostream& operator<<(
@@ -473,7 +472,6 @@ public:
   }
 };
 
-
 class PolynomialOverModule;
 
 class SlTwoInSlN {
@@ -548,8 +546,8 @@ public:
   List<List<Polynomial<Rational> > > rPolynomials;
   List<List<Rational> > kazhdanLuzstigCoefficients;
   void kazhdanLuzstigCoefficientsToString(
-      List<int>& kazhdanLuzstigCoefficients, std::string& output
-      );
+    List<int>& kazhdanLuzstigCoefficients, std::string& output
+  );
   void findNextToExplore();
   int findMinimalBruhatNonExplored(List<bool>& explored);
   int findMaximalBruhatNonExplored(List<bool>& explored);
@@ -572,8 +570,8 @@ public:
   void computeRPolys();
   int computeProductfromSimpleReflectionsActionList(int x, int y);
   void writeKLCoeffsToFile(
-      std::fstream& output, List<int>& KLcoeff, int topIndex
-      );
+    std::fstream& output, List<int>& KLcoeff, int topIndex
+  );
   // returns the topIndex of the KL coefficients
   int readKLCoeffsFromFile(std::fstream& input, List<int>& output);
   KazhdanLusztigPolynomials() {
@@ -582,4 +580,5 @@ public:
   void generatePartialBruhatOrder();
   void initFromWeyl(WeylGroupData* weylGroup);
 };
+
 #endif // header_math_lie_theory_ALREADY_INCLUDED

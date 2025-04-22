@@ -11,8 +11,6 @@ class AlgebraicClosureRationals;
 template <class Coefficient>
 class MatrixTensor;
 
-
-
 template <
   class Coefficient,
   unsigned int inputHashFunction(const Coefficient&) = Coefficient::
@@ -2732,9 +2730,6 @@ public:
   }
 };
 
-
-
-
 template <class TemplateMonomial, class Coefficient>
 bool LinearCombination<TemplateMonomial, Coefficient>::operator==(int x) const {
   if (x == 0) {
@@ -3640,7 +3635,6 @@ void Matrix<Coefficient>::getMaxMovementAndLeavingVariableRow(
   }
 }
 
-
 template <typename Coefficient>
 void Matrix<Coefficient>::getZeroEigenSpaceModifyMe(
   List<Vector<Coefficient> >& output
@@ -3713,7 +3707,6 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
   }
   return out.str();
 }
-
 
 template <class Coefficient>
 std::string Vector<Coefficient>::toStringLetterFormat(
@@ -4326,7 +4319,6 @@ public:
   bool checkConsistency() const;
 };
 
-
 class VectorPartition {
 public:
   Vectors<Rational> partitioningVectors;
@@ -4930,7 +4922,6 @@ void MatrixTensor<Coefficient>::invert() {
 
 class PolynomialOverModule;
 
-
 template <typename Coefficient>
 void Matrix<Coefficient>::getVectorFromRow(
   int rowIndex, Vector<Coefficient>& output
@@ -5008,7 +4999,6 @@ std::ostream& operator<<(
   }
   return output;
 }
-
 
 template <class Coefficient>
 void Vectors<Coefficient>::intersectTwoLinearSpaces(

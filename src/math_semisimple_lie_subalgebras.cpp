@@ -7160,7 +7160,6 @@ void SemisimpleSubalgebras::resetComputations() {
   this->subalgebras.clear();
 }
 
-
 void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   int maximumPolynomialDivisions = 1000;
   int maximumMonomialOperations = 10000;

@@ -3,14 +3,12 @@
 
 #include "general_logging_global_variables.h"
 #include "general_strings.h"
+#include "math_general.h"
 #include "math_large_integers.h"
 #include "math_subsets_selections.h"
 #include "math_vectors.h"
-#include "math_general.h"
 
 class ProgressReport;
-
-
 
 class MonomialPolynomial {
 private:
@@ -298,9 +296,6 @@ public:
   };
 };
 
-
-
-
 class MonomialWeylAlgebra {
 public:
   MonomialPolynomial polynomialPart;
@@ -376,9 +371,6 @@ std::iostream& operator<<(
   return output;
 }
 
-
-
-
 class PolynomialOrder {
 public:
   List<MonomialPolynomial>::Comparator monomialOrder;
@@ -424,7 +416,9 @@ public:
   const;
   // Gets the constant term of a polynomial.
   // Pass the coefficient zero as input.
-  Coefficient constantTerm(const Coefficient& ringZero = Coefficient::zeroStatic()) const {
+  Coefficient constantTerm(
+    const Coefficient& ringZero = Coefficient::zeroStatic()
+  ) const {
     Coefficient result;
     this->constantTerm(result, ringZero);
     return result;
@@ -1277,7 +1271,8 @@ public:
   static void getVariablesToSolveFor(
     const List<Polynomial<Coefficient> >& input, Selection& output
   );
-  void trySettingValueToVariable(List<Polynomial<Coefficient> >& inputSystem,
+  void trySettingValueToVariable(
+    List<Polynomial<Coefficient> >& inputSystem,
     const Coefficient& aValueToTryOnPreferredVariable
   );
   static bool isContradictoryReducedSystem(
@@ -1302,9 +1297,6 @@ public:
     const Polynomial<Rational>& input, std::stringstream* commentsOnFailure
   );
 };
-
-
-
 
 template <class Coefficient>
 bool Polynomial<Coefficient>::getLinearSystemFromLinearPolynomials(
@@ -1367,9 +1359,6 @@ void Polynomial<Coefficient>::makeLinearNoConstant(
   }
 }
 
-
-
-
 template <class Coefficient>
 void PolynomialSubstitution<Coefficient>::makeIdentitySubstitution(
   int numberOfVariables, const Coefficient& ringUnit
@@ -1417,10 +1406,6 @@ void PolynomialSubstitution<Coefficient>::makeExponentSubstitution(
   }
 }
 
-
-
-
-
 template <class Coefficient>
 void Polynomial<Coefficient>::makePolynomialFromDirectionAndNormal(
   Vector<Coefficient>& direction,
@@ -1461,12 +1446,6 @@ void Matrix<Coefficient>::actOnMonomialAsDifferentialOperator(
   }
 }
 
-
-
-
-
-
-
 template <class Coefficient>
 void PolynomialSubstitution<Coefficient>::
 makeLinearSubstitutionConstantTermsLastRow(Matrix<Coefficient>& matrix) {
@@ -1502,9 +1481,5 @@ void PolynomialSubstitution<Coefficient>::getLinearSystemFromLinearPolynomials(
     << global.fatal;
   }
 }
-
-
-
-
 
 #endif // header_math_polynomials_ALREADY_INCLUDED

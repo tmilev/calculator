@@ -1268,14 +1268,14 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool solvePolynomialSystemModP(
-      Calculator& calculator,
-      const Vector<Polynomial<Rational> >& input,
-      ExpressionContext& context,
-      Expression& output,
-      int maximumPolynomialDivisions,
-      int maximumMonomialOperations,
-      int primeModulus
-      );
+    Calculator& calculator,
+    const Vector<Polynomial<Rational> >& input,
+    ExpressionContext& context,
+    Expression& output,
+    int maximumPolynomialDivisions,
+    int maximumMonomialOperations,
+    int primeModulus
+  );
   static bool solvePolynomialSystem(
     Calculator& calculator,
     const Vector<Polynomial<Rational> >& input,

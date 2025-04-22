@@ -3,6 +3,7 @@
 
 #include "math_general.h"
 #include "math_polynomials.h"
+
 class EllipticCurveWeierstrassNormalForm {
 public:
   LargeInteger linearCoefficient;

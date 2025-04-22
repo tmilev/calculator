@@ -644,11 +644,10 @@ bool Vectors<Coefficient>::linearAlgebraForVertexComputation(
   return false;
 }
 
-
 template <class Object>
 void List<Object>::subSelection(
-    const Selection& selection, List<Object>& output
-    ) {
+  const Selection& selection, List<Object>& output
+) {
   if (&output == this) {
     List<Object> thisCopy = *this;
     thisCopy.subSelection(selection, output);
@@ -662,8 +661,8 @@ void List<Object>::subSelection(
 
 template <class Object>
 void List<Object>::intersectWith(
-    const List<Object>& other, List<Object>& output
-    ) const {
+  const List<Object>& other, List<Object>& output
+) const {
   if (&output == &other || this == &output) {
     List<Object> l1 = *this;
     List<Object> l2 = other;

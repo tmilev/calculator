@@ -9,8 +9,6 @@
 
 const int ElementZmodP::maximumModulusForUserFacingPolynomialDivision = 10000;
 
-
-
 bool ElementZmodP::needsParenthesisForMultiplication(
   FormatExpressions* format
 ) const {
@@ -204,24 +202,29 @@ void ElementZmodP::convertLiftPolynomialModular(
   }
 }
 
-void ElementZmodP::convertPolynomialsRationalToModular(      const List<Polynomial<Rational>>& input,
-                                                       List<Polynomial<ElementZmodP>>& output,
-                                                       const LargeIntegerUnsigned& newModulus
-){
+void ElementZmodP::convertPolynomialsRationalToModular(
+  const List<Polynomial<Rational> >& input,
+  List<Polynomial<ElementZmodP> >& output,
+  const LargeIntegerUnsigned& newModulus
+) {
   STACK_TRACE("ElementZmodP::convertPolynomialsRationalToModular");
-  for (const Polynomial<Rational>& polynomial: input){
+  for (const Polynomial<Rational>& polynomial : input) {
     Polynomial<ElementZmodP> converted;
-    ElementZmodP:: convertPolynomialRationalToModular(polynomial, converted, newModulus);
-output.addOnTop(converted);
+    ElementZmodP::convertPolynomialRationalToModular(
+      polynomial, converted, newModulus
+    );
+    output.addOnTop(converted);
   }
-
 }
 
-void ElementZmodP::convertPolynomialRationalToModular(const Polynomial<Rational>& input,
+void ElementZmodP::convertPolynomialRationalToModular(
+  const Polynomial<Rational>& input,
   Polynomial<ElementZmodP>& output,
   const LargeIntegerUnsigned& newModulus
 ) {
-  STACK_TRACE("ElementZmodP::convertPolynomialModuloIntegerAfterScalingToIntegral");
+  STACK_TRACE(
+    "ElementZmodP::convertPolynomialModuloIntegerAfterScalingToIntegral"
+  );
   Polynomial<Rational> rescaled;
   rescaled = input;
   rescaled.scaleNormalizeLeadingMonomial(&MonomialPolynomial::orderDefault());
@@ -463,4 +466,3 @@ bool ElementZmodP::operator/=(const ElementZmodP& other) {
   *this *= inverted;
   return true;
 }
-

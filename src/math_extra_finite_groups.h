@@ -5,8 +5,8 @@
 #include "json.h"
 #include "math_extra_vector_space.h"
 #include "math_general.h"
-#include "math_polynomials.h"
 #include "math_lie_theory.h"
+#include "math_polynomials.h"
 
 // To do: move Weyl groups to this file. Eliminate all redundant code and
 // organize nicely.

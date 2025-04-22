@@ -2,8 +2,9 @@
 #define header_math_extra_polynomial_factorization_ALREADY_INCLUDED
 
 #include "math_general.h"
-#include "math_polynomials.h"
 #include "math_modular_arithmetic.h"
+#include "math_polynomials.h"
+
 class IntegerModulusSmall {
 public:
   int modulus;

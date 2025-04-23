@@ -1232,6 +1232,7 @@ bool CalculatorFunctions::solvePolynomialSystemModP(
   system.flagTryDirectlySolutionOverAlgebraicClosure = false;
   global.defaultFormat.getElement() = system.groebner.format;
   system.flagUseMonomialBranchingOptimization = true;
+  system.sampleCoefficient.makeFrom(modulus, 1);
   system.solveSerreLikeSystem(polynomials);
   std::stringstream out;
   out << "<br>The context vars:<br>" << context.toString();
@@ -1668,17 +1669,18 @@ bool IntegralRationalFunctionComputation::checkConsistency() const {
 bool IntegralRationalFunctionComputation::
 preparePartialFractionExpressionSummands() {
   STACK_TRACE(
-    "IntegralRationalFunctionComputation::preparePartialFractionExpressionSummands"
+    "IntegralRationalFunctionComputation::"
+    "preparePartialFractionExpressionSummands"
   );
   this->checkConsistency();
   Expression polynomialExpression;
   Expression currentNumerator;
   Expression denominatorExponent;
   Expression currentDenominatorNoPowerMonic;
-  Expression currentDen;
+  Expression currentDenominator;
   Expression currentPartialFractionNoCoefficient;
   Expression currentPFWithCoefficient;
-  Expression coeffE;
+  Expression coefficientExpression;
   this->partialFractionSummands.setSize(0);
   Polynomial<AlgebraicNumber> denominatorRescaled;
   Polynomial<AlgebraicNumber> numeratorRescaled;
@@ -1729,19 +1731,20 @@ preparePartialFractionExpressionSummands() {
       }
       if (j != 0) {
         denominatorExponent.assignValue(*this->owner, j + 1);
-        currentDen.makeXOX(
+        currentDenominator.makeXOX(
           *this->owner,
           this->owner->opPower(),
           currentDenominatorNoPowerMonic,
           denominatorExponent
         );
       } else {
-        currentDen = currentDenominatorNoPowerMonic;
+        currentDenominator = currentDenominatorNoPowerMonic;
       }
       currentPartialFractionNoCoefficient = currentNumerator;
-      currentPartialFractionNoCoefficient /= currentDen;
-      coeffE.assignValue(*this->owner, currentCoefficient);
-      currentPFWithCoefficient = coeffE * currentPartialFractionNoCoefficient;
+      currentPartialFractionNoCoefficient /= currentDenominator;
+      coefficientExpression.assignValue(*this->owner, currentCoefficient);
+      currentPFWithCoefficient =
+      coefficientExpression * currentPartialFractionNoCoefficient;
       currentPFWithCoefficient.checkConsistencyRecursively();
       this->partialFractionSummands.addOnTop(currentPFWithCoefficient);
     }
@@ -5188,9 +5191,9 @@ bool CalculatorFunctionsIntegration::integrateRationalFunctionBuidingBlockIb(
 bool CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(
   const Expression& quadratic,
   const Expression& variable,
-  Expression& outputCoeffVarSquared,
-  Expression& outputCoeffLinTerm,
-  Expression& outputConstTerm
+  Expression& outputCoefficientVariableSquared,
+  Expression& outputCoefficientLinearTerm,
+  Expression& outputConstantTerm
 ) {
   STACK_TRACE(
     "CalculatorFunctions::"
@@ -5211,17 +5214,19 @@ bool CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(
   if (coefficients.getLargestParticipatingBasisIndex() != 2) {
     return false;
   }
-  outputCoeffVarSquared.assignValue(calculator, 0);
-  outputCoeffLinTerm.assignValue(calculator, 0);
-  outputConstTerm.assignValue(calculator, 0);
+  outputCoefficientVariableSquared.assignValue(calculator, 0);
+  outputCoefficientLinearTerm.assignValue(calculator, 0);
+  outputConstantTerm.assignValue(calculator, 0);
   if (coefficients.monomials.contains(MonomialVector(0))) {
-    outputConstTerm = coefficients.getCoefficientOf(MonomialVector(0));
+    outputConstantTerm = coefficients.getCoefficientOf(MonomialVector(0));
   }
   if (coefficients.monomials.contains(MonomialVector(1))) {
-    outputCoeffLinTerm = coefficients.getCoefficientOf(MonomialVector(1));
+    outputCoefficientLinearTerm =
+    coefficients.getCoefficientOf(MonomialVector(1));
   }
   if (coefficients.monomials.contains(MonomialVector(2))) {
-    outputCoeffVarSquared = coefficients.getCoefficientOf(MonomialVector(2));
+    outputCoefficientVariableSquared =
+    coefficients.getCoefficientOf(MonomialVector(2));
   }
   return true;
 }
@@ -5229,8 +5234,8 @@ bool CalculatorFunctions::extractQuadraticCoefficientsWithRespectToVariable(
 bool CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(
   const Expression& linearExpression,
   const Expression& variable,
-  Expression& outputCoeffLinTerm,
-  Expression& outputConstTerm
+  Expression& outputCoefficientLinearTerm,
+  Expression& outputConstantTerm
 ) {
   STACK_TRACE(
     "CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable"
@@ -5246,13 +5251,14 @@ bool CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(
   if (coefficients.getLargestParticipatingBasisIndex() > 1) {
     return false;
   }
-  outputCoeffLinTerm.assignValue(calculator, 0);
-  outputConstTerm.assignValue(calculator, 0);
+  outputCoefficientLinearTerm.assignValue(calculator, 0);
+  outputConstantTerm.assignValue(calculator, 0);
   if (coefficients.monomials.contains(MonomialVector(1))) {
-    outputCoeffLinTerm = coefficients.getCoefficientOf(MonomialVector(1));
+    outputCoefficientLinearTerm =
+    coefficients.getCoefficientOf(MonomialVector(1));
   }
   if (coefficients.monomials.contains(MonomialVector(0))) {
-    outputConstTerm = coefficients.getCoefficientOf(MonomialVector(0));
+    outputConstantTerm = coefficients.getCoefficientOf(MonomialVector(0));
   }
   return true;
 }

@@ -1260,8 +1260,8 @@ void Lattice::intersectWithLinearSubspaceGivenByNormal(
     return;
   }
   int pivotColumnIndex = scalarProducts.getIndexLastNonZeroCoordinate();
-  Rational pivotCoeff = scalarProducts[pivotColumnIndex];
-  scalarProducts /= - pivotCoeff;
+  Rational pivotCoefficient = scalarProducts[pivotColumnIndex];
+  scalarProducts /= - pivotCoefficient;
   Vectors<Rational> eigenSpacePlusOrthogonalComponent;
   eigenSpacePlusOrthogonalComponent.setSize(scalarProducts.size);
   for (int i = 0; i < scalarProducts.size; i ++) {

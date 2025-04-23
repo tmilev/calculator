@@ -405,7 +405,7 @@ public:
   );
   bool assignMonomialUniversalEnveloping(
     MonomialUniversalEnveloping<Coefficient>& input,
-    const Coefficient& inputCoeff,
+    const Coefficient& inputCoefficient,
     SemisimpleLieAlgebraOrdered& owner,
     const Coefficient& ringUnit,
     const Coefficient& ringZero
@@ -429,11 +429,11 @@ public:
     PolynomialSubstitution<Rational>& substitution
   );
   void makeConstant(
-    const Coefficient& coeff, SemisimpleLieAlgebraOrdered& inputOwner
+    const Coefficient& coefficient, SemisimpleLieAlgebraOrdered& inputOwner
   ) {
     this->makeZero(inputOwner);
     MonomialUniversalEnvelopingOrdered<Coefficient> monomial;
-    monomial.makeConstant(coeff, inputOwner);
+    monomial.makeConstant(coefficient, inputOwner);
     this->addMonomial(monomial);
   }
   void simplify(
@@ -969,19 +969,19 @@ bool SemisimpleLieAlgebra::getElementAdjointRepresentation(
 
 template <class Coefficient>
 void MonomialUniversalEnveloping<Coefficient>::modOutVermaRelations(
-  Coefficient& outputCoeff,
+  Coefficient& outputCoefficient,
   const Vector<Coefficient>* substitutionHiGoesToIthElement,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
 ) {
   int totalPositiveRoots = this->getOwner().getNumberOfPositiveRoots();
   int dimension = this->getOwner().getRank();
-  outputCoeff = ringUnit;
+  outputCoefficient = ringUnit;
   for (int i = this->generatorsIndices.size - 1; i >= 0; i --) {
     int indexCurrentGenerator = this->generatorsIndices[i];
     if (indexCurrentGenerator >= totalPositiveRoots + dimension) {
       this->makeOne(*this->owner);
-      outputCoeff = ringZero;
+      outputCoefficient = ringZero;
       return;
     }
     if (indexCurrentGenerator < totalPositiveRoots) {
@@ -993,7 +993,7 @@ void MonomialUniversalEnveloping<Coefficient>::modOutVermaRelations(
     ) {
       if (substitutionHiGoesToIthElement == 0) {
         this->makeOne(*this->owner);
-        outputCoeff = ringZero;
+        outputCoefficient = ringZero;
         return;
       }
       int degree = 0;
@@ -1004,7 +1004,7 @@ void MonomialUniversalEnveloping<Coefficient>::modOutVermaRelations(
       Coefficient substitutedH;
       substitutedH = (*substitutionHiGoesToIthElement)[hIndex];
       MathRoutines::raiseToPower(substitutedH, degree, ringUnit);
-      outputCoeff *= substitutedH;
+      outputCoefficient *= substitutedH;
       this->generatorsIndices.size --;
       this->powers.size --;
     }
@@ -2137,7 +2137,7 @@ template <class Coefficient>
 bool ElementUniversalEnvelopingOrdered<Coefficient>::
 assignMonomialUniversalEnveloping(
   MonomialUniversalEnveloping<Coefficient>& input,
-  const Coefficient& inputCoeff,
+  const Coefficient& inputCoefficient,
   SemisimpleLieAlgebraOrdered& owner,
   const Coefficient& ringUnit,
   const Coefficient& ringZero
@@ -2145,12 +2145,12 @@ assignMonomialUniversalEnveloping(
   ElementUniversalEnvelopingOrdered monomial;
   ElementSemisimpleLieAlgebra<Rational> element;
   Coefficient coefficient;
-  coefficient = inputCoeff;
+  coefficient = inputCoefficient;
   this->makeConstant(coefficient, owner);
   for (int i = 0; i < input.generatorsIndices.size; i ++) {
     int power;
-    bool isASmallInt = input.powers.objects[i].isSmallInteger(&power);
-    if (isASmallInt) {
+    bool isASmallInteger = input.powers.objects[i].isSmallInteger(&power);
+    if (isASmallInteger) {
       element.makeGenerator(
         input.generatorsIndices.objects[i], *input.owners, input.indexInOwners
       );
@@ -2365,7 +2365,7 @@ splitCharacterOverReductiveSubalgebra(
   List<Coefficient> multiplicities;
   HashedList<Vector<Coefficient> > tempHashedRoots;
   Coefficient bufferCoefficient;
-  Coefficient highestCoeff;
+  Coefficient highestCoefficient;
   for (int i = 0; i < this->size(); i ++) {
     const Weight<Coefficient>& monomial = (*this)[i];
     if (
@@ -2492,11 +2492,11 @@ splitCharacterOverReductiveSubalgebra(
         }
       }
     }
-    highestCoeff =
+    highestCoefficient =
     remainingCharProjected.coefficients[
       remainingCharProjected.monomials.getIndex(localHighest)
     ];
-    output.addMonomial(localHighest, highestCoeff);
+    output.addMonomial(localHighest, highestCoefficient);
     if (
       !weylGroupFiniteDimensionalSmall.freudenthalFormulaIrrepIsWRTLeviPart(
         localHighest.weightFundamentalCoordinates,
@@ -2517,7 +2517,7 @@ splitCharacterOverReductiveSubalgebra(
       weylGroupFiniteDimensionalSmall.ambientWeyl->
       getFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoefficient = multiplicities[i];
-      bufferCoefficient *= highestCoeff;
+      bufferCoefficient *= highestCoefficient;
       remainingCharProjected.subtractMonomial(
         workingMonomial, bufferCoefficient
       );

@@ -9582,12 +9582,12 @@ computeRootSubsystem() {
 }
 
 void KazhdanLusztigPolynomials::writeKLCoeffsToFile(
-  std::fstream& output, List<int>& KLcoeff, int topIndex
+  std::fstream& output, List<int>& KLCoefficient, int topIndex
 ) {
   output.clear();
   output << "Top_index: " << topIndex << "\n";
   std::string currentString;
-  this->kazhdanLuzstigCoefficientsToString(KLcoeff, currentString);
+  this->kazhdanLuzstigCoefficientsToString(KLCoefficient, currentString);
   output << currentString;
 }
 

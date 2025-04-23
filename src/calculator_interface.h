@@ -2971,7 +2971,7 @@ public:
   static bool collectCoefficientsPowersVariables(
     const Expression& input,
     const Expression& variable,
-    VectorSparse<Expression>& outputPositionIiscoeffXtoIth
+    VectorSparse<Expression>& outputPositionJIsCoefficientXtoJth
   );
   bool collectOpands(
     const Expression& input, int operation, List<Expression>& outputOpands

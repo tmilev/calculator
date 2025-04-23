@@ -60,7 +60,7 @@ public:
     std::stringstream* logStream = nullptr
   );
   void modOutVermaRelations(
-    Coefficient& outputCoeff,
+    Coefficient& outputCoefficient,
     const Vector<Coefficient>* substitutionHiGoesToIthElement = 0,
     const Coefficient& ringUnit = 1,
     const Coefficient& ringZero = 0

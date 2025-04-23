@@ -570,7 +570,7 @@ public:
   void computeRPolys();
   int computeProductfromSimpleReflectionsActionList(int x, int y);
   void writeKLCoeffsToFile(
-    std::fstream& output, List<int>& KLcoeff, int topIndex
+    std::fstream& output, List<int>& KLCoefficient, int topIndex
   );
   // returns the topIndex of the KL coefficients
   int readKLCoeffsFromFile(std::fstream& input, List<int>& output);

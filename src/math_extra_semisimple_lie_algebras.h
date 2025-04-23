@@ -1059,10 +1059,10 @@ void Weight<Coefficient>::accountSingleWeight(
   monomial.owner = this->owner;
   monomial.weightFundamentalCoordinates =
   weylGroup.getFundamentalCoordinatesFromSimple(dominant);
-  Coefficient coeffChange;
-  coeffChange = multiplicity;
-  coeffChange *= sign;
-  outputAccum.addMonomial(monomial, coeffChange);
+  Coefficient coefficientChange;
+  coefficientChange = multiplicity;
+  coefficientChange *= sign;
+  outputAccum.addMonomial(monomial, coefficientChange);
 }
 
 template <class Coefficient>

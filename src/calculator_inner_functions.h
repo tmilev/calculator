@@ -1090,15 +1090,15 @@ public:
   static bool extractQuadraticCoefficientsWithRespectToVariable(
     const Expression& quadratic,
     const Expression& variable,
-    Expression& outputCoeffVarSquared,
-    Expression& outputCoeffLinTerm,
-    Expression& outputConstTerm
+    Expression& outputCoefficientVariableSquared,
+    Expression& outputCoefficientLinearTerm,
+    Expression& outputConstantTerm
   );
   static bool extractLinearCoefficientsWithRespectToVariable(
     const Expression& linearExpression,
     const Expression& variable,
-    Expression& outputCoeffLinTerm,
-    Expression& outputConstTerm
+    Expression& outputCoefficientLinearTerm,
+    Expression& outputConstantTerm
   );
   static bool powerImaginaryUnit(
     Calculator& calculator, const Expression& input, Expression& output

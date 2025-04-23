@@ -866,7 +866,7 @@ bool CalculatorBasics::rightDistributeBracketIsOnTheRight(
 bool Calculator::collectCoefficientsPowersVariables(
   const Expression& input,
   const Expression& variable,
-  VectorSparse<Expression>& outputPositionIiscoeffXtoIth
+  VectorSparse<Expression>& outputPositionJIsCoefficientXtoJth
 ) {
   STACK_TRACE("Calculator::collectCoefficientsPowersVariables");
   List<Expression> summands;
@@ -875,7 +875,7 @@ bool Calculator::collectCoefficientsPowersVariables(
   Calculator& calculator = *input.owner;
   calculator.collectOpands(input, calculator.opPlus(), summands);
   Expression currentCoefficient;
-  outputPositionIiscoeffXtoIth.makeZero();
+  outputPositionJIsCoefficientXtoJth.makeZero();
   for (int i = 0; i < summands.size; i ++) {
     calculator.collectOpands(
       summands[i], calculator.opTimes(), currentMultiplicands
@@ -891,7 +891,7 @@ bool Calculator::collectCoefficientsPowersVariables(
         currentCoefficient.makeProduct(calculator, remainingMultiplicands);
       }
       if (currentExpression == variable) {
-        outputPositionIiscoeffXtoIth.addMonomial(
+        outputPositionJIsCoefficientXtoJth.addMonomial(
           MonomialVector(1), currentCoefficient
         );
         found = true;
@@ -901,7 +901,7 @@ bool Calculator::collectCoefficientsPowersVariables(
         int power;
         if (currentExpression[1] == variable) {
           if (currentExpression[2].isSmallInteger(&power)) {
-            outputPositionIiscoeffXtoIth.addMonomial(
+            outputPositionJIsCoefficientXtoJth.addMonomial(
               MonomialVector(power), currentCoefficient
             );
             found = true;
@@ -911,7 +911,9 @@ bool Calculator::collectCoefficientsPowersVariables(
       }
     }
     if (!found) {
-      outputPositionIiscoeffXtoIth.addMonomial(MonomialVector(0), summands[i]);
+      outputPositionJIsCoefficientXtoJth.addMonomial(
+        MonomialVector(0), summands[i]
+      );
     }
   }
   return true;

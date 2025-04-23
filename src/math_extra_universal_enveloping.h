@@ -110,12 +110,9 @@ public:
   // first come the negative roots, in increasing height, then the elements of
   // the Cartan subalgebra, then the positive roots, in increasing height
   // The order of the positive roots is the same as the order in which roots
-  // are
-  // kept
-  // in WeylGroup::RootSystem.
+  // are kept in WeylGroup::rootSystem.
   // The "zero level roots" - i.e. the elements of the Cartan subalgebra lie in
-  // between
-  // the negative and positive rootss.
+  // between the negative and positive rootss.
   void simplify(
     ElementUniversalEnveloping<Coefficient>& output,
     const Coefficient& ringUnit = 1
@@ -342,6 +339,9 @@ public:
     const PolynomialSubstitution<Rational>& polynomialSubstitution
   );
   void makeCasimir(SemisimpleLieAlgebra& inputOwner);
+  // Same as make casimir but uses a slower formula.
+  // Used during development to check the output of the above.
+  void makeCasimirErrorCheck(SemisimpleLieAlgebra& inputOwner);
   void makeCasimirWRTLeviParabolic(
     SemisimpleLieAlgebra& owner, const Selection& leviRoots
   );
@@ -408,6 +408,11 @@ public:
   ) {
     this->operator=(other);
   }
+  class Test {
+  public:
+    static bool all();
+    static bool casimirElement();
+  };
 };
 
 template <class Coefficient>
@@ -427,13 +432,13 @@ void ElementUniversalEnveloping<Coefficient>::substitute(
   ElementUniversalEnveloping<Coefficient> output;
   output.makeZero(*this->owner);
   MonomialUniversalEnveloping<Coefficient> monomial;
-  Coefficient tempCF;
+  Coefficient coefficient;
   for (int i = 0; i < this->size(); i ++) {
     monomial = (*this)[i];
     monomial.substitute(polynomialSubstitution);
-    tempCF = this->coefficients[i];
-    tempCF.substitute(polynomialSubstitution, 1, nullptr);
-    output.addMonomial(monomial, tempCF);
+    coefficient = this->coefficients[i];
+    coefficient.substitute(polynomialSubstitution, 1, nullptr);
+    output.addMonomial(monomial, coefficient);
   }
   *this = output;
 }
@@ -454,7 +459,8 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimirWRTLeviParabolic(
   Selection rootsNotInLEvi = leviRoots;
   rootsNotInLEvi.invertSelection();
   Vector<Rational> rootsNotInLeviVectorForm = rootsNotInLEvi;
-  Vector<Rational> weightLeft, weightRight;
+  Vector<Rational> weightLeft;
+  Vector<Rational> weightRight;
   this->makeZero(owner);
   MonomialUniversalEnveloping<Coefficient> monomial;
   Rational coefficient;
@@ -948,18 +954,19 @@ Coefficient ElementUniversalEnveloping<Coefficient>::getKillingFormProduct(
     return 0;
   }
   Coefficient result = 0;
-  ElementUniversalEnveloping<Coefficient> adadAppliedToMon, element;
+  ElementUniversalEnveloping<Coefficient> adadAppliedToMonomial;
+  ElementUniversalEnveloping<Coefficient> element;
   SemisimpleLieAlgebra* owner = &this->getOwner();
-  MonomialUniversalEnveloping<Coefficient> baseGen;
+  MonomialUniversalEnveloping<Coefficient> baseGenenerator;
   for (int i = 0; i < owner->getNumberOfGenerators(); i ++) {
-    baseGen.makeGenerator(i, *owner);
-    adadAppliedToMon.makeZero(*owner);
-    adadAppliedToMon.addMonomial(baseGen, 1);
-    right.adjointRepresentationAction(adadAppliedToMon, element);
+    baseGenenerator.makeGenerator(i, *owner);
+    adadAppliedToMonomial.makeZero(*owner);
+    adadAppliedToMonomial.addMonomial(baseGenenerator, 1);
+    right.adjointRepresentationAction(adadAppliedToMonomial, element);
     element.simplify(Coefficient::one());
-    this->adjointRepresentationAction(element, adadAppliedToMon);
-    adadAppliedToMon.simplify(Coefficient::one());
-    result += adadAppliedToMon.getCoefficientOf(baseGen);
+    this->adjointRepresentationAction(element, adadAppliedToMonomial);
+    adadAppliedToMonomial.simplify(Coefficient::one());
+    result += adadAppliedToMonomial.getCoefficientOf(baseGenenerator);
   }
   return result;
 }
@@ -990,8 +997,8 @@ highestWeightTransposeAntiAutomorphismBilinearForm(
     this->getOwner().universalEnvelopingGeneratorOrder[i] = - 1;
   }
   accumulator.makeZero(this->getOwner());
-  MonomialUniversalEnveloping<Coefficient> constMon;
-  constMon.makeOne(this->getOwner());
+  MonomialUniversalEnveloping<Coefficient> constantMonomial;
+  constantMonomial.makeOne(this->getOwner());
   if (logStream != nullptr) {
     *logStream
     << "left element transposed: "
@@ -1069,7 +1076,7 @@ highestWeightTransposeAntiAutomorphismBilinearForm(
     }
     intermediate *= leftMonomialCoefficient;
     accumulator += intermediate;
-    int index = intermediate.monomials.getIndex(constMon);
+    int index = intermediate.monomials.getIndex(constantMonomial);
     if (index != - 1) {
       output += intermediate.coefficients[index];
     }
@@ -1093,72 +1100,20 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
   int dimension = weylGroup.cartanSymmetric.numberOfRows;
   Vector<Rational> root1;
   Vector<Rational> root2;
-  //  Matrix<Rational> killingForm;
-  //  killingForm.initialize(dimension, dimension);
-  //  for (int i = 0; i < dimension; i ++)
-  //  { root1.makeEi(dimension, i);
-  //    for (int j = 0; j < dimension; j ++)
-  //    { killingForm.elements[i][j] = 0;
-  //      root2.makeEi(dimension, j);
-  //      for (int k = 0; k < weylGroup.RootSystem.size; k++)
-  // killingForm.elements[i][j] += weylGroup.rootScalarCartanRoot(root1,
-  // weylGroup.RootSystem.objects[k])* weylGroup.rootScalarCartanRoot(root2,
-  // weylGroup.RootSystem.objects[k]);
-  //    }
-  //  }
-  //  killingForm.invert(global);
-  //  out << killingForm.toString(true, false);
-  ElementUniversalEnveloping<Coefficient> element1, element2;
-  // this code is to check a math formula:
-  //  ElementUniversalEnveloping checkElement;
-  //  checkElement.makeZero(owner);
-  Matrix<Rational> invertedSymCartan;
-  invertedSymCartan = weylGroup.cartanSymmetric;
-  invertedSymCartan.invert();
+  ElementUniversalEnveloping<Coefficient> element1;
+  ElementUniversalEnveloping<Coefficient> element2;
+  Matrix<Rational> invertedSymmetricCartan;
+  invertedSymmetricCartan = weylGroup.cartanSymmetric;
+  invertedSymmetricCartan.invert();
   for (int i = 0; i < dimension; i ++) {
     root1.makeEi(dimension, i);
-    // implementation without the ninja formula:
-    //    killingForm.actOnVectorColumn(root1, root2);
-    //    element1.makeCartanGenerator(root1, vars, owner);
-    //    element2.makeCartanGenerator(root2, vars, owner);
-    //    element1*= element2;
-    //    *this+= element1;
-    // Alternative implementation using a ninja formula I cooked up after
-    // looking at the printouts:
-    invertedSymCartan.actOnVectorColumn(root1, root2);
+    invertedSymmetricCartan.actOnVectorColumn(root1, root2);
     element1.makeCartanGenerator(root1, inputOwner);
     element2.makeCartanGenerator(root2, inputOwner);
     element1 *= element2;
     *this += element1;
   }
-  // Rational rational;
   for (int i = 0; i < weylGroup.rootSystem.size; i ++) {
-    // Implementation without the ninja formula:
-    //    rational = 0;
-    //    Vector<Rational> & root = weylGroup.RootSystem.objects[i];
-    //    int indexOfOpposite = weylGroup.RootSystem.getIndex(-root);
-    // Vector<Rational> & opposite =
-    // weylGroup.RootSystem.objects[indexOfOpposite];
-    //    for (int j = 0; j < weylGroup.RootSystem.size; j ++)
-    //    { Vector<Rational> & current = weylGroup.RootSystem.objects[j];
-    //      if (current == opposite)
-    //        rational +=2;
-    //       else
-    //       { int indexOfSum= weylGroup.RootSystem.getIndex(current +root);
-    //         if (indexOfSum!= - 1)
-    // rational
-    // +=(owner.ChevalleyConstants.elements[i][j]*owner.ChevalleyConstants.elements[indexOfOpposite][indexOfSum]);
-    //       }
-    //     }
-    //     rational +=2;
-    //     rational = 1/rational;
-    //     element2.makeOneGeneratorCoefficientOne(opposite, vars, owner);
-    //     element1.makeOneGeneratorCoefficientOne(root, vars, owner);
-    //     element2*= element1;
-    //
-    //     element2*= rational;
-    //     *this+= element2;
-    // The ninja formula alternative implementation:
     const Vector<Rational>& root = weylGroup.rootSystem[i];
     element2.makeOneGeneratorCoefficientOne(- root, inputOwner);
     element1.makeOneGeneratorCoefficientOne(root, inputOwner);
@@ -1171,23 +1126,74 @@ void ElementUniversalEnveloping<Coefficient>::makeCasimir(
     *this += element2;
   }
   *this /= weylGroup.getKillingDividedByTraceRatio();
-  // check that the ninja formula is correct:
-  // this->DebugString= out.str();
-  //  Vector<Rational> root;
-  //  for (int i = 0; i < dimension; i ++)
-  //  { root.makeEi(dimension, i);
-  //    if (!length1Explored)
-  //    { length1= weylGroup.rootScalarCartanRoot(root, root);
-  //      length1Explored = true;
-  //      coefficient1= 0;
-  //      for (int j = 0; j < weylGroup.rootsOfBorel.size; j ++)
-  // { coefficient1+= weylGroup.rootScalarCartanRoot(root,
-  // weylGroup.rootsOfBorel.objects[j])*weylGroup.rootScalarCartanRoot(root,
-  // weylGroup.rootsOfBorel.objects[j]);
-  //        coef
-  //      }
-  //    }
-  //  }
+  this->simplify(0);
+}
+
+template <class Coefficient>
+void ElementUniversalEnveloping<Coefficient>::makeCasimirErrorCheck(
+  SemisimpleLieAlgebra& inputOwner
+) {
+  // std::stringstream out;
+  this->makeZero(inputOwner);
+  WeylGroupData& weylGroup = this->getOwner().weylGroup;
+  int dimension = weylGroup.cartanSymmetric.numberOfRows;
+  Vector<Rational> root1;
+  Vector<Rational> root2;
+  Matrix<Rational> killingForm;
+  killingForm.initialize(dimension, dimension);
+  for (int i = 0; i < dimension; i ++) {
+    root1.makeEi(dimension, i);
+    for (int j = 0; j < dimension; j ++) {
+      killingForm.elements[i][j] = 0;
+      root2.makeEi(dimension, j);
+      for (int k = 0; k < weylGroup.rootSystem.size; k ++) {
+        killingForm.elements[i][j] +=
+        weylGroup.rootScalarCartanRoot(root1, weylGroup.rootSystem[k]) *
+        weylGroup.rootScalarCartanRoot(root2, weylGroup.rootSystem[k]);
+      }
+    }
+  }
+  killingForm.invert();
+  global.comments << killingForm.toString();
+  ElementUniversalEnveloping<Coefficient> element1;
+  ElementUniversalEnveloping<Coefficient> element2;
+  Matrix<Rational> invertedSymmetricCartan;
+  invertedSymmetricCartan = weylGroup.cartanSymmetric;
+  invertedSymmetricCartan.invert();
+  for (int i = 0; i < dimension; i ++) {
+    root1.makeEi(dimension, i);
+    killingForm.actOnVectorColumn(root1, root2);
+    element1.makeCartanGenerator(root1, *this->owner);
+    element2.makeCartanGenerator(root2, *this->owner);
+    element1 *= element2;
+    *this += element1;
+  }
+  Rational rational;
+  for (int i = 0; i < weylGroup.rootSystem.size; i ++) {
+    rational = 0;
+    const Vector<Rational>& root = weylGroup.rootSystem[i];
+    int indexOfOpposite = weylGroup.rootSystem.getIndex(- root);
+    const Vector<Rational>& opposite = weylGroup.rootSystem[indexOfOpposite];
+    for (int j = 0; j < weylGroup.rootSystem.size; j ++) {
+      const Vector<Rational>& current = weylGroup.rootSystem[j];
+      if (current == opposite) rational += 2; else {
+        int indexOfSum = weylGroup.rootSystem.getIndex(current + root);
+        if (indexOfSum != - 1) {
+          rational +=
+          this->owner->chevalleyConstants(i, j) *
+          this->owner->chevalleyConstants(indexOfOpposite, indexOfSum);
+        }
+      }
+    }
+    rational += 2;
+    rational = 1 / rational;
+    element2.makeOneGeneratorCoefficientOne(opposite, *this->owner, 1);
+    element1.makeOneGeneratorCoefficientOne(root, *this->owner, 1);
+    element2 *= element1;
+    element2 *= rational;
+    *this += element2;
+  }
+  *this /= weylGroup.getKillingDividedByTraceRatio();
   this->simplify(0);
 }
 

@@ -359,8 +359,10 @@ void GroebnerBasisComputation<Coefficient>::oneDivisonSubStepWithBasis(
     << global.fatal;
   }
   if (this->flagDoLogDivision) {
-    this->divisionReport.getElement().intermediateHighestMonDivHighestMon.
-    addOnTop(quotientMonomial);
+    this->divisionReport.getElement().
+    intermediateHighestMonomialDividedByHighestMonomial.addOnTop(
+      quotientMonomial
+    );
     this->divisionReport.getElement().intermediateSelectedDivisors.addOnTop(
       index
     );
@@ -955,16 +957,14 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
       }
       if (!this->solutionsFound.selected[j]) {
         this->setSerreLikeSolutionIndex(j, this->sampleCoefficient.zero());
-      } else {
-        if (this->systemSolution[j] != this->sampleCoefficient.zero()) {
-          global.fatal
-          << "Variable index "
-          << j + 1
-          << " is supposed to be a free parameter, "
-          << "i.e., be set to zero, but "
-          << "instead it has a non-zero value. "
-          << global.fatal;
-        }
+      } else if (this->systemSolution[j] != this->sampleCoefficient.zero()) {
+        global.fatal
+        << "Variable index "
+        << j + 1
+        << " is supposed to be a free parameter, "
+        << "i.e., be set to zero, but "
+        << "instead it has a non-zero value. "
+        << global.fatal;
       }
       finalSubstitution[j] = 0;
       changed = true;
@@ -1282,6 +1282,7 @@ void PolynomialSystem<Coefficient>::setUpRecursiveComputation(
   toBeModified.groebner.format = this->groebner.format;
   toBeModified.groebner.polynomialOrder = this->groebner.polynomialOrder;
   toBeModified.substitutionsProvider = this->substitutionsProvider;
+  toBeModified.sampleCoefficient = this->sampleCoefficient;
 }
 
 template <class Coefficient>
@@ -2778,9 +2779,9 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     );
   }
   if (this->owner->remainderDivision.isEqualToZero()) {
-    MonomialPolynomial constMon;
-    constMon.makeOne();
-    this->allMonomials.addOnTopNoRepetition(constMon);
+    MonomialPolynomial constMonomial;
+    constMonomial.makeOne();
+    this->allMonomials.addOnTopNoRepetition(constMonomial);
   }
   this->allMonomials.quickSortDescending(
     &this->owner->polynomialOrder.monomialOrder
@@ -2826,9 +2827,9 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionLaTeXSlide() {
     this->allMonomials.size, dummyList
   );
   this->highlightAllMonsFinalRemainder = - 1;
-  int currentSlideNumer = this->firstIndexLatexSlide + 1;
+  int currentSlideNumber = this->firstIndexLatexSlide + 1;
   for (int i = 0; i < remainders.size; i ++) {
-    this->computeHighLightsFromRemainder(i, currentSlideNumer);
+    this->computeHighLightsFromRemainder(i, currentSlideNumber);
   }
   for (int i = 0; i < subtrahends.size; i ++) {
     this->firstNonZeroIndicesPerIntermediateSubtracand[i] =
@@ -3289,13 +3290,13 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
   ].addOnTop(currentSlideNumber);
   int indexCurrentQuotientMonomialInAllMonomials =
   this->allMonomials.getIndex(
-    this->intermediateHighestMonDivHighestMon[remainderIndex]
+    this->intermediateHighestMonomialDividedByHighestMonomial[remainderIndex]
   );
   Polynomial<Coefficient>& currentQuotient =
   this->owner->quotients[indexCurrentDivisor];
   int indexCurrentQuotientMonomial =
   currentQuotient.monomials.getIndex(
-    this->intermediateHighestMonDivHighestMon[remainderIndex]
+    this->intermediateHighestMonomialDividedByHighestMonomial[remainderIndex]
   );
   this->fcAnswerMonsQuotients[indexCurrentDivisor][
     indexCurrentQuotientMonomialInAllMonomials
@@ -3445,16 +3446,16 @@ preferredVariableForArbitrarySubstitutionProvider(
 template <class Coefficient>
 ArbitrarySubstitutionsProvider<Coefficient>::ArbitrarySubstitutionsProvider() {
   this->flagChooseSmallestIndexVariableFirst = false;
-  this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf = - 1;
+  this->oneIsFirstWhenRecursionDepthIsMultipleOf = - 1;
 }
 
 template <class Coefficient>
 void ArbitrarySubstitutionsProvider<Coefficient>::computeArbitrarySubstitutions
 (int recursionDepth) {
   if (
-    this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf > 0 &&
-    (recursionDepth - 1) %
-    this->oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf ==
+    this->oneIsFirstWhenRecursionDepthIsMultipleOf > 0 && (recursionDepth - 1)
+    %
+    this->oneIsFirstWhenRecursionDepthIsMultipleOf ==
     0
   ) {
     // One comes first.

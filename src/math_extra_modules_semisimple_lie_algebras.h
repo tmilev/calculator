@@ -2144,15 +2144,16 @@ template <class Coefficient>
 void ElementTensorsGeneralizedVermas<Coefficient>::makeHighestWeightVector(
   ModuleSSalgebra<Coefficient>& inputOwner, const Coefficient& ringUnit
 ) {
-  MonomialTensorGeneralizedVermas<Coefficient> tensorMon;
+  MonomialTensorGeneralizedVermas<Coefficient> tensorMonomial;
   Coefficient currentCoefficient;
   currentCoefficient = ringUnit;
-  tensorMon.monomials.setSize(1);
-  MonomialGeneralizedVerma<Coefficient>& monomial = tensorMon.monomials[0];
+  tensorMonomial.monomials.setSize(1);
+  MonomialGeneralizedVerma<Coefficient>& monomial =
+  tensorMonomial.monomials[0];
   monomial.indexFDVector = inputOwner.generatingWordsNonReduced.size - 1;
   monomial.makeConstant(inputOwner);
   this->makeZero();
-  this->addMonomial(tensorMon, ringUnit);
+  this->addMonomial(tensorMonomial, ringUnit);
 }
 
 template <class Coefficient>

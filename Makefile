@@ -210,6 +210,7 @@ SOURCES_RELATIVE_PATH=\
     math_implementation_5_test.cpp \
     math_implementation_6_test.cpp \
     math_lattices.cpp \
+    math_lie_theory_test.cpp \
     math_modular_arithmetic.cpp \
     math_vector_partition_functions.cpp \
     math_semisimple_lie_algebras.cpp \

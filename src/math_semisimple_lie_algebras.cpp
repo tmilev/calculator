@@ -723,6 +723,7 @@ void SemisimpleLieAlgebra::computeChevalleyConstants() {
     global.fatal
     << "Number of positive roots of a "
     << "semisimple Lie algebra is reported to be zero. "
+    << this->weylGroup.dynkinType.toStringPretty()
     << global.fatal;
   }
 }

@@ -754,6 +754,7 @@ SOURCES += \
     math_implementation_6.cpp \
     math_implementation_6_test.cpp \
     math_lattices.cpp \
+  math_lie_theory_test.cpp \
   math_modular_arithmetic.cpp \
     math_semisimple_lie_algebras.cpp \
     math_semisimple_lie_root_subalgebras.cpp \

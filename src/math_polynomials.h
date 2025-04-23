@@ -1014,7 +1014,7 @@ public:
   HashedList<MonomialPolynomial> allMonomials;
   List<Polynomial<Coefficient> > intermediateRemainders;
   List<List<MonomialPolynomial> > intermediateHighlightedMons;
-  List<MonomialPolynomial> intermediateHighestMonDivHighestMon;
+  List<MonomialPolynomial> intermediateHighestMonomialDividedByHighestMonomial;
   List<Coefficient> intermediateCoefficients;
   List<Polynomial<Coefficient> > intermediateSubtractands;
   Polynomial<Coefficient> startingPolynomial;
@@ -1164,7 +1164,7 @@ class ArbitrarySubstitutionsProvider {
 public:
   List<Coefficient> arbitrarySubstitutions;
   bool flagChooseSmallestIndexVariableFirst;
-  int oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf;
+  int oneIsFirstWhenRecursionDepthIsMultipleOf;
   ArbitrarySubstitutionsProvider();
   void computeArbitrarySubstitutions(int recursionDepth);
   int preferredVariableForArbitrarySubstitutionProvider(

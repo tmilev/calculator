@@ -7172,7 +7172,7 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   }
   DynkinType& embeddedType = this->weylNonEmbedded->dynkinType;
   this->configuredSystemToSolve.substitutionsProvider.
-  oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf =
+  oneIsFirstWhenRecursionDepthIsMultipleOf =
   3;
   if (embeddedType.getRank() == 1) {
     maximumPolynomialDivisions = 2000;
@@ -7206,7 +7206,7 @@ void CandidateSemisimpleSubalgebra::configurePolynomialSystem() {
   }
   if (embeddingLieAlgebraName == "A^{36}_1+A^{4}_1") {
     this->configuredSystemToSolve.substitutionsProvider.
-    oneIsFirstArbitrarySubstitutionWhenRecursionDepthIsMultipleOf =
+    oneIsFirstWhenRecursionDepthIsMultipleOf =
     2;
   }
   this->configuredSystemToSolve.groebner.maximumMonomialOperations =

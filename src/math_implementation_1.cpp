@@ -746,11 +746,11 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
     return false;
   }
   ElementUniversalEnveloping<Coefficient> accumulator;
-  ElementUniversalEnveloping<Coefficient> intermediateAccum;
+  ElementUniversalEnveloping<Coefficient> intermediateAccumulator;
   ElementUniversalEnveloping<Coefficient> element;
   accumulator.makeZero(*this->owners, this->indexInOwners);
-  MonomialUniversalEnveloping<Coefficient> constMon;
-  constMon.makeConstant();
+  MonomialUniversalEnveloping<Coefficient> constantMonomial;
+  constantMonomial.makeConstant();
   if (logStream != nullptr) {
     *logStream
     << "backtraced elt: "
@@ -762,15 +762,15 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
     << "<br>";
   }
   for (int j = 0; j < right.size; j ++) {
-    intermediateAccum = *this;
-    intermediateAccum.simplify(global, ringUnit, ringZero);
+    intermediateAccumulator = *this;
+    intermediateAccumulator.simplify(global, ringUnit, ringZero);
     if (logStream != nullptr) {
       *logStream
       << "intermediate after simplification: "
-      << intermediateAccum.toString(&global.defaultFormat.getElement())
+      << intermediateAccumulator.toString(&global.defaultFormat.getElement())
       << "<br>";
     }
-    intermediateAccum.modOutVermaRelations(
+    intermediateAccumulator.modOutVermaRelations(
       &global, substitutionHiGoesToIthElement, ringUnit, ringZero
     );
     MonomialUniversalEnveloping<Coefficient>& rightMonomial =
@@ -787,7 +787,7 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
             this->indexInOwners,
             ringUnit
           );
-          MathRoutines::swap(element, intermediateAccum);
+          MathRoutines::swap(element, intermediateAccumulator);
           if (logStream != nullptr) {
             *logStream
             << "element before mult: "
@@ -795,30 +795,38 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
             << "<br>";
             *logStream
             << "intermediate before mult: "
-            << intermediateAccum.toString(&global.defaultFormat.getElement())
+            << intermediateAccumulator.toString(
+              &global.defaultFormat.getElement()
+            )
             << "<br>";
           }
-          intermediateAccum *= (element);
+          intermediateAccumulator *= (element);
           if (logStream != nullptr) {
             *logStream
             << "intermediate before simplification: "
-            << intermediateAccum.toString(&global.defaultFormat.getElement())
+            << intermediateAccumulator.toString(
+              &global.defaultFormat.getElement()
+            )
             << "<br>";
           }
-          intermediateAccum.simplify(ringUnit);
+          intermediateAccumulator.simplify(ringUnit);
           if (logStream != nullptr) {
             *logStream
             << "intermediate after simplification: "
-            << intermediateAccum.toString(&global.defaultFormat.getElement())
+            << intermediateAccumulator.toString(
+              &global.defaultFormat.getElement()
+            )
             << "<br>";
           }
-          intermediateAccum.modOutVermaRelations(
+          intermediateAccumulator.modOutVermaRelations(
             substitutionHiGoesToIthElement, ringUnit, ringZero
           );
           if (logStream != nullptr) {
             *logStream
             << "intermediate after Verma rels: "
-            << intermediateAccum.toString(&global.defaultFormat.getElement())
+            << intermediateAccumulator.toString(
+              &global.defaultFormat.getElement()
+            )
             << "<br>";
           }
         }
@@ -826,11 +834,11 @@ bool ElementUniversalEnveloping<Coefficient>::highestWeightMTAbilinearForm(
         return false;
       }
     }
-    intermediateAccum *= rightMonomialCoefficient;
-    accumulator += intermediateAccum;
-    int index = intermediateAccum.getIndex(constMon);
+    intermediateAccumulator *= rightMonomialCoefficient;
+    accumulator += intermediateAccumulator;
+    int index = intermediateAccumulator.getIndex(constantMonomial);
     if (index != - 1) {
-      output += intermediateAccum.coefficients[index];
+      output += intermediateAccumulator.coefficients[index];
     }
   }
   if (logStream != nullptr) {

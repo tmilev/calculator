@@ -3136,10 +3136,10 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::raiseToPower(
   ElementMonomialAlgebra<TemplateMonomial, Coefficient>& output,
   const Coefficient& ringUnit
 ) {
-  ElementMonomialAlgebra<TemplateMonomial, Coefficient> tempOne;
-  tempOne.makeConstant(ringUnit);
+  ElementMonomialAlgebra<TemplateMonomial, Coefficient> monomialOne;
+  monomialOne.makeConstant(ringUnit);
   output = *this;
-  MathRoutines::raiseToPower(output, d, tempOne);
+  MathRoutines::raiseToPower(output, d, monomialOne);
 }
 
 class LaTeXProcedures {

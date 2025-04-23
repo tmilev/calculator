@@ -331,6 +331,8 @@ public:
   // These functions are used to plot dynkin diagrams and Vogan diagrams.
   void plot(Plot& output);
   static void plotInitialize(Plot& output);
+  // Makes a dynkin type from stirng
+  void fromString(const std::string& input);
 };
 
 class DynkinDiagramRootSubalgebra {

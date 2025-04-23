@@ -8344,6 +8344,11 @@ void WeylGroupData::initializeGenerators() {
 }
 
 void WeylGroupData::makeFromDynkinType(const DynkinType& inputType) {
+  if (&inputType == &this->dynkinType) {
+    DynkinType typeCopy = inputType;
+    this->makeFromDynkinType(typeCopy);
+    return;
+  }
   this->reset();
   this->dynkinType = inputType;
   this->dynkinType.getCartanSymmetric(this->cartanSymmetric);

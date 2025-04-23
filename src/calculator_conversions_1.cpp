@@ -671,7 +671,7 @@ bool CalculatorConversions::dynkinSimpleType(
 }
 
 bool CalculatorConversions::functionDynkinSimpleType(
-  Calculator& calculator, const Expression& input, DynkinSimpleType& outputMon
+  Calculator& calculator, const Expression& input, DynkinSimpleType& output
 ) {
   STACK_TRACE("CalculatorConversions::functionDynkinSimpleType");
   Expression rankExpression;
@@ -735,7 +735,8 @@ bool CalculatorConversions::functionDynkinSimpleType(
     << "the type of a simple Lie algebra "
     << "must be the letter A, B, C, D, E, F or G. "
     << "Instead, it is "
-    << typeName + ". Error encountered while processing "
+    << typeName
+    << ". Error encountered while processing "
     << input.toString();
   }
   char weylLetter = typeName[0];
@@ -802,7 +803,7 @@ bool CalculatorConversions::functionDynkinSimpleType(
     << rank
     << ". ";
   }
-  outputMon.makeArbitrary(weylLetter, rank, scale);
+  output.makeArbitrary(weylLetter, rank, scale);
   return true;
 }
 
@@ -2514,4 +2515,42 @@ bool CalculatorConversions::polynomialModuloInteger(
   polynomial.context.setDefaultModulus(modulus.value);
   return
   output.assignValueWithContext(calculator, converted, polynomial.context);
+}
+
+void DynkinType::fromString(const std::string& input) {
+  STACK_TRACE("DynkinType::fromString");
+  Calculator& calculator = global.calculator().getElement();
+  calculator.initialize(Calculator::Mode::full);
+  Expression dynkinTypeExpression;
+  bool mustBeTrue =
+  calculator.parser.parseNoEmbeddingInCommand(input, dynkinTypeExpression);
+  if (!mustBeTrue) {
+    global.fatal
+    << "Failed to parse: "
+    << input
+    << "; DynkinType::fromString is an internal "
+    << "function that should not fail."
+    << global.fatal;
+  }
+  mustBeTrue =
+  CalculatorConversions::functionDynkinType(
+    calculator, dynkinTypeExpression, *this
+  );
+  if (!mustBeTrue) {
+    global.fatal
+    << "DynkinType::fromString is an internal function that "
+    << "should not be called when it can fail. "
+    << "Input: "
+    << input
+    << ". "
+    << "Comments: "
+    << calculator.comments.str()
+    << global.fatal;
+  }
+  if (this->isEqualToZero()) {
+    global.fatal
+    << "DynkinType::fromString produced a zero dynkin type from: "
+    << input
+    << global.fatal;
+  }
 }

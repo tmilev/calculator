@@ -2,7 +2,6 @@
 #define header_math_extra_lie_theory_extras_ALREADY_INCLUDED
 
 #include "math_extra_semisimple_lie_algebras.h"
-#include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_rational_function.h"
 #include "math_vector_partition_functions.h"
@@ -1798,8 +1797,8 @@ commuteConsecutiveIndicesRightIndexAroundLeft(
       this->generatorsIndices[i], this->powers[i]
     );
   }
-  MonomialUniversalEnvelopingOrdered startMon;
-  startMon = monomial;
+  MonomialUniversalEnvelopingOrdered startMonomial;
+  startMonomial = monomial;
   ElementSemisimpleLieAlgebra<Rational> adResult;
   ElementSemisimpleLieAlgebra<Rational> element;
   ElementSemisimpleLieAlgebra<Rational> leftElement;
@@ -1811,7 +1810,7 @@ commuteConsecutiveIndicesRightIndexAroundLeft(
     for (int i = 0; i < coefficients.size; i ++) {
       if (coefficients[i] != 0) {
         int newGeneratorIndex = i;
-        monomial = startMon;
+        monomial = startMonomial;
         monomial.coefficient = acquiredCoefficient;
         monomial.coefficient *= coefficients[i];
         monomial.multiplyByGeneratorPowerOnTheRight(
@@ -1879,9 +1878,9 @@ commuteConsecutiveIndicesLeftIndexAroundRight(
   monomial.multiplyByGeneratorPowerOnTheRight(
     this->generatorsIndices.objects[index], leftPower
   );
-  MonomialUniversalEnvelopingOrdered startMon;
+  MonomialUniversalEnvelopingOrdered startMonomial;
   MonomialUniversalEnvelopingOrdered monomial2;
-  startMon = monomial;
+  startMonomial = monomial;
   ElementSemisimpleLieAlgebra<Rational> adResult;
   ElementSemisimpleLieAlgebra<Rational> element;
   ElementSemisimpleLieAlgebra<Rational> temprightElement;
@@ -1895,7 +1894,7 @@ commuteConsecutiveIndicesLeftIndexAroundRight(
     for (int i = 0; i < coefficients.size; i ++) {
       if (coefficients[i] != 0) {
         int newGeneratorIndex = i;
-        monomial = startMon;
+        monomial = startMonomial;
         monomial.multiplyByGeneratorPowerOnTheRight(
           rightGeneratorIndex, rightPower
         );

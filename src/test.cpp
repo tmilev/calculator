@@ -109,6 +109,7 @@ void Test::run() {
     << Logger::blue
     << "Scientific function test start ..."
     << Logger::endL;
+    ElementUniversalEnveloping<Rational>::Test::all();
     SemisimpleSubalgebras::Test::all();
     global
     << Logger::green

@@ -966,7 +966,7 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
         << "instead it has a non-zero value. "
         << global.fatal;
       }
-      finalSubstitution[j] = 0;
+      finalSubstitution[j] = this->sampleCoefficient.zero();
       changed = true;
     }
   }

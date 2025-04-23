@@ -975,7 +975,7 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoSinglePolynomial(
       finalSubstitution, this->sampleCoefficient.one()
     );
   }
-  Coefficient mustBeConstant;
+  Coefficient mustBeConstant = this->sampleCoefficient.zero();
   if (!toBeSubstitutedIn.isConstant(&mustBeConstant)) {
     global.fatal
     << "After carrying all implied substitutions "
@@ -1335,7 +1335,12 @@ void PolynomialSystem<Coefficient>::trySettingValueToVariable(
   substitution.makeIdentitySubstitution(
     this->systemSolution.size, this->sampleCoefficient.one()
   );
-  Coefficient converter;
+  // Must be initialized when Coefficient == ElementZmodP,
+  // where the modulus is not known at compile time.
+  // In other words, whenever the base element belongs to a
+  // dynamically constructed ring/field, we need
+  // the initialization below.
+  Coefficient converter = this->sampleCoefficient;
   converter = aValueToTryOnPreferredVariable;
   substitution[variableIndex] = converter;
   if (this->groebner.flagDoProgressReport) {
@@ -1523,6 +1528,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
       return;
     }
   }
+  this->substitutionsProvider.sampleCoefficient = this->sampleCoefficient;
   this->substitutionsProvider.computeArbitrarySubstitutions(
     this->recursionCounterSerreLikeSystem
   );
@@ -3452,6 +3458,9 @@ ArbitrarySubstitutionsProvider<Coefficient>::ArbitrarySubstitutionsProvider() {
 template <class Coefficient>
 void ArbitrarySubstitutionsProvider<Coefficient>::computeArbitrarySubstitutions
 (int recursionDepth) {
+  STACK_TRACE(
+    "ArbitrarySubstitutionsProvider::computeArbitrarySubstitutions"
+  );
   if (
     this->oneIsFirstWhenRecursionDepthIsMultipleOf > 0 && (recursionDepth - 1)
     %
@@ -3459,13 +3468,13 @@ void ArbitrarySubstitutionsProvider<Coefficient>::computeArbitrarySubstitutions
     0
   ) {
     // One comes first.
-    this->arbitrarySubstitutions = List<Rational>(
-      {Rational::oneStatic(), Rational::zeroStatic()}
+    this->arbitrarySubstitutions = List<Coefficient>(
+      {this->sampleCoefficient.one(), this->sampleCoefficient.zero()}
     );
   } else {
     // Zero comes first.
-    this->arbitrarySubstitutions = List<Rational>(
-      {Rational::zeroStatic(), Rational::oneStatic()}
+    this->arbitrarySubstitutions = List<Coefficient>(
+      {this->sampleCoefficient.zero(), this->sampleCoefficient.one()}
     );
   }
 }

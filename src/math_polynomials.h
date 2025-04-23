@@ -1165,6 +1165,7 @@ public:
   List<Coefficient> arbitrarySubstitutions;
   bool flagChooseSmallestIndexVariableFirst;
   int oneIsFirstWhenRecursionDepthIsMultipleOf;
+  Coefficient sampleCoefficient;
   ArbitrarySubstitutionsProvider();
   void computeArbitrarySubstitutions(int recursionDepth);
   int preferredVariableForArbitrarySubstitutionProvider(

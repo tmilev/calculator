@@ -454,8 +454,9 @@ void Calculator::initializeFunctionsScientificBasic() {
     "The third number is the prime number p over "
     "which we are solving.",
     "FindOneSolutionModPUpperLimit{}(\n"
-    "100,"
+    "100,\n"
     "10000,\n"
+    "3,\n"
     "x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+ 1, "
     "x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, "
     "x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, "

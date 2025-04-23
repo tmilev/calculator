@@ -1253,7 +1253,6 @@ public:
   static bool extractPolynomialSystemInputs(
     Calculator& calculator,
     const Expression& input,
-    Expression& outputOnError,
     Vector<Polynomial<Rational> >& outputSystem,
     ExpressionContext& outputContext,
     List<int>* outputUpperLimits

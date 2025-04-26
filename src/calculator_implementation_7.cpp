@@ -1228,7 +1228,7 @@ bool CalculatorFunctions::solvePolynomialSystemModP(
   system.groebner.maximumMonomialOperations = maximumMonomialOperations;
   system.groebner.polynomialOrder.monomialOrder =
   MonomialPolynomial::orderDefault();
-  system.algebraicClosure = &calculator.objectContainer.algebraicClosure;
+  system.algebraicClosure = nullptr;
   system.flagTryDirectlySolutionOverAlgebraicClosure = false;
   global.defaultFormat.getElement() = system.groebner.format;
   system.flagUseMonomialBranchingOptimization = true;
@@ -1259,8 +1259,11 @@ bool CalculatorFunctions::solvePolynomialSystemModP(
       << "my heuristics are not good enough.";
     }
   }
+  global.comments << out.str();
+  global.fatal
+  << "DEBUG: Crashing in case something is wrong."
+  << global.fatal;
   return output.assignValue(calculator, out.str());
-  return false;
 }
 
 bool CalculatorFunctions::solvePolynomialSystem(

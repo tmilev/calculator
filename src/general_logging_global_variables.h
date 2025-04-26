@@ -274,7 +274,11 @@ public:
   int32_t(*timePointer)();
   static int32_t timeInternal();
   static int32_t timeMockForTests();
+  // A global handle to a calculator object.
   MemorySaving<Calculator>& calculator();
+  // A calculator handle for a throw-away calculator object
+  // used for parsing.
+  MemorySaving<Calculator>& calculatorForParsing();
   int64_t millisecondOffset;
   int64_t millisecondsMaxComputation;
   int64_t millisecondsNoPingBeforeChildIsPresumedDead;

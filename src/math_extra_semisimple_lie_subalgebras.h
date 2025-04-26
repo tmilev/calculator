@@ -301,15 +301,15 @@ public:
     int indexCartanCentralizerGenerator,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
+  void getGenericNegativeGeneratorLinearCombination(
+    int indexNegativeGenerators,
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
+  );
   void getGenericPositiveGeneratorLinearCombination(
     int indexPositiveGenerators,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   bool isExtremeWeight(int moduleIndex, int indexInIsomorphismComponent) const;
-  void getGenericNegativeGeneratorLinearCombination(
-    int indexNegativeGenerators,
-    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
-  );
   bool isRegularSubalgebra() const;
   bool compareLeftGreaterThanRight(
     const Vector<Rational>& left, const Vector<Rational>& right

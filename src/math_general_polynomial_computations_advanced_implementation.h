@@ -613,7 +613,6 @@ template <class Coefficient>
 PolynomialSystem<Coefficient>::PolynomialSystem() {
   this->algebraicClosure = nullptr;
   this->numberOfSerreSystemComputations = 0;
-  this->numberOfSerreVariablesOneGenerator = - 1;
   this->recursionCounterSerreLikeSystem = 0;
   this->numberOfVariablesToSolveForStart = - 1;
   this->numberOfVariablesToSolveForAfterReduction = 0;
@@ -993,6 +992,9 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoPolynomialSystem(
   List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions
 ) {
   STACK_TRACE("PolynomialSystem::backSubstituteIntoPolynomialSystem");
+  global.fatal
+  << "DEBUG: debug crash at backSubstituteIntoPolynomialSystem"
+  << global.fatal;
   PolynomialSubstitution<Coefficient> finalSubstitution;
   this->getSubstitutionFromPartialSolutionSerreLikeSystem(finalSubstitution);
   for (int i = impliedSubstitutions.size - 1; i >= 0; i --) {
@@ -1090,12 +1092,12 @@ void PolynomialSystem<Coefficient>::polynomialSystemSolutionSimplificationPhase
 
 template <class Coefficient>
 bool PolynomialSystem<Coefficient>::
-oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
-  List<Polynomial<Coefficient> >& inputOutputSystem,
-  ProgressReport& simplificationProgressReport,
-  ProgressReport& substitutionsProgressReport
+gaussianEliminationReturnFalseIfSystemIsContradictory(
+  List<Polynomial<Coefficient> >& inputOutputSystem
 ) {
-  this->groebner.numberPolynomialDivisions = 0;
+  STACK_TRACE(
+    "PolynomialSystem::gaussianEliminationReturnFalseIfSystemIsContradictory"
+  );
   Polynomial<Coefficient>::gaussianEliminationByRows(
     inputOutputSystem,
     nullptr,
@@ -1103,6 +1105,34 @@ oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
     nullptr,
     &this->groebner.numberMonomialOperations
   );
+  for (const Polynomial<Coefficient>& polynomial : inputOutputSystem) {
+    if (polynomial.isConstant() && !polynomial.isEqualToZero()) {
+      this->flagSystemProvenToHaveNoSolution = true;
+      return false;
+    }
+  }
+  return true;
+}
+
+template <class Coefficient>
+bool PolynomialSystem<Coefficient>::
+oneSimplificationStepReturnTrueIfMoreSimplificationNeeded(
+  List<Polynomial<Coefficient> >& inputOutputSystem,
+  ProgressReport& simplificationProgressReport,
+  ProgressReport& substitutionsProgressReport
+) {
+  STACK_TRACE(
+    "PolynomialSystem::"
+    "oneSimplificationStepReturnTrueIfMoreSimplificationNeeded"
+  );
+  this->groebner.numberPolynomialDivisions = 0;
+  if (
+    !this->gaussianEliminationReturnFalseIfSystemIsContradictory(
+      inputOutputSystem
+    )
+  ) {
+    return false;
+  }
   if (
     this->findAndApplyImpliedSubstitutions(
       inputOutputSystem, substitutionsProgressReport
@@ -1206,6 +1236,7 @@ bool PolynomialSystem<Coefficient>::findAndApplyImpliedSubstitutions(
     progressReport.report(reportStream.str());
   }
   this->impliedSubstitutions.addOnTop(substitution);
+  global.comments << "DEBUG: Reached substitution!!!!<br>";
   for (int i = 0; i < inputSystem.size; i ++) {
     inputSystem[i].substitute(substitution, this->sampleCoefficient.one());
   }
@@ -1449,6 +1480,9 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
       allProvenToHaveNoSolution = false;
     }
     if (this->flagSystemSolvedOverBaseField) {
+      global.fatal
+      << "DEBUG: debug crash at flagSystemSolvedOverBaseField"
+      << global.fatal;
       return;
     }
   }
@@ -1479,10 +1513,12 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
     << ". ";
     report1.report(out.str());
   }
+  if (
+    !this->gaussianEliminationReturnFalseIfSystemIsContradictory(inputSystem)
+  ) {
+    return;
+  }
   this->gaussianEliminatedSystem = inputSystem;
-  Polynomial<Coefficient>::gaussianEliminationByRows(
-    this->gaussianEliminatedSystem, nullptr, nullptr, nullptr, nullptr
-  );
   this->polynomialSystemSolutionSimplificationPhase(inputSystem);
   if (
     this->flagSystemProvenToHaveNoSolution ||
@@ -1643,6 +1679,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
   this->recursionCounterSerreLikeSystem = 0;
   this->groebner.numberPolynomialDivisions = 0;
   this->numberOfSerreSystemComputations = 0;
+  this->groebner.format.flagSuppressModP = true;
   int numberOfVariables = 0;
   List<Polynomial<Coefficient> > workingSystem = inputSystem;
   for (int i = 0; i < workingSystem.size; i ++) {
@@ -1663,9 +1700,6 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     << this->toStringCalculatorInputFromSystem(inputSystem);
     report.report(reportStream.str());
   }
-  this->numberOfSerreVariablesOneGenerator =
-  workingSystem[0].minimalNumberOfVariables() /
-  2;
   if (this->algebraicClosure == 0) {
     this->flagTryDirectlySolutionOverAlgebraicClosure = false;
   }
@@ -1673,6 +1707,7 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     this->flagUsingAlgebraicClosure = false;
     this->solveSerreLikeSystemRecursively(workingSystem);
   }
+  global.fatal << "DEBUG: debug crash ehre" << global.fatal;
   if (
     this->algebraicClosure != nullptr &&
     !this->flagSystemSolvedOverBaseField &&

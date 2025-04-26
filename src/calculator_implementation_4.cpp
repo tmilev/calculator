@@ -28,6 +28,11 @@ MemorySaving<Calculator>& GlobalVariables::calculator() {
   return result;
 }
 
+MemorySaving<Calculator>& GlobalVariables::calculatorForParsing() {
+  static MemorySaving<Calculator> result;
+  return result;
+}
+
 std::string Calculator::writeDefaultLatexFileReturnHtmlLink(
   const std::string& fileContent,
   std::string* outputFileNameNoExtension,

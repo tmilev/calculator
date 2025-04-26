@@ -55,11 +55,11 @@ public:
   static int leastCommonMultiple(int a, int b);
   template <typename Integral>
   static Integral greatestCommonDivisor(Integral left, Integral right) {
-    Integral temp;
+    Integral swapPlaceholder;
     while (!(right == 0)) {
-      temp = left % right;
+      swapPlaceholder = left % right;
       left = right;
-      right = temp;
+      right = swapPlaceholder;
     }
     return left;
   }

@@ -7290,23 +7290,6 @@ bool CandidateSemisimpleSubalgebra::verifySolution(
 }
 
 void CandidateSemisimpleSubalgebra::
-getGenericNegativeGeneratorLinearCombination(
-  int indexNegativeGenerators,
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
-) {
-  int offsetIndex = 0;
-  for (int i = 0; i < indexNegativeGenerators; i ++) {
-    offsetIndex += this->involvedNegativeGenerators[i].size;
-  }
-  this->getGenericLinearCombination(
-    this->totalUnknownsWithCentralizer,
-    offsetIndex,
-    this->involvedNegativeGenerators[indexNegativeGenerators],
-    output
-  );
-}
-
-void CandidateSemisimpleSubalgebra::
 getGenericCartanCentralizerLinearCombination(
   int indexCartanCentralizerGenerator,
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
@@ -7323,6 +7306,23 @@ getGenericCartanCentralizerLinearCombination(
   }
   this->getGenericLinearCombination(
     this->totalUnknownsWithCentralizer, offsetIndex, elementsOfCartan, output
+  );
+}
+
+void CandidateSemisimpleSubalgebra::
+getGenericNegativeGeneratorLinearCombination(
+  int indexNegativeGenerators,
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
+) {
+  int offsetIndex = 0;
+  for (int i = 0; i < indexNegativeGenerators; i ++) {
+    offsetIndex += this->involvedNegativeGenerators[i].size;
+  }
+  this->getGenericLinearCombination(
+    this->totalUnknownsWithCentralizer,
+    offsetIndex,
+    this->involvedNegativeGenerators[indexNegativeGenerators],
+    output
   );
 }
 

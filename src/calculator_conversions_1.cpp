@@ -2519,7 +2519,8 @@ bool CalculatorConversions::polynomialModuloInteger(
 
 void DynkinType::fromString(const std::string& input) {
   STACK_TRACE("DynkinType::fromString");
-  Calculator& calculator = global.calculator().getElement();
+  Calculator& calculator = global.calculatorForParsing().getElement();
+  calculator.reset();
   calculator.initialize(Calculator::Mode::full);
   Expression dynkinTypeExpression;
   bool mustBeTrue =

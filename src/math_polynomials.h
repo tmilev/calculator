@@ -1177,7 +1177,6 @@ template <class Coefficient>
 class PolynomialSystem {
 public:
   int numberOfSerreSystemComputations;
-  int numberOfSerreVariablesOneGenerator;
   int recursionCounterSerreLikeSystem;
   int numberOfVariablesToSolveForStart;
   int numberOfVariablesToSolveForAfterReduction;
@@ -1242,6 +1241,9 @@ public:
     List<Polynomial<Coefficient> >& inputSystem
   );
   void polynomialSystemSolutionSimplificationPhase(
+    List<Polynomial<Coefficient> >& inputOutputSystem
+  );
+  bool gaussianEliminationReturnFalseIfSystemIsContradictory(
     List<Polynomial<Coefficient> >& inputOutputSystem
   );
   // Carries out one polynomial system simplification step.

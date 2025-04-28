@@ -1259,10 +1259,6 @@ bool CalculatorFunctions::solvePolynomialSystemModP(
       << "my heuristics are not good enough.";
     }
   }
-  global.comments << out.str();
-  global.fatal
-  << "DEBUG: Crashing in case something is wrong."
-  << global.fatal;
   return output.assignValue(calculator, out.str());
 }
 

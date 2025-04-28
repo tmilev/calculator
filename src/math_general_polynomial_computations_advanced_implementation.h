@@ -992,9 +992,6 @@ void PolynomialSystem<Coefficient>::backSubstituteIntoPolynomialSystem(
   List<PolynomialSubstitution<Coefficient> >& impliedSubstitutions
 ) {
   STACK_TRACE("PolynomialSystem::backSubstituteIntoPolynomialSystem");
-  global.fatal
-  << "DEBUG: debug crash at backSubstituteIntoPolynomialSystem"
-  << global.fatal;
   PolynomialSubstitution<Coefficient> finalSubstitution;
   this->getSubstitutionFromPartialSolutionSerreLikeSystem(finalSubstitution);
   for (int i = impliedSubstitutions.size - 1; i >= 0; i --) {
@@ -1236,7 +1233,6 @@ bool PolynomialSystem<Coefficient>::findAndApplyImpliedSubstitutions(
     progressReport.report(reportStream.str());
   }
   this->impliedSubstitutions.addOnTop(substitution);
-  global.comments << "DEBUG: Reached substitution!!!!<br>";
   for (int i = 0; i < inputSystem.size; i ++) {
     inputSystem[i].substitute(substitution, this->sampleCoefficient.one());
   }
@@ -1480,9 +1476,6 @@ void PolynomialSystem<Coefficient>::solveWhenSystemHasSingleMonomial(
       allProvenToHaveNoSolution = false;
     }
     if (this->flagSystemSolvedOverBaseField) {
-      global.fatal
-      << "DEBUG: debug crash at flagSystemSolvedOverBaseField"
-      << global.fatal;
       return;
     }
   }
@@ -1707,7 +1700,6 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystem(
     this->flagUsingAlgebraicClosure = false;
     this->solveSerreLikeSystemRecursively(workingSystem);
   }
-  global.fatal << "DEBUG: debug crash ehre" << global.fatal;
   if (
     this->algebraicClosure != nullptr &&
     !this->flagSystemSolvedOverBaseField &&

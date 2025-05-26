@@ -1197,6 +1197,25 @@ bool CalculatorFunctions::solvePolynomialSystem(
   );
 }
 
+void computeArbitrarySubstitutionsModP(
+  ArbitrarySubstitutionsProvider<ElementZmodP>& object, int recursionDepth
+) {
+  STACK_TRACE("computeArbitrarySubstitutionsModP");
+  (void) recursionDepth;
+  int upperLimit = 0;
+  LargeIntegerUnsigned& modulus = object.sampleCoefficient.modulus;
+  if (!modulus.isIntegerFittingInInt(&upperLimit)) {
+    upperLimit = 2;
+  }
+  if (upperLimit > 100) {
+    upperLimit = 100;
+  }
+  object.arbitrarySubstitutions.setSize(upperLimit);
+  for (int i = 0; i < upperLimit; i ++) {
+    object.arbitrarySubstitutions[i].makeFrom(modulus, i);
+  }
+}
+
 bool CalculatorFunctions::solvePolynomialSystemModP(
   Calculator& calculator,
   const Vector<Polynomial<Rational> >& input,
@@ -1232,7 +1251,9 @@ bool CalculatorFunctions::solvePolynomialSystemModP(
   system.flagTryDirectlySolutionOverAlgebraicClosure = false;
   global.defaultFormat.getElement() = system.groebner.format;
   system.flagUseMonomialBranchingOptimization = true;
-  system.sampleCoefficient.makeFrom(modulus, 1);
+  system.sampleCoefficient = oneModP;
+  system.substitutionsProvider.computeArbitrarySubstitutionsOverride =
+  &computeArbitrarySubstitutionsModP;
   system.solveSerreLikeSystem(polynomials);
   std::stringstream out;
   out << "<br>The context vars:<br>" << context.toString();
@@ -1247,6 +1268,8 @@ bool CalculatorFunctions::solvePolynomialSystemModP(
     out << "<br>The system does not have a solution. ";
   } else if (system.flagSystemProvenToHaveSolution) {
     out << "<br>System proven to have solution. ";
+  } else {
+    out << "<br>The system was neither solved nor proved contradictory. ";
   }
   if (!system.flagSystemProvenToHaveNoSolution) {
     if (system.flagSystemSolvedOverBaseField) {

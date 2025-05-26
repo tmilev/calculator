@@ -4312,20 +4312,22 @@ void CandidateSemisimpleSubalgebra::prepareSystemCentralizerCommutingRelations(
         this->unknownCartanCentralizerBasis[j],
         mustBeZero
       );
-      this->addToSystem(mustBeZero);
+      this->addToSystem(mustBeZero, this->systemToSolve);
       this->getAmbientSemisimpleLieAlgebra().lieBracket(
         this->unknownPositiveGenerators[i],
         this->unknownCartanCentralizerBasis[j],
         mustBeZero
       );
-      this->addToSystem(mustBeZero);
+      this->addToSystem(mustBeZero, this->systemToSolve);
     }
   }
 }
 
 void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
-  int leftIndex, int rightIndex
-) {
+  int leftIndex,
+  int rightIndex,
+  List<Polynomial<AlgebraicNumber> >& outputSystem
+) const {
   STACK_TRACE(
     "CandidateSemisimpleSubalgebra::"
     "prepareSystemSerreRelationsForIndices"
@@ -4343,7 +4345,7 @@ void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
       mustBeZero
     );
     mustBeZero -= goalValue;
-    this->addToSystem(mustBeZero);
+    this->addToSystem(mustBeZero, outputSystem);
     return;
   }
   Vector<Rational> positiveRoot1;
@@ -4357,7 +4359,7 @@ void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
     this->unknownPositiveGenerators[rightIndex],
     mustBeZero
   );
-  this->addToSystem(mustBeZero);
+  this->addToSystem(mustBeZero, outputSystem);
   positiveRoot1.makeEi(this->weylNonEmbedded->getDimension(), leftIndex);
   positiveRoot2.makeEi(this->weylNonEmbedded->getDimension(), rightIndex);
   int alphaStringLength = - 1;
@@ -4381,7 +4383,7 @@ void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
       this->unknownPositiveGenerators[leftIndex], mustBeZero, mustBeZero
     );
   }
-  this->addToSystem(mustBeZero);
+  this->addToSystem(mustBeZero, outputSystem);
   // Negative-negative generator Serre relations
   mustBeZero = this->unknownNegativeGenerators[rightIndex];
   for (int k = 0; k < alphaStringLength + 1; k ++) {
@@ -4389,14 +4391,14 @@ void CandidateSemisimpleSubalgebra::prepareSystemSerreRelationsForIndexPair(
       this->unknownNegativeGenerators[rightIndex], mustBeZero, mustBeZero
     );
   }
-  this->addToSystem(mustBeZero);
+  this->addToSystem(mustBeZero, outputSystem);
 }
 
 void CandidateSemisimpleSubalgebra::prepareSystemSerreRelations() {
   STACK_TRACE("CandidateSemisimpleSubalgebra::prepareSystemSerreRelations");
   for (int i = 0; i < this->unknownNegativeGenerators.size; i ++) {
     for (int j = 0; j < this->unknownPositiveGenerators.size; j ++) {
-      this->prepareSystemSerreRelationsForIndexPair(i, j);
+      this->prepareSystemSerreRelationsForIndexPair(i, j, this->systemToSolve);
     }
   }
   this->prepareSystemCentralizerCommutingRelations();
@@ -7346,15 +7348,16 @@ getGenericPositiveGeneratorLinearCombination(
 
 void CandidateSemisimpleSubalgebra::addToSystem(
   const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
-  elementThatMustVanish
-) {
+  elementThatMustVanish,
+  List<Polynomial<AlgebraicNumber> >& outputSystem
+) const {
   Polynomial<AlgebraicNumber> polynomial;
   for (int i = 0; i < elementThatMustVanish.size(); i ++) {
     polynomial = elementThatMustVanish.coefficients[i];
     polynomial.scaleNormalizeLeadingMonomial(
       &MonomialPolynomial::orderDefault()
     );
-    this->systemToSolve.addOnTopNoRepetition(polynomial);
+    outputSystem.addOnTopNoRepetition(polynomial);
   }
 }
 
@@ -10599,7 +10602,35 @@ std::string CandidateSemisimpleSubalgebra::toStringSystemPart2(
   << ";"
   << "<br> "
   << this->toStringLoadUnknown();
+  out << this->toStringSubSystems();
   return out.str();
+}
+
+std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSubSystems");
+  std::stringstream out;
+  out << " <br><br><b>Restricted systems:</b><br>";
+  for (int i = 0; i < this->cartanElementsSubalgebra.size - 1; i ++) {
+    out
+    << "<b>Rank "
+    << i + 1
+    << ": </b><br>"
+    << this->toStringSubSystemOfRank(i + 1);
+  }
+  return out.str();
+}
+
+std::string CandidateSemisimpleSubalgebra::toStringSubSystemOfRank(int rank)
+const {
+  STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSubSystemOfRank");
+  List<Polynomial<AlgebraicNumber> > system;
+  for (int i = 0; i < rank; i ++) {
+    for (int j = 0; j < rank; j ++) {
+      this->prepareSystemSerreRelationsForIndexPair(i, j, system);
+    }
+  }
+  return
+  this->configuredSystemToSolve.toStringCalculatorInputFromSystem(system);
 }
 
 std::string CandidateSemisimpleSubalgebra::toStringLoadUnknown(

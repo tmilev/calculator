@@ -339,8 +339,9 @@ public:
   void computeRatioKillingsByComponent();
   void addToSystem(
     const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >&
-    elementThatMustVanish
-  );
+    elementThatMustVanish,
+    List<Polynomial<AlgebraicNumber> >& outputSystem
+  ) const;
   CandidateSubalgebraStatus attemptToRealize(
     PossibleExtensionsOfSemisimpleLieSubalgebra* currentExtension
   );
@@ -460,7 +461,11 @@ public:
     List<ChevalleyGenerator>& allowedSummands
   );
   void prepareSystemCentralizerCommutingRelations();
-  void prepareSystemSerreRelationsForIndexPair(int leftIndex, int rightIndex);
+  void prepareSystemSerreRelationsForIndexPair(
+    int leftIndex,
+    int rightIndex,
+    List<Polynomial<AlgebraicNumber> >& outputSystem
+  ) const;
   void prepareSystemSerreRelations();
   bool computeCharacter(bool allowBadCharacter);
   void configurePolynomialSystem();
@@ -486,6 +491,8 @@ public:
   std::string toString(FormatExpressions* format, bool generateLinks) const;
   std::string toStringSystem(FormatExpressions* format = nullptr) const;
   std::string toStringSystemPart2(FormatExpressions* format = nullptr) const;
+  std::string toStringSubSystems() const;
+  std::string toStringSubSystemOfRank(int i) const;
   std::string toStringLoadUnknown(FormatExpressions* format = nullptr) const;
   std::string toStringCentralizer(
     FormatExpressions* format, bool writeToHardDisk

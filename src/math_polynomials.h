@@ -1167,6 +1167,9 @@ public:
   int oneIsFirstWhenRecursionDepthIsMultipleOf;
   Coefficient sampleCoefficient;
   ArbitrarySubstitutionsProvider();
+  void(*computeArbitrarySubstitutionsOverride)(
+    ArbitrarySubstitutionsProvider& object, int recurstionDepth
+  );
   void computeArbitrarySubstitutions(int recursionDepth);
   int preferredVariableForArbitrarySubstitutionProvider(
     Selection& variablesToSolveFor, int bestHeursticCandidate

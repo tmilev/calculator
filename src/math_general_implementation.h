@@ -208,15 +208,15 @@ template <class TemplateMonomial, class Coefficient>
 void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
   const ElementMonomialAlgebra<TemplateMonomial, Coefficient>& other,
   ElementMonomialAlgebra<TemplateMonomial, Coefficient>& output,
-  ElementMonomialAlgebra<TemplateMonomial, Coefficient>& bufferPoly,
-  TemplateMonomial& bufferMon
+  ElementMonomialAlgebra<TemplateMonomial, Coefficient>& bufferPolynomial,
+  TemplateMonomial& bufferMonomial
 ) const {
   STACK_TRACE("ElementMonomialAlgebra::multiplyBy");
   if (other.isEqualToZero()) {
     output.makeZero();
     return;
   }
-  if (&bufferPoly == this || &bufferPoly == &other) {
+  if (&bufferPolynomial == this || &bufferPolynomial == &other) {
     global.fatal
     << "Bad buffer in ElementMonomialAlgebra::multiplyBy."
     << global.fatal;
@@ -227,29 +227,29 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
   if (maximumMonomials > 2000000) {
     maximumMonomials = 2000000;
   }
-  int totalMonPairs = 0;
+  int totalMonomialPairs = 0;
   ProgressReport report1;
   ProgressReport report2(400);
-  if (report1.tickAndWantReport()) {
-    totalMonPairs = other.size() * this->size();
+  if (report1.tickAndWantReport() && maximumMonomials > 400) {
+    totalMonomialPairs = other.size() * this->size();
     std::stringstream reportStream;
     reportStream
     << "Large polynomial computation: "
     << this->size()
-    << " x "
+    << " times "
     << other.size()
     << "="
-    << totalMonPairs
+    << totalMonomialPairs
     << " monomials:\n<br>\n"
     << this->toString()
     << " times "
     << other.toString();
     report1.report(reportStream.str());
   }
-  bufferPoly.makeZero();
-  bufferPoly.setExpectedSize(maximumMonomials);
-  bufferPoly.checkConsistency();
-  bufferMon.checkConsistency();
+  bufferPolynomial.makeZero();
+  bufferPolynomial.setExpectedSize(maximumMonomials);
+  bufferPolynomial.checkConsistency();
+  bufferMonomial.checkConsistency();
   Coefficient current;
   for (int i = 0; i < other.size(); i ++) {
     for (int j = 0; j < this->size(); j ++) {
@@ -267,14 +267,14 @@ void ElementMonomialAlgebra<TemplateMonomial, Coefficient>::multiplyBy(
         << ". ";
         report2.report(reportStream2.str());
       }
-      bufferMon = (*this)[j];
-      bufferMon *= other[i];
+      bufferMonomial = (*this)[j];
+      bufferMonomial *= other[i];
       current = this->coefficients[j];
       current *= other.coefficients[i];
-      bufferPoly.addMonomial(bufferMon, current);
+      bufferPolynomial.addMonomial(bufferMonomial, current);
     }
   }
-  output = bufferPoly;
+  output = bufferPolynomial;
 }
 
 template <class TemplateMonomial, class Coefficient>
@@ -324,11 +324,11 @@ void MatrixTensor<Coefficient>::operator*=(
   if (maximumMonomialsFinal > 2000000) {
     maximumMonomialsFinal = 2000000;
   }
-  int totalMonPairs = 0;
+  int totalMonomialPairs = 0;
   ProgressReport report1;
   ProgressReport report2(400);
   if (report1.tickAndWantReport()) {
-    totalMonPairs = other.size() * this->size();
+    totalMonomialPairs = other.size() * this->size();
     std::stringstream reportStream;
     reportStream
     << "Large matrix monomial computation: "
@@ -336,7 +336,7 @@ void MatrixTensor<Coefficient>::operator*=(
     << " x "
     << other.size()
     << "="
-    << totalMonPairs
+    << totalMonomialPairs
     << " monomials:\n<br>\n"
     << this->toString()
     << " times "

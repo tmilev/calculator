@@ -1561,32 +1561,34 @@ void PolynomialSystem<Coefficient>::solveSerreLikeSystemRecursively(
   this->substitutionsProvider.computeArbitrarySubstitutions(
     this->recursionCounterSerreLikeSystem
   );
+  List<Coefficient>& arbitrarySubstitutions =
+  this->substitutionsProvider.arbitrarySubstitutions;
   std::stringstream reportStreamHeuristics;
   if (this->groebner.flagDoProgressReport) {
     reportStreamHeuristics
     << "Attempting the arbitrary substitutions: "
-    << this->substitutionsProvider.arbitrarySubstitutions.
-    toStringCommaDelimited()
+    << arbitrarySubstitutions.toStringCommaDelimited()
     << ".<br>";
   }
-  for (
-    int i = 0; i < this->substitutionsProvider.arbitrarySubstitutions.size; i
-    ++
-  ) {
+  for (int i = 0; i < arbitrarySubstitutions.size; i ++) {
+    const Coefficient& arbitrarySubstitution = arbitrarySubstitutions[i];
     if (this->groebner.flagDoProgressReport) {
       MonomialPolynomial monomial(
         this->getPreferredSerreSystemSubstitutionIndex(inputSystem)
       );
       reportStreamHeuristics
       << "Attempting arbitrary substitution "
+      << monomial.toString(&this->format())
+      << " = "
+      << arbitrarySubstitution
+      << "; ["
       << i + 1
       << " out of "
-      << this->substitutionsProvider.arbitrarySubstitutions.size
-      << ". ";
+      << arbitrarySubstitutions.size
+      << "]"
+      << "<br>";
       report3.report(reportStreamHeuristics.str());
     }
-    const Coefficient& arbitrarySubstitution =
-    this->substitutionsProvider.arbitrarySubstitutions[i];
     this->trySettingValueToVariable(inputSystem, arbitrarySubstitution);
     if (this->flagSystemSolvedOverBaseField) {
       return;
@@ -3480,11 +3482,16 @@ template <class Coefficient>
 ArbitrarySubstitutionsProvider<Coefficient>::ArbitrarySubstitutionsProvider() {
   this->flagChooseSmallestIndexVariableFirst = false;
   this->oneIsFirstWhenRecursionDepthIsMultipleOf = - 1;
+  this->computeArbitrarySubstitutionsOverride = nullptr;
 }
 
 template <class Coefficient>
 void ArbitrarySubstitutionsProvider<Coefficient>::computeArbitrarySubstitutions
 (int recursionDepth) {
+  if (this->computeArbitrarySubstitutionsOverride != nullptr) {
+    this->computeArbitrarySubstitutionsOverride(*this, recursionDepth);
+    return;
+  }
   STACK_TRACE(
     "ArbitrarySubstitutionsProvider::computeArbitrarySubstitutions"
   );

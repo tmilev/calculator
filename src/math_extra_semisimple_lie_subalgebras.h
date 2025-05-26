@@ -492,7 +492,12 @@ public:
   std::string toStringSystem(FormatExpressions* format = nullptr) const;
   std::string toStringSystemPart2(FormatExpressions* format = nullptr) const;
   std::string toStringSubSystems() const;
-  std::string toStringSubSystemOfRank(int i) const;
+  // Prints the serre relations that only involve some of the generators.
+  // Ignores the generators that match the cartan elements whose
+  // weights match cartan generators whose index is out of the given range.
+  std::string toStringSubSystemOfRank(
+    int startCartanGeneratorIndex, int numberOfCartanGenerators
+  ) const;
   std::string toStringLoadUnknown(FormatExpressions* format = nullptr) const;
   std::string toStringCentralizer(
     FormatExpressions* format, bool writeToHardDisk

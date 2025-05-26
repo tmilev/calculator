@@ -10609,23 +10609,26 @@ std::string CandidateSemisimpleSubalgebra::toStringSystemPart2(
 std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
   STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSubSystems");
   std::stringstream out;
-  out << " <br><br><b>Restricted systems:</b><br>";
-  for (int i = 0; i < this->cartanElementsSubalgebra.size - 1; i ++) {
+  out << " <br><br><b>sl(2)-subsystems:</b><br>";
+  for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
     out
-    << "<b>Rank "
+    << "<b>Cartan element "
     << i + 1
     << ": </b><br>"
-    << this->toStringSubSystemOfRank(i + 1);
+    << this->toStringSubSystemOfRank(i, 1);
   }
   return out.str();
 }
 
-std::string CandidateSemisimpleSubalgebra::toStringSubSystemOfRank(int rank)
-const {
+std::string CandidateSemisimpleSubalgebra::toStringSubSystemOfRank(
+  int startCartanGeneratorIndex, int numberOfCartanGenerators
+) const {
   STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSubSystemOfRank");
   List<Polynomial<AlgebraicNumber> > system;
-  for (int i = 0; i < rank; i ++) {
-    for (int j = 0; j < rank; j ++) {
+  int firstExcludedIndex =
+  startCartanGeneratorIndex + numberOfCartanGenerators;
+  for (int i = startCartanGeneratorIndex; i < firstExcludedIndex; i ++) {
+    for (int j = startCartanGeneratorIndex; j < firstExcludedIndex; j ++) {
       this->prepareSystemSerreRelationsForIndexPair(i, j, system);
     }
   }

@@ -7757,11 +7757,11 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   if (useHtml) {
     out << "\n<br>\n";
   }
-  out << this->toStringTriple(format);
+  out << this->toStringTriple(&latexFormat);
   out << this->toStringTripleStandardRealization();
-  out << this->toStringKostantSekiguchiTriple(format);
+  out << this->toStringKostantSekiguchiTriple(&latexFormat);
   out << this->toStringKostantSekiguchiTripleStandardRealization();
-  out << this->toStringTripleVerification(format);
+  out << this->toStringTripleVerification(&latexFormat);
   out << "<br>Unfold the hidden panel for more information.<br>";
   out << "<div class='lieAlgebraPanel'><div>";
   out << this->toStringTripleUnknowns(format);
@@ -10608,11 +10608,14 @@ std::string CandidateSemisimpleSubalgebra::toStringSystemPart2(
 
 std::string CandidateSemisimpleSubalgebra::toStringSubSystems() const {
   STACK_TRACE("CandidateSemisimpleSubalgebra::toStringSubSystems");
+  if (this->cartanElementsSubalgebra.size == 1) {
+    return "";
+  }
   std::stringstream out;
   out << " <br><br><b>sl(2)-subsystems:</b><br>";
   for (int i = 0; i < this->cartanElementsSubalgebra.size; i ++) {
     out
-    << "<b>Cartan element "
+    << "<br><b>Cartan element "
     << i + 1
     << ": </b><br>"
     << this->toStringSubSystemOfRank(i, 1);

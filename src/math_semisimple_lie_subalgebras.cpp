@@ -7680,15 +7680,19 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
     return "sl(2) subalgebra not initialized.";
   }
   std::stringstream out;
-  std::string currentString;
+  DynkinType dynkinType;
+  this->computeDynkinTypeEmbedded(dynkinType);
+  out
+      <<"\\(" << dynkinType.toString() << "\\)\n<br>\n";
   out
   << "<a name ='sl2index"
   << this->indexInContainer
   << "'>h-characteristic: "
   << this->hCharacteristic.toString()
   << "</a>";
+
   out << "<br>Length of the weight dual to h: " << this->lengthHSquared;
-  currentString = this->preferredAmbientSimpleBasis.toString();
+  std::string currentString = this->preferredAmbientSimpleBasis.toString();
   std::string virtualPath = "";
   std::string htmlPathServer = "";
   bool useHtml = true;
@@ -7720,6 +7724,8 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   localFormat.flagUseLatex = useLatex;
   latexFormat.flagUseHTML = false;
   latexFormat.flagUseLatex = true;
+  // Don't break lines.
+  latexFormat.maximumLineLength = -1;
   for (int i = 0; i < this->indicesContainingRootSubalgebras.size; i ++) {
     out
     << "\nContaining regular semisimple subalgebra number "
@@ -7764,9 +7770,9 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << this->toStringTripleVerification(&latexFormat);
   out << "<br>Unfold the hidden panel for more information.<br>";
   out << "<div class='lieAlgebraPanel'><div>";
-  out << this->toStringTripleUnknowns(format);
-  out << this->toStringTripleUnknownsPolynomialSystem(format);
-  out << this->toStringTripleArbitrary(format);
+  out << this->toStringTripleUnknowns(&latexFormat);
+  out << this->toStringTripleUnknownsPolynomialSystem(&latexFormat);
+  out << this->toStringTripleArbitrary(&latexFormat);
   out << this->toStringTripleArbitraryMatrix();
   out << this->toStringKostantSekiguchiTripleInternals(format);
   out << "</div></div>";
@@ -8731,9 +8737,6 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
   bool useHtml = format == nullptr ? true : format->flagUseHTML;
   for (const SlTwoSubalgebra& current : this->allSubalgebras) {
     currentString = current.toString(format);
-    if (useHtml) {
-      body << "<br>";
-    }
     body << currentString;
     if (useHtml) {
       body << "<hr>";

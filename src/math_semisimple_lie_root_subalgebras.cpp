@@ -3409,16 +3409,16 @@ void SlTwoSubalgebra::initializeUnknownTriples(const Vector<Rational>& targetH)
   this->hPolynomialAlgebraic.makeCartanGenerator(
     targetH, this->getOwnerSemisimpleAlgebra()
   );
-  // /
+  //
   // Zero e and f for the arbitrary f choice optimization.
   this->eArbitraryUnknown.makeZero();
   // In the code below, f will be chosen arbitrarily.
   this->fArbitrary.makeZero();
-  // /
+  //
   // Zero e and f without arbitrary optimizations.
   this->eUnknown.makeZero();
   this->fUnknown.makeZero();
-  // /
+  //
   // Zero e  and f for the Kostant-Sekiguchi computation.
   this->eKostantSekiguchiUnknown.makeZero();
   this->fKostantSekiguchiUnknown.makeZero();

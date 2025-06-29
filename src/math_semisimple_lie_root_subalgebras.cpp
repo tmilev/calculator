@@ -3148,6 +3148,10 @@ const {
   << "f&=&"
   << this->fUnknown.toString(format)
   << "\\end{array}\\)";
+  out
+  << "<br>Participating positive roots: "
+  << this->participatingPositiveRoots.toString()
+  << ".";
   out << "<br>Lie brackets of the unknowns.<br>";
   out
   << "\\([e,f] - h = "
@@ -3264,25 +3268,24 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   if (relativeDimension != zeroCharacteristics.numberOfElements) {
     global.fatal << "Relative dimension is incorrect. " << global.fatal;
   }
-  // Format. We are looking for an sl(2) for which e = a_0 g^\alpha_0+...
-  // a_kg^\alpha_k, andattemptExtendingHFtoHEFWithRespectToSubalgebra
+  // Format. We are looking for an sl(2) for which
+  // e = a_0 g^\alpha_0+...a_kg^\alpha_k,
+  // and
   // f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
   // where the first \alpha's are ordered as in rootsInPlay.
   // Those are ordered as follows. First come the simple roots of
-  // characteristic
-  // 2,
+  // characteristic 2,
   // and the last \alpha's are the members of SelectedExtraPositiveRoots
   // (i.e. root equal to the sum of one simple root
   // of characteristic 2 with a simple roots of characteristic 0).
-  // Then the first k variables of the polynomials below will be a_0, ...,
-  // a_k.,
-  // and
-  // the last k variables will be the b_i's
+  // Then the first k variables of the polynomials below will be
+  // a_0, ..., a_k and
+  // the last k variables will be the b_i's,
   // the l^th polynomial will correspond to the coefficient of g^\alpha_{l/2},
   // where
   // l/2 is the index of the rootattemptExtendingHFtoHEFWithRespectToSubalgebra
   // of SelectedExtraPositiveRoots, if l is even, and to the
-  // coefficient of  g^{-\alpha_{(l+ 1)/2}} otherwise
+  // coefficient of  g^{-\alpha_{(l+ 1)/2}} otherwise.
   for (int i = 0; i < relativeDimension; i ++) {
     if (!zeroCharacteristics.selected[i]) {
       this->participatingPositiveRoots.addOnTop(simpleBasisSubalgebras[i]);
@@ -3319,8 +3322,9 @@ bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   this->eElement.makeZero();
   ChevalleyGenerator generator;
   if (
-    !Matrix<Rational>::solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
-    (matrix, adjoinedColumn, result)
+    !Matrix<Rational>::solveAxEqualsBModifyInputReturnFirstSolutionIfExists(
+      matrix, adjoinedColumn, result
+    )
   ) {
     return false;
   }
@@ -3396,6 +3400,7 @@ bool SlTwoSubalgebra::checkConsistencyParticipatingRoots(
 
 void SlTwoSubalgebra::initializeUnknownTriples(const Vector<Rational>& targetH)
 {
+  STACK_TRACE("SlTwoSubalgebra::initializeUnknownTriples");
   if (this->algebraicClosure == nullptr) {
     global.fatal << "The algebraic closure is required." << global.fatal;
   }

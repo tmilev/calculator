@@ -3963,6 +3963,9 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystem(
   this->involvedPositiveGenerators.setSize(
     this->cartanElementsScaledToActByTwo.size
   );
+  this->involvedPositiveRoots.setSize(
+    this->cartanSubalgebrasByComponentScaledToActByTwo.size
+  );
   for (int i = 0; i < this->cartanElementsScaledToActByTwo.size; i ++) {
     this->computeInvolvedGeneratorsOfIndex(i);
     if (
@@ -3993,6 +3996,8 @@ void CandidateSemisimpleSubalgebra::computeInvolvedGeneratorsOfIndex(
   this->involvedPositiveGenerators[index];
   List<ChevalleyGenerator>& involvedNegativeGenerators =
   this->involvedNegativeGenerators[index];
+  List<Vector<Rational> > currentInvolvedPositiveRoots =
+  this->involvedPositiveRoots[index];
   involvedNegativeGenerators.setExpectedSize(
     this->getAmbientWeyl().getDimension() * 2
   );
@@ -4001,27 +4006,28 @@ void CandidateSemisimpleSubalgebra::computeInvolvedGeneratorsOfIndex(
   );
   involvedNegativeGenerators.setSize(0);
   involvedPositiveGenerators.setSize(0);
+  currentInvolvedPositiveRoots.setSize(0);
   ChevalleyGenerator currentGenerator;
   ChevalleyGenerator currentOppositeGenerator;
-  for (int j = 0; j < this->getAmbientWeyl().rootSystem.size; j ++) {
+  const List<Vector<Rational> > rootSystem = this->getAmbientWeyl().rootSystem;
+  for (int j = 0; j < rootSystem.size; j ++) {
+    const Vector<Rational>& currentRoot = rootSystem[j];
+    if (!this->isWeightSystemSpaceIndex(index, currentRoot)) {
+      continue;
+    }
     int generatorIndex =
     this->getAmbientSemisimpleLieAlgebra().getGeneratorFromRootIndex(j);
     int oppositeGeneratorIndex =
     this->getAmbientSemisimpleLieAlgebra().getGeneratorIndexFromRoot(
-      - this->getAmbientWeyl().rootSystem[j]
+      - currentRoot
     );
     currentGenerator.makeGenerator(*this->owner->owner, generatorIndex);
     currentOppositeGenerator.makeGenerator(
       *this->owner->owner, oppositeGeneratorIndex
     );
-    if (
-      this->isWeightSystemSpaceIndex(
-        index, this->getAmbientWeyl().rootSystem[j]
-      )
-    ) {
-      involvedPositiveGenerators.addOnTop(currentGenerator);
-      involvedNegativeGenerators.addOnTop(currentOppositeGenerator);
-    }
+    involvedPositiveGenerators.addOnTop(currentGenerator);
+    involvedNegativeGenerators.addOnTop(currentOppositeGenerator);
+    currentInvolvedPositiveRoots.addOnTop(currentRoot);
   }
   if (involvedNegativeGenerators.size == 0) {
     if (involvedPositiveGenerators.size != 0) {
@@ -7682,15 +7688,13 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   std::stringstream out;
   DynkinType dynkinType;
   this->computeDynkinTypeEmbedded(dynkinType);
-  out
-      <<"\\(" << dynkinType.toString() << "\\)\n<br>\n";
+  out << "\\(" << dynkinType.toString() << "\\)\n<br>\n";
   out
   << "<a name ='sl2index"
   << this->indexInContainer
   << "'>h-characteristic: "
   << this->hCharacteristic.toString()
   << "</a>";
-
   out << "<br>Length of the weight dual to h: " << this->lengthHSquared;
   std::string currentString = this->preferredAmbientSimpleBasis.toString();
   std::string virtualPath = "";
@@ -7725,7 +7729,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   latexFormat.flagUseHTML = false;
   latexFormat.flagUseLatex = true;
   // Don't break lines.
-  latexFormat.maximumLineLength = -1;
+  latexFormat.maximumLineLength = - 1;
   for (int i = 0; i < this->indicesContainingRootSubalgebras.size; i ++) {
     out
     << "\nContaining regular semisimple subalgebra number "

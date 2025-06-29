@@ -1147,7 +1147,7 @@ public:
     ) =
     0
   );
-  static bool solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
+  static bool solveAxEqualsBModifyInputReturnFirstSolutionIfExists(
     Matrix<Coefficient>& A, Matrix<Coefficient>& b, Matrix<Coefficient>& output
   );
   Coefficient getDeterminant();
@@ -1781,8 +1781,7 @@ void Matrix<Coefficient>::switchRows(int row1, int row2) {
 }
 
 template <typename Coefficient>
-bool Matrix<Coefficient>::
-solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
+bool Matrix<Coefficient>::solveAxEqualsBModifyInputReturnFirstSolutionIfExists(
   Matrix<Coefficient>& A, Matrix<Coefficient>& b, Matrix<Coefficient>& output
 ) {
   if (A.numberOfRows != b.numberOfRows) {

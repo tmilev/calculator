@@ -141,6 +141,7 @@ public:
   unknownCartanCentralizerBasis;
   List<List<ChevalleyGenerator> > involvedPositiveGenerators;
   List<List<ChevalleyGenerator> > involvedNegativeGenerators;
+  List<List<Vector<Rational> > > involvedPositiveRoots;
   // Character of the ambient Lie algebra with
   // respect to (Cartan subalgebra of) sl(2).
   CharacterSemisimpleLieAlgebraModule<Rational>
@@ -327,10 +328,6 @@ public:
     int numberOfVariables,
     int variableOffset,
     List<ChevalleyGenerator>& involvedGenerators,
-    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
-  );
-  void getGenericLinearCombinationInvolvedPosGens(
-    int index,
     ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output
   );
   void computeCentralizerIsWellChosen();

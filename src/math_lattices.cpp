@@ -498,8 +498,7 @@ bool QuasiPolynomial::substitutionFewerVariables(
     shiftMatrixForm.assignVectorColumn(this->latticeShifts[i]);
     shiftMatrixForm -= subLatticeShift;
     if (
-      latticeSubstitution.
-      solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(
+      latticeSubstitution.solveAxEqualsBModifyInputReturnFirstSolutionIfExists(
         latticeSubstitution, shiftMatrixForm, shiftImage
       )
     ) {

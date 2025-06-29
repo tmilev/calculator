@@ -730,8 +730,6 @@ public:
   ) const;
   std::string toStringKostantSekiguchiTriple(FormatExpressions* format) const;
   std::string toStringKostantSekiguchiTripleStandardRealization() const;
-  void getInvolvedPositiveGenerators(List<ChevalleyGenerator>& output);
-  void getInvolvedNegativeGenerators(List<ChevalleyGenerator>& output);
   void toStringModuleDecompositionMinimalContainingRegularSubalgebras(
     bool useLatex, bool useHtml, SlTwoSubalgebras& owner, std::string& output
   ) const;

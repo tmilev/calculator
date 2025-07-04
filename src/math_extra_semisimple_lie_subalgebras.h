@@ -3,6 +3,7 @@
 
 #include "math_extra_algebraic_numbers.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
+#include "math_extra_semisimple_lie_subalgebras_sltwos.h"
 #include "math_general.h"
 
 class SemisimpleSubalgebras;
@@ -488,6 +489,7 @@ public:
   std::string toString(FormatExpressions* format, bool generateLinks) const;
   std::string toStringSystem(FormatExpressions* format = nullptr) const;
   std::string toStringSystemPart2(FormatExpressions* format = nullptr) const;
+  std::string toStringInvolvedPositiveRoots() const;
   std::string toStringSubSystems() const;
   // Prints the serre relations that only involve some of the generators.
   // Ignores the generators that match the cartan elements whose

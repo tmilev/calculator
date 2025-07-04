@@ -123,6 +123,8 @@ public:
   }
 };
 
+class SlTwoSubalgebraCandidate;
+
 class RootSubalgebra {
   friend std::ostream& operator<<(
     std::ostream& output, RootSubalgebra& subalgebra
@@ -227,6 +229,11 @@ public:
     int indexRootSubalgebraInContainer,
     bool computeRealForm,
     AlgebraicClosureRationals* algebraicClosure
+  );
+  void addSlTwoSubalgebraIfNew(
+    SlTwoSubalgebraCandidate& candidate,
+    SlTwoSubalgebras& output,
+    int indexRootSubalgebraInContainer
   );
   bool isEquivalentToByDiagramsAndDimensions(const RootSubalgebra& other)
   const;
@@ -368,6 +375,8 @@ public:
     Selection& selectionKModules, RootSubalgebras& owner, int indexInOwner
   );
   std::string toString(FormatExpressions* format = nullptr);
+  std::string toStringContainingRegularSubalgebras();
+  std::string toStringMinimallyContainingRegularSubalgebras();
   void toHTML(int index, FormatExpressions* format);
   std::string toStringLieBracketTable(
     bool useLaTeX, bool useHtml, RootSubalgebra& owner
@@ -550,296 +559,6 @@ public:
   void initOwnerMustBeNonZero();
   void initForNilradicalGeneration();
   RootSubalgebras();
-};
-
-// template <>
-// class ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >;
-class SlTwoSubalgebra {
-public:
-  friend std::ostream& operator<<(
-    std::ostream& output, const SlTwoSubalgebra& sl2
-  ) {
-    output << sl2.toString();
-    return output;
-  }
-  SemisimpleLieAlgebra* owner;
-  SlTwoSubalgebras* container;
-  AlgebraicClosureRationals* algebraicClosure;
-  CharacterSemisimpleLieAlgebraModule<Rational>
-  moduleDecompositionAmbientSubalgebra;
-  List<int> moduleDimensions;
-  Rational lengthHSquared;
-  int indexInContainer;
-  int dimensionCentralizer;
-  DynkinType centralizerTypeIfKnown;
-  Rational dimCentralizerToralPart;
-  bool flagCentralizerTypeComputed;
-  bool flagCentralizerIsRegular;
-  List<int> indicesContainingRootSubalgebras;
-  List<int> indicesMinimalContainingRootSubalgebras;
-  Vectors<Rational> preferredAmbientSimpleBasis;
-  Vectors<Rational> participatingPositiveRoots;
-  ElementSemisimpleLieAlgebra<Rational> hElement;
-  // Mathematically equal to the previous.
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> hAlgebraic;
-  // Mathematically equal to the previous.
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > hPolynomialRational;
-  // Mathematically equal to the previous.
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
-  hPolynomialAlgebraic;
-  // One possible element e for which [e, f] = h
-  // [h, e] = 2e.
-  ElementSemisimpleLieAlgebra<Rational> eElement;
-  // One possible element f for which [e, f] = h
-  // [h, f] = -2f.
-  ElementSemisimpleLieAlgebra<Rational> fElement;
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > eUnknown;
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > fUnknown;
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > eBracketFMinusHUnknown;
-  // The polynomial system required to solve to find e, f.
-  PolynomialSubstitution<Rational> systemToSolve;
-  // Used to check our work over the rationals
-  ElementSemisimpleLieAlgebra<Rational> hBracketE, hBracketF, eBracketF;
-  // The following describes an optional Cartan involution.
-  // A map \theta is a Cartan involution if the following hold.
-  // \theta is linear
-  // \theta^2 = id.
-  // \theta is a lie bracket automorphism, i.e., [\theta(a), \theta(b)] =
-  // \theta([a,b]).
-  // Here, if theta is not null, we request that it
-  // correspond to the maximally compact real form and have the property
-  // \theta(h) = -h.
-  // TODO(tmilev): does the property above need to be tweaked when
-  // we compute outside of the maximally compact real form?
-  LinearMapSemisimpleLieAlgebra<Rational>* cartanInvolutionPreservedByEMinusF;
-  // Fix one Cartan involution theta for which theta(h) = -h.
-  //
-  // The following element has all properties that the rational element e has,
-  // as well as the following additional property:
-  //
-  // 1) e - f is invariant with respect the cartan involution, i.e.,
-  // theta(e-f)=e-f.
-  //
-  // An h, e, f-triple as above is called a Kostant-Sekiguchi sl(2)-triple.
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> eKostantSekiguchi;
-  // F element of the Kostant-Sekiguchi sl(2)-triple.
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> fKostantSekiguchi;
-  // Same as hKostantSekiguchi but with polynomial coefficients.
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
-  hKnownKostantSekiguchi;
-  // An element of the form x_1 g_{k_1} + ... + x_s g_{k_s} where
-  // x_1, ..., x_s are unknowns and g_{?} are the Chevalley generators
-  // of the root spaces given by participatingPositiveRoots.
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
-  eKostantSekiguchiUnknown;
-  // An element of the form x_1 g_{-k_1} + ... + x_s g_{-k_s} where
-  // x_1, ..., x_s are unknowns and g_{-?} are the Chevalley generators
-  // of the root spaces given by the negatives of the
-  // participatingPositiveRoots.
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
-  fKostantSekiguchiUnknown;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
-  eBracketFMinusHUnknownKostantSekiguchi;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eMinusFUnknown;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
-  involutionAppliedToEMinusF;
-  // The polynomial system required to solve to find a Kostant-sekiguchi triple
-  // e, f, h.
-  // Here, we assume that theta(h) = - h is already satisfied.
-  PolynomialSubstitution<AlgebraicNumber> systemToSolveKostantSekiguchi;
-  // Arbitrarily chosen coefficients of the F element over the rationals.
-  // This arbitrary choice of F allows to reduce
-  // the polynomial system needed to realize the E and F
-  // to a linear one.
-  // The rationale for this arbitrary choice:
-  // 1) Speed (linear systems are easer to solve than polynomial systems).
-  // 2) Algorithmic simplicity. When this function was first designed,
-  // we did not have machinery for solving polynomial systems
-  // so this used to be an algorithmic necessity.
-  //
-  // Here, we recall that the element H is known and computed by algorithms
-  // following Dynkin.
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > fArbitrary;
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > eArbitraryUnknown;
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> >
-  eBracketFMinusHArbitraryUnknown;
-  // The polynomial (actually, linear) system required to solve for
-  // eArbitraryUnknown.
-  PolynomialSubstitution<Rational> systemToSolveArbitrary;
-  // The matrix of the linear system given by systemToSolveArbitrary.
-  Matrix<Rational> systemArbitraryMatrix;
-  // The column-vector of the linear system given by systemToSolveArbitrary.
-  Matrix<Rational> systemArbitraryColumnVector;
-  List<CharacterSemisimpleLieAlgebraModule<Rational> >
-  moduleDecompositionMinimalContainingRootSubalgebras;
-  Vector<Rational> hCharacteristic;
-  Vector<Rational> hElementCorrespondingToCharacteristic;
-  Vectors<Rational> hCommutingRootSpaces;
-  Vectors<Rational> rootsWithScalar2WithH;
-  DynkinDiagramRootSubalgebra diagramM;
-  int dynkinsEpsilon;
-  bool flagDeallocated;
-  void initialize();
-  SlTwoSubalgebra() {
-    this->flagDeallocated = false;
-    this->initialize();
-  }
-  ~SlTwoSubalgebra() {
-    this->flagDeallocated = true;
-  }
-  void computeDynkinTypeEmbedded(DynkinType& output) const;
-  bool checkConsistency() const;
-  SlTwoSubalgebras& getContainerSl2s() {
-    if (this->container == nullptr) {
-      global.fatal
-      << "Attempt to "
-      << "access the container list of "
-      << "a non-initialized sl(2)-subalgebra. "
-      << global.fatal;
-    }
-    return *this->container;
-  }
-  const WeylGroupData& getOwnerWeyl() const;
-  SemisimpleLieAlgebra& getOwnerSemisimpleAlgebra() {
-    if (this->owner == nullptr) {
-      global.fatal
-      << "Attempt to access "
-      << "the ambient Lie algebra of a "
-      << "non-initialized sl(2)-subalgebra. "
-      << global.fatal;
-    }
-    return *this->owner;
-  }
-  std::string toStringTriple(FormatExpressions* format) const;
-  std::string toStringTripleStandardRealization() const;
-  std::string toStringTripleVerification(FormatExpressions* format) const;
-  std::string toStringTripleUnknowns(FormatExpressions* format) const;
-  std::string toStringTripleUnknownsPolynomialSystem(
-    FormatExpressions* format = nullptr
-  ) const;
-  template <typename Coefficient>
-  std::string toStringPolynomialSystem(
-    const PolynomialSubstitution<Coefficient>& system,
-    FormatExpressions* format = nullptr
-  ) const;
-  std::string toStringTripleArbitrary(FormatExpressions* format) const;
-  std::string toStringTripleArbitraryMatrix() const;
-  std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toStringKostantSekiguchiTripleInternals(
-    FormatExpressions* format
-  ) const;
-  std::string toStringKostantSekiguchiTriple(FormatExpressions* format) const;
-  std::string toStringKostantSekiguchiTripleStandardRealization() const;
-  void toStringModuleDecompositionMinimalContainingRegularSubalgebras(
-    bool useLatex, bool useHtml, SlTwoSubalgebras& owner, std::string& output
-  ) const;
-  void computeModuleDecompositionsition(
-    const Vectors<Rational>& positiveRootsContainingRegularSubalgebra,
-    int dimensionContainingRegularSubalgebra,
-    CharacterSemisimpleLieAlgebraModule<Rational>& outputHighestWeights,
-    List<int>& outputModuleDimensions
-  );
-  Rational getDynkinIndex() const;
-  bool checkIndicesMinimalContainingRootSubalgebras() const;
-  void computeModuleDecompositionsitionAmbientLieAlgebra();
-  bool attemptToComputeCentralizer();
-  bool attemptExtendingHFtoHEFWithRespectToSubalgebra(
-    Vectors<Rational>& rootsWithCharacteristic2,
-    Selection& zeroCharacteristics,
-    Vectors<Rational>& simpleBasisSubalgebras,
-    Vector<Rational>& h,
-    bool computeRealForm,
-    AlgebraicClosureRationals* inputAlgebraicClosure
-  );
-  bool attemptRealizingKostantSekiguchi();
-  bool checkConsistencyParticipatingRoots(const Vector<Rational>& targetH);
-  // Initializes the h,e,f computation with f arbitrarily chosen.
-  // See the preceding comments on why f is chosen arbitrarily.
-  void initializeUnknownTriples(const Vector<Rational>& targetH);
-  void computePolynomialSystems();
-  void adjoinKostantSekiguchiRelationsToPolynomialSystem(
-    LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
-    cartanInvolutionPreservedByEMinusF
-  );
-  void computeLieBracketsUnknowns();
-  void initializeHEFSystemFromFCoefficients(
-    const Vector<Rational>& targetH,
-    LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
-    cartanInvolutionPreservedByEMinusF
-  );
-  void initializeHEFSystemFromFCoefficientsPartTwo();
-  void computeModuleDecompositionsitionOfMinimalContainingRegularSAs(
-    SlTwoSubalgebras& owner
-  );
-  bool moduleDecompositionFitsInto(const SlTwoSubalgebra& other) const;
-  static bool moduleDecompositionLeftFitsIntoRight(
-    const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoLeft,
-    const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoRight
-  );
-  void makeReportPrecomputations(
-    int indexMinimalContainingRegularSA,
-    RootSubalgebra& minimalContainingRegularSubalgebra
-  );
-  // the below is outdated, must be deleted as soon as equivalent code is
-  // written.
-  void computeDynkinsEpsilon(WeylGroupData& weyl);
-  void toHTML(std::string& filePath);
-  bool operator==(const SlTwoSubalgebra& right) const;
-  bool operator>(const SlTwoSubalgebra& right) const;
-  unsigned int hashFunction() const;
-  static inline unsigned int hashFunction(const SlTwoSubalgebra& input) {
-    return input.hashFunction();
-  }
-};
-
-class SlTwoSubalgebras {
-  friend class SemisimpleSubalgebras;
-  SemisimpleLieAlgebra* owner;
-public:
-  static std::string descriptionHCharacteristic;
-  static std::string descriptionModuleDecompositionOverSl2;
-  static std::string descriptionHRealization;
-  static std::string descriptionMinimalContainingRegularSubalgebras;
-  HashedList<SlTwoSubalgebra> allSubalgebras;
-  List<List<int> > indicesSl2sContainedInRootSubalgebras;
-  List<int> indicesSl2DecompositionFormulas;
-  Vectors<Rational> badHCharacteristics;
-  int indexZeroWeight;
-  RootSubalgebras rootSubalgebras;
-  ~SlTwoSubalgebras() {}
-  SlTwoSubalgebras(): owner(nullptr) {}
-  SlTwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner) {}
-  bool operator==(const SlTwoSubalgebras& other) const {
-    if (this->owner == nullptr) {
-      return other.owner == nullptr;
-    }
-    if (other.owner == nullptr) {
-      return false;
-    }
-    return this->getOwner() == other.getOwner();
-  }
-  bool checkConsistency() const;
-  bool checkMinimalContainingRootSubalgebras() const;
-  void checkInitialization() const;
-  WeylGroupData& getOwnerWeyl() const {
-    return this->getOwner().weylGroup;
-  }
-  SemisimpleLieAlgebra& getOwner() const {
-    this->checkInitialization();
-    return *this->owner;
-  }
-  void computeModuleDecompositionsitionsOfAmbientLieAlgebra();
-  void reset(SemisimpleLieAlgebra& inputOwners);
-  bool containsSl2WithGivenH(Vector<Rational>& elementH, int* outputIndex);
-  bool containsSl2WithGivenHCharacteristic(
-    Vector<Rational>& hCharacteristic, int* outputIndex
-  );
-  void writeHTML(FormatExpressions* format = nullptr);
-  std::string toStringSummary(FormatExpressions* format = nullptr);
-  void toStringModuleDecompositionMinimalContainingRegularSAs(
-    std::string& output, bool useLatex, bool useHtml
-  );
-  std::string toString(FormatExpressions* format = nullptr);
 };
 
 #endif // header_math_extra_semisimple_lie_algebras_root_subalgebras_ALREADY_INCLUDED

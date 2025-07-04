@@ -3674,7 +3674,12 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
     useHtml = format->flagUseHTML;
   }
   if (!useLaTeX && !useHtml) {
-    out << this->size << " vectors: \n";
+    out << this->size << " vectors";
+    if (this->size != 0) {
+      out << ": \n";
+    } else {
+      out << ". ";
+    }
   }
   if (useLaTeX && makeTable) {
     out << "\\begin{tabular}{c}";

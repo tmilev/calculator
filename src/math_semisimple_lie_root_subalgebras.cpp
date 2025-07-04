@@ -2,6 +2,7 @@
 #include "math_extra_finite_groups_implementation.h"
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
+#include "math_extra_semisimple_lie_subalgebras_sltwos.h"
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks web assembly build.
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
@@ -1564,15 +1565,33 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* format) {
   << this->dynkinDiagram.toString()
   << "</title>";
   output
-  << "<meta name = \"keywords\" content = \""
+  << "<meta name='keywords' content='"
   << this->getAmbientWeyl().dynkinType.toString()
   << " root subsystems, root subsystems, root systems";
   if (this->getAmbientWeyl().dynkinType.hasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
   }
-  output << " \">";
+  output << "'>";
   output << "<body>" << this->toString(format) << "</body></html>";
   output.close();
+}
+
+std::string RootSubalgebra::toStringMinimallyContainingRegularSubalgebras() {
+  std::stringstream out;
+  out << "Not implemented yet";
+  return out.str();
+}
+
+std::string RootSubalgebra::toStringContainingRegularSubalgebras() {
+  std::stringstream out;
+  for (int i = 0; i < this->indicesSubalgebrasContainingK.size; i ++) {
+    int indexOfContainer = this->indicesSubalgebrasContainingK[i];
+    out << this->owner->toStringAlgebraLink(indexOfContainer);
+    if (i != this->indicesSubalgebrasContainingK.size - 1) {
+      out << ", ";
+    }
+  }
+  return out.str();
 }
 
 std::string RootSubalgebra::toString(FormatExpressions* format) {
@@ -1627,6 +1646,10 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   out
   << "<br>\n simple basis centralizer: "
   << this->simpleBasisCentralizerRoots.toString();
+  out << "<br>Containing regular subalgebras: ";
+  out << this->toStringContainingRegularSubalgebras();
+  out << "<br>Minimally containing regular subalgebras: ";
+  out << this->toStringMinimallyContainingRegularSubalgebras();
   out << "<hr>\n Number of k-submodules of g: " << this->modules.size;
   out << "<br>Module decomposition, fundamental coords over k: ";
   out
@@ -1635,7 +1658,9 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   );
   out << "<br>\n";
   out
-  << "\ng/k k-submodules<table border =\"1\">\n<tr><th>id</th><th>size</th>"
+  << "\ng/k k-submodules<table border='1'>\n"
+  << "<tr>"
+  << "<th>id</th><th>size</th>"
   << "<th>b\\cap k-lowest weight</th>"
   << "<th>b\\cap k-highest weight</th>"
   << "<th>Module basis</th><th>Weights epsilon coords</th>";
@@ -2402,18 +2427,18 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
   List<int> tempPermutation2;
   SelectionWithDifferentMaxMultiplicities tempAutos;
   SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
-  List<List<List<int> > > DiagramAutomorphisms;
-  List<List<List<int> > > CentralizerDiagramAutomorphisms;
-  this->dynkinDiagram.getAutomorphisms(DiagramAutomorphisms);
-  this->centralizerDiagram.getAutomorphisms(CentralizerDiagramAutomorphisms);
-  tempAutos.initializePart1(DiagramAutomorphisms.size);
-  tempAutosCentralizer.initializePart1(CentralizerDiagramAutomorphisms.size);
-  for (int i = 0; i < DiagramAutomorphisms.size; i ++) {
-    tempAutos.capacities[i] = DiagramAutomorphisms[i].size - 1;
+  List<List<List<int> > > diagramAutomorphisms;
+  List<List<List<int> > > centralizerDiagramAutomorphisms;
+  this->dynkinDiagram.getAutomorphisms(diagramAutomorphisms);
+  this->centralizerDiagram.getAutomorphisms(centralizerDiagramAutomorphisms);
+  tempAutos.initializePart1(diagramAutomorphisms.size);
+  tempAutosCentralizer.initializePart1(centralizerDiagramAutomorphisms.size);
+  for (int i = 0; i < diagramAutomorphisms.size; i ++) {
+    tempAutos.capacities[i] = diagramAutomorphisms[i].size - 1;
   }
-  for (int i = 0; i < CentralizerDiagramAutomorphisms.size; i ++) {
+  for (int i = 0; i < centralizerDiagramAutomorphisms.size; i ++) {
     tempAutosCentralizer.capacities[i] =
-    CentralizerDiagramAutomorphisms[i].size - 1;
+    centralizerDiagramAutomorphisms[i].size - 1;
   }
   tempList.setSize(this->dynkinDiagram.sameTypeComponents.size);
   int tempSize = 0;
@@ -2452,7 +2477,7 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
             isoDomain,
             isoRange,
             tempPermutation1,
-            DiagramAutomorphisms,
+            diagramAutomorphisms,
             tempAutos,
             right.dynkinDiagram
           );
@@ -2460,7 +2485,7 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
             isoDomain,
             isoRange,
             tempPermutation2,
-            CentralizerDiagramAutomorphisms,
+            centralizerDiagramAutomorphisms,
             tempAutosCentralizer,
             right.centralizerDiagram
           );
@@ -2631,6 +2656,41 @@ void RootSubalgebra::computePotentialExtensions() {
     this->potentialExtensionDynkinTypes[i].getCartanSymmetric(
       this->potentialExtensionCartanSymmetrics[i]
     );
+  }
+}
+
+void RootSubalgebra::addSlTwoSubalgebraIfNew(
+  SlTwoSubalgebraCandidate& candidate,
+  SlTwoSubalgebras& output,
+  int indexRootSubalgebraInContainer
+) {
+  int indexIsoSl2 = - 1;
+  SlTwoSubalgebra newSubalgebra;
+  newSubalgebra.fromSlTwoSubalgebraCandidate(candidate);
+  global.comments << "DEBUG: got to here2";
+  newSubalgebra.makeReportPrecomputations(
+    // indexRootSubalgebraInContainer,
+    *this
+  );
+  if (
+    output.containsSl2WithGivenHCharacteristic(
+      newSubalgebra.hCharacteristic, &indexIsoSl2
+    )
+  ) {
+    output.allSubalgebras.getElement(indexIsoSl2).
+    indicesContainingRootSubalgebras.addOnTop(indexRootSubalgebraInContainer);
+    output.indicesSl2sContainedInRootSubalgebras[
+      indexRootSubalgebraInContainer
+    ].addOnTop(indexIsoSl2);
+  } else {
+    global.comments << "DEBUG: got to adding, brand new";
+    output.indicesSl2sContainedInRootSubalgebras[
+      indexRootSubalgebraInContainer
+    ].addOnTop(output.allSubalgebras.size);
+    newSubalgebra.indexInContainer = output.allSubalgebras.size;
+    output.allSubalgebras.addOnTop(newSubalgebra);
+    output.allSubalgebras.lastObject()->
+    checkIndicesMinimalContainingRootSubalgebras();
   }
 }
 
@@ -3038,529 +3098,6 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(
   }
 }
 
-bool SlTwoSubalgebra::operator>(const SlTwoSubalgebra& right) const {
-  STACK_TRACE("SlTwoSubalgebra::operatorGreaterThan");
-  if (this->owner != right.owner) {
-    global.fatal
-    << "Error: comparing sl(2) subalgebras with different owners."
-    << global.fatal;
-  }
-  if (this->lengthHSquared > right.lengthHSquared) {
-    return true;
-  }
-  if (right.lengthHSquared > this->lengthHSquared) {
-    return false;
-  }
-  return this->hCharacteristic > right.hCharacteristic;
-}
-
-bool SlTwoSubalgebra::operator==(const SlTwoSubalgebra& right) const {
-  // See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter
-  // 7-10
-  if (this->owner != right.owner) {
-    global.fatal
-    << "Comparing sl(2) "
-    << "subalgebras that have different ambient Lie algebras. "
-    << global.fatal;
-  }
-  return this->hCharacteristic == right.hCharacteristic;
-}
-
-std::string SlTwoSubalgebra::toStringTripleVerification(
-  FormatExpressions* format
-) const {
-  std::stringstream out;
-  bool useHtml = format == nullptr ? true : format->flagUseHTML;
-  out << "<br>Lie brackets of the above elements.<br>";
-  if (useHtml) {
-    out << "\n<br>\n";
-  }
-  out
-  << "\\(\\begin{array}{rcl}"
-  << "[e, f]&=&"
-  << this->eBracketF.toString(format)
-  << "\\\\\n"
-  << "[h, e]&=&"
-  << this->hBracketE.toString(format)
-  << "\\\\\n"
-  << "[h, f]&=&"
-  << this->hBracketF.toString(format)
-  << "\\end{array}\\)";
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringTripleArbitrary(
-  FormatExpressions* format
-) const {
-  std::stringstream out;
-  out
-  << "Starting h, e, f triple. H is computed according to Dynkin, "
-  << "and the coefficients of f are arbitrarily chosen. "
-  << "<br>More precisely, the chevalley generators "
-  << "participating in f are ordered in the order "
-  << "in which their roots appear, and the "
-  << "coefficients are chosen to be the increasing odd "
-  << "numbers 1, 3, 5, ....<br>"
-  << "This arbitrary (but well-defined) choice of "
-  << "f guarantees that the computation is linear and fast. <br>\n";
-  out
-  << "\\(\\begin{array}{rcl}"
-  << "h&=&"
-  << this->hPolynomialRational.toString(format)
-  << "\\\\"
-  << "e&=&"
-  << this->eArbitraryUnknown.toString(format)
-  << "\\\\"
-  << "f&=&"
-  << this->fArbitrary.toString(format)
-  << "\\end{array}\\)";
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringTripleArbitraryMatrix() const {
-  std::stringstream out;
-  out << "<br>Matrix form of the system we are trying to solve:\n";
-  FormatExpressions formatLatex;
-  formatLatex.flagUseLatex = true;
-  formatLatex.flagUseHTML = false;
-  out
-  << "\\("
-  << this->systemArbitraryMatrix.toString(&formatLatex)
-  << "[col. vect.]"
-  << "="
-  << this->systemArbitraryColumnVector.toString(&formatLatex)
-  << "\\)";
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringTripleUnknowns(FormatExpressions* format)
-const {
-  std::stringstream out;
-  out << "<hr>Unknown elements.<br>";
-  out
-  << "\\(\\begin{array}{rcl}"
-  << "h&=&"
-  << this->hPolynomialRational.toString(format)
-  << "\\\\\n"
-  << "e&=&"
-  << this->eUnknown.toString(format)
-  << "\\\\\n"
-  << "f&=&"
-  << this->fUnknown.toString(format)
-  << "\\end{array}\\)";
-  out
-  << "<br>Participating positive roots: "
-  << this->participatingPositiveRoots.toString()
-  << ".";
-  out << "<br>Lie brackets of the unknowns.<br>";
-  out
-  << "\\([e,f] - h = "
-  << this->eBracketFMinusHUnknown.toString(format)
-  << "\\)";
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringKostantSekiguchiTriple(
-  FormatExpressions* format
-) const {
-  if (this->eKostantSekiguchi.isEqualToZero()) {
-    return "";
-  }
-  std::stringstream out;
-  out << "<br>Kostant-Sekiguchi elements.<br>";
-  out << "\\(";
-  out << "\\begin{array}{rcl}";
-  out << "h&=&" << this->hPolynomialAlgebraic.toString(format) << "\\\\\n";
-  out << "e&=&" << this->eKostantSekiguchi.toString(format) << "\\\\\n";
-  out << "f&=&" << this->fKostantSekiguchi.toString(format);
-  out << "\\end{array}\\)";
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleInternals(
-  FormatExpressions* format
-) const {
-  std::stringstream out;
-  out << "<br>The unknown Kostant-Sekiguchi elements.<br>";
-  std::stringstream tripleSystem;
-  tripleSystem << "\\begin{array}{rcl}";
-  tripleSystem
-  << "h&=&"
-  << this->hPolynomialAlgebraic.toString(format)
-  << "\\\\\n";
-  tripleSystem
-  << "e&=&"
-  << this->eKostantSekiguchiUnknown.toString(format)
-  << "\\\\\n";
-  tripleSystem << "f&=&" << this->fKostantSekiguchiUnknown.toString(format);
-  tripleSystem << "\\end{array}";
-  out << HtmlRoutines::getMathNoDisplay(tripleSystem.str());
-  out << "<br>\\(e-f=" << this->eMinusFUnknown.toString(format) << "\\)";
-  out
-  << "<br>\\(\\theta(e-f)="
-  << this->involutionAppliedToEMinusF.toString(format)
-  << "\\)";
-  out << "<br>The polynomial system we need to solve.<br>";
-  out
-  << this->toStringPolynomialSystem(
-    this->systemToSolveKostantSekiguchi, format
-  );
-  return out.str();
-}
-
-template <typename Coefficient>
-std::string SlTwoSubalgebra::toStringPolynomialSystem(
-  const PolynomialSubstitution<Coefficient>& system, FormatExpressions* format
-) const {
-  std::stringstream latexStreamActual;
-  latexStreamActual << "\\begin{array}{rcl}";
-  for (int i = 0; i < system.size; i ++) {
-    latexStreamActual << system[i].toString(format) << "&=&0\\\\";
-  }
-  latexStreamActual << "\\end{array}";
-  return HtmlRoutines::getMathNoDisplay(latexStreamActual.str());
-}
-
-std::string SlTwoSubalgebra::toStringTripleUnknownsPolynomialSystem(
-  FormatExpressions* format
-) const {
-  std::stringstream out;
-  out
-  << "<br>The polynomial system that corresponds "
-  << "to finding the h, e, f triple:<br>\n";
-  out
-  << this->toStringPolynomialSystem(this->systemToSolve, format)
-  << "\n<br>\n";
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
-  std::stringstream out;
-  out << "\\begin{array}{rcl}";
-  out << "h&=&" << this->hElement.toString(format) << "\\\\\n";
-  out << "e&=&" << this->eElement.toString(format) << "\\\\\n";
-  out << "f&=&" << this->fElement.toString(format);
-  out << "\\end{array}";
-  return HtmlRoutines::getMathNoDisplay(out.str());
-}
-
-bool SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra(
-  Vectors<Rational>& rootsWithCharacteristic2,
-  Selection& zeroCharacteristics,
-  Vectors<Rational>& simpleBasisSubalgebras,
-  Vector<Rational>& h,
-  bool computeRealForm,
-  AlgebraicClosureRationals* inputAlgebraicClosure
-) {
-  STACK_TRACE(
-    "SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra"
-  );
-  if (
-    zeroCharacteristics.cardinalitySelection ==
-    zeroCharacteristics.numberOfElements
-  ) {
-    return false;
-  }
-  this->algebraicClosure = inputAlgebraicClosure;
-  this->hAlgebraic.makeCartanGenerator(h, this->getOwnerSemisimpleAlgebra());
-  this->participatingPositiveRoots.size = 0;
-  int relativeDimension = simpleBasisSubalgebras.size;
-  if (relativeDimension != zeroCharacteristics.numberOfElements) {
-    global.fatal << "Relative dimension is incorrect. " << global.fatal;
-  }
-  // Format. We are looking for an sl(2) for which
-  // e = a_0 g^\alpha_0+...a_kg^\alpha_k,
-  // and
-  // f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
-  // where the first \alpha's are ordered as in rootsInPlay.
-  // Those are ordered as follows. First come the simple roots of
-  // characteristic 2,
-  // and the last \alpha's are the members of SelectedExtraPositiveRoots
-  // (i.e. root equal to the sum of one simple root
-  // of characteristic 2 with a simple roots of characteristic 0).
-  // Then the first k variables of the polynomials below will be
-  // a_0, ..., a_k and
-  // the last k variables will be the b_i's,
-  // the l^th polynomial will correspond to the coefficient of g^\alpha_{l/2},
-  // where
-  // l/2 is the index of the rootattemptExtendingHFtoHEFWithRespectToSubalgebra
-  // of SelectedExtraPositiveRoots, if l is even, and to the
-  // coefficient of  g^{-\alpha_{(l+ 1)/2}} otherwise.
-  for (int i = 0; i < relativeDimension; i ++) {
-    if (!zeroCharacteristics.selected[i]) {
-      this->participatingPositiveRoots.addOnTop(simpleBasisSubalgebras[i]);
-    }
-  }
-  Vectors<Rational> selectedExtraPositiveRoots;
-  for (int i = 0; i < rootsWithCharacteristic2.size; i ++) {
-    if (!simpleBasisSubalgebras.contains(rootsWithCharacteristic2[i])) {
-      selectedExtraPositiveRoots.addOnTop(rootsWithCharacteristic2[i]);
-    }
-  }
-  this->participatingPositiveRoots.addListOnTop(selectedExtraPositiveRoots);
-  LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
-  cartanInvolutionStandard;
-  LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
-  cartanInvolutionToRespect =
-  nullptr;
-  if (computeRealForm) {
-    if (
-      this->owner->hasImplementedCartanInvolutionMaximallyCompactCase(
-        &cartanInvolutionStandard
-      )
-    ) {
-      cartanInvolutionToRespect = &cartanInvolutionStandard;
-    }
-  }
-  this->initializeHEFSystemFromFCoefficients(h, cartanInvolutionToRespect);
-  Matrix<Rational> matrix;
-  Matrix<Rational> adjoinedColumn;
-  Matrix<Rational> result;
-  matrix = this->systemArbitraryMatrix;
-  adjoinedColumn = this->systemArbitraryColumnVector;
-  this->fElement.makeZero();
-  this->eElement.makeZero();
-  ChevalleyGenerator generator;
-  if (
-    !Matrix<Rational>::solveAxEqualsBModifyInputReturnFirstSolutionIfExists(
-      matrix, adjoinedColumn, result
-    )
-  ) {
-    return false;
-  }
-  this->fElement = this->fArbitrary;
-  for (int i = 0; i < this->participatingPositiveRoots.size; i ++) {
-    generator.makeGenerator(
-      this->getOwnerSemisimpleAlgebra(),
-      this->getOwnerSemisimpleAlgebra().getGeneratorIndexFromRoot(
-        this->participatingPositiveRoots[i]
-      )
-    );
-    this->eElement.addMonomial(generator, result.elements[i][0]);
-  }
-  if (computeRealForm) {
-    this->attemptRealizingKostantSekiguchi();
-  }
-  return true;
-}
-
-bool SlTwoSubalgebra::attemptRealizingKostantSekiguchi() {
-  STACK_TRACE("SlTwoSubalgebra::attemptRealizingKostantSekiguchi");
-  PolynomialSystem<AlgebraicNumber> computation;
-  computation.algebraicClosure = this->algebraicClosure;
-  computation.initializeForSystemSolution();
-  computation.groebner.polynomialOrder.monomialOrder =
-  MonomialPolynomial::orderDefault();
-  computation.solveSerreLikeSystem(this->systemToSolveKostantSekiguchi);
-  if (!computation.flagSystemSolvedOverBaseField) {
-    return false;
-  }
-  PolynomialSubstitution<AlgebraicNumber> solution;
-  solution.setSize(computation.systemSolution.size);
-  for (int i = 0; i < solution.size; i ++) {
-    solution[i].makeConstant(computation.systemSolution[i]);
-  }
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eSolved;
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > fSolved;
-  eSolved = this->eKostantSekiguchiUnknown;
-  fSolved = this->fKostantSekiguchiUnknown;
-  eSolved.substituteInCoefficients(solution);
-  fSolved.substituteInCoefficients(solution);
-  this->eKostantSekiguchi = eSolved;
-  this->fKostantSekiguchi = fSolved;
-  return true;
-}
-
-bool SlTwoSubalgebra::checkConsistencyParticipatingRoots(
-  const Vector<Rational>& targetH
-) {
-  STACK_TRACE("SlTwoSubalgebra::checkConsistencyParticipatingRoots");
-  for (int i = 0; i < this->participatingPositiveRoots.size; i ++) {
-    if (
-      this->getOwnerWeyl().rootScalarCartanRoot(
-        targetH, this->participatingPositiveRoots[i]
-      ) ==
-      2
-    ) {
-      continue;
-    }
-    global.fatal
-    << "The scalar product of the h element: "
-    << targetH.toString()
-    << " and the root in play "
-    << this->participatingPositiveRoots[i].toString()
-    << " must be 2, but equals instead "
-    << this->getOwnerWeyl().rootScalarCartanRoot(
-      targetH, this->participatingPositiveRoots[i]
-    ).toString()
-    << global.fatal;
-  }
-  return true;
-}
-
-void SlTwoSubalgebra::initializeUnknownTriples(const Vector<Rational>& targetH)
-{
-  STACK_TRACE("SlTwoSubalgebra::initializeUnknownTriples");
-  if (this->algebraicClosure == nullptr) {
-    global.fatal << "The algebraic closure is required." << global.fatal;
-  }
-  // Set the h element.
-  this->hPolynomialRational.makeZero();
-  this->hPolynomialRational.makeCartanGenerator(
-    targetH, this->getOwnerSemisimpleAlgebra()
-  );
-  // Set the h element but over the algebraic numbers.
-  this->hPolynomialAlgebraic.makeZero();
-  this->hPolynomialAlgebraic.makeCartanGenerator(
-    targetH, this->getOwnerSemisimpleAlgebra()
-  );
-  //
-  // Zero e and f for the arbitrary f choice optimization.
-  this->eArbitraryUnknown.makeZero();
-  // In the code below, f will be chosen arbitrarily.
-  this->fArbitrary.makeZero();
-  //
-  // Zero e and f without arbitrary optimizations.
-  this->eUnknown.makeZero();
-  this->fUnknown.makeZero();
-  //
-  // Zero e  and f for the Kostant-Sekiguchi computation.
-  this->eKostantSekiguchiUnknown.makeZero();
-  this->fKostantSekiguchiUnknown.makeZero();
-  for (int i = 0; i < this->participatingPositiveRoots.size; i ++) {
-    // Initialize arbitrary triple
-    ChevalleyGenerator negative;
-    negative.makeGeneratorRootSpace(
-      this->getOwnerSemisimpleAlgebra(),
-      - this->participatingPositiveRoots[i]
-    );
-    this->fArbitrary.addMonomial(negative, i * i + 1);
-    // (i % 2== 0)? 1: 2;
-    ChevalleyGenerator positive;
-    positive.makeGeneratorRootSpace(
-      this->getOwnerSemisimpleAlgebra(), this->participatingPositiveRoots[i]
-    );
-    Polynomial<Rational> unknownCoefficient;
-    unknownCoefficient.makeMonomial(i, 1, 1);
-    this->eArbitraryUnknown.addMonomial(positive, unknownCoefficient);
-    // Initialize true unknown triple.
-    unknownCoefficient.makeMonomial(i, 1, 1);
-    this->eUnknown.addMonomial(positive, unknownCoefficient);
-    unknownCoefficient.makeMonomial(
-      i + this->participatingPositiveRoots.size, 1, 1
-    );
-    this->fUnknown.addMonomial(negative, unknownCoefficient);
-    Polynomial<AlgebraicNumber> unknownCoefficientAlgebraic;
-    unknownCoefficientAlgebraic.makeMonomial(
-      i, 1, this->algebraicClosure->one()
-    );
-    this->eKostantSekiguchiUnknown.addMonomial(
-      positive, unknownCoefficientAlgebraic
-    );
-    unknownCoefficientAlgebraic.makeMonomial(
-      i + this->participatingPositiveRoots.size,
-      1,
-      this->algebraicClosure->one()
-    );
-    this->fKostantSekiguchiUnknown.addMonomial(
-      negative, unknownCoefficientAlgebraic
-    );
-  }
-}
-
-void SlTwoSubalgebra::computeLieBracketsUnknowns() {
-  this->getOwnerSemisimpleAlgebra().lieBracket(
-    this->eArbitraryUnknown,
-    this->fArbitrary,
-    this->eBracketFMinusHArbitraryUnknown
-  );
-  this->eBracketFMinusHArbitraryUnknown -= this->hPolynomialRational;
-  this->getOwnerSemisimpleAlgebra().lieBracket(
-    this->eUnknown, this->fUnknown, this->eBracketFMinusHUnknown
-  );
-  this->eBracketFMinusHUnknown -= this->hPolynomialRational;
-  this->getOwnerSemisimpleAlgebra().lieBracket(
-    this->eKostantSekiguchiUnknown,
-    this->fKostantSekiguchiUnknown,
-    this->eBracketFMinusHUnknownKostantSekiguchi
-  );
-  this->eBracketFMinusHUnknownKostantSekiguchi -= this->hPolynomialAlgebraic;
-}
-
-void SlTwoSubalgebra::computePolynomialSystems() {
-  this->systemToSolveArbitrary.clear();
-  for (int i = 0; i < this->eBracketFMinusHArbitraryUnknown.size(); i ++) {
-    this->systemToSolveArbitrary.addOnTop(
-      this->eBracketFMinusHArbitraryUnknown.coefficients[i]
-    );
-  }
-  this->systemToSolve.clear();
-  for (int i = 0; i < this->eBracketFMinusHUnknown.size(); i ++) {
-    this->systemToSolve.addOnTop(
-      this->eBracketFMinusHUnknown.coefficients[i]
-    );
-  }
-  this->systemToSolveKostantSekiguchi.clear();
-  for (
-    int i = 0; i < this->eBracketFMinusHUnknownKostantSekiguchi.size(); i ++
-  ) {
-    this->systemToSolveKostantSekiguchi.addOnTop(
-      this->eBracketFMinusHUnknownKostantSekiguchi.coefficients[i]
-    );
-  }
-}
-
-void SlTwoSubalgebra::adjoinKostantSekiguchiRelationsToPolynomialSystem(
-  LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
-  cartanInvolutionPreservedByEMinusF
-) {
-  STACK_TRACE(
-    "SlTwoSubalgebra::adjoinKostantSekiguchiRelationsToPolynomialSystem"
-  );
-  if (cartanInvolutionPreservedByEMinusF == nullptr) {
-    return;
-  }
-  this->eMinusFUnknown =
-  this->eKostantSekiguchiUnknown - this->fKostantSekiguchiUnknown;
-  cartanInvolutionPreservedByEMinusF->applyTo(
-    this->eMinusFUnknown, this->involutionAppliedToEMinusF
-  );
-  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > mustBeZero;
-  mustBeZero = this->eMinusFUnknown - this->involutionAppliedToEMinusF;
-  for (int i = 0; i < mustBeZero.size(); i ++) {
-    this->systemToSolveKostantSekiguchi.addOnTop(mustBeZero.coefficients[i]);
-  }
-}
-
-void SlTwoSubalgebra::initializeHEFSystemFromFCoefficients(
-  const Vector<Rational>& targetH,
-  LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
-  cartanInvolutionPreservedByEMinusF
-) {
-  STACK_TRACE("SlTwoSubalgebra::initializeHEFSystemFromFCoefficients");
-  this->checkConsistencyParticipatingRoots(targetH);
-  this->initializeUnknownTriples(targetH);
-  this->computeLieBracketsUnknowns();
-  this->computePolynomialSystems();
-  this->adjoinKostantSekiguchiRelationsToPolynomialSystem(
-    cartanInvolutionPreservedByEMinusF
-  );
-  this->initializeHEFSystemFromFCoefficientsPartTwo();
-}
-
-void SlTwoSubalgebra::initializeHEFSystemFromFCoefficientsPartTwo() {
-  STACK_TRACE("SlTwoSubalgebra::initializeHEFSystemFromECoefficientsPartTwo");
-  this->systemArbitraryMatrix.initialize(
-    this->systemToSolve.size, this->participatingPositiveRoots.size
-  );
-  this->systemArbitraryColumnVector.initialize(this->systemToSolve.size, 1);
-  this->systemArbitraryMatrix.makeZero();
-  this->systemArbitraryColumnVector.makeZero();
-  this->systemToSolveArbitrary.getLinearSystemFromLinearPolynomials(
-    this->systemArbitraryMatrix, this->systemArbitraryColumnVector
-  );
-}
-
 void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   SlTwoSubalgebras& output,
   int indexRootSubalgebraInContainer,
@@ -3577,9 +3114,9 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   }
   Selection selectionRootsWithZeroCharacteristic;
   Selection simpleRootsChar2;
-  Vectors<Rational> rootsScalarProduct2HnonRaised;
+  Vectors<Rational> rootsScalarProduct2HNonRaised;
   Vectors<Rational> reflectedSimpleBasisK;
-  rootsScalarProduct2HnonRaised.reserve(
+  rootsScalarProduct2HNonRaised.reserve(
     this->positiveRootsReductiveSubalgebra.size
   );
   ElementWeylGroup raisingElement;
@@ -3609,9 +3146,9 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   this->positiveRootsReductiveSubalgebra.getCoordinatesInBasis(
     this->simpleRootsReductiveSubalgebra, relativeRootSystem
   );
-  SlTwoSubalgebra sl2;
-  sl2.container = &output;
-  sl2.owner = &this->getOwnerLieAlgebra();
+  SlTwoSubalgebraCandidate candidate;
+  candidate.container = &output;
+  candidate.owner = &this->getOwnerLieAlgebra();
   SemisimpleLieAlgebra& lieAlgebra = this->getOwnerLieAlgebra();
   DynkinDiagramRootSubalgebra diagramZeroCharRoots;
   for (
@@ -3626,7 +3163,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       rootsZeroChar, this->getAmbientWeyl()
     );
     int slack = 0;
-    rootsScalarProduct2HnonRaised.size = 0;
+    rootsScalarProduct2HNonRaised.size = 0;
     simpleRootsChar2 = selectionRootsWithZeroCharacteristic;
     simpleRootsChar2.invertSelection();
     Vector<Rational> simpleRootsChar2Vector;
@@ -3634,7 +3171,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     for (int j = 0; j < relativeRootSystem.size; j ++) {
       if (simpleRootsChar2Vector.scalarEuclidean(relativeRootSystem[j]) == 1) {
         slack ++;
-        rootsScalarProduct2HnonRaised.addOnTop(
+        rootsScalarProduct2HNonRaised.addOnTop(
           this->positiveRootsReductiveSubalgebra[j]
         );
       }
@@ -3668,10 +3205,10 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       characteristicH +=
       this->simpleRootsReductiveSubalgebra[j] * relativeSimpleCoordinates[j];
     }
-    for (int k = 0; k < rootsScalarProduct2HnonRaised.size; k ++) {
+    for (int k = 0; k < rootsScalarProduct2HNonRaised.size; k ++) {
       if (
         this->getAmbientWeyl().rootScalarCartanRoot(
-          characteristicH, rootsScalarProduct2HnonRaised[k]
+          characteristicH, rootsScalarProduct2HNonRaised[k]
         ) !=
         2
       ) {
@@ -3679,12 +3216,12 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         << "CharacteristicH is: "
         << characteristicH.toString()
         << "; rootsWithScalarProduct2NonRaised: "
-        << rootsScalarProduct2HnonRaised.toString()
+        << rootsScalarProduct2HNonRaised.toString()
         << "; the scalar product with vector "
-        << rootsScalarProduct2HnonRaised[k].toString()
+        << rootsScalarProduct2HNonRaised[k].toString()
         << " is:  "
         << this->getAmbientWeyl().rootScalarCartanRoot(
-          characteristicH, rootsScalarProduct2HnonRaised[k]
+          characteristicH, rootsScalarProduct2HNonRaised[k]
         ).toString()
         << " which is supposed to equal 2. "
         << global.fatal;
@@ -3697,16 +3234,16 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     for (int k = 0; k < reflectedSimpleBasisK.size; k ++) {
       this->getAmbientWeyl().actOn(raisingElement, reflectedSimpleBasisK[k]);
     }
-    sl2.rootsWithScalar2WithH = rootsScalarProduct2HnonRaised;
-    for (int k = 0; k < sl2.rootsWithScalar2WithH.size; k ++) {
+    candidate.rootsWithScalar2WithH = rootsScalarProduct2HNonRaised;
+    for (int k = 0; k < candidate.rootsWithScalar2WithH.size; k ++) {
       this->getAmbientWeyl().actOn(
-        raisingElement, sl2.rootsWithScalar2WithH[k]
+        raisingElement, candidate.rootsWithScalar2WithH[k]
       );
     }
-    for (int i = 0; i < sl2.rootsWithScalar2WithH.size; i ++) {
+    for (int i = 0; i < candidate.rootsWithScalar2WithH.size; i ++) {
       if (
         this->getAmbientWeyl().rootScalarCartanRoot(
-          characteristicH, sl2.rootsWithScalar2WithH[i]
+          characteristicH, candidate.rootsWithScalar2WithH[i]
         ) !=
         2
       ) {
@@ -3720,12 +3257,12 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         << " to get: "
         << reflectedSimpleBasisK.toString()
         << " theSl2.RootsWithScalar2WithH: "
-        << sl2.rootsWithScalar2WithH.toString()
+        << candidate.rootsWithScalar2WithH.toString()
         << ", theSl2.RootsWithScalar2WithH[i]: "
-        << sl2.rootsWithScalar2WithH[i].toString()
+        << candidate.rootsWithScalar2WithH[i].toString()
         << " scalar product: "
         << this->getAmbientWeyl().rootScalarCartanRoot(
-          characteristicH, sl2.rootsWithScalar2WithH[i]
+          characteristicH, candidate.rootsWithScalar2WithH[i]
         ).toString()
         << ". The inverted relative cartan: "
         << invertedRelativeKillingForm.toString()
@@ -3735,16 +3272,17 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         << global.fatal;
       }
     }
-    sl2.hElement.makeCartanGenerator(characteristicH, lieAlgebra);
-    sl2.lengthHSquared =
-    sl2.getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(
+    candidate.hElement.makeCartanGenerator(characteristicH, lieAlgebra);
+    candidate.lengthHSquared =
+    candidate.getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(
       characteristicH, characteristicH
     );
-    sl2.eElement.makeZero();
-    sl2.fElement.makeZero();
+    candidate.eElement.makeZero();
+    candidate.fElement.makeZero();
+    global.comments << "DEBUG: got to here!";
     if (
-      sl2.attemptExtendingHFtoHEFWithRespectToSubalgebra(
-        sl2.rootsWithScalar2WithH,
+      candidate.attemptExtendingHFtoHEFWithRespectToSubalgebra(
+        candidate.rootsWithScalar2WithH,
         selectionRootsWithZeroCharacteristic,
         reflectedSimpleBasisK,
         characteristicH,
@@ -3752,31 +3290,11 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         algebraicClosure
       )
     ) {
-      int indexIsoSl2 = - 1;
-      sl2.makeReportPrecomputations(indexRootSubalgebraInContainer, *this);
-      if (
-        output.containsSl2WithGivenHCharacteristic(
-          sl2.hCharacteristic, &indexIsoSl2
-        )
-      ) {
-        output.allSubalgebras.getElement(indexIsoSl2).
-        indicesContainingRootSubalgebras.addOnTop(
-          indexRootSubalgebraInContainer
-        );
-        output.indicesSl2sContainedInRootSubalgebras[
-          indexRootSubalgebraInContainer
-        ].addOnTop(indexIsoSl2);
-      } else {
-        output.indicesSl2sContainedInRootSubalgebras[
-          indexRootSubalgebraInContainer
-        ].addOnTop(output.allSubalgebras.size);
-        sl2.indexInContainer = output.allSubalgebras.size;
-        output.allSubalgebras.addOnTop(sl2);
-        output.allSubalgebras.lastObject()->
-        checkIndicesMinimalContainingRootSubalgebras();
-      }
+      this->addSlTwoSubalgebraIfNew(
+        candidate, output, indexRootSubalgebraInContainer
+      );
     } else {
-      output.badHCharacteristics.addOnTop(characteristicH);
+      output.unsuitableHCharacteristics.addOnTop(characteristicH);
       DynkinType tempType;
       diagramZeroCharRoots.getDynkinType(tempType);
       global.comments
@@ -4500,6 +4018,62 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
       if (i != this->subalgebrasOrderParabolicPseudoParabolicNeither.size - 1) {
         out << ",";
       }
+    }
+  }
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringContainingRootSubalgebras(
+  const std::string& displayPathAlgebra
+) const {
+  STACK_TRACE("SlTwoSubalgebra::toStringContainingRootSubalgebras");
+  std::stringstream out;
+  RootSubalgebras& rootSubalgebras = this->container->rootSubalgebras;
+  for (int j = 0; j < this->indicesContainingRootSubalgebras.size; j ++) {
+    int rootSubalgebraIndex = this->indicesContainingRootSubalgebras[j];
+    RootSubalgebra& currentRootSubalgebra =
+    rootSubalgebras.subalgebras[rootSubalgebraIndex];
+    out
+    << "<a href='"
+    << displayPathAlgebra
+    << "rootSubalgebra_"
+    << rootSubalgebraIndex + 1
+    << ".html'>"
+    << "\\("
+    << currentRootSubalgebra.dynkinDiagram.toString()
+    << "\\)"
+    << "</a>";
+    if (j != this->indicesContainingRootSubalgebras.size - 1) {
+      out << ", ";
+    }
+  }
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras(
+  const std::string& displayPathAlgebra
+) const {
+  STACK_TRACE("SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras");
+  std::stringstream out;
+  RootSubalgebras& rootSubalgebras = this->container->rootSubalgebras;
+  for (int j = 0; j < this->indicesMinimalContainingRootSubalgebras.size; j ++)
+  {
+    int rootSubalgebraIndex =
+    this->indicesMinimalContainingRootSubalgebras[j];
+    RootSubalgebra& currentRootSubalgebra =
+    rootSubalgebras.subalgebras[rootSubalgebraIndex];
+    out
+    << "<a href='"
+    << displayPathAlgebra
+    << "rootSubalgebra_"
+    << rootSubalgebraIndex + 1
+    << ".html'>"
+    << "\\("
+    << currentRootSubalgebra.dynkinDiagram.toString()
+    << "\\)"
+    << "</a>";
+    if (j != this->indicesMinimalContainingRootSubalgebras.size - 1) {
+      out << ", ";
     }
   }
   return out.str();

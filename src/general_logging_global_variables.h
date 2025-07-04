@@ -532,6 +532,9 @@ public:
     }
   };
 
+  // Global comments / debug notes valid for the
+  // current client-server connection.
+  // Intended for debugging and unexpected situations.
   CommentsCurrentConnection comments;
   void joinAllThreads();
   bool configurationStore();

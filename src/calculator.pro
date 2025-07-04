@@ -43,6 +43,7 @@ HEADERS += \
     math_basics.h \
     math_conversions.h \
     math_extra_polynomial_factorization.h \
+  math_extra_semisimple_lie_subalgebras_sltwos.h \
     math_lattices.h \
   math_lie_theory.h \
     math_modular_arithmetic.h \
@@ -759,6 +760,7 @@ SOURCES += \
     math_semisimple_lie_algebras.cpp \
     math_semisimple_lie_root_subalgebras.cpp \
     math_semisimple_lie_subalgebras.cpp \
+  math_semisimple_lie_subalgebras_sltwos.cpp \
     math_vector_partition_functions.cpp \
   math_vectors_test.cpp \
     multiprocessing.cpp \

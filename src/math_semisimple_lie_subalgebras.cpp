@@ -3971,7 +3971,7 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystem(
     this->cartanElementsScaledToActByTwo.size
   );
   this->involvedPositiveRoots.setSize(
-    this->cartanSubalgebrasByComponentScaledToActByTwo.size
+    this->cartanElementsScaledToActByTwo.size
   );
   for (int i = 0; i < this->cartanElementsScaledToActByTwo.size; i ++) {
     this->computeInvolvedGeneratorsOfIndex(i);

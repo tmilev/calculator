@@ -143,7 +143,6 @@ public:
   CharacterSemisimpleLieAlgebraModule<Rational>
   moduleDecompositionAmbientSubalgebra;
   List<int> moduleDimensions;
-  Rational lengthHSquared;
   int indexInContainer;
   int dimensionCentralizer;
   DynkinType centralizerTypeIfKnown;
@@ -211,6 +210,8 @@ public:
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eMinusFUnknown;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
   involutionAppliedToEMinusF;
+  Rational lengthHSquared;
+
   void fromSlTwoSubalgebraCandidate(SlTwoSubalgebraCandidate& input);
   void initialize();
   SlTwoSubalgebra() {

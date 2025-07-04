@@ -2667,7 +2667,6 @@ void RootSubalgebra::addSlTwoSubalgebraIfNew(
   int indexIsoSl2 = - 1;
   SlTwoSubalgebra newSubalgebra;
   newSubalgebra.fromSlTwoSubalgebraCandidate(candidate);
-  global.comments << "DEBUG: got to here2";
   newSubalgebra.makeReportPrecomputations(
     // indexRootSubalgebraInContainer,
     *this
@@ -2683,7 +2682,6 @@ void RootSubalgebra::addSlTwoSubalgebraIfNew(
       indexRootSubalgebraInContainer
     ].addOnTop(indexIsoSl2);
   } else {
-    global.comments << "DEBUG: got to adding, brand new";
     output.indicesSl2sContainedInRootSubalgebras[
       indexRootSubalgebraInContainer
     ].addOnTop(output.allSubalgebras.size);
@@ -3279,7 +3277,6 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     );
     candidate.eElement.makeZero();
     candidate.fElement.makeZero();
-    global.comments << "DEBUG: got to here!";
     if (
       candidate.attemptExtendingHFtoHEFWithRespectToSubalgebra(
         candidate.rootsWithScalar2WithH,

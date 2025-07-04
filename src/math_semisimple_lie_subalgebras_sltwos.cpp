@@ -19,8 +19,8 @@ bool SlTwoSubalgebra::operator>(const SlTwoSubalgebra& right) const {
 }
 
 bool SlTwoSubalgebra::operator==(const SlTwoSubalgebra& right) const {
-  // See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter
-  // 7-10
+  // See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras,
+  // chapter 7-10.
   if (this->owner != right.owner) {
     global.fatal
     << "Comparing sl(2) "
@@ -307,6 +307,7 @@ void SlTwoSubalgebra::fromSlTwoSubalgebraCandidate(
   this->fKostantSekiguchi = input.fKostantSekiguchi;
   this->eMinusFUnknown = input.eMinusFUnknown;
   this->involutionAppliedToEMinusF = input.involutionAppliedToEMinusF;
+  this->lengthHSquared=input.lengthHSquared;
 }
 
 bool SlTwoSubalgebra::attemptToComputeCentralizer() {

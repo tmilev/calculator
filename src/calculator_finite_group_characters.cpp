@@ -6,7 +6,7 @@
 #include "math_extra_symmetric_groups_and_generalizations.h"
 #include "math_general.h"
 #include "math_general_implementation.h"
-#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
+#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ 'make optimize=1' build.
 
 template < >
 List<ClassFunction<WeylGroupData::WeylGroupBase, Rational> >::Comparator*

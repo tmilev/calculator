@@ -7,6 +7,7 @@
 #include "html_routines.h"
 #include "math_extra_drawing_variables.h"
 #include "math_extra_elliptic_curves.h"
+#include "math_extra_finite_groups_implementation.h"
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 #include "math_rational_function.h"

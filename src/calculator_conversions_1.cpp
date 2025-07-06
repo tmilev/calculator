@@ -3,7 +3,7 @@
 #include "calculator_lie_theory.h"
 #include "general_file_operations_encodings.h"
 #include "math_extra_universal_enveloping.h"
-#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep. Breaks g++ optimize=2 compilation.
+#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep. Breaks g++ 'make optimize=1' compilation.
 #include "math_rational_function.h"
 #include "math_weyl_algebras.h"
 

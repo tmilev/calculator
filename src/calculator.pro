@@ -755,14 +755,14 @@ SOURCES += \
     math_implementation_6.cpp \
     math_implementation_6_test.cpp \
     math_lattices.cpp \
-  math_lie_theory_test.cpp \
-  math_modular_arithmetic.cpp \
+    math_lie_theory_test.cpp \
+    math_modular_arithmetic.cpp \
     math_semisimple_lie_algebras.cpp \
     math_semisimple_lie_root_subalgebras.cpp \
     math_semisimple_lie_subalgebras.cpp \
-  math_semisimple_lie_subalgebras_sltwos.cpp \
+    math_semisimple_lie_subalgebras_sltwos.cpp \
     math_vector_partition_functions.cpp \
-  math_vectors_test.cpp \
+    math_vectors_test.cpp \
     multiprocessing.cpp \
     multitasking.cpp \
     network.cpp \

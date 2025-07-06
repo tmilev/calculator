@@ -5143,12 +5143,19 @@ PrintSemisimpleLieAlgebra{}(2 G^5_2 + B_3);
 ```
 Creates a printout with information about the semisimple Lie algebra, including the Lie bracket pairing table. In addition, this function creates a graphics of the root system. 
 
-*PrecomputeSemisimpleLieAlgebraStructure* [PrecomputeSemisimpleLieAlgebraStructure] {CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure}. (admin only) 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrecomputeSemisimpleLieAlgebraStructure%200%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PrecomputeSemisimpleLieAlgebraStructureEverything* [PrecomputeSemisimpleLieAlgebraStructureEverything] {CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureEverything}. (admin only) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrecomputeSemisimpleLieAlgebraStructureEverything%200%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PrecomputeSemisimpleLieAlgebraStructure 0
+PrecomputeSemisimpleLieAlgebraStructureEverything 0
 ```
-Function available to logged-in admins only. Precomputes all built-in semisimple Lie algebra information. Argument gives a starting point (0 or negative to start at the beginning). Turn process monitoring on when using this function. 
+Function available to logged-in admins only. Precomputes all built-in semisimple Lie algebra information: root subalgebras, sl(2) subalgebras and semisimple Lie subalgebras, over the complex numbers. Real forms are not included, although there is code for that in the works.Argument gives a starting point (0 or negative to start at the beginning). Turn process monitoring on when using this function.
+
+*PrecomputeSemisimpleLieAlgebraStructureAllButSubalgebras* [PrecomputeSemisimpleLieAlgebraStructureAllButSubalgebras] {CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureAllButSubalgebras}. (admin only) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrecomputeSemisimpleLieAlgebraStructureAllButSubalgebras%200%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+PrecomputeSemisimpleLieAlgebraStructureAllButSubalgebras 0
+```
+Function available to logged-in admins only. Precomputes all built-in semisimple Lie algebra information over the complex numbers, except the semisimple Lie subalgebras. Similar to the precomputeSemisimpleLieAlgebraStructureEverything except that it omits the computation of all semisimple subalgebras, which is by far the slowest computation.Turn process monitoring on when using this function.
 
 *ChevalleyGenerator* [ChevalleyGenerator] {Calculator::chevalleyGenerator}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5bChevalleyGenerator%7b%7d%28G_2%2c%206%29%2c%20ChevalleyGenerator%7b%7d%28G_2%2c%20-6%29%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)

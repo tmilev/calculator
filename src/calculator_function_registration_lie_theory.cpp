@@ -104,7 +104,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "although there is code for that in the works."
     "Argument gives a starting point "
     "(0 or negative to start at the beginning). "
-    "Turn process monitoring on when using this function. ",
+    "Turn process monitoring on when using this function.",
     "PrecomputeSemisimpleLieAlgebraStructureEverything 0",
     "CalculatorLieTheory::"
     "precomputeSemisimpleLieAlgebraStructureEverything",
@@ -122,7 +122,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Similar to the precomputeSemisimpleLieAlgebraStructureEverything "
     "except that it omits the computation of all semisimple subalgebras, "
     "which is by far the slowest computation."
-    "Turn process monitoring on when using this function. ",
+    "Turn process monitoring on when using this function.",
     "PrecomputeSemisimpleLieAlgebraStructureAllButSubalgebras 0",
     "CalculatorLieTheory::"
     "precomputeSemisimpleLieAlgebraStructureAllButSubalgebras",

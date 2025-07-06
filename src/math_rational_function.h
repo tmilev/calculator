@@ -2,6 +2,7 @@
 #define header_math_rational_function_ALREADY_INCLUDED
 
 #include "math_general.h"
+#include "math_general_polynomial_computations_basic_implementation.h"
 #include "progress_report.h"
 
 template <class Coefficient>

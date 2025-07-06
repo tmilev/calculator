@@ -1,6 +1,7 @@
 #include "calculator_lie_theory.h"
 #include "general_file_operations_encodings.h"
 #include "math_extra_differential_operators.h"
+#include "math_extra_finite_groups_implementation.h"
 #include "math_extra_lie_theory_extras.h"
 #include "math_extra_modules_semisimple_lie_algebras.h"
 #include "math_extra_semisimple_lie_algebras.h"

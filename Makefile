@@ -36,10 +36,10 @@ $(info Optimization flag selected. [1;31mThis may slow down compilation a great
 # - Without O2 optimization.
 # -- Speed: ~121ms to compute 2019 factorial and openssl-send the result back.
 # -- Compilation time: 30 seconds.
-# -O3 "optimization" is known to break linkage, please DO NOT USE.
+# -O3 "optimization" is known to break linkage.
 # Conclusion: O2 optimization speeds up computations by 40%, 
 # slows down compilation by a factor of three. 
-OPTIMIZATION_FLAGS+=-O2
+OPTIMIZATION_FLAGS+=-O3
 endif
 
 CFLAGS=-Wpedantic -Wall -Wextra $(OPTIMIZATION_FLAGS) -c -pthread

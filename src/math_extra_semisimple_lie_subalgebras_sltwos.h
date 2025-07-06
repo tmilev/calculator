@@ -2,6 +2,7 @@
 #define header_math_extra_semisimple_lie_subalgebras_sltwos_ALREADY_INCLUDED
 
 #include "math_extra_algebraic_numbers.h"
+#include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 #include "math_general.h"
 

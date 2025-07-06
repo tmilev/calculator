@@ -1,5 +1,7 @@
 #include "general_file_operations_encodings.h"
+#include "math_extra_finite_groups_implementation.h"
 #include "math_extra_semisimple_lie_subalgebras_sltwos.h"
+#include "math_general_polynomial_computations_advanced_implementation.h"
 #include "progress_report.h"
 
 bool SlTwoSubalgebra::operator>(const SlTwoSubalgebra& right) const {

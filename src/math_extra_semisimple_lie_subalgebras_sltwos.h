@@ -211,7 +211,6 @@ public:
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
   involutionAppliedToEMinusF;
   Rational lengthHSquared;
-
   void fromSlTwoSubalgebraCandidate(SlTwoSubalgebraCandidate& input);
   void initialize();
   SlTwoSubalgebra() {

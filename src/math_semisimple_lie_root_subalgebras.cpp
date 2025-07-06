@@ -2664,32 +2664,32 @@ void RootSubalgebra::addSlTwoSubalgebraIfNew(
   SlTwoSubalgebras& output,
   int indexRootSubalgebraInContainer
 ) {
-  int indexIsoSl2 = - 1;
-  SlTwoSubalgebra newSubalgebra;
-  newSubalgebra.fromSlTwoSubalgebraCandidate(candidate);
-  newSubalgebra.makeReportPrecomputations(
-    // indexRootSubalgebraInContainer,
-    *this
-  );
+  STACK_TRACE("RootSubalgebra::addSlTwoSubalgebraIfNew");
+  int indexIsomorphicSl2 = - 1;
   if (
-    output.containsSl2WithGivenHCharacteristic(
-      newSubalgebra.hCharacteristic, &indexIsoSl2
+    !output.containsSl2WithGivenHCharacteristic(
+      candidate.hCharacteristic, &indexIsomorphicSl2
     )
   ) {
-    output.allSubalgebras.getElement(indexIsoSl2).
-    indicesContainingRootSubalgebras.addOnTop(indexRootSubalgebraInContainer);
-    output.indicesSl2sContainedInRootSubalgebras[
-      indexRootSubalgebraInContainer
-    ].addOnTop(indexIsoSl2);
-  } else {
-    output.indicesSl2sContainedInRootSubalgebras[
-      indexRootSubalgebraInContainer
-    ].addOnTop(output.allSubalgebras.size);
-    newSubalgebra.indexInContainer = output.allSubalgebras.size;
+    SlTwoSubalgebra newSubalgebra;
+    newSubalgebra.fromSlTwoSubalgebraCandidate(candidate);
+    newSubalgebra.makeReportPrecomputations(
+      // indexRootSubalgebraInContainer,
+      *this
+    );
+    indexIsomorphicSl2 = output.allSubalgebras.size;
+    newSubalgebra.indexInContainer = indexIsomorphicSl2;
     output.allSubalgebras.addOnTop(newSubalgebra);
-    output.allSubalgebras.lastObject()->
-    checkIndicesMinimalContainingRootSubalgebras();
   }
+  SlTwoSubalgebra& realizedSubalgebra =
+  output.allSubalgebras.getElement(indexIsomorphicSl2);
+  realizedSubalgebra.indicesContainingRootSubalgebras.addOnTop(
+    indexRootSubalgebraInContainer
+  );
+  output.indicesSl2sContainedInRootSubalgebras[
+    indexRootSubalgebraInContainer
+  ].addOnTop(indexIsomorphicSl2);
+  output.checkMinimalContainingRootSubalgebras();
 }
 
 bool RootSubalgebras::growDynkinType(

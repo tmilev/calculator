@@ -307,7 +307,7 @@ void SlTwoSubalgebra::fromSlTwoSubalgebraCandidate(
   this->fKostantSekiguchi = input.fKostantSekiguchi;
   this->eMinusFUnknown = input.eMinusFUnknown;
   this->involutionAppliedToEMinusF = input.involutionAppliedToEMinusF;
-  this->lengthHSquared=input.lengthHSquared;
+  this->lengthHSquared = input.lengthHSquared;
 }
 
 bool SlTwoSubalgebra::attemptToComputeCentralizer() {

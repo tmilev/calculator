@@ -58,6 +58,7 @@ std::string Plot::Labels::graphicsTwoDimensional = "graphicsTwoDimensional";
 std::string Plot::Labels::plotObjects = "plotObjects";
 
 bool DynkinSimpleType::hasPrecomputedSubalgebras() const {
+  global.comments << "DEBUG: do not submit this!";
   if (this->letter == 'F') {
     return true;
   }

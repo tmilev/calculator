@@ -2401,10 +2401,16 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   return false;
 }
 
-bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure(
-  Calculator& calculator, const Expression& input, Expression& output
+bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureWithOptions(
+  Calculator& calculator,
+  const Expression& input,
+  Expression& output,
+  bool shouldComputeSemisimpleSubalgebras
 ) {
-  STACK_TRACE("CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure");
+  STACK_TRACE(
+    "CalculatorLieTheory::"
+    "precomputeSemisimpleLieAlgebraStructureWithOptions"
+  );
   if (!global.response.monitoringAllowed()) {
     global.response.initiate(
       "Triggered by precomputeSemisimpleLieAlgebraStructure."
@@ -2418,7 +2424,7 @@ bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure(
     << "To get one, install the calculator on your machine.";
   }
   int startingIndex = 0;
-  if (!input[1].isSmallInteger(&startingIndex)) {
+  if (input.size() > 1 && !input[1].isSmallInteger(&startingIndex)) {
     return
     calculator
     << "Argument of precomputeSemisimpleLieAlgebraStructure "
@@ -2462,10 +2468,21 @@ bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure(
     algebra.weylGroup.dynkinType.plot(plot);
     std::string plotDynkinType = plot.getPlotHtml2d(calculator);
     algebra.writeHTML(true, false, plotDynkinType);
-    if (allTypes[i].hasPrecomputedSubalgebras()) {
+    if (
+      shouldComputeSemisimpleSubalgebras &&
+      allTypes[i].hasPrecomputedSubalgebras()
+    ) {
       SemisimpleSubalgebras subalgebras;
       MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasContainer;
       ListReferences<SlTwoSubalgebras> sl2Conainer;
+      SemisimpleSubalgebrasComputationOptions options;
+      options.forceRecompute = false;
+      options.doFullInitialization = true;
+      options.computeNilradicals = false;
+      options.computeModuleDecomposition = true;
+      options.attemptToSolveSystems = true;
+      options.computePairingTable = false;
+      options.adjustCentralizers = true;
       if (
         !subalgebras.computeStructureWriteFiles(
           algebra,
@@ -2474,13 +2491,7 @@ bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure(
           sl2Conainer,
           CalculatorConversions::stringFromSemisimpleSubalgebras,
           nullptr,
-          false,
-          true,
-          false,
-          true,
-          true,
-          false,
-          true,
+          options,
           plotDynkinType
         )
       ) {

@@ -1700,13 +1700,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   std::string(*toStringExpression)(SemisimpleSubalgebras&),
   std::stringstream* outputStream,
-  bool forceRecompute,
-  bool doFullInitialization,
-  bool computeNilradicals,
-  bool computeModuleDecomposition,
-  bool attemptToSolveSystems,
-  bool computePairingTable,
-  bool adjustCentralizers,
+  SemisimpleSubalgebrasComputationOptions& options,
   const std::string& extraDynkinDiagramPlot
 ) {
   STACK_TRACE("SemisimpleSubalgebras::computeStructureWriteFiles");
@@ -1715,18 +1709,18 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
   this->computeFolderNames(this->currentFormat);
   if (
     !FileOperations::fileExistsVirtual(this->virtualNameMainFile1) ||
-    forceRecompute
+    options.forceRecompute
   ) {
-    if (doFullInitialization) {
+    if (options.doFullInitialization) {
       this->millisecondsComputationStart = global.getElapsedMilliseconds();
     }
-    this->flagComputeNilradicals = computeNilradicals;
-    this->flagComputeModuleDecomposition = computeModuleDecomposition;
-    this->flagAttemptToSolveSystems = attemptToSolveSystems;
-    this->flagComputePairingTable = computePairingTable;
-    this->flagAttemptToAdjustCentralizers = adjustCentralizers;
+    this->flagComputeNilradicals = options.computeNilradicals;
+    this->flagComputeModuleDecomposition = options.computeModuleDecomposition;
+    this->flagAttemptToSolveSystems = options.attemptToSolveSystems;
+    this->flagComputePairingTable = options.computePairingTable;
+    this->flagAttemptToAdjustCentralizers = options.adjustCentralizers;
     this->checkFileWritePermissions();
-    if (doFullInitialization) {
+    if (options.doFullInitialization) {
       this->findSemisimpleSubalgebrasFromScratch(
         newOwner,
         ownerField,
@@ -10927,4 +10921,15 @@ bool SemisimpleSubalgebras::Test::constructAllB3Subalgebras() {
     << global.fatal;
   }
   return true;
+}
+
+SemisimpleSubalgebrasComputationOptions::
+SemisimpleSubalgebrasComputationOptions() {
+  this->forceRecompute = false;
+  this->doFullInitialization = false;
+  this->computeNilradicals = false;
+  this->computeModuleDecomposition = false;
+  this->attemptToSolveSystems = true;
+  this->computePairingTable = false;
+  this->adjustCentralizers = false;
 }

@@ -590,6 +590,18 @@ public:
   bool checkConsistency();
 };
 
+struct SemisimpleSubalgebrasComputationOptions {
+public:
+  bool forceRecompute;
+  bool doFullInitialization;
+  bool computeNilradicals;
+  bool computeModuleDecomposition;
+  bool attemptToSolveSystems;
+  bool computePairingTable;
+  bool adjustCentralizers;
+  SemisimpleSubalgebrasComputationOptions();
+};
+
 class SemisimpleSubalgebras {
 public:
   friend std::ostream& operator<<(
@@ -858,13 +870,7 @@ public:
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
     std::string(*toStringExpression)(SemisimpleSubalgebras&),
     std::stringstream* outputStream,
-    bool forceRecompute,
-    bool doFullInitialization,
-    bool computeNilradicals,
-    bool computeModuleDecomposition,
-    bool attemptToSolveSystems,
-    bool computePairingTable,
-    bool adjustCentralizers,
+    SemisimpleSubalgebrasComputationOptions& options,
     const std::string& extraDynkinDiagramPlot
   );
   bool computeStructureRealFormsWriteFiles(

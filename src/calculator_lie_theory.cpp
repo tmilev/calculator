@@ -6066,6 +6066,14 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   }
   Plot plot;
   subalgebras.owner->weylGroup.dynkinType.plot(plot);
+  SemisimpleSubalgebrasComputationOptions options;
+  options.forceRecompute = doForceRecompute;
+  options.doFullInitialization = !isAlreadySubalgebrasObject;
+  options.computeNilradicals = doComputeNilradicals;
+  options.computeModuleDecomposition = docomputeModuleDecompositionsition;
+  options.attemptToSolveSystems = doAttemptToSolveSystems;
+  options.computePairingTable = docomputePairingTable;
+  options.adjustCentralizers = doAdjustCentralizers;
   subalgebras.computeStructureWriteFiles(
     ownerLieAlgebra,
     calculator.objectContainer.algebraicClosure,
@@ -6073,13 +6081,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
     calculator.objectContainer.slTwoSubalgebras,
     CalculatorConversions::stringFromSemisimpleSubalgebras,
     &out,
-    doForceRecompute,
-    !isAlreadySubalgebrasObject,
-    doComputeNilradicals,
-    docomputeModuleDecompositionsition,
-    doAttemptToSolveSystems,
-    docomputePairingTable,
-    doAdjustCentralizers,
+    options,
     plot.getPlotHtml(calculator)
   );
   return output.assignValue(calculator, out.str());

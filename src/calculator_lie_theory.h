@@ -220,8 +220,27 @@ public:
   static bool computeSemisimpleSubalgebras(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool precomputeSemisimpleLieAlgebraStructure(
+  static bool precomputeSemisimpleLieAlgebraStructureEverything(
     Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureWithOptions(
+      calculator, input, output, true
+    );
+  }
+  static bool precomputeSemisimpleLieAlgebraStructureAllButSubalgebras(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureWithOptions(
+      calculator, input, output, false
+    );
+  }
+  static bool precomputeSemisimpleLieAlgebraStructureWithOptions(
+    Calculator& calculator,
+    const Expression& input,
+    Expression& output,
+    bool shouldComputeSemisimpleSubalgebras
   );
   static bool embedSemisimpleAlgebraInSemisimpleAlgebra(
     Calculator& calculator, const Expression& input, Expression& output

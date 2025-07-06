@@ -93,17 +93,40 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     standardOptions
   );
   this->addOperationHandler(
-    "PrecomputeSemisimpleLieAlgebraStructure",
-    CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure,
+    "PrecomputeSemisimpleLieAlgebraStructureEverything",
+    CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureEverything,
     "",
     "Function available to logged-in admins only. "
-    "Precomputes all built-in semisimple Lie algebra information. "
+    "Precomputes all built-in semisimple Lie algebra information: "
+    "root subalgebras, sl(2) subalgebras and semisimple "
+    "Lie subalgebras, over the complex numbers. "
+    "Real forms are not included, "
+    "although there is code for that in the works."
     "Argument gives a starting point "
     "(0 or negative to start at the beginning). "
     "Turn process monitoring on when using this function. ",
-    "PrecomputeSemisimpleLieAlgebraStructure 0",
-    "CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructure",
-    "PrecomputeSemisimpleLieAlgebraStructure",
+    "PrecomputeSemisimpleLieAlgebraStructureEverything 0",
+    "CalculatorLieTheory::"
+    "precomputeSemisimpleLieAlgebraStructureEverything",
+    "PrecomputeSemisimpleLieAlgebraStructureEverything",
+    adminNoTest
+  );
+  this->addOperationHandler(
+    "PrecomputeSemisimpleLieAlgebraStructureAllButSubalgebras",
+    CalculatorLieTheory::
+    precomputeSemisimpleLieAlgebraStructureAllButSubalgebras,
+    "",
+    "Function available to logged-in admins only. "
+    "Precomputes all built-in semisimple Lie algebra information "
+    "over the complex numbers, except the semisimple Lie subalgebras. "
+    "Similar to the precomputeSemisimpleLieAlgebraStructureEverything "
+    "except that it omits the computation of all semisimple subalgebras, "
+    "which is by far the slowest computation."
+    "Turn process monitoring on when using this function. ",
+    "PrecomputeSemisimpleLieAlgebraStructureAllButSubalgebras 0",
+    "CalculatorLieTheory::"
+    "precomputeSemisimpleLieAlgebraStructureAllButSubalgebras",
+    "PrecomputeSemisimpleLieAlgebraStructureAllButSubalgebras",
     adminNoTest
   );
   this->addOperationHandler(

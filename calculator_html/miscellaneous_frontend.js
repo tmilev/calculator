@@ -95,6 +95,9 @@ function writeHTML(
   /** @type {string} */
   htmlContent,
 ) {
+  if (typeof htmlContent !== "string") {
+    throw new Error(`Unexpected html content: ${htmlContent}`);
+  }
   try {
     element.setHTML(htmlContent);
   } catch (e) {

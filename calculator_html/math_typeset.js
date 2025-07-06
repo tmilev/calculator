@@ -3,6 +3,7 @@ const equationEditor = require("./equation_editor/src/equation_editor");
 class TypeSetter {
   constructor() {
     this.logTiming = false;
+    this.logExcessiveTiming = true;
   }
 
   typesetSoft(
@@ -25,6 +26,7 @@ class TypeSetter {
       sanitizeLatexSource: false,
       removeDisplayStyle: true,
       logTiming: this.logTiming,
+      logExcessiveTiming: this.logExcessiveTiming,
       extraAttributes: extraAttributes,
       mathML: true,
       svgAndDOM: false,

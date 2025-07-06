@@ -134,7 +134,6 @@ class AccountActivator {
     /** @type {string} */
     result
   ) {
-    ;
     let inputParsed = miscellaneous.jsonUnescapeParse(result);
     miscellaneous.writeHtmlElementsFromCommentsAndErrors(
       inputParsed,

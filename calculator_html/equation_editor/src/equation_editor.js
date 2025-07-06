@@ -1611,6 +1611,7 @@ let latexOptionsWithCursor = new ToLatexOptions(true);
 class LaTeXConstants {
   constructor() {
     this.mathMLMaximumConsecutiveDigits = 20;
+    this.mathMLMaximumDigitsInNumber = 1000;
     this.latinCharactersString =
       'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     this.latinCharacters = {};
@@ -2377,7 +2378,7 @@ class LaTeXParser {
     if (this.equationEditor.options.editable) {
       secondToLastElement.node.ensureEditableAtomsRecursive();
     }
-    if (elapsedTime > 200 && this.equationEditor.options.logTiming) {
+    if (elapsedTime > 200 && this.equationEditor.options.logExcessiveTiming) {
       console.log(`Normalization+parsing took too long: ${elapsedTime}ms`);
     }
     // let elapsedTime = new Date().getTime() - this.startTime;
@@ -3145,6 +3146,7 @@ class EquationEditorOptions {
      * editHandler: (Function?|null|undefined),
      * lineBreakWidth: (number|undefined),
      * logTiming: (boolean|undefined),
+     * logExcessiveTiming: (boolean|undefined),
      * copyButton: (boolean|undefined),
      * extraKeyHandlers: (?Object.<string, function (!EquationEditor,
      * boolean)>|null|undefined), highlightStyle: ({ backgroundColor:
@@ -3168,6 +3170,11 @@ class EquationEditorOptions {
     this.latexInput = options.latexInput;
     /** @type {boolean|undefined} */
     this.logTiming = options.logTiming;
+    /** @type {boolean|undefined} */
+    this.logExcessiveTiming = options.logExcessiveTiming;
+    if (this.logExcessiveTiming !== true) {
+      this.logExcessiveTiming = false;
+    }
     /** @type {number} */
     this.lineBreakWidth = 0;
     /** @type {boolean} */
@@ -8845,6 +8852,11 @@ class MathNode {
       result.textContent = content;
       return result;
     }
+    if (content.length > latexConstants.mathMLMaximumDigitsInNumber) {
+      const result = this.createMathMLElement("ms");
+      result.textContent = content;
+      return result;
+    }
     const result = this.createMathMLElement("mrow");
     for (let i = 0; i < content.length; i += interval) {
       const next = this.createMathMLElement("mn");
@@ -8857,7 +8869,8 @@ class MathNode {
 
   toMathMLAtom(/** @type {string}*/ content) {
     let result = null;
-    if (latexConstants.isDigitsNonEmpty(content)) {
+    const hasDigitsOnly = latexConstants.isDigitsNonEmpty(content);
+    if (hasDigitsOnly) {
       return this.toMathMLDigits(content);
     } else if (content.length === 1 || latexConstants.isTextLike(content)) {
       result = this.createMathMLElement("mi");
@@ -12919,6 +12932,7 @@ class MathTagConverter {
      * svgOnly: (boolean|undefined),
      * mathML: (boolean|undefined),
      * logTiming: (boolean|undefined),
+     * logExcessiveTiming: (boolean|undefined),
      * copyButton: (boolean|undefined),
      * extraAttributes: (Object.<string, string>!|undefined)}|undefined}
      */
@@ -12929,6 +12943,7 @@ class MathTagConverter {
         sanitizeLatexSource: false,
         removeDisplayStyle: false,
         logTiming: false,
+        logExcessiveTiming: false,
         extraAttributes: {},
         mathML: false,
         svgOnly: false,
@@ -12951,6 +12966,11 @@ class MathTagConverter {
     }
     /** @type {boolean} */
     this.logTiming = /** @type {boolean} */ (options.logTiming);
+    /** @type {boolean} */
+    this.logExcessiveTiming = false;
+    if (options.logExcessiveTiming === true) {
+      this.logExcessiveTiming = true;
+    }
     if (this.logTiming === undefined || this.logTiming === null) {
       this.logTiming = false;
     }
@@ -13264,6 +13284,7 @@ function typeset(
    * removeDisplayStyle: boolean,
    * svgOnly: boolean,
    * mathML: boolean,
+   * logExcessiveTiming: boolean,
    * extraAttributes: Object.<string, string>!}}
    */
   options,
@@ -13273,11 +13294,10 @@ function typeset(
   }
   new MathTagConverter(
     options,
-  )
-    .typeset(
-      toBeModified,
-      callbackEquationCreation,
-    );
+  ).typeset(
+    toBeModified,
+    callbackEquationCreation,
+  );
 }
 
 class EquationEditorAction {

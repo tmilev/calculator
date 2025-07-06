@@ -2457,10 +2457,11 @@ bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureWithOptions(
     SlTwoSubalgebras slTwoSubalgebras(algebra);
     slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo =
     true;
+    bool computeRealForm = false;
     algebra.findSl2Subalgebras(
       algebra,
       slTwoSubalgebras,
-      true,
+      computeRealForm,
       &calculator.objectContainer.algebraicClosure
     );
     slTwoSubalgebras.writeHTML();

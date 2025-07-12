@@ -1972,6 +1972,7 @@ bool CalculatorParser::replaceAXXbyEXX() {
 }
 
 bool CalculatorParser::replaceIntegerXbyEX() {
+  STACK_TRACE("CalculatorParser::replaceIntegerXbyEX");
   SyntacticElement& element = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
@@ -3216,12 +3217,13 @@ bool CalculatorParser::applyOneRule() {
   if (this->currentSyntacticStack->size <= this->numberOfEmptyTokensStart) {
     return false;
   }
-  const SyntacticElement& lastE = (*this->currentSyntacticStack)[(
+  const SyntacticElement& lastExpression = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
     1
   ];
-  const std::string& lastS = this->controlSequences[lastE.controlIndex];
+  const std::string& lastS =
+  this->controlSequences[lastExpression.controlIndex];
   const SyntacticElement& secondToLastE = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
@@ -3444,7 +3446,7 @@ bool CalculatorParser::applyOneRule() {
   if (
     this->isDefiniteIntegral(thirdToLastS) &&
     secondToLastS == "Expression" &&
-    this->canBeRegardedAsDifferentialForm(lastE)
+    this->canBeRegardedAsDifferentialForm(lastExpression)
   ) {
     return this->setStackValue(thirdToLastE.data, "Expression", - 3);
   }
@@ -3453,7 +3455,7 @@ bool CalculatorParser::applyOneRule() {
       thirdToLastS == "+" || thirdToLastS == "-"
     ) &&
     secondToLastS == "Expression" &&
-    this->canBeRegardedAsDifferentialForm(lastE)
+    this->canBeRegardedAsDifferentialForm(lastExpression)
   ) {
     return this->replaceEOEXByEX();
   }
@@ -3496,7 +3498,10 @@ bool CalculatorParser::applyOneRule() {
   ) {
     Expression exponent;
     exponent.makeXOX(
-      *this->owner, this->owner->opPower(), thirdToLastE.data, lastE.data
+      *this->owner,
+      this->owner->opPower(),
+      thirdToLastE.data,
+      lastExpression.data
     );
     this->setStackValue(exponent, "\\int_{*}^{**}", - 3);
     this->lastRuleName = "int_{*}^{**}";
@@ -3525,7 +3530,10 @@ bool CalculatorParser::applyOneRule() {
   ) {
     Expression underscore;
     underscore.makeXOX(
-      *this->owner, this->owner->opUnderscore(), thirdToLastE.data, lastE.data
+      *this->owner,
+      this->owner->opUnderscore(),
+      thirdToLastE.data,
+      lastExpression.data
     );
     this->lastRuleName = "[\\int^{*}_{**}]";
     this->setStackValue(underscore, "\\int_{*}^{**}", - 3);
@@ -3550,7 +3558,7 @@ bool CalculatorParser::applyOneRule() {
   if (this->owner->flagUsePredefinedWordSplits) {
     if (lastS == "Variable") {
       const std::string& currentVariable =
-      this->owner->operations.keys[lastE.data.data];
+      this->owner->operations.keys[lastExpression.data.data];
       bool replaced =
       this->replaceVbyVdotsVAccordingToPredefinedWordSplits(currentVariable);
       if (replaced) {
@@ -3637,7 +3645,7 @@ bool CalculatorParser::applyOneRule() {
     return this->replaceXXByEEmptySequence();
   }
   if (secondToLastS == "\\text" && lastS == "d") {
-    if (lastE.data.isOperationGiven("d")) {
+    if (lastExpression.data.isOperationGiven("d")) {
       return this->replaceXXbyO(this->owner->opDifferential());
     }
   }
@@ -4070,8 +4078,8 @@ bool CalculatorParser::applyOneRule() {
   }
   if (
     lastS == "Sequence" &&
-    lastE.data.size() == 0 &&
-    lastE.data.data == this->owner->opList()
+    lastExpression.data.size() == 0 &&
+    lastExpression.data.data == this->owner->opList()
   ) {
     return
     this->replaceXByCon(

@@ -44,7 +44,8 @@ const allLatexSnippets = [
   (3, 2)&-\\varepsilon_{1}-\\varepsilon_{2}+2\\varepsilon_{3}&g_{6}& 2h_{2}+3h_{1}& g_{2}& -g_{3}& g_{4}& -g_{5}&
   0& 0& -g_{6}& 0& 0& 0& 0& 0& 0\\\\
   \\end{array}`,
-  '\\frac{ \\cancel{ x } } { \\cancel{ (d{ \\color{ pink } { d45 ^ { d } } }y) } \\cdot 5 }',
+  `\\frac{ \\cancel{ x } } { \\cancel{ (d{ \\color{ pink } { d45 ^ { d } } }y) } \\cdot 5 }`,
+  `123456789`.repeat(10_000),
 ];
 
 const bodyContainer = document.createElement("div");

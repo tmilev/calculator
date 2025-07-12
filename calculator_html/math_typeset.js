@@ -19,6 +19,7 @@ class TypeSetter {
     if (typeof element === "string") {
       element = document.getElementById(element);
     }
+    const startTime = new Date().getTime();
     equationEditor.typeset(
       element,
       callbackEquationCreation, {
@@ -31,8 +32,12 @@ class TypeSetter {
       mathML: true,
       svgAndDOM: false,
       copyButton: true,
-    },
-    );
+    });
+    const endTime = new Date().getTime();
+    const elapsedMilliseconds = endTime - startTime;
+    if (elapsedMilliseconds > 200 && this.logExcessiveTiming) {
+      console.log(`Typesetting took too long: ${elapsedMilliseconds} ms.`);
+    }
   }
 }
 

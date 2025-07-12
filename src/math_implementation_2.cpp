@@ -1,3 +1,4 @@
+#include "crypto_calculator.h"
 #include "general_lists.h"
 #include "math_extra_algebraic_numbers.h"
 #include "math_general.h"
@@ -34,14 +35,10 @@ const unsigned int HashConstants::primeConstants[HashConstants::size] =
 };
 
 void LargeIntegerUnsigned::assignString(const std::string& input) {
-  if (input.size() < 10) {
-    unsigned int x = static_cast<unsigned>(std::atoi(input.c_str()));
-    this->assignShiftedUInt(x, 0);
-    return;
-  }
+  STACK_TRACE("LargeIntegerUnsigned::assignString");
+  List<char> digits;
   this->makeZero();
   for (unsigned int i = 0; i < input.size(); i ++) {
-    this->operator*=(10);
     int whichDigit = input[i] - '0';
     if (whichDigit > 9 || whichDigit < 0) {
       global.fatal
@@ -56,8 +53,9 @@ void LargeIntegerUnsigned::assignString(const std::string& input) {
       << "please use the big gun (a.k.a. Calculator). "
       << global.fatal;
     }
-    this->operator+=(static_cast<unsigned>(whichDigit));
+    digits.addOnTop(whichDigit);
   }
+  this->assignDigits(digits);
 }
 
 bool LargeIntegerUnsigned::assignStringFailureAllowed(
@@ -68,24 +66,57 @@ bool LargeIntegerUnsigned::assignStringFailureAllowed(
     // <- sorry folks, no more than 10 million digits.
     return false;
   }
-  if (input.size() < 10) {
-    unsigned int x = static_cast<unsigned>(std::atoi(input.c_str()));
-    this->assignShiftedUInt(x, 0);
-    return true;
-  }
   this->makeZero();
+  List<char> digits;
   for (unsigned int i = 0; i < input.size(); i ++) {
-    this->operator*=(10);
     int whichDigit = input[i] - '0';
     if (whichDigit > 9 || whichDigit < 0) {
       if (!ignoreNonDigits) {
         return false;
       }
     } else {
-      this->operator+=(static_cast<unsigned>(whichDigit));
+      digits.addOnTop(whichDigit);
     }
   }
+  this->assignDigits(digits);
   return true;
+}
+
+void LargeIntegerUnsigned::assignDigits(const List<char>& inputDigits) {
+  if (this->carryOverBound == 1000000000) {
+    // Fast path.
+    return this->assignDigitsWhenCarryOverBoundIsPowerOfTen(inputDigits, 9);
+  }
+  if (this->carryOverBound == 10) {
+    // Fast path.
+    this->assignDigitsWhenCarryOverBoundIsPowerOfTen(inputDigits, 1);
+  }
+  // This is slow!
+  this->digits.clear();
+  for (char digit : inputDigits) {
+    *this *= 10;
+    *this += static_cast<unsigned int>(digit);
+  }
+  this->fitSize();
+}
+
+void LargeIntegerUnsigned::assignDigitsWhenCarryOverBoundIsPowerOfTen(
+  const List<char>& inputDigits, int powerOfTen
+) {
+  this->digits.clear();
+  for (int i = inputDigits.size - 1; i >= 0; i -= powerOfTen) {
+    int start = i - powerOfTen + 1;
+    if (start < 0) {
+      start = 0;
+    }
+    int32_t currentReader = 0;
+    for (int j = start; j <= i; j ++) {
+      int currentDigit = static_cast<int32_t>(inputDigits[j]);
+      currentReader = currentReader * 10 + currentDigit;
+    }
+    this->digits.addOnTop(currentReader);
+  }
+  this->fitSize();
 }
 
 LargeIntegerUnsigned LargeIntegerUnsigned::operator*(
@@ -2594,7 +2625,7 @@ bool Rational::assignStringFailureAllowed(const std::string& input) {
   }
   int sign = 1;
   int readerDigit = - 1;
-  Rational readerDenominator = 1;
+  bool hasDenominator = false;
   unsigned positionInString = 0;
   for (; positionInString < input.size(); positionInString ++) {
     if (input[positionInString] == '-') {
@@ -2609,35 +2640,47 @@ bool Rational::assignStringFailureAllowed(const std::string& input) {
       return false;
     }
   }
+  std::string numeratorString;
+  std::string denominatorString;
   for (; positionInString < input.size(); positionInString ++) {
-    if (MathRoutines::isDigit(input[positionInString], &readerDigit)) {
-      *this *= 10;
-      *this += readerDigit;
+    char currentDigit = input[positionInString];
+    if (MathRoutines::isDigit(currentDigit, &readerDigit)) {
+      numeratorString.push_back(currentDigit);
     } else if (input[positionInString] == '/') {
       positionInString ++;
-      readerDenominator = 0;
+      hasDenominator = true;
       break;
     } else {
       return false;
     }
   }
   for (; positionInString < input.size(); positionInString ++) {
+    char currentDigit = input[positionInString];
     if (MathRoutines::isDigit(input[positionInString], &readerDigit)) {
-      readerDenominator *= 10;
-      readerDenominator += readerDigit;
+      denominatorString.push_back(currentDigit);
     } else {
       return false;
     }
   }
-  if (readerDenominator.isEqualToZero()) {
-    return false;
+  LargeIntegerUnsigned readerDenominator;
+  if (hasDenominator) {
+    readerDenominator.assignString(numeratorString);
+    if (readerDenominator.isEqualToZero()) {
+      return false;
+    }
   }
-  *this /= readerDenominator;
+  LargeIntegerUnsigned readerNumerator;
+  readerNumerator.assignString(numeratorString);
+  *this = readerNumerator;
+  if (hasDenominator) {
+    *this /= readerDenominator;
+  }
   *this *= sign;
   return true;
 }
 
 void Rational::assignString(const std::string& input) {
+  STACK_TRACE("Rational::assignString");
   if (!Rational::assignStringFailureAllowed(input)) {
     global.fatal
     << "Rational::assignString failed (likely a zero denominator). "

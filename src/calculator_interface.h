@@ -4133,6 +4133,7 @@ bool Expression::assignValueWithContext(
 
 template <class Type>
 bool Expression::assignValue(Calculator& owner, const Type& inputValue) {
+  STACK_TRACE("Expression::assignValue");
   int currentType = owner.builtInCode<Type>();
   if (
     currentType == owner.builtInCode<ElementZmodP>() ||

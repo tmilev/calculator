@@ -9,6 +9,17 @@ class LargeIntegerUnsigned {
   void addNoFitSize(const LargeIntegerUnsigned& x);
   void fitSize();
   static List<unsigned int> precomputedPrimesSmallerThan15Bits;
+  // Internal function for parsing strings to integers.
+  // Assigns a list of digits.
+  // In the input, the least significant digits come last,
+  // most significant come first.
+  void assignDigits(const List<char>& inputDigits);
+  // Same as the above function, but assumes (without verifying) that the
+  // carryOverBound is a power of ten, which allows us
+  // to read the digits fast.
+  void assignDigitsWhenCarryOverBoundIsPowerOfTen(
+    const List<char>& inputDigits, int powerOfTen
+  );
 public:
   // The zero element is assumed to have length one array with a zero entry.
   //
@@ -20,6 +31,9 @@ public:
   //     on the system.
   // On a 32 bit machine any number smaller than or equal to 2^30 will work.
   // If you got no clue what to put just leave CarryOverBound as it is below.
+  // The first element of this array is the least significant digit of the
+  // number;
+  // the second element is the 10's digit and so on.
   List<int32_t> digits;
   // static const int CarryOverBound =10; //<-for extreme "corner case" testing
   static const int carryOverBound = 1000000000;

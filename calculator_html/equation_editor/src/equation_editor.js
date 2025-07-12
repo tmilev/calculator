@@ -2381,7 +2381,6 @@ class LaTeXParser {
     if (elapsedTime > 200 && this.equationEditor.options.logExcessiveTiming) {
       console.log(`Normalization+parsing took too long: ${elapsedTime}ms`);
     }
-    // let elapsedTime = new Date().getTime() - this.startTime;
     return secondToLastElement.node;
   }
 
@@ -4021,6 +4020,7 @@ class EquationEditor {
     if (this.container.style.minWidth === '') {
       this.container.style.minWidth = '1px';
     }
+    const startTime = new Date().getTime();
     this.latexLastWritten = latex;
     this.rootNode.removeAllChildren();
     if (this.rootNode.element !== null) {
@@ -4036,10 +4036,15 @@ class EquationEditor {
       console.log(`Failed to construct node from your input ${latex}.`);
       return false;
     }
+
     this.rootNode.appendChild(newContent);
     this.writeLatexFromContent(newContent);
     this.container.setAttribute('latexsource', latex);
+    const elapsedMilliseconds = new Date().getTime() - startTime;
     this.writeDebugInfo(parser);
+    if (elapsedMilliseconds > 200 && this.options.logExcessiveTiming) {
+      console.log(`Writing latex took too long: ${elapsedMilliseconds} ms.`);
+    }
     return true;
   }
 
@@ -4143,7 +4148,11 @@ class EquationEditor {
       result.push(elements[i]);
     }
     result.push(document.createElement('br'));
-    result.push(document.createTextNode(`Backslash position: ${this.backslashPosition}; started: ${this.backslashSequenceStarted}, sequence: ${this.backslashSequence}.`));
+    result.push(document.createTextNode(
+      `Backslash position: ${this.backslashPosition}; ` +
+      `started: ${this.backslashSequenceStarted}, ` +
+      `sequence: ${this.backslashSequence}.`
+    ));
     result.push(document.createElement('br'));
     result.push(document.createTextNode(
       `Position computation string: ${this.positionDebugString}.`));
@@ -13197,13 +13206,13 @@ class MathTagConverter {
     /** @type {Function?} callback after the element has been typeset*/
     callback,
   ) {
-    let currentTime = (new Date()).getTime();
-    let elapsedTime = currentTime - this.lastTimeSample;
-    if (elapsedTime < this.typesetTimeout ||
+    let currentMilliseconds = (new Date()).getTime();
+    let elapsedMilliseconds = currentMilliseconds - this.lastTimeSample;
+    if (elapsedMilliseconds < this.typesetTimeout ||
       this.typesetTotal >= this.elementsToTypeset) {
       return false;
     }
-    this.lastTimeSample = currentTime;
+    this.lastTimeSample = currentMilliseconds;
     setTimeout(() => {
       this.typesetMathTags(callback);
     }, 10);
@@ -13251,9 +13260,17 @@ class MathTagConverter {
         useMathML,
         this.copyButton,
       );
-      let typeSetTime = (new Date()).getTime() - startTime;
-      if (this.logTiming) {
-        console.log(`Typeset of element ${this.typesetTotal + 1} out of ${this.elementsToTypeset} took ${typeSetTime} ms.`);
+      const endTime = (new Date()).getTime();
+      let elapsedTime = endTime - startTime;
+      const logPerformance = this.logTiming || (
+        this.logExcessiveTiming && elapsedTime > 200
+      );
+      if (logPerformance) {
+        console.log(
+          `Typeset of element ${this.typesetTotal + 1} ` +
+          `out of ${this.elementsToTypeset} ` +
+          `took ${elapsedTime} ms.`
+        );
       }
     }
   }

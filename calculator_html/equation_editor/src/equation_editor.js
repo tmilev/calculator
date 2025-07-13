@@ -5301,7 +5301,10 @@ class MathNodeMerger {
   }
 
   /** @return {MathNodeAtom} */
-  toMathNodeAtom(/** @type {EquationEditor} */ equationEditor) {
+  toMathNode(/** @type {EquationEditor} */ equationEditor) {
+    if (this.content.length === 1) {
+      return this.content[0];
+    }
     /** @type {string[]} */
     const toBeJoined = [];
     let desiredCursorPosition = -1;
@@ -7043,7 +7046,7 @@ class MathNode {
     }
     this.removeAllChildren();
     for (let i = 0; i < updatedChildren.length; i++) {
-      const updated = updatedChildren[i].toMathNodeAtom(this.equationEditor);
+      const updated = updatedChildren[i].toMathNode(this.equationEditor);
       this.appendChild(updated);
     }
     return true;
@@ -7205,7 +7208,7 @@ class MathNode {
   }
 
   /** @return {boolean} whether reduction occurred. */
-  applyBackspaceToTheLeftChildWithSiblingWrapper() {
+  applyBackspaceBetweenExponentLikePair() {
     let parent = this.parent;
     let parentIndexInParent = parent.indexInParent;
     let base = parent.children[0];
@@ -10748,7 +10751,7 @@ class MathNodeExponent extends MathNode {
    * @return {boolean}
    */
   applyBackspaceToTheLeft() {
-    return this.applyBackspaceToTheLeftChildWithSiblingWrapper();
+    return this.applyBackspaceBetweenExponentLikePair();
   }
 }
 
@@ -10765,7 +10768,7 @@ class MathNodeSubscript extends MathNode {
    * @return {boolean}
    */
   applyBackspaceToTheLeft() {
-    return this.applyBackspaceToTheLeftChildWithSiblingWrapper();
+    return this.applyBackspaceBetweenExponentLikePair();
   }
 }
 

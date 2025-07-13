@@ -45,6 +45,7 @@ const allLatexSnippets = [
   0& 0& -g_{6}& 0& 0& 0& 0& 0& 0\\\\
   \\end{array}`,
   `\\frac{ \\cancel{ x } } { \\cancel{ (d{ \\color{ pink } { d45 ^ { d } } }y) } \\cdot 5 }`,
+  // Make sure we don't die on large input!
   `123456789`.repeat(10_000),
 ];
 

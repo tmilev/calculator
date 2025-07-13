@@ -1525,6 +1525,7 @@ function mathFromLatex(
       sanitizeLatexSource: sanitizeLatexSource,
       removeDisplayStyle: removeDisplayStyle,
       logTiming: true,
+      logExcessiveTiming: true,
       lineBreakWidth: lineBreakWidth,
       copyButton: copyButton,
       useSVG: useSVG,
@@ -2371,13 +2372,14 @@ class LaTeXParser {
       return this.constructError();
     }
     let elapsedTime = new Date().getTime() - this.startTime;
-    if (elapsedTime > 200 && this.equationEditor.options.logTiming) {
+    if (elapsedTime > 200 && this.equationEditor.options.logExcessiveTiming) {
       console.log(`Parsing took too long: ${elapsedTime}ms`);
     }
     secondToLastElement.node.normalizeHorizontalMathRecursive();
     if (this.equationEditor.options.editable) {
       secondToLastElement.node.ensureEditableAtomsRecursive();
     }
+    elapsedTime = new Date().getTime() - this.startTime;
     if (elapsedTime > 200 && this.equationEditor.options.logExcessiveTiming) {
       console.log(`Normalization+parsing took too long: ${elapsedTime}ms`);
     }
@@ -5281,6 +5283,45 @@ class BackslashResult {
   }
 }
 
+class MathNodeMerger {
+  constructor() {
+    /** @type {MathNode[]} */
+    this.content = [];
+    this.desiredCursorPosition = -1;
+  }
+
+  /** @return {MathNode} */
+  lastMathNode() {
+    return this.content[this.content.length - 1];
+  }
+
+  /** @return {boolean} */
+  lastMathNodeIsAtomic() {
+    return this.lastMathNode().type.type === knownTypes.atom.type;
+  }
+
+  /** @return {MathNodeAtom} */
+  toMathNodeAtom(/** @type {EquationEditor} */ equationEditor) {
+    /** @type {string[]} */
+    const toBeJoined = [];
+    let desiredCursorPosition = -1;
+    let charactersMerged = 0;
+    for (let i = 0; i < this.content.length; i++) {
+      const current = this.content[i];
+      const currentContent = current.textContentOrInitialContent();
+      toBeJoined.push(currentContent);
+      if (current.desiredCursorPosition >= 0) {
+        desiredCursorPosition = charactersMerged + current.desiredCursorPosition;
+      }
+      charactersMerged += currentContent.length;
+    }
+    const resultContent = toBeJoined.join("");
+    const result = mathNodeFactory.atom(equationEditor, resultContent);
+    result.desiredCursorPosition = desiredCursorPosition;
+    return result;
+  }
+}
+
 class MathNode {
   constructor(
     /** @type {EquationEditor!} */
@@ -6958,9 +6999,10 @@ class MathNode {
     let normalizedChildren = [];
     let found = false;
     for (let i = 0; i < this.children.length; i++) {
+      const child = /** @type {MathNode!} */ (this.children[i]);
       if (this.normalizeHorizontalMathInHorizontalMathOnceAccountOneChild(
         normalizedChildren,
-              /** @type {MathNode!} */(this.children[i]),
+        child,
       )) {
         found = true;
       }
@@ -6973,44 +7015,38 @@ class MathNode {
     return true;
   }
 
-  mergeAtomContentToTheRight(
-    /** @type {MathNode!} */
-    right,
-  ) {
-    let thisContent = this.initialContent;
-    if (this.element !== null) {
-      thisContent = this.element.textContent;
-    }
-    let rightContent = right.initialContent;
-    if (right.element !== null) {
-      rightContent = right.element.textContent;
-    }
-    if (right.desiredCursorPosition !== -1) {
-      this.desiredCursorPosition =
-        thisContent.length + right.desiredCursorPosition;
-    }
-    thisContent += rightContent;
-    if (this.element === null) {
-      this.initialContent = thisContent;
-    } else {
-      this.element.textContent = thisContent;
-    }
-  }
 
   /** @return {boolean} */
   normalizeHorizontalMathAtomNextToAtomOnce() {
-    for (let i = 0; i < this.children.length - 1; i++) {
+    /** @type {MathNodeMerger[]} */
+    const updatedChildren = [];
+    let found = false;
+    for (let i = 0; i < this.children.length; i++) {
       let current = this.children[i];
-      let next = this.children[i + 1];
-      if (current.type.type !== knownTypes.atom.type ||
-        next.type.type !== knownTypes.atom.type) {
-        continue;
+      let isNew = updatedChildren.length === 0 || current.type.type !== knownTypes.atom.type;
+      if (!isNew) {
+        isNew = !updatedChildren[
+          updatedChildren.length - 1
+        ].lastMathNodeIsAtomic();
       }
-      current.mergeAtomContentToTheRight(next);
-      this.removeChildRange(i + 1, i + 1);
-      return true;
+      if (isNew) {
+        const next = new MathNodeMerger();
+        next.content.push(current);
+        updatedChildren.push(next);
+      } else {
+        found = true;
+        updatedChildren[updatedChildren.length - 1].content.push(current);
+      }
     }
-    return false;
+    if (!found) {
+      return false;
+    }
+    this.removeAllChildren();
+    for (let i = 0; i < updatedChildren.length; i++) {
+      const updated = updatedChildren[i].toMathNodeAtom(this.equationEditor);
+      this.appendChild(updated);
+    }
+    return true;
   }
 
   replaceChildAtPositionWithChildren(

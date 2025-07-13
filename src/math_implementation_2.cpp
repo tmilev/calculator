@@ -1,4 +1,3 @@
-#include "crypto_calculator.h"
 #include "general_lists.h"
 #include "math_extra_algebraic_numbers.h"
 #include "math_general.h"

@@ -2663,7 +2663,7 @@ bool Rational::assignStringFailureAllowed(const std::string& input) {
   }
   LargeIntegerUnsigned readerDenominator;
   if (hasDenominator) {
-    readerDenominator.assignString(numeratorString);
+    readerDenominator.assignString(denominatorString);
     if (readerDenominator.isEqualToZero()) {
       return false;
     }

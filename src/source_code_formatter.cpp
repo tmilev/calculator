@@ -14,6 +14,7 @@ CodeFormatter::Element::Element() {
   this->owner = nullptr;
   this->parent = nullptr;
   this->indexInParent = - 1;
+  this->maximumDesiredLineLengthOverride = - 1;
 }
 
 std::string CodeFormatter::Element::toStringWithoutType() const {
@@ -684,6 +685,13 @@ bool CodeFormatter::Element::computeIndentationMacroline() {
   return this->computeIndentationBasic(0);
 }
 
+int CodeFormatter::Element::maximumLineLength() {
+  if (this->maximumDesiredLineLengthOverride <= 0) {
+    return this->owner->maximumDesiredLineLength;
+  }
+  return this->maximumDesiredLineLengthOverride;
+}
+
 void CodeFormatter::Element::computeIndentationAtomic() {
   CodeFormatter::Element* previous = this->previousAtom();
   if (previous != nullptr) {
@@ -704,7 +712,7 @@ void CodeFormatter::Element::computeIndentationAtomic() {
     this->columnFinal = this->content.size() + this->whiteSpaceBefore;
     return;
   }
-  if (this->columnFinal < this->owner->maximumDesiredLineLength) {
+  if (this->columnFinal < this->maximumLineLength()) {
     return;
   }
   if (previous->newLinesAfter == 0) {
@@ -755,7 +763,7 @@ bool CodeFormatter::Element::computeIndentationInParentheses(
   // +4 allows for open parentheses, space, open curly brace.
   bool tooWide =
   this->children[0].rightMostAtomUnderMe()->columnFinal + middleSize + 4 >
-  this->owner->maximumDesiredLineLength;
+  this->maximumLineLength();
   this->children[1].computeIndentation();
   bool middleHasNewLines =
   this->children[1].containsNewLineAfterExcludingComments();
@@ -871,8 +879,7 @@ bool CodeFormatter::Element::computeIndentationReturnedExpression() {
   bool shouldBreak = this->containsNewLineAfterExcludingComments();
   if (
     !shouldBreak &&
-    this->rightMostAtomUnderMe()->columnFinal + 1 >=
-    this->owner->maximumDesiredLineLength
+    this->rightMostAtomUnderMe()->columnFinal + 1 >= this->maximumLineLength()
   ) {
     shouldBreak = true;
   }
@@ -904,6 +911,12 @@ bool CodeFormatter::Element::computeIndentation() {
     // The first element of code should be a dummy element, no need to
     // compute its indentation.
     return true;
+  }
+  if (this->maximumDesiredLineLengthOverride > 0) {
+    for (CodeFormatter::Element& element : this->children) {
+      element.maximumDesiredLineLengthOverride =
+      this->maximumDesiredLineLengthOverride;
+    }
   }
   switch (this->type) {
   case CodeFormatter::Element::TopLevel:
@@ -1079,7 +1092,7 @@ bool CodeFormatter::Element::computeIndentationComment() {
   int currentOffset = this->offsetFromPrevious();
   List<std::string> lines;
   std::string currentWord;
-  int maximumWidth = this->owner->maximumDesiredLineLength;
+  int maximumWidth = this->maximumLineLength();
   currentWord = words[0];
   for (int i = 1; i < words.size; i ++) {
     int incomingLength =
@@ -1217,10 +1230,14 @@ bool CodeFormatter::Element::computeIndentationControlWantsCodeBlock() {
     this->computeIndentationBasic(0);
     return true;
   }
-  this->children[0].indentationLevel = this->indentationLevel;
-  this->children[1].indentationLevel = this->indentationLevel;
-  this->children[1].leftMostAtomUnderMe()->whiteSpaceBefore = 1;
-  this->children[0].computeIndentation();
+  CodeFormatter::Element & keywordAndCondition = this->children[0];
+  keywordAndCondition.maximumDesiredLineLengthOverride =
+  this->owner->maximumDesiredLineLength - 1;
+  CodeFormatter::Element& codeBlock = this->children[1];
+  keywordAndCondition.indentationLevel = this->indentationLevel;
+  keywordAndCondition.computeIndentation();
+  codeBlock.indentationLevel = this->indentationLevel;
+  codeBlock.leftMostAtomUnderMe()->whiteSpaceBefore = 1;
   this->children[1].computeIndentation();
   return true;
 }
@@ -1447,16 +1464,15 @@ bool CodeFormatter::Element::computeIndentationCommand() {
     return true;
   }
   // We have a semicolon that is standing on a new line alone.
-  int oldMaximumLineLength = this->owner->maximumDesiredLineLength;
-  this->owner->maximumDesiredLineLength --;
   for (int i = 0; i < this->children.size - 1; i ++) {
     this->children[i].indentationLevel = this->indentationLevel;
+    this->children[i].maximumDesiredLineLengthOverride =
+    this->owner->maximumDesiredLineLength - 1;
     this->children[i].computeIndentation();
   }
-  this->owner->maximumDesiredLineLength = oldMaximumLineLength;
   if (this->children.size > 1) {
     CodeFormatter::Element& secondToLast = *last.previousAtom();
-    if (secondToLast.columnFinal < this->owner->maximumDesiredLineLength) {
+    if (secondToLast.columnFinal < this->maximumLineLength()) {
       if (
         secondToLast.type != CodeFormatter::Element::CommentCollection &&
         secondToLast.type != CodeFormatter::Element::Comment &&
@@ -1485,7 +1501,7 @@ bool CodeFormatter::Element::computeIndentationCommaList(bool forceNewLines) {
   if (!mustSplitLines) {
     if (
       this->minimalSizeWithSpacebars() + this->offsetFromPrevious() >
-      this->owner->maximumDesiredLineLength
+      this->maximumLineLength()
     ) {
       mustSplitLines = true;
     }

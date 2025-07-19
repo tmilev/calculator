@@ -632,8 +632,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::
-    addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra
-    ,
+    addRationalOrPolynomialOrElementWeylAlgebraToSimilar,
     this->opRational(),
     this->opElementWeylAlgebra(),
     "Adds a rational or polynomial to element Weyl algebra. ",
@@ -649,8 +648,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::
-    addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra
-    ,
+    addRationalOrPolynomialOrElementWeylAlgebraToSimilar,
     this->opPolynomialRational(),
     this->opElementWeylAlgebra(),
     "Adds a rational or polynomial to element Weyl algebra. ",
@@ -666,8 +664,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::
-    addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra
-    ,
+    addRationalOrPolynomialOrElementWeylAlgebraToSimilar,
     this->opElementWeylAlgebra(),
     this->opPolynomialRational(),
     "Adds a rational or polynomial to element Weyl algebra. ",
@@ -683,8 +680,7 @@ void Calculator::initializeFunctionsScientificBasic() {
   this->addOperationBinaryInnerHandlerWithTypes(
     "+",
     CalculatorFunctionsBinaryOps::
-    addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra
-    ,
+    addRationalOrPolynomialOrElementWeylAlgebraToSimilar,
     this->opElementWeylAlgebra(),
     this->opElementWeylAlgebra(),
     "Adds a rational or polynomial to element Weyl algebra. ",

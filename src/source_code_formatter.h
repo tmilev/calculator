@@ -172,6 +172,7 @@ public:
     bool isStringStreamExpressionLike();
     bool isOfTypeOrCommandOfType(CodeFormatter::Element::Type input);
     bool shouldAddExtraLineInTopLevel(CodeFormatter::Element& next);
+    int maximumLineLength();
   public:
     Element::Type type;
     std::string content;
@@ -185,6 +186,7 @@ public:
     // The number of columns needed to display the element.
     int columnFinal;
     int newLinesAfter;
+    int maximumDesiredLineLengthOverride;
     std::string toStringContentAndMetaData() const;
     std::string toStringIndentation() const;
     std::string toString() const;

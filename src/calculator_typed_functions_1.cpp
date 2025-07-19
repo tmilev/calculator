@@ -809,12 +809,12 @@ addRationalOrPolynomialOrRationalFunctionToRationalFunction(
 }
 
 bool CalculatorFunctionsBinaryOps::
-addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra
-(Calculator& calculator, const Expression& input, Expression& output) {
+addRationalOrPolynomialOrElementWeylAlgebraToSimilar(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   STACK_TRACE(
     "CalculatorFunctionsBinaryOps::"
-    "addRationalOrPolynomialOrElementWeylAlgebra"
-    "ToRattionalOrPolynomialOrElementWeylAlgebra"
+    "addRationalOrPolynomialOrElementWeylAlgebraToSimilar"
   );
   return
   CalculatorFunctionsBinaryOps::addTypeToType<ElementWeylAlgebra<Rational> >(
@@ -938,7 +938,10 @@ bool CalculatorFunctionsBinaryOps::
 multiplyLittlemannRootOperatorByLakshmibaiSeshadriPath(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsBinaryOps::multiplyLRObyLSPath");
+  STACK_TRACE(
+    "CalculatorFunctionsBinaryOps::"
+    "multiplyLittlemannRootOperatorByLakshmibaiSeshadriPath"
+  );
   calculator.checkInputNotSameAsOutput(input, output);
   if (!input.isListNElements(3)) {
     return false;

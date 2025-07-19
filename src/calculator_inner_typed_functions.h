@@ -20,9 +20,9 @@ public:
   static bool addDoubleOrRationalToDoubleOrRational(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool
-  addRationalOrPolynomialOrElementWeylAlgebraToRattionalOrPolynomialOrElementWeylAlgebra
-  (Calculator& calculator, const Expression& input, Expression& output);
+  static bool addRationalOrPolynomialOrElementWeylAlgebraToSimilar(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool addRationalOrPolynomialOrRationalFunctionToRationalFunction(
     Calculator& calculator, const Expression& input, Expression& output
   );

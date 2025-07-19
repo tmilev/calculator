@@ -629,8 +629,9 @@ std::string SemisimpleSubalgebras::toStringHTML() {
   return out.str();
 }
 
-void SemisimpleSubalgebras::computeFolderNames(FormatExpressions& inputFormat)
-{
+void SemisimpleSubalgebras::computeFolderNames(
+  FormatExpressions& inputFormat
+) {
   STACK_TRACE("SemisimpleSubalgebras::computeFolderNames");
   (void) inputFormat;
   this->checkConsistency();
@@ -8056,8 +8057,8 @@ computeAndVerifyFromKnownGeneratorsAndHsPrepare(
   return this->status != CandidateSubalgebraStatus::corrupt;
 }
 
-bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs()
-{
+bool CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs(
+) {
   STACK_TRACE(
     "CandidateSemisimpleSubalgebra::computeAndVerifyFromKnownGeneratorsAndHs"
   );

@@ -2772,8 +2772,9 @@ bool CalculatorParser::replaceXEEBy_OofEE(int inputOperation) {
   return this->decreaseStackSetCharacterRanges(2);
 }
 
-bool CalculatorParser::isSeparatorFromTheLeftGeneral(const std::string& input)
-{
+bool CalculatorParser::isSeparatorFromTheLeftGeneral(
+  const std::string& input
+) {
   return
   input == "{" ||
   input == "(" ||
@@ -2822,8 +2823,9 @@ bool CalculatorParser::isSeparatorFromTheRightGeneral(const std::string& input)
   input == "EndProgram";
 }
 
-bool CalculatorParser::isSeparatorFromTheLeftForList(const std::string& input)
-{
+bool CalculatorParser::isSeparatorFromTheLeftForList(
+  const std::string& input
+) {
   return
   input == "{" ||
   input == "(" ||

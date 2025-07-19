@@ -3095,8 +3095,9 @@ bool CalculatorHTML::Parser::consumeAfterEquality() {
   );
 }
 
-bool CalculatorHTML::Parser::consumeAfterQuote(const std::string& quoteSymbol)
-{
+bool CalculatorHTML::Parser::consumeAfterQuote(
+  const std::string& quoteSymbol
+) {
   SyntacticElementHTML& secondToLast =
   this->elementStack[this->elementStack.size - 2];
   if (secondToLast.syntacticRole != quoteSymbol) {

@@ -1996,8 +1996,8 @@ bool GroupRepresentation<someGroup, Coefficient>::verifyRepresentation() {
 }
 
 template <typename somegroup, typename Coefficient>
-std::string GroupRepresentation<somegroup, Coefficient>::describeAsDirectSum()
-{
+std::string GroupRepresentation<somegroup, Coefficient>::describeAsDirectSum(
+) {
   this->computeCharacter();
   std::stringstream out;
   bool firstone = true;

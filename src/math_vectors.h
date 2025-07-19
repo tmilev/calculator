@@ -725,8 +725,9 @@ int Vector<Coefficient>::findLeastCommonMultipleDenominatorsTruncateToInt() {
 template <class Coefficient>
 class Vectors: public List<Vector<Coefficient> > {
 public:
-  std::string toStringEpsilonForm(bool useLatex, bool useHtml, bool makeTable)
-  {
+  std::string toStringEpsilonForm(
+    bool useLatex, bool useHtml, bool makeTable
+  ) {
     std::string currentString;
     std::stringstream out;
     if (useLatex) {

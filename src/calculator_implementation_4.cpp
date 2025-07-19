@@ -1269,8 +1269,9 @@ int Calculator::addOperationNoRepetitionOrReturnIndexFirst(
   return result;
 }
 
-void Calculator::addOperationNoRepetitionAllowed(const std::string& operation)
-{
+void Calculator::addOperationNoRepetitionAllowed(
+  const std::string& operation
+) {
   if (this->operations.contains(operation)) {
     global.fatal
     << "Operation "

@@ -25,8 +25,9 @@ private:
 
 class GraphEdge {
 public:
-  friend std::ostream& operator<<(std::ostream& output, const GraphEdge& edge)
-  {
+  friend std::ostream& operator<<(
+    std::ostream& output, const GraphEdge& edge
+  ) {
     output << edge.toString();
     return output;
   }

@@ -118,8 +118,9 @@ void TransportLayerSecurity::initializeNonThreadSafePartsCommon() {
   ASNObject::initializeNonThreadSafe();
 }
 
-void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(bool isServer)
-{
+void TransportLayerSecurity::initializeNonThreadSafeOnFirstCall(
+  bool isServer
+) {
   STACK_TRACE("TransportLayerSecurity::initializeNonThreadSafeOnFirstCall");
   if (this->flagInitialized) {
     return;

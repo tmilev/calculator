@@ -2173,8 +2173,9 @@ bool SubgroupData<someGroup, elementSomeGroup>::sameCosetAs(
 }
 
 template <typename someGroup, typename elementSomeGroup>
-int SubgroupData<someGroup, elementSomeGroup>::getCosetId(elementSomeGroup& g)
-{
+int SubgroupData<someGroup, elementSomeGroup>::getCosetId(
+  elementSomeGroup& g
+) {
   int gi = - 1;
   if (this->cosetRepresentativeEnumerator && this->sameCosetAsByFormula) {
     if (!this->flagCosetRepresentativesComputed) {

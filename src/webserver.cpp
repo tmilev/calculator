@@ -2447,8 +2447,9 @@ int WebWorker::serveClient() {
   return this->processFolderOrFile(true);
 }
 
-int WebWorker::processFolderOrFile(bool generateLinkToCalculatorOnMissingFile)
-{
+int WebWorker::processFolderOrFile(
+  bool generateLinkToCalculatorOnMissingFile
+) {
   STACK_TRACE("WebWorker::processFolderOrFile");
   this->virtualFileName =
   HtmlRoutines::convertURLStringToNormal(this->addressComputed, true);

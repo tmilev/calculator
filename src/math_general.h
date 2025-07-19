@@ -4707,8 +4707,9 @@ public:
     }
   }
   template <class otherType>
-  void assignVectorsToRows(const List<VectorSparse<otherType> >& inputVectors)
-  {
+  void assignVectorsToRows(
+    const List<VectorSparse<otherType> >& inputVectors
+  ) {
     this->makeZero();
     for (int i = 0; i < inputVectors.size; i ++) {
       for (int j = 0; j < inputVectors[i].size(); j ++) {

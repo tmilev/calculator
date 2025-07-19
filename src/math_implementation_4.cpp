@@ -1311,8 +1311,8 @@ bool DynkinDiagramRootSubalgebra::isGreaterThan(
   return false;
 }
 
-Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula()
-{
+Rational DynkinDiagramRootSubalgebra::getSizeCorrespondingWeylGroupByFormula(
+) {
   Rational output = 1;
   for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
     output *=
@@ -1538,8 +1538,9 @@ int DynkinDiagramRootSubalgebra::numberRootsGeneratedByDiagram() {
   return result;
 }
 
-int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent)
-{
+int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(
+  int indexComponent
+) {
   STACK_TRACE("DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes");
   Vectors<Rational>& currentComponent =
   this->simpleBasesConnectedComponents[indexComponent];

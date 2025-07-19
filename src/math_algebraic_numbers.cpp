@@ -429,8 +429,9 @@ void AlgebraicClosureRationals::contractBasesIfRedundant(
   *this = previousCopy;
 }
 
-bool AlgebraicClosureRationals::reduceMe(std::stringstream* commentsOnFailure)
-{
+bool AlgebraicClosureRationals::reduceMe(
+  std::stringstream* commentsOnFailure
+) {
   STACK_TRACE("AlgebraicClosureRationals::reduceMe");
   if (!this->chooseGeneratingElement(1000, commentsOnFailure)) {
     return false;
@@ -1714,8 +1715,9 @@ AlgebraicNumber AlgebraicClosureRationals::imaginaryUnit() {
   return result;
 }
 
-AlgebraicNumber AlgebraicClosureRationals::fromRational(const Rational& input)
-{
+AlgebraicNumber AlgebraicClosureRationals::fromRational(
+  const Rational& input
+) {
   AlgebraicNumber result(input);
   result.owner = this;
   return result;

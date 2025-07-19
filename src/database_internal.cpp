@@ -351,7 +351,8 @@ bool DatabaseInternal::sendAndReceiveFromClientInternal(
 bool DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex
 (const std::string& input, std::string& output) {
   STACK_TRACE(
-    "DatabaseInternal::sendAndReceiveFromClientToServerFallbackWithProcessMutex"
+    "DatabaseInternal::"
+    "sendAndReceiveFromClientToServerFallbackWithProcessMutex"
   );
   MutexProcesslockGuard guard(this->mutexFallbackDatabase);
   // Read the entire DB from file:
@@ -855,8 +856,9 @@ std::string DatabaseInternalRequest::typeToString(
   return "";
 }
 
-bool DatabaseInternalRequest::fromJSData(std::stringstream* commentsOnFailure)
-{
+bool DatabaseInternalRequest::fromJSData(
+  std::stringstream* commentsOnFailure
+) {
   STACK_TRACE("DatabaseInternalRequest::fromJSData");
   this->requestType =
   DatabaseInternalRequest::stringToType(

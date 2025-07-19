@@ -159,8 +159,9 @@ void MeshTriangles::addPointFromVerticesValues(
   outputAppend.addOnTop(left * contributionLeft + right * contributionRight);
 }
 
-int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(int currentIndex)
-{
+int MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex(
+  int currentIndex
+) {
   STACK_TRACE("MeshTriangles::cleanUpTrianglesReturnUpdatedCurrentIndex");
   if (
     this->flagTriangleLimitReached ||

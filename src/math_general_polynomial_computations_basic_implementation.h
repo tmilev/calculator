@@ -789,8 +789,9 @@ void Polynomial<Coefficient>::operator-=(const Coefficient& other) {
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::operator-=(const Polynomial<Coefficient>& other)
-{
+void Polynomial<Coefficient>::operator-=(
+  const Polynomial<Coefficient>& other
+) {
   this->::LinearCombination<MonomialPolynomial, Coefficient>::operator-=(
     other
   );
@@ -802,8 +803,9 @@ void Polynomial<Coefficient>::operator*=(const MonomialPolynomial& other) {
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::operator*=(const Polynomial<Coefficient>& other)
-{
+void Polynomial<Coefficient>::operator*=(
+  const Polynomial<Coefficient>& other
+) {
   this->::ElementMonomialAlgebra<MonomialPolynomial, Coefficient>::operator*=(
     other
   );
@@ -838,8 +840,9 @@ Polynomial<Coefficient> Polynomial<Coefficient>::operator%(
 }
 
 template <class Coefficient>
-void Polynomial<Coefficient>::operator/=(const Polynomial<Coefficient>& other)
-{
+void Polynomial<Coefficient>::operator/=(
+  const Polynomial<Coefficient>& other
+) {
   Polynomial<Coefficient> monomial = *this;
   Polynomial<Coefficient> remainder;
   monomial.divideBy(

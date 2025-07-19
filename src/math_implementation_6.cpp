@@ -572,8 +572,8 @@ bool PolynomialFactorizationFiniteFields::oneFactorFromModularization(
   return result;
 }
 
-void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary()
-{
+void PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary(
+) {
   STACK_TRACE(
     "PolynomialFactorizationFiniteFields::computeCoefficientBoundsElementary"
   );

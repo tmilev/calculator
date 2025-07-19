@@ -673,8 +673,8 @@ void GroebnerBasisComputation<Coefficient>::addBasisElementNoReduction(
 }
 
 template <class Coefficient>
-void GroebnerBasisComputation<Coefficient>::initializeForGroebnerComputation()
-{
+void GroebnerBasisComputation<Coefficient>::initializeForGroebnerComputation(
+) {
   STACK_TRACE("GroebnerBasisComputation::initializeForGroebnerComputation");
   this->basisCandidates.setSize(0);
   this->basis.setSize(0);

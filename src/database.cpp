@@ -699,8 +699,9 @@ void Database::correctData(JSData& row) {
   Database::correctDataFromLabels(row, DatabaseStrings::labelPassword);
 }
 
-void Database::correctDataFromLabels(JSData& row, const std::string& oneLabel)
-{
+void Database::correctDataFromLabels(
+  JSData& row, const std::string& oneLabel
+) {
   Database::correctDataFromLabels(row, List<std::string>({oneLabel}));
 }
 
@@ -944,8 +945,9 @@ void QueryUpdate::addKeyValueStringPair(
   this->data.addOnTop(querySetOnce);
 }
 
-void QueryUpdate::addKeyValuePair(const std::string& key, const JSData& value)
-{
+void QueryUpdate::addKeyValuePair(
+  const std::string& key, const JSData& value
+) {
   QueryUpdateOnce querySetOnce;
   querySetOnce.nestedLabels.addOnTop(key);
   querySetOnce.value = value;

@@ -181,8 +181,9 @@ bool DatabaseLoader::loadOneObject(
   return true;
 }
 
-bool DatabaseLoader::correctDatabaseJSON(std::stringstream& commentsOnFailure)
-{
+bool DatabaseLoader::correctDatabaseJSON(
+  std::stringstream& commentsOnFailure
+) {
   JSData& users = this->databaseJSON["users"];
   for (JSData& user : users.listObjects) {
     if (!this->correctUser(user, commentsOnFailure)) {

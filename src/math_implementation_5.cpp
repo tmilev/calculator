@@ -1006,8 +1006,9 @@ void MonomialPolynomial::makeEi(
   this->setVariable(letterIndex, power);
 }
 
-void MonomialPolynomial::setVariable(int variableIndex, const Rational& power)
-{
+void MonomialPolynomial::setVariable(
+  int variableIndex, const Rational& power
+) {
   if (variableIndex >= this->monomialBody.size) {
     this->setSize(variableIndex + 1);
   }

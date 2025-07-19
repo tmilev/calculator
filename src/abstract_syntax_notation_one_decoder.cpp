@@ -891,8 +891,9 @@ void ASNElement::computeTag() {
   }
 }
 
-bool AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent(ASNElement& output)
-{
+bool AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent(
+  ASNElement& output
+) {
   STACK_TRACE("AbstractSyntaxNotationOneSubsetDecoder::decodeCurrent");
   RecursionDepthCounter recursionGuard(&this->recursionDepthGuard);
   if (this->recursionDepthGuard > this->maxRecursionDepth) {

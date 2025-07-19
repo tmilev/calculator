@@ -1856,8 +1856,8 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(
   //  this->getLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
 }
 
-void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2()
-{
+void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2(
+) {
   int dimension = this->getAmbientWeyl().cartanSymmetric.numberOfRows;
   std::stringstream out;
   out << this->toString() << "\n\n";
@@ -2784,8 +2784,8 @@ bool RootSubalgebras::growDynkinType(
 }
 
 void RootSubalgebra::
-computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators()
-{
+computeOuterSubalgebraAutomorphismsExtendingToAmbientAutomorphismsGenerators(
+) {
   STACK_TRACE(
     "RootSubalgebra::"
     "computeOuterSubalgebraAutomorphisms"

@@ -1033,13 +1033,22 @@ bool CodeFormatter::Element::computeIndentationFunctionDefinition() {
   if (this->children.size != 2) {
     return true;
   }
+  CodeFormatter::Element& functionDeclaration = this->children[0];
   CodeFormatter::Element& lastElementFunctionDeclaration =
-  *this->children[0].rightMostAtomUnderMe();
+  *functionDeclaration.rightMostAtomUnderMe();
   if (
     lastElementFunctionDeclaration.type == CodeFormatter::Element::ConstKeyWord
   ) {
     lastElementFunctionDeclaration.newLinesAfter = 0;
     this->children[1].leftMostAtomUnderMe()->whiteSpaceBefore = 1;
+  } else if (
+    lastElementFunctionDeclaration.columnFinal ==
+    this->owner->maximumDesiredLineLength - 2 &&
+    functionDeclaration.maximumDesiredLineLengthOverride <= 0
+  ) {
+    functionDeclaration.maximumDesiredLineLengthOverride =
+    this->owner->maximumDesiredLineLength - 2;
+    this->computeIndentationFunctionDefinition();
   }
   return true;
 }
@@ -4902,8 +4911,9 @@ void CodeFormatter::wirePointersRecursively(
   }
 }
 
-void CodeFormatter::correctMultiArguments(CodeFormatter::Element& inputOutput)
-{
+void CodeFormatter::correctMultiArguments(
+  CodeFormatter::Element& inputOutput
+) {
   if (
     inputOutput.type != CodeFormatter::Element::Expression ||
     inputOutput.children.size != 3

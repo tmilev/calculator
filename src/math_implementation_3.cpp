@@ -5273,8 +5273,8 @@ void OnePartialFractionDenominatorComponent::computeOneCheckSum(
   }
 }
 
-int OnePartialFractionDenominatorComponent::getMultiplicityLargestElongation()
-{
+int OnePartialFractionDenominatorComponent::getMultiplicityLargestElongation(
+) {
   int result = 0;
   int largestElongationFound = 0;
   for (int i = 0; i < this->elongations.size; i ++) {
@@ -5470,8 +5470,9 @@ void SelectionWithDifferentMaxMultiplicities::initializePart1(
   this->elements.size = 0;
 }
 
-void SelectionWithMultiplicities::initWithMultiplicities(int numberOfElements)
-{
+void SelectionWithMultiplicities::initWithMultiplicities(
+  int numberOfElements
+) {
   this->multiplicities.setSize(numberOfElements);
   for (int i = 0; i < this->multiplicities.size; i ++) {
     this->multiplicities[i] = 0;
@@ -5712,8 +5713,8 @@ void::SelectionWithDifferentMaxMultiplicities::clearNoMaxMultiplicitiesChange()
   }
 }
 
-bool SelectionWithDifferentMaxMultiplicities::incrementReturnFalseIfPastLast()
-{
+bool SelectionWithDifferentMaxMultiplicities::incrementReturnFalseIfPastLast(
+) {
   STACK_TRACE(
     "SelectionWithDifferentMaxMultiplicities::incrementReturnFalseIfPastLast"
   );
@@ -8022,8 +8023,9 @@ void WeylGroupData::actOnRootAlgByGroupElement(
   }
 }
 
-void WeylGroupData::computeWeylGroupAndrootsOfBorel(Vectors<Rational>& output)
-{
+void WeylGroupData::computeWeylGroupAndrootsOfBorel(
+  Vectors<Rational>& output
+) {
   this->group.computeAllElements(false);
   output.size = 0;
   output.reserve(this->rootSystem.size / 2);
@@ -8556,8 +8558,9 @@ Rational WeylGroupData::getKillingDividedByTraceRatio() {
   return result;
 }
 
-void WeylGroupData::getLongestWeylElement(ElementWeylGroup& outputWeylElement)
-{
+void WeylGroupData::getLongestWeylElement(
+  ElementWeylGroup& outputWeylElement
+) {
   this->computeRho(false);
   Vector<Rational> lowest = this->rho;
   Vectors<Rational> roots;
@@ -13596,8 +13599,9 @@ bool Cone::makeConvexHullOfMeAnd(const Cone& other) {
   return true;
 }
 
-bool ConeCollection::refineOneByNormals(Cone& toBeRefined, List<Cone>& output)
-{
+bool ConeCollection::refineOneByNormals(
+  Cone& toBeRefined, List<Cone>& output
+) {
   STACK_TRACE("ConeCollection::refineByNormals");
   output.clear();
   int& counter = toBeRefined.payload.lowestSlicingIndex;

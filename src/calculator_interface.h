@@ -345,8 +345,9 @@ public:
   );
   // Same as assignValueWithContext but with shuffled arguments. Deprecated.
   template <class BuiltIn>
-  bool assignWithContext(Calculator& owner, const WithContext<BuiltIn>& input)
-  {
+  bool assignWithContext(
+    Calculator& owner, const WithContext<BuiltIn>& input
+  ) {
     return this->assignValueWithContext(owner, input.content, input.context);
   }
   bool setContextAtLeastEqualTo(
@@ -1479,8 +1480,9 @@ public:
 
 class InputBox {
 public:
-  friend std::ostream& operator<<(std::ostream& output, const InputBox& input)
-  {
+  friend std::ostream& operator<<(
+    std::ostream& output, const InputBox& input
+  ) {
     output << "name: " << input.name << ", ...";
     return output;
   }

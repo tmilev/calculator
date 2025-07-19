@@ -2611,8 +2611,9 @@ MonomialMacdonald::~MonomialMacdonald() {
   this->flagDeallocated = true;
 }
 
-void MonomialMacdonald::generateMyOrbit(HashedList<MonomialMacdonald>& output)
-{
+void MonomialMacdonald::generateMyOrbit(
+  HashedList<MonomialMacdonald>& output
+) {
   STACK_TRACE("MonomialMacdonald::generateMyOrbit");
   output.clear();
   output.addOnTop(*this);

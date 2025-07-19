@@ -18,8 +18,9 @@ void Crypto::Random::getRandomBytesSecureInternal(
   );
 }
 
-void Crypto::Random::acquireAdditionalRandomness(int64_t additionalRandomness)
-{
+void Crypto::Random::acquireAdditionalRandomness(
+  int64_t additionalRandomness
+) {
   if (
     static_cast<unsigned>(global.randomBytesCurrent.size) < global.
     maximumExtractedRandomBytes
@@ -1119,8 +1120,9 @@ std::string Crypto::convertIntToHex(int input, int significantBytes) {
   Crypto::convertUintToHex(static_cast<unsigned int>(input), significantBytes);
 }
 
-std::string Crypto::convertUintToHex(unsigned int input, int significantBytes)
-{
+std::string Crypto::convertUintToHex(
+  unsigned int input, int significantBytes
+) {
   std::stringstream out;
   out
   << std::hex

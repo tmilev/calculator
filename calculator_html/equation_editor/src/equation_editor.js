@@ -5260,7 +5260,7 @@ class BoundingBox {
 // than the latex string but
 // that turned out to be bug-prone so
 // the metadata was removed. We keep the class however,
-// in case we need to store metada in the future again.
+// in case we need to store metadata in the future again.
 class LatexWithAnnotation {
   constructor(
     /** @type {string} */

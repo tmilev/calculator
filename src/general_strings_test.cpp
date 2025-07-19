@@ -87,8 +87,8 @@ bool StringRoutines::Conversions::Test::oneConversionUtf8Success(
   return true;
 }
 
-bool StringRoutines::Conversions::Test::convertUtf8StringToUnicodeCodePoints()
-{
+bool StringRoutines::Conversions::Test::convertUtf8StringToUnicodeCodePoints(
+) {
   StringRoutines::Conversions::Test::oneConversionUtf8Success("$", 36);
   StringRoutines::Conversions::Test::oneConversionUtf8Success("\u00A2", 162);
   StringRoutines::Conversions::Test::oneConversionUtf8Success("\u0939", 2361);

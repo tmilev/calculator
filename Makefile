@@ -50,14 +50,12 @@ OBJECT_FILE_OUTPUT=bin/
 
 ifeq ($(llvm), 1)
 	compiler=clang++
-    # CFLAGS+=-stdlib=libc++ -std=c++11
+	# CFLAGS+=-stdlib=libc++ -std=c++11
 	# On Ubuntu, install clang with: 
 	# sudo apt install clang 
 	# You will likely also need to install:
-    # sudo apt install libc++-dev
-    # sudo apt install libstdc++-dev
-else
-    CFLAGS+=-std=c++0x
+	# sudo apt install libc++-dev
+	# sudo apt install libstdc++-dev
 endif
 
 ifeq ($(wasm), 1)

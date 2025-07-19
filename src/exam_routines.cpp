@@ -2179,8 +2179,8 @@ std::string CalculatorHTML::toStringInterprettedCommands(
   out << "<table>";
   int commandCounter = calculator.programExpression.size() - 1;
   for (
-    int elementCounter = elements.size - 1; elementCounter > 0; elementCounter
-    --
+    int elementCounter = elements.size - 1; elementCounter > 0;
+    elementCounter --
   ) {
     SyntacticElementHTML& currentElement = elements[elementCounter];
     std::string currentElementString =
@@ -2857,8 +2857,8 @@ bool CalculatorHTML::Parser::reduceStackMergeContentsRetainLast(
   SyntacticElementHTML& calculatorTag =
   this->elementStack[this->elementStack.size - numberOfElementsToRemove - 2];
   for (
-    int i = this->elementStack.size - numberOfElementsToRemove - 1; i < this->
-    elementStack.size -
+    int i = this->elementStack.size - numberOfElementsToRemove - 1; i < this
+    ->elementStack.size -
     1; i ++
   ) {
     calculatorTag.content.append(this->elementStack[i].content);
@@ -3205,8 +3205,8 @@ std::string CalculatorHTML::Parser::toStringPhaseInfo() {
   std::stringstream stackTop;
   int stepsToShow = 5;
   for (
-    int i = this->elementStack.size - stepsToShow - 1; i < this->elementStack.
-    size; i ++
+    int i = this->elementStack.size - stepsToShow - 1; i < this->elementStack
+    .size; i ++
   ) {
     SyntacticElementHTML& current = this->elementStack[i];
     if (

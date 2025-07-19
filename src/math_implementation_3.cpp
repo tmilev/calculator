@@ -1935,8 +1935,8 @@ std::string FileOperations::getVirtualNameWithHash(
   std::string fileNameEnd;
   for (
     int i = 0; i <
-    FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i
-    ++
+    FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size;
+    i ++
   ) {
     const std::string& currentStart =
     FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i];
@@ -1960,8 +1960,8 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedWriteOnly(
   std::string inputStart = "";
   for (
     int i = 0; i <
-    FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash().size;
-    i ++
+    FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash().
+    size; i ++
   ) if (
     StringRoutines::stringBeginsWith(
       inputFileName,
@@ -2036,8 +2036,8 @@ bool FileOperations::getPhysicalFileNameFromVirtualCustomizedReadOnly(
   std::string inputStart = "";
   for (
     int i = 0; i <
-    FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash().size;
-    i ++
+    FileOperations::folderStartsToWhichWeAppendInstructorUsernameSlash().
+    size; i ++
   ) {
     if (
       StringRoutines::stringBeginsWith(
@@ -2128,8 +2128,8 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
   std::string folderEnd, folderEnd2;
   for (
     int i = 0; i <
-    FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i
-    ++
+    FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size;
+    i ++
   ) {
     if (
       StringRoutines::stringBeginsWith(
@@ -2173,7 +2173,8 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
   }
   if (accessSensitiveFolders) {
     for (
-      int i = 0; i < FileOperations::folderVirtualLinksSensitive().size(); i ++
+      int i = 0; i < FileOperations::folderVirtualLinksSensitive().size(); i
+      ++
     ) {
       if (
         StringRoutines::stringBeginsWith(
@@ -2192,8 +2193,8 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
   }
   if (accessULTRASensitiveFolders) {
     for (
-      int i = 0; i < FileOperations::folderVirtualLinksULTRASensitive().size();
-      i ++
+      int i = 0; i < FileOperations::folderVirtualLinksULTRASensitive().size(
+      ); i ++
     ) {
       if (
         StringRoutines::stringBeginsWith(
@@ -3771,7 +3772,8 @@ int OnePartialFractionDenominator::
 getNumberProportionalVectorsClassicalRootSystems(PartialFractions& owner) {
   int result = 0;
   for (
-    int i = 0; i < owner.indicesRedundantShortRoots.cardinalitySelection; i ++
+    int i = 0; i < owner.indicesRedundantShortRoots.cardinalitySelection; i
+    ++
   ) {
     int index = owner.indicesRedundantShortRoots.elements[i];
     int rootIndex =
@@ -5567,8 +5569,8 @@ bool SelectionWithMaximumMultiplicity::incrementSubsetFixedCardinality(
     }
   }
   for (
-    int i = this->multiplicities.size - 1; currentCardinality < cardinality; i
-    --
+    int i = this->multiplicities.size - 1; currentCardinality < cardinality;
+    i --
   ) {
     if (this->multiplicities[i] != 0) {
       global.fatal
@@ -8009,9 +8011,8 @@ void WeylGroupData::actOnRootAlgByGroupElement(
   int index, PolynomialSubstitution<Rational>& root, bool rhoAction
 ) {
   for (
-    int i = this->group.elements[index].generatorsLastAppliedFirst.size - 1; i
-    >=
-    0; i --
+    int i = this->group.elements[index].generatorsLastAppliedFirst.size - 1;
+    i >= 0; i --
   ) {
     this->simpleReflectionRootPolynomial(
       this->group.elements[index].generatorsLastAppliedFirst[i].index,
@@ -9421,8 +9422,9 @@ toStringCosetGraph() {
   for (int i = 0; i < layers.size; i ++) {
     arrows[i].setSize(layers[i].size);
     for (int j = 0; j < layers[i].size; j ++) {
-      for (int k = 0; k < this->representativesQuotientAmbientOrder.size; k ++)
-      {
+      for (
+        int k = 0; k < this->representativesQuotientAmbientOrder.size; k ++
+      ) {
         if (
           this->ambientWeyl->leftIsHigherInBruhatOrderThanRight(
             this->representativesQuotientAmbientOrder[k],
@@ -13019,8 +13021,8 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep4() {
     this->maximaCandidates[i].setSize(currentComplex.refinedCones.size());
     for (int j = 0; j < currentComplex.refinedCones.size(); j ++) {
       for (
-        int k = 0; k < this->complexStartingPerRepresentative[k].refinedCones.
-        size(); k ++
+        int k = 0; k < this->complexStartingPerRepresentative[k].refinedCones
+        .size(); k ++
       ) {
         if (
           this->complexStartingPerRepresentative[i].refinedCones[k].isInCone(
@@ -13066,8 +13068,8 @@ void ConeLatticeAndShiftMaxComputation::findExtremaParametricStep1() {
   ProgressReport report2;
   ProgressReport report3;
   for (
-    ; this->numberOfProcessedNonParameters < this->numberOfNonParameters; this
-    ->numberOfProcessedNonParameters ++
+    ; this->numberOfProcessedNonParameters < this->numberOfNonParameters;
+    this->numberOfProcessedNonParameters ++
   ) {
     while (this->conesLargerDimension.size > 0) {
       ConeLatticeAndShift& currentCLS =
@@ -14752,8 +14754,8 @@ int Cone::addFakeWalls() {
   Selection selection;
   for (
     int i = 0; i < dimension &&
-    this->getAllNormals().getRankElementSpan(&matrix, &selection) < dimension;
-    i ++
+    this->getAllNormals().getRankElementSpan(&matrix, &selection) <
+    dimension; i ++
   ) {
     Wall fakeWall;
     fakeWall.normal.makeEi(dimension, i);

@@ -1918,8 +1918,8 @@ void IntegralRationalFunctionComputation::prepareFormatExpressions() {
   << " = ";
   int variableCounter = 0;
   for (
-    int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size();
-    i ++
+    int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size(
+    ); i ++
   ) {
     int tempSize = - 1;
     this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[i].
@@ -1936,8 +1936,9 @@ void IntegralRationalFunctionComputation::prepareFormatExpressions() {
         polyStream << "(";
       }
       for (
-        int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities[i].
-        totalDegree(); j ++
+        int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities[
+          i
+        ].totalDegree(); j ++
       ) {
         variableCounter ++;
         std::stringstream variableNameStream;
@@ -1973,8 +1974,8 @@ void IntegralRationalFunctionComputation::prepareFormatExpressions() {
         polyStream << ")";
       }
       for (
-        int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities.size
-        (); j ++
+        int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities.
+        size(); j ++
       ) {
         Rational exponent =
         this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[j];
@@ -2041,8 +2042,8 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
     this->denominatorFactorsAlgebraicWithMultiplicities.size()
   );
   for (
-    int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size();
-    i ++
+    int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size(
+    ); i ++
   ) {
     int tempSize = - 1;
     this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[i].
@@ -2055,8 +2056,9 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
       currentSummand.makeZero();
       this->numerators[i][k].makeZero();
       for (
-        int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities[i].
-        totalDegree(); j ++
+        int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities[
+          i
+        ].totalDegree(); j ++
       ) {
         this->numberOfSystemVariables ++;
         monomial.makeEi(this->numberOfSystemVariables);
@@ -2065,8 +2067,8 @@ void IntegralRationalFunctionComputation::prepareNumerators() {
         currentSummand.addMonomial(monomial, 1);
       }
       for (
-        int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities.size
-        (); j ++
+        int j = 0; j < this->denominatorFactorsAlgebraicWithMultiplicities.
+        size(); j ++
       ) {
         Rational exponent =
         this->denominatorFactorsAlgebraicWithMultiplicities.coefficients[j];
@@ -2091,8 +2093,8 @@ void IntegralRationalFunctionComputation::prepareFinalAnswer() {
   std::stringstream rationalFractionStream;
   std::stringstream answerFinalStream;
   for (
-    int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size();
-    i ++
+    int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size(
+    ); i ++
   ) {
     for (
       int k = 0; k < this->denominatorFactorsAlgebraicWithMultiplicities.
@@ -2330,8 +2332,8 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
   Polynomial<AlgebraicNumber> currentSecondDegreePolynomialAlgebraic;
   this->additionalMultiple = 1;
   for (
-    int i = 0; i < this->denominatorFactorsRationalWithMultiplicities.size(); i
-    ++
+    int i = 0; i < this->denominatorFactorsRationalWithMultiplicities.size();
+    i ++
   ) {
     currentSecondDegreePolynomial =
     this->denominatorFactorsRationalWithMultiplicities[i];
@@ -2476,8 +2478,8 @@ bool IntegralRationalFunctionComputation::computePartialFractionDecomposition()
     substitution[i].makeConstant(constantTerms(i - 1, 0));
   }
   for (
-    int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size();
-    i ++
+    int i = 0; i < this->denominatorFactorsAlgebraicWithMultiplicities.size(
+    ); i ++
   ) {
     for (
       int k = 0; k < this->denominatorFactorsAlgebraicWithMultiplicities.
@@ -6471,8 +6473,9 @@ bool CalculatorFunctionsDifferentiation::ddivDxToDiffDivDiffx(
   if (denominatorString[0] != 'd') {
     return false;
   }
-  for (int i = 0; i < static_cast<signed>(denominatorString.size()) - 1; i ++)
-  {
+  for (
+    int i = 0; i < static_cast<signed>(denominatorString.size()) - 1; i ++
+  ) {
     unsigned k = static_cast<unsigned>(i);
     denominatorString[k] = denominatorString[k + 1];
   }
@@ -6610,8 +6613,9 @@ bool Expression::splitProduct(
   multiplicandsRight.setExpectedSize(
     multiplicandsLeft.size - totalDesiredMultiplicandsLeft
   );
-  for (int i = totalDesiredMultiplicandsLeft; i < multiplicandsLeft.size; i ++)
-  {
+  for (
+    int i = totalDesiredMultiplicandsLeft; i < multiplicandsLeft.size; i ++
+  ) {
     multiplicandsRight.addOnTop(multiplicandsLeft[i]);
   }
   multiplicandsLeft.setSize(totalDesiredMultiplicandsLeft);
@@ -10803,9 +10807,8 @@ public:
     STACK_TRACE("ExpressionTreeDrawer::getLayerWidth");
     Rational result = 0;
     for (
-      int i = this->layerFirstIndices[layerIndex]; i < this->layerFirstIndices[
-        layerIndex
-      ] +
+      int i = this->layerFirstIndices[layerIndex]; i < this->
+      layerFirstIndices[layerIndex] +
       this->layerSizes[layerIndex]; i ++
     ) {
       result += this->getStringWidthTruncated(i) + this->padding;
@@ -10820,9 +10823,8 @@ public:
     STACK_TRACE("ExpressionTreeDrawer::computeLayerPositions");
     Rational currentX = - this->getLayerWidth(layerIndex) / 2;
     for (
-      int i = this->layerFirstIndices[layerIndex]; i < this->layerFirstIndices[
-        layerIndex
-      ] +
+      int i = this->layerFirstIndices[layerIndex]; i < this->
+      layerFirstIndices[layerIndex] +
       this->layerSizes[layerIndex]; i ++
     ) {
       this->nodePositions[i].setSize(2);

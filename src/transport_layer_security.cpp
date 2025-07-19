@@ -1859,8 +1859,8 @@ void Serialization::writeNByteUnsigned(
     output.setSize(inputOutputOffset + byteCountOfLength);
   }
   for (
-    int i = byteCountOfLength - 1 + inputOutputOffset; i >= inputOutputOffset;
-    i --
+    int i = byteCountOfLength - 1 + inputOutputOffset; i >=
+    inputOutputOffset; i --
   ) {
     output[i] = static_cast<unsigned char>(input % 256);
     input /= 256;

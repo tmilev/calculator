@@ -2980,8 +2980,8 @@ gaussianEliminationByRows(
   Coefficient accumulator;
   Coefficient negated;
   for (
-    int i = 0; i < allMonomials.size && currentRowIndex < toBeEliminated.size;
-    i ++
+    int i = 0; i < allMonomials.size &&
+    currentRowIndex < toBeEliminated.size; i ++
   ) {
     const TemplateMonomial& monomial = allMonomials[i];
     int goodRow = currentRowIndex;
@@ -3840,8 +3840,8 @@ simplifyEqualConsecutiveGenerators(int lowestNonReducedIndex) {
   }
   bool result = false;
   for (
-    int next = lowestNonReducedIndex + 1; next < this->generatorsIndices.size;
-    next ++
+    int next = lowestNonReducedIndex + 1; next < this->generatorsIndices.
+    size; next ++
   ) {
     if (
       this->generatorsIndices[lowestNonReducedIndex] ==

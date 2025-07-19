@@ -328,8 +328,9 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
     << global.fatal;
   }
   this->checkIndicesMinimalContainingRootSubalgebras();
-  for (int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++)
-  {
+  for (
+    int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++
+  ) {
     int indexMinimalContainer =
     this->indicesMinimalContainingRootSubalgebras[i];
     RootSubalgebra& currentMinimalContainer =
@@ -355,8 +356,9 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
 }
 
 bool SlTwoSubalgebra::checkIndicesMinimalContainingRootSubalgebras() const {
-  for (int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++)
-  {
+  for (
+    int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++
+  ) {
     int indexMinimalContainer =
     this->indicesMinimalContainingRootSubalgebras[i];
     if (
@@ -529,8 +531,9 @@ computeModuleDecompositionsitionOfMinimalContainingRegularSAs(
   );
   List<int> buffer;
   this->checkIndicesMinimalContainingRootSubalgebras();
-  for (int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++)
-  {
+  for (
+    int i = 0; i < this->indicesMinimalContainingRootSubalgebras.size; i ++
+  ) {
     RootSubalgebra& subalgebra =
     owner.rootSubalgebras.subalgebras[
       this->indicesMinimalContainingRootSubalgebras[i]

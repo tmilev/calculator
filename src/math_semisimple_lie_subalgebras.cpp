@@ -667,8 +667,9 @@ std::string SemisimpleSubalgebras::toStringSemisimpleSubalgebraSummaryHTML(
   int numberOfNoLinfRelationsFound = 0;
   int numberOfNonCentralizerConditionWithConeCondition = 0;
   int totalBadParabolics = 0;
-  for (const RealizedSemisimpleSubalgebra& realized : this->subalgebras.values)
-  {
+  for (
+    const RealizedSemisimpleSubalgebra& realized : this->subalgebras.values
+  ) {
     const CandidateSemisimpleSubalgebra& candidate = realized.content;
     totalIsotypicallyCompleteNilradicals +=
     candidate.fernandoKacNilradicalCandidates.size;
@@ -3800,8 +3801,8 @@ void CandidateSemisimpleSubalgebra::addHIncomplete(
     }
   }
   for (
-    int i = 0; i < this->posistiveRootsPerpendicularToPrecedingWeights.size; i
-    ++
+    int i = 0; i < this->posistiveRootsPerpendicularToPrecedingWeights.size;
+    i ++
   ) {
     if (
       this->getAmbientWeyl().rootScalarCartanRoot(
@@ -5094,7 +5095,8 @@ void CandidateSemisimpleSubalgebra::WConjecture::computeSmallOrbits(
 ) {
   this->flagSlTwoIsSmall = false;
   for (
-    int i = 0; i < owner.characterNonPrimalFundamentalCoordinates.size(); i ++
+    int i = 0; i < owner.characterNonPrimalFundamentalCoordinates.size(); i
+    ++
   ) {
     const Weight<Rational>& weight =
     owner.characterNonPrimalFundamentalCoordinates.monomials[i];
@@ -5877,8 +5879,9 @@ void NilradicalCandidate::computeParabolicACExtendsToParabolicAC() {
     this->owner->bilinearFormFundamentalPrimal
   );
   bool ambientLeviHasBDGE = false;
-  for (int i = 0; i < this->leviDiagramAmbient.simpleComponentTypes.size; i ++)
-  {
+  for (
+    int i = 0; i < this->leviDiagramAmbient.simpleComponentTypes.size; i ++
+  ) {
     DynkinSimpleType& currentType =
     this->leviDiagramAmbient.simpleComponentTypes[i];
     if (
@@ -5972,8 +5975,8 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
           );
           this->coneRelativelyStrongIntersection.setSize(0);
           for (
-            int k = 0; k < this->nilradicalSubselection.cardinalitySelection; k
-            ++
+            int k = 0; k < this->nilradicalSubselection.cardinalitySelection;
+            k ++
           ) {
             this->coneStrongIntersection[
               this->nilradicalSubselection.elements[k]
@@ -5994,8 +5997,8 @@ bool NilradicalCandidate::tryFindingLInfiniteRelations() {
           this->nonFernandoKacHighestWeightVectorsStrongRelativeToSubsetWeights
           .setSize(0);
           for (
-            int k = 0; k < this->nonFernandoKacHighestWeightsStronglyTwoSided.
-            size; k ++
+            int k = 0; k < this->nonFernandoKacHighestWeightsStronglyTwoSided
+            .size; k ++
           ) {
             this->coneStrongIntersection[k + this->nilradicalWeights.size] =
             betterIntersection[k + i];
@@ -6103,8 +6106,9 @@ bool NilradicalCandidate::isStronglySingularRelativeToSubset(
   STACK_TRACE("NilradicalCandidate::isStronglySingularRelativeToSubset");
   this->checkInitialization();
   ElementSemisimpleLieAlgebra<AlgebraicNumber> mustBeZero;
-  for (int j = 0; j < this->nilradicalSubselection.cardinalitySelection; j ++)
-  {
+  for (
+    int j = 0; j < this->nilradicalSubselection.cardinalitySelection; j ++
+  ) {
     this->owner->owner->owner->lieBracket(
       this->nilradical[this->nilradicalSubselection.elements[j]],
       this->nonFernandoKacHighestWeightVectors[nonFernandoKacWeightIndex],
@@ -6532,8 +6536,8 @@ isPossibleNilradicalCarryOutSelectionImplications(
   }
   for (int i = 0; i < selectedIndices.size; i ++) {
     for (
-      int j = 0; j < this->oppositeModulesByStructure[selectedIndices[i]].size;
-      j ++
+      int j = 0; j < this->oppositeModulesByStructure[selectedIndices[i]].
+      size; j ++
     ) {
       if (
         selection[this->oppositeModulesByStructure[selectedIndices[i]][j]] == 1
@@ -6931,8 +6935,8 @@ computePrimalModuleDecompositionHighestWeightsLastPart() {
     rank + this->cartanOfCentralizer.size
   );
   for (
-    int i = 0; i < this->characterFormat.getElement().vectorSpaceEiBasisNames.
-    size; i ++
+    int i = 0; i < this->characterFormat.getElement().vectorSpaceEiBasisNames
+    .size; i ++
   ) {
     std::stringstream currentStream;
     if (i < rank) {
@@ -7428,12 +7432,13 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
   for (int k = 0; k < this->getAmbientWeyl().rootSystem.size; k ++) {
     int counter = - 1;
     for (
-      int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size; i
-      ++
+      int i = 0; i < this->cartanSubalgebrasByComponentScaledToActByTwo.size;
+      i ++
     ) {
       for (
-        int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[i].
-        size; j ++
+        int j = 0; j < this->cartanSubalgebrasByComponentScaledToActByTwo[
+          i
+        ].size; j ++
       ) {
         counter ++;
         monomial.weightFundamentalCoordinates[counter] = (
@@ -7485,8 +7490,8 @@ bool CandidateSemisimpleSubalgebra::computeCharacter(bool allowBadCharacter) {
       return false;
     }
     for (
-      int i = 0; i < totalCharacter[currentIndex].weightFundamentalCoordinates.
-      size; i ++
+      int i = 0; i < totalCharacter[currentIndex].
+      weightFundamentalCoordinates.size; i ++
     ) {
       if (totalCharacter[currentIndex].weightFundamentalCoordinates[i] < 0) {
         return false;
@@ -7552,8 +7557,9 @@ toStringModuleDecompositionMinimalContainingRegularSubalgebras(
   << this->hCharacteristic.toString()
   << "</td>";
   this->checkIndicesMinimalContainingRootSubalgebras();
-  for (int k = 0; k < this->indicesMinimalContainingRootSubalgebras.size; k ++)
-  {
+  for (
+    int k = 0; k < this->indicesMinimalContainingRootSubalgebras.size; k ++
+  ) {
     RootSubalgebra& rootSubalgebra =
     owner.rootSubalgebras.subalgebras[
       this->indicesMinimalContainingRootSubalgebras[k]
@@ -7914,8 +7920,9 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
     output.rootSubalgebras.subalgebras.size * 2
   );
   output.checkMinimalContainingRootSubalgebras();
-  for (int i = 0; i < output.indicesSl2sContainedInRootSubalgebras.size; i ++)
-  {
+  for (
+    int i = 0; i < output.indicesSl2sContainedInRootSubalgebras.size; i ++
+  ) {
     output.indicesSl2sContainedInRootSubalgebras[i].size = 0;
   }
   ProgressReport report;
@@ -7947,10 +7954,12 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
   for (int i = 0; i < indexMap.size; i ++) {
     indexMap[permutation[i]] = i;
   }
-  for (int j = 0; j < output.indicesSl2sContainedInRootSubalgebras.size; j ++)
-  {
+  for (
+    int j = 0; j < output.indicesSl2sContainedInRootSubalgebras.size; j ++
+  ) {
     for (
-      int k = 0; k < output.indicesSl2sContainedInRootSubalgebras[j].size; k ++
+      int k = 0; k < output.indicesSl2sContainedInRootSubalgebras[j].size; k
+      ++
     ) {
       output.indicesSl2sContainedInRootSubalgebras[j][k] =
       indexMap[output.indicesSl2sContainedInRootSubalgebras[j][k]];
@@ -8093,12 +8102,14 @@ bool CandidateSemisimpleSubalgebra::checkMaximalDominance() const {
     this->getAmbientWeyl().rootsOfBorel[i];
     bool canBeRaisingReflection = true;
     for (
-      int k = 0; k < this->cartanSubalgebrasByComponentScaledToActByTwo.size &&
+      int k = 0; k < this->cartanSubalgebrasByComponentScaledToActByTwo.size
+      &&
       canBeRaisingReflection; k ++
     ) {
       for (
-        int l = 0; l < this->cartanSubalgebrasByComponentScaledToActByTwo[k].
-        size &&
+        int l = 0; l < this->cartanSubalgebrasByComponentScaledToActByTwo[
+          k
+        ].size &&
         canBeRaisingReflection; l ++
       ) {
         scalarProduct =
@@ -8811,8 +8822,8 @@ std::string NilradicalCandidate::toString(FormatExpressions* format) const {
     out << this->coneIntersection.toStringLetterFormat("w", &currentFormat);
     if (this->flagNilradicalConesStronglyIntersect) {
       for (
-        int j = 0; j < this->nonFernandoKacHighestWeightsStronglyTwoSided.size;
-        j ++
+        int j = 0; j < this->nonFernandoKacHighestWeightsStronglyTwoSided.
+        size; j ++
       ) {
         currentFormat.vectorSpaceEiBasisNames[j + this->nilradicalWeights.size]
         =
@@ -9095,8 +9106,8 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
         out << "\\begin{tabular}{l";
         for (
           int j = 0; j < currentNilradical.
-          nonFernandoKacHighestWeightVectorsStrongRelativeToSubsetWeights.size
-          +
+          nonFernandoKacHighestWeightVectorsStrongRelativeToSubsetWeights.
+          size +
           currentNilradical.nilradicalSubsetWeights.size; j ++
         ) {
           out << "cc";
@@ -9104,8 +9115,8 @@ std::string CandidateSemisimpleSubalgebra::toStringNilradicals(
         out << "}Relation&";
         for (
           int j = 0; j < currentNilradical.
-          nonFernandoKacHighestWeightVectorsStrongRelativeToSubsetWeights.size;
-          j ++
+          nonFernandoKacHighestWeightVectorsStrongRelativeToSubsetWeights.
+          size; j ++
         ) {
           Rational coefficient =
           currentNilradical.coneRelativelyStrongIntersection[

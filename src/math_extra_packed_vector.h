@@ -239,8 +239,9 @@ void AnotherWeylGroup<scalar, templateVector>::computeRho() {
   }
   global.comments << "symmetric Cartan matrix is" << "\n";
   for (int i = 0; i < this->unrationalCartanSymmetric.numberOfRows; i ++) {
-    for (int j = 0; j < this->unrationalCartanSymmetric.numberOfColumns; j ++)
-    {
+    for (
+      int j = 0; j < this->unrationalCartanSymmetric.numberOfColumns; j ++
+    ) {
       global.comments
       << this->unrationalCartanSymmetric.elements[i][j]
       << '\t';

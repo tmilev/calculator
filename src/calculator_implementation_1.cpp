@@ -1309,8 +1309,8 @@ JSData Plot::plotJSON2d(Calculator& owner) {
 void Plot::writeParameters(JSData& output, Calculator& owner) {
   List<std::string> inputBoxes;
   for (
-    int i = 0; i < owner.objectContainer.userInputTextBoxesWithValues.size(); i
-    ++
+    int i = 0; i < owner.objectContainer.userInputTextBoxesWithValues.size();
+    i ++
   ) {
     inputBoxes.addOnTop(
       owner.objectContainer.userInputTextBoxesWithValues.values[i].

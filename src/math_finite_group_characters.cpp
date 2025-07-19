@@ -379,8 +379,9 @@ decomposeThomasVersion() {
     return out;
   }
   List<List<Vector<Coefficient> > > es;
-  for (int cfi = this->ownerGroup->conjugacyClassCount() - 1; cfi >= 0; cfi --)
-  {
+  for (
+    int cfi = this->ownerGroup->conjugacyClassCount() - 1; cfi >= 0; cfi --
+  ) {
     ClassFunction<somegroup, Coefficient> cf;
     cf.makeZero(*this->ownerGroup);
     cf[cfi] = 1;
@@ -938,15 +939,16 @@ void SubgroupDataWeylGroup::ComputeTauSignature() {
   Vector<Rational> XiS;
   XiS.makeZero(this->subgroupData.subgroupContent->conjugacyClasses.size);
   for (
-    int i = 0; i < this->subgroupData.groupContent->conjugacyClasses.size; i ++
+    int i = 0; i < this->subgroupData.groupContent->conjugacyClasses.size; i
+    ++
   ) {
     ClassFunction<FiniteGroup<ElementWeylGroup>, Rational>& XiG =
     this->weylData->group.characterTable[i];
     // global.Comments << "Restricting character: " << Xip.toString() <<
     // "<br>";
     for (
-      int j = 0; j < this->subgroupData.subgroupContent->conjugacyClasses.size;
-      j ++
+      int j = 0; j < this->subgroupData.subgroupContent->conjugacyClasses.
+      size; j ++
     ) {
       XiS[j] = XiG[this->subgroupData.ccRepresentativesPreimages[j]];
     }
@@ -975,8 +977,8 @@ void SubgroupDataRootReflections::computeCCSizesRepresentativesPreimages() {
       this->subgroupData.groupContent->conjugacyClasses.size
     );
     for (
-      int i = 0; i < this->subgroupData.subgroupContent->conjugacyClasses.size;
-      i ++
+      int i = 0; i < this->subgroupData.subgroupContent->conjugacyClasses.
+      size; i ++
     ) {
       this->subgroupData.subgroupContent->conjugacyClasses[i].
       flagRepresentativeComputed =

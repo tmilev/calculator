@@ -1433,8 +1433,9 @@ void WeylGroupAutomorphisms::actOnStandard(
 ) const {
   this->checkInitialization();
   outputVector = inputVector;
-  for (int i = groupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --)
-  {
+  for (
+    int i = groupElement.generatorsLastAppliedFirst.size - 1; i >= 0; i --
+  ) {
     SimpleReflectionOrOuterAutomorphism& currentGenerator =
     groupElement.generatorsLastAppliedFirst[i];
     if (!currentGenerator.flagIsOuter) {

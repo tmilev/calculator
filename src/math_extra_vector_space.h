@@ -155,7 +155,8 @@ bool VectorSpace<Coefficient>::addVectorDestructively(Vector<Coefficient>& v) {
     }
     int j = i;
     for (
-      ;(j < fastbasis.numberOfColumns) && (fastbasis.elements[i][j] == 0); j ++
+      ;(j < fastbasis.numberOfColumns) && (fastbasis.elements[i][j] == 0); j
+      ++
     ) {
       if (jj < j) {
         if (fastbasis.actualNumberOfRows >= fastbasis.numberOfRows + 1) {

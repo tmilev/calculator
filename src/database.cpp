@@ -1081,7 +1081,8 @@ bool QueryResultOptions::fromJSON(
     this->fieldsProjectedAway.addOnTop(field.stringValue);
   }
   for (
-    JSData& field : inputCopy[DatabaseStrings::requestProjectInto].listObjects
+    JSData& field :
+    inputCopy[DatabaseStrings::requestProjectInto].listObjects
   ) {
     if (field.stringValue == "") {
       if (commentsOnFailure != nullptr) {

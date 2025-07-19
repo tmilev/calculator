@@ -1230,15 +1230,19 @@ bool CodeFormatter::Element::computeIndentationControlWantsCodeBlock() {
     this->computeIndentationBasic(0);
     return true;
   }
-  CodeFormatter::Element & keywordAndCondition = this->children[0];
-  keywordAndCondition.maximumDesiredLineLengthOverride =
-  this->owner->maximumDesiredLineLength - 1;
-  CodeFormatter::Element& codeBlock = this->children[1];
-  keywordAndCondition.indentationLevel = this->indentationLevel;
-  keywordAndCondition.computeIndentation();
-  codeBlock.indentationLevel = this->indentationLevel;
-  codeBlock.leftMostAtomUnderMe()->whiteSpaceBefore = 1;
-  this->children[1].computeIndentation();
+  this->maximumDesiredLineLengthOverride =
+  this->owner->maximumDesiredLineLength - 2;
+  CodeFormatter::Element& keyword = this->children[0];
+  CodeFormatter::Element& condition = this->children[1];
+  keyword.maximumDesiredLineLengthOverride =
+  this->maximumDesiredLineLengthOverride;
+  condition.maximumDesiredLineLengthOverride =
+  this->maximumDesiredLineLengthOverride;
+  keyword.indentationLevel = this->indentationLevel;
+  keyword.computeIndentation();
+  condition.indentationLevel = this->indentationLevel;
+  condition.leftMostAtomUnderMe()->whiteSpaceBefore = 1;
+  condition.computeIndentation();
   return true;
 }
 
@@ -1464,10 +1468,10 @@ bool CodeFormatter::Element::computeIndentationCommand() {
     return true;
   }
   // We have a semicolon that is standing on a new line alone.
+  int updatedMaximumLength = this->maximumLineLength() - 1;
   for (int i = 0; i < this->children.size - 1; i ++) {
     this->children[i].indentationLevel = this->indentationLevel;
-    this->children[i].maximumDesiredLineLengthOverride =
-    this->owner->maximumDesiredLineLength - 1;
+    this->children[i].maximumDesiredLineLengthOverride = updatedMaximumLength;
     this->children[i].computeIndentation();
   }
   if (this->children.size > 1) {
@@ -2020,7 +2024,8 @@ bool CodeFormatter::formatCPPSourceCode(
   } else {
     out << "FAILED_TO_PARSE;\n";
     for (
-      int i = this->dummyElements; i < this->processor.code.children.size; i ++
+      int i = this->dummyElements; i < this->processor.code.children.size; i
+      ++
     ) {
       this->processor.code.children[i].toStringContentOnly(out);
       out << "\n";

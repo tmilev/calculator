@@ -379,8 +379,8 @@ public:
     }
     int result = 0;
     for (
-      int i = 0; i < this->highestWeightFundamentalCoordinatesBaseField.size; i
-      ++
+      int i = 0; i < this->highestWeightFundamentalCoordinatesBaseField.size;
+      i ++
     ) {
       result =
       MathRoutines::maximum(
@@ -1788,7 +1788,8 @@ void ModuleSSalgebra<Coefficient>::getElementsNilradical(
   outputListOfGenerators->setSize(0);
   outputListOfGenerators->reserve(ownerSS.getNumberOfPositiveRoots());
   for (
-    int i = beginning; i < beginning + ownerSS.getNumberOfPositiveRoots(); i ++
+    int i = beginning; i < beginning + ownerSS.getNumberOfPositiveRoots(); i
+    ++
   ) {
     if (this->isNotInLevi(i)) {
       outputListOfGenerators->addOnTop(i);

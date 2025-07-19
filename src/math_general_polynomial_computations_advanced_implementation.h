@@ -3213,7 +3213,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     }
   }
   for (
-    int i = 0; i < this->intermediateHighlightedMons[remainderIndex].size; i ++
+    int i = 0; i < this->intermediateHighlightedMons[remainderIndex].size; i
+    ++
   ) {
     int monomialIndex =
     this->allMonomials.getIndex(
@@ -3385,7 +3386,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     );
   }
   for (
-    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i
+    ++
   ) {
     this->fcAnswerMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(
@@ -3405,7 +3407,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     ].addOnTop(currentSlideNumber);
   }
   for (
-    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i
+    ++
   ) {
     this->highlightMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(
@@ -3431,7 +3434,8 @@ void PolynomialDivisionReport<Coefficient>::computeHighLightsFromRemainder(
     ].addOnTop(currentSlideNumber);
   }
   for (
-    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i ++
+    int i = 0; i < this->intermediateSubtractands[remainderIndex].size(); i
+    ++
   ) {
     this->highlightMonsSubtrahends[remainderIndex][
       this->allMonomials.getIndex(

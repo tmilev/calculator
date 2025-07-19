@@ -249,8 +249,9 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
     return;
   }
   int succeedingIndex = 0;
-  for (int i = this->waypoints.size - 1; i >= indexMinimalScalarProduct; i --)
-  {
+  for (
+    int i = this->waypoints.size - 1; i >= indexMinimalScalarProduct; i --
+  ) {
     Rational scalar =
     weylGroup.rootScalarCartanRoot(alphaScaled, this->waypoints[i]);
     if (scalar >= minimalScalarProduct + 1) {

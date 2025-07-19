@@ -1395,8 +1395,8 @@ computeHomomorphismFromImagesSimpleChevalleyGenerators(
       this->domainAlgebra().getWeightOfGenerator(index);
       // Looking for elements left, right such that [left, right] = current.
       for (
-        int leftIndex = 0; leftIndex < nonComputed.numberOfElements; leftIndex
-        ++
+        int leftIndex = 0; leftIndex < nonComputed.numberOfElements;
+        leftIndex ++
       ) {
         if (nonComputed.selected[leftIndex]) {
           // The candidate for left is not computed yet.
@@ -1661,8 +1661,9 @@ std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
     out << "<br>";
   }
   FormatExpressions* format = &global.defaultFormat.getElement();
-  for (int i = 0; i < this->imagesNegativeSimpleChevalleyGenerators.size; i ++)
-  {
+  for (
+    int i = 0; i < this->imagesNegativeSimpleChevalleyGenerators.size; i ++
+  ) {
     ChevalleyGenerator preimage;
     Vector<Rational> simpleRoot;
     simpleRoot.makeEi(this->domain->getRank(), i);
@@ -1684,8 +1685,9 @@ std::string HomomorphismSemisimpleLieAlgebra::toString(bool useHtml) {
   if (useHtml) {
     out << "<br>";
   }
-  for (int i = 0; i < this->imagesPositiveSimpleChevalleyGenerators.size; i ++)
-  {
+  for (
+    int i = 0; i < this->imagesPositiveSimpleChevalleyGenerators.size; i ++
+  ) {
     ChevalleyGenerator preimage;
     Vector<Rational> simpleRoot;
     simpleRoot.makeEi(this->domain->getRank(), i);

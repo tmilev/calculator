@@ -119,8 +119,9 @@ void Polynomial<Rational>::getValuesLagrangeInterpolands(
     for (int j = 0; j < pointsOfInterpolation.size; j ++) {
       currentInterpoland[j] = (i == j) ? 1 : 0;
     }
-    for (int j = pointsOfInterpolation.size; j < pointsOfEvaluation.size; j ++)
-    {
+    for (
+      int j = pointsOfInterpolation.size; j < pointsOfEvaluation.size; j ++
+    ) {
       currentInterpoland[j] = 1;
       for (int k = 0; k < pointsOfInterpolation.size; k ++) {
         if (i == k) {

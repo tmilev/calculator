@@ -49,7 +49,8 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
         << dimension
         << ": ";
         for (
-          int colCounter = 0; colCounter < this->numberOfColumns; colCounter ++
+          int colCounter = 0; colCounter < this->numberOfColumns; colCounter
+          ++
         ) {
           reportStream << (*this)(i, colCounter).toString();
           if (colCounter != this->numberOfColumns - 1) {

@@ -1150,8 +1150,8 @@ bool RootSubalgebra::attemptTheTripleTrickWRTSubalgebra(
   int rank = this->getOwnerLieAlgebra().getRank();
   DynkinDiagramRootSubalgebra diagram;
   for (
-    int i = 2; i <= MathRoutines::maximum(highestWeightsAllowed.size, rank); i
-    ++
+    int i = 2; i <= MathRoutines::maximum(highestWeightsAllowed.size, rank);
+    i ++
   ) {
     selection.initializeMaximumMultiplicity(highestWeightsAllowed.size, i);
     LargeInteger numberOfElements =
@@ -2329,8 +2329,8 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   );
   int tempSize = 0;
   for (
-    int i = 0; i < domainRootSubalgebra.centralizerDiagram.sameTypeComponents.
-    size; i ++
+    int i = 0; i < domainRootSubalgebra.centralizerDiagram.sameTypeComponents
+    .size; i ++
   ) {
     tempList[i] =
     domainRootSubalgebra.centralizerDiagram.sameTypeComponents[i].size;
@@ -2932,8 +2932,8 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     this->owner->subalgebras[this->indexInducingSubalgebra].
     potentialExtensionCartanSymmetrics;
     for (
-      int i = 0; i < extensionRootPermutations.size && goodPermutation == - 1;
-      i ++
+      int i = 0; i < extensionRootPermutations.size &&
+      goodPermutation == - 1; i ++
     ) {
       this->scalarProdMatrixOrdered.makeZeroMatrix(
         this->simpleRootsReductiveSubalgebra.size
@@ -3452,8 +3452,8 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
     if (report2.tickAndWantReport()) {
       std::stringstream reportStream;
       for (
-        int j = 0; j < this->subalgebras[i].potentialExtensionDynkinTypes.size;
-        j ++
+        int j = 0; j < this->subalgebras[i].potentialExtensionDynkinTypes.
+        size; j ++
       ) {
         reportStream
         << this->subalgebras[i].potentialExtensionDynkinTypes[j].toString();
@@ -3943,8 +3943,8 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
         out << "\"" << currentSubalgebra.dynkinType.toString() << "\", ";
         out << "[";
         for (
-          int j = 0; j < currentSubalgebra.simpleRootsReductiveSubalgebra.size;
-          j ++
+          int j = 0; j < currentSubalgebra.simpleRootsReductiveSubalgebra.
+          size; j ++
         ) {
           int index =
           GAPPosRootSystem.getIndex(
@@ -3991,13 +3991,14 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
       out << "\"" << currentSubalgebra.dynkinType.toString() << "\", ";
       out << "[";
       for (
-        int j = 0; j < currentSubalgebra.simpleRootsReductiveSubalgebra.size; j
-        ++
+        int j = 0; j < currentSubalgebra.simpleRootsReductiveSubalgebra.size;
+        j ++
       ) {
         out << "[";
         for (
-          int k = 0; k < currentSubalgebra.simpleRootsReductiveSubalgebra[j].
-          size; k ++
+          int k = 0; k < currentSubalgebra.simpleRootsReductiveSubalgebra[
+            j
+          ].size; k ++
         ) {
           out
           << currentSubalgebra.simpleRootsReductiveSubalgebra[j][k].toString();
@@ -4053,8 +4054,9 @@ std::string SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras(
   STACK_TRACE("SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras");
   std::stringstream out;
   RootSubalgebras& rootSubalgebras = this->container->rootSubalgebras;
-  for (int j = 0; j < this->indicesMinimalContainingRootSubalgebras.size; j ++)
-  {
+  for (
+    int j = 0; j < this->indicesMinimalContainingRootSubalgebras.size; j ++
+  ) {
     int rootSubalgebraIndex =
     this->indicesMinimalContainingRootSubalgebras[j];
     RootSubalgebra& currentRootSubalgebra =
@@ -4220,8 +4222,9 @@ computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
   bufferSubalgebras[recursionDepth - 1].generatorsK;
   bufferSubalgebras[recursionDepth].owner = this;
   ProgressReport report;
-  for (int k = 0; k < bufferSubalgebras[recursionDepth - 1].modules.size; k ++)
-  {
+  for (
+    int k = 0; k < bufferSubalgebras[recursionDepth - 1].modules.size; k ++
+  ) {
     if (
       bufferSubalgebras[recursionDepth - 1].highestWeightsPrimalSimple[k].
       isPositive()
@@ -4428,8 +4431,9 @@ approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(
   if (!this->flagUsingActionsNormalizerCentralizerNilradical) {
     return true;
   }
-  for (int i = 0; i < this->actionsNormalizerCentralizerNilradical.size; i ++)
-  {
+  for (
+    int i = 0; i < this->actionsNormalizerCentralizerNilradical.size; i ++
+  ) {
     if (
       !this->approveSelAgainstOneGenerator(
         this->actionsNormalizerCentralizerNilradical[i], targetSelection
@@ -4522,8 +4526,8 @@ void RootSubalgebras::toStringConeConditionNotSatisfying(
       RootSubalgebra& currentRootSubalgebra = this->subalgebras[i];
       roots.size = 0;
       for (
-        int j = 0; j < currentRootSubalgebra.positiveRootsReductiveSubalgebra.
-        size; j ++
+        int j = 0; j < currentRootSubalgebra.positiveRootsReductiveSubalgebra
+        .size; j ++
       ) {
         roots.addOnTop(
           currentRootSubalgebra.positiveRootsReductiveSubalgebra[j]
@@ -5165,8 +5169,8 @@ void ConeRelation::computeConnectedComponents(
   for (int i = 0; i < input.size; i ++) {
     output[i].size = 0;
     for (
-      int j = 0; j < owner.dynkinDiagram.simpleBasesConnectedComponents.size; j
-      ++
+      int j = 0; j < owner.dynkinDiagram.simpleBasesConnectedComponents.size;
+      j ++
     ) {
       if (
         owner.dynkinDiagram.simpleBasesConnectedComponents[j].
@@ -5385,8 +5389,8 @@ void ConeRelation::computeKComponents(
   for (int i = 0; i < input.size; i ++) {
     output[i].size = 0;
     for (
-      int j = 0; j < owner.dynkinDiagram.simpleBasesConnectedComponents.size; j
-      ++
+      int j = 0; j < owner.dynkinDiagram.simpleBasesConnectedComponents.size;
+      j ++
     ) {
       if (
         owner.dynkinDiagram.simpleBasesConnectedComponents[j].
@@ -5405,8 +5409,9 @@ void ConeRelation::computeDiagramRelationsAndK(RootSubalgebra& owner) {
   roots.size = 0;
   roots.reserve(owner.getAmbientWeyl().cartanSymmetric.numberOfRows * 2);
   roots.addListOnTop(owner.simpleRootsReductiveSubalgebra);
-  for (int i = 0; i < this->diagram.simpleBasesConnectedComponents.size; i ++)
-  {
+  for (
+    int i = 0; i < this->diagram.simpleBasesConnectedComponents.size; i ++
+  ) {
     roots.addListOnTop(this->diagram.simpleBasesConnectedComponents[i]);
   }
   this->diagramRelationAndK.computeDiagramTypeModifyInput(

@@ -962,8 +962,9 @@ multiplyLittlemannRootOperatorByLakshmibaiSeshadriPath(
   MonomialTensor<int, HashFunctions::hashFunction> littlemannRootOperator;
   littlemannRootOperator =
   output.getValue<MonomialTensor<int, HashFunctions::hashFunction> >();
-  for (int i = littlemannRootOperator.generatorsIndices.size - 1; i >= 0; i --)
-  {
+  for (
+    int i = littlemannRootOperator.generatorsIndices.size - 1; i >= 0; i --
+  ) {
     if (
       littlemannRootOperator.generatorsIndices[i] == 0 ||
       littlemannRootOperator.generatorsIndices[i] < - weylGroup.getDimension()

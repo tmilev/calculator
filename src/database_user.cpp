@@ -129,8 +129,9 @@ UserCalculator::~UserCalculator() {
   for (unsigned i = 0; i < this->enteredPassword.size(); i ++) {
     this->enteredPassword[i] = ' ';
   }
-  for (unsigned i = 0; i < this->usernameHashedPlusPassWordHashed.size(); i ++)
-  {
+  for (
+    unsigned i = 0; i < this->usernameHashedPlusPassWordHashed.size(); i ++
+  ) {
     this->usernameHashedPlusPassWordHashed[i] = ' ';
   }
   for (unsigned i = 0; i < this->enteredHashedSaltedPassword.size(); i ++) {

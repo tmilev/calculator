@@ -1033,8 +1033,9 @@ bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
   minusMinimalPolynomialMinusMaximalMonomial /= leadingCoefficientModified;
   minusMinimalPolynomialMinusMaximalMonomial *= - 1;
   MatrixTensor<Rational> currentCoefficientMatrixForm;
-  for (int i = 0; i < minusMinimalPolynomialMinusMaximalMonomial.size(); i ++)
-  {
+  for (
+    int i = 0; i < minusMinimalPolynomialMinusMaximalMonomial.size(); i ++
+  ) {
     AlgebraicNumber& currentCoefficient =
     minusMinimalPolynomialMinusMaximalMonomial.coefficients[i];
     const MonomialPolynomial& monomial =

@@ -690,8 +690,8 @@ void SlTwoInSlN::climbUpFromVector(
   outputLastNonZero = input;
   largestPowerNotKillingInput = 0;
   for (
-    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, matrix); !
-    matrix.isEqualToZero(); Matrix<Rational>::lieBracket(
+    Matrix<Rational>::lieBracket(this->eElement, outputLastNonZero, matrix);
+    !matrix.isEqualToZero(); Matrix<Rational>::lieBracket(
       this->eElement, outputLastNonZero, matrix
     )
   ) {
@@ -1084,8 +1084,9 @@ bool MonomialPolynomial::operator>(const MonomialPolynomial& other) const {
 }
 
 bool MonomialPolynomial::isDivisibleBy(const MonomialPolynomial& other) const {
-  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --)
-  {
+  for (
+    int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --
+  ) {
     if (other.monomialBody[i] > 0) {
       return false;
     }
@@ -1101,14 +1102,16 @@ bool MonomialPolynomial::isDivisibleBy(const MonomialPolynomial& other) const {
 }
 
 bool MonomialPolynomial::operator==(const MonomialPolynomial& other) const {
-  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --)
-  {
+  for (
+    int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --
+  ) {
     if (other.monomialBody[i] != 0) {
       return false;
     }
   }
-  for (int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --)
-  {
+  for (
+    int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --
+  ) {
     if (this->monomialBody[i] != 0) {
       return false;
     }
@@ -1157,8 +1160,9 @@ bool MonomialPolynomial::greaterThan_totalDegree_leftLargerWins(
 bool MonomialPolynomial::greaterThan_rightLargerWins(
   const MonomialPolynomial& other
 ) const {
-  for (int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --)
-  {
+  for (
+    int i = other.monomialBody.size - 1; i >= this->monomialBody.size; i --
+  ) {
     if (other.monomialBody[i] > 0) {
       return false;
     }
@@ -1166,8 +1170,9 @@ bool MonomialPolynomial::greaterThan_rightLargerWins(
       return true;
     }
   }
-  for (int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --)
-  {
+  for (
+    int i = this->monomialBody.size - 1; i >= other.monomialBody.size; i --
+  ) {
     if (this->monomialBody[i] > 0) {
       return true;
     }

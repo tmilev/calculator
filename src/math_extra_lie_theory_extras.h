@@ -1641,8 +1641,8 @@ simplifyAccumulateInOutputNoOutputInit(
       reductionOccurred = true;
     } else {
       for (
-        int i = 0; i < output[indexlowestNonSimplified].generatorsIndices.size
-        -
+        int i = 0; i < output[indexlowestNonSimplified].generatorsIndices.
+        size -
         1; i ++
       ) {
         if (
@@ -2451,8 +2451,8 @@ splitCharacterOverReductiveSubalgebra(
       remainingCharDominantLevI[i].weightFundamentalCoordinates
     );
     for (
-      int j = 0; j < weylGroupFiniteDimensionalSmall.ambientWeyl->getDimension(
-      ); j ++
+      int j = 0; j < weylGroupFiniteDimensionalSmall.ambientWeyl->
+      getDimension(); j ++
     ) {
       fundamentalCoordinatesSmaller[j] =
       weylGroup.rootScalarCartanRoot(
@@ -2476,7 +2476,8 @@ splitCharacterOverReductiveSubalgebra(
     for (bool Found = true; Found;) {
       Found = false;
       for (
-        int i = 0; i < weylGroupFiniteDimensionalSmall.rootsOfBorel.size; i ++
+        int i = 0; i < weylGroupFiniteDimensionalSmall.rootsOfBorel.size; i
+        ++
       ) {
         workingMonomial = localHighest;
         simpleGeneratorBaseField =

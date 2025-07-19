@@ -1110,7 +1110,8 @@ SemisimpleLieAlgebra*& Expression::getValueNonConst() const {
     << global.fatal;
   }
   for (
-    int i = this->owner->objectContainer.semisimpleLieAlgebraPointers.size; i <
+    int i = this->owner->objectContainer.semisimpleLieAlgebraPointers.size; i
+    <
     this->owner->objectContainer.semisimpleLieAlgebras.size(); i ++
   ) {
     this->owner->objectContainer.semisimpleLieAlgebraPointers.addOnTop(

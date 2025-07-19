@@ -1583,8 +1583,8 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(
       this->irreducibleRepresentations[i].character.data.size
     );
     for (
-      int j = 0; j < this->irreducibleRepresentations[i].character.data.size; j
-      ++
+      int j = 0; j < this->irreducibleRepresentations[i].character.data.size;
+      j ++
     ) {
       values[i][j] =
       irreducibleRepresentations[i].character.data[j].toString();
@@ -1937,8 +1937,9 @@ bool GroupRepresentation<someGroup, Coefficient>::verifyRepresentation() {
         }
         Matrix<Rational> Mi = M1;
         for (
-          int n = 1; n < this->ownerGroup->generatorCommutationRelations(i, j);
-          n ++
+          int n = 1; n < this->ownerGroup->generatorCommutationRelations(
+            i, j
+          ); n ++
         ) {
           Mi *= M1;
         }

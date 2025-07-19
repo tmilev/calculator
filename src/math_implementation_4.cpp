@@ -2477,8 +2477,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
   << "\n";
   this->preimageWeylChamberSmallerAlgebra.walls =
   this->weylChamberSmallerAlgebra.walls;
-  for (int i = 0; i < this->preimageWeylChamberLargerAlgebra.walls.size; i ++)
-  {
+  for (
+    int i = 0; i < this->preimageWeylChamberLargerAlgebra.walls.size; i ++
+  ) {
     root.makeZero(
       input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1
     );
@@ -2530,8 +2531,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(
     &global.defaultFormat.getElement()
   )
   << "\n";
-  for (int i = 0; i < this->preimageWeylChamberSmallerAlgebra.walls.size; i ++)
-  {
+  for (
+    int i = 0; i < this->preimageWeylChamberSmallerAlgebra.walls.size; i ++
+  ) {
     root.makeZero(
       input.coDomainAlgebra().getRank() + input.domainAlgebra().getRank() + 1
     );
@@ -2934,8 +2936,9 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
       currentProjectiveCone
     );
   }
-  for (int i = 0; i < this->preimageWeylChamberSmallerAlgebra.walls.size; i ++)
-  {
+  for (
+    int i = 0; i < this->preimageWeylChamberSmallerAlgebra.walls.size; i ++
+  ) {
     projectivizedChamberFinal.splittingNormals.addOnTop(
       this->preimageWeylChamberSmallerAlgebra.walls[i].normal
     );
@@ -2970,11 +2973,12 @@ void GeneralizedVermaModuleCharacters::transformToWeylProjectiveStep2() {
   report.report(out.str());
   this->projectivizedChamber = projectivizedChamberFinal;
   for (int k = 1; k < this->linearOperators.size; k ++) {
-    for (int i = 0; i < this->smallerAlgebraChamber.refinedCones.size(); i ++)
-    {
+    for (
+      int i = 0; i < this->smallerAlgebraChamber.refinedCones.size(); i ++
+    ) {
       for (
-        int j = 0; j < this->smallerAlgebraChamber.refinedCones[i].walls.size;
-        j ++
+        int j = 0; j < this->smallerAlgebraChamber.refinedCones[i].walls.
+        size; j ++
       ) {
         this->transformToWeylProjective(
           k,

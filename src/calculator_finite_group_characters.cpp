@@ -305,8 +305,9 @@ decomposeTodorsVersion(
   checkInitializationFiniteDimensionalRepresentationComputation();
   outputIrrepMults.makeZero();
   List<GroupRepresentation<somegroup, Coefficient> > appendOnlyIrrepsList;
-  for (int i = 0; i < this->ownerGroup->irreducibleRepresentations.size; i ++)
-  {
+  for (
+    int i = 0; i < this->ownerGroup->irreducibleRepresentations.size; i ++
+  ) {
     appendOnlyIrrepsList.addOnTop(
       this->ownerGroup->irreducibleRepresentations[i]
     );
@@ -433,8 +434,9 @@ void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation
       inclusionMap.generatorImages[i].k.toggleBit(i + 1);
     }
     int oneortwo = (inclusionMap.generatorImages.size + 1) % 2;
-    for (int i = 0; i < inclusionMap.generatorImages.size - 1 - oneortwo; i ++)
-    {
+    for (
+      int i = 0; i < inclusionMap.generatorImages.size - 1 - oneortwo; i ++
+    ) {
       inclusionMap.generatorImages.lastObject()->k.toggleBit(i);
     }
     FiniteGroup<ElementHyperoctahedralGroupR2> imG;
@@ -916,7 +918,8 @@ bool CalculatorFunctionsWeylGroup::weylOrbit(
       standardElement.makeOne(*semisimpleLieAlgebra.content);
       bool isGood = true;
       for (
-        int j = orbitGeneratingSet[i].generatorsLastAppliedFirst.size - 1; j >=
+        int j = orbitGeneratingSet[i].generatorsLastAppliedFirst.size - 1; j
+        >=
         0; j --
       ) {
         int simpleIndex =
@@ -1469,7 +1472,8 @@ std::string WeylGroupData::toStringSignSignatureRootSubsystem(
     }
   }
   for (
-    int i = 0; i < pseudoSignSig.size && !hasRepeatingPseudoParabolicSigs; i ++
+    int i = 0; i < pseudoSignSig.size && !hasRepeatingPseudoParabolicSigs; i
+    ++
   ) {
     for (
       int j = i + 1; j < pseudoSignSig.size &&

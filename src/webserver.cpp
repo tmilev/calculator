@@ -1231,8 +1231,8 @@ void WebWorker::sanitizeVirtualFileName() {
   resultName.reserve(this->virtualFileName.size());
   bool foundslash = false;
   for (
-    signed i = static_cast<signed>(this->virtualFileName.size()) - 1; i >= 0; i
-    --
+    signed i = static_cast<signed>(this->virtualFileName.size()) - 1; i >= 0;
+    i --
   ) {
     unsigned k = static_cast<unsigned>(i);
     bool isOK = true;
@@ -4020,8 +4020,9 @@ int WebServer::run() {
   for (int i = 0; i < this->maximumTotalUsedWorkers; i ++) {
     this->allWorkers[i].flagInUse = false;
   }
-  while (this->runOnce(listener, previousReportedNumberOfSelects, returnCode))
-  {}
+  while (
+    this->runOnce(listener, previousReportedNumberOfSelects, returnCode)
+  ) {}
   return 0;
 }
 
@@ -4689,8 +4690,8 @@ void WebServer::initializeMainAddresses() {
   this->addressStartsSentWithCacheMaxAge.addOnTop("/html-common/");
   for (
     int i = 0; i <
-    FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size; i
-    ++
+    FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size;
+    i ++
   ) {
     this->addressStartsSentWithCacheMaxAge.addOnTop(
       FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash()[i] +

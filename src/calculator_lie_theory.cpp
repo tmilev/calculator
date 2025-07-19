@@ -5770,7 +5770,8 @@ getPositiveNStringSuchThatWeightMinusNAlphaIsWeight(
   for (
     ; this->monomials.contains(currentWeight);
     result ++,
-    currentWeight.weightFundamentalCoordinates -= alphaInFundamentalCoordinates
+    currentWeight.weightFundamentalCoordinates -=
+    alphaInFundamentalCoordinates
   ) {}
   return result;
 }

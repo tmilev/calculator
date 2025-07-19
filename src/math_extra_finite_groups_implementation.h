@@ -526,8 +526,8 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(
           int totalClassesSameCharPoly = 0;
           for (
             int j = 0; j < this->
-            characterPolynomialsConjugacyClassesStandardRepresentation.size; j
-            ++
+            characterPolynomialsConjugacyClassesStandardRepresentation.size;
+            j ++
           ) {
             if (
               this->characterPolynomialsConjugacyClassesStandardRepresentation[
@@ -545,8 +545,8 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(
             << " conjugacy classes, numbers: ";
             for (
               int j = 0; j < this->
-              characterPolynomialsConjugacyClassesStandardRepresentation.size;
-              j ++
+              characterPolynomialsConjugacyClassesStandardRepresentation.
+              size; j ++
             ) {
               if (
                 this->
@@ -1880,8 +1880,8 @@ classFunctionMatrix(
         this->generators[0].numberOfColumns
       );
       for (
-        int icci = 0; icci < this->ownerGroup->conjugacyClasses[cci].size; icci
-        ++
+        int icci = 0; icci < this->ownerGroup->conjugacyClasses[cci].size;
+        icci ++
       ) {
         this->classFunctionMatrices[cci] +=
         this->getMatrixElement(

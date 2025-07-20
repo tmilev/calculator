@@ -1,11 +1,7 @@
-#include "html_routines.h"
-#include "math_extra_algebraic_numbers.h"
 #include "math_general.h"
 #include "math_general_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 #include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks web assembly build.
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
-#include "math_subsets_selections.h"
-#include "progress_report.h"
 
 const int ElementZmodP::maximumModulusForUserFacingPolynomialDivision = 10000;
 

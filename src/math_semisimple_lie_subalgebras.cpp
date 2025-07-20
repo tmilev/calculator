@@ -7885,7 +7885,7 @@ void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
   STACK_TRACE("SlTwoSubalgebras::reset");
   this->indicesSl2sContainedInRootSubalgebras.setSize(0);
   this->indicesSl2DecompositionFormulas.setSize(0);
-  this->unsuitableHCharacteristics.setSize(0);
+  this->unsuitableHs.setSize(0);
   this->indexZeroWeight = - 1;
   this->owner = &inputOwner;
   this->rootSubalgebras.owner = &inputOwner;

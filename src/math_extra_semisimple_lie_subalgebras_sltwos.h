@@ -22,6 +22,7 @@ public:
   AlgebraicClosureRationals* algebraicClosure;
   // Initialized.
   Rational lengthHSquared;
+  Vector<Rational> candidateH;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> hAlgebraic;
   Vectors<Rational> participatingPositiveRoots;
   Vectors<Rational> rootsWithScalar2WithH;
@@ -54,9 +55,6 @@ public:
   // Here, we recall that the element H is known and computed by algorithms
   // following Dynkin.
   ElementSemisimpleLieAlgebra<Polynomial<Rational> > fArbitrary;
-  // A list of desired scalar product of the h element with the simple roots.
-  // The terminology comes from Dynkin's paper on semisimple Lie subalgebras.
-  Vector<Rational> hCharacteristic;
   // The matrix of the linear system given by systemToSolveArbitrary.
   Matrix<Rational> systemArbitraryMatrix;
   // The column-vector of the linear system given by systemToSolveArbitrary.
@@ -181,9 +179,8 @@ public:
   DynkinDiagramRootSubalgebra diagramM;
   int dynkinsEpsilon;
   bool flagDeallocated;
-  // Copied from the candidate from which the sl(2) was computed.
-  // See the same-named variables in the candidate class for
-  // more detailed documentation.
+  // A list of desired scalar product of the h element with the simple roots.
+  // The terminology comes from Dynkin's paper on semisimple Lie subalgebras.
   Vector<Rational> hCharacteristic;
   Vectors<Rational> preferredAmbientSimpleBasis;
   Matrix<Rational> systemArbitraryMatrix;
@@ -301,14 +298,6 @@ public:
   void computeModuleDecompositionsitionOfMinimalContainingRegularSAs(
     SlTwoSubalgebras& owner
   );
-  // The root/regular subalgebra that contains the sl(2).
-  // The containment is mimimal in that there exists no
-  // "middleman" container root/regular subalgebra
-  // that contains the sl(2) and is inside the given container.
-  void initializeContainerSubalgebras(
-    RootSubalgebra& currentMinimalRegularContainer,
-    int indexCurrentMinimalRegularContainer
-  );
   void makeReportPrecomputations(
     RootSubalgebra& minimalContainingRegularSubalgebra
   );
@@ -325,7 +314,7 @@ public:
   HashedList<SlTwoSubalgebra> allSubalgebras;
   List<List<int> > indicesSl2sContainedInRootSubalgebras;
   List<int> indicesSl2DecompositionFormulas;
-  Vectors<Rational> unsuitableHCharacteristics;
+  Vectors<Rational> unsuitableHs;
   int indexZeroWeight;
   RootSubalgebras rootSubalgebras;
   ~SlTwoSubalgebras() {}
@@ -353,9 +342,6 @@ public:
   void computeModuleDecompositionsitionsOfAmbientLieAlgebra();
   void reset(SemisimpleLieAlgebra& inputOwners);
   bool containsSl2WithGivenH(Vector<Rational>& elementH, int* outputIndex);
-  bool containsSl2WithGivenHCharacteristic(
-    Vector<Rational>& hCharacteristic, int* outputIndex
-  );
   void writeHTML(FormatExpressions* format = nullptr);
   std::string toString(FormatExpressions* format = nullptr);
   std::string toStringSummary(FormatExpressions* format = nullptr);

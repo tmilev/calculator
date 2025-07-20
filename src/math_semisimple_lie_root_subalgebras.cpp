@@ -2666,11 +2666,8 @@ void RootSubalgebra::addSlTwoSubalgebraIfNew(
 ) {
   STACK_TRACE("RootSubalgebra::addSlTwoSubalgebraIfNew");
   int indexIsomorphicSl2 = - 1;
-  if (
-    !output.containsSl2WithGivenHCharacteristic(
-      candidate.hCharacteristic, &indexIsomorphicSl2
-    )
-  ) {
+  if (!output.containsSl2WithGivenH(candidate.candidateH, &indexIsomorphicSl2))
+  {
     SlTwoSubalgebra newSubalgebra;
     newSubalgebra.fromSlTwoSubalgebraCandidate(candidate);
     newSubalgebra.makeReportPrecomputations(
@@ -3148,7 +3145,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   candidate.container = &output;
   candidate.owner = &this->getOwnerLieAlgebra();
   SemisimpleLieAlgebra& lieAlgebra = this->getOwnerLieAlgebra();
-  DynkinDiagramRootSubalgebra diagramZeroCharRoots;
+  DynkinDiagramRootSubalgebra diagramZeroCharacteristicRoots;
   for (
     int cycleCounter = 0; cycleCounter < numberOfCycles;
     cycleCounter ++,
@@ -3157,7 +3154,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     this->simpleRootsReductiveSubalgebra.subSelection(
       selectionRootsWithZeroCharacteristic, rootsZeroChar
     );
-    diagramZeroCharRoots.computeDiagramTypeModifyInput(
+    diagramZeroCharacteristicRoots.computeDiagramTypeModifyInput(
       rootsZeroChar, this->getAmbientWeyl()
     );
     int slack = 0;
@@ -3175,7 +3172,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
       }
     }
     int dynkinEpsilon =
-    diagramZeroCharRoots.numberRootsGeneratedByDiagram() +
+    diagramZeroCharacteristicRoots.numberRootsGeneratedByDiagram() +
     relativeDimension - slack;
     // If Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2)
     // subalgebra.
@@ -3197,36 +3194,35 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     invertedRelativeKillingForm.actOnVectorColumn(
       relativeCharacteristic, relativeSimpleCoordinates
     );
-    Vector<Rational> characteristicH;
-    characteristicH.makeZero(lieAlgebra.getRank());
+    candidate.candidateH.makeZero(lieAlgebra.getRank());
     for (int j = 0; j < relativeDimension; j ++) {
-      characteristicH +=
+      candidate.candidateH +=
       this->simpleRootsReductiveSubalgebra[j] * relativeSimpleCoordinates[j];
     }
     for (int k = 0; k < rootsScalarProduct2HNonRaised.size; k ++) {
       if (
         this->getAmbientWeyl().rootScalarCartanRoot(
-          characteristicH, rootsScalarProduct2HNonRaised[k]
+          candidate.candidateH, rootsScalarProduct2HNonRaised[k]
         ) !=
         2
       ) {
         global.fatal
         << "CharacteristicH is: "
-        << characteristicH.toString()
+        << candidate.candidateH.toString()
         << "; rootsWithScalarProduct2NonRaised: "
         << rootsScalarProduct2HNonRaised.toString()
         << "; the scalar product with vector "
         << rootsScalarProduct2HNonRaised[k].toString()
         << " is:  "
         << this->getAmbientWeyl().rootScalarCartanRoot(
-          characteristicH, rootsScalarProduct2HNonRaised[k]
+          candidate.candidateH, rootsScalarProduct2HNonRaised[k]
         ).toString()
         << " which is supposed to equal 2. "
         << global.fatal;
       }
     }
     this->getAmbientWeyl().raiseToDominantWeight(
-      characteristicH, nullptr, nullptr, &raisingElement
+      candidate.candidateH, nullptr, nullptr, &raisingElement
     );
     reflectedSimpleBasisK = this->simpleRootsReductiveSubalgebra;
     for (int k = 0; k < reflectedSimpleBasisK.size; k ++) {
@@ -3241,13 +3237,13 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     for (int i = 0; i < candidate.rootsWithScalar2WithH.size; i ++) {
       if (
         this->getAmbientWeyl().rootScalarCartanRoot(
-          characteristicH, candidate.rootsWithScalar2WithH[i]
+          candidate.candidateH, candidate.rootsWithScalar2WithH[i]
         ) !=
         2
       ) {
         global.fatal
         << "Bad scalar product after raising: raised characteristic: "
-        << characteristicH.toString()
+        << candidate.candidateH.toString()
         << " simplebasisK: "
         << this->simpleRootsReductiveSubalgebra.toString()
         << "raised by: "
@@ -3260,7 +3256,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         << candidate.rootsWithScalar2WithH[i].toString()
         << " scalar product: "
         << this->getAmbientWeyl().rootScalarCartanRoot(
-          characteristicH, candidate.rootsWithScalar2WithH[i]
+          candidate.candidateH, candidate.rootsWithScalar2WithH[i]
         ).toString()
         << ". The inverted relative cartan: "
         << invertedRelativeKillingForm.toString()
@@ -3270,10 +3266,10 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         << global.fatal;
       }
     }
-    candidate.hElement.makeCartanGenerator(characteristicH, lieAlgebra);
+    candidate.hElement.makeCartanGenerator(candidate.candidateH, lieAlgebra);
     candidate.lengthHSquared =
     candidate.getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(
-      characteristicH, characteristicH
+      candidate.candidateH, candidate.candidateH
     );
     candidate.eElement.makeZero();
     candidate.fElement.makeZero();
@@ -3282,7 +3278,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         candidate.rootsWithScalar2WithH,
         selectionRootsWithZeroCharacteristic,
         reflectedSimpleBasisK,
-        characteristicH,
+        candidate.candidateH,
         computeRealForm,
         algebraicClosure
       )
@@ -3291,18 +3287,18 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
         candidate, output, indexRootSubalgebraInContainer
       );
     } else {
-      output.unsuitableHCharacteristics.addOnTop(characteristicH);
+      output.unsuitableHs.addOnTop(candidate.candidateH);
       DynkinType tempType;
-      diagramZeroCharRoots.getDynkinType(tempType);
+      diagramZeroCharacteristicRoots.getDynkinType(tempType);
       global.comments
       << "<br>obtained bad characteristic "
-      << characteristicH.toString()
+      << candidate.candidateH.toString()
       << ". The zero char root diagram is "
       << tempType.toString()
       << "; the Dynkin epsilon is "
       << dynkinEpsilon
       << "= the num roots generated by diagram "
-      << diagramZeroCharRoots.numberRootsGeneratedByDiagram()
+      << diagramZeroCharacteristicRoots.numberRootsGeneratedByDiagram()
       << " + the relative dimension "
       << relativeDimension
       << " - the slack "

@@ -940,19 +940,17 @@ toStringModuleDecompositionMinimalContainingRegularSAs(
   return out.str();
 }
 
-std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
+std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
   STACK_TRACE("SlTwoSubalgebras::toStringSummary");
   std::stringstream out;
-  bool useHtml = format == nullptr ? true : format->flagUseHTML;
-  std::string displayPathAlgebra;
-  displayPathAlgebra = "../";
   out << "Number of sl(2) subalgebras: " << this->allSubalgebras.size << ".\n";
-  std::stringstream out2;
-  out2
+  out << this->toHTMLSummaryTable(format);
+  out << "<hr>";
+  out
   << "<br>Length longest root ambient algebra squared/4= "
   << this->getOwnerWeyl().getLongestRootLengthSquared() / 4
   << "<br>";
-  out2
+  out
   << "<br> Given a root subsystem P, and a root subsubsystem P_0, "
   << "in (10.2) of Semisimple subalgebras of semisimple Lie algebras, "
   << "E. Dynkin defines "
@@ -979,7 +977,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
         << this->unsuitableHs[i]
         << "</b>";
       } else {
-        out2
+        out
         << "<br><b>"
         << "It turns out that in the current case of Cartan element h = "
         << this->unsuitableHs[i]
@@ -994,7 +992,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
       out << "<br><b>Found bad characteristics!</b><br>";
     }
   } else {
-    out2
+    out
     << "It turns out by direct computation that, in the current case of "
     << this->getOwner().toStringLieAlgebraName()
     << ",  e(P,P_0)= 0 implies that an S-sl(2) subalgebra "
@@ -1003,75 +1001,114 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
     << "always exists. Note that "
     << "Theorem 10.3 is stated in one direction only.";
   }
-  if (useHtml) {
-    std::string idSpanHCharacteristicDescription =
-    "spanDynkinHCharacteristicDescription";
-    out
-    << "<div id='"
-    << idSpanHCharacteristicDescription
-    << "'>"
-    << this->descriptionHCharacteristic
-    << "</div><br>";
-    out
-    << "<div id='idCartanElementRealization'>"
-    << this->descriptionHRealization
-    << "</div>";
-    out
-    << "<div id='idMinimalContainingRegularSA'>"
-    << this->descriptionMinimalContainingRegularSubalgebras
-    << "</div>";
-    out
-    << "<div id='idModuleDecomposition'>"
-    << this->descriptionModuleDecompositionOverSl2
-    << "</div>";
-    out
-    << "<br><br><table><tr>"
-    << "<td>Type + realization link</td>"
-    << "<td style='padding-right:20px'>"
-    << "<a href='#"
-    << idSpanHCharacteristicDescription
-    << "'>h-Characteristic</a>"
-    << "</td>";
-    out
-    << "<td align='center' style='white-space: nowrap'>"
-    << "<a href='#idCartanElementRealization'>Realization of h</a>"
-    << "</td>"
-    << "<td style='padding-left:20px'>"
-    << "<a href='#idModuleDecomposition'>"
-    << "sl(2)-module decomposition of the ambient Lie algebra</a> <br> "
-    << "\\(\\psi=\\) the fundamental \\(sl(2)\\)-weight. "
-    << "</a></td>"
-    << "<td>Centralizer dimension</td>"
-    << "<td>Type of semisimple part of centralizer, if known</td>"
-    << "<td>The square of the length of the weight dual to h.</td>"
-    << "<td>Dynkin index </td>"
-    << "<td>Minimal containing regular semisimple SAs</td>"
-    << "<td>"
-    << "<a href='#idMinimalContainingRegularSA'>"
-    << "Containing regular semisimple SAs in "
-    << "which the sl(2) has no centralizer</a>"
-    << "</td></tr>";
-  }
+  return out.str();
+}
+
+std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
+  (void) format;
+  std::stringstream out;
+  std::string displayPathAlgebra = "../";
+  std::string idSpanHCharacteristicDescription =
+  "spanDynkinHCharacteristicDescription";
+  out
+  << "<div id='"
+  << idSpanHCharacteristicDescription
+  << "'>"
+  << this->descriptionHCharacteristic
+  << "</div><br>";
+  out
+  << "<div id='idCartanElementRealization'>"
+  << this->descriptionHRealization
+  << "</div>";
+  out
+  << "<div id='idMinimalContainingRegularSA'>"
+  << this->descriptionMinimalContainingRegularSubalgebras
+  << "</div>";
+  out
+  << "<div id='idModuleDecomposition'>"
+  << this->descriptionModuleDecompositionOverSl2
+  << "</div>";
+  std::string floatRow =
+  "position: sticky; "
+  "top: 0; "
+  "background-color: #fafafa; "
+  "z-index: 2; ";
+  std::string floatColumn =
+  "position: sticky; "
+  "left: 0; "
+  "background-color: #fafafa; "
+  "z-index: 1;";
+  out
+  << "<br><br>"
+  << "<div style='max-height: 80vh; max-width: 99%; overflow: auto;'>"
+  << "<table><tr>"
+  << "<th style='"
+  << "position: sticky; "
+  << "left: 0; "
+  << "top: 0; "
+  << "background-color: #fafafa; "
+  << "z-index: 3; "
+  << "'>Type + realization link</th>"
+  << "<th style='padding-right:20px; "
+  << floatRow
+  << "'>"
+  << "<a href='#"
+  << idSpanHCharacteristicDescription
+  << "'>h-Characteristic</a>"
+  << "</th>";
+  out
+  << "<th align='center' style='white-space: nowrap; "
+  << floatRow
+  << "'>"
+  << "<a href='#idCartanElementRealization'>Realization of h</a>"
+  << "</th>"
+  << "<th style='padding-left:20px; "
+  << floatRow
+  << "'>"
+  << "<a href='#idModuleDecomposition'>"
+  << "sl(2)-module decomposition of the ambient Lie algebra</a> <br> "
+  << "\\(\\psi=\\) the fundamental \\(sl(2)\\)-weight. "
+  << "</a></th>"
+  << "<th style='"
+  << floatRow
+  << "'>Centralizer dimension</th>"
+  << "<th style='"
+  << floatRow
+  << "'>Type of semisimple part of centralizer, if known</th>"
+  << "<th style='"
+  << floatRow
+  << "'>The square of the length of the weight dual to h.</th>"
+  << "<th style='"
+  << floatRow
+  << "'>Dynkin index </th>"
+  << "<th style='"
+  << floatRow
+  << "'>Minimal containing regular semisimple SAs</th>"
+  << "<th style='"
+  << floatRow
+  << "'>"
+  << "<a href='#idMinimalContainingRegularSA'>"
+  << "Containing regular semisimple SAs in "
+  << "which the sl(2) has no centralizer</a>"
+  << "</th></tr>";
   for (int i = 0; i < this->allSubalgebras.size; i ++) {
     const SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras[i];
-    if (useHtml) {
-      out
-      << "<tr>"
-      << "<td style='padding-right:20px'>"
-      << "<a href='#sl2index"
-      << i
-      << "'>\\(A^{"
-      << currentSubalgebra.getDynkinIndex()
-      << "}_1"
-      << "\\)</a>"
-      << "</td>";
-      out << "<td>";
-    }
+    out
+    << "<tr>"
+    << "<td style='padding-right:20px; "
+    << floatColumn
+    << "'>"
+    << "<a href='#sl2index"
+    << i
+    << "'>\\(A^{"
+    << currentSubalgebra.getDynkinIndex()
+    << "}_1"
+    << "\\)</a>"
+    << "</td>";
+    out << "<td>";
     out << "\\(" << currentSubalgebra.hCharacteristic.toString() << "\\)";
-    if (useHtml) {
-      out << "</td>";
-      out << "<td style='white-space: nowrap'>";
-    }
+    out << "</td>";
+    out << "<td style='white-space: nowrap'>";
     out << currentSubalgebra.hElement.getCartanPart().toString();
     if (
       !this->getOwnerWeyl().isDominantWeight(
@@ -1084,9 +1121,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
       << "This shouldn't happen: "
       << "this is either a programming or mathematical error. </b>";
     }
-    if (useHtml) {
-      out << "</td><td style='padding-left:20px'>";
-    }
+    out << "</td><td style='padding-left:20px'>";
     FormatExpressions formatCharacter;
     formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
     out
@@ -1097,9 +1132,7 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
       )
     )
     << "\n<br>\n";
-    if (useHtml) {
-      out << "</td>";
-    }
+    out << "</td>";
     out << "<td>" << currentSubalgebra.dimensionCentralizer << "</td>";
     if (currentSubalgebra.flagCentralizerTypeComputed) {
       out
@@ -1111,37 +1144,24 @@ std::string SlTwoSubalgebras::toStringSummary(FormatExpressions* format) {
     } else {
       out << "<td> not computed</td>";
     }
-    if (useHtml) {
-      out << "<td>";
-    }
+    out << "<td>";
     out << currentSubalgebra.lengthHSquared;
-    if (useHtml) {
-      out << "</td><td>";
-    }
+    out << "</td><td>";
     out << currentSubalgebra.getDynkinIndex();
-    if (useHtml) {
-      out << "</td><td>";
-    }
+    out << "</td><td>";
     currentSubalgebra.checkIndicesMinimalContainingRootSubalgebras();
     out
     << currentSubalgebra.toStringMinimalContainingRootSubalgebras(
       displayPathAlgebra
     );
-    if (useHtml) {
-      out << "</td><td>";
-    }
+    out << "</td><td>";
     out
     << currentSubalgebra.toStringContainingRootSubalgebras(
       displayPathAlgebra
     );
-    if (useHtml) {
-      out << "</td></tr>\n";
-    }
+    out << "</td></tr>\n";
   }
-  if (useHtml) {
-    out << "</table><hr>";
-  }
-  out << out2.str() << "<hr>";
+  out << "</table>" << "</div>" << "<hr>";
   return out.str();
 }
 
@@ -1160,7 +1180,7 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
   if (useHtml) {
     out << "<br>";
   }
-  out << this->toStringSummary(format);
+  out << this->toHTMLSummary(format);
   out << body.str();
   return out.str();
 }

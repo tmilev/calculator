@@ -261,6 +261,7 @@ public:
   ) const;
   std::string toStringKostantSekiguchiTriple(FormatExpressions* format) const;
   std::string toStringKostantSekiguchiTripleStandardRealization() const;
+  void toHTML(std::string& filePath);
   void toStringModuleDecompositionMinimalContainingRegularSubalgebras(
     bool useLatex, bool useHtml, SlTwoSubalgebras& owner, std::string& output
   ) const;
@@ -288,7 +289,6 @@ public:
   // the below is outdated, must be deleted as soon as equivalent code is
   // written.
   void computeDynkinsEpsilon(WeylGroupData& weyl);
-  void toHTML(std::string& filePath);
   bool operator==(const SlTwoSubalgebra& right) const;
   bool operator>(const SlTwoSubalgebra& right) const;
   unsigned int hashFunction() const;
@@ -344,7 +344,8 @@ public:
   bool containsSl2WithGivenH(Vector<Rational>& elementH, int* outputIndex);
   void writeHTML(FormatExpressions* format = nullptr);
   std::string toString(FormatExpressions* format = nullptr);
-  std::string toStringSummary(FormatExpressions* format = nullptr);
+  std::string toHTMLSummaryTable(FormatExpressions* format = nullptr);
+  std::string toHTMLSummary(FormatExpressions* format = nullptr);
   std::string toStringModuleDecompositionMinimalContainingRegularSAs(
     bool useLatex, bool useHtml
   );

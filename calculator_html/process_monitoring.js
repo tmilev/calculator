@@ -107,6 +107,10 @@ class Monitor {
   pauseButtonMarkFinished() {
     this.pauseButton.textContent = "finished";
     this.pauseButton.style.display = "none";
+    this.currentWorkerId = "";
+    storage.variables.calculator.workerId.setAndStore(
+      this.currentWorkerId, true, false
+    );
   }
 
   callbackPauseRequest(input) {

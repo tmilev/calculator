@@ -6340,7 +6340,7 @@ bool CalculatorLieTheory::rootSubsystem(
   );
   diagram.ambientBilinearForm = weylGroup.cartanSymmetric;
   diagram.ambientRootSystem = weylGroup.rootSystem;
-  diagram.computeDiagramInputIsSimple(outputRoots);
+  diagram.computeDiagramInputIsSimpleBasis(outputRoots);
   out
   << "Diagram final: "
   << diagram.toString()

@@ -7974,14 +7974,16 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
 bool SlTwoSubalgebras::minimallyContains(
   SlTwoSubalgebra& toBeContained, int indexRootSubalgebra
 ) {
+  STACK_TRACE("SlTwoSubalgebras::minimallyContains");
+  RootSubalgebra& candidateForMinimalContainer =
+  this->rootSubalgebras.subalgebras[indexRootSubalgebra];
   for (
-    int maybeContainerIndex : toBeContained.indicesContainingRootSubalgebras
+    int maybeIntermediateContainer :
+    toBeContained.indicesContainingRootSubalgebras
   ) {
-    RootSubalgebra& maybeContainer =
-    this->rootSubalgebras.subalgebras[maybeContainerIndex];
     if (
-      maybeContainer.indicesSubalgebrasContainingK.contains(
-        indexRootSubalgebra
+      candidateForMinimalContainer.indicesSubalgebrasContainingK.contains(
+        maybeIntermediateContainer
       )
     ) {
       return false;
@@ -7993,7 +7995,7 @@ bool SlTwoSubalgebras::minimallyContains(
 void SlTwoSubalgebras::computeOneRootSubalgebraContainers(
   SlTwoSubalgebra& output
 ) {
-  output.indicesMinimalContainingRootSubalgebras.size = 0;
+  output.indicesMinimalContainingRootSubalgebras.clear();
   for (int j : output.indicesContainingRootSubalgebras) {
     if (!this->minimallyContains(output, j)) {
       continue;
@@ -8007,9 +8009,6 @@ void SlTwoSubalgebras::computeRootSubalgebraContainers() {
   for (int i = 0; i < this->allSubalgebras.size; i ++) {
     SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras.getElement(i);
     currentSubalgebra.indexInContainer = i;
-    currentSubalgebra.indicesMinimalContainingRootSubalgebras.reserve(
-      currentSubalgebra.indicesContainingRootSubalgebras.size
-    );
     this->computeOneRootSubalgebraContainers(currentSubalgebra);
     this->checkConsistency();
   }

@@ -365,8 +365,8 @@ public:
   // The function below takes as an input a set of roots and
   // computes the corredponding Dynkin diagram of the
   // root subsystem. Note: the simleBasisInput
-  // is required to be a set of simple
-  // roots.
+  // is required to be a set of simple basis roots,
+  // not to be confused with a basis of a simple Dynkin diagram.
   // The procedure calls a
   // transformation to simple basis on the simpleBasisInput,
   // so your input will get changed if it wasn't
@@ -376,7 +376,9 @@ public:
   );
   // The following function is just as the above but doesn't modify
   // simpleBasisInput
-  void computeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput);
+  void computeDiagramInputIsSimpleBasis(
+    const Vectors<Rational>& simpleBasisInput
+  );
   void computeDiagramTypeModifyInputRelative(
     Vectors<Rational>& inputOutputSimpleWeightSystem,
     const HashedList<Vector<Rational> >& weightSystem,

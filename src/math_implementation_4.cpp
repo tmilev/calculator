@@ -958,7 +958,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     DynkinDiagramRootSubalgebra diagramWithoutTripleNode;
     diagramWithoutTripleNode.ambientBilinearForm = this->ambientBilinearForm;
     diagramWithoutTripleNode.ambientRootSystem = this->ambientRootSystem;
-    diagramWithoutTripleNode.computeDiagramInputIsSimple(
+    diagramWithoutTripleNode.computeDiagramInputIsSimpleBasis(
       rootsWithoutTripleNode
     );
     if (diagramWithoutTripleNode.simpleBasesConnectedComponents.size != 3) {
@@ -1200,10 +1200,12 @@ bool DynkinDiagramRootSubalgebra::checkInitialization() const {
   return true;
 }
 
-void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple(
+void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimpleBasis(
   const Vectors<Rational>& simpleBasisInput
 ) {
-  STACK_TRACE("DynkinDiagramRootSubalgebra::computeDiagramInputIsSimple");
+  STACK_TRACE(
+    "DynkinDiagramRootSubalgebra::computeDiagramInputIsSimpleBasis"
+  );
   this->checkInitialization();
   this->simpleBasesConnectedComponents.size = 0;
   this->simpleBasesConnectedComponents.reserve(simpleBasisInput.size);
@@ -1359,7 +1361,7 @@ void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInput(
   this->ambientRootSystem = weylGroup.rootSystem;
   this->ambientBilinearForm = weylGroup.cartanSymmetric;
   weylGroup.transformToSimpleBasisGenerators(inputRoots, weylGroup.rootSystem);
-  this->computeDiagramInputIsSimple(inputRoots);
+  this->computeDiagramInputIsSimpleBasis(inputRoots);
 }
 
 void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative(
@@ -1375,7 +1377,7 @@ void DynkinDiagramRootSubalgebra::computeDiagramTypeModifyInputRelative(
   WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(
     inputOutputSimpleWeightSystem, weightSystem
   );
-  this->computeDiagramInputIsSimple(inputOutputSimpleWeightSystem);
+  this->computeDiagramInputIsSimpleBasis(inputOutputSimpleWeightSystem);
 }
 
 void DynkinDiagramRootSubalgebra::computeDynkinStrings() {

@@ -512,7 +512,7 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   DynkinDiagramRootSubalgebra diagram;
   diagram.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   diagram.ambientRootSystem = this->getOwnerWeyl().rootSystem;
-  diagram.computeDiagramInputIsSimple(roots);
+  diagram.computeDiagramInputIsSimpleBasis(roots);
   roots.makeEiBasis(dimension);
   this->getOwnerSemisimpleAlgebra().weylGroup.
   transformToSimpleBasisGeneratorsWithRespectToH(
@@ -521,7 +521,7 @@ void SlTwoSubalgebra::makeReportPrecomputations(
   DynkinDiagramRootSubalgebra diagramComputer;
   diagramComputer.ambientBilinearForm = this->getOwnerWeyl().cartanSymmetric;
   diagramComputer.ambientRootSystem = this->getOwnerWeyl().rootSystem;
-  diagramComputer.computeDiagramInputIsSimple(roots);
+  diagramComputer.computeDiagramInputIsSimpleBasis(roots);
   this->preferredAmbientSimpleBasis = roots;
   this->hCharacteristic.setSize(dimension);
   for (int i = 0; i < dimension; i ++) {

@@ -704,7 +704,7 @@ getSimpleCoordinatesOverSubalgebraSemisimplePart(
       inputGWeightSimpleCoordinates, this->simpleRootsReductiveSubalgebra[i]
     );
   }
-  this->scalarProdInvertedMatrixOrdered.actOnVectorColumn(result);
+  this->scalarProductInvertedMatrixOrdered.actOnVectorColumn(result);
   return result;
 }
 
@@ -886,9 +886,9 @@ void RootSubalgebra::computeModuleDecomposition() {
 void RootSubalgebra::computeKModules() {
   STACK_TRACE("RootSubalgebra::computeKModules");
   this->computeRootsOfK();
-  this->scalarProdInvertedMatrixOrdered = this->scalarProdMatrixOrdered;
-  if (this->scalarProdInvertedMatrixOrdered.numberOfRows > 0) {
-    this->scalarProdInvertedMatrixOrdered.invert();
+  this->scalarProductInvertedMatrixOrdered = this->scalarProductMatrixOrdered;
+  if (this->scalarProductInvertedMatrixOrdered.numberOfRows > 0) {
+    this->scalarProductInvertedMatrixOrdered.invert();
   }
   this->computeHighestVectorsHighestWeights();
   this->computeModulesFromHighestVectors();
@@ -1315,7 +1315,9 @@ void RootSubalgebra::computeEpsilonCoordinatesWithRespectToSubalgebra() {
             root[k]
           );
         }
-        this->scalarProdInvertedMatrixOrdered.actOnVectorColumn(root, root3);
+        this->scalarProductInvertedMatrixOrdered.actOnVectorColumn(
+          root, root3
+        );
         root2.makeZero(this->getAmbientWeyl().cartanSymmetric.numberOfRows);
         for (int j = 0; j < this->simpleRootsReductiveSubalgebra.size; j ++) {
           root2 += this->simpleRootsReductiveSubalgebra[j] * root3[j];
@@ -1718,7 +1720,7 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   out
   << "<br>Heirs rejected due to having symmetric Cartan type outside "
   << "of list dictated by parabolic heirs: "
-  << this->totalHeirsRejectedBadAngleS
+  << this->totalHeirsRejectedBadAngles
   << "<br>Heirs rejected due to not being maximally dominant: "
   << this->totalHeirsRejectedNotMaximallyDominant
   << "<br>Heirs rejected due to not being maximal "
@@ -1958,14 +1960,14 @@ RootSubalgebra::RootSubalgebra() {
   this->flagMakingProgressReport = true;
   this->flagComputeConeCondition = true;
   this->initForNilradicalGeneration();
-  this->initNoOwnerReset();
+  this->initializeNoOwnerReset();
 }
 
-void RootSubalgebra::initNoOwnerReset() {
+void RootSubalgebra::initializeNoOwnerReset() {
   this->indexInducingSubalgebra = - 1;
   this->totalHeirsRejectedNotMaximallyDominant = 0;
   this->totalHeirsRejectedSameModuleDecomposition = 0;
-  this->totalHeirsRejectedBadAngleS = 0;
+  this->totalHeirsRejectedBadAngles = 0;
   this->totalHeirsRejectedNotMaximalWithRespectToOuterAutomorphisms = 0;
   this->indicesSubalgebrasContainingK.clear();
 }
@@ -2634,7 +2636,7 @@ bool RootSubalgebra::checkScalarProductMatrixOrdered() const {
   this->simpleRootsReductiveSubalgebra.getGramMatrix(
     matrix, &this->getAmbientWeyl().cartanSymmetric
   );
-  if (matrix != this->scalarProdMatrixOrdered) {
+  if (matrix != this->scalarProductMatrixOrdered) {
     global.fatal
     << "Bilinear product matrix does not match the stored value. "
     << global.fatal;
@@ -2873,12 +2875,12 @@ void RootSubalgebra::computeEssentials() {
   STACK_TRACE("RootSubalgebra::computeEssentials");
   this->simpleRootsReductiveSubalgebra = this->generatorsK;
   this->simpleRootsReductiveSubalgebra.getGramMatrix(
-    this->scalarProdMatrixOrdered, &this->getAmbientWeyl().cartanSymmetric
+    this->scalarProductMatrixOrdered, &this->getAmbientWeyl().cartanSymmetric
   );
   this->dynkinDiagram.ambientRootSystem = this->getAmbientWeyl().rootSystem;
   this->dynkinDiagram.ambientBilinearForm =
   this->getAmbientWeyl().cartanSymmetric;
-  this->dynkinDiagram.computeDiagramInputIsSimple(
+  this->dynkinDiagram.computeDiagramInputIsSimpleBasis(
     this->simpleRootsReductiveSubalgebra
   );
   this->dynkinDiagram.getDynkinType(this->dynkinType);
@@ -2899,7 +2901,9 @@ void RootSubalgebra::computeEssentials() {
   this->nilradicalKModules.initialize(this->modules.size);
 }
 
-bool RootSubalgebra::computeEssentialsIfNew() {
+bool RootSubalgebra::computeEssentialsIfNew(
+  RootSubalgebra* baseSubalgebraWeExtend
+) {
   STACK_TRACE("RootSubalgebra::computeEssentialsIfNew");
   this->generatorsK = this->simpleRootsReductiveSubalgebra;
   this->checkInitialization();
@@ -2917,40 +2921,39 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     reportStream << "Computing root subalgebra... ";
     report.report(reportStream.str());
   }
-  if (this->indexInducingSubalgebra != - 1) {
+  if (baseSubalgebraWeExtend != nullptr) {
     this->simpleRootsReductiveSubalgebra.getGramMatrix(
-      this->scalarProdMatrixPermuted, &this->getAmbientWeyl().cartanSymmetric
+      this->scalarProductMatrixPermuted,
+      &this->getAmbientWeyl().cartanSymmetric
     );
     int goodPermutation = - 1;
     List<List<int> >& extensionRootPermutations =
-    this->owner->subalgebras[this->indexInducingSubalgebra].
-    potentialExtensionRootPermutations;
+    baseSubalgebraWeExtend->potentialExtensionRootPermutations;
     List<Matrix<Rational> >& extensionCartanSymmetrics =
-    this->owner->subalgebras[this->indexInducingSubalgebra].
-    potentialExtensionCartanSymmetrics;
+    baseSubalgebraWeExtend->potentialExtensionCartanSymmetrics;
     for (
       int i = 0; i < extensionRootPermutations.size &&
       goodPermutation == - 1; i ++
     ) {
-      this->scalarProdMatrixOrdered.makeZeroMatrix(
+      this->scalarProductMatrixOrdered.makeZeroMatrix(
         this->simpleRootsReductiveSubalgebra.size
       );
       for (int j = 0; j < this->simpleRootsReductiveSubalgebra.size; j ++) {
         for (int k = 0; k < this->simpleRootsReductiveSubalgebra.size; k ++) {
-          this->scalarProdMatrixOrdered(
+          this->scalarProductMatrixOrdered(
             extensionRootPermutations[i][j], extensionRootPermutations[i][k]
           ) =
-          this->scalarProdMatrixPermuted(j, k);
+          this->scalarProductMatrixPermuted(j, k);
         }
       }
-      if (this->scalarProdMatrixOrdered == extensionCartanSymmetrics[i]) {
+      if (this->scalarProductMatrixOrdered == extensionCartanSymmetrics[i]) {
         goodPermutation = i;
         break;
       }
     }
-    if (goodPermutation == - 1) {
+    if (goodPermutation == - 1 && this->indexInducingSubalgebra != - 1) {
       this->owner->subalgebras[this->indexInducingSubalgebra].
-      totalHeirsRejectedBadAngleS ++;
+      totalHeirsRejectedBadAngles ++;
       return false;
     }
     Vectors<Rational> copySimpleBasisK = this->simpleRootsReductiveSubalgebra;
@@ -2962,7 +2965,7 @@ bool RootSubalgebra::computeEssentialsIfNew() {
     }
   } else {
     this->simpleRootsReductiveSubalgebra.getGramMatrix(
-      this->scalarProdMatrixOrdered, &this->getAmbientWeyl().cartanSymmetric
+      this->scalarProductMatrixOrdered, &this->getAmbientWeyl().cartanSymmetric
     );
   }
   if (report.tickAndWantReport()) {
@@ -2982,16 +2985,17 @@ bool RootSubalgebra::computeEssentialsIfNew() {
       this->simpleBasisKInOrderOfGeneration
     )
   ) {
-    Vectors<Rational> tempVs = this->simpleBasisKInOrderOfGeneration;
-    tempVs.removeLastObject();
+    Vectors<Rational> errorCheckRootSystem =
+    this->simpleBasisKInOrderOfGeneration;
+    errorCheckRootSystem.removeLastObject();
     if (
       !this->getAmbientWeylAutomorphisms().areMaximallyDominantGroupOuter(
-        tempVs
+        errorCheckRootSystem
       )
     ) {
       global.fatal
       << "<br>First vectors "
-      << tempVs.toString()
+      << errorCheckRootSystem.toString()
       << " are not maximally dominant. "
       << global.fatal;
     }
@@ -3008,7 +3012,7 @@ bool RootSubalgebra::computeEssentialsIfNew() {
   this->dynkinDiagram.ambientBilinearForm =
   this->getAmbientWeyl().cartanSymmetric;
   this->dynkinDiagram.ambientRootSystem = this->getAmbientWeyl().rootSystem;
-  this->dynkinDiagram.computeDiagramInputIsSimple(
+  this->dynkinDiagram.computeDiagramInputIsSimpleBasis(
     this->simpleRootsReductiveSubalgebra
   );
   this->dynkinDiagram.getDynkinType(this->dynkinType);
@@ -3017,16 +3021,18 @@ bool RootSubalgebra::computeEssentialsIfNew() {
   this->computeModuleDecompositionAmbientAlgebraDimensionsOnly();
   this->checkRankInequality();
   for (int i = 0; i < this->owner->subalgebras.size; i ++) {
+    RootSubalgebra& previouslyFound = this->owner->subalgebras[i];
     if (
-      this->owner->subalgebras[i].dynkinDiagram == this->dynkinDiagram &&
-      this->owner->subalgebras[i].centralizerDynkinType ==
-      this->centralizerDynkinType &&
+      previouslyFound.dynkinDiagram == this->dynkinDiagram &&
+      previouslyFound.centralizerDynkinType == this->centralizerDynkinType &&
       this->moduleDecompoAmbientAlgebraDimensionsOnly ==
-      this->owner->subalgebras[i].moduleDecompoAmbientAlgebraDimensionsOnly
+      previouslyFound.moduleDecompoAmbientAlgebraDimensionsOnly
     ) {
       if (this->indexInducingSubalgebra != - 1) {
-        this->owner->subalgebras[this->indexInducingSubalgebra].
-        totalHeirsRejectedSameModuleDecomposition ++;
+        RootSubalgebra& inducer =
+        this->owner->subalgebras[this->indexInducingSubalgebra];
+        inducer.totalHeirsRejectedSameModuleDecomposition ++;
+        inducer.indicesSubalgebrasContainingK.addOnTopNoRepetition(i);
       }
       return false;
     }
@@ -3316,7 +3322,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   }
 }
 
-void RootSubalgebras::computeAllReductiveRootSAsInit() {
+void RootSubalgebras::computeAllReductiveRootSubalgebrasInitialize() {
   this->getOwnerWeyl().computeRho(true);
   this->validScales.clear();
   this->validScales.setExpectedSize(this->owner->getRank() * 2);
@@ -3326,6 +3332,7 @@ void RootSubalgebras::computeAllReductiveRootSAsInit() {
     );
   }
   this->weylGroupAutomorphisms.weylGroup = &this->getOwnerWeyl();
+  this->subalgebras.clear();
 }
 
 void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
@@ -3389,8 +3396,11 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
       this->getIndexUpToEquivalenceByDiagramsAndDimensions(currentSubalgebra);
       if (index == - 1) {
         global.fatal
-        << "Experimental code has failed an internal "
-        << "check on the current subalgebra: "
+        << "Subalgebra not found: "
+        << currentSubalgebra.dynkinType.toString()
+        << " not found in "
+        << this->toStringDynkinTableHTML(nullptr)
+        << "<hr>Curent subalgebra details: "
         << currentSubalgebra.toString()
         << global.fatal;
       }
@@ -3427,85 +3437,48 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
   );
 }
 
+std::string RootSubalgebra::toStringPotentialExtensions(
+  FormatExpressions* format
+) const {
+  (void) format;
+  std::stringstream reportStream;
+  for (int j = 0; j < this->potentialExtensionDynkinTypes.size; j ++) {
+    reportStream << this->potentialExtensionDynkinTypes[j].toString();
+    if (j != this->potentialExtensionDynkinTypes.size - 1) {
+      reportStream << ", ";
+    }
+  }
+  return reportStream.str();
+}
+
 void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
   STACK_TRACE(
     "RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism"
   );
   this->initOwnerMustBeNonZero();
-  this->computeAllReductiveRootSAsInit();
-  HashedList<Vector<Rational> > tempVectors;
-  this->flagPrintGAPinput =
-  this->owner->weylGroup.loadGAPRootSystem(tempVectors);
+  this->computeAllReductiveRootSubalgebrasInitialize();
+  HashedList<Vector<Rational> > gapVectors;
+  this->flagPrintGAPInput =
+  this->owner->weylGroup.loadGAPRootSystem(gapVectors);
   ProgressReport report2;
-  RootSubalgebra rootSubalgebra;
-  rootSubalgebra.owner = this;
-  rootSubalgebra.computeEssentialsIfNew();
-  rootSubalgebra.computePotentialExtensions();
-  this->subalgebras.reserve(this->getOwnerWeyl().rootsOfBorel.size);
-  this->subalgebras.addOnTop(rootSubalgebra);
-  std::string reportString;
+  RootSubalgebra cartanSubalgebra;
+  cartanSubalgebra.owner = this;
+  cartanSubalgebra.indexInducingSubalgebra = - 1;
+  cartanSubalgebra.computeEssentialsIfNew(nullptr);
+  this->subalgebras.addOnTop(cartanSubalgebra);
   for (int i = 0; i < this->subalgebras.size; i ++) {
-    if (report2.tickAndWantReport()) {
-      std::stringstream reportStream;
-      for (
-        int j = 0; j < this->subalgebras[i].potentialExtensionDynkinTypes.
-        size; j ++
-      ) {
-        reportStream
-        << this->subalgebras[i].potentialExtensionDynkinTypes[j].toString();
-        if (j != this->subalgebras[i].potentialExtensionDynkinTypes.size - 1) {
-          reportStream << ", ";
-        }
-      }
-      reportString = reportStream.str();
-    }
-    for (int j = 0; j < this->subalgebras[i].modules.size; j ++) {
-      if (this->subalgebras[i].highestWeightsPrimalSimple[j].isEqualToZero()) {
-        continue;
-      }
-      if (report2.tickAndWantReport()) {
-        std::stringstream out;
-        out
-        << "Exploring extensions of subalgebra "
-        << i + 1
-        << " out of "
-        << this->subalgebras.size
-        << ". Type current SA: "
-        << this->subalgebras[i].dynkinType.toString()
-        << ". Possible standard parabolic extensions: "
-        << reportString
-        << ". Exploring extension by lowest weight vector of module "
-        << j + 1
-        << " out of "
-        << this->subalgebras[i].modules.size;
-        report2.report(out.str());
-      }
-      rootSubalgebra.initNoOwnerReset();
-      rootSubalgebra.simpleRootsReductiveSubalgebra =
-      this->subalgebras[i].simpleRootsReductiveSubalgebra;
-      rootSubalgebra.simpleRootsReductiveSubalgebra.addOnTop(
-        this->subalgebras[i].lowestWeightsPrimalSimple[j]
-      );
-      rootSubalgebra.simpleBasisKInOrderOfGeneration =
-      this->subalgebras[i].simpleBasisKInOrderOfGeneration;
-      rootSubalgebra.simpleBasisKInOrderOfGeneration.addOnTop(
-        this->subalgebras[i].lowestWeightsPrimalSimple[j]
-      );
-      rootSubalgebra.indexInducingSubalgebra = i;
-      if (!rootSubalgebra.computeEssentialsIfNew()) {
-        continue;
-      }
-      if (
-        rootSubalgebra.simpleRootsReductiveSubalgebra.getRankElementSpan() !=
-        rootSubalgebra.simpleRootsReductiveSubalgebra.size
-      ) {
-        global.fatal
-        << "<br>simple basis vectors not linearly independent! "
-        << global.fatal;
-      }
-      this->subalgebras.addOnTop(rootSubalgebra);
-      this->subalgebras.lastObject()->computePotentialExtensions();
-    }
+    // Make an explicit copy of the underlying root subalgebra.
+    // We will be expanding the subalgebras container as we go.
+    // If we were to take a reference instead as in
+    //
+    // RootSubalgebra& currentlyExtended = this->subalgebras[i];
+    //
+    // then the subalgebra container expansion may wipe off
+    // the currentlyExtended object when our subalgebras array
+    // runs out of buffer space.
+    RootSubalgebra currentlyExtended = this->subalgebras[i];
+    currentlyExtended.computePotentialExtensions();
+    this->findAllExtensions(currentlyExtended, i, report2);
   }
   std::stringstream reportStream;
   if (report2.tickAndWantReport()) {
@@ -3543,6 +3516,78 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
       reportStream << " done. ";
       report2.report(reportStream.str());
     }
+  }
+}
+
+void RootSubalgebras::maybeExtendByHighestWeightOfModuleIndex(
+  RootSubalgebra& toBeExtended,
+  int indexOfToBeExtended,
+  int j,
+  ProgressReport& progressReport
+) {
+  STACK_TRACE("RootSubalgebras::maybeExtendByHighestWeightOfModuleIndex");
+  if (toBeExtended.highestWeightsPrimalSimple[j].isEqualToZero()) {
+    return;
+  }
+  if (progressReport.tickAndWantReport()) {
+    std::stringstream out;
+    out
+    << "Exploring extensions of subalgebra "
+    << indexOfToBeExtended + 1
+    << " out of "
+    << this->subalgebras.size
+    << ". Type current SA: "
+    << toBeExtended.dynkinType.toString()
+    << ". Possible standard parabolic extensions: "
+    << toBeExtended.toStringPotentialExtensions()
+    << ". Exploring extension by lowest weight vector of module "
+    << j + 1
+    << " out of "
+    << toBeExtended.modules.size;
+    progressReport.report(out.str());
+  }
+  const Vector<Rational>& extensionWeight =
+  toBeExtended.lowestWeightsPrimalSimple[j];
+  RootSubalgebra candidate;
+  candidate.owner = this;
+  candidate.initializeNoOwnerReset();
+  candidate.simpleRootsReductiveSubalgebra =
+  toBeExtended.simpleRootsReductiveSubalgebra;
+  candidate.simpleRootsReductiveSubalgebra.addOnTop(extensionWeight);
+  candidate.simpleBasisKInOrderOfGeneration =
+  toBeExtended.simpleBasisKInOrderOfGeneration;
+  candidate.simpleBasisKInOrderOfGeneration.addOnTop(extensionWeight);
+  candidate.indexInducingSubalgebra = indexOfToBeExtended;
+  if (!candidate.computeEssentialsIfNew(&toBeExtended)) {
+    return;
+  }
+  if (
+    candidate.simpleRootsReductiveSubalgebra.getRankElementSpan() !=
+    candidate.simpleRootsReductiveSubalgebra.size
+  ) {
+    global.fatal
+    << "<br>simple basis vectors not linearly independent! "
+    << global.fatal;
+  }
+  // The inducer is mathematically the same as the toBeExtended.
+  // More precisely, toBeExtended is a copy of an old version of inducer.
+  // All essential data of the two objects is the same.
+  // However, combinatorial data such as minimal subalgebra inclusion
+  // should be stale in toBeExtended.
+  RootSubalgebra& inducer = this->subalgebras[indexOfToBeExtended];
+  inducer.indicesSubalgebrasContainingK.addOnTop(this->subalgebras.size);
+  this->subalgebras.addOnTop(candidate);
+}
+
+void RootSubalgebras::findAllExtensions(
+  RootSubalgebra& toBeExtended,
+  int indexOfToBeExtended,
+  ProgressReport& progressReport
+) {
+  for (int j = 0; j < toBeExtended.modules.size; j ++) {
+    this->maybeExtendByHighestWeightOfModuleIndex(
+      toBeExtended, indexOfToBeExtended, j, progressReport
+    );
   }
 }
 
@@ -3645,8 +3690,7 @@ void RootSubalgebras::sortDescendingOrderBySSRank() {
     RootSubalgebra& currentSubalgebra = *output.subalgebras.lastObject();
     List<int>& otherArray =
     this->subalgebras[sortingArray[i]].indicesSubalgebrasContainingK;
-    currentSubalgebra.indicesSubalgebrasContainingK.reserve(otherArray.size);
-    currentSubalgebra.indicesSubalgebrasContainingK.setSize(0);
+    currentSubalgebra.indicesSubalgebrasContainingK.clear();
     for (int j = 0; j < otherArray.size; j ++) {
       currentSubalgebra.indicesSubalgebrasContainingK.addOnTop(
         inverseOfSortingArray[otherArray[j]]
@@ -3912,7 +3956,7 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
     << " non pseudo-parabolic root subsystems.";
     HashedList<Vector<Rational> > GAPPosRootSystem;
     if (
-      this->flagPrintGAPinput &&
+      this->flagPrintGAPInput &&
       this->owner->weylGroup.loadGAPRootSystem(GAPPosRootSystem)
     ) {
       out
@@ -4393,7 +4437,7 @@ RootSubalgebras::RootSubalgebras() {
   this->columnsPerTableLatex = 4;
   this->upperLimitElementsWeylGroup = 0;
   this->owner = nullptr;
-  this->flagPrintGAPinput = false;
+  this->flagPrintGAPInput = false;
   this->flagPrintParabolicPseudoParabolicInfo = false;
   this->initForNilradicalGeneration();
   this->totalNonPseudoParabolic = 0;

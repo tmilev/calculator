@@ -135,7 +135,7 @@ class RootSubalgebra {
 public:
   int totalHeirsRejectedNotMaximallyDominant;
   int totalHeirsRejectedSameModuleDecomposition;
-  int totalHeirsRejectedBadAngleS;
+  int totalHeirsRejectedBadAngles;
   int totalHeirsRejectedNotMaximalWithRespectToOuterAutomorphisms;
   List<DynkinType> parabolicallyAllowedHeirs;
   int numberOfNilradicalsAllowed;
@@ -191,9 +191,9 @@ public:
   List<int> kComponentRanks;
   RootSubalgebras* owner;
   HashedList<Vector<Rational> > bufferForModuleGeneration;
-  Matrix<Rational> scalarProdMatrixPermuted;
-  Matrix<Rational> scalarProdMatrixOrdered;
-  Matrix<Rational> scalarProdInvertedMatrixOrdered;
+  Matrix<Rational> scalarProductMatrixPermuted;
+  Matrix<Rational> scalarProductMatrixOrdered;
+  Matrix<Rational> scalarProductInvertedMatrixOrdered;
   List<Matrix<Rational> > potentialExtensionCartanSymmetrics;
   List<List<int> > potentialExtensionRootPermutations;
   List<DynkinType> potentialExtensionDynkinTypes;
@@ -375,6 +375,8 @@ public:
     Selection& selectionKModules, RootSubalgebras& owner, int indexInOwner
   );
   std::string toString(FormatExpressions* format = nullptr);
+  std::string toStringPotentialExtensions(FormatExpressions* format = nullptr)
+  const;
   std::string toStringContainingRegularSubalgebras();
   std::string toStringMinimallyContainingRegularSubalgebras();
   void toHTML(int index, FormatExpressions* format);
@@ -390,7 +392,7 @@ public:
   );
   void computeDynkinDiagramKAndCentralizer();
   bool checkRankInequality() const;
-  bool computeEssentialsIfNew();
+  bool computeEssentialsIfNew(RootSubalgebra* baseSubalgebraWeExtend);
   void computeEssentials();
   bool checkForMaximalDominanceCartanSubalgebra();
   void computeRootsOfK();
@@ -413,7 +415,7 @@ public:
   void getLinearCombinationFromMaxRankRootsAndExtraRoot(bool doEnumeration);
   //  void commonCodeForgetLinearCombinationFromMaxRankRootsAndExtraRoot();
   void initForNilradicalGeneration();
-  void initNoOwnerReset();
+  void initializeNoOwnerReset();
   void getLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
   bool linearCombinationToString(
     const Vector<Rational>& alphaRoot,
@@ -486,7 +488,7 @@ public:
   bool flagComputeConeCondition;
   bool flagLookingForMinimalRels;
   bool flagStoringNilradicals;
-  bool flagPrintGAPinput;
+  bool flagPrintGAPInput;
   bool flagPrintParabolicPseudoParabolicInfo;
   SemisimpleLieAlgebra& getOwnerSemisimpleLieAlgebra() const;
   WeylGroupData& getOwnerWeyl() const;
@@ -496,6 +498,17 @@ public:
     List<DynkinType>& output,
     List<List<int> >* outputPermutationSimpleRoots
   ) const;
+  void findAllExtensions(
+    RootSubalgebra& toBeExtended,
+    int indexOfToBeExtended,
+    ProgressReport& progressReport
+  );
+  void maybeExtendByHighestWeightOfModuleIndex(
+    RootSubalgebra& toBeExtended,
+    int indexOfToBeExtended,
+    int j,
+    ProgressReport& progressReport
+  );
   void computeKmodMultTables();
   bool approveKModuleSelectionWRTActionsNormalizerCentralizerNilradical(
     Selection& targetSelection
@@ -513,7 +526,7 @@ public:
   void computeNormalizerOfCentralizerIntersectNilradical(
     Selection& selectedBasisRoots, RootSubalgebra& rootSubalgebra
   );
-  void computeAllReductiveRootSAsInit();
+  void computeAllReductiveRootSubalgebrasInitialize();
   void computeAllReductiveRootSubalgebrasUpToIsomorphism();
   void computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(
     bool sort, bool computeEpsilonCoordinates

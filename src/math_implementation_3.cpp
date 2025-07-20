@@ -9272,7 +9272,7 @@ toString(std::string& output, bool displayElements) {
   this->ambientWeyl->rootSystem;
   dynkinDiagramRootSubalgebra.ambientBilinearForm =
   this->ambientWeyl->cartanSymmetric;
-  dynkinDiagramRootSubalgebra.computeDiagramInputIsSimple(
+  dynkinDiagramRootSubalgebra.computeDiagramInputIsSimpleBasis(
     this->simpleRootsInner
   );
   out

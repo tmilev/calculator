@@ -56,6 +56,9 @@ ifeq ($(llvm), 1)
 	# You will likely also need to install:
 	# sudo apt install libc++-dev
 	# sudo apt install libstdc++-dev
+else
+    # flag known to be necessary in some deployment environments.
+    CFLAGS+=-std=c++0x
 endif
 
 ifeq ($(wasm), 1)

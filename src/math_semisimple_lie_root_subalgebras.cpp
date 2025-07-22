@@ -139,9 +139,9 @@ void RootSubalgebra::computeModuleDecompositionAmbientAlgebraDimensionsOnly() {
   STACK_TRACE(
     "RootSubalgebra::computeModuleDecompositionAmbientAlgebraDimensionsOnly"
   );
-  this->moduleDecompoAmbientAlgebraDimensionsOnly.makeZero();
+  this->moduleDecompositionAmbientAlgebraDimensionsOnly.makeZero();
   for (int i = 0; i < this->getNumberOfModules(); i ++) {
-    this->moduleDecompoAmbientAlgebraDimensionsOnly.addMonomial(
+    this->moduleDecompositionAmbientAlgebraDimensionsOnly.addMonomial(
       MonomialVector(this->modules[i].size - 1), 1
     );
   }
@@ -1584,12 +1584,14 @@ std::string RootSubalgebra::toStringMinimallyContainingRegularSubalgebras() {
   return out.str();
 }
 
-std::string RootSubalgebra::toStringContainingRegularSubalgebras() {
+std::string RootSubalgebra::toStringImmediatelyContainingRegularSubalgebras() {
   std::stringstream out;
-  for (int i = 0; i < this->indicesSubalgebrasContainingK.size; i ++) {
-    int indexOfContainer = this->indicesSubalgebrasContainingK[i];
+  for (
+    int i = 0; i < this->indicesSubalgebrasImmediatelyContainingK.size; i ++
+  ) {
+    int indexOfContainer = this->indicesSubalgebrasImmediatelyContainingK[i];
     out << this->owner->toStringAlgebraLink(indexOfContainer);
-    if (i != this->indicesSubalgebrasContainingK.size - 1) {
+    if (i != this->indicesSubalgebrasImmediatelyContainingK.size - 1) {
       out << ", ";
     }
   }
@@ -1648,8 +1650,13 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   out
   << "<br>\n simple basis centralizer: "
   << this->simpleBasisCentralizerRoots.toString();
-  out << "<br>Containing regular subalgebras: ";
-  out << this->toStringContainingRegularSubalgebras();
+  out << "<br>Immediately containing regular subalgebras: ";
+  out << this->toStringImmediatelyContainingRegularSubalgebras();
+  out
+  << "<br>Here, we say that the larger subalgebra A "
+  << "immediately contains B if the root system of B,"
+  << " extended by a single root, generates a "
+  << "root system isomorphic to the root system of A. ";
   out << "<br>Minimally containing regular subalgebras: ";
   out << this->toStringMinimallyContainingRegularSubalgebras();
   out << "<hr>\n Number of k-submodules of g: " << this->modules.size;
@@ -1969,7 +1976,7 @@ void RootSubalgebra::initializeNoOwnerReset() {
   this->totalHeirsRejectedSameModuleDecomposition = 0;
   this->totalHeirsRejectedBadAngles = 0;
   this->totalHeirsRejectedNotMaximalWithRespectToOuterAutomorphisms = 0;
-  this->indicesSubalgebrasContainingK.clear();
+  this->indicesSubalgebrasImmediatelyContainingK.clear();
 }
 
 void RootSubalgebra::initForNilradicalGeneration() {
@@ -2901,6 +2908,27 @@ void RootSubalgebra::computeEssentials() {
   this->nilradicalKModules.initialize(this->modules.size);
 }
 
+void RootSubalgebra::rejectNonMaximallyDominantAccountContainers() {
+  Vectors<Rational> errorCheckRootSystem =
+  this->simpleBasisKInOrderOfGeneration;
+  errorCheckRootSystem.removeLastObject();
+  if (
+    !this->getAmbientWeylAutomorphisms().areMaximallyDominantGroupOuter(
+      errorCheckRootSystem
+    )
+  ) {
+    global.fatal
+    << "<br>First vectors "
+    << errorCheckRootSystem.toString()
+    << " are not maximally dominant. "
+    << global.fatal;
+  }
+  if (this->indexInducingSubalgebra != - 1) {
+    this->owner->subalgebras[this->indexInducingSubalgebra].
+    totalHeirsRejectedNotMaximallyDominant ++;
+  }
+}
+
 bool RootSubalgebra::computeEssentialsIfNew(
   RootSubalgebra* baseSubalgebraWeExtend
 ) {
@@ -2985,24 +3013,7 @@ bool RootSubalgebra::computeEssentialsIfNew(
       this->simpleBasisKInOrderOfGeneration
     )
   ) {
-    Vectors<Rational> errorCheckRootSystem =
-    this->simpleBasisKInOrderOfGeneration;
-    errorCheckRootSystem.removeLastObject();
-    if (
-      !this->getAmbientWeylAutomorphisms().areMaximallyDominantGroupOuter(
-        errorCheckRootSystem
-      )
-    ) {
-      global.fatal
-      << "<br>First vectors "
-      << errorCheckRootSystem.toString()
-      << " are not maximally dominant. "
-      << global.fatal;
-    }
-    if (this->indexInducingSubalgebra != - 1) {
-      this->owner->subalgebras[this->indexInducingSubalgebra].
-      totalHeirsRejectedNotMaximallyDominant ++;
-    }
+    this->rejectNonMaximallyDominantAccountContainers();
     return false;
   }
   if (report.tickAndWantReport()) {
@@ -3025,15 +3036,9 @@ bool RootSubalgebra::computeEssentialsIfNew(
     if (
       previouslyFound.dynkinDiagram == this->dynkinDiagram &&
       previouslyFound.centralizerDynkinType == this->centralizerDynkinType &&
-      this->moduleDecompoAmbientAlgebraDimensionsOnly ==
-      previouslyFound.moduleDecompoAmbientAlgebraDimensionsOnly
+      this->moduleDecompositionAmbientAlgebraDimensionsOnly ==
+      previouslyFound.moduleDecompositionAmbientAlgebraDimensionsOnly
     ) {
-      if (this->indexInducingSubalgebra != - 1) {
-        RootSubalgebra& inducer =
-        this->owner->subalgebras[this->indexInducingSubalgebra];
-        inducer.totalHeirsRejectedSameModuleDecomposition ++;
-        inducer.indicesSubalgebrasContainingK.addOnTopNoRepetition(i);
-      }
       return false;
     }
   }
@@ -3055,8 +3060,8 @@ bool RootSubalgebra::isEquivalentToByDiagramsAndDimensions(
   const RootSubalgebra& other
 ) const {
   return
-  this->moduleDecompoAmbientAlgebraDimensionsOnly ==
-  other.moduleDecompoAmbientAlgebraDimensionsOnly &&
+  this->moduleDecompositionAmbientAlgebraDimensionsOnly ==
+  other.moduleDecompositionAmbientAlgebraDimensionsOnly &&
   this->dynkinType == other.dynkinType &&
   this->centralizerDynkinType == other.centralizerDynkinType;
 }
@@ -3090,7 +3095,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(
     rootSAsGenerateAll.subalgebras, 1
   );
   if (sort) {
-    this->sortDescendingOrderBySSRank();
+    this->sortDescendingOrderBySemisimpleRank();
   }
   if (computeEpsilonCoordinates) {
     for (int i = 0; i < this->subalgebras.size; i ++) {
@@ -3488,7 +3493,8 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
     << " subalgebras. Proceeding to sort the subalgebras...";
     report2.report(reportStream.str());
   }
-  this->sortDescendingOrderBySSRank();
+  this->sortDescendingOrderBySemisimpleRank();
+  this->computeImmediateInclusions();
   if (report2.tickAndWantReport()) {
     reportStream << "done. ";
     report2.report(reportStream.str());
@@ -3569,13 +3575,6 @@ void RootSubalgebras::maybeExtendByHighestWeightOfModuleIndex(
     << "<br>simple basis vectors not linearly independent! "
     << global.fatal;
   }
-  // The inducer is mathematically the same as the toBeExtended.
-  // More precisely, toBeExtended is a copy of an old version of inducer.
-  // All essential data of the two objects is the same.
-  // However, combinatorial data such as minimal subalgebra inclusion
-  // should be stale in toBeExtended.
-  RootSubalgebra& inducer = this->subalgebras[indexOfToBeExtended];
-  inducer.indicesSubalgebrasContainingK.addOnTop(this->subalgebras.size);
   this->subalgebras.addOnTop(candidate);
 }
 
@@ -3659,9 +3658,78 @@ void RootSubalgebras::computeLProhibitingRelations() {
   }
 }
 
-void RootSubalgebras::sortDescendingOrderBySSRank() {
-  STACK_TRACE("RootSubalgebras::sortDescendingOrderBySSRank");
-  // Bubble sort
+int RootSubalgebras::findIndexOfRootSubalgebraWithPermutedSimpleComponents(
+  RootSubalgebra& toBeFound
+) {
+  STACK_TRACE(
+    "RootSubalgebras::findIndexOfRootSubalgebraWithPermutedSimpleComponents"
+  );
+  List<int> candidatesForEquality;
+  for (int i = 0; i < this->subalgebras.size; i ++) {
+    RootSubalgebra& maybeMatch = this->subalgebras[i];
+    if (
+      toBeFound.dynkinType == maybeMatch.dynkinType &&
+      toBeFound.moduleDecompositionAmbientAlgebraDimensionsOnly ==
+      maybeMatch.moduleDecompositionAmbientAlgebraDimensionsOnly
+    ) {
+      candidatesForEquality.addOnTop(i);
+    }
+  }
+  if (candidatesForEquality.size != 1) {
+    return - 1;
+  }
+  return candidatesForEquality[0];
+}
+
+void RootSubalgebras::computeImmediateInclusions() {
+  STACK_TRACE("RootSubalgebras::computeImmediateInclusions");
+  this->getOwnerWeyl().computeRho(false);
+  for (int i = 0; i < this->subalgebras.size; i ++) {
+    RootSubalgebra& rootSubalgebra = this->subalgebras[i];
+    this->computeImmediateInclusionsOnce(rootSubalgebra, i);
+  }
+}
+
+void RootSubalgebras::computeImmediateInclusionsOnce(
+  RootSubalgebra& toBeModified, int indexOfToBeModified
+) {
+  STACK_TRACE("RootSubalgebras::computeImmediateInclusionsOnce");
+  for (
+    Vector<Rational>& extensionWeight :
+    toBeModified.lowestWeightsPrimalSimple
+  ) {
+    RootSubalgebra extension;
+    extension.owner = this;
+    extension.initializeNoOwnerReset();
+    extension.simpleRootsReductiveSubalgebra =
+    toBeModified.simpleRootsReductiveSubalgebra;
+    extension.simpleRootsReductiveSubalgebra.addOnTop(extensionWeight);
+    extension.simpleBasisKInOrderOfGeneration =
+    extension.simpleBasisKInOrderOfGeneration;
+    extension.simpleBasisKInOrderOfGeneration.addOnTop(extensionWeight);
+    extension.generatorsK = extension.simpleRootsReductiveSubalgebra;
+    this->getOwnerWeyl().transformToSimpleBasisGeneratorsWithRespectToH(
+      extension.generatorsK, this->getOwnerWeyl().rho
+    );
+    extension.computeEssentials();
+    int index =
+    this->findIndexOfRootSubalgebraWithPermutedSimpleComponents(extension);
+    if (index == - 1) {
+      global.fatal
+      << "Failed to find the index of "
+      << extension.toString()
+      << global.fatal;
+    }
+    if (index != indexOfToBeModified) {
+      toBeModified.indicesSubalgebrasImmediatelyContainingK.
+      addOnTopNoRepetition(index);
+    }
+  }
+}
+
+void RootSubalgebras::sortDescendingOrderBySemisimpleRank() {
+  STACK_TRACE("RootSubalgebras::sortDescendingOrderBySemisimpleRank");
+  // Bubble sort.
   RootSubalgebras output;
   List<int> sortingArray;
   List<int> inverseOfSortingArray;
@@ -3688,13 +3756,12 @@ void RootSubalgebras::sortDescendingOrderBySSRank() {
   for (int i = 0; i < this->subalgebras.size; i ++) {
     output.subalgebras.addOnTop(this->subalgebras[sortingArray[i]]);
     RootSubalgebra& currentSubalgebra = *output.subalgebras.lastObject();
-    List<int>& otherArray =
-    this->subalgebras[sortingArray[i]].indicesSubalgebrasContainingK;
-    currentSubalgebra.indicesSubalgebrasContainingK.clear();
-    for (int j = 0; j < otherArray.size; j ++) {
-      currentSubalgebra.indicesSubalgebrasContainingK.addOnTop(
-        inverseOfSortingArray[otherArray[j]]
-      );
+    if (currentSubalgebra.indicesSubalgebrasImmediatelyContainingK.size != 0) {
+      global.fatal
+      << "At this point of the code, "
+      << "the immediate containment array should be empty. "
+      << "It will be computed later. "
+      << global.fatal;
     }
     if (currentSubalgebra.indexInducingSubalgebra != - 1) {
       currentSubalgebra.indexInducingSubalgebra =
@@ -4282,18 +4349,20 @@ computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
       << " Total found SAs: "
       << this->subalgebras.size;
       report.report(out.str());
-      int indexSA = this->indexSubalgebra(bufferSubalgebras[recursionDepth]);
-      if (indexSA == - 1) {
+      int index = this->indexSubalgebra(bufferSubalgebras[recursionDepth]);
+      if (index == - 1) {
         bufferSubalgebras[recursionDepth].computeEssentials();
-        this->subalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.
-        addOnTopNoRepetition(this->subalgebras.size);
+        this->subalgebras[currentAlgebraIndex].
+        indicesSubalgebrasImmediatelyContainingK.addOnTopNoRepetition(
+          this->subalgebras.size
+        );
         this->
         computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
           bufferSubalgebras, recursionDepth + 1
         );
       } else {
-        this->subalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.
-        addOnTopNoRepetition(indexSA);
+        this->subalgebras[currentAlgebraIndex].
+        indicesSubalgebrasImmediatelyContainingK.addOnTopNoRepetition(index);
       }
       bufferSubalgebras[recursionDepth].generatorsK.removeIndexSwapWithLast(
         bufferSubalgebras[recursionDepth].generatorsK.size - 1

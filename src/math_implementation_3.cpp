@@ -10465,6 +10465,15 @@ void WeylGroupData::transformToSimpleBasisGeneratorsArbitraryCoordinates(
 void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(
   Vectors<Rational>& generators, const Vector<Rational>& hVector
 ) {
+  STACK_TRACE(
+    "WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH"
+  );
+  for (int i = 0; i < generators.size; i ++) {
+    if (generators[i].isEqualToZero()) {
+      generators.removeIndexSwapWithLast(i);
+      i --;
+    }
+  }
   for (int i = 0; i < generators.size; i ++) {
     if (!this->isPositiveOrPerpWithRespectToH(generators[i], hVector)) {
       generators[i].negate();
@@ -10472,6 +10481,8 @@ void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(
   }
   bool reductionOccured = true;
   Vector<Rational> root;
+  int maximumRuns = this->rootSystem.size * this->rootSystem.size;
+  int totalRuns = 0;
   while (reductionOccured) {
     reductionOccured = false;
     for (int i = 0; i < generators.size; i ++) {
@@ -10492,6 +10503,17 @@ void WeylGroupData::transformToSimpleBasisGeneratorsWithRespectToH(
           reductionOccured = true;
         }
       }
+    }
+    totalRuns ++;
+    if (totalRuns > maximumRuns) {
+      global.fatal
+      << "This function should complete much faster, "
+      << "there's something wrong with the inputs. The generators are: "
+      << generators.toString()
+      << "; the positive root is: "
+      << hVector.toString()
+      << "."
+      << global.fatal;
     }
   }
 }

@@ -7982,9 +7982,8 @@ bool SlTwoSubalgebras::minimallyContains(
     toBeContained.indicesContainingRootSubalgebras
   ) {
     if (
-      candidateForMinimalContainer.indicesSubalgebrasContainingK.contains(
-        maybeIntermediateContainer
-      )
+      candidateForMinimalContainer.indicesSubalgebrasImmediatelyContainingK.
+      contains(maybeIntermediateContainer)
     ) {
       return false;
     }

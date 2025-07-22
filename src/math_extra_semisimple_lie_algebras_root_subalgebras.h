@@ -158,7 +158,12 @@ public:
   List<Vector<Rational> > lowestWeightsPrimalSimple;
   CharacterSemisimpleLieAlgebraModule<Rational>
   moduleDecompositionHighestWeights;
-  List<int> indicesSubalgebrasContainingK;
+  // A larger subalgebra A is said to immediately contain
+  // a smaller subalgebra B if
+  // the addition of a single root to the root system of the smaller
+  // subalgebra B generates a subalgebra isomorphic
+  // to the larger subalgebra A.
+  List<int> indicesSubalgebrasImmediatelyContainingK;
   List<List<List<int> > > pairingTable;
   List<int> oppositeKModules;
   DynkinDiagramRootSubalgebra dynkinDiagram;
@@ -197,7 +202,7 @@ public:
   List<Matrix<Rational> > potentialExtensionCartanSymmetrics;
   List<List<int> > potentialExtensionRootPermutations;
   List<DynkinType> potentialExtensionDynkinTypes;
-  VectorSparse<Rational> moduleDecompoAmbientAlgebraDimensionsOnly;
+  VectorSparse<Rational> moduleDecompositionAmbientAlgebraDimensionsOnly;
   RootSubalgebra();
   ~RootSubalgebra() {
     this->flagDeallocated = true;
@@ -377,7 +382,7 @@ public:
   std::string toString(FormatExpressions* format = nullptr);
   std::string toStringPotentialExtensions(FormatExpressions* format = nullptr)
   const;
-  std::string toStringContainingRegularSubalgebras();
+  std::string toStringImmediatelyContainingRegularSubalgebras();
   std::string toStringMinimallyContainingRegularSubalgebras();
   void toHTML(int index, FormatExpressions* format);
   std::string toStringLieBracketTable(
@@ -392,6 +397,7 @@ public:
   );
   void computeDynkinDiagramKAndCentralizer();
   bool checkRankInequality() const;
+  void rejectNonMaximallyDominantAccountContainers();
   bool computeEssentialsIfNew(RootSubalgebra* baseSubalgebraWeExtend);
   void computeEssentials();
   bool checkForMaximalDominanceCartanSubalgebra();
@@ -541,7 +547,18 @@ public:
   void computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
     List<RootSubalgebra>& bufferSubalgebras, int recursionDepth
   );
-  void sortDescendingOrderBySSRank();
+  // Computes the immediate inclusions between the subalgebras.
+  // Here, by immediate inclusion we mean that the smaller root system gets
+  // only
+  // one single root added to it.
+  void computeImmediateInclusions();
+  void computeImmediateInclusionsOnce(
+    RootSubalgebra& toBeModified, int indexOfToBeModified
+  );
+  int findIndexOfRootSubalgebraWithPermutedSimpleComponents(
+    RootSubalgebra& toBeFound
+  );
+  void sortDescendingOrderBySemisimpleRank();
   void toStringRootSpaces(
     std::string& output, bool includeMatrixForm, Vectors<Rational>& input
   );

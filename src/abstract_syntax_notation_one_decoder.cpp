@@ -710,8 +710,9 @@ void ASNElement::toJSON(JSData& output) const {
       output[ASNElement::JSLabels::interpretation] =
       Crypto::convertListUnsignedCharsToHex(this->ASNAtom);
     }
-    if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01)
-    {
+    if (
+      this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::boolean0x01
+    ) {
       if (this->ASNAtom.size > 0) {
         if (this->ASNAtom[0]) {
           output[ASNElement::JSLabels::interpretation] = "true";
@@ -720,8 +721,9 @@ void ASNElement::toJSON(JSData& output) const {
         }
       }
     }
-    if (this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02)
-    {
+    if (
+      this->tag == AbstractSyntaxNotationOneSubsetDecoder::tags::integer0x02
+    ) {
       LargeInteger integer;
       this->isInteger(&integer, nullptr);
       output[ASNElement::JSLabels::interpretation] = integer.toString();
@@ -2214,8 +2216,9 @@ bool TBSCertificateInfo::loadExtensions(
   const ASNElement& input, std::stringstream* commentsOnFailure
 ) {
   this->extensions.setSize(0);
-  if (input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03)
-  {
+  if (
+    input.tag != AbstractSyntaxNotationOneSubsetDecoder::tags::bitString0x03
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "TBS certificate extensions are expected to be of type bit string. ";
@@ -2363,8 +2366,9 @@ bool TBSCertificateInfo::load(
     }
     return false;
   }
-  if (!input.hasSubElementOfType({0, 0}, {}, this->version, commentsOnFailure))
-  {
+  if (
+    !input.hasSubElementOfType({0, 0}, {}, this->version, commentsOnFailure)
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure << "Failed to load version. ";
     }

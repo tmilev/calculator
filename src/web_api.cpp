@@ -90,8 +90,9 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processSubmitAnswers();
   } else if (global.requestType == "scores" && global.flagLoggedIn) {
     return this->processScores();
-  } else if (global.requestType == "scoresInCoursePage" && global.flagLoggedIn)
-  {
+  } else if (
+    global.requestType == "scoresInCoursePage" && global.flagLoggedIn
+  ) {
     return this->processScoresInCoursePage();
   } else if (
     global.userGuestMode() && global.requestType == "submitExerciseNoLogin"
@@ -175,8 +176,9 @@ bool WebAPIResponse::serveResponseFalseIfUnrecognized(
     return this->processCompareExpressions(true);
   } else if (global.requestType == WebAPI::Request::submitAnswerHardcoded) {
     return this->processSubmitAnswerHardcoded();
-  } else if (global.requestType == WebAPI::Request::compareExpressionsInternal)
-  {
+  } else if (
+    global.requestType == WebAPI::Request::compareExpressionsInternal
+  ) {
     return this->processCompareExpressions(false);
   } else if ("/" + global.requestType == WebAPI::Request::onePageJS) {
     return this->processCalculatorOnePageJS(false);

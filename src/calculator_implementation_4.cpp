@@ -645,8 +645,9 @@ bool CalculatorBasics::multiplyByOne(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE("CalculatorBasics::multiplyByOne");
-  if (!input.isListStartingWithAtom(calculator.opTimes()) || input.size() != 3)
-  {
+  if (
+    !input.isListStartingWithAtom(calculator.opTimes()) || input.size() != 3
+  ) {
     return false;
   }
   if (!input[1].isEqualToOne()) {
@@ -2580,8 +2581,9 @@ bool Expression::mergeContextsMyAruments(
   Expression convertedE;
   for (int i = 1; i < this->size(); i ++) {
     convertedE = (*this)[i];
-    if (!convertedE.setContextAtLeastEqualTo(commonContext, commentsOnFailure))
-    {
+    if (
+      !convertedE.setContextAtLeastEqualTo(commonContext, commentsOnFailure)
+    ) {
       *this->owner
       << "<hr>Failed to convert "
       << convertedE.toString()

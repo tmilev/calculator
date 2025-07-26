@@ -1759,8 +1759,9 @@ writeGeneralizedVermaModuleAsDifferentialOperatorUpToLevel(
   Expression resultSSalgebraE;
   resultSSalgebraE = leftE;
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
-  if (!CalculatorConversions::convert(calculator, leftE, semisimpleLieAlgebra))
-  {
+  if (
+    !CalculatorConversions::convert(calculator, leftE, semisimpleLieAlgebra)
+  ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   int rank = semisimpleLieAlgebra.content->getRank();
@@ -1955,8 +1956,9 @@ bool CalculatorLieTheory::splitGenericGeneralizedVermaTensorFiniteDimensional(
   const Expression& genVemaWeightNode = input[3];
   const Expression& fdWeightNode = input[2];
   WithContext<SemisimpleLieAlgebra*> semisimpleLieAlgebra;
-  if (!CalculatorConversions::convert(calculator, leftE, semisimpleLieAlgebra))
-  {
+  if (
+    !CalculatorConversions::convert(calculator, leftE, semisimpleLieAlgebra)
+  ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   int rank = semisimpleLieAlgebra.content->getRank();
@@ -3260,8 +3262,9 @@ bool CartanInvolution::computeSimpleRootImagesTypeBI(
     return false;
   }
   int rank = this->owner->getRank();
-  if (this->voganDiagram.parameter < 0 || this->voganDiagram.parameter >= rank)
-  {
+  if (
+    this->voganDiagram.parameter < 0 || this->voganDiagram.parameter >= rank
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Parameter must be between 0 and "
@@ -3314,8 +3317,9 @@ bool CartanInvolution::computeSimpleRootImagesTypeCI(
     return false;
   }
   int rank = this->owner->getRank();
-  if (this->voganDiagram.parameter < 0 || this->voganDiagram.parameter >= rank)
-  {
+  if (
+    this->voganDiagram.parameter < 0 || this->voganDiagram.parameter >= rank
+  ) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "Parameter must be between 0 and the rank less one. The rank is: "
@@ -5229,8 +5233,9 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
     << "Semisimple subalgebras function expects 1 argument. ";
   }
   WithContext<SemisimpleLieAlgebra*> lieAlgebraPointer;
-  if (!CalculatorConversions::convert(calculator, input[1], lieAlgebraPointer))
-  {
+  if (
+    !CalculatorConversions::convert(calculator, input[1], lieAlgebraPointer)
+  ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
   SemisimpleLieAlgebra& lieAlgebra = *lieAlgebraPointer.content;

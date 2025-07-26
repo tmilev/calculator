@@ -1904,8 +1904,9 @@ bool CalculatorFunctionsBinaryOps::powerElementWeylAlgebraBySmallInteger(
     for (
       int i = 0; i < monomial.polynomialPart.minimalNumberOfVariables(); i ++
     ) {
-      if (monomial.polynomialPart(i) != 0 && monomial.differentialPart(i) != 0)
-      {
+      if (
+        monomial.polynomialPart(i) != 0 && monomial.differentialPart(i) != 0
+      ) {
         return
         calculator
         << "<hr>Failed to raise "
@@ -2958,8 +2959,9 @@ bool CalculatorFunctionsBinaryOps::multiplyMatRatOrMatAlgByMatRatOrMatAlg(
       return false;
     }
   }
-  if (matrixAlgebraicLeft.numberOfColumns != matrixAlgebraicRight.numberOfRows)
-  {
+  if (
+    matrixAlgebraicLeft.numberOfColumns != matrixAlgebraicRight.numberOfRows
+  ) {
     std::stringstream errorStream;
     errorStream
     << "Error: attempting to multiply matrix with "

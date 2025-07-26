@@ -482,8 +482,9 @@ class SlTwoInSlN {
   int getModuleIndexFromHighestWeightVector(const Matrix<Rational>& input) {
     Rational scale;
     for (int i = 0; i < this->highestWeightVectors.size; i ++) {
-      if (this->highestWeightVectors.objects[i].isProportionalTo(input, scale))
-      {
+      if (
+        this->highestWeightVectors.objects[i].isProportionalTo(input, scale)
+      ) {
         return i;
       }
     }

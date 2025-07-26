@@ -752,8 +752,9 @@ bool GlobalVariables::configurationLoad() {
     }
     return false;
   }
-  if (!global.configuration.parse(this->configurationFileContent, false, &out))
-  {
+  if (
+    !global.configuration.parse(this->configurationFileContent, false, &out)
+  ) {
     global
     << Logger::red
     << "Failed to read configuration. "

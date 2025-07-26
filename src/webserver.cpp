@@ -3123,8 +3123,9 @@ std::string WebServer::toStringStatusAll() {
 bool WebServer::restartNeeded() {
   STACK_TRACE("WebServer::restartNeeded");
   struct stat fileStatistic;
-  if (stat(global.physicalNameExecutableWithPath.c_str(), &fileStatistic) != 0)
-  {
+  if (
+    stat(global.physicalNameExecutableWithPath.c_str(), &fileStatistic) != 0
+  ) {
     global
     << Logger::red
     << "Failed to extract executable statistics from: "

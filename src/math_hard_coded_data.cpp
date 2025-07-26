@@ -3143,8 +3143,9 @@ bool HardCodedWeylGroupData::loadOutputSubgroupsFromJSData(
   SubgroupDataRootReflections readerSubgroup;
   for (int i = 0; i < input.listObjects.size; i ++) {
     JSData& currentSGdata = input.listObjects[i];
-    if (currentSGdata.listObjects[0].listObjects[0].stringValue == "parabolic")
-    {
+    if (
+      currentSGdata.listObjects[0].listObjects[0].stringValue == "parabolic"
+    ) {
       readerSubgroup.flagIsParabolic = true;
       readerSubgroup.flagIsExtendedParabolic = true;
     } else if (

@@ -2024,8 +2024,9 @@ std::string CalculatorHTML::toStringOneDeadlineFormatted(
   bool deadlineHasPassed = (secondsTillDeadline < 0);
   if (deadlineIsInherited && !global.userStudentVieWOn()) {
     out << "Inherited: ";
-  } else if (deadlineIsInherited && isSection && returnEmptyStringIfNoDeadline)
-  {
+  } else if (
+    deadlineIsInherited && isSection && returnEmptyStringIfNoDeadline
+  ) {
     return "";
   } else {
     out << "Deadline: ";

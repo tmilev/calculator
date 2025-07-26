@@ -875,8 +875,9 @@ bool Calculator::Test::processResults() {
   std::stringstream badCommands;
   std::stringstream badCommandsConsole;
   this->inconsistencies = 0;
-  if (this->startIndex > 0 || this->lastIndexNotTested < this->commands.size())
-  {
+  if (
+    this->startIndex > 0 || this->lastIndexNotTested < this->commands.size()
+  ) {
     out
     << "<b style='color:red'>Only "
     << this->numberOfTests

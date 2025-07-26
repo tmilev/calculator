@@ -1728,8 +1728,9 @@ greatestCommonDivisorRational(
   computer.rightInput = rightRescaled;
   Polynomial<LargeInteger> outputInteger;
   int64_t millisecondsStart = global.getElapsedMilliseconds();
-  if (!computer.computeGreatestCommonDivisor(outputInteger, commentsOnFailure))
-  {
+  if (
+    !computer.computeGreatestCommonDivisor(outputInteger, commentsOnFailure)
+  ) {
     return false;
   }
   computer.millisecondsTotal =

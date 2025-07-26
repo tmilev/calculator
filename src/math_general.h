@@ -647,8 +647,9 @@ public:
     const Vector<Coefficient>& right,
     const Coefficient& ringZero
   ) const {
-    if (left.size != this->numberOfColumns || right.size != this->numberOfRows)
-    {
+    if (
+      left.size != this->numberOfColumns || right.size != this->numberOfRows
+    ) {
       global.fatal
       << "Scalar product using matrix: dimensions of vectors don't match. "
       << global.fatal;
@@ -690,8 +691,9 @@ public:
     return this->numberOfColumns == this->numberOfRows;
   }
   bool isDiagonal() const {
-    if (this->numberOfRows != this->numberOfColumns || this->numberOfRows <= 0)
-    {
+    if (
+      this->numberOfRows != this->numberOfColumns || this->numberOfRows <= 0
+    ) {
       return false;
     }
     for (int i = 0; i < this->numberOfRows; i ++) {
@@ -707,8 +709,9 @@ public:
     return true;
   }
   bool isIdentity() const {
-    if (this->numberOfRows != this->numberOfColumns || this->numberOfRows <= 0)
-    {
+    if (
+      this->numberOfRows != this->numberOfColumns || this->numberOfRows <= 0
+    ) {
       return false;
     }
     for (int i = 0; i < this->numberOfRows; i ++) {

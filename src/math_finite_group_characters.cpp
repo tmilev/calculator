@@ -351,8 +351,9 @@ decomposeThomasVersion() {
   List<Vector<Coefficient> > Vb = this->basis;
   List<Vector<Coefficient> > tempVectors;
   for (int i = 0; i < this->ownerGroup->characterTable.size; i ++) {
-    if (this->character.innerProduct(this->ownerGroup->characterTable[i]) != 0)
-    {
+    if (
+      this->character.innerProduct(this->ownerGroup->characterTable[i]) != 0
+    ) {
       global.comments << "contains irrep " << i << "\n";
       this->classFunctionMatrix(
         this->ownerGroup->characterTable[i], splittingOperatorMatrix

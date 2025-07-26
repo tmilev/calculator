@@ -2356,8 +2356,9 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   Selection tempSel;
   for (int i = 0; i < domain.size; i ++) {
     isoDomain.addOnTop(domain[i]);
-    if (isoDomain.getRankElementSpan(&rankComputer, &tempSel) < isoDomain.size)
-    {
+    if (
+      isoDomain.getRankElementSpan(&rankComputer, &tempSel) < isoDomain.size
+    ) {
       isoDomain.removeLastObject();
     } else {
       isoRange.addOnTop(range[i]);
@@ -2675,8 +2676,9 @@ void RootSubalgebra::addSlTwoSubalgebraIfNew(
 ) {
   STACK_TRACE("RootSubalgebra::addSlTwoSubalgebraIfNew");
   int indexIsomorphicSl2 = - 1;
-  if (!output.containsSl2WithGivenH(candidate.candidateH, &indexIsomorphicSl2))
-  {
+  if (
+    !output.containsSl2WithGivenH(candidate.candidateH, &indexIsomorphicSl2)
+  ) {
     SlTwoSubalgebra newSubalgebra;
     newSubalgebra.fromSlTwoSubalgebraCandidate(candidate);
     newSubalgebra.makeReportPrecomputations(
@@ -4873,8 +4875,9 @@ void RootSubalgebras::toStringRootSpaces(
       totalNilradicalRootSpaces ++;
     }
     if (includeMatrixForm) {
-      if (totalNilradicalRootSpaces % 2 == 0 && totalNilradicalRootSpaces != 0)
-      {
+      if (
+        totalNilradicalRootSpaces % 2 == 0 && totalNilradicalRootSpaces != 0
+      ) {
         out << "\\\\";
       }
     }

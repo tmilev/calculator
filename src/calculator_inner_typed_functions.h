@@ -433,8 +433,9 @@ bool CalculatorConversions::extractPolynomialFromDifference(
   STACK_TRACE(
     "CalculatorConversions::extractPolynomialFromDifferenceOrProduct"
   );
-  if (!input.isListStartingWithAtom(calculator.opMinus()) || input.size() != 3)
-  {
+  if (
+    !input.isListStartingWithAtom(calculator.opMinus()) || input.size() != 3
+  ) {
     global.fatal
     << "Unexpected input for extractPolynomialFromDifference. "
     << global.fatal;

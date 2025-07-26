@@ -1094,8 +1094,9 @@ void SemisimpleSubalgebras::writeSubalgebraToFile(
     }
   }
   out << "\n</body></html>\n ";
-  if (!FileOperations::writeFileVirtual(fileName, out.str(), &commentsOnError))
-  {
+  if (
+    !FileOperations::writeFileVirtual(fileName, out.str(), &commentsOnError)
+  ) {
     global.fatal
     << "<br>Failed to store your subalgebra file: "
     << fileName
@@ -3443,8 +3444,9 @@ std::string PossibleExtensionsOfSemisimpleLieSubalgebra::toString() {
   << " out of "
   << this->possibleLargerDynkinTypes.size
   << " types explored, current type: ";
-  if (this->numberOfLargerTypesExplored < this->possibleLargerDynkinTypes.size)
-  {
+  if (
+    this->numberOfLargerTypesExplored < this->possibleLargerDynkinTypes.size
+  ) {
     out << "<b>" << this->nextUnexploredDynkinType().toString() << "</b>";
   } else {
     out << "<b>All types explored.</b>";
@@ -10412,8 +10414,9 @@ void CandidateSemisimpleSubalgebra::getHsScaledToActByTwoByType(
   this->weylNonEmbedded->dynkinType.getTypesWithMults(allTypes);
   outputHsByType.setSize(0);
   outputTypeList.setSize(0);
-  if (allTypes.size != this->cartanSubalgebrasByComponentScaledToActByTwo.size)
-  {
+  if (
+    allTypes.size != this->cartanSubalgebrasByComponentScaledToActByTwo.size
+  ) {
     global.fatal
     << "AllTypes.size must equal "
     << "this->cartanSubalgebrasByComponentScaledToActByTwo.size. "

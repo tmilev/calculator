@@ -2635,8 +2635,9 @@ bool JavascriptExtractor::extractFromUnaryOrBinary(
   std::string opString;
   std::string leftString;
   std::string rightString;
-  if (!this->extractJavascriptRecursive(input[0], opString, commentsOnFailure))
-  {
+  if (
+    !this->extractJavascriptRecursive(input[0], opString, commentsOnFailure)
+  ) {
     return false;
   }
   if (

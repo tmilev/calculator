@@ -501,8 +501,9 @@ bool CalculatorFunctions::printZnEnumeration(
   }
   int grade = 0;
   int dimension = 0;
-  if (!input[2].isSmallInteger(&grade) || !input[1].isSmallInteger(&dimension))
-  {
+  if (
+    !input[2].isSmallInteger(&grade) || !input[1].isSmallInteger(&dimension)
+  ) {
     return false;
   }
   if (grade > 10 || dimension > 5 || grade < 0 || dimension < 0) {

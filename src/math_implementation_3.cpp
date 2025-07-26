@@ -7867,8 +7867,9 @@ bool WeylGroupData::isRegular(
     *indexFirstPerpendicularRoot = - 1;
   }
   for (int i = 0; i < this->rootSystem.size; i ++) {
-    if (this->rootScalarCartanRoot(input, this->rootSystem[i]).isEqualToZero())
-    {
+    if (
+      this->rootScalarCartanRoot(input, this->rootSystem[i]).isEqualToZero()
+    ) {
       if (indexFirstPerpendicularRoot != nullptr) {
         *indexFirstPerpendicularRoot = i;
       }

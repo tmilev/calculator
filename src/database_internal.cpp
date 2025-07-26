@@ -946,8 +946,9 @@ bool DatabaseInternalServer::deleteAllByFindQuery(
     return false;
   }
   HashedList<std::string> allObjectIds;
-  if (!this->findAllObjectIds(query, allObjectIds, nullptr, commentsOnFailure))
-  {
+  if (
+    !this->findAllObjectIds(query, allObjectIds, nullptr, commentsOnFailure)
+  ) {
     return false;
   }
   DatabaseCollection& collection =

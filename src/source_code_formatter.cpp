@@ -1448,9 +1448,11 @@ bool CodeFormatter::Element::computeIndentationIfWantsCodeBlock() {
     this->children[1].whiteSpaceBefore = 1;
   }
   this->computeIndentationBasic(0);
-  CodeFormatter::Element* rightMostChild =
-      this->rightMostAtomUnderMe();
-  if (rightMostChild==nullptr || rightMostChild->columnFinal != this->owner->maximumDesiredLineLength-2) {
+  CodeFormatter::Element* rightMostChild = this->rightMostAtomUnderMe();
+  if (
+    rightMostChild == nullptr ||
+    rightMostChild->columnFinal != this->owner->maximumDesiredLineLength - 2
+  ) {
     return true;
   }
   // We are exactly 2 characters from the end line, so we risk having code
@@ -1466,8 +1468,9 @@ bool CodeFormatter::Element::computeIndentationIfWantsCodeBlock() {
   // }
   // for consistency.
   // Restrict line length and recompute.
-    this->maximumDesiredLineLengthOverride = this->owner->maximumDesiredLineLength-1;
-return  this->computeIndentationBasic(0);
+  this->maximumDesiredLineLengthOverride =
+  this->owner->maximumDesiredLineLength - 1;
+  return this->computeIndentationBasic(0);
 }
 
 bool CodeFormatter::Element::computeIndentationIfClause() {
@@ -4767,8 +4770,9 @@ bool CodeFormatter::Processor::isSuitableForExpressionOperatorExpressionXX(
       return false;
     }
   }
-  if (this->owner->rightOperatorOverridesLeft(operatorElement, lookAheadFirst))
-  {
+  if (
+    this->owner->rightOperatorOverridesLeft(operatorElement, lookAheadFirst)
+  ) {
     return false;
   }
   if (

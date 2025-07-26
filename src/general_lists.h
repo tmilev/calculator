@@ -1729,8 +1729,9 @@ void List<Object>::addListOnTop(const List<Object>& incoming) {
 
 template <class Object>
 void List<Object>::swapTwoIndices(int index1, int index2) {
-  if (index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size)
-  {
+  if (
+    index1 < 0 || index1 >= this->size || index2 < 0 || index2 >= this->size
+  ) {
     std::stringstream commentsOnCrash;
     commentsOnCrash
     << "Requested elements with indices "

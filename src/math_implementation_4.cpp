@@ -1022,8 +1022,9 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       // type E_n.
       Rational scale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') /
       tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
-      if (diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size != 2)
-      {
+      if (
+        diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size != 2
+      ) {
         global.fatal
         << "The Dynkin diagram has two components of "
         << "length larger than 2 linked to the triple node."
@@ -1258,8 +1259,8 @@ void DynkinDiagramRootSubalgebra::computeDiagramInputIsSimpleBasis(
 bool DynkinDiagramRootSubalgebra::letterIsDynkinGreaterThanLetter(
   char letter1, char letter2
 ) {
-  if ((letter1 == 'B' || letter1 == 'D') && (letter2 == 'B' || letter2 == 'D'))
-  {
+  if ((letter1 == 'B' || letter1 == 'D') && (letter2 == 'B' || letter2 == 'D')
+  ) {
     if (letter1 == letter2) {
       return false;
     }

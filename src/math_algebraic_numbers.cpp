@@ -104,8 +104,9 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
       if (vectorActedOnSelection.selected[i] && selection.selected[i]) {
         resultVectorSelection.selected[i] = false;
         coefficient *= this->quadraticRadicals[i];
-      } else if (!vectorActedOnSelection.selected[i] && !selection.selected[i])
-      {
+      } else if (
+        !vectorActedOnSelection.selected[i] && !selection.selected[i]
+      ) {
         resultVectorSelection.selected[i] = false;
       } else {
         resultVectorSelection.selected[i] = true;

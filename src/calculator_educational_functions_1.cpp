@@ -346,8 +346,9 @@ bool CalculatorEducationalFunctions::compareExpressionsJSONInternal(
     "Unexpected failure to extract free variables from desired answer.";
     return output.assignValue(calculator, comparison.toJSON());
   }
-  if (!comparison.given.getFreeVariables(comparison.freeVariablesFound, false))
-  {
+  if (
+    !comparison.given.getFreeVariables(comparison.freeVariablesFound, false)
+  ) {
     comparison.errorEvaluation =
     "Unexpected failure to extract free variables from given answer.";
     return output.assignValue(calculator, comparison.toJSON());

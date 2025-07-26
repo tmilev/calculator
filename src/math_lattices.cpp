@@ -411,8 +411,9 @@ bool QuasiPolynomial::compressOnce() {
   STACK_TRACE("QuasiPolynomial::compressOnce");
   for (int i = 0; i < this->latticeShifts.size; i ++) {
     for (int j = i + 1; j < this->latticeShifts.size; j ++) {
-      if (this->valueOnEachLatticeShift[i] != this->valueOnEachLatticeShift[j])
-      {
+      if (
+        this->valueOnEachLatticeShift[i] != this->valueOnEachLatticeShift[j]
+      ) {
         continue;
       }
       if (

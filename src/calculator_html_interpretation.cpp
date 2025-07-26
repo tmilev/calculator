@@ -188,8 +188,9 @@ std::string WebAPIResponse::setProblemWeight() {
   );
   std::stringstream commentsOnFailure;
   std::stringstream out;
-  if (problem.mergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure))
-  {
+  if (
+    problem.mergeProblemWeightAndStore(inputProblemInfo, &commentsOnFailure)
+  ) {
     out << "<b style='color:green'>Modified.</b>";
   } else {
     out << "<b style='color:red'>" << commentsOnFailure.str() << "</b>";
@@ -693,8 +694,9 @@ std::string WebAPIResponse::getBrowserification(
   STACK_TRACE("WebAPIReponse::getBrowserification");
   BuilderApplication builder;
   std::stringstream errorStream;
-  if (!builder.loadJavascriptFileNames(buildJSONVirtualFileName, &errorStream))
-  {
+  if (
+    !builder.loadJavascriptFileNames(buildJSONVirtualFileName, &errorStream)
+  ) {
     errorStream
     << "<b>Failed to load the javascript build json file: "
     << buildJSONVirtualFileName

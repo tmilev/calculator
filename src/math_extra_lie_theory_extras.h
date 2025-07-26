@@ -1279,8 +1279,9 @@ assignElementUniversalEnvelopingOrderedTimesHighestWeightVector(
   const Coefficient& ringUnit
 ) {
   this->elementInternal.operator=(input);
-  if (ringZero.substitutionNthElementIsImageNthCoordinateSimpleBasis.size != 3)
-  {
+  if (
+    ringZero.substitutionNthElementIsImageNthCoordinateSimpleBasis.size != 3
+  ) {
     global.fatal
     << "ringZero.substitutionNthElementIsImageNthCoordinateSimpleBasis.size "
     << "is not equal to 3 as expected. "

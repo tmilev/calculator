@@ -205,8 +205,9 @@ void LaTeXCrawler::buildFreecalc() {
       }
       if (buffer[i] == '{') {
         leftBracketsMinusRight ++;
-        if (leftBracketsMinusRight == 1 && numberOfBallancedBracketGroups == 2)
-        {
+        if (
+          leftBracketsMinusRight == 1 && numberOfBallancedBracketGroups == 2
+        ) {
           recordingLectureNumber = true;
         }
       }

@@ -5926,8 +5926,9 @@ std::string Expression::toUTF8String(FormatExpressions* format) const {
         firstExpression != "" &&
         firstExpression != "-"
       ) {
-        if (MathRoutines::isDigit(firstExpression[firstExpression.size() - 1]))
-        {
+        if (
+          MathRoutines::isDigit(firstExpression[firstExpression.size() - 1])
+        ) {
           if (MathRoutines::isDigit(secondUTF8String[0])) {
             mustHaveTimes = true;
           }

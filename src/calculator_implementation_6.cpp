@@ -1846,8 +1846,9 @@ bool CalculatorFunctions::isProductLinearOrConstantTermsIn(
     return false;
   }
   List<Expression> multiplicands;
-  if (!calculator.collectOpands(input[2], calculator.opTimes(), multiplicands))
-  {
+  if (
+    !calculator.collectOpands(input[2], calculator.opTimes(), multiplicands)
+  ) {
     return
     calculator
     << "Could not extract multiplicands from: "
@@ -1996,8 +1997,9 @@ bool CalculatorFunctions::isProductTermsUpToPower(
     }
   }
   List<Expression> multiplicands;
-  if (!calculator.collectOpands(input[2], calculator.opTimes(), multiplicands))
-  {
+  if (
+    !calculator.collectOpands(input[2], calculator.opTimes(), multiplicands)
+  ) {
     return
     calculator
     << "Could not extract multiplicands from: "

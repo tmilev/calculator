@@ -4956,8 +4956,9 @@ bool CalculatorFunctions::polynomialize(
   if (input.size() != 2) {
     return false;
   }
-  if (CalculatorFunctions::functionPolynomialize(calculator, input[1], output))
-  {
+  if (
+    CalculatorFunctions::functionPolynomialize(calculator, input[1], output)
+  ) {
     return true;
   }
   output = input[1];
@@ -5826,8 +5827,9 @@ bool CalculatorFunctionsIntegration::integrateXPowerN(
   STACK_TRACE("CalculatorFunctionsIntegration::integrateXPowerN");
   Expression functionExpression;
   Expression variableExpression;
-  if (!input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression))
-  {
+  if (
+    !input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression)
+  ) {
     return false;
   }
   Expression functionCoefficient;
@@ -6314,8 +6316,9 @@ bool CalculatorFunctionsIntegration::integrateEpowerAxDiffX(
   STACK_TRACE("CalculatorFunctionsIntegration::integrateEpowerAxDiffX");
   Expression functionExpression;
   Expression variableExpression;
-  if (!input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression))
-  {
+  if (
+    !input.isIndefiniteIntegralFdx(&variableExpression, &functionExpression)
+  ) {
     return false;
   }
   Expression functionCoefficient;
@@ -7810,8 +7813,9 @@ bool CalculatorFunctionsPlot::plot2D(
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
   }
-  if (extractor.extractJavascript(plotObject.rightPoint, &calculator.comments))
-  {
+  if (
+    extractor.extractJavascript(plotObject.rightPoint, &calculator.comments)
+  ) {
     plotObject.rightPtJS = extractor.result;
   } else {
     plotObject.plotType = "plotFunctionPrecomputed";
@@ -10764,8 +10768,9 @@ public:
   }
   void addStringTruncate(const std::string& input, bool isLeaf) {
     this->displayedStringIsLeaf.addOnTop(isLeaf);
-    if (input.size() <= static_cast<unsigned>(this->maximumCharactersInString))
-    {
+    if (
+      input.size() <= static_cast<unsigned>(this->maximumCharactersInString)
+    ) {
       this->displayedExpressionStrings.addOnTop(input);
       return;
     }

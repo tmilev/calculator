@@ -1578,24 +1578,16 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* format) {
   output.close();
 }
 
+std::string RootSubalgebra::toStringAllContainingRegularSubalgebras() {
+  return this->owner->toStringAlgebraLinks(this->containerIndices);
+}
+
 std::string RootSubalgebra::toStringMinimallyContainingRegularSubalgebras() {
-  std::stringstream out;
-  out << "Not implemented yet";
-  return out.str();
+  return this->owner->toStringAlgebraLinks(this->minimalContainerIndices);
 }
 
 std::string RootSubalgebra::toStringImmediatelyContainingRegularSubalgebras() {
-  std::stringstream out;
-  for (
-    int i = 0; i < this->indicesSubalgebrasImmediatelyContainingK.size; i ++
-  ) {
-    int indexOfContainer = this->indicesSubalgebrasImmediatelyContainingK[i];
-    out << this->owner->toStringAlgebraLink(indexOfContainer);
-    if (i != this->indicesSubalgebrasImmediatelyContainingK.size - 1) {
-      out << ", ";
-    }
-  }
-  return out.str();
+  return this->owner->toStringAlgebraLinks(this->immediateContainerIndices);
 }
 
 std::string RootSubalgebra::toString(FormatExpressions* format) {
@@ -1966,6 +1958,7 @@ RootSubalgebra::RootSubalgebra() {
   this->numberOfGModKTableRowsAllowedLatex = 35;
   this->flagMakingProgressReport = true;
   this->flagComputeConeCondition = true;
+  this->flagAllInclusionsAreComputed = false;
   this->initForNilradicalGeneration();
   this->initializeNoOwnerReset();
 }
@@ -1976,7 +1969,7 @@ void RootSubalgebra::initializeNoOwnerReset() {
   this->totalHeirsRejectedSameModuleDecomposition = 0;
   this->totalHeirsRejectedBadAngles = 0;
   this->totalHeirsRejectedNotMaximalWithRespectToOuterAutomorphisms = 0;
-  this->indicesSubalgebrasImmediatelyContainingK.clear();
+  this->immediateContainerIndices.clear();
 }
 
 void RootSubalgebra::initForNilradicalGeneration() {
@@ -3467,6 +3460,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
   }
   this->sortDescendingOrderBySemisimpleRank();
   this->computeImmediateInclusions();
+  this->computeAllInclusions();
   if (report2.tickAndWantReport()) {
     reportStream << "done. ";
     report2.report(reportStream.str());
@@ -3653,6 +3647,49 @@ int RootSubalgebras::findIndexOfRootSubalgebraWithPermutedSimpleComponents(
   return candidatesForEquality[0];
 }
 
+void RootSubalgebras::computeAllInclusions() {
+  STACK_TRACE("RootSubalgebras::computeAllInclusions");
+  if (this->subalgebras.size == 0) {
+    return;
+  }
+  this->computeAllInclusionsOfOneSubalgebra(
+    *this->subalgebras.lastObject(), 0
+  );
+}
+
+void RootSubalgebras::computeAllInclusionsOfOneSubalgebra(
+  RootSubalgebra& toBeModified, int recursionDepth
+) {
+  STACK_TRACE("RootSubalgebras::computeAllInclusionsOfOneSubalgebra");
+  if (recursionDepth > this->subalgebras.size) {
+    global.fatal
+    << "Run-off recursion with recursion depth: "
+    << recursionDepth
+    << global.fatal;
+  }
+  if (toBeModified.flagAllInclusionsAreComputed) {
+    return;
+  }
+  toBeModified.containerIndices.clear();
+  toBeModified.minimalContainerIndices.clear();
+  for (int immediateContainerIndex : toBeModified.immediateContainerIndices) {
+    RootSubalgebra& container = this->subalgebras[immediateContainerIndex];
+    this->computeAllInclusionsOfOneSubalgebra(container, recursionDepth + 1);
+    toBeModified.containerIndices.addOnTopNoRepetition(
+      container.containerIndices
+    );
+  }
+  for (int immediateContainerIndex : toBeModified.immediateContainerIndices) {
+    if (!toBeModified.containerIndices.contains(immediateContainerIndex)) {
+      toBeModified.minimalContainerIndices.addOnTop(immediateContainerIndex);
+    }
+    toBeModified.containerIndices.addOnTopNoRepetition(
+      immediateContainerIndex
+    );
+  }
+  toBeModified.flagAllInclusionsAreComputed = true;
+}
+
 void RootSubalgebras::computeImmediateInclusions() {
   STACK_TRACE("RootSubalgebras::computeImmediateInclusions");
   this->getOwnerWeyl().computeRho(false);
@@ -3693,8 +3730,7 @@ void RootSubalgebras::computeImmediateInclusionsOnce(
       << global.fatal;
     }
     if (index != indexOfToBeModified) {
-      toBeModified.indicesSubalgebrasImmediatelyContainingK.
-      addOnTopNoRepetition(index);
+      toBeModified.immediateContainerIndices.addOnTopNoRepetition(index);
     }
   }
 }
@@ -3728,7 +3764,7 @@ void RootSubalgebras::sortDescendingOrderBySemisimpleRank() {
   for (int i = 0; i < this->subalgebras.size; i ++) {
     output.subalgebras.addOnTop(this->subalgebras[sortingArray[i]]);
     RootSubalgebra& currentSubalgebra = *output.subalgebras.lastObject();
-    if (currentSubalgebra.indicesSubalgebrasImmediatelyContainingK.size != 0) {
+    if (currentSubalgebra.immediateContainerIndices.size != 0) {
       global.fatal
       << "At this point of the code, "
       << "the immediate containment array should be empty. "
@@ -3887,14 +3923,26 @@ void RootSubalgebras::toStringCentralizerIsomorphisms(
   output = out.str();
 }
 
-std::string RootSubalgebras::toStringAlgebraLink(int index) {
+std::string RootSubalgebras::toStringAlgebraLink(int index) const {
   std::stringstream out;
   out
-  << "<a href = \"rootSubalgebra_"
+  << "<a href='rootSubalgebra_"
   << index + 1
-  << ".html\">"
+  << ".html'>"
   << this->subalgebras[index].dynkinDiagram.toString()
   << "</a>";
+  return out.str();
+}
+
+std::string RootSubalgebras::toStringAlgebraLinks(const List<int>& indices)
+const {
+  std::stringstream out;
+  for (int i = 0; i < indices.size; i ++) {
+    out << this->toStringAlgebraLink(indices[i]);
+    if (i != indices.size - 1) {
+      out << ", ";
+    }
+  }
   return out.str();
 }
 

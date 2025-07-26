@@ -351,9 +351,6 @@ public:
   );
   void computeRootSubalgebraContainers();
   void computeOneRootSubalgebraContainers(SlTwoSubalgebra& output);
-  bool minimallyContains(
-    SlTwoSubalgebra& toBeContained, int indexRootSubalgebra
-  );
 };
 
 #endif // header_math_extra_semisimple_lie_subalgebras_sltwos_ALREADY_INCLUDED

@@ -148,6 +148,7 @@ public:
   bool flagComputeConeCondition;
   bool flagMakingProgressReport;
   bool flagDeallocated;
+  bool flagAllInclusionsAreComputed;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > modules;
   List<ElementSemisimpleLieAlgebra<Rational> > highestVectors;
   List<Vectors<Rational> > weightsModulesNONPrimalSimple;
@@ -163,7 +164,13 @@ public:
   // the addition of a single root to the root system of the smaller
   // subalgebra B generates a subalgebra isomorphic
   // to the larger subalgebra A.
-  List<int> indicesSubalgebrasImmediatelyContainingK;
+  List<int> immediateContainerIndices;
+  // All the subalgebras containing a
+  // conjugate copy of the present subalgebra.
+  HashedList<int> containerIndices;
+  // All the subalgebras containing a conjugate copy of the present
+  // subalgebra without any intermediate root subalgebra containers.
+  List<int> minimalContainerIndices;
   List<List<List<int> > > pairingTable;
   List<int> oppositeKModules;
   DynkinDiagramRootSubalgebra dynkinDiagram;
@@ -384,6 +391,7 @@ public:
   const;
   std::string toStringImmediatelyContainingRegularSubalgebras();
   std::string toStringMinimallyContainingRegularSubalgebras();
+  std::string toStringAllContainingRegularSubalgebras();
   void toHTML(int index, FormatExpressions* format);
   std::string toStringLieBracketTable(
     bool useLaTeX, bool useHtml, RootSubalgebra& owner
@@ -546,11 +554,14 @@ public:
   int indexSubalgebra(RootSubalgebra& input);
   // Computes the immediate inclusions between the subalgebras.
   // Here, by immediate inclusion we mean that the smaller root system gets
-  // only
-  // one single root added to it.
+  // only one single root added to it to generate the larger subalgebra.
   void computeImmediateInclusions();
   void computeImmediateInclusionsOnce(
     RootSubalgebra& toBeModified, int indexOfToBeModified
+  );
+  void computeAllInclusions();
+  void computeAllInclusionsOfOneSubalgebra(
+    RootSubalgebra& toBeModified, int recursionDepth
   );
   int findIndexOfRootSubalgebraWithPermutedSimpleComponents(
     RootSubalgebra& toBeFound
@@ -571,7 +582,8 @@ public:
   );
   void toHTML(FormatExpressions* format);
   std::string toString(FormatExpressions* format);
-  std::string toStringAlgebraLink(int index);
+  std::string toStringAlgebraLink(int index) const;
+  std::string toStringAlgebraLinks(const List<int>& subalgebras) const;
   std::string toStringDynkinTableHTML(FormatExpressions* format);
   std::string toStringDynkinTableFormatToLaTeX(FormatExpressions* format);
   void computeLProhibitingRelations();

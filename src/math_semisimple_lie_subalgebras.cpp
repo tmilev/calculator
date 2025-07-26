@@ -7977,35 +7977,21 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
   output.computeRootSubalgebraContainers();
 }
 
-bool SlTwoSubalgebras::minimallyContains(
-  SlTwoSubalgebra& toBeContained, int indexRootSubalgebra
-) {
-  STACK_TRACE("SlTwoSubalgebras::minimallyContains");
-  RootSubalgebra& candidateForMinimalContainer =
-  this->rootSubalgebras.subalgebras[indexRootSubalgebra];
-  for (
-    int maybeIntermediateContainer :
-    toBeContained.indicesContainingRootSubalgebras
-  ) {
-    if (
-      candidateForMinimalContainer.indicesSubalgebrasImmediatelyContainingK.
-      contains(maybeIntermediateContainer)
-    ) {
-      return false;
-    }
-  }
-  return true;
-}
-
 void SlTwoSubalgebras::computeOneRootSubalgebraContainers(
   SlTwoSubalgebra& output
 ) {
+  STACK_TRACE("SlTwoSubalgebras::computeOneRootSubalgebraContainers");
   output.indicesMinimalContainingRootSubalgebras.clear();
+  HashedList<int> containersOfContainers;
   for (int j : output.indicesContainingRootSubalgebras) {
-    if (!this->minimallyContains(output, j)) {
+    RootSubalgebra& container = this->rootSubalgebras.subalgebras[j];
+    containersOfContainers.addOnTopNoRepetition(container.containerIndices);
+  }
+  for (int j : output.indicesContainingRootSubalgebras) {
+    if (containersOfContainers.contains(j)) {
       continue;
     }
-    output.indicesMinimalContainingRootSubalgebras.addOnTopNoRepetition(j);
+    output.indicesMinimalContainingRootSubalgebras.addOnTop(j);
   }
 }
 

@@ -2289,11 +2289,7 @@
   },
   {
     "input":"PrintRootSubalgebrasAndSlTwos(E_6)",
-    "output":"\"The table is precomputed and served from the hard disk. <br><a href='output/semisimple_lie_algebras/E^{1}_6/rootSubalgebras_E^{1}_6.html' target='_blank'>E^{1}_6 </a>\""
-  },
-  {
-    "input":"PrintSlTwoSubalgebras(g_2)",
-    "output":"\"The table is precomputed and served from the hard disk. <br><a href='output/semisimple_lie_algebras/G^{1}_2/sl2s/sl2s_G^{1}_2.html' target='_blank'>G^{1}_2 </a>\""
+    "output":"\"The tables are precomputed and served from the hard disk. <br><a href='output/semisimple_lie_algebras/E^{1}_6/rootSubalgebras_E^{1}_6.html' target='_blank'>Root subalgebras of E^{1}_6 </a><br><a href='output/semisimple_lie_algebras/E^{1}_6/sl2s/sl2s_E^{1}_6.html' target='_blank'>sl(2)-subalgebras of E^{1}_6 </a>\""
   },
   {
     "input":"parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))",

@@ -5498,26 +5498,19 @@ RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))
 ```
 Generates a root subsystem of a simple type. First argument indicates simple type, second, third, ... arguments give the generating roots. 
 
-*PrintRootSubalgebrasAndSlTwos* [PrintRootSubalgebrasAndSlTwos] {CalculatorLieTheory::printRootSubalgebras}. 
+*PrintRootSubalgebrasAndSlTwos* [PrintRootSubalgebrasAndSlTwos] {CalculatorLieTheory::printRootSubalgebrasAndSlTwos}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintRootSubalgebrasAndSlTwos%28E_6%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PrintRootSubalgebrasAndSlTwos(E_6)
 ```
 Prints sl(2) subalgebras and root subalgebras. The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).
 
-*PrintRootSubalgebrasAndSlTwosRecompute* [PrintRootSubalgebrasAndSlTwosRecompute] {CalculatorLieTheory::printRootSAsForceRecompute}. (admin only) 
+*PrintRootSubalgebrasAndSlTwosRecompute* [PrintRootSubalgebrasAndSlTwosRecompute] {CalculatorLieTheory::printRootSubalgebrasAndSlTwosForceRecompute}. (admin only) 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintRootSubalgebrasAndSlTwosRecompute%28b_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PrintRootSubalgebrasAndSlTwosRecompute(b_3)
 ```
-Same as printRootSubalgebras but forces recomputation. Use to recompute obsolete or interrupted output files.
-
-*PrintSlTwoSubalgebras* [PrintSlTwoSubalgebras] {CalculatorLieTheory::printSltwos}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintSlTwoSubalgebras%28g_2%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
-```
-PrintSlTwoSubalgebras(g_2)
-```
-Prints sl(2) subalgebras and root subalgebras. The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).
+Same as PrintRootSubalgebrasAndSlTwos but forces recomputation. Use to recompute obsolete or interrupted output files.
 
 *ParabolicsInfoBruhatGraph* [ParabolicsInfoBruhatGraph] {CalculatorLieTheory::parabolicWeylGroupsBruhatGraph}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22parabolicsInfoBruhatGraph%7b%7d%28B_3%2c%281%2c0%2c0%29%2c%281%2c0%2c0%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

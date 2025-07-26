@@ -543,8 +543,9 @@ modOutFDRelationsExperimental(
       currentWeight += currentRoot;
       testWeight = currentWeight;
       weyl.raiseToDominantWeight(testWeight);
-      if (!(highestWeightSimpleCoordinatesTrue - testWeight).isPositiveOrZero())
-      {
+      if (
+        !(highestWeightSimpleCoordinatesTrue - testWeight).isPositiveOrZero()
+      ) {
         this->makeZero(ringZero, *this->owner);
         return true;
       }

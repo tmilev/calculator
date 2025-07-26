@@ -1720,8 +1720,9 @@ bool WeylGroupData::areMaximallyDominantGroupInner(
       if (this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[i]) < 0) {
         bool reflectionDoesRaise = true;
         for (int k = 0; k < i; k ++) {
-          if (this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[k]) > 0)
-          {
+          if (
+            this->rootScalarCartanRoot(this->rootsOfBorel[j], weights[k]) > 0
+          ) {
             reflectionDoesRaise = false;
             break;
           }

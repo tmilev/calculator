@@ -1437,8 +1437,9 @@ computeConjugacyClassesSizesRepresentativesWords() {
 
 template <typename elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::computeGeneratorCommutationRelations() {
-  if (this->generatorCommutationRelations.numberOfRows == this->generators.size)
-  {
+  if (
+    this->generatorCommutationRelations.numberOfRows == this->generators.size
+  ) {
     return;
   }
   this->generatorCommutationRelations.initialize(

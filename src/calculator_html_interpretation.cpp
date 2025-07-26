@@ -725,8 +725,9 @@ std::string WebAPIResponse::getBrowserification(
       << "specifically white-listed as ok. \");";
       builder.jsFileContents[i] = moduleNotFound.str();
     }
-    if (builder.jsFileNames[i] == "/calculator_html/web_assembly/calculator.js")
-    {
+    if (
+      builder.jsFileNames[i] == "/calculator_html/web_assembly/calculator.js"
+    ) {
       // Special exception for web assembly.
       // Save ourselves lots of headache and
       // configuration by manually inserting the snippets we

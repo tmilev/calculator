@@ -984,9 +984,9 @@ bool RootSubalgebra::coneConditionHolds(
 }
 
 bool RootSubalgebra::checkRankInequality() const {
-  if ((this->dynkinType.getRank() + this->centralizerDynkinType.getRank()) *
-    2 < this->owner->owner->getRank()
-  ) {
+  int rankOfSubalgebraAndItsCentralizer =
+  this->dynkinType.getRank() + this->centralizerDynkinType.getRank();
+  if (rankOfSubalgebraAndItsCentralizer * 2 < this->owner->owner->getRank()) {
     global.fatal
     << "2*(Centralizer rank + rank) < ambient rank, "
     << "which is mathematically impossible. There was a programming error. "
@@ -1654,8 +1654,8 @@ std::string RootSubalgebra::toString(FormatExpressions* format) {
   out << this->toStringImmediatelyContainingRegularSubalgebras();
   out
   << "<br>Here, we say that the larger subalgebra A "
-  << "immediately contains B if the root system of B,"
-  << " extended by a single root, generates a "
+  << "immediately contains B if the root system of B, "
+  << "extended by a single root, generates a "
   << "root system isomorphic to the root system of A. ";
   out << "<br>Minimally containing regular subalgebras: ";
   out << this->toStringMinimallyContainingRegularSubalgebras();
@@ -3076,36 +3076,6 @@ void RootSubalgebra::generateAutomorphismsPreservingBorel(
   this->generateIsomorphismsPreservingBorel(*this, &outputAutomorphisms);
 }
 
-void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD(
-  bool sort, bool computeEpsilonCoordinates
-) {
-  STACK_TRACE(
-    "RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphismOLD"
-  );
-  this->subalgebras.size = 0;
-  this->getOwnerWeyl().computeRho(true);
-  // this->initDynkinDiagramsNonDecided(this->ambientWeyl, WeylLetter,
-  // WeylRank);
-  RootSubalgebras rootSAsGenerateAll;
-  rootSAsGenerateAll.subalgebras.setSize(
-    this->getOwnerSemisimpleLieAlgebra().getRank() * 2 + 1
-  );
-  rootSAsGenerateAll.subalgebras[0].generatorsK.size = 0;
-  rootSAsGenerateAll.subalgebras[0].owner = this;
-  rootSAsGenerateAll.subalgebras[0].computeEssentials();
-  this->computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
-    rootSAsGenerateAll.subalgebras, 1
-  );
-  if (sort) {
-    this->sortDescendingOrderBySemisimpleRank();
-  }
-  if (computeEpsilonCoordinates) {
-    for (int i = 0; i < this->subalgebras.size; i ++) {
-      this->subalgebras[i].computeEpsilonCoordinatesWithRespectToSubalgebra();
-    }
-  }
-}
-
 void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
   SlTwoSubalgebras& output,
   int indexRootSubalgebraInContainer,
@@ -3800,13 +3770,13 @@ void RootSubalgebras::toHTML(FormatExpressions* format) {
   << this->subalgebras[0].dynkinDiagram.toString()
   << "</title>";
   output
-  << "<meta name = \"keywords\" content = \""
+  << "<meta name='keywords' content='"
   << this->subalgebras[0].dynkinDiagram.toString()
   << " root subsystems, root subsystems, root systems";
   if (this->getOwnerWeyl().dynkinType.hasExceptionalComponent()) {
     output << ", exceptional Lie algebra";
   }
-  output << " \">";
+  output << "'>";
   output << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements();
   output
   << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload()
@@ -3967,7 +3937,6 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
   "C(k_{ss}) consists of root spaces with roots strongly "
   "orthogonal to \\Delta(k) and a part of the Cartan h";
   int col = 0;
-  int row = 0;
   out
   << "g: "
   << this->subalgebras[0].dynkinDiagram.toString()
@@ -3977,21 +3946,20 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
   << this->subalgebras.size - 2
   << " larger than the Cartan subalgebra + "
   << "the Cartan subalgebra + the full subalgebra).\n\n";
-  out << "<table border =\"1\">\n <colgroup>";
+  out << "<table border='1'>\n <colgroup>";
   for (int i = 0; i < this->columnsPerTableLatex; i ++) {
-    out << "<col width = \"180\">";
+    out << "<col width='180'>";
   }
   out << "</colgroup>";
   for (int i = 0; i < this->subalgebras.size; i ++) {
-    row = i / this->columnsPerTableLatex;
     col = i % this->columnsPerTableLatex;
     if (col == 0) {
       out << "<tr>";
     }
     out
-    << "<td style = \"vertical-align: text-top;\" title =\""
+    << "<td style='vertical-align: text-top;' title='"
     << tooltipSAs
-    << "\">";
+    << "'>";
     out << "\n\nType k_{ss}: " << this->toStringAlgebraLink(i);
     out << "<br>";
     if (i == 0) {
@@ -4003,9 +3971,6 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
     out
     << "\n<br>\nType C(k_{ss})_{ss}: "
     << this->subalgebras[i].centralizerDiagram.toString();
-    if (row == this->linesPerTableLatex) {
-      row = 0;
-    }
     out << "</td>";
     if (
       col == this->columnsPerTableLatex - 1 || i == this->subalgebras.size - 1
@@ -4023,10 +3988,10 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
     << " pseudo-parabolic but not parabolic and "
     << this->totalNonPseudoParabolic
     << " non pseudo-parabolic root subsystems.";
-    HashedList<Vector<Rational> > GAPPosRootSystem;
+    HashedList<Vector<Rational> > GAPPositiveRootSystem;
     if (
       this->flagPrintGAPInput &&
-      this->owner->weylGroup.loadGAPRootSystem(GAPPosRootSystem)
+      this->owner->weylGroup.loadGAPRootSystem(GAPPositiveRootSystem)
     ) {
       out
       << " The roots needed to generate the "
@@ -4056,12 +4021,12 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
           size; j ++
         ) {
           int index =
-          GAPPosRootSystem.getIndex(
+          GAPPositiveRootSystem.getIndex(
             currentSubalgebra.simpleRootsReductiveSubalgebra[j]
           );
           if (index == - 1) {
             index =
-            GAPPosRootSystem.getIndex(
+            GAPPositiveRootSystem.getIndex(
               - currentSubalgebra.simpleRootsReductiveSubalgebra[j]
             );
           }
@@ -4071,8 +4036,9 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
           }
         }
         out << "]]";
-        if (i != this->subalgebrasOrderParabolicPseudoParabolicNeither.size - 1)
-        {
+        if (
+          i != this->subalgebrasOrderParabolicPseudoParabolicNeither.size - 1
+        ) {
           out << ",";
         }
       }
@@ -4111,8 +4077,9 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
         ) {
           out
           << currentSubalgebra.simpleRootsReductiveSubalgebra[j][k].toString();
-          if (k != currentSubalgebra.simpleRootsReductiveSubalgebra[j].size - 1)
-          {
+          if (
+            k != currentSubalgebra.simpleRootsReductiveSubalgebra[j].size - 1
+          ) {
             out << ", ";
           }
         }
@@ -4313,64 +4280,6 @@ int RootSubalgebras::getindexSubalgebraIsomorphicTo(RootSubalgebra& input) {
     }
   }
   return - 1;
-}
-
-void RootSubalgebras::
-computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
-  List<RootSubalgebra>& bufferSubalgebras, int recursionDepth
-) {
-  this->subalgebras.addOnTop(bufferSubalgebras[recursionDepth - 1]);
-  int currentAlgebraIndex = this->subalgebras.size - 1;
-  if (recursionDepth >= bufferSubalgebras.size) {
-    bufferSubalgebras.setSize(
-      bufferSubalgebras.size +
-      this->getOwnerWeyl().cartanSymmetric.numberOfRows
-    );
-  }
-  bufferSubalgebras[recursionDepth].generatorsK =
-  bufferSubalgebras[recursionDepth - 1].generatorsK;
-  bufferSubalgebras[recursionDepth].owner = this;
-  ProgressReport report;
-  for (
-    int k = 0; k < bufferSubalgebras[recursionDepth - 1].modules.size; k ++
-  ) {
-    if (
-      bufferSubalgebras[recursionDepth - 1].highestWeightsPrimalSimple[k].
-      isPositive()
-    ) {
-      bufferSubalgebras[recursionDepth].generatorsK.addOnTop(
-        bufferSubalgebras[recursionDepth - 1].highestWeightsPrimalSimple[k]
-      );
-      bufferSubalgebras[recursionDepth].computeDynkinDiagramKAndCentralizer();
-      std::stringstream out;
-      out
-      << "Included root "
-      << k + 1
-      << " out of "
-      << bufferSubalgebras[recursionDepth - 1].modules.size
-      << " Total found SAs: "
-      << this->subalgebras.size;
-      report.report(out.str());
-      int index = this->indexSubalgebra(bufferSubalgebras[recursionDepth]);
-      if (index == - 1) {
-        bufferSubalgebras[recursionDepth].computeEssentials();
-        this->subalgebras[currentAlgebraIndex].
-        indicesSubalgebrasImmediatelyContainingK.addOnTopNoRepetition(
-          this->subalgebras.size
-        );
-        this->
-        computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
-          bufferSubalgebras, recursionDepth + 1
-        );
-      } else {
-        this->subalgebras[currentAlgebraIndex].
-        indicesSubalgebrasImmediatelyContainingK.addOnTopNoRepetition(index);
-      }
-      bufferSubalgebras[recursionDepth].generatorsK.removeIndexSwapWithLast(
-        bufferSubalgebras[recursionDepth].generatorsK.size - 1
-      );
-    }
-  }
 }
 
 void RootSubalgebras::makeProgressReportAutomorphisms(

@@ -544,9 +544,6 @@ public:
     const RootSubalgebra& subalgebra
   );
   int indexSubalgebra(RootSubalgebra& input);
-  void computeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(
-    List<RootSubalgebra>& bufferSubalgebras, int recursionDepth
-  );
   // Computes the immediate inclusions between the subalgebras.
   // Here, by immediate inclusion we mean that the smaller root system gets
   // only

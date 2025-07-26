@@ -671,8 +671,9 @@ public:
     return (*this)(static_cast<signed>(i), static_cast<signed>(j));
   }
   Coefficient& operator()(int i, int j) const {
-    if (i < 0 || i >= this->numberOfRows || j < 0 || j >= this->numberOfColumns)
-    {
+    if (
+      i < 0 || i >= this->numberOfRows || j < 0 || j >= this->numberOfColumns
+    ) {
       global.fatal
       << "Request of (row, column) with index ("
       << i

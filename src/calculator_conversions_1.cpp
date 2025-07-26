@@ -870,8 +870,9 @@ bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
   DynkinType dynkinType;
   outputPointer.content = nullptr;
   outputPointer.context.initialize(calculator);
-  if (!CalculatorConversions::functionDynkinType(calculator, input, dynkinType))
-  {
+  if (
+    !CalculatorConversions::functionDynkinType(calculator, input, dynkinType)
+  ) {
     return
     calculator
     << "Failed to extract Dynkin type from: "

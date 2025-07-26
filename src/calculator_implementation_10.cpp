@@ -139,8 +139,9 @@ getVectorsForConeDecompositionFromDynkinType(
     "getVectorsForConeDecompositionFromDynkinType"
   );
   DynkinSimpleType type;
-  if (!CalculatorConversions::functionDynkinSimpleType(calculator, input, type))
-  {
+  if (
+    !CalculatorConversions::functionDynkinSimpleType(calculator, input, type)
+  ) {
     return false;
   }
   WeylGroupData weylGroup;

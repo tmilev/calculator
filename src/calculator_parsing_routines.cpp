@@ -307,8 +307,8 @@ std::string CalculatorParser::toStringSyntacticStackHTMLSimple() {
   );
   SyntacticElement& lastSyntacticElement =
   *(*this->currentSyntacticStack).lastObject();
-  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1)
-  {
+  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1
+  ) {
     if (lastSyntacticElement.controlIndex != this->conExpression()) {
       isBad = true;
     }
@@ -3624,8 +3624,8 @@ bool CalculatorParser::applyOneRule() {
   ) {
     return this->replaceVXdotsXbyE_NONBOUND_XdotsX(2);
   }
-  if ((secondToLastS == "\\left" || secondToLastS == "\\right") && lastS == "|")
-  {
+  if ((secondToLastS == "\\left" || secondToLastS == "\\right") && lastS == "|"
+  ) {
     return this->replaceXYByY();
   }
   if (
@@ -4344,8 +4344,9 @@ bool CalculatorParser::applyOneRule() {
   if (lastS == "\\displaystyle") {
     return this->popTopSyntacticStack();
   }
-  if (thirdToLastS == "Matrix" && secondToLastS == "Expression" && lastS == "&")
-  {
+  if (
+    thirdToLastS == "Matrix" && secondToLastS == "Expression" && lastS == "&"
+  ) {
     return this->replaceMatrixEXByMatrix();
   }
   if (

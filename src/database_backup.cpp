@@ -174,8 +174,9 @@ bool DatabaseLoader::loadOneObject(
   // unused);
   collection.updateObjectInIndexReturnTrueIfChanged(objectId, input);
   DatabaseInternalServer& database = Database::get().localDatabase.server;
-  if (!database.storeObject(objectId, collection.name, input, false, &comments))
-  {
+  if (
+    !database.storeObject(objectId, collection.name, input, false, &comments)
+  ) {
     return false;
   }
   return true;

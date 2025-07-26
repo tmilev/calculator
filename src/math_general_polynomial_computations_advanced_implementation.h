@@ -2759,8 +2759,9 @@ bool PolynomialFactorizationCantorZassenhaus<
       << currentPolynomial.modulus()->toString(&this->output->format)
       << "\\)";
     }
-    if (this->divisorFromCandidate(currentPolynomial.getValue(), "A", comments))
-    {
+    if (
+      this->divisorFromCandidate(currentPolynomial.getValue(), "A", comments)
+    ) {
       return true;
     }
     currentPolynomialPlusOne = currentPolynomial;

@@ -3549,8 +3549,9 @@ void WebServer::recycleOneChild(int childIndex, int& numberInUse) {
   int64_t millisecondsElapsed =
   global.getElapsedMilliseconds() -
   currentWorker.millisecondsLastPingServerSideOnly;
-  if (millisecondsElapsed <= global.millisecondsNoPingBeforeChildIsPresumedDead)
-  {
+  if (
+    millisecondsElapsed <= global.millisecondsNoPingBeforeChildIsPresumedDead
+  ) {
     return;
   }
   this->terminateChildSystemCall(childIndex);

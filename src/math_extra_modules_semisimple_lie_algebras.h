@@ -1183,8 +1183,9 @@ void ModuleSSalgebra<Coefficient>::splitOverLevi(
     }
     return;
   }
-  if (this->getOwner().getRank() != splittingParablicSelection.numberOfElements)
-  {
+  if (
+    this->getOwner().getRank() != splittingParablicSelection.numberOfElements
+  ) {
     global.fatal
     << "Semisimple rank is "
     << this->getOwner().getRank()

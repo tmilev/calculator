@@ -2252,8 +2252,9 @@ incrementReturnFalseIfPastLast() {
   for (int i = this->multiplicities.size - 2; i >= 0; i --) {
     rankToRedistribute += this->multiplicities[i + 1];
     this->multiplicities[i + 1] = 0;
-    if (this->multiplicities[i] < this->capacities[i] && rankToRedistribute > 0)
-    {
+    if (
+      this->multiplicities[i] < this->capacities[i] && rankToRedistribute > 0
+    ) {
       this->multiplicities[i] ++;
       rankToRedistribute --;
       for (int j = this->multiplicities.size - 1; j > i; j --) {

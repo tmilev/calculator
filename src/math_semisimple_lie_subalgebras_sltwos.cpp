@@ -1041,7 +1041,8 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
   out
   << "<br><br>"
   << "<div style='max-height: 80vh; max-width: 99%; overflow: auto;'>"
-  << "<table><tr>"
+  << "<table style='border-collapse: collapse;'>"
+  << "<tr>"
   << "<th style='"
   << "position: sticky; "
   << "left: 0; "
@@ -1091,12 +1092,15 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
   << "Containing regular semisimple SAs in "
   << "which the sl(2) has no centralizer</a>"
   << "</th></tr>";
+  std::string borderStyle = "border-top: 1px solid black;";
   for (int i = 0; i < this->allSubalgebras.size; i ++) {
     const SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras[i];
     out
     << "<tr>"
     << "<td style='padding-right:20px; "
     << floatColumn
+    << " "
+    << borderStyle
     << "'>"
     << "<a href='#sl2index"
     << i
@@ -1105,10 +1109,10 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     << "}_1"
     << "\\)</a>"
     << "</td>";
-    out << "<td>";
+    out << "<td style='" << borderStyle << "'>";
     out << "\\(" << currentSubalgebra.hCharacteristic.toString() << "\\)";
     out << "</td>";
-    out << "<td style='white-space: nowrap'>";
+    out << "<td style='white-space: nowrap; " << borderStyle << "'>";
     out << currentSubalgebra.hElement.getCartanPart().toString();
     if (
       !this->getOwnerWeyl().isDominantWeight(
@@ -1121,7 +1125,7 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
       << "This shouldn't happen: "
       << "this is either a programming or mathematical error. </b>";
     }
-    out << "</td><td style='padding-left:20px'>";
+    out << "</td><td style='padding-left:20px; " << borderStyle << "'>";
     FormatExpressions formatCharacter;
     formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
     out
@@ -1133,28 +1137,35 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     )
     << "\n<br>\n";
     out << "</td>";
-    out << "<td>" << currentSubalgebra.dimensionCentralizer << "</td>";
+    out
+    << "<td style='"
+    << borderStyle
+    << "'>"
+    << currentSubalgebra.dimensionCentralizer
+    << "</td>";
     if (currentSubalgebra.flagCentralizerTypeComputed) {
       out
-      << "<td> "
+      << "<td style='"
+      << borderStyle
+      << "'> "
       << HtmlRoutines::getMathNoDisplay(
         currentSubalgebra.centralizerTypeIfKnown.toString()
       )
       << "</td>";
     } else {
-      out << "<td> not computed</td>";
+      out << "<td style='" << borderStyle << "'> not computed</td>";
     }
-    out << "<td>";
+    out << "<td style='" << borderStyle << "'>";
     out << currentSubalgebra.lengthHSquared;
-    out << "</td><td>";
+    out << "</td>" << "<td style='" << borderStyle << "'>";
     out << currentSubalgebra.getDynkinIndex();
-    out << "</td><td>";
+    out << "</td>" << "<td style='" << borderStyle << "'>";
     currentSubalgebra.checkIndicesMinimalContainingRootSubalgebras();
     out
     << currentSubalgebra.toStringMinimalContainingRootSubalgebras(
       displayPathAlgebra
     );
-    out << "</td><td>";
+    out << "</td>" << "<td style='" << borderStyle << "'>";
     out
     << currentSubalgebra.toStringContainingRootSubalgebras(
       displayPathAlgebra

@@ -831,8 +831,9 @@ bool WithContext<RationalFraction<AlgebraicNumber> >::extendContext(
   this->context.polynomialSubstitutionNoFailure(
     newContext, substitution, closure.one()
   );
-  if (!this->content.substitute(substitution, closure.one(), commentsOnFailure))
-  {
+  if (
+    !this->content.substitute(substitution, closure.one(), commentsOnFailure)
+  ) {
     // This is not supposed to happen.
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure

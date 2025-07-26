@@ -361,8 +361,9 @@ bool CalculatorFunctionsEncoding::convertBase64ToString(
   if (!input[1].isOfType(&inputString)) {
     inputString = input[1].toString();
   }
-  if (!Crypto::convertBase64ToString(inputString, result, &calculator.comments))
-  {
+  if (
+    !Crypto::convertBase64ToString(inputString, result, &calculator.comments)
+  ) {
     return false;
   }
   return output.assignValue(calculator, result);
@@ -5681,8 +5682,9 @@ bool CalculatorFunctionsIntegration::integratePowerByUncoveringParenthesisFirst
     integrandExpression,
     variableExpression
   );
-  if (!calculator.evaluateExpression(calculator, newIntegralExpression, output))
-  {
+  if (
+    !calculator.evaluateExpression(calculator, newIntegralExpression, output)
+  ) {
     return false;
   }
   if (output.containsAsSubExpressionNoBuiltInTypes(calculator.opIntegral())) {
@@ -6885,8 +6887,9 @@ bool CalculatorFunctionsLinearAlgebra::minimalPolynomialMatrix(
     << argument.toString()
     << " to rational matrix.";
   }
-  if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfRows <= 0)
-  {
+  if (
+    matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfRows <= 0
+  ) {
     return output.assignError(calculator, "Error: matrix is not square.");
   }
   FormatExpressions format;
@@ -6919,8 +6922,9 @@ bool CalculatorFunctionsLinearAlgebra::characteristicPolynomialMatrix(
     << input.toString()
     << " to rational matrix.";
   }
-  if (matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfRows <= 0)
-  {
+  if (
+    matrix.numberOfRows != matrix.numberOfColumns || matrix.numberOfRows <= 0
+  ) {
     return output.assignError(calculator, "Error: matrix is not square.");
   }
   FormatExpressions format;
@@ -7096,8 +7100,9 @@ bool CalculatorFunctionsListsAndSets::removeLastElement(
   }
   if (input.size() == 2) {
     const Expression& sequenceCandidate = input[1];
-    if (sequenceCandidate.isSequenceNElements() && sequenceCandidate.size() > 1)
-    {
+    if (
+      sequenceCandidate.isSequenceNElements() && sequenceCandidate.size() > 1
+    ) {
       output = sequenceCandidate;
       output.removeLastChild();
       return true;

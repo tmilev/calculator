@@ -678,8 +678,9 @@ bool CalculatorFunctionsCrypto::testRSASign(
     << "Failed to extract positive integers "
     << "from the second and third argument. ";
   }
-  if (!key.computeFromTwoPrimes(key.primeOne, key.primeTwo, true, &errorStream))
-  {
+  if (
+    !key.computeFromTwoPrimes(key.primeOne, key.primeTwo, true, &errorStream)
+  ) {
     return
     calculator
     << "Inputs do not appear to be prime. "
@@ -1348,8 +1349,9 @@ bool CalculatorFunctions::leftIntervalGreaterThanRight(
   if (left1IsDouble && right[1] == minusInfinityExpression) {
     return true;
   }
-  if (left[1] == minusInfinityExpression || right[1] == minusInfinityExpression)
-  {
+  if (
+    left[1] == minusInfinityExpression || right[1] == minusInfinityExpression
+  ) {
     if (left2IsDouble && righ2IsDouble) {
       if (left2 > right2) {
         return true;

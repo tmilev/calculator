@@ -1645,8 +1645,9 @@ bool CalculatorHTML::prepareAndExecuteCommands(
   this->timeIntermediateComments.lastObject()->addOnTop(
     "calculator initialize time"
   );
-  if (global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights())
-  {
+  if (
+    global.userDebugFlagOn() && global.userDefaultHasProblemComposingRights()
+  ) {
     this->logCommandsProblemGeneration
     << "<b>Input commands:</b> "
     << this->problemData.commandsGenerateProblemLink
@@ -2917,8 +2918,9 @@ bool CalculatorHTML::Parser::closeOpenTag(int tagOffsetNegative) {
     if (tagName == SyntacticElementHTML::Tags::calculatorSolution) {
       toBeConverted.tag = SyntacticElementHTML::Tags::calculatorSolutionStart;
       toBeConverted.syntacticRole = "command";
-    } else if (tagName == SyntacticElementHTML::Tags::answerCalculatorHighlight)
-    {
+    } else if (
+      tagName == SyntacticElementHTML::Tags::answerCalculatorHighlight
+    ) {
       toBeConverted.tag =
       SyntacticElementHTML::Tags::answerCalculatorHighlightStart;
       toBeConverted.syntacticRole = "command";
@@ -3870,8 +3872,9 @@ bool CalculatorHTML::interpretHtmlOneAttempt(
       problemLabel = current.displayTitle + "&nbsp;&nbsp;";
     }
   }
-  if (this->flagIsForReal && global.requestType == WebAPI::Frontend::scoredQuiz)
-  {
+  if (
+    this->flagIsForReal && global.requestType == WebAPI::Frontend::scoredQuiz
+  ) {
     bool problemAlreadySolved = false;
     if (this->currentUser.problemData.contains(this->fileName)) {
       ProblemData& problemData =
@@ -5318,8 +5321,9 @@ void TopicElement::computeLinks(CalculatorHTML& owner, bool plainStyle) {
     this->displayScore =
     owner.toStringProblemScoreShort(this->problemFileName, problemSolved);
   }
-  if (this->problemFileName == "" && this->type == TopicElement::types::problem)
-  {
+  if (
+    this->problemFileName == "" && this->type == TopicElement::types::problem
+  ) {
     this->displayDeadlinE = "";
   } else {
     this->displayDeadlinE =

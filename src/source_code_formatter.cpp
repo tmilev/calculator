@@ -1451,7 +1451,7 @@ bool CodeFormatter::Element::computeIndentationIfWantsCodeBlock() {
   CodeFormatter::Element* rightMostChild = this->rightMostAtomUnderMe();
   if (
     rightMostChild == nullptr ||
-    rightMostChild->columnFinal != this->owner->maximumDesiredLineLength - 2
+    rightMostChild->columnFinal < this->owner->maximumDesiredLineLength - 2
   ) {
     return true;
   }
@@ -2033,8 +2033,9 @@ bool CodeFormatter::formatCPPSourceCode(
   bool logDebugInfo
 ) {
   STACK_TRACE("CodeFormatter::formatCPPSourceCode");
-  if (!this->initializeFileNames(inputFileName, output, outputOnFail, comments))
-  {
+  if (
+    !this->initializeFileNames(inputFileName, output, outputOnFail, comments)
+  ) {
     return false;
   }
   this->words.initialize(*this);

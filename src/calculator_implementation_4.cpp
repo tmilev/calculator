@@ -2292,8 +2292,8 @@ std::string CalculatorParser::toStringSyntacticStackHTMLTable(
   );
   SyntacticElement& lastSyntacticElement =
   *(*this->currentSyntacticStack).lastObject();
-  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1)
-  {
+  if ((*this->currentSyntacticStack).size == this->numberOfEmptyTokensStart + 1
+  ) {
     if (lastSyntacticElement.controlIndex != this->conExpression()) {
       isBad = true;
     }

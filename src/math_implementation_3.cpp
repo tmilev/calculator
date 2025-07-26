@@ -318,8 +318,9 @@ void ProgressReport::report(const std::string& stringToReport) {
   if (this->threadIndex == - 1) {
     return;
   }
-  if (global.progressReportStrings[this->threadIndex].size > this->currentLevel)
-  {
+  if (
+    global.progressReportStrings[this->threadIndex].size > this->currentLevel
+  ) {
     global.progressReportStrings[this->threadIndex][this->currentLevel] =
     stringToReport;
     global.makeReport();
@@ -9198,8 +9199,9 @@ toStringBruhatGraph() {
   for (int i = 0; i < this->allElements.size; i ++) {
     const ElementSubgroupWeylGroupAutomorphisms& currentElement =
     this->allElements[i];
-    if (currentElement.generatorsLastAppliedFirst.size != oldLayerElementLength)
-    {
+    if (
+      currentElement.generatorsLastAppliedFirst.size != oldLayerElementLength
+    ) {
       layers.setSize(layers.size + 1);
       oldLayerElementLength = currentElement.generatorsLastAppliedFirst.size;
     }

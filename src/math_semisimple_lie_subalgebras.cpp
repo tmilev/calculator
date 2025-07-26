@@ -2545,8 +2545,9 @@ void SemisimpleSubalgebras::writeHCandidatesForOneOrbit(
   List<int>& currentRootInjection
 ) {
   STACK_TRACE("SemisimpleSubalgebras::writeHCandidatesForOneOrbit");
-  if (currentSubalgebra.lengthHSquared != desiredHScaledToActByTwoLengthSquared)
-  {
+  if (
+    currentSubalgebra.lengthHSquared != desiredHScaledToActByTwoLengthSquared
+  ) {
     return;
   }
   if (baseRank == 0) {
@@ -3360,8 +3361,9 @@ incrementReturnFalseIfPastLast(ProgressReport* report) {
       report->report(this->owner->toStringCurrentChain());
     }
     this->indexOfCurrentHCandidate ++;
-    if (this->indexOfCurrentHCandidate < this->candidateHsScaledToActByTwo.size)
-    {
+    if (
+      this->indexOfCurrentHCandidate < this->candidateHsScaledToActByTwo.size
+    ) {
       return true;
     }
     this->indexOfCurrentHCandidate = - 1;
@@ -3531,8 +3533,9 @@ bool SemisimpleSubalgebras::incrementReturnFalseIfPastLast() {
   while (this->currentSubalgebraChain.size > 0) {
     PossibleExtensionsOfSemisimpleLieSubalgebra& lastExtension =
     *this->currentSubalgebraChain.lastObject();
-    if (lastExtension.realizedBase->content.getRank() >= this->owner->getRank())
-    {
+    if (
+      lastExtension.realizedBase->content.getRank() >= this->owner->getRank()
+    ) {
       this->currentSubalgebraChain.removeLastObject();
       continue;
     }
@@ -3887,8 +3890,9 @@ bool CandidateSemisimpleSubalgebra::isGoodHNewActingByTwo(
         hNewActingByTwo, hNewActingByTwo
       );
     }
-    if (scalarProduct != this->weylNonEmbedded->coCartanSymmetric(indexHNew, i))
-    {
+    if (
+      scalarProduct != this->weylNonEmbedded->coCartanSymmetric(indexHNew, i)
+    ) {
       return false;
     }
   }
@@ -10286,8 +10290,9 @@ std::string CandidateSemisimpleSubalgebra::toString(
     << "The second row indicates "
     << "weights of the highest weight vectors relative "
     << "to the Cartan of the semisimple subalgebra. ";
-    if (this->flagCentralizerIsWellChosen && this->cartanOfCentralizer.size > 0)
-    {
+    if (
+      this->flagCentralizerIsWellChosen && this->cartanOfCentralizer.size > 0
+    ) {
       out
       << "As the centralizer is well-chosen and "
       << "the centralizer of our subalgebra is "
@@ -10341,8 +10346,9 @@ std::string CandidateSemisimpleSubalgebra::toString(
       << "\\)</td>";
     }
     out << "</tr>";
-    if (this->flagCentralizerIsWellChosen && this->cartanOfCentralizer.size > 0)
-    {
+    if (
+      this->flagCentralizerIsWellChosen && this->cartanOfCentralizer.size > 0
+    ) {
       out
       << "<tr><td>weights rel. to Cartan of "
       << "(centralizer+semisimple s.a.). </td>";

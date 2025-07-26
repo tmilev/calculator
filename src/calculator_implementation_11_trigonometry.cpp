@@ -193,8 +193,9 @@ bool CalculatorFunctionsTrigonometry::eulerFormulaAsLaw(
   currentE.addChildAtomOnTop(calculator.opCoefficientOf());
   currentE.addChildOnTop(iE);
   currentE.addChildOnTop(input[2]);
-  if (!CalculatorFunctions::coefficientOf(calculator, currentE, coefficientOfI))
-  {
+  if (
+    !CalculatorFunctions::coefficientOf(calculator, currentE, coefficientOfI)
+  ) {
     return false;
   }
   if (coefficientOfI.isEqualToZero()) {

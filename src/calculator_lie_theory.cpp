@@ -4437,7 +4437,8 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(Calculator& calculator,
+bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
+  Calculator& calculator,
   const Expression& input,
   Expression& output,
   bool computeRealFormSlTwos,
@@ -4501,20 +4502,19 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(Calculator& calculator,
     out << "The tables are precomputed and served from the hard disk. <br>";
   }
   out
-      << "<a href='"
-      <<  outRootHtmlDisplayName.str()
-      << "' target='_blank'>"
-      << "Root subalgebras of "
-      << semisimpleLieAlgebra.content->toStringLieAlgebraName()
-      << " </a>"
-      << "<br>"
-      << "<a href='"
-      <<  outSltwoMainFile.str()
-      << "' target='_blank'>"
-      <<"sl(2)-subalgebras of "
-      << semisimpleLieAlgebra.content->toStringLieAlgebraName()
-      << " </a>";
-
+  << "<a href='"
+  << outRootHtmlDisplayName.str()
+  << "' target='_blank'>"
+  << "Root subalgebras of "
+  << semisimpleLieAlgebra.content->toStringLieAlgebraName()
+  << " </a>"
+  << "<br>"
+  << "<a href='"
+  << outSltwoMainFile.str()
+  << "' target='_blank'>"
+  << "sl(2)-subalgebras of "
+  << semisimpleLieAlgebra.content->toStringLieAlgebraName()
+  << " </a>";
   return output.assignValue(calculator, out.str());
 }
 

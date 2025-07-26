@@ -1447,7 +1447,27 @@ bool CodeFormatter::Element::computeIndentationIfWantsCodeBlock() {
   if (this->children.size >= 2) {
     this->children[1].whiteSpaceBefore = 1;
   }
-  return this->computeIndentationBasic(0);
+  this->computeIndentationBasic(0);
+  CodeFormatter::Element* rightMostChild =
+      this->rightMostAtomUnderMe();
+  if (rightMostChild==nullptr || rightMostChild->columnFinal != this->owner->maximumDesiredLineLength-2) {
+    return true;
+  }
+  // We are exactly 2 characters from the end line, so we risk having code
+  // formatting such as
+  // if (something)
+  // {
+  // }
+  // which doesn't look consistent.
+  // Instead, we want:
+  // if (
+  //   something
+  // ) {
+  // }
+  // for consistency.
+  // Restrict line length and recompute.
+    this->maximumDesiredLineLengthOverride = this->owner->maximumDesiredLineLength-1;
+return  this->computeIndentationBasic(0);
 }
 
 bool CodeFormatter::Element::computeIndentationIfClause() {

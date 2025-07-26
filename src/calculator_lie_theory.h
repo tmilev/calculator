@@ -167,7 +167,7 @@ public:
   ) {
     return
     CalculatorLieTheory::rootSubalgebrasAndSlTwos(
-      calculator, input, output, false,  false
+      calculator, input, output, false, false
     );
   }
   static bool printRootSubalgebrasAndSlTwosForceRecompute(
@@ -175,7 +175,7 @@ public:
   ) {
     return
     CalculatorLieTheory::rootSubalgebrasAndSlTwos(
-      calculator, input, output, false,  true
+      calculator, input, output, false, true
     );
   }
   static bool weylDimensionFormula(

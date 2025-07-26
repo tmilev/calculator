@@ -877,39 +877,27 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     standardOptions
   );
   this->addOperationHandler(
-    "PrintRootSubalgebras",
-    CalculatorLieTheory::printRootSubalgebras,
+    "PrintRootSubalgebrasAndSlTwos",
+    CalculatorLieTheory::printRootSubalgebrasAndSlTwos,
     "",
     "Prints sl(2) subalgebras and root subalgebras. "
     "The argument gives the type of the Lie algebra "
     "in the form Type_Rank (e.g. E_6).",
-    "PrintRootSubalgebras(E_6)",
-    "CalculatorLieTheory::printRootSubalgebras",
-    "PrintRootSubalgebras",
+    "PrintRootSubalgebrasAndSlTwos(E_6)",
+    "CalculatorLieTheory::printRootSubalgebrasAndSlTwos",
+    "PrintRootSubalgebrasAndSlTwos",
     standardOptions
   );
   this->addOperationHandler(
-    "PrintRootSubalgebrasRecompute",
-    CalculatorLieTheory::printRootSubalgebrasForceRecompute,
+    "PrintRootSubalgebrasAndSlTwosRecompute",
+    CalculatorLieTheory::printRootSubalgebrasAndSlTwosForceRecompute,
     "",
-    "Same as printRootSubalgebras but forces recomputation. "
+    "Same as PrintRootSubalgebrasAndSlTwos but forces recomputation. "
     "Use to recompute obsolete or interrupted output files.",
-    "PrintRootSubalgebrasRecompute(b_3)",
-    "CalculatorLieTheory::printRootSAsForceRecompute",
-    "PrintRootSubalgebrasRecompute",
+    "PrintRootSubalgebrasAndSlTwosRecompute(b_3)",
+    "CalculatorLieTheory::printRootSubalgebrasAndSlTwosForceRecompute",
+    "PrintRootSubalgebrasAndSlTwosRecompute",
     adminNoTest
-  );
-  this->addOperationHandler(
-    "PrintSlTwoSubalgebras",
-    CalculatorLieTheory::printSlTwos,
-    "",
-    "Prints sl(2) subalgebras and root subalgebras. "
-    "The argument gives the type of the Lie algebra "
-    "in the form Type_Rank (e.g. E_6).",
-    "PrintSlTwoSubalgebras(g_2)",
-    "CalculatorLieTheory::printSltwos",
-    "PrintSlTwoSubalgebras",
-    standardOptions
   );
   this->addOperationHandler(
     "ParabolicsInfoBruhatGraph",

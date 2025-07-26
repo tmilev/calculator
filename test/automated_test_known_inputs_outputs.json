@@ -2288,7 +2288,7 @@
     "output":"\"Diagram final: B^{1}_3. Simple basis: 3 vectors: \\n(1, 1, 2, 2), (0, 1, 0, 0), (0, 0, 1, 0)\\n\""
   },
   {
-    "input":"PrintRootSubalgebras(E_6)",
+    "input":"PrintRootSubalgebrasAndSlTwos(E_6)",
     "output":"\"The table is precomputed and served from the hard disk. <br><a href='output/semisimple_lie_algebras/E^{1}_6/rootSubalgebras_E^{1}_6.html' target='_blank'>E^{1}_6 </a>\""
   },
   {

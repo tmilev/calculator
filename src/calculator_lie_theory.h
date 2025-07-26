@@ -159,32 +159,23 @@ public:
     Calculator& calculator,
     const Expression& input,
     Expression& output,
-    bool showSLTwos,
     bool computeRealFormSlTwos,
     bool mustRecompute
   );
-  static bool printRootSubalgebras(
+  static bool printRootSubalgebrasAndSlTwos(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
     return
     CalculatorLieTheory::rootSubalgebrasAndSlTwos(
-      calculator, input, output, false, false, false
+      calculator, input, output, false,  false
     );
   }
-  static bool printRootSubalgebrasForceRecompute(
+  static bool printRootSubalgebrasAndSlTwosForceRecompute(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
     return
     CalculatorLieTheory::rootSubalgebrasAndSlTwos(
-      calculator, input, output, false, false, true
-    );
-  }
-  static bool printSlTwos(
-    Calculator& calculator, const Expression& input, Expression& output
-  ) {
-    return
-    CalculatorLieTheory::rootSubalgebrasAndSlTwos(
-      calculator, input, output, true, false, false
+      calculator, input, output, false,  true
     );
   }
   static bool weylDimensionFormula(

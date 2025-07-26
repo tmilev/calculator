@@ -5498,17 +5498,17 @@ RootSubsystem(F_4, (0, 1, 0, 0), (0, 0, 1, 0), (1, 1, 2, 2))
 ```
 Generates a root subsystem of a simple type. First argument indicates simple type, second, third, ... arguments give the generating roots. 
 
-*PrintRootSubalgebras* [PrintRootSubalgebras] {CalculatorLieTheory::printRootSubalgebras}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintRootSubalgebras%28E_6%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PrintRootSubalgebrasAndSlTwos* [PrintRootSubalgebrasAndSlTwos] {CalculatorLieTheory::printRootSubalgebras}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintRootSubalgebrasAndSlTwos%28E_6%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PrintRootSubalgebras(E_6)
+PrintRootSubalgebrasAndSlTwos(E_6)
 ```
 Prints sl(2) subalgebras and root subalgebras. The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).
 
-*PrintRootSubalgebrasRecompute* [PrintRootSubalgebrasRecompute] {CalculatorLieTheory::printRootSAsForceRecompute}. (admin only) 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintRootSubalgebrasRecompute%28b_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+*PrintRootSubalgebrasAndSlTwosRecompute* [PrintRootSubalgebrasAndSlTwosRecompute] {CalculatorLieTheory::printRootSAsForceRecompute}. (admin only) 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintRootSubalgebrasAndSlTwosRecompute%28b_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PrintRootSubalgebrasRecompute(b_3)
+PrintRootSubalgebrasAndSlTwosRecompute(b_3)
 ```
 Same as printRootSubalgebras but forces recomputation. Use to recompute obsolete or interrupted output files.
 

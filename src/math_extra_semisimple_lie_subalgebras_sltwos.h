@@ -6,6 +6,19 @@
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 #include "math_general.h"
 
+class CentralizerComputer {
+public:
+  SemisimpleLieAlgebra* owner;
+  List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
+  List<ElementSemisimpleLieAlgebra<Rational> > generators;
+  DynkinType typeIfKnown;
+  bool flagTypeComputed;
+  bool flagBasisComputed;
+  CentralizerComputer();
+  std::string toString() const;
+  bool compute();
+};
+
 // The sl(2)-subalgebra candidate from which the sl(2) is to be realized.
 // Contains internal information about the computation,
 // intermediate systems of equations, etc.
@@ -144,9 +157,7 @@ public:
   List<int> moduleDimensions;
   int indexInContainer;
   int dimensionCentralizer;
-  DynkinType centralizerTypeIfKnown;
-  Rational dimCentralizerToralPart;
-  bool flagCentralizerTypeComputed;
+  Rational dimensionCentralizerToralPart;
   bool flagCentralizerIsRegular;
   List<int> indicesContainingRootSubalgebras;
   List<int> indicesMinimalContainingRootSubalgebras;
@@ -209,6 +220,7 @@ public:
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
   involutionAppliedToEMinusF;
   Rational lengthHSquared;
+  CentralizerComputer centralizerComputer;
   void fromSlTwoSubalgebraCandidate(SlTwoSubalgebraCandidate& input);
   void initialize();
   SlTwoSubalgebra() {
@@ -244,6 +256,7 @@ public:
   std::string toStringTriple(FormatExpressions* format) const;
   std::string toStringTripleStandardRealization() const;
   std::string toStringTripleVerification(FormatExpressions* format) const;
+  std::string toStringCentralizer() const;
   std::string toStringTripleUnknowns(FormatExpressions* format) const;
   std::string toStringTripleUnknownsPolynomialSystem(
     FormatExpressions* format = nullptr
@@ -351,6 +364,7 @@ public:
   );
   void computeRootSubalgebraContainers();
   void computeOneRootSubalgebraContainers(SlTwoSubalgebra& output);
+  void computeCentralizers();
 };
 
 #endif // header_math_extra_semisimple_lie_subalgebras_sltwos_ALREADY_INCLUDED

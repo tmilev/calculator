@@ -186,7 +186,7 @@ public:
   int recursionDepthCounterForNilradicalGeneration;
   int totalUnknownsNoCentralizer;
   int totalUnknownsWithCentralizer;
-  long long int totalArithmeticOpsToSolveSystem;
+  long long int totalArithmeticOperationsToSolveSystem;
   List<NilradicalCandidate> fernandoKacNilradicalCandidates;
   int numberOfConeIntersections;
   int numberOfCasesNoLInfiniteRelationFound;

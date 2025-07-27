@@ -73,10 +73,8 @@ public:
   }
   void operator=(const Selection& right);
   void operator=(const Vector<Rational>& other);
-  // void operator=(const std::string& other);
-  // warning: to call the comparison operator sucessfully, cardinalitySelection
-  // must
-  // be properly computed!
+  // Warning: to call the comparison operator sucessfully, cardinalitySelection
+  // must be properly computed!
   bool operator==(const Selection& right) const {
     if (
       this->numberOfElements != right.numberOfElements ||

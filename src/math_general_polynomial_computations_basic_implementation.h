@@ -1472,7 +1472,9 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringLaTeX() {
     out
     << "&"
     << this->getPolynomialStringSpacedMonomialsLaTeX(
-      remainders[i], &highlightedColor, &this->intermediateHighlightedMons[i]
+      remainders[i],
+      &highlightedColor,
+      &this->intermediateHighlightedMonomials[i]
     )
     << "\\\\\n";
     if (i < subtrahends.size) {
@@ -1622,12 +1624,12 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
     out << "</td></tr>";
   }
   out << "</tr>";
-  if (remainders.size != this->intermediateHighlightedMons.size) {
+  if (remainders.size != this->intermediateHighlightedMonomials.size) {
     global.fatal
     << "Should have as many remainders: "
     << remainders.size
     << " as intermediate highlighted mons: "
-    << this->intermediateHighlightedMons.size
+    << this->intermediateHighlightedMonomials.size
     << global.fatal;
   }
   if (remainders.size != subtrahends.size + 1) {
@@ -1641,7 +1643,7 @@ std::string PolynomialDivisionReport<Coefficient>::getDivisionStringHtml() {
     << this->getPolynomialStringSpacedMonomialsHtml(
       remainders[i],
       " style='vertical-align: bottom'",
-      &this->intermediateHighlightedMons[i]
+      &this->intermediateHighlightedMonomials[i]
     )
     << "</tr>";
     if (i < subtrahends.size) {

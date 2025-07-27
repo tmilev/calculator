@@ -32,6 +32,10 @@ bool SlTwoSubalgebra::operator==(const SlTwoSubalgebra& right) const {
   return this->hCharacteristic == right.hCharacteristic;
 }
 
+std::string SlTwoSubalgebra::toStringCentralizer() const {
+  return this->centralizerComputer.toString();
+}
+
 std::string SlTwoSubalgebra::toStringTripleVerification(
   FormatExpressions* format
 ) const {
@@ -65,8 +69,9 @@ std::string SlTwoSubalgebra::toStringTripleArbitrary(
   << "<br>More precisely, the chevalley generators "
   << "participating in f are ordered in the order "
   << "in which their roots appear, and the "
-  << "coefficients are chosen to be the increasing odd "
-  << "numbers 1, 3, 5, ....<br>"
+  << "coefficients are chosen "
+  << "with an arbitrary formula. "
+  << "More precisely, the n^th coefficient equals (n-1)^2+1.<br>"
   << "This arbitrary (but well-defined) choice of "
   << "f guarantees that the computation is linear and fast. <br>\n";
   out
@@ -266,7 +271,6 @@ void SlTwoSubalgebra::fromSlTwoSubalgebraCandidate(
 bool SlTwoSubalgebra::attemptToComputeCentralizer() {
   STACK_TRACE("SlTwoSubalgebra::attemptToComputeCentralizer");
   this->flagCentralizerIsRegular = false;
-  this->flagCentralizerTypeComputed = false;
   Weight<Rational> zeroWeight;
   zeroWeight.weightFundamentalCoordinates.makeZero(1);
   if (
@@ -286,24 +290,30 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
     this->indicesMinimalContainingRootSubalgebras[i];
     RootSubalgebra& currentMinimalContainer =
     this->container->rootSubalgebras.subalgebras[indexMinimalContainer];
-    Rational dimOfSSpartOfCentralizerOfRootSA =
+    Rational dimensionSemisimplePartOfCentralizerRootSubalgebra =
     currentMinimalContainer.centralizerDynkinType.getRankRational() +
     currentMinimalContainer.centralizerDynkinType.getRootSystemSize();
-    this->dimCentralizerToralPart =
+    this->dimensionCentralizerToralPart =
     this->owner->getRank() -
     currentMinimalContainer.dynkinType.getRank() -
     currentMinimalContainer.centralizerDynkinType.getRank();
     Rational totalCentalizerCandidateDim =
-    dimOfSSpartOfCentralizerOfRootSA + this->dimCentralizerToralPart;
+    dimensionSemisimplePartOfCentralizerRootSubalgebra +
+    this->dimensionCentralizerToralPart;
     if (totalCentalizerCandidateDim == this->dimensionCentralizer) {
       this->flagCentralizerIsRegular = true;
-      this->flagCentralizerTypeComputed = true;
-      this->centralizerTypeIfKnown =
+      this->centralizerComputer.flagTypeComputed = true;
+      this->centralizerComputer.typeIfKnown =
       currentMinimalContainer.centralizerDynkinType;
       return true;
     }
   }
-  return false;
+  this->centralizerComputer.generatorsToCentralize =
+  List<ElementSemisimpleLieAlgebra<Rational> >(
+    {this->eElement, this->hElement, this->fElement}
+  );
+  this->centralizerComputer.owner = this->owner;
+  return this->centralizerComputer.compute();
 }
 
 bool SlTwoSubalgebra::checkIndicesMinimalContainingRootSubalgebras() const {
@@ -466,7 +476,6 @@ void SlTwoSubalgebra::computeModuleDecompositionsitionAmbientLieAlgebra() {
     this->moduleDecompositionAmbientSubalgebra,
     this->moduleDimensions
   );
-  this->attemptToComputeCentralizer();
 }
 
 void SlTwoSubalgebra::
@@ -1143,13 +1152,13 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     << "'>"
     << currentSubalgebra.dimensionCentralizer
     << "</td>";
-    if (currentSubalgebra.flagCentralizerTypeComputed) {
+    if (currentSubalgebra.centralizerComputer.flagTypeComputed) {
       out
       << "<td style='"
       << borderStyle
       << "'> "
       << HtmlRoutines::getMathNoDisplay(
-        currentSubalgebra.centralizerTypeIfKnown.toString()
+        currentSubalgebra.centralizerComputer.typeIfKnown.toString()
       )
       << "</td>";
     } else {
@@ -1246,4 +1255,35 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
     << commentsOnError.str()
     << global.fatal;
   }
+}
+
+CentralizerComputer::CentralizerComputer() {
+  this->flagTypeComputed = false;
+  this->flagBasisComputed = false;
+  this->owner = nullptr;
+}
+
+std::string CentralizerComputer::toString() const {
+  std::stringstream out;
+  out << "Centralizer type: ";
+  if (this->flagTypeComputed) {
+    out << this->typeIfKnown.toString();
+  } else {
+    out << " not computed";
+  }
+  out << "\n<br>\nGenerators of centralizer: ";
+  if (this->flagBasisComputed) {
+    out << this->generators.toStringCommaDelimited();
+  } else {
+    out << " not computed.";
+  }
+  return out.str();
+}
+
+bool CentralizerComputer::compute() {
+  this->owner->getCommonCentralizer(
+    this->generatorsToCentralize, this->generators
+  );
+  this->flagBasisComputed = true;
+  return false;
 }

@@ -1013,29 +1013,29 @@ class PolynomialDivisionReport {
 public:
   HashedList<MonomialPolynomial> allMonomials;
   List<Polynomial<Coefficient> > intermediateRemainders;
-  List<List<MonomialPolynomial> > intermediateHighlightedMons;
+  List<List<MonomialPolynomial> > intermediateHighlightedMonomials;
   List<MonomialPolynomial> intermediateHighestMonomialDividedByHighestMonomial;
   List<Coefficient> intermediateCoefficients;
   List<Polynomial<Coefficient> > intermediateSubtractands;
   Polynomial<Coefficient> startingPolynomial;
-  int highlightAllMonsFinalRemainder;
+  int highlightAllMonomialsFinalRemainder;
   int firstIndexLatexSlide;
   List<List<int> > additionalHighlightRemainders;
-  List<List<List<int> > > highlightMonsQuotients;
-  List<List<List<int> > > highlightMonsRemainders;
-  List<List<List<int> > > highlightMonsSubtrahends;
-  List<List<List<int> > > highlightMonsDivisors;
-  List<List<int> > fcAnswerMonsQuotients;
-  List<List<int> > fcAnswerMonsRemainders;
-  List<List<int> > fcAnswerMonsSubtrahends;
-  List<List<int> > fcAnswerMonsDivisors;
+  List<List<List<int> > > highlightMonomialsQuotients;
+  List<List<List<int> > > highlightMonomialsRemainders;
+  List<List<List<int> > > highlightMonomialsSubtrahends;
+  List<List<List<int> > > highlightMonomialsDivisors;
+  List<List<int> > fcAnswerMonomialsQuotients;
+  List<List<int> > fcAnswerMonomialsRemainders;
+  List<List<int> > fcAnswerMonomialsSubtrahends;
+  List<List<int> > fcAnswerMonomialsDivisors;
   List<int> firstNonZeroIndicesPerIntermediateSubtracand;
   List<int> intermediateSelectedDivisors;
-  List<int> uncoverAllMonsQuotients;
-  List<int> uncoverAllMonsRemainders;
-  List<int> uncoverAllMonsSubtrahends;
-  List<int> uncoverAllMonsDivisors;
-  List<int> uncoverMonsFinalRemainder;
+  List<int> uncoverAllMonomialsQuotients;
+  List<int> uncoverAllMonomialsRemainders;
+  List<int> uncoverAllMonomialsSubtrahends;
+  List<int> uncoverAllMonomialsDivisors;
+  List<int> uncoverMonomialsFinalRemainder;
   List<int> additionalHighlightFinalRemainder;
   std::string divisionLog;
   GroebnerBasisComputation<Coefficient>* owner;
@@ -1051,11 +1051,11 @@ public:
   );
   std::string getSpacedMonomialsWithHighlightLaTeX(
     const Polynomial<Coefficient>& polynomial,
-    List<List<int> >* slidesToHighlightMon,
+    List<List<int> >* slidesToHighlightMonomials,
     List<int>* slidesToFcAnswer,
     List<int>* slidesToUncover,
     List<int>* slidesAdditionalHighlight,
-    int slidesToUncoverAllMons,
+    int slidesToUncoverAllMonomials,
     bool useColumnSeparator
   );
   std::string getPolynomialStringSpacedMonomialsHtml(

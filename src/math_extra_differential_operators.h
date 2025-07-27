@@ -123,7 +123,7 @@ void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
 ) {
   STACK_TRACE("QuasiDifferentialOperator::generateBasisLieAlgebra");
   ProgressReport report;
-  HashedList<QuasiDifferentialMononomial> bufferMons;
+  HashedList<QuasiDifferentialMononomial> bufferMonomials;
   List<LinearCombination<QuasiDifferentialMononomial, Coefficient> >
   elementsConverted;
   elementsConverted = inputElements;
@@ -155,7 +155,7 @@ void QuasiDifferentialOperator<Coefficient>::generateBasisLieAlgebra(
         report.report(reportStream.str());
         elementsConverted.addOnTop(tempQDO);
         QuasiDifferentialOperator::gaussianEliminationByRows(
-          elementsConverted, 0, &bufferMons
+          elementsConverted, 0, &bufferMonomials
         );
         if (!elementsConverted.lastObject()->isEqualToZero()) {
           foundNew = true;

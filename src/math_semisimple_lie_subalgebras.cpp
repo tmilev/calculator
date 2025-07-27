@@ -2915,10 +2915,10 @@ bool CandidateSemisimpleSubalgebra::computeCentralizerTypeFailureAllowed() {
   }
   const SlTwoSubalgebra& sl2 =
   this->owner->slTwoSubalgebras.allSubalgebras[indexSl2];
-  if (!sl2.flagCentralizerTypeComputed) {
+  if (!sl2.centralizerComputer.flagTypeComputed) {
     return false;
   }
-  this->centralizerType = sl2.centralizerTypeIfKnown;
+  this->centralizerType = sl2.centralizerComputer.typeIfKnown;
   this->flagCentralizerTypeIsComputed = true;
   return true;
 }
@@ -4444,7 +4444,7 @@ void CandidateSemisimpleSubalgebra::attemptToSolveSystemPart2(
     long long int startingNumberOfOperations =
     Rational::totalArithmeticOperations();
     this->status = this->attemptToSolveSystemFinal();
-    this->totalArithmeticOpsToSolveSystem +=
+    this->totalArithmeticOperationsToSolveSystem +=
     Rational::totalArithmeticOperations() - startingNumberOfOperations;
   }
   if (
@@ -5384,7 +5384,7 @@ void CandidateSemisimpleSubalgebra::reset(SemisimpleSubalgebras* inputOwner) {
   this->flagInternalInitializationAndVerificationComplete = false;
   this->totalUnknownsNoCentralizer = 0;
   this->totalUnknownsWithCentralizer = 0;
-  this->totalArithmeticOpsToSolveSystem = 0;
+  this->totalArithmeticOperationsToSolveSystem = 0;
   this->numberOfConeIntersections = - 1;
   this->numberOfCasesNoLInfiniteRelationFound = - 1;
   this->numberOfBadParabolics = 0;
@@ -7785,8 +7785,9 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << this->toStringKostantSekiguchiTriple(&latexFormat);
   out << this->toStringKostantSekiguchiTripleStandardRealization();
   out << this->toStringTripleVerification(&latexFormat);
-  out << "<br>Unfold the hidden panel for more information.<br>";
-  out << "<div class='lieAlgebraPanel'><div>";
+  out << "\n<br>" << this->toStringCentralizer();
+  out << "\n<br>Unfold the hidden panel for more information.<br>\n";
+  out << "\n<div class='lieAlgebraPanel'><div>\n";
   out << this->toStringTripleUnknowns(&latexFormat);
   out << this->toStringTripleUnknownsPolynomialSystem(&latexFormat);
   out << this->toStringTripleArbitrary(&latexFormat);
@@ -7801,7 +7802,6 @@ void SlTwoSubalgebra::initialize() {
   this->owner = nullptr;
   this->container = nullptr;
   this->indexInContainer = - 1;
-  this->flagCentralizerTypeComputed = false;
   this->flagCentralizerIsRegular = false;
   this->dimensionCentralizer = - 1;
 }
@@ -7975,6 +7975,13 @@ void SemisimpleLieAlgebra::findSl2Subalgebras(
   inputOwner.checkConsistency();
   output.checkMinimalContainingRootSubalgebras();
   output.computeRootSubalgebraContainers();
+  output.computeCentralizers();
+}
+
+void SlTwoSubalgebras::computeCentralizers() {
+  for (SlTwoSubalgebra& currentSubalgebra : this->allSubalgebras) {
+    currentSubalgebra.attemptToComputeCentralizer();
+  }
 }
 
 void SlTwoSubalgebras::computeOneRootSubalgebraContainers(
@@ -9777,17 +9784,14 @@ void CandidateSemisimpleSubalgebra::computeCentralizerIsWellChosen() {
     ) {
       // When this happens, one of two things holds.
       // 1. We don't have the max containing semisimple container computed,
-      // say,
-      // this is a partial run
-      // where not all semisimple algebras were found.
+      // say, this is a partial run where not all semisimple algebras
+      // were found.
       // 2. This is a semisimple subalgebra that is not contained in another
-      // larger proper semisimple subalgebra.
-      // In this case, the centralizer of the present subalgebra must
-      // necessarily be
-      // diagonal (inside the ambient Cartan). But as the rank computation
-      // above
-      // shows, that is not
-      // the case. We must have made a serious programming mistake.
+      // larger proper semisimple subalgebra. In this case, the centralizer
+      // of the present subalgebra must necessarily be diagonal
+      // (inside the ambient Cartan).
+      // But as the rank computation above shows, that is not the case.
+      // We must have made a serious programming mistake.
       // We assume the best - that 1) holds.
       this->computeCentralizerManually();
       if (!this->flagCentralizerIsWellChosen) {
@@ -10368,13 +10372,16 @@ std::string CandidateSemisimpleSubalgebra::toString(
     out << "<br>" << this->toStringDrawWeights(format) << "<br>";
   }
   bool shouldDisplaySystem = false;
-  if (this->totalArithmeticOpsToSolveSystem != 0) {
+  if (this->totalArithmeticOperationsToSolveSystem != 0) {
     out
     << "<br>Made total "
-    << totalArithmeticOpsToSolveSystem
+    << totalArithmeticOperationsToSolveSystem
     << " arithmetic operations while solving "
     << "the Serre relations polynomial system. ";
-    if (this->totalArithmeticOpsToSolveSystem > 1000000 && !shortReportOnly) {
+    if (
+      this->totalArithmeticOperationsToSolveSystem > 1000000 &&
+      !shortReportOnly
+    ) {
       shouldDisplaySystem = true;
       out
       << "<br>The total number of arithmetic operations "

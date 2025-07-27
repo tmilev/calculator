@@ -68,14 +68,14 @@ checkAllSimpleGeneratorsAreOK() const {
 template <typename somegroup, typename Coefficient>
 void GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
 checkRepresentationIsMultiplicativelyClosed() {
-  List<Matrix<Rational> > tempList;
-  tempList.addOnTop(this->elementImages);
+  List<Matrix<Rational> > allProducts;
+  allProducts.addOnTop(this->elementImages);
   Matrix<Rational> matrix;
   ElementWeylGroup element;
-  for (int i = 0; i < tempList.size; i ++) {
-    for (int j = 0; j < tempList.size; j ++) {
-      matrix = tempList[i];
-      matrix.multiplyOnTheLeft(tempList[j]);
+  for (int i = 0; i < allProducts.size; i ++) {
+    for (int j = 0; j < allProducts.size; j ++) {
+      matrix = allProducts[i];
+      matrix.multiplyOnTheLeft(allProducts[j]);
       element = this->ownerGroup->elements[j];
       element *= this->ownerGroup->elements[i];
       element.makeCanonical();
@@ -87,9 +87,9 @@ checkRepresentationIsMultiplicativelyClosed() {
         << " times element "
         << j + 1
         << " is outside of the set, i.e.,  "
-        << tempList[i].toString()
+        << allProducts[i].toString()
         << " * "
-        << tempList[j].toString()
+        << allProducts[j].toString()
         << " is bad. "
         << global.fatal;
       }

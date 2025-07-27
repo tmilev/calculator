@@ -2,6 +2,7 @@
 #define header_math_extra_graph_ALREADY_INCLUDED
 
 #include "math_general.h"
+#include "math_linear_combination.h"
 
 class GraphOLD {
   // This type of graph is stored as a continuous block,

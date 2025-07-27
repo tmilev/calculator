@@ -5,6 +5,7 @@
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks web assembly build.
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
+#include "math_linear_combination.h"
 #include "math_subsets_selections.h"
 #include "math_vector_partition_functions.h"
 
@@ -4565,60 +4566,6 @@ void CandidateSemisimpleSubalgebra::extendToModule(
       if (vectorSpace.size > inputOutput.size) {
         inputOutput.addOnTop(element);
       }
-    }
-  }
-}
-
-template <class TemplateMonomial, class Coefficient>
-template <class LinearCombinationTemplate>
-void LinearCombination<TemplateMonomial, Coefficient>::intersectVectorSpaces(
-  const List<LinearCombinationTemplate>& vectorSpace1,
-  const List<LinearCombinationTemplate>& vectorSpace2,
-  List<LinearCombinationTemplate>& outputIntersection,
-  HashedList<TemplateMonomial>* seedMonomials
-) {
-  STACK_TRACE("LinearCombination::intersectVectorSpaces");
-  List<LinearCombinationTemplate> workingSpace = vectorSpace1;
-  List<LinearCombinationTemplate> vectorSpace2Eliminated = vectorSpace2;
-  LinearCombination<TemplateMonomial, Coefficient>::
-  gaussianEliminationByRowsDeleteZeroRows(
-    vectorSpace2Eliminated, nullptr, seedMonomials
-  );
-  LinearCombination<TemplateMonomial, Coefficient>::
-  gaussianEliminationByRowsDeleteZeroRows(
-    workingSpace, nullptr, seedMonomials
-  );
-  Matrix<Coefficient> linearCombinationMatrix;
-  int dimensionFirstSpace = workingSpace.size;
-  linearCombinationMatrix.makeIdentityMatrix(
-    workingSpace.size + vectorSpace2Eliminated.size
-  );
-  workingSpace.addListOnTop(vectorSpace2Eliminated);
-  vectorSpace2Eliminated = workingSpace;
-  LinearCombination<TemplateMonomial, Coefficient>::gaussianEliminationByRows(
-    workingSpace, nullptr, seedMonomials, &linearCombinationMatrix
-  );
-  int resultDimension = 0;
-  for (int i = workingSpace.size - 1; i >= 0; i --) {
-    if (workingSpace[i].isEqualToZero()) {
-      resultDimension ++;
-    } else {
-      break;
-    }
-  }
-  outputIntersection.setSize(resultDimension);
-  int counter = - 1;
-  LinearCombinationTemplate current;
-  for (int i = workingSpace.size - 1; i >= 0; i --) {
-    if (!workingSpace[i].isEqualToZero()) {
-      break;
-    }
-    counter ++;
-    outputIntersection[counter].makeZero();
-    for (int j = 0; j < dimensionFirstSpace; j ++) {
-      current = vectorSpace2Eliminated[j];
-      current *= linearCombinationMatrix(i, j);
-      outputIntersection[counter] += current;
     }
   }
 }

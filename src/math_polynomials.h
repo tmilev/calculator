@@ -5,6 +5,7 @@
 #include "general_strings.h"
 #include "math_general.h"
 #include "math_large_integers.h"
+#include "math_linear_combination.h"
 #include "math_subsets_selections.h"
 #include "math_vectors.h"
 

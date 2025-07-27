@@ -1260,6 +1260,7 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
 CentralizerComputer::CentralizerComputer() {
   this->flagTypeComputed = false;
   this->flagBasisComputed = false;
+  this->flagCartanSelected = false;
   this->owner = nullptr;
 }
 
@@ -1271,19 +1272,36 @@ std::string CentralizerComputer::toString() const {
   } else {
     out << " not computed";
   }
-  out << "\n<br>\nGenerators of centralizer: ";
+  out << "\n<br>\n" << "Generators of centralizer: ";
   if (this->flagBasisComputed) {
-    out << this->generators.toStringCommaDelimited();
+    out << this->centralizerBasis.toStringCommaDelimited();
   } else {
     out << " not computed.";
   }
+  out
+  << "\n<br>\nPreferred cartan of centralizer: "
+  << this->centralizerCartan.toStringCommaDelimited();
   return out.str();
 }
 
 bool CentralizerComputer::compute() {
   this->owner->getCommonCentralizer(
-    this->generatorsToCentralize, this->generators
+    this->generatorsToCentralize, this->centralizerBasis
   );
   this->flagBasisComputed = true;
+  this->flagCartanSelected = this->selectCartan();
   return false;
+}
+
+bool CentralizerComputer::selectCartan() {
+  this->ambientCartanBasis.clear();
+  for (int i = 0; i < this->owner->getRank(); i ++) {
+    ElementSemisimpleLieAlgebra<Rational> h;
+    h.makeCartanGeneratorHi(i, *this->owner);
+    this->ambientCartanBasis.addOnTop(h);
+  }
+  ElementSemisimpleLieAlgebra<Rational>::intersectVectorSpaces(
+    this->ambientCartanBasis, this->centralizerBasis, this->centralizerCartan
+  );
+  return true;
 }

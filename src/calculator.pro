@@ -46,6 +46,7 @@ HEADERS += \
   math_extra_semisimple_lie_subalgebras_sltwos.h \
     math_lattices.h \
   math_lie_theory.h \
+  math_linear_combination.h \
     math_modular_arithmetic.h \
   math_polynomials.h \
     math_vector_partition_functions.h \

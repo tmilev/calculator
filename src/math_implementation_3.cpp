@@ -9,6 +9,7 @@
 #include "math_general_implementation.h"
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
 #include "math_lattices.h"
+#include "math_linear_combination.h"
 #include "math_rational_function.h"
 #include "math_vector_partition_functions.h"
 #include "string_constants.h"

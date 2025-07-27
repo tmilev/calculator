@@ -10,13 +10,17 @@ class CentralizerComputer {
 public:
   SemisimpleLieAlgebra* owner;
   List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
-  List<ElementSemisimpleLieAlgebra<Rational> > generators;
+  List<ElementSemisimpleLieAlgebra<Rational> > centralizerBasis;
+  List<ElementSemisimpleLieAlgebra<Rational> > centralizerCartan;
+  List<ElementSemisimpleLieAlgebra<Rational> > ambientCartanBasis;
   DynkinType typeIfKnown;
   bool flagTypeComputed;
   bool flagBasisComputed;
+  bool flagCartanSelected;
   CentralizerComputer();
   std::string toString() const;
   bool compute();
+  bool selectCartan();
 };
 
 // The sl(2)-subalgebra candidate from which the sl(2) is to be realized.

@@ -1,5 +1,4 @@
 #include "math_extra_lie_theory_extras.h" // IWYU pragma: keep: breaks the build.
-#include "math_general.h"
 #include "math_general_implementation.h" // IWYU pragma: keep: breaks the build.
 
 template < >

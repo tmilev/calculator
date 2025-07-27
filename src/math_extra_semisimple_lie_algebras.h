@@ -37,8 +37,11 @@ public:
   );
   bool isElementCartan() const;
   void makeCartanGenerator(
-    const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& inputOwners
+    const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& owner
   );
+  // Creates the Cartan generator h_i.
+  // Here, i is the index of the i^th simple root.
+  void makeCartanGeneratorHi(int index, SemisimpleLieAlgebra& owner);
   void makeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
   void toVectorNegativeRootSpacesFirst(Vector<Coefficient>& output) const;
   void toVectorNegativeRootSpacesFirst(
@@ -1351,19 +1354,20 @@ void SemisimpleLieAlgebra::getCommonCentralizer(
   List<ElementSemisimpleLieAlgebra<Coefficient> >& outputCentralizingElements
 ) {
   STACK_TRACE("SemisimpleLieAlgebra::getCommonCentralizer");
-  Matrix<Coefficient> currentAdjointOperator, commonAdjointOperator;
+  Matrix<Coefficient> currentAdjointOperator;
+  Matrix<Coefficient> commonAdjointOperator;
   for (int i = 0; i < inputElementsToCentralize.size; i ++) {
     this->getAdjoint(currentAdjointOperator, inputElementsToCentralize[i]);
     commonAdjointOperator.appendMatrixToTheBottom(currentAdjointOperator);
   }
-  Vectors<Coefficient> outputV;
-  commonAdjointOperator.getZeroEigenSpace(outputV);
-  outputCentralizingElements.setSize(outputV.size);
-  for (int i = 0; i < outputV.size; i ++) {
+  Vectors<Coefficient> outputVectors;
+  commonAdjointOperator.getZeroEigenSpace(outputVectors);
+  outputCentralizingElements.setSize(outputVectors.size);
+  for (int i = 0; i < outputVectors.size; i ++) {
     ElementSemisimpleLieAlgebra<Coefficient>& currentElement =
     outputCentralizingElements[i];
     currentElement.assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
-      outputV[i], *this
+      outputVectors[i], *this
     );
   }
 }
@@ -1509,15 +1513,26 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::isElementCartan() const {
 }
 
 template <class Coefficient>
+void ElementSemisimpleLieAlgebra<Coefficient>::makeCartanGeneratorHi(
+  int index, SemisimpleLieAlgebra& owner
+) {
+  this->makeZero();
+  ChevalleyGenerator generator;
+  generator.makeGenerator(
+    owner, owner.getGeneratorIndexFromNonZeroCoefficientIndexInCartan(index)
+  );
+  this->addMonomial(generator, 1);
+}
+
+template <class Coefficient>
 void ElementSemisimpleLieAlgebra<Coefficient>::makeCartanGenerator(
-  const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& inputOwner
+  const Vector<Coefficient>& elementH, SemisimpleLieAlgebra& owner
 ) {
   ChevalleyGenerator generator;
   this->makeZero();
   for (int i = 0; i < elementH.size; i ++) {
     generator.makeGenerator(
-      inputOwner,
-      inputOwner.getGeneratorIndexFromNonZeroCoefficientIndexInCartan(i)
+      owner, owner.getGeneratorIndexFromNonZeroCoefficientIndexInCartan(i)
     );
     this->addMonomial(generator, elementH[i]);
   }

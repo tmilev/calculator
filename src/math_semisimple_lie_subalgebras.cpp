@@ -7751,6 +7751,7 @@ void SlTwoSubalgebra::initialize() {
   this->indexInContainer = - 1;
   this->flagCentralizerIsRegular = false;
   this->dimensionCentralizer = - 1;
+  this->flagTryToComputeCentralizerFully = true;
 }
 
 void SlTwoSubalgebra::computeDynkinTypeEmbedded(DynkinType& output) const {

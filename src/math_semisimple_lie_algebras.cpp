@@ -1580,7 +1580,7 @@ void HomomorphismSemisimpleLieAlgebra::getMapSmallCartanDualToLargeCartanDual(
       this->domainAlgebra()
     );
     this->applyHomomorphism(domainElement, imageElement);
-    output.assignVectorToColumnKeepOtherColsIntactNoInit(
+    output.assignVectorToColumnKeepOtherColumnsIntact(
       i, imageElement.getCartanPart()
     );
   }

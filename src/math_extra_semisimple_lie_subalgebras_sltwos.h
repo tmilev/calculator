@@ -5,6 +5,7 @@
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 #include "math_general.h"
+#include "math_polynomials.h"
 
 class CentralizerComputer {
 public:
@@ -12,7 +13,11 @@ public:
   List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerBasis;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerCartan;
-  List<ElementSemisimpleLieAlgebra<Rational> > ambientCartanBasis;
+  ElementSemisimpleLieAlgebra<Rational> semisimpleElement;
+  Matrix<Rational> adjointActionOfSemisimpleElement;
+  Polynomial<Rational> characteristicPolynomialAdjointActionSemisimpleElement;
+  PolynomialFactorizationUnivariate<Rational>
+  factorizationCharacteristicPolynomial;
   DynkinType typeIfKnown;
   bool flagTypeComputed;
   bool flagBasisComputed;
@@ -20,7 +25,8 @@ public:
   CentralizerComputer();
   std::string toString() const;
   bool compute();
-  bool selectCartan();
+  bool intersectAmbientCartanWithCentralizer();
+  bool trySemisimpleElement(ElementSemisimpleLieAlgebra<Rational>& candidate);
 };
 
 // The sl(2)-subalgebra candidate from which the sl(2) is to be realized.
@@ -163,6 +169,7 @@ public:
   int dimensionCentralizer;
   Rational dimensionCentralizerToralPart;
   bool flagCentralizerIsRegular;
+  bool flagTryToComputeCentralizerFully;
   List<int> indicesContainingRootSubalgebras;
   List<int> indicesMinimalContainingRootSubalgebras;
   Vectors<Rational> participatingPositiveRoots;

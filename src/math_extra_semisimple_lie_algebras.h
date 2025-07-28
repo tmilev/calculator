@@ -1,7 +1,6 @@
 #ifndef header_math_extra_semisimple_lie_algebras_ALREADY_INCLUDED
 #define header_math_extra_semisimple_lie_algebras_ALREADY_INCLUDED
 
-#include "html_routines.h"
 #include "math_extra_drawing_variables.h"
 #include "math_extra_finite_groups.h"
 #include "math_lie_theory.h"
@@ -65,11 +64,14 @@ public:
     List<ElementSemisimpleLieAlgebra>& elements,
     List<ElementSemisimpleLieAlgebra>& outputBasis
   );
+  void lieBracketOnTheRight(
+    const ElementSemisimpleLieAlgebra<Coefficient>& element,
+    ElementSemisimpleLieAlgebra<Coefficient>& output
+  ) const;
   void actOnMe(
     const ElementSemisimpleLieAlgebra<Coefficient>& element,
-    ElementSemisimpleLieAlgebra<Coefficient>& output,
-    SemisimpleLieAlgebra& owner
-  );
+    ElementSemisimpleLieAlgebra<Coefficient>& output
+  ) const;
   void actOnMe(
     const ElementSemisimpleLieAlgebra<Coefficient>& element,
     ElementSemisimpleLieAlgebra<Coefficient>& output,
@@ -113,6 +115,13 @@ public:
     );
   }
   Vector<Rational> getRootIMustBeWeight() const;
+  // Computes the adjoint action of the element in a given basis.
+  // Returns false if the basis in not stable with respect to
+  // the adjoint action of the element.
+  bool computeAdjointActionWithRespectToBasis(
+    List<ElementSemisimpleLieAlgebra<Coefficient> >& basis,
+    Matrix<Coefficient>& output
+  );
 };
 
 // Linear map from a semisimple lie algebra to itself.
@@ -601,6 +610,17 @@ public:
     const ElementUniversalEnveloping<Coefficient>& element,
     Matrix<Coefficient>& output,
     std::stringstream* commentsOnFailure
+  );
+  // Given an element acting by the adjoint action on an
+  // ad-stable vector subspace of the Lie algebra, returns the matrix
+  // of the action with coordinates corresponding to the
+  // given vector subspace basis.
+  template <typename Coefficient>
+  bool getElementAdjointRepresentationWithRespectToBasis(
+    const ElementSemisimpleLieAlgebra<Coefficient>& element,
+    List<ElementSemisimpleLieAlgebra<Coefficient> >& basisInvariantSpace,
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure = nullptr
   );
   template <typename Coefficient>
   bool accumulateChevalleyGeneratorStandardRepresentation(
@@ -1407,10 +1427,91 @@ void SemisimpleLieAlgebra::lieBracket(
 template <class Coefficient>
 void ElementSemisimpleLieAlgebra<Coefficient>::actOnMe(
   const ElementSemisimpleLieAlgebra<Coefficient>& element,
-  ElementSemisimpleLieAlgebra<Coefficient>& output,
-  SemisimpleLieAlgebra& owner
+  ElementSemisimpleLieAlgebra<Coefficient>& output
+) const {
+  element.lieBracketOnTheRight(*this, output);
+}
+
+template <class Coefficient>
+void ElementSemisimpleLieAlgebra<Coefficient>::lieBracketOnTheRight(
+  const ElementSemisimpleLieAlgebra<Coefficient>& element,
+  ElementSemisimpleLieAlgebra<Coefficient>& output
+) const {
+  if (this->isEqualToZero()) {
+    output = *this;
+    return;
+  }
+  this->getOwner()->lieBracket(*this, element, output);
+}
+
+template <class Coefficient>
+bool ElementSemisimpleLieAlgebra<Coefficient>::
+computeAdjointActionWithRespectToBasis(
+  List<ElementSemisimpleLieAlgebra<Coefficient> >& basis,
+  Matrix<Coefficient>& output
 ) {
-  owner.lieBracket(element, *this, output);
+  if (this->isEqualToZero()) {
+    output.makeZeroMatrix(basis.size, 0);
+    return true;
+  }
+  return
+  this->getOwner()->getElementAdjointRepresentationWithRespectToBasis(
+    *this, basis, output
+  );
+}
+
+template <typename Coefficient>
+bool SemisimpleLieAlgebra::getElementAdjointRepresentationWithRespectToBasis(
+  const ElementSemisimpleLieAlgebra<Coefficient>& element,
+  List<ElementSemisimpleLieAlgebra<Coefficient> >& basisInvariantSpace,
+  Matrix<Coefficient>& output,
+  std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE(
+    "SemisimpleLieAlgebra::"
+    "getElementAdjointRepresentationWithRespectToBasis"
+  );
+  if (
+    ElementSemisimpleLieAlgebra<Coefficient>::getRankElementSpan(
+      basisInvariantSpace
+    ) !=
+    basisInvariantSpace.size
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The given invariant space basis is not linearly independent: "
+      << basisInvariantSpace.toStringCommaDelimited();
+    }
+    return false;
+  }
+  output.makeZeroMatrix(basisInvariantSpace.size, 0);
+  ElementSemisimpleLieAlgebra<Coefficient> actionOnBasisElement;
+  Vector<Coefficient> basisElementTransformation;
+  for (int i = 0; i < basisInvariantSpace.size; i ++) {
+    const ElementSemisimpleLieAlgebra<Coefficient>& basisElement =
+    basisInvariantSpace[i];
+    element.lieBracketOnTheRight(basisElement, actionOnBasisElement);
+    if (
+      !actionOnBasisElement.getCoordinatesInBasis(
+        basisInvariantSpace, basisElementTransformation
+      )
+    ) {
+      if (commentsOnFailure != nullptr) {
+        *commentsOnFailure
+        << "The lie bracket of "
+        << element.toString()
+        << " with basis element:"
+        << basisElement.toString()
+        << " does not lie in the vector space generated by: "
+        << basisInvariantSpace.toStringCommaDelimited();
+      }
+      return false;
+    }
+    output.assignVectorToColumnKeepOtherColumnsIntact(
+      i, basisElementTransformation
+    );
+  }
+  return true;
 }
 
 template <class Coefficient>

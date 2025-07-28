@@ -1,5 +1,6 @@
 #include "general_file_operations_encodings.h"
 #include "math_extra_finite_groups_implementation.h"
+#include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_semisimple_lie_subalgebras_sltwos.h"
 #include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
 #include "progress_report.h"
@@ -313,6 +314,11 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
     {this->eElement, this->hElement, this->fElement}
   );
   this->centralizerComputer.owner = this->owner;
+  if (!this->flagTryToComputeCentralizerFully) {
+    // Guard until the centralizer computation algorithm
+    // is properly implemented.
+    return false;
+  }
   return this->centralizerComputer.compute();
 }
 
@@ -1279,6 +1285,20 @@ std::string CentralizerComputer::toString() const {
     out << " not computed.";
   }
   out
+  << "\n<br>\nCartan-generating semisimple element: \\("
+  << this->semisimpleElement.toString()
+  << "\\)";
+  out
+  << "\n<br>\nAdjoint action of semisimple element: \\("
+  << this->adjointActionOfSemisimpleElement.toStringLatex()
+  << "\\)";
+  out
+  << "\n<br>\nCharacteristic polynomial: "
+  << this->characteristicPolynomialAdjointActionSemisimpleElement.toString();
+  out
+  << "\n<br>\n Factorization of characteristic polynomial: "
+  << this->factorizationCharacteristicPolynomial.toStringResult();
+  out
   << "\n<br>\nPreferred cartan of centralizer: "
   << this->centralizerCartan.toStringCommaDelimited();
   return out.str();
@@ -1289,19 +1309,62 @@ bool CentralizerComputer::compute() {
     this->generatorsToCentralize, this->centralizerBasis
   );
   this->flagBasisComputed = true;
-  this->flagCartanSelected = this->selectCartan();
+  if (this->centralizerBasis.size == 0) {
+    return true;
+  }
+  this->flagCartanSelected = this->intersectAmbientCartanWithCentralizer();
+  ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
+  for (
+    const ElementSemisimpleLieAlgebra<Rational>& summand :
+    this->centralizerBasis
+  ) {
+    semisimpleCandidate += summand;
+  }
+  this->trySemisimpleElement(semisimpleCandidate);
   return false;
 }
 
-bool CentralizerComputer::selectCartan() {
-  this->ambientCartanBasis.clear();
+bool CentralizerComputer::intersectAmbientCartanWithCentralizer() {
+  STACK_TRACE("CentralizerComputer::intersectAmbientCartanWithCentralizer");
+  List<ElementSemisimpleLieAlgebra<Rational> > ambientCartanBasis;
   for (int i = 0; i < this->owner->getRank(); i ++) {
     ElementSemisimpleLieAlgebra<Rational> h;
     h.makeCartanGeneratorHi(i, *this->owner);
-    this->ambientCartanBasis.addOnTop(h);
+    ambientCartanBasis.addOnTop(h);
   }
   ElementSemisimpleLieAlgebra<Rational>::intersectVectorSpaces(
-    this->ambientCartanBasis, this->centralizerBasis, this->centralizerCartan
+    ambientCartanBasis, this->centralizerBasis, this->centralizerCartan
   );
+  return true;
+}
+
+bool CentralizerComputer::trySemisimpleElement(
+  ElementSemisimpleLieAlgebra<Rational>& candidate
+) {
+  STACK_TRACE("CentralizerComputer::trySemisimpleElement");
+  this->semisimpleElement = candidate;
+  bool mustBeTrue =
+  this->semisimpleElement.computeAdjointActionWithRespectToBasis(
+    this->centralizerBasis, this->adjointActionOfSemisimpleElement
+  );
+  this->adjointActionOfSemisimpleElement.
+  getCharacteristicPolynomialStandardRepresentation(
+    this->characteristicPolynomialAdjointActionSemisimpleElement
+  );
+  PolynomialFactorizationFiniteFields algorithm;
+  this->factorizationCharacteristicPolynomial.factor(
+    this->characteristicPolynomialAdjointActionSemisimpleElement,
+    algorithm,
+    nullptr,
+    nullptr
+  );
+  if (!mustBeTrue) {
+    global.fatal
+    << "Failed to compute the adjoint action of "
+    << this->semisimpleElement.toString()
+    << " in basis: "
+    << this->centralizerBasis.toStringCommaDelimited()
+    << global.fatal;
+  }
   return true;
 }

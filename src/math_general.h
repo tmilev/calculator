@@ -943,7 +943,7 @@ public:
       this->elements[rowIndex][i] = input[i];
     }
   }
-  void assignVectorToColumnKeepOtherColsIntactNoInit(
+  void assignVectorToColumnKeepOtherColumnsIntact(
     int columnIndex, const Vector<Coefficient>& input
   ) {
     if (

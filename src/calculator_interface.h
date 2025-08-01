@@ -4026,14 +4026,16 @@ bool CalculatorConversions::functionGetMatrixInternal(
       if (!success) {
         if (commentsOnError != nullptr) {
           *commentsOnError
-          << "Failed to convert matrix element: "
+          << "Can't convert matrix element: "
           << "row: "
           << i
           << ", column: "
           << j
           << ", expression: "
           << matrixExpressions(i, j).toString()
-          << ". ";
+          << " to type: ["
+          << calculator.builtInName<Type>()
+          << "]. ";
         }
         return false;
       }

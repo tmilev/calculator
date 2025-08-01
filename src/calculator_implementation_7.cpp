@@ -8912,7 +8912,7 @@ bool CalculatorFunctions::functionDeterminant(
   Calculator& calculator,
   const Expression& input,
   Expression& output,
-  int maxiumDimension,
+  int maximumDimension,
   bool convertByComputation
 ) {
   STACK_TRACE("CalculatorFunctions::functionDeterminant");
@@ -8951,14 +8951,14 @@ bool CalculatorFunctions::functionDeterminant(
       calculator, "Request to compute determinant of non-square matrix. "
     );
   }
-  if (matrix.numberOfRows > maxiumDimension) {
+  if (matrix.numberOfRows > maximumDimension) {
     return
     calculator
     << "<hr>Maximum dimension for "
     << "determinant computation of the given type is "
-    << maxiumDimension
+    << maximumDimension
     << " by "
-    << maxiumDimension
+    << maximumDimension
     << ". Your matrix is "
     << matrix.numberOfRows
     << " by "

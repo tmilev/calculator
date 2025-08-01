@@ -952,7 +952,7 @@ public:
       columnIndex < 0
     ) {
       global.fatal
-      << "In assignVectorToColumnKeepOtherColsIntactNoInit: "
+      << "In assignVectorToColumnKeepOtherColumnsIntact: "
       << "bad vector/matrix dimensions. "
       << global.fatal;
     }
@@ -1139,7 +1139,7 @@ public:
   );
   void gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
     int firstNonProcessedRow,
-    List<int>& outputPivotPointCols,
+    List<int>& outputPivotPointColumns,
     Selection* outputNonPivotPoints__WarningSelectionNotInitialized
   );
   void gaussianEliminationEuclideanDomain(
@@ -1834,10 +1834,10 @@ bool Matrix<Coefficient>::rowEchelonFormToLinearSystemSolution(
 template <typename Coefficient>
 void Matrix<Coefficient>::gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
   int firstNonProcessedRow,
-  List<int>& outputPivotPointCols,
+  List<int>& outputPivotPointColumns,
   Selection* outputNonPivotPoints__WarningSelectionNotInitialized
 ) {
-  outputPivotPointCols.setSize(this->numberOfRows);
+  outputPivotPointColumns.setSize(this->numberOfRows);
   Coefficient coefficient;
   for (int i = firstNonProcessedRow; i < this->numberOfRows; i ++) {
     int currentPivotCol = - 1;
@@ -1847,7 +1847,7 @@ void Matrix<Coefficient>::gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
         break;
       }
     }
-    outputPivotPointCols.objects[i] = currentPivotCol;
+    outputPivotPointColumns.objects[i] = currentPivotCol;
     if (currentPivotCol != - 1) {
       coefficient = this->elements[i][currentPivotCol];
       coefficient.invert();
@@ -1867,9 +1867,9 @@ void Matrix<Coefficient>::gaussianEliminationByRowsNoRowSwapPivotPointsByRows(
       outputNonPivotPoints__WarningSelectionNotInitialized->selected[i] = true;
     }
     for (int i = 0; i < this->numberOfRows; i ++) {
-      if (outputPivotPointCols.objects[i] != - 1) {
+      if (outputPivotPointColumns.objects[i] != - 1) {
         outputNonPivotPoints__WarningSelectionNotInitialized->selected[
-          outputPivotPointCols.objects[i]
+          outputPivotPointColumns.objects[i]
         ] =
         false;
       }

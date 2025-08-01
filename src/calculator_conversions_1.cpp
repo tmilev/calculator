@@ -479,7 +479,10 @@ bool CalculatorConversions::convert<AlgebraicNumber>(
   WithContext<AlgebraicNumber>& output
 ) {
   (void) calculator;
-  return input.isOfTypeWithContext(&output);
+  return
+  CalculatorConversions::convertWithoutComputation<AlgebraicNumber>(
+    calculator, input, output, nullptr
+  );
 }
 
 template < >

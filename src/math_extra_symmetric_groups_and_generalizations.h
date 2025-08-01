@@ -1589,9 +1589,9 @@ std::string FiniteGroup<elementSomeGroup>::prettyPrintCharacterTable(
     ) {
       values[i][j] =
       irreducibleRepresentations[i].character.data[j].toString();
-      int vijcols = static_cast<int>(values[i][j].length());
-      if (vijcols > columnsPerElement) {
-        columnsPerElement = vijcols;
+      int vijColumns = static_cast<int>(values[i][j].length());
+      if (vijColumns > columnsPerElement) {
+        columnsPerElement = vijColumns;
       }
     }
   }

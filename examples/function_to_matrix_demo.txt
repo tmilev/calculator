@@ -1,0 +1,6 @@
+f{}({{a}}, {{b}}) = \sqrt(a+b);
+A = FunctionToMatrix (f, 3,3);
+x = \det A;
+B= A\otimes A; 
+\det B
+

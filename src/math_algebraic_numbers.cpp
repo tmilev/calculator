@@ -878,9 +878,6 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
       );
     }
   }
-  global.comments
-  << "<br>\nDEBUG: adjoining root of: "
-  << polynomial.toStringPretty();
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderDefault();
   minimialPolynomial /=
@@ -1584,11 +1581,6 @@ bool AlgebraicNumber::radicalMeDefault(
   int radical, std::stringstream* commentsOnError
 ) {
   STACK_TRACE("AlgebraicNumber::radicalMeDefault");
-  global.comments
-  << "DEBUG: take sqrt["
-  << radical
-  << "] of: "
-  << this->toString();
   if (this->owner == nullptr) {
     if (commentsOnError != nullptr) {
       *commentsOnError

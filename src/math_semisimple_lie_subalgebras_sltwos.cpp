@@ -1461,15 +1461,6 @@ bool PolynomialQuadraticRootFinder::addRootsOfQuadraticFactor(
   Rational b = rescaled.coefficientOfXZeroPowerK(1);
   Rational c = rescaled.coefficientOfXZeroPowerK(0);
   Rational discriminant = b * b - 4 * a * c;
-  global.comments
-  << "Discriminant: "
-  << discriminant.toString()
-  << ", a: "
-  << a.toString()
-  << ", b: "
-  << b.toString()
-  << ", c: "
-  << c.toString();
   AlgebraicNumber squareRootOfDiscriminant;
   squareRootOfDiscriminant.assignRational(
     discriminant, this->algebraicClosure
@@ -1477,10 +1468,8 @@ bool PolynomialQuadraticRootFinder::addRootsOfQuadraticFactor(
   if (!squareRootOfDiscriminant.radicalMeDefault(2, nullptr)) {
     // We failed to take the square root of the rational;
     // possibly due to a computational throttle.
-    global.comments << "DEBUG: Failed to compute roots of quadratic factor!!!";
     return false;
   }
-  global.comments << "DEBUG: sqrt(D)= " << squareRootOfDiscriminant.toString();
   AlgebraicNumber root1 = (squareRootOfDiscriminant - b) / (a* 2);
   AlgebraicNumber root2 = (squareRootOfDiscriminant *(- 1) - b) / (a* 2);
   this->roots.addOnTop(root1);

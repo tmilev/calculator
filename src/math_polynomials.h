@@ -661,8 +661,13 @@ public:
     this->::LinearCombination<MonomialPolynomial, Coefficient>::assignOtherType
     (other, converter);
   }
+  // Gets the coefficient of x_1^degree, where x_1 is the
+  // first (zero index) variable of the polynomial.
+  Coefficient coefficientOfXZeroPowerK(int degree) const {
+    return this->coefficientOfXPowerK(0, degree);
+  }
   // Returns the coefficient a of a monomial of the form ax^k.
-  Coefficient coefficientOfXPowerK(int variableIndex, int variablePower) {
+  Coefficient coefficientOfXPowerK(int variableIndex, int variablePower) const {
     MonomialPolynomial monomial;
     monomial.setVariable(variableIndex, variablePower);
     return this->getCoefficientOf(monomial);
@@ -887,6 +892,15 @@ public:
   int64_t maximumComputations;
   FormatExpressions format;
   bool basicChecks(std::stringstream* commentsOnFailure);
+  // Factors the polynomial. Returns true if the polynomial is
+  // probably fully factored.
+  // Returns false if the polynomial factorization failed,
+  // in which case
+  // it still produces a valid, but possibly trivial
+  // factorization of the polynomial.
+  // When the result is false, all polynomial factors that were not properly
+  // probabilistically factored will be located in the nonReduced list of
+  // factors.
   template <class OneFactorFinder>
   bool factor(
     const Polynomial<Coefficient>& input,
@@ -914,6 +928,7 @@ public:
   );
   bool checkFactorization() const;
   std::string toStringResult(FormatExpressions* format = nullptr) const;
+  bool hasLinearAndQuadraticFactorsOnly();
   PolynomialFactorizationUnivariate();
 };
 

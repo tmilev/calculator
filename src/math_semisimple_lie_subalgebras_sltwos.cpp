@@ -313,7 +313,7 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
   List<ElementSemisimpleLieAlgebra<Rational> >(
     {this->eElement, this->hElement, this->fElement}
   );
-  this->centralizerComputer.owner = this->owner;
+  this->centralizerComputer.initialize(this->owner, this->algebraicClosure);
   if (!this->flagTryToComputeCentralizerFully) {
     // Guard until the centralizer computation algorithm
     // is properly implemented.
@@ -1268,6 +1268,16 @@ CentralizerComputer::CentralizerComputer() {
   this->flagBasisComputed = false;
   this->flagCartanSelected = false;
   this->owner = nullptr;
+  this->algebraicClosureRationals = nullptr;
+}
+
+void CentralizerComputer::initialize(
+  SemisimpleLieAlgebra* inputOwner,
+  AlgebraicClosureRationals* inputAlgebraicClosure
+) {
+  this->owner = inputOwner;
+  this->algebraicClosureRationals = inputAlgebraicClosure;
+  this->rootsOfCharacteristicPolynomial.initialize(inputAlgebraicClosure);
 }
 
 std::string CentralizerComputer::toString() const {
@@ -1275,6 +1285,9 @@ std::string CentralizerComputer::toString() const {
   out << "Centralizer type: ";
   if (this->flagTypeComputed) {
     out << this->typeIfKnown.toString();
+    if (this->typeIfKnown.isEqualToZero()) {
+      return out.str();
+    }
   } else {
     out << " not computed";
   }
@@ -1289,15 +1302,15 @@ std::string CentralizerComputer::toString() const {
   << this->semisimpleElement.toString()
   << "\\)";
   out
-  << "\n<br>\nAdjoint action of semisimple element: \\("
+  << "\n<br>\nAdjoint action of semisimple element H: \\("
   << this->adjointActionOfSemisimpleElement.toStringLatex()
   << "\\)";
   out
-  << "\n<br>\nCharacteristic polynomial: "
+  << "\n<br>\nCharacteristic polynomial ad H: "
   << this->characteristicPolynomialAdjointActionSemisimpleElement.toString();
   out
-  << "\n<br>\n Factorization of characteristic polynomial: "
-  << this->factorizationCharacteristicPolynomial.toStringResult();
+  << "\n<br>\nFactorization of characteristic polynomial of ad H: "
+  << this->rootsOfCharacteristicPolynomial.toString();
   out
   << "\n<br>\nPreferred cartan of centralizer: "
   << this->centralizerCartan.toStringCommaDelimited();
@@ -1347,17 +1360,6 @@ bool CentralizerComputer::trySemisimpleElement(
   this->semisimpleElement.computeAdjointActionWithRespectToBasis(
     this->centralizerBasis, this->adjointActionOfSemisimpleElement
   );
-  this->adjointActionOfSemisimpleElement.
-  getCharacteristicPolynomialStandardRepresentation(
-    this->characteristicPolynomialAdjointActionSemisimpleElement
-  );
-  PolynomialFactorizationFiniteFields algorithm;
-  this->factorizationCharacteristicPolynomial.factor(
-    this->characteristicPolynomialAdjointActionSemisimpleElement,
-    algorithm,
-    nullptr,
-    nullptr
-  );
   if (!mustBeTrue) {
     global.fatal
     << "Failed to compute the adjoint action of "
@@ -1366,5 +1368,146 @@ bool CentralizerComputer::trySemisimpleElement(
     << this->centralizerBasis.toStringCommaDelimited()
     << global.fatal;
   }
+  this->adjointActionOfSemisimpleElement.
+  getCharacteristicPolynomialStandardRepresentation(
+    this->characteristicPolynomialAdjointActionSemisimpleElement
+  );
+  this->rootsOfCharacteristicPolynomial.initialize(
+    this->algebraicClosureRationals
+  );
+  if (
+    !this->rootsOfCharacteristicPolynomial.findRoots(
+      this->characteristicPolynomialAdjointActionSemisimpleElement
+    )
+  ) {
+    return false;
+  }
   return true;
+}
+
+bool PolynomialQuadraticRootFinder::findRoots(Polynomial<Rational>& input) {
+  STACK_TRACE("PolynomialQuadraticRootFinder::findRoots");
+  this->polynomial = input;
+  PolynomialFactorizationFiniteFields algorithm;
+  bool factorizationSuccess =
+  this->factorization.factor(this->polynomial, algorithm, nullptr, nullptr);
+  if (!factorizationSuccess) {
+    return false;
+  }
+  if (this->factorization.nonReduced.size > 0) {
+    // We failed to fully factor the characteristic polynomial.
+    return false;
+  }
+  if (!this->factorization.hasLinearAndQuadraticFactorsOnly()) {
+    // The factors of the characteristic polynomial are not quadratic.
+    // Using this requires non-quadratic extensions of the rationals,
+    // let's give up for now.
+    // We haven't observed this happening in practice.
+    // Is there a mathematical reason (i.e., a theorem) for this?
+    return false;
+  }
+  this->roots.clear();
+  AlgebraicNumber minimalRoot;
+  for (const Polynomial<Rational>& factor : this->factorization.reduced) {
+    if (factor.totalDegree() < 2) {
+      continue;
+    }
+    // Extend the algebraic closure so it holds the roots of the polynomial.
+    if (
+      !this->algebraicClosure->adjoinRootMinimalRationalPolynomial(
+        factor, minimalRoot, nullptr
+      )
+    ) {
+      return false;
+    }
+  }
+  for (const Polynomial<Rational>& factor : this->factorization.reduced) {
+    if (factor.totalDegree() == 1) {
+      if (!this->addRootsOfLinearFactor(factor)) {
+        return false;
+      }
+      continue;
+    }
+    if (factor.totalDegree() == 2) {
+      if (!this->addRootsOfQuadraticFactor(input)) {
+        return false;
+      }
+      continue;
+    }
+    global.fatal
+    << "In polynomial root finder: this piece of code should be unreachable! "
+    << global.fatal;
+  }
+  return true;
+}
+
+bool PolynomialQuadraticRootFinder::addRootsOfLinearFactor(
+  const Polynomial<Rational>& factor
+) {
+  AlgebraicNumber rootOfLinearFactor;
+  rootOfLinearFactor.owner = this->algebraicClosure;
+  rootOfLinearFactor = - factor.coefficientOfXZeroPowerK(0) /
+  factor.coefficientOfXZeroPowerK(1);
+  this->roots.addOnTop(rootOfLinearFactor);
+  return true;
+}
+
+bool PolynomialQuadraticRootFinder::addRootsOfQuadraticFactor(
+  const Polynomial<Rational>& factor
+) {
+  Polynomial<Rational> rescaled = factor;
+  rescaled.scaleNormalizeLeadingMonomial(nullptr);
+  Rational a = rescaled.coefficientOfXZeroPowerK(2);
+  Rational b = rescaled.coefficientOfXZeroPowerK(1);
+  Rational c = rescaled.coefficientOfXZeroPowerK(0);
+  Rational discriminant = b * b - 4 * a * c;
+  global.comments
+  << "Discriminant: "
+  << discriminant.toString()
+  << ", a: "
+  << a.toString()
+  << ", b: "
+  << b.toString()
+  << ", c: "
+  << c.toString();
+  AlgebraicNumber squareRootOfDiscriminant;
+  squareRootOfDiscriminant.assignRational(
+    discriminant, this->algebraicClosure
+  );
+  if (!squareRootOfDiscriminant.radicalMeDefault(2, nullptr)) {
+    // We failed to take the square root of the rational;
+    // possibly due to a computational throttle.
+    global.comments << "DEBUG: Failed to compute roots of quadratic factor!!!";
+    return false;
+  }
+  global.comments << "DEBUG: sqrt(D)= " << squareRootOfDiscriminant.toString();
+  AlgebraicNumber root1 = (squareRootOfDiscriminant - b) / (a* 2);
+  AlgebraicNumber root2 = (squareRootOfDiscriminant *(- 1) - b) / (a* 2);
+  this->roots.addOnTop(root1);
+  this->roots.addOnTop(root2);
+  return true;
+}
+
+void PolynomialQuadraticRootFinder::initialize(
+  AlgebraicClosureRationals* inputAlgebraicClosure
+) {
+  this->algebraicClosure = inputAlgebraicClosure;
+}
+
+std::string PolynomialQuadraticRootFinder::toString(FormatExpressions* format)
+const {
+  (void) format;
+  std::stringstream out;
+  out
+  << "\n<br>\nPolynomial: "
+  << this->polynomial.toString()
+  << "\n<br>\nFactorization: "
+  << this->factorization.toStringResult(format)
+  << "\n<br>\nRoots of polynomial: "
+  << this->roots.toStringCommaDelimited();
+  return out.str();
+}
+
+PolynomialQuadraticRootFinder::PolynomialQuadraticRootFinder() {
+  this->algebraicClosure = nullptr;
 }

@@ -256,6 +256,11 @@ public:
     const Polynomial<AlgebraicNumber>& input,
     Polynomial<AlgebraicNumber>& output
   );
+  bool adjoinRootMinimalRationalPolynomial(
+    const Polynomial<Rational>& polynomial,
+    AlgebraicNumber& outputRoot,
+    std::stringstream* commentsOnFailure
+  );
   bool adjoinRootMinimalPolynomial(
     const Polynomial<AlgebraicNumber>& polynomial,
     AlgebraicNumber& outputRoot,
@@ -487,6 +492,23 @@ public:
       const std::string& inputPolynomial, const std::string& desiredBound
     );
   };
+};
+
+// A class that (attempts to) determine whether the polynomial has
+// quadratic radical roots and find them if they exist.
+// As of writing, the algorithms used allow for failure.
+class PolynomialQuadraticRootFinder {
+  AlgebraicClosureRationals* algebraicClosure;
+  bool addRootsOfLinearFactor(const Polynomial<Rational>& factor);
+  bool addRootsOfQuadraticFactor(const Polynomial<Rational>& factor);
+public:
+  Polynomial<Rational> polynomial;
+  PolynomialFactorizationUnivariate<Rational> factorization;
+  List<AlgebraicNumber> roots;
+  PolynomialQuadraticRootFinder();
+  void initialize(AlgebraicClosureRationals* inputAlgebraicClosure);
+  bool findRoots(Polynomial<Rational>& input);
+  std::string toString(FormatExpressions* format = nullptr) const;
 };
 
 #endif // header_math_extra_algebraic_numbers_ALREADY_INCLUDED

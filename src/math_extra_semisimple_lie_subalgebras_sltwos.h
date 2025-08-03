@@ -8,25 +8,30 @@
 #include "math_polynomials.h"
 
 class CentralizerComputer {
-public:
   SemisimpleLieAlgebra* owner;
+  AlgebraicClosureRationals* algebraicClosureRationals;
+public:
   List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerBasis;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerCartan;
   ElementSemisimpleLieAlgebra<Rational> semisimpleElement;
   Matrix<Rational> adjointActionOfSemisimpleElement;
   Polynomial<Rational> characteristicPolynomialAdjointActionSemisimpleElement;
-  PolynomialFactorizationUnivariate<Rational>
-  factorizationCharacteristicPolynomial;
+  PolynomialQuadraticRootFinder rootsOfCharacteristicPolynomial;
   DynkinType typeIfKnown;
   bool flagTypeComputed;
   bool flagBasisComputed;
   bool flagCartanSelected;
+  void initialize(
+    SemisimpleLieAlgebra* inputOwner,
+    AlgebraicClosureRationals* inputAlgebraicClosure
+  );
   CentralizerComputer();
   std::string toString() const;
   bool compute();
   bool intersectAmbientCartanWithCentralizer();
   bool trySemisimpleElement(ElementSemisimpleLieAlgebra<Rational>& candidate);
+  bool findSemisimpleElementEigenvalues();
 };
 
 // The sl(2)-subalgebra candidate from which the sl(2) is to be realized.

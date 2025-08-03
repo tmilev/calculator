@@ -878,6 +878,9 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
       );
     }
   }
+  global.comments
+  << "<br>\nDEBUG: adjoining root of: "
+  << polynomial.toStringPretty();
   List<MonomialPolynomial>::Comparator* monomialOrder =
   &MonomialPolynomial::orderDefault();
   minimialPolynomial /=
@@ -907,8 +910,8 @@ adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
     global.fatal
     << "The number z = "
     << outputRoot.toString()
-    <<
-    " was just adjoined to a quadratic radical extension of the rationals; z "
+    << " was just adjoined to a quadratic "
+    << "radical extension of the rationals; z "
     << "was given by requesting that it has minimial polynomial "
     << algebraicNumberPolynomial.toString()
     << ", however, substituting z back in to the minimal polynomial "
@@ -942,6 +945,19 @@ convertPolynomialOneVariableToPolynomialFirstVariable(
   substitution[indexVariable].makeMonomial(0, 1, 1);
   output = input;
   output.substitute(substitution, this->one());
+}
+
+bool AlgebraicClosureRationals::adjoinRootMinimalRationalPolynomial(
+  const Polynomial<Rational>& polynomial,
+  AlgebraicNumber& outputRoot,
+  std::stringstream* commentsOnFailure
+) {
+  Polynomial<AlgebraicNumber> converter;
+  converter = polynomial;
+  return
+  this->adjoinRootQuadraticPolynomialToQuadraticRadicalExtension(
+    converter, outputRoot, commentsOnFailure
+  );
 }
 
 bool AlgebraicClosureRationals::adjoinRootMinimalPolynomial(
@@ -1568,6 +1584,11 @@ bool AlgebraicNumber::radicalMeDefault(
   int radical, std::stringstream* commentsOnError
 ) {
   STACK_TRACE("AlgebraicNumber::radicalMeDefault");
+  global.comments
+  << "DEBUG: take sqrt["
+  << radical
+  << "] of: "
+  << this->toString();
   if (this->owner == nullptr) {
     if (commentsOnError != nullptr) {
       *commentsOnError

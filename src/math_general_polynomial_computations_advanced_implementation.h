@@ -2193,6 +2193,22 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountNonReducedFactor(
 }
 
 template <class Coefficient>
+bool PolynomialFactorizationUnivariate<Coefficient>::
+hasLinearAndQuadraticFactorsOnly() {
+  for (const Polynomial<Coefficient>& factor : this->reduced) {
+    if (factor.totalDegree() > 2) {
+      return false;
+    }
+  }
+  for (const Polynomial<Coefficient>& factor : this->nonReduced) {
+    if (factor.totalDegree() > 2) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <class Coefficient>
 bool PolynomialFactorizationUnivariate<Coefficient>::accountReducedFactor(
   Polynomial<Coefficient>& incoming, bool accountQuotientAsNonReduced
 ) {

@@ -106,7 +106,7 @@ bool WeylGroupData::isDominantWithRespectToGenerator<
     << "you might want to consider introducing a substitution "
     << "evaluating the rational function, some sort of a monomial order, "
     << "or some other method of deciding the "
-    << "\"sign\" of a rational function. "
+    << "'sign' of a rational function. "
     << "Whether or not this is a mistake, I am crashing.  "
     << global.fatal;
     return false;

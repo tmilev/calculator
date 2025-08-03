@@ -803,13 +803,24 @@ void Calculator::initializeFunctionsStandard() {
   );
   this->addOperationHandler(
     "\\int",
-    CalculatorFunctionsIntegration::integrateXpowerNePowerAx,
+    CalculatorFunctionsIntegration::integrateXPowerNePowerAx,
     "",
     "Integrates by parts \\int x^n e^{a x} dx, "
     "where n is a positive integer.",
     "\\int 2 x^{3} e^{5x} dx ",
     "CalculatorFunctionsIntegration::integrateXpowerNePowerAx",
     "IntegrateXpowerNePowerAx",
+    innerStandard
+  );
+  this->addOperationHandler(
+    "\\int",
+    CalculatorFunctionsIntegration::integrateXPowerNSineOrCosineAxPlusB,
+    "",
+    "Integrates by parts \\int x^n cos(a x) dx and \\int x^n sin(a x) dx "
+    "where n is a positive integer.",
+    "\\int 2 x^{3} sin(5x) dx; \\int 2 x^{5} cos(-5x) dx",
+    "CalculatorFunctionsIntegration::integrateXPowerNSineOrCosineAxPlusB",
+    "IntegrateXPowerNTrigonometryAxPlusB",
     innerStandard
   );
   this->addOperationHandler(

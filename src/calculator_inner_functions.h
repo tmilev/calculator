@@ -455,7 +455,10 @@ public:
   static bool integrateSqrtXsquaredMinusOne(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool integrateXpowerNePowerAx(
+  static bool integrateXPowerNePowerAx(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
+  static bool integrateXPowerNSineOrCosineAxPlusB(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool integrateEpowerAxDiffX(

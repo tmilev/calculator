@@ -646,10 +646,116 @@ bool CalculatorFunctionsIntegration::integrateSqrtOneMinusXsquared(
   return true;
 }
 
-bool CalculatorFunctionsIntegration::integrateXpowerNePowerAx(
+bool CalculatorFunctionsIntegration::integrateXPowerNSineOrCosineAxPlusB(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsIntegration::integrateXpowerNePowerAx");
+  STACK_TRACE(
+    "CalculatorFunctionsIntegration::integrateXPowerNSineOrCosineAxPlusB"
+  );
+  Expression functionExpression;
+  Expression variableExpression;
+  Expression setExpression;
+  if (
+    !input.isIndefiniteIntegralFdx(
+      &variableExpression, &functionExpression, &setExpression
+    )
+  ) {
+    return false;
+  }
+  if (!functionExpression.startsWith(calculator.opTimes(), 3)) {
+    return false;
+  }
+  Expression trigonometricPart = functionExpression[1];
+  // <- note: the seemingly odd order is intentional!
+  Expression polynomialPartExpression = functionExpression[2];
+  // <- note: the seemingly odd order is intentional!
+  Expression powerOfXExpression;
+  Expression trigonometryArgument;
+  Expression aExpression;
+  Expression bExpression;
+  // Trig argument is of form aX+b
+  powerOfXExpression.assignValue(calculator, 1);
+  bool isGood = false;
+  for (int i = 0; i < 2; i ++) {
+    MathRoutines::swap(trigonometricPart, polynomialPartExpression);
+    if (
+      !trigonometricPart.startsWith(calculator.opSin(), 2) &&
+      !trigonometricPart.startsWith(calculator.opCos(), 2)
+    ) {
+      continue;
+    }
+    trigonometryArgument = trigonometricPart[1];
+    if (
+      !CalculatorFunctions::extractLinearCoefficientsWithRespectToVariable(
+        trigonometryArgument, variableExpression, aExpression, bExpression
+      )
+    ) {
+      continue;
+    }
+    if (!aExpression.isConstantNumber() || !bExpression.isConstantNumber()) {
+      continue;
+    }
+    if (polynomialPartExpression != variableExpression) {
+      if (!polynomialPartExpression.startsWith(calculator.opPower(), 3)) {
+        continue;
+      }
+      if (polynomialPartExpression[1] != variableExpression) {
+        continue;
+      }
+      int integerValue = - 1;
+      if (!polynomialPartExpression[2].isSmallInteger(&integerValue)) {
+        continue;
+      }
+      if (integerValue <= 0) {
+        continue;
+      }
+      powerOfXExpression = polynomialPartExpression[2];
+    }
+    isGood = true;
+    break;
+  }
+  if (!isGood) {
+    return false;
+  }
+  Expression remainingIntegrand;
+  Expression integralPart;
+  remainingIntegrand.makeXOX(
+    calculator,
+    calculator.opPower(),
+    variableExpression,
+    powerOfXExpression - calculator.expressionOne()
+  );
+  bool isSine = trigonometricPart[0].isOperationGiven(calculator.opSin());
+  Expression transformedTrigonometry;
+  Expression newCoefficient;
+  if (isSine) {
+    transformedTrigonometry.makeOX(
+      calculator, calculator.opCos(), trigonometricPart[1]
+    );
+    newCoefficient = calculator.expressionMinusOne();
+  } else {
+    transformedTrigonometry.makeOX(
+      calculator, calculator.opSin(), trigonometricPart[1]
+    );
+    newCoefficient = calculator.expressionOne();
+  }
+  transformedTrigonometry = newCoefficient * transformedTrigonometry;
+  remainingIntegrand *= transformedTrigonometry;
+  integralPart.makeIntegral(
+    calculator, setExpression, remainingIntegrand, variableExpression
+  );
+  output = (
+    polynomialPartExpression *
+    transformedTrigonometry - powerOfXExpression * integralPart
+  ) /
+  aExpression;
+  return true;
+}
+
+bool CalculatorFunctionsIntegration::integrateXPowerNePowerAx(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
+  STACK_TRACE("CalculatorFunctionsIntegration::integrateXPowerNePowerAx");
   Expression functionExpression;
   Expression variableExpression;
   Expression setExpression;
@@ -790,15 +896,17 @@ bool CalculatorFunctionsIntegration::integrateSqrtXsquaredMinusOne(
   newVariableExpression = variableExpression * variableChangeCoeffiicent;
   functionCoefficient /= variableChangeCoeffiicent;
   Expression algSQRTPart;
-  Expression algPart;
+  Expression algebraicPart;
   Expression lnPart;
   algSQRTPart =
   newVariableExpression * newVariableExpression - calculator.expressionOne();
-  algPart.makeSqrt(calculator, algSQRTPart);
+  algebraicPart.makeSqrt(calculator, algSQRTPart);
   lnPart.makeOX(
-    calculator, calculator.opLog(), newVariableExpression - algPart
+    calculator, calculator.opLog(), newVariableExpression - algebraicPart
   );
-  output = functionCoefficient *(algPart * newVariableExpression + lnPart) / 2;
+  output =
+  functionCoefficient *(algebraicPart * newVariableExpression + lnPart) /
+  2;
   return true;
 }
 

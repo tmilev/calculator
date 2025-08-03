@@ -4999,15 +4999,23 @@ integrateRationalFunctionSplitToBuidingBlocks(
   }
   ExpressionContext context = computation.rationalFraction.context;
   if (context.numberOfVariables() > 1) {
-    return
-    calculator
-    << "<hr>I converted "
-    << functionExpression.toString()
-    << " to rational function, but it is of "
-    << context.numberOfVariables()
-    << " variables. I have been taught to work with 1 variable only. "
-    << "<br>The context of the rational function is: "
-    << context.toString();
+    HashedList<Expression> freeVariables;
+    functionExpression.getFreeVariables(freeVariables, true);
+    if (freeVariables.size > 1) {
+      return
+      calculator
+      << "<hr>I converted "
+      << functionExpression.toString()
+      << " to rational function, but it is of "
+      << context.numberOfVariables()
+      << " variables: "
+      << freeVariables.toStringCommaDelimited()
+      << " I have been taught to work with 1 variable only. "
+      << "<br>The context of the rational function is: "
+      << context.toString();
+    } else {
+      return false;
+    }
   }
   if (context.numberOfVariables() == 1) {
     if (context.getVariable(0) != variableExpression) {

@@ -936,6 +936,10 @@
     "output":"\\frac{2}{5} x^{3} e^{5 x}-\\frac{6}{25} x^{2} e^{5 x}+\\frac{12}{125} x e^{5 x}-\\frac{12}{625} e^{5 x}"
   },
   {
+    "input":"\\int 2 x^{3} sin(5x) dx; \\int 2 x^{5} cos(-5x) dx",
+    "output":"(-\\frac{2}{5} x^{3} \\cos{}\\left(5 x\\right)+\\frac{6}{25} x^{2} \\sin{}\\left(5 x\\right)+\\frac{12}{125} x \\cos{}\\left(5 x\\right)-\\frac{12}{625} \\sin{}\\left(5 x\\right);-\\frac{2}{5} x^{5} \\sin{}\\left(-5 x\\right)+\\frac{2}{5} x^{4} \\cos{}\\left(-5 x\\right)+\\frac{8}{25} x^{3} \\sin{}\\left(-5 x\\right)-\\frac{24}{125} x^{2} \\cos{}\\left(-5 x\\right)-\\frac{48}{625} x \\sin{}\\left(-5 x\\right)+\\frac{48}{3125} \\cos{}\\left(-5 x\\right))"
+  },
+  {
     "input":"\\int \\sin^{4}x \\cos^{6}x dx ",
     "output":"\\frac{1}{320} {\\sin^{5}}{}\\left(2 x\\right)+\\frac{1}{2048} \\sin{}\\left(8 x\\right)-\\frac{1}{256} \\sin{}\\left(4 x\\right)+\\frac{3}{256} x"
   },

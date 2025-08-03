@@ -665,12 +665,12 @@ bool CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor(
 }
 
 bool CalculatorFunctionsBinaryOps::
-multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra
-(Calculator& calculator, const Expression& input, Expression& output) {
+multiplyRationalOrPolynomialOrElementWeylAlgebraBySimilar(
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   STACK_TRACE(
     "CalculatorFunctionsBinaryOps::"
-    "multiplyRationalOrPolynomialOrElementWeylAlgebra"
-    "ByRationalOrPolynomialOrElementWeylAlgebra"
+    "multiplyRationalOrPolynomialOrElementWeylAlgebraBySimilar"
   );
   if (input.size() != 3) {
     return false;

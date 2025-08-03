@@ -2121,7 +2121,7 @@ If the argument is a power of the base does the computation.
 ```
 Logarithm function (arbitrary base). Equivalent to \log_{{a}} {{b}}= (\log b)/(\log a). 
 
-Operator or function \int is overloaded with 18 total handlers.
+Operator or function \int is overloaded with 19 total handlers.
 
 *\int* [DefiniteIntegral] {CalculatorFunctionsIntegration::integrateDefiniteIntegral}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint_%7b1%7d%5e2%20%28x%5e2%2bx%29%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)
@@ -2180,6 +2180,13 @@ Integrates \int \sqrt{x^2-a}dx, a > 0.
 \int 2 x^{3} e^{5x} dx 
 ```
 Integrates by parts \int x^n e^{a x} dx, where n is a positive integer.
+
+*\int* [IntegrateXPowerNTrigonometryAxPlusB] {CalculatorFunctionsIntegration::integrateXPowerNSineOrCosineAxPlusB}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%202%20x%5e%7b3%7d%20sin%285x%29%20dx%3b%20%5c%5cint%202%20x%5e%7b5%7d%20cos%28-5x%29%20dx%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+\int 2 x^{3} sin(5x) dx; \int 2 x^{5} cos(-5x) dx
+```
+Integrates by parts \int x^n cos(a x) dx and \int x^n sin(a x) dx where n is a positive integer.
 
 *\int* [IntegrateSinPowerNCosPowerM] {CalculatorFunctionsIntegration::integrateSinPowerNCosPowerM}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22%5c%5cint%20%5c%5csin%5e%7b4%7dx%20%5c%5ccos%5e%7b6%7dx%20dx%20%22%2c%22currentPage%22%3a%22calculator%22%7d)

@@ -92,9 +92,9 @@ public:
   static bool multiplyRationalOrPolynomialOrRationalFunctionByRationalFraction(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool
-  multiplyRationalOrPolynomialOrElementWeylAlgebraByRationalOrPolynomialOrElementWeylAlgebra
-  (Calculator& calculator, const Expression& input, Expression& output);
+  static bool multiplyRationalOrPolynomialOrElementWeylAlgebraBySimilar(
+    Calculator& calculator, const Expression& input, Expression& output
+  );
   static bool multiplyPolynomialModPByPolynomialModP(
     Calculator& calculator, const Expression& input, Expression& output
   );
@@ -796,7 +796,8 @@ bool CalculatorConversions::functionRationalFraction(
     input.startsWith(calculator.opTimes(), 3) ||
     input.startsWith(calculator.opDivide(), 3)
   ) {
-    WithContext<RationalFraction<Coefficient> > left, right;
+    WithContext<RationalFraction<Coefficient> > left;
+    WithContext<RationalFraction<Coefficient> > right;
     if (
       !CalculatorConversions::functionRationalFraction<Coefficient>(
         calculator, input[1], left, allowNonIntegerPowers
@@ -842,7 +843,7 @@ bool CalculatorConversions::functionRationalFraction(
       return true;
     }
     global.fatal
-    << "This line of code should never be reached, something has gone wrong."
+    << "This line of code should never be reached, something has gone wrong. "
     << global.fatal;
   }
   int smallPower = - 1;

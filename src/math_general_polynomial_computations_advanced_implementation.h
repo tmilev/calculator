@@ -2196,11 +2196,21 @@ template <class Coefficient>
 bool PolynomialFactorizationUnivariate<Coefficient>::
 hasLinearAndQuadraticFactorsOnly() {
   for (const Polynomial<Coefficient>& factor : this->reduced) {
+    global.comments
+    << "DEBUG: Facctor "
+    << factor.toStringPretty()
+    << " total deg: "
+    << factor.totalDegree();
     if (factor.totalDegree() > 2) {
       return false;
     }
   }
   for (const Polynomial<Coefficient>& factor : this->nonReduced) {
+    global.comments
+    << "DEBUG: nonredu Facctor "
+    << factor.toStringPretty()
+    << " total deg: "
+    << factor.totalDegree();
     if (factor.totalDegree() > 2) {
       return false;
     }

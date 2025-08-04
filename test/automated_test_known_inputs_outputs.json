@@ -2192,8 +2192,8 @@
     "output":"\"<hr>Root subsystem type B^{1}_3. Orbit has 1 element(s), here they are: <br>a_9a_10a_11a_12a_13a_14a_15a_16a_17<hr>Root subsystem type A^{1}_3. Orbit has 1 element(s), here they are: <br>a_9a_10a_12a_15a_16a_17<hr>Root subsystem type A^{2}_1+2A^{1}_1. Orbit has 3 element(s), here they are: <br>a_10a_14a_15<br>a_12a_13a_16<br>a_9a_11a_17<hr>Root subsystem type B^{1}_2. Orbit has 3 element(s), here they are: <br>a_9a_13a_14a_17<br>a_12a_11a_14a_16<br>a_10a_11a_13a_15<hr>Root subsystem type A^{1}_2. Orbit has 4 element(s), here they are: <br>a_10a_16a_17<br>a_12a_15a_17<br>a_9a_15a_16<br>a_9a_10a_12<hr>Root subsystem type A^{2}_1+A^{1}_1. Orbit has 6 element(s), here they are: <br>a_14a_15<br>a_13a_16<br>a_14a_10<br>a_11a_17<br>a_13a_12<br>a_11a_9<hr>Root subsystem type 2A^{1}_1. Orbit has 3 element(s), here they are: <br>a_9a_17<br>a_12a_16<br>a_10a_15<hr>Root subsystem type A^{2}_1. Orbit has 3 element(s), here they are: <br>a_14<br>a_13<br>a_11<hr>Root subsystem type A^{1}_1. Orbit has 6 element(s), here they are: <br>a_17<br>a_16<br>a_15<br>a_12<br>a_10<br>a_9<hr>Root subsystem type 0. Orbit has 1 element(s), here they are: <br>1Type: B^{1}_3. Number of root subsystems: 10\""
   },
   {
-    "input":"A =\\begin{pmatrix}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23\\end{pmatrix}; p =MinPolyMatrix{}A",
-    "output":"(A=\\begin{pmatrix}2 & 3 & 5\\\\ \n7 & 11 & 13\\\\ \n17 & 19 & 23 \\end{pmatrix};p=\"q^3-36q^2-32q +78\")"
+    "input":"A =\\begin{pmatrix}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23\\end{pmatrix}; CharPoly{}A;MinPolyMatrix{}A;",
+    "output":"(A=\\begin{pmatrix}2 & 3 & 5\\\\ \n7 & 11 & 13\\\\ \n17 & 19 & 23 \\end{pmatrix};\"q^3-36q^2-32q +78\";\"q^3-36q^2-32q +78\")"
   },
   {
     "input":"x = MakeCharacterLieAlg{}(G_2, (1, 0));\ny = MakeCharacterLieAlg{}(G_2, (0, 1));\nx * y",

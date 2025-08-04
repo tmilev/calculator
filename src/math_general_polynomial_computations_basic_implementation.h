@@ -1027,18 +1027,29 @@ void Polynomial<Coefficient>::assignCharacteristicPolynomial(
     << "modify the present assertion. "
     << global.fatal;
   }
-  this->makeConstant(1);
-  Matrix<Coefficient> accumulator = input;
-  Coefficient currenCoefficient;
-  for (int i = 1; i < n; i ++) {
-    currenCoefficient = - accumulator.getTrace() / i;
-    this->addMonomial(MonomialPolynomial(0, i), currenCoefficient);
-    for (int j = 0; j < n; j ++) {
-      accumulator(j, j) += currenCoefficient;
-    }
-    accumulator.multiplyOnTheLeft(input);
+  List<Coefficient> tracesOfPowersOfInput;
+  tracesOfPowersOfInput.addOnTop(1);
+  Matrix<Coefficient> inputPowerN;
+  inputPowerN.makeIdentityMatrix(n);
+  for (int i = 1; i < n + 1; i ++) {
+    inputPowerN.multiplyOnTheLeft(input);
+    tracesOfPowersOfInput.addOnTop(inputPowerN.getTrace());
   }
-  this->addMonomial(MonomialPolynomial(0, n), - accumulator.getTrace() / n);
+  this->makeZero();
+  this->addMonomial(MonomialPolynomial(0, n), 1);
+  List<Coefficient> unknownCoefficients;
+  unknownCoefficients.addOnTop(1);
+  for (int i = 1; i < n + 1; i ++) {
+    Coefficient nextCoefficientComputer;
+    nextCoefficientComputer = 0;
+    for (int j = 1; j <= i; j ++) {
+      nextCoefficientComputer +=
+      tracesOfPowersOfInput[j] * unknownCoefficients[i - j];
+    }
+    nextCoefficientComputer = - nextCoefficientComputer / i;
+    unknownCoefficients.addOnTop(nextCoefficientComputer);
+    this->addMonomial(MonomialPolynomial(0, n - i), nextCoefficientComputer);
+  }
 }
 
 template <class Coefficient>

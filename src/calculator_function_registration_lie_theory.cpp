@@ -323,7 +323,8 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "7& 11& 13\\\\ "
     "17&19 &23"
     "\\end{pmatrix}; "
-    "p =MinPolyMatrix{}A",
+    "CharPoly{}A;"
+    "MinPolyMatrix{}A;",
     "CalculatorFunctions::characteristicPolynomialMatrix",
     "CharPoly",
     standardOptions

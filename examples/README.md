@@ -5273,9 +5273,9 @@ PrintMacdonaldPolys{}(B_3)
 Prints macdonald polynomials from a semisimple type. 
 
 *CharPoly* [CharPoly] {CalculatorFunctions::characteristicPolynomialMatrix}. 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%5c%5cbegin%7bpmatrix%7d2%20%26%203%26%205%5c%5c%5c%5c%207%26%2011%26%2013%5c%5c%5c%5c%2017%2619%20%2623%5c%5cend%7bpmatrix%7d%3b%20p%20%3dMinPolyMatrix%7b%7dA%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22A%20%3d%5c%5cbegin%7bpmatrix%7d2%20%26%203%26%205%5c%5c%5c%5c%207%26%2011%26%2013%5c%5c%5c%5c%2017%2619%20%2623%5c%5cend%7bpmatrix%7d%3b%20CharPoly%7b%7dA%3bMinPolyMatrix%7b%7dA%3b%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-A =\begin{pmatrix}2 & 3& 5\\ 7& 11& 13\\ 17&19 &23\end{pmatrix}; p =MinPolyMatrix{}A
+A =\begin{pmatrix}2 & 3& 5\\ 7& 11& 13\\ 17&19 &23\end{pmatrix}; CharPoly{}A;MinPolyMatrix{}A;
 ```
 Computes the characteristic polynomial of a matrix (= det(A-q*Id)), provided that the matrix is not too large.
 

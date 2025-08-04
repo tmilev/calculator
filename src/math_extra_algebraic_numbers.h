@@ -511,4 +511,20 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
 };
 
+// Finds eigenvalues of a matrix.
+// Currently assumes that the matrix is rational and the eigenvalues lie in a
+// quadratic radical extension of the rationals.
+// This assumption is not neccessary and can be removed if
+class MatrixEigenvalueFinder {
+  AlgebraicClosureRationals* algebraicClosure;
+public:
+  Matrix<Rational> matrix;
+  Polynomial<Rational> characteristicPolynomial;
+  PolynomialQuadraticRootFinder eigenvalueFinder;
+  List<Vectors<AlgebraicNumber> > eigenvectors;
+  MatrixEigenvalueFinder();
+  void initialize(AlgebraicClosureRationals* inputAlgebraicClosure);
+  bool findEigenValuesAndEigenspaces(Matrix<Rational>& input);
+};
+
 #endif // header_math_extra_algebraic_numbers_ALREADY_INCLUDED

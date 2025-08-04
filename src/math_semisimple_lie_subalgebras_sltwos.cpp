@@ -1277,7 +1277,9 @@ void CentralizerComputer::initialize(
 ) {
   this->owner = inputOwner;
   this->algebraicClosureRationals = inputAlgebraicClosure;
-  this->rootsOfCharacteristicPolynomial.initialize(inputAlgebraicClosure);
+  this->semisimpleElementAdjointEigenvalueFinder.initialize(
+    inputAlgebraicClosure
+  );
 }
 
 std::string CentralizerComputer::toString() const {
@@ -1307,10 +1309,20 @@ std::string CentralizerComputer::toString() const {
   << "\\)";
   out
   << "\n<br>\nCharacteristic polynomial ad H: "
-  << this->characteristicPolynomialAdjointActionSemisimpleElement.toString();
+  << this->semisimpleElementAdjointEigenvalueFinder.characteristicPolynomial.
+  toString();
   out
   << "\n<br>\nFactorization of characteristic polynomial of ad H: "
-  << this->rootsOfCharacteristicPolynomial.toString();
+  << this->semisimpleElementAdjointEigenvalueFinder.eigenvalueFinder.
+  factorization.toStringResult();
+  out
+  << "\n<br>\nEigenvalues of ad H: "
+  << this->semisimpleElementAdjointEigenvalueFinder.eigenvalueFinder.roots.
+  toStringCommaDelimited();
+  out
+  << "\n<br>\nEigenvectors of ad H: "
+  << this->semisimpleElementAdjointEigenvalueFinder.eigenvectors.
+  toStringCommaDelimited();
   out
   << "\n<br>\nPreferred cartan of centralizer: "
   << this->centralizerCartan.toStringCommaDelimited();
@@ -1368,17 +1380,12 @@ bool CentralizerComputer::trySemisimpleElement(
     << this->centralizerBasis.toStringCommaDelimited()
     << global.fatal;
   }
-  this->adjointActionOfSemisimpleElement.
-  getCharacteristicPolynomialStandardRepresentation(
-    this->characteristicPolynomialAdjointActionSemisimpleElement
-  );
-  this->rootsOfCharacteristicPolynomial.initialize(
+  this->semisimpleElementAdjointEigenvalueFinder.initialize(
     this->algebraicClosureRationals
   );
   if (
-    !this->rootsOfCharacteristicPolynomial.findRoots(
-      this->characteristicPolynomialAdjointActionSemisimpleElement
-    )
+    !this->semisimpleElementAdjointEigenvalueFinder.
+    findEigenValuesAndEigenspaces(this->adjointActionOfSemisimpleElement)
   ) {
     return false;
   }
@@ -1429,7 +1436,7 @@ bool PolynomialQuadraticRootFinder::findRoots(Polynomial<Rational>& input) {
       continue;
     }
     if (factor.totalDegree() == 2) {
-      if (!this->addRootsOfQuadraticFactor(input)) {
+      if (!this->addRootsOfQuadraticFactor(factor)) {
         return false;
       }
       continue;
@@ -1444,6 +1451,7 @@ bool PolynomialQuadraticRootFinder::findRoots(Polynomial<Rational>& input) {
 bool PolynomialQuadraticRootFinder::addRootsOfLinearFactor(
   const Polynomial<Rational>& factor
 ) {
+  STACK_TRACE("PolynomialQuadraticRootFinder::addRootsOfLinearFactor");
   AlgebraicNumber rootOfLinearFactor;
   rootOfLinearFactor.owner = this->algebraicClosure;
   rootOfLinearFactor = - factor.coefficientOfXZeroPowerK(0) /
@@ -1455,6 +1463,7 @@ bool PolynomialQuadraticRootFinder::addRootsOfLinearFactor(
 bool PolynomialQuadraticRootFinder::addRootsOfQuadraticFactor(
   const Polynomial<Rational>& factor
 ) {
+  STACK_TRACE("PolynomialQuadraticRootFinder::addRootsOfQuadraticFactor");
   Polynomial<Rational> rescaled = factor;
   rescaled.scaleNormalizeLeadingMonomial(nullptr);
   Rational a = rescaled.coefficientOfXZeroPowerK(2);
@@ -1465,6 +1474,11 @@ bool PolynomialQuadraticRootFinder::addRootsOfQuadraticFactor(
   squareRootOfDiscriminant.assignRational(
     discriminant, this->algebraicClosure
   );
+  global.comments
+  << "<br>DEBUG: a: "
+  << a.toString()
+  << " factor: "
+  << factor.toString();
   if (!squareRootOfDiscriminant.radicalMeDefault(2, nullptr)) {
     // We failed to take the square root of the rational;
     // possibly due to a computational throttle.
@@ -1499,4 +1513,43 @@ const {
 
 PolynomialQuadraticRootFinder::PolynomialQuadraticRootFinder() {
   this->algebraicClosure = nullptr;
+}
+
+MatrixEigenvalueFinder::MatrixEigenvalueFinder() {
+  this->algebraicClosure = nullptr;
+}
+
+void MatrixEigenvalueFinder::initialize(
+  AlgebraicClosureRationals* inputAlgebraicClosure
+) {
+  this->algebraicClosure = inputAlgebraicClosure;
+  this->eigenvalueFinder.initialize(this->algebraicClosure);
+}
+
+bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
+  Matrix<Rational>& input
+) {
+  this->matrix = input;
+  this->matrix.getCharacteristicPolynomialStandardRepresentation(
+    this->characteristicPolynomial
+  );
+  if (
+    this->characteristicPolynomial.totalDegree() !=
+    this->matrix.numberOfColumns
+  ) {
+    global.fatal << "Bad characteristic polynomial degree. " << global.fatal;
+  }
+  this->eigenvalueFinder.initialize(this->algebraicClosure);
+  if (!this->eigenvalueFinder.findRoots(this->characteristicPolynomial)) {
+    return false;
+  }
+  Matrix<AlgebraicNumber> matrixAlgebraic;
+  matrixAlgebraic.makeZeroMatrix(
+    this->matrix.numberOfColumns, this->algebraicClosure->zero()
+  );
+  matrixAlgebraic = this->matrix;
+  matrixAlgebraic.getEigenSpacesFromEigenvalues(
+    this->eigenvalueFinder.roots, this->eigenvectors
+  );
+  return true;
 }

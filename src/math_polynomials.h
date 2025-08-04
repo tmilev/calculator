@@ -406,6 +406,8 @@ public:
   }
   void assignFloor() const {}
   void assignMinimalPolynomial(const Matrix<Coefficient>& input);
+  // Computes the characteristic polynomial using the
+  // Faddeev–LeVerrier algorithm.
   void assignCharacteristicPolynomial(const Matrix<Coefficient>& input);
   void assignMonomialWithExponent(
     Vector<Rational>& r, const Coefficient& coefficient = 1

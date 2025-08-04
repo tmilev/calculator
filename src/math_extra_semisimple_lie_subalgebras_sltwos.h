@@ -14,10 +14,14 @@ public:
   List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerBasis;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerCartan;
+  // A semisimple element of the centalizer whose centralizer can serve as a
+  // Cartan subalgebra.
   ElementSemisimpleLieAlgebra<Rational> semisimpleElement;
+  // The adjoint action of the semisimple element.
   Matrix<Rational> adjointActionOfSemisimpleElement;
-  Polynomial<Rational> characteristicPolynomialAdjointActionSemisimpleElement;
-  PolynomialQuadraticRootFinder rootsOfCharacteristicPolynomial;
+  // A computational structure to find the eigenvalues and eigenspaces of the
+  // preceding element.
+  MatrixEigenvalueFinder semisimpleElementAdjointEigenvalueFinder;
   DynkinType typeIfKnown;
   bool flagTypeComputed;
   bool flagBasisComputed;

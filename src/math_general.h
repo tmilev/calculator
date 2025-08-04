@@ -1161,11 +1161,20 @@ public:
   );
   void scaleToIntegralForMinimalRationalHeightNoSignChange();
   void getMatrixIntegerWithDenominator(
-    Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDenominator
+    Matrix<LargeInteger>& outputMatrix, LargeIntegerUnsigned& outputDenominator
   );
   void lieBracketWith(const Matrix<Coefficient>& right);
+  // A function that finds eigenspaces of a matrix provided the eigenvalues are
+  // easy to guess. This function is likely no longer needed
+  // and can be obsoleted cleanly by class [MatrixEigenvalueFinder].
   bool getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(
     List<Vectors<Coefficient> >& output
+  ) const;
+  // Finds the eigenspaces of the matrix corresponding to the given
+  // eigenvalues.
+  // You can use this through the [MatrixEigenvalueFinder] class.
+  void getEigenSpacesFromEigenvalues(
+    List<Coefficient>& eigenvalues, List<Vectors<Coefficient> >& output
   ) const;
   void getZeroEigenSpace(List<Vector<Coefficient> >& output) const {
     Matrix<Coefficient> matrixCopy = *this;
@@ -2253,15 +2262,15 @@ findPositiveLCMCoefficientDenominators() {
 
 template <class Coefficient>
 void Matrix<Coefficient>::getMatrixIntegerWithDenominator(
-  Matrix<LargeInteger>& outputMat, LargeIntegerUnsigned& outputDenominator
+  Matrix<LargeInteger>& outputMatrix, LargeIntegerUnsigned& outputDenominator
 ) {
   outputDenominator = this->findPositiveLCMCoefficientDenominators();
-  outputMat.initialize(this->numberOfRows, this->numberOfColumns);
+  outputMatrix.initialize(this->numberOfRows, this->numberOfColumns);
   Rational product;
   for (int i = 0; i < this->numberOfRows; i ++) {
     for (int j = 0; j < this->numberOfColumns; j ++) {
       product = this->elements[i][j] * outputDenominator;
-      outputMat(i, j) = product.getNumerator();
+      outputMatrix(i, j) = product.getNumerator();
     }
   }
 }
@@ -2502,6 +2511,65 @@ void Matrix<Coefficient>::getMaxMovementAndLeavingVariableRow(
       }
     }
   }
+}
+
+template <class Coefficient>
+void Matrix<Coefficient>::getEigenSpacesFromEigenvalues(
+  List<Coefficient>& eigenvalues, List<Vectors<Coefficient> >& output
+) const {
+  output.setSize(0);
+  Matrix<Coefficient> eigenspaceMatrix;
+  output.setSize(eigenvalues.size);
+  for (int i = 0; i < eigenvalues.size; i ++) {
+    const Coefficient& eigenValue = eigenvalues[i];
+    eigenspaceMatrix = *this;
+    Vectors<Coefficient>& currentEigenspace = output[i];
+    currentEigenspace.clear();
+    eigenspaceMatrix.getEigenspaceModifyMe(eigenValue, currentEigenspace);
+  }
+}
+
+template <class Coefficient>
+bool Matrix<Coefficient>::
+getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(
+  List<Vectors<Coefficient> >& output
+) const {
+  int upperLimitComputations = 100000;
+  output.setSize(0);
+  int found = 0;
+  Polynomial<Coefficient> minimalPolynomial;
+  minimalPolynomial.assignMinimalPolynomial(*this);
+  Vector<Coefficient> eigenValueCandidate;
+  eigenValueCandidate.setSize(1);
+  Matrix<Rational> eigenSpaceMatrix;
+  for (int ii = 0; ii < upperLimitComputations; ii ++) {
+    int i = ((ii + 1) / 2) *(2 *(ii % 2) - 1);
+    // 0, 1, - 1, 2, - 2, 3, - 3,...
+    eigenValueCandidate[0] = i;
+    if (minimalPolynomial.evaluate(eigenValueCandidate) == 0) {
+      eigenSpaceMatrix = *this;
+      output.setSize(output.size + 1);
+      eigenSpaceMatrix.getEigenspaceModifyMe(
+        eigenValueCandidate[0], *output.lastObject()
+      );
+      if (output.lastObject()->size == 0) {
+        global.fatal
+        << "This is a programmig error: "
+        << eigenValueCandidate[0].toString()
+        << " is a zero of the minimal polynomial "
+        << minimalPolynomial.toString()
+        << " of the operator "
+        << this->toString()
+        << " but the corresponding eigenspace is empty. "
+        << global.fatal;
+      }
+      found += output.lastObject()->size;
+      if (found == this->numberOfColumns) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 template <typename Coefficient>

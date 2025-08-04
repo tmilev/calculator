@@ -319,49 +319,6 @@ decomposeTodorsVersion(
   );
 }
 
-template <class Element>
-bool Matrix<Element>::
-getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(
-  List<Vectors<Element> >& output
-) const {
-  int upperLimitComputations = 100000;
-  output.setSize(0);
-  int found = 0;
-  Polynomial<Element> minimalPolynomil;
-  minimalPolynomil.assignMinimalPolynomial(*this);
-  Vector<Element> eigenValueCandidate;
-  eigenValueCandidate.setSize(1);
-  Matrix<Rational> eigenSpaceMatrix;
-  for (int ii = 0; ii < upperLimitComputations; ii ++) {
-    int i = ((ii + 1) / 2) *(2 *(ii % 2) - 1);
-    // 0, 1, - 1, 2, - 2, 3, - 3,...
-    eigenValueCandidate[0] = i;
-    if (minimalPolynomil.evaluate(eigenValueCandidate) == 0) {
-      eigenSpaceMatrix = *this;
-      output.setSize(output.size + 1);
-      eigenSpaceMatrix.getEigenspaceModifyMe(
-        eigenValueCandidate[0], *output.lastObject()
-      );
-      if (output.lastObject()->size == 0) {
-        global.fatal
-        << "This is a programmig error: "
-        << eigenValueCandidate[0].toString()
-        << " is a zero of the minimal polynomial "
-        << minimalPolynomil.toString()
-        << " of the operator "
-        << this->toString()
-        << " but the corresponding eigenspace is empty. "
-        << global.fatal;
-      }
-      found += output.lastObject()->size;
-      if (found == this->numberOfColumns) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 void WeylGroupData::computeIrreducibleRepresentationsWithFormulasImplementation
 (FiniteGroup<ElementWeylGroup>& g) {
   List<char> letters;

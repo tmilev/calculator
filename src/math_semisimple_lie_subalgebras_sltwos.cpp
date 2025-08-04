@@ -1474,11 +1474,6 @@ bool PolynomialQuadraticRootFinder::addRootsOfQuadraticFactor(
   squareRootOfDiscriminant.assignRational(
     discriminant, this->algebraicClosure
   );
-  global.comments
-  << "<br>DEBUG: a: "
-  << a.toString()
-  << " factor: "
-  << factor.toString();
   if (!squareRootOfDiscriminant.radicalMeDefault(2, nullptr)) {
     // We failed to take the square root of the rational;
     // possibly due to a computational throttle.

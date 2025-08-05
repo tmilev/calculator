@@ -1320,7 +1320,9 @@ std::string CentralizerComputer::toString() const {
   << this->semisimpleElementAdjointEigenvalueFinder.eigenvalueFinder.roots.
   toStringCommaDelimited();
   out
-  << "\n<br>\nEigenvectors of ad H: "
+  << "\n<br>\n"
+  << this->semisimpleElementAdjointEigenvalueFinder.numberOfEigenVectors()
+  << " eigenvectors of ad H: "
   << this->semisimpleElementAdjointEigenvalueFinder.eigenvectors.
   toStringCommaDelimited();
   out
@@ -1521,6 +1523,14 @@ void MatrixEigenvalueFinder::initialize(
   this->eigenvalueFinder.initialize(this->algebraicClosure);
 }
 
+int MatrixEigenvalueFinder::numberOfEigenVectors() const {
+  int result = 0;
+  for (const Vectors<AlgebraicNumber>& eigenspace : this->eigenvectors) {
+    result += eigenspace.size;
+  }
+  return result;
+}
+
 bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
   Matrix<Rational>& input
 ) {
@@ -1543,8 +1553,11 @@ bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
     this->matrix.numberOfColumns, this->algebraicClosure->zero()
   );
   matrixAlgebraic = this->matrix;
+  this->eigenValuesWithoutMultiplicity.addOnTopNoRepetition(
+    this->eigenvalueFinder.roots
+  );
   matrixAlgebraic.getEigenSpacesFromEigenvalues(
-    this->eigenvalueFinder.roots, this->eigenvectors
+    this->eigenValuesWithoutMultiplicity, this->eigenvectors
   );
   return true;
 }

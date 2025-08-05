@@ -319,9 +319,9 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Computes the characteristic polynomial of a matrix (= det(A-q*Id)), "
     "provided that the matrix is not too large.",
     "A =\\begin{pmatrix}"
-    "2 & 3& 5\\\\ "
-    "7& 11& 13\\\\ "
-    "17&19 &23"
+    "2 & 3  & 5 \\\\ "
+    "7 & 11 & 13\\\\ "
+    "17& 19 & 23"
     "\\end{pmatrix}; "
     "CharPoly{}A;"
     "MinPolyMatrix{}A;",

@@ -521,10 +521,12 @@ public:
   Matrix<Rational> matrix;
   Polynomial<Rational> characteristicPolynomial;
   PolynomialQuadraticRootFinder eigenvalueFinder;
+  HashedList<AlgebraicNumber> eigenValuesWithoutMultiplicity;
   List<Vectors<AlgebraicNumber> > eigenvectors;
   MatrixEigenvalueFinder();
   void initialize(AlgebraicClosureRationals* inputAlgebraicClosure);
   bool findEigenValuesAndEigenspaces(Matrix<Rational>& input);
+  int numberOfEigenVectors() const;
 };
 
 #endif // header_math_extra_algebraic_numbers_ALREADY_INCLUDED

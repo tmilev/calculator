@@ -1327,7 +1327,7 @@ std::string CentralizerComputer::toString() const {
   toStringCommaDelimited();
   out
   << "\n<br>\nPreferred cartan of centralizer: "
-  << this->centralizerCartan.toStringCommaDelimited();
+  << this->centralizerIntersectedWithAmbientCartan.toStringCommaDelimited();
   return out.str();
 }
 
@@ -1340,6 +1340,20 @@ bool CentralizerComputer::compute() {
     return true;
   }
   this->flagCartanSelected = this->intersectAmbientCartanWithCentralizer();
+  if (this->centralizerIntersectedWithAmbientCartan.size > 0) {
+    ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
+    int counter = 1;
+    for (
+      const ElementSemisimpleLieAlgebra<Rational>& summand :
+      this->centralizerIntersectedWithAmbientCartan
+    ) {
+      semisimpleCandidate += summand * counter * counter;
+      counter ++;
+    }
+    if (this->trySemisimpleElement(semisimpleCandidate)) {
+      return true;
+    }
+  }
   ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
   for (
     const ElementSemisimpleLieAlgebra<Rational>& summand :
@@ -1360,7 +1374,9 @@ bool CentralizerComputer::intersectAmbientCartanWithCentralizer() {
     ambientCartanBasis.addOnTop(h);
   }
   ElementSemisimpleLieAlgebra<Rational>::intersectVectorSpaces(
-    ambientCartanBasis, this->centralizerBasis, this->centralizerCartan
+    ambientCartanBasis,
+    this->centralizerBasis,
+    this->centralizerIntersectedWithAmbientCartan
   );
   return true;
 }

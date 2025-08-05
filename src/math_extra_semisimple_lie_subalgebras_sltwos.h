@@ -13,7 +13,8 @@ class CentralizerComputer {
 public:
   List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerBasis;
-  List<ElementSemisimpleLieAlgebra<Rational> > centralizerCartan;
+  List<ElementSemisimpleLieAlgebra<Rational> >
+  centralizerIntersectedWithAmbientCartan;
   // A semisimple element of the centalizer whose centralizer can serve as a
   // Cartan subalgebra.
   ElementSemisimpleLieAlgebra<Rational> semisimpleElement;

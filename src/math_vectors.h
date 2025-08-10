@@ -873,8 +873,7 @@ public:
   void getGramMatrix(
     Matrix<Coefficient>& output, const Matrix<Rational>* bilinearForm = nullptr
   ) const;
-  void getMatrixRootsToRows(Matrix<Rational>& output) const;
-  void getOrthogonalComplement(
+  void orthogonalComplement(
     Vectors<Coefficient>& output, Matrix<Coefficient>* bilinearForm = nullptr
   );
   bool linearSpanContainsVector(

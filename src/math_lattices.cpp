@@ -1309,7 +1309,7 @@ void Lattice::intersectWithLinearSubspaceSpannedBy(
 ) {
   Vectors<Rational> normals;
   Matrix<Rational> matrix;
-  subspaceBasis.getMatrixRootsToRows(matrix);
+  matrix.assignVectorsToRows(subspaceBasis);
   matrix.getZeroEigenSpace(normals);
   this->intersectWithLinearSubspaceGivenByNormals(normals);
 }

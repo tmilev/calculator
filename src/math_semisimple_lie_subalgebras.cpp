@@ -4962,7 +4962,7 @@ void CandidateSemisimpleSubalgebra::WConjecture::compute(
     );
   }
   Vectors<AlgebraicNumber> orthogonalComplement;
-  centralizerOfSl2InP.getOrthogonalComplement(
+  centralizerOfSl2InP.orthogonalComplement(
     orthogonalComplement, &owner.owner->wConjecture.killingFormRescaled
   );
   this->basisOrthogonalComplementOfCentralizerOfSl2InP.setSize(

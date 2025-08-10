@@ -527,7 +527,7 @@ public:
   void initialize(AlgebraicClosureRationals* inputAlgebraicClosure);
   bool findEigenValuesAndEigenspaces(Matrix<Rational>& input);
   int numberOfEigenVectors() const;
-  void getEigenVectorsFromEigenValue(
+  void eigenVectorsFromEigenValue(
     const AlgebraicNumber& eigenValue, Vectors<AlgebraicNumber>& output
   );
 };

@@ -740,7 +740,7 @@ void RootSubalgebra::computeHighestVectorsHighestWeights() {
     }
   }
   Vectors<Rational> cartanCentralizer;
-  this->simpleRootsReductiveSubalgebra.getOrthogonalComplement(
+  this->simpleRootsReductiveSubalgebra.orthogonalComplement(
     cartanCentralizer, &this->getAmbientWeyl().cartanSymmetric
   );
   Vector<Rational> zeroRoot;
@@ -1811,7 +1811,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRoot(
   std::stringstream out;
   out2 << this->toString() << "\n";
   Matrix<Rational> inverted;
-  this->simpleRootsReductiveSubalgebra.getMatrixRootsToRows(inverted);
+  inverted.assignVectorsToRows(this->simpleRootsReductiveSubalgebra);
   inverted.invert();
   int counter = 0;
   HashedList<Vector<Rational> >& allRoots = this->getAmbientWeyl().rootSystem;
@@ -1877,7 +1877,7 @@ void RootSubalgebra::getLinearCombinationFromMaxRankRootsAndExtraRootMethod2(
       roots = (this->simpleRootsReductiveSubalgebra);
       roots[l] = (root);
       Matrix<Rational> inverted;
-      roots.getMatrixRootsToRows(inverted);
+      inverted.assignVectorsToRows(roots);
       inverted.invert();
       for (int i = 0; i < allRoots.size; i ++) {
         Vector<Rational> linearCombination;
@@ -2166,8 +2166,7 @@ SemisimpleLieAlgebra& RootSubalgebra::getOwnerLieAlgebra() const {
 
 bool RootSubalgebra::operator>(const RootSubalgebra& other) const {
   // current implementation does not work as expected in types E_7 and for
-  // large
-  // D_n's
+  // large D_n's
   if (this->dynkinType > other.dynkinType) {
     return true;
   }
@@ -2457,8 +2456,8 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
     tempSize += tempList[i];
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);
-  int tempI1;
-  int totalAutomorphisms;
+  int tempI1=0;
+  int totalAutomorphisms=0;
   tempI1 = permComponents.totalNumberSubsetsSmallInt();
   totalAutomorphisms = tempAutos.totalNumberSubsetsSmallInt();
   int tempI2 = permComponentsCentralizer.totalNumberSubsetsSmallInt();

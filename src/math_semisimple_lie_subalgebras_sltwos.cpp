@@ -683,8 +683,8 @@ bool SlTwoSubalgebraCandidate::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   // a_0, ..., a_k and
   // the last k variables will be the b_i's,
   // the l^th polynomial will correspond to the coefficient of g^\alpha_{l/2},
-  // where
-  // l/2 is the index of the rootattemptExtendingHFtoHEFWithRespectToSubalgebra
+  // where l/2 is the index of the
+  // rootattemptExtendingHFtoHEFWithRespectToSubalgebra
   // of SelectedExtraPositiveRoots, if l is even, and to the
   // coefficient of  g^{-\alpha_{(l+ 1)/2}} otherwise.
   for (int i = 0; i < relativeDimension; i ++) {
@@ -1429,17 +1429,18 @@ bool CentralizerComputer::trySemisimpleElement(
     processedEigenValues.addOnTopNoRepetition(eigenValue);
     Vectors<AlgebraicNumber> rootSpace;
     Vectors<AlgebraicNumber> negativeRootSpace;
-    this->semisimpleElementAdjointEigenvalueFinder.
-    getEigenVectorsFromEigenValue(eigenValue, rootSpace);
+    this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenValue(
+      eigenValue, rootSpace
+    );
     if (rootSpace.size != 1) {
       // We have an eigenvalue with multiplicity more than one.
       // The semisimple element we started with is not generic enough to split
-      // the
-      // weight spaces.
+      // the weight spaces.
       return false;
     }
-    this->semisimpleElementAdjointEigenvalueFinder.
-    getEigenVectorsFromEigenValue(minusEigenValue, negativeRootSpace);
+    this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenValue(
+      minusEigenValue, negativeRootSpace
+    );
     ElementSemisimpleLieAlgebra<AlgebraicNumber> e;
     ElementSemisimpleLieAlgebra<AlgebraicNumber> f;
     this->getCentralizerElementFromCoordinates(rootSpace[0], e);
@@ -1681,10 +1682,10 @@ int MatrixEigenvalueFinder::numberOfEigenVectors() const {
   return result;
 }
 
-void MatrixEigenvalueFinder::getEigenVectorsFromEigenValue(
+void MatrixEigenvalueFinder::eigenVectorsFromEigenValue(
   const AlgebraicNumber& eigenValue, Vectors<AlgebraicNumber>& output
 ) {
-  STACK_TRACE("MatrixEigenvalueFinder::getEigenVectorsFromEigenValue");
+  STACK_TRACE("MatrixEigenvalueFinder::eigenVectorsFromEigenValue");
   output.clear();
   int indexOfEigenValue =
   this->eigenValuesWithoutMultiplicity.getIndex(eigenValue);

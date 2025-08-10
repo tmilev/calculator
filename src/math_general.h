@@ -1289,8 +1289,8 @@ bool Vectors<Coefficient>::conesIntersect(
   Vector<Rational>* outputLinearCombo,
   Vector<Rational>* outputSplittingNormal
 ) {
-  Matrix<Rational> matA;
-  Matrix<Rational> matb;
+  Matrix<Rational> A;
+  Matrix<Rational> b;
   if (strictCone.size == 0) {
     if (outputSplittingNormal != nullptr) {
       if (nonStrictCone.size > 0) {
@@ -1301,28 +1301,28 @@ bool Vectors<Coefficient>::conesIntersect(
   }
   int dimension = strictCone[0].size;
   int numberOfColumns = strictCone.size + nonStrictCone.size;
-  matA.initialize(dimension + 1, numberOfColumns);
-  matb.initialize(dimension + 1, 1);
-  matb.makeZero();
-  matb.elements[dimension][0].makeOne();
+  A.initialize(dimension + 1, numberOfColumns);
+  b.initialize(dimension + 1, 1);
+  b.makeZero();
+  b.elements[dimension][0].makeOne();
   for (int i = 0; i < strictCone.size; i ++) {
     for (int k = 0; k < dimension; k ++) {
-      matA.elements[k][i].assign(strictCone[i][k]);
+      A.elements[k][i].assign(strictCone[i][k]);
     }
-    matA.elements[dimension][i].makeOne();
+    A.elements[dimension][i].makeOne();
   }
   for (int i = 0; i < nonStrictCone.size; i ++) {
     int currentColumn = i + strictCone.size;
     for (int k = 0; k < dimension; k ++) {
-      matA.elements[k][currentColumn].assign(nonStrictCone[i][k]);
-      matA.elements[k][currentColumn].negate();
+      A.elements[k][currentColumn].assign(nonStrictCone[i][k]);
+      A.elements[k][currentColumn].negate();
     }
-    matA.elements[dimension][currentColumn].makeZero();
+    A.elements[dimension][currentColumn].makeZero();
   }
   if (
     !Matrix<Rational>::
     systemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-    (matA, matb, outputLinearCombo)
+    (A, b, outputLinearCombo)
   ) {
     if (outputSplittingNormal != nullptr) {
       bool tempBool = Vectors<Coefficient>::getNormalSeparatingCones(
@@ -1423,24 +1423,10 @@ void Matrix<Coefficient>::resize(
 }
 
 template <typename Coefficient>
-void Vectors<Coefficient>::getMatrixRootsToRows(Matrix<Rational>& output) const {
-  int numberOfColumns = 0;
-  if (this->size != 0) {
-    numberOfColumns = static_cast<int>(this->objects[0].size);
-  }
-  output.initialize(static_cast<int>(this->size), numberOfColumns);
-  for (int i = 0; i < this->size; i ++) {
-    for (int j = 0; j < numberOfColumns; j ++) {
-      output.elements[i][j] = this->objects[i][j];
-    }
-  }
-}
-
-template <typename Coefficient>
-void Vectors<Coefficient>::getOrthogonalComplement(
+void Vectors<Coefficient>::orthogonalComplement(
   Vectors<Coefficient>& output, Matrix<Coefficient>* bilinearForm
 ) {
-  STACK_TRACE("Vectors::getOrthogonalComplement");
+  STACK_TRACE("Vectors::orthogonalComplement");
   if (this->size == 0) {
     if (bilinearForm != nullptr) {
       output.makeEiBasis(bilinearForm->numberOfRows);
@@ -1701,8 +1687,8 @@ void Matrix<Coefficient>::assignTensorProduct(
     left.numberOfColumns * right.numberOfColumns,
     false
   );
-  int sr = right.numberOfRows;
-  int sc = right.numberOfColumns;
+  int rightRows = right.numberOfRows;
+  int rightColumns = right.numberOfColumns;
   // The basis of the tensor product vector space MUST be
   // in the SAME order as the one used by MatrixTensor::assignTensorProduct.
   // indexing. Let the first vector space have basis
@@ -1714,7 +1700,7 @@ void Matrix<Coefficient>::assignTensorProduct(
     for (int iw = 0; iw < right.numberOfRows; iw ++) {
       for (int jv = 0; jv < left.numberOfColumns; jv ++) {
         for (int jw = 0; jw < right.numberOfColumns; jw ++) {
-          this->elements[iv * sr + iw][jv * sc + jw] =
+          this->elements[iv * rightRows + iw][jv * rightColumns + jw] =
           left.elements[iv][jv] * right.elements[iw][jw];
         }
       }
@@ -2554,7 +2540,7 @@ getEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDimension(
       );
       if (output.lastObject()->size == 0) {
         global.fatal
-        << "This is a programmig error: "
+        << "This is a programming error: "
         << eigenValueCandidate[0].toString()
         << " is a zero of the minimal polynomial "
         << minimalPolynomial.toString()

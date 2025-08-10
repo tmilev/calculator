@@ -1155,7 +1155,7 @@ public:
     Matrix<Coefficient>& A, Matrix<Coefficient>& b, Matrix<Coefficient>& output
   );
   Coefficient getDeterminant();
-  Coefficient getTrace() const;
+  Coefficient trace() const;
   void assignMatrixIntegerWithDenominator(
     Matrix<LargeInteger>& matrix, const LargeIntegerUnsigned& denominator
   );
@@ -2318,7 +2318,7 @@ Coefficient Matrix<Coefficient>::getDeterminant() {
 }
 
 template <class Coefficient>
-Coefficient Matrix<Coefficient>::getTrace() const {
+Coefficient Matrix<Coefficient>::trace() const {
   if (this->numberOfColumns != this->numberOfRows) {
     global.fatal
     << "This is either programming error, a mathematical error, "

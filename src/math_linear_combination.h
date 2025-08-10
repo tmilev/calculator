@@ -105,7 +105,7 @@ public:
     this->coefficients.removeIndexSwapWithLast(index);
   }
   void addOtherTimesConst(
-    LinearCombination<TemplateMonomial, Coefficient>& other,
+    const LinearCombination<TemplateMonomial, Coefficient>& other,
     const Coefficient& coefficient
   );
   void popMonomial(
@@ -864,7 +864,7 @@ subtractOtherTimesCoefficient(
 
 template <class TemplateMonomial, class Coefficient>
 void LinearCombination<TemplateMonomial, Coefficient>::addOtherTimesConst(
-  LinearCombination<TemplateMonomial, Coefficient>& other,
+  const LinearCombination<TemplateMonomial, Coefficient>& other,
   const Coefficient& coefficient
 ) {
   this->setExpectedSize(other.size() + this->size());

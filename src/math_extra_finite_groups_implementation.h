@@ -3208,7 +3208,7 @@ GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::getCharacter() {
     this->character.data[cci] =
     this->getMatrixElement(
       this->ownerGroup->conjugacyClasses[cci].representative
-    ).getTrace();
+    ).trace();
   }
   this->flagCharacterIsComputed = true;
   return this->character;

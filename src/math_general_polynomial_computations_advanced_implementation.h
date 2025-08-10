@@ -2125,6 +2125,8 @@ bool PolynomialFactorizationUnivariate<Coefficient>::factor(
 ) {
   STACK_TRACE("PolynomialFactorizationUnivariate::factor");
   this->original = input;
+  this->reduced.clear();
+  this->nonReduced.clear();
   if (this->original.isConstant(&this->constantFactor)) {
     return true;
   }

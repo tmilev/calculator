@@ -682,7 +682,7 @@ bool Vector<Coefficient>::isProportionalTo(
     }
     return false;
   }
-  Vector<Rational> root = *this;
+  Vector<Coefficient> root = *this;
   outputTimesMeEqualsInput = input[indexFirstNonZero];
   outputTimesMeEqualsInput /= (*this)[indexFirstNonZero];
   root *= outputTimesMeEqualsInput;

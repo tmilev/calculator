@@ -4773,7 +4773,7 @@ void CandidateSemisimpleSubalgebra::computeRatioKillingsByComponent() {
       adMatrix, currentElement
     );
     adMatrix *= adMatrix;
-    this->ratiosKillingsByComponent[i] = adMatrix.getTrace();
+    this->ratiosKillingsByComponent[i] = adMatrix.trace();
     this->ratiosKillingsByComponent[i] /= result;
   }
 }

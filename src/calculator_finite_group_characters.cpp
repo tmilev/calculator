@@ -2419,9 +2419,12 @@ bool CalculatorFunctionsWeylGroup::decomposeWeylRep(
   input.getValueNonConst<
     GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
   >();
-  VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational> outputRep;
-  inputRepresentation.makeGRCAM().decomposeTodorsVersion(outputRep);
-  return output.assignValue(calculator, outputRep);
+  VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+  outputRepresentation;
+  inputRepresentation.makeGRCAM().decomposeTodorsVersion(
+    outputRepresentation
+  );
+  return output.assignValue(calculator, outputRepresentation);
 }
 
 bool CalculatorFunctionsWeylGroup::isOuterAutoWeylGroup(

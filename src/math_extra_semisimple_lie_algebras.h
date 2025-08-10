@@ -80,22 +80,23 @@ public:
     const RationalFraction<Rational>& ringZero
   );
   bool isCoefficientOneChevalleyGenerator();
-  bool isProportionalTo(const ElementSemisimpleLieAlgebra<Coefficient>& other)
+  bool isProportionalTo(const ElementSemisimpleLieAlgebra<Coefficient>& input)
   const {
-    Vector<Rational> left, right;
-    this->toVectorNegativeRootSpacesFirst(left);
-    other.toVectorNegativeRootSpacesFirst(right);
-    return left.isProportionalTo(right);
+    Coefficient unused;
+    return this->isProportionalTo(input, unused);
   }
   bool isProportionalTo(
-    const ElementSemisimpleLieAlgebra<Coefficient>& other,
-    Rational& outputTimesMeEqualsInput
+    const ElementSemisimpleLieAlgebra<Coefficient>& input,
+    Coefficient& outputTimesMeEqualsInput
   ) const {
-    Vector<Rational> root1;
-    Vector<Rational> root2;
-    this->toVectorNegativeRootSpacesFirst(root1);
-    other.toVectorNegativeRootSpacesFirst(root2);
-    return root1.isProportionalTo(root2, outputTimesMeEqualsInput);
+    Vector<Coefficient> thisCoordinates;
+    Vector<Coefficient> inputCoordinates;
+    this->toVectorNegativeRootSpacesFirst(thisCoordinates);
+    input.toVectorNegativeRootSpacesFirst(inputCoordinates);
+    return
+    thisCoordinates.isProportionalTo(
+      inputCoordinates, outputTimesMeEqualsInput
+    );
   }
   unsigned int hashFunction() const {
     return

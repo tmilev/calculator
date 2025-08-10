@@ -6981,7 +6981,7 @@ bool CalculatorFunctions::matrixTrace(
         calculator, "Error: attempting to get trace of non-square matrix. "
       );
     }
-    return output.assignValue(calculator, matrix.getTrace());
+    return output.assignValue(calculator, matrix.trace());
   }
   Matrix<RationalFraction<Rational> > matrixRationalFunction;
   if (
@@ -6995,7 +6995,7 @@ bool CalculatorFunctions::matrixTrace(
         calculator, "Error: attempting to get trace of non-square matrix. "
       );
     }
-    return output.assignValue(calculator, matrixRationalFunction.getTrace());
+    return output.assignValue(calculator, matrixRationalFunction.trace());
   }
   Matrix<Expression> matrixExpression;
   if (
@@ -7015,7 +7015,7 @@ bool CalculatorFunctions::matrixTrace(
     << "interpretation of a scalar as a 1x1 matrix. Trace not taken. ";
     return false;
   }
-  output = matrixExpression.getTrace();
+  output = matrixExpression.trace();
   return true;
 }
 

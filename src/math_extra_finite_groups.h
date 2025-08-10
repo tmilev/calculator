@@ -1661,7 +1661,7 @@ void GroupRepresentation<someGroup, Coefficient>::computeCharacter() const {
     for (int i = 0; i < ccirWord.size; i ++) {
       M *= this->generators[ccirWord[i]];
     }
-    this->character.data[cci] = M.getTrace();
+    this->character.data[cci] = M.trace();
   }
   this->character.G = ownerGroup;
   this->flagCharacterIsComputed = true;
@@ -2302,7 +2302,7 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<
     global.comments
     << this->groupContent->generators[i]
     << ' '
-    << sr.generators[i].getTrace()
+    << sr.generators[i].trace()
     << '\n'
     << sr.generators[i].toStringPlainText()
     << '\n';
@@ -2312,7 +2312,7 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<
     global.comments
     << this->groupContent->generators[i]
     << ' '
-    << qr.generators[i].getTrace()
+    << qr.generators[i].trace()
     << '\n'
     << qr.generators[i].toStringPlainText()
     << '\n';
@@ -2322,7 +2322,7 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<
     global.comments
     << this->groupContent->generators[i]
     << ' '
-    << out.generators[i].getTrace()
+    << out.generators[i].trace()
     << '\n'
     << out.generators[i].toStringPlainText()
     << '\n';
@@ -2368,7 +2368,7 @@ GroupRepresentation<someGroup, Coefficient> SubgroupData<
     global.comments
     << this->groupContent->generators[i]
     << ' '
-    << out.generators[i].getTrace()
+    << out.generators[i].trace()
     << '\n'
     << out.generators[i].toStringPlainText()
     << '\n';
@@ -2891,13 +2891,13 @@ void PolynomialUnivariateDense<Coefficient>::assignCharacteristicPolynomial(
   Matrix<Coefficient> acc;
   acc = input;
   for (int i = 1; i < n; i ++) {
-    this->data[i] = - acc.getTrace() / i;
+    this->data[i] = - acc.trace() / i;
     for (int j = 0; j < n; j ++) {
       acc.elements[j][j] += this->data[i];
     }
     acc.multiplyOnTheLeft(input);
   }
-  this->data[n] = - acc.getTrace() / n;
+  this->data[n] = - acc.trace() / n;
 }
 
 template <typename Coefficient>

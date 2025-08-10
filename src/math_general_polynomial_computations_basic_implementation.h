@@ -1033,7 +1033,7 @@ void Polynomial<Coefficient>::assignCharacteristicPolynomial(
   inputPowerN.makeIdentityMatrix(n);
   for (int i = 1; i < n + 1; i ++) {
     inputPowerN.multiplyOnTheLeft(input);
-    tracesOfPowersOfInput.addOnTop(inputPowerN.getTrace());
+    tracesOfPowersOfInput.addOnTop(inputPowerN.trace());
   }
   this->makeZero();
   this->addMonomial(MonomialPolynomial(0, n), 1);

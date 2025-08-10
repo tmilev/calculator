@@ -7,29 +7,89 @@
 #include "math_general.h"
 #include "math_polynomials.h"
 
+class ElementSemisimpleLieAlgebraWithAdjointAction {
+  friend std::ostream& operator<<(
+    std::ostream& output,
+    const ElementSemisimpleLieAlgebraWithAdjointAction& element
+  ) {
+    output << element.toString();
+    return output;
+  }
+public:
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
+  Matrix<AlgebraicNumber> adjointAction;
+  static unsigned int hashFunction(
+    const ElementSemisimpleLieAlgebraWithAdjointAction& input
+  ) {
+    return input.element.hashFunction();
+  }
+  int hashFunction() const {
+    return this->element.hashFunction();
+  }
+  bool operator==(const ElementSemisimpleLieAlgebraWithAdjointAction& other)
+  const {
+    return this->element == other.element;
+  }
+  AlgebraicNumber scalarProductKilling(
+    const ElementSemisimpleLieAlgebraWithAdjointAction& other
+  ) const;
+  Rational scalarProductKillingMustBeRational(
+    const ElementSemisimpleLieAlgebraWithAdjointAction& other
+  ) const;
+  std::string toString() const;
+  ElementSemisimpleLieAlgebraWithAdjointAction operator-(
+    const ElementSemisimpleLieAlgebraWithAdjointAction& other
+  ) const {
+    ElementSemisimpleLieAlgebraWithAdjointAction result;
+    result.element = this->element - other.element;
+    result.adjointAction = this->adjointAction - other.adjointAction;
+    return result;
+  }
+};
+
 class CentralizerComputer {
   SemisimpleLieAlgebra* owner;
   AlgebraicClosureRationals* algebraicClosureRationals;
+  // A helper method for determining whether dual element to
+  // a root space is simple.
+  bool isSimpleIndex(int i);
 public:
   List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerBasis;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >
+  centralizerBasisOverAlgebraicNumbers;
   List<ElementSemisimpleLieAlgebra<Rational> >
   centralizerIntersectedWithAmbientCartan;
   // A semisimple element of the centalizer whose centralizer can serve as a
   // Cartan subalgebra.
-  ElementSemisimpleLieAlgebra<Rational> semisimpleElement;
-  // The adjoint action of the semisimple element.
-  Matrix<Rational> adjointActionOfSemisimpleElement;
+  ElementSemisimpleLieAlgebraWithAdjointAction semisimpleElement;
+  List<ElementSemisimpleLieAlgebra<Rational> > centralizerCartan;
   // A computational structure to find the eigenvalues and eigenspaces of the
   // preceding element.
   MatrixEigenvalueFinder semisimpleElementAdjointEigenvalueFinder;
+  HashedList<ElementSemisimpleLieAlgebraWithAdjointAction> dualsOfRootSpaces;
+  HashedList<ElementSemisimpleLieAlgebraWithAdjointAction>
+  postiveDualsOfRootSpaces;
+  List<ElementSemisimpleLieAlgebraWithAdjointAction> simpleDualsOfRootSpaces;
   DynkinType typeIfKnown;
   bool flagTypeComputed;
   bool flagBasisComputed;
   bool flagCartanSelected;
+  void getCentralizerElementFromCoordinates(
+    Vector<AlgebraicNumber>& vector,
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& output
+  );
   void initialize(
     SemisimpleLieAlgebra* inputOwner,
     AlgebraicClosureRationals* inputAlgebraicClosure
+  );
+  void makeCentralizerElementWithAdjointAction(
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& input,
+    ElementSemisimpleLieAlgebraWithAdjointAction& output
+  );
+  void makeCentralizerElementWithAdjointAction(
+    ElementSemisimpleLieAlgebra<Rational>& input,
+    ElementSemisimpleLieAlgebraWithAdjointAction& output
   );
   CentralizerComputer();
   std::string toString() const;
@@ -37,6 +97,7 @@ public:
   bool intersectAmbientCartanWithCentralizer();
   bool trySemisimpleElement(ElementSemisimpleLieAlgebra<Rational>& candidate);
   bool findSemisimpleElementEigenvalues();
+  bool computeSimpleBasis();
 };
 
 // The sl(2)-subalgebra candidate from which the sl(2) is to be realized.
@@ -329,7 +390,7 @@ public:
   static inline unsigned int hashFunction(const SlTwoSubalgebra& input) {
     return input.hashFunction();
   }
-  void computeModuleDecompositionsitionOfMinimalContainingRegularSAs(
+  void computeModuleDecompositionMinimalContainingRegularSubalgebras(
     SlTwoSubalgebras& owner
   );
   void makeReportPrecomputations(
@@ -380,7 +441,7 @@ public:
   std::string toString(FormatExpressions* format = nullptr);
   std::string toHTMLSummaryTable(FormatExpressions* format = nullptr);
   std::string toHTMLSummary(FormatExpressions* format = nullptr);
-  std::string toStringModuleDecompositionMinimalContainingRegularSAs(
+  std::string toStringModuleDecompositionMinimalContainingRegularSubalgebras(
     bool useLatex, bool useHtml
   );
   void computeRootSubalgebraContainers();

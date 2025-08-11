@@ -7,41 +7,36 @@
 #include "math_general.h"
 #include "math_polynomials.h"
 
-class ElementSemisimpleLieAlgebraWithAdjointAction {
+class CartanElementCandidate {
   friend std::ostream& operator<<(
-    std::ostream& output,
-    const ElementSemisimpleLieAlgebraWithAdjointAction& element
+    std::ostream& output, const CartanElementCandidate& element
   ) {
     output << element.toString();
     return output;
   }
 public:
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> element;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> h;
   Matrix<AlgebraicNumber> adjointAction;
-  static unsigned int hashFunction(
-    const ElementSemisimpleLieAlgebraWithAdjointAction& input
-  ) {
-    return input.element.hashFunction();
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> e;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> f;
+  static unsigned int hashFunction(const CartanElementCandidate& input) {
+    return input.h.hashFunction();
   }
   int hashFunction() const {
-    return this->element.hashFunction();
+    return this->h.hashFunction();
   }
-  bool operator==(const ElementSemisimpleLieAlgebraWithAdjointAction& other)
-  const {
-    return this->element == other.element;
+  bool operator==(const CartanElementCandidate& other) const {
+    return this->h == other.h;
   }
-  AlgebraicNumber scalarProductKilling(
-    const ElementSemisimpleLieAlgebraWithAdjointAction& other
-  ) const;
+  AlgebraicNumber scalarProductKilling(const CartanElementCandidate& other)
+  const;
   Rational scalarProductKillingMustBeRational(
-    const ElementSemisimpleLieAlgebraWithAdjointAction& other
+    const CartanElementCandidate& other
   ) const;
   std::string toString() const;
-  ElementSemisimpleLieAlgebraWithAdjointAction operator-(
-    const ElementSemisimpleLieAlgebraWithAdjointAction& other
-  ) const {
-    ElementSemisimpleLieAlgebraWithAdjointAction result;
-    result.element = this->element - other.element;
+  CartanElementCandidate operator-(const CartanElementCandidate& other) const {
+    CartanElementCandidate result;
+    result.h = this->h - other.h;
     result.adjointAction = this->adjointAction - other.adjointAction;
     return result;
   }
@@ -53,6 +48,7 @@ class CentralizerComputer {
   // A helper method for determining whether dual element to
   // a root space is simple.
   bool isSimpleIndex(int i);
+  Rational computeSimpleRootScalarProductArbitraryScale(int i, int j) const;
 public:
   List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerBasis;
@@ -62,16 +58,19 @@ public:
   centralizerIntersectedWithAmbientCartan;
   // A semisimple element of the centalizer whose centralizer can serve as a
   // Cartan subalgebra.
-  ElementSemisimpleLieAlgebraWithAdjointAction semisimpleElement;
+  CartanElementCandidate semisimpleElement;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerCartan;
   // A computational structure to find the eigenvalues and eigenspaces of the
   // preceding element.
   MatrixEigenvalueFinder semisimpleElementAdjointEigenvalueFinder;
-  HashedList<ElementSemisimpleLieAlgebraWithAdjointAction> dualsOfRootSpaces;
-  HashedList<ElementSemisimpleLieAlgebraWithAdjointAction>
-  postiveDualsOfRootSpaces;
-  List<ElementSemisimpleLieAlgebraWithAdjointAction> simpleDualsOfRootSpaces;
+  HashedList<CartanElementCandidate> dualsOfRootSpaces;
+  HashedList<CartanElementCandidate> postiveDualsOfRootSpaces;
+  List<CartanElementCandidate> simpleDualsOfRootSpaces;
+  List<CartanElementCandidate> simpleDualsOfRootSpacesAmbientAdjoint;
+  List<Vector<AlgebraicNumber> > dualRootsAlgebraic;
+  DynkinDiagramRootSubalgebra dynkinDiagramComputer;
   DynkinType typeIfKnown;
+  Rational ambientLongRootAdjointActionSquaredTrace;
   bool flagTypeComputed;
   bool flagBasisComputed;
   bool flagCartanSelected;
@@ -83,13 +82,17 @@ public:
     SemisimpleLieAlgebra* inputOwner,
     AlgebraicClosureRationals* inputAlgebraicClosure
   );
-  void makeCentralizerElementWithAdjointAction(
-    ElementSemisimpleLieAlgebra<AlgebraicNumber>& input,
-    ElementSemisimpleLieAlgebraWithAdjointAction& output
+  void makeCartanCandidate(
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputH,
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputE,
+    ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputF,
+    CartanElementCandidate& output
   );
-  void makeCentralizerElementWithAdjointAction(
-    ElementSemisimpleLieAlgebra<Rational>& input,
-    ElementSemisimpleLieAlgebraWithAdjointAction& output
+  void makeCartanCandidate(
+    ElementSemisimpleLieAlgebra<Rational>& inputH,
+    ElementSemisimpleLieAlgebra<Rational>& inputE,
+    ElementSemisimpleLieAlgebra<Rational>& inputF,
+    CartanElementCandidate& output
   );
   CentralizerComputer();
   std::string toString() const;

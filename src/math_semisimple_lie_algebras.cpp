@@ -1263,6 +1263,27 @@ bool SemisimpleLieAlgebra::isInTheWeightSupport(
   return true;
 }
 
+int SemisimpleLieAlgebra::longRootIndex() {
+  char dynkinType = 0;
+  int rank = 0;
+  if (!this->weylGroup.dynkinType.isSimple(&dynkinType, &rank)) {
+    return - 1;
+  }
+  switch (dynkinType) {
+  case 'G':
+  case 'C':
+    return rank - 1;
+  case 'A':
+  case 'B':
+  case 'D':
+  case 'E':
+  case 'F':
+    return 0;
+  default:
+    return - 1;
+  }
+}
+
 void SemisimpleLieAlgebra::createEmbeddingFromFDModuleHaving1dimWeightSpaces(
   Vector<Rational>& highestWeight
 ) {

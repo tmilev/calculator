@@ -2229,7 +2229,7 @@ generateOrbitReturnFalseIfTruncated(
     }
     for (int j = 1; j < this->externalAutomorphisms.size; j ++) {
       externalAutosOverAmbientField = this->externalAutomorphisms[j];
-      orbit[i].getCoordinatesInBasis(externalAutosOverAmbientField, root);
+      orbit[i].coordinatesInBasis(externalAutosOverAmbientField, root);
       orbit.addOnTopNoRepetition(root);
     }
   }

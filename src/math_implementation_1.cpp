@@ -581,7 +581,7 @@ modOutFDRelationsExperimental(
 }
 
 template <class Coefficient>
-bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
+bool ElementUniversalEnveloping<Coefficient>::coordinatesInBasis(
   List<ElementUniversalEnveloping<Coefficient> >& basis,
   Vector<Coefficient>& output,
   const Coefficient& ringUnit,
@@ -602,7 +602,7 @@ bool ElementUniversalEnveloping<Coefficient>::getCoordinatesInBasis(
   Vector<Coefficient> root;
   root = *coordinates.lastObject();
   coordinates.setSize(basis.size);
-  return root.getCoordinatesInBasis(coordinates, output);
+  return root.coordinatesInBasis(coordinates, output);
 }
 
 template <class Coefficient>
@@ -650,7 +650,7 @@ bool ElementUniversalEnveloping<Coefficient>::getBasisFromSpanOfElements(
   }
   Matrix<Coefficient> bufferMatrix;
   Vectors<Coefficient> bufferVectors;
-  outputCoordinatesBeforeReduction.getCoordinatesInBasis(
+  outputCoordinatesBeforeReduction.coordinatesInBasis(
     basisCoordinateForm,
     outputCoordinates,
     bufferVectors,

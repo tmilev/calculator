@@ -290,7 +290,7 @@ public:
     Vectors<Coefficient>& outputCoordinates,
     ElementUniversalEnveloping<Coefficient>& outputCorrespondingMonomials
   );
-  bool getCoordinatesInBasis(
+  bool coordinatesInBasis(
     List<ElementUniversalEnveloping<Coefficient> >& basis,
     Vector<Coefficient>& output,
     const Coefficient& ringUnit,

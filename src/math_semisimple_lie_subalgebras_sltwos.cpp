@@ -382,7 +382,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
   List<int> bufferHighestWeights;
   Rational scalarProduct;
   Vectors<Rational> coordinatesInPreferredSimpleBasis;
-  positiveRootsContainingRegularSubalgebra.getCoordinatesInBasis(
+  positiveRootsContainingRegularSubalgebra.coordinatesInBasis(
     this->preferredAmbientSimpleBasis, coordinatesInPreferredSimpleBasis
   );
   for (int k = 0; k < positiveRootsContainingRegularSubalgebra.size; k ++) {
@@ -1285,6 +1285,7 @@ void CentralizerComputer::initialize(
 
 std::string CentralizerComputer::toString() const {
   std::stringstream out;
+  bool withDetail = false;
   out << "Centralizer type: ";
   if (this->flagTypeComputed) {
     out << this->typeIfKnown.toString();
@@ -1294,6 +1295,9 @@ std::string CentralizerComputer::toString() const {
   } else {
     out << " not computed";
   }
+  out
+  << "\n<br>\nAmbient dual to long root: "
+  << this->ambientLongRootAdjointActionSquaredTrace.toString();
   out << "\n<br>\n" << "Generators of centralizer: ";
   if (this->flagBasisComputed) {
     out << this->centralizerBasis.toStringCommaDelimited();
@@ -1321,12 +1325,34 @@ std::string CentralizerComputer::toString() const {
   << " eigenvectors of ad H: "
   << this->semisimpleElementAdjointEigenvalueFinder.eigenvectors.
   toStringCommaDelimited();
+  if (withDetail) {
+    out
+    << "\n<br>\nElements of Cartan dual to the root system ("
+    << this->postiveDualsOfRootSpaces.size
+    << " total): "
+    << this->postiveDualsOfRootSpaces.toStringCommaDelimited();
+  }
   out
-  << "\n<br>\nSimple basis of Cartan of centralizer: "
+  << "\n<br>\nScalar product computed: \\("
+  << this->dynkinDiagramComputer.ambientBilinearForm.toStringLatex()
+  << "\\)";
+  out
+  << "\n<br>\nCentralizer type: "
+  << this->dynkinDiagramComputer.toString();
+  out
+  << "\n<br>\nSimple basis of Cartan of centralizer ("
+  << this->simpleDualsOfRootSpaces.size
+  << " total):"
   << this->simpleDualsOfRootSpaces.toStringCommaDelimited();
   out
-  << "\n<br>\nPreferred cartan of centralizer: "
-  << this->centralizerIntersectedWithAmbientCartan.toStringCommaDelimited();
+  << "\n<br>\nLinear space basis of intersection "
+  << "of centralizer and ambient Cartan "
+  << "["
+  << this->simpleDualsOfRootSpaces.toStringCommaDelimited()
+  << "]";
+  out
+  << "\n<br>\nElements in Cartan dual to root system: "
+  << this->dualRootsAlgebraic.toStringCommaDelimited();
   return out.str();
 }
 
@@ -1398,9 +1424,8 @@ bool CentralizerComputer::trySemisimpleElement(
   ElementSemisimpleLieAlgebra<Rational>& candidate
 ) {
   STACK_TRACE("CentralizerComputer::trySemisimpleElement");
-  this->makeCentralizerElementWithAdjointAction(
-    candidate, this->semisimpleElement
-  );
+  ElementSemisimpleLieAlgebra<Rational> zero;
+  this->makeCartanCandidate(candidate, zero, zero, this->semisimpleElement);
   this->semisimpleElementAdjointEigenvalueFinder.initialize(
     this->algebraicClosureRationals
   );
@@ -1459,11 +1484,11 @@ bool CentralizerComputer::trySemisimpleElement(
       << global.fatal;
     }
     h *= coefficientOrProportionality / 2;
-    ElementSemisimpleLieAlgebraWithAdjointAction hWithAction;
-    this->makeCentralizerElementWithAdjointAction(h, hWithAction);
+    CartanElementCandidate hWithAction;
+    this->makeCartanCandidate(h, e, f, hWithAction);
     this->dualsOfRootSpaces.addOnTop(hWithAction);
     h *= - 1;
-    this->makeCentralizerElementWithAdjointAction(h, hWithAction);
+    this->makeCartanCandidate(h, f, e, hWithAction);
     this->dualsOfRootSpaces.addOnTop(hWithAction);
   }
   if (!this->computeSimpleBasis()) {
@@ -1472,33 +1497,43 @@ bool CentralizerComputer::trySemisimpleElement(
   return true;
 }
 
-void CentralizerComputer::makeCentralizerElementWithAdjointAction(
-  ElementSemisimpleLieAlgebra<Rational>& input,
-  ElementSemisimpleLieAlgebraWithAdjointAction& output
+void CentralizerComputer::makeCartanCandidate(
+  ElementSemisimpleLieAlgebra<Rational>& inputH,
+  ElementSemisimpleLieAlgebra<Rational>& inputE,
+  ElementSemisimpleLieAlgebra<Rational>& inputF,
+  CartanElementCandidate& output
 ) {
-  ElementSemisimpleLieAlgebra<AlgebraicNumber> converter;
-  converter = input;
-  this->makeCentralizerElementWithAdjointAction(converter, output);
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> converterH;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> converterE;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> converterF;
+  converterH = inputH;
+  converterE = inputE;
+  converterF = inputF;
+  this->makeCartanCandidate(converterH, converterE, converterF, output);
 }
 
-void CentralizerComputer::makeCentralizerElementWithAdjointAction(
-  ElementSemisimpleLieAlgebra<AlgebraicNumber>& input,
-  ElementSemisimpleLieAlgebraWithAdjointAction& output
+void CentralizerComputer::makeCartanCandidate(
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputH,
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputE,
+  ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputF,
+  CartanElementCandidate& output
 ) {
   STACK_TRACE("CentralizerComputer::makeCentralizerElementWithAdjointAction");
-  output.element = input;
+  output.h = inputH;
   bool mustBeTrue =
-  output.element.computeAdjointActionWithRespectToBasis(
+  output.h.computeAdjointActionWithRespectToBasis(
     this->centralizerBasisOverAlgebraicNumbers, output.adjointAction
   );
   if (!mustBeTrue) {
     global.fatal
     << "Failed to compute the adjoint action of "
-    << input.toString()
+    << inputH.toString()
     << " in basis: "
     << this->centralizerBasis.toStringCommaDelimited()
     << global.fatal;
   }
+  output.e = inputE;
+  output.f = inputF;
 }
 
 bool CentralizerComputer::computeSimpleBasis() {
@@ -1530,19 +1565,104 @@ bool CentralizerComputer::computeSimpleBasis() {
       i --;
     }
   }
+  this->simpleDualsOfRootSpacesAmbientAdjoint.clear();
+  ElementSemisimpleLieAlgebra<Rational> longRootedElementCartan;
+  int indexLongRoot = this->owner->longRootIndex();
+  if (indexLongRoot < 0) {
+    // The starting semisimple Lie algebra was not simple, so
+    // can't unambiguously determine long root. We give up.
+    return false;
+  }
+  longRootedElementCartan.makeCartanGeneratorHi(indexLongRoot, *this->owner);
+  Matrix<Rational> longRootAdjointAction;
+  this->owner->getAdjoint(longRootAdjointAction, longRootedElementCartan);
+  Matrix<Rational> longRootAdjointActionSquared = longRootAdjointAction;
+  longRootAdjointActionSquared.multiplyOnTheLeft(longRootAdjointAction);
+  this->ambientLongRootAdjointActionSquaredTrace =
+  longRootAdjointActionSquared.trace();
+  for (
+    const CartanElementCandidate& candidate : this->simpleDualsOfRootSpaces
+  ) {
+    CartanElementCandidate candidateWithAmbientAdjoint = candidate;
+    this->owner->getAdjoint(
+      candidateWithAmbientAdjoint.adjointAction, candidateWithAmbientAdjoint.h
+    );
+    this->simpleDualsOfRootSpacesAmbientAdjoint.addOnTop(
+      candidateWithAmbientAdjoint
+    );
+  }
+  Matrix<Rational> coSymmetricCartanMatrix;
+  coSymmetricCartanMatrix.resize(
+    this->simpleDualsOfRootSpaces.size,
+    this->simpleDualsOfRootSpaces.size,
+    false
+  );
+  for (int i = 0; i < this->simpleDualsOfRootSpaces.size; i ++) {
+    for (int j = 0; j < this->simpleDualsOfRootSpaces.size; j ++) {
+      coSymmetricCartanMatrix(i, j) =
+      this->computeSimpleRootScalarProductArbitraryScale(i, j);
+    }
+  }
+  this->dynkinDiagramComputer.ambientBilinearForm.resize(
+    this->simpleDualsOfRootSpaces.size,
+    this->simpleDualsOfRootSpaces.size,
+    false
+  );
+  for (int i = 0; i < this->simpleDualsOfRootSpaces.size; i ++) {
+    for (int j = 0; j < this->simpleDualsOfRootSpaces.size; j ++) {
+      this->dynkinDiagramComputer.ambientBilinearForm(i, j) =
+      coSymmetricCartanMatrix(i, j) * 4 /
+      coSymmetricCartanMatrix(j, j) /
+      coSymmetricCartanMatrix(i, i);
+    }
+  }
+  Vectors<Rational> simpleBasis;
+  simpleBasis.makeEiBasis(this->simpleDualsOfRootSpaces.size);
+  this->dynkinDiagramComputer.computeDiagramInputIsSimpleBasis(simpleBasis);
+  this->dualRootsAlgebraic.clear();
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > simpleHs;
+  for (const CartanElementCandidate& simpleH : this->simpleDualsOfRootSpaces) {
+    simpleHs.addOnTop(simpleH.h);
+  }
+  for (const CartanElementCandidate& dualRootSpace : this->dualsOfRootSpaces) {
+    Vector<AlgebraicNumber> coordinateVector;
+    bool mustBeTrue =
+    dualRootSpace.h.coordinatesInBasis(simpleHs, coordinateVector);
+    if (!mustBeTrue) {
+      global.fatal
+      << "Unexpected failure: the simple duals don't span the duals. "
+      << global.fatal;
+    }
+    this->dualRootsAlgebraic.addOnTop(coordinateVector);
+  }
   return true;
 }
 
+Rational CentralizerComputer::computeSimpleRootScalarProductArbitraryScale(
+  int i, int j
+) const {
+  Rational scale = 2 / this->ambientLongRootAdjointActionSquaredTrace;
+  return
+  this->simpleDualsOfRootSpacesAmbientAdjoint[i].
+  scalarProductKillingMustBeRational(
+    this->simpleDualsOfRootSpacesAmbientAdjoint[j]
+  ) *
+  scale;
+}
+
 bool CentralizerComputer::isSimpleIndex(int i) {
-  ElementSemisimpleLieAlgebraWithAdjointAction difference;
-  for (int j = 0; j < this->simpleDualsOfRootSpaces.size; j ++) {
-    difference =
-    this->simpleDualsOfRootSpaces[j] - this->simpleDualsOfRootSpaces[i];
+  const CartanElementCandidate& underTest = this->simpleDualsOfRootSpaces[i];
+  CartanElementCandidate difference;
+  for (
+    const CartanElementCandidate& positiveRootSpace :
+    this->postiveDualsOfRootSpaces
+  ) {
+    difference = underTest - positiveRootSpace;
     if (this->postiveDualsOfRootSpaces.contains(difference)) {
-      return true;
+      return false;
     }
   }
-  return false;
+  return true;
 }
 
 bool PolynomialQuadraticRootFinder::findRoots(Polynomial<Rational>& input) {
@@ -1726,18 +1846,17 @@ bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
   return true;
 }
 
-AlgebraicNumber ElementSemisimpleLieAlgebraWithAdjointAction::
-scalarProductKilling(const ElementSemisimpleLieAlgebraWithAdjointAction& other)
-const {
+AlgebraicNumber CartanElementCandidate::scalarProductKilling(
+  const CartanElementCandidate& other
+) const {
   Matrix<AlgebraicNumber> matrix;
   matrix = this->adjointAction;
   matrix.multiplyOnTheRight(other.adjointAction);
   return matrix.trace();
 }
 
-Rational ElementSemisimpleLieAlgebraWithAdjointAction::
-scalarProductKillingMustBeRational(
-  const ElementSemisimpleLieAlgebraWithAdjointAction& other
+Rational CartanElementCandidate::scalarProductKillingMustBeRational(
+  const CartanElementCandidate& other
 ) const {
   Matrix<AlgebraicNumber> matrix;
   matrix = this->adjointAction;
@@ -1752,11 +1871,11 @@ scalarProductKillingMustBeRational(
   return resultRational;
 }
 
-std::string ElementSemisimpleLieAlgebraWithAdjointAction::toString() const {
+std::string CartanElementCandidate::toString() const {
   std::stringstream out;
   out
   << "\\("
-  << this->element.toStringPretty()
+  << this->h.toStringPretty()
   << "\\), adjoint action: "
   << "\\("
   << this->adjointAction.toStringLatex()

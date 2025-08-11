@@ -55,7 +55,7 @@ void RootSubalgebra::getCoxeterPlane(
     tempGroup.computeRootSubsystem();
     Vector<Rational>& lastRoot = *tempGroup.rootSubsystem.lastObject();
     Vector<Rational> lastRootinSimpleCoordinates;
-    lastRoot.getCoordinatesInBasis(
+    lastRoot.coordinatesInBasis(
       tempGroup.simpleRootsInner, lastRootinSimpleCoordinates
     );
     coxeterNumber =
@@ -1532,14 +1532,14 @@ bool RootSubalgebra::isAnIsomorphism(
   Vector<Rational> root;
   if (additionalDomain != nullptr) {
     for (int i = 0; i < additionalDomain->size; i ++) {
-      additionalDomain->objects[i].getCoordinatesInBasis(roots, root);
+      additionalDomain->objects[i].coordinatesInBasis(roots, root);
       if (!(root == additionalRange->objects[i])) {
         return false;
       }
     }
   }
   for (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
-    this->getAmbientWeyl().rootsOfBorel[i].getCoordinatesInBasis(roots, root);
+    this->getAmbientWeyl().rootsOfBorel[i].coordinatesInBasis(roots, root);
     if (!this->isARoot(root)) {
       return false;
     }
@@ -2456,8 +2456,8 @@ bool RootSubalgebra::generateIsomorphismsPreservingBorel(
     tempSize += tempList[i];
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);
-  int tempI1=0;
-  int totalAutomorphisms=0;
+  int tempI1 = 0;
+  int totalAutomorphisms = 0;
   tempI1 = permComponents.totalNumberSubsetsSmallInt();
   totalAutomorphisms = tempAutos.totalNumberSubsetsSmallInt();
   int tempI2 = permComponentsCentralizer.totalNumberSubsetsSmallInt();
@@ -3113,7 +3113,7 @@ void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
     selectionRootsWithZeroCharacteristic.numberOfElements
   );
   Vectors<Rational> relativeRootSystem;
-  this->positiveRootsReductiveSubalgebra.getCoordinatesInBasis(
+  this->positiveRootsReductiveSubalgebra.coordinatesInBasis(
     this->simpleRootsReductiveSubalgebra, relativeRootSystem
   );
   SlTwoSubalgebraCandidate candidate;

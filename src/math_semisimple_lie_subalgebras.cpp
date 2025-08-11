@@ -5386,7 +5386,7 @@ void CandidateSemisimpleSubalgebra::computePairKWeightElementAndModule(
       report.report(reportStream.str());
     }
     bool tempbool =
-    lieBracket.getCoordinatesInBasis(
+    lieBracket.coordinatesInBasis(
       this->fullBasisByModules, coordinatesInFullBasis
     );
     if (!tempbool) {

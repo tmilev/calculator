@@ -477,7 +477,7 @@ public:
     }
     return false;
   }
-  bool getCoordinatesInBasis(
+  bool coordinatesInBasis(
     const Vectors<Coefficient>& inputBasis, Vector<Coefficient>& output
   ) const;
   Vector<Coefficient> getProjectivizedNormal(Vector<Coefficient>& affinePoint);
@@ -920,7 +920,7 @@ public:
       output += this->objects[i];
     }
   }
-  bool getCoordinatesInBasis(
+  bool coordinatesInBasis(
     const Vectors<Coefficient>& inputBasis,
     Vectors<Coefficient>& outputCoordinates
   ) const;
@@ -1182,13 +1182,13 @@ bool Vector<Coefficient>::fromString(const std::string& input) {
 }
 
 template <class Coefficient>
-bool Vector<Coefficient>::getCoordinatesInBasis(
+bool Vector<Coefficient>::coordinatesInBasis(
   const Vectors<Coefficient>& inputBasis, Vector<Coefficient>& output
 ) const {
   if (inputBasis.size == 0) {
     return false;
   }
-  STACK_TRACE("Vector::getCoordinatesInBasis");
+  STACK_TRACE("Vector::coordinatesInBasis");
   Vectors<Coefficient> bufferVectors;
   Vector<Coefficient> linearCombination;
   if (this->size != inputBasis[0].size) {
@@ -1251,16 +1251,16 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
 }
 
 template <class Coefficient>
-bool Vectors<Coefficient>::getCoordinatesInBasis(
+bool Vectors<Coefficient>::coordinatesInBasis(
   const Vectors<Coefficient>& inputBasis,
   Vectors<Coefficient>& outputCoordinates
 ) const {
-  STACK_TRACE("Vectors::getCoordinatesInBasis");
+  STACK_TRACE("Vectors::coordinatesInBasis");
   outputCoordinates.setSize(this->size);
   for (int i = 0; i < this->size; i ++) {
     if (
       !(
-        this->operator[](i).getCoordinatesInBasis(
+        this->operator[](i).coordinatesInBasis(
           inputBasis, outputCoordinates[i]
         )
       )

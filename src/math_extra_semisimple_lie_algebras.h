@@ -49,7 +49,7 @@ public:
   void assignVectorNegativeRootSpacesCartanPosistiveRootSpaces(
     const Vector<Coefficient>& input, SemisimpleLieAlgebra& owner
   );
-  bool getCoordinatesInBasis(
+  bool coordinatesInBasis(
     const List<ElementSemisimpleLieAlgebra<Coefficient> >& basis,
     Vector<Coefficient>& output
   ) const;
@@ -575,6 +575,9 @@ public:
   void createEmbeddingFromFDModuleHaving1dimWeightSpaces(
     Vector<Rational>& highestWeight
   );
+  // For a simple Lie algebra, returns an index of a long simple root.
+  // When the semisimple Lie algebra is not simple, returns -1.
+  int longRootIndex();
   int getLengthStringAlongAlphaThroughBeta(
     Vector<Rational>& alpha,
     Vector<Rational>& beta,
@@ -962,10 +965,10 @@ public:
 };
 
 template <class Coefficient>
-bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
+bool ElementSemisimpleLieAlgebra<Coefficient>::coordinatesInBasis(
   const List<ElementSemisimpleLieAlgebra>& basis, Vector<Coefficient>& output
 ) const {
-  STACK_TRACE("ElementSemisimpleLieAlgebra::getCoordinatesInBasis");
+  STACK_TRACE("ElementSemisimpleLieAlgebra::coordinatesInBasis");
   if (basis.size == 0) {
     return false;
   }
@@ -980,7 +983,7 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::getCoordinatesInBasis(
     basis[i].toVectorNegativeRootSpacesFirst(basisVectors[i]);
   }
   this->toVectorNegativeRootSpacesFirst(element);
-  return element.getCoordinatesInBasis(basisVectors, output);
+  return element.coordinatesInBasis(basisVectors, output);
 }
 
 template <class Coefficient>
@@ -1493,7 +1496,7 @@ bool SemisimpleLieAlgebra::getElementAdjointRepresentationWithRespectToBasis(
     basisInvariantSpace[i];
     element.lieBracketOnTheRight(basisElement, actionOnBasisElement);
     if (
-      !actionOnBasisElement.getCoordinatesInBasis(
+      !actionOnBasisElement.coordinatesInBasis(
         basisInvariantSpace, basisElementTransformation
       )
     ) {

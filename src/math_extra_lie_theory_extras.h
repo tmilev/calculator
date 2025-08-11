@@ -459,7 +459,7 @@ public:
     const CoefficientTypeQuotientField& fieldUnit,
     const CoefficientTypeQuotientField& fieldZero
   );
-  bool getCoordinatesInBasis(
+  bool coordinatesInBasis(
     List<ElementUniversalEnvelopingOrdered<Coefficient> >& basis,
     Vector<Coefficient>& output,
     const Coefficient& ringUnit,
@@ -585,7 +585,7 @@ public:
     const RationalFraction<Rational>& rationalFractionOne,
     const RationalFraction<Rational>& rationalFractionZero
   );
-  bool getCoordinatesInBasis(
+  bool coordinatesInBasis(
     const List<ElementVermaModuleOrdered<Coefficient> >& basis,
     Vector<Coefficient>& output,
     const Coefficient& ringUnit,
@@ -1136,7 +1136,7 @@ void MonomialUniversalEnvelopingOrdered<Coefficient>::setNumberOfVariables(
 }
 
 template <class Coefficient>
-bool ElementUniversalEnvelopingOrdered<Coefficient>::getCoordinatesInBasis(
+bool ElementUniversalEnvelopingOrdered<Coefficient>::coordinatesInBasis(
   List<ElementUniversalEnvelopingOrdered<Coefficient> >& basis,
   Vector<Coefficient>& output,
   const Coefficient& ringUnit,
@@ -1153,8 +1153,7 @@ bool ElementUniversalEnvelopingOrdered<Coefficient>::getCoordinatesInBasis(
   Vector<Coefficient> lastRoot;
   lastRoot = *coordinates.lastObject();
   coordinates.setSize(basis.size);
-  return
-  lastRoot.getCoordinatesInBasis(coordinates, output, ringUnit, ringZero);
+  return lastRoot.coordinatesInBasis(coordinates, output, ringUnit, ringZero);
 }
 
 template <class Coefficient>
@@ -1248,7 +1247,7 @@ void ElementVermaModuleOrdered<Coefficient>::getBasisFromSpanOfElements(
 }
 
 template <class Coefficient>
-bool ElementVermaModuleOrdered<Coefficient>::getCoordinatesInBasis(
+bool ElementVermaModuleOrdered<Coefficient>::coordinatesInBasis(
   const List<ElementVermaModuleOrdered<Coefficient> >& basis,
   Vector<Coefficient>& output,
   const Coefficient& ringUnit,
@@ -1260,7 +1259,7 @@ bool ElementVermaModuleOrdered<Coefficient>::getCoordinatesInBasis(
     elementsUEform.objects[i] = basis.objects[i].elementInternal;
   }
   return
-  this->elementInternal.getCoordinatesInBasis(
+  this->elementInternal.coordinatesInBasis(
     elementsUEform, output, ringUnit, ringZero
   );
 }
@@ -1409,7 +1408,7 @@ void ElementUniversalEnvelopingOrdered<Coefficient>::getBasisFromSpanOfElements
   }
   Matrix<Coefficient> bufferMatrix;
   Vectors<Coefficient> bufferVectors;
-  outputCoordinatesBeforeReduction.getCoordinatesInBasis(
+  outputCoordinatesBeforeReduction.coordinatesInBasis(
     basisCoordForm,
     outputCoordinates,
     bufferVectors,

@@ -96,7 +96,7 @@ Vector<Coefficient> Basis<Coefficient>::putInBasis(
     Vectors<Coefficient> basisVectorForm;
     this->basis.getVectorsFromRows(basisVectorForm);
     Vector<Coefficient> output;
-    input.getCoordinatesInBasis(basisVectorForm, output);
+    input.coordinatesInBasis(basisVectorForm, output);
     return output;
   } else {
     if (!this->haveGramMatrix) {

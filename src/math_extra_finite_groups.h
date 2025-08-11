@@ -707,7 +707,6 @@ public:
   FiniteGroup<ElementWeylGroup> group;
   List<std::string> ccCarterLabels;
   List<std::string> irrepsCarterLabels;
-  // void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   bool flagDeallocated;
   typedef FiniteGroup<ElementWeylGroup> WeylGroupBase;
   void reset();

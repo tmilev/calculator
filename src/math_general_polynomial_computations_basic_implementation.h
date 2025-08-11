@@ -1083,7 +1083,7 @@ void Polynomial<Coefficient>::assignMinimalPolynomial(
       }
       basis.addOnTop(vectorPowers);
     }
-    vectorPowers.getCoordinatesInBasis(basis, firstDependentPower);
+    vectorPowers.coordinatesInBasis(basis, firstDependentPower);
     currentFactor.setExpectedSize(basis.size + 1);
     currentFactor.makeZero();
     for (int i = 0; i < basis.size; i ++) {

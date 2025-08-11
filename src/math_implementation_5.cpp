@@ -130,7 +130,7 @@ computeSubGroupFromGeneratingReflections(
       }
     }
     for (int j = 1; j < this->externalAutomorphisms.size; j ++) {
-      orbitRho[i].getCoordinatesInBasis(
+      orbitRho[i].coordinatesInBasis(
         this->externalAutomorphisms[j], currentRoot
       );
       if (!orbitRho.contains(currentRoot)) {
@@ -387,7 +387,7 @@ void SemisimpleLieAlgebraOrdered::initialize(
   ElementSemisimpleLieAlgebra<Rational> currentElement;
   for (int i = 0; i < owner.getNumberOfGenerators(); i ++) {
     currentElement.makeGenerator(i, owner);
-    currentElement.getCoordinatesInBasis(
+    currentElement.coordinatesInBasis(
       this->elementOrder, coordinatesInCurrentBasis
     );
     for (int j = 0; j < coordinatesInCurrentBasis.size; j ++) {

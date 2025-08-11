@@ -984,8 +984,8 @@ void Lattice::intersectWith(const Lattice& other) {
   otherCommonBasis.assignMatrixRows(
     otherLatticeIntersected.basisRationalForm
   );
-  thisCommonBasis.getCoordinatesInBasis(commonBasis, thisCommonCoordinates);
-  otherCommonBasis.getCoordinatesInBasis(commonBasis, otherCommonCoordinates);
+  thisCommonBasis.coordinatesInBasis(commonBasis, thisCommonCoordinates);
+  otherCommonBasis.coordinatesInBasis(commonBasis, otherCommonCoordinates);
   Lattice thisCommonCoordinatesLattice;
   Lattice otherCommonCoordinatesLattice;
   thisCommonCoordinatesLattice.makeFromRoots(thisCommonCoordinates);
@@ -1174,7 +1174,7 @@ bool Lattice::reduceVector(Vector<Rational>& vector) const {
   }
   Vectors<Rational> basisRoots;
   basisRoots.assignMatrixRows(this->basisRationalForm);
-  if (!vector.getCoordinatesInBasis(basisRoots, output)) {
+  if (!vector.coordinatesInBasis(basisRoots, output)) {
     global.fatal
     << "Failed to get coordinates of: "
     << vector.toString()
@@ -1458,7 +1458,7 @@ void Lattice::subLatticeScalarProductTimesDirectionInLattice(
   Vectors<Rational> basis;
   basis.assignMatrixRows(target.basisRationalForm);
   Vector<Rational> coordinates;
-  direction.getCoordinatesInBasis(basis, coordinates);
+  direction.coordinatesInBasis(basis, coordinates);
   Rational scale;
   scale = Rational::scaleNoSignChange(coordinates);
   this->subLatticeWithIntegralScalarProducts(scalarProductWith, output);

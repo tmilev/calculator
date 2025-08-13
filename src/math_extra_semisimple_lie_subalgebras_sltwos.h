@@ -48,7 +48,9 @@ class CentralizerComputer {
   // A helper method for determining whether dual element to
   // a root space is simple.
   bool isSimpleIndex(int i);
-  Rational computeSimpleRootScalarProductArbitraryScale(int i, int j) const;
+  Rational computeSimpleRootScalarProductAmbientKilling(int i, int j) const;
+  Rational computeSimpleRootScalarProductCentralizerKilling(int i, int j)
+  const;
 public:
   List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerBasis;
@@ -63,6 +65,8 @@ public:
   // A computational structure to find the eigenvalues and eigenspaces of the
   // preceding element.
   MatrixEigenvalueFinder semisimpleElementAdjointEigenvalueFinder;
+  Matrix<Rational> coSymmetricCartanMatrixCentralizerAmbientKilling;
+  Matrix<Rational> coSymmetricCartanMatrixCentralizerCentralizerKilling;
   HashedList<CartanElementCandidate> dualsOfRootSpaces;
   HashedList<CartanElementCandidate> postiveDualsOfRootSpaces;
   List<CartanElementCandidate> simpleDualsOfRootSpaces;
@@ -70,7 +74,8 @@ public:
   List<Vector<AlgebraicNumber> > dualRootsAlgebraic;
   DynkinDiagramRootSubalgebra dynkinDiagramComputer;
   DynkinType typeIfKnown;
-  Rational ambientLongRootAdjointActionSquaredTrace;
+  // The killing form square of the dual to the ambient long root.
+  Rational killingSquareOfDualOfAmbientLongRoot;
   bool flagTypeComputed;
   bool flagBasisComputed;
   bool flagCartanSelected;

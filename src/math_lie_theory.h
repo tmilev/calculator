@@ -356,6 +356,15 @@ public:
   void sort();
   void getDynkinType(DynkinType& output) const;
   void swapDynkinStrings(int i, int j);
+  // Gets the index of the first simple component in the simpleComponentTypes
+  // that has a simple root whose scalar product with the given root is
+  // non-zero.
+  int indexFirstComponentLinkedTo(const Vector<Rational>& inputVector) const;
+  // Gets the first Dynkin simple type that has a root with
+  // that is not perpendicular to the given vector.
+  DynkinSimpleType typeFirstComponentLinkedTo(
+    const Vector<Rational>& inputVector
+  ) const;
   Rational getSquareLengthLongestRootLinkedTo(
     const Vector<Rational>& inputVector
   );

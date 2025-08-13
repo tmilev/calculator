@@ -868,6 +868,37 @@ void DynkinDiagramRootSubalgebra::sort() {
   }
 }
 
+int DynkinDiagramRootSubalgebra::indexFirstComponentLinkedTo(
+  const Vector<Rational>& inputVector
+) const {
+  STACK_TRACE("DynkinDiagramRootSubalgebra::indexFirstComponentLinkedTo");
+  for (int i = 0; i < this->simpleBasesConnectedComponents.size; i ++) {
+    for (
+      const Vector<Rational>& simpleRoot :
+      this->simpleBasesConnectedComponents[i]
+    ) {
+      if (
+        inputVector.scalarProduct(simpleRoot, this->ambientBilinearForm) != 0
+      ) {
+        return i;
+      }
+    }
+  }
+  return - 1;
+}
+
+DynkinSimpleType DynkinDiagramRootSubalgebra::typeFirstComponentLinkedTo(
+  const Vector<Rational>& inputVector
+) const {
+  STACK_TRACE("DynkinDiagramRootSubalgebra::typeFirstComponentLinkedTo");
+  int firstIndex = this->indexFirstComponentLinkedTo(inputVector);
+  DynkinSimpleType result;
+  if (firstIndex == - 1) {
+    return result;
+  }
+  return this->simpleComponentTypes[firstIndex];
+}
+
 Rational DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo(
   const Vector<Rational>& inputVector
 ) {
@@ -1180,10 +1211,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
 std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* format)
 const {
   DynkinType dynkinType;
-  dynkinType.makeZero();
-  for (int j = 0; j < this->simpleComponentTypes.size; j ++) {
-    dynkinType.addMonomial(this->simpleComponentTypes[j], 1);
-  }
+  this->getDynkinType(dynkinType);
   return dynkinType.toString(format);
 }
 

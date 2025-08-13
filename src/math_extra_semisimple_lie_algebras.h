@@ -87,7 +87,7 @@ public:
   }
   bool isProportionalTo(
     const ElementSemisimpleLieAlgebra<Coefficient>& input,
-    Coefficient& outputTimesMeEqualsInput
+    Coefficient& outputTimesThisEqualsInput
   ) const {
     Vector<Coefficient> thisCoordinates;
     Vector<Coefficient> inputCoordinates;
@@ -95,7 +95,7 @@ public:
     input.toVectorNegativeRootSpacesFirst(inputCoordinates);
     return
     thisCoordinates.isProportionalTo(
-      inputCoordinates, outputTimesMeEqualsInput
+      inputCoordinates, outputTimesThisEqualsInput
     );
   }
   unsigned int hashFunction() const {

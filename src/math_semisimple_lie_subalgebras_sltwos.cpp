@@ -1296,8 +1296,9 @@ std::string CentralizerComputer::toString() const {
     out << " not computed";
   }
   out
-  << "\n<br>\nAmbient dual to long root: "
-  << this->ambientLongRootAdjointActionSquaredTrace.toString();
+  <<
+  "\n<br>\nKilling form square of Cartan element dual to ambient long root: "
+  << this->killingSquareOfDualOfAmbientLongRoot.toString();
   out << "\n<br>\n" << "Generators of centralizer: ";
   if (this->flagBasisComputed) {
     out << this->centralizerBasis.toStringCommaDelimited();
@@ -1333,16 +1334,26 @@ std::string CentralizerComputer::toString() const {
     << this->postiveDualsOfRootSpaces.toStringCommaDelimited();
   }
   out
+  <<
+  "\n<br>\nCo-symmetric Cartan Matrix of centralizer, scaled by ambient killing form: "
+  << "\\("
+  << this->coSymmetricCartanMatrixCentralizerAmbientKilling.toStringLatex()
+  << "\\)";
+  out
+  <<
+  "\n<br>\nCo-symmetric Cartan Matrix of centralizer, scaled by killing form restricted to centalizer: "
+  << "\\("
+  << this->coSymmetricCartanMatrixCentralizerCentralizerKilling.toStringLatex()
+  << "\\)";
+  out
   << "\n<br>\nScalar product computed: \\("
   << this->dynkinDiagramComputer.ambientBilinearForm.toStringLatex()
   << "\\)";
-  out
-  << "\n<br>\nCentralizer type: "
-  << this->dynkinDiagramComputer.toString();
+  out << "\n<br>\nCentralizer type: " << this->typeIfKnown.toString();
   out
   << "\n<br>\nSimple basis of Cartan of centralizer ("
   << this->simpleDualsOfRootSpaces.size
-  << " total):"
+  << " total): "
   << this->simpleDualsOfRootSpaces.toStringCommaDelimited();
   out
   << "\n<br>\nLinear space basis of intersection "
@@ -1483,7 +1494,7 @@ bool CentralizerComputer::trySemisimpleElement(
       << h.toStringPretty()
       << global.fatal;
     }
-    h *= coefficientOrProportionality / 2;
+    h *= coefficientOrProportionality * 2;
     CartanElementCandidate hWithAction;
     this->makeCartanCandidate(h, e, f, hWithAction);
     this->dualsOfRootSpaces.addOnTop(hWithAction);
@@ -1518,7 +1529,7 @@ void CentralizerComputer::makeCartanCandidate(
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputF,
   CartanElementCandidate& output
 ) {
-  STACK_TRACE("CentralizerComputer::makeCentralizerElementWithAdjointAction");
+  STACK_TRACE("CentralizerComputer::makeCartanCandidate");
   output.h = inputH;
   bool mustBeTrue =
   output.h.computeAdjointActionWithRespectToBasis(
@@ -1573,12 +1584,18 @@ bool CentralizerComputer::computeSimpleBasis() {
     // can't unambiguously determine long root. We give up.
     return false;
   }
+  Vector<Rational> longRoot;
+  longRoot.makeEi(this->owner->getRank(), indexLongRoot);
   longRootedElementCartan.makeCartanGeneratorHi(indexLongRoot, *this->owner);
+  // Recale the long rooted element so it act by multiplication by 2 on
+  // its root space.
+  longRootedElementCartan *= 2 /
+  longRoot.scalarProduct(longRoot, this->owner->weylGroup.cartanSymmetric);
   Matrix<Rational> longRootAdjointAction;
   this->owner->getAdjoint(longRootAdjointAction, longRootedElementCartan);
   Matrix<Rational> longRootAdjointActionSquared = longRootAdjointAction;
   longRootAdjointActionSquared.multiplyOnTheLeft(longRootAdjointAction);
-  this->ambientLongRootAdjointActionSquaredTrace =
+  this->killingSquareOfDualOfAmbientLongRoot =
   longRootAdjointActionSquared.trace();
   for (
     const CartanElementCandidate& candidate : this->simpleDualsOfRootSpaces
@@ -1591,16 +1608,36 @@ bool CentralizerComputer::computeSimpleBasis() {
       candidateWithAmbientAdjoint
     );
   }
-  Matrix<Rational> coSymmetricCartanMatrix;
-  coSymmetricCartanMatrix.resize(
+  this->coSymmetricCartanMatrixCentralizerAmbientKilling.resize(
     this->simpleDualsOfRootSpaces.size,
     this->simpleDualsOfRootSpaces.size,
     false
   );
-  for (int i = 0; i < this->simpleDualsOfRootSpaces.size; i ++) {
-    for (int j = 0; j < this->simpleDualsOfRootSpaces.size; j ++) {
-      coSymmetricCartanMatrix(i, j) =
-      this->computeSimpleRootScalarProductArbitraryScale(i, j);
+  this->coSymmetricCartanMatrixCentralizerCentralizerKilling.resize(
+    this->simpleDualsOfRootSpaces.size,
+    this->simpleDualsOfRootSpaces.size,
+    false
+  );
+  Rational killingSquareSmallest = 0;
+  int indexOfKillingSquareSmallest = - 1;
+  for (int i = 0; i < this->simpleDualsOfRootSpacesAmbientAdjoint.size; i ++) {
+    for (
+      int j = 0; j < this->simpleDualsOfRootSpacesAmbientAdjoint.size; j ++
+    ) {
+      this->coSymmetricCartanMatrixCentralizerAmbientKilling(i, j) =
+      this->computeSimpleRootScalarProductAmbientKilling(i, j);
+      this->coSymmetricCartanMatrixCentralizerCentralizerKilling(i, j) =
+      this->computeSimpleRootScalarProductCentralizerKilling(i, j);
+    }
+    Rational currentSquareScalarProduct =
+    this->coSymmetricCartanMatrixCentralizerAmbientKilling(0, 0);
+    if (i == 0) {
+      killingSquareSmallest = currentSquareScalarProduct;
+      indexOfKillingSquareSmallest = i;
+    }
+    if (killingSquareSmallest > currentSquareScalarProduct) {
+      killingSquareSmallest = currentSquareScalarProduct;
+      indexOfKillingSquareSmallest = i;
     }
   }
   this->dynkinDiagramComputer.ambientBilinearForm.resize(
@@ -1611,14 +1648,29 @@ bool CentralizerComputer::computeSimpleBasis() {
   for (int i = 0; i < this->simpleDualsOfRootSpaces.size; i ++) {
     for (int j = 0; j < this->simpleDualsOfRootSpaces.size; j ++) {
       this->dynkinDiagramComputer.ambientBilinearForm(i, j) =
-      coSymmetricCartanMatrix(i, j) * 4 /
-      coSymmetricCartanMatrix(j, j) /
-      coSymmetricCartanMatrix(i, i);
+      this->coSymmetricCartanMatrixCentralizerCentralizerKilling(i, j) * 4 /
+      this->coSymmetricCartanMatrixCentralizerCentralizerKilling(j, j) /
+      this->coSymmetricCartanMatrixCentralizerCentralizerKilling(i, i);
     }
   }
   Vectors<Rational> simpleBasis;
   simpleBasis.makeEiBasis(this->simpleDualsOfRootSpaces.size);
   this->dynkinDiagramComputer.computeDiagramInputIsSimpleBasis(simpleBasis);
+  Vector<Rational> longestSimpleRootOfCentalizer;
+  longestSimpleRootOfCentalizer.makeEi(
+    this->simpleDualsOfRootSpaces.size, indexOfKillingSquareSmallest
+  );
+  DynkinSimpleType typeContainingLongestSimpleRootOfCentalizer =
+  this->dynkinDiagramComputer.typeFirstComponentLinkedTo(
+    longestSimpleRootOfCentalizer
+  );
+  Rational scale =
+  killingSquareSmallest *
+  typeContainingLongestSimpleRootOfCentalizer.getLongRootLengthSquared() /
+  this->killingSquareOfDualOfAmbientLongRoot /
+  2;
+  this->dynkinDiagramComputer.getDynkinType(this->typeIfKnown);
+  this->typeIfKnown.scaleFirstCoRootSquaredLength(scale);
   this->dualRootsAlgebraic.clear();
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > simpleHs;
   for (const CartanElementCandidate& simpleH : this->simpleDualsOfRootSpaces) {
@@ -1638,16 +1690,23 @@ bool CentralizerComputer::computeSimpleBasis() {
   return true;
 }
 
-Rational CentralizerComputer::computeSimpleRootScalarProductArbitraryScale(
+Rational CentralizerComputer::computeSimpleRootScalarProductAmbientKilling(
   int i, int j
 ) const {
-  Rational scale = 2 / this->ambientLongRootAdjointActionSquaredTrace;
   return
   this->simpleDualsOfRootSpacesAmbientAdjoint[i].
   scalarProductKillingMustBeRational(
     this->simpleDualsOfRootSpacesAmbientAdjoint[j]
-  ) *
-  scale;
+  );
+}
+
+Rational CentralizerComputer::computeSimpleRootScalarProductCentralizerKilling(
+  int i, int j
+) const {
+  return
+  this->simpleDualsOfRootSpaces[i].scalarProductKillingMustBeRational(
+    this->simpleDualsOfRootSpaces[j]
+  );
 }
 
 bool CentralizerComputer::isSimpleIndex(int i) {
@@ -1873,10 +1932,19 @@ Rational CartanElementCandidate::scalarProductKillingMustBeRational(
 
 std::string CartanElementCandidate::toString() const {
   std::stringstream out;
+  out << "\\(" << this->h.toStringPretty() << "\\), ";
+  if (!this->e.isEqualToZero()) {
+    out
+    << "matching e: \\("
+    << this->e.toStringPretty()
+    << "\\), verification: \\( [h,e]-2e=";
+    ElementSemisimpleLieAlgebra<AlgebraicNumber> computer;
+    this->h.lieBracketOnTheRight(this->e, computer);
+    computer -= this->e * 2;
+    out << computer.toString() << "\\), ";
+  }
   out
-  << "\\("
-  << this->h.toStringPretty()
-  << "\\), adjoint action: "
+  << "adjoint action: "
   << "\\("
   << this->adjointAction.toStringLatex()
   << "\\)";

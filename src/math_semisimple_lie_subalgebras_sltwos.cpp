@@ -240,7 +240,7 @@ void SlTwoSubalgebraCandidate::computeLieBracketsUnknowns() {
 void SlTwoSubalgebra::fromSlTwoSubalgebraCandidate(
   SlTwoSubalgebraCandidate& input
 ) {
-  STACK_TRACE("SlTwoSubalgebra::fromSlTwoSubalgebraCandidate");
+  STACK_TRACE("SlTwoSubalgebraCandidate::fromSlTwoSubalgebraCandidate");
   this->owner = input.owner;
   this->container = input.container;
   this->algebraicClosure = input.algebraicClosure;
@@ -298,10 +298,10 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
     this->owner->getRank() -
     currentMinimalContainer.dynkinType.getRank() -
     currentMinimalContainer.centralizerDynkinType.getRank();
-    Rational totalCentalizerCandidateDim =
+    Rational totalCentalizerCandidateDimension =
     dimensionSemisimplePartOfCentralizerRootSubalgebra +
     this->dimensionCentralizerToralPart;
-    if (totalCentalizerCandidateDim == this->dimensionCentralizer) {
+    if (totalCentalizerCandidateDimension == this->dimensionCentralizer) {
       this->flagCentralizerIsRegular = true;
       this->centralizerComputer.flagTypeComputed = true;
       this->centralizerComputer.typeIfKnown =
@@ -490,7 +490,7 @@ computeModuleDecompositionMinimalContainingRegularSubalgebras(
 ) {
   STACK_TRACE(
     "SlTwoSubalgebra::"
-    "computeModuleDecompositionsitionOfMinimalContainingRegularSAs"
+    "computeModuleDecompositionMinimalContainingRegularSubalgebras"
   );
   this->moduleDecompositionMinimalContainingRootSubalgebras.setSize(
     this->indicesMinimalContainingRootSubalgebras.size
@@ -577,7 +577,7 @@ SemisimpleLieAlgebra& SlTwoSubalgebraCandidate::getOwnerSemisimpleAlgebra() {
 void SlTwoSubalgebraCandidate::initializeUnknownTriples(
   const Vector<Rational>& targetH
 ) {
-  STACK_TRACE("SlTwoSubalgebra::initializeUnknownTriples");
+  STACK_TRACE("SlTwoSubalgebraCandidate::initializeUnknownTriples");
   if (this->algebraicClosure == nullptr) {
     global.fatal << "The algebraic closure is required." << global.fatal;
   }
@@ -654,7 +654,7 @@ bool SlTwoSubalgebraCandidate::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   AlgebraicClosureRationals* inputAlgebraicClosure
 ) {
   STACK_TRACE(
-    "SlTwoSubalgebra::attemptExtendingHFtoHEFWithRespectToSubalgebra"
+    "SlTwoSubalgebraCandidate::attemptExtendingHFtoHEFWithRespectToSubalgebra"
   );
   if (
     zeroCharacteristics.cardinalitySelection ==
@@ -750,7 +750,9 @@ void SlTwoSubalgebraCandidate::initializeHEFSystemFromFCoefficients(
   LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
   cartanInvolutionPreservedByEMinusF
 ) {
-  STACK_TRACE("SlTwoSubalgebra::initializeHEFSystemFromFCoefficients");
+  STACK_TRACE(
+    "SlTwoSubalgebraCandidate::initializeHEFSystemFromFCoefficients"
+  );
   this->checkConsistencyParticipatingRoots(targetH);
   this->initializeUnknownTriples(targetH);
   this->computeLieBracketsUnknowns();
@@ -762,7 +764,10 @@ void SlTwoSubalgebraCandidate::initializeHEFSystemFromFCoefficients(
 }
 
 void SlTwoSubalgebraCandidate::initializeHEFSystemFromFCoefficientsPartTwo() {
-  STACK_TRACE("SlTwoSubalgebra::initializeHEFSystemFromECoefficientsPartTwo");
+  STACK_TRACE(
+    "SlTwoSubalgebraCandidate::"
+    "initializeHEFSystemFromECoefficientsPartTwo"
+  );
   this->systemArbitraryMatrix.initialize(
     this->systemToSolve.size, this->participatingPositiveRoots.size
   );
@@ -775,7 +780,7 @@ void SlTwoSubalgebraCandidate::initializeHEFSystemFromFCoefficientsPartTwo() {
 }
 
 bool SlTwoSubalgebraCandidate::attemptRealizingKostantSekiguchi() {
-  STACK_TRACE("SlTwoSubalgebra::attemptRealizingKostantSekiguchi");
+  STACK_TRACE("SlTwoSubalgebraCandidate::attemptRealizingKostantSekiguchi");
   PolynomialSystem<AlgebraicNumber> computation;
   computation.algebraicClosure = this->algebraicClosure;
   computation.initializeForSystemSolution();
@@ -804,7 +809,7 @@ bool SlTwoSubalgebraCandidate::attemptRealizingKostantSekiguchi() {
 bool SlTwoSubalgebraCandidate::checkConsistencyParticipatingRoots(
   const Vector<Rational>& targetH
 ) {
-  STACK_TRACE("SlTwoSubalgebra::checkConsistencyParticipatingRoots");
+  STACK_TRACE("SlTwoSubalgebraCandidate::checkConsistencyParticipatingRoots");
   for (int i = 0; i < this->participatingPositiveRoots.size; i ++) {
     if (
       this->getOwnerWeyl().rootScalarCartanRoot(
@@ -957,7 +962,7 @@ toStringModuleDecompositionMinimalContainingRegularSubalgebras(
 }
 
 std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
-  STACK_TRACE("SlTwoSubalgebras::toStringSummary");
+  STACK_TRACE("SlTwoSubalgebras::toHTMLSummary");
   std::stringstream out;
   out << "Number of sl(2) subalgebras: " << this->allSubalgebras.size << ".\n";
   out << this->toHTMLSummaryTable(format);
@@ -1296,8 +1301,8 @@ std::string CentralizerComputer::toString() const {
     out << " not computed";
   }
   out
-  <<
-  "\n<br>\nKilling form square of Cartan element dual to ambient long root: "
+  << "\n<br>\nKilling form square of "
+  << "Cartan element dual to ambient long root: "
   << this->killingSquareOfDualOfAmbientLongRoot.toString();
   out << "\n<br>\n" << "Generators of centralizer: ";
   if (this->flagBasisComputed) {
@@ -1334,14 +1339,14 @@ std::string CentralizerComputer::toString() const {
     << this->postiveDualsOfRootSpaces.toStringCommaDelimited();
   }
   out
-  <<
-  "\n<br>\nCo-symmetric Cartan Matrix of centralizer, scaled by ambient killing form: "
+  << "\n<br>\nCo-symmetric Cartan Matrix of centralizer, "
+  << "scaled by ambient killing form: "
   << "\\("
   << this->coSymmetricCartanMatrixCentralizerAmbientKilling.toStringLatex()
   << "\\)";
   out
-  <<
-  "\n<br>\nCo-symmetric Cartan Matrix of centralizer, scaled by killing form restricted to centalizer: "
+  << "\n<br>\nCo-symmetric Cartan Matrix of centralizer, "
+  << "scaled by killing form restricted to centalizer: "
   << "\\("
   << this->coSymmetricCartanMatrixCentralizerCentralizerKilling.toStringLatex()
   << "\\)";
@@ -1671,6 +1676,7 @@ bool CentralizerComputer::computeSimpleBasis() {
   2;
   this->dynkinDiagramComputer.getDynkinType(this->typeIfKnown);
   this->typeIfKnown.scaleFirstCoRootSquaredLength(scale);
+  this->flagTypeComputed = true;
   this->dualRootsAlgebraic.clear();
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > simpleHs;
   for (const CartanElementCandidate& simpleH : this->simpleDualsOfRootSpaces) {

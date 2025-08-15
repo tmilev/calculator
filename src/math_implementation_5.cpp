@@ -766,7 +766,7 @@ std::string SlTwoInSlN::initFromModuleDecomposition(
   std::string endMath;
   std::string newLine;
   if (useHtml) {
-    beginMath = "<span class ='mathcalculator'>";
+    beginMath = "<span class='mathcalculator'>";
     endMath = "</span>";
     newLine = "<br>";
   } else {
@@ -910,7 +910,7 @@ std::string SlTwoInSlN::pairTwoIndices(
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
   if (useHtml) {
-    beginMath = "<span class ='mathcalculator'>";
+    beginMath = "<span class='mathcalculator'>";
     endMath = "</span>";
     newLine = "<br>";
   } else {

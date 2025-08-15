@@ -929,7 +929,7 @@ Rational DynkinDiagramRootSubalgebra::getSquareLengthShortestRootLinkedTo(
   const Vector<Rational>& inputVector
 ) {
   STACK_TRACE(
-    "DynkinDiagramRootSubalgebra::getSquareLengthLongestRootLinkedTo"
+    "DynkinDiagramRootSubalgebra::getSquareLengthShortestRootLinkedTo"
   );
   Rational result =
   inputVector.scalarProduct(inputVector, this->ambientBilinearForm);

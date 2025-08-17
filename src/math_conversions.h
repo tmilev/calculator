@@ -13,4 +13,4 @@ public:
   bool convert(const Rational& input, ElementZmodP& output);
 };
 
-#endif // header_math_basics_ALREADY_INCLUDED
+#endif // header_math_conversions_ALREADY_INCLUDED

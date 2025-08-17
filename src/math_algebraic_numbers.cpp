@@ -1489,6 +1489,51 @@ const {
   return true;
 }
 
+bool AlgebraicNumber::evaluatesToComplex(
+  Complex<double>* outputApproximateValue
+) const {
+  STACK_TRACE("AlgebraicNumber::evaluatesToComplex");
+  Rational rationalValue;
+  if (this->isRational(&rationalValue)) {
+    if (outputApproximateValue != nullptr) {
+      *outputApproximateValue = rationalValue.getDoubleValue();
+    }
+    return true;
+  }
+  if (this->owner == nullptr) {
+    global.fatal
+    << "Non-rational algebraic number is "
+    << "not allowed to not have Algebraic closure owner."
+    << global.fatal;
+  }
+  if (!this->owner->flagIsQuadraticRadicalExtensionRationals) {
+    return false;
+  }
+  if (!this->isExpressedViaLatestBasis()) {
+    AlgebraicNumber number = *this;
+    number.expressViaLatestBasis();
+    return number.evaluatesToComplex(outputApproximateValue);
+  }
+  if (outputApproximateValue == nullptr) {
+    return true;
+  }
+  *outputApproximateValue = 0;
+  for (int i = 0; i < this->element.size(); i ++) {
+    int index = this->element.monomials[i].monomialIndex;
+    const LargeInteger& radical =
+    this->owner->quadraticRadicalsCorrespondingToBasisElements[index];
+    double magnitudeOfSquareRoot =
+    this->element.coefficients[i].getDoubleValue() *
+    FloatingPoint::sqrtFloating(radical.getDoubleValue());
+    if (radical > 0) {
+      outputApproximateValue->realPart += magnitudeOfSquareRoot;
+    } else {
+      outputApproximateValue->imaginaryPart += magnitudeOfSquareRoot;
+    }
+  }
+  return true;
+}
+
 bool AlgebraicNumber::assignRationalQuadraticRadical(
   const Rational& input,
   AlgebraicClosureRationals& inputOwner,

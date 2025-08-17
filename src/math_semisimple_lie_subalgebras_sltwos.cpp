@@ -1386,11 +1386,23 @@ bool CentralizerComputer::compute() {
   if (this->centralizerIntersectedWithAmbientCartan.size > 0) {
     ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
     int counter = 1;
+    // Construct an arbitrary linear combination of the elements of
+    // the intersection of the ambient Cartan with the
+    // centralizer.
+    // We want the arbitrary linear combination to have maximal rank
+    // of its adjoint action.
+    // This happens with probability 1 for a random linear combination.
+    // However, when choosing small coefficients, there is a
+    // high chance that the rank will actually not be maximal.
+    // We are choosing choosing a linear combination with
+    // an arbitary formula, whose only goal is to avoid
+    // the chance of non-maximal rank of the adjoint action.
     for (
       const ElementSemisimpleLieAlgebra<Rational>& summand :
       this->centralizerIntersectedWithAmbientCartan
     ) {
-      semisimpleCandidate += summand * counter * counter;
+      Rational arbitraryCoefficient = (counter * counter + 1);
+      semisimpleCandidate += summand * arbitraryCoefficient;
       counter ++;
     }
     if (this->trySemisimpleElement(semisimpleCandidate)) {
@@ -1557,18 +1569,24 @@ bool CentralizerComputer::computeSimpleBasis() {
   this->postiveDualsOfRootSpaces.clear();
   this->postiveDualsOfRootSpaces.addListOnTop(this->dualsOfRootSpaces);
   AlgebraicNumber scalarProduct;
-  Rational scalarProductRational;
+  Complex<double> scalarProductComplex;
   for (int i = 0; i < this->postiveDualsOfRootSpaces.size; i ++) {
     scalarProduct =
     this->postiveDualsOfRootSpaces[i].scalarProductKilling(
       this->semisimpleElement
     );
-    if (!scalarProduct.isRealGuaranteed(nullptr)) {
+    if (!scalarProduct.evaluatesToComplex(&scalarProductComplex)) {
       return false;
     }
-    if (scalarProduct.isNegativeRealGuaranteed()) {
+    if (
+      scalarProductComplex.realPart < 0 || (
+        scalarProductComplex.realPart == 0 &&
+        scalarProductComplex.imaginaryPart < 0
+      )
+    ) {
       // Discard the elements of the cartan whose scalar product
-      // with the defining semisimple element is negative.
+      // with the defining semisimple element is in the second or
+      // third quadrant.
       this->postiveDualsOfRootSpaces.removeIndexSwapWithLast(i);
       i --;
     }

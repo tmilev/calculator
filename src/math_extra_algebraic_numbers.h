@@ -141,6 +141,7 @@ public:
   }
   bool radicalMeDefault(int radical, std::stringstream* commentsOnError);
   void invert();
+  bool evaluatesToComplex(Complex<double>* outputApproximateValue) const;
   bool evaluatesToDouble(double* outputWhichDouble) const;
   void operator/=(const AlgebraicNumber& other);
   bool operator==(const AlgebraicNumber& other) const;

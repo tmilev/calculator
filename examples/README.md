@@ -1188,7 +1188,7 @@ x = MakeElementWeylGroup{}(A_2, 1); x*x
 ```
 Multiplies two Weyl group elements if possible. 
 
-*\** [TensorAndDecomposeWeylGroupRepresentations] {CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps}. 
+*\** [TensorAndDecomposeWeylGroupRepresentations] {CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylRepresentations}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22W%20%3d%20WeylGroupNaturalRep%7b%7d%28B_3%29%3b%5cnV%20%3d%20MakeVirtualWeylGroupRepresentation%7b%7dW%3b%5cnW%5c%5cotimes%20W%3b%5cnV%20%2a%20V%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 W = WeylGroupNaturalRep{}(B_3);
@@ -1198,7 +1198,7 @@ V * V
 ```
 Tensor and decompose two virtual Weyl group representations. 
 
-*\** [MultiplyRationalByUE] {CalculatorFunctionsBinaryOps::multiplyAnyByUE}. 
+*\** [MultiplyRationalByUE] {CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22g_%7b%7bi%7d%7d%3d%20ChevalleyGenerator%7b%7d%28F_1%2c%20i%29%3b%20h_%7b%7bi%7d%7d%3d%20CartanGenerator%7b%7d%28F_1%2c%20i%29%3b%5cn%5bg_%7b22%7d%2bg_%7b20%7d%2bg_%7b14%7d%2cg_%7b17%7d-6%2f5g_%7b14%7d%5d%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 g_{{i}}= ChevalleyGenerator{}(F_1, i); h_{{i}}= CartanGenerator{}(F_1, i);
@@ -5265,7 +5265,7 @@ AttemptExtendingEtoHEFwithHinCartan{}(F_4, g_1+2g_2+3g_3+4g_4)
 ```
 Attempts to embed an element E into an sl(2)-triple over the rationals, such that the element H is in the ambient Cartan algebra. 
 
-*PrintMacdonaldPolys* [PrintMacdonaldPolys] {CalculatorFunctionsWeylGroup::macdonaldPolys}. 
+*PrintMacdonaldPolys* [PrintMacdonaldPolys] {CalculatorFunctionsWeylGroup::macdonaldPolynomials}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintMacdonaldPolys%7b%7d%28B_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
 PrintMacdonaldPolys{}(B_3)

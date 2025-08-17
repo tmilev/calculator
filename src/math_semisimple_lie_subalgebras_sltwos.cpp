@@ -1050,80 +1050,52 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
   << "<div id='idModuleDecomposition'>"
   << this->descriptionModuleDecompositionOverSl2
   << "</div>";
-  std::string floatRow =
-  "position: sticky; "
-  "top: 0; "
-  "background-color: #fafafa; "
-  "z-index: 2; ";
-  std::string floatColumn =
-  "position: sticky; "
-  "left: 0; "
-  "background-color: #fafafa; "
-  "z-index: 1;";
   out
   << "<br><br>"
-  << "<div style='max-height: 80vh; max-width: 99%; overflow: auto;'>"
-  << "<table style='border-collapse: collapse;'>"
+
+  << "<div class='containerTableSummarySlTwo'>"
+  << "<table class='tableSummarySlTwo'>"
   << "<tr>"
-  << "<th style='"
-  << "position: sticky; "
-  << "left: 0; "
-  << "top: 0; "
-  << "background-color: #fafafa; "
-  << "z-index: 3; "
-  << "'>Type + realization link</th>"
-  << "<th style='padding-right:20px; "
-  << floatRow
-  << "'>"
+  << "<th class='tableHeaderSummarySlTwoType'>Type + realization link</th>"
+  << "<th class='tableHeaderSummarySlTwoDefault' style='padding-right:20px;'>"
   << "<a href='#"
   << idSpanHCharacteristicDescription
   << "'>h-Characteristic</a>"
   << "</th>";
   out
-  << "<th align='center' style='white-space: nowrap; "
-  << floatRow
+  << "<th class='tableHeaderSummarySlTwoDefault' "
+         <<"align='center' "
+         <<"style='white-space: nowrap;'"
   << "'>"
   << "<a href='#idCartanElementRealization'>Realization of h</a>"
   << "</th>"
-  << "<th style='padding-left:20px; "
-  << floatRow
-  << "'>"
+  << "<th class='tableHeaderSummarySlTwoDefault' style='padding-left:20px;'>"
   << "<a href='#idModuleDecomposition'>"
   << "sl(2)-module decomposition of the ambient Lie algebra</a> <br> "
   << "\\(\\psi=\\) the fundamental \\(sl(2)\\)-weight. "
   << "</a></th>"
-  << "<th style='"
-  << floatRow
-  << "'>Centralizer dimension</th>"
-  << "<th style='"
-  << floatRow
-  << "'>Type of semisimple part of centralizer, if known</th>"
-  << "<th style='"
-  << floatRow
-  << "'>The square of the length of the weight dual to h.</th>"
-  << "<th style='"
-  << floatRow
-  << "'>Dynkin index </th>"
-  << "<th style='"
-  << floatRow
-  << "'>Minimal containing regular semisimple SAs</th>"
-  << "<th style='"
-  << floatRow
-  << "'>"
+  << "<th class='tableHeaderSummarySlTwoDefault'>"
+  <<"Centralizer dimension</th>"
+  << "<th class='tableHeaderSummarySlTwoDefault'>"
+  << "Type of semisimple part of centralizer, if known</th>"
+  << "<th class='tableHeaderSummarySlTwoDefault'>"
+      <<"The square of the length of the weight dual to h.</th>"
+  << "<th class='tableHeaderSummarySlTwoDefault'>"
+  <<"Dynkin index </th>"
+  << "<th class='tableHeaderSummarySlTwoDefault'>"
+      <<"Minimal containing regular semisimple SAs</th>"
+  << "<th class='tableHeaderSummarySlTwoDefault'>"
   << "<a href='#idMinimalContainingRegularSA'>"
   << "Containing regular semisimple SAs in "
   << "which the sl(2) has no centralizer</a>"
   << "</th></tr>";
-  std::string borderStyle = "border-top: 1px solid black;";
+  FormatExpressions formatCharacter;
+  formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
   for (int i = 0; i < this->allSubalgebras.size; i ++) {
     const SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras[i];
     out
     << "<tr>"
-    << "<td style='padding-right:20px; "
-    << floatColumn
-    << " "
-    << borderStyle
-    << "'>"
+    << "<td class='tableSummarySlTwoType'>"
     << "<a href='#sl2index"
     << i
     << "'>\\(A^{"
@@ -1131,10 +1103,10 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     << "}_1"
     << "\\)</a>"
     << "</td>";
-    out << "<td style='" << borderStyle << "'>";
+    out << "<td class='tableSummarySlTwoDefault'>";
     out << "\\(" << currentSubalgebra.hCharacteristic.toString() << "\\)";
     out << "</td>";
-    out << "<td style='white-space: nowrap; " << borderStyle << "'>";
+    out << "<td class='tableSummarySlTwoDefault' style='white-space: nowrap;'>";
     out << currentSubalgebra.hElement.getCartanPart().toString();
     if (
       !this->getOwnerWeyl().isDominantWeight(
@@ -1147,9 +1119,8 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
       << "This shouldn't happen: "
       << "this is either a programming or mathematical error. </b>";
     }
-    out << "</td><td style='padding-left:20px; " << borderStyle << "'>";
-    FormatExpressions formatCharacter;
-    formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
+    out << "</td><td class='tableSummarySlTwoDefault' style='padding-left:20px;'>";
+
     out
     << HtmlRoutines::getMathNoDisplay((
         currentSubalgebra.moduleDecompositionAmbientSubalgebra.toString(
@@ -1160,34 +1131,30 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     << "\n<br>\n";
     out << "</td>";
     out
-    << "<td style='"
-    << borderStyle
-    << "'>"
+    << "<td class='tableSummarySlTwoDefault'>"
     << currentSubalgebra.dimensionCentralizer
     << "</td>";
     if (currentSubalgebra.centralizerComputer.flagTypeComputed) {
       out
-      << "<td style='"
-      << borderStyle
-      << "'> "
+      << "<td class='tableSummarySlTwoDefault'> "
       << HtmlRoutines::getMathNoDisplay(
         currentSubalgebra.centralizerComputer.typeIfKnown.toString()
       )
       << "</td>";
     } else {
-      out << "<td style='" << borderStyle << "'> not computed</td>";
+      out << "<td class='tableSummarySlTwoDefault'> not computed</td>";
     }
-    out << "<td style='" << borderStyle << "'>";
+    out << "<td class='tableSummarySlTwoDefault'>";
     out << currentSubalgebra.lengthHSquared;
-    out << "</td>" << "<td style='" << borderStyle << "'>";
+    out << "</td>" << "<td class='tableSummarySlTwoDefault'>";
     out << currentSubalgebra.getDynkinIndex();
-    out << "</td>" << "<td style='" << borderStyle << "'>";
+    out << "</td>" << "<td class='tableSummarySlTwoDefault'>";
     currentSubalgebra.checkIndicesMinimalContainingRootSubalgebras();
     out
     << currentSubalgebra.toStringMinimalContainingRootSubalgebras(
       displayPathAlgebra
     );
-    out << "</td>" << "<td style='" << borderStyle << "'>";
+    out << "</td>" << "<td class='tableSummarySlTwoDefault'>";
     out
     << currentSubalgebra.toStringContainingRootSubalgebras(
       displayPathAlgebra

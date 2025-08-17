@@ -36,7 +36,7 @@ table.tableNone {
   border: none;
 }
 
-table.tableNone td{
+table.tableNone td {
   border: none;
 }
 
@@ -48,13 +48,13 @@ span.fElement {
   color: blue;
 }
 
-div.divSubalgebraInformation{
+div.divSubalgebraInformation {
   position: absolute;
   width: 10%;
   right: 0;
 }
 
-div.divPanelSemisimpleLieAlgebraStructure{
+div.divPanelSemisimpleLieAlgebraStructure {
   position: fixed;
   width: 10%;
   right: 0;
@@ -64,7 +64,7 @@ div.divPanelSemisimpleLieAlgebraStructure{
 }
 
 div.divSemisimpleLieAlgebraStructureMainPage {
-  width:90%;
+  width: 90%;
 }
 
 h1 {
@@ -73,4 +73,43 @@ h1 {
 
 body {
   overflow: auto;
+}
+
+
+div.containerTableSummarySlTwo {
+  max-height: 80vh;
+  max-width: 99%;
+  overflow: auto;
+}
+
+table.tableSummarySlTwo {
+  border-collapse: collapse;
+}
+
+th.tableHeaderSummarySlTwoType {
+  position: sticky;
+  left: 0;
+  top: 0;
+  background-color: #fafafa;
+  z-index: 3;
+}
+
+th.tableHeaderSummarySlTwoDefault {
+  position: sticky;
+  top: 0;
+  background-color: #fafafa;
+  z-index: 2;
+}
+
+td.tableSummarySlTwoType {
+  padding-right: 20px;
+  position: sticky;
+  left: 0;
+  background-color: #fafafa;
+  z-index: 1;
+  border-top: 1px solid black;
+}
+
+td.tableSummarySlTwoDefault {
+  border-top: 1px solid black;
 }

@@ -1251,6 +1251,35 @@ bool SemisimpleLieAlgebra::hasImplementedCartanInvolution(
   whichInvolution->computeFromDiagram(voganDiagram, *this, commentsOnFailure);
 }
 
+Rational SemisimpleLieAlgebra::killingSquareOfDualOfAmbientLongRoot() {
+  if (!this->cachedKillingSquareOfDualOfAmbientLongRoot.isZeroPointer()) {
+    return this->cachedKillingSquareOfDualOfAmbientLongRoot.getElementConst();
+  }
+  Rational & result =
+  this->cachedKillingSquareOfDualOfAmbientLongRoot.getElement();
+  ElementSemisimpleLieAlgebra<Rational> longRootedElementCartan;
+  int indexLongRoot = this->longRootIndex();
+  if (indexLongRoot < 0) {
+    // The starting semisimple Lie algebra was not simple, so
+    // can't unambiguously determine long root.
+    result = 0;
+    return result;
+  }
+  Vector<Rational> longRoot;
+  longRoot.makeEi(this->getRank(), indexLongRoot);
+  longRootedElementCartan.makeCartanGeneratorHi(indexLongRoot, *this);
+  // Recale the long rooted element so it act by multiplication by 2 on
+  // its root space.
+  longRootedElementCartan *= 2 /
+  longRoot.scalarProduct(longRoot, this->weylGroup.cartanSymmetric);
+  Matrix<Rational> longRootAdjointAction;
+  this->getAdjoint(longRootAdjointAction, longRootedElementCartan);
+  Matrix<Rational> longRootAdjointActionSquared = longRootAdjointAction;
+  longRootAdjointActionSquared.multiplyOnTheLeft(longRootAdjointAction);
+  result = longRootAdjointActionSquared.trace();
+  return result;
+}
+
 bool SemisimpleLieAlgebra::isInTheWeightSupport(
   Vector<Rational>& weight, Vector<Rational>& highestWeight
 ) {

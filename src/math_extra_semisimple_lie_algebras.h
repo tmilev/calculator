@@ -255,9 +255,17 @@ public:
 
 class SemisimpleLieAlgebra {
 private:
+  // Semisimple Lie algebras can't be moved once created.
+  // Reason: the object is complicated, with lots of
+  // compute-on-demand large structures and
+  // too many other objects have pointers to it.
+  // Therefore the equals operator for the semisimple Lie algebra
+  // is private and has no implementation to prevent
+  // accidental copying of the object.
   void operator=(const SemisimpleLieAlgebra& other);
-  // <-semisimple Lie algebra can't be moved once created.
-  // <-Too many objects have pointers to it.
+  // The killing form square of the dual to the ambient long root.
+  // Computed on demand, access through the similarly named function.
+  MemorySaving<Rational> cachedKillingSquareOfDualOfAmbientLongRoot;
 public:
   WeylGroupData weylGroup;
   // We fix the usual linear space basis for our Lie algebra.
@@ -649,6 +657,11 @@ public:
   bool hasImplementedCartanInvolutionMaximallyCompactCase(
     LinearMapSemisimpleLieAlgebra<Coefficient>* whichInvolution
   );
+  // If the subalgebra is simple, computes or fetches from cache
+  // the killing form square of the dual of the long root.
+  // If the subalgebra is not simple, the notion of "long root"
+  // is regarded as ill-defined and the function returns 0.
+  Rational killingSquareOfDualOfAmbientLongRoot();
 };
 
 template <class Coefficient>

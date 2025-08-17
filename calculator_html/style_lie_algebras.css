@@ -103,13 +103,16 @@ th.tableHeaderSummarySlTwoDefault {
 
 td.tableSummarySlTwoType {
   padding-right: 20px;
+  padding-top: 5px;
   position: sticky;
   left: 0;
   background-color: #fafafa;
   z-index: 1;
   border-top: 1px solid black;
+  font-size: larger;
 }
 
 td.tableSummarySlTwoDefault {
   border-top: 1px solid black;
+  font-size: larger;
 }

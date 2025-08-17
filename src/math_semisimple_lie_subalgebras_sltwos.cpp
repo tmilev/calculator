@@ -1326,14 +1326,13 @@ std::string CentralizerComputer::toString() const {
   out
   << "\n<br>\nSimple basis of Cartan of centralizer ("
   << this->simpleDualsOfRootSpaces.size
-  << " total): "
-  << this->simpleDualsOfRootSpaces.toStringCommaDelimited();
+  << " total):<br>"
+  << this->simpleDualsOfRootSpaces.toStringWithSeparator("\n<br>\n");
   out
   << "\n<br>\nLinear space basis of intersection "
-  << "of centralizer and ambient Cartan "
-  << "["
-  << this->simpleDualsOfRootSpaces.toStringCommaDelimited()
-  << "]";
+  << "of centralizer and ambient Cartan:<br>\n"
+  << this->simpleDualsOfRootSpaces.toStringWithSeparator("\n<br>\n")
+;
   out
   << "\n<br>\nElements in Cartan dual to root system: "
   << this->dualRootsAlgebraic.toStringCommaDelimited();
@@ -1415,6 +1414,75 @@ bool CentralizerComputer::intersectAmbientCartanWithCentralizer() {
   return true;
 }
 
+bool CentralizerComputer::computeRootSpaces(){
+  STACK_TRACE("CentralizerComputer::computeRootSpaces");
+  HashedList<AlgebraicNumber> processedEigenValues;
+  processedEigenValues.addOnTop(this->algebraicClosureRationals->zero());
+  // Find all non-zero eigenspaces.
+  for (
+      const AlgebraicNumber& eigenValue :
+      this->semisimpleElementAdjointEigenvalueFinder.
+      eigenValuesWithoutMultiplicity
+      ) {
+    AlgebraicNumber minusEigenValue = eigenValue;
+    minusEigenValue.negate();
+    if (processedEigenValues.contains(minusEigenValue)) {
+      // The negative of this eigenvalue was already processed.
+      continue;
+    }
+    processedEigenValues.addOnTopNoRepetition(eigenValue);
+    if (!this->computeRootSpaceForNonZeroEigenvalue(eigenValue)){
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CentralizerComputer::computeRootSpaceForNonZeroEigenvalue(const AlgebraicNumber& eigenvalue){
+  STACK_TRACE("CentralizerComputer::computeRootSpaceForNonZeroEigenvalue");
+  Vectors<AlgebraicNumber> rootSpace;
+  Vectors<AlgebraicNumber> negativeRootSpace;
+  this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenValue(
+      eigenvalue, rootSpace
+      );
+  if (rootSpace.size != 1) {
+    // We have an eigenvalue with multiplicity more than one.
+    // The semisimple element we started with is not generic enough to split
+    // the weight spaces.
+    return false;
+  }
+  AlgebraicNumber minusEigenvalue=eigenvalue;
+  minusEigenvalue.negate();
+  this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenValue(
+      minusEigenvalue, negativeRootSpace
+      );
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> e;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> f;
+  this->getCentralizerElementFromCoordinates(rootSpace[0], e);
+  this->getCentralizerElementFromCoordinates(negativeRootSpace[0], f);
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> h;
+  e.lieBracketOnTheRight(f, h);
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> proportionalToE;
+  h.lieBracketOnTheRight(e, proportionalToE);
+  AlgebraicNumber coefficientOrProportionality;
+  bool mustBeTrue =
+      proportionalToE.isProportionalTo(e, coefficientOrProportionality);
+  if (!mustBeTrue) {
+    global.fatal
+        << "Corrupt h element: "
+        << h.toStringPretty()
+        << global.fatal;
+  }
+  h *= coefficientOrProportionality * 2;
+  CartanElementCandidate hWithAction;
+  this->makeCartanCandidate(h, e, f, hWithAction);
+  this->dualsOfRootSpaces.addOnTop(hWithAction);
+  h *= - 1;
+  this->makeCartanCandidate(h, f, e, hWithAction);
+  this->dualsOfRootSpaces.addOnTop(hWithAction);
+  return true;
+}
+
 bool CentralizerComputer::trySemisimpleElement(
   ElementSemisimpleLieAlgebra<Rational>& candidate
 ) {
@@ -1432,61 +1500,10 @@ bool CentralizerComputer::trySemisimpleElement(
   ) {
     return false;
   }
-  HashedList<AlgebraicNumber> processedEigenValues;
-  processedEigenValues.addOnTop(this->algebraicClosureRationals->zero());
-  // Find all non-zero eigenspaces.
-  for (
-    const AlgebraicNumber& eigenValue :
-    this->semisimpleElementAdjointEigenvalueFinder.
-    eigenValuesWithoutMultiplicity
-  ) {
-    AlgebraicNumber minusEigenValue = eigenValue;
-    minusEigenValue.negate();
-    if (processedEigenValues.contains(minusEigenValue)) {
-      // The negative of this eigenvalue was already processed.
-      continue;
-    }
-    processedEigenValues.addOnTopNoRepetition(eigenValue);
-    Vectors<AlgebraicNumber> rootSpace;
-    Vectors<AlgebraicNumber> negativeRootSpace;
-    this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenValue(
-      eigenValue, rootSpace
-    );
-    if (rootSpace.size != 1) {
-      // We have an eigenvalue with multiplicity more than one.
-      // The semisimple element we started with is not generic enough to split
-      // the weight spaces.
-      return false;
-    }
-    this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenValue(
-      minusEigenValue, negativeRootSpace
-    );
-    ElementSemisimpleLieAlgebra<AlgebraicNumber> e;
-    ElementSemisimpleLieAlgebra<AlgebraicNumber> f;
-    this->getCentralizerElementFromCoordinates(rootSpace[0], e);
-    this->getCentralizerElementFromCoordinates(negativeRootSpace[0], f);
-    ElementSemisimpleLieAlgebra<AlgebraicNumber> h;
-    e.lieBracketOnTheRight(f, h);
-    ElementSemisimpleLieAlgebra<AlgebraicNumber> proportionalToE;
-    h.lieBracketOnTheRight(e, proportionalToE);
-    AlgebraicNumber coefficientOrProportionality;
-    bool mustBeTrue =
-    proportionalToE.isProportionalTo(e, coefficientOrProportionality);
-    if (!mustBeTrue) {
-      global.fatal
-      << "Corrupt h element: "
-      << h.toStringPretty()
-      << global.fatal;
-    }
-    h *= coefficientOrProportionality * 2;
-    CartanElementCandidate hWithAction;
-    this->makeCartanCandidate(h, e, f, hWithAction);
-    this->dualsOfRootSpaces.addOnTop(hWithAction);
-    h *= - 1;
-    this->makeCartanCandidate(h, f, e, hWithAction);
-    this->dualsOfRootSpaces.addOnTop(hWithAction);
+  if (!this->computeRootSpaces()){
+    return false;
   }
-  if (!this->computeSimpleBasis()) {
+  if (!this->computeTypes()) {
     return false;
   }
   return true;
@@ -1531,8 +1548,63 @@ void CentralizerComputer::makeCartanCandidate(
   output.f = inputF;
 }
 
-bool CentralizerComputer::computeSimpleBasis() {
-  STACK_TRACE("CentralizerComputer::computeSimpleBasis");
+void CentralizerComputer::mergeReductiveComponents(List<int>& indicesOfComponentsToBeMergedSorted){
+  STACK_TRACE("CentralizerComputer::mergeReductiveComponents");
+  if (indicesOfComponentsToBeMergedSorted.size==0){
+    // Nothing to merge.
+    return;
+  }
+  int smallestIndex =indicesOfComponentsToBeMergedSorted[0];
+  for (int i = 1; i < indicesOfComponentsToBeMergedSorted.size; i ++){
+    const ReductiveSubalgebraComponent& toBeDissolved = this->reductiveComponents[indicesOfComponentsToBeMergedSorted[i]];
+    // The present loop modifies the reductiveComponents array,
+    // so to reduce the danger of use-after-free,
+    // it is safest to take a reference of the subalgebra element
+    // on each run.
+    ReductiveSubalgebraComponent & reductiveSubalgebraComponent=
+        this->reductiveComponents[smallestIndex];
+    for (const CartanElementCandidate& element: toBeDissolved.cartanElements){
+      reductiveSubalgebraComponent.cartanElements.addOnTop(element);
+
+    }
+    // We are modifying the reductive components array which
+    // we took a reference from earlier in the loop.
+    // Since we took the reference recently, so
+    // there is no danger of use-after-free.
+    this->reductiveComponents.removeIndexSwapWithLast(i);
+  }
+}
+
+void CentralizerComputer::computeReductiveComponentsBases(){
+  STACK_TRACE("CentralizerComputer::computeReductiveComponentsBases");
+  for (const CartanElementCandidate & candidate : this->dualsOfRootSpaces){
+this->mergeOneRootSpaceCandidate(candidate);
+  }
+}
+
+void CentralizerComputer::mergeOneRootSpaceCandidate(const CartanElementCandidate& candidate){
+  List<int> indicesLinkedToCandidate ;
+  for (int i = 0; i < this->reductiveComponents.size ; i++) {
+    if (this->reductiveComponents[i].isLinkedTo(candidate)){
+      indicesLinkedToCandidate.addOnTop(i);
+    }
+  }
+  this->mergeReductiveComponents(indicesLinkedToCandidate);
+  if (indicesLinkedToCandidate.size ==0){
+    ReductiveSubalgebraComponent reductiveComponent;
+    reductiveComponent.cartanElements.addOnTop(candidate);
+    this->reductiveComponents.addOnTop(reductiveComponent);
+    return;
+  }
+  ReductiveSubalgebraComponent &container = this->reductiveComponents[indicesLinkedToCandidate[0]];
+  container.cartanElements.addOnTop(candidate);
+
+}
+
+bool CentralizerComputer::computeTypes() {
+  STACK_TRACE("CentralizerComputer::computeTypes");
+this->computeReductiveComponentsBases();
+
   this->postiveDualsOfRootSpaces.clear();
   this->postiveDualsOfRootSpaces.addListOnTop(this->dualsOfRootSpaces);
   AlgebraicNumber scalarProduct;
@@ -1940,4 +2012,15 @@ std::string CartanElementCandidate::toString() const {
   << this->adjointAction.toStringLatex()
   << "\\)";
   return out.str();
+}
+
+bool ReductiveSubalgebraComponent::isLinkedTo(const CartanElementCandidate& candidate)const{
+  STACK_TRACE("ReductiveSubalgebraComponent::isLinkedTo");
+  for (const CartanElementCandidate& myRootSpace: this->cartanElements){
+
+    if (! myRootSpace.scalarProductKilling(candidate).isEqualToZero()){
+      return true;
+    }
+  }
+  return false;
 }

@@ -100,7 +100,7 @@ public:
   static bool lieAlgebraRhoWeight(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool macdonaldPolys(
+  static bool macdonaldPolynomials(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool weylGroupLoadOrComputeCharTable(
@@ -118,10 +118,10 @@ public:
   static bool tensorWeylReps(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool tensorAndDecomposeWeylReps(
+  static bool tensorAndDecomposeWeylRepresentations(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool makeVirtualWeylRep(
+  static bool makeVirtualWeylRepresentation(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool isOuterAutoWeylGroup(

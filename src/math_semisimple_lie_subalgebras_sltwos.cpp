@@ -314,6 +314,7 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
     {this->eElement, this->hElement, this->fElement}
   );
   this->centralizerComputer.initialize(this->owner, this->algebraicClosure);
+  this->centralizerComputer.label = this->toStringDynkinType();
   if (!this->flagTryToComputeCentralizerFully) {
     // Guard until the centralizer computation algorithm
     // is properly implemented.
@@ -1403,8 +1404,7 @@ bool CentralizerComputer::compute() {
   ) {
     semisimpleCandidate += summand;
   }
-  this->trySemisimpleElement(semisimpleCandidate);
-  return false;
+  return this->trySemisimpleElement(semisimpleCandidate);
 }
 
 void CentralizerComputer::getCentralizerElementFromCoordinates(
@@ -1563,10 +1563,10 @@ bool CentralizerComputer::computeSimpleBasis() {
     this->postiveDualsOfRootSpaces[i].scalarProductKilling(
       this->semisimpleElement
     );
-    if (!scalarProduct.isRational(&scalarProductRational)) {
+    if (!scalarProduct.isRealGuaranteed(nullptr)) {
       return false;
     }
-    if (scalarProductRational < 0) {
+    if (scalarProduct.isNegativeRealGuaranteed()) {
       // Discard the elements of the cartan whose scalar product
       // with the defining semisimple element is negative.
       this->postiveDualsOfRootSpaces.removeIndexSwapWithLast(i);

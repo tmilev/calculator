@@ -94,13 +94,11 @@ public:
     return false;
   }
   bool isRational(Rational* whichRational = nullptr) const;
-  bool isNegative() const {
-    Rational rationalValue;
-    if (this->isRational(&rationalValue)) {
-      return rationalValue.isNegative();
-    }
-    return false;
-  }
+  // Whether the algebraic number is guaranteed to be real and negative.
+  // When it returns true, the number is known to be real and negative.
+  // When it returns false, the number may or may not be real.
+  bool isNegativeRealGuaranteed() const;
+  bool isRealGuaranteed(double* outputApproximateRealValue) const;
   bool isEqualToZero() const;
   bool isEqualToOne() const {
     return (*this) == 1;
@@ -220,6 +218,7 @@ public:
   Vectors<Rational> generatingElementPowersBasis;
   bool flagIsQuadraticRadicalExtensionRationals;
   HashedList<LargeInteger> quadraticRadicals;
+  List<LargeInteger> quadraticRadicalsCorrespondingToBasisElements;
   List<std::string> displayNamesBasisElements;
   void injectOldBases(const MatrixTensor<Rational>* injectionNullForIdentity);
   void appendAdditiveEiBasis();
@@ -239,7 +238,7 @@ public:
     AlgebraicClosureRationals& previousCopy,
     AlgebraicNumber* outputImageGenerator
   );
-  void computeDisplayStringsFromRadicals();
+  void computeQuadraticRadicals();
   bool getRadicalSelectionFromIndex(int inputIndex, Selection& selection);
   int getDimensionOverRationals() const;
   static int getIndexFromRadicalSelection(const Selection& selection);

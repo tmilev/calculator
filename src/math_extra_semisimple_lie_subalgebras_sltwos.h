@@ -52,6 +52,7 @@ class CentralizerComputer {
   Rational computeSimpleRootScalarProductCentralizerKilling(int i, int j)
   const;
 public:
+  std::string label;
   List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerBasis;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >
@@ -358,6 +359,7 @@ public:
   ) const;
   std::string toStringTripleArbitrary(FormatExpressions* format) const;
   std::string toStringTripleArbitraryMatrix() const;
+  std::string toStringDynkinType() const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringKostantSekiguchiTripleInternals(
     FormatExpressions* format

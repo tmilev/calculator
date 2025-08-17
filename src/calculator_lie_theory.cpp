@@ -5673,7 +5673,7 @@ bool CalculatorLieTheory::getSymmetricCartan(
   return output.assignValue(calculator, out.str());
 }
 
-bool CalculatorLieTheory::drawWeightSupportWithMults(
+bool CalculatorLieTheory::drawWeightSupportWithMultiplicities(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   if (!input.isListNElements(3)) {

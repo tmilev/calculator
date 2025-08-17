@@ -304,11 +304,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "PrintMacdonaldPolys",
-    CalculatorFunctionsWeylGroup::macdonaldPolys,
+    CalculatorFunctionsWeylGroup::macdonaldPolynomials,
     "",
     "Prints macdonald polynomials from a semisimple type. ",
     "PrintMacdonaldPolys{}(B_3)",
-    "CalculatorFunctionsWeylGroup::macdonaldPolys",
+    "CalculatorFunctionsWeylGroup::macdonaldPolynomials",
     "PrintMacdonaldPolys",
     standardOptions
   );
@@ -604,7 +604,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "DrawWeightSupportWithMults",
-    CalculatorLieTheory::drawWeightSupportWithMults,
+    CalculatorLieTheory::drawWeightSupportWithMultiplicities,
     "",
     "Draws the weight support of an irreducible "
     "finite-dimensional highest weight module. "
@@ -1602,7 +1602,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationHandler(
     "MakeVirtualWeylGroupRepresentation",
-    CalculatorFunctionsWeylGroup::makeVirtualWeylRep,
+    CalculatorFunctionsWeylGroup::makeVirtualWeylRepresentation,
     "",
     "Convert a representation into virtual one.",
     "MakeVirtualWeylGroupRepresentation{}(WeylGroupNaturalRep{}(B_3))",
@@ -1818,7 +1818,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
   );
   this->addOperationBinaryInnerHandlerWithTypes(
     "*",
-    CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps,
+    CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylRepresentations,
     this->opWeylGroupVirtualRep(),
     this->opWeylGroupVirtualRep(),
     "Tensor and decompose two virtual Weyl group representations. ",
@@ -1826,7 +1826,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "V = MakeVirtualWeylGroupRepresentation{}W;\n"
     "W\\otimes W;\n"
     "V * V",
-    "CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps",
+    "CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylRepresentations",
     "TensorAndDecomposeWeylGroupRepresentations",
     experimentalNoTest
   );
@@ -1839,7 +1839,7 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "g_{{i}}= ChevalleyGenerator{}(F_1, i); "
     "h_{{i}}= CartanGenerator{}(F_1, i);\n"
     "[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]",
-    "CalculatorFunctionsBinaryOps::multiplyAnyByUE",
+    "CalculatorFunctionsBinaryOps::multiplyAnyByElementUniversalEnveloping",
     "MultiplyRationalByUE",
     standardOptions
   );
@@ -1866,11 +1866,14 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "tensor product of generalized Verma modules. "
     "Not fully tested and documented at the moment. "
     "Will get more documented in the future. ",
-    "X = G_2;\ng_{{i}}= ChevalleyGenerator{}(X,i);\n"
+    "X = G_2;\n"
+    "g_{{i}}= ChevalleyGenerator{}(X,i);\n"
     "h_{{i}}= CartanGenerator{}(X, i);\n"
     "v=HeighestWeightVector{}(G_2, (1,0),(0,0));\n"
-    "2/5 v;\n(3/4 v)\\otimes v;\n"
-    "3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)",
+    "2/5 v;\n"
+    "(3/4 v)\\otimes v;\n"
+    "3/4 (v\\otimes v);\n"
+    "(3/4 v)\\otimes v-3/4 (v\\otimes v)",
     "CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor",
     "MultiplyAnyByElementTensor",
     standardOptions
@@ -1924,8 +1927,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     "Will get more documented in the future. ",
     "X = G_2;\ng_{{i}}= ChevalleyGenerator{}(X,i);\n"
     "h_{{i}}= CartanGenerator{}(X, i);\n"
-    "z= Polynomial{}y;\nv=HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
-    "h_1 v; \nh_2 v;\n g_1 g_{- 1} v ",
+    "z= Polynomial{}y;\n"
+    "v=HeighestWeightVector{}(G_2, (z,1),(1,0));\n"
+    "h_1 v; \n"
+    "h_2 v;\n "
+    "g_1 g_{- 1} v ",
     "CalculatorFunctionsBinaryOps::multiplyAnyByElementTensor",
     "MultiplyElementUniversalEnvelopingRational"
     "FunctionByElementTensorGeneralizedVermaModule",

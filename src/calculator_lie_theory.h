@@ -257,7 +257,7 @@ public:
   static bool drawRootSystem(
     Calculator& calculator, const Expression& input, Expression& output
   );
-  static bool drawWeightSupportWithMults(
+  static bool drawWeightSupportWithMultiplicities(
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool drawWeightSupport(

@@ -121,11 +121,14 @@ void AlgebraicClosureRationals::getMultiplicativeOperatorFromRadicalSelection(
   } while (vectorActedOnSelection.incrementReturnFalseIfPastLast());
 }
 
-void AlgebraicClosureRationals::computeDisplayStringsFromRadicals() {
-  STACK_TRACE("AlgebraicClosureRationals::computeDisplayStringsFromRadicals");
+void AlgebraicClosureRationals::computeQuadraticRadicals() {
+  STACK_TRACE("AlgebraicClosureRationals::computeQuadraticRadicals");
   if (!this->flagIsQuadraticRadicalExtensionRationals) {
     return;
   }
+  this->quadraticRadicalsCorrespondingToBasisElements.setSize(
+    this->latestBasis.size
+  );
   this->displayNamesBasisElements.setSize(this->latestBasis.size);
   Selection selection;
   selection.initialize(this->quadraticRadicals.size);
@@ -138,10 +141,9 @@ void AlgebraicClosureRationals::computeDisplayStringsFromRadicals() {
     if (radical != 1) {
       out << "\\sqrt{" << radical.toString() << "}";
     }
-    this->displayNamesBasisElements[
-      this->getIndexFromRadicalSelection(selection)
-    ] =
-    out.str();
+    int index = this->getIndexFromRadicalSelection(selection);
+    this->quadraticRadicalsCorrespondingToBasisElements[index] = radical;
+    this->displayNamesBasisElements[index] = out.str();
   } while (selection.incrementReturnFalseIfPastLast());
 }
 
@@ -284,7 +286,7 @@ bool AlgebraicClosureRationals::mergeRadicals(
   } while (largerFieldSelection.incrementReturnFalseIfPastLast());
   this->injectOldBases(&currentInjection);
   this->appendAdditiveEiBasis();
-  this->computeDisplayStringsFromRadicals();
+  this->computeQuadraticRadicals();
   return true;
 }
 
@@ -1432,60 +1434,56 @@ void AlgebraicNumber::expressViaLatestBasis() {
   }
   this->owner->getAdditionTo(*this, this->element);
   this->basisIndex = this->owner->basisInjections.size - 1;
+  if (!this->isExpressedViaLatestBasis()) {
+    global.fatal
+    << "Number should be expressed by the latest basis. "
+    << global.fatal;
+  }
 }
 
 bool AlgebraicNumber::evaluatesToDouble(double* outputWhichDouble) const {
   STACK_TRACE("AlgebraicNumber::evaluatesToDouble");
-  if (!this->isExpressedViaLatestBasis()) {
-    AlgebraicNumber thisCopy = *this;
-    thisCopy.expressViaLatestBasis();
-    return thisCopy.evaluatesToDouble(outputWhichDouble);
-  }
-  Rational ratValue;
-  if (this->isRational(&ratValue)) {
-    if (outputWhichDouble != nullptr) {
-      *outputWhichDouble = ratValue.getDoubleValue();
+  return this->isRealGuaranteed(outputWhichDouble);
+}
+
+bool AlgebraicNumber::isRealGuaranteed(double* outputApproximateRealValue)
+const {
+  STACK_TRACE("AlgebraicNumber::isRealGuaranteed");
+  Rational rationalValue;
+  if (this->isRational(&rationalValue)) {
+    if (outputApproximateRealValue != nullptr) {
+      *outputApproximateRealValue = rationalValue.getDoubleValue();
     }
     return true;
   }
   if (this->owner == nullptr) {
     global.fatal
-    << "Owner is zero but algebraic number is not rational. "
+    << "Non-rational algebraic number is "
+    << "not allowed to not have Algebraic closure owner."
     << global.fatal;
   }
   if (!this->owner->flagIsQuadraticRadicalExtensionRationals) {
     return false;
   }
-  if (outputWhichDouble != nullptr) {
-    *outputWhichDouble = 0;
+  if (!this->isExpressedViaLatestBasis()) {
+    AlgebraicNumber number = *this;
+    number.expressViaLatestBasis();
+    return number.isRealGuaranteed(outputApproximateRealValue);
   }
-  Selection currentRadicalSelection;
-  double currentMultiplicand = 0;
+  if (outputApproximateRealValue != nullptr) {
+    *outputApproximateRealValue = 0;
+  }
   for (int i = 0; i < this->element.size(); i ++) {
-    this->owner->getRadicalSelectionFromIndex(
-      this->element[i].monomialIndex, currentRadicalSelection
-    );
-    if (outputWhichDouble != nullptr) {
-      currentMultiplicand = this->element.coefficients[i].getDoubleValue();
+    int index = this->element.monomials[i].monomialIndex;
+    const LargeInteger& radical =
+    this->owner->quadraticRadicalsCorrespondingToBasisElements[index];
+    if (radical < 0) {
+      return false;
     }
-    for (int j = 0; j < currentRadicalSelection.cardinalitySelection; j ++) {
-      if (
-        this->owner->quadraticRadicals[currentRadicalSelection.elements[j]] < 0
-      ) {
-        return false;
-      } else {
-        if (outputWhichDouble != nullptr) {
-          currentMultiplicand *=
-          FloatingPoint::sqrtFloating(
-            this->owner->quadraticRadicals[
-              currentRadicalSelection.elements[j]
-            ].getDoubleValue()
-          );
-        }
-      }
-    }
-    if (outputWhichDouble != nullptr) {
-      *outputWhichDouble += currentMultiplicand;
+    if (outputApproximateRealValue != nullptr) {
+      *outputApproximateRealValue +=
+      this->element.coefficients[i].getDoubleValue() *
+      FloatingPoint::sqrtFloating(radical.getDoubleValue());
     }
   }
   return true;
@@ -1753,6 +1751,15 @@ const {
     return this->toStringQuadraticRadical(&currentFormat);
   }
   return this->toStringFull(&currentFormat);
+}
+
+bool AlgebraicNumber::isNegativeRealGuaranteed() const {
+  STACK_TRACE("AlgebraicNumber::isNegativeRealGuaranteed");
+  double approximateValue = 0;
+  if (!this->isRealGuaranteed(&approximateValue)) {
+    return false;
+  }
+  return approximateValue < 0;
 }
 
 bool AlgebraicNumber::isRational(Rational* whichRational) const {

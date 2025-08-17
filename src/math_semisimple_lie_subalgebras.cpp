@@ -7641,15 +7641,19 @@ std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleStandardRealization(
   return out.str();
 }
 
+std::string SlTwoSubalgebra::toStringDynkinType() const {
+  DynkinType dynkinType;
+  this->computeDynkinTypeEmbedded(dynkinType);
+  return dynkinType.toStringPretty();
+}
+
 std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   STACK_TRACE("SlTwoSubalgebra::toString");
   if (this->container == nullptr) {
     return "sl(2) subalgebra not initialized.";
   }
   std::stringstream out;
-  DynkinType dynkinType;
-  this->computeDynkinTypeEmbedded(dynkinType);
-  out << "\\(" << dynkinType.toString() << "\\)\n<br>\n";
+  out << "\\(" << this->toStringDynkinType() << "\\)\n<br>\n";
   out
   << "<a name='sl2index"
   << this->indexInContainer

@@ -1321,10 +1321,12 @@ bool CalculatorFunctionsWeylGroup::tensorWeylReps(
   return output.assignValue(calculator, leftRepresentation);
 }
 
-bool CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps(
+bool CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylRepresentations(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylReps");
+  STACK_TRACE(
+    "CalculatorFunctionsWeylGroup::tensorAndDecomposeWeylRepresentations"
+  );
   Expression tensorExpression;
   if (input.size() != 3) {
     return false;
@@ -2640,10 +2642,10 @@ void MonomialMacdonald::actOnMeSimpleReflection(
   }
 }
 
-bool CalculatorFunctionsWeylGroup::macdonaldPolys(
+bool CalculatorFunctionsWeylGroup::macdonaldPolynomials(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsWeylGroup::macdonaldPolys");
+  STACK_TRACE("CalculatorFunctionsWeylGroup::macdonaldPolynomials");
   // note that if input is list of 2 elements then input[0] is sequence atom,
   // and your two elements are in fact
   // input[1] and input[2];
@@ -2663,14 +2665,14 @@ bool CalculatorFunctionsWeylGroup::macdonaldPolys(
   MonomialMacdonald generator;
   HashedList<MonomialMacdonald> orbit;
   for (int i = 0; i < rootSubalgebras.subalgebras.size; i ++) {
-    RootSubalgebra& currentRootSA = rootSubalgebras.subalgebras[i];
+    RootSubalgebra& currentRootSubalgebra = rootSubalgebras.subalgebras[i];
     generator.makeFromRootSubsystem(
-      currentRootSA.positiveRootsReductiveSubalgebra, *algebra.content
+      currentRootSubalgebra.positiveRootsReductiveSubalgebra, *algebra.content
     );
     generator.generateMyOrbit(orbit);
     out
     << "<hr>Root subsystem type "
-    << currentRootSA.dynkinDiagram.toString();
+    << currentRootSubalgebra.dynkinDiagram.toString();
     out << ". Orbit has " << orbit.size << " element(s), here they are: ";
     for (int j = 0; j < orbit.size; j ++) {
       out << "<br>" << orbit[j].toString();
@@ -2960,7 +2962,7 @@ bool CalculatorFunctionsWeylGroup::hyperOctahedralGetOneRepresentation(
     calculator.objectContainer.hyperOctahedralGroups[index].
     makeHyperoctahedralGroup(partitionLeft.n + partitionRight.n);
   }
-  // <-may be broken if copying of groups doesn't work!!!!!!!!
+  // <-May be broken if copying of groups doesn't work as advertised.
   HyperoctahedralGroupData& HD =
   calculator.objectContainer.hyperOctahedralGroups[index];
   GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational> R;
@@ -3164,10 +3166,10 @@ void VirtualRepresentation<somegroup, Coefficient>::assignRepresentation(
   //  otherCopy.decomposeTodorsVersion(this->coefficientsIrreps, global);
 }
 
-bool CalculatorFunctionsWeylGroup::makeVirtualWeylRep(
+bool CalculatorFunctionsWeylGroup::makeVirtualWeylRepresentation(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsWeylGroup::makeVirtualWeylRep");
+  STACK_TRACE("CalculatorFunctionsWeylGroup::makeVirtualWeylRepresentation");
   if (
     input.isOfType<
       VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>

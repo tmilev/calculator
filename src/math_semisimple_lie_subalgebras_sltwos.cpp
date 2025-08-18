@@ -1944,6 +1944,9 @@ void CentralizerComputer::mergeOneRootSpaceCandidate(
     reductiveComponent.initialize(
       this->owner, this->algebraicClosureRationals, this->semisimpleElement
     );
+    std::stringstream out;
+    out << "Simple component of centralizer of: " << this->label;
+    reductiveComponent.label = out.str();
     reductiveComponent.dualsToRoots.addOnTop(candidate);
     this->simpleComponents.addOnTop(reductiveComponent);
     return;

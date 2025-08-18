@@ -1524,7 +1524,7 @@ bool AlgebraicNumber::evaluatesToComplex(
     this->owner->quadraticRadicalsCorrespondingToBasisElements[index];
     double magnitudeOfSquareRoot =
     this->element.coefficients[i].getDoubleValue() *
-    FloatingPoint::sqrtFloating(radical.getDoubleValue());
+    FloatingPoint::sqrtFloating(radical.value.getDoubleValue());
     if (radical > 0) {
       outputApproximateValue->realPart += magnitudeOfSquareRoot;
     } else {

@@ -77,6 +77,9 @@ public:
   // The shortest Cartan element corresponds to the longest root
   // of the root system.
   Rational killingSquareProductShortestDual;
+  // A label for this centralizer to be used in internal printouts
+  // to help us with debugging when the simpleType is not computed yet.
+  std::string label;
   void initialize(
     SemisimpleLieAlgebra* inputOwner,
     AlgebraicClosureRationals* inputAlgebraicClosure,

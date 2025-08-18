@@ -2179,12 +2179,21 @@ public:
     }
     return true;
   }
+  Coefficient magnitudeSquared() const {
+    return
+    this->realPart * this->realPart +
+    this->imaginaryPart * this->imaginaryPart;
+  }
   Complex() {}
   Complex(int other) {
     this->operator=(other);
   }
   Complex(double other) {
     this->operator=(other);
+  }
+  Complex(const Complex<Coefficient>& other) {
+    this->realPart = other.realPart;
+    this->imaginaryPart = other.imaginaryPart;
   }
 };
 

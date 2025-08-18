@@ -5,6 +5,7 @@
 #include "math_general.h"
 #include "math_modular_arithmetic.h"
 
+class Calculator;
 class AlgebraicClosureRationals;
 
 class AlgebraicNumber {
@@ -192,8 +193,19 @@ public:
   std::string toStringNonInjected(FormatExpressions* format = nullptr) const;
   class Test {
   public:
+    // Constructs an algebraic number from string.
+    // Owned by an instance of the Calculator.
+    static bool fromString(
+      const std::string& input, Calculator& inputOwner, AlgebraicNumber& output
+    );
+    // Same as fromString but will crash if the input
+    // cannot be parsed.
+    static AlgebraicNumber fromStringWithoutFailure(
+      const std::string& input, Calculator& inputOwner
+    );
     static bool all();
     static bool constantValues();
+    static bool evaluatesToComplex();
     static bool hashFunction();
   };
 };

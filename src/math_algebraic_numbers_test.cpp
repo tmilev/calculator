@@ -1,8 +1,10 @@
+#include "calculator_interface.h"
 #include "math_extra_algebraic_numbers.h"
 
 bool AlgebraicNumber::Test::all() {
   AlgebraicNumber::Test::constantValues();
   AlgebraicNumber::Test::hashFunction();
+  AlgebraicNumber::Test::evaluatesToComplex();
   return true;
 }
 
@@ -16,6 +18,104 @@ bool AlgebraicNumber::Test::constantValues() {
     global.fatal
     << "Algebraic number 0 has unexpected value. "
     << global.fatal;
+  }
+  return true;
+}
+
+struct AlgebraicNumberWithValue {
+  std::string algebraicNumber;
+  Complex<double> expectedValue;
+  AlgebraicNumberWithValue() {}
+  AlgebraicNumberWithValue(
+    const std::string& inputAlgebraicNumber,
+    double inputRealPart,
+    double inputImaginaryPart
+  ):
+  algebraicNumber(inputAlgebraicNumber) {
+    this->expectedValue.realPart = inputRealPart;
+    this->expectedValue.imaginaryPart = inputImaginaryPart;
+  }
+};
+
+bool AlgebraicNumber::Test::fromString(
+  const std::string& input, Calculator& inputOwner, AlgebraicNumber& output
+) {
+  STACK_TRACE("AlgebraicNumber::fromString");
+  inputOwner.evaluate(input);
+  Expression target = inputOwner.programExpression;
+  if (target.startsWith(inputOwner.opCommandSequence())) {
+    target = target[1];
+  }
+  WithContext<AlgebraicNumber> result;
+  if (!CalculatorConversions::convert(inputOwner, target, result)) {
+    return false;
+  }
+  output = result.content;
+  return true;
+}
+
+AlgebraicNumber AlgebraicNumber::Test::fromStringWithoutFailure(
+  const std::string& input, Calculator& inputOwner
+) {
+  STACK_TRACE("AlgebraicNumber::fromStringWithoutFailure");
+  AlgebraicNumber result;
+  bool mustBeTrue =
+  AlgebraicNumber::Test::fromString(input, inputOwner, result);
+  if (!mustBeTrue) {
+    global.fatal << "Attempt to create algebraic number failed for: " << input;
+  }
+  return result;
+}
+
+bool AlgebraicNumber::Test::evaluatesToComplex() {
+  List<AlgebraicNumberWithValue> examples = List<AlgebraicNumberWithValue>({
+      AlgebraicNumberWithValue("sqrt(-1)", 0, 1),
+      AlgebraicNumberWithValue(
+        "sqrt(-1)+sqrt(-2)+sqrt(-3)",
+        0,
+        1 + FloatingPoint::sqrtFloating(2) + FloatingPoint::sqrtFloating(3)
+      ),
+      AlgebraicNumberWithValue(
+        "1/(sqrt(-1)+sqrt(-2)+sqrt(-3))",
+        0,
+        - 1 / (
+          1 + FloatingPoint::sqrtFloating(2) + FloatingPoint::sqrtFloating(3)
+        )
+      ),
+    });
+  for (const AlgebraicNumberWithValue& example : examples) {
+    Calculator calculator;
+    calculator.initialize(Calculator::Mode::full);
+    AlgebraicClosureRationals algebraicClosure;
+    AlgebraicNumber number =
+    AlgebraicNumber::Test::fromStringWithoutFailure(
+      example.algebraicNumber, calculator
+    );
+    Complex<double> value;
+    bool mustBeTrue = number.evaluatesToComplex(&value);
+    if (!mustBeTrue) {
+      global.fatal
+      << "Failed to evaluate "
+      << number.toString()
+      << " ["
+      << example.algebraicNumber
+      << "] to complex number. "
+      << global.fatal;
+    }
+    Complex<double> mustBeZero = value;
+    mustBeZero -= example.expectedValue;
+    if (mustBeZero.magnitudeSquared() > 0.001) {
+      global.fatal
+      << "The value of "
+      << number.toString()
+      << " ["
+      << example.algebraicNumber
+      << "] is: "
+      << value.toString()
+      << ", expected: "
+      << example.expectedValue.toString()
+      << global.fatal;
+    }
   }
   return true;
 }

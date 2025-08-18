@@ -42,10 +42,6 @@ template <class ElementLeft, class ElementRight, class Coefficient>
 class TensorProductMonomial;
 
 List<bool> FileOperations::safeFileCharacters;
-// template < > int ListPointers<PartFraction>::MemoryAllocationIncrement =100;
-// ListPointers<PartFraction> PartFraction::GlobalCollectorPartFraction;
-// FacetPointers TheBigFacetOutput;
-// DrawingVariables TDV(200, 400);
 unsigned long long int Rational::totalLargeAdditions = 0;
 unsigned long long int Rational::totalLargeGreatestCommonDivisors = 0;
 unsigned long long int Rational::totalLargeMultiplications = 0;

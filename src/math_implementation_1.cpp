@@ -7,13 +7,13 @@
 #include "math_general.h"
 #include "math_vector_partition_functions.h"
 
-void SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators(
+void SemisimpleLieAlgebra::chevalleyGeneratorAsLieBracketsSimpleGenerators(
   int generatorIndex,
   List<int>& outputIndicesFormatAd0Ad1Ad2etc,
   Rational& outputMultiplyLieBracketsToGetGenerator
 ) {
   STACK_TRACE(
-    "SemisimpleLieAlgebra::getChevalleyGeneratorAsLieBracketsSimpleGenerators"
+    "SemisimpleLieAlgebra::chevalleyGeneratorAsLieBracketsSimpleGenerators"
   );
   outputIndicesFormatAd0Ad1Ad2etc.size = 0;
   if (this->isGeneratorFromCartan(generatorIndex)) {
@@ -914,9 +914,7 @@ bool ElementUniversalEnveloping<Coefficient>::convertToRationalCoefficient(
 }
 
 void BranchingData::initializePart1NoSubgroups() {
-  STACK_TRACE(
-    "BranchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups"
-  );
+  STACK_TRACE("BranchingData::initializePart1NoSubgroups");
   this->weylGroupFiniteDimensionalSmallAsSubgroupInLarge.ambientWeyl =
   &this->homomorphism.coDomainAlgebra().weylGroup;
   this->weylGroupFiniteDimensionalSmall.ambientWeyl =
@@ -1018,10 +1016,10 @@ void BranchingData::initializePart1NoSubgroups() {
     }
     if (!isGood) {
       global.fatal
-      <<
-      "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
-      <<
-      " is wrong. The question is, which is the more desirable case... The bad apple is element "
+      << "This is either a programming error, or "
+      << "Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
+      << " is wrong. The question is, which is the more desirable case..."
+      << " The bad apple is element "
       << this->nilradicalSmall[i].toString()
       << " of weight "
       << this->weightsNilradicalSmall[i].toString()

@@ -391,7 +391,7 @@ public:
     inputElementsToCentralize,
     List<ElementSemisimpleLieAlgebra<Coefficient> >& outputCentralizingElements
   );
-  void getChevalleyGeneratorAsLieBracketsSimpleGenerators(
+  void chevalleyGeneratorAsLieBracketsSimpleGenerators(
     int generatorIndex,
     List<int>& outputIndicesFormatAd0Ad1Ad2etc,
     Rational& outputMultiplyLieBracketsToGetGenerator

@@ -91,7 +91,8 @@ bool LargeIntegerUnsigned::Test::comparisons() {
 }
 
 bool LargeIntegerUnsigned::Test::isPossiblyPrime() {
-  List<LargeIntegerUnsigned> mustReturnTrue, mustReturnFalse;
+  List<LargeIntegerUnsigned> mustReturnTrue;
+  List<LargeIntegerUnsigned> mustReturnFalse;
   mustReturnTrue.addOnTop(2);
   mustReturnTrue.addOnTop(3);
   mustReturnTrue.addOnTop(5);

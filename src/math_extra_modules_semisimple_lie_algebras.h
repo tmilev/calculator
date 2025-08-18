@@ -888,7 +888,7 @@ getActionGeneratorIndex(int generatorIndex) {
   }
   List<int> adActions;
   Rational coefficient;
-  this->getOwner().getChevalleyGeneratorAsLieBracketsSimpleGenerators(
+  this->getOwner().chevalleyGeneratorAsLieBracketsSimpleGenerators(
     generatorIndex, adActions, coefficient
   );
   MatrixTensor<Coefficient> tempO;

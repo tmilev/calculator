@@ -1764,7 +1764,6 @@ public:
   int sumPartition;
   int maximumCachedKostkaNumbers;
   LargeInteger value;
-  //  bool incrementReturnFalseIfPastLast();
   bool initTableaux(std::stringstream* comments = nullptr);
   bool operator==(const KostkaNumber& other) const;
   static Rational computeTypeBParabolicSignMultiplicity(

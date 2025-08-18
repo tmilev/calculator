@@ -4144,63 +4144,6 @@ std::string RootSubalgebras::toStringDynkinTableHTML(
   return out.str();
 }
 
-std::string SlTwoSubalgebra::toStringContainingRootSubalgebras(
-  const std::string& displayPathAlgebra
-) const {
-  STACK_TRACE("SlTwoSubalgebra::toStringContainingRootSubalgebras");
-  std::stringstream out;
-  RootSubalgebras& rootSubalgebras = this->container->rootSubalgebras;
-  for (int j = 0; j < this->indicesContainingRootSubalgebras.size; j ++) {
-    int rootSubalgebraIndex = this->indicesContainingRootSubalgebras[j];
-    RootSubalgebra& currentRootSubalgebra =
-    rootSubalgebras.subalgebras[rootSubalgebraIndex];
-    out
-    << "<a href='"
-    << displayPathAlgebra
-    << "rootSubalgebra_"
-    << rootSubalgebraIndex + 1
-    << ".html'>"
-    << "\\("
-    << currentRootSubalgebra.dynkinDiagram.toString()
-    << "\\)"
-    << "</a>";
-    if (j != this->indicesContainingRootSubalgebras.size - 1) {
-      out << ", ";
-    }
-  }
-  return out.str();
-}
-
-std::string SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras(
-  const std::string& displayPathAlgebra
-) const {
-  STACK_TRACE("SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras");
-  std::stringstream out;
-  RootSubalgebras& rootSubalgebras = this->container->rootSubalgebras;
-  for (
-    int j = 0; j < this->indicesMinimalContainingRootSubalgebras.size; j ++
-  ) {
-    int rootSubalgebraIndex =
-    this->indicesMinimalContainingRootSubalgebras[j];
-    RootSubalgebra& currentRootSubalgebra =
-    rootSubalgebras.subalgebras[rootSubalgebraIndex];
-    out
-    << "<a href='"
-    << displayPathAlgebra
-    << "rootSubalgebra_"
-    << rootSubalgebraIndex + 1
-    << ".html'>"
-    << "\\("
-    << currentRootSubalgebra.dynkinDiagram.toString()
-    << "\\)"
-    << "</a>";
-    if (j != this->indicesMinimalContainingRootSubalgebras.size - 1) {
-      out << ", ";
-    }
-  }
-  return out.str();
-}
-
 std::string RootSubalgebras::toStringDynkinTableFormatToLaTeX(
   FormatExpressions* format
 ) {

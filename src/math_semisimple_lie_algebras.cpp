@@ -1252,10 +1252,11 @@ bool SemisimpleLieAlgebra::hasImplementedCartanInvolution(
 }
 
 Rational SemisimpleLieAlgebra::killingSquareOfDualOfAmbientLongRoot() {
+  STACK_TRACE("SemisimpleLieAlgebra::killingSquareOfDualOfAmbientLongRoot");
   if (!this->cachedKillingSquareOfDualOfAmbientLongRoot.isZeroPointer()) {
     return this->cachedKillingSquareOfDualOfAmbientLongRoot.getElementConst();
   }
-  Rational & result =
+  Rational& result =
   this->cachedKillingSquareOfDualOfAmbientLongRoot.getElement();
   ElementSemisimpleLieAlgebra<Rational> longRootedElementCartan;
   int indexLongRoot = this->longRootIndex();

@@ -53,7 +53,6 @@ public:
   std::string deadlineSchema;
   JSData deadlines;
   List<std::string> sectionsTaught;
-  // List<std::string> sectionsViewableByUser;
   List<std::string> selectedColumnsUnsafe;
   List<std::string> selectedColumnValuesUnsafe;
   List<std::string> selectedColumnsRetrievalFailureRemarks;

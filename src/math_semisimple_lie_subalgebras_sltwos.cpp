@@ -89,6 +89,33 @@ std::string SlTwoSubalgebra::toStringTripleArbitrary(
   return out.str();
 }
 
+std::string SlTwoSubalgebra::toStringContainingRootSubalgebras(
+  const std::string& displayPathAlgebra
+) const {
+  STACK_TRACE("SlTwoSubalgebra::toStringContainingRootSubalgebras");
+  std::stringstream out;
+  RootSubalgebras& rootSubalgebras = this->container->rootSubalgebras;
+  for (int j = 0; j < this->indicesContainingRootSubalgebras.size; j ++) {
+    int rootSubalgebraIndex = this->indicesContainingRootSubalgebras[j];
+    RootSubalgebra& currentRootSubalgebra =
+    rootSubalgebras.subalgebras[rootSubalgebraIndex];
+    out
+    << "<a href='"
+    << displayPathAlgebra
+    << "rootSubalgebra_"
+    << rootSubalgebraIndex + 1
+    << ".html'>"
+    << "\\("
+    << currentRootSubalgebra.dynkinDiagram.toString()
+    << "\\)"
+    << "</a>";
+    if (j != this->indicesContainingRootSubalgebras.size - 1) {
+      out << ", ";
+    }
+  }
+  return out.str();
+}
+
 std::string SlTwoSubalgebra::toStringTripleArbitraryMatrix() const {
   std::stringstream out;
   out << "<br>Matrix form of the system we are trying to solve:\n";
@@ -147,6 +174,348 @@ std::string SlTwoSubalgebra::toStringKostantSekiguchiTriple(
   out << "f&=&" << this->fKostantSekiguchi.toString(format);
   out << "\\end{array}\\)";
   return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringDynkinType() const {
+  DynkinType dynkinType;
+  this->computeDynkinTypeEmbedded(dynkinType);
+  return dynkinType.toStringPretty();
+}
+
+std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
+  STACK_TRACE("SlTwoSubalgebra::toString");
+  if (this->container == nullptr) {
+    return "sl(2) subalgebra not initialized.";
+  }
+  std::stringstream out;
+  out << "\\(" << this->toStringDynkinType() << "\\)\n<br>\n";
+  out
+  << "<a name='sl2index"
+  << this->indexInContainer
+  << "'>h-characteristic: "
+  << this->hCharacteristic.toString()
+  << "</a>";
+  out << "<br>Length of the weight dual to h: " << this->lengthHSquared;
+  std::string currentString = this->preferredAmbientSimpleBasis.toString();
+  std::string virtualPath = "";
+  std::string htmlPathServer = "";
+  bool useHtml = true;
+  bool useLatex = false;
+  virtualPath = this->owner->fileNames.virtualFolderName() + "sl2s/";
+  htmlPathServer =
+  this->owner->fileNames.displayFolderName("../../") + "sl2s/";
+  if (virtualPath == "" || htmlPathServer == "") {
+    useHtml = false;
+  }
+  if (useHtml) {
+    out << "<br>";
+  }
+  out << "\nSimple basis ambient algebra w.r.t defining h: " << currentString;
+  if (useHtml) {
+    out << "<br>";
+  }
+  if (this->indicesContainingRootSubalgebras.size > 1) {
+    out
+    << "Number of containing regular semisimple subalgebras: "
+    << this->indicesContainingRootSubalgebras.size;
+    if (useHtml) {
+      out << "<br>";
+    }
+  }
+  FormatExpressions localFormat;
+  FormatExpressions latexFormat;
+  localFormat.flagUseHTML = useHtml;
+  localFormat.flagUseLatex = useLatex;
+  latexFormat.flagUseHTML = false;
+  latexFormat.flagUseLatex = true;
+  // Don't break lines.
+  latexFormat.maximumLineLength = - 1;
+  for (int i = 0; i < this->indicesContainingRootSubalgebras.size; i ++) {
+    out
+    << "\nContaining regular semisimple subalgebra number "
+    << i + 1
+    << ": ";
+    int rootSubalgebraIndex = this->indicesContainingRootSubalgebras[i];
+    RootSubalgebra& currentSubalgebra =
+    this->container->rootSubalgebras.subalgebras[rootSubalgebraIndex];
+    std::string dynkinType = currentSubalgebra.dynkinDiagram.toString();
+    if (useHtml) {
+      out
+      << "<a href='../rootSubalgebra_"
+      << rootSubalgebraIndex + 1
+      << ".html'>";
+    }
+    out << "\\(" << dynkinType << "\\)";
+    if (useHtml) {
+      out << "</a>";
+    }
+  }
+  if (useHtml) {
+    out << "<br>";
+  }
+  out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
+  FormatExpressions formatCharacter;
+  formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
+  out
+  << HtmlRoutines::getMathNoDisplay((
+      this->moduleDecompositionAmbientSubalgebra.toString(&formatCharacter)
+    )
+  )
+  << "\n<br>\n";
+  out << "\nBelow is one possible realization of the sl(2) subalgebra.";
+  if (useHtml) {
+    out << "\n<br>\n";
+  }
+  out << this->toStringTriple(&latexFormat);
+  out << this->toStringTripleStandardRealization();
+  out << this->toStringKostantSekiguchiTriple(&latexFormat);
+  out << this->toStringKostantSekiguchiTripleStandardRealization();
+  out << this->toStringTripleVerification(&latexFormat);
+  out << "\n<br>" << this->toStringCentralizer();
+  out << "\n<br>Unfold the hidden panel for more information.<br>\n";
+  out << "\n<div class='lieAlgebraPanel'><div>\n";
+  out << this->toStringTripleUnknowns(&latexFormat);
+  out << this->toStringTripleUnknownsPolynomialSystem(&latexFormat);
+  out << this->toStringTripleArbitrary(&latexFormat);
+  out << this->toStringTripleArbitraryMatrix();
+  out << this->toStringKostantSekiguchiTripleInternals(format);
+  out << "</div></div>";
+  return out.str();
+}
+
+void SlTwoSubalgebra::initialize() {
+  this->algebraicClosure = nullptr;
+  this->owner = nullptr;
+  this->container = nullptr;
+  this->indexInContainer = - 1;
+  this->flagCentralizerIsRegular = false;
+  this->dimensionCentralizer = - 1;
+  this->flagTryToComputeCentralizerFully = true;
+}
+
+void SlTwoSubalgebra::computeDynkinTypeEmbedded(DynkinType& output) const {
+  Rational halfLength = this->lengthHSquared / 2;
+  output.makeSimpleType('A', 1, &halfLength);
+}
+
+bool SlTwoSubalgebra::checkConsistency() const {
+  if (this->flagDeallocated) {
+    global.fatal << "Use after free of SlTwoSubalgebra. " << global.fatal;
+  }
+  if (this->owner != nullptr) {
+    this->owner->checkConsistency();
+  }
+  return true;
+}
+
+const WeylGroupData& SlTwoSubalgebra::getOwnerWeyl() const {
+  if (this->owner == nullptr) {
+    global.fatal << "Weyl group with non-initialized owner. " << global.fatal;
+  }
+  return this->owner->weylGroup;
+}
+
+std::string SlTwoSubalgebra::toStringTripleStandardRealization() const {
+  Matrix<Rational> matrixH;
+  Matrix<Rational> matrixE;
+  Matrix<Rational> matrixF;
+  if (
+    !this->owner->getElementStandardRepresentation(this->hElement, matrixH) ||
+    !this->owner->getElementStandardRepresentation(this->eElement, matrixE) ||
+    !this->owner->getElementStandardRepresentation(this->fElement, matrixF)
+  ) {
+    return "";
+  }
+  std::stringstream out;
+  FormatExpressions format;
+  format.flagUseHTML = false;
+  format.flagUseLatex = true;
+  out << "<br>Matrix realizations in a standard representation: ";
+  out << "<div class='lieAlgebraPanel'>";
+  out << "<div>";
+  out << "\\(\\begin{array}{rcl}";
+  out << "h&=&" << matrixH.toString(&format) << "\\\\\n";
+  out << "e&=&" << matrixE.toString(&format) << "\\\\\n";
+  out << "f&=&" << matrixF.toString(&format);
+  out << "\\end{array}\\)";
+  out << "<br>";
+  std::stringstream calculatorLink;
+  calculatorLink
+  << "h="
+  << matrixH.toString(&format)
+  << ";\n"
+  << "e="
+  << matrixE.toString(&format)
+  << ";\n"
+  << "f="
+  << matrixF.toString(&format)
+  << ";\n";
+  out
+  << "Calculator link: "
+  << HtmlRoutines::getCalculatorComputationAnchorThisServer(
+    calculatorLink.str(), ""
+  );
+  out << "</div>";
+  out << "</div>";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleStandardRealization(
+) const {
+  Matrix<AlgebraicNumber> matrixH;
+  Matrix<AlgebraicNumber> matrixE;
+  Matrix<AlgebraicNumber> matrixF;
+  if (
+    !this->owner->getElementStandardRepresentation(this->hAlgebraic, matrixH)
+    ||
+    !this->owner->getElementStandardRepresentation(
+      this->eKostantSekiguchi, matrixE
+    ) ||
+    !this->owner->getElementStandardRepresentation(
+      this->fKostantSekiguchi, matrixF
+    )
+  ) {
+    return "";
+  }
+  std::stringstream out;
+  FormatExpressions format;
+  format.flagUseHTML = false;
+  format.flagUseLatex = true;
+  out << "<br>Matrix realizations in a standard representation: ";
+  out << "<div class='lieAlgebraPanel'>";
+  out << "<div>";
+  out << "\\(\\begin{array}{rcl}";
+  out << "h&=&" << matrixH.toString(&format) << "\\\\\n";
+  out << "e&=&" << matrixE.toString(&format) << "\\\\\n";
+  out << "f&=&" << matrixF.toString(&format);
+  out << "\\end{array}\\)";
+  out << "<br>";
+  std::stringstream calculatorLink;
+  calculatorLink
+  << "h="
+  << matrixH.toString(&format)
+  << ";\n"
+  << "e="
+  << matrixE.toString(&format)
+  << ";\n"
+  << "f="
+  << matrixF.toString(&format)
+  << ";\n";
+  out
+  << "Calculator link: "
+  << HtmlRoutines::getCalculatorComputationAnchorThisServer(
+    calculatorLink.str(), ""
+  );
+  out << "</div>";
+  out << "</div>";
+  return out.str();
+}
+
+void SlTwoSubalgebra::computeDynkinsEpsilon(WeylGroupData& weyl) {
+  this->dynkinsEpsilon =
+  this->diagramM.numberRootsGeneratedByDiagram() + this->diagramM.rankTotal();
+  int r = 0;
+  for (int i = 0; i < this->hCharacteristic.size; i ++) {
+    if (!this->hCharacteristic[i].isEqualToZero()) {
+      r ++;
+    }
+  }
+  this->dynkinsEpsilon += r;
+  for (int i = 0; i < weyl.rootSystem.size; i ++) {
+    int nonZeroFound = 0;
+    for (int j = 0; j < this->hCharacteristic.size; j ++) {
+      if (weyl.rootSystem[i][j] == 1) {
+        nonZeroFound ++;
+      }
+      if (nonZeroFound > 1) {
+        break;
+      }
+    }
+    if (nonZeroFound == 1) {
+      this->dynkinsEpsilon --;
+    }
+  }
+  this->dynkinsEpsilon = 0;
+  for (int i = 0; i < this->hCharacteristic.size; i ++) {
+    if (this->hCharacteristic[i] == 1) {
+      this->dynkinsEpsilon = - 1;
+    }
+  }
+  this->dynkinsEpsilon = 0;
+}
+
+bool SlTwoSubalgebra::moduleDecompositionFitsInto(const SlTwoSubalgebra& other)
+const {
+  return
+  this->moduleDecompositionLeftFitsIntoRight(
+    this->moduleDecompositionAmbientSubalgebra,
+    other.moduleDecompositionAmbientSubalgebra
+  );
+}
+
+bool SlTwoSubalgebra::moduleDecompositionLeftFitsIntoRight(
+  const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoLeft,
+  const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoRight
+) {
+  STACK_TRACE("SlTwoSubalgebra::moduleDecompositionLeftFitsIntoRight");
+  CharacterSemisimpleLieAlgebraModule<Rational> moduleDifference =
+  moduleDecompoRight - moduleDecompoLeft;
+  for (int i = 0; i < moduleDifference.size(); i ++) {
+    if (moduleDifference.coefficients[i] < 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::string SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras(
+  const std::string& displayPathAlgebra
+) const {
+  STACK_TRACE("SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras");
+  std::stringstream out;
+  RootSubalgebras& rootSubalgebras = this->container->rootSubalgebras;
+  for (
+    int j = 0; j < this->indicesMinimalContainingRootSubalgebras.size; j ++
+  ) {
+    int rootSubalgebraIndex =
+    this->indicesMinimalContainingRootSubalgebras[j];
+    RootSubalgebra& currentRootSubalgebra =
+    rootSubalgebras.subalgebras[rootSubalgebraIndex];
+    out
+    << "<a href='"
+    << displayPathAlgebra
+    << "rootSubalgebra_"
+    << rootSubalgebraIndex + 1
+    << ".html'>"
+    << "\\("
+    << currentRootSubalgebra.dynkinDiagram.toString()
+    << "\\)"
+    << "</a>";
+    if (j != this->indicesMinimalContainingRootSubalgebras.size - 1) {
+      out << ", ";
+    }
+  }
+  return out.str();
+}
+
+void SlTwoSubalgebra::toHTML(std::string& filePath) {
+  std::fstream file;
+  std::string fileName = filePath;
+  fileName.append("theSlTwo.txt");
+  FileOperations::openFileCreateIfNotPresentVirtual(
+    file, "output/" + filePath, false, true, false
+  );
+}
+
+void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
+  STACK_TRACE("SlTwoSubalgebras::reset");
+  this->indicesSl2sContainedInRootSubalgebras.setSize(0);
+  this->indicesSl2DecompositionFormulas.setSize(0);
+  this->unsuitableHs.setSize(0);
+  this->indexZeroWeight = - 1;
+  this->owner = &inputOwner;
+  this->rootSubalgebras.owner = &inputOwner;
+  this->allSubalgebras.clear();
 }
 
 std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleInternals(
@@ -1166,6 +1535,7 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
 }
 
 std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
+  STACK_TRACE("SlTwoSubalgebras::toString");
   std::string currentString;
   std::stringstream out;
   std::stringstream body;
@@ -1257,6 +1627,7 @@ void CentralizerComputer::initialize(
 }
 
 std::string CentralizerComputer::toString() const {
+  STACK_TRACE("CentralizerComputer::toString");
   std::stringstream out;
   out << "Centralizer type: ";
   if (this->flagTypeComputed) {
@@ -1267,6 +1638,10 @@ std::string CentralizerComputer::toString() const {
   } else {
     out << " not computed";
   }
+  if (this->owner == nullptr) {
+    return out.str();
+  }
+  Rational killingSquare = this->owner->killingSquareOfDualOfAmbientLongRoot();
   out
   << "\n<br>\nKilling form square of "
   << "Cartan element dual to ambient long root: "
@@ -1859,12 +2234,6 @@ std::string SimpleSubalgebraComponent::toString() const {
   << "\\("
   << this->coSymmetricCartanMatrixCentralizerAmbientKilling.toStringLatex()
   << "\\)";
-  out
-  << "\n<br>\nCo-symmetric Cartan Matrix of centralizer, "
-  << "scaled by killing form restricted to centalizer: "
-  << "\\("
-  << this->coSymmetricCartanMatrixCentralizerCentralizerKilling.toStringLatex()
-  << "\\)";
   return out.str();
 }
 
@@ -1919,31 +2288,21 @@ bool SimpleSubalgebraComponent::compute() {
     this->simpleDualsOfRootSpaces.size,
     false
   );
-  this->coSymmetricCartanMatrixCentralizerCentralizerKilling.resize(
-    this->simpleDualsOfRootSpaces.size,
-    this->simpleDualsOfRootSpaces.size,
-    false
-  );
-  Rational killingSquareSmallest = 0;
-  int indexOfKillingSquareSmallest = - 1;
+  this->killingSquareProductShortestDual = 0;
   for (int i = 0; i < this->simpleDualsOfRootSpacesAmbientAdjoint.size; i ++) {
     for (
       int j = 0; j < this->simpleDualsOfRootSpacesAmbientAdjoint.size; j ++
     ) {
       this->coSymmetricCartanMatrixCentralizerAmbientKilling(i, j) =
       this->computeSimpleRootScalarProductAmbientKilling(i, j);
-      this->coSymmetricCartanMatrixCentralizerCentralizerKilling(i, j) =
-      this->computeSimpleRootScalarProductCentralizerKilling(i, j);
     }
     Rational currentSquareScalarProduct =
-    this->coSymmetricCartanMatrixCentralizerAmbientKilling(0, 0);
+    this->coSymmetricCartanMatrixCentralizerAmbientKilling(i, i);
     if (i == 0) {
-      killingSquareSmallest = currentSquareScalarProduct;
-      indexOfKillingSquareSmallest = i;
+      this->killingSquareProductShortestDual = currentSquareScalarProduct;
     }
-    if (killingSquareSmallest > currentSquareScalarProduct) {
-      killingSquareSmallest = currentSquareScalarProduct;
-      indexOfKillingSquareSmallest = i;
+    if (this->killingSquareProductShortestDual > currentSquareScalarProduct) {
+      this->killingSquareProductShortestDual = currentSquareScalarProduct;
     }
   }
   this->dynkinDiagramComputer.ambientBilinearForm.resize(
@@ -1954,33 +2313,31 @@ bool SimpleSubalgebraComponent::compute() {
   for (int i = 0; i < this->simpleDualsOfRootSpaces.size; i ++) {
     for (int j = 0; j < this->simpleDualsOfRootSpaces.size; j ++) {
       this->dynkinDiagramComputer.ambientBilinearForm(i, j) =
-      this->coSymmetricCartanMatrixCentralizerCentralizerKilling(i, j) * 4 /
-      this->coSymmetricCartanMatrixCentralizerCentralizerKilling(j, j) /
-      this->coSymmetricCartanMatrixCentralizerCentralizerKilling(i, i);
+      this->coSymmetricCartanMatrixCentralizerAmbientKilling(i, j) * 4 /
+      this->coSymmetricCartanMatrixCentralizerAmbientKilling(j, j) /
+      this->coSymmetricCartanMatrixCentralizerAmbientKilling(i, i);
     }
   }
   Vectors<Rational> simpleBasis;
   simpleBasis.makeEiBasis(this->simpleDualsOfRootSpaces.size);
   this->dynkinDiagramComputer.computeDiagramInputIsSimpleBasis(simpleBasis);
-  Vector<Rational> longestSimpleRootOfCentalizer;
-  longestSimpleRootOfCentalizer.makeEi(
-    this->simpleDualsOfRootSpaces.size, indexOfKillingSquareSmallest
-  );
-  DynkinSimpleType typeContainingLongestSimpleRootOfCentalizer =
-  this->dynkinDiagramComputer.typeFirstComponentLinkedTo(
-    longestSimpleRootOfCentalizer
-  );
   if (this->owner->killingSquareOfDualOfAmbientLongRoot().isEqualToZero()) {
-    // The owner is not simple, so we
-    // can't get a long root, which makes dynkin indices
-    // ill-defined.
+    // The owner is not simple, so we can't get a long root.
+    // We could attempt to make a Dynkin index definition
+    // in such a situation, but for now,
+    // let us simply give up.
     return false;
   }
-  Rational scale =
-  killingSquareSmallest *
-  typeContainingLongestSimpleRootOfCentalizer.getLongRootLengthSquared() /
-  this->owner->killingSquareOfDualOfAmbientLongRoot() /
-  2;
+  if (this->dynkinDiagramComputer.simpleComponentTypes.size != 1) {
+    global.fatal
+    << "The dynkin diagram computer should hold a single simple component."
+    << global.fatal;
+  }
+  const DynkinSimpleType& simpleType =
+  this->dynkinDiagramComputer.simpleComponentTypes[0];
+  Rational longRootRatio = this->killingSquareProductShortestDual /
+  this->owner->killingSquareOfDualOfAmbientLongRoot();
+  Rational scale = longRootRatio * simpleType.getLongRootLengthSquared() / 2;
   this->dynkinDiagramComputer.getDynkinType(this->simpleType);
   this->simpleType.scaleFirstCoRootSquaredLength(scale);
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > simpleHs;
@@ -2018,14 +2375,6 @@ computeSimpleRootScalarProductAmbientKilling(int i, int j) const {
   this->simpleDualsOfRootSpacesAmbientAdjoint[i].
   scalarProductKillingMustBeRational(
     this->simpleDualsOfRootSpacesAmbientAdjoint[j]
-  );
-}
-
-Rational SimpleSubalgebraComponent::
-computeSimpleRootScalarProductCentralizerKilling(int i, int j) const {
-  return
-  this->simpleDualsOfRootSpaces[i].scalarProductKillingMustBeRational(
-    this->simpleDualsOfRootSpaces[j]
   );
 }
 

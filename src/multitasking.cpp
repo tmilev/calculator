@@ -79,7 +79,6 @@ MutexRecursiveWrapper::~MutexRecursiveWrapper() {
 }
 
 bool MutexRecursiveWrapper::islockedUnsafeUseForWINguiOnly() {
-  // std::cout << "checking consistency from islockedUnsafeUseForWINguiOnly";
   this->checkConsistency();
   return this->flagUnsafeFlagForDebuggingIslocked;
 }
@@ -186,7 +185,7 @@ std::string ThreadData::toStringHtml() const {
   std::stringstream out;
   out << "Process type: <b>" << global.logs.toStringProcessType() << "</b>. ";
   if (this->getCurrentThreadId() == this->index) {
-    out << "<b style = 'color:green'>Current thread</b> ";
+    out << "<b style='color:green'>Current thread</b> ";
   } else {
     out << "Thread ";
   }

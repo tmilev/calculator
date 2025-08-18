@@ -1411,9 +1411,7 @@ void Lattice::getRougherLatticeFromAffineHyperplaneDirectionAndLattice(
   basis.assignMatrixRows(this->basisRationalForm);
   Lattice hyperplaneLatticeNoShift;
   Lattice directionLattice;
-  // , normalProjectionLattice, trueProjectionLattice;
   Vectors<Rational> roots;
-  // Vector<Rational> root;
   roots.addOnTop(direction);
   directionLattice = *this;
   directionLattice.intersectWithLinearSubspaceSpannedBy(roots);

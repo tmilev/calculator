@@ -33,10 +33,10 @@ sl(2)-module decomposition of the ambient Lie algebra: \(V_{10\psi}+V_{6\psi}+V_
 Below is one possible realization of the sl(2) subalgebra.
 <br>
 \(\begin{array}{rcl}h&=&12h_{3}+10h_{2}+6h_{1}\\
-e&=&6/5g_{3}+5g_{2}+6g_{1}\\
-f&=&g_{-1}+2g_{-2}+5g_{-3}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&12h_{3}+10h_{2}+6h_{1}\\
-[h, e]&=&12/5g_{3}+10g_{2}+12g_{1}\\
-[h, f]&=&-2g_{-1}-4g_{-2}-10g_{-3}\end{array}\)
+e&=&3g_{3}-10g_{2}+6g_{1}\\
+f&=&g_{-1}-g_{-2}+2g_{-3}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&12h_{3}+10h_{2}+6h_{1}\\
+[h, e]&=&6g_{3}-20g_{2}+12g_{1}\\
+[h, f]&=&-2g_{-1}+2g_{-2}-4g_{-3}\end{array}\)
 <br>Centralizer type: 0
 <br>Unfold the hidden panel for more information.<br>
 
@@ -47,10 +47,10 @@ f&=&x_{4} g_{-1}+x_{5} g_{-2}+x_{6} g_{-3}\end{array}\)<br>Participating positiv
 \(\begin{array}{rcl}x_{1} x_{4} -6&=&0\\x_{2} x_{5} -10&=&0\\2x_{3} x_{6} -12&=&0\\\end{array}\)
 <br>
 Starting h, e, f triple. H is computed according to Dynkin, and the coefficients of f are arbitrarily chosen. <br>More precisely, the chevalley generators participating in f are ordered in the order in which their roots appear, and the coefficients are chosen with an arbitrary formula. More precisely, the n^th coefficient equals (n-1)^2+1.<br>This arbitrary (but well-defined) choice of f guarantees that the computation is linear and fast. <br>
-\(\begin{array}{rcl}h&=&12h_{3}+10h_{2}+6h_{1}\\e&=&x_{3} g_{3}+x_{2} g_{2}+x_{1} g_{1}\\f&=&g_{-1}+2g_{-2}+5g_{-3}\end{array}\)<br>Matrix form of the system we are trying to solve:
+\(\begin{array}{rcl}h&=&12h_{3}+10h_{2}+6h_{1}\\e&=&x_{3} g_{3}+x_{2} g_{2}+x_{1} g_{1}\\f&=&g_{-1}-g_{-2}+2g_{-3}\end{array}\)<br>Matrix form of the system we are trying to solve:
 \(\begin{pmatrix}1 & 0 & 0\\
-0 & 2 & 0\\
-0 & 0 & 10\\
+0 & -1 & 0\\
+0 & 0 & 4\\
 \end{pmatrix}[col. vect.]=\begin{pmatrix}6\\
 10\\
 12\\
@@ -69,10 +69,10 @@ sl(2)-module decomposition of the ambient Lie algebra: \(V_{6\psi}+2V_{4\psi}+V_
 Below is one possible realization of the sl(2) subalgebra.
 <br>
 \(\begin{array}{rcl}h&=&6h_{3}+6h_{2}+4h_{1}\\
-e&=&3g_{7}+3/5g_{2}+2g_{1}\\
-f&=&2g_{-1}+5g_{-2}+g_{-7}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&6h_{3}+6h_{2}+4h_{1}\\
-[h, e]&=&6g_{7}+6/5g_{2}+4g_{1}\\
-[h, f]&=&-4g_{-1}-10g_{-2}-2g_{-7}\end{array}\)
+e&=&3g_{7}+3/2g_{2}-4g_{1}\\
+f&=&-g_{-1}+2g_{-2}+g_{-7}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&6h_{3}+6h_{2}+4h_{1}\\
+[h, e]&=&6g_{7}+3g_{2}-8g_{1}\\
+[h, f]&=&2g_{-1}-4g_{-2}-2g_{-7}\end{array}\)
 <br>Centralizer type: 0
 <br>Unfold the hidden panel for more information.<br>
 
@@ -83,10 +83,10 @@ f&=&x_{5} g_{-1}+x_{6} g_{-2}+x_{4} g_{-7}\end{array}\)<br>Participating positiv
 \(\begin{array}{rcl}x_{1} x_{4} +x_{3} x_{6} -6&=&0\\2x_{1} x_{4} -6&=&0\\x_{2} x_{5} -4&=&0\\\end{array}\)
 <br>
 Starting h, e, f triple. H is computed according to Dynkin, and the coefficients of f are arbitrarily chosen. <br>More precisely, the chevalley generators participating in f are ordered in the order in which their roots appear, and the coefficients are chosen with an arbitrary formula. More precisely, the n^th coefficient equals (n-1)^2+1.<br>This arbitrary (but well-defined) choice of f guarantees that the computation is linear and fast. <br>
-\(\begin{array}{rcl}h&=&6h_{3}+6h_{2}+4h_{1}\\e&=&x_{1} g_{7}+x_{3} g_{2}+x_{2} g_{1}\\f&=&2g_{-1}+5g_{-2}+g_{-7}\end{array}\)<br>Matrix form of the system we are trying to solve:
-\(\begin{pmatrix}1 & 0 & 5\\
+\(\begin{array}{rcl}h&=&6h_{3}+6h_{2}+4h_{1}\\e&=&x_{1} g_{7}+x_{3} g_{2}+x_{2} g_{1}\\f&=&-g_{-1}+2g_{-2}+g_{-7}\end{array}\)<br>Matrix form of the system we are trying to solve:
+\(\begin{pmatrix}1 & 0 & 2\\
 2 & 0 & 0\\
-0 & 2 & 0\\
+0 & -1 & 0\\
 \end{pmatrix}[col. vect.]=\begin{pmatrix}6\\
 6\\
 4\\
@@ -105,10 +105,10 @@ sl(2)-module decomposition of the ambient Lie algebra: \(V_{4\psi}+5V_{2\psi}+V_
 Below is one possible realization of the sl(2) subalgebra.
 <br>
 \(\begin{array}{rcl}h&=&4h_{3}+4h_{2}+2h_{1}\\
-e&=&1/2g_{7}+g_{6}+1/5g_{2}\\
-f&=&5g_{-2}+g_{-6}+2g_{-7}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&4h_{3}+4h_{2}+2h_{1}\\
-[h, e]&=&g_{7}+2g_{6}+2/5g_{2}\\
-[h, f]&=&-10g_{-2}-2g_{-6}-4g_{-7}\end{array}\)
+e&=&-g_{7}+g_{6}+1/2g_{2}\\
+f&=&2g_{-2}+g_{-6}-g_{-7}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&4h_{3}+4h_{2}+2h_{1}\\
+[h, e]&=&-2g_{7}+2g_{6}+g_{2}\\
+[h, f]&=&-4g_{-2}-2g_{-6}+2g_{-7}\end{array}\)
 <br>Centralizer type: 0
 <br>Unfold the hidden panel for more information.<br>
 
@@ -119,10 +119,10 @@ f&=&x_{6} g_{-2}+x_{4} g_{-6}+x_{5} g_{-7}\end{array}\)<br>Participating positiv
 \(\begin{array}{rcl}2x_{1} x_{4} -2&=&0\\2x_{1} x_{4} +x_{2} x_{5} +x_{3} x_{6} -4&=&0\\2x_{1} x_{4} +2x_{2} x_{5} -4&=&0\\\end{array}\)
 <br>
 Starting h, e, f triple. H is computed according to Dynkin, and the coefficients of f are arbitrarily chosen. <br>More precisely, the chevalley generators participating in f are ordered in the order in which their roots appear, and the coefficients are chosen with an arbitrary formula. More precisely, the n^th coefficient equals (n-1)^2+1.<br>This arbitrary (but well-defined) choice of f guarantees that the computation is linear and fast. <br>
-\(\begin{array}{rcl}h&=&4h_{3}+4h_{2}+2h_{1}\\e&=&x_{2} g_{7}+x_{1} g_{6}+x_{3} g_{2}\\f&=&5g_{-2}+g_{-6}+2g_{-7}\end{array}\)<br>Matrix form of the system we are trying to solve:
+\(\begin{array}{rcl}h&=&4h_{3}+4h_{2}+2h_{1}\\e&=&x_{2} g_{7}+x_{1} g_{6}+x_{3} g_{2}\\f&=&2g_{-2}+g_{-6}-g_{-7}\end{array}\)<br>Matrix form of the system we are trying to solve:
 \(\begin{pmatrix}2 & 0 & 0\\
-2 & 2 & 5\\
-2 & 4 & 0\\
+2 & -1 & 2\\
+2 & -2 & 0\\
 \end{pmatrix}[col. vect.]=\begin{pmatrix}2\\
 4\\
 4\\
@@ -140,10 +140,10 @@ sl(2)-module decomposition of the ambient Lie algebra: \(2V_{3\psi}+2V_{2\psi}+2
 Below is one possible realization of the sl(2) subalgebra.
 <br>
 \(\begin{array}{rcl}h&=&4h_{3}+3h_{2}+2h_{1}\\
-e&=&1/2g_{7}+g_{6}\\
-f&=&g_{-6}+2g_{-7}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&4h_{3}+3h_{2}+2h_{1}\\
-[h, e]&=&g_{7}+2g_{6}\\
-[h, f]&=&-2g_{-6}-4g_{-7}\end{array}\)
+e&=&-g_{7}+g_{6}\\
+f&=&g_{-6}-g_{-7}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&4h_{3}+3h_{2}+2h_{1}\\
+[h, e]&=&-2g_{7}+2g_{6}\\
+[h, f]&=&-2g_{-6}+2g_{-7}\end{array}\)
 <br>Centralizer type: A^{1}_1
 <br>Unfold the hidden panel for more information.<br>
 
@@ -154,10 +154,10 @@ f&=&x_{3} g_{-6}+x_{4} g_{-7}\end{array}\)<br>Participating positive roots: 0 ve
 \(\begin{array}{rcl}2x_{1} x_{3} -2&=&0\\2x_{1} x_{3} +x_{2} x_{4} -3&=&0\\2x_{1} x_{3} +2x_{2} x_{4} -4&=&0\\\end{array}\)
 <br>
 Starting h, e, f triple. H is computed according to Dynkin, and the coefficients of f are arbitrarily chosen. <br>More precisely, the chevalley generators participating in f are ordered in the order in which their roots appear, and the coefficients are chosen with an arbitrary formula. More precisely, the n^th coefficient equals (n-1)^2+1.<br>This arbitrary (but well-defined) choice of f guarantees that the computation is linear and fast. <br>
-\(\begin{array}{rcl}h&=&4h_{3}+3h_{2}+2h_{1}\\e&=&x_{2} g_{7}+x_{1} g_{6}\\f&=&g_{-6}+2g_{-7}\end{array}\)<br>Matrix form of the system we are trying to solve:
+\(\begin{array}{rcl}h&=&4h_{3}+3h_{2}+2h_{1}\\e&=&x_{2} g_{7}+x_{1} g_{6}\\f&=&g_{-6}-g_{-7}\end{array}\)<br>Matrix form of the system we are trying to solve:
 \(\begin{pmatrix}2 & 0\\
-2 & 2\\
-2 & 4\\
+2 & -1\\
+2 & -2\\
 \end{pmatrix}[col. vect.]=\begin{pmatrix}2\\
 3\\
 4\\
@@ -176,10 +176,10 @@ sl(2)-module decomposition of the ambient Lie algebra: \(5V_{2\psi}+6V_{0}\)
 Below is one possible realization of the sl(2) subalgebra.
 <br>
 \(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\
-e&=&g_{9}+1/2g_{1}\\
-f&=&2g_{-1}+g_{-9}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&2h_{3}+2h_{2}+2h_{1}\\
-[h, e]&=&2g_{9}+g_{1}\\
-[h, f]&=&-4g_{-1}-2g_{-9}\end{array}\)
+e&=&g_{9}-g_{1}\\
+f&=&-g_{-1}+g_{-9}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&2h_{3}+2h_{2}+2h_{1}\\
+[h, e]&=&2g_{9}-2g_{1}\\
+[h, f]&=&2g_{-1}-2g_{-9}\end{array}\)
 <br>Centralizer type: 2A^{1}_1
 <br>Unfold the hidden panel for more information.<br>
 
@@ -190,8 +190,8 @@ f&=&x_{4} g_{-1}+x_{3} g_{-9}\end{array}\)<br>Participating positive roots: 0 ve
 \(\begin{array}{rcl}x_{1} x_{3} +x_{2} x_{4} -2&=&0\\2x_{1} x_{3} -2&=&0\\2x_{1} x_{3} -2&=&0\\\end{array}\)
 <br>
 Starting h, e, f triple. H is computed according to Dynkin, and the coefficients of f are arbitrarily chosen. <br>More precisely, the chevalley generators participating in f are ordered in the order in which their roots appear, and the coefficients are chosen with an arbitrary formula. More precisely, the n^th coefficient equals (n-1)^2+1.<br>This arbitrary (but well-defined) choice of f guarantees that the computation is linear and fast. <br>
-\(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\e&=&x_{1} g_{9}+x_{2} g_{1}\\f&=&2g_{-1}+g_{-9}\end{array}\)<br>Matrix form of the system we are trying to solve:
-\(\begin{pmatrix}1 & 2\\
+\(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\e&=&x_{1} g_{9}+x_{2} g_{1}\\f&=&-g_{-1}+g_{-9}\end{array}\)<br>Matrix form of the system we are trying to solve:
+\(\begin{pmatrix}1 & -1\\
 2 & 0\\
 2 & 0\\
 \end{pmatrix}[col. vect.]=\begin{pmatrix}2\\

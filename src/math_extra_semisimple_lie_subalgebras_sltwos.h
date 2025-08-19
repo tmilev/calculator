@@ -284,6 +284,18 @@ public:
     LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
     cartanInvolutionPreservedByEMinusF
   );
+  // Returns a list of arbitrarily chosen small numbers that, when
+  // chosen as arbitrary coefficients for forming the element f
+  // result in an H, E, F triple.
+  // The numbers were found by quick manual experimentation with small integers
+  // of approximate value less than 20 and running the calculator to
+  // inspect if so formed H, F elements extend to H, E, F-triples.
+  static const List<Rational>& fArbitraryCoefficientsPerType(
+    char type, int rank
+  );
+  static Rational fArbitraryCoefficient(
+    int coefficientIndex, char type, int rank
+  );
 };
 
 class SlTwoSubalgebra {

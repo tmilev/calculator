@@ -6245,7 +6245,7 @@ void DynkinType::getCartanSymmetric(Matrix<Rational>& output) const {
 }
 
 void DynkinType::getCoCartanSymmetric(Matrix<Rational>& output) const {
-  STACK_TRACE("DynkinType::getCartanSymmetric");
+  STACK_TRACE("DynkinType::getCoCartanSymmetric");
   Matrix<Rational> currentCartan;
   this->getCartanSymmetric(currentCartan);
   WeylGroupData::getCoCartanSymmetric(currentCartan, output);
@@ -6364,7 +6364,7 @@ Rational DynkinSimpleType::getEpsilonRealizationLongRootLengthSquared() const {
   }
   global.fatal
   << "Calling "
-  << "DynkinSimpleType::getLongRootLengthSquared "
+  << "DynkinSimpleType::getEpsilonRealizationLongRootLengthSquared "
   << "on a non-initialized simple type. "
   << global.fatal;
   return - 1;

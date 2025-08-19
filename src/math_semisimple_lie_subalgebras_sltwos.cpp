@@ -974,6 +974,11 @@ void SlTwoSubalgebraCandidate::initializeUnknownTriples(
   // Zero e  and f for the Kostant-Sekiguchi computation.
   this->eKostantSekiguchiUnknown.makeZero();
   this->fKostantSekiguchiUnknown.makeZero();
+  int rank = this->owner->weylGroup.dynkinType.getRank();
+  char type = 0;
+  if (!this->owner->weylGroup.dynkinType.isSimple(&type)) {
+    type = 'X';
+  }
   for (int i = 0; i < this->participatingPositiveRoots.size; i ++) {
     // Initialize arbitrary triple
     ChevalleyGenerator negative;
@@ -981,8 +986,11 @@ void SlTwoSubalgebraCandidate::initializeUnknownTriples(
       this->getOwnerSemisimpleAlgebra(),
       - this->participatingPositiveRoots[i]
     );
-    this->fArbitrary.addMonomial(negative, i * i + 1);
-    // (i % 2== 0)? 1: 2;
+    Polynomial<Rational> fArbitraryConstant;
+    fArbitraryConstant.makeConstant(
+      SlTwoSubalgebraCandidate::fArbitraryCoefficient(i, type, rank)
+    );
+    this->fArbitrary.addMonomial(negative, fArbitraryConstant);
     ChevalleyGenerator positive;
     positive.makeGeneratorRootSpace(
       this->getOwnerSemisimpleAlgebra(), this->participatingPositiveRoots[i]
@@ -1174,6 +1182,35 @@ bool SlTwoSubalgebraCandidate::attemptRealizingKostantSekiguchi() {
   this->eKostantSekiguchi = eSolved;
   this->fKostantSekiguchi = fSolved;
   return true;
+}
+
+Rational SlTwoSubalgebraCandidate::fArbitraryCoefficient(
+  int coefficientIndex, char type, int rank
+) {
+  const List<Rational> arbitraryCoefficients =
+  SlTwoSubalgebraCandidate::fArbitraryCoefficientsPerType(type, rank);
+  if (coefficientIndex < arbitraryCoefficients.size) {
+    return arbitraryCoefficients[coefficientIndex];
+  }
+  return coefficientIndex * coefficientIndex + 1;
+}
+
+const List<Rational>& SlTwoSubalgebraCandidate::fArbitraryCoefficientsPerType(
+  char type, int rank
+) {
+  // Coefficients found by manual experimentation with the computation
+  // end-to-end.
+  // Do not work in all cases, found out by quick computational experiments.
+  static List<Rational> resultDefault({1, - 1, 2, - 2, 3, - 3, 4, - 4});
+  static List<Rational> resultC5({1, - 1, 3, - 2, 3, - 3, 4, - 4});
+  static List<Rational> resultB6({1, - 2, 5, 3, - 1, 3, 4, - 4});
+  if (type == 'C' && rank == 5) {
+    return resultC5;
+  }
+  if (type == 'B' && rank == 6) {
+    return resultB6;
+  }
+  return resultDefault;
 }
 
 bool SlTwoSubalgebraCandidate::checkConsistencyParticipatingRoots(
@@ -1694,38 +1731,54 @@ bool CentralizerComputer::compute() {
   this->flagCartanSelected = this->intersectAmbientCartanWithCentralizer();
   if (this->centralizerIntersectedWithAmbientCartan.size > 0) {
     ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
-    int counter = 1;
-    // Construct an arbitrary linear combination of the elements of
-    // the intersection of the ambient Cartan with the
-    // centralizer.
-    // We want the arbitrary linear combination to have maximal rank
-    // of its adjoint action.
-    // This happens with probability 1 for a random linear combination.
-    // However, when choosing small coefficients, there is a
-    // high chance that the rank will actually not be maximal.
-    // We are choosing choosing a linear combination with
-    // an arbitary formula, whose only goal is to avoid
-    // the chance of non-maximal rank of the adjoint action.
-    for (
-      const ElementSemisimpleLieAlgebra<Rational>& summand :
-      this->centralizerIntersectedWithAmbientCartan
-    ) {
-      Rational arbitraryCoefficient = (counter * counter + 1);
-      semisimpleCandidate += summand * arbitraryCoefficient;
-      counter ++;
+    for (int attempt = 0; attempt < 3; attempt ++) {
+      int counter = 1;
+      // Construct an arbitrary linear combination of the elements of
+      // the intersection of the ambient Cartan with the
+      // centralizer.
+      // We want the arbitrary linear combination to have maximal rank
+      // of its adjoint action.
+      // This happens with probability 1 for a random linear combination.
+      // However, when choosing small coefficients, there is a
+      // high chance that the rank will actually not be maximal.
+      // We are choosing choosing a linear combination with
+      // an arbitary formula, whose only goal is to avoid
+      // the chance of non-maximal rank of the adjoint action.
+      for (
+        const ElementSemisimpleLieAlgebra<Rational>& summand :
+        this->centralizerIntersectedWithAmbientCartan
+      ) {
+        Rational arbitraryCoefficient = (counter * counter + 1 + 2 * attempt);
+        semisimpleCandidate += summand * arbitraryCoefficient;
+        counter ++;
+      }
     }
     if (this->trySemisimpleElement(semisimpleCandidate)) {
       return true;
     }
   }
-  ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
-  for (
-    const ElementSemisimpleLieAlgebra<Rational>& summand :
-    this->centralizerBasis
-  ) {
-    semisimpleCandidate += summand;
+  for (int attempt = 0; attempt < 3; attempt ++) {
+    ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
+    for (int i = 0; i < this->centralizerBasis.size; i ++) {
+      const ElementSemisimpleLieAlgebra<Rational>& summand =
+      this->centralizerBasis[i];
+      Rational coefficient = 1;
+      if (attempt == 1 && i % 2 == 0) {
+        coefficient = - 1;
+      }
+      if (attempt == 2) {
+        coefficient =
+        SlTwoSubalgebraCandidate::fArbitraryCoefficient(
+          i, 'A', this->owner->weylGroup.dynkinType.getRank()
+        );
+      }
+      semisimpleCandidate += summand * coefficient;
+    }
+    if (this->trySemisimpleElement(semisimpleCandidate)) {
+      return true;
+    }
   }
-  return this->trySemisimpleElement(semisimpleCandidate);
+  return false;
 }
 
 void CentralizerComputer::getCentralizerElementFromCoordinates(
@@ -1816,6 +1869,12 @@ bool CentralizerComputer::computeRootSpaceForNonZeroEigenvalue(
     global.fatal
     << "Corrupt h element: "
     << h.toStringPretty()
+    << " with [h,e]="
+    << proportionalToE.toStringPretty()
+    << " not proportional to "
+    << e.toStringPretty()
+    << " and eigenvalue equal to: "
+    << eigenvalue.toString()
     << global.fatal;
   }
   h *= coefficientOrProportionality * 2;

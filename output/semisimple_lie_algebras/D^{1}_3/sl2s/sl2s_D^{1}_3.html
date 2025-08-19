@@ -27,10 +27,10 @@ sl(2)-module decomposition of the ambient Lie algebra: \(V_{6\psi}+V_{4\psi}+V_{
 Below is one possible realization of the sl(2) subalgebra.
 <br>
 \(\begin{array}{rcl}h&=&3h_{3}+3h_{2}+4h_{1}\\
-e&=&3/5g_{3}+3g_{2}+2g_{1}\\
-f&=&2g_{-1}+g_{-2}+5g_{-3}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&3h_{3}+3h_{2}+4h_{1}\\
-[h, e]&=&6/5g_{3}+6g_{2}+4g_{1}\\
-[h, f]&=&-4g_{-1}-2g_{-2}-10g_{-3}\end{array}\)
+e&=&3/2g_{3}+3g_{2}-4g_{1}\\
+f&=&-g_{-1}+g_{-2}+2g_{-3}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&3h_{3}+3h_{2}+4h_{1}\\
+[h, e]&=&3g_{3}+6g_{2}-8g_{1}\\
+[h, f]&=&2g_{-1}-2g_{-2}-4g_{-3}\end{array}\)
 <br>Centralizer type: 0
 <br>Unfold the hidden panel for more information.<br>
 
@@ -41,10 +41,10 @@ f&=&x_{5} g_{-1}+x_{4} g_{-2}+x_{6} g_{-3}\end{array}\)<br>Participating positiv
 \(\begin{array}{rcl}x_{1} x_{4} -3&=&0\\x_{2} x_{5} -4&=&0\\x_{3} x_{6} -3&=&0\\\end{array}\)
 <br>
 Starting h, e, f triple. H is computed according to Dynkin, and the coefficients of f are arbitrarily chosen. <br>More precisely, the chevalley generators participating in f are ordered in the order in which their roots appear, and the coefficients are chosen with an arbitrary formula. More precisely, the n^th coefficient equals (n-1)^2+1.<br>This arbitrary (but well-defined) choice of f guarantees that the computation is linear and fast. <br>
-\(\begin{array}{rcl}h&=&3h_{3}+3h_{2}+4h_{1}\\e&=&x_{3} g_{3}+x_{1} g_{2}+x_{2} g_{1}\\f&=&2g_{-1}+g_{-2}+5g_{-3}\end{array}\)<br>Matrix form of the system we are trying to solve:
+\(\begin{array}{rcl}h&=&3h_{3}+3h_{2}+4h_{1}\\e&=&x_{3} g_{3}+x_{1} g_{2}+x_{2} g_{1}\\f&=&-g_{-1}+g_{-2}+2g_{-3}\end{array}\)<br>Matrix form of the system we are trying to solve:
 \(\begin{pmatrix}1 & 0 & 0\\
-0 & 2 & 0\\
-0 & 0 & 5\\
+0 & -1 & 0\\
+0 & 0 & 2\\
 \end{pmatrix}[col. vect.]=\begin{pmatrix}3\\
 4\\
 3\\
@@ -62,10 +62,10 @@ sl(2)-module decomposition of the ambient Lie algebra: \(V_{4\psi}+3V_{2\psi}+V_
 Below is one possible realization of the sl(2) subalgebra.
 <br>
 \(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\
-e&=&2g_{4}+g_{3}\\
-f&=&2g_{-3}+g_{-4}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&2h_{3}+2h_{2}+2h_{1}\\
-[h, e]&=&4g_{4}+2g_{3}\\
-[h, f]&=&-4g_{-3}-2g_{-4}\end{array}\)
+e&=&2g_{4}-2g_{3}\\
+f&=&-g_{-3}+g_{-4}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&2h_{3}+2h_{2}+2h_{1}\\
+[h, e]&=&4g_{4}-4g_{3}\\
+[h, f]&=&2g_{-3}-2g_{-4}\end{array}\)
 <br>Centralizer type: 0
 <br>Unfold the hidden panel for more information.<br>
 
@@ -76,10 +76,10 @@ f&=&x_{4} g_{-3}+x_{3} g_{-4}\end{array}\)<br>Participating positive roots: 0 ve
 \(\begin{array}{rcl}x_{1} x_{3} -2&=&0\\x_{1} x_{3} -2&=&0\\x_{2} x_{4} -2&=&0\\\end{array}\)
 <br>
 Starting h, e, f triple. H is computed according to Dynkin, and the coefficients of f are arbitrarily chosen. <br>More precisely, the chevalley generators participating in f are ordered in the order in which their roots appear, and the coefficients are chosen with an arbitrary formula. More precisely, the n^th coefficient equals (n-1)^2+1.<br>This arbitrary (but well-defined) choice of f guarantees that the computation is linear and fast. <br>
-\(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\e&=&x_{1} g_{4}+x_{2} g_{3}\\f&=&2g_{-3}+g_{-4}\end{array}\)<br>Matrix form of the system we are trying to solve:
+\(\begin{array}{rcl}h&=&2h_{3}+2h_{2}+2h_{1}\\e&=&x_{1} g_{4}+x_{2} g_{3}\\f&=&-g_{-3}+g_{-4}\end{array}\)<br>Matrix form of the system we are trying to solve:
 \(\begin{pmatrix}1 & 0\\
 1 & 0\\
-0 & 2\\
+0 & -1\\
 \end{pmatrix}[col. vect.]=\begin{pmatrix}2\\
 2\\
 2\\
@@ -97,51 +97,51 @@ sl(2)-module decomposition of the ambient Lie algebra: \(4V_{2\psi}+3V_{0}\)
 Below is one possible realization of the sl(2) subalgebra.
 <br>
 \(\begin{array}{rcl}h&=&h_{3}+h_{2}+2h_{1}\\
-e&=&g_{6}+1/2g_{1}\\
-f&=&2g_{-1}+g_{-6}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&h_{3}+h_{2}+2h_{1}\\
-[h, e]&=&2g_{6}+g_{1}\\
-[h, f]&=&-4g_{-1}-2g_{-6}\end{array}\)
+e&=&g_{6}-g_{1}\\
+f&=&-g_{-1}+g_{-6}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array}{rcl}[e, f]&=&h_{3}+h_{2}+2h_{1}\\
+[h, e]&=&2g_{6}-2g_{1}\\
+[h, f]&=&2g_{-1}-2g_{-6}\end{array}\)
 <br>Centralizer type: A^{2}_1
 <br>
 Killing form square of Cartan element dual to ambient long root: 16
 <br>
-Generators of centralizer: h_{3}-h_{2}, g_{2}+1/2g_{-3}, g_{3}+1/2g_{-2}
+Generators of centralizer: h_{3}-h_{2}, g_{2}-g_{-3}, g_{3}-g_{-2}
 <br>
-Cartan-generating semisimple element: \(2h_{3}-2h_{2}\), adjoint action: \(\begin{pmatrix}0 & 0 & 0\\
-0 & -4 & 0\\
-0 & 0 & 4\\
+Cartan-generating semisimple element: \(12h_{3}-12h_{2}\), adjoint action: \(\begin{pmatrix}0 & 0 & 0\\
+0 & -24 & 0\\
+0 & 0 & 24\\
 \end{pmatrix}\)
 <br>
-Characteristic polynomial ad H: x^3-16x 
+Characteristic polynomial ad H: x^3-576x 
 <br>
-Factorization of characteristic polynomial of ad H: (x )(x -4)(x +4)
+Factorization of characteristic polynomial of ad H: (x )(x -24)(x +24)
 <br>
-Eigenvalues of ad H: 0, 4, -4
+Eigenvalues of ad H: 0, 24, -24
 <br>
 3 eigenvectors of ad H: [(1, 0, 0)], [(0, 0, 1)], [(0, 1, 0)]
 <br>
-Co-symmetric Cartan Matrix of centralizer, scaled by ambient killing form: \(\begin{pmatrix}32\\
-\end{pmatrix}\)
-<br>
-Co-symmetric Cartan Matrix of centralizer, scaled by killing form restricted to centalizer: \(\begin{pmatrix}8\\
-\end{pmatrix}\)
-<br>
-Scalar product computed: \(\begin{pmatrix}1/2\\
-\end{pmatrix}\)
-<br>
 Centralizer type: A^{2}_1
 <br>
-Simple basis of Cartan of centralizer (1 total): \(h_{3}-h_{2}\), matching e: \(g_{3}+1/2g_{-2}\), verification: \( [h,e]-2e=0\), adjoint action: \(\begin{pmatrix}0 & 0 & 0\\
+Reductive components (1 total):
+<br>
+Scalar product computed: \(\begin{pmatrix}1/8\\
+\end{pmatrix}\)
+<br>
+Simple basis of Cartan of centralizer (1 total):<br>\(h_{3}-h_{2}\), matching e: \(g_{3}-g_{-2}\), verification: \( [h,e]-2e=0\), adjoint action: \(\begin{pmatrix}0 & 0 & 0\\
 0 & -2 & 0\\
 0 & 0 & 2\\
 \end{pmatrix}\)
 <br>
-Linear space basis of intersection of centralizer and ambient Cartan [\(h_{3}-h_{2}\), matching e: \(g_{3}+1/2g_{-2}\), verification: \( [h,e]-2e=0\), adjoint action: \(\begin{pmatrix}0 & 0 & 0\\
+Linear space basis of intersection of centralizer and ambient Cartan:<br>
+\(h_{3}-h_{2}\), matching e: \(g_{3}-g_{-2}\), verification: \( [h,e]-2e=0\), adjoint action: \(\begin{pmatrix}0 & 0 & 0\\
 0 & -2 & 0\\
 0 & 0 & 2\\
-\end{pmatrix}\)]
+\end{pmatrix}\)
 <br>
 Elements in Cartan dual to root system: (1), (-1)
+<br>
+Co-symmetric Cartan Matrix of centralizer, scaled by ambient killing form: \(\begin{pmatrix}32\\
+\end{pmatrix}\)
 <br>Unfold the hidden panel for more information.<br>
 
 <div class='lieAlgebraPanel'><div>
@@ -151,8 +151,8 @@ f&=&x_{4} g_{-1}+x_{3} g_{-6}\end{array}\)<br>Participating positive roots: 0 ve
 \(\begin{array}{rcl}x_{1} x_{3} +x_{2} x_{4} -2&=&0\\x_{1} x_{3} -1&=&0\\x_{1} x_{3} -1&=&0\\\end{array}\)
 <br>
 Starting h, e, f triple. H is computed according to Dynkin, and the coefficients of f are arbitrarily chosen. <br>More precisely, the chevalley generators participating in f are ordered in the order in which their roots appear, and the coefficients are chosen with an arbitrary formula. More precisely, the n^th coefficient equals (n-1)^2+1.<br>This arbitrary (but well-defined) choice of f guarantees that the computation is linear and fast. <br>
-\(\begin{array}{rcl}h&=&h_{3}+h_{2}+2h_{1}\\e&=&x_{1} g_{6}+x_{2} g_{1}\\f&=&2g_{-1}+g_{-6}\end{array}\)<br>Matrix form of the system we are trying to solve:
-\(\begin{pmatrix}1 & 2\\
+\(\begin{array}{rcl}h&=&h_{3}+h_{2}+2h_{1}\\e&=&x_{1} g_{6}+x_{2} g_{1}\\f&=&-g_{-1}+g_{-6}\end{array}\)<br>Matrix form of the system we are trying to solve:
+\(\begin{pmatrix}1 & -1\\
 1 & 0\\
 1 & 0\\
 \end{pmatrix}[col. vect.]=\begin{pmatrix}2\\
@@ -177,34 +177,6 @@ f&=&g_{-6}\end{array}\)<br>Lie brackets of the above elements.<br>\(\begin{array
 [h, e]&=&2g_{6}\\
 [h, f]&=&-2g_{-6}\end{array}\)
 <br>Centralizer type: A^{1}_1
-<br>
-Killing form square of Cartan element dual to ambient long root: 0/0
-<br>
-Generators of centralizer:  not computed.
-<br>
-Cartan-generating semisimple element: \(0\), adjoint action: \(\begin{pmatrix}\end{pmatrix}\)
-<br>
-Characteristic polynomial ad H: 0
-<br>
-Factorization of characteristic polynomial of ad H: 0/0
-<br>
-Eigenvalues of ad H: 
-<br>
-0 eigenvectors of ad H: 
-<br>
-Co-symmetric Cartan Matrix of centralizer, scaled by ambient killing form: \(\begin{pmatrix}\end{pmatrix}\)
-<br>
-Co-symmetric Cartan Matrix of centralizer, scaled by killing form restricted to centalizer: \(\begin{pmatrix}\end{pmatrix}\)
-<br>
-Scalar product computed: \(\begin{pmatrix}\end{pmatrix}\)
-<br>
-Centralizer type: A^{1}_1
-<br>
-Simple basis of Cartan of centralizer (0 total): 
-<br>
-Linear space basis of intersection of centralizer and ambient Cartan []
-<br>
-Elements in Cartan dual to root system: 
 <br>Unfold the hidden panel for more information.<br>
 
 <div class='lieAlgebraPanel'><div>

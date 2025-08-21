@@ -896,10 +896,9 @@ public:
   bool basicChecks(std::stringstream* commentsOnFailure);
   // Factors the polynomial. Returns true if the polynomial is
   // probably fully factored.
-  // Returns false if the polynomial factorization failed,
-  // in which case
-  // it still produces a valid, but possibly trivial
-  // factorization of the polynomial.
+  // Returns false if the polynomial factorization failed, in which case
+  // it still produces a valid, but possibly trivial factorization of the
+  // polynomial.
   // When the result is false, all polynomial factors that were not properly
   // probabilistically factored will be located in the nonReduced list of
   // factors.
@@ -932,6 +931,7 @@ public:
   std::string toStringResult(FormatExpressions* format = nullptr) const;
   bool hasLinearAndQuadraticFactorsOnly();
   PolynomialFactorizationUnivariate();
+  void clear();
 };
 
 template <class Coefficient>
@@ -957,14 +957,11 @@ public:
   );
   // In the following function we have that:
   // the format of the linear substitution is:
-  // substitution is a matrix whose number of rows minus 1 must equal the #
-  // number of
-  // target variables and whose number of columns must equal the number of
-  // variables in
-  // the current polynomial (this->totalVariables).
+  // substitution is a matrix whose number of rows minus 1 must equal the
+  // number of target variables and whose number of columns must equal the
+  // number of variables in the current polynomial (this->totalVariables).
   // The first row denotes the constant term in the substitution of the
-  // respective variable.
-  // An element in the x-th row and y-th column
+  // respective variable. An element in the x-th row and y-th column
   // is defined as element [x][y].
   void makeExponentSubstitution(Matrix<LargeInteger>& substitution);
   void multiplyByConstant(Coefficient& r);
@@ -1017,8 +1014,7 @@ public:
   }
   void makeLinearSubstitutionConstantTermsLastRow(Matrix<Coefficient>& matrix);
   // Interprets the polynomials in the substitution as a system of linear
-  // polynomial equations
-  // and converts them to a linear system.
+  // polynomial equations and converts them to a linear system.
   // Will crash if the polynomials are not linear.
   void getLinearSystemFromLinearPolynomials(
     Matrix<Coefficient>& outputHomogenousPart,
@@ -1207,9 +1203,9 @@ public:
   bool flagSystemProvenToHaveSolution;
   bool flagSystemSolvedOverBaseField;
   bool flagUsingAlgebraicClosure;
-  // For fields that are dynamically generated such as
-  // modular arithmetic elements (ElementZModP), use this element as
-  // factory to generate contstants.
+  // For fields that are dynamically generated such as modular arithmetic
+  // elements (ElementZModP), use this element as factory to generate
+  // contstants.
   Coefficient sampleCoefficient;
   List<Polynomial<Coefficient> > gaussianEliminatedSystem;
   AlgebraicClosureRationals* algebraicClosure;

@@ -979,6 +979,8 @@ void SlTwoSubalgebraCandidate::initializeUnknownTriples(
   if (!this->owner->weylGroup.dynkinType.isSimple(&type)) {
     type = 'X';
   }
+  Rational targetHLength =
+  targetH.scalarProduct(targetH, this->getOwnerWeyl().cartanSymmetric);
   for (int i = 0; i < this->participatingPositiveRoots.size; i ++) {
     // Initialize arbitrary triple
     ChevalleyGenerator negative;
@@ -988,7 +990,9 @@ void SlTwoSubalgebraCandidate::initializeUnknownTriples(
     );
     Polynomial<Rational> fArbitraryConstant;
     fArbitraryConstant.makeConstant(
-      SlTwoSubalgebraCandidate::fArbitraryCoefficient(i, type, rank)
+      SlTwoSubalgebraCandidate::fArbitraryCoefficient(
+        i, type, rank, targetHLength
+      )
     );
     this->fArbitrary.addMonomial(negative, fArbitraryConstant);
     ChevalleyGenerator positive;
@@ -1185,32 +1189,37 @@ bool SlTwoSubalgebraCandidate::attemptRealizingKostantSekiguchi() {
 }
 
 Rational SlTwoSubalgebraCandidate::fArbitraryCoefficient(
-  int coefficientIndex, char type, int rank
+  int coefficientIndex, char type, int rank, const Rational& hElementLength
 ) {
-  const List<Rational> arbitraryCoefficients =
-  SlTwoSubalgebraCandidate::fArbitraryCoefficientsPerType(type, rank);
+  List<Rational> arbitraryCoefficients =
+  SlTwoSubalgebraCandidate::fArbitraryCoefficients(type, rank, hElementLength);
   if (coefficientIndex < arbitraryCoefficients.size) {
     return arbitraryCoefficients[coefficientIndex];
   }
   return coefficientIndex * coefficientIndex + 1;
 }
 
-const List<Rational>& SlTwoSubalgebraCandidate::fArbitraryCoefficientsPerType(
-  char type, int rank
+List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
+  char type, int rank, const Rational& hElementLength
 ) {
   // Coefficients found by manual experimentation with the computation
   // end-to-end.
   // Do not work in all cases, found out by quick computational experiments.
-  static List<Rational> resultDefault({1, - 1, 2, - 2, 3, - 3, 4, - 4});
-  static List<Rational> resultC5({1, - 1, 3, - 2, 3, - 3, 4, - 4});
-  static List<Rational> resultB6({1, - 2, 5, 3, - 1, 3, 4, - 4});
-  if (type == 'C' && rank == 5) {
-    return resultC5;
+  if (type == 'C' && rank == 5 && hElementLength == 10) {
+    return List<Rational>({1, - 1, 3, - 2, 3});
   }
   if (type == 'B' && rank == 6) {
-    return resultB6;
+    if (hElementLength == 64) {
+      return List<Rational>({1, - 1, 3, - 1, 3, - 3});
+    }
+    if (hElementLength == 16) {
+      return List<Rational>({1, 1, 1, 1, - 1, 1});
+    }
+    if (hElementLength == 6) {
+      return List<Rational>({1, - 1, 2, - 1, 3, - 3});
+    }
   }
-  return resultDefault;
+  return List<Rational>({1, - 1, 2, - 2, 3, - 3, 4, - 4});
 }
 
 bool SlTwoSubalgebraCandidate::checkConsistencyParticipatingRoots(
@@ -1757,7 +1766,7 @@ bool CentralizerComputer::compute() {
       return true;
     }
   }
-  for (int attempt = 0; attempt < 3; attempt ++) {
+  for (int attempt = 0; attempt < 2; attempt ++) {
     ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
     for (int i = 0; i < this->centralizerBasis.size; i ++) {
       const ElementSemisimpleLieAlgebra<Rational>& summand =
@@ -1765,12 +1774,6 @@ bool CentralizerComputer::compute() {
       Rational coefficient = 1;
       if (attempt == 1 && i % 2 == 0) {
         coefficient = - 1;
-      }
-      if (attempt == 2) {
-        coefficient =
-        SlTwoSubalgebraCandidate::fArbitraryCoefficient(
-          i, 'A', this->owner->weylGroup.dynkinType.getRank()
-        );
       }
       semisimpleCandidate += summand * coefficient;
     }
@@ -1828,9 +1831,22 @@ bool CentralizerComputer::computeRootSpaces() {
     }
     processedEigenValues.addOnTopNoRepetition(eigenValue);
     if (!this->computeRootSpaceForNonZeroEigenvalue(eigenValue)) {
+      global.comments
+      << "<br>DEBUG: failed eigenvalue finding for: "
+      << this->label
+      << " value:  "
+      << eigenValue
+      << "eigenvalues: "
+      << this->semisimpleElementAdjointEigenvalueFinder.
+      eigenValuesWithoutMultiplicity;
       return false;
     }
   }
+  global.comments
+  << "<br>DEBUG: found eigenvalues: "
+  << this->label
+  << " value:  "
+  << processedEigenValues.toString();
   return true;
 }
 
@@ -1854,6 +1870,12 @@ bool CentralizerComputer::computeRootSpaceForNonZeroEigenvalue(
   this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenValue(
     minusEigenvalue, negativeRootSpace
   );
+  if (rootSpace.size != 1) {
+    global.fatal
+    << "This should be impossible: negative and "
+    << "positive root spaces have different multiplicities."
+    << global.fatal;
+  }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> e;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> f;
   this->getCentralizerElementFromCoordinates(rootSpace[0], e);
@@ -1867,12 +1889,18 @@ bool CentralizerComputer::computeRootSpaceForNonZeroEigenvalue(
   proportionalToE.isProportionalTo(e, coefficientOrProportionality);
   if (!mustBeTrue) {
     global.fatal
-    << "Corrupt h element: "
+    << "In type: "
+    << this->label
+    << ". Corrupt h element: "
     << h.toStringPretty()
-    << " with [h,e]="
-    << proportionalToE.toStringPretty()
-    << " not proportional to "
+    << " constructed as h=[e,f] where \\(e="
     << e.toStringPretty()
+    << "\\) and \\(f="
+    << f.toStringPretty()
+    << "\\). "
+    << "We have that \\([h,e]="
+    << proportionalToE.toStringPretty()
+    << "\\) which is not proportional to "
     << " and eigenvalue equal to: "
     << eigenvalue.toString()
     << global.fatal;
@@ -1904,9 +1932,17 @@ bool CentralizerComputer::trySemisimpleElement(
   ) {
     return false;
   }
+  global.comments
+  << "<br>DEBUG: before root spaces for: "
+  << this->label
+  << ": ";
   if (!this->computeRootSpaces()) {
     return false;
   }
+  global.comments
+  << "<br>DEBUG: before compute types for: "
+  << this->label
+  << ": ";
   if (!this->computeTypes()) {
     return false;
   }
@@ -2021,6 +2057,12 @@ bool CentralizerComputer::computeTypes() {
   this->typeIfKnown.makeZero();
   for (SimpleSubalgebraComponent& simpleComponent : this->simpleComponents) {
     if (!simpleComponent.compute()) {
+      global.comments
+      << "<br>DEBUG: failed to compute for type: "
+      << this->label
+      << "; got "
+      << this->simpleComponents.size
+      << " components";
       return false;
     }
     this->typeIfKnown += simpleComponent.simpleType;
@@ -2127,6 +2169,9 @@ void PolynomialQuadraticRootFinder::initialize(
   AlgebraicClosureRationals* inputAlgebraicClosure
 ) {
   this->algebraicClosure = inputAlgebraicClosure;
+  this->roots.clear();
+  this->polynomial.makeZero();
+  this->factorization.clear();
 }
 
 std::string PolynomialQuadraticRootFinder::toString(FormatExpressions* format)
@@ -2155,6 +2200,9 @@ void MatrixEigenvalueFinder::initialize(
   AlgebraicClosureRationals* inputAlgebraicClosure
 ) {
   this->algebraicClosure = inputAlgebraicClosure;
+  this->characteristicPolynomial.makeZero();
+  this->eigenValuesWithoutMultiplicity.clear();
+  this->eigenvectors.clear();
   this->eigenvalueFinder.initialize(this->algebraicClosure);
 }
 
@@ -2182,6 +2230,7 @@ void MatrixEigenvalueFinder::eigenVectorsFromEigenValue(
 bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
   Matrix<Rational>& input
 ) {
+  this->initialize(this->algebraicClosure);
   this->matrix = input;
   this->matrix.getCharacteristicPolynomialStandardRepresentation(
     this->characteristicPolynomial
@@ -2192,7 +2241,6 @@ bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
   ) {
     global.fatal << "Bad characteristic polynomial degree. " << global.fatal;
   }
-  this->eigenvalueFinder.initialize(this->algebraicClosure);
   if (!this->eigenvalueFinder.findRoots(this->characteristicPolynomial)) {
     return false;
   }

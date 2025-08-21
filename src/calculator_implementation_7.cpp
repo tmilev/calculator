@@ -2609,7 +2609,7 @@ bool CalculatorFunctions::splitToPartialFractionsOverAlgebraicRealsAlgorithm(
 bool CalculatorFunctions::gaussianEliminationMatrix(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("gaussianEliminationMatrix");
+  STACK_TRACE("CalculatorFunctions::gaussianEliminationMatrix");
   Expression converted;
   if (!CalculatorConversions::makeMatrix(calculator, input, converted)) {
     return
@@ -6241,24 +6241,6 @@ bool CalculatorFunctionsIntegration::integrateTanPowerNSecPowerM(
       );
     } else {
       return false;
-      /*currentE= (oneE-cosDoubleE)/twoE;
-      powerE.assignValue(powerSine/2, calculator);
-      currentIntegrandSinePart.makeXOX
-      (calculator, calculator.opThePower(),currentE, powerE);
-      currentE= (oneE+cosDoubleE)/twoE;
-      powerE.assignValue(powerCosine/2, calculator);
-      currentIntegrandCosinePart.makeXOX
-      (calculator, calculator.opThePower(),currentE, powerE);
-      currentCF.assignValue(trigPoly.coeffs[i], calculator);
-      currentIntegrandNonPolynomializedE=
-      currentCF*currentIntegrandSinePart*currentIntegrandCosinePart;
-      currentIntegrandE.reset(calculator);
-      currentIntegrandE.addChildAtomOnTop("Polynomialize");
-      currentIntegrandE.addChildOnTop(currentIntegrandNonPolynomializedE);
-      currentIntegral.makeIntegral(calculator,
-      integrationSet, currentIntegrandE, variableExpression);
-      outputCandidate += currentIntegral;
-      continue;*/
     }
     currentIntegrandNonPolynomializedE =
     currentCF * currentIntegrandTanPart * currentIntegrandSecPart;
@@ -10597,14 +10579,6 @@ bool CalculatorFunctions::transpose(
   } else {
     calculator.getMatrixExpressions(input, matrix);
   }
-  // The commented code used to be here. I don't remember why I added it,
-  // perhaps there was a solid reason?
-  // If the code is uncommented, then ((1,2),(3,5))^t will not be transposed
-  // according to expectation.
-  // If the commented code needs to be restored, please document why.
-  // if (input.isSequenceNElements())
-  //   if (matrix.numberOfRows !=1)
-  //     return false;
   matrix.transpose();
   return output.assignMatrixExpressions(matrix, calculator, true, true);
 }
@@ -11334,7 +11308,7 @@ bool CalculatorFunctions::convertPolynomialModularToPolynomialRational(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctions::convertPolynomialModulotIntegerToInteger"
+    "CalculatorFunctions::convertPolynomialModularToPolynomialRational"
   );
   if (input.size() < 2) {
     return false;

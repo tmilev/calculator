@@ -168,6 +168,15 @@ public:
 // Contains internal information about the computation,
 // intermediate systems of equations, etc.
 class SlTwoSubalgebraCandidate {
+  // Returns a list of arbitrarily chosen small numbers that, when
+  // chosen as arbitrary coefficients for forming the element f
+  // result in an H, E, F triple.
+  // The numbers were found by quick manual experimentation with small integers
+  // of approximate value less than 20 and running the calculator to
+  // inspect if so formed H, F elements extend to H, E, F-triples.
+  static List<Rational> fArbitraryCoefficients(
+    char type, int rank, const Rational& hElementLength
+  );
 public:
   // Owner semisimple Lie algebra.
   SemisimpleLieAlgebra* owner;
@@ -178,7 +187,6 @@ public:
   // as rational linear combinations of the Chevalley generators.
   // However, we need this for real form computations.
   AlgebraicClosureRationals* algebraicClosure;
-  // Initialized.
   Rational lengthHSquared;
   Vector<Rational> candidateH;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> hAlgebraic;
@@ -284,17 +292,8 @@ public:
     LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
     cartanInvolutionPreservedByEMinusF
   );
-  // Returns a list of arbitrarily chosen small numbers that, when
-  // chosen as arbitrary coefficients for forming the element f
-  // result in an H, E, F triple.
-  // The numbers were found by quick manual experimentation with small integers
-  // of approximate value less than 20 and running the calculator to
-  // inspect if so formed H, F elements extend to H, E, F-triples.
-  static const List<Rational>& fArbitraryCoefficientsPerType(
-    char type, int rank
-  );
   static Rational fArbitraryCoefficient(
-    int coefficientIndex, char type, int rank
+    int coefficientIndex, char type, int rank, const Rational& hElementLength
   );
 };
 

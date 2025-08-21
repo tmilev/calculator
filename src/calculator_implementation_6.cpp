@@ -1674,7 +1674,7 @@ bool CalculatorFunctionsIntervals::unionIntervals(
 bool CalculatorFunctionsIntervals::normalizeIntervals(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsIntervals::outerNormalizeIntervals");
+  STACK_TRACE("CalculatorFunctionsIntervals::normalizeIntervals");
   if (input.size() != 2) {
     return false;
   }
@@ -2061,7 +2061,7 @@ bool CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
   STACK_TRACE(
-    "CalculatorFunctionsBinaryOps::powerRatByRatReducePrimeFactors"
+    "CalculatorFunctionsBinaryOps::powerRationalByRationalOutputAlgebraic"
   );
   if (!input.startsWith(calculator.opPower(), 3)) {
     return false;
@@ -2223,18 +2223,6 @@ bool CalculatorFunctions::elementEllipticCurveNormalForm(
   }
   const Expression& xDefinitionExpression = input[2];
   const Expression& yDefinitionExpression = input[3];
-  //  HashedList<Expression> xEcandidates, yEcandidates;
-  //  if (!xDefE.getFreeVariables(xEcandidates, false))
-  // return calculator << "Failed to get free variables from " <<
-  // xDefE.toString();
-  //  if (!yDefE.getFreeVariables(yEcandidates, false))
-  // return calculator << "Failed to get free variables from " <<
-  // yDefE.toString();
-  //  if (xEcandidates.size != 1 || yEcandidates.size != 1)
-  // return calculator << "Couldn't get single free variable from " <<
-  // xEcandidates.toStringCommaDelimited()
-  //    << " and/or " << yEcandidates.toStringCommaDelimited();
-  //  if (CalculatorFunctions::equalityToArithmeticExpression())
   if (!xDefinitionExpression.startsWith(calculator.opDefine(), 3)) {
     return
     calculator
@@ -2424,7 +2412,8 @@ bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureWithOptions(
   if (!global.userDefaultHasAdminRights()) {
     return
     calculator
-    << "Function CalculatorFunctions::precomputeSemisimpleLieAlgebraStructure "
+    << "Function CalculatorFunctions::"
+    << "precomputeSemisimpleLieAlgebraStructureWithOptions "
     << "requires administrator access. "
     << "To get one, install the calculator on your machine.";
   }

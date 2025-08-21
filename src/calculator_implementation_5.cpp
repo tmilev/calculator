@@ -105,14 +105,14 @@ double MeshTriangles::getValueAtPoint(const Vector<double>& point) {
 }
 
 void MeshTriangles::evaluateFunAtTriangleVertices(int triangleIndex) {
-  STACK_TRACE("MeshTriangles::EvaluateFunAtTriangleVertices");
+  STACK_TRACE("MeshTriangles::evaluateFunAtTriangleVertices");
   for (int j = 0; j < this->triangles[triangleIndex].size; j ++) {
     this->getValueAtPoint(this->triangles[triangleIndex][j]);
   }
 }
 
 double MeshTriangles::getTriangleMaxSideLength(int triangleIndex) {
-  STACK_TRACE("MeshTriangles::GetTriangleMaxSideLength");
+  STACK_TRACE("MeshTriangles::getTriangleMaxSideLength");
   if (this->triangles[triangleIndex].size != 3) {
     global.fatal
     << "Error: triangle needs three vertices, instead it has vertices: "
@@ -234,7 +234,7 @@ void MeshTriangles::subdivide(int triangleIndex) {
 }
 
 void MeshTriangles::computeImplicitPlotPart2() {
-  STACK_TRACE("MeshTriangles::ComputeImplicitPlotPart2");
+  STACK_TRACE("MeshTriangles::computeImplicitPlotPart2");
   this->triangles.setExpectedSize(this->maximimNumberOfTriangles * 2);
   this->trianglesUsed.setExpectedSize(this->maximimNumberOfTriangles * 2);
   this->trianglesUsed.initializeFillInObject(this->triangles.size, true);
@@ -318,7 +318,7 @@ void MeshTriangles::computeImplicitPlotPart2() {
 }
 
 void MeshTriangles::computeImplicitPlot() {
-  STACK_TRACE("MeshTriangles::ComputeImplicitPlot");
+  STACK_TRACE("MeshTriangles::computeImplicitPlot");
   if (this->xStartingGridCount == 0 || this->yStartingGridCount == 0) {
     return;
   }
@@ -426,7 +426,7 @@ bool CalculatorFunctionsPlot::plotImplicitShowGridFunction(
 bool MeshTriangles::computePoints(
   Calculator& calculator, const Expression& input, bool showGrid
 ) {
-  STACK_TRACE("MeshTriangles::ComputePoints");
+  STACK_TRACE("MeshTriangles::computePoints");
   if (input.size() < 5) {
     return false;
   }
@@ -2426,7 +2426,7 @@ std::string InputBox::getSliderName() const {
 }
 
 std::string InputBox::getInputBoxLatex() const {
-  STACK_TRACE("InputBox::getUserInputBoxAndLatex");
+  STACK_TRACE("InputBox::getInputBoxLatex");
   std::stringstream out;
   double reader = 0;
   out.precision(4);

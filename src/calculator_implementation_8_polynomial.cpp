@@ -298,8 +298,13 @@ bool CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments(
   Expression& output,
   bool includeComments
 ) {
-  STACK_TRACE("CalculatorFunctionsPolynomial::factorPolynomialFiniteFields");
+  STACK_TRACE(
+    "CalculatorFunctionsPolynomial::factorPolynomialFiniteFieldsWithComments"
+  );
   WithContext<Polynomial<Rational> > polynomial;
+  if (input.size() < 2) {
+    return false;
+  }
   if (!CalculatorConversions::convert(calculator, input[1], polynomial)) {
     return false;
   }
@@ -543,15 +548,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(
     );
   }
   Vector<Polynomial<Rational> > inputs;
-  if (
-    calculator.getVectorFromFunctionArguments(
-      input,
-      inputs,
-      nullptr,
-      - 1 // ,
-      //    CalculatorConversions::functionPolynomial<Rational>
-    )
-  ) {
+  if (calculator.getVectorFromFunctionArguments(input, inputs, nullptr, - 1)) {
     return
     CalculatorFunctionsPolynomial::sylvesterMatrixFromPolynomials(
       calculator, inputs, nullptr, output
@@ -560,11 +557,7 @@ bool CalculatorFunctionsPolynomial::sylvesterMatrix(
   Vector<Polynomial<AlgebraicNumber> > inputsAlgebraic;
   if (
     calculator.getVectorFromFunctionArguments(
-      input,
-      inputsAlgebraic,
-      nullptr,
-      - 1 // ,
-      // CalculatorConversions::functionPolynomial<AlgebraicNumber>
+      input, inputsAlgebraic, nullptr, - 1
     )
   ) {
     return
@@ -861,10 +854,8 @@ private:
   // with respect to calculator sorting.
   ExpressionContext extractedContext;
   // Comptutation context:
-  // contains all involved variables, but in possibly
-  // different order specified by the
-  // order
-  // argument.
+  // contains all involved variables, but in possibly different order
+  // specified by the order argument.
   ExpressionContext desiredContext;
   int upperBound;
   LargeInteger modulus;

@@ -2124,9 +2124,8 @@ bool PolynomialFactorizationUnivariate<Coefficient>::factor(
   std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("PolynomialFactorizationUnivariate::factor");
+  this->clear();
   this->original = input;
-  this->reduced.clear();
-  this->nonReduced.clear();
   if (this->original.isConstant(&this->constantFactor)) {
     return true;
   }
@@ -2192,6 +2191,13 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountNonReducedFactor(
   }
   this->nonReduced.addOnTop(quotient);
   return true;
+}
+
+template <class Coefficient>
+void PolynomialFactorizationUnivariate<Coefficient>::clear() {
+  this->reduced.clear();
+  this->nonReduced.clear();
+  this->computations = 0;
 }
 
 template <class Coefficient>

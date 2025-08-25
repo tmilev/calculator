@@ -6,6 +6,46 @@
 #include "progress_report.h"
 
 template <class Coefficient>
+bool Matrix<Coefficient>::changeBasis(
+  const List<Vector<Coefficient> >& newBasis, Matrix<Coefficient>& output
+) const {
+  STACK_TRACE("Matrix::changeBasis");
+  return Matrix<Coefficient>::changeBasis(*this, newBasis, output);
+}
+
+template <class Coefficient>
+bool Matrix<Coefficient>::changeBasis(
+  const Matrix<Coefficient>& linearOperator,
+  const List<Vector<Coefficient> >& newBasis,
+  Matrix<Coefficient>& output
+) {
+  STACK_TRACE("Matrix::changeBasis");
+  if (&linearOperator == &output) {
+    Matrix<Coefficient> inputCopy = linearOperator;
+    return Matrix<Coefficient>::changeBasis(inputCopy, newBasis, output);
+  }
+  if (!linearOperator.preservesVectorSpace(newBasis)) {
+    return false;
+  }
+  int d = newBasis.size;
+  Matrix<Coefficient> gramMatrix;
+  output.initialize(d, d);
+  gramMatrix.initialize(d, d);
+  Vector<Coefficient> vectorColumn;
+  Coefficient zero;
+  zero = 0;
+  for (int j = 0; j < d; j ++) {
+    linearOperator.actOnVectorColumn(newBasis[j], vectorColumn, zero);
+    for (int i = 0; i < d; i ++) {
+      output(i, j) = newBasis[i].scalarEuclidean(vectorColumn);
+      gramMatrix(i, j) = newBasis[i].scalarEuclidean(newBasis[j]);
+    }
+  }
+  output.multiplyOnTheLeft(gramMatrix.inverse());
+  return true;
+}
+
+template <class Coefficient>
 void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
   Coefficient& output, const Coefficient& ringOne, const Coefficient& ringZero
 ) {
@@ -39,47 +79,38 @@ void Matrix<Coefficient>::computeDeterminantOverwriteMatrix(
     output *= scalar;
     scalar.invert();
     this->rowTimesScalar(i, scalar);
-    if (doReport) {
-      if (report.tickAndWantReport()) {
-        std::stringstream reportStream;
-        reportStream
-        << "Pivot row "
-        << i + 1
-        << " out of "
-        << dimension
-        << ": ";
-        for (
-          int colCounter = 0; colCounter < this->numberOfColumns; colCounter
-          ++
-        ) {
-          reportStream << (*this)(i, colCounter).toString();
-          if (colCounter != this->numberOfColumns - 1) {
-            reportStream << ", ";
-          }
+    if (doReport && report.tickAndWantReport()) {
+      std::stringstream reportStream;
+      reportStream << "Pivot row " << i + 1 << " out of " << dimension << ": ";
+      for (int column = 0; column < this->numberOfColumns; column ++) {
+        reportStream << (*this)(i, column).toString();
+        if (column != this->numberOfColumns - 1) {
+          reportStream << ", ";
         }
-        report.report(reportStream.str());
       }
+      report.report(reportStream.str());
     }
     for (int j = i + 1; j < dimension; j ++) {
-      if (!this->elements[j][i].isEqualToZero()) {
-        scalar = this->elements[j][i];
-        scalar.negate();
-        this->addTwoRows(i, j, i, scalar);
-        if (doReport) {
-          if (report2.tickAndWantReport()) {
-            std::stringstream reportStream;
-            reportStream
-            << "Computing large determinant: pivot "
-            << i + 1
-            << ", row "
-            << j
-            << " out of "
-            << dimension
-            << " times  "
-            << dimension
-            << " total.";
-            report2.report(reportStream.str());
-          }
+      if (this->elements[j][i].isEqualToZero()) {
+        continue;
+      }
+      scalar = this->elements[j][i];
+      scalar.negate();
+      this->addTwoRows(i, j, i, scalar);
+      if (doReport) {
+        if (report2.tickAndWantReport()) {
+          std::stringstream reportStream;
+          reportStream
+          << "Computing large determinant: pivot "
+          << i + 1
+          << ", row "
+          << j
+          << " out of "
+          << dimension
+          << " times  "
+          << dimension
+          << " total.";
+          report2.report(reportStream.str());
         }
       }
     }
@@ -300,7 +331,7 @@ void Vectors<Coefficient>::chooseABasis() {
   Selection selection;
   for (int i = 0; i < this->size; i ++) {
     output.addOnTop(this->objects[i]);
-    if (output.getRankElementSpan(&toBeEliminated, &selection) < output.size) {
+    if (output.getRankLinearSpan(&toBeEliminated, &selection) < output.size) {
       output.removeLastObject();
     }
   }
@@ -316,7 +347,7 @@ void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(
   if (this->size != 0 && dimension != this->getDimension()) {
     global.fatal << "Vector dimension is incorrect. " << global.fatal;
   }
-  int currentRank = this->getRankElementSpan(buffer, selection);
+  int currentRank = this->getRankLinearSpan(buffer, selection);
   if (currentRank == dimension) {
     return;
   }
@@ -324,7 +355,7 @@ void Vectors<Coefficient>::beefUpWithEiToLinearlyIndependentBasis(
   for (int i = 0; i < dimension && currentRank < dimension; i ++) {
     vector.makeEi(dimension, i);
     this->addOnTop(vector);
-    int candidateRank = this->getRankElementSpan(buffer, selection);
+    int candidateRank = this->getRankLinearSpan(buffer, selection);
     if (candidateRank > currentRank) {
       currentRank = candidateRank;
     } else {
@@ -446,7 +477,7 @@ void Matrix<Coefficient>::gaussianEliminationByRows(
   if (this->numberOfRows == 0) {
     global.fatal
     << "Request to do Gaussian elimination on a matrix with "
-    << " zero rows. "
+    << "zero rows. "
     << global.fatal;
   }
   if (carbonCopyMatrix != 0) {

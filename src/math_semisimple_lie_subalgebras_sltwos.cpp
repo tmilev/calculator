@@ -411,39 +411,6 @@ std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleStandardRealization(
   return out.str();
 }
 
-void SlTwoSubalgebra::computeDynkinsEpsilon(WeylGroupData& weyl) {
-  this->dynkinsEpsilon =
-  this->diagramM.numberRootsGeneratedByDiagram() + this->diagramM.rankTotal();
-  int r = 0;
-  for (int i = 0; i < this->hCharacteristic.size; i ++) {
-    if (!this->hCharacteristic[i].isEqualToZero()) {
-      r ++;
-    }
-  }
-  this->dynkinsEpsilon += r;
-  for (int i = 0; i < weyl.rootSystem.size; i ++) {
-    int nonZeroFound = 0;
-    for (int j = 0; j < this->hCharacteristic.size; j ++) {
-      if (weyl.rootSystem[i][j] == 1) {
-        nonZeroFound ++;
-      }
-      if (nonZeroFound > 1) {
-        break;
-      }
-    }
-    if (nonZeroFound == 1) {
-      this->dynkinsEpsilon --;
-    }
-  }
-  this->dynkinsEpsilon = 0;
-  for (int i = 0; i < this->hCharacteristic.size; i ++) {
-    if (this->hCharacteristic[i] == 1) {
-      this->dynkinsEpsilon = - 1;
-    }
-  }
-  this->dynkinsEpsilon = 0;
-}
-
 bool SlTwoSubalgebra::moduleDecompositionFitsInto(const SlTwoSubalgebra& other)
 const {
   return
@@ -1148,7 +1115,7 @@ void SlTwoSubalgebraCandidate::initializeHEFSystemFromFCoefficients(
 void SlTwoSubalgebraCandidate::initializeHEFSystemFromFCoefficientsPartTwo() {
   STACK_TRACE(
     "SlTwoSubalgebraCandidate::"
-    "initializeHEFSystemFromECoefficientsPartTwo"
+    "initializeHEFSystemFromFCoefficientsPartTwo"
   );
   this->systemArbitraryMatrix.initialize(
     this->systemToSolve.size, this->participatingPositiveRoots.size
@@ -1205,8 +1172,17 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
   // Coefficients found by manual experimentation with the computation
   // end-to-end.
   // Do not work in all cases, found out by quick computational experiments.
+  if (type == 'C' && rank == 4 && hElementLength == 8) {
+    return List<Rational>({1, 1, - 1, 1});
+  }
   if (type == 'C' && rank == 5 && hElementLength == 10) {
     return List<Rational>({1, - 1, 3, - 2, 3});
+  }
+  if (type == 'C' && rank == 5 && hElementLength == 8) {
+    return List<Rational>({1, 1, 1, 1, 1});
+  }
+  if (type == 'F' && hElementLength == 56) {
+    return List<Rational>({1, 1, 1, 1});
   }
   if (type == 'B' && rank == 6) {
     if (hElementLength == 64) {
@@ -1215,8 +1191,11 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
     if (hElementLength == 16) {
       return List<Rational>({1, 1, 1, 1, - 1, 1});
     }
+    if (hElementLength == 12) {
+      return List<Rational>({1, 1, - 1, 1, 1, 1});
+    }
     if (hElementLength == 6) {
-      return List<Rational>({1, - 1, 2, - 1, 3, - 3});
+      return List<Rational>({1, - 1, 1, 1, 1, - 1});
     }
   }
   return List<Rational>({1, - 1, 2, - 2, 3, - 3, 4, - 4});
@@ -1707,12 +1686,12 @@ std::string CentralizerComputer::toString() const {
   toStringPretty();
   out
   << "\n<br>\nFactorization of characteristic polynomial of ad H: "
-  << this->semisimpleElementAdjointEigenvalueFinder.eigenvalueFinder.
-  factorization.toStringResult();
+  << this->semisimpleElementAdjointEigenvalueFinder.
+  factorizationMinimalPolynomial().toStringResult();
   out
   << "\n<br>\nEigenvalues of ad H: "
-  << this->semisimpleElementAdjointEigenvalueFinder.eigenvalueFinder.roots.
-  toStringCommaDelimited();
+  << this->semisimpleElementAdjointEigenvalueFinder.
+  eigenValuesWithoutMultiplicity.toStringCommaDelimited();
   out
   << "\n<br>\n"
   << this->semisimpleElementAdjointEigenvalueFinder.numberOfEigenVectors()
@@ -1743,8 +1722,7 @@ bool CentralizerComputer::compute() {
     for (int attempt = 0; attempt < 3; attempt ++) {
       int counter = 1;
       // Construct an arbitrary linear combination of the elements of
-      // the intersection of the ambient Cartan with the
-      // centralizer.
+      // the intersection of the ambient Cartan with the centralizer.
       // We want the arbitrary linear combination to have maximal rank
       // of its adjoint action.
       // This happens with probability 1 for a random linear combination.
@@ -1785,7 +1763,7 @@ bool CentralizerComputer::compute() {
 }
 
 void CentralizerComputer::getCentralizerElementFromCoordinates(
-  Vector<AlgebraicNumber>& vector,
+  const Vector<AlgebraicNumber>& vector,
   ElementSemisimpleLieAlgebra<AlgebraicNumber>& output
 ) {
   output.makeZero();
@@ -1817,6 +1795,12 @@ bool CentralizerComputer::computeRootSpaces() {
   STACK_TRACE("CentralizerComputer::computeRootSpaces");
   HashedList<AlgebraicNumber> processedEigenValues;
   processedEigenValues.addOnTop(this->algebraicClosureRationals->zero());
+  if (!this->computeCartanOfCentalizerFromSemisimpleElement()) {
+    // The centralizer is not generic enough, and so the
+    // elements that centralize the semisimple element
+    // do not commute with one another.
+    return false;
+  }
   // Find all non-zero eigenspaces.
   for (
     const AlgebraicNumber& eigenValue :
@@ -1831,22 +1815,69 @@ bool CentralizerComputer::computeRootSpaces() {
     }
     processedEigenValues.addOnTopNoRepetition(eigenValue);
     if (!this->computeRootSpaceForNonZeroEigenvalue(eigenValue)) {
-      global.comments
-      << "<br>DEBUG: failed eigenvalue finding for: "
-      << this->label
-      << " value:  "
-      << eigenValue
-      << "eigenvalues: "
-      << this->semisimpleElementAdjointEigenvalueFinder.
-      eigenValuesWithoutMultiplicity;
       return false;
     }
   }
-  global.comments
-  << "<br>DEBUG: found eigenvalues: "
-  << this->label
-  << " value:  "
-  << processedEigenValues.toString();
+  return true;
+}
+
+bool CentralizerComputer::computeCartanOfCentalizerFromSemisimpleElement() {
+  STACK_TRACE(
+    "CentralizerComputer::computeCartanOfCentalizerFromSemisimpleElement"
+  );
+  List<ElementSemisimpleLieAlgebra<Rational> > centralizerOfSemisimpleElement;
+  ElementSemisimpleLieAlgebra<Rational> semisimpleElementOverTheRationals;
+  // Our starting semisimple element is supposed to be defined over the
+  // rationals.
+  // Convert back to an element over the rationals or throw:
+  semisimpleElementOverTheRationals = this->semisimpleElement.h;
+  this->owner->getCommonCentralizer(
+    List<ElementSemisimpleLieAlgebra<Rational> >(
+      {semisimpleElementOverTheRationals}
+    ),
+    centralizerOfSemisimpleElement
+  );
+  ElementSemisimpleLieAlgebra<Rational>::intersectVectorSpaces(
+    centralizerOfSemisimpleElement,
+    this->centralizerBasis,
+    this->centralizerCartan
+  );
+  ElementSemisimpleLieAlgebra<Rational> mustBeZero;
+  for (int i = 0; i < this->centralizerCartan.size; i ++) {
+    for (int j = i + 1; j < this->centralizerCartan.size; j ++) {
+      this->centralizerCartan[i].lieBracketOnTheRight(
+        this->centralizerCartan[j], mustBeZero
+      );
+      if (!mustBeZero.isEqualToZero()) {
+        // The original element was not semisimple or was not generic enough.
+        return false;
+      }
+    }
+  }
+  // Reset the compute-on-demand centralizerCartanCandidates.
+  this->centralizerCartanCandidates.clear();
+  return true;
+}
+
+bool CentralizerComputer::computeOnDemandCartanOfCentralizerMatrixForm() {
+  STACK_TRACE(
+    "CentralizerComputer::computeOnDemandCartanOfCentralizerMatrixForm"
+  );
+  if (this->centralizerCartanCandidates.size > 0) {
+    // Already computed.
+    return true;
+  }
+  ElementSemisimpleLieAlgebra<Rational> zero;
+  for (
+    const ElementSemisimpleLieAlgebra<Rational>& splitter :
+    this->centralizerCartan
+  ) {
+    CartanElementCandidate splitterCandidate;
+    if (!this->makeCartanCandidate(splitter, zero, zero, splitterCandidate)) {
+      return false;
+    }
+    this->centralizerCartanCandidates.addOnTop(splitterCandidate);
+  }
   return true;
 }
 
@@ -1856,30 +1887,149 @@ bool CentralizerComputer::computeRootSpaceForNonZeroEigenvalue(
   STACK_TRACE("CentralizerComputer::computeRootSpaceForNonZeroEigenvalue");
   Vectors<AlgebraicNumber> rootSpace;
   Vectors<AlgebraicNumber> negativeRootSpace;
-  this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenValue(
+  this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenvalue(
     eigenvalue, rootSpace
   );
-  if (rootSpace.size != 1) {
-    // We have an eigenvalue with multiplicity more than one.
-    // The semisimple element we started with is not generic enough to split
-    // the weight spaces.
-    return false;
-  }
   AlgebraicNumber minusEigenvalue = eigenvalue;
   minusEigenvalue.negate();
-  this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenValue(
+  this->semisimpleElementAdjointEigenvalueFinder.eigenVectorsFromEigenvalue(
     minusEigenvalue, negativeRootSpace
   );
-  if (rootSpace.size != 1) {
+  if (rootSpace.size == 1 && negativeRootSpace.size == 1) {
+    return
+    this->computeRootSpaceFromEAndF(
+      eigenvalue, rootSpace[0], negativeRootSpace[0]
+    );
+  }
+  // The root spaces are of higher dimension. We need to separate them further.
+  // We will attempt to do so by subdividing the root spaces into eigenvectors
+  // with respect to other elements of the centalizer.
+  if (!this->computeOnDemandCartanOfCentralizerMatrixForm()) {
+    return false;
+  }
+  for (
+    const CartanElementCandidate& elementCentralizerCartan :
+    this->centralizerCartanCandidates
+  ) {
+    if (
+      this->subsplitRootSpaces(
+        eigenvalue, rootSpace, negativeRootSpace, elementCentralizerCartan
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool CentralizerComputer::subsplitRootSpaces(
+  const AlgebraicNumber& startingEigenvalue,
+  const List<Vector<AlgebraicNumber> >& rootSpace,
+  const List<Vector<AlgebraicNumber> >& negativeRootSpace,
+  const CartanElementCandidate& splittingElementCentralizerCartan
+) {
+  STACK_TRACE("CentralizerComputer::subsplitRootSpaces");
+  Matrix<AlgebraicNumber> matrixPositive;
+  Matrix<AlgebraicNumber> matrixNegative;
+  if (
+    !splittingElementCentralizerCartan.adjointAction.changeBasis(
+      rootSpace, matrixPositive
+    ) ||
+    !splittingElementCentralizerCartan.adjointAction.changeBasis(
+      negativeRootSpace, matrixNegative
+    )
+  ) {
+    return false;
+  }
+  MatrixEigenvalueFinderAlgebraic positiveRootSplitter;
+  MatrixEigenvalueFinderAlgebraic negativeRootSplitter;
+  if (
+    !positiveRootSplitter.findEigenValuesAndEigenspaces(matrixPositive) ||
+    !negativeRootSplitter.findEigenValuesAndEigenspaces(matrixNegative)
+  ) {
+    return false;
+  }
+  int centralizerDimension = this->centralizerBasis.size;
+  for (
+    const AlgebraicNumber& eigenvalue :
+    positiveRootSplitter.eigenValuesWithoutMultiplicity
+  ) {
+    AlgebraicNumber minusEigenvalue = eigenvalue;
+    minusEigenvalue.negate();
+    if (
+      !negativeRootSplitter.eigenValuesWithoutMultiplicity.contains(
+        minusEigenvalue
+      )
+    ) {
+      return false;
+    }
+    Vectors<AlgebraicNumber> subsplitPositiveRootsRestricted;
+    Vectors<AlgebraicNumber> subsplitNegativeRootsRestricted;
+    positiveRootSplitter.eigenVectorsFromEigenvalue(
+      eigenvalue, subsplitPositiveRootsRestricted
+    );
+    negativeRootSplitter.eigenVectorsFromEigenvalue(
+      minusEigenvalue, subsplitNegativeRootsRestricted
+    );
+    if (
+      subsplitPositiveRootsRestricted.size != 1 ||
+      subsplitNegativeRootsRestricted.size != 1
+    ) {
+      return false;
+    }
+    const Vector<AlgebraicNumber>& positiveRootRestricted =
+    subsplitPositiveRootsRestricted[0];
+    const Vector<AlgebraicNumber>& negativeRootRestricted =
+    subsplitNegativeRootsRestricted[0];
+    Vector<AlgebraicNumber> positiveRoot;
+    Vector<AlgebraicNumber> negativeRoot;
+    positiveRoot.makeZero(centralizerDimension);
+    negativeRoot.makeZero(centralizerDimension);
+    for (int i = 0; i < positiveRootRestricted.size; i ++) {
+      positiveRoot.addOtherTimesScalar(
+        rootSpace[i], positiveRootRestricted[i]
+      );
+    }
+    for (int i = 0; i < negativeRootRestricted.size; i ++) {
+      negativeRoot.addOtherTimesScalar(
+        negativeRootSpace[i], negativeRootRestricted[i]
+      );
+    }
+    if (
+      !this->computeRootSpaceFromEAndF(
+        startingEigenvalue, positiveRoot, negativeRoot
+      )
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CentralizerComputer::computeRootSpaceFromEAndF(
+  const AlgebraicNumber& eigenvalue,
+  const Vector<AlgebraicNumber>& eInCentralizerCoordinates,
+  const Vector<AlgebraicNumber>& fInCentralizerCoordinates
+) {
+  STACK_TRACE("CentralizerComputer::computeRootSpaceFromEAndF");
+  int centralizerDimension = this->centralizerBasis.size;
+  if (
+    eInCentralizerCoordinates.size != centralizerDimension ||
+    fInCentralizerCoordinates.size != centralizerDimension
+  ) {
     global.fatal
-    << "This should be impossible: negative and "
-    << "positive root spaces have different multiplicities."
+    << "Bad coordinates: the centralizer dimension is: "
+    << centralizerDimension
+    << " but the coordinates given are: "
+    << eInCentralizerCoordinates.toString()
+    << " and "
+    << fInCentralizerCoordinates.toString()
     << global.fatal;
   }
   ElementSemisimpleLieAlgebra<AlgebraicNumber> e;
   ElementSemisimpleLieAlgebra<AlgebraicNumber> f;
-  this->getCentralizerElementFromCoordinates(rootSpace[0], e);
-  this->getCentralizerElementFromCoordinates(negativeRootSpace[0], f);
+  this->getCentralizerElementFromCoordinates(eInCentralizerCoordinates, e);
+  this->getCentralizerElementFromCoordinates(fInCentralizerCoordinates, f);
   ElementSemisimpleLieAlgebra<AlgebraicNumber> h;
   e.lieBracketOnTheRight(f, h);
   ElementSemisimpleLieAlgebra<AlgebraicNumber> proportionalToE;
@@ -1900,8 +2050,8 @@ bool CentralizerComputer::computeRootSpaceForNonZeroEigenvalue(
     << "\\). "
     << "We have that \\([h,e]="
     << proportionalToE.toStringPretty()
-    << "\\) which is not proportional to "
-    << " and eigenvalue equal to: "
+    << "\\) which is not proportional to e "
+    << "and eigenvalue equal to: "
     << eigenvalue.toString()
     << global.fatal;
   }
@@ -1920,7 +2070,9 @@ bool CentralizerComputer::trySemisimpleElement(
 ) {
   STACK_TRACE("CentralizerComputer::trySemisimpleElement");
   ElementSemisimpleLieAlgebra<Rational> zero;
-  this->makeCartanCandidate(candidate, zero, zero, this->semisimpleElement);
+  this->makeCartanCandidateNoFailure(
+    candidate, zero, zero, this->semisimpleElement
+  );
   this->semisimpleElementAdjointEigenvalueFinder.initialize(
     this->algebraicClosureRationals
   );
@@ -1932,27 +2084,29 @@ bool CentralizerComputer::trySemisimpleElement(
   ) {
     return false;
   }
-  global.comments
-  << "<br>DEBUG: before root spaces for: "
-  << this->label
-  << ": ";
+  if (
+    this->semisimpleElementAdjointEigenvalueFinder.numberOfEigenVectors() !=
+    this->semisimpleElement.adjointAction.numberOfColumns
+  ) {
+    // The element has fewer eigenvectors than
+    // the dimension of the space,
+    // i.e., it has non-trivial Jordan normal form.
+    // i.e., the candidate element is not semisimple.
+    return false;
+  }
   if (!this->computeRootSpaces()) {
     return false;
   }
-  global.comments
-  << "<br>DEBUG: before compute types for: "
-  << this->label
-  << ": ";
   if (!this->computeTypes()) {
     return false;
   }
   return true;
 }
 
-void CentralizerComputer::makeCartanCandidate(
-  ElementSemisimpleLieAlgebra<Rational>& inputH,
-  ElementSemisimpleLieAlgebra<Rational>& inputE,
-  ElementSemisimpleLieAlgebra<Rational>& inputF,
+bool CentralizerComputer::makeCartanCandidate(
+  const ElementSemisimpleLieAlgebra<Rational>& inputH,
+  const ElementSemisimpleLieAlgebra<Rational>& inputE,
+  const ElementSemisimpleLieAlgebra<Rational>& inputF,
   CartanElementCandidate& output
 ) {
   ElementSemisimpleLieAlgebra<AlgebraicNumber> converterH;
@@ -1961,21 +2115,34 @@ void CentralizerComputer::makeCartanCandidate(
   converterH = inputH;
   converterE = inputE;
   converterF = inputF;
-  this->makeCartanCandidate(converterH, converterE, converterF, output);
+  return this->makeCartanCandidate(converterH, converterE, converterF, output);
 }
 
-void CentralizerComputer::makeCartanCandidate(
-  ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputH,
-  ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputE,
-  ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputF,
+bool CentralizerComputer::makeCartanCandidate(
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputH,
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputE,
+  const ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputF,
   CartanElementCandidate& output
 ) {
   STACK_TRACE("CentralizerComputer::makeCartanCandidate");
   output.h = inputH;
-  bool mustBeTrue =
+  bool result =
   output.h.computeAdjointActionWithRespectToBasis(
     this->centralizerBasisOverAlgebraicNumbers, output.adjointAction
   );
+  output.e = inputE;
+  output.f = inputF;
+  return result;
+}
+
+void CentralizerComputer::makeCartanCandidateNoFailure(
+  const ElementSemisimpleLieAlgebra<Rational>& inputH,
+  const ElementSemisimpleLieAlgebra<Rational>& inputE,
+  const ElementSemisimpleLieAlgebra<Rational>& inputF,
+  CartanElementCandidate& output
+) {
+  STACK_TRACE("CentralizerComputer::makeCartanCandidateNoFailure");
+  bool mustBeTrue = this->makeCartanCandidate(inputH, inputE, inputF, output);
   if (!mustBeTrue) {
     global.fatal
     << "Failed to compute the adjoint action of "
@@ -1984,8 +2151,6 @@ void CentralizerComputer::makeCartanCandidate(
     << this->centralizerBasis.toStringCommaDelimited()
     << global.fatal;
   }
-  output.e = inputE;
-  output.f = inputF;
 }
 
 void CentralizerComputer::mergeReductiveComponents(
@@ -2004,10 +2169,10 @@ void CentralizerComputer::mergeReductiveComponents(
     // so to reduce the danger of use-after-free,
     // it is safest to take a reference of the subalgebra element
     // on each run.
-    SimpleSubalgebraComponent& reductiveSubalgebraComponent =
+    SimpleSubalgebraComponent& simpleSubalgebraComponent =
     this->simpleComponents[smallestIndex];
     for (const CartanElementCandidate& element : toBeDissolved.dualsToRoots) {
-      reductiveSubalgebraComponent.dualsToRoots.addOnTop(element);
+      simpleSubalgebraComponent.dualsToRoots.addOnTop(element);
     }
     // We are modifying the reductive components array which
     // we took a reference from earlier in the loop.
@@ -2057,12 +2222,6 @@ bool CentralizerComputer::computeTypes() {
   this->typeIfKnown.makeZero();
   for (SimpleSubalgebraComponent& simpleComponent : this->simpleComponents) {
     if (!simpleComponent.compute()) {
-      global.comments
-      << "<br>DEBUG: failed to compute for type: "
-      << this->label
-      << "; got "
-      << this->simpleComponents.size
-      << " components";
       return false;
     }
     this->typeIfKnown += simpleComponent.simpleType;
@@ -2192,72 +2351,6 @@ PolynomialQuadraticRootFinder::PolynomialQuadraticRootFinder() {
   this->algebraicClosure = nullptr;
 }
 
-MatrixEigenvalueFinder::MatrixEigenvalueFinder() {
-  this->algebraicClosure = nullptr;
-}
-
-void MatrixEigenvalueFinder::initialize(
-  AlgebraicClosureRationals* inputAlgebraicClosure
-) {
-  this->algebraicClosure = inputAlgebraicClosure;
-  this->characteristicPolynomial.makeZero();
-  this->eigenValuesWithoutMultiplicity.clear();
-  this->eigenvectors.clear();
-  this->eigenvalueFinder.initialize(this->algebraicClosure);
-}
-
-int MatrixEigenvalueFinder::numberOfEigenVectors() const {
-  int result = 0;
-  for (const Vectors<AlgebraicNumber>& eigenspace : this->eigenvectors) {
-    result += eigenspace.size;
-  }
-  return result;
-}
-
-void MatrixEigenvalueFinder::eigenVectorsFromEigenValue(
-  const AlgebraicNumber& eigenValue, Vectors<AlgebraicNumber>& output
-) {
-  STACK_TRACE("MatrixEigenvalueFinder::eigenVectorsFromEigenValue");
-  output.clear();
-  int indexOfEigenValue =
-  this->eigenValuesWithoutMultiplicity.getIndex(eigenValue);
-  if (indexOfEigenValue < 0) {
-    return;
-  }
-  output = this->eigenvectors[indexOfEigenValue];
-}
-
-bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
-  Matrix<Rational>& input
-) {
-  this->initialize(this->algebraicClosure);
-  this->matrix = input;
-  this->matrix.getCharacteristicPolynomialStandardRepresentation(
-    this->characteristicPolynomial
-  );
-  if (
-    this->characteristicPolynomial.totalDegree() !=
-    this->matrix.numberOfColumns
-  ) {
-    global.fatal << "Bad characteristic polynomial degree. " << global.fatal;
-  }
-  if (!this->eigenvalueFinder.findRoots(this->characteristicPolynomial)) {
-    return false;
-  }
-  Matrix<AlgebraicNumber> matrixAlgebraic;
-  matrixAlgebraic.makeZeroMatrix(
-    this->matrix.numberOfColumns, this->algebraicClosure->zero()
-  );
-  matrixAlgebraic = this->matrix;
-  this->eigenValuesWithoutMultiplicity.addOnTopNoRepetition(
-    this->eigenvalueFinder.roots
-  );
-  matrixAlgebraic.getEigenSpacesFromEigenvalues(
-    this->eigenValuesWithoutMultiplicity, this->eigenvectors
-  );
-  return true;
-}
-
 AlgebraicNumber CartanElementCandidate::scalarProductKilling(
   const CartanElementCandidate& other
 ) const {
@@ -2311,7 +2404,7 @@ SimpleSubalgebraComponent::SimpleSubalgebraComponent() {
 bool SimpleSubalgebraComponent::isLinkedTo(
   const CartanElementCandidate& candidate
 ) const {
-  STACK_TRACE("ReductiveSubalgebraComponent::isLinkedTo");
+  STACK_TRACE("SimpleSubalgebraComponent::isLinkedTo");
   for (const CartanElementCandidate& myRootSpace : this->dualsToRoots) {
     if (!myRootSpace.scalarProductKilling(candidate).isEqualToZero()) {
       return true;
@@ -2348,13 +2441,14 @@ std::string SimpleSubalgebraComponent::toString() const {
 }
 
 bool SimpleSubalgebraComponent::compute() {
-  this->postiveDualsOfRootSpaces.clear();
-  this->postiveDualsOfRootSpaces.addListOnTop(this->dualsToRoots);
+  STACK_TRACE("SimpleSubalgebraComponent::compute");
+  this->positiveDualsOfRootSpaces.clear();
+  this->positiveDualsOfRootSpaces.addListOnTop(this->dualsToRoots);
   AlgebraicNumber scalarProduct;
   Complex<double> scalarProductComplex;
-  for (int i = 0; i < this->postiveDualsOfRootSpaces.size; i ++) {
+  for (int i = 0; i < this->positiveDualsOfRootSpaces.size; i ++) {
     scalarProduct =
-    this->postiveDualsOfRootSpaces[i].scalarProductKilling(
+    this->positiveDualsOfRootSpaces[i].scalarProductKilling(
       this->definingSemisimpleElement
     );
     if (!scalarProduct.evaluatesToComplex(&scalarProductComplex)) {
@@ -2369,12 +2463,12 @@ bool SimpleSubalgebraComponent::compute() {
       // Discard the elements of the cartan whose scalar product
       // with the defining semisimple element is in the second or
       // third quadrant.
-      this->postiveDualsOfRootSpaces.removeIndexSwapWithLast(i);
+      this->positiveDualsOfRootSpaces.removeIndexSwapWithLast(i);
       i --;
     }
   }
   this->simpleDualsOfRootSpaces.clear();
-  this->simpleDualsOfRootSpaces.addListOnTop(this->postiveDualsOfRootSpaces);
+  this->simpleDualsOfRootSpaces.addListOnTop(this->positiveDualsOfRootSpaces);
   for (int i = 0; i < this->simpleDualsOfRootSpaces.size; i ++) {
     if (!this->isSimpleIndex(i)) {
       this->simpleDualsOfRootSpaces.removeIndexSwapWithLast(i);
@@ -2493,10 +2587,10 @@ bool SimpleSubalgebraComponent::isSimpleIndex(int i) {
   CartanElementCandidate difference;
   for (
     const CartanElementCandidate& positiveRootSpace :
-    this->postiveDualsOfRootSpaces
+    this->positiveDualsOfRootSpaces
   ) {
     difference = underTest - positiveRootSpace;
-    if (this->postiveDualsOfRootSpaces.contains(difference)) {
+    if (this->positiveDualsOfRootSpaces.contains(difference)) {
       return false;
     }
   }

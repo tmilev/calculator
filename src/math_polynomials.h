@@ -185,23 +185,19 @@ public:
   // "Lexicographic" order.
   // If computing with n variables, the "lexicographic order"
   // coincides with the infinite-alphabet dictionary of all words with length
-  // n,
-  // where
-  // each letter is given by the variable exponent.
+  // n, where each letter is given by the variable exponent.
   // In other words, the lexicographic order for x^2 y^0 z^3 is the
-  // "lexicographic" order
-  // of the triple [2,0,3].
+  // "lexicographic" order of the triple [2,0,3].
   // This is confusing, as it is completely different from the "dictionary
   // order" in which
   // the monomial x^2 y^0 z^3 = x x z z z would be placed. For example,
   // x^3 y^3 z > x y^2 z^3 because [3, 3, 0] > [1, 2, 3].
   // However, the word formed by the letters in the monomial are
-  // "dictionary-ordered"
-  // in the opposite order.
+  // "dictionary-ordered" in the opposite order.
   // x x x y y y z <  x y y z z z.
   // This has lead to lots of confusion in previous version, so we have dropped
-  // the
-  // term "lexicographic" in all places except the end-user facing calculator
+  // the term "lexicographic" in all places except the end-user facing
+  // calculator
   // commands.
   bool greaterThan_leftLargerWins(const MonomialPolynomial& other) const;
   static bool greaterThan_leftLargerWins(
@@ -493,8 +489,7 @@ public:
     Coefficient& correction
   );
   // Constructs a linear system from a system of linear polynomials equal to
-  // zero.
-  // Returns false if the polynomials are not linear.
+  // zero. Returns false if the polynomials are not linear.
   static bool getLinearSystemFromLinearPolynomials(
     const List<Polynomial<Coefficient> >& linearPolynomials,
     Matrix<Coefficient>& outputHomogenousPart,

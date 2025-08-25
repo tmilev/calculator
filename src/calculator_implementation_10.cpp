@@ -67,7 +67,7 @@ vectorPartitionFunctionFormulaInternal(
 ) {
   STACK_TRACE(
     "CalculatorFunctionsVectorPartitionFunction::"
-    "vectorPartitionFunctionFormula"
+    "vectorPartitionFunctionFormulaInternal"
   );
   Vectors<Rational> vectors;
   std::string label;
@@ -315,7 +315,7 @@ subLatticeScalarProductTimesDirectionInLattice(
 ) {
   STACK_TRACE(
     "CalculatorFunctionsVectorPartitionFunction::"
-    "subLatticeWithIntegralScalarProducts"
+    "subLatticeScalarProductTimesDirectionInLattice"
   );
   if (input.size() != 5) {
     return

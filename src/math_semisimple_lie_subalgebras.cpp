@@ -7996,7 +7996,7 @@ std::string CandidateSemisimpleSubalgebra::toStringDrawWeights(
         ) {
           basisToDrawCirclesAt.addOnTop(this->weightsModulesPrimal[i][k]);
           if (
-            basisToDrawCirclesAt.getRankElementSpan() !=
+            basisToDrawCirclesAt.getRankLinearSpan() !=
             basisToDrawCirclesAt.size
           ) {
             basisToDrawCirclesAt.removeLastObject();

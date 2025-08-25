@@ -1811,11 +1811,10 @@ getClassFunctionMatrix(
         ) && (this->parent->classFunctionMatricesComputed[cci]);
       }
       if (useParent) {
-        Matrix<Coefficient>::matrixInBasis(
+        Matrix<Coefficient>::changeBasis(
           this->parent->classFunctionMatrices[cci],
-          this->classFunctionMatrices[cci],
           this->basis,
-          this->gramMatrixInverted
+          this->classFunctionMatrices[cci]
         );
       } else {
         auto& currentCC = this->ownerGroup->conjugacyClasses[cci];
@@ -2712,7 +2711,7 @@ computeIrreducibleRepresentationsTodorsVersion() {
       // we are initializing by the sign or natural rep.
       newRep *= appendOnlyIrrepsList[i];
       bool tempB =
-      newRep.decomposeTodorsVersion(
+      newRep.decomposeAlternativeVersion(
         decompositionNewRep, &appendOnlyIrrepsList
       );
       if (!tempB) {
@@ -2809,14 +2808,15 @@ getLargestDenominatorSimpleGenerators(
 
 template <typename somegroup, typename Coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
-decomposeTodorsVersionRecursive(
+decomposeAlternativeVersionRecursive(
   VirtualRepresentation<somegroup, Coefficient>& outputIrrepMults,
   List<GroupRepresentation<somegroup, Coefficient> >& appendOnlyIrrepsList,
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >*
   appendOnlyGRCAMSList
 ) {
   STACK_TRACE(
-    "GroupRepresentationCarriesAllMatrices::decomposeTodorsVersionRecursive"
+    "GroupRepresentationCarriesAllMatrices::"
+    "decomposeAlternativeVersionRecursive"
   );
   this->checkInitialization();
   this->ownerGroup->
@@ -2966,7 +2966,7 @@ decomposeTodorsVersionRecursive(
       remainingVectorSpace, remainingCharacter, reducedRep
     );
     return
-    reducedRep.decomposeTodorsVersionRecursive(
+    reducedRep.decomposeAlternativeVersionRecursive(
       outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList
     );
   }
@@ -3001,7 +3001,7 @@ decomposeTodorsVersionRecursive(
           subRepresentationBasis[i], remainingCharacter, newRep
         );
         if (
-          !newRep.decomposeTodorsVersionRecursive(
+          !newRep.decomposeAlternativeVersionRecursive(
             outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList
           )
         ) {

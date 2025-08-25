@@ -5017,7 +5017,7 @@ bool PartialFractions::inputIsValid(std::stringstream* commentsOnFailure) const 
   }
   Vectors<Rational> rankComputer;
   rankComputer.addListOnTop(this->normalizedVectors);
-  if (rankComputer.getRankElementSpan() != this->ambientDimension) {
+  if (rankComputer.getRankLinearSpan() != this->ambientDimension) {
     if (commentsOnFailure != nullptr) {
       *commentsOnFailure
       << "The input vectors are required to span the entire vector space. ";
@@ -10856,9 +10856,7 @@ void OnePartialFractionDenominator::getVectorPartitionFunction(
       lattice
     );
     shiftedQuasiPolynomial *= coefficient.coefficients[i];
-    //    shiftedQuasiPolynomial.checkConsistency();
     output += shiftedQuasiPolynomial;
-    //    output.checkConsistency();
   }
 }
 
@@ -11326,7 +11324,7 @@ std::string HtmlRoutines::toHtmlTableRowsFromJSON(const JSData& input) {
   STACK_TRACE("HtmlRoutines::toHtmlTableRowsFromJSON");
   if (input.elementType == JSData::Type::tokenObject) {
     std::stringstream out;
-    out << "<table class = \"tableDatabaseItem\">";
+    out << "<table class='tableDatabaseItem'>";
     for (int i = 0; i < input.objects.size(); i ++) {
       out
       << "<tr><td>"
@@ -12699,8 +12697,7 @@ Rational PiecewiseQuasipolynomial::evaluateInputProjectivized(
   }
   result = this->quasiPolynomials[index].evaluate(affineInput, comments);
   // The following for loop is for self-check purposes only.
-  // Comment it out as soon as
-  // the code has been tested sufficiently.
+  // Comment it out as soon as the code has been tested sufficiently.
   for (int i = 0; i < this->projectivizedComplex.refinedCones.size(); i ++) {
     if (!this->projectivizedComplex.refinedCones[i].isInCone(input)) {
       continue;
@@ -13471,7 +13468,7 @@ bool ConeCollection::splitChamber(
   Cone newMinusCone(this->conesCreated);
   this->conesCreated ++;
   bool needToRecomputeVertices = (
-    toBeSliced.getAllNormals().getRankElementSpan() < this->getDimension()
+    toBeSliced.getAllNormals().getRankLinearSpan() < this->getDimension()
   );
   newPlusCone.flagIsTheZeroCone = false;
   newMinusCone.flagIsTheZeroCone = false;
@@ -13705,7 +13702,7 @@ bool ConeCollection::isSpannedByDirections(const Vector<Rational>& planeNormal)
       directionsPerpendicularToNormal.addOnTop(direction);
     }
   }
-  int rankSpan = directionsPerpendicularToNormal.getRankElementSpan();
+  int rankSpan = directionsPerpendicularToNormal.getRankLinearSpan();
   return rankSpan == this->getDimension() - 1;
 }
 
@@ -14200,7 +14197,7 @@ bool ConeCollection::isAddmissibleConeSplit(
       hasVertexInOppositeWedge = true;
     }
   }
-  int rank = vertices.getRankElementSpan();
+  int rank = vertices.getRankLinearSpan();
   if (rank != sliceNormal.size - 1) {
     // The wall doesn't pass through vertices that span it.
     return false;
@@ -14469,8 +14466,6 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numberOfAddedFakeWalls) {
     matrix.getZeroEigenSpaceModifyMe(normalsToSubspace);
     if (normalsToSubspace.size > 0) {
       matrixOfNormals.assignVectorsToRows(normalsToSubspace);
-      // global.Comments << "<br>normals to the subspace spanned by the
-      // vertices: " << NormalsToSubspace.toString();
       gramMatrixInverted = matrixOfNormals;
       gramMatrixInverted.transpose();
       gramMatrixInverted.multiplyOnTheLeft(matrixOfNormals);
@@ -14504,7 +14499,7 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numberOfAddedFakeWalls) {
   Matrix<Rational> matrixX;
   Selection currentSelectionX;
   int desiredRank =
-  this->vertices.getRankElementSpan(&matrixX, &currentSelectionX);
+  this->vertices.getRankLinearSpan(&matrixX, &currentSelectionX);
   if (desiredRank > 1) {
     for (int i = 0; i < this->walls.size; i ++) {
       Vector<Rational>& currentNormal = this->walls[i].normal;
@@ -14514,7 +14509,7 @@ bool Cone::eliminateFakeNormalsUsingVertices(int numberOfAddedFakeWalls) {
         if (currentNormal.scalarEuclidean(this->vertices[j]).isEqualToZero()) {
           verticesOnWall.addOnTop(this->vertices[j]);
           int rank =
-          verticesOnWall.getRankElementSpan(&matrixX, &currentSelectionX);
+          verticesOnWall.getRankLinearSpan(&matrixX, &currentSelectionX);
           if (rank < verticesOnWall.size) {
             verticesOnWall.removeLastObject();
           } else {
@@ -14663,7 +14658,7 @@ bool Cone::createFromVertices(const Vectors<Rational>& inputVertices) {
   Matrix<Rational> matrix;
   Selection wallGeneratorSelection;
   int rankVerticesSpan =
-  inputVertices.getRankElementSpan(&matrix, &wallGeneratorSelection);
+  inputVertices.getRankLinearSpan(&matrix, &wallGeneratorSelection);
   int dimension = inputVertices.getDimension();
   Vectors<Rational> extraVertices;
   extraVertices.setSize(0);
@@ -14780,8 +14775,8 @@ int Cone::addFakeWalls() {
   Selection selection;
   for (
     int i = 0; i < dimension &&
-    this->getAllNormals().getRankElementSpan(&matrix, &selection) <
-    dimension; i ++
+    this->getAllNormals().getRankLinearSpan(&matrix, &selection) < dimension;
+    i ++
   ) {
     Wall fakeWall;
     fakeWall.normal.makeEi(dimension, i);

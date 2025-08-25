@@ -6,7 +6,7 @@
 bool CalculatorFunctionsTrigonometry::sinExact(
   Calculator& calculator, const Expression& input, Expression& output
 ) {
-  STACK_TRACE("CalculatorFunctionsTrigonometry::sin");
+  STACK_TRACE("CalculatorFunctionsTrigonometry::sinExact");
   if (input.size() != 2) {
     return false;
   }

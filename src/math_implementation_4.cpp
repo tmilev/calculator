@@ -968,16 +968,13 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     << global.fatal;
   }
   if (this->numberOfThreeValencyNodes(indexComponent) == 1) {
-    // type D or E
-    // in type D first comes the triple node, then the long string, then the
-    // one-root strings
-    // the long string is oriented with the end that is connected to the triple
-    // node having
-    // smaller index
-    // in type E similarly the longest string comes first oriented with the
-    // root
-    // that is
-    // linked to the triple node having smaller index
+    // Type D or E.
+    // In type D, first comes the triple node, then the long string, then the
+    // one-root strings.
+    // The long string is oriented with the end that is connected to the triple
+    // node having smaller index.
+    // In type E similarly the longest string comes first oriented with the
+    // root that is linked to the triple node having smaller index
     // then comes the second longest string (oriented in the same fashion)
     // and last the one-root string
     Vector<Rational> tripleNode;
@@ -1048,9 +1045,8 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       // <-last two vectors
       outputType.makeArbitrary('D', currentComponent.size, scale);
     } else {
-      // the second largest component has more than one element, hence we are
-      // in
-      // type E_n.
+      // The second largest component has more than one element, hence we are
+      // in type E_n.
       Rational scale = DynkinSimpleType::getDefaultLongRootLengthSquared('E') /
       tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
       if (
@@ -1070,8 +1066,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
         diagramWithoutTripleNode.simpleBasesConnectedComponents[1].
         reverseElements();
         // <-the 2-root component has the first root perpendicular to the
-        // triple
-        // node
+        // triple node
       }
       if (
         tripleNode.scalarProduct(
@@ -1143,9 +1138,9 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       MathRoutines::swap(numberOfLength1, numberOfLength2);
       currentEnds.swapTwoIndices(0, 1);
     }
-    // <-so far we made sure the first length is long
+    // <-so far we made sure the first length is long.
     // By convention, in types G and C, in the Dynkin diagram the long root
-    // comes last
+    // comes last.
     // This is handled at the very end of this function (outside all the if
     // clauses).
     if (numberOfLength1 == numberOfLength2) {
@@ -1185,7 +1180,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       }
     }
   }
-  // The following code ensures the Dynkin diagram is properly ordered
+  // The following code ensures the Dynkin diagram is properly ordered.
   currentComponent.swapTwoIndices(0, currentEnds[0]);
   for (int i = 0; i < currentComponent.size; i ++) {
     for (int j = i + 1; j < currentComponent.size; j ++) {

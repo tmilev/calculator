@@ -1612,7 +1612,7 @@ public:
     }
   }
   void lieBracketOnTheLeft(const MatrixTensor<Coefficient>& standsOnTheLeft) {
-    STACK_TRACE("MatrixTensor<Coefficient>::lieBracketOnTheLeft");
+    STACK_TRACE("MatrixTensor::lieBracketOnTheLeft");
     MatrixTensor<Coefficient> output;
     MonomialMatrix monomial;
     output.makeZero();

@@ -5,6 +5,7 @@
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_general.h"
+#include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
 #include "math_vector_partition_functions.h"
 
 void SemisimpleLieAlgebra::chevalleyGeneratorAsLieBracketsSimpleGenerators(
@@ -270,9 +271,6 @@ void LittelmannPath::actByFAlpha(int indexAlpha) {
     for (int i = this->waypoints.size - 1; i >= succeedingIndex + 1; i --) {
       this->waypoints[i] = this->waypoints[i - 1];
     }
-    // Rational scalarNext =
-    // weylGroup.rootScalarCartanRoot(this->waypoints[succeedingIndex],
-    // alphaScaled);
     Vector<Rational>& r1 = this->waypoints[succeedingIndex];
     Vector<Rational>& r2 = this->waypoints[succeedingIndex - 1];
     Rational s2 = weylGroup.rootScalarCartanRoot(r2, alphaScaled);

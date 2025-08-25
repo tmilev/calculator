@@ -67,7 +67,7 @@ public:
   // This is the element whose eigenvalues and eigenspaces
   // were used to compute the dualsToRoots
   CartanElementCandidate definingSemisimpleElement;
-  HashedList<CartanElementCandidate> postiveDualsOfRootSpaces;
+  HashedList<CartanElementCandidate> positiveDualsOfRootSpaces;
   List<CartanElementCandidate> simpleDualsOfRootSpaces;
   List<CartanElementCandidate> simpleDualsOfRootSpacesAmbientAdjoint;
   DynkinDiagramRootSubalgebra dynkinDiagramComputer;
@@ -99,7 +99,24 @@ class CentralizerComputer {
   bool findSemisimpleElementEigenvalues();
   // Computes the root spaces of the candidate semisimple element.
   bool computeRootSpaces();
+  // Computes the cartan of the centralizer from the given semisimple element.
+  // Will fail if the element is not semisimple or not generic enough;
+  // when that happens the elements that commute with the semisimple element
+  // do not all pairwise commute.
+  bool computeCartanOfCentalizerFromSemisimpleElement();
+  bool computeOnDemandCartanOfCentralizerMatrixForm();
   bool computeRootSpaceForNonZeroEigenvalue(const AlgebraicNumber& eigenvalue);
+  bool subsplitRootSpaces(
+    const AlgebraicNumber& startingEigenvalue,
+    const List<Vector<AlgebraicNumber> >& rootSpace,
+    const List<Vector<AlgebraicNumber> >& negativeRootSpace,
+    const CartanElementCandidate& splittingElementCentralizerCartan
+  );
+  bool computeRootSpaceFromEAndF(
+    const AlgebraicNumber& eigenvalue,
+    const Vector<AlgebraicNumber>& eInCentralizerCoordinates,
+    const Vector<AlgebraicNumber>& fInCentralizerCoordinates
+  );
   // Computes the dynkin type of the centralizer
   // from the dualsOfRootSpaces.
   bool computeTypes();
@@ -124,6 +141,7 @@ public:
   // Cartan subalgebra.
   CartanElementCandidate semisimpleElement;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerCartan;
+  List<CartanElementCandidate> centralizerCartanCandidates;
   // A computational structure to find the eigenvalues and eigenspaces of the
   // preceding element.
   MatrixEigenvalueFinder semisimpleElementAdjointEigenvalueFinder;
@@ -140,23 +158,29 @@ public:
   bool flagBasisComputed;
   bool flagCartanSelected;
   void getCentralizerElementFromCoordinates(
-    Vector<AlgebraicNumber>& vector,
+    const Vector<AlgebraicNumber>& vector,
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& output
   );
   void initialize(
     SemisimpleLieAlgebra* inputOwner,
     AlgebraicClosureRationals* inputAlgebraicClosure
   );
-  void makeCartanCandidate(
-    ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputH,
-    ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputE,
-    ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputF,
+  bool makeCartanCandidate(
+    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputH,
+    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputE,
+    const ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputF,
     CartanElementCandidate& output
   );
-  void makeCartanCandidate(
-    ElementSemisimpleLieAlgebra<Rational>& inputH,
-    ElementSemisimpleLieAlgebra<Rational>& inputE,
-    ElementSemisimpleLieAlgebra<Rational>& inputF,
+  bool makeCartanCandidate(
+    const ElementSemisimpleLieAlgebra<Rational>& inputH,
+    const ElementSemisimpleLieAlgebra<Rational>& inputE,
+    const ElementSemisimpleLieAlgebra<Rational>& inputF,
+    CartanElementCandidate& output
+  );
+  void makeCartanCandidateNoFailure(
+    const ElementSemisimpleLieAlgebra<Rational>& inputH,
+    const ElementSemisimpleLieAlgebra<Rational>& inputE,
+    const ElementSemisimpleLieAlgebra<Rational>& inputF,
     CartanElementCandidate& output
   );
   CentralizerComputer();
@@ -457,9 +481,6 @@ public:
     const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoLeft,
     const CharacterSemisimpleLieAlgebraModule<Rational>& moduleDecompoRight
   );
-  // the below is outdated, must be deleted as soon as equivalent code is
-  // written.
-  void computeDynkinsEpsilon(WeylGroupData& weyl);
   bool operator==(const SlTwoSubalgebra& right) const;
   bool operator>(const SlTwoSubalgebra& right) const;
   unsigned int hashFunction() const;

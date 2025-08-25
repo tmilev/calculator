@@ -1,6 +1,7 @@
 #ifndef header_math_extra_lie_theory_extras_ALREADY_INCLUDED
 #define header_math_extra_lie_theory_extras_ALREADY_INCLUDED
 
+#include "html_routines.h"
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_rational_function.h"

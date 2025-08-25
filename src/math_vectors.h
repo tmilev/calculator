@@ -374,7 +374,6 @@ public:
     output /= this->objects[this->size - 1];
     return true;
   }
-  bool makeAffineProjectionFromNormal(AffineHyperplane<Rational>& output);
   int getIndexFirstNonZeroCoordinate() const {
     for (int i = 0; i < this->size; i ++) {
       if (!this->objects[i].isEqualToZero()) {
@@ -637,6 +636,9 @@ public:
     result -= other;
     return result;
   }
+  void addOtherTimesScalar(
+    const Vector<Coefficient>& other, const Coefficient& scalar
+  );
 };
 
 template <class Coefficient>
@@ -701,6 +703,27 @@ void Vector<Coefficient>::findLeastCommonMultipleDenominators(
     LargeIntegerUnsigned::greatestCommonDivisor(output, remainder, quotient);
     output.multiplyBy(remainder);
     output.dividePositive(quotient, output, remainder);
+  }
+}
+
+template <class Coefficient>
+void Vector<Coefficient>::addOtherTimesScalar(
+  const Vector<Coefficient>& other, const Coefficient& scalar
+) {
+  if (this->size != other.size) {
+    global.fatal
+    << "Attempt to add vector of dimension "
+    << other.size
+    << " to vector of dimension "
+    << this->size
+    << "."
+    << global.fatal;
+  }
+  Coefficient contribution;
+  for (int i = 0; i < this->size; i ++) {
+    contribution = other[i];
+    contribution *= scalar;
+    (*this)[i] += contribution;
   }
 }
 
@@ -881,6 +904,8 @@ public:
     Matrix<Coefficient>& bufferMatrix,
     Selection& bufferSelection
   ) const;
+  bool linearSpanContainsVectors(const List<Vector<Coefficient> >& input)
+  const;
   void makeEiBasis(int dimension) {
     this->setSize(dimension);
     for (int i = 0; i < this->size; i ++) {
@@ -893,7 +918,8 @@ public:
     List<Vector<Coefficient> >& output,
     Selection& outputSelectedPivots
   );
-  int getRankElementSpan(
+  static int getRankLinearSpan(const List<Vector<Coefficient> >& input);
+  int getRankLinearSpan(
     Matrix<Coefficient>* buffer = 0, Selection* bufferSelection = nullptr
   ) const;
   static bool conesIntersect(
@@ -1246,8 +1272,19 @@ bool Vectors<Coefficient>::linearSpanContainsVector(
   bufferVectors = *this;
   bufferVectors.addOnTop(input);
   return
-  this->getRankElementSpan(&bufferMatrix, &bufferSelection) ==
-  bufferVectors.getRankElementSpan(&bufferMatrix, &bufferSelection);
+  this->getRankLinearSpan(&bufferMatrix, &bufferSelection) ==
+  bufferVectors.getRankLinearSpan(&bufferMatrix, &bufferSelection);
+}
+
+template <class Coefficient>
+bool Vectors<Coefficient>::linearSpanContainsVectors(
+  const List<Vector<Coefficient> >& input
+) const {
+  STACK_TRACE("Vectors::linearSpanContainsVector");
+  Vectors<Coefficient> bufferVectors;
+  bufferVectors = *this;
+  bufferVectors.addListOnTop(input);
+  return this->getRankLinearSpan() == bufferVectors.getRankLinearSpan();
 }
 
 template <class Coefficient>
@@ -1378,7 +1415,7 @@ int Vectors<Coefficient>::arrangeFirstVectorsBeOfMaxPossibleRank(
   int oldRank = 0;
   for (int i = 0; i < this->size; i ++) {
     roots.addOnTop(this->objects[i]);
-    int newRank = roots.getRankElementSpan(bufferMatrix, bufferSelection);
+    int newRank = roots.getRankLinearSpan(bufferMatrix, bufferSelection);
     if (newRank == oldRank) {
       roots.removeIndexSwapWithLast(roots.size - 1);
     } else {
@@ -1539,14 +1576,6 @@ public:
   int getDimension();
   void superimposeAffineCones(AffineCones& otherComplex);
   bool wallIsInternalInCone(AffineHyperplane<Rational>& killerCandidate);
-  // The below function returns true if the system of homogeneous linear
-  // inequalities Ax<=b
-  // has a solution, false otherwise, where A is a matrix and x and b are
-  // column
-  // vectors.
-  // bool systemLinearInequalitiesHasSolution
-  // (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> &
-  // outputPoint);
   bool splitByAffineHyperplane(
     AffineHyperplane<Rational>& killerPlane, AffineCones& output
   );

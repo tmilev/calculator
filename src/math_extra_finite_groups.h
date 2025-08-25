@@ -1810,14 +1810,14 @@ public:
     const ClassFunction<Somegroup, Rational>& remainingCharacter,
     GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient>& output
   );
-  bool decomposeTodorsVersionRecursive(
+  bool decomposeAlternativeVersionRecursive(
     VirtualRepresentation<Somegroup, Coefficient>& outputIrrepMults,
     List<GroupRepresentation<Somegroup, Coefficient> >& appendOnlyIrrepList,
     List<GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient> >*
     appendOnlyGRCAMSList =
     0
   );
-  bool decomposeTodorsVersion(
+  bool decomposeAlternativeVersion(
     VirtualRepresentation<Somegroup, Coefficient>& outputIrrepMults,
     List<GroupRepresentationCarriesAllMatrices<Somegroup, Coefficient> >*
     appendOnlyIrrepsList =

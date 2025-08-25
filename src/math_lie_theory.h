@@ -228,8 +228,7 @@ public:
 // collection,
 // but rather have a monomial collection as a private member.
 // Many important operations with Dynkin types require
-// fixed order of monomials,
-// which may impose this reorganization.
+// fixed order of monomials, which may impose this reorganization.
 class DynkinType: public LinearCombination<DynkinSimpleType, Rational> {
 private:
 public:

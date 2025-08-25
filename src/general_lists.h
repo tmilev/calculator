@@ -168,8 +168,7 @@ class Calculator;
 class Function;
 class Expression;
 
-// This class is used as a custom completely portable
-// stack trace log.
+// This class is used as a custom completely portable stack trace log.
 class RegisterFunctionCall {
 public:
   int threadIndex;
@@ -546,8 +545,7 @@ public:
   // selection.elements.
   void subSelection(const Selection& selection, List<Object>& output);
   // If comparison function is not specified, quickSortAscending uses operator
-  // >, else it uses the given
-  // comparison function
+  // >, else it uses the given comparison function.
   template <class otherType = Object>
   void quickSortAscending(
     const List<Object>::Comparator* order = nullptr,
@@ -787,7 +785,6 @@ public:
       }
     }
   }
-  // sortedGetIndex
   int sortedGetIndex(const Object& o) const {
     int n = this->sortedIndexFirstNotLessThan(o);
     if (n != this->size) {

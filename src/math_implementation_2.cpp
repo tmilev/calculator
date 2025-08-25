@@ -786,7 +786,6 @@ void LargeIntegerUnsigned::dividePositive(
       << " by "
       << divisor.toString()
       << " got too many algorithm steps without remainder size decrease. "
-      << "."
       << global.fatal;
     }
   }

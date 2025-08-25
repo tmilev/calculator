@@ -526,22 +526,45 @@ public:
 // Finds eigenvalues of a matrix.
 // Currently assumes that the matrix is rational and the eigenvalues lie in a
 // quadratic radical extension of the rationals.
-// This assumption is not neccessary and can be removed if
+// This assumption is not neccessary and can be removed at the
+// cost of solid future algorithmic improvements.
 class MatrixEigenvalueFinder {
   AlgebraicClosureRationals* algebraicClosure;
+  PolynomialQuadraticRootFinder eigenvalueFinder;
 public:
   Matrix<Rational> matrix;
   Polynomial<Rational> characteristicPolynomial;
-  PolynomialQuadraticRootFinder eigenvalueFinder;
   HashedList<AlgebraicNumber> eigenValuesWithoutMultiplicity;
   List<Vectors<AlgebraicNumber> > eigenvectors;
   MatrixEigenvalueFinder();
   void initialize(AlgebraicClosureRationals* inputAlgebraicClosure);
   bool findEigenValuesAndEigenspaces(Matrix<Rational>& input);
   int numberOfEigenVectors() const;
-  void eigenVectorsFromEigenValue(
+  void eigenVectorsFromEigenvalue(
     const AlgebraicNumber& eigenValue, Vectors<AlgebraicNumber>& output
   );
+  const PolynomialFactorizationUnivariate<Rational>&
+  factorizationMinimalPolynomial() const;
+};
+
+// Finds eigenvalues of a matrix with algebraic coefficients.
+// This is work in progress and should currently only work for
+// 2x2 matrices.
+class MatrixEigenvalueFinderAlgebraic {
+  AlgebraicClosureRationals* algebraicClosure;
+public:
+  Matrix<AlgebraicNumber> matrix;
+  Polynomial<AlgebraicNumber> characteristicPolynomial;
+  HashedList<AlgebraicNumber> eigenValuesWithoutMultiplicity;
+  List<Vectors<AlgebraicNumber> > eigenvectors;
+  void initialize(AlgebraicClosureRationals* inputAlgebraicClosure);
+  bool findEigenValuesAndEigenspaces(Matrix<AlgebraicNumber>& input);
+  int numberOfEigenVectors() const;
+  void eigenVectorsFromEigenvalue(
+    const AlgebraicNumber& eigenValue, Vectors<AlgebraicNumber>& output
+  );
+  MatrixEigenvalueFinderAlgebraic();
+  std::string toString() const;
 };
 
 #endif // header_math_extra_algebraic_numbers_ALREADY_INCLUDED

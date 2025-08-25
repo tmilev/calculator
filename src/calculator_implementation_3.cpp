@@ -185,7 +185,6 @@ getAllDominantWeightsHWFDIMwithRespectToAmbientAlgebra(
     int lowestUnexploredHeightDiff = 0; lowestUnexploredHeightDiff <=
     topHeightSimpleCoordinates; lowestUnexploredHeightDiff ++
   ) {
-    // double startCycleTime = global.getElapsedSeconds();
     if (
       upperBoundDominantWeights > 0 &&
       totalWeightsFound > upperBoundDominantWeights
@@ -1013,7 +1012,7 @@ bool Calculator::Test::processResults() {
   }
   if (this->unknown == 0 && this->inconsistencies == 0) {
     out
-    << "<b style ='color:green'>"
+    << "<b style='color:green'>"
     << "No inconsistencies or uknown computations.</b> ";
   }
   out << "<table>" << goodCommands.str() << "</table>";

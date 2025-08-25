@@ -391,7 +391,7 @@ bool AlgebraicClosureRationals::chooseGeneratingElement(
       this->generatingElementPowersBasis.addOnTop(currentVect);
       if (
         this->generatingElementPowersBasis.size >
-        this->generatingElementPowersBasis.getRankElementSpan()
+        this->generatingElementPowersBasis.getRankLinearSpan()
       ) {
         this->generatingElementPowersBasis.setSize(
           this->generatingElementPowersBasis.size - 1
@@ -1199,7 +1199,7 @@ bool AlgebraicNumber::checkCommonOwner(const AlgebraicNumber& other) const {
 }
 
 void AlgebraicNumber::operator-=(const AlgebraicNumber& other) {
-  STACK_TRACE("AlgebraicNumber::operator=");
+  STACK_TRACE("AlgebraicNumber::operator-=");
   this->checkCommonOwner(other);
   if (this->basisIndex == other.basisIndex) {
     this->element -= other.element;
@@ -1977,4 +1977,162 @@ bool PolynomialSystem<AlgebraicNumber>::getOneVariablePolynomialSolution(
   }
   outputSolution = number;
   return true;
+}
+
+MatrixEigenvalueFinder::MatrixEigenvalueFinder() {
+  this->algebraicClosure = nullptr;
+}
+
+void MatrixEigenvalueFinder::initialize(
+  AlgebraicClosureRationals* inputAlgebraicClosure
+) {
+  this->algebraicClosure = inputAlgebraicClosure;
+  this->characteristicPolynomial.makeZero();
+  this->eigenValuesWithoutMultiplicity.clear();
+  this->eigenvectors.clear();
+  this->eigenvalueFinder.initialize(this->algebraicClosure);
+}
+
+int MatrixEigenvalueFinder::numberOfEigenVectors() const {
+  int result = 0;
+  for (const Vectors<AlgebraicNumber>& eigenspace : this->eigenvectors) {
+    result += eigenspace.size;
+  }
+  return result;
+}
+
+const PolynomialFactorizationUnivariate<Rational>& MatrixEigenvalueFinder::
+factorizationMinimalPolynomial() const {
+  return this->eigenvalueFinder.factorization;
+}
+
+void MatrixEigenvalueFinder::eigenVectorsFromEigenvalue(
+  const AlgebraicNumber& eigenValue, Vectors<AlgebraicNumber>& output
+) {
+  STACK_TRACE("MatrixEigenvalueFinder::eigenVectorsFromEigenvalue");
+  output.clear();
+  int indexOfEigenValue =
+  this->eigenValuesWithoutMultiplicity.getIndex(eigenValue);
+  if (indexOfEigenValue < 0) {
+    return;
+  }
+  output = this->eigenvectors[indexOfEigenValue];
+}
+
+bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
+  Matrix<Rational>& input
+) {
+  this->initialize(this->algebraicClosure);
+  this->matrix = input;
+  this->matrix.getCharacteristicPolynomialStandardRepresentation(
+    this->characteristicPolynomial
+  );
+  if (
+    this->characteristicPolynomial.totalDegree() !=
+    this->matrix.numberOfColumns
+  ) {
+    global.fatal << "Bad characteristic polynomial degree. " << global.fatal;
+  }
+  if (!this->eigenvalueFinder.findRoots(this->characteristicPolynomial)) {
+    return false;
+  }
+  Matrix<AlgebraicNumber> matrixAlgebraic;
+  matrixAlgebraic.makeZeroMatrix(
+    this->matrix.numberOfColumns, this->algebraicClosure->zero()
+  );
+  matrixAlgebraic = this->matrix;
+  this->eigenValuesWithoutMultiplicity.addOnTopNoRepetition(
+    this->eigenvalueFinder.roots
+  );
+  matrixAlgebraic.getEigenSpacesFromEigenvalues(
+    this->eigenValuesWithoutMultiplicity, this->eigenvectors
+  );
+  return true;
+}
+
+std::string MatrixEigenvalueFinderAlgebraic::toString() const {
+  STACK_TRACE("MatrixEigenvalueFinderAlgebraic::toString");
+  std::stringstream out;
+  out
+  << "Matrix: "
+  << this->matrix.toString()
+  << ", eigenvalues: "
+  << this->eigenValuesWithoutMultiplicity.toStringCommaDelimited()
+  << ", eigenvectors: "
+  << this->eigenvectors.toStringCommaDelimited()
+  << ", characteristic polynomial: \\("
+  << this->characteristicPolynomial.toStringPretty()
+  << "\\)";
+  return out.str();
+}
+
+MatrixEigenvalueFinderAlgebraic::MatrixEigenvalueFinderAlgebraic() {
+  this->algebraicClosure = nullptr;
+}
+
+void MatrixEigenvalueFinderAlgebraic::initialize(
+  AlgebraicClosureRationals* inputAlgebraicClosure
+) {
+  this->algebraicClosure = inputAlgebraicClosure;
+  this->characteristicPolynomial.makeZero();
+  this->eigenValuesWithoutMultiplicity.clear();
+  this->eigenvectors.clear();
+}
+
+int MatrixEigenvalueFinderAlgebraic::numberOfEigenVectors() const {
+  int result = 0;
+  for (const Vectors<AlgebraicNumber>& eigenspace : this->eigenvectors) {
+    result += eigenspace.size;
+  }
+  return result;
+}
+
+bool MatrixEigenvalueFinderAlgebraic::findEigenValuesAndEigenspaces(
+  Matrix<AlgebraicNumber>& input
+) {
+  this->initialize(this->algebraicClosure);
+  this->matrix = input;
+  if (this->matrix.numberOfColumns != 2) {
+    // Only 2x2 matrices are supported for now.
+    return false;
+  }
+  this->matrix.getCharacteristicPolynomialStandardRepresentation(
+    this->characteristicPolynomial
+  );
+  if (
+    this->characteristicPolynomial.totalDegree() !=
+    this->matrix.numberOfColumns
+  ) {
+    global.fatal << "Bad characteristic polynomial degree. " << global.fatal;
+  }
+  AlgebraicNumber a =
+  this->characteristicPolynomial.coefficientOfXPowerK(0, 2);
+  AlgebraicNumber b =
+  this->characteristicPolynomial.coefficientOfXPowerK(0, 1);
+  AlgebraicNumber c =
+  this->characteristicPolynomial.coefficientOfXPowerK(0, 0);
+  AlgebraicNumber discriminant = b * b - a * c * 4;
+  AlgebraicNumber squareRootDiscriminant = discriminant;
+  squareRootDiscriminant.squareRootDefault(nullptr);
+  AlgebraicNumber xOne = (b *(- 1) + squareRootDiscriminant) / (a* 2);
+  AlgebraicNumber xTwo = (b *(- 1) - squareRootDiscriminant) / (a* 2);
+  this->eigenValuesWithoutMultiplicity.addOnTopNoRepetition(xOne);
+  this->eigenValuesWithoutMultiplicity.addOnTopNoRepetition(xTwo);
+  this->matrix.getEigenSpacesFromEigenvalues(
+    this->eigenValuesWithoutMultiplicity, this->eigenvectors
+  );
+  return true;
+}
+
+void MatrixEigenvalueFinderAlgebraic::eigenVectorsFromEigenvalue(
+  const AlgebraicNumber& eigenValue, Vectors<AlgebraicNumber>& output
+) {
+  STACK_TRACE("MatrixEigenvalueFinderAlgebraic::eigenVectorsFromEigenvalue");
+  output.clear();
+  int indexOfEigenValue =
+  this->eigenValuesWithoutMultiplicity.getIndex(eigenValue);
+  if (indexOfEigenValue < 0) {
+    return;
+  }
+  output = this->eigenvectors[indexOfEigenValue];
 }

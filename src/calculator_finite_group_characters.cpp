@@ -281,11 +281,8 @@ restrictRepresentation(
       reportStream << "Restricting the action of generator of index " << i;
       report.report(reportStream.str());
     }
-    Matrix<Coefficient>::matrixInBasis(
-      this->generators[i],
-      output.generators[i],
-      output.basis,
-      output.gramMatrixInverted
+    Matrix<Coefficient>::changeBasis(
+      this->generators[i], output.basis, output.generators[i]
     );
   }
   output.checkAllSimpleGeneratorsAreOK();
@@ -293,13 +290,13 @@ restrictRepresentation(
 
 template <typename somegroup, typename Coefficient>
 bool GroupRepresentationCarriesAllMatrices<somegroup, Coefficient>::
-decomposeTodorsVersion(
+decomposeAlternativeVersion(
   VirtualRepresentation<somegroup, Coefficient>& outputIrrepMults,
   List<GroupRepresentationCarriesAllMatrices<somegroup, Coefficient> >*
   appendOnlyGRCAMSList
 ) {
   STACK_TRACE(
-    "GroupRepresentationCarriesAllMatrices::decomposeTodorsVersion"
+    "GroupRepresentationCarriesAllMatrices::decomposeAlternativeVersion"
   );
   this->checkInitialization();
   this->ownerGroup->
@@ -314,7 +311,7 @@ decomposeTodorsVersion(
     );
   }
   return
-  this->decomposeTodorsVersionRecursive(
+  this->decomposeAlternativeVersionRecursive(
     outputIrrepMults, appendOnlyIrrepsList, appendOnlyGRCAMSList
   );
 }
@@ -2422,7 +2419,7 @@ bool CalculatorFunctionsWeylGroup::decomposeWeylRep(
   >();
   VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
   outputRepresentation;
-  inputRepresentation.makeGRCAM().decomposeTodorsVersion(
+  inputRepresentation.makeGRCAM().decomposeAlternativeVersion(
     outputRepresentation
   );
   return output.assignValue(calculator, outputRepresentation);

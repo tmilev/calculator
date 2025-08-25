@@ -1375,8 +1375,8 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   Vectors<Rational>* additionalDomain,
   Vectors<Rational>* additionalRange
 ) {
-  int currentRank = domain.getRankElementSpan();
-  if (currentRank != range.getRankElementSpan()) {
+  int currentRank = domain.getRankLinearSpan();
+  if (currentRank != range.getRankLinearSpan()) {
     global.fatal << "Ranks do not coincide. " << global.fatal;
   }
   if (abortKmodule != nullptr) {
@@ -1431,7 +1431,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
   }
   int counter = 0;
   domainRec.addOnTop(leftSubalgebra.highestWeightsPrimalSimple[counter]);
-  while (domainRec.getRankElementSpan() == currentRank) {
+  while (domainRec.getRankLinearSpan() == currentRank) {
     counter ++;
     if (leftSubalgebra.modules.size <= counter) {
       global.fatal
@@ -1447,7 +1447,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
       domainRec.lastObject()->operator=(
         leftSubalgebra.highestWeightsPrimalSimple[i]
       );
-      if (domainRec.getRankElementSpan() == currentRank) {
+      if (domainRec.getRankLinearSpan() == currentRank) {
         domainRec.lastObject()->operator=(
           leftSubalgebra.highestWeightsPrimalSimple[counter]
         );
@@ -1456,7 +1456,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
       }
     }
   }
-  if (!(domainRec.getRankElementSpan() == currentRank + 1)) {
+  if (!(domainRec.getRankLinearSpan() == currentRank + 1)) {
     global.fatal << "Ranks do not match. " << global.fatal;
   }
   Vectors<Rational>& firstKmodLeft =
@@ -1467,7 +1467,7 @@ bool RootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(
     if (firstKmodLeft.size == rightSubalgebra.modules[i].size) {
       for (int j = 0; j < firstKmodLeft.size; j ++) {
         rangeRec.addOnTop(rightSubalgebra.weightsModulesPrimalSimple[i][j]);
-        if (rangeRec.getRankElementSpan() != (currentRank + 1)) {
+        if (rangeRec.getRankLinearSpan() != (currentRank + 1)) {
           continue;
         }
         if (
@@ -2348,15 +2348,13 @@ bool RootSubalgebra::attemptExtensionToIsomorphism(
   Selection tempSel;
   for (int i = 0; i < domain.size; i ++) {
     isoDomain.addOnTop(domain[i]);
-    if (
-      isoDomain.getRankElementSpan(&rankComputer, &tempSel) < isoDomain.size
-    ) {
+    if (isoDomain.getRankLinearSpan(&rankComputer, &tempSel) < isoDomain.size) {
       isoDomain.removeLastObject();
     } else {
       isoRange.addOnTop(range[i]);
     }
   }
-  if (isoRange.getRankElementSpan(&rankComputer, &tempSel) < isoRange.size) {
+  if (isoRange.getRankLinearSpan(&rankComputer, &tempSel) < isoRange.size) {
     return false;
   }
   int givenSize = isoDomain.size;
@@ -2539,7 +2537,7 @@ void RootSubalgebra::doKRootsEnumeration() {
       this->positiveRootsKConnectedComponents[i].size
     );
     this->kComponentRanks[i] =
-    this->positiveRootsKConnectedComponents[i].getRankElementSpan(
+    this->positiveRootsKConnectedComponents[i].getRankLinearSpan(
       &rankComputer, &selection
     );
   }
@@ -2995,7 +2993,7 @@ bool RootSubalgebra::computeEssentialsIfNew(
     report.report(reportStream.str());
   }
   if (
-    this->simpleRootsReductiveSubalgebra.getRankElementSpan() !=
+    this->simpleRootsReductiveSubalgebra.getRankLinearSpan() !=
     this->simpleRootsReductiveSubalgebra.size
   ) {
     global.fatal
@@ -3345,7 +3343,7 @@ void RootSubalgebras::computeParabolicPseudoParabolicNeitherOrder() {
         report.report(reportStream.str());
       }
       basis.subSelection(parabolicSelection, currentBasis);
-      if (currentBasis.getRankElementSpan() != currentBasis.size) {
+      if (currentBasis.getRankLinearSpan() != currentBasis.size) {
         continue;
       }
       currentSubalgebra.generatorsK = currentBasis;
@@ -3533,7 +3531,7 @@ void RootSubalgebras::maybeExtendByHighestWeightOfModuleIndex(
     return;
   }
   if (
-    candidate.simpleRootsReductiveSubalgebra.getRankElementSpan() !=
+    candidate.simpleRootsReductiveSubalgebra.getRankLinearSpan() !=
     candidate.simpleRootsReductiveSubalgebra.size
   ) {
     global.fatal

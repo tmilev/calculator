@@ -1181,6 +1181,17 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
   if (type == 'C' && rank == 5 && hElementLength == 8) {
     return List<Rational>({1, 1, 1, 1, 1});
   }
+  if (type == 'C' && rank == 6) {
+    if (hElementLength == 12) {
+      return List<Rational>({1, 3, - 3, - 1, 3, 1});
+    } else if (hElementLength == 10) {
+      return List<Rational>({1, - 1, 1, 1, 1, 1});
+    } else if (hElementLength == 8) {
+      return List<Rational>({1, 1, 1, 1, 1, 1});
+    } else if (hElementLength == 6) {
+      return List<Rational>({1, 3, - 1, - 1, 1, 1});
+    }
+  }
   if (type == 'F' && hElementLength == 56) {
     return List<Rational>({1, 1, 1, 1});
   }

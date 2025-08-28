@@ -1017,9 +1017,8 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
     }
     currentComponent.setSize(0);
     if (diagramWithoutTripleNode.simpleBasesConnectedComponents[1].size == 1) {
-      // <- components are sorted by length, therefore the second and third
-      // component are of length 1,
-      // therefore we have type D_n
+      // <- Components are sorted by length, therefore the second and third
+      // component are of length 1, therefore we have type D_n
       Rational scale = DynkinSimpleType::getDefaultLongRootLengthSquared('D') /
       tripleNode.scalarProduct(tripleNode, this->ambientBilinearForm);
       currentComponent.addListOnTop(
@@ -1194,7 +1193,7 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
       }
     }
   }
-  // so far we made sure the entire component is one properly ordered string,
+  // So far we made sure the entire component is one properly ordered string,
   // starting with the long root.
   if (outputType.letter == 'G' || outputType.letter == 'C') {
     currentComponent.reverseElements();

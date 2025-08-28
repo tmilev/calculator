@@ -1849,6 +1849,8 @@ bool CentralizerComputer::computeCartanOfCentalizerFromSemisimpleElement() {
         this->centralizerCartan[j], mustBeZero
       );
       if (!mustBeZero.isEqualToZero()) {
+        // The elements centralizing the semisimple element do not
+        // commute pairwise.
         // The original element was not semisimple or was not generic enough.
         return false;
       }
@@ -2086,7 +2088,7 @@ bool CentralizerComputer::trySemisimpleElement(
   }
   if (
     this->semisimpleElementAdjointEigenvalueFinder.numberOfEigenVectors() !=
-    this->semisimpleElement.adjointAction.numberOfColumns
+    this->centralizerBasis.size
   ) {
     // The element has fewer eigenvectors than
     // the dimension of the space,
@@ -2163,8 +2165,9 @@ void CentralizerComputer::mergeReductiveComponents(
   }
   int smallestIndex = indicesOfComponentsToBeMergedSorted[0];
   for (int i = 1; i < indicesOfComponentsToBeMergedSorted.size; i ++) {
+    int indexOfDissolved = indicesOfComponentsToBeMergedSorted[i];
     const SimpleSubalgebraComponent& toBeDissolved =
-    this->simpleComponents[indicesOfComponentsToBeMergedSorted[i]];
+    this->simpleComponents[indexOfDissolved];
     // The present loop modifies the reductiveComponents array,
     // so to reduce the danger of use-after-free,
     // it is safest to take a reference of the subalgebra element
@@ -2178,7 +2181,7 @@ void CentralizerComputer::mergeReductiveComponents(
     // we took a reference from earlier in the loop.
     // Since we took the reference recently, so
     // there is no danger of use-after-free.
-    this->simpleComponents.removeIndexSwapWithLast(i);
+    this->simpleComponents.removeIndexSwapWithLast(indexOfDissolved);
   }
 }
 
@@ -2192,6 +2195,7 @@ void CentralizerComputer::computeReductiveComponentsBases() {
 void CentralizerComputer::mergeOneRootSpaceCandidate(
   const CartanElementCandidate& candidate
 ) {
+  STACK_TRACE("CentralizerComputer::mergeOneRootSpaceCandidate");
   List<int> indicesLinkedToCandidate;
   for (int i = 0; i < this->simpleComponents.size; i ++) {
     if (this->simpleComponents[i].isLinkedTo(candidate)) {
@@ -2200,15 +2204,18 @@ void CentralizerComputer::mergeOneRootSpaceCandidate(
   }
   this->mergeReductiveComponents(indicesLinkedToCandidate);
   if (indicesLinkedToCandidate.size == 0) {
-    SimpleSubalgebraComponent reductiveComponent;
-    reductiveComponent.initialize(
-      this->owner, this->algebraicClosureRationals, this->semisimpleElement
+    SimpleSubalgebraComponent semisimpleComponent;
+    semisimpleComponent.initialize(
+      this->owner,
+      this->algebraicClosureRationals,
+      this->semisimpleElement,
+      this
     );
     std::stringstream out;
-    out << "Simple component of centralizer of: " << this->label;
-    reductiveComponent.label = out.str();
-    reductiveComponent.dualsToRoots.addOnTop(candidate);
-    this->simpleComponents.addOnTop(reductiveComponent);
+    out << "S(" << this->label << ")";
+    semisimpleComponent.label = out.str();
+    semisimpleComponent.dualsToRoots.addOnTop(candidate);
+    this->simpleComponents.addOnTop(semisimpleComponent);
     return;
   }
   SimpleSubalgebraComponent& container =
@@ -2467,6 +2474,11 @@ bool SimpleSubalgebraComponent::compute() {
       i --;
     }
   }
+  if (this->positiveDualsOfRootSpaces.size * 2 != this->dualsToRoots.size) {
+    global.fatal
+    << "Exactly half of the roots must be positive. "
+    << global.fatal;
+  }
   this->simpleDualsOfRootSpaces.clear();
   this->simpleDualsOfRootSpaces.addListOnTop(this->positiveDualsOfRootSpaces);
   for (int i = 0; i < this->simpleDualsOfRootSpaces.size; i ++) {
@@ -2528,8 +2540,7 @@ bool SimpleSubalgebraComponent::compute() {
   if (this->owner->killingSquareOfDualOfAmbientLongRoot().isEqualToZero()) {
     // The owner is not simple, so we can't get a long root.
     // We could attempt to make a Dynkin index definition
-    // in such a situation, but for now,
-    // let us simply give up.
+    // in such a situation, but for now, let us simply give up.
     return false;
   }
   if (this->dynkinDiagramComputer.simpleComponentTypes.size != 1) {
@@ -2566,11 +2577,13 @@ bool SimpleSubalgebraComponent::compute() {
 void SimpleSubalgebraComponent::initialize(
   SemisimpleLieAlgebra* inputOwner,
   AlgebraicClosureRationals* inputAlgebraicClosure,
-  const CartanElementCandidate& inputDefiningSemisimpleElement
+  const CartanElementCandidate& inputDefiningSemisimpleElement,
+  CentralizerComputer* inputOptionalContainer
 ) {
   this->owner = inputOwner;
   this->algebraicClosure = inputAlgebraicClosure;
   this->definingSemisimpleElement = inputDefiningSemisimpleElement;
+  this->optionalContainer = inputOptionalContainer;
 }
 
 Rational SimpleSubalgebraComponent::

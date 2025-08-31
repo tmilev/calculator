@@ -135,8 +135,52 @@ class CentralizerComputer {
   void mergeReductiveComponents(
     List<int>& indicesOfComponentsToBeMergedSorted
   );
+  // For this function, we are given a simple type A_1^b,
+  // a Cartan subalgebra H, and a basis of the centralizer of
+  // A_1^b intersected with H, that is,
+  // a basis h_1, ..., h_k of C(A_1^b) \cap H.
+  // Our mathematical goal is to select a sufficiently generic
+  // linear combination h_s=a_1h_1 + ... + a_kh_k so that C(A_1^b)
+  // decomposes into root spaces with respect to h_s. Here,
+  // by "root spaces with respect to h_s" we mean
+  // eigenvectors of ad(h_s) that no multiplicities.
+  // The present function returns an arbitrarily chosen number
+  // a_index, where we aim to choose a_index as small as possible
+  // (so that computations run fast), and as large as possible
+  // so that h_s has no eigenvalue multiplicities and has
+  // sufficiently simple eigenvalues that we can compute them easily.
+  // The coefficients were selected through manual experimentation
+  // by running the end-to-end centralizer computation
+  // and checking that the entire computation goes through.
+  // - index gives the index of the coefficient a_index.
+  // - ambientSimple type gives the ambient Simple Lie algebra.
+  //   If the ambient Lie algebra is not simple, just pass an
+  //   invalid type such as 'X'.
+  // - ambientRank gives the rank of the ambient semisimple Lie algebra.
+  // - dynkinIndexOfSlTwo gives the Dynkin index b of the sl(2).
+  static int arbitraryCartanWeight(
+    int index,
+    char ambientSimpleType,
+    int ambientRank,
+    const Rational& dynkinIndexOfSlTwo
+  );
+  // Helper method for the implementation of arbitraryCartanWeight.
+  static List<int> hardCodedArbitraryCartanWeights(
+    char ambientSimpleType, int ambientRank, const Rational& dynkinIndexOfSlTwo
+  );
+  // Returns an arbitrary coefficient used when forming a semisimple element
+  static Rational arbitraryCoefficientToFormSemisimpleElement(
+    int coefficientIndex, char type, int rank, const Rational& hElementLength
+  );
+  // Returns an arbitrary coefficient used when forming a semisimple element
+  static List<int> hardCodedCoefficientsToFormSemisimpleElement(
+    char type, int rank, const Rational& hElementLength
+  );
 public:
   std::string label;
+  // The dynkin index of the simple subalgebra being centralized, if known.
+  // If the subalgebra being centralized is not simple, this can be set to 0.
+  Rational dynkinIndexOfCentralizedComponent;
   List<ElementSemisimpleLieAlgebra<Rational> > generatorsToCentralize;
   List<ElementSemisimpleLieAlgebra<Rational> > centralizerBasis;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >
@@ -169,7 +213,8 @@ public:
   );
   void initialize(
     SemisimpleLieAlgebra* inputOwner,
-    AlgebraicClosureRationals* inputAlgebraicClosure
+    AlgebraicClosureRationals* inputAlgebraicClosure,
+    Rational* inputDynkinIndexOfCentralizedComponent
   );
   bool makeCartanCandidate(
     const ElementSemisimpleLieAlgebra<AlgebraicNumber>& inputH,
@@ -206,6 +251,11 @@ class SlTwoSubalgebraCandidate {
   // inspect if so formed H, F elements extend to H, E, F-triples.
   static List<Rational> fArbitraryCoefficients(
     char type, int rank, const Rational& hElementLength
+  );
+  // Returns an arbitrary coefficient to use when forming the element f
+  // in a potential h,e,f-triple.
+  static Rational fArbitraryCoefficient(
+    int coefficientIndex, char type, int rank, const Rational& hElementLength
   );
 public:
   // Owner semisimple Lie algebra.
@@ -321,9 +371,6 @@ public:
   void adjoinKostantSekiguchiRelationsToPolynomialSystem(
     LinearMapSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >*
     cartanInvolutionPreservedByEMinusF
-  );
-  static Rational fArbitraryCoefficient(
-    int coefficientIndex, char type, int rank, const Rational& hElementLength
   );
 };
 
@@ -550,6 +597,21 @@ public:
   void computeRootSubalgebraContainers();
   void computeOneRootSubalgebraContainers(SlTwoSubalgebra& output);
   void computeCentralizers();
+  // Finds all sl(2) subalgebras up to conjugation of the given semisimple
+  // Lie algebra.
+  // If computeRealForm is set, will use real forms (work in progress).
+  // When restrictToThisSl2Triple is set, will restrict the computation to the
+  // type given by restrictToThisSl2Triple; all other sl(2)-triples will
+  // be ignored. Used to speed up computations when interested in one
+  // particular
+  // triple.
+  static void findSl2Subalgebras(
+    SemisimpleLieAlgebra& inputOwner,
+    SlTwoSubalgebras& output,
+    bool computeRealForm,
+    AlgebraicClosureRationals* algebraicClosure,
+    DynkinSimpleType* restrictToThisSl2Triple = nullptr
+  );
 };
 
 #endif // header_math_extra_semisimple_lie_subalgebras_sltwos_ALREADY_INCLUDED

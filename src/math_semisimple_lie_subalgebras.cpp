@@ -1340,7 +1340,7 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
   STACK_TRACE(
     "SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand"
   );
-  this->getSemisimpleOwner().findSl2Subalgebras(
+  this->slTwoSubalgebras.findSl2Subalgebras(
     this->getSemisimpleOwner(),
     this->slTwoSubalgebras,
     computeRealSlTwos,
@@ -1801,7 +1801,7 @@ bool SemisimpleSubalgebras::computeStructureRealForms(
     newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras
   );
   this->slTwoSubalgebras.checkMinimalContainingRootSubalgebras();
-  this->owner->findSl2Subalgebras(
+  this->slTwoSubalgebras.findSl2Subalgebras(
     newOwner, this->slTwoSubalgebras, true, &ownerField
   );
   this->computeStructureRealFormsSlTwos();
@@ -2714,9 +2714,7 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
       typeDefaultScale.letter, typeDefaultScale.rank
     );
     simpleAlgebra.computeChevalleyConstants();
-    simpleAlgebra.findSl2Subalgebras(
-      simpleAlgebra, sl2s, false, algebraicClosure
-    );
+    sl2s.findSl2Subalgebras(simpleAlgebra, sl2s, false, algebraicClosure);
     dynkinSimpleTypesWithComputedSl2Subalgebras.addOnTop(typeDefaultScale);
     outputIndicesDefaultScale.setExpectedSize(sl2s.allSubalgebras.size);
     for (int i = 0; i < sl2s.allSubalgebras.size; i ++) {
@@ -7536,121 +7534,6 @@ toStringModuleDecompositionMinimalContainingRegularSubalgebras(
     out << "$";
   }
   output = out.str();
-}
-
-void SemisimpleLieAlgebra::findSl2Subalgebras(
-  SemisimpleLieAlgebra& inputOwner,
-  SlTwoSubalgebras& output,
-  bool computeRealForm,
-  AlgebraicClosureRationals* algebraicClosure
-) {
-  STACK_TRACE("SemisimpleLieAlgebra::findSl2Subalgebras");
-  ProgressReport report0;
-  if (report0.tickAndWantReport()) {
-    std::stringstream reportStream0;
-    reportStream0
-    << "Finding sl(2)-subalgebras (and thus a "
-    << "full list of the nilpotent orbits) of "
-    << inputOwner.weylGroup.dynkinType.toString();
-    report0.report(reportStream0.str());
-  }
-  inputOwner.checkConsistency();
-  output.reset(inputOwner);
-  output.checkConsistency();
-  output.getOwner().computeChevalleyConstants();
-  output.rootSubalgebras.owner = &inputOwner;
-  output.rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
-  output.indicesSl2sContainedInRootSubalgebras.setSize(
-    output.rootSubalgebras.subalgebras.size
-  );
-  output.indicesSl2sContainedInRootSubalgebras.reserve(
-    output.rootSubalgebras.subalgebras.size * 2
-  );
-  output.checkMinimalContainingRootSubalgebras();
-  for (
-    int i = 0; i < output.indicesSl2sContainedInRootSubalgebras.size; i ++
-  ) {
-    output.indicesSl2sContainedInRootSubalgebras[i].size = 0;
-  }
-  ProgressReport report;
-  for (int i = 0; i < output.rootSubalgebras.subalgebras.size; i ++) {
-    std::stringstream currentStream;
-    currentStream
-    << "\nExploring root subalgebra "
-    << output.rootSubalgebras.subalgebras[i].dynkinDiagram.toString()
-    << " ("
-    << (i + 1)
-    << " out of "
-    << output.rootSubalgebras.subalgebras.size
-    << ")\n";
-    report.report(currentStream.str());
-    output.rootSubalgebras.subalgebras[i].
-    getSsl2SubalgebrasAppendListNoRepetition(
-      output, i, computeRealForm, algebraicClosure
-    );
-  }
-  // sort subalgebras by dynkin index
-  List<int> permutation;
-  List<int> indexMap;
-  permutation.setSize(output.allSubalgebras.size);
-  indexMap.setSize(permutation.size);
-  for (int i = 0; i < permutation.size; i ++) {
-    permutation[i] = i;
-  }
-  output.allSubalgebras.quickSortDescending(nullptr, &permutation);
-  for (int i = 0; i < indexMap.size; i ++) {
-    indexMap[permutation[i]] = i;
-  }
-  for (
-    int j = 0; j < output.indicesSl2sContainedInRootSubalgebras.size; j ++
-  ) {
-    for (
-      int k = 0; k < output.indicesSl2sContainedInRootSubalgebras[j].size; k
-      ++
-    ) {
-      output.indicesSl2sContainedInRootSubalgebras[j][k] =
-      indexMap[output.indicesSl2sContainedInRootSubalgebras[j][k]];
-    }
-  }
-  inputOwner.checkConsistency();
-  output.checkMinimalContainingRootSubalgebras();
-  output.computeRootSubalgebraContainers();
-  output.computeCentralizers();
-}
-
-void SlTwoSubalgebras::computeCentralizers() {
-  for (SlTwoSubalgebra& currentSubalgebra : this->allSubalgebras) {
-    currentSubalgebra.attemptToComputeCentralizer();
-  }
-}
-
-void SlTwoSubalgebras::computeOneRootSubalgebraContainers(
-  SlTwoSubalgebra& output
-) {
-  STACK_TRACE("SlTwoSubalgebras::computeOneRootSubalgebraContainers");
-  output.indicesMinimalContainingRootSubalgebras.clear();
-  HashedList<int> containersOfContainers;
-  for (int j : output.indicesContainingRootSubalgebras) {
-    RootSubalgebra& container = this->rootSubalgebras.subalgebras[j];
-    containersOfContainers.addOnTopNoRepetition(container.containerIndices);
-  }
-  for (int j : output.indicesContainingRootSubalgebras) {
-    if (containersOfContainers.contains(j)) {
-      continue;
-    }
-    output.indicesMinimalContainingRootSubalgebras.addOnTop(j);
-  }
-}
-
-void SlTwoSubalgebras::computeRootSubalgebraContainers() {
-  STACK_TRACE("SlTwoSubalgebras::computeRootSubalgebraContainers");
-  for (int i = 0; i < this->allSubalgebras.size; i ++) {
-    SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras.getElement(i);
-    currentSubalgebra.indexInContainer = i;
-    this->computeOneRootSubalgebraContainers(currentSubalgebra);
-    this->checkConsistency();
-  }
-  this->computeModuleDecompositionsitionsOfAmbientLieAlgebra();
 }
 
 bool CandidateSemisimpleSubalgebra::checkConsistency() const {

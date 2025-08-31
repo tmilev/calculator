@@ -561,12 +561,6 @@ public:
     ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
     std::stringstream* logStream = nullptr
   );
-  static void findSl2Subalgebras(
-    SemisimpleLieAlgebra& inputOwner,
-    SlTwoSubalgebras& output,
-    bool computeRealForm,
-    AlgebraicClosureRationals* algebraicClosure
-  );
   template <class Coefficient>
   void getAdjoint(
     Matrix<Coefficient>& output, ElementSemisimpleLieAlgebra<Coefficient>& e

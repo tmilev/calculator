@@ -901,6 +901,19 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     adminNoTest
   );
   this->addOperationHandler(
+    "PrintRootSubalgebrasAndSlTwosRecomputeOneSlTwo",
+    CalculatorLieTheory::printRootSubalgebrasAndSlTwosForceRecomputeOnce,
+    "",
+    "Same as PrintRootSubalgebrasAndSlTwos but forces recomputation "
+    "and recomputes only a single sl(2)-triple. The first argument gives "
+    "the ambient simple algebra type, the second argument gives the "
+    "type of the sl(2) triple(s) to be computed.",
+    "PrintRootSubalgebrasAndSlTwosRecomputeOneSlTwo(f_4, A^8_1)",
+    "CalculatorLieTheory::printRootSubalgebrasAndSlTwosForceRecompute",
+    "PrintRootSubalgebrasAndSlTwosRecompute",
+    adminNoTest
+  );
+  this->addOperationHandler(
     "ParabolicsInfoBruhatGraph",
     CalculatorLieTheory::parabolicWeylGroupsBruhatGraph,
     "",

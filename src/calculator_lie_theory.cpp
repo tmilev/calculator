@@ -4447,10 +4447,11 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   const Expression& input,
   Expression& output,
   bool computeRealFormSlTwos,
-  bool mustRecompute
+  bool mustRecompute,
+  bool restrictTypes
 ) {
   STACK_TRACE("CalculatorLieTheory::rootSAsAndSltwos");
-  if (input.size() != 2) {
+  if (input.size() < 2) {
     return
     calculator
     << "Root subalgebra / sl(2)-subalgebras function expects 1 argument. ";
@@ -4460,6 +4461,28 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
     !CalculatorConversions::convert(calculator, input[1], semisimpleLieAlgebra)
   ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
+  }
+  DynkinSimpleType restrictToThisSl2Triple;
+  if (restrictTypes && input.size() > 2) {
+    if (
+      !CalculatorConversions::dynkinSimpleType(
+        calculator, input[2], restrictToThisSl2Triple
+      )
+    ) {
+      return
+      calculator
+      << "Failed to extract dynkin simple type from "
+      << input[2].toString();
+    }
+    if (
+      restrictToThisSl2Triple.letter != 'A' ||
+      restrictToThisSl2Triple.rank != 1
+    ) {
+      return
+      calculator
+      << "The sl(2)-triple must be of type A^{index}_1, yours is of type: "
+      << restrictToThisSl2Triple.toString();
+    }
   }
   FormatExpressions format;
   format.flagUseHTML = true;
@@ -4491,11 +4514,14 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
     SlTwoSubalgebras slTwoSubalgebras(*semisimpleLieAlgebra.content);
     slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo =
     true;
-    semisimpleLieAlgebra.content->findSl2Subalgebras(
+    DynkinSimpleType* restrictToThisTriple =
+    restrictTypes ? &restrictToThisSl2Triple : nullptr;
+    slTwoSubalgebras.findSl2Subalgebras(
       *semisimpleLieAlgebra.content,
       slTwoSubalgebras,
       computeRealFormSlTwos,
-      &calculator.objectContainer.algebraicClosure
+      &calculator.objectContainer.algebraicClosure,
+      restrictToThisTriple
     );
     slTwoSubalgebras.writeHTML(&format);
     Plot plot;

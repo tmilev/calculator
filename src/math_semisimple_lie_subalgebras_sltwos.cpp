@@ -649,7 +649,10 @@ bool SlTwoSubalgebra::attemptToComputeCentralizer() {
   List<ElementSemisimpleLieAlgebra<Rational> >(
     {this->eElement, this->hElement, this->fElement}
   );
-  this->centralizerComputer.initialize(this->owner, this->algebraicClosure);
+  Rational dynkinIndex = this->getDynkinIndex();
+  this->centralizerComputer.initialize(
+    this->owner, this->algebraicClosure, &dynkinIndex
+  );
   this->centralizerComputer.label = this->toStringDynkinType();
   if (!this->flagTryToComputeCentralizerFully) {
     // Guard until the centralizer computation algorithm
@@ -1183,7 +1186,7 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
   }
   if (type == 'C' && rank == 6) {
     if (hElementLength == 12) {
-      return List<Rational>({1, 3, - 3, - 1, 3, 1});
+      return List<Rational>({1, 1, 1, 1, 1, 1});
     } else if (hElementLength == 10) {
       return List<Rational>({1, - 1, 1, 1, 1, 1});
     } else if (hElementLength == 8) {
@@ -1318,6 +1321,122 @@ bool SlTwoSubalgebras::checkConsistency() const {
     current.checkConsistency();
   }
   return true;
+}
+
+void SlTwoSubalgebras::findSl2Subalgebras(
+  SemisimpleLieAlgebra& inputOwner,
+  SlTwoSubalgebras& output,
+  bool computeRealForm,
+  AlgebraicClosureRationals* algebraicClosure,
+  DynkinSimpleType* restrictToThisSl2Triple
+) {
+  STACK_TRACE("SlTwoSubalgebras::findSl2Subalgebras");
+  ProgressReport report0;
+  if (report0.tickAndWantReport()) {
+    std::stringstream reportStream0;
+    reportStream0
+    << "Finding sl(2)-subalgebras (and thus a "
+    << "full list of the nilpotent orbits) of "
+    << inputOwner.weylGroup.dynkinType.toString();
+    report0.report(reportStream0.str());
+  }
+  inputOwner.checkConsistency();
+  output.reset(inputOwner);
+  output.checkConsistency();
+  output.getOwner().computeChevalleyConstants();
+  output.rootSubalgebras.owner = &inputOwner;
+  output.rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
+  output.indicesSl2sContainedInRootSubalgebras.setSize(
+    output.rootSubalgebras.subalgebras.size
+  );
+  output.indicesSl2sContainedInRootSubalgebras.reserve(
+    output.rootSubalgebras.subalgebras.size * 2
+  );
+  output.checkMinimalContainingRootSubalgebras();
+  for (
+    int i = 0; i < output.indicesSl2sContainedInRootSubalgebras.size; i ++
+  ) {
+    output.indicesSl2sContainedInRootSubalgebras[i].size = 0;
+  }
+  ProgressReport report;
+  for (int i = 0; i < output.rootSubalgebras.subalgebras.size; i ++) {
+    std::stringstream currentStream;
+    currentStream
+    << "\nExploring root subalgebra "
+    << output.rootSubalgebras.subalgebras[i].dynkinDiagram.toString()
+    << " ("
+    << (i + 1)
+    << " out of "
+    << output.rootSubalgebras.subalgebras.size
+    << ")\n";
+    report.report(currentStream.str());
+    output.rootSubalgebras.subalgebras[i].
+    getSsl2SubalgebrasAppendListNoRepetition(
+      output, i, computeRealForm, algebraicClosure
+    );
+  }
+  // sort subalgebras by dynkin index
+  List<int> permutation;
+  List<int> indexMap;
+  permutation.setSize(output.allSubalgebras.size);
+  indexMap.setSize(permutation.size);
+  for (int i = 0; i < permutation.size; i ++) {
+    permutation[i] = i;
+  }
+  output.allSubalgebras.quickSortDescending(nullptr, &permutation);
+  for (int i = 0; i < indexMap.size; i ++) {
+    indexMap[permutation[i]] = i;
+  }
+  for (
+    int j = 0; j < output.indicesSl2sContainedInRootSubalgebras.size; j ++
+  ) {
+    for (
+      int k = 0; k < output.indicesSl2sContainedInRootSubalgebras[j].size; k
+      ++
+    ) {
+      output.indicesSl2sContainedInRootSubalgebras[j][k] =
+      indexMap[output.indicesSl2sContainedInRootSubalgebras[j][k]];
+    }
+  }
+  inputOwner.checkConsistency();
+  output.checkMinimalContainingRootSubalgebras();
+  output.computeRootSubalgebraContainers();
+  output.computeCentralizers();
+}
+
+void SlTwoSubalgebras::computeCentralizers() {
+  for (SlTwoSubalgebra& currentSubalgebra : this->allSubalgebras) {
+    currentSubalgebra.attemptToComputeCentralizer();
+  }
+}
+
+void SlTwoSubalgebras::computeOneRootSubalgebraContainers(
+  SlTwoSubalgebra& output
+) {
+  STACK_TRACE("SlTwoSubalgebras::computeOneRootSubalgebraContainers");
+  output.indicesMinimalContainingRootSubalgebras.clear();
+  HashedList<int> containersOfContainers;
+  for (int j : output.indicesContainingRootSubalgebras) {
+    RootSubalgebra& container = this->rootSubalgebras.subalgebras[j];
+    containersOfContainers.addOnTopNoRepetition(container.containerIndices);
+  }
+  for (int j : output.indicesContainingRootSubalgebras) {
+    if (containersOfContainers.contains(j)) {
+      continue;
+    }
+    output.indicesMinimalContainingRootSubalgebras.addOnTop(j);
+  }
+}
+
+void SlTwoSubalgebras::computeRootSubalgebraContainers() {
+  STACK_TRACE("SlTwoSubalgebras::computeRootSubalgebraContainers");
+  for (int i = 0; i < this->allSubalgebras.size; i ++) {
+    SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras.getElement(i);
+    currentSubalgebra.indexInContainer = i;
+    this->computeOneRootSubalgebraContainers(currentSubalgebra);
+    this->checkConsistency();
+  }
+  this->computeModuleDecompositionsitionsOfAmbientLieAlgebra();
 }
 
 void SlTwoSubalgebras::computeModuleDecompositionsitionsOfAmbientLieAlgebra() {
@@ -1653,13 +1772,20 @@ CentralizerComputer::CentralizerComputer() {
 
 void CentralizerComputer::initialize(
   SemisimpleLieAlgebra* inputOwner,
-  AlgebraicClosureRationals* inputAlgebraicClosure
+  AlgebraicClosureRationals* inputAlgebraicClosure,
+  Rational* inputDynkinIndexOfCentralizedComponent
 ) {
   this->owner = inputOwner;
   this->algebraicClosureRationals = inputAlgebraicClosure;
   this->semisimpleElementAdjointEigenvalueFinder.initialize(
     inputAlgebraicClosure
   );
+  if (inputDynkinIndexOfCentralizedComponent == nullptr) {
+    this->dynkinIndexOfCentralizedComponent = 0;
+  } else {
+    this->dynkinIndexOfCentralizedComponent =
+    *inputDynkinIndexOfCentralizedComponent;
+  }
 }
 
 std::string CentralizerComputer::toString() const {
@@ -1728,47 +1854,49 @@ bool CentralizerComputer::compute() {
     return true;
   }
   this->flagCartanSelected = this->intersectAmbientCartanWithCentralizer();
+  char ambientSimpleType = 'X';
+  int rank = 1;
+  this->owner->weylGroup.dynkinType.isSimple(&ambientSimpleType, &rank);
   if (this->centralizerIntersectedWithAmbientCartan.size > 0) {
     ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
-    for (int attempt = 0; attempt < 3; attempt ++) {
-      int counter = 1;
-      // Construct an arbitrary linear combination of the elements of
-      // the intersection of the ambient Cartan with the centralizer.
-      // We want the arbitrary linear combination to have maximal rank
-      // of its adjoint action.
-      // This happens with probability 1 for a random linear combination.
-      // However, when choosing small coefficients, there is a
-      // high chance that the rank will actually not be maximal.
-      // We are choosing choosing a linear combination with
-      // an arbitary formula, whose only goal is to avoid
-      // the chance of non-maximal rank of the adjoint action.
-      for (
-        const ElementSemisimpleLieAlgebra<Rational>& summand :
-        this->centralizerIntersectedWithAmbientCartan
-      ) {
-        Rational arbitraryCoefficient = (counter * counter + 1 + 2 * attempt);
-        semisimpleCandidate += summand * arbitraryCoefficient;
-        counter ++;
-      }
+    // Construct an arbitrary linear combination of the elements of
+    // the intersection of the ambient Cartan with the centralizer.
+    // We want the arbitrary linear combination to have maximal rank
+    // of its adjoint action.
+    // This happens with probability 1 for a random linear combination.
+    // However, when choosing small coefficients, there is a
+    // high chance that the rank will actually not be maximal.
+    // We are choosing choosing a linear combination with
+    // an arbitary formula, whose only goal is to avoid
+    // the chance of non-maximal rank of the adjoint action.
+    for (
+      int i = 0; i < this->centralizerIntersectedWithAmbientCartan.size; i ++
+    ) {
+      const ElementSemisimpleLieAlgebra<Rational>& summand =
+      this->centralizerIntersectedWithAmbientCartan[i];
+      Rational arbitraryCoefficient;
+      arbitraryCoefficient =
+      this->arbitraryCartanWeight(
+        i, ambientSimpleType, rank, this->dynkinIndexOfCentralizedComponent
+      );
+      semisimpleCandidate += summand * arbitraryCoefficient;
     }
     if (this->trySemisimpleElement(semisimpleCandidate)) {
       return true;
     }
   }
-  for (int attempt = 0; attempt < 2; attempt ++) {
-    ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
-    for (int i = 0; i < this->centralizerBasis.size; i ++) {
-      const ElementSemisimpleLieAlgebra<Rational>& summand =
-      this->centralizerBasis[i];
-      Rational coefficient = 1;
-      if (attempt == 1 && i % 2 == 0) {
-        coefficient = - 1;
-      }
-      semisimpleCandidate += summand * coefficient;
-    }
-    if (this->trySemisimpleElement(semisimpleCandidate)) {
-      return true;
-    }
+  ElementSemisimpleLieAlgebra<Rational> semisimpleCandidate;
+  for (int i = 0; i < this->centralizerBasis.size; i ++) {
+    const ElementSemisimpleLieAlgebra<Rational>& summand =
+    this->centralizerBasis[i];
+    Rational coefficient =
+    this->arbitraryCoefficientToFormSemisimpleElement(
+      i, ambientSimpleType, rank, this->dynkinIndexOfCentralizedComponent
+    );
+    semisimpleCandidate += summand * coefficient;
+  }
+  if (this->trySemisimpleElement(semisimpleCandidate)) {
+    return true;
   }
   return false;
 }
@@ -2146,6 +2274,80 @@ bool CentralizerComputer::makeCartanCandidate(
   output.e = inputE;
   output.f = inputF;
   return result;
+}
+
+int CentralizerComputer::arbitraryCartanWeight(
+  int index,
+  char ambientSimpleType,
+  int ambientRank,
+  const Rational& dynkinIndexOfSlTwo
+) {
+  STACK_TRACE("CentralizerComputer::arbitraryCartanWeight");
+  List<int> preferredHardCodedCoefficients =
+  CentralizerComputer::hardCodedArbitraryCartanWeights(
+    ambientSimpleType, ambientRank, dynkinIndexOfSlTwo
+  );
+  if (index < preferredHardCodedCoefficients.size) {
+    return preferredHardCodedCoefficients[index];
+  }
+  return 1;
+}
+
+List<int> CentralizerComputer::hardCodedArbitraryCartanWeights(
+  char ambientSimpleType, int ambientRank, const Rational& dynkinIndexOfSlTwo
+) {
+  if (ambientSimpleType == 'B' && ambientRank == 4 && dynkinIndexOfSlTwo == 2) {
+    return List<int>({1, 2});
+  }
+  if (ambientSimpleType == 'D' && ambientRank == 4 && dynkinIndexOfSlTwo == 2) {
+    return List<int>({1, 2});
+  }
+  if (ambientSimpleType == 'F' && ambientRank == 4 && dynkinIndexOfSlTwo == 8) {
+    return List<int>({1, 3});
+  }
+  if (ambientSimpleType == 'A' && ambientRank == 5 && dynkinIndexOfSlTwo == 3) {
+    return List<int>({1, 3});
+  }
+  if (ambientSimpleType == 'B' && ambientRank == 5) {
+    if (dynkinIndexOfSlTwo == 4 || dynkinIndexOfSlTwo == 2) {
+      return List<int>({1, 2});
+    }
+  }
+  if (ambientSimpleType == 'D' && ambientRank == 5) {
+    if (
+      dynkinIndexOfSlTwo == 10 ||
+      dynkinIndexOfSlTwo == 3 ||
+      dynkinIndexOfSlTwo == 2
+    ) {
+      return List<int>({1, 2, - 2});
+    }
+  }
+  return List<int>({1, 1, 1, 1, 1, 1, 1, 1});
+}
+
+Rational CentralizerComputer::arbitraryCoefficientToFormSemisimpleElement(
+  int index,
+  char ambientSimpleType,
+  int ambientRank,
+  const Rational& dynkinIndexOfSlTwo
+) {
+  STACK_TRACE(
+    "CentralizerComputer::arbitraryCoefficientToFormSemisimpleElement"
+  );
+  List<int> hardCoded =
+  CentralizerComputer::hardCodedCoefficientsToFormSemisimpleElement(
+    ambientSimpleType, ambientRank, dynkinIndexOfSlTwo
+  );
+  if (index < hardCoded.size) {
+    return hardCoded[index];
+  }
+  return 1;
+}
+
+List<int> CentralizerComputer::hardCodedCoefficientsToFormSemisimpleElement(
+  char ambientSimpleType, int ambientRank, const Rational& dynkinIndexOfSlTwo
+) {
+  return List<int>({});
 }
 
 void CentralizerComputer::makeCartanCandidateNoFailure(

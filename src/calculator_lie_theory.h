@@ -155,19 +155,35 @@ public:
   static bool splitFDpartB3overG2CharsOnly(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  // Computes root subalgebras and sl(2)'s.
+  // When computeRealFormSlTwos is set, attempts to compute the real
+  // forms (work in progress).
+  // When mustRecompute is set, does not use cached results.
+  // When restrictTypes is set, attempts to restrict the computation to
+  // a single type of sl(2)-triple, extracted from the second argument
+  // of the input function.
   static bool rootSubalgebrasAndSlTwos(
     Calculator& calculator,
     const Expression& input,
     Expression& output,
     bool computeRealFormSlTwos,
-    bool mustRecompute
+    bool mustRecompute,
+    bool restrictTypes
   );
   static bool printRootSubalgebrasAndSlTwos(
     Calculator& calculator, const Expression& input, Expression& output
   ) {
     return
     CalculatorLieTheory::rootSubalgebrasAndSlTwos(
-      calculator, input, output, false, false
+      calculator, input, output, false, false, false
+    );
+  }
+  static bool printRootSubalgebrasAndSlTwosForceRecomputeOnce(
+    Calculator& calculator, const Expression& input, Expression& output
+  ) {
+    return
+    CalculatorLieTheory::rootSubalgebrasAndSlTwos(
+      calculator, input, output, false, true, true
     );
   }
   static bool printRootSubalgebrasAndSlTwosForceRecompute(
@@ -175,7 +191,7 @@ public:
   ) {
     return
     CalculatorLieTheory::rootSubalgebrasAndSlTwos(
-      calculator, input, output, false, true
+      calculator, input, output, false, true, false
     );
   }
   static bool weylDimensionFormula(

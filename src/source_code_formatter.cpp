@@ -3558,6 +3558,17 @@ bool CodeFormatter::Processor::applyOneRule() {
     return this->removeLast(3);
   }
   if (
+    thirdToLast.type == CodeFormatter::Element::LeftParenthesis &&
+    secondToLast.type == CodeFormatter::Element::LeftCurlyBrace &&
+    last.type == CodeFormatter::Element::RightCurlyBrace
+  ) {
+    this->lastRuleName = "({}";
+    secondToLast.makeFrom2(
+      CodeFormatter::Element::Expression, secondToLast, last
+    );
+    return this->removeLast();
+  }
+  if (
     secondToLast.type == CodeFormatter::Element::LeftCurlyBrace &&
     last.type == CodeFormatter::Element::RightCurlyBrace
   ) {

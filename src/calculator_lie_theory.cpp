@@ -4447,8 +4447,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   const Expression& input,
   Expression& output,
   bool computeRealFormSlTwos,
-  bool mustRecompute,
-  bool restrictTypes
+  bool mustRecompute
 ) {
   STACK_TRACE("CalculatorLieTheory::rootSAsAndSltwos");
   if (input.size() < 2) {
@@ -4462,11 +4461,12 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
   ) {
     return output.assignError(calculator, "Error extracting Lie algebra.");
   }
-  DynkinSimpleType restrictToThisSl2Triple;
-  if (restrictTypes && input.size() > 2) {
+  DynkinSimpleType* restrictToThisSl2Triple = nullptr;
+  DynkinSimpleType typeHolder;
+  if (input.size() > 2) {
     if (
-      !CalculatorConversions::dynkinSimpleType(
-        calculator, input[2], restrictToThisSl2Triple
+      !CalculatorConversions::functionDynkinSimpleType(
+        calculator, input[2], typeHolder
       )
     ) {
       return
@@ -4474,15 +4474,13 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
       << "Failed to extract dynkin simple type from "
       << input[2].toString();
     }
-    if (
-      restrictToThisSl2Triple.letter != 'A' ||
-      restrictToThisSl2Triple.rank != 1
-    ) {
+    if (typeHolder.letter != 'A' || typeHolder.rank != 1) {
       return
       calculator
       << "The sl(2)-triple must be of type A^{index}_1, yours is of type: "
-      << restrictToThisSl2Triple.toString();
+      << typeHolder.toString();
     }
+    restrictToThisSl2Triple = &typeHolder;
   }
   FormatExpressions format;
   format.flagUseHTML = true;
@@ -4514,14 +4512,12 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
     SlTwoSubalgebras slTwoSubalgebras(*semisimpleLieAlgebra.content);
     slTwoSubalgebras.rootSubalgebras.flagPrintParabolicPseudoParabolicInfo =
     true;
-    DynkinSimpleType* restrictToThisTriple =
-    restrictTypes ? &restrictToThisSl2Triple : nullptr;
     slTwoSubalgebras.findSl2Subalgebras(
       *semisimpleLieAlgebra.content,
       slTwoSubalgebras,
       computeRealFormSlTwos,
       &calculator.objectContainer.algebraicClosure,
-      restrictToThisTriple
+      restrictToThisSl2Triple
     );
     slTwoSubalgebras.writeHTML(&format);
     Plot plot;

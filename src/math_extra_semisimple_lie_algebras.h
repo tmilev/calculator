@@ -990,7 +990,7 @@ bool ElementSemisimpleLieAlgebra<Coefficient>::coordinatesInBasis(
     basis[i].toVectorNegativeRootSpacesFirst(basisVectors[i]);
   }
   this->toVectorNegativeRootSpacesFirst(element);
-  return element.coordinatesInBasis(basisVectors, output);
+  return element.coordinatesInBasis(basisVectors, output, nullptr);
 }
 
 template <class Coefficient>

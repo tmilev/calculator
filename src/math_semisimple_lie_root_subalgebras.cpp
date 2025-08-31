@@ -56,7 +56,7 @@ void RootSubalgebra::getCoxeterPlane(
     Vector<Rational>& lastRoot = *tempGroup.rootSubsystem.lastObject();
     Vector<Rational> lastRootinSimpleCoordinates;
     lastRoot.coordinatesInBasis(
-      tempGroup.simpleRootsInner, lastRootinSimpleCoordinates
+      tempGroup.simpleRootsInner, lastRootinSimpleCoordinates, nullptr
     );
     coxeterNumber =
     MathRoutines::maximum(
@@ -1532,14 +1532,16 @@ bool RootSubalgebra::isAnIsomorphism(
   Vector<Rational> root;
   if (additionalDomain != nullptr) {
     for (int i = 0; i < additionalDomain->size; i ++) {
-      additionalDomain->objects[i].coordinatesInBasis(roots, root);
+      additionalDomain->objects[i].coordinatesInBasisNoFailure(roots, root);
       if (!(root == additionalRange->objects[i])) {
         return false;
       }
     }
   }
   for (int i = 0; i < this->getAmbientWeyl().rootsOfBorel.size; i ++) {
-    this->getAmbientWeyl().rootsOfBorel[i].coordinatesInBasis(roots, root);
+    this->getAmbientWeyl().rootsOfBorel[i].coordinatesInBasisNoFailure(
+      roots, root
+    );
     if (!this->isARoot(root)) {
       return false;
     }
@@ -3064,229 +3066,6 @@ void RootSubalgebra::generateAutomorphismsPreservingBorel(
 ) {
   this->computeEssentials();
   this->generateIsomorphismsPreservingBorel(*this, &outputAutomorphisms);
-}
-
-void RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition(
-  SlTwoSubalgebras& output,
-  int indexRootSubalgebraInContainer,
-  bool computeRealForm,
-  AlgebraicClosureRationals* algebraicClosure
-) {
-  STACK_TRACE("RootSubalgebra::getSsl2SubalgebrasAppendListNoRepetition");
-  // reference: Dynkin, semisimple Lie algebras of simple lie algebras,
-  // theorems
-  // 10.1 - 10.4
-  int relativeDimension = this->simpleRootsReductiveSubalgebra.size;
-  if (relativeDimension == 0) {
-    return;
-  }
-  Selection selectionRootsWithZeroCharacteristic;
-  Selection simpleRootsChar2;
-  Vectors<Rational> rootsScalarProduct2HNonRaised;
-  Vectors<Rational> reflectedSimpleBasisK;
-  rootsScalarProduct2HNonRaised.reserve(
-    this->positiveRootsReductiveSubalgebra.size
-  );
-  ElementWeylGroup raisingElement;
-  selectionRootsWithZeroCharacteristic.initialize(relativeDimension);
-  Matrix<Rational> invertedRelativeKillingForm;
-  invertedRelativeKillingForm.initialize(relativeDimension, relativeDimension);
-  for (int k = 0; k < relativeDimension; k ++) {
-    for (int j = 0; j < relativeDimension; j ++) {
-      invertedRelativeKillingForm(k, j) =
-      this->getAmbientWeyl().rootScalarCartanRoot(
-        this->simpleRootsReductiveSubalgebra[k],
-        this->simpleRootsReductiveSubalgebra[j]
-      );
-    }
-  }
-  invertedRelativeKillingForm.invert();
-  int numberOfCycles =
-  MathRoutines::twoToTheNth(
-    selectionRootsWithZeroCharacteristic.numberOfElements
-  );
-  ProgressReport report;
-  Vectors<Rational> rootsZeroChar;
-  rootsZeroChar.reserve(
-    selectionRootsWithZeroCharacteristic.numberOfElements
-  );
-  Vectors<Rational> relativeRootSystem;
-  this->positiveRootsReductiveSubalgebra.coordinatesInBasis(
-    this->simpleRootsReductiveSubalgebra, relativeRootSystem
-  );
-  SlTwoSubalgebraCandidate candidate;
-  candidate.container = &output;
-  candidate.owner = &this->getOwnerLieAlgebra();
-  SemisimpleLieAlgebra& lieAlgebra = this->getOwnerLieAlgebra();
-  DynkinDiagramRootSubalgebra diagramZeroCharacteristicRoots;
-  for (
-    int cycleCounter = 0; cycleCounter < numberOfCycles;
-    cycleCounter ++,
-    selectionRootsWithZeroCharacteristic.incrementSelection()
-  ) {
-    this->simpleRootsReductiveSubalgebra.subSelection(
-      selectionRootsWithZeroCharacteristic, rootsZeroChar
-    );
-    diagramZeroCharacteristicRoots.computeDiagramTypeModifyInput(
-      rootsZeroChar, this->getAmbientWeyl()
-    );
-    int slack = 0;
-    rootsScalarProduct2HNonRaised.size = 0;
-    simpleRootsChar2 = selectionRootsWithZeroCharacteristic;
-    simpleRootsChar2.invertSelection();
-    Vector<Rational> simpleRootsChar2Vector;
-    simpleRootsChar2Vector = simpleRootsChar2;
-    for (int j = 0; j < relativeRootSystem.size; j ++) {
-      if (simpleRootsChar2Vector.scalarEuclidean(relativeRootSystem[j]) == 1) {
-        slack ++;
-        rootsScalarProduct2HNonRaised.addOnTop(
-          this->positiveRootsReductiveSubalgebra[j]
-        );
-      }
-    }
-    int dynkinEpsilon =
-    diagramZeroCharacteristicRoots.numberRootsGeneratedByDiagram() +
-    relativeDimension - slack;
-    // If Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2)
-    // subalgebra.
-    // otherwise, as far as I understand, it always is //
-    // except for G_2 (go figure!).
-    // (but selectionRootsWithZeroCharacteristic still have to be found)
-    // this is done in the below code.
-    if (dynkinEpsilon != 0) {
-      continue;
-    }
-    Vector<Rational> relativeCharacteristic;
-    Vector<Rational> relativeSimpleCoordinates;
-    relativeCharacteristic.makeZero(relativeDimension);
-    for (int k = 0; k < relativeDimension; k ++) {
-      if (!selectionRootsWithZeroCharacteristic.selected[k]) {
-        relativeCharacteristic[k] = 2;
-      }
-    }
-    invertedRelativeKillingForm.actOnVectorColumn(
-      relativeCharacteristic, relativeSimpleCoordinates
-    );
-    candidate.candidateH.makeZero(lieAlgebra.getRank());
-    for (int j = 0; j < relativeDimension; j ++) {
-      candidate.candidateH +=
-      this->simpleRootsReductiveSubalgebra[j] * relativeSimpleCoordinates[j];
-    }
-    for (int k = 0; k < rootsScalarProduct2HNonRaised.size; k ++) {
-      if (
-        this->getAmbientWeyl().rootScalarCartanRoot(
-          candidate.candidateH, rootsScalarProduct2HNonRaised[k]
-        ) !=
-        2
-      ) {
-        global.fatal
-        << "CharacteristicH is: "
-        << candidate.candidateH.toString()
-        << "; rootsWithScalarProduct2NonRaised: "
-        << rootsScalarProduct2HNonRaised.toString()
-        << "; the scalar product with vector "
-        << rootsScalarProduct2HNonRaised[k].toString()
-        << " is:  "
-        << this->getAmbientWeyl().rootScalarCartanRoot(
-          candidate.candidateH, rootsScalarProduct2HNonRaised[k]
-        ).toString()
-        << " which is supposed to equal 2. "
-        << global.fatal;
-      }
-    }
-    this->getAmbientWeyl().raiseToDominantWeight(
-      candidate.candidateH, nullptr, nullptr, &raisingElement
-    );
-    reflectedSimpleBasisK = this->simpleRootsReductiveSubalgebra;
-    for (int k = 0; k < reflectedSimpleBasisK.size; k ++) {
-      this->getAmbientWeyl().actOn(raisingElement, reflectedSimpleBasisK[k]);
-    }
-    candidate.rootsWithScalar2WithH = rootsScalarProduct2HNonRaised;
-    for (int k = 0; k < candidate.rootsWithScalar2WithH.size; k ++) {
-      this->getAmbientWeyl().actOn(
-        raisingElement, candidate.rootsWithScalar2WithH[k]
-      );
-    }
-    for (int i = 0; i < candidate.rootsWithScalar2WithH.size; i ++) {
-      if (
-        this->getAmbientWeyl().rootScalarCartanRoot(
-          candidate.candidateH, candidate.rootsWithScalar2WithH[i]
-        ) !=
-        2
-      ) {
-        global.fatal
-        << "Bad scalar product after raising: raised characteristic: "
-        << candidate.candidateH.toString()
-        << " simplebasisK: "
-        << this->simpleRootsReductiveSubalgebra.toString()
-        << "raised by: "
-        << raisingElement.toString()
-        << " to get: "
-        << reflectedSimpleBasisK.toString()
-        << " theSl2.RootsWithScalar2WithH: "
-        << candidate.rootsWithScalar2WithH.toString()
-        << ", theSl2.RootsWithScalar2WithH[i]: "
-        << candidate.rootsWithScalar2WithH[i].toString()
-        << " scalar product: "
-        << this->getAmbientWeyl().rootScalarCartanRoot(
-          candidate.candidateH, candidate.rootsWithScalar2WithH[i]
-        ).toString()
-        << ". The inverted relative cartan: "
-        << invertedRelativeKillingForm.toString()
-        << ". The cartan: "
-        << this->getAmbientWeyl().cartanSymmetric.toString()
-        << ". "
-        << global.fatal;
-      }
-    }
-    candidate.hElement.makeCartanGenerator(candidate.candidateH, lieAlgebra);
-    candidate.lengthHSquared =
-    candidate.getOwnerSemisimpleAlgebra().weylGroup.rootScalarCartanRoot(
-      candidate.candidateH, candidate.candidateH
-    );
-    candidate.eElement.makeZero();
-    candidate.fElement.makeZero();
-    if (
-      candidate.attemptExtendingHFtoHEFWithRespectToSubalgebra(
-        candidate.rootsWithScalar2WithH,
-        selectionRootsWithZeroCharacteristic,
-        reflectedSimpleBasisK,
-        candidate.candidateH,
-        computeRealForm,
-        algebraicClosure
-      )
-    ) {
-      this->addSlTwoSubalgebraIfNew(
-        candidate, output, indexRootSubalgebraInContainer
-      );
-    } else {
-      output.unsuitableHs.addOnTop(candidate.candidateH);
-      DynkinType tempType;
-      diagramZeroCharacteristicRoots.getDynkinType(tempType);
-      global.comments
-      << "<br>obtained bad characteristic "
-      << candidate.candidateH.toString()
-      << ". The zero char root diagram is "
-      << tempType.toString()
-      << "; the Dynkin epsilon is "
-      << dynkinEpsilon
-      << "= the num roots generated by diagram "
-      << diagramZeroCharacteristicRoots.numberRootsGeneratedByDiagram()
-      << " + the relative dimension "
-      << relativeDimension
-      << " - the slack "
-      << slack
-      << "<br>The relative root system is: "
-      << relativeRootSystem.toString();
-    }
-    std::stringstream out;
-    out
-    << "Exploring Dynkin characteristics case "
-    << cycleCounter + 1
-    << " out of "
-    << numberOfCycles;
-    report.report(out.str());
-  }
 }
 
 void RootSubalgebras::computeAllReductiveRootSubalgebrasInitialize() {

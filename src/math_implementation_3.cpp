@@ -6455,7 +6455,7 @@ std::string DynkinSimpleType::toString(FormatExpressions* format) const {
 void DynkinSimpleType::makeArbitrary(
   char inputLetter,
   int inputRank,
-  const Rational& inputLengthFirstCorRootSquared
+  const Rational& inputLengthFirstCoRootSquared
 ) {
   if ((
       inputLetter != 'A' &&
@@ -6491,7 +6491,7 @@ void DynkinSimpleType::makeArbitrary(
   }
   this->rank = inputRank;
   this->letter = inputLetter;
-  this->cartanSymmetricInverseScale = inputLengthFirstCorRootSquared;
+  this->cartanSymmetricInverseScale = inputLengthFirstCoRootSquared;
 }
 
 int DynkinSimpleType::getRootSystemSize() const {
@@ -8478,7 +8478,9 @@ void WeylGroupData::getEpsilonCoordinatesWRTsubalgebra(
   simpleBasis.assignListList(dynkinType.simpleBasesConnectedComponents);
   coordinatesInNewBasis.setSize(input.size);
   for (int i = 0; i < input.size; i ++) {
-    input[i].coordinatesInBasis(simpleBasis, coordinatesInNewBasis[i]);
+    input[i].coordinatesInBasisNoFailure(
+      simpleBasis, coordinatesInNewBasis[i]
+    );
   }
   basisChange.actOnVectorsColumn(coordinatesInNewBasis, output);
 }
@@ -11217,7 +11219,7 @@ void Cone::intersectHyperplane(
   Vectors<Rational> simpleRoots;
   Vectors<Rational> convertedCoordinates;
   simpleRoots.makeEiBasis(dimension);
-  simpleRoots.coordinatesInBasis(basis, convertedCoordinates);
+  simpleRoots.coordinatesInBasisNoFailure(basis, convertedCoordinates);
   projection.assignVectorsToRows(convertedCoordinates);
   projection.transpose();
   projection.resize(dimension - 1, dimension, false);
@@ -12292,7 +12294,7 @@ void Lattice::getRootOnLatticeSmallestPositiveProportionalTo(
   Vectors<Rational> basis;
   Vector<Rational> root;
   basis.assignMatrixRows(this->basisRationalForm);
-  input.coordinatesInBasis(basis, root);
+  input.coordinatesInBasisNoFailure(basis, root);
   Cone::scaleNormalizeByPositive(root);
   Matrix<Rational> matrix;
   matrix = this->basisRationalForm;
@@ -12444,7 +12446,7 @@ bool Lattice::getInternalPointInConeForSomeFundamentalDomain(
   coneContainingOutputPoint.internalPoint(output);
   Vectors<Rational> basisRoots;
   basisRoots.assignMatrixRows(this->basisRationalForm);
-  if (!output.coordinatesInBasis(basisRoots, coordinatesInBasis)) {
+  if (!output.coordinatesInBasis(basisRoots, coordinatesInBasis, nullptr)) {
     return false;
   }
   Rational maximalCoordinate = coordinatesInBasis[0];

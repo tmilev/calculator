@@ -422,11 +422,14 @@ public:
   static bool changeBasis(
     const Matrix<Coefficient>& linearOperator,
     const List<Vector<Coefficient> >& newBasis,
-    Matrix<Coefficient>& output
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure
   );
   // Interprets the matrix as a linear operator and makes a basis change.
   bool changeBasis(
-    const List<Vector<Coefficient> >& newBasis, Matrix<Coefficient>& output
+    const List<Vector<Coefficient> >& newBasis,
+    Matrix<Coefficient>& output,
+    std::stringstream* commentsOnFailure
   ) const;
   void computeDeterminantOverwriteMatrix(
     Coefficient& output,

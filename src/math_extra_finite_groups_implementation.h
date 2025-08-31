@@ -1814,7 +1814,8 @@ getClassFunctionMatrix(
         Matrix<Coefficient>::changeBasis(
           this->parent->classFunctionMatrices[cci],
           this->basis,
-          this->classFunctionMatrices[cci]
+          this->classFunctionMatrices[cci],
+          nullptr
         );
       } else {
         auto& currentCC = this->ownerGroup->conjugacyClasses[cci];
@@ -2228,7 +2229,9 @@ generateOrbitReturnFalseIfTruncated(
     }
     for (int j = 1; j < this->externalAutomorphisms.size; j ++) {
       externalAutosOverAmbientField = this->externalAutomorphisms[j];
-      orbit[i].coordinatesInBasis(externalAutosOverAmbientField, root);
+      orbit[i].coordinatesInBasisNoFailure(
+        externalAutosOverAmbientField, root
+      );
       orbit.addOnTopNoRepetition(root);
     }
   }

@@ -7,41 +7,49 @@
 
 template <class Coefficient>
 bool Matrix<Coefficient>::changeBasis(
-  const List<Vector<Coefficient> >& newBasis, Matrix<Coefficient>& output
+  const List<Vector<Coefficient> >& newBasis,
+  Matrix<Coefficient>& output,
+  std::stringstream* commentsOnFailure
 ) const {
   STACK_TRACE("Matrix::changeBasis");
-  return Matrix<Coefficient>::changeBasis(*this, newBasis, output);
+  return
+  Matrix<Coefficient>::changeBasis(*this, newBasis, output, commentsOnFailure);
 }
 
 template <class Coefficient>
 bool Matrix<Coefficient>::changeBasis(
   const Matrix<Coefficient>& linearOperator,
   const List<Vector<Coefficient> >& newBasis,
-  Matrix<Coefficient>& output
+  Matrix<Coefficient>& output,
+  std::stringstream* commentsOnFailure
 ) {
   STACK_TRACE("Matrix::changeBasis");
   if (&linearOperator == &output) {
     Matrix<Coefficient> inputCopy = linearOperator;
-    return Matrix<Coefficient>::changeBasis(inputCopy, newBasis, output);
+    return
+    Matrix<Coefficient>::changeBasis(
+      inputCopy, newBasis, output, commentsOnFailure
+    );
   }
-  if (!linearOperator.preservesVectorSpace(newBasis)) {
+  Vectors<Coefficient> vectors = newBasis;
+  Vectors<Coefficient> transformed;
+  Vectors<Coefficient> outputCoordinates;
+  linearOperator.actOnVectorsColumn(vectors, transformed);
+  if (
+    !transformed.coordinatesInBasis(
+      newBasis, outputCoordinates, commentsOnFailure
+    )
+  ) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "The matrix does not preserve the input vector space: it maps: "
+      << newBasis.toStringCommaDelimited()
+      << " to: "
+      << transformed.toStringCommaDelimited();
+    }
     return false;
   }
-  int d = newBasis.size;
-  Matrix<Coefficient> gramMatrix;
-  output.initialize(d, d);
-  gramMatrix.initialize(d, d);
-  Vector<Coefficient> vectorColumn;
-  Coefficient zero;
-  zero = 0;
-  for (int j = 0; j < d; j ++) {
-    linearOperator.actOnVectorColumn(newBasis[j], vectorColumn, zero);
-    for (int i = 0; i < d; i ++) {
-      output(i, j) = newBasis[i].scalarEuclidean(vectorColumn);
-      gramMatrix(i, j) = newBasis[i].scalarEuclidean(newBasis[j]);
-    }
-  }
-  output.multiplyOnTheLeft(gramMatrix.inverse());
+  output.assignVectorsToColumns(transformed);
   return true;
 }
 

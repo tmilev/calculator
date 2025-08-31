@@ -103,7 +103,7 @@ public:
   void makeArbitrary(
     char inputLetter,
     int inputRank,
-    const Rational& inputLengthFirstCorRootSquared
+    const Rational& inputLengthFirstCoRootSquared
   );
   Rational getPrincipalSlTwoCartanSymmetricInverseScale() const;
   void getCoCartanSymmetric(Matrix<Rational>& output) const;
@@ -128,6 +128,9 @@ public:
     this->letter == other.letter &&
     this->rank == other.rank &&
     this->cartanSymmetricInverseScale == other.cartanSymmetricInverseScale;
+  }
+  bool operator!=(const DynkinSimpleType& other) const {
+    return !((*this) == other);
   }
   static unsigned int hashFunction(const DynkinSimpleType& input) {
     return

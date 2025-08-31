@@ -476,8 +476,14 @@ public:
     }
     return false;
   }
+  void coordinatesInBasisNoFailure(
+    const Vectors<Coefficient>& inputBasis,
+    Vector<Coefficient>& outputCoordinates
+  ) const;
   bool coordinatesInBasis(
-    const Vectors<Coefficient>& inputBasis, Vector<Coefficient>& output
+    const Vectors<Coefficient>& inputBasis,
+    Vector<Coefficient>& output,
+    std::stringstream* commentsOnFailure
   ) const;
   Vector<Coefficient> getProjectivizedNormal(Vector<Coefficient>& affinePoint);
   Vector<Coefficient> operator*(const Coefficient& other) const {
@@ -948,6 +954,11 @@ public:
   }
   bool coordinatesInBasis(
     const Vectors<Coefficient>& inputBasis,
+    Vectors<Coefficient>& outputCoordinates,
+    std::stringstream* commentsOnFailure
+  ) const;
+  void coordinatesInBasisNoFailure(
+    const Vectors<Coefficient>& inputBasis,
     Vectors<Coefficient>& outputCoordinates
   ) const;
   bool getIntegralCoordinatesInBasisIfTheyExist(
@@ -1055,7 +1066,13 @@ public:
     const Coefficient& one = 1,
     const Coefficient& zero = 0
   );
-  // Computes a linear combination with coefficients in the natural order.
+  // Computes a linear combination of the vectors v_1, ..., v_k.
+  // If a linear combination does not exists returns false.
+  // If a linear combination exists a_1v_1+...+a_kv_k=0,
+  // it will be written in the outputVector. More precisely,
+  // the i^th coordinate of outputVector holds the i^th
+  // coefficient of the linear combination. In other words,
+  // outputVector = (a_1, ..., a_k).
   bool getLinearDependenceHomogenous(
     Vector<Coefficient>& outputLinearCombination,
     const Coefficient& one = 1,
@@ -1208,8 +1225,26 @@ bool Vector<Coefficient>::fromString(const std::string& input) {
 }
 
 template <class Coefficient>
+void Vector<Coefficient>::coordinatesInBasisNoFailure(
+  const Vectors<Coefficient>& inputBasis,
+  Vector<Coefficient>& outputCoordinates
+) const {
+  std::stringstream commentsOnFailure;
+  bool mustBeTrue =
+  this->coordinatesInBasis(inputBasis, outputCoordinates, &commentsOnFailure);
+  if (!mustBeTrue) {
+    global.fatal
+    << "Failure to convert vectors to given basis not allowed. "
+    << commentsOnFailure.str()
+    << global.fatal;
+  }
+}
+
+template <class Coefficient>
 bool Vector<Coefficient>::coordinatesInBasis(
-  const Vectors<Coefficient>& inputBasis, Vector<Coefficient>& output
+  const Vectors<Coefficient>& inputBasis,
+  Vector<Coefficient>& output,
+  std::stringstream* commentsOnFailure
 ) const {
   if (inputBasis.size == 0) {
     return false;
@@ -1230,6 +1265,13 @@ bool Vector<Coefficient>::coordinatesInBasis(
   bufferVectors.addListOnTop(inputBasis);
   bufferVectors.addOnTop(*this);
   if (!bufferVectors.getLinearDependenceHomogenous(linearCombination)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Vector: "
+      << this->toString()
+      << " does not belong to the linear span of "
+      << inputBasis.toStringCommaDelimited();
+    }
     return false;
   }
   Coefficient temporaryCoefficient =
@@ -1288,9 +1330,26 @@ bool Vectors<Coefficient>::linearSpanContainsVectors(
 }
 
 template <class Coefficient>
-bool Vectors<Coefficient>::coordinatesInBasis(
+void Vectors<Coefficient>::coordinatesInBasisNoFailure(
   const Vectors<Coefficient>& inputBasis,
   Vectors<Coefficient>& outputCoordinates
+) const {
+  std::stringstream commentsOnFailure;
+  bool mustBeTrue =
+  this->coordinatesInBasis(inputBasis, outputCoordinates, &commentsOnFailure);
+  if (!mustBeTrue) {
+    global.fatal
+    << "Failure to convert vectors to given basis not allowed. "
+    << commentsOnFailure.str()
+    << global.fatal;
+  }
+}
+
+template <class Coefficient>
+bool Vectors<Coefficient>::coordinatesInBasis(
+  const Vectors<Coefficient>& inputBasis,
+  Vectors<Coefficient>& outputCoordinates,
+  std::stringstream* commentsOnFailure
 ) const {
   STACK_TRACE("Vectors::coordinatesInBasis");
   outputCoordinates.setSize(this->size);
@@ -1298,7 +1357,7 @@ bool Vectors<Coefficient>::coordinatesInBasis(
     if (
       !(
         this->operator[](i).coordinatesInBasis(
-          inputBasis, outputCoordinates[i]
+          inputBasis, outputCoordinates[i], commentsOnFailure
         )
       )
     ) {

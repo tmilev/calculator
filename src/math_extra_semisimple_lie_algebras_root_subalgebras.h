@@ -236,12 +236,6 @@ public:
   );
   void getCoxeterElement(Matrix<Rational>& output);
   void computePotentialExtensions();
-  void getSsl2SubalgebrasAppendListNoRepetition(
-    SlTwoSubalgebras& output,
-    int indexRootSubalgebraInContainer,
-    bool computeRealForm,
-    AlgebraicClosureRationals* algebraicClosure
-  );
   void addSlTwoSubalgebraIfNew(
     SlTwoSubalgebraCandidate& candidate,
     SlTwoSubalgebras& output,

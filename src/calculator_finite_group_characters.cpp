@@ -282,7 +282,7 @@ restrictRepresentation(
       report.report(reportStream.str());
     }
     Matrix<Coefficient>::changeBasis(
-      this->generators[i], output.basis, output.generators[i]
+      this->generators[i], output.basis, output.generators[i], nullptr
     );
   }
   output.checkAllSimpleGeneratorsAreOK();

@@ -894,21 +894,11 @@ void Calculator::initializeFunctionsSemisimpleLieAlgebras() {
     CalculatorLieTheory::printRootSubalgebrasAndSlTwosForceRecompute,
     "",
     "Same as PrintRootSubalgebrasAndSlTwos but forces recomputation. "
-    "Use to recompute obsolete or interrupted output files.",
-    "PrintRootSubalgebrasAndSlTwosRecompute(b_3)",
-    "CalculatorLieTheory::printRootSubalgebrasAndSlTwosForceRecompute",
-    "PrintRootSubalgebrasAndSlTwosRecompute",
-    adminNoTest
-  );
-  this->addOperationHandler(
-    "PrintRootSubalgebrasAndSlTwosRecomputeOneSlTwo",
-    CalculatorLieTheory::printRootSubalgebrasAndSlTwosForceRecomputeOnce,
-    "",
-    "Same as PrintRootSubalgebrasAndSlTwos but forces recomputation "
-    "and recomputes only a single sl(2)-triple. The first argument gives "
-    "the ambient simple algebra type, the second argument gives the "
-    "type of the sl(2) triple(s) to be computed.",
-    "PrintRootSubalgebrasAndSlTwosRecomputeOneSlTwo(f_4, A^8_1)",
+    "Use to recompute obsolete or interrupted output files. "
+    "If you provide a second argument and it is a dynkin simple type, then "
+    "only the specified dynkin simple type will be recomputed.",
+    "PrintRootSubalgebrasAndSlTwosRecompute(b_3);\n"
+    "PrintRootSubalgebrasAndSlTwosRecompute(f_4, A^8_1);\n",
     "CalculatorLieTheory::printRootSubalgebrasAndSlTwosForceRecompute",
     "PrintRootSubalgebrasAndSlTwosRecompute",
     adminNoTest

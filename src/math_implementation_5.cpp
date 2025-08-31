@@ -131,7 +131,7 @@ computeSubGroupFromGeneratingReflections(
     }
     for (int j = 1; j < this->externalAutomorphisms.size; j ++) {
       orbitRho[i].coordinatesInBasis(
-        this->externalAutomorphisms[j], currentRoot
+        this->externalAutomorphisms[j], currentRoot, nullptr
       );
       if (!orbitRho.contains(currentRoot)) {
         orbitRho.addOnTop(currentRoot);

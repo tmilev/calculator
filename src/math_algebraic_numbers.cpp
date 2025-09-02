@@ -1628,7 +1628,6 @@ bool AlgebraicNumber::radicalMeDefault(
     if (commentsOnError != nullptr) {
       *commentsOnError
       << "Failed to extract radical: algebraic closure is missing. ";
-      global.comments << "DEBUG: no alg closure!!!!!!!!!";
     }
     return false;
   }
@@ -2091,6 +2090,5 @@ bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
   matrixAlgebraic.getEigenSpacesFromEigenvalues(
     this->eigenValuesWithoutMultiplicity, this->eigenvectors
   );
-  global.comments << "<br>DEBUG: success finding eigenies";
   return true;
 }

@@ -1214,7 +1214,7 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
     } else if (dynkinIndex == 4) {
       return List<Rational>({1, 1, 1, 1, 1, 1});
     } else if (dynkinIndex == 3) {
-      return List<Rational>({1, 3, - 1, - 1, 1, 1});
+      return List<Rational>({1, 1, 1});
     }
   }
   return List<Rational>({1, - 1, 2, - 2, 3, - 3, 4, - 4});
@@ -2381,40 +2381,37 @@ bool CentralizerComputer::subsplitRootSpacesOnceAgainstCartanElement(
   const CartanElementCandidate& splittingElementCentralizerCartan,
   List<RootSpacePair>& output
 ) {
-  STACK_TRACE("CentralizerComputer::subsplitRootSpacesOnceAgainstCartanElement");
+  STACK_TRACE(
+    "CentralizerComputer::subsplitRootSpacesOnceAgainstCartanElement"
+  );
   if (rootSpacePair.negativeSpace.size == 1) {
     // Already fully split.
     return false;
   }
   Matrix<AlgebraicNumber> matrixPositive;
   Matrix<AlgebraicNumber> matrixNegative;
-  std::stringstream commentsOnFailure;
   if (
     !splittingElementCentralizerCartan.adjointAction.changeBasis(
-      rootSpacePair.positiveSpace, matrixPositive, &commentsOnFailure
+      rootSpacePair.positiveSpace, matrixPositive, nullptr
     ) ||
     !splittingElementCentralizerCartan.adjointAction.changeBasis(
-      rootSpacePair.negativeSpace, matrixNegative, &commentsOnFailure
+      rootSpacePair.negativeSpace, matrixNegative, nullptr
     )
   ) {
-    global.comments
-    << "<br>DEBUG: no subsplit: change basis fail. Comments: "
-    << commentsOnFailure.str();
     return false;
   }
   MatrixEigenvalueFinder positiveRootSplitter;
   MatrixEigenvalueFinder negativeRootSplitter;
+  positiveRootSplitter.initialize(this->algebraicClosureRationals);
+  negativeRootSplitter.initialize(this->algebraicClosureRationals);
   if (
     !positiveRootSplitter.findEigenValuesAndEigenspaces(
-      matrixPositive, &commentsOnFailure
+      matrixPositive, nullptr
     ) ||
     !negativeRootSplitter.findEigenValuesAndEigenspaces(
-      matrixNegative, &commentsOnFailure
+      matrixNegative, nullptr
     )
   ) {
-    global.comments
-    << "<br>DEBUG: can't eigenspace find."
-    << commentsOnFailure.str();
     return false;
   }
   List<RootSpacePair> newPairs;
@@ -2429,7 +2426,6 @@ bool CentralizerComputer::subsplitRootSpacesOnceAgainstCartanElement(
         minusEigenvalue
       )
     ) {
-      global.comments << "<br>DEBUG: can't minus eigenvalue here.";
       return false;
     }
     Vectors<AlgebraicNumber> subsplitPositiveRootsRestricted;
@@ -2444,14 +2440,11 @@ bool CentralizerComputer::subsplitRootSpacesOnceAgainstCartanElement(
       subsplitNegativeRootsRestricted.size !=
       subsplitPositiveRootsRestricted.size
     ) {
-      global.comments
-      << "<br>DEBUG: UNEXPECTED mismatch of positive and negative root space.";
       return false;
     }
     if (
       subsplitPositiveRootsRestricted.size == rootSpacePair.positiveSpace.size
     ) {
-      global.comments << "<br>DEBUG: subsplit didn't do anything useful. ";
       return false;
     }
     RootSpacePair newPair =
@@ -2594,6 +2587,15 @@ bool CentralizerComputer::trySemisimpleElement(
   if (!this->computeTypes()) {
     return false;
   }
+  if (
+    this->typeIfKnown.getLieAlgebraDimension() > this->centralizerBasis.size
+  ) {
+    global.fatal
+    << "Programming error: the dimension of the allegedly "
+    << "computed type of the centralizer "
+    << "is larger than the has dimension of the actual centralizer."
+    << global.fatal;
+  }
   return true;
 }
 
@@ -2706,7 +2708,7 @@ List<int> CentralizerComputer::hardCodedArbitraryCartanWeights(
       return List<int>({1, 5, - 2, 3});
     }
     if (dynkinIndexOfSlTwo == 3) {
-      return List<int>({1, - 1});
+      return List<int>({1, 2,3});
     }
   }
   return List<int>({});
@@ -2749,34 +2751,18 @@ List<int> CentralizerComputer::hardCodedCoefficientsToFormSemisimpleElement(
     if (dynkinIndexOfSlTwo == 3) {
       return
       List<int>({
-          1,
-          - 1,
-          1,
-          - 1,
-          1,
-          - 1,
-          1,
-          - 1,
-          1,
-          - 1,
-          1,
-          - 1,
-          1,
-          - 1,
-          1,
-          1,
-          - 1,
-          1,
-          - 1,
-          1,
-          - 1,
-          1,
-          - 1,
-          1,
-          - 1,
-          1,
-          - 1,
-          1
+          0,
+           0,
+          0,
+          0,0,0,
+
+          0,0,1,
+
+          1,1,1,
+          1,0,1,
+          0,0,0,
+          0,0,0,
+          0,0,0,
         });
     }
   }
@@ -2983,7 +2969,6 @@ bool PolynomialQuadraticRootFinder::findRoots(
   if (!this->factorInput()) {
     return false;
   }
-  global.comments << "DEBUG: got to here: finding rooties!";
   if (this->factorization.nonReduced.size > 0) {
     // We failed to fully factor the characteristic polynomial.
     return false;
@@ -2996,7 +2981,6 @@ bool PolynomialQuadraticRootFinder::findRoots(
     // Is there a mathematical reason (i.e., a theorem) for this?
     return false;
   }
-  global.comments << "DEBUG: got to here: linear and quadraties only!";
   for (
     const Polynomial<AlgebraicNumber>& factor : this->factorization.reduced
   ) {
@@ -3016,7 +3000,6 @@ bool PolynomialQuadraticRootFinder::findRoots(
     << "In polynomial root finder: this piece of code should be unreachable! "
     << global.fatal;
   }
-  global.comments << "<br>DEBUG: factorizatino success!";
   return true;
 }
 
@@ -3050,9 +3033,6 @@ bool PolynomialQuadraticRootFinder::addRootsOfQuadraticFactor(
   if (!squareRootOfDiscriminant.radicalMeDefault(2, &commentsOnFailure)) {
     // We failed to take the square root of the rational;
     // possibly due to a computational throttle.
-    global.comments
-    << "DEBUG: failed to sqrt default!!!"
-    << commentsOnFailure.str();
     return false;
   }
   AlgebraicNumber root1 = (squareRootOfDiscriminant - b) / (a* 2);

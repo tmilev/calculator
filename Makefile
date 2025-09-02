@@ -218,6 +218,7 @@ SOURCES_RELATIVE_PATH=\
     math_semisimple_lie_root_subalgebras.cpp \
     math_semisimple_lie_subalgebras.cpp \
     math_semisimple_lie_subalgebras_sltwos.cpp \
+    math_semisimple_lie_subalgebras_sltwos_arbitrary_constants.cpp \
     multiprocessing.cpp \
     multitasking.cpp \
     network.cpp \

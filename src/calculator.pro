@@ -762,6 +762,7 @@ SOURCES += \
     math_semisimple_lie_root_subalgebras.cpp \
     math_semisimple_lie_subalgebras.cpp \
     math_semisimple_lie_subalgebras_sltwos.cpp \
+  math_semisimple_lie_subalgebras_sltwos_arbitrary_constants.cpp \
     math_vector_partition_functions.cpp \
     math_vectors_test.cpp \
     multiprocessing.cpp \

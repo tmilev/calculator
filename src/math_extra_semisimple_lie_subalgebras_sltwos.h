@@ -197,16 +197,26 @@ class CentralizerComputer {
     const Rational& dynkinIndexOfSlTwo
   );
   // Helper method for the implementation of arbitraryCartanWeight.
-  static List<int> hardCodedArbitraryCartanWeights(
+  static List<int> hardCodedArbitraryCoefficientsCartan(
     char ambientSimpleType, int ambientRank, const Rational& dynkinIndexOfSlTwo
   );
   // Returns an arbitrary coefficient used when forming a semisimple element
   static Rational arbitraryCoefficientToFormSemisimpleElement(
-    int coefficientIndex, char type, int rank, const Rational& hElementLength
+    int coefficientIndex,
+    char type,
+    int rank,
+    const Rational& hElementLength,
+    int centralizerDimension
   );
   // Returns an arbitrary coefficient used when forming a semisimple element
   static List<int> hardCodedCoefficientsToFormSemisimpleElement(
-    char type, int rank, const Rational& hElementLength
+    char type,
+    int rank,
+    const Rational& hElementLength,
+    int centralizerDimension
+  );
+  static List<int> onesAtPositions(
+    const List<int>& positions, int desiredSize
   );
 public:
   std::string label;

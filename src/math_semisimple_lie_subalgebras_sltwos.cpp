@@ -1159,67 +1159,6 @@ bool SlTwoSubalgebraCandidate::attemptRealizingKostantSekiguchi() {
   return true;
 }
 
-Rational SlTwoSubalgebraCandidate::fArbitraryCoefficient(
-  int coefficientIndex, char type, int rank, int dynkinIndex
-) {
-  List<Rational> arbitraryCoefficients =
-  SlTwoSubalgebraCandidate::fArbitraryCoefficients(type, rank, dynkinIndex);
-  if (coefficientIndex < arbitraryCoefficients.size) {
-    return arbitraryCoefficients[coefficientIndex];
-  }
-  return coefficientIndex * coefficientIndex + 1;
-}
-
-List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
-  char type, int rank, int dynkinIndex
-) {
-  // Coefficients found by manual experimentation with the computation
-  // end-to-end.
-  // Do not work in all cases, found out by quick computational experiments.
-  if (type == 'C' && rank == 4 && dynkinIndex == 4) {
-    return List<Rational>({1, 1, - 1, 1});
-  }
-  if (type == 'F' && dynkinIndex == 28) {
-    return List<Rational>({1, 1, 1, 1});
-  }
-  if (type == 'C' && rank == 5) {
-    if (dynkinIndex == 5) {
-      return List<Rational>({1, - 1, 3, - 2, 3});
-    }
-    if (dynkinIndex == 4) {
-      return List<Rational>({1, 1, 1, 1, 1});
-    }
-  }
-  if (type == 'B' && rank == 6) {
-    if (dynkinIndex == 32) {
-      return List<Rational>({1, - 1, 3, - 1, 3, - 3});
-    }
-    if (dynkinIndex == 8) {
-      return List<Rational>({1, 1, 1, 1, - 1, 1});
-    }
-    if (dynkinIndex == 6) {
-      return List<Rational>({1, 1, - 1, 1, 1, 1});
-    }
-    if (dynkinIndex == 3) {
-      return List<Rational>({1, - 1, 1, 1, 1, - 1});
-    }
-  }
-  if (type == 'C' && rank == 6) {
-    if (dynkinIndex == 8) {
-      return List<Rational>({1, 1, 1, 1, 1, 1});
-    } else if (dynkinIndex == 6) {
-      return List<Rational>({1, 1, 1, 1, 1, 1});
-    } else if (dynkinIndex == 5) {
-      return List<Rational>({1, - 1, 1, 1, 1, 1});
-    } else if (dynkinIndex == 4) {
-      return List<Rational>({1, 1, 1, 1, 1, 1});
-    } else if (dynkinIndex == 3) {
-      return List<Rational>({1, 1, 1});
-    }
-  }
-  return List<Rational>({1, - 1, 2, - 2, 3, - 3, 4, - 4});
-}
-
 bool SlTwoSubalgebraCandidate::checkConsistencyParticipatingRoots(
   const Vector<Rational>& targetH
 ) {
@@ -2153,7 +2092,11 @@ bool CentralizerComputer::compute() {
     this->centralizerBasis[i];
     Rational coefficient =
     this->arbitraryCoefficientToFormSemisimpleElement(
-      i, ambientSimpleType, rank, this->dynkinIndexOfCentralizedComponent
+      i,
+      ambientSimpleType,
+      rank,
+      this->dynkinIndexOfCentralizedComponent,
+      this->centralizerBasis.size
     );
     semisimpleCandidate += summand * coefficient;
   }
@@ -2629,144 +2572,6 @@ bool CentralizerComputer::makeCartanCandidate(
   output.e = inputE;
   output.f = inputF;
   return result;
-}
-
-int CentralizerComputer::arbitraryCartanWeight(
-  int index,
-  char ambientSimpleType,
-  int ambientRank,
-  const Rational& dynkinIndexOfSlTwo
-) {
-  STACK_TRACE("CentralizerComputer::arbitraryCartanWeight");
-  List<int> preferredHardCodedCoefficients =
-  CentralizerComputer::hardCodedArbitraryCartanWeights(
-    ambientSimpleType, ambientRank, dynkinIndexOfSlTwo
-  );
-  if (index < preferredHardCodedCoefficients.size) {
-    return preferredHardCodedCoefficients[index];
-  }
-  return 1;
-}
-
-List<int> CentralizerComputer::hardCodedArbitraryCartanWeights(
-  char ambientSimpleType, int ambientRank, const Rational& dynkinIndexOfSlTwo
-) {
-  if (ambientSimpleType == 'B' && ambientRank == 4 && dynkinIndexOfSlTwo == 2) {
-    return List<int>({1, 2});
-  }
-  if (ambientSimpleType == 'D' && ambientRank == 4 && dynkinIndexOfSlTwo == 2) {
-    return List<int>({1, 2});
-  }
-  if (ambientSimpleType == 'F' && ambientRank == 4 && dynkinIndexOfSlTwo == 8) {
-    return List<int>({1, 3});
-  }
-  if (ambientSimpleType == 'A' && ambientRank == 5 && dynkinIndexOfSlTwo == 3) {
-    return List<int>({1, 3});
-  }
-  if (ambientSimpleType == 'B' && ambientRank == 5) {
-    if (dynkinIndexOfSlTwo == 4 || dynkinIndexOfSlTwo == 2) {
-      return List<int>({1, 2});
-    }
-  }
-  if (ambientSimpleType == 'D' && ambientRank == 5) {
-    if (
-      dynkinIndexOfSlTwo == 10 ||
-      dynkinIndexOfSlTwo == 3 ||
-      dynkinIndexOfSlTwo == 2
-    ) {
-      return List<int>({1, 2, - 2});
-    }
-  }
-  if (ambientSimpleType == 'A' && ambientRank == 6 && dynkinIndexOfSlTwo == 3) {
-    return List<int>({1, 1, - 1});
-  }
-  if (ambientSimpleType == 'B' && ambientRank == 6) {
-    if (dynkinIndexOfSlTwo == 12) {
-      return List<int>({1, 2, 1});
-    }
-    if (dynkinIndexOfSlTwo == 10) {
-      return List<int>({1, 1, - 1});
-    }
-    if (dynkinIndexOfSlTwo == 6) {
-      return List<int>({1, 2, - 1});
-    }
-    if (dynkinIndexOfSlTwo == 4) {
-      return List<int>({1, 2, - 1});
-    }
-    if (dynkinIndexOfSlTwo == 3) {
-      return List<int>({1, - 3, 2});
-    }
-    if (dynkinIndexOfSlTwo == 2) {
-      return List<int>({1, - 2, 3, - 4});
-    }
-  }
-  if (ambientSimpleType == 'C' && ambientRank == 6) {
-    if (dynkinIndexOfSlTwo == 16) {
-      return List<int>({1, 2});
-    }
-    if (dynkinIndexOfSlTwo == 8) {
-      return List<int>({1, 5, - 2, 3});
-    }
-    if (dynkinIndexOfSlTwo == 3) {
-      return List<int>({1, 2,3});
-    }
-  }
-  return List<int>({});
-}
-
-Rational CentralizerComputer::arbitraryCoefficientToFormSemisimpleElement(
-  int index,
-  char ambientSimpleType,
-  int ambientRank,
-  const Rational& dynkinIndexOfSlTwo
-) {
-  STACK_TRACE(
-    "CentralizerComputer::arbitraryCoefficientToFormSemisimpleElement"
-  );
-  List<int> hardCoded =
-  CentralizerComputer::hardCodedCoefficientsToFormSemisimpleElement(
-    ambientSimpleType, ambientRank, dynkinIndexOfSlTwo
-  );
-  if (index < hardCoded.size) {
-    return hardCoded[index];
-  }
-  return 1;
-}
-
-List<int> CentralizerComputer::hardCodedCoefficientsToFormSemisimpleElement(
-  char ambientSimpleType, int ambientRank, const Rational& dynkinIndexOfSlTwo
-) {
-  if (ambientSimpleType == 'B' && ambientRank == 6) {
-    if (dynkinIndexOfSlTwo == 6) {
-      return List<int>({1, - 1, 1, - 1, 1, - 1, 1, - 1, 1});
-    }
-  }
-  if (ambientSimpleType == 'C' && ambientRank == 6) {
-    if (dynkinIndexOfSlTwo == 11) {
-      return List<int>({1, - 1, 1, - 1, 1, - 1});
-    }
-    if (dynkinIndexOfSlTwo == 6) {
-      return List<int>({1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
-    }
-    if (dynkinIndexOfSlTwo == 3) {
-      return
-      List<int>({
-          0,
-           0,
-          0,
-          0,0,0,
-
-          0,0,1,
-
-          1,1,1,
-          1,0,1,
-          0,0,0,
-          0,0,0,
-          0,0,0,
-        });
-    }
-  }
-  return List<int>({});
 }
 
 void CentralizerComputer::makeCartanCandidateNoFailure(

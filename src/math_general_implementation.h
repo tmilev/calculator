@@ -49,7 +49,7 @@ bool Matrix<Coefficient>::changeBasis(
     }
     return false;
   }
-  output.assignVectorsToColumns(transformed);
+  output.assignVectorsToColumns(outputCoordinates);
   return true;
 }
 

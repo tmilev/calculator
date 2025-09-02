@@ -2310,41 +2310,91 @@ bool CentralizerComputer::computeRootSpaceForNonZeroEigenvalue(
   if (!this->computeOnDemandCartanOfCentralizerMatrixForm()) {
     return false;
   }
-  for (
-    const CartanElementCandidate& elementCentralizerCartan :
-    this->centralizerCartanCandidates
-  ) {
-    if (
-      this->subsplitRootSpaces(
-        eigenvalue, rootSpace, negativeRootSpace, elementCentralizerCartan
-      )
-    ) {
-      return true;
-    }
-    global.comments
-    << "<br>DEBUG: subsplit with "
-    << elementCentralizerCartan.h.toStringPretty()
-    << " failed";
-  }
-  return false;
+  return this->subsplitRootSpaces(eigenvalue, rootSpace, negativeRootSpace);
 }
 
 bool CentralizerComputer::subsplitRootSpaces(
   const AlgebraicNumber& startingEigenvalue,
   const List<Vector<AlgebraicNumber> >& rootSpace,
-  const List<Vector<AlgebraicNumber> >& negativeRootSpace,
-  const CartanElementCandidate& splittingElementCentralizerCartan
+  const List<Vector<AlgebraicNumber> >& negativeRootSpace
 ) {
   STACK_TRACE("CentralizerComputer::subsplitRootSpaces");
+  List<RootSpacePair> nonSplitPairs;
+  List<RootSpacePair> fullySplitPairs;
+  RootSpacePair onePair;
+  onePair.negativeSpace = negativeRootSpace;
+  onePair.positiveSpace = rootSpace;
+  nonSplitPairs.addOnTop(onePair);
+  while (nonSplitPairs.size > 0) {
+    RootSpacePair currentPair = nonSplitPairs.popLastObject();
+    if (this->subsplitRootSpacesOnce(currentPair, nonSplitPairs)) {
+      continue;
+    }
+    if (
+      currentPair.negativeSpace.size != 1 ||
+      currentPair.positiveSpace.size != 1
+    ) {
+      // Could not properly split the current pair of root spaces.
+      return false;
+    }
+    fullySplitPairs.addOnTop(currentPair);
+  }
+  for (const RootSpacePair& pair : fullySplitPairs) {
+    if (
+      !this->computeRootSpaceFromEAndF(
+        startingEigenvalue, pair.positiveSpace[0], pair.negativeSpace[0]
+      )
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CentralizerComputer::subsplitRootSpacesOnce(
+  const RootSpacePair& rootSpacePair, List<RootSpacePair>& output
+) {
+  STACK_TRACE("CentralizerComputer::subsplitRootSpacesOnce");
+  if (
+    rootSpacePair.negativeSpace.size == 1 &&
+    rootSpacePair.positiveSpace.size == 1
+  ) {
+    return false;
+  }
+  for (
+    const CartanElementCandidate& elementCentralizerCartan :
+    this->centralizerCartanCandidates
+  ) {
+    if (
+      this->subsplitRootSpacesOnceAgainstCartanElement(
+        rootSpacePair, elementCentralizerCartan, output
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool CentralizerComputer::subsplitRootSpacesOnceAgainstCartanElement(
+  const RootSpacePair& rootSpacePair,
+  const CartanElementCandidate& splittingElementCentralizerCartan,
+  List<RootSpacePair>& output
+) {
+  STACK_TRACE("CentralizerComputer::subsplitRootSpacesOnceAgainstCartanElement");
+  if (rootSpacePair.negativeSpace.size == 1) {
+    // Already fully split.
+    return false;
+  }
   Matrix<AlgebraicNumber> matrixPositive;
   Matrix<AlgebraicNumber> matrixNegative;
   std::stringstream commentsOnFailure;
   if (
     !splittingElementCentralizerCartan.adjointAction.changeBasis(
-      rootSpace, matrixPositive, &commentsOnFailure
+      rootSpacePair.positiveSpace, matrixPositive, &commentsOnFailure
     ) ||
     !splittingElementCentralizerCartan.adjointAction.changeBasis(
-      negativeRootSpace, matrixNegative, &commentsOnFailure
+      rootSpacePair.negativeSpace, matrixNegative, &commentsOnFailure
     )
   ) {
     global.comments
@@ -2352,16 +2402,22 @@ bool CentralizerComputer::subsplitRootSpaces(
     << commentsOnFailure.str();
     return false;
   }
-  MatrixEigenvalueFinderAlgebraic positiveRootSplitter;
-  MatrixEigenvalueFinderAlgebraic negativeRootSplitter;
+  MatrixEigenvalueFinder positiveRootSplitter;
+  MatrixEigenvalueFinder negativeRootSplitter;
   if (
-    !positiveRootSplitter.findEigenValuesAndEigenspaces(matrixPositive) ||
-    !negativeRootSplitter.findEigenValuesAndEigenspaces(matrixNegative)
+    !positiveRootSplitter.findEigenValuesAndEigenspaces(
+      matrixPositive, &commentsOnFailure
+    ) ||
+    !negativeRootSplitter.findEigenValuesAndEigenspaces(
+      matrixNegative, &commentsOnFailure
+    )
   ) {
-    global.comments << "<br>DEBUG: can't eigenspace find.";
+    global.comments
+    << "<br>DEBUG: can't eigenspace find."
+    << commentsOnFailure.str();
     return false;
   }
-  int centralizerDimension = this->centralizerBasis.size;
+  List<RootSpacePair> newPairs;
   for (
     const AlgebraicNumber& eigenvalue :
     positiveRootSplitter.eigenValuesWithoutMultiplicity
@@ -2385,40 +2441,63 @@ bool CentralizerComputer::subsplitRootSpaces(
       minusEigenvalue, subsplitNegativeRootsRestricted
     );
     if (
-      subsplitPositiveRootsRestricted.size != 1 ||
-      subsplitNegativeRootsRestricted.size != 1
+      subsplitNegativeRootsRestricted.size !=
+      subsplitPositiveRootsRestricted.size
     ) {
-      global.comments << "<br>DEBUG: subsplit bad dim.";
+      global.comments
+      << "<br>DEBUG: UNEXPECTED mismatch of positive and negative root space.";
       return false;
-    }
-    const Vector<AlgebraicNumber>& positiveRootRestricted =
-    subsplitPositiveRootsRestricted[0];
-    const Vector<AlgebraicNumber>& negativeRootRestricted =
-    subsplitNegativeRootsRestricted[0];
-    Vector<AlgebraicNumber> positiveRoot;
-    Vector<AlgebraicNumber> negativeRoot;
-    positiveRoot.makeZero(centralizerDimension);
-    negativeRoot.makeZero(centralizerDimension);
-    for (int i = 0; i < positiveRootRestricted.size; i ++) {
-      positiveRoot.addOtherTimesScalar(
-        rootSpace[i], positiveRootRestricted[i]
-      );
-    }
-    for (int i = 0; i < negativeRootRestricted.size; i ++) {
-      negativeRoot.addOtherTimesScalar(
-        negativeRootSpace[i], negativeRootRestricted[i]
-      );
     }
     if (
-      !this->computeRootSpaceFromEAndF(
-        startingEigenvalue, positiveRoot, negativeRoot
-      )
+      subsplitPositiveRootsRestricted.size == rootSpacePair.positiveSpace.size
     ) {
-      global.comments << "<br>DEBUG: bas root space from e and f";
+      global.comments << "<br>DEBUG: subsplit didn't do anything useful. ";
       return false;
     }
+    RootSpacePair newPair =
+    rootSpacePair.constructFromLinearCombinations(
+      subsplitPositiveRootsRestricted, subsplitNegativeRootsRestricted
+    );
+    newPairs.addOnTop(newPair);
   }
+  output.addListOnTop(newPairs);
   return true;
+}
+
+RootSpacePair RootSpacePair::constructFromLinearCombinations(
+  const List<Vector<AlgebraicNumber> >& positiveCoordinates,
+  const List<Vector<AlgebraicNumber> >& negativeCoordinates
+) const {
+  STACK_TRACE("RootSpacePair::constructFromLinearCombinations");
+  RootSpacePair result;
+  for (int i = 0; i < positiveCoordinates.size; i ++) {
+    this->appendLinearCombinations(
+      positiveCoordinates[i], negativeCoordinates[i], result
+    );
+  }
+  return result;
+}
+
+void RootSpacePair::appendLinearCombinations(
+  const Vector<AlgebraicNumber>& positiveCoordinates,
+  const Vector<AlgebraicNumber>& negativeCoordinates,
+  RootSpacePair& output
+) const {
+  Vector<AlgebraicNumber> positiveRoot;
+  Vector<AlgebraicNumber> negativeRoot;
+  int dimension = this->positiveSpace[0].size;
+  positiveRoot.makeZero(dimension);
+  negativeRoot.makeZero(dimension);
+  for (int j = 0; j < positiveCoordinates.size; j ++) {
+    positiveRoot.addOtherTimesScalar(
+      this->positiveSpace[j], positiveCoordinates[j]
+    );
+    negativeRoot.addOtherTimesScalar(
+      this->negativeSpace[j], negativeCoordinates[j]
+    );
+  }
+  output.positiveSpace.addOnTop(positiveRoot);
+  output.negativeSpace.addOnTop(negativeRoot);
 }
 
 bool CentralizerComputer::computeRootSpaceFromEAndF(
@@ -2491,11 +2570,11 @@ bool CentralizerComputer::trySemisimpleElement(
   this->semisimpleElementAdjointEigenvalueFinder.initialize(
     this->algebraicClosureRationals
   );
-  Matrix<Rational> rationalAdjointAction;
-  rationalAdjointAction = this->semisimpleElement.adjointAction;
   if (
     !this->semisimpleElementAdjointEigenvalueFinder.
-    findEigenValuesAndEigenspaces(rationalAdjointAction)
+    findEigenValuesAndEigenspaces(
+      this->semisimpleElement.adjointAction, nullptr
+    )
   ) {
     return false;
   }
@@ -2804,15 +2883,107 @@ bool CentralizerComputer::computeTypes() {
   return true;
 }
 
-bool PolynomialQuadraticRootFinder::findRoots(Polynomial<Rational>& input) {
-  STACK_TRACE("PolynomialQuadraticRootFinder::findRoots");
-  this->polynomial = input;
+bool PolynomialQuadraticRootFinder::hasRationalPolynomial(
+  Polynomial<Rational>& whichPolynomial
+) {
+  whichPolynomial.makeZero();
+  for (int i = 0; i < this->polynomial.size(); i ++) {
+    Rational rationalCoefficient;
+    if (!this->polynomial.coefficients[i].isRational(&rationalCoefficient)) {
+      return false;
+    }
+    whichPolynomial.addMonomial(
+      this->polynomial.monomials[i], rationalCoefficient
+    );
+  }
+  return true;
+}
+
+bool PolynomialQuadraticRootFinder::factorRationalInput(
+  const Polynomial<Rational>& input
+) {
   PolynomialFactorizationFiniteFields algorithm;
+  PolynomialFactorizationUnivariate<Rational> rationalFactorization;
   bool factorizationSuccess =
-  this->factorization.factor(this->polynomial, algorithm, nullptr, nullptr);
+  rationalFactorization.factor(input, algorithm, nullptr, nullptr);
   if (!factorizationSuccess) {
     return false;
   }
+  // The following assignments convert from rational numbers
+  // to algebraic numbers.
+  this->factorization.clear();
+  this->factorization.original = input;
+  this->factorization.constantFactor = rationalFactorization.constantFactor;
+  this->factorization.reduced = rationalFactorization.reduced;
+  this->factorization.computations = rationalFactorization.computations;
+  return true;
+}
+
+bool PolynomialQuadraticRootFinder::factorInput() {
+  STACK_TRACE("PolynomialQuadraticRootFinder::factorInput");
+  Polynomial<Rational> polynomialRational;
+  if (this->hasRationalPolynomial(polynomialRational)) {
+    return this->factorRationalInput(polynomialRational);
+  }
+  this->factorization.clear();
+  this->factorization.original = this->polynomial;
+  this->factorization.constantFactor = 1;
+  if (this->polynomial.constantTerm().isEqualToZero()) {
+    this->rootHints.addOnTop(0);
+  }
+  Polynomial<AlgebraicNumber> quotient = this->polynomial;
+  for (const AlgebraicNumber& hint : this->rootHints) {
+    while (true) {
+      Polynomial<AlgebraicNumber> divisor;
+      Polynomial<AlgebraicNumber> maybeNextQuotient;
+      Polynomial<AlgebraicNumber> remainder;
+      divisor.makeMonomial(0, 1, 1);
+      divisor -= hint;
+      quotient.divideBy(divisor, maybeNextQuotient, remainder, nullptr);
+      if (remainder.isEqualToZero()) {
+        // We found a factorization.
+        this->factorization.reduced.addOnTop(divisor);
+        quotient = maybeNextQuotient;
+      } else {
+        break;
+      }
+    }
+  }
+  AlgebraicNumber remainingConstant;
+  if (quotient.isConstant(&remainingConstant)) {
+    // We fully factored the polynomial into linear terms.
+    this->factorization.constantFactor = remainingConstant;
+    return true;
+  }
+  this->factorization.reduced.addOnTop(quotient);
+  if (quotient.totalDegree() <= 2) {
+    // We factored the polynomial into a product of linear terms and
+    // a quadratic term.
+    // Assuming we don't run into computuational issues while taking
+    // the square root of the discriminant
+    // - the discriminant need not be rational -
+    // we will additionally factor the quadratic term later using the
+    // quadratic formula.
+    return true;
+  }
+  // The remaining quotient is of degree 3 or above.
+  // For now, give up.
+  // In the future, we could assume that is the minimial polynomial of
+  // an element and attempt to extend with it the base field over
+  // which we are computing.
+  return false;
+}
+
+bool PolynomialQuadraticRootFinder::findRoots(
+  Polynomial<AlgebraicNumber>& input
+) {
+  STACK_TRACE("PolynomialQuadraticRootFinder::findRoots");
+  this->roots.clear();
+  this->polynomial = input;
+  if (!this->factorInput()) {
+    return false;
+  }
+  global.comments << "DEBUG: got to here: finding rooties!";
   if (this->factorization.nonReduced.size > 0) {
     // We failed to fully factor the characteristic polynomial.
     return false;
@@ -2825,22 +2996,10 @@ bool PolynomialQuadraticRootFinder::findRoots(Polynomial<Rational>& input) {
     // Is there a mathematical reason (i.e., a theorem) for this?
     return false;
   }
-  this->roots.clear();
-  AlgebraicNumber minimalRoot;
-  for (const Polynomial<Rational>& factor : this->factorization.reduced) {
-    if (factor.totalDegree() < 2) {
-      continue;
-    }
-    // Extend the algebraic closure so it holds the roots of the polynomial.
-    if (
-      !this->algebraicClosure->adjoinRootMinimalRationalPolynomial(
-        factor, minimalRoot, nullptr
-      )
-    ) {
-      return false;
-    }
-  }
-  for (const Polynomial<Rational>& factor : this->factorization.reduced) {
+  global.comments << "DEBUG: got to here: linear and quadraties only!";
+  for (
+    const Polynomial<AlgebraicNumber>& factor : this->factorization.reduced
+  ) {
     if (factor.totalDegree() == 1) {
       if (!this->addRootsOfLinearFactor(factor)) {
         return false;
@@ -2857,11 +3016,12 @@ bool PolynomialQuadraticRootFinder::findRoots(Polynomial<Rational>& input) {
     << "In polynomial root finder: this piece of code should be unreachable! "
     << global.fatal;
   }
+  global.comments << "<br>DEBUG: factorizatino success!";
   return true;
 }
 
 bool PolynomialQuadraticRootFinder::addRootsOfLinearFactor(
-  const Polynomial<Rational>& factor
+  const Polynomial<AlgebraicNumber>& factor
 ) {
   STACK_TRACE("PolynomialQuadraticRootFinder::addRootsOfLinearFactor");
   AlgebraicNumber rootOfLinearFactor;
@@ -2873,22 +3033,26 @@ bool PolynomialQuadraticRootFinder::addRootsOfLinearFactor(
 }
 
 bool PolynomialQuadraticRootFinder::addRootsOfQuadraticFactor(
-  const Polynomial<Rational>& factor
+  const Polynomial<AlgebraicNumber>& factor
 ) {
   STACK_TRACE("PolynomialQuadraticRootFinder::addRootsOfQuadraticFactor");
-  Polynomial<Rational> rescaled = factor;
+  Polynomial<AlgebraicNumber> rescaled = factor;
   rescaled.scaleNormalizeLeadingMonomial(nullptr);
-  Rational a = rescaled.coefficientOfXZeroPowerK(2);
-  Rational b = rescaled.coefficientOfXZeroPowerK(1);
-  Rational c = rescaled.coefficientOfXZeroPowerK(0);
-  Rational discriminant = b * b - 4 * a * c;
-  AlgebraicNumber squareRootOfDiscriminant;
-  squareRootOfDiscriminant.assignRational(
-    discriminant, this->algebraicClosure
-  );
-  if (!squareRootOfDiscriminant.radicalMeDefault(2, nullptr)) {
+  AlgebraicNumber a = rescaled.coefficientOfXZeroPowerK(2);
+  AlgebraicNumber b = rescaled.coefficientOfXZeroPowerK(1);
+  AlgebraicNumber c = rescaled.coefficientOfXZeroPowerK(0);
+  AlgebraicNumber discriminant = b * b - a * c * 4;
+  AlgebraicNumber squareRootOfDiscriminant = discriminant;
+  if (squareRootOfDiscriminant.owner == nullptr) {
+    squareRootOfDiscriminant.owner = this->algebraicClosure;
+  }
+  std::stringstream commentsOnFailure;
+  if (!squareRootOfDiscriminant.radicalMeDefault(2, &commentsOnFailure)) {
     // We failed to take the square root of the rational;
     // possibly due to a computational throttle.
+    global.comments
+    << "DEBUG: failed to sqrt default!!!"
+    << commentsOnFailure.str();
     return false;
   }
   AlgebraicNumber root1 = (squareRootOfDiscriminant - b) / (a* 2);

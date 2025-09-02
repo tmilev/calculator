@@ -1013,8 +1013,12 @@ void Polynomial<Coefficient>::assignCharacteristicPolynomial(
   STACK_TRACE("Polynomial::assignCharacteristicPolynomial");
   if (input.numberOfColumns != input.numberOfRows) {
     global.fatal
-    << "Request the "
-    << "minimimal polynomial of a non-square matrix. "
+    << "Requested the minimimal polynomial of the "
+    << input.numberOfRows
+    << " by "
+    << input.numberOfColumns
+    << " non-square matrix: "
+    << input.toString()
     << global.fatal;
   }
   int n = input.numberOfColumns;

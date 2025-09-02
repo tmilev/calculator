@@ -1628,6 +1628,7 @@ bool AlgebraicNumber::radicalMeDefault(
     if (commentsOnError != nullptr) {
       *commentsOnError
       << "Failed to extract radical: algebraic closure is missing. ";
+      global.comments << "DEBUG: no alg closure!!!!!!!!!";
     }
     return false;
   }
@@ -2001,8 +2002,8 @@ int MatrixEigenvalueFinder::numberOfEigenVectors() const {
   return result;
 }
 
-const PolynomialFactorizationUnivariate<Rational>& MatrixEigenvalueFinder::
-factorizationMinimalPolynomial() const {
+const PolynomialFactorizationUnivariate<AlgebraicNumber>&
+MatrixEigenvalueFinder::factorizationMinimalPolynomial() const {
   return this->eigenvalueFinder.factorization;
 }
 
@@ -2020,8 +2021,43 @@ void MatrixEigenvalueFinder::eigenVectorsFromEigenvalue(
 }
 
 bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
-  Matrix<Rational>& input
+  const Matrix<Rational>& input, std::stringstream* commentsOnFailure
 ) {
+  STACK_TRACE("MatrixEigenvalueFinder::findEigenValuesAndEigenspaces");
+  Matrix<AlgebraicNumber> inputAlgebraic;
+  inputAlgebraic = input;
+  return
+  this->findEigenValuesAndEigenspaces(inputAlgebraic, commentsOnFailure);
+}
+
+void MatrixEigenvalueFinder::extractPossibleEigenvalues() {
+  STACK_TRACE("MatrixEigenvalueFinder::extractPossibleEigenvalues");
+  for (int i = 0; i < this->matrix.numberOfRows; i ++) {
+    this->checkDiagonalElementForEigenvalueCandidacy(i);
+  }
+}
+
+void MatrixEigenvalueFinder::checkDiagonalElementForEigenvalueCandidacy(
+  int index
+) {
+  for (int i = 0; i < this->matrix.numberOfRows; i ++) {
+    if (i == index) {
+      continue;
+    }
+    if (
+      !this->matrix(i, index).isEqualToZero() ||
+      !this->matrix(index, i).isEqualToZero()
+    ) {
+      return;
+    }
+  }
+  this->eigenvalueFinder.rootHints.addOnTop(this->matrix(index, index));
+}
+
+bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
+  const Matrix<AlgebraicNumber>& input, std::stringstream* commentsOnFailure
+) {
+  STACK_TRACE("MatrixEigenvalueFinder::findEigenValuesAndEigenspaces");
   this->initialize(this->algebraicClosure);
   this->matrix = input;
   this->matrix.getCharacteristicPolynomialStandardRepresentation(
@@ -2033,7 +2069,15 @@ bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
   ) {
     global.fatal << "Bad characteristic polynomial degree. " << global.fatal;
   }
+  this->extractPossibleEigenvalues();
   if (!this->eigenvalueFinder.findRoots(this->characteristicPolynomial)) {
+    if (commentsOnFailure != nullptr) {
+      *commentsOnFailure
+      << "Failed to find the roots of the characteristic polynomial: "
+      << this->characteristicPolynomial.toStringPretty()
+      << ". The matrix: "
+      << this->matrix.toString();
+    }
     return false;
   }
   Matrix<AlgebraicNumber> matrixAlgebraic;
@@ -2047,92 +2091,6 @@ bool MatrixEigenvalueFinder::findEigenValuesAndEigenspaces(
   matrixAlgebraic.getEigenSpacesFromEigenvalues(
     this->eigenValuesWithoutMultiplicity, this->eigenvectors
   );
+  global.comments << "<br>DEBUG: success finding eigenies";
   return true;
-}
-
-std::string MatrixEigenvalueFinderAlgebraic::toString() const {
-  STACK_TRACE("MatrixEigenvalueFinderAlgebraic::toString");
-  std::stringstream out;
-  out
-  << "Matrix: "
-  << this->matrix.toString()
-  << ", eigenvalues: "
-  << this->eigenValuesWithoutMultiplicity.toStringCommaDelimited()
-  << ", eigenvectors: "
-  << this->eigenvectors.toStringCommaDelimited()
-  << ", characteristic polynomial: \\("
-  << this->characteristicPolynomial.toStringPretty()
-  << "\\)";
-  return out.str();
-}
-
-MatrixEigenvalueFinderAlgebraic::MatrixEigenvalueFinderAlgebraic() {
-  this->algebraicClosure = nullptr;
-}
-
-void MatrixEigenvalueFinderAlgebraic::initialize(
-  AlgebraicClosureRationals* inputAlgebraicClosure
-) {
-  this->algebraicClosure = inputAlgebraicClosure;
-  this->characteristicPolynomial.makeZero();
-  this->eigenValuesWithoutMultiplicity.clear();
-  this->eigenvectors.clear();
-}
-
-int MatrixEigenvalueFinderAlgebraic::numberOfEigenVectors() const {
-  int result = 0;
-  for (const Vectors<AlgebraicNumber>& eigenspace : this->eigenvectors) {
-    result += eigenspace.size;
-  }
-  return result;
-}
-
-bool MatrixEigenvalueFinderAlgebraic::findEigenValuesAndEigenspaces(
-  Matrix<AlgebraicNumber>& input
-) {
-  this->initialize(this->algebraicClosure);
-  this->matrix = input;
-  if (this->matrix.numberOfColumns != 2) {
-    // Only 2x2 matrices are supported for now.
-    return false;
-  }
-  this->matrix.getCharacteristicPolynomialStandardRepresentation(
-    this->characteristicPolynomial
-  );
-  if (
-    this->characteristicPolynomial.totalDegree() !=
-    this->matrix.numberOfColumns
-  ) {
-    global.fatal << "Bad characteristic polynomial degree. " << global.fatal;
-  }
-  AlgebraicNumber a =
-  this->characteristicPolynomial.coefficientOfXPowerK(0, 2);
-  AlgebraicNumber b =
-  this->characteristicPolynomial.coefficientOfXPowerK(0, 1);
-  AlgebraicNumber c =
-  this->characteristicPolynomial.coefficientOfXPowerK(0, 0);
-  AlgebraicNumber discriminant = b * b - a * c * 4;
-  AlgebraicNumber squareRootDiscriminant = discriminant;
-  squareRootDiscriminant.squareRootDefault(nullptr);
-  AlgebraicNumber xOne = (b *(- 1) + squareRootDiscriminant) / (a* 2);
-  AlgebraicNumber xTwo = (b *(- 1) - squareRootDiscriminant) / (a* 2);
-  this->eigenValuesWithoutMultiplicity.addOnTopNoRepetition(xOne);
-  this->eigenValuesWithoutMultiplicity.addOnTopNoRepetition(xTwo);
-  this->matrix.getEigenSpacesFromEigenvalues(
-    this->eigenValuesWithoutMultiplicity, this->eigenvectors
-  );
-  return true;
-}
-
-void MatrixEigenvalueFinderAlgebraic::eigenVectorsFromEigenvalue(
-  const AlgebraicNumber& eigenValue, Vectors<AlgebraicNumber>& output
-) {
-  STACK_TRACE("MatrixEigenvalueFinderAlgebraic::eigenVectorsFromEigenvalue");
-  output.clear();
-  int indexOfEigenValue =
-  this->eigenValuesWithoutMultiplicity.getIndex(eigenValue);
-  if (indexOfEigenValue < 0) {
-    return;
-  }
-  output = this->eigenvectors[indexOfEigenValue];
 }

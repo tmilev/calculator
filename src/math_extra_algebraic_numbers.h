@@ -511,60 +511,68 @@ public:
 // As of writing, the algorithms used allow for failure.
 class PolynomialQuadraticRootFinder {
   AlgebraicClosureRationals* algebraicClosure;
-  bool addRootsOfLinearFactor(const Polynomial<Rational>& factor);
-  bool addRootsOfQuadraticFactor(const Polynomial<Rational>& factor);
+  bool addRootsOfLinearFactor(const Polynomial<AlgebraicNumber>& factor);
+  bool addRootsOfQuadraticFactor(const Polynomial<AlgebraicNumber>& factor);
 public:
-  Polynomial<Rational> polynomial;
-  PolynomialFactorizationUnivariate<Rational> factorization;
+  Polynomial<AlgebraicNumber> polynomial;
+  PolynomialFactorizationUnivariate<AlgebraicNumber> factorization;
   List<AlgebraicNumber> roots;
+  // A list of suspected polynomial roots.
+  // The numbers must be roots of the polynomial.
+  // We expect to have a mathematical reason for expecting these
+  // to be roots. An example of when that can happen is when
+  // the polynomial was obtained as minimal polynomial of a matrix
+  // for which we happen to know an eigenvalue.
+  List<AlgebraicNumber> rootHints;
   PolynomialQuadraticRootFinder();
   void initialize(AlgebraicClosureRationals* inputAlgebraicClosure);
-  bool findRoots(Polynomial<Rational>& input);
+  bool findRoots(Polynomial<AlgebraicNumber>& input);
+  bool factorInput();
+  bool factorRationalInput(const Polynomial<Rational>& input);
+  bool hasRationalPolynomial(Polynomial<Rational>& whichPolynomial);
   std::string toString(FormatExpressions* format = nullptr) const;
 };
 
+// Attemtps to find a sufficiently simple factorization of the
+// polynomial over a quadratic extension of the current
+// maximal field held in the algebraicClosure.
+class PolynomialFactorizationSimpleQuadraticRational {
+public:
+  List<Rational> expectedRationalRoots;
+};
+
 // Finds eigenvalues of a matrix.
-// Currently assumes that the matrix is rational and the eigenvalues lie in a
+// Currently only works only for special cases.
+// The most powerful supported case is rational matrix with
+// the eigenvalues that lie in a
 // quadratic radical extension of the rationals.
-// This assumption is not neccessary and can be removed at the
-// cost of solid future algorithmic improvements.
+// Some other special cases work too, this is work in progress.
+// With sufficient algorithmic work, this could be made to work
+// in full generality.
 class MatrixEigenvalueFinder {
   AlgebraicClosureRationals* algebraicClosure;
   PolynomialQuadraticRootFinder eigenvalueFinder;
-public:
-  Matrix<Rational> matrix;
-  Polynomial<Rational> characteristicPolynomial;
-  HashedList<AlgebraicNumber> eigenValuesWithoutMultiplicity;
-  List<Vectors<AlgebraicNumber> > eigenvectors;
-  MatrixEigenvalueFinder();
-  void initialize(AlgebraicClosureRationals* inputAlgebraicClosure);
-  bool findEigenValuesAndEigenspaces(Matrix<Rational>& input);
-  int numberOfEigenVectors() const;
-  void eigenVectorsFromEigenvalue(
-    const AlgebraicNumber& eigenValue, Vectors<AlgebraicNumber>& output
-  );
-  const PolynomialFactorizationUnivariate<Rational>&
-  factorizationMinimalPolynomial() const;
-};
-
-// Finds eigenvalues of a matrix with algebraic coefficients.
-// This is work in progress and should currently only work for
-// 2x2 matrices.
-class MatrixEigenvalueFinderAlgebraic {
-  AlgebraicClosureRationals* algebraicClosure;
 public:
   Matrix<AlgebraicNumber> matrix;
   Polynomial<AlgebraicNumber> characteristicPolynomial;
   HashedList<AlgebraicNumber> eigenValuesWithoutMultiplicity;
   List<Vectors<AlgebraicNumber> > eigenvectors;
+  MatrixEigenvalueFinder();
   void initialize(AlgebraicClosureRationals* inputAlgebraicClosure);
-  bool findEigenValuesAndEigenspaces(Matrix<AlgebraicNumber>& input);
+  bool findEigenValuesAndEigenspaces(
+    const Matrix<Rational>& input, std::stringstream* commentsOnFailure
+  );
+  bool findEigenValuesAndEigenspaces(
+    const Matrix<AlgebraicNumber>& input, std::stringstream* commentsOnFailure
+  );
   int numberOfEigenVectors() const;
   void eigenVectorsFromEigenvalue(
     const AlgebraicNumber& eigenValue, Vectors<AlgebraicNumber>& output
   );
-  MatrixEigenvalueFinderAlgebraic();
-  std::string toString() const;
+  void checkDiagonalElementForEigenvalueCandidacy(int index);
+  const PolynomialFactorizationUnivariate<AlgebraicNumber>&
+  factorizationMinimalPolynomial() const;
+  void extractPossibleEigenvalues();
 };
 
 #endif // header_math_extra_algebraic_numbers_ALREADY_INCLUDED

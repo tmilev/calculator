@@ -97,6 +97,31 @@ public:
   SimpleSubalgebraComponent();
 };
 
+struct RootSpacePair {
+  // Suppose the positive root space is given by vectors v_1, ..., v_k
+  // and the negative root space is given by w_1, ..., w_k.
+  // Given coordinates (a_1, ..., a_k) and (b_1, ..., b_k), constructs the
+  // vectors a_1v_1+...+a_kv_k and b_1w_1+...+b_kw_k and appends them to the
+  // output pair.
+private:
+  void appendLinearCombinations(
+    const Vector<AlgebraicNumber>& positiveCoordinates,
+    const Vector<AlgebraicNumber>& negativeCoordinates,
+    RootSpacePair& output
+  ) const;
+public:
+  List<Vector<AlgebraicNumber> > positiveSpace;
+  List<Vector<AlgebraicNumber> > negativeSpace;
+  // Constructs a root space pair from a list of positive
+  // and negative coordinates, where the coordinates follow the same convention
+  // as that
+  // of function [appendLinearCombinations].
+  RootSpacePair constructFromLinearCombinations(
+    const List<Vector<AlgebraicNumber> >& positiveCoordinates,
+    const List<Vector<AlgebraicNumber> >& negativeCoordinates
+  ) const;
+};
+
 class CentralizerComputer {
   SemisimpleLieAlgebra* owner;
   AlgebraicClosureRationals* algebraicClosureRationals;
@@ -115,8 +140,15 @@ class CentralizerComputer {
   bool subsplitRootSpaces(
     const AlgebraicNumber& startingEigenvalue,
     const List<Vector<AlgebraicNumber> >& rootSpace,
-    const List<Vector<AlgebraicNumber> >& negativeRootSpace,
-    const CartanElementCandidate& splittingElementCentralizerCartan
+    const List<Vector<AlgebraicNumber> >& negativeRootSpace
+  );
+  bool subsplitRootSpacesOnce(
+    const RootSpacePair& rootSpacePair, List<RootSpacePair>& output
+  );
+  bool subsplitRootSpacesOnceAgainstCartanElement(
+    const RootSpacePair& rootSpacePair,
+    const CartanElementCandidate& splittingElementCentralizerCartan,
+    List<RootSpacePair>& output
   );
   bool computeRootSpaceFromEAndF(
     const AlgebraicNumber& eigenvalue,

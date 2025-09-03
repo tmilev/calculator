@@ -5513,11 +5513,13 @@ PrintRootSubalgebrasAndSlTwos(E_6)
 Prints sl(2) subalgebras and root subalgebras. The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).
 
 *PrintRootSubalgebrasAndSlTwosRecompute* [PrintRootSubalgebrasAndSlTwosRecompute] {CalculatorLieTheory::printRootSubalgebrasAndSlTwosForceRecompute}. (admin only) 
-[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintRootSubalgebrasAndSlTwosRecompute%28b_3%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22PrintRootSubalgebrasAndSlTwosRecompute%28b_3%29%3b%5cnPrintRootSubalgebrasAndSlTwosRecompute%28f_4%2c%20A%5e8_1%29%3b%5cn%22%2c%22currentPage%22%3a%22calculator%22%7d)
 ```
-PrintRootSubalgebrasAndSlTwosRecompute(b_3)
+PrintRootSubalgebrasAndSlTwosRecompute(b_3);
+PrintRootSubalgebrasAndSlTwosRecompute(f_4, A^8_1);
+
 ```
-Same as PrintRootSubalgebrasAndSlTwos but forces recomputation. Use to recompute obsolete or interrupted output files.
+Same as PrintRootSubalgebrasAndSlTwos but forces recomputation. Use to recompute obsolete or interrupted output files. If you provide a second argument and it is a dynkin simple type, then only the specified dynkin simple type will be recomputed.
 
 *ParabolicsInfoBruhatGraph* [ParabolicsInfoBruhatGraph] {CalculatorLieTheory::parabolicWeylGroupsBruhatGraph}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22parabolicsInfoBruhatGraph%7b%7d%28B_3%2c%281%2c0%2c0%29%2c%281%2c0%2c0%29%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

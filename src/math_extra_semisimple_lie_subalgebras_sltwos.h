@@ -630,6 +630,7 @@ public:
   void reset(SemisimpleLieAlgebra& inputOwners);
   bool containsSl2WithGivenH(Vector<Rational>& elementH, int* outputIndex);
   void writeHTML(FormatExpressions* format = nullptr);
+  bool isHOfConstructedSlTwo(const Vector<Rational>& h) const;
   std::string toString(FormatExpressions* format = nullptr);
   std::string toHTMLSummaryTable(FormatExpressions* format = nullptr);
   std::string toHTMLSummary(FormatExpressions* format = nullptr);

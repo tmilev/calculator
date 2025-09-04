@@ -317,13 +317,13 @@ public:
     List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
     HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
     HashedList<Rational>& outputDynkinIndices,
-    AlgebraicClosureRationals* algebraicClosure
+    MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures
   );
   void getDynkinIndicesSl2Subalgebras(
     List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
     HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
     HashedList<Rational>& outputDynkinIndices,
-    AlgebraicClosureRationals* algebraicClosure
+    MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures
   );
   bool hasExceptionalComponent() const;
   bool operator>(const DynkinType& other) const;

@@ -387,6 +387,9 @@ public:
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > eMinusFUnknown;
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >
   involutionAppliedToEMinusF;
+  // A global label for the candidate; includes the type of
+  // the ambient Lie algebra and the h element.
+  std::string globalLabel;
   // Initializes the h,e,f computation with f arbitrarily chosen.
   // See the preceding comments on why f is chosen arbitrarily.
   void initializeUnknownTriples(const Vector<Rational>& targetH);
@@ -396,7 +399,7 @@ public:
     Vectors<Rational>& simpleBasisSubalgebras,
     Vector<Rational>& h,
     bool computeRealForm,
-    AlgebraicClosureRationals* inputAlgebraicClosure
+    MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures
   );
   SemisimpleLieAlgebra& getOwnerSemisimpleAlgebra();
   void initializeHEFSystemFromFCoefficients(
@@ -634,6 +637,7 @@ public:
   std::string toString(FormatExpressions* format = nullptr);
   std::string toHTMLSummaryTable(FormatExpressions* format = nullptr);
   std::string toHTMLSummary(FormatExpressions* format = nullptr);
+  std::string toHTMLFieldReport() const;
   std::string toStringModuleDecompositionMinimalContainingRegularSubalgebras(
     bool useLatex, bool useHtml
   );
@@ -646,13 +650,15 @@ public:
   // When restrictToThisSl2Triple is set, will restrict the computation to the
   // type given by restrictToThisSl2Triple; all other sl(2)-triples will
   // be ignored. Used to speed up computations when interested in one
-  // particular
-  // triple.
+  // particular triple.
+  // For computational reasons we are forced to operate with multiple
+  // algebraic closures, despite algebraic closures being designed
+  // as being shared by an entire computation.
   static void findSl2Subalgebras(
     SemisimpleLieAlgebra& inputOwner,
     SlTwoSubalgebras& output,
     bool computeRealForm,
-    AlgebraicClosureRationals* algebraicClosure,
+    MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures,
     DynkinSimpleType* restrictToThisSl2Triple = nullptr
   );
   // Appends all S-sl(2) subalgebras of the given root subalgebra.
@@ -661,7 +667,7 @@ public:
     SlTwoSubalgebras& output,
     int indexRootSubalgebraInContainer,
     bool computeRealForm,
-    AlgebraicClosureRationals* algebraicClosure,
+    MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures,
     DynkinSimpleType* restrictToThisSl2Triple
   );
 };

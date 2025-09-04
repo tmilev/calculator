@@ -2505,6 +2505,15 @@ void ObjectContainer::reset() {
   this->vectorPartitionFunctions.clear();
   this->lattices.clear();
   this->arithmeticOperations.clear();
+  // The algebraic closures for large computations.
+  // The outputs of the large computations are considered
+  // immutable (repeated computations should yield identical
+  // results). Each large computation has a unique label key.
+  // Originally, this was used for computations of sl(2)-triples
+  // of simple Lie algebras; as keys we use the type of the
+  // simple Lie algebra combined with the dynkin type and
+  // generating h element of the sl(2)-triple.
+  this->algebraicClosuresForLargeComputations.clear();
   this->resetPlots();
   this->resetSliders();
 }

@@ -1577,7 +1577,16 @@ public:
   MapReferences<
     std::string, std::string, HashFunctions::hashFunction<std::string>
   > graphicsScripts;
+  // A single shared algebraic closure intended.
   AlgebraicClosureRationals algebraicClosure;
+  // For the purposes of large computations,
+  // computational complexity may force us to use
+  // different algebraic closures over the rationals.
+  // In such case, coefficients from the resulting
+  // computations cannot be mixed with coefficients
+  // using the original algebraic closure without explitic conversion.
+  MapReferences<std::string, AlgebraicClosureRationals>
+  algebraicClosuresForLargeComputations;
   HashedList<AlgebraicNumber> allAlgebraicNumbers;
   HashedListReferences<
     HyperoctahedralBitsAutomorphism::ElementHyperoctahedralGroupR2

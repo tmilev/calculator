@@ -1344,7 +1344,7 @@ void SemisimpleSubalgebras::computeSl2sInitOrbitsForComputationOnDemand(
     this->getSemisimpleOwner(),
     this->slTwoSubalgebras,
     computeRealSlTwos,
-    this->ownerField
+    *this->ownerFieldsForExtraComputation
   );
   this->orbitHElementLengths.clear();
   this->orbitDynkinIndices.clear();
@@ -1601,6 +1601,12 @@ void SemisimpleSubalgebras::findSemisimpleSubalgebrasInitialize() {
     << "<hr>Owner of semisimple subalgebras is zero."
     << global.fatal;
   }
+  if (
+    this->ownerField == nullptr ||
+    this->ownerFieldsForExtraComputation == nullptr
+  ) {
+    global.fatal << "<hr>Non-initialized owner fields. " << global.fatal;
+  }
   if (global.response.monitoringAllowed()) {
     this->fileNameToLogComments =
     this->owner->fileNames.virtualFolderName() +
@@ -1699,7 +1705,9 @@ void DynkinType::getPrecomputedDynkinTypes(List<DynkinType>& output) {
 
 bool SemisimpleSubalgebras::computeStructureWriteFiles(
   SemisimpleLieAlgebra& newOwner,
-  AlgebraicClosureRationals& ownerField,
+  AlgebraicClosureRationals& inputOwnerField,
+  MapReferences<std::string, AlgebraicClosureRationals>&
+  inputOwnerFieldsForExrtaComputations,
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   std::string(*toStringExpression)(SemisimpleSubalgebras&),
@@ -1727,7 +1735,8 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
     if (options.doFullInitialization) {
       this->findSemisimpleSubalgebrasFromScratch(
         newOwner,
-        ownerField,
+        inputOwnerField,
+        inputOwnerFieldsForExrtaComputations,
         containerSubalgebras,
         containerSl2Subalgebras,
         nullptr
@@ -1759,14 +1768,20 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
 
 bool SemisimpleSubalgebras::computeStructureRealFormsWriteFiles(
   SemisimpleLieAlgebra& newOwner,
-  AlgebraicClosureRationals& ownerField,
+  AlgebraicClosureRationals& inputOwnerField,
+  MapReferences<std::string, AlgebraicClosureRationals>&
+  inputOwnerFieldsForExrtaComputations,
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   std::stringstream* outputStream
 ) {
   STACK_TRACE("SemisimpleSubalgebras::computeStructureRealFormsWriteFiles");
   this->computeStructureRealForms(
-    newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras
+    newOwner,
+    inputOwnerField,
+    inputOwnerFieldsForExrtaComputations,
+    containerSubalgebras,
+    containerSl2Subalgebras
   );
   this->writeFilesRealForms(outputStream);
   return true;
@@ -1774,14 +1789,20 @@ bool SemisimpleSubalgebras::computeStructureRealFormsWriteFiles(
 
 bool SemisimpleSubalgebras::computeStructureRealFormsInitialize(
   SemisimpleLieAlgebra& newOwner,
-  AlgebraicClosureRationals& ownerField,
+  AlgebraicClosureRationals& inputOwnerField,
+  MapReferences<std::string, AlgebraicClosureRationals>&
+  inputOwnerFieldsForExrtaComputations,
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
 ) {
   STACK_TRACE("SemisimpleSubalgebras::computeStructureRealFormsInitialize");
   if (this->subalgebrasNonEmbedded == nullptr || this->owner == nullptr) {
     this->initHookUpPointers(
-      newOwner, &ownerField, &containerSubalgebras, &containerSl2Subalgebras
+      newOwner,
+      &inputOwnerField,
+      &inputOwnerFieldsForExrtaComputations,
+      &containerSubalgebras,
+      &containerSl2Subalgebras
     );
   }
   this->checkInitialization();
@@ -1792,17 +1813,26 @@ bool SemisimpleSubalgebras::computeStructureRealFormsInitialize(
 
 bool SemisimpleSubalgebras::computeStructureRealForms(
   SemisimpleLieAlgebra& newOwner,
-  AlgebraicClosureRationals& ownerField,
+  AlgebraicClosureRationals& inputOwnerField,
+  MapReferences<std::string, AlgebraicClosureRationals>&
+  inputOwnerFieldsForExrtaComputations,
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
 ) {
   STACK_TRACE("SemisimpleSubalgebras::computeStructureRealForms");
   this->computeStructureRealFormsInitialize(
-    newOwner, ownerField, containerSubalgebras, containerSl2Subalgebras
+    newOwner,
+    inputOwnerField,
+    inputOwnerFieldsForExrtaComputations,
+    containerSubalgebras,
+    containerSl2Subalgebras
   );
   this->slTwoSubalgebras.checkMinimalContainingRootSubalgebras();
   this->slTwoSubalgebras.findSl2Subalgebras(
-    newOwner, this->slTwoSubalgebras, true, &ownerField
+    newOwner,
+    this->slTwoSubalgebras,
+    true,
+    *this->ownerFieldsForExtraComputation
   );
   this->computeStructureRealFormsSlTwos();
   return true;
@@ -1925,7 +1955,9 @@ bool SemisimpleSubalgebras::checkIsEmpty() const {
 
 bool SemisimpleSubalgebras::findSemisimpleSubalgebrasFromScratch(
   SemisimpleLieAlgebra& newOwner,
-  AlgebraicClosureRationals& ownerField,
+  AlgebraicClosureRationals& inputOwnerField,
+  MapReferences<std::string, AlgebraicClosureRationals>&
+  inputOwnerFieldsForExrtaComputations,
   MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
   ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
   const DynkinType* targetType
@@ -1933,7 +1965,11 @@ bool SemisimpleSubalgebras::findSemisimpleSubalgebrasFromScratch(
   STACK_TRACE("SemisimpleSubalgebras::findSemisimpleSubalgebrasFromScratch");
   this->resetComputations();
   this->initHookUpPointers(
-    newOwner, &ownerField, &containerSubalgebras, &containerSl2Subalgebras
+    newOwner,
+    &inputOwnerField,
+    &inputOwnerFieldsForExrtaComputations,
+    &containerSubalgebras,
+    &containerSl2Subalgebras
   );
   this->checkIsEmpty();
   this->owner->computeChevalleyConstants();
@@ -2702,7 +2738,7 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
   List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
   HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
   HashedList<Rational>& outputDynkinIndices,
-  AlgebraicClosureRationals* algebraicClosure
+  MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures
 ) {
   STACK_TRACE("DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType");
   DynkinSimpleType typeDefaultScale(desiredType.letter, desiredType.rank, 1);
@@ -2714,7 +2750,7 @@ void DynkinType::getDynkinIndicesSl2SubalgebrasSimpleType(
       typeDefaultScale.letter, typeDefaultScale.rank
     );
     simpleAlgebra.computeChevalleyConstants();
-    sl2s.findSl2Subalgebras(simpleAlgebra, sl2s, false, algebraicClosure);
+    sl2s.findSl2Subalgebras(simpleAlgebra, sl2s, false, algebraicClosures);
     dynkinSimpleTypesWithComputedSl2Subalgebras.addOnTop(typeDefaultScale);
     outputIndicesDefaultScale.setExpectedSize(sl2s.allSubalgebras.size);
     for (int i = 0; i < sl2s.allSubalgebras.size; i ++) {
@@ -2743,7 +2779,7 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
   List<List<Rational> >& precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
   HashedList<DynkinSimpleType>& dynkinSimpleTypesWithComputedSl2Subalgebras,
   HashedList<Rational>& outputDynkinIndices,
-  AlgebraicClosureRationals* algebraicClosure
+  MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures
 ) {
   STACK_TRACE("DynkinType::getDynkinIndicesSl2Subalgebras");
   List<DynkinSimpleType> dynkinTypes;
@@ -2756,7 +2792,7 @@ void DynkinType::getDynkinIndicesSl2Subalgebras(
       precomputedDynkinIndicesSl2subalgebrasSimpleTypes,
       dynkinSimpleTypesWithComputedSl2Subalgebras,
       bufferIndices,
-      algebraicClosure
+      algebraicClosures
     );
     dynkinIndicesPerType.setSize(dynkinIndicesPerType.size + 1);
     dynkinIndicesPerType.lastObject()->addOnTop(0);
@@ -2823,13 +2859,13 @@ bool SemisimpleSubalgebras::centralizersComputedToHaveUnsuitableNilpotentOrbits
         this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
         this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
         dynkinIndicesCurrentSummand,
-        this->ownerField
+        *this->ownerFieldsForExtraComputation
       );
       centralizerOfComplementOfCurrentSummand.getDynkinIndicesSl2Subalgebras(
         this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
         this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
         dynkinIndicesCentralizerComplementCurrentSummand,
-        this->ownerField
+        *this->ownerFieldsForExtraComputation
       );
       if (
         !dynkinIndicesCentralizerComplementCurrentSummand.contains(
@@ -2948,13 +2984,13 @@ centralizerOfBaseComputedToHaveUnsuitableNilpotentOrbits() {
     this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
     this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
     dynkinIndicesTheyGotToFitIn,
-    this->ownerField
+    *this->ownerFieldsForExtraComputation
   );
   newSummandType.getDynkinIndicesSl2Subalgebras(
     this->cachedDynkinIndicesSl2subalgebrasSimpleTypes,
     this->cachedDynkinSimpleTypesWithComputedSl2Subalgebras,
     dynkinIndicesNewSummand,
-    this->ownerField
+    *this->ownerFieldsForExtraComputation
   );
   if (dynkinIndicesTheyGotToFitIn.contains(dynkinIndicesNewSummand)) {
     return false;
@@ -7081,6 +7117,8 @@ bool SemisimpleSubalgebras::checkAll() const {
 void SemisimpleSubalgebras::initHookUpPointers(
   SemisimpleLieAlgebra& inputOwner,
   AlgebraicClosureRationals* field,
+  MapReferences<std::string, AlgebraicClosureRationals>*
+  inputOwnerFieldsForExrtaComputations,
   MapReferences<DynkinType, SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
   ListReferences<SlTwoSubalgebras>* inputSl2sOfSubalgebras
 ) {
@@ -7088,6 +7126,7 @@ void SemisimpleSubalgebras::initHookUpPointers(
   this->owner = &inputOwner;
   this->slTwoSubalgebras.owner = &inputOwner;
   this->ownerField = field;
+  this->ownerFieldsForExtraComputation = inputOwnerFieldsForExrtaComputations;
   this->subalgebrasNonEmbedded = inputSubalgebrasNonEmbedded;
 }
 
@@ -7096,6 +7135,7 @@ void SemisimpleSubalgebras::resetPointers() {
   this->owner = nullptr;
   this->ownerField = nullptr;
   this->slTwoSubalgebras.owner = nullptr;
+  this->ownerFieldsForExtraComputation = nullptr;
   this->flagHasPossibleSubalgebrasWeCouldntSolveFor = false;
   this->flagAttemptToSolveSystems = true;
   this->flagComputeModuleDecomposition = true;
@@ -10439,11 +10479,18 @@ bool SemisimpleSubalgebras::Test::constructAllB3Subalgebras() {
   SemisimpleSubalgebras subalgebras;
   SemisimpleLieAlgebra b3;
   b3.weylGroup.makeArbitrarySimple('B', 3);
-  AlgebraicClosureRationals allgebraicClosure;
+  AlgebraicClosureRationals algebraicClosure;
+  MapReferences<std::string, AlgebraicClosureRationals>
+  algebraicClosuresForLargeComputations;
   MapReferences<DynkinType, SemisimpleLieAlgebra> subalgebrasNonEmbedded;
   ListReferences<SlTwoSubalgebras> sl2sOfSubalgebras;
   subalgebras.findSemisimpleSubalgebrasFromScratch(
-    b3, allgebraicClosure, subalgebrasNonEmbedded, sl2sOfSubalgebras, nullptr
+    b3,
+    algebraicClosure,
+    algebraicClosuresForLargeComputations,
+    subalgebrasNonEmbedded,
+    sl2sOfSubalgebras,
+    nullptr
   );
   int expected = 16;
   if (subalgebras.subalgebras.size() != expected) {

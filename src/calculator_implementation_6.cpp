@@ -2456,7 +2456,7 @@ bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureWithOptions(
       algebra,
       slTwoSubalgebras,
       computeRealForm,
-      &calculator.objectContainer.algebraicClosure
+      calculator.objectContainer.algebraicClosuresForLargeComputations
     );
     slTwoSubalgebras.writeHTML();
     Plot plot;
@@ -2482,6 +2482,7 @@ bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureWithOptions(
         !subalgebras.computeStructureWriteFiles(
           algebra,
           calculator.objectContainer.algebraicClosure,
+          calculator.objectContainer.algebraicClosuresForLargeComputations,
           subalgebrasContainer,
           sl2Conainer,
           CalculatorConversions::stringFromSemisimpleSubalgebras,

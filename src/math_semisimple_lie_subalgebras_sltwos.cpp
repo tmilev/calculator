@@ -1004,7 +1004,7 @@ bool SlTwoSubalgebraCandidate::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   Vectors<Rational>& simpleBasisSubalgebras,
   Vector<Rational>& h,
   bool computeRealForm,
-  AlgebraicClosureRationals* inputAlgebraicClosure
+  MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures
 ) {
   STACK_TRACE(
     "SlTwoSubalgebraCandidate::attemptExtendingHFtoHEFWithRespectToSubalgebra"
@@ -1015,7 +1015,11 @@ bool SlTwoSubalgebraCandidate::attemptExtendingHFtoHEFWithRespectToSubalgebra(
   ) {
     return false;
   }
-  this->algebraicClosure = inputAlgebraicClosure;
+  std::stringstream keyStream;
+  keyStream << this->owner->weylGroup.dynkinType.toString() << h.toString();
+  this->algebraicClosure =
+  &algebraicClosures.getValueCreateNoInitialization(keyStream.str());
+  this->algebraicClosure->reset();
   this->hAlgebraic.makeCartanGenerator(h, this->getOwnerSemisimpleAlgebra());
   this->participatingPositiveRoots.size = 0;
   int relativeDimension = simpleBasisSubalgebras.size;
@@ -1271,7 +1275,7 @@ void SlTwoSubalgebras::findSl2Subalgebras(
   SemisimpleLieAlgebra& inputOwner,
   SlTwoSubalgebras& output,
   bool computeRealForm,
-  AlgebraicClosureRationals* algebraicClosure,
+  MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures,
   DynkinSimpleType* restrictToThisSl2Triple
 ) {
   STACK_TRACE("SlTwoSubalgebras::findSl2Subalgebras");
@@ -1319,7 +1323,7 @@ void SlTwoSubalgebras::findSl2Subalgebras(
       output,
       i,
       computeRealForm,
-      algebraicClosure,
+      algebraicClosures,
       restrictToThisSl2Triple
     );
   }
@@ -1357,7 +1361,7 @@ void SlTwoSubalgebras::appendSSl2SubalgebrasFromRootSubalgebra(
   SlTwoSubalgebras& output,
   int indexRootSubalgebraInContainer,
   bool computeRealForm,
-  AlgebraicClosureRationals* algebraicClosure,
+  MapReferences<std::string, AlgebraicClosureRationals>& algebraicClosures,
   DynkinSimpleType* restrictToThisSl2Triple
 ) {
   STACK_TRACE("SlTwoSubalgebras::appendSSl2SubalgebrasFromRootSubalgebra");
@@ -1555,7 +1559,7 @@ void SlTwoSubalgebras::appendSSl2SubalgebrasFromRootSubalgebra(
         reflectedSimpleBasisK,
         candidate.candidateH,
         computeRealForm,
-        algebraicClosure
+        algebraicClosures
       )
     ) {
       container.addSlTwoSubalgebraIfNew(
@@ -1682,6 +1686,22 @@ bool SlTwoSubalgebras::isHOfConstructedSlTwo(const Vector<Rational>& h) const {
   return false;
 }
 
+std::string SlTwoSubalgebras::toHTMLFieldReport() const {
+  std::stringstream out;
+  HashedList<std::string> allFieldsUsed;
+  for (const SlTwoSubalgebra& subalgebra : this->allSubalgebras) {
+    allFieldsUsed.addOnTopNoRepetition(
+      subalgebra.algebraicClosure->toString()
+    );
+  }
+  out << "Extensions of the rationals used";
+  if (allFieldsUsed.size > 0) {
+    out << " (" << allFieldsUsed.size << " total)";
+  }
+  out << ": " << allFieldsUsed.toStringCommaDelimited();
+  return out.str();
+}
+
 std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
   STACK_TRACE("SlTwoSubalgebras::toHTMLSummary");
   std::stringstream out;
@@ -1740,9 +1760,8 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
     << "is indeed an S-subalgebra of a smaller root subalgebra P'.</b>";
   }
   if (!allGood) {
-    out << "<br><b style='color:red'>Found bad characteristics!</b><br>";
+    out << "<br><b style='color:red'>Found bad characteristics!</b>";
   }
-  out << "<br>";
   return out.str();
 }
 
@@ -1902,7 +1921,9 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
     out << "<br>";
   }
   out << this->toHTMLSummary(format);
-  out << body.str();
+  out << "<hr>";
+  out << this->toHTMLFieldReport();
+  out << "<hr>" << body.str();
   return out.str();
 }
 

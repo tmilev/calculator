@@ -611,7 +611,12 @@ public:
   }
   FormatExpressions currentFormat;
   SemisimpleLieAlgebra* owner;
+  // The shared base field over which we compute.
   AlgebraicClosureRationals* ownerField;
+  // Additional fields used for computations of the centralizers of
+  // sl(2)-triples
+  MapReferences<std::string, AlgebraicClosureRationals>*
+  ownerFieldsForExtraComputation;
   DynkinType targetDynkinType;
   SlTwoSubalgebras slTwoSubalgebras;
   MapReferences<DynkinType, SemisimpleLieAlgebra>* subalgebrasNonEmbedded;
@@ -775,6 +780,8 @@ public:
   void initHookUpPointers(
     SemisimpleLieAlgebra& inputOwner,
     AlgebraicClosureRationals* field,
+    MapReferences<std::string, AlgebraicClosureRationals>*
+    inputOwnerFieldsForExrtaComputations,
     MapReferences<DynkinType, SemisimpleLieAlgebra>*
     inputSubalgebrasNonEmbedded,
     ListReferences<SlTwoSubalgebras>* inputSl2sOfSubalgebras
@@ -857,14 +864,18 @@ public:
   bool findSemisimpleSubalgebrasContinue();
   bool findSemisimpleSubalgebrasFromScratch(
     SemisimpleLieAlgebra& newOwner,
-    AlgebraicClosureRationals& ownerField,
+    AlgebraicClosureRationals& inputOwnerField,
+    MapReferences<std::string, AlgebraicClosureRationals>&
+    inputOwnerFieldsForExrtaComputations,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
     const DynkinType* targetType
   );
   bool computeStructureWriteFiles(
     SemisimpleLieAlgebra& newOwner,
-    AlgebraicClosureRationals& ownerField,
+    AlgebraicClosureRationals& inputOwnerField,
+    MapReferences<std::string, AlgebraicClosureRationals>&
+    inputOwnerFieldsForExrtaComputations,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
     std::string(*toStringExpression)(SemisimpleSubalgebras&),
@@ -874,14 +885,18 @@ public:
   );
   bool computeStructureRealFormsWriteFiles(
     SemisimpleLieAlgebra& newOwner,
-    AlgebraicClosureRationals& ownerField,
+    AlgebraicClosureRationals& inputOwnerField,
+    MapReferences<std::string, AlgebraicClosureRationals>&
+    inputOwnerFieldsForExrtaComputations,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras,
     std::stringstream* outputStream
   );
   bool computeStructureRealForms(
     SemisimpleLieAlgebra& newOwner,
-    AlgebraicClosureRationals& ownerField,
+    AlgebraicClosureRationals& inputOwnerField,
+    MapReferences<std::string, AlgebraicClosureRationals>&
+    inputOwnerFieldsForExrtaComputations,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
   );
@@ -894,7 +909,9 @@ public:
   );
   bool computeStructureRealFormsInitialize(
     SemisimpleLieAlgebra& newOwner,
-    AlgebraicClosureRationals& ownerField,
+    AlgebraicClosureRationals& inputOwnerField,
+    MapReferences<std::string, AlgebraicClosureRationals>&
+    inputOwnerFieldsForExrtaComputations,
     MapReferences<DynkinType, SemisimpleLieAlgebra>& containerSubalgebras,
     ListReferences<SlTwoSubalgebras>& containerSl2Subalgebras
   );

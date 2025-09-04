@@ -8777,6 +8777,7 @@ bool CalculatorLieTheory::embedSemisimpleAlgebraInSemisimpleAlgebra(
   semisimpleSubalgebras.findSemisimpleSubalgebrasFromScratch(
     semisimpleLieAlgebra,
     calculator.objectContainer.algebraicClosure,
+    calculator.objectContainer.algebraicClosuresForLargeComputations,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.slTwoSubalgebras,
     &smallSubalgebraPointer.content->weylGroup.dynkinType

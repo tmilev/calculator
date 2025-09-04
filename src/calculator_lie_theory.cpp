@@ -4435,6 +4435,7 @@ bool CalculatorLieTheory::slTwoRealFormStructure(
   subalgebras.computeStructureRealFormsWriteFiles(
     *ownerLieAlgebra.content,
     calculator.objectContainer.algebraicClosure,
+    calculator.objectContainer.algebraicClosuresForLargeComputations,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.slTwoSubalgebras,
     &out
@@ -4516,7 +4517,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
       *semisimpleLieAlgebra.content,
       slTwoSubalgebras,
       computeRealFormSlTwos,
-      &calculator.objectContainer.algebraicClosure,
+      calculator.objectContainer.algebraicClosuresForLargeComputations,
       restrictToThisSl2Triple
     );
     slTwoSubalgebras.writeHTML(&format);
@@ -5173,6 +5174,7 @@ bool CalculatorLieTheory::growDynkinType(
   subalgebras.initHookUpPointers(
     *semisimpleLieAlgebra.content,
     &calculator.objectContainer.algebraicClosure,
+    &calculator.objectContainer.algebraicClosuresForLargeComputations,
     &calculator.objectContainer.semisimpleLieAlgebras,
     &calculator.objectContainer.slTwoSubalgebras
   );
@@ -5282,6 +5284,7 @@ bool CalculatorLieTheory::computeSemisimpleSubalgebras(
   semisimpleSubalgebras.findSemisimpleSubalgebrasFromScratch(
     lieAlgebra,
     calculator.objectContainer.algebraicClosure,
+    calculator.objectContainer.algebraicClosuresForLargeComputations,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.slTwoSubalgebras,
     nullptr
@@ -5419,7 +5422,7 @@ bool CalculatorLieTheory::getDynkinIndicesSlTwoSubalgebras(
     bufferIndices,
     bufferTypes,
     indices,
-    &calculator.objectContainer.algebraicClosure
+    calculator.objectContainer.algebraicClosuresForLargeComputations
   );
   std::stringstream out;
   out
@@ -6114,6 +6117,7 @@ bool CalculatorLieTheory::printSemisimpleSubalgebras(
   subalgebras.computeStructureWriteFiles(
     ownerLieAlgebra,
     calculator.objectContainer.algebraicClosure,
+    calculator.objectContainer.algebraicClosuresForLargeComputations,
     calculator.objectContainer.semisimpleLieAlgebras,
     calculator.objectContainer.slTwoSubalgebras,
     CalculatorConversions::stringFromSemisimpleSubalgebras,

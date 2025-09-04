@@ -84,6 +84,14 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
       return List<Rational>({1, 1, 1, 1, 1, 1, 1});
     }
   }
+  if (type == 'C' && rank == 7) {
+    if (dynkinIndex == 15) {
+      return List<Rational>({1, 1, 1, 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 12) {
+      return List<Rational>({1, 1, 1, 1, 1, 1, 1});
+    }
+  }
   return List<Rational>({1, - 1, 2, - 2, 3, - 3, 4, - 4});
 }
 
@@ -230,6 +238,20 @@ List<int> CentralizerComputer::hardCodedArbitraryCoefficientsCartan(
       return List<int>({1, 5, - 2, 1, - 3});
     }
   }
+  if (ambientSimpleType == 'C' && ambientRank == 7) {
+    if (dynkinIndexOfSlTwo == 17) {
+      return List<int>({1, 7});
+    }
+    if (dynkinIndexOfSlTwo == 16) {
+      return List<int>({1, 5, - 3});
+    }
+    if (dynkinIndexOfSlTwo == 9) {
+      return List<int>({1, 5, - 3, - 4, 2});
+    }
+    if (dynkinIndexOfSlTwo == 8) {
+      return List<int>({1, 5, - 3, - 4, 2});
+    }
+  }
   return List<int>({});
 }
 
@@ -353,6 +375,17 @@ List<int> CentralizerComputer::hardCodedCoefficientsToFormSemisimpleElement(
     if (dynkinIndexOfSlTwo == 6) {
       return
       List<int>({1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,});
+    }
+  }
+  if (ambientSimpleType == 'C' && ambientRank == 7) {
+    if (dynkinIndexOfSlTwo == 15) {
+      return CentralizerComputer::onesAtPositions(List<int>({0, 1, 2}), 10);
+    }
+    if (dynkinIndexOfSlTwo == 12) {
+      return List<int>({1, 1, 1, 0, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndexOfSlTwo == 7) {
+      return CentralizerComputer::onesAtPositions(List<int>({0, 1, 2}), 21);
     }
   }
   return List<int>({});

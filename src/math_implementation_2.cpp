@@ -791,6 +791,10 @@ void LargeIntegerUnsigned::dividePositive(
   }
 }
 
+std::string LargeIntegerUnsigned::toMathML() const {
+  return "<mn>" + this->toString() + "</mn>";
+}
+
 std::string LargeIntegerUnsigned::toString(FormatExpressions* format) const {
   (void) format;
   // to avoid unused paramater warning
@@ -1626,6 +1630,18 @@ void LargeInteger::toString(std::string& output) const {
   this->value.toString(currentString);
   out << currentString;
   output = out.str();
+}
+
+std::string LargeInteger::toMathML() const {
+  if (this->isEqualToZero()) {
+    return "<mn>0</mn>";
+  }
+  std::stringstream out;
+  if (this->sign == - 1) {
+    out << "<mo>-</mo>";
+  }
+  out << this->value.toMathML();
+  return out.str();
 }
 
 void LargeInteger::assignUInt64(uint64_t x) {
@@ -2487,6 +2503,22 @@ bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
   crossProduct.assign(*this);
   crossProduct.subtract(right);
   return crossProduct.isPositiveOrZero();
+}
+
+std::string Rational::toMathML(FormatExpressions* format) const {
+  (void) format;
+  std::stringstream out;
+  LargeInteger numerator = this->getNumerator();
+  if (this->isInteger()) {
+    return numerator.toMathML();
+  }
+  LargeIntegerUnsigned denominator = this->getDenominator();
+  out
+  << "<mfrac>"
+  << numerator.toMathML()
+  << denominator.toMathML()
+  << "</mfrac>";
+  return out.str();
 }
 
 std::string Rational::toString(FormatExpressions* format) const {

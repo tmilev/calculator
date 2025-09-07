@@ -87,6 +87,9 @@ public:
     out << "]";
     return out.str();
   }
+  std::string toMathMLLetterFormat(
+    const std::string& inputLetter, FormatExpressions* format = nullptr
+  ) const;
   std::string toStringLetterFormat(
     const std::string& inputLetter,
     FormatExpressions* format = nullptr,

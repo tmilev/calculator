@@ -3,23 +3,6 @@
 #include "math_basics.h"
 #include "math_large_integers.h"
 
-std::string MathRoutines::toMathML(
-  const std::string& mathMLContent, const std::string& latex
-) {
-  std::stringstream out;
-  out
-  << "<span class='mathcalculatorbackendrendered'>"
-  << "<math>"
-  << mathMLContent
-  << "<semantics>"
-  << "<annotation>"
-  << latex
-  << "</annotation"
-  << "</semantics></math>"
-  << "</span>";
-  return out.str();
-}
-
 void MathRoutines::parseListIntegersNoFailure(
   const std::string& input, List<int>& result
 ) {

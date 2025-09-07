@@ -47,6 +47,7 @@ HEADERS += \
     math_lattices.h \
   math_lie_theory.h \
   math_linear_combination.h \
+  math_mathml.h \
     math_modular_arithmetic.h \
   math_polynomials.h \
     math_vector_partition_functions.h \
@@ -758,6 +759,7 @@ SOURCES += \
     math_implementation_6_test.cpp \
     math_lattices.cpp \
     math_lie_theory_test.cpp \
+  math_mathml.cpp \
     math_modular_arithmetic.cpp \
     math_semisimple_lie_algebras.cpp \
     math_semisimple_lie_root_subalgebras.cpp \

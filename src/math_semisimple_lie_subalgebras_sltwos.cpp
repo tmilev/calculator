@@ -1826,12 +1826,13 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
   << "Containing regular semisimple SAs in "
   << "which the sl(2) has no centralizer</a>"
   << "</th></tr>";
-  FormatExpressions formatCharacter;
-  formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
+  FormatExpressions formatCharacterMathML;
+  formatCharacterMathML.vectorSpaceEiBasisNames.addOnTop("&psi;");
+  formatCharacterMathML.flagSupressDynkinIndexOne = false;
   for (int i = 0; i < this->allSubalgebras.size; i ++) {
     const SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras[i];
     DynkinSimpleType simpleType;
-    simpleType.makeArbitrary('A', 1, currentSubalgebra.getDynkinIndex() * 2);
+    simpleType.makeArbitrary('A', 1, currentSubalgebra.getDynkinIndex());
     out
     << "<tr>"
     << "<td class='tableSummarySlTwoType'>"
@@ -1861,7 +1862,7 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     << "</td><td class='tableSummarySlTwoDefault' style='padding-left:20px;'>";
     out
     << currentSubalgebra.moduleDecompositionAmbientSubalgebra.toMathMLFinal(
-      &formatCharacter
+      &formatCharacterMathML
     )
     << "\n<br>\n";
     out << "</td>";
@@ -1872,8 +1873,8 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     if (currentSubalgebra.centralizerComputer.flagTypeComputed) {
       out
       << "<td class='tableSummarySlTwoDefault'> "
-      << HtmlRoutines::getMathNoDisplay(
-        currentSubalgebra.centralizerComputer.typeIfKnown.toString()
+      << currentSubalgebra.centralizerComputer.typeIfKnown.toMathMLFinal(
+        &formatCharacterMathML
       )
       << "</td>";
     } else {

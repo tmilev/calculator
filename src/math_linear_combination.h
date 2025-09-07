@@ -6,6 +6,7 @@
 #include "math_basics.h"
 #include "math_general.h"
 #include "math_large_integers.h"
+#include "math_mathml.h"
 #include "math_subsets_selections.h"
 #include "math_vectors.h"
 #include "progress_report.h"
@@ -27,6 +28,12 @@ private:
     const LinearCombination<TemplateMonomial, Coefficient>& collection
   );
   std::string getTermString(
+    const Coefficient& coefficient,
+    const TemplateMonomial& monomial,
+    FormatExpressions* format,
+    const std::string& customCoefficientMonomialSeparator
+  ) const;
+  std::string termToMathML(
     const Coefficient& coefficient,
     const TemplateMonomial& monomial,
     FormatExpressions* format,
@@ -1300,6 +1307,41 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::getTermString(
 }
 
 template <class TemplateMonomial, class Coefficient>
+std::string LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
+  const Coefficient& coefficient,
+  const TemplateMonomial& monomial,
+  FormatExpressions* format,
+  const std::string& customCoefficientMonomialSeparator
+) const {
+  std::string coefficientString;
+  std::string monomialString;
+  if (coefficient.needsParenthesisForMultiplication(format)) {
+    std::string coefficientMathML = coefficient.toMathML(format);
+    coefficientString =
+    MathML::leftParenthesis + coefficientMathML + MathML::rightParenthesis;
+  } else {
+    coefficientString = coefficient.toMathML(format);
+  }
+  monomialString = monomial.toMathML(format);
+  if (customCoefficientMonomialSeparator != "") {
+    return
+    coefficientString +
+    customCoefficientMonomialSeparator +
+    monomialString;
+  }
+  if (monomialString == "<mn>1</mn>") {
+    return coefficientString;
+  }
+  if (coefficientString == "<mn>1</mn>") {
+    return monomialString;
+  }
+  if (coefficientString == "<mo>-</mo><mn>1</mn>") {
+    return "<mo>-</mo>" + monomialString;
+  }
+  return coefficientString + monomialString;
+}
+
+template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::
 toStringWithPossibleLineBreak(
   FormatExpressions* format, int* outputNumberOfLines
@@ -1323,14 +1365,14 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathMLFinal(
 ) const {
   std::string latex = this->toString(format);
   std::string mathML = this->toMathML(format);
-  return MathRoutines::toMathML(mathML, latex);
+  return MathML::toMathML(mathML, latex);
 }
 
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
   FormatExpressions* format
 ) const {
-  STACK_TRACE("LinearCombination::toMathMLComponent");
+  STACK_TRACE("LinearCombination::toMathML");
   if (this->size() == 0) {
     return "<mn>0</mn>";
   }
@@ -1365,7 +1407,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
     int coefficientIndex = this->monomials.getIndex(monomial);
     Coefficient& coefficient = this->coefficients[coefficientIndex];
     std::string termString =
-    this->getTermString(coefficient, monomial, format, customTimes);
+    this->termToMathML(coefficient, monomial, format, customTimes);
     if (i > 0) {
       if (!useCustomPlus) {
         if (termString.size() > 0) {

@@ -4,6 +4,7 @@
 #include "general_logging_global_variables.h"
 #include "general_strings.h"
 #include "math_large_integers.h"
+#include "math_mathml.h"
 #include "math_subsets_selections.h"
 #include "math_vectors.h"
 
@@ -2682,6 +2683,54 @@ std::string Vectors<Coefficient>::toString(FormatExpressions* format) const {
   if (useLaTeX && makeTable) {
     out << "\\end{tabular}";
   }
+  return out.str();
+}
+
+template <class Coefficient>
+std::string Vector<Coefficient>::toMathMLLetterFormat(
+  const std::string& inputLetter, FormatExpressions* format
+) const {
+  if (this->isEqualToZero()) {
+    return "<mn>0</mn>";
+  }
+  std::stringstream out;
+  std::string term;
+  bool found = false;
+  out << "<mrow>";
+  for (int i = 0; i < this->size; i ++) {
+    if ((*this)[i].isEqualToZero()) {
+      continue;
+    }
+    term = (*this)[i].toMathML(format);
+    if ((*this)[i].needsParenthesisForMultiplication(format)) {
+      term = MathML::leftParenthesis + term + MathML::rightParenthesis;
+    }
+    if (term == "<mn>1</mn>") {
+      term = "";
+    }
+    if (term == "<mo>-</mo><mn>1</mn>") {
+      term = "<mo>-</mo>";
+    }
+    if (found && !StringRoutines::stringBeginsWith(term, "<mo>-</mo>")) {
+      out << "<mo>+</mo>";
+    }
+    found = true;
+    out << term;
+    if (format != nullptr) {
+      if (format->vectorSpaceEiBasisNames.size > i) {
+        out << "<mi>" << format->vectorSpaceEiBasisNames[i] << "</mi>";
+        continue;
+      }
+    }
+    out
+    << "<msub><mi>"
+    << inputLetter
+    << "</mi>"
+    << "<mn>"
+    << i + 1
+    << "</mn></msub>";
+  }
+  out << "</mrow>";
   return out.str();
 }
 

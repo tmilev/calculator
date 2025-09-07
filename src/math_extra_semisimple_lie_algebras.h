@@ -691,6 +691,7 @@ public:
     const Coefficient& zero = Coefficient::zero()
   ) const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(FormatExpressions* format = nullptr) const;
   inline unsigned int hashFunction() const {
     return weightFundamentalCoordinates.hashFunction();
   }
@@ -1051,6 +1052,56 @@ std::string Weight<Coefficient>::toString(FormatExpressions* format) const {
     )
     << "}";
   }
+  if (format != nullptr) {
+    format->customPlusSign = oldCustomPlus;
+  }
+  return out.str();
+}
+
+template <class Coefficient>
+std::string Weight<Coefficient>::toMathML(FormatExpressions* format) const {
+  std::stringstream out;
+  bool formatWeightAsIndexVectorSpace = format ==
+  nullptr ? true : format->flagFormatWeightAsVectorSpaceIndex;
+  if (!formatWeightAsIndexVectorSpace) {
+    if (this->owner == nullptr) {
+      return
+      this->weightFundamentalCoordinates.toStringLetterFormat("\\psi", format);
+    }
+    Vector<Coefficient> weightEpsilonCoordinates;
+    Vector<Coefficient> weightSimpleCoordinates;
+    weightSimpleCoordinates =
+    this->owner->weylGroup.getSimpleCoordinatesFromFundamental(
+      this->weightFundamentalCoordinates, Coefficient::zero()
+    );
+    this->owner->weylGroup.getEpsilonCoordinates(
+      weightSimpleCoordinates, weightEpsilonCoordinates
+    );
+    return
+    weightEpsilonCoordinates.toStringLetterFormat("\\varepsilon", format);
+  }
+  bool useOmega = true;
+  std::string oldCustomPlus;
+  std::string vectorSpaceLetter = "V";
+  if (format != nullptr) {
+    useOmega = (format->fundamentalWeightLetter == "");
+    oldCustomPlus = format->customPlusSign;
+    format->customPlusSign = "";
+    vectorSpaceLetter = format->finiteDimensionalRepresentationLetter;
+  }
+  out << "<msub><mi>" << vectorSpaceLetter << "</mi>";
+  if (useOmega) {
+    out
+    << this->weightFundamentalCoordinates.toMathMLLetterFormat(
+      "\\omega", format
+    );
+  } else {
+    out
+    << this->weightFundamentalCoordinates.toMathMLLetterFormat(
+      format->fundamentalWeightLetter, format
+    );
+  }
+  out << "</msub>";
   if (format != nullptr) {
     format->customPlusSign = oldCustomPlus;
   }

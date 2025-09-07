@@ -10,6 +10,7 @@
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks the build.
 #include "math_lattices.h"
 #include "math_linear_combination.h"
+#include "math_mathml.h"
 #include "math_rational_function.h"
 #include "math_vector_partition_functions.h"
 #include "string_constants.h"
@@ -6394,10 +6395,22 @@ std::string DynkinSimpleType::toStringNonTechnicalName(
   return out.str();
 }
 
-std::string DynkinSimpleType::toMathML(FormatExpressions* format) {
+std::string DynkinSimpleType::toMathML(FormatExpressions* format) const {
+  bool hasAmbient = false;
+  if (format != nullptr) {
+    hasAmbient = (format->ambientWeylLetter != 'X');
+  }
   bool supressDynkinIndexOne = format ==
   nullptr ? false : format->flagSupressDynkinIndexOne;
-  Rational dynkinIndex = this->cartanSymmetricInverseScale / 2;
+  Rational dynkinIndex = this->cartanSymmetricInverseScale;
+  if (hasAmbient) {
+    DynkinSimpleType ambientType;
+    ambientType.letter = format->ambientWeylLetter;
+    ambientType.cartanSymmetricInverseScale =
+    format->ambientCartanSymmetricInverseScale;
+    dynkinIndex = ambientType.getLongRootLengthSquared() /
+    this->getLongRootLengthSquared();
+  }
   bool subscriptOnly = supressDynkinIndexOne && dynkinIndex.isEqualToOne();
   std::stringstream out;
   if (subscriptOnly) {
@@ -6416,9 +6429,8 @@ std::string DynkinSimpleType::toMathML(FormatExpressions* format) {
   return out.str();
 }
 
-std::string DynkinSimpleType::toMathMLFinal(FormatExpressions* format) {
-  return
-  MathRoutines::toMathML(this->toMathML(format), this->toString(format));
+std::string DynkinSimpleType::toMathMLFinal(FormatExpressions* format) const {
+  return MathML::toMathML(this->toMathML(format), this->toString(format));
 }
 
 std::string DynkinSimpleType::toString(FormatExpressions* format) const {
@@ -6435,7 +6447,7 @@ std::string DynkinSimpleType::toString(FormatExpressions* format) const {
   }
   if (includeTechnicalNames) {
     if (!hasAmbient) {
-      out << letter;
+      out << this->letter;
       if (!supressDynkinIndexOne || this->cartanSymmetricInverseScale != 1) {
         if (usePlusesAndExponents) {
           out << "^{";
@@ -6452,7 +6464,7 @@ std::string DynkinSimpleType::toString(FormatExpressions* format) const {
       format->ambientCartanSymmetricInverseScale;
       Rational dynkinIndex = ambientType.getLongRootLengthSquared() /
       this->getLongRootLengthSquared();
-      out << letter;
+      out << this->letter;
       if (!supressDynkinIndexOne || dynkinIndex != 1) {
         if (usePlusesAndExponents) {
           out << "^{";

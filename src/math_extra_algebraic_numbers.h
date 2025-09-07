@@ -190,6 +190,10 @@ public:
   }
   bool operator>(const AlgebraicNumber& other) const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   std::string toStringNonInjected(FormatExpressions* format = nullptr) const;
   class Test {
   public:
@@ -232,7 +236,7 @@ public:
   bool flagIsQuadraticRadicalExtensionRationals;
   HashedList<LargeInteger> quadraticRadicals;
   List<LargeInteger> quadraticRadicalsCorrespondingToBasisElements;
-  List<std::string> displayNamesBasisElements;
+  List<VariableLetter> displayNamesBasisElements;
   void injectOldBases(const MatrixTensor<Rational>* injectionNullForIdentity);
   void appendAdditiveEiBasis();
   void assignDefaultBasisDisplayNames();

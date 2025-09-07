@@ -148,9 +148,9 @@ bool Polynomial<Rational>::Test::all() {
 
 template < >
 void Polynomial<Rational>::Test::initialize() {
-  this->format.polynomialAlphabet.addOnTop("x");
-  this->format.polynomialAlphabet.addOnTop("y");
-  this->format.polynomialAlphabet.addOnTop("z");
+  this->format.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
+  this->format.polynomialAlphabet.addOnTop(VariableLetter("y", "y"));
+  this->format.polynomialAlphabet.addOnTop(VariableLetter("z", "z"));
   this->format.flagUseHTML = false;
 }
 
@@ -348,12 +348,14 @@ bool Polynomial<Rational>::Test::oneDifferential(
 
 template < >
 bool Polynomial<Rational>::Test::differential() {
-  this->formatDifferentials.polynomialAlphabet.addOnTop("x");
-  this->formatDifferentials.polynomialAlphabet.addOnTop("y");
-  this->formatDifferentials.polynomialAlphabet.addOnTop("z");
-  this->formatDifferentials.polynomialAlphabet.addOnTop("dx");
-  this->formatDifferentials.polynomialAlphabet.addOnTop("dy");
-  this->formatDifferentials.polynomialAlphabet.addOnTop("dz");
+  List<std::string> variables = List<std::string>(
+    {"x", "y", "z", "dx", "dy", "dz"}
+  );
+  for (const std::string& variable : variables) {
+    this->formatDifferentials.polynomialAlphabet.addOnTop(
+      VariableLetter(variable, variable)
+    );
+  }
   this->oneDifferential("1", "0");
   this->oneDifferential("x+y+z+1", "dx +dy +dz ");
   this->oneDifferential(

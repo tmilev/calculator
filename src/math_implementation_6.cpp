@@ -1368,7 +1368,7 @@ const {
   MemorySaving<FormatExpressions> backupFormat;
   if (format == nullptr) {
     format = &backupFormat.getElement();
-    format->polynomialAlphabet.addOnTop("x");
+    format->polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
   }
   for (int i = 0; i < this->coefficients.size; i ++) {
     LargeInteger coefficient = this->coefficients[i];

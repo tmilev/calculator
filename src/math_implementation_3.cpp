@@ -3503,17 +3503,16 @@ void FormatExpressions::makeAlphabetXYZUW() {
   if (this->polynomialAlphabet.size > 0) {
     return;
   }
-  this->polynomialAlphabet.addOnTop("x");
-  this->polynomialAlphabet.addOnTop("y");
-  this->polynomialAlphabet.addOnTop("z");
-  this->polynomialAlphabet.addOnTop("u");
-  this->polynomialAlphabet.addOnTop("w");
+  List<std::string> letters = List<std::string>({"x", "y", "z", "u", "w"});
+  for (const std::string& letter : letters) {
+    this->polynomialAlphabet.addOnTop(VariableLetter(letter, letter));
+  }
 }
 
 FormatExpressions* FormatExpressions::defaultFormat() {
   static FormatExpressions result;
   if (result.polynomialAlphabet.size == 0) {
-    result.polynomialAlphabet.addOnTop("x");
+    result.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
   }
   return &result;
 }
@@ -3563,12 +3562,26 @@ FormatExpressions::FormatExpressions() {
   MonomialPolynomial::orderDefault().leftGreaterThanRight;
 }
 
-std::string FormatExpressions::getPolynomialLetter(int index) const {
+std::string FormatExpressions::polynomialLatexLetter(int index) const {
   if (index < this->polynomialAlphabet.size) {
-    return this->polynomialAlphabet[index];
+    return this->polynomialAlphabet[index].latexLetter;
   }
   std::stringstream out;
   out << this->polynomialDefaultLetter << "_{" << index + 1 << "}";
+  return out.str();
+}
+
+std::string FormatExpressions::polynomialMathMLLetter(int index) const {
+  if (index < this->polynomialAlphabet.size) {
+    return this->polynomialAlphabet[index].mathMLLetter;
+  }
+  std::stringstream out;
+  out
+  << "<msub><mi>"
+  << this->polynomialDefaultLetter
+  << "</mi><mn>"
+  << index + 1
+  << "</mn></msub>";
   return out.str();
 }
 
@@ -15588,4 +15601,15 @@ bool ConeCollection::findMaxLFOverConeProjective(
     }
   }
   return true;
+}
+
+bool VariableLetter::operator==(const VariableLetter& other) const {
+  return
+  this->latexLetter == other.latexLetter &&
+  this->mathMLLetter == other.mathMLLetter;
+}
+
+void VariableLetter::operator=(const std::string& other) {
+  this->latexLetter = other;
+  this->mathMLLetter = other;
 }

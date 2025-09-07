@@ -541,13 +541,24 @@ public:
   std::string toStringTriple(FormatExpressions* format) const;
   std::string toStringTripleStandardRealization() const;
   std::string toStringTripleVerification(FormatExpressions* format) const;
+  std::string toMathMLTripleVerification(FormatExpressions* format) const;
+  std::string toHTMLTripleVerification(FormatExpressions* format) const;
   std::string toStringCentralizer() const;
+  std::string toHTMLTripleUnknowns(FormatExpressions* format) const;
   std::string toStringTripleUnknowns(FormatExpressions* format) const;
-  std::string toStringTripleUnknownsPolynomialSystem(
+  std::string toMathMLTripleUnknowns(FormatExpressions* format) const;
+  std::string toStringEBracketFMinusHUnknown(FormatExpressions* format) const;
+  std::string toMathMLEBracketFMinusHUnknown(FormatExpressions* format) const;
+  std::string toHTMLTripleUnknownsPolynomialSystem(
     FormatExpressions* format = nullptr
   ) const;
   template <typename Coefficient>
   std::string toStringPolynomialSystem(
+    const PolynomialSubstitution<Coefficient>& system,
+    FormatExpressions* format = nullptr
+  ) const;
+  template <typename Coefficient>
+  std::string toMathMLPolynomialSystem(
     const PolynomialSubstitution<Coefficient>& system,
     FormatExpressions* format = nullptr
   ) const;

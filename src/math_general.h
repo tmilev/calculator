@@ -1936,11 +1936,15 @@ struct VariableLetter {
   std::string latexLetter;
   std::string mathMLLetter;
   VariableLetter(
-    const std::string& inputLatexLetter = "",
-    const std::string& inputMathMLLetter = ""
+    const std::string& inputLatexLetter, const std::string& inputMathMLLetter
   ):
   latexLetter(inputLatexLetter),
   mathMLLetter(inputMathMLLetter) {}
+  VariableLetter(const std::string& inputLetter = ""):
+  latexLetter(inputLetter),
+  mathMLLetter(inputLetter) {}
+  bool operator==(const VariableLetter& other) const;
+  void operator=(const std::string& other);
 };
 
 class FormatExpressions {
@@ -1955,7 +1959,7 @@ public:
   std::string customCoefficientMonomialSeparator;
   std::string finiteDimensionalRepresentationLetter;
   std::string simpleRootLetter;
-  List<std::string> polynomialAlphabet;
+  List<VariableLetter> polynomialAlphabet;
   List<std::string> weylAlgebraLetters;
   List<VariableLetter> vectorSpaceEiBasisNames;
   Rational ambientCartanSymmetricInverseScale;
@@ -1998,7 +2002,8 @@ public:
   List<MonomialPolynomial>::Comparator monomialOrder;
   template <typename TemplateMonomial>
   typename List<TemplateMonomial>::Comparator* getMonomialOrder();
-  std::string getPolynomialLetter(int index) const;
+  std::string polynomialLatexLetter(int index) const;
+  std::string polynomialMathMLLetter(int index) const;
   FormatExpressions();
   static FormatExpressions* defaultFormat();
   void makePolynomialAlphabetLetters(
@@ -2028,6 +2033,10 @@ public:
   MonomialVector(): monomialIndex(- 1) {}
   MonomialVector(int inputIndex): monomialIndex(inputIndex) {}
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   unsigned int hashFunction() const {
     return static_cast<unsigned int>(this->monomialIndex);
   }

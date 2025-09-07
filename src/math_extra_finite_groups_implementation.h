@@ -493,7 +493,7 @@ std::string FiniteGroup<elementSomeGroup>::toStringConjugacyClasses(
   out << "<br>Size: " << this->getSize().toString() << "\n";
   FormatExpressions charPolyFormat;
   charPolyFormat.polynomialAlphabet.setSize(1);
-  charPolyFormat.polynomialAlphabet[0] = "q";
+  charPolyFormat.polynomialAlphabet[0] = VariableLetter("q", "q");
   if (this->conjugacyClassCount() > 0) {
     out
     << "<br>"

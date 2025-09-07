@@ -618,12 +618,18 @@ bool CalculatorFunctionsPolynomial::polynomialRelations(
   Vector<Polynomial<Rational> > generators;
   FormatExpressions format;
   context.getFormat(format);
+  HashedList<std::string> variableNames;
+  for (const VariableLetter& variable : format.polynomialAlphabet) {
+    variableNames.addOnTopNoRepetition(variable.latexLetter);
+  }
   for (char i = 0; i < 26; i ++) {
     char currentLetter = 'a' + i;
     std::string currentString;
     currentString = currentLetter;
-    if (!format.polynomialAlphabet.contains(currentString)) {
-      format.polynomialAlphabet.addOnTop(currentString);
+    if (!variableNames.contains(currentString)) {
+      format.polynomialAlphabet.addOnTop(
+        VariableLetter(currentString, currentString)
+      );
     }
   }
   if (

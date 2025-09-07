@@ -88,6 +88,10 @@ public:
     return result;
   }
   std::string toString(FormatExpressions* polynomialFormat = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* polynomialFormat = nullptr,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   void makeFromPowers(const Vector<Rational>& inputMonomialBody);
   void makeOne() {
     this->monomialBody.setSize(0);
@@ -995,7 +999,7 @@ public:
     output.clear();
     for (int i = 0; i < this->size; i ++) {
       if (format != nullptr) {
-        out << format->getPolynomialLetter(i);
+        out << format->polynomialLatexLetter(i);
       } else {
         out << "x_{" << i + 1 << "}";
       }

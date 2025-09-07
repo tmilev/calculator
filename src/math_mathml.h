@@ -24,6 +24,7 @@ public:
   static std::string rightParenthesis;
   static std::string negativeSign;
   static std::string positiveSign;
+  static std::string mtableDefault;
 };
 
 #endif // header_math_mathml_ALREADY_INCLUDED

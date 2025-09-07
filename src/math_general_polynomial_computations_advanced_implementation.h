@@ -1874,10 +1874,7 @@ bool Polynomial<Coefficient>::leastCommonMultiple(
   basis.addOnTop(rightBuffer);
   GroebnerBasisComputation<Coefficient> computation;
   computation.format.flagSuppressModP = true;
-  computation.format.polynomialAlphabet.addOnTop("x");
-  computation.format.polynomialAlphabet.addOnTop("y");
-  computation.format.polynomialAlphabet.addOnTop("z");
-  computation.format.polynomialAlphabet.addOnTop("w");
+  computation.format.makeAlphabetXYZUW();
   computation.polynomialOrder.monomialOrder =
   MonomialPolynomial::orderForGreatestCommonDivisor();
   computation.maximumMonomialOperations = - 1;
@@ -2036,8 +2033,8 @@ bool Polynomial<Coefficient>::greatestCommonDivisor(
   );
   if (!remainderBuffer.isEqualToZero() || output.isEqualToZero()) {
     FormatExpressions format;
-    format.polynomialAlphabet.addOnTop("x");
-    format.polynomialAlphabet.addOnTop("y");
+    format.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
+    format.polynomialAlphabet.addOnTop(VariableLetter("y", "y"));
     global.fatal
     << "<br>While computing the gcd of left = "
     << left.toString(&format)
@@ -2176,7 +2173,7 @@ bool PolynomialFactorizationUnivariate<Coefficient>::accountNonReducedFactor(
   if (quotient.isConstant()) {
     FormatExpressions format;
     format.flagSuppressModP = true;
-    format.polynomialAlphabet.addOnTop("x");
+    format.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
     global.fatal
     << "While factoring: "
     << this->original.toString(&format)
@@ -2262,7 +2259,7 @@ bool PolynomialFactorizationUnivariate<Coefficient>::checkFactorization() const 
   if (!checkComputations.isEqualTo(this->original)) {
     FormatExpressions format;
     format.flagSuppressModP = true;
-    format.polynomialAlphabet.addOnTop("x");
+    format.polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
     global.fatal
     << "Error in polynomial factorization function. "
     << "Product of factorization: "
@@ -2285,7 +2282,7 @@ std::string PolynomialFactorizationUnivariate<Coefficient>::toStringResult(
   if (format == nullptr) {
     format = &backup.getElement();
     format->flagSuppressModP = true;
-    format->polynomialAlphabet.addOnTop("x");
+    format->polynomialAlphabet.addOnTop(VariableLetter("x", "x"));
   }
   std::string constantFactorString = this->constantFactor.toString(format);
   if (this->nonReduced.size + this->reduced.size == 0) {
@@ -2452,7 +2449,7 @@ bool PolynomialFactorizationCantorZassenhaus<
       << global.fatal;
     }
     if (comments != nullptr) {
-      std::string xLetter = this->output->format.getPolynomialLetter(0);
+      std::string xLetter = this->output->format.polynomialLatexLetter(0);
       *comments
       << "<br>GCD: "
       << candidateDivisor.toString(&this->output->format)
@@ -2474,7 +2471,7 @@ bool PolynomialFactorizationCantorZassenhaus<
       candidateDivisor.totalDegreeInt() < this->current.totalDegreeInt()
     ) {
       if (comments != nullptr) {
-        std::string xLetter = this->output->format.getPolynomialLetter(0);
+        std::string xLetter = this->output->format.polynomialLatexLetter(0);
         *comments
         << "<br>Found factor: "
         << candidateDivisor.toString(&this->output->format)

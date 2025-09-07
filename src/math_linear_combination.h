@@ -80,7 +80,10 @@ public:
     format.makeAlphabetXYZUW();
     return this->toString(&format);
   }
-  std::string toMathML(FormatExpressions* format) const;
+  std::string toMathML(
+    FormatExpressions* format,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   std::string toMathMLFinal(FormatExpressions* format) const;
   int size() const {
     return this->monomials.size;
@@ -1327,9 +1330,9 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
     coefficientString =
     MathML::leftParenthesis + coefficientMathML + MathML::rightParenthesis;
   } else {
-    coefficientString = coefficient.toMathML(format, &outputProperties);
+    coefficientString = coefficient.toMathML(format, &coefficientProperites);
   }
-  monomialString = monomial.toMathML(format, &outputProperties);
+  monomialString = monomial.toMathML(format, &monomialProperties);
   if (customCoefficientMonomialSeparator != "") {
     rowOutputs.addOnTop(coefficientString);
     rowOutputs.addOnTop(customCoefficientMonomialSeparator);
@@ -1347,7 +1350,7 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
     return;
   }
   if (coefficientProperites.isNegativeOne) {
-    rowOutputs.addOnTop("<mo>-</mo>");
+    rowOutputs.addOnTop(MathML::negativeSign);
     rowOutputs.addOnTop(monomialString);
     outputProperties.startsWithMinus = true;
     if (monomialProperties.isOne) {
@@ -1389,7 +1392,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathMLFinal(
 
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
-  FormatExpressions* format
+  FormatExpressions* format, MathMLExpressionProperties* outputProperties
 ) const {
   STACK_TRACE("LinearCombination::toMathML");
   if (this->size() == 0) {
@@ -1430,6 +1433,9 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
     this->termToMathML(
       coefficient, monomial, format, customTimes, termStrings, termProperties
     );
+    if (i == 0 && outputProperties != nullptr) {
+      *outputProperties = termProperties;
+    }
     if (i > 0) {
       if (!termProperties.startsWithMinus && !useCustomPlus) {
         out << "<mo>+</mo>";

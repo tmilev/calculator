@@ -483,7 +483,7 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
     format.flagSuppressOneIn1overXtimesY = true;
     format.flagUseFrac = true;
     format.makePolynomialAlphabetLetters("x", this->collection.getDimension());
-    format.polynomialAlphabet.addOnTop("t");
+    format.polynomialAlphabet.addOnTop(VariableLetter("t", "t"));
     reportStream
     << "<br>Lattice shift: \\("
     << startingShift.toString()
@@ -510,7 +510,7 @@ computeOneQuasiPolynomialExitWallWithoutNeighborOneScaleOneShift(
     this->bernoulliSumComputer.getBernoulliSumStartingAtZero(i, bernoulliSum);
     if (this->comments.shouldComment()) {
       FormatExpressions format;
-      format.polynomialAlphabet.addOnTop("t");
+      format.polynomialAlphabet.addOnTop(VariableLetter("t", "t"));
       std::stringstream reportStream;
       reportStream
       << "<br>Current bernouli sum: "

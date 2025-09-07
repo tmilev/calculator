@@ -196,8 +196,12 @@ bool CalculatorLieTheory::writeGenVermaModAsDiffOperatorInner(
         << k - totalStartingVariables + 1
         << "}";
         if (
-          weylFormat.polynomialAlphabet.contains(currentStream2.str()) ||
-          weylFormat.polynomialAlphabet.contains(currentStream3.str())
+          weylFormat.polynomialAlphabet.contains(
+            VariableLetter(currentStream2.str(), currentStream2.str())
+          ) ||
+          weylFormat.polynomialAlphabet.contains(
+            VariableLetter(currentStream3.str(), currentStream3.str())
+          )
         ) {
           return
           output.assignError(
@@ -1040,7 +1044,7 @@ bool CalculatorLieTheory::kazhdanLuzstigCoeffificents(
   }
   FormatExpressions format;
   format.polynomialAlphabet.setSize(1);
-  format.polynomialAlphabet[0] = "q";
+  format.polynomialAlphabet[0] = VariableLetter("q", "q");
   out
   << "Our notation follows that of the original Kazhdan-Lusztig paper, "
   << "Representations of Coxeter Groups and Hecke Algebras.<br>";

@@ -37,7 +37,7 @@ std::string SlTwoSubalgebra::toStringCentralizer() const {
   return this->centralizerComputer.toString();
 }
 
-std::string SlTwoSubalgebra::toStringTripleVerification(
+std::string SlTwoSubalgebra::toHTMLTripleVerification(
   FormatExpressions* format
 ) const {
   std::stringstream out;
@@ -46,6 +46,54 @@ std::string SlTwoSubalgebra::toStringTripleVerification(
   if (useHtml) {
     out << "\n<br>\n";
   }
+  out
+  << MathML::toMathMLFinal(
+    this->toMathMLTriple(format), this->toStringTripleVerification(format)
+  );
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toMathMLTripleVerification(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
+  out
+  << MathML::mtableDefault
+  << "<mtr>"
+  << "<mtd>"
+  << "<mtr><mo>[</mo><mi>e</mi> <mo>,</mo><mi> f</mi><mo>]</mo>"
+  << "</mtd>"
+  << "<mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->eBracketF.toMathML(format)
+  << "</mtd>"
+  << "</mtr>"
+  << "<mtr>"
+  << "<mtd>"
+  << "<mtr><mo>[</mo><mi>h</mi> <mo>,</mo><mi> e</mi><mo>]</mo>"
+  << "</mtd>"
+  << "<mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->hBracketE.toMathML(format)
+  << "</mtd>"
+  << "</mtr>"
+  << "<mtr>"
+  << "<mtd>"
+  << "<mtr><mo>[</mo><mi>h</mi> <mo>,</mo><mi> f</mi><mo>]</mo>"
+  << "</mtd>"
+  << "<mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->hBracketF.toMathML(format)
+  << "</mtd>"
+  << "</mtr>"
+  << "</mtable>";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleVerification(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
   out
   << "\\(\\begin{array}{rcl}"
   << "[e, f]&=&"
@@ -134,12 +182,41 @@ std::string SlTwoSubalgebra::toStringTripleArbitraryMatrix() const {
   return out.str();
 }
 
+std::string SlTwoSubalgebra::toMathMLTripleUnknowns(FormatExpressions* format)
+const {
+  std::stringstream out;
+  out
+  << MathML::mtableDefault
+  << "<mtr>"
+  << "<mtd><mi>h</mi></mtd>"
+  << "<mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->hPolynomialAlgebraic.toMathML(format)
+  << "</mtd>"
+  << "</mtr>"
+  << "<mtr>"
+  << "<mtd><mi>e</mi></mtd>"
+  << "<mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->eUnknown.toMathML(format)
+  << "</mtd>"
+  << "</mtr>"
+  << "<mtr>"
+  << "<mtd><mi>e</mi></mtd>"
+  << "<mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->fUnknown.toMathML(format)
+  << "</mtd>"
+  << "</mtr>"
+  << "</mtable>";
+  return out.str();
+}
+
 std::string SlTwoSubalgebra::toStringTripleUnknowns(FormatExpressions* format)
 const {
   std::stringstream out;
-  out << "<hr>Unknown elements.<br>";
   out
-  << "\\(\\begin{array}{rcl}"
+  << "\\begin{array}{rcl}"
   << "h&=&"
   << this->hPolynomialAlgebraic.toString(format)
   << "\\\\\n"
@@ -148,16 +225,51 @@ const {
   << "\\\\\n"
   << "f&=&"
   << this->fUnknown.toString(format)
-  << "\\end{array}\\)";
+  << "\\end{array}";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringEBracketFMinusHUnknown(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
+  out << "[e,f] - h = " << this->eBracketFMinusHUnknown.toString(format);
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toMathMLEBracketFMinusHUnknown(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
+  out
+  << "<mrow><mrow>"
+  << "<mo>[</mo><mi>e</mi><mo>,</mo><mi>f</mi><mo>]</mo>"
+  << MathML::negativeSign
+  << "<mi>h</mi></mrow><mo>=</mo> "
+  << this->eBracketFMinusHUnknown.toMathML(format)
+  << "</mrow>";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toHTMLTripleUnknowns(FormatExpressions* format)
+const {
+  std::stringstream out;
+  out << "<hr>Unknown elements.<br>";
+  out
+  << MathML::toMathMLFinal(
+    this->toMathMLTripleUnknowns(format),
+    this->toStringTripleUnknowns(format)
+  );
   out
   << "<br>Participating positive roots: "
   << this->participatingPositiveRoots.toString()
   << ".";
   out << "<br>Lie brackets of the unknowns.<br>";
   out
-  << "\\([e,f] - h = "
-  << this->eBracketFMinusHUnknown.toString(format)
-  << "\\)";
+  << MathML::toMathMLFinal(
+    this->toMathMLEBracketFMinusHUnknown(format),
+    this->toStringEBracketFMinusHUnknown(format)
+  );
   return out.str();
 }
 
@@ -278,12 +390,12 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << this->toStringTripleStandardRealization();
   out << this->toStringKostantSekiguchiTriple(&latexFormat);
   out << this->toStringKostantSekiguchiTripleStandardRealization();
-  out << this->toStringTripleVerification(&latexFormat);
+  out << this->toHTMLTripleVerification(&latexFormat);
   out << "\n<br>" << this->toStringCentralizer();
   out << "\n<br>Unfold the hidden panel for more information.<br>\n";
   out << "\n<div class='lieAlgebraPanel'><div>\n";
-  out << this->toStringTripleUnknowns(&latexFormat);
-  out << this->toStringTripleUnknownsPolynomialSystem(&latexFormat);
+  out << this->toHTMLTripleUnknowns(&latexFormat);
+  out << this->toHTMLTripleUnknownsPolynomialSystem(&latexFormat);
   out << this->toStringTripleArbitrary(&latexFormat);
   out << this->toStringTripleArbitraryMatrix();
   out << this->toStringKostantSekiguchiTripleInternals(format);
@@ -540,7 +652,24 @@ std::string SlTwoSubalgebra::toStringPolynomialSystem(
   return HtmlRoutines::getMathNoDisplay(latexStreamActual.str());
 }
 
-std::string SlTwoSubalgebra::toStringTripleUnknownsPolynomialSystem(
+template <typename Coefficient>
+std::string SlTwoSubalgebra::toMathMLPolynomialSystem(
+  const PolynomialSubstitution<Coefficient>& system, FormatExpressions* format
+) const {
+  std::stringstream out;
+  out << MathML::mtableDefault;
+  for (const Polynomial<Coefficient>& element : system) {
+    out << "<mtr>";
+    out << "<mtd>" << element.toMathML(format) << "</mtd>";
+    out << "<mtd><mo>=</mo></mtd>";
+    out << "<mtd><mi>0</mi></mtd>";
+    out << "</mtr>";
+  }
+  out << "</mtable>";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toHTMLTripleUnknownsPolynomialSystem(
   FormatExpressions* format
 ) const {
   std::stringstream out;
@@ -555,7 +684,7 @@ std::string SlTwoSubalgebra::toStringTripleUnknownsPolynomialSystem(
 
 std::string SlTwoSubalgebra::toMathMLTriple(FormatExpressions* format) const {
   std::stringstream out;
-  out << " <mtable frame='solid' rowlines='solid'>";
+  out << MathML::mtableDefault;
   out
   << "<mtr>"
   << "<mtd><mi>h</mi>"

@@ -7,6 +7,27 @@
 #include "math_subsets_selections.h"
 #include "progress_report.h"
 
+std::string MonomialVector::toMathML(
+  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+) const {
+  (void) outputProperties;
+  if (
+    format != nullptr &&
+    this->monomialIndex < format->vectorSpaceEiBasisNames.size &&
+    this->monomialIndex >= 0
+  ) {
+    std::string result =
+    format->vectorSpaceEiBasisNames[this->monomialIndex].mathMLLetter;
+    if (outputProperties != nullptr && (result == "" || result == "1")) {
+      outputProperties->isOne = true;
+    }
+    return result;
+  }
+  std::stringstream out;
+  out << "<msub><mi>e</mi><mi>" << this->monomialIndex + 1 << "</mi></msub>";
+  return out.str();
+}
+
 std::string MonomialVector::toString(FormatExpressions* format) const {
   if (format != nullptr) {
     if (
@@ -833,7 +854,7 @@ void AlgebraicClosureRationals::reset() {
   this->basisInjections[0][0].makeEi(0);
   this->quadraticRadicals.clear();
   this->displayNamesBasisElements.setSize(1);
-  this->displayNamesBasisElements[0] = "";
+  this->displayNamesBasisElements[0] = VariableLetter("", "");
   this->generatingElementTensorForm.makeIdentity(1);
   this->generatingElementMatrixForm.makeIdentityMatrix(
     1, Rational::one(), Rational::zero()
@@ -1682,10 +1703,10 @@ const {
     out << "<br>";
     std::stringstream formulaStream;
     if (i < this->displayNamesBasisElements.size) {
-      if (this->displayNamesBasisElements[i] == "") {
+      if (this->displayNamesBasisElements[i].latexLetter == "") {
         formulaStream << "1";
       } else {
-        formulaStream << this->displayNamesBasisElements[i];
+        formulaStream << this->displayNamesBasisElements[i].latexLetter;
       }
     } else {
       formulaStream << " e_{" << i + 1 << "}";
@@ -1846,13 +1867,35 @@ std::string AlgebraicNumber::toString(FormatExpressions* format) const {
   VectorSparse<Rational> additiveVector;
   this->owner->getAdditionTo(*this, additiveVector);
   out << additiveVector.toString(&currentFormat);
-  // << "~ in~ the~ field~ " << this->owner->toString();
   if (
     this->basisIndex < this->owner->basisInjections.size - 1 &&
     global.userDebugFlagOn()
   ) {
     out << "[=" << this->toStringNonInjected() << "]";
   }
+  return out.str();
+}
+
+std::string AlgebraicNumber::toMathML(
+  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+) const {
+  if (this->owner == nullptr) {
+    if (this->element.isEqualToZero()) {
+      return "0";
+    }
+    return this->element.coefficients[0].toMathML(format, outputProperties);
+  }
+  std::stringstream out;
+  FormatExpressions currentFormat;
+  currentFormat.vectorSpaceEiBasisNames =
+  this->owner->displayNamesBasisElements;
+  if (format != nullptr) {
+    currentFormat.flagUseFrac = format->flagUseFrac;
+  }
+  currentFormat.flagUseHTML = false;
+  VectorSparse<Rational> additiveVector;
+  this->owner->getAdditionTo(*this, additiveVector);
+  out << additiveVector.toMathML(&currentFormat, outputProperties);
   return out.str();
 }
 

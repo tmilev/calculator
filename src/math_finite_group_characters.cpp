@@ -894,7 +894,7 @@ std::string SubgroupData<someGroup, elementSomeGroup>::toString(
 std::string SubgroupDataRootReflections::toString(FormatExpressions* format) {
   STACK_TRACE("SubgroupDataRootReflections::toString");
   std::stringstream out;
-  out << subGroupDataContainer.toString(format);
+  out << this->subGroupDataContainer.toString(format);
   return out.str();
 }
 

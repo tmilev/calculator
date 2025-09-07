@@ -1356,6 +1356,38 @@ bool Cone::isInInterior(const Vector<Rational>& point) const {
   return true;
 }
 
+std::string MonomialPolynomial::toMathML(
+  FormatExpressions* polynomialFormat,
+  MathMLExpressionProperties* outputProperties
+) const {
+  std::stringstream out;
+  MemorySaving<FormatExpressions> formatContainer;
+  if (polynomialFormat == nullptr) {
+    polynomialFormat = &formatContainer.getElement();
+  }
+  if (this->isConstant()) {
+    if (outputProperties != nullptr) {
+      outputProperties->isOne = true;
+    }
+    return "<mi>1</mi>";
+  }
+  MathMLExpressionProperties exponentProperties;
+  for (int i = 0; i < this->monomialBody.size; i ++) {
+    const Rational& onePower = this->monomialBody[i];
+    if (onePower.isEqualToZero()) {
+      continue;
+    }
+    std::string base = polynomialFormat->polynomialMathMLLetter(i);
+    std::string exponentString =
+    onePower.toMathML(nullptr, &exponentProperties);
+    if (exponentProperties.startsWithMinus) {
+      exponentString = "<mrow>" + exponentString + "</mrow>";
+    }
+    out << "<msup>" << base << exponentString << "</msup>";
+  }
+  return out.str();
+}
+
 std::string MonomialPolynomial::toString(FormatExpressions* polynomialFormat)
 const {
   std::stringstream out;
@@ -1370,7 +1402,7 @@ const {
     if ((this->monomialBody[i].isEqualToZero())) {
       continue;
     }
-    out << polynomialFormat->getPolynomialLetter(i);
+    out << polynomialFormat->polynomialLatexLetter(i);
     if (this->monomialBody[i] == 1) {
       out << " ";
     } else {

@@ -3440,12 +3440,32 @@ class FocusInformation {
   }
 }
 
+/** 
+ * An interface that behaves like the equation editor for the 
+ * purposes of the copy button. 
+ */
+class EquationEditorCopyInterface {
+  constructor(
+    /** @type{HTMLElement!} */
+    inputContainer,
+    /** @type {string} */
+    inputText
+  ) {
+    this.container = inputContainer;
+    this.text = inputText;
+  }
+
+  copyToClipboard() {
+    navigator.clipboard.writeText(this.text);
+  }
+}
+
 class CopyButton {
   constructor(
-    /** @type {EquationEditor?} */
+    /** @type {EquationEditor?|EquationEditorCopyInterface} */
     equationEditor,
   ) {
-    /** @type {EquationEditor?} */
+    /** @type {EquationEditor?|EquationEditorCopyInterface} */
     this.equationEditor = equationEditor;
     /** @type {HTMLElement?} */
     this.button = null;
@@ -13080,6 +13100,8 @@ class MathTagConverter {
     /** @type {HTMLElement[]} */
     this.mathElementsMathML = [];
     /** @type {HTMLElement[]} */
+    this.mathElementsBackendRendered = [];
+    /** @type {HTMLElement[]} */
     this.allMathElements = [];
   }
 
@@ -13220,6 +13242,8 @@ class MathTagConverter {
       this.mathElementsMathML
     ).concat(
       this.mathElementsSVG
+    ).concat(
+      this.mathElementsBackendRendered
     );
     this.typesetMathTags(callback);
   }
@@ -13231,16 +13255,30 @@ class MathTagConverter {
     this.appendTagToCollection('mathcalculator', this.mathElementsDOM);
     this.appendTagToCollection('mathcalculatorSVG', this.mathElementsSVG);
     this.appendTagToCollection('mathcalculatorMathML', this.mathElementsMathML);
+    this.appendTagToCollection("mathcalculatorbackendrendered", this.mathElementsBackendRendered);
   }
 
-  appendTagToCollection(/** @type {string} */ className, /** @type {HTMLElement[]} */ collection) {
-    let incoming = this.elementProcessed.getElementsByClassName(
-      className
+  /** 
+   * Appends all elements with the given tag or class name to the given collection.
+   */
+  appendTagToCollection(
+    /** @type {string} */ classOrTagName,
+    /** @type {HTMLElement[]} */ collection
+  ) {
+    const incomingElementsByClassname = this.elementProcessed.getElementsByClassName(
+      classOrTagName
     );
-    for (const element of incoming) {
+    for (const element of incomingElementsByClassname) {
       collection.push(element);
     }
-    if (this.elementProcessed.className === className) {
+    if (this.elementProcessed.className === classOrTagName) {
+      collection.push(this.elementProcessed);
+    }
+    const incomingElementsByTag = this.elementProcessed.getElementsByTagName(classOrTagName);
+    for (const element of incomingElementsByTag) {
+      collection.push(element);
+    }
+    if (this.elementProcessed.tagName == classOrTagName) {
       collection.push(this.elementProcessed);
     }
   }
@@ -13282,19 +13320,40 @@ class MathTagConverter {
       }
       /** @type {HTMLElement!} */
       let element = this.allMathElements[this.typesetTotal];
-      if (element.getAttribute('typeset') === 'true') {
-        continue;
-      }
-      element.setAttribute('typeset', 'true');
-      let startTime = (new Date()).getTime();
-      let useSVG = false;
-      let useMathML = false;
-      if (element.className === "mathcalculatorSVG") {
-        useSVG = true;
-      }
-      if (element.className === "mathcalculatorMathML") {
-        useMathML = true;
-      }
+      this.renderOneMathTag(element, callback);
+    }
+  }
+
+  renderOneMathTag(
+    /** @type {HTMLElement!} */
+    element,
+    /** @type {Function?} callback after the element has been typeset */
+    callback,
+  ) {
+    if (element.getAttribute('typeset') === 'true') {
+      // The element was already typeset.
+      return;
+    }
+    element.setAttribute('typeset', 'true');
+    let startTime = (new Date()).getTime();
+    let useSVG = false;
+    let useMathML = false;
+    let prerendered = false;
+
+
+    if (element.className.toLowerCase() === "mathcalculatorsvg" || element.tagName.toLowerCase() === "mathcalculatorsvg") {
+      useSVG = true;
+    }
+    if (element.className.toLowerCase() === "mathcalculatormathml" || element.tagName.toLowerCase() === "mathcalculatormathml") {
+      useMathML = true;
+    }
+    if (element.className.toLowerCase() === "mathcalculatorbackendrendered" || element.tagName.toLowerCase() === "mathcalculatorbackendrendered") {
+      prerendered = true;
+    }
+
+    if (prerendered) {
+      this.maybeAttachCopyButton(element);
+    } else {
       mathFromElement(
         element,
         false,
@@ -13305,19 +13364,57 @@ class MathTagConverter {
         useMathML,
         this.copyButton,
       );
-      const endTime = (new Date()).getTime();
-      let elapsedTime = endTime - startTime;
-      const logPerformance = this.logTiming || (
-        this.logExcessiveTiming && elapsedTime > 200
+    }
+    const endTime = (new Date()).getTime();
+    let elapsedTime = endTime - startTime;
+    const logPerformance = this.logTiming || (
+      this.logExcessiveTiming && elapsedTime > 200
+    );
+    if (logPerformance) {
+      console.log(
+        `Typeset of element ${this.typesetTotal + 1} ` +
+        `out of ${this.elementsToTypeset} ` +
+        `took ${elapsedTime} ms.`
       );
-      if (logPerformance) {
-        console.log(
-          `Typeset of element ${this.typesetTotal + 1} ` +
-          `out of ${this.elementsToTypeset} ` +
-          `took ${elapsedTime} ms.`
-        );
+    }
+  }
+
+  /** @return {string} */
+  extractLatexAnnotation(
+    /** @type{HtmlCollection} */
+    allAnnotations,
+  ) {
+    if (allAnnotations.length === 0) {
+      return "";
+    }
+    if (allAnnotations.length === 1) {
+      return allAnnotations[0].textContent;
+    }
+    for (/** @type {HtmlElement} */ const element of allAnnotations) {
+      const encoding = element.getAttribute("encoding");
+      if (encoding === "application/x-tex") {
+        return element.textContent;
       }
     }
+    return "";
+  }
+
+  maybeAttachCopyButton(/** @type{HtmlElement} */ element) {
+    let copyButtonFromTag = element.getAttribute('copyButton');
+    if (!this.copyButton && copyButtonFromTag !== "true") {
+      return;
+    }
+    const allAnnotations = element.getElementsByTagName("annotation");
+    const annotation = this.extractLatexAnnotation(allAnnotations);
+    if (annotation === "") {
+      return;
+    }
+    const equationEditorForCopyButton = new EquationEditorCopyInterface(
+      element, allAnnotations
+    );
+    element.style.position = "relative";
+    const copyButton = new CopyButton(equationEditorForCopyButton);
+    copyButton.initialize();
   }
 }
 

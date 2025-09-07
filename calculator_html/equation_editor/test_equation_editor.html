@@ -401,8 +401,65 @@ Typeset all math in the 'toBeTypeSet' tag.
     The tag specifies the format of the rendering.
 
     <ul>
+      <li> Backend-rendered math ML. The equation editor should attach the copy latex button.
+        <div class="mathcalculatorbackendrendered" style="display: inline-block; overflow:visible" copyButton="true">
+          <math displaystyle="true">
+            <semantics>
+              <mrow>
+                <mrow></mrow>
+                <msup>
+                  <mi>e</mi>
+                  <mrow>
+                    <mrow>
+                      <mi>x</mi>
+                    </mrow>
+                  </mrow>
+                </msup>
+                <mo stretchy="false">=</mo>
+                <munderover>
+                  <mo stretchy="false">&sum;</mo>
+                  <mrow>
+                    <mrow>
+                      <mi>n</mi>
+                      <mo stretchy="false">=</mo>
+                      <mn>0</mn>
+                    </mrow>
+                  </mrow>
+                  <mrow>
+                    <mrow>
+                      <mi>&infin;</mi>
+                    </mrow>
+                  </mrow>
+                </munderover>
+                <mfrac>
+                  <mrow>
+                    <mrow>
+                      <msup>
+                        <mi>x</mi>
+                        <mrow>
+                          <mrow>
+                            <mi>n</mi>
+                          </mrow>
+                        </mrow>
+                      </msup>
+                    </mrow>
+                  </mrow>
+                  <mrow>
+                    <mrow>
+                      <mi>n!</mi>
+                    </mrow>
+                  </mrow>
+                </mfrac>
+              </mrow>
+              <annotation encoding="application/x-tex">e^{x}=\vartheta _{n=0}^{\infty }\frac{x^{n}}{n!}</annotation>
+            </semantics>
+          </math>
+        </div>
+      </li>
       <li> Math ML tag.
         <span class="mathcalculatorMathML">e^x=\sum_{n=0}^\infty \frac{x^n}{n!} </span>
+      </li>
+      <li>Same thing but with <mathcalculatorMathML>e^x=\sum_{n=0}^\infty \frac{x^n}{n!} </mathcalculatorMathML> tag.
       </li>
       <li>
         <span class="mathcalculator">\begin{align}x&y\\ x &z\end{align} </span>

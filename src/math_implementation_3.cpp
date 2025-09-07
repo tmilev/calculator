@@ -6395,7 +6395,10 @@ std::string DynkinSimpleType::toStringNonTechnicalName(
   return out.str();
 }
 
-std::string DynkinSimpleType::toMathML(FormatExpressions* format) const {
+std::string DynkinSimpleType::toMathML(
+  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+) const {
+  (void) outputProperties;
   bool hasAmbient = false;
   if (format != nullptr) {
     hasAmbient = (format->ambientWeylLetter != 'X');
@@ -6430,7 +6433,7 @@ std::string DynkinSimpleType::toMathML(FormatExpressions* format) const {
 }
 
 std::string DynkinSimpleType::toMathMLFinal(FormatExpressions* format) const {
-  return MathML::toMathML(this->toMathML(format), this->toString(format));
+  return MathML::toMathMLFinal(this->toMathML(format), this->toString(format));
 }
 
 std::string DynkinSimpleType::toString(FormatExpressions* format) const {

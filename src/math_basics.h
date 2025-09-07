@@ -3,6 +3,8 @@
 
 #include "general_lists.h"
 
+class MathMLExpressionProperties;
+
 class MathRoutines {
 public:
   template <class Coefficient>

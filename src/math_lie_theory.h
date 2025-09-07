@@ -54,6 +54,10 @@ public:
   }
   bool operator>(const ChevalleyGenerator& other) const;
   std::string toString(FormatExpressions* inputFormat = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* inputFormat = nullptr,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   void checkConsistencyWithOther(const ChevalleyGenerator& other) const;
   bool operator==(const ChevalleyGenerator& other) const {
     this->checkConsistencyWithOther(other);
@@ -176,7 +180,10 @@ public:
   std::string toStringNonTechnicalName(FormatExpressions* format = nullptr)
   const;
   std::string toMathMLFinal(FormatExpressions* format) const;
-  std::string toMathML(FormatExpressions* format) const;
+  std::string toMathML(
+    FormatExpressions* format,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other) const;
   static void getEpsilonMatrix(
@@ -354,6 +361,8 @@ public:
   List<int> indexUniComponent;
   List<int> indexInUniComponent;
   bool checkInitialization() const;
+  std::string toMathMLFinal(FormatExpressions* format = nullptr) const;
+  std::string toMathML(FormatExpressions* format = nullptr) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   int rankTotal();
   int numberRootsGeneratedByDiagram();

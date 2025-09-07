@@ -6,6 +6,7 @@
 #include "math_extra_semisimple_lie_algebras_root_subalgebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_general_implementation.h" // IWYU pragma: keep: breaks the build.
+#include "math_mathml.h"
 #include "math_rational_function.h"
 #include "math_subsets_selections.h"
 #include "math_vectors.h"
@@ -1938,19 +1939,64 @@ bool ChevalleyGenerator::isInRootSpace(Vector<Rational>* whichRootSpace) const {
   return result;
 }
 
+std::string ChevalleyGenerator::toMathML(
+  FormatExpressions* inputFormat, MathMLExpressionProperties* outputProperties
+) const {
+  this->checkInitialization();
+  if (outputProperties != nullptr) {
+    outputProperties->isNegativeOne = false;
+    outputProperties->isOne = false;
+    outputProperties->startsWithMinus = false;
+  }
+  return
+  this->owner->toMathMLChevalleyGenerator(this->generatorIndex, inputFormat);
+}
+
 std::string ChevalleyGenerator::toString(FormatExpressions* inputFormat) const {
   this->checkInitialization();
   return
-  this->owner->getStringFromChevalleyGenerator(
-    this->generatorIndex, inputFormat
-  );
+  this->owner->toStringChevalleyGenerator(this->generatorIndex, inputFormat);
 }
 
 bool ChevalleyGenerator::operator>(const ChevalleyGenerator& other) const {
   return this->generatorIndex > other.generatorIndex;
 }
 
-std::string SemisimpleLieAlgebra::getStringFromChevalleyGenerator(
+std::string SemisimpleLieAlgebra::toMathMLChevalleyGenerator(
+  int index, FormatExpressions* polynomialFormat
+) const {
+  std::stringstream out;
+  MemorySaving<FormatExpressions> currentFormat;
+  if (polynomialFormat == nullptr) {
+    polynomialFormat = &currentFormat.getElement();
+  }
+  if (this->isGeneratorFromCartan(index)) {
+    out
+    << "<msub><mi>"
+    << polynomialFormat->chevalleyHGeneratorLetter
+    << "</mi>"
+    << "<mn>"
+    << index - this->getNumberOfPositiveRoots() + 1
+    << "</mn></msub>";
+  } else {
+    out
+    << "<msub><mi>"
+    << polynomialFormat->chevalleyGGeneratorLetter
+    << "</mi>";
+    int displayIndex = 0;
+    if (index >= this->getNumberOfPositiveRoots()) {
+      displayIndex =
+      index - this->getNumberOfPositiveRoots() - this->getRank() + 1;
+    } else {
+      displayIndex = index - this->getNumberOfPositiveRoots();
+    }
+    out << MathML::toMathMLInteger(displayIndex);
+    out << "</msub>";
+  }
+  return out.str();
+}
+
+std::string SemisimpleLieAlgebra::toStringChevalleyGenerator(
   int index, FormatExpressions* polynomialFormat
 ) const {
   std::stringstream out;

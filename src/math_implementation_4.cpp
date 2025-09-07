@@ -1202,6 +1202,19 @@ void DynkinDiagramRootSubalgebra::computeDynkinString(int indexComponent) {
   }
 }
 
+std::string DynkinDiagramRootSubalgebra::toMathML(FormatExpressions* format)
+const {
+  DynkinType dynkinType;
+  this->getDynkinType(dynkinType);
+  return dynkinType.toMathML(format);
+}
+
+std::string DynkinDiagramRootSubalgebra::toMathMLFinal(
+  FormatExpressions* format
+) const {
+  return MathML::toMathMLFinal(this->toMathML(format), this->toString());
+}
+
 std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* format)
 const {
   DynkinType dynkinType;

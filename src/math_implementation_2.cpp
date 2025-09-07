@@ -1632,13 +1632,25 @@ void LargeInteger::toString(std::string& output) const {
   output = out.str();
 }
 
-std::string LargeInteger::toMathML() const {
+std::string LargeInteger::toMathML(
+  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+) const {
+  (void) format;
   if (this->isEqualToZero()) {
     return "<mn>0</mn>";
   }
   std::stringstream out;
   if (this->sign == - 1) {
+    if (outputProperties != nullptr) {
+      outputProperties->startsWithMinus = true;
+      if (this->value.isEqualToOne()) {
+        outputProperties->isNegativeOne = true;
+      }
+    }
     out << "<mo>-</mo>";
+  }
+  if (outputProperties != nullptr) {
+    outputProperties->isOne = this->isEqualToOne();
   }
   out << this->value.toMathML();
   return out.str();
@@ -2505,14 +2517,27 @@ bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
   return crossProduct.isPositiveOrZero();
 }
 
-std::string Rational::toMathML(FormatExpressions* format) const {
+std::string Rational::toMathML(
+  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+) const {
   (void) format;
   std::stringstream out;
   LargeInteger numerator = this->getNumerator();
   if (this->isInteger()) {
-    return numerator.toMathML();
+    return numerator.toMathML(format, outputProperties);
   }
   LargeIntegerUnsigned denominator = this->getDenominator();
+  if (numerator.isNegative()) {
+    out << MathML::negativeSign;
+    numerator.negate();
+    if (outputProperties != nullptr) {
+      outputProperties->startsWithMinus = true;
+    }
+  }
+  if (outputProperties != nullptr) {
+    outputProperties->isOne = this->isEqualToOne();
+    outputProperties->isNegativeOne = ((*this) == - 1);
+  }
   out
   << "<mfrac>"
   << numerator.toMathML()

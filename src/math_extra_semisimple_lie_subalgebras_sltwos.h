@@ -536,6 +536,8 @@ public:
     }
     return *this->owner;
   }
+  std::string toMathMLTriple(FormatExpressions* format) const;
+  std::string toMathMLFinalTriple(FormatExpressions* format) const;
   std::string toStringTriple(FormatExpressions* format) const;
   std::string toStringTripleStandardRealization() const;
   std::string toStringTripleVerification(FormatExpressions* format) const;
@@ -552,6 +554,7 @@ public:
   std::string toStringTripleArbitrary(FormatExpressions* format) const;
   std::string toStringTripleArbitraryMatrix() const;
   std::string toStringDynkinType() const;
+  std::string toMathMLFinalDynkinType() const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringKostantSekiguchiTripleInternals(
     FormatExpressions* format
@@ -563,12 +566,12 @@ public:
     bool useLatex, bool useHtml, SlTwoSubalgebras& owner, std::string& output
   ) const;
   std::string toStringMinimalContainingRootSubalgebras(
-    const std::string& displayPathAlgebra
+    const std::string& displayPathAlgebra, bool useMathML
   ) const;
   std::string toStringContainingRootSubalgebras(
-    const std::string& displayPathAlgebra
+    const std::string& displayPathAlgebra, bool useMathML
   ) const;
-  void computeModuleDecompositionsition(
+  void computeModuleDecomposition(
     const Vectors<Rational>& positiveRootsContainingRegularSubalgebra,
     int dimensionContainingRegularSubalgebra,
     CharacterSemisimpleLieAlgebraModule<Rational>& outputHighestWeights,

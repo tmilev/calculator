@@ -90,7 +90,7 @@ std::string SlTwoSubalgebra::toStringTripleArbitrary(
 }
 
 std::string SlTwoSubalgebra::toStringContainingRootSubalgebras(
-  const std::string& displayPathAlgebra
+  const std::string& displayPathAlgebra, bool useMathML
 ) const {
   STACK_TRACE("SlTwoSubalgebra::toStringContainingRootSubalgebras");
   std::stringstream out;
@@ -104,11 +104,13 @@ std::string SlTwoSubalgebra::toStringContainingRootSubalgebras(
     << displayPathAlgebra
     << "rootSubalgebra_"
     << rootSubalgebraIndex + 1
-    << ".html'>"
-    << "\\("
-    << currentRootSubalgebra.dynkinDiagram.toString()
-    << "\\)"
-    << "</a>";
+    << ".html'>";
+    if (useMathML) {
+      out << currentRootSubalgebra.dynkinDiagram.toMathMLFinal();
+    } else {
+      out << "\\(" << currentRootSubalgebra.dynkinDiagram.toString() << "\\)";
+    }
+    out << "</a>";
     if (j != this->indicesContainingRootSubalgebras.size - 1) {
       out << ", ";
     }
@@ -176,6 +178,12 @@ std::string SlTwoSubalgebra::toStringKostantSekiguchiTriple(
   return out.str();
 }
 
+std::string SlTwoSubalgebra::toMathMLFinalDynkinType() const {
+  DynkinType dynkinType;
+  this->computeDynkinTypeEmbedded(dynkinType);
+  return dynkinType.toMathMLFinal(nullptr);
+}
+
 std::string SlTwoSubalgebra::toStringDynkinType() const {
   DynkinType dynkinType;
   this->computeDynkinTypeEmbedded(dynkinType);
@@ -188,7 +196,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
     return "sl(2) subalgebra not initialized.";
   }
   std::stringstream out;
-  out << "\\(" << this->toStringDynkinType() << "\\)\n<br>\n";
+  out << this->toMathMLFinalDynkinType() << "\n<br>\n";
   out
   << "<a name='sl2index"
   << this->indexInContainer
@@ -238,14 +246,13 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
     int rootSubalgebraIndex = this->indicesContainingRootSubalgebras[i];
     RootSubalgebra& currentSubalgebra =
     this->container->rootSubalgebras.subalgebras[rootSubalgebraIndex];
-    std::string dynkinType = currentSubalgebra.dynkinDiagram.toString();
     if (useHtml) {
       out
       << "<a href='../rootSubalgebra_"
       << rootSubalgebraIndex + 1
       << ".html'>";
     }
-    out << "\\(" << dynkinType << "\\)";
+    out << currentSubalgebra.dynkinDiagram.toMathMLFinal();
     if (useHtml) {
       out << "</a>";
     }
@@ -255,18 +262,19 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   }
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   FormatExpressions formatCharacter;
-  formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
+  formatCharacter.vectorSpaceEiBasisNames.addOnTop(
+    VariableLetter("\\psi", "&psi;")
+  );
   out
-  << HtmlRoutines::getMathNoDisplay((
-      this->moduleDecompositionAmbientSubalgebra.toString(&formatCharacter)
-    )
+  << this->moduleDecompositionAmbientSubalgebra.toMathMLFinal(
+    &formatCharacter
   )
   << "\n<br>\n";
   out << "\nBelow is one possible realization of the sl(2) subalgebra.";
   if (useHtml) {
     out << "\n<br>\n";
   }
-  out << this->toStringTriple(&latexFormat);
+  out << this->toMathMLFinalTriple(&latexFormat);
   out << this->toStringTripleStandardRealization();
   out << this->toStringKostantSekiguchiTriple(&latexFormat);
   out << this->toStringKostantSekiguchiTripleStandardRealization();
@@ -436,7 +444,7 @@ bool SlTwoSubalgebra::moduleDecompositionLeftFitsIntoRight(
 }
 
 std::string SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras(
-  const std::string& displayPathAlgebra
+  const std::string& displayPathAlgebra, bool useMathML
 ) const {
   STACK_TRACE("SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras");
   std::stringstream out;
@@ -453,11 +461,13 @@ std::string SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras(
     << displayPathAlgebra
     << "rootSubalgebra_"
     << rootSubalgebraIndex + 1
-    << ".html'>"
-    << "\\("
-    << currentRootSubalgebra.dynkinDiagram.toString()
-    << "\\)"
-    << "</a>";
+    << ".html'>";
+    if (useMathML) {
+      out << currentRootSubalgebra.dynkinDiagram.toMathMLFinal();
+    } else {
+      out << "\\(" << currentRootSubalgebra.dynkinDiagram.toString() << "\\)";
+    }
+    out << "</a>";
     if (j != this->indicesMinimalContainingRootSubalgebras.size - 1) {
       out << ", ";
     }
@@ -541,6 +551,45 @@ std::string SlTwoSubalgebra::toStringTripleUnknownsPolynomialSystem(
   << this->toStringPolynomialSystem(this->systemToSolve, format)
   << "\n<br>\n";
   return out.str();
+}
+
+std::string SlTwoSubalgebra::toMathMLTriple(FormatExpressions* format) const {
+  std::stringstream out;
+  out << " <mtable frame='solid' rowlines='solid'>";
+  out
+  << "<mtr>"
+  << "<mtd><mi>h</mi>"
+  << "</mtd><mtd><mo>=</mo>"
+  << "</mtd><mtd>"
+  << this->hElement.toMathML(format)
+  << "</mtd>"
+  << "</mtr>";
+  out
+  << "<mtr>"
+  << "<mtd><mi>e</mi>"
+  << "</mtd><mtd><mo>=</mo>"
+  << "</mtd><mtd>"
+  << this->eElement.toMathML(format)
+  << "</mtd>"
+  << "</mtr>";
+  out
+  << "<mtr>"
+  << "<mtd><mi>f</mi>"
+  << "</mtd><mtd><mo>=</mo>"
+  << "</mtd><mtd>"
+  << this->fElement.toMathML(format)
+  << "</mtd>"
+  << "</mtr>";
+  out << "</mtd>";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toMathMLFinalTriple(FormatExpressions* format)
+const {
+  return
+  MathML::toMathMLFinal(
+    this->toMathMLTriple(format), this->toStringTriple(format)
+  );
 }
 
 std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
@@ -699,7 +748,7 @@ unsigned int SlTwoSubalgebra::hashFunction() const {
 }
 
 // The below code is related to sl(2) subalgebras of simple Lie algebras.
-void SlTwoSubalgebra::computeModuleDecompositionsition(
+void SlTwoSubalgebra::computeModuleDecomposition(
   const Vectors<Rational>& positiveRootsContainingRegularSubalgebra,
   int dimensionContainingRegularSubalgebra,
   CharacterSemisimpleLieAlgebraModule<Rational>& outputHighestWeights,
@@ -818,7 +867,7 @@ void SlTwoSubalgebra::computeModuleDecompositionsition(
 
 void SlTwoSubalgebra::computeModuleDecompositionsitionAmbientLieAlgebra() {
   this->checkConsistency();
-  this->computeModuleDecompositionsition(
+  this->computeModuleDecomposition(
     this->getOwnerWeyl().rootsOfBorel,
     this->getOwnerWeyl().cartanSymmetric.numberOfRows,
     this->moduleDecompositionAmbientSubalgebra,
@@ -846,7 +895,7 @@ computeModuleDecompositionMinimalContainingRegularSubalgebras(
     owner.rootSubalgebras.subalgebras[
       this->indicesMinimalContainingRootSubalgebras[i]
     ];
-    this->computeModuleDecompositionsition(
+    this->computeModuleDecomposition(
       subalgebra.positiveRootsReductiveSubalgebra,
       subalgebra.simpleRootsReductiveSubalgebra.size,
       this->moduleDecompositionMinimalContainingRootSubalgebras[i],
@@ -1827,7 +1876,9 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
   << "which the sl(2) has no centralizer</a>"
   << "</th></tr>";
   FormatExpressions formatCharacterMathML;
-  formatCharacterMathML.vectorSpaceEiBasisNames.addOnTop("&psi;");
+  formatCharacterMathML.vectorSpaceEiBasisNames.addOnTop(
+    VariableLetter("\\psi", "&psi;")
+  );
   formatCharacterMathML.flagSupressDynkinIndexOne = false;
   for (int i = 0; i < this->allSubalgebras.size; i ++) {
     const SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras[i];
@@ -1888,12 +1939,12 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     currentSubalgebra.checkIndicesMinimalContainingRootSubalgebras();
     out
     << currentSubalgebra.toStringMinimalContainingRootSubalgebras(
-      displayPathAlgebra
+      displayPathAlgebra, true
     );
     out << "</td>" << "<td class='tableSummarySlTwoDefault'>";
     out
     << currentSubalgebra.toStringContainingRootSubalgebras(
-      displayPathAlgebra
+      displayPathAlgebra, true
     );
     out << "</td></tr>\n";
   }

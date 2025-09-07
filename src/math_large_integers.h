@@ -278,7 +278,10 @@ public:
     this->toString(currentString);
     return currentString;
   }
-  std::string toMathML() const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   bool isIntegerFittingInInt(int* whichInt);
   bool isPositive() const {
     return this->sign == 1 && (this->value.isPositive());
@@ -696,7 +699,10 @@ public:
     this->extended->denominator.multiplyBy(x);
     this->simplify();
   }
-  std::string toMathML(FormatExpressions* format = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringFrac() const;
   std::string toStringForFileOperations(FormatExpressions* notUsed = nullptr)

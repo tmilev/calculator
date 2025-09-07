@@ -1037,8 +1037,7 @@ std::string MonomialUniversalEnveloping<Coefficient>::toString(
   for (int i = 0; i < this->generatorsIndices.size; i ++) {
     Coefficient& power = this->powers[i];
     int index = this->generatorsIndices[i];
-    currentString =
-    this->getOwner().getStringFromChevalleyGenerator(index, format);
+    currentString = this->getOwner().toStringChevalleyGenerator(index, format);
     out << currentString;
     if (!power.isEqualToOne()) {
       out << "^";
@@ -2054,7 +2053,7 @@ std::string MonomialUniversalEnvelopingOrdered<Coefficient>::toString(
     int index = this->generatorsIndices[i];
     bool usebrackets = false;
     currentString =
-    this->owner->ownerSemisimpleLieAlgebra->getStringFromChevalleyGenerator(
+    this->owner->ownerSemisimpleLieAlgebra->toStringChevalleyGenerator(
       index, format
     );
     if (usebrackets) {

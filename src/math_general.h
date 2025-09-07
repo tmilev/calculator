@@ -1932,6 +1932,17 @@ void Matrix<Coefficient>::initialize(
   this->resize(desiredNumberOfRows, desiredNumberOfColumns, false);
 }
 
+struct VariableLetter {
+  std::string latexLetter;
+  std::string mathMLLetter;
+  VariableLetter(
+    const std::string& inputLatexLetter = "",
+    const std::string& inputMathMLLetter = ""
+  ):
+  latexLetter(inputLatexLetter),
+  mathMLLetter(inputMathMLLetter) {}
+};
+
 class FormatExpressions {
 public:
   // alphabetBases must contain at least two elements
@@ -1946,7 +1957,7 @@ public:
   std::string simpleRootLetter;
   List<std::string> polynomialAlphabet;
   List<std::string> weylAlgebraLetters;
-  List<std::string> vectorSpaceEiBasisNames;
+  List<VariableLetter> vectorSpaceEiBasisNames;
   Rational ambientCartanSymmetricInverseScale;
   int extraLinesCounterLatex;
   int numberOfAmpersandsPerNewLineForLaTeX;
@@ -2718,7 +2729,10 @@ std::string Vector<Coefficient>::toMathMLLetterFormat(
     out << term;
     if (format != nullptr) {
       if (format->vectorSpaceEiBasisNames.size > i) {
-        out << "<mi>" << format->vectorSpaceEiBasisNames[i] << "</mi>";
+        out
+        << "<mi>"
+        << format->vectorSpaceEiBasisNames[i].mathMLLetter
+        << "</mi>";
         continue;
       }
     }
@@ -2772,7 +2786,7 @@ std::string Vector<Coefficient>::toStringLetterFormat(
       out << term;
       if (format != nullptr) {
         if (format->vectorSpaceEiBasisNames.size > i) {
-          out << format->vectorSpaceEiBasisNames[i];
+          out << format->vectorSpaceEiBasisNames[i].latexLetter;
           continue;
         }
       }

@@ -13,7 +13,7 @@ std::string MonomialVector::toString(FormatExpressions* format) const {
       this->monomialIndex < format->vectorSpaceEiBasisNames.size &&
       this->monomialIndex >= 0
     ) {
-      return format->vectorSpaceEiBasisNames[this->monomialIndex];
+      return format->vectorSpaceEiBasisNames[this->monomialIndex].latexLetter;
     }
   }
   std::stringstream out;

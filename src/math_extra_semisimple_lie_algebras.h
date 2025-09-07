@@ -426,7 +426,10 @@ public:
   );
   static std::string toHTMLCalculatorBodyOnload();
   static std::string toHTMLCalculatorMainDiv();
-  std::string getStringFromChevalleyGenerator(
+  std::string toStringChevalleyGenerator(
+    int index, FormatExpressions* polynomialFormat
+  ) const;
+  std::string toMathMLChevalleyGenerator(
     int index, FormatExpressions* polynomialFormat
   ) const;
   std::string toStringLieAlgebraNameFullHTML() const;
@@ -691,7 +694,10 @@ public:
     const Coefficient& zero = Coefficient::zero()
   ) const;
   std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toMathML(FormatExpressions* format = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   inline unsigned int hashFunction() const {
     return weightFundamentalCoordinates.hashFunction();
   }
@@ -1059,7 +1065,14 @@ std::string Weight<Coefficient>::toString(FormatExpressions* format) const {
 }
 
 template <class Coefficient>
-std::string Weight<Coefficient>::toMathML(FormatExpressions* format) const {
+std::string Weight<Coefficient>::toMathML(
+  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+) const {
+  if (outputProperties != nullptr) {
+    outputProperties->isOne = false;
+    outputProperties->isNegativeOne = false;
+    outputProperties->startsWithMinus = false;
+  }
   std::stringstream out;
   bool formatWeightAsIndexVectorSpace = format ==
   nullptr ? true : format->flagFormatWeightAsVectorSpaceIndex;

@@ -33,11 +33,13 @@ private:
     FormatExpressions* format,
     const std::string& customCoefficientMonomialSeparator
   ) const;
-  std::string termToMathML(
+  void termToMathML(
     const Coefficient& coefficient,
     const TemplateMonomial& monomial,
     FormatExpressions* format,
-    const std::string& customCoefficientMonomialSeparator
+    const std::string& customCoefficientMonomialSeparator,
+    List<std::string>& rowOutputs,
+    MathMLExpressionProperties& outputProperties
   ) const;
 public:
   HashedList<TemplateMonomial> monomials;
@@ -1307,12 +1309,17 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::getTermString(
 }
 
 template <class TemplateMonomial, class Coefficient>
-std::string LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
+void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
   const Coefficient& coefficient,
   const TemplateMonomial& monomial,
   FormatExpressions* format,
-  const std::string& customCoefficientMonomialSeparator
+  const std::string& customCoefficientMonomialSeparator,
+  List<std::string>& rowOutputs,
+  MathMLExpressionProperties& outputProperties
 ) const {
+  MathMLExpressionProperties coefficientProperites;
+  MathMLExpressionProperties monomialProperties;
+  rowOutputs.clear();
   std::string coefficientString;
   std::string monomialString;
   if (coefficient.needsParenthesisForMultiplication(format)) {
@@ -1320,25 +1327,37 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
     coefficientString =
     MathML::leftParenthesis + coefficientMathML + MathML::rightParenthesis;
   } else {
-    coefficientString = coefficient.toMathML(format);
+    coefficientString = coefficient.toMathML(format, &outputProperties);
   }
-  monomialString = monomial.toMathML(format);
+  monomialString = monomial.toMathML(format, &outputProperties);
   if (customCoefficientMonomialSeparator != "") {
-    return
-    coefficientString +
-    customCoefficientMonomialSeparator +
-    monomialString;
+    rowOutputs.addOnTop(coefficientString);
+    rowOutputs.addOnTop(customCoefficientMonomialSeparator);
+    rowOutputs.addOnTop(monomialString);
+    return;
   }
-  if (monomialString == "<mn>1</mn>") {
-    return coefficientString;
+  if (monomialProperties.isOne) {
+    rowOutputs.addOnTop(coefficientString);
+    outputProperties = coefficientProperites;
+    return;
   }
-  if (coefficientString == "<mn>1</mn>") {
-    return monomialString;
+  if (coefficientProperites.isOne) {
+    rowOutputs.addOnTop(monomialString);
+    outputProperties = monomialProperties;
+    return;
   }
-  if (coefficientString == "<mo>-</mo><mn>1</mn>") {
-    return "<mo>-</mo>" + monomialString;
+  if (coefficientProperites.isNegativeOne) {
+    rowOutputs.addOnTop("<mo>-</mo>");
+    rowOutputs.addOnTop(monomialString);
+    outputProperties.startsWithMinus = true;
+    if (monomialProperties.isOne) {
+      outputProperties.isNegativeOne = true;
+    }
+    return;
   }
-  return coefficientString + monomialString;
+  rowOutputs.addOnTop(coefficientString);
+  rowOutputs.addOnTop(monomialString);
+  outputProperties.startsWithMinus = coefficientProperites.startsWithMinus;
 }
 
 template <class TemplateMonomial, class Coefficient>
@@ -1365,7 +1384,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathMLFinal(
 ) const {
   std::string latex = this->toString(format);
   std::string mathML = this->toMathML(format);
-  return MathML::toMathML(mathML, latex);
+  return MathML::toMathMLFinal(mathML, latex);
 }
 
 template <class TemplateMonomial, class Coefficient>
@@ -1406,22 +1425,21 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
     TemplateMonomial& monomial = sortedMonomials[i];
     int coefficientIndex = this->monomials.getIndex(monomial);
     Coefficient& coefficient = this->coefficients[coefficientIndex];
-    std::string termString =
-    this->termToMathML(coefficient, monomial, format, customTimes);
+    List<std::string> termStrings;
+    MathMLExpressionProperties termProperties;
+    this->termToMathML(
+      coefficient, monomial, format, customTimes, termStrings, termProperties
+    );
     if (i > 0) {
-      if (!useCustomPlus) {
-        if (termString.size() > 0) {
-          if (termString[0] != '-') {
-            out << "<mo>+</mo>";
-          }
-        } else {
-          out << "<mo>+</mo>";
-        }
+      if (!termProperties.startsWithMinus && !useCustomPlus) {
+        out << "<mo>+</mo>";
       } else {
         out << format->customPlusSign;
       }
     }
-    out << termString;
+    for (const std::string& termString : termStrings) {
+      out << termString;
+    }
   }
   if (format != nullptr) {
     format->customCoefficientMonomialSeparator = customTimes;

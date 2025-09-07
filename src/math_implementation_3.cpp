@@ -6394,6 +6394,33 @@ std::string DynkinSimpleType::toStringNonTechnicalName(
   return out.str();
 }
 
+std::string DynkinSimpleType::toMathML(FormatExpressions* format) {
+  bool supressDynkinIndexOne = format ==
+  nullptr ? false : format->flagSupressDynkinIndexOne;
+  Rational dynkinIndex = this->cartanSymmetricInverseScale / 2;
+  bool subscriptOnly = supressDynkinIndexOne && dynkinIndex.isEqualToOne();
+  std::stringstream out;
+  if (subscriptOnly) {
+    out << "<msub>";
+  } else {
+    out << "<msubsup>";
+  }
+  out << "<mi>" << this->letter << "</mi>";
+  out << "<mn>" << this->rank << "</mn>";
+  if (subscriptOnly) {
+    out << "</msub>";
+  } else {
+    out << "<mn>" << dynkinIndex << "</mn>";
+    out << "</msubsup>";
+  }
+  return out.str();
+}
+
+std::string DynkinSimpleType::toMathMLFinal(FormatExpressions* format) {
+  return
+  MathRoutines::toMathML(this->toMathML(format), this->toString(format));
+}
+
 std::string DynkinSimpleType::toString(FormatExpressions* format) const {
   std::stringstream out;
   bool includeTechnicalNames = format ==

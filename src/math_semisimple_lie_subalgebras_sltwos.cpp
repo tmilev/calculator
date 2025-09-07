@@ -1830,15 +1830,16 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
   formatCharacter.vectorSpaceEiBasisNames.addOnTop("\\psi");
   for (int i = 0; i < this->allSubalgebras.size; i ++) {
     const SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras[i];
+    DynkinSimpleType simpleType;
+    simpleType.makeArbitrary('A', 1, currentSubalgebra.getDynkinIndex() * 2);
     out
     << "<tr>"
     << "<td class='tableSummarySlTwoType'>"
     << "<a href='#sl2index"
     << i
-    << "'>\\(A^{"
-    << currentSubalgebra.getDynkinIndex()
-    << "}_1"
-    << "\\)</a>"
+    << "'>"
+    << simpleType.toMathMLFinal(nullptr)
+    << "</a>"
     << "</td>";
     out << "<td class='tableSummarySlTwoDefaultNoWrap'>";
     out << currentSubalgebra.hCharacteristic.toString();
@@ -1859,11 +1860,8 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     out
     << "</td><td class='tableSummarySlTwoDefault' style='padding-left:20px;'>";
     out
-    << HtmlRoutines::getMathNoDisplay((
-        currentSubalgebra.moduleDecompositionAmbientSubalgebra.toString(
-          &formatCharacter
-        )
-      )
+    << currentSubalgebra.moduleDecompositionAmbientSubalgebra.toMathMLFinal(
+      &formatCharacter
     )
     << "\n<br>\n";
     out << "</td>";
@@ -1940,7 +1938,9 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   << "<html><title>sl(2)-subalgebras of "
   << this->rootSubalgebras.subalgebras[0].dynkinDiagram.toString()
   << "</title>";
-  out << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements("../../../..");
+  int warningTheNExtThingMustBeTrue;
+  out
+  << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(false, "../../../..");
   out
   << "<meta name='keywords' content='"
   << this->rootSubalgebras.subalgebras[0].dynkinDiagram.toString()

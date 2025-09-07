@@ -1076,52 +1076,6 @@ Logger::StringHighligher::StringHighligher(const std::string& input) {
   }
 }
 
-void MathRoutines::parseListIntegersNoFailure(
-  const std::string& input, List<int>& result
-) {
-  bool success = MathRoutines::parseListIntegers(input, result, nullptr);
-  if (!success) {
-    global.fatal
-    << "Failed to parse list int with a function that does not allow failure. "
-    << global.fatal;
-  }
-}
-
-bool MathRoutines::parseListIntegers(
-  const std::string& input,
-  List<int>& result,
-  std::stringstream* commentsOnFailure
-) {
-  List<char> delimiters;
-  delimiters.addOnTopNoRepetition('\n');
-  delimiters.addOnTopNoRepetition(',');
-  delimiters.addOnTopNoRepetition('[');
-  delimiters.addOnTopNoRepetition(']');
-  delimiters.addOnTopNoRepetition('(');
-  delimiters.addOnTopNoRepetition(')');
-  List<std::string> numberStrings;
-  StringRoutines::splitExcludeDelimiters(input, delimiters, numberStrings);
-  result.setSize(numberStrings.size);
-  for (int i = 0; i < numberStrings.size; i ++) {
-    LargeInteger integerValue;
-    bool success =
-    integerValue.assignStringFailureAllowed(
-      numberStrings[i], commentsOnFailure
-    );
-    if (!success) {
-      return false;
-    }
-    if (!integerValue.isIntegerFittingInInt(&result[i])) {
-      if (commentsOnFailure != nullptr) {
-        *commentsOnFailure << "Integer at position " << i << " is too large. ";
-      }
-      result.setSize(0);
-      return false;
-    }
-  }
-  return true;
-}
-
 Logger& Logger::operator<<(const Logger::StringHighligher& input) {
   this->nextHighlighter.sections = input.sections;
   return *this;

@@ -422,7 +422,7 @@ public:
     const std::string& extraDynkinDiagramPlot
   );
   static std::string toHTMLCalculatorHeadElements(
-    const std::string& relativeTo = "../../.."
+    bool addBootstrap = true, const std::string& relativeTo = "../../.."
   );
   static std::string toHTMLCalculatorBodyOnload();
   static std::string toHTMLCalculatorMainDiv();

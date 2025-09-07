@@ -203,7 +203,7 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
 }
 
 std::string SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
-  const std::string& relativeTo
+  bool addBootstrap, const std::string& relativeTo
 ) {
   std::stringstream out;
   out
@@ -217,6 +217,15 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
   << WebAPI::Request::lieAlgebrasCSS
   << "'>";
   out
+  << "<script>"
+  << "window.onload = ()=>{"
+  << "window.calculator.dynamicJavascript."
+  << "dynamicJavascript.bootstrapAllScripts(document.body);\n";
+  if (addBootstrap) {
+    out << "window.calculator.lieAlgebras.bootstrap();\n";
+  }
+  out << "}" << "</script>";
+  out
   << "\n<script src='"
   << relativeTo
   << WebAPI::Request::onePageJS
@@ -226,12 +235,7 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
 
 std::string SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload() {
   std::stringstream out;
-  out
-  << "<body onload='"
-  << "window.calculator.dynamicJavascript."
-  << "dynamicJavascript.bootstrapAllScripts(document.body);"
-  << "window.calculator.lieAlgebras.bootstrap();"
-  << "'>";
+  out << "<body>";
   return out.str();
 }
 

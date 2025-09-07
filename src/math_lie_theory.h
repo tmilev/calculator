@@ -175,6 +175,8 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringNonTechnicalName(FormatExpressions* format = nullptr)
   const;
+  std::string toMathMLFinal(FormatExpressions* format);
+  std::string toMathML(FormatExpressions* format);
   void operator++(int);
   bool operator>(const DynkinSimpleType& other) const;
   static void getEpsilonMatrix(

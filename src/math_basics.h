@@ -196,6 +196,9 @@ public:
   static void parseListIntegersNoFailure(
     const std::string& input, List<int>& result
   );
+  static std::string toMathML(
+    const std::string& mathMLContent, const std::string& latex
+  );
 };
 
 // We are wrapping the math.h c++ functions for portability reasons

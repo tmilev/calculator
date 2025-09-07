@@ -116,3 +116,10 @@ td.tableSummarySlTwoDefault {
   border-top: 1px solid black;
   font-size: larger;
 }
+
+td.tableSummarySlTwoDefaultNoWrap {
+  border-top: 1px solid black;
+  font-size: larger;
+  white-space: nowrap;
+  padding-left: 20px;
+}

@@ -292,12 +292,16 @@ class SlTwoSubalgebraCandidate {
   // of approximate value less than 20 and running the calculator to
   // inspect if so formed H, F elements extend to H, E, F-triples.
   static List<Rational> fArbitraryCoefficients(
-    char type, int rank, int dynkinIndex
+    char type, int rank, int dynkinIndex, const Vector<Rational>& targetH
   );
   // Returns an arbitrary coefficient to use when forming the element f
   // in a potential h,e,f-triple.
   static Rational fArbitraryCoefficient(
-    int coefficientIndex, char type, int rank, int dynkinIndex
+    int coefficientIndex,
+    char type,
+    int rank,
+    int dynkinIndex,
+    const Vector<Rational>& targetH
   );
 public:
   // Owner semisimple Lie algebra.
@@ -604,7 +608,7 @@ public:
   HashedList<SlTwoSubalgebra> allSubalgebras;
   List<List<int> > indicesSl2sContainedInRootSubalgebras;
   List<int> indicesSl2DecompositionFormulas;
-  Vectors<Rational> unsuitableHs;
+  HashedList<Vector<Rational> > unsuitableHs;
   int indexZeroWeight;
   RootSubalgebras rootSubalgebras;
   ~SlTwoSubalgebras() {}

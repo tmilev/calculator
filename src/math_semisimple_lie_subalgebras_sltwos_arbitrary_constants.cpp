@@ -1,15 +1,17 @@
-#include "general_file_operations_encodings.h"
-#include "math_extra_finite_groups_implementation.h"
-#include "math_extra_semisimple_lie_algebras.h"
+#include "general_lists.h"
 #include "math_extra_semisimple_lie_subalgebras_sltwos.h"
-#include "math_general_polynomial_computations_advanced_implementation.h" // IWYU pragma: keep: breaks g++ -02 optimization build.
-#include "progress_report.h"
 
 Rational SlTwoSubalgebraCandidate::fArbitraryCoefficient(
-  int coefficientIndex, char type, int rank, int dynkinIndex
+  int coefficientIndex,
+  char type,
+  int rank,
+  int dynkinIndex,
+  const Vector<Rational>& targetH
 ) {
   List<Rational> arbitraryCoefficients =
-  SlTwoSubalgebraCandidate::fArbitraryCoefficients(type, rank, dynkinIndex);
+  SlTwoSubalgebraCandidate::fArbitraryCoefficients(
+    type, rank, dynkinIndex, targetH
+  );
   if (coefficientIndex < arbitraryCoefficients.size) {
     return arbitraryCoefficients[coefficientIndex];
   }
@@ -17,8 +19,10 @@ Rational SlTwoSubalgebraCandidate::fArbitraryCoefficient(
 }
 
 List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
-  char type, int rank, int dynkinIndex
+  char type, int rank, int dynkinIndex, const Vector<Rational>& targetH
 ) {
+  STACK_TRACE("SlTwoSubalgebraCandidate::fArbitraryCoefficients");
+  std::string h = targetH.toString();
   // Coefficients found by manual experimentation with the computation
   // end-to-end.
   // Do not work in all cases, found out by quick computational experiments.
@@ -92,7 +96,129 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
       return List<Rational>({1, 1, 1, 1, 1, 1, 1});
     }
     if (dynkinIndex == 7) {
-      return List<Rational>({1, 1, 1, 1, 1, 0, 0});
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex == 6) {
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex == 5) {
+      return List<Rational>({1, 1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 4) {
+      return List<Rational>({1, 1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 3) {
+      return List<Rational>({1, 1, 0, 0, 0, 0, 0});
+    }
+  }
+  if (type == 'D' && rank == 7) {
+    if (dynkinIndex == 31) {
+      return List<Rational>({1, 1, 1, 1, 1, 1, 0});
+    }
+    if (dynkinIndex == 10 && h == "(4, 6, 6, 6, 6, 3, 3)") {
+      return List<Rational>({1, 1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 6) {
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0});
+    }
+  }
+  if (type == 'E' && rank == 7) {
+    if (dynkinIndex == 35) {
+      return List<Rational>({1, 1, 1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex == 29) {
+      return List<Rational>({1, 1, 1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex == 28) {
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 11) {
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 10) {
+      return List<Rational>({1, 1, 1, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 8) {
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 7) {
+      return List<Rational>({1, 1, 1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex == 4) {
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 3) {
+      return List<Rational>({1, 1, 1, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex == 2) {
+      return List<Rational>({1, 1, 0, 0, 0, 0, 0, 0});
+    }
+  }
+  if (type =='A' && rank==8){
+    if (dynkinIndex==8){
+      return List<Rational>({1, 1,1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex==7){
+      return List<Rational>({1, 1, 1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex==4){
+      return List<Rational>({1, 1, 1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex==3){
+      return List<Rational>({1, 1, 1, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex==2){
+      return List<Rational>({1, 1, 0, 0, 0, 0, 0, 0});
+    }
+  }
+  if (type =='B' && rank==8){
+    if (dynkinIndex==62){
+      return List<Rational>({1, 1,1, 1, 1, 1, 0, 0});
+    }
+    if (dynkinIndex==35){
+      return List<Rational>({1, 1,1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex==30){
+      return List<Rational>({1, 1,1, 1, 1, 1, 0, 0});
+    }
+    if (dynkinIndex==20){
+      return List<Rational>({1, 1,1, 1, 1, 1, 0, 0});
+    }
+    if (dynkinIndex==14){
+      return List<Rational>({1, 1,1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex==13){
+      return List<Rational>({1, 1,1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex==12){
+      return List<Rational>({1, 1,1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex==11){
+      return List<Rational>({1, 1,1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex==10){
+      return List<Rational>({1, 1,1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex==8){
+      return List<Rational>({1, 1,1, 1, 1, 0, 0, 0});
+    }
+    if (dynkinIndex==7){
+      return List<Rational>({1, 1,1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex==6){
+      return List<Rational>({1, 1,1,1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex==5){
+      return List<Rational>({1, 1,1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex==4){
+      return List<Rational>({1, 1,1, 1, 0, 0, 0, 0});
+    }
+    if (dynkinIndex==3){
+      return List<Rational>({1, 1,1, 0, 0, 0, 0, 0});
+    }
+    if (dynkinIndex==2){
+      return List<Rational>({1, 1,0, 0, 0, 0, 0, 0});
     }
   }
   return List<Rational>({1, - 1, 2, - 2, 3, - 3, 4, - 4});
@@ -257,6 +383,141 @@ List<int> CentralizerComputer::hardCodedArbitraryCoefficientsCartan(
     if (dynkinIndexOfSlTwo == 8) {
       return List<int>({1, 5, - 3, - 4, 2});
     }
+    if (dynkinIndexOfSlTwo == 7) {
+      return List<int>({1, 5, - 3});
+    }
+    if (dynkinIndexOfSlTwo == 6) {
+      return List<int>({1, 5, - 3, 2, 1});
+    }
+    if (dynkinIndexOfSlTwo == 5) {
+      return List<int>({1, 5, - 3, 2, 1});
+    }
+    if (dynkinIndexOfSlTwo == 4) {
+      return List<int>({1, 5, - 3, 2, 1});
+    }
+    if (dynkinIndexOfSlTwo == 3) {
+      return List<int>({1, 7, - 3, 6, 1});
+    }
+  }
+  if (ambientSimpleType == 'D' && ambientRank == 7) {
+    if (dynkinIndexOfSlTwo == 60) {
+      return List<int>({1, 5});
+    }
+    if (dynkinIndexOfSlTwo == 28) {
+      return List<int>({1, 5, - 6});
+    }
+    if (dynkinIndexOfSlTwo == 12) {
+      return List<int>({1, 5,});
+    }
+    if (dynkinIndexOfSlTwo == 11) {
+      return List<int>({1, 5, - 6});
+    }
+    if (dynkinIndexOfSlTwo == 10) {
+      return List<int>({1, 9, - 7, - 5, 8});
+    }
+    if (dynkinIndexOfSlTwo == 6) {
+      return List<int>({1, 5, - 6, - 3, - 2});
+    }
+    if (dynkinIndexOfSlTwo == 4) {
+      return List<int>({1, 9, - 7, - 5, 8});
+    }
+    if (dynkinIndexOfSlTwo == 3) {
+      return List<int>({1, 9, - 7, - 5, 8});
+    }
+    if (dynkinIndexOfSlTwo == 2) {
+      return List<int>({1, 11, - 7, - 5, - 8, 11});
+    }
+  }
+  if (ambientSimpleType == 'E' && ambientRank == 7) {
+    if (dynkinIndexOfSlTwo == 35) {
+      return List<int>({1, 5});
+    }
+    if (dynkinIndexOfSlTwo == 29) {
+      return List<int>({1, 5});
+    }
+    if (dynkinIndexOfSlTwo == 28) {
+      return List<int>({1, 7, - 3});
+    }
+    if (dynkinIndexOfSlTwo == 11) {
+      return List<int>({1, 7, - 3});
+    }
+    if (dynkinIndexOfSlTwo == 10) {
+      return List<int>({1, 7, - 3, - 5});
+    }
+    if (dynkinIndexOfSlTwo == 8) {
+      return List<int>({1, 5});
+    }
+    if (dynkinIndexOfSlTwo == 7) {
+      return List<int>({1, 5});
+    }
+    if (dynkinIndexOfSlTwo == 4) {
+      return List<int>({1, 7, - 3});
+    }
+    if (dynkinIndexOfSlTwo == 3) {
+      return List<int>({1, 7, - 3, - 5, 4, 6});
+    }
+    if (dynkinIndexOfSlTwo == 2) {
+      return List<int>({1, 9, - 7, - 5, 4, 7});
+    }
+  }
+  if (ambientSimpleType == 'A' && ambientRank == 8) {
+    if (dynkinIndexOfSlTwo == 8) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 4) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 2) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+  }
+  if (ambientSimpleType == 'B' && ambientRank == 8) {
+    if (dynkinIndexOfSlTwo == 62) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 35) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 30) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 14) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 13) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 12) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 11) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 10) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 8) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 6) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 5) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 4) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 3) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+    if (dynkinIndexOfSlTwo == 2) {
+      return List<int>({1, 9,-7,-5,4,3,2});
+    }
+
+
+
+
   }
   return List<int>({});
 }

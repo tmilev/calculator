@@ -1,8 +1,8 @@
 #include "calculator_interface.h"
 #include "crypto_calculator.h"
 #include "math_general.h"
-#include "math_rational_function.h"
 #include "math_general_polynomial_computations_basic_implementation.h" // IWYU pragma: keep: breaks g++ -03 optimization build.
+#include "math_rational_function.h"
 
 bool LargeIntegerUnsigned::Test::serializationToHex(
   const LargeIntegerUnsigned& input

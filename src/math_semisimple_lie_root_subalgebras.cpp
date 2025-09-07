@@ -3207,6 +3207,7 @@ void RootSubalgebras::computeAllReductiveRootSubalgebrasUpToIsomorphism() {
   this->flagPrintGAPInput =
   this->owner->weylGroup.loadGAPRootSystem(gapVectors);
   ProgressReport report2;
+  report2.ticksPerReport=1;
   RootSubalgebra cartanSubalgebra;
   cartanSubalgebra.owner = this;
   cartanSubalgebra.indexInducingSubalgebra = - 1;
@@ -3329,6 +3330,7 @@ void RootSubalgebras::findAllExtensions(
     this->maybeExtendByHighestWeightOfModuleIndex(
       toBeExtended, indexOfToBeExtended, j, progressReport
     );
+
   }
 }
 

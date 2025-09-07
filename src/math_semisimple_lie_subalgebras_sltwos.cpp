@@ -962,7 +962,7 @@ void SlTwoSubalgebraCandidate::initializeUnknownTriples(
     Polynomial<Rational> fArbitraryConstant;
     fArbitraryConstant.makeConstant(
       SlTwoSubalgebraCandidate::fArbitraryCoefficient(
-        i, type, rank, dynkinIndex
+        i, type, rank, dynkinIndex, targetH
       )
     );
     this->fArbitrary.addMonomial(negative, fArbitraryConstant);
@@ -1566,7 +1566,7 @@ void SlTwoSubalgebras::appendSSl2SubalgebrasFromRootSubalgebra(
         candidate, output, indexRootSubalgebraInContainer
       );
     } else {
-      output.unsuitableHs.addOnTop(candidate.candidateH);
+      output.unsuitableHs.addOnTopNoRepetition(candidate.candidateH);
     }
     std::stringstream out;
     out
@@ -1717,10 +1717,26 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
     return out.str();
   }
   bool allGood = true;
+  List<Rational> lengths;
   for (const Vector<Rational>& h : this->unsuitableHs) {
+    lengths.addOnTop(this->getOwnerWeyl().rootScalarCartanRoot(h, h));
+  }
+  List<Vector<Rational> > sortedUnsuitableHs;
+  sortedUnsuitableHs.addListOnTop(this->unsuitableHs);
+  lengths.quickSortDescending(nullptr, &sortedUnsuitableHs);
+  for (const Vector<Rational>& h : sortedUnsuitableHs) {
     Rational length = this->getOwnerWeyl().rootScalarCartanRoot(h, h);
+    out << "<hr>";
+    bool wasConstructed = this->isHOfConstructedSlTwo(h);
+    if (wasConstructed) {
+      out
+      << "<b style='color:green'>H that "
+      << "wasn't realized on the first attempt but was "
+      << "ultimately realized:</b> ";
+    } else {
+      out << "<b style='color:red'>H that wasn't realized:</b> ";
+    }
     out
-    << "H that wasn't realized immediately: "
     << h.toString()
     << ", <b style='color:blue'>Type: "
     << "\\(A^{"
@@ -1728,7 +1744,7 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
     << "}_{"
     << 1
     << "}\\)</b>. ";
-    if (!this->isHOfConstructedSlTwo(h)) {
+    if (!wasConstructed) {
       allGood = false;
       continue;
     }
@@ -1824,11 +1840,10 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     << "}_1"
     << "\\)</a>"
     << "</td>";
-    out << "<td class='tableSummarySlTwoDefault'>";
-    out << "\\(" << currentSubalgebra.hCharacteristic.toString() << "\\)";
+    out << "<td class='tableSummarySlTwoDefaultNoWrap'>";
+    out << currentSubalgebra.hCharacteristic.toString();
     out << "</td>";
-    out
-    << "<td class='tableSummarySlTwoDefault' style='white-space: nowrap;'>";
+    out << "<td class='tableSummarySlTwoDefaultNoWrap'>";
     out << currentSubalgebra.hElement.getCartanPart().toString();
     if (
       !this->getOwnerWeyl().isDominantWeight(

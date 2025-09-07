@@ -70,6 +70,7 @@ public:
     format.makeAlphabetXYZUW();
     return this->toString(&format);
   }
+  std::string toMathML(FormatExpressions* format)const;
   int size() const {
     return this->monomials.size;
   }
@@ -1313,7 +1314,105 @@ toStringWithPossibleLineBreak(
   out << "\\begin{array}{l}" << result << "\\end{array}";
   return out.str();
 }
+/*
+template <class TemplateMonomial, class Coefficient>
+std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
+    FormatExpressions* format
+    ) const {
+  STACK_TRACE("LinearCombination::toMathML");
 
+  if (this->size() == 0) {
+    return "0";
+  }
+  std::stringstream out;
+  List<TemplateMonomial> sortedMonomials;
+  sortedMonomials = this->monomials;
+  // If this line fails to link, you must do the following.
+  // You need to implement
+  // FormatExpressions::getMonomialOrder<TemplateMonomial>()
+  // and make it return 0 (or a pointer to a monomial order, should you
+  // wish to use a custom one.
+  typename List<TemplateMonomial>::Comparator* monomialOrder = (
+                                                                   format == nullptr
+                                                                   ) ?
+                                                                   0 :
+                                                                   format->getMonomialOrder<TemplateMonomial>();
+  sortedMonomials.quickSortDescending(monomialOrder);
+  int cutOffCounter = 0;
+  bool useCustomPlus = false;
+  int maximumLineLength = format == nullptr ? - 1 : format->maximumLineLength;
+  int numberOfAmpersandsPerNewLineForLaTeX = (format == nullptr) ?
+                                                 1 :
+                                                 format->numberOfAmpersandsPerNewLineForLaTeX;
+  bool flagUseLaTeX = (format == nullptr) ? false : format->flagUseLatex;
+  bool flagUseHTML = (format == nullptr) ? false : format->flagUseHTML;
+  bool isInNumerator = (format == nullptr) ? false : format->flagIsInNumerator;
+  std::string customTimes = "";
+  if (format != nullptr) {
+    useCustomPlus = (format->customPlusSign != "");
+    if (
+        format->flagPassCustomCoefficientMonomialSeparatorToCoefficients == false
+        ) {
+      customTimes = format->customCoefficientMonomialSeparator;
+      format->customCoefficientMonomialSeparator = "";
+    }
+  }
+  for (int i = 0; i < sortedMonomials.size; i ++) {
+    TemplateMonomial& monomial = sortedMonomials[i];
+    int coefficientIndex = this->monomials.getIndex(monomial);
+    Coefficient& coefficient = this->coefficients[coefficientIndex];
+    std::string termString =
+        this->getTermString(coefficient, monomial, format, customTimes);
+    if (i > 0) {
+      if (!useCustomPlus) {
+        if (termString.size() > 0) {
+          if (termString[0] != '-') {
+            out << "+";
+            cutOffCounter += 1;
+          }
+        } else {
+          out << "+";
+          cutOffCounter += 1;
+        }
+      } else {
+        out << format->customPlusSign;
+      }
+    }
+    out << termString;
+    cutOffCounter += termString.size();
+    if (maximumLineLength > 0) {
+      if (cutOffCounter > maximumLineLength) {
+        cutOffCounter = 0;
+        if (flagUseLaTeX && i != sortedMonomials.size - 1) {
+          if (outputNumberOfLines != nullptr) {
+            (*outputNumberOfLines) ++;
+          }
+          out << " \\\\";
+          if (isInNumerator) {
+            out << " \\hline ";
+          }
+          for (int k = 0; k < numberOfAmpersandsPerNewLineForLaTeX; k ++) {
+            out << "&";
+          }
+          out << " ";
+        }
+        if (flagUseHTML && !flagUseLaTeX && (i != sortedMonomials.size - 1)) {
+          out << " <br>";
+        }
+      }
+    }
+  }
+  if (format != nullptr) {
+    format->customCoefficientMonomialSeparator = customTimes;
+    if (format->suffixLinearCombination != "") {
+      out << " " << format->suffixLinearCombination;
+    }
+  }
+  return out.str();
+}
+
+
+*/
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   FormatExpressions* format, int* outputNumberOfLines

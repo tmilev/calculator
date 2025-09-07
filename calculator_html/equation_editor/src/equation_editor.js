@@ -10000,9 +10000,15 @@ class MathNodeRoot extends MathNode {
   }
 
   toMathML() {
+    const annotation = this.createMathMLElement("annotation");
+    annotation.textContent = this.toLatex();
+    annotation.setAttribute("encoding", "application/x-tex");
+    const semantics = this.createMathMLElement("semantics");
+    semantics.appendChild(this.children[0].toMathML());
+    semantics.appendChild(annotation);
     const result = this.createMathMLElement("math");
     result.setAttribute("displaystyle", "true");
-    result.appendChild(this.children[0].toMathML());
+    result.appendChild(semantics);
     return result;
   }
 }

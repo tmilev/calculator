@@ -36,6 +36,10 @@ public:
     typeError = 3
   };
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   bool needsParenthesisForMultiplication(FormatExpressions* unused = nullptr)
   const;
   bool findOneVariableRationalRoots(List<Rational>& output);
@@ -473,6 +477,32 @@ bool RationalFraction<Coefficient>::needsParenthesisForMultiplication(
 }
 
 template <class Coefficient>
+std::string RationalFraction<Coefficient>::toMathML(
+  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+) const {
+  if (this->expressionType == this->typeError) {
+    return "<mtext>[error]</mtext>";
+  }
+  if (this->expressionType == TypeExpression::typeConstant) {
+    return this->constantValue.toMathML(format, outputProperties);
+  }
+  if (this->expressionType == TypeExpression::typePolynomial) {
+    return
+    this->numerator.getElementConst().toMathML(format, outputProperties);
+  }
+  std::stringstream out;
+  bool needParenthesis = false;
+  out << "<mfrac>";
+  if (needParenthesis) {
+    out << MathML::leftParenthesis;
+  }
+  out << this->numerator.getElementConst().toMathML(format, nullptr);
+  out << this->denominator.getElementConst().toMathML(format, nullptr);
+  out << "</mfrac>";
+  return out.str();
+}
+
+template <class Coefficient>
 std::string RationalFraction<Coefficient>::toString(FormatExpressions* format)
 const {
   if (this->expressionType == this->typeError) {
@@ -512,7 +542,6 @@ const {
   } else {
     out << ")";
   }
-  // out << " Num vars: " << this->minimalNumberOfVariables();
   return out.str();
 }
 

@@ -563,13 +563,28 @@ public:
     FormatExpressions* format = nullptr
   ) const;
   std::string toStringTripleArbitrary(FormatExpressions* format) const;
+  std::string toMathMLTripleArbitrary(FormatExpressions* format) const;
+  std::string toHTMLTripleArbitrary(FormatExpressions* format) const;
   std::string toStringTripleArbitraryMatrix() const;
+  std::string toMathMLTripleArbitraryMatrix() const;
+  std::string toHTMLTripleArbitraryMatrix() const;
   std::string toStringDynkinType() const;
   std::string toMathMLFinalDynkinType() const;
   std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toStringKostantSekiguchiTripleInternals(
+  std::string toStringTripleArbitraryKostantSekiguchi(
     FormatExpressions* format
   ) const;
+  std::string toMathMLTripleArbitraryKostantSekiguchi(
+    FormatExpressions* format
+  ) const;
+  std::string toStringEMinusFKostantSekiguchi(FormatExpressions* format) const;
+  std::string toMathMLEMinusFKostantSekiguchi(FormatExpressions* format) const;
+  std::string toStringInvolutionAppliedToEMinusF(FormatExpressions* format)
+  const;
+  std::string toMathMLInvolutionAppliedToEMinusF(FormatExpressions* format)
+  const;
+  std::string toHTMLKostantSekiguchiTripleInternals(FormatExpressions* format)
+  const;
   std::string toStringKostantSekiguchiTriple(FormatExpressions* format) const;
   std::string toStringKostantSekiguchiTripleStandardRealization() const;
   void toHTML(std::string& filePath);

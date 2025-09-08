@@ -434,6 +434,7 @@ public:
   ) const;
   std::string toStringLieAlgebraNameFullHTML() const;
   std::string toStringLieAlgebraName() const;
+  std::string toMathMLFinalLieAlgebraName() const;
   std::string toStringLieAlgebraNameNonTechnicalHTML() const;
   int getNumberOfGenerators() const {
     return

@@ -108,9 +108,8 @@ std::string SlTwoSubalgebra::toStringTripleVerification(
   return out.str();
 }
 
-std::string SlTwoSubalgebra::toStringTripleArbitrary(
-  FormatExpressions* format
-) const {
+std::string SlTwoSubalgebra::toHTMLTripleArbitrary(FormatExpressions* format)
+const {
   std::stringstream out;
   out
   << "Starting h, e, f triple. H is computed according to Dynkin, "
@@ -119,12 +118,60 @@ std::string SlTwoSubalgebra::toStringTripleArbitrary(
   << "participating in f are ordered in the order "
   << "in which their roots appear, and the "
   << "coefficients are chosen "
-  << "with an arbitrary formula. "
-  << "More precisely, the n^th coefficient equals (n-1)^2+1.<br>"
-  << "This arbitrary (but well-defined) choice of "
-  << "f guarantees that the computation is linear and fast. <br>\n";
+  << "arbitrarily. "
+  << "More precisely, the n^th coefficient either "
+  << "1) equals (n-1)^2+1 or "
+  << "2) equals a hard-coded number that is specific "
+  << "to the given ambient Lie algebra, dynkin index and h element. "
+  << "Whenever a hard-coded coefficient is used, it was selected "
+  << "so it results in fast computations. "
+  << "The selection was discovered through manual experimentation. "
+  << "As of writing, the arbitrary coefficient selection "
+  << "happens <a href='"
+  << HtmlRoutines::gitRepository
+  << "/blob/master/src/"
+  << "math_semisimple_lie_subalgebras_sltwos_arbitrary_constants.cpp"
+  << "' target='_blank'>here</a>. "
+  << "<br>\n";
   out
-  << "\\(\\begin{array}{rcl}"
+  << MathML::toMathMLFinal(
+    this->toMathMLTripleArbitrary(format),
+    this->toStringTripleArbitrary(format)
+  );
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toMathMLTripleArbitrary(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
+  out
+  << MathML::mtableDefault
+  << "<mtr><mtd><mi>h</mi></mtd><mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->hPolynomialAlgebraic.toMathML(format)
+  << "</mtd>"
+  << "</mtr>"
+  << "<mtr><mtd><mi>e</mi></mtd><mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->eArbitraryUnknown.toMathML(format)
+  << "</mtd>"
+  << "</mtr>"
+  << "<mtr><mtd><mi>f</mi></mtd><mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->fArbitrary.toMathML(format)
+  << "</mtd>"
+  << "</mtr>"
+  << "</mtable>";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleArbitrary(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
+  out
+  << "\\begin{array}{rcl}"
   << "h&=&"
   << this->hPolynomialAlgebraic.toString(format)
   << "\\\\"
@@ -133,7 +180,7 @@ std::string SlTwoSubalgebra::toStringTripleArbitrary(
   << "\\\\"
   << "f&=&"
   << this->fArbitrary.toString(format)
-  << "\\end{array}\\)";
+  << "\\end{array}";
   return out.str();
 }
 
@@ -166,19 +213,42 @@ std::string SlTwoSubalgebra::toStringContainingRootSubalgebras(
   return out.str();
 }
 
-std::string SlTwoSubalgebra::toStringTripleArbitraryMatrix() const {
+std::string SlTwoSubalgebra::toHTMLTripleArbitraryMatrix() const {
   std::stringstream out;
   out << "<br>Matrix form of the system we are trying to solve:\n";
+  out
+  << MathML::toMathMLFinal(
+    this->toMathMLTripleArbitraryMatrix(),
+    this->toStringTripleArbitraryMatrix()
+  );
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleArbitraryMatrix() const {
   FormatExpressions formatLatex;
   formatLatex.flagUseLatex = true;
   formatLatex.flagUseHTML = false;
+  std::stringstream out;
   out
-  << "\\("
   << this->systemArbitraryMatrix.toString(&formatLatex)
   << "[col. vect.]"
   << "="
-  << this->systemArbitraryColumnVector.toString(&formatLatex)
-  << "\\)";
+  << this->systemArbitraryColumnVector.toString(&formatLatex);
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toMathMLTripleArbitraryMatrix() const {
+  FormatExpressions formatLatex;
+  formatLatex.flagUseLatex = true;
+  formatLatex.flagUseHTML = false;
+  std::stringstream out;
+  out
+  << "<mrow>"
+  << this->systemArbitraryMatrix.toMathML(&formatLatex)
+  << "<ms>[col. vect.]</ms>"
+  << "<mo>=</mo>"
+  << this->systemArbitraryColumnVector.toMathML(&formatLatex)
+  << "</mrow>";
   return out.str();
 }
 
@@ -396,9 +466,9 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << "\n<div class='lieAlgebraPanel'><div>\n";
   out << this->toHTMLTripleUnknowns(&latexFormat);
   out << this->toHTMLTripleUnknownsPolynomialSystem(&latexFormat);
-  out << this->toStringTripleArbitrary(&latexFormat);
-  out << this->toStringTripleArbitraryMatrix();
-  out << this->toStringKostantSekiguchiTripleInternals(format);
+  out << this->toHTMLTripleArbitrary(&latexFormat);
+  out << this->toHTMLTripleArbitraryMatrix();
+  out << this->toHTMLKostantSekiguchiTripleInternals(format);
   out << "</div></div>";
   return out.str();
 }
@@ -607,12 +677,9 @@ void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
   this->allSubalgebras.clear();
 }
 
-std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleInternals(
+std::string SlTwoSubalgebra::toStringTripleArbitraryKostantSekiguchi(
   FormatExpressions* format
 ) const {
-  STACK_TRACE("SlTwoSubalgebra::toStringKostantSekiguchiTripleInternals");
-  std::stringstream out;
-  out << "<br>The unknown Kostant-Sekiguchi elements.<br>";
   std::stringstream tripleSystem;
   tripleSystem << "\\begin{array}{rcl}";
   tripleSystem
@@ -625,16 +692,113 @@ std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleInternals(
   << "\\\\\n";
   tripleSystem << "f&=&" << this->fKostantSekiguchiUnknown.toString(format);
   tripleSystem << "\\end{array}";
-  out << HtmlRoutines::getMathNoDisplay(tripleSystem.str());
-  out << "<br>\\(e-f=" << this->eMinusFUnknown.toString(format) << "\\)";
+  return tripleSystem.str();
+}
+
+std::string SlTwoSubalgebra::toMathMLTripleArbitraryKostantSekiguchi(
+  FormatExpressions* format
+) const {
+  std::stringstream tripleSystem;
+  tripleSystem << MathML::mtableDefault;
+  tripleSystem
+  << "<mtr><mtd><mi>h</mi></mtd><mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->hPolynomialAlgebraic.toMathML(format)
+  << "</mtd>"
+  << "</mtr>";
+  tripleSystem
+  << "<mtr><mtd><mi>e</mi></mtd><mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->eKostantSekiguchiUnknown.toMathML(format)
+  << "</mtd>"
+  << "</mtr>";
+  tripleSystem
+  << "<mtr><mtd><mi>f</mi></mtd><mtd><mo>=</mo></mtd>"
+  << "<mtd>"
+  << this->fKostantSekiguchiUnknown.toMathML(format)
+  << "</mtd>"
+  << "</mtr>";
+  tripleSystem << "</mtable>";
+  return tripleSystem.str();
+}
+
+std::string SlTwoSubalgebra::toStringEMinusFKostantSekiguchi(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
+  out << "e-f=" << this->eMinusFUnknown.toString(format);
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toMathMLEMinusFKostantSekiguchi(
+  FormatExpressions* format
+) const {
+  std::stringstream out;
   out
-  << "<br>\\(\\theta(e-f)="
-  << this->involutionAppliedToEMinusF.toString(format)
-  << "\\)";
+  << "<mrow><mi>e</mi>"
+  << MathML::negativeSign
+  << "<mi>f</mi><mo>=</mo>"
+  << this->eMinusFUnknown.toMathML(format)
+  << "</mrow>";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toMathMLInvolutionAppliedToEMinusF(
+  FormatExpressions* format
+) const {
+  STACK_TRACE("SlTwoSubalgebra::toMathMLinvolutionAppliedToEMinusF");
+  std::stringstream out;
+  out
+  << "<mrow><mi>&theta;</mi>"
+  << "<mo>(</mo><mi>e</mi>"
+  << MathML::negativeSign
+  << "<mi>f</mi><mo>)</mo><mo>=</mo>"
+  << this->involutionAppliedToEMinusF.toMathML(format)
+  << "</mrow>";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringInvolutionAppliedToEMinusF(
+  FormatExpressions* format
+) const {
+  STACK_TRACE("SlTwoSubalgebra::toStringInvolutionAppliedToEMinusF");
+  std::stringstream out;
+  out << "\\theta(e-f)=" << this->involutionAppliedToEMinusF.toString(format);
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toHTMLKostantSekiguchiTripleInternals(
+  FormatExpressions* format
+) const {
+  STACK_TRACE("SlTwoSubalgebra::toHTMLKostantSekiguchiTripleInternals");
+  std::stringstream out;
+  out << "<br>The unknown Kostant-Sekiguchi elements.<br>";
+  out
+  << MathML::toMathMLFinal(
+    this->toMathMLTripleArbitraryKostantSekiguchi(format),
+    this->toStringTripleArbitraryKostantSekiguchi(format)
+  );
+  out << "\n<br>\n";
+  out
+  << MathML::toMathMLFinal(
+    this->toMathMLEMinusFKostantSekiguchi(format),
+    this->toStringEMinusFKostantSekiguchi(format)
+  );
+  out << "\n<br>\n";
+  out
+  << MathML::toMathMLFinal(
+    this->toMathMLInvolutionAppliedToEMinusF(format),
+    this->toStringInvolutionAppliedToEMinusF(format)
+  );
   out << "<br>The polynomial system we need to solve.<br>";
   out
-  << this->toStringPolynomialSystem(
-    this->systemToSolveKostantSekiguchi, format
+  << MathML::toMathMLFinal(
+    this->toMathMLPolynomialSystem(
+      this->systemToSolveKostantSekiguchi, format
+    ),
+    this->toStringPolynomialSystem(
+      this->systemToSolveKostantSekiguchi, format
+    )
   );
   return out.str();
 }
@@ -677,7 +841,10 @@ std::string SlTwoSubalgebra::toHTMLTripleUnknownsPolynomialSystem(
   << "<br>The polynomial system that corresponds "
   << "to finding the h, e, f triple:<br>\n";
   out
-  << this->toStringPolynomialSystem(this->systemToSolve, format)
+  << MathML::toMathMLFinal(
+    this->toMathMLPolynomialSystem(this->systemToSolve, format),
+    this->toStringPolynomialSystem(this->systemToSolve, format)
+  )
   << "\n<br>\n";
   return out.str();
 }
@@ -1886,7 +2053,7 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
   if (this->unsuitableHs.size == 0) {
     out
     << "It turns out by direct computation that, in the current case of "
-    << this->getOwner().toStringLieAlgebraName()
+    << this->getOwner().toMathMLFinalLieAlgebraName()
     << ",  e(P,P_0)= 0 implies that an S-sl(2) subalgebra "
     << "of the root subalgebra generated by P with "
     << "characteristic with 2's in the simple roots of P_0 "
@@ -2189,7 +2356,7 @@ std::string CentralizerComputer::toString() const {
   std::stringstream out;
   out << "Centralizer type: ";
   if (this->flagTypeComputed) {
-    out << this->typeIfKnown.toString();
+    out << this->typeIfKnown.toMathMLFinal(nullptr);
     if (this->typeIfKnown.isEqualToZero()) {
       return out.str();
     }

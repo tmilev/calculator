@@ -607,6 +607,10 @@ public:
       this->actOnVectorColumn(inputOutput[i], ringZero);
     }
   }
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathMLExpressionProperties* outputProperties = nullptr
+  ) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringLatex(FormatExpressions* format = nullptr) const;
   std::string toStringSystemLatex(
@@ -2966,6 +2970,45 @@ std::string Matrix<Coefficient>::toStringSystemLatex(
     out << "\\\\";
   }
   out << "\\end{array}";
+  return out.str();
+}
+
+template <typename Coefficient>
+std::string Matrix<Coefficient>::toMathML(
+  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+) const {
+  (void) outputProperties;
+  std::stringstream out;
+  std::string coefficientString;
+  int verticalLineIndex = format ==
+  nullptr ? - 1 : format->matrixColumnVerticalLineIndex;
+  out << "<mrow>" << MathML::leftParenthesis;
+  if (verticalLineIndex == - 1) {
+    out << "<mtable>";
+  } else {
+    out << "<mtable columnlines='";
+    for (int i = 0; i < this->numberOfColumns; i ++) {
+      if (i > 0) {
+        out << " ";
+      }
+      if (i == verticalLineIndex) {
+        out << "solid";
+      } else {
+        out << "none";
+      }
+    }
+    out << "'>";
+  }
+  for (int i = 0; i < this->numberOfRows; i ++) {
+    out << "<mtr>";
+    for (int j = 0; j < this->numberOfColumns; j ++) {
+      coefficientString = (*this)(i, j).toMathML(format);
+      out << "<mtd>" << coefficientString << "</mtd>";
+    }
+    out << "</mtr>";
+  }
+  out << "</mtable>";
+  out << MathML::rightParenthesis << "</mrow>";
   return out.str();
 }
 

@@ -4730,6 +4730,7 @@ void WebServer::initializeMainAll() {
   this->initializeMainRequests();
   this->initializeMainAddresses();
   this->initializeMainMIMETypes();
+  MathML::mapFromLatexToMathMLEquivalents();
 }
 
 extern int mainTest(List<std::string>& remainingArgs);

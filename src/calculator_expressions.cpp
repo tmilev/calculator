@@ -3258,6 +3258,63 @@ bool Expression::toStringData(
   return handler(*this, out, format);
 }
 
+bool Expression::toMathMLData(std::stringstream& out) const {
+  STACK_TRACE("Expression::toMathMLData");
+  if (this->owner == nullptr) {
+    out << "<ms>(non-initialized)</ms>";
+    return true;
+  }
+  if (this->isAtom()) {
+    if (this->isOperationGiven(this->owner->opDifferential())) {
+      out << "<mtext>d</mtext>";
+    } else if (this->isOperationGiven(this->owner->opPhantom())) {
+      out << "";
+    } else if (
+      this->owner->flagUseLnInsteadOfLog &&
+      this->isOperationGiven(this->owner->opLog())
+    ) {
+      out << "<ln/>";
+    } else if (
+      this->data < this->owner->getOperations().size && this->data >= 0
+    ) {
+      std::string latex = this->owner->getOperations()[this->data];
+      out << MathML::latexCommandToMathMLEquivalent(latex);
+    } else {
+      out << "[unknown atom of value " << this->data << "]";
+    }
+    return true;
+  }
+  if (this->isMatrixOfType<RationalFraction<Rational> >()) {
+    FormatExpressions format;
+    this->getContext().getFormat(format);
+    format.flagUseHTML = false;
+    format.flagUseLatex = true;
+    Matrix<RationalFraction<Rational> > matrix;
+    CalculatorConversions::functionGetMatrix(
+      *this->owner, *this, matrix, false
+    );
+    out << matrix.toMathML(&format);
+    return true;
+  }
+  int typeIndex = - 1;
+  if (!this->isBuiltInType(&typeIndex)) {
+    return false;
+  }
+  Calculator& commands = *this->owner;
+  // The following handlers are initialized in
+  // Calculator::initializeToMathMLHandlers.
+  if (!commands.toMathMLDataHandlers.contains(typeIndex)) {
+    return false;
+  }
+  // handler must hold the function pointer:
+  // Expression::toStringBuiltIn<builtInType>,
+  // where builtInType is one of the types registered in
+  // Calculator::initializeToStringHandlers.
+  Expression::ToStringHandler handler =
+  commands.toMathMLDataHandlers.getValueNoFail(typeIndex);
+  return handler(*this, out, nullptr);
+}
+
 std::string Expression::toStringSemiFull() const {
   std::stringstream out;
   if (this->toStringData(out)) {
@@ -3957,6 +4014,35 @@ bool Expression::toStringGeneral(
   }
   if (needParenthesis) {
     out << "\\right)";
+  }
+  return true;
+}
+
+bool Expression::toMathMLGeneral(std::stringstream& out) const {
+  if (this->size() < 2) {
+    return false;
+  }
+  out << (*this)[0].toMathML();
+  bool needParenthesis = true;
+  if (this->size() == 2) {
+    if ((*this)[0].isAtomWhoseExponentsAreInterpretedAsFunction()) {
+      needParenthesis = !(*this)[1].isAtom();
+    }
+    if ((*this)[0].isPowerOfAtomWhoseExponentsAreInterpretedAsFunction()) {
+      needParenthesis = !(*this)[1].isAtom();
+    }
+  }
+  if (needParenthesis) {
+    out << MathML::leftParenthesis;
+  }
+  for (int i = 1; i < this->children.size; i ++) {
+    out << (*this)[i].toMathML();
+    if (i != this->children.size - 1) {
+      out << "<mo>,</mo>";
+    }
+  }
+  if (needParenthesis) {
+    out << MathML::rightParenthesis;
   }
   return true;
 }
@@ -5125,6 +5211,45 @@ bool Expression::toStringWithAtomHandler(
   return false;
 }
 
+bool Expression::toMathMLWithAtomHandler(std::stringstream& out) const {
+  STACK_TRACE("Expression::toMathMLWithAtomHandler");
+  if (!this->isList()) {
+    return false;
+  }
+  if (!(*this)[0].isAtom()) {
+    return false;
+  }
+  int atom = (*this)[0].data;
+  // The handlers are initialized in:
+  // Calculator::initializeToStringHandlers
+  if (this->owner->toMathMLHandlersAtoms.contains(atom)) {
+    Expression::ToStringHandler handler =
+    this->owner->toMathMLHandlersAtoms.getValueNoFail(atom);
+    return handler(*this, out, nullptr);
+  }
+  return false;
+}
+
+bool Expression::toMathMLWithCompositeHandler(std::stringstream& out) const {
+  STACK_TRACE("Expression::toMathMLWithCompositeHandler");
+  if (!this->isList()) {
+    return false;
+  }
+  if (!(*this)[0].isList()) {
+    return false;
+  }
+  if (!(*this)[0][0].isAtom()) {
+    return false;
+  }
+  int atom = (*this)[0][0].data;
+  if (this->owner->toMathMLHandlersComposite.contains(atom)) {
+    Expression::ToStringHandler handler =
+    this->owner->toMathMLHandlersComposite.getValueNoFail(atom);
+    return handler(*this, out, nullptr);
+  }
+  return false;
+}
+
 bool Expression::toStringWithCompositeHandler(
   std::stringstream& out, FormatExpressions* format
 ) const {
@@ -5145,6 +5270,39 @@ bool Expression::toStringWithCompositeHandler(
     return handler(*this, out, format);
   }
   return false;
+}
+
+std::string Expression::toMathML() const {
+  STACK_TRACE("Expression::toMathML");
+  if (this->owner != nullptr) {
+    if (this->owner->recursionDepth + 1 > this->owner->maximumRecursionDepth) {
+      return "<ms>(...)</ms>";
+    }
+  } else {
+    return "<ms>(Error:NoOwner)</ms>";
+  }
+  RecursionDepthCounter recursionCounter;
+  recursionCounter.initialize(&this->owner->recursionDepth);
+  this->checkConsistency();
+  int notationIndex =
+  owner->objectContainer.expressionWithNotation.getIndex(*this);
+  if (notationIndex != - 1) {
+    return owner->objectContainer.expressionNotation[notationIndex];
+  }
+  std::stringstream out;
+  if (this->toMathMLData(out)) {} else if (this->toMathMLWithAtomHandler(out)) {}
+ else if (this->toMathMLWithCompositeHandler(out)) {} else if (
+    this->toStringEndStatement(out, nullptr, nullptr, nullptr)
+  ) {} else if (this->size() == 1) {
+    out << (*this)[0].toMathML();
+  } else if (this->toMathMLGeneral(out)) {} else {
+    out << "<ms>(ProgrammingError:NotDocumented)</ms>";
+  }
+  return out.str();
+}
+
+std::string Expression::toMathMLFinal() const {
+  return MathML::toMathMLFinal(this->toMathML(), this->toString());
 }
 
 std::string Expression::toString(

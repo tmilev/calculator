@@ -127,11 +127,18 @@ public:
   Calculator* owner;
   int data;
   bool flagDeallocated;
-  // ////
+  // A function for transforming an expression to another one.
   typedef bool(*FunctionAddress)(
     Calculator& calculator, const Expression& input, Expression& output
   );
+  // A function that converts an expression to string and writes the string
+  // into the given stream.
   typedef bool(*ToStringHandler)(
+    const Expression& input, std::stringstream& out, FormatExpressions* format
+  );
+  // A function that converts an expression to mathML and writes the string
+  // into the given stream.
+  typedef bool(*ToMathMLHandler)(
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   // ////
@@ -480,6 +487,7 @@ public:
   bool toStringData(
     std::stringstream& out, FormatExpressions* format = nullptr
   ) const;
+  bool toMathMLData(std::stringstream& out) const;
   std::string toStringSemiFull() const;
   std::string toStringFull() const;
   std::string toStringFullWithHints(bool isBuiltInObjectIndex) const;
@@ -492,9 +500,11 @@ public:
   bool toStringWithAtomHandler(
     std::stringstream& out, FormatExpressions* format
   ) const;
+  bool toMathMLWithAtomHandler(std::stringstream& out) const;
   bool toStringWithCompositeHandler(
     std::stringstream& out, FormatExpressions* format
   ) const;
+  bool toMathMLWithCompositeHandler(std::stringstream& out) const;
   static bool toStringLnAbsoluteInsteadOfLogarithm(
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
@@ -669,8 +679,11 @@ public:
     bool unfoldCommandEnclosures = true,
     JSData* outputJS = nullptr
   ) const;
+  std::string toMathML() const;
+  std::string toMathMLFinal() const;
   bool toStringGeneral(std::stringstream& out, FormatExpressions* format)
   const;
+  bool toMathMLGeneral(std::stringstream& out) const;
   std::string toStringWithStartingExpression(
     FormatExpressions* format,
     Expression* startingExpression,
@@ -2140,10 +2153,16 @@ public:
   List<Function*> approximationHandlers;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
   toStringHandlersAtoms;
+  MapList<int, Expression::ToMathMLHandler, HashFunctions::hashFunction>
+  toMathMLHandlersAtoms;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
   toStringHandlersComposite;
+  MapList<int, Expression::ToMathMLHandler, HashFunctions::hashFunction>
+  toMathMLHandlersComposite;
   MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>
   toStringDataHandlers;
+  MapList<int, Expression::ToMathMLHandler, HashFunctions::hashFunction>
+  toMathMLDataHandlers;
   class NamedRuleLocation {
   public:
     // Operation for which the named rule was registered.
@@ -3146,8 +3165,12 @@ public:
     const List<std::string>* parentsThatBanHandler = nullptr
   );
   void addOneStringAtomHandler(int atom, Expression::ToStringHandler handler);
+  void addOneMathMLAtomHandler(int atom, Expression::ToMathMLHandler handler);
   void addOneStringCompositeHandler(
     int atom, Expression::ToStringHandler handler
+  );
+  void addOneMathMLCompositeHandler(
+    int atom, Expression::ToMathMLHandler handler
   );
   void addOneStringHandler(
     int atom,
@@ -3155,9 +3178,16 @@ public:
     MapList<int, Expression::ToStringHandler, HashFunctions::hashFunction>&
     handlerCollection
   );
+  void addOneMathMLHandler(
+    int atom,
+    Expression::ToMathMLHandler handler,
+    MapList<int, Expression::ToMathMLHandler, HashFunctions::hashFunction>&
+    handlerCollection
+  );
   void reset();
   void initialize(Calculator::Mode desiredMode);
   void initializeLogDuration(Calculator::Mode desiredMode);
+  void initializeToMathMLHandlers();
   void initializeToStringHandlers();
   void initializeAtomsThatFreezeArguments();
   void initializeBuiltInsFreezeArguments();

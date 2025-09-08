@@ -10,10 +10,24 @@
 #include "math_vector_partition_functions.h"
 
 std::string SlTwoSubalgebras::descriptionHCharacteristic =
-"Let h be in the Cartan subalgebra. Let \\(\\alpha_1, ..., \\alpha_n\\) "
-"be simple roots with respect to h. "
-"Then the h-characteristic, as defined by E. Dynkin, "
-"is the n-tuple \\((\\alpha_1(h), ..., \\alpha_n(h))\\).";
+"Let \\(h\\) be in the Cartan subalgebra. Let "
+"<math><mrow>" +
+MathML::leftParenthesis +
+"<msub><mi>&alpha;</mi><mn>1</mn></msub>"
+"<mo>,</mo><mo>&#x2026;</mo><mo>,</mo>"
+"<msub><mi>&alpha;</mi><mi>n</mi></msub>" +
+MathML::rightParenthesis +
+"</mrow></math>"
+"be simple roots with respect to <math><mi>h</mi></math>. "
+"Then the <math><mi>h</mi></math>-characteristic, as defined by E. Dynkin, "
+"is the <math><mi>n</mi></math>-tuple "
+"<math><mrow>" +
+MathML::leftParenthesis +
+"<msub><mi>&alpha;</mi><mn>1</mn></msub><mo>(</mo><mi>h</mi><mo>)</mo>"
+"<mo>,</mo><mo>&#x2026;</mo><mo>,</mo>"
+"<msub><mi>&alpha;</mi><mi>n</mi></msub><mo>(</mo><mi>h</mi><mo>)</mo>" +
+MathML::rightParenthesis +
+"</mrow></math>.";
 std::string SlTwoSubalgebras::descriptionHRealization =
 "The actual realization of h. "
 "The coordinates of h are given with "
@@ -107,6 +121,10 @@ std::string SemisimpleLieAlgebra::toStringLieAlgebraNameFullHTML() const {
   << this->weylGroup.dynkinType.toString()
   << "\\)";
   return out.str();
+}
+
+std::string SemisimpleLieAlgebra::toMathMLFinalLieAlgebraName() const {
+  return this->weylGroup.dynkinType.toMathMLFinal(nullptr);
 }
 
 std::string SemisimpleLieAlgebra::toStringLieAlgebraName() const {

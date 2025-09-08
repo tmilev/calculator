@@ -1647,7 +1647,7 @@ std::string LargeInteger::toMathML(
         outputProperties->isNegativeOne = true;
       }
     }
-    out << "<mo>-</mo>";
+    out << MathML::negativeSign;
   }
   if (outputProperties != nullptr) {
     outputProperties->isOne = this->isEqualToOne();

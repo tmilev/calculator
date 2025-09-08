@@ -1378,6 +1378,10 @@ std::string MonomialPolynomial::toMathML(
       continue;
     }
     std::string base = polynomialFormat->polynomialMathMLLetter(i);
+    if (onePower.isEqualToOne()) {
+      out << base;
+      continue;
+    }
     std::string exponentString =
     onePower.toMathML(nullptr, &exponentProperties);
     if (exponentProperties.startsWithMinus) {

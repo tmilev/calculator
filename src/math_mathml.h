@@ -1,10 +1,13 @@
 #ifndef header_math_mathml_ALREADY_INCLUDED
 #define header_math_mathml_ALREADY_INCLUDED
 
+#include "general_lists.h"
+#include "general_maps.h"
 #include <sstream>
 
 // Properties of a printed mathml expression.
-struct MathMLExpressionProperties {
+class MathMLExpressionProperties {
+public:
   bool startsWithMinus;
   bool isNegativeOne;
   bool isOne;
@@ -20,11 +23,47 @@ public:
     const std::string& mathMLContent, const std::string& latex
   );
   static std::string toMathMLInteger(int integer);
+  static std::string latexCommandToMathMLEquivalent(const std::string& input);
+  // Replaces all latex enclosed in
+  // \(\)-delimiters in the input with a mathml equivalent.
+  static std::string processLatex(const std::string& input);
   static std::string leftParenthesis;
   static std::string rightParenthesis;
   static std::string negativeSign;
   static std::string positiveSign;
   static std::string mtableDefault;
+  static MapList<std::string, std::string>& mapFromLatexToMathMLEquivalents();
+};
+
+class LatexOrString {
+public:
+  std::string content;
+  bool isLatex;
+  LatexOrString(
+    const std::string& inputContent = "", bool inputIsLatex = false
+  ):
+  content(inputContent),
+  isLatex(inputIsLatex) {}
+};
+
+class Calculator;
+
+// Replaces all latex enclosed in
+// \(\)-delimiters in the input with a mathml equivalent.
+// This class is to be used once per conversion.
+class MathMLConverter {
+  std::string toBeConverted;
+  List<LatexOrString> elements;
+public:
+  MathMLConverter(const std::string& input): toBeConverted(input) {}
+  std::string convertTextWithLatexTags();
+  static std::string convertLatex(
+    const std::string& input, Calculator& calculator
+  );
+  void extractTags();
+  void addStringOnTop(const std::string& incomingSnippet, bool isLatex);
+  void convertTags();
+  std::string collectConvertedTags();
 };
 
 #endif // header_math_mathml_ALREADY_INCLUDED

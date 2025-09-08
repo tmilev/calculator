@@ -3573,7 +3573,7 @@ std::string FormatExpressions::polynomialLatexLetter(int index) const {
 
 std::string FormatExpressions::polynomialMathMLLetter(int index) const {
   if (index < this->polynomialAlphabet.size) {
-    return this->polynomialAlphabet[index].mathMLLetter;
+    return "<mi>" + this->polynomialAlphabet[index].mathMLLetter + "</mi>";
   }
   std::stringstream out;
   out

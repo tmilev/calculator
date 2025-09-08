@@ -6305,10 +6305,41 @@ void Calculator::addOneStringAtomHandler(
   this->addOneStringHandler(atom, handler, this->toStringHandlersAtoms);
 }
 
+void Calculator::addOneMathMLAtomHandler(
+  int atom, Expression::ToMathMLHandler handler
+) {
+  this->addOneMathMLHandler(atom, handler, this->toMathMLHandlersAtoms);
+}
+
 void Calculator::addOneStringCompositeHandler(
   int atom, Expression::ToStringHandler handler
 ) {
   this->addOneStringHandler(atom, handler, this->toStringHandlersComposite);
+}
+
+void Calculator::addOneMathMLCompositeHandler(
+  int atom, Expression::ToMathMLHandler handler
+) {
+  this->addOneMathMLHandler(atom, handler, this->toMathMLHandlersComposite);
+}
+
+void Calculator::addOneMathMLHandler(
+  int atom,
+  Expression::ToMathMLHandler handler,
+  MapList<int, Expression::ToMathMLHandler, HashFunctions::hashFunction>&
+  handlerCollection
+) {
+  if (handlerCollection.contains(atom)) {
+    if (handlerCollection.getValueNoFail(atom) != handler) {
+      global.fatal
+      << "More than one toStringHandler for atom "
+      << this->operations.keys[atom]
+      << "."
+      << global.fatal;
+    }
+  } else {
+    handlerCollection.setKeyValue(atom, handler);
+  }
 }
 
 void Calculator::addOneStringHandler(
@@ -6328,6 +6359,121 @@ void Calculator::addOneStringHandler(
   } else {
     handlerCollection.setKeyValue(atom, handler);
   }
+}
+
+void Calculator::initializeToMathMLHandlers() {
+  STACK_TRACE("Calculator::initializeToMathMLHandlers");
+  this->addOneMathMLAtomHandler(this->opDefine(), Expression::toStringDefine);
+  this->addOneMathMLAtomHandler(
+    this->opIsDenotedBy(), Expression::toStringIsDenotedBy
+  );
+  this->addOneMathMLAtomHandler(
+    this->opLog(), Expression::toStringLnAbsoluteInsteadOfLogarithm
+  );
+  this->addOneMathMLAtomHandler(
+    this->opLogBase(), Expression::toStringLogBase
+  );
+  this->addOneMathMLAtomHandler(
+    this->opIntervalOpen(), Expression::toStringIntervalOpen
+  );
+  this->addOneMathMLAtomHandler(
+    this->opIntervalRightClosed(), Expression::toStringIntervalRightClosed
+  );
+  this->addOneMathMLAtomHandler(
+    this->opIntervalLeftClosed(), Expression::toStringIntervalLeftClosed
+  );
+  this->addOneMathMLAtomHandler(
+    this->opIntervalClosed(), Expression::toStringIntervalClosed
+  );
+  this->addOneMathMLAtomHandler(this->opQuote(), Expression::toStringQuote);
+  this->addOneMathMLAtomHandler(
+    this->opDefineConditional(), Expression::toStringDefineConditional
+  );
+  this->addOneMathMLAtomHandler(this->opDivide(), Expression::toStringDivide);
+  this->addOneMathMLAtomHandler(this->opTensor(), Expression::toStringTensor);
+  this->addOneMathMLAtomHandler(this->opIn(), Expression::toStringIn);
+  this->addOneMathMLAtomHandler(this->opOr(), Expression::toStringOr);
+  this->addOneMathMLAtomHandler(this->opAnd(), Expression::toStringAnd);
+  this->addOneMathMLAtomHandler(this->opBinom(), Expression::toStringBinom);
+  this->addOneMathMLAtomHandler(
+    this->opUnderscore(), Expression::toStringUnderscore
+  );
+  this->addOneMathMLAtomHandler(
+    this->opSetMinus(), Expression::toStringSetMinus
+  );
+  this->addOneMathMLAtomHandler(
+    this->opLimitBoundary(), Expression::toStringLimitBoundary
+  );
+  this->addOneMathMLAtomHandler(this->opTimes(), Expression::toStringTimes);
+  this->addOneMathMLAtomHandler(
+    this->opCrossProduct(), Expression::toStringCrossProduct
+  );
+  this->addOneMathMLAtomHandler(this->opSqrt(), Expression::toStringSqrt);
+  this->addOneMathMLAtomHandler(
+    this->opFactorial(), Expression::toStringFactorial
+  );
+  this->addOneMathMLAtomHandler(
+    this->opAbsoluteValue(), Expression::toStringAbsoluteValue
+  );
+  this->addOneMathMLAtomHandler(this->opPower(), Expression::toStringPower);
+  this->addOneMathMLAtomHandler(this->opPlus(), Expression::toStringPlus);
+  this->addOneMathMLAtomHandler(
+    this->opDirectSum(), Expression::toStringDirectSum
+  );
+  this->addOneMathMLAtomHandler(this->opMinus(), Expression::toStringMinus);
+  this->addOneMathMLAtomHandler(this->opBind(), Expression::toStringBind);
+  this->addOneMathMLAtomHandler(
+    this->opEqualEqual(), Expression::toStringEqualEqual
+  );
+  this->addOneMathMLAtomHandler(
+    this->opEqualEqualEqual(), Expression::toStringEqualEqualEqual
+  );
+  this->addOneMathMLAtomHandler(
+    this->opDifferentiate(), Expression::toStringDifferentiate
+  );
+  this->addOneMathMLAtomHandler(
+    this->opDifferential(), Expression::toStringDifferential
+  );
+  this->addOneMathMLAtomHandler(
+    this->opSum(), Expression::toStringSumOrIntegral
+  );
+  this->addOneMathMLAtomHandler(
+    this->opIntegral(), Expression::toStringSumOrIntegral
+  );
+  this->addOneMathMLAtomHandler(
+    this->opGreaterThan(), Expression::toStringGreaterThan
+  );
+  this->addOneMathMLAtomHandler(
+    this->opGreaterThanOrEqualTo(), Expression::toStringGreaterThanOrEqualTo
+  );
+  this->addOneMathMLAtomHandler(
+    this->opLessThanOrEqualTo(), Expression::toStringLessThanOrEqualTo
+  );
+  this->addOneMathMLAtomHandler(this->opLimit(), Expression::toStringLimit);
+  this->addOneMathMLAtomHandler(
+    this->opLimitProcess(), Expression::toStringLimitProcess
+  );
+  this->addOneMathMLAtomHandler(
+    this->opLessThan(), Expression::toStringLessThan
+  );
+  this->addOneMathMLAtomHandler(
+    this->opSequence(), Expression::toStringSequence
+  );
+  this->addOneMathMLAtomHandler(
+    this->opLieBracket(), Expression::toStringLieBracket
+  );
+  this->addOneMathMLAtomHandler(this->opMod(), Expression::toStringMod);
+  this->addOneMathMLAtomHandler(this->opUnion(), Expression::toStringUnion);
+  this->addOneMathMLAtomHandler(
+    this->opIntersection(), Expression::toStringIntersection
+  );
+  this->addOneMathMLAtomHandler(
+    this->opUnionNoRepetition(), Expression::toStringUnionNoRepetition
+  );
+  this->addOneMathMLAtomHandler(this->opError(), Expression::toStringError);
+  this->addOneMathMLCompositeHandler(
+    this->opMatrix(), Expression::toStringMatrix
+  );
 }
 
 void Calculator::initializeToStringHandlers() {

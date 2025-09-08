@@ -554,6 +554,9 @@ public:
   static bool toStringUnderscore(
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
+  static bool toMathMLUnderscore(
+    const Expression& input, std::stringstream& out, FormatExpressions* format
+  );
   static bool toStringSetMinus(
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
@@ -644,6 +647,9 @@ public:
   static bool toStringPower(
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
+  static bool toMathMLPower(
+    const Expression& input, std::stringstream& out, FormatExpressions* format
+  );
   static bool toStringFactorial(
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
@@ -688,14 +694,14 @@ public:
   ) const;
   std::string toMathML() const {
     std::stringstream out;
-    this->toMathML(out);
+    this->toMathML(out, nullptr);
     return out.str();
   }
-  void toMathML(std::stringstream& out) const;
+  void toMathML(std::stringstream& out, FormatExpressions* format) const;
   std::string toMathMLFinal() const;
   bool toStringGeneral(std::stringstream& out, FormatExpressions* format)
   const;
-  bool toMathMLGeneral(std::stringstream& out) const;
+  bool toMathMLGeneral(std::stringstream& out, FormatExpressions* format) const;
   std::string toStringWithStartingExpression(
     FormatExpressions* format,
     Expression* startingExpression,

@@ -29,7 +29,9 @@ std::string MathML::toMathMLFinal(
 MapList<std::string, std::string>& MathML::mapFromLatexToMathMLEquivalents() {
   static MapList<std::string, std::string> result;
   if (result.size() == 0) {
-    result.setKeyValue("alpha", "<mi>&alpha;</mi>");
+    result.setKeyValue("\\alpha", "<mi>&alpha;</mi>");
+    result.setKeyValue("\\psi", "<mo>&psi;</mo>");
+    result.setKeyValue("\\dots", "<mo>&mldr;</mo>");
   }
   return result;
 }

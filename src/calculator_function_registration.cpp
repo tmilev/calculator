@@ -6396,7 +6396,7 @@ void Calculator::initializeToMathMLHandlers() {
   this->addOneMathMLAtomHandler(this->opAnd(), Expression::toStringAnd);
   this->addOneMathMLAtomHandler(this->opBinom(), Expression::toStringBinom);
   this->addOneMathMLAtomHandler(
-    this->opUnderscore(), Expression::toStringUnderscore
+    this->opUnderscore(), Expression::toMathMLUnderscore
   );
   this->addOneMathMLAtomHandler(
     this->opSetMinus(), Expression::toStringSetMinus
@@ -6415,7 +6415,7 @@ void Calculator::initializeToMathMLHandlers() {
   this->addOneMathMLAtomHandler(
     this->opAbsoluteValue(), Expression::toStringAbsoluteValue
   );
-  this->addOneMathMLAtomHandler(this->opPower(), Expression::toStringPower);
+  this->addOneMathMLAtomHandler(this->opPower(), Expression::toMathMLPower);
   this->addOneMathMLAtomHandler(this->opPlus(), Expression::toStringPlus);
   this->addOneMathMLAtomHandler(
     this->opDirectSum(), Expression::toStringDirectSum

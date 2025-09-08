@@ -2123,15 +2123,15 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
   << "</div><br>";
   out
   << "<div id='idCartanElementRealization'>"
-  << this->descriptionHRealization
+      << MathML::processLatex( this->descriptionHRealization)
   << "</div>";
   out
   << "<div id='idMinimalContainingRegularSA'>"
-  << this->descriptionMinimalContainingRegularSubalgebras
+      << MathML::processLatex( this->descriptionMinimalContainingRegularSubalgebras)
   << "</div>";
   out
   << "<div id='idModuleDecomposition'>"
-  << this->descriptionModuleDecompositionOverSl2
+      << MathML::processLatex( this->descriptionModuleDecompositionOverSl2)
   << "</div>";
   out
   << "<br><br>"
@@ -2302,7 +2302,7 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   out << this->owner->toHTMLCalculatorMainDiv();
   out
   << MathML::processLatex("<h1>\\(sl{}(2)\\)-subalgebras of ")
-  << MathML::processLatex(this->owner->toStringLieAlgebraNameFullHTML())
+  << MathML::processLatex(this->owner->toHTMLLieAlgebraNameFull())
   << "</h1>";
   out
   << this->owner->toStringHTMLMenuStructureSummary(

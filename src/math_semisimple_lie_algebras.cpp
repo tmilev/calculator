@@ -137,7 +137,7 @@ std::string SemisimpleLieAlgebra::toStringHTMLMenuStructureSummary(
 ) {
   std::stringstream out;
   out << "<div class = 'divPanelSemisimpleLieAlgebraStructure'>";
-  out << this->toStringLieAlgebraNameFullHTML() << "<br>";
+  out << this->toHTMLLieAlgebraNameFull() << "<br>";
   out
   << this->toStringMenuStructurePages(
     relativeTo,
@@ -257,7 +257,7 @@ std::string SemisimpleLieAlgebra::toHTML(
   latexFormat.flagUseHTML = false;
   out
   << "<h1>Lie algebra "
-  << this->toStringLieAlgebraNameFullHTML()
+  << this->toHTMLLieAlgebraNameFull()
   << "</h1>";
   out
   << "<br>Weyl group size: "

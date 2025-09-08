@@ -19,23 +19,23 @@ std::string SlTwoSubalgebras::descriptionHCharacteristic =
 ".";
 std::string SlTwoSubalgebras::descriptionHRealization =
 "The actual realization of h. "
-"The coordinates of h are given with "
+"The coordinates of \\(h\\) are given with "
 "respect to the fixed original simple basis. "
-"Note that the h-characteristic is computed using "
+"Note that the \\(h\\)-characteristic is computed using "
 "<b>a possibly different simple basis</b>, "
 "more precisely, with respect to any h-positive simple basis. ";
 std::string SlTwoSubalgebras::descriptionMinimalContainingRegularSubalgebras =
-"A regular semisimple subalgebra might contain an sl(2) such that the sl(2) "
+"A regular semisimple subalgebra might contain an \\(sl(2)\\) such that it "
 "has no centralizer in the regular semisimple subalgebra, "
 "but the regular semisimple subalgebra might fail to be minimal containing. "
 "This happens when another minimal containing regular semisimple subalgebra "
-"of equal rank nests as a root subalgebra in the containing SA. "
+"of equal rank nests as a root subalgebra in the containing subalgebra. "
 "See Dynkin, Semisimple Lie subalgebras of semisimple "
 "Lie algebras, remark before Theorem 10.4.";
 std::string SlTwoSubalgebras::descriptionModuleDecompositionOverSl2 =
 "The \\(sl(2)\\) submodules of the "
 "ambient Lie algebra are parametrized by their "
-"highest weight with respect to the Cartan element h of \\(sl(2)\\). "
+"highest weight with respect to the Cartan element \\(h\\) of \\(sl(2)\\). "
 "In turn, the highest weight is a positive integer "
 "multiple of the fundamental highest weight \\(\\psi\\). "
 "\\(V_{k\\psi}\\) is \\(k + 1\\)-dimensional. ";
@@ -94,18 +94,18 @@ void SemisimpleLieAlgebra::generateLieSubalgebra(
   }
 }
 
-std::string SemisimpleLieAlgebra::toStringLieAlgebraNameFullHTML() const {
-  STACK_TRACE("SemisimpleLieAlgebra::toStringLieAlgebraNameFullHTML");
+std::string SemisimpleLieAlgebra::toHTMLLieAlgebraNameFull() const {
+  STACK_TRACE("SemisimpleLieAlgebra::toHTMLLieAlgebraNameFull");
   std::stringstream out;
   if (this->weylGroup.dynkinType.hasExceptionalComponent()) {
-    out << "\\(" << this->weylGroup.dynkinType.toString() << "\\)";
+    out << this->weylGroup.dynkinType.toMathMLFinal(nullptr);
     return out.str();
   }
   out
   << this->toStringLieAlgebraNameNonTechnicalHTML()
-  << ", type \\("
-  << this->weylGroup.dynkinType.toString()
-  << "\\)";
+  << ", type "
+  << this->weylGroup.dynkinType.toMathMLFinal(nullptr)
+;
   return out.str();
 }
 
@@ -918,7 +918,7 @@ std::string SemisimpleSubalgebras::toString(
 ) {
   STACK_TRACE("SemisimpleSubalgebras::toString");
   std::stringstream out;
-  out << "<h1>Lie algebra " << this->owner->toStringLieAlgebraNameFullHTML();
+  out << "<h1>Lie algebra " << this->owner->toHTMLLieAlgebraNameFull();
   if (!this->flagRealForms) {
     out << "<br>Semisimple complex Lie subalgebras";
   } else {

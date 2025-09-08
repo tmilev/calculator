@@ -432,7 +432,7 @@ public:
   std::string toMathMLChevalleyGenerator(
     int index, FormatExpressions* polynomialFormat
   ) const;
-  std::string toStringLieAlgebraNameFullHTML() const;
+  std::string toHTMLLieAlgebraNameFull() const;
   std::string toStringLieAlgebraName() const;
   std::string toMathMLFinalLieAlgebraName() const;
   std::string toStringLieAlgebraNameNonTechnicalHTML() const;

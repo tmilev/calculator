@@ -497,6 +497,10 @@ public:
   static bool toStringBuiltIn(
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
+  template <class Type>
+  static bool toMathMLBuiltIn(
+    const Expression& input, std::stringstream& out, FormatExpressions* format
+  );
   bool toStringWithAtomHandler(
     std::stringstream& out, FormatExpressions* format
   ) const;
@@ -575,6 +579,9 @@ public:
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringSequence(
+    const Expression& input, std::stringstream& out, FormatExpressions* format
+  );
+  static bool toMathMLSequence(
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringLieBracket(
@@ -679,7 +686,12 @@ public:
     bool unfoldCommandEnclosures = true,
     JSData* outputJS = nullptr
   ) const;
-  std::string toMathML() const;
+  std::string toMathML() const {
+    std::stringstream out;
+    this->toMathML(out);
+    return out.str();
+  }
+  void toMathML(std::stringstream& out) const;
   std::string toMathMLFinal() const;
   bool toStringGeneral(std::stringstream& out, FormatExpressions* format)
   const;
@@ -4307,6 +4319,11 @@ void Calculator::addOneBuiltInHandler() {
     Expression::toStringBuiltIn<Type>,
     this->toStringDataHandlers
   );
+  this->addOneMathMLHandler(
+    typeConverter.getBuiltInType<Type>(),
+    Expression::toMathMLBuiltIn<Type>,
+    this->toMathMLDataHandlers
+  );
 }
 
 template <class Coefficient>
@@ -4683,6 +4700,22 @@ template <class Type>
 int Expression::getBuiltInType() const {
   this->checkInitialization();
   return this->owner->builtInCode<Type>();
+}
+
+template <class Type>
+bool Expression::toMathMLBuiltIn(
+  const Expression& input, std::stringstream& out, FormatExpressions* format
+) {
+  STACK_TRACE("Expression::toMathMLBuiltIn");
+  (void) out;
+  (void) format;
+  global.fatal
+  << "Please implement toMathMLBuiltIn[YourType] "
+  << "in file calculator_expressions_mathml.cpp. "
+  << "Type: "
+  << input.owner->builtInName<Type>()
+  << global.fatal;
+  return true;
 }
 
 template <class Type>

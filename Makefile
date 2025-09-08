@@ -143,6 +143,7 @@ SOURCES_RELATIVE_PATH=\
     calculator_educational_functions_1.cpp \
     calculator_expressions.cpp \
     calculator_expression_context.cpp \
+    calculator_expressions_mathml.cpp \
     calculator_expressions_test.cpp \
     calculator_evaluation_steps.cpp \
     calculator_lie_theory.cpp \

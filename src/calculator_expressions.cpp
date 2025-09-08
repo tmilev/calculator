@@ -3244,8 +3244,9 @@ bool Expression::toStringData(
     return false;
   }
   Calculator& commands = *this->owner;
-  // The following handlers are initialized in
-  // Calculator::initializeToStringHandlers.
+  // The following handlers are initialized by
+  // calling Calculator::addBuiltInType
+  // in Calculator::initialize.
   if (!commands.toStringDataHandlers.contains(typeIndex)) {
     return false;
   }
@@ -3301,8 +3302,9 @@ bool Expression::toMathMLData(std::stringstream& out) const {
     return false;
   }
   Calculator& commands = *this->owner;
-  // The following handlers are initialized in
-  // Calculator::initializeToMathMLHandlers.
+  // The following handlers are initialized by
+  // calling Calculator::addBuiltInType
+  // in Calculator::initialize.
   if (!commands.toMathMLDataHandlers.contains(typeIndex)) {
     return false;
   }
@@ -5272,14 +5274,16 @@ bool Expression::toStringWithCompositeHandler(
   return false;
 }
 
-std::string Expression::toMathML() const {
+void Expression::toMathML(std::stringstream& out) const {
   STACK_TRACE("Expression::toMathML");
   if (this->owner != nullptr) {
     if (this->owner->recursionDepth + 1 > this->owner->maximumRecursionDepth) {
-      return "<ms>(...)</ms>";
+      out << "<ms>(...)</ms>";
+      return;
     }
   } else {
-    return "<ms>(Error:NoOwner)</ms>";
+    out << "<ms>(Error:NoOwner)</ms>";
+    return;
   }
   RecursionDepthCounter recursionCounter;
   recursionCounter.initialize(&this->owner->recursionDepth);
@@ -5287,18 +5291,17 @@ std::string Expression::toMathML() const {
   int notationIndex =
   owner->objectContainer.expressionWithNotation.getIndex(*this);
   if (notationIndex != - 1) {
-    return owner->objectContainer.expressionNotation[notationIndex];
+    out << owner->objectContainer.expressionNotation[notationIndex];
+    return;
   }
-  std::stringstream out;
   if (this->toMathMLData(out)) {} else if (this->toMathMLWithAtomHandler(out)) {}
  else if (this->toMathMLWithCompositeHandler(out)) {} else if (
     this->toStringEndStatement(out, nullptr, nullptr, nullptr)
   ) {} else if (this->size() == 1) {
-    out << (*this)[0].toMathML();
+    (*this)[0].toMathML(out);
   } else if (this->toMathMLGeneral(out)) {} else {
     out << "<ms>(ProgrammingError:NotDocumented)</ms>";
   }
-  return out.str();
 }
 
 std::string Expression::toMathMLFinal() const {

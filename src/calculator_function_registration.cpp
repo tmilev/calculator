@@ -6457,7 +6457,7 @@ void Calculator::initializeToMathMLHandlers() {
     this->opLessThan(), Expression::toStringLessThan
   );
   this->addOneMathMLAtomHandler(
-    this->opSequence(), Expression::toStringSequence
+    this->opSequence(), Expression::toMathMLSequence
   );
   this->addOneMathMLAtomHandler(
     this->opLieBracket(), Expression::toStringLieBracket

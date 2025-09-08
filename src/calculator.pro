@@ -695,6 +695,7 @@ SOURCES += \
     calculator_conversions_1.cpp \
     calculator_educational_functions_1.cpp \
     calculator_expressions.cpp \
+  calculator_expressions_mathml.cpp \
     calculator_finite_group_characters.cpp \
     calculator_function_registration.cpp \
     calculator_function_registration_extra.cpp \

@@ -37,7 +37,7 @@ MapList<std::string, std::string>& MathML::mapFromLatexToMathMLEquivalents() {
 std::string MathML::latexCommandToMathMLEquivalent(const std::string& input) {
   MapList<std::string, std::string>& map =
   MathML::mapFromLatexToMathMLEquivalents();
-  return map.getValue(input, input);
+  return map.getValue(input, "<mi>" + input + "</mi>");
 }
 
 std::string MathML::toMathMLInteger(int integer) {
@@ -114,7 +114,7 @@ void MathMLConverter::addStringOnTop(
 }
 
 void MathMLConverter::convertTags() {
-  Calculator calculator;
+  Calculator& calculator = this->converterCalculator();
   for (LatexOrString& latexOrString : this->elements) {
     if (!latexOrString.isLatex) {
       continue;
@@ -141,4 +141,12 @@ std::string MathMLConverter::collectConvertedTags() {
     out << latexOrString.content;
   }
   return out.str();
+}
+
+Calculator& MathMLConverter::converterCalculator() {
+  static Calculator result;
+  if (result.operations.size() == 0) {
+    result.initialize(Calculator::Mode::educational);
+  }
+  return result;
 }

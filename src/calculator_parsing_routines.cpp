@@ -451,7 +451,6 @@ void Calculator::reset() {
   this->flagUseBracketsForIntervals = false;
   this->maximumLatexChars = 2000;
   this->objectContainer.reset();
-  // this->logEvaluationSteps.setSize(0);
   this->operations.clear();
   this->allBuiltInTypes.clear();
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.clear();

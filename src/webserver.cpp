@@ -4731,6 +4731,7 @@ void WebServer::initializeMainAll() {
   this->initializeMainAddresses();
   this->initializeMainMIMETypes();
   MathML::mapFromLatexToMathMLEquivalents();
+  MathMLConverter::converterCalculator();
 }
 
 extern int mainTest(List<std::string>& remainingArgs);

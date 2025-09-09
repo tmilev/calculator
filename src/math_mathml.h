@@ -6,12 +6,12 @@
 #include <sstream>
 
 // Properties of a printed mathml expression.
-class MathMLExpressionProperties {
+class MathExpressionProperties {
 public:
   bool startsWithMinus;
   bool isNegativeOne;
   bool isOne;
-  MathMLExpressionProperties():
+  MathExpressionProperties():
   startsWithMinus(false),
   isNegativeOne(false),
   isOne(false) {}

@@ -255,10 +255,7 @@ std::string SemisimpleLieAlgebra::toHTML(
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
-  out
-  << "<h1>Lie algebra "
-  << this->toHTMLLieAlgebraNameFull()
-  << "</h1>";
+  out << "<h1>Lie algebra " << this->toHTMLLieAlgebraNameFull() << "</h1>";
   out
   << "<br>Weyl group size: "
   << this->weylGroup.group.getSize().toString()
@@ -1940,7 +1937,7 @@ bool ChevalleyGenerator::isInRootSpace(Vector<Rational>* whichRootSpace) const {
 }
 
 std::string ChevalleyGenerator::toMathML(
-  FormatExpressions* inputFormat, MathMLExpressionProperties* outputProperties
+  FormatExpressions* inputFormat, MathExpressionProperties* outputProperties
 ) const {
   this->checkInitialization();
   if (outputProperties != nullptr) {

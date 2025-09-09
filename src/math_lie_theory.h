@@ -56,7 +56,7 @@ public:
   std::string toString(FormatExpressions* inputFormat = nullptr) const;
   std::string toMathML(
     FormatExpressions* inputFormat = nullptr,
-    MathMLExpressionProperties* outputProperties = nullptr
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   void checkConsistencyWithOther(const ChevalleyGenerator& other) const;
   bool operator==(const ChevalleyGenerator& other) const {
@@ -182,7 +182,7 @@ public:
   std::string toMathMLFinal(FormatExpressions* format) const;
   std::string toMathML(
     FormatExpressions* format,
-    MathMLExpressionProperties* outputProperties = nullptr
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other) const;

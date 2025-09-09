@@ -104,8 +104,7 @@ std::string SemisimpleLieAlgebra::toHTMLLieAlgebraNameFull() const {
   out
   << this->toStringLieAlgebraNameNonTechnicalHTML()
   << ", type "
-  << this->weylGroup.dynkinType.toMathMLFinal(nullptr)
-;
+  << this->weylGroup.dynkinType.toMathMLFinal(nullptr);
   return out.str();
 }
 

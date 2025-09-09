@@ -6409,7 +6409,7 @@ std::string DynkinSimpleType::toStringNonTechnicalName(
 }
 
 std::string DynkinSimpleType::toMathML(
-  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+  FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) outputProperties;
   bool hasAmbient = false;

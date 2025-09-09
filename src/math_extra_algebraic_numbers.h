@@ -192,7 +192,7 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toMathML(
     FormatExpressions* format = nullptr,
-    MathMLExpressionProperties* outputProperties = nullptr
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   std::string toStringNonInjected(FormatExpressions* format = nullptr) const;
   class Test {

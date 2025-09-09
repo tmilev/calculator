@@ -1633,7 +1633,7 @@ void LargeInteger::toString(std::string& output) const {
 }
 
 std::string LargeInteger::toMathML(
-  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+  FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) format;
   if (this->isEqualToZero()) {
@@ -2518,7 +2518,7 @@ bool Rational::isGreaterThanOrEqualTo(const Rational& right) const {
 }
 
 std::string Rational::toMathML(
-  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+  FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) format;
   std::stringstream out;

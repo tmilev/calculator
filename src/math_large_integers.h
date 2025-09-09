@@ -280,7 +280,7 @@ public:
   }
   std::string toMathML(
     FormatExpressions* format = nullptr,
-    MathMLExpressionProperties* outputProperties = nullptr
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   bool isIntegerFittingInInt(int* whichInt);
   bool isPositive() const {
@@ -701,7 +701,7 @@ public:
   }
   std::string toMathML(
     FormatExpressions* format = nullptr,
-    MathMLExpressionProperties* outputProperties = nullptr
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringFrac() const;

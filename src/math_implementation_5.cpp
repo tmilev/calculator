@@ -1358,7 +1358,7 @@ bool Cone::isInInterior(const Vector<Rational>& point) const {
 
 std::string MonomialPolynomial::toMathML(
   FormatExpressions* polynomialFormat,
-  MathMLExpressionProperties* outputProperties
+  MathExpressionProperties* outputProperties
 ) const {
   std::stringstream out;
   MemorySaving<FormatExpressions> formatContainer;
@@ -1371,7 +1371,7 @@ std::string MonomialPolynomial::toMathML(
     }
     return "<mi>1</mi>";
   }
-  MathMLExpressionProperties exponentProperties;
+  MathExpressionProperties exponentProperties;
   for (int i = 0; i < this->monomialBody.size; i ++) {
     const Rational& onePower = this->monomialBody[i];
     if (onePower.isEqualToZero()) {

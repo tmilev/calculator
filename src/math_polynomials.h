@@ -90,7 +90,7 @@ public:
   std::string toString(FormatExpressions* polynomialFormat = nullptr) const;
   std::string toMathML(
     FormatExpressions* polynomialFormat = nullptr,
-    MathMLExpressionProperties* outputProperties = nullptr
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   void makeFromPowers(const Vector<Rational>& inputMonomialBody);
   void makeOne() {

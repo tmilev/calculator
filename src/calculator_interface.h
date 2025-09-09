@@ -134,12 +134,18 @@ public:
   // A function that converts an expression to string and writes the string
   // into the given stream.
   typedef bool(*ToStringHandler)(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
   );
   // A function that converts an expression to mathML and writes the string
   // into the given stream.
   typedef bool(*ToMathMLHandler)(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
   );
   // ////
   friend std::ostream& operator<<(
@@ -487,7 +493,11 @@ public:
   bool toStringData(
     std::stringstream& out, FormatExpressions* format = nullptr
   ) const;
-  bool toMathMLData(std::stringstream& out) const;
+  bool toMathMLData(
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+  ) const;
   std::string toStringSemiFull() const;
   std::string toStringFull() const;
   std::string toStringFullWithHints(bool isBuiltInObjectIndex) const;
@@ -495,25 +505,43 @@ public:
   std::string toUTF8String(FormatExpressions* format = nullptr) const;
   template <class Type>
   static bool toStringBuiltIn(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   template <class Type>
   static bool toMathMLBuiltIn(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   bool toStringWithAtomHandler(
     std::stringstream& out, FormatExpressions* format
   ) const;
-  bool toMathMLWithAtomHandler(std::stringstream& out) const;
-  bool toStringWithCompositeHandler(
-    std::stringstream& out, FormatExpressions* format
+  bool toMathMLWithAtomHandler(
+    std::stringstream& out, MathExpressionProperties* outputProperties
   ) const;
-  bool toMathMLWithCompositeHandler(std::stringstream& out) const;
+  bool toStringWithCompositeHandler(
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+  ) const;
+  bool toMathMLWithCompositeHandler(
+    std::stringstream& out, MathExpressionProperties* outputProperties
+  ) const;
   static bool toStringLnAbsoluteInsteadOfLogarithm(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringDifferential(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringDifferential2(
     const Expression& input, std::stringstream& out, FormatExpressions* format
@@ -522,103 +550,208 @@ public:
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringDifferentiate(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringDefine(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
   );
   static bool toStringIsDenotedBy(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringLogBase(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringQuote(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringDefineConditional(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringTensor(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringIn(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringAnd(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringBinom(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringUnderscore(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toMathMLUnderscore(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringSetMinus(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringLimitBoundary(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringCrossProduct(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringAbsoluteValue(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringBind(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringMod(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringPlus(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringMatrix(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringSequence(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toMathMLSequence(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
   );
   static bool toStringLieBracket(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringSumOrIntegral(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringGreaterThan(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringGreaterThanOrEqualTo(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringLessThanOrEqualTo(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringDirectSum(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringLimitProcess(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringLessThan(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringLimit(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringTimes(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
+  static bool toMathMLTimes(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringSqrt(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringSqrt2(
     const Expression& input, std::stringstream& out, FormatExpressions* format
@@ -627,37 +760,70 @@ public:
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringOr(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringIntervalOpen(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringIntervalLeftClosed(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringIntervalRightClosed(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringIntervalClosed(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringDivide(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringPower(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toMathMLPower(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringFactorial(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringUnion(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringMinus(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringMinus2(
     const Expression& input, std::stringstream& out, FormatExpressions* format
@@ -666,19 +832,34 @@ public:
     const Expression& input, std::stringstream& out, FormatExpressions* format
   );
   static bool toStringIntersection(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringUnionNoRepetition(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringEqualEqual(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringEqualEqualEqual(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringError(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
   );
   void toStringOpMultiplicative(
     std::stringstream& out,
@@ -692,16 +873,26 @@ public:
     bool unfoldCommandEnclosures = true,
     JSData* outputJS = nullptr
   ) const;
-  std::string toMathML() const {
+  std::string toMathML(
+    FormatExpressions* format, MathExpressionProperties* outputProperties
+  ) const {
     std::stringstream out;
-    this->toMathML(out, nullptr);
+    this->toMathML(out, format, outputProperties);
     return out.str();
   }
-  void toMathML(std::stringstream& out, FormatExpressions* format) const;
+  void toMathML(
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+  ) const;
   std::string toMathMLFinal() const;
   bool toStringGeneral(std::stringstream& out, FormatExpressions* format)
   const;
-  bool toMathMLGeneral(std::stringstream& out, FormatExpressions* format) const;
+  bool toMathMLGeneral(
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+  ) const;
   std::string toStringWithStartingExpression(
     FormatExpressions* format,
     Expression* startingExpression,
@@ -862,6 +1053,7 @@ public:
   void substituteRecursivelyInChildren(
     MapList<Expression, Expression>& substitutions
   );
+  static void initializeToMathMLHandlers(Calculator& toBeInitialized);
   class Test {
   public:
     static bool all();
@@ -3205,7 +3397,6 @@ public:
   void reset();
   void initialize(Calculator::Mode desiredMode);
   void initializeLogDuration(Calculator::Mode desiredMode);
-  void initializeToMathMLHandlers();
   void initializeToStringHandlers();
   void initializeAtomsThatFreezeArguments();
   void initializeBuiltInsFreezeArguments();
@@ -4710,11 +4901,15 @@ int Expression::getBuiltInType() const {
 
 template <class Type>
 bool Expression::toMathMLBuiltIn(
-  const Expression& input, std::stringstream& out, FormatExpressions* format
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
 ) {
   STACK_TRACE("Expression::toMathMLBuiltIn");
   (void) out;
   (void) format;
+  (void) outputProperties;
   global.fatal
   << "Please implement toMathMLBuiltIn[YourType] "
   << "in file calculator_expressions_mathml.cpp. "
@@ -4726,11 +4921,15 @@ bool Expression::toMathMLBuiltIn(
 
 template <class Type>
 bool Expression::toStringBuiltIn(
-  const Expression& input, std::stringstream& out, FormatExpressions* format
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
 ) {
   STACK_TRACE("Expression::toStringBuiltIn");
   (void) out;
   (void) format;
+  (void) outputProperties;
   global.fatal
   << "Please implement toStringBuiltIn[YourType] "
   << "in file calculator_expressions.cpp. "

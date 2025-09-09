@@ -609,7 +609,7 @@ public:
   }
   std::string toMathML(
     FormatExpressions* format = nullptr,
-    MathMLExpressionProperties* outputProperties = nullptr
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringLatex(FormatExpressions* format = nullptr) const;
@@ -2039,7 +2039,7 @@ public:
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toMathML(
     FormatExpressions* format = nullptr,
-    MathMLExpressionProperties* outputProperties = nullptr
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   unsigned int hashFunction() const {
     return static_cast<unsigned int>(this->monomialIndex);
@@ -2975,7 +2975,7 @@ std::string Matrix<Coefficient>::toStringSystemLatex(
 
 template <typename Coefficient>
 std::string Matrix<Coefficient>::toMathML(
-  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+  FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) outputProperties;
   std::stringstream out;

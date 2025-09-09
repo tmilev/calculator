@@ -39,7 +39,7 @@ private:
     FormatExpressions* format,
     const std::string& customCoefficientMonomialSeparator,
     List<std::string>& rowOutputs,
-    MathMLExpressionProperties& outputProperties
+    MathExpressionProperties& outputProperties
   ) const;
 public:
   HashedList<TemplateMonomial> monomials;
@@ -82,7 +82,7 @@ public:
   }
   std::string toMathML(
     FormatExpressions* format,
-    MathMLExpressionProperties* outputProperties = nullptr
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   std::string toMathMLFinal(FormatExpressions* format) const;
   int size() const {
@@ -1318,10 +1318,10 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
   FormatExpressions* format,
   const std::string& customCoefficientMonomialSeparator,
   List<std::string>& rowOutputs,
-  MathMLExpressionProperties& outputProperties
+  MathExpressionProperties& outputProperties
 ) const {
-  MathMLExpressionProperties coefficientProperites;
-  MathMLExpressionProperties monomialProperties;
+  MathExpressionProperties coefficientProperites;
+  MathExpressionProperties monomialProperties;
   rowOutputs.clear();
   std::string coefficientString;
   std::string monomialString;
@@ -1392,7 +1392,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathMLFinal(
 
 template <class TemplateMonomial, class Coefficient>
 std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
-  FormatExpressions* format, MathMLExpressionProperties* outputProperties
+  FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   STACK_TRACE("LinearCombination::toMathML");
   if (this->size() == 0) {
@@ -1429,7 +1429,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
     int coefficientIndex = this->monomials.getIndex(monomial);
     Coefficient& coefficient = this->coefficients[coefficientIndex];
     List<std::string> termStrings;
-    MathMLExpressionProperties termProperties;
+    MathExpressionProperties termProperties;
     this->termToMathML(
       coefficient, monomial, format, customTimes, termStrings, termProperties
     );

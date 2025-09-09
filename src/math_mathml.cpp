@@ -101,7 +101,6 @@ void MathMLConverter::extractTags() {
   }
   if (hasPrevious) {
     current.push_back(previous);
-    hasPrevious = false;
   }
   this->addStringOnTop(current, isLatex);
 }

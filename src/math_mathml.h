@@ -11,10 +11,16 @@ public:
   bool startsWithMinus;
   bool isNegativeOne;
   bool isOne;
+  bool startsWithDigit;
+  bool endsWithDigit;
+  bool startsWithFraction;
   MathExpressionProperties():
   startsWithMinus(false),
   isNegativeOne(false),
-  isOne(false) {}
+  isOne(false),
+  startsWithDigit(false),
+  endsWithDigit(false),
+  startsWithFraction(false) {}
 };
 
 class MathML {

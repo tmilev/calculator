@@ -93,7 +93,7 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
     toBeInitialized.opPower(), Expression::toMathMLPower
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opPlus(), Expression::toStringPlus
+    toBeInitialized.opPlus(), Expression::toMathMLPlus
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opDirectSum(), Expression::toStringDirectSum
@@ -451,28 +451,29 @@ bool Expression::toMathMLTimes(
   FormatExpressions* format,
   MathExpressionProperties* outputProperties
 ) {
+  (void) outputProperties;
   if (!input.startsWith(input.owner->opTimes(), 3)) {
     return false;
   }
+  MathExpressionProperties secondExpressionProperties;
+  MathExpressionProperties firstExpressionProperties;
   std::string secondExpressionMathML =
-  input[2].toMathML(format, outputProperties);
-  std::string secondExpressionString = input[2].toString();
+  input[2].toMathML(format, &secondExpressionProperties);
   if (input[1].isOperationGiven(input.owner->opSqrt())) {
     // A malformed expression such as: "\sqrt 3" will be parsed as "sqrt * 3"
     // and later corrected to "\sqrt{3}".
     out << "<msqrt>" << secondExpressionMathML << "</msqrt>";
     return true;
   }
-  std::string firstExpression = input[1].toMathML(format, outputProperties);
+  std::string firstExpression =
+  input[1].toMathML(format, &firstExpressionProperties);
   bool firstNeedsBrackets = input[1].needsParenthesisForMultiplication();
   bool secondNeedsBrackets =
   input[2].needsParenthesisForMultiplicationWhenSittingOnTheRightMost(
     &(input[1])
   );
-  if (secondExpressionString.size() > 0) {
-    if (secondExpressionString[0] == '-') {
-      secondNeedsBrackets = true;
-    }
+  if (secondExpressionProperties.startsWithMinus) {
+    secondNeedsBrackets = true;
   }
   bool mustHaveTimes = false;
   bool collapseUnits = true;
@@ -480,52 +481,99 @@ bool Expression::toMathMLTimes(
     collapseUnits = !format->flagDontCollalpseProductsByUnits;
   }
   if (collapseUnits) {
-    if (firstExpression == "-1" || firstExpression == "- 1") {
-      firstExpression = "-";
+    if (firstExpressionProperties.isNegativeOne) {
+      firstExpression = MathML::negativeSign;
       firstNeedsBrackets = false;
     }
-    if (firstExpression == "1") {
+    if (firstExpressionProperties.isOne) {
       firstExpression = "";
     }
   }
+  bool needsRow = !firstExpressionProperties.isOne &&
+  !secondExpressionProperties.isOne;
+  if (needsRow) {
+    out << "<mrow>";
+  }
   if (firstNeedsBrackets) {
-    out << "\\left(" << firstExpression << "\\right)";
+    out
+    << MathML::leftParenthesis
+    << firstExpression
+    << MathML::rightParenthesis;
   } else {
     out << firstExpression;
   }
-  bool mustHaveSpace = true;
   if (
     !firstNeedsBrackets &&
     !secondNeedsBrackets &&
     firstExpression != "" &&
-    firstExpression != "-"
+    firstExpressionProperties.isNegativeOne
   ) {
-    if (MathRoutines::isDigit(secondExpressionString[0])) {
+    if (secondExpressionProperties.startsWithDigit) {
       mustHaveTimes = true;
     }
-    if (MathRoutines::isDigit(firstExpression[firstExpression.size() - 1])) {
-      if (StringRoutines::stringBeginsWith(secondExpressionString, "\\frac")) {
+    if (firstExpressionProperties.endsWithDigit) {
+      if (secondExpressionProperties.startsWithFraction) {
         mustHaveTimes = true;
       }
     }
   }
-  if (
-    firstNeedsBrackets ||
-    mustHaveTimes ||
-    firstExpression == "" ||
-    firstExpression == "-"
-  ) {
-    mustHaveSpace = false;
-  }
   if (mustHaveTimes) {
-    out << "\\cdot ";
-  } else if (mustHaveSpace) {
-    out << " ";
+    out << "<mo>&sdot;</mo>";
   }
   if (secondNeedsBrackets) {
-    out << "\\left(" << secondExpressionString << "\\right)";
+    out
+    << MathML::leftParenthesis
+    << secondExpressionMathML
+    << MathML::rightParenthesis;
   } else {
-    out << secondExpressionString;
+    out << secondExpressionMathML;
   }
+  if (needsRow) {
+    out << "</mrow>";
+  }
+  return true;
+}
+
+bool Expression::toMathMLPlus(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opPlus())) {
+    return false;
+  }
+  if (input.size() < 3) {
+    global.fatal
+    << "Plus operation takes at least 2 arguments, "
+    << "whereas this expression has "
+    << input.children.size - 1
+    << " arguments. "
+    << global.fatal;
+  }
+  input.checkInitialization();
+  List<Expression> summands;
+  input.owner->collectOpands(input, input.owner->opPlus(), summands);
+  out << "<mrow>";
+  for (int i = 0; i < summands.size; i ++) {
+    const Expression& summand = summands[i];
+    bool needsParenthesesForAddition = summand.needsParenthesisForAddition();
+    MathExpressionProperties properties;
+    std::string summandString = summand.toMathML(format, &properties);
+    if (i > 0) {
+      if (needsParenthesesForAddition || !properties.startsWithMinus) {
+        out << "<mo>+</mo>";
+      }
+    }
+    if (needsParenthesesForAddition) {
+      out << MathML::leftParenthesis;
+    }
+    out << summandString;
+    if (needsParenthesesForAddition) {
+      out << MathML::rightParenthesis;
+    }
+  }
+  out << "</mrow>";
   return true;
 }

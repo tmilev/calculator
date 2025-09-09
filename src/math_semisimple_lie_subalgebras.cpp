@@ -25,7 +25,7 @@ std::string SlTwoSubalgebras::descriptionHRealization =
 "<b>a possibly different simple basis</b>, "
 "more precisely, with respect to any h-positive simple basis. ";
 std::string SlTwoSubalgebras::descriptionMinimalContainingRegularSubalgebras =
-"A regular semisimple subalgebra might contain an \\(sl(2)\\) such that it "
+"A regular semisimple subalgebra might contain an \\(sl{}(2)\\) such that it "
 "has no centralizer in the regular semisimple subalgebra, "
 "but the regular semisimple subalgebra might fail to be minimal containing. "
 "This happens when another minimal containing regular semisimple subalgebra "
@@ -33,9 +33,9 @@ std::string SlTwoSubalgebras::descriptionMinimalContainingRegularSubalgebras =
 "See Dynkin, Semisimple Lie subalgebras of semisimple "
 "Lie algebras, remark before Theorem 10.4.";
 std::string SlTwoSubalgebras::descriptionModuleDecompositionOverSl2 =
-"The \\(sl(2)\\) submodules of the "
+"The \\(sl{}(2)\\) submodules of the "
 "ambient Lie algebra are parametrized by their "
-"highest weight with respect to the Cartan element \\(h\\) of \\(sl(2)\\). "
+"highest weight with respect to the Cartan element \\(h\\) of \\(sl{}(2)\\). "
 "In turn, the highest weight is a positive integer "
 "multiple of the fundamental highest weight \\(\\psi\\). "
 "\\(V_{k\\psi}\\) is \\(k + 1\\)-dimensional. ";

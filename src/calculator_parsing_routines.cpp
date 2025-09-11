@@ -17,7 +17,6 @@ std::string SyntacticElement::getIntegerStringCrashIfNot(
   return result;
 }
 
-
 bool SyntacticElement::isCommandEnclosure() const {
   Calculator* owner = this->data.owner;
   if (this->data.owner == nullptr) {
@@ -1353,8 +1352,12 @@ bool CalculatorParser::setStackValue(
   return true;
 }
 
-bool CalculatorParser::isFontModifier(const std::string& input)const{
-  return input == "\\mathbb" || input=="\\mathbf"|| input=="\\mathfrak" ||  input=="\\mathcal";
+bool CalculatorParser::isFontModifier(const std::string& input) const {
+  return
+  input == "\\mathbb" ||
+  input == "\\mathbf" ||
+  input == "\\mathfrak" ||
+  input == "\\mathcal";
 }
 
 bool CalculatorParser::isInterpretedAsEmptySpace(const std::string& input) {
@@ -3279,13 +3282,11 @@ bool CalculatorParser::applyOneRule() {
   ];
   const std::string& thirdToLastS =
   this->controlSequences[thirdToLastE.controlIndex];
-  const SyntacticElement& fourthToLastE = (*this->currentSyntacticStack)[(
-      *this->currentSyntacticStack
-    ).size -
-    4
-  ];
+  const SyntacticElement& fourthToLastExpression = (
+    *this->currentSyntacticStack
+  )[(*this->currentSyntacticStack).size - 4];
   const std::string& fourthToLastS =
-  this->controlSequences[fourthToLastE.controlIndex];
+  this->controlSequences[fourthToLastExpression.controlIndex];
   const SyntacticElement& fifthToLastE = (*this->currentSyntacticStack)[(
       *this->currentSyntacticStack
     ).size -
@@ -3501,8 +3502,6 @@ bool CalculatorParser::applyOneRule() {
     this->setStackValue(underscore, "\\int^{*}", - 4);
     return this->decreaseStackExceptLast(2);
   }
-
-
   if (
     thirdToLastS == "\\int_{*}" &&
     secondToLastS == "^" &&
@@ -3528,7 +3527,7 @@ bool CalculatorParser::applyOneRule() {
     exponent.makeXOX(
       *this->owner,
       this->owner->opPower(),
-      fourthToLastE.data,
+      fourthToLastExpression.data,
       secondToLastE.data
     );
     this->setStackValue(exponent, "\\int_{*}^{**}", - 4);
@@ -3560,7 +3559,7 @@ bool CalculatorParser::applyOneRule() {
     underscore.makeXOX(
       *this->owner,
       this->owner->opUnderscore(),
-      fourthToLastE.data,
+      fourthToLastExpression.data,
       secondToLastE.data
     );
     this->lastRuleName = "\\int^{*} _ Expression --> \\int^{*}_{**}";
@@ -3607,20 +3606,41 @@ bool CalculatorParser::applyOneRule() {
   ) {
     return this->replaceXXVXdotsXbyE_BOUND_XdotsX(2);
   }
-  if (this->isFontModifier( secondToLastS) && lastS == "Variable"){
+  if (this->isFontModifier(secondToLastS) && lastS == "Variable") {
     std::string variable;
     std::string fontModifier;
-    if (lastExpression.data.isOperation(& variable) && secondToLastE.data.isOperation(&fontModifier) && variable.size() < 10){
+    if (
+      lastExpression.data.isOperation(&variable) &&
+      secondToLastE.data.isOperation(&fontModifier) &&
+      variable.size() < 10
+    ) {
       Expression newElement;
-      newElement.makeAtom(*this->owner, secondToLastS + "{"+variable+"}");
-      this->setStackValue(newElement,"Expression", -2 );
+      newElement.makeAtom(*this->owner, secondToLastS + "{" + variable + "}");
+      this->setStackValue(newElement, "Expression", - 2);
       this->lastRuleName = "mathbb variable -> expression";
       return this->decreaseStack(1);
-
     }
-
   }
-
+  if (
+    this->isFontModifier(fourthToLastS) &&
+    thirdToLastS == "{" &&
+    secondToLastS == "Variable" &&
+    lastS == "}"
+  ) {
+    std::string variable;
+    std::string fontModifier;
+    if (
+      secondToLastE.data.isOperation(&variable) &&
+      fourthToLastExpression.data.isOperation(&fontModifier) &&
+      variable.size() < 10
+    ) {
+      Expression newElement;
+      newElement.makeAtom(*this->owner, fourthToLastS + "{" + variable + "}");
+      this->setStackValue(newElement, "Expression", - 4);
+      this->lastRuleName = "mathbb {variable} -> expression";
+      return this->decreaseStack(3);
+    }
+  }
   if (
     secondToLastS == "Variable" && ((lastS != "}" && lastS != " ") ||
       thirdToLastS != "{" ||
@@ -3628,7 +3648,6 @@ bool CalculatorParser::applyOneRule() {
     )
   ) {
     this->lastRuleName = "variable Y -> expression Y";
-
     return this->replaceVXdotsXbyE_NONBOUND_XdotsX(1);
   }
   if (

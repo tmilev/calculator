@@ -1861,8 +1861,7 @@ JSData Calculator::toJSONOutputAndSpecials() {
     return result;
   }
   result[WebAPI::Result::performance] = this->toJSONPerformance();
-  result[WebAPI::Result::parsingLog] =  this->parser.parsingLog;
-
+  result[WebAPI::Result::parsingLog] = this->parser.parsingLog;
   return result;
 }
 

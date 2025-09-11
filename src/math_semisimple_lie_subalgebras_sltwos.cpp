@@ -2273,7 +2273,7 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
   out << "<hr>";
   out << this->toHTMLFieldReport();
   out << "<hr>" << body.str();
-  return MathML::processLatex( out.str());
+  return MathML::processLatex(out.str());
 }
 
 void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {

@@ -674,7 +674,7 @@ class Calculator {
     result.appendChild(inputOutputComments);
     if (inputParsed.parsingLog !== undefined) {
       let element = document.createElement("div");
-      writeHTML(element, inputParsed.parsingLog);
+      writeHTML(element, inputParsed.parsingLog.join("<hr>"));
       result.appendChild(element);
     }
     return result;

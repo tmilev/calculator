@@ -288,8 +288,12 @@ public:
     std::stringstream* commentsOnFailure
   );
   std::string toStringQuadraticRadical(FormatExpressions* format = nullptr)
-  const;
+      const;
+  std::string toMathMLQuadraticRadical(FormatExpressions* format = nullptr)
+      const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(FormatExpressions* format = nullptr) const;
+  std::string toMathMLFinal(FormatExpressions* format = nullptr) const;
   std::string toStringFull(FormatExpressions* format = nullptr) const;
   AlgebraicNumber one();
   AlgebraicNumber zero();

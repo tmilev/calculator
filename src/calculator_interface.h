@@ -1167,6 +1167,7 @@ public:
   Expression toExpressionPolynomialVariables() const;
   Expression toExpressionDifferntialOperators() const;
   std::string toString() const;
+
 };
 
 template <class BuiltIn>
@@ -1372,6 +1373,7 @@ public:
   }
   std::string getIntegerStringCrashIfNot(CalculatorParser& owner);
   bool isCommandEnclosure() const;
+
 };
 
 class PlotObject {
@@ -1887,6 +1889,7 @@ private:
     const std::string& newRole,
     int stackOffset
   );
+  bool isFontModifier(const std::string& input)const;
   bool isInterpretedAsEmptySpace(const std::string& input);
   bool isInterpretedAsEmptySpace(unsigned char input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);

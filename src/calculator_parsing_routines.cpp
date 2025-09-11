@@ -17,6 +17,7 @@ std::string SyntacticElement::getIntegerStringCrashIfNot(
   return result;
 }
 
+
 bool SyntacticElement::isCommandEnclosure() const {
   Calculator* owner = this->data.owner;
   if (this->data.owner == nullptr) {
@@ -264,6 +265,10 @@ void CalculatorParser::initializeControlSequences() {
   this->controlSequences.addOnTopNoRepetitionMustBeNew("HideLHS");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("EndProgram");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("\\text");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\mathbb");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\mathbf");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\mathfrak");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("\\mathcal");
 }
 
 bool CalculatorParser::parseAndExtractExpressionsDefault(
@@ -1346,6 +1351,10 @@ bool CalculatorParser::setStackValue(
   this->syntacticStack[this->syntacticStack.size + stackOffset].controlIndex =
   this->controlSequences.getIndexNoFail(newRole);
   return true;
+}
+
+bool CalculatorParser::isFontModifier(const std::string& input)const{
+  return input == "\\mathbb" || input=="\\mathbf"|| input=="\\mathfrak" ||  input=="\\mathcal";
 }
 
 bool CalculatorParser::isInterpretedAsEmptySpace(const std::string& input) {
@@ -3207,7 +3216,6 @@ void CalculatorParser::logParsingOperation() {
   if (!this->flagLogSyntaxRules) {
     return;
   }
-  this->parsingLog.addOnTop("<hr>");
   this->parsingLog.addOnTop(
     this->toStringSyntacticStackHTMLTable(false, false)
   );
@@ -3376,7 +3384,7 @@ bool CalculatorParser::applyOneRule() {
   if (secondToLastS == "%" && lastS == "NumberColors") {
     if (!this->owner->flagUseNumberColors) {
       *this->owner
-      << "<span style ='color:blue'>Floating point numbers</span> "
+      << "<span style='color:blue'>Floating point numbers</span> "
       << "are displayed in "
       << "<span style='color:blue'>blue</span>."
       << "<br><span style='color:red'>Algebraic numbers</span> "
@@ -3493,6 +3501,8 @@ bool CalculatorParser::applyOneRule() {
     this->setStackValue(underscore, "\\int^{*}", - 4);
     return this->decreaseStackExceptLast(2);
   }
+
+
   if (
     thirdToLastS == "\\int_{*}" &&
     secondToLastS == "^" &&
@@ -3597,12 +3607,28 @@ bool CalculatorParser::applyOneRule() {
   ) {
     return this->replaceXXVXdotsXbyE_BOUND_XdotsX(2);
   }
+  if (this->isFontModifier( secondToLastS) && lastS == "Variable"){
+    std::string variable;
+    std::string fontModifier;
+    if (lastExpression.data.isOperation(& variable) && secondToLastE.data.isOperation(&fontModifier) && variable.size() < 10){
+      Expression newElement;
+      newElement.makeAtom(*this->owner, secondToLastS + "{"+variable+"}");
+      this->setStackValue(newElement,"Expression", -2 );
+      this->lastRuleName = "mathbb variable -> expression";
+      return this->decreaseStack(1);
+
+    }
+
+  }
+
   if (
     secondToLastS == "Variable" && ((lastS != "}" && lastS != " ") ||
       thirdToLastS != "{" ||
       fourthToLastS != "{"
     )
   ) {
+    this->lastRuleName = "variable Y -> expression Y";
+
     return this->replaceVXdotsXbyE_NONBOUND_XdotsX(1);
   }
   if (
@@ -3613,6 +3639,7 @@ bool CalculatorParser::applyOneRule() {
       fifthToLastS != "{"
     )
   ) {
+    this->lastRuleName = "variable XY -> expression XY";
     return this->replaceVXdotsXbyE_NONBOUND_XdotsX(2);
   }
   if (
@@ -3622,6 +3649,7 @@ bool CalculatorParser::applyOneRule() {
     lastS != "}" &&
     lastS != " "
   ) {
+    this->lastRuleName = "{variable}}X -> {expression}}X";
     return this->replaceVXdotsXbyE_NONBOUND_XdotsX(2);
   }
   if ((secondToLastS == "\\left" || secondToLastS == "\\right") && lastS == "|"

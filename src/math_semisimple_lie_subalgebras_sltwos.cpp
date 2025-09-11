@@ -442,7 +442,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   if (useHtml) {
     out << "<br>";
   }
-  out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
+  out << "\n\\(sl{}(2)\\)-module decomposition of the ambient Lie algebra: ";
   FormatExpressions formatCharacter;
   formatCharacter.vectorSpaceEiBasisNames.addOnTop(
     VariableLetter("\\psi", "&psi;")
@@ -2019,7 +2019,7 @@ std::string SlTwoSubalgebras::toHTMLFieldReport() const {
   HashedList<std::string> allFieldsUsed;
   for (const SlTwoSubalgebra& subalgebra : this->allSubalgebras) {
     allFieldsUsed.addOnTopNoRepetition(
-      subalgebra.algebraicClosure->toString()
+      subalgebra.algebraicClosure->toMathMLFinal()
     );
   }
   out << "Extensions of the rationals used";
@@ -2159,7 +2159,7 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
   << "<th class='tableHeaderSummarySlTwoDefault' style='padding-left:20px;'>"
   << "<a href='#idModuleDecomposition'>"
   << "sl(2)-module decomposition of the ambient Lie algebra</a> <br> "
-  << "\\(\\psi=\\) the fundamental \\(sl(2)\\)-weight. "
+  << "\\(\\psi\\)= the fundamental \\(sl{}(2)\\)-weight. "
   << "</a></th>"
   << "<th class='tableHeaderSummarySlTwoDefault'>"
   << "Centralizer dimension</th>"
@@ -2273,7 +2273,7 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
   out << "<hr>";
   out << this->toHTMLFieldReport();
   out << "<hr>" << body.str();
-  return out.str();
+  return MathML::processLatex( out.str());
 }
 
 void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {

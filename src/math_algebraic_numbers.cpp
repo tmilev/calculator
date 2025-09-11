@@ -1677,8 +1677,8 @@ bool AlgebraicNumber::radicalMeDefault(
 }
 
 std::string AlgebraicClosureRationals::toStringQuadraticRadical(
-  FormatExpressions* format
-) const {
+    FormatExpressions* format
+    ) const {
   (void) format;
   std::stringstream out;
   out << "\\mathbb Q[";
@@ -1690,6 +1690,21 @@ std::string AlgebraicClosureRationals::toStringQuadraticRadical(
   }
   out << "]";
   return HtmlRoutines::getMathNoDisplay(out.str());
+}
+std::string AlgebraicClosureRationals::toMathMLQuadraticRadical(
+    FormatExpressions* format
+    ) const {
+  (void) format;
+  std::stringstream out;
+  out << "<mrow><mi>&Qopf;</mi><mo>[</mo>";
+  for (int i = 0; i < this->quadraticRadicals.size; i ++) {
+    out << "<msqrt>" << this->quadraticRadicals[i].toMathML() << "</msqrt>";
+    if (i != this->quadraticRadicals.size - 1) {
+      out << "<mo>,<mo> ";
+    }
+  }
+  out << "<mo>]</mo></mrow>";
+  return out.str();
 }
 
 std::string AlgebraicClosureRationals::toStringFull(FormatExpressions* format)
@@ -1815,6 +1830,32 @@ const {
   }
   if (this->flagIsQuadraticRadicalExtensionRationals) {
     return this->toStringQuadraticRadical(&currentFormat);
+  }
+  return this->toStringFull(&currentFormat);
+}
+
+std::string AlgebraicClosureRationals::toMathMLFinal(FormatExpressions* format)
+    const {
+  STACK_TRACE("AlgebraicClosureRationals::toMathMLFinal");
+
+  return MathML::toMathMLFinal(this->toMathML(format), this->toString(format));
+
+}
+
+std::string AlgebraicClosureRationals::toMathML(FormatExpressions* format)
+    const {
+  STACK_TRACE("AlgebraicClosureRationals::toMathML");
+  (void) format;
+  std::stringstream out;
+  FormatExpressions currentFormat;
+  currentFormat.flagUseHTML = false;
+  currentFormat.flagUseLatex = true;
+  if (this->latestBasis.size == 1) {
+    out << "<mi>&Qopf;</mi>";
+    return out.str();
+  }
+  if (this->flagIsQuadraticRadicalExtensionRationals) {
+    return this->toMathMLQuadraticRadical(&currentFormat);
   }
   return this->toStringFull(&currentFormat);
 }

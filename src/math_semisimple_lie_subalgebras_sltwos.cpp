@@ -457,7 +457,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
     out << "\n<br>\n";
   }
   out << this->toMathMLFinalTriple(&latexFormat);
-  out << this->toStringTripleStandardRealization();
+  out << this->toHTMLTripleStandardRealization();
   out << this->toStringKostantSekiguchiTriple(&latexFormat);
   out << this->toStringKostantSekiguchiTripleStandardRealization();
   out << this->toHTMLTripleVerification(&latexFormat);
@@ -505,7 +505,82 @@ const WeylGroupData& SlTwoSubalgebra::getOwnerWeyl() const {
   return this->owner->weylGroup;
 }
 
-std::string SlTwoSubalgebra::toStringTripleStandardRealization() const {
+std::string SlTwoSubalgebra::toStringTripleStandardRealization(
+  Matrix<AlgebraicNumber> matrixH,
+  Matrix<AlgebraicNumber> matrixE,
+  Matrix<AlgebraicNumber> matrixF,
+  FormatExpressions* format
+) const {
+  std::stringstream out;
+  out << "\\begin{array}{rcl}";
+  out << "h&=&" << matrixH.toString(format) << "\\\\\n";
+  out << "e&=&" << matrixE.toString(format) << "\\\\\n";
+  out << "f&=&" << matrixF.toString(format);
+  out << "\\end{array}";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toMathMLTripleStandardRealization(
+  Matrix<AlgebraicNumber> matrixH,
+  Matrix<AlgebraicNumber> matrixE,
+  Matrix<AlgebraicNumber> matrixF,
+  FormatExpressions* format
+) const {
+  std::stringstream out;
+  out << "<mtable>";
+  out
+  << "<mtr><mtd><mi>h</mi><mtd><mo>=</mo></mtd><mtd>"
+  << matrixH.toMathML(format)
+  << "</mtd></mtr>";
+  out
+  << "<mtr><mtd><mi>e</mi><mtd><mo>=</mo></mtd><mtd>"
+  << matrixE.toMathML(format)
+  << "</mtd></mtr>";
+  out
+  << "<mtr><mtd><mi>f</mi><mtd><mo>=</mo></mtd><mtd>"
+  << matrixF.toMathML(format)
+  << "</mtd></mtr>";
+  out << "</mtable>";
+  return out.str();
+}
+
+std::string SlTwoSubalgebra::toStringTripleStandardRealization(
+  Matrix<Rational> matrixH,
+  Matrix<Rational> matrixE,
+  Matrix<Rational> matrixF,
+  FormatExpressions* format
+) const {
+  Matrix<AlgebraicNumber> convertedH;
+  Matrix<AlgebraicNumber> convertedE;
+  Matrix<AlgebraicNumber> convertedF;
+  convertedH = matrixH;
+  convertedE = matrixE;
+  convertedF = matrixF;
+  return
+  this->toStringTripleStandardRealization(
+    convertedH, convertedE, convertedF, format
+  );
+}
+
+std::string SlTwoSubalgebra::toMathMLTripleStandardRealization(
+  Matrix<Rational> matrixH,
+  Matrix<Rational> matrixE,
+  Matrix<Rational> matrixF,
+  FormatExpressions* format
+) const {
+  Matrix<AlgebraicNumber> convertedH;
+  Matrix<AlgebraicNumber> convertedE;
+  Matrix<AlgebraicNumber> convertedF;
+  convertedH = matrixH;
+  convertedE = matrixE;
+  convertedF = matrixF;
+  return
+  this->toMathMLTripleStandardRealization(
+    convertedH, convertedE, convertedF, format
+  );
+}
+
+std::string SlTwoSubalgebra::toHTMLTripleStandardRealization() const {
   Matrix<Rational> matrixH;
   Matrix<Rational> matrixE;
   Matrix<Rational> matrixF;
@@ -523,11 +598,12 @@ std::string SlTwoSubalgebra::toStringTripleStandardRealization() const {
   out << "<br>Matrix realizations in a standard representation: ";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
-  out << "\\(\\begin{array}{rcl}";
-  out << "h&=&" << matrixH.toString(&format) << "\\\\\n";
-  out << "e&=&" << matrixE.toString(&format) << "\\\\\n";
-  out << "f&=&" << matrixF.toString(&format);
-  out << "\\end{array}\\)";
+  out
+  << MathML::toMathMLFinal(
+    this->toMathMLTripleStandardRealization(matrixH, matrixE, matrixF, &format)
+    ,
+    this->toStringTripleStandardRealization(matrixH, matrixE, matrixF, &format)
+  );
   out << "<br>";
   std::stringstream calculatorLink;
   calculatorLink
@@ -555,6 +631,9 @@ std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleStandardRealization(
   Matrix<AlgebraicNumber> matrixH;
   Matrix<AlgebraicNumber> matrixE;
   Matrix<AlgebraicNumber> matrixF;
+  if (this->hAlgebraic.isEqualToZero()) {
+    return "";
+  }
   if (
     !this->owner->getElementStandardRepresentation(this->hAlgebraic, matrixH)
     ||
@@ -574,11 +653,12 @@ std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleStandardRealization(
   out << "<br>Matrix realizations in a standard representation: ";
   out << "<div class='lieAlgebraPanel'>";
   out << "<div>";
-  out << "\\(\\begin{array}{rcl}";
-  out << "h&=&" << matrixH.toString(&format) << "\\\\\n";
-  out << "e&=&" << matrixE.toString(&format) << "\\\\\n";
-  out << "f&=&" << matrixF.toString(&format);
-  out << "\\end{array}\\)";
+  out
+  << MathML::toMathMLFinal(
+    this->toMathMLTripleStandardRealization(matrixH, matrixE, matrixF, &format)
+    ,
+    this->toStringTripleStandardRealization(matrixH, matrixE, matrixF, &format)
+  );
   out << "<br>";
   std::stringstream calculatorLink;
   calculatorLink
@@ -3297,7 +3377,7 @@ std::string CartanElementCandidate::toString() const {
   << "adjoint action: "
   << "\\("
   << this->adjointAction.toStringLatex()
-  << "\\)";
+  << "\\) ";
   return out.str();
 }
 

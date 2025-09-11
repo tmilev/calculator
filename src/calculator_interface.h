@@ -675,6 +675,12 @@ public:
     FormatExpressions* format,
     MathExpressionProperties* outputProperties = nullptr
   );
+  static bool toMathMLMatrix(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties = nullptr
+  );
   static bool toStringSequence(
     const Expression& input,
     std::stringstream& out,

@@ -539,7 +539,31 @@ public:
   std::string toMathMLTriple(FormatExpressions* format) const;
   std::string toMathMLFinalTriple(FormatExpressions* format) const;
   std::string toStringTriple(FormatExpressions* format) const;
-  std::string toStringTripleStandardRealization() const;
+  std::string toStringTripleStandardRealization(
+    Matrix<AlgebraicNumber> matrixH,
+    Matrix<AlgebraicNumber> matrixE,
+    Matrix<AlgebraicNumber> matrixF,
+    FormatExpressions* format
+  ) const;
+  std::string toMathMLTripleStandardRealization(
+    Matrix<AlgebraicNumber> matrixH,
+    Matrix<AlgebraicNumber> matrixE,
+    Matrix<AlgebraicNumber> matrixF,
+    FormatExpressions* format
+  ) const;
+  std::string toStringTripleStandardRealization(
+    Matrix<Rational> matrixH,
+    Matrix<Rational> matrixE,
+    Matrix<Rational> matrixF,
+    FormatExpressions* format
+  ) const;
+  std::string toMathMLTripleStandardRealization(
+    Matrix<Rational> matrixH,
+    Matrix<Rational> matrixE,
+    Matrix<Rational> matrixF,
+    FormatExpressions* format
+  ) const;
+  std::string toHTMLTripleStandardRealization() const;
   std::string toStringTripleVerification(FormatExpressions* format) const;
   std::string toMathMLTripleVerification(FormatExpressions* format) const;
   std::string toHTMLTripleVerification(FormatExpressions* format) const;

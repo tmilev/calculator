@@ -165,7 +165,7 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
     toBeInitialized.opError(), Expression::toStringError
   );
   toBeInitialized.addOneMathMLCompositeHandler(
-    toBeInitialized.opMatrix(), Expression::toStringMatrix
+    toBeInitialized.opMatrix(), Expression::toMathMLMatrix
   );
 }
 
@@ -575,5 +575,29 @@ bool Expression::toMathMLPlus(
     }
   }
   out << "</mrow>";
+  return true;
+}
+
+bool Expression::toMathMLMatrix(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  if (!input.isMatrix()) {
+    return false;
+  }
+  out << MathML::leftParenthesis;
+  out << "<mtable>";
+  for (int i = 1; i < input.size(); i ++) {
+    out << "<mtr>";
+    for (int j = 1; j < input[i].size(); j ++) {
+      out << "<mtd>" << input[i][j].toMathML(format, nullptr) << "</mtd>";
+    }
+    out << "</mtr>";
+  }
+  out << "<mtable>";
+  out << MathML::rightParenthesis;
   return true;
 }

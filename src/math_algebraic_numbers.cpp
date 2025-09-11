@@ -1826,7 +1826,7 @@ const {
   currentFormat.flagUseHTML = false;
   currentFormat.flagUseLatex = true;
   if (this->latestBasis.size == 1) {
-    out << HtmlRoutines::getMathNoDisplay("\\mathbb Q");
+    out << "\\mathbb Q";
     return out.str();
   }
   if (this->flagIsQuadraticRadicalExtensionRationals) {
@@ -1961,7 +1961,6 @@ const {
     currentFormat.flagUseFrac = format->flagUseFrac;
   }
   out << this->element.toString(&currentFormat);
-  // << "~ in~ the~ field~ " << this->owner->toString();
   return out.str();
 }
 

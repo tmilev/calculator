@@ -10063,6 +10063,13 @@ class MathNodeError extends MathNode {
   ) {
     return new LatexWithAnnotation(this.textContentOrInitialContent());
   }
+
+  toMathML() {
+    const result = this.createMathMLElement("ms");
+    result.textContent = this.textContentOrInitialContent();
+    result.style.color = "red";
+    return result;
+  }
 }
 
 class MathNodeCancel extends MathNode {

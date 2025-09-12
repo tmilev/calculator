@@ -468,7 +468,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << this->toHTMLTripleUnknownsPolynomialSystem(&latexFormat);
   out << this->toHTMLTripleArbitrary(&latexFormat);
   out << this->toHTMLTripleArbitraryMatrix();
-  out << this->toHTMLKostantSekiguchiTripleInternals(format);
+  out << this->toHTMLKostantSekiguchiTripleInternals(&latexFormat);
   out << "</div></div>";
   return out.str();
 }
@@ -617,9 +617,8 @@ std::string SlTwoSubalgebra::toHTMLTripleStandardRealization() const {
   << matrixF.toString(&format)
   << ";\n";
   out
-  << "Calculator link: "
   << HtmlRoutines::getCalculatorComputationAnchorThisServer(
-    calculatorLink.str(), ""
+    calculatorLink.str(), "Calculator link with the above matrices."
   );
   out << "</div>";
   out << "</div>";
@@ -871,13 +870,15 @@ std::string SlTwoSubalgebra::toHTMLKostantSekiguchiTripleInternals(
     this->toStringInvolutionAppliedToEMinusF(format)
   );
   out << "<br>The polynomial system we need to solve.<br>";
+  FormatExpressions systemFormat;
+  systemFormat.flagUseHTML = false;
   out
   << MathML::toMathMLFinal(
     this->toMathMLPolynomialSystem(
-      this->systemToSolveKostantSekiguchi, format
+      this->systemToSolveKostantSekiguchi, &systemFormat
     ),
     this->toStringPolynomialSystem(
-      this->systemToSolveKostantSekiguchi, format
+      this->systemToSolveKostantSekiguchi, &systemFormat
     )
   );
   return out.str();
@@ -901,7 +902,7 @@ std::string SlTwoSubalgebra::toMathMLPolynomialSystem(
   const PolynomialSubstitution<Coefficient>& system, FormatExpressions* format
 ) const {
   std::stringstream out;
-  out << MathML::mtableDefault;
+  out << "<mtable>";
   for (const Polynomial<Coefficient>& element : system) {
     out << "<mtr>";
     out << "<mtd>" << element.toMathML(format) << "</mtd>";
@@ -3360,24 +3361,48 @@ Rational CartanElementCandidate::scalarProductKillingMustBeRational(
   return resultRational;
 }
 
-std::string CartanElementCandidate::toString() const {
+std::string CartanElementCandidate::toStringVerification() const {
   std::stringstream out;
-  out << "\\(" << this->h.toStringPretty() << "\\), ";
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> computer;
+  this->h.lieBracketOnTheRight(this->e, computer);
+  computer -= this->e * 2;
+  out << "[h,e]-2e=" << computer.toString();
+  return out.str();
+}
+
+std::string CartanElementCandidate::toMathMLVerification() const {
+  std::stringstream out;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> computer;
+  this->h.lieBracketOnTheRight(this->e, computer);
+  computer -= this->e * 2;
+  out
+  << "<mrow><mo>[</mo><mo>h</mo><mo>,</mo><mo>e</mo><mo>]</mo>"
+  << MathML::negativeSign
+  << "<mn>2</mn><mi>e</mi><mo>=</mo>"
+  << computer.toMathML(nullptr)
+  << "</mrow>";
+  return out.str();
+}
+
+std::string CartanElementCandidate::toString() const {
+  return this->toHTML();
+}
+
+std::string CartanElementCandidate::toHTML() const {
+  STACK_TRACE("CartanElementCandidate::toHTML");
+  std::stringstream out;
+  out << this->h.toMathMLFinal(nullptr);
   if (!this->e.isEqualToZero()) {
     out
-    << "matching e: \\("
-    << this->e.toStringPretty()
-    << "\\), verification: \\( [h,e]-2e=";
-    ElementSemisimpleLieAlgebra<AlgebraicNumber> computer;
-    this->h.lieBracketOnTheRight(this->e, computer);
-    computer -= this->e * 2;
-    out << computer.toString() << "\\), ";
+    << "matching e: "
+    << this->e.toMathMLFinal(nullptr)
+    << ", verification: "
+    << MathML::toMathMLFinal(
+      this->toMathMLVerification(), this->toStringVerification()
+    );
+;
   }
-  out
-  << "adjoint action: "
-  << "\\("
-  << this->adjointAction.toStringLatex()
-  << "\\) ";
+  out << "adjoint action: " << this->adjointAction.toMathMLFinal(nullptr);
   return out.str();
 }
 

@@ -3538,7 +3538,7 @@ FormatExpressions::FormatExpressions() {
   this->flagMakingExpressionTableWithLatex = false;
   this->numberOfAmpersandsPerNewLineForLaTeX = 0;
   this->monomialOrder = nullptr;
-  this->flagExpressionIsFinal = true;
+  this->flagExpressionIsTopLevel = true;
   this->flagExpressionNewLineAllowed = false;
   this->flagIncludeLieAlgebraTypes = true;
   this->flagUseReflectionNotation = false;

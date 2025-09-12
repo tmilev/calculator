@@ -727,6 +727,17 @@ class Calculator {
     if (typeof inputParsed.result.output === "string") {
       inputParsed.result.output = [inputParsed.result.output];
     }
+    if (
+      inputParsed.result.input === undefined ||
+      inputParsed.result.input === null ||
+      inputParsed.result.output === undefined ||
+      inputParsed.result.output === null
+    ) {
+      const errorMessage = document.createElement("b");
+      errorMessage.style.color = "red";
+      errorMessage.textContent = "Missing input";
+      return errorMessage;
+    }
     let totalEntries = Math.max(
       inputParsed.result.input.length,
       inputParsed.result.output.length,

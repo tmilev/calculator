@@ -1715,7 +1715,7 @@ void Calculator::evaluateCommands() {
   !this->flagPlotNoControls;
   global.defaultFormat.getElement().flagLatexDetailsInHtml =
   this->flagWriteLatexPlots;
-  global.defaultFormat.getElement().flagExpressionIsFinal = true;
+  global.defaultFormat.getElement().flagExpressionIsTopLevel = true;
   if (global.runMode == GlobalVariables::RunMode::consoleRegular) {
     this->evaluateCommandsConsoleOutput(startingExpression, out);
   } else if (!this->flagDisplayFullExpressionTree) {
@@ -1758,14 +1758,14 @@ void Calculator::evaluateCommandsConsoleOutput(
   const Expression& startingExpression, std::stringstream& out
 ) {
   global.defaultFormat.getElement().flagUseQuotes = false;
-  global.defaultFormat.getElement().flagExpressionIsFinal = true;
+  global.defaultFormat.getElement().flagExpressionIsTopLevel = true;
   if (global.programArguments.size > 1) {
     out
     << "Input:\n"
     << startingExpression.toString(&global.defaultFormat.getElement())
     << std::endl;
   }
-  global.defaultFormat.getElement().flagExpressionIsFinal = true;
+  global.defaultFormat.getElement().flagExpressionIsTopLevel = true;
   this->objectContainer.resetSliders();
   out
   << Logger::consoleNormal()
@@ -1788,10 +1788,22 @@ void Calculator::evaluateCommandsStandardOutput(
   this->objectContainer.resetPlots();
   JSData result;
   result.elementType = JSData::Type::tokenObject;
-  std::string resultString =
-  this->programExpression.toString(
-    &global.defaultFormat.getElement(), &startingExpression, true, &result
-  );
+  std::string resultString;
+  if (this->flagUseMathML) {
+    resultString =
+    this->programExpression.toMathML(
+      &global.defaultFormat.getElement(),
+      nullptr,
+      &startingExpression,
+      true,
+      &result
+    );
+  } else {
+    resultString =
+    this->programExpression.toString(
+      &global.defaultFormat.getElement(), &startingExpression, true, &result
+    );
+  }
   this->output[WebAPI::Result::resultLabel] = result;
   out << resultString;
 }

@@ -237,6 +237,7 @@ void CalculatorParser::initializeControlSequences() {
     "NoLogarithmExponentShortcut"
   );
   this->controlSequences.addOnTopNoRepetitionMustBeNew("LogParsing");
+  this->controlSequences.addOnTopNoRepetitionMustBeNew("UseMathML");
   this->controlSequences.addOnTopNoRepetitionMustBeNew("LogEvaluation");
   this->controlSequences.addOnTopNoRepetitionMustBeNew(
     "HidePolynomialDataStructure"
@@ -453,6 +454,7 @@ void Calculator::reset() {
   this->flagPlotShowJavascriptOnly = false;
   this->flagHasGraphics = false;
   this->flagUseBracketsForIntervals = false;
+  this->flagUseMathML=false;
   this->maximumLatexChars = 2000;
   this->objectContainer.reset();
   this->operations.clear();
@@ -507,7 +509,7 @@ void Calculator::initialize(Calculator::Mode desiredMode) {
   this->operations.setExpectedSize(1000);
   this->namedRules.setExpectedSize(500);
   this->allBuiltInTypes.setExpectedSize(50);
-  this->formatVisibleStrings.flagExpressionIsFinal = true;
+  this->formatVisibleStrings.flagExpressionIsTopLevel = true;
   // Operation List is the very first operation.
   // It signifies a non-atomic expression.
   // Operation List is signified by the empty string.
@@ -3327,6 +3329,13 @@ bool CalculatorParser::applyOneRule() {
     this->owner->flagLogFullTreeCrunching = true;
     this->popTopSyntacticStack();
     return this->popTopSyntacticStack();
+  }
+  if (secondToLastS == "%" && lastS == "UseMathML") {
+    this->owner->comments
+    <<
+    "<b style='color:red'>WORK IN PROGRESS.</b> Using mathML for the output.";
+    this->owner->flagUseMathML = true;
+    return this->decreaseStack(2);
   }
   if (secondToLastS == "%" && lastS == "UseBracketForIntervals") {
     this->owner->flagUseBracketsForIntervals = true;

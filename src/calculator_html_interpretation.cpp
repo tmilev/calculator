@@ -267,7 +267,7 @@ std::string WebAPIResponse::getCommentsInterpretation(
 ) {
   STACK_TRACE("WebAPIReponse::getCommentsInterpretation");
   std::stringstream out;
-  format.flagExpressionIsFinal = true;
+  format.flagExpressionIsTopLevel = true;
   format.flagIncludeExtraHtmlDescriptionsInPlots = false;
   interpreterWithAdvice.objectContainer.resetPlots();
   if (indexShift >= interpreterWithAdvice.programExpression.size()) {
@@ -2328,7 +2328,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
     return result;
   }
   FormatExpressions format;
-  format.flagExpressionIsFinal = true;
+  format.flagExpressionIsTopLevel = true;
   format.flagIncludeExtraHtmlDescriptionsInPlots = false;
   format.flagUseQuotes = false;
   format.flagUseLatex = true;
@@ -2369,7 +2369,7 @@ JSData WebAPIResponse::getAnswerOnGiveUp(
       if (!isFirst) {
         out << "<br>";
       }
-      format.flagExpressionIsFinal = true;
+      format.flagExpressionIsTopLevel = true;
       format.flagIncludeExtraHtmlDescriptionsInPlots = false;
       format.flagUseQuotes = false;
       format.flagUseLatex = true;

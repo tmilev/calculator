@@ -169,12 +169,22 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
   );
 }
 
+std::string Expression::toMathMLFinal() const {
+  return MathML::toMathMLFinal(this->toMathML(), this->toString());
+}
+
 void Expression::toMathML(
   std::stringstream& out,
   FormatExpressions* format,
-  MathExpressionProperties* outputProperties
+  MathExpressionProperties* outputProperties,
+  Expression* startingExpression,
+  bool unfoldCommandEnclosures,
+  JSData* outputJS
 ) const {
   STACK_TRACE("Expression::toMathML");
+  RecursionDepthCounter recursionCounter;
+  recursionCounter.initialize(&this->owner->recursionDepth);
+  this->checkConsistency();
   if (this->owner != nullptr) {
     if (this->owner->recursionDepth + 1 > this->owner->maximumRecursionDepth) {
       out << "<ms>(...)</ms>";
@@ -184,9 +194,41 @@ void Expression::toMathML(
     out << "<ms>(Error:NoOwner)</ms>";
     return;
   }
-  RecursionDepthCounter recursionCounter;
-  recursionCounter.initialize(&this->owner->recursionDepth);
-  this->checkConsistency();
+  MemorySaving<FormatExpressions> formatContainer;
+  if (format == nullptr) {
+    format = &formatContainer.getElement();
+    format->flagUseQuotes = false;
+  }
+  if (startingExpression != nullptr && unfoldCommandEnclosures) {
+    Expression newStart;
+    Expression newMe;
+    if (
+      CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
+        *this->owner, *this, newMe
+      ) &&
+      CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
+        *this->owner, *startingExpression, newStart
+      )
+    ) {
+      newMe.toMathML(
+        out, format, outputProperties, &newStart, false, outputJS
+      );
+      return;
+    }
+  }
+  if (
+    !this->isOfType<std::string>() &&
+    !this->startsWith(this->owner->opCommandSequence())
+  ) {
+    if (startingExpression == nullptr) {
+      format->flagUseQuotes = true;
+    } else {
+      format->flagUseQuotes = false;
+    }
+  }
+  if (outputJS != nullptr) {
+    outputJS->reset();
+  }
   int notationIndex =
   owner->objectContainer.expressionWithNotation.getIndex(*this);
   if (notationIndex != - 1) {
@@ -196,12 +238,166 @@ void Expression::toMathML(
   if (this->toMathMLData(out, format, outputProperties)) {} else if (
     this->toMathMLWithAtomHandler(out, outputProperties)
   ) {} else if (this->toMathMLWithCompositeHandler(out, outputProperties)) {}
- else if (this->toStringEndStatement(out, nullptr, nullptr, nullptr)) {} else
-  if (this->size() == 1) {
-    (*this)[0].toMathML(out, format, outputProperties);
+ else if (
+    this->toMathMLEndStatement(out, startingExpression, outputJS, format)
+  ) {} else if (this->size() == 1) {
+    (*this)[0].toMathML(
+      out, format, outputProperties, nullptr, false, nullptr
+    );
   } else if (this->toMathMLGeneral(out, format, outputProperties)) {} else {
     out << "<ms>(ProgrammingError:NotDocumented)</ms>";
   }
+}
+
+bool Expression::toMathMLEndStatement(
+  std::stringstream& out,
+  Expression* startingExpression,
+  JSData* outputJS,
+  FormatExpressions* format
+) const {
+  STACK_TRACE("Expression::toMathMLEndStatement");
+  if (!this->isListStartingWithAtom(this->owner->opCommandSequence())) {
+    return false;
+  }
+  if (startingExpression != nullptr) {
+    return
+    this->toMathMLEndStatementTopLevel(
+      out, *startingExpression, outputJS, format
+    );
+  }
+  return this->toMathMLEndStatementNested(out, format);
+}
+
+bool Expression::toMathMLEndStatementTopLevel(
+  std::stringstream& out,
+  Expression& startingExpression,
+  JSData* outputJS,
+  FormatExpressions* format
+) const {
+  STACK_TRACE("Expression::toMathMLEndStatementTopLevel");
+  MemorySaving<FormatExpressions> temporaryFormat;
+  if (format == nullptr) {
+    format = &temporaryFormat.getElement();
+    format->flagExpressionIsTopLevel = true;
+  }
+  bool isFinal = format->flagExpressionIsTopLevel;
+  bool createTable = true;
+  bool createSingleTable = true;
+  if (
+    createTable == false &&
+    format != nullptr &&
+    global.runMode != GlobalVariables::RunMode::consoleRegular
+  ) {
+    createSingleTable = format->flagMakingExpressionTableWithLatex;
+    format->flagMakingExpressionTableWithLatex = false;
+  }
+  if (!createSingleTable && !createTable && this->size() > 2) {
+    out << "(";
+  }
+  if (createSingleTable) {
+    out << "<table class='tableCalculatorOutput'>";
+  }
+  std::string currentOutput;
+  if (outputJS != nullptr) {
+    (*outputJS)["input"].elementType = JSData::Type::tokenArray;
+    (*outputJS)["output"].elementType = JSData::Type::tokenArray;
+  }
+  for (int i = 1; i < this->size(); i ++) {
+    const Expression expression = (*this)[i];
+    this->toMathMLEndStatementOneRowTopLevel(
+      out, &startingExpression, outputJS, i, *format
+    );
+    if (format != nullptr) {
+      format->flagExpressionIsTopLevel = isFinal;
+    }
+  }
+  if (createSingleTable) {
+    out << "</table>";
+  }
+  if (!createSingleTable && !createTable && this->size() > 2) {
+    out << ")";
+  }
+  return true;
+}
+
+bool Expression::toMathMLEndStatementOneRowTopLevel(
+  std::stringstream& out,
+  Expression* startingExpression,
+  JSData* outputJS,
+  int index,
+  FormatExpressions& format
+) const {
+  STACK_TRACE("Expression::toMathMLEndStatementOneRowTopLevel");
+  std::string currentInput, currentOutput;
+  const Expression currentE = (*this)[index];
+  out << "<tr><td class='cellCalculatorInput'>";
+  if (!this->owner->flagHideLHS) {
+    if (index < (*startingExpression).size()) {
+      format.flagDontCollalpseProductsByUnits = true;
+      currentInput =
+      HtmlRoutines::getMathNoDisplay((*startingExpression)[index].toString(
+          &format
+        )
+      );
+    } else {
+      currentInput =
+      "No matching starting expression - "
+      "possible use of the Melt keyword.";
+    }
+  } else {
+    currentInput = "...";
+  }
+  out << currentInput;
+  if (outputJS != nullptr) {
+    (*outputJS)["input"][index - 1] = currentInput;
+  }
+  if (index != this->size() - 1) {
+    out << ";";
+  }
+  out << "</td><td class='cellCalculatorResult'>";
+  if (currentE.isOfType<std::string>()) {
+    currentOutput =
+    StringRoutines::Conversions::stringToCalculatorDisplay(
+      currentE.getValue<std::string>()
+    );
+  } else if (currentE.requiresNoMathTags()) {
+    format.flagDontCollalpseProductsByUnits = false;
+    currentOutput = currentE.toString(&format);
+  } else {
+    format.flagDontCollalpseProductsByUnits = false;
+    std::string childString = currentE.toString(&format);
+    if (StringRoutines::stringContains(childString, "\\(")) {
+      // The string contains the math tag \(. We assume the childString
+      // has embedded descriptive latex strings. We should not generate math
+      // tags; the expression is either too complicated to be formatted
+      // correctly,
+      // or the childString has already got all it's tags.
+      currentOutput = childString;
+    } else {
+      currentOutput = HtmlRoutines::getMathNoDisplay(childString);
+    }
+  }
+  currentOutput += currentE.toStringAllSlidersInExpression();
+  if (outputJS != nullptr) {
+    (*outputJS)["output"][index - 1] = currentOutput;
+  }
+  out << currentOutput;
+  out << "</td></tr>";
+  return true;
+}
+
+bool Expression::toMathMLEndStatementNested(
+  std::stringstream& out, FormatExpressions* format
+) const {
+  STACK_TRACE("Expression::toMathMLEndStatementNested");
+  out << "<mtable>";
+  for (int i = 1; i < this->size(); i ++) {
+    out << "<mtr><mtd>";
+    (*this)[i].toMathML(format, nullptr, nullptr, false, nullptr);
+    out << "</mtd></mtr>";
+  }
+  out << "</mtable>";
+  return true;
 }
 
 bool Expression::toMathMLData(
@@ -235,15 +431,15 @@ bool Expression::toMathMLData(
     return true;
   }
   if (this->isMatrixOfType<RationalFraction<Rational> >()) {
-    FormatExpressions format;
-    this->getContext().getFormat(format);
-    format.flagUseHTML = false;
-    format.flagUseLatex = true;
+    FormatExpressions currentFormat;
+    this->getContext().getFormat(currentFormat);
+    currentFormat.flagUseHTML = false;
+    currentFormat.flagUseLatex = true;
     Matrix<RationalFraction<Rational> > matrix;
     CalculatorConversions::functionGetMatrix(
       *this->owner, *this, matrix, false
     );
-    out << matrix.toMathML(&format);
+    out << matrix.toMathML(&currentFormat);
     return true;
   }
   int typeIndex = - 1;
@@ -274,7 +470,7 @@ bool Expression::toMathMLGeneral(
   if (this->size() < 2) {
     return false;
   }
-  (*this)[0].toMathML(out, format, outputProperties);
+  (*this)[0].toMathML(out, format, outputProperties, nullptr, false, nullptr);
   bool needParenthesis = true;
   if (this->size() == 2) {
     if ((*this)[0].isAtomWhoseExponentsAreInterpretedAsFunction()) {
@@ -288,7 +484,9 @@ bool Expression::toMathMLGeneral(
     out << MathML::leftParenthesis;
   }
   for (int i = 1; i < this->children.size; i ++) {
-    (*this)[i].toMathML(out, format, outputProperties);
+    (*this)[i].toMathML(
+      out, format, outputProperties, nullptr, false, nullptr
+    );
     if (i != this->children.size - 1) {
       out << "<mo>,</mo>";
     }
@@ -597,7 +795,7 @@ bool Expression::toMathMLMatrix(
     }
     out << "</mtr>";
   }
-  out << "<mtable>";
+  out << "</mtable>";
   out << MathML::rightParenthesis;
   return true;
 }

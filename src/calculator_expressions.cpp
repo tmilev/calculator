@@ -2517,7 +2517,7 @@ bool Expression::toStringBuiltIn<std::string>(
 ) {
   (void) outputProperties;
   bool useQuotes = format == nullptr ? false : format->flagUseQuotes;
-  bool isFinal = format == nullptr ? true : format->flagExpressionIsFinal;
+  bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
   if (!useQuotes) {
     if (isFinal) {
       out
@@ -2645,7 +2645,7 @@ bool Expression::toStringBuiltIn<InputBox>(
 ) {
   (void) format;
   (void) outputProperties;
-  bool isFinal = format == nullptr ? true : format->flagExpressionIsFinal;
+  bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
   if (!isFinal) {
     out << "(input box not shown)";
     return true;
@@ -3038,7 +3038,7 @@ bool Expression::toStringBuiltIn<Plot>(
   MathExpressionProperties* outputProperties
 ) {
   (void) outputProperties;
-  bool isFinal = format == nullptr ? true : format->flagExpressionIsFinal;
+  bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
   if (isFinal) {
     Plot& plot = input.getValueNonConst<Plot>();
     plot.flagIncludeExtraHtmlDescriptions = (format == nullptr) ?
@@ -4218,9 +4218,9 @@ bool Expression::toStringEndStatement(
   MemorySaving<FormatExpressions> temporaryFormat;
   if (format == nullptr) {
     format = &temporaryFormat.getElement();
-    format->flagExpressionIsFinal = true;
+    format->flagExpressionIsTopLevel = true;
   }
-  bool isFinal = format->flagExpressionIsFinal;
+  bool isFinal = format->flagExpressionIsTopLevel;
   bool createTable = (startingExpression != nullptr);
   bool createSingleTable = false;
   if (
@@ -4276,7 +4276,7 @@ bool Expression::toStringEndStatement(
       }
     }
     if (format != nullptr) {
-      format->flagExpressionIsFinal = isFinal;
+      format->flagExpressionIsTopLevel = isFinal;
     }
   }
   if (createSingleTable) {
@@ -4934,9 +4934,9 @@ std::string Expression::toStringWithStartingExpression(
   MemorySaving<FormatExpressions> formatContainer;
   if (format == nullptr) {
     format = &formatContainer.getElement();
-    format->flagExpressionIsFinal = true;
+    format->flagExpressionIsTopLevel = true;
   }
-  isFinal = format->flagExpressionIsFinal;
+  isFinal = format->flagExpressionIsTopLevel;
   outTrue << "<table class='tableCalculatorOutput'>";
   outTrue << "<tr><th>Input</th><th>Result</th></tr>";
   if (this->isListStartingWithAtom(this->owner->opCommandSequence())) {
@@ -5519,6 +5519,7 @@ bool Expression::toMathMLWithCompositeHandler(
     return false;
   }
   int atom = (*this)[0][0].data;
+  global.comments << "DEBUG: got to here compo handler!";
   if (this->owner->toMathMLHandlersComposite.contains(atom)) {
     Expression::ToStringHandler handler =
     this->owner->toMathMLHandlersComposite.getValueNoFail(atom);
@@ -5549,11 +5550,6 @@ bool Expression::toStringWithCompositeHandler(
     return handler(*this, out, format, outputProperties);
   }
   return false;
-}
-
-std::string Expression::toMathMLFinal() const {
-  return
-  MathML::toMathMLFinal(this->toMathML(nullptr, nullptr), this->toString());
 }
 
 std::string Expression::toString(

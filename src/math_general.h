@@ -611,6 +611,7 @@ public:
     FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const;
+  std::string toMathMLFinal(FormatExpressions* format = nullptr) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringLatex(FormatExpressions* format = nullptr) const;
   std::string toStringSystemLatex(
@@ -1984,7 +1985,7 @@ public:
   bool flagDynkinTypeDontUsePlusAndExponent;
   bool flagUseCalculatorFormatForUEOrdered;
   bool flagQuasiDiffOpCombineWeylPart;
-  bool flagExpressionIsFinal;
+  bool flagExpressionIsTopLevel;
   bool flagIncludeMutableInformation;
   bool flagExpressionNewLineAllowed;
   bool flagIncludeExtraHtmlDescriptionsInPlots;
@@ -3010,6 +3011,12 @@ std::string Matrix<Coefficient>::toMathML(
   out << "</mtable>";
   out << MathML::rightParenthesis << "</mrow>";
   return out.str();
+}
+
+template <typename Coefficient>
+std::string Matrix<Coefficient>::toMathMLFinal(FormatExpressions* format) const {
+  return
+  MathML::toMathMLFinal(this->toMathML(format), this->toStringLatex(nullptr));
 }
 
 template <typename Coefficient>

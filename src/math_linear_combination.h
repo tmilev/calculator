@@ -1320,6 +1320,7 @@ void LinearCombination<TemplateMonomial, Coefficient>::termToMathML(
   List<std::string>& rowOutputs,
   MathExpressionProperties& outputProperties
 ) const {
+  STACK_TRACE("LinearCombination::termToMathML");
   MathExpressionProperties coefficientProperites;
   MathExpressionProperties monomialProperties;
   rowOutputs.clear();
@@ -1409,7 +1410,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
   typename List<TemplateMonomial>::Comparator* monomialOrder = (
     format == nullptr
   ) ?
-  0 :
+  nullptr :
   format->getMonomialOrder<TemplateMonomial>();
   sortedMonomials.quickSortDescending(monomialOrder);
   bool useCustomPlus = false;
@@ -1437,10 +1438,10 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
       *outputProperties = termProperties;
     }
     if (i > 0) {
-      if (!termProperties.startsWithMinus && !useCustomPlus) {
-        out << "<mo>+</mo>";
-      } else {
+      if (useCustomPlus) {
         out << format->customPlusSign;
+      } else if (!termProperties.startsWithMinus) {
+        out << "<mo>+</mo>";
       }
     }
     for (const std::string& termString : termStrings) {

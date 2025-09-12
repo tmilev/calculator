@@ -2270,7 +2270,7 @@ bool CalculatorHTML::processOneExecutedCommand(
     element.flagUseMathMode = false;
   }
   FormatExpressions format;
-  format.flagExpressionIsFinal = true;
+  format.flagExpressionIsTopLevel = true;
   format.flagMakingExpressionTableWithLatex = true;
   format.flagIncludeExtraHtmlDescriptionsInPlots = false;
   format.flagUseQuotes = false;

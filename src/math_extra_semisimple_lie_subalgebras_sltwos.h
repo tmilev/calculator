@@ -33,6 +33,9 @@ public:
   Rational scalarProductKillingMustBeRational(
     const CartanElementCandidate& other
   ) const;
+  std::string toMathMLVerification() const;
+  std::string toStringVerification() const;
+  std::string toHTML() const;
   std::string toString() const;
   CartanElementCandidate operator-(const CartanElementCandidate& other) const {
     CartanElementCandidate result;

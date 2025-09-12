@@ -3907,7 +3907,7 @@ class EquationEditor {
   }
 
   /** Writes a MathML component into the container element. */
-  writeMathML() {
+  writeMathML(/** @type {string|null} */ latex) {
     if (!this.options.useMathML) {
       return;
     }
@@ -3917,8 +3917,7 @@ class EquationEditor {
       this.rootNode.element.style.position = "";
       this.container.appendChild(this.rootNode.element);
     }
-    let mathMLElement = this.rootNode.toMathML();
-
+    let mathMLElement = this.rootNode.toMathML(latex);
     this.rootNode.element.appendChild(mathMLElement);
   }
 
@@ -4024,6 +4023,9 @@ class EquationEditor {
     }
     let inputContent = this.options.latexInput.value;
     this.writeLatex(inputContent);
+    if (this.options.editHandler !== null) {
+      this.options.editHandler();
+    }
   }
 
   containerWidthIsZero() {
@@ -4060,7 +4062,11 @@ class EquationEditor {
     }
 
     this.rootNode.appendChild(newContent);
-    this.writeLatexFromContent(newContent);
+    if (this.options.useMathML) {
+      this.writeMathML(latex);
+    } else {
+      this.writeLatexFromContent();
+    }
     this.container.setAttribute('latexsource', latex);
     const elapsedMilliseconds = new Date().getTime() - startTime;
     this.writeDebugInfo(parser);
@@ -4070,14 +4076,11 @@ class EquationEditor {
     return true;
   }
 
-  writeLatexFromContent(
-    /** @type {MathNode} */
-    newContent
-  ) {
-    if (this.options.useMathML) {
-      this.writeMathML(newContent);
-      return;
-    }
+  /** 
+   * Writes latex from content. 
+   * @param {string|null} latexContent the content that is being written. 
+   */
+  writeLatexFromContent() {
     // Create the DOM if needed and compute all coordinates.
     // If we're doing svg rendering, the coordinates of the DOM
     // will be used to figure out the SVG coordinates. After that,
@@ -10019,9 +10022,23 @@ class MathNodeRoot extends MathNode {
     this.children[0].drawOnCanvas(canvas, boundingBox);
   }
 
-  toMathML() {
+  /**
+   * Converts the node to mathML.
+   * 
+   * This function does not require construction of a DOM reprsentation of
+   * the math formula, and so not all functions may work as expected.
+   * In particular, calling toLatex() from the body of the function below
+   * may fail to return the correct latex.
+   * 
+   * @param {string|null} latexHint specifies an optional latex annotation.
+   */
+  toMathML(latexHint) {
     const annotation = this.createMathMLElement("annotation");
-    annotation.textContent = this.toLatex();
+    if (latexHint) {
+      annotation.textContent = latexHint;
+    } else {
+      annotation.textContent = this.toLatex();
+    }
     annotation.setAttribute("encoding", "application/x-tex");
     const semantics = this.createMathMLElement("semantics");
     semantics.appendChild(this.children[0].toMathML());
@@ -10190,8 +10207,6 @@ class MathNodeCancel extends MathNode {
     cancelSign.style.display = "inline-block";
     cancelSign.style.borderBottom = "1px solid black";
     cancelSign.style.position = "absolute";
-    //    cancelSign.style.width = `100%`;
-    //  cancelSign.style.height = `100%`;
     cancelSign.style.height = "1px";
     cancelSign.style.width = "100%";
     cancelSign.style.top = "50%";

@@ -10450,7 +10450,7 @@ bool Calculator::Test::calculatorTestRun() {
   Calculator tester;
   ProgressReport report;
   FormatExpressions format;
-  format.flagExpressionIsFinal = true;
+  format.flagExpressionIsTopLevel = true;
   if (this->numberOfTests <= 0) {
     this->numberOfTests = this->commands.size() - this->startIndex;
     if (this->numberOfTests < 0) {

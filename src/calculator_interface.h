@@ -886,16 +886,30 @@ public:
     JSData* outputJS = nullptr
   ) const;
   std::string toMathML(
-    FormatExpressions* format, MathExpressionProperties* outputProperties
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr,
+    Expression* startingExpression = nullptr,
+    bool unfoldCommandEnclosures = true,
+    JSData* outputJS = nullptr
   ) const {
     std::stringstream out;
-    this->toMathML(out, format, outputProperties);
+    this->toMathML(
+      out,
+      format,
+      outputProperties,
+      startingExpression,
+      unfoldCommandEnclosures,
+      outputJS
+    );
     return out.str();
   }
   void toMathML(
     std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr,
+    Expression* startingExpression = nullptr,
+    bool unfoldCommandEnclosures = false,
+    JSData* outputJS = nullptr
   ) const;
   std::string toMathMLFinal() const;
   bool toStringGeneral(std::stringstream& out, FormatExpressions* format)
@@ -917,12 +931,34 @@ public:
     JSData* outputJS,
     FormatExpressions* format
   ) const;
+  bool toMathMLEndStatement(
+    std::stringstream& out,
+    Expression* startingExpression,
+    JSData* outputJS,
+    FormatExpressions* format
+  ) const;
+  bool toMathMLEndStatementTopLevel(
+    std::stringstream& out,
+    Expression& startingExpression,
+    JSData* outputJS,
+    FormatExpressions* format
+  ) const;
+  bool toMathMLEndStatementNested(
+    std::stringstream& out, FormatExpressions* format
+  ) const;
   bool toStringEndStatementOneRow(
     std::stringstream& out,
     Expression* startingExpression,
     JSData* outputJS,
     int index,
     bool isFinal,
+    FormatExpressions& format
+  ) const;
+  bool toMathMLEndStatementOneRowTopLevel(
+    std::stringstream& out,
+    Expression* startingExpression,
+    JSData* outputJS,
+    int index,
     FormatExpressions& format
   ) const;
   bool requiresNoMathTags() const;
@@ -2516,6 +2552,7 @@ public:
   bool flagUseNumberColors;
   bool flagLogRules;
   bool flagUseBracketsForIntervals;
+  bool flagUseMathML;
   bool flagLogCache;
   bool flagLogpatternMatching;
   bool flagLogFullTreeCrunching;

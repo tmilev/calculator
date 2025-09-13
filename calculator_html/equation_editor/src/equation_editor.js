@@ -2035,6 +2035,12 @@ class LaTeXConstants {
       '\\end{cases}': true,
     };
     /** @type {Object.<string, boolean>!} */
+    this.escapedAsWhitespace = {
+      ' ': ' ',
+      ':': ' ',
+      ',': ' ',
+    };
+    /** @type {Object.<string, boolean>!} */
     // The boolean indicates that the white space should be ignored.
     this.whiteSpaceCharactersIgnored = {
       '~': false,
@@ -2540,6 +2546,15 @@ class LaTeXParser {
   // Applies the first possible rule to the top of the parsing stack.
   applyOneRule() {
     let last = this.parsingStack[this.parsingStack.length - 1];
+    let secondToLast = this.parsingStack[this.parsingStack.length - 2];
+    if (secondToLast.syntacticRole === '\\' && last.syntacticRole === '' && last.content in latexConstants.escapedAsWhitespace) {
+      this.lastRuleName = 'escaped whitespace';
+      let node = mathNodeFactory.atom(
+        this.equationEditor,
+        latexConstants.escapedAsWhitespace[last.content],
+      );
+      return this.replaceParsingStackTop(node, '', -2);
+    }
     if (latexConstants.isWhiteSpace(last.content)) {
       if (latexConstants.isWhiteSpaceIgnored(last.content)) {
         this.lastRuleName = 'clean whitespace';
@@ -2557,7 +2572,6 @@ class LaTeXParser {
         null, latexConstants.latexSyntacticValues[last.content], -1);
     }
 
-    let secondToLast = this.parsingStack[this.parsingStack.length - 2];
     if (secondToLast.syntacticRole === '\\') {
       if (last.syntacticRole === '\\') {
         this.lastRuleName = 'double backslash';

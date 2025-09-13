@@ -1977,7 +1977,6 @@ public:
   static const int expressionLineBreak = 50;
   bool flagDontCollalpseProductsByUnits;
   bool flagPassCustomCoefficientMonomialSeparatorToCoefficients;
-  bool flagMakingExpressionTableWithLatex;
   bool flagUseLatex;
   bool flagUsePmatrix;
   bool flagUsePNG;

@@ -885,6 +885,12 @@ public:
     bool unfoldCommandEnclosures = true,
     JSData* outputJS = nullptr
   ) const;
+  bool toStringWithUnfoldedCommandEnclosures(
+    std::stringstream& out,
+    FormatExpressions* format = nullptr,
+    Expression* startingExpression = nullptr,
+    JSData* outputJS = nullptr
+  ) const;
   std::string toMathML(
     FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr,
@@ -926,6 +932,15 @@ public:
     JSData* outputJS
   ) const;
   bool toStringEndStatement(
+    std::stringstream& out,
+    Expression* startingExpression,
+    JSData* outputJS,
+    FormatExpressions* format
+  ) const;
+  bool toStringEndStatementNested(
+    std::stringstream& out, FormatExpressions* format
+  ) const;
+  bool toStringEndStatementTopLevel(
     std::stringstream& out,
     Expression* startingExpression,
     JSData* outputJS,

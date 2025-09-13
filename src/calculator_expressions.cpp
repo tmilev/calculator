@@ -4212,6 +4212,21 @@ bool Expression::toStringEndStatement(
   JSData* outputJS,
   FormatExpressions* format
 ) const {
+  if (startingExpression != nullptr || outputJS != nullptr) {
+    return
+    this->toStringEndStatementTopLevel(
+      out, startingExpression, outputJS, format
+    );
+  }
+  return this->toStringEndStatementNested(out, format);
+}
+
+bool Expression::toStringEndStatementTopLevel(
+  std::stringstream& out,
+  Expression* startingExpression,
+  JSData* outputJS,
+  FormatExpressions* format
+) const {
   if (!this->isListStartingWithAtom(this->owner->opCommandSequence())) {
     return false;
   }
@@ -4223,14 +4238,6 @@ bool Expression::toStringEndStatement(
   bool isFinal = format->flagExpressionIsTopLevel;
   bool createTable = (startingExpression != nullptr);
   bool createSingleTable = false;
-  if (
-    createTable == false &&
-    format != nullptr &&
-    global.runMode != GlobalVariables::RunMode::consoleRegular
-  ) {
-    createSingleTable = format->flagMakingExpressionTableWithLatex;
-    format->flagMakingExpressionTableWithLatex = false;
-  }
   if (!createSingleTable && !createTable && this->size() > 2) {
     out << "(";
   }
@@ -4283,6 +4290,68 @@ bool Expression::toStringEndStatement(
     out << "</table>";
   }
   if (!createSingleTable && !createTable && this->size() > 2) {
+    out << ")";
+  }
+  return true;
+}
+
+bool Expression::toStringEndStatementNested(
+  std::stringstream& out, FormatExpressions* format
+) const {
+  if (!this->isListStartingWithAtom(this->owner->opCommandSequence())) {
+    return false;
+  }
+  MemorySaving<FormatExpressions> temporaryFormat;
+  if (format == nullptr) {
+    format = &temporaryFormat.getElement();
+    format->flagExpressionIsTopLevel = true;
+  }
+  bool isFinal = format->flagExpressionIsTopLevel;
+  //  bool createTable = false;
+  bool createSingleTable = false;
+  if (
+    format != nullptr &&
+    global.runMode != GlobalVariables::RunMode::consoleRegular
+  ) {}
+  if (!createSingleTable && this->size() > 2) {
+    out << "(";
+  }
+  if (createSingleTable) {
+    out << "<table class='tableCalculatorOutput'>";
+  }
+  std::string currentOutput;
+  for (int i = 1; i < this->size(); i ++) {
+    const Expression expression = (*this)[i];
+    bool addLatexDelimiter = !expression.isOfType<JSData>();
+    std::stringstream outWithDelimiter;
+    if (createSingleTable) {
+      out << "<tr><td>\n";
+      addLatexDelimiter = !expression.hasType<Plot>() &&
+      !expression.isOfType<JSData>();
+      if (addLatexDelimiter) {
+        outWithDelimiter << "\\(";
+      }
+    }
+    outWithDelimiter << expression.toString(format);
+    if (createSingleTable && addLatexDelimiter) {
+      outWithDelimiter << "\\)";
+    }
+    outWithDelimiter << expression.toStringAllSlidersInExpression();
+    out << outWithDelimiter.str();
+    if (createSingleTable) {
+      out << "</td></tr>\n";
+    }
+    if (i != this->size() - 1 && !createSingleTable) {
+      out << ";";
+    }
+    if (format != nullptr) {
+      format->flagExpressionIsTopLevel = isFinal;
+    }
+  }
+  if (createSingleTable) {
+    out << "</table>";
+  }
+  if (!createSingleTable && this->size() > 2) {
     out << ")";
   }
   return true;
@@ -5519,7 +5588,6 @@ bool Expression::toMathMLWithCompositeHandler(
     return false;
   }
   int atom = (*this)[0][0].data;
-  global.comments << "DEBUG: got to here compo handler!";
   if (this->owner->toMathMLHandlersComposite.contains(atom)) {
     Expression::ToStringHandler handler =
     this->owner->toMathMLHandlersComposite.getValueNoFail(atom);
@@ -5552,6 +5620,42 @@ bool Expression::toStringWithCompositeHandler(
   return false;
 }
 
+bool Expression::toStringWithUnfoldedCommandEnclosures(
+  std::stringstream& out,
+  FormatExpressions* format,
+  Expression* startingExpression,
+  JSData* outputJS
+) const {
+  if (this->owner==nullptr){
+    return false;
+  }
+  if (!this->startsWith(this->owner->opCommandEnclosure())&& !this->startsWith(this->owner->opCommandSequence()) ) {
+    return false;
+  }
+  Expression newMe;
+  if (
+    !CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
+      *this->owner, *this, newMe
+    )
+  ) {
+    return false;
+  }
+  if (startingExpression == nullptr) {
+    out << newMe.toString(format, nullptr, false, outputJS);
+    return true;
+  }
+  Expression newStart;
+  if (
+    !CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
+      *this->owner, *startingExpression, newStart
+    )
+  ) {
+    return false;
+  }
+  out << newMe.toString(format, &newStart, false, outputJS);
+  return true;
+}
+
 std::string Expression::toString(
   FormatExpressions* format,
   Expression* startingExpression,
@@ -5574,26 +5678,20 @@ std::string Expression::toString(
   RecursionDepthCounter recursionCounter;
   recursionCounter.initialize(&this->owner->recursionDepth);
   this->checkConsistency();
-  if (startingExpression != nullptr && unfoldCommandEnclosures) {
-    Expression newStart;
-    Expression newMe;
-    if (
-      CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
-        *this->owner, *this, newMe
-      ) &&
-      CalculatorBasics::functionFlattenCommandEnclosuresOneLayer(
-        *this->owner, *startingExpression, newStart
-      )
-    ) {
-      return newMe.toString(format, &newStart, false, outputJS);
-    }
+  std::stringstream out;
+  if (
+    unfoldCommandEnclosures &&
+    this->toStringWithUnfoldedCommandEnclosures(
+      out, format, startingExpression, outputJS
+    )
+  ) {
+    return out.str();
   }
   int notationIndex =
   owner->objectContainer.expressionWithNotation.getIndex(*this);
   if (notationIndex != - 1) {
     return owner->objectContainer.expressionNotation[notationIndex];
   }
-  std::stringstream out;
   if (
     !this->isOfType<std::string>() &&
     !this->startsWith(this->owner->opCommandSequence())

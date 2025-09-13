@@ -2220,19 +2220,36 @@ void Calculator::initializeFunctionsStandard() {
     CalculatorFunctions::matchesPattern,
     "",
     "Checks whether the first argument matches "
-    "the pattern of the second argument. If no, returns 0. "
+    "the pattern of the second argument. If returns 1 if yes, 0 otherwise. "
     "Pattern parametric entries are indicated "
     "with the bound variable notation {{a}}. "
-    "If the expression matches "
-    "the pattern, the return is a command enclosure "
-    "in which each of the variables is "
-    "freed and assigned the matched value. ",
+,
     "MatchesPattern{}(a = b * 10, a = {{c}} * b);\n"
     "MatchesPattern{}(a = b * 10, a = b * {{c}})",
     "CalculatorFunctions::matchesPattern",
     "MatchesPattern",
     innerStandard
   );
+  this->addOperationHandler(
+      "MatchPattern",
+      CalculatorFunctions::matchPattern,
+      "",
+      "If the first argument of the function "
+      "matches the pattern of the second argument, "
+      "returns is a command enclosure "
+      "in which each of the variables is "
+      "freed and assigned the matched value. "
+      "Pattern parametric entries are indicated "
+      "with the bound variable notation {{a}}. "
+      "If the first argument doesn't matches "
+      "the pattern of the second argument, does nothing. "
+      ,
+      "MatchPattern{}(a = b * 10, a = {{c}} * b);\n"
+      "MatchPattern{}(a = b * 10, a = b * {{c}})",
+      "CalculatorFunctions::matchPattern",
+      "MatchPattern",
+      innerStandard
+      );
   this->addOperationHandler(
     "GetVariablesExcludeNamedConstants",
     CalculatorFunctions::getFreeVariablesExcludeNamedConstants,

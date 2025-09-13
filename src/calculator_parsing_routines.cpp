@@ -454,7 +454,7 @@ void Calculator::reset() {
   this->flagPlotShowJavascriptOnly = false;
   this->flagHasGraphics = false;
   this->flagUseBracketsForIntervals = false;
-  this->flagUseMathML=false;
+  this->flagUseMathML = false;
   this->maximumLatexChars = 2000;
   this->objectContainer.reset();
   this->operations.clear();

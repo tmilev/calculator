@@ -830,8 +830,11 @@ public:
     Calculator& calculator, const Expression& input, Expression& output
   );
   static bool matchesPattern(
-    Calculator& calculator, const Expression& input, Expression& output
-  );
+      Calculator& calculator, const Expression& input, Expression& output
+      );
+  static bool matchPattern(
+      Calculator& calculator, const Expression& input, Expression& output
+      );
   static bool thaw(
     Calculator& calculator, const Expression& input, Expression& output
   );

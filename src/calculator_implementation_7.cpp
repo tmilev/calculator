@@ -10449,8 +10449,6 @@ bool Calculator::Test::calculatorTestRun() {
   this->initialize();
   Calculator tester;
   ProgressReport report;
-  FormatExpressions format;
-  format.flagExpressionIsTopLevel = true;
   if (this->numberOfTests <= 0) {
     this->numberOfTests = this->commands.size() - this->startIndex;
     if (this->numberOfTests < 0) {
@@ -10491,8 +10489,12 @@ bool Calculator::Test::calculatorTestRun() {
     tester.initialize(Calculator::Mode::full);
     tester.checkConsistencyAfterInitialization();
     tester.evaluate(currentTest.command);
-    currentTest.actualResult = tester.programExpression.toString(&format);
-    reportStream << "<br>Result: " << tester.programExpression.toString();
+    FormatExpressions format;
+//    format.flagExpressionIsTopLevel = true;
+    JSData unused;
+    currentTest.actualResult =
+    tester.programExpression.toString(&format);
+    reportStream << "<br>Result: " << currentTest.actualResult;
     reportStream
     << "<br>Done in: "
     << global.getElapsedSeconds() - this->startTime

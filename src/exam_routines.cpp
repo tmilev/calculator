@@ -2271,14 +2271,16 @@ bool CalculatorHTML::processOneExecutedCommand(
   }
   FormatExpressions format;
   format.flagExpressionIsTopLevel = true;
-  format.flagMakingExpressionTableWithLatex = true;
   format.flagIncludeExtraHtmlDescriptionsInPlots = false;
   format.flagUseQuotes = false;
   format.flagUseLatex = true;
   format.flagUseQuotes = false;
-  format.flagMakingExpressionTableWithLatex = true;
   element.interpretedCommand = "";
-  element.interpretedCommand += interpretedExpression.toString(&format);
+  // The presense of javascript content signals that
+  // we are at the top level of the expression.
+  JSData javascriptContent;
+  element.interpretedCommand +=
+  interpretedExpression.toString(&format, nullptr, true, &javascriptContent);
   element.flagUseDisplaystyleInMathMode = (
     element.content.find("\\displaystyle") != std::string::npos
   );

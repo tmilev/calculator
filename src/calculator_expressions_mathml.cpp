@@ -287,10 +287,7 @@ bool Expression::toMathMLEndStatementTopLevel(
     createTable == false &&
     format != nullptr &&
     global.runMode != GlobalVariables::RunMode::consoleRegular
-  ) {
-    createSingleTable = format->flagMakingExpressionTableWithLatex;
-    format->flagMakingExpressionTableWithLatex = false;
-  }
+  ) {}
   if (!createSingleTable && !createTable && this->size() > 2) {
     out << "(";
   }

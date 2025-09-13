@@ -3535,7 +3535,6 @@ FormatExpressions::FormatExpressions() {
   this->flagUsePmatrix = true;
   this->matrixColumnVerticalLineIndex = - 1;
   this->flagQuasiDiffOpCombineWeylPart = true;
-  this->flagMakingExpressionTableWithLatex = false;
   this->numberOfAmpersandsPerNewLineForLaTeX = 0;
   this->monomialOrder = nullptr;
   this->flagExpressionIsTopLevel = true;

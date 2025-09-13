@@ -1708,7 +1708,6 @@ void Calculator::evaluateCommands() {
     << "."
     << global.fatal;
   }
-  global.defaultFormat.getElement().flagMakingExpressionTableWithLatex = true;
   global.defaultFormat.getElement().flagUseLatex = true;
   global.defaultFormat.getElement().flagExpressionNewLineAllowed = true;
   global.defaultFormat.getElement().flagIncludeExtraHtmlDescriptionsInPlots =

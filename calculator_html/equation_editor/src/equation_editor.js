@@ -2638,6 +2638,7 @@ class LaTeXParser {
       return this.replaceParsingStackTop(null, '\\left.', -2);
     }
     if (secondToLast.syntacticRole === '\\right' && last.content === '.') {
+      this.lastRuleName = "right + dot";
       return this.replaceParsingStackTop(null, '\\right.', -2);
     }
     if (secondToLast.syntacticRole === '\\mathcal') {
@@ -3129,7 +3130,7 @@ class LaTeXParser {
       return false;
     }
     if (left.syntacticRole === '|' || right.syntacticRole === '|') {
-      return left.syntacticRole === right.syntacticRole;
+      return left.syntacticRole === right.syntacticRole || right.syntacticRole === '\\right.';
     }
     return true;
   }

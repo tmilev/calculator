@@ -1477,7 +1477,11 @@
   },
   {
     "input":"MatchesPattern{}(a = b * 10, a = {{c}} * b);\nMatchesPattern{}(a = b * 10, a = b * {{c}})",
-    "output":"(CommandEnclosure{}\\left(c=10\\right);0)"
+    "output":"(1;0)"
+  },
+  {
+    "input":"MatchPattern{}(a = b * 10, a = {{c}} * b);\nMatchPattern{}(a = b * 10, a = b * {{c}})",
+    "output":"(CommandEnclosureStart;c=10;CommandEnclosureFinish;MatchPattern{}\\left(a=10 b, a=b {{c}}\\right))"
   },
   {
     "input":"GetVariablesExcludeNamedConstants{}(e^x + x + 5 +\\arctan x + x *y + x^y + x^{y^z});\nGetVariablesIncludeNamedConstants{}(e^x + x + 5 +\\arctan x + x *y + x^y + x^{y^z})",

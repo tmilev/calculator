@@ -3457,7 +3457,15 @@ Creates an empty plot with a given canvas id. If you add a nameless plot to a na
 MatchesPattern{}(a = b * 10, a = {{c}} * b);
 MatchesPattern{}(a = b * 10, a = b * {{c}})
 ```
-Checks whether the first argument matches the pattern of the second argument. If no, returns 0. Pattern parametric entries are indicated with the bound variable notation {{a}}. If the expression matches the pattern, the return is a command enclosure in which each of the variables is freed and assigned the matched value. 
+Checks whether the first argument matches the pattern of the second argument. If returns 1 if yes, 0 otherwise. Pattern parametric entries are indicated with the bound variable notation {{a}}. 
+
+*MatchPattern* [MatchPattern] {CalculatorFunctions::matchPattern}. 
+[Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22MatchPattern%7b%7d%28a%20%3d%20b%20%2a%2010%2c%20a%20%3d%20%7b%7bc%7d%7d%20%2a%20b%29%3b%5cnMatchPattern%7b%7d%28a%20%3d%20b%20%2a%2010%2c%20a%20%3d%20b%20%2a%20%7b%7bc%7d%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)
+```
+MatchPattern{}(a = b * 10, a = {{c}} * b);
+MatchPattern{}(a = b * 10, a = b * {{c}})
+```
+If the first argument of the function matches the pattern of the second argument, returns is a command enclosure in which each of the variables is freed and assigned the matched value. Pattern parametric entries are indicated with the bound variable notation {{a}}. If the first argument doesn't matches the pattern of the second argument, does nothing. 
 
 *GetVariablesExcludeNamedConstants* [GetVariablesExcludeNamedConstants] {CalculatorFunctions::getFreeVariablesExcludeNamedConstants}. 
 [Example](https://calculator-algebra.org/app#%7b%22calculatorInput%22%3a%22GetVariablesExcludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b%205%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2b%20x%5ey%20%2b%20x%5e%7by%5ez%7d%29%3b%5cnGetVariablesIncludeNamedConstants%7b%7d%28e%5ex%20%2b%20x%20%2b%205%20%2b%5c%5carctan%20x%20%2b%20x%20%2ay%20%2b%20x%5ey%20%2b%20x%5e%7by%5ez%7d%29%22%2c%22currentPage%22%3a%22calculator%22%7d)

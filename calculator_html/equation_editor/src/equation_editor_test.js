@@ -53,6 +53,12 @@ const allLatexSnippets = [
   `123456789`.repeat(10_000),
 ];
 
+/** @type {Object.<string, string>} */
+const parsedToLatex = {
+  '2 or 3': '2or3',
+  '2~or\\ 3': '2~or~3',
+}
+
 const bodyContainer = document.createElement("div");
 document.body.appendChild(bodyContainer);
 
@@ -74,6 +80,26 @@ function renderLatex(
   }));
   equationEditor.writeLatex(input);
   return container;
+}
+
+
+/** @return {EquationEditor} */
+function renderLatexReturnEditor(
+  /** @type {string} */ input,
+  /** @type {boolean} */ editable,
+  /** @type {boolean} */ useSVG,
+  /** @type {boolean} */ useMathML,
+) {
+  const container = document.createElement("div");
+  bodyContainer.textContent = "";
+  bodyContainer.appendChild(container);
+  let equationEditor = new EquationEditor(container, new EquationEditorOptions({
+    editable: editable,
+    useMathML: useMathML,
+    useSVG: useSVG,
+  }));
+  equationEditor.writeLatex(input);
+  return equationEditor;
 }
 
 describe("Equation editor", () => {
@@ -112,4 +138,23 @@ describe("Equation editor", () => {
       expect(container.getAttribute("latexsource").length > 0).toBe(true)
     }
   });
+
+  it("Equation editor renders mathML with correct Latex annotation", async () => {
+    for (const latex in parsedToLatex) {
+      const container = renderLatex(latex, false, false, true);
+      const annotation = container.childNodes[1].childNodes[0].childNodes[0].childNodes[1];
+      // The mathml annotation leaves the original latex source unchanged.
+      expect(annotation.textContent).toBe(latex);
+    }
+  });
+
+  it("Equation editor renders and returns correct toLatex", async () => {
+    for (const latex in parsedToLatex) {
+      const editor = renderLatexReturnEditor(latex, false, false, true);
+      const result = editor.rootNode.toLatex();
+      const expected = parsedToLatex[latex];
+      expect(result).toBe(expected);
+    }
+  });
+
 });

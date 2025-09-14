@@ -2036,7 +2036,8 @@ class LaTeXConstants {
     };
     /** @type {Object.<string, boolean>!} */
     this.escapedAsWhitespace = {
-      ' ': ' ',
+      // regular spacebar
+      '\u0020': '\u0020',
       ':': ' ',
       ',': ' ',
     };
@@ -2044,16 +2045,18 @@ class LaTeXConstants {
     // The boolean indicates that the white space should be ignored.
     this.whiteSpaceCharactersIgnored = {
       '~': false,
+      // regular spacebar
       ' ': true,
       '\t': true,
       '\u00A0': true,
       '\n': true,
     };
     this.whiteSpaceUtf16 = {
-      '\u00A0': ' ',
-      '\u200A': ' ',
-      '\u200B': ' ',
-      '\u2009': ' ',
+      ' ': '~',
+      '\u00A0': '~',
+      '\u200A': '~',
+      '\u200B': '~',
+      '\u2009': '~',
     };
     /** @type {Object.<string, string>?} */
     this.utf16ToLatexMap = null;
@@ -2117,7 +2120,7 @@ class LaTeXConstants {
     }
     // Non-breakable space.
     for (let key in this.whiteSpaceUtf16) {
-      this.utf16ToLatexMap[key] = ' ';
+      this.utf16ToLatexMap[key] = this.whiteSpaceUtf16[key];
     }
     for (let key in this.latexBackslashAtomsEditable) {
       let current = this.latexBackslashAtomsEditable[key];
@@ -2160,14 +2163,16 @@ class LaTeXConstants {
     if (positionCursor === 0) {
       result.push('\\cursor ');
     }
+    console.log("DEBUG: hex incoming: ", encodeURIComponent(input));
+
     for (let i = 0; i < input.length; i++) {
       let current = '';
       for (let j = 0; j < 4 && i + j < input.length; j++) {
         current += input[i + j];
         if (current in this.utf16ToLatexMap) {
-          current = this.utf16ToLatexMap[current];
+          const incoming = this.utf16ToLatexMap[current];
           i += j;
-          result.push(current);
+          result.push(incoming);
           current = '';
           break;
         }

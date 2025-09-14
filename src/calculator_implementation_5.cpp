@@ -2539,11 +2539,18 @@ bool JavascriptExtractor::convertListOfListOfExpressionsToPoints(
   Matrix<Expression> matrix;
   matrix.resize(input.size, desiredDimension, false, nullptr);
   for (int i = 0; i < input.size; i ++) {
-    if (!input[i].isSequenceNElements(desiredDimension)) {
+    const Expression& child = input[i];
+    if (child.owner == nullptr) {
       return false;
     }
-    for (int j = 1; j < input[i].size(); j ++) {
-      matrix(i, j - 1) = input[i][j];
+    if (
+      !child.isSequenceNElements(desiredDimension) &&
+      !child.startsWith(this->owner->opIntervalOpen())
+    ) {
+      return false;
+    }
+    for (int j = 1; j < child.size(); j ++) {
+      matrix(i, j - 1) = child[j];
     }
   }
   return this->convertMatrixOfExpressionToPoints(matrix, output);

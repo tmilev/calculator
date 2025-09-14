@@ -3425,9 +3425,11 @@ bool SimpleSubalgebraComponent::isLinkedTo(
 std::string SimpleSubalgebraComponent::toString() const {
   std::stringstream out;
   out
-  << "\n<br>\nScalar product computed: \\("
+  << "\n<br>\nScalar product computed: "
+         << "\\("
   << this->dynkinDiagramComputer.ambientBilinearForm.toStringLatex()
-  << "\\)";
+  << "\\)"
+      ;
   out
   << "\n<br>\nSimple basis of Cartan of centralizer ("
   << this->simpleDualsOfRootSpaces.size

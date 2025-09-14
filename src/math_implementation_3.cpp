@@ -2124,7 +2124,8 @@ bool FileOperations::getPhysicalFileNameFromVirtual(
     return false;
   }
   std::string inputCopy = inputFileName;
-  std::string folderEnd, folderEnd2;
+  std::string folderEnd;
+  std::string folderEnd2;
   for (
     int i = 0; i <
     FileOperations::folderVirtualLinksToWhichWeAppendTimeAndBuildHash().size;

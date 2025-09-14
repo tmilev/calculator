@@ -16,8 +16,8 @@ std::string MathML::toMathMLFinal(
   out
   << "<span class='mathcalculatorbackendrendered'>"
   << "<math>"
+      << "<semantics>"
   << mathMLContent
-  << "<semantics>"
   << "<annotation>"
   << latex
   << "</annotation"

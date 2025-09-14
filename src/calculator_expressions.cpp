@@ -4149,10 +4149,15 @@ bool Expression::toStringEndStatementOneRow(
   bool isFinal,
   FormatExpressions& format
 ) const {
-  std::string currentInput, currentOutput;
+  STACK_TRACE("Expression::toStringEndStatementOneRow");
+  if (this->owner==nullptr){
+    return false;
+  }
+  std::string currentInput;
+  std::string currentOutput;
   const Expression currentE = (*this)[index];
   out << "<tr><td class='cellCalculatorInput'>";
-  if (!this->owner->flagHideLHS) {
+  if (!this->owner->flagHideLHS && startingExpression!= nullptr) {
     if (index < (*startingExpression).size()) {
       format.flagDontCollalpseProductsByUnits = true;
       currentInput =
@@ -4228,6 +4233,7 @@ bool Expression::toStringEndStatementTopLevel(
   JSData* outputJS,
   FormatExpressions* format
 ) const {
+  STACK_TRACE("Expression::toStringEndStatementTopLevel");
   if (!this->isListStartingWithAtom(this->owner->opCommandSequence())) {
     return false;
   }
@@ -4238,61 +4244,25 @@ bool Expression::toStringEndStatementTopLevel(
   }
   bool isFinal = format->flagExpressionIsTopLevel;
   bool createTable = (startingExpression != nullptr);
-  bool createSingleTable = false;
-  if (!createSingleTable && !createTable && this->size() > 2) {
+  if (!createTable && this->size() > 2) {
     out << "(";
-  }
-  if (createSingleTable) {
-    out << "<table class='tableCalculatorOutput'>";
   }
   std::string currentOutput;
   if (outputJS != nullptr) {
     (*outputJS)["input"].elementType = JSData::Type::tokenArray;
     (*outputJS)["output"].elementType = JSData::Type::tokenArray;
   }
+  out << "<table class='tableCalculatorOutput'>";
   for (int i = 1; i < this->size(); i ++) {
     const Expression expression = (*this)[i];
-    if (createTable) {
       this->toStringEndStatementOneRow(
         out, startingExpression, outputJS, i, isFinal, *format
       );
-    } else {
-      bool addLatexDelimiter = !expression.isOfType<JSData>();
-      std::stringstream outWithDelimiter;
-      if (createSingleTable) {
-        out << "<tr><td>\n";
-        addLatexDelimiter = !expression.hasType<Plot>() &&
-        !expression.isOfType<JSData>();
-        if (addLatexDelimiter) {
-          outWithDelimiter << "\\(";
-        }
-      }
-      outWithDelimiter << expression.toString(format);
-      if (createSingleTable && addLatexDelimiter) {
-        outWithDelimiter << "\\)";
-      }
-      outWithDelimiter << expression.toStringAllSlidersInExpression();
-      out << outWithDelimiter.str();
-      if (outputJS != nullptr) {
-        (*outputJS)["output"][i] = outWithDelimiter.str();
-      }
-      if (createSingleTable) {
-        out << "</td></tr>\n";
-      }
-      if (i != this->size() - 1 && !createSingleTable) {
-        out << ";";
-      }
-    }
     if (format != nullptr) {
       format->flagExpressionIsTopLevel = isFinal;
     }
   }
-  if (createSingleTable) {
-    out << "</table>";
-  }
-  if (!createSingleTable && !createTable && this->size() > 2) {
-    out << ")";
-  }
+  out << "</table>";
   return true;
 }
 
@@ -4308,7 +4278,6 @@ bool Expression::toStringEndStatementNested(
     format->flagExpressionIsTopLevel = true;
   }
   bool isFinal = format->flagExpressionIsTopLevel;
-  //  bool createTable = false;
   bool createSingleTable = false;
   if (
     format != nullptr &&

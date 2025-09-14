@@ -1019,6 +1019,7 @@ class TopicElement {
       contentArray, this.badProblemExplanation,
     );
     let problemBody = document.createElement("span");
+    console.log("DEBUG: about to write: ", this.decodedProblem);
     miscellaneous.writeHTML(
       problemBody,
       this.decodedProblem + this.commentsProblem,

@@ -2163,8 +2163,6 @@ class LaTeXConstants {
     if (positionCursor === 0) {
       result.push('\\cursor ');
     }
-    console.log("DEBUG: hex incoming: ", encodeURIComponent(input));
-
     for (let i = 0; i < input.length; i++) {
       let current = '';
       for (let j = 0; j < 4 && i + j < input.length; j++) {

@@ -374,6 +374,7 @@ std::string SlTwoSubalgebra::toStringDynkinType() const {
 
 std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   STACK_TRACE("SlTwoSubalgebra::toString");
+  (void)format;
   if (this->container == nullptr) {
     return "sl(2) subalgebra not initialized.";
   }

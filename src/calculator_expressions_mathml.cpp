@@ -48,10 +48,10 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
     Expression::toStringDefineConditional
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opDivide(), Expression::toStringDivide
+    toBeInitialized.opDivide(), Expression::toMathMLDivide
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opTensor(), Expression::toStringTensor
+    toBeInitialized.opTensor(), Expression::toMathMLTensor
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opIn(), Expression::toStringIn
@@ -99,7 +99,7 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
     toBeInitialized.opDirectSum(), Expression::toStringDirectSum
   );
   toBeInitialized.addOneMathMLAtomHandler(
-    toBeInitialized.opMinus(), Expression::toStringMinus
+    toBeInitialized.opMinus(), Expression::toMathMLMinus
   );
   toBeInitialized.addOneMathMLAtomHandler(
     toBeInitialized.opBind(), Expression::toStringBind
@@ -169,8 +169,8 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
   );
 }
 
-std::string Expression::toMathMLFinal() const {
-  return MathML::toMathMLFinal(this->toMathML(), this->toString());
+std::string Expression::toMathMLFinal(FormatExpressions* format) const {
+  return MathML::toMathMLFinal(this->toMathML(format), this->toString(format));
 }
 
 void Expression::toMathML(
@@ -331,11 +331,9 @@ bool Expression::toMathMLEndStatementOneRowTopLevel(
   if (!this->owner->flagHideLHS) {
     if (index < (*startingExpression).size()) {
       format.flagDontCollalpseProductsByUnits = true;
-      currentInput =
-      HtmlRoutines::getMathNoDisplay((*startingExpression)[index].toString(
+      currentInput = (*startingExpression)[index].toMathMLFinal(
           &format
-        )
-      );
+          );
     } else {
       currentInput =
       "No matching starting expression - "
@@ -371,7 +369,7 @@ bool Expression::toMathMLEndStatementOneRowTopLevel(
       // or the childString has already got all it's tags.
       currentOutput = childString;
     } else {
-      currentOutput = HtmlRoutines::getMathNoDisplay(childString);
+      currentOutput = currentE.toMathMLFinal(&format);
     }
   }
   currentOutput += currentE.toStringAllSlidersInExpression();
@@ -783,16 +781,198 @@ bool Expression::toMathMLMatrix(
   if (!input.isMatrix()) {
     return false;
   }
+  out << "<mrow>";
   out << MathML::leftParenthesis;
   out << "<mtable>";
   for (int i = 1; i < input.size(); i ++) {
     out << "<mtr>";
     for (int j = 1; j < input[i].size(); j ++) {
-      out << "<mtd>" << input[i][j].toMathML(format, nullptr) << "</mtd>";
+      out << "<mtd>"
+          << input[i][j].toMathML(format, nullptr) << "</mtd>";
     }
     out << "</mtr>";
   }
   out << "</mtable>";
   out << MathML::rightParenthesis;
+  out << "</mrow>";
   return true;
+}
+
+bool Expression::toMathMLDivide(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) outputProperties;
+  Calculator& commands = *input.owner;
+  if (!input.startsWith(commands.opDivide(), 3)) {
+    return false;
+  }
+  bool doUseFrac = commands.flagUseFracInRationalLaTeX;
+  if (
+      doUseFrac && (
+          input[1].startsWith(commands.opTimes()) ||
+          input[1].startsWith(commands.opDivide())
+          )
+      ) {
+    List<Expression> multiplicandsLeft;
+    input.getMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
+    for (int i = 0; i < multiplicandsLeft.size; i ++) {
+      if (
+          multiplicandsLeft[i].startsWith(commands.opIntegral()) ||
+          multiplicandsLeft[i].isOperationGiven(commands.opIntegral())
+          ) {
+        doUseFrac = false;
+        break;
+      }
+    }
+  }
+  if (!doUseFrac) {
+    std::string firstMathML = input[1].toMathML(format);
+    std::string secondMathML = input[2].toMathML(format);
+    bool firstNeedsBrackets =
+        !(
+            input[1].isListStartingWithAtom(commands.opTimes()) ||
+            input[1].isListStartingWithAtom(commands.opDivide())
+            );
+    bool secondNeedsBrackets = true;
+    if (input[2].isOfType<Rational>()) {
+      if (input[2].getValue<Rational>().isInteger()) {
+        secondNeedsBrackets = false;
+      }
+    }
+    if (firstNeedsBrackets) {
+      out << MathML::leftParenthesis << firstMathML << MathML::rightParenthesis;
+    } else {
+      out << firstMathML;
+    }
+    out << "<mo>/</mo>";
+    if (secondNeedsBrackets) {
+      out << MathML::leftParenthesis << secondMathML << MathML::rightParenthesis;
+    } else {
+      out << secondMathML;
+    }
+  } else {
+    StateMaintainer<bool> maintain;
+    if (format != nullptr) {
+      maintain.initialize(format->flagExpressionNewLineAllowed);
+      format->flagExpressionNewLineAllowed = false;
+    } else {
+      // Compilers will complain at certain optimization levels about
+      // maintain not being initialized.
+      maintain.toMaintain = nullptr;
+      maintain.contentAtStart = false;
+    }
+    std::string firstMathML = input[1].toMathML(format);
+    std::string secondMathML = input[2].toMathML(format);
+    out << "<mfrac>" << firstMathML  << secondMathML << "</mfrac>";
+  }
+  return true;
+}
+
+
+
+bool Expression::toMathMLMinus(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opMinus())) {
+    return false;
+  }
+  if (input.size() == 2) {
+    return Expression::toMathMLMinus2(input, out, format);
+  }
+  return Expression::toMathMLMinus3(input, out, format);
+}
+
+bool Expression::toMathMLMinus3(
+    const Expression& input, std::stringstream& out, FormatExpressions* format
+    ) {
+  if (!input.startsWith(input.owner->opMinus(), 3)) {
+    return false;
+  }
+  if (input.children.size != 3) {
+    global.fatal
+        << "The minus function expects 1 or 2 arguments, "
+        << "instead there are "
+        << input.children.size - 1
+        << ". "
+        << global.fatal;
+  }
+  out << input[1].toMathML(format) << MathML::negativeSign;
+  if (
+      input[2].startsWith(input.owner->opPlus()) ||
+      input[2].startsWith(input.owner->opMinus())
+      ) {
+    out << MathML::leftParenthesis << input[2].toMathML(format) << MathML::rightParenthesis;
+  } else {
+    out << input[2].toMathML(format);
+  }
+  return true;
+}
+bool Expression::toMathMLMinus2(
+    const Expression& input, std::stringstream& out, FormatExpressions* format
+    ) {
+  if (!input.startsWith(input.owner->opMinus(), 2)) {
+    return false;
+  }
+  if (
+      input[1].startsWith(input.owner->opPlus()) ||
+      input[1].startsWith(input.owner->opMinus())
+      ) {
+    out << MathML::negativeSign << MathML::leftParenthesis<< input[1].toMathML(format) << MathML::rightParenthesis;
+  } else {
+    out << MathML::negativeSign << input[1].toMathML(format);
+  }
+  return true;
+}
+
+bool Expression::toMathMLTensor(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) outputProperties;
+  if (!input.startsWith(input.owner->opTensor(), 3)) {
+    return false;
+  }
+  input.toMathMLOpMultiplicative(out, "<mo>&otimes;</mo>", format);
+  return true;
+}
+
+void Expression::toMathMLOpMultiplicative(
+    std::stringstream& out,
+    const std::string& operation,
+    FormatExpressions* format
+    ) const {
+  MathExpressionProperties propertiesOfFirst;
+  MathExpressionProperties propertiesOfSecond;
+  std::string firstMathML = (*this)[1].toMathML(format, &propertiesOfFirst);
+  std::string secondMathML = (*this)[2].toMathML(format, &propertiesOfSecond);
+  bool firstNeedsBrackets = (*this)[1].needsParenthesisForMultiplication();
+  bool secondNeedsBrackets = (*this)[2].needsParenthesisForMultiplication();
+  if (propertiesOfFirst.isNegativeOne) {
+    firstMathML = MathML::negativeSign;
+    firstNeedsBrackets = false;
+  }
+  if (propertiesOfFirst.isOne) {
+    firstMathML = "";
+    firstNeedsBrackets=false;
+  }
+  if (firstNeedsBrackets) {
+    out << MathML::leftParenthesis << firstMathML <<MathML::rightParenthesis;
+  } else {
+    out << firstMathML;
+  }
+  out << operation ;
+  if (secondNeedsBrackets) {
+    out << MathML::leftParenthesis << secondMathML << MathML::rightParenthesis;
+  } else {
+    out << secondMathML;
+  }
 }

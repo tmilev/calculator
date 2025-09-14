@@ -591,6 +591,12 @@ public:
     FormatExpressions* format,
     MathExpressionProperties* outputProperties = nullptr
   );
+  static bool toMathMLTensor(
+      const Expression& input,
+      std::stringstream& out,
+      FormatExpressions* format,
+      MathExpressionProperties* outputProperties = nullptr
+      );
   static bool toStringIn(
     const Expression& input,
     std::stringstream& out,
@@ -802,11 +808,17 @@ public:
     MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringDivide(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties = nullptr
-  );
+      const Expression& input,
+      std::stringstream& out,
+      FormatExpressions* format,
+      MathExpressionProperties* outputProperties = nullptr
+      );
+  static bool toMathMLDivide(
+      const Expression& input,
+      std::stringstream& out,
+      FormatExpressions* format,
+      MathExpressionProperties* outputProperties = nullptr
+      );
   static bool toStringPower(
     const Expression& input,
     std::stringstream& out,
@@ -832,17 +844,29 @@ public:
     MathExpressionProperties* outputProperties = nullptr
   );
   static bool toStringMinus(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties = nullptr
-  );
+      const Expression& input,
+      std::stringstream& out,
+      FormatExpressions* format,
+      MathExpressionProperties* outputProperties = nullptr
+      );
   static bool toStringMinus2(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
-  );
+      const Expression& input, std::stringstream& out, FormatExpressions* format
+      );
   static bool toStringMinus3(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
-  );
+      const Expression& input, std::stringstream& out, FormatExpressions* format
+      );
+  static bool toMathMLMinus(
+      const Expression& input,
+      std::stringstream& out,
+      FormatExpressions* format,
+      MathExpressionProperties* outputProperties = nullptr
+      );
+  static bool toMathMLMinus2(
+      const Expression& input, std::stringstream& out, FormatExpressions* format
+      );
+  static bool toMathMLMinus3(
+      const Expression& input, std::stringstream& out, FormatExpressions* format
+      );
   static bool toStringIntersection(
     const Expression& input,
     std::stringstream& out,
@@ -874,10 +898,15 @@ public:
     MathExpressionProperties* outputProperties = nullptr
   );
   void toStringOpMultiplicative(
-    std::stringstream& out,
-    const std::string& operation,
-    FormatExpressions* format
-  ) const;
+      std::stringstream& out,
+      const std::string& operation,
+      FormatExpressions* format
+      ) const;
+  void toMathMLOpMultiplicative(
+      std::stringstream& out,
+      const std::string& operation,
+      FormatExpressions* format
+      ) const;
   std::string toStringTreeHtml(int depth) const;
   std::string toString(
     FormatExpressions* format = nullptr,
@@ -917,7 +946,7 @@ public:
     bool unfoldCommandEnclosures = false,
     JSData* outputJS = nullptr
   ) const;
-  std::string toMathMLFinal() const;
+  std::string toMathMLFinal(FormatExpressions* format=nullptr) const;
   bool toStringGeneral(std::stringstream& out, FormatExpressions* format)
   const;
   bool toMathMLGeneral(

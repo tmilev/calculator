@@ -10490,10 +10490,9 @@ bool Calculator::Test::calculatorTestRun() {
     tester.checkConsistencyAfterInitialization();
     tester.evaluate(currentTest.command);
     FormatExpressions format;
-//    format.flagExpressionIsTopLevel = true;
+    //    format.flagExpressionIsTopLevel = true;
     JSData unused;
-    currentTest.actualResult =
-    tester.programExpression.toString(&format);
+    currentTest.actualResult = tester.programExpression.toString(&format);
     reportStream << "<br>Result: " << currentTest.actualResult;
     reportStream
     << "<br>Done in: "

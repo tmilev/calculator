@@ -1110,27 +1110,24 @@ bool CalculatorFunctions::matchesPattern(
     return false;
   }
   MapList<Expression, Expression> unused;
-  bool result =calculator.expressionMatchesPattern(
-      input[2], input[1], unused, nullptr
-      );
+  bool result =
+  calculator.expressionMatchesPattern(input[2], input[1], unused, nullptr);
   return output.assignValue(calculator, static_cast<int>(result));
-
 }
 
-
 bool CalculatorFunctions::matchPattern(
-    Calculator& calculator, const Expression& input, Expression& output
-    ) {
+  Calculator& calculator, const Expression& input, Expression& output
+) {
   STACK_TRACE("CalculatorFunctions::matchPattern");
   if (input.size() != 3) {
     return false;
   }
   MapList<Expression, Expression> matchedExpressions;
   if (
-      !calculator.expressionMatchesPattern(
-          input[2], input[1], matchedExpressions, nullptr
-          )
-      ) {
+    !calculator.expressionMatchesPattern(
+      input[2], input[1], matchedExpressions, nullptr
+    )
+  ) {
     return false;
   }
   Expression commandList;
@@ -1141,23 +1138,24 @@ bool CalculatorFunctions::matchPattern(
     if (!matchedExpressions.keys[i].startsWith(calculator.opBind(), 2)) {
       std::stringstream errorStream;
       errorStream
-          << "Bound variable "
-          << matchedExpressions.keys[i].toString()
-          << " does not start with the bind atom. ";
+      << "Bound variable "
+      << matchedExpressions.keys[i].toString()
+      << " does not start with the bind atom. ";
       return output.assignError(calculator, errorStream.str());
     }
     currentCommand.makeXOX(
-        calculator,
-        calculator.opDefine(),
-        matchedExpressions.keys[i][1],
-        matchedExpressions.values[i]
-        );
+      calculator,
+      calculator.opDefine(),
+      matchedExpressions.keys[i][1],
+      matchedExpressions.values[i]
+    );
     commandList.addChildOnTop(currentCommand);
   }
   output.reset(calculator);
   output.addChildAtomOnTop(calculator.opCommandEnclosure());
   return output.addChildOnTop(commandList);
 }
+
 bool CalculatorFunctions::degreesToRadians(
   Calculator& calculator, const Expression& input, Expression& output
 ) {

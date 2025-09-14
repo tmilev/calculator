@@ -5626,10 +5626,13 @@ bool Expression::toStringWithUnfoldedCommandEnclosures(
   Expression* startingExpression,
   JSData* outputJS
 ) const {
-  if (this->owner==nullptr){
+  if (this->owner == nullptr) {
     return false;
   }
-  if (!this->startsWith(this->owner->opCommandEnclosure())&& !this->startsWith(this->owner->opCommandSequence()) ) {
+  if (
+    !this->startsWith(this->owner->opCommandEnclosure()) &&
+    !this->startsWith(this->owner->opCommandSequence())
+  ) {
     return false;
   }
   Expression newMe;

@@ -477,6 +477,11 @@ public:
     bool useArrows = true,
     bool includeDominance = false
   ) const;
+  std::string toMathML(
+    bool useSimpleCoordinates = true,
+    bool useArrows = true,
+    bool includeDominance = false
+  ) const;
   void simplify();
   unsigned int hashFunction() const {
     return this->waypoints.hashFunction();

@@ -24,32 +24,32 @@ bool Expression::toMathMLBuiltIn<Polynomial<Rational> >(
   return true;
 }
 
-
 template < >
 bool Expression::toMathMLBuiltIn<Weight<Polynomial<Rational> > >(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) format;
   (void) outputProperties;
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   formatLocal.flagFormatWeightAsVectorSpaceIndex = false;
   out
-      << input.getValue<Weight<Polynomial<Rational> > >().toMathML(&formatLocal, outputProperties);
+  << input.getValue<Weight<Polynomial<Rational> > >().toMathML(
+    &formatLocal, outputProperties
+  );
   return true;
 }
 
-
 template < >
 bool Expression::toMathMLBuiltIn<Weight<Rational> >(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   input.checkInitialization();
   (void) format;
   (void) outputProperties;
@@ -59,35 +59,36 @@ bool Expression::toMathMLBuiltIn<Weight<Rational> >(
 
 template < >
 bool Expression::toMathMLBuiltIn<
-    ElementUniversalEnveloping<RationalFraction<Rational> >
-    >(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  ElementUniversalEnveloping<RationalFraction<Rational> >
+>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) format;
   (void) outputProperties;
   FormatExpressions formatLocal;
   input.getContext().getFormat(formatLocal);
   out
-      << "<mrow><mi>UEE{}</mi>" << MathML::leftParenthesis
-      << input.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >()
-             .toMathML(&formatLocal)
-      << MathML::rightParenthesis << "</mrow>";
+  << "<mrow><mi>UEE{}</mi>"
+  << MathML::leftParenthesis
+  << input.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >()
+  .toMathML(&formatLocal)
+  << MathML::rightParenthesis
+  << "</mrow>";
   return true;
 }
 
-
 template < >
 bool Expression::toMathMLBuiltIn<RationalFraction<ElementZmodP> >(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   bool showContext = input.owner ==
-                             nullptr ? false : input.owner->flagDisplayContext;
+  nullptr ? false : input.owner->flagDisplayContext;
   (void) format;
   (void) outputProperties;
   FormatExpressions formatLocal;
@@ -95,108 +96,251 @@ bool Expression::toMathMLBuiltIn<RationalFraction<ElementZmodP> >(
   formatLocal.flagSuppressModP = true;
   formatLocal.flagUseFrac = true;
   const RationalFraction<ElementZmodP>& data =
-      input.getValue<RationalFraction<ElementZmodP> >();
-  if (showContext){
+  input.getValue<RationalFraction<ElementZmodP> >();
+  if (showContext) {
     out << "<mrow>";
   }
   if (
-      data.expressionType ==
-      RationalFraction<ElementZmodP>::TypeExpression::typeRationalFraction
-      ) {
+    data.expressionType ==
+    RationalFraction<ElementZmodP>::TypeExpression::typeRationalFraction
+  ) {
     ElementZmodP constantSample =
-        data.numerator.getElementConst().coefficients[0];
+    data.numerator.getElementConst().coefficients[0];
     out
-        << "<mfrac>"
-        << constantSample.toMathMLPolynomialCalculator(
-               data.numerator.getElementConst(), &formatLocal
-               )
-
-        << constantSample.toMathMLPolynomialCalculator(
-               data.denominator.getElementConst(), &formatLocal
-               )
-        << "</mfrac>";
+    << "<mfrac>"
+    << constantSample.toMathMLPolynomialCalculator(
+      data.numerator.getElementConst(), &formatLocal
+    )
+    << constantSample.toMathMLPolynomialCalculator(
+      data.denominator.getElementConst(), &formatLocal
+    )
+    << "</mfrac>";
   } else if (
-      data.expressionType ==
-      RationalFraction<ElementZmodP>::TypeExpression::typePolynomial
-      ) {
+    data.expressionType ==
+    RationalFraction<ElementZmodP>::TypeExpression::typePolynomial
+  ) {
     ElementZmodP constantSample =
-        data.numerator.getElementConst().coefficients[0];
+    data.numerator.getElementConst().coefficients[0];
     out
-        << constantSample.toMathMLPolynomialCalculator(
-               data.numerator.getElementConst(), &formatLocal
-               );
+    << constantSample.toMathMLPolynomialCalculator(
+      data.numerator.getElementConst(), &formatLocal
+    );
   } else {
     Polynomial<ElementZmodP> zero;
     out << data.constantValue.toMathMLPolynomialCalculator(zero, &formatLocal);
   }
   if (showContext) {
-    out << "<mo>[</mo>" << input.getContext().toMathML() << "<mo>]</mo></mrow>";
+    out
+    << "<mo>[</mo>"
+    << input.getContext().toMathML()
+    << "<mo>]</mo></mrow>";
   }
   return true;
 }
 
 template < >
 bool Expression::toMathMLBuiltIn<
-    CharacterSemisimpleLieAlgebraModule<Rational>
-    >(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions localFormat;
+  const GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& element =
+  input.getValue<GroupRepresentation<FiniteGroup<ElementWeylGroup>, Rational> >
+  ();
+  localFormat.flagUseLatex = true;
+  localFormat.flagUseHTML = false;
+  localFormat.flagUseReflectionNotation = true;
+  out << element.toMathML(&localFormat);
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<
+  VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  const VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>& element
+  =
+  input.getValue<
+    VirtualRepresentation<FiniteGroup<ElementWeylGroup>, Rational>
+  >();
+  formatLocal.flagUseLatex = true;
+  formatLocal.flagUseHTML = false;
+  formatLocal.flagUseReflectionNotation = true;
+  out << element.toMathML(&formatLocal);
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<
+  CharacterSemisimpleLieAlgebraModule<Rational>
+>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) format;
   (void) outputProperties;
   CharacterSemisimpleLieAlgebraModule<Rational> element =
-      input.getValue<CharacterSemisimpleLieAlgebraModule<Rational> >();
+  input.getValue<CharacterSemisimpleLieAlgebraModule<Rational> >();
   out << element.toMathML(format, outputProperties);
   return true;
 }
 
 template < >
+bool Expression::toMathMLBuiltIn<JSData>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  JSData data = input.getValue<JSData>();
+  std::string dataString = data.toString(&JSData::PrintOptions::HTML());
+  out << dataString;
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<VectorPartitionFunction>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  STACK_TRACE("Expression::toMathMLBuiltIn_VectorPartitionFunction");
+  (void) format;
+  (void) outputProperties;
+  const VectorPartitionFunction& vectorPartitionFunction =
+  input.getValue<VectorPartitionFunction>();
+  out << vectorPartitionFunction.toHTML();
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<Lattice>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  STACK_TRACE("Expression::toMathMLBuiltIn_Lattice");
+  (void) format;
+  (void) outputProperties;
+  const Lattice& lattice = input.getValue<Lattice>();
+  out
+  << "<mrow><mi>"
+  << Calculator::Functions::Names::lattice
+  << "{}</mi>"
+  << lattice.toStringParentheses()
+  << "</mrow>";
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<LittelmannPath>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  out << input.getValue<LittelmannPath>().toMathML();
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<
+  GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>
+>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  out
+  << input.getValue<
+    GroupRepresentation<FiniteGroup<ElementHyperoctahedralGroupR2>, Rational>
+  >().toMathML();
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<ElementHyperoctahedralGroupR2>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  out << input.getValue<ElementHyperoctahedralGroupR2>().toMathML(format);
+  return true;
+}
+
+template < >
 bool Expression::toMathMLBuiltIn<ElementEllipticCurve<Rational> >(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) format;
   (void) outputProperties;
   FormatExpressions formatEllipticCurve;
   input.getContext().getFormat(formatEllipticCurve);
   formatEllipticCurve.flagUseFrac = true;
   out
-      << input.getValue<ElementEllipticCurve<Rational> >().toMathML(
-             &formatEllipticCurve
-             );
+  << input.getValue<ElementEllipticCurve<Rational> >().toMathML(
+    &formatEllipticCurve
+  );
   return true;
 }
 
 template < >
 bool Expression::toMathMLBuiltIn<ElementEllipticCurve<ElementZmodP> >(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) format;
   (void) outputProperties;
   FormatExpressions formatElementZModP;
   input.getContext().getFormat(formatElementZModP);
   formatElementZModP.flagUseFrac = true;
   out
-      << input.getValue<ElementEllipticCurve<ElementZmodP> >().toMathML(
-             &formatElementZModP
-             );
+  << input.getValue<ElementEllipticCurve<ElementZmodP> >().toMathML(
+    &formatElementZModP
+  );
   return true;
 }
 
 template < >
 bool Expression::toMathMLBuiltIn<InputBox>(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) format;
   (void) outputProperties;
   bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
@@ -603,14 +747,13 @@ bool Expression::toMathMLBuiltIn<AlgebraicNumber>(
   return true;
 }
 
-
 template < >
 bool Expression::toMathMLBuiltIn<WeylGroupData>(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) format;
   (void) outputProperties;
   FormatExpressions formatLocal;
@@ -624,11 +767,11 @@ bool Expression::toMathMLBuiltIn<WeylGroupData>(
 
 template < >
 bool Expression::toMathMLBuiltIn<ElementWeylGroup>(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) format;
   (void) outputProperties;
   FormatExpressions localFormat;

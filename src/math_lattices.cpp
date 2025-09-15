@@ -1594,6 +1594,21 @@ std::string Lattice::toStringParentheses() const {
   return out.str();
 }
 
+std::string Lattice::toMathMLParentheses() const {
+  std::stringstream out;
+  out << "<mrow>" << MathML::leftParenthesis;
+  Vectors<Rational> vectors;
+  vectors.assignMatrixRows(this->basisRationalForm);
+  for (int i = 0; i < this->basisRationalForm.numberOfRows; i ++) {
+    out << vectors[i].toMathML();
+    if (i != this->basisRationalForm.numberOfRows - 1) {
+      out << "<mo>,</mo>";
+    }
+  }
+  out << MathML::rightParenthesis;
+  return out.str();
+}
+
 void Lattice::drawOnePointWithSigns(
   const Vector<Rational>& toDraw,
   const List<Vector<Rational> >& basis,

@@ -2440,8 +2440,35 @@ std::string ClassFunction<someFiniteGroup, Coefficient>::toString(
 }
 
 template <class someFiniteGroup, typename Coefficient>
+std::string ClassFunction<someFiniteGroup, Coefficient>::toMathML(
+  FormatExpressions* format, MathExpressionProperties* outputProperties
+) const {
+  (void) format;
+  (void)outputProperties;
+  if (this->G == 0) {
+    return "<ms>(not initialized)</ms>";
+  }
+  std::stringstream out;
+  out << "<mrow>" << MathML::leftParenthesis;
+  for (int i = 0; i < this->data.size; i ++) {
+    out << this->data[i];
+    if (i < this->data.size - 1) {
+      out << "<mo>,</mo>";
+    }
+  }
+  out << MathML::rightParenthesis;
+  if (this->norm().toString() != "1") {
+    out << "<mo>[</mo>";
+    out << this->norm().toMathML();
+    out << "<mo>]</mo>";
+  }
+  out << "</mrow>";
+  return out.str();
+}
+
+template <class someFiniteGroup, typename Coefficient>
 std::ostream& operator<<(
-  std::ostream& out, const ClassFunction<someFiniteGroup, Coefficient> X
+  std::ostream& out, const ClassFunction<someFiniteGroup, Coefficient> &X
 ) {
   out << X.toString();
   return out;

@@ -7604,10 +7604,13 @@ std::string ElementWeylGroup::toString(FormatExpressions* format) const {
   }
   return out.str();
 }
-std::string ElementWeylGroup::toMathML(FormatExpressions* format, MathExpressionProperties* outputProperties) const {
+
+std::string ElementWeylGroup::toMathML(
+  FormatExpressions* format, MathExpressionProperties* outputProperties
+) const {
   STACK_TRACE("ElementWeylGroup::toString");
   (void) format;
-  (void)outputProperties;
+  (void) outputProperties;
   if (this->generatorsLastAppliedFirst.size == 0) {
     return "<mi>id</mi>";
   }
@@ -8327,10 +8330,12 @@ std::string WeylGroupData::toString(FormatExpressions* format) {
   return out.str();
 }
 
-std::string WeylGroupData::toMathML(FormatExpressions* format, MathExpressionProperties* outputProperties) {
+std::string WeylGroupData::toMathML(
+  FormatExpressions* format, MathExpressionProperties* outputProperties
+) {
   STACK_TRACE("WeylGroupData::toMathML");
-  (void)outputProperties
-      ;  return this->toString(format);
+  (void) outputProperties;
+  return this->toString(format);
 }
 
 bool WeylGroupData::isAddmisibleDynkinType(char candidateLetter, int n) {

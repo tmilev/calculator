@@ -153,6 +153,7 @@ public:
   ) const;
   std::string toString() const;
   std::string toStringParentheses() const;
+  std::string toMathMLParentheses() const;
   static unsigned int hashFunction(const Lattice& input);
   bool operator!=(const Lattice& other) const;
   bool operator==(const Lattice& other) const;

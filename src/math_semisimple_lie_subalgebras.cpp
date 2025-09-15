@@ -10038,10 +10038,11 @@ std::string SimpleReflection::toString() const {
   out << "}";
   return out.str();
 }
+
 std::string SimpleReflection::toMathML() const {
   std::stringstream out;
   out << "<msub><mi>s</mi>";
-  out << "<mn>" << this->index + 1<< "</mn></msub>";
+  out << "<mn>" << this->index + 1 << "</mn></msub>";
   return out.str();
 }
 

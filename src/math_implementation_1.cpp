@@ -1189,6 +1189,48 @@ std::string LittelmannPath::toString(
   return out.str();
 }
 
+std::string LittelmannPath::toMathML(
+  bool useSimpleCoordinates, bool useArrows, bool includeDominance
+) const {
+  if (this->waypoints.size == 0) {
+    return "<mn>0</mn>";
+  }
+  std::stringstream out;
+  out << "<mrow>";
+  for (int i = 0; i < this->waypoints.size; i ++) {
+    if (useSimpleCoordinates) {
+      out << this->waypoints[i].toMathML();
+    } else {
+      out
+      << this->owner->getFundamentalCoordinatesFromSimple(this->waypoints[i]).
+      toMathML();
+    }
+    if (i != this->waypoints.size - 1) {
+      if (useArrows) {
+        out << "<mo>&larr;</mo>";
+      } else {
+        out << "<mo>,</mo>";
+      }
+    }
+  }
+  if (includeDominance) {
+    for (int i = 0; i < this->owner->getDimension(); i ++) {
+      LittelmannPath path = *this;
+      path.actByEFDisplayIndex(i + 1);
+      if (!path.isEqualToZero()) {
+        out << "<msub><mi>e</mi><mn>" << i + 1 << "</mn></msub>";
+      }
+      path = *this;
+      path.actByEFDisplayIndex(- i - 1);
+      if (!path.isEqualToZero()) {
+        out << "<msub><mi>e</mi><mn>" << - i - 1 << "</mn></msub><mo>,</mo>";
+      }
+    }
+  }
+  out << "</mrow>";
+  return out.str();
+}
+
 template < >
 unsigned int HashFunctions::hashFunction(const std::string& input) {
   size_t numberOfCycles = input.size();

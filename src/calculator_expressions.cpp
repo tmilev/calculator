@@ -3156,7 +3156,7 @@ bool Expression::toStringBuiltIn<
 ) {
   (void) format;
   (void) outputProperties;
-const  CharacterSemisimpleLieAlgebraModule<Rational>& element =
+  const CharacterSemisimpleLieAlgebraModule<Rational>& element =
   input.getValue<CharacterSemisimpleLieAlgebraModule<Rational> >();
   out << element.toString();
   return true;

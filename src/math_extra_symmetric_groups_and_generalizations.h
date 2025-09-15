@@ -305,6 +305,7 @@ public:
   template <typename somestream>
   somestream& intoStream(somestream& out) const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(FormatExpressions* format = nullptr) const;
   friend std::ostream& operator<<(std::ostream& out, const PermutationR2& data)
   {
     return data.intoStream(out);
@@ -416,6 +417,16 @@ public:
     out << ',';
     out << k.toString(format);
     out << rightDelimiter;
+    return out.str();
+  }
+  std::string toMathML(FormatExpressions* format = nullptr) const {
+    std::stringstream out;
+    out << "<mrow>" << MathML::leftParenthesis;
+    out << h.toMathML(format);
+    out << "<mo>,</mo>";
+    out << k.toMathML(format);
+    out << MathML::rightParenthesis;
+    out << "</mrow>";
     return out.str();
   }
   void makeFromString(const std::string& in) {
@@ -605,6 +616,20 @@ public:
     }
     return false;
   }
+  std::string toMathML(FormatExpressions* format = nullptr) const {
+    (void) format;
+    std::stringstream out;
+    out << "<mrow>";
+    for (int i = 0; i < this->bits.size; i ++) {
+      out << "<mn>" << (this->bits[i] ? '1' : '0') << "</mn>";
+      // parentheses are needed because << binds like a bitwise operator
+      if (i != this->bits.size - 1) {
+        out << "<mo>,</mo>";
+      }
+    }
+    out << "</mrow>";
+    return out.str();
+  }
   std::string toString(FormatExpressions* format = nullptr) const {
     std::stringstream out;
     if (format == nullptr) {
@@ -733,6 +758,7 @@ public:
     return this->dimension == other.dimension;
   }
   std::string toString() const;
+  std::string toMathML() const;
   template <typename somestream>
   somestream& intoStream(somestream& outstream) const;
 };

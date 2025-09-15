@@ -482,7 +482,7 @@ public:
     FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const {
-    (void)outputProperties;
+    (void) outputProperties;
     if (this->highestWeightVectorNotation != "") {
       return this->highestWeightVectorNotation;
     }

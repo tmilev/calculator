@@ -45,6 +45,10 @@ public:
   ClassFunction reducedWithCharacters(const List<ClassFunction>& chars);
   Coefficient& operator[](int i) const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
+  ) const;
   static unsigned int hashFunction(const ClassFunction& input);
   unsigned int hashFunction() const;
   void operator*=(const Coefficient& inputCoefficient) {
@@ -558,7 +562,10 @@ public:
   bool isIdentity();
   std::string toStringInvariants(FormatExpressions* format) const;
   std::string toString(FormatExpressions* format = nullptr) const;
-  std::string toMathML(FormatExpressions* format = nullptr, MathExpressionProperties* outputProperties=nullptr) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
+  ) const;
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const ElementWeylGroup& input) {
     return input.hashFunction();
@@ -749,7 +756,10 @@ public:
   std::string toStringRootsAndRootReflections(
     FormatExpressions* format = nullptr
   );
-  std::string toMathML(FormatExpressions* format = nullptr, MathExpressionProperties* outputProperties=nullptr);
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
+  );
   std::string toString(FormatExpressions* format = nullptr);
   std::string toStringCppConjugacyClasses(FormatExpressions* format = nullptr);
   std::string toStringCppCharTable(FormatExpressions* format = nullptr);
@@ -1560,7 +1570,8 @@ public:
   JSData toJSON();
   template <typename somestream>
   somestream& intoStream(somestream& out) const;
-  std::string toString(FormatExpressions* fmt = nullptr) const;
+  std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(FormatExpressions* format = nullptr) const;
   friend std::ostream& operator<<(
     std::ostream& out, GroupRepresentation<someGroup, Coefficient>& data
   ) {
@@ -1718,13 +1729,20 @@ somestream&GroupRepresentation<someGroup, Coefficient>::intoStream(
 
 template <typename someGroup, typename Coefficient>
 std::string GroupRepresentation<someGroup, Coefficient>::toString(
-  FormatExpressions* fmt
+  FormatExpressions* format
 ) const {
-  (void) fmt;
+  (void) format;
   // portable way of avoiding unused parameter warning
   std::stringstream out;
   this->intoStream(out);
   return out.str();
+}
+
+template <typename someGroup, typename Coefficient>
+std::string GroupRepresentation<someGroup, Coefficient>::toMathML(
+  FormatExpressions* format
+) const {
+  return this->toString(format);
 }
 
 template <typename someGroup, typename Coefficient>

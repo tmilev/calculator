@@ -54,6 +54,7 @@ public:
     FormatExpressions* format = nullptr,
     MathExpressionProperties* outputProperties = nullptr
   ) const {
+    (void) outputProperties;
     std::stringstream out;
     out.precision(5);
     out << "<mrow>" << MathML::leftParenthesis;

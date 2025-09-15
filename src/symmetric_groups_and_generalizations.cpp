@@ -732,6 +732,24 @@ std::string PermutationR2::toString(FormatExpressions* format) const {
   return out.str();
 }
 
+std::string PermutationR2::toMathML(FormatExpressions* format) const {
+  std::stringstream out;
+  (void)format;
+  out << "<mrow>" << MathML::leftParenthesis;
+  for (int i = 0; i < this->cycles.size; i ++) {
+    out << MathML::leftParenthesis;
+    for (int j = 0; j < this->cycles[i].size; j ++) {
+      out << "<mn>" << this->cycles[i][j] + 1 << "</mn>";
+      if (j != this->cycles[i].size - 1) {
+        out << "<mo>,</mo> ";
+      }
+    }
+    out << MathML::rightParenthesis;
+  }
+  out << MathML::rightParenthesis << "</mrow>";
+  return out.str();
+}
+
 //  MonomialTensor<T1, T2> operator*(MonomialTensor<T1,T2>& right) const;
 // should this get stuffed in MonomialTensor?
 void PermutationR2::actOnMonomialTensor(
@@ -1572,6 +1590,10 @@ std::string HyperoctahedralGroupData::toString() const {
   std::stringstream out;
   this->intoStream(out);
   return out.str();
+}
+
+std::string HyperoctahedralGroupData::toMathML() const {
+  return this->toString();
 }
 
 std::ostream& operator<<(

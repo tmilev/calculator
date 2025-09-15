@@ -313,6 +313,10 @@ public:
     this->differentialPart.isConstant();
   }
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
+  ) const;
   static unsigned int hashFunction(const MonomialWeylAlgebra& input) {
     return
     input.polynomialPart.hashFunction() +

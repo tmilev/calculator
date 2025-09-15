@@ -24,6 +24,18 @@ std::string ElementZmodP::toStringModP(const LargeIntegerUnsigned& modulus) {
   return out.str();
 }
 
+std::string ElementZmodP::toMathMLModP() const {
+  std::stringstream out;
+  out
+  << "<mrow><mo>mod</mo>"
+  << MathML::leftParenthesis
+  << this->modulus.toMathML()
+  << MathML::rightParenthesis
+  << MathML::rightParenthesis
+  << "</mrow>";
+  return out.str();
+}
+
 std::string ElementZmodP::toStringPolynomial(
   const Polynomial<ElementZmodP>& input, FormatExpressions* format
 ) const {
@@ -52,6 +64,28 @@ std::string ElementZmodP::toString(FormatExpressions* format) const {
     out << this->value.toString();
   } else {
     out << "(" << this->value.toString() << " " << this->toStringModP() << ")";
+  }
+  return out.str();
+}
+
+std::string ElementZmodP::toMathML(
+  FormatExpressions* format, MathExpressionProperties* outputProperties
+) const {
+  (void) outputProperties;
+  bool suppressModulus = false;
+  if (format != nullptr) {
+    suppressModulus = format->flagSuppressModP;
+  }
+  std::stringstream out;
+  if (suppressModulus) {
+    out << this->value.toString();
+  } else {
+    out
+    << MathML::leftParenthesis
+    << this->value.toMathML()
+    << " "
+    << this->toMathMLModP()
+    << MathML::rightParenthesis;
   }
   return out.str();
 }

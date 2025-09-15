@@ -1454,7 +1454,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathML(
       out << " " << format->suffixLinearCombination;
     }
   }
-  out << "<mrow>";
+  out << "</mrow>";
   return out.str();
 }
 
@@ -1784,6 +1784,17 @@ public:
     Matrix<Coefficient> matrix;
     this->getMatrix(matrix, this->getMinimumNumberOfColumnsNumberOfRows());
     return matrix.toString(format);
+  }
+  std::string toMathMLMatrixForm(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
+  ) const {
+    if (this->isEqualToZero()) {
+      return "<mrow><mo>(</mo><mn>0</mn><mo>)</mo></mrow>";
+    }
+    Matrix<Coefficient> matrix;
+    this->getMatrix(matrix, this->getMinimumNumberOfColumnsNumberOfRows());
+    return matrix.toMathML(format, outputProperties);
   }
   void getMatrix(Matrix<Coefficient>& output, int dimension) const {
     dimension =

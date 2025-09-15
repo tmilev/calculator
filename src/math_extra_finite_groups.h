@@ -468,6 +468,7 @@ struct SimpleReflection {
     this->index = - 1;
   }
   std::string toString() const;
+  std::string toMathML() const;
   void makeSimpleReflection(int inputIndex) {
     this->index = inputIndex;
   }
@@ -557,6 +558,7 @@ public:
   bool isIdentity();
   std::string toStringInvariants(FormatExpressions* format) const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(FormatExpressions* format = nullptr, MathExpressionProperties* outputProperties=nullptr) const;
   unsigned int hashFunction() const;
   static unsigned int hashFunction(const ElementWeylGroup& input) {
     return input.hashFunction();
@@ -747,6 +749,7 @@ public:
   std::string toStringRootsAndRootReflections(
     FormatExpressions* format = nullptr
   );
+  std::string toMathML(FormatExpressions* format = nullptr, MathExpressionProperties* outputProperties=nullptr);
   std::string toString(FormatExpressions* format = nullptr);
   std::string toStringCppConjugacyClasses(FormatExpressions* format = nullptr);
   std::string toStringCppCharTable(FormatExpressions* format = nullptr);

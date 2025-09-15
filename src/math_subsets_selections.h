@@ -46,6 +46,7 @@ public:
     return input.hashFunction();
   }
   std::string toString() const;
+  std::string toMathML() const;
   void incrementSelection();
   bool incrementReturnFalseIfPastLast() {
     this->incrementSelection();

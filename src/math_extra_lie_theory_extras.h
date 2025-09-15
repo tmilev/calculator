@@ -1050,6 +1050,36 @@ std::string MonomialUniversalEnveloping<Coefficient>::toString(
 }
 
 template <class Coefficient>
+std::string MonomialUniversalEnveloping<Coefficient>::toMathML(
+  FormatExpressions* format, MathExpressionProperties* outputProperties
+) const {
+  (void) outputProperties;
+  std::stringstream out;
+  std::string currentString;
+  if (this->owner == nullptr) {
+    return "<ms>(Error:Programming:NonInitializedMonomial)</ms>";
+  }
+  if (this->generatorsIndices.size == 0) {
+    return "<mn>1</mn>";
+  }
+  out << "<mrow>";
+  for (int i = 0; i < this->generatorsIndices.size; i ++) {
+    Coefficient& power = this->powers[i];
+    int index = this->generatorsIndices[i];
+    currentString = this->getOwner().toMathMLChevalleyGenerator(index, format);
+    if (!power.isEqualToOne()) {
+      out << "<msup>";
+    }
+    out << currentString;
+    if (!power.isEqualToOne()) {
+      out << power.toMathML(format);
+    }
+  }
+  out << "</mrow>";
+  return out.str();
+}
+
+template <class Coefficient>
 void MonomialUniversalEnveloping<Coefficient>::simplify(
   ElementUniversalEnveloping<Coefficient>& output, const Coefficient& ringUnit
 ) {

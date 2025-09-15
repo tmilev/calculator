@@ -9,6 +9,10 @@ class MonomialUniversalEnveloping: public MonomialTensor<Coefficient> {
 private:
 public:
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
+  ) const;
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators
   // participating in the monomial

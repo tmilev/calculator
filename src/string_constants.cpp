@@ -186,9 +186,7 @@ std::string WebAPI::Frontend::calculatorHandlerDocumentation =
 "calculatorHandlerDocumentation";
 std::string WebAPI::UserInfo::processMonitoring = "processMonitoring";
 std::string WebAPI::Calculator::testFileNameVirtual =
-    "test/automated_test_known_inputs_outputs.json";
-std::string WebAPI::Calculator::testFileNameVirtualMathML =
-    "test/automated_test_known_inputs_outputs_mathml.json";
+"test/automated_test_known_inputs_outputs.json";
 std::string DatabaseStrings::labelUserId = "id";
 std::string DatabaseStrings::labelUsername = "username";
 std::string DatabaseStrings::labelPassword = "password";

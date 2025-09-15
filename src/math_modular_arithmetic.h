@@ -78,7 +78,12 @@ public:
   ElementZmodP operator*(const Rational& other) const;
   ElementZmodP operator*(const ElementZmodP& other) const;
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
+  ) const;
   std::string toStringModP() const;
+  std::string toMathMLModP() const;
   static std::string toStringModP(const LargeIntegerUnsigned& modulus);
   bool assignRational(const Rational& other);
   void operator=(const Rational& other);
@@ -115,6 +120,9 @@ public:
     const Polynomial<ElementZmodP>& input, FormatExpressions* format
   ) const;
   std::string toStringPolynomialCalculator(
+    const Polynomial<ElementZmodP>& input, FormatExpressions* format
+  ) const;
+  std::string toMathMLPolynomialCalculator(
     const Polynomial<ElementZmodP>& input, FormatExpressions* format
   ) const;
   ElementZmodP zero() const;

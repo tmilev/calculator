@@ -12,6 +12,650 @@ bool Expression::toMathMLBuiltIn<Rational>(
   return true;
 }
 
+template < >
+bool Expression::toMathMLBuiltIn<Polynomial<Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  out << input.getValue<Polynomial<Rational> >().toMathML(format, nullptr);
+  return true;
+}
+
+
+template < >
+bool Expression::toMathMLBuiltIn<Weight<Polynomial<Rational> > >(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagFormatWeightAsVectorSpaceIndex = false;
+  out
+      << input.getValue<Weight<Polynomial<Rational> > >().toMathML(&formatLocal, outputProperties);
+  return true;
+}
+
+
+template < >
+bool Expression::toMathMLBuiltIn<Weight<Rational> >(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  input.checkInitialization();
+  (void) format;
+  (void) outputProperties;
+  out << input.owner->builtInName<Weight<Rational> >();
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<
+    ElementUniversalEnveloping<RationalFraction<Rational> >
+    >(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  out
+      << "<mrow><mi>UEE{}</mi>" << MathML::leftParenthesis
+      << input.getValue<ElementUniversalEnveloping<RationalFraction<Rational> > >()
+             .toMathML(&formatLocal)
+      << MathML::rightParenthesis << "</mrow>";
+  return true;
+}
+
+
+template < >
+bool Expression::toMathMLBuiltIn<RationalFraction<ElementZmodP> >(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  bool showContext = input.owner ==
+                             nullptr ? false : input.owner->flagDisplayContext;
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagSuppressModP = true;
+  formatLocal.flagUseFrac = true;
+  const RationalFraction<ElementZmodP>& data =
+      input.getValue<RationalFraction<ElementZmodP> >();
+  if (showContext){
+    out << "<mrow>";
+  }
+  if (
+      data.expressionType ==
+      RationalFraction<ElementZmodP>::TypeExpression::typeRationalFraction
+      ) {
+    ElementZmodP constantSample =
+        data.numerator.getElementConst().coefficients[0];
+    out
+        << "<mfrac>"
+        << constantSample.toMathMLPolynomialCalculator(
+               data.numerator.getElementConst(), &formatLocal
+               )
+
+        << constantSample.toMathMLPolynomialCalculator(
+               data.denominator.getElementConst(), &formatLocal
+               )
+        << "</mfrac>";
+  } else if (
+      data.expressionType ==
+      RationalFraction<ElementZmodP>::TypeExpression::typePolynomial
+      ) {
+    ElementZmodP constantSample =
+        data.numerator.getElementConst().coefficients[0];
+    out
+        << constantSample.toMathMLPolynomialCalculator(
+               data.numerator.getElementConst(), &formatLocal
+               );
+  } else {
+    Polynomial<ElementZmodP> zero;
+    out << data.constantValue.toMathMLPolynomialCalculator(zero, &formatLocal);
+  }
+  if (showContext) {
+    out << "<mo>[</mo>" << input.getContext().toMathML() << "<mo>]</mo></mrow>";
+  }
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<
+    CharacterSemisimpleLieAlgebraModule<Rational>
+    >(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) format;
+  (void) outputProperties;
+  CharacterSemisimpleLieAlgebraModule<Rational> element =
+      input.getValue<CharacterSemisimpleLieAlgebraModule<Rational> >();
+  out << element.toMathML(format, outputProperties);
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<ElementEllipticCurve<Rational> >(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatEllipticCurve;
+  input.getContext().getFormat(formatEllipticCurve);
+  formatEllipticCurve.flagUseFrac = true;
+  out
+      << input.getValue<ElementEllipticCurve<Rational> >().toMathML(
+             &formatEllipticCurve
+             );
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<ElementEllipticCurve<ElementZmodP> >(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatElementZModP;
+  input.getContext().getFormat(formatElementZModP);
+  formatElementZModP.flagUseFrac = true;
+  out
+      << input.getValue<ElementEllipticCurve<ElementZmodP> >().toMathML(
+             &formatElementZModP
+             );
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<InputBox>(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) format;
+  (void) outputProperties;
+  bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
+  if (!isFinal) {
+    out << "<ms>(input box not shown)</ms>";
+    return true;
+  }
+  if (isFinal) {
+    out << input.getValueNonConst<InputBox>().name;
+  }
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<Plot>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
+  if (isFinal) {
+    Plot& plot = input.getValueNonConst<Plot>();
+    plot.flagIncludeExtraHtmlDescriptions = (format == nullptr) ?
+    true :
+    format->flagIncludeExtraHtmlDescriptionsInPlots;
+    plot.flagPlotShowJavascriptOnly = input.owner->flagPlotShowJavascriptOnly;
+    out << plot.getPlotHtml(*input.owner);
+    if (input.owner->flagWriteLatexPlots) {
+      out
+      << input.owner->writeDefaultLatexFileReturnHtmlLink(
+        plot.getPlotStringAddLatexCommands(false), nullptr, true
+      );
+      out
+      << "<br><b>LaTeX code used to generate the output. </b><br>"
+      << plot.getPlotStringAddLatexCommands(true);
+    }
+  } else {
+    out << "<ms>(plot not shown)</ms>";
+  }
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<Polynomial<ElementZmodP> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  bool showContext = input.owner ==
+  nullptr ? false : input.owner->flagDisplayContext;
+  FormatExpressions formatLocal;
+  const Polynomial<ElementZmodP>& polynomial =
+  input.getValue<Polynomial<ElementZmodP> >();
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagSuppressModP = true;
+  formatLocal.flagUseFrac = true;
+  if (!polynomial.isEqualToZero()) {
+    out
+    << polynomial.coefficients[0].toMathMLPolynomialCalculator(
+      polynomial, &formatLocal
+    );
+  } else {
+    out << "<mn>0</mn>";
+  }
+  if (showContext) {
+    out << "<mo>[</mo>" << input.getContext().toMathML() << "<mo>]</mo>";
+  }
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<ElementZmodP>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  out << input.getValue<ElementZmodP>().toMathML(format, outputProperties);
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<double>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  std::string currentString =
+  FloatingPoint::doubleToString(input.getValue<double>());
+  bool useColor = input.owner ==
+  nullptr ? false : input.owner->flagUseNumberColors;
+  if (useColor) {
+    out << "<mn style='color:blue'>";
+  } else {
+    out << "<mn>";
+  }
+  out << currentString;
+  out << "</mn>";
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<RationalFraction<Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  bool showContext = input.owner ==
+  nullptr ? false : input.owner->flagDisplayContext;
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseFrac = true;
+  if (showContext) {
+    out << "<mrow>";
+  }
+  out
+  << "<mi>MakeRationalFunction{}</mi>"
+  << MathML::leftParenthesis
+  << input.getValue<RationalFraction<Rational> >().toMathML(&formatLocal)
+  << MathML::rightParenthesis;
+  if (showContext) {
+    out << "<mo>[</mo>" << input.getContext().toMathML() << "</mo></mrow>";
+  }
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<RationalFraction<AlgebraicNumber> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  bool showContext = input.owner ==
+  nullptr ? false : input.owner->flagDisplayContext;
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseFrac = true;
+  if (showContext) {
+    out << "<mrow>";
+  }
+  out
+  << "<mi>MakeRationalFunction{}</mi>"
+  << MathML::leftParenthesis
+  << input.getValue<RationalFraction<AlgebraicNumber> >().toMathML(
+    &formatLocal
+  )
+  << MathML::rightParenthesis;
+  if (showContext) {
+    out << "<mo>[</mo>" << input.getContext().toMathML() << "<mo>]</mo>";
+    out << "</mrow>";
+  }
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<Polynomial<AlgebraicNumber> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  bool showContext = input.owner ==
+  nullptr ? false : input.owner->flagDisplayContext;
+  formatLocal.flagUseFrac = true;
+  out << "PolynomialAlgebraicNumbers{}(";
+  std::string currentString =
+  input.getValue<Polynomial<AlgebraicNumber> >().toString(&formatLocal);
+  if (currentString.size() > 0) {
+    if (currentString[0] == '-') {
+      currentString = currentString.substr(1);
+      out << "-";
+    }
+  }
+  if (input.owner->flagUseNumberColors) {
+    out << "\\color{red}{";
+  }
+  out << currentString;
+  if (input.owner->flagUseNumberColors) {
+    out << "}";
+  }
+  out << ")";
+  if (showContext) {
+    out << "[" << input.getContext().toString() << "]";
+  }
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<ElementWeylAlgebra<Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  bool showContext = input.owner ==
+  nullptr ? false : input.owner->flagDisplayContext;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseHTML = false;
+  formatLocal.flagUseLatex = true;
+  out << "<mrow>";
+  out << "<mi>ElementWeylAlgebra{}</mi>" << MathML::leftParenthesis;
+  out
+  << input.getValue<ElementWeylAlgebra<Rational> >().toMathML(&formatLocal);
+  out << MathML::rightParenthesis;
+  if (showContext) {
+    out << "<mo>[</mo>" << input.getContext().toMathML() << "<mo>]</mo>";
+  }
+  out << "</mrow>";
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<PolynomialModuloPolynomial<ElementZmodP> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseFrac = true;
+  const PolynomialModuloPolynomial<ElementZmodP>& element =
+  input.getValue<PolynomialModuloPolynomial<ElementZmodP> >();
+  ElementZmodP sample;
+  formatLocal.flagSuppressModP = true;
+  if (!element.modulusContainer.isEqualToZero()) {
+    sample = element.modulusContainer.coefficients[0];
+    out
+    << "<mrow>"
+    << sample.toMathMLPolynomialCalculator(element.value, &formatLocal)
+    << "<mo>mod</mo>"
+    << sample.toMathMLPolynomialCalculator(
+      element.modulusContainer, &formatLocal
+    )
+    << "</mrow>";
+  } else {
+    out
+    << "<mrow>"
+    << element.value.toMathML(&formatLocal)
+    << " mod "
+    << element.modulusContainer.toMathML(&formatLocal)
+    << "</mrow>";
+  }
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<MatrixTensor<Rational> >(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  input.getContext().getFormat(formatLocal);
+  formatLocal.flagUseLatex = true;
+  formatLocal.flagUseHTML = false;
+  if (
+    input.getValue<MatrixTensor<Rational> >().
+    getMinimumNumberOfColumnsNumberOfRows() <
+    20
+  ) {
+    out
+    << "<mi>MatrixRationalsTensorForm{}</mi>"
+    << MathML::leftParenthesis
+    << input.getValue<MatrixTensor<Rational> >().toMathMLMatrixForm(
+      &formatLocal, outputProperties
+    )
+    << MathML::rightParenthesis;
+  } else {
+    out
+    << input.getValue<MatrixTensor<Rational> >().toMathML(
+      format, outputProperties
+    );
+  }
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<
+  ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions localFormat;
+  input.getContext().getFormat(localFormat);
+  out << "<mrow>";
+  out
+  << "<mi>"
+  << input.owner->builtInName<
+    ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+  >()
+  << "{}</mi>"
+  << MathML::leftParenthesis;
+  out
+  << input.getValue<
+    ElementTensorsGeneralizedVermas<RationalFraction<Rational> >
+  >().toMathML(&localFormat);
+  out << MathML::rightParenthesis;
+  bool showContext = input.owner ==
+  nullptr ? false : input.owner->flagDisplayContext;
+  if (showContext) {
+    out << "<mo>[</mo>" << input.getContext().toMathML() << "<mo>]</mo>";
+  }
+  out << "</mrow>";
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<std::string>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) outputProperties;
+  bool useQuotes = format == nullptr ? false : format->flagUseQuotes;
+  bool isFinal = format == nullptr ? true : format->flagExpressionIsTopLevel;
+  if (!useQuotes) {
+    if (isFinal) {
+      out
+      << StringRoutines::Conversions::stringToCalculatorDisplay(
+        input.getValue<std::string>()
+      );
+    } else {
+      out << "<ms>" << input.getValue<std::string>() << "</ms>";
+    }
+  } else {
+    out
+    << "<ms>\""
+    << StringRoutines::Conversions::escapeJavascriptLike(
+      input.getValue<std::string>()
+    )
+    << "\"</ms>";
+  }
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<AlgebraicNumber>(
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  if (input.owner->flagUseFracInRationalLaTeX) {
+    formatLocal.flagUseFrac = true;
+  }
+  MathExpressionProperties properties;
+  std::string currentString =
+  input.getValue<AlgebraicNumber>().toMathML(&formatLocal, &properties);
+  bool useColors = input.owner ==
+  nullptr ? false : input.owner->flagUseNumberColors;
+  if (useColors) {
+    out << "<mrow style='color:red'>";
+  } else {
+    out << "</mrow>";
+  }
+  out << currentString;
+  if (useColors) {
+    out << "</mrow>";
+  }
+  bool showContext = input.owner ==
+  nullptr ? false : input.owner->flagDisplayContext;
+  if (showContext) {
+    out << "<mo>[</mo>" << input.getContext().toMathML() << "<mo>]</mo>";
+  }
+  if (outputProperties != nullptr) {
+    *outputProperties = properties;
+  }
+  return true;
+}
+
+
+template < >
+bool Expression::toMathMLBuiltIn<WeylGroupData>(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions formatLocal;
+  WeylGroupData& group = input.getValueNonConst<WeylGroupData>();
+  formatLocal.flagUseLatex = true;
+  formatLocal.flagUseHTML = false;
+  formatLocal.flagUseReflectionNotation = true;
+  out << group.toMathML(&formatLocal);
+  return true;
+}
+
+template < >
+bool Expression::toMathMLBuiltIn<ElementWeylGroup>(
+    const Expression& input,
+    std::stringstream& out,
+    FormatExpressions* format,
+    MathExpressionProperties* outputProperties
+    ) {
+  (void) format;
+  (void) outputProperties;
+  FormatExpressions localFormat;
+  const ElementWeylGroup& element = input.getValue<ElementWeylGroup>();
+  localFormat.flagUseLatex = true;
+  localFormat.flagUseHTML = false;
+  localFormat.flagUseReflectionNotation = true;
+  out << element.toMathML(&localFormat);
+  return true;
+}
+
+std::string ElementZmodP::toMathMLPolynomialCalculator(
+  const Polynomial<ElementZmodP>& input, FormatExpressions* format
+) const {
+  std::stringstream out;
+  out << "<mrow>";
+  out << "<mi>PolynomialModP{}</mi>" << MathML::leftParenthesis;
+  out << input.toMathML(format);
+  out
+  << "<mo>,</mo><mn>"
+  << this->modulus
+  << "</mn>"
+  << MathML::rightParenthesis;
+  out << "</mrow>";
+  return out.str();
+}
+
 void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
   STACK_TRACE("Expression::initializeToMathMLHandlers");
   toBeInitialized.addOneMathMLAtomHandler(
@@ -331,9 +975,7 @@ bool Expression::toMathMLEndStatementOneRowTopLevel(
   if (!this->owner->flagHideLHS) {
     if (index < (*startingExpression).size()) {
       format.flagDontCollalpseProductsByUnits = true;
-      currentInput = (*startingExpression)[index].toMathMLFinal(
-          &format
-          );
+      currentInput = (*startingExpression)[index].toMathMLFinal(&format);
     } else {
       currentInput =
       "No matching starting expression - "
@@ -787,8 +1429,7 @@ bool Expression::toMathMLMatrix(
   for (int i = 1; i < input.size(); i ++) {
     out << "<mtr>";
     for (int j = 1; j < input[i].size(); j ++) {
-      out << "<mtd>"
-          << input[i][j].toMathML(format, nullptr) << "</mtd>";
+      out << "<mtd>" << input[i][j].toMathML(format, nullptr) << "</mtd>";
     }
     out << "</mtr>";
   }
@@ -799,11 +1440,11 @@ bool Expression::toMathMLMatrix(
 }
 
 bool Expression::toMathMLDivide(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) outputProperties;
   Calculator& commands = *input.owner;
   if (!input.startsWith(commands.opDivide(), 3)) {
@@ -811,18 +1452,18 @@ bool Expression::toMathMLDivide(
   }
   bool doUseFrac = commands.flagUseFracInRationalLaTeX;
   if (
-      doUseFrac && (
-          input[1].startsWith(commands.opTimes()) ||
-          input[1].startsWith(commands.opDivide())
-          )
-      ) {
+    doUseFrac && (
+      input[1].startsWith(commands.opTimes()) ||
+      input[1].startsWith(commands.opDivide())
+    )
+  ) {
     List<Expression> multiplicandsLeft;
     input.getMultiplicandsDivisorsRecursive(multiplicandsLeft, 0);
     for (int i = 0; i < multiplicandsLeft.size; i ++) {
       if (
-          multiplicandsLeft[i].startsWith(commands.opIntegral()) ||
-          multiplicandsLeft[i].isOperationGiven(commands.opIntegral())
-          ) {
+        multiplicandsLeft[i].startsWith(commands.opIntegral()) ||
+        multiplicandsLeft[i].isOperationGiven(commands.opIntegral())
+      ) {
         doUseFrac = false;
         break;
       }
@@ -832,10 +1473,10 @@ bool Expression::toMathMLDivide(
     std::string firstMathML = input[1].toMathML(format);
     std::string secondMathML = input[2].toMathML(format);
     bool firstNeedsBrackets =
-        !(
-            input[1].isListStartingWithAtom(commands.opTimes()) ||
-            input[1].isListStartingWithAtom(commands.opDivide())
-            );
+    !(
+      input[1].isListStartingWithAtom(commands.opTimes()) ||
+      input[1].isListStartingWithAtom(commands.opDivide())
+    );
     bool secondNeedsBrackets = true;
     if (input[2].isOfType<Rational>()) {
       if (input[2].getValue<Rational>().isInteger()) {
@@ -843,13 +1484,19 @@ bool Expression::toMathMLDivide(
       }
     }
     if (firstNeedsBrackets) {
-      out << MathML::leftParenthesis << firstMathML << MathML::rightParenthesis;
+      out
+      << MathML::leftParenthesis
+      << firstMathML
+      << MathML::rightParenthesis;
     } else {
       out << firstMathML;
     }
     out << "<mo>/</mo>";
     if (secondNeedsBrackets) {
-      out << MathML::leftParenthesis << secondMathML << MathML::rightParenthesis;
+      out
+      << MathML::leftParenthesis
+      << secondMathML
+      << MathML::rightParenthesis;
     } else {
       out << secondMathML;
     }
@@ -866,19 +1513,17 @@ bool Expression::toMathMLDivide(
     }
     std::string firstMathML = input[1].toMathML(format);
     std::string secondMathML = input[2].toMathML(format);
-    out << "<mfrac>" << firstMathML  << secondMathML << "</mfrac>";
+    out << "<mfrac>" << firstMathML << secondMathML << "</mfrac>";
   }
   return true;
 }
 
-
-
 bool Expression::toMathMLMinus(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opMinus())) {
     return false;
@@ -890,41 +1535,49 @@ bool Expression::toMathMLMinus(
 }
 
 bool Expression::toMathMLMinus3(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
-    ) {
+  const Expression& input, std::stringstream& out, FormatExpressions* format
+) {
   if (!input.startsWith(input.owner->opMinus(), 3)) {
     return false;
   }
   if (input.children.size != 3) {
     global.fatal
-        << "The minus function expects 1 or 2 arguments, "
-        << "instead there are "
-        << input.children.size - 1
-        << ". "
-        << global.fatal;
+    << "The minus function expects 1 or 2 arguments, "
+    << "instead there are "
+    << input.children.size - 1
+    << ". "
+    << global.fatal;
   }
   out << input[1].toMathML(format) << MathML::negativeSign;
   if (
-      input[2].startsWith(input.owner->opPlus()) ||
-      input[2].startsWith(input.owner->opMinus())
-      ) {
-    out << MathML::leftParenthesis << input[2].toMathML(format) << MathML::rightParenthesis;
+    input[2].startsWith(input.owner->opPlus()) ||
+    input[2].startsWith(input.owner->opMinus())
+  ) {
+    out
+    << MathML::leftParenthesis
+    << input[2].toMathML(format)
+    << MathML::rightParenthesis;
   } else {
     out << input[2].toMathML(format);
   }
   return true;
 }
+
 bool Expression::toMathMLMinus2(
-    const Expression& input, std::stringstream& out, FormatExpressions* format
-    ) {
+  const Expression& input, std::stringstream& out, FormatExpressions* format
+) {
   if (!input.startsWith(input.owner->opMinus(), 2)) {
     return false;
   }
   if (
-      input[1].startsWith(input.owner->opPlus()) ||
-      input[1].startsWith(input.owner->opMinus())
-      ) {
-    out << MathML::negativeSign << MathML::leftParenthesis<< input[1].toMathML(format) << MathML::rightParenthesis;
+    input[1].startsWith(input.owner->opPlus()) ||
+    input[1].startsWith(input.owner->opMinus())
+  ) {
+    out
+    << MathML::negativeSign
+    << MathML::leftParenthesis
+    << input[1].toMathML(format)
+    << MathML::rightParenthesis;
   } else {
     out << MathML::negativeSign << input[1].toMathML(format);
   }
@@ -932,11 +1585,11 @@ bool Expression::toMathMLMinus2(
 }
 
 bool Expression::toMathMLTensor(
-    const Expression& input,
-    std::stringstream& out,
-    FormatExpressions* format,
-    MathExpressionProperties* outputProperties
-    ) {
+  const Expression& input,
+  std::stringstream& out,
+  FormatExpressions* format,
+  MathExpressionProperties* outputProperties
+) {
   (void) outputProperties;
   if (!input.startsWith(input.owner->opTensor(), 3)) {
     return false;
@@ -946,10 +1599,10 @@ bool Expression::toMathMLTensor(
 }
 
 void Expression::toMathMLOpMultiplicative(
-    std::stringstream& out,
-    const std::string& operation,
-    FormatExpressions* format
-    ) const {
+  std::stringstream& out,
+  const std::string& operation,
+  FormatExpressions* format
+) const {
   MathExpressionProperties propertiesOfFirst;
   MathExpressionProperties propertiesOfSecond;
   std::string firstMathML = (*this)[1].toMathML(format, &propertiesOfFirst);
@@ -962,17 +1615,38 @@ void Expression::toMathMLOpMultiplicative(
   }
   if (propertiesOfFirst.isOne) {
     firstMathML = "";
-    firstNeedsBrackets=false;
+    firstNeedsBrackets = false;
   }
   if (firstNeedsBrackets) {
-    out << MathML::leftParenthesis << firstMathML <<MathML::rightParenthesis;
+    out << MathML::leftParenthesis << firstMathML << MathML::rightParenthesis;
   } else {
     out << firstMathML;
   }
-  out << operation ;
+  out << operation;
   if (secondNeedsBrackets) {
     out << MathML::leftParenthesis << secondMathML << MathML::rightParenthesis;
   } else {
     out << secondMathML;
   }
+}
+
+std::string ExpressionContext::toMathML() const {
+  std::stringstream out;
+  // this->checkInitialization();
+  out << "Context. ";
+  if (this->variables.size > 0) {
+    out << "Variables: " << this->variables.toStringCommaDelimited() << ". ";
+  }
+  if (this->differentialOperatorVariables.size > 0) {
+    out
+    << "Differential operators: "
+    << this->variables.toStringCommaDelimited()
+    << ". ";
+  }
+  if (this->indexAmbientSemisimpleLieAlgebra != - 1) {
+    out
+    << "Ambient semisimple Lie algebra: "
+    << this->getAmbientSemisimpleLieAlgebra()->weylGroup.dynkinType.toString();
+  }
+  return out.str();
 }

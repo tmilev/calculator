@@ -225,7 +225,6 @@ public:
   struct Calculator {
   public:
     static std::string testFileNameVirtual;
-    static std::string testFileNameVirtualMathML;
   };
 
   static std::string headerCacheControl;

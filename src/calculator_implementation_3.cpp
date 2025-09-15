@@ -713,9 +713,13 @@ bool Calculator::Test::processOneTest(JSData& input) {
     << Logger::endL;
     return false;
   }
+  if (input["outputMathML"].elementType != JSData::Type::tokenString) {
+    input["outputMathML"] = "";
+  }
   Calculator::Test::OneTest& currentTest =
   this->commands.getValueCreateEmpty(command);
   currentTest.expectedResult = input["output"].stringValue;
+  currentTest.expectedResultMathML = input["outputMathML"].stringValue;
   return true;
 }
 
@@ -801,7 +805,9 @@ Calculator::Test::Test(Calculator& inputOwner) {
   this->startIndex = 0;
   this->startTime = global.getElapsedMilliseconds();
   this->inconsistencies = 0;
+  this->inconsistenciesMathML = 0;
   this->unknown = 0;
+  this->unknownMathML = 0;
   this->noTestSkips = 0;
   this->numberOfTests = 0;
   this->lastIndexNotTested = 0;
@@ -889,7 +895,7 @@ bool Calculator::Test::processResults() {
     std::stringstream currentLine;
     std::stringstream currentLineConsole;
     currentLine << "<tr>";
-    currentLine << "<td style = 'min-width:25px;'>" << i << "</td>";
+    currentLine << "<td style='min-width:25px;'>" << i << "</td>";
     currentLineConsole << "Test " << i << "\n";
     currentLine
     << "<td style = 'min-width:200px;'>"
@@ -902,25 +908,25 @@ bool Calculator::Test::processResults() {
     << currentTest.atom
     << "\n";
     currentLine
-    << "<td style = 'min-width:45px;'>"
+    << "<td style='min-width:45px;'>"
     << currentTest.atom
     << "</td>";
     currentLineConsole << "Ran:\n" << this->commands.keys[i] << "\n";
     currentLine
-    << "<td style = 'min-width:200px;'>"
+    << "<td style='min-width:200px;'>"
     << HtmlRoutines::getCalculatorComputationAnchorThisServer(
       this->commands.keys[i], this->commands.keys[i], true
     )
     << "</td>";
     bool isBad = false;
-    bool isUknown = false;
+    bool isUnknown = false;
     if (currentTest.actualResult == currentTest.expectedResult) {
       currentLine
-      << "<td style = 'min-width:30px;'><b style='color:green;'>OK</b></td>";
+      << "<td style='min-width:30px;'><b style='color:green;'>OK</b></td>";
     } else if (currentTest.expectedResult == "") {
       currentLine
       << "<td><b style='color:orange;'>expected result unknown</b></td>";
-      isUknown = true;
+      isUnknown = true;
       this->unknown ++;
     } else {
       StringRoutines::Differ differ;
@@ -931,9 +937,9 @@ bool Calculator::Test::processResults() {
         currentTest.expectedResult, false
       );
       currentLine
-      << "<td style = 'min-width:100px;'>"
+      << "<td style='min-width:100px;'>"
       << "<b style='color:red'>unexpected result</b></td>"
-      << "<td class = 'cellCalculatorResult'>";
+      << "<td class='cellCalculatorResult'>";
       currentLine << differ.differenceHTML("actual", "expected");
       currentLine << "</td>";
       currentLineConsole << "Got:\n" << currentTest.actualResult << "\n";
@@ -944,11 +950,44 @@ bool Calculator::Test::processResults() {
       isBad = true;
       this->inconsistencies ++;
     }
+    if (currentTest.actualResultMathML == currentTest.expectedResultMathML) {
+      currentLine
+      <<
+      "<td style='min-width:30px;'><b style='color:green;'>mathml OK</b></td>";
+    } else if (currentTest.expectedResultMathML == "") {
+      currentLine
+      << "<td><b style='color:orange;'>expected mathml unknown</b></td>";
+      isUnknown = true;
+      this->unknownMathML ++;
+    } else {
+      StringRoutines::Differ differ;
+      differ.left =
+      HtmlRoutines::convertStringToHtmlString(
+        currentTest.actualResultMathML, false
+      );
+      differ.right =
+      HtmlRoutines::convertStringToHtmlString(
+        currentTest.expectedResultMathML, false
+      );
+      currentLine
+      << "<td style='min-width:100px;'>"
+      << "<b style='color:red'>unexpected mathml</b></td>"
+      << "<td class='cellCalculatorResult'>";
+      currentLine << differ.differenceHTML("actual", "expected");
+      currentLine << "</td>";
+      currentLineConsole << "Got:\n" << currentTest.actualResultMathML << "\n";
+      currentLineConsole
+      << "Expected:\n"
+      << currentTest.expectedResultMathML
+      << "\n";
+      isUnknown = true;
+      this->inconsistenciesMathML ++;
+    }
     currentLine << "</tr>";
     if (isBad) {
       badCommands << currentLine.str();
       badCommandsConsole << currentLineConsole.str();
-    } else if (isUknown) {
+    } else if (isUnknown) {
       unknownCommands << currentLine.str();
     } else {
       goodCommands << currentLine.str();
@@ -961,7 +1000,7 @@ bool Calculator::Test::processResults() {
     << "The kinds of functions not auto-tested are "
     << "described in the comments of class Function::Options. ";
   }
-  if (this->inconsistencies > 0) {
+  if (this->inconsistencies > 0 || this->inconsistenciesMathML > 0) {
     out
     << "<b style='color:red'>"
     << "The test file results do not match the current results. </b>"
@@ -986,7 +1025,7 @@ bool Calculator::Test::processResults() {
     << Logger::endL;
     global << badCommandsConsole.str() << Logger::endL;
   }
-  if (this->unknown > 0) {
+  if (this->unknown > 0 || this->unknownMathML > 0) {
     out
     << "<b style = 'color:orange'>There were "
     << this->unknown

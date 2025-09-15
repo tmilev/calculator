@@ -3,6 +3,7 @@
 
 #include "general_logging_global_variables.h"
 #include "math_large_integers.h"
+#include "math_mathml.h"
 
 class SelectionWithMultiplicities;
 class Selection;
@@ -47,6 +48,23 @@ public:
       }
     }
     out << ")";
+    return out.str();
+  }
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
+  ) const {
+    std::stringstream out;
+    out.precision(5);
+    out << "<mrow>" << MathML::leftParenthesis;
+    for (int i = 0; i < this->size; i ++) {
+      out << (*this)[i].toMathML(format);
+      if (i != this->size - 1) {
+        out << "<mo>,</mo>";
+      }
+    }
+    out << MathML::rightParenthesis;
+    out << "</mrow>";
     return out.str();
   }
   void toListStringsBasicType(List<std::string>& output) const {

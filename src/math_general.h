@@ -3323,6 +3323,31 @@ public:
     this->dualIndex = - 1;
     this->isIdentity = true;
   }
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
+  ) const {
+    (void) format;
+    (void) outputProperties;
+    std::stringstream out;
+    if (!this->isIdentity) {
+      out
+      << "<mrow><msub><mi>m</mi>"
+      << "<mn>"
+      << (this->vIndex + 1)
+      << "</mn>"
+      << "<mo>&otimes;</mo>"
+      << "<msubsup><mi>m</mi>"
+      << "<mn> "
+      << (this->dualIndex + 1)
+      << "</mn>"
+      << "<mo>*</mo>"
+      << "</mrow>";
+    } else {
+      out << "<mi>id</mi>";
+    }
+    return out.str();
+  }
   std::string toString(FormatExpressions* format = nullptr) const {
     (void) format;
     std::stringstream out;

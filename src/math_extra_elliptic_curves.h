@@ -48,6 +48,7 @@ public:
   bool operator==(const ElementEllipticCurve& other) const;
   bool operator*=(const ElementEllipticCurve& other);
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(FormatExpressions* format=nullptr, MathExpressionProperties* outputProperties=nullptr)const;
   ElementEllipticCurve() {
     this->flagInfinity = true;
   }
@@ -149,7 +150,7 @@ std::string ElementEllipticCurve<Coefficient>::toString(
   FormatExpressions* format
 ) const {
   std::stringstream out;
-  Polynomial<Rational> leftHandSide, rightHandSide;
+  Polynomial<Rational> leftHandSide;  Polynomial<Rational>  rightHandSide;
   leftHandSide.makeMonomial(1, 2, 1);
   rightHandSide.makeMonomial(0, 3, 1);
   rightHandSide.addMonomial(
@@ -172,6 +173,42 @@ std::string ElementEllipticCurve<Coefficient>::toString(
   << ") ";
   if (this->flagInfinity) {
     out << " Infinity. ";
+  }
+  return out.str();
+}
+
+
+template <typename Coefficient>
+std::string ElementEllipticCurve<Coefficient>::toMathML(
+    FormatExpressions* format, MathExpressionProperties* outputProperties
+    ) const {
+  (void)outputProperties;
+  std::stringstream out;
+  Polynomial<Rational> leftHandSide;
+Polynomial<Rational>   rightHandSide;
+  leftHandSide.makeMonomial(1, 2, 1);
+  rightHandSide.makeMonomial(0, 3, 1);
+  rightHandSide.addMonomial(
+      MonomialPolynomial(0, 1), this->owner.linearCoefficient
+      );
+  rightHandSide += Rational(this->owner.constantTerm);
+  out
+      << "<mrow><mi>ElementEllipticCurveNormalForm{}</mi>"
+      << MathML::leftParenthesis
+      << leftHandSide.toMathML(format)
+      << " <mo>=</mo> "
+      << rightHandSide.toMathML(format)
+      << "<mo>,</mo>"
+      << MonomialPolynomial(0, 1).toString(format)
+      << "<mo>=</mo>"
+      << this->xCoordinate.toMathML()
+      << "<mo>,</mo>"
+      << MonomialPolynomial(1, 1).toMathML(format)
+      << "<mo>=</mo>"
+      << this->yCoordinate.toMathML()
+      << MathML::rightParenthesis;
+  if (this->flagInfinity) {
+    out << "<ms>Infinity.</ms>";
   }
   return out.str();
 }

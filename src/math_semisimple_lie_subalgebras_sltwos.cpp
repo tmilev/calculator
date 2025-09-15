@@ -374,7 +374,7 @@ std::string SlTwoSubalgebra::toStringDynkinType() const {
 
 std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   STACK_TRACE("SlTwoSubalgebra::toString");
-  (void)format;
+  (void) format;
   if (this->container == nullptr) {
     return "sl(2) subalgebra not initialized.";
   }
@@ -3427,10 +3427,9 @@ std::string SimpleSubalgebraComponent::toString() const {
   std::stringstream out;
   out
   << "\n<br>\nScalar product computed: "
-         << "\\("
+  << "\\("
   << this->dynkinDiagramComputer.ambientBilinearForm.toStringLatex()
-  << "\\)"
-      ;
+  << "\\)";
   out
   << "\n<br>\nSimple basis of Cartan of centralizer ("
   << this->simpleDualsOfRootSpaces.size

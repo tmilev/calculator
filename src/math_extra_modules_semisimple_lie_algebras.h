@@ -4,6 +4,7 @@
 #include "html_routines.h"
 #include "math_extra_differential_operators.h"
 #include "math_extra_drawing_variables.h"
+#include "math_extra_lie_theory_extras.h"
 #include "math_extra_semisimple_lie_algebras.h"
 #include "math_extra_universal_enveloping.h"
 #include "math_general.h"
@@ -36,6 +37,10 @@ public:
   }
   std::string toString(
     FormatExpressions* format = nullptr, bool includeV = true
+  ) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   bool operator==(const MonomialGeneralizedVerma<Coefficient>& other) const {
     if (
@@ -201,6 +206,10 @@ public:
   }
   std::string toString(
     FormatExpressions* format = nullptr, bool includeV = true
+  ) const;
+  std::string toMathML(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
   ) const;
   MonomialTensorGeneralizedVermas() {}
   void operator=(const MonomialTensorGeneralizedVermas<Coefficient>& other) {
@@ -453,6 +462,7 @@ public:
     const Coefficient& ringZero
   );
   std::string toString(FormatExpressions* format = nullptr) const;
+  std::string toMathML(FormatExpressions* format = nullptr) const;
   std::string elementToStringHighestWeightVector(
     FormatExpressions* format = nullptr
   ) const {
@@ -466,6 +476,24 @@ public:
     << ", "
     << this->parabolicSelectionNonSelectedAreElementsLevi.toString()
     << "}";
+    return out.str();
+  }
+  std::string elementToMathMLHighestWeightVector(
+    FormatExpressions* format = nullptr,
+    MathExpressionProperties* outputProperties = nullptr
+  ) const {
+    (void)outputProperties;
+    if (this->highestWeightVectorNotation != "") {
+      return this->highestWeightVectorNotation;
+    }
+    std::stringstream out;
+    out
+    << "<msub><mi>v</mi>"
+    << "<mrow>"
+    << this->highestWeightFundamentalCoordinatesBaseField.toMathML(format)
+    << "<mo>,</mo>"
+    << this->parabolicSelectionNonSelectedAreElementsLevi.toMathML()
+    << "</mrow>";
     return out.str();
   }
   void splitOverLevi(
@@ -2903,6 +2931,34 @@ std::string MonomialTensorGeneralizedVermas<Coefficient>::toString(
 }
 
 template <class Coefficient>
+std::string MonomialTensorGeneralizedVermas<Coefficient>::toMathML(
+  FormatExpressions* format, MathExpressionProperties* outputProperties
+) const {
+  (void) outputProperties;
+  std::stringstream out;
+  if (this->monomials.size > 1) {
+    out << "<mrow>";
+    for (int i = 0; i < this->monomials.size; i ++) {
+      bool isHighestWeightVector = this->monomials[i].isHighestWeightVector();
+      if (!isHighestWeightVector) {
+        out << MathML::leftParenthesis;
+      }
+      out << this->monomials[i].toMathML(format);
+      if (!isHighestWeightVector) {
+        out << MathML::rightParenthesis;
+      }
+      if (i != this->monomials.size - 1) {
+        out << "<mo>&otimes;</mo>";
+      }
+    }
+    out << "</mrow>";
+  } else {
+    out << this->monomials[0].toMathML(format);
+  }
+  return out.str();
+}
+
+template <class Coefficient>
 std::string MonomialGeneralizedVerma<Coefficient>::toString(
   FormatExpressions* format, bool includeV
 ) const {
@@ -2912,14 +2968,8 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(
     << global.fatal;
   }
   ModuleSSalgebra<Coefficient>& module = *this->owner;
-  std::string coefficientString;
-  if (coefficientString == "1") {
-    coefficientString = "";
-  }
-  if (coefficientString == "- 1" || coefficientString == "-1") {
-    coefficientString = "-";
-  }
-  coefficientString += this->monomialCoefficientOne.toString(format);
+  std::string coefficientString =
+  this->monomialCoefficientOne.toString(format);
   if (coefficientString == "1") {
     coefficientString = "";
   }
@@ -2947,6 +2997,45 @@ std::string MonomialGeneralizedVerma<Coefficient>::toString(
   if (includeV) {
     out << module.elementToStringHighestWeightVector(format);
   }
+  return out.str();
+}
+
+template <class Coefficient>
+std::string MonomialGeneralizedVerma<Coefficient>::toMathML(
+  FormatExpressions* format, MathExpressionProperties* outputProperties
+) const {
+  if (this->owner == nullptr) {
+    global.fatal
+    << "Non-initialized generalized Verma monomial (owner is 0)."
+    << global.fatal;
+  }
+  (void) outputProperties;
+  ModuleSSalgebra<Coefficient>& module = *this->owner;
+  MathExpressionProperties coefficientProperties;
+  std::string coefficientString =
+  this->monomialCoefficientOne.toMathML(format, &coefficientProperties);
+  if (coefficientProperties.isOne) {
+    coefficientString = "";
+  }
+  if (coefficientProperties.isNegativeOne) {
+    coefficientString = MathML::negativeSign;
+  }
+  bool needsCdot = (
+    !coefficientProperties.isOne && !coefficientProperties.isNegativeOne
+  );
+  std::stringstream out;
+  out << "<mrow>" << coefficientString;
+  MathExpressionProperties monomialProperties;
+  std::string monomialString =
+  module.generatingWordsNonReduced[this->indexFDVector].toMathML(
+    format, &monomialProperties
+  );
+  out << monomialString;
+  if (needsCdot) {
+    out << "<mo>&sdot;</mo>";
+  }
+  out << module.elementToMathMLHighestWeightVector(format);
+  out << "</mrow>";
   return out.str();
 }
 

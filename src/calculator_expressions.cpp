@@ -3156,7 +3156,7 @@ bool Expression::toStringBuiltIn<
 ) {
   (void) format;
   (void) outputProperties;
-  CharacterSemisimpleLieAlgebraModule<Rational> element =
+const  CharacterSemisimpleLieAlgebraModule<Rational>& element =
   input.getValue<CharacterSemisimpleLieAlgebraModule<Rational> >();
   out << element.toString();
   return true;
@@ -3896,13 +3896,6 @@ void Expression::toStringOpMultiplicative(
   std::string firstE = (*this)[1].toString(format);
   bool firstNeedsBrackets = (*this)[1].needsParenthesisForMultiplication();
   bool secondNeedsBrackets = (*this)[2].needsParenthesisForMultiplication();
-  if (firstE == "- 1" || firstE == "-1") {
-    firstE = "-";
-    firstNeedsBrackets = false;
-  }
-  if (firstE == "1") {
-    firstE = "";
-  }
   if (firstNeedsBrackets) {
     out << "\\left(" << firstE << "\\right)";
   } else {
@@ -4150,14 +4143,14 @@ bool Expression::toStringEndStatementOneRow(
   FormatExpressions& format
 ) const {
   STACK_TRACE("Expression::toStringEndStatementOneRow");
-  if (this->owner==nullptr){
+  if (this->owner == nullptr) {
     return false;
   }
   std::string currentInput;
   std::string currentOutput;
   const Expression currentE = (*this)[index];
   out << "<tr><td class='cellCalculatorInput'>";
-  if (!this->owner->flagHideLHS && startingExpression!= nullptr) {
+  if (!this->owner->flagHideLHS && startingExpression != nullptr) {
     if (index < (*startingExpression).size()) {
       format.flagDontCollalpseProductsByUnits = true;
       currentInput =
@@ -4255,9 +4248,9 @@ bool Expression::toStringEndStatementTopLevel(
   out << "<table class='tableCalculatorOutput'>";
   for (int i = 1; i < this->size(); i ++) {
     const Expression expression = (*this)[i];
-      this->toStringEndStatementOneRow(
-        out, startingExpression, outputJS, i, isFinal, *format
-      );
+    this->toStringEndStatementOneRow(
+      out, startingExpression, outputJS, i, isFinal, *format
+    );
     if (format != nullptr) {
       format->flagExpressionIsTopLevel = isFinal;
     }

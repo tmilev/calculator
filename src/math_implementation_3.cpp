@@ -3333,6 +3333,12 @@ std::string Selection::toString() const {
   return vector.toString();
 }
 
+std::string Selection::toMathML() const {
+  Vector<Rational> vector;
+  vector = *this;
+  return vector.toMathML();
+}
+
 void Selection::incrementSelection() {
   for (int i = this->numberOfElements - 1; i >= 0; i --) {
     this->selected[i] = !this->selected[i];
@@ -7598,6 +7604,21 @@ std::string ElementWeylGroup::toString(FormatExpressions* format) const {
   }
   return out.str();
 }
+std::string ElementWeylGroup::toMathML(FormatExpressions* format, MathExpressionProperties* outputProperties) const {
+  STACK_TRACE("ElementWeylGroup::toString");
+  (void) format;
+  (void)outputProperties;
+  if (this->generatorsLastAppliedFirst.size == 0) {
+    return "<mi>id</mi>";
+  }
+  std::stringstream out;
+  out << "<mrow>";
+  for (int i = 0; i < this->generatorsLastAppliedFirst.size; i ++) {
+    out << this->generatorsLastAppliedFirst[i].toMathML();
+  }
+  out << "</mrow>";
+  return out.str();
+}
 
 unsigned int ElementWeylGroup::hashFunction() const {
   unsigned int result = 0;
@@ -8304,6 +8325,12 @@ std::string WeylGroupData::toString(FormatExpressions* format) {
   out << this->toStringCppConjugacyClasses(format);
   out << this->toStringCppCharTable(format);
   return out.str();
+}
+
+std::string WeylGroupData::toMathML(FormatExpressions* format, MathExpressionProperties* outputProperties) {
+  STACK_TRACE("WeylGroupData::toMathML");
+  (void)outputProperties
+      ;  return this->toString(format);
 }
 
 bool WeylGroupData::isAddmisibleDynkinType(char candidateLetter, int n) {

@@ -2681,15 +2681,22 @@ void RootSubalgebra::addSlTwoSubalgebraIfNew(
     newSubalgebra.indexInContainer = indexIsomorphicSl2;
     output.allSubalgebras.addOnTop(newSubalgebra);
   }
+  this->registerSubalgebraContainsSl2(
+    output, indexIsomorphicSl2, indexRootSubalgebraInContainer
+  );
+  output.checkMinimalContainingRootSubalgebras();
+}
+
+void RootSubalgebra::registerSubalgebraContainsSl2(
+  SlTwoSubalgebras& output, int indexSl2, int indexRootSubalgebraInContainer
+) {
   SlTwoSubalgebra& realizedSubalgebra =
-  output.allSubalgebras.getElement(indexIsomorphicSl2);
-  realizedSubalgebra.indicesContainingRootSubalgebras.addOnTop(
+  output.allSubalgebras.getElement(indexSl2);
+  realizedSubalgebra.indicesContainingRootSubalgebras.addOnTopNoRepetition(
     indexRootSubalgebraInContainer
   );
-  output.indicesSl2sContainedInRootSubalgebras[
-    indexRootSubalgebraInContainer
-  ].addOnTop(indexIsomorphicSl2);
-  output.checkMinimalContainingRootSubalgebras();
+  output.sl2sPerRootSubalgebras[indexRootSubalgebraInContainer].
+  addOnTopNoRepetition(indexSl2);
 }
 
 bool RootSubalgebras::growDynkinType(

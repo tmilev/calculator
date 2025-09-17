@@ -445,7 +445,7 @@ public:
   Rational dimensionCentralizerToralPart;
   bool flagCentralizerIsRegular;
   bool flagTryToComputeCentralizerFully;
-  List<int> indicesContainingRootSubalgebras;
+  HashedList<int> indicesContainingRootSubalgebras;
   List<int> indicesMinimalContainingRootSubalgebras;
   Vectors<Rational> participatingPositiveRoots;
   // Mathematically equal to the previous.
@@ -662,9 +662,13 @@ public:
   static std::string descriptionHRealization;
   static std::string descriptionMinimalContainingRegularSubalgebras;
   HashedList<SlTwoSubalgebra> allSubalgebras;
-  List<List<int> > indicesSl2sContainedInRootSubalgebras;
+  List<List<int> > sl2sPerRootSubalgebras;
   List<int> indicesSl2DecompositionFormulas;
-  HashedList<Vector<Rational> > unsuitableHs;
+  HashedList<Vector<Rational> > allRealizedHs;
+  // A map from each unsuitable H into all root subalgebras
+  // for whom the H was an S-subalgebra candidate
+  // but we couldn't realize it.
+  MapList<Vector<Rational>, List<int> > unsuitableHs;
   int indexZeroWeight;
   RootSubalgebras rootSubalgebras;
   ~SlTwoSubalgebras() {}
@@ -700,6 +704,16 @@ public:
   std::string toHTMLFieldReport() const;
   std::string toStringModuleDecompositionMinimalContainingRegularSubalgebras(
     bool useLatex, bool useHtml
+  );
+  void computeAllRealizedHs();
+  // Some H elements were not successfully realized as S-subalgebras
+  // of root subalgebras that were eligible to contain the h.
+  // We hereby assume that the realization is actually possible
+  // and account the root subalgebras as containers of the
+  // unsuitable Hs.
+  void computeRootSubalgebraContainersFromUnsuitableHs();
+  void computeRootSubalgebraContainersFromOneUnsuitableH(
+    const Vector<Rational>& h
   );
   void computeRootSubalgebraContainers();
   void computeOneRootSubalgebraContainers(SlTwoSubalgebra& output);

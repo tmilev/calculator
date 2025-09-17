@@ -1647,12 +1647,15 @@ std::string LargeInteger::toMathML(
         outputProperties->isNegativeOne = true;
       }
     }
-    out << MathML::negativeSign;
+    out << "<mrow>" << MathML::negativeSign;
   }
   if (outputProperties != nullptr) {
     outputProperties->isOne = this->isEqualToOne();
   }
   out << this->value.toMathML();
+  if (this->sign == - 1) {
+    out << "</mrow>";
+  }
   return out.str();
 }
 

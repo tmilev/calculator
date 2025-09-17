@@ -18,9 +18,9 @@ std::string MathML::toMathMLFinal(
   << "<math>"
   << "<semantics>"
   << mathMLContent
-  << "<annotation>"
+  << "<annotation encoding='application/x-tex'>"
   << latex
-  << "</annotation"
+  << "</annotation>"
   << "</semantics></math>"
   << "</span>";
   return out.str();

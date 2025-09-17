@@ -1689,7 +1689,7 @@ std::string AlgebraicClosureRationals::toStringQuadraticRadical(
     }
   }
   out << "]";
-  return HtmlRoutines::getMathNoDisplay(out.str());
+  return out.str();
 }
 
 std::string AlgebraicClosureRationals::toMathMLQuadraticRadical(
@@ -1701,7 +1701,7 @@ std::string AlgebraicClosureRationals::toMathMLQuadraticRadical(
   for (int i = 0; i < this->quadraticRadicals.size; i ++) {
     out << "<msqrt>" << this->quadraticRadicals[i].toMathML() << "</msqrt>";
     if (i != this->quadraticRadicals.size - 1) {
-      out << "<mo>,<mo> ";
+      out << "<mo>,</mo> ";
     }
   }
   out << "<mo>]</mo></mrow>";

@@ -241,6 +241,9 @@ public:
     SlTwoSubalgebras& output,
     int indexRootSubalgebraInContainer
   );
+  void registerSubalgebraContainsSl2(
+    SlTwoSubalgebras& output, int indexSl2, int indexRootSubalgebraInContainer
+  );
   bool isEquivalentToByDiagramsAndDimensions(const RootSubalgebra& other)
   const;
   void

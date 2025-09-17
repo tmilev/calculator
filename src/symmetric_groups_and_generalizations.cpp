@@ -734,7 +734,7 @@ std::string PermutationR2::toString(FormatExpressions* format) const {
 
 std::string PermutationR2::toMathML(FormatExpressions* format) const {
   std::stringstream out;
-  (void)format;
+  (void) format;
   out << "<mrow>" << MathML::leftParenthesis;
   for (int i = 0; i < this->cycles.size; i ++) {
     out << MathML::leftParenthesis;

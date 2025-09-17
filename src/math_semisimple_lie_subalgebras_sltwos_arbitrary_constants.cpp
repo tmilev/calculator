@@ -221,7 +221,7 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
       return List<Rational>({1, 1, 0, 0, 0, 0, 0, 0});
     }
   }
-  return List<Rational>({1, - 1, 2, - 2, 3, - 3, 4, - 4});
+  return List<Rational>({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
 }
 
 int CentralizerComputer::arbitraryCartanWeight(

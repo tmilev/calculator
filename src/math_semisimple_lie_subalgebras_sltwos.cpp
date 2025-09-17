@@ -748,9 +748,9 @@ void SlTwoSubalgebra::toHTML(std::string& filePath) {
 
 void SlTwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner) {
   STACK_TRACE("SlTwoSubalgebras::reset");
-  this->indicesSl2sContainedInRootSubalgebras.setSize(0);
+  this->sl2sPerRootSubalgebras.setSize(0);
   this->indicesSl2DecompositionFormulas.setSize(0);
-  this->unsuitableHs.setSize(0);
+  this->unsuitableHs.clear();
   this->indexZeroWeight = - 1;
   this->owner = &inputOwner;
   this->rootSubalgebras.owner = &inputOwner;
@@ -1721,17 +1721,15 @@ void SlTwoSubalgebras::findSl2Subalgebras(
   output.getOwner().computeChevalleyConstants();
   output.rootSubalgebras.owner = &inputOwner;
   output.rootSubalgebras.computeAllReductiveRootSubalgebrasUpToIsomorphism();
-  output.indicesSl2sContainedInRootSubalgebras.setSize(
+  output.sl2sPerRootSubalgebras.setSize(
     output.rootSubalgebras.subalgebras.size
   );
-  output.indicesSl2sContainedInRootSubalgebras.reserve(
+  output.sl2sPerRootSubalgebras.reserve(
     output.rootSubalgebras.subalgebras.size * 2
   );
   output.checkMinimalContainingRootSubalgebras();
-  for (
-    int i = 0; i < output.indicesSl2sContainedInRootSubalgebras.size; i ++
-  ) {
-    output.indicesSl2sContainedInRootSubalgebras[i].size = 0;
+  for (int i = 0; i < output.sl2sPerRootSubalgebras.size; i ++) {
+    output.sl2sPerRootSubalgebras[i].size = 0;
   }
   ProgressReport report;
   for (int i = 0; i < output.rootSubalgebras.subalgebras.size; i ++) {
@@ -1766,18 +1764,15 @@ void SlTwoSubalgebras::findSl2Subalgebras(
   for (int i = 0; i < indexMap.size; i ++) {
     indexMap[permutation[i]] = i;
   }
-  for (
-    int j = 0; j < output.indicesSl2sContainedInRootSubalgebras.size; j ++
-  ) {
-    for (
-      int k = 0; k < output.indicesSl2sContainedInRootSubalgebras[j].size; k
-      ++
-    ) {
-      output.indicesSl2sContainedInRootSubalgebras[j][k] =
-      indexMap[output.indicesSl2sContainedInRootSubalgebras[j][k]];
+  for (int j = 0; j < output.sl2sPerRootSubalgebras.size; j ++) {
+    for (int k = 0; k < output.sl2sPerRootSubalgebras[j].size; k ++) {
+      output.sl2sPerRootSubalgebras[j][k] =
+      indexMap[output.sl2sPerRootSubalgebras[j][k]];
     }
   }
+  output.computeAllRealizedHs();
   inputOwner.checkConsistency();
+  output.computeRootSubalgebraContainersFromUnsuitableHs();
   output.checkMinimalContainingRootSubalgebras();
   output.computeRootSubalgebraContainers();
   output.computeCentralizers();
@@ -1993,7 +1988,11 @@ void SlTwoSubalgebras::appendSSl2SubalgebrasFromRootSubalgebra(
         candidate, output, indexRootSubalgebraInContainer
       );
     } else {
-      output.unsuitableHs.addOnTopNoRepetition(candidate.candidateH);
+      if (!output.unsuitableHs.contains(candidate.candidateH)) {
+        output.unsuitableHs.setKeyValue(candidate.candidateH, List<int>({}));
+      }
+      output.unsuitableHs.getValueNoFailNonConst(candidate.candidateH).addOnTop
+      (indexRootSubalgebraInContainer);
     }
     std::stringstream out;
     out
@@ -2026,6 +2025,40 @@ void SlTwoSubalgebras::computeOneRootSubalgebraContainers(
       continue;
     }
     output.indicesMinimalContainingRootSubalgebras.addOnTop(j);
+  }
+}
+
+void SlTwoSubalgebras::computeRootSubalgebraContainersFromUnsuitableHs() {
+  STACK_TRACE(
+    "SlTwoSubalgebras::"
+    "computeRootSubalgebraContainersFromUnsuitableHs"
+  );
+  for (const Vector<Rational>& h : this->unsuitableHs.keys) {
+    this->computeRootSubalgebraContainersFromOneUnsuitableH(h);
+  }
+}
+
+void SlTwoSubalgebras::computeRootSubalgebraContainersFromOneUnsuitableH(
+  const Vector<Rational>& h
+) {
+  STACK_TRACE(
+    "SlTwoSubalgebras::computeRootSubalgebraContainersFromOneUnsuitableH"
+  );
+  if (!this->allRealizedHs.contains(h)) {
+    return;
+  }
+  int indexSl2 = this->allRealizedHs.getIndexNoFail(h);
+  SlTwoSubalgebra& subalgebra = this->allSubalgebras.getElement(indexSl2);
+  const List<int>& containerRootSubalgebras =
+  this->unsuitableHs.getValueNoFail(h);
+  for (int indexContainerRootSubalgebra : containerRootSubalgebras) {
+    subalgebra.indicesContainingRootSubalgebras.addOnTopNoRepetition(
+      indexContainerRootSubalgebra
+    );
+    this->rootSubalgebras.subalgebras[indexContainerRootSubalgebra].
+    registerSubalgebraContainsSl2(
+      *this, indexSl2, indexContainerRootSubalgebra
+    );
   }
 }
 
@@ -2087,13 +2120,15 @@ toStringModuleDecompositionMinimalContainingRegularSubalgebras(
   return out.str();
 }
 
-bool SlTwoSubalgebras::isHOfConstructedSlTwo(const Vector<Rational>& h) const {
+void SlTwoSubalgebras::computeAllRealizedHs() {
+  this->allRealizedHs.clear();
   for (const SlTwoSubalgebra& current : this->allSubalgebras) {
-    if (h == current.hElement.getCartanPart()) {
-      return true;
-    }
+    this->allRealizedHs.addOnTop(current.hElement.getCartanPart());
   }
-  return false;
+}
+
+bool SlTwoSubalgebras::isHOfConstructedSlTwo(const Vector<Rational>& h) const {
+  return this->allRealizedHs.contains(h);
 }
 
 std::string SlTwoSubalgebras::toHTMLFieldReport() const {
@@ -2108,7 +2143,7 @@ std::string SlTwoSubalgebras::toHTMLFieldReport() const {
   if (allFieldsUsed.size > 0) {
     out << " (" << allFieldsUsed.size << " total)";
   }
-  out << ": " << allFieldsUsed.toStringCommaDelimited();
+  out << ":\n" << allFieldsUsed.toStringCommaDelimited();
   return out.str();
 }
 
@@ -2133,7 +2168,7 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
   "characteristic 2 for all simple roots of \\(P\\) lying in \\(P_0\\), then "
   "\\(e{}(P, P_0)= 0\\). ";
   out << MathML::processLatex(dynkinEpsilonRemark);
-  if (this->unsuitableHs.size == 0) {
+  if (this->unsuitableHs.size() == 0) {
     std::stringstream unsuitableStream;
     unsuitableStream
     << "It turns out by direct computation that, in the current case of "
@@ -2148,11 +2183,11 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
   }
   bool allGood = true;
   List<Rational> lengths;
-  for (const Vector<Rational>& h : this->unsuitableHs) {
+  for (const Vector<Rational>& h : this->unsuitableHs.keys) {
     lengths.addOnTop(this->getOwnerWeyl().rootScalarCartanRoot(h, h));
   }
   List<Vector<Rational> > sortedUnsuitableHs;
-  sortedUnsuitableHs.addListOnTop(this->unsuitableHs);
+  sortedUnsuitableHs.addListOnTop(this->unsuitableHs.keys);
   lengths.quickSortDescending(nullptr, &sortedUnsuitableHs);
   for (const Vector<Rational>& h : sortedUnsuitableHs) {
     Rational length = this->getOwnerWeyl().rootScalarCartanRoot(h, h);
@@ -3395,15 +3430,14 @@ std::string CartanElementCandidate::toHTML() const {
   out << this->h.toMathMLFinal(nullptr);
   if (!this->e.isEqualToZero()) {
     out
-    << "matching e: "
+    << " matching e: "
     << this->e.toMathMLFinal(nullptr)
     << ", verification: "
     << MathML::toMathMLFinal(
       this->toMathMLVerification(), this->toStringVerification()
     );
-;
   }
-  out << "adjoint action: " << this->adjointAction.toMathMLFinal(nullptr);
+  out << " adjoint action: " << this->adjointAction.toMathMLFinal(nullptr);
   return out.str();
 }
 

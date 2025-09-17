@@ -2444,7 +2444,7 @@ std::string ClassFunction<someFiniteGroup, Coefficient>::toMathML(
   FormatExpressions* format, MathExpressionProperties* outputProperties
 ) const {
   (void) format;
-  (void)outputProperties;
+  (void) outputProperties;
   if (this->G == 0) {
     return "<ms>(not initialized)</ms>";
   }
@@ -2468,7 +2468,7 @@ std::string ClassFunction<someFiniteGroup, Coefficient>::toMathML(
 
 template <class someFiniteGroup, typename Coefficient>
 std::ostream& operator<<(
-  std::ostream& out, const ClassFunction<someFiniteGroup, Coefficient> &X
+  std::ostream& out, const ClassFunction<someFiniteGroup, Coefficient>& X
 ) {
   out << X.toString();
   return out;

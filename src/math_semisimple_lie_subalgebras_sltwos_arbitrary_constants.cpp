@@ -29,6 +29,9 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
   if (type == 'C' && rank == 4 && dynkinIndex == 4) {
     return List<Rational>({1, 1, - 1, 1});
   }
+  if (type == 'D' && rank == 4 && dynkinIndex == 12) {
+    return List<Rational>({1, - 1, 2, - 2, 1, - 1});
+  }
   if (type == 'F' && dynkinIndex == 28) {
     return List<Rational>({1, 1, 1, 1});
   }
@@ -38,6 +41,11 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
     }
     if (dynkinIndex == 4) {
       return List<Rational>({1, 1, 1, 1, 1});
+    }
+  }
+  if (type == 'D' && rank == 5) {
+    if (dynkinIndex == 30) {
+      return List<Rational>({1, - 1, 1, - 1, - 1});
     }
   }
   if (type == 'B' && rank == 6) {
@@ -55,6 +63,9 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
     }
   }
   if (type == 'C' && rank == 6) {
+    if (dynkinIndex == 11) {
+      return List<Rational>({1, - 1, 1, - 1, 1, - 1});
+    }
     if (dynkinIndex == 8) {
       return List<Rational>({1, 1, 1, 1, 1, 1});
     } else if (dynkinIndex == 6) {
@@ -68,6 +79,15 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
     }
   }
   if (type == 'D' && rank == 6) {
+    if (dynkinIndex == 62) {
+      return List<Rational>({1, - 1, 2, - 2, 1, - 1, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 38) {
+      return List<Rational>({1, - 1, 2, - 2, 3, - 3, 1, 1, 1, 1, 1});
+    }
+    if (dynkinIndex == 13) {
+      return List<Rational>({1, - 1, 2, - 2, 1, - 1, 1, 1, 1, 1, 1});
+    }
     if (dynkinIndex == 6) {
       return List<Rational>({1, 1, 1, 1, 1, 1});
     }
@@ -76,16 +96,16 @@ List<Rational> SlTwoSubalgebraCandidate::fArbitraryCoefficients(
     }
   }
   if (type == 'E' && rank == 6) {
-    if (dynkinIndex == 2) {
-      return List<Rational>({1, 1, 1, 1, 1, 1});
+    if (dynkinIndex == 84) {
+      return List<Rational>({1, - 1, 1, - 1, 1, - 1});
+    }
+    if (dynkinIndex == 30) {
+      return List<Rational>({1, - 1, 1, - 1, 1, - 1});
     }
   }
   if (type == 'B' && rank == 7) {
-    if (dynkinIndex == 8) {
-      return List<Rational>({1, 1, 1, 1, 1, 1, 1});
-    }
-    if (dynkinIndex == 6) {
-      return List<Rational>({1, 1, 1, 1, 1, 1, 1});
+    if (dynkinIndex == 40) {
+      return List<Rational>({1, - 1, 1, - 1, 1, - 1, 0, 0, 0});
     }
   }
   if (type == 'C' && rank == 7) {
@@ -311,11 +331,14 @@ List<int> CentralizerComputer::hardCodedArbitraryCoefficientsCartan(
     if (dynkinIndexOfSlTwo == 10) {
       return List<int>({1, 3, - 1});
     }
+    if (dynkinIndexOfSlTwo == 8) {
+      return List<int>({1, 3, - 1});
+    }
     if (dynkinIndexOfSlTwo == 4) {
       return List<int>({1, 3});
     }
     if (dynkinIndexOfSlTwo == 3) {
-      return List<int>({1, 3, 1});
+      return List<int>({1, 7, - 3, 4});
     }
     if (dynkinIndexOfSlTwo == 2) {
       return List<int>({1, - 1, 1, - 1});

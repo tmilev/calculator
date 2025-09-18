@@ -1718,7 +1718,7 @@ void Calculator::evaluateCommands() {
   if (global.runMode == GlobalVariables::RunMode::consoleRegular) {
     this->evaluateCommandsConsoleOutput(startingExpression, out);
   } else if (!this->flagDisplayFullExpressionTree) {
-    this->evaluateCommandsStandardOutput(startingExpression, out);
+    this->evaluateCommandsDefault(startingExpression, out);
   } else {
     this->evaluateCommandsDebugExpressionTreeOutput(startingExpression, out);
   }
@@ -1774,7 +1774,7 @@ void Calculator::evaluateCommandsConsoleOutput(
   << std::endl;
 }
 
-void Calculator::evaluateCommandsStandardOutput(
+void Calculator::evaluateCommandsDefault(
   Expression& startingExpression, std::stringstream& out
 ) {
   std::string badCharactersString =

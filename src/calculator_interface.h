@@ -1966,6 +1966,9 @@ public:
   std::string syntaxErrors;
   List<std::string> parsingLog;
   std::string lastRuleName;
+  // This function is not thread safe.
+  // Initialized in initializeMainAll().
+  static const HashedList<std::string>& whitespaceContainer();
 private:
   // Sets an expression value and syntactic role to a given position in the
   // stack.
@@ -2335,6 +2338,10 @@ public:
     List<SyntacticElement>& outputSyntacticStack,
     std::string* outputSyntacticErrors
   );
+  // Inspects the last 4 or fewer bytes of the input string
+  // and trims them away in-place if they form non-standard white space.
+  // When trimming happens, returns true, otherwise returns false.
+  bool trimNonStandardWhiteSpaceFromEnd(std::string& inputOutput);
   void parseFillDictionary(
     const std::string& input, List<SyntacticElement>& output
   );
@@ -2362,7 +2369,7 @@ class Calculator {
   void evaluateCommandsConsoleOutput(
     const Expression& startingExpression, std::stringstream& out
   );
-  void evaluateCommandsStandardOutput(
+  void evaluateCommandsDefault(
     Expression& startingExpression, std::stringstream& out
   );
   void evaluateCommandsDebugExpressionTreeOutput(

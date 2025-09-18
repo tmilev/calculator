@@ -1250,6 +1250,7 @@ bool Expression::toMathMLGeneral(
   if (this->size() < 2) {
     return false;
   }
+  out << "<mrow>";
   (*this)[0].toMathML(out, format, outputProperties, nullptr, false, nullptr);
   bool needParenthesis = true;
   if (this->size() == 2) {
@@ -1274,6 +1275,7 @@ bool Expression::toMathMLGeneral(
   if (needParenthesis) {
     out << MathML::rightParenthesis;
   }
+  out << "</mrow>";
   return true;
 }
 

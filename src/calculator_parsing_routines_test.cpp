@@ -1,6 +1,7 @@
 #include "calculator_interface.h"
 #include "general_file_operations_encodings.h"
 #include "string_constants.h"
+#include "test.h"
 #include <iostream>
 
 bool Calculator::Test::all(bool updateABTestFile) {
@@ -205,7 +206,6 @@ bool Calculator::Test::parseDecimal(Calculator& ownerInitialized) {
   "00000000000000000000000000000000000 - 10^128 + 1";
   ownerInitialized.evaluate(mustEvaluateToOne);
   if (ownerInitialized.programExpression.toString() != "1") {
-    std::cout << "Must crash!\n";
     global.fatal
     << "Expression: "
     << mustEvaluateToOne
@@ -263,5 +263,38 @@ bool Calculator::Examples::Test::compose() {
   Calculator calculator;
   calculator.initialize(Calculator::Mode::full);
   calculator.examples.writeExamplesReadme();
+  return true;
+}
+
+bool CalculatorParserTest::all() {
+  CalculatorParserTest::whitespace();
+  return true;
+}
+
+bool CalculatorParserTest::whitespace() {
+  std::string expression;
+  Calculator owner;
+  owner.initialize(Calculator::Mode::educational);
+  Expression output(owner);
+  std::string input =
+  "\t\n\v\f\r\u0085\u00a0\u2000\u2001"
+  "\u2002\u2003\u2004\u2005\u2006\u2007"
+  "\u2008\u2009\u200A\u2028\u2029\u202f"
+  "\u205f\u3000A";
+  bool mustBeTrue = owner.parser.parse(input, false, output);
+  if (!mustBeTrue) {
+    global.fatal << "Failed to parse:\n" << input << global.fatal;
+  }
+  std::string result = output.toString();
+  std::string expected = "A";
+  if (result != expected) {
+    global.fatal
+    << "Parsed white space: got:\n"
+    << HtmlRoutines::convertStringToURLString(result, false)
+    << "\nexpected:\n"
+    << HtmlRoutines::convertStringToURLString(expected, false)
+    << output.toStringSemiFull()
+    << global.fatal;
+  }
   return true;
 }

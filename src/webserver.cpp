@@ -4732,6 +4732,7 @@ void WebServer::initializeMainAll() {
   this->initializeMainMIMETypes();
   MathML::mapFromLatexToMathMLEquivalents();
   MathMLConverter::converterCalculator();
+  CalculatorParser::whitespaceContainer();
 }
 
 extern int mainTest(List<std::string>& remainingArgs);

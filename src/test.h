@@ -50,4 +50,10 @@ public:
   static Vector<Rational> fromString(const std::string& input);
 };
 
+class CalculatorParserTest {
+public:
+  static bool all();
+  static bool whitespace();
+};
+
 #endif

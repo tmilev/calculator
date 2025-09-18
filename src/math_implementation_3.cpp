@@ -11553,7 +11553,7 @@ std::string HtmlRoutines::convertStringToURLStringExceptDashesAndSlashes(
       out << input[i];
     } else {
       out << "%";
-      int x = input[i];
+      int x = static_cast<int>(static_cast<unsigned char>(input[i]));
       out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
     }
   }
@@ -11571,8 +11571,10 @@ std::string HtmlRoutines::convertStringToURLString(
       out << '+';
     } else {
       out << "%";
-      int x = input[i];
-      out << std::hex << ((x / 16) % 16) << (x % 16) << std::dec;
+      int x = static_cast<int>(static_cast<unsigned char>(input[i]));
+      int significantHex = ((x / 16) % 16);
+      int lessSignificantHex = x % 16;
+      out << std::hex << significantHex << lessSignificantHex << std::dec;
     }
   }
   return out.str();

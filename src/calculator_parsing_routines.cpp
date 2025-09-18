@@ -1,4 +1,5 @@
 #include  "calculator_interface.h"
+#include <iostream>
 
 std::string SyntacticElement::getIntegerStringCrashIfNot(
   CalculatorParser& owner
@@ -1354,6 +1355,60 @@ bool CalculatorParser::setStackValue(
   return true;
 }
 
+const HashedList<std::string>& CalculatorParser::whitespaceContainer() {
+  static HashedList<std::string> result;
+  if (result.size > 0) {
+    return result;
+  }
+  result.addOnTop("\t");
+  result.addOnTop("\n");
+  // Vertical tab.
+  result.addOnTop("\v");
+  // Form feed.
+  result.addOnTop("\f");
+  // Carriage return.
+  result.addOnTop("\r");
+  // The following are 2 bytes each.
+  // Next line (nel); has 2 bytes.
+  result.addOnTop("\u0085");
+  // Non-breaking space; has 2 bytes.
+  result.addOnTop("\u00a0");
+  // The following are 3 bytes each.
+  // En quad.
+  result.addOnTop("\u2000");
+  // Mutton quad.
+  result.addOnTop("\u2001");
+  // En space.
+  result.addOnTop("\u2002");
+  // Em space.
+  result.addOnTop("\u2003");
+  // Three-per-em space.
+  result.addOnTop("\u2004");
+  // Four-per-em space.
+  result.addOnTop("\u2005");
+  // Six-per-em space.
+  result.addOnTop("\u2006");
+  // Figure space.
+  result.addOnTop("\u2007");
+  // Punctuation space.
+  result.addOnTop("\u2008");
+  // Thin space.
+  result.addOnTop("\u2009");
+  // Hair space.
+  result.addOnTop("\u200A");
+  // Line separator.
+  result.addOnTop("\u2028");
+  // Paragraph separator.
+  result.addOnTop("\u2029");
+  // Narrow no-break space.
+  result.addOnTop("\u202f");
+  // Medium mathematical space.
+  result.addOnTop("\u205f");
+  // ideographic space.
+  result.addOnTop("\u3000");
+  return result;
+}
+
 bool CalculatorParser::isFontModifier(const std::string& input) const {
   return
   input == "\\mathbb" ||
@@ -1425,6 +1480,13 @@ bool CalculatorParser::shouldSplitOutsideQuotes(
   if (leftIsDigit && rightIsDigit) {
     return false;
   }
+  char c2 = static_cast<char>(12 * 16 + 2);
+  char nbsp = static_cast<char>(160);
+  if (leftLastChar == c2 && right == nbsp) {
+    // Do not separate 0xc2 0xa0:
+    // that is a white space that will be separated later.
+    return false;
+  }
   if (
     this->isLeftSeparator(static_cast<unsigned char>(left[0])) ||
     this->isRightSeparator(static_cast<unsigned char>(right)) ||
@@ -1488,6 +1550,24 @@ bool CalculatorParser::parseEmbedInCommandSequence(
   return this->parse(input, true, output);
 }
 
+bool CalculatorParser::trimNonStandardWhiteSpaceFromEnd(
+  std::string& inputOutput
+) {
+  int size = static_cast<int>(inputOutput.size());
+  const HashedList<std::string> whiteSpaces = this->whitespaceContainer();
+  for (int i = 0; i < 3; i ++) {
+    if (i >= size) {
+      return false;
+    }
+    std::string end = inputOutput.substr(size - i - 1);
+    if (whiteSpaces.contains(end)) {
+      inputOutput.resize(size - i - 1);
+      return true;
+    }
+  }
+  return false;
+}
+
 void CalculatorParser::parseFillDictionary(
   const std::string& input, List<SyntacticElement>& output
 ) {
@@ -1509,11 +1589,18 @@ void CalculatorParser::parseFillDictionary(
     } else {
       lookAheadChar = ' ';
     }
+    bool nonStandardWhitespaceTrimmedFromEnd =
+    this->trimNonStandardWhiteSpaceFromEnd(current);
+    if (current == "") {
+      continue;
+    }
     if (this->isInterpretedAsEmptySpace(current)) {
       current = " ";
     }
-    if (!this->shouldSplitOutsideQuotes(current, lookAheadChar)) {
-      continue;
+    if (!nonStandardWhitespaceTrimmedFromEnd) {
+      if (!this->shouldSplitOutsideQuotes(current, lookAheadChar)) {
+        continue;
+      }
     }
     if (this->controlSequences.contains(current)) {
       currentElement.controlIndex = this->controlSequences.getIndex(current);

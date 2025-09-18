@@ -131,6 +131,7 @@ void Test::run() {
     Course::Test::all();
   }
   if (this->shouldTest(Test::Suites::calculator)) {
+    CalculatorParserTest::all();
     if (Test::flagUpdateABTests) {
       global
       << Logger::red

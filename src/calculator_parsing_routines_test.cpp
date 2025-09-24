@@ -231,12 +231,7 @@ bool Calculator::Test::builtInFunctionsABTest(
     std::stringstream crashFileWriteReport;
     std::stringstream crashFile;
     crashFile
-    << "<!DOCTYPE html><link "
-    << "type='text/css' "
-    << "rel='stylesheet' "
-    << "href='"
-    << WebAPI::Request::calculatorCSS
-    << "'>"
+    << "<!DOCTYPE html>"
     << "<body><div style='overflow:auto;height:100%'>"
     << test.reportHtml
     << "</div></body></html>";

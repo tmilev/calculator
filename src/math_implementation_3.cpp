@@ -3562,6 +3562,7 @@ FormatExpressions::FormatExpressions() {
   this->flagUseQuotes = true;
   this->flagSuppressModP = false;
   this->flagIsInNumerator = false;
+  this->bootstrapScriptType = MathBootstrapScriptType::backendRendering;
   this->maximumMatrixDisplayedRows = 20;
   this->maximumMatrixLineLength = 20;
   this->monomialOrder.leftGreaterThanRight =
@@ -6452,7 +6453,10 @@ std::string DynkinSimpleType::toMathML(
 }
 
 std::string DynkinSimpleType::toMathMLFinal(FormatExpressions* format) const {
-  return MathML::toMathMLFinal(this->toMathML(format), this->toString(format));
+  return
+  MathML::toMathMLFinal(
+    this->toMathML(format), this->toString(format), format
+  );
 }
 
 std::string DynkinSimpleType::toString(FormatExpressions* format) const {

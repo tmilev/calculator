@@ -828,7 +828,7 @@ std::string WebAPIResponse::getHTMLAllInOneJavascriptCSS(
     )
   ) {
     out
-    << "<html><body><b>Failed to load the application file. </b>"
+    << "<!DOCTYPE html><body><b>Failed to load the application file. </b>"
     << "Further comments follow. "
     << errorStream.str()
     << "</body></html>";
@@ -990,16 +990,6 @@ JSData WebAPIResponse::getSelectCourseJSON() {
   CourseList courses;
   courses.load();
   return courses.toJSON();
-}
-
-std::string WebAPIResponse::getHtmlTagWithManifest() {
-  STACK_TRACE("WebAPIReponse::getHtmlTagWithManifest");
-  std::stringstream out;
-  out << "<!DOCTYPE HTML>\n";
-  out
-  << "<html>\n<!-- tag added automatically; "
-  << "user-specified html tag ignored-->\n";
-  return out.str();
 }
 
 JSData WebAPIResponse::getTopicTableJSON() {

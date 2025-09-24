@@ -1388,7 +1388,7 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toMathMLFinal(
 ) const {
   std::string latex = this->toString(format);
   std::string mathML = this->toMathML(format);
-  return MathML::toMathMLFinal(mathML, latex);
+  return MathML::toMathMLFinal(mathML, latex, format);
 }
 
 template <class TemplateMonomial, class Coefficient>

@@ -133,11 +133,12 @@ std::string SemisimpleLieAlgebra::toStringHTMLMenuStructureSummary(
   bool includeStructureConstants,
   bool includeRootSubalgebras,
   bool includeSl2Subalgebras,
-  bool includeSemisimpleSubalgebras
+  bool includeSemisimpleSubalgebras,
+  FormatExpressions* format
 ) {
   std::stringstream out;
   out << "<div class = 'divPanelSemisimpleLieAlgebraStructure'>";
-  out << this->toHTMLLieAlgebraNameFull() << "<br>";
+  out << this->toHTMLLieAlgebraNameFull(format) << "<br>";
   out
   << this->toStringMenuStructurePages(
     relativeTo,
@@ -204,7 +205,7 @@ std::string SemisimpleLieAlgebra::toStringMenuStructurePages(
 }
 
 std::string SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
-  bool addBootstrap, const std::string& relativeTo
+  MathBootstrapScriptType bootstrapType, const std::string& relativeTo
 ) {
   std::stringstream out;
   out
@@ -217,13 +218,35 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
   << relativeTo
   << WebAPI::Request::lieAlgebrasCSS
   << "'>";
+  if (bootstrapType == MathBootstrapScriptType::katex) {
+    out
+    << "<head>"
+    << "<link rel='stylesheet' "
+    << "href='https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css' "
+    << "crossorigin='anonymous'>"
+    "<script defer "
+    << "src='https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js' "
+    << "crossorigin='anonymous'></script>"
+    << "<script defer "
+    <<
+    "src='https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js' "
+    << "crossorigin='anonymous'"
+    << "onload='renderMathInElement(document.body);'>"
+    << "</script>"
+    << "</head>";
+  }
   out
   << "<script>"
   << "window.onload = ()=>{"
   << "window.calculator.dynamicJavascript."
   << "dynamicJavascript.bootstrapAllScripts(document.body);\n";
-  if (addBootstrap) {
+  switch (bootstrapType) {
+  case backendRendering:
+  case equationEditor:
     out << "window.calculator.lieAlgebras.bootstrap();\n";
+  case none:
+  default:
+    break;
   }
   out << "}" << "</script>";
   out
@@ -255,7 +278,11 @@ std::string SemisimpleLieAlgebra::toHTML(
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
-  out << "<h1>Lie algebra " << this->toHTMLLieAlgebraNameFull() << "</h1>";
+  latexFormat.bootstrapScriptType = MathBootstrapScriptType::backendRendering;
+  out
+  << "<h1>Lie algebra "
+  << this->toHTMLLieAlgebraNameFull(&latexFormat)
+  << "</h1>";
   out
   << "<br>Weyl group size: "
   << this->weylGroup.group.getSize().toString()
@@ -451,11 +478,18 @@ void SemisimpleLieAlgebra::writeHTML(
 ) {
   std::stringstream outWithLinks;
   std::stringstream outFile;
-  outFile << "<html>";
-  outFile << this->toHTMLCalculatorHeadElements();
+  outFile << "<!DOCTYPE html>";
+  outFile
+  << this->toHTMLCalculatorHeadElements(
+    MathBootstrapScriptType::backendRendering
+  );
+  FormatExpressions format;
+  format.bootstrapScriptType = MathBootstrapScriptType::backendRendering;
   outFile << this->toHTMLCalculatorBodyOnload();
   outFile
-  << this->toStringHTMLMenuStructureSummary("", false, true, true, true);
+  << this->toStringHTMLMenuStructureSummary(
+    "", false, true, true, true, &format
+  );
   outFile << this->toHTMLCalculatorMainDiv();
   outFile
   << this->toHTML(verbose, flagWriteLatexPlots, extraDynkinDiagramPlot);

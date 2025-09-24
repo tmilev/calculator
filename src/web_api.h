@@ -88,7 +88,6 @@ public:
     std::stringstream& argumentProcessingFailureComments,
     std::stringstream& comments
   );
-  static std::string getHtmlTagWithManifest();
   static std::string modifyProblemReport();
   static JSData clonePageResult();
   static void changePassword(

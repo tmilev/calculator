@@ -154,17 +154,22 @@ void AlgebraicClosureRationals::computeQuadraticRadicals() {
   Selection selection;
   selection.initialize(this->quadraticRadicals.size);
   do {
-    std::stringstream out;
     LargeInteger radical = 1;
     for (int i = 0; i < selection.cardinalitySelection; i ++) {
       radical *= this->quadraticRadicals[selection.elements[i]];
     }
+    std::stringstream latexRadical;
+    std::stringstream mathMLRadical;
     if (radical != 1) {
-      out << "\\sqrt{" << radical.toString() << "}";
+      latexRadical << "\\sqrt{" << radical.toString() << "}";
+      mathMLRadical << "<msqrt>" << radical.toMathML() << "</msqrt>";
     }
     int index = this->getIndexFromRadicalSelection(selection);
     this->quadraticRadicalsCorrespondingToBasisElements[index] = radical;
-    this->displayNamesBasisElements[index] = out.str();
+    VariableLetter displayName;
+    displayName.latexLetter = latexRadical.str();
+    displayName.mathMLLetter = mathMLRadical.str();
+    this->displayNamesBasisElements[index] = displayName;
   } while (selection.incrementReturnFalseIfPastLast());
 }
 
@@ -1839,7 +1844,10 @@ std::string AlgebraicClosureRationals::toMathMLFinal(
   FormatExpressions* format
 ) const {
   STACK_TRACE("AlgebraicClosureRationals::toMathMLFinal");
-  return MathML::toMathMLFinal(this->toMathML(format), this->toString(format));
+  return
+  MathML::toMathMLFinal(
+    this->toMathML(format), this->toString(format), format
+  );
 }
 
 std::string AlgebraicClosureRationals::toMathML(FormatExpressions* format)

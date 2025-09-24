@@ -2001,6 +2001,7 @@ public:
   bool flagUseQuotes;
   bool flagSuppressModP;
   bool flagIsInNumerator;
+  MathBootstrapScriptType bootstrapScriptType;
   std::string suffixLinearCombination;
   char ambientWeylLetter;
   List<MonomialPolynomial>::Comparator monomialOrder;
@@ -3015,7 +3016,9 @@ std::string Matrix<Coefficient>::toMathML(
 template <typename Coefficient>
 std::string Matrix<Coefficient>::toMathMLFinal(FormatExpressions* format) const {
   return
-  MathML::toMathMLFinal(this->toMathML(format), this->toStringLatex(nullptr));
+  MathML::toMathMLFinal(
+    this->toMathML(format), this->toStringLatex(format), format
+  );
 }
 
 template <typename Coefficient>

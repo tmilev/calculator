@@ -2471,7 +2471,8 @@ bool CalculatorLieTheory::precomputeSemisimpleLieAlgebraStructureWithOptions(
       computeRealForm,
       calculator.objectContainer.algebraicClosuresForLargeComputations
     );
-    slTwoSubalgebras.writeHTML();
+    FormatExpressions format;
+    slTwoSubalgebras.writeHTML(&format);
     Plot plot;
     algebra.weylGroup.dynkinType.plot(plot);
     std::string plotDynkinType = plot.getPlotHtml2d(calculator);

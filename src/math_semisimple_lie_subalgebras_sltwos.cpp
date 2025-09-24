@@ -33,8 +33,9 @@ bool SlTwoSubalgebra::operator==(const SlTwoSubalgebra& right) const {
   return this->hCharacteristic == right.hCharacteristic;
 }
 
-std::string SlTwoSubalgebra::toStringCentralizer() const {
-  return this->centralizerComputer.toString();
+std::string SlTwoSubalgebra::toStringCentralizer(FormatExpressions* format)
+const {
+  return this->centralizerComputer.toString(format);
 }
 
 std::string SlTwoSubalgebra::toHTMLTripleVerification(
@@ -48,7 +49,9 @@ std::string SlTwoSubalgebra::toHTMLTripleVerification(
   }
   out
   << MathML::toMathMLFinal(
-    this->toMathMLTriple(format), this->toStringTripleVerification(format)
+    this->toMathMLTriple(format),
+    this->toStringTripleVerification(format),
+    format
   );
   return out.str();
 }
@@ -95,7 +98,7 @@ std::string SlTwoSubalgebra::toStringTripleVerification(
 ) const {
   std::stringstream out;
   out
-  << "\\(\\begin{array}{rcl}"
+  << "\\begin{array}{rcl}"
   << "[e, f]&=&"
   << this->eBracketF.toString(format)
   << "\\\\\n"
@@ -104,7 +107,7 @@ std::string SlTwoSubalgebra::toStringTripleVerification(
   << "\\\\\n"
   << "[h, f]&=&"
   << this->hBracketF.toString(format)
-  << "\\end{array}\\)";
+  << "\\end{array}";
   return out.str();
 }
 
@@ -136,7 +139,8 @@ const {
   out
   << MathML::toMathMLFinal(
     this->toMathMLTripleArbitrary(format),
-    this->toStringTripleArbitrary(format)
+    this->toStringTripleArbitrary(format),
+    format
   );
   return out.str();
 }
@@ -185,7 +189,7 @@ std::string SlTwoSubalgebra::toStringTripleArbitrary(
 }
 
 std::string SlTwoSubalgebra::toStringContainingRootSubalgebras(
-  const std::string& displayPathAlgebra, bool useMathML
+  const std::string& displayPathAlgebra, FormatExpressions* format
 ) const {
   STACK_TRACE("SlTwoSubalgebra::toStringContainingRootSubalgebras");
   std::stringstream out;
@@ -200,11 +204,7 @@ std::string SlTwoSubalgebra::toStringContainingRootSubalgebras(
     << "rootSubalgebra_"
     << rootSubalgebraIndex + 1
     << ".html'>";
-    if (useMathML) {
-      out << currentRootSubalgebra.dynkinDiagram.toMathMLFinal();
-    } else {
-      out << "\\(" << currentRootSubalgebra.dynkinDiagram.toString() << "\\)";
-    }
+    out << currentRootSubalgebra.dynkinDiagram.toMathMLFinal(format);
     out << "</a>";
     if (j != this->indicesContainingRootSubalgebras.size - 1) {
       out << ", ";
@@ -213,13 +213,16 @@ std::string SlTwoSubalgebra::toStringContainingRootSubalgebras(
   return out.str();
 }
 
-std::string SlTwoSubalgebra::toHTMLTripleArbitraryMatrix() const {
+std::string SlTwoSubalgebra::toHTMLTripleArbitraryMatrix(
+  FormatExpressions* format
+) const {
   std::stringstream out;
   out << "<br>Matrix form of the system we are trying to solve:\n";
   out
   << MathML::toMathMLFinal(
     this->toMathMLTripleArbitraryMatrix(),
-    this->toStringTripleArbitraryMatrix()
+    this->toStringTripleArbitraryMatrix(),
+    format
   );
   return out.str();
 }
@@ -328,7 +331,8 @@ const {
   out
   << MathML::toMathMLFinal(
     this->toMathMLTripleUnknowns(format),
-    this->toStringTripleUnknowns(format)
+    this->toStringTripleUnknowns(format),
+    format
   );
   out
   << "<br>Participating positive roots: "
@@ -338,7 +342,8 @@ const {
   out
   << MathML::toMathMLFinal(
     this->toMathMLEBracketFMinusHUnknown(format),
-    this->toStringEBracketFMinusHUnknown(format)
+    this->toStringEBracketFMinusHUnknown(format),
+    format
   );
   return out.str();
 }
@@ -360,10 +365,12 @@ std::string SlTwoSubalgebra::toStringKostantSekiguchiTriple(
   return out.str();
 }
 
-std::string SlTwoSubalgebra::toMathMLFinalDynkinType() const {
+std::string SlTwoSubalgebra::toMathMLFinalDynkinType(
+  FormatExpressions* format
+) const {
   DynkinType dynkinType;
   this->computeDynkinTypeEmbedded(dynkinType);
-  return dynkinType.toMathMLFinal(nullptr);
+  return dynkinType.toMathMLFinal(format);
 }
 
 std::string SlTwoSubalgebra::toStringDynkinType() const {
@@ -379,7 +386,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
     return "sl(2) subalgebra not initialized.";
   }
   std::stringstream out;
-  out << this->toMathMLFinalDynkinType() << "\n<br>\n";
+  out << this->toMathMLFinalDynkinType(format) << "\n<br>\n";
   out
   << "<a name='sl2index"
   << this->indexInContainer
@@ -415,12 +422,18 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   }
   FormatExpressions localFormat;
   FormatExpressions latexFormat;
+  FormatExpressions formatCharacter;
   localFormat.flagUseHTML = useHtml;
   localFormat.flagUseLatex = useLatex;
   latexFormat.flagUseHTML = false;
   latexFormat.flagUseLatex = true;
   // Don't break lines.
   latexFormat.maximumLineLength = - 1;
+  if (format != nullptr) {
+    localFormat.bootstrapScriptType = format->bootstrapScriptType;
+    latexFormat.bootstrapScriptType = format->bootstrapScriptType;
+    formatCharacter.bootstrapScriptType = format->bootstrapScriptType;
+  }
   for (int i = 0; i < this->indicesContainingRootSubalgebras.size; i ++) {
     out
     << "\nContaining regular semisimple subalgebra number "
@@ -435,7 +448,7 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
       << rootSubalgebraIndex + 1
       << ".html'>";
     }
-    out << currentSubalgebra.dynkinDiagram.toMathMLFinal();
+    out << currentSubalgebra.dynkinDiagram.toMathMLFinal(format);
     if (useHtml) {
       out << "</a>";
     }
@@ -444,7 +457,6 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
     out << "<br>";
   }
   out << "\n\\(sl{}(2)\\)-module decomposition of the ambient Lie algebra: ";
-  FormatExpressions formatCharacter;
   formatCharacter.vectorSpaceEiBasisNames.addOnTop(
     VariableLetter("\\psi", "&psi;")
   );
@@ -462,13 +474,13 @@ std::string SlTwoSubalgebra::toString(FormatExpressions* format) const {
   out << this->toStringKostantSekiguchiTriple(&latexFormat);
   out << this->toStringKostantSekiguchiTripleStandardRealization();
   out << this->toHTMLTripleVerification(&latexFormat);
-  out << "\n<br>" << this->toStringCentralizer();
+  out << "\n<br>" << this->toStringCentralizer(format);
   out << "\n<br>Unfold the hidden panel for more information.<br>\n";
   out << "\n<div class='lieAlgebraPanel'><div>\n";
   out << this->toHTMLTripleUnknowns(&latexFormat);
   out << this->toHTMLTripleUnknownsPolynomialSystem(&latexFormat);
   out << this->toHTMLTripleArbitrary(&latexFormat);
-  out << this->toHTMLTripleArbitraryMatrix();
+  out << this->toHTMLTripleArbitraryMatrix(format);
   out << this->toHTMLKostantSekiguchiTripleInternals(&latexFormat);
   out << "</div></div>";
   return out.str();
@@ -604,6 +616,8 @@ std::string SlTwoSubalgebra::toHTMLTripleStandardRealization() const {
     this->toMathMLTripleStandardRealization(matrixH, matrixE, matrixF, &format)
     ,
     this->toStringTripleStandardRealization(matrixH, matrixE, matrixF, &format)
+    ,
+    &format
   );
   out << "<br>";
   std::stringstream calculatorLink;
@@ -658,6 +672,8 @@ std::string SlTwoSubalgebra::toStringKostantSekiguchiTripleStandardRealization(
     this->toMathMLTripleStandardRealization(matrixH, matrixE, matrixF, &format)
     ,
     this->toStringTripleStandardRealization(matrixH, matrixE, matrixF, &format)
+    ,
+    &format
   );
   out << "<br>";
   std::stringstream calculatorLink;
@@ -706,7 +722,7 @@ bool SlTwoSubalgebra::moduleDecompositionLeftFitsIntoRight(
 }
 
 std::string SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras(
-  const std::string& displayPathAlgebra, bool useMathML
+  const std::string& displayPathAlgebra, FormatExpressions* format
 ) const {
   STACK_TRACE("SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras");
   std::stringstream out;
@@ -724,11 +740,7 @@ std::string SlTwoSubalgebra::toStringMinimalContainingRootSubalgebras(
     << "rootSubalgebra_"
     << rootSubalgebraIndex + 1
     << ".html'>";
-    if (useMathML) {
-      out << currentRootSubalgebra.dynkinDiagram.toMathMLFinal();
-    } else {
-      out << "\\(" << currentRootSubalgebra.dynkinDiagram.toString() << "\\)";
-    }
+    out << currentRootSubalgebra.dynkinDiagram.toMathMLFinal(format);
     out << "</a>";
     if (j != this->indicesMinimalContainingRootSubalgebras.size - 1) {
       out << ", ";
@@ -856,19 +868,22 @@ std::string SlTwoSubalgebra::toHTMLKostantSekiguchiTripleInternals(
   out
   << MathML::toMathMLFinal(
     this->toMathMLTripleArbitraryKostantSekiguchi(format),
-    this->toStringTripleArbitraryKostantSekiguchi(format)
+    this->toStringTripleArbitraryKostantSekiguchi(format),
+    format
   );
   out << "\n<br>\n";
   out
   << MathML::toMathMLFinal(
     this->toMathMLEMinusFKostantSekiguchi(format),
-    this->toStringEMinusFKostantSekiguchi(format)
+    this->toStringEMinusFKostantSekiguchi(format),
+    format
   );
   out << "\n<br>\n";
   out
   << MathML::toMathMLFinal(
     this->toMathMLInvolutionAppliedToEMinusF(format),
-    this->toStringInvolutionAppliedToEMinusF(format)
+    this->toStringInvolutionAppliedToEMinusF(format),
+    format
   );
   out << "<br>The polynomial system we need to solve.<br>";
   FormatExpressions systemFormat;
@@ -880,7 +895,8 @@ std::string SlTwoSubalgebra::toHTMLKostantSekiguchiTripleInternals(
     ),
     this->toStringPolynomialSystem(
       this->systemToSolveKostantSekiguchi, &systemFormat
-    )
+    ),
+    format
   );
   return out.str();
 }
@@ -895,7 +911,7 @@ std::string SlTwoSubalgebra::toStringPolynomialSystem(
     latexStreamActual << system[i].toString(format) << "&=&0\\\\";
   }
   latexStreamActual << "\\end{array}";
-  return HtmlRoutines::getMathNoDisplay(latexStreamActual.str());
+  return latexStreamActual.str();
 }
 
 template <typename Coefficient>
@@ -925,7 +941,8 @@ std::string SlTwoSubalgebra::toHTMLTripleUnknownsPolynomialSystem(
   out
   << MathML::toMathMLFinal(
     this->toMathMLPolynomialSystem(this->systemToSolve, format),
-    this->toStringPolynomialSystem(this->systemToSolve, format)
+    this->toStringPolynomialSystem(this->systemToSolve, format),
+    format
   )
   << "\n<br>\n";
   return out.str();
@@ -966,7 +983,7 @@ std::string SlTwoSubalgebra::toMathMLFinalTriple(FormatExpressions* format)
 const {
   return
   MathML::toMathMLFinal(
-    this->toMathMLTriple(format), this->toStringTriple(format)
+    this->toMathMLTriple(format), this->toStringTriple(format), format
   );
 }
 
@@ -977,7 +994,7 @@ std::string SlTwoSubalgebra::toStringTriple(FormatExpressions* format) const {
   out << "e&=&" << this->eElement.toString(format) << "\\\\\n";
   out << "f&=&" << this->fElement.toString(format);
   out << "\\end{array}";
-  return HtmlRoutines::getMathNoDisplay(out.str());
+  return out.str();
 }
 
 void SlTwoSubalgebraCandidate::computeLieBracketsUnknowns() {
@@ -2131,12 +2148,13 @@ bool SlTwoSubalgebras::isHOfConstructedSlTwo(const Vector<Rational>& h) const {
   return this->allRealizedHs.contains(h);
 }
 
-std::string SlTwoSubalgebras::toHTMLFieldReport() const {
+std::string SlTwoSubalgebras::toHTMLFieldReport(FormatExpressions* format)
+const {
   std::stringstream out;
   HashedList<std::string> allFieldsUsed;
   for (const SlTwoSubalgebra& subalgebra : this->allSubalgebras) {
     allFieldsUsed.addOnTopNoRepetition(
-      subalgebra.algebraicClosure->toMathMLFinal()
+      subalgebra.algebraicClosure->toMathMLFinal(format)
     );
   }
   out << "Extensions of the rationals used";
@@ -2167,7 +2185,7 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
   "the root subalgebra generated by \\(P\\), such that it has "
   "characteristic 2 for all simple roots of \\(P\\) lying in \\(P_0\\), then "
   "\\(e{}(P, P_0)= 0\\). ";
-  out << MathML::processLatex(dynkinEpsilonRemark);
+  out << MathML::processLatex(dynkinEpsilonRemark, format);
   if (this->unsuitableHs.size() == 0) {
     std::stringstream unsuitableStream;
     unsuitableStream
@@ -2178,7 +2196,7 @@ std::string SlTwoSubalgebras::toHTMLSummary(FormatExpressions* format) {
     << "characteristic with 2's in the simple roots of \\(P_0\\) "
     << "always exists. Note that "
     << "Theorem 10.3 is stated in one direction only.";
-    out << MathML::processLatex(unsuitableStream.str());
+    out << MathML::processLatex(unsuitableStream.str(), format);
     return out.str();
   }
   bool allGood = true;
@@ -2239,21 +2257,21 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
   << "<div id='"
   << idSpanHCharacteristicDescription
   << "'>"
-  << MathML::processLatex(this->descriptionHCharacteristic)
+  << MathML::processLatex(this->descriptionHCharacteristic, format)
   << "</div><br>";
   out
   << "<div id='idCartanElementRealization'>"
-  << MathML::processLatex(this->descriptionHRealization)
+  << MathML::processLatex(this->descriptionHRealization, format)
   << "</div>";
   out
   << "<div id='idMinimalContainingRegularSA'>"
   << MathML::processLatex(
-    this->descriptionMinimalContainingRegularSubalgebras
+    this->descriptionMinimalContainingRegularSubalgebras, format
   )
   << "</div>";
   out
   << "<div id='idModuleDecomposition'>"
-  << MathML::processLatex(this->descriptionModuleDecompositionOverSl2)
+  << MathML::processLatex(this->descriptionModuleDecompositionOverSl2, format)
   << "</div>";
   out
   << "<br><br>"
@@ -2298,6 +2316,10 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     VariableLetter("\\psi", "&psi;")
   );
   formatCharacterMathML.flagSupressDynkinIndexOne = false;
+  formatCharacterMathML.bootstrapScriptType = format ==
+  nullptr ?
+  MathBootstrapScriptType::backendRendering :
+  format->bootstrapScriptType;
   for (int i = 0; i < this->allSubalgebras.size; i ++) {
     const SlTwoSubalgebra& currentSubalgebra = this->allSubalgebras[i];
     DynkinSimpleType simpleType;
@@ -2308,7 +2330,7 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     << "<a href='#sl2index"
     << i
     << "'>"
-    << simpleType.toMathMLFinal(nullptr)
+    << simpleType.toMathMLFinal(format)
     << "</a>"
     << "</td>";
     out << "<td class='tableSummarySlTwoDefaultNoWrap'>";
@@ -2357,12 +2379,12 @@ std::string SlTwoSubalgebras::toHTMLSummaryTable(FormatExpressions* format) {
     currentSubalgebra.checkIndicesMinimalContainingRootSubalgebras();
     out
     << currentSubalgebra.toStringMinimalContainingRootSubalgebras(
-      displayPathAlgebra, true
+      displayPathAlgebra, format
     );
     out << "</td>" << "<td class='tableSummarySlTwoDefault'>";
     out
     << currentSubalgebra.toStringContainingRootSubalgebras(
-      displayPathAlgebra, true
+      displayPathAlgebra, format
     );
     out << "</td></tr>\n";
   }
@@ -2388,9 +2410,9 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
   }
   out << this->toHTMLSummary(format);
   out << "<hr>";
-  out << this->toHTMLFieldReport();
+  out << this->toHTMLFieldReport(format);
   out << "<hr>" << body.str();
-  return MathML::processLatex(out.str());
+  return MathML::processLatex(out.str(), format);
 }
 
 void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
@@ -2405,12 +2427,17 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   this->rootSubalgebras.toHTML(format);
   std::stringstream out;
   out
-  << "<html><title>sl(2)-subalgebras of "
+  << "<!DOCTYPE html><title>sl(2)-subalgebras of "
   << this->rootSubalgebras.subalgebras[0].dynkinDiagram.toString()
   << "</title>";
-  int warningTheNExtThingMustBeTrue;
+  MathBootstrapScriptType bootstrapType = format ==
+  nullptr ?
+  MathBootstrapScriptType::backendRendering :
+  format->bootstrapScriptType;
   out
-  << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(false, "../../../..");
+  << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
+    bootstrapType, "../../../.."
+  );
   out
   << "<meta name='keywords' content='"
   << this->rootSubalgebras.subalgebras[0].dynkinDiagram.toString()
@@ -2423,12 +2450,14 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   out << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload();
   out << this->owner->toHTMLCalculatorMainDiv();
   out
-  << MathML::processLatex("<h1>\\(sl{}(2)\\)-subalgebras of ")
-  << MathML::processLatex(this->owner->toHTMLLieAlgebraNameFull())
+  << MathML::processLatex("<h1>\\(sl{}(2)\\)-subalgebras of ", format)
+  << MathML::processLatex(
+    this->owner->toHTMLLieAlgebraNameFull(format), format
+  )
   << "</h1>";
   out
   << this->owner->toStringHTMLMenuStructureSummary(
-    "../", true, true, false, true
+    "../", true, true, false, true, format
   );
   out << this->toString(format);
   out << "</div>";
@@ -2473,12 +2502,12 @@ void CentralizerComputer::initialize(
   }
 }
 
-std::string CentralizerComputer::toString() const {
+std::string CentralizerComputer::toString(FormatExpressions* format) const {
   STACK_TRACE("CentralizerComputer::toString");
   std::stringstream out;
   out << "Centralizer type: ";
   if (this->flagTypeComputed) {
-    out << this->typeIfKnown.toMathMLFinal(nullptr);
+    out << this->typeIfKnown.toMathMLFinal(format);
     if (this->typeIfKnown.isEqualToZero()) {
       return out.str();
     }
@@ -2515,11 +2544,17 @@ std::string CentralizerComputer::toString() const {
   }
   out
   << "\n<br>\nCartan-generating semisimple element: "
-  << this->semisimpleElement.toString();
+  << this->semisimpleElement.toHTML(format);
+  FormatExpressions characteristicPolynomialFormat;
+  characteristicPolynomialFormat.makeAlphabetXYZUW();
+  characteristicPolynomialFormat.bootstrapScriptType = format ==
+  nullptr ?
+  MathBootstrapScriptType::backendRendering :
+  format->bootstrapScriptType;
   out
   << "\n<br>\nCharacteristic polynomial ad H: "
   << this->semisimpleElementAdjointEigenvalueFinder.characteristicPolynomial.
-  toStringPretty();
+  toMathMLFinal(&characteristicPolynomialFormat);
   out
   << "\n<br>\nFactorization of characteristic polynomial of ad H: "
   << this->semisimpleElementAdjointEigenvalueFinder.
@@ -2539,7 +2574,11 @@ std::string CentralizerComputer::toString() const {
   << "\n<br>\nReductive components ("
   << this->simpleComponents.size
   << " total):";
-  out << this->simpleComponents.toStringWithSeparator("\n<br>\n");
+  List<std::string> componentStrings;
+  for (const SimpleSubalgebraComponent& component : this->simpleComponents) {
+    componentStrings.addOnTop(component.toString(format));
+  }
+  out << componentStrings.toStringWithSeparator("\n<br>\n");
   return out.str();
 }
 
@@ -3420,24 +3459,24 @@ std::string CartanElementCandidate::toMathMLVerification() const {
   return out.str();
 }
 
-std::string CartanElementCandidate::toString() const {
-  return this->toHTML();
+std::string CartanElementCandidate::toString(FormatExpressions* format) const {
+  return this->toHTML(format);
 }
 
-std::string CartanElementCandidate::toHTML() const {
+std::string CartanElementCandidate::toHTML(FormatExpressions* format) const {
   STACK_TRACE("CartanElementCandidate::toHTML");
   std::stringstream out;
-  out << this->h.toMathMLFinal(nullptr);
+  out << this->h.toMathMLFinal(format);
   if (!this->e.isEqualToZero()) {
     out
     << " matching e: "
-    << this->e.toMathMLFinal(nullptr)
+    << this->e.toMathMLFinal(format)
     << ", verification: "
     << MathML::toMathMLFinal(
-      this->toMathMLVerification(), this->toStringVerification()
+      this->toMathMLVerification(), this->toStringVerification(), format
     );
   }
-  out << " adjoint action: " << this->adjointAction.toMathMLFinal(nullptr);
+  out << " adjoint action: " << this->adjointAction.toMathMLFinal(format);
   return out.str();
 }
 
@@ -3457,31 +3496,30 @@ bool SimpleSubalgebraComponent::isLinkedTo(
   return false;
 }
 
-std::string SimpleSubalgebraComponent::toString() const {
+std::string SimpleSubalgebraComponent::toString(FormatExpressions* format)
+const {
   std::stringstream out;
   out
   << "\n<br>\nScalar product computed: "
-  << "\\("
-  << this->dynkinDiagramComputer.ambientBilinearForm.toStringLatex()
-  << "\\)";
+  << this->dynkinDiagramComputer.ambientBilinearForm.toMathMLFinal(format);
   out
   << "\n<br>\nSimple basis of Cartan of centralizer ("
   << this->simpleDualsOfRootSpaces.size
   << " total):<br>"
-  << this->simpleDualsOfRootSpaces.toStringWithSeparator("\n<br>\n");
+  << this->simpleDualsOfRootSpaces.toString(format, "\n<br>\n");
   out
   << "\n<br>\nLinear space basis of intersection "
   << "of centralizer and ambient Cartan:<br>\n"
-  << this->simpleDualsOfRootSpaces.toStringWithSeparator("\n<br>\n");
+  << this->simpleDualsOfRootSpaces.toString(format, "\n<br>\n");
   out
   << "\n<br>\nElements in Cartan dual to root system: "
-  << this->dualsToRootsAlgebraic.toStringCommaDelimited();
+  << this->dualsToRootsAlgebraic.toString(format, ", ");
   out
   << "\n<br>\nCo-symmetric Cartan Matrix of centralizer, "
   << "scaled by ambient killing form: "
-  << "\\("
-  << this->coSymmetricCartanMatrixCentralizerAmbientKilling.toStringLatex()
-  << "\\)";
+  << this->coSymmetricCartanMatrixCentralizerAmbientKilling.toMathMLFinal(
+    format
+  );
   return out.str();
 }
 

@@ -1563,7 +1563,7 @@ void RootSubalgebra::toHTML(int index, FormatExpressions* format) {
     output, myPath.str(), false, true, false
   );
   output
-  << "<html><title>"
+  << "<!DOCTYPE html><title>"
   << this->getAmbientWeyl().dynkinType.toString()
   << " root subalgebra of type "
   << this->dynkinDiagram.toString()
@@ -3586,7 +3586,7 @@ void RootSubalgebras::toHTML(FormatExpressions* format) {
     << global.fatal;
   }
   output
-  << "<html><title> Root subsystems of "
+  << "<!DOCTYPE html><title> Root subsystems of "
   << this->subalgebras[0].dynkinDiagram.toString()
   << "</title>";
   output
@@ -3597,10 +3597,15 @@ void RootSubalgebras::toHTML(FormatExpressions* format) {
     output << ", exceptional Lie algebra";
   }
   output << "'>";
-  output << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements();
+  output
+  << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
+    MathBootstrapScriptType::backendRendering
+  );
   output
   << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload()
-  << this->owner->toStringHTMLMenuStructureSummary("", true, false, true, true)
+  << this->owner->toStringHTMLMenuStructureSummary(
+    "", true, false, true, true, format
+  )
   << this->owner->toHTMLCalculatorMainDiv()
   << this->toString(format)
   << "<hr>LaTeX table with root subalgebra details.<br>"

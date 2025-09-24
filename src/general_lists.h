@@ -704,7 +704,9 @@ public:
   void permuteIndices(const List<List<int> >& cycles);
   std::string toStringLimit(int limit = 20) const;
   std::string toStringConcatenate() const;
-  std::string toString(FormatExpressions* format) const;
+  std::string toString(
+    FormatExpressions* format, const std::string& separator = "\n"
+  ) const;
   std::string toString() const;
   std::string toStringCommaDelimited(FormatExpressions* format) const;
   std::string toStringCommaDelimited() const;
@@ -2031,10 +2033,15 @@ std::string List<Object>::toStringConcatenate() const {
 }
 
 template <class Object>
-std::string List<Object>::toString(FormatExpressions* format) const {
+std::string List<Object>::toString(
+  FormatExpressions* format, const std::string& separator
+) const {
   std::stringstream out;
   for (int i = 0; i < this->size; i ++) {
-    out << this->objects[i].toString(format) << "\n";
+    out << this->objects[i].toString(format);
+    if (i != this->size - 1) {
+      out << separator;
+    }
   }
   return out.str();
 }
@@ -2042,14 +2049,7 @@ std::string List<Object>::toString(FormatExpressions* format) const {
 template <class Object>
 std::string List<Object>::toStringCommaDelimited(FormatExpressions* format)
 const {
-  std::stringstream out;
-  for (int i = 0; i < this->size; i ++) {
-    out << this->objects[i].toString(format);
-    if (i != this->size - 1) {
-      out << ", ";
-    }
-  }
-  return out.str();
+  return this->toString(format, ", ");
 }
 
 template <class Object>

@@ -11,7 +11,7 @@ class CartanElementCandidate {
   friend std::ostream& operator<<(
     std::ostream& output, const CartanElementCandidate& element
   ) {
-    output << element.toString();
+    output << element.toString(nullptr);
     return output;
   }
 public:
@@ -35,8 +35,8 @@ public:
   ) const;
   std::string toMathMLVerification() const;
   std::string toStringVerification() const;
-  std::string toHTML() const;
-  std::string toString() const;
+  std::string toHTML(FormatExpressions* format) const;
+  std::string toString(FormatExpressions* format) const;
   CartanElementCandidate operator-(const CartanElementCandidate& other) const {
     CartanElementCandidate result;
     result.h = this->h - other.h;
@@ -58,7 +58,7 @@ class SimpleSubalgebraComponent {
   friend std::ostream& operator<<(
     std::ostream& output, const SimpleSubalgebraComponent& element
   ) {
-    output << element.toString();
+    output << element.toString(nullptr);
     return output;
   }
 public:
@@ -95,7 +95,7 @@ public:
     CentralizerComputer* inputOptionalContainer
   );
   bool isLinkedTo(const CartanElementCandidate& maybeBelongsToComponent) const;
-  std::string toString() const;
+  std::string toString(FormatExpressions* format) const;
   bool compute();
   SimpleSubalgebraComponent();
 };
@@ -280,7 +280,7 @@ public:
     CartanElementCandidate& output
   );
   CentralizerComputer();
-  std::string toString() const;
+  std::string toString(FormatExpressions* format) const;
   bool compute();
 };
 
@@ -570,7 +570,7 @@ public:
   std::string toStringTripleVerification(FormatExpressions* format) const;
   std::string toMathMLTripleVerification(FormatExpressions* format) const;
   std::string toHTMLTripleVerification(FormatExpressions* format) const;
-  std::string toStringCentralizer() const;
+  std::string toStringCentralizer(FormatExpressions* format) const;
   std::string toHTMLTripleUnknowns(FormatExpressions* format) const;
   std::string toStringTripleUnknowns(FormatExpressions* format) const;
   std::string toMathMLTripleUnknowns(FormatExpressions* format) const;
@@ -594,9 +594,9 @@ public:
   std::string toHTMLTripleArbitrary(FormatExpressions* format) const;
   std::string toStringTripleArbitraryMatrix() const;
   std::string toMathMLTripleArbitraryMatrix() const;
-  std::string toHTMLTripleArbitraryMatrix() const;
+  std::string toHTMLTripleArbitraryMatrix(FormatExpressions* format) const;
   std::string toStringDynkinType() const;
-  std::string toMathMLFinalDynkinType() const;
+  std::string toMathMLFinalDynkinType(FormatExpressions* format) const;
   std::string toString(FormatExpressions* format = nullptr) const;
   std::string toStringTripleArbitraryKostantSekiguchi(
     FormatExpressions* format
@@ -619,10 +619,10 @@ public:
     bool useLatex, bool useHtml, SlTwoSubalgebras& owner, std::string& output
   ) const;
   std::string toStringMinimalContainingRootSubalgebras(
-    const std::string& displayPathAlgebra, bool useMathML
+    const std::string& displayPathAlgebra, FormatExpressions* format
   ) const;
   std::string toStringContainingRootSubalgebras(
-    const std::string& displayPathAlgebra, bool useMathML
+    const std::string& displayPathAlgebra, FormatExpressions* format
   ) const;
   void computeModuleDecomposition(
     const Vectors<Rational>& positiveRootsContainingRegularSubalgebra,
@@ -696,12 +696,13 @@ public:
   void computeModuleDecompositionsitionsOfAmbientLieAlgebra();
   void reset(SemisimpleLieAlgebra& inputOwners);
   bool containsSl2WithGivenH(Vector<Rational>& elementH, int* outputIndex);
+  // Writes HTML in a file.
   void writeHTML(FormatExpressions* format = nullptr);
   bool isHOfConstructedSlTwo(const Vector<Rational>& h) const;
   std::string toString(FormatExpressions* format = nullptr);
   std::string toHTMLSummaryTable(FormatExpressions* format = nullptr);
   std::string toHTMLSummary(FormatExpressions* format = nullptr);
-  std::string toHTMLFieldReport() const;
+  std::string toHTMLFieldReport(FormatExpressions* format) const;
   std::string toStringModuleDecompositionMinimalContainingRegularSubalgebras(
     bool useLatex, bool useHtml
   );

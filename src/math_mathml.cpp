@@ -10,12 +10,25 @@ std::string MathML::positiveSign = "<mo>+</mo>";
 std::string MathML::mtableDefault = "<mtable>";
 
 std::string MathML::toMathMLFinal(
-  const std::string& mathMLContent, const std::string& latex
+  const std::string& mathMLContent,
+  const std::string& latex,
+  const FormatExpressions* format
 ) {
   std::stringstream out;
+  MathBootstrapScriptType bootstrapType = format ==
+  nullptr ?
+  MathBootstrapScriptType::backendRendering :
+  format->bootstrapScriptType;
+  if (
+    bootstrapType == MathBootstrapScriptType::equationEditor ||
+    bootstrapType == MathBootstrapScriptType::katex
+  ) {
+    out << "\\(" << latex << "\\)";
+    return out.str();
+  }
   out
   << "<span class='mathcalculatorbackendrendered'>"
-  << "<math>"
+  << "<math style='color:red'>"
   << "<semantics>"
   << mathMLContent
   << "<annotation encoding='application/x-tex'>"
@@ -108,14 +121,18 @@ std::string MathML::toMathMLInteger(int integer) {
   return out.str();
 }
 
-std::string MathML::processLatex(const std::string& input) {
+std::string MathML::processLatex(
+  const std::string& input, FormatExpressions* format
+) {
   MathMLConverter converter(input);
-  return converter.convertTextWithLatexTags();
+  return converter.convertTextWithLatexTags(format);
 }
 
-std::string MathMLConverter::convertTextWithLatexTags() {
+std::string MathMLConverter::convertTextWithLatexTags(
+  FormatExpressions* format
+) {
   this->extractTags();
-  this->convertTags();
+  this->convertTags(format);
   return this->collectConvertedTags();
 }
 
@@ -163,26 +180,26 @@ void MathMLConverter::addStringOnTop(
   this->elements.addOnTop(LatexOrString(incomingSnippet, isLatex));
 }
 
-void MathMLConverter::convertTags() {
+void MathMLConverter::convertTags(FormatExpressions* format) {
   Calculator& calculator = this->converterCalculator();
   for (LatexOrString& latexOrString : this->elements) {
     if (!latexOrString.isLatex) {
       continue;
     }
     latexOrString.content =
-    this->convertLatex(latexOrString.content, calculator);
+    this->convertLatex(latexOrString.content, calculator, format);
   }
 }
 
 std::string MathMLConverter::convertLatex(
-  const std::string& input, Calculator& calculator
+  const std::string& input, Calculator& calculator, FormatExpressions* format
 ) {
   Expression expression;
   bool shouldBeTrue = calculator.parser.parse(input, true, expression);
   if (!shouldBeTrue) {
     return "\\(" + input + "\\)";
   }
-  return expression.toMathMLFinal();
+  return expression.toMathMLFinal(format);
 }
 
 std::string MathMLConverter::collectConvertedTags() {

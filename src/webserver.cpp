@@ -1450,7 +1450,7 @@ int WebWorker::processFolder() {
   this->setHeaderOKNoContentLength("");
   std::stringstream outPage;
   std::stringstream outError;
-  outPage << "<html><body>";
+  outPage << "<!DOCTYPE html><body>";
   if (this->relativePhysicalFileName.size() > 0) {
     if (
       this->relativePhysicalFileName[this->relativePhysicalFileName.size() - 1]
@@ -1549,7 +1549,7 @@ int WebWorker::processFileDoesntExist(
   // Use convertStringToHtmlString to sanitize strings.
   // Never return non-sanitized user input back to the user.
   std::stringstream out;
-  out << "<html>" << "<body>";
+  out << "<!DOCTYPE html>" << "<body>";
   if (generateLinkToCalculatorOnMissingFile) {
     out
     << "one page <a href = \""
@@ -2123,7 +2123,7 @@ void WebWorker::redirect(const std::string& address) {
   this->setHeader("HTTP/1.0 303 See other", headerStream.str());
   std::stringstream out;
   out
-  << "<html><head>"
+  << "<!DOCTYPE html><head>"
   << "<meta http-equiv=\"refresh\" content =\"0; url ='"
   << address
   << "'\" />"
@@ -2204,7 +2204,7 @@ bool WebWorker::processRedirectAwayFromWWW() {
   );
   std::stringstream out;
   out
-  << "<html><body>Please remove the www. "
+  << "<!DOCTYPE html><body>Please remove the www. "
   << "from the address, it creates issues with "
   << "authentication services. " // Address
   // is quote-escaped to prevent content injection.
@@ -2243,7 +2243,7 @@ int WebWorker::processLoginNeededOverUnsecureConnection() {
     redirectStream << "Location: " << newAddressStream.str();
     this->setHeader("HTTP/1.0 301 Moved Permanently", redirectStream.str());
     outBody
-    << "<html><body>Address available through "
+    << "<!DOCTYPE html><body>Address available through "
     << "secure (SSL) connection only. " // The
     // newAddressStream is quote-escaped;
     // this should prevent content injection in the snippet below.
@@ -2253,7 +2253,7 @@ int WebWorker::processLoginNeededOverUnsecureConnection() {
   } else {
     this->setHeaderOKNoContentLength("");
     outBody
-    << "<html><body>Address available through "
+    << "<!DOCTYPE html><body>Address available through "
     << "secure (SSL) connection only. <br>"
     << "<b style ='color:red'>In the web address, please "
     << "change http to https. </b><br>"

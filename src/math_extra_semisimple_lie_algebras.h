@@ -402,7 +402,8 @@ public:
     bool includeStructureConstants,
     bool includeRootSubalgebras,
     bool includeSl2Subalgebras,
-    bool includeSemisimpleSubalgebras
+    bool includeSemisimpleSubalgebras,
+    FormatExpressions* format
   );
   std::string toStringMenuStructurePages(
     const std::string& relativeTo,
@@ -422,7 +423,8 @@ public:
     const std::string& extraDynkinDiagramPlot
   );
   static std::string toHTMLCalculatorHeadElements(
-    bool addBootstrap = true, const std::string& relativeTo = "../../.."
+    MathBootstrapScriptType bootstrapType,
+    const std::string& relativeTo = "../../.."
   );
   static std::string toHTMLCalculatorBodyOnload();
   static std::string toHTMLCalculatorMainDiv();
@@ -432,7 +434,7 @@ public:
   std::string toMathMLChevalleyGenerator(
     int index, FormatExpressions* polynomialFormat
   ) const;
-  std::string toHTMLLieAlgebraNameFull() const;
+  std::string toHTMLLieAlgebraNameFull(FormatExpressions* format) const;
   std::string toStringLieAlgebraName() const;
   std::string toMathMLFinalLieAlgebraName() const;
   std::string toStringLieAlgebraNameNonTechnicalHTML() const;

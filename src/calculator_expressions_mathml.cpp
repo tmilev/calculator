@@ -957,7 +957,10 @@ void Expression::initializeToMathMLHandlers(Calculator& toBeInitialized) {
 }
 
 std::string Expression::toMathMLFinal(FormatExpressions* format) const {
-  return MathML::toMathMLFinal(this->toMathML(format), this->toString(format));
+  return
+  MathML::toMathMLFinal(
+    this->toMathML(format), this->toString(format), format
+  );
 }
 
 void Expression::toMathML(

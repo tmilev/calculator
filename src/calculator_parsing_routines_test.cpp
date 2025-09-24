@@ -231,7 +231,7 @@ bool Calculator::Test::builtInFunctionsABTest(
     std::stringstream crashFileWriteReport;
     std::stringstream crashFile;
     crashFile
-    << "<html><link "
+    << "<!DOCTYPE html><link "
     << "type='text/css' "
     << "rel='stylesheet' "
     << "href='"

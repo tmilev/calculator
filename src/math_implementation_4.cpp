@@ -1212,7 +1212,8 @@ const {
 std::string DynkinDiagramRootSubalgebra::toMathMLFinal(
   FormatExpressions* format
 ) const {
-  return MathML::toMathMLFinal(this->toMathML(format), this->toString());
+  return
+  MathML::toMathMLFinal(this->toMathML(format), this->toString(), format);
 }
 
 std::string DynkinDiagramRootSubalgebra::toString(FormatExpressions* format)

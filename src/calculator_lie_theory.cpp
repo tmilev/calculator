@@ -4487,10 +4487,12 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
     }
     restrictToThisSl2Triple = &typeHolder;
   }
+  bool selectDifferentOption;
   FormatExpressions format;
   format.flagUseHTML = true;
   format.flagUseLatex = false;
   format.flagUsePNG = true;
+  format.bootstrapScriptType = MathBootstrapScriptType::katex;
   std::stringstream outRootHtmlFileName;
   std::stringstream outRootHtmlDisplayName;
   std::stringstream outSltwoMainFile;

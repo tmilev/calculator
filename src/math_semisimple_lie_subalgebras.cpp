@@ -94,17 +94,19 @@ void SemisimpleLieAlgebra::generateLieSubalgebra(
   }
 }
 
-std::string SemisimpleLieAlgebra::toHTMLLieAlgebraNameFull() const {
+std::string SemisimpleLieAlgebra::toHTMLLieAlgebraNameFull(
+  FormatExpressions* format
+) const {
   STACK_TRACE("SemisimpleLieAlgebra::toHTMLLieAlgebraNameFull");
   std::stringstream out;
   if (this->weylGroup.dynkinType.hasExceptionalComponent()) {
-    out << this->weylGroup.dynkinType.toMathMLFinal(nullptr);
+    out << this->weylGroup.dynkinType.toMathMLFinal(format);
     return out.str();
   }
   out
   << this->toStringLieAlgebraNameNonTechnicalHTML()
   << ", type "
-  << this->weylGroup.dynkinType.toMathMLFinal(nullptr);
+  << this->weylGroup.dynkinType.toMathMLFinal(format);
   return out.str();
 }
 
@@ -622,11 +624,14 @@ void SemisimpleSubalgebras::writeReportToFiles() {
 std::string SemisimpleSubalgebras::toStringHTML() {
   std::stringstream out;
   out
-  << "<html><title>Semisimple subalgebras of "
+  << "<!DOCTYPE html><title>Semisimple subalgebras of "
   << "the semisimple Lie algebras: the subalgebras of "
   << this->owner->weylGroup.dynkinType.toString()
   << "</title>";
-  out << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements();
+  out
+  << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
+    MathBootstrapScriptType::backendRendering
+  );
   out << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload();
   out << this->toString(&this->currentFormat, true);
   out << "</body></html>";
@@ -917,7 +922,7 @@ std::string SemisimpleSubalgebras::toString(
 ) {
   STACK_TRACE("SemisimpleSubalgebras::toString");
   std::stringstream out;
-  out << "<h1>Lie algebra " << this->owner->toHTMLLieAlgebraNameFull();
+  out << "<h1>Lie algebra " << this->owner->toHTMLLieAlgebraNameFull(format);
   if (!this->flagRealForms) {
     out << "<br>Semisimple complex Lie subalgebras";
   } else {
@@ -926,7 +931,7 @@ std::string SemisimpleSubalgebras::toString(
   out << "</h1>";
   out
   << this->owner->toStringHTMLMenuStructureSummary(
-    "", true, true, true, false
+    "", true, true, true, false, format
   );
   if (this->flagRealForms) {
     if (this->wConjecture.wConjectureHolds(*this)) {
@@ -1060,8 +1065,10 @@ void SemisimpleSubalgebras::writeSubalgebraToFile(
   std::string fileName =
   this->getRelativePhysicalFileNameSubalgebra(subalgebraIndex);
   out
-  << "<html>"
-  << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements()
+  << "<!DOCTYPE html>"
+  << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
+    MathBootstrapScriptType::backendRendering
+  )
   << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload();
   out
   << this->toStringSubalgebraNumberWithAmbientLink(subalgebraIndex, format);
@@ -1077,8 +1084,10 @@ void SemisimpleSubalgebras::writeSubalgebraToFile(
     std::string fileName =
     this->getRelativePhysicalFileNameFKFTNilradicals(subalgebraIndex);
     outputFileFiniteTypeNilradicals
-    << "<html>"
-    << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements()
+    << "<!DOCTYPE html>"
+    << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
+      MathBootstrapScriptType::backendRendering
+    )
     << "<body>"
     << this->toStringAlgebraLink(subalgebraIndex, format, true)
     << currentSubalgebra.toStringNilradicals(format)
@@ -1295,12 +1304,12 @@ std::string SemisimpleSubalgebras::toStringPart3(
   std::stringstream fileSl2Content;
   std::stringstream fileLoadContent;
   fileSl2Content
-  << "<html>"
+  << "<!DOCTYPE html>"
   << "<body>"
   << this->toStringSl2s()
   << "</body></html>";
   fileLoadContent
-  << "<html>"
+  << "<!DOCTYPE html>"
   << "<body>"
   << this->toStringProgressReport(format)
   << "</body></html>";
@@ -1746,7 +1755,8 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
       );
     }
     this->writeReportToFiles();
-    this->slTwoSubalgebras.writeHTML();
+    FormatExpressions format;
+    this->slTwoSubalgebras.writeHTML(&format);
     this->owner->writeHTML(true, false, extraDynkinDiagramPlot);
   } else {
     if (outputStream != nullptr) {
@@ -1925,19 +1935,22 @@ bool SemisimpleSubalgebras::writeFilesRealForms(
   this->computeFolderNames(format);
   std::stringstream content;
   content
-  << "<html><title>"
+  << "<!DOCTYPE html><title>"
   << "Semisimple subalgebras of the semisimple Lie algebras: "
   << "the subalgebras of "
   << this->owner->weylGroup.dynkinType.toString()
   << "</title>";
-  content << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements();
+  content
+  << SemisimpleLieAlgebra::toHTMLCalculatorHeadElements(
+    MathBootstrapScriptType::backendRendering
+  );
   content << SemisimpleLieAlgebra::toHTMLCalculatorBodyOnload();
   content << this->toString(&this->currentFormat, true);
   content << "</body></html>";
   std::string fileName =
   this->owner->fileNames.virtualFolderName() +
   this->owner->fileNames.fileNameSlTwoRealFormSubalgebraStructure();
-  this->slTwoSubalgebras.writeHTML(nullptr);
+  this->slTwoSubalgebras.writeHTML(&format);
   return
   FileOperations::writeFileVirtual(fileName, content.str(), outputStream);
 }

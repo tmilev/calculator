@@ -270,15 +270,18 @@ std::string SemisimpleLieAlgebra::toHTMLCalculatorMainDiv() {
 std::string SemisimpleLieAlgebra::toHTML(
   bool verbose,
   bool flagWriteLatexPlots,
-  const std::string& extraDynkinDiagramPlot
+  const std::string& extraDynkinDiagramPlot,
+  FormatExpressions* format
 ) {
   STACK_TRACE("SemisimpleLieAlgebra::toHTML");
   std::stringstream out;
-  FormatExpressions format;
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex = true;
   latexFormat.flagUseHTML = false;
-  latexFormat.bootstrapScriptType = MathBootstrapScriptType::backendRendering;
+  latexFormat.bootstrapScriptType = format ==
+  nullptr ?
+  MathBootstrapScriptType::backendRendering :
+  format->bootstrapScriptType;
   out
   << "<h1>Lie algebra "
   << this->toHTMLLieAlgebraNameFull(&latexFormat)
@@ -333,7 +336,7 @@ std::string SemisimpleLieAlgebra::toHTML(
         this->weylGroup.getEpsilonCoordinates(root, root2);
         out
         << "$"
-        << element1.toString(&format)
+        << element1.toString(format)
         << "$&$"
         << root.toString()
         << "$";
@@ -492,7 +495,9 @@ void SemisimpleLieAlgebra::writeHTML(
   );
   outFile << this->toHTMLCalculatorMainDiv();
   outFile
-  << this->toHTML(verbose, flagWriteLatexPlots, extraDynkinDiagramPlot);
+  << this->toHTML(
+    verbose, flagWriteLatexPlots, extraDynkinDiagramPlot, &format
+  );
   outFile << "</div>";
   outFile << "</body>";
   outFile << "</html>";
@@ -521,13 +526,17 @@ std::string DynkinType::toStringVirtualNameFolder() const {
 
 std::string SemisimpleLieAlgebra::FileNames::
 fileNameRelativePathSlTwoSubalgebras() const {
+  return this->fileNameStemRelativePathSlTwoSubalgebras() + ".html";
+}
+
+std::string SemisimpleLieAlgebra::FileNames::
+fileNameStemRelativePathSlTwoSubalgebras() const {
   std::stringstream out;
   out
   << "sl2s/sl2s_"
   << FileOperations::cleanUpForFileNameUse(
     this->owner->weylGroup.dynkinType.toString()
-  )
-  << ".html";
+  );
   return out.str();
 }
 

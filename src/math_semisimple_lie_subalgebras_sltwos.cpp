@@ -2415,11 +2415,8 @@ std::string SlTwoSubalgebras::toString(FormatExpressions* format) {
   return MathML::processLatex(out.str(), format);
 }
 
-void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
-  STACK_TRACE("SlTwoSubalgebras::writeHTML");
-  std::string virtualFileName =
-  this->owner->fileNames.virtualFolderName() +
-  this->owner->fileNames.fileNameRelativePathSlTwoSubalgebras();
+std::string SlTwoSubalgebras::toHTML(FormatExpressions* format) {
+  STACK_TRACE("SlTwoSubalgebras::toHTML");
   ProgressReport report;
   report.report(
     "Preparing html pages for sl(2) subalgebras. This might take a while."
@@ -2427,7 +2424,8 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   this->rootSubalgebras.toHTML(format);
   std::stringstream out;
   out
-  << "<!DOCTYPE html><title>sl(2)-subalgebras of "
+  << "<!DOCTYPE html>"
+  << "<title>sl(2)-subalgebras of "
   << this->rootSubalgebras.subalgebras[0].dynkinDiagram.toString()
   << "</title>";
   MathBootstrapScriptType bootstrapType = format ==
@@ -2463,16 +2461,49 @@ void SlTwoSubalgebras::writeHTML(FormatExpressions* format) {
   out << "</div>";
   out << "</body>";
   out << "</html>";
+  return out.str();
+}
+
+void SlTwoSubalgebras::writeHTML() {
+  STACK_TRACE("SlTwoSubalgebras::writeHTML");
+  FormatExpressions format;
+  format.flagUseHTML = true;
+  format.flagUseLatex = false;
+  format.flagUsePNG = true;
+  format.bootstrapScriptType = MathBootstrapScriptType::backendRendering;
+  std::string contentBackend = this->toHTML(&format);
+  format.bootstrapScriptType = MathBootstrapScriptType::equationEditor;
+  std::string contentEquationEditor = this->toHTML(&format);
+  format.bootstrapScriptType = MathBootstrapScriptType::katex;
+  std::string contentKatex = this->toHTML(&format);
   std::stringstream commentsOnError;
-  if (
-    !FileOperations::writeFileVirtual(
-      virtualFileName, out.str(), &commentsOnError
-    )
-  ) {
-    global.fatal
-    << "Failed to write sl(2)-subalgebras. "
-    << commentsOnError.str()
-    << global.fatal;
+  std::string virtualFileNameBackendRendering =
+  this->owner->fileNames.virtualFolderName() +
+  this->owner->fileNames.fileNameStemRelativePathSlTwoSubalgebras() +
+  ".html";
+  std::string virtualFileNameEquationEditor =
+  this->owner->fileNames.virtualFolderName() +
+  this->owner->fileNames.fileNameStemRelativePathSlTwoSubalgebras() +
+  "_equation_editor.html";
+  std::string virtualFileNameKatex =
+  this->owner->fileNames.virtualFolderName() +
+  this->owner->fileNames.fileNameStemRelativePathSlTwoSubalgebras() +
+  "_katex.html";
+  MapList<std::string, std::string> fileAndContent;
+  fileAndContent[virtualFileNameBackendRendering] = contentBackend;
+  fileAndContent[virtualFileNameEquationEditor] = contentEquationEditor;
+  fileAndContent[virtualFileNameKatex] = contentKatex;
+  for (int i = 0; i < fileAndContent.size(); i ++) {
+    if (
+      !FileOperations::writeFileVirtual(
+        fileAndContent.keys[i], fileAndContent.values[i], &commentsOnError
+      )
+    ) {
+      global.fatal
+      << "Failed to write sl(2)-subalgebras. "
+      << commentsOnError.str()
+      << global.fatal;
+    }
   }
 }
 
@@ -2566,9 +2597,17 @@ std::string CentralizerComputer::toString(FormatExpressions* format) const {
   out
   << "\n<br>\n"
   << this->semisimpleElementAdjointEigenvalueFinder.numberOfEigenVectors()
-  << " eigenvectors of ad H: "
-  << this->semisimpleElementAdjointEigenvalueFinder.eigenvectors.
-  toStringCommaDelimited();
+  << " eigenvectors of ad H: ";
+  List<std::string> eigenvectorStrings;
+  for (
+    const Vectors<AlgebraicNumber>& eigenVectorSet :
+    this->semisimpleElementAdjointEigenvalueFinder.eigenvectors
+  ) {
+    for (const Vector<AlgebraicNumber>& eigenVector : eigenVectorSet) {
+      eigenvectorStrings.addOnTop(eigenVector.toMathMLFinal(format));
+    }
+  }
+  out << eigenvectorStrings.toStringCommaDelimited();
   out << "\n<br>\nCentralizer type: " << this->typeIfKnown.toString();
   out
   << "\n<br>\nReductive components ("

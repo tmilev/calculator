@@ -4487,12 +4487,6 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
     }
     restrictToThisSl2Triple = &typeHolder;
   }
-  bool selectDifferentOption;
-  FormatExpressions format;
-  format.flagUseHTML = true;
-  format.flagUseLatex = false;
-  format.flagUsePNG = true;
-  format.bootstrapScriptType = MathBootstrapScriptType::katex;
   std::stringstream outRootHtmlFileName;
   std::stringstream outRootHtmlDisplayName;
   std::stringstream outSltwoMainFile;
@@ -4526,7 +4520,7 @@ bool CalculatorLieTheory::rootSubalgebrasAndSlTwos(
       calculator.objectContainer.algebraicClosuresForLargeComputations,
       restrictToThisSl2Triple
     );
-    slTwoSubalgebras.writeHTML(&format);
+    slTwoSubalgebras.writeHTML();
     Plot plot;
     semisimpleLieAlgebra.content->weylGroup.dynkinType.plot(plot);
     semisimpleLieAlgebra.content->writeHTML(
@@ -6442,7 +6436,7 @@ bool CalculatorLieTheory::writeToHardDiskOrPrintSemisimpleLieAlgebra(
   }
   return
   CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
-    calculator, input[1], output, verbose, writeToHD
+    calculator, input[1], output, verbose, writeToHD, nullptr
   );
 }
 
@@ -6451,7 +6445,8 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   const Expression& input,
   Expression& output,
   bool verbose,
-  bool writeToHD
+  bool writeToHD,
+  FormatExpressions* format
 ) {
   STACK_TRACE(
     "CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra"
@@ -6483,7 +6478,7 @@ bool CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
   }
   out
   << semisimpleAlgebra.toHTML(
-    verbose, calculator.flagWriteLatexPlots, plotHTML
+    verbose, calculator.flagWriteLatexPlots, plotHTML, format
   );
   return output.assignValue(calculator, out.str());
 }

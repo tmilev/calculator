@@ -1490,7 +1490,6 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
   1 :
   format->numberOfAmpersandsPerNewLineForLaTeX;
   bool flagUseLaTeX = (format == nullptr) ? false : format->flagUseLatex;
-  bool flagUseHTML = (format == nullptr) ? false : format->flagUseHTML;
   bool isInNumerator = (format == nullptr) ? false : format->flagIsInNumerator;
   std::string customTimes = "";
   if (format != nullptr) {
@@ -1540,9 +1539,6 @@ std::string LinearCombination<TemplateMonomial, Coefficient>::toString(
             out << "&";
           }
           out << " ";
-        }
-        if (flagUseHTML && !flagUseLaTeX && (i != sortedMonomials.size - 1)) {
-          out << " <br>";
         }
       }
     }

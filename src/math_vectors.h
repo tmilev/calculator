@@ -68,6 +68,12 @@ public:
     out << "</mrow>";
     return out.str();
   }
+  std::string toMathMLFinal(FormatExpressions* format = nullptr) const {
+    return
+    MathML::toMathMLFinal(
+      this->toStringCommaDelimited(format), this->toMathML(format), format
+    );
+  }
   void toListStringsBasicType(List<std::string>& output) const {
     output.setSize(this->size);
     for (int i = 0; i < this->size; i ++) {

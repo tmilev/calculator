@@ -911,7 +911,7 @@ bool CalculatorConversions::functionSemisimpleLieAlgebraFromDynkinType(
     outputPointer.content->computeChevalleyConstants();
     Expression converter;
     CalculatorLieTheory::functionWriteToHardDiskOrPrintSemisimpleLieAlgebra(
-      calculator, output, converter, false, false
+      calculator, output, converter, false, false, nullptr
     );
     calculator << converter.getValue<std::string>();
   }

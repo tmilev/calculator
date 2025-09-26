@@ -325,6 +325,7 @@ public:
     std::string fileNameNoPathSemisimpleSubalgebras() const;
     std::string fileNameNoPathRootSubalgebras() const;
     std::string fileNameRelativePathSlTwoSubalgebras() const;
+    std::string fileNameStemRelativePathSlTwoSubalgebras() const;
     std::string fileNameSlTwoRealFormSubalgebraStructure() const;
     std::string virtualFilenameProgressSemisimpleSubalgebras() const;
   };
@@ -420,7 +421,8 @@ public:
   std::string toHTML(
     bool verbose,
     bool flagWriteLatexPlots,
-    const std::string& extraDynkinDiagramPlot
+    const std::string& extraDynkinDiagramPlot,
+    FormatExpressions* format
   );
   static std::string toHTMLCalculatorHeadElements(
     MathBootstrapScriptType bootstrapType,

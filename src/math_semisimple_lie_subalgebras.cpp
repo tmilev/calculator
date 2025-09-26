@@ -1755,8 +1755,7 @@ bool SemisimpleSubalgebras::computeStructureWriteFiles(
       );
     }
     this->writeReportToFiles();
-    FormatExpressions format;
-    this->slTwoSubalgebras.writeHTML(&format);
+    this->slTwoSubalgebras.writeHTML();
     this->owner->writeHTML(true, false, extraDynkinDiagramPlot);
   } else {
     if (outputStream != nullptr) {
@@ -1950,7 +1949,7 @@ bool SemisimpleSubalgebras::writeFilesRealForms(
   std::string fileName =
   this->owner->fileNames.virtualFolderName() +
   this->owner->fileNames.fileNameSlTwoRealFormSubalgebraStructure();
-  this->slTwoSubalgebras.writeHTML(&format);
+  this->slTwoSubalgebras.writeHTML();
   return
   FileOperations::writeFileVirtual(fileName, content.str(), outputStream);
 }

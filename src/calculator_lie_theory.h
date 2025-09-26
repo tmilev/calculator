@@ -388,7 +388,8 @@ public:
     const Expression& input,
     Expression& output,
     bool verbose,
-    bool writeToHD
+    bool writeToHD,
+    FormatExpressions* format
   );
   static bool rootSubsystem(
     Calculator& calculator, const Expression& input, Expression& output

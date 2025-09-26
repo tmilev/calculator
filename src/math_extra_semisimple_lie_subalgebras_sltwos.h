@@ -697,7 +697,8 @@ public:
   void reset(SemisimpleLieAlgebra& inputOwners);
   bool containsSl2WithGivenH(Vector<Rational>& elementH, int* outputIndex);
   // Writes HTML in a file.
-  void writeHTML(FormatExpressions* format = nullptr);
+  void writeHTML();
+  std::string toHTML(FormatExpressions* format);
   bool isHOfConstructedSlTwo(const Vector<Rational>& h) const;
   std::string toString(FormatExpressions* format = nullptr);
   std::string toHTMLSummaryTable(FormatExpressions* format = nullptr);
